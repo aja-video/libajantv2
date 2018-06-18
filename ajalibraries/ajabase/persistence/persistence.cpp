@@ -55,6 +55,11 @@
 #endif
 #endif
 
+// Use deferent log levels so can better sort reads/writes
+#define AJA_LOG_READ(_expr_)     AJA_sINFO(AJA_DebugUnit_Persistence, _expr_)
+#define AJA_LOG_WRITE(_expr_)    AJA_sNOTICE(AJA_DebugUnit_Persistence, _expr_)
+#define AJA_LOG_ERROR(_expr_)    AJA_sERROR(AJA_DebugUnit_Persistence, _expr_)
+
 // Encapsulate the sqlite3 object so automatically handled by constructor/destructor
 class AJAPersistenceDBImplObject
 {
@@ -64,11 +69,29 @@ public:
         {
             mPath = pathToDB;
             mOpenErrorCode = sqlite3_open_v2(mPath.c_str(), &mDb, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+            if (mOpenErrorCode != SQLITE_OK)
+            {
+                AJA_LOG_ERROR("sqlite> error code: " << mOpenErrorCode <<
+                              " with message: \"" << sqlite3_errmsg(mDb) << "\" when opening DB at: " << mPath);
+            }
+            else
+            {
+                AJA_LOG_WRITE("sqlite> successfully opened handle to DB at: " << mPath);
+            }
         }
 
         virtual ~AJAPersistenceDBImplObject()
         {
-            sqlite3_close(mDb);
+            int rc = sqlite3_close(mDb);
+            if (rc != SQLITE_OK)
+            {
+                AJA_LOG_ERROR("sqlite> error code: " << mOpenErrorCode <<
+                              " with message: \"" << sqlite3_errmsg(mDb) << "\" when closing DB at: " << mPath);
+            }
+            else
+            {
+                AJA_LOG_WRITE("sqlite> successfully closed handle to DB at: " << mPath);
+            }
         }
 
         bool IsDBOpen()         { return (mOpenErrorCode == SQLITE_OK); }
@@ -101,6 +124,16 @@ public:
         {
             mStmtString = stmt;
             mPrepareErrorCode = sqlite3_prepare_v2(db.GetHandle(), mStmtString.c_str(), -1, &mStmt, NULL);
+
+            if (mPrepareErrorCode != SQLITE_OK)
+            {
+                AJA_LOG_ERROR("sqlite> error code: " << mPrepareErrorCode <<
+                              " with message: \"" << sqlite3_errmsg(db.GetHandle()) << "\" when preparing statement: " << mStmtString);
+            }
+            else
+            {
+                AJA_LOG_WRITE("sqlite> successfully prepared statement: " << mStmtString);
+            }
             return mPrepareErrorCode;
         }
 
@@ -152,6 +185,11 @@ public:
             return mPrepareErrorCode;
         }
 
+        std::string GetString()
+        {
+            return mStmtString;
+        }
+
         sqlite3_stmt* GetHandle()
         {
             return mStmt;
@@ -169,29 +207,36 @@ public:
         AJAPersistenceDBImpl(const std::string &pathToDB)
         : mDb(pathToDB)
         {
-            mCreateTableStmt.Prepare(mDb, "CREATE TABLE IF NOT EXISTS persistence(id INTEGER, name CHAR(255), value CHAR(64), dev_name CHAR(64), dev_num CHAR(64), PRIMARY KEY(id))");
-            mBlobCreateTableStmt.Prepare(mDb, "CREATE TABLE IF NOT EXISTS persistenceBlobs(id INTEGER, name CHAR(255), value BLOB, dev_name CHAR(64), dev_num CHAR(64), PRIMARY KEY(id))");
+            if (mDb.IsDBOpen())
+            {
+                mCreateTableStmt.Prepare(mDb, "CREATE TABLE IF NOT EXISTS persistence(id INTEGER, name CHAR(255), value CHAR(64), dev_name CHAR(64), dev_num CHAR(64), PRIMARY KEY(id))");
+                mBlobCreateTableStmt.Prepare(mDb, "CREATE TABLE IF NOT EXISTS persistenceBlobs(id INTEGER, name CHAR(255), value BLOB, dev_name CHAR(64), dev_num CHAR(64), PRIMARY KEY(id))");
 
-            // The tables must exist before the other prepared statements can be made
-            mTableCreateErrorCode = mCreateTableStmt.Step();
-            mBlobTableCreateErrorCode = mBlobCreateTableStmt.Step();
+                // The tables must exist before the other prepared statements can be made
+                mTableCreateErrorCode = mCreateTableStmt.Step();
+                mBlobTableCreateErrorCode = mBlobCreateTableStmt.Step();
 
-            // normal table statements
-            mGetValueSpecificStmt.Prepare(mDb, "SELECT value FROM persistence WHERE name=?1 AND dev_name=?2 AND dev_num=?3");
-            mGetValueLessSpecificStmt.Prepare(mDb, "SELECT value FROM persistence WHERE name=?1 AND dev_name=?2");
-            mUpdateValueStmt.Prepare(mDb, "UPDATE persistence SET value=?1 WHERE name=?2 AND dev_name=?3 AND dev_num=?4");
-            mSetValueStmt.Prepare(mDb, "INSERT INTO persistence (name,value,dev_name,dev_num) values(?1,?2,?3,?4)");
+                // normal table statements
+                mGetValueSpecificStmt.Prepare(mDb, "SELECT value FROM persistence WHERE name=?1 AND dev_name=?2 AND dev_num=?3");
+                mGetValueLessSpecificStmt.Prepare(mDb, "SELECT value FROM persistence WHERE name=?1 AND dev_name=?2");
+                mUpdateValueStmt.Prepare(mDb, "UPDATE persistence SET value=?1 WHERE name=?2 AND dev_name=?3 AND dev_num=?4");
+                mSetValueStmt.Prepare(mDb, "INSERT INTO persistence (name,value,dev_name,dev_num) values(?1,?2,?3,?4)");
 
-            // blob table statements
-            mBlobGetValueSpecificStmt.Prepare(mDb, "SELECT value FROM persistenceBlobs WHERE name=?1 AND dev_name=?2 AND dev_num=?3");
-            mBlobGetValueLessSpecificStmt.Prepare(mDb, "SELECT value FROM persistenceBlobs WHERE name=?1 AND dev_name=?2");
-            mBlobUpdateValueStmt.Prepare(mDb, "UPDATE persistenceBlobs SET value=?1 WHERE name=?2 AND dev_name=?3 AND dev_num=?4");
-            mBlobSetValueStmt.Prepare(mDb, "INSERT INTO persistenceBlobs (name,value,dev_name,dev_num) values(?1,?2,?3,?4)");
+                // blob table statements
+                mBlobGetValueSpecificStmt.Prepare(mDb, "SELECT value FROM persistenceBlobs WHERE name=?1 AND dev_name=?2 AND dev_num=?3");
+                mBlobGetValueLessSpecificStmt.Prepare(mDb, "SELECT value FROM persistenceBlobs WHERE name=?1 AND dev_name=?2");
+                mBlobUpdateValueStmt.Prepare(mDb, "UPDATE persistenceBlobs SET value=?1 WHERE name=?2 AND dev_name=?3 AND dev_num=?4");
+                mBlobSetValueStmt.Prepare(mDb, "INSERT INTO persistenceBlobs (name,value,dev_name,dev_num) values(?1,?2,?3,?4)");
 
-            // multiple return statements
-            mGetAllValuesSpecificStmt.Prepare(mDb, "SELECT name, value FROM persistence WHERE name LIKE ?1 AND dev_name=?2 AND dev_num=?3");
-            mGetAllValuesLessSpecificStmt.Prepare(mDb, "SELECT name, value FROM persistence WHERE name LIKE ?1 AND dev_name=?2");
-            mGetAllValuesGenericStmt.Prepare(mDb, "SELECT name, value FROM persistence WHERE name LIKE ?1");
+                // multiple return statements
+                mGetAllValuesSpecificStmt.Prepare(mDb, "SELECT name, value FROM persistence WHERE name LIKE ?1 AND dev_name=?2 AND dev_num=?3");
+                mGetAllValuesLessSpecificStmt.Prepare(mDb, "SELECT name, value FROM persistence WHERE name LIKE ?1 AND dev_name=?2");
+                mGetAllValuesGenericStmt.Prepare(mDb, "SELECT name, value FROM persistence WHERE name LIKE ?1");
+            }
+            else
+            {
+                AJA_LOG_ERROR("sqlite> could not prepare statements DB not opened");
+            }
         }
 
         virtual ~AJAPersistenceDBImpl()
@@ -1247,6 +1292,8 @@ AJAPersistence::~AJAPersistence()
 
 void AJAPersistence::SetParams(const std::string& appID, const std::string& deviceType, const std::string& deviceNumber, bool bSharePrefFile)
 {
+    std::string lastStateKeyName = mstateKeyName;
+
     mappId          = appID;
     mboardId        = deviceType;
     mserialNumber	= deviceNumber;
@@ -1264,13 +1311,18 @@ void AJAPersistence::SetParams(const std::string& appID, const std::string& devi
     mstateKeyName += appID;
 
 #if defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
-    if (mDBImpl)
+    if (mDBImpl && lastStateKeyName != mstateKeyName)
     {
+        AJA_sINFO(AJA_DebugUnit_Persistence, "deleting existing db instance in SetParams");
         delete mDBImpl;
         mDBImpl = NULL;
     }
 
-    mDBImpl = new AJAPersistenceDBImpl(mstateKeyName);
+    if (mDBImpl == NULL)
+    {
+        AJA_sINFO(AJA_DebugUnit_Persistence, "creating db instance in SetParams");
+        mDBImpl = new AJAPersistenceDBImpl(mstateKeyName);
+    }
 #endif
 }
 
@@ -1284,6 +1336,8 @@ void AJAPersistence::GetParams(std::string& appID, std::string& deviceType, std:
 
 bool AJAPersistence::SetValue(const std::string& key, void *value, AJAPersistenceType type, int blobSize)
 {
+    AJA_LOG_WRITE("writing value of type: " << type << " , with key: " << key);
+
 #if defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
     bool isGood = false;
     if (mDBImpl)
@@ -1309,6 +1363,8 @@ bool AJAPersistence::GetValue(const std::string& key, void *value, AJAPersistenc
 	if (FileExists() == false)
 		return false;
 
+    AJA_LOG_READ("reading value of type: " << type << " , with key: " << key);
+
 #if defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
     bool isGood = false;
     if (mDBImpl)
@@ -1324,31 +1380,36 @@ bool AJAPersistence::GetValue(const std::string& key, void *value, AJAPersistenc
 #endif
 }
 
-bool AJAPersistence::GetValuesString(const std::string& key_query, std::vector<std::string>& keys, std::vector<std::string>& values)
+bool AJAPersistence::GetValuesString(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<std::string>& values)
 {
 	// with Get, don't create file if it does not exist
 	if (FileExists() == false)
 		return false;
+
+    AJA_LOG_READ("reading string values with query key: " << keyQuery);
+
 #if defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
     bool isGood = false;
     if (mDBImpl)
     {
-        isGood = mDBImpl->GetAllMatchingValues(key_query, keys, values, mboardId, mserialNumber);
+        isGood = mDBImpl->GetAllMatchingValues(keyQuery, keys, values, mboardId, mserialNumber);
     }
     return isGood;
 #else
-	return ::PresistenceGetValues(mstateKeyName, key_query, keys, values, mboardId, mserialNumber);
+    return ::PresistenceGetValues(mstateKeyName, keyQuery, keys, values, mboardId, mserialNumber);
 #endif
 }
 
-bool AJAPersistence::GetValuesInt(const std::string& key_query, std::vector<std::string>& keys, std::vector<int>& values)
+bool AJAPersistence::GetValuesInt(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<int>& values)
 {
 	// with Get, don't create file if it does not exist
 	if (FileExists() == false)
 		return false;
+
+    AJA_LOG_READ("reading int values with query key: " << keyQuery);
 	
 	std::vector<std::string> tmpValues;
-	if (GetValuesString(key_query, keys, tmpValues))
+    if (GetValuesString(keyQuery, keys, tmpValues))
 	{
 		for (int i = 0; i < (int)keys.size(); i++)
 		{
@@ -1360,14 +1421,16 @@ bool AJAPersistence::GetValuesInt(const std::string& key_query, std::vector<std:
 	return false;
 }
 
-bool AJAPersistence::GetValuesBool(const std::string& key_query, std::vector<std::string>& keys, std::vector<bool>& values)
+bool AJAPersistence::GetValuesBool(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<bool>& values)
 {
 	// with Get, don't create file if it does not exist
 	if (FileExists() == false)
 		return false;
 
+    AJA_LOG_READ("reading bool values with query key: " << keyQuery);
+
 	std::vector<std::string> tmpValues;
-	if (GetValuesString(key_query, keys, tmpValues))
+    if (GetValuesString(keyQuery, keys, tmpValues))
 	{
 		for (int i = 0; i < (int)keys.size(); i++)
 		{
@@ -1379,14 +1442,16 @@ bool AJAPersistence::GetValuesBool(const std::string& key_query, std::vector<std
 	return false;
 }
 
-bool AJAPersistence::GetValuesDouble(const std::string& key_query, std::vector<std::string>& keys, std::vector<double>& values)
+bool AJAPersistence::GetValuesDouble(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<double>& values)
 {
 	// with Get, don't create file if it does not exist
 	if (FileExists() == false)
 		return false;
 
+    AJA_LOG_READ("reading double values with query key: " << keyQuery);
+
 	std::vector<std::string> tmpValues;
-	if (GetValuesString(key_query, keys, tmpValues))
+    if (GetValuesString(keyQuery, keys, tmpValues))
 	{
 		for (int i = 0; i < (int)keys.size(); i++)
 		{
@@ -1412,6 +1477,7 @@ bool AJAPersistence::DeletePrefFile()
 #if defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
         if (mDBImpl)
         {
+            AJA_sINFO(AJA_DebugUnit_Persistence, "deleting existing db instance in DeletePrefFile");
             delete mDBImpl;
             mDBImpl = NULL;
         }
@@ -1421,6 +1487,7 @@ bool AJAPersistence::DeletePrefFile()
 		bSuccess = err != 0;
 
 #if defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
+        AJA_sINFO(AJA_DebugUnit_Persistence, "creating db instance in DeletePrefFile");
         mDBImpl = new AJAPersistenceDBImpl(mstateKeyName);
 #endif
 	}

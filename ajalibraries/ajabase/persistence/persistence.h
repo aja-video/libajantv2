@@ -45,10 +45,10 @@ public:
 	bool FileExists();
 	bool DeletePrefFile();
 
-    bool GetValuesInt(const std::string& key_query, std::vector<std::string>& keys, std::vector<int>& values);
-    bool GetValuesBool(const std::string& key_query, std::vector<std::string>& keys, std::vector<bool>& values);
-    bool GetValuesDouble(const std::string& key_query, std::vector<std::string>& keys, std::vector<double>& values);
-    bool GetValuesString(const std::string& key_query, std::vector<std::string>& keys, std::vector<std::string>& values);
+    bool GetValuesInt(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<int>& values);
+    bool GetValuesBool(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<bool>& values);
+    bool GetValuesDouble(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<double>& values);
+    bool GetValuesString(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<std::string>& values);
 	
 private:	
 
