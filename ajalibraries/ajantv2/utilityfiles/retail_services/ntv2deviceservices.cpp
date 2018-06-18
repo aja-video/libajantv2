@@ -3819,18 +3819,9 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 	ULWord regValue = 0;
 	// convert from enum to actual register bits
 	
-    // special case for Auto (KONAHDMI only for now)
-    if (input == NTV2_Auto && mDeviceID == DEVICE_ID_KONAHDMI)
-	{
-		switch (mVirtualInputSelect)
-		{
-			default:
-			case NTV2_Input1Select:	input = NTV2_HDMISelect; break;
-			case NTV2_Input2Select:	input = NTV2_HDMI2Select; break;
-			case NTV2_Input3Select:	input = NTV2_HDMI3Select; break;
-			case NTV2_Input4Select:	input = NTV2_HDMI4Select; break;
-		}
-	}
+    // pick reasonable selection for Auto 
+    if (input == NTV2_Auto)
+		input = RetailSupport::AutoSelectAudioInput(mDeviceID, mVirtualInputSelect);
 	
 	switch (input)
 	{

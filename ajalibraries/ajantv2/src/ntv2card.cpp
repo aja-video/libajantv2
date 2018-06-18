@@ -1017,7 +1017,7 @@ NTV2DIDSet CNTV2Card::GetDefaultAncExtractorDIDs (void)
 
 	NTV2BoardType CNTV2Card::GetBoardType (void) const
 	{
-		return _boardType;
+		return DEVICETYPE_NTV2;
 	}
 
 	NTV2BoardSubType CNTV2Card::GetBoardSubType (void)
