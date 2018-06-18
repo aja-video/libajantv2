@@ -7,11 +7,13 @@
 #include "persistence.h"
 #include "sqlite3.h"
 #include "stdlib.h"
-//#include "ajabase/system/debug.h"
+
 #include <iostream>
 
 #include "ajabase/common/common.h"
+#include "ajabase/system/debug.h"
 #include "ajabase/system/file_io.h"
+#include "ajabase/system/systemtime.h"
 
 #define AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL 1
 
@@ -59,6 +61,7 @@
 #define AJA_LOG_READ(_expr_)     AJA_sINFO(AJA_DebugUnit_Persistence, _expr_)
 #define AJA_LOG_WRITE(_expr_)    AJA_sNOTICE(AJA_DebugUnit_Persistence, _expr_)
 #define AJA_LOG_ERROR(_expr_)    AJA_sERROR(AJA_DebugUnit_Persistence, _expr_)
+#define AJA_LOG_WARN(_expr_)     AJA_sWARNING(AJA_DebugUnit_Persistence, _expr_)
 
 // Encapsulate the sqlite3 object so automatically handled by constructor/destructor
 class AJAPersistenceDBImplObject
@@ -110,12 +113,14 @@ class AJAPersistenceDBImplStatement
 {
 public:
         AJAPersistenceDBImplStatement()
-        : mStmt(NULL), mStmtString(""), mPrepareErrorCode(SQLITE_ERROR)
+        : mStmt(NULL), mStmtString(""), mPrepareErrorCode(SQLITE_ERROR),
+          mNumRetries(5), mMicrosecondsBetweenRetries(1500)
         {
         }
 
         AJAPersistenceDBImplStatement(AJAPersistenceDBImplObject &db, const std::string &stmt)
-        : mStmt(NULL), mStmtString(""), mPrepareErrorCode(SQLITE_ERROR)
+        : mStmt(NULL), mStmtString(""), mPrepareErrorCode(SQLITE_ERROR),
+          mNumRetries(5), mMicrosecondsBetweenRetries(1500)
         {
             Prepare(db, stmt);
         }
@@ -123,16 +128,30 @@ public:
         int Prepare(AJAPersistenceDBImplObject &db, const std::string &stmt)
         {
             mStmtString = stmt;
-            mPrepareErrorCode = sqlite3_prepare_v3(db.GetHandle(), mStmtString.c_str(), -1, SQLITE_PREPARE_PERSISTENT, &mStmt, NULL);
+            for(int i=0;i<mNumRetries;i++)
+            {
+                mPrepareErrorCode = sqlite3_prepare_v3(db.GetHandle(), mStmtString.c_str(), -1, SQLITE_PREPARE_PERSISTENT, &mStmt, NULL);
+                if (mPrepareErrorCode != SQLITE_OK)
+                {
+                    std::ostringstream	oss;
+                    oss << "sqlite> attempt: " << i+1 << " of " << mNumRetries << ", error code: " << mPrepareErrorCode <<
+                           " with message: \"" << sqlite3_errmsg(db.GetHandle()) << "\" when preparing statement: " << mStmtString;
 
-            if (mPrepareErrorCode != SQLITE_OK)
-            {
-                AJA_LOG_ERROR("sqlite> error code: " << mPrepareErrorCode <<
-                              " with message: \"" << sqlite3_errmsg(db.GetHandle()) << "\" when preparing statement: " << mStmtString);
-            }
-            else
-            {
-                AJA_LOG_WRITE("sqlite> successfully prepared statement: " << mStmtString);
+                    if (i == mNumRetries-1)
+                    {
+                        AJA_LOG_ERROR(oss.str());
+                    }
+                    else
+                    {
+                        AJA_LOG_WARN(oss.str());
+                        AJATime::SleepInMicroseconds(mMicrosecondsBetweenRetries);
+                    }
+                }
+                else
+                {
+                    AJA_LOG_WRITE("sqlite> successfully prepared statement: " << mStmtString);
+                    break;
+                }
             }
             return mPrepareErrorCode;
         }
@@ -199,6 +218,8 @@ private:
         sqlite3_stmt *mStmt;
         std::string mStmtString;
         int mPrepareErrorCode;
+        int mNumRetries;
+        int32_t mMicrosecondsBetweenRetries;
 };
 
 class AJAPersistenceDBImpl
