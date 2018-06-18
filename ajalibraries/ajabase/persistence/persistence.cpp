@@ -123,7 +123,7 @@ public:
         int Prepare(AJAPersistenceDBImplObject &db, const std::string &stmt)
         {
             mStmtString = stmt;
-            mPrepareErrorCode = sqlite3_prepare_v2(db.GetHandle(), mStmtString.c_str(), -1, &mStmt, NULL);
+            mPrepareErrorCode = sqlite3_prepare_v3(db.GetHandle(), mStmtString.c_str(), -1, SQLITE_PREPARE_PERSISTENT, &mStmt, NULL);
 
             if (mPrepareErrorCode != SQLITE_OK)
             {
