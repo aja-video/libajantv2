@@ -1376,8 +1376,10 @@ typedef enum
 }NTV2SplitMode;
 
 
-//	Mixer/Keyer (Video Processing) Control
-//	(one for foreground input, one for background input)
+/**
+	@brief		These enum values identify the Mixer/Keyer foreground and background input control values.
+	@see		CNTV2Card::GetMixerFGInputControl, CNTV2Card::SetMixerFGInputControl, CNTV2Card::GetMixerBGInputControl, CNTV2Card::SetMixerBGInputControl, \ref widget_mixkey
+**/
 typedef enum
 {
     NTV2MIXERINPUTCONTROL_FULLRASTER,
@@ -1394,13 +1396,17 @@ typedef enum
 #endif	//	!defined (NTV2_DEPRECATE)
 
 
+/**
+	@brief		These enum values identify the mixer mode.
+	@see		CNTV2Card::GetMixerMode, CNTV2Card::SetMixerMode, \ref widget_mixkey
+**/
 typedef enum
 {
-    NTV2MIXERMODE_FOREGROUND_ON,
-    NTV2MIXERMODE_MIX,
-    NTV2MIXERMODE_SPLIT,
-    NTV2MIXERMODE_FOREGROUND_OFF,
-    NTV2MIXERMODE_INVALID
+    NTV2MIXERMODE_FOREGROUND_ON,	///< @brief		Passes only foreground video + key to the Mixer output.
+    NTV2MIXERMODE_MIX,				///< @brief		Overlays foreground video on top of background video.
+    NTV2MIXERMODE_SPLIT,			///< @deprecated	Obsolete -- split-view is no longer supported.
+    NTV2MIXERMODE_FOREGROUND_OFF,	///< @brief		Passes only background video + key to the Mixer output.
+    NTV2MIXERMODE_INVALID			///< @brief		Invalid/uninitialized.
 } NTV2MixerKeyerMode;
 
 #define	NTV2_IS_VALID_MIXERMODE(__x__)		((__x__) >= NTV2MIXERMODE_FOREGROUND_ON  &&  (__x__) < NTV2MIXERMODE_INVALID)
@@ -1434,12 +1440,7 @@ typedef enum
 } NTV2ProcAmpControl;
 
 
-#if defined(FS1) || defined(BORG)
-// An FS1 or a Borg is the whole system, not a plugin board, so there is only one of it.
-#define NTV2_MAXBOARDS 1
-#else
 #define NTV2_MAXBOARDS 8
-#endif
 
 
 typedef enum

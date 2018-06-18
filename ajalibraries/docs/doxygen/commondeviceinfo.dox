@@ -703,9 +703,10 @@
 			-	<b>Video</b>:  This determines the video that will appear in the foreground of the mix,
 				and should be routed to a widget that produces YCbCr video.
 			-	<b>Key</b>:  This determines the foreground key, and should be routed to another widget’s YCbCr output.
-				Note that only the Y component is used — the Cb and Cr components are ignored.
+				Only the Y component is used — the Cb and Cr components are ignored.
 			-	Call ::GetMixerFGInputXpt to obtain a foreground ::NTV2InputCrosspointID:
-				-	Specify the Mixer/Keyer of interest by ::NTV2Channel (e.g. use ::NTV2_CHANNEL2 for Mixer/Keyer 2).
+				-	Specify the ::NTV2Channel used. (The actual zero-based Mixer index that’s used will be half the
+					ordinal value of ::NTV2Channel.)
 				-	Pass \c false for \c inIsKey for the Video input;  pass \c true for the Key input.
 		-	<b>Background Inputs</b>:
 			-	<b>Video</b>:  This determines the video that will appear in the background,
@@ -713,13 +714,15 @@
 			-	<b>Key</b>:  This determines the background key, and should be routed to another widget’s YCbCr output.
 				Note that only the Y component is used — the Cb and Cr components are ignored.
 			-	Call ::GetMixerBGInputXpt to obtain a background ::NTV2InputCrosspointID:
-				-	Specify the Mixer/Keyer of interest by ::NTV2Channel (e.g. use ::NTV2_CHANNEL2 for Mixer/Keyer 2).
+				-	Specify the ::NTV2Channel used. (The actual zero-based Mixer index that’s used will be half the
+					ordinal value of ::NTV2Channel.)
 				-	Pass \c false for \c inIsKey for the Video input;  pass \c true for the Key input.
 	-	Each Mixer/Keyer widget has two output crosspoints:
 		-	<b>Video Output</b>:  This produces the mixed/keyed YCbCr video raster.
 		-	<b>Key Output</b>:  This produces a YCbCr signal with the resulting mixed key data in the Y channel.
 		-	Call ::GetMixerOutputXptFromChannel to obtain a Mixer’s ::NTV2OutputCrosspointID:
-			-	Specify the Mixer/Keyer of interest by ::NTV2Channel (e.g. use ::NTV2_CHANNEL2 for Mixer/Keyer 2).
+			-	Specify the ::NTV2Channel used. (The actual zero-based Mixer index that’s used will be half the
+				ordinal value of ::NTV2Channel.)
 			-	Pass \c false for \c inIsKey for the Mixer’s Video output;  pass \c true for the Mixer’s Key output.
 	-	The Mixer is controlled using ::CNTV2Card API calls:
 		-	<b>Mode</b>:
