@@ -15,7 +15,7 @@
 	-	Mixer/Keyer widgets on older devices wouldn’t pass VANC.
 	-	There’s no HANC support.
 	-	The frame buffer geometry doesn’t match the video standard, which again, adds more code complexity.
-	-	Tall/taller-frame geometries are not (and never will be) supported for 4K or UHD video formats.
+	-	Tall/taller-frame geometries aren’t supported for 4K or UHD video formats.
 
 	Starting in SDK 12.3, AJA introduced a new way of handling ancillary data using Anc extractor/inserter widgets in device firmware.
 	During playout, an inserter widget inserts ancillary data into the outgoing SDI data stream from a separate host buffer in the
@@ -29,22 +29,29 @@
 	-	Client code dealing with the host video image no longer has to contend with the VANC lines. The frame geometry now can
 		match the video standard.
 
-	@note	All NTV2 devices still support the "tall" and "taller" VANC geometries (see \c NTV2VANCMode).
-	@note	Neither \c NTV2_VANCMODE_TALL nor \c NTV2_VANCMODE_TALLER are supported for 4K or UHD video formats (see \c NTV2_IS_4K_VIDEO_FORMAT macro).
-	@note	AUTOCIRCULATE_TRANSFER -based AutoCirculate APIs support VANC geometries and/or the newer Anc inserter/extractor firmware.
-			To use the latter, the \c AUTOCIRCULATE_WITH_ANC option must be specified in the call to CNTV2Card::AutoCirculateInitForInput
+	@note	All NTV2 devices still support the "tall" and "taller" VANC geometries (see ::NTV2VANCMode).
+
+	@note	Neither ::NTV2_VANCMODE_TALL nor ::NTV2_VANCMODE_TALLER are supported for 4K or UHD video formats (see ::NTV2_IS_4K_VIDEO_FORMAT macro).
+
+	@note	::AUTOCIRCULATE_TRANSFER -based AutoCirculate APIs support VANC geometries and/or the newer Anc inserter/extractor firmware.
+			To use the latter, the ::AUTOCIRCULATE_WITH_ANC option must be specified in the call to CNTV2Card::AutoCirculateInitForInput
 			or CNTV2Card::AutoCirculateInitForOutput.
-	@note	In SDKs prior to 14.0, the Anc inserter/extractor firmware feature only worked with AutoCirculate.
-			SDK 14.1 introduced a new API for operating the Anc inserter/extractor widgets without AutoCirculate.
-	@note	\ref ajaanc can make it easier to pack/unpack the data to/from the host Anc data buffer(s).
+
+	@note	In SDKs prior to 14.3, the Anc inserter/extractor firmware feature only worked with AutoCirculate.
+
+	@note	\ref ajaanc can make it easier to pack/unpack data packets to/from the host Anc data buffer(s).
+			In SDK 14.2,\ref ajaanc uses a more consistent API to pack/unpack data packets to/from frame buffer VANC lines.
 
 	@bug	Custom Anc data is inserted/extracted to/from the SDI output/input connector that corresponds to the AutoCirculate
-			channel being used. For example, to output custom Anc data through SDI output 3, you must use AutoCirculate \c NTV2_CHANNEL3.
+			channel being used. For example, to output custom Anc data through SDI output 3, you must use AutoCirculate ::NTV2_CHANNEL3.
 			This will be fixed in a future SDK/driver.
 
-	@bug	Custom HANC insertion on playout doesn't currently work (firmware issue).
+	@bug	Custom HANC insertion on playout is not supported (this is a difficult to resolve firmware issue).
+
 
 	@section	ancembeddedaudio	Embedded Audio
+
+	@subsection	ancembeddedaudiocapture		Audio Capture
 
 	To capture embedded audio from HANC into the audio input buffer, set the audio source select register, for the specific
 	audio subsystem, to specify the desired embedded groups (see CNTV2Card::SetAudioSystemInputSource) and start the audio system running.
@@ -55,8 +62,8 @@
 	@section	anctimecode			Timecode (RP-188, SMPTE-12M)
 
 	SMPTE 12M specifies the transmission of timecode in the ancillary data space. Any RP-188 data in the input video with DBB-1
-	data matching the device's current RP-188 source select filter will be stuffed into the device's RP-188 registers, and can be
-	read using CNTV2Card::GetRP188Data. When RP-188 output is enabled for a video channel (by passing \c NTV2_RP188_OUTPUT into
+	data matching the device's current RP-188 source select filter will be placed into the device's RP-188 registers, and can be
+	read using CNTV2Card::GetRP188Data. When RP-188 output is enabled for a video channel (by passing ::NTV2_RP188_OUTPUT into
 	CNTV2Card::SetRP188Mode), whatever RP-188 data is in the RP-188 registers (call CNTV2Card::SetRP188Data to set it) is inserted
 	into the HANC area of the output video on the appropriate line:
 	-	720x486 -- lines 10 & 273
@@ -78,7 +85,7 @@
 
 	For capturing Ancillary data packets (e.g., RP-215, VITC, SMPTE 334, etc.), newer NTV2 devices (see ::NTV2DeviceCanDoCustomAnc)
 	provide ANC data extractors that, when used with the new AutoCirculate APIs introduced in SDK 12.3, captures the raw
-	packet data into a separate host data buffer that's independent of the video buffer (see the \c AUTOCIRCULATE_TRANSFER class).
+	packet data into a separate host data buffer that's independent of the video buffer (see the ::AUTOCIRCULATE_TRANSFER class).
 
 	@subsection	ancgumpformat	SDI Device Anc Buffer Data Format
 	The data bytes in the buffer consist of one or more packets having the following format:
@@ -107,7 +114,7 @@
 	@image	html	fbf-rtp.png
 
 	Clients are free to parse the data themselves, or call AJAAncillaryList::SetFromIPAncData to transform the buffer contents
-	into an \c AJAAncillaryList containing one \c AJAAncillaryData instance per ancillary data packet.
+	into an ::AJAAncillaryList containing one ::AJAAncillaryData instance per ancillary data packet.
 
 	@note	In <b>Playout</b> mode, the KonaIP and IoIP 2110 firmware expect the total RTP packet bytecount to appear in the
 			<b>Sequence Number</b> field in the first longword of the RTP packet header.
@@ -116,7 +123,7 @@
 
 	For transmitting Ancillary data packets from your own buffer, newer NTV2 devices (see ::NTV2DeviceCanDoCustomAnc) provide
 	ancillary data inserters that, when used with the new AutoCirculate APIs introduced in SDK 12.3, embed the packet data from
-	a separate host buffer (see the \c AUTOCIRCULATE_TRANSFER class). Prior to calling CNTV2Card::AutoCirculateTransfer, the data
+	a separate host buffer (see the ::AUTOCIRCULATE_TRANSFER class). Prior to calling CNTV2Card::AutoCirculateTransfer, the data
 	must be packaged as specified in \ref ancgumpformat for SDI, or \ref ancrtpformat for IP/RTP.
 
 	@note	Because the outgoing line number can be specified, it's possible to overrun a line. Be certain that the data packets to be
@@ -135,20 +142,20 @@
 
 	There are some restrictions on which frame buffer formats can be used for capture or playout with VANC.
 
-	The easiest format to use is \c NTV2_FBF_8BIT_YCBCR, but to prevent truncating the LSBs of the VANC data, the AJA device firmware must be
-	told to not do this by calling CNTV2Card::SetVANCShiftMode. When a frame is captured using the \c NTV2_VANCDATA_8BITSHIFT_ENABLE
-	mode, VANC lines can be easily parsed into Ancillary packets. With \c NTV2_FBF_10BIT_YCBCR frame buffers, ancillary data packets can be
+	The easiest format to use is ::NTV2_FBF_8BIT_YCBCR, but to prevent truncating the LSBs of the VANC data, the AJA device firmware must be
+	told to not do this by calling CNTV2Card::SetVANCShiftMode. When a frame is captured using the ::NTV2_VANCDATA_8BITSHIFT_ENABLE
+	mode, VANC lines can be easily parsed into Ancillary packets. With ::NTV2_FBF_10BIT_YCBCR frame buffers, ancillary data packets can be
 	found in the VANC lines, but the scanning process is more difficult, due to the packing of 10-bit words in the frame buffer.
-	The \c CNTV2SMPTEAncData class in the \ref ajacc has some functions (e.g., CNTV2SMPTEAncData::FindAnc, CNTV2SMPTEAncData::InsertAnc,
-	etc.) to help with this. Starting in SDK 14.1, the AJAAncillaryList::SetFromVANCData class method answers with an \c AJAAncillaryList
-	with \c AJAAncillaryData instances for each VANC packet found in a given frame buffer.
+	The ::CNTV2SMPTEAncData class in the \ref ajacc has some functions (e.g., CNTV2SMPTEAncData::FindAnc, CNTV2SMPTEAncData::InsertAnc,
+	etc.) to help with this. Starting in SDK 14.1, the AJAAncillaryList::SetFromVANCData class method answers with an ::AJAAncillaryList
+	with ::AJAAncillaryData instances for each VANC packet found in a given frame buffer.
 
-	@bug	VANC Shift Mode is not implemented for SD video formats. You must use \c NTV2_FBF_10BIT_YCBCR for SD 525i/625i video.
+	@bug	VANC Shift Mode is not implemented for SD video formats. You must use ::NTV2_FBF_10BIT_YCBCR for SD 525i/625i video.
 
 	RGB video to/from YCbCr frame buffers generally doesn't work because the VANC data is corrupted by the color-space converters.
 	However, dual-link RGB video to/from RGB frame buffers will work.
 
-	@note	Mixer/Keyer widgets on newer devices (generally, those that support ::NTV2DeviceHasCustomAnc) will pass VANC.
+	@note	Mixer/Keyer widgets on newer devices (generally, those that support ::NTV2DeviceCanDoCustomAnc) will pass VANC.
 			Call CNTV2Card::GetMixerVancOutputFromForeground to determine if the Mixer is configured to pass foreground or background VANC.
 			Call CNTV2Card::SetMixerVancOutputFromForeground to change the setting.
 

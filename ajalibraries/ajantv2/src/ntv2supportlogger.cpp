@@ -266,13 +266,13 @@ AJAExport std::ostream & operator << (std::ostream & outStream, const CNTV2Suppo
 CNTV2SupportLogger::CNTV2SupportLogger(CNTV2Card& card, NTV2SupportLoggerSections sections)
     : mSections(sections)
 {
-    mDevice.Open(card.GetIndexNumber(), false, DEVICETYPE_NTV2);
+    mDevice.Open(card.GetIndexNumber());
 }
 
 CNTV2SupportLogger::CNTV2SupportLogger(int cardIndex, NTV2SupportLoggerSections sections)
     : mSections(sections)
 {
-    mDevice.Open(cardIndex, false, DEVICETYPE_NTV2);
+    mDevice.Open(cardIndex);
 }
 
 CNTV2SupportLogger::~CNTV2SupportLogger()
@@ -425,7 +425,7 @@ void CNTV2SupportLogger::FetchInfoLog(std::ostringstream& oss)
     if (mDevice.IsKonaIPDevice())
     {
         ULWord cfg(0);
-        mDevice.ReadRegister((kRegSarekFwCfg + SAREK_REGS), &cfg);
+        mDevice.ReadRegister((kRegSarekFwCfg + SAREK_REGS), cfg);
 
         PACKAGE_INFO_STRUCT pis;
         mDevice.GetPackageInformation(pis);
@@ -446,9 +446,9 @@ void CNTV2SupportLogger::FetchInfoLog(std::ostringstream& oss)
         if (cfg & SAREK_2022_2)
         {
             ULWord dnaLo;
-            ntv2Card.ReadRegister(kRegSarekDNALow + SAREK_REGS, &dnaLo);
+            ntv2Card.ReadRegister(kRegSarekDNALow + SAREK_REGS, dnaLo);
             ULWord dnaHi;
-            ntv2Card.ReadRegister(kRegSarekDNAHi + SAREK_REGS, &dnaHi);
+            ntv2Card.ReadRegister(kRegSarekDNAHi + SAREK_REGS, dnaHi);
             oss << "Device DNA: " << HEX0N(dnaHi,8) << "-" << HEX0N(dnaLo,8) << endl;
         }
 
@@ -459,7 +459,7 @@ void CNTV2SupportLogger::FetchInfoLog(std::ostringstream& oss)
         if (cfg & SAREK_2022_2)
         {
             ULWord licenseStatus;
-            ntv2Card.ReadRegister(kRegSarekLicenseStatus + SAREK_REGS, &licenseStatus);
+            ntv2Card.ReadRegister(kRegSarekLicenseStatus + SAREK_REGS, licenseStatus);
             oss  << ((licenseStatus & SAREK_LICENSE_PRESENT) ? "" : "License not found ")
                  << ((licenseStatus & SAREK_LICENSE_VALID) ? "License is valid" : "License NOT valid")
                  << " (Enable Mask: 0x" << hex << (licenseStatus & 0xff) << ")"

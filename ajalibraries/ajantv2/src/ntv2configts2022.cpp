@@ -376,13 +376,13 @@ bool CNTV2ConfigTs2022::SetupJ2KDecoder(const j2kDecoderConfig &config)
     mDevice.WriteRegister(SAREK_IPX_J2K_DECODER_1 + kRegJ2kPrpMainCsr, 0x10);   // prp mode play
     mDevice.WriteRegister(SAREK_IPX_J2K_DECODER_1 + kRegJ2kPopMainCsr, 0x12);   // pop mode play once
 
-    mDevice.WriteRegister(SAREK_REGS2 + kRegSarekModeSelect,(uint32_t) config.selectionMode);
+    mDevice.WriteRegister(SAREK_REGS2 + kRegSarekModeSelect, uint32_t(config.selectionMode));
     mDevice.WriteRegister(SAREK_REGS2 + kRegSarekProgNumSelect,  config.programNumber);
     mDevice.WriteRegister(SAREK_REGS2 + kRegSarekProgPIDSelect,  config.programPID);
     mDevice.WriteRegister(SAREK_REGS2 + kRegSarekAudioNumSelect, config.audioNumber);
 
     uint32_t seqNum;
-    mDevice.ReadRegister( SAREK_REGS2 + kRegSarekHostSeqNum, &seqNum);
+    mDevice.ReadRegister( SAREK_REGS2 + kRegSarekHostSeqNum, seqNum);
     mDevice.WriteRegister(SAREK_REGS2 + kRegSarekHostSeqNum, ++seqNum);
 
     return true;
@@ -390,10 +390,11 @@ bool CNTV2ConfigTs2022::SetupJ2KDecoder(const j2kDecoderConfig &config)
 
 bool CNTV2ConfigTs2022::ReadbackJ2KDecoder(j2kDecoderConfig &config)
 {
-    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekModeSelect, (uint32_t*)&config.selectionMode);
-    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekProgNumSelect,  &config.programNumber);
-    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekProgPIDSelect,  &config.programPID);
-    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekAudioNumSelect, &config.audioNumber);
+	CNTV2DriverInterface &	device(mDevice);
+    device.ReadRegister(SAREK_REGS2 + kRegSarekModeSelect, config.selectionMode);
+    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekProgNumSelect,  config.programNumber);
+    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekProgPIDSelect,  config.programPID);
+    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekAudioNumSelect, config.audioNumber);
 
     return true;
 }
@@ -402,20 +403,20 @@ bool CNTV2ConfigTs2022::GetJ2KDecoderStatus(j2kDecoderStatus &status)
 {
     status.init();
 
-    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekNumPGMs,   &status.numAvailablePrograms);
-    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekNumAudios, &status.numAvailableAudios);
+    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekNumPGMs,   status.numAvailablePrograms);
+    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekNumAudios, status.numAvailableAudios);
     for (uint32_t i=0; i < status.numAvailablePrograms; i++)
     {
         uint32_t val;
-        mDevice.ReadRegister(SAREK_REGS2 + kRegSarekPGMNums + i, &val);
+        mDevice.ReadRegister(SAREK_REGS2 + kRegSarekPGMNums + i, val);
         status.availableProgramNumbers.push_back(val);
-        mDevice.ReadRegister(SAREK_REGS2 + kRegSarekPGMPIDs + i, &val);
+        mDevice.ReadRegister(SAREK_REGS2 + kRegSarekPGMPIDs + i, val);
         status.availableProgramPIDs.push_back(val);
     }
     for (uint32_t i=0; i < status.numAvailableAudios; i++)
     {
         uint32_t val;
-        mDevice.ReadRegister(SAREK_REGS2 + kRegSarekAudioPIDs + i, &val);
+        mDevice.ReadRegister(SAREK_REGS2 + kRegSarekAudioPIDs + i, val);
         status.availableAudioPIDs.push_back(val);
     }
 
@@ -612,7 +613,7 @@ bool CNTV2ConfigTs2022::SetupEncodeTsAesEncap(const NTV2Channel channel)
 uint32_t CNTV2ConfigTs2022::GetFeatures()
 {
     uint32_t val;
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekFwCfg, &val);
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekFwCfg, val);
     return val;
 }
 
@@ -631,7 +632,7 @@ bool CNTV2ConfigTs2022::J2kCanAcceptCmd(const NTV2Channel channel)
     uint32_t addr = GetIpxJ2KAddr(channel);
 
     // Read T0 Main CSR Register
-    mDevice.ReadRegister(addr + kRegJ2kT0FIFOCsr, &val);
+    mDevice.ReadRegister(addr + kRegJ2kT0FIFOCsr, val);
 
     // Check CF bit note this is bit reversed from documentation
     // so we check 6 instead of 25
@@ -645,9 +646,11 @@ bool CNTV2ConfigTs2022::J2KGetNextT0Status(const NTV2Channel channel, uint32_t *
 {
     uint32_t val;
     uint32_t addr = GetIpxJ2KAddr(channel);
+	if (!pStatus)
+		return false;
 
     // Read T0 Main CSR Register
-    mDevice.ReadRegister(addr + kRegJ2kT0FIFOCsr, &val);
+    mDevice.ReadRegister(addr + kRegJ2kT0FIFOCsr, val);
 
 	// Clear SF Status Full & SO Status Overflow bits
 	if (val & (BIT(10) | BIT(9))) {
@@ -659,8 +662,7 @@ bool CNTV2ConfigTs2022::J2KGetNextT0Status(const NTV2Channel channel, uint32_t *
     if(val & BIT(11))
         return false;
 
-	mDevice.ReadRegister( addr + kRegJ2kT0StatusFIFO, pStatus );
-	return true;
+	return mDevice.ReadRegister( addr + kRegJ2kT0StatusFIFO, *pStatus );
 }
 
 
@@ -720,7 +722,7 @@ uint32_t CNTV2ConfigTs2022::J2kGetFrameCounter(const NTV2Channel channel, uint32
     uint32_t addr = GetIpxJ2KAddr(channel);
     uint32_t val = 0;
 
-    mDevice.ReadRegister(addr + (tier*0x40) + kRegJ2kT0Framecount, &val);
+    mDevice.ReadRegister(addr + (tier*0x40) + kRegJ2kT0Framecount, val);
     //printf("J2kGetFrameCounter - %d read 0x%08x to MAIN CSR in tier %d\n", channel, val, tier);
     return val;
 }
@@ -1092,7 +1094,7 @@ bool CNTV2ConfigTs2022::ReadJ2KConfigReg(const NTV2Channel channel, const uint32
     // Only NTV2_CHANNEL1 and NTV2_CHANNEL2 are valid.
     if ((channel == NTV2_CHANNEL1) || (channel == NTV2_CHANNEL2))
     {
-        rv = mDevice.ReadRegister(SAREK_REGS2 + reg + ((kRegSarekEncodeAudio1Pid1-kRegSarekEncodeVideoFormat1+1) * channel), value);
+        rv = mDevice.ReadRegister(SAREK_REGS2 + reg + ((kRegSarekEncodeAudio1Pid1-kRegSarekEncodeVideoFormat1+1) * channel), *value);
     }
     else
         mIpErrorCode = NTV2IpErrInvalidChannel;
@@ -1119,7 +1121,7 @@ void CNTV2ConfigTs2022::SetEncoderInputEnable(const NTV2Channel channel, bool bE
 
 	uint32_t val;
 	uint32_t tmp = (bEnable?encoderBit:0) | (bMDEnable?mdBit:0);
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekControl, &val);
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekControl, val);
     val &= ~(encoderBit|mdBit);
 	val |= tmp;
 	mDevice.WriteRegister(SAREK_REGS + kRegSarekControl, val);
@@ -1134,7 +1136,7 @@ void CNTV2ConfigTs2022::SetEncoderReset(const NTV2Channel channel, bool bReset )
 #else
 	uint32_t resetBit = (channel == NTV2_CHANNEL2)?ENCODER_2_RESET:ENCODER_1_RESET;
 	uint32_t val;
-	mDevice.ReadRegister( SAREK_REGS + kRegSarekControl, &val);
+	mDevice.ReadRegister( SAREK_REGS + kRegSarekControl, val);
 	if (bReset)
 		val |= (resetBit);
 	else

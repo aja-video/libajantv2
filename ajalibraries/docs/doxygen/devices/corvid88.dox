@@ -7,6 +7,7 @@
 
 	This page describes the <b>Corvid 88</b> OEM capture/playout board, which features eight SDI connectors that can be programmatically
 	configured as inputs or outputs.
+	It’s identified by ::DEVICE_ID_CORVID88.
 
 	@image	html	corvid88.png
 
@@ -52,8 +53,8 @@
 
 	@par		Ancillary Data
 
-	-	Anc inserters and extractors (use \c AUTOCIRCULATE_TRANSFER)
-	-	VANC geometries
+	-	Anc inserters and extractors (use ::AUTOCIRCULATE_TRANSFER)
+	-	\ref vancframegeometries
 
 	@par		Secondary LTC Input
 

@@ -511,16 +511,15 @@ io_connect_t CNTV2MacDriverInterface::GetIOConnect (const bool inDoNotAllocate) 
 //--------------------------------------------------------------------------------------------------------------------
 //	Open
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, bool displayError, NTV2DeviceType eBoardType,	const char * pInHostName)
+bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, const string & hostName)
 {
 	if (inDeviceIndexNumber >= kMaxNumDevices)
 		return false;
 
-	const string	hostName	(pInHostName ? pInHostName : "");
-	if (IsOpen ()  &&  inDeviceIndexNumber == _boardNumber)
+	if (IsOpen()  &&  inDeviceIndexNumber == _boardNumber)
 	{
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-		if (hostName.empty ()  &&  _remoteHandle == INVALID_NUB_HANDLE)
+		if (hostName.empty()  &&  _remoteHandle == INVALID_NUB_HANDLE)
 			return true;	//	Same local device requested, already open
 		if (_hostname == hostName  &&  _remoteHandle != INVALID_NUB_HANDLE)
 			return true;	//	Same remote device requested, already open
@@ -529,17 +528,15 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, bool displayError
 #endif
 	}
 
-	if (IsOpen ())
-		Close ();		//	Close if different device requested
+	if (IsOpen())
+		Close();	//	Close if different device requested
 
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (!hostName.empty())
-		_boardOpened = OpenRemote (inDeviceIndexNumber, displayError, eBoardType, pInHostName);	//	Remote host open
+		_boardOpened = OpenRemote (inDeviceIndexNumber, false, 256, hostName.c_str());	//	Remote host open
 	else
 #else
-	(void) pInHostName;
-	(void) eBoardType;
-	(void) displayError;
+	(void) hostName;
 #endif
 	{
 		// Local host open -- get a Mach connection
@@ -566,10 +563,10 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, bool displayError
 		// Set _boardNumber now, because ReadRegister needs it to talk to the correct device
 		_boardNumber = inDeviceIndexNumber;	
 		const NTV2DeviceIDSet	legalDeviceIDs	(::NTV2GetSupportedDevices ());
-		if (!ReadRegister (kRegBoardID, reinterpret_cast<ULWord*>(&_boardID)))
+		if (!CNTV2DriverInterface::ReadRegister (kRegBoardID, _boardID))
 		{
 			MDIFAIL ("ReadRegister failed for 'kRegBoardID' -- " << INSTP(this) << ", ndx=" << inDeviceIndexNumber << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndexNumber, false)) << ", id=" << HEX4(_boardID));
-			if (!ReadRegister (kRegBoardID, reinterpret_cast<ULWord*>(&_boardID)))
+			if (!CNTV2DriverInterface::ReadRegister (kRegBoardID, _boardID))
 			{
 				MDIFAIL ("ReadRegister retry failed for 'kRegBoardID' -- " << INSTP(this) << ", ndx=" << inDeviceIndexNumber << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndexNumber, false)) << ", id=" << HEX4(_boardID));
 				_boardNumber = 0;
@@ -591,17 +588,27 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, bool displayError
 		NTV2FrameGeometry fg;
 		ULWord returnVal1, returnVal2;
 
-		ReadRegister (kRegGlobalControl, (ULWord*)&fg, kRegMaskGeometry, kRegShiftGeometry);
-		ReadRegister (kRegCh1Control, &returnVal1, kRegMaskFrameFormat, kRegShiftFrameFormat);
-		ReadRegister (kRegCh1Control, &returnVal2, kRegMaskFrameFormatHiBit, kRegShiftFrameFormatHiBit);
+		CNTV2DriverInterface::ReadRegister (kRegGlobalControl, fg, kRegMaskGeometry, kRegShiftGeometry);
+		ReadRegister (kRegCh1Control, returnVal1, kRegMaskFrameFormat, kRegShiftFrameFormat);
+		ReadRegister (kRegCh1Control, returnVal2, kRegMaskFrameFormatHiBit, kRegShiftFrameFormatHiBit);
 
-		InitMemberVariablesOnOpen (fg, (NTV2FrameBufferFormat)((returnVal1&0x0f) | ((returnVal2&0x1)<<4)));
+		InitMemberVariablesOnOpen (fg, NTV2FrameBufferFormat((returnVal1&0x0f) | ((returnVal2&0x1)<<4)));
 	}
 	MDIDBGIF (kMacDeviceMapDebugLog_OpenClose, " CNTV2MacDriverInterface" << INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber, false)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
 
 	return IsOpen ();
 
 }	//	Open
+
+#if !defined(NTV2_DEPRECATE_14_3)
+bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, bool displayError, NTV2DeviceType eBoardType, const char * pInHostName)
+{
+	(void) displayError;
+	(void) eBoardType;
+	const string host(pInHostName ? pInHostName : "");
+	return Open(inDeviceIndexNumber, host);
+}
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -813,16 +820,12 @@ bool CNTV2MacDriverInterface::MapMemory( MemoryType memType, void **memPtr )
 //
 //	Return the value of specified register after masking and shifting the value.
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::ReadRegister( ULWord registerNumber,
-											ULWord *registerValue,
-											ULWord registerMask,
-											ULWord registerShift )
-
+bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outRegValue, const ULWord inRegMask, const ULWord inRegShift)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 	{
-		if (!CNTV2DriverInterface::ReadRegister (registerNumber, registerValue, registerMask, registerShift))
+		if (!CNTV2DriverInterface::ReadRegister (inRegNum, outRegValue, inRegMask, inRegShift))
 		{
 			MDIFAILIF (kDriverReadRegister, INSTP(this) << ":  NTV2ReadRegisterRemote failed");
 			return false;
@@ -831,16 +834,16 @@ bool CNTV2MacDriverInterface::ReadRegister( ULWord registerNumber,
 	}
 	else
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-	NTV2_ASSERT (registerShift < 32);
+	NTV2_ASSERT (inRegShift < 32);
 	{
 		kern_return_t 	kernResult			= KERN_FAILURE;
 
 		uint64_t	scalarI_64[2];
-		uint64_t	scalarO_64 = registerValue ? *registerValue : 0;
+		uint64_t	scalarO_64 = outRegValue;
 		uint32_t	outputCount = 1;
 
-		scalarI_64[0] = registerNumber;
-		scalarI_64[1] = registerMask;
+		scalarI_64[0] = inRegNum;
+		scalarI_64[1] = inRegMask;
 
 		if (GetIOConnect())
 			kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
@@ -849,13 +852,13 @@ bool CNTV2MacDriverInterface::ReadRegister( ULWord registerNumber,
 												   2,						// the number of scalar input values.
 												   &scalarO_64,				// array of scalar (64-bit) output values.
 												   &outputCount);			// pointer to the number of scalar output values.
-		*registerValue = (uint32_t) scalarO_64;
+		outRegValue = (uint32_t) scalarO_64;
 		if (kernResult == KERN_SUCCESS)
 			return true;
 		else
 		{
 			MDIFAILIF (kDriverReadRegister, KR(kernResult) << INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(GetIOConnect(false))
-											<< " -- reg=" << registerNumber << ", mask=" << HEX8(registerMask) << ", shift=" << HEX8(registerShift) << ", WILL RESET DEVICE MAP");
+											<< " -- reg=" << DEC(inRegNum) << ", mask=" << HEX8(inRegMask) << ", shift=" << HEX8(inRegShift));
 			return false;
 		}
 	}
@@ -2052,7 +2055,7 @@ bool CNTV2MacDriverInterface::SetUserModeDebugLevel( ULWord level )
 
 bool CNTV2MacDriverInterface::GetUserModeDebugLevel( ULWord* level )
 {
-	return ReadRegister(kVRegMacUserModeDebugLevel, level);
+	return ReadRegister(kVRegMacUserModeDebugLevel, *level);
 }
 
 bool CNTV2MacDriverInterface::SetKernelModeDebugLevel( ULWord level )
@@ -2062,7 +2065,7 @@ bool CNTV2MacDriverInterface::SetKernelModeDebugLevel( ULWord level )
 
 bool CNTV2MacDriverInterface::GetKernelModeDebugLevel( ULWord* level )
 {
-	return ReadRegister(kVRegMacKernelModeDebugLevel, level);
+	return ReadRegister(kVRegMacKernelModeDebugLevel, *level);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -2075,7 +2078,7 @@ bool CNTV2MacDriverInterface::SetUserModePingLevel( ULWord level )
 
 bool CNTV2MacDriverInterface::GetUserModePingLevel( ULWord* level )
 {
-	return ReadRegister(kVRegMacUserModePingLevel,level);
+	return ReadRegister(kVRegMacUserModePingLevel, *level);
 }
 
 bool CNTV2MacDriverInterface::SetKernelModePingLevel( ULWord level )
@@ -2085,7 +2088,7 @@ bool CNTV2MacDriverInterface::SetKernelModePingLevel( ULWord level )
 
 bool CNTV2MacDriverInterface::GetKernelModePingLevel( ULWord* level )
 {
-	return ReadRegister(kVRegMacKernelModePingLevel,level);
+	return ReadRegister(kVRegMacKernelModePingLevel, *level);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -2098,7 +2101,7 @@ bool CNTV2MacDriverInterface::SetLatencyTimerValue( ULWord value )
 
 bool CNTV2MacDriverInterface::GetLatencyTimerValue( ULWord* value )
 {
-	return ReadRegister(kVRegLatencyTimerValue,value);
+	return ReadRegister(kVRegLatencyTimerValue, *value);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -2111,7 +2114,7 @@ bool CNTV2MacDriverInterface::SetOutputTimecodeOffset( ULWord frames )
 
 bool CNTV2MacDriverInterface::GetOutputTimecodeOffset( ULWord* pFrames )
 {
-	return ReadRegister(kVRegOutputTimecodeOffset, pFrames);
+	return ReadRegister(kVRegOutputTimecodeOffset, *pFrames);
 }
 
 bool CNTV2MacDriverInterface::SetOutputTimecodeType( ULWord type )
@@ -2121,7 +2124,7 @@ bool CNTV2MacDriverInterface::SetOutputTimecodeType( ULWord type )
 
 bool CNTV2MacDriverInterface::GetOutputTimecodeType( ULWord* pType )
 {
-	return ReadRegister(kVRegOutputTimecodeType, pType);
+	return ReadRegister(kVRegOutputTimecodeType, *pType);
 }
 
 
@@ -2144,17 +2147,17 @@ bool CNTV2MacDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 	RP188_STRUCT rp188;
 	NTV2DeviceID boardID = DEVICE_ID_NOTFOUND;
 	RP188SourceSelect source = kRP188SourceEmbeddedLTC;
-	ULWord dbbReg, msReg, lsReg;
+	ULWord dbbReg(0), msReg(0), lsReg(0);
 
-	ReadRegister(kRegBoardID, (ULWord *)&boardID);
-	ReadRegister(kVRegRP188SourceSelect, (ULWord *)&source);
+	CNTV2DriverInterface::ReadRegister(kRegBoardID, boardID);
+	CNTV2DriverInterface::ReadRegister(kVRegRP188SourceSelect, source);
 	bool bLTCPort = (source == kRP188SourceLTCPort);
 
 	// values come from LTC port registers
 	if (bLTCPort)
 	{
 		ULWord ltcPresent;
-		ReadRegister (kRegStatus, &ltcPresent, kRegMaskLTCInPresent, kRegShiftLTCInPresent);
+		ReadRegister (kRegStatus, ltcPresent, kRegMaskLTCInPresent, kRegShiftLTCInPresent);
 
 		// there is no equivalent DBB for LTC port - we synthesize it here
 		rp188.DBB = (ltcPresent) ? 0xFE000000 | NEW_SELECT_RP188_RCVD : 0xFE000000;
@@ -2172,8 +2175,7 @@ bool CNTV2MacDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 
 		if(NTV2DeviceGetNumVideoInputs(boardID) > 1)
 		{
-
-			ReadRegister (kVRegInputSelect, (ULWord *)&inputSelect);
+			CNTV2DriverInterface::ReadRegister (kVRegInputSelect, inputSelect);
 			channel = (inputSelect == NTV2_Input1Select) ? NTV2_CHANNEL1 : NTV2_CHANNEL2;
 		}
 		else
@@ -2185,11 +2187,11 @@ bool CNTV2MacDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 		dbbReg = (channel == NTV2_CHANNEL1 ? kRegRP188InOut1DBB : kRegRP188InOut2DBB);
 		//Check to see if TC is received
 		uint32_t tcReceived = 0;
-		ReadRegister(dbbReg, &tcReceived, BIT(16), 16);
+		ReadRegister(dbbReg, tcReceived, BIT(16), 16);
 		if(tcReceived == 0)
 			return false;//No TC recevied
 
-		ReadRegister (dbbReg, &rp188.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB );
+		ReadRegister (dbbReg, rp188.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB );
 		switch(rp188.DBB)//What do we have?
 		{
 		default:
@@ -2208,7 +2210,7 @@ bool CNTV2MacDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 				{
 					//We want Embedded LTC, so we should check one other place
 					uint32_t ltcPresent = 0;
-					ReadRegister(dbbReg, &ltcPresent, BIT(18), 18);
+					ReadRegister(dbbReg, ltcPresent, BIT(18), 18);
 					if(ltcPresent == 1)
 					{
 						//Read LTC registers
@@ -2234,10 +2236,10 @@ bool CNTV2MacDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 			}
 		}
 		//Re-Read the whole register just in case something is expecting other status values
-		ReadRegister (dbbReg, &rp188.DBB);
+		ReadRegister (dbbReg, rp188.DBB);
 	}
-	ReadRegister (msReg,  &rp188.Low );
-	ReadRegister (lsReg,  &rp188.High);
+	ReadRegister (msReg,  rp188.Low );
+	ReadRegister (lsReg,  rp188.High);
 
 	// register stability filter
 	do
@@ -2247,9 +2249,9 @@ bool CNTV2MacDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 
 		// read again into local struct
 		if (!bLTCPort)
-			ReadRegister (dbbReg, &rp188.DBB );
-		ReadRegister (msReg,  &rp188.Low );
-		ReadRegister (lsReg,  &rp188.High);
+			ReadRegister (dbbReg, rp188.DBB );
+		ReadRegister (msReg,  rp188.Low );
+		ReadRegister (lsReg,  rp188.High);
 
 		// if the new read equals the previous read, consider it done
 		if ( (rp188.DBB  == pRP188Data->DBB) &&
@@ -2280,7 +2282,7 @@ bool CNTV2MacDriverInterface::SetAudioAVSyncEnable( bool enable )
 
 bool CNTV2MacDriverInterface::GetAudioAVSyncEnable( bool* enable )
 {
-	return ReadRegister(kVRegAudioAVSyncEnable, (ULWord *)enable);
+	return enable ? CNTV2DriverInterface::ReadRegister(kVRegAudioAVSyncEnable, *enable) : false;
 }
 
 
@@ -2295,7 +2297,7 @@ bool CNTV2MacDriverInterface::SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mo
 
 bool CNTV2MacDriverInterface::GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode)
 {
-	return ReadRegister(kVRegGlobalAudioPlaybackMode,(ULWord*)mode);
+	return mode ? CNTV2DriverInterface::ReadRegister(kVRegGlobalAudioPlaybackMode, *mode) : false;
 }
 
 

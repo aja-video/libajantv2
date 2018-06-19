@@ -9,6 +9,7 @@
 #include "ntv2debug.h"
 
 
+#if !defined(NTV2_DEPRECATE_14_3)
 const char * NTV2DeviceTypeString (NTV2DeviceType type)
 {
 	const char *result = "";
@@ -24,6 +25,7 @@ const char * NTV2DeviceTypeString (NTV2DeviceType type)
 
 	return (result);
 }
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 
 const char * NTV2DeviceIDString (const NTV2DeviceID id)

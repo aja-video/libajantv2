@@ -18,9 +18,8 @@ using namespace std;
 
 
 
-CNTV2OutputAudio::CNTV2OutputAudio(UWord boardNumber,bool displayErrorMessage, NTV2DeviceType ulBoardType )
-:   CNTV2Status(boardNumber, displayErrorMessage,  ulBoardType) 
-
+CNTV2OutputAudio::CNTV2OutputAudio(UWord boardNumber)
+	:	CNTV2Card(boardNumber) 
 {
 	_currentAudioOffset = 0;
 	_dmaEngine = NTV2_DMA_FIRST_AVAILABLE; // reasonable default
@@ -31,12 +30,11 @@ CNTV2OutputAudio::CNTV2OutputAudio(UWord boardNumber,bool displayErrorMessage, N
 
 CNTV2OutputAudio::~CNTV2OutputAudio()
 {
-
 }
 
-bool CNTV2OutputAudio::Open(UWord boardNumber, bool displayError, NTV2DeviceType eBoardType )
+bool CNTV2OutputAudio::Open(UWord boardNumber)
 {
-	CNTV2LinuxDriverInterface::Open(boardNumber,displayError,eBoardType);
+	CNTV2LinuxDriverInterface::Open(boardNumber);
 	return SetupAudio();
 }
 
@@ -45,22 +43,9 @@ bool CNTV2OutputAudio::SetupAudio()
 {
 	if ( IsOpen() )
 	{
-		iFrameNumber		= GetAudioFrameBufferNumber();
+		iFrameNumber = GetAudioFrameBufferNumber();
 		ULWord fpgaRevision=0;
-		ReadRegister(kRegStatus,&fpgaRevision,kRegMaskFPGAVersion,kRegShiftFPGAVersion);
-		#if !defined (NTV2_DEPRECATE)
-		if ( GetBoardID() == BOARD_ID_XENAX2 && fpgaRevision > 0 )
-		{
-			ULWord channel1Compressed;
-			ULWord channel2Compressed;
-			ReadRegister(kRegCh1Control,&channel1Compressed,kRegMaskChannelCompressed,kRegShiftChannelCompressed);
-			ReadRegister(kRegCh2Control,&channel2Compressed,kRegMaskChannelCompressed,kRegShiftChannelCompressed);
-			if ( channel1Compressed || channel2Compressed )
-				iFrameNumber = 31;
-			else
-				iFrameNumber = 15;
-		}
-		#endif	//	!defined (NTV2_DEPRECATE)
+		ReadRegister(kRegStatus,fpgaRevision,kRegMaskFPGAVersion,kRegShiftFPGAVersion);
 		if ( NTV2DeviceGetMaxAudioChannels(GetDeviceID()) == 16 )
 		{
 			SetNumberAudioChannels(16);
@@ -84,7 +69,7 @@ bool CNTV2OutputAudio::SetBoard(UWord boardNumber)
 ULWord CNTV2OutputAudio::GetHardwareAudioOutputPointer()
 {
 	ULWord value;
-	ReadRegister(kRegAud1OutputLastAddr,&value);
+	ReadRegister(kRegAud1OutputLastAddr, value);
 	return value;
 }
 
@@ -92,7 +77,7 @@ ULWord CNTV2OutputAudio::GetHardwareAudioOutputPointer()
 ULWord CNTV2OutputAudio::GetCurrentHardwareAudioOutputPointer()
 {
 	ULWord value;
-	ReadRegister(kRegAud1Counter,&value);
+	ReadRegister(kRegAud1Counter, value);
 	return value;
 }
 
@@ -121,7 +106,7 @@ void CNTV2OutputAudio::StartAudio(NTV2_GlobalAudioPlaybackMode mode)
 bool CNTV2OutputAudio::IsAudioRunning()
 {
 	ULWord value;
-	ReadRegister(kRegAud1Control,&value,kRegMaskResetAudioOutput,kRegShiftResetAudioOutput);
+	ReadRegister(kRegAud1Control,value,kRegMaskResetAudioOutput,kRegShiftResetAudioOutput);
 	return !value;
 }
 

@@ -721,7 +721,7 @@ void CNTV2DeviceScanner::SetVideoAttributes (NTV2DeviceInfo & info)
 		if (::NTV2DeviceGetNumAudioSystems(info.deviceID))
 		{
 			ULWord audioControl;
-			inBoard.ReadRegister(kRegAud1Control, &audioControl);
+			inBoard.ReadRegister(kRegAud1Control, audioControl);
 
 			//audioSampleRateList
 			info.audioSampleRateList.push_back(k48KHzSampleRate);

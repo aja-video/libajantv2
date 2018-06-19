@@ -33,10 +33,7 @@
 #define	AJA_NTV2_SDK_VERSION_BEFORE(__a__,__b__)		(AJA_NTV2_SDK_VERSION < (((__a__) << 24) | ((__b__) << 16)))
 
 
-/**
-    @brief	Identifies a particular AJA device type.
-            In modern NTV2 SDKs, there really is only one device type: DEVICETYPE_NTV2.
-**/
+#if !defined(NTV2_DEPRECATE_14_3)
 typedef enum
 {
     DEVICETYPE_UNKNOWN=0,
@@ -48,6 +45,7 @@ typedef enum
         BOARDTYPE_MAX		= DEVICETYPE_MAX
     #endif	//	!defined (NTV2_DEPRECATE)
 } NTV2DeviceType;		///< @deprecated	Obsolete.
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 
 #if !defined (NTV2_DEPRECATE)
@@ -64,38 +62,38 @@ typedef enum
 **/
 typedef enum
 {
-    DEVICE_ID_CORVID1					= 0x10244800,
-    DEVICE_ID_CORVID22					= 0x10293000,
-    DEVICE_ID_CORVID24					= 0x10402100,
-    DEVICE_ID_CORVID3G					= 0x10294900,
-    DEVICE_ID_CORVID44					= 0x10565400,
-    DEVICE_ID_CORVID88					= 0x10538200,
-    DEVICE_ID_CORVIDHBR					= 0x10668200,
-    DEVICE_ID_CORVIDHEVC				= 0x10634500,
-    DEVICE_ID_IO4K						= 0x10478300,
-	DEVICE_ID_IO4KPLUS					= 0x10710800,
-    DEVICE_ID_IO4KUFC					= 0x10478350,
-    DEVICE_ID_IOEXPRESS					= 0x10280300,
-    DEVICE_ID_IOIP_2022                 = 0x10710850,
-    DEVICE_ID_IOIP_2110                 = 0x10710851,
-    DEVICE_ID_IOXT						= 0x10378800,
-	DEVICE_ID_KONA1						= 0x10756600,
-    DEVICE_ID_KONA3G					= 0x10294700,
-    DEVICE_ID_KONA3GQUAD				= 0x10322950,
-	DEVICE_ID_KONA4						= 0x10518400,
-	DEVICE_ID_KONA4UFC					= 0x10518450,
-    DEVICE_ID_KONAHDMI                  = 0x10767400,
-    DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,
-	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,
-    DEVICE_ID_KONAIP_2022               = 0x10646700,
-    DEVICE_ID_KONAIP_2110               = 0x10646706,
-	DEVICE_ID_KONAIP_2RX_1SFP_J2K		= 0x10646704,
-    DEVICE_ID_KONAIP_2TX_1SFP_J2K		= 0x10646703,
-    DEVICE_ID_KONAIP_4CH_2SFP			= 0x10646701,
-    DEVICE_ID_KONALHEPLUS				= 0x10352300,
-    DEVICE_ID_KONALHI					= 0x10266400,
-    DEVICE_ID_KONALHIDVI				= 0x10266401,
-    DEVICE_ID_TTAP						= 0x10416000,
+    DEVICE_ID_CORVID1					= 0x10244800,	///< @brief	See \ref corvid1corvid3g
+    DEVICE_ID_CORVID22					= 0x10293000,	///< @brief	See \ref corvid22
+    DEVICE_ID_CORVID24					= 0x10402100,	///< @brief	See \ref corvid24
+    DEVICE_ID_CORVID3G					= 0x10294900,	///< @brief	See \ref corvid3g
+    DEVICE_ID_CORVID44					= 0x10565400,	///< @brief	See \ref corvid44
+    DEVICE_ID_CORVID88					= 0x10538200,	///< @brief	See \ref corvid88
+    DEVICE_ID_CORVIDHBR					= 0x10668200,	///< @brief	See \ref corvidhbr
+    DEVICE_ID_CORVIDHEVC				= 0x10634500,	///< @brief	See \ref corvidhevc
+    DEVICE_ID_IO4K						= 0x10478300,	///< @brief	See \ref io4kquad
+	DEVICE_ID_IO4KPLUS					= 0x10710800,	///< @brief	See \ref io4kplus
+    DEVICE_ID_IO4KUFC					= 0x10478350,	///< @brief	See \ref io4kufc
+    DEVICE_ID_IOEXPRESS					= 0x10280300,	///< @brief	See \ref ioexpress
+    DEVICE_ID_IOIP_2022                 = 0x10710850,	///< @brief	See \ref ioip
+    DEVICE_ID_IOIP_2110                 = 0x10710851,	///< @brief	See \ref ioip
+    DEVICE_ID_IOXT						= 0x10378800,	///< @brief	See \ref ioxt
+	DEVICE_ID_KONA1						= 0x10756600,	///< @brief	See \ref kona1
+    DEVICE_ID_KONA3G					= 0x10294700,	///< @brief	See \ref kona3gufc
+    DEVICE_ID_KONA3GQUAD				= 0x10322950,	///< @brief	See \ref kona3gquad
+    DEVICE_ID_KONA4						= 0X10518400,	///< @brief	See \ref kona4quad
+    DEVICE_ID_KONA4UFC					= 0X10518450,	///< @brief	See \ref kona4ufc
+    DEVICE_ID_KONAHDMI                  = 0x10767400,	///< @brief	See \ref konahdmi
+    DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,	///< @brief	See \ref konaip
+	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief	See \ref konaip
+    DEVICE_ID_KONAIP_2022               = 0x10646700,	///< @brief	See \ref konaip
+    DEVICE_ID_KONAIP_2110               = 0x10646706,	///< @brief	See \ref konaip
+	DEVICE_ID_KONAIP_2RX_1SFP_J2K		= 0x10646704,	///< @brief	See \ref konaip
+    DEVICE_ID_KONAIP_2TX_1SFP_J2K		= 0x10646703,	///< @brief	See \ref konaip
+    DEVICE_ID_KONAIP_4CH_2SFP			= 0x10646701,	///< @brief	See \ref konaip
+    DEVICE_ID_KONALHEPLUS				= 0x10352300,	///< @brief	See \ref konalheplus
+    DEVICE_ID_KONALHI					= 0x10266400,	///< @brief	See \ref konalhi
+    DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief	See \ref konalhi
+    DEVICE_ID_TTAP						= 0x10416000,	///< @brief	See \ref ttap
 	DEVICE_ID_KONA5						= 0x10798400,
 #if !defined (NTV2_DEPRECATE_12_6)
     DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
@@ -133,18 +131,18 @@ typedef enum
 **/
 typedef enum
 {
-    NTV2_STANDARD_1080,			// i/psf			SMPTE
-    NTV2_STANDARD_720,			//					SMPTE
-    NTV2_STANDARD_525,			// interlaced		SMPTE
-    NTV2_STANDARD_625,			// interlaced		SMPTE
-    NTV2_STANDARD_1080p,		//					SMPTE
-    NTV2_STANDARD_2K,			// 2048x1556psf		SMPTE
-    NTV2_STANDARD_2Kx1080p,		//					SMPTE
-    NTV2_STANDARD_2Kx1080i,		// psf only			SMPTE
-    NTV2_STANDARD_3840x2160p,
-    NTV2_STANDARD_4096x2160p,
-    NTV2_STANDARD_3840HFR,
-    NTV2_STANDARD_4096HFR,
+    NTV2_STANDARD_1080,			///< @brief	Identifies SMPTE HD 1080i or 1080psf
+    NTV2_STANDARD_720,			///< @brief	Identifies SMPTE HD 720p
+    NTV2_STANDARD_525,			///< @brief	Identifies SMPTE SD 525i
+    NTV2_STANDARD_625,			///< @brief	Identifies SMPTE SD 625i
+    NTV2_STANDARD_1080p,		///< @brief	Identifies SMPTE HD 1080p
+    NTV2_STANDARD_2K,			///< @brief	Identifies SMPTE HD 2048x1556psf (1.35 full-aperture film)
+    NTV2_STANDARD_2Kx1080p,		///< @brief	Identifies SMPTE HD 2K1080p
+    NTV2_STANDARD_2Kx1080i,		///< @brief	Identifies SMPTE HD 2K1080psf
+    NTV2_STANDARD_3840x2160p,	///< @brief	Identifies Ultra-High-Definition (UHD)
+    NTV2_STANDARD_4096x2160p,	///< @brief	Identifies 4K
+    NTV2_STANDARD_3840HFR,		///< @brief	Identifies high frame-rate UHD
+    NTV2_STANDARD_4096HFR,		///< @brief	Identifies high frame-rate 4K
     NTV2_NUM_STANDARDS,
     NTV2_STANDARD_UNDEFINED	= NTV2_NUM_STANDARDS,
     NTV2_STANDARD_INVALID	= NTV2_NUM_STANDARDS
@@ -197,39 +195,39 @@ typedef enum
 typedef enum
 {
 	NTV2_FBF_FIRST					= 0
-	,NTV2_FBF_10BIT_YCBCR			= NTV2_FBF_FIRST
-	,NTV2_FBF_8BIT_YCBCR
-	,NTV2_FBF_ARGB
-	,NTV2_FBF_RGBA
-	,NTV2_FBF_10BIT_RGB
-	,NTV2_FBF_8BIT_YCBCR_YUY2
-	,NTV2_FBF_ABGR
+	,NTV2_FBF_10BIT_YCBCR			= NTV2_FBF_FIRST	///< @brief	See \ref fbformat10bitycbcr
+	,NTV2_FBF_8BIT_YCBCR								///< @brief	See \ref fbformat8bitycbcr
+	,NTV2_FBF_ARGB										///< @brief	See \ref fbformats8bitrgb
+	,NTV2_FBF_RGBA										///< @brief	See \ref fbformats8bitrgb
+	,NTV2_FBF_10BIT_RGB									///< @brief	See \ref fbformats10bitrgb
+	,NTV2_FBF_8BIT_YCBCR_YUY2							///< @brief	See \ref fbformatsyuy2
+	,NTV2_FBF_ABGR										///< @brief	See \ref fbformats8bitrgb
 	,NTV2_FBF_LAST_SD_FBF = NTV2_FBF_ABGR
-	,NTV2_FBF_10BIT_DPX
-	,NTV2_FBF_10BIT_YCBCR_DPX
-	,NTV2_FBF_8BIT_DVCPRO
-	,NTV2_FBF_8BIT_YCBCR_420PL3
-	,NTV2_FBF_8BIT_HDV
-	,NTV2_FBF_24BIT_RGB
-	,NTV2_FBF_24BIT_BGR
-	,NTV2_FBF_10BIT_YCBCRA
-	,NTV2_FBF_10BIT_DPX_LE
-	,NTV2_FBF_48BIT_RGB
-	,NTV2_FBF_PRORES
-	,NTV2_FBF_PRORES_DVCPRO
-	,NTV2_FBF_PRORES_HDV
-	,NTV2_FBF_10BIT_RGB_PACKED
-	,NTV2_FBF_10BIT_ARGB
-	,NTV2_FBF_16BIT_ARGB
-	,NTV2_FBF_8BIT_YCBCR_422PL3
-	,NTV2_FBF_10BIT_RAW_RGB
-	,NTV2_FBF_10BIT_RAW_YCBCR
-	,NTV2_FBF_10BIT_YCBCR_420PL3_LE
-	,NTV2_FBF_10BIT_YCBCR_422PL3_LE
-	,NTV2_FBF_10BIT_YCBCR_420PL2
-	,NTV2_FBF_10BIT_YCBCR_422PL2
-	,NTV2_FBF_8BIT_YCBCR_420PL2
-	,NTV2_FBF_8BIT_YCBCR_422PL2
+	,NTV2_FBF_10BIT_DPX									///< @brief	See \ref fbformats10bitrgbdpx
+	,NTV2_FBF_10BIT_YCBCR_DPX							///< @brief	See \ref fbformats10bitycbcrdpx
+	,NTV2_FBF_8BIT_DVCPRO								///< @brief	See \ref fbformats8bitdvcpro
+	,NTV2_FBF_8BIT_YCBCR_420PL3							///< @brief	See \ref fbformats8bitycbcrplanar3
+	,NTV2_FBF_8BIT_HDV									///< @brief	See \ref fbformats8bithdv
+	,NTV2_FBF_24BIT_RGB									///< @brief	See \ref fbformats24bitrgb
+	,NTV2_FBF_24BIT_BGR									///< @brief	See \ref fbformats24bitbgr
+	,NTV2_FBF_10BIT_YCBCRA								///< @brief	10-Bit YCbCrA
+	,NTV2_FBF_10BIT_DPX_LE								///< @brief	10-Bit DPX Little-Endian
+	,NTV2_FBF_48BIT_RGB									///< @brief	See \ref fbformats48bitrgb
+	,NTV2_FBF_PRORES									///< @brief	Apple ProRes
+	,NTV2_FBF_PRORES_DVCPRO								///< @brief	Apple ProRes DVC Pro
+	,NTV2_FBF_PRORES_HDV								///< @brief	Apple ProRes HDV
+	,NTV2_FBF_10BIT_RGB_PACKED							///< @brief	10-Bit Packed RGB
+	,NTV2_FBF_10BIT_ARGB								///< @brief	10-Bit ARGB
+	,NTV2_FBF_16BIT_ARGB								///< @brief	16-Bit ARGB
+	,NTV2_FBF_8BIT_YCBCR_422PL3							///< @brief	See \ref fbformats8bitycbcr422pl3
+	,NTV2_FBF_10BIT_RAW_RGB								///< @brief	10-Bit Raw RGB
+	,NTV2_FBF_10BIT_RAW_YCBCR							///< @brief	See \ref fbformats10bitcion
+	,NTV2_FBF_10BIT_YCBCR_420PL3_LE						///< @brief	See \ref fbformats10bitycbcr420pl3
+	,NTV2_FBF_10BIT_YCBCR_422PL3_LE						///< @brief	See \ref fbformats10bitycbcr422pl3
+	,NTV2_FBF_10BIT_YCBCR_420PL2						///< @brief	10-Bit 4:2:0 2-Plane YCbCr
+	,NTV2_FBF_10BIT_YCBCR_422PL2						///< @brief	10-Bit 4:2:2 2-Plane YCbCr
+	,NTV2_FBF_8BIT_YCBCR_420PL2							///< @brief	8-Bit 4:2:0 2-Plane YCbCr
+	,NTV2_FBF_8BIT_YCBCR_422PL2							///< @brief	8-Bit 4:2:2 2-Plane YCbCr
 	,NTV2_FBF_LAST
 	,NTV2_FBF_NUMFRAMEBUFFERFORMATS	= NTV2_FBF_LAST
 	,NTV2_FBF_INVALID				= NTV2_FBF_NUMFRAMEBUFFERFORMATS
@@ -314,24 +312,24 @@ typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief	An alias for NTV2Fram
 **/
 typedef enum
 {
-    NTV2_FG_1920x1080	= 0,	//	1080i, 1080p
-    NTV2_FG_1280x720	= 1,	//	720p
-    NTV2_FG_720x486		= 2,	//	ntsc 525i, 525p60
-    NTV2_FG_720x576		= 3,	//	pal 625i
-    NTV2_FG_1920x1114	= 4,	//	1920x1080 + taller vanc
-    NTV2_FG_2048x1114	= 5,	//	2048x1080 + taller vanc
-    NTV2_FG_720x508		= 6,	//	720x486 + tall vanc
-    NTV2_FG_720x598		= 7,	//	pal 625i + tall vanc
-    NTV2_FG_1920x1112	= 8,	//	1920x1080 + tall vanc
-    NTV2_FG_1280x740	= 9,	//	1280x720 + tall vanc
-    NTV2_FG_2048x1080	= 10,	//	2k1080p
-    NTV2_FG_2048x1556	= 11,	//	2k1556psf
-    NTV2_FG_2048x1588 	= 12,	//	2048x1556 + tall vanc
-    NTV2_FG_2048x1112 	= 13,	//	2048x1080 + tall vanc
-    NTV2_FG_720x514 	= 14,	//	720x486 + taller vanc (extra-wide ntsc)
-    NTV2_FG_720x612 	= 15,	//	720x576 + taller vanc (extra-wide pal)
-    NTV2_FG_4x1920x1080 = 16,	//	UHD
-    NTV2_FG_4x2048x1080 = 17,	//	4K
+    NTV2_FG_1920x1080	= 0,	///< @brief	1920x1080, for 1080i and 1080p, ::NTV2_VANCMODE_OFF
+    NTV2_FG_1280x720	= 1,	///< @brief	1280x720, for 720p, ::NTV2_VANCMODE_OFF
+    NTV2_FG_720x486		= 2,	///< @brief	720x486, for NTSC 525i and 525p60, ::NTV2_VANCMODE_OFF
+    NTV2_FG_720x576		= 3,	///< @brief	720x576, for PAL 625i, ::NTV2_VANCMODE_OFF
+    NTV2_FG_1920x1114	= 4,	///< @brief	1920x1080, ::NTV2_VANCMODE_TALLER
+    NTV2_FG_2048x1114	= 5,	///< @brief	2048x1080, ::NTV2_VANCMODE_TALLER
+    NTV2_FG_720x508		= 6,	///< @brief	720x486, for NTSC 525i, ::NTV2_VANCMODE_TALL
+    NTV2_FG_720x598		= 7,	///< @brief	720x576, for PAL 625i, ::NTV2_VANCMODE_TALL
+    NTV2_FG_1920x1112	= 8,	///< @brief	1920x1080, for 1080i and 1080p, ::NTV2_VANCMODE_TALL
+    NTV2_FG_1280x740	= 9,	///< @brief	1280x720, for 720p, ::NTV2_VANCMODE_TALL
+    NTV2_FG_2048x1080	= 10,	///< @brief	2048x1080, for 2Kx1080p, ::NTV2_VANCMODE_OFF
+    NTV2_FG_2048x1556	= 11,	///< @brief	2048x1556, for 2Kx1556psf film format, ::NTV2_VANCMODE_OFF
+    NTV2_FG_2048x1588 	= 12,	///< @brief	2048x1556, for 2Kx1556psf film format, ::NTV2_VANCMODE_TALL
+    NTV2_FG_2048x1112 	= 13,	///< @brief	2048x1080, for 2Kx1080p, ::NTV2_VANCMODE_TALL
+    NTV2_FG_720x514 	= 14,	///< @brief	720x486, for NTSC 525i and 525p60, ::NTV2_VANCMODE_TALLER
+    NTV2_FG_720x612 	= 15,	///< @brief	720x576, for PAL 625i, ::NTV2_VANCMODE_TALLER
+    NTV2_FG_4x1920x1080 = 16,	///< @brief	3840x2160, for UHD, ::NTV2_VANCMODE_OFF
+    NTV2_FG_4x2048x1080 = 17,	///< @brief	4096x2160, for 4K, ::NTV2_VANCMODE_OFF
     NTV2_FG_NUMFRAMEGEOMETRIES,
     NTV2_FG_INVALID	= NTV2_FG_NUMFRAMEGEOMETRIES
 } NTV2FrameGeometry;
@@ -436,7 +434,7 @@ typedef enum
 //		Add a corresponding timing to NTV2KonaLHTiming in ntv2register.cpp
 //		Add a corresponding case to SetVPIDData in ntv2vpid.cpp
 //		Add a corresponding case to NTV2VideoFromatString in ntv2debug.cpp
-//		Add a corresponding case to NTV2BoardGetVideoFormatFromState_Ex in sdkgen/*.csv for ntv2devicefeatures.cpp
+//		Add a corresponding case to NTV2DeviceGetVideoFormatFromState_Ex in sdkgen/*.csv for ntv2devicefeatures.cpp
 //		Consider adding a new test case to commonapps/hi5_4k_diag/main.cpp
 //		Add a corresponding case to AJAVideoFormatNTV2Table in commonclasses/ntv2videoformataja.cpp
 //			(If the format is really new, videotypes.h in ajabase/common may need updating)
@@ -588,7 +586,7 @@ typedef enum _NTV2VideoFormat
         (__f__) >= NTV2_FORMAT_FIRST_STANDARD_DEF_FORMAT	&&		\
         (__f__) < NTV2_FORMAT_END_STANDARD_DEF_FORMATS )
 
-#define NTV2_IS_720P_VIDEO_FORMAT(__f__)									\
+#define NTV2_IS_720P_VIDEO_FORMAT(__f__)							\
     (	(__f__) == NTV2_FORMAT_720p_2398	||						\
         (__f__) == NTV2_FORMAT_720p_2500	||						\
         (__f__) == NTV2_FORMAT_720p_5000	||						\
@@ -823,13 +821,17 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_1080p_2K_5994_A ||                   \
         (__f__) == NTV2_FORMAT_1080p_2K_6000_A	)
 
+/**
+	@brief		Identifies the mode of a frame store, either Capture (Input) or Display (Output).
+	@see		CNTV2Card::SetMode, CNTV2Card::GetMode, \ref vidop-fs
+**/
 typedef enum
 {
-    NTV2_MODE_DISPLAY,
-    NTV2_MODE_OUTPUT	= NTV2_MODE_DISPLAY,
-    NTV2_MODE_CAPTURE,
-    NTV2_MODE_INPUT		= NTV2_MODE_CAPTURE,
-    NTV2_MODE_INVALID
+    NTV2_MODE_DISPLAY,							///< @brief	Playout (output) mode
+    NTV2_MODE_OUTPUT	= NTV2_MODE_DISPLAY,	///< @brief	Output (playout, display) mode
+    NTV2_MODE_CAPTURE,							///< @brief	Capture (input) mode
+    NTV2_MODE_INPUT		= NTV2_MODE_CAPTURE,	///< @brief	Input (capture) mode
+    NTV2_MODE_INVALID							///< @brief	The invalid mode
 } NTV2Mode;
 
 #define	NTV2_IS_VALID_MODE(__mode__)			(((__mode__) >= NTV2_MODE_DISPLAY) && ((__mode__) < NTV2_MODE_INVALID))
@@ -851,26 +853,26 @@ typedef enum
 	@details	Always call ::NTV2DeviceCanDoInputSource to determine if a device has one of these input sources.
 				Call CNTV2Card::GetInputVideoFormat to determine what video signal is present on the input (if any).
 				Call ::GetInputSourceOutputXpt to get an NTV2OutputCrosspointID for one of these inputs to pass to
-				CNTV2Card::Connect.
+				CNTV2Card::Connect. See \ref devicesignalinputsoutputs.
 	@warning	Do not rely on the ordinal values of these constants between successive SDKs, since new devices
 				can be introduced that require additional inputs.
 **/
 typedef enum
 {
-	 NTV2_INPUTSOURCE_ANALOG1
-	,NTV2_INPUTSOURCE_HDMI1
-	,NTV2_INPUTSOURCE_HDMI2
-	,NTV2_INPUTSOURCE_HDMI3
-	,NTV2_INPUTSOURCE_HDMI4
-	,NTV2_INPUTSOURCE_SDI1
-	,NTV2_INPUTSOURCE_SDI2
-	,NTV2_INPUTSOURCE_SDI3
-	,NTV2_INPUTSOURCE_SDI4
-	,NTV2_INPUTSOURCE_SDI5
-	,NTV2_INPUTSOURCE_SDI6
-	,NTV2_INPUTSOURCE_SDI7
-	,NTV2_INPUTSOURCE_SDI8
-	,NTV2_INPUTSOURCE_INVALID
+	 NTV2_INPUTSOURCE_ANALOG1	///< @brief	Identifies the first analog video input
+	,NTV2_INPUTSOURCE_HDMI1		///< @brief	Identifies the 1st HDMI video input
+	,NTV2_INPUTSOURCE_HDMI2		///< @brief	Identifies the 2nd HDMI video input
+	,NTV2_INPUTSOURCE_HDMI3		///< @brief	Identifies the 3rd HDMI video input
+	,NTV2_INPUTSOURCE_HDMI4		///< @brief	Identifies the 4th HDMI video input
+	,NTV2_INPUTSOURCE_SDI1		///< @brief	Identifies the 1st SDI video input
+	,NTV2_INPUTSOURCE_SDI2		///< @brief	Identifies the 2nd SDI video input
+	,NTV2_INPUTSOURCE_SDI3		///< @brief	Identifies the 3rd SDI video input
+	,NTV2_INPUTSOURCE_SDI4		///< @brief	Identifies the 4th SDI video input
+	,NTV2_INPUTSOURCE_SDI5		///< @brief	Identifies the 5th SDI video input
+	,NTV2_INPUTSOURCE_SDI6		///< @brief	Identifies the 6th SDI video input
+	,NTV2_INPUTSOURCE_SDI7		///< @brief	Identifies the 7th SDI video input
+	,NTV2_INPUTSOURCE_SDI8		///< @brief	Identifies the 8th SDI video input
+	,NTV2_INPUTSOURCE_INVALID	///< @brief	The invalid video input
 	,NTV2_NUM_INPUTSOURCES = NTV2_INPUTSOURCE_INVALID
 } NTV2InputSource;
 
@@ -924,7 +926,7 @@ typedef enum
 #define	NTV2_IS_VALID_INPUT_SOURCE(_inpSrc_)			(((_inpSrc_) >= 0) && ((_inpSrc_) < NTV2_INPUTSOURCE_INVALID))
 
 /**
-	@brief		Used to specify one or more NTV2InputSource types.
+	@brief		Used to specify one or more ::NTV2InputSource types.
 **/
 typedef enum _NTV2InputSourceKinds
 {
@@ -932,7 +934,7 @@ typedef enum _NTV2InputSourceKinds
 	NTV2_INPUTSOURCES_SDI		= 1,	///< @brief	Specifies SDI input source kinds.
 	NTV2_INPUTSOURCES_HDMI		= 2,	///< @brief	Specifies HDMI input source kinds.
 	NTV2_INPUTSOURCES_ANALOG	= 4,	///< @brief	Specifies analog input source kinds.
-	NTV2_INPUTSOURCES_NONE		= 0
+	NTV2_INPUTSOURCES_NONE		= 0		///< @brief	Doesn't specify any kind of input source.
 } NTV2InputSourceKinds;
 
 
@@ -995,22 +997,34 @@ typedef enum
 #define	NTV2_IS_VALID_OUTPUT_DEST(_dest_)				(((_dest_) >= 0) && ((_dest_) < NTV2_NUM_OUTPUTDESTINATIONS))
 
 
+/**
+	@brief		These enum values are mostly used to identify a specific \ref widget_framestore widget.
+				They're also typically used to identify a particular channel (or video input/output stream).
+				They can also be used anywhere a zero-based index value is expected.
+	@note		In NTV2 parlance, the terms <b>Channel</b> and <b>Frame Store</b> are used interchangeably.
+	@see		::NTV2DeviceGetNumFrameStores, \ref vidop-fs
+**/
 typedef enum
 {
-    NTV2_CHANNEL1,
-    NTV2_CHANNEL2,
-    NTV2_CHANNEL3,
-    NTV2_CHANNEL4,
-    NTV2_CHANNEL5,
-    NTV2_CHANNEL6,
-    NTV2_CHANNEL7,
-    NTV2_CHANNEL8,
+    NTV2_CHANNEL1,		///< @brief	Specifies channel or Frame Store 1 (or the first item).
+    NTV2_CHANNEL2,		///< @brief	Specifies channel or Frame Store 2 (or the 2nd item).
+    NTV2_CHANNEL3,		///< @brief	Specifies channel or Frame Store 3 (or the 3rd item).
+    NTV2_CHANNEL4,		///< @brief	Specifies channel or Frame Store 4 (or the 4th item).
+    NTV2_CHANNEL5,		///< @brief	Specifies channel or Frame Store 5 (or the 5th item).
+    NTV2_CHANNEL6,		///< @brief	Specifies channel or Frame Store 6 (or the 6th item).
+    NTV2_CHANNEL7,		///< @brief	Specifies channel or Frame Store 7 (or the 7th item).
+    NTV2_CHANNEL8,		///< @brief	Specifies channel or Frame Store 8 (or the 8th item).
     NTV2_MAX_NUM_CHANNELS,			//	Always last!
     NTV2_CHANNEL_INVALID = NTV2_MAX_NUM_CHANNELS
 } NTV2Channel;
 
 #define NTV2_IS_VALID_CHANNEL(__x__)					((__x__) >= NTV2_CHANNEL1 && (__x__) < NTV2_MAX_NUM_CHANNELS)
 
+
+/**
+	@brief		Identifies a specific IP-based data stream.
+	@warning	The ordinal values of the enum names may change in successive SDKs.
+**/
 typedef enum
 {
     NTV2_VIDEO1_STREAM      = 0,
@@ -1030,11 +1044,14 @@ typedef enum
 } NTV2Stream;
 
 
+/**
+	@brief		Identifies the kind of data that can be carried by an IP-based data stream.
+**/
 typedef enum
 {
-    VIDEO_STREAM,
-    AUDIO_STREAM,
-    METADATA_STREAM,
+    VIDEO_STREAM,		///< @brief	Video data
+    AUDIO_STREAM,		///< @brief	Audio data
+    METADATA_STREAM,	///< @brief	Metadata
     INVALID_STREAM
 } NTV2StreamType;
 
@@ -1042,27 +1059,33 @@ typedef enum
 #define NTV2_IS_VALID_RX_STREAM(__x__)					((__x__) >= NTV2_VIDEO1_STREAM && (__x__) < NTV2_MAX_NUM_STREAMS)
 #define NTV2_IS_VALID_TX_STREAM(__x__)					((__x__) >= NTV2_VIDEO1_STREAM && (__x__) < NTV2_MAX_NUM_STREAMS)
 
+/**
+	@brief		These enum values identify a specific source for the device's (output) reference clock.
+	@see		CNTV2Card::GetReference, CNTV2Card::SetReference, \ref deviceclockingandsync
+	@warning	Do not rely on the ordinal values of these constants between successive SDKs, since new devices
+				can be introduced that require additional inputs.
+**/
 typedef enum
 {
-    NTV2_REFERENCE_EXTERNAL         = 0,
-    NTV2_REFERENCE_INPUT1           = 1,
-    NTV2_REFERENCE_INPUT2           = 2,
-    NTV2_REFERENCE_FREERUN          = 3,
-    NTV2_REFERENCE_ANALOG_INPUT1    = 4,
-    NTV2_REFERENCE_HDMI_INPUT1      = 5,
-    NTV2_REFERENCE_INPUT3           = 6,
-    NTV2_REFERENCE_INPUT4           = 7,
-    NTV2_REFERENCE_INPUT5           = 8,
-    NTV2_REFERENCE_INPUT6           = 9,
-    NTV2_REFERENCE_INPUT7           = 10,
-    NTV2_REFERENCE_INPUT8           = 11,
-    NTV2_REFERENCE_SFP1_PTP         = 12,
-    NTV2_REFERENCE_SFP1_PCR         = 13,
-    NTV2_REFERENCE_SFP2_PTP         = 14,
-    NTV2_REFERENCE_SFP2_PCR         = 15,
-    NTV2_REFERENCE_HDMI_INPUT2      = 16,
-    NTV2_REFERENCE_HDMI_INPUT3      = 17,
-    NTV2_REFERENCE_HDMI_INPUT4      = 18,
+    NTV2_REFERENCE_EXTERNAL         = 0,	///< @brief	Specifies the External Reference connector.
+    NTV2_REFERENCE_INPUT1           = 1,	///< @brief	Specifies the SDI In 1 connector.
+    NTV2_REFERENCE_INPUT2           = 2,	///< @brief	Specifies the SDI In 2 connector.
+    NTV2_REFERENCE_FREERUN          = 3,	///< @brief	Specifies the device's internal clock.
+    NTV2_REFERENCE_ANALOG_INPUT1    = 4,	///< @brief	Specifies the Analog In 1 connector.
+    NTV2_REFERENCE_HDMI_INPUT1      = 5,	///< @brief	Specifies the HDMI In 1 connector.
+    NTV2_REFERENCE_INPUT3           = 6,	///< @brief	Specifies the SDI In 3 connector.
+    NTV2_REFERENCE_INPUT4           = 7,	///< @brief	Specifies the SDI In 4 connector.
+    NTV2_REFERENCE_INPUT5           = 8,	///< @brief	Specifies the SDI In 5 connector.
+    NTV2_REFERENCE_INPUT6           = 9,	///< @brief	Specifies the SDI In 6 connector.
+    NTV2_REFERENCE_INPUT7           = 10,	///< @brief	Specifies the SDI In 7 connector.
+    NTV2_REFERENCE_INPUT8           = 11,	///< @brief	Specifies the SDI In 8 connector.
+    NTV2_REFERENCE_SFP1_PTP         = 12,	///< @brief	Specifies the PTP source on SFP 1.
+    NTV2_REFERENCE_SFP1_PCR         = 13,	///< @brief	Specifies the PCR source on SFP 1.
+    NTV2_REFERENCE_SFP2_PTP         = 14,	///< @brief	Specifies the PTP source on SFP 2.
+    NTV2_REFERENCE_SFP2_PCR         = 15,	///< @brief	Specifies the PCR source on SFP 2.
+    NTV2_REFERENCE_HDMI_INPUT2      = 16,	///< @brief	Specifies the HDMI In 2 connector.
+    NTV2_REFERENCE_HDMI_INPUT3      = 17,	///< @brief	Specifies the HDMI In 3 connector.
+    NTV2_REFERENCE_HDMI_INPUT4      = 18,	///< @brief	Specifies the HDMI In 4 connector.
     NTV2_NUM_REFERENCE_INPUTS,			//	Always last!
     NTV2_REFERENCE_HDMI_INPUT       = NTV2_REFERENCE_HDMI_INPUT1,	///< @deprecated	Use NTV2_REFERENCE_HDMI_INPUT1 instead.
     NTV2_REFERENCE_ANALOG_INPUT		= NTV2_REFERENCE_ANALOG_INPUT1,	///< @deprecated	Use NTV2_REFERENCE_ANALOG_INPUT1 instead.
@@ -1279,8 +1302,8 @@ typedef enum
 } NTV2SignalMask;
 
 /**
-    @brief	These are essentially an NTV2Channel with a direction (input/capture/ingest versus output/playout).
-    @note	These will be deprecated and known only to the driver at some point in the future.
+    @brief	Logically, these are an ::NTV2Channel combined with an ::NTV2Mode.
+    @note	Do not use these, as they will be removed at some point in the future.
 **/
 typedef enum
 {
@@ -1354,8 +1377,10 @@ typedef enum
 }NTV2SplitMode;
 
 
-//	Mixer/Keyer (Video Processing) Control
-//	(one for foreground input, one for background input)
+/**
+	@brief		These enum values identify the Mixer/Keyer foreground and background input control values.
+	@see		CNTV2Card::GetMixerFGInputControl, CNTV2Card::SetMixerFGInputControl, CNTV2Card::GetMixerBGInputControl, CNTV2Card::SetMixerBGInputControl, \ref widget_mixkey
+**/
 typedef enum
 {
     NTV2MIXERINPUTCONTROL_FULLRASTER,
@@ -1372,13 +1397,17 @@ typedef enum
 #endif	//	!defined (NTV2_DEPRECATE)
 
 
+/**
+	@brief		These enum values identify the mixer mode.
+	@see		CNTV2Card::GetMixerMode, CNTV2Card::SetMixerMode, \ref widget_mixkey
+**/
 typedef enum
 {
-    NTV2MIXERMODE_FOREGROUND_ON,
-    NTV2MIXERMODE_MIX,
-    NTV2MIXERMODE_SPLIT,
-    NTV2MIXERMODE_FOREGROUND_OFF,
-    NTV2MIXERMODE_INVALID
+    NTV2MIXERMODE_FOREGROUND_ON,	///< @brief		Passes only foreground video + key to the Mixer output.
+    NTV2MIXERMODE_MIX,				///< @brief		Overlays foreground video on top of background video.
+    NTV2MIXERMODE_SPLIT,			///< @deprecated	Obsolete -- split-view is no longer supported.
+    NTV2MIXERMODE_FOREGROUND_OFF,	///< @brief		Passes only background video + key to the Mixer output.
+    NTV2MIXERMODE_INVALID			///< @brief		Invalid/uninitialized.
 } NTV2MixerKeyerMode;
 
 #define	NTV2_IS_VALID_MIXERMODE(__x__)		((__x__) >= NTV2MIXERMODE_FOREGROUND_ON  &&  (__x__) < NTV2MIXERMODE_INVALID)
@@ -1412,12 +1441,7 @@ typedef enum
 } NTV2ProcAmpControl;
 
 
-#if defined(FS1) || defined(BORG)
-// An FS1 or a Borg is the whole system, not a plugin board, so there is only one of it.
-#define NTV2_MAXBOARDS 1
-#else
 #define NTV2_MAXBOARDS 8
-#endif
 
 
 typedef enum
@@ -1543,9 +1567,10 @@ typedef enum
 
 
 /**
-    @brief	This enum value determines/states which video input will be used to supply audio samples to an audio system.
+    @brief	This enum value determines/states which SDI video input will be used to supply
+			audio samples to an audio system.
             It assumes that the audio systems' audio source is set to NTV2_AUDIO_EMBEDDED.
-            See the SetEmbeddedAudioInput and GetEmbeddedAudioInput methods of CNTV2Card.
+	@see	CNTV2Card::SetEmbeddedAudioInput, CNTV2Card::GetEmbeddedAudioInput
 **/
 typedef enum
 {
@@ -1564,6 +1589,12 @@ typedef enum
 #define	NTV2_IS_VALID_EMBEDDED_AUDIO_INPUT(_x_)			((_x_) >= NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1  &&  (_x_) < NTV2_EMBEDDED_AUDIO_INPUT_INVALID)
 
 
+/**
+    @brief	This enum value determines/states the device audio clock reference source.
+			It was important to set this to ::NTV2_EMBEDDED_AUDIO_CLOCK_VIDEO_INPUT on older devices.
+			Newer devices always use ::NTV2_EMBEDDED_AUDIO_CLOCK_VIDEO_INPUT and cannot be changed.
+    @see	CNTV2Card::GetEmbeddedAudioClock, CNTV2Card::SetEmbeddedAudioClock, \ref audiooperation
+**/
 typedef enum
 {
     NTV2_EMBEDDED_AUDIO_CLOCK_REFERENCE,	///< @brief	Audio clock derived from the device reference
@@ -1577,7 +1608,7 @@ typedef enum
 
 /**
     @brief	This enum value determines/states where an audio system will obtain its audio samples.
-            See the SetAudioSystemInputSource and GetAudioSystemInputSource methods of CNTV2Card.
+    @see	CNTV2Card::SetAudioSystemInputSource, CNTV2Card::GetAudioSystemInputSource, \ref audiocapture
 **/
 typedef enum
 {
@@ -1597,10 +1628,15 @@ typedef enum
 #define	NTV2_IS_VALID_AUDIO_SOURCE(_x_)			((_x_) >= NTV2_AUDIO_EMBEDDED  &&  (_x_) < NTV2_AUDIO_SOURCE_INVALID)
 
 
+/**
+    @brief	This enum value determines/states if an audio output embedder will embed silence (zeroes)
+            or de-embedded audio from an SDI input.
+    @see	CNTV2Card::SetAudioSystemInputSource, CNTV2Card::GetAudioSystemInputSource, \ref audioplayout
+**/
 typedef enum
 {
-    NTV2_AUDIO_LOOPBACK_OFF,
-    NTV2_AUDIO_LOOPBACK_ON,
+    NTV2_AUDIO_LOOPBACK_OFF,		///< @brief	Embeds silence (zeroes) into the data stream.
+    NTV2_AUDIO_LOOPBACK_ON,			///< @brief	Embeds SDI input source audio into the data stream.
     NTV2_AUDIO_LOOPBACK_INVALID
 } NTV2AudioLoopBack;
 
@@ -1853,6 +1889,10 @@ typedef enum
     NTV2_HDMISelect,
     NTV2_AudioInputOther,
 	NTV2_MicInSelect,
+	NTV2_HDMI2Select,
+    NTV2_HDMI3Select,
+    NTV2_HDMI4Select,
+    NTV2_Auto,
     NTV2_MAX_NUM_InputAudioSelectEnums
 } NTV2InputAudioSelect;
 
@@ -2086,7 +2126,9 @@ typedef enum
 
 
 /**
-    @brief	Identifies a widget output, a signal source, that potentially can drive another widget's input (identified by NTV2InputCrosspointID).
+    @brief	Identifies a widget output, a signal source, that potentially can drive
+			another widget's input (identified by ::NTV2InputCrosspointID).
+	@see	CNTV2Card::Connect
 **/
 typedef enum NTV2OutputCrosspointID
 {
@@ -2287,13 +2329,15 @@ typedef enum NTV2OutputCrosspointID
     #endif	//	!defined (NTV2_DEPRECATE)
 } NTV2OutputCrosspointID;
 
-typedef NTV2OutputCrosspointID	NTV2CrosspointID;	///< @deprecated	Use NTV2OutputCrosspointID instead.
+typedef NTV2OutputCrosspointID	NTV2CrosspointID;	///< @deprecated	Use ::NTV2OutputCrosspointID instead.
 
 #define	NTV2_IS_VALID_OutputCrosspointID(__s__)			((__s__) >= NTV2_XptBlack && (__s__) < NTV2_OUTPUT_CROSSPOINT_INVALID)
 
 
 /**
-    @brief	Identifies a widget input that potentially can accept a signal emitted from another widget's output (identified by NTV2OutputCrosspointID).
+    @brief	Identifies a widget input that potentially can accept a signal emitted
+			from another widget's output (identified by ::NTV2OutputCrosspointID).
+	@see	CNTV2Card::Connect
 **/
 typedef enum NTV2InputCrosspointID
 {
@@ -2440,8 +2484,8 @@ typedef enum NTV2InputCrosspointID
 
 /**
     @brief	Identifies firmware widgets that logically can have zero or more signal inputs
-            (identified by \c NTV2InputCrosspointID) and/or zero or more signal outputs
-            (identified by \c NTV2OutputCrosspointID).
+            (identified by ::NTV2InputCrosspointID) and/or zero or more signal outputs
+            (identified by ::NTV2OutputCrosspointID).
 **/
 #define NTV2_WIDGET_FIRST		0
 typedef enum
@@ -2577,6 +2621,9 @@ typedef enum
 #endif	//	!defined (NTV2_DEPRECATE)
 
 
+/**
+    @brief	Identifies the \ref ntv2hwaccessories that may be attached to an AJA NTV2 device.
+**/
 typedef enum
 {
     NTV2_BreakoutNone,			///< @brief	No identifiable breakout hardware appears to be attached.
@@ -2595,25 +2642,15 @@ typedef enum
 #define	NTV2_IS_VALID_BREAKOUT_TYPE(__p__)		((__p__) > NTV2_BreakoutNone && (__p__) < NTV2_MAX_NUM_BreakoutTypes)
 
 
-typedef enum
-{
-    NTV2_AudioMonitor1_2,			// Analog Audio Monitor Channels 1-2
-    NTV2_AudioMonitor3_4,			// Analog Audio Monitor Channels 3-4
-    NTV2_AudioMonitor5_6,			// Analog Audio Monitor Channels 5-6
-    NTV2_AudioMonitor7_8,			// Analog Audio Monitor Channels 7-8
-    NTV2_AudioMonitor9_10,			// Analog Audio Monitor Channels 9-10
-    NTV2_AudioMonitor11_12,			// Analog Audio Monitor Channels 11-12
-    NTV2_AudioMonitor13_14,			// Analog Audio Monitor Channels 13-14
-    NTV2_AudioMonitor15_16,			// Analog Audio Monitor Channels 15-16
-    NTV2_MAX_NUM_AudioMonitorSelect,
-    NTV2_AUDIO_MONITOR_INVALID	=	NTV2_MAX_NUM_AudioMonitorSelect
-} NTV2AudioMonitorSelect;
-
-#define	NTV2_IS_VALID_AUDIO_MONITOR(__p__)		((__p__) < NTV2_MAX_NUM_AudioMonitorSelect)
-
-
 #define	EXTENDED_AUDIO_SUPPORTED
 
+/**
+    @brief	Identifies a pair of audio channels.
+    @note	The audio channels in the pair are adjacent, and never span an audio group.
+    @see	CNTV2Card::GetAudioPCMControl(const NTV2AudioSystem, const NTV2AudioChannelPair),
+			CNTV2Card::SetAudioPCMControl(const NTV2AudioSystem, const NTV2AudioChannelPair),
+			::NTV2DeviceGetMaxAudioChannels, \ref audiooperation
+**/
 typedef enum
 {
     NTV2_AudioChannel1_2,		///< @brief	This selects audio channels 1 and 2		(Group 1 channels 1 and 2)
@@ -2691,6 +2728,22 @@ typedef NTV2AudioChannelPair	NTV2Audio2ChannelSelect;
 #define	NTV2_IS_NORMAL_AUDIO_CHANNEL_PAIR(__p__)			((__p__) >= NTV2_AudioChannel1_2	&& (__p__) <= NTV2_AudioChannel15_16)
 #define	NTV2_IS_EXTENDED_AUDIO_CHANNEL_PAIR(__p__)			((__p__) >= NTV2_AudioChannel17_18	&& (__p__) < NTV2_MAX_NUM_AudioChannelPair)
 
+
+#define	NTV2_AudioMonitor1_2				NTV2_AudioChannel1_2		// Analog Audio Monitor Channels 1-2
+#define	NTV2_AudioMonitor3_4				NTV2_AudioChannel3_4		// Analog Audio Monitor Channels 3-4
+#define	NTV2_AudioMonitor5_6				NTV2_AudioChannel5_6		// Analog Audio Monitor Channels 5-6
+#define	NTV2_AudioMonitor7_8				NTV2_AudioChannel7_8		// Analog Audio Monitor Channels 7-8
+#define	NTV2_AudioMonitor9_10				NTV2_AudioChannel9_10		// Analog Audio Monitor Channels 9-10
+#define	NTV2_AudioMonitor11_12				NTV2_AudioChannel11_12		// Analog Audio Monitor Channels 11-12
+#define	NTV2_AudioMonitor13_14				NTV2_AudioChannel13_14		// Analog Audio Monitor Channels 13-14
+#define	NTV2_AudioMonitor15_16				NTV2_AudioChannel15_16		// Analog Audio Monitor Channels 15-16
+#define	NTV2_MAX_NUM_AudioMonitorSelect		NTV2_AudioChannel17_18
+#define	NTV2_AUDIO_MONITOR_INVALID			NTV2_MAX_NUM_AudioMonitorSelect
+typedef NTV2AudioChannelPair	NTV2AudioMonitorSelect;
+
+#define	NTV2_IS_VALID_AUDIO_MONITOR(__p__)		((__p__) < NTV2_MAX_NUM_AudioMonitorSelect)
+
+
 typedef enum
 {
 	NTV2_AudioMixerChannel1,
@@ -2716,6 +2769,10 @@ typedef enum
 #define	NTV2_IS_VALID_AUDIO_MIXER_CHANNEL(__p__)		((__p__) >= NTV2_AudioMixerChannel1	&& (__p__) < NTV2_MAX_NUM_AudioMixerChannel)
 #define	NTV2_IS_AUDIO_MIXER_CHANNELS_1_OR_2(__p__)		((__p__) >= NTV2_AudioMixerChannel1	&& (__p__) <= NTV2_AudioMixerChannel2)
 
+/**
+    @brief	Identifies a contiguous, adjacent group of four audio channels.
+    @see	CNTV2Card::GetAESOutputSource, CNTV2Card::SetAESOutputSource, \ref audiooperation
+**/
 typedef enum
 {
     NTV2_AudioChannel1_4,			///< @brief	This selects audio channels 1 thru 4
@@ -2761,6 +2818,10 @@ typedef NTV2Audio4ChannelSelect	NTV2AudioChannelQuad;
 #define	NTV2_IS_EXTENDED_AUDIO_CHANNEL_QUAD(__p__)			((__p__) >= NTV2_AudioChannel17_20	&& (__p__) < NTV2_MAX_NUM_Audio4ChannelSelect)
 
 
+/**
+    @brief	Identifies a contiguous, adjacent group of eight audio channels.
+    @see	CNTV2Card::GetHDMIOutAudioSource8Channel, CNTV2Card::SetHDMIOutAudioSource8Channel, \ref audiooperation
+**/
 typedef enum
 {
     NTV2_AudioChannel1_8,			///< @brief	This selects audio channels 1 thru 8
@@ -3146,13 +3207,18 @@ typedef enum
 #define	NTV2_IS_VALID_LHI_HDMI_COLORSPACE(__x__)	((__x__) < NTV2_MAX_NUM_LHIHDMIColorSpaces)
 
 
-// This specifies HDMI Protocol
+/**
+    @brief	This specifies the HDMI protocol to be used.
+**/
 typedef enum
 {
     NTV2_HDMIProtocolHDMI,		//	HDMI Protocol
     NTV2_HDMIProtocolDVI,		//	DVI Protocol
-    NTV2_MAX_NUM_HDMIProtocols
+    NTV2_MAX_NUM_HDMIProtocols,
+    NTV2_INVALID_HDMI_PROTOCOL	= NTV2_MAX_NUM_HDMIProtocols
 } NTV2HDMIProtocol;
+
+#define	NTV2_IS_VALID_HDMI_PROTOCOL(__x__)	((__x__) < NTV2_MAX_NUM_LHIHDMIColorSpaces)
 
 
 // Bit depth on HDMI interface
@@ -3160,8 +3226,11 @@ typedef enum
 {
     NTV2_HDMI8Bit,				//	8 bit
     NTV2_HDMI10Bit,				//	10 bit
-    NTV2_MAX_NUM_HDMIBitDepths
+    NTV2_MAX_NUM_HDMIBitDepths,
+    NTV2_INVALID_HDMIBitDepth = NTV2_MAX_NUM_HDMIBitDepths
 } NTV2HDMIBitDepth;
+
+#define	NTV2_IS_VALID_HDMI_BITDEPTH(__x__)	((__x__) < NTV2_MAX_NUM_HDMIBitDepths)
 
 
 // This specifies the range of levels for 10-bit RGB (aka DualLink)
@@ -3283,12 +3352,16 @@ typedef enum
 } NTV2VideoLimiting;
 
 
+/**
+    @brief	These enum values identify the available VANC modes.
+    @see	CNTV2Card::GetVANCMode, CNTV2Card::SetVANCMode, \ref vidop-fs, \ref vancframegeometries
+**/
 typedef enum
 {
-    NTV2_VANCMODE_OFF,
-    NTV2_VANCMODE_TALL,
-    NTV2_VANCMODE_TALLER,
-    NTV2_VANCMODE_INVALID
+    NTV2_VANCMODE_OFF,		///< @brief	This identifies the mode in which there are no VANC lines in the frame buffer.
+    NTV2_VANCMODE_TALL,		///< @brief	This identifies the "tall" mode in which there are some VANC lines in the frame buffer.
+    NTV2_VANCMODE_TALLER,	///< @brief	This identifies the mode in which there are some + extra VANC lines in the frame buffer.
+    NTV2_VANCMODE_INVALID	///< @brief	This identifies the invalid (unspecified, uninitialized) VANC mode.
 } NTV2VANCMode;
 
 #define	NTV2_IS_VALID_VANCMODE(__v__)			((__v__) >= NTV2_VANCMODE_OFF && (__v__) < NTV2_VANCMODE_INVALID)
@@ -3378,16 +3451,20 @@ typedef enum
 } NTV2LUTControlSelect;
 
 
+/**
+    @brief	These enum values identify the available NTV2 Audio Systems.
+    @see	See \ref audiooperation
+**/
 typedef enum
 {
-    NTV2_AUDIOSYSTEM_1,
-    NTV2_AUDIOSYSTEM_2,
-    NTV2_AUDIOSYSTEM_3,
-    NTV2_AUDIOSYSTEM_4,
-    NTV2_AUDIOSYSTEM_5,
-    NTV2_AUDIOSYSTEM_6,
-    NTV2_AUDIOSYSTEM_7,
-	NTV2_AUDIOSYSTEM_8,
+    NTV2_AUDIOSYSTEM_1,	///< @brief	This identifies the first Audio System.
+    NTV2_AUDIOSYSTEM_2,	///< @brief	This identifies the 2nd Audio System.
+    NTV2_AUDIOSYSTEM_3,	///< @brief	This identifies the 3rd Audio System.
+    NTV2_AUDIOSYSTEM_4,	///< @brief	This identifies the 4th Audio System.
+    NTV2_AUDIOSYSTEM_5,	///< @brief	This identifies the 5th Audio System.
+    NTV2_AUDIOSYSTEM_6,	///< @brief	This identifies the 6th Audio System.
+    NTV2_AUDIOSYSTEM_7,	///< @brief	This identifies the 7th Audio System.
+	NTV2_AUDIOSYSTEM_8,	///< @brief	This identifies the 8th Audio System.
     NTV2_MAX_NUM_AudioSystemEnums,
     NTV2_NUM_AUDIOSYSTEMS		= NTV2_MAX_NUM_AudioSystemEnums,
     NTV2_AUDIOSYSTEM_INVALID	= NTV2_NUM_AUDIOSYSTEMS
@@ -3430,7 +3507,7 @@ typedef enum
 
 /**
     @brief	These enum values are indexes into the capture/playout AutoCirculate timecode arrays
-            (see AUTOCIRCULATE_TRANSFER::GetInputTimeCode and AUTOCIRCULATE_TRANSFER::SetOutputTimeCode methods).
+    @see	AUTOCIRCULATE_TRANSFER::GetInputTimeCode, AUTOCIRCULATE_TRANSFER::SetOutputTimeCode
 **/
 typedef enum
 {

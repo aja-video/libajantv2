@@ -17,6 +17,7 @@
 		<tr><td><b>Frame Buffer</b>		<td>A contiguous chunk of RAM used to store a frame of video pixel data, either on the host computer or in an AJA device.
 		<tr><td><b>Frame Store</b>		<td>A device widget having mode, pixel format and video format properties (e.g., Capture, 10-bit YCbCr, and 1080i50), that, when enabled, can write or read video frame data to or from device SDRAM. Often used interchangeably with the word “Channel”.
 		<tr><td><b>HANC</b>				<td>\e Horizontal \e Ancillary \e Data, is ancillary data that is embedded into the video lines that are between the start and end of active video.
+		<tr><td><b>HD</b>				<td>\e High \e Definition television standards:  ::NTV2_STANDARD_720, ::NTV2_STANDARD_1080, ::NTV2_STANDARD_1080p or more.
 		<tr><td><b>HDMI</b>				<td>\e High-Definition \e Multimedia \e Interface, a compact hardware interface used for transferring video and audio data between compatible devices.
 		<tr><td><b>HEVC</b>				<td>\e High \e Efficiency \e Video \e Coding, H.265/HEVC is a video compression standard, a successor to H.264/MPEG-4 AVC (\e Advanced \e Video \e Coding).
 		<tr><td><b>HFR</b>				<td>\e High \e Frame \e Rate … usually 60 fps minimum.
@@ -29,6 +30,7 @@
 		<tr><td><b>LTC</b>				<td>\e Linear \e Time \e Code, a SMPTE standard for encoding timecode in an audio signal.
 		<tr><td><b>Loopback</b>			<td>An audio subsystem feature on NTV2 devices that, when enabled, the output embedder’s FIFO obtains audio samples directly from the audio subsystem’s input de-embedder FIFO, instead of from the audio subsystem’s output buffer.
 		<tr><td><b>MB86M31</b>			<td>HEVC/H.265 Real-time encoder hardware, developed by Socionext, a new company established by the consolidation of the System LSI businesses of Fujitsu Ltd and Panasonic Corp.  This real-time 4K encoder is used in AJA HEVC-capable hardware and is supported in this SDK.
+		<tr><td><b>MSI</b>				<td>\e Message \e Signaled \e Interrupts — a more modern method of signaling an interrupt to a host computer from a PCI device using in-band messages instead of through dedicated interrupt lines.
 		<tr><td><b>OpenGL</b>			<td>\e Open \e Graphics \e Library, a cross-language, multi-platform API for rendering 2-D and 3-D vector graphics. It’s commonly used to achieve hardware-accelerated rendering using a host computer’s GPU.
 		<tr><td><b>Outgoing Frame</b>	<td>The frame data currently being read out of a frame buffer in an AJA device’s SDRAM and sent to its video output connector.
 		<tr><td><b>PCI</b>				<td>\e Peripheral \e Component \e Interconnect, a standardized expansion bus for attaching hardware devices to a host computer.
@@ -39,6 +41,7 @@
 		<tr><td><b>RAM</b>				<td>Acronym for \e Random \e Access \e Memory.
 		<tr><td><b>Relay</b>			<td>An electrical switch whose position is controlled by another independent electrical signal. The switch has a default position when no power or signal is applied to its control input.
 		<tr><td><b>RP-188</b>			<td>A SMPTE standard for encoding and conveying timecode over SDI.
+		<tr><td><b>SD</b>				<td>\e Standard \e Definition television standards: i.e. ::NTV2_STANDARD_525 and ::NTV2_STANDARD_625.
 		<tr><td><b>SDI</b>				<td>\e Serial \e Digital \e Interface, a family of video interfaces standardized by SMPTE for transferring video and audio data between two machines.
 		<tr><td><b>SDRAM</b>			<td>\e Synchronous \e Dynamic \e Random \e Access \e Memory, a type of random access memory that is refreshed dynamically every clock cycle on the PCI bus.
 		<tr><td><b>SFP</b>				<td>\e Small \e Form-factor \e Pluggable \e transceiver, a hot-pluggable optical connector used to connect to high-speed IP communications networks.

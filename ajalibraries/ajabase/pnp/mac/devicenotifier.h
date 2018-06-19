@@ -27,21 +27,6 @@
 
 
 	/**
-		@brief	These bit numbers control debug logging to stderr/cerr via "SetDebugLogging" class member function
-				or via "NTV2DEVICENOTIFYLOG" environment variable at client startup.
-	**/
-	enum
-	{
-		kMacDeviceDebugLog_DeviceRemoved		= 58,	///< @brief	Log device removed events
-		kMacDeviceDebugLog_DeviceAdded			= 59,	///< @brief	Log device added events
-		kMacDeviceDebugLog_DeviceChanged		= 60,	///< @brief	Log device change events
-		kMacDeviceDebugLog_ExitFunctions		= 61,	///< @brief	Log function exit
-		kMacDeviceDebugLog_EnterFunctions		= 62,	///< @brief	Log function entry
-		kMacDeviceDebugLog_RawMessages			= 63	///< @brief	Log raw events
-	};
-
-
-	/**
 		@brief	Mac-specific class that notifies clients when AJA devices are attached/detached, etc.
 	**/
 	class DeviceNotifier
@@ -72,7 +57,7 @@
 
 	//	Class Methods
 	public:
-		static void								SetDebugLogging (const uint64_t inWhichUserClientCommands);
+		//static void							SetDebugLogging (const uint64_t inWhichUserClientCommands);
 		static std::string						MessageTypeToStr (const natural_t messageType);
 
 		//	Non-Public Class Methods

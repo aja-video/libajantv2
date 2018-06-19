@@ -212,6 +212,10 @@ public:
     bool        GetLinkStatus(eSFP sfp, SFPStatus & sfpStatus);
     bool        Get2022ChannelRxStatus(NTV2Channel channel, s2022RxChannelStatus & status);
 
+    bool        SetIPServicesControl(const bool enable, const bool forceReconfig);
+    bool        GetIPServicesControl(bool & enable, bool & forceReconfig);
+
+
     // If method returns false call this to get details
     std::string getLastError();
     NTV2IpError getLastErrorCode();

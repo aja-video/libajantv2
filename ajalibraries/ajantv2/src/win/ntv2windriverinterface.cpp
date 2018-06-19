@@ -16,6 +16,7 @@
 #include "ntv2nubtypes.h"
 #include "ntv2debug.h"
 #include "winioctl.h"
+#include <sstream>
 
 using namespace std;
 
@@ -138,16 +139,14 @@ static const ULWord	gChannelToTSLastInputVertHi []		= {	kVRegTimeStampLastInput1
 //            defaults to FILE_SHARE_READ | FILE_SHARE_WRITE
 //            which allows multiple opens on the same device.
 // Output: bool - true if opened ok.
-bool CNTV2WinDriverInterface::Open (UWord boardNumber, bool displayError, NTV2DeviceType eBoardType, const char *hostname)
+bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & hostName)
 {
 	// Check if already opened
 	if (IsOpen())
 	{
 		// Don't do anything if the requested board is the same as last opened, and
 		// the requested or last opened board aren't remote boards
-		if ( ( _boardNumber == boardNumber ) &&
-				((hostname == NULL) || (hostname[0] == '\0')) &&
-				 (_remoteHandle == INVALID_NUB_HANDLE ) )
+		if ( (_boardNumber == inDeviceIndexNumber) && hostName.empty() && (_remoteHandle == INVALID_NUB_HANDLE) )
 			return true;
 
 		Close();   // Close current board and open desired board
@@ -159,45 +158,26 @@ bool CNTV2WinDriverInterface::Open (UWord boardNumber, bool displayError, NTV2De
 	//eBoardType = _boardType;
 	ULWord deviceID = 0x0;
 
-	_displayErrorMessage = displayError;
 #define BOARDSTRMAX	32
-	char boardStr[BOARDSTRMAX];
-	if (_boardType != DEVICETYPE_NTV2)
+	if (!hostName.empty())	// Non-empty: card on remote host
 	{
-		if (_displayErrorMessage)	DisplayNTV2Error ("Open not called with BOARDTYPE_NTV2");
-		return false;
-	}
-
-	if (hostname && hostname[0] != '\0')	// Non-null: card on remote host
-	{
-		_snprintf_s(boardStr, BOARDSTRMAX - 1, "%s:ntv2%d", hostname, _boardNumber);
-
-		if ( !OpenRemote(boardNumber, displayError, _boardType, hostname))
+		ostringstream	oss;
+		oss << hostName << ":ntv2" << inDeviceIndexNumber;
+		if (!OpenRemote(inDeviceIndexNumber, _displayErrorMessage, 256, hostName.c_str()))
 		{
 			DisplayNTV2Error("Failed to open board on remote host.");
 		}
 	}
 	else
 	{
-
-		switch (_boardType)
 		{
-		case DEVICETYPE_NTV2:
-			{
-				DEFINE_GUIDSTRUCT("844B39E5-C98E-45a1-84DE-3BAF3F4F9F14", AJAVIDEO_NTV2_PROPSET);
+			DEFINE_GUIDSTRUCT("844B39E5-C98E-45a1-84DE-3BAF3F4F9F14", AJAVIDEO_NTV2_PROPSET);
 #define AJAVIDEO_NTV2_PROPSET DEFINE_GUIDNAMED(AJAVIDEO_NTV2_PROPSET)
-				_GUID_PROPSET = AJAVIDEO_NTV2_PROPSET;
-			}
-			break;
-		case DEVICETYPE_UNKNOWN:
-			return false;
-
-		default: // if it's something we don't know about yet, don't open it
-			return false;
+			_GUID_PROPSET = AJAVIDEO_NTV2_PROPSET;
 		}
 
 		REFGUID refguid = _GUID_PROPSET;
-		_boardNumber = boardNumber;
+		_boardNumber = inDeviceIndexNumber;
 
 		DWORD dwShareMode;
 		if (_bOpenShared)
@@ -212,124 +192,116 @@ bool CNTV2WinDriverInterface::Open (UWord boardNumber, bool displayError, NTV2De
 			dwFlagsAndAttributes = 0x0;
 
 		dwFlagsAndAttributes = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED;
-		switch (_boardType)
+
+		DWORD dwReqSize=0;
+		SP_DEVICE_INTERFACE_DATA spDevIFaceData;
+		memset(&spDevIFaceData, 0, sizeof(SP_DEVICE_INTERFACE_DATA));
+		GUID myguid = refguid;  // an un-const guid for compiling with new Platform SDK!
+		_hDevInfoSet = SetupDiGetClassDevs(&myguid,NULL,NULL,DIGCF_PRESENT|DIGCF_DEVICEINTERFACE);
+		if(_hDevInfoSet==INVALID_HANDLE_VALUE)
 		{
-		case DEVICETYPE_NTV2:
-			{
-				DWORD dwReqSize=0;
-				SP_DEVICE_INTERFACE_DATA spDevIFaceData;
-				memset(&spDevIFaceData, 0, sizeof(SP_DEVICE_INTERFACE_DATA));
-				GUID myguid = refguid;  // an un-const guid for compiling with new Platform SDK!
-				_hDevInfoSet = SetupDiGetClassDevs(&myguid,NULL,NULL,DIGCF_PRESENT|DIGCF_DEVICEINTERFACE);
-				if(_hDevInfoSet==INVALID_HANDLE_VALUE)
-				{
-					return false;
-				}
-				spDevIFaceData.cbSize=sizeof(SP_DEVICE_INTERFACE_DATA);
-				myguid = refguid;
-				if(!SetupDiEnumDeviceInterfaces(_hDevInfoSet,NULL,&myguid,_boardNumber,&spDevIFaceData))
-				{
-					SetupDiDestroyDeviceInfoList(_hDevInfoSet);
-					return false;
-				}
+			return false;
+		}
+		spDevIFaceData.cbSize=sizeof(SP_DEVICE_INTERFACE_DATA);
+		myguid = refguid;
+		if(!SetupDiEnumDeviceInterfaces(_hDevInfoSet,NULL,&myguid,_boardNumber,&spDevIFaceData))
+		{
+			SetupDiDestroyDeviceInfoList(_hDevInfoSet);
+			return false;
+		}
 
-				if(SetupDiGetDeviceInterfaceDetail(_hDevInfoSet,&spDevIFaceData,NULL,0,&dwReqSize,NULL))
-				{
-					SetupDiDestroyDeviceInfoList(_hDevInfoSet);
-					return false; //should have failed!
-				}
-				if(GetLastError()!=ERROR_INSUFFICIENT_BUFFER)
-				{
-					SetupDiDestroyDeviceInfoList(_hDevInfoSet);
-					return false;
-				}
-				_pspDevIFaceDetailData=(PSP_DEVICE_INTERFACE_DETAIL_DATA) new BYTE[dwReqSize];
-				if(!(_pspDevIFaceDetailData))
-				{
-					SetupDiDestroyDeviceInfoList(_hDevInfoSet);
-					return false; // out of memory
-				}
+		if(SetupDiGetDeviceInterfaceDetail(_hDevInfoSet,&spDevIFaceData,NULL,0,&dwReqSize,NULL))
+		{
+			SetupDiDestroyDeviceInfoList(_hDevInfoSet);
+			return false; //should have failed!
+		}
+		if(GetLastError()!=ERROR_INSUFFICIENT_BUFFER)
+		{
+			SetupDiDestroyDeviceInfoList(_hDevInfoSet);
+			return false;
+		}
+		_pspDevIFaceDetailData=(PSP_DEVICE_INTERFACE_DETAIL_DATA) new BYTE[dwReqSize];
+		if(!(_pspDevIFaceDetailData))
+		{
+			SetupDiDestroyDeviceInfoList(_hDevInfoSet);
+			return false; // out of memory
+		}
 
-				memset(&_spDevInfoData, 0, sizeof(SP_DEVINFO_DATA));
-				_spDevInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
-				_pspDevIFaceDetailData->cbSize=sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
-				//now we are setup to get the info we want!
-				if(!SetupDiGetDeviceInterfaceDetail(_hDevInfoSet ,&spDevIFaceData,_pspDevIFaceDetailData, dwReqSize,NULL,&_spDevInfoData))
-				{
-					delete _pspDevIFaceDetailData;
-					_pspDevIFaceDetailData=NULL;
-					SetupDiDestroyDeviceInfoList(_hDevInfoSet);
-					return false; // out of memory
-				}
+		memset(&_spDevInfoData, 0, sizeof(SP_DEVINFO_DATA));
+		_spDevInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
+		_pspDevIFaceDetailData->cbSize=sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
+		//now we are setup to get the info we want!
+		if(!SetupDiGetDeviceInterfaceDetail(_hDevInfoSet ,&spDevIFaceData,_pspDevIFaceDetailData, dwReqSize,NULL,&_spDevInfoData))
+		{
+			delete _pspDevIFaceDetailData;
+			_pspDevIFaceDetailData=NULL;
+			SetupDiDestroyDeviceInfoList(_hDevInfoSet);
+			return false; // out of memory
+		}
 
-				ULONG deviceInstanceSize = 0;
-				CM_Get_Device_ID_Size(&deviceInstanceSize, _spDevInfoData.DevInst, 0);
-				char* deviceInstance = (char*)new BYTE[deviceInstanceSize*2];
-				CM_Get_Device_IDA(_spDevInfoData.DevInst, deviceInstance, deviceInstanceSize*2, 0);
-				string sDeviceInstance(deviceInstance);
-				delete deviceInstance;
-				if(sDeviceInstance.find("DB") != string::npos)
-				{
-					string sDeviceID = sDeviceInstance.substr(sDeviceInstance.find("DB"),4);
-					if(sDeviceID.compare("DB01") == 0)
-						deviceID = 0xDB01;
-					else if(sDeviceID.compare("DB02") == 0)
-						deviceID = 0xDB02;
-					else if(sDeviceID.compare("DB03") == 0)
-						deviceID = 0xDB03;
-					else if(sDeviceID.compare("DB04") == 0)
-						deviceID = 0xDB04;
-					else if(sDeviceID.compare("DB05") == 0)
-						deviceID = 0xDB05;
-					else if(sDeviceID.compare("DB06") == 0)
-						deviceID = 0xDB06;
-					else if(sDeviceID.compare("DB07") == 0)
-						deviceID = 0xDB07;
-					else if(sDeviceID.compare("DB08") == 0)
-						deviceID = 0xDB08;
-					else if(sDeviceID.compare("DB09") == 0)
-						deviceID = 0xDB09;
-					else if(sDeviceID.compare("DB10") == 0)
-						deviceID = 0xDB10;
-					else if(sDeviceID.compare("DB11") == 0)
-						deviceID = 0xDB11;
-					else
-						deviceID = 0x0;
-				}
-				else
-					deviceID = 0x0;
+		ULONG deviceInstanceSize = 0;
+		CM_Get_Device_ID_Size(&deviceInstanceSize, _spDevInfoData.DevInst, 0);
+		char* deviceInstance = (char*)new BYTE[deviceInstanceSize*2];
+		CM_Get_Device_IDA(_spDevInfoData.DevInst, deviceInstance, deviceInstanceSize*2, 0);
+		string sDeviceInstance(deviceInstance);
+		delete deviceInstance;
+		if(sDeviceInstance.find("DB") != string::npos)
+		{
+			string sDeviceID = sDeviceInstance.substr(sDeviceInstance.find("DB"),4);
+			if(sDeviceID.compare("DB01") == 0)
+				deviceID = 0xDB01;
+			else if(sDeviceID.compare("DB02") == 0)
+				deviceID = 0xDB02;
+			else if(sDeviceID.compare("DB03") == 0)
+				deviceID = 0xDB03;
+			else if(sDeviceID.compare("DB04") == 0)
+				deviceID = 0xDB04;
+			else if(sDeviceID.compare("DB05") == 0)
+				deviceID = 0xDB05;
+			else if(sDeviceID.compare("DB06") == 0)
+				deviceID = 0xDB06;
+			else if(sDeviceID.compare("DB07") == 0)
+				deviceID = 0xDB07;
+			else if(sDeviceID.compare("DB08") == 0)
+				deviceID = 0xDB08;
+			else if(sDeviceID.compare("DB09") == 0)
+				deviceID = 0xDB09;
+			else if(sDeviceID.compare("DB10") == 0)
+				deviceID = 0xDB10;
+			else if(sDeviceID.compare("DB11") == 0)
+				deviceID = 0xDB11;
+			else
+				deviceID = 0x0;
+		}
+		else
+			deviceID = 0x0;
 
-				_hDevice = CreateFile(_pspDevIFaceDetailData->DevicePath,
-					GENERIC_READ | GENERIC_WRITE,
-					dwShareMode,
-					NULL,
-					OPEN_EXISTING,
-					dwFlagsAndAttributes,
-					NULL);
+		_hDevice = CreateFile(_pspDevIFaceDetailData->DevicePath,
+			GENERIC_READ | GENERIC_WRITE,
+			dwShareMode,
+			NULL,
+			OPEN_EXISTING,
+			dwFlagsAndAttributes,
+			NULL);
 
-				if(_hDevice == INVALID_HANDLE_VALUE)
-				{
-					delete _pspDevIFaceDetailData;
-					_pspDevIFaceDetailData=NULL;
-					SetupDiDestroyDeviceInfoList(_hDevInfoSet);
-					_hDevInfoSet=NULL;
-					return false;
-				}
-			}
-			break;
+		if(_hDevice == INVALID_HANDLE_VALUE)
+		{
+			delete _pspDevIFaceDetailData;
+			_pspDevIFaceDetailData=NULL;
+			SetupDiDestroyDeviceInfoList(_hDevInfoSet);
+			_hDevInfoSet=NULL;
+			return false;
 		}
 	}
+
 	_boardOpened = true;
-	ReadRegister(kRegBoardID, reinterpret_cast<ULWord*>(&_boardID));
+	CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID);
 	NTV2FrameGeometry fg;
-	ReadRegister (kRegGlobalControl,
-				  (ULWord*)&fg,
-				  kRegMaskGeometry,
-				  kRegShiftGeometry);
+	CNTV2DriverInterface::ReadRegister (kRegGlobalControl, fg, kRegMaskGeometry, kRegShiftGeometry);
 
 	ULWord returnVal1,returnVal2;
-	ReadRegister (kRegCh1Control,&returnVal1,kRegMaskFrameFormat,kRegShiftFrameFormat);
-	ReadRegister (kRegCh1Control,&returnVal2,kRegMaskFrameFormatHiBit,kRegShiftFrameFormatHiBit);
+	ReadRegister (kRegCh1Control,returnVal1,kRegMaskFrameFormat,kRegShiftFrameFormat);
+	ReadRegister (kRegCh1Control,returnVal2,kRegMaskFrameFormatHiBit,kRegShiftFrameFormatHiBit);
 	NTV2FrameBufferFormat format = (NTV2FrameBufferFormat)((returnVal1&0x0f) | ((returnVal2&0x1)<<4));
 
 	// Write the device ID
@@ -339,6 +311,19 @@ bool CNTV2WinDriverInterface::Open (UWord boardNumber, bool displayError, NTV2De
 
 	return true;
 }
+
+#if !defined(NTV2_DEPRECATE_14_3)
+	bool CNTV2WinDriverInterface::Open (	UWord			boardNumber,
+											bool			displayError,
+											NTV2DeviceType	eBoardType,
+											const char 	*	hostname)
+	{
+		(void) eBoardType;
+		const string host(hostname ? hostname : "");
+		_displayErrorMessage = displayError;
+		return Open(boardNumber, host);
+	}
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 // Method:	SetShareMode
 // Input:	bool mode
@@ -511,8 +496,8 @@ bool CNTV2WinDriverInterface::CompleteMemoryForDMA (ULWord * pFrameBuffer)
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-bool CNTV2WinDriverInterface::ReadRegister(ULWord registerNumber, ULWord *registerValue, ULWord registerMask,
-							   ULWord registerShift)
+bool CNTV2WinDriverInterface::ReadRegister(const ULWord registerNumber, ULWord & registerValue, const ULWord registerMask,
+							   const ULWord registerShift)
 {
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 	{
@@ -543,33 +528,17 @@ bool CNTV2WinDriverInterface::ReadRegister(ULWord registerNumber, ULWord *regist
 		propStruct.ulRegisterShift	= registerShift;
 
 		BOOL fRet = FALSE;
-		if(_boardType != DEVICETYPE_NTV2)
-		{
-			fRet = DeviceIoControl(
-					 _hDevice,
-					 IOCTL_KS_PROPERTY,
-					 &propStruct,
-					 sizeof(KSPROPERTY_AJAPROPS_GETSETREGISTER_S),
-					 &propStruct,
-					 sizeof(KSPROPERTY_AJAPROPS_GETSETREGISTER_S),
-					 &dwBytesReturned,
-					 NULL);
-		}
-		else
-		{
-			fRet = DeviceIoControl(
-					_hDevice,
-					IOCTL_AJAPROPS_GETSETREGISTER,
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_GETSETREGISTER_S),
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_GETSETREGISTER_S),
-					&dwBytesReturned,
-					NULL);
-		}
+		fRet = DeviceIoControl(_hDevice,
+								IOCTL_AJAPROPS_GETSETREGISTER,
+								&propStruct,
+								sizeof(KSPROPERTY_AJAPROPS_GETSETREGISTER_S),
+								&propStruct,
+								sizeof(KSPROPERTY_AJAPROPS_GETSETREGISTER_S),
+								&dwBytesReturned,
+								NULL);
 		if (fRet)
 		{
-			*registerValue=propStruct.ulRegisterValue;
+			registerValue = propStruct.ulRegisterValue;
 			return true;
 		}
 		else
@@ -632,31 +601,14 @@ bool CNTV2WinDriverInterface::WriteRegister (ULWord registerNumber,ULWord regist
 		propStruct.ulRegisterShift = registerShift;
 
 		BOOL fRet =  FALSE;
-		if(_boardType != DEVICETYPE_NTV2)
-		{
-			fRet = DeviceIoControl(
-						 _hDevice,
-						 IOCTL_KS_PROPERTY,
-						 &propStruct,
-						 sizeof(KSPROPERTY_AJAPROPS_GETSETREGISTER_S),
-						 &propStruct,
-						 sizeof(KSPROPERTY_AJAPROPS_GETSETREGISTER_S),
-						 &dwBytesReturned,
-						 NULL);
-		}
-		else
-		{
-			fRet = DeviceIoControl(
-						_hDevice,
-						IOCTL_AJAPROPS_GETSETREGISTER,
-						&propStruct,
-						sizeof(KSPROPERTY_AJAPROPS_GETSETREGISTER_S),
-						&propStruct,
-						sizeof(KSPROPERTY_AJAPROPS_GETSETREGISTER_S),
-						&dwBytesReturned,
-						NULL);
-		}
-
+		fRet = DeviceIoControl(_hDevice,
+								IOCTL_AJAPROPS_GETSETREGISTER,
+								&propStruct,
+								sizeof(KSPROPERTY_AJAPROPS_GETSETREGISTER_S),
+								&propStruct,
+								sizeof(KSPROPERTY_AJAPROPS_GETSETREGISTER_S),
+								&dwBytesReturned,
+								NULL);
 		if (fRet)
 			return true;
 		else
@@ -690,32 +642,14 @@ bool CNTV2WinDriverInterface::ConfigureInterrupt (bool bEnable, INTERRUPT_ENUMS 
 
 	BOOL
 	 fRet =  FALSE;
-	if(_boardType != DEVICETYPE_NTV2)
-	{
-		fRet = DeviceIoControl(
-					 _hDevice,
-					 IOCTL_KS_PROPERTY,
-					 &propStruct,
-					 sizeof(KSPROPERTY_AJAPROPS_INTERRUPTS_S),
-					 &propStruct,
-					 sizeof(KSPROPERTY_AJAPROPS_INTERRUPTS_S),
-					 &dwBytesReturned,
-					 NULL);
-	}
-	else
-	{
-		fRet = DeviceIoControl(
-					_hDevice,
-					IOCTL_AJAPROPS_INTERRUPTS,
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_INTERRUPTS_S),
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_INTERRUPTS_S),
-					&dwBytesReturned,
-					NULL);
-
-	}
-
+	fRet = DeviceIoControl(_hDevice,
+							IOCTL_AJAPROPS_INTERRUPTS,
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_INTERRUPTS_S),
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_INTERRUPTS_S),
+							&dwBytesReturned,
+							NULL);
 	if (fRet)
 		return true;
 	else
@@ -773,7 +707,7 @@ bool CNTV2WinDriverInterface::ConfigureSubscription (bool bSubscribe, INTERRUPT_
 	BOOL bRet;
 	ULWord driverVersion;
 	GetDriverVersion(&driverVersion);
-	if ( driverVersion & BIT_13 || _boardType == DEVICETYPE_NTV2)  // 64 bit driver.
+	if ( driverVersion & BIT_13)  // 64 bit driver.
 	{
 		// for support of 64 bit driver only in 5.0...
 		ZeroMemory (&propStruct,sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S));
@@ -789,30 +723,14 @@ bool CNTV2WinDriverInterface::ConfigureSubscription (bool bSubscribe, INTERRUPT_
 		propStruct.Handle = hSubscription;
 		propStruct.eInterrupt = eInterruptType;
 
-		if(_boardType != DEVICETYPE_NTV2)
-		{
-			bRet = DeviceIoControl(
-						 _hDevice,
-						 IOCTL_KS_PROPERTY,
-						 &propStruct,
-						 sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
-						 &propStruct,
-						 sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
-						 &dwBytesReturned,
-						 NULL);
-		}
-		else
-		{
-			bRet = DeviceIoControl(
-						_hDevice,
-						IOCTL_AJAPROPS_NEWSUBSCRIPTIONS,
-						&propStruct,
-						sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
-						&propStruct,
-						sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
-						&dwBytesReturned,
-						NULL);
-		}
+		bRet = DeviceIoControl(_hDevice,
+								IOCTL_AJAPROPS_NEWSUBSCRIPTIONS,
+								&propStruct,
+								sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
+								&propStruct,
+								sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
+								&dwBytesReturned,
+								NULL);
 	}
 	else
 	{
@@ -832,32 +750,14 @@ bool CNTV2WinDriverInterface::ConfigureSubscription (bool bSubscribe, INTERRUPT_
 		propStruct.pHandle = &hSubscription;
 		propStruct.eInterrupt = eInterruptType;
 
-		if(_boardType != DEVICETYPE_NTV2)
-		{
-			bRet = DeviceIoControl(
-						 _hDevice,
-						 IOCTL_KS_PROPERTY,
-						 &propStruct,
-						 sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S),
-						 &propStruct,
-						 sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S),
-						 &dwBytesReturned,
-						 NULL);
-		}
-		else
-		{
-			bRet = DeviceIoControl(
-						_hDevice,
-						IOCTL_AJAPROPS_SUBSCRIPTIONS,
-						&propStruct,
-						sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S),
-						&propStruct,
-						sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S),
-						&dwBytesReturned,
-						NULL);
-
-		}
-
+		bRet = DeviceIoControl(_hDevice,
+								IOCTL_AJAPROPS_SUBSCRIPTIONS,
+								&propStruct,
+								sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S),
+								&propStruct,
+								sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S),
+								&dwBytesReturned,
+								NULL);
 	}
 
 	if (( !bSubscribe && bRet ) || ( bSubscribe && !bRet ))
@@ -905,31 +805,14 @@ bool CNTV2WinDriverInterface::GetInterruptCount(INTERRUPT_ENUMS eInterruptType, 
 		propStruct.ulIntCount = (ULONG) eInterruptType;
 
 		BOOL ioctlSuccess = FALSE;
-		if(_boardType != DEVICETYPE_NTV2)
-		{
-			ioctlSuccess = DeviceIoControl(
-								 _hDevice,
-								 IOCTL_KS_PROPERTY,
-								 &propStruct,
-								 sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
-								 &propStruct,
-								 sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
-								 &dwBytesReturned,
-								 NULL);
-		}
-		else
-		{
-			ioctlSuccess = DeviceIoControl(
-								_hDevice,
-								IOCTL_AJAPROPS_NEWSUBSCRIPTIONS,
-								&propStruct,
-								sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
-								&propStruct,
-								sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
-								&dwBytesReturned,
-								NULL);
-		}
-
+		ioctlSuccess = DeviceIoControl(_hDevice,
+										IOCTL_AJAPROPS_NEWSUBSCRIPTIONS,
+										&propStruct,
+										sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
+										&propStruct,
+										sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
+										&dwBytesReturned,
+										NULL);
 		if (!ioctlSuccess)
 		{
 			DisplayNTV2Error("getInterruptCount() failed");
@@ -953,32 +836,14 @@ bool CNTV2WinDriverInterface::GetInterruptCount(INTERRUPT_ENUMS eInterruptType, 
 		propStruct.ulIntCount = (ULONG) eInterruptType;
 
 		BOOL ioctlSuccess = FALSE;
-		if(_boardType != DEVICETYPE_NTV2)
-		{
-			ioctlSuccess = DeviceIoControl(
-								 _hDevice,
-								 IOCTL_KS_PROPERTY,
-								 &propStruct,
-								 sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S),
-								 &propStruct,
-								 sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S),
-								 &dwBytesReturned,
-								 NULL);
-		}
-		else
-		{
-			ioctlSuccess = DeviceIoControl(
-								_hDevice,
-								IOCTL_AJAPROPS_SUBSCRIPTIONS,
-								&propStruct,
-								sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S),
-								&propStruct,
-								sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S),
-								&dwBytesReturned,
-								NULL);
-
-		}
-
+		ioctlSuccess = DeviceIoControl(_hDevice,
+										IOCTL_AJAPROPS_SUBSCRIPTIONS,
+										&propStruct,
+										sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S),
+										&propStruct,
+										sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S),
+										&dwBytesReturned,
+										NULL);
 		if (!ioctlSuccess)
 		{
 			DisplayNTV2Error("getInterruptCount() failed");
@@ -1054,35 +919,18 @@ bool CNTV2WinDriverInterface::MapFrameBuffers (void)
 	propStruct.bMapType = NTV2_MAPMEMORY_FRAMEBUFFER;
 
 	BOOL fRet = FALSE;
-	if(_boardType != DEVICETYPE_NTV2)
-	{
-		fRet = DeviceIoControl(
-				 _hDevice,
-				 IOCTL_KS_PROPERTY,
-				 &propStruct,
-				 sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-				 &propStruct,
-				 sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-				 &dwBytesReturned,
-				 NULL);
-	}
-	else
-	{
-		fRet = DeviceIoControl(
-				_hDevice,
-				IOCTL_AJAPROPS_MAPMEMORY,
-				&propStruct,
-				sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-				&propStruct,
-				sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-				&dwBytesReturned,
-				NULL);
-	}
-
+	fRet = DeviceIoControl(_hDevice,
+							IOCTL_AJAPROPS_MAPMEMORY,
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+							&dwBytesReturned,
+							NULL);
 	if (fRet)
 	{
 		ULWord boardIDRegister;
-		ReadRegister(kRegBoardID, &boardIDRegister);	//unfortunately GetBoardID is in ntv2card...ooops.
+		ReadRegister(kRegBoardID, boardIDRegister);	//unfortunately GetBoardID is in ntv2card...ooops.
 		_pFrameBaseAddress = (ULWord *) propStruct.mapMemory.Address;
 		_pCh1FrameBaseAddress = _pFrameBaseAddress;
 		_pCh2FrameBaseAddress = _pFrameBaseAddress;
@@ -1119,7 +967,7 @@ bool CNTV2WinDriverInterface::MapFrameBuffers (void)
 bool CNTV2WinDriverInterface::UnmapFrameBuffers (void)
 {
     ULWord boardIDRegister;
-    ReadRegister(kRegBoardID, &boardIDRegister);	//unfortunately GetBoardID is in ntv2card...ooops.
+    ReadRegister(kRegBoardID, boardIDRegister);	//unfortunately GetBoardID is in ntv2card...ooops.
     ULWord * pFrameBaseAddress;
     pFrameBaseAddress = _pFrameBaseAddress;
     if (pFrameBaseAddress == 0)
@@ -1138,31 +986,14 @@ bool CNTV2WinDriverInterface::UnmapFrameBuffers (void)
 	propStruct.mapMemory.Address = pFrameBaseAddress;
 
 	BOOL fRet = FALSE;
-	if(_boardType != DEVICETYPE_NTV2)
-	{
-		fRet = DeviceIoControl(
-			_hDevice,
-			IOCTL_KS_PROPERTY,
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&dwBytesReturned,
-			NULL);
-	}
-	else
-	{
-		fRet = DeviceIoControl(
-			_hDevice,
-			IOCTL_AJAPROPS_MAPMEMORY,
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&dwBytesReturned,
-			NULL);
-	}
-
+	fRet = DeviceIoControl(_hDevice,
+							IOCTL_AJAPROPS_MAPMEMORY,
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+							&dwBytesReturned,
+							NULL);
 	_pFrameBaseAddress = 0;
     _pCh1FrameBaseAddress = 0;
     _pCh2FrameBaseAddress = 0;
@@ -1214,31 +1045,14 @@ bool CNTV2WinDriverInterface::MapRegisters (void)
 	propStruct.bMapType = NTV2_MAPMEMORY_REGISTER;
 
 	BOOL fRet = FALSE;
-	if(_boardType != DEVICETYPE_NTV2)
-	{
-		fRet = DeviceIoControl(
-			_hDevice,
-			IOCTL_KS_PROPERTY,
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&dwBytesReturned,
-			NULL);
-	}
-	else
-	{
-		fRet = DeviceIoControl(
-			_hDevice,
-			IOCTL_AJAPROPS_MAPMEMORY,
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&dwBytesReturned,
-			NULL);
-	}
-
+	fRet = DeviceIoControl(_hDevice,
+							IOCTL_AJAPROPS_MAPMEMORY,
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+							&dwBytesReturned,
+							NULL);
 	if (fRet)
 	{
 		_pRegisterBaseAddress = (ULWord *) propStruct.mapMemory.Address;
@@ -1271,31 +1085,14 @@ bool CNTV2WinDriverInterface::UnmapRegisters (void)
 	propStruct.mapMemory.Address = _pRegisterBaseAddress;
 
 	BOOL fRet = FALSE;
-	if(_boardType != DEVICETYPE_NTV2)
-	{
-		fRet = DeviceIoControl(
-			_hDevice,
-			IOCTL_KS_PROPERTY,
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&dwBytesReturned,
-			NULL);
-	}
-	else
-	{
-		fRet = DeviceIoControl(
-			_hDevice,
-			IOCTL_AJAPROPS_MAPMEMORY,
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&dwBytesReturned,
-			NULL);
-	}
-
+	fRet = DeviceIoControl(_hDevice,
+							IOCTL_AJAPROPS_MAPMEMORY,
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+							&dwBytesReturned,
+							NULL);
 	_pRegisterBaseAddress = 0;
 	_pRegisterBaseAddressLength = 0;
 	if (fRet)
@@ -1325,31 +1122,14 @@ bool CNTV2WinDriverInterface::MapXena2Flash (void)
 	propStruct.bMapType = NTV2_MAPMEMORY_PCIFLASHPROGRAM;
 
 	BOOL fRet = FALSE;
-	if(_boardType != DEVICETYPE_NTV2)
-	{
-		fRet = DeviceIoControl(
-			_hDevice,
-			IOCTL_KS_PROPERTY,
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&dwBytesReturned,
-			NULL);
-	}
-	else
-	{
-		fRet = DeviceIoControl(
-			_hDevice,
-			IOCTL_AJAPROPS_MAPMEMORY,
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&dwBytesReturned,
-			NULL);
-	}
-
+	fRet = DeviceIoControl(_hDevice,
+							IOCTL_AJAPROPS_MAPMEMORY,
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+							&dwBytesReturned,
+							NULL);
 	if (fRet)
 	{
 		_pXena2FlashBaseAddress = (ULWord *) propStruct.mapMemory.Address;
@@ -1382,31 +1162,14 @@ bool CNTV2WinDriverInterface::UnmapXena2Flash (void)
 	propStruct.mapMemory.Address = _pRegisterBaseAddress;
 
 	BOOL fRet = FALSE;
-	if(_boardType != DEVICETYPE_NTV2)
-	{
-		fRet = DeviceIoControl(
-			_hDevice,
-			IOCTL_KS_PROPERTY,
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&dwBytesReturned,
-			NULL);
-	}
-	else
-	{
-		fRet = DeviceIoControl(
-			_hDevice,
-			IOCTL_AJAPROPS_MAPMEMORY,
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&propStruct,
-			sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-			&dwBytesReturned,
-			NULL);
-	}
-
+	fRet = DeviceIoControl(_hDevice,
+							IOCTL_AJAPROPS_MAPMEMORY,
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+							&dwBytesReturned,
+							NULL);
 	_pRegisterBaseAddress = 0;
 	_pRegisterBaseAddressLength = 0;
 	if (fRet)
@@ -1443,32 +1206,14 @@ bool CNTV2WinDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine, bool bRead, 
 	propStruct.bSync		 = bSync;
 
 	BOOL fRet = FALSE;
-	if(_boardType != DEVICETYPE_NTV2)
-	{
-		fRet = DeviceIoControl(
-					_hDevice,
-					IOCTL_KS_PROPERTY,
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_DMA_S),
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_DMA_S),
-					&dwBytesReturned,
-					NULL);
-	}
-	else
-	{
-		fRet = DeviceIoControl(
-					_hDevice,
-					IOCTL_AJAPROPS_DMA,
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_DMA_S),
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_DMA_S),
-					&dwBytesReturned,
-					NULL);
-
-	}
-
+	fRet = DeviceIoControl(_hDevice,
+							IOCTL_AJAPROPS_DMA,
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_DMA_S),
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_DMA_S),
+							&dwBytesReturned,
+							NULL);
 	if (fRet)
 		return true;
 	else
@@ -1526,31 +1271,14 @@ bool CNTV2WinDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine, bool bRead, 
 	propStruct.bSync = bSync;
 
   	BOOL fRet = FALSE;
-	if(_boardType != DEVICETYPE_NTV2)
-	{
-		fRet = DeviceIoControl(
-					_hDevice,
-					IOCTL_KS_PROPERTY,
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_DMA_EX_S),
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_DMA_EX_S),
-					&dwBytesReturned,
-					NULL);
-	}
-	else
-	{
-		fRet = DeviceIoControl(
-					_hDevice,
-					IOCTL_AJAPROPS_DMA_EX,
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_DMA_EX_S),
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_DMA_EX_S),
-					&dwBytesReturned,
-					NULL);
-	}
-
+	fRet = DeviceIoControl(_hDevice,
+							IOCTL_AJAPROPS_DMA_EX,
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_DMA_EX_S),
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_DMA_EX_S),
+							&dwBytesReturned,
+							NULL);
 	if (fRet)
 		return true;
 	else
@@ -1639,31 +1367,14 @@ bool CNTV2WinDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine,
 	propStruct.ulMessageData = pP2PData->messageData;
 
 	BOOL fRet = FALSE;
-	if(_boardType != DEVICETYPE_NTV2)
-	{
-		fRet = DeviceIoControl(
-					_hDevice,
-					IOCTL_KS_PROPERTY,
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_DMA_P2P_S),
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_DMA_P2P_S),
-					&dwBytesReturned,
-					NULL);
-	}
-	else
-	{
-		fRet = DeviceIoControl(
-					_hDevice,
-					IOCTL_AJAPROPS_DMA_P2P,
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_DMA_P2P_S),
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_DMA_P2P_S),
-					&dwBytesReturned,
-					NULL);
-	}
-
+	fRet = DeviceIoControl(_hDevice,
+							IOCTL_AJAPROPS_DMA_P2P,
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_DMA_P2P_S),
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_DMA_P2P_S),
+							&dwBytesReturned,
+							NULL);
 	if (fRet)
 	{
 		if (bTarget)
@@ -1727,31 +1438,14 @@ bool CNTV2WinDriverInterface::MapMemory (PVOID pvUserVa, ULWord ulNumBytes, bool
 	propStruct.ulVidNumBytes = ulNumBytes;
 
 	BOOL fRet = FALSE;
-	if(_boardType != DEVICETYPE_NTV2)
-	{
-		fRet = DeviceIoControl(
-					_hDevice,
-					IOCTL_KS_PROPERTY,
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_DMA_S),
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_DMA_S),
-					&dwBytesReturned,
-					NULL);
-	}
-	else
-	{
-		fRet = DeviceIoControl(
-					_hDevice,
-					IOCTL_AJAPROPS_DMA,
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_DMA_S),
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_DMA_S),
-					&dwBytesReturned,
-					NULL);
-	}
-
+	fRet = DeviceIoControl(_hDevice,
+							IOCTL_AJAPROPS_DMA,
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_DMA_S),
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_DMA_S),
+							&dwBytesReturned,
+							NULL);
 	if (fRet)
 	{
 		if(ulUser != NULL)
@@ -1829,31 +1523,14 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 				autoCircControl.bVal8 = autoCircData.bVal8;
 
 				BOOL fRet = FALSE;
-				if(_boardType != DEVICETYPE_NTV2)
-				{
-					fRet = DeviceIoControl(
-								_hDevice,
-								IOCTL_KS_PROPERTY,
-								&autoCircControl,
-								sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S),
-								&autoCircControl,
-								sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S),
-								&dwBytesReturned,
-								NULL);
-				}
-				else
-				{
-					fRet = DeviceIoControl(
-								_hDevice,
-								IOCTL_AJAPROPS_AUTOCIRC_CONTROL,
-								&autoCircControl,
-								sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S),
-								&autoCircControl,
-								sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S),
-								&dwBytesReturned,
-								NULL);
-				}
-
+				fRet = DeviceIoControl(_hDevice,
+										IOCTL_AJAPROPS_AUTOCIRC_CONTROL,
+										&autoCircControl,
+										sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S),
+										&autoCircControl,
+										sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S),
+										&dwBytesReturned,
+										NULL);
 				if (fRet)
 				{
 					bRes = true;
@@ -1904,31 +1581,14 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 				autoCircControl.bVal8 = autoCircData.bVal8;
 
 				BOOL fRet = FALSE;
-				if(_boardType != DEVICETYPE_NTV2)
-				{
-					fRet = DeviceIoControl(
-								_hDevice,
-								IOCTL_KS_PROPERTY,
-								&autoCircControl,
-								sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_EX_S),
-								&autoCircControl,
-								sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_EX_S),
-								&dwBytesReturned,
-								NULL);
-				}
-				else
-				{
-					fRet = DeviceIoControl(
-								_hDevice,
-								IOCTL_AJAPROPS_AUTOCIRC_CONTROL_EX,
-								&autoCircControl,
-								sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_EX_S),
-								&autoCircControl,
-								sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_EX_S),
-								&dwBytesReturned,
-								NULL);
-				}
-
+				fRet = DeviceIoControl(_hDevice,
+										IOCTL_AJAPROPS_AUTOCIRC_CONTROL_EX,
+										&autoCircControl,
+										sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_EX_S),
+										&autoCircControl,
+										sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_EX_S),
+										&dwBytesReturned,
+										NULL);
 				if (fRet)
 				{
 					bRes = true;
@@ -1989,31 +1649,14 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 				}
 
 				BOOL fRet = FALSE;
-				if(_boardType != DEVICETYPE_NTV2)
-				{
-					fRet = DeviceIoControl(
-								_hDevice,
-								IOCTL_KS_PROPERTY,
-								&autoCircControl,
-								sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S),
-								&autoCircControl,
-								sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S),
-								&dwBytesReturned,
-								NULL);
-				}
-				else
-				{
-					fRet = DeviceIoControl(
-								_hDevice,
-								IOCTL_AJAPROPS_AUTOCIRC_CONTROL,
-								&autoCircControl,
-								sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S),
-								&autoCircControl,
-								sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S),
-								&dwBytesReturned,
-								NULL);
-				}
-
+				fRet = DeviceIoControl(_hDevice,
+										IOCTL_AJAPROPS_AUTOCIRC_CONTROL,
+										&autoCircControl,
+										sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S),
+										&autoCircControl,
+										sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S),
+										&dwBytesReturned,
+										NULL);
 				if (fRet)
 				{
 					bRes = true;
@@ -2055,31 +1698,14 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 				if(autoCircData.pvVal1 != NULL)
 				{
 					BOOL fRet = FALSE;
-					if(_boardType != DEVICETYPE_NTV2)
-					{
-						fRet = DeviceIoControl(
-									_hDevice,
-									IOCTL_KS_PROPERTY,
-									&autoCircStatus,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_STATUS_S),
-									&autoCircStatus,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_STATUS_S),
-									&dwBytesReturned,
-									NULL);
-					}
-					else
-					{
-						fRet = DeviceIoControl(
-									_hDevice,
-									IOCTL_AJAPROPS_AUTOCIRC_STATUS,
-									&autoCircStatus,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_STATUS_S),
-									&autoCircStatus,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_STATUS_S),
-									&dwBytesReturned,
-									NULL);
-					}
-
+					fRet = DeviceIoControl(_hDevice,
+											IOCTL_AJAPROPS_AUTOCIRC_STATUS,
+											&autoCircStatus,
+											sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_STATUS_S),
+											&autoCircStatus,
+											sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_STATUS_S),
+											&dwBytesReturned,
+											NULL);
 					if (fRet)
 					{
 						*(AUTOCIRCULATE_STATUS_STRUCT *)autoCircData.pvVal1 = autoCircStatus.autoCircStatus;
@@ -2112,31 +1738,14 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 					autoCircFrame.frameStamp	= *(FRAME_STAMP_STRUCT *) autoCircData.pvVal1;
 
 					BOOL fRet = FALSE;
-					if(_boardType != DEVICETYPE_NTV2)
-					{
-						fRet = DeviceIoControl(
-									_hDevice,
-									IOCTL_KS_PROPERTY,
-									&autoCircFrame,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_S),
-									&autoCircFrame,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_S),
-									&dwBytesReturned,
-									NULL);
-					}
-					else
-					{
-						fRet = DeviceIoControl(
-									_hDevice,
-									IOCTL_AJAPROPS_AUTOCIRC_FRAME,
-									&autoCircFrame,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_S),
-									&autoCircFrame,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_S),
-									&dwBytesReturned,
-									NULL);
-					}
-
+					fRet = DeviceIoControl(_hDevice,
+											IOCTL_AJAPROPS_AUTOCIRC_FRAME,
+											&autoCircFrame,
+											sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_S),
+											&autoCircFrame,
+											sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_S),
+											&dwBytesReturned,
+											NULL);
 					if (fRet)
 					{
 						*(FRAME_STAMP_STRUCT *)autoCircData.pvVal1 = autoCircFrame.frameStamp;
@@ -2173,31 +1782,14 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 					}
 
 					BOOL fRet = FALSE;
-					if(_boardType != DEVICETYPE_NTV2)
-					{
-						fRet = DeviceIoControl(
-									_hDevice,
-									IOCTL_KS_PROPERTY,
-									&autoCircFrame,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S),
-									&autoCircFrame,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S),
-									&dwBytesReturned,
-									NULL);
-					}
-					else
-					{
-						fRet = DeviceIoControl(
-									_hDevice,
-									IOCTL_AJAPROPS_AUTOCIRC_FRAME_EX2,
-									&autoCircFrame,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S),
-									&autoCircFrame,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S),
-									&dwBytesReturned,
-									NULL);
-					}
-
+					fRet = DeviceIoControl(_hDevice,
+											IOCTL_AJAPROPS_AUTOCIRC_FRAME_EX2,
+											&autoCircFrame,
+											sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S),
+											&autoCircFrame,
+											sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S),
+											&dwBytesReturned,
+											NULL);
 					if (fRet)
 					{
 						*(FRAME_STAMP_STRUCT *)autoCircData.pvVal1 = autoCircFrame.frameStamp;
@@ -2252,31 +1844,14 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 					AUTOCIRCULATE_TRANSFER_STATUS_STRUCT acStatus = *(PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT) autoCircData.pvVal2;
 
 					BOOL fRet = FALSE;
-					if(_boardType != DEVICETYPE_NTV2)
-					{
-						fRet = DeviceIoControl(
-									_hDevice,
-									IOCTL_KS_PROPERTY,
-									&autoCircTransfer,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_S),
-									&acStatus,
-									sizeof (AUTOCIRCULATE_TRANSFER_STATUS_STRUCT),
-									&dwBytesReturned,
-									NULL);
-					}
-					else
-					{
-						fRet = DeviceIoControl(
-									_hDevice,
-									IOCTL_AJAPROPS_AUTOCIRC_TRANSFER,
-									&autoCircTransfer,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_S),
-									&acStatus,
-									sizeof (AUTOCIRCULATE_TRANSFER_STATUS_STRUCT),
-									&dwBytesReturned,
-									NULL);
-					}
-
+					fRet = DeviceIoControl(_hDevice,
+											IOCTL_AJAPROPS_AUTOCIRC_TRANSFER,
+											&autoCircTransfer,
+											sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_S),
+											&acStatus,
+											sizeof (AUTOCIRCULATE_TRANSFER_STATUS_STRUCT),
+											&dwBytesReturned,
+											NULL);
 					if (fRet)
 					{
 						*(PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT)autoCircData.pvVal2 = acStatus;
@@ -2350,31 +1925,14 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 					AUTOCIRCULATE_TRANSFER_STATUS_STRUCT acStatus = *(PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT) autoCircData.pvVal2;
 
 					BOOL fRet = FALSE;
-					if(_boardType != DEVICETYPE_NTV2)
-					{
-						fRet = DeviceIoControl(
-									_hDevice,
-									IOCTL_KS_PROPERTY,
-									&autoCircTransfer,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_EX_S),
-									&acStatus,
-									sizeof (AUTOCIRCULATE_TRANSFER_STATUS_STRUCT),
-									&dwBytesReturned,
-									NULL);
-					}
-					else
-					{
-						fRet = DeviceIoControl(
-									_hDevice,
-									IOCTL_AJAPROPS_AUTOCIRC_TRANSFER_EX,
-									&autoCircTransfer,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_EX_S),
-									&acStatus,
-									sizeof (AUTOCIRCULATE_TRANSFER_STATUS_STRUCT),
-									&dwBytesReturned,
-									NULL);
-					}
-
+					fRet = DeviceIoControl(_hDevice,
+											IOCTL_AJAPROPS_AUTOCIRC_TRANSFER_EX,
+											&autoCircTransfer,
+											sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_EX_S),
+											&acStatus,
+											sizeof (AUTOCIRCULATE_TRANSFER_STATUS_STRUCT),
+											&dwBytesReturned,
+											NULL);
 					if (fRet)
 					{
 						*(PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT)autoCircData.pvVal2 = acStatus;
@@ -2452,31 +2010,14 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 					AUTOCIRCULATE_TRANSFER_STATUS_STRUCT acStatus = *(PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT) autoCircData.pvVal2;
 
 					BOOL fRet = FALSE;
-					if(_boardType != DEVICETYPE_NTV2)
-					{
-						fRet = DeviceIoControl(
-									_hDevice,
-									IOCTL_KS_PROPERTY,
-									&autoCircTransfer,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_EX2_S),
-									&acStatus,
-									sizeof (AUTOCIRCULATE_TRANSFER_STATUS_STRUCT),
-									&dwBytesReturned,
-									NULL);
-					}
-					else
-					{
-						fRet = DeviceIoControl(
-									_hDevice,
-									IOCTL_AJAPROPS_AUTOCIRC_TRANSFER_EX2,
-									&autoCircTransfer,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_EX2_S),
-									&acStatus,
-									sizeof (AUTOCIRCULATE_TRANSFER_STATUS_STRUCT),
-									&dwBytesReturned,
-									NULL);
-					}
-
+					fRet = DeviceIoControl(_hDevice,
+											IOCTL_AJAPROPS_AUTOCIRC_TRANSFER_EX2,
+											&autoCircTransfer,
+											sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_EX2_S),
+											&acStatus,
+											sizeof (AUTOCIRCULATE_TRANSFER_STATUS_STRUCT),
+											&dwBytesReturned,
+											NULL);
 					if (fRet)
 					{
 						*(PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT)autoCircData.pvVal2 = acStatus;
@@ -2528,31 +2069,14 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 					autoCircFrame.acTask = *(AUTOCIRCULATE_TASK_STRUCT *) autoCircData.pvVal1;
 
 					BOOL fRet = FALSE;
-					if(_boardType != DEVICETYPE_NTV2)
-					{
-						fRet = DeviceIoControl(
-									_hDevice,
-									IOCTL_KS_PROPERTY,
-									&autoCircFrame,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S),
-									&autoCircFrame,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S),
-									&dwBytesReturned,
-									NULL);
-					}
-					else
-					{
-						fRet = DeviceIoControl(
-									_hDevice,
-									IOCTL_AJAPROPS_AUTOCIRC_CAPTURE_TASK,
-									&autoCircFrame,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S),
-									&autoCircFrame,
-									sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S),
-									&dwBytesReturned,
-									NULL);
-					}
-
+					fRet = DeviceIoControl(_hDevice,
+											IOCTL_AJAPROPS_AUTOCIRC_CAPTURE_TASK,
+											&autoCircFrame,
+											sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S),
+											&autoCircFrame,
+											sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S),
+											&dwBytesReturned,
+											NULL);
 					if (!fRet)
 					{
 						bRes = false;
@@ -2575,15 +2099,14 @@ bool CNTV2WinDriverInterface::NTV2Message(NTV2_HEADER * pInMessage)
 {
 	DWORD	dwBytesReturned = 0;
 	BOOL fRet = FALSE;
-	fRet = DeviceIoControl(
-		_hDevice,
-		IOCTL_AJANTV2_MESSAGE,
-		pInMessage,
-		pInMessage->GetSizeInBytes (),
-		pInMessage,
-		pInMessage->GetSizeInBytes (),
-		&dwBytesReturned,
-		NULL);
+	fRet = DeviceIoControl(_hDevice,
+							IOCTL_AJANTV2_MESSAGE,
+							pInMessage,
+							pInMessage->GetSizeInBytes (),
+							pInMessage,
+							pInMessage->GetSizeInBytes (),
+							&dwBytesReturned,
+							NULL);
 	return fRet ? true : false;
 }
 
@@ -2593,16 +2116,14 @@ bool CNTV2WinDriverInterface::HevcSendMessage(HevcMessageHeader* pInMessage)
 	DWORD	dwBytesReturned = 0;
 	BOOL	fRet = FALSE;
 
-	fRet = DeviceIoControl(
-		_hDevice,
-		IOCTL_AJAHEVC_MESSAGE,
-		pInMessage,
-		pInMessage->size,
-		pInMessage,
-		pInMessage->size,
-		&dwBytesReturned,
-		NULL);
-
+	fRet = DeviceIoControl(_hDevice,
+							IOCTL_AJAHEVC_MESSAGE,
+							pInMessage,
+							pInMessage->size,
+							pInMessage,
+							pInMessage->size,
+							&dwBytesReturned,
+							NULL);
 	return fRet ? true : false;
 }
 
@@ -2620,7 +2141,7 @@ bool CNTV2WinDriverInterface::SetRelativeVideoPlaybackDelay(ULWord frameDelay)
 
 bool CNTV2WinDriverInterface::GetRelativeVideoPlaybackDelay(ULWord* frameDelay)
 {
-	return ReadRegister (kVRegRelativeVideoPlaybackDelay, frameDelay);
+	return frameDelay ? ReadRegister (kVRegRelativeVideoPlaybackDelay, *frameDelay) : false;
 }
 
 bool CNTV2WinDriverInterface::SetAudioRecordPinDelay(ULWord millisecondDelay)
@@ -2630,7 +2151,7 @@ bool CNTV2WinDriverInterface::SetAudioRecordPinDelay(ULWord millisecondDelay)
 
 bool CNTV2WinDriverInterface::GetStrictTiming(ULWord* strictTiming)
 {
-	return ReadRegister (kVRegStrictTiming, strictTiming);
+	return strictTiming ? ReadRegister (kVRegStrictTiming, *strictTiming) : false;
 }
 
 bool CNTV2WinDriverInterface::SetStrictTiming(ULWord strictTiming)
@@ -2641,12 +2162,12 @@ bool CNTV2WinDriverInterface::SetStrictTiming(ULWord strictTiming)
 
 bool CNTV2WinDriverInterface::GetAudioRecordPinDelay(ULWord* millisecondDelay)
 {
-	return ReadRegister (kVRegAudioRecordPinDelay, millisecondDelay);
+	return millisecondDelay ? ReadRegister (kVRegAudioRecordPinDelay, *millisecondDelay) : false;
 }
 
 bool CNTV2WinDriverInterface::GetDriverVersion(ULWord* driverVersion)
 {
-	return ReadRegister (kVRegDriverVersion, driverVersion);
+	return driverVersion ? ReadRegister (kVRegDriverVersion, *driverVersion) : false;
 }
 
 bool CNTV2WinDriverInterface::SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode)
@@ -2656,7 +2177,7 @@ bool CNTV2WinDriverInterface::SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mo
 
 bool CNTV2WinDriverInterface::GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode)
 {
-	return ReadRegister(kVRegGlobalAudioPlaybackMode,(ULWord*)mode);
+	return mode ? CNTV2DriverInterface::ReadRegister(kVRegGlobalAudioPlaybackMode, *mode) : false;
 }
 
 bool CNTV2WinDriverInterface::DisplayNTV2Error (const char *str)
@@ -2729,30 +2250,14 @@ CNTV2WinDriverInterface::DriverGetBitFileInformation(
 			propStruct.Property.Flags	= KSPROPERTY_TYPE_GET;
 
 			BOOL fRet = FALSE;
-			if(_boardType != DEVICETYPE_NTV2)
-			{
-				fRet = DeviceIoControl(
-							 _hDevice,
-							 IOCTL_KS_PROPERTY,
-							 &propStruct,
-							 sizeof(KSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S),
-							 &propStruct,
-							 sizeof(KSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S),
-							 &dwBytesReturned,
-							 NULL);
-			}
-			else
-			{
-				fRet = DeviceIoControl(
-							_hDevice,
-							IOCTL_AJAPROPS_GETSETBITFILEINFO,
-							&propStruct,
-							sizeof(KSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S),
-							&propStruct,
-							sizeof(KSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S),
-							&dwBytesReturned,
-							NULL);
-			}
+			fRet = DeviceIoControl(_hDevice,
+									IOCTL_AJAPROPS_GETSETBITFILEINFO,
+									&propStruct,
+									sizeof(KSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S),
+									&propStruct,
+									sizeof(KSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S),
+									&dwBytesReturned,
+									NULL);
 			if (fRet)
 			{
 				bitFileInfo = propStruct.bitFileInfoStruct;
@@ -2781,30 +2286,14 @@ CNTV2WinDriverInterface::DriverSetBitFileInformation(
 	propStruct.bitFileInfoStruct = bitFileInfo;
 
 	BOOL fRet = FALSE;
-	if(_boardType != DEVICETYPE_NTV2)
-	{
-		fRet = DeviceIoControl(
-					 _hDevice,
-					 IOCTL_KS_PROPERTY,
-					 &propStruct,
-					 sizeof(KSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S),
-					 &propStruct,
-					 sizeof(KSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S),
-					 &dwBytesReturned,
-					 NULL);
-	}
-	else
-	{
-		fRet = DeviceIoControl(
-					_hDevice,
-					IOCTL_AJAPROPS_GETSETBITFILEINFO,
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S),
-					&propStruct,
-					sizeof(KSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S),
-					&dwBytesReturned,
-					NULL);
-	}
+	fRet = DeviceIoControl(_hDevice,
+							IOCTL_AJAPROPS_GETSETBITFILEINFO,
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S),
+							&propStruct,
+							sizeof(KSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S),
+							&dwBytesReturned,
+							NULL);
 	if (fRet)
 	{
 		return true;
@@ -2824,7 +2313,7 @@ bool CNTV2WinDriverInterface::SwitchBitfile(NTV2DeviceID boardID, NTV2BitfileTyp
 	if (bitfile == NTV2_BITFILE_NO_CHANGE)
 		return true;
 
-	ULWord numRegisters = NTV2BoardGetNumberRegisters(boardID);
+	ULWord numRegisters = NTV2DeviceGetMaxRegisterNumber(boardID);
 	ULWord *regValues = new ULWord[numRegisters];
 
 	if (regValues == NULL)
@@ -2835,7 +2324,7 @@ bool CNTV2WinDriverInterface::SwitchBitfile(NTV2DeviceID boardID, NTV2BitfileTyp
 
 
 	for (ULWord i = 0; i < numRegisters; i ++)
-		ReadRegister(i, &regValues[i]);
+		ReadRegister(i, regValues[i]);
 
 	// Disable all interrupts.
 	for ( ULWord i=0; i<eNumInterruptTypes; i++)
@@ -2880,7 +2369,7 @@ bool CNTV2WinDriverInterface::RestoreHardwareProcampRegisters()
 PerfCounterTimestampMode CNTV2WinDriverInterface::GetPerfCounterTimestampMode()
 {
 	ULWord mode;
-	ReadRegister(kVRegTimeStampMode,&mode);
+	ReadRegister(kVRegTimeStampMode,mode);
 
 	return (PerfCounterTimestampMode)mode;
 }
@@ -2895,8 +2384,8 @@ LWord64 CNTV2WinDriverInterface::GetLastOutputVerticalTimestamp()
 	LWord64 value;
 	ULWord loValue;
 	ULWord hiValue;
-	ReadRegister(kVRegTimeStampLastOutputVerticalLo,&loValue);
-	ReadRegister(kVRegTimeStampLastOutputVerticalHi,&hiValue);
+	ReadRegister(kVRegTimeStampLastOutputVerticalLo,loValue);
+	ReadRegister(kVRegTimeStampLastOutputVerticalHi,hiValue);
 	value = loValue | ((LWord64)hiValue<<32);
 
 	return value;
@@ -2907,8 +2396,8 @@ LWord64 CNTV2WinDriverInterface::GetLastInput1VerticalTimestamp()
 	LWord64 value;
 	ULWord loValue;
 	ULWord hiValue;
-	ReadRegister(kVRegTimeStampLastInput1VerticalLo,&loValue);
-	ReadRegister(kVRegTimeStampLastInput1VerticalHi,&hiValue);
+	ReadRegister(kVRegTimeStampLastInput1VerticalLo,loValue);
+	ReadRegister(kVRegTimeStampLastInput1VerticalHi,hiValue);
 	value = loValue | ((LWord64)hiValue<<32);
 
 	return value;
@@ -2919,8 +2408,8 @@ LWord64 CNTV2WinDriverInterface::GetLastInput2VerticalTimestamp()
 	LWord64 value;
 	ULWord loValue;
 	ULWord hiValue;
-	ReadRegister(kVRegTimeStampLastInput2VerticalLo,&loValue);
-	ReadRegister(kVRegTimeStampLastInput2VerticalHi,&hiValue);
+	ReadRegister(kVRegTimeStampLastInput2VerticalLo,loValue);
+	ReadRegister(kVRegTimeStampLastInput2VerticalHi,hiValue);
 	value = loValue | ((LWord64)hiValue<<32);
 
 	return value;
@@ -2931,8 +2420,8 @@ LWord64 CNTV2WinDriverInterface::GetLastOutputVerticalTimestamp(NTV2Channel chan
 	LWord64 value;
 	ULWord loValue;
 	ULWord hiValue;
-	ReadRegister(gChannelToTSLastOutputVertLo[channel],&loValue);
-	ReadRegister(gChannelToTSLastOutputVertHi[channel],&hiValue);
+	ReadRegister(gChannelToTSLastOutputVertLo[channel],loValue);
+	ReadRegister(gChannelToTSLastOutputVertHi[channel],hiValue);
 	value = loValue | ((LWord64)hiValue<<32);
 
 	return value;
@@ -2943,8 +2432,8 @@ LWord64 CNTV2WinDriverInterface::GetLastInputVerticalTimestamp(NTV2Channel chann
 	LWord64 value;
 	ULWord loValue;
 	ULWord hiValue;
-	ReadRegister(gChannelToTSLastInputVertLo[channel],&loValue);
-	ReadRegister(gChannelToTSLastInputVertHi[channel],&hiValue);
+	ReadRegister(gChannelToTSLastInputVertLo[channel],loValue);
+	ReadRegister(gChannelToTSLastInputVertHi[channel],hiValue);
 	value = loValue | ((LWord64)hiValue<<32);
 
 	return value;
@@ -2989,15 +2478,15 @@ bool CNTV2WinDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 	RP188SourceSelect source = kRP188SourceEmbeddedLTC;
 	ULWord dbbReg, msReg, lsReg;
 
-	ReadRegister(kRegBoardID, (ULWord *)&boardID);
-	ReadRegister(kVRegRP188SourceSelect, (ULWord *)&source);
+	CNTV2DriverInterface::ReadRegister(kRegBoardID, boardID);
+	CNTV2DriverInterface::ReadRegister(kVRegRP188SourceSelect, source);
 	bool bLTCPort = (source == kRP188SourceLTCPort);
 
 	// values come from LTC port registers
 	if (bLTCPort)
 	{
 		ULWord ltcPresent;
-		ReadRegister (kRegStatus, &ltcPresent, kRegMaskLTCInPresent, kRegShiftLTCInPresent);
+		ReadRegister (kRegStatus, ltcPresent, kRegMaskLTCInPresent, kRegShiftLTCInPresent);
 
 		// there is no equivalent DBB for LTC port - we synthesize it here
 		rp188.DBB = (ltcPresent) ? 0xFE000000 | NEW_SELECT_RP188_RCVD : 0xFE000000;
@@ -3016,7 +2505,7 @@ bool CNTV2WinDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 		if(NTV2DeviceGetNumVideoInputs(boardID) > 1)
 		{
 
-			ReadRegister (kVRegInputSelect, (ULWord *)&inputSelect);
+			CNTV2DriverInterface::ReadRegister (kVRegInputSelect, inputSelect);
 			channel = (inputSelect == NTV2_Input1Select) ? NTV2_CHANNEL1 : NTV2_CHANNEL2;
 		}
 		else
@@ -3028,11 +2517,11 @@ bool CNTV2WinDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 		dbbReg = (channel == NTV2_CHANNEL1 ? kRegRP188InOut1DBB : kRegRP188InOut2DBB);
 		//Check to see if TC is received
 		uint32_t tcReceived = 0;
-		ReadRegister(dbbReg, &tcReceived, BIT(16), 16);
+		ReadRegister(dbbReg, tcReceived, BIT(16), 16);
 		if(tcReceived == 0)
 			return false;//No TC recevied
 
-		ReadRegister (dbbReg, &rp188.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB );
+		ReadRegister (dbbReg, rp188.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB );
 		switch(rp188.DBB)//What do we have?
 		{
 		default:
@@ -3051,7 +2540,7 @@ bool CNTV2WinDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 				{
 					//We want Embedded LTC, so we should check one other place
 					uint32_t ltcPresent = 0;
-					ReadRegister(dbbReg, &ltcPresent, BIT(18), 18);
+					ReadRegister(dbbReg, ltcPresent, BIT(18), 18);
 					if(ltcPresent == 1)
 					{
 						//Read LTC registers
@@ -3077,10 +2566,10 @@ bool CNTV2WinDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 			}
 		}
 		//Re-Read the whole register just in case something is expecting other status values
-		ReadRegister (dbbReg, &rp188.DBB);
+		ReadRegister (dbbReg, rp188.DBB);
 	}
-	ReadRegister (msReg,  &rp188.Low );
-	ReadRegister (lsReg,  &rp188.High);
+	ReadRegister (msReg,  rp188.Low );
+	ReadRegister (lsReg,  rp188.High);
 
 	// register stability filter
 	do
@@ -3090,9 +2579,9 @@ bool CNTV2WinDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 
 		// read again into local struct
 		if (!bLTCPort)
-			ReadRegister (dbbReg, &rp188.DBB );
-		ReadRegister (msReg,  &rp188.Low );
-		ReadRegister (lsReg,  &rp188.High);
+			ReadRegister (dbbReg, rp188.DBB );
+		ReadRegister (msReg,  rp188.Low );
+		ReadRegister (lsReg,  rp188.High);
 
 		// if the new read equals the previous read, consider it done
 		if ( (rp188.DBB  == pRP188Data->DBB) &&
@@ -3117,7 +2606,7 @@ bool CNTV2WinDriverInterface::SetOutputTimecodeOffset( ULWord frames )
 
 bool CNTV2WinDriverInterface::GetOutputTimecodeOffset( ULWord* pFrames )
 {
-	return ReadRegister(kVRegOutputTimecodeOffset, pFrames);
+	return pFrames ? ReadRegister(kVRegOutputTimecodeOffset, *pFrames) : false;
 }
 
 bool CNTV2WinDriverInterface::SetOutputTimecodeType( ULWord type )
@@ -3127,7 +2616,7 @@ bool CNTV2WinDriverInterface::SetOutputTimecodeType( ULWord type )
 
 bool CNTV2WinDriverInterface::GetOutputTimecodeType( ULWord* pType )
 {
-	return ReadRegister(kVRegOutputTimecodeType, pType);
+	return pType ? ReadRegister(kVRegOutputTimecodeType, *pType) : false;
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -3259,8 +2748,8 @@ bool CNTV2WinDriverInterface::LoadBitFile( void* dataPtr, uint32_t dataSize, NTV
 bool CNTV2WinDriverInterface::AcquireStreamForApplicationWithReference( ULWord appCode, int32_t pid )
 {
 	ULWord currentCode, currentPID;
-	ReadRegister(kVRegApplicationCode, &currentCode);
-	ReadRegister(kVRegApplicationPID, &currentPID);
+	ReadRegister(kVRegApplicationCode, currentCode);
+	ReadRegister(kVRegApplicationPID, currentPID);
 
 	HANDLE pH = OpenProcess(READ_CONTROL, false, (DWORD)currentPID);
 	if(INVALID_HANDLE_VALUE != pH && NULL != pH)
@@ -3272,8 +2761,8 @@ bool CNTV2WinDriverInterface::AcquireStreamForApplicationWithReference( ULWord a
 		ReleaseStreamForApplication(currentCode, currentPID);
 	}
 
-	ReadRegister(kVRegApplicationCode, &currentCode);
-	ReadRegister(kVRegApplicationPID, &currentPID);
+	ReadRegister(kVRegApplicationCode, currentCode);
+	ReadRegister(kVRegApplicationPID, currentPID);
 
 	for(int count = 0; count < 20; count++)
 	{
@@ -3310,9 +2799,9 @@ bool CNTV2WinDriverInterface::AcquireStreamForApplicationWithReference( ULWord a
 bool CNTV2WinDriverInterface::ReleaseStreamForApplicationWithReference( ULWord appCode, int32_t pid )
 {
 	ULWord currentCode, currentPID, currentCount;
-	ReadRegister(kVRegApplicationCode, &currentCode);
-	ReadRegister(kVRegApplicationPID, &currentPID);
-	ReadRegister(kVRegAcquireReferenceCount, &currentCount);
+	ReadRegister(kVRegApplicationCode, currentCode);
+	ReadRegister(kVRegApplicationPID, currentPID);
+	ReadRegister(kVRegAcquireReferenceCount, currentCount);
 
 	if(currentCode == appCode && currentPID == (ULWord)pid)
 	{
@@ -3344,8 +2833,8 @@ bool CNTV2WinDriverInterface::AcquireStreamForApplication( ULWord appCode, int32
 	}
 
 	ULWord currentAppCode, currentPID;
-	ReadRegister(kVRegApplicationCode, &currentAppCode);
-	ReadRegister(kVRegApplicationPID, &currentPID);
+	ReadRegister(kVRegApplicationCode, currentAppCode);
+	ReadRegister(kVRegApplicationPID, currentPID);
 
 	HANDLE hProcess = OpenProcess(SYNCHRONIZE, false, DWORD(currentPID));
 	if (hProcess != NULL && hProcess != INVALID_HANDLE_VALUE)
@@ -3404,10 +2893,9 @@ bool CNTV2WinDriverInterface::SetStreamingApplication( ULWord appCode, int32_t p
 
 bool CNTV2WinDriverInterface::GetStreamingApplication( ULWord *appCode, int32_t  *pid )
 {
-	if(!ReadRegister(kVRegApplicationCode, appCode))
+	if(!(appCode && ReadRegister(kVRegApplicationCode, *appCode)))
 		return false;
-	else
-		 return ReadRegister(kVRegApplicationPID, (ULWord*)pid);
+	return pid && CNTV2DriverInterface::ReadRegister(kVRegApplicationPID, *pid);
 }
 
 bool CNTV2WinDriverInterface::SetDefaultDeviceForPID( int32_t pid )
@@ -3424,8 +2912,8 @@ bool CNTV2WinDriverInterface::IsDefaultDeviceForPID( int32_t pid )
 
 bool CNTV2WinDriverInterface::SuspendAudio()
 {
-	ReadRegister(kRegAud1Control, &_previousAudioState);
-	ReadRegister(kRegAud1SourceSelect, &_previousAudioSelection);
+	ReadRegister(kRegAud1Control, _previousAudioState);
+	ReadRegister(kRegAud1SourceSelect, _previousAudioSelection);
 	return true;
 }
 

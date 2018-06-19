@@ -380,7 +380,7 @@ AJAExport const std::string &	AJAAncillaryDataCodingToString (const AJAAncillary
 				payload-agnostic, I serve as the generic base class for more specific objects that know
 				how to decode/parse specific types of ancillary data.
 
-	@details	My \c m_payload member stores the User Data Words (UDWs) as an ordered collection of 8-bit data bytes.
+	@details	My AJAAncillaryData::m_payload member stores the User Data Words (UDWs) as an ordered collection of 8-bit data bytes.
 				Because it's an STL vector, it knows how many UDW elements it contains. Thus, it stores the SMPTE "DC"
 				(data count) value.
 

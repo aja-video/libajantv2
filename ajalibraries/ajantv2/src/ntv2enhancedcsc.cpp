@@ -163,24 +163,24 @@ bool CNTV2EnhancedCSC::SetKeyGain (const double inKeyGain)
 
 bool CNTV2EnhancedCSC::SendToHardware (CNTV2Card & inDevice, const NTV2Channel inChannel) const
 {
-	if (!inDevice.IsOpen ())
+	if (!inDevice.IsOpen())
 		return false;
 
 	ULWord cscBaseAddress = gChannelToEnhancedCSCRegNum [inChannel];
 	ULWord cscRegs [kRegNumEnhancedCSCRegisters];
 
 	//	Read-modify-write only the relevent control bits
-	if (!inDevice.ReadRegister (cscBaseAddress, &cscRegs [0]))
+	if (!inDevice.ReadRegister (cscBaseAddress, cscRegs[0]))
 		return false;
 
-	cscRegs [0] = (cscRegs [0] & ~kK2RegMaskEnhancedCSCInputPixelFormat)   | (mInputPixelFormat   << kK2RegShiftEnhancedCSCInputPixelFormat);
-	cscRegs [0] = (cscRegs [0] & ~kK2RegMaskEnhancedCSCOutputPixelFormat)  | (mOutputPixelFormat  << kK2RegShiftEnhancedCSCOutputPixelFormat);
-	cscRegs [0] = (cscRegs [0] & ~kK2RegMaskEnhancedCSCChromaFilterSelect) | (mChromaFilterSelect << kK2RegShiftEnhancedCSCChromaFilterSelect);
-	cscRegs [0] = (cscRegs [0] & ~kK2RegMaskEnhancedCSCChromaEdgeControl)  | (mChromaEdgeControl  << kK2RegShiftEnhancedCSCChromaEdgeControl);
+	cscRegs [0] = (cscRegs[0] & ~kK2RegMaskEnhancedCSCInputPixelFormat)   | (mInputPixelFormat   << kK2RegShiftEnhancedCSCInputPixelFormat);
+	cscRegs [0] = (cscRegs[0] & ~kK2RegMaskEnhancedCSCOutputPixelFormat)  | (mOutputPixelFormat  << kK2RegShiftEnhancedCSCOutputPixelFormat);
+	cscRegs [0] = (cscRegs[0] & ~kK2RegMaskEnhancedCSCChromaFilterSelect) | (mChromaFilterSelect << kK2RegShiftEnhancedCSCChromaFilterSelect);
+	cscRegs [0] = (cscRegs[0] & ~kK2RegMaskEnhancedCSCChromaEdgeControl)  | (mChromaEdgeControl  << kK2RegShiftEnhancedCSCChromaEdgeControl);
 
-	cscRegs [1] = (Matrix ().GetOffset (NTV2CSCOffsetIndex_Pre1) << 16) | Matrix ().GetOffset (NTV2CSCOffsetIndex_Pre0);
+	cscRegs [1] = (Matrix ().GetOffset(NTV2CSCOffsetIndex_Pre1) << 16) | Matrix ().GetOffset(NTV2CSCOffsetIndex_Pre0);
 
-	cscRegs [2] = Matrix ().GetOffset (NTV2CSCOffsetIndex_Pre2);
+	cscRegs [2] = Matrix ().GetOffset(NTV2CSCOffsetIndex_Pre2);
 
 	cscRegs [3] = ConvertCoeffDoubleToULWord (Matrix ().GetCoefficient (NTV2CSCCoeffIndex_A0));
 
@@ -219,7 +219,6 @@ bool CNTV2EnhancedCSC::SendToHardware (CNTV2Card & inDevice, const NTV2Channel i
 		regInfo.registerValue	= cscRegs [i];
 		regInfo.registerMask	= 0xFFFFFFFF;
 		regInfo.registerShift	= 0;
-
 		regVector.push_back (regInfo);
 	}
 
@@ -255,7 +254,7 @@ bool CNTV2EnhancedCSC::GetFromHardware (CNTV2Card & inDevice, const NTV2Channel 
 	int i = 0;
 	for (NTV2RegValueMapConstIter iter = regMap.begin ();  iter != regMap.end ();  ++iter)
 	{
-		cscRegs [i++] = iter->second;
+		cscRegs[i++] = iter->second;
 	}
 
 	mInputPixelFormat	= (NTV2EnhancedCSCPixelFormat)			((cscRegs [0] & kK2RegMaskEnhancedCSCInputPixelFormat)   >> kK2RegShiftEnhancedCSCInputPixelFormat);

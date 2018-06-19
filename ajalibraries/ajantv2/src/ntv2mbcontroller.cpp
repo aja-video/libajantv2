@@ -272,11 +272,11 @@ eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddre
     if (!(getFeatures() & SAREK_MB_PRESENT))
         return ARP_VALID;
 
-    sprintf((char*)txBuf,"cmd=%d,ipaddr=%s,port=%d,chan=%d,stream=%d",
-            (int)MB_CMD_GET_MAC_FROM_ARP_TABLE,
+    sprintf(reinterpret_cast<char*>(txBuf), "cmd=%d,ipaddr=%s,port=%d,stream=%d",
+            int(MB_CMD_GET_MAC_FROM_ARP_TABLE),
             remote_IPAddress.c_str(),
-            (int)port,
-            (int)stream);
+            int(port),
+            int(stream));
     bool rv = sendMsg(500);
     if (!rv)
     {
@@ -447,7 +447,7 @@ void CNTV2MBController::EnableIGMPGroup(eSFP port, NTV2Stream stream, bool enabl
 {
     uint32_t val = 0;
     uint32_t offset = getIGMPCBOffset(port, stream);
-    mDevice.ReadRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE,&val);
+    mDevice.ReadRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, val);
     if (val != 0)
     {
         // is used or busy, so can enable/disable
@@ -489,7 +489,7 @@ bool CNTV2MBController::SetTxLinkState(NTV2Channel channel, bool sfp1Enable, boo
     val <<= (chan * 2);
 
     uint32_t state;
-    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, state);
     if (!rv) return false;
     state   &= ~( 0x3 << (chan * 2) );
     state  |= val;
@@ -502,7 +502,7 @@ bool CNTV2MBController::GetTxLinkState(NTV2Channel channel, bool & sfp1Enable, b
     uint32_t chan = (uint32_t)channel;
 
     uint32_t state;
-    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, state);
     if (!rv) return false;
     state  &=  ( 0x3 << (chan * 2) );
     state >>= (chan * 2);
@@ -522,7 +522,7 @@ bool CNTV2MBController::SetRxLinkState(NTV2Channel channel, bool sfp1Enable, boo
     val <<= (chan * 2);
 
     uint32_t state;
-    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, state);
     if (!rv) return false;
     state   &= ~( (0x3 << (chan * 2)) << 8 );
     state  |= (val << 8);
@@ -535,7 +535,7 @@ bool CNTV2MBController::GetRxLinkState(NTV2Channel channel, bool & sfp1Enable, b
     uint32_t chan = (uint32_t)channel;
 
     uint32_t state;
-    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    bool rv = mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, state);
     if (!rv) return false;
     state >>= 8;
     state  &=  ( 0x3 << (chan * 2) );
@@ -552,11 +552,11 @@ bool  CNTV2MBController::SetRxMatch(NTV2Channel channel, eSFP link, uint8_t matc
     uint32_t val;
     if (link == SFP_1)
     {
-        mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesA, &val);
+        mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesA, val);
     }
     else
     {
-       mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesB, &val);
+       mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesB, val);
     }
 
     val  &= ~( 0xff << (chan * 8));
@@ -580,11 +580,11 @@ bool  CNTV2MBController::GetRxMatch(NTV2Channel channel, eSFP link, uint8_t & ma
     uint32_t val;
     if (link == SFP_1)
     {
-        mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesA, &val);
+        mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesA, val);
     }
     else
     {
-       mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesB, &val);
+       mDevice.ReadRegister(SAREK_REGS + kRegSarekRxMatchesB, val);
     }
 
     val >>= (chan * 8);
@@ -597,7 +597,7 @@ bool  CNTV2MBController::GetRxMatch(NTV2Channel channel, eSFP link, uint8_t & ma
 bool CNTV2MBController::SetSFPActive(eSFP sfp)
 {
     uint32_t state;
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, state);
     if (sfp == SFP_2)
     {
         state  |= S2022_LINK_B_ACTIVE;
@@ -613,7 +613,7 @@ bool CNTV2MBController::SetSFPActive(eSFP sfp)
 bool CNTV2MBController::SetSFPInactive(eSFP sfp)
 {
     uint32_t state;
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, state);
     if (sfp == SFP_2)
     {
         state  &= ~S2022_LINK_B_ACTIVE;
@@ -630,7 +630,7 @@ bool CNTV2MBController::SetSFPInactive(eSFP sfp)
 bool CNTV2MBController::GetSFPActive(eSFP sfp)
 {
     uint32_t state;
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, state);
     if (sfp == SFP_2)
     {
         if (state & S2022_LINK_B_ACTIVE)
@@ -647,7 +647,7 @@ bool CNTV2MBController::GetSFPActive(eSFP sfp)
 bool CNTV2MBController::SetDualLinkMode(bool enable)
 {
     uint32_t state;
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, state);
     if (enable)
     {
         state  |= S2022_DUAL_LINK;
@@ -663,7 +663,7 @@ bool CNTV2MBController::SetDualLinkMode(bool enable)
 bool CNTV2MBController::GetDualLinkMode(bool & enable)
 {
     uint32_t state;
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, &state);
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekLinkModes, state);
     enable = ((state & S2022_DUAL_LINK) != 0);
     return true;
 }
@@ -673,7 +673,7 @@ bool CNTV2MBController::SetTxFormat(NTV2Channel chan, NTV2VideoFormat fmt)
 {
     uint32_t shift = 8 * (int)chan;
     uint32_t state;
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekTxFmts, &state);
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekTxFmts, state);
     state  &= ~(0xff << shift);
     state  |= (uint8_t(fmt) << shift );
     mDevice.WriteRegister(SAREK_REGS + kRegSarekTxFmts, state);
@@ -684,7 +684,7 @@ bool CNTV2MBController::GetTxFormat(NTV2Channel chan, NTV2VideoFormat & fmt)
 {
     uint32_t shift = 8 * (int)chan;
     uint32_t state;
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekTxFmts, &state);
+    mDevice.ReadRegister(SAREK_REGS + kRegSarekTxFmts, state);
     state  &= (0xff << shift);
     state >>= shift;
     fmt = (NTV2VideoFormat)state;
@@ -696,8 +696,8 @@ uint64_t CNTV2MBController::GetNTPTimestamp()
 {
     uint32_t secsLo;
     uint32_t nanosecs;
-    mDevice.ReadRegister(SAREK_PLL + kRegPll_PTP_CurPtpSecLo, &secsLo);
-    mDevice.ReadRegister(SAREK_PLL + kRegPll_PTP_CurPtpNSec, &nanosecs);
+    mDevice.ReadRegister(SAREK_PLL + kRegPll_PTP_CurPtpSecLo, secsLo);
+    mDevice.ReadRegister(SAREK_PLL + kRegPll_PTP_CurPtpNSec, nanosecs);
 
     uint64_t res = secsLo;
     res = (res << 32) + nanosecs;

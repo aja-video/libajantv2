@@ -141,6 +141,7 @@ AJADebug::Open(bool incrementRefCount)
             addDebugGroupToLabelVector(AJA_DebugUnit_AJAAncData);
             addDebugGroupToLabelVector(AJA_DebugUnit_AJAAncList);
             addDebugGroupToLabelVector(AJA_DebugUnit_BFT);
+            addDebugGroupToLabelVector(AJA_DebugUnit_PnP);
 
             for(int i=AJA_DebugUnit_FirstUnused;i<AJA_DebugUnit_Size;i++)
             {

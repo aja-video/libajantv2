@@ -161,7 +161,7 @@ enum
 	kRegSerialNumber			= 2118,				// Serial register 2 quadlet, 8 bytes
 	kRegUpdateData				= 2120,				// data 128(0x80) quadlets, or 512(0x200) bytes, thru 0x8d0
 
-	// NOTE: THIS VALUE HAS TO MATCH WHAT IS RETURNED BY NTV2BoardGetNumberRegisters
+	// NOTE: THIS VALUE HAS TO MATCH WHAT IS RETURNED BY NTV2DeviceGetMaxRegisterNumber
 	kRegIoHDLast				= 2624
 };
 

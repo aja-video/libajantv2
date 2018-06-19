@@ -1484,6 +1484,20 @@ bool FRAME_STAMP::CopyTo (FRAME_STAMP_STRUCT & outOldStruct) const
 	outOldStruct.currentReps					= acCurrentReps;
     outOldStruct.currenthUser					= (ULWord)acCurrentUserCookie;
 	outOldStruct.currentRP188					= acRP188;
+	//	Ticket 3367 -- Mark Gilbert of Gallery UK reports that after updating from AJA Retail Software 10.5 to 14.0,
+	//	their QuickTime app stopped receiving timecode during capture. Turns out the QuickTime components use the new
+	//	AutoCirculate APIs, but internally still use the old FRAME_STAMP_STRUCT for frame info, including timecode...
+	//	...and only use the "currentRP188" field for the "retail" timecode.
+	//	Sadly, this FRAME_STAMP-to-FRAME_STAMP_STRUCT function historically only set "currentRP188" from the deprecated
+	//	(and completely unused) "acRP188" field, when it really should've been using the acTimeCodes[NTV2_TCINDEX_DEFAULT]
+	//	value all along...
+	if (!acTimeCodes.IsNULL())									//	If there's an acTimeCodes buffer...
+		if (acTimeCodes.GetByteCount() >= sizeof(NTV2_RP188))	//	...and it has at least one timecode value...
+		{
+			const NTV2_RP188 *	pDefaultTC	(reinterpret_cast<const NTV2_RP188*>(acTimeCodes.GetHostPointer()));
+			if (pDefaultTC)
+				outOldStruct.currentRP188		= pDefaultTC[NTV2_TCINDEX_DEFAULT];	//	Stuff the "default" (retail) timecode into "currentRP188".
+		}
 	return true;
 }
 

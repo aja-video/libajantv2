@@ -6,6 +6,7 @@
 	@subsection		ioxt	IoXT
 
 	This page describes the IoXT Thunderbolt-based capture/playout device.
+	It’s identified by ::DEVICE_ID_IOXT.
 
 	@image	html	ioxtfront.jpg
 	@image	html	ioxtrear.jpg
@@ -51,7 +52,7 @@
 
 	@par		Ancillary Data
 
-	-	VANC geometries only
+	-	\ref vancframegeometries only
 
 	@par		Power Dissipation
 

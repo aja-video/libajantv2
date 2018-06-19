@@ -81,7 +81,6 @@ static DriverInterfaceGlobalInitializer	gInitializerSingleton;
 CNTV2DriverInterface::CNTV2DriverInterface ()
 	:	_boardNumber					(0),
 		_boardOpened					(false),
-		_boardType						(DEVICETYPE_NTV2),
 		_boardID						(DEVICE_ID_NOTFOUND),
 		_displayErrorMessage			(false),
 		_pciSlot						(0),
@@ -274,7 +273,7 @@ bool CNTV2DriverInterface::CloseRemote()
 CNTV2DriverInterface & CNTV2DriverInterface::operator = (const CNTV2DriverInterface & inRHS)
 {
 	(void) inRHS;
-	assert (false && "These are not assignable");
+	NTV2_ASSERT(false && "These are not assignable");
 	return *this;
 }	//	operator =
 
@@ -282,31 +281,25 @@ CNTV2DriverInterface & CNTV2DriverInterface::operator = (const CNTV2DriverInterf
 CNTV2DriverInterface::CNTV2DriverInterface (const CNTV2DriverInterface & inObjToCopy)
 {
 	(void) inObjToCopy;
-	assert (false && "These are not copyable");
+	NTV2_ASSERT(false && "These are not copyable");
 }	//	copy constructor
 
 
 // Common remote card read register.  Subclasses have overloaded function
 // that does platform-specific read of register on local card.
-bool CNTV2DriverInterface::ReadRegister (ULWord inRegisterNumber, ULWord * pOutRegisterValue, ULWord inRegisterMask, ULWord inRegisterShift)
+bool CNTV2DriverInterface::ReadRegister (const ULWord inRegisterNumber, ULWord & outRegisterValue, const ULWord inRegisterMask, const ULWord inRegisterShift)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	assert( _remoteHandle != INVALID_NUB_HANDLE);
-
-	return !NTV2ReadRegisterRemote(_sockfd,
-								_remoteHandle,
-								_nubProtocolVersion,
-								inRegisterNumber,
-								pOutRegisterValue,
-								inRegisterMask,
-								inRegisterShift);
+	if (_remoteHandle != INVALID_NUB_HANDLE)
+		return !NTV2ReadRegisterRemote (_sockfd, _remoteHandle, _nubProtocolVersion,
+										inRegisterNumber, &outRegisterValue, inRegisterMask, inRegisterShift);
 #else
 	(void) inRegisterNumber;
-	(void) pOutRegisterValue;
+	(void) outRegisterValue;
 	(void) inRegisterMask;
 	(void) inRegisterShift;
-	return false;
 #endif
+	return false;
 }
 
 
@@ -331,11 +324,7 @@ bool CNTV2DriverInterface::ReadRegisterMulti (ULWord numRegs, ULWord *whichRegis
 	// context switch OR just get them from register set mapped into userspace
 	for (ULWord i = 0; i < numRegs; i++)
 	{
-		if (!ReadRegister(	aRegs[i].registerNumber,
-							&aRegs[i].registerValue,
-							aRegs[i].registerMask,
-							aRegs[i].registerShift)
-							)
+		if (!ReadRegister (aRegs[i].registerNumber, aRegs[i].registerValue, aRegs[i].registerMask, aRegs[i].registerShift))
 		{
 			*whichRegisterFailed = aRegs[i].registerNumber;
 			return false;
@@ -369,7 +358,7 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 bool CNTV2DriverInterface::GetDriverVersion (ULWord * driverVersion)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	assert( _remoteHandle != INVALID_NUB_HANDLE);
+	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
 
 	return !NTV2GetDriverVersionRemote(	_sockfd,
 										_remoteHandle,
@@ -387,7 +376,7 @@ bool CNTV2DriverInterface::GetDriverVersion (ULWord * driverVersion)
 bool CNTV2DriverInterface::WriteRegister (ULWord registerNumber, ULWord registerValue, ULWord registerMask, ULWord registerShift)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	assert( _remoteHandle != INVALID_NUB_HANDLE);
+	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
 
 	return !NTV2WriteRegisterRemote(_sockfd,
 								_remoteHandle,
@@ -410,7 +399,7 @@ bool CNTV2DriverInterface::WriteRegister (ULWord registerNumber, ULWord register
 bool CNTV2DriverInterface::WaitForInterrupt (INTERRUPT_ENUMS eInterrupt, ULWord timeOutMs)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	assert( _remoteHandle != INVALID_NUB_HANDLE);
+	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
 
 	return !NTV2WaitForInterruptRemote(	_sockfd,
 										_remoteHandle,
@@ -429,7 +418,7 @@ bool CNTV2DriverInterface::WaitForInterrupt (INTERRUPT_ENUMS eInterrupt, ULWord 
 bool CNTV2DriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	assert( _remoteHandle != INVALID_NUB_HANDLE);
+	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
 
 	switch(autoCircData.eCommand)
 	{
@@ -455,7 +444,7 @@ bool CNTV2DriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bitFileInfo, NTV2BitFileType bitFileType)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	//assert( _remoteHandle != INVALID_NUB_HANDLE);
+	//NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 	{
 		return ! NTV2DriverGetBitFileInformationRemote(	_sockfd,
@@ -537,7 +526,7 @@ bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageIn
 
     string packInfo;
     ULWord deviceID = (ULWord)_boardID;
-    ReadRegister (kRegBoardID, &deviceID);
+    ReadRegister (kRegBoardID, deviceID);
 
     if (CNTV2AxiSpiFlash::DeviceSupported((NTV2DeviceID)deviceID))
     {
@@ -574,7 +563,7 @@ bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageIn
         do
         {
             ULWord regValue;
-            ReadRegister(kRegXenaxFlashControlStatus, &regValue);
+            ReadRegister(kRegXenaxFlashControlStatus, regValue);
             if (regValue & BIT(8))
             {
                 busy = true;
@@ -595,7 +584,7 @@ bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageIn
             do
             {
                 ULWord regValue;
-                ReadRegister(kRegXenaxFlashControlStatus, &regValue);
+                ReadRegister(kRegXenaxFlashControlStatus, regValue);
                 if ( regValue & BIT(8))
                 {
                     busy = true;
@@ -606,7 +595,7 @@ bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageIn
             } while(busy == true && timeoutCount > 0);
             if (timeoutCount == 0)
                 return false;
-            ReadRegister(kRegXenaxFlashDOUT, &bitFilePtr[count]);
+            ReadRegister(kRegXenaxFlashDOUT, bitFilePtr[count]);
         }
 
         packInfo = (char*)bitFilePtr;
@@ -660,9 +649,9 @@ void CNTV2DriverInterface::InitMemberVariablesOnOpen (NTV2FrameGeometry frameGeo
 	ULWord returnVal1 = false;
 	ULWord returnVal2 = false;
 	if(::NTV2DeviceCanDo4KVideo(_boardID))
-		ReadRegister(kRegGlobalControl2, &returnVal1, kRegMaskQuadMode, kRegShiftQuadMode);
+		ReadRegister(kRegGlobalControl2, returnVal1, kRegMaskQuadMode, kRegShiftQuadMode);
 	if(::NTV2DeviceCanDo425Mux(_boardID))
-		ReadRegister(kRegGlobalControl2, &returnVal2, kRegMask425FB12, kRegShift425FB12);
+		ReadRegister(kRegGlobalControl2, returnVal2, kRegMask425FB12, kRegShift425FB12);
 
     _pFrameBaseAddress = 0;
 	//	for old KSD and KHD boards
@@ -693,7 +682,7 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 	if (NTV2DeviceHasSPIv4(_boardID))
     {
         uint32_t val;
-        ReadRegister((0x100000 + 0x08) / 4, &val);
+        ReadRegister((0x100000 + 0x08) / 4, val);
         if (val != 0x01)
         {
             // cannot read flash
@@ -710,7 +699,7 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 		do
 		{
 			ULWord regValue;
-			ReadRegister(kRegXenaxFlashControlStatus, &regValue);
+			ReadRegister(kRegXenaxFlashControlStatus, regValue);
 			if (regValue & BIT(8))
 			{
 				busy = true;
@@ -732,7 +721,7 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 		do
 		{
 			ULWord regValue;
-			ReadRegister(kRegXenaxFlashControlStatus, &regValue);
+			ReadRegister(kRegXenaxFlashControlStatus, regValue);
 			if ( regValue & BIT(8))
 			{
 				busy = true;
@@ -743,7 +732,7 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 		} while(busy == true && timeoutCount > 0);
 		if (timeoutCount == 0)
 			return false;
-		ReadRegister(kRegXenaxFlashDOUT, &bitFilePtr[count]);
+		ReadRegister(kRegXenaxFlashDOUT, bitFilePtr[count]);
 	}
 
 	CNTV2Bitfile fileInfo;
@@ -789,7 +778,7 @@ bool CNTV2DriverInterface::IsMBSystemValid()
 	if (IsKonaIPDevice())
 	{
         uint32_t val;
-        ReadRegister(SAREK_REGS + kRegSarekIfVersion, &val);
+        ReadRegister(SAREK_REGS + kRegSarekIfVersion, val);
         if (val == SAREK_IF_VERSION)
             return true;
         else
@@ -803,7 +792,7 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 	if (IsKonaIPDevice())
 	{
 		uint32_t val;
-		ReadRegister(SAREK_REGS + kRegSarekMBState, &val);
+		ReadRegister(SAREK_REGS + kRegSarekMBState, val);
 		if (val != 0x01)
 		{
 			//MB not ready
@@ -812,7 +801,7 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 		else
 		{
             // Not enough to read MB State, we need to make sure MB is running
-            ReadRegister(SAREK_REGS + kRegSarekMBUptime, &val);
+            ReadRegister(SAREK_REGS + kRegSarekMBUptime, val);
             if (val < 2)
                 return false;
             else
@@ -826,12 +815,12 @@ bool CNTV2DriverInterface::IsKonaIPDevice()
 {
 	ULWord val = 0;
 	ULWord hexID = 0x0;
-	ReadRegister (kRegBoardID, &hexID);
+	ReadRegister (kRegBoardID, hexID);
 	switch((NTV2DeviceID)hexID)
 	{
 	case DEVICE_ID_KONA4:
 	case DEVICE_ID_KONA4UFC:
-		ReadRegister((0x100000 + 0x80) / 4, &val);
+		ReadRegister((0x100000 + 0x80) / 4, val);
 		if (val != 0x00000000 && val != 0xffffffff)
 			return true;
 		else

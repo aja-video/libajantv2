@@ -96,7 +96,8 @@ protected:
 	/**
 		@brief		Initializes the payload buffer with all of the "static" pixels, e.g. run-in clock, pre- and post- black, etc.
 		@param[in]	inLineStartOffset	Pixel count from beginning of line (buffer) to the start of the waveform.
-		@param[out]	outDataStartOffset	Receives the pixel count from beginning of line (buffer) to the first data pixel (required by the \c EncodeLine function).
+		@param[out]	outDataStartOffset	Receives the pixel count from beginning of line (buffer) to the first data pixel
+										(required by the AJAAncillaryData_Cea608_Line21::EncodeLine function).
 		@return		AJA_STATUS_SUCCESS if successful, or AJA_STATUS_FAIL if payload not allocated or wrong size.
 	**/
 	virtual AJAStatus	InitEncodeBuffer (const uint32_t inLineStartOffset, uint32_t & outDataStartOffset);

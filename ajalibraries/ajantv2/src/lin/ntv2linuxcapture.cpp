@@ -174,7 +174,7 @@ bool CNTV2Capture::StartPreview()
 
 	if ( _preview != true )
 	{
-		if( NTV2BoardNeedsRoutingSetup(GetBoardID()) )
+		if( ::NTV2DeviceNeedsRoutingSetup(GetBoardID()) )
 		{
 			SetupRouting();
 		}
@@ -242,7 +242,7 @@ bool CNTV2Capture::StopPreview()
 
 	if ( _preview == true )
 	{
-		if( NTV2BoardNeedsRoutingSetup(GetBoardID()) )
+		if( ::NTV2DeviceNeedsRoutingSetup(GetBoardID()) )
 		{
 			ClearRouting();
 		}
@@ -471,7 +471,7 @@ bool CNTV2Capture::CopyFrameToYCbCrFile(NTV2Channel channel,
 	ULWord oldPCIAccessFrame;
 	GetPCIAccessFrame(channel,&oldPCIAccessFrame);
 	SetPCIAccessFrame(channel,frameNumber);
-	if( NTV2BoardCanDoPIO(GetBoardID()) )
+	if( NTV2DeviceCanDoPIO(GetDeviceID()) )
 	{
 		MapFrameBuffers();
 		GetBaseAddress(channel, &frameBuffer);
@@ -546,7 +546,7 @@ bool CNTV2Capture::CopyFrameToYCbCrFile(NTV2Channel channel,
 
 	}
 
-	if( NTV2BoardCanDoPIO(GetBoardID()) )
+	if( NTV2DeviceCanDoPIO(GetDeviceID()) )
 	{
 		UnmapFrameBuffers();
 	}
@@ -595,7 +595,7 @@ void CNTV2Capture::CopyFrameToQImage(NTV2Channel channel,ULWord frameNumber,bool
 
 	GetPCIAccessFrame(channel,&oldPCIAccessFrame);
 	SetPCIAccessFrame(channel,frameNumber);
-	if( NTV2BoardCanDoPIO(GetBoardID()) )
+	if( NTV2DeviceCanDoPIO(GetDeviceID()) )
 	{
 		MapFrameBuffers();
 		GetBaseAddress(channel, &frameBufferBase);
@@ -679,7 +679,7 @@ void CNTV2Capture::CopyFrameToQImage(NTV2Channel channel,ULWord frameNumber,bool
 
 	SetPCIAccessFrame(channel,oldPCIAccessFrame);
 
-	if( NTV2BoardCanDoPIO(GetBoardID()) )
+	if( NTV2DeviceCanDoPIO(GetDeviceID()) )
 	{
 		UnmapFrameBuffers();
 	}
@@ -763,7 +763,7 @@ void CNTV2Capture::SetupRouting()
 		xena2Router.addWithValue(SDIOut1InputSelectEntry, input);
 
 		// Check for bi-directional sdi
-		if(NTV2BoardHasBiDirectionalSDI(GetBoardID()))
+		if(NTV2DeviceHasBiDirectionalSDI(GetBoardID()))
 			SetSDITransmitEnable(NTV2_CHANNEL1, false);
 		
 		break;
@@ -782,7 +782,7 @@ void CNTV2Capture::SetupRouting()
 		xena2Router.addWithValue(SDIOut2InputSelectEntry, input);
 
 		// Check for bi-directional sdi
-		if(NTV2BoardHasBiDirectionalSDI(GetBoardID()))
+		if(NTV2DeviceHasBiDirectionalSDI(GetBoardID()))
 			SetSDITransmitEnable(NTV2_CHANNEL2, false);
 		break;
 	}

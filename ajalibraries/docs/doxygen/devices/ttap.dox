@@ -6,6 +6,7 @@
 	@subsection		ttap		T-Tap
 
 	This page describes the T-Tapvideo playout device.
+	It’s identified by ::DEVICE_ID_TTAP.
 
 	@image	html	ttap.png
 
@@ -36,7 +37,7 @@
 	-	RGB is not supported.
 
 	@par		Ancillary Data
-	-	VANC geometries only
+	-	\ref vancframegeometries only
 
 	@par		Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/144/25>

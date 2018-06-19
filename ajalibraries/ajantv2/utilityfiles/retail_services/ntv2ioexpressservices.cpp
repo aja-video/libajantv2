@@ -197,7 +197,7 @@ void IoExpressServices::SetDeviceXPointCapture()
 	
 	// if user select LTC port as input - loop it back during capture
 	uint32_t enabled = false;
-	mCard->ReadRegister(kRegFS1ReferenceSelect, &enabled, kFS1RefMaskLTCOnRefInSelect, kRegShiftLTCOnRefInSelect);
+	mCard->ReadRegister(kRegFS1ReferenceSelect, enabled, kFS1RefMaskLTCOnRefInSelect, kRegShiftLTCOnRefInSelect);
 	mCard->WriteRegister (kRegFS1ReferenceSelect, enabled, kRegMaskLTCLoopback, kRegShiftLTCLoopback);
 	
 	// Figure out what our input format is based on what is selected
@@ -426,7 +426,7 @@ void IoExpressServices::SetDeviceMiscRegisters ()
 			case kHDMIOutProtocolAutoDetect:
 				{
 					ULWord detectedProtocol;
-					mCard->ReadRegister (kRegHDMIInputStatus, &detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
+					mCard->ReadRegister (kRegHDMIInputStatus, detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
 					mCard->WriteRegister (kRegHDMIOutControl, detectedProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);				
 				}
 				break;

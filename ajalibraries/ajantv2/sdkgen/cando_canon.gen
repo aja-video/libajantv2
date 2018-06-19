@@ -93,7 +93,6 @@ NTV2DeviceHasGenlockv2
 NTV2DeviceHasColorSpaceConverterOnChannel2
 NTV2DeviceSoftwareCanChangeFrameBufferSize	
 NTV2DeviceCanDoFrameStore1Display	
-NTV2DeviceCanDoFreezeOutput			
 NTV2DeviceCanDoQREZ
 NTV2DeviceCanDoIsoConvert
 NTV2DeviceCanChangeEmbeddedAudioClock		

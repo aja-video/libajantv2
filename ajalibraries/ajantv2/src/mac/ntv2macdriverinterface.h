@@ -52,10 +52,14 @@ public:
 						CNTV2MacDriverInterface( void );
 	virtual 			~CNTV2MacDriverInterface( void );
 
-	virtual bool		Open (UWord inDeviceIndex = 0,
-							  bool displayError = false,
-							  NTV2DeviceType eDeviceType = DEVICETYPE_UNKNOWN,
-							  const char * hostName = NULL);   // Non-null: card on remote host
+#if !defined(NTV2_DEPRECATE_14_3)
+	virtual bool		Open (UWord inDeviceIndex,
+							  bool displayError,
+							  NTV2DeviceType eDeviceType,
+							  const char * hostName);
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
+	virtual bool		Open (const UWord inDeviceIndex = 0,
+							  const std::string & inHostName = std::string());
 	bool				TestOpen();
 	virtual bool		Close (void);
 	virtual ULWord		GetPCISlotNumber (void) const;
@@ -68,10 +72,16 @@ public:
 	bool				MapMemory( MemoryType memType, void **memPtr );
 
 	// Driver calls
-	virtual bool		ReadRegister( ULWord registerNumber,
-									  ULWord *registerValue,
-									  ULWord registerMask = 0xFFFFFFFF,
-									  ULWord registerShift = 0x0 );
+	virtual bool		ReadRegister (const ULWord inRegisterNumber,
+									  ULWord & outValue,
+									  const ULWord inRegisterMask = 0xFFFFFFFF,
+									  const ULWord inRegisterShift = 0x0);
+#if !defined(NTV2_DEPRECATE_14_3)
+	virtual inline NTV2_DEPRECATED_f(bool	ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0x0))
+	{
+		return pOutValue ? ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift) : false;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 	virtual bool		WriteRegister( ULWord registerNumber,
 									   ULWord registerValue,
 									   ULWord registerMask = 0xFFFFFFFF,

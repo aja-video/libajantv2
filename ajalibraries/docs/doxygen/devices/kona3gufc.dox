@@ -7,6 +7,7 @@
 
 	This page describes the KONA 3G capture/playout board in its 2-channel mode of operation.
 	It can be "flashed" with different firmware to become a 4-channel device (see \ref kona3gquad).
+	It’s identified by ::DEVICE_ID_KONA3G.
 
 	@image	html	kona3g.png
 
@@ -53,7 +54,7 @@
 
 	@par		Ancillary Data
 
-	-	VANC geometries only
+	-	\ref vancframegeometries only
 
 	@par		Video Processing
 

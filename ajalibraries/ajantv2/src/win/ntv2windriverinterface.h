@@ -48,10 +48,13 @@ public:
 	// Call this method to set the Open overlapped mode
 	bool SetOverlappedMode (bool bOverlapped);
 
-	bool Open(UWord boardNumber=0, bool displayError = false,
-        NTV2DeviceType eBoardType = DEVICETYPE_UNKNOWN,
-		const char *hostname = 0   // Non-null: card on remote host
-		);
+	bool Open (const UWord inDeviceIndex = 0,
+			  const std::string & inHostName = std::string());
+#if !defined(NTV2_DEPRECATE_14_3)
+	bool Open(UWord boardNumber, bool displayError,
+        NTV2DeviceType eBoardType,
+		const char *hostname);   // Non-null: card on remote host
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 	bool Close();
 
@@ -61,10 +64,16 @@ public:
 							   ULWord registerValue,
 							   ULWord registerMask = 0xFFFFFFFF,
 							   ULWord registerShift = 0x0);
-	bool ReadRegister(ULWord registerNumber,
-							  ULWord *registerValue,
-							  ULWord registerMask = 0xFFFFFFFF,
-							  ULWord registerShift = 0x0);
+	virtual bool		ReadRegister (const ULWord inRegisterNumber,
+									  ULWord & outValue,
+									  const ULWord inRegisterMask = 0xFFFFFFFF,
+									  const ULWord inRegisterShift = 0x0);
+#if !defined(NTV2_DEPRECATE_14_3)
+	virtual inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0))
+	{
+		return pOutValue ? ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift) : false;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
     bool DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
                         const bool			inIsRead,

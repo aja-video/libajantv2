@@ -8,6 +8,7 @@
 	This page describes the Io4K capture/playout device with Quad-Mode firmware,
 	which supports 4K ingest or playout through a Thunderbolt II port.
 	It can be "flashed" with different firmware to become a 2-channel device (see \ref io4kufc).
+	It’s identified by ::DEVICE_ID_IO4K.
 
 	@image	html	io4kfront.png
 	@image	html	io4krear.png
@@ -55,8 +56,8 @@
 
 	@par	Ancillary Data
 
-	-	Anc inserters and extractors (use \c AUTOCIRCULATE_TRANSFER)
-	-	VANC geometries
+	-	Anc inserters and extractors (use ::AUTOCIRCULATE_TRANSFER)
+	-	\ref vancframegeometries
 
 	@par	Physical
 

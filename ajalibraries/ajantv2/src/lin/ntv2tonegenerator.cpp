@@ -34,7 +34,7 @@ void CNTV2ToneGenerator::InitThread()
 void CNTV2ToneGenerator::Loop()
 {
 	fprintf(stderr, "%s called id(%d)\n", __FUNCTION__, _isDying);
-	_ntv2Card.Open( _boardNumber,false,_boardType );
+	_ntv2Card.Open(_boardNumber);
 
 	if ( _ntv2Card.IsOpen() )
 	{
@@ -51,14 +51,14 @@ void CNTV2ToneGenerator::Loop()
 		}
 		#else	//	defined (NTV2_DEPRECATE)
 		_ntv2Card.SetAudioBufferSize(NTV2_AUDIO_BUFFER_BIG);
-		_ntv2Card.SetNumberAudioChannels(NTV2BoardGetMaxAudioChannels (_ntv2Card.GetDeviceID()), NTV2_AUDIOSYSTEM_1);
+		_ntv2Card.SetNumberAudioChannels(NTV2DeviceGetMaxAudioChannels(_ntv2Card.GetDeviceID()), NTV2_AUDIOSYSTEM_1);
 		#endif	//	defined (NTV2_DEPRECATE)
 
 		// reset audio and load up some tone and then let her go.
 		_ntv2Card.SubscribeOutputVerticalEvent(NTV2_CHANNEL1);
 		_ntv2Card.ResetAudioOutput();
 		NTV2FrameRate frameRate;
-		_ntv2Card.GetFrameRate(&frameRate);
+		_ntv2Card.GetFrameRate(frameRate);
 		ULWord numChannels;
 		_ntv2Card.GetNumberAudioChannels(numChannels);
 

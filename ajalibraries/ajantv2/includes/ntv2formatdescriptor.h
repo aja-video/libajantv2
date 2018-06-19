@@ -47,12 +47,12 @@ public:
 														const NTV2FrameBufferFormat inFrameBufferFormat,
 														const bool inVANCenabled,
 														const bool in2Kby1080 = false,
-														const bool inWideVANC = false));	///< @deprecated	Use the constructor that accepts an \c NTV2VANCMode parameter instead.
+														const bool inWideVANC = false));	///< @deprecated	Use the constructor that accepts an ::NTV2VANCMode parameter instead.
 
 	explicit	NTV2_DEPRECATED_f(NTV2FormatDescriptor (const NTV2VideoFormat inVideoFormat,
 														const NTV2FrameBufferFormat inFrameBufferFormat,
 														const bool inVANCenabled,
-														const bool inWideVANC = false));	///< @deprecated	Use the constructor that accepts an \c NTV2VANCMode parameter instead.
+														const bool inWideVANC = false));	///< @deprecated	Use the constructor that accepts an ::NTV2VANCMode parameter instead.
 #endif	//	!defined (NTV2_DEPRECATE_13_0)
 
 	/**

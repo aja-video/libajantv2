@@ -6,6 +6,7 @@
 	@subsection		konalhi		KONA LHi
 
 	This page describes the KONA LHi video capture/playout board.
+	It’s identified by ::DEVICE_ID_KONALHI.
 
 	@image	html	konalhi.png
 
@@ -52,7 +53,7 @@
 	-	Up/Down/Cross Converter
 
 	@par		Ancillary Data
-	-	VANC geometries only
+	-	\ref vancframegeometries only
 
 	@par		External Connectivity
 	-	Optional \ref aja101884 provides access to other inputs and outputs

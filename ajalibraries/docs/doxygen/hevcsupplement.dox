@@ -151,7 +151,7 @@ Build and run the <b>ntv2encodehevc</b> application.  The output should look sim
 \endcode
 
 While the <b>ntv2encodehevc</b> application is running, you can monitor the encoding operation using the HEVC monitor application
-<b>qthevcmon.exe</b> in the \c DiagnosticsAndTools directory.
+<b>qthevcmon.exe</b> in the \c bin directory.
 
 Type ctrl-c to terminate the application.
 

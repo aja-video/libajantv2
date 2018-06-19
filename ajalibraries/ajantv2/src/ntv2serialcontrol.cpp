@@ -43,7 +43,7 @@ CNTV2SerialControl::CNTV2SerialControl (const UWord inDeviceIndexNumber, const U
 
 			//	Verify that the device can do RS422...
 			ULWord  value	(0);
-			_ntv2Card.ReadRegister (_controlRegisterNum, &value);
+			_ntv2Card.ReadRegister (_controlRegisterNum, value);
 			assert (value & kRegMaskRS422Present && "UART must be present!");
 
 			//	Flush the FIFO's and enable TX and RX...
@@ -279,7 +279,7 @@ bool CNTV2SerialControl::WriteCommand (const UByte * txBuffer, bool response)
 			_ntv2Card.WaitForInterrupt (eUartTx, commandLength + 1);
 
 			//	Make sure the TX FIFO is empty...
-			_ntv2Card.ReadRegister (_controlRegisterNum, &val);
+			_ntv2Card.ReadRegister (_controlRegisterNum, val);
 			if ((val & BIT_1) != 0)
 				break;
 		}
@@ -292,7 +292,7 @@ bool CNTV2SerialControl::WriteCommand (const UByte * txBuffer, bool response)
 		{
 			WaitForRxInterrupt ();
 			//	Make sure that there is data in the RX FIFO...
-			_ntv2Card.ReadRegister (_controlRegisterNum, &val);
+			_ntv2Card.ReadRegister (_controlRegisterNum, val);
 			if (val & BIT_4)
 			{
 				//	Wait for all the data...
@@ -308,11 +308,11 @@ bool CNTV2SerialControl::WriteCommand (const UByte * txBuffer, bool response)
 		//	Read the response (and everything else) from the FIFO...
 		for (i = 0; i < 1000; i++)
 		{
-			_ntv2Card.ReadRegister (_controlRegisterNum, &val);
+			_ntv2Card.ReadRegister (_controlRegisterNum, val);
 			if ((val & BIT_4) == 0)
 				break;
 
-			_ntv2Card.ReadRegister (_receiveRegisterNum, &data);
+			_ntv2Card.ReadRegister (_receiveRegisterNum, data);
 			if (_serialMachineResponse.length < NTV2_SERIAL_RESPONSE_SIZE)
 				_serialMachineResponse.buffer [_serialMachineResponse.length++] = data & 0xFF;
 		}
@@ -370,14 +370,14 @@ bool CNTV2SerialControl::ReadRxBuffer (UByte * rxBuffer, UWord & actualLength, U
 	{	
 		ULWord val;
 		ULWord numRead = 0;
-		_ntv2Card.ReadRegister (_controlRegisterNum, &val);
+		_ntv2Card.ReadRegister (_controlRegisterNum, val);
 
 		while (val & BIT_4 && numRead < maxLength)
 		{
 			ULWord data;
-			_ntv2Card.ReadRegister (_receiveRegisterNum, &data);
+			_ntv2Card.ReadRegister (_receiveRegisterNum, data);
 			rxBuffer [numRead++] = data & 0xFF;
-			_ntv2Card.ReadRegister (_controlRegisterNum, &val);
+			_ntv2Card.ReadRegister (_controlRegisterNum, val);
 		}
 		actualLength = numRead;
 	}

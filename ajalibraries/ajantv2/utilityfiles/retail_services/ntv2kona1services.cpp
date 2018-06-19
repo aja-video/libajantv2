@@ -23,8 +23,8 @@ void Kona1Services::SetDeviceXPointPlayback ()
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback();
 
-	bool						bFb1RGB				= IsFormatRGB(mFb1Format);
-	bool						bFb2RGB				= IsFormatRGB(mFb2Format);
+	bool						bFb1RGB				= IsRGBFormat(mFb1Format);
+	bool						bFb2RGB				= IsRGBFormat(mFb2Format);
 	
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
@@ -410,7 +410,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 	DeviceServices::SetDeviceXPointCapture();
 
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
-	bool 						bFb1RGB 			= IsFormatRGB(mFb1Format);
+	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	//bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	//bool						b4kHfr              = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
@@ -428,7 +428,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 
 	// get selected input video format
 	NTV2VideoFormat	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
-	//bool levelBInput = NTV2_IS_3Gb_FORMAT(inputFormat);
+	//bool inHfrB = IsVideoFormatB(inputFormat);
 
 	inputXptYUV1 = NTV2_XptSDIIn1;
 	inputXptYUV2 = NTV2_XptSDIIn1DS2;
@@ -438,6 +438,24 @@ void Kona1Services::SetDeviceXPointCapture ()
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b3GbInEnabled && inputFormatSelect != NTV2_RGBSelect));
 
+    if(mCard->GetVPIDValidA(NTV2_CHANNEL1))
+    {
+        ULWord vpida = 0, vpidb	= 0;
+        mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
+        //debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
+
+        CNTV2VPID parser;
+        parser.SetVPID(vpida);
+        VPIDSampling sample = parser.GetSampling();
+        if (sample == VPIDSampling_YUV_422)
+        {
+            inputFormatSelect = NTV2_YUVSelect;
+        }
+        else
+        {
+            inputFormatSelect = NTV2_RGBSelect;
+        }
+    }
 
 	// Dual Link In 1
 	if (inputFormatSelect == NTV2_RGBSelect)

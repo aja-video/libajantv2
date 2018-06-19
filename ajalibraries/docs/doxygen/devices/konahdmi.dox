@@ -6,6 +6,7 @@
 	@subsection		konahdmi		KONA HDMI
 
 	This page describes the KONA HDMI capture board.
+	It’s identified by ::DEVICE_ID_KONAHDMI.
 
 	@image	html	konahdmi.png
 
