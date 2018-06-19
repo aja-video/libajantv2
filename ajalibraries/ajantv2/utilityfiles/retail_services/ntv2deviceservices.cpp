@@ -3081,6 +3081,10 @@ void DeviceServices::SetDeviceXPointCapture()
     else if ((mDeviceID == DEVICE_ID_KONAIP_2110) ||
              (mDeviceID == DEVICE_ID_IOIP_2110))
     {
+        uint32_t audioInputSelect;
+        mCard->ReadRegister(kVRegAudioInputSelect, audioInputSelect);
+        SetAudioInputSelect((NTV2InputAudioSelect)audioInputSelect);
+
         mCard->SetReference(NTV2_REFERENCE_SFP1_PTP);
     }
 	// For J2K devices we don't set the audio input select reg, audio input
