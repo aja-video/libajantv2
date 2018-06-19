@@ -258,12 +258,13 @@ public:
         {
             if (mDb.IsDBOpen())
             {
-                mCreateTableStmt.Prepare(mDb, "CREATE TABLE IF NOT EXISTS persistence(id INTEGER, name CHAR(255), value CHAR(64), dev_name CHAR(64), dev_num CHAR(64), PRIMARY KEY(id))");
-                mBlobCreateTableStmt.Prepare(mDb, "CREATE TABLE IF NOT EXISTS persistenceBlobs(id INTEGER, name CHAR(255), value BLOB, dev_name CHAR(64), dev_num CHAR(64), PRIMARY KEY(id))");
+                // generic table statements
+                mCreateTablesStmt.Prepare(mDb, "CREATE TABLE IF NOT EXISTS persistence(id INTEGER, name CHAR(255), value CHAR(64), dev_name CHAR(64), dev_num CHAR(64), PRIMARY KEY(id));"
+                                               "CREATE TABLE IF NOT EXISTS persistenceBlobs(id INTEGER, name CHAR(255), value BLOB, dev_name CHAR(64), dev_num CHAR(64), PRIMARY KEY(id));");
+                mClearTablesStmt.Prepare(mDb, "DELETE FROM persistence;DELETE FROM persistenceBlobs;");
 
                 // The tables must exist before the other prepared statements can be made
-                mTableCreateErrorCode = mCreateTableStmt.Step();
-                mBlobTableCreateErrorCode = mBlobCreateTableStmt.Step();
+                mTableCreatesErrorCode = mCreateTablesStmt.Step();
 
                 // normal table statements
                 mGetValueSpecificStmt.Prepare(mDb, "SELECT value FROM persistence WHERE name=?1 AND dev_name=?2 AND dev_num=?3");
@@ -290,6 +291,15 @@ public:
 
         virtual ~AJAPersistenceDBImpl()
         {
+        }
+
+        int ClearTables()
+        {
+            mClearTablesStmt.Reset();
+
+            int rc = 0;
+            rc = mClearTablesStmt.Step();
+            return rc;
         }
 
         bool ConvertStringToValueType(const std::string& inputString, AJAPersistenceType type, void *outputValue)
@@ -553,17 +563,18 @@ public:
 
 private:
       AJAPersistenceDBImplObject    mDb;
-      int                           mTableCreateErrorCode;
-      int                           mBlobTableCreateErrorCode;
+      int                           mTableCreatesErrorCode;
+
+      // generic statements
+      AJAPersistenceDBImplStatement mCreateTablesStmt;
+      AJAPersistenceDBImplStatement mClearTablesStmt;
 
       // normal statements
-      AJAPersistenceDBImplStatement mCreateTableStmt;
       AJAPersistenceDBImplStatement mGetValueSpecificStmt;
       AJAPersistenceDBImplStatement mGetValueLessSpecificStmt;
       AJAPersistenceDBImplStatement mUpdateSetStmt;
 
       // blob statements
-      AJAPersistenceDBImplStatement mBlobCreateTableStmt;
       AJAPersistenceDBImplStatement mBlobGetValueSpecificStmt;
       AJAPersistenceDBImplStatement mBlobGetValueLessSpecificStmt;
       AJAPersistenceDBImplStatement mBlobUpdateSetStmt;
@@ -1467,6 +1478,26 @@ bool AJAPersistence::GetValuesDouble(const std::string& keyQuery, std::vector<st
 bool AJAPersistence::FileExists()
 {
     return AJAFileIO::FileExists(mstateKeyName.c_str());
+}
+
+bool AJAPersistence::ClearPrefFile()
+{
+    bool bSuccess = true;
+    if (FileExists())
+    {
+#if defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
+        if (mDBImpl)
+        {
+            int rc = mDBImpl->ClearTables();
+            bSuccess = (rc == 0);
+        }
+        else
+        {
+            bSuccess = false;
+        }
+#endif
+    }
+    return bSuccess;
 }
 
 // delete pref file
