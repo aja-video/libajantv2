@@ -91,8 +91,12 @@ void KonaIP22Services::SetDeviceXPointPlayback ()
     bool						bFb2HdrRGB			= (mFb2Format == NTV2_FBF_48BIT_RGB) ? true : false;
 
     // Turn off RX IP channels on playback, don't need to wait for DeviceReady becuase these are virtuals
-    mCard->WriteRegister(kVRegRxcEnable1, false);
-    mCard->WriteRegister(kVRegRxcEnable2, false);
+    //mCard->WriteRegister(kVRegRxcEnable1, false);
+    //mCard->WriteRegister(kVRegRxcEnable2, false);
+
+    // Decided it's best to leave RX channel on
+    mCard->WriteRegister(kVRegRxcEnable1, true);
+    mCard->WriteRegister(kVRegRxcEnable2, true);
 
 	// make sure formats/modes match for multibuffer modes
 	if (b4K || b2FbLevelBHfr || bStereoOut)
@@ -2575,7 +2579,9 @@ void KonaIP22Services::SetDeviceMiscRegisters()
                     else if (enableChServices)
                     {
                         if (NotEqual(rxHwConfig, mRx2022Config1, m2022_7Mode) ||
-                            enable2022_7Card != m2022_7Mode)
+                            enable2022_7Card != m2022_7Mode ||
+                            mFb1ModeLast != mFb1Mode ||
+                            mFb1VideoFormatLast != mFb1VideoFormat)
                         {
                             config->SetRxChannelEnable(NTV2_CHANNEL1, false);
                             SetRxConfig(config, NTV2_CHANNEL1, m2022_7Mode);
@@ -2620,7 +2626,9 @@ void KonaIP22Services::SetDeviceMiscRegisters()
                     else if (enableChServices)
                     {
                         if (NotEqual(rxHwConfig, mRx2022Config2, m2022_7Mode) ||
-                            enable2022_7Card != m2022_7Mode)
+                            enable2022_7Card != m2022_7Mode ||
+                            mFb1ModeLast != mFb1Mode ||
+                            mFb1VideoFormatLast != mFb1VideoFormat)
                         {
                             config->SetRxChannelEnable(NTV2_CHANNEL2, false);
                             SetRxConfig(config, NTV2_CHANNEL2, m2022_7Mode);
