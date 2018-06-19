@@ -109,18 +109,20 @@ private:
 };
 
 // Encapsulate the sqlite3_stmt object so automatically handled by constructor/destructor
+const int gDefaultNumSqliteRetries = 10;
+
 class AJAPersistenceDBImplStatement
 {
 public:
         AJAPersistenceDBImplStatement()
         : mStmt(NULL), mStmtString(""), mPrepareErrorCode(SQLITE_ERROR),
-          mNumRetries(5), mMicrosecondsBetweenRetries(1500)
+          mNumRetries(gDefaultNumSqliteRetries), mMicrosecondsBetweenRetries(1500)
         {
         }
 
         AJAPersistenceDBImplStatement(AJAPersistenceDBImplObject &db, const std::string &stmt)
         : mStmt(NULL), mStmtString(""), mPrepareErrorCode(SQLITE_ERROR),
-          mNumRetries(5), mMicrosecondsBetweenRetries(1500)
+          mNumRetries(gDefaultNumSqliteRetries), mMicrosecondsBetweenRetries(1500)
         {
             Prepare(db, stmt);
         }
@@ -181,7 +183,33 @@ public:
 
         int Step()
         {
-            int rc = sqlite3_step(mStmt);
+            int rc = SQLITE_OK;
+
+            for(int i=0;i<mNumRetries;i++)
+            {
+                rc = sqlite3_step(mStmt);
+                if (rc != SQLITE_OK && rc != SQLITE_ROW && rc != SQLITE_DONE)
+                {
+                    std::ostringstream	oss;
+                    oss << "sqlite> attempt: " << i+1 << " of " << mNumRetries << ", error code: " << rc <<
+                           " with message: \"" << sqlite3_errstr(rc) << "\" when stepping statement: " << sqlite3_expanded_sql(mStmt);
+
+                    if (i == (mNumRetries)-1)
+                    {
+                        AJA_LOG_ERROR(oss.str());
+                    }
+                    else
+                    {
+                        AJA_LOG_WARN(oss.str());
+                        AJATime::SleepInMicroseconds(mMicrosecondsBetweenRetries);
+                    }
+                }
+                else
+                {
+                    //AJA_LOG_WRITE("sqlite> successfully stepped statement: " << sqlite3_expanded_sql(mStmt));
+                    break;
+                }
+            }
             return rc;
         }
 
@@ -240,19 +268,19 @@ public:
                 // normal table statements
                 mGetValueSpecificStmt.Prepare(mDb, "SELECT value FROM persistence WHERE name=?1 AND dev_name=?2 AND dev_num=?3");
                 mGetValueLessSpecificStmt.Prepare(mDb, "SELECT value FROM persistence WHERE name=?1 AND dev_name=?2");
-                mUpdateValueStmt.Prepare(mDb, "UPDATE persistence SET value=?1 WHERE name=?2 AND dev_name=?3 AND dev_num=?4");
-                mSetValueStmt.Prepare(mDb, "INSERT INTO persistence (name,value,dev_name,dev_num) values(?1,?2,?3,?4)");
+                mUpdateSetStmt.Prepare(mDb, "INSERT OR REPLACE INTO persistence (id, name, value, dev_name, dev_num) SELECT id, ?1, ?2, ?3, ?4 "
+                                            "FROM ( SELECT NULL ) LEFT JOIN ( SELECT * FROM persistence WHERE name=?5 AND dev_name=?6 AND dev_num=?7)");
+
 
                 // blob table statements
                 mBlobGetValueSpecificStmt.Prepare(mDb, "SELECT value FROM persistenceBlobs WHERE name=?1 AND dev_name=?2 AND dev_num=?3");
                 mBlobGetValueLessSpecificStmt.Prepare(mDb, "SELECT value FROM persistenceBlobs WHERE name=?1 AND dev_name=?2");
-                mBlobUpdateValueStmt.Prepare(mDb, "UPDATE persistenceBlobs SET value=?1 WHERE name=?2 AND dev_name=?3 AND dev_num=?4");
-                mBlobSetValueStmt.Prepare(mDb, "INSERT INTO persistenceBlobs (name,value,dev_name,dev_num) values(?1,?2,?3,?4)");
+                mBlobUpdateSetStmt.Prepare(mDb, "INSERT OR REPLACE INTO persistenceBlobs (id, name, value, dev_name, dev_num) SELECT id, ?1, ?2, ?3, ?4 "
+                                                "FROM ( SELECT NULL ) LEFT JOIN ( SELECT * FROM persistenceBlobs WHERE name=?5 AND dev_name=?6 AND dev_num=?7)");
 
                 // multiple return statements
                 mGetAllValuesSpecificStmt.Prepare(mDb, "SELECT name, value FROM persistence WHERE name LIKE ?1 AND dev_name=?2 AND dev_num=?3");
                 mGetAllValuesLessSpecificStmt.Prepare(mDb, "SELECT name, value FROM persistence WHERE name LIKE ?1 AND dev_name=?2");
-                mGetAllValuesGenericStmt.Prepare(mDb, "SELECT name, value FROM persistence WHERE name LIKE ?1");
             }
             else
             {
@@ -421,79 +449,51 @@ public:
             bool isGood = false;
             if (mDb.IsDBOpen())
             {
-                AJAPersistenceDBImplStatement *getValueStmt;
-                AJAPersistenceDBImplStatement *updateStmt;
-                AJAPersistenceDBImplStatement *setStmt;
+                AJAPersistenceDBImplStatement *updateSetStmt;
 
                 std::string strValue;
                 bool goodToSet = false;
                 if (type == AJAPersistenceTypeBlob)
                 {
-                    getValueStmt = &mBlobGetValueSpecificStmt;
-                    updateStmt   = &mBlobUpdateValueStmt;
-                    setStmt      = &mBlobSetValueStmt;
-                    goodToSet    = true;
+                    updateSetStmt = &mBlobUpdateSetStmt;
+                    goodToSet     = true;
                 }
                 else
                 {
-                    getValueStmt = &mGetValueSpecificStmt;
-                    updateStmt   = &mUpdateValueStmt;
-                    setStmt      = &mSetValueStmt;
-                    goodToSet    = ConvertValueTypeToString(value, type, strValue);
+                    updateSetStmt = &mUpdateSetStmt;
+                    goodToSet     = ConvertValueTypeToString(value, type, strValue);
                 }
 
                 if (goodToSet)
                 {
-                    // Reset statements and bind parameters
-                    getValueStmt->Reset();
-                    updateStmt->Reset();
-                    setStmt->Reset();
-
-                    getValueStmt->BindText(1, keyQuery);
-                    getValueStmt->BindText(2, devName);
-                    getValueStmt->BindText(3, devNum);
+                    // Reset statement and bind parameters
+                    updateSetStmt->Reset();
 
                     if (type == AJAPersistenceTypeBlob)
                     {
-                        updateStmt->BindBlob(1, blobSizeInBytes, value);
-                        updateStmt->BindText(2, keyQuery);
-                        updateStmt->BindText(3, devName);
-                        updateStmt->BindText(4, devNum);
-
-                        setStmt->BindText(1, keyQuery);
-                        setStmt->BindBlob(2, blobSizeInBytes, value);
-                        setStmt->BindText(3, devName);
-                        setStmt->BindText(4, devNum);
+                        updateSetStmt->BindText(1, keyQuery);
+                        updateSetStmt->BindBlob(2, blobSizeInBytes, value);
+                        updateSetStmt->BindText(3, devName);
+                        updateSetStmt->BindText(4, devNum);
+                        updateSetStmt->BindText(5, keyQuery);
+                        updateSetStmt->BindText(6, devName);
+                        updateSetStmt->BindText(7, devNum);
                     }
                     else
                     {
-                        updateStmt->BindText(1, strValue);
-                        updateStmt->BindText(2, keyQuery);
-                        updateStmt->BindText(3, devName);
-                        updateStmt->BindText(4, devNum);
-
-                        setStmt->BindText(1, keyQuery);
-                        setStmt->BindText(2, strValue);
-                        setStmt->BindText(3, devName);
-                        setStmt->BindText(4, devNum);
+                        updateSetStmt->BindText(1, keyQuery);
+                        updateSetStmt->BindText(2, strValue);
+                        updateSetStmt->BindText(3, devName);
+                        updateSetStmt->BindText(4, devNum);
+                        updateSetStmt->BindText(5, keyQuery);
+                        updateSetStmt->BindText(6, devName);
+                        updateSetStmt->BindText(7, devNum);
                     }
 
-                    // see if already have a matching row that needs update
-                    if (getValueStmt->Step() == SQLITE_ROW)
+                    if (updateSetStmt->Step() == SQLITE_DONE)
                     {
-                        if (updateStmt->Step() == SQLITE_DONE)
-                        {
-                            // update was good
-                            isGood = true;
-                        }
-                    }
-                    else
-                    {
-                        // do an INSERT of new data
-                        if (setStmt->Step() == SQLITE_DONE)
-                        {
-                            isGood = true;
-                        }
+                        // update was good
+                        isGood = true;
                     }
                 }
             }
@@ -510,7 +510,6 @@ public:
                 // Reset statements and bind parameters
                 mGetAllValuesSpecificStmt.Reset();
                 mGetAllValuesLessSpecificStmt.Reset();
-                mGetAllValuesGenericStmt.Reset();
 
                 mGetAllValuesSpecificStmt.BindText(1, keyQuery);
                 mGetAllValuesSpecificStmt.BindText(2, devName);
@@ -518,8 +517,6 @@ public:
 
                 mGetAllValuesLessSpecificStmt.BindText(1, keyQuery);
                 mGetAllValuesLessSpecificStmt.BindText(2, devName);
-
-                mGetAllValuesGenericStmt.BindText(1, keyQuery);
 
                 int ret_code = mGetAllValuesSpecificStmt.Step();
                 while(ret_code == SQLITE_ROW)
@@ -546,20 +543,6 @@ public:
                     }
                 }
 
-                if (keys.empty())
-                {
-                    ret_code = mGetAllValuesGenericStmt.Step();
-                    while(ret_code == SQLITE_ROW)
-                    {
-                        std::string name = mGetAllValuesGenericStmt.ColumnText(0);
-                        std::string value = mGetAllValuesGenericStmt.ColumnText(1);
-                        keys.push_back(name);
-                        values.push_back(value);
-
-                        ret_code = mGetAllValuesGenericStmt.Step();
-                    }
-                }
-
                 if (keys.empty() == false)
                 {
                     isGood = true;
@@ -577,20 +560,17 @@ private:
       AJAPersistenceDBImplStatement mCreateTableStmt;
       AJAPersistenceDBImplStatement mGetValueSpecificStmt;
       AJAPersistenceDBImplStatement mGetValueLessSpecificStmt;
-      AJAPersistenceDBImplStatement mUpdateValueStmt;
-      AJAPersistenceDBImplStatement mSetValueStmt;
+      AJAPersistenceDBImplStatement mUpdateSetStmt;
 
       // blob statements
       AJAPersistenceDBImplStatement mBlobCreateTableStmt;
       AJAPersistenceDBImplStatement mBlobGetValueSpecificStmt;
       AJAPersistenceDBImplStatement mBlobGetValueLessSpecificStmt;
-      AJAPersistenceDBImplStatement mBlobUpdateValueStmt;
-      AJAPersistenceDBImplStatement mBlobSetValueStmt;
+      AJAPersistenceDBImplStatement mBlobUpdateSetStmt;
 
       // multiple return statements
       AJAPersistenceDBImplStatement mGetAllValuesSpecificStmt;
       AJAPersistenceDBImplStatement mGetAllValuesLessSpecificStmt;
-      AJAPersistenceDBImplStatement mGetAllValuesGenericStmt;
 };
 
 #if !defined(AJA_FEATURE_FLAG_USE_NEW_SQLITE_IMPL)
