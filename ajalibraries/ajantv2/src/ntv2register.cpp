@@ -7659,7 +7659,7 @@ bool CNTV2Card::ReadAnalogLTCInput (const UWord inLTCInput, NTV2_RP188 & outRP18
 	ULWord	regLo	(inLTCInput == 0 ? kRegLTCAnalogBits0_31 : (inLTCInput == 1 ? kRegLTC2AnalogBits0_31 : 0));
 	ULWord	regHi	(inLTCInput == 0 ? kRegLTCAnalogBits32_63 : (inLTCInput == 1 ? kRegLTC2AnalogBits32_63 : 0));
 	outRP188Data.fDBB = 0;
-	return regLo  &&  regHi  &&  CNTV2DriverInterface::ReadRegister(regLo, outRP188Data.fLo)  &&  CNTV2DriverInterface::ReadRegister(regHi, outRP188Data.fHi);
+    return regLo  &&  regHi  &&  ReadRegister(regLo, outRP188Data.fLo)  &&  ReadRegister(regHi, outRP188Data.fHi);
 }
 
 
