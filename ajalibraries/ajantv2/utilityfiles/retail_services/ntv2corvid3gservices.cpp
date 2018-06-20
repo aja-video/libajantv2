@@ -601,7 +601,7 @@ void Corvid3GServices::SetDeviceMiscRegisters ()
 	mCard->GetFrameGeometry(primaryGeometry);
 	
 	// VPID
-	//bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
+	//bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect);
 	
 	// special case - VANC 8bit pixel shift support
 	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format) )
@@ -611,7 +611,7 @@ void Corvid3GServices::SetDeviceMiscRegisters ()
 		
 	// Set VBlank RGB range bits - ALWAYS SMPTE
 	// Except when there is a full-range RGB frame buffer, and we go through the color space converter
-	if (mRGB10Range == NTV2_RGB10RangeFull && mVirtualDigitalOutput1Select != NTV2_DualLinkOutputSelect)
+	if (mRGB10Range == NTV2_RGB10RangeFull && mVirtualDigitalOutput1Select != NTV2_RgbOutputSelect)
 	{
 		mCard->WriteRegister(kRegCh1Control, NTV2_RGB10RangeFull, kRegMaskVBlankRGBRange, kRegShiftVBlankRGBRange);
 		mCard->WriteRegister(kRegCh2Control, NTV2_RGB10RangeFull, kRegMaskVBlankRGBRange, kRegShiftVBlankRGBRange);

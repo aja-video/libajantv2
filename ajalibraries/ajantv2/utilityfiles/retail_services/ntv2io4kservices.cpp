@@ -111,7 +111,7 @@ void Io4KServices::SetDeviceXPointPlayback ()
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
+	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect;
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b2pi                = (b4K && m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
 	bool						b2xQuadOut			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
@@ -1024,7 +1024,7 @@ void Io4KServices::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_DualLinkOutputSelect)			// RGB Out
+	else if (mVirtualDigitalOutput2Select == NTV2_RgbOutputSelect)			// RGB Out
 	{
 		mCard->Connect (NTV2_XptSDIOut4Input, b3GbOut ? NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut1DS2);
 		mCard->Connect (NTV2_XptSDIOut4InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
@@ -1499,7 +1499,7 @@ void Io4KServices::SetDeviceXPointCapture ()
 	NTV2VideoFormat				inputFormat			= NTV2_FORMAT_UNKNOWN;
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool						b3GbOut				= mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb;
-	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
+	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect;
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4k6gOut			= b4K && !b4kHfr && !bSdiOutRGB && 
@@ -2850,7 +2850,7 @@ void Io4KServices::SetDeviceXPointCapture ()
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_DualLinkOutputSelect)			// Same as RGB in this case
+	else if (mVirtualDigitalOutput2Select == NTV2_RgbOutputSelect)			// Same as RGB in this case
 	{
 		if (b3GbOut)
 		{
@@ -3083,7 +3083,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 	bool					b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	//bool					bHfr				= NTV2_IS_3G_FORMAT(mFb1VideoFormat);
-	bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
+	bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect);
 	NTV2FrameRate			primaryFrameRate	= GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	
 	// single wire 3Gb out
@@ -3498,7 +3498,7 @@ void Io4KServices::SetDeviceMiscRegisters ()
 	
 	// Set VBlank RGB range bits - ALWAYS SMPTE
 	// Except when there is a full-range RGB frame buffer, and we go through the color space converter
-	if (mRGB10Range == NTV2_RGB10RangeFull && mVirtualDigitalOutput1Select != NTV2_DualLinkOutputSelect)
+	if (mRGB10Range == NTV2_RGB10RangeFull && mVirtualDigitalOutput1Select != NTV2_RgbOutputSelect)
 	{
 		mCard->WriteRegister(kRegCh1Control, NTV2_RGB10RangeFull, kRegMaskVBlankRGBRange, kRegShiftVBlankRGBRange);
 		mCard->WriteRegister(kRegCh2Control, NTV2_RGB10RangeFull, kRegMaskVBlankRGBRange, kRegShiftVBlankRGBRange);

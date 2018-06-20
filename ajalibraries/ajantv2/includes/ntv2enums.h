@@ -1914,7 +1914,7 @@ typedef enum
 {
     NTV2_PrimaryOutputSelect,
     NTV2_SecondaryOutputSelect,
-    NTV2_DualLinkOutputSelect,
+    NTV2_RgbOutputSelect,
     NTV2_VideoPlusKeySelect,
     NTV2_StereoOutputSelect,
     NTV2_Quadrant1Select,
@@ -4139,7 +4139,7 @@ typedef enum
     //	NTV2OutputVideoSelect
     #define		NTV2K2_PrimaryOutputSelect			NTV2_PrimaryOutputSelect			///< @deprecated	Use NTV2_PrimaryOutputSelect instead.
     #define		NTV2K2_SecondaryOutputSelect		NTV2_SecondaryOutputSelect			///< @deprecated	Use NTV2_SecondaryOutputSelect instead.
-    #define		NTV2K2_DualLinkOutputSelect			NTV2_DualLinkOutputSelect			///< @deprecated	Use NTV2_DualLinkOutputSelect instead.
+    #define		NTV2K2_DualLinkOutputSelect			NTV2_RgbOutputSelect			///< @deprecated	Use NTV2_RgbOutputSelect instead.
     #define		NTV2K2_VideoPlusKeySelect			NTV2_VideoPlusKeySelect				///< @deprecated	Use NTV2_VideoPlusKeySelect instead.
     #define		NTV2K2_StereoOutputSelect			NTV2_StereoOutputSelect				///< @deprecated	Use NTV2_StereoOutputSelect instead.
     #define		NTV2K2_Quadrant1Select				NTV2_Quadrant1Select				///< @deprecated	Use NTV2_Quadrant1Select instead.

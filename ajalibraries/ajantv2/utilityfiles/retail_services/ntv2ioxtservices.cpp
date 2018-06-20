@@ -206,7 +206,7 @@ void IoXTServices::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptFrameBuffer1RGB);
 	
 		// if RGB-to-RGB apply LUT converter
-		if (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)
+		if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)
 		{
 			mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL1,
 											mRGB10Range == NTV2_RGB10RangeFull ? 
@@ -285,7 +285,7 @@ void IoXTServices::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptConversionModule);
 		bEanbleConverter = true;
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)			// RGB Out
+	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)			// RGB Out
 	{		
 		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);
 		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
@@ -336,7 +336,7 @@ void IoXTServices::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptConversionModule);
 		bEanbleConverter = true;
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_DualLinkOutputSelect)			// RGB Out
+	else if (mVirtualDigitalOutput2Select == NTV2_RgbOutputSelect)			// RGB Out
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, b3GbOut ? NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut1DS2);
 		mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
@@ -937,7 +937,7 @@ void IoXTServices::SetDeviceXPointCapture ()
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)				// Same as RGB in this case
+	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)				// Same as RGB in this case
 	{		
 		if (b3GbOut)
 		{
@@ -954,7 +954,7 @@ void IoXTServices::SetDeviceXPointCapture ()
 			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 		    && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
-		if (inputFormatSelect == NTV2_RGBSelect && mVirtualDigitalOutput1Select != NTV2_DualLinkOutputSelect)
+		if (inputFormatSelect == NTV2_RGBSelect && mVirtualDigitalOutput1Select != NTV2_RgbOutputSelect)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
 		}
@@ -986,7 +986,7 @@ void IoXTServices::SetDeviceXPointCapture ()
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_DualLinkOutputSelect)				// Same as RGB in this case
+	else if (mVirtualDigitalOutput2Select == NTV2_RgbOutputSelect)				// Same as RGB in this case
 	{
 		if (b3GbOut)
 		{
@@ -1003,7 +1003,7 @@ void IoXTServices::SetDeviceXPointCapture ()
 			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
-		if (inputFormatSelect == NTV2_RGBSelect && mVirtualDigitalOutput1Select != NTV2_DualLinkOutputSelect)
+		if (inputFormatSelect == NTV2_RGBSelect && mVirtualDigitalOutput1Select != NTV2_RgbOutputSelect)
 		{
 			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptCSC1VidYUV);
 		}
@@ -1082,7 +1082,7 @@ void IoXTServices::SetDeviceMiscRegisters ()
 	
 	// VPID
 	//bool					b3GbOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-	//bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
+	//bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect);
 	//bool					bDualStreamOut		= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 	//											  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
 	//											  IsVideoFormatB(mFb1VideoFormat) ||
@@ -1294,7 +1294,7 @@ void IoXTServices::SetDeviceMiscRegisters ()
 	
 	// Set VBlank RGB range bits - ALWAYS SMPTE
 	// Except when there is a full-range RGB frame buffer, and we go through the color space converter
-	if (mRGB10Range == NTV2_RGB10RangeFull && mVirtualDigitalOutput1Select != NTV2_DualLinkOutputSelect)
+	if (mRGB10Range == NTV2_RGB10RangeFull && mVirtualDigitalOutput1Select != NTV2_RgbOutputSelect)
 	{
 		mCard->WriteRegister(kRegCh1Control, NTV2_RGB10RangeFull, kRegMaskVBlankRGBRange, kRegShiftVBlankRGBRange);
 		mCard->WriteRegister(kRegCh2Control, NTV2_RGB10RangeFull, kRegMaskVBlankRGBRange, kRegShiftVBlankRGBRange);
