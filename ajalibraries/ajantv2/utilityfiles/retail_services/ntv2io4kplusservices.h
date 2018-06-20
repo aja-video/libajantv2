@@ -20,7 +20,6 @@ public:
 	Io4KPlusServices();
 	~Io4KPlusServices();
 	
-	virtual void UpdateAutoState (void);
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();
 	virtual void SetDeviceMiscRegisters ();

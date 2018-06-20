@@ -35,16 +35,6 @@ KonaIPJ2kServices::KonaIPJ2kServices()
 
 
 //-------------------------------------------------------------------------------------------------------
-//	UpdateAutoState
-//-------------------------------------------------------------------------------------------------------
-void KonaIPJ2kServices::UpdateAutoState (void)
-{
-	// J2K only supports 3Ga transport type
-	mDualStreamTransportType = NTV2_SDITransport_3Ga;
-}
-
-
-//-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
 void KonaIPJ2kServices::SetDeviceXPointPlayback ()

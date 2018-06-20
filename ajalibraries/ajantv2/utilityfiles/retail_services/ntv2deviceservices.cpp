@@ -410,8 +410,8 @@ void DeviceServices::ReadDriverState (void)
 //-------------------------------------------------------------------------------------------------------
 void DeviceServices::UpdateAutoState ()
 {
-	if (mDualStreamTransportType == NTV2_SDITransport_Auto)
-		mDualStreamTransportType = NTV2_SDITransport_DualLink_3Gb;
+	mDualStreamTransportType = 
+		RetailSupport::AutoSelect3GTransport(mDeviceID, mDualStreamTransportType, mFb1VideoFormat);
 }
 
 

@@ -20,7 +20,6 @@ public:
 	IoIP2022Services();
 	~IoIP2022Services();
 	
-	virtual void UpdateAutoState (void);
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();
 	virtual void SetDeviceMiscRegisters ();

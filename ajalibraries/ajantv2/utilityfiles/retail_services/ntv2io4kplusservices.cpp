@@ -23,22 +23,6 @@ Io4KPlusServices::~Io4KPlusServices()
 
 
 //-------------------------------------------------------------------------------------------------------
-//	UpdateAutoState
-//-------------------------------------------------------------------------------------------------------
-void Io4KPlusServices::UpdateAutoState (void)
-{
-	// auto mode from transport
-	if (mDualStreamTransportType == NTV2_SDITransport_Auto)
-	{
-		if (IsVideoFormatA(mFb1VideoFormat))
-			mDualStreamTransportType = NTV2_SDITransport_3Ga;
-		else
-			mDualStreamTransportType = NTV2_SDITransport_DualLink_3Gb;
-	}
-}
-
-
-//-------------------------------------------------------------------------------------------------------
 //	GetSelectedInputVideoFormat
 //	Note:	Determine input video format based on input select and fbVideoFormat
 //			which currently is videoformat of ch1-framebuffer
@@ -134,6 +118,7 @@ void Io4KPlusServices::SetDeviceXPointPlayback ()
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
+	bool						b3GaOut				= (mDualStreamTransportType == NTV2_SDITransport_3Ga);
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b2pi                = (b4K && m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);	// 2 pixed interleaved
 	bool						b2xQuadOut			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);

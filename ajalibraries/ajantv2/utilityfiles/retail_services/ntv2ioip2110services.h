@@ -20,7 +20,6 @@ public:
 	IoIP2110Services();
 	~IoIP2110Services();
 	
-	virtual void UpdateAutoState (void);
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();
 	virtual void SetDeviceMiscRegisters ();

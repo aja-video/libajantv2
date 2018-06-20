@@ -14,20 +14,6 @@ Kona4QuadServices::Kona4QuadServices()
 {
 }
 
-//-------------------------------------------------------------------------------------------------------
-//	UpdateAutoState
-//-------------------------------------------------------------------------------------------------------
-void Kona4QuadServices::UpdateAutoState (void)
-{
-	// auto mode from transport
-	if (mDualStreamTransportType == NTV2_SDITransport_Auto)
-	{
-		if (IsVideoFormatA(mFb1VideoFormat))
-			mDualStreamTransportType = NTV2_SDITransport_3Ga;
-		else
-			mDualStreamTransportType = NTV2_SDITransport_DualLink_3Gb;
-	}
-}
 
 //-------------------------------------------------------------------------------------------------------
 //	GetSelectedInputVideoFormat

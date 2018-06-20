@@ -19,7 +19,6 @@ public:
 	Kona4QuadServices();
 	~Kona4QuadServices() {}
 	
-	virtual void UpdateAutoState (void);
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();
 	virtual void SetDeviceMiscRegisters ();

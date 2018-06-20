@@ -16,21 +16,6 @@ Corvid44Services::Corvid44Services()
 }
 
 //-------------------------------------------------------------------------------------------------------
-//	UpdateAutoState
-//-------------------------------------------------------------------------------------------------------
-void Corvid44Services::UpdateAutoState (void)
-{
-	// auto mode from transport
-	if (mDualStreamTransportType == NTV2_SDITransport_Auto)
-	{
-		if (IsVideoFormatA(mFb1VideoFormat))
-			mDualStreamTransportType = NTV2_SDITransport_3Ga;
-		else
-			mDualStreamTransportType = NTV2_SDITransport_DualLink_3Gb;
-	}
-}
-
-//-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
 void Corvid44Services::SetDeviceXPointPlayback ()
