@@ -452,6 +452,8 @@ TEST_SUITE("persistence -- functions in ajabase/persistence/persistence.h");
 
     TEST_CASE("AJAPersistence")
     {
+        //AJADebug::Open();
+
         std::string appID("com.aja.unittest.ajabase");
         std::string deviceType("");
         std::string deviceNumber("");
@@ -487,7 +489,7 @@ TEST_SUITE("persistence -- functions in ajabase/persistence/persistence.h");
         bool		isGood;
 
         //clear out any old values
-        p.DeletePrefFile();
+        p.ClearPrefFile();
 
         // Write
 
