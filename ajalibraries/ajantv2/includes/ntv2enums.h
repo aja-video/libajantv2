@@ -1923,8 +1923,6 @@ typedef enum
     NTV2_Quadrant4Select,
     NTV2_Quarter4k,
     NTV2_4kHalfFrameRate,
-    NTV2_2xSdi4k,
-    NTV2_4xSdi4k,
     NTV2_MAX_NUM_OutputVideoSelectEnums
 } NTV2OutputVideoSelect;
 
@@ -4147,8 +4145,6 @@ typedef enum
     #define		NTV2K2_Quadrant3Select				NTV2_Quadrant3Select				///< @deprecated	Use NTV2_Quadrant3Select instead.
     #define		NTV2K2_Quadrant4Select				NTV2_Quadrant4Select				///< @deprecated	Use NTV2_Quadrant4Select instead.
     #define		NTV2k2_Quarter4k					NTV2_Quarter4k						///< @deprecated	Use NTV2_Quarter4k instead.
-    #define		NTV2K2_2xSdi4k						NTV2_2xSdi4k						///< @deprecated	Use NTV2_2xSdi4k instead.
-    #define		NTV2K2_4xSdi4k						NTV2_4xSdi4k						///< @deprecated	Use NTV2_4xSdi4k instead.
 
     //	NTV2UpConvertMode
     #define		NTV2K2_UpConvertAnamorphic			NTV2_UpConvertAnamorphic			///< @deprecated	Use NTV2_UpConvertAnamorphic instead.
