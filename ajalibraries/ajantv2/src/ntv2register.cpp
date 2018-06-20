@@ -3412,7 +3412,7 @@ bool CNTV2Card::GetRegisterWritemode (NTV2RegisterWriteMode & outValue, NTV2Chan
 
 
 bool CNTV2Card::SetLEDState (ULWord value)								{return WriteRegister (kRegGlobalControl, value, kRegMaskLED, kRegShiftLED);}
-bool CNTV2Card::GetLEDState (ULWord & outValue)							{return CNTV2DriverInterface::ReadRegister (kRegGlobalControl, outValue, kRegMaskLED, kRegShiftLED);}
+bool CNTV2Card::GetLEDState (ULWord & outValue)							{return ReadRegister (kRegGlobalControl, outValue, kRegMaskLED, kRegShiftLED);}
 
 
 ////////////////////////////////////////////////////////////////////
@@ -4345,7 +4345,7 @@ bool CNTV2Card::Get64BitAutodetect(ULWord* autodetect64)						{return autodetect
 bool CNTV2Card::SetVideoDACMode (NTV2VideoDACMode value)						{return WriteRegister (kRegAnalogOutControl,	value,	kK2RegMaskVideoDACMode,	kK2RegShiftVideoDACMode);}
 bool CNTV2Card::GetVideoDACMode (NTV2VideoDACMode & outValue)					{return CNTV2DriverInterface::ReadRegister (kRegAnalogOutControl, outValue,	kK2RegMaskVideoDACMode,	kK2RegShiftVideoDACMode);}
 bool CNTV2Card::SetAnalogOutHTiming (ULWord value)								{return WriteRegister (kRegAnalogOutControl,	value,	kK2RegMaskOutHTiming,	kK2RegShiftOutHTiming);}
-bool CNTV2Card::GetAnalogOutHTiming (ULWord & outValue)							{return CNTV2DriverInterface::ReadRegister (kRegAnalogOutControl, outValue,	kK2RegMaskOutHTiming,	kK2RegShiftOutHTiming);}
+bool CNTV2Card::GetAnalogOutHTiming (ULWord & outValue)							{return ReadRegister (kRegAnalogOutControl, outValue,	kK2RegMaskOutHTiming,	kK2RegShiftOutHTiming);}
 
 bool CNTV2Card::SetSDIOutputStandard (const UWord inOutputSpigot, const NTV2Standard inValue)
 {
@@ -7659,7 +7659,7 @@ bool CNTV2Card::ReadAnalogLTCInput (const UWord inLTCInput, NTV2_RP188 & outRP18
 	ULWord	regLo	(inLTCInput == 0 ? kRegLTCAnalogBits0_31 : (inLTCInput == 1 ? kRegLTC2AnalogBits0_31 : 0));
 	ULWord	regHi	(inLTCInput == 0 ? kRegLTCAnalogBits32_63 : (inLTCInput == 1 ? kRegLTC2AnalogBits32_63 : 0));
 	outRP188Data.fDBB = 0;
-    return regLo  &&  regHi  &&  ReadRegister(regLo, outRP188Data.fLo)  &&  ReadRegister(regHi, outRP188Data.fHi);
+	return regLo  &&  regHi  &&  ReadRegister(regLo, outRP188Data.fLo)  &&  ReadRegister(regHi, outRP188Data.fHi);
 }
 
 
@@ -7671,7 +7671,7 @@ bool CNTV2Card::GetAnalogLTCInClockChannel (const UWord inLTCInput, NTV2Channel 
 	ULWord		value			(0);
 	ULWord		shift			(inLTCInput == 0 ? 1 : (inLTCInput == 1 ? 9 : 0));	//	Bits 1|2|3 for LTCIn1, bits 9|10|11 for LTCIn2
 	bool		isMultiFormat	(false);
-	const bool	retVal 			(shift && GetMultiFormatMode (isMultiFormat) && isMultiFormat && CNTV2DriverInterface::ReadRegister (kRegLTCStatusControl, value, 0x7, shift));
+	const bool	retVal 			(shift && GetMultiFormatMode (isMultiFormat) && isMultiFormat && ReadRegister (kRegLTCStatusControl, value, 0x7, shift));
 	if (retVal)
 		outChannel = static_cast <NTV2Channel> (value + 1);
 	return retVal;
@@ -7716,7 +7716,7 @@ bool CNTV2Card::GetAnalogLTCOutClockChannel (const UWord inLTCOutput, NTV2Channe
 	ULWord		value			(0);
 	ULWord		shift			(inLTCOutput == 0 ? 16 : (inLTCOutput == 1 ? 20 : 0));	//	Bits 16|17|18 for LTCOut1, bits 20|21|22 for LTCOut2
 	bool		isMultiFormat	(false);
-	const bool	retVal 			(shift && GetMultiFormatMode (isMultiFormat) && isMultiFormat && CNTV2DriverInterface::ReadRegister (kRegLTCStatusControl, value, 0x7, shift));
+	const bool	retVal 			(shift && GetMultiFormatMode (isMultiFormat) && isMultiFormat && ReadRegister (kRegLTCStatusControl, value, 0x7, shift));
 	if (retVal)
 		outChannel = static_cast <NTV2Channel> (value + 1);
 	return retVal;
