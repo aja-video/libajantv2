@@ -261,7 +261,7 @@ public:
                 // generic table statements
                 mCreateTablesStmt.Prepare(mDb, "CREATE TABLE IF NOT EXISTS persistence(id INTEGER, name CHAR(255), value CHAR(64), dev_name CHAR(64), dev_num CHAR(64), PRIMARY KEY(id));"
                                                "CREATE TABLE IF NOT EXISTS persistenceBlobs(id INTEGER, name CHAR(255), value BLOB, dev_name CHAR(64), dev_num CHAR(64), PRIMARY KEY(id));");
-                mClearTablesStmt.Prepare(mDb, "DELETE FROM persistence;DELETE FROM persistenceBlobs;");
+                mClearTablesStmt.Prepare(mDb, "DELETE FROM persistence;DELETE FROM persistenceBlobs;VACUUM;");
 
                 // The tables must exist before the other prepared statements can be made
                 mTableCreatesErrorCode = mCreateTablesStmt.Step();
