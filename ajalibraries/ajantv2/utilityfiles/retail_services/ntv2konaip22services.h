@@ -25,7 +25,7 @@ public:
 	virtual void SetDeviceMiscRegisters ();
 
 protected:
-    CNTV2Config2022     * config;
+    CNTV2Config2022 *       config;
 
     NTV2Mode				mFb1ModeLast;
     NTV2VideoFormat			mFb1VideoFormatLast;

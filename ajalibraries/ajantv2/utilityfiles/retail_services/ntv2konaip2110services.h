@@ -25,7 +25,7 @@ public:
 	virtual void SetDeviceMiscRegisters ();
 
 protected:
-    CNTV2Config2110     * config2110;
+    CNTV2Config2110 *       config2110;
 
     NetworkData2110			m2110NetworkLast;
     TransmitVideoData2110   m2110TxVideoDataLast;

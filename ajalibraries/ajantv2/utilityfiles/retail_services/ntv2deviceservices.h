@@ -102,6 +102,15 @@ public:
 	virtual void DisableStartupSequence() {mStartupDisabled = true;}
 
     // common IP support routines
+    virtual void EveryFrameTask2022(CNTV2Config2022* config2022, NTV2Mode* modeLast, NTV2VideoFormat* videoFormatLast);
+    virtual void EveryFrameTask2110(CNTV2Config2110* config2110,
+                                    NTV2VideoFormat* videoFormatLast,
+                                    NetworkData2110* s2110NetworkLast,
+                                    TransmitVideoData2110* s2110TxVideoDataLast,
+                                    TransmitAudioData2110* s2110TxAudioDataLast,
+                                    ReceiveVideoData2110* s2110RxVideoDataLast,
+                                    ReceiveAudioData2110* s2110RxAudioDataLast);
+
     virtual void SetNetConfig(CNTV2Config2022* config, eSFP  port);
     virtual void SetRxConfig(CNTV2Config2022* config, NTV2Channel channel, bool is2022_7);
     virtual void SetTxConfig(CNTV2Config2022* config, NTV2Channel channel, bool is2022_7);
