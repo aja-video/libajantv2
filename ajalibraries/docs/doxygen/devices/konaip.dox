@@ -73,7 +73,7 @@
 	-	The \ref ntv2konaipjsonsetup demo application shows how to software-configure the SFPs.
 	-	Note that the KONA IP has a MicroBlaze processor that must be booted when power is applied to the board,
 		so it won't respond to configuration changes for a minute or two. To detect when the MicroBlaze is running,
-		and thus when the SFPs can be configured, poll the uptime register (0x40004) until it starts incrementing.
+		and thus when the SFPs can be configured, poll CNTV2DriverInterface::IsDeviceReady until it returns \c true.
 
 	@par	Firmware
 
