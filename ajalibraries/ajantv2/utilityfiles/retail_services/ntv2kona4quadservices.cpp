@@ -97,7 +97,8 @@ void Kona4QuadServices::SetDeviceXPointPlayback ()
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect;
-	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	bool						b3GaOutRGB			= (mDualStreamTransportType == NTV2_SDITransport_3Ga) && bSdiOutRGB;
+	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) || b3GaOutRGB;
 	bool						b1wireQ4k			= (b4K && m4kTransportOutSelection == NTV2_4kTransport_Quarter_1wire);		// 1 wire quarter
 
 	bool						b2pi                = (b4K && m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);	// 2 pixed interleaved
@@ -3043,19 +3044,18 @@ void Kona4QuadServices::SetDeviceMiscRegisters()
 	mCard->GetStandard(primaryStandard);
 	mCard->GetFrameGeometry(primaryGeometry);
 
-	bool					bFbLevelA = IsVideoFormatA(mFb1VideoFormat);
-	bool					b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
-	bool					b4kHfr = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	//bool					bHfr = NTV2_IS_3G_FORMAT(mFb1VideoFormat);
-	//bool					b1wireQ4k = (b4K && m4kTransportOutSelection == NTV2_4kTransport_Quarter_1wire);		// 1 wire quarter
-	
-	bool					bSdiRgbOut = (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect);
-	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
+	bool					bFbLevelA 			= IsVideoFormatA(mFb1VideoFormat);
+	bool					b4K 				= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
+	bool					b4kHfr 				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
+	bool					bHfr				= NTV2_IS_3G_FORMAT(mFb1VideoFormat);
+	bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect);
+	bool					b3GaOutRGB			= (mDualStreamTransportType == NTV2_SDITransport_3Ga) && bSdiOutRGB;
+	NTV2FrameRate			primaryFrameRate 	= GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)
 	bool b1x3GbOut = (b4K == false) &&
-		((bSdiRgbOut == true) ||
+		((bSdiOutRGB == true) ||
 		(mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 		(mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
 		(bFbLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
@@ -3068,7 +3068,7 @@ void Kona4QuadServices::SetDeviceMiscRegisters()
 	// all 3Gb transport out
 	// b3GbOut = (b1x3GbOut + !2wire) | (4k + rgb) | (4khfr + 3gb)
 	bool b3GbOut = (b1x3GbOut == true && mDualStreamTransportType != NTV2_SDITransport_DualLink_1_5) ||
-		(b4K == true && bSdiRgbOut == true) ||
+		(b4K == true && bSdiOutRGB == true) ||
 		(b4kHfr == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 		b2wire4kOut || b2wire4kIn;
 
@@ -3116,7 +3116,7 @@ void Kona4QuadServices::SetDeviceMiscRegisters()
 	else
 	{
 		b2pi = b4K && (m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
-		if (b2pi && !bSdiRgbOut && !b4kHfr)
+		if (b2pi && !bSdiOutRGB && !b4kHfr)
 			b4xIo = false;										// low frame rate two pixel interleave YUV
 		
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL1, b4xIo);		// 1,2 are for capture, unless 4K playback
@@ -3334,29 +3334,40 @@ void Kona4QuadServices::SetDeviceMiscRegisters()
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 
 	//
-	// SDI Out 1
+	// SDI Out
 	//
-
-	// is 2K frame buffer geometry, includes 4K mode
-	//bool b2KFbGeom = NTV2_IS_2K_1080_FRAME_GEOMETRY(primaryGeometry) || primaryGeometry == NTV2_FG_4x2048x1080;
-	//NTV2Standard transportStandard = b3GbOut && bHfr ? NTV2_STANDARD_1080 : primaryStandard;
-
+	
+	// Level A to B conversion
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bFbLevelA && b3GbOut);
-
-	//
-	// SDI Out 2
-	//
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bFbLevelA && b3GbOut);
-
-	//
-	// SDI Out 3
-	//
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL3, bFbLevelA && b3GbOut);
-
-	//
-	// SDI Out 4
-	//
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL4, bFbLevelA && b3GbOut);	
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL4, bFbLevelA && b3GbOut);
+	bool sdi5_3GbTransportOut = false;
+	if (b4K)
+	{
+		if (b4kHfr)
+			sdi5_3GbTransportOut = 	(mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
+									(mDualStreamTransportType == NTV2_SDITransport_OctLink_3Gb);
+		else
+			sdi5_3GbTransportOut = 	(bSdiOutRGB && !b2pi);	// UHD 29.97 YUV playback and RGB but not if TSI
+	}
+	else
+	{
+		if (bHfr)
+			sdi5_3GbTransportOut = 	IsVideoFormatB(mFb1VideoFormat) || 
+									(mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+		else
+			sdi5_3GbTransportOut = 	b3GbOut || bSdiOutRGB;
+	}
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL5, (bFbLevelA && sdi5_3GbTransportOut) || (b4K && bSdiOutRGB));
+	
+	
+	// RGB LevelA option
+	mCard->SetSDIOutRGBLevelAConversion(NTV2_CHANNEL1, !bFbLevelA && b3GaOutRGB);
+	mCard->SetSDIOutRGBLevelAConversion(NTV2_CHANNEL2, !bFbLevelA && b3GaOutRGB);
+	mCard->SetSDIOutRGBLevelAConversion(NTV2_CHANNEL3, !bFbLevelA && b3GaOutRGB);
+	mCard->SetSDIOutRGBLevelAConversion(NTV2_CHANNEL4, !bFbLevelA && b3GaOutRGB);
+	mCard->SetSDIOutRGBLevelAConversion(NTV2_CHANNEL5, !bFbLevelA && b3GaOutRGB);
 	
 	// Set HBlack RGB range bits - ALWAYS SMPTE
 	if (b4K)
