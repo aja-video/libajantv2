@@ -176,7 +176,7 @@ void Corvid3GServices::SetDeviceXPointPlayback ()
 	
 	
 	// SDI Out 1
-	if (b2FbLevelBHfr || bStereoOut)												// B format or Stereo 3D
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbOut ? frameSync2YUV : NTV2_XptBlack);

@@ -208,7 +208,7 @@ void Kona1Services::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);
 		mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptDuallinkOut1DS2);
 	}
-	else if (b2FbLevelBHfr || bStereoOut)										// B format or Stereo 3D
+	else if (b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbOut ? frameSync2YUV : NTV2_XptBlack);

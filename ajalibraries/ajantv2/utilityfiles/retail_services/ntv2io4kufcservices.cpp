@@ -273,7 +273,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
 	
 	
 	// SDI Out 1
-	if (b2FbLevelBHfr || bStereoOut)												// B format or Stereo 3D
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbOut ? frameSync2YUV : NTV2_XptBlack);
@@ -334,7 +334,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
 	
 	
 	// SDI Out 2
-	if (b2FbLevelBHfr || bStereoOut)												// B format or Stereo 3D
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		if (b3GbOut)
 		{
@@ -347,8 +347,8 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if ( (mVirtualDigitalOutput2Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
-			  || (   (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
+	else if ( (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
+			  || (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
 			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
@@ -371,18 +371,18 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
             mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
         }
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)			// Secondary
+	else if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)			// Secondary
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptConversionModule);
 		mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 		bEanbleConverter = true;
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_RgbOutputSelect)			// RGB Out
+	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)			// RGB Out
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, b3GbOut ? NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut1DS2);
 		mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)				// Video+Key
+	else if (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)				// Video+Key
 	{
 		if (bDSKOn)
 		{
@@ -1054,8 +1054,8 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 	
 	// SDI Out 2
 	if (b2FbLevelBHfr ||															// Dual Stream - p60b
-		mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||					// Stereo 3D
-		mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)					// Video + Key
+		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
+		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)					// Video + Key
 	{
 		if (b3GbOut)
 		{
@@ -1068,7 +1068,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_RgbOutputSelect)				// Same as RGB in this case
+	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)				// Same as RGB in this case
 	{
 		if (b3GbOut)
 		{
@@ -1080,8 +1080,8 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptDuallinkOut1DS2);				// 2 wires
 		}
 	}
-	else if ( (mVirtualDigitalOutput2Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
-		      || (   (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
+	else if ( (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
+		      || (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
 			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
@@ -1094,7 +1094,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 			mCard->Connect (NTV2_XptSDIOut2Input, frameSync1YUV);
 		}
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)
+	else if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync2YUV);
 	}

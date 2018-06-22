@@ -323,12 +323,12 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_RgbOutputSelect)				// RGB Out
+	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)				// RGB Out
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, b3GbOut ? NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut1DS2);
 		mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)				// Video+Key
+	else if (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)				// Video+Key
 	{
 		if (bDSKOn)
 		{
@@ -1046,8 +1046,8 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 
 	// SDI Out 4 - acts like SDI 2
 	if (IsVideoFormatB(mFb1VideoFormat) ||												// Dual Stream - p60b
-		mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||					// Stereo 3D
-		mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)						// Video + Key
+		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
+		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{
 		if (b3GbOut)
 		{
@@ -1060,7 +1060,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_RgbOutputSelect)				// Same as RGB in this case
+	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)				// Same as RGB in this case
 	{
 		if (b3GbOut)
 		{
