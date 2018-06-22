@@ -13,6 +13,15 @@
 
 	The Corvid88 has eight bi-directional SDI connectors, plus a reference/LTC input.
 
+	<b>Low-Profile Version:</b>
+	@image	html	corvid88lp.png
+
+	<b>Fanless Version:</b>  (See important environmental note below.)
+	@image	html	corvid88fanless.png
+
+	<b>Low-Profile Fanless Version:</b>  (See important environmental note below.)
+	@image	html	corvid88fanlesslp.png
+
 	@par	PCI Interface
 
 	-	PCI device ID: <b>0xEB0D</b>
