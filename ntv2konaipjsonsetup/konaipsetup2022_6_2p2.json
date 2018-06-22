@@ -1,16 +1,19 @@
 {
+    "protocol":"2022",
+    "enable2022_7":"false",
+    "networkPathDifferential":"50",
     "sfps":[
         {
             "designator":"sfp1",
             "ipAddress":"172.16.19.10",
             "subnetMask":"255.255.0.0",
-            "gateway":"255.255.255.255",
+            "gateway":"255.255.255.255"
         },
         {
             "designator":"sfp2",
             "ipAddress":"172.16.19.11",
             "subnetMask":"255.255.0.0",
-            "gateway":"255.255.255.255",
+            "gateway":"255.255.255.255"
         }
     ],
     "receive2022":[
