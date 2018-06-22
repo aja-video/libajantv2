@@ -184,11 +184,11 @@ void Corvid22Services::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
+	else if (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync1YUV);
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)				// Video+Key
+	else if (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)				// Video+Key
 	{
 		if (bDSKOn)
 		{
@@ -538,8 +538,8 @@ void Corvid22Services::SetDeviceXPointCapture ()
 
 	// SDI Out 2
 	if (IsVideoFormatB(mFb1VideoFormat) ||											// Dual Stream - p60b
-		mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||					// Stereo 3D
-		mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)						// Video + Key
+		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
+		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{
 		if (b3GbOut)
 		{
