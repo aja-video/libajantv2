@@ -3504,62 +3504,43 @@ void Io4KPlusServices::SetDeviceMiscRegisters ()
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
-		
+	
 	//
-	// SDI Out 1
+	// SDI Out
 	//
 	
-	// is 2K frame buffer geometry, includes 4K mode
-	//bool b2KFbGeom = NTV2_IS_2K_1080_FRAME_GEOMETRY(primaryGeometry) || primaryGeometry == NTV2_FG_4x2048x1080;
-	//NTV2Standard transportStandard = b3GbOut && bHfr ? NTV2_STANDARD_1080 : primaryStandard;
-	
-	// Select primary standard
+	// Level A to B conversion
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bFbLevelA && b3GbOut);
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bFbLevelA && b3GbOut);
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL3, (bFbLevelA && b3GbOut) || ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL4, (bFbLevelA && b3GbOut) || ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
+	bool sdi5_3GbTransportOut = false;
+	if (b4K)
+	{
+		if (b4kHfr)
+			sdi5_3GbTransportOut = 	(mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
+									(mDualStreamTransportType == NTV2_SDITransport_OctLink_3Gb);
+		else
+			sdi5_3GbTransportOut = 	(bSdiOutRGB && !b2pi);	// UHD 29.97 YUV playback and RGB but not if TSI
+	}
+	else
+	{
+		if (bHfr)
+			sdi5_3GbTransportOut = 	IsVideoFormatB(mFb1VideoFormat) || 
+									(mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+		else
+			sdi5_3GbTransportOut = 	b3GbOut || bSdiOutRGB;
+	}
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL5, (bFbLevelA && sdi5_3GbTransportOut) || (b4K && bSdiOutRGB));
+	
 	
 	// RGB LevelA option
 	mCard->SetSDIOutRGBLevelAConversion(NTV2_CHANNEL1, !bFbLevelA && b3GaOutRGB);
 	mCard->SetSDIOutRGBLevelAConversion(NTV2_CHANNEL2, !bFbLevelA && b3GaOutRGB);
 	mCard->SetSDIOutRGBLevelAConversion(NTV2_CHANNEL3, !bFbLevelA && b3GaOutRGB);
 	mCard->SetSDIOutRGBLevelAConversion(NTV2_CHANNEL4, !bFbLevelA && b3GaOutRGB);
-
-	bool sdi5_3GbTransportOut = false;
-
-	if (b4K)
-	{
-		if (b4kHfr)
-		{
-			sdi5_3GbTransportOut = (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
-				(mDualStreamTransportType == NTV2_SDITransport_OctLink_3Gb);
-		}
-		else
-		{
-			if (bSdiOutRGB && !b2pi)
-			{
-				sdi5_3GbTransportOut = true;         // DAC this works UHD 29.97 YUV playback and RGB but not if TSI
-			}
-			else
-			{
-				//sdi5_3GbTransportOut = (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-				sdi5_3GbTransportOut = false;       // DAC - this works for 29.97 UHD YUV playback
-			}
-		}
-	}
-	else
-	{
-		if (bHfr)
-		{
-			sdi5_3GbTransportOut = IsVideoFormatB(mFb1VideoFormat)
-				|| (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-		}
-		else
-		{
-			sdi5_3GbTransportOut = b3GbOut || bSdiOutRGB;
-		}
-	}
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL5, (bFbLevelA && sdi5_3GbTransportOut) || (b4K && bSdiOutRGB));
+	mCard->SetSDIOutRGBLevelAConversion(NTV2_CHANNEL5, !bFbLevelA && b3GaOutRGB);
+	
 	
 	// Set HBlack RGB range bits - ALWAYS SMPTE
 	mCard->WriteRegister(kRegSDIOut1Control, NTV2_RGB10RangeSMPTE, kK2RegMaskSDIOutHBlankRGBRange, kK2RegShiftSDIOutHBlankRGBRange);
