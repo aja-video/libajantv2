@@ -3,6 +3,7 @@
 
 	@section		ntv2hwcorvid
 
+	<hr>
 	@subsection		corvid22		Corvid 22
 
 	This page describes the <b>Corvid 22</b> capture/playout board.
@@ -22,16 +23,16 @@
 
 	@par	Inputs & Outputs
 
-	-	2 x SDI inputs
-	-	2 x SDI outputs
-	-	1 x reference input
-	-	2 x RS-422 serial ports
+	-	2 × SDI inputs
+	-	2 × SDI outputs
+	-	1 × reference input
+	-	2 × RS-422 serial ports
 
 	@par	Frame Buffer
 
 	-	512 MB SDRAM
-	-	64 x 8MB frames
-	-	32 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	64 × 8MB frames
+	-	32 × 16MB frames for 2K (1080×2048), 1920×1080 VANC, and 16-bit RGB
 
 	@par	Audio
 
@@ -60,7 +61,7 @@
 
 	@par	Physical
 
-	-	Size (W x D x H):  0.708" x 6.57" x 3.86" (18mm × 167mm × 98mm)
+	-	Size (W × D × H):  0.708" × 6.57" × 3.86" (18mm × 167mm × 98mm)
 	-	Power: 12w (typ), 15w (max)
 
 	@par	Environment

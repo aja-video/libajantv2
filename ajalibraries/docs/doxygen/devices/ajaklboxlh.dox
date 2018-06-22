@@ -3,6 +3,7 @@
 
 	@section		ntv2hwaccessories
 
+	<hr>
 	@subsection		ajaklboxlh	KL-Box-LH Breakout Box
 
 	This page describes the AJA KL-Box-LH Breakout Box, which can be connected to a \ref konalheplus capture/playout board.

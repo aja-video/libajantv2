@@ -3,6 +3,7 @@
 
 	@section		ntv2hwcorvid
 
+	<hr>
 	@subsection		corvid44		Corvid 44
 
 	This page describes the <b>Corvid 44</b> OEM capture/playout board, which features four SDI connectors that can be programmatically
@@ -11,18 +12,22 @@
 
 	@image	html	corvid44.png
 
-	The Corvid44 has an RS-422 serial port, 2 x input and 2 x output SDI connectors, a reference/LTC input BNC,
-	...and a secondary LTC-only input connector on the board header.
+	The Corvid44 has an RS-422 serial port, 2 × input and 2 × output SDI connectors, a reference/LTC input BNC,
+	and a secondary LTC-only input connector on the board header.
 
+	<hr size="50px">
 	<b>BNC Version:</b>
 	@image	html	corvid44bnc.png
 
+	<hr size="50px">
 	<b>Low-Profile Version:</b>
 	@image	html	corvid44lp.png
 
+	<hr size="50px">
 	<b>Fanless Version:</b>  (See important environmental note below.)
 	@image	html	corvid44fanless.png
 
+	<hr size="50px">
 	<b>Low-Profile Fanless Version:</b>  (See important environmental note below.)
 	@image	html	corvid44fanlesslp.png
 
@@ -35,16 +40,16 @@
 
 	@par	Inputs & Outputs
 
-	-	4 x SDI bi-directional (under software control)
-	-	1 x reference/LTC input
-	-	1 x secondary LTC-only input (2-pin Molex connector on board header)
-	-	1 x RS-422 serial port (full-height board version has DB-9 connector)
+	-	4 × SDI bi-directional (under software control)
+	-	1 × reference/LTC input
+	-	1 × secondary LTC-only input (2-pin Molex connector on board header)
+	-	1 × RS-422 serial port (full-height board version has DB-9 connector)
 
 	@par	Frame Buffer
 
 	-	1GB SDRAM
-	-	128 x 8MB frames
-	-	64 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	128 × 8MB frames
+	-	64 × 16MB frames for 2K (1080×2048), 1920×1080 VANC, and 16-bit RGB
 	-	Support for planar formats added in firmware rev 0xNN and SDK 14.0:
 		-	::NTV2_FBF_8BIT_YCBCR_420PL3
 		-	::NTV2_FBF_8BIT_YCBCR_422PL3
@@ -78,7 +83,7 @@
 
 	@par	Physical
 
-	-	Size (W x D x H):  0.875" x 7.25" x 4.875" (22.23mm × 184.15mm × 123.83mm)
+	-	Size (W × D × H):  0.875" × 7.25" × 4.875" (22.23mm × 184.15mm × 123.83mm)
 	-	Weight: 0.4 lb (0.2 kg)
 	-	Power: 17w (typ), 19w (max)
 

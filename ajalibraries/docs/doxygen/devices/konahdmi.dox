@@ -3,6 +3,7 @@
 
 	@section		ntv2hwkona
 
+	<hr>
 	@subsection		konahdmi		KONA HDMI
 
 	This page describes the KONA HDMI capture board.
@@ -15,20 +16,20 @@
 	@par	PCI Interface
 
 	-	PCI device ID: <b>0xEB24</b>
-	-	Gen 2 x 8 PCIe
+	-	Gen 2 × 8 PCIe
 	-	2 DMA engines
 	-	MSI interrupt delivery supported
 
 	@par	Inputs & Outputs
 
-	-	4 x HDMI 2.0 inputs
+	-	4 × HDMI 2.0 inputs
 
 	@par	Frame Buffer
 
 	-	2 GB SDRAM
-	-	256 x 8MB frames
-	-	128 x 16MB frames for 2K (1080x2048) and RGB-16+
-	-	64 x 32MB frames for 4K RGB
+	-	256 × 8MB frames
+	-	128 × 16MB frames for 2K (1080x2048) and RGB-16+
+	-	64 × 32MB frames for 4K RGB
 
 	@par	Audio
 
@@ -61,7 +62,7 @@
 
 	@par	Physical
 
-	-	Size (W x D x H):  0.75" x 8.25" x 5.0" (19.05mm × 209.55mm × 127mm)
+	-	Size (W × D × H):  0.75" × 8.25" × 5.0" (19.05mm × 209.55mm × 127mm)
 	-	Weight: 0.7 lb (0.4 kg)
 
 	@par	Environment

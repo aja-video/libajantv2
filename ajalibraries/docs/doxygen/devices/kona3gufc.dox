@@ -3,6 +3,7 @@
 
 	@section		ntv2hwkona
 
+	<hr>
 	@subsection		kona3gufc		KONA 3G (UFC Mode)
 
 	This page describes the KONA 3G capture/playout board in its 2-channel mode of operation.
@@ -23,19 +24,19 @@
 
 	@par	Inputs & Outputs
 
-	-	2 x SDI inputs
-	-	2 x SDI outputs
-	-	1 x HDMI output
-	-	1 x analog component video output
-	-	2 x reference/LTC inputs
-	-	2 x LTC outputs
-	-	2 x RS-422 serial ports
+	-	2 × SDI inputs
+	-	2 × SDI outputs
+	-	1 × HDMI output
+	-	1 × analog component video output
+	-	2 × reference/LTC inputs
+	-	2 × LTC outputs
+	-	2 × RS-422 serial ports
 
 	@par	Frame Buffer
 
 	-	512 MB SDRAM
-	-	64 x 8MB frames
-	-	32 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	64 × 8MB frames
+	-	32 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
 
 	@par	Audio
 

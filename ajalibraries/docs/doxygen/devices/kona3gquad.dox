@@ -3,6 +3,7 @@
 
 	@section		ntv2hwkona
 
+	<hr>
 	@subsection		kona3gquad		KONA 3G (Quad Mode)
 
 	This page describes the KONA 3G capture/playout board in its 4-channel mode of operation.
@@ -24,18 +25,18 @@
 
 	@par	Inputs & Outputs
 
-	-	4 x SDI bi-directional (under software control)
-	-	1 x HDMI output
-	-	1 x analog component video output
-	-	2 x reference/LTC inputs
-	-	2 x LTC outputs
-	-	2 x RS-422 serial ports
+	-	4 × SDI bi-directional (under software control)
+	-	1 × HDMI output
+	-	1 × analog component video output
+	-	2 × reference/LTC inputs
+	-	2 × LTC outputs
+	-	2 × RS-422 serial ports
 
 	@par	Frame Buffer
 
 	-	512 MB SDRAM
-	-	64 x 8MB frames
-	-	32 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	64 × 8MB frames
+	-	32 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
 
 	@par	Audio
 

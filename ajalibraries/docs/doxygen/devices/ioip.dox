@@ -3,6 +3,7 @@
 
 	@section		ntv2hwio
 
+	<hr>
 	@subsection		ioip		Io IP
 
 	This page describes the Io IP device.
@@ -25,20 +26,20 @@
 	-	Four-lane gen 3 PCI Express
 	-	2 DMA engines
 	-	MSI supported
-	-	2 x Thunderbolt III connectors
+	-	2 × Thunderbolt III connectors
 
 	@par	Inputs & Outputs
 
-	-	2 x bi-directional 10GbE SFP+ TCP/IP cages, represented in firmware as 4 x virtual 3G-SDI bi-directional SDI spigots
+	-	2 × bi-directional 10GbE SFP+ TCP/IP cages, represented in firmware as 4 × virtual 3G-SDI bi-directional SDI spigots
 	-	SMPTE 2022-6 supported for input & output, up to 4 streams of SD or HD each with 16 audio channels and metadata
-	-	1 x HDMI 1.4 output (8-channel embedded audio support, no HDCP support)
-	-	1 x reference input
+	-	1 × HDMI 1.4 output (8-channel embedded audio support, no HDCP support)
+	-	1 × reference input
 
 	@par	Frame Buffer
 
 	-	2GB SDRAM
-	-	256 x 8MB frames
-	-	128 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	256 × 8MB frames
+	-	128 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
 
 	@par	Audio
 
@@ -50,7 +51,7 @@
 
 	-	Supports all standard video formats, plus 2K and 4K/UHD formats, and 4Kp60.
 
-	@note	4 x hardware color-space converters (CSCs) can convert the input/output YCbCr to/from RGB when using RGB buffer formats.
+	@note	4 × hardware color-space converters (CSCs) can convert the input/output YCbCr to/from RGB when using RGB buffer formats.
 
 	@par	Ancillary Data
 
@@ -59,10 +60,10 @@
 
 	@par	Video Processing
 
-	-	2 x independent Mixer/Keyer widgets, each with its own Mix Coefficient
+	-	2 × independent Mixer/Keyer widgets, each with its own Mix Coefficient
 	-	Can mix keys on and off
 	-	Can differentiate between shaped and unshaped video
-	-	2 x 2D LUTs
+	-	2 × 2D LUTs
 
 	@par	Configuration
 
@@ -76,7 +77,7 @@
 
 	@par	Physical
 
-	-	Size (W x D x H):  0.75" x 8.25" x 5.0" (19.05mm × 209.55mm × 127mm)
+	-	Size (W × D × H):  0.75" × 8.25" × 5.0" (19.05mm × 209.55mm × 127mm)
 	-	Weight: 0.7 lb (0.4 kg)
 	-	Power:  25W (typ), 27W (max)
 

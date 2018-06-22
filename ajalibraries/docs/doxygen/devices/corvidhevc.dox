@@ -3,6 +3,7 @@
 
 	@section		ntv2hwcorvid
 
+	<hr>
 	@subsection		corvidhevc		Corvid HEVC
 
 	This page describes the <b>Corvid HEVC</b> OEM capture/playout board, which features four SDI inputs to support
@@ -11,7 +12,7 @@
 
 	@image	html	corvidhevc.png
 
-	The Corvid HEVC has 4 x input SDI connectors and an LTC/reference input BNC.
+	The Corvid HEVC has 4 × input SDI connectors and an LTC/reference input BNC.
 
 	@par	PCI Interface
 
@@ -21,13 +22,13 @@
 
 	@par	Inputs
 
-	-	4 x 3G-SDI inputs
-	-	1 x LTC input
+	-	4 × 3G-SDI inputs
+	-	1 × LTC input
 
 	@par	Frame Buffer
 
 	-	1GB SDRAM
-	-	64 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	64 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
 
 	@par	Audio
 
@@ -55,7 +56,7 @@
 
 	@par	Physical
 
-	-	Size, without bracket (W x D x H):  0.875" x 7.5" x 5" (22.23mm × 190.5mm × 127mm)
+	-	Size, without bracket (W × D × H):  0.875" × 7.5" × 5" (22.23mm × 190.5mm × 127mm)
 	-	Weight:  0.9 lb (0.4 kg)
 	-	Power: Requires either PCIe bus power via graphics slot or ATX 6-pin from host power supply
 
