@@ -1637,12 +1637,13 @@ typedef enum
 	kRefMaskHDMIAudioPairSelect = BIT(2)+BIT(3),
 	kRegMaskHDMISampleRateConverterEnable = BIT(4),
 	kRegMaskHDMIInputRange		= BIT(28),
+	kRefMaskHDMIInfoRange		= BIT(31),
 	
 	//kRegHDMIInputControl / kRegHDMIOutControl
 	kRegMaskHDMIColorSpace		= BIT(4)+BIT(5),
 	kRegMaskHDMIProtocol		= BIT(30),
 	kRegMaskHDMIPolarity		= BIT(16)+BIT(17)+BIT(18)+BIT(19),
-
+	
 	//kK2RegAnalogOutControl - (controls Analog Inputs also, for some boards)
 	kK2RegMaskVideoDACMode		= BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4),
 	kFS1RegMaskVideoDAC2Mode    = BIT(8)+BIT(9)+BIT(10)+BIT(11)+BIT(12),
@@ -2765,6 +2766,7 @@ typedef enum
 	kRegShiftHDMISampleRateConverterEnable = 4,
 	kRegShiftHDMIInputRange				= 28,
 	kRegShiftHDMIInputPolarity			= 16,
+	kRefShiftHDMIInfoRange				= 31,
 	
 	//kRegHDMIInputControl / kRegHDMIOutControl
 	kRegShiftHDMIColorSpace				= 4,

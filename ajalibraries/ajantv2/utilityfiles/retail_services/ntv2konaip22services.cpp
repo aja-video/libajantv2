@@ -82,7 +82,7 @@ void KonaIP22Services::SetDeviceXPointPlayback ()
     // Decided it's best to leave RX channel on
     mCard->WriteRegister(kVRegRxcEnable1, true);
     mCard->WriteRegister(kVRegRxcEnable2, true);
-
+    
 	// make sure formats/modes match for multibuffer modes
 	if (b4K || b2FbLevelBHfr || bStereoOut)
 	{

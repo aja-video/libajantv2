@@ -17,6 +17,7 @@ using namespace std;
 
 
 static const ULWord gHDMIChannelToInputStatusRegNum [] =    { kRegHDMIInputStatus1, kRegHDMIInputStatus2, kRegHDMIInputStatus3, kRegHDMIInputStatus4, 0 };
+static const ULWord gHDMIChannelToControlRegNum [] =    { kRegHDMIControl1, kRegHDMIControl2, kRegHDMIControl3, kRegHDMIControl4, 0 };
 
 
 //////////////////////////////////////////////////////////////////
@@ -56,6 +57,18 @@ bool CNTV2Card::GetHDMIInputColor (NTV2LHIHDMIColorSpace & outValue, const NTV2C
         return CNTV2DriverInterface::ReadRegister (kRegHDMIInputStatus, outValue, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
 	if (inChannel <= NTV2Channel(numInputs))
 		return CNTV2DriverInterface::ReadRegister (gHDMIChannelToInputStatusRegNum[inChannel], outValue, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
+	return false;
+}
+
+bool CNTV2Card::GetHDMIInVideoRange (NTV2HDMIRange & outValue, const NTV2Channel inChannel)
+{
+    const ULWord numInputs(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
+    if (numInputs < 1)
+		return false;
+    if (numInputs == 1)
+        return CNTV2DriverInterface::ReadRegister (kRegHDMIInputControl, outValue, kRefMaskHDMIInfoRange, kRefShiftHDMIInfoRange);
+	if (inChannel <= NTV2Channel(numInputs))
+		return CNTV2DriverInterface::ReadRegister (gHDMIChannelToControlRegNum[inChannel], outValue, kRefMaskHDMIInfoRange, kRefShiftHDMIInfoRange);
 	return false;
 }
 
