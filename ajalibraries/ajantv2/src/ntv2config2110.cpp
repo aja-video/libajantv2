@@ -482,13 +482,14 @@ void CNTV2Config2110::SetVideoFormatForRxTx(const NTV2Stream stream, const NTV2V
     NTV2FormatDescriptor fd(format, NTV2_FBF_10BIT_YCBCR);
 
     NTV2FrameRate       fr  = GetNTV2FrameRateFromVideoFormat(format);
-    NTV2FrameGeometry   fg  = fd.GetFrameGeometry();
+    NTV2FrameGeometry   fg  = GetNTV2FrameGeometryFromVideoFormat(format);
     NTV2Standard        std = fd.GetVideoStandard();
     bool               is2K = fd.Is2KFormat();
 
     uint32_t val = ( (((uint32_t) fr) << 8) |
                      (((uint32_t) fg) << 4) |
                       ((uint32_t) std ) );
+
     if (is2K)
         val += BIT(13);
 
