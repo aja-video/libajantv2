@@ -5,6 +5,7 @@
 //
 
 #include "ntv2konaip2110services.h"
+#include "ajabase/system/systemtime.h"
 
 //-------------------------------------------------------------------------------------------------------
 //	class KonaIP2110Services
@@ -2401,10 +2402,29 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	bool					bSdiOutRGB = (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect);
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 
-    // Configure all of the 2110 IP settings
-    EveryFrameTask2110(config2110, &mFb1VideoFormatLast, &m2110NetworkLast,
-                       &m2110TxVideoDataLast, &m2110TxAudioDataLast,
-                       &m2110RxVideoDataLast, &m2110RxAudioDataLast);
+    if (mCard->IsDeviceReady(true) == true)
+    {
+        bool ipServiceEnable, ipServiceForceConfig;
+
+        if (config2110 == NULL)
+        {
+            config2110 = new CNTV2Config2110(*mCard);
+            ipServiceEnable = false;
+            // For some reason on Windows this doesn't immediately happen so make sure it gets set
+            while (ipServiceEnable == false)
+            {
+                AJATime::Sleep(10);
+
+                config2110->SetIPServicesControl(true, false);
+                config2110->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
+            }
+        }
+
+        // Configure all of the 2110 IP settings
+        EveryFrameTask2110(config2110, &mFb1VideoFormatLast, &m2110NetworkLast,
+                           &m2110TxVideoDataLast, &m2110TxAudioDataLast,
+                           &m2110RxVideoDataLast, &m2110RxAudioDataLast);
+    }
 
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)
