@@ -3068,8 +3068,29 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
 	bool					b4k12gOut			= (b4K && (b4kHfr || bSdiOutRGB) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	NTV2FrameRate			primaryFrameRate	= GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 
-    // Configure all of the 2022 IP settings
-    EveryFrameTask2022(config, &mFb1ModeLast, &mFb1VideoFormatLast);
+
+    if (mCard->IsDeviceReady(true) == true)
+    {
+        bool ipServiceEnable, ipServiceForceConfig;
+
+        if (config == NULL)
+        {
+            config = new CNTV2Config2022(*mCard);
+            ipServiceEnable = false;
+            // For some reason on Windows this doesn't immediately happen so make sure it gets set
+            while (ipServiceEnable == false)
+            {
+                AJATime::Sleep(10);
+
+                config->SetIPServicesControl(true, false);
+                config->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
+            }
+            config->SetBiDirectionalChannels(true);     // logically bidirectional
+        }
+
+        // Configure all of the 2022 IP settings
+        EveryFrameTask2022(config, &mFb1ModeLast, &mFb1VideoFormatLast);
+    }
 
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)

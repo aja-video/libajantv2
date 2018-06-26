@@ -2018,317 +2018,305 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                                         ReceiveVideoData2110* s2110RxVideoDataLast,
                                         ReceiveAudioData2110* s2110RxAudioDataLast)
 {
-    if (mCard->IsDeviceReady(true) == true)
+    bool ipServiceEnable, ipServiceForceConfig;
+
+    config2110->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
+    if (ipServiceEnable)
     {
-        if (config2110 == NULL)
+        // See if network needs configuring
+        if (memcmp(&m2110Network, s2110NetworkLast, sizeof(NetworkData2110)) != 0 || ipServiceForceConfig)
         {
-            config2110 = new CNTV2Config2110(*mCard);
-            config2110->SetIPServicesControl(true, false);
+            *s2110NetworkLast = m2110Network;
+
+            // configure PTP master
+            if (m2110Network.ptpMasterIP[0])
+            {
+                mCard->SetReference(NTV2_REFERENCE_SFP1_PTP);
+                config2110->SetPTPMaster(m2110Network.ptpMasterIP);
+                config2110->Set4KModeEnable(m2110Network.setup4k);
+            }
+
+            for (uint32_t i = 0; i < m2110Network.numSFPs; i++)
+            {
+                eSFP sfp = SFP_1;
+                if (i > 0)
+                    sfp = SFP_2;
+
+                bool rv;
+                if (m2110Network.sfp[i].enable)
+                {
+                    rv =  config2110->SetNetworkConfiguration(sfp,
+                                                              m2110Network.sfp[i].ipAddress,
+                                                              m2110Network.sfp[i].subnetMask,
+                                                              m2110Network.sfp[i].gateWay);
+                    if (rv)
+                    {
+                        printf("SetNetworkConfiguration OK\n");
+                        SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
+                    }
+                    else
+                    {
+                        printf("SetNetworkConfiguration ERROR %s\n", config2110->getLastError().c_str());
+                        SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, config2110->getLastErrorCode());
+                    }
+                }
+                else
+                {
+                    config2110->DisableNetworkInterface(sfp);
+                }
+            }
         }
 
-        bool    ipServiceEnable;
-        bool    ipServiceForceConfig;
+        tx_2110Config txConfig;
 
-        config2110->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
-        if (ipServiceEnable)
+        // See if any transmit video channels need configuring/enabling
+        for (uint32_t i=0; i<m2110TxVideoData.numTxVideoChannels; i++)
         {
-            // See if network needs configuring
-            if (memcmp(&m2110Network, s2110NetworkLast, sizeof(NetworkData2110)) != 0 || ipServiceForceConfig)
+            if (memcmp(&m2110TxVideoData.txVideoCh[i], &s2110TxVideoDataLast->txVideoCh[i], sizeof(TxVideoChData2110)) != 0 ||
+                *videoFormatLast != mFb1VideoFormat ||
+                ipServiceForceConfig)
             {
-                *s2110NetworkLast = m2110Network;
+                s2110TxVideoDataLast->txVideoCh[i] = m2110TxVideoData.txVideoCh[i];
 
-                // configure PTP master
-                if (m2110Network.ptpMasterIP[0])
+                // Process the configuration
+                txConfig.init();
+                txConfig.remoteIP[0] = m2110TxVideoData.txVideoCh[i].remoteIP[0];
+                txConfig.remoteIP[1] = m2110TxVideoData.txVideoCh[i].remoteIP[1];
+                txConfig.remotePort[0] = m2110TxVideoData.txVideoCh[i].remotePort[0];
+                txConfig.remotePort[1] = m2110TxVideoData.txVideoCh[i].remotePort[1];
+                txConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
+                txConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
+                txConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
+                txConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
+                txConfig.payload = m2110TxVideoData.txVideoCh[i].payload;
+                txConfig.ttl = 0x40;
+                txConfig.tos = 0x64;
+
+                // Video specific
+                txConfig.videoFormat = mFb1VideoFormat;
+                txConfig.videoSamples = VPIDSampling_YUV_422;
+
+                if (config2110->SetTxStreamConfiguration(m2110TxVideoData.txVideoCh[i].stream, txConfig) == true)
                 {
-                    mCard->SetReference(NTV2_REFERENCE_SFP1_PTP);
-                    config2110->SetPTPMaster(m2110Network.ptpMasterIP);
-                    config2110->Set4KModeEnable(m2110Network.setup4k);
-                }
+                    printf("SetTxStreamConfiguration Video OK\n");
+                    SetIPError((NTV2Channel)m2110TxVideoData.txVideoCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
 
-                for (uint32_t i = 0; i < m2110Network.numSFPs; i++)
-                {
-                    eSFP sfp = SFP_1;
-                    if (i > 0)
-                        sfp = SFP_2;
-
-                    bool rv;
-                    if (m2110Network.sfp[i].enable)
+                    // Process the enable
+                    if (m2110TxVideoData.txVideoCh[i].enable)
                     {
-                        rv =  config2110->SetNetworkConfiguration(sfp,
-                                                                  m2110Network.sfp[i].ipAddress,
-                                                                  m2110Network.sfp[i].subnetMask,
-                                                                  m2110Network.sfp[i].gateWay);
-                        if (rv)
-                        {
-                            printf("SetNetworkConfiguration OK\n");
-                            SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
-                        }
-                        else
-                        {
-                            printf("SetNetworkConfiguration ERROR %s\n", config2110->getLastError().c_str());
-                            SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, config2110->getLastErrorCode());
-                        }
+                        printf("SetTxVideoStream on %d\n", m2110TxVideoData.txVideoCh[i].stream);
+                        config2110->SetTxStreamEnable(m2110TxVideoData.txVideoCh[i].stream,
+                                                      (bool)m2110TxVideoData.txVideoCh[i].sfpEnable[0],
+                                                      (bool)m2110TxVideoData.txVideoCh[i].sfpEnable[1]);
+                        m2110IpStatusData.txChStatus[i] = kIpStatusRunning;
                     }
                     else
                     {
-                        config2110->DisableNetworkInterface(sfp);
+                        printf("SetTxVideoStream off %d\n", m2110TxVideoData.txVideoCh[i].stream);
+                        config2110->SetTxStreamEnable(m2110TxVideoData.txVideoCh[i].stream, false, false);
+                        m2110IpStatusData.txChStatus[i] = kIpStatusStopped;
+
                     }
                 }
-            }
-
-            tx_2110Config txConfig;
-
-            // See if any transmit video channels need configuring/enabling
-            for (uint32_t i=0; i<m2110TxVideoData.numTxVideoChannels; i++)
-            {
-                if (memcmp(&m2110TxVideoData.txVideoCh[i], &s2110TxVideoDataLast->txVideoCh[i], sizeof(TxVideoChData2110)) != 0 ||
-                    *videoFormatLast != mFb1VideoFormat ||
-                    ipServiceForceConfig)
+                else
                 {
-                    s2110TxVideoDataLast->txVideoCh[i] = m2110TxVideoData.txVideoCh[i];
-
-                    // Process the configuration
-                    txConfig.init();
-                    txConfig.remoteIP[0] = m2110TxVideoData.txVideoCh[i].remoteIP[0];
-                    txConfig.remoteIP[1] = m2110TxVideoData.txVideoCh[i].remoteIP[1];
-                    txConfig.remotePort[0] = m2110TxVideoData.txVideoCh[i].remotePort[0];
-                    txConfig.remotePort[1] = m2110TxVideoData.txVideoCh[i].remotePort[1];
-                    txConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
-                    txConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
-                    txConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
-                    txConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
-                    txConfig.payload = m2110TxVideoData.txVideoCh[i].payload;
-                    txConfig.ttl = 0x40;
-                    txConfig.tos = 0x64;
-
-                    // Video specific
-                    txConfig.videoFormat = mFb1VideoFormat;
-                    txConfig.videoSamples = VPIDSampling_YUV_422;
-
-                    if (config2110->SetTxStreamConfiguration(m2110TxVideoData.txVideoCh[i].stream, txConfig) == true)
-                    {
-                        printf("SetTxStreamConfiguration Video OK\n");
-                        SetIPError((NTV2Channel)m2110TxVideoData.txVideoCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
-
-                        // Process the enable
-                        if (m2110TxVideoData.txVideoCh[i].enable)
-                        {
-                            printf("SetTxVideoStream on %d\n", m2110TxVideoData.txVideoCh[i].stream);
-                            config2110->SetTxStreamEnable(m2110TxVideoData.txVideoCh[i].stream,
-                                                          (bool)m2110TxVideoData.txVideoCh[i].sfpEnable[0],
-                                                          (bool)m2110TxVideoData.txVideoCh[i].sfpEnable[1]);
-                            m2110IpStatusData.txChStatus[i] = kIpStatusRunning;
-                        }
-                        else
-                        {
-                            printf("SetTxVideoStream off %d\n", m2110TxVideoData.txVideoCh[i].stream);
-                            config2110->SetTxStreamEnable(m2110TxVideoData.txVideoCh[i].stream, false, false);
-                            m2110IpStatusData.txChStatus[i] = kIpStatusStopped;
-
-                        }
-                    }
-                    else
-                    {
-                        printf("SetTxStreamConfiguration Video ERROR %s\n", config2110->getLastError().c_str());
-                        SetIPError((NTV2Channel)m2110TxVideoData.txVideoCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
-                        m2110IpStatusData.txChStatus[i] = kIpStatusFail;
-                    }
+                    printf("SetTxStreamConfiguration Video ERROR %s\n", config2110->getLastError().c_str());
+                    SetIPError((NTV2Channel)m2110TxVideoData.txVideoCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
+                    m2110IpStatusData.txChStatus[i] = kIpStatusFail;
                 }
             }
-
-            // See if any transmit audio channels need configuring/enabling
-            for (uint32_t i=0; i<m2110TxAudioData.numTxAudioChannels; i++)
-            {
-                if (memcmp(&m2110TxAudioData.txAudioCh[i], &s2110TxAudioDataLast->txAudioCh[i], sizeof(TxAudioChData2110)) != 0 ||
-                    *videoFormatLast != mFb1VideoFormat ||
-                    ipServiceForceConfig)
-                {
-                    s2110TxAudioDataLast->txAudioCh[i] = m2110TxAudioData.txAudioCh[i];
-
-                    // Process the configuration
-                    txConfig.init();
-                    txConfig.remoteIP[0] = m2110TxAudioData.txAudioCh[i].remoteIP[0];
-                    txConfig.remoteIP[1] = m2110TxAudioData.txAudioCh[i].remoteIP[1];
-                    txConfig.remotePort[0] = m2110TxAudioData.txAudioCh[i].remotePort[0];
-                    txConfig.remotePort[1] = m2110TxAudioData.txAudioCh[i].remotePort[1];
-                    txConfig.localPort[0] = m2110TxAudioData.txAudioCh[i].localPort[0];
-                    txConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
-                    txConfig.localPort[0] = m2110TxAudioData.txAudioCh[i].localPort[0];
-                    txConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
-                    txConfig.payload = m2110TxAudioData.txAudioCh[i].payload;
-                    txConfig.ttl = 0x40;
-                    txConfig.tos = 0x64;
-
-                    // Audio specific
-                    txConfig.numAudioChannels = m2110TxAudioData.txAudioCh[i].numAudioChannels;
-                    txConfig.firstAudioChannel = m2110TxAudioData.txAudioCh[i].firstAudioChannel;
-                    txConfig.audioPktInterval = m2110TxAudioData.txAudioCh[i].audioPktInterval;
-
-
-                    if (config2110->SetTxStreamConfiguration(m2110TxAudioData.txAudioCh[i].stream, txConfig) == true)
-                    {
-                        printf("SetTxStreamConfiguration Audio OK\n");
-                        SetIPError((NTV2Channel)m2110TxVideoData.txVideoCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
-
-                        // Process the enable
-                        if (m2110TxAudioData.txAudioCh[i].enable)
-                        {
-                            printf("SetTxAudioStream on %d\n", m2110TxAudioData.txAudioCh[i].stream);
-                            config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].stream,
-                                                          (bool)m2110TxAudioData.txAudioCh[i].sfpEnable[0],
-                                                          (bool)m2110TxAudioData.txAudioCh[i].sfpEnable[1]);
-                        }
-                        else
-                        {
-                            printf("SetTxAudioStream off %d\n", m2110TxAudioData.txAudioCh[i].stream);
-                            config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].stream, false, false);
-                        }
-                    }
-                    else
-                    {
-                        printf("SetTxStreamConfiguration Audio ERROR %s\n", config2110->getLastError().c_str());
-                        SetIPError((NTV2Channel)m2110TxAudioData.txAudioCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
-                    }
-                }
-            }
-            *videoFormatLast = mFb1VideoFormat;
-
-            rx_2110Config rxConfig;
-            eSFP sfp = SFP_1;
-
-            // See if any receive video channels need configuring/enabling
-            for (uint32_t i=0; i<m2110RxVideoData.numRxVideoChannels; i++)
-            {
-                if (memcmp(&m2110RxVideoData.rxVideoCh[i], &s2110RxVideoDataLast->rxVideoCh[i], sizeof(RxVideoChData2110)) != 0 ||
-                    ipServiceForceConfig)
-                {
-                    s2110RxVideoDataLast->rxVideoCh[i] = m2110RxVideoData.rxVideoCh[i];
-
-                    rxConfig.init();
-                    if (m2110RxVideoData.rxVideoCh[i].sfpEnable[1])
-                    {
-                        // Use SFP 2 params
-                        sfp = SFP_2;
-                        rxConfig.rxMatch = m2110RxVideoData.rxVideoCh[i].rxMatch[1];
-                        rxConfig.sourceIP = m2110RxVideoData.rxVideoCh[i].sourceIP[1];
-                        rxConfig.destIP = m2110RxVideoData.rxVideoCh[i].destIP[1];
-                        rxConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[1];
-                        rxConfig.destPort = m2110RxVideoData.rxVideoCh[i].destPort[1];
-                        sfp = SFP_2;
-                    }
-                    else if (m2110RxVideoData.rxVideoCh[i].sfpEnable[0])
-                    {
-                        // Use SFP 1 params
-                        sfp = SFP_1;
-                        rxConfig.rxMatch = m2110RxVideoData.rxVideoCh[i].rxMatch[0];
-                        rxConfig.sourceIP = m2110RxVideoData.rxVideoCh[i].sourceIP[0];
-                        rxConfig.destIP = m2110RxVideoData.rxVideoCh[i].destIP[0];
-                        rxConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[0];
-                        rxConfig.destPort = m2110RxVideoData.rxVideoCh[i].destPort[0];
-                    }
-                    rxConfig.payload = m2110RxVideoData.rxVideoCh[i].payload;
-
-                    // Video specific
-                    rxConfig.videoFormat = m2110RxVideoData.rxVideoCh[i].videoFormat;
-                    rxConfig.videoSamples = VPIDSampling_YUV_422;
-                    printf("Format (%d, %d, %d)\n", i, mFollowInputFormat, rxConfig.videoFormat);
-
-
-                    if (config2110->SetRxStreamConfiguration(sfp, m2110RxVideoData.rxVideoCh[i].stream, rxConfig) == true)
-                    {
-                        printf("SetRxStreamConfiguration Video OK\n");
-                        SetIPError((NTV2Channel)m2110RxVideoData.rxVideoCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
-
-                        // Process the enable
-                        if (m2110RxVideoData.rxVideoCh[i].enable)
-                        {
-                            printf("SetRxVideoStream on %d\n", m2110RxVideoData.rxVideoCh[i].stream);
-                            config2110->SetRxStreamEnable(sfp, m2110RxVideoData.rxVideoCh[i].stream, true);
-                            m2110IpStatusData.rxChStatus[i] = kIpStatusRunning;
-                        }
-                        else
-                        {
-                            printf("SetRxVideoStream off %d\n", m2110RxVideoData.rxVideoCh[i].stream);
-                            config2110->SetRxStreamEnable(sfp, m2110RxVideoData.rxVideoCh[i].stream, false);
-                            m2110IpStatusData.rxChStatus[i] = kIpStatusStopped;
-                        }
-                    }
-                    else
-                    {
-                        printf("SetRxStreamConfiguration Video ERROR %s\n", config2110->getLastError().c_str());
-                        SetIPError((NTV2Channel)m2110RxVideoData.rxVideoCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
-                        m2110IpStatusData.rxChStatus[i] = kIpStatusFail;
-                    }
-                }
-            }
-
-            // See if any receive video channels need configuring/enabling
-            for (uint32_t i=0; i<m2110RxAudioData.numRxAudioChannels; i++)
-            {
-                if (memcmp(&m2110RxAudioData.rxAudioCh[i], &s2110RxAudioDataLast->rxAudioCh[i], sizeof(RxAudioChData2110)) != 0 || ipServiceForceConfig)
-                {
-                    s2110RxAudioDataLast->rxAudioCh[i] = m2110RxAudioData.rxAudioCh[i];
-
-                    rxConfig.init();
-                    if (m2110RxAudioData.rxAudioCh[i].sfpEnable[1])
-                    {
-                        // Use SFP 2 params
-                        sfp = SFP_2;
-                        rxConfig.rxMatch = m2110RxAudioData.rxAudioCh[i].rxMatch[1];
-                        rxConfig.sourceIP = m2110RxAudioData.rxAudioCh[i].sourceIP[1];
-                        rxConfig.destIP = m2110RxAudioData.rxAudioCh[i].destIP[1];
-                        rxConfig.sourcePort = m2110RxAudioData.rxAudioCh[i].sourcePort[1];
-                        rxConfig.destPort = m2110RxAudioData.rxAudioCh[i].destPort[1];
-                        sfp = SFP_2;
-                    }
-                    else if (m2110RxAudioData.rxAudioCh[i].sfpEnable[0])
-                    {
-                        // Use SFP 1 params
-                        sfp = SFP_1;
-                        rxConfig.rxMatch = m2110RxAudioData.rxAudioCh[i].rxMatch[0];
-                        rxConfig.sourceIP = m2110RxAudioData.rxAudioCh[i].sourceIP[0];
-                        rxConfig.destIP = m2110RxAudioData.rxAudioCh[i].destIP[0];
-                        rxConfig.sourcePort = m2110RxAudioData.rxAudioCh[i].sourcePort[0];
-                        rxConfig.destPort = m2110RxAudioData.rxAudioCh[i].destPort[0];
-                    }
-                    rxConfig.payload = m2110RxAudioData.rxAudioCh[i].payload;
-
-                    // Audio specific
-                    rxConfig.numAudioChannels = m2110RxAudioData.rxAudioCh[i].numAudioChannels;
-                    rxConfig.audioPktInterval = m2110RxAudioData.rxAudioCh[i].audioPktInterval;
-
-                    if (config2110->SetRxStreamConfiguration(sfp, m2110RxAudioData.rxAudioCh[i].stream, rxConfig) == true)
-                    {
-                        printf("SetRxStreamConfiguration Audio OK\n");
-                        SetIPError(m2110RxAudioData.rxAudioCh[i].channel, kErrNetworkConfig, NTV2IpErrNone);
-
-                        // Process the enable
-                        if (m2110RxAudioData.rxAudioCh[i].enable)
-                        {
-                            printf("SetRxAudioStream on %d\n", m2110RxAudioData.rxAudioCh[i].stream);
-                            config2110->SetRxStreamEnable(sfp, m2110RxAudioData.rxAudioCh[i].stream, true);
-                        }
-                        else
-                        {
-                            printf("SetRxAudioStream off %d\n", m2110RxAudioData.rxAudioCh[i].stream);
-                            config2110->SetRxStreamEnable(sfp, m2110RxAudioData.rxAudioCh[i].stream, false);
-                        }
-                    }
-                    else
-                    {
-                        printf("SetRxStreamConfiguration Audio ERROR %s\n", config2110->getLastError().c_str());
-                        SetIPError(m2110RxAudioData.rxAudioCh[i].channel, kErrNetworkConfig, config2110->getLastErrorCode());
-                    }
-                }
-            }
-            // Write status
-            mCard->WriteVirtualData(kChStatusData2110, &m2110IpStatusData, sizeof(IpStatus2110));
-            
-            // Turn off force config
-            config2110->SetIPServicesControl(ipServiceEnable, false);
         }
+
+        // See if any transmit audio channels need configuring/enabling
+        for (uint32_t i=0; i<m2110TxAudioData.numTxAudioChannels; i++)
+        {
+            if (memcmp(&m2110TxAudioData.txAudioCh[i], &s2110TxAudioDataLast->txAudioCh[i], sizeof(TxAudioChData2110)) != 0 ||
+                *videoFormatLast != mFb1VideoFormat ||
+                ipServiceForceConfig)
+            {
+                s2110TxAudioDataLast->txAudioCh[i] = m2110TxAudioData.txAudioCh[i];
+
+                // Process the configuration
+                txConfig.init();
+                txConfig.remoteIP[0] = m2110TxAudioData.txAudioCh[i].remoteIP[0];
+                txConfig.remoteIP[1] = m2110TxAudioData.txAudioCh[i].remoteIP[1];
+                txConfig.remotePort[0] = m2110TxAudioData.txAudioCh[i].remotePort[0];
+                txConfig.remotePort[1] = m2110TxAudioData.txAudioCh[i].remotePort[1];
+                txConfig.localPort[0] = m2110TxAudioData.txAudioCh[i].localPort[0];
+                txConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
+                txConfig.localPort[0] = m2110TxAudioData.txAudioCh[i].localPort[0];
+                txConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
+                txConfig.payload = m2110TxAudioData.txAudioCh[i].payload;
+                txConfig.ttl = 0x40;
+                txConfig.tos = 0x64;
+
+                // Audio specific
+                txConfig.numAudioChannels = m2110TxAudioData.txAudioCh[i].numAudioChannels;
+                txConfig.firstAudioChannel = m2110TxAudioData.txAudioCh[i].firstAudioChannel;
+                txConfig.audioPktInterval = m2110TxAudioData.txAudioCh[i].audioPktInterval;
+
+
+                if (config2110->SetTxStreamConfiguration(m2110TxAudioData.txAudioCh[i].stream, txConfig) == true)
+                {
+                    printf("SetTxStreamConfiguration Audio OK\n");
+                    SetIPError((NTV2Channel)m2110TxVideoData.txVideoCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
+
+                    // Process the enable
+                    if (m2110TxAudioData.txAudioCh[i].enable)
+                    {
+                        printf("SetTxAudioStream on %d\n", m2110TxAudioData.txAudioCh[i].stream);
+                        config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].stream,
+                                                      (bool)m2110TxAudioData.txAudioCh[i].sfpEnable[0],
+                                                      (bool)m2110TxAudioData.txAudioCh[i].sfpEnable[1]);
+                    }
+                    else
+                    {
+                        printf("SetTxAudioStream off %d\n", m2110TxAudioData.txAudioCh[i].stream);
+                        config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].stream, false, false);
+                    }
+                }
+                else
+                {
+                    printf("SetTxStreamConfiguration Audio ERROR %s\n", config2110->getLastError().c_str());
+                    SetIPError((NTV2Channel)m2110TxAudioData.txAudioCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
+                }
+            }
+        }
+        *videoFormatLast = mFb1VideoFormat;
+
+        rx_2110Config rxConfig;
+        eSFP sfp = SFP_1;
+
+        // See if any receive video channels need configuring/enabling
+        for (uint32_t i=0; i<m2110RxVideoData.numRxVideoChannels; i++)
+        {
+            if (memcmp(&m2110RxVideoData.rxVideoCh[i], &s2110RxVideoDataLast->rxVideoCh[i], sizeof(RxVideoChData2110)) != 0 ||
+                ipServiceForceConfig)
+            {
+                s2110RxVideoDataLast->rxVideoCh[i] = m2110RxVideoData.rxVideoCh[i];
+
+                rxConfig.init();
+                if (m2110RxVideoData.rxVideoCh[i].sfpEnable[1])
+                {
+                    // Use SFP 2 params
+                    sfp = SFP_2;
+                    rxConfig.rxMatch = m2110RxVideoData.rxVideoCh[i].rxMatch[1];
+                    rxConfig.sourceIP = m2110RxVideoData.rxVideoCh[i].sourceIP[1];
+                    rxConfig.destIP = m2110RxVideoData.rxVideoCh[i].destIP[1];
+                    rxConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[1];
+                    rxConfig.destPort = m2110RxVideoData.rxVideoCh[i].destPort[1];
+                    sfp = SFP_2;
+                }
+                else if (m2110RxVideoData.rxVideoCh[i].sfpEnable[0])
+                {
+                    // Use SFP 1 params
+                    sfp = SFP_1;
+                    rxConfig.rxMatch = m2110RxVideoData.rxVideoCh[i].rxMatch[0];
+                    rxConfig.sourceIP = m2110RxVideoData.rxVideoCh[i].sourceIP[0];
+                    rxConfig.destIP = m2110RxVideoData.rxVideoCh[i].destIP[0];
+                    rxConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[0];
+                    rxConfig.destPort = m2110RxVideoData.rxVideoCh[i].destPort[0];
+                }
+                rxConfig.payload = m2110RxVideoData.rxVideoCh[i].payload;
+
+                // Video specific
+                rxConfig.videoFormat = m2110RxVideoData.rxVideoCh[i].videoFormat;
+                rxConfig.videoSamples = VPIDSampling_YUV_422;
+                printf("Format (%d, %d, %d)\n", i, mFollowInputFormat, rxConfig.videoFormat);
+
+
+                if (config2110->SetRxStreamConfiguration(sfp, m2110RxVideoData.rxVideoCh[i].stream, rxConfig) == true)
+                {
+                    printf("SetRxStreamConfiguration Video OK\n");
+                    SetIPError((NTV2Channel)m2110RxVideoData.rxVideoCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
+
+                    // Process the enable
+                    if (m2110RxVideoData.rxVideoCh[i].enable)
+                    {
+                        printf("SetRxVideoStream on %d\n", m2110RxVideoData.rxVideoCh[i].stream);
+                        config2110->SetRxStreamEnable(sfp, m2110RxVideoData.rxVideoCh[i].stream, true);
+                        m2110IpStatusData.rxChStatus[i] = kIpStatusRunning;
+                    }
+                    else
+                    {
+                        printf("SetRxVideoStream off %d\n", m2110RxVideoData.rxVideoCh[i].stream);
+                        config2110->SetRxStreamEnable(sfp, m2110RxVideoData.rxVideoCh[i].stream, false);
+                        m2110IpStatusData.rxChStatus[i] = kIpStatusStopped;
+                    }
+                }
+                else
+                {
+                    printf("SetRxStreamConfiguration Video ERROR %s\n", config2110->getLastError().c_str());
+                    SetIPError((NTV2Channel)m2110RxVideoData.rxVideoCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
+                    m2110IpStatusData.rxChStatus[i] = kIpStatusFail;
+                }
+            }
+        }
+
+        // See if any receive video channels need configuring/enabling
+        for (uint32_t i=0; i<m2110RxAudioData.numRxAudioChannels; i++)
+        {
+            if (memcmp(&m2110RxAudioData.rxAudioCh[i], &s2110RxAudioDataLast->rxAudioCh[i], sizeof(RxAudioChData2110)) != 0 || ipServiceForceConfig)
+            {
+                s2110RxAudioDataLast->rxAudioCh[i] = m2110RxAudioData.rxAudioCh[i];
+
+                rxConfig.init();
+                if (m2110RxAudioData.rxAudioCh[i].sfpEnable[1])
+                {
+                    // Use SFP 2 params
+                    sfp = SFP_2;
+                    rxConfig.rxMatch = m2110RxAudioData.rxAudioCh[i].rxMatch[1];
+                    rxConfig.sourceIP = m2110RxAudioData.rxAudioCh[i].sourceIP[1];
+                    rxConfig.destIP = m2110RxAudioData.rxAudioCh[i].destIP[1];
+                    rxConfig.sourcePort = m2110RxAudioData.rxAudioCh[i].sourcePort[1];
+                    rxConfig.destPort = m2110RxAudioData.rxAudioCh[i].destPort[1];
+                    sfp = SFP_2;
+                }
+                else if (m2110RxAudioData.rxAudioCh[i].sfpEnable[0])
+                {
+                    // Use SFP 1 params
+                    sfp = SFP_1;
+                    rxConfig.rxMatch = m2110RxAudioData.rxAudioCh[i].rxMatch[0];
+                    rxConfig.sourceIP = m2110RxAudioData.rxAudioCh[i].sourceIP[0];
+                    rxConfig.destIP = m2110RxAudioData.rxAudioCh[i].destIP[0];
+                    rxConfig.sourcePort = m2110RxAudioData.rxAudioCh[i].sourcePort[0];
+                    rxConfig.destPort = m2110RxAudioData.rxAudioCh[i].destPort[0];
+                }
+                rxConfig.payload = m2110RxAudioData.rxAudioCh[i].payload;
+
+                // Audio specific
+                rxConfig.numAudioChannels = m2110RxAudioData.rxAudioCh[i].numAudioChannels;
+                rxConfig.audioPktInterval = m2110RxAudioData.rxAudioCh[i].audioPktInterval;
+
+                if (config2110->SetRxStreamConfiguration(sfp, m2110RxAudioData.rxAudioCh[i].stream, rxConfig) == true)
+                {
+                    printf("SetRxStreamConfiguration Audio OK\n");
+                    SetIPError(m2110RxAudioData.rxAudioCh[i].channel, kErrNetworkConfig, NTV2IpErrNone);
+
+                    // Process the enable
+                    if (m2110RxAudioData.rxAudioCh[i].enable)
+                    {
+                        printf("SetRxAudioStream on %d\n", m2110RxAudioData.rxAudioCh[i].stream);
+                        config2110->SetRxStreamEnable(sfp, m2110RxAudioData.rxAudioCh[i].stream, true);
+                    }
+                    else
+                    {
+                        printf("SetRxAudioStream off %d\n", m2110RxAudioData.rxAudioCh[i].stream);
+                        config2110->SetRxStreamEnable(sfp, m2110RxAudioData.rxAudioCh[i].stream, false);
+                    }
+                }
+                else
+                {
+                    printf("SetRxStreamConfiguration Audio ERROR %s\n", config2110->getLastError().c_str());
+                    SetIPError(m2110RxAudioData.rxAudioCh[i].channel, kErrNetworkConfig, config2110->getLastErrorCode());
+                }
+            }
+        }
+        // Write status
+        mCard->WriteVirtualData(kChStatusData2110, &m2110IpStatusData, sizeof(IpStatus2110));
         
-        //printIpEnable(m21110IpEnable);
+        // Turn off force config
+        config2110->SetIPServicesControl(ipServiceEnable, false);
     }
 }
 
@@ -2339,289 +2327,271 @@ void DeviceServices::EveryFrameTask2022(CNTV2Config2022* config2022, NTV2Mode* m
     uint32_t				networkPathDiffCard;
     uint32_t                configErr;
 
-    if (mCard->IsDeviceReady(true) == true)
+    rx_2022_channel         rxHwConfig;
+    tx_2022_channel         txHwConfig, txHwConfig2;
+    bool                    ipServiceEnable, ipServiceForceConfig;
+
+    config2022->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
+    if (ipServiceEnable)
     {
-        rx_2022_channel		rxHwConfig;
-        tx_2022_channel		txHwConfig, txHwConfig2;
-        bool                ipServiceEnable, ipServiceForceConfig;
+        // KonaIP network configuration
+        string hwIp,hwNet,hwGate;       // current hardware config
 
-        if (config2022 == NULL)
+        rv = config2022->GetNetworkConfiguration(SFP_1,hwIp,hwNet,hwGate);
+        if (rv)
         {
-            config2022 = new CNTV2Config2022(*mCard);
-            ipServiceEnable = false;
-            // For some reason on Windows this doesn't immediately happen so make sure it gets set
-            while (ipServiceEnable == false)
-            {
-                AJATime::Sleep(10);
+            uint32_t ip, net, gate;
+            ip   = inet_addr(hwIp.c_str());
+            net  = inet_addr(hwNet.c_str());
+            gate = inet_addr(hwGate.c_str());
 
-                config2022->SetIPServicesControl(true, false);
-                config2022->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
+            if ((ip != mEth0.ipc_ip) ||
+                (net != mEth0.ipc_subnet) ||
+                (gate != mEth0.ipc_gateway) ||
+                ipServiceForceConfig)
+            {
+                SetNetConfig(config2022, SFP_1);
             }
-            config2022->SetBiDirectionalChannels(true);     // logically bidirectional
+        }
+        else
+            printf("GetNetworkConfiguration SFP_TOP - FAILED\n");
+
+        rv = config2022->GetNetworkConfiguration(SFP_2,hwIp,hwNet,hwGate);
+        if (rv)
+        {
+            uint32_t ip, net, gate;
+            ip   = inet_addr(hwIp.c_str());
+            net  = inet_addr(hwNet.c_str());
+            gate = inet_addr(hwGate.c_str());
+
+            if ((ip != mEth1.ipc_ip) ||
+                (net != mEth1.ipc_subnet) ||
+                (gate != mEth1.ipc_gateway) ||
+                ipServiceForceConfig)
+            {
+                SetNetConfig(config2022, SFP_2);
+            }
+        }
+        else
+            printf("GetNetworkConfiguration SFP_BOTTOM - FAILED\n");
+
+        // KonaIP look for changes in 2022-7 mode and NPD if enabled
+        rv  = config2022->Get2022_7_Mode(enable2022_7Card, networkPathDiffCard);
+
+        if (rv && ((enable2022_7Card != m2022_7Mode) || (enable2022_7Card && (networkPathDiffCard != mNetworkPathDiff))))
+        {
+            printf("NPD ser/card (%d %d)\n", mNetworkPathDiff, networkPathDiffCard);
+            if (config2022->Set2022_7_Mode(m2022_7Mode, mNetworkPathDiff) == true)
+            {
+                printf("Set 2022_7Mode OK\n");
+                SetIPError(NTV2_CHANNEL1, kErrRxConfig, NTV2IpErrNone);
+            }
+            else
+            {
+                printf("Set 2022_7Mode ERROR %s\n", config2022->getLastError().c_str());
+                SetIPError(NTV2_CHANNEL1, kErrRxConfig, config2022->getLastErrorCode());
+            }
         }
 
-        config2022->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
-        if (ipServiceEnable)
+        // KonaIP Input configurations
+        if (IsValidConfig(mRx2022Config1, m2022_7Mode))
         {
-            // KonaIP network configuration
-            string hwIp,hwNet,hwGate;       // current hardware config
-
-            rv = config2022->GetNetworkConfiguration(SFP_1,hwIp,hwNet,hwGate);
-            if (rv)
+            // clear any previous error
+            SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrNone);
+            rv  = config2022->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
+            rv2 = config2022->GetRxChannelEnable(NTV2_CHANNEL1,enableChCard);
+            mCard->ReadRegister(kVRegRxcEnable1, enableChServices);
+            if (rv && rv2)
             {
-                uint32_t ip, net, gate;
-                ip   = inet_addr(hwIp.c_str());
-                net  = inet_addr(hwNet.c_str());
-                gate = inet_addr(hwGate.c_str());
-
-                if ((ip != mEth0.ipc_ip) ||
-                    (net != mEth0.ipc_subnet) ||
-                    (gate != mEth0.ipc_gateway) ||
-                    ipServiceForceConfig)
+                // if the channel enable toggled
+                if (enableChCard != (enableChServices ? true : false))
                 {
-                    SetNetConfig(config2022, SFP_1);
+                    config2022->SetRxChannelEnable(NTV2_CHANNEL1, false);
+
+                    // if the channel is enabled
+                    if (enableChServices)
+                    {
+                        SetRxConfig(config2022, NTV2_CHANNEL1, m2022_7Mode);
+                        GetIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
+                        if (!configErr)
+                        {
+                            config2022->SetRxChannelEnable(NTV2_CHANNEL1, true);
+                        }
+                    }
                 }
-            }
-            else
-                printf("GetNetworkConfiguration SFP_TOP - FAILED\n");
-
-            rv = config2022->GetNetworkConfiguration(SFP_2,hwIp,hwNet,hwGate);
-            if (rv)
-            {
-                uint32_t ip, net, gate;
-                ip   = inet_addr(hwIp.c_str());
-                net  = inet_addr(hwNet.c_str());
-                gate = inet_addr(hwGate.c_str());
-
-                if ((ip != mEth1.ipc_ip) ||
-                    (net != mEth1.ipc_subnet) ||
-                    (gate != mEth1.ipc_gateway) ||
-                    ipServiceForceConfig)
+                // if the channel is already enabled then check to see if a configuration has changed
+                else if (enableChServices)
                 {
-                    SetNetConfig(config2022, SFP_2);
-                }
-            }
-            else
-                printf("GetNetworkConfiguration SFP_BOTTOM - FAILED\n");
-
-            // KonaIP look for changes in 2022-7 mode and NPD if enabled
-            rv  = config2022->Get2022_7_Mode(enable2022_7Card, networkPathDiffCard);
-
-            if (rv && ((enable2022_7Card != m2022_7Mode) || (enable2022_7Card && (networkPathDiffCard != mNetworkPathDiff))))
-            {
-                printf("NPD ser/card (%d %d)\n", mNetworkPathDiff, networkPathDiffCard);
-                if (config2022->Set2022_7_Mode(m2022_7Mode, mNetworkPathDiff) == true)
-                {
-                    printf("Set 2022_7Mode OK\n");
-                    SetIPError(NTV2_CHANNEL1, kErrRxConfig, NTV2IpErrNone);
-                }
-                else
-                {
-                    printf("Set 2022_7Mode ERROR %s\n", config2022->getLastError().c_str());
-                    SetIPError(NTV2_CHANNEL1, kErrRxConfig, config2022->getLastErrorCode());
-                }
-            }
-
-            // KonaIP Input configurations
-            if (IsValidConfig(mRx2022Config1, m2022_7Mode))
-            {
-                // clear any previous error
-                SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrNone);
-                rv  = config2022->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
-                rv2 = config2022->GetRxChannelEnable(NTV2_CHANNEL1,enableChCard);
-                mCard->ReadRegister(kVRegRxcEnable1, enableChServices);
-                if (rv && rv2)
-                {
-                    // if the channel enable toggled
-                    if (enableChCard != (enableChServices ? true : false))
+                    if (NotEqual(rxHwConfig, mRx2022Config1, m2022_7Mode) ||
+                        enable2022_7Card != m2022_7Mode ||
+                        *modeLast != mFb1Mode ||
+                        *videoFormatLast != mFb1VideoFormat)
                     {
                         config2022->SetRxChannelEnable(NTV2_CHANNEL1, false);
-
-                        // if the channel is enabled
-                        if (enableChServices)
+                        SetRxConfig(config2022, NTV2_CHANNEL1, m2022_7Mode);
+                        GetIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
+                        if (!configErr)
                         {
-                            SetRxConfig(config2022, NTV2_CHANNEL1, m2022_7Mode);
-                            GetIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config2022->SetRxChannelEnable(NTV2_CHANNEL1, true);
-                            }
-                        }
-                    }
-                    // if the channel is already enabled then check to see if a configuration has changed
-                    else if (enableChServices)
-                    {
-                        if (NotEqual(rxHwConfig, mRx2022Config1, m2022_7Mode) ||
-                            enable2022_7Card != m2022_7Mode ||
-                            *modeLast != mFb1Mode ||
-                            *videoFormatLast != mFb1VideoFormat)
-                        {
-                            config2022->SetRxChannelEnable(NTV2_CHANNEL1, false);
-                            SetRxConfig(config2022, NTV2_CHANNEL1, m2022_7Mode);
-                            GetIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config2022->SetRxChannelEnable(NTV2_CHANNEL1, true);
-                            }
+                            config2022->SetRxChannelEnable(NTV2_CHANNEL1, true);
                         }
                     }
                 }
-                else printf("rxConfig ch 1 read failed\n");
             }
-            else SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrInvalidConfig);
+            else printf("rxConfig ch 1 read failed\n");
+        }
+        else SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrInvalidConfig);
 
-            if (IsValidConfig(mRx2022Config2, m2022_7Mode))
+        if (IsValidConfig(mRx2022Config2, m2022_7Mode))
+        {
+            // clear any previous error
+            SetIPError(NTV2_CHANNEL2,kErrRxConfig,NTV2IpErrNone);
+            rv  = config2022->GetRxChannelConfiguration(NTV2_CHANNEL2, rxHwConfig);
+            rv2 = config2022->GetRxChannelEnable(NTV2_CHANNEL2, enableChCard);
+            mCard->ReadRegister(kVRegRxcEnable2, enableChServices);
+            if (rv && rv2)
             {
-                // clear any previous error
-                SetIPError(NTV2_CHANNEL2,kErrRxConfig,NTV2IpErrNone);
-                rv  = config2022->GetRxChannelConfiguration(NTV2_CHANNEL2, rxHwConfig);
-                rv2 = config2022->GetRxChannelEnable(NTV2_CHANNEL2, enableChCard);
-                mCard->ReadRegister(kVRegRxcEnable2, enableChServices);
-                if (rv && rv2)
+                // if the channel enable toggled
+                if (enableChCard != (enableChServices ? true : false))
                 {
-                    // if the channel enable toggled
-                    if (enableChCard != (enableChServices ? true : false))
+                    config2022->SetRxChannelEnable(NTV2_CHANNEL2, false);
+
+                    // if the channel is enabled
+                    if (enableChServices)
+                    {
+                        SetRxConfig(config2022, NTV2_CHANNEL2, m2022_7Mode);
+                        GetIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
+                        if (!configErr)
+                        {
+                            config2022->SetRxChannelEnable(NTV2_CHANNEL2, true);
+                        }
+                    }
+                }
+                // if the channel is already enabled then check to see if a configuration has changed
+                else if (enableChServices)
+                {
+                    if (NotEqual(rxHwConfig, mRx2022Config2, m2022_7Mode) ||
+                        enable2022_7Card != m2022_7Mode ||
+                        *modeLast != mFb1Mode ||
+                        *videoFormatLast != mFb1VideoFormat)
                     {
                         config2022->SetRxChannelEnable(NTV2_CHANNEL2, false);
-
-                        // if the channel is enabled
-                        if (enableChServices)
+                        SetRxConfig(config2022, NTV2_CHANNEL2, m2022_7Mode);
+                        GetIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
+                        if (!configErr)
                         {
-                            SetRxConfig(config2022, NTV2_CHANNEL2, m2022_7Mode);
-                            GetIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config2022->SetRxChannelEnable(NTV2_CHANNEL2, true);
-                            }
-                        }
-                    }
-                    // if the channel is already enabled then check to see if a configuration has changed
-                    else if (enableChServices)
-                    {
-                        if (NotEqual(rxHwConfig, mRx2022Config2, m2022_7Mode) ||
-                            enable2022_7Card != m2022_7Mode ||
-                            *modeLast != mFb1Mode ||
-                            *videoFormatLast != mFb1VideoFormat)
-                        {
-                            config2022->SetRxChannelEnable(NTV2_CHANNEL2, false);
-                            SetRxConfig(config2022, NTV2_CHANNEL2, m2022_7Mode);
-                            GetIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config2022->SetRxChannelEnable(NTV2_CHANNEL2, true);
-                            }
+                            config2022->SetRxChannelEnable(NTV2_CHANNEL2, true);
                         }
                     }
                 }
-                else printf("rxConfig ch 2 config read failed\n");
             }
-            else SetIPError(NTV2_CHANNEL2,kErrRxConfig,NTV2IpErrInvalidConfig);
+            else printf("rxConfig ch 2 config read failed\n");
+        }
+        else SetIPError(NTV2_CHANNEL2,kErrRxConfig,NTV2IpErrInvalidConfig);
 
-            // KonaIP output configurations
-            if (IsValidConfig(mTx2022Config3, m2022_7Mode))
+        // KonaIP output configurations
+        if (IsValidConfig(mTx2022Config3, m2022_7Mode))
+        {
+            // clear any previous error
+            SetIPError(NTV2_CHANNEL3,kErrTxConfig,NTV2IpErrNone);
+            rv  = config2022->GetTxChannelConfiguration(NTV2_CHANNEL3, txHwConfig);
+            rv2 = config2022->GetTxChannelEnable(NTV2_CHANNEL3, enableChCard);
+            GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
+            mCard->ReadRegister(kVRegTxcEnable3, enableChServices);
+            if (rv && rv2)
             {
-                // clear any previous error
-                SetIPError(NTV2_CHANNEL3,kErrTxConfig,NTV2IpErrNone);
-                rv  = config2022->GetTxChannelConfiguration(NTV2_CHANNEL3, txHwConfig);
-                rv2 = config2022->GetTxChannelEnable(NTV2_CHANNEL3, enableChCard);
-                GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
-                mCard->ReadRegister(kVRegTxcEnable3, enableChServices);
-                if (rv && rv2)
+                // if the channel enable toggled
+                if (enableChCard != (enableChServices ? true : false))
                 {
-                    // if the channel enable toggled
-                    if (enableChCard != (enableChServices ? true : false))
+                    config2022->SetTxChannelEnable(NTV2_CHANNEL3, false);
+
+                    // if the channel is enabled
+                    if (enableChServices)
+                    {
+                        SetTxConfig(config2022, NTV2_CHANNEL3, m2022_7Mode);
+                        GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
+                        if (!configErr)
+                        {
+                            config2022->SetTxChannelEnable(NTV2_CHANNEL3, true);
+                        }
+                    }
+                }
+                // if the channel is already enabled then check to see if a configuration has changed
+                else if (enableChServices)
+                {
+                    if (NotEqual(txHwConfig, mTx2022Config3, m2022_7Mode) ||
+                        configErr ||
+                        enable2022_7Card != m2022_7Mode ||
+                        *modeLast != mFb1Mode ||
+                        *videoFormatLast != mFb1VideoFormat)
                     {
                         config2022->SetTxChannelEnable(NTV2_CHANNEL3, false);
-
-                        // if the channel is enabled
-                        if (enableChServices)
+                        SetTxConfig(config2022, NTV2_CHANNEL3, m2022_7Mode);
+                        GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
+                        if (!configErr)
                         {
-                            SetTxConfig(config2022, NTV2_CHANNEL3, m2022_7Mode);
-                            GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config2022->SetTxChannelEnable(NTV2_CHANNEL3, true);
-                            }
-                        }
-                    }
-                    // if the channel is already enabled then check to see if a configuration has changed
-                    else if (enableChServices)
-                    {
-                        if (NotEqual(txHwConfig, mTx2022Config3, m2022_7Mode) ||
-                            configErr ||
-                            enable2022_7Card != m2022_7Mode ||
-                            *modeLast != mFb1Mode ||
-                            *videoFormatLast != mFb1VideoFormat)
-                        {
-                            config2022->SetTxChannelEnable(NTV2_CHANNEL3, false);
-                            SetTxConfig(config2022, NTV2_CHANNEL3, m2022_7Mode);
-                            GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config2022->SetTxChannelEnable(NTV2_CHANNEL3, true);
-                            }
+                            config2022->SetTxChannelEnable(NTV2_CHANNEL3, true);
                         }
                     }
                 }
-                else printf("txConfig ch 3 read failed\n");
             }
-            else SetIPError(NTV2_CHANNEL3,kErrTxConfig,NTV2IpErrInvalidConfig);
+            else printf("txConfig ch 3 read failed\n");
+        }
+        else SetIPError(NTV2_CHANNEL3,kErrTxConfig,NTV2IpErrInvalidConfig);
 
-            if (IsValidConfig(mTx2022Config4, m2022_7Mode))
+        if (IsValidConfig(mTx2022Config4, m2022_7Mode))
+        {
+            // clear any previous error
+            SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrNone);
+            rv  = config2022->GetTxChannelConfiguration(NTV2_CHANNEL4, txHwConfig2);
+            rv2 = config2022->GetTxChannelEnable(NTV2_CHANNEL4, enableChCard);
+            GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
+            mCard->ReadRegister(kVRegTxcEnable4, enableChServices);
+            if (rv && rv2)
             {
-                // clear any previous error
-                SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrNone);
-                rv  = config2022->GetTxChannelConfiguration(NTV2_CHANNEL4, txHwConfig2);
-                rv2 = config2022->GetTxChannelEnable(NTV2_CHANNEL4, enableChCard);
-                GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
-                mCard->ReadRegister(kVRegTxcEnable4, enableChServices);
-                if (rv && rv2)
+                // if the channel enable toggled
+                if (enableChCard != (enableChServices ? true : false))
                 {
-                    // if the channel enable toggled
-                    if (enableChCard != (enableChServices ? true : false))
+                    config2022->SetTxChannelEnable(NTV2_CHANNEL4, false);
+
+                    // if the channel is enabled
+                    if (enableChServices)
+                    {
+                        SetTxConfig(config2022, NTV2_CHANNEL4, m2022_7Mode);
+                        GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
+                        if (!configErr)
+                        {
+                            config2022->SetTxChannelEnable(NTV2_CHANNEL4, true);
+                        }
+                    }
+                }
+                // if the channel is already enabled then check to see if a configuration has changed
+                else if (enableChServices)
+                {
+                    if (NotEqual(txHwConfig2, mTx2022Config4, m2022_7Mode) ||
+                        configErr ||
+                        enable2022_7Card != m2022_7Mode ||
+                        *modeLast != mFb1Mode ||
+                        *videoFormatLast != mFb1VideoFormat)
                     {
                         config2022->SetTxChannelEnable(NTV2_CHANNEL4, false);
-
-                        // if the channel is enabled
-                        if (enableChServices)
+                        SetTxConfig(config2022, NTV2_CHANNEL4, m2022_7Mode);
+                        GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
+                        if (!configErr)
                         {
-                            SetTxConfig(config2022, NTV2_CHANNEL4, m2022_7Mode);
-                            GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config2022->SetTxChannelEnable(NTV2_CHANNEL4, true);
-                            }
-                        }
-                    }
-                    // if the channel is already enabled then check to see if a configuration has changed
-                    else if (enableChServices)
-                    {
-                        if (NotEqual(txHwConfig2, mTx2022Config4, m2022_7Mode) ||
-                            configErr ||
-                            enable2022_7Card != m2022_7Mode ||
-                            *modeLast != mFb1Mode ||
-                            *videoFormatLast != mFb1VideoFormat)
-                        {
-                            config2022->SetTxChannelEnable(NTV2_CHANNEL4, false);
-                            SetTxConfig(config2022, NTV2_CHANNEL4, m2022_7Mode);
-                            GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config2022->SetTxChannelEnable(NTV2_CHANNEL4, true);
-                            }
+                            config2022->SetTxChannelEnable(NTV2_CHANNEL4, true);
                         }
                     }
                 }
-                else printf("txConfig ch 4 read failed\n");
             }
-            else
-                SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrInvalidConfig);
-            
-            *modeLast = mFb1Mode;
-            *videoFormatLast = mFb1VideoFormat;
-            
-            config2022->SetIPServicesControl(true, false);
+            else printf("txConfig ch 4 read failed\n");
         }
+        else
+            SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrInvalidConfig);
+        
+        *modeLast = mFb1Mode;
+        *videoFormatLast = mFb1VideoFormat;
+        
+        config2022->SetIPServicesControl(true, false);
     }
 }
 

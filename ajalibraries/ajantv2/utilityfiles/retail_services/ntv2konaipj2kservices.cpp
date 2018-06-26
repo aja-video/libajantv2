@@ -1136,8 +1136,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 
 		}
 
-        bool    ipServiceEnable;
-        bool    ipServiceForceConfig;
+        bool    ipServiceEnable, ipServiceForceConfig;
 
         config->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
         if (ipServiceEnable)
