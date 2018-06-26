@@ -556,12 +556,12 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		// follow input option
 		if (mFollowInputFormat)
 		{
-			NTV2VideoFormat lockedInputFormat = GetLockedInputVideoFormat();
-			if (mFb1VideoFormat != lockedInputFormat)
-			{
-				mCard->WriteRegister(kVRegDefaultVideoFormat, lockedInputFormat);
-				mCard->SetVideoFormat(lockedInputFormat);
-			}
+            NTV2VideoFormat lockedInputFormat = GetLockedInputVideoFormat();
+            if (mFb1VideoFormat != lockedInputFormat)
+            {
+                mCard->WriteRegister(kVRegDefaultVideoFormat, lockedInputFormat);
+                mCard->SetVideoFormat(lockedInputFormat);
+            }
 		}
 	
 		if (IsFormatRaw(mFb1Format))
@@ -830,8 +830,8 @@ bool DeviceServices::SetVPIDData (	ULWord &				outVPID,
 NTV2VideoFormat DeviceServices::GetLockedInputVideoFormat()
 {
 	const int32_t kLockAttemps		= 3;
-	const int32_t kLockSleepTimeMs	= 30;
-	
+	const int32_t kLockSleepTimeMs	= 30;	
+
 	NTV2VideoFormat frameBufferVideoFormat;
 	mCard->GetVideoFormat(frameBufferVideoFormat);
 	
@@ -2199,7 +2199,8 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
             // See if any receive video channels need configuring/enabling
             for (uint32_t i=0; i<m2110RxVideoData.numRxVideoChannels; i++)
             {
-                if (memcmp(&m2110RxVideoData.rxVideoCh[i], &s2110RxVideoDataLast->rxVideoCh[i], sizeof(RxVideoChData2110)) != 0 || ipServiceForceConfig)
+                if (memcmp(&m2110RxVideoData.rxVideoCh[i], &s2110RxVideoDataLast->rxVideoCh[i], sizeof(RxVideoChData2110)) != 0 ||
+                    ipServiceForceConfig)
                 {
                     s2110RxVideoDataLast->rxVideoCh[i] = m2110RxVideoData.rxVideoCh[i];
 
@@ -2230,6 +2231,8 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     // Video specific
                     rxConfig.videoFormat = m2110RxVideoData.rxVideoCh[i].videoFormat;
                     rxConfig.videoSamples = VPIDSampling_YUV_422;
+                    printf("Format (%d, %d, %d)\n", i, mFollowInputFormat, rxConfig.videoFormat);
+
 
                     if (config2110->SetRxStreamConfiguration(sfp, m2110RxVideoData.rxVideoCh[i].stream, rxConfig) == true)
                     {

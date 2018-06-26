@@ -249,7 +249,7 @@ public:
 
 	// real register state - common
 	NTV2DeviceID			mDeviceID;
-	NTV2VideoFormat			mFb1VideoFormat;
+    NTV2VideoFormat			mFb1VideoFormat;
 	NTV2FrameBufferFormat	mFb1Format;
 	NTV2FrameBufferFormat	mFb2Format;
 	NTV2Mode				mFb1Mode;
