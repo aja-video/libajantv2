@@ -6317,24 +6317,26 @@ typedef enum
 						(i.e. the frame is packed in device memory).
 					-	To DMA a sub-section of a frame, set NTV2SegmentedDMAInfo::acNumActiveBytesPerRow to the number of bytes
 						that comprise one row of the subsection, then NTV2SegmentedDMAInfo::acNumSegments to the number of rows
-						in the subsection, NTV2SegmentedDMAInfo::acSegmentHostPitch to the rowBytes of the entire frame in host
-						memory, and NTV2SegmentedDMAInfo::acSegmentDevicePitch to the rowBytes of the entire frame in device memory.
-			@note	IMPORTANT:  For segmented DMAs, the AUTOCIRCULATE_TRANSFER::acVideoBuffer.fByteCount field holds the segment
+						in the subsection, NTV2SegmentedDMAInfo::acSegmentHostPitch to the bytes-per-row of the entire frame in host
+						memory, and NTV2SegmentedDMAInfo::acSegmentDevicePitch to the bytes-per-row of the entire frame in device memory.
+			@note	IMPORTANT:  For segmented DMAs, the ::AUTOCIRCULATE_TRANSFER::acVideoBuffer.fByteCount field holds the segment
 					byte count (i.e., the number of bytes to transfer per segment.
+
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 			@todo	Create a new field in the ::NTV2SegmentedDMAInfo structure to eliminate the necessity of setting
-					AUTOCIRCULATE_TRANSFER::acVideoBuffer.fByteCount to store the segmented transfer's bytes-per-segment value.
+					::AUTOCIRCULATE_TRANSFER::acVideoBuffer.fByteCount to store the segmented transfer's bytes-per-segment value.
+
 			@note	Setting NTV2SegmentedDMAInfo::acNumSegments to 0 or 1 defaults to normal non-segmented DMA behavior
 					(i.e. DMA one complete, packed frame).
 		**/
 		NTV2_STRUCT_BEGIN (NTV2SegmentedDMAInfo)
-				ULWord		acNumSegments;				///< @brief	Number of segments of size 'acInVideoByteCount' to DMA (i.e. numLines).
-														///			Zero or 1 means normal (unsegmented) transfer.
+				ULWord		acNumSegments;				///< @brief	Number of segments of size ::AUTOCIRCULATE_TRANSFER::acVideoBuffer.fByteCount
+														///			to transfer. Zero or 1 means normal (unsegmented) transfer.
 				ULWord		acNumActiveBytesPerRow;		///< @brief	Number of active bytes in a row of video.
-				ULWord		acSegmentHostPitch;			///< @brief	Offset (in bytes) between the start of one host segment and the start of
-														///			the next host segment (i.e. host memory rowBytes).
-				ULWord		acSegmentDevicePitch;		///< @brief	Offset (in bytes) between the start of one device segment and the start of
-														///			the next device segment (i.e. device memory rowBytes).
+				ULWord		acSegmentHostPitch;			///< @brief	Offset, in bytes, between the start of one host segment and the start of
+														///			the next host segment (i.e. host memory bytes-per-row).
+				ULWord		acSegmentDevicePitch;		///< @brief	Offset, in bytes, between the start of one device segment and the start of
+														///			the next device segment (i.e. device memory bytes-per-row).
 
 			#if !defined (NTV2_BUILDING_DRIVER)
 				/**
