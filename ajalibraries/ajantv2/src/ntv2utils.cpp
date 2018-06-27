@@ -3120,30 +3120,38 @@ NTV2FrameGeometry GetNormalizedFrameGeometry (const NTV2FrameGeometry inFrameGeo
 {
 	switch (inFrameGeometry)
 	{
-		case NTV2_FG_1920x1080:	//	1080i, 1080p
-		case NTV2_FG_1280x720:	//	720p
-		case NTV2_FG_720x486:	//	ntsc 525i, 525p60
-		case NTV2_FG_720x576:	//	pal 625i
-			return inFrameGeometry;	//	No change
-
-		case NTV2_FG_1920x1114:	return NTV2_FG_1920x1080;	//	1920x1080 + taller vanc
-		case NTV2_FG_2048x1114:	return NTV2_FG_2048x1080;	//	2048x1080 + taller vanc
-		case NTV2_FG_720x508:	return NTV2_FG_720x486;		//	720x486 + tall vanc
-		case NTV2_FG_720x598:	return NTV2_FG_720x576;		//	pal 625i + tall vanc
-		case NTV2_FG_1920x1112:	return NTV2_FG_1920x1080;	//	1920x1080 + tall vanc
-		case NTV2_FG_1280x740:	return NTV2_FG_1280x720;	//	1280x720 + tall vanc
-
-		case NTV2_FG_2048x1080:	//	2k1080p
-		case NTV2_FG_2048x1556:	//	2k1556psf
-			return inFrameGeometry;	//	No change
-
-		case NTV2_FG_2048x1588:	return NTV2_FG_2048x1556;	//	2048x1556 + tall vanc
-		case NTV2_FG_2048x1112:	return NTV2_FG_2048x1080;	//	2048x1080 + tall vanc
-		case NTV2_FG_720x514:	return NTV2_FG_720x486;		//	720x486 + taller vanc (extra-wide ntsc)
-		case NTV2_FG_720x612:	return NTV2_FG_720x576;		//	720x576 + taller vanc (extra-wide pal)
+		case NTV2_FG_1920x1080:		//	1080i, 1080p
+		case NTV2_FG_1280x720:		//	720p
+		case NTV2_FG_720x486:		//	ntsc 525i, 525p60
+		case NTV2_FG_720x576:		//	pal 625i
+		case NTV2_FG_2048x1080:		//	2k1080p
+		case NTV2_FG_2048x1556:		//	2k1556psf
 		case NTV2_FG_4x1920x1080:	//	UHD
 		case NTV2_FG_4x2048x1080:	//	4K
-			return inFrameGeometry;	//	No change
+			return inFrameGeometry;	//	No change, already normalized
+
+															//	525i
+		case NTV2_FG_720x508:	return NTV2_FG_720x486;		//	720x486 + tall vanc
+		case NTV2_FG_720x514:	return NTV2_FG_720x486;		//	720x486 + taller vanc (extra-wide ntsc)
+
+															//	625i
+		case NTV2_FG_720x598:	return NTV2_FG_720x576;		//	pal 625i + tall vanc
+		case NTV2_FG_720x612:	return NTV2_FG_720x576;		//	720x576 + taller vanc (extra-wide pal)
+
+															//	720p
+		case NTV2_FG_1280x740:	return NTV2_FG_1280x720;	//	1280x720 + tall vanc
+
+															//	1080
+		case NTV2_FG_1920x1112:	return NTV2_FG_1920x1080;	//	1920x1080 + tall vanc
+		case NTV2_FG_1920x1114:	return NTV2_FG_1920x1080;	//	1920x1080 + taller vanc
+
+															//	2kx1080
+		case NTV2_FG_2048x1112:	return NTV2_FG_2048x1080;	//	2048x1080 + tall vanc
+		case NTV2_FG_2048x1114:	return NTV2_FG_2048x1080;	//	2048x1080 + taller vanc
+
+															//	2kx1556 film
+		case NTV2_FG_2048x1588:	return NTV2_FG_2048x1556;	//	2048x1556 + tall vanc
+
 #if defined (_DEBUG)
 		case NTV2_FG_INVALID:	break;
 #else
