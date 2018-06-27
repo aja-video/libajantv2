@@ -1728,7 +1728,7 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, const NTV2Stream str
     GetTxStreamConfiguration(stream, config);
 
     uint32_t baseAddrPacketizer;
-    SetTxPacketizerChannel(NTV2_VIDEO1_STREAM, baseAddrPacketizer);
+    SetTxPacketizerChannel(stream, baseAddrPacketizer);
 
     uint32_t width;
     mDevice.ReadRegister(kReg4175_pkt_width + baseAddrPacketizer, width);
