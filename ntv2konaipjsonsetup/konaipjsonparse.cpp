@@ -584,7 +584,7 @@ bool CKonaIpJsonParse2110::StructToJsonReceiveAudio(const ReceiveAudioData2110& 
         obj.insert("audioPktInterval",      QJsonValue((int)rAudio2110.rxAudioCh[i].audioPktInterval));
 
         obj.insert("enable",                QJsonValue(QString(GetEnable(rAudio2110.rxAudioCh[i].enable))));
-        obj.insert("designator",            QJsonValue(QString(GetEnable(rAudio2110.rxAudioCh[i].channel))));
+        obj.insert("designator",            QJsonValue(QString(GetChannel(rAudio2110.rxAudioCh[i].channel))));
         obj.insert("stream",                QJsonValue(QString(GetAudioStream(rAudio2110.rxAudioCh[i].stream))));
 
         aArray += QJsonValue(obj);
@@ -773,7 +773,7 @@ bool CKonaIpJsonParse2110::StructToJsonTransmitAudio(const TransmitAudioData2110
 
         obj.insert("enable",                QJsonValue(QString(GetEnable(tAudio2110.txAudioCh[i].enable))));
         obj.insert("stream",                QJsonValue(QString(GetAudioStream(tAudio2110.txAudioCh[i].stream))));
-        obj.insert("designator",            QJsonValue(QString(GetEnable(tAudio2110.txAudioCh[i].channel))));
+        obj.insert("designator",            QJsonValue(QString(GetChannel(tAudio2110.txAudioCh[i].channel))));
         aArray += QJsonValue(obj);
     }
 
