@@ -55,19 +55,40 @@
 #endif
 #endif
 
-// Reduce the typing when using the logging macros
-#define AJA_LOG_DEBUG(_expr_)    AJA_sDEBUG(AJA_DebugUnit_Persistence, _expr_)
-#define AJA_LOG_INFO(_expr_)     AJA_sINFO(AJA_DebugUnit_Persistence, _expr_)
-#define AJA_LOG_NOTICE(_expr_)   AJA_sNOTICE(AJA_DebugUnit_Persistence, _expr_)
-#define AJA_LOG_WARN(_expr_)     AJA_sWARNING(AJA_DebugUnit_Persistence, _expr_)
-#define AJA_LOG_ERROR(_expr_)    AJA_sERROR(AJA_DebugUnit_Persistence, _expr_)
-//#define AJA_LOG_ALERT(_expr_)    AJA_sALERT(AJA_DebugUnit_Persistence, _expr_)
-//#define AJA_LOG_EMERGENCY(_expr_) AJA_sEMERGENCY(AJA_DebugUnit_Persistence, _expr_)
-//#define AJA_LOG_ASSERT(_expr_)   AJA_sASSERT(AJA_DebugUnit_Persistence, _expr_)
+static std::vector<std::string> sTypeLabelsVector;
+#define addTypeLabelToVector(x) sTypeLabelsVector.push_back(#x)
+inline void initTypeLabels()
+{
+    sTypeLabelsVector.clear();
+    addTypeLabelToVector(AJAPersistenceTypeInt);
+    addTypeLabelToVector(AJAPersistenceTypeBool);
+    addTypeLabelToVector(AJAPersistenceTypeDouble);
+    addTypeLabelToVector(AJAPersistenceTypeString);
+    addTypeLabelToVector(AJAPersistenceTypeBlob);
+    addTypeLabelToVector(AJAPersistenceTypeEnd);
+}
 
-// Use deferent log levels so can better sort reads/writes
-#define AJA_LOG_READ(_expr_)     AJA_LOG_INFO(_expr_)
-#define AJA_LOG_WRITE(_expr_)    AJA_LOG_NOTICE(_expr_)
+inline std::string labelForPersistenceType(AJAPersistenceType type)
+{
+    if (type >= 0 && type < AJAPersistenceTypeEnd && type < sTypeLabelsVector.size())
+        return sTypeLabelsVector.at(type);
+    else
+        return "unknown type";
+}
+
+// Reduce the typing when using the logging macros
+#define AJA_LOG_DEBUG(_should_log_, _expr_)    if (_should_log_) { AJA_sDEBUG(AJA_DebugUnit_Persistence, _expr_); }
+#define AJA_LOG_INFO(_should_log_, _expr_)     if (_should_log_) { AJA_sINFO(AJA_DebugUnit_Persistence, _expr_); }
+#define AJA_LOG_NOTICE(_should_log_, _expr_)   if (_should_log_) { AJA_sNOTICE(AJA_DebugUnit_Persistence, _expr_); }
+#define AJA_LOG_WARN(_should_log_, _expr_)     if (_should_log_) { AJA_sWARNING(AJA_DebugUnit_Persistence, _expr_); }
+#define AJA_LOG_ERROR(_should_log_, _expr_)    if (_should_log_) { AJA_sERROR(AJA_DebugUnit_Persistence, _expr_); }
+//#define AJA_LOG_ALERT(_should_log_, _expr_)    if (_should_log_) { AJA_sALERT(AJA_DebugUnit_Persistence, _expr_); }
+//#define AJA_LOG_EMERGENCY(_should_log_, _expr_) if (_should_log_) { AJA_sEMERGENCY(AJA_DebugUnit_Persistence, _expr_); }
+//#define AJA_LOG_ASSERT(_should_log_, _expr_)   if (_should_log_) { AJA_sASSERT(AJA_DebugUnit_Persistence, _expr_); }
+
+// Use different log levels so can better sort reads/writes
+#define AJA_LOG_READ(_should_log_, _expr_)     AJA_LOG_INFO(_should_log_, _expr_)
+#define AJA_LOG_WRITE(_should_log_, _expr_)    AJA_LOG_NOTICE(_should_log_, _expr_)
 
 inline bool should_we_log()
 {
@@ -76,50 +97,103 @@ inline bool should_we_log()
     return (refCount > 0);
 }
 
+// There are a few places where we want to try calling sqlite3_*() calls a couple of times if busy
+// this macro wraps that and provides logging
+#define RETRY_SQLITE_CALL_WITH_LOGGING(_should_log_, _result_code_, _num_max_retries_, _sleep_time_in_microsec_,\
+                                       _retry_condition_, _message_, _sqlite_function_call_)\
+{\
+    int last_i = _num_max_retries_ - 1;\
+    for(int i=0;i<_num_max_retries_;i++)\
+    {\
+        _result_code_ = _sqlite_function_call_;\
+        if (_retry_condition_)\
+        {\
+            if (_should_log_)\
+            {\
+                std::ostringstream oss;\
+                oss << "sqlite> attempt: " << i+1 << " of " << _num_max_retries_ << ", error code: " << _result_code_ <<\
+                       " with message: \"" << _message_;\
+                if (i == last_i)\
+                    { AJA_LOG_ERROR(_should_log_, oss.str()); }\
+                else\
+                    { AJA_LOG_WARN(_should_log_, oss.str()); }\
+            }\
+            if (i != last_i)\
+                AJATime::SleepInMicroseconds(_sleep_time_in_microsec_);\
+        }\
+        else\
+            break;\
+    }\
+}
+
+// Encapsulate the sqlite3_stmt object so automatically handled by constructor/destructor
+const int gDefaultNumSqliteRetries = 25;
+const int32_t gDefaultMicrosecondsBetweenRetries = 2000;
+
 // Encapsulate the sqlite3 object so automatically handled by constructor/destructor
 class AJAPersistenceDBImplObject
 {
 public:
         AJAPersistenceDBImplObject(const std::string &pathToDB)
-        : mDb(NULL), mPath(""), mOpenErrorCode(SQLITE_ERROR)
+        : mDb(NULL), mPath(pathToDB), mOpenErrorCode(SQLITE_ERROR)
         {
-            mPath = pathToDB;
             mOpenErrorCode = sqlite3_open_v2(mPath.c_str(), &mDb, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
-            if (should_we_log())
+            bool shouldLog = should_we_log();
+            if (mOpenErrorCode != SQLITE_OK)
             {
-                if (mOpenErrorCode != SQLITE_OK)
-                {
-                    AJA_LOG_ERROR("sqlite> error code: " << mOpenErrorCode <<
-                                  " with message: \"" << sqlite3_errmsg(mDb) << "\" when opening DB at: " << mPath);
-                }
-                else
-                {
-                    AJA_LOG_WRITE("sqlite> successfully opened handle to DB at: " << mPath);
-                }
+                AJA_LOG_ERROR(shouldLog, "sqlite> error code: " << mOpenErrorCode <<
+                                         " with message: \"" << sqlite3_errmsg(mDb) << "\" when opening DB at: " << mPath);
+            }
+            else
+            {
+                AJA_LOG_WRITE(shouldLog, "sqlite> successfully opened handle to DB at: " << mPath);
+                Execute("PRAGMA journal_mode=WAL;");
             }
         }
 
         virtual ~AJAPersistenceDBImplObject()
         {
             int rc = sqlite3_close(mDb);
-            if (should_we_log())
+            bool shouldLog = should_we_log();
+            if (rc != SQLITE_OK)
             {
-                if (rc != SQLITE_OK)
-                {
-                    AJA_LOG_ERROR("sqlite> error code: " << mOpenErrorCode <<
-                                  " with message: \"" << sqlite3_errmsg(mDb) << "\" when closing DB at: " << mPath);
-                }
-                else
-                {
-                    AJA_LOG_WRITE("sqlite> successfully closed handle to DB at: " << mPath);
-                }
+                AJA_LOG_ERROR(shouldLog, "sqlite> error code: " << mOpenErrorCode <<
+                                         " with message: \"" << sqlite3_errmsg(mDb) << "\" when closing DB at: " << mPath);
+            }
+            else
+            {
+                AJA_LOG_WRITE(shouldLog, "sqlite> successfully closed handle to DB at: " << mPath);
             }
         }
 
-        bool IsDBOpen()         { return (mOpenErrorCode == SQLITE_OK); }
+        bool IsDBOpen()         { return (mOpenErrorCode == SQLITE_OK && mDb); }
         int OpenErrorCode()     { return mOpenErrorCode; }
         std::string PathToDB()  { return mPath; }
         sqlite3* GetHandle()    { return mDb; }
+
+        int Execute(const std::string& stmt,
+                    int numRetries = gDefaultNumSqliteRetries, int sleepBetweenTries = gDefaultMicrosecondsBetweenRetries)
+        {
+            if (IsDBOpen())
+            {
+                int rc = SQLITE_ERROR;
+                bool shouldLog = should_we_log();
+                RETRY_SQLITE_CALL_WITH_LOGGING(shouldLog, rc, numRetries, sleepBetweenTries,
+                                               rc != SQLITE_OK, sqlite3_errstr(rc) << "\" when executing statement: " << stmt,
+                                               sqlite3_exec(mDb, stmt.c_str(), NULL, NULL, NULL));
+                return rc;
+            }
+            else
+                return SQLITE_ERROR;
+        }
+
+        int Checkpoint(const std::string& dbName, int checkpointMode = SQLITE_CHECKPOINT_PASSIVE)
+        {
+            if (IsDBOpen())
+                return sqlite3_wal_checkpoint_v2(mDb, dbName.c_str(), checkpointMode, NULL, NULL);
+            else
+                return SQLITE_ERROR;
+        }
 
 private:
         sqlite3 *mDb;
@@ -127,64 +201,43 @@ private:
         int mOpenErrorCode;
 };
 
-// Encapsulate the sqlite3_stmt object so automatically handled by constructor/destructor
-const int gDefaultNumSqliteRetries = 10;
-const int32_t gDefaultMicrosecondsBetweenRetries = 1500;
-
 class AJAPersistenceDBImplStatement
 {
 public:
         AJAPersistenceDBImplStatement()
-        : mStmt(NULL), mStmtString(""), mPrepareErrorCode(SQLITE_ERROR),
+        : mDb(NULL), mStmt(NULL), mStmtString(""), mPrepareErrorCode(SQLITE_ERROR),
           mNumRetries(gDefaultNumSqliteRetries), mMicrosecondsBetweenRetries(gDefaultMicrosecondsBetweenRetries)
         {
         }
 
         AJAPersistenceDBImplStatement(AJAPersistenceDBImplObject &db, const std::string &stmt)
-        : mStmt(NULL), mStmtString(""), mPrepareErrorCode(SQLITE_ERROR),
+        : mDb(&db), mStmt(NULL), mStmtString(""), mPrepareErrorCode(SQLITE_ERROR),
           mNumRetries(gDefaultNumSqliteRetries), mMicrosecondsBetweenRetries(gDefaultMicrosecondsBetweenRetries)
         {
-            Prepare(db, stmt);
+            Prepare(stmt);
         }
 
-        int Prepare(AJAPersistenceDBImplObject &db, const std::string &stmt)
+        void SetDb(AJAPersistenceDBImplObject &db)
+        {
+            mDb = &db;
+        }
+
+        int Prepare(const std::string &stmt)
         {
             bool shouldLog = should_we_log();
 
             mStmtString = stmt;
-            for(int i=0;i<mNumRetries;i++)
+
+            if (mDb == NULL || mDb->GetHandle() == NULL)
             {
-                mPrepareErrorCode = sqlite3_prepare_v3(db.GetHandle(), mStmtString.c_str(), -1, SQLITE_PREPARE_PERSISTENT, &mStmt, NULL);
-                if (mPrepareErrorCode != SQLITE_OK)
-                {                                      
-                    std::ostringstream oss;
-                    if (shouldLog)
-                    {
-                        oss << "sqlite> attempt: " << i+1 << " of " << mNumRetries << ", error code: " << mPrepareErrorCode <<
-                               " with message: \"" << sqlite3_errmsg(db.GetHandle()) << "\" when preparing statement: " << mStmtString;
-                    }
-
-                    if (i == mNumRetries-1)
-                    {
-                        if (shouldLog)
-                            AJA_LOG_ERROR(oss.str());
-                    }
-                    else
-                    {
-                        if (shouldLog)
-                            AJA_LOG_WARN(oss.str());
-
-                        AJATime::SleepInMicroseconds(mMicrosecondsBetweenRetries);
-                    }
-                }
-                else
-                {
-                    if (shouldLog)
-                        AJA_LOG_WRITE("sqlite> successfully prepared statement: " << mStmtString);
-
-                    break;
-                }
+                AJA_LOG_ERROR(shouldLog, "sqlite> DB handle invalid for path: \"" << mDb->PathToDB() << "\", could not prepare statement: " << mStmtString);
+                return SQLITE_ERROR;
             }
+
+            mPrepareErrorCode = SQLITE_ERROR;
+            RETRY_SQLITE_CALL_WITH_LOGGING(shouldLog, mPrepareErrorCode, mNumRetries, mMicrosecondsBetweenRetries,
+                                           mPrepareErrorCode != SQLITE_OK, sqlite3_errmsg(mDb->GetHandle()) << "\" when preparing statement: " << mStmtString,
+                                           sqlite3_prepare_v3(mDb->GetHandle(), mStmtString.c_str(), -1, SQLITE_PREPARE_PERSISTENT, &mStmt, NULL));
             return mPrepareErrorCode;
         }
 
@@ -195,18 +248,36 @@ public:
 
         int Reset()
         {
+            if (mStmt == NULL)
+            {
+                AJA_LOG_ERROR(should_we_log(), "sqlite> could not reset, statement handle invalid for statement: " << mStmtString);
+                return SQLITE_ERROR;
+            }
+
             int rc = sqlite3_reset(mStmt);
             return rc;
         }
 
         int BindText(int parameterNum, const std::string& value)
         {
+            if (mStmt == NULL)
+            {
+                AJA_LOG_ERROR(should_we_log(), "sqlite> could not bind text, statement handle invalid for statement: " << mStmtString);
+                return SQLITE_ERROR;
+            }
+
             int rc = sqlite3_bind_text(mStmt, parameterNum, value.c_str(), -1, NULL);
             return rc;
         }
 
         int BindBlob(int parameterNum, int blobSizeInBytes, const void *value)
         {
+            if (mStmt == NULL)
+            {
+                AJA_LOG_ERROR(should_we_log(), "sqlite> could not bind blob, statement handle invalid for statement: " << mStmtString);
+                return SQLITE_ERROR;
+            }
+
             int rc = sqlite3_bind_blob(mStmt, parameterNum, value, blobSizeInBytes, SQLITE_TRANSIENT);
             return rc;
         }
@@ -214,51 +285,51 @@ public:
         int Step()
         {
             bool shouldLog = should_we_log();
-
-            int rc = SQLITE_OK;
-
-            for(int i=0;i<mNumRetries;i++)
+            if (mDb == NULL)
             {
-                rc = sqlite3_step(mStmt);
-                if (rc != SQLITE_OK && rc != SQLITE_ROW && rc != SQLITE_DONE)
-                {
-                    std::ostringstream oss;
-                    if (shouldLog)
-                    {
-                        oss << "sqlite> attempt: " << i+1 << " of " << mNumRetries << ", error code: " << rc <<
-                               " with message: \"" << sqlite3_errstr(rc) << "\" when stepping statement: " << sqlite3_expanded_sql(mStmt);
-                    }
-
-                    if (i == (mNumRetries)-1)
-                    {
-                        if (shouldLog)
-                            AJA_LOG_ERROR(oss.str());
-                    }
-                    else
-                    {
-                        if (shouldLog)
-                            AJA_LOG_WARN(oss.str());
-
-                        AJATime::SleepInMicroseconds(mMicrosecondsBetweenRetries);
-                    }
-                }
-                else
-                {
-                    //if (shouldLog)
-                    //AJA_LOG_WRITE("sqlite> successfully stepped statement: " << sqlite3_expanded_sql(mStmt));
-                    break;
-                }
+                AJA_LOG_ERROR(shouldLog, "sqlite> could not step, DB handle invalid");
+                return SQLITE_ERROR;
             }
+
+            if (mDb->IsDBOpen() == false)
+            {
+                AJA_LOG_ERROR(shouldLog, "sqlite> could not step, DB not opened at: " << mDb->PathToDB());
+                return SQLITE_ERROR;
+            }
+
+            if (mStmt == NULL)
+            {
+                AJA_LOG_ERROR(shouldLog, "sqlite> could not step, statement handle invalid for statement: " << mStmtString);
+                return SQLITE_ERROR;
+            }           
+
+            int rc = SQLITE_ERROR;
+            RETRY_SQLITE_CALL_WITH_LOGGING(shouldLog, rc, mNumRetries, mMicrosecondsBetweenRetries,
+                                           rc != SQLITE_OK && rc != SQLITE_ROW && rc != SQLITE_DONE,
+                                           sqlite3_errstr(rc) << "\" when stepping statement: " << sqlite3_expanded_sql(mStmt),
+                                           sqlite3_step(mStmt));
             return rc;
         }
 
         std::string ColumnText(int col)
         {
+            if (mStmt == NULL)
+            {
+                AJA_LOG_ERROR(should_we_log(), "sqlite> could not get column text, statement handle invalid for statement: " << mStmtString);
+                return "";
+            }
+
             return std::string((const char*)sqlite3_column_text(mStmt, col));
         }
 
         bool ColumnBlob(int col, void* output, int& blobSize)
         {
+            if (mStmt == NULL)
+            {
+                AJA_LOG_ERROR(should_we_log(), "sqlite> could not get column blob, statement handle invalid for statement: " << mStmtString);
+                return false;
+            }
+
             blobSize = sqlite3_column_bytes(mStmt, col);
             if (blobSize > 0)
                 memcpy(output, sqlite3_column_blob(mStmt, col), blobSize);
@@ -276,12 +347,8 @@ public:
             return mStmtString;
         }
 
-        sqlite3_stmt* GetHandle()
-        {
-            return mStmt;
-        }
-
 private:
+        AJAPersistenceDBImplObject *mDb;
         sqlite3_stmt *mStmt;
         std::string mStmtString;
         int mPrepareErrorCode;
@@ -289,6 +356,7 @@ private:
         int32_t mMicrosecondsBetweenRetries;
 };
 
+// This is the class that AJAPersistence uses directly to communicate with the SQLite layer
 class AJAPersistenceDBImpl
 {
 public:
@@ -296,40 +364,42 @@ public:
         : mDb(pathToDB)
         {
             if (mDb.IsDBOpen())
-            {
+            {                
                 // generic table statements
                 AJAPersistenceDBImplStatement createTableStmt(mDb, "CREATE TABLE IF NOT EXISTS persistence(id INTEGER, name CHAR(255), value CHAR(64), dev_name CHAR(64), dev_num CHAR(64), PRIMARY KEY(id))");
                 AJAPersistenceDBImplStatement blobCreateTableStmt(mDb, "CREATE TABLE IF NOT EXISTS persistenceBlobs(id INTEGER, name CHAR(255), value BLOB, dev_name CHAR(64), dev_num CHAR(64), PRIMARY KEY(id))");
-
-                mClearTableStmt.Prepare(mDb, "DELETE FROM persistence");
-                mBlobClearTableStmt.Prepare(mDb, "DELETE FROM persistenceBlobs");
-                mVacuumDBStmt.Prepare(mDb, "VACUUM");
 
                 // The tables must exist before the other prepared statements can be made
                 mTableCreateErrorCode = createTableStmt.Step();
                 mTableCreateBlobErrorCode = blobCreateTableStmt.Step();
 
                 // normal table statements
-                mGetValueSpecificStmt.Prepare(mDb, "SELECT value FROM persistence WHERE name=?1 AND dev_name=?2 AND dev_num=?3");
-                mGetValueLessSpecificStmt.Prepare(mDb, "SELECT value FROM persistence WHERE name=?1 AND dev_name=?2");
-                mUpdateSetStmt.Prepare(mDb, "INSERT OR REPLACE INTO persistence (id, name, value, dev_name, dev_num) SELECT id, ?1, ?2, ?3, ?4 "
-                                            "FROM ( SELECT NULL ) LEFT JOIN ( SELECT * FROM persistence WHERE name=?5 AND dev_name=?6 AND dev_num=?7)");
-
+                mGetValueSpecificStmt.SetDb(mDb);
+                mGetValueLessSpecificStmt.SetDb(mDb);
+                mInsertOrReplaceStmt.SetDb(mDb);
+                mGetValueSpecificStmt.Prepare("SELECT value FROM persistence WHERE name=?1 AND dev_name=?2 AND dev_num=?3");
+                mGetValueLessSpecificStmt.Prepare("SELECT value FROM persistence WHERE name=?1 AND dev_name=?2");
+                mInsertOrReplaceStmt.Prepare("INSERT OR REPLACE INTO persistence (id, name, value, dev_name, dev_num) SELECT id, ?1, ?2, ?3, ?4 "
+                                             "FROM ( SELECT NULL ) LEFT JOIN ( SELECT * FROM persistence WHERE name=?5 AND dev_name=?6 AND dev_num=?7)");
 
                 // blob table statements
-                mBlobGetValueSpecificStmt.Prepare(mDb, "SELECT value FROM persistenceBlobs WHERE name=?1 AND dev_name=?2 AND dev_num=?3");
-                mBlobGetValueLessSpecificStmt.Prepare(mDb, "SELECT value FROM persistenceBlobs WHERE name=?1 AND dev_name=?2");
-                mBlobUpdateSetStmt.Prepare(mDb, "INSERT OR REPLACE INTO persistenceBlobs (id, name, value, dev_name, dev_num) SELECT id, ?1, ?2, ?3, ?4 "
-                                                "FROM ( SELECT NULL ) LEFT JOIN ( SELECT * FROM persistenceBlobs WHERE name=?5 AND dev_name=?6 AND dev_num=?7)");
+                mBlobGetValueSpecificStmt.SetDb(mDb);
+                mBlobGetValueLessSpecificStmt.SetDb(mDb);
+                mBlobInsertOrReplaceStmt.SetDb(mDb);
+                mBlobGetValueSpecificStmt.Prepare("SELECT value FROM persistenceBlobs WHERE name=?1 AND dev_name=?2 AND dev_num=?3");
+                mBlobGetValueLessSpecificStmt.Prepare("SELECT value FROM persistenceBlobs WHERE name=?1 AND dev_name=?2");
+                mBlobInsertOrReplaceStmt.Prepare("INSERT OR REPLACE INTO persistenceBlobs (id, name, value, dev_name, dev_num) SELECT id, ?1, ?2, ?3, ?4 "
+                                                 "FROM ( SELECT NULL ) LEFT JOIN ( SELECT * FROM persistenceBlobs WHERE name=?5 AND dev_name=?6 AND dev_num=?7)");
 
                 // multiple return statements
-                mGetAllValuesSpecificStmt.Prepare(mDb, "SELECT name, value FROM persistence WHERE name LIKE ?1 AND dev_name=?2 AND dev_num=?3");
-                mGetAllValuesLessSpecificStmt.Prepare(mDb, "SELECT name, value FROM persistence WHERE name LIKE ?1 AND dev_name=?2");
+                mGetAllValuesSpecificStmt.SetDb(mDb);
+                mGetAllValuesLessSpecificStmt.SetDb(mDb);
+                mGetAllValuesSpecificStmt.Prepare("SELECT name, value FROM persistence WHERE name LIKE ?1 AND dev_name=?2 AND dev_num=?3");
+                mGetAllValuesLessSpecificStmt.Prepare("SELECT name, value FROM persistence WHERE name LIKE ?1 AND dev_name=?2");
             }
             else
             {
-                if (should_we_log())
-                    AJA_LOG_ERROR("sqlite> could not prepare statements DB not opened");
+                AJA_LOG_ERROR(should_we_log(), "sqlite> could not prepare statements DB not opened at: " << mDb.PathToDB());
             }
         }
 
@@ -339,19 +409,11 @@ public:
 
         bool ClearTables()
         {
-            mClearTableStmt.Reset();
-            mBlobClearTableStmt.Reset();
-            mVacuumDBStmt.Reset();
-
-            int rc = 0;
-            rc = mClearTableStmt.Step();
-            mBlobClearTableStmt.Step();
-            mVacuumDBStmt.Step();
-
+            int rc = mDb.Execute("DELETE FROM persistence; DELETE FROM persistenceBlobs;");
             return (rc == SQLITE_OK || rc == SQLITE_DONE);
         }
 
-        bool ConvertStringToValueType(const std::string& inputString, AJAPersistenceType type, void *outputValue)
+        static bool ConvertStringToValueType(const std::string& inputString, AJAPersistenceType type, void *outputValue)
         {
             bool isGood = false;
             switch(type)
@@ -398,7 +460,7 @@ public:
             return isGood;
         }
 
-        bool ConvertValueTypeToString(void *inputValue, AJAPersistenceType type, std::string& outputString)
+        static bool ConvertValueTypeToString(void *inputValue, AJAPersistenceType type, std::string& outputString)
         {
             bool isGood = false;
             switch(type)
@@ -508,55 +570,58 @@ public:
             bool isGood = false;
             if (mDb.IsDBOpen())
             {
-                AJAPersistenceDBImplStatement *updateSetStmt;
+                AJAPersistenceDBImplStatement *insertOrReplaceStmt;
 
                 std::string strValue;
                 bool goodToSet = false;
                 if (type == AJAPersistenceTypeBlob)
                 {
-                    updateSetStmt = &mBlobUpdateSetStmt;
-                    goodToSet     = true;
+                    insertOrReplaceStmt = &mBlobInsertOrReplaceStmt;
+                    goodToSet           = true;
                 }
                 else
                 {
-                    updateSetStmt = &mUpdateSetStmt;
-                    goodToSet     = ConvertValueTypeToString(value, type, strValue);
+                    insertOrReplaceStmt = &mInsertOrReplaceStmt;
+                    goodToSet           = ConvertValueTypeToString(value, type, strValue);
                 }
 
                 if (goodToSet)
                 {
                     // Reset statement and bind parameters
-                    updateSetStmt->Reset();
+                    insertOrReplaceStmt->Reset();
 
                     if (type == AJAPersistenceTypeBlob)
                     {
-                        updateSetStmt->BindText(1, keyQuery);
-                        updateSetStmt->BindBlob(2, blobSizeInBytes, value);
-                        updateSetStmt->BindText(3, devName);
-                        updateSetStmt->BindText(4, devNum);
-                        updateSetStmt->BindText(5, keyQuery);
-                        updateSetStmt->BindText(6, devName);
-                        updateSetStmt->BindText(7, devNum);
+                        insertOrReplaceStmt->BindText(1, keyQuery);
+                        insertOrReplaceStmt->BindBlob(2, blobSizeInBytes, value);
+                        insertOrReplaceStmt->BindText(3, devName);
+                        insertOrReplaceStmt->BindText(4, devNum);
+                        insertOrReplaceStmt->BindText(5, keyQuery);
+                        insertOrReplaceStmt->BindText(6, devName);
+                        insertOrReplaceStmt->BindText(7, devNum);
                     }
                     else
                     {
-                        updateSetStmt->BindText(1, keyQuery);
-                        updateSetStmt->BindText(2, strValue);
-                        updateSetStmt->BindText(3, devName);
-                        updateSetStmt->BindText(4, devNum);
-                        updateSetStmt->BindText(5, keyQuery);
-                        updateSetStmt->BindText(6, devName);
-                        updateSetStmt->BindText(7, devNum);
+                        insertOrReplaceStmt->BindText(1, keyQuery);
+                        insertOrReplaceStmt->BindText(2, strValue);
+                        insertOrReplaceStmt->BindText(3, devName);
+                        insertOrReplaceStmt->BindText(4, devNum);
+                        insertOrReplaceStmt->BindText(5, keyQuery);
+                        insertOrReplaceStmt->BindText(6, devName);
+                        insertOrReplaceStmt->BindText(7, devNum);
                     }
 
-                    if (updateSetStmt->Step() == SQLITE_DONE)
+                    if (insertOrReplaceStmt->Step() == SQLITE_DONE)
                     {
                         // update was good
                         isGood = true;
+                        if (type == AJAPersistenceTypeBlob)
+                            mDb.Checkpoint("persistenceBlobs", SQLITE_CHECKPOINT_FULL);
+                        else
+                            mDb.Checkpoint("persistence", SQLITE_CHECKPOINT_FULL);
                     }
                 }
             }
-
             return isGood;
         }
 
@@ -615,37 +680,34 @@ private:
       int                           mTableCreateErrorCode;
       int                           mTableCreateBlobErrorCode;
 
-      // generic statements
-      AJAPersistenceDBImplStatement mClearTableStmt;
-      AJAPersistenceDBImplStatement mBlobClearTableStmt;
-      AJAPersistenceDBImplStatement mVacuumDBStmt;
-
       // normal statements
       AJAPersistenceDBImplStatement mGetValueSpecificStmt;
       AJAPersistenceDBImplStatement mGetValueLessSpecificStmt;
-      AJAPersistenceDBImplStatement mUpdateSetStmt;
+      AJAPersistenceDBImplStatement mInsertOrReplaceStmt;
 
       // blob statements
       AJAPersistenceDBImplStatement mBlobGetValueSpecificStmt;
       AJAPersistenceDBImplStatement mBlobGetValueLessSpecificStmt;
-      AJAPersistenceDBImplStatement mBlobUpdateSetStmt;
+      AJAPersistenceDBImplStatement mBlobInsertOrReplaceStmt;
 
       // multiple return statements
       AJAPersistenceDBImplStatement mGetAllValuesSpecificStmt;
       AJAPersistenceDBImplStatement mGetAllValuesLessSpecificStmt;
 };
 
-//MARK: Start of Class
+// Start of Public Class AJAPersistence
 
 AJAPersistence::AJAPersistence()
     : mDBImpl(NULL)
 {
+    initTypeLabels();
     SetParams("null_device");
 }
 
 AJAPersistence::AJAPersistence(const std::string& appID, const std::string& deviceType, const std::string& deviceNumber, bool bSharePrefFile)
     : mDBImpl(NULL)
 {
+    initTypeLabels();
     SetParams(appID, deviceType, deviceNumber, bSharePrefFile);
 }
 
@@ -668,31 +730,23 @@ void AJAPersistence::SetParams(const std::string& appID, const std::string& devi
     mSharedPrefFile = bSharePrefFile;
 
     if (mSharedPrefFile)
-    {
         mSysInfo.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreSystem, mstateKeyName);
-    }
     else
-    {
         mSysInfo.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, mstateKeyName);
-    }
 
     mstateKeyName += appID;
 
     bool shouldLog = should_we_log();
     if (mDBImpl && lastStateKeyName != mstateKeyName)
     {
-        if (shouldLog)
-            AJA_LOG_INFO("deleting existing db instance called from SetParams");
-
+        AJA_LOG_INFO(shouldLog, "deleting existing db instance called from SetParams");
         delete mDBImpl;
         mDBImpl = NULL;
     }
 
     if (mDBImpl == NULL)
     {
-        if (shouldLog)
-            AJA_LOG_INFO("creating db instance called from SetParams");
-
+        AJA_LOG_INFO(shouldLog, "creating db instance called from SetParams");
         mDBImpl = new AJAPersistenceDBImpl(mstateKeyName);
     }
 }
@@ -707,14 +761,21 @@ void AJAPersistence::GetParams(std::string& appID, std::string& deviceType, std:
 
 bool AJAPersistence::SetValue(const std::string& key, void *value, AJAPersistenceType type, int blobSize)
 {
-    if (should_we_log())
-        AJA_LOG_WRITE("writing value of type: " << type << " , with key: " << key);
-
+    bool shouldLog = should_we_log();
+    if (shouldLog)
+    {
+        std::string dbgValue = "(could not log type)";
+        AJAPersistenceDBImpl::ConvertValueTypeToString(value, type, dbgValue);
+        AJA_LOG_WRITE(shouldLog, "write value of type: " << labelForPersistenceType(type) <<
+                                 ", with key: \""        << key                           << "\"" <<
+                                 ", with dev_name: \""   << mboardId                      << "\"" <<
+                                 ", with dev_num: \""    << mserialNumber                 << "\"" <<
+                                 ", and value of: \""    << dbgValue                      << "\"");
+    }
     bool isGood = false;
     if (mDBImpl)
-    {
         isGood = mDBImpl->SetValue(key, value, type, blobSize, mboardId, mserialNumber);
-    }
+
     return isGood;
 }
 
@@ -724,14 +785,22 @@ bool AJAPersistence::GetValue(const std::string& key, void *value, AJAPersistenc
 	if (FileExists() == false)
 		return false;
 
-    if (should_we_log())
-        AJA_LOG_READ("reading value of type: " << type << " , with key: " << key);
-
+    bool shouldLog = should_we_log();
     bool isGood = false;
     if (mDBImpl)
-    {
         isGood = mDBImpl->GetValue(key, value, type, blobSize, mboardId, mserialNumber);
+
+    if (shouldLog)
+    {
+        std::string dbgValue = "(could not log type)";
+        AJAPersistenceDBImpl::ConvertValueTypeToString(value, type, dbgValue);
+        AJA_LOG_READ(shouldLog, "read value of type: " << labelForPersistenceType(type) <<
+                                ", with key: \""       << key                           << "\"" <<
+                                ", with dev_name: \""  << mboardId                      << "\"" <<
+                                ", with dev_num: \""   << mserialNumber                 << "\"" <<
+                                ", and value of: \""   << dbgValue                      << "\"");
     }
+
     return isGood;
 }
 
@@ -741,14 +810,12 @@ bool AJAPersistence::GetValuesString(const std::string& keyQuery, std::vector<st
 	if (FileExists() == false)
 		return false;
 
-    if (should_we_log())
-        AJA_LOG_READ("reading string values with query key: " << keyQuery);
+    AJA_LOG_READ(should_we_log(), "reading string values with query key: " << keyQuery);
 
     bool isGood = false;
     if (mDBImpl)
-    {
         isGood = mDBImpl->GetAllMatchingValues(keyQuery, keys, values, mboardId, mserialNumber);
-    }
+
     return isGood;
 }
 
@@ -758,8 +825,7 @@ bool AJAPersistence::GetValuesInt(const std::string& keyQuery, std::vector<std::
 	if (FileExists() == false)
 		return false;
 
-    if (should_we_log())
-        AJA_LOG_READ("reading int values with query key: " << keyQuery);
+    AJA_LOG_READ(should_we_log(), "reading int values with query key: " << keyQuery);
 	
 	std::vector<std::string> tmpValues;
     if (GetValuesString(keyQuery, keys, tmpValues))
@@ -780,8 +846,7 @@ bool AJAPersistence::GetValuesBool(const std::string& keyQuery, std::vector<std:
 	if (FileExists() == false)
 		return false;
 
-    if (should_we_log())
-        AJA_LOG_READ("reading bool values with query key: " << keyQuery);
+    AJA_LOG_READ(should_we_log(), "reading bool values with query key: " << keyQuery);
 
 	std::vector<std::string> tmpValues;
     if (GetValuesString(keyQuery, keys, tmpValues))
@@ -802,8 +867,7 @@ bool AJAPersistence::GetValuesDouble(const std::string& keyQuery, std::vector<st
 	if (FileExists() == false)
 		return false;
 
-    if (should_we_log())
-        AJA_LOG_READ("reading double values with query key: " << keyQuery);
+    AJA_LOG_READ(should_we_log(), "reading double values with query key: " << keyQuery);
 
 	std::vector<std::string> tmpValues;
     if (GetValuesString(keyQuery, keys, tmpValues))
@@ -831,23 +895,18 @@ bool AJAPersistence::ClearPrefFile()
     {
         if (mDBImpl)
         {
-            if (shouldLog)
-                AJA_LOG_INFO("clearing existing tables in db instance called from ClearPrefFile");
-
+            AJA_LOG_INFO(shouldLog, "clearing existing tables in db instance called from ClearPrefFile");
             bSuccess = mDBImpl->ClearTables();
         }
         else
         {
-            if (shouldLog)
-                AJA_LOG_NOTICE("could not clear existing tables in db, instance not found, called from ClearPrefFile");
-
+            AJA_LOG_NOTICE(shouldLog, "could not clear existing tables in db, instance not found, called from ClearPrefFile");
             bSuccess = false;
         }
     }
     else
     {
-        if (shouldLog)
-            AJA_LOG_NOTICE("could not clear existing tables in db, file not found, called from ClearPrefFile");
+        AJA_LOG_NOTICE(shouldLog, "could not clear existing tables in db, file not found, called from ClearPrefFile");
     }
     return bSuccess;
 }
@@ -861,9 +920,7 @@ bool AJAPersistence::DeletePrefFile()
 	{
         if (mDBImpl)
         {
-            if (shouldLog)
-                AJA_LOG_INFO("deleting existing db instance called from DeletePrefFile");
-
+            AJA_LOG_INFO(shouldLog, "deleting existing db instance called from DeletePrefFile");
             delete mDBImpl;
             mDBImpl = NULL;
         }
@@ -871,15 +928,12 @@ bool AJAPersistence::DeletePrefFile()
 		int err = remove(mstateKeyName.c_str());
 		bSuccess = err != 0;
 
-        if (shouldLog)
-            AJA_LOG_INFO("creating db instance called from DeletePrefFile");
-
+        AJA_LOG_INFO(shouldLog, "creating db instance called from DeletePrefFile");
         mDBImpl = new AJAPersistenceDBImpl(mstateKeyName);
 	}
     else
     {
-        if (shouldLog)
-            AJA_LOG_NOTICE("could not delete existing db, file not found, called from DeletePrefFile");
+        AJA_LOG_NOTICE(shouldLog, "could not delete existing db, file not found, called from DeletePrefFile");
     }
 	return bSuccess;
 }
