@@ -412,7 +412,6 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	bool 						bFb1Compressed 		= IsFormatCompressed(mFb1Format);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-	bool						bStereoIn			= mSDIInput1FormatSelect == NTV2_Stereo3DSelect;
 	int							bFb1Disable			= 0;					// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;					// Assume Channel 2 IS disabled by default
 													  
@@ -427,7 +426,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	
 	
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
-	if (b2FbLevelBHfr || bStereoIn)
+	if (b2FbLevelBHfr)
 	{
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
@@ -501,7 +500,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	
 
 	// Frame Buffer 1
-	if (b2FbLevelBHfr || bStereoIn)
+	if (b2FbLevelBHfr)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
 	}
@@ -542,7 +541,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	
 	
 	// Frame Buffer 2
-	if (b2FbLevelBHfr || bStereoIn)
+	if (b2FbLevelBHfr)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
 	}
@@ -553,7 +552,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	
 	
 	// Make sure both channels are enable for stereo, level B
-	if (b2FbLevelBHfr || bStereoIn)
+	if (b2FbLevelBHfr)
 	{
 		bFb1Disable = bFb2Disable = false;
 	}

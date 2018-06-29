@@ -645,7 +645,6 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	bool 						bFb1Compressed 		= IsFormatCompressed(mFb1Format);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-	bool						bStereoIn			= mSDIInput1FormatSelect == NTV2_Stereo3DSelect;
 	bool						bEanbleConverter	= false;
 	int							bFb1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;		// Assume Channel 2 IS disabled by default
@@ -660,7 +659,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
 
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
-	if (b2FbLevelBHfr || bStereoIn)
+	if (b2FbLevelBHfr)
 	{
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
@@ -688,7 +687,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	
 	// Frame Sync 1
 	NTV2CrosspointID frameSync1YUV;
-	if (bStereoIn || b2FbLevelBHfr)
+	if (b2FbLevelBHfr)
 	{
 		frameSync1YUV = inputXptYUV1;
 	}
@@ -705,7 +704,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV;
-	if (bStereoIn || b2FbLevelBHfr)
+	if (b2FbLevelBHfr)
 	{
 		frameSync2YUV = inputXptYUV2;
 	}
@@ -853,7 +852,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	
 
 	// Frame Buffer 1
-	if (b2FbLevelBHfr || bStereoIn)
+	if (b2FbLevelBHfr)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
 	}
@@ -895,7 +894,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	
 	
 	// Frame Buffer 2
-	if (b2FbLevelBHfr || bStereoIn)
+	if (b2FbLevelBHfr)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
 	}
@@ -906,7 +905,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	
 	
 	// Make sure both channels are enable for stereo, dual-link B
-	if (b2FbLevelBHfr || bStereoIn)
+	if (b2FbLevelBHfr)
 	{
 		bFb1Disable = bFb2Disable = false;
 	}
