@@ -3103,8 +3103,8 @@ typedef enum
 typedef enum
 {
     NTV2_ColorSpaceModeAuto,		// Auto Select
-    NTV2_ColorSpaceModeYCbCr,	// YCbCr (TBD, add 420, 444 options)
-    NTV2_ColorSpaceModeRgb,		// RGB
+    NTV2_ColorSpaceModeYCbCr,		// YCbCr (TBD, add 420, 444 options)
+    NTV2_ColorSpaceModeRgb,			// RGB
     NTV2_MAX_NUM_ColorSpaceModes
 } NTV2ColorSpaceMode;
 
