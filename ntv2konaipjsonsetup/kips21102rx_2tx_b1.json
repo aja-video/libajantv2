@@ -127,7 +127,7 @@
             "vlan":1,
             "ssrc":1234,
             "payload":100,
-            "numAudioChannels":16,
+            "numAudioChannels":4,
             "audioPktInterval" :1000,
             "sfp1Enable":"true",
             "sfp2Enable":"false",
