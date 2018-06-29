@@ -77,12 +77,11 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 	//NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
-
-	NTV2CrosspointID			inputXpt1		= NTV2_XptBlack;
-	NTV2CrosspointID			inputXpt2		= NTV2_XptBlack;
-	NTV2CrosspointID			inputXpt3		= NTV2_XptBlack;
-	NTV2CrosspointID			inputXpt4		= NTV2_XptBlack;
-	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
+	NTV2CrosspointID			inputXpt1			= NTV2_XptBlack;
+	NTV2CrosspointID			inputXpt2			= NTV2_XptBlack;
+	NTV2CrosspointID			inputXpt3			= NTV2_XptBlack;
+	NTV2CrosspointID			inputXpt4			= NTV2_XptBlack;
+	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;		// Input format select (YUV, RGB, etc)
 	
 	NTV2LHIHDMIColorSpace hdmiInputColor;
 	mCard->GetHDMIInputColor(hdmiInputColor, (NTV2Channel)mVirtualInputSelect);

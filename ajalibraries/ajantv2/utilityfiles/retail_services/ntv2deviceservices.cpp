@@ -219,9 +219,9 @@ void DeviceServices::ReadDriverState (void)
 	mCard->ReadRegister(kVRegFramesPerVertical, mRegFramesPerVertical);
 	AsDriverInterface(mCard)->ReadRegister(kVReg4kOutputTransportSelection, m4kTransportOutSelection);
 	
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1FormatSelect, mSDIInput1FormatSelect);
-	//AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput2FormatSelect, mSDIInput2FormatSelect);
-	mSDIInput2FormatSelect = mSDIInput1FormatSelect;	// for now
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1FormatSelect, mSDIInput1ColorSpace);
+	//AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput2FormatSelect, mSDIInput2ColorSpace);
+	mSDIInput2ColorSpace = mSDIInput1ColorSpace;	// for now
 	
 	// basic Ch1 HW registers 
 	mDeviceID = mCard->GetDeviceID();
@@ -437,13 +437,13 @@ NTV2VideoFormat DeviceServices::GetSelectedInputVideoFormat(
         case NTV2_DualLink4xSdi4k:
             inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
             if (inputFormatSelect)
-                *inputFormatSelect = mSDIInput1FormatSelect;
+                *inputFormatSelect = mSDIInput1ColorSpace;
             break;
 
         case NTV2_Input2Select:
             inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
             if (inputFormatSelect)
-                *inputFormatSelect = mSDIInput2FormatSelect;
+                *inputFormatSelect = mSDIInput2ColorSpace;
             break;
 
         default:
@@ -1107,7 +1107,7 @@ NTV2RGB10Range DeviceServices::GetCSCRange()
 		else	// mFb1Mode == NTV2_MODE_CAPTURE
 		{
 			// follow input RGB range
-			if (mSDIInput1FormatSelect == NTV2_RGBSelect)
+			if (mSDIInput1ColorSpace == NTV2_RGBSelect)
 			{
 				cscRange = (mSDIInput1RGBRange == NTV2_RGBRangeFull) ? NTV2_RGB10RangeFull : NTV2_RGB10RangeSMPTE;
 			}
@@ -3147,7 +3147,7 @@ bool DeviceServices::UpdateK2LUTSelect()
 			wantedLUT = (fbRange == mSDIOutput1RGBRange) ? NTV2_LUTLinear : NTV2_LUTRGBRangeFull_SMPTE;
 		}
 		
-		else if (mFb1Mode == NTV2_MODE_CAPTURE && bFb1RGB == true && mSDIInput1FormatSelect == NTV2_RGBSelect)
+		else if (mFb1Mode == NTV2_MODE_CAPTURE && bFb1RGB == true && mSDIInput1ColorSpace == NTV2_RGBSelect)
 		{
 			wantedLUT = NTV2_LUTRGBRangeFull_SMPTE;
 		}

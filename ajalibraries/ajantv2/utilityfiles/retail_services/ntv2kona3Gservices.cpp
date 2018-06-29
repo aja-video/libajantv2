@@ -606,7 +606,7 @@ void Kona3GServices::SetDeviceXPointCapture ()
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;		// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	NTV2VideoFormat				inputFormat			= mFb1VideoFormat;		// Input source selected format
-	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;		// Input format select (YUV, RGB, Stereo 3D)
+	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;		// Input format select (YUV, RGB, etc)
 	
 	
 	// Figure out what our input format is based on what is selected 

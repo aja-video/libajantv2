@@ -34,13 +34,13 @@ NTV2VideoFormat Io4KUfcServices::GetSelectedInputVideoFormat(
 	{
 		inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
 		if (inputFormatSelect)
-			*inputFormatSelect = mSDIInput1FormatSelect;
+			*inputFormatSelect = mSDIInput1ColorSpace;
 	}
 	else if (mVirtualInputSelect == NTV2_Input2Select)
 	{
 		inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
 		if (inputFormatSelect)
-			*inputFormatSelect = mSDIInput2FormatSelect;
+			*inputFormatSelect = mSDIInput2ColorSpace;
 	}
 	else if (mVirtualInputSelect == NTV2_Input3Select)	// HDMI
 	{
@@ -714,7 +714,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;		// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	NTV2VideoFormat				inputFormat			= mFb1VideoFormat;		// Input source selected format
-	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;		// Input format select (YUV, RGB, Stereo 3D)
+	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;		// Input format select (YUV, RGB, etc)
 	
 	// Figure out what our input format is based on what is selected
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);

@@ -44,9 +44,9 @@ void Corvid24Services::SetDeviceXPointPlayback ()
 	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
 								bDSKOn				= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
-	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1FormatSelect;	// Input format select (YUV, RGB, Stereo 3D)
-	NTV2CrosspointID	inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
-	NTV2CrosspointID	inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
+	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
+	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
+	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	
 	// make sure formats/modes match for multibuffer modes
 	if (b4K || b2FbLevelBHfr || bStereoOut)
@@ -934,9 +934,9 @@ void Corvid24Services::SetDeviceXPointCapture ()
 	int							bFb3Disable			= 1;		// Assume Channel 2 IS disabled by default
 	int							bFb4Disable			= 1;		// Assume Channel 2 IS disabled by default
 
-	NTV2CrosspointID	inputXptYUV1		= NTV2_XptBlack;				// Input source selected single stream
-	NTV2CrosspointID	inputXptYUV2		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
+	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;		// Input source selected single stream
+	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
+	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;		// Input format select (YUV, RGB, etc)
 	
 	// Figure out what our input format is based on what is selected 
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);

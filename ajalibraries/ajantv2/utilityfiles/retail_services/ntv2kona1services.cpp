@@ -38,7 +38,7 @@ void Kona1Services::SetDeviceXPointPlayback ()
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || 
 													  mDSKMode == NTV2_DSKModeFBOverVideoIn || 
 													  (bFb2RGB && bDSKGraphicMode);
-	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1FormatSelect;	// Input format select (YUV, RGB, Stereo 3D)
+	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
 	bool						bInRGB				= inputFormatSelect == NTV2_RGBSelect;
 		
 	// make sure frame DualLink B mode (SMPTE 372), Stereo
@@ -416,14 +416,9 @@ void Kona1Services::SetDeviceXPointCapture ()
 	//bool						b4kHfr              = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	//bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	//bool						b2xQuadOut          = (b4K && !b4kHfr  && (mVirtualInputSelect == NTV2_DualLink2xSdi4k));
-	//int							bFb1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
-	//int							bFb2Disable			= 1;		// Assume Channel 2 IS disabled by default
-	//int							bFb3Disable			= 1;		// Assume Channel 2 IS disabled by default
-	//int							bFb4Disable			= 1;		// Assume Channel 2 IS disabled by default
-
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;				// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
+	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, etc)
 
 	// get selected input video format
 	NTV2VideoFormat	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);

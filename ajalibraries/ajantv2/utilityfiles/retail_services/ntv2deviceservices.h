@@ -258,8 +258,8 @@ public:
 	NTV2VideoFormat			mSelectedInputVideoFormat;
 	NTV2SDIInputFormatSelect mSDIInputFormatSelect;
 	
-	NTV2SDIInputFormatSelect mSDIInput1FormatSelect;
-	NTV2SDIInputFormatSelect mSDIInput2FormatSelect;
+	NTV2SDIInputFormatSelect mSDIInput1ColorSpace;
+	NTV2SDIInputFormatSelect mSDIInput2ColorSpace;
 	NTV2RGBRangeMode		mSDIInput1RGBRange;
 	NTV2RGBRangeMode		mSDIInput2RGBRange;
 	NTV2Stereo3DMode		mSDIInput1Stereo3DMode;

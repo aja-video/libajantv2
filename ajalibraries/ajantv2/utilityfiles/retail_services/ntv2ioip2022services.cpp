@@ -60,12 +60,12 @@ NTV2VideoFormat IoIP2022Services::GetSelectedInputVideoFormat(
     case NTV2_DualLink2xSdi4k:
 		inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
 		if (inputFormatSelect)
-			*inputFormatSelect = mSDIInput1FormatSelect;
+			*inputFormatSelect = mSDIInput1ColorSpace;
         break;
     case NTV2_Input2Select:
 		inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
 		if (inputFormatSelect)
-			*inputFormatSelect = mSDIInput1FormatSelect;
+			*inputFormatSelect = mSDIInput1ColorSpace;
         break;
     case NTV2_Input5Select:	// HDMI
         {
@@ -122,8 +122,8 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || 
 													  mDSKMode == NTV2_DSKModeFBOverVideoIn || 
 													  (bFb2RGB && bDSKGraphicMode);
-	bDSKOn											= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
-	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1FormatSelect;	// Input format select (YUV, RGB, Stereo 3D)
+								bDSKOn				= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
+	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	
@@ -1529,7 +1529,7 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 	int							bFb3Disable			= 1;		// Assume Channel 2 IS disabled by default
 	int							bFb4Disable			= 1;		// Assume Channel 2 IS disabled by default
 	
-	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
+	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, etc)
 	bool						bHdmiIn             = mVirtualInputSelect == NTV2_Input5Select;
 	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
 														 mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB10bit) ||
