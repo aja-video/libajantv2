@@ -94,7 +94,7 @@ public:
 	virtual void SetDeviceMiscRegisters();
 	
 	virtual NTV2VideoFormat GetLockedInputVideoFormat();
-	virtual NTV2VideoFormat GetSelectedInputVideoFormat(NTV2VideoFormat referenceFormat, NTV2SDIInputFormatSelect* inputFormatSelect=NULL);
+	virtual NTV2VideoFormat GetSelectedInputVideoFormat(NTV2VideoFormat referenceFormat, NTV2ColorSpaceMode* inputColorSpace=NULL);
     virtual NTV2VideoFormat GetCorrespondingAFormat(NTV2VideoFormat bVideoFormat);
 	virtual void SetDeviceXPointPlaybackRaw();
 	virtual void SetDeviceXPointCaptureRaw();
@@ -258,8 +258,8 @@ public:
 	NTV2VideoFormat			mSelectedInputVideoFormat;
 	NTV2SDIInputFormatSelect mSDIInputFormatSelect;
 	
-	NTV2SDIInputFormatSelect mSDIInput1ColorSpace;
-	NTV2SDIInputFormatSelect mSDIInput2ColorSpace;
+	NTV2ColorSpaceMode 		mSDIInput1ColorSpace;
+	NTV2ColorSpaceMode 		mSDIInput2ColorSpace;
 	NTV2RGBRangeMode		mSDIInput1RGBRange;
 	NTV2RGBRangeMode		mSDIInput2RGBRange;
 	NTV2Stereo3DMode		mSDIInput1Stereo3DMode;

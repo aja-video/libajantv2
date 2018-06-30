@@ -38,8 +38,7 @@ void Kona1Services::SetDeviceXPointPlayback ()
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || 
 													  mDSKMode == NTV2_DSKModeFBOverVideoIn || 
 													  (bFb2RGB && bDSKGraphicMode);
-	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
-	bool						bInRGB				= inputFormatSelect == NTV2_RGBSelect;
+	bool						bInRGB				= mSDIInput1ColorSpace == NTV2_RGBSelect;
 		
 	// make sure frame DualLink B mode (SMPTE 372), Stereo
 	if (b2FbLevelBHfr || bStereoOut)
@@ -418,10 +417,10 @@ void Kona1Services::SetDeviceXPointCapture ()
 	//bool						b2xQuadOut          = (b4K && !b4kHfr  && (mVirtualInputSelect == NTV2_DualLink2xSdi4k));
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;				// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, etc)
+	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)
 
 	// get selected input video format
-	NTV2VideoFormat	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
+	NTV2VideoFormat	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
 	//bool inHfrB = IsVideoFormatB(inputFormat);
 
 	inputXptYUV1 = NTV2_XptSDIIn1;
@@ -430,7 +429,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 	// SDI In 1
 	bool b3GbInEnabled;
 	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b3GbInEnabled && inputFormatSelect != NTV2_RGBSelect));
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b3GbInEnabled && inputColorSpace != NTV2_RGBSelect));
 
     if(mCard->GetVPIDValidA(NTV2_CHANNEL1))
     {
@@ -443,16 +442,16 @@ void Kona1Services::SetDeviceXPointCapture ()
         VPIDSampling sample = parser.GetSampling();
         if (sample == VPIDSampling_YUV_422)
         {
-            inputFormatSelect = NTV2_YUVSelect;
+            inputColorSpace = NTV2_ColorSpaceModeYCbCr;
         }
         else
         {
-            inputFormatSelect = NTV2_RGBSelect;
+            inputColorSpace = NTV2_ColorSpaceModeRgb;
         }
     }
 
 	// Dual Link In 1
-	if (inputFormatSelect == NTV2_RGBSelect)
+	if (inputColorSpace == NTV2_RGBSelect)
 	{
 		mCard->Connect (NTV2_XptDualLinkIn1Input, inputXptYUV1);
 		mCard->Connect (NTV2_XptDualLinkIn1DSInput, inputXptYUV2);
@@ -467,7 +466,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 	}
 
 	// CSC 1
-	if (inputFormatSelect != NTV2_RGBSelect)
+	if (inputColorSpace != NTV2_RGBSelect)
 	{
 			mCard->Connect (NTV2_XptCSC1VidInput, inputXptYUV1);
 	}
@@ -477,7 +476,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 	}
 
 	// LUT 1
-	if (inputFormatSelect != NTV2_RGBSelect)
+	if (inputColorSpace != NTV2_RGBSelect)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
 		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
@@ -503,7 +502,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 	if (inputFormat == mFb1VideoFormat)
 	{
 		// Input is NOT secondary
-		if (inputFormatSelect != NTV2_RGBSelect)
+		if (inputColorSpace != NTV2_RGBSelect)
 		{
 			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptLUT1RGB);
 		}
@@ -525,7 +524,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 		// Input is Secondary format
 		// NOTE: This is the same logic as above but we can't do the dual link case because we would
 		// need two LUT's to convert RGB to YUB then back again.
-		if (inputFormatSelect != NTV2_RGBSelect)
+		if (inputColorSpace != NTV2_RGBSelect)
 		{
 			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptLUT1RGB);
 		}
@@ -538,7 +537,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 	// Frame Buffer 1
 	if (bFb1RGB)
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_RGBSelect)
 		{
 			if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 			{

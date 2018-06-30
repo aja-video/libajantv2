@@ -45,7 +45,7 @@ void Kona3GQuadServices::SetDeviceXPointPlayback ()
 	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
 								bDSKOn				= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
-	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
+	NTV2ColorSpaceMode            inputColorSpace	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	
@@ -90,7 +90,7 @@ void Kona3GQuadServices::SetDeviceXPointPlayback ()
 	}
 	
 	// Dual Link In 1
-	if (inputFormatSelect == NTV2_RGBSelect)
+	if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptDualLinkIn1Input, inputXptYuv1);
 		mCard->Connect (NTV2_XptDualLinkIn1DSInput, inputXptYuv2);
@@ -970,10 +970,10 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;				// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, etc)
+	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
 	
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1011,12 +1011,12 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	
 	
 	// Dual Link In 1
-	if (b4K && (inputFormatSelect == NTV2_RGBSelect))
+	if (b4K && (inputColorSpace == NTV2_ColorSpaceModeRgb))
 	{
 		mCard->Connect (NTV2_XptDualLinkIn1Input, NTV2_XptSDIIn1);
 		mCard->Connect (NTV2_XptDualLinkIn1DSInput, NTV2_XptSDIIn1DS2);
 	}
-	else if (inputFormatSelect == NTV2_RGBSelect)
+	else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptDualLinkIn1Input, inputXptYUV1);
 		mCard->Connect (NTV2_XptDualLinkIn1DSInput, inputXptYUV2);
@@ -1032,7 +1032,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	
 	
 	// Dual Link In 2
-	if (b4K && (inputFormatSelect == NTV2_RGBSelect))
+	if (b4K && (inputColorSpace == NTV2_ColorSpaceModeRgb))
 	{
 		mCard->Connect (NTV2_XptDualLinkIn2Input, NTV2_XptSDIIn2);
 		mCard->Connect (NTV2_XptDualLinkIn2DSInput, NTV2_XptSDIIn2DS2);
@@ -1045,7 +1045,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	
 	
 	// Dual Link In 3
-	if (b4K && (inputFormatSelect == NTV2_RGBSelect))
+	if (b4K && (inputColorSpace == NTV2_ColorSpaceModeRgb))
 	{
 		mCard->Connect (NTV2_XptDualLinkIn3Input, NTV2_XptSDIIn3);
 		mCard->Connect (NTV2_XptDualLinkIn3DSInput, NTV2_XptSDIIn3DS2);
@@ -1058,7 +1058,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	
 	
 	// Dual Link In 4
-	if (b4K && (inputFormatSelect == NTV2_RGBSelect))
+	if (b4K && (inputColorSpace == NTV2_ColorSpaceModeRgb))
 	{
 		mCard->Connect (NTV2_XptDualLinkIn4Input, NTV2_XptSDIIn4);
 		mCard->Connect (NTV2_XptDualLinkIn4DSInput, NTV2_XptSDIIn4DS2);
@@ -1078,7 +1078,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	// CSC 1
 	if (b4K)
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptLUT1RGB);
 		}
@@ -1087,7 +1087,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 			mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptSDIIn1);
 		}
 	}
-	else if (inputFormatSelect != NTV2_RGBSelect)
+	else if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 	{
 		if (inputFormat == mFb1VideoFormat)
 		{
@@ -1111,7 +1111,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 		{
 			mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptSDIIn1DS2);
 		}
-		else if (inputFormatSelect == NTV2_RGBSelect)
+		else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptLUT2RGB);
 		}
@@ -1133,7 +1133,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 		{
 			mCard->Connect (NTV2_XptCSC3VidInput, NTV2_XptSDIIn2);
 		}
-		else if (inputFormatSelect == NTV2_RGBSelect)
+		else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptCSC3VidInput, NTV2_XptLUT3Out);
 		}
@@ -1155,7 +1155,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 		{
 			mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptSDIIn2DS2);
 		}
-		else if (inputFormatSelect == NTV2_RGBSelect)
+		else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptLUT4Out);
 		}
@@ -1172,7 +1172,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 
 	// LUT 1
 	// note b4K processing is same
-	if (inputFormatSelect != NTV2_RGBSelect)
+	if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
 		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
@@ -1198,7 +1198,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	// LUT 2 
 	if (b4K)
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptLUT2Input, NTV2_XptDuallinkIn2);
 			
@@ -1220,7 +1220,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_YUV2RGB);
 		}
 	}
-	else if (inputFormatSelect == NTV2_RGBSelect)
+	else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 	{
 		// provides SMPTE <-> Full conversion
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptDuallinkIn1);
@@ -1234,7 +1234,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	// LUT 3 
 	if (b4K)
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptLUT3Input, NTV2_XptDuallinkIn3);
 			
@@ -1265,7 +1265,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	// LUT 4 
 	if (b4K)
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptLUT4Input, NTV2_XptDuallinkIn4);
 			
@@ -1298,7 +1298,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	{
 		// Input is NOT secondary
 	
-		if (inputFormatSelect != NTV2_RGBSelect)
+		if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptLUT1RGB);
 		}
@@ -1319,7 +1319,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 		// Input is Secondary format
 		// NOTE: This is the same logic as above but we can't do the dual link case because we would
 		// need two LUT's to convert RGB to YUB then back again.
-		if (inputFormatSelect != NTV2_RGBSelect)
+		if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptLUT1RGB);
 		}
@@ -1338,7 +1338,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	{
 		if (bFb1RGB)
 		{
-			if (inputFormatSelect == NTV2_RGBSelect)
+			if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 				{
@@ -1360,7 +1360,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 			{
 				mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);
 			}
-			else if (inputFormatSelect == NTV2_RGBSelect)
+			else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidYUV);
 			}
@@ -1376,7 +1376,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	}
 	else if (bFb1RGB)
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 			{
@@ -1407,7 +1407,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	{
 		if (bFb1RGB)
 		{
-			if (inputFormatSelect == NTV2_RGBSelect)
+			if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 				{
@@ -1429,7 +1429,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 			{
 				mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptSDIIn1DS2);
 			}
-			else if (inputFormatSelect == NTV2_RGBSelect)
+			else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptCSC2VidYUV);
 			}
@@ -1454,7 +1454,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	{
 		if (bFb1RGB)
 		{
-			if (inputFormatSelect == NTV2_RGBSelect)
+			if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 				{
@@ -1476,7 +1476,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 			{
 				mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptSDIIn2);
 			}
-			else if (inputFormatSelect == NTV2_RGBSelect)
+			else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptCSC3VidYUV);
 			}
@@ -1497,7 +1497,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	{
 		if (bFb1RGB)
 		{
-			if (inputFormatSelect == NTV2_RGBSelect)
+			if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 				{
@@ -1519,7 +1519,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 			{
 				mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptSDIIn2DS2);
 			}
-			else if (inputFormatSelect == NTV2_RGBSelect)
+			else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptCSC4VidYUV);
 			}
@@ -1650,10 +1650,10 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 		switch (mVirtualHDMIOutputSelect)
 		{
 		default:
-		case NTV2_Quadrant1Select: mCard->Connect (NTV2_XptHDMIOutInput, inputFormatSelect == NTV2_RGBSelect ? NTV2_XptCSC1VidYUV : NTV2_XptSDIIn1); break;
-		case NTV2_Quadrant2Select: mCard->Connect (NTV2_XptHDMIOutInput, inputFormatSelect == NTV2_RGBSelect ? NTV2_XptCSC2VidYUV : NTV2_XptSDIIn2); break;
-		case NTV2_Quadrant3Select: mCard->Connect (NTV2_XptHDMIOutInput, inputFormatSelect == NTV2_RGBSelect ? NTV2_XptCSC3VidYUV : NTV2_XptSDIIn3); break;
-		case NTV2_Quadrant4Select: mCard->Connect (NTV2_XptHDMIOutInput, inputFormatSelect == NTV2_RGBSelect ? NTV2_XptCSC4VidYUV : NTV2_XptSDIIn4); break;
+		case NTV2_Quadrant1Select: mCard->Connect (NTV2_XptHDMIOutInput, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC1VidYUV : NTV2_XptSDIIn1); break;
+		case NTV2_Quadrant2Select: mCard->Connect (NTV2_XptHDMIOutInput, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC2VidYUV : NTV2_XptSDIIn2); break;
+		case NTV2_Quadrant3Select: mCard->Connect (NTV2_XptHDMIOutInput, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC3VidYUV : NTV2_XptSDIIn3); break;
+		case NTV2_Quadrant4Select: mCard->Connect (NTV2_XptHDMIOutInput, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC4VidYUV : NTV2_XptSDIIn4); break;
 		};
 	}
 	else 
@@ -1669,10 +1669,10 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 		switch (mVirtualAnalogOutputSelect)
 		{
 		default:
-		case NTV2_Quadrant1Select: mCard->Connect (NTV2_XptAnalogOutInput, inputFormatSelect == NTV2_RGBSelect ? NTV2_XptCSC1VidYUV : NTV2_XptSDIIn1); break;
-		case NTV2_Quadrant2Select: mCard->Connect (NTV2_XptAnalogOutInput, inputFormatSelect == NTV2_RGBSelect ? NTV2_XptCSC2VidYUV : NTV2_XptSDIIn2); break;
-		case NTV2_Quadrant3Select: mCard->Connect (NTV2_XptAnalogOutInput, inputFormatSelect == NTV2_RGBSelect ? NTV2_XptCSC3VidYUV : NTV2_XptSDIIn3); break;
-		case NTV2_Quadrant4Select: mCard->Connect (NTV2_XptAnalogOutInput, inputFormatSelect == NTV2_RGBSelect ? NTV2_XptCSC4VidYUV : NTV2_XptSDIIn4); break;
+		case NTV2_Quadrant1Select: mCard->Connect (NTV2_XptAnalogOutInput, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC1VidYUV : NTV2_XptSDIIn1); break;
+		case NTV2_Quadrant2Select: mCard->Connect (NTV2_XptAnalogOutInput, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC2VidYUV : NTV2_XptSDIIn2); break;
+		case NTV2_Quadrant3Select: mCard->Connect (NTV2_XptAnalogOutInput, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC3VidYUV : NTV2_XptSDIIn3); break;
+		case NTV2_Quadrant4Select: mCard->Connect (NTV2_XptAnalogOutInput, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC4VidYUV : NTV2_XptSDIIn4); break;
 		};
 	}
 	else

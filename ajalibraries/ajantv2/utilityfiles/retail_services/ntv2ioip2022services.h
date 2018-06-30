@@ -25,7 +25,7 @@ public:
 	virtual void SetDeviceMiscRegisters ();
 	virtual NTV2VideoFormat GetSelectedInputVideoFormat (
 									NTV2VideoFormat fbVideoFormat,
-									NTV2SDIInputFormatSelect* inputFormatSelect=NULL);
+									NTV2ColorSpaceMode* inputColorSpace=NULL);
     
 protected:
     CNTV2Config2022 *       config;

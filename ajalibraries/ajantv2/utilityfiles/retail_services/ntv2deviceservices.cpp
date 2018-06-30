@@ -422,11 +422,11 @@ void DeviceServices::UpdateAutoState ()
 //-------------------------------------------------------------------------------------------------------
 NTV2VideoFormat DeviceServices::GetSelectedInputVideoFormat(
 											NTV2VideoFormat fbVideoFormat,
-											NTV2SDIInputFormatSelect* inputFormatSelect)
+											NTV2ColorSpaceMode* inputColorSpace)
 {
 	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-	if (inputFormatSelect)
-		*inputFormatSelect = NTV2_YUVSelect;
+	if (inputColorSpace)
+		*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
 	
 	// Figure out what our input format is based on what is selected 
 	switch (mVirtualInputSelect)
@@ -436,14 +436,14 @@ NTV2VideoFormat DeviceServices::GetSelectedInputVideoFormat(
         case NTV2_DualLink2xSdi4k:
         case NTV2_DualLink4xSdi4k:
             inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-            if (inputFormatSelect)
-                *inputFormatSelect = mSDIInput1ColorSpace;
+            if (inputColorSpace)
+                *inputColorSpace = mSDIInput1ColorSpace;
             break;
 
         case NTV2_Input2Select:
             inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
-            if (inputFormatSelect)
-                *inputFormatSelect = mSDIInput2ColorSpace;
+            if (inputColorSpace)
+                *inputColorSpace = mSDIInput2ColorSpace;
             break;
 
         default:

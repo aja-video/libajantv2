@@ -651,10 +651,10 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack	;	// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;	// Input source selected for 2nd stream
 	NTV2VideoFormat				inputFormat			= mFb1VideoFormat;	// Input source selected format
-	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;	// Input format select (YUV, RGB, etc)
+	NTV2ColorSpaceMode			inputColorSpace 	= NTV2_ColorSpaceModeYCbCr;	// Input format select (YUV, RGB, etc)
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
 
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
 	if (b2FbLevelBHfr)
@@ -718,7 +718,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	
 	
 	// Dual Link In 1
-	if (inputFormatSelect == NTV2_RGBSelect)
+	if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptDualLinkIn1Input, inputXptYUV1);
 		mCard->Connect (NTV2_XptDualLinkIn1DSInput, inputXptYUV2);
@@ -756,7 +756,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 
 
 	// CSC 1
-	if (inputFormatSelect != NTV2_RGBSelect)
+	if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 	{
 		if (inputFormat == mFb1VideoFormat)
 		{
@@ -775,7 +775,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	
 
 	// LUT 1
-	if (inputFormatSelect != NTV2_RGBSelect)
+	if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
 		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);	
@@ -800,7 +800,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	
 	// LUT 2 
 	// provides SMPTE <-> Full conversion
-	if (inputFormatSelect == NTV2_RGBSelect)
+	if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptDuallinkIn1);
 		mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL2,	
@@ -814,7 +814,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	{
 		// Input is NOT secondary
 	
-		if (inputFormatSelect != NTV2_RGBSelect)
+		if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptLUT1RGB);
 		}
@@ -835,7 +835,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 		// Input is Secondary format
 		// NOTE: This is the same logic as above but we can't do the dual link case because we would
 		// need two LUT's to convert RGB to YUB then back again.
-		if (inputFormatSelect != NTV2_RGBSelect)
+		if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptLUT1RGB);
 		}
@@ -856,7 +856,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	}
 	else if (bFb1RGB)
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 			{
@@ -946,7 +946,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 		    && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
-		if (inputFormatSelect == NTV2_RGBSelect && mVirtualDigitalOutput1Select != NTV2_RgbOutputSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb && mVirtualDigitalOutput1Select != NTV2_RgbOutputSelect)
 		{
 			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
 		}
@@ -994,7 +994,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
-		if (inputFormatSelect == NTV2_RGBSelect && mVirtualDigitalOutput1Select != NTV2_RgbOutputSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb && mVirtualDigitalOutput1Select != NTV2_RgbOutputSelect)
 		{
 			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptCSC1VidYUV);
 		}
@@ -1015,7 +1015,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 			&& (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptHDMIOutInput, NTV2_XptCSC1VidYUV);
 		}
@@ -1042,7 +1042,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 			&& (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 		    && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptAnalogOutInput, NTV2_XptCSC1VidYUV);
 		}

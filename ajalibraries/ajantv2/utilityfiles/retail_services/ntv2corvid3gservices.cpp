@@ -418,11 +418,11 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;		// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	NTV2VideoFormat				inputFormat			= mFb1VideoFormat;		// Input source selected format
-	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;		// Input format select (YUV, RGB, etc)
+	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;		// Input format select (YUV, RGB, etc)
 	
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
 	
 	
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
@@ -458,7 +458,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 
 	
 	// CSC 1
-	if (inputFormatSelect != NTV2_RGBSelect)
+	if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 	{
 		if (inputFormat == mFb1VideoFormat)
 		{
@@ -476,7 +476,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	
 
 	// LUT 1
-	if (inputFormatSelect != NTV2_RGBSelect)
+	if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
 		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);	
@@ -490,7 +490,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	
 	// LUT 2 
 	// provides SMPTE <-> Full conversion
-	if (inputFormatSelect == NTV2_RGBSelect)
+	if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptDuallinkIn1);
 		mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL2,	
@@ -506,7 +506,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	}
 	else if (bFb1RGB)
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 			{

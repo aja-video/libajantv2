@@ -22,13 +22,13 @@ Kona4QuadServices::Kona4QuadServices()
 //-------------------------------------------------------------------------------------------------------
 NTV2VideoFormat Kona4QuadServices::GetSelectedInputVideoFormat(
                                                               NTV2VideoFormat fbVideoFormat,
-                                                              NTV2SDIInputFormatSelect* inputFormatSelect)
+                                                              NTV2ColorSpaceMode* inputColorSpace)
 {
     bool inHfrB;
     bool levelbtoaConvert;
     NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-    if (inputFormatSelect)
-        *inputFormatSelect = NTV2_YUVSelect;
+    if (inputColorSpace)
+        *inputColorSpace = NTV2_ColorSpaceModeYCbCr;
     
     // Figure out what our input format is based on what is selected
     switch (mVirtualInputSelect)
@@ -44,16 +44,16 @@ NTV2VideoFormat Kona4QuadServices::GetSelectedInputVideoFormat(
                 inputFormat = GetCorrespondingAFormat(inputFormat);
             }
             
-            if (inputFormatSelect)
-                *inputFormatSelect = mSDIInput1ColorSpace;
+            if (inputColorSpace)
+                *inputColorSpace = mSDIInput1ColorSpace;
             break;
             
         case NTV2_DualLinkInputSelect:
         case NTV2_DualLink4xSdi4k:
         case NTV2_DualLink2xSdi4k:
             inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-            if (inputFormatSelect)
-                *inputFormatSelect = mSDIInput1ColorSpace;
+            if (inputColorSpace)
+                *inputColorSpace = mSDIInput1ColorSpace;
             break;
         case NTV2_Input2Select:
             inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
@@ -66,8 +66,8 @@ NTV2VideoFormat Kona4QuadServices::GetSelectedInputVideoFormat(
                 inputFormat = GetCorrespondingAFormat(inputFormat);
             }
             
-            if (inputFormatSelect)
-                *inputFormatSelect = mSDIInput1ColorSpace;
+            if (inputColorSpace)
+                *inputColorSpace = mSDIInput1ColorSpace;
             break;
         default:
             break;
@@ -116,7 +116,7 @@ void Kona4QuadServices::SetDeviceXPointPlayback ()
 													  mDSKMode == NTV2_DSKModeFBOverVideoIn || 
 													  (bFb2RGB && bDSKGraphicMode);
 	bDSKOn											= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
-	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
+	NTV2ColorSpaceMode          inputColorSpace		= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	
@@ -133,7 +133,7 @@ void Kona4QuadServices::SetDeviceXPointPlayback ()
 	ULWord						selectSwapQuad		= 0;
 	mCard->ReadRegister(kVRegSwizzle4kOutput, selectSwapQuad);
 	bool						bQuadSwap			= b4K && !b4k12gOut && !b4k6gOut && (selectSwapQuad != 0);	
-	bool						bInRGB				= inputFormatSelect == NTV2_RGBSelect;
+	bool						bInRGB				= inputColorSpace == NTV2_ColorSpaceModeRgb;
 
 	// make sure formats/modes match for multibuffer modes
 	if (b4K || b2FbLevelBHfr || bStereoOut)
@@ -1498,7 +1498,7 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 	int							bFb3Disable			= 1;		// Assume Channel 2 IS disabled by default
 	int							bFb4Disable			= 1;		// Assume Channel 2 IS disabled by default
 	
-	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;	// Input format select (YUV, RGB, etc)
+	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;	// Input format select (YUV, RGB, etc)
 	bool						bHdmiIn             = false; //mVirtualInputSelect == NTV2_Input5Select;
 	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
 														 mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB10bit) ||
@@ -1527,7 +1527,7 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 	bool						b3GbInEnabled;
 	
     // Figure out what our input format is based on what is selected
-    inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
+    inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
 	bool inHfrB = IsVideoFormatB(inputFormat);
 	
 	// SDI In 1
@@ -1606,24 +1606,24 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 		if (b2piIn)
 			b2xQuadIn = b4xQuadIn = false;
 
-		// override inputFormatSelect for SMTE425
+		// override inputColorSpace for SMTE425
 		if (b2piIn)
 		{
 			VPIDSampling sample = parser.GetSampling();
 			if (sample == VPIDSampling_YUV_422)
 			{
-				inputFormatSelect = NTV2_YUVSelect;
+				inputColorSpace = NTV2_ColorSpaceModeYCbCr;
 			}
 			else
 			{
-				inputFormatSelect = NTV2_RGBSelect;
+				inputColorSpace = NTV2_ColorSpaceModeRgb;
 			}
 		}
 	}
 	
 	// other bools
 	b2pi		= b2piIn || (bHdmiIn && b4K);				
-	bInRGB		= (bHdmiIn == false && inputFormatSelect == NTV2_RGBSelect) ||
+	bInRGB		= (bHdmiIn == false && inputColorSpace == NTV2_ColorSpaceModeRgb) ||
 				  (bHdmiIn == true && bHdmiInRGB == true);
 	
 
