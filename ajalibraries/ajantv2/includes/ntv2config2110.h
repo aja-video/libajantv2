@@ -224,7 +224,6 @@ public:
     uint32_t            ssrc;               ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2110_SSRC set)
     uint16_t            vlan;               ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2110_VLAN set)
     uint16_t            payload;
-    NTV2Channel         channel;
     NTV2VideoFormat     videoFormat;
     VPIDSampling        videoSamples;
     uint32_t            numAudioChannels;
