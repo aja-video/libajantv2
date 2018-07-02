@@ -256,7 +256,7 @@ public:
 
 	// calculated valule, selected by user
 	NTV2VideoFormat			mSelectedInputVideoFormat;
-	NTV2SDIInputFormatSelect mSDIInputFormatSelect;
+	//NTV2SDIInputFormatSelect mSDIInputFormatSelect;
 	
 	NTV2ColorSpaceMode 		mSDIInput1ColorSpace;
 	NTV2ColorSpaceMode 		mSDIInput2ColorSpace;
