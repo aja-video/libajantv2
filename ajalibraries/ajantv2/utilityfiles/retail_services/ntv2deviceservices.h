@@ -94,7 +94,7 @@ public:
 	virtual void SetDeviceMiscRegisters();
 	
 	virtual NTV2VideoFormat GetLockedInputVideoFormat();
-	virtual NTV2VideoFormat GetSelectedInputVideoFormat(NTV2VideoFormat referenceFormat, NTV2SDIInputFormatSelect* inputFormatSelect=NULL);
+	virtual NTV2VideoFormat GetSelectedInputVideoFormat(NTV2VideoFormat referenceFormat, NTV2ColorSpaceMode* inputColorSpace=NULL);
     virtual NTV2VideoFormat GetCorrespondingAFormat(NTV2VideoFormat bVideoFormat);
 	virtual void SetDeviceXPointPlaybackRaw();
 	virtual void SetDeviceXPointCaptureRaw();
@@ -102,6 +102,15 @@ public:
 	virtual void DisableStartupSequence() {mStartupDisabled = true;}
 
     // common IP support routines
+    virtual void EveryFrameTask2022(CNTV2Config2022* config2022, NTV2Mode* modeLast, NTV2VideoFormat* videoFormatLast);
+    virtual void EveryFrameTask2110(CNTV2Config2110* config2110,
+                                    NTV2VideoFormat* videoFormatLast,
+                                    NetworkData2110* s2110NetworkLast,
+                                    TransmitVideoData2110* s2110TxVideoDataLast,
+                                    TransmitAudioData2110* s2110TxAudioDataLast,
+                                    ReceiveVideoData2110* s2110RxVideoDataLast,
+                                    ReceiveAudioData2110* s2110RxAudioDataLast);
+
     virtual void SetNetConfig(CNTV2Config2022* config, eSFP  port);
     virtual void SetRxConfig(CNTV2Config2022* config, NTV2Channel channel, bool is2022_7);
     virtual void SetTxConfig(CNTV2Config2022* config, NTV2Channel channel, bool is2022_7);
@@ -200,7 +209,7 @@ public:
 	int32_t					mStreamingAppPID;
 	uint32_t				mStreamingAppType;
 	NTV2OutputVideoSelect	mVirtualDigitalOutput1Select;
-	NTV2OutputVideoSelect	mVirtualDigitalOutput2Select;
+	//NTV2OutputVideoSelect	mVirtualDigitalOutput1Select;
 	NTV2OutputVideoSelect	mVirtualHDMIOutputSelect;
 	NTV2OutputVideoSelect	mVirtualAnalogOutputSelect;
 	NTV2LutType				mLUTType;
@@ -240,17 +249,17 @@ public:
 
 	// real register state - common
 	NTV2DeviceID			mDeviceID;
-	NTV2VideoFormat			mFb1VideoFormat;
+    NTV2VideoFormat			mFb1VideoFormat;
 	NTV2FrameBufferFormat	mFb1Format;
 	NTV2FrameBufferFormat	mFb2Format;
 	NTV2Mode				mFb1Mode;
 
 	// calculated valule, selected by user
 	NTV2VideoFormat			mSelectedInputVideoFormat;
-	NTV2SDIInputFormatSelect mSDIInputFormatSelect;
+	//NTV2SDIInputFormatSelect mSDIInputFormatSelect;
 	
-	NTV2SDIInputFormatSelect mSDIInput1FormatSelect;
-	NTV2SDIInputFormatSelect mSDIInput2FormatSelect;
+	NTV2ColorSpaceMode 		mSDIInput1ColorSpace;
+	NTV2ColorSpaceMode 		mSDIInput2ColorSpace;
 	NTV2RGBRangeMode		mSDIInput1RGBRange;
 	NTV2RGBRangeMode		mSDIInput2RGBRange;
 	NTV2Stereo3DMode		mSDIInput1Stereo3DMode;

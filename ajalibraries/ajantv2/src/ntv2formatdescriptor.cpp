@@ -498,6 +498,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inStandard,
 	mStandard		= inStandard;
 	mPixelFormat	= inFrameBufferFormat;
 	mVancMode		= inVancMode;
+	mFrameGeometry	= ::GetVANCFrameGeometry(::GetGeometryFromStandard(mStandard), mVancMode);
 
 	//	Account for VANC...
 	if (NTV2_IS_VANCMODE_ON(inVancMode))
@@ -522,6 +523,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inStandard,
 		}
 		firstActiveLine = numLines - numActiveLines;
 	}
+
 	if (numLines  &&  NTV2_IS_FBF_PLANAR(inFrameBufferFormat))
 		FinalizePlanar();
 
@@ -596,6 +598,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 	mStandard		= inStandard;
 	mPixelFormat	= inFrameBufferFormat;
 	mVancMode		= inVancMode;
+	mFrameGeometry	= ::GetVANCFrameGeometry(::GetNTV2FrameGeometryFromVideoFormat(mVideoFormat), mVancMode);
 
 	//	Account for VANC...
 	if (NTV2_IS_VANCMODE_ON(inVancMode))

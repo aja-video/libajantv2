@@ -20,7 +20,6 @@ public:
 	Corvid88Services();
 	~Corvid88Services() {}
 	
-	virtual void UpdateAutoState (void);
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();
 	virtual void SetDeviceMiscRegisters ();

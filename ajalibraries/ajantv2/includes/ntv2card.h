@@ -4187,6 +4187,15 @@ public:
 	**/
 	AJA_VIRTUAL bool		GetHDMIInBitDepth (NTV2HDMIBitDepth & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
+
+	/**
+		@brief						Answers with the given HDMI input's video black/white range.
+		@param[in]	outValue		Receives the HDMI input's current ::NTV2HDMIRange value.
+		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetHDMIInVideoRange (NTV2HDMIRange & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
 	AJA_VIRTUAL bool		SetHDMIOut3DPresent (const bool inIs3DPresent);
 	AJA_VIRTUAL bool		GetHDMIOut3DPresent (bool & outIs3DPresent);
 

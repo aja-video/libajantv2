@@ -23,11 +23,11 @@ KonaLHiServices::KonaLHiServices()
 //-------------------------------------------------------------------------------------------------------
 NTV2VideoFormat KonaLHiServices::GetSelectedInputVideoFormat(
 											NTV2VideoFormat fbVideoFormat,
-											NTV2SDIInputFormatSelect* inputFormatSelect)
+											NTV2ColorSpaceMode* inputColorSpace)
 {
 	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-	if (inputFormatSelect)
-		*inputFormatSelect = NTV2_YUVSelect;
+	if (inputColorSpace)
+		*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
 	
 	// Figure out what our input format is based on what is selected
 	switch (mVirtualInputSelect)
@@ -311,7 +311,7 @@ void KonaLHiServices::SetDeviceXPointPlayback ()
 		// Select Up/Down converter out (0x06)
 		mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptConversionModule);
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)
+	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)
 	{
 		// Select dual link out (0x0b)
 		mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptDuallinkOut1);
@@ -353,7 +353,7 @@ void KonaLHiServices::SetDeviceXPointPlayback ()
 		// Select Up/Down converter out (0x06)
 		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptConversionModule);
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)
+	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)
 	{		
 		// Select dual link out (0x0b)
 		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);
@@ -936,7 +936,7 @@ void KonaLHiServices::SetDeviceXPointCapture ()
 		// Select frame sync 2 output (0x0a)
 		mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptFrameSync2YUV);
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)
+	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)
 	{
 		// Select dual link out (0x0b)
 		mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptDuallinkOut1);
@@ -957,7 +957,7 @@ void KonaLHiServices::SetDeviceXPointCapture ()
 		// Select frame sync 2 output (0x0a)
 		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptFrameSync2YUV);
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect)
+	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)
 	{		
 		// Select dual link out (0x0b)
 		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);
@@ -993,7 +993,7 @@ void KonaLHiServices::SetDeviceXPointCapture ()
 		// Select frame sync 2 output (0x0a)
 		mCard->Connect (NTV2_XptAnalogOutInput, NTV2_XptFrameSync2YUV);
 	}
-	else if (mVirtualAnalogOutputSelect == NTV2_DualLinkOutputSelect)
+	else if (mVirtualAnalogOutputSelect == NTV2_RgbOutputSelect)
 	{
 		// Select dual link out (0x0b)
 		mCard->Connect (NTV2_XptAnalogOutInput, NTV2_XptDuallinkOut1);

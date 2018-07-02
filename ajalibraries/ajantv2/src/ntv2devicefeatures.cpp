@@ -50,6 +50,18 @@ bool NTV2DeviceCanDoAudioIn(const NTV2DeviceID inDeviceID)
     return inputs > 0 ? true : false;
 }
 
+bool NTV2DeviceCanDo292Out(NTV2DeviceID boardID, UWord index0)
+{
+	switch (index0)
+	{
+	case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut1);
+	case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut2);
+	case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut3);
+	case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut4);
+	default:	return false;
+	}
+}	//	NTV2DeviceCanDo3GOut
+
 bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 {
 	switch (index0)

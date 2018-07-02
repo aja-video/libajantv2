@@ -3,6 +3,7 @@
 
 	@section		ntv2hwkona
 
+	<hr>
 	@subsection		konalheplus		KONA LHe Plus
 
 	This page describes the KONA LHe Plus video capture/playout board.
@@ -22,18 +23,18 @@
 
 	@par	Inputs & Outputs
 
-	-	1 x SDI input
-	-	2 x SDI outputs
-	-	1 x analog component video input
-	-	1 x analog component video output
-	-	1 x reference/LTC input
-	-	1 x LTC output
-	-	1 x RS-422 serial port
+	-	1 × SDI input
+	-	2 × SDI outputs
+	-	1 × analog component video input
+	-	1 × analog component video output
+	-	1 × reference/LTC input
+	-	1 × LTC output
+	-	1 × RS-422 serial port
 
 	@par	Frame Buffer
 
 	-	256 MB SDRAM
-	-	32 x 8MB frames
+	-	32 × 8MB frames
 
 	@par	Audio
 

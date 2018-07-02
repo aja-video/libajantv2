@@ -1035,10 +1035,10 @@ typedef enum
     NTV2_AUDIO2_STREAM      = 5,
     NTV2_AUDIO3_STREAM      = 6,
     NTV2_AUDIO4_STREAM      = 7,
-    NTV2_METADATA1_STREAM   = 8,
-    NTV2_METADATA2_STREAM   = 9,
-    NTV2_METADATA3_STREAM   = 10,
-    NTV2_METADATA4_STREAM   = 11,
+    NTV2_ANC1_STREAM        = 8,
+    NTV2_ANC2_STREAM        = 9,
+    NTV2_ANC3_STREAM        = 10,
+    NTV2_ANC4_STREAM        = 11,
     NTV2_MAX_NUM_STREAMS    = 12,
     NTV2_STREAM_INVALID = NTV2_MAX_NUM_STREAMS
 } NTV2Stream;
@@ -1051,7 +1051,7 @@ typedef enum
 {
     VIDEO_STREAM,		///< @brief	Video data
     AUDIO_STREAM,		///< @brief	Audio data
-    METADATA_STREAM,	///< @brief	Metadata
+    ANC_STREAM,         ///< @brief	Anc data
     INVALID_STREAM
 } NTV2StreamType;
 
@@ -1915,7 +1915,7 @@ typedef enum
 {
     NTV2_PrimaryOutputSelect,
     NTV2_SecondaryOutputSelect,
-    NTV2_DualLinkOutputSelect,
+    NTV2_RgbOutputSelect,
     NTV2_VideoPlusKeySelect,
     NTV2_StereoOutputSelect,
     NTV2_Quadrant1Select,
@@ -1924,8 +1924,6 @@ typedef enum
     NTV2_Quadrant4Select,
     NTV2_Quarter4k,
     NTV2_4kHalfFrameRate,
-    NTV2_2xSdi4k,
-    NTV2_4xSdi4k,
     NTV2_MAX_NUM_OutputVideoSelectEnums
 } NTV2OutputVideoSelect;
 
@@ -3106,9 +3104,9 @@ typedef enum
 **/
 typedef enum
 {
-    NTV2_ColorSpaceModeAuto,			// Auto Select
-    NTV2_ColorSpaceModeYCbCr,			// YCbCr
-    NTV2_ColorSpaceModeRGB,				// RGB
+    NTV2_ColorSpaceModeAuto,		// Auto Select
+    NTV2_ColorSpaceModeYCbCr,		// YCbCr (TBD, add 420, 444 options)
+    NTV2_ColorSpaceModeRgb,			// RGB
     NTV2_MAX_NUM_ColorSpaceModes
 } NTV2ColorSpaceMode;
 
@@ -4141,7 +4139,7 @@ typedef enum
     //	NTV2OutputVideoSelect
     #define		NTV2K2_PrimaryOutputSelect			NTV2_PrimaryOutputSelect			///< @deprecated	Use NTV2_PrimaryOutputSelect instead.
     #define		NTV2K2_SecondaryOutputSelect		NTV2_SecondaryOutputSelect			///< @deprecated	Use NTV2_SecondaryOutputSelect instead.
-    #define		NTV2K2_DualLinkOutputSelect			NTV2_DualLinkOutputSelect			///< @deprecated	Use NTV2_DualLinkOutputSelect instead.
+    #define		NTV2K2_DualLinkOutputSelect			NTV2_RgbOutputSelect			///< @deprecated	Use NTV2_RgbOutputSelect instead.
     #define		NTV2K2_VideoPlusKeySelect			NTV2_VideoPlusKeySelect				///< @deprecated	Use NTV2_VideoPlusKeySelect instead.
     #define		NTV2K2_StereoOutputSelect			NTV2_StereoOutputSelect				///< @deprecated	Use NTV2_StereoOutputSelect instead.
     #define		NTV2K2_Quadrant1Select				NTV2_Quadrant1Select				///< @deprecated	Use NTV2_Quadrant1Select instead.
@@ -4149,8 +4147,6 @@ typedef enum
     #define		NTV2K2_Quadrant3Select				NTV2_Quadrant3Select				///< @deprecated	Use NTV2_Quadrant3Select instead.
     #define		NTV2K2_Quadrant4Select				NTV2_Quadrant4Select				///< @deprecated	Use NTV2_Quadrant4Select instead.
     #define		NTV2k2_Quarter4k					NTV2_Quarter4k						///< @deprecated	Use NTV2_Quarter4k instead.
-    #define		NTV2K2_2xSdi4k						NTV2_2xSdi4k						///< @deprecated	Use NTV2_2xSdi4k instead.
-    #define		NTV2K2_4xSdi4k						NTV2_4xSdi4k						///< @deprecated	Use NTV2_4xSdi4k instead.
 
     //	NTV2UpConvertMode
     #define		NTV2K2_UpConvertAnamorphic			NTV2_UpConvertAnamorphic			///< @deprecated	Use NTV2_UpConvertAnamorphic instead.

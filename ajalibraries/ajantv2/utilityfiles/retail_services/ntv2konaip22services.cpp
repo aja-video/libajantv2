@@ -37,21 +37,6 @@ KonaIP22Services::KonaIP22Services()
      }
  }
 
-//-------------------------------------------------------------------------------------------------------
-//	UpdateAutoState
-//-------------------------------------------------------------------------------------------------------
-void KonaIP22Services::UpdateAutoState (void)
-{
-	// auto mode from transport
-	if (mDualStreamTransportType == NTV2_SDITransport_Auto)
-	{
-		if (IsVideoFormatA(mFb1VideoFormat))
-			mDualStreamTransportType = NTV2_SDITransport_3Ga;
-		else
-			mDualStreamTransportType = NTV2_SDITransport_DualLink_3Gb;
-	}
-}
-
 
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
@@ -70,7 +55,7 @@ void KonaIP22Services::SetDeviceXPointPlayback ()
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool						bSdiRgbOut			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
+	bool						bSdiRgbOut			= mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect;
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b2pi                = (b4K && m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);	// 2 pixed interleaved
 	bool						b2xQuadOut			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
@@ -80,20 +65,25 @@ void KonaIP22Services::SetDeviceXPointPlayback ()
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
 	int							bFb4Disable			= 1;						// Assume Channel 4 IS disabled by default
 	bool						bFb2RGB				= IsRGBFormat(mFb2Format);
-	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
+	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || 
+													   mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
 								bDSKOn				= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
-	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1FormatSelect;	// Input format select (YUV, RGB, Stereo 3D)
+	NTV2ColorSpaceMode            inputColorSpace	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
-	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
+	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream 
 	
     bool						bFb1HdrRGB			= (mFb1Format == NTV2_FBF_48BIT_RGB) ? true : false;
     bool						bFb2HdrRGB			= (mFb2Format == NTV2_FBF_48BIT_RGB) ? true : false;
 
     // Turn off RX IP channels on playback, don't need to wait for DeviceReady becuase these are virtuals
-    mCard->WriteRegister(kVRegRxcEnable1, false);
-    mCard->WriteRegister(kVRegRxcEnable2, false);
+    //mCard->WriteRegister(kVRegRxcEnable1, false);
+    //mCard->WriteRegister(kVRegRxcEnable2, false);
 
+    // Decided it's best to leave RX channel on
+    mCard->WriteRegister(kVRegRxcEnable1, true);
+    mCard->WriteRegister(kVRegRxcEnable2, true);
+    
 	// make sure formats/modes match for multibuffer modes
 	if (b4K || b2FbLevelBHfr || bStereoOut)
 	{
@@ -137,7 +127,7 @@ void KonaIP22Services::SetDeviceXPointPlayback ()
 	}
 	
 	// Dual Link In 1
-	if (inputFormatSelect == NTV2_RGBSelect)
+	if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptDualLinkIn1Input, inputXptYuv1);
 		mCard->Connect (NTV2_XptDualLinkIn1DSInput, inputXptYuv2);
@@ -952,12 +942,12 @@ void KonaIP22Services::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_DualLinkOutputSelect)			// RGB Out
+	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)			// RGB Out
 	{
         mCard->Connect (NTV2_XptSDIOut4Input, b3GbOut ? NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut1DS2);
         mCard->Connect (NTV2_XptSDIOut4InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)				// Video+Key
+	else if (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)				// Video+Key
 	{
 		if (bDSKOn)
 		{
@@ -1418,9 +1408,8 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
-	bool						bSdiRgbOut			= mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect;
+	bool						bSdiRgbOut			= mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect;
 	bool						b2xQuadOut			= (b4K && !b4kHfr && mVirtualInputSelect == NTV2_DualLink2xSdi4k);
-	bool						bStereoIn			= false;
 	int							bFb1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;		// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;		// Assume Channel 2 IS disabled by default
@@ -1428,14 +1417,14 @@ void KonaIP22Services::SetDeviceXPointCapture()
 
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;				// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
+	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)
 
     // Turn on RX IP channels on playback, don't need to wait for DeviceReady becuase these are virtuals
     mCard->WriteRegister(kVRegRxcEnable1, true);
     mCard->WriteRegister(kVRegRxcEnable2, true);
 
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
 	
 	//printf("inputformat=%d mFb1VideoFormat=%d\n", inputFormat, mFb1VideoFormat);
 	bool inHfrB = IsVideoFormatB(inputFormat);
@@ -1459,11 +1448,8 @@ void KonaIP22Services::SetDeviceXPointCapture()
 		inputXptYUV2 = NTV2_XptSDIIn2;
 	}
 
-	// is stereo in?
-	bStereoIn = inputFormatSelect == NTV2_Stereo3DSelect;
-
 	// make sure formats/modes match for multibuffer modes
-	if (b4K || b2FbLevelBHfr || bStereoIn)
+	if (b4K || b2FbLevelBHfr)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
@@ -1495,17 +1481,17 @@ void KonaIP22Services::SetDeviceXPointCapture()
 
 	bool b2piIn = (b2x2piIn || b4x2piInA || b4x2piInB);
 
-	// override inputFormatSelect for SMTE425
+	// override inputColorSpace for SMTE425
 	if (b2piIn)
 	{
 		VPIDSampling sample = parser.GetSampling();
 		if (sample == VPIDSampling_YUV_422)
 		{
-			inputFormatSelect = NTV2_YUVSelect;
+			inputColorSpace = NTV2_ColorSpaceModeYCbCr;
 		}
 		else
 		{
-			inputFormatSelect = NTV2_RGBSelect;
+			inputColorSpace = NTV2_ColorSpaceModeRgb;
 		}
 	}
 
@@ -1534,12 +1520,12 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	
 	
 	// Dual Link In 1
-	if (b4K && (inputFormatSelect == NTV2_RGBSelect))
+	if (b4K && (inputColorSpace == NTV2_ColorSpaceModeRgb))
 	{
 		mCard->Connect (NTV2_XptDualLinkIn1Input, NTV2_XptSDIIn1);
 		mCard->Connect (NTV2_XptDualLinkIn1DSInput, NTV2_XptSDIIn1DS2);
 	}
-	else if (inputFormatSelect == NTV2_RGBSelect)
+	else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptDualLinkIn1Input, inputXptYUV1);
 		mCard->Connect (NTV2_XptDualLinkIn1DSInput, inputXptYUV2);
@@ -1555,7 +1541,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	
 	
 	// Dual Link In 2
-	if (b4K && (inputFormatSelect == NTV2_RGBSelect))
+	if (b4K && (inputColorSpace == NTV2_ColorSpaceModeRgb))
 	{
 		mCard->Connect (NTV2_XptDualLinkIn2Input, NTV2_XptSDIIn2);
 		mCard->Connect (NTV2_XptDualLinkIn2DSInput, NTV2_XptSDIIn2DS2);
@@ -1568,7 +1554,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	
 	
 	// Dual Link In 3
-	if (b4K && (inputFormatSelect == NTV2_RGBSelect))
+	if (b4K && (inputColorSpace == NTV2_ColorSpaceModeRgb))
 	{
 		mCard->Connect (NTV2_XptDualLinkIn3Input, NTV2_XptSDIIn3);
 		mCard->Connect (NTV2_XptDualLinkIn3DSInput, NTV2_XptSDIIn3DS2);
@@ -1581,7 +1567,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	
 	
 	// Dual Link In 4
-	if (b4K && (inputFormatSelect == NTV2_RGBSelect))
+	if (b4K && (inputColorSpace == NTV2_ColorSpaceModeRgb))
 	{
 		mCard->Connect (NTV2_XptDualLinkIn4Input, NTV2_XptSDIIn4);
 		mCard->Connect (NTV2_XptDualLinkIn4DSInput, NTV2_XptSDIIn4DS2);
@@ -1596,7 +1582,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	// CSC 1
 	if (b4K)
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptLUT1RGB);
 		}
@@ -1605,7 +1591,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 			mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptSDIIn1);
 		}
 	}
-	else if (inputFormatSelect != NTV2_RGBSelect)
+	else if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptCSC1VidInput, inputXptYUV1);
 	}
@@ -1622,7 +1608,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 		{
 			mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptSDIIn1DS2);
 		}
-		else if (inputFormatSelect == NTV2_RGBSelect)
+		else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptLUT2RGB);
 		}
@@ -1648,7 +1634,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 		{
 			mCard->Connect (NTV2_XptCSC3VidInput, NTV2_XptSDIIn2);
 		}
-		else if (inputFormatSelect == NTV2_RGBSelect)
+		else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptCSC3VidInput, NTV2_XptLUT3Out);
 		}
@@ -1674,7 +1660,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 		{
 			mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptSDIIn2DS2);
 		}
-		else if (inputFormatSelect == NTV2_RGBSelect)
+		else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptLUT4Out);
 		}
@@ -1695,7 +1681,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 
 	// LUT 1
 	// note b4K processing is same
-	if (inputFormatSelect != NTV2_RGBSelect)
+	if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
 		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
@@ -1721,7 +1707,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	// LUT 2 
 	if (b4K)
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptLUT2Input, NTV2_XptDuallinkIn2);
 			
@@ -1743,7 +1729,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_YUV2RGB);
 		}
 	}
-	else if (inputFormatSelect == NTV2_RGBSelect)
+	else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 	{
 		// provides SMPTE <-> Full conversion
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptDuallinkIn1);
@@ -1761,7 +1747,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	// LUT 3 
 	if (b4K)
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptLUT3Input, NTV2_XptDuallinkIn3);
 
@@ -1792,7 +1778,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	// LUT 4 
 	if (b4K)
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptLUT4Input, NTV2_XptDuallinkIn4);
 
@@ -1825,7 +1811,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	{
 		// Input is NOT secondary
 	
-		if (inputFormatSelect != NTV2_RGBSelect)
+		if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptDualLinkOut3Input, NTV2_XptLUT1RGB);
 			mCard->Connect (NTV2_XptDualLinkOut4Input, NTV2_XptLUT1RGB);
@@ -1850,7 +1836,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 		// Input is Secondary format
 		// NOTE: This is the same logic as above but we can't do the dual link case because we would
 		// need two LUT's to convert RGB to YUB then back again.
-		if (inputFormatSelect != NTV2_RGBSelect)
+		if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptDualLinkOut3Input, NTV2_XptLUT1RGB);
 			mCard->Connect (NTV2_XptDualLinkOut4Input, NTV2_XptLUT1RGB);
@@ -1868,7 +1854,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	{
 		if (bFb1RGB)
 		{
-			if (inputFormatSelect == NTV2_RGBSelect)
+			if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				mCard->Connect(NTV2_Xpt425Mux1AInput, NTV2_XptDuallinkIn1);
 				mCard->Connect(NTV2_Xpt425Mux1BInput, NTV2_XptDuallinkIn2);
@@ -1885,7 +1871,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 		}
 		else
 		{
-			if (inputFormatSelect == NTV2_RGBSelect)
+			if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				mCard->Connect(NTV2_Xpt425Mux1AInput, NTV2_XptCSC1VidYUV);
 				mCard->Connect(NTV2_Xpt425Mux1BInput, NTV2_XptCSC2VidYUV);
@@ -1945,7 +1931,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	{
 		if (bFb1RGB)
 		{
-			if (inputFormatSelect == NTV2_RGBSelect)
+			if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 				{
@@ -1967,7 +1953,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 			{
 				mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);
 			}
-			else if (inputFormatSelect == NTV2_RGBSelect)
+			else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 			{ 
 				mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidYUV);
 			}
@@ -1977,13 +1963,13 @@ void KonaIP22Services::SetDeviceXPointCapture()
 			}
 		}
 	}
-	else if (b2FbLevelBHfr || bStereoIn)
+	else if (b2FbLevelBHfr)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
 	}
 	else if (bFb1RGB)
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 			{
@@ -2024,7 +2010,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	{
 		if (bFb1RGB)
 		{
-			if (inputFormatSelect == NTV2_RGBSelect)
+			if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 				{
@@ -2046,7 +2032,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 			{
 				mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptSDIIn1DS2);
 			}
-			else if (inputFormatSelect == NTV2_RGBSelect)
+			else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptCSC2VidYUV);
 			}
@@ -2056,7 +2042,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 			}
 		}
 	}
-	else if (b2FbLevelBHfr || bStereoIn)
+	else if (b2FbLevelBHfr)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
 	}
@@ -2071,7 +2057,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	{
 		if (bFb1RGB)
 		{
-			if (inputFormatSelect == NTV2_RGBSelect)
+			if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 				{
@@ -2093,7 +2079,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 			{
 				mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptSDIIn2);
 			}
-			else if (inputFormatSelect == NTV2_RGBSelect && !b2piIn)
+			else if (inputColorSpace == NTV2_ColorSpaceModeRgb && !b2piIn)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptCSC3VidYUV);
 			}
@@ -2114,7 +2100,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	{
 		if (bFb1RGB)
 		{
-			if (inputFormatSelect == NTV2_RGBSelect)
+			if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 				{
@@ -2136,7 +2122,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 			{
 				mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptSDIIn2DS2);
 			}
-			else if (inputFormatSelect == NTV2_RGBSelect && !b2piIn)
+			else if (inputColorSpace == NTV2_ColorSpaceModeRgb && !b2piIn)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptCSC4VidYUV);
 			}
@@ -2153,7 +2139,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	
 	
 	// Frame Buffer Disabling
-	if (b2FbLevelBHfr || bStereoIn)
+	if (b2FbLevelBHfr)
 	{
 		bFb1Disable = bFb2Disable = false;
 	}
@@ -2176,7 +2162,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	// 4K Down Converter
 	if (b4K)
 	{
-		if (b4kHfr && (inputFormatSelect != NTV2_RGBSelect))
+		if (b4kHfr && (inputColorSpace != NTV2_ColorSpaceModeRgb))
 		{
 			if (b2piIn)
 			{
@@ -2298,8 +2284,8 @@ void KonaIP22Services::SetDeviceXPointCapture()
 		}
 	}
 	else if (IsVideoFormatB(mFb1VideoFormat) ||												// Dual Stream - p60b
-		mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||					// Stereo 3D
-		mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)						// Video + Key
+		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
+		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{
 		if (b3GbOut)
 		{
@@ -2312,7 +2298,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_DualLinkOutputSelect)				// Same as RGB in this case
+	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)				// Same as RGB in this case
 	{
 		if (b3GbOut)
 		{
@@ -2338,7 +2324,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 	NTV2CrosspointID XPt4 = NTV2_XptBlack;
 	if (b4K)
 	{
-		if (b4kHfr && (inputFormatSelect != NTV2_RGBSelect))
+		if (b4kHfr && (inputColorSpace != NTV2_ColorSpaceModeRgb))
 		{
 			// YUV to HDMI Out
 			if (b2piIn)
@@ -2411,7 +2397,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 			}
 		}
 	}
-	else if (b2FbLevelBHfr || bStereoIn)
+	else if (b2FbLevelBHfr)
 	{
 		// Stereo or LevelB
 		XPt1 = NTV2_XptLUT1RGB;
@@ -2432,10 +2418,10 @@ void KonaIP22Services::SetDeviceXPointCapture()
 		switch (mVirtualAnalogOutputSelect)
 		{
 		default:
-		case NTV2_Quadrant1Select: mCard->Connect (NTV2_XptAnalogOutInput, inputFormatSelect == NTV2_RGBSelect ? NTV2_XptCSC1VidYUV : NTV2_XptSDIIn1); break;
-		case NTV2_Quadrant2Select: mCard->Connect (NTV2_XptAnalogOutInput, inputFormatSelect == NTV2_RGBSelect ? NTV2_XptCSC2VidYUV : NTV2_XptSDIIn2); break;
-		case NTV2_Quadrant3Select: mCard->Connect (NTV2_XptAnalogOutInput, inputFormatSelect == NTV2_RGBSelect ? NTV2_XptCSC3VidYUV : NTV2_XptSDIIn3); break;
-		case NTV2_Quadrant4Select: mCard->Connect (NTV2_XptAnalogOutInput, inputFormatSelect == NTV2_RGBSelect ? NTV2_XptCSC4VidYUV : NTV2_XptSDIIn4); break;
+		case NTV2_Quadrant1Select: mCard->Connect (NTV2_XptAnalogOutInput, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC1VidYUV : NTV2_XptSDIIn1); break;
+		case NTV2_Quadrant2Select: mCard->Connect (NTV2_XptAnalogOutInput, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC2VidYUV : NTV2_XptSDIIn2); break;
+		case NTV2_Quadrant3Select: mCard->Connect (NTV2_XptAnalogOutInput, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC3VidYUV : NTV2_XptSDIIn3); break;
+		case NTV2_Quadrant4Select: mCard->Connect (NTV2_XptAnalogOutInput, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC4VidYUV : NTV2_XptSDIIn4); break;
 		};
 	}
 	else
@@ -2454,19 +2440,23 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
-	bool					rv, rv2, enableChCard, enable2022_7Card;
-	uint32_t				enableChServices;
-    uint32_t				networkPathDiffCard;
-    uint32_t                configErr;
 
 	mCard->GetStandard(primaryStandard);
 	mCard->GetFrameGeometry(primaryGeometry);
 	
+	// VPID
+	bool					bFbLevelA = IsVideoFormatA(mFb1VideoFormat);
+	bool					b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
+	bool					b4kHfr = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
+	//bool					bHfr = NTV2_IS_3G_FORMAT(mFb1VideoFormat);
+	//bool					b1wireQ4k = (b4K && m4kTransportOutSelection == NTV2_4kTransport_Quarter_1wire);		// 1 wire quarter
+	
+	bool					bSdiRgbOut = (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect);
+	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
+
     if (mCard->IsDeviceReady(true) == true)
     {
-        rx_2022_channel		rxHwConfig;
-        tx_2022_channel		txHwConfig, txHwConfig2;
-        bool                ipServiceEnable, ipServiceForceConfig;
+        bool    ipServiceEnable, ipServiceForceConfig;
 
         if (config == NULL)
         {
@@ -2483,275 +2473,9 @@ void KonaIP22Services::SetDeviceMiscRegisters()
             config->SetBiDirectionalChannels(true);     // logically bidirectional
         }
 
-        config->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
-        if (ipServiceEnable)
-        {
-            // KonaIP network configuration
-            string hwIp,hwNet,hwGate;       // current hardware config
-
-            rv = config->GetNetworkConfiguration(SFP_1,hwIp,hwNet,hwGate);
-            if (rv)
-            {
-                uint32_t ip, net, gate;
-                ip   = inet_addr(hwIp.c_str());
-                net  = inet_addr(hwNet.c_str());
-                gate = inet_addr(hwGate.c_str());
-
-                if ((ip != mEth0.ipc_ip) ||
-                    (net != mEth0.ipc_subnet) ||
-                    (gate != mEth0.ipc_gateway) ||
-                    ipServiceForceConfig)
-                {
-                    SetNetConfig(config, SFP_1);
-                }
-            }
-            else
-                printf("GetNetworkConfiguration SFP_TOP - FAILED\n");
-
-            rv = config->GetNetworkConfiguration(SFP_2,hwIp,hwNet,hwGate);
-            if (rv)
-            {
-                uint32_t ip, net, gate;
-                ip   = inet_addr(hwIp.c_str());
-                net  = inet_addr(hwNet.c_str());
-                gate = inet_addr(hwGate.c_str());
-
-                if ((ip != mEth1.ipc_ip) ||
-                    (net != mEth1.ipc_subnet) ||
-                    (gate != mEth1.ipc_gateway) ||
-                    ipServiceForceConfig)
-                {
-                    SetNetConfig(config, SFP_2);
-                }
-            }
-            else
-                printf("GetNetworkConfiguration SFP_BOTTOM - FAILED\n");
-
-            // KonaIP look for changes in 2022-7 mode and NPD if enabled
-            rv  = config->Get2022_7_Mode(enable2022_7Card, networkPathDiffCard);
-
-            if (rv && ((enable2022_7Card != m2022_7Mode) || (enable2022_7Card && (networkPathDiffCard != mNetworkPathDiff))))
-            {
-                printf("NPD ser/card (%d %d)\n", mNetworkPathDiff, networkPathDiffCard);
-                if (config->Set2022_7_Mode(m2022_7Mode, mNetworkPathDiff) == true)
-                {
-                    printf("Set 2022_7Mode OK\n");
-                    SetIPError(NTV2_CHANNEL1, kErrRxConfig, NTV2IpErrNone);
-                }
-                else
-                {
-                    printf("Set 2022_7Mode ERROR %s\n", config->getLastError().c_str());
-                    SetIPError(NTV2_CHANNEL1, kErrRxConfig, config->getLastErrorCode());
-                }
-            }
-
-            // KonaIP Input configurations
-            if (IsValidConfig(mRx2022Config1, m2022_7Mode))
-            {
-                // clear any previous error
-                SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrNone);
-                rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL1,rxHwConfig);
-                rv2 = config->GetRxChannelEnable(NTV2_CHANNEL1,enableChCard);
-                mCard->ReadRegister(kVRegRxcEnable1, enableChServices);
-                if (rv && rv2)
-                {
-                    // if the channel enable toggled
-                    if (enableChCard != (enableChServices ? true : false))
-                    {
-                        config->SetRxChannelEnable(NTV2_CHANNEL1, false);
-
-                        // if the channel is enabled
-                        if (enableChServices)
-                        {
-                            SetRxConfig(config, NTV2_CHANNEL1, m2022_7Mode);
-                            GetIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config->SetRxChannelEnable(NTV2_CHANNEL1, true);
-                            }
-                        }
-                    }
-                    // if the channel is already enabled then check to see if a configuration has changed
-                    else if (enableChServices)
-                    {
-                        if (NotEqual(rxHwConfig, mRx2022Config1, m2022_7Mode) ||
-                            enable2022_7Card != m2022_7Mode)
-                        {
-                            config->SetRxChannelEnable(NTV2_CHANNEL1, false);
-                            SetRxConfig(config, NTV2_CHANNEL1, m2022_7Mode);
-                            GetIPError(NTV2_CHANNEL1,kErrRxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config->SetRxChannelEnable(NTV2_CHANNEL1, true);
-                            }
-                        }
-                    }
-                }
-                else printf("rxConfig ch 1 read failed\n");
-            }
-            else SetIPError(NTV2_CHANNEL1,kErrRxConfig,NTV2IpErrInvalidConfig);
-
-            if (IsValidConfig(mRx2022Config2, m2022_7Mode))
-            {
-                // clear any previous error
-                SetIPError(NTV2_CHANNEL2,kErrRxConfig,NTV2IpErrNone);
-                rv  = config->GetRxChannelConfiguration(NTV2_CHANNEL2, rxHwConfig);
-                rv2 = config->GetRxChannelEnable(NTV2_CHANNEL2, enableChCard);
-                mCard->ReadRegister(kVRegRxcEnable2, enableChServices);
-                if (rv && rv2)
-                {
-                    // if the channel enable toggled
-                    if (enableChCard != (enableChServices ? true : false))
-                    {
-                        config->SetRxChannelEnable(NTV2_CHANNEL2, false);
-
-                        // if the channel is enabled
-                        if (enableChServices)
-                        {
-                            SetRxConfig(config, NTV2_CHANNEL2, m2022_7Mode);
-                            GetIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config->SetRxChannelEnable(NTV2_CHANNEL2, true);
-                            }
-                        }
-                    }
-                    // if the channel is already enabled then check to see if a configuration has changed
-                    else if (enableChServices)
-                    {
-                        if (NotEqual(rxHwConfig, mRx2022Config2, m2022_7Mode) ||
-                            enable2022_7Card != m2022_7Mode)
-                        {
-                            config->SetRxChannelEnable(NTV2_CHANNEL2, false);
-                            SetRxConfig(config, NTV2_CHANNEL2, m2022_7Mode);
-                            GetIPError(NTV2_CHANNEL2,kErrRxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config->SetRxChannelEnable(NTV2_CHANNEL2, true);
-                            }
-                        }
-                    }
-                }
-                else printf("rxConfig ch 2 config read failed\n");
-            }
-            else SetIPError(NTV2_CHANNEL2,kErrRxConfig,NTV2IpErrInvalidConfig);
-
-            // KonaIP output configurations
-            if (IsValidConfig(mTx2022Config3, m2022_7Mode))
-            {
-                // clear any previous error
-                SetIPError(NTV2_CHANNEL3,kErrTxConfig,NTV2IpErrNone);
-                rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL3, txHwConfig);
-                rv2 = config->GetTxChannelEnable(NTV2_CHANNEL3, enableChCard);
-                GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
-                mCard->ReadRegister(kVRegTxcEnable3, enableChServices);
-                if (rv && rv2)
-                {
-                    // if the channel enable toggled
-                    if (enableChCard != (enableChServices ? true : false))
-                    {
-                        config->SetTxChannelEnable(NTV2_CHANNEL3, false);
-
-                        // if the channel is enabled
-                        if (enableChServices)
-                        {
-                            SetTxConfig(config, NTV2_CHANNEL3, m2022_7Mode);
-                            GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config->SetTxChannelEnable(NTV2_CHANNEL3, true);
-                            }
-                        }
-                    }
-                    // if the channel is already enabled then check to see if a configuration has changed
-                    else if (enableChServices)
-                    {
-                        if (NotEqual(txHwConfig, mTx2022Config3, m2022_7Mode) ||
-                            configErr ||
-                            enable2022_7Card != m2022_7Mode ||
-                            mFb1ModeLast != mFb1Mode ||
-                            mFb1VideoFormatLast != mFb1VideoFormat)
-                        {
-                            config->SetTxChannelEnable(NTV2_CHANNEL3, false);
-                            SetTxConfig(config, NTV2_CHANNEL3, m2022_7Mode);
-                            GetIPError(NTV2_CHANNEL3,kErrTxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config->SetTxChannelEnable(NTV2_CHANNEL3, true);
-                            }
-                        }
-                    }
-                }
-                else printf("txConfig ch 3 read failed\n");
-            }
-            else SetIPError(NTV2_CHANNEL3,kErrTxConfig,NTV2IpErrInvalidConfig);
-
-            if (IsValidConfig(mTx2022Config4, m2022_7Mode))
-            {
-                // clear any previous error
-                SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrNone);
-                rv  = config->GetTxChannelConfiguration(NTV2_CHANNEL4, txHwConfig2);
-                rv2 = config->GetTxChannelEnable(NTV2_CHANNEL4, enableChCard);
-                GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
-                mCard->ReadRegister(kVRegTxcEnable4, enableChServices);
-                if (rv && rv2)
-                {
-                    // if the channel enable toggled
-                    if (enableChCard != (enableChServices ? true : false))
-                    {
-                        config->SetTxChannelEnable(NTV2_CHANNEL4, false);
-
-                        // if the channel is enabled
-                        if (enableChServices)
-                        {
-                            SetTxConfig(config, NTV2_CHANNEL4, m2022_7Mode);
-                            GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config->SetTxChannelEnable(NTV2_CHANNEL4, true);
-                            }
-                        }
-                    }
-                    // if the channel is already enabled then check to see if a configuration has changed
-                    else if (enableChServices)
-                    {
-                        if (NotEqual(txHwConfig2, mTx2022Config4, m2022_7Mode) ||
-                            configErr ||
-                            enable2022_7Card != m2022_7Mode ||
-                            mFb1ModeLast != mFb1Mode ||
-                            mFb1VideoFormatLast != mFb1VideoFormat)
-                        {
-                            config->SetTxChannelEnable(NTV2_CHANNEL4, false);
-                            SetTxConfig(config, NTV2_CHANNEL4, m2022_7Mode);
-                            GetIPError(NTV2_CHANNEL4,kErrTxConfig,configErr);
-                            if (!configErr)
-                            {
-                                config->SetTxChannelEnable(NTV2_CHANNEL4, true);
-                            }
-                        }
-                    }
-                }
-                else printf("txConfig ch 4 read failed\n");
-            }
-            else
-                SetIPError(NTV2_CHANNEL4,kErrTxConfig,NTV2IpErrInvalidConfig);
-
-            mFb1ModeLast = mFb1Mode;
-            mFb1VideoFormatLast = mFb1VideoFormat;
-
-            config->SetIPServicesControl(true, false);
-        }
+        // Configure all of the 2022 IP settings
+        EveryFrameTask2022(config, &mFb1ModeLast, &mFb1VideoFormatLast);
     }
-
-	// VPID
-	bool					bFbLevelA = IsVideoFormatA(mFb1VideoFormat);
-	bool					b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
-	bool					b4kHfr = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	//bool					bHfr = NTV2_IS_3G_FORMAT(mFb1VideoFormat);
-	//bool					b1wireQ4k = (b4K && m4kTransportOutSelection == NTV2_4kTransport_Quarter_1wire);		// 1 wire quarter
-	
-	bool					bSdiRgbOut = (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
-	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)
@@ -3222,7 +2946,7 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 
 	// Set VBlank RGB range bits - ALWAYS SMPTE
 	// Except when there is a full-range RGB frame buffer, and we go through the color space converter
-	if (mRGB10Range == NTV2_RGB10RangeFull && mVirtualDigitalOutput1Select != NTV2_DualLinkOutputSelect)
+	if (mRGB10Range == NTV2_RGB10RangeFull && mVirtualDigitalOutput1Select != NTV2_RgbOutputSelect)
 	{
 		mCard->WriteRegister(kRegCh1Control, NTV2_RGB10RangeFull, kRegMaskVBlankRGBRange, kRegShiftVBlankRGBRange);
 		mCard->WriteRegister(kRegCh2Control, NTV2_RGB10RangeFull, kRegMaskVBlankRGBRange, kRegShiftVBlankRGBRange);
