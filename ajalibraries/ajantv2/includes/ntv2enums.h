@@ -1034,10 +1034,10 @@ typedef enum
     NTV2_AUDIO2_STREAM      = 5,
     NTV2_AUDIO3_STREAM      = 6,
     NTV2_AUDIO4_STREAM      = 7,
-    NTV2_METADATA1_STREAM   = 8,
-    NTV2_METADATA2_STREAM   = 9,
-    NTV2_METADATA3_STREAM   = 10,
-    NTV2_METADATA4_STREAM   = 11,
+    NTV2_ANC1_STREAM        = 8,
+    NTV2_ANC2_STREAM        = 9,
+    NTV2_ANC3_STREAM        = 10,
+    NTV2_ANC4_STREAM        = 11,
     NTV2_MAX_NUM_STREAMS    = 12,
     NTV2_STREAM_INVALID = NTV2_MAX_NUM_STREAMS
 } NTV2Stream;
@@ -1050,7 +1050,7 @@ typedef enum
 {
     VIDEO_STREAM,		///< @brief	Video data
     AUDIO_STREAM,		///< @brief	Audio data
-    METADATA_STREAM,	///< @brief	Metadata
+    ANC_STREAM,         ///< @brief	Anc data
     INVALID_STREAM
 } NTV2StreamType;
 

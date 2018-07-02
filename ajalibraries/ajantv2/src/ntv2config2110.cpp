@@ -1526,11 +1526,11 @@ uint32_t CNTV2Config2110::Get2110TxStreamIndex(NTV2Stream str)
             index = (uint32_t)(str-NTV2_AUDIO1_STREAM);
             break;
 
-        case NTV2_METADATA1_STREAM:
-        case NTV2_METADATA2_STREAM:
-        case NTV2_METADATA3_STREAM:
-        case NTV2_METADATA4_STREAM:
-            index = (uint32_t)(str-NTV2_METADATA1_STREAM);
+        case NTV2_ANC1_STREAM:
+        case NTV2_ANC2_STREAM:
+        case NTV2_ANC3_STREAM:
+        case NTV2_ANC4_STREAM:
+            index = (uint32_t)(str-NTV2_ANC1_STREAM);
             break;
 
 		case NTV2_MAX_NUM_STREAMS:		break;
@@ -1882,11 +1882,11 @@ NTV2StreamType CNTV2Config2110::StreamType(const NTV2Stream stream)
         case NTV2_AUDIO4_STREAM:
             type = AUDIO_STREAM;
             break;
-        case NTV2_METADATA1_STREAM:
-        case NTV2_METADATA2_STREAM:
-        case NTV2_METADATA3_STREAM:
-        case NTV2_METADATA4_STREAM:
-            type = METADATA_STREAM;
+        case NTV2_ANC1_STREAM:
+        case NTV2_ANC2_STREAM:
+        case NTV2_ANC3_STREAM:
+        case NTV2_ANC4_STREAM:
+            type = ANC_STREAM;
             break;
 
         default:
