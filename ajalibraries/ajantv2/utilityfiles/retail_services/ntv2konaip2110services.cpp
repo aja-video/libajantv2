@@ -2354,7 +2354,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
         if (config2110 == NULL)
         {
             config2110 = new CNTV2Config2110(*mCard);
-            ipServiceEnable = true;
+            ipServiceEnable = false;
             // For some reason on Windows this doesn't immediately happen so make sure it gets set
             while (ipServiceEnable == false)
             {
