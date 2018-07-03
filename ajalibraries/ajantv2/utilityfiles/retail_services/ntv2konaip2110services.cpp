@@ -1371,7 +1371,8 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 	b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
 	b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
 	
-	bool b2piIn = (b2x2piIn || b4x2piInA || b4x2piInB);
+	//bool b2piIn = (b2x2piIn || b4x2piInA || b4x2piInB);
+	bool b2piIn = b4K;
 	
 	// override inputColorSpace for SMTE425
 	if (b2piIn)
