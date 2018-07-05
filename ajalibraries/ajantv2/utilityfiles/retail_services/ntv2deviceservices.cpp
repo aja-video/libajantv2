@@ -183,6 +183,7 @@ void DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVRegDSKMode, mDSKMode);
 	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput1Select, mVirtualDigitalOutput1Select);
 	//AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput2Select, mVirtualDigitalOutput1Select);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1ColorSpaceMode, mDigitalOutput1ColorSpace);
 	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutputSelect, mVirtualHDMIOutputSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutputSelect, mVirtualAnalogOutputSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegLUTType, mLUTType);
