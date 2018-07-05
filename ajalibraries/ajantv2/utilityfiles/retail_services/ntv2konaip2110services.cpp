@@ -638,24 +638,15 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 		}
 		else
 		{
-			// is SMPTE 425 YUV
-			if (b4kHfr)
+			if (bFb1RGB)
 			{
-				if (bFb1RGB)
-				{
-					mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
-				}
-				else
-				{
-					mCard->Connect (NTV2_XptSDIOut1Input, NTV2_Xpt425Mux1AYUV);
-				}
-				mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
+				mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
 			}
 			else
 			{
-				mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptBlack);
-				mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
+				mCard->Connect (NTV2_XptSDIOut1Input, NTV2_Xpt425Mux1AYUV);
 			}
+			mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 		}
 	}
 	else
@@ -697,23 +688,15 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 		}
 		else
 		{
-			if (b4kHfr)
+			if (bFb1RGB)
 			{
-				if (bFb1RGB)
-				{
-					mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptCSC2VidYUV);
-				}
-				else
-				{
-					mCard->Connect (NTV2_XptSDIOut2Input, NTV2_Xpt425Mux1BYUV);
-				}
-				mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
+				mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptCSC2VidYUV);
 			}
 			else
 			{
-				mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptBlack);
-				mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
+				mCard->Connect (NTV2_XptSDIOut2Input, NTV2_Xpt425Mux1BYUV);
 			}
+			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 		}
 	}
 	else
@@ -763,32 +746,15 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 		}
 		else
 		{
-			// smpte 425
-			if (b4kHfr)
+			if (bFb1RGB)
 			{
-				if (bFb1RGB)
-				{
-					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC3VidYUV);
-				}
-				else
-				{
-					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_Xpt425Mux2AYUV);
-				}
-				mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
+				mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC3VidYUV);
 			}
 			else
 			{
-				if (bFb1RGB)
-				{
-					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC1VidYUV);
-					mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptCSC2VidYUV);
-				}
-				else
-				{
-					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_Xpt425Mux1AYUV);
-					mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_Xpt425Mux1BYUV);
-				}
+				mCard->Connect (NTV2_XptSDIOut3Input, NTV2_Xpt425Mux2AYUV);
 			}
+			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
 		}
 	}
 	else if (b2FbLevelBHfr || bStereoOut)												// Stereo or LevelB
@@ -874,33 +840,15 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 		}
 		else
 		{
-			// is 2 pixel interleaved - YUV output
-			if (b4kHfr)
+			if (bFb1RGB)
 			{
-				if (bFb1RGB)
-				{
-					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptCSC4VidYUV);
-				}
-				else
-				{
-					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_Xpt425Mux2BYUV);
-				}
-				mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
+				mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptCSC4VidYUV);
 			}
 			else
 			{
-				// is 2 pixel interleaved - YUV output
-				if (bFb1RGB)
-				{
-					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptCSC3VidYUV);
-					mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptCSC4VidYUV);
-				}
-				else
-				{
-					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_Xpt425Mux2AYUV);
-					mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_Xpt425Mux2BYUV);
-				}
+				mCard->Connect (NTV2_XptSDIOut4Input, NTV2_Xpt425Mux2BYUV);
 			}
+			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 		}
 	}
 	else if (b2FbLevelBHfr || bStereoOut)													// Stereo or LevelB
@@ -1419,11 +1367,12 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 	CNTV2VPID parser;
 	parser.SetVPID(vpida);
 	VPIDStandard std = parser.GetStandard();
-	b2x2piIn  = (std == VPIDStandard_2160_DualLink);
+	//b2x2piIn  = (std == VPIDStandard_2160_DualLink);
 	b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
 	b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
 	
-	bool b2piIn = (b2x2piIn || b4x2piInA || b4x2piInB);
+	//bool b2piIn = (b2x2piIn || b4x2piInA || b4x2piInB);
+	bool b2piIn = b4K;
 	
 	// override inputColorSpace for SMTE425
 	if (b2piIn)
