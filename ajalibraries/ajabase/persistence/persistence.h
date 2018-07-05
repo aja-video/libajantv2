@@ -23,6 +23,7 @@ enum AJAPersistenceType
 	AJAPersistenceTypeEnd
 };
 
+class AJAPersistenceDBImpl;
 
 /**
  * Class used to talk to the board in such a way as to maintain a persistant state 
@@ -42,12 +43,13 @@ public:
     bool SetValue(const std::string& key, void *value, AJAPersistenceType type, int blobBytes = 0);
     bool GetValue(const std::string& key, void *value, AJAPersistenceType type, int blobBytes = 0);
 	bool FileExists();
+    bool ClearPrefFile();
 	bool DeletePrefFile();
 
-    bool GetValuesInt(const std::string& key_query, std::vector<std::string>& keys, std::vector<int>& values);
-    bool GetValuesBool(const std::string& key_query, std::vector<std::string>& keys, std::vector<bool>& values);
-    bool GetValuesDouble(const std::string& key_query, std::vector<std::string>& keys, std::vector<double>& values);
-    bool GetValuesString(const std::string& key_query, std::vector<std::string>& keys, std::vector<std::string>& values);
+    bool GetValuesInt(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<int>& values);
+    bool GetValuesBool(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<bool>& values);
+    bool GetValuesDouble(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<double>& values);
+    bool GetValuesString(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<std::string>& values);
 	
 private:	
 
@@ -58,6 +60,8 @@ private:
 	std::string				mstateKeyName;
 
     AJASystemInfo           mSysInfo;
+
+    AJAPersistenceDBImpl*   mDBImpl;
 };
 
 #endif	//	AJAPersistence_H
