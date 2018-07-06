@@ -5788,13 +5788,13 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (int inputNum, bool progressivePi
 		else if (boardID == DEVICE_ID_KONALHI || boardID == DEVICE_ID_IOEXPRESS)
 			result = GetAnalogInputVideoFormat();
 		else if (boardID == DEVICE_ID_KONA3GQUAD || boardID == DEVICE_ID_CORVID24 || boardID == DEVICE_ID_IO4K ||
-			boardID == DEVICE_ID_IO4KUFC || boardID == DEVICE_ID_KONA4 || boardID == DEVICE_ID_KONA4UFC)
+            boardID == DEVICE_ID_IO4KUFC || boardID == DEVICE_ID_KONA4 || boardID == DEVICE_ID_KONA4UFC || boardID == DEVICE_ID_KONA5)
 			result = GetInput3VideoFormat(progressivePicture);
 		break;
 
 	case 3:
 		if (boardID == DEVICE_ID_KONA3GQUAD || boardID == DEVICE_ID_CORVID24 || boardID == DEVICE_ID_IO4K ||
-			boardID == DEVICE_ID_IO4KUFC || boardID == DEVICE_ID_KONA4 || boardID == DEVICE_ID_KONA4UFC)
+            boardID == DEVICE_ID_IO4KUFC || boardID == DEVICE_ID_KONA4 || boardID == DEVICE_ID_KONA4UFC || boardID == DEVICE_ID_KONA5)
 			result = GetInput4VideoFormat(progressivePicture);
 		break;
 
