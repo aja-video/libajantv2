@@ -5,7 +5,7 @@
 		Generates the device features code from device .gen files.
 
 	SYNTAX:
-		ntv2sdkgen.py   [--verbose|-v]   [--ajantv2  ajantv2Folder]   [--failwarnings|-f]   [--csv  pathToCSVs]  [--ohh  hhFolder]  [--ohpp  hppFolder]
+		ntv2sdkgen.py   [--verbose|-v]   [--ajantv2  ajantv2Folder]   [--failwarnings|-f]  [--ohh  hhFolder]  [--ohpp  hppFolder]
 
 	REQUIRED PARAMETERS:
 		none
@@ -15,9 +15,6 @@
 									If not specified, looks in the current directory.
 
 		[--verbose]					Optionally emits progress information to stdout.
-
-		[--csv  csvPath]			Optionally specifies folder path in which to write the .csv files.
-									If not specified, puts them into the current directory.
 
 		[--ohh  outputFolder]		Optionally writes the .hh file into the specified folder.
 									If not specified, no .hh file is written.
@@ -44,7 +41,6 @@ import uuid
 def parse_args ():
     """ Parse the command line arguments """
     parser = argparse.ArgumentParser (description = "Generates device features code from device .gen files")
-    parser.add_argument ('--csv',					help = """write .csv files in given folder""")
     parser.add_argument ('--ajantv2',				help = """path to 'ajalibraries/ajantv2' folder""")
     parser.add_argument ('--ohh',					help = """write .hh file in given folder""")
     parser.add_argument ('--ohpp',					help = """write .hpp file in given folder""")
@@ -499,54 +495,6 @@ def parse_device_files (args, dev_path):
     return {'err': err, 'devices': device_maps}
 
 
-def write_csv (args, csvDir, csvName, devices, headings, funcs, descs, func_to_devs_map, types = None):
-    csvFile = os.path.join(csvDir, csvName)
-    if os.path.exists(csvFile):
-        if os.path.isdir(csvFile):
-            print("## ERROR:  Cannot overwrite folder '%s' with CSV file" % (csvFile))
-            return 406
-        print("## WARNING:  Will overwrite CSV file '%s'" % (csvFile))
-        if args.failwarnings:
-            return 405
-
-    with open(csvFile, "w") as f:
-        f.write("%s,%s\n" % (",".join(headings), ",".join(devices)))
-        for func in sorted(funcs, key=str.lower):
-            desc = ""
-            if descs != None:
-                if func in descs:
-                    desc = descs[func]
-            if "," in desc:
-                desc = "\"" + desc + "\""
-
-            tuple = [func]
-            if descs != None:
-                tuple = [func, desc]
-            if types != None:
-                if func in types:
-                    tuple = [func, types[func], desc]
-
-            f.write(",".join(tuple))
-            supported_devs = []
-            if func in func_to_devs_map:
-                supported_devs = func_to_devs_map[func]
-            for dev in sorted(devices, key=str.lower):
-                if dev in supported_devs:
-                    if types != None:
-                        f.write(",%s" % (supported_devs[dev]))
-                    else:
-                        f.write(",X")
-                else:
-                    if types != None:
-                        f.write(",0")
-                    else:
-                        f.write(",-")
-            f.write("\n")
-    if args.verbose:
-        print("## NOTE:  '%s' written successfully" % (csvName))
-    return 0
-
-
 def write_can_do_function (args, f, device_ids, funcName, typeName, paramName, canonical_enums, Enum_to_devs_map, invalid_enum = ""):
             f.write("\n\n/**\n\t%s\n**/\n" % (funcName))
             f.write("bool %s (const NTV2DeviceID inDeviceID, const %s %s)\n" % (funcName, typeName, paramName))
@@ -605,7 +553,6 @@ def main ():
     typesDir = ""
     functionsDir = ""
     sdkgenDir = ""
-    csvDir = ""
     ohhDir = ""
     ohhFile = ""
     ohppDir = ""
@@ -635,15 +582,6 @@ def main ():
         return 404
     if args.verbose:
         print("## NOTE:  Using 'devices' folder '%s'" % (devicesDir))
-
-    if args.csv:
-        csvDir = os.path.join(args.csv)
-        if not os.path.exists(csvDir) or not os.path.isdir(csvDir):
-            print("## ERROR:  CSV folder '%s' not found or not a folder" % (args.csv))
-            return 404
-    if csvDir:
-        if args.verbose:
-            print("## NOTE:  Will generate CSV files in folder '%s'" % (csvDir))
 
     if args.ohh:
         ohhDir = os.path.join(args.ohh)
@@ -953,56 +891,9 @@ def main ():
         print("\nDSK MODES:\n", DSKModes)
         print("\nCONVERSION MODES:\n", ConversionModes)
 
-        # To match existing CSVs, use the existing device ID order:
-    devices_old_order = [	"DEVICE_ID_NOTFOUND",					"DEVICE_ID_CORVID1",				"DEVICE_ID_CORVID3G",				"DEVICE_ID_KONALHI",
-     						"DEVICE_ID_KONALHIDVI",					"DEVICE_ID_KONALHEPLUS",			"DEVICE_ID_IOEXPRESS",				"DEVICE_ID_CORVID22",
-    						"DEVICE_ID_KONA3G",						"DEVICE_ID_KONA3GQUAD",				"DEVICE_ID_CORVID24",				"DEVICE_ID_IOXT",
-    						"DEVICE_ID_TTAP",						"DEVICE_ID_IO4K",					"DEVICE_ID_IO4KUFC",				"DEVICE_ID_CORVID88",
-    						"DEVICE_ID_KONA4",						"DEVICE_ID_KONA4UFC",				"DEVICE_ID_CORVID44",				"DEVICE_ID_CORVIDHEVC",
-    						"DEVICE_ID_CORVIDHBR",					"DEVICE_ID_KONAIP_2022",			"DEVICE_ID_KONAIP_4CH_2SFP",		"DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K",
-    						"DEVICE_ID_KONAIP_2TX_1SFP_J2K",		"DEVICE_ID_KONAIP_2RX_1SFP_J2K",	"DEVICE_ID_KONAIP_1RX_1TX_2110",	"DEVICE_ID_IO4KPLUS",
-    						"DEVICE_ID_IOIP_2022",					"DEVICE_ID_IOIP_2110",				"DEVICE_ID_KONAIP_2110",			"DEVICE_ID_KONA1",
-    						"DEVICE_ID_KONAHDMI"	]
-
-    # Optional:  Write CSV files:
-    if csvDir:
-        if len(devices_old_order) != len(device_ids):
-            print("## WARNING:  %d != %d" % (len(devices_old_order), len(device_ids)))
-            print(devices_old_order)
-            print(device_ids)
-
-        # Write CanDo.csv
-        result = write_csv(args, csvDir, "CanDo.csv", devices_old_order, ["FunctionName","Brief"], can_do_functions, can_do_descs, CanDos)
-        if result != 0:
-            return result
-        # Write GetNum.csv
-        result = write_csv(args, csvDir, "GetNum.csv", devices_old_order, ["FunctionName","Returns","Brief"], get_num_functions, get_num_descs, GetNums, get_num_types)
-        if result != 0:
-            return result
-        # Write ConversionModes.csv
-        result = write_csv(args, csvDir, "ConversionModes.csv", devices_old_order, ["NTV2ConversionMode"], conversion_modes, None, ConversionModes)
-        if result != 0:
-            return result
-        # Write DSKModes.csv
-        result = write_csv(args, csvDir, "DSKModes.csv", devices_old_order, ["NTV2DSKMode"], dsk_modes, None, DSKModes)
-        if result != 0:
-            return result
-        # Write FBFormats.csv
-        result = write_csv(args, csvDir, "FBFormats.csv", devices_old_order, ["NTV2FrameBufferFormat"], pixel_formats, None, FrameBufferFormats)
-        if result != 0:
-            return result
-        # Write InputSources.csv
-        result = write_csv(args, csvDir, "InputSources.csv", devices_old_order, ["NTV2InputSource"], input_sources, None, InputSources)
-        if result != 0:
-            return result
-        # Write VideoFormats.csv
-        result = write_csv(args, csvDir, "VideoFormats.csv", devices_old_order, ["NTV2VideoFormat"], video_formats, None, VideoFormats)
-        if result != 0:
-            return result
-        # Write Widgets.csv
-        result = write_csv(args, csvDir, "Widgets.csv", devices_old_order, ["NTV2WidgetID"], widget_ids, None, WidgetIDs)
-        if result != 0:
-            return result
+    # Keep an alphabetically sorted list of device IDs:
+    device_ids_sorted = list(device_ids.keys())
+    device_ids_sorted.sort()
 
     # Optional:  Write .hh file:
     if ohhFile:
@@ -1106,13 +997,13 @@ def main ():
                         all_devices = device_ids
                         for device_name in all_devices:
                             all_devices[device_name] = False
-                        for device_name in devices_old_order:
+                        for device_name in device_ids_sorted:
                             if device_name in devices_that_support_this_feature:
                                 f.write("\t\tcase %s:\n" % (device_name))
                                 all_devices[device_name] = True
                         f.write("\t\t\treturn true;\n")
                         f.write("\t#if defined(_DEBUG)\n")
-                        for device_name in all_devices:
+                        for device_name in device_ids_sorted:
                             if not all_devices[device_name]:
                                 f.write("\t\tcase %s:\n" % (device_name))
                         f.write("\t#else\n")
@@ -1154,7 +1045,7 @@ def main ():
                     all_devices = device_ids
                     for device_name in all_devices:
                         all_devices[device_name] = False
-                    for device_name in devices_old_order:
+                    for device_name in device_ids_sorted:
                         if device_name in device_to_value_map:
                             if device_name:
                                 all_devices[device_name] = True
@@ -1167,7 +1058,7 @@ def main ():
                                     tabs = "\t"
                                 f.write("\t\tcase %s:%sreturn %s;\n" % (device_name, tabs, value))
                     f.write("\t#if defined(_DEBUG)\t\t// These devices all return zero:\n")
-                    for device_name in all_devices:
+                    for device_name in device_ids_sorted:
                         if not all_devices[device_name]:
                             f.write("\t\tcase %s:\n" % (device_name))
                     f.write("\t#else\n")
