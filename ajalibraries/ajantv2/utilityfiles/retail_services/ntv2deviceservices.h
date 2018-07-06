@@ -211,7 +211,7 @@ public:
 	NTV2OutputVideoSelect	mVirtualDigitalOutput1Select;
 	NTV2OutputVideoSelect	mVirtualHDMIOutputSelect;
 	NTV2OutputVideoSelect	mVirtualAnalogOutputSelect;
-	NTV2ColorSpaceMode		mDigitalOutput1ColorSpace;
+	NTV2ColorSpaceMode		mSDIOutput1ColorSpace;
 	NTV2LutType				mLUTType;
 	NTV2LutType				mLUT2Type;
 	NTV2InputVideoSelect	mVirtualInputSelect;

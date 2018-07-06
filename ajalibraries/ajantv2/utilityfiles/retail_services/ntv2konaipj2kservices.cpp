@@ -207,7 +207,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptFrameBuffer1RGB);
 	
 		// if RGB-to-RGB apply LUT converter
-		if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)
+		if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL1,
 											mRGB10Range == NTV2_RGB10RangeFull ? 
@@ -279,7 +279,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbOut ? frameSync2YUV : NTV2_XptBlack);
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)				// RGB Out
+	else if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)				// RGB Out
 	{		
 		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);
 		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
@@ -323,7 +323,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)				// RGB Out
+	else if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)				// RGB Out
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, b3GbOut ? NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut1DS2);
 		mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
@@ -1021,7 +1021,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)				// Same as RGB in this case
+	else if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)				// Same as RGB in this case
 	{		
 		if (b3GbOut)
 		{
@@ -1056,7 +1056,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)				// Same as RGB in this case
+	else if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)				// Same as RGB in this case
 	{
 		if (b3GbOut)
 		{
@@ -1447,7 +1447,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 	bool					b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	//bool					bHfr = NTV2_IS_3G_FORMAT(mFb1VideoFormat);
 
-	bool					bSdiOutRGB = (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect);
+	bool					bSdiOutRGB = (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb);
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 
 	// single wire 3Gb out
@@ -1790,7 +1790,7 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 
 	// Set VBlank RGB range bits - ALWAYS SMPTE
 	// Except when there is a full-range RGB frame buffer, and we go through the color space converter
-	if (mRGB10Range == NTV2_RGB10RangeFull && mVirtualDigitalOutput1Select != NTV2_RgbOutputSelect)
+	if (mRGB10Range == NTV2_RGB10RangeFull && mSDIOutput1ColorSpace != NTV2_ColorSpaceModeRgb)
 	{
 		mCard->WriteRegister(kRegCh1Control, NTV2_RGB10RangeFull, kRegMaskVBlankRGBRange, kRegShiftVBlankRGBRange);
 		mCard->WriteRegister(kRegCh2Control, NTV2_RGB10RangeFull, kRegMaskVBlankRGBRange, kRegShiftVBlankRGBRange);

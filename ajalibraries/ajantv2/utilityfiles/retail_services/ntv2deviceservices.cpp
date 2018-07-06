@@ -183,7 +183,7 @@ void DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVRegDSKMode, mDSKMode);
 	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput1Select, mVirtualDigitalOutput1Select);
 	//AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput2Select, mVirtualDigitalOutput1Select);
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1ColorSpaceMode, mDigitalOutput1ColorSpace);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1ColorSpaceMode, mSDIOutput1ColorSpace);
 	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutputSelect, mVirtualHDMIOutputSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutputSelect, mVirtualAnalogOutputSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegLUTType, mLUTType);
@@ -413,6 +413,9 @@ void DeviceServices::UpdateAutoState ()
 {
 	mDualStreamTransportType = 
 		RetailSupport::AutoSelect3GTransport(mDeviceID, mDualStreamTransportType, mFb1VideoFormat);
+		
+	mSDIOutput1ColorSpace = mSDIOutput1ColorSpace == NTV2_ColorSpaceModeAuto ?
+							NTV2_ColorSpaceModeYCbCr : mSDIOutput1ColorSpace;
 }
 
 
@@ -3143,7 +3146,7 @@ bool DeviceServices::UpdateK2LUTSelect()
 		// convert to NTV2RGB10Range to NTV2RGBRangeMode to do the comparison
 		NTV2RGBRangeMode fbRange = (mRGB10Range == NTV2_RGB10RangeFull) ? NTV2_RGBRangeFull : NTV2_RGBRangeSMPTE;
 	
-		if (mFb1Mode == NTV2_MODE_DISPLAY && bFb1RGB == true && mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)
+		if (mFb1Mode == NTV2_MODE_DISPLAY && bFb1RGB == true && mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			wantedLUT = (fbRange == mSDIOutput1RGBRange) ? NTV2_LUTLinear : NTV2_LUTRGBRangeFull_SMPTE;
 		}
@@ -4279,7 +4282,7 @@ void DeviceServices::SetDeviceXPointCaptureRaw()
 		default:
 		case FORMAT_RAW:
 		case FORMAT_RAW_HFR:
-			if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)
+			if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptSDIIn1);
 				mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptSDIIn1DS2);
@@ -4300,7 +4303,7 @@ void DeviceServices::SetDeviceXPointCaptureRaw()
 	{
 		default:
 		case FORMAT_RAW:
-			if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)
+			if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptSDIIn1);
 				mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptSDIIn1DS2);
@@ -4312,7 +4315,7 @@ void DeviceServices::SetDeviceXPointCaptureRaw()
 			}
 			break;
 		case FORMAT_RAW_HFR:
-			if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)
+			if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptSDIIn2);
 				mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptSDIIn2DS2);
@@ -4336,7 +4339,7 @@ void DeviceServices::SetDeviceXPointCaptureRaw()
 			default:
 			case FORMAT_RAW:
 			case FORMAT_RAW_HFR:
-				if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)
+				if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)
 				{
 					mCard->Connect (NTV2_XptSDIOut5Input, NTV2_XptSDIIn1);
 					mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptSDIIn1DS2);
