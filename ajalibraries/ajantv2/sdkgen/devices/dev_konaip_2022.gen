@@ -131,7 +131,6 @@ NTV2DeviceGetNum2022ChannelsSFP1			4
 NTV2DeviceCanChangeEmbeddedAudioClock
 NTV2DeviceCanChangeFrameBufferSize
 NTV2DeviceCanDo3GLevelConversion
-NTV2DeviceCanDoRGBLevelAConversion
 NTV2DeviceCanDoAudio8Channels
 NTV2DeviceCanDoAudio96K
 NTV2DeviceCanDoAudioDelay
@@ -142,14 +141,17 @@ NTV2DeviceCanDoDSKOpacity
 NTV2DeviceCanDoDualLink
 NTV2DeviceCanDoEnhancedCSC
 NTV2DeviceCanDoFrameStore1Display
+NTV2DeviceCanDoHDMIHDROut
 NTV2DeviceCanDoHDMIOutStereo
 NTV2DeviceCanDoHDVideo
+NTV2DeviceCanDoIP
 NTV2DeviceCanDoMSI
 NTV2DeviceCanDoMultiFormat
 NTV2DeviceCanDoPCMControl
 NTV2DeviceCanDoPlayback
 NTV2DeviceCanDoProgrammableCSC
 NTV2DeviceCanDoQuarterExpand
+NTV2DeviceCanDoRGBLevelAConversion
 NTV2DeviceCanDoRGBPlusAlphaOut
 NTV2DeviceCanDoRP188
 NTV2DeviceCanDoSDVideo
@@ -157,6 +159,7 @@ NTV2DeviceCanDoStackedAudio
 NTV2DeviceCanDoStereoIn
 NTV2DeviceCanDoStereoOut
 NTV2DeviceCanDoVideoProcessing
+NTV2DeviceCanDoVITC2
 NTV2DeviceCanMeasureTemperature
 NTV2DeviceCanReportFrameSize
 NTV2DeviceHasBiDirectionalSDI
@@ -170,9 +173,6 @@ NTV2DeviceIsDirectAddressable
 NTV2DeviceIsSupported
 NTV2DeviceNeedsRoutingSetup
 NTV2DeviceSoftwareCanChangeFrameBufferSize
-NTV2DeviceCanDoVITC2
-NTV2DeviceCanDoHDMIHDROut
-NTV2DeviceCanDoIP
 
 
 // NTV2ConversionModes

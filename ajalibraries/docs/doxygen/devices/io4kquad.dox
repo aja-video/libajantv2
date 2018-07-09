@@ -3,6 +3,7 @@
 
 	@section		ntv2hwio
 
+	<hr>
 	@subsection		io4kquad	Io4K (Quad Mode)
 
 	This page describes the Io4K capture/playout device with Quad-Mode firmware,
@@ -19,23 +20,23 @@
 	-	Four-lane gen 2 PCI Express
 	-	2 DMA engines
 	-	MSI supported
-	-	2 x Thunderbolt II connectors
+	-	2 × Thunderbolt II connectors
 
 	@par	Inputs & Outputs
 
-	-	4 x SDI bi-directional (under software control)
-	-	1 x SDI monitor output
-	-	1 x HDMI 2.0 input
-	-	1 x HDMI output (HDMI v2.0a subset with v1.4 connection, to support HDR InfoFrame metadata and UHD/4K@60 4:2:0 YUV)
-	-	1 x Reference/LTC input
-	-	1 x LTC output
-	-	1 x RS-422 serial port
+	-	4 × SDI bi-directional (under software control)
+	-	1 × SDI monitor output
+	-	1 × HDMI 2.0 input
+	-	1 × HDMI output (HDMI v2.0a subset with v1.4 connection, to support HDR InfoFrame metadata and UHD/4K@60 4:2:0 YUV)
+	-	1 × Reference/LTC input
+	-	1 × LTC output
+	-	1 × RS-422 serial port
 
 	@par	Frame Buffer
 
 	-	512MB SDRAM
-	-	64 x 8MB frames
-	-	32 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	64 × 8MB frames
+	-	32 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
 
 	@par	Audio
 
@@ -61,7 +62,7 @@
 
 	@par	Physical
 
-	-	Size (W x D x H):  8.74" x 7.09" x 1.65" (222mm × 180mm × 42mm)
+	-	Size (W × D × H):  8.74" × 7.09" × 1.65" (222mm × 180mm × 42mm)
 	-	Weight:	3.1 lb (1.5 kg)
 	-	Power: 23W (typ), 28W (max)
 	-	NOTE:  Power supply to Thunderbolt ports can cause power draw to reach 58W

@@ -3,6 +3,7 @@
 
 	@section		ntv2hwcorvid
 
+	<hr>
 	@subsection		corvid88		Corvid 88
 
 	This page describes the <b>Corvid 88</b> OEM capture/playout board, which features eight SDI connectors that can be programmatically
@@ -13,6 +14,18 @@
 
 	The Corvid88 has eight bi-directional SDI connectors, plus a reference/LTC input.
 
+	<hr size="50px">
+	<b>Low-Profile Version:</b>
+	@image	html	corvid88lp.png
+
+	<hr size="50px">
+	<b>Fanless Version:</b>  (See important environmental note below.)
+	@image	html	corvid88fanless.png
+
+	<hr size="50px">
+	<b>Low-Profile Fanless Version:</b>  (See important environmental note below.)
+	@image	html	corvid88fanlesslp.png
+
 	@par	PCI Interface
 
 	-	PCI device ID: <b>0xEB0D</b>
@@ -22,16 +35,16 @@
 
 	@par	Inputs & Outputs
 
-	-	8 x SDI bi-directional (under software control)
-	-	1 x reference/LTC input
-	-	1 x secondary LTC-only input (2-pin Molex connector on board header)
-	-	1 x RS-422 serial port (full-height board version has DB-9 connector)
+	-	8 × SDI bi-directional (under software control)
+	-	1 × reference/LTC input
+	-	1 × secondary LTC-only input (2-pin Molex connector on board header)
+	-	1 × RS-422 serial port (full-height board version has DB-9 connector)
 
 	@par	Frame Buffer
 
 	-	1GB SDRAM
-	-	128 x 8MB frames
-	-	64 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	128 × 8MB frames
+	-	64 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
 
 	@par	Audio
 
@@ -72,7 +85,7 @@
 
 	@par	Physical
 
-	-	Size (W x D x H):  0.875" x 7.25" x 4.875" (22.23mm × 184.15mm × 123.83mm)
+	-	Size (W × D × H):  0.875" × 7.25" × 4.875" (22.23mm × 184.15mm × 123.83mm)
 	-	Weight:	0.4 lb (0.2 kg)
 	-	Power: 17 watts (typ), 19 watts (max)
 
@@ -83,7 +96,7 @@
 	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
 	-	Safe Storage Temperature (Power OFF): -40 to 70 degrees Celcius (-40 to 158 degrees Fahrenheit)
 
-	@note	There is a fanless version of this device which requires airflow of 100LFM @25deg C or lower,
-			host chassis must have vented opening to exterior, immediately adjacent to the PCIe shield
-			(heatsink side), to permit 100LFM across the heatsink.
+	@note	The fanless version of this device requires airflow of 100LFM @25deg C or lower, and the
+			host chassis must have vented opening to the exterior, immediately adjacent to the PCIe
+			shield (heatsink side), to permit 100LFM across the heatsink.
 **/

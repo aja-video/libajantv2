@@ -30,8 +30,8 @@ typedef enum
     kTransmitAudioData2110  = NTV2_FOURCC('t','a','1','0'), // 4CC of audio transmit config data
     kReceiveVideoData2110   = NTV2_FOURCC('r','v','1','0'), // 4CC of video receive config data
     kReceiveAudioData2110   = NTV2_FOURCC('r','a','1','0'), // 4CC of audio receive config data
-    kMetadataVData2110      = NTV2_FOURCC('m','d','1','0'), // 4CC of metadata config data
-    kChStatusData2110       = NTV2_FOURCC('s','t','1','0')  // 4CC of metadata config data
+    kAncVData2110           = NTV2_FOURCC('a','n','1','0'), // 4CC of anc config data
+    kChStatusData2110       = NTV2_FOURCC('s','t','1','0')  // 4CC of channel status config data
 } VirtualDataTag2110 ;
 
 typedef enum
@@ -156,7 +156,18 @@ typedef struct
 typedef struct
 {
     uint32_t                placeHolder;
-} MetadataVData2110;
+} AncVData2110;
+
+
+inline NTV2Stream ChToVideoStream(int ch)
+	{ return (NTV2Stream)(NTV2_VIDEO1_STREAM+ch); }
+inline int VideoStreamToCh(NTV2Stream s)
+	{ return (int)(s); }
+	
+inline NTV2Stream ChToAudioStream(int ch)
+	{ return (NTV2Stream)(NTV2_AUDIO1_STREAM+ch); }
+inline int AudioStreamToCh(NTV2Stream s)
+	{ return (int)(s >= NTV2_AUDIO1_STREAM ? s-NTV2_AUDIO1_STREAM : 0); }
 
 
 /**
@@ -213,7 +224,6 @@ public:
     uint32_t            ssrc;               ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2110_SSRC set)
     uint16_t            vlan;               ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2110_VLAN set)
     uint16_t            payload;
-    NTV2Channel         channel;
     NTV2VideoFormat     videoFormat;
     VPIDSampling        videoSamples;
     uint32_t            numAudioChannels;

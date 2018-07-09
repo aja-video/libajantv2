@@ -3,6 +3,7 @@
 
 	@section		ntv2hwio
 
+	<hr>
 	@subsection		ioexpress		Io Express
 
 	This page describes the IoExpress capture/playout device.
@@ -23,20 +24,20 @@
 
 	@par	Inputs & Outputs
 
-	-	1 x SDI input
-	-	1 x SDI output
-	-	1 x HDMI input
-	-	1 x HDMI output
-	-	1 x reference/LTC input
-	-	1 x LTC output
-	-	1 x RS-422 serial port
-	-	1 x analog component video output
+	-	1 × SDI input
+	-	1 × SDI output
+	-	1 × HDMI input
+	-	1 × HDMI output
+	-	1 × reference/LTC input
+	-	1 × LTC output
+	-	1 × RS-422 serial port
+	-	1 × analog component video output
 
 	@par	Frame Buffer
 
 	-	256 MB SDRAM
-	-	32 x 8MB frames
-	-	16 x 16MB frames for 2K (1080x2048), 1920x1080 VANC (YCbCr only)
+	-	32 × 8MB frames
+	-	16 × 16MB frames for 2K (1080x2048), 1920x1080 VANC (YCbCr only)
 
 	@par	Audio
 

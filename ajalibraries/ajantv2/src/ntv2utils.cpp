@@ -2048,11 +2048,11 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 //-------------------------------------------------------------------------------------------------------
 //	GetNTV2FrameGeometryFromVideoFormat
 //-------------------------------------------------------------------------------------------------------
-NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(NTV2VideoFormat videoFormat)
+NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(const NTV2VideoFormat inVideoFormat)
 {
 	NTV2FrameGeometry result = NTV2_FG_INVALID;
 
-	switch (videoFormat)
+	switch (inVideoFormat)
 	{
 		case NTV2_FORMAT_4x1920x1080psf_2398:
 		case NTV2_FORMAT_4x1920x1080psf_2400:
@@ -3120,30 +3120,38 @@ NTV2FrameGeometry GetNormalizedFrameGeometry (const NTV2FrameGeometry inFrameGeo
 {
 	switch (inFrameGeometry)
 	{
-		case NTV2_FG_1920x1080:	//	1080i, 1080p
-		case NTV2_FG_1280x720:	//	720p
-		case NTV2_FG_720x486:	//	ntsc 525i, 525p60
-		case NTV2_FG_720x576:	//	pal 625i
-			return inFrameGeometry;	//	No change
-
-		case NTV2_FG_1920x1114:	return NTV2_FG_1920x1080;	//	1920x1080 + taller vanc
-		case NTV2_FG_2048x1114:	return NTV2_FG_2048x1080;	//	2048x1080 + taller vanc
-		case NTV2_FG_720x508:	return NTV2_FG_720x486;		//	720x486 + tall vanc
-		case NTV2_FG_720x598:	return NTV2_FG_720x576;		//	pal 625i + tall vanc
-		case NTV2_FG_1920x1112:	return NTV2_FG_1920x1080;	//	1920x1080 + tall vanc
-		case NTV2_FG_1280x740:	return NTV2_FG_1280x720;	//	1280x720 + tall vanc
-
-		case NTV2_FG_2048x1080:	//	2k1080p
-		case NTV2_FG_2048x1556:	//	2k1556psf
-			return inFrameGeometry;	//	No change
-
-		case NTV2_FG_2048x1588:	return NTV2_FG_2048x1556;	//	2048x1556 + tall vanc
-		case NTV2_FG_2048x1112:	return NTV2_FG_2048x1080;	//	2048x1080 + tall vanc
-		case NTV2_FG_720x514:	return NTV2_FG_720x486;		//	720x486 + taller vanc (extra-wide ntsc)
-		case NTV2_FG_720x612:	return NTV2_FG_720x576;		//	720x576 + taller vanc (extra-wide pal)
+		case NTV2_FG_1920x1080:		//	1080i, 1080p
+		case NTV2_FG_1280x720:		//	720p
+		case NTV2_FG_720x486:		//	ntsc 525i, 525p60
+		case NTV2_FG_720x576:		//	pal 625i
+		case NTV2_FG_2048x1080:		//	2k1080p
+		case NTV2_FG_2048x1556:		//	2k1556psf
 		case NTV2_FG_4x1920x1080:	//	UHD
 		case NTV2_FG_4x2048x1080:	//	4K
-			return inFrameGeometry;	//	No change
+			return inFrameGeometry;	//	No change, already normalized
+
+															//	525i
+		case NTV2_FG_720x508:	return NTV2_FG_720x486;		//	720x486 + tall vanc
+		case NTV2_FG_720x514:	return NTV2_FG_720x486;		//	720x486 + taller vanc (extra-wide ntsc)
+
+															//	625i
+		case NTV2_FG_720x598:	return NTV2_FG_720x576;		//	pal 625i + tall vanc
+		case NTV2_FG_720x612:	return NTV2_FG_720x576;		//	720x576 + taller vanc (extra-wide pal)
+
+															//	720p
+		case NTV2_FG_1280x740:	return NTV2_FG_1280x720;	//	1280x720 + tall vanc
+
+															//	1080
+		case NTV2_FG_1920x1112:	return NTV2_FG_1920x1080;	//	1920x1080 + tall vanc
+		case NTV2_FG_1920x1114:	return NTV2_FG_1920x1080;	//	1920x1080 + taller vanc
+
+															//	2kx1080
+		case NTV2_FG_2048x1112:	return NTV2_FG_2048x1080;	//	2048x1080 + tall vanc
+		case NTV2_FG_2048x1114:	return NTV2_FG_2048x1080;	//	2048x1080 + taller vanc
+
+															//	2kx1556 film
+		case NTV2_FG_2048x1588:	return NTV2_FG_2048x1556;	//	2048x1556 + tall vanc
+
 #if defined (_DEBUG)
 		case NTV2_FG_INVALID:	break;
 #else
@@ -3151,6 +3159,89 @@ NTV2FrameGeometry GetNormalizedFrameGeometry (const NTV2FrameGeometry inFrameGeo
 #endif
 	}
 	return NTV2_FG_INVALID;	//	fail
+}
+
+
+NTV2FrameGeometry GetVANCFrameGeometry (const NTV2FrameGeometry inFrameGeometry, const NTV2VANCMode inVancMode)
+{
+	if (!NTV2_IS_VALID_VANCMODE(inVancMode))
+		return NTV2_FG_INVALID;	//	Invalid vanc mode
+	if (!NTV2_IS_VALID_NTV2FrameGeometry(inFrameGeometry))
+		return NTV2_FG_INVALID;	//	Invalid FG
+	if (!NTV2_IS_VANCMODE_ON(inVancMode))
+		return ::GetNormalizedFrameGeometry(inFrameGeometry);	//	Return normalized
+
+	switch (inFrameGeometry)
+	{
+		case NTV2_FG_1920x1080:	//	1920x1080 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_1920x1112:	//	1920x1080 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_1920x1114:	//	1920x1080 ::NTV2_VANCMODE_TALLER
+			return NTV2_IS_VANCMODE_TALL(inVancMode) ? NTV2_FG_1920x1112 : NTV2_FG_1920x1114;
+
+		case NTV2_FG_1280x720:	//	1280x720, ::NTV2_VANCMODE_OFF
+		case NTV2_FG_1280x740:	//	1280x720 ::NTV2_VANCMODE_TALL
+			return NTV2_FG_1280x740;
+
+		case NTV2_FG_720x486:	//	720x486 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_720x508:	//	720x486 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_720x514: 	//	720x486 ::NTV2_VANCMODE_TALLER
+			return NTV2_IS_VANCMODE_TALL(inVancMode) ? NTV2_FG_720x508 : NTV2_FG_720x514;
+
+		case NTV2_FG_720x576:	//	720x576 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_720x598:	//	720x576 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_720x612: 	//	720x576 ::NTV2_VANCMODE_TALLER
+			return NTV2_IS_VANCMODE_TALL(inVancMode) ? NTV2_FG_720x598 : NTV2_FG_720x612;
+
+		case NTV2_FG_2048x1080:	//	2048x1080 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_2048x1112: //	2048x1080 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_2048x1114:	//	2048x1080 ::NTV2_VANCMODE_TALLER
+			return NTV2_IS_VANCMODE_TALL(inVancMode) ? NTV2_FG_2048x1112 : NTV2_FG_2048x1114;
+
+		case NTV2_FG_2048x1556:	//	2048x1556 film ::NTV2_VANCMODE_OFF
+		case NTV2_FG_2048x1588: //	2048x1556 film ::NTV2_VANCMODE_TALL
+			return NTV2_FG_2048x1588;
+
+		case NTV2_FG_4x1920x1080:	//	3840x2160 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_4x2048x1080:	//	4096x2160 ::NTV2_VANCMODE_OFF
+			return inFrameGeometry;	//	no tall or taller geometries!
+#if defined (_DEBUG)
+		case NTV2_FG_INVALID:	break;
+#else
+		default:				break;
+#endif
+	}
+	return NTV2_FG_INVALID;	//	fail
+}
+
+
+NTV2FrameGeometry GetGeometryFromStandard (const NTV2Standard inStandard)
+{
+	switch (inStandard)
+	{
+		case NTV2_STANDARD_720:			return NTV2_FG_1280x720;	//	720p
+		case NTV2_STANDARD_525:			return NTV2_FG_720x486;		//	525i
+		case NTV2_STANDARD_625:			return NTV2_FG_720x576;		//	625i
+
+		case NTV2_STANDARD_1080:
+		case NTV2_STANDARD_1080p:		return NTV2_FG_1920x1080;	//	1080i, 1080psf, 1080p
+
+		case NTV2_STANDARD_2K:			return NTV2_FG_2048x1556;	//	2048x1556 film
+
+		case NTV2_STANDARD_2Kx1080p:
+		case NTV2_STANDARD_2Kx1080i:	return NTV2_FG_2048x1080;	//	2K1080p/i/psf
+
+		case NTV2_STANDARD_3840x2160p:								//	UHD
+		case NTV2_STANDARD_3840HFR:		return NTV2_FG_4x1920x1080;	//	HFR UHD
+
+		case NTV2_STANDARD_4096x2160p:								//	4K
+		case NTV2_STANDARD_4096HFR:		return NTV2_FG_4x2048x1080;	//	HFR 4K
+#if defined (_DEBUG)
+		case NTV2_STANDARD_INVALID:	break;
+#else
+		default:					break;
+#endif
+	}
+	return NTV2_FG_INVALID;
 }
 
 

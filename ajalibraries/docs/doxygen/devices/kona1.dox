@@ -3,6 +3,7 @@
 
 	@section		ntv2hwkona
 
+	<hr>
 	@subsection		kona1		KONA 1
 
 	This page describes the KONA 1 capture/playout board.
@@ -15,22 +16,22 @@
 	@par	PCI Interface
 
 	-	PCI device ID: <b>0xEB23</b>
-	-	Gen 2 x 1 PCIe
+	-	Gen 2 × 1 PCIe
 	-	2 DMA engines
 	-	MSI interrupt delivery supported
 
 	@par	Inputs & Outputs
 
-	-	1 x 3G-SDI input
-	-	1 x 3G-SDI output
-	-	1 x reference/LTC input
-	-	1 x RS-422 serial port
+	-	1 × 3G-SDI input
+	-	1 × 3G-SDI output
+	-	1 × reference/LTC input
+	-	1 × RS-422 serial port
 
 	@par	Frame Buffer
 
 	-	1 GB SDRAM
-	-	128 x 8MB frames
-	-	64 x 16MB frames for 2K, HD VANC, and 16-bit RGB
+	-	128 × 8MB frames
+	-	64 × 16MB frames for 2K, HD VANC, and 16-bit RGB
 
 	@par	Audio
 
@@ -60,7 +61,7 @@
 
 	@par	Physical
 
-	-	Size (W x D x H):  0.55" x 6.61" x 2.16" (14mm × 168mm × 55mm)
+	-	Size (W × D × H):  0.55" × 6.61" × 2.16" (14mm × 168mm × 55mm)
 	-	Weight: TBD
 
 	@par	Environment

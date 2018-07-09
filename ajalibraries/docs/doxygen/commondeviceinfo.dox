@@ -703,9 +703,10 @@
 			-	<b>Video</b>:  This determines the video that will appear in the foreground of the mix,
 				and should be routed to a widget that produces YCbCr video.
 			-	<b>Key</b>:  This determines the foreground key, and should be routed to another widget’s YCbCr output.
-				Note that only the Y component is used — the Cb and Cr components are ignored.
+				Only the Y component is used — the Cb and Cr components are ignored.
 			-	Call ::GetMixerFGInputXpt to obtain a foreground ::NTV2InputCrosspointID:
-				-	Specify the Mixer/Keyer of interest by ::NTV2Channel (e.g. use ::NTV2_CHANNEL2 for Mixer/Keyer 2).
+				-	Specify the ::NTV2Channel used. (The actual zero-based Mixer index that’s used will be half the
+					ordinal value of ::NTV2Channel.)
 				-	Pass \c false for \c inIsKey for the Video input;  pass \c true for the Key input.
 		-	<b>Background Inputs</b>:
 			-	<b>Video</b>:  This determines the video that will appear in the background,
@@ -713,13 +714,15 @@
 			-	<b>Key</b>:  This determines the background key, and should be routed to another widget’s YCbCr output.
 				Note that only the Y component is used — the Cb and Cr components are ignored.
 			-	Call ::GetMixerBGInputXpt to obtain a background ::NTV2InputCrosspointID:
-				-	Specify the Mixer/Keyer of interest by ::NTV2Channel (e.g. use ::NTV2_CHANNEL2 for Mixer/Keyer 2).
+				-	Specify the ::NTV2Channel used. (The actual zero-based Mixer index that’s used will be half the
+					ordinal value of ::NTV2Channel.)
 				-	Pass \c false for \c inIsKey for the Video input;  pass \c true for the Key input.
 	-	Each Mixer/Keyer widget has two output crosspoints:
 		-	<b>Video Output</b>:  This produces the mixed/keyed YCbCr video raster.
 		-	<b>Key Output</b>:  This produces a YCbCr signal with the resulting mixed key data in the Y channel.
 		-	Call ::GetMixerOutputXptFromChannel to obtain a Mixer’s ::NTV2OutputCrosspointID:
-			-	Specify the Mixer/Keyer of interest by ::NTV2Channel (e.g. use ::NTV2_CHANNEL2 for Mixer/Keyer 2).
+			-	Specify the ::NTV2Channel used. (The actual zero-based Mixer index that’s used will be half the
+				ordinal value of ::NTV2Channel.)
 			-	Pass \c false for \c inIsKey for the Mixer’s Video output;  pass \c true for the Mixer’s Key output.
 	-	The Mixer is controlled using ::CNTV2Card API calls:
 		-	<b>Mode</b>:
@@ -802,6 +805,10 @@
 	For HD, each audio sample consists of 24 bits of sample data (normally PCM).
 	For SD, each audio sample consists of 20 bits of sample data (normally PCM) -- audio extended packets are ignored.
 
+	Call CNTV2Card::IsAudioInputRunning to determine if the capture side of the <b>Audio System</b> is running or not.
+	Call CNTV2Card::StartAudioInput to start the capture side of the <b>Audio System</b> running.
+	Call CNTV2Card::StopAudioInput to stop the capture side of the <b>Audio System</b> running.
+
 	When the <b>Audio System</b> is running, each 24-bit sample is copied as-is into the most-significant 3 bytes of each 4-byte sample word
 	in the <b>Audio Input Buffer</b> in device memory at the address specified by the <b>Audio System</b>’s Audio Input Last Address register (i.e.,
 	the <b>Record Head</b> or “write head”). Call CNTV2Card::ReadAudioLastIn to obtain the current <b>Record Head</b> position. Audio data continues to
@@ -861,6 +868,10 @@
 	There is currently no provision for enabling or disabling specific audio groups.
 
 	The SDI output embedder always inserts audio packets unless it’s been disabled (see CNTV2Card::SetAudioOutputEmbedderState).
+
+	Call CNTV2Card::IsAudioOutputRunning to determine if the playout side of the <b>Audio System</b> is running or not.
+	Call CNTV2Card::StartAudioOutput to start the playout side of the <b>Audio System</b> running.
+	Call CNTV2Card::StopAudioOutput to stop the playout side of the <b>Audio System</b> running.
 
 	When the <b>Audio System</b> is stopped, the output embedder will either embed silence (zeroes) into the data stream, or,
 	if ::NTV2AudioLoopBack mode is enabled, it will embed audio samples obtained (through a FIFO) from its input de-embedder

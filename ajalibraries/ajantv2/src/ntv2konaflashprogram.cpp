@@ -49,7 +49,7 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram ()
 {
 }
 
-CNTV2KonaFlashProgram::CNTV2KonaFlashProgram (const UWord boardNumber, const bool displayErrorMessage, const UWord ulBoardType)
+CNTV2KonaFlashProgram::CNTV2KonaFlashProgram (const UWord boardNumber)
 	:	CNTV2Card (boardNumber),
         _bitFileBuffer      (NULL),
         _customFileBuffer   (NULL),
@@ -75,8 +75,6 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram (const UWord boardNumber, const boo
         _mcsStep            (0),
         _spiFlash(NULL)
 {
-	(void) displayErrorMessage;	//	unused
-	(void) ulBoardType;			//	unused
 	SetDeviceProperties();
 }
 
@@ -99,9 +97,9 @@ void CNTV2KonaFlashProgram::SetQuietMode()
     }
 }
 
-bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, NTV2DeviceType boardType, uint32_t index)
+bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, uint32_t index)
 {
-	if (!Open (boardNumber, false, boardType))
+	if (!Open (boardNumber))
 		return false;
 
 	// if board is a sarek with microblaze - ensure access to flash
@@ -134,46 +132,88 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 	bool status = false;
 	_deviceID = ReadDeviceID();
 
+//    case 0x00202018://STMircro
+//    case 0x00012018://CYPRESS S25FL128
+//    case 0x00C22018://Macronix
+//        T-Tap
+//        IoExpress
+//        IoXT
+//        Kona Lhe+
+//        Kona 3G
+//        Kona 3G Quad
+//        Corvid 1
+//        Corvid 22
+//        Corvid 24
+//        Corvid 3G
+
+//    case 0x00010220://CYPRESS f25fl512
+//        Kona IP 2022
+//        Kona IP 2110
+//        IoIP 2022
+//        IoIP 2110
+//        Io4K+
+
+//    case 0x009d6019://ISSI
+//        No Product 6/27/18
+
+//    case 0x00C84018://GIGADEVICE GD25Q127CFIG
+//    case 0x00EF4018://WINBOND W25Q128
+//        T-Tap
+//        IoExpress
+//        IoXT
+//        Kona Lhe+
+//        Kona 3G
+//        Kona 3G Quad
+//        Corvid 1
+//        Corvid 22
+//        Corvid 24
+//        Corvid 3G
+
+//    case 0x00010219://CYPRESS S25FL256
+//        Kona 1
+//        Kona HDMI
+//        Kona 4
+//        Kona 4 UFC
+//        Corvid 44
+//        Corvid 88
+//        Corvid HBR
+//        Corvid HEVC
+
 	switch(_deviceID)
 	{
-	case 0x00202018:
-	case 0x00012018:
-	case 0x00C22018:
+    case 0x00202018://STMircro
+    case 0x00012018://CYPRESS S25FL128
+    case 0x00C22018://Macronix
 		_flashSize = 16 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 256 * 1024;
 		knownChip = true;
 		break;
-	case 0x00010220:
+    case 0x00010220://CYPRESS f25fl512
 		_flashSize = 64 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 256 * 1024;
 		knownChip = true;
 		break;
-    case 0x009d6019:
+    case 0x009d6019://ISSI
         _flashSize = 64 * 1024 * 1024;
         _bankSize = 16 * 1024 * 1024;
         _sectorSize = 64 * 1024;
         knownChip = true;
         break;
-	case 0x00C84018:
+    case 0x00C84018://GIGADEVICE GD25Q127CFIG
+    case 0x00EF4018://WINBOND W25Q128
 		_flashSize = 16 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 64 * 1024;
 		knownChip = true;
 		break;
-	case 0x00010219:
+    case 0x00010219://CYPRESS S25FL256
 		_flashSize = 32 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 64 * 1024;
 		knownChip = true;
-		break;
-//	case spiv5:
-//		_flashSize = 64 * 1024 * 1024;
-//		_bankSize = 16 * 1024 * 1024;
-//		_sectorSize = 256 * 1024;
-//		knownChip = true;
-//		break;
+        break;
 	default:
 		_flashSize = 0;
 		_bankSize = 0;
@@ -883,7 +923,7 @@ bool CNTV2KonaFlashProgram::CreateSRecord(bool bChangeEndian)
 		sprintf(&sRecord[2], "%02x", cc);
 		checksum += cc;
 
-		uint32_t addr = baseAddress+partitionOffset;
+        uint32_t addr = baseAddress+partitionOffset;
 		UWord aa = ((addr >> 24) &0xff);
 		sprintf(&sRecord[4], "%02x", aa);
 		checksum += aa;

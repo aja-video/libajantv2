@@ -37,11 +37,10 @@
 			To use the latter, the ::AUTOCIRCULATE_WITH_ANC option must be specified in the call to CNTV2Card::AutoCirculateInitForInput
 			or CNTV2Card::AutoCirculateInitForOutput.
 
-	@note	In SDKs prior to 14.0, the Anc inserter/extractor firmware feature only worked with AutoCirculate.
-			SDK 14.1 introduced a new API for operating the Anc inserter/extractor widgets without AutoCirculate.
+	@note	In SDKs prior to 14.3, the Anc inserter/extractor firmware feature only worked with AutoCirculate.
 
 	@note	\ref ajaanc can make it easier to pack/unpack data packets to/from the host Anc data buffer(s).
-			In SDK 14.1,\ref ajaanc uses a more consistent API to pack/unpack data packets to/from frame buffer VANC lines.
+			In SDK 14.2,\ref ajaanc uses a more consistent API to pack/unpack data packets to/from frame buffer VANC lines.
 
 	@bug	Custom Anc data is inserted/extracted to/from the SDI output/input connector that corresponds to the AutoCirculate
 			channel being used. For example, to output custom Anc data through SDI output 3, you must use AutoCirculate ::NTV2_CHANNEL3.

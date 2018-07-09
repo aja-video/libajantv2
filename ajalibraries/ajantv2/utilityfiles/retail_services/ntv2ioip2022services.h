@@ -20,16 +20,15 @@ public:
 	IoIP2022Services();
 	~IoIP2022Services();
 	
-	virtual void UpdateAutoState (void);
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();
 	virtual void SetDeviceMiscRegisters ();
 	virtual NTV2VideoFormat GetSelectedInputVideoFormat (
 									NTV2VideoFormat fbVideoFormat,
-									NTV2SDIInputFormatSelect* inputFormatSelect=NULL);
+									NTV2ColorSpaceMode* inputColorSpace=NULL);
     
 protected:
-    CNTV2Config2022     * config;
+    CNTV2Config2022 *       config;
 
     NTV2Mode				mFb1ModeLast;
     NTV2VideoFormat			mFb1VideoFormatLast;

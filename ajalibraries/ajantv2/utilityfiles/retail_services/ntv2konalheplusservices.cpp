@@ -23,11 +23,11 @@ KonaLHePlusServices::KonaLHePlusServices()
 //-------------------------------------------------------------------------------------------------------
 NTV2VideoFormat KonaLHePlusServices::GetSelectedInputVideoFormat(
 											NTV2VideoFormat fbVideoFormat,
-											NTV2SDIInputFormatSelect* inputFormatSelect)
+											NTV2ColorSpaceMode* inputColorSpace)
 {
 	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-	if (inputFormatSelect)
-		*inputFormatSelect = NTV2_YUVSelect;
+	if (inputColorSpace)
+		*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
 	
 	// Figure out what our input format is based on what is selected 
 	switch (mVirtualInputSelect)
@@ -214,7 +214,7 @@ void KonaLHePlusServices::SetDeviceXPointPlayback ()
 	
 
 	// SDI Out 1
-	if (b2FbLevelBHfr || bStereoOut)												// B format or Stereo 3D
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 	}
@@ -247,22 +247,22 @@ void KonaLHePlusServices::SetDeviceXPointPlayback ()
 	
 	
 	// SDI Out 2
-	if (b2FbLevelBHfr || bStereoOut)												// B format or Stereo 3D
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync2YUV);
 	}
-	else if ( (mVirtualDigitalOutput2Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
-			  || (   (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
+	else if ( (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
+			  || (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
 			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync1YUV);
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)			// Secondary
+	else if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)			// Secondary
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptConversionModule);
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)				// Video+Key
+	else if (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)				// Video+Key
 	{
 		if (bDSKOn)
 		{
@@ -668,14 +668,14 @@ void KonaLHePlusServices::SetDeviceXPointCapture ()
 	
 	
 	// SDI Out 2 
-	if (	(mVirtualDigitalOutput2Select == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
-		      || (   (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)		// or if "Secondary" AND Secondary == Primary and not SD format
+	if (	(mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
+		      || (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)		// or if "Secondary" AND Secondary == Primary and not SD format
 			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync1YUV);
 	}
-	else if (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)
+	else if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync2YUV);
 	}

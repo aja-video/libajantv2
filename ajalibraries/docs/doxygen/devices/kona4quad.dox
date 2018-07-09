@@ -3,10 +3,11 @@
 
 	@section		ntv2hwkona
 
+	<hr>
 	@subsection		kona4quad		KONA 4 (Quad Mode)
 
 	This page describes the KONA 4 capture/playout board in its 4-channel mode of operation.
-	It can be "flashed" with different firmware to become a 2-channel device (see \ref kona4ufc).
+	It can be “flashed” with different firmware to become a 2-channel device (see \ref kona4ufc).
 	It’s identified by ::DEVICE_ID_KONA4.
 
 	@image	html	kona4.png
@@ -24,18 +25,18 @@
 
 	@par	Inputs & Outputs
 
-	-	4 x SDI bi-directional (under software control)
-	-	1 x HDMI output (HDMI v2.0a subset with v1.4 connection, to support HDR InfoFrame metadata and UHD/4K@60 4:2:0 YUV)
-	-	1 x analog component video output
-	-	2 x reference/LTC inputs
-	-	2 x LTC outputs
-	-	1 x RS-422 serial port
+	-	4 × SDI bi-directional (under software control)
+	-	1 × HDMI output (HDMI v2.0a subset with v1.4 connection, to support HDR InfoFrame metadata and UHD/4K@60 4:2:0 YUV)
+	-	1 × analog component video output
+	-	2 × reference/LTC inputs
+	-	2 × LTC outputs
+	-	1 × RS-422 serial port
 
 	@par	Frame Buffer
 
 	-	512 MB SDRAM
-	-	64 x 8MB frames
-	-	32 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	64 × 8MB frames
+	-	32 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
 
 	@par	Audio
 
@@ -72,7 +73,7 @@
 
 	@par	Physical
 
-	-	Size (W x D x H):  0.75" x 8.25" x 5.0" (19.05mm × 209.55mm × 127mm)
+	-	Size (W × D × H):  0.75" × 8.25" × 5.0" (19.05mm × 209.55mm × 127mm)
 	-	Weight: 0.7 lb (0.4 kg)
 
 	@par	Environment

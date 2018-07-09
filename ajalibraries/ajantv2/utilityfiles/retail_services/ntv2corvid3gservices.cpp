@@ -176,7 +176,7 @@ void Corvid3GServices::SetDeviceXPointPlayback ()
 	
 	
 	// SDI Out 1
-	if (b2FbLevelBHfr || bStereoOut)												// B format or Stereo 3D
+	if (b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut1InputDS2, b3GbOut ? frameSync2YUV : NTV2_XptBlack);
@@ -412,22 +412,21 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	bool 						bFb1Compressed 		= IsFormatCompressed(mFb1Format);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-	bool						bStereoIn			= mSDIInput1FormatSelect == NTV2_Stereo3DSelect;
 	int							bFb1Disable			= 0;					// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;					// Assume Channel 2 IS disabled by default
 													  
-	NTV2CrosspointID	inputXptYUV1		= NTV2_XptBlack;		// Input source selected single stream
-	NTV2CrosspointID	inputXptYUV2		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	NTV2VideoFormat				inputFormat			= mFb1VideoFormat;	// Input source selected format
-	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;		// Input format select (YUV, RGB, Stereo 3D)
+	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;		// Input source selected single stream
+	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
+	NTV2VideoFormat				inputFormat			= mFb1VideoFormat;		// Input source selected format
+	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;		// Input format select (YUV, RGB, etc)
 	
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
 	
 	
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
-	if (b2FbLevelBHfr || bStereoIn)
+	if (b2FbLevelBHfr)
 	{
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
@@ -459,7 +458,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 
 	
 	// CSC 1
-	if (inputFormatSelect != NTV2_RGBSelect)
+	if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 	{
 		if (inputFormat == mFb1VideoFormat)
 		{
@@ -477,7 +476,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	
 
 	// LUT 1
-	if (inputFormatSelect != NTV2_RGBSelect)
+	if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
 		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);	
@@ -491,7 +490,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	
 	// LUT 2 
 	// provides SMPTE <-> Full conversion
-	if (inputFormatSelect == NTV2_RGBSelect)
+	if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptDuallinkIn1);
 		mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL2,	
@@ -501,13 +500,13 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	
 
 	// Frame Buffer 1
-	if (b2FbLevelBHfr || bStereoIn)
+	if (b2FbLevelBHfr)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
 	}
 	else if (bFb1RGB)
 	{
-		if (inputFormatSelect == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 			{
@@ -542,7 +541,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	
 	
 	// Frame Buffer 2
-	if (b2FbLevelBHfr || bStereoIn)
+	if (b2FbLevelBHfr)
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
 	}
@@ -553,7 +552,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	
 	
 	// Make sure both channels are enable for stereo, level B
-	if (b2FbLevelBHfr || bStereoIn)
+	if (b2FbLevelBHfr)
 	{
 		bFb1Disable = bFb2Disable = false;
 	}
@@ -601,7 +600,7 @@ void Corvid3GServices::SetDeviceMiscRegisters ()
 	mCard->GetFrameGeometry(primaryGeometry);
 	
 	// VPID
-	//bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_DualLinkOutputSelect);
+	//bool					bSdiOutRGB			= (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb);
 	
 	// special case - VANC 8bit pixel shift support
 	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format) )
@@ -611,7 +610,7 @@ void Corvid3GServices::SetDeviceMiscRegisters ()
 		
 	// Set VBlank RGB range bits - ALWAYS SMPTE
 	// Except when there is a full-range RGB frame buffer, and we go through the color space converter
-	if (mRGB10Range == NTV2_RGB10RangeFull && mVirtualDigitalOutput1Select != NTV2_DualLinkOutputSelect)
+	if (mRGB10Range == NTV2_RGB10RangeFull && mSDIOutput1ColorSpace != NTV2_ColorSpaceModeRgb)
 	{
 		mCard->WriteRegister(kRegCh1Control, NTV2_RGB10RangeFull, kRegMaskVBlankRGBRange, kRegShiftVBlankRGBRange);
 		mCard->WriteRegister(kRegCh2Control, NTV2_RGB10RangeFull, kRegMaskVBlankRGBRange, kRegShiftVBlankRGBRange);

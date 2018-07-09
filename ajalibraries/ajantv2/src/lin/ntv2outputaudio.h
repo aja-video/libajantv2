@@ -19,8 +19,7 @@ public:  // Constructors
 	CNTV2OutputAudio(UWord boardNumber);
 	~CNTV2OutputAudio();
 
-	virtual bool Open(UWord boardNumber=0, bool displayError = false,
-					  NTV2DeviceType eBoardType = DEVICETYPE_UNKNOWN);
+	virtual bool Open(UWord boardNumber=0);
 
 	bool SetupAudio();
 

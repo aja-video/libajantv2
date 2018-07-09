@@ -42,7 +42,7 @@ AJAExport bool NTV2DeviceCanDoAudioOut(const NTV2DeviceID inDeviceID);
 */
 AJAExport bool NTV2DeviceCanDoAudioIn(const NTV2DeviceID inDeviceID);
 
-
+AJAExport bool NTV2DeviceCanDo292Out(NTV2DeviceID boardID, UWord index0);
 AJAExport bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0);
 AJAExport bool NTV2DeviceCanDo12GOut(NTV2DeviceID boardID, UWord index0);
 AJAExport bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0);

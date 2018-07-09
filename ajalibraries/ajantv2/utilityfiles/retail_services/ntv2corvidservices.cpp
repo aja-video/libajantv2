@@ -23,17 +23,17 @@ CorvidServices::CorvidServices()
 //-------------------------------------------------------------------------------------------------------
 NTV2VideoFormat CorvidServices::GetSelectedInputVideoFormat(
 											NTV2VideoFormat fbVideoFormat,
-											NTV2SDIInputFormatSelect* inputFormatSelect)
+											NTV2ColorSpaceMode* inputColorSpace)
 {
 	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-	if (inputFormatSelect)
-		*inputFormatSelect = NTV2_YUVSelect;
+	if (inputColorSpace)
+		*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
 	
 	if (mVirtualInputSelect == NTV2_Input1Select)
 	{
 		inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-		if (inputFormatSelect)
-			*inputFormatSelect = mSDIInput1FormatSelect;
+		if (inputColorSpace)
+			*inputColorSpace = mSDIInput1ColorSpace;
 	}
 	inputFormat = GetTransportCompatibleFormat(inputFormat, fbVideoFormat);
 	

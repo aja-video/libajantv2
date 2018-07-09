@@ -3,6 +3,7 @@
 
 	@section		ntv2hwio
 
+	<hr>
 	@subsection		ioxt	IoXT
 
 	This page describes the IoXT Thunderbolt-based capture/playout device.
@@ -17,24 +18,24 @@
 	-	Four-lane gen 2 PCI Express
 	-	2 DMA engines
 	-	Legacy and MSI interrupt delivery supported
-	-	2 x Thunderbolt I connectors
+	-	2 × Thunderbolt I connectors
 
 	@par	Inputs & Outputs
 
-	-	2 x SDI inputs
-	-	2 x SDI outputs
-	-	1 x HDMI input
-	-	1 x HDMI output
-	-	1 x analog component video output
-	-	1 x Reference/LTC input
-	-	1 x LTC output
-	-	1 x RS-422 serial port
+	-	2 × SDI inputs
+	-	2 × SDI outputs
+	-	1 × HDMI input
+	-	1 × HDMI output
+	-	1 × analog component video output
+	-	1 × Reference/LTC input
+	-	1 × LTC output
+	-	1 × RS-422 serial port
 
 	@par	Frame Buffer
 
 	-	256MB SDRAM (64MB reserved for UFC, 192MB for frame storage)
-	-	32 x 8MB frames
-	-	16 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	32 × 8MB frames
+	-	16 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
 
 	@par	Audio
 

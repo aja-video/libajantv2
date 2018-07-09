@@ -81,7 +81,6 @@ static DriverInterfaceGlobalInitializer	gInitializerSingleton;
 CNTV2DriverInterface::CNTV2DriverInterface ()
 	:	_boardNumber					(0),
 		_boardOpened					(false),
-		_boardType						(DEVICETYPE_NTV2),
 		_boardID						(DEVICE_ID_NOTFOUND),
 		_displayErrorMessage			(false),
 		_pciSlot						(0),
