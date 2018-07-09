@@ -1842,13 +1842,10 @@ typedef enum
 } NTV2AnalogBlackLevel;
 
 
-typedef enum				// used in Virtual Register: kVRegInputSelect
+typedef enum					// used in Virtual Register: kVRegInputSelect
 {
     NTV2_Input1Select,
     NTV2_Input2Select,
-    #if !defined (NTV2_DEPRECATE)
-        NTV2_AnalogInputSelect		= NTV2_Input2Select,
-    #endif	//	!defined (NTV2_DEPRECATE)
     NTV2_Input3Select,
     NTV2_Input4Select,
     NTV2_Input5Select,
