@@ -2109,7 +2109,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     txConfig.tos = 0x64;
 
                     // Video specific
-                    txConfig.videoFormat = mFb1VideoFormat;
+                    txConfig.videoFormat = Convert21104KFormat(mFb1VideoFormat);;
                     txConfig.videoSamples = VPIDSampling_YUV_422;
 
                     if (config2110->SetTxStreamConfiguration(m2110TxVideoData.txVideoCh[i].stream, txConfig) == true)
@@ -2329,7 +2329,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                 }
             }
         }
-
+        
         // See if network needs configuring
         if (memcmp(&m2110Network, s2110NetworkLast, sizeof(NetworkData2110)) != 0 || ipServiceForceConfig)
         {
@@ -2370,7 +2370,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                 }
             }
         }
-        
+
         // Write status
         mCard->WriteVirtualData(kChStatusData2110, &m2110IpStatusData, sizeof(IpStatus2110));
         
@@ -2652,6 +2652,86 @@ void DeviceServices::EveryFrameTask2022(CNTV2Config2022* config2022, NTV2Mode* m
         
         config2022->SetIPServicesControl(true, false);
     }
+}
+
+NTV2VideoFormat DeviceServices::Convert21104KFormat(NTV2VideoFormat videoFormat)
+{
+    NTV2VideoFormat format;
+
+    switch (videoFormat)
+    {
+        case NTV2_FORMAT_4x2048x1080p_2398:
+        case NTV2_FORMAT_4x2048x1080psf_2398:
+            format = NTV2_FORMAT_1080p_2K_2398;
+            break;
+        case NTV2_FORMAT_4x2048x1080p_2400:
+        case NTV2_FORMAT_4x2048x1080psf_2400:
+            format = NTV2_FORMAT_1080p_2K_2400;
+            break;
+        case NTV2_FORMAT_4x2048x1080p_2500:
+        case NTV2_FORMAT_4x2048x1080psf_2500:
+            format = NTV2_FORMAT_1080p_2K_2500;
+            break;
+        case NTV2_FORMAT_4x2048x1080p_2997:
+        case NTV2_FORMAT_4x2048x1080psf_2997:
+            format = NTV2_FORMAT_1080p_2K_2997;
+            break;
+        case NTV2_FORMAT_4x2048x1080p_3000:
+        case NTV2_FORMAT_4x2048x1080psf_3000:
+            format = NTV2_FORMAT_1080p_2K_3000;
+            break;
+        case NTV2_FORMAT_4x2048x1080p_4795:
+            format = NTV2_FORMAT_1080p_2K_4795_A;
+            break;
+        case NTV2_FORMAT_4x2048x1080p_4800:
+            format = NTV2_FORMAT_1080p_2K_4800_A;
+            break;
+        case NTV2_FORMAT_4x2048x1080p_5000:
+            format = NTV2_FORMAT_1080p_2K_5000_A;
+            break;
+        case NTV2_FORMAT_4x2048x1080p_5994:
+            format = NTV2_FORMAT_1080p_2K_5994_A;
+            break;
+        case NTV2_FORMAT_4x2048x1080p_6000:
+            format = NTV2_FORMAT_1080p_2K_6000_A;
+            break;
+
+        case NTV2_FORMAT_4x1920x1080p_2398:
+        case NTV2_FORMAT_4x1920x1080psf_2398:
+            format = NTV2_FORMAT_1080p_2398;
+            break;
+        case NTV2_FORMAT_4x1920x1080p_2400:
+        case NTV2_FORMAT_4x1920x1080psf_2400:
+            format = NTV2_FORMAT_1080p_2400;
+            break;
+        case NTV2_FORMAT_4x1920x1080p_2500:
+        case NTV2_FORMAT_4x1920x1080psf_2500:
+            format = NTV2_FORMAT_1080p_2500;
+            break;
+        case NTV2_FORMAT_4x1920x1080p_2997:
+        case NTV2_FORMAT_4x1920x1080psf_2997:
+            format = NTV2_FORMAT_1080p_2997;
+            break;
+        case NTV2_FORMAT_4x1920x1080p_3000:
+        case NTV2_FORMAT_4x1920x1080psf_3000:
+            format = NTV2_FORMAT_1080p_3000;
+            break;
+        case NTV2_FORMAT_4x1920x1080p_5000:
+            format = NTV2_FORMAT_1080p_5000_A;
+            break;
+        case NTV2_FORMAT_4x1920x1080p_5994:
+            format = NTV2_FORMAT_1080p_5994_A;
+            break;
+        case NTV2_FORMAT_4x1920x1080p_6000:
+            format = NTV2_FORMAT_1080p_6000_A;
+            break;
+
+        default:
+            format = videoFormat;
+            break;
+    }
+    
+    return format;
 }
 
 void  DeviceServices::SetNetConfig(CNTV2Config2022* config, eSFP  port)
