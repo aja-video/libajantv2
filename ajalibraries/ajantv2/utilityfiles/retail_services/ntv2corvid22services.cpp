@@ -447,7 +447,7 @@ void Corvid22Services::SetDeviceXPointCapture ()
 		inputXptYUV2 = NTV2_XptSDIIn2DS2;
 	}
 	// dual link select
-	else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+	else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 	{
 		inputXptYUV1 = NTV2_XptSDIIn1;
 		inputXptYUV2 = NTV2_XptSDIIn2;

@@ -469,9 +469,9 @@ NTV2VideoFormat DeviceServices::GetSelectedInputVideoFormat(
 	switch (mVirtualInputSelect)
 	{
         case NTV2_Input1Select:
-        case NTV2_DualLinkInputSelect:
-        case NTV2_DualLink2xSdi4k:
-        case NTV2_DualLink4xSdi4k:
+        case NTV2_Input2xDLHDSelect:
+        case NTV2_Input2x4kSelect:
+        case NTV2_Input4x4kSelect:
             inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
             if (inputColorSpace)
                 *inputColorSpace = mSDIInput1ColorSpace;
@@ -1935,7 +1935,7 @@ NTV2VideoFormat DeviceServices::GetSdiInVideoFormatWithVpid(int32_t index)
 			parser.SetVPID(vpida);
 			inputFormat = parser.GetVideoFormat();
 
-			if (mVirtualInputSelect == NTV2_DualLink4xSdi4k || mVirtualInputSelect == NTV2_DualLink2xSdi4k)
+			if (mVirtualInputSelect == NTV2_Input4x4kSelect || mVirtualInputSelect == NTV2_Input2x4kSelect)
 			{
 				inputFormat = GetQuadSizedVideoFormat(inputFormat);
 			}

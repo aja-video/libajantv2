@@ -30,7 +30,7 @@ NTV2VideoFormat Io4KUfcServices::GetSelectedInputVideoFormat(
 		*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
 	
 	// Figure out what our input format is based on what is selected 
-	if ((mVirtualInputSelect == NTV2_Input1Select) || (mVirtualInputSelect == NTV2_DualLinkInputSelect))
+	if ((mVirtualInputSelect == NTV2_Input1Select) || (mVirtualInputSelect == NTV2_Input2xDLHDSelect))
 	{
 		inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
 		if (inputColorSpace)
@@ -265,7 +265,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
 		{
 			mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn2);
 		}
-		else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+		else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 		{
 			mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptDuallinkIn1);
 		}
@@ -545,7 +545,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptSDIIn2);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptSDIIn2);
 				}
-				else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+				else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 				{
 					// Select dual link (0x83)
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptDuallinkIn1);
@@ -606,7 +606,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptSDIIn2);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptSDIIn2);
 				}
-				else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+				else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 				{
 					// Select dual link (0x83)
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptDuallinkIn1);
@@ -739,7 +739,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 		inputXptYUV2 = NTV2_XptSDIIn2DS2;
 	}
 	// dual link select
-	else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+	else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 	{
 		inputXptYUV1 = NTV2_XptSDIIn1;
 		inputXptYUV2 = NTV2_XptSDIIn2;
