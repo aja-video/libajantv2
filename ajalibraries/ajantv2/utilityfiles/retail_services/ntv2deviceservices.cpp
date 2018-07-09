@@ -433,6 +433,22 @@ void DeviceServices::UpdateAutoState()
 	// out range						
 	mSDIOutput1RGBRange = mSDIOutput1RGBRange == NTV2_RGBRangeAuto ?
 							NTV2_RGBRangeFull : mSDIOutput1RGBRange;
+	
+	// 4k transport
+	NTV24kTransportType tranport4k = NTV2_4kTransport_PixelInterleave;
+	if (::NTV2DeviceCanDo425Mux(mDeviceID) == false)
+		tranport4k = NTV2_4kTransport_Quadrants_4wire;
+		
+	m4kTransportOutSelection = m4kTransportOutSelection == NTV2_4kTransport_Auto ? 
+				tranport4k : m4kTransportOutSelection;
+				
+	// 3G tranport
+	NTV2SDITransportType transport3g = NTV2_SDITransport_DualLink_3Gb;
+	if (::NTV2DeviceCanDo3GOut(mDeviceID, 0) == false)
+		transport3g	= NTV2_SDITransport_DualLink_1_5;
+		
+	mDualStreamTransportType = mDualStreamTransportType == NTV2_SDITransport_Auto ? 
+				transport3g : mDualStreamTransportType;
 }
 
 
