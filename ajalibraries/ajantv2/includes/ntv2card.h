@@ -5611,8 +5611,8 @@ public:
     AJA_VIRTUAL bool SetAncExtField2WriteParams(NTV2Channel channel, ULWord frameNumber);
 
     AJA_VIRTUAL bool EnableAncInserter(NTV2Channel channel, bool bEnable);
-    AJA_VIRTUAL bool SetAncInsReadParams(NTV2Channel channel, ULWord frameNumber, ULWord field1Size, ULWord field2Size);
-    AJA_VIRTUAL bool SetAncInsReadField2Params(NTV2Channel channel);
+    AJA_VIRTUAL bool SetAncInsReadParams(NTV2Channel channel, ULWord frameNumber, ULWord field1Size);
+    AJA_VIRTUAL bool SetAncInsReadField2Params(NTV2Channel channel, ULWord frameNumber, ULWord field2Size);
 
 	///@}
 
