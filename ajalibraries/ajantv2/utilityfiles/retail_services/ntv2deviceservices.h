@@ -211,7 +211,6 @@ public:
 	NTV2OutputVideoSelect	mVirtualDigitalOutput1Select;
 	NTV2OutputVideoSelect	mVirtualHDMIOutputSelect;
 	NTV2OutputVideoSelect	mVirtualAnalogOutputSelect;
-	NTV2ColorSpaceMode		mSDIOutput1ColorSpace;
 	NTV2LutType				mLUTType;
 	NTV2LutType				mLUT2Type;
 	NTV2InputVideoSelect	mVirtualInputSelect;
@@ -224,7 +223,8 @@ public:
 	ReferenceSelect			mDisplayReferenceSelect;
 	NTV2GammaType			mGammaMode;
 	NTV2RGB10Range			mRGB10Range;
-	NTV2ColorSpaceType		mColorSpaceMode;
+	NTV2ColorSpaceType		mColorSpaceType;
+	NTV2ColorSpaceMode		mSDIOutput1ColorSpace;
 	NTV2RGBRangeMode		mSDIOutput1RGBRange;
     rx2022Config            mRx2022Config1;
     rx2022Config            mRx2022Config2;

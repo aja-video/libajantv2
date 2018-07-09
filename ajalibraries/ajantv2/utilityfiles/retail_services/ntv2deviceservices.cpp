@@ -201,7 +201,7 @@ void DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVRegDisplayReferenceSelect, mDisplayReferenceSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegGammaMode, mGammaMode);
 	AsDriverInterface(mCard)->ReadRegister(kVRegRGB10Range, mRGB10Range);
-	AsDriverInterface(mCard)->ReadRegister(kVRegColorSpaceMode, mColorSpaceMode);
+	AsDriverInterface(mCard)->ReadRegister(kVRegColorSpaceMode, mColorSpaceType);
 	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1RGBRange, mSDIOutput1RGBRange);
 	
 	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1RGBRange, mSDIInput1RGBRange);
@@ -413,13 +413,30 @@ void DeviceServices::ReadDriverState (void)
 //-------------------------------------------------------------------------------------------------------
 //	UpdateAutoState
 //-------------------------------------------------------------------------------------------------------
-void DeviceServices::UpdateAutoState ()
+void DeviceServices::UpdateAutoState()
 {
 	mDualStreamTransportType = 
 		RetailSupport::AutoSelect3GTransport(mDeviceID, mDualStreamTransportType, mFb1VideoFormat);
-		
+	
+	// out select sdi
+	mVirtualDigitalOutput1Select = mVirtualDigitalOutput1Select == NTV2_AutoOutputSelect ?
+				NTV2_PrimaryOutputSelect : mVirtualDigitalOutput1Select;
+	
+	// out select hdmi
+	mVirtualHDMIOutputSelect = mVirtualHDMIOutputSelect == NTV2_AutoOutputSelect ?
+				NTV2_PrimaryOutputSelect : mVirtualHDMIOutputSelect;
+	
+	// out select analog
+	mVirtualAnalogOutputSelect = mVirtualAnalogOutputSelect == NTV2_AutoOutputSelect ?
+				NTV2_PrimaryOutputSelect : mVirtualAnalogOutputSelect;
+	
+	// out cs
 	mSDIOutput1ColorSpace = mSDIOutput1ColorSpace == NTV2_ColorSpaceModeAuto ?
 							NTV2_ColorSpaceModeYCbCr : mSDIOutput1ColorSpace;
+	
+	// out range						
+	mSDIOutput1RGBRange = mSDIOutput1RGBRange == NTV2_RGBRangeAuto ?
+							NTV2_RGBRangeFull : mSDIOutput1RGBRange;
 }
 
 
@@ -3048,7 +3065,7 @@ bool DeviceServices::UpdateK2ColorSpaceMatrixSelect()
 
 	// figure out what ColorSpace we want to be using
 	NTV2ColorSpaceMatrixType matrix = NTV2_Rec709Matrix;
-	switch (mColorSpaceMode)
+	switch (mColorSpaceType)
 	{
 		// force to Rec 601
 		default:	
