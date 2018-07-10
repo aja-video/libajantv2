@@ -1843,19 +1843,17 @@ typedef enum
 } NTV2AnalogBlackLevel;
 
 
-typedef enum				// used in Virtual Register: kVRegInputSelect
+typedef enum					// used in Virtual Register: kVRegInputSelect
 {
     NTV2_Input1Select,
     NTV2_Input2Select,
-    #if !defined (NTV2_DEPRECATE)
-        NTV2_AnalogInputSelect		= NTV2_Input2Select,
-    #endif	//	!defined (NTV2_DEPRECATE)
     NTV2_Input3Select,
     NTV2_Input4Select,
     NTV2_Input5Select,
-    NTV2_DualLinkInputSelect,
-    NTV2_DualLink2xSdi4k,
-    NTV2_DualLink4xSdi4k,
+    NTV2_Input2xDLHDSelect,
+    NTV2_Input2x4kSelect,
+    NTV2_Input4x4kSelect,
+    NTV2_InputAutoSelect,
     NTV2_MAX_NUM_InputVideoSelectEnums
 } NTV2InputVideoSelect;
 
@@ -4107,9 +4105,9 @@ typedef enum
     #define		NTV2K2_Input3Select					NTV2_Input3Select					///< @deprecated	Use NTV2_Input3Select instead.
     #define		NTV2K2_Input4Select					NTV2_Input4Select					///< @deprecated	Use NTV2_Input4Select instead.
     #define		NTV2K2_Input5Select					NTV2_Input5Select					///< @deprecated	Use NTV2_Input5Select instead.
-    #define		NTV2K2_DualLinkInputSelect			NTV2_DualLinkInputSelect			///< @deprecated	Use NTV2_DualLinkInputSelect instead.
-    #define		NTV2K2_DualLink2xSdi4k				NTV2_DualLink2xSdi4k				///< @deprecated	Use NTV2_DualLink2xSdi4k instead.
-    #define		NTV2K2_DualLink4xSdi4k				NTV2_DualLink4xSdi4k				///< @deprecated	Use NTV2_DualLink4xSdi4k instead.
+    #define		NTV2K2_DualLinkInputSelect			NTV2_Input2xDLHDSelect			///< @deprecated	Use NTV2_Input2xDLHDSelect instead.
+    #define		NTV2K2_DualLink2xSdi4k				NTV2_Input2x4kSelect				///< @deprecated	Use NTV2_Input2x4kSelect instead.
+    #define		NTV2K2_DualLink4xSdi4k				NTV2_Input4x4kSelect				///< @deprecated	Use NTV2_Input4x4kSelect instead.
     #define		NTV2K2_InputSelectMax				NTV2_MAX_NUM_InputVideoSelectEnums	///< @deprecated	Use NTV2_MAX_NUM_InputVideoSelectEnums instead.
 
     //	NTV2SDIInputFormatSelect

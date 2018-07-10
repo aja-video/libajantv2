@@ -32,7 +32,7 @@ NTV2VideoFormat KonaLHiServices::GetSelectedInputVideoFormat(
 	// Figure out what our input format is based on what is selected
 	switch (mVirtualInputSelect)
 	{
-		case NTV2_DualLinkInputSelect:
+		case NTV2_Input2xDLHDSelect:
 		case NTV2_Input1Select:
 			inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
 			break;
@@ -283,7 +283,7 @@ void KonaLHiServices::SetDeviceXPointPlayback ()
 			// Select input 3
 			mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptAnalogIn);
 		}
-		else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+		else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 		{
 			// Select dual link
 			mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptDuallinkIn1);
@@ -485,7 +485,7 @@ void KonaLHiServices::SetDeviceXPointPlayback ()
 							mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptAnalogIn);
 							mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptAnalogIn);
 						}
-						else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+						else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 						{
 							// Select dual link
 							mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptDuallinkIn1);
@@ -556,7 +556,7 @@ void KonaLHiServices::SetDeviceXPointPlayback ()
 							mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptAnalogIn);
 							mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptAnalogIn);
 						}
-						else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+						else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 						{
 							// Select dual link
 							mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptDuallinkIn1);
@@ -677,7 +677,7 @@ void KonaLHiServices::SetDeviceXPointCapture ()
 		inputSelectPrimary = NTV2_XptAnalogIn;
 		//inputSelectSecondary = NTV2_XptBlack;
 	}
-	else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+	else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 	{
 		// Select color space converter
 		inputSelectPrimary = NTV2_XptCSC1VidYUV;
@@ -741,7 +741,7 @@ void KonaLHiServices::SetDeviceXPointCapture ()
 			mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptConversionModule);
 		}
 	}
-	else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+	else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 	{
 		// Select LUT RGB out
 		mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptLUT1RGB);
@@ -757,7 +757,7 @@ void KonaLHiServices::SetDeviceXPointCapture ()
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
 		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
 	}
-	else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+	else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 	{
 		// Select dual link in
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptDuallinkIn1);
@@ -776,7 +776,7 @@ void KonaLHiServices::SetDeviceXPointCapture ()
 			// Select LUT RGB out
 			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptLUT1RGB);
 		}
-		else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+		else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 		{
 			// Select dual link in
 			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptDuallinkIn1);		// fixed
@@ -794,7 +794,7 @@ void KonaLHiServices::SetDeviceXPointCapture ()
 			// Select LUT RGB out
 			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptLUT1RGB);
 		}
-		else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+		else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 		{
 			// Select dual link - this is wrong since the Dual Link input can't be converted from Secondary to Primary
 			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptDuallinkIn1);		// fixed
@@ -854,7 +854,7 @@ void KonaLHiServices::SetDeviceXPointCapture ()
 				// Select LUT RGB out
 				mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptLUT1RGB);
 			}
-			else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+			else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 			{
 				// Select dual link in
 				mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptDuallinkIn1);
@@ -871,7 +871,7 @@ void KonaLHiServices::SetDeviceXPointCapture ()
 				// Select LUT RGB out
 				mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptLUT1RGB);
 			}
-			else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+			else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 			{
 				// Select dual link in
 				mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptDuallinkIn1);
