@@ -11,6 +11,8 @@
 
 	-	\ref usingcables -- A handy utility for graphically showing and changing the signal routing in NTV2 devices.
 
+	-	\ref usingajalogger — A handy viewer for displaying and/or logging messages from the ::AJADebug facility.
+
 	-	\ref usingsystemtest -- Measures the DMA performance of any AJA device attached to the host,
 		as well as the read/write performance of local host storage.
 
