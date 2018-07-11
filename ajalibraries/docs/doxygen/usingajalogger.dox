@@ -1,0 +1,189 @@
+/**
+@page	toolsandutilities
+
+@section	usingajalogger		“AJA Logger”
+
+This page describes how to use the <b>AJA Logger</b> utility to monitor logging activity of AJA software.
+
+The <b>AJA Logger</b> application allows you to monitor, in real time, log messages generated from the ::AJADebug facility.
+It includes a filtering mechanism that can focus on seeing specific classifications and/or severities of messages.
+It can also monitor third-party AJA client software, if they choose to post messages using the AJA Debug API.
+AJA plans to incorporate ::AJADebug based logging into more of its software going forward.
+
+@par	General Operation
+
+The<b>AJA Logger</b>’s user interface consists of one main window, the main window having three parts:
+-	The <b>Main View</b> containing the log display that consumes the majority of the visible space;
+-	A <b>Toolbar</b> at the top that allows you to configure what is seen (or not seen) in the main view;
+-	A <b>Status Bar</b> at the bottom that shows logging activity statistics.
+
+
+
+
+
+
+@subsection	logger-operation	AJA Logger Operation
+
+@image	html	logger-in-action.png
+
+The <b>Main View</b> shows log messages in tabular fashion, one log entry per table row, with the log entry data shown in columns:
+-	<b>Index</b>: The unique index number of the log message. This number is reset to zero when the host OS is started.
+-	<b>PID</b>: The host process ID where the log message originated.
+-	<b>TID</b>: The host thread ID where the log message originated.
+-	<b>Time</b>: The host timestamp when the log message was created.
+-	<b>Group</b>: The log message classification group (see ::AJADebugUnit).
+-	<b>Severity</b>: The severity of the log message (see ::AJADebugSeverity).
+-	<b>File</b>: The name of the source file where the log message originated (if known).
+-	<b>Message</b>: The log message text.
+
+Messages are always displayed in increasing index order, top-to-bottom.
+
+The <b>Status Bar</b> shows the following:
+-	<b>File Recording State</b>:  If the logger’s “Log” setting is enabled, it shows the path of the log file
+	being written, and its size, in bytes.  If the logger’s “Log” setting is off, it shows “not logging to file”.
+-	<b>Message Stats</b>:
+	-	<b>Ignored</b>: The number of messages that were reported by ::AJADebug clients, but ignored by the AJA Logger.
+		You can choose the kinds of messages to ignore by showing the <b>Enables</b> dialog box by clicking the
+		<b>Enables</b> button. You can also pause the logger by clicking the <b>Pause</b> button.
+	-	<b>Accepted</b>: The number of messages that were reported by ::AJADebug clients, and accepted for display
+		by the AJA Logger application.
+	-	<b>Total</b>: The total number of messages that were reported by ::AJADebug clients.
+	-	<b>Ref Count</b>: The number of attached clients that are currently monitoring ::AJADebug activity.
+
+As new messages are reported to the ::AJADebug logging facility, these are detected and, if configured to show them,
+incorporated into the log display.
+
+If the <b>Scroll</b> button is highlighted, the display will auto-scroll to the bottom, to continually show the newest message.
+Otherwise, the <b>Main View</b> remains at its current scroll position.
+
+@note	Log messages containing line breaks (newline characters) are displayed in a single row, with the message text
+		truncated at the first line break in the message. If logging to a file is enabled, the message text is written
+		to the log file unchanged.
+
+
+
+@par	Selecting and Copying Data
+
+Clicking inside the <b>Main View</b> highlights (selects) information on a per-cell basis.
+
+The usual rules of selection are followed:
+-	“Shift-click” — Extends the selection.
+-	“Ctrl-click” or “Command-click” — Extends or contracts the selection.
+-	“Dragging” — Continues to extend (or contract) the selection while the mouse button is down (and auto-scrolls, too).
+
+The usual rules of copying data to the clipboard are followed.
+-	“Ctrl-C” or “Command-C” — Copies the highlighted (selected) data to the clipboard.
+	The copied text will have the same line and field delimiters used for file logging (see below).
+
+
+
+@par	Logging to a File
+
+When the <b>Log</b> button in the Toolbar is highlighted, incoming messages are automatically logged to a file on the host.
+-	The path to the file (and its current size, in bytes) is displayed in the Status Bar, on the left side.
+-	The file is written in clear text, in UTF-8 encoding, one line per message.
+-	The line delimiter is host-dependent:
+	-	On Mac OS and Linux, it’s a single 0x0A (Line-Feed) character.
+	-	On Windows, it’s 0x0D (Carriage-Return) followed by 0x0A (Line-Feed).
+-	The delimiter between fields (Index, PID, TID, Time, Group, etc.) is user-selectable, and defaults to the semicolon (“;”).
+	To change it, click in the <b>Settings</b> menu, then choose <b>Text Delimiter</b> … then choose the desired delimiter.
+	Subsequent writes to the file will use the new delimiter.
+-	Log messages that contain line breaks in the message text are written into the log file without change.
+
+To toggle file logging on or off, click the <b>Log</b> button in the Toolbar.
+
+
+
+@par	Clearing the Log Display
+
+To clear the log display, click the <b>Clear</b> button in the Toolbar.
+
+
+
+@par	Pausing or Resuming the Log Display
+
+When the <b>Pause</b> button in the Toolbar is highlighted, incoming messages are no longer accepted for display in the logger.
+New messages, however, are still recorded in the log file (if file logging is enabled).
+
+To toggle the log display, click the <b>Pause</b> button in the Toolbar.
+
+
+
+@par	Inserting Markers Into the Log
+
+An “elapsed time” marker is automatically inserted into the log when a new log message is posted (and accepted by AJA Logger)
+after a user-configurable number of seconds has passed since the last accepted message was received.
+The default time interval is 86400 seconds (one day).
+To change this automatic marker-insertion delay, type a new value, in seconds,
+into the <b>Auto Group</b> edit box in the Toolbar … then press Return, Enter or Tab.
+
+To manually insert a marker into the log, click the <b>Add Marker</b> button in the Toolbar.
+It will be timestamped and added to the bottom of the log.
+
+
+
+@par	Changing the Display Font/Typeface
+
+To change the typeface used in the log display, click the <b>Fonts</b> button in the Toolbar.
+The host-specific Font-chooser dialog box will appear.
+Choose the font family, size and style, then click <b>OK</b>.
+The <b>Main View</b> will be redrawn using the new typeface.
+
+
+
+@par	Resizing Columns
+
+AJA Logger can automatically adjust the width of its columns based on the longest data in the column.
+When the <b>Automatically Resize Columns</b> item in the <b>Settings</b> menu is checked,
+AJA Logger will automatically resize columns based on the messages it’s accepted for display.
+If the item is unchecked, column widths are fixed.
+Choose the <b>Automatically Resize Columns</b> item to toggle its setting.
+
+To manually resize a display column, click on the column’s border in the column heading, and drag.
+
+
+
+@par	Filtering Displayed Messages
+
+To see only those messages that contain a particular character string, enter the search text into the <b>Message Filter</b>
+edit box in the Toolbar … then press Return, Enter or Tab. Henceforth, you’ll only see messages that contain that text
+— all others will be excluded and invisible.
+
+@note	This will only affect messages received by AJA Logger <i>after</i> changing the <b>Message Filter</b> text.
+
+To stop filtering displayed messages, delete all text from the <b>Message Filter</b> edit box … then press Return, Enter or Tab.
+
+
+
+@subsection	logger-config	Configuring AJA Logger
+
+@image	html	logger-enables.png
+
+The AJA Logger has powerful filtering capabilities that make it easy to “include everything except…”
+or “exclude everything but…” or a combination.
+
+To reveal the <b>Set and Clear Enables</b> dialog box, click the <b>Enables</b> button in the Toolbar,
+or choose the <b>Enables…</b> command from the <b>Settings</b> menu.
+
+The dialog box has two sections:
+-	<b>Groups</b> — Enable or disable message display by group (aka ::AJADebugUnit).
+-	<b>Severity</b> — Enable or disable message display by severity (aka ::AJADebugSeverity).
+
+Each checkbox is “live” — i.e. toggling a checkbox takes effect immediately.
+
+There are handy pushbuttons for immediately enabling or disabling all of the Group or Severity checkboxes.
+
+Click <b>OK</b> to dismiss (hide) the dialog box.
+
+
+
+@subsection	logger-custom	How to Post Your Own Messages
+
+You can use the ::AJADebug facility to post your own messages to the AJA Debug Log.
+
+-#	In your source file(s), \c #include \c "ajadebug.h" .
+-#	In your project, be sure to link with the <b>libajabase</b> library.
+-#	When your application starts, call AJADebug::Open.
+-#	Call AJADebug::Report to log a message … or use one of the ::AJA_sDEBUG, ::AJA_sINFO, ::AJA_sNOTICE, etc. macros.
+
+**/
