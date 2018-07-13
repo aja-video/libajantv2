@@ -754,7 +754,7 @@ bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID)
 		SetBankSelect(BANK_0);
 		break;
 	case FAILSAFE_FLASHBLOCK:
-		SetBankSelect(BANK_2);
+        SetBankSelect(NTV2DeviceHasSPIv5(_boardID) ? BANK_2 : BANK_1);
 		break;
 	}
 	for (uint32_t count = 0; count < dwordSizeCount; count += 64, baseAddress += 256, bitFilePtr += 64)//count++, baseAddress += 4 )

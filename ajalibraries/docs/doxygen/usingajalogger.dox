@@ -186,4 +186,6 @@ You can use the ::AJADebug facility to post your own messages to the AJA Debug L
 -#	When your application starts, call AJADebug::Open.
 -#	Call AJADebug::Report to log a message … or use one of the ::AJA_sDEBUG, ::AJA_sINFO, ::AJA_sNOTICE, etc. macros.
 
+<hr size="50px">
+
 **/
