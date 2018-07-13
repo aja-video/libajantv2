@@ -132,4 +132,6 @@ The DMA category messages detail the setup of the DMA registers.
 There are also categories for bounce buffer allocation and driver status information requests.
 
 The debug tab also contains version information for the NTV2 codec driver and internal codec software and firmware.
+
+<hr size="50px">
 **/
