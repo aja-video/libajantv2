@@ -6947,6 +6947,17 @@ typedef enum
 				bool		GetInputTimeCodes (NTV2TimeCodeList & outValues) const;
 
 				/**
+					@brief		Returns only those timecodes from the frame that are associated with a given SDI input.
+					@param[out]	outTimeCodes	Receives the timecode values.
+					@param[in]	inSDIInput		Specifies the SDI input of interest, expressed as an ::NTV2Channel.
+					@param[in]	inValidOnly		Optionally specifies if only valid timecodes should be returned. Defaults to true.
+												Specify false to return all timecode values associated with the channel of interest,
+												even if they're not valid.
+					@return		True if successful;  otherwise false.
+				**/
+				bool		GetInputTimeCodes (NTV2TimeCodes & outTimeCodes, const NTV2Channel inSDIInput, const bool inValidOnly = true) const;
+
+				/**
 					@brief		Answers with a specific timecode captured in my acTimeCodes member.
 					@param[out]	outTimeCode		Receives the requested timecode value.
 					@param[in]	inTCIndex		Specifies which NTV2TCIndex to use. Defaults to NTV2_TCINDEX_SDI1.
@@ -7328,6 +7339,20 @@ typedef enum
 					@return		True if successful;  otherwise false.
 				**/
 				bool									GetInputTimeCode (NTV2_RP188 & outTimeCode, const NTV2TCIndex inTCIndex = NTV2_TCINDEX_SDI1) const;
+
+				/**
+					@brief		Retrieves the timecodes from the captured frame that are associated with the given SDI input.
+					@param[out]	outTimeCodes	Receives the timecode values as a mapping of ::NTV2TCIndex values to ::NTV2_RP188 objects.
+					@param[in]	inSDIInput		Specifies the SDI input of interest as an ::NTV2Channel. Defaults to ::NTV2_CHANNEL1 (SDI In 1).
+					@param[in]	inValidOnly		Optionally specifies if only valid timecodes should be returned. Defaults to true.
+												Specify false to return all timecode values associated with the SDI input of interest,
+												even if they're not valid.
+					@note		Note that specifying an SDI input source that's not connected to the framestore associated with the
+								channel being AutoCirculated will likely result in a timecode that's not frame-accurate.
+					@note		To work right, CNTV2Card::AutoCirculateInitForInput must have been initialized with the AUTOCIRCULATE_WITH_RP188 option.
+					@return		True if successful;  otherwise false.
+				**/
+				bool									GetInputTimeCodes (NTV2TimeCodes & outTimeCodes, const NTV2Channel inSDIInput = NTV2_CHANNEL1, const bool inValidOnly = true) const;
 				///@}
 
 				/**
