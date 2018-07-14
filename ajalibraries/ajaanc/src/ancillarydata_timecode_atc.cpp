@@ -283,8 +283,6 @@ AJAAncillaryDataType AJAAncillaryData_Timecode_ATC::RecognizeThisAncillaryData (
 
 ostream & AJAAncillaryData_Timecode_ATC::Print (ostream & debugStream, const bool bShowDetail) const
 {
-	debugStream << IDAsString() << "(" << ::AJAAncillaryDataCodingToString (m_coding) << ")" << endl;
-	//debugStream << "SMPTE 12M ATC Anc Pkt (" << ((m_coding == AJAAncillaryDataCoding_Digital) ? "Digital" : ((m_coding == AJAAncillaryDataCoding_Analog) ? "Analog" : "???????")) << ")" << endl;
 	AJAAncillaryData_Timecode::Print (debugStream, bShowDetail);	// print the generic stuff
 	debugStream << endl
 				<< "DBB1: " << xHEX0N(uint16_t(m_dbb1),2) << endl
