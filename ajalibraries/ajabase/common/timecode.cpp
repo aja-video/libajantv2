@@ -295,7 +295,7 @@ void AJATimeCode::SetHmsf(uint32_t h, uint32_t m, uint32_t s, uint32_t f, const 
 		// this is just good for 29.97, 59.94, 23.976
 		double dFrameRate   = double(frameRate2) / double(frameDuration);
 		uint32_t dropFrames = AJATimeCodeRound(dFrameRate*.066666);		//Number of drop frames is 6% of framerate rounded to nearest integer
-		uint32_t tb         = AJATimeCodeRound(dFrameRate);				//We don’t need the exact framerate anymore, we just need it rounded to nearest integer
+		uint32_t tb         = AJATimeCodeRound(dFrameRate);				//We don't need the exact framerate anymore, we just need it rounded to nearest integer
 		
 		uint32_t hourFrames		= tb*60*60;								//Number of frames per hour (non-drop)
 		uint32_t minuteFrames	= tb*60;								//Number of frames per minute (non-drop)
@@ -310,7 +310,7 @@ void AJATimeCode::SetHmsf(uint32_t h, uint32_t m, uint32_t s, uint32_t f, const 
 	else
 	{
 		double dFrameRate   = double(frameRate2) / double(frameDuration);
-		uint32_t tb         = AJATimeCodeRound(dFrameRate);         //We don’t need the exact framerate anymore, we just need it rounded to nearest integer
+		uint32_t tb         = AJATimeCodeRound(dFrameRate);         //We don't need the exact framerate anymore, we just need it rounded to nearest integer
 		
 		uint32_t hourFrames   = tb*60*60;							//Number of frames per hour (non-drop)
 		uint32_t minuteFrames = tb*60;								//Number of frames per minute (non-drop)
@@ -500,16 +500,27 @@ void AJATimeCode::SetRP188(uint32_t dbb, uint32_t low, uint32_t high, const AJAT
 
 void AJATimeCode::QueryRP188(uint32_t *pDbb, uint32_t *pLow, uint32_t *pHigh, const AJATimeBase& timeBase, bool bDrop)
 {
+	uint32_t dbb(0), low(0), high(0);
+	QueryRP188(dbb, low, high, timeBase, bDrop);
+	if (*pDbb)  *pDbb = dbb;
+	if (*pLow)  *pLow = low;
+	if (*pHigh) *pHigh = high;
+}
+
+void AJATimeCode::QueryRP188(uint32_t & outDBB, uint32_t & outLo, uint32_t & outHi, const AJATimeBase & timeBase, const bool bDrop)
+{
     AJA_UNUSED(timeBase);
     AJA_UNUSED(bDrop);
     
 	uint32_t dbb  = 0;
 	uint32_t low  = 0;
 	uint32_t high = 0;
-	if (*pDbb)  *pDbb = dbb;
-	if (*pLow)  *pLow = low;
-	if (*pHigh) *pHigh = high;
+	//	UNIMPLEMENTED -- FINISH
+	outDBB = dbb;
+	outLo = low;
+	outHi = high;
 }
+
 
 //---------------------------------------------------------------------------------------------------------------------
 //  Name:   = operator

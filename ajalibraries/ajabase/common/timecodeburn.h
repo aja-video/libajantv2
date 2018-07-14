@@ -35,8 +35,14 @@ public:
 	 *
 	 *
 	 *	@param[in]	pBaseVideoAddress	Base address of Raster
-	 *	@param[in]	pTimeCodeString		Something like "00:00:00:00"
-	 *	@param[in]	percentY		    Percent down the screen. if 0, will make it 80
+	 *	@param[in]	inTimeCodeStr		A string containing something like "00:00:00:00"
+	 *	@param[in]	inYPercent		    Percent down the screen. If 0, will make it 80.
+	 *	@returns    True if successful;  otherwise false.
+	 */
+	AJA_EXPORT bool BurnTimeCode (void * pBaseVideoAddress, const std::string & inTimeCodeStr, const uint32_t inYPercent);
+
+	/**
+	 *	DEPRECATED: Use std::string version of this function.
 	 */
 	AJA_EXPORT bool BurnTimeCode (char * pBaseVideoAddress, const char * pTimeCodeString, const uint32_t percentY);
 
