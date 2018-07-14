@@ -14,11 +14,11 @@
 	The Corvid 3G has one SDI input, one SDI output, one LTC input, and one RS-422 port.
 	It has a video processing module (mixer/keyer), and can handle 2K and 3Gb video formats.
 
-	@image	html	corvid3g.jpeg		width=50%
+	@image	html	corvid3g.jpeg
 
 	The Corvid 3G Fiber looks very similar:
 
-	@image	html	corvid3gfiber.jpg	width=10cm
+	@image	html	corvid3gfiber.jpg
 
 	The connector layout is the same on all three boards: RS-422 serial on the far left; LTC in/out on the left,
 	video input in the middle, and video output on the right.

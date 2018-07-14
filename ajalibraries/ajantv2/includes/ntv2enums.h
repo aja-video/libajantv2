@@ -65,7 +65,7 @@ typedef enum
     DEVICE_ID_CORVID1					= 0x10244800,	///< @brief	See \ref corvid1corvid3g
     DEVICE_ID_CORVID22					= 0x10293000,	///< @brief	See \ref corvid22
     DEVICE_ID_CORVID24					= 0x10402100,	///< @brief	See \ref corvid24
-    DEVICE_ID_CORVID3G					= 0x10294900,	///< @brief	See \ref corvid3g
+    DEVICE_ID_CORVID3G					= 0x10294900,	///< @brief	See \ref corvid1corvid3g
     DEVICE_ID_CORVID44					= 0x10565400,	///< @brief	See \ref corvid44
     DEVICE_ID_CORVID88					= 0x10538200,	///< @brief	See \ref corvid88
     DEVICE_ID_CORVIDHBR					= 0x10668200,	///< @brief	See \ref corvidhbr
