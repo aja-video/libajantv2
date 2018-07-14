@@ -140,15 +140,30 @@ public:
 	void                SetRP188(uint32_t inDBB, uint32_t inLo, uint32_t inHi, const AJATimeBase& timeBase);
 	
 	/**
-	 *	Get RP188 bytes from a frame number, timebase, and drop frame.
+	 *	Get RP188 register values using the given timebase, and drop frame.
 	 *
 	 *	@param[in]	pDbb		If non-NULL, points to the variable to receive the DBB component.
 	 *	@param[in]	pLow		If non-NULL, points to the variable to receive the low byte component.
  	 *	@param[in]	pHigh		If non-NULL, points to the variable to receive the high byte component.
  	 *	@param[in]	timeBase	Specifies the AJATimeBase to use.
  	 *	@param[in]	bDrop		Specify true if forcing drop-frame;  otherwise false.
+ 	 *	@bug		Unimplemented.
+ 	 *	@todo		Needs to be implemented.
 	 */
 	void                QueryRP188(uint32_t *pDbb, uint32_t *pLow, uint32_t *pHigh, const AJATimeBase& timeBase, bool bDrop);
+	
+	/**
+	 *	Get RP188 register values using the given timebase, and drop frame.
+	 *
+	 *	@param[out]	outDBB		Receives the DBB component.
+	 *	@param[out]	outLo		Receives the low byte component.
+ 	 *	@param[out]	outHi		Receives the high byte component.
+ 	 *	@param[in]	timeBase	Specifies the AJATimeBase to use.
+ 	 *	@param[in]	bDrop		Specify true if forcing drop-frame;  otherwise false.
+ 	 *	@bug		Unimplemented.
+ 	 *	@todo		Needs to be implemented.
+	 */
+	void                QueryRP188(uint32_t & outDBB, uint32_t & outLo, uint32_t & outHi, const AJATimeBase & timeBase, const bool bDrop);
 	
 	/**
 	 *	Set HFR divide-by-two flag.
