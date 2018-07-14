@@ -675,3 +675,15 @@ ostream & AJAAncillaryData_Timecode::Print (ostream & debugStream, const bool bS
 				<< "BG Flag: " << uint16_t(binaryGroupFlag);
 	return debugStream;
 }
+
+string AJAAncillaryData_Timecode::TimecodeString (void) const
+{
+	ostringstream	oss;
+	uint8_t			timeDigits[kNumTimeDigits];
+	GetTimeDigits (timeDigits[kTcHourTens], timeDigits[kTcHourUnits], timeDigits[kTcMinuteTens], timeDigits[kTcMinuteUnits], timeDigits[kTcSecondTens], timeDigits[kTcSecondUnits], timeDigits[kTcFrameTens], timeDigits[kTcFrameUnits]);
+	oss	<< dec << setw(1) << uint32_t(timeDigits[kTcHourTens])   << setw(1) << uint32_t(timeDigits[kTcHourUnits])
+		<< ":" << setw(1) << uint32_t(timeDigits[kTcMinuteTens]) << setw(1) << uint32_t(timeDigits[kTcMinuteUnits])
+		<< ":" << setw(1) << uint32_t(timeDigits[kTcSecondTens]) << setw(1) << uint32_t(timeDigits[kTcSecondUnits])
+		<< ":" << setw(1) << uint32_t(timeDigits[kTcFrameTens])  << setw(1) << uint32_t(timeDigits[kTcFrameUnits]);
+	return oss.str();
+}
