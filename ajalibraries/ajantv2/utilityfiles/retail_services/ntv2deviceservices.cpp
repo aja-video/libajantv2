@@ -2072,35 +2072,36 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
             (m2110RxVideoData.numRxVideoChannels == 0) &&
             (m2110RxAudioData.numRxAudioChannels == 0))
         {
-
             for (uint32_t i=0; i<4; i++)
             {
                 if (memcmp(&m2110TxVideoData.txVideoCh[i], &s2110TxVideoDataLast->txVideoCh[i], sizeof(TxVideoChData2110)) != 0)
                 {
-                    printf("TX Video Reset disable \n");
+                    printf("TX Video Reset disable %d\n", s2110TxVideoDataLast->txVideoCh[i].stream);
+                    config2110->SetTxStreamEnable(s2110TxVideoDataLast->txVideoCh[i].stream, false, false);
                     s2110TxVideoDataLast->txVideoCh[i] = m2110TxVideoData.txVideoCh[i];
-                    config2110->SetTxStreamEnable((NTV2Stream)(NTV2_VIDEO1_STREAM+i), false, false);
                 }
                 if (memcmp(&m2110TxAudioData.txAudioCh[i], &s2110TxAudioDataLast->txAudioCh[i], sizeof(TxAudioChData2110)) != 0)
                 {
-                    printf("TX Audio Reset disable \n");
+                    printf("TX Audio Reset disable %d\n", s2110TxAudioDataLast->txAudioCh[i].stream);
+                    config2110->SetTxStreamEnable(s2110TxAudioDataLast->txAudioCh[i].stream, false, false);
                     s2110TxAudioDataLast->txAudioCh[i] = m2110TxAudioData.txAudioCh[i];
-                    config2110->SetTxStreamEnable((NTV2Stream)(NTV2_AUDIO1_STREAM+i), false, false);
                 }
                 if (memcmp(&m2110RxVideoData.rxVideoCh[i], &s2110RxVideoDataLast->rxVideoCh[i], sizeof(RxVideoChData2110)) != 0)
                 {
-                    printf("RX Video Reset disable \n");
+                    printf("RX Video Reset disable %d\n", s2110RxVideoDataLast->rxVideoCh[i].stream);
+                    config2110->SetRxStreamEnable(SFP_1, s2110RxVideoDataLast->rxVideoCh[i].stream, false);
+                    config2110->SetRxStreamEnable(SFP_2, s2110RxVideoDataLast->rxVideoCh[i].stream, false);
                     s2110RxVideoDataLast->rxVideoCh[i] = m2110RxVideoData.rxVideoCh[i];
-                    config2110->SetRxStreamEnable(SFP_1, (NTV2Stream)(NTV2_VIDEO1_STREAM+i), false);
-                    config2110->SetRxStreamEnable(SFP_2, (NTV2Stream)(NTV2_VIDEO1_STREAM+i), false);
                 }
                 if (memcmp(&m2110RxAudioData.rxAudioCh[i], &s2110RxAudioDataLast->rxAudioCh[i], sizeof(RxAudioChData2110)) != 0)
                 {
-                    printf("RX Audio Reset disable \n");
+                    printf("RX Audio Reset disable %d\n", s2110RxAudioDataLast->rxAudioCh[i].stream);
+                    config2110->SetRxStreamEnable(SFP_1, s2110RxAudioDataLast->rxAudioCh[i].stream, false);
+                    config2110->SetRxStreamEnable(SFP_2, s2110RxAudioDataLast->rxAudioCh[i].stream, false);
                     s2110RxAudioDataLast->rxAudioCh[i] = m2110RxAudioData.rxAudioCh[i];
-                    config2110->SetRxStreamEnable(SFP_1, (NTV2Stream)(NTV2_AUDIO1_STREAM+i), false);
-                    config2110->SetRxStreamEnable(SFP_2, (NTV2Stream)(NTV2_AUDIO1_STREAM+i), false);
                 }
+                m2110IpStatusData.txChStatus[i] = kIpStatusStopped;
+                m2110IpStatusData.rxChStatus[i] = kIpStatusStopped;
             }
         }
         else
@@ -2112,8 +2113,6 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     *videoFormatLast != mFb1VideoFormat ||
                     ipServiceForceConfig)
                 {
-                    s2110TxVideoDataLast->txVideoCh[i] = m2110TxVideoData.txVideoCh[i];
-
                     // Process the configuration
                     txConfig.init();
                     txConfig.remoteIP[0] = m2110TxVideoData.txVideoCh[i].remoteIP[0];
@@ -2129,12 +2128,13 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     txConfig.tos = 0x64;
 
                     // Video specific
-                    txConfig.videoFormat = Convert21104KFormat(mFb1VideoFormat);;
+                    txConfig.videoFormat = Convert21104KFormat(mFb1VideoFormat);
                     txConfig.videoSamples = VPIDSampling_YUV_422;
 
                     if (config2110->SetTxStreamConfiguration(m2110TxVideoData.txVideoCh[i].stream, txConfig) == true)
                     {
                         printf("SetTxStreamConfiguration Video OK\n");
+                        s2110TxVideoDataLast->txVideoCh[i] = m2110TxVideoData.txVideoCh[i];
                         SetIPError((NTV2Channel)m2110TxVideoData.txVideoCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
 
                         // Process the enable
@@ -2170,8 +2170,6 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     *videoFormatLast != mFb1VideoFormat ||
                     ipServiceForceConfig)
                 {
-                    s2110TxAudioDataLast->txAudioCh[i] = m2110TxAudioData.txAudioCh[i];
-
                     // Process the configuration
                     txConfig.init();
                     txConfig.remoteIP[0] = m2110TxAudioData.txAudioCh[i].remoteIP[0];
@@ -2195,6 +2193,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     if (config2110->SetTxStreamConfiguration(m2110TxAudioData.txAudioCh[i].stream, txConfig) == true)
                     {
                         printf("SetTxStreamConfiguration Audio OK\n");
+                        s2110TxAudioDataLast->txAudioCh[i] = m2110TxAudioData.txAudioCh[i];
                         SetIPError((NTV2Channel)m2110TxVideoData.txVideoCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
 
                         // Process the enable
@@ -2229,8 +2228,6 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                 if (memcmp(&m2110RxVideoData.rxVideoCh[i], &s2110RxVideoDataLast->rxVideoCh[i], sizeof(RxVideoChData2110)) != 0 ||
                     ipServiceForceConfig)
                 {
-                    s2110RxVideoDataLast->rxVideoCh[i] = m2110RxVideoData.rxVideoCh[i];
-
                     rxConfig.init();
                     if (m2110RxVideoData.rxVideoCh[i].sfpEnable[1])
                     {
@@ -2256,7 +2253,26 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     rxConfig.payload = m2110RxVideoData.rxVideoCh[i].payload;
 
                     // Video specific
-                    rxConfig.videoFormat = m2110RxVideoData.rxVideoCh[i].videoFormat;
+                    if (mFollowInputFormat && (m2110RxVideoData.rxVideoCh[i].videoFormat != NTV2_FORMAT_UNKNOWN))
+                    {
+                        rxConfig.videoFormat = Convert21104KFormat(m2110RxVideoData.rxVideoCh[i].videoFormat);
+
+                        // if format was not converted assume it was not a 4k format and disable 4k mode, otherwise enable it
+                        if (rxConfig.videoFormat == m2110RxVideoData.rxVideoCh[i].videoFormat)
+                            config2110->Set4KModeEnable(false);
+                        else
+                            config2110->Set4KModeEnable(true);
+                    }
+                    else
+                    {
+                        rxConfig.videoFormat = Convert21104KFormat(mFb1VideoFormat);
+
+                        // if format was not converted assume it was not a 4k format and disable 4k mode, otherwise enable it
+                        if (rxConfig.videoFormat == mFb1VideoFormat)
+                            config2110->Set4KModeEnable(false);
+                        else
+                            config2110->Set4KModeEnable(true);
+                    }
                     rxConfig.videoSamples = VPIDSampling_YUV_422;
                     printf("Format (%d, %d, %d)\n", i, mFollowInputFormat, rxConfig.videoFormat);
 
@@ -2264,6 +2280,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     if (config2110->SetRxStreamConfiguration(sfp, m2110RxVideoData.rxVideoCh[i].stream, rxConfig) == true)
                     {
                         printf("SetRxStreamConfiguration Video OK\n");
+                        s2110RxVideoDataLast->rxVideoCh[i] = m2110RxVideoData.rxVideoCh[i];
                         SetIPError((NTV2Channel)m2110RxVideoData.rxVideoCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
 
                         // Process the enable
@@ -2294,8 +2311,6 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
             {
                 if (memcmp(&m2110RxAudioData.rxAudioCh[i], &s2110RxAudioDataLast->rxAudioCh[i], sizeof(RxAudioChData2110)) != 0 || ipServiceForceConfig)
                 {
-                    s2110RxAudioDataLast->rxAudioCh[i] = m2110RxAudioData.rxAudioCh[i];
-
                     rxConfig.init();
                     if (m2110RxAudioData.rxAudioCh[i].sfpEnable[1])
                     {
@@ -2327,6 +2342,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     if (config2110->SetRxStreamConfiguration(sfp, m2110RxAudioData.rxAudioCh[i].stream, rxConfig) == true)
                     {
                         printf("SetRxStreamConfiguration Audio OK\n");
+                        s2110RxAudioDataLast->rxAudioCh[i] = m2110RxAudioData.rxAudioCh[i];
                         SetIPError(m2110RxAudioData.rxAudioCh[i].channel, kErrNetworkConfig, NTV2IpErrNone);
 
                         // Process the enable
@@ -2357,7 +2373,6 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
 
             mCard->SetReference(NTV2_REFERENCE_SFP1_PTP);
             config2110->SetPTPMaster(m2110Network.ptpMasterIP);
-            config2110->Set4KModeEnable(m2110Network.setup4k);
 
             for (uint32_t i = 0; i < SFP_MAX_NUM_SFPS; i++)
             {
