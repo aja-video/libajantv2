@@ -820,9 +820,13 @@ AJAStatus AJAAncillaryList::GetAnalogAncillaryDataTypeMap (AJAAncillaryAnalogTyp
 
 AJAStatus AJAAncillaryList::SetAnalogAncillaryDataTypeForLine (const uint16_t inLineNum, const AJAAncillaryDataType inAncType)
 {
-	m_analogTypeMap.erase (inLineNum);				// in case someone has already set this line
-	if (inAncType != AJAAncillaryDataType_Unknown)	// note: a non-entry is the same as AJAAncillaryDataType_Unknown
-		m_analogTypeMap [inLineNum] = inAncType;
+	m_analogTypeMap.erase(inLineNum);				//	In case someone has already set this line
+	if (inAncType == AJAAncillaryDataType_Unknown)
+		return AJA_STATUS_SUCCESS;					//	A non-entry is the same as AJAAncillaryDataType_Unknown
+	else if (IS_VALID_AJAAncillaryDataType(inAncType))
+			m_analogTypeMap[inLineNum] = inAncType;
+	else
+		return AJA_STATUS_BAD_PARAM;
 	return AJA_STATUS_SUCCESS;
 }
 

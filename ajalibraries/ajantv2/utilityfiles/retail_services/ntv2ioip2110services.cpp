@@ -55,9 +55,9 @@ NTV2VideoFormat IoIP2110Services::GetSelectedInputVideoFormat(
                 *inputColorSpace = mSDIInput1ColorSpace;
             break;
             
-        case NTV2_DualLinkInputSelect:
-        case NTV2_DualLink4xSdi4k:
-        case NTV2_DualLink2xSdi4k:
+        case NTV2_Input2xDLHDSelect:
+        case NTV2_Input4x4kSelect:
+        case NTV2_Input2x4kSelect:
             inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
             if (inputColorSpace)
                 *inputColorSpace = mSDIInput1ColorSpace;
@@ -195,7 +195,7 @@ void IoIP2110Services::SetDeviceXPointPlayback ()
 		inputXptYuv2 = NTV2_XptBlack;
 	}
 	// dual link select
-	else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+	else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 	{
 		inputXptYuv1 = NTV2_XptSDIIn1;
 		inputXptYuv2 = NTV2_XptSDIIn2;
@@ -1311,7 +1311,7 @@ void IoIP2110Services::SetDeviceXPointPlayback ()
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptHDMIIn);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptHDMIIn);
 				}
-				else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+				else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 				{
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptDuallinkIn1);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptDuallinkIn1);
@@ -1369,7 +1369,7 @@ void IoIP2110Services::SetDeviceXPointPlayback ()
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptHDMIIn);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptHDMIIn);
 				}
-				else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+				else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 				{
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptDuallinkIn1);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptDuallinkIn1);
@@ -1525,8 +1525,8 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	bool						b4k6gOut			= (b4K && !b4kHfr && !bSdiOutRGB && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	//bool						b4k12gOut			= (b4K && (b4kHfr || bSdiOutRGB) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
-	bool						b2xQuadIn			= b4K && !b4kHfr && (mVirtualInputSelect == NTV2_DualLink2xSdi4k);
-	bool						b4xQuadIn			= b4K && (mVirtualInputSelect == NTV2_DualLink4xSdi4k);
+	bool						b2xQuadIn			= b4K && !b4kHfr && (mVirtualInputSelect == NTV2_Input2x4kSelect);
+	bool						b4xQuadIn			= b4K && (mVirtualInputSelect == NTV2_Input4x4kSelect);
 	bool						b2xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
 	//bool						b4xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_4wire);
 	int							bFb1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
@@ -1543,7 +1543,7 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	// swap quad mode
 	ULWord						selectSwapQuad		= 0;
 	mCard->ReadRegister(kVRegSwizzle4kInput, selectSwapQuad);
-	bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_DualLink4xSdi4k && selectSwapQuad != 0;
+	bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_Input4x4kSelect && selectSwapQuad != 0;
 	
 	// SMPTE 425 (2pi)
 	bool						bVpid2x2piIn		= false;
@@ -1602,7 +1602,7 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 		inHdRGB1 = NTV2_XptHDMIInRGB;
 	}
 	// dual link select
-	else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+	else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 	{
 		inHdYUV1 = NTV2_XptSDIIn1;
 		inHdYUV2 = NTV2_XptSDIIn2;
@@ -3091,7 +3091,7 @@ void IoIP2110Services::SetDeviceMiscRegisters ()
 
 	bool b2xQuadOut = (    ((mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire))
 		                 || ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
-	bool b2xQuadIn =  (mFb1Mode == NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && mVirtualInputSelect  == NTV2_DualLink2xSdi4k);
+	bool b2xQuadIn =  (mFb1Mode == NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && mVirtualInputSelect  == NTV2_Input2x4kSelect);
 	
 	// all 3Gb transport out
 	// b3GbOut = (b1x3GbOut + !2wire) | (4k + rgb) | (4khfr + 3gb)

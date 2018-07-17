@@ -281,7 +281,7 @@ def main ():
         destination_rsync_url = "/Users/demo/Sites/"
     print "## NOTE:  rsync '%s' to '%s'..." % (html_folder_path, destination_rsync_url)
     cmd_lines = []
-    cmd_lines.append (['rsync', '-av', '--delete', html_folder_path, destination_rsync_url])
+    cmd_lines.append (['rsync', '-avc', '--delete', html_folder_path, destination_rsync_url])
     if build_type:
         win_html = make_redirect_html ('Windows', client_browser_url, win_major, win_minor, win_point, win_build_num, win_build_type)
         lin_html = make_redirect_html ('Linux',   client_browser_url, lin_major, lin_minor, lin_point, lin_build_num, lin_build_type)

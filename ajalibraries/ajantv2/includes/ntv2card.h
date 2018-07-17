@@ -2106,11 +2106,7 @@ public:
 	AJA_VIRTUAL bool	ReadFlashProgramControl(ULWord & outValue);
 	AJA_VIRTUAL bool	IsXilinxProgrammed();
 	AJA_VIRTUAL bool	ProgramMainFlash(const char *fileName);
-	AJA_VIRTUAL bool	EraseFlashBlock(ULWord numSectors, ULWord sectorSize);
-	AJA_VIRTUAL bool	CheckFlashErased(ULWord numSectors);
-	AJA_VIRTUAL bool	VerifyMainFlash(const char *fileName);
 	AJA_VIRTUAL bool	GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct);
-	AJA_VIRTUAL bool	WaitForFlashNOTBusy();
 
     /**
         @brief		Reports the revision number of the currently-running firmware package.
