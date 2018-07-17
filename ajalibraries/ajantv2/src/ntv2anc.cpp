@@ -164,14 +164,6 @@ bool CNTV2Card::AncExtractInit(NTV2Channel channel, NTV2VideoFormat videoFormat)
 	return true;
 }
 
-
-
-
-
-
-
-
-
 bool CNTV2Card::EnableAncExtractor(NTV2Channel channel, bool bEnable)
 {
     if (!bEnable)
@@ -383,10 +375,12 @@ bool CNTV2Card::SetAncInsReadParams(NTV2Channel channel, uint32_t frameNumber, u
 {
     //Calculate where ANC Extractor will put the data
     frameNumber++; //Start at the beginning of next frame and subtract offset
-    NTV2FrameSize frameSize = NTV2_FRAMESIZE_8MB;
+    NTV2Framesize frameSize = NTV2_FRAMESIZE_8MB;
     GetFrameBufferSize(channel, frameSize);
     uint32_t frameLocation = frameSize * frameNumber;
-    uint32_t ANCStartMemory = frameLocation - ReadRegister(kVRegAncField1Offset);
+    uint32_t field1Offset = 0;
+    ReadRegister(kVRegAncField1Offset, field1Offset);
+    uint32_t ANCStartMemory = frameLocation - field1Offset;
     SetAncInsField1StartAddr(channel, ANCStartMemory);
     SetAncInsField1Bytes(channel, field1Size);
     return true;
@@ -395,10 +389,12 @@ bool CNTV2Card::SetAncInsReadParams(NTV2Channel channel, uint32_t frameNumber, u
 bool CNTV2Card::SetAncInsReadField2Params(NTV2Channel channel, uint32_t frameNumber, uint32_t field2Size)
 {
     frameNumber++; //Start at the beginning of next frame and subtract offset
-    NTV2FrameSize frameSize = NTV2_FRAMESIZE_8MB;
+    NTV2Framesize frameSize = NTV2_FRAMESIZE_8MB;
     GetFrameBufferSize(channel, frameSize);
     uint32_t frameLocation = frameSize * frameNumber;
-    uint32_t ANCStartMemory = frameLocation - ReadRegister(kVRegAncField2Offset);
+    uint32_t field2Offset = 0;
+    ReadRegister(kVRegAncField1Offset, field2Offset);
+    uint32_t ANCStartMemory = frameLocation - field2Offset;
     SetAncInsField2StartAddr(channel, ANCStartMemory);
     SetAncInsField2Bytes(channel, field2Size);
     return true;
