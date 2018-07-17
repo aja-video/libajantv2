@@ -3628,7 +3628,7 @@ public:
 	//		The improved GetNTV2VideoFormat function may return a new CNTV2SDIVideoInfo object that can be interrogated about many things.
 	//		@note			This function originated in CNTV2Status.
 	static NTV2VideoFormat		GetNTV2VideoFormat (NTV2FrameRate frameRate, UByte inputGeometry, bool progressiveTransport, bool isThreeG, bool progressivePicture=false);
-	static NTV2VideoFormat		GetNTV2VideoFormat (NTV2FrameRate frameRate, NTV2Standard standard, bool isThreeG, UByte inputGeometry=0, bool progressivePicture=false);
+    static NTV2VideoFormat		GetNTV2VideoFormat (NTV2FrameRate frameRate, NTV2Standard standard, bool isThreeG, UByte inputGeometry=0, bool progressivePicture=false, bool isSquareDivision = true);
 	//	--------------------------------------------
 
 	#if !defined (NTV2_DEPRECATE)

@@ -466,21 +466,31 @@ ULWord NTV2DeviceGetAudioFrameBuffer2 (NTV2DeviceID boardID, NTV2FrameGeometry i
 
 
 AJAExport bool NTV2DeviceGetVideoFormatFromState (	NTV2VideoFormat *		pOutValue,
-													const NTV2FrameRate		inFrameRate,
-													const NTV2FrameGeometry	inFrameGeometry,
-													const NTV2Standard		inStandard,
-													const ULWord			inIsSMPTE372Enabled)
+                                                    const NTV2FrameRate		inFrameRate,
+                                                    const NTV2FrameGeometry	inFrameGeometry,
+                                                    const NTV2Standard		inStandard,
+                                                    const ULWord			inIsSMPTE372Enabled)
 {
-	return NTV2DeviceGetVideoFormatFromState_Ex (pOutValue, inFrameRate, inFrameGeometry, inStandard, inIsSMPTE372Enabled, false);
+    return NTV2DeviceGetVideoFormatFromState_Ex (pOutValue, inFrameRate, inFrameGeometry, inStandard, inIsSMPTE372Enabled, false);
 }
 
-
 bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
+                                            const NTV2FrameRate		inFrameRate,
+                                            const NTV2FrameGeometry	inFrameGeometry,
+                                            const NTV2Standard		inStandard,
+                                            const ULWord			inIsSMPTE372Enabled,
+                                            const bool				inIsProgressivePicture)
+{
+    return NTV2DeviceGetVideoFormatFromState_Ex2 (pOutValue, inFrameRate, inFrameGeometry, inStandard, inIsSMPTE372Enabled, inIsProgressivePicture, true);
+}
+
+bool NTV2DeviceGetVideoFormatFromState_Ex2(	NTV2VideoFormat *		pOutValue,
 											const NTV2FrameRate		inFrameRate,
 											const NTV2FrameGeometry	inFrameGeometry,
 											const NTV2Standard		inStandard,
 											const ULWord			inIsSMPTE372Enabled,
-											const bool				inIsProgressivePicture)
+                                            const bool				inIsProgressivePicture,
+                                            const bool              inIsSquareDivision)
 {
 	if (!pOutValue)
 		return false;
@@ -501,9 +511,9 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 					*pOutValue = NTV2_FORMAT_1080p_6000_B;
 			}
 			else if (inFrameGeometry == NTV2_FG_4x1920x1080)
-				*pOutValue = NTV2_FORMAT_4x1920x1080psf_3000;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x1920x1080psf_3000 : NTV2_FORMAT_3840x2160psf_3000;
 			else if (inFrameGeometry == NTV2_FG_4x2048x1080)
-				*pOutValue = NTV2_FORMAT_4x2048x1080psf_3000;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080psf_3000 : NTV2_FORMAT_4096x2160psf_3000;
 			else
 				*pOutValue = inIsProgressivePicture ? NTV2_FORMAT_1080psf_3000_2 : NTV2_FORMAT_1080i_6000;
 			break;
@@ -516,9 +526,9 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 					*pOutValue = NTV2_FORMAT_1080p_5994_B;
 			}
 			else if (inFrameGeometry == NTV2_FG_4x1920x1080)
-				*pOutValue = NTV2_FORMAT_4x1920x1080psf_2997;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x1920x1080psf_2997 : NTV2_FORMAT_3840x2160psf_2997;
 			else if (inFrameGeometry == NTV2_FG_4x2048x1080)
-				*pOutValue = NTV2_FORMAT_4x2048x1080psf_2997;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080psf_2997 : NTV2_FORMAT_4096x2160psf_2997;
 			else
 				*pOutValue = inIsProgressivePicture ? NTV2_FORMAT_1080psf_2997_2: NTV2_FORMAT_1080i_5994;
 			break;
@@ -533,9 +543,9 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 			else if (inFrameGeometry == NTV2_FG_2048x1080 || inFrameGeometry == NTV2_FG_2048x1112 || inFrameGeometry == NTV2_FG_2048x1114)
 				*pOutValue = NTV2_FORMAT_1080psf_2K_2500;
 			else if (inFrameGeometry == NTV2_FG_4x1920x1080)
-				*pOutValue = NTV2_FORMAT_4x1920x1080psf_2500;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x1920x1080psf_2500 : NTV2_FORMAT_3840x2160psf_2500;
 			else if (inFrameGeometry == NTV2_FG_4x2048x1080)
-				*pOutValue = NTV2_FORMAT_4x2048x1080psf_2500;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080psf_2500 : NTV2_FORMAT_4096x2160psf_2500;
 			else
 				*pOutValue = inIsProgressivePicture ? NTV2_FORMAT_1080psf_2500_2 : NTV2_FORMAT_1080i_5000;
 			break;
@@ -545,9 +555,9 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 			else if ( inFrameGeometry == NTV2_FG_2048x1080 || inFrameGeometry == NTV2_FG_2048x1112 || inFrameGeometry == NTV2_FG_2048x1114)
 				*pOutValue = NTV2_FORMAT_1080psf_2K_2400;
 			else if (inFrameGeometry == NTV2_FG_4x1920x1080)
-				*pOutValue = NTV2_FORMAT_4x1920x1080psf_2400;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x1920x1080psf_2400 : NTV2_FORMAT_3840x2160psf_2400;
 			else if (inFrameGeometry == NTV2_FG_4x2048x1080)
-				*pOutValue = NTV2_FORMAT_4x2048x1080psf_2400;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080psf_2400 : NTV2_FORMAT_4096x2160psf_2400;
 			else
 				*pOutValue = NTV2_FORMAT_1080psf_2400;
 			break;
@@ -557,9 +567,9 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 			else if ( inFrameGeometry == NTV2_FG_2048x1080 || inFrameGeometry == NTV2_FG_2048x1112 || inFrameGeometry == NTV2_FG_2048x1114)
 				*pOutValue = NTV2_FORMAT_1080psf_2K_2398;
 			else if (inFrameGeometry == NTV2_FG_4x1920x1080)
-				*pOutValue = NTV2_FORMAT_4x1920x1080psf_2398;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x1920x1080psf_2398 : NTV2_FORMAT_3840x2160psf_2398;
 			else if (inFrameGeometry == NTV2_FG_4x2048x1080)
-				*pOutValue = NTV2_FORMAT_4x2048x1080psf_2398;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080psf_2398 : NTV2_FORMAT_4096x2160psf_2398;
 			else
 				*pOutValue = NTV2_FORMAT_1080psf_2398;
 			break;
@@ -575,9 +585,9 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 			if ( inFrameGeometry == NTV2_FG_2048x1080 || inFrameGeometry == NTV2_FG_2048x1112 || inFrameGeometry == NTV2_FG_2048x1114)
 				*pOutValue = NTV2_FORMAT_1080p_2K_3000;
 			else if (inFrameGeometry == NTV2_FG_4x1920x1080)
-				*pOutValue = NTV2_FORMAT_4x1920x1080p_3000;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x1920x1080p_3000 : NTV2_FORMAT_3840x2160p_3000;
 			else if (inFrameGeometry == NTV2_FG_4x2048x1080)
-				*pOutValue = NTV2_FORMAT_4x2048x1080p_3000;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080p_3000 : NTV2_FORMAT_4096x2160p_3000;
 			else
 				*pOutValue = NTV2_FORMAT_1080p_3000;
 			break;
@@ -585,9 +595,9 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 			if ( inFrameGeometry == NTV2_FG_2048x1080 || inFrameGeometry == NTV2_FG_2048x1112 || inFrameGeometry == NTV2_FG_2048x1114)
 				*pOutValue = NTV2_FORMAT_1080p_2K_2997;
 			else if (inFrameGeometry == NTV2_FG_4x1920x1080)
-				*pOutValue = NTV2_FORMAT_4x1920x1080p_2997;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x1920x1080p_2997 : NTV2_FORMAT_3840x2160p_2997;
 			else if (inFrameGeometry == NTV2_FG_4x2048x1080)
-				*pOutValue = NTV2_FORMAT_4x2048x1080p_2997;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080p_2997 : NTV2_FORMAT_4096x2160p_2997;
 			else
 				*pOutValue = NTV2_FORMAT_1080p_2997;
 			break;
@@ -595,9 +605,9 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 			if ( inFrameGeometry == NTV2_FG_2048x1080 || inFrameGeometry == NTV2_FG_2048x1112 || inFrameGeometry == NTV2_FG_2048x1114)
 				*pOutValue = NTV2_FORMAT_1080p_2K_2500;
 			else if (inFrameGeometry == NTV2_FG_4x1920x1080)
-				*pOutValue = NTV2_FORMAT_4x1920x1080p_2500;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x1920x1080p_2500 : NTV2_FORMAT_3840x2160p_2500;
 			else if (inFrameGeometry == NTV2_FG_4x2048x1080)
-				*pOutValue = NTV2_FORMAT_4x2048x1080p_2500;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080p_2500 : NTV2_FORMAT_4096x2160p_2500;
 			else
 				*pOutValue = NTV2_FORMAT_1080p_2500;
 			break;
@@ -605,9 +615,9 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 			if ( inFrameGeometry == NTV2_FG_2048x1080 || inFrameGeometry == NTV2_FG_2048x1112 || inFrameGeometry == NTV2_FG_2048x1114)
 				*pOutValue = NTV2_FORMAT_1080p_2K_2400;
 			else if (inFrameGeometry == NTV2_FG_4x1920x1080)
-				*pOutValue = NTV2_FORMAT_4x1920x1080p_2400;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x1920x1080p_2400 : NTV2_FORMAT_3840x2160p_2400;
 			else if (inFrameGeometry == NTV2_FG_4x2048x1080)
-				*pOutValue = NTV2_FORMAT_4x2048x1080p_2400;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080p_2400 : NTV2_FORMAT_4096x2160p_2400;
 			else
 				*pOutValue = NTV2_FORMAT_1080p_2400;
 			break;
@@ -615,29 +625,29 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 			if ( inFrameGeometry == NTV2_FG_2048x1080 || inFrameGeometry == NTV2_FG_2048x1112 || inFrameGeometry == NTV2_FG_2048x1114)
 				*pOutValue = NTV2_FORMAT_1080p_2K_2398;
 			else if (inFrameGeometry == NTV2_FG_4x1920x1080)
-				*pOutValue = NTV2_FORMAT_4x1920x1080p_2398;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x1920x1080p_2398 : NTV2_FORMAT_3840x2160p_2398;
 			else if (inFrameGeometry == NTV2_FG_4x2048x1080)
-				*pOutValue = NTV2_FORMAT_4x2048x1080p_2398;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080p_2398 : NTV2_FORMAT_4096x2160p_2398;
 			else
 				*pOutValue = NTV2_FORMAT_1080p_2398;
 			break;
 		case NTV2_FRAMERATE_4795:
 			if ( inFrameGeometry == NTV2_FG_4x2048x1080 )
-				*pOutValue = NTV2_FORMAT_4x2048x1080p_4795;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080p_4795 : NTV2_FORMAT_4096x2160p_4795;
 			else
 				*pOutValue = NTV2_FORMAT_1080p_2K_4795_A;
 			break;
 		case NTV2_FRAMERATE_4800:
 			if ( inFrameGeometry == NTV2_FG_4x2048x1080 )
-				*pOutValue = NTV2_FORMAT_4x2048x1080p_4800;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080p_4800 : NTV2_FORMAT_4096x2160p_4800;
 			else
 				*pOutValue = NTV2_FORMAT_1080p_2K_4800_A;
 			break;
 		case NTV2_FRAMERATE_5000:
 			if ( inFrameGeometry == NTV2_FG_4x1920x1080 )
-				*pOutValue = NTV2_FORMAT_4x1920x1080p_5000;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x1920x1080p_5000 : NTV2_FORMAT_3840x2160p_5000;
 			else if ( inFrameGeometry == NTV2_FG_4x2048x1080 )
-				*pOutValue = NTV2_FORMAT_4x2048x1080p_5000;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080p_5000 : NTV2_FORMAT_4096x2160p_5000;
 			else if ( inFrameGeometry == NTV2_FG_2048x1080 || inFrameGeometry == NTV2_FG_2048x1112 || inFrameGeometry == NTV2_FG_2048x1114)
 				*pOutValue = NTV2_FORMAT_1080p_2K_5000_A;
 			else
@@ -645,9 +655,9 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 			break;
 		case NTV2_FRAMERATE_5994:
 			if ( inFrameGeometry == NTV2_FG_4x1920x1080 )
-				*pOutValue = NTV2_FORMAT_4x1920x1080p_5994;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x1920x1080p_5994 : NTV2_FORMAT_3840x2160p_5994;
 			else if ( inFrameGeometry == NTV2_FG_4x2048x1080 )
-				*pOutValue = NTV2_FORMAT_4x2048x1080p_5994;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080p_5994 : NTV2_FORMAT_4096x2160p_5994;
 			else if ( inFrameGeometry == NTV2_FG_2048x1080 || inFrameGeometry == NTV2_FG_2048x1112 || inFrameGeometry == NTV2_FG_2048x1114)
 				*pOutValue = NTV2_FORMAT_1080p_2K_5994_A;
 			else
@@ -655,9 +665,9 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 			break;
 		case NTV2_FRAMERATE_6000:
 			if ( inFrameGeometry == NTV2_FG_4x1920x1080 )
-				*pOutValue = NTV2_FORMAT_4x1920x1080p_6000;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x1920x1080p_6000 : NTV2_FORMAT_3840x2160p_6000;
 			else if ( inFrameGeometry == NTV2_FG_4x2048x1080 )
-				*pOutValue = NTV2_FORMAT_4x2048x1080p_6000;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080p_6000 : NTV2_FORMAT_4096x2160p_6000;
 			else if ( inFrameGeometry == NTV2_FG_2048x1080 || inFrameGeometry == NTV2_FG_2048x1112 || inFrameGeometry == NTV2_FG_2048x1114)
 				*pOutValue = NTV2_FORMAT_1080p_2K_6000_A;
 			else
@@ -665,11 +675,11 @@ bool NTV2DeviceGetVideoFormatFromState_Ex(	NTV2VideoFormat *		pOutValue,
 			break;
 		case NTV2_FRAMERATE_11988:
 			if ( inFrameGeometry == NTV2_FG_4x2048x1080 )
-				*pOutValue = NTV2_FORMAT_4x2048x1080p_11988;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080p_11988 : NTV2_FORMAT_4096x2160p_11988;
 			break;
 		case NTV2_FRAMERATE_12000:
 			if ( inFrameGeometry == NTV2_FG_4x2048x1080 )
-				*pOutValue = NTV2_FORMAT_4x2048x1080p_12000;
+                *pOutValue = inIsSquareDivision ? NTV2_FORMAT_4x2048x1080p_12000 : NTV2_FORMAT_4096x2160p_12000;
 			break;
 		default:
 			return false;

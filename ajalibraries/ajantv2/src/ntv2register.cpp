@@ -977,7 +977,7 @@ NTV2VideoFormat CNTV2Card::GetNTV2VideoFormat(NTV2FrameRate frameRate, UByte inp
 	return GetNTV2VideoFormat(frameRate, standard, isThreeG, inputGeometry, progressivePicture);
 }
 
-NTV2VideoFormat CNTV2Card::GetNTV2VideoFormat (NTV2FrameRate frameRate, NTV2Standard standard, bool isThreeG, UByte inputGeometry, bool progressivePicture)
+NTV2VideoFormat CNTV2Card::GetNTV2VideoFormat (NTV2FrameRate frameRate, NTV2Standard standard, bool isThreeG, UByte inputGeometry, bool progressivePicture, bool isSquareDivision)
 {
 	NTV2VideoFormat videoFormat = NTV2_FORMAT_UNKNOWN;
 
@@ -1081,14 +1081,14 @@ NTV2VideoFormat CNTV2Card::GetNTV2VideoFormat (NTV2FrameRate frameRate, NTV2Stan
 		case NTV2_STANDARD_3840x2160p:
 			switch (frameRate)
 			{
-				case NTV2_FRAMERATE_2398:	videoFormat = NTV2_FORMAT_4x1920x1080p_2398;	break;
-				case NTV2_FRAMERATE_2400:	videoFormat = NTV2_FORMAT_4x1920x1080p_2400;	break;
-				case NTV2_FRAMERATE_2500:	videoFormat = NTV2_FORMAT_4x1920x1080p_2500;	break;
-				case NTV2_FRAMERATE_2997:	videoFormat = NTV2_FORMAT_4x1920x1080p_2997;	break;
-				case NTV2_FRAMERATE_3000:	videoFormat = NTV2_FORMAT_4x1920x1080p_3000;	break;
-				case NTV2_FRAMERATE_5000:	videoFormat = NTV2_FORMAT_4x1920x1080p_5000;	break;
-				case NTV2_FRAMERATE_5994:	videoFormat = NTV2_FORMAT_4x1920x1080p_5994;	break;
-				case NTV2_FRAMERATE_6000:	videoFormat = NTV2_FORMAT_4x1920x1080p_6000;	break;
+                case NTV2_FRAMERATE_2398:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x1920x1080p_2398 : NTV2_FORMAT_3840x2160p_2398;	break;
+                case NTV2_FRAMERATE_2400:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x1920x1080p_2400 : NTV2_FORMAT_3840x2160p_2400;	break;
+                case NTV2_FRAMERATE_2500:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x1920x1080p_2500 : NTV2_FORMAT_3840x2160p_2500;	break;
+                case NTV2_FRAMERATE_2997:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x1920x1080p_2997 : NTV2_FORMAT_3840x2160p_2997;	break;
+                case NTV2_FRAMERATE_3000:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x1920x1080p_3000 : NTV2_FORMAT_3840x2160p_3000;	break;
+                case NTV2_FRAMERATE_5000:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x1920x1080p_5000 : NTV2_FORMAT_3840x2160p_5000;	break;
+                case NTV2_FRAMERATE_5994:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x1920x1080p_5994 : NTV2_FORMAT_3840x2160p_5994;	break;
+                case NTV2_FRAMERATE_6000:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x1920x1080p_6000 : NTV2_FORMAT_3840x2160p_6000;	break;
 				default:					videoFormat = NTV2_FORMAT_UNKNOWN;				break;
 			}
 			break;
@@ -1098,14 +1098,14 @@ NTV2VideoFormat CNTV2Card::GetNTV2VideoFormat (NTV2FrameRate frameRate, NTV2Stan
 		case NTV2_STANDARD_4096x2160p:
 			switch (frameRate)
 			{
-				case NTV2_FRAMERATE_2398:	videoFormat = NTV2_FORMAT_4x2048x1080p_2398;	break;
-				case NTV2_FRAMERATE_2400:	videoFormat = NTV2_FORMAT_4x2048x1080p_2400;	break;
-				case NTV2_FRAMERATE_2500:	videoFormat = NTV2_FORMAT_4x2048x1080p_2500;	break;
-				case NTV2_FRAMERATE_2997:	videoFormat = NTV2_FORMAT_4x2048x1080p_2997;	break;
-				case NTV2_FRAMERATE_3000:	videoFormat = NTV2_FORMAT_4x2048x1080p_3000;	break;
-                case NTV2_FRAMERATE_5000:	videoFormat = NTV2_FORMAT_4x2048x1080p_5000;	break;
-                case NTV2_FRAMERATE_5994:	videoFormat = NTV2_FORMAT_4x2048x1080p_5994;	break;
-                case NTV2_FRAMERATE_6000:	videoFormat = NTV2_FORMAT_4x2048x1080p_6000;	break;
+                case NTV2_FRAMERATE_2398:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x2048x1080p_2398 : NTV2_FORMAT_4096x2160p_2398;	break;
+                case NTV2_FRAMERATE_2400:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x2048x1080p_2400 : NTV2_FORMAT_4096x2160p_2400;	break;
+                case NTV2_FRAMERATE_2500:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x2048x1080p_2500 : NTV2_FORMAT_4096x2160p_2500;	break;
+                case NTV2_FRAMERATE_2997:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x2048x1080p_2997 : NTV2_FORMAT_4096x2160p_2997;	break;
+                case NTV2_FRAMERATE_3000:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x2048x1080p_3000 : NTV2_FORMAT_4096x2160p_3000;	break;
+                case NTV2_FRAMERATE_5000:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x2048x1080p_5000 : NTV2_FORMAT_4096x2160p_5000;	break;
+                case NTV2_FRAMERATE_5994:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x2048x1080p_5994 : NTV2_FORMAT_4096x2160p_5994;	break;
+                case NTV2_FRAMERATE_6000:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x2048x1080p_6000 : NTV2_FORMAT_4096x2160p_6000;	break;
 				default:					videoFormat = NTV2_FORMAT_UNKNOWN;				break;
 			}
 			break;
