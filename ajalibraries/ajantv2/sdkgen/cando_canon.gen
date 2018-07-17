@@ -101,3 +101,4 @@ NTV2DeviceHasHeadphoneJack					True if the device having the given ID has a head
 NTV2DeviceHasAudioMonitorRCAJacks			True if the device having the given ID has a pair of unbalanced RCA audio monitor output jacks.
 NTV2DeviceHasBiDirectionalAnalogAudio		True if the device having the given ID has a bi-directional analog audio connector.
 NTV2DeviceCanDoIP							True if the device having the given ID ingests and/or plays video via TCP/IP (instead of SDI/HDMI/etc).
+NTV2DeviceHasGenlockv3
