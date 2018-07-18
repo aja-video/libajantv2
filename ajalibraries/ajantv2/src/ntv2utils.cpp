@@ -2091,10 +2091,11 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 		case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
 		case NTV2_FORMAT_END_2K_DEF_FORMATS:
 		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
+        case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
 			break;	// Unsupported
 #else
-		default:
-			break;
+        default:
+            break;
 #endif
     }
 	
