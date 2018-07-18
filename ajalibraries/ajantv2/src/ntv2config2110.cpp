@@ -1078,8 +1078,6 @@ bool CNTV2Config2110::SetTxStreamEnable(const NTV2Stream stream, bool enableSfp1
         mDevice.WriteRegister(kReg4175_pkt_ctrl + packetizerBaseAddr, 0x00);
     }
 
-    GenSDP(stream);
-
     return true;
 }
 
@@ -1707,6 +1705,8 @@ bool CNTV2Config2110::GenSDP(const NTV2Stream stream)
     {
         GenSDPAudioStream(sdp, stream, gmInfo);
     }
+    
+    //cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
 
     rv = PushSDP(filename,sdp);
 
@@ -1719,7 +1719,7 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, const NTV2Stream str
     bool enabledA;
     bool enabledB;
     GetTxStreamEnable(stream, enabledA, enabledB);
-    if (!enabledA)
+    if (!enabledA && !enabledB)
     {
         return true;
     }
@@ -1802,7 +1802,7 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, const  NTV2Stream st
     bool enabledA;
     bool enabledB;
     GetTxStreamEnable(stream, enabledA, enabledB);
-    if (!enabledA)
+    if (!enabledA && !enabledB)
     {
         return true;
     }
