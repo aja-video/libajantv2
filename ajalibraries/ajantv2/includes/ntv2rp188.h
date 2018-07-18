@@ -23,9 +23,7 @@
 # include <string.h>		/* memset, memcpy */
 #endif
 
-/**
-	@brief	Identifies a specific timecode format based on frame rate and whether it's drop-frame or not.
-**/
+
 typedef enum
 {
 	kTCFormatUnknown,
@@ -36,9 +34,7 @@ typedef enum
 	kTCFormat48fps,
 	kTCFormat50fps,
 	kTCFormat60fps,
-	kTCFormat60fpsDF,
-	kTCFormatNumFormats,
-	kTCFormatInvalid = kTCFormatNumFormats
+	kTCFormat60fpsDF
 } TimecodeFormat;
 
 typedef enum
@@ -53,363 +49,83 @@ typedef enum
 const int64_t kDefaultFrameCount = 0x80000000;
 
 
-/**
-	@brief	I'm used for evaluating, manipulating and converting RP188 timecodes.
-**/
+//--------------------------------------------------------------------------------------------------------------------
+//	class CRP188
+//--------------------------------------------------------------------------------------------------------------------
 class AJAExport CRP188
 {
 public:
-	/**
-		@name	Construction & Destruction
-	**/
-	///@{
-						CRP188 ();	///< @brief	My default constructor.
+    // Constructors
+						CRP188 ();
+						CRP188 (const RP188_STRUCT & rp188, const TimecodeFormat tcFormat = kTCFormat30fps);
+						CRP188 (const NTV2_RP188 & rp188, const TimecodeFormat tcFormat = kTCFormat30fps);
+						CRP188 (const std::string & sRP188, const TimecodeFormat tcFormat = kTCFormat30fps);
+						CRP188 (ULWord ulFrms, ULWord ulSecs, ULWord ulMins, ULWord ulHrs, const TimecodeFormat tcFormat = kTCFormat30fps);
+						CRP188 (ULWord frames, const TimecodeFormat tcFormat = kTCFormat30fps);
+	virtual 			~CRP188();
+	void				Init ();
+	bool				operator==( const CRP188& s);
 
-						/**
-							@brief		Constructs me from another CRP188 instance (copy constructor).
-							@param[in]	inRP188		Specifies the ::CRP188 instance to copy.
-							@note		This is necessary until the raster rendering is removed from this class.
-						**/
-						CRP188 (const CRP188 & inRP188);
+    // Setters
+	void				SetRP188 (ULWord ulFrms, ULWord ulSecs, ULWord ulMins, ULWord ulHrs,
+									NTV2FrameRate frameRate, const bool bDropFrame = false, const bool bSMPTE372 = false);
+    void				SetRP188 (const RP188_STRUCT & rp188, const TimecodeFormat tcFormat = kTCFormatUnknown);
+    void				SetRP188 (const NTV2_RP188 & rp188, const TimecodeFormat tcFormat = kTCFormatUnknown);
+    void				SetRP188 (const std::string &sRP188, const TimecodeFormat tcFormat = kTCFormatUnknown);
+    void				SetRP188 (ULWord ulFrms, ULWord ulSecs, ULWord ulMins, ULWord ulHrs, const TimecodeFormat tcFormat = kTCFormatUnknown);
+	void				SetRP188 (ULWord frames, const TimecodeFormat tcFormat = kTCFormatUnknown);
 
-						/**
-							@brief		Constructs me from an ::RP188_STRUCT.
-							@param[in]	inRP188		Specifies the ::RP188_STRUCT.
-							@param[in]	tcFormat	Optionally specifies the ::TimecodeFormat. Defaults to 30fps.
-						**/
-						CRP188 (const RP188_STRUCT & inRP188, const TimecodeFormat tcFormat = kTCFormat30fps);
-
-						/**
-							@brief		Constructs me from an ::NTV2_RP188.
-							@param[in]	inRP188		Specifies the ::NTV2_RP188.
-							@param[in]	tcFormat	Optionally specifies the ::TimecodeFormat. Defaults to 30fps.
-						**/
-						CRP188 (const NTV2_RP188 & inRP188, const TimecodeFormat tcFormat = kTCFormat30fps);
-
-						/**
-							@brief		Constructs me from a string that contains a timecode.
-							@param[in]	sTimecode	Specifies a string containing a timecode.
-							@param[in]	tcFormat	Optionally specifies the ::TimecodeFormat. Defaults to 30fps.
-						**/
-						CRP188 (const std::string & sTimecode, const TimecodeFormat tcFormat = kTCFormat30fps);
-
-						/**
-							@brief		Constructs me from the given timecode component values.
-							@param[in]	inFrames	Specifies the "frames" component.
-							@param[in]	inSecs		Specifies the "seconds" component.
-							@param[in]	inMins		Specifies the "minutes" component.
-							@param[in]	inHours		Specifies the "hours" component.
-							@param[in]	tcFormat	Optionally specifies the ::TimecodeFormat. Defaults to 30fps.
-						**/
-						CRP188 (const ULWord inFrames, const ULWord inSecs, const ULWord inMins, const ULWord inHrs, const TimecodeFormat tcFormat = kTCFormat30fps);
-
-						/**
-							@brief		Constructs me from a frame count and ::TimecodeFormat.
-							@param[in]	inFrameCount	Specifies the frame count.
-							@param[in]	tcFormat		Optionally specifies the ::TimecodeFormat. Defaults to 30fps.
-						**/
-						CRP188 (const ULWord inFrameCount, const TimecodeFormat tcFormat = kTCFormat30fps);
-
-	virtual 			~CRP188();	///< @brief	My destructor.
-	///@}
-
-	/**
-		@name	Modifiers
-	**/
-	///@{
-	/**
-		@brief		Assigns me from another CRP188 instance.
-		@param[in]	inRHS	The CRP188 instance being assigned to me.
-		@returns	A non-constant reference to me.
-		@note		This is necessary until the raster rendering is removed from this class.
-	**/
-	CRP188 &			operator = (const CRP188 & inRHS);
-
-	/**
-		@brief		Resets me using the given timecode component values.
-		@param[in]	inFrames	Specifies the "frames" component.
-		@param[in]	inSecs		Specifies the "seconds" component.
-		@param[in]	inMins		Specifies the "minutes" component.
-		@param[in]	inHours		Specifies the "hours" component.
-		@param[in]	inFrameRate	Specifies the ::NTV2FrameRate.
-		@param[in]	bDropFrame	Specify if this is "drop frame" or not. Defaults to false.
-		@param[in]	bSMPTE372	Specify true for SMPTE 372; otherwise false. Defaults to false.
-	**/
-	void				SetRP188 (const ULWord inFrames, const ULWord inSecs, const ULWord inMins, const ULWord inHours,
-									const NTV2FrameRate inFrameRate, const bool bDropFrame = false, const bool bSMPTE372 = false);
-	/**
-		@brief		Resets me from an ::RP188_STRUCT.
-		@param[in]	inRP188		Specifies the ::RP188_STRUCT.
-		@param[in]	tcFormat	Optionally changes my ::TimecodeFormat. Defaults to kTCFormatUnknown, which retains my existing format.
-	**/
-    void				SetRP188 (const RP188_STRUCT & inRP188, const TimecodeFormat tcFormat = kTCFormatUnknown);
-
-	/**
-		@brief		Resets me from an ::NTV2_RP188 object.
-		@param[in]	inRP188		Specifies the ::NTV2_RP188.
-		@param[in]	tcFormat	Optionally changes my ::TimecodeFormat. Defaults to kTCFormatUnknown, which retains my existing format.
-	**/
-    void				SetRP188 (const NTV2_RP188 & inRP188, const TimecodeFormat tcFormat = kTCFormatUnknown);
-
-	/**
-		@brief		Resets me from a string that contains a timecode.
-		@param[in]	sTimecode	Specifies a string containing a timecode.
-		@param[in]	tcFormat	Optionally changes my ::TimecodeFormat. Defaults to kTCFormatUnknown, which retains my existing format.
-	**/
-    void				SetRP188 (const std::string & sTimecode, const TimecodeFormat tcFormat = kTCFormatUnknown);
-
-	/**
-		@brief		Resets me from the given timecode components.
-		@param[in]	inFrames	Specifies the "frames" component.
-		@param[in]	inSecs		Specifies the "seconds" component.
-		@param[in]	inMins		Specifies the "minutes" component.
-		@param[in]	inHours		Specifies the "hours" component.
-		@param[in]	inFrameRate	Specifies the ::NTV2FrameRate.
-		@param[in]	tcFormat	Optionally changes my ::TimecodeFormat. Defaults to kTCFormatUnknown, which retains my existing format.
-	**/
-    void				SetRP188 (const ULWord inFrames, const ULWord inSecs, const ULWord inMins, const ULWord inHours, const TimecodeFormat tcFormat = kTCFormatUnknown);
-
-	/**
-		@brief		Resets me from the given frame count.
-		@param[in]	inFrameCount	Specifies the frame count.
-		@param[in]	tcFormat		Optionally changes my ::TimecodeFormat. Defaults to kTCFormatUnknown, which retains my existing format.
-	**/
-	void				SetRP188 (const ULWord inFrameCount, const TimecodeFormat tcFormat = kTCFormatUnknown);
-
-	/**
-		@brief		Sets or clears my drop-frame flag (including in my ::RP188_STRUCT member).
-		@param[in]	bDropFrameFlag	Specify true to set my drop-frame flag;  otherwise false to clear it.
-	**/
-	void				SetDropFrame (const bool bDropFrameFlag);
-
-	/**
-		@brief		Sets or clears my color-frame flag (including in my ::RP188_STRUCT member).
-		@param[in]	bColorFrameFlag	Specify true to set my color-frame flag;  otherwise false to clear it.
-	**/
-	void				SetColorFrame (const bool bColorFrameFlag);
-
+	void				SetDropFrame (bool bDropFrameFlag);
+	void				SetColorFrame (bool bColorFrameFlag);
 	void				SetVaricamFrameActive (bool bVaricamActive, ULWord frame);
 	void				SetVaricamRate (NTV2FrameRate frameRate);
-
-	/**
-		@brief		Sets my field ID (including in my ::RP188_STRUCT member).
-		@param[in]	inFieldID	The new field ID value to use. Please specify only 0 or 1.
-	**/
-	void				SetFieldID (const ULWord inFieldID);
-
+	void				SetFieldID (ULWord fieldID);
+	bool				GetFieldID (void);
 	void				SetBFGBits (bool bBFG0, bool bBFG1, bool bBFG2);
 	void				SetSource (UByte src);
 	void				SetOutputFilter (UByte src);
 
-	/**
-		@brief		Increments my frame count. Accounts for 24-hour wrap in my ::TimecodeFormat.
-		@param[in]	inNumFrames		The number of frames to increment.
-		@returns	My new frame count.
-	**/
-	ULWord				AddFrames (const ULWord inNumFrames);
+    // Getters
+    bool				GetRP188Str  (std::string & sRP188) const;
+	const char *		GetRP188CString () const;
+    bool				GetRP188Secs (ULWord & ulSecs) const;
+    bool				GetRP188Frms (ULWord & ulFrms) const;
+    bool				GetRP188Mins (ULWord & ulMins) const;
+    bool				GetRP188Hrs  (ULWord & ulHrs) const;
+    bool				GetRP188Reg  (RP188_STRUCT & outRP188) const;
+    bool				GetRP188Reg  (NTV2_RP188 & outRP188) const;
+	bool				GetFrameCount (ULWord & frameCount);
+	ULWord				MaxFramesPerDay (TimecodeFormat format = kTCFormatUnknown) const;
+	void				ConvertTimecode (ULWord & frameCount, TimecodeFormat format, ULWord hours, ULWord minutes, ULWord seconds, ULWord frames);
+	void				ConvertFrameCount (ULWord frameCount, TimecodeFormat format, ULWord & hours, ULWord & minutes, ULWord & seconds, ULWord & frames);
+	ULWord				AddFrames (ULWord frameCount);
+	ULWord				SubtractFrames (ULWord frameCount);
+	bool				GetRP188UserBitsStr (std::string & sRP188UB);
+	const char *		GetRP188UserBitsCString ();
+	UByte				GetSource () const ;
+	UByte				GetOutputFilter () const ;
+	TimecodeFormat		GetTimecodeFormat() { return _tcFormat; }
 
-	/**
-		@brief		Decrements my frame count by a given amount. Accounts for 24-hour "underflow" in my ::TimecodeFormat.
-		@param[in]	inNumFrames		The number of frames to decrement. (It's okay to exceed MaxFramesPerDay.)
-		@returns	My new frame count.
-	**/
-	ULWord				SubtractFrames (const ULWord inNumFrames);
-
-	/**
-		@brief		Increments my frame count by a given amount.
-		@param[in]	inNumFrames		The number of frames to increment.
-		@returns	A non-constant reference to me.
-		@see		CRP188::AddFrames
-	**/
-	inline CRP188 &		operator += (const unsigned inRHS)			{ AddFrames(ULWord(inRHS));  return *this; }
-
-	/**
-		@brief		Decrements my frame count by a given amount.
-		@param[in]	inNumFrames		The number of frames to decrement.
-		@returns	A non-constant reference to me.
-		@see		CRP188::SubtractFrames
-	**/
-	inline CRP188 &		operator -= (const unsigned inRHS)			{ SubtractFrames(ULWord(inRHS));  return *this; }
-	///@}
-
-	/**
-		@name	Inquiry
-	**/
-	///@{
-	/**
-		@returns	True if I've been properly initialized;  otherwise false.
-	**/
-	inline bool					IsInitialized (void) const						{ return _bInitialized; }
-
-	/**
-		@brief		Answers with my current cached timecode string.
-		@param[out]	outValue	Receives my current cached timecode string value.
-		@returns	True if I've been properly initialized;  otherwise false.
-	**/
-    inline bool					GetRP188Str  (std::string & outStr) const		{ outStr = GetRP188Str();  return _bInitialized; }
-
-	/**
-		@returns	A constant reference to my cached timecode string.
-		@note		The string contents won't be valid if I haven't been properly initialized.
-	**/
-    inline const std::string &	GetRP188Str  (void) const						{ return _sHMSF; }
-
-	/**
-		@brief		Answers with my current cached "frames" value.
-		@param[out]	outValue	Receives my current cached "frames" value.
-		@returns	True if I've been properly initialized;  otherwise false.
-	**/
-	inline bool					GetRP188Frms (ULWord & outValue) const			{ outValue = _ulVal[0];  return IsInitialized(); }
-
-	/**
-		@brief		Answers with my current cached "seconds" value.
-		@param[out]	outValue	Receives my current cached "seconds" value.
-		@returns	True if I've been properly initialized;  otherwise false.
-	**/
-	inline bool					GetRP188Secs (ULWord & outValue) const			{ outValue = _ulVal[1];  return IsInitialized(); }
-
-	/**
-		@brief		Answers with my current cached "minutes" value.
-		@param[out]	outValue	Receives my current cached "minutes" value.
-		@returns	True if I've been properly initialized;  otherwise false.
-	**/
-	inline bool					GetRP188Mins (ULWord & outValue) const			{ outValue = _ulVal[2];  return IsInitialized(); }
-
-	/**
-		@brief		Answers with my current cached "hours" value.
-		@param[out]	outValue	Receives my current cached "hours" value.
-		@returns	True if I've been properly initialized;  otherwise false.
-	**/
-	inline bool					GetRP188Hrs  (ULWord & outValue) const			{ outValue = _ulVal[3];  return IsInitialized(); }
-
-	/**
-		@brief		Answers with the current value of my ::RP188_STRUCT.
-		@param[out]	outRP188	Receives my current RP188 "registers" value.
-		@returns	True if I've been properly initialized;  otherwise false.
-	**/
-	inline bool					GetRP188Reg  (RP188_STRUCT & outRP188) const	{ outRP188 = _rp188;	return IsInitialized(); }
-
-	/**
-		@returns	A constant reference to my RP188 "registers" value.
-	**/
-	inline const RP188_STRUCT &	GetRP188Reg  (void) const						{ return _rp188; }
-
-	/**
-		@brief		Answers with the current value of my RP188 "registers" value.
-		@param[out]	outRP188	Receives my current RP188 "registers" value as an ::NTV2_RP188 object.
-		@returns	True if I've been properly initialized;  otherwise false.
-	**/
-	inline bool					GetRP188Reg  (NTV2_RP188 & outRP188) const		{ outRP188 = _rp188;	return IsInitialized(); }
-
-	/**
-		@returns	My current RP188 "registers" value as an ::NTV2_RP188 object.
-	**/
-	inline NTV2_RP188			GetNTV2RP188 (void) const						{ return NTV2_RP188(_rp188); }
-
-	/**
-		@returns	True if my current Field ID bit is set;  otherwise false if it's clear.
-		@note		The returned value won't be valid if I haven't been properly initialized.
-	**/
-	bool						GetFieldID (void);
-
-	/**
-		@brief		Answers with my total frame count based on my ::TimecodeFormat and my cached
-					hours, minutes, seconds and frames components.
-		@param[out]	outFrameCount	Receives the calculated total frame count.
-		@returns	True if I've been properly initialized;  otherwise false.
-	**/
-	bool						GetFrameCount (ULWord & outFrameCount) const;
-
-	/**
-		@returns	The maximum number of frames that are possible for a 24-hour period.
-		@param[in]	tcFormat	Optionally specifies a different ::TimecodeFormat than my own.
-								Defaults to kTCFormatUnknown, which uses my current ::TimecodeFormat.
-	**/
-	ULWord						MaxFramesPerDay (const TimecodeFormat tcFormat = kTCFormatUnknown) const;
-
-	inline const std::string &	GetRP188UserBitsStr (void)			{ RP188ToUserBits();  return _sUserBits; }
-	bool						GetRP188UserBitsStr (std::string & sRP188UB);
-
-	/**
-		@returns	The source component byte of my cached DBB field.
-	**/
-	inline UByte				GetSource (void) const				{ return UByte((_rp188.DBB & 0xFF000000) >> 24); }
-
-	/**
-		@returns	The output filter component byte of my cached DBB field.
-	**/
-	inline UByte				GetOutputFilter (void) const		{ return UByte(_rp188.DBB & 0x000000FF); }
-
-	/**
-		@returns	My current ::TimecodeFormat.
-	**/
-	inline TimecodeFormat		GetTimecodeFormat (void) const		{ return _tcFormat; }
-
-	/**
-		@brief		Dumps me in a human-readable format to the given output stream.
-		@param		theStream	The output stream in which to stream the dump.
-		@param[in]	inCompact	Optionally specifies if the Dump should be in a compact form.
-								Defaults to true.
-		@returns	The given output stream.
-	**/
-	std::ostream &				Dump (std::ostream & theStream, const bool inCompact = true) const;
-
-	inline NTV2_SHOULD_BE_DEPRECATED(const char *	GetRP188CString (void) const)		{ return GetRP188Str().c_str(); }
-	inline NTV2_SHOULD_BE_DEPRECATED(const char *	GetRP188UserBitsCString (void))		{ return GetRP188UserBitsStr().c_str(); }
-	///@}
-
-
-	/**
-		@name	Conversion
-	**/
-	///@{
-	/**
-		@brief		Converts the given timecode components into a frame count.
-		@param[out]	outFrameCount	Receives the calculated total frame count.
-		@param[in]	tcFormat		Specifies the ::TimecodeFormat to use.
-									Specify kTCFormatUnknown to use my ::TimecodeFormat.
-		@param[in]	inHours			Specifies the "hours" component to use in the calculation.
-		@param[in]	inMins			Specifies the "minutes" component to use in the calculation.
-		@param[in]	inSecs			Specifies the "seconds" component to use in the calculation.
-		@param[in]	inFrames		Specifies the "frames" component to use in the calculation.
-	**/
-	void						ConvertTimecode (ULWord & outFrameCount, const TimecodeFormat tcFormat, const ULWord inHours, const ULWord inMins, const ULWord inSecs, const ULWord inFrames) const;
-
-	void						ConvertFrameCount (ULWord frameCount, TimecodeFormat format, ULWord & hours, ULWord & minutes, ULWord & seconds, ULWord & frames);
-	///@}
-
-
-	/**
-		@name	Attribute Testing
-	**/
-	///@{
-	/**
-		@returns	True if my RP188 data has been marked "fresh" this past frame;  otherwise false.
-		@note		This result is valid only if I was instantiated or set using an ::RP188_STRUCT.
-	**/
-	inline bool			IsFreshRP188 (void) const				{ return _bFresh; }
-
-	/**
-		@returns	True if my Varicam "Frame 0 Active" bit is set;  otherwise false.
-		@note		This result is valid only if I was instantiated or set using an ::RP188_STRUCT.
-	**/
-	inline bool			VaricamFrame0 (void) const				{ return _bVaricamActiveF0; }
-
-	/**
-		@returns	True if my Varicam "Frame 1 Active" bit is set;  otherwise false.
-		@note		This result is valid only if I was instantiated or set using an ::RP188_STRUCT.
-	**/
-	inline bool			VaricamFrame1 (void) const				{ return _bVaricamActiveF1; }
+	// these tests are ONLY valid if the CRP188 object is instantiated or set with an RP188_STRUCT
+	bool				IsFreshRP188 (void)
+							{ return(_bFresh); }					// true if RP188 data is fresh this past frame
+	bool				VaricamFrame0 (void)
+							{ return(_bVaricamActiveF0); }			// true if Varicam "Frame0 Active" bit is set
+	bool				VaricamFrame1 (void)
+							{ return(_bVaricamActiveF1); }			// true if Varicam "Frame1 Active" bit is set
 	ULWord				VaricamFrameRate (void);
+	NTV2FrameRate		defaultFrameRateForTimecodeFormat (TimecodeFormat format = kTCFormatUnknown) const;
 	bool				FormatIsDropFrame (TimecodeFormat format = kTCFormatUnknown) const;
 	bool				FormatIs60_50fps (TimecodeFormat format = kTCFormatUnknown) const;
 	bool				FormatIsPAL (TimecodeFormat format = kTCFormatUnknown) const;
 
-	inline ULWord		FieldID (void) const					{ return _fieldID; }			// fieldID bit
-	inline bool			DropFrame (void) const					{ return _bDropFrameFlag;  }	// drop frame bit
-	inline bool			ColorFrame (void) const					{ return _bColorFrameFlag; }	// color frame bit
+	ULWord				FieldID (void)
+							{ return(_fieldID); }					// fieldID bit
+	bool				DropFrame (void)
+							{ return(_bDropFrameFlag);  }			// drop frame bit
+	bool				ColorFrame (void)
+							{ return(_bColorFrameFlag); }			// color frame bit
 	ULWord				BinaryGroup (ULWord smpteNum);
-	///@}
 
 	// For historical reasons, calling SetRP188 clears the user bits, so a call to either of these two functions
 	// should be done after the timecode value is set
@@ -417,76 +133,20 @@ public:
 	bool				SetUserBits (ULWord bits);					// eight groups of four bits each
 
 	ULWord				UDW (ULWord smpteUDW);
-
-	/**
-		@return	The frame rate of the given TimecodeFormat.
-		@note	This function doesn't deal (accurately) with drop-frame.
-	**/
 	ULWord				FramesPerSecond (TimecodeFormat format = kTCFormatUnknown) const;
 	NTV2FrameRate		DefaultFrameRateForTimecodeFormat (TimecodeFormat format = kTCFormatUnknown) const;
 
-	/**
-		@name	Comparing
-	**/
-	///@{
-	/**
-		@returns	True if my cached hours, minutes, seconds and frames values all match those of the operand's;
-					otherwise false.
-		@param[in]	inRHS	The right-hand-side operand I'm to be compared with.
-	**/
-	bool				operator == (const CRP188 & inRHS) const;
-
-	/**
-		@returns	True if my total frame count is less than that of the operand's;  otherwise false.
-		@param[in]	inRHS	The right-hand-side operand I'm being compared with.
-	**/
-	bool				operator < (const CRP188 & inRHS) const;	//	Returns true if my frame count < RHS
-
-	/**
-		@returns	The difference, in total frames, between me and the operand.
-		@param[in]	inRHS	The right-hand-side operand whose total frame count is being subtracted from my own.
-	**/
-	int					operator - (const CRP188 & inRHS) const;	//	Returns difference, in frames
-
-	/**
-		@returns	The absolute difference, in total frames, between me and the operand.
-		@param[in]	inRHS	The right-hand-side operand whose total frame count is being subtracted from my own.
-	**/
-	inline ULWord		FramesApart (const CRP188 & inRHS) const	{return ULWord(abs(*this - inRHS));}
-
-	/**
-		@returns	True if the absolute difference, in total frames, between me and the operand is exactly 1;
-					otherwise false.
-		@param[in]	inTC	The right-hand-side timecode operand.
-	**/
-	inline bool			IsAdjacent (const CRP188 & inTC) const		{return FramesApart(inTC) == 1;}
-	///@}
-
-	/**
-		@name	Raster Burn-In
-	**/
-	///@{
+    // Modifiers
 	bool				InitBurnIn (NTV2FrameBufferFormat frameBufferFormat, NTV2FrameDimensions frameDimensions, LWord percentY = 0);
 	void				writeV210Pixel (char **pBytePtr, int x, int c, int y);
 	bool				BurnTC (char *pBaseVideoAddress, int rowBytes, TimecodeBurnMode burnMode, int64_t frameCount = kDefaultFrameCount, bool bDisplay60_50fpsAs30_25 = false);
 	void				CopyDigit (char *pDigit, int digitWidth, int digitHeight, char *pFrameBuff, int fbRowBytes);
 	std::string			GetTimeCodeString(bool bDisplay60_50fpsAs30_25 = false);
-	///@}
-
-	/**
-		@returns	A string containing a readable form of a given ::TimecodeFormat.
-		@param[in]	inFormat			The ::TimecodeFormat to convert into a string.
-		@param[in]	inIsHumanReadable	If true, use a human-readable (and more compact) format;
-										otherwise, use the symbolic constant used in this header file.
-										Defaults to false (the longer, technical format).
-	**/
-	static std::string	TimecodeFormatToString (const TimecodeFormat inFormat, const bool inIsHumanReadable = false);
-
+	
 private:
     void				ConvertTcStrToVal (void);   // converts _sHMSF to _ulVal
     void				ConvertTcStrToReg (void);   // converts _sHMSF to _rp188
 	void				RP188ToUserBits (void);		// derives _ulUserBits and _sUserBits from RP188 struct
-	void				Init (void);
 
 
 private:
