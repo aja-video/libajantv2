@@ -882,9 +882,6 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
 
         // end setup 4175 packetizer
         SetTxFormat(VideoStreamToChannel(stream), txConfig.videoFormat);
-
-        // Generate and push the video SDP
-        GenSDP(stream);
     }
     else if (StreamType(stream) == AUDIO_STREAM)
     {
@@ -915,9 +912,10 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
         // ssrc
         mDevice.WriteRegister(kReg3190_pkt_ssrc + baseAddrPacketizer,txConfig.ssrc);
 
-        // Generate and push the audio SDP
-        GenSDP(stream);
     }
+
+    // Generate and push the SDP
+    GenSDP(stream);
 
     return rv;
 }
@@ -1077,6 +1075,9 @@ bool CNTV2Config2110::SetTxStreamEnable(const NTV2Stream stream, bool enableSfp1
         // disable
         mDevice.WriteRegister(kReg4175_pkt_ctrl + packetizerBaseAddr, 0x00);
     }
+
+    // Generate and push the SDP
+    GenSDP(stream);
 
     return true;
 }
@@ -1632,10 +1633,7 @@ string CNTV2Config2110::GetTxSDPUrl(const eSFP sfp, const NTV2Stream stream)
 
 string CNTV2Config2110::GetTxSDP(const NTV2Stream stream)
 {
-    if (txsdp[stream].str().empty())
-    {
-        GenSDP(stream);
-    }
+    GenSDP(stream, false);
     return txsdp[stream].str();
 }
 
@@ -1646,7 +1644,7 @@ string CNTV2Config2110::To_String(int val)
     return oss.str();
 }
 
-bool CNTV2Config2110::GenSDP(const NTV2Stream stream)
+bool CNTV2Config2110::GenSDP(const NTV2Stream stream, bool pushit)
 {
     string filename = "txstream";
 
@@ -1708,7 +1706,10 @@ bool CNTV2Config2110::GenSDP(const NTV2Stream stream)
     
     //cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
 
-    rv = PushSDP(filename,sdp);
+    if (pushit)
+        rv = PushSDP(filename,sdp);
+    else
+        rv = true;
 
     return rv;
 }
