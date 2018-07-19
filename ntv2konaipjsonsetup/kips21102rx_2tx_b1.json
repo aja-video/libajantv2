@@ -84,7 +84,7 @@
             "ssrc":1234,
             "payload":100,
             "numAudioChannels":4,
-            "audioPktInterval" :1000,
+            "audioPktInterval" :"1000us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"
@@ -106,7 +106,7 @@
             "ssrc":1234,
             "payload":100,
             "numAudioChannels":4,
-            "audioPktInterval" :1000,
+            "audioPktInterval" :"1000us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"
@@ -128,7 +128,7 @@
             "ssrc":1234,
             "payload":100,
             "numAudioChannels":4,
-            "audioPktInterval" :1000,
+            "audioPktInterval" :"1000us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"
@@ -150,7 +150,7 @@
             "ssrc":1234,
             "payload":100,
             "numAudioChannels":4,
-            "audioPktInterval" :1000,
+            "audioPktInterval" :"1000us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"
@@ -207,7 +207,7 @@
             "ttl":64,
             "numAudioChannels":4,
             "firstAudioChannel":0,
-            "audioPktInterval" :1000,
+            "audioPktInterval" :"1000us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"
@@ -226,7 +226,7 @@
             "ttl":64,
             "numAudioChannels":4,
             "firstAudioChannel":4,
-            "audioPktInterval" :1000,
+            "audioPktInterval" :"1000us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"
@@ -245,7 +245,7 @@
             "ttl":64,
             "numAudioChannels":4,
             "firstAudioChannel":8,
-            "audioPktInterval" :1000,
+            "audioPktInterval" :"1000us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"
@@ -264,7 +264,7 @@
             "ttl":64,
             "numAudioChannels":4,
             "firstAudioChannel":12,
-            "audioPktInterval" :1000,
+            "audioPktInterval" :"1000us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"

@@ -105,7 +105,7 @@
             "ttl":64,
             "numAudioChannels":4,
             "firstAudioChannel":0,
-            "audioPktInterval":125,
+            "audioPktInterval" :"1000us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"
@@ -124,7 +124,7 @@
             "ttl":64,
             "numAudioChannels":4,
             "firstAudioChannel":4,
-            "audioPktInterval":125,
+            "audioPktInterval" :"1000us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"
@@ -143,7 +143,7 @@
             "ttl":64,
             "numAudioChannels":4,
             "firstAudioChannel":8,
-            "audioPktInterval":125,
+            "audioPktInterval" :"1000us",
             "sfp1Enable":"false",
             "sfp2Enable":"true",
 			"enable":"true"
@@ -162,7 +162,7 @@
             "ttl":64,
             "numAudioChannels":4,
             "firstAudioChannel":12,
-            "audioPktInterval":125,
+            "audioPktInterval" :"1000us",
             "sfp1Enable":"false",
             "sfp2Enable":"true",
 			"enable":"true"
