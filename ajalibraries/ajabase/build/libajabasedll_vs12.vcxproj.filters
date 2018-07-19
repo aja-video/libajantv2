@@ -190,9 +190,6 @@
     <ClInclude Include="..\common\timecodeburn.h">
       <Filter>Common Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\timecodeburndata.h">
-      <Filter>Common Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\timer.h">
       <Filter>Common Files</Filter>
     </ClInclude>

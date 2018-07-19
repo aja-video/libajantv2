@@ -487,6 +487,12 @@ AJAExport INTERRUPT_ENUMS		NTV2ChannelToOutputInterrupt (const NTV2Channel inCha
 AJAExport NTV2TCIndex			NTV2ChannelToTimecodeIndex (const NTV2Channel inChannel, const bool inEmbeddedLTC = false);
 
 /**
+	@return		The NTV2TCIndexes that are associated with the given SDI input.
+	@param[in]	inSDIInput		Specifies the SDI input of interest as an NTV2Channel.
+**/
+AJAExport NTV2TCIndexes			GetTCIndexesForSDIInput (const NTV2Channel inSDIInput);
+
+/**
 	@brief		Converts the given NTV2TCIndex value into the appropriate NTV2Channel value.
 	@param[in]	inTCIndex		Specifies the NTV2TCIndex to be converted.
 	@return		The equivalent NTV2Channel value.

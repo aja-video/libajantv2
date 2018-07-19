@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <sstream>
 #include <vector>
+#include <iterator>
 
 using namespace std;
 

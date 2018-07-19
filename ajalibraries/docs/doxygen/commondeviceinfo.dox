@@ -756,6 +756,21 @@
 	NTV2-compatible devices have a minimum of one <b>Audio System</b> (sometimes referred to as an <b>Audio Engine</b>).
 	Call ::NTV2DeviceGetNumAudioSystems to determine the number of Audio Systems on a device.
 
+	An <b>Audio System</b> is implemented in FPGA firmware using several hardware registers, which together perform the following functions:
+	-	If it has any SDI, HDMI, analog, or AES inputs (see ::NTV2DeviceCanDoCapture):
+		-	It continually de-embeds 20/24-bit AES audio samples. For SDI inputs, these will come from SMPTE 272M/299M HANC packets
+			detected in the SDI input stream.
+		-	If its capture side is running, it will write the de-embedded audio samples into its input audio buffer in device SDRAM.
+		-	The audio samples can always be piped through a FIFO to source an <b>Audio System</b>’s output audio embedder for
+			“loopback” play-through.
+	-	If it has an SDI output (see ::NTV2DeviceCanDoPlayback):
+		-	Unless its embedder is disabled, it will continually embed 20/24-bit AES audio samples into SMPTE 272M/292M HANC packets
+			into its SDI output stream.
+		-	When its playout side is running, it will read from its output audio buffer in device SDRAM the audio samples to be embedded.
+		-	When its playout side is not running...
+			-	If configured for “loopback” play-through, it obtains audio samples from an <b>Audio System</b>’s input audio de-embedder.
+			-	It will otherwise embed silence (audio packets that contain all-zero sample values).
+
 	Each <b>Audio System</b> can accommodate at least 8 channels of audio.
 	Call ::NTV2DeviceGetMaxAudioChannels to determine the maximum number of audio channels that a device’s <b>Audio Systems</b> can handle.
 	Call CNTV2Card::GetNumberAudioChannels to determine how many audio channels a device <b>Audio System</b> is currently configured for.
