@@ -73,6 +73,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	if (! NTV2_IS_WIRE_FORMAT (outputFormat))
 	{
 		*pOutVPID = 0;
+
 		return true;
 	}
 

@@ -898,6 +898,15 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_1080p_2K_5994_A ||                   \
         (__f__) == NTV2_FORMAT_1080p_2K_6000_A	)
 
+#define NTV2_IS_TSI_FORMAT(__f__)									\
+    (	((__f__) >= NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT    &&      \
+        (__f__) < NTV2_FORMAT_FIRST_4K_TSI_DEF_FORMAT   ) 	)
+
+
+#define NTV2_IS_SQUARE_DIVISION_FORMAT(__f__)									\
+    (	((__f__) >= NTV2_FORMAT_FIRST_4K_DEF_FORMAT    &&      \
+        (__f__) < NTV2_FORMAT_END_4K_DEF_FORMATS   ) 	)
+
 /**
 	@brief		Identifies the mode of a frame store, either Capture (Input) or Display (Output).
 	@see		CNTV2Card::SetMode, CNTV2Card::GetMode, \ref vidop-fs

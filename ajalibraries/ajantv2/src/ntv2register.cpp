@@ -258,7 +258,10 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 		//This will handle 4k formats
 		if (NTV2_IS_QUAD_FRAME_FORMAT(value))
 		{
-			SetQuadFrameEnable(true, channel);
+            if(NTV2_IS_SQUARE_DIVISION_FORMAT(value))
+                SetQuadFrameEnable(true, channel);
+            else
+                SetTsiFrameEnable(true, channel);
 		}
 		else
 		{
@@ -313,8 +316,13 @@ bool CNTV2Card::GetVideoFormat (NTV2VideoFormat & outValue, NTV2Channel inChanne
 	ULWord progressivePicture;
 	GetProgressivePicture (progressivePicture);
 
+    bool isSquares = false;
+    if(NTV2_IS_QUAD_FRAME_GEOMETRY(frameGeometry))
+        Get4kSquaresEnable(isSquares, inChannel);
+
 	#if defined (NTV2_DEPRECATE)
-		return ::NTV2DeviceGetVideoFormatFromState_Ex (&outValue,  frameRate,  frameGeometry,  standard,  smpte372Enabled,  progressivePicture);
+        //return ::NTV2DeviceGetVideoFormatFromState_Ex (&outValue,  frameRate,  frameGeometry,  standard,  smpte372Enabled,  progressivePicture);
+        return ::NTV2DeviceGetVideoFormatFromState_Ex2 (&outValue, frameRate, frameGeometry, standard, smpte372Enabled, progressivePicture, isSquares);
 	#else
 		if (!::NTV2DeviceGetVideoFormatFromState_Ex (&outValue,  frameRate,  frameGeometry,  standard,  smpte372Enabled,  progressivePicture))
 		{
@@ -4598,7 +4606,7 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (NTV2InputSource inSource, const 
 	}
 }
 
-
+#include "ntv2vpid.h"
 NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool inIsProgressivePicture)
 {
 	ULWord status (0), threeGStatus (0);
@@ -4609,6 +4617,15 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 	case NTV2_CHANNEL1:
 		if (ReadRegister(kRegInputStatus, status))
 		{
+            ULWord vpidDS1 = 0, vpidDS2 = 0;
+            CNTV2VPID inputVPID;
+            bool bHaveVPID = false;
+            if(GetVPIDValidA(inChannel))
+            {
+                bHaveVPID = true;
+                ReadSDIInVPID(inChannel, vpidDS1, vpidDS2);
+                inputVPID.SetVPID(vpidDS1);
+            }
 			//	Now it is really ugly
 			if (::NTV2DeviceCanDo12GSDI(_boardID) && ReadRegister(kRegSDIInput3GStatus, threeGStatus))
 			{
