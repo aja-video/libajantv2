@@ -5109,6 +5109,27 @@ public:
 		@return		The default DIDs that the device Anc extractor filter is started with.
 	**/
 	static NTV2DIDSet		GetDefaultAncExtractorDIDs (void);
+
+	/**
+		@brief		Initializes the given SDI output's Anc inserter for custom Anc packet insertion.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inChannel		Specifies the SDI output of interest as an ::NTV2Channel (a zero-based index value).
+		@param[in]	inVideoFormat	Specifies the video format of the SDI output's video stream.
+	**/
+	AJA_VIRTUAL bool AncInsertInit (const NTV2Channel inChannel, const NTV2VideoFormat inVideoFormat);
+	AJA_VIRTUAL bool AncExtractInit (const NTV2Channel inChannel, const NTV2VideoFormat inVideoFormat);
+
+//	AJA_VIRTUAL bool SetAncInsertParameters (const NTV2Channel inChannel, const uint32_t frameNumber);
+//	AJA_VIRTUAL bool SetAncExtractParameters (const NTV2Channel inChannel, uint32_t frameNumber);
+
+    AJA_VIRTUAL bool EnableAncExtractor (const NTV2Channel inChannel, bool bEnable);
+    AJA_VIRTUAL bool SetAncExtWriteParams (const NTV2Channel inChannel, ULWord frameNumber);
+    AJA_VIRTUAL bool SetAncExtField2WriteParams (const NTV2Channel inChannel, ULWord frameNumber);
+
+    AJA_VIRTUAL bool EnableAncInserter (const NTV2Channel inChannel, bool bEnable);
+    AJA_VIRTUAL bool SetAncInsReadParams (const NTV2Channel inChannel, ULWord frameNumber, ULWord field1Size);
+    AJA_VIRTUAL bool SetAncInsReadField2Params (const NTV2Channel inChannel, ULWord frameNumber, ULWord field2Size);
 	///@}
 
 	/**
@@ -5595,20 +5616,6 @@ public:
     AJA_VIRTUAL bool GetHDRData (HDRRegValues & outRegisterValues);
 	AJA_VIRTUAL bool SetHDMIHDRBT2020 (void);
 	AJA_VIRTUAL bool SetHDMIHDRDCIP3 (void);
-
-	AJA_VIRTUAL bool AncInsertInit(NTV2Channel channel, NTV2VideoFormat videoFormat);
-	AJA_VIRTUAL bool AncExtractInit(NTV2Channel channel, NTV2VideoFormat videoFormat);
-
-	AJA_VIRTUAL bool SetAncInsertParameters(NTV2Channel channel, uint32_t frameNumber);
-	AJA_VIRTUAL bool SetAncExtractParameters(NTV2Channel channel, uint32_t frameNumber);
-
-    AJA_VIRTUAL bool EnableAncExtractor(NTV2Channel channel, bool bEnable);
-    AJA_VIRTUAL bool SetAncExtWriteParams(NTV2Channel channel, ULWord frameNumber);
-    AJA_VIRTUAL bool SetAncExtField2WriteParams(NTV2Channel channel, ULWord frameNumber);
-
-    AJA_VIRTUAL bool EnableAncInserter(NTV2Channel channel, bool bEnable);
-    AJA_VIRTUAL bool SetAncInsReadParams(NTV2Channel channel, ULWord frameNumber, ULWord field1Size);
-    AJA_VIRTUAL bool SetAncInsReadField2Params(NTV2Channel channel, ULWord frameNumber, ULWord field2Size);
 
 	///@}
 

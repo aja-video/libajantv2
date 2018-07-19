@@ -35,16 +35,16 @@ static const ULWord	gChannelToAncInsOffset[] = { ANC_INS_1_OFFSET, ANC_INS_2_OFF
 
 typedef struct ANCInserterInitParams
 {
-	uint32_t field1ActiveLine;
-	uint32_t field2ActiveLine;
-	uint32_t hActivePixels;
-	uint32_t hTotalPixels;
-	uint32_t totalLines;
-	uint32_t fidLow;
-	uint32_t fidHigh;
-}ANCInserterInitParams;
+	uint32_t	field1ActiveLine;
+	uint32_t	field2ActiveLine;
+	uint32_t	hActivePixels;
+	uint32_t	hTotalPixels;
+	uint32_t	totalLines;
+	uint32_t	fidLow;
+	uint32_t	fidHigh;
+} ANCInserterInitParams;
 
-const static ANCInserterInitParams inserterInitParamsTable[NTV2_NUM_STANDARDS] =
+static const ANCInserterInitParams inserterInitParamsTable[NTV2_NUM_STANDARDS] =
 {
 	/*NTV2_STANDARD_1080*/			{	21,		564,	1920,	2200,	1125,	1125,	563	},
 	/*NTV2_STANDARD_720*/			{	26,		0,		1280,	1280,	750,	0,		0	},
@@ -60,36 +60,40 @@ const static ANCInserterInitParams inserterInitParamsTable[NTV2_NUM_STANDARDS] =
 	/*NTV2_STANDARD_4096HFR*/		{	42,		0,		2048,	2640,	1125,	0,		0	}
 };
 
-bool CNTV2Card::AncInsertInit(NTV2Channel channel, NTV2VideoFormat videoFormat)
+bool CNTV2Card::AncInsertInit (const NTV2Channel inChannel, const NTV2VideoFormat inVideoFormat)
 {
-	NTV2Standard theStandard = GetNTV2StandardFromVideoFormat(videoFormat);
-	ANCInserterInitParams initParams = inserterInitParamsTable[theStandard];
-	SetAncInsField1ActiveLine(channel, initParams.field1ActiveLine);
-	SetAncInsField2ActiveLine(channel, initParams.field2ActiveLine);
-	SetAncInsHActivePixels(channel, initParams.hActivePixels);
-	SetAncInsHTotalPixels(channel, initParams.hTotalPixels);
-	SetAncInsTotalLines(channel, initParams.totalLines);
-	SetAncInsFidLow(channel, initParams.fidLow);
-	SetAncInsFidHi(channel, initParams.fidHigh);
-	SetAncInsProgressive(channel, NTV2_IS_PROGRESSIVE_STANDARD(theStandard));
-	SetAncInsSDPacketSplit(channel, NTV2_IS_SD_STANDARD(theStandard));
-	EnableAncInsHancC(channel, true);
-	EnableAncInsHancY(channel, true);
-	EnableAncInsVancC(channel, true);
-	EnableAncInsVancY(channel, true);
-	SetAncInsHancPixelDelay(channel, 0);
-	SetAncInsVancPixelDelay(channel, 0);
-	WriteRegister(gChannelToAncInsOffset[channel] + regAncInsBlankCStartLine, 0);
-	WriteRegister(gChannelToAncInsOffset[channel] + regAncInsBlankField1CLines, 0);
-	WriteRegister(gChannelToAncInsOffset[channel] + regAncInsBlankField2CLines, 0);
-    uint32_t ancField1Offset = 0;
-    ReadRegister(kVRegAncField1Offset, &ancField1Offset);
-    uint32_t ancField2Offset = 0;
-    ReadRegister(kVRegAncField2Offset, &ancField2Offset);
-    uint32_t fieldBytes = (ancField2Offset - ancField1Offset)-1;
-    SetAncInsField1Bytes(channel, fieldBytes);
-    SetAncInsField2Bytes(channel, fieldBytes);
-	return true;
+	const NTV2Standard theStandard (::GetNTV2StandardFromVideoFormat(inVideoFormat));
+	if (!NTV2_IS_VALID_STANDARD(theStandard))
+		return false;
+
+	const ANCInserterInitParams & initParams(inserterInitParamsTable[theStandard]);
+	bool ok(true);
+	if (ok)	ok = SetAncInsField1ActiveLine (inChannel, initParams.field1ActiveLine);
+	if (ok)	ok = SetAncInsField2ActiveLine (inChannel, initParams.field2ActiveLine);
+	if (ok)	ok = SetAncInsHActivePixels (inChannel, initParams.hActivePixels);
+	if (ok)	ok = SetAncInsHTotalPixels (inChannel, initParams.hTotalPixels);
+	if (ok)	ok = SetAncInsTotalLines (inChannel, initParams.totalLines);
+	if (ok)	ok = SetAncInsFidLow (inChannel, initParams.fidLow);
+	if (ok)	ok = SetAncInsFidHi (inChannel, initParams.fidHigh);
+	if (ok)	ok = SetAncInsProgressive (inChannel, NTV2_IS_PROGRESSIVE_STANDARD(theStandard));
+	if (ok)	ok = SetAncInsSDPacketSplit (inChannel, NTV2_IS_SD_STANDARD(theStandard));
+	if (ok)	ok = EnableAncInsHancC (inChannel, true);
+	if (ok)	ok = EnableAncInsHancY (inChannel, true);
+	if (ok)	ok = EnableAncInsVancC (inChannel, true);
+	if (ok)	ok = EnableAncInsVancY (inChannel, true);
+	if (ok)	ok = SetAncInsHancPixelDelay (inChannel, 0);
+	if (ok)	ok = SetAncInsVancPixelDelay (inChannel, 0);
+	if (ok)	ok = WriteRegister (gChannelToAncInsOffset[inChannel] + regAncInsBlankCStartLine, 0);
+	if (ok)	ok = WriteRegister (gChannelToAncInsOffset[inChannel] + regAncInsBlankField1CLines, 0);
+	if (ok)	ok = WriteRegister (gChannelToAncInsOffset[inChannel] + regAncInsBlankField2CLines, 0);
+
+	ULWord	ancF1Offset(0), ancF2Offset(0);
+	if (ok)	ok = ReadRegister(kVRegAncField1Offset, ancF1Offset);
+	if (ok)	ok = ReadRegister(kVRegAncField2Offset, ancF2Offset);
+	const ULWord	fieldBytes ((ancF2Offset - ancF1Offset) - 1);
+	if (ok)	ok = SetAncInsField1Bytes (inChannel, fieldBytes);
+	if (ok)	ok = SetAncInsField2Bytes (inChannel, fieldBytes);
+	return ok;
 }
 
 typedef struct ANCExtractorInitParams
@@ -186,13 +190,13 @@ bool CNTV2Card::SetAncExtWriteParams(NTV2Channel channel, ULWord frameNumber)
     endOfFrameLocation = NTV2FramesizeToByteCount(frameSize);
     endOfFrameLocation *= frameNumber;
     uint32_t quadFormatEnabled = 0;
-    GetQuadFrameEnable(&quadFormatEnabled, channel);
+    GetQuadFrameEnable(quadFormatEnabled, channel);
     if(quadFormatEnabled)
         endOfFrameLocation *= 4;
-    uint32_t ancField1Offset = 0;
-    ReadRegister(kVRegAncField1Offset, &ancField1Offset);
-    uint32_t ancField2Offset = 0;
-    ReadRegister(kVRegAncField2Offset, &ancField2Offset);
+    ULWord ancField1Offset = 0;
+    ReadRegister(kVRegAncField1Offset, ancField1Offset);
+    ULWord ancField2Offset = 0;
+    ReadRegister(kVRegAncField2Offset, ancField2Offset);
     uint32_t ANCStartMemory = endOfFrameLocation - ancField1Offset;
     uint32_t ANCStopMemory = endOfFrameLocation - ancField2Offset;
     ANCStopMemory -= 1;
@@ -210,11 +214,11 @@ bool CNTV2Card::SetAncExtField2WriteParams(NTV2Channel channel, ULWord frameNumb
     endOfFrameLocation = NTV2FramesizeToByteCount(frameSize);
     endOfFrameLocation *= frameNumber;
     uint32_t quadFormatEnabled = 0;
-    GetQuadFrameEnable(&quadFormatEnabled, channel);
+    GetQuadFrameEnable(quadFormatEnabled, channel);
     if(quadFormatEnabled)
         endOfFrameLocation *= 4;
-    uint32_t ancField2Offset = 0;
-    ReadRegister(kVRegAncField2Offset, &ancField2Offset);
+    ULWord ancField2Offset = 0;
+    ReadRegister(kVRegAncField2Offset, ancField2Offset);
     uint32_t ANCStartMemory = endOfFrameLocation - ancField2Offset;
     uint32_t ANCStopMemory = endOfFrameLocation - 1;
     SetAncExtField2StartAddr(channel, ANCStartMemory);
@@ -294,9 +298,9 @@ bool CNTV2Card::SetAncExtField2CutoffLine(NTV2Channel channel, uint32_t lineNumb
 
 bool CNTV2Card::IsAncExtOverrun(NTV2Channel channel)
 {
-    uint32_t value = 0;
-    ReadRegister(gChannelToAncExtOffset[channel] + regAncExtTotalStatus, &value, maskTotalOverrun, shiftTotalOverrun);
-    return value == 1 ? true : false;
+    bool result(false);
+    CNTV2DriverInterface::ReadRegister(gChannelToAncExtOffset[channel] + regAncExtTotalStatus, result, maskTotalOverrun, shiftTotalOverrun);
+    return result;
 }
 
 bool CNTV2Card::SetAncExtField1StartLine(NTV2Channel channel, uint32_t lineNumber)
@@ -370,7 +374,17 @@ bool CNTV2Card::EnableAncInserter(NTV2Channel channel, bool bEnable)
     WriteRegister(gChannelToAncInsOffset[channel] + regAncInsBlankField2CLines, 0);
     return WriteRegister(gChannelToAncInsOffset[channel] + regAncInsControl, bEnable ? 0 : 1, maskInsDisableInserter, shiftInsDisableInserter);
 }
+/*
+bool CNTV2Card::SetAncInsertParameters (const NTV2Channel inChannel, const ULWord inFrameNumber)
+{
+	return false;	//	FINISH THIS
+}
 
+bool CNTV2Card::SetAncExtractParameters (const NTV2Channel inChannel, const ULWord inFrameNumber)
+{
+	return false;	//	FINISH THIS
+}
+*/
 bool CNTV2Card::SetAncInsReadParams(NTV2Channel channel, uint32_t frameNumber, uint32_t field1Size)
 {
     //Calculate where ANC Extractor will put the data
