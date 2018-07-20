@@ -185,7 +185,7 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
     case 0x00C22018://Macronix
 		_flashSize = 16 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
-		_sectorSize = 256 * 1024;
+        _sectorSize = 256 * 1024;
 		knownChip = true;
 		break;
     case 0x00010220://CYPRESS f25fl512
@@ -203,6 +203,7 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
     case 0x00C84018://GIGADEVICE GD25Q127CFIG
     case 0x00EF4018://WINBOND W25Q128
     case 0x00012018://CYPRESS S25FL128
+    case 0x00012018:
 		_flashSize = 16 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 64 * 1024;
@@ -783,8 +784,8 @@ bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID)
 		{
 			printf("Error %d E(%08X),R(%08X)\n", count, bitFileValue, flashValue);
 			errorCount++;
-			if ( errorCount > 1 )
-				break;
+            if ( errorCount > 1 )
+                break;
 		}
 		percentComplete = (count*100)/dwordSizeCount;
 		if(!_bQuiet)
