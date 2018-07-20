@@ -5167,7 +5167,7 @@ public:
     AJA_VIRTUAL bool	AncExtractSetEnable (const UWord inSDIInput, const bool inIsEnabled);
 
 	/**
-		@brief		Answers with the run state of the given Anc extractor -- i.e. if its "memory writer" is enabled or not.
+		@brief		Answers whether the given SDI input's Anc extractor is enabled/active or not.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
@@ -5175,39 +5175,73 @@ public:
 	**/
 	AJA_VIRTUAL bool	AncExtractIsEnabled (const UWord inSDIInput, bool & outIsEnabled);
 
+	/**
+		@brief		Configures the given SDI input's Anc extractor to receive the next frame's F1 Anc data.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
+		@param[in]	inFrameNumber	Tells the Anc inserter where to write the received Anc data, specified as a
+									frame number.
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (Frame Store) that's driving the SDI input,
+									if different from the SDI input. The default is to use the same ::NTV2Channel
+									that corresponds to the SDI input (e.g., ::NTV2_CHANNEL1 == 0 == SDIIn1).
+		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Anc buffer location
+									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
+		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
+					use \ref aboutautocirculate.
+	**/
     AJA_VIRTUAL bool	AncExtractSetWriteParams (const UWord inSDIInput, const ULWord inFrameNumber,
 													const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
 													const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);
+
+	/**
+		@brief		Configures the given SDI input's Anc extractor to receive the next frame's F2 Anc data.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
+		@param[in]	inFrameNumber	Tells the Anc inserter where to write the received Anc data, specified as a
+									frame number.
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (Frame Store) that's driving the SDI input,
+									if different from the SDI input. The default is to use the same ::NTV2Channel
+									that corresponds to the SDI input (e.g., ::NTV2_CHANNEL1 == 0 == SDIIn1).
+		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Anc buffer location
+									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
+		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
+					use \ref aboutautocirculate.
+	**/
     AJA_VIRTUAL bool	AncExtractSetField2WriteParams (const UWord inSDIInput, const ULWord inFrameNumber,
 														const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
 														const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);
 	/**
-		@brief		Answers with an NTV2DIDSet of the DIDs currently being excluded (filtered) by the SDI input's Anc extractor.
+		@brief		Answers with the DIDs currently being excluded (filtered) by the SDI input's Anc extractor.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
 		@return		True if successful; otherwise false.
-		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
-		@param[out]	outDIDs			Receives the DIDs that are currently being filtered for the given SDI input.
+		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
+		@param[out]	outDIDs			Receives the ::NTV2DIDSet that contain the DIDs that are currently being
+									filtered (excluded).
 	**/
 	AJA_VIRTUAL bool	AncExtractGetFilterDIDs (const UWord inSDIInput, NTV2DIDSet & outDIDs);
 
 	/**
-		@brief		Replaces the set of DIDs to be excluded (filtered) by the given SDI input's Anc extractor.
+		@brief		Replaces the DIDs to be excluded (filtered) by the given SDI input's Anc extractor.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
 		@return		True if successful; otherwise false.
-		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
-		@param[in]	inDIDs			Specifies the set of DIDs to be filtered for the given SDI input. Specify an
-									empty set to disable all packet filtering.
+		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
+		@param[in]	inDIDs			Specifies the DIDs to be filtered (excluded). Specify an empty set to
+									disable all packet filtering.
 		@note		DIDs having the value 0 (zero) are ignored.
 	**/
 	AJA_VIRTUAL bool	AncExtractSetFilterDIDs (const UWord inSDIInput, const NTV2DIDSet & inDIDs);
 
 	/**
-		@brief		Answers whether or not the given SDI input's Anc extractor overran its buffer limits.
+		@brief		Answers whether or not the given SDI input's Anc extractor reached its buffer limits.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
 		@return		True if successful; otherwise false.
-		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
-		@param[out]	outIsOverrun	Receives true if the inserter is reporting that it overran its buffer limits;
+		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
+		@param[out]	outIsOverrun	Receives true if the extractor is reporting that it overran its buffer limits;
 									otherwise false if it didn't.
+		@note		The extractor will not actually write any Anc bytes past its "stop" address, but it will
+					report that it was about to via this "overrun" flag.
 	**/
 	AJA_VIRTUAL bool	AncExtractGetBufferOverrun (const UWord inSDIInput, bool & outIsOverrun);
 
@@ -5221,7 +5255,9 @@ public:
 	**/
 	static NTV2DIDSet	AncExtractGetDefaultDIDs (void);
 
+
 	//	Old Anc API Names:
+	//	(These will be deprecated in a future SDK)
 	#define	GetAncInserterRunState				AncInsertIsEnabled
 	#define	GetAncExtractorRunState				AncExtractIsEnabled
 	#define	GetAncExtractorFilterDIDs			AncExtractGetFilterDIDs

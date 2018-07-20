@@ -3587,6 +3587,18 @@ ULWord NTV2SmpteLineNumber::GetFirstActiveLine (const NTV2FieldID inFieldID) con
 }
 
 
+ULWord NTV2SmpteLineNumber::GetLastLine (const NTV2FieldID inRasterFieldID) const
+{
+	if (!NTV2_IS_VALID_FIELD(inFieldID))
+		return 0;
+
+	if (inFieldID == NTV2_FIELD0)
+		return firstFieldTop ? LineNumbersF1Last[mStandard] : LineNumbersF2Last[mStandard];
+	else
+		return firstFieldTop ? LineNumbersF2Last[mStandard] : LineNumbersF1Last[mStandard];
+}
+
+
 ostream & NTV2SmpteLineNumber::Print (ostream & inOutStream) const
 {
 	if (!IsValid ())

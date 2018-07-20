@@ -817,12 +817,20 @@ public:
 	inline bool		IsValid (void) const	{return NTV2_IS_VALID_STANDARD (mStandard) && smpteFirstActiveLine;}
 
 	/**
-		@brief	Returns the SMPTE line number of the Start of Active Video (SAV).
+		@returns	The SMPTE line number of the Start of Active Video (SAV).
 		@param[in]	inRasterFieldID		Specifies a valid raster field ID (not the wire field ID).
 										Defaults to NTV2_FIELD0 (i.e. first field) of the raster.
 										Use NTV2_FIELD1 for the starting line of a PsF frame.
 	**/
 	ULWord			GetFirstActiveLine (const NTV2FieldID inRasterFieldID = NTV2_FIELD0) const;
+
+	/**
+		@returns	The SMPTE line number of the last raster line.
+		@param[in]	inRasterFieldID		Specifies a valid raster field ID (not the wire field ID).
+										Defaults to NTV2_FIELD0 (i.e. first field) of the raster.
+										Use NTV2_FIELD1 for the starting line of a PsF frame.
+	**/
+	ULWord			GetLastLine (const NTV2FieldID inRasterFieldID = NTV2_FIELD0) const;
 
 	/**
 		@return	True if I'm equal to the given NTV2SmpteLineNumber.
