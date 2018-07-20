@@ -340,7 +340,7 @@ protected:
 
     bool		ConfigurePTP(const eSFP sfp, const std::string localIPAddress);
 
-    bool        GenSDP(const NTV2Stream stream);
+    bool        GenSDP(const NTV2Stream stream, bool pushit=true);
     bool        GenSDPVideoStream(std::stringstream & sdp, const NTV2Stream stream, std::string gmInfo);
     bool        GenSDPAudioStream(std::stringstream & sdp, const NTV2Stream stream, std::string gmInfo);
 
