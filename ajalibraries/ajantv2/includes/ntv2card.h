@@ -5104,8 +5104,8 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
 		@param[in]	inFrameNumber	Tells the Anc inserter where to find the Anc data to transmit, specified as a
-									frame number.
-		@param[in]	inF1Size		Specifies the number of F1 bytes to process in the Anc data buffer in the frame.
+									zero-based frame number.
+		@param[in]	inF1Size		Specifies the maximum number of F1 bytes to process in the Anc data buffer in the frame.
 		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (Frame Store) that's driving the SDI output,
 									if different from the SDI output. The default is to use the same ::NTV2Channel
 									that corresponds to the given SDI output (e.g., ::NTV2_CHANNEL1 == 0 == SDIOut1).
@@ -5124,8 +5124,8 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
 		@param[in]	inFrameNumber	Tells the Anc inserter where to find the Anc data to transmit, specified as a
-									frame number.
-		@param[in]	inF2Size		Specifies the number of F2 bytes to process in the Anc data buffer in the frame.
+									zero-based frame number.
+		@param[in]	inF2Size		Specifies the maximum number of F2 bytes to process in the Anc data buffer in the frame.
 		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (Frame Store) that's driving the SDI output,
 									if different from the SDI output. The default is to use the same ::NTV2Channel
 									that corresponds to the given SDI output (e.g., ::NTV2_CHANNEL1 == 0 == SDIOut1).
