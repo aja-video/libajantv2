@@ -5063,23 +5063,124 @@ public:
 	**/
 	///@{
 	/**
-		@brief		Answers with the run state of the given Anc extractor -- i.e. if its "memory writer" is enabled or not.
-					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
+		@brief		Initializes the given SDI output's Anc inserter for custom Anc packet insertion.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
 		@return		True if successful; otherwise false.
-		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
-		@param[out]	outIsRunning	Receives 'true' if the Anc extractor is in the running state;  otherwise false.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (Frame Store) that's driving the SDI output,
+									if different from the SDI output. The default is to use the same ::NTV2Channel
+									that corresponds to the given SDI output (e.g., ::NTV2_CHANNEL1 == 0 == SDIOut1).
+		@param[in]	inStandard		Optionally overrides the ::NTV2Standard used to initialize the Anc inserter.
+									Defaults to using the ::NTV2Standard of the ::NTV2Channel being used.
+		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
+					use \ref aboutautocirculate.
 	**/
-	AJA_VIRTUAL bool		GetAncExtractorRunState (const UWord inSDIInput, bool & outIsRunning);
+	AJA_VIRTUAL bool	AncInsertInit (const UWord inSDIOutput, const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+										const NTV2Standard inStandard = NTV2_STANDARD_INVALID);
+
+	/**
+		@brief		Enables or disables the given SDI output's Anc inserter.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[in]	inIsEnabled		Specify true to enable the Anc inserter;  otherwise false to disable it.
+		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
+					use \ref aboutautocirculate.
+	**/
+    AJA_VIRTUAL bool	AncInsertSetEnable (const UWord inSDIOutput, const bool inIsEnabled);
 
 	/**
 		@brief		Answers with the run state of the given Anc inserter -- i.e. if its "memory reader" is enabled or not.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIOutput		Specifies the SDI output of interest as a zero-based index value (e.g., 0 == SDIOut1).
-		@param[out]	outIsRunning	Receives 'true' if the Anc inserter is in the running state;  otherwise false.
+		@param[out]	outIsEnabled	Receives 'true' if the Anc inserter is enabled (running);  otherwise false.
 	**/
-	AJA_VIRTUAL bool		GetAncInserterRunState (const UWord inSDIOutput, bool & outIsRunning);
+	AJA_VIRTUAL bool	AncInsertIsEnabled (const UWord inSDIOutput, bool & outIsEnabled);
 
+	/**
+		@brief		Configures the Anc inserter for the next frame's F1 Anc data to embed/transmit.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[in]	inFrameNumber	Tells the Anc inserter where to find the Anc data to transmit, specified as a
+									frame number.
+		@param[in]	inF1Size		Specifies the number of F1 bytes to process in the Anc data buffer in the frame.
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (Frame Store) that's driving the SDI output,
+									if different from the SDI output. The default is to use the same ::NTV2Channel
+									that corresponds to the given SDI output (e.g., ::NTV2_CHANNEL1 == 0 == SDIOut1).
+		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Anc buffer location
+									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
+		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
+					use \ref aboutautocirculate.
+	**/
+    AJA_VIRTUAL bool	AncInsertSetReadParams (const UWord inSDIOutput, const ULWord inFrameNumber, const ULWord inF1Size,
+												const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+												const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);
+
+	/**
+		@brief		Configures the Anc inserter for the next frame's F2 Anc data to embed/transmit.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[in]	inFrameNumber	Tells the Anc inserter where to find the Anc data to transmit, specified as a
+									frame number.
+		@param[in]	inF2Size		Specifies the number of F2 bytes to process in the Anc data buffer in the frame.
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (Frame Store) that's driving the SDI output,
+									if different from the SDI output. The default is to use the same ::NTV2Channel
+									that corresponds to the given SDI output (e.g., ::NTV2_CHANNEL1 == 0 == SDIOut1).
+		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Anc buffer location
+									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
+		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
+					use \ref aboutautocirculate.
+	**/
+    AJA_VIRTUAL bool	AncInsertSetField2ReadParams (const UWord inSDIOutput, const ULWord inFrameNumber, const ULWord inF2Size,
+														const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+														const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);
+
+
+	/**
+		@brief		Initializes the given SDI input's Anc extractor for custom Anc packet detection and de-embedding.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (Frame Store) that's driving the SDI input,
+									if different from the SDI input. The default is to use the same ::NTV2Channel
+									that corresponds to the given SDI input (e.g., ::NTV2_CHANNEL1 == 0 == SDIIn1).
+		@param[in]	inStandard		Optionally overrides the ::NTV2Standard used to initialize the Anc inserter.
+									Defaults to using the ::NTV2Standard of the ::NTV2Channel being used.
+		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
+					use \ref aboutautocirculate.
+	**/
+	AJA_VIRTUAL bool	AncExtractInit (const UWord inSDIInput, const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+										const NTV2Standard inStandard = NTV2_STANDARD_INVALID);
+
+	/**
+		@brief		Enables or disables the given SDI input's Anc extractor.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[in]	inIsEnabled		Specify true to enable the Anc extractor;  otherwise false to disable it.
+		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
+					use \ref aboutautocirculate.
+	**/
+    AJA_VIRTUAL bool	AncExtractSetEnable (const UWord inSDIInput, const bool inIsEnabled);
+
+	/**
+		@brief		Answers with the run state of the given Anc extractor -- i.e. if its "memory writer" is enabled or not.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
+		@param[out]	outIsEnabled	Receives 'true' if the Anc extractor is enabled (running);  otherwise false.
+	**/
+	AJA_VIRTUAL bool	AncExtractIsEnabled (const UWord inSDIInput, bool & outIsEnabled);
+
+    AJA_VIRTUAL bool	AncExtractSetWriteParams (const UWord inSDIInput, const ULWord inFrameNumber,
+													const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+													const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);
+    AJA_VIRTUAL bool	AncExtractSetField2WriteParams (const UWord inSDIInput, const ULWord inFrameNumber,
+														const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+														const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);
 	/**
 		@brief		Answers with an NTV2DIDSet of the DIDs currently being excluded (filtered) by the SDI input's Anc extractor.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
@@ -5087,7 +5188,7 @@ public:
 		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
 		@param[out]	outDIDs			Receives the DIDs that are currently being filtered for the given SDI input.
 	**/
-	AJA_VIRTUAL bool		GetAncExtractorFilterDIDs (const UWord inSDIInput, NTV2DIDSet & outDIDs);
+	AJA_VIRTUAL bool	AncExtractGetFilterDIDs (const UWord inSDIInput, NTV2DIDSet & outDIDs);
 
 	/**
 		@brief		Replaces the set of DIDs to be excluded (filtered) by the given SDI input's Anc extractor.
@@ -5098,38 +5199,35 @@ public:
 									empty set to disable all packet filtering.
 		@note		DIDs having the value 0 (zero) are ignored.
 	**/
-	AJA_VIRTUAL bool		SetAncExtractorFilterDIDs (const UWord inSDIInput, const NTV2DIDSet & inDIDs);
+	AJA_VIRTUAL bool	AncExtractSetFilterDIDs (const UWord inSDIInput, const NTV2DIDSet & inDIDs);
+
+	/**
+		@brief		Answers whether or not the given SDI input's Anc extractor overran its buffer limits.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
+		@param[out]	outIsOverrun	Receives true if the inserter is reporting that it overran its buffer limits;
+									otherwise false if it didn't.
+	**/
+	AJA_VIRTUAL bool	AncExtractGetBufferOverrun (const UWord inSDIInput, bool & outIsOverrun);
 
 	/**
 		@return		The maximum number of distinct DIDs that the device Anc extractor filter can accommodate.
 	**/
-	static UWord			GetMaxNumAncExtractorFilterDIDs (void);
+	static UWord		AncExtractGetMaxNumFilterDIDs (void);
 
 	/**
 		@return		The default DIDs that the device Anc extractor filter is started with.
 	**/
-	static NTV2DIDSet		GetDefaultAncExtractorDIDs (void);
+	static NTV2DIDSet	AncExtractGetDefaultDIDs (void);
 
-	/**
-		@brief		Initializes the given SDI output's Anc inserter for custom Anc packet insertion.
-					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
-		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the SDI output of interest as an ::NTV2Channel (a zero-based index value).
-		@param[in]	inVideoFormat	Specifies the video format of the SDI output's video stream.
-	**/
-	AJA_VIRTUAL bool AncInsertInit (const NTV2Channel inChannel, const NTV2VideoFormat inVideoFormat);
-	AJA_VIRTUAL bool AncExtractInit (const NTV2Channel inChannel, const NTV2VideoFormat inVideoFormat);
-
-//	AJA_VIRTUAL bool SetAncInsertParameters (const NTV2Channel inChannel, const uint32_t frameNumber);
-//	AJA_VIRTUAL bool SetAncExtractParameters (const NTV2Channel inChannel, uint32_t frameNumber);
-
-    AJA_VIRTUAL bool EnableAncExtractor (const NTV2Channel inChannel, bool bEnable);
-    AJA_VIRTUAL bool SetAncExtWriteParams (const NTV2Channel inChannel, ULWord frameNumber);
-    AJA_VIRTUAL bool SetAncExtField2WriteParams (const NTV2Channel inChannel, ULWord frameNumber);
-
-    AJA_VIRTUAL bool EnableAncInserter (const NTV2Channel inChannel, bool bEnable);
-    AJA_VIRTUAL bool SetAncInsReadParams (const NTV2Channel inChannel, ULWord frameNumber, ULWord field1Size);
-    AJA_VIRTUAL bool SetAncInsReadField2Params (const NTV2Channel inChannel, ULWord frameNumber, ULWord field2Size);
+	//	Old Anc API Names:
+	#define	GetAncInserterRunState				AncInsertIsEnabled
+	#define	GetAncExtractorRunState				AncExtractIsEnabled
+	#define	GetAncExtractorFilterDIDs			AncExtractGetFilterDIDs
+	#define	SetAncExtractorFilterDIDs			AncExtractSetFilterDIDs
+	#define	GetMaxNumAncExtractorFilterDIDs		AncExtractGetMaxNumFilterDIDs
+	#define	GetDefaultAncExtractorDIDs			AncExtractGetDefaultDIDs
 	///@}
 
 	/**
@@ -5812,55 +5910,6 @@ private:
 	**/
 	AJA_VIRTUAL bool	GetRegInfoForNumericParam (const NTV2NumericParamID inParamID, NTV2RegInfo & outRegInfo);
 	AJA_VIRTUAL bool	CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFirst, const NTV2Channel inLast);
-
-    AJA_VIRTUAL bool EnableAncExtHancY(NTV2Channel channel, bool bEnable);
-    AJA_VIRTUAL bool EnableAncExtHancC(NTV2Channel channel, bool bEnable);
-    AJA_VIRTUAL bool EnableAncExtVancY(NTV2Channel channel, bool bEnable);
-    AJA_VIRTUAL bool EnableAncExtVancC(NTV2Channel channel, bool bEnable);
-    AJA_VIRTUAL bool SetAncExtSDDemux(NTV2Channel channel, bool bEnable);
-    AJA_VIRTUAL bool SetAncExtProgressive(NTV2Channel channel, bool bEnable);
-    AJA_VIRTUAL bool SetAncExtSynchro(NTV2Channel channel);
-    AJA_VIRTUAL bool SetAncExtLSBEnable(NTV2Channel channel, bool bEnable);
-    AJA_VIRTUAL bool SetAncExtField1StartAddr(NTV2Channel channel, ULWord addr);
-    AJA_VIRTUAL bool SetAncExtField1EndAddr(NTV2Channel channel, ULWord addr);
-    AJA_VIRTUAL bool SetAncExtField2StartAddr(NTV2Channel channel, ULWord addr);
-    AJA_VIRTUAL bool SetAncExtField2EndAddr(NTV2Channel channel, ULWord addr);
-    AJA_VIRTUAL bool SetAncExtField1CutoffLine(NTV2Channel channel, ULWord lineNumber);
-    AJA_VIRTUAL bool SetAncExtField2CutoffLine(NTV2Channel channel, ULWord lineNumber);
-    AJA_VIRTUAL bool IsAncExtOverrun(NTV2Channel channel);
-
-    AJA_VIRTUAL bool SetAncExtField1StartLine(NTV2Channel channel, ULWord lineNumber);
-    AJA_VIRTUAL bool SetAncExtField2StartLine(NTV2Channel channel, ULWord lineNumber);
-    AJA_VIRTUAL bool SetAncExtTotalFrameLines(NTV2Channel channel, ULWord totalFrameLines);
-    AJA_VIRTUAL bool SetAncExtFidLow(NTV2Channel channel, ULWord lineNumber);
-    AJA_VIRTUAL bool SetAncExtFidHi(NTV2Channel channel, ULWord lineNumber);
-    AJA_VIRTUAL bool SetAncExtField1AnalogStartLine(NTV2Channel channel, ULWord lineNumber);
-    AJA_VIRTUAL bool SetAncExtField2AnalogStartLine(NTV2Channel channel, ULWord lineNumber);
-    AJA_VIRTUAL bool SetAncExtField1AnalogYFilter(NTV2Channel channel, ULWord lineFilter);
-    AJA_VIRTUAL bool SetAncExtField2AnalogYFilter(NTV2Channel channel, ULWord lineFilter);
-    AJA_VIRTUAL bool SetAncExtField1AnalogCFilter(NTV2Channel channel, ULWord lineFilter);
-    AJA_VIRTUAL bool SetAncExtField2AnalogCFilter(NTV2Channel channel, ULWord lineFilter);
-
-    AJA_VIRTUAL bool SetAncInsField1Bytes(NTV2Channel channel, ULWord numberOfBytes);
-    AJA_VIRTUAL bool SetAncInsField2Bytes(NTV2Channel channel, ULWord numberOfBytes);
-    AJA_VIRTUAL bool EnableAncInsHancY(NTV2Channel channel, bool bEnable);
-    AJA_VIRTUAL bool EnableAncInsHancC(NTV2Channel channel, bool bEnable);
-    AJA_VIRTUAL bool EnableAncInsVancY(NTV2Channel channel, bool bEnable);
-    AJA_VIRTUAL bool EnableAncInsVancC(NTV2Channel channel, bool bEnable);
-    AJA_VIRTUAL bool SetAncInsProgressive(NTV2Channel channel, bool isProgressive);
-    AJA_VIRTUAL bool SetAncInsSDPacketSplit(NTV2Channel channel, bool inEnable);
-    AJA_VIRTUAL bool SetAncInsField1StartAddr(NTV2Channel channel, ULWord startAddr);
-    AJA_VIRTUAL bool SetAncInsField2StartAddr(NTV2Channel channel, ULWord startAddr);
-    AJA_VIRTUAL bool SetAncInsHancPixelDelay(NTV2Channel channel, ULWord numberOfPixels);
-    AJA_VIRTUAL bool SetAncInsVancPixelDelay(NTV2Channel channel, ULWord numberOfPixels);
-    AJA_VIRTUAL bool SetAncInsField1ActiveLine(NTV2Channel channel, ULWord activeLineNumber);
-    AJA_VIRTUAL bool SetAncInsField2ActiveLine(NTV2Channel channel, ULWord activeLineNumber);
-    AJA_VIRTUAL bool SetAncInsHActivePixels(NTV2Channel channel, ULWord numberOfActiveLinePixels);
-    AJA_VIRTUAL bool SetAncInsHTotalPixels(NTV2Channel channel, ULWord numberOfLinePixels);
-    AJA_VIRTUAL bool SetAncInsTotalLines(NTV2Channel channel, ULWord numberOfLines);
-    AJA_VIRTUAL bool SetAncInsFidHi(NTV2Channel channel, ULWord lineNumber);
-    AJA_VIRTUAL bool SetAncInsFidLow(NTV2Channel channel, ULWord lineNumber);
-
 
 };	//	CNTV2Card
 

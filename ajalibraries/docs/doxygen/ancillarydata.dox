@@ -37,16 +37,18 @@
 			To use the latter, the ::AUTOCIRCULATE_WITH_ANC option must be specified in the call to CNTV2Card::AutoCirculateInitForInput
 			or CNTV2Card::AutoCirculateInitForOutput.
 
-	@note	In SDKs prior to 14.3, the Anc inserter/extractor firmware feature only worked with AutoCirculate.
+	@note	SDK 14.4 introduced an API that permits the Anc inserter/extractor firmware to be used from applications that don’t use
+			AutoCirculate. Look for functions that start with “AncInsert” and “AncExtract” in the ::CNTV2Card class. The \ref ntv2llburn
+			demonstrates how to use this new API.
 
 	@note	\ref ajaanc can make it easier to pack/unpack data packets to/from the host Anc data buffer(s).
-			In SDK 14.2,\ref ajaanc uses a more consistent API to pack/unpack data packets to/from frame buffer VANC lines.
+			In SDK 14.2, \ref ajaanc uses a more consistent API to pack/unpack data packets to/from frame buffer VANC lines.
 
-	@bug	Custom Anc data is inserted/extracted to/from the SDI output/input connector that corresponds to the AutoCirculate
-			channel being used. For example, to output custom Anc data through SDI output 3, you must use AutoCirculate ::NTV2_CHANNEL3.
-			This will be fixed in a future SDK/driver.
+	@bug	Using AutoCirculate, custom Anc data is inserted/extracted to/from the SDI output/input connector that corresponds
+			to the AutoCirculate ::NTV2Channel being used. For example, to output custom Anc data through SDI output 3, you must
+			use AutoCirculate ::NTV2_CHANNEL3. This will be fixed in a future SDK/driver.
 
-	@bug	Custom HANC insertion on playout is not supported (this is a difficult to resolve firmware issue).
+	@bug	Custom HANC insertion on playout is not supported (due to a thorny firmware issue).
 
 
 	@section	ancembeddedaudio	Embedded Audio

@@ -5347,15 +5347,18 @@ typedef enum
 	regAncExtTotalFrameLines,					//	Reg 10 - total_lines[10:0]
 	regAncExtFID,								//	Reg 11 - fid_low[10:0], fid_hi[10:0]
 	regAncExtIgnorePacketReg_1_2_3_4,			//	Reg 12 - Packet Ignore bytes
+	regAncExtIgnorePktsReg_First	= regAncExtIgnorePacketReg_1_2_3_4,
 	regAncExtIgnorePacketReg_5_6_7_8,			//	Reg 13 - Packet Ignore bytes
 	regAncExtIgnorePacketReg_9_10_11_12,		//	Reg 14 - Packet Ignore bytes
 	regAncExtIgnorePacketReg_13_14_15_16,		//	Reg 15 - Packet Ignore bytes
 	regAncExtIgnorePacketReg_17_18_19_20,		//	Reg 16 - Packet Ignore bytes
+	regAncExtIgnorePktsReg_Last		= regAncExtIgnorePacketReg_17_18_19_20,
 	regAncExtAnalogStartLine,					//	Reg 17 - analog_start_line[10:0]
 	regAncExtField1AnalogYFilter,				//	Reg 18 - analog_line_y_f1[10:0]
 	regAncExtField2AnalogYFilter,				//	Reg 19 - analog_line_y_f2[10:0]
 	regAncExtField1AnalogCFilter,				//	Reg 20 - analog_line_c_f1[10:0]
 	regAncExtField2AnalogCFilter,				//	Reg 21 - analog_line_c_f2[10:0]
+	regAncExtAnalogActiveLineLength = 27,		//	Reg 27 - analog active line length
 	regAncExt_LAST
 } ANCExtRegisters;
 
