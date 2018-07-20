@@ -5,9 +5,11 @@
 **/
 
 #include "ntv2llburn.h"
+#include "ntv2endian.h"
 #include "ntv2formatdescriptor.h"
 #include "ajabase/common/types.h"
 #include "ajabase/system/memory.h"
+#include "ajaanc/includes/ancillarylist.h"
 #include <iostream>
 
 using namespace std;
@@ -479,6 +481,9 @@ void NTV2LLBurn::ProcessFrames (void)
 	const UWord	sdiInput				= UWord(::GetIndexForNTV2InputSource(mInputSource));
 	const UWord	sdiOutput				= UWord(::NTV2OutputDestinationToChannel(mOutputDestination));
 	const ULWord	ancByteCount		= mpHostF1AncBuffer.GetByteCount() / 2;	//	Half for now
+	const bool	isInterlace				= !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mVideoFormat);
+	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(::GetNTV2StandardFromVideoFormat(mVideoFormat)));
+	Bouncer<UWord>	yPercent	(85/*upperLimit*/, 1/*lowerLimit*/, 1/*startValue*/);	//	Used to "bounce" timecode up & down in raster
 	uint32_t	currentInFrame			= 0;	//	Will ping-pong between 0 and 1
 	uint32_t	currentOutFrame			= 2;	//	Will ping-pong between 2 and 3
 	uint32_t	currentAudioInAddress	= 0;
@@ -488,6 +493,8 @@ void NTV2LLBurn::ProcessFrames (void)
 	uint32_t	audioBytesCaptured		= 0;
 	bool		audioIsReset			= true;
 	string		timeCodeString;
+	AJAAncillaryList	capturedPackets, playoutPackets;
+	const AJAAncillaryDataLocation	F1Loc(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 10, 0, AJAAncillaryDataStream_1);
 
 	if (mWithAnc && ::IsProgressivePicture(mVideoFormat))
 		mpHostF2AncBuffer.Allocate(0);	//	Free F2 Anc buffer
@@ -541,10 +548,9 @@ if (doAncInput)
 if (doAncInput && mpHostF2AncBuffer)
 	mDevice.AncExtractSetWriteParams (sdiInput, currentInFrame, mInputChannel);
 
-if (doAncOutput)
-	mDevice.AncInsertSetReadParams (sdiOutput, currentOutFrame, ancByteCount, mOutputChannel);
-if (doAncOutput && mpHostF2AncBuffer)
-	mDevice.AncInsertSetField2ReadParams (sdiOutput, currentOutFrame, ancByteCount, mOutputChannel);
+if (doAncOutput  &&  mDevice.AncInsertSetReadParams (sdiOutput, currentOutFrame, ancByteCount, mOutputChannel))
+	if (isInterlace)
+		mDevice.AncInsertSetField2ReadParams (sdiOutput, currentOutFrame, ancByteCount, mOutputChannel);
 
 		if (mWithAudio)
 		{
@@ -589,10 +595,18 @@ if (doAncOutput && mpHostF2AncBuffer)
 		currentInFrame	^= 1;
 		currentOutFrame	^= 1;
 
-		//	DMA the new frame to system memory...
+		//	Transfer the new frame to system memory...
 		mDevice.DMAReadFrame (currentInFrame, (ULWord*)mpHostVideoBuffer.GetHostPointer(), mpHostVideoBuffer.GetByteCount());
 		if (doAncInput)
+		{	//	Transfer new Anc data into my F1 & F2 buffers...
 			mDevice.DMAReadAnc (currentInFrame, mpHostF1AncBuffer, mpHostF2AncBuffer);
+			AJAAncillaryList::SetFromSDIAncData (mpHostF1AncBuffer, mpHostF2AncBuffer, capturedPackets);
+			if (capturedPackets.CountAncillaryData())
+				capturedPackets.Print(cerr, false);
+			//	Clear/zero the Anc capture buffer...
+			mpHostF1AncBuffer.Fill(ULWord(0));   mpHostF2AncBuffer.Fill(ULWord(0));
+			mDevice.DMAWriteAnc (currentInFrame, mpHostF1AncBuffer, mpHostF2AncBuffer);
+		}
 
 		//	Determine which timecode value should be burned in to the video frame
 		NTV2_RP188	timecodeValue;
@@ -625,12 +639,33 @@ if (doAncOutput && mpHostF2AncBuffer)
 		}
 
 		//	"Burn" the timecode into the host buffer while we have full access to it...
-		mTCBurner.BurnTimeCode (reinterpret_cast <char *> (mpHostVideoBuffer.GetHostPointer()), timeCodeString.c_str (), 80);
+		mTCBurner.BurnTimeCode (reinterpret_cast <char *> (mpHostVideoBuffer.GetHostPointer()), timeCodeString.c_str(), yPercent.Next());
 
 		//	Send the updated frame back to the board for display...
 		mDevice.DMAWriteFrame (currentOutFrame, (ULWord*)mpHostVideoBuffer.GetHostPointer(), mpHostVideoBuffer.GetByteCount());
 		if (doAncOutput)
-			mDevice.DMAReadAnc (currentOutFrame, mpHostF1AncBuffer, mpHostF2AncBuffer);
+		{
+			//	For now, invent a packet
+			AJAAncillaryData pkt;	AJAAncillaryList pkts;
+			AJAAncillaryDataLocation F2Loc(F1Loc);
+			LWord pktData(NTV2EndianSwap32(mFramesProcessed));
+			pkt.SetDID(0xC0);  pkt.SetSID(0x00);  pkt.SetDataLocation(F1Loc);  pkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
+			pkt.SetPayloadData((const uint8_t*) &pktData, 4);
+			pkts.AddAncillaryData(pkt);
+			if (isInterlace)
+			{
+				F2Loc.SetLineNumber(uint16_t(smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD1)
+												+ ULWord(F1Loc.GetLineNumber())
+												- smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD0)));
+				pkt.SetDID(0xC1);  pkt.SetSID(0x01);  pkt.SetDataLocation(F2Loc);
+				pktData = ULWord(pktData << 16) | ULWord(pktData >> 16);
+				pkt.SetPayloadData((const uint8_t*) &pktData, 4);
+				pkts.AddAncillaryData(pkt);
+			}
+			pkts.SortListByLocation();	//pkts.Print(cerr, true); cerr << endl;
+			pkts.GetSDITransmitData (mpHostF1AncBuffer, mpHostF2AncBuffer, !isInterlace, isInterlace ? smpteLineNumInfo.GetLastLine(NTV2_FIELD0)+1 : 0);
+			mDevice.DMAWriteAnc (currentOutFrame, mpHostF1AncBuffer, mpHostF2AncBuffer);
+		}
 
 		//	Write the output timecode (for all SDI output spigots)...
 		for (NTV2ChannelSetConstIter iter(mRP188Outputs.begin());  iter != mRP188Outputs.end();  ++iter)
