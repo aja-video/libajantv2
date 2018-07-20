@@ -84,7 +84,7 @@
             "ssrc":1234,
             "payload":100,
             "numAudioChannels":16,
-            "audioPktInterval" :1000,
+            "audioPktInterval" :"125us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"
@@ -106,7 +106,7 @@
             "ssrc":1234,
             "payload":100,
             "numAudioChannels":16,
-            "audioPktInterval" :1000,
+            "audioPktInterval" :"125us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"
@@ -163,7 +163,7 @@
             "ttl":64,
             "numAudioChannels":16,
             "firstAudioChannel":0,
-            "audioPktInterval" :1000,
+            "audioPktInterval" :"125us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"
@@ -182,7 +182,7 @@
             "ttl":64,
             "numAudioChannels":16,
             "firstAudioChannel":0,
-            "audioPktInterval" :1000,
+            "audioPktInterval" :"125us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"

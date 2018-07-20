@@ -67,6 +67,8 @@ public:
     QString GetSfp(eSFP sfp);
     NTV2Stream GetAudioStream(std::string streamString);
     QString GetAudioStream(NTV2Stream stream);
+    eNTV2PacketInterval GetAudioPktInterval(std::string streamString);
+    QString GetAudioPktInterval(eNTV2PacketInterval stream);
     NTV2Stream GetVideoStream(std::string streamString);
     QString GetVideoStream(NTV2Stream stream);
 

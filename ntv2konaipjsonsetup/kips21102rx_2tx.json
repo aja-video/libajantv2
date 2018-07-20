@@ -8,14 +8,14 @@
 		[
 			{
 				"designator":"sfp1",
-				"ipAddress":"172.16.45.6",
+				"ipAddress":"172.16.45.8",
 				"subnetMask":"255.255.0.0",
 				"gateWay":"255.255.255.255",
 				"enable":"true"
 			},
 			{
 				"designator":"sfp2",
-				"ipAddress":"172.16.45.7",
+				"ipAddress":"172.16.45.9",
 				"subnetMask":"255.255.0.0",
 				"gateWay":"255.255.255.255",
 				"enable":"true"
@@ -84,7 +84,7 @@
             "ssrc":1234,
             "payload":100,
             "numAudioChannels":16,
-            "audioPktInterval" :1000,
+            "audioPktInterval" :"125us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"
@@ -106,7 +106,7 @@
             "ssrc":1234,
             "payload":100,
             "numAudioChannels":16,
-            "audioPktInterval" :1000,
+            "audioPktInterval" :"125us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"
@@ -163,7 +163,7 @@
             "ttl":64,
             "numAudioChannels":16,
             "firstAudioChannel":0,
-            "audioPktInterval" :1000,
+            "audioPktInterval" :"125us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"
@@ -182,7 +182,7 @@
             "ttl":64,
             "numAudioChannels":16,
             "firstAudioChannel":0,
-            "audioPktInterval" :1000,
+            "audioPktInterval" :"125us",
             "sfp1Enable":"true",
             "sfp2Enable":"false",
 			"enable":"true"

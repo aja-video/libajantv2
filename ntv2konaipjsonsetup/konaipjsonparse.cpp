@@ -304,6 +304,34 @@ QString CKonaIpJsonParse2110::GetAudioStream(NTV2Stream stream)
     return str;
 }
 
+eNTV2PacketInterval CKonaIpJsonParse2110::GetAudioPktInterval(std::string pktIntervalString)
+{
+    eNTV2PacketInterval pktInterval;
+
+    if (pktIntervalString == "1000us")
+        pktInterval = PACKET_INTERVAL_1mS;
+    else if (pktIntervalString == "125us")
+        pktInterval = PACKET_INTERVAL_125uS;
+    else
+        pktInterval = PACKET_INTERVAL_125uS;
+
+    return pktInterval;
+}
+
+QString CKonaIpJsonParse2110::GetAudioPktInterval(eNTV2PacketInterval pktInterval)
+{
+    QString str;
+
+    if (pktInterval == PACKET_INTERVAL_1mS)
+        str = "1000us";
+    else if (pktInterval == PACKET_INTERVAL_125uS)
+        str = "125us";
+    else
+        str = "invalid";
+
+    return str;
+}
+
 bool CKonaIpJsonParse2110::JsonToStructNetwork(const QJsonObject& topObj, NetworkData2110& n2110)
 {
     memset(&n2110, 0, sizeof(NetworkData2110));
@@ -542,8 +570,10 @@ bool CKonaIpJsonParse2110::JsonToStructReceiveAudio(const QJsonArray& aArray, Re
         if (m_verbose) std::cout << " payload " << rAudio2110.rxAudioCh[i].payload << std::endl;
         rAudio2110.rxAudioCh[i].numAudioChannels    = vObj["numAudioChannels"].toInt();
         if (m_verbose) std::cout << " numAudioChannels " << rAudio2110.rxAudioCh[i].numAudioChannels << std::endl;
-        rAudio2110.rxAudioCh[i].audioPktInterval    = (eNTV2PacketInterval)vObj["audioPktInterval"].toInt();
-        if (m_verbose) std::cout << " audioPktInterval " << rAudio2110.rxAudioCh[i].audioPktInterval << std::endl;
+
+        str = vObj["audioPktInterval"].toString().toStdString();
+        if (m_verbose) std::cout << " audioPktInterval " << str.c_str() << std::endl;
+        rAudio2110.rxAudioCh[i].audioPktInterval = GetAudioPktInterval(str);
         str = vObj["enable"].toString().toStdString();
         if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
         rAudio2110.rxAudioCh[i].enable = GetEnable(str);
@@ -581,8 +611,8 @@ bool CKonaIpJsonParse2110::StructToJsonReceiveAudio(const ReceiveAudioData2110& 
         obj.insert("ssrc",                  QJsonValue((int)rAudio2110.rxAudioCh[i].ssrc));
         obj.insert("payload",               QJsonValue((int)rAudio2110.rxAudioCh[i].payload));
         obj.insert("numAudioChannels",      QJsonValue((int)rAudio2110.rxAudioCh[i].numAudioChannels));
-        obj.insert("audioPktInterval",      QJsonValue((int)rAudio2110.rxAudioCh[i].audioPktInterval));
 
+        obj.insert("audioPktInterval",      QJsonValue(QString(GetAudioPktInterval(rAudio2110.rxAudioCh[i].audioPktInterval))));
         obj.insert("enable",                QJsonValue(QString(GetEnable(rAudio2110.rxAudioCh[i].enable))));
         obj.insert("designator",            QJsonValue(QString(GetChannel(rAudio2110.rxAudioCh[i].channel))));
         obj.insert("stream",                QJsonValue(QString(GetAudioStream(rAudio2110.rxAudioCh[i].stream))));
@@ -732,9 +762,10 @@ bool CKonaIpJsonParse2110::JsonToStructTransmitAudio(const QJsonArray& aArray, T
         if (m_verbose) std::cout << " numAudioChannels " << tAudio2110.txAudioCh[i].numAudioChannels << std::endl;
         tAudio2110.txAudioCh[i].firstAudioChannel   = vObj["firstAudioChannel"].toInt();
         if (m_verbose) std::cout << " firstAudioChannel " << tAudio2110.txAudioCh[i].firstAudioChannel << std::endl;
-        tAudio2110.txAudioCh[i].audioPktInterval    = (eNTV2PacketInterval)vObj["audioPktInterval"].toInt();
-        if (m_verbose) std::cout << " audioPktInterval " << tAudio2110.txAudioCh[i].audioPktInterval << std::endl;
 
+        str = vObj["audioPktInterval"].toString().toStdString();
+        if (m_verbose) std::cout << " audioPktInterval " << str.c_str() << std::endl;
+        tAudio2110.txAudioCh[i].audioPktInterval = GetAudioPktInterval(str);
         str = vObj["enable"].toString().toStdString();
         if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
         tAudio2110.txAudioCh[i].enable = GetEnable(str);
@@ -769,8 +800,8 @@ bool CKonaIpJsonParse2110::StructToJsonTransmitAudio(const TransmitAudioData2110
         obj.insert("payload",               QJsonValue((int)tAudio2110.txAudioCh[i].payload));
         obj.insert("numAudioChannels",      QJsonValue((int)tAudio2110.txAudioCh[i].numAudioChannels));
         obj.insert("firstAudioChannel",     QJsonValue((int)tAudio2110.txAudioCh[i].firstAudioChannel));
-        obj.insert("audioPktInterval",      QJsonValue((int)tAudio2110.txAudioCh[i].audioPktInterval));
 
+        obj.insert("audioPktInterval",      QJsonValue(QString(GetAudioPktInterval(tAudio2110.txAudioCh[i].audioPktInterval))));
         obj.insert("enable",                QJsonValue(QString(GetEnable(tAudio2110.txAudioCh[i].enable))));
         obj.insert("stream",                QJsonValue(QString(GetAudioStream(tAudio2110.txAudioCh[i].stream))));
         obj.insert("designator",            QJsonValue(QString(GetChannel(tAudio2110.txAudioCh[i].channel))));
