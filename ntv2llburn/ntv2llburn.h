@@ -43,13 +43,15 @@ class NTV2LLBurn
 			@param[in]	inTCIndex			Specifies the timecode of interest. Defaults to whatever is found embedded in the input video.
 			@param[in]	inDoMultiChannel	If true, enables multichannel mode (if the device supports it), and won't acquire
 											or release the device. If false (the default), acquires/releases exclusive use of the device.
+			@param[in]	inWithAnc			If true, capture & play ancillary data. Defaults to false.
 		**/
 							NTV2LLBurn (const std::string &			inDeviceSpecifier	= "0",
 										const bool					inWithAudio			= true,
 										const NTV2FrameBufferFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
 										const NTV2InputSource		inInputSource		= NTV2_INPUTSOURCE_SDI1,
 										const NTV2TCIndex			inTCIndex			= NTV2_TCINDEX_SDI1,
-										const bool					inDoMultiChannel	= false);
+										const bool					inDoMultiChannel	= false,
+										const bool					inWithAnc			= false);
 		virtual				~NTV2LLBurn ();
 
 		/**
@@ -159,6 +161,7 @@ class NTV2LLBurn
 		NTV2VANCMode				mVancMode;				///< @brief	VANC mode
 		NTV2AudioSystem				mAudioSystem;			///< @brief	The audio system I'm using
 		bool						mDoMultiChannel;		///< @brief	Set the board up for multi-format
+		bool						mWithAnc;				///< @brief	Capture and Playout packetized ANC data
 
 		bool						mGlobalQuit;			///< @brief	Set "true" to gracefully stop
 		AJATimeCodeBurn				mTCBurner;				///< @brief	My timecode burner
@@ -166,6 +169,8 @@ class NTV2LLBurn
 
 		NTV2_POINTER				mpHostVideoBuffer;		///< @brief My host video buffer for burning in the timecode
 		NTV2_POINTER				mpHostAudioBuffer;		///< @brief My host audio buffer for the samples matching the video buffer
+		NTV2_POINTER				mpHostF1AncBuffer;		///< @brief My host Anc buffer (F1)
+		NTV2_POINTER				mpHostF2AncBuffer;		///< @brief My host Anc buffer (F2)
 
 		uint32_t					mAudioInLastAddress;	///< @brief My record of the location of the last audio sample captured
 		uint32_t					mAudioOutLastAddress;	///< @brief My record of the location of the last audio sample played

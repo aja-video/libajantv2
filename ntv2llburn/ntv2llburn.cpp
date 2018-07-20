@@ -23,7 +23,8 @@ NTV2LLBurn::NTV2LLBurn (const string &				inDeviceSpecifier,
 						const NTV2FrameBufferFormat	inPixelFormat,
 						const NTV2InputSource		inInputSource,
 						const NTV2TCIndex			inTCIndex,
-						const bool					inDoMultiChannel)
+						const bool					inDoMultiChannel,
+						const bool					inWithAnc)
 
 	:	mRunThread				(NULL),
 		mDeviceID				(DEVICE_ID_NOTFOUND),
@@ -40,6 +41,7 @@ NTV2LLBurn::NTV2LLBurn (const string &				inDeviceSpecifier,
 		mVancMode				(NTV2_VANCMODE_OFF),
 		mAudioSystem			(NTV2_AUDIOSYSTEM_1),
 		mDoMultiChannel			(inDoMultiChannel),
+		mWithAnc				(inWithAnc),
 		mGlobalQuit				(false),
 		mFramesProcessed		(0),
 		mFramesDropped			(0)
@@ -134,6 +136,9 @@ AJAStatus NTV2LLBurn::Init (void)
 		AJATime::Sleep (500);
 	}
 
+	if (mWithAnc && !::NTV2DeviceCanDoCustomAnc(mDeviceID))
+		{cerr << "## WARNING: Device doesn't support custom Anc, '-a' option ignored" << endl;  mWithAnc = false;}
+
 	//	Set up the video and audio...
 	status = SetupVideo ();
 	if (AJA_FAILURE (status))
@@ -194,6 +199,9 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 		mDevice.WaitForInputVerticalInterrupt(mInputChannel, 12);			//	...and give the device a dozen frames or so to lock to the input signal
 	}	//	if input SDI connector needs to switch from transmit mode
 
+	if (mWithAnc && !NTV2_INPUT_SOURCE_IS_SDI(mInputSource))
+		cerr << "## WARNING: Non-SDI input source, no Anc capture possible" << endl;
+
 	//	Determine the input video signal format, and set the device's reference source to that input...
 	mVideoFormat = mDevice.GetInputVideoFormat (mInputSource);
 	if (mVideoFormat == NTV2_FORMAT_UNKNOWN)
@@ -209,6 +217,9 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 	if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID)					//	If device has bidirectional SDI connectors...
 		&& NTV2_OUTPUT_DEST_IS_SDI (mOutputDestination))			//	...and output destination is SDI...
 			mDevice.SetSDITransmitEnable (mOutputChannel, true);	//	...then enable transmit mode
+
+	if (mWithAnc && !NTV2_OUTPUT_DEST_IS_SDI(mOutputDestination))
+		cerr << "## WARNING: Non-SDI output destination, no Anc playout possible" << endl;
 
 	mDevice.EnableChannel (mInputChannel);		//	Enable the input frame buffer
 	mDevice.EnableChannel (mOutputChannel);		//	Enable the output frame buffer
@@ -334,8 +345,10 @@ AJAStatus NTV2LLBurn::SetupHostBuffers (void)
 	//	Note that DMA performance can be accelerated slightly by using page-aligned video buffers...
 	mpHostVideoBuffer = NTV2_POINTER(::GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancMode));
 	mpHostAudioBuffer = NTV2_POINTER(NTV2_AUDIOSIZE_MAX);
+	mpHostF1AncBuffer = NTV2_POINTER(mWithAnc ? 4096 : 0);
+	mpHostF2AncBuffer = NTV2_POINTER(mWithAnc ? 4096 : 0);
 
-	if (!mpHostVideoBuffer || !mpHostAudioBuffer)
+	if (!mpHostVideoBuffer || !mpHostAudioBuffer  ||  (mWithAnc && !mpHostF1AncBuffer)  ||  (mWithAnc && !mpHostF2AncBuffer))
 	{
 		cerr << "## ERROR:  Unable to allocate host video and/or audio buffer " << endl;
 		return AJA_STATUS_MEMORY;
@@ -461,6 +474,11 @@ void NTV2LLBurn::RunThreadStatic (AJAThread * pThread, void * pContext)		//	stat
 
 void NTV2LLBurn::ProcessFrames (void)
 {
+	const bool	doAncInput				= mWithAnc && NTV2_INPUT_SOURCE_IS_SDI(mInputSource);
+	const bool	doAncOutput				= mWithAnc && NTV2_OUTPUT_DEST_IS_SDI(mOutputDestination);
+	const UWord	sdiInput				= UWord(::GetIndexForNTV2InputSource(mInputSource));
+	const UWord	sdiOutput				= UWord(::NTV2OutputDestinationToChannel(mOutputDestination));
+	const ULWord	ancByteCount		= mpHostF1AncBuffer.GetByteCount() / 2;	//	Half for now
 	uint32_t	currentInFrame			= 0;	//	Will ping-pong between 0 and 1
 	uint32_t	currentOutFrame			= 2;	//	Will ping-pong between 2 and 3
 	uint32_t	currentAudioInAddress	= 0;
@@ -470,6 +488,19 @@ void NTV2LLBurn::ProcessFrames (void)
 	uint32_t	audioBytesCaptured		= 0;
 	bool		audioIsReset			= true;
 	string		timeCodeString;
+
+	if (mWithAnc && ::IsProgressivePicture(mVideoFormat))
+		mpHostF2AncBuffer.Allocate(0);	//	Free F2 Anc buffer
+	if (doAncInput)
+	{
+		mDevice.AncExtractInit(sdiInput, mInputChannel);
+		mDevice.AncExtractSetEnable (sdiOutput, true);
+	}
+	if (doAncOutput)
+	{
+		mDevice.AncInsertInit(sdiOutput, mInputChannel);
+		mDevice.AncInsertSetEnable (sdiOutput, true);
+	}
 
 	mFramesProcessed = mFramesDropped = 0;	//	Start with a fresh frame count
 
@@ -504,6 +535,16 @@ void NTV2LLBurn::ProcessFrames (void)
 	{
 		//	Wait until the input has completed capturing a frame...
 		mDevice.WaitForInputFieldID (NTV2_FIELD0, mInputChannel);
+
+if (doAncInput)
+	mDevice.AncExtractSetWriteParams (sdiInput, currentInFrame, mInputChannel);
+if (doAncInput && mpHostF2AncBuffer)
+	mDevice.AncExtractSetWriteParams (sdiInput, currentInFrame, mInputChannel);
+
+if (doAncOutput)
+	mDevice.AncInsertSetReadParams (sdiOutput, currentOutFrame, ancByteCount, mOutputChannel);
+if (doAncOutput && mpHostF2AncBuffer)
+	mDevice.AncInsertSetField2ReadParams (sdiOutput, currentOutFrame, ancByteCount, mOutputChannel);
 
 		if (mWithAudio)
 		{
@@ -550,6 +591,8 @@ void NTV2LLBurn::ProcessFrames (void)
 
 		//	DMA the new frame to system memory...
 		mDevice.DMAReadFrame (currentInFrame, (ULWord*)mpHostVideoBuffer.GetHostPointer(), mpHostVideoBuffer.GetByteCount());
+		if (doAncInput)
+			mDevice.DMAReadAnc (currentInFrame, mpHostF1AncBuffer, mpHostF2AncBuffer);
 
 		//	Determine which timecode value should be burned in to the video frame
 		NTV2_RP188	timecodeValue;
@@ -586,6 +629,8 @@ void NTV2LLBurn::ProcessFrames (void)
 
 		//	Send the updated frame back to the board for display...
 		mDevice.DMAWriteFrame (currentOutFrame, (ULWord*)mpHostVideoBuffer.GetHostPointer(), mpHostVideoBuffer.GetByteCount());
+		if (doAncOutput)
+			mDevice.DMAReadAnc (currentOutFrame, mpHostF1AncBuffer, mpHostF2AncBuffer);
 
 		//	Write the output timecode (for all SDI output spigots)...
 		for (NTV2ChannelSetConstIter iter(mRP188Outputs.begin());  iter != mRP188Outputs.end();  ++iter)
@@ -635,6 +680,11 @@ void NTV2LLBurn::ProcessFrames (void)
 		mDevice.SetOutputFrame	(mOutputChannel, currentOutFrame);
 
 	}	//	loop til quit signaled
+
+	if (doAncInput)
+		mDevice.AncExtractSetEnable (sdiOutput, false);
+	if (doAncOutput)
+		mDevice.AncInsertSetEnable (sdiOutput, false);
 
 }	//	ProcessFrames
 

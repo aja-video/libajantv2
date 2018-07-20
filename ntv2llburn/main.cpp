@@ -117,8 +117,8 @@ static MapMaker	gMapMakerSingleton;
 
 /**
 	@brief		Main entry point for 'ntv2llburn' demo application.
-	@param[in]	argc	Number arguments specified on the command line, including the path to the executable.
-	@param[in]	argv	Array of 'const char' pointers, one for each argument.
+	@param[in]	argc	Number of arguments specified on the command line, including the path to the executable.
+	@param[in]	argv	Array of arguments.
 	@return		Result code, which must be zero if successful, or non-zero for failure.
 **/
 int main (int argc, const char ** argv)
@@ -127,12 +127,13 @@ int main (int argc, const char ** argv)
 	char *			pDeviceSpec		(NULL);						//	Which device to use
 	char *			pVidSource		(NULL);						//	Video input source string
 	char *			pTcSource		(NULL);						//	Time code source string
-	int				noAudio			(0);						//	Disable audio?
-	int				useRGB			(0);						//	Use 10-bit RGB instead of 8-bit YCbCr?
-	poptContext		optionsContext;								//	Context for parsing command line arguments
 	NTV2InputSource	vidSource		(NTV2_INPUTSOURCE_SDI1);	//	Video source
 	NTV2TCIndex		tcSource		(NTV2_TCINDEX_SDI1);		//	Time code source
+	int				noAudio			(0);						//	Disable audio?
+	int				useRGB			(0);						//	Use 10-bit RGB instead of 8-bit YCbCr?
 	int				doMultiChannel	(0);						//  Set the board up for multi-channel/format
+	int				doAnc			(0);						//	Use the Anc Extractor/Inserter
+	poptContext		optionsContext;								//	Context for parsing command line arguments
 	AJADebug::Open();
 
 	//	Command line option descriptions:
@@ -145,6 +146,7 @@ int main (int argc, const char ** argv)
 		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio?",					NULL},
 		{"rgb",			0,		POPT_ARG_NONE,		&useRGB,		0,	"use RGB10 frame buffer?",			NULL},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multichannel/multiformat?",	NULL},
+		{"anc",			'a',	POPT_ARG_NONE,		&doAnc,			0,	"use Anc data extractor/inserter",	NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -182,7 +184,8 @@ int main (int argc, const char ** argv)
 						useRGB ? NTV2_FBF_10BIT_RGB : NTV2_FBF_8BIT_YCBCR,	//	Use RGB frame buffer format?
 						vidSource,											//	Which video input source?
 						tcSource,											//	Which time code source?
-						doMultiChannel ? true : false);						//  Set the board up for multi-channel/format
+						doMultiChannel ? true : false,						//  Set the board up for multi-channel/format
+						doAnc ? true : false);								//	Use the Anc Extractor/Inserter
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)
