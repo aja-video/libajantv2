@@ -352,7 +352,7 @@ AJAStatus NTV2LLBurn::SetupHostBuffers (void)
 
 	if (!mpHostVideoBuffer || !mpHostAudioBuffer  ||  (mWithAnc && !mpHostF1AncBuffer)  ||  (mWithAnc && !mpHostF2AncBuffer))
 	{
-		cerr << "## ERROR:  Unable to allocate host video and/or audio buffer " << endl;
+		cerr << "## ERROR:  Unable to allocate host buffer(s)" << endl;
 		return AJA_STATUS_MEMORY;
 	}
 
@@ -473,34 +473,36 @@ void NTV2LLBurn::RunThreadStatic (AJAThread * pThread, void * pContext)		//	stat
 
 }	//	RunThreadStatic
 
-static const bool	REPLACE_OUTGOING_ANC_WITH_CUSTOM_PACKETS(false);
-static const bool	CLEAR_DEVICE_ANC_BUFFER_AFTER_READ(false);
+
+static const bool	REPLACE_OUTGOING_ANC_WITH_CUSTOM_PACKETS	(false);
+static const bool	CLEAR_DEVICE_ANC_BUFFER_AFTER_READ			(false);
+
 
 void NTV2LLBurn::ProcessFrames (void)
 {
-	const bool	doAncInput				= mWithAnc && NTV2_INPUT_SOURCE_IS_SDI(mInputSource);
-	const bool	doAncOutput				= mWithAnc && NTV2_OUTPUT_DEST_IS_SDI(mOutputDestination);
-	const UWord	sdiInput				= UWord(::GetIndexForNTV2InputSource(mInputSource));
-	const UWord	sdiOutput				= UWord(::NTV2OutputDestinationToChannel(mOutputDestination));
-	const ULWord	ancByteCount		= mpHostF1AncBuffer.GetByteCount() / 2;	//	Half for now
-	const bool	isInterlace				= !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mVideoFormat);
-	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(::GetNTV2StandardFromVideoFormat(mVideoFormat)));
-	Bouncer<UWord>	yPercent	(85/*upperLimit*/, 1/*lowerLimit*/, 1/*startValue*/);	//	Used to "bounce" timecode up & down in raster
-	uint32_t	currentInFrame			= 0;	//	Will ping-pong between 0 and 1
-	uint32_t	currentOutFrame			= 2;	//	Will ping-pong between 2 and 3
-	uint32_t	currentAudioInAddress	= 0;
-	uint32_t	audioReadOffset			= 0;
-	uint32_t	audioInWrapAddress		= 0;
-	uint32_t	audioOutWrapAddress		= 0;
-	uint32_t	audioBytesCaptured		= 0;
-	bool		audioIsReset			= true;
+	const bool	doAncInput				(mWithAnc && NTV2_INPUT_SOURCE_IS_SDI(mInputSource));
+	const bool	doAncOutput				(mWithAnc && NTV2_OUTPUT_DEST_IS_SDI(mOutputDestination));
+	const UWord	sdiInput				(UWord(::GetIndexForNTV2InputSource(mInputSource)));
+	const UWord	sdiOutput				(UWord(::NTV2OutputDestinationToChannel(mOutputDestination)));
+	const bool	isInterlace				(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mVideoFormat));
+	uint32_t	currentInFrame			(0);	//	Will ping-pong between 0 and 1
+	uint32_t	currentOutFrame			(2);	//	Will ping-pong between 2 and 3
+	uint32_t	currentAudioInAddress	(0);
+	uint32_t	audioReadOffset			(0);
+	uint32_t	audioInWrapAddress		(0);
+	uint32_t	audioOutWrapAddress		(0);
+	uint32_t	audioBytesCaptured		(0);
+	bool		audioIsReset			(true);
 	string		timeCodeString;
-	AJAAncillaryList	capturedPackets, playoutPackets;
-	const AJAAncillaryDataLocation	F1Loc(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 10, 0, AJAAncillaryDataStream_1);
+
+	const NTV2Standard				videoStandard		(::GetNTV2StandardFromVideoFormat(mVideoFormat));
+	const NTV2SmpteLineNumber		smpteLineNumInfo	(::GetSmpteLineNumber(videoStandard));
+	Bouncer<UWord>					yPercent			(85/*upperLimit*/, 1/*lowerLimit*/, 1/*startValue*/);	//	Vertically "bounces" timecode in raster
+	const AJAAncillaryDataLocation	F1AncDataLoc		(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 10, 0, AJAAncillaryDataStream_1);
 	NTV2_POINTER	zeroesBuffer(mpHostF1AncBuffer.GetByteCount());
 	zeroesBuffer.Fill(ULWord64(0));
 
-	if (mWithAnc && ::IsProgressivePicture(mVideoFormat))
+	if (mWithAnc && !isInterlace)
 		mpHostF2AncBuffer.Allocate(0);	//	Free F2 Anc buffer
 	if (doAncInput)
 	{
@@ -546,8 +548,8 @@ void NTV2LLBurn::ProcessFrames (void)
 	{
 		if (doAncInput)
 			mDevice.AncExtractSetWriteParams (sdiInput, currentInFrame, mInputChannel);
-		if (doAncInput && mpHostF2AncBuffer)
-			mDevice.AncExtractSetWriteParams (sdiInput, currentInFrame, mInputChannel);
+		if (doAncInput && isInterlace)
+			mDevice.AncExtractSetField2WriteParams (sdiInput, currentInFrame, mInputChannel);
 
 		//	Wait until the input has completed capturing a frame...
 		mDevice.WaitForInputFieldID (NTV2_FIELD0, mInputChannel);
@@ -603,9 +605,10 @@ void NTV2LLBurn::ProcessFrames (void)
 		mDevice.DMAReadFrame (currentInFrame, (ULWord*)mpHostVideoBuffer.GetHostPointer(), mpHostVideoBuffer.GetByteCount());
 		if (doAncInput)
 		{	//	Transfer received Anc data into my F1 & F2 buffers...
+			AJAAncillaryList	capturedPackets;
 			mDevice.DMAReadAnc (currentInFrame, mpHostF1AncBuffer, mpHostF2AncBuffer);
 			AJAAncillaryList::SetFromSDIAncData (mpHostF1AncBuffer, mpHostF2AncBuffer, capturedPackets);
-			//if (capturedPackets.CountAncillaryData())		capturedPackets.Print(cerr, false);
+			//	if (capturedPackets.CountAncillaryData())	capturedPackets.Print(cerr, false);		//	Dump packets
 			if (CLEAR_DEVICE_ANC_BUFFER_AFTER_READ)
 				mDevice.DMAWriteAnc (currentInFrame, zeroesBuffer, zeroesBuffer);
 		}
@@ -650,15 +653,15 @@ void NTV2LLBurn::ProcessFrames (void)
 			if (REPLACE_OUTGOING_ANC_WITH_CUSTOM_PACKETS)
 			{
 				AJAAncillaryData pkt;	AJAAncillaryList pkts;
-				AJAAncillaryDataLocation F2Loc(F1Loc);
+				AJAAncillaryDataLocation F2Loc(F1AncDataLoc);
 				LWord pktData(NTV2EndianSwap32(mFramesProcessed));
-				pkt.SetDID(0xC0);  pkt.SetSID(0x00);  pkt.SetDataLocation(F1Loc);  pkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
+				pkt.SetDID(0xC0);  pkt.SetSID(0x00);  pkt.SetDataLocation(F1AncDataLoc);  pkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
 				pkt.SetPayloadData((const uint8_t*) &pktData, 4);
 				pkts.AddAncillaryData(pkt);
 				if (isInterlace)
 				{
 					F2Loc.SetLineNumber(uint16_t(smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD1)
-													+ ULWord(F1Loc.GetLineNumber())
+													+ ULWord(F1AncDataLoc.GetLineNumber())
 													- smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD0)));
 					pkt.SetDID(0xC1);  pkt.SetSID(0x01);  pkt.SetDataLocation(F2Loc);
 					pktData = ULWord(pktData << 16) | ULWord(pktData >> 16);
@@ -666,7 +669,10 @@ void NTV2LLBurn::ProcessFrames (void)
 					pkts.AddAncillaryData(pkt);
 				}
 				pkts.SortListByLocation();	//pkts.Print(cerr, true); cerr << endl;
-				pkts.GetSDITransmitData (mpHostF1AncBuffer, mpHostF2AncBuffer, !isInterlace, isInterlace ? smpteLineNumInfo.GetLastLine(NTV2_FIELD0)+1 : 0);
+				if (NTV2_DEVICE_SUPPORTS_SMPTE2110(mDeviceID))
+					pkts.GetIPTransmitData (mpHostF1AncBuffer, mpHostF2AncBuffer, !isInterlace, isInterlace ? smpteLineNumInfo.GetLastLine(NTV2_FIELD0)+1 : 0);
+				else
+					pkts.GetSDITransmitData (mpHostF1AncBuffer, mpHostF2AncBuffer, !isInterlace, isInterlace ? smpteLineNumInfo.GetLastLine(NTV2_FIELD0)+1 : 0);
 			}
 			mDevice.DMAWriteAnc (currentOutFrame, mpHostF1AncBuffer, mpHostF2AncBuffer);
 		}
