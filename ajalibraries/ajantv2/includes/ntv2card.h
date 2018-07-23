@@ -5143,11 +5143,11 @@ public:
 		@brief		Initializes the given SDI input's Anc extractor for custom Anc packet detection and de-embedding.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc extractor firmware.)
 		@return		True if successful; otherwise false.
-		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
-		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (Frame Store) that's driving the SDI input,
+		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (Frame Store) that's fed from the SDI input,
 									if different from the SDI input. The default is to use the same ::NTV2Channel
 									that corresponds to the given SDI input (e.g., ::NTV2_CHANNEL1 == 0 == SDIIn1).
-		@param[in]	inStandard		Optionally overrides the ::NTV2Standard used to initialize the Anc inserter.
+		@param[in]	inStandard		Optionally overrides the ::NTV2Standard used to initialize the Anc extractor.
 									Defaults to using the ::NTV2Standard of the ::NTV2Channel being used.
 		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
 					use \ref aboutautocirculate.
