@@ -144,6 +144,7 @@
 		B41B5E8116E5330C00A9E0DC /* ntv2serialcontrol.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E1A16E5330C00A9E0DC /* ntv2serialcontrol.h */; };
 		B41B5E9716E537C600A9E0DC /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B41B5E9616E537C600A9E0DC /* IOKit.framework */; };
 		B455DE3C2106319E002A69FD /* ntv2anc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DE3B2106319E002A69FD /* ntv2anc.cpp */; };
+		B455DE3D21063546002A69FD /* ntv2anc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DE3B2106319E002A69FD /* ntv2anc.cpp */; };
 		B462E8BD2076F72E0003262A /* ntv2hdmi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B462E8BC2076F72E0003262A /* ntv2hdmi.cpp */; };
 		B462E8BE2076F7440003262A /* ntv2hdmi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B462E8BC2076F72E0003262A /* ntv2hdmi.cpp */; };
 		B480B6441C6291E1003210EE /* ntv2hevc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B480B6431C6291E1003210EE /* ntv2hevc.cpp */; };
@@ -790,6 +791,7 @@
 				B4CE1E1A16E582A10092B564 /* ntv2nubaccess.cpp in Sources */,
 				B4CE1E1B16E582A10092B564 /* ntv2nubpktcom.cpp in Sources */,
 				B4058556195A1A7C00425B9E /* ntv2audio.cpp in Sources */,
+				B455DE3D21063546002A69FD /* ntv2anc.cpp in Sources */,
 				B4FE2EDD1C7E8A7500C5627A /* ntv2vpidfromspec.cpp in Sources */,
 				B4CE1E1E16E582A10092B564 /* ntv2procamp.cpp in Sources */,
 				B4CE1E1F16E582A10092B564 /* ntv2register.cpp in Sources */,
