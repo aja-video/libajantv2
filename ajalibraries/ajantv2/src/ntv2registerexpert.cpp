@@ -439,7 +439,9 @@ private:
 														"Ignore DID 1-4",		"Ignore DID 5-8",		"Ignore DID 9-12",
 														"Ignore DID 13-16",		"Ignore DID 17-20",		"Analog Start Line",
 														"Analog F1 Y Filter",	"Analog F2 Y Filter",	"Analog F1 C Filter",
-														"Analog F2 C Filter"	};
+														"Analog F2 C Filter"	"",						"",
+														"",						"",						"",
+														"",						""};
 		static const string	AncInsRegNames []	=	{	"Field Bytes",			"Control",				"F1 Start Address",
 														"F2 Start Address",		"Pixel Delays",			"First Active Lines",
 														"Pixels Per Line",		"Lines Per Frame",		"Field ID Lines",
