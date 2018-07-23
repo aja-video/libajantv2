@@ -27,6 +27,7 @@ INCLUDES = -I$(KERNEL_INCLUDES)
 
 AJA_LIB_SRCS = ntv2audio.cpp \
 		ntv2active.cpp \
+		ntv2anc.cpp \
 		ntv2autocirculate.cpp \
 		ntv2bitfile.cpp \
 		ntv2card.cpp \
