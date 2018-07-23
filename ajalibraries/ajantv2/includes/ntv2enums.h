@@ -1835,6 +1835,7 @@ typedef enum
 } NTV2Framesize;
 
 #define	NTV2_IS_VALID_FRAMESIZE(__x__)		((__x__) >= NTV2_FRAMESIZE_2MB  &&  (__x__) < NTV2_MAX_NUM_Framesizes)
+#define	NTV2_IS_VALID_8MB_FRAMESIZE(__x__)	((__x__) == NTV2_FRAMESIZE_8MB  ||  (__x__) == NTV2_FRAMESIZE_16MB  ||  (__x__) == NTV2_FRAMESIZE_32MB)
 
 
 typedef enum

@@ -146,13 +146,18 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 	{
 		// Don't do anything if the requested board is the same as last opened, and
 		// the requested or last opened board aren't remote boards
-		if ( (_boardNumber == inDeviceIndexNumber) && hostName.empty() && (_remoteHandle == INVALID_NUB_HANDLE) )
-			return true;
+		if ( (_boardNumber == inDeviceIndexNumber) && hostName.empty())
+			#if defined(NTV2_NUB_CLIENT_SUPPORT)
+				if (_remoteHandle == INVALID_NUB_HANDLE)
+			#endif	//	NTV2_NUB_CLIENT_SUPPORT
+				return true;
 
 		Close();   // Close current board and open desired board
 	}
 
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	_remoteHandle = (LWord)INVALID_NUB_HANDLE;
+#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
 	_hDevice = INVALID_HANDLE_VALUE;
 	//_boardType = eBoardType;
 	//eBoardType = _boardType;
@@ -163,7 +168,9 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 	{
 		ostringstream	oss;
 		oss << hostName << ":ntv2" << inDeviceIndexNumber;
+	#if defined(NTV2_NUB_CLIENT_SUPPORT)
 		if (!OpenRemote(inDeviceIndexNumber, _displayErrorMessage, 256, hostName.c_str()))
+	#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
 		{
 			DisplayNTV2Error("Failed to open board on remote host.");
 		}
@@ -346,20 +353,16 @@ bool CNTV2WinDriverInterface::SetOverlappedMode (bool bOverlapped)
 // Output: NONE
 bool CNTV2WinDriverInterface::Close()
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 	{
 		return CloseRemote();
 	}
-
+#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
     // If board already closed, return true
     if (!_boardOpened)
         return true;
 
-	if ( _remoteHandle != (LWord)INVALID_NUB_HANDLE )
-	{
-
-	}
-	else
 	{
 		assert( _hDevice );
 		if(_pspDevIFaceDetailData)
@@ -417,7 +420,9 @@ bool CNTV2WinDriverInterface::Close()
 	}
 
 	_hDevice = INVALID_HANDLE_VALUE;
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	_remoteHandle = (LWord)INVALID_NUB_HANDLE;
+#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
 	_boardOpened = false;
 
 	return true;
@@ -499,6 +504,7 @@ bool CNTV2WinDriverInterface::CompleteMemoryForDMA (ULWord * pFrameBuffer)
 bool CNTV2WinDriverInterface::ReadRegister(const ULWord registerNumber, ULWord & registerValue, const ULWord registerMask,
 							   const ULWord registerShift)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 	{
 		if (!CNTV2DriverInterface::ReadRegister(
@@ -513,6 +519,7 @@ bool CNTV2WinDriverInterface::ReadRegister(const ULWord registerNumber, ULWord &
 		return true;
 	}
 	else
+#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
 	{
 		NTV2_ASSERT (registerShift < 32);
 
@@ -572,6 +579,7 @@ bool CNTV2WinDriverInterface::ReadRegister(const ULWord registerNumber, ULWord &
 bool CNTV2WinDriverInterface::WriteRegister (ULWord registerNumber,ULWord registerValue, ULWord registerMask,
 								 ULWord registerShift)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 	{
 		if (!CNTV2DriverInterface::WriteRegister(
@@ -586,6 +594,7 @@ bool CNTV2WinDriverInterface::WriteRegister (ULWord registerNumber,ULWord regist
 		return true;
 	}
 	else
+#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
 	{
 		KSPROPERTY_AJAPROPS_GETSETREGISTER_S propStruct;
 		DWORD dwBytesReturned = 0;
@@ -864,11 +873,12 @@ HANDLE CNTV2WinDriverInterface::GetInterruptEvent( INTERRUPT_ENUMS eInterruptTyp
 bool CNTV2WinDriverInterface::WaitForInterrupt (INTERRUPT_ENUMS eInterruptType,
 												ULWord timeOutMs)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 	{
 		return CNTV2DriverInterface::WaitForInterrupt(eInterruptType,timeOutMs);
 	}
-
+#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
     bool bInterruptHappened = false;    // return value
 
 	HANDLE hEvent = mInterruptEventHandles [eInterruptType];
@@ -1483,6 +1493,7 @@ bool CNTV2WinDriverInterface::MapMemory (PVOID pvUserVa, ULWord ulNumBytes, bool
 // AutoCirculate
 bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 	{
 		if (!CNTV2DriverInterface::AutoCirculate(autoCircData))
@@ -1493,6 +1504,7 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 		return true;
 	}
 	else
+#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
 	{
 		bool bRes = true;
 		DWORD	dwBytesReturned = 0;
@@ -2214,6 +2226,7 @@ CNTV2WinDriverInterface::DriverGetBitFileInformation(
 		BITFILE_INFO_STRUCT &bitFileInfo,
 		NTV2BitFileType bitFileType)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 	{
 		if (!CNTV2DriverInterface::DriverGetBitFileInformation(
@@ -2226,6 +2239,7 @@ CNTV2WinDriverInterface::DriverGetBitFileInformation(
 		return true;
 	}
 	else
+#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
 	{
 		//The boards below only have one bitfile and there is no need to query the driver
 		if(NTV2DeviceHasSPIFlash(_boardID))

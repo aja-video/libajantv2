@@ -183,6 +183,9 @@
     <ClCompile Include="..\src\ntv2supportlogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ntv2anc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\includes\ajaexport.h">

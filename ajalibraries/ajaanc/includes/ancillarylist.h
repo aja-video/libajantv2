@@ -266,7 +266,7 @@ public:	//	INSTANCE METHODS
 		@param		inIsProgressive		Specify true to designate the output ancillary data stream as progressive; 
 										otherwise, specify false. Defaults to true (is progressive).
 		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
-										Defaults to zero (progressive).
+										Defaults to zero (progressive). For interlaced video, see NTV2SmpteLineNumber::GetLastLine .
 		@note		It's assumed that my packets are already sorted by location.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
@@ -391,7 +391,7 @@ public:	//	INSTANCE METHODS
 	**/
 	virtual AJAStatus						GetAnalogAncillaryDataTypeMap (AJAAncillaryAnalogTypeMap & outMap) const;
 
-	
+
 	/**
 		@brief		Sets (or changes) the map entry for the designated line to the designated type.
 		@note		Setting a particular line to AJAAncillaryDataType_Unknown erases the entry for that line,
@@ -402,7 +402,7 @@ public:	//	INSTANCE METHODS
 	**/
 	virtual	AJAStatus						SetAnalogAncillaryDataTypeForLine (const uint16_t inLineNum, const AJAAncillaryDataType inType);
 
-	
+
 	/**
 		@brief		Answers with the ancillary data type associated with the designated line.
 		@param[in]	inLineNum		Specifies the frame line number of interest.
