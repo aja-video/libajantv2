@@ -209,6 +209,7 @@
     <ClCompile Include="..\codecs\hevc\m31\ntv2m31vaparam.cpp" />
     <ClCompile Include="..\codecs\hevc\m31\ntv2m31vinparam.cpp" />
     <ClCompile Include="..\codecs\hevc\m31\ntv2m31viparam.cpp" />
+    <ClCompile Include="..\src\ntv2anc.cpp" />
     <ClCompile Include="..\src\ntv2audio.cpp" />
     <ClCompile Include="..\src\ntv2autocirculate.cpp" />
     <ClCompile Include="..\src\ntv2bitfile.cpp" />
