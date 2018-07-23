@@ -911,6 +911,12 @@ NTV2InputSourceSet & operator += (NTV2InputSourceSet & inOutSet, const NTV2Input
 }
 
 
+ostream & operator << (ostream & inOutStrm, const NTV2SegmentedXferInfo & inRun)
+{
+	return inRun.Print(inOutStrm);
+}
+
+
 //	Implementation of NTV2AutoCirculateStateToString...
 string NTV2AutoCirculateStateToString (const NTV2AutoCirculateState inState)
 {
@@ -927,6 +933,29 @@ NTV2_TRAILER::NTV2_TRAILER ()
 	:	fTrailerVersion		(NTV2_CURRENT_TRAILER_VERSION),
 		fTrailerTag			(NTV2_TRAILER_TAG)
 {
+}
+
+
+ostream & NTV2SegmentedXferInfo::Print (ostream & inStrm, const bool inDumpSegments) const
+{
+	if (!isValid())
+		return inStrm << "(invalid)";
+	if (inDumpSegments)
+	{
+	}
+	else
+	{
+		inStrm	<< DEC(getSegmentCount()) << " segment(s) of " << DEC(getSegmentLength()) << " elements long";
+		if (getElementLength() != 1)
+			inStrm << ", bytes/Elem=" << DEC(getElementLength());
+		if (getSourceOffset())
+			inStrm	<< ", srcOffset=" << DEC(getSourceOffset());
+		inStrm << ", srcSpan=" << DEC(getSourcePitch()) << (isSourceBottomUp()?" Vflip":"");
+		if (getDestOffset())
+			inStrm	<< ", dstOffset=" << DEC(getDestOffset());
+		inStrm << ", dstSpan=" << DEC(getDestPitch()) << (isDestBottomUp()?" Vflip":"");
+	}
+	return inStrm;
 }
 
 
@@ -1151,6 +1180,42 @@ bool NTV2_POINTER::CopyFrom (const NTV2_POINTER & inBuffer,
 	pDst += inDstByteOffset;
 
 	::memcpy (pDst, pSrc, inByteCount);
+	return true;
+}
+
+
+bool NTV2_POINTER::CopyFrom (const NTV2_POINTER & inSrcBuffer, const NTV2SegmentedXferInfo & inXferInfo)
+{
+	if (!inXferInfo.isValid())
+		return false;
+
+	const ULWord	elementSize	(inXferInfo.getElementLength());
+	if (elementSize != 1  &&  elementSize != 2  &&  elementSize != 4  &&  elementSize != 8)
+		return false;	//	Illegal element size
+
+	ULWord		bytesPerSegment	(elementSize * inXferInfo.getSegmentLength());
+	ULWord		totalSegments	(inXferInfo.getSegmentCount());
+	ULWord		totalElements	(totalSegments * inXferInfo.getSegmentLength());
+	ULWord		totalBytes		(totalElements * elementSize);
+	const bool	bClearExcess	(false);
+
+	if (GetByteCount() < totalBytes)
+		return false;	//	Too small
+	if (bClearExcess  &&  GetByteCount() > totalBytes)
+		::memset(GetHostAddress(totalBytes), 0, GetByteCount() - totalBytes);
+
+	//	Copy every segment...
+	ULWord	dstByteOffset(0), srcByteOffset(0);
+	for (ULWord ndx(0);  ndx < totalSegments;  ndx++)
+	{
+		void *	pSrc (inSrcBuffer.GetHostAddress(srcByteOffset, inXferInfo.isSourceBottomUp()));
+		NTV2_ASSERT(pSrc);	//	Should never happen if 'totalBytes' is correct
+		void *	pDst (GetHostAddress(dstByteOffset, inXferInfo.isDestBottomUp()));
+		NTV2_ASSERT(pDst);	//	Should never happen if 'totalBytes' is correct
+		::memcpy (pDst,  pSrc,  bytesPerSegment);
+		srcByteOffset += bytesPerSegment  +  inXferInfo.getSourcePitch() * elementSize;	//	Bump src offset
+		dstByteOffset += bytesPerSegment  +  inXferInfo.getDestPitch() * elementSize;	//	Bump dst offset
+	}	//	for each segment
 	return true;
 }
 
