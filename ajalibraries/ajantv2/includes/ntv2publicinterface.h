@@ -5327,8 +5327,6 @@ typedef enum
 	shiftField1AnalogStartLine = 0,
 	maskField2AnalogStartLine = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26),
 	shiftField2AnalogStartLine = 16
-
-
 } ANCExtMaskShift;
 
 typedef enum
@@ -5354,11 +5352,16 @@ typedef enum
 	regAncExtIgnorePacketReg_17_18_19_20,		//	Reg 16 - Packet Ignore bytes
 	regAncExtIgnorePktsReg_Last		= regAncExtIgnorePacketReg_17_18_19_20,
 	regAncExtAnalogStartLine,					//	Reg 17 - analog_start_line[10:0]
-	regAncExtField1AnalogYFilter,				//	Reg 18 - analog_line_y_f1[10:0]
-	regAncExtField2AnalogYFilter,				//	Reg 19 - analog_line_y_f2[10:0]
-	regAncExtField1AnalogCFilter,				//	Reg 20 - analog_line_c_f1[10:0]
-	regAncExtField2AnalogCFilter,				//	Reg 21 - analog_line_c_f2[10:0]
-	regAncExtAnalogActiveLineLength = 27,		//	Reg 27 - analog active line length
+	regAncExtField1AnalogYFilter,				//	Reg 18 - analog_line_y_f1[31:0] - one bit per F1 line past analog_start_line, 1=captureAnalogY, 0=normal
+	regAncExtField2AnalogYFilter,				//	Reg 19 - analog_line_y_f2[31:0] - one bit per F2 line past analog_start_line, 1=captureAnalogY, 0=normal
+	regAncExtField1AnalogCFilter,				//	Reg 20 - analog_line_c_f1[31:0] - one bit per F1 line past analog_start_line, 1=captureAnalogC, 0=normal
+	regAncExtField2AnalogCFilter,				//	Reg 21 - analog_line_c_f2[31:0] - one bit per F2 line past analog_start_line, 1=captureAnalogC, 0=normal
+	regAncExtTwoFrameCadenceDetect,				//	Reg 22 - not used in NTV2
+	regAncExtRP188Type,							//	Reg 23 - not used in NTV2
+	regAncExtTimecodeStatus0_31,				//	Reg 24 - not used in NTV2
+	regAncExtTimecodeStatus32_63,				//	Reg 25 - not used in NTV2
+	regAncExtTimecodeStatusDBB,					//	Reg 26 - not used in NTV2
+	regAncExtAnalogActiveLineLength,			//	Reg 27 - analog active line length
 	regAncExt_LAST
 } ANCExtRegisters;
 
@@ -5379,7 +5382,6 @@ typedef enum
 	regAncInsBlankCStartLine,
 	regAncInsBlankField1CLines,
 	regAncInsBlankField2CLines,
-	regAncInsBlandField2CLines	= regAncInsBlankField2CLines,	//	Whoops
 	regAncIns_LAST
 } ANCInsRegisters;
 
