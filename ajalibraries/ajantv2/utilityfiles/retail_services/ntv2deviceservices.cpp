@@ -2217,7 +2217,6 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     }
                 }
             }
-            *videoFormatLast = mFb1VideoFormat;
 
             rx_2110Config rxConfig;
             eSFP sfp = SFP_1;
@@ -2226,6 +2225,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
             for (uint32_t i=0; i<m2110RxVideoData.numRxVideoChannels; i++)
             {
                 if (memcmp(&m2110RxVideoData.rxVideoCh[i], &s2110RxVideoDataLast->rxVideoCh[i], sizeof(RxVideoChData2110)) != 0 ||
+                    *videoFormatLast != mFb1VideoFormat ||
                     ipServiceForceConfig)
                 {
                     rxConfig.init();
@@ -2305,6 +2305,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     }
                 }
             }
+            *videoFormatLast = mFb1VideoFormat;
 
             // See if any receive audio channels need configuring/enabling
             for (uint32_t i=0; i<m2110RxAudioData.numRxAudioChannels; i++)
