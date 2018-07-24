@@ -3,6 +3,7 @@
 
 	@section		ntv2hwio
 
+	<hr>
 	@subsection		io4kplus	Io4K Plus
 
 	This page describes the Io4K Plus capture/playout device with standard Quad-Mode firmware,
@@ -18,29 +19,29 @@
 	-	Four-lane gen 3 PCI Express
 	-	2 DMA engines
 	-	MSI supported
-	-	2 x Thunderbolt III connectors
+	-	2 × Thunderbolt III connectors
 
 	@par	Inputs & Outputs
 
-	-	4 x SDI connectors
+	-	4 × SDI connectors
 		-#	Bi-directional in 3G mode (under software control), 4K/UHD input-only in 6G/12G mode
 		-#	Bi-directional 3G-SDI (under software control)
 		-#	Bi-directional in 3G mode (under software control), 4K/UHD output-only in 6G/12G mode
 		-#	Bi-directional 3G-SDI (under software control)
-	-	1 x 3G-SDI monitor output
-	-	1 x HDMI 2.0 input
-	-	1 x HDMI 2.0 output (supports HDR InfoFrame metadata and UHD/4Kp60 4:4:4)
-	-	1 x Reference/LTC input (Ref supports 1V analog color black, 2/4V composite sync, or 1V HD tri-level sync)
-	-	1 x LTC output
-	-	1 x RS-422 serial port
-	-	1 x Microphone input
-	-	1 x DB-25 connector for audio (8 channels in, or 8 channels out, or 4-in/4-out)
+	-	1 × 3G-SDI monitor output
+	-	1 × HDMI 2.0 input
+	-	1 × HDMI 2.0 output (supports HDR InfoFrame metadata and UHD/4Kp60 4:4:4)
+	-	1 × Reference/LTC input (Ref supports 1V analog color black, 2/4V composite sync, or 1V HD tri-level sync)
+	-	1 × LTC output
+	-	1 × RS-422 serial port
+	-	1 × Microphone input
+	-	1 × DB-25 connector for audio (8 channels in, or 8 channels out, or 4-in/4-out)
 
 	@par	Frame Buffer
 
 	-	2GB SDRAM
-	-	256 x 8MB frames
-	-	128 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	256 × 8MB frames
+	-	128 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
 
 	@par	Audio
 
@@ -71,7 +72,7 @@
 
 	@par	Physical
 
-	-	Size (W x D x H):  8.74" x 8.11" x 1.65" (222mm × 206mm × 42mm)
+	-	Size (W × D × H):  8.74" × 8.11" × 1.65" (222mm × 206mm × 42mm)
 	-	Weight:	3.4 lb (1.5 kg)
 	-	Power: 30W (typ), 33W (max), 70W max with USB-C power delivery to downstream devices
 

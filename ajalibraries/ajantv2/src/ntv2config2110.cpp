@@ -482,13 +482,14 @@ void CNTV2Config2110::SetVideoFormatForRxTx(const NTV2Stream stream, const NTV2V
     NTV2FormatDescriptor fd(format, NTV2_FBF_10BIT_YCBCR);
 
     NTV2FrameRate       fr  = GetNTV2FrameRateFromVideoFormat(format);
-    NTV2FrameGeometry   fg  = fd.GetFrameGeometry();
+    NTV2FrameGeometry   fg  = GetNTV2FrameGeometryFromVideoFormat(format);
     NTV2Standard        std = fd.GetVideoStandard();
     bool               is2K = fd.Is2KFormat();
 
     uint32_t val = ( (((uint32_t) fr) << 8) |
                      (((uint32_t) fg) << 4) |
                       ((uint32_t) std ) );
+
     if (is2K)
         val += BIT(13);
 
@@ -881,9 +882,6 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
 
         // end setup 4175 packetizer
         SetTxFormat(VideoStreamToChannel(stream), txConfig.videoFormat);
-
-        // Generate and push the video SDP
-        GenSDP(stream);
     }
     else if (StreamType(stream) == AUDIO_STREAM)
     {
@@ -914,9 +912,10 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
         // ssrc
         mDevice.WriteRegister(kReg3190_pkt_ssrc + baseAddrPacketizer,txConfig.ssrc);
 
-        // Generate and push the audio SDP
-        GenSDP(stream);
     }
+
+    // Generate and push the SDP
+    GenSDP(stream);
 
     return rv;
 }
@@ -1076,8 +1075,6 @@ bool CNTV2Config2110::SetTxStreamEnable(const NTV2Stream stream, bool enableSfp1
         // disable
         mDevice.WriteRegister(kReg4175_pkt_ctrl + packetizerBaseAddr, 0x00);
     }
-
-    GenSDP(stream);
 
     return true;
 }
@@ -1525,11 +1522,11 @@ uint32_t CNTV2Config2110::Get2110TxStreamIndex(NTV2Stream str)
             index = (uint32_t)(str-NTV2_AUDIO1_STREAM);
             break;
 
-        case NTV2_METADATA1_STREAM:
-        case NTV2_METADATA2_STREAM:
-        case NTV2_METADATA3_STREAM:
-        case NTV2_METADATA4_STREAM:
-            index = (uint32_t)(str-NTV2_METADATA1_STREAM);
+        case NTV2_ANC1_STREAM:
+        case NTV2_ANC2_STREAM:
+        case NTV2_ANC3_STREAM:
+        case NTV2_ANC4_STREAM:
+            index = (uint32_t)(str-NTV2_ANC1_STREAM);
             break;
 
 		case NTV2_MAX_NUM_STREAMS:		break;
@@ -1633,10 +1630,7 @@ string CNTV2Config2110::GetTxSDPUrl(const eSFP sfp, const NTV2Stream stream)
 
 string CNTV2Config2110::GetTxSDP(const NTV2Stream stream)
 {
-    if (txsdp[stream].str().empty())
-    {
-        GenSDP(stream);
-    }
+    GenSDP(stream, false);
     return txsdp[stream].str();
 }
 
@@ -1647,7 +1641,7 @@ string CNTV2Config2110::To_String(int val)
     return oss.str();
 }
 
-bool CNTV2Config2110::GenSDP(const NTV2Stream stream)
+bool CNTV2Config2110::GenSDP(const NTV2Stream stream, bool pushit)
 {
     string filename = "txstream";
 
@@ -1706,8 +1700,13 @@ bool CNTV2Config2110::GenSDP(const NTV2Stream stream)
     {
         GenSDPAudioStream(sdp, stream, gmInfo);
     }
+    
+    //cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
 
-    rv = PushSDP(filename,sdp);
+    if (pushit)
+        rv = PushSDP(filename,sdp);
+    else
+        rv = true;
 
     return rv;
 }
@@ -1718,7 +1717,7 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, const NTV2Stream str
     bool enabledA;
     bool enabledB;
     GetTxStreamEnable(stream, enabledA, enabledB);
-    if (!enabledA)
+    if (!enabledA && !enabledB)
     {
         return true;
     }
@@ -1727,7 +1726,7 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, const NTV2Stream str
     GetTxStreamConfiguration(stream, config);
 
     uint32_t baseAddrPacketizer;
-    SetTxPacketizerChannel(NTV2_VIDEO1_STREAM, baseAddrPacketizer);
+    SetTxPacketizerChannel(stream, baseAddrPacketizer);
 
     uint32_t width;
     mDevice.ReadRegister(kReg4175_pkt_width + baseAddrPacketizer, width);
@@ -1801,7 +1800,7 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, const  NTV2Stream st
     bool enabledA;
     bool enabledB;
     GetTxStreamEnable(stream, enabledA, enabledB);
-    if (!enabledA)
+    if (!enabledA && !enabledB)
     {
         return true;
     }
@@ -1881,11 +1880,11 @@ NTV2StreamType CNTV2Config2110::StreamType(const NTV2Stream stream)
         case NTV2_AUDIO4_STREAM:
             type = AUDIO_STREAM;
             break;
-        case NTV2_METADATA1_STREAM:
-        case NTV2_METADATA2_STREAM:
-        case NTV2_METADATA3_STREAM:
-        case NTV2_METADATA4_STREAM:
-            type = METADATA_STREAM;
+        case NTV2_ANC1_STREAM:
+        case NTV2_ANC2_STREAM:
+        case NTV2_ANC3_STREAM:
+        case NTV2_ANC4_STREAM:
+            type = ANC_STREAM;
             break;
 
         default:

@@ -23,11 +23,11 @@ IoExpressServices::IoExpressServices()
 //-------------------------------------------------------------------------------------------------------
 NTV2VideoFormat IoExpressServices::GetSelectedInputVideoFormat(
 											NTV2VideoFormat fbVideoFormat,
-											NTV2SDIInputFormatSelect* inputFormatSelect)
+											NTV2ColorSpaceMode* inputColorSpace)
 {
 	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-	if (inputFormatSelect)
-		*inputFormatSelect = NTV2_YUVSelect;
+	if (inputColorSpace)
+		*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
 	
 	// Figure out what our input format is based on what is selected 
 	switch (mVirtualInputSelect)

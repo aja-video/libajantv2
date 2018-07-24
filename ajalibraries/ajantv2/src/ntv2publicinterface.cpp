@@ -1447,6 +1447,34 @@ bool FRAME_STAMP::GetInputTimeCode (NTV2_RP188 & outTimeCode, const NTV2TCIndex 
 	return true;
 }
 
+
+bool FRAME_STAMP::GetInputTimeCodes (NTV2TimeCodes & outTimeCodes, const NTV2Channel inSDIInput, const bool inValidOnly) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	outTimeCodes.clear();
+
+	if (!NTV2_IS_VALID_CHANNEL(inSDIInput))
+		return false;	//	Bad SDI input
+
+	NTV2TimeCodeList	allTCs;
+	if (!GetInputTimeCodes(allTCs))
+		return false;	//	GetInputTimeCodes failed
+
+	const NTV2TCIndexes	tcIndexes (GetTCIndexesForSDIInput(inSDIInput));
+	for (NTV2TCIndexesConstIter iter(tcIndexes.begin());  iter != tcIndexes.end();  ++iter)
+	{
+		const NTV2TCIndex tcIndex(*iter);
+		NTV2_ASSERT(NTV2_IS_VALID_TIMECODE_INDEX(tcIndex));
+		const NTV2_RP188 tc(allTCs.at(tcIndex));
+		if (!inValidOnly)
+			outTimeCodes[tcIndex] = tc;
+		else if (tc.IsValid())
+			outTimeCodes[tcIndex] = tc;
+	}
+	return true;
+}
+
+
 bool FRAME_STAMP::GetSDIInputStatus(NTV2SDIInputStatus & outStatus, const UWord inSDIInputIndex0) const
 {
 	NTV2_ASSERT_STRUCT_VALID;
@@ -2080,6 +2108,13 @@ bool AUTOCIRCULATE_TRANSFER::GetInputTimeCode (NTV2_RP188 & outTimeCode, const N
 {
 	NTV2_ASSERT_STRUCT_VALID;
 	return acTransferStatus.acFrameStamp.GetInputTimeCode (outTimeCode, inTCIndex);
+}
+
+
+bool AUTOCIRCULATE_TRANSFER::GetInputTimeCodes (NTV2TimeCodes & outTimeCodes, const NTV2Channel inSDIInput, const bool inValidOnly) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	return acTransferStatus.acFrameStamp.GetInputTimeCodes (outTimeCodes, inSDIInput, inValidOnly);
 }
 
 

@@ -285,4 +285,6 @@ and choosing a LUT configuration menu.
 		This should only be chosen if the LUT is being fed RGB video, and feeding YCbCr video downstream.
 	-	<b>YUV—>RGB, Full—>SMPTE</b> — If clicked, __DESCRIBE__.
 		This should only be chosen if the LUT is being fed YCbCr video, and feeding RGB video downstream.
+
+<hr size="50px">
 **/

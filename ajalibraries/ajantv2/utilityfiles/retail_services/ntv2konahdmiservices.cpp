@@ -15,21 +15,6 @@ KonaHDMIServices::KonaHDMIServices()
 {
 }
 
-//-------------------------------------------------------------------------------------------------------
-//	UpdateAutoState
-//-------------------------------------------------------------------------------------------------------
-void KonaHDMIServices::UpdateAutoState (void)
-{
-	// auto mode from transport
-	if (mDualStreamTransportType == NTV2_SDITransport_Auto)
-	{
-		if (IsVideoFormatA(mFb1VideoFormat))
-			mDualStreamTransportType = NTV2_SDITransport_3Ga;
-		else
-			mDualStreamTransportType = NTV2_SDITransport_DualLink_3Gb;
-	}
-}
-
 
 //-------------------------------------------------------------------------------------------------------
 //	GetSelectedInputVideoFormat
@@ -38,12 +23,12 @@ void KonaHDMIServices::UpdateAutoState (void)
 //-------------------------------------------------------------------------------------------------------
 NTV2VideoFormat KonaHDMIServices::GetSelectedInputVideoFormat(
 											NTV2VideoFormat fbVideoFormat,
-											NTV2SDIInputFormatSelect* inputFormatSelect)
+											NTV2ColorSpaceMode* inputColorSpace)
 {
 	(void)fbVideoFormat;
 	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-	if (inputFormatSelect)
-		*inputFormatSelect = NTV2_YUVSelect;
+	if (inputColorSpace)
+		*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
 	
 	// Figure out what our input format is based on what is selected
     switch (mVirtualInputSelect)
@@ -58,8 +43,8 @@ NTV2VideoFormat KonaHDMIServices::GetSelectedInputVideoFormat(
 				NTV2LHIHDMIColorSpace hdmiInputColor;
 				mCard->GetHDMIInputColor(hdmiInputColor, (NTV2Channel)mVirtualInputSelect);
 
-				if (inputFormatSelect)
-					*inputFormatSelect = (hdmiInputColor == NTV2_LHIHDMIColorSpaceYCbCr) ? NTV2_YUVSelect : NTV2_RGBSelect;
+				if (inputColorSpace)
+					*inputColorSpace = (hdmiInputColor == NTV2_LHIHDMIColorSpaceYCbCr) ? NTV2_ColorSpaceModeYCbCr : NTV2_ColorSpaceModeRgb;
 			}
 			break;
 
@@ -92,19 +77,18 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 	//NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
-
-	NTV2CrosspointID			inputXpt1		= NTV2_XptBlack;
-	NTV2CrosspointID			inputXpt2		= NTV2_XptBlack;
-	NTV2CrosspointID			inputXpt3		= NTV2_XptBlack;
-	NTV2CrosspointID			inputXpt4		= NTV2_XptBlack;
-	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
+	NTV2CrosspointID			inputXpt1			= NTV2_XptBlack;
+	NTV2CrosspointID			inputXpt2			= NTV2_XptBlack;
+	NTV2CrosspointID			inputXpt3			= NTV2_XptBlack;
+	NTV2CrosspointID			inputXpt4			= NTV2_XptBlack;
+	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;		// Input format select (YUV, RGB, etc)
 	
 	NTV2LHIHDMIColorSpace hdmiInputColor;
 	mCard->GetHDMIInputColor(hdmiInputColor, (NTV2Channel)mVirtualInputSelect);
 	if(hdmiInputColor == NTV2_LHIHDMIColorSpaceYCbCr)
-		inputFormatSelect = NTV2_YUVSelect;
+		inputColorSpace = NTV2_ColorSpaceModeYCbCr;
 	else
-		inputFormatSelect = NTV2_RGBSelect;
+		inputColorSpace = NTV2_ColorSpaceModeRgb;
 
 	NTV2VideoFormat hdmiInputFormat = mCard->GetHDMIInputVideoFormat((NTV2Channel)mVirtualInputSelect);
 	b4K = NTV2_IS_QUAD_FRAME_FORMAT(hdmiInputFormat);
@@ -112,25 +96,25 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 	switch(mVirtualInputSelect)
 	{
 	case NTV2_Input1Select:
-		inputXpt1 = inputFormatSelect == NTV2_YUVSelect ? NTV2_XptHDMIIn1 : NTV2_XptHDMIIn1RGB;
-		inputXpt2 = inputFormatSelect == NTV2_YUVSelect ? NTV2_XptHDMIIn1Q2 : NTV2_XptHDMIIn1Q2RGB;
-		inputXpt3 = inputFormatSelect == NTV2_YUVSelect ? NTV2_XptHDMIIn1Q3 : NTV2_XptHDMIIn1Q3RGB;
-		inputXpt4 = inputFormatSelect == NTV2_YUVSelect ? NTV2_XptHDMIIn1Q4 : NTV2_XptHDMIIn1Q4RGB;
+		inputXpt1 = inputColorSpace == NTV2_ColorSpaceModeYCbCr ? NTV2_XptHDMIIn1 : NTV2_XptHDMIIn1RGB;
+		inputXpt2 = inputColorSpace == NTV2_ColorSpaceModeYCbCr ? NTV2_XptHDMIIn1Q2 : NTV2_XptHDMIIn1Q2RGB;
+		inputXpt3 = inputColorSpace == NTV2_ColorSpaceModeYCbCr ? NTV2_XptHDMIIn1Q3 : NTV2_XptHDMIIn1Q3RGB;
+		inputXpt4 = inputColorSpace == NTV2_ColorSpaceModeYCbCr ? NTV2_XptHDMIIn1Q4 : NTV2_XptHDMIIn1Q4RGB;
 		break;
 	case NTV2_Input2Select:
-		inputXpt1 = inputFormatSelect == NTV2_YUVSelect ? NTV2_XptHDMIIn2 : NTV2_XptHDMIIn2RGB;
-		inputXpt2 = inputFormatSelect == NTV2_YUVSelect ? NTV2_XptHDMIIn2Q2 : NTV2_XptHDMIIn2Q2RGB;
-		inputXpt3 = inputFormatSelect == NTV2_YUVSelect ? NTV2_XptHDMIIn2Q3 : NTV2_XptHDMIIn2Q3RGB;
-		inputXpt4 = inputFormatSelect == NTV2_YUVSelect ? NTV2_XptHDMIIn2Q4 : NTV2_XptHDMIIn2Q4RGB;
+		inputXpt1 = inputColorSpace == NTV2_ColorSpaceModeYCbCr ? NTV2_XptHDMIIn2 : NTV2_XptHDMIIn2RGB;
+		inputXpt2 = inputColorSpace == NTV2_ColorSpaceModeYCbCr ? NTV2_XptHDMIIn2Q2 : NTV2_XptHDMIIn2Q2RGB;
+		inputXpt3 = inputColorSpace == NTV2_ColorSpaceModeYCbCr ? NTV2_XptHDMIIn2Q3 : NTV2_XptHDMIIn2Q3RGB;
+		inputXpt4 = inputColorSpace == NTV2_ColorSpaceModeYCbCr ? NTV2_XptHDMIIn2Q4 : NTV2_XptHDMIIn2Q4RGB;
 		break;
 	case NTV2_Input3Select:
-		inputXpt1 = inputFormatSelect == NTV2_YUVSelect ? NTV2_XptHDMIIn3 : NTV2_XptHDMIIn3RGB;
+		inputXpt1 = inputColorSpace == NTV2_ColorSpaceModeYCbCr ? NTV2_XptHDMIIn3 : NTV2_XptHDMIIn3RGB;
 		inputXpt2 = NTV2_XptBlack;
 		inputXpt3 = NTV2_XptBlack;
 		inputXpt4 = NTV2_XptBlack;
 		break;
 	case NTV2_Input4Select:
-		inputXpt1 = inputFormatSelect == NTV2_YUVSelect ? NTV2_XptHDMIIn4 : NTV2_XptHDMIIn4RGB;
+		inputXpt1 = inputColorSpace == NTV2_ColorSpaceModeYCbCr ? NTV2_XptHDMIIn4 : NTV2_XptHDMIIn4RGB;
 		inputXpt2 = NTV2_XptBlack;
 		inputXpt3 = NTV2_XptBlack;
 		inputXpt4 = NTV2_XptBlack;
@@ -151,7 +135,7 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 	mCard->SetTsiFrameEnable(b4K, NTV2_CHANNEL2);
 	
 	// CSCs
-	if (inputFormatSelect == NTV2_RGBSelect)
+	if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptLUT1RGB);
 		mCard->Connect (NTV2_XptCSC2VidInput, b4K ? NTV2_XptLUT2RGB : NTV2_XptBlack);
@@ -168,7 +152,7 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 	
 
 	// LUTs
-	if (inputFormatSelect == NTV2_RGBSelect)
+	if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, inputXpt1);
 		mCard->Connect (NTV2_XptLUT2Input, b4K ? inputXpt2 : NTV2_XptBlack);
@@ -204,7 +188,7 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 	}
 
 	// 425 muxs
-	if(inputFormatSelect == NTV2_RGBSelect)
+	if(inputColorSpace == NTV2_ColorSpaceModeRgb)
 	{
 		if(bFb1RGB)
 		{
@@ -269,7 +253,7 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptFrameBuffer1Input, inputFormatSelect == NTV2_RGBSelect ? NTV2_XptCSC1VidRGB : inputXpt1);
+			mCard->Connect (NTV2_XptFrameBuffer1Input, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC1VidRGB : inputXpt1);
 		}
 		mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_XptBlack);
 		mCard->Connect(NTV2_XptFrameBuffer2Input, NTV2_XptBlack);

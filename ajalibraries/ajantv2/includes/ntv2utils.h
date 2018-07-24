@@ -290,8 +290,21 @@ AJAExport bool	CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,
 							const UWord					inSrcHorzPixelsToCopy);
 
 AJAExport NTV2Standard GetNTV2StandardFromScanGeometry (UByte geometry, bool progressiveTransport);
+
+/**
+	@return		The ::NTV2Standard that corresponds to the given ::NTV2VideoFormat.
+	@param[in]	inVideoFormat	Specifies the ::NTV2VideoFormat of interest.
+	@see		::GetNTV2FrameGeometryFromVideoFormat, ::GetGeometryFromStandard
+**/
 AJAExport NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat);
-AJAExport NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(NTV2VideoFormat videoFormat);
+
+/**
+	@return		The ::NTV2FrameGeometry that corresponds to the given ::NTV2VideoFormat.
+	@param[in]	inVideoFormat	Specifies the ::NTV2VideoFormat of interest.
+	@see		::GetNTV2StandardFromScanGeometry
+**/
+AJAExport NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat (const NTV2VideoFormat inVideoFormat);
+
 #if defined (NTV2_DEPRECATE)
 	#define	GetHdmiV2StandardFromVideoFormat(__vf__)	::GetNTV2StandardFromVideoFormat (__vf__)
 #else
@@ -397,13 +410,31 @@ AJAExport ULWord				GetVaricamRepeatCount (NTV2FrameRate sequenceRate, NTV2Frame
 AJAExport ULWord				GetScaleFromFrameRate (NTV2FrameRate playFrameRate);
 AJAExport NTV2FrameRate			GetFrameRateFromScale (long scale, long duration, NTV2FrameRate playFrameRate);
 AJAExport NTV2FrameRate			GetNTV2FrameRateFromVideoFormat (NTV2VideoFormat videoFormat);
+
 /**
-	@return	The equivalent non-VANC NTV2FrameGeometry value for the given frame geometry.
-	@param[in]	inFrameGeometry	Specifies the frame geometry to be normalized to its non-VANC equivalent.
+	@return		The equivalent non-VANC ::NTV2FrameGeometry value for a given ::NTV2FrameGeometry.
+	@param[in]	inFrameGeometry	Specifies the ::NTV2FrameGeometry to be normalized into its non-VANC equivalent.
+	@see		::GetVANCFrameGeometry
 **/
 AJAExport NTV2FrameGeometry		GetNormalizedFrameGeometry (const NTV2FrameGeometry inFrameGeometry);
+
+/**
+	@return	The equivalent VANC ::NTV2FrameGeometry value for a given ::NTV2VANCMode.
+	@param[in]	inFrameGeometry	Specifies the ::NTV2FrameGeometry to be converted into its VANC equivalent.
+	@param[in]	inVancMode		Specifies the desired ::NTV2VANCMode.
+	@see		::GetNormalizedFrameGeometry
+**/
+AJAExport NTV2FrameGeometry		GetVANCFrameGeometry (const NTV2FrameGeometry inFrameGeometry, const NTV2VANCMode inVancMode);
+
 AJAExport ULWord				GetNTV2FrameGeometryWidth (NTV2FrameGeometry geometry);
 AJAExport ULWord				GetNTV2FrameGeometryHeight (NTV2FrameGeometry geometry);
+
+/**
+	@return	The equivalent normalized (non-VANC) ::NTV2FrameGeometry value for a given ::NTV2Standard.
+	@param[in]	inStandard		Specifies the ::NTV2Standard to be converted into a normalized ::NTV2FrameGeometry.
+**/
+AJAExport NTV2FrameGeometry		GetGeometryFromStandard (const NTV2Standard inStandard);
+
 AJAExport ULWord				GetDisplayWidth (NTV2VideoFormat videoFormat);
 AJAExport ULWord				GetDisplayHeight (NTV2VideoFormat videoFormat);
 AJAExport NTV2ConversionMode	GetConversionMode (NTV2VideoFormat inFormat, NTV2VideoFormat outFormat);
@@ -413,16 +444,18 @@ AJAExport NTV2VideoFormat		GetOutputForConversionMode (NTV2ConversionMode conver
 AJAExport NTV2Channel			GetNTV2ChannelForIndex (const ULWord inIndex0);
 AJAExport ULWord				GetIndexForNTV2Channel (const NTV2Channel inChannel);
 
-AJAExport NTV2Crosspoint		GetNTV2CrosspointChannelForIndex (const ULWord inIndex0);
-AJAExport ULWord				GetIndexForNTV2CrosspointChannel (const NTV2Crosspoint inChannel);
-AJAExport NTV2Crosspoint		GetNTV2CrosspointInputForIndex (const ULWord inIndex0);
-AJAExport ULWord				GetIndexForNTV2CrosspointInput (const NTV2Crosspoint inChannel);
-AJAExport NTV2Crosspoint		GetNTV2CrosspointForIndex (const ULWord inIndex0);
-AJAExport ULWord				GetIndexForNTV2Crosspoint (const NTV2Crosspoint inChannel);
-
-AJAExport bool					IsNTV2CrosspointInput (const NTV2Crosspoint inChannel);
-AJAExport bool					IsNTV2CrosspointOutput (const NTV2Crosspoint inChannel);
-AJAExport std::string			NTV2CrosspointToString (const NTV2Crosspoint inChannel);
+AJAExport NTV2_SHOULD_BE_DEPRECATED(NTV2Crosspoint	GetNTV2CrosspointChannelForIndex (const ULWord inIndex0));
+AJAExport NTV2_SHOULD_BE_DEPRECATED(ULWord			GetIndexForNTV2CrosspointChannel (const NTV2Crosspoint inChannel));
+AJAExport NTV2_SHOULD_BE_DEPRECATED(NTV2Crosspoint	GetNTV2CrosspointInputForIndex (const ULWord inIndex0));
+AJAExport NTV2_SHOULD_BE_DEPRECATED(ULWord			GetIndexForNTV2CrosspointInput (const NTV2Crosspoint inChannel));
+AJAExport NTV2_SHOULD_BE_DEPRECATED(NTV2Crosspoint	GetNTV2CrosspointForIndex (const ULWord inIndex0));
+AJAExport NTV2_SHOULD_BE_DEPRECATED(ULWord			GetIndexForNTV2Crosspoint (const NTV2Crosspoint inChannel));
+AJAExport NTV2_SHOULD_BE_DEPRECATED(bool			IsNTV2CrosspointInput (const NTV2Crosspoint inChannel));
+AJAExport NTV2_SHOULD_BE_DEPRECATED(bool			IsNTV2CrosspointOutput (const NTV2Crosspoint inChannel));
+AJAExport NTV2_SHOULD_BE_DEPRECATED(std::string		NTV2CrosspointToString (const NTV2Crosspoint inChannel));
+AJAExport NTV2_SHOULD_BE_DEPRECATED(NTV2Channel		NTV2CrosspointToNTV2Channel (const NTV2Crosspoint inCrosspointChannel));
+AJAExport NTV2_SHOULD_BE_DEPRECATED(NTV2Crosspoint	NTV2ChannelToInputCrosspoint (const NTV2Channel inChannel));
+AJAExport NTV2_SHOULD_BE_DEPRECATED(NTV2Crosspoint	NTV2ChannelToOutputCrosspoint (const NTV2Channel inChannel));
 
 AJAExport NTV2VideoFormat		GetTransportCompatibleFormat (const NTV2VideoFormat inFormat, const NTV2VideoFormat inTargetFormat);
 AJAExport bool					IsTransportCompatibleFormat (const NTV2VideoFormat inFormat1, const NTV2VideoFormat inFormat2);
@@ -430,23 +463,6 @@ AJAExport bool					IsTransportCompatibleFormat (const NTV2VideoFormat inFormat1,
 AJAExport NTV2InputSource		GetNTV2InputSourceForIndex (const ULWord inIndex0);				//	0-based index
 AJAExport NTV2InputSource		GetNTV2HDMIInputSourceForIndex (const ULWord inIndex0);
 AJAExport ULWord				GetIndexForNTV2InputSource (const NTV2InputSource inValue);		//	0-based index
-
-
-AJAExport NTV2Channel			NTV2CrosspointToNTV2Channel (const NTV2Crosspoint inCrosspointChannel);
-
-/**
-	@brief		Converts the given NTV2Channel value into the equivalent input NTV2Crosspoint.
-	@param[in]	inChannel		Specifies the NTV2Channel to be converted.
-	@return		The equivalent input NTV2Crosspoint value.
-**/
-AJAExport NTV2Crosspoint		NTV2ChannelToInputCrosspoint (const NTV2Channel inChannel);
-
-/**
-	@brief		Converts the given NTV2Channel value into the equivalent output NTV2Crosspoint.
-	@param[in]	inChannel		Specifies the NTV2Channel to be converted.
-	@return		The equivalent output NTV2Crosspoint value.
-**/
-AJAExport NTV2Crosspoint		NTV2ChannelToOutputCrosspoint (const NTV2Channel inChannel);
 
 /**
 	@brief		Converts the given NTV2Channel value into the equivalent input INTERRUPT_ENUMS value.
@@ -469,6 +485,12 @@ AJAExport INTERRUPT_ENUMS		NTV2ChannelToOutputInterrupt (const NTV2Channel inCha
 	@return		The equivalent NTV2TCIndex value.
 **/
 AJAExport NTV2TCIndex			NTV2ChannelToTimecodeIndex (const NTV2Channel inChannel, const bool inEmbeddedLTC = false);
+
+/**
+	@return		The NTV2TCIndexes that are associated with the given SDI input.
+	@param[in]	inSDIInput		Specifies the SDI input of interest as an NTV2Channel.
+**/
+AJAExport NTV2TCIndexes			GetTCIndexesForSDIInput (const NTV2Channel inSDIInput);
 
 /**
 	@brief		Converts the given NTV2TCIndex value into the appropriate NTV2Channel value.
@@ -795,12 +817,20 @@ public:
 	inline bool		IsValid (void) const	{return NTV2_IS_VALID_STANDARD (mStandard) && smpteFirstActiveLine;}
 
 	/**
-		@brief	Returns the SMPTE line number of the Start of Active Video (SAV).
+		@returns	The SMPTE line number of the Start of Active Video (SAV).
 		@param[in]	inRasterFieldID		Specifies a valid raster field ID (not the wire field ID).
 										Defaults to NTV2_FIELD0 (i.e. first field) of the raster.
 										Use NTV2_FIELD1 for the starting line of a PsF frame.
 	**/
 	ULWord			GetFirstActiveLine (const NTV2FieldID inRasterFieldID = NTV2_FIELD0) const;
+
+	/**
+		@returns	The SMPTE line number of the last raster line.
+		@param[in]	inRasterFieldID		Specifies a valid raster field ID (not the wire field ID).
+										Defaults to NTV2_FIELD0 (i.e. first field) of the raster.
+										Use NTV2_FIELD1 for the starting line of a PsF frame.
+	**/
+	ULWord			GetLastLine (const NTV2FieldID inRasterFieldID = NTV2_FIELD0) const;
 
 	/**
 		@return	True if I'm equal to the given NTV2SmpteLineNumber.

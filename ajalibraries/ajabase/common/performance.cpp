@@ -47,7 +47,7 @@ AJAPerformance::AJAPerformance(const std::string& name,
 }
 
 AJAPerformance::AJAPerformance(const std::string& name,
-                               const AJAPerformaceExtraMap &values,
+                               const AJAPerformanceExtraMap &values,
                                AJATimerPrecision precision,
                                uint64_t skipEntries)
     : mTimer(precision)
@@ -87,7 +87,7 @@ AJAPerformance::~AJAPerformance(void)
     }
 }
 
-void AJAPerformance::SetExtras(const AJAPerformaceExtraMap& values)
+void AJAPerformance::SetExtras(const AJAPerformanceExtraMap& values)
 {
     mExtras = values;
 }
@@ -138,7 +138,7 @@ double AJAPerformance::StandardDeviation(void)
     return sqrt(Variance());
 }
 
-const AJAPerformaceExtraMap AJAPerformance::Extras(void)
+const AJAPerformanceExtraMap AJAPerformance::Extras(void)
 {
     return mExtras;
 }
@@ -225,7 +225,7 @@ void AJAPerformance::Report(const std::string& name, const char* pFileName, int3
     }
 }
 
-bool AJAPerformaceTracking_start(AJAPerformanceTracking& stats,
+bool AJAPerformanceTracking_start(AJAPerformanceTracking& stats,
                                  std::string key, AJATimerPrecision precision, uint64_t skipEntries)
 {
     if(stats.find(key) == stats.end())
@@ -247,8 +247,8 @@ bool AJAPerformaceTracking_start(AJAPerformanceTracking& stats,
     }
 }
 
-bool AJAPerformaceTracking_start(AJAPerformanceTracking& stats,
-                                 std::string key, const AJAPerformaceExtraMap& extras, AJATimerPrecision precision,
+bool AJAPerformanceTracking_start(AJAPerformanceTracking& stats,
+                                 std::string key, const AJAPerformanceExtraMap& extras, AJATimerPrecision precision,
                                  uint64_t skipEntries)
 {
     if(stats.find(key) == stats.end())
@@ -270,7 +270,7 @@ bool AJAPerformaceTracking_start(AJAPerformanceTracking& stats,
     }
 }
 
-bool AJAPerformaceTracking_stop(AJAPerformanceTracking& stats, std::string key)
+bool AJAPerformanceTracking_stop(AJAPerformanceTracking& stats, std::string key)
 {
     AJAPerformanceTracking::iterator foundAt = stats.find(key);
     if(foundAt != stats.end())
@@ -284,7 +284,7 @@ bool AJAPerformaceTracking_stop(AJAPerformanceTracking& stats, std::string key)
     }
 }
 
-bool AJAPerformaceTracking_report(AJAPerformanceTracking& stats, std::string title, const char *pFileName, int32_t lineNumber)
+bool AJAPerformanceTracking_report(AJAPerformanceTracking& stats, std::string title, const char *pFileName, int32_t lineNumber)
 {
     const int32_t unit = (int32_t)AJA_DebugUnit_StatsGeneric;
     const int32_t severity = (int32_t)AJA_DebugSeverity_Debug;

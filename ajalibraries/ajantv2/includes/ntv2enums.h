@@ -65,7 +65,7 @@ typedef enum
     DEVICE_ID_CORVID1					= 0x10244800,	///< @brief	See \ref corvid1corvid3g
     DEVICE_ID_CORVID22					= 0x10293000,	///< @brief	See \ref corvid22
     DEVICE_ID_CORVID24					= 0x10402100,	///< @brief	See \ref corvid24
-    DEVICE_ID_CORVID3G					= 0x10294900,	///< @brief	See \ref corvid3g
+    DEVICE_ID_CORVID3G					= 0x10294900,	///< @brief	See \ref corvid1corvid3g
     DEVICE_ID_CORVID44					= 0x10565400,	///< @brief	See \ref corvid44
     DEVICE_ID_CORVID88					= 0x10538200,	///< @brief	See \ref corvid88
     DEVICE_ID_CORVIDHBR					= 0x10668200,	///< @brief	See \ref corvidhbr
@@ -94,6 +94,7 @@ typedef enum
     DEVICE_ID_KONALHI					= 0x10266400,	///< @brief	See \ref konalhi
     DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief	See \ref konalhi
     DEVICE_ID_TTAP						= 0x10416000,	///< @brief	See \ref ttap
+    DEVICE_ID_KONA5						= 0x10798400,	///< @brief	See \ref kona5
 #if !defined (NTV2_DEPRECATE_12_6)
     DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
 #endif	//	NTV2_DEPRECATE_12_6
@@ -1034,10 +1035,10 @@ typedef enum
     NTV2_AUDIO2_STREAM      = 5,
     NTV2_AUDIO3_STREAM      = 6,
     NTV2_AUDIO4_STREAM      = 7,
-    NTV2_METADATA1_STREAM   = 8,
-    NTV2_METADATA2_STREAM   = 9,
-    NTV2_METADATA3_STREAM   = 10,
-    NTV2_METADATA4_STREAM   = 11,
+    NTV2_ANC1_STREAM        = 8,
+    NTV2_ANC2_STREAM        = 9,
+    NTV2_ANC3_STREAM        = 10,
+    NTV2_ANC4_STREAM        = 11,
     NTV2_MAX_NUM_STREAMS    = 12,
     NTV2_STREAM_INVALID = NTV2_MAX_NUM_STREAMS
 } NTV2Stream;
@@ -1050,7 +1051,7 @@ typedef enum
 {
     VIDEO_STREAM,		///< @brief	Video data
     AUDIO_STREAM,		///< @brief	Audio data
-    METADATA_STREAM,	///< @brief	Metadata
+    ANC_STREAM,         ///< @brief	Anc data
     INVALID_STREAM
 } NTV2StreamType;
 
@@ -1376,8 +1377,10 @@ typedef enum
 }NTV2SplitMode;
 
 
-//	Mixer/Keyer (Video Processing) Control
-//	(one for foreground input, one for background input)
+/**
+	@brief		These enum values identify the Mixer/Keyer foreground and background input control values.
+	@see		CNTV2Card::GetMixerFGInputControl, CNTV2Card::SetMixerFGInputControl, CNTV2Card::GetMixerBGInputControl, CNTV2Card::SetMixerBGInputControl, \ref widget_mixkey
+**/
 typedef enum
 {
     NTV2MIXERINPUTCONTROL_FULLRASTER,
@@ -1394,13 +1397,17 @@ typedef enum
 #endif	//	!defined (NTV2_DEPRECATE)
 
 
+/**
+	@brief		These enum values identify the mixer mode.
+	@see		CNTV2Card::GetMixerMode, CNTV2Card::SetMixerMode, \ref widget_mixkey
+**/
 typedef enum
 {
-    NTV2MIXERMODE_FOREGROUND_ON,
-    NTV2MIXERMODE_MIX,
-    NTV2MIXERMODE_SPLIT,
-    NTV2MIXERMODE_FOREGROUND_OFF,
-    NTV2MIXERMODE_INVALID
+    NTV2MIXERMODE_FOREGROUND_ON,	///< @brief		Passes only foreground video + key to the Mixer output.
+    NTV2MIXERMODE_MIX,				///< @brief		Overlays foreground video on top of background video.
+    NTV2MIXERMODE_SPLIT,			///< @deprecated	Obsolete -- split-view is no longer supported.
+    NTV2MIXERMODE_FOREGROUND_OFF,	///< @brief		Passes only background video + key to the Mixer output.
+    NTV2MIXERMODE_INVALID			///< @brief		Invalid/uninitialized.
 } NTV2MixerKeyerMode;
 
 #define	NTV2_IS_VALID_MIXERMODE(__x__)		((__x__) >= NTV2MIXERMODE_FOREGROUND_ON  &&  (__x__) < NTV2MIXERMODE_INVALID)
@@ -1434,12 +1441,7 @@ typedef enum
 } NTV2ProcAmpControl;
 
 
-#if defined(FS1) || defined(BORG)
-// An FS1 or a Borg is the whole system, not a plugin board, so there is only one of it.
-#define NTV2_MAXBOARDS 1
-#else
 #define NTV2_MAXBOARDS 8
-#endif
 
 
 typedef enum
@@ -1747,6 +1749,7 @@ typedef enum
 } NTV2Framesize;
 
 #define	NTV2_IS_VALID_FRAMESIZE(__x__)		((__x__) >= NTV2_FRAMESIZE_2MB  &&  (__x__) < NTV2_MAX_NUM_Framesizes)
+#define	NTV2_IS_VALID_8MB_FRAMESIZE(__x__)	((__x__) == NTV2_FRAMESIZE_8MB  ||  (__x__) == NTV2_FRAMESIZE_16MB  ||  (__x__) == NTV2_FRAMESIZE_32MB)
 
 
 typedef enum
@@ -1841,19 +1844,17 @@ typedef enum
 } NTV2AnalogBlackLevel;
 
 
-typedef enum				// used in Virtual Register: kVRegInputSelect
+typedef enum					// used in Virtual Register: kVRegInputSelect
 {
     NTV2_Input1Select,
     NTV2_Input2Select,
-    #if !defined (NTV2_DEPRECATE)
-        NTV2_AnalogInputSelect		= NTV2_Input2Select,
-    #endif	//	!defined (NTV2_DEPRECATE)
     NTV2_Input3Select,
     NTV2_Input4Select,
     NTV2_Input5Select,
-    NTV2_DualLinkInputSelect,
-    NTV2_DualLink2xSdi4k,
-    NTV2_DualLink4xSdi4k,
+    NTV2_Input2xDLHDSelect,
+    NTV2_Input2x4kSelect,
+    NTV2_Input4x4kSelect,
+    NTV2_InputAutoSelect,
     NTV2_MAX_NUM_InputVideoSelectEnums
 } NTV2InputVideoSelect;
 
@@ -1913,7 +1914,7 @@ typedef enum
 {
     NTV2_PrimaryOutputSelect,
     NTV2_SecondaryOutputSelect,
-    NTV2_DualLinkOutputSelect,
+    NTV2_RgbOutputSelect,					// Deprecated
     NTV2_VideoPlusKeySelect,
     NTV2_StereoOutputSelect,
     NTV2_Quadrant1Select,
@@ -1922,8 +1923,7 @@ typedef enum
     NTV2_Quadrant4Select,
     NTV2_Quarter4k,
     NTV2_4kHalfFrameRate,
-    NTV2_2xSdi4k,
-    NTV2_4xSdi4k,
+	NTV2_AutoOutputSelect,
     NTV2_MAX_NUM_OutputVideoSelectEnums
 } NTV2OutputVideoSelect;
 
@@ -1950,8 +1950,9 @@ typedef enum
 
 typedef enum
 {
-    NTV2_4kTransport_Quadrants_2wire,        // square division
-    NTV2_4kTransport_Quadrants_4wire,        // square division
+    NTV2_4kTransport_Auto,        			 // auto
+    NTV2_4kTransport_Quadrants_2wire,        // quads 2x wire
+    NTV2_4kTransport_Quadrants_4wire,        // quads 4x wire
     NTV2_4kTransport_PixelInterleave,		 // SMPTE 425-5 & 425-3
     NTV2_4kTransport_Quarter_1wire,          // quarter size
 	NTV2_4kTransport_12g_6g_1wire,		     // 12G / 6G 1wire
@@ -2929,6 +2930,7 @@ typedef enum
     NTV2_BITFILE_KONAIP_2110        = 53,
     NTV2_BITFILE_KONA1				= 54,
     NTV2_BITFILE_KONAHDMI           = 55,
+	NTV2_BITFILE_KONA5_MAIN			= 56,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 
@@ -3103,9 +3105,9 @@ typedef enum
 **/
 typedef enum
 {
-    NTV2_ColorSpaceModeAuto,			// Auto Select
-    NTV2_ColorSpaceModeYCbCr,			// YCbCr
-    NTV2_ColorSpaceModeRGB,				// RGB
+    NTV2_ColorSpaceModeAuto,		// Auto Select
+    NTV2_ColorSpaceModeYCbCr,		// YCbCr (TBD, add 420, 444 options)
+    NTV2_ColorSpaceModeRgb,			// RGB
     NTV2_MAX_NUM_ColorSpaceModes
 } NTV2ColorSpaceMode;
 
@@ -4104,9 +4106,9 @@ typedef enum
     #define		NTV2K2_Input3Select					NTV2_Input3Select					///< @deprecated	Use NTV2_Input3Select instead.
     #define		NTV2K2_Input4Select					NTV2_Input4Select					///< @deprecated	Use NTV2_Input4Select instead.
     #define		NTV2K2_Input5Select					NTV2_Input5Select					///< @deprecated	Use NTV2_Input5Select instead.
-    #define		NTV2K2_DualLinkInputSelect			NTV2_DualLinkInputSelect			///< @deprecated	Use NTV2_DualLinkInputSelect instead.
-    #define		NTV2K2_DualLink2xSdi4k				NTV2_DualLink2xSdi4k				///< @deprecated	Use NTV2_DualLink2xSdi4k instead.
-    #define		NTV2K2_DualLink4xSdi4k				NTV2_DualLink4xSdi4k				///< @deprecated	Use NTV2_DualLink4xSdi4k instead.
+    #define		NTV2K2_DualLinkInputSelect			NTV2_Input2xDLHDSelect			///< @deprecated	Use NTV2_Input2xDLHDSelect instead.
+    #define		NTV2K2_DualLink2xSdi4k				NTV2_Input2x4kSelect				///< @deprecated	Use NTV2_Input2x4kSelect instead.
+    #define		NTV2K2_DualLink4xSdi4k				NTV2_Input4x4kSelect				///< @deprecated	Use NTV2_Input4x4kSelect instead.
     #define		NTV2K2_InputSelectMax				NTV2_MAX_NUM_InputVideoSelectEnums	///< @deprecated	Use NTV2_MAX_NUM_InputVideoSelectEnums instead.
 
     //	NTV2SDIInputFormatSelect
@@ -4138,7 +4140,7 @@ typedef enum
     //	NTV2OutputVideoSelect
     #define		NTV2K2_PrimaryOutputSelect			NTV2_PrimaryOutputSelect			///< @deprecated	Use NTV2_PrimaryOutputSelect instead.
     #define		NTV2K2_SecondaryOutputSelect		NTV2_SecondaryOutputSelect			///< @deprecated	Use NTV2_SecondaryOutputSelect instead.
-    #define		NTV2K2_DualLinkOutputSelect			NTV2_DualLinkOutputSelect			///< @deprecated	Use NTV2_DualLinkOutputSelect instead.
+    #define		NTV2K2_DualLinkOutputSelect			NTV2_RgbOutputSelect				///< @deprecated	Use NTV2_RgbOutputSelect instead.
     #define		NTV2K2_VideoPlusKeySelect			NTV2_VideoPlusKeySelect				///< @deprecated	Use NTV2_VideoPlusKeySelect instead.
     #define		NTV2K2_StereoOutputSelect			NTV2_StereoOutputSelect				///< @deprecated	Use NTV2_StereoOutputSelect instead.
     #define		NTV2K2_Quadrant1Select				NTV2_Quadrant1Select				///< @deprecated	Use NTV2_Quadrant1Select instead.
@@ -4146,8 +4148,6 @@ typedef enum
     #define		NTV2K2_Quadrant3Select				NTV2_Quadrant3Select				///< @deprecated	Use NTV2_Quadrant3Select instead.
     #define		NTV2K2_Quadrant4Select				NTV2_Quadrant4Select				///< @deprecated	Use NTV2_Quadrant4Select instead.
     #define		NTV2k2_Quarter4k					NTV2_Quarter4k						///< @deprecated	Use NTV2_Quarter4k instead.
-    #define		NTV2K2_2xSdi4k						NTV2_2xSdi4k						///< @deprecated	Use NTV2_2xSdi4k instead.
-    #define		NTV2K2_4xSdi4k						NTV2_4xSdi4k						///< @deprecated	Use NTV2_4xSdi4k instead.
 
     //	NTV2UpConvertMode
     #define		NTV2K2_UpConvertAnamorphic			NTV2_UpConvertAnamorphic			///< @deprecated	Use NTV2_UpConvertAnamorphic instead.

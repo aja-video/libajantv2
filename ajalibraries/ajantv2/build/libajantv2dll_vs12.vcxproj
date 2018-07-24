@@ -218,6 +218,7 @@
       </PrecompiledHeader>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="..\src\ntv2anc.cpp" />
     <ClCompile Include="..\src\ntv2audio.cpp" />
     <ClCompile Include="..\src\ntv2autocirculate.cpp" />
     <ClCompile Include="..\src\ntv2bitfile.cpp" />

@@ -50,6 +50,18 @@ bool NTV2DeviceCanDoAudioIn(const NTV2DeviceID inDeviceID)
     return inputs > 0 ? true : false;
 }
 
+bool NTV2DeviceCanDo292Out(NTV2DeviceID boardID, UWord index0)
+{
+	switch (index0)
+	{
+	case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut1);
+	case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut2);
+	case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut3);
+	case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut4);
+	default:	return false;
+	}
+}	//	NTV2DeviceCanDo3GOut
+
 bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 {
 	switch (index0)
@@ -198,6 +210,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
     case DEVICE_ID_IOIP_2110:
     case DEVICE_ID_KONAIP_2110:
     case DEVICE_ID_KONAHDMI:
+	case DEVICE_ID_KONA5:
         switch (inFrameGeometry)
 		{
 		case NTV2_FG_4x1920x1080:
@@ -299,6 +312,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
     case DEVICE_ID_KONAIP_2110:
 	case DEVICE_ID_KONA1:
     case DEVICE_ID_KONAHDMI:
+	case DEVICE_ID_KONA5:
         return 111;
 	case DEVICE_ID_KONA3G:
 		return 56; // ufc uses 8 
@@ -360,6 +374,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
     case DEVICE_ID_IOIP_2110:
     case DEVICE_ID_KONAIP_2110:
     case DEVICE_ID_KONAHDMI:
+	case DEVICE_ID_KONA5:
         switch (inFrameGeometry)
 		{
 		case NTV2_FG_4x1920x1080:
@@ -773,6 +788,8 @@ bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspo
         // TODO: need to generate these for IOIP cards
         case DEVICE_ID_IOIP_2110:
             return xpt_io4kplusMatrix[inInputXpt][inOutputXpt];
+//		case DEVICE_ID_KONA5:
+//			return xpt_kona5Matrix[inInputXpt][inOutputXpt];
 
         default:
             return true;

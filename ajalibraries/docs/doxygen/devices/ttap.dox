@@ -3,9 +3,10 @@
 
 	@section		ntv2hwio
 
+	<hr>
 	@subsection		ttap		T-Tap
 
-	This page describes the T-Tapvideo playout device.
+	This page describes the T-Tap video playout device.
 	It’s identified by ::DEVICE_ID_TTAP.
 
 	@image	html	ttap.png
@@ -18,15 +19,15 @@
 	-	Four-lane gen 1 PCI Express
 	-	2 DMA engines
 	-	Legacy and MSI interrupt delivery
-	-	1 x Thunderbolt I connector
+	-	1 × Thunderbolt I connector
 
 	@par	Inputs & Outputs
-	-	1 x SDI output
-	-	1 x HDMI output
+	-	1 × SDI output
+	-	1 × HDMI output
 
 	@par	Frame Buffer
 	-	128 MB SDRAM
-	-	16 x 8MB frames
+	-	16 × 8MB frames
 
 	@par	Audio
 	-	1 subsystem

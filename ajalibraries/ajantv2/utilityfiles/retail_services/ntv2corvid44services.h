@@ -20,7 +20,6 @@ public:
 	Corvid44Services();
 	~Corvid44Services() {}
 	
-	virtual void UpdateAutoState (void);
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();
 	virtual void SetDeviceMiscRegisters ();

@@ -425,5 +425,5 @@ The inspector has the following individual panels:
 		-	<b>C++ (CNTV2SignalRouter calls)</b> -- C++ code that will produce the current routing configuration using CNTV2SignalRouter::AddConnection calls.
 	-	<b>Routing Registers</b> -- A panel containing a list of the device’s routing registers. The register values can be changed.
 
-
+<hr size="50px">
 **/

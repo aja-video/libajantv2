@@ -132,46 +132,88 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 	bool status = false;
 	_deviceID = ReadDeviceID();
 
+//    case 0x00202018://STMircro
+//    case 0x00012018://CYPRESS S25FL128
+//    case 0x00C22018://Macronix
+//        T-Tap
+//        IoExpress
+//        IoXT
+//        Kona Lhe+
+//        Kona 3G
+//        Kona 3G Quad
+//        Corvid 1
+//        Corvid 22
+//        Corvid 24
+//        Corvid 3G
+
+//    case 0x00010220://CYPRESS f25fl512
+//        Kona IP 2022
+//        Kona IP 2110
+//        IoIP 2022
+//        IoIP 2110
+//        Io4K+
+
+//    case 0x009d6019://ISSI
+//        No Product 6/27/18
+
+//    case 0x00C84018://GIGADEVICE GD25Q127CFIG
+//    case 0x00EF4018://WINBOND W25Q128
+//        T-Tap
+//        IoExpress
+//        IoXT
+//        Kona Lhe+
+//        Kona 3G
+//        Kona 3G Quad
+//        Corvid 1
+//        Corvid 22
+//        Corvid 24
+//        Corvid 3G
+
+//    case 0x00010219://CYPRESS S25FL256
+//        Kona 1
+//        Kona HDMI
+//        Kona 4
+//        Kona 4 UFC
+//        Corvid 44
+//        Corvid 88
+//        Corvid HBR
+//        Corvid HEVC
+
 	switch(_deviceID)
 	{
-	case 0x00202018:
-	case 0x00012018:
-	case 0x00C22018:
+    case 0x00202018://STMircro
+    case 0x00C22018://Macronix
 		_flashSize = 16 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
-		_sectorSize = 256 * 1024;
+        _sectorSize = 256 * 1024;
 		knownChip = true;
 		break;
-	case 0x00010220:
+    case 0x00010220://CYPRESS f25fl512
 		_flashSize = 64 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 256 * 1024;
 		knownChip = true;
 		break;
-    case 0x009d6019:
+    case 0x009d6019://ISSI
         _flashSize = 64 * 1024 * 1024;
         _bankSize = 16 * 1024 * 1024;
         _sectorSize = 64 * 1024;
         knownChip = true;
         break;
-	case 0x00C84018:
+    case 0x00C84018://GIGADEVICE GD25Q127CFIG
+    case 0x00EF4018://WINBOND W25Q128
+    case 0x00012018://CYPRESS S25FL128
 		_flashSize = 16 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 64 * 1024;
 		knownChip = true;
 		break;
-	case 0x00010219:
+    case 0x00010219://CYPRESS S25FL256
 		_flashSize = 32 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 64 * 1024;
 		knownChip = true;
-		break;
-//	case spiv5:
-//		_flashSize = 64 * 1024 * 1024;
-//		_bankSize = 16 * 1024 * 1024;
-//		_sectorSize = 256 * 1024;
-//		knownChip = true;
-//		break;
+        break;
 	default:
 		_flashSize = 0;
 		_bankSize = 0;
@@ -712,7 +754,7 @@ bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID)
 		SetBankSelect(BANK_0);
 		break;
 	case FAILSAFE_FLASHBLOCK:
-		SetBankSelect(BANK_2);
+        SetBankSelect(NTV2DeviceHasSPIv5(_boardID) ? BANK_2 : BANK_1);
 		break;
 	}
 	for (uint32_t count = 0; count < dwordSizeCount; count += 64, baseAddress += 256, bitFilePtr += 64)//count++, baseAddress += 4 )
@@ -741,8 +783,8 @@ bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID)
 		{
 			printf("Error %d E(%08X),R(%08X)\n", count, bitFileValue, flashValue);
 			errorCount++;
-			if ( errorCount > 1 )
-				break;
+            if ( errorCount > 1 )
+                break;
 		}
 		percentComplete = (count*100)/dwordSizeCount;
 		if(!_bQuiet)
@@ -881,7 +923,7 @@ bool CNTV2KonaFlashProgram::CreateSRecord(bool bChangeEndian)
 		sprintf(&sRecord[2], "%02x", cc);
 		checksum += cc;
 
-		uint32_t addr = baseAddress+partitionOffset;
+        uint32_t addr = baseAddress+partitionOffset;
 		UWord aa = ((addr >> 24) &0xff);
 		sprintf(&sRecord[4], "%02x", aa);
 		checksum += aa;

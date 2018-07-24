@@ -1637,12 +1637,13 @@ typedef enum
 	kRefMaskHDMIAudioPairSelect = BIT(2)+BIT(3),
 	kRegMaskHDMISampleRateConverterEnable = BIT(4),
 	kRegMaskHDMIInputRange		= BIT(28),
+	kRegMaskHDMIInfoRange		= BIT(31),
 	
 	//kRegHDMIInputControl / kRegHDMIOutControl
 	kRegMaskHDMIColorSpace		= BIT(4)+BIT(5),
 	kRegMaskHDMIProtocol		= BIT(30),
 	kRegMaskHDMIPolarity		= BIT(16)+BIT(17)+BIT(18)+BIT(19),
-
+	
 	//kK2RegAnalogOutControl - (controls Analog Inputs also, for some boards)
 	kK2RegMaskVideoDACMode		= BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4),
 	kFS1RegMaskVideoDAC2Mode    = BIT(8)+BIT(9)+BIT(10)+BIT(11)+BIT(12),
@@ -2765,6 +2766,7 @@ typedef enum
 	kRegShiftHDMISampleRateConverterEnable = 4,
 	kRegShiftHDMIInputRange				= 28,
 	kRegShiftHDMIInputPolarity			= 16,
+	kRegShiftHDMIInfoRange				= 31,
 	
 	//kRegHDMIInputControl / kRegHDMIOutControl
 	kRegShiftHDMIColorSpace				= 4,
@@ -5325,8 +5327,6 @@ typedef enum
 	shiftField1AnalogStartLine = 0,
 	maskField2AnalogStartLine = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26),
 	shiftField2AnalogStartLine = 16
-
-
 } ANCExtMaskShift;
 
 typedef enum
@@ -5345,15 +5345,23 @@ typedef enum
 	regAncExtTotalFrameLines,					//	Reg 10 - total_lines[10:0]
 	regAncExtFID,								//	Reg 11 - fid_low[10:0], fid_hi[10:0]
 	regAncExtIgnorePacketReg_1_2_3_4,			//	Reg 12 - Packet Ignore bytes
+	regAncExtIgnorePktsReg_First	= regAncExtIgnorePacketReg_1_2_3_4,
 	regAncExtIgnorePacketReg_5_6_7_8,			//	Reg 13 - Packet Ignore bytes
 	regAncExtIgnorePacketReg_9_10_11_12,		//	Reg 14 - Packet Ignore bytes
 	regAncExtIgnorePacketReg_13_14_15_16,		//	Reg 15 - Packet Ignore bytes
 	regAncExtIgnorePacketReg_17_18_19_20,		//	Reg 16 - Packet Ignore bytes
+	regAncExtIgnorePktsReg_Last		= regAncExtIgnorePacketReg_17_18_19_20,
 	regAncExtAnalogStartLine,					//	Reg 17 - analog_start_line[10:0]
-	regAncExtField1AnalogYFilter,				//	Reg 18 - analog_line_y_f1[10:0]
-	regAncExtField2AnalogYFilter,				//	Reg 19 - analog_line_y_f2[10:0]
-	regAncExtField1AnalogCFilter,				//	Reg 20 - analog_line_c_f1[10:0]
-	regAncExtField2AnalogCFilter,				//	Reg 21 - analog_line_c_f2[10:0]
+	regAncExtField1AnalogYFilter,				//	Reg 18 - analog_line_y_f1[31:0] - one bit per F1 line past analog_start_line, 1=captureAnalogY, 0=normal
+	regAncExtField2AnalogYFilter,				//	Reg 19 - analog_line_y_f2[31:0] - one bit per F2 line past analog_start_line, 1=captureAnalogY, 0=normal
+	regAncExtField1AnalogCFilter,				//	Reg 20 - analog_line_c_f1[31:0] - one bit per F1 line past analog_start_line, 1=captureAnalogC, 0=normal
+	regAncExtField2AnalogCFilter,				//	Reg 21 - analog_line_c_f2[31:0] - one bit per F2 line past analog_start_line, 1=captureAnalogC, 0=normal
+	regAncExtTwoFrameCadenceDetect,				//	Reg 22 - not used in NTV2
+	regAncExtRP188Type,							//	Reg 23 - not used in NTV2
+	regAncExtTimecodeStatus0_31,				//	Reg 24 - not used in NTV2
+	regAncExtTimecodeStatus32_63,				//	Reg 25 - not used in NTV2
+	regAncExtTimecodeStatusDBB,					//	Reg 26 - not used in NTV2
+	regAncExtAnalogActiveLineLength,			//	Reg 27 - analog active line length
 	regAncExt_LAST
 } ANCExtRegisters;
 
@@ -5374,7 +5382,6 @@ typedef enum
 	regAncInsBlankCStartLine,
 	regAncInsBlankField1CLines,
 	regAncInsBlankField2CLines,
-	regAncInsBlandField2CLines	= regAncInsBlankField2CLines,	//	Whoops
 	regAncIns_LAST
 } ANCInsRegisters;
 
@@ -6406,24 +6413,26 @@ typedef enum
 						(i.e. the frame is packed in device memory).
 					-	To DMA a sub-section of a frame, set NTV2SegmentedDMAInfo::acNumActiveBytesPerRow to the number of bytes
 						that comprise one row of the subsection, then NTV2SegmentedDMAInfo::acNumSegments to the number of rows
-						in the subsection, NTV2SegmentedDMAInfo::acSegmentHostPitch to the rowBytes of the entire frame in host
-						memory, and NTV2SegmentedDMAInfo::acSegmentDevicePitch to the rowBytes of the entire frame in device memory.
-			@note	IMPORTANT:  For segmented DMAs, the AUTOCIRCULATE_TRANSFER::acVideoBuffer.fByteCount field holds the segment
+						in the subsection, NTV2SegmentedDMAInfo::acSegmentHostPitch to the bytes-per-row of the entire frame in host
+						memory, and NTV2SegmentedDMAInfo::acSegmentDevicePitch to the bytes-per-row of the entire frame in device memory.
+			@note	IMPORTANT:  For segmented DMAs, the ::AUTOCIRCULATE_TRANSFER::acVideoBuffer.fByteCount field holds the segment
 					byte count (i.e., the number of bytes to transfer per segment.
+
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 			@todo	Create a new field in the ::NTV2SegmentedDMAInfo structure to eliminate the necessity of setting
-					AUTOCIRCULATE_TRANSFER::acVideoBuffer.fByteCount to store the segmented transfer's bytes-per-segment value.
+					::AUTOCIRCULATE_TRANSFER::acVideoBuffer.fByteCount to store the segmented transfer's bytes-per-segment value.
+
 			@note	Setting NTV2SegmentedDMAInfo::acNumSegments to 0 or 1 defaults to normal non-segmented DMA behavior
 					(i.e. DMA one complete, packed frame).
 		**/
 		NTV2_STRUCT_BEGIN (NTV2SegmentedDMAInfo)
-				ULWord		acNumSegments;				///< @brief	Number of segments of size 'acInVideoByteCount' to DMA (i.e. numLines).
-														///			Zero or 1 means normal (unsegmented) transfer.
+				ULWord		acNumSegments;				///< @brief	Number of segments of size ::AUTOCIRCULATE_TRANSFER::acVideoBuffer.fByteCount
+														///			to transfer. Zero or 1 means normal (unsegmented) transfer.
 				ULWord		acNumActiveBytesPerRow;		///< @brief	Number of active bytes in a row of video.
-				ULWord		acSegmentHostPitch;			///< @brief	Offset (in bytes) between the start of one host segment and the start of
-														///			the next host segment (i.e. host memory rowBytes).
-				ULWord		acSegmentDevicePitch;		///< @brief	Offset (in bytes) between the start of one device segment and the start of
-														///			the next device segment (i.e. device memory rowBytes).
+				ULWord		acSegmentHostPitch;			///< @brief	Offset, in bytes, between the start of one host segment and the start of
+														///			the next host segment (i.e. host memory bytes-per-row).
+				ULWord		acSegmentDevicePitch;		///< @brief	Offset, in bytes, between the start of one device segment and the start of
+														///			the next device segment (i.e. device memory bytes-per-row).
 
 			#if !defined (NTV2_BUILDING_DRIVER)
 				/**
@@ -7034,6 +7043,17 @@ typedef enum
 				bool		GetInputTimeCodes (NTV2TimeCodeList & outValues) const;
 
 				/**
+					@brief		Returns only those timecodes from the frame that are associated with a given SDI input.
+					@param[out]	outTimeCodes	Receives the timecode values.
+					@param[in]	inSDIInput		Specifies the SDI input of interest, expressed as an ::NTV2Channel.
+					@param[in]	inValidOnly		Optionally specifies if only valid timecodes should be returned. Defaults to true.
+												Specify false to return all timecode values associated with the channel of interest,
+												even if they're not valid.
+					@return		True if successful;  otherwise false.
+				**/
+				bool		GetInputTimeCodes (NTV2TimeCodes & outTimeCodes, const NTV2Channel inSDIInput, const bool inValidOnly = true) const;
+
+				/**
 					@brief		Answers with a specific timecode captured in my acTimeCodes member.
 					@param[out]	outTimeCode		Receives the requested timecode value.
 					@param[in]	inTCIndex		Specifies which NTV2TCIndex to use. Defaults to NTV2_TCINDEX_SDI1.
@@ -7415,6 +7435,20 @@ typedef enum
 					@return		True if successful;  otherwise false.
 				**/
 				bool									GetInputTimeCode (NTV2_RP188 & outTimeCode, const NTV2TCIndex inTCIndex = NTV2_TCINDEX_SDI1) const;
+
+				/**
+					@brief		Retrieves the timecodes from the captured frame that are associated with the given SDI input.
+					@param[out]	outTimeCodes	Receives the timecode values as a mapping of ::NTV2TCIndex values to ::NTV2_RP188 objects.
+					@param[in]	inSDIInput		Specifies the SDI input of interest as an ::NTV2Channel. Defaults to ::NTV2_CHANNEL1 (SDI In 1).
+					@param[in]	inValidOnly		Optionally specifies if only valid timecodes should be returned. Defaults to true.
+												Specify false to return all timecode values associated with the SDI input of interest,
+												even if they're not valid.
+					@note		Note that specifying an SDI input source that's not connected to the framestore associated with the
+								channel being AutoCirculated will likely result in a timecode that's not frame-accurate.
+					@note		To work right, CNTV2Card::AutoCirculateInitForInput must have been initialized with the AUTOCIRCULATE_WITH_RP188 option.
+					@return		True if successful;  otherwise false.
+				**/
+				bool									GetInputTimeCodes (NTV2TimeCodes & outTimeCodes, const NTV2Channel inSDIInput = NTV2_CHANNEL1, const bool inValidOnly = true) const;
 				///@}
 
 				/**

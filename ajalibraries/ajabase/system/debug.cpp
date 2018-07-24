@@ -133,7 +133,7 @@ AJADebug::Open(bool incrementRefCount)
             addDebugGroupToLabelVector(AJA_DebugUnit_CC608Encode);
             addDebugGroupToLabelVector(AJA_DebugUnit_CC708Decode);
             addDebugGroupToLabelVector(AJA_DebugUnit_CC708Service);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC708SvcBlkQue);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CC708ServiceBlockQueue);
             addDebugGroupToLabelVector(AJA_DebugUnit_CC708Window);
             addDebugGroupToLabelVector(AJA_DebugUnit_CC708Encode);
             addDebugGroupToLabelVector(AJA_DebugUnit_CCFont);
@@ -142,6 +142,8 @@ AJADebug::Open(bool incrementRefCount)
             addDebugGroupToLabelVector(AJA_DebugUnit_AJAAncList);
             addDebugGroupToLabelVector(AJA_DebugUnit_BFT);
             addDebugGroupToLabelVector(AJA_DebugUnit_PnP);
+            addDebugGroupToLabelVector(AJA_DebugUnit_Persistence);
+            addDebugGroupToLabelVector(AJA_DebugUnit_Avid);
 
             for(int i=AJA_DebugUnit_FirstUnused;i<AJA_DebugUnit_Size;i++)
             {

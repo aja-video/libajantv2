@@ -1155,6 +1155,11 @@
 		B44C0B0A1B61C25100D7F59A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				OTHER_LDFLAGS = (
+					"${inherited}",
+					"-lajacc",
+					"-lajaanc",
+				);
 				PRODUCT_NAME = ntv2llburn;
 			};
 			name = Debug;
@@ -1162,6 +1167,11 @@
 		B44C0B0B1B61C25100D7F59A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				OTHER_LDFLAGS = (
+					"${inherited}",
+					"-lajacc",
+					"-lajaanc",
+				);
 				PRODUCT_NAME = ntv2llburn;
 			};
 			name = Release;

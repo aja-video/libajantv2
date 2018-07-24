@@ -498,6 +498,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inStandard,
 	mStandard		= inStandard;
 	mPixelFormat	= inFrameBufferFormat;
 	mVancMode		= inVancMode;
+	mFrameGeometry	= ::GetVANCFrameGeometry(::GetGeometryFromStandard(mStandard), mVancMode);
 
 	//	Account for VANC...
 	if (NTV2_IS_VANCMODE_ON(inVancMode))
@@ -522,6 +523,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inStandard,
 		}
 		firstActiveLine = numLines - numActiveLines;
 	}
+
 	if (numLines  &&  NTV2_IS_FBF_PLANAR(inFrameBufferFormat))
 		FinalizePlanar();
 
@@ -596,6 +598,7 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 	mStandard		= inStandard;
 	mPixelFormat	= inFrameBufferFormat;
 	mVancMode		= inVancMode;
+	mFrameGeometry	= ::GetVANCFrameGeometry(::GetNTV2FrameGeometryFromVideoFormat(mVideoFormat), mVancMode);
 
 	//	Account for VANC...
 	if (NTV2_IS_VANCMODE_ON(inVancMode))
@@ -1102,11 +1105,23 @@ ostream & NTV2FormatDescriptor::PrintSMPTELineNumber (ostream & inOutStream, con
 }
 
 
-//	Q:	WHY IS NTV2SmpteLineNumber's CONSTRUCTOR HERE?
+//	Q:	WHY IS NTV2SmpteLineNumber's CONSTRUCTOR & GetLastLine IMPLEMENTATION HERE?
 //	A:	TO USE THE SAME LineNumbersF1/LineNumbersF2 TABLES (above)
 
 NTV2SmpteLineNumber::NTV2SmpteLineNumber (const NTV2Standard inStandard)
 {
 	NTV2_ASSERT (inStandard < sizeof(LineNumbersF1) / sizeof(ULWord));
 	*this = NTV2SmpteLineNumber (LineNumbersF1[inStandard],  LineNumbersF2[inStandard],  inStandard != NTV2_STANDARD_525,  inStandard);
+}
+
+
+ULWord NTV2SmpteLineNumber::GetLastLine (const NTV2FieldID inRasterFieldID) const
+{
+	if (!NTV2_IS_VALID_FIELD(inRasterFieldID))
+		return 0;
+
+	if (inRasterFieldID == NTV2_FIELD0)
+		return firstFieldTop ? LineNumbersF1Last[mStandard] : LineNumbersF2Last[mStandard];
+	else
+		return firstFieldTop ? LineNumbersF2Last[mStandard] : LineNumbersF1Last[mStandard];
 }

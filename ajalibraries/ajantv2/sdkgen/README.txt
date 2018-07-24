@@ -38,9 +38,6 @@ ABOUT SDKGEN FILES
 	                                  Widgets.csv           Supported per-device NTV2WidgetIDs.
 	                              If not specified, no CSV files are written.
 
-	ntv2devicefeatures.py       Older Python script that generated 'ntv2devicefeatures.hh' and 'ntv2devicefeatures.hpp' files
-	                            from the several .csv files listed above.
-
 	cando_canon.gen             Text file containing the canonical "CanDo" function names (and optional return value descriptions).
 
 	getnum_canon.gen            Text file containing the canonical "GetNum" function names and return types (and optional
@@ -83,22 +80,17 @@ ADD NEW NTV2FrameBufferFormat
 
 
 GENERATING THE SDK
-	You must run one of the Python scripts BEFORE compiling or distributing the SDK.
+	You must run the "sdkgen.py" script BEFORE compiling or distributing the SDK.
+	This method generates the SDK .hh and .hpp files directly.
 
-	OLD WAY:
-		This method assumes you still want to generate the SDK from CSV files.
-		1)  Generate the CSVs using 'ntv2sdkgen.py':
-		        $  cd ajalibraries/ajantv2
-		        $  ./sdkgen/ntv2sdkgen.py  --csv sdkgen
-		    If the script succeeds, the generated CSVs will have replaced any existing ones in the 'sdkgen' folder.
-		2)  Generate the .hh and .hpp files from the CSVs using the old script:
-		        $  ./sdkgen/ntv2devicefeatures.py   --csv sdkgen   --ohh includes   --ohpp src
-		    If the script succeeds, the generated files will have replaced the existing ones.
 
-	NEW WAY:
-		This method generates the SDK .hh and .hpp files directly.
-		1)  Invoke the new script:
-		        $  cd ajalibraries/ajantv2
-		        $  ./sdkgen/ntv2sdkgen.py   --ohh includes   --ohpp src
-		    If the script succeeds, the .hh and .hpp files will have replaced the existing ones.
-		    The SDK is now ready to be built and/or distributed.
+	METHOD 1  ---  Run the script from the top-level directory (that contains 'ajalibraries'):
+	        $  ./sdkgen/ntv2sdkgen.py   --ajantv2 ajalibraries/ajantv2   --ohh ajalibraries/ajantv2/includes   --ohpp ajalibraries/ajantv2/src
+
+
+	METHOD 2  ---  Run the script from the 'ajalibraries/ajantv2' directory
+	        $  cd ajalibraries/ajantv2
+	        $  ./sdkgen/ntv2sdkgen.py   --ohh includes   --ohpp src
+
+    If the script succeeds, the .hh and .hpp files will have replaced the existing ones.
+    The SDK is now ready to be built and/or distributed.

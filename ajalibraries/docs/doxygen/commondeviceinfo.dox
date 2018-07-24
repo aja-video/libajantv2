@@ -703,9 +703,10 @@
 			-	<b>Video</b>:  This determines the video that will appear in the foreground of the mix,
 				and should be routed to a widget that produces YCbCr video.
 			-	<b>Key</b>:  This determines the foreground key, and should be routed to another widget’s YCbCr output.
-				Note that only the Y component is used — the Cb and Cr components are ignored.
+				Only the Y component is used — the Cb and Cr components are ignored.
 			-	Call ::GetMixerFGInputXpt to obtain a foreground ::NTV2InputCrosspointID:
-				-	Specify the Mixer/Keyer of interest by ::NTV2Channel (e.g. use ::NTV2_CHANNEL2 for Mixer/Keyer 2).
+				-	Specify the ::NTV2Channel used. (The actual zero-based Mixer index that’s used will be half the
+					ordinal value of ::NTV2Channel.)
 				-	Pass \c false for \c inIsKey for the Video input;  pass \c true for the Key input.
 		-	<b>Background Inputs</b>:
 			-	<b>Video</b>:  This determines the video that will appear in the background,
@@ -713,13 +714,15 @@
 			-	<b>Key</b>:  This determines the background key, and should be routed to another widget’s YCbCr output.
 				Note that only the Y component is used — the Cb and Cr components are ignored.
 			-	Call ::GetMixerBGInputXpt to obtain a background ::NTV2InputCrosspointID:
-				-	Specify the Mixer/Keyer of interest by ::NTV2Channel (e.g. use ::NTV2_CHANNEL2 for Mixer/Keyer 2).
+				-	Specify the ::NTV2Channel used. (The actual zero-based Mixer index that’s used will be half the
+					ordinal value of ::NTV2Channel.)
 				-	Pass \c false for \c inIsKey for the Video input;  pass \c true for the Key input.
 	-	Each Mixer/Keyer widget has two output crosspoints:
 		-	<b>Video Output</b>:  This produces the mixed/keyed YCbCr video raster.
 		-	<b>Key Output</b>:  This produces a YCbCr signal with the resulting mixed key data in the Y channel.
 		-	Call ::GetMixerOutputXptFromChannel to obtain a Mixer’s ::NTV2OutputCrosspointID:
-			-	Specify the Mixer/Keyer of interest by ::NTV2Channel (e.g. use ::NTV2_CHANNEL2 for Mixer/Keyer 2).
+			-	Specify the ::NTV2Channel used. (The actual zero-based Mixer index that’s used will be half the
+				ordinal value of ::NTV2Channel.)
 			-	Pass \c false for \c inIsKey for the Mixer’s Video output;  pass \c true for the Mixer’s Key output.
 	-	The Mixer is controlled using ::CNTV2Card API calls:
 		-	<b>Mode</b>:
@@ -752,6 +755,21 @@
 
 	NTV2-compatible devices have a minimum of one <b>Audio System</b> (sometimes referred to as an <b>Audio Engine</b>).
 	Call ::NTV2DeviceGetNumAudioSystems to determine the number of Audio Systems on a device.
+
+	An <b>Audio System</b> is implemented in FPGA firmware using several hardware registers, which together perform the following functions:
+	-	If it has any SDI, HDMI, analog, or AES inputs (see ::NTV2DeviceCanDoCapture):
+		-	It continually de-embeds 20/24-bit AES audio samples. For SDI inputs, these will come from SMPTE 272M/299M HANC packets
+			detected in the SDI input stream.
+		-	If its capture side is running, it will write the de-embedded audio samples into its input audio buffer in device SDRAM.
+		-	The audio samples can always be piped through a FIFO to source an <b>Audio System</b>’s output audio embedder for
+			“loopback” play-through.
+	-	If it has an SDI output (see ::NTV2DeviceCanDoPlayback):
+		-	Unless its embedder is disabled, it will continually embed 20/24-bit AES audio samples into SMPTE 272M/292M HANC packets
+			into its SDI output stream.
+		-	When its playout side is running, it will read from its output audio buffer in device SDRAM the audio samples to be embedded.
+		-	When its playout side is not running...
+			-	If configured for “loopback” play-through, it obtains audio samples from an <b>Audio System</b>’s input audio de-embedder.
+			-	It will otherwise embed silence (audio packets that contain all-zero sample values).
 
 	Each <b>Audio System</b> can accommodate at least 8 channels of audio.
 	Call ::NTV2DeviceGetMaxAudioChannels to determine the maximum number of audio channels that a device’s <b>Audio Systems</b> can handle.

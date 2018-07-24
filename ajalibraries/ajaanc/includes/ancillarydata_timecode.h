@@ -248,6 +248,11 @@ public:
 	**/
 	virtual std::ostream &				Print (std::ostream & inOutStream, const bool inDetailed = false) const;
 
+	/**
+		@return		A string containing my human-readable timecode.
+	**/
+	virtual std::string					TimecodeString (void) const;
+
 protected:
 	void Init (void);	// NOT virtual - called by constructors
 

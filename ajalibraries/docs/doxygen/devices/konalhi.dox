@@ -3,6 +3,7 @@
 
 	@section		ntv2hwkona
 
+	<hr>
 	@subsection		konalhi		KONA LHi
 
 	This page describes the KONA LHi video capture/playout board.
@@ -20,20 +21,20 @@
 	-	Legacy interrupt delivery (INTA\# for all interrupts) — MSI not supported
 
 	@par	Inputs & Outputs
-	-	1 x SDI input
-	-	1 x SDI output
-	-	1 x analog component video input
-	-	1 x analog component video output
-	-	1 x HDMI input
-	-	1 x HDMI output
-	-	1 x reference input
-	-	1 x reference output
-	-	1 x RS-422 serial port
+	-	1 × SDI input
+	-	1 × SDI output
+	-	1 × analog component video input
+	-	1 × analog component video output
+	-	1 × HDMI input
+	-	1 × HDMI output
+	-	1 × reference input
+	-	1 × reference output
+	-	1 × RS-422 serial port
 
 	@par	Frame Buffer
 	-	256 MB SDRAM
-	-	32 x 8MB frames
-	-	16 x 16MB frames for VANC and 2K formats
+	-	32 × 8MB frames
+	-	16 × 16MB frames for VANC and 2K formats
 
 	@par	Audio
 	-	1 subsystem

@@ -111,7 +111,6 @@
 		B4CE1FC916E802870092B564 /* testpatterndata.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FBC16E802870092B564 /* testpatterndata.h */; };
 		B4CE1FCA16E802870092B564 /* timecodeburn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CE1FBD16E802870092B564 /* timecodeburn.cpp */; };
 		B4CE1FCB16E802870092B564 /* timecodeburn.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FBE16E802870092B564 /* timecodeburn.h */; };
-		B4CE1FCC16E802870092B564 /* timecodeburndata.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1FBF16E802870092B564 /* timecodeburndata.h */; };
 		B4FF311E1EDDDB180084915F /* common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4FF311D1EDDDB180084915F /* common.cpp */; };
 /* End PBXBuildFile section */
 
@@ -218,7 +217,6 @@
 		B4CE1FBC16E802870092B564 /* testpatterndata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testpatterndata.h; path = ../common/testpatterndata.h; sourceTree = SOURCE_ROOT; };
 		B4CE1FBD16E802870092B564 /* timecodeburn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = timecodeburn.cpp; path = ../common/timecodeburn.cpp; sourceTree = SOURCE_ROOT; };
 		B4CE1FBE16E802870092B564 /* timecodeburn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timecodeburn.h; path = ../common/timecodeburn.h; sourceTree = SOURCE_ROOT; };
-		B4CE1FBF16E802870092B564 /* timecodeburndata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timecodeburndata.h; path = ../common/timecodeburndata.h; sourceTree = SOURCE_ROOT; };
 		B4FF311D1EDDDB180084915F /* common.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = common.cpp; path = ../common/common.cpp; sourceTree = SOURCE_ROOT; };
 		D2AAC046055464E500DB518D /* libajabased.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libajabased.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -299,7 +297,6 @@
 				B4A35B6F144CDA2800957C64 /* timecode.h */,
 				B4CE1FBD16E802870092B564 /* timecodeburn.cpp */,
 				B4CE1FBE16E802870092B564 /* timecodeburn.h */,
-				B4CE1FBF16E802870092B564 /* timecodeburndata.h */,
 				A411D89111DE8E40003E7E53 /* timer.cpp */,
 				A411D89211DE8E40003E7E53 /* timer.h */,
 				A411D89311DE8E40003E7E53 /* types.h */,
@@ -455,7 +452,6 @@
 				A411D8A411DE8E40003E7E53 /* timer.h in Headers */,
 				B4A35B71144CDA2800957C64 /* timecode.h in Headers */,
 				B4CE1FCB16E802870092B564 /* timecodeburn.h in Headers */,
-				B4CE1FCC16E802870092B564 /* timecodeburndata.h in Headers */,
 				A411D8A511DE8E40003E7E53 /* types.h in Headers */,
 				B40C6FC216682EF90080F00F /* videotypes.h in Headers */,
 				B4A35B75144CDA4400957C64 /* videoutilities.h in Headers */,

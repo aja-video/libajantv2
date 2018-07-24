@@ -3,6 +3,7 @@
 
 	@section		ntv2hwcorvid
 
+	<hr>
 	@subsection		corvid1corvid3g		Corvid, Corvid 3G
 
 	This page describes the Corvid (sometimes called the <b>Corvid 1</b>), and the <b>Corvid 3G</b> OEM video capture/playout boards.
@@ -13,11 +14,11 @@
 	The Corvid 3G has one SDI input, one SDI output, one LTC input, and one RS-422 port.
 	It has a video processing module (mixer/keyer), and can handle 2K and 3Gb video formats.
 
-	@image	html	corvid3g.jpeg		width=50%
+	@image	html	corvid3g.jpeg
 
 	The Corvid 3G Fiber looks very similar:
 
-	@image	html	corvid3gfiber.jpg	width=10cm
+	@image	html	corvid3gfiber.jpg
 
 	The connector layout is the same on all three boards: RS-422 serial on the far left; LTC in/out on the left,
 	video input in the middle, and video output on the right.
@@ -33,17 +34,17 @@
 
 	@par	Inputs & Outputs
 
-	-	1 x SDI input
-	-	1 x SDI output
-	-	1 x reference input
-	-	1 x LTC input
-	-	1 x RS-422 serial port
+	-	1 × SDI input
+	-	1 × SDI output
+	-	1 × reference input
+	-	1 × LTC input
+	-	1 × RS-422 serial port
 
 	@par	Frame Buffer
 
 	-	256 MB SDRAM
-	-	32 x 8MB frames
-	-	16 x 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB (Corvid 3G only)
+	-	32 × 8MB frames
+	-	16 × 16MB frames for 2K (1080×2048), 1920×1080 VANC, and 16-bit RGB (Corvid 3G only)
 
 	@par	Audio
 
@@ -71,7 +72,7 @@
 
 	@par	Physical
 
-	-	Size (W x D x H):  0.55" x 6.61" x 2.16" (14mm × 168mm × 55mm)
+	-	Size (W × D × H):  0.55" × 6.61" × 2.16" (14mm × 168mm × 55mm)
 
 	@par	Environment
 

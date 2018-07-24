@@ -20,13 +20,12 @@ public:
 	IoIP2110Services();
 	~IoIP2110Services();
 	
-	virtual void UpdateAutoState (void);
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();
 	virtual void SetDeviceMiscRegisters ();
 	virtual NTV2VideoFormat GetSelectedInputVideoFormat (
 									NTV2VideoFormat fbVideoFormat,
-									NTV2SDIInputFormatSelect* inputFormatSelect=NULL);
+									NTV2ColorSpaceMode* inputColorSpace=NULL);
 };
 
 

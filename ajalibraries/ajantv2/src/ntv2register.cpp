@@ -12,6 +12,7 @@
 #include "ntv2bitfile.h"
 #include "ntv2mcsfile.h"
 #include "ntv2registersmb.h"
+#include "ntv2konaflashprogram.h"
 #include <math.h>
 #include <assert.h>
 #if defined (AJALinux)
@@ -2865,313 +2866,28 @@ bool CNTV2Card::GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct)
 
 bool CNTV2Card::ProgramMainFlash(const char *fileName)
 {
-	unsigned char *	bitfileBuffer	= NULL;
-	ULWord			programSize		= 0;
-	bool			result			= false;
-	CNTV2Bitfile	bitfileStream;
-	_programStatus = 0;
+    CNTV2KonaFlashProgram ntv2Device;
+    ntv2Device.SetBoard(this->GetIndexNumber());
+    ntv2Device.SetQuietMode();
 
-	if(!bitfileStream.Open(fileName))
-		return result;
+    try
+    {
+        ntv2Device.SetBitFile(fileName, MAIN_FLASHBLOCK);
+    }
+    catch(...)
+    {
+        return false;
+    }
 
-	unsigned bitfileLength = bitfileStream.GetFileStreamLength();
-	bitfileBuffer = new unsigned char[bitfileLength + 512];
-	if(bitfileBuffer == NULL)
-		return result;
-
-	memset(bitfileBuffer, 0xFF, bitfileLength+512);
-	unsigned readBytes = bitfileStream.GetFileByteStream(bitfileBuffer, bitfileLength);
-	std::string designName = bitfileStream.GetDesignName();
-	if(readBytes != bitfileLength)
-	{
-        delete[] bitfileBuffer;
-		return result;
-	}
-
-	if (!bitfileStream.CanFlashDevice (_boardID))
-		return false;	//	Bitfile intended for other device
-	bitfileStream.Close();
-
-	//To-Do check boardid to GetPartName
-
-	uint32_t numSectors = 0;
-	uint32_t sectorSize = 256*1024;
-	uint32_t twoFiftySixBlockSizeCount = (bitfileLength+256)/256;
-	uint32_t fileDwordSize = (bitfileLength+4)/4;
-	if(::NTV2DeviceHasSPIFlash(_boardID))
-	{
-		if(::NTV2DeviceHasSPIv2(_boardID))
-		{
-			programSize = 8*1024*1024;
-			programSize += 256*twoFiftySixBlockSizeCount;
-			programSize += 4*fileDwordSize;
-			numSectors = 32;
-		}
-		else if(::NTV2DeviceHasSPIv3(_boardID))
-		{
-			programSize = 16*1024*1024;
-			programSize += 256*twoFiftySixBlockSizeCount;
-			programSize += 4*fileDwordSize;
-			numSectors = 64;
-			WriteRegister(kRegXenaxFlashAddress, 0);
-			WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
-			WaitForFlashNOTBusy();
-		}
-		else if(NTV2DeviceHasSPIv5(_boardID))
-		{
-			programSize = 32 * 1024 * 1024;
-			programSize += 256*twoFiftySixBlockSizeCount;
-			programSize += 4*fileDwordSize;
-			numSectors = 128;
-			WriteRegister(kRegXenaxFlashAddress, 0);
-			WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
-			WaitForFlashNOTBusy();
-		}
-		else
-		{
-			programSize = 4*1024*1024;
-			programSize += 256*twoFiftySixBlockSizeCount;
-			programSize += 4*fileDwordSize;
-			numSectors = 16;
-		}
-		WriteRegister(kVRegFlashSize, programSize);
-		WriteRegister(kVRegFlashStatus, 0);
-	}
-	else
-	{
-        delete[] bitfileBuffer;
-		return result;
-	}
-	
-	//erase main
-	WriteRegister(kVRegFlashState, kProgramStateEraseMainFlashBlock);
-	bool didErase = EraseFlashBlock(numSectors, sectorSize);
-
-	if (didErase == true)
-	{
-		//program the main bitfile
-		WriteRegister(kVRegFlashState, kProgramStateProgramFlash);
-		uint32_t* bitfilePtr = (uint32_t*)bitfileBuffer;
-		uint32_t baseAddress = 0;
-		for(uint32_t blockCount = 0; blockCount < twoFiftySixBlockSizeCount; blockCount++, baseAddress += 256)
-		{
-			if(NTV2DeviceHasSPIv5(_boardID) && baseAddress == 16 * 1024 * 1024)
-			{
-				baseAddress = 0;
-				WriteRegister(kRegXenaxFlashAddress, 1);
-				WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
-				WaitForFlashNOTBusy();
-
-			}
-			WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandWriteEnable);
-			WaitForFlashNOTBusy();
-			for ( ULWord count=0; count < 64; count++ )
-			{
-				WriteRegister(kRegXenaxFlashDIN, *bitfilePtr++);
-			}
-			WriteRegister(kRegXenaxFlashAddress, baseAddress);
-			WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandPageProgram);
-			WaitForFlashNOTBusy();
-
-			_programStatus += 256;
-			WriteRegister(kVRegFlashStatus, _programStatus);
-		}
-
-		if(NTV2DeviceHasSPIv5(_boardID))
-		{
-			WriteRegister(kRegXenaxFlashAddress, 0);
-			WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
-			WaitForFlashNOTBusy();
-		}
-
-		// Protect Device
-		WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandWriteEnable);
-		WaitForFlashNOTBusy();
-		WriteRegister(kRegXenaxFlashDIN, 0x1C);
-		WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandWriteStatus);
-		WaitForFlashNOTBusy();
-
-		if (VerifyMainFlash(fileName))
-			result =  true;
-
-		WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandWriteEnable);
-		WaitForFlashNOTBusy();
-		WriteRegister(kRegXenaxFlashDIN, 0x9C);
-		WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandWriteStatus);
-		WaitForFlashNOTBusy();
-
-		WriteRegister(kVRegFlashStatus, programSize);
-		WriteRegister(kVRegFlashState, kProgramStateFinished);
-	}
-
-    delete[] bitfileBuffer;
-	return result;
-}
-
-
-bool CNTV2Card::EraseFlashBlock(ULWord numSectors, ULWord sectorSize)
-{
-	WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandWriteEnable);
-	WaitForFlashNOTBusy();
-	WriteRegister(kRegXenaxFlashDIN, 0x0);
-	WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandWriteStatus);
-	WaitForFlashNOTBusy();
-	
-	uint32_t baseAddress = 0;
-	uint32_t numBankSectors = NTV2DeviceHasSPIv5(_boardID) ? numSectors/2 : numSectors;
-	for (ULWord sectorCount = 0; sectorCount < numBankSectors; sectorCount++ )
-	{
-		for (int i=0; i<4; i++ , baseAddress += (64*1024))
-		{
-			WriteRegister(kRegXenaxFlashAddress, baseAddress);
-			WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandWriteEnable);
-			WaitForFlashNOTBusy();
-			WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandSectorErase);
-			WaitForFlashNOTBusy();
-		}
-		_programStatus += sectorSize;
-		WriteRegister(kVRegFlashStatus, _programStatus);
-	}
-
-	if(NTV2DeviceHasSPIv5(_boardID))
-	{
-		WriteRegister(kRegXenaxFlashAddress, 1);
-		WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
-		WaitForFlashNOTBusy();
-		baseAddress = 0;
-		for (ULWord sectorCount = numBankSectors; sectorCount < numSectors; sectorCount++ )
-		{
-			for (int i=0; i<4; i++ , baseAddress += (64*1024))
-			{
-				WriteRegister(kRegXenaxFlashAddress, baseAddress);
-				WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandWriteEnable);
-				WaitForFlashNOTBusy();
-				WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandSectorErase);
-				WaitForFlashNOTBusy();
-			}
-			_programStatus += sectorSize;
-			WriteRegister(kVRegFlashStatus, _programStatus);
-		}
-		WriteRegister(kRegXenaxFlashAddress, 0);
-		WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
-		WaitForFlashNOTBusy();
-	}
-
-	// Optional check. Program status is not updated here so progress indicator will stall if enabled.
-#if 0
-	if ( !CheckFlashErased(numSectors))
-	{
-		return false;
-	}
-#endif
-	return true;
-}
-
-bool CNTV2Card::CheckFlashErased(ULWord numSectors)
-{
-	uint32_t baseAddress = 0;
-	uint32_t dwordSizeCount = (numSectors * (64*1024))/4;
-	
-	for (uint32_t count = 0; count < dwordSizeCount; count++, baseAddress += 4)
-	{
-		WriteRegister(kRegXenaxFlashAddress, baseAddress);
-		WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandReadFast);
-		WaitForFlashNOTBusy();
-
-		ULWord flashValue;
-		ReadRegister(kRegXenaxFlashDOUT, flashValue);
-		if ( flashValue != 0xFFFFFFFF )
-			return false;
-	}
-	
-	return true;
-}
-
-bool CNTV2Card::VerifyMainFlash(const char *fileName)
-{
-	unsigned char *	bitfileBuffer	= NULL;
-	CNTV2Bitfile	bitfileStream;
-
-	if(!bitfileStream.Open(fileName))
-		return false;
-
-	unsigned bitfileLength = bitfileStream.GetFileStreamLength();
-	bitfileBuffer = new unsigned char[bitfileLength+512];
-	if(bitfileBuffer == NULL)
-		return false;
-
-	memset(bitfileBuffer, 0xFF, bitfileLength+512);
-	unsigned readBytes = bitfileStream.GetFileByteStream(bitfileBuffer, bitfileLength);
-	bitfileStream.Close();
-	if(readBytes != bitfileLength)
-	{
-        delete[] bitfileBuffer;
-		return false;
-	}
-
-	WriteRegister(kVRegFlashState, kProgramStateVerifyFlash);
-	ULWord errorCount = 0;
-	ULWord baseAddress = 0;
-	ULWord* bitfilePtr = (ULWord*)bitfileBuffer;
-	ULWord dwordSizeCount = (bitfileLength+4)/4;
-	for ( ULWord count = 0; count < dwordSizeCount; count++, baseAddress += 4 )
-	{
-		if(NTV2DeviceHasSPIv5(_boardID) && baseAddress == 16 * 1024 * 1024)
-		{
-			baseAddress = 0;
-			WriteRegister(kRegXenaxFlashAddress, 1);
-			WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
-			WaitForFlashNOTBusy();
-		}
-		WriteRegister(kRegXenaxFlashAddress, baseAddress);
-		WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandReadFast);
-		WaitForFlashNOTBusy();
-		ULWord flashValue;
-		ReadRegister(kRegXenaxFlashDOUT, flashValue);
-		ULWord bitfileValue = *bitfilePtr++;
-		if ( flashValue != bitfileValue)
-		{
-			errorCount++;
-			if ( errorCount > 1 )
-				break;
-		}
-		_programStatus += 4;
-		WriteRegister(kVRegFlashStatus, _programStatus);
-	}
-	if(NTV2DeviceHasSPIv5(_boardID))
-	{
-		WriteRegister(kRegXenaxFlashAddress, 0);
-		WriteRegister(kRegXenaxFlashControlStatus, kProgramCommandBankWrite);
-		WaitForFlashNOTBusy();
-	}
-
-	return errorCount ? false : true;
-}
-
-
-bool CNTV2Card::WaitForFlashNOTBusy()
-{
-	bool busy  = true;
-	int i = 0;
-	uint32_t regValue;
-	while(i<1)
-	{
-		ReadRegister(kRegBoardID, regValue);
-		i++;
-	}
-	regValue = 0;
-	do
-	{
-		regValue = BIT(8);
-		ReadRegister(kRegXenaxFlashControlStatus, regValue);
-		if( !(regValue & BIT(8)) )
-		{
-			busy = false;
-			break;
-		}
-	} while(busy == true);
-	
-	return true;
+    try
+    {
+        ntv2Device.Program(true);
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
 }
 
 bool CNTV2Card::GetRunningFirmwarePackageRevision (ULWord & outRevision)
@@ -3199,7 +2915,6 @@ bool CNTV2Card::GetRunningFirmwareRevision (UWord & outRevision)
 	outRevision = uint16_t((regValue & 0x0000FF00) >> 8);
 	return true;
 }
-
 
 bool CNTV2Card::GetRunningFirmwareDate (UWord & outYear, UWord & outMonth, UWord & outDay)
 {
@@ -3412,7 +3127,7 @@ bool CNTV2Card::GetRegisterWritemode (NTV2RegisterWriteMode & outValue, NTV2Chan
 
 
 bool CNTV2Card::SetLEDState (ULWord value)								{return WriteRegister (kRegGlobalControl, value, kRegMaskLED, kRegShiftLED);}
-bool CNTV2Card::GetLEDState (ULWord & outValue)							{return CNTV2DriverInterface::ReadRegister (kRegGlobalControl, outValue, kRegMaskLED, kRegShiftLED);}
+bool CNTV2Card::GetLEDState (ULWord & outValue)							{return ReadRegister (kRegGlobalControl, outValue, kRegMaskLED, kRegShiftLED);}
 
 
 ////////////////////////////////////////////////////////////////////
@@ -4345,7 +4060,7 @@ bool CNTV2Card::Get64BitAutodetect(ULWord* autodetect64)						{return autodetect
 bool CNTV2Card::SetVideoDACMode (NTV2VideoDACMode value)						{return WriteRegister (kRegAnalogOutControl,	value,	kK2RegMaskVideoDACMode,	kK2RegShiftVideoDACMode);}
 bool CNTV2Card::GetVideoDACMode (NTV2VideoDACMode & outValue)					{return CNTV2DriverInterface::ReadRegister (kRegAnalogOutControl, outValue,	kK2RegMaskVideoDACMode,	kK2RegShiftVideoDACMode);}
 bool CNTV2Card::SetAnalogOutHTiming (ULWord value)								{return WriteRegister (kRegAnalogOutControl,	value,	kK2RegMaskOutHTiming,	kK2RegShiftOutHTiming);}
-bool CNTV2Card::GetAnalogOutHTiming (ULWord & outValue)							{return CNTV2DriverInterface::ReadRegister (kRegAnalogOutControl, outValue,	kK2RegMaskOutHTiming,	kK2RegShiftOutHTiming);}
+bool CNTV2Card::GetAnalogOutHTiming (ULWord & outValue)							{return ReadRegister (kRegAnalogOutControl, outValue,	kK2RegMaskOutHTiming,	kK2RegShiftOutHTiming);}
 
 bool CNTV2Card::SetSDIOutputStandard (const UWord inOutputSpigot, const NTV2Standard inValue)
 {
@@ -5788,13 +5503,13 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (int inputNum, bool progressivePi
 		else if (boardID == DEVICE_ID_KONALHI || boardID == DEVICE_ID_IOEXPRESS)
 			result = GetAnalogInputVideoFormat();
 		else if (boardID == DEVICE_ID_KONA3GQUAD || boardID == DEVICE_ID_CORVID24 || boardID == DEVICE_ID_IO4K ||
-			boardID == DEVICE_ID_IO4KUFC || boardID == DEVICE_ID_KONA4 || boardID == DEVICE_ID_KONA4UFC)
+            boardID == DEVICE_ID_IO4KUFC || boardID == DEVICE_ID_KONA4 || boardID == DEVICE_ID_KONA4UFC || boardID == DEVICE_ID_KONA5)
 			result = GetInput3VideoFormat(progressivePicture);
 		break;
 
 	case 3:
 		if (boardID == DEVICE_ID_KONA3GQUAD || boardID == DEVICE_ID_CORVID24 || boardID == DEVICE_ID_IO4K ||
-			boardID == DEVICE_ID_IO4KUFC || boardID == DEVICE_ID_KONA4 || boardID == DEVICE_ID_KONA4UFC)
+            boardID == DEVICE_ID_IO4KUFC || boardID == DEVICE_ID_KONA4 || boardID == DEVICE_ID_KONA4UFC || boardID == DEVICE_ID_KONA5)
 			result = GetInput4VideoFormat(progressivePicture);
 		break;
 
@@ -7659,7 +7374,7 @@ bool CNTV2Card::ReadAnalogLTCInput (const UWord inLTCInput, NTV2_RP188 & outRP18
 	ULWord	regLo	(inLTCInput == 0 ? kRegLTCAnalogBits0_31 : (inLTCInput == 1 ? kRegLTC2AnalogBits0_31 : 0));
 	ULWord	regHi	(inLTCInput == 0 ? kRegLTCAnalogBits32_63 : (inLTCInput == 1 ? kRegLTC2AnalogBits32_63 : 0));
 	outRP188Data.fDBB = 0;
-	return regLo  &&  regHi  &&  CNTV2DriverInterface::ReadRegister(regLo, outRP188Data.fLo)  &&  CNTV2DriverInterface::ReadRegister(regHi, outRP188Data.fHi);
+	return regLo  &&  regHi  &&  ReadRegister(regLo, outRP188Data.fLo)  &&  ReadRegister(regHi, outRP188Data.fHi);
 }
 
 
@@ -7671,7 +7386,7 @@ bool CNTV2Card::GetAnalogLTCInClockChannel (const UWord inLTCInput, NTV2Channel 
 	ULWord		value			(0);
 	ULWord		shift			(inLTCInput == 0 ? 1 : (inLTCInput == 1 ? 9 : 0));	//	Bits 1|2|3 for LTCIn1, bits 9|10|11 for LTCIn2
 	bool		isMultiFormat	(false);
-	const bool	retVal 			(shift && GetMultiFormatMode (isMultiFormat) && isMultiFormat && CNTV2DriverInterface::ReadRegister (kRegLTCStatusControl, value, 0x7, shift));
+	const bool	retVal 			(shift && GetMultiFormatMode (isMultiFormat) && isMultiFormat && ReadRegister (kRegLTCStatusControl, value, 0x7, shift));
 	if (retVal)
 		outChannel = static_cast <NTV2Channel> (value + 1);
 	return retVal;
@@ -7716,7 +7431,7 @@ bool CNTV2Card::GetAnalogLTCOutClockChannel (const UWord inLTCOutput, NTV2Channe
 	ULWord		value			(0);
 	ULWord		shift			(inLTCOutput == 0 ? 16 : (inLTCOutput == 1 ? 20 : 0));	//	Bits 16|17|18 for LTCOut1, bits 20|21|22 for LTCOut2
 	bool		isMultiFormat	(false);
-	const bool	retVal 			(shift && GetMultiFormatMode (isMultiFormat) && isMultiFormat && CNTV2DriverInterface::ReadRegister (kRegLTCStatusControl, value, 0x7, shift));
+	const bool	retVal 			(shift && GetMultiFormatMode (isMultiFormat) && isMultiFormat && ReadRegister (kRegLTCStatusControl, value, 0x7, shift));
 	if (retVal)
 		outChannel = static_cast <NTV2Channel> (value + 1);
 	return retVal;
