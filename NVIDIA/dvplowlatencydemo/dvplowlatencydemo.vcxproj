@@ -41,7 +41,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\..\..\bin\$(Platform)\</OutDir>
+    <OutDir>..\..\..\..\..\bin\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -54,8 +54,8 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;MSWindows;AJA_WINDOWS;AJA_NO_AUTOIMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\;..\common;..\..\..\..\..\ajalibraries\gpustuff\include;..\..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\..\ajalibraries\ajantv2\src\win;..\..\..\..\..\ajalibraries</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;MSWindows;AJA_WINDOWS;AJA_NO_AUTOIMPORT;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\;..\common;..\..\..\..\..\ajalibraries\gpustuff\include;..\..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\..\ajalibraries\ajantv2\src\win;..\..\..\..\..\ajalibraries\ajabase\common;..\..\..\..\..\ajalibraries\ajabase\system;..\..\..\..\..\ajalibraries</AdditionalIncludeDirectories>
       <StringPooling>false</StringPooling>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <FunctionLevelLinking>false</FunctionLevelLinking>
@@ -74,7 +74,7 @@
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
-      <AdditionalLibraryDirectories>..\..\..\..\..\bin</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\..\bin;..\..\..\..\..\ajalibraries\gpustuff\lib\x64</AdditionalLibraryDirectories>
       <ShowProgress>NotSet</ShowProgress>
     </Link>
   </ItemDefinitionGroup>
@@ -86,7 +86,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>false</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;MSWindows=1;AJA_WINDOWS;AJA_NO_AUTOIMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;MSWindows=1;AJA_WINDOWS;AJA_NO_AUTOIMPORT;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\;..\common;..\..\..\..\..\ajalibraries\gpustuff\include;..\..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\..\ajalibraries\ajantv2\src\win;..\..\..\..\..\ajalibraries</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
@@ -96,9 +96,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\..\..\..\..\bin</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\..\bin;..\..\..\..\..\ajalibraries\gpustuff\lib\x64</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;dvp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -128,7 +128,7 @@
     <ClInclude Include="AJA_Logo_Small.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\ajalibraries\ajabase\build\ajabasedll_vs12.vcxproj">
+    <ProjectReference Include="..\..\..\..\..\ajalibraries\ajabase\build\libajabasedll_vs12.vcxproj">
       <Project>{733755c5-1cf3-489b-81d5-ecd353029782}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\..\ajalibraries\ajantv2\build\libajantv2dll_vs12.vcxproj">
