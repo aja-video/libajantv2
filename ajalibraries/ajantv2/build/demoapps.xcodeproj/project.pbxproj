@@ -141,6 +141,20 @@
 			remoteGlobalIDString = B45183D81935348C00F3D8E9;
 			remoteInfo = ntv2player4k;
 		};
+		B455DE44210933B0002A69FD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B455DE3E210933B0002A69FD /* ajaanc.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B457A4E916C2CFAC009ADC05;
+			remoteInfo = staticlib;
+		};
+		B455DE46210933B0002A69FD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B455DE3E210933B0002A69FD /* ajaanc.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B40D91851A2405F000CF03EB;
+			remoteInfo = libajaanctest;
+		};
 		B46B5F961729AEF2004E84C3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B4A7F8B71677FB4C001D4AA8 /* Project object */;
@@ -273,6 +287,7 @@
 		B45183D61935342E00F3D8E9 /* ntv2player4k.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2player4k.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2player4k/ntv2player4k.cpp; sourceTree = SOURCE_ROOT; };
 		B45183D71935342E00F3D8E9 /* ntv2player4k.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ntv2player4k.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2player4k/ntv2player4k.h; sourceTree = SOURCE_ROOT; };
 		B45183E31935348C00F3D8E9 /* ntv2player4k */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2player4k; sourceTree = BUILT_PRODUCTS_DIR; };
+		B455DE3E210933B0002A69FD /* ajaanc.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ajaanc.xcodeproj; path = ../../ajaanc/build/ajaanc.xcodeproj; sourceTree = "<group>"; };
 		B46B5F8C1729AD2F004E84C3 /* ntv2fieldburn */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2fieldburn; sourceTree = BUILT_PRODUCTS_DIR; };
 		B46B5F9A1729AF7D004E84C3 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2fieldburn/main.cpp; sourceTree = SOURCE_ROOT; };
 		B46B5FA31729B06D004E84C3 /* ntv2fieldburn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2fieldburn.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2fieldburn/ntv2fieldburn.cpp; sourceTree = SOURCE_ROOT; };
@@ -489,6 +504,15 @@
 			path = ../../../ajaapps/crossplatform/demoapps/ntv2player4k;
 			sourceTree = SOURCE_ROOT;
 		};
+		B455DE3F210933B0002A69FD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B455DE45210933B0002A69FD /* libajaanc.a */,
+				B455DE47210933B0002A69FD /* libajaanctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		B46B5F981729AF3E004E84C3 /* ntv2fieldburn */ = {
 			isa = PBXGroup;
 			children = (
@@ -536,6 +560,7 @@
 		B4A7F8B51677FB4C001D4AA8 = {
 			isa = PBXGroup;
 			children = (
+				B455DE3E210933B0002A69FD /* ajaanc.xcodeproj */,
 				B4A7F8D616781B19001D4AA8 /* demoapps */,
 				B4A7FC431679155A001D4AA8 /* Frameworks */,
 				B4A7F8C41677FC15001D4AA8 /* Products */,
@@ -893,6 +918,12 @@
 			mainGroup = B4A7F8B51677FB4C001D4AA8;
 			productRefGroup = B4A7F8C41677FC15001D4AA8 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = B455DE3F210933B0002A69FD /* Products */;
+					ProjectRef = B455DE3E210933B0002A69FD /* ajaanc.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				B4A7FD971679171B001D4AA8 /* ntv2burn */,
@@ -912,6 +943,23 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		B455DE45210933B0002A69FD /* libajaanc.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libajaanc.a;
+			remoteRef = B455DE44210933B0002A69FD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		B455DE47210933B0002A69FD /* libajaanctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = libajaanctest;
+			remoteRef = B455DE46210933B0002A69FD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
 		A40162311EBA804E001B8830 /* Sources */ = {

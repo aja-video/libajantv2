@@ -279,7 +279,7 @@ The \ref ajantv2 source code is provided, and the libraries can be built with de
 		\code{.sh}
 		$ xcrun xcodebuild -project ajalibraries/ajantv2/build/ajantv2.xcodeproj  -target libajantv2  -configuration Debug  CLANG_CXX_LIBRARY=libstdc++  clean build
 		$ xcrun xcodebuild -project ajalibraries/ajabase/build/ajabase.xcodeproj  -target ajabase     -configuration Debug  CLANG_CXX_LIBRARY=libstdc++  clean build
-		$ xcrun xcodebuild -project ajalibraries/ajaanc/build/libajaanc.xcodeproj -target staticlib   -configuration Debug  CLANG_CXX_LIBRARY=libstdc++  clean build
+		$ xcrun xcodebuild -project ajalibraries/ajaanc/build/ajaanc.xcodeproj    -target staticlib   -configuration Debug  CLANG_CXX_LIBRARY=libstdc++  clean build
 		\endcode
 		If you use the \ref ajacc, AJA supplies a stdc++-compatible version of this library inside the \c lib/libstdc++ folder.
 		Swap them with their counterparts in the \c lib folder.
