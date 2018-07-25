@@ -914,9 +914,6 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
 
     }
 
-    // Generate and push the SDP
-    GenSDP(stream);
-
     return rv;
 }
 
@@ -1062,6 +1059,16 @@ bool CNTV2Config2110::SetTxStreamEnable(const NTV2Stream stream, bool enableSfp1
     // ** Packetizer
     uint32_t packetizerBaseAddr;
     SetTxPacketizerChannel(stream, packetizerBaseAddr);
+
+    // Generate and push the SDP
+    if (enableSfp1)
+    {
+        GenSDP(SFP_1, stream);
+    }
+    if (enableSfp2)
+    {
+        GenSDP(SFP_2, stream);
+    }
 
     if (enableSfp1 || enableSfp2)
     {
@@ -1628,10 +1635,10 @@ string CNTV2Config2110::GetTxSDPUrl(const eSFP sfp, const NTV2Stream stream)
     return preAmble + localIPAddress + "/" + namePre + namePost;
 }
 
-string CNTV2Config2110::GetTxSDP(const NTV2Stream stream)
+string CNTV2Config2110::GetTxSDP(const eSFP sfp, const NTV2Stream stream)
 {
-    GenSDP(stream, false);
-    return txsdp[stream].str();
+    GenSDP(sfp, stream, false);
+    return txsdp.str();
 }
 
 string CNTV2Config2110::To_String(int val)
@@ -1641,7 +1648,7 @@ string CNTV2Config2110::To_String(int val)
     return oss.str();
 }
 
-bool CNTV2Config2110::GenSDP(const NTV2Stream stream, bool pushit)
+bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushit)
 {
     string filename = "txstream";
 
@@ -1658,7 +1665,7 @@ bool CNTV2Config2110::GenSDP(const NTV2Stream stream, bool pushit)
         default:                    filename += "";         break;
     }
 
-    stringstream & sdp = txsdp[stream];
+    stringstream & sdp = txsdp;
 
     sdp.str("");
     sdp.clear();
@@ -1675,7 +1682,11 @@ bool CNTV2Config2110::GenSDP(const NTV2Stream stream, bool pushit)
     sdp << " 0 IN IP4 ";
 
     uint32_t val;
-    mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0, val);
+    if (sfp == SFP_2)
+        mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1, val);
+    else
+        mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0, val);
+
     struct in_addr addr;
     addr.s_addr = val;
     string localIPAddress = inet_ntoa(addr);
@@ -1694,11 +1705,11 @@ bool CNTV2Config2110::GenSDP(const NTV2Stream stream, bool pushit)
 
     if (StreamType(stream) == VIDEO_STREAM)
     {
-        GenSDPVideoStream(sdp, stream, gmInfo);
+        GenSDPVideoStream(sdp, sfp, stream, gmInfo);
     }
     else
     {
-        GenSDPAudioStream(sdp, stream, gmInfo);
+        GenSDPAudioStream(sdp, sfp, stream, gmInfo);
     }
     
     //cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
@@ -1711,13 +1722,17 @@ bool CNTV2Config2110::GenSDP(const NTV2Stream stream, bool pushit)
     return rv;
 }
 
-bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, const NTV2Stream stream, string gmInfo)
+bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, const eSFP sfp, const NTV2Stream stream, string gmInfo)
 {
-    // TODO - fix this to work with sfp2
+    // Insure appropriate stream is enabled
     bool enabledA;
     bool enabledB;
     GetTxStreamEnable(stream, enabledA, enabledB);
-    if (!enabledA && !enabledB)
+    if ((sfp == SFP_1) && !enabledA)
+    {
+        return true;
+    }
+    if ((sfp == SFP_2) && !enabledB)
     {
         return true;
     }
@@ -1749,13 +1764,20 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, const NTV2Stream str
 
     // media name
     sdp << "m=video ";
-    sdp << To_String(config.remotePort[0]);     // FIXME
+    if (sfp == SFP_2)
+        sdp << To_String(config.remotePort[1]);
+    else
+        sdp << To_String(config.remotePort[0]);
+
     sdp << " RTP/AVP ";
     sdp << To_String(config.payload) << endl;
 
     // connection information
     sdp << "c=IN IP4 ";
-    sdp << config.remoteIP[0];
+    if (sfp == SFP_2)
+        sdp << config.remoteIP[1];
+    else
+        sdp << config.remoteIP[0];
     sdp << "/" << To_String(config.ttl) << endl;
 
     // rtpmap
@@ -1794,13 +1816,17 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, const NTV2Stream str
 }
 
 
-bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, const  NTV2Stream stream, string gmInfo)
+bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, const eSFP sfp, const  NTV2Stream stream, string gmInfo)
 {
-    // TODO - fix this to work with sfp2
+    // Insure appropriate stream is enabled
     bool enabledA;
     bool enabledB;
     GetTxStreamEnable(stream, enabledA, enabledB);
-    if (!enabledA && !enabledB)
+    if ((sfp == SFP_1) && !enabledA)
+    {
+        return true;
+    }
+    if ((sfp == SFP_2) && !enabledB)
     {
         return true;
     }
@@ -1810,13 +1836,21 @@ bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, const  NTV2Stream st
 
     // media name
     sdp << "m=audio ";
-    sdp << To_String(config.remotePort[0]);     // FIXME
+    if (sfp == SFP_2)
+        sdp << To_String(config.remotePort[1]);
+    else
+        sdp << To_String(config.remotePort[0]);
+
     sdp << " RTP/AVP ";
     sdp << To_String(config.payload) << endl;
 
     // connection information
     sdp << "c=IN IP4 ";
-    sdp << config.remoteIP[0];
+    if (sfp == SFP_2)
+        sdp << config.remoteIP[1];
+    else
+        sdp << config.remoteIP[0];
+
     sdp << "/" << To_String(config.ttl) << endl;
 
     // rtpmap
