@@ -274,13 +274,14 @@ The \ref ajantv2 source code is provided, and the libraries can be built with de
 -#	Choose <b>Build</b> from the <b>Product</b> menu.
 -#	Look for the new \c libajantv2d.a library in the \c lib folder.
 
-@note	The \ref ajantv2 and \ref ajabase included in the SDK are built to link with the traditional, non-C++11 standard library.
-		If your application uses C++11, you must rebuild them both to reference the LLVM C++11 standard library:
+@note	The \ref ajantv2, \ref ajabase and \ref ajaanc included in the SDK are built to link with the latest C++11 standard library.
+		If your application must use the older \c stdc++ standard libraries, you must rebuild them to reference the stdc++ standard library:
 		\code{.sh}
-		$ xcrun xcodebuild -project ajalibraries/ajantv2/build/ajantv2.xcodeproj  -target libajantv2  -configuration Debug  CLANG_CXX_LIBRARY=libc++  clean build
-		$ xcrun xcodebuild -project ajalibraries/ajabase/build/ajabase.xcodeproj  -target ajabase  -configuration Debug  CLANG_CXX_LIBRARY=libc++  clean build
+		$ xcrun xcodebuild -project ajalibraries/ajantv2/build/ajantv2.xcodeproj  -target libajantv2  -configuration Debug  CLANG_CXX_LIBRARY=libstdc++  clean build
+		$ xcrun xcodebuild -project ajalibraries/ajabase/build/ajabase.xcodeproj  -target ajabase     -configuration Debug  CLANG_CXX_LIBRARY=libstdc++  clean build
+		$ xcrun xcodebuild -project ajalibraries/ajaanc/build/libajaanc.xcodeproj -target staticlib   -configuration Debug  CLANG_CXX_LIBRARY=libstdc++  clean build
 		\endcode
-		If you use the \ref ajaanc and/or \ref ajacc, AJA supplies libc++-compatible versions of these libraries inside the \c lib/libc++11 folder.
+		If you use the \ref ajacc, AJA supplies a stdc++-compatible version of this library inside the \c lib/libstdc++ folder.
 		Swap them with their counterparts in the \c lib folder.
 
 
@@ -311,7 +312,7 @@ To get started, look for the <b>build</b> folder in the SDK:
 -	<b>ntv2sdkPPP_XX.YY.ZZ.nn</b> — The extracted SDK folder.
 	-	<b>build</b> — This folder contains a complete <b>qmake</b> build structure that builds the NTV2 libraries and demo applications.
 		-	<b>_ntv2demos.pro</b> — This is the “solution file” or “project file” that builds everything — the libraries and the demonstration applications.
-		-	<b>ajaanc</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to link with \ref ajaanc.
+		-	<b>ajaanc</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajaanc.
 		-	<b>ajabase</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajabase.
 		-	<b>ajacc</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to link with the \ref ajacc.
 		-	<b>ajantv2</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajantv2.
@@ -376,8 +377,8 @@ Many OEM developers choose to create their own NTV2-based Xcode projects “from
 	-	\c sdkdir/ajalibraries/ajantv2/includes
 	-	\c sdkdir/ajalibraries/ajantv2/src/mac
 	-	\c sdkdir/ajalibraries/ajabase (only if the \ref ajabase is needed)
-	-	\c sdkdir/ajalibraries/ajacc (only if the \ref ajacc is needed)
 	-	\c sdkdir/ajalibraries/ajaanc (only if the \ref ajaanc is needed)
+	-	\c sdkdir/ajalibraries/ajacc (only if the \ref ajacc is needed)
 -	It is not necessary to always search “user” header paths.
 -	Use inch marks (i.e. "), and not angle brackets (i.e. <>) when quoting AJA header file names in \c #include statements.
 -	Add the following library search paths:
@@ -385,8 +386,8 @@ Many OEM developers choose to create their own NTV2-based Xcode projects “from
 -	Add the following to the “Other Linker Flags” setting:
 	-	\c -lajantv2 (Release) or <b>-lajantv2d</b> (Debug)
 	-	\c -lajabase (Release) or <b>-lajabased</b> (Debug), if needed
-	-	\c -lajacc, if the AJA captioning library is needed
-	-	\c -lajaanc, if the AJA ancillary data library is needed
+	-	\c -lajaanc, if the \ref ajaanc is needed
+	-	\c -lajacc, if the \ref ajacc is needed
 
 @warning	The libraries shipped with the SDK for MacOS are \c x86_64 (64-bit) only.
 			AJA no longer supports the \c i386 (Intel 32-bit) or PowerPC architectures.
@@ -423,8 +424,8 @@ Many OEM developers choose to create their own solution and project files “fro
 -	Add the appropriate SDK <b>.vcproj</b> file(s) to your solution as needed, then make your build target(s) dependent upon them. This will configure the linker properly.
 -	It’s important to link with the correct runtime libraries. When using AJA’s static libraries, link with Multi-threaded \c /MT or Multi-threaded debug \c /Mtd
 	runtime libraries. When using AJA’s dynamic libraries, link with Multi-threaded-DLL \c /MD or Multi-threaded DLL debug \c /MDd runtime libraries.
--	When using the \ref ajacc and \ref ajaanc (found in the \c lib directory), it’s important to link with the ones that are correct for the Visual Studio
-	compiler being used. The library names have been decorated with the Visual Studio compiler version (\c _vs10, \c _vs11, etc.), Win32 or x64 (\c _32 or \c _64),
+-	When using the \ref ajacc (found in the \c lib directory), it’s important to link with the one that’s correct for the Visual Studio
+	compiler being used. The library names are decorated with the Visual Studio compiler version (\c _vs10, \c _vs11, etc.), Win32 or x64 (\c _32 or \c _64),
 	and the runtime library they’re compatible with (undecorated is \c /MT, \c d for \c /Mtd, \c MD for \c /MD, and \c MDd for \c /MDd ).
 -	When using AJA’s pre-built DLLs, AJA recommends configuring your solution to place build products in the same \c bin directory that contains AJA’s pre-built
 	executables. This will speed development, since the requisite DLLs can readily be found by your application at run time.
