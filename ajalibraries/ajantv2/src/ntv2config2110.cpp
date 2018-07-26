@@ -1712,7 +1712,7 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
         GenSDPAudioStream(sdp, sfp, stream, gmInfo);
     }
     
-    //cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
+    cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
 
     if (pushit)
         rv = PushSDP(filename,sdp);

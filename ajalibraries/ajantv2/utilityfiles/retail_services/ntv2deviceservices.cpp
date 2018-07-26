@@ -2131,6 +2131,11 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     txConfig.videoFormat = Convert21104KFormat(mFb1VideoFormat);
                     txConfig.videoSamples = VPIDSampling_YUV_422;
 
+                    // Start by turning off the video stream
+                    printf("SetTxVideoStream off %d\n", m2110TxVideoData.txVideoCh[i].stream);
+                    config2110->SetTxStreamEnable(m2110TxVideoData.txVideoCh[i].stream, false, false);
+                    m2110IpStatusData.txChStatus[i] = kIpStatusStopped;
+
                     if (config2110->SetTxStreamConfiguration(m2110TxVideoData.txVideoCh[i].stream, txConfig) == true)
                     {
                         printf("SetTxStreamConfiguration Video OK\n");
@@ -2145,13 +2150,6 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                                                           (bool)m2110TxVideoData.txVideoCh[i].sfpEnable[0],
                                                           (bool)m2110TxVideoData.txVideoCh[i].sfpEnable[1]);
                             m2110IpStatusData.txChStatus[i] = kIpStatusRunning;
-                        }
-                        else
-                        {
-                            printf("SetTxVideoStream off %d\n", m2110TxVideoData.txVideoCh[i].stream);
-                            config2110->SetTxStreamEnable(m2110TxVideoData.txVideoCh[i].stream, false, false);
-                            m2110IpStatusData.txChStatus[i] = kIpStatusStopped;
-
                         }
                     }
                     else
@@ -2189,6 +2187,9 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     txConfig.firstAudioChannel = m2110TxAudioData.txAudioCh[i].firstAudioChannel;
                     txConfig.audioPktInterval = m2110TxAudioData.txAudioCh[i].audioPktInterval;
 
+                    // Start by turning off the audio stream
+                    printf("SetTxAudioStream off %d\n", m2110TxAudioData.txAudioCh[i].stream);
+                    config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].stream, false, false);
 
                     if (config2110->SetTxStreamConfiguration(m2110TxAudioData.txAudioCh[i].stream, txConfig) == true)
                     {
@@ -2203,11 +2204,6 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                             config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].stream,
                                                           (bool)m2110TxAudioData.txAudioCh[i].sfpEnable[0],
                                                           (bool)m2110TxAudioData.txAudioCh[i].sfpEnable[1]);
-                        }
-                        else
-                        {
-                            printf("SetTxAudioStream off %d\n", m2110TxAudioData.txAudioCh[i].stream);
-                            config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].stream, false, false);
                         }
                     }
                     else
@@ -2276,6 +2272,10 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     rxConfig.videoSamples = VPIDSampling_YUV_422;
                     printf("Format (%d, %d, %d)\n", i, mFollowInputFormat, rxConfig.videoFormat);
 
+                    // Start by turning off the video receiver
+                    printf("SetRxVideoStream off %d\n", m2110RxVideoData.rxVideoCh[i].stream);
+                    config2110->SetRxStreamEnable(sfp, m2110RxVideoData.rxVideoCh[i].stream, false);
+                    m2110IpStatusData.rxChStatus[i] = kIpStatusStopped;
 
                     if (config2110->SetRxStreamConfiguration(sfp, m2110RxVideoData.rxVideoCh[i].stream, rxConfig) == true)
                     {
@@ -2289,12 +2289,6 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                             printf("SetRxVideoStream on %d\n", m2110RxVideoData.rxVideoCh[i].stream);
                             config2110->SetRxStreamEnable(sfp, m2110RxVideoData.rxVideoCh[i].stream, true);
                             m2110IpStatusData.rxChStatus[i] = kIpStatusRunning;
-                        }
-                        else
-                        {
-                            printf("SetRxVideoStream off %d\n", m2110RxVideoData.rxVideoCh[i].stream);
-                            config2110->SetRxStreamEnable(sfp, m2110RxVideoData.rxVideoCh[i].stream, false);
-                            m2110IpStatusData.rxChStatus[i] = kIpStatusStopped;
                         }
                     }
                     else
@@ -2340,6 +2334,10 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     rxConfig.numAudioChannels = m2110RxAudioData.rxAudioCh[i].numAudioChannels;
                     rxConfig.audioPktInterval = m2110RxAudioData.rxAudioCh[i].audioPktInterval;
 
+                    // Start by turning off the audio receiver
+                    printf("SetRxAudioStream off %d\n", m2110RxAudioData.rxAudioCh[i].stream);
+                    config2110->SetRxStreamEnable(sfp, m2110RxAudioData.rxAudioCh[i].stream, false);
+
                     if (config2110->SetRxStreamConfiguration(sfp, m2110RxAudioData.rxAudioCh[i].stream, rxConfig) == true)
                     {
                         printf("SetRxStreamConfiguration Audio OK\n");
@@ -2351,11 +2349,6 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                         {
                             printf("SetRxAudioStream on %d\n", m2110RxAudioData.rxAudioCh[i].stream);
                             config2110->SetRxStreamEnable(sfp, m2110RxAudioData.rxAudioCh[i].stream, true);
-                        }
-                        else
-                        {
-                            printf("SetRxAudioStream off %d\n", m2110RxAudioData.rxAudioCh[i].stream);
-                            config2110->SetRxStreamEnable(sfp, m2110RxAudioData.rxAudioCh[i].stream, false);
                         }
                     }
                     else
