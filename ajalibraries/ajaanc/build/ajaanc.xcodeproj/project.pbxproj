@@ -93,7 +93,7 @@
 		B455DE5021093D39002A69FD /* ajaancd.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = ajaancd.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		B457A20216C17FA6009ADC05 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		B457A2C116C17FDE009ADC05 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
-		B457A4E916C2CFAC009ADC05 /* libajaanc.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libajaanc.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B457A4E916C2CFAC009ADC05 /* libajaancd.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libajaancd.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4A71D381BF2BC6400A9E314 /* ancillarydata_timecode_atc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_timecode_atc.h; path = ../includes/ancillarydata_timecode_atc.h; sourceTree = SOURCE_ROOT; };
 		B4A71D391BF2BC6400A9E314 /* ancillarydata_timecode_vitc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_timecode_vitc.h; path = ../includes/ancillarydata_timecode_vitc.h; sourceTree = SOURCE_ROOT; };
 		B4A71D3A1BF2BC6400A9E314 /* ancillarydata_timecode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_timecode.h; path = ../includes/ancillarydata_timecode.h; sourceTree = SOURCE_ROOT; };
@@ -149,7 +149,7 @@
 		034768DDFF38A45A11DB9C8B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				B457A4E916C2CFAC009ADC05 /* libajaanc.a */,
+				B457A4E916C2CFAC009ADC05 /* libajaancd.a */,
 				B455DE5021093D39002A69FD /* ajaancd.dylib */,
 			);
 			name = Products;
@@ -278,7 +278,7 @@
 			);
 			name = staticlib;
 			productName = staticlib;
-			productReference = B457A4E916C2CFAC009ADC05 /* libajaanc.a */;
+			productReference = B457A4E916C2CFAC009ADC05 /* libajaancd.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -532,7 +532,7 @@
 		B457A4EA16C2CFAC009ADC05 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				PRODUCT_NAME = ajaanc;
+				PRODUCT_NAME = ajaancd;
 			};
 			name = Debug;
 		};
