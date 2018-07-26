@@ -147,6 +147,27 @@ AJAExport inline const std::string &	AJAAncillaryDataVideoStreamToString (const 
 
 
 /**
+	@brief	Specifies which channel of a video stream in which to look for Anc data.
+**/
+enum AncChannelSearchSelect
+{
+	AncChannelSearch_Y,			///< @brief	Only look in luma samples
+	AncChannelSearch_C,			///< @brief	Only look in chroma samples
+	AncChannelSearch_Both,		///< @brief	Look both luma and chroma samples (SD only)
+	AncChannelSearch_Invalid	///< @brief	Invalid
+};
+
+#define	IS_VALID_AncChannelSearchSelect(_x_)	((_x_) >= AncChannelSearch_Y  &&  (_x_) < AncChannelSearch_Invalid)
+
+/**
+	@return		A string containing a human-readable representation of the given AncChannelSearchSelect value (or empty if not possible).
+	@param[in]	inSelect	Specifies the AncChannelSearchSelect value to be converted.
+	@param[in]	inCompact	If true (the default), returns the compact representation;  otherwise returns the longer symbolic format.
+**/
+AJAExport std::string AncChannelSearchSelectToString (const AncChannelSearchSelect inSelect, const bool inCompact = true);
+
+
+/**
 	@brief	Identifies the raster section of a video stream that contains the ancillary data.
 **/
 enum AJAAncillaryDataSpace
@@ -872,6 +893,52 @@ public:
 	static std::string						DIDSIDToString (const uint8_t inDID, const uint8_t inSDID);
 	///@}
 
+	/**
+		@return		The given data byte in bits 7:0, plus even parity in bit 8 and ~bit 8 in bit 9.
+		@param[in]	inDataByte		The given data byte to have parity added to it.
+	**/
+	static uint16_t							AddEvenParity (const uint8_t inDataByte);
+
+
+	typedef std::vector<uint16_t>	U16Packet;	///< @brief	An ordered sequence of 10-bit packet words stored in uint16_t values.
+	typedef std::vector<U16Packet>	U16Packets;	///< @brief	An ordered sequence of zero or more U16Packet values. 
+
+	/**
+		@brief		Extracts whatever VANC packets are found inside the given 16-bit YUV line buffer.
+		@param[in]	inYUV16Line			Specifies the uint16_t sequence containing the 10-bit YUV VANC line data components.
+										(Use ::UnpackLine_10BitYUVtoUWordSequence to convert a VANC line from an NTV2_FBF_10BIT_YCBCR
+										frame buffer into this format. Use UnpackLine_8BitYUVtoU16s to convert a VANC line from an
+										::NTV2_FBF_8BIT_YCBCR frame buffer into this format.)
+		@param[in]	inChanSelect		Specifies the ancillary data channel to search. Use AncChannelSearch_Y for luma, AncChannelSearch_C
+										for chroma, or AncChannelSearch_Both for both (SD only).
+		@param[out]	outRawPackets		Receives the packet vector, which will contain one vector of uint16_t values per extracted packet.
+										Each packet in the returned list will start with the 0x000/0x3FF/0x3FF/DID/SDID/DC
+										sequence, followed by each 10-bit packet data word, and ending with the checksum word.
+		@param[out]	outWordOffsets		Receives the horizontal word offsets into the line, one for each packet found.
+										This should have the same number of elements as "outRawPackets".
+										These offsets can also be used to discern which channel each packet originated in (Y or C).
+		@return		True if successful;  false if failed.
+		@note		This function will not finish parsing the line once a parity, checksum, or overrun error is discovered in the line.
+	**/
+	static bool								GetAncPacketsFromVANCLine (const std::vector<uint16_t> &	inYUV16Line,
+																		const AncChannelSearchSelect	inChanSelect,
+																		U16Packets &					outRawPackets,
+																		std::vector<uint16_t> &			outWordOffsets);
+	/**
+		@brief		Converts a single line of ::NTV2_FBF_8BIT_YCBCR data from the given source buffer into an ordered sequence of uint16_t
+					values that contain the resulting 10-bit even-parity data.
+		@param[in]	pInYUV8Line			A valid, non-NULL pointer to the start of the VANC line in an ::NTV2_FBF_8BIT_YCBCR video buffer.
+		@param[out]	outU16YUVLine		Receives the converted 10-bit-per-component values as an ordered sequence of uint16_t values,
+										which will include even parity and valid checksums.
+		@param[in]	inNumPixels			Specifies the length of the line to be converted, in pixels.
+		@return		True if successful;  otherwise false.
+		@note		If SMPTE ancillary data is detected in the video, this routine "intelligently" stretches it by copying the 8-bits to
+					the LS 8-bits of the 10-bit output, recalculating parity and checksums as needed. (This emulates what NTV2 device
+					firmware does during playout of ::NTV2_FBF_8BIT_YCBCR frame buffers with ::NTV2_VANCDATA_8BITSHIFT_ENABLE.)
+	**/
+	static bool								Unpack8BitYCbCrToU16sVANCLine (const void * pInYUV8Line,
+																			std::vector<uint16_t> & outU16YUVLine,
+																			const uint32_t inNumPixels);
 
 	protected:
 		typedef std::vector<uint8_t>		ByteVector;
