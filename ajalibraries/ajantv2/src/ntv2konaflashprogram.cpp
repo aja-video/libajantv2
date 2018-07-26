@@ -97,7 +97,19 @@ void CNTV2KonaFlashProgram::SetQuietMode()
     }
 }
 
-bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, uint32_t index)
+void CNTV2KonaFlashProgram::SetMBReset()
+{
+    if(GetDeviceID() == DEVICE_ID_IOIP_2022 || GetDeviceID() == DEVICE_ID_IOIP_2110)
+    {
+        WriteRegister(SAREK_REGS + kRegSarekControl, 0x02);
+    }
+    else if(GetDeviceID() == DEVICE_ID_KONAIP_2022 || GetDeviceID() == DEVICE_ID_KONAIP_2110)
+    {
+        WriteRegister(SAREK_REGS + kRegSarekControl, 0x01);
+    }
+}
+
+bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, NTV2DeviceType boardType, uint32_t index)
 {
 	if (!Open (boardNumber))
 		return false;
