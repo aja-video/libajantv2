@@ -377,6 +377,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
     case DEVICE_ID_KONAIP_2110:
     case DEVICE_ID_KONAHDMI:
 	case DEVICE_ID_KONA5:
+    case DEVICE_ID_KONA5_12G:
         switch (inFrameGeometry)
 		{
 		case NTV2_FG_4x1920x1080:
