@@ -7570,6 +7570,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (void)
 														DEVICE_ID_KONA1,
                                                         DEVICE_ID_KONAHDMI,
 														DEVICE_ID_KONA5,
+                                                        DEVICE_ID_KONA5_12G,
                                                         DEVICE_ID_NOTFOUND	};
 	NTV2DeviceIDSet	result;
 	for (unsigned ndx (0);  ndx < sizeof (sValidDeviceIDs) / sizeof (NTV2DeviceID);  ndx++)
