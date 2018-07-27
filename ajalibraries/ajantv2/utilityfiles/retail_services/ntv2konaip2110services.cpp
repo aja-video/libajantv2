@@ -2214,22 +2214,22 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 			}
 		}
 		
-		if (b2wire4kIn)
-			b4xIo = false;
+		//if (b2wire4kIn)
+		//	b4xIo = false;
 		
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL1, false);
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL2, false);
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL3, !b4xIo);		// 3,4 are for playback, unless 4K capture
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL4, !b4xIo);		// 3,4 are for playback, unless 4K capture
+		mCard->SetSDITransmitEnable(NTV2_CHANNEL3, false);		// 3,4 are for playback, unless 4K capture
+		mCard->SetSDITransmitEnable(NTV2_CHANNEL4, false);		// 3,4 are for playback, unless 4K capture
 	}
 	else
 	{
-		b2pi = b4K && (m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
-		if (b2pi && !bSdiOutRGB && !b4kHfr)
-			b4xIo = false;										// low frame rate two pixel interleave YUV
+		//b2pi = b4K && (m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
+		//if (b2pi && !bSdiOutRGB && !b4kHfr)
+		//	b4xIo = false;										// low frame rate two pixel interleave YUV
 		
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL1, b4xIo);		// 1,2 are for capture, unless 4K playback
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL2, b4xIo);		// 1,2 are for capture, unless 4K playback
+		mCard->SetSDITransmitEnable(NTV2_CHANNEL1, true);		// 1,2 are for capture, unless 4K playback
+		mCard->SetSDITransmitEnable(NTV2_CHANNEL2, true);		// 1,2 are for capture, unless 4K playback
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL4, true);
 	}

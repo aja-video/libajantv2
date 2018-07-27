@@ -877,7 +877,7 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 		ReadRegister (kVRegInputSelect, inputSelect);
 
 		//	Next, determine the ControlPanel's current TimeCode source (LTC? VITC1? VITC2)...
-		RP188SourceSelect TimecodeSource;
+		RP188SourceSelect TimecodeSource(kRP188SourceEmbeddedLTC);
 		CNTV2DriverInterface::ReadRegister(kVRegRP188SourceSelect, TimecodeSource);
 
 		//	Now convert that into an NTV2TCIndex...
