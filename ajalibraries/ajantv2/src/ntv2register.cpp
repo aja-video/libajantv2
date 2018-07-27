@@ -2864,27 +2864,21 @@ bool CNTV2Card::GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct)
 	return true;
 }
 
-bool CNTV2Card::ProgramMainFlash(const char *fileName)
+#include "ntv2konaflashprogram.cpp"
+bool CNTV2Card::ProgramMainFlash(const char *fileName, bool bForceUpdate)
 {
-    CNTV2KonaFlashProgram ntv2Device;
-    ntv2Device.SetBoard(this->GetIndexNumber());
-    ntv2Device.SetQuietMode();
-
+    CNTV2KonaFlashProgram thisDevice;
+    thisDevice.SetBoard(GetIndexNumber());
     try
     {
-        ntv2Device.SetBitFile(fileName, MAIN_FLASHBLOCK);
+        thisDevice.SetBitFile(fileName, MAIN_FLASHBLOCK);
+        if(bForceUpdate)
+            thisDevice.SetMBReset();
+        thisDevice.Program(true);
     }
-    catch(...)
+    catch (const char* Message)
     {
-        return false;
-    }
-
-    try
-    {
-        ntv2Device.Program(true);
-    }
-    catch (...)
-    {
+        (void)Message;
         return false;
     }
     return true;

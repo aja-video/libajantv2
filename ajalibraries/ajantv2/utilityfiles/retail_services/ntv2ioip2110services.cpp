@@ -104,10 +104,6 @@ void IoIP2110Services::SetDeviceXPointPlayback ()
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback();
 	
-	//
-	// Io4K
-	//
-	
 	bool						bFb1RGB				= IsRGBFormat(mFb1Format);
 	bool						bFb2RGB				= IsRGBFormat(mFb2Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);

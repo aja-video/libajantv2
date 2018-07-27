@@ -6,10 +6,8 @@
 
 #include "ancillarylist.h"
 #include "ancillarydatafactory.h"
-#include "ajabase/system/debug.h"				//	This makes 'ajaanc' dependent upon 'ajabase'
-#include "ajacc/includes/ntv2smpteancdata.h"	//	This makes 'ajaanc' dependent upon 'ajacc':
-												//	CNTV2SMPTEAncData::UnpackLine_8BitYUVtoUWordSequence
-												//	CNTV2SMPTEAncData::GetAncPacketsFromVANCLine
+#include "ajabase/system/debug.h"	//	This makes 'ajaanc' dependent upon 'ajabase'
+#include "ajantv2/includes/ntv2utils.h"	//	This makes 'ajaanc' dependent upon 'ajantv2'
 #if defined (AJALinux)
 	#include <string.h>		//	For memcpy
 #endif	//	AJALinux
@@ -686,38 +684,38 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffe
 			::UnpackLine_10BitYUVtoUWordSequence (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), lineOffset),
 													inFormatDesc, uwords);
 		else
-			CNTV2SMPTEAncData::UnpackLine_8BitYUVtoUWordSequence (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), lineOffset),
-																	uwords,  inFormatDesc.GetRasterWidth());
+			AJAAncillaryData::Unpack8BitYCbCrToU16sVANCLine (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), lineOffset),
+															uwords,  inFormatDesc.GetRasterWidth());
 		if (isSD)
 		{
-			UWordVANCPacketList			ycPackets;
-			UWordSequence				ycHOffsets;
-			AJAAncillaryDataLocation	loc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_Both, AJAAncillaryDataSpace_VANC, uint16_t(smpteLineNum));
+			AJAAncillaryData::U16Packets	ycPackets;
+			UWordSequence					ycHOffsets;
+			AJAAncillaryDataLocation		loc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_Both, AJAAncillaryDataSpace_VANC, uint16_t(smpteLineNum));
 
-			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Both, ycPackets, ycHOffsets);
+			AJAAncillaryData::GetAncPacketsFromVANCLine (uwords, AncChannelSearch_Both, ycPackets, ycHOffsets);
 			NTV2_ASSERT(ycPackets.size() == ycHOffsets.size());
 
-			for (UWordVANCPacketListConstIter it (ycPackets.begin());  it != ycPackets.end();  ++it, ndx++)
+			for (AJAAncillaryData::U16Packets::const_iterator it(ycPackets.begin());  it != ycPackets.end();  ++it, ndx++)
 				outPackets.AddVANCData (*it, loc.SetHorizontalOffset(ycHOffsets[ndx]));
 		}
 		else
 		{
-			UWordVANCPacketList			yPackets, cPackets;
-			UWordSequence				yHOffsets, cHOffsets;
-			AJAAncillaryDataLocation	yLoc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, uint16_t(smpteLineNum));
-			AJAAncillaryDataLocation	cLoc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, uint16_t(smpteLineNum));
+			AJAAncillaryData::U16Packets	yPackets, cPackets;
+			UWordSequence					yHOffsets, cHOffsets;
+			AJAAncillaryDataLocation		yLoc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, uint16_t(smpteLineNum));
+			AJAAncillaryDataLocation		cLoc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, uint16_t(smpteLineNum));
 			//cerr << endl << "SetFromVANCData: +" << DEC0N(lineOffset,2) << ": ";  inFormatDesc.PrintSMPTELineNumber(cerr, lineOffset);  cerr << ":" << endl << uwords << endl;
-			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Y, yPackets, yHOffsets);
-			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_C, cPackets, cHOffsets);
+			AJAAncillaryData::GetAncPacketsFromVANCLine (uwords, AncChannelSearch_Y, yPackets, yHOffsets);
+			AJAAncillaryData::GetAncPacketsFromVANCLine (uwords, AncChannelSearch_C, cPackets, cHOffsets);
 			NTV2_ASSERT(yPackets.size() == yHOffsets.size());
 			NTV2_ASSERT(cPackets.size() == cHOffsets.size());
 
 			unsigned	ndxx(0);
-			for (UWordVANCPacketListConstIter it (yPackets.begin());  it != yPackets.end();  ++it, ndxx++)
+			for (AJAAncillaryData::U16Packets::const_iterator it(yPackets.begin());  it != yPackets.end();  ++it, ndxx++)
 				outPackets.AddVANCData (*it, yLoc.SetHorizontalOffset(yHOffsets[ndxx]));
 
 			ndxx = 0;
-			for (UWordVANCPacketListConstIter it (cPackets.begin());  it != cPackets.end();  ++it, ndxx++)
+			for (AJAAncillaryData::U16Packets::const_iterator it(cPackets.begin());  it != cPackets.end();  ++it, ndxx++)
 				outPackets.AddVANCData (*it, cLoc.SetHorizontalOffset(cHOffsets[ndxx]));
 		}
 	}	//	for each VANC line

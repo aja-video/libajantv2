@@ -6,9 +6,7 @@
 
 #include "ntv2publicinterface.h"
 #include "ancillarydata.h"
-#include "ajabase/system/debug.h"				//	This makes 'ajaanc' dependent upon 'ajabase'
-#include "ajacc/includes/ntv2smpteancdata.h"	//	This makes 'ajaanc' dependent upon 'ajacc':
-												//	CNTV2SMPTEAncData::AddEvenParity
+#include "ajabase/system/debug.h"	//	This makes 'ajaanc' dependent upon 'ajabase'
 #if defined(AJA_LINUX)
 	#include <string.h>				// For memcpy
 	#include <stdlib.h>				// For realloc
@@ -194,12 +192,12 @@ NTV2_ASSERT(sum == uint8_t(Calculate9BitChecksum()));
 uint16_t AJAAncillaryData::Calculate9BitChecksum (void) const
 {
 	//	SMPTE 291-1:2011:	6.7 Checksum Word
-	uint16_t	sum	(CNTV2SMPTEAncData::AddEvenParity(m_DID));	//	DID
-	sum += CNTV2SMPTEAncData::AddEvenParity(m_SID);				//	+ SDID
-	sum += CNTV2SMPTEAncData::AddEvenParity(UByte(GetDC()));	//	+ DC
+	uint16_t	sum	(AddEvenParity(m_DID));	//	DID
+	sum += AddEvenParity(m_SID);				//	+ SDID
+	sum += AddEvenParity(UByte(GetDC()));	//	+ DC
 	if (!m_payload.empty())										//	+ payload:
 		for (ByteVector::size_type ndx(0);  ndx < m_payload.size();  ndx++)
-			sum += CNTV2SMPTEAncData::AddEvenParity(m_payload[ndx]);
+			sum += AddEvenParity(m_payload[ndx]);
 
 	const bool	b8	((sum & 0x100) != 0);
 	const bool	b9	(!b8);
@@ -450,7 +448,7 @@ AJAStatus AJAAncillaryData::GetPayloadData (vector<uint16_t> & outUDWs, const bo
 	const vector<uint16_t>::size_type	origSize	(outUDWs.size());
 	for (ByteVectorConstIter iter(m_payload.begin());  iter != m_payload.end()  &&  AJA_SUCCESS(status);  ++iter)
 	{
-		const uint16_t	UDW	(inAddParity ? CNTV2SMPTEAncData::AddEvenParity(*iter) : *iter);
+		const uint16_t	UDW	(inAddParity ? AddEvenParity(*iter) : *iter);
 		try
 		{
 			outUDWs.push_back(UDW);	//	Copy 8-bit data into LS 8 bits, add even parity to bit 8, and ~bit 8 to bit 9
@@ -788,9 +786,9 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint16_t> & outRawCompo
 			outRawComponents.push_back(0x000);											//	000
 			outRawComponents.push_back(0x3FF);											//	3FF
 			outRawComponents.push_back(0x3FF);											//	3FF
-			outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(GetDID()));		//	DID
-			outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(GetSID()));		//	SDID
-			outRawComponents.push_back(CNTV2SMPTEAncData::AddEvenParity(dataCount));	//	DC
+			outRawComponents.push_back(AddEvenParity(GetDID()));		//	DID
+			outRawComponents.push_back(AddEvenParity(GetSID()));		//	SDID
+			outRawComponents.push_back(AddEvenParity(dataCount));	//	DC
 		}
 		catch(...)
 		{
@@ -838,9 +836,9 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData)
 
 	//////////////////////////////////////////////////
 	//	Prepare an array of 10-bit DID/SID/DC/UDWs/CS values...
-		const uint16_t	did	(CNTV2SMPTEAncData::AddEvenParity(GetDID()));
-		const uint16_t	sid	(CNTV2SMPTEAncData::AddEvenParity(GetSID()));
-		const uint16_t	dc	(CNTV2SMPTEAncData::AddEvenParity(uint8_t(GetDC())));
+		const uint16_t	did	(AddEvenParity(GetDID()));
+		const uint16_t	sid	(AddEvenParity(GetSID()));
+		const uint16_t	dc	(AddEvenParity(uint8_t(GetDC())));
 		const uint16_t	cs	(Calculate9BitChecksum());
 
 		vector<uint16_t>	UDW16s;	//	10-bit even-parity words
@@ -1321,6 +1319,290 @@ bool AJAAncillaryData::operator == (const AJAAncillaryData & inRHS) const
 {
 	return AJA_SUCCESS(Compare(inRHS, false/*ignoreLocations=false*/, false/*ignoreChecksums=false*/));
 }
+
+
+//	Returns the original data byte in bits 7:0, plus even parity in bit 8 and ~bit 8 in bit 9
+uint16_t AJAAncillaryData::AddEvenParity (const uint8_t inDataByte)
+{
+	// Parity Table
+	static const uint16_t gEvenParityTable[256] =
+	{
+		/* 0-7 */		0x200,0x101,0x102,0x203,0x104,0x205,0x206,0x107,
+		/* 8-15 */		0x108,0x209,0x20A,0x10B,0x20C,0x10D,0x10E,0x20F,
+		/* 16-23 */		0x110,0x211,0x212,0x113,0x214,0x115,0x116,0x217,
+		/* 24-31 */		0x218,0x119,0x11A,0x21B,0x11C,0x21D,0x21E,0x11F,
+		/* 32-39 */		0x120,0x221,0x222,0x123,0x224,0x125,0x126,0x227,
+		/* 40-47 */		0x228,0x129,0x12A,0x22B,0x12C,0x22D,0x22E,0x12F,
+		/* 48-55 */		0x230,0x131,0x132,0x233,0x134,0x235,0x236,0x137,
+		/* 56-63 */		0x138,0x239,0x23A,0x13B,0x23C,0x13D,0x13E,0x23F,
+		/* 64-71 */		0x140,0x241,0x242,0x143,0x244,0x145,0x146,0x247,
+		/* 72-79 */		0x248,0x149,0x14A,0x24B,0x14C,0x24D,0x24E,0x14F,
+		/* 80-87 */		0x250,0x151,0x152,0x253,0x154,0x255,0x256,0x157,
+		/* 88-95 */		0x158,0x259,0x25A,0x15B,0x25C,0x15D,0x15E,0x25F,
+		/* 96-103 */	0x260,0x161,0x162,0x263,0x164,0x265,0x266,0x167,
+		/* 104-111 */	0x168,0x269,0x26A,0x16B,0x26C,0x16D,0x16E,0x26F,
+		/* 112-119 */	0x170,0x271,0x272,0x173,0x274,0x175,0x176,0x277,
+		/* 120-127 */	0x278,0x179,0x17A,0x27B,0x17C,0x27D,0x27E,0x17F,
+		/* 128-135 */	0x180,0x281,0x282,0x183,0x284,0x185,0x186,0x287,
+		/* 136-143 */	0x288,0x189,0x18A,0x28B,0x18C,0x28D,0x28E,0x18F,
+		/* 144-151 */	0x290,0x191,0x192,0x293,0x194,0x295,0x296,0x197,
+		/* 152-159 */	0x198,0x299,0x29A,0x19B,0x29C,0x19D,0x19E,0x29F,
+		/* 160-167 */	0x2A0,0x1A1,0x1A2,0x2A3,0x1A4,0x2A5,0x2A6,0x1A7,
+		/* 168-175 */	0x1A8,0x2A9,0x2AA,0x1AB,0x2AC,0x1AD,0x1AE,0x2AF,
+		/* 176-183 */	0x1B0,0x2B1,0x2B2,0x1B3,0x2B4,0x1B5,0x1B6,0x2B7,
+		/* 184-191 */	0x2B8,0x1B9,0x1BA,0x2BB,0x1BC,0x2BD,0x2BE,0x1BF,
+		/* 192-199 */	0x2C0,0x1C1,0x1C2,0x2C3,0x1C4,0x2C5,0x2C6,0x1C7,
+		/* 200-207 */	0x1C8,0x2C9,0x2CA,0x1CB,0x2CC,0x1CD,0x1CE,0x2CF,
+		/* 208-215 */	0x1D0,0x2D1,0x2D2,0x1D3,0x2D4,0x1D5,0x1D6,0x2D7,
+		/* 216-223 */	0x2D8,0x1D9,0x1DA,0x2DB,0x1DC,0x2DD,0x2DE,0x1DF,
+		/* 224-231 */	0x1E0,0x2E1,0x2E2,0x1E3,0x2E4,0x1E5,0x1E6,0x2E7,
+		/* 232-239 */	0x2E8,0x1E9,0x1EA,0x2EB,0x1EC,0x2ED,0x2EE,0x1EF,
+		/* 240-247 */	0x2F0,0x1F1,0x1F2,0x2F3,0x1F4,0x2F5,0x2F6,0x1F7,
+		/* 248-255 */	0x1F8,0x2F9,0x2FA,0x1FB,0x2FC,0x1FD,0x1FE,0x2FF
+	};	//	gEvenParityTable
+	return gEvenParityTable[inDataByte];
+}
+
+
+string AncChannelSearchSelectToString (const AncChannelSearchSelect inSelect, const bool inCompact)
+{
+	switch (inSelect)
+	{
+		case AncChannelSearch_Y:	return inCompact ? "Y"   : "AncChannelSearch_Y";
+		case AncChannelSearch_C:	return inCompact ? "C"   : "AncChannelSearch_C";
+		case AncChannelSearch_Both:	return inCompact ? "Y+C" : "AncChannelSearch_Both";
+		default:					break;
+	}
+	return "";
+}
+
+
+static bool CheckAncParityAndChecksum (const AJAAncillaryData::U16Packet &	inYUV16Line,
+										const uint16_t		inStartIndex,
+										const uint16_t		inTotalCount,
+										const uint16_t		inIncrement = 2)
+{
+	bool	bErr	(false);
+	UWord	ndx		(0);
+	if (inIncrement == 0  ||  inIncrement > 2)
+		return true;	//	Increment must be 1 or 2
+
+	//	Check parity on all words...
+	for (ndx = 3;  ndx < inTotalCount - 1;  ndx++)	//	Skip ANC Data Flags and Checksum
+	{
+		const UWord	wordValue	(inYUV16Line[inStartIndex + ndx * inIncrement]);
+		if (wordValue != AJAAncillaryData::AddEvenParity(wordValue & 0xFF))
+		{
+			LOGMYERROR ("Parity error at word " << ndx << ":  got " << xHEX0N(wordValue,2)
+						<< ", expected " << xHEX0N(AJAAncillaryData::AddEvenParity(wordValue & 0xFF),2));
+			bErr = true;
+		}
+	}
+
+	//	The checksum word is different: bit 8 is part of the checksum total, and bit 9 should be ~bit 8...
+	const UWord	checksum	(inYUV16Line [inStartIndex + (inTotalCount - 1) * inIncrement]);
+	const bool	b8			((checksum & BIT(8)) != 0);
+	const bool	b9			((checksum & BIT(9)) != 0);
+	if (b8 == b9)
+	{
+		LOGMYERROR ("Checksum word error:  got " << xHEX0N(checksum,2) << ", expected " << xHEX0N(checksum ^ 0x200, 2));
+		bErr = true;
+	}
+
+	//	Check the checksum math...
+	UWord	sum	(0);
+	for (ndx = 3;  ndx < inTotalCount - 1;  ndx++)
+		sum += inYUV16Line [inStartIndex + ndx * inIncrement] & 0x1FF;
+
+	if ((sum & 0x1FF) != (checksum & 0x1FF))
+	{
+		LOGMYERROR ("Checksum math error:  got " << xHEX0N(checksum & 0x1FF, 2) << ", expected " << xHEX0N(sum & 0x1FF, 2));
+		bErr = true;
+	}
+
+	return bErr;
+
+}	//	CheckAncParityAndChecksum
+
+
+bool AJAAncillaryData::GetAncPacketsFromVANCLine (const vector<uint16_t> &			inYUV16Line,
+													const AncChannelSearchSelect	inChanSelect,
+													U16Packets &					outRawPackets,
+													vector<uint16_t> &				outWordOffsets)
+{
+	const UWord	wordCountMax	(UWord(inYUV16Line.size ()));
+
+	//	If we're only looking at Y samples, start the search 1 word into the line...
+	const UWord	searchOffset	(inChanSelect == AncChannelSearch_Y ? 1 : 0);
+
+	//	If we're looking in both channels (e.g. SD video), increment search words by 1, else skip at every other word...
+	const UWord	searchIncr		(inChanSelect == AncChannelSearch_Both ? 1 : 2);
+
+	outRawPackets.clear();
+	outWordOffsets.clear();
+
+	if (!IS_VALID_AncChannelSearchSelect(inChanSelect))
+		return false;	//	bad search select
+	if (wordCountMax < 12)
+		return false;	//	too small
+
+	for (UWord wordNum = searchOffset;  wordNum < (wordCountMax - 12);  wordNum += searchIncr)
+	{
+		const UWord	ancHdr0	(inYUV16Line.at (wordNum + (0 * searchIncr)));	//	0x000
+		const UWord	ancHdr1	(inYUV16Line.at (wordNum + (1 * searchIncr)));	//	0x3ff
+		const UWord	ancHdr2	(inYUV16Line.at (wordNum + (2 * searchIncr)));	//	0x3ff
+		const UWord	ancHdr3	(inYUV16Line.at (wordNum + (3 * searchIncr)));	//	DID
+		const UWord	ancHdr4	(inYUV16Line.at (wordNum + (4 * searchIncr)));	//	SDID
+		const UWord	ancHdr5	(inYUV16Line.at (wordNum + (5 * searchIncr)));	//	DC
+		if (ancHdr0 == 0x000  &&  ancHdr1 == 0x3ff  &&  ancHdr2 == 0x3ff)
+		{
+			//	Total words in ANC packet: 6 header words + data count + checksum word...
+			UWord	dataCount	(ancHdr5 & 0xFF);
+			UWord	totalCount	(6  +  dataCount  +  1);
+
+			if (totalCount > wordCountMax)
+			{
+				totalCount = wordCountMax;
+				LOGMYERROR ("packet totalCount " << totalCount << " exceeds max " << wordCountMax);
+				return false;
+			}
+
+			//	Be sure we don't go past the end of the line buffer...
+			if (ULWord (wordNum + totalCount) >= wordCountMax)
+			{
+				LOGMYDEBUG ("past end of line: " << wordNum << " + " << totalCount << " >= " << wordCountMax);
+				return false;	//	Past end of line buffer
+			}
+
+			if (CheckAncParityAndChecksum (inYUV16Line, wordNum, totalCount, searchIncr))
+				return false;	//	Parity/Checksum error
+
+			U16Packet	packet;
+			for (unsigned i = 0;  i < totalCount;  i++)
+				packet.push_back (inYUV16Line.at (wordNum + (i * searchIncr)));
+			outRawPackets.push_back (packet);
+			outWordOffsets.push_back (wordNum);
+
+			LOGMYINFO ("Found ANC packet in " << ::AncChannelSearchSelectToString(inChanSelect)
+							<< ": DID=" << xHEX0N(ancHdr3,4)
+							<< " SDID=" << xHEX0N(ancHdr4,4)
+							<< " word=" << wordNum
+							<< " DC=" << ancHdr5
+							<< " pix=" << (wordNum / searchIncr));
+		}	//	if ANC packet found (wildcard or matching DID/SDID)
+	}	//	scan the line
+
+	return true;
+
+}	//	GetAncPacketsFromVANCLine
+
+
+bool AJAAncillaryData::Unpack8BitYCbCrToU16sVANCLine (const void * pInYUV8Line,
+														vector<uint16_t> & outU16YUVLine,
+														const uint32_t inNumPixels)
+{
+	const UByte *	pInYUV8Buffer	(reinterpret_cast <const UByte *> (pInYUV8Line));
+	const ULWord	maxOutElements	(inNumPixels * 2);
+
+	outU16YUVLine.clear ();
+	outU16YUVLine.reserve (maxOutElements);
+	while (outU16YUVLine.size() < size_t(maxOutElements))
+		outU16YUVLine.push_back(0);
+
+	if (!pInYUV8Buffer)
+		return false;	//	NULL pointer
+	if (inNumPixels < 12)
+		return false;	//	Invalid width
+	if (inNumPixels % 4)	//	6)?
+		return false;	//	Width not evenly divisible by 4
+
+	//	Since Y and C may have separate/independent ANC data going on, we're going to split the task and do all
+	//	the even (C) samples first, the come back and repeat it for all of the odd (Y) samples...
+	for (ULWord comp = 0;  comp < 2;  comp++)
+	{
+		bool	bNoMoreAnc	(false);	//	Assume all ANC packets (if any) begin at the first pixel and are contiguous
+										//	(i.e. no gaps between Anc packets). Once we see a "gap" we set this flag and the
+										//	rest of the line turns into a copy.
+
+		ULWord	ancCount	(0);		//	Number of bytes to shift and copy (once an ANC packet is found).
+										//	0 == at the start of a potential new Anc packet.
+
+		ULWord	pixNum		(0);		//	The current pixel we are currently serving (note: NOT the component or sample number!)
+		UWord	checksum	(0);		//	Accumulator for checksum calculations
+
+
+		while (pixNum < inNumPixels)
+		{
+			//	We've found a gap in the Anc data - which we interpret to mean there is no more on this line.
+			//	Just do a simple 8-bit -> 10-bit expansion with the remaining data on the line...
+			if (bNoMoreAnc)
+			{
+				const ULWord	index		(2 * pixNum  +  comp);
+				const UWord		dataValue	(static_cast <UWord> (pInYUV8Buffer [index] << 2));	//	Pad 2 LSBs with zeros
+				NTV2_ASSERT (index <= ULWord(outU16YUVLine.size()));
+				if (index < ULWord(outU16YUVLine.size()))
+					outU16YUVLine [index] = dataValue;
+				else
+					outU16YUVLine.push_back (dataValue);
+				pixNum++;
+			}
+			else
+			{
+				//	Still processing (possible) Anc data...
+				if (ancCount == 0)
+				{
+					//	AncCount == 0 means we're at the beginning of an Anc packet - or not...
+					if ((pixNum + 7) < inNumPixels)
+					{
+						//	An Anc packet has to be at least 7 pixels long to be real...
+						if (   pInYUV8Buffer [(2 * (pixNum+0)) + comp] == 0x00
+							&& pInYUV8Buffer [(2 * (pixNum+1)) + comp] == 0xFF
+							&& pInYUV8Buffer [(2 * (pixNum+2)) + comp] == 0xFF)
+						{
+							//	"00-FF-FF" means a new Anc packet is being started...
+							outU16YUVLine [(2 * pixNum++) + comp] = 0x000;
+							outU16YUVLine [(2 * pixNum++) + comp] = 0x3ff;
+							outU16YUVLine [(2 * pixNum++) + comp] = 0x3ff;		//	Stuff a 10-bit "00-FF-FF" into the output buffer
+
+							ancCount = pInYUV8Buffer[(2 * (pixNum+2)) + comp] + 3 + 1;	//	Grab the number of data words + DID + SID + DC + checksum words
+							checksum = 0;												//	Reset checksum accumulator
+						}
+						else
+							bNoMoreAnc = true;	//	No anc here -- assume there's no more for the rest of the line
+					}
+					else
+						bNoMoreAnc = true;	//	Not enough room for another anc packet here -- assume no more for the rest of the line
+				}	//	if ancCount == 0
+				else if (ancCount == 1)
+				{
+					//	This is the last byte of an anc packet -- the checksum. Since the original conversion to 8 bits
+					//	wiped out part of the original checksum, we've been recalculating it all along until now...
+					outU16YUVLine [(2 * pixNum) + comp]  = checksum & 0x1ff;			//	LS 9 bits of checksum
+					outU16YUVLine [(2 * pixNum) + comp] |= (~checksum & 0x100) << 1;	//	bit 9 = ~bit 8;
+
+					pixNum++;
+					ancCount--;
+				}	//	else if end of valid Anc packet
+				else
+				{
+					//	ancCount > 0 means an Anc packet is being processed.
+					//	Copy 8-bit data into LS 8 bits, add even parity to bit 8, and ~bit 8 to bit 9...
+					const UByte	ancByte	(pInYUV8Buffer [(2 * pixNum) + comp]);
+					const UWord	ancWord	(AddEvenParity (ancByte));
+
+					outU16YUVLine [(2 * pixNum) + comp] = ancWord;
+
+					checksum += (ancWord & 0x1ff);	//	Add LS 9 bits to checksum
+
+					pixNum++;
+					ancCount--;
+				}	//	else copying actual Anc packet
+			}	//	else processing an Anc packet
+		}	//	for each pixel in the line
+	}	//	for each Y/C component (channel)
+
+	return true;
+}	//	Unpack8BitYCbCrToU16sVANCLine
 
 
 string AJAAncillaryData::DIDSIDToString (const uint8_t inDID, const uint8_t inSID)

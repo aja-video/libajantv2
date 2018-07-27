@@ -1133,8 +1133,7 @@
 			buildSettings = {
 				OTHER_LDFLAGS = (
 					"${inherited}",
-					"-lajacc",
-					"-lajaanc",
+					"-lajaccd",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1146,7 +1145,6 @@
 				OTHER_LDFLAGS = (
 					"${inherited}",
 					"-lajacc",
-					"-lajaanc",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1169,12 +1167,6 @@
 		B45183E11935348C00F3D8E9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				OTHER_LDFLAGS = (
-					"-lajantv2d",
-					"-lajabased",
-					"-lajaanc",
-					"-lajacc",
-				);
 				PRODUCT_NAME = ntv2player4k;
 			};
 			name = Debug;
@@ -1182,12 +1174,6 @@
 		B45183E21935348C00F3D8E9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				OTHER_LDFLAGS = (
-					"-lajantv2",
-					"-lajabase",
-					"-lajaanc",
-					"-lajacc",
-				);
 				PRODUCT_NAME = ntv2player4k;
 			};
 			name = Release;
@@ -1209,12 +1195,6 @@
 		B4A700F916794E9B001D4AA8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				OTHER_LDFLAGS = (
-					"-lajantv2d",
-					"-lajabased",
-					"-lajaanc",
-					"-lajacc",
-				);
 				PRODUCT_NAME = ntv2player;
 			};
 			name = Debug;
@@ -1222,12 +1202,6 @@
 		B4A700FA16794E9B001D4AA8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				OTHER_LDFLAGS = (
-					"-lajantv2",
-					"-lajabase",
-					"-lajaanc",
-					"-lajacc",
-				);
 				PRODUCT_NAME = ntv2player;
 			};
 			name = Release;
@@ -1271,8 +1245,7 @@
 			buildSettings = {
 				OTHER_LDFLAGS = (
 					"${inherited}",
-					"-lajacc",
-					"-lajaanc",
+					"-lajaccd",
 				);
 				PRODUCT_NAME = ntv2ccgrabber;
 			};
@@ -1284,7 +1257,6 @@
 				OTHER_LDFLAGS = (
 					"${inherited}",
 					"-lajacc",
-					"-lajaanc",
 				);
 				PRODUCT_NAME = ntv2ccgrabber;
 			};
@@ -1298,7 +1270,7 @@
 				CLANG_ANALYZER_SECURITY_FLOATLOOPCOUNTER = YES;
 				CLANG_ANALYZER_SECURITY_INSECUREAPI_RAND = YES;
 				CLANG_ANALYZER_SECURITY_INSECUREAPI_STRCPY = YES;
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_ASSIGN_ENUM = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
@@ -1347,6 +1319,7 @@
 				OTHER_LDFLAGS = (
 					"-lajantv2d",
 					"-lajabased",
+					"-lajaancd",
 				);
 				SDKROOT = macosx;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -1363,7 +1336,7 @@
 				CLANG_ANALYZER_SECURITY_FLOATLOOPCOUNTER = YES;
 				CLANG_ANALYZER_SECURITY_INSECUREAPI_RAND = YES;
 				CLANG_ANALYZER_SECURITY_INSECUREAPI_STRCPY = YES;
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_ASSIGN_ENUM = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
@@ -1410,6 +1383,7 @@
 				OTHER_LDFLAGS = (
 					"-lajantv2",
 					"-lajabase",
+					"-lajaanc",
 				);
 				SDKROOT = macosx;
 				SYMROOT = ../../../bin;

@@ -97,24 +97,28 @@ void CNTV2KonaFlashProgram::SetQuietMode()
     }
 }
 
+void CNTV2KonaFlashProgram::SetMBReset()
+{
+    if (IsKonaIPDevice())
+    {
+        //Hold MB in reset
+        if(GetDeviceID() == DEVICE_ID_IOIP_2022 || GetDeviceID() == DEVICE_ID_IOIP_2110)
+        {
+            WriteRegister(SAREK_REGS + kRegSarekControl, 0x02);
+        }
+        else if(GetDeviceID() == DEVICE_ID_KONAIP_2022 || GetDeviceID() == DEVICE_ID_KONAIP_2110)
+        {
+            WriteRegister(SAREK_REGS + kRegSarekControl, 0x01);
+        }
+        //Take SPI bus control
+        WriteRegister(SAREK_REGS + kRegSarekSpiSelect, 0x01);
+    }
+}
+
 bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, uint32_t index)
 {
 	if (!Open (boardNumber))
 		return false;
-
-	// if board is a sarek with microblaze - ensure access to flash
-	CNTV2Card	device;
-	CNTV2DeviceScanner::GetDeviceAtIndex(boardNumber, device);
-	if (device.IsKonaIPDevice())
-	{
-		uint32_t regVal = 0;
-		device.ReadRegister(SAREK_REGS + kRegSarekFwCfg, regVal);
-		if (regVal & SAREK_MB_PRESENT)
-		{
-			// take access
-			device.WriteRegister(SAREK_REGS + kRegSarekSpiSelect, 0x01);
-		}
-	}
 
 	if (!SetDeviceProperties())
 		return false;
