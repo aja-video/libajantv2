@@ -9,7 +9,7 @@
 #include "ajaexport.h"
 #include "ajatypes.h"
 #include "fixed.h"
-#include "videodefines.h"
+#include "ntv2videodefines.h"
 #include <vector>
 
 // TODO: DEBUG ONLY

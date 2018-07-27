@@ -10,7 +10,7 @@
 
 #include "ajaexport.h"
 #include "ajatypes.h"
-#include "videodefines.h"
+#include "ntv2videodefines.h"
 #include "fixed.h"
 
 

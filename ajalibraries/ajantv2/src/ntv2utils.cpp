@@ -7,7 +7,7 @@
 #include "ntv2utils.h"
 #include "ntv2formatdescriptor.h"
 #include "ntv2registerexpert.h"
-#include "videodefines.h"
+#include "ntv2videodefines.h"
 #include "audiodefines.h"
 #include "ntv2endian.h"
 #include "ntv2debug.h"
