@@ -2878,6 +2878,7 @@ bool CNTV2Card::ProgramMainFlash(const char *fileName, bool bForceUpdate)
     }
     catch (const char* Message)
     {
+        (void)Message;
         return false;
     }
     return true;

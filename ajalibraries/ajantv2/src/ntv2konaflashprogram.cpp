@@ -115,24 +115,10 @@ void CNTV2KonaFlashProgram::SetMBReset()
     }
 }
 
-bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, NTV2DeviceType boardType, uint32_t index)
+bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, uint32_t index)
 {
 	if (!Open (boardNumber))
 		return false;
-
-	// if board is a sarek with microblaze - ensure access to flash
-	CNTV2Card	device;
-	CNTV2DeviceScanner::GetDeviceAtIndex(boardNumber, device);
-//	if (device.IsKonaIPDevice())
-//	{
-//		uint32_t regVal = 0;
-//		device.ReadRegister(SAREK_REGS + kRegSarekFwCfg, regVal);
-//		if (regVal & SAREK_MB_PRESENT)
-//		{
-//			// take access
-//			device.WriteRegister(SAREK_REGS + kRegSarekSpiSelect, 0x01);
-//		}
-//	}
 
 	if (!SetDeviceProperties())
 		return false;
