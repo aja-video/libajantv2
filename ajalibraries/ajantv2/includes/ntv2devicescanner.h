@@ -8,7 +8,7 @@
 #define NTV2DEVICESCANNER_H
 
 #include "ajaexport.h"
-#include "ntv2status.h"
+#include "ntv2card.h"
 #include "string.h"
 #include <vector>
 #include <algorithm>

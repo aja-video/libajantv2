@@ -4,8 +4,7 @@
 	@copyright	(C) 2004-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
-#include "ntv2testpattern.h"
-//#include "testpatterndata.h"
+#include "ntv2card.h"
 #include "ntv2utils.h"
 #include "ntv2formatdescriptor.h"
 #include "ntv2transcode.h"
@@ -22,11 +21,7 @@
 #include "ntv2nubaccess.h"
 #include "math.h"
 #include <assert.h>
-#if defined (NTV2_DEPRECATE)
-	#define	CNTV2TESTPATTERNCLASS	CNTV2Card
-#else
-	#define	CNTV2TESTPATTERNCLASS	CNTV2TestPattern
-#endif
+
 
 static const ULWord ColorBars100_1080_0[] =
 { //0
@@ -2077,7 +2072,7 @@ const UWord numSegmentTestPatterns = sizeof(NTV2TestPatternSegments)/sizeof(Segm
 #endif	//	!defined (NTV2_DEPRECATE)
 
 
-void CNTV2TESTPATTERNCLASS::InitNTV2TestPattern (void)
+void CNTV2Card::InitNTV2TestPattern (void)
 {
 	SetChannel (NTV2_CHANNEL1);
 
@@ -2099,7 +2094,7 @@ void CNTV2TESTPATTERNCLASS::InitNTV2TestPattern (void)
 }
 
 
-bool CNTV2TESTPATTERNCLASS::DownloadTestPattern (UWord testPatternNumber )
+bool CNTV2Card::DownloadTestPattern (UWord testPatternNumber )
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (_remoteHandle != INVALID_NUB_HANDLE)
@@ -2149,7 +2144,7 @@ bool CNTV2TESTPATTERNCLASS::DownloadTestPattern (UWord testPatternNumber )
 	return true;
 }
 
-void CNTV2TESTPATTERNCLASS::DownloadTestPattern(char* testPatternName )
+void CNTV2Card::DownloadTestPattern(char* testPatternName )
 {
 	TestPatternList::iterator tpIter;
 	UWord testPatternNumber = 0;
@@ -2168,7 +2163,7 @@ void CNTV2TESTPATTERNCLASS::DownloadTestPattern(char* testPatternName )
 }
 
 #if !defined(NTV2_DEPRECATE_13_0)
-void CNTV2TESTPATTERNCLASS::LocalLoadBarsTestPattern( UWord testPatternNumber, NTV2Standard standard)
+void CNTV2Card::LocalLoadBarsTestPattern( UWord testPatternNumber, NTV2Standard standard)
 {
 	SegmentTestPatternData *pTestPatternSegmentData = &NTV2TestPatternSegments[testPatternNumber];
 
@@ -2289,7 +2284,7 @@ void CNTV2TESTPATTERNCLASS::LocalLoadBarsTestPattern( UWord testPatternNumber, N
 }
 #endif	//	!defined(NTV2_DEPRECATE_13_0)
 
-void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData* pTestPatternSegmentData )
+void CNTV2Card::DownloadSegmentedTestPattern(SegmentTestPatternData* pTestPatternSegmentData )
 {
 	ULWord* baseAddress=0;
 	ULWord  packedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*4]; // extra room
@@ -2552,7 +2547,7 @@ void CNTV2TESTPATTERNCLASS::DownloadSegmentedTestPattern(SegmentTestPatternData*
 		FlipFlopPage(_channel);
 }
 
-void CNTV2TESTPATTERNCLASS::DownloadBlackTestPattern(  )
+void CNTV2Card::DownloadBlackTestPattern(  )
 {
 	ULWord* baseAddress=0;
 	ULWord  packedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K];
@@ -2698,7 +2693,7 @@ void CNTV2TESTPATTERNCLASS::DownloadBlackTestPattern(  )
 		FlipFlopPage(_channel);
 }	
 
-void CNTV2TESTPATTERNCLASS::DownloadBorderTestPattern(  )
+void CNTV2Card::DownloadBorderTestPattern(  )
 {
 	ULWord* baseAddress=0;
 	ULWord  packedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*4];
@@ -2861,7 +2856,7 @@ void CNTV2TESTPATTERNCLASS::DownloadBorderTestPattern(  )
 	FlipFlopPage(_channel);
 }	
 
-void CNTV2TESTPATTERNCLASS::DownloadSlantRampTestPattern(  )
+void CNTV2Card::DownloadSlantRampTestPattern(  )
 {
 	switch ( _fbFormat )
 	{
@@ -2873,7 +2868,7 @@ void CNTV2TESTPATTERNCLASS::DownloadSlantRampTestPattern(  )
 	}
 
 }	
-void CNTV2TESTPATTERNCLASS::Download48BitRGBSlantRampTestPattern()
+void CNTV2Card::Download48BitRGBSlantRampTestPattern()
 {
 	ULWord* baseAddress=0;
 	RGBAlpha16BitPixel rgbPixels[HD_NUMCOMPONENTPIXELS_1080_2K*2];
@@ -2974,7 +2969,7 @@ void CNTV2TESTPATTERNCLASS::Download48BitRGBSlantRampTestPattern()
 }
 
 
-void CNTV2TESTPATTERNCLASS::DownloadYCbCrSlantRampTestPattern(  )
+void CNTV2Card::DownloadYCbCrSlantRampTestPattern(  )
 {
 	ULWord* baseAddress=0;
 	ULWord  packedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*4];
@@ -3118,7 +3113,7 @@ void CNTV2TESTPATTERNCLASS::DownloadYCbCrSlantRampTestPattern(  )
 
 
 
-void CNTV2TESTPATTERNCLASS::DownloadVerticalSweepTestPattern(  )
+void CNTV2Card::DownloadVerticalSweepTestPattern(  )
 {
 	ULWord* baseAddress=0;
 	ULWord  packedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*4];
@@ -3309,7 +3304,7 @@ void CNTV2TESTPATTERNCLASS::DownloadVerticalSweepTestPattern(  )
 
 
 
-void CNTV2TESTPATTERNCLASS::DownloadZonePlateTestPattern(  )
+void CNTV2Card::DownloadZonePlateTestPattern(  )
 {
 	ULWord* baseAddress=0;
 	ULWord  packedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*4];
@@ -3439,14 +3434,14 @@ void CNTV2TESTPATTERNCLASS::DownloadZonePlateTestPattern(  )
 }	
 
 
-void CNTV2TESTPATTERNCLASS::RenderTestPatternToBuffer(UWord testPatternNumber, ULWord *buffer)
+void CNTV2Card::RenderTestPatternToBuffer(UWord testPatternNumber, ULWord *buffer)
 {
 	SetClientDownloadBuffer(buffer);
 	DownloadTestPattern(testPatternNumber);
 	SetClientDownloadBuffer(NULL);
 }
 
-bool CNTV2TESTPATTERNCLASS::RenderTestPatternBuffer(NTV2Channel channel, UByte *buffer, NTV2VideoFormat videoFormat, NTV2FrameBufferFormat fbFormat, ULWord width, ULWord height, ULWord rowBytes)
+bool CNTV2Card::RenderTestPatternBuffer(NTV2Channel channel, UByte *buffer, NTV2VideoFormat videoFormat, NTV2FrameBufferFormat fbFormat, ULWord width, ULWord height, ULWord rowBytes)
 {
 	(void) videoFormat;
 	(void) width;
@@ -3468,7 +3463,7 @@ bool CNTV2TESTPATTERNCLASS::RenderTestPatternBuffer(NTV2Channel channel, UByte *
 }
 
 
-void CNTV2TESTPATTERNCLASS::DownloadTestPatternBuffer(ULWord *buffer, ULWord size)
+void CNTV2Card::DownloadTestPatternBuffer(ULWord *buffer, ULWord size)
 {
 	if (size == 0)
 		size = GetPatternBufferSize();
@@ -3535,7 +3530,7 @@ void CNTV2TESTPATTERNCLASS::DownloadTestPatternBuffer(ULWord *buffer, ULWord siz
 }
 
 
-ULWord CNTV2TESTPATTERNCLASS::GetPatternBufferSize(ULWord *width, ULWord *height, ULWord *rowBytes, ULWord *firstLine)
+ULWord CNTV2Card::GetPatternBufferSize(ULWord *width, ULWord *height, ULWord *rowBytes, ULWord *firstLine)
 {
 	NTV2Standard standard;
 	GetStandard(standard, _channel);
@@ -3581,7 +3576,7 @@ ULWord CNTV2TESTPATTERNCLASS::GetPatternBufferSize(ULWord *width, ULWord *height
 //		If bChroma is true, the output level varies from 64 to 960, centered at 0 chroma (512). An input of 0.0 produces
 //		a zero chroma output ("512").
 //
-int CNTV2TESTPATTERNCLASS::MakeSineWaveVideo(double radians, bool bChroma)
+int CNTV2Card::MakeSineWaveVideo(double radians, bool bChroma)
 {
 	int result;
 
@@ -3616,7 +3611,7 @@ int CNTV2TESTPATTERNCLASS::MakeSineWaveVideo(double radians, bool bChroma)
 // ConvertLinePixelFormat()
 //		Converts a line of "unpacked" 10-bit Y/Cb/Cr pixels into a "packed" line in the pixel format
 //	for the current frame buffer format.
-void CNTV2TESTPATTERNCLASS::ConvertLinePixelFormat(UWord *unPackedBuffer, ULWord *packedBuffer, int numPixels)
+void CNTV2Card::ConvertLinePixelFormat(UWord *unPackedBuffer, ULWord *packedBuffer, int numPixels)
 {
 	bool  bIsSD;
     IsSDStandard(bIsSD);
@@ -3718,7 +3713,7 @@ void CNTV2TESTPATTERNCLASS::ConvertLinePixelFormat(UWord *unPackedBuffer, ULWord
 }
 
 
-void CNTV2TESTPATTERNCLASS::AdjustFor2048x1080(ULWord& numPixels,ULWord& linePitch)
+void CNTV2Card::AdjustFor2048x1080(ULWord& numPixels,ULWord& linePitch)
 {
 	switch ( _fbFormat )
 	{	
@@ -3782,7 +3777,7 @@ void CNTV2TESTPATTERNCLASS::AdjustFor2048x1080(ULWord& numPixels,ULWord& linePit
 	}
 }
 
-void CNTV2TESTPATTERNCLASS::AdjustFor3840x2160(ULWord& numPixels,ULWord& linePitch, ULWord& numLines)
+void CNTV2Card::AdjustFor3840x2160(ULWord& numPixels,ULWord& linePitch, ULWord& numLines)
 {
 	switch ( _fbFormat )
 	{	
@@ -3852,7 +3847,7 @@ void CNTV2TESTPATTERNCLASS::AdjustFor3840x2160(ULWord& numPixels,ULWord& linePit
 	}
 }
 
-void CNTV2TESTPATTERNCLASS::AdjustFor4096x2160(ULWord& numPixels,ULWord& linePitch, ULWord& numLines)
+void CNTV2Card::AdjustFor4096x2160(ULWord& numPixels,ULWord& linePitch, ULWord& numLines)
 {
 	switch ( _fbFormat )
 	{	
@@ -3924,7 +3919,7 @@ void CNTV2TESTPATTERNCLASS::AdjustFor4096x2160(ULWord& numPixels,ULWord& linePit
 
 #ifdef AJAMac		// 'til proven OK (or useful) for non-Mac users...
 	// download a Mac ARGB picture to the "current PCI" frame
-void CNTV2TESTPATTERNCLASS::DownloadRGBPicture(char *pSrc, ULWord srcWidthPixels, ULWord srcHeightPixels, ULWord srcRowBytes)
+void CNTV2Card::DownloadRGBPicture(char *pSrc, ULWord srcWidthPixels, ULWord srcHeightPixels, ULWord srcRowBytes)
 {
 	ULWord* baseAddress=0;
 

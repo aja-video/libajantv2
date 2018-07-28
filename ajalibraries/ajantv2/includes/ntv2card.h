@@ -5950,7 +5950,13 @@ private:
 };	//	CNTV2Card
 
 
-typedef CNTV2Card	CNTV2Device;	///< @brief	Instances of this class are able to interrogate and control an NTV2 AJA video/audio capture/playout device.
+typedef CNTV2Card	CNTV2Device;			///< @brief	Instances of this class are able to interrogate and control an NTV2 AJA video/audio capture/playout device.
+typedef	CNTV2Card	CNTV2Status;			///< @deprecated	Use CNTV2Card instead.
+typedef	CNTV2Card	CNTV2TestPattern;		///< @deprecated	Use CNTV2Card instead.
+typedef CNTV2Card	CNTV2VidProc;			///< @deprecated	Use CNTV2Card instead
+typedef	CNTV2Card	CNTV2ColorCorrection;	///< @deprecated	Use CNTV2Card instead.
+typedef	CNTV2Card	CNTV2ProcAmp;			///< @deprecated	Use CNTV2Card instead.
+typedef	CNTV2Card	CXena2VidProc;			///< @deprecated	Use CNTV2Card instead.
 
 #define SetTablesToHardware						LoadLUTTables
 #define GetTablesFromHardware					GetLUTTables

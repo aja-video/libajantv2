@@ -9,8 +9,7 @@
 
 #include "ntv2utils.h"
 #include "ntv2vpid.h"
-#include "ntv2vidproc.h"
-#include "ntv2vidprocmasks.h"
+#include "ntv2card.h"
 #include "ntv2config2022.h"
 #include "virtualregistermodel.h"
 
