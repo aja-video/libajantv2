@@ -13,6 +13,7 @@
 #include "ntv2mcsfile.h"
 #include "ntv2registersmb.h"
 #include "ntv2konaflashprogram.h"
+#include "ntv2konaflashprogram.h"
 #include <math.h>
 #include <assert.h>
 #if defined (AJALinux)
@@ -2864,7 +2865,6 @@ bool CNTV2Card::GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct)
 	return true;
 }
 
-#include "ntv2konaflashprogram.cpp"
 bool CNTV2Card::ProgramMainFlash(const char *fileName, bool bForceUpdate)
 {
     CNTV2KonaFlashProgram thisDevice;
