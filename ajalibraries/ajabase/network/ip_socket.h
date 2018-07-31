@@ -17,14 +17,13 @@
 #include <map>
 
 #if defined(AJA_LINUX) || defined(AJA_MAC)
-#	include <arpa/inet.h>
-#	include <ifaddrs.h>
-#	include <netinet/in.h>
-#	include <netdb.h>
-#	include <poll.h>
-#	include <sys/socket.h>
+	#include <arpa/inet.h>
+	#include <ifaddrs.h>
+	#include <netinet/in.h>
+	#include <netdb.h>
+	#include <poll.h>
+	#include <sys/socket.h>
 #elif defined(AJA_WINDOWS)
-#include <WinSock2.h>
 	typedef int socklen_t;
 #endif
 

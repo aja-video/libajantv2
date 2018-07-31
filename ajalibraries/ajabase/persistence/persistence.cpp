@@ -70,7 +70,7 @@ inline void initTypeLabels()
 
 inline std::string labelForPersistenceType(AJAPersistenceType type)
 {
-    if (type >= 0 && type < AJAPersistenceTypeEnd && type < sTypeLabelsVector.size())
+    if (type >= 0  &&  type < AJAPersistenceTypeEnd  &&  size_t(type) < sTypeLabelsVector.size())
         return sTypeLabelsVector.at(type);
     else
         return "unknown type";

@@ -19,53 +19,53 @@
 			#pragma comment (lib, "odbc32.lib")
 			#pragma comment (lib, "shlwapi.lib")
             #pragma comment (lib, "netapi32.lib")
-		#else
+		#else	//	else !defined(AJA_DLL_BUILD)
 			#define AJA_EXPORT __declspec(dllimport)
             #if !defined(AJA_NO_AUTOIMPORT)
                 #if defined(AJA_DEBUG)
                     #if defined(_WIN64)
-                        #pragma comment (lib, "libajabasedlld")
+                        #pragma comment (lib, "libajantv2dlld")
                     #else
-                        #pragma comment (lib, "libajabasedll_32d")
+                        #pragma comment (lib, "libajantv2dll_32d")
                     #endif
                 #else
                     #if defined(_WIN64)
-                        #pragma comment (lib, "libajabasedll")
+                        #pragma comment (lib, "libajantv2dll")
                     #else
-                        #pragma comment (lib, "libajabasedll_32")
+                        #pragma comment (lib, "libajantv2dll_32")
                     #endif
                 #endif
-            #endif
-		#endif
-	#else
+            #endif	//	!defined(AJA_NO_AUTOIMPORT)
+		#endif	//	else !defined(AJA_DLL_BUILD)
+	#else	//	!defined(AJA_WINDLL)
 		#define AJA_EXPORT
-#if !defined(AJA_NO_AUTOIMPORT)
-    #if !defined AJA_BASE_OBJ
-			#if defined(AJA_DEBUG)
-				#if defined(_WIN64)
-                    #pragma comment (lib, "libajabased")
-				#else
-                    #pragma comment (lib, "libajabase_32d")
-				#endif
-			#else
-				#if defined(_WIN64)
-                    #pragma comment (lib, "libajabase")
-				#else
-                    #pragma comment (lib, "libajabase_32")
-				#endif
-			#endif
-			#pragma comment (lib, "comctl32.lib")
-			#pragma comment (lib, "wsock32.lib")
-			#pragma comment (lib, "winmm")
-			#pragma comment (lib, "setupapi.lib")
-			#pragma comment (lib, "odbc32.lib")
-            #pragma comment (lib, "shlwapi.lib")
-            #pragma comment (lib, "netapi32.lib")
-		#endif
-#endif
-	#endif
-#else
+		#if !defined(AJA_NO_AUTOIMPORT)
+			#if !defined AJA_BASE_OBJ
+				#if defined(AJA_DEBUG)
+					#if defined(_WIN64)
+						#pragma comment (lib, "libajantv2d")
+					#else
+						#pragma comment (lib, "libajantv2_32d")
+					#endif
+				#else	//	else !defined(AJA_DEBUG)
+					#if defined(_WIN64)
+						#pragma comment (lib, "libajantv2")
+					#else
+						#pragma comment (lib, "libajantv2_32")
+					#endif
+				#endif	//	else !defined(AJA_DEBUG)
+				#pragma comment (lib, "comctl32.lib")
+				#pragma comment (lib, "wsock32.lib")
+				#pragma comment (lib, "winmm")
+				#pragma comment (lib, "setupapi.lib")
+				#pragma comment (lib, "odbc32.lib")
+				#pragma comment (lib, "shlwapi.lib")
+				#pragma comment (lib, "netapi32.lib")
+			#endif	//	!defined AJA_BASE_OBJ
+		#endif	//	!defined(AJA_NO_AUTOIMPORT)
+	#endif	//	else !defined(AJA_WINDLL)
+#else	//	else !defined(AJA_WINDOWS)
 	#define AJA_EXPORT
-#endif
+#endif	//	else !defined(AJA_WINDOWS)
 
 #endif	//	AJA_EXPORT_H
