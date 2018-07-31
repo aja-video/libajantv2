@@ -198,9 +198,6 @@
     <ClInclude Include="ntv2encodehevcfileac.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\ajalibraries\ajabase\build\libajabase_vs12.vcxproj">
-      <Project>{96cff836-474a-4ae8-85c8-5bb85697e9aa}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\..\ajalibraries\ajantv2\build\libajantv2_vs12.vcxproj">
       <Project>{5cb46d0f-27ca-4a59-ab0a-1dfbdb44caa2}</Project>
     </ProjectReference>

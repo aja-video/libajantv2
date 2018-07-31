@@ -4,15 +4,9 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\democlasses\ntv2demohevccommon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\democlasses\ntv2encodehevcfile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\democlasses\ntv2encodehevcfileac.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <ClCompile Include="..\ntv2demohevccommon.cpp" />
+    <ClCompile Include="ntv2encodehevcfile.cpp" />
+    <ClCompile Include="ntv2encodehevcfileac.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -23,14 +17,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\democlasses\ntv2demohevccommon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\democlasses\ntv2encodehevcfile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\democlasses\ntv2encodehevcfileac.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClInclude Include="..\ntv2demohevccommon.h" />
+    <ClInclude Include="ntv2encodehevcfile.h" />
+    <ClInclude Include="ntv2encodehevcfileac.h" />
   </ItemGroup>
 </Project>

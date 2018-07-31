@@ -18,15 +18,15 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\democlasses\ntv2outputtestpattern.cpp">
+    <ClCompile Include="..\ntv2democommon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\democlasses\ntv2democommon.cpp">
+    <ClCompile Include="ntv2outputtestpattern.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\democlasses\ntv2outputtestpattern.h">
+    <ClInclude Include="ntv2outputtestpattern.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

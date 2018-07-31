@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\democlasses\ntv2enumerateboards.h">
+    <ClInclude Include="ntv2enumerateboards.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -23,7 +23,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\democlasses\ntv2enumerateboards.cpp">
+    <ClCompile Include="ntv2enumerateboards.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
