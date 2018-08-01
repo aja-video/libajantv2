@@ -2183,6 +2183,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     txConfig.tos = 0x64;
 
                     // Audio specific
+                    txConfig.channel = m2110TxAudioData.txAudioCh[i].channel;
                     txConfig.numAudioChannels = m2110TxAudioData.txAudioCh[i].numAudioChannels;
                     txConfig.firstAudioChannel = m2110TxAudioData.txAudioCh[i].firstAudioChannel;
                     txConfig.audioPktInterval = m2110TxAudioData.txAudioCh[i].audioPktInterval;
