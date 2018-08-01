@@ -28,93 +28,6 @@ static void SignalHandler (int inSignal)
 }
 
 
-typedef struct
-{
-	const string		fName;
-	const NTV2TCIndex	fEnum;
-}	TCSourceMapping;
-
-
-typedef struct
-{
-	const string			fName;
-	const NTV2InputSource	fEnum;
-}	SourceMapping;
-
-
-static const TCSourceMapping	gTCSourceMappings [] =	{{"sdi1",	NTV2_TCINDEX_SDI1},
-														{"sdi2",	NTV2_TCINDEX_SDI2},
-														{"sdi3",	NTV2_TCINDEX_SDI3},
-														{"sdi4",	NTV2_TCINDEX_SDI4},
-														{"sltc1",	NTV2_TCINDEX_SDI1_LTC},
-														{"sltc2",	NTV2_TCINDEX_SDI2_LTC},
-														{"ltc1",	NTV2_TCINDEX_LTC1},
-														{"ltc2",	NTV2_TCINDEX_LTC2},
-														{"",		NTV2_TCINDEX_SDI1}};
-
-static const SourceMapping		gSourceMappings []	=	{{"sdi1",	NTV2_INPUTSOURCE_SDI1},
-														{"sdi2",	NTV2_INPUTSOURCE_SDI2},
-														{"sdi3",	NTV2_INPUTSOURCE_SDI3},
-														{"sdi4",	NTV2_INPUTSOURCE_SDI4},
-														{"sdi5",	NTV2_INPUTSOURCE_SDI5},
-														{"sdi6",	NTV2_INPUTSOURCE_SDI6},
-														{"sdi7",	NTV2_INPUTSOURCE_SDI7},
-														{"sdi8",	NTV2_INPUTSOURCE_SDI8},
-														{"hdmi",	NTV2_INPUTSOURCE_HDMI1},
-														{"analog",	NTV2_INPUTSOURCE_ANALOG1},
-														{"anlg",	NTV2_INPUTSOURCE_ANALOG1},
-														{"",		NTV2_NUM_INPUTSOURCES}};
-
-
-typedef map <string, NTV2TCIndex>		TCSourceMap;
-typedef TCSourceMap::const_iterator		TCSourceMapConstIter;
-static TCSourceMap						gTCSourceMap;
-
-typedef map <string, NTV2InputSource>	SourceMap;
-typedef SourceMap::const_iterator		SourceMapConstIter;
-static SourceMap						gSourceMap;
-
-class MapMaker
-{
-	public:
-		MapMaker ()
-		{
-			for (size_t ndx (0);  ndx < sizeof (gTCSourceMappings) / sizeof (TCSourceMapping);  ndx++)
-				if (!gTCSourceMappings [ndx].fName.empty ())
-					gTCSourceMap [gTCSourceMappings [ndx].fName] = gTCSourceMappings [ndx].fEnum;
-			for (size_t ndx (0);  ndx < sizeof (gSourceMappings) / sizeof (SourceMapping);  ndx++)
-				if (!gSourceMappings [ndx].fName.empty ())
-					gSourceMap [gSourceMappings [ndx].fName] = gSourceMappings [ndx].fEnum;
-		}
-};	//	MapMaker
-
-static ostream & operator << (ostream & inOutStream, const TCSourceMap & inObj)
-{
-	for (TCSourceMapConstIter iter (inObj.begin ());  ;  )
-	{
-		inOutStream << iter->first;
-		if (++iter != inObj.end ())
-			inOutStream << "|";
-		else
-			return inOutStream;
-	}
-}
-
-static ostream & operator << (ostream & inOutStream, const SourceMap & inObj)
-{
-	for (SourceMapConstIter iter (inObj.begin ());  ;  )
-	{
-		inOutStream << iter->first;
-		if (++iter != inObj.end ())
-			inOutStream << "|";
-		else
-			return inOutStream;
-	}
-}
-
-static MapMaker	gMapMakerSingleton;
-
-
 /**
 	@brief		Main entry point for 'ntv2llburn' demo application.
 	@param[in]	argc	Number of arguments specified on the command line, including the path to the executable.
@@ -159,23 +72,36 @@ int main (int argc, const char ** argv)
 		return 1;
 	}
 	optionsContext = ::poptFreeContext (optionsContext);
+	const string	deviceSpec		(pDeviceSpec ? pDeviceSpec : "0");
+	const string	vidSourceStr	(pVidSource ? CNTV2DemoCommon::ToLower(pVidSource) : "");
+	const string	tcSourceStr		(pTcSource ? CNTV2DemoCommon::ToLower(pTcSource) : "");
+
+	const string	legalDevices(CNTV2DemoCommon::GetDeviceStrings(NTV2_DEVICEKIND_ALL));
+	if (deviceSpec == "?" || deviceSpec == "list")
+		{cout << legalDevices << endl;  return 0;}
+	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
+		{cout << "## ERROR:  No such device '" << deviceSpec << "'" << endl << legalDevices;  return 1;}
 
 	//	Select video source...
-	if (pVidSource)
+	const string	legalSources(CNTV2DemoCommon::GetInputSourceStrings(NTV2_INPUTSOURCES_ALL, deviceSpec));
+	if (vidSourceStr == "?" || vidSourceStr == "list")
+		{cout << legalSources << endl;  return 0;}
+	if (!vidSourceStr.empty())
 	{
-		const string	videoSource	(CNTV2DemoCommon::ToLower (pVidSource));
-		if (gSourceMap.find (videoSource) == gSourceMap.end ())
-			{cerr << "## ERROR:  Video source '" << videoSource << "' not one of these: " << gSourceMap << endl;	return 1;}
-		vidSource = gSourceMap [videoSource];
+		vidSource = CNTV2DemoCommon::GetInputSourceFromString(vidSourceStr);
+		if (!NTV2_IS_VALID_INPUT_SOURCE(vidSource))
+			{cerr << "## ERROR:  Input source '" << vidSourceStr << "' not one of these:" << endl << legalSources << endl;	return 1;}
 	}	//	if video source specified
 
 	//	Select time code source...
-	if (pTcSource)
+	const string	legalTCSources(CNTV2DemoCommon::GetTCIndexStrings(TC_INDEXES_ALL, deviceSpec));
+	if (tcSourceStr == "?" || tcSourceStr == "list")
+		{cout << legalTCSources << endl;  return 0;}
+	if (!tcSourceStr.empty())
 	{
-		const string	timecodeSource	(CNTV2DemoCommon::ToLower (pTcSource));
-		if (gTCSourceMap.find (timecodeSource) == gTCSourceMap.end ())
-			{cerr << "## ERROR:  Timecode source '" << timecodeSource << "' not one of these: " << gTCSourceMap << endl;	return 1;}
-		tcSource = gTCSourceMap [timecodeSource];
+		tcSource = CNTV2DemoCommon::GetTCIndexFromString(tcSourceStr);
+		if (!NTV2_IS_VALID_TIMECODE_INDEX(tcSource))
+			{cerr << "## ERROR:  Timecode source '" << tcSourceStr << "' not one of these:" << endl << legalTCSources << endl;	return 1;}
 	}
 
 	//	Instantiate the NTV2Burn object...
