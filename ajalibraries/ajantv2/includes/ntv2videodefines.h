@@ -1,5 +1,5 @@
 /**
-	@file		videodefines.h
+	@file		ntv2videodefines.h
 	@copyright	Copyright (C) 2004-2018 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares common video macros and structs used in the SDK.
 **/
