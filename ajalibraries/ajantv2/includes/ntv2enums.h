@@ -1022,6 +1022,31 @@ typedef enum
 
 
 /**
+	@brief		Used for device selection/filtering.
+**/
+typedef enum _NTV2DeviceKinds
+{
+	NTV2_DEVICEKIND_ALL			= 0xFFFF,	///< @brief	Specifies any/all devices.
+	NTV2_DEVICEKIND_INPUT		= 0x0001,	///< @brief	Specifies devices that input (capture).
+	NTV2_DEVICEKIND_OUTPUT		= 0x0002,	///< @brief	Specifies devices that output (playout).
+	NTV2_DEVICEKIND_SDI			= 0x0004,	///< @brief	Specifies devices with SDI connectors.
+	NTV2_DEVICEKIND_HDMI		= 0x0008,	///< @brief	Specifies devices with HDMI connectors.
+	NTV2_DEVICEKIND_ANALOG		= 0x0010,	///< @brief	Specifies devices with analog video connectors.
+	NTV2_DEVICEKIND_SFP			= 0x0020,	///< @brief	Specifies devices with SFP connectors.
+	NTV2_DEVICEKIND_IP			= NTV2_DEVICEKIND_SFP,
+	NTV2_DEVICEKIND_EXTERNAL	= 0x0040,	///< @brief	Specifies external devices (e.g. Firewire, USB).
+	NTV2_DEVICEKIND_4K			= 0x0080,	///< @brief	Specifies devices that can do 4K video.
+	NTV2_DEVICEKIND_8K			= 0x0100,	///< @brief	Specifies devices that can do 8K video.
+//	NTV2_DEVICEKIND_HFR			= 0x0200,	///< @brief	Specifies devices that can handle HFR video.
+	NTV2_DEVICEKIND_6G			= 0x0400,	///< @brief	Specifies devices that have 6G SDI connectors.
+	NTV2_DEVICEKIND_12G			= 0x0800,	///< @brief	Specifies devices that have 12G SDI connectors.
+	NTV2_DEVICEKIND_CUSTOM_ANC	= 0x1000,	///< @brief	Specifies devices that have custom Anc inserter/extractor firmware.
+	NTV2_DEVICEKIND_RELAYS		= 0x2000,	///< @brief	Specifies devices that have bypass relays.
+	NTV2_DEVICEKIND_NONE		= 0			///< @brief	Doesn't specify any kind of device.
+} NTV2DeviceKinds;
+
+
+/**
 	@brief		Identifies a specific IP-based data stream.
 	@warning	The ordinal values of the enum names may change in successive SDKs.
 **/

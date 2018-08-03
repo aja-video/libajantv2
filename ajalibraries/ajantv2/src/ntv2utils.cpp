@@ -7533,7 +7533,7 @@ string NTV2GetFirmwareFolderPath (void)
 }
 
 
-NTV2DeviceIDSet NTV2GetSupportedDevices (void)
+NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 {
 	static const NTV2DeviceID	sValidDeviceIDs []	= {	DEVICE_ID_CORVID1,
 														DEVICE_ID_CORVID22,
@@ -7545,33 +7545,70 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (void)
 														DEVICE_ID_CORVIDHEVC,
 														DEVICE_ID_IO4K,
 														DEVICE_ID_IO4KUFC,
+														DEVICE_ID_IO4KPLUS,
+                                                        DEVICE_ID_IOIP_2022,
+                                                        DEVICE_ID_IOIP_2110,
 														DEVICE_ID_IOEXPRESS,
 														DEVICE_ID_IOXT,
+														DEVICE_ID_KONA1,
 														DEVICE_ID_KONA3G,
 														DEVICE_ID_KONA3GQUAD,
 														DEVICE_ID_KONA4,
 														DEVICE_ID_KONA4UFC,
+														DEVICE_ID_KONA5,
+                                                        DEVICE_ID_KONAHDMI,
 														DEVICE_ID_KONAIP_2022,
 														DEVICE_ID_KONAIP_4CH_2SFP,
 														DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K,
 														DEVICE_ID_KONAIP_2TX_1SFP_J2K,
+														DEVICE_ID_KONAIP_1RX_1TX_2110,
+														DEVICE_ID_KONAIP_2110,
 														DEVICE_ID_KONALHEPLUS,
 														DEVICE_ID_KONALHI,
 														DEVICE_ID_KONALHIDVI,
 														DEVICE_ID_TTAP,
-														DEVICE_ID_KONAIP_1RX_1TX_2110,
-														DEVICE_ID_IO4KPLUS,
-                                                        DEVICE_ID_IOIP_2022,
-                                                        DEVICE_ID_IOIP_2110,
-														DEVICE_ID_KONAIP_2110,
-														DEVICE_ID_KONA1,
-                                                        DEVICE_ID_KONAHDMI,
-														DEVICE_ID_KONA5,
                                                         DEVICE_ID_NOTFOUND	};
 	NTV2DeviceIDSet	result;
-	for (unsigned ndx (0);  ndx < sizeof (sValidDeviceIDs) / sizeof (NTV2DeviceID);  ndx++)
-		if (sValidDeviceIDs [ndx] != DEVICE_ID_NOTFOUND)
-			result.insert (sValidDeviceIDs [ndx]);
+	if (inKinds != NTV2_DEVICEKIND_NONE)
+		for (unsigned ndx(0);  ndx < sizeof(sValidDeviceIDs) / sizeof(NTV2DeviceID);  ndx++)
+		{
+			const NTV2DeviceID	deviceID(sValidDeviceIDs[ndx]);
+			if (deviceID != DEVICE_ID_NOTFOUND)
+			{
+				if (inKinds == NTV2_DEVICEKIND_ALL)
+					{result.insert (deviceID);	continue;}
+				//	else ...
+				bool insertIt (false);
+				if (insertIt)
+					;
+				else if (inKinds & NTV2_DEVICEKIND_INPUT  &&  ::NTV2DeviceCanDoCapture(deviceID))
+					insertIt = true;
+				else if (inKinds & NTV2_DEVICEKIND_OUTPUT  &&  ::NTV2DeviceCanDoPlayback(deviceID))
+					insertIt = true;
+				else if (inKinds & NTV2_DEVICEKIND_SDI  &&  (::NTV2DeviceGetNumVideoInputs(deviceID)+::NTV2DeviceGetNumVideoOutputs(deviceID)) > 0)
+					insertIt = true;
+				else if (inKinds & NTV2_DEVICEKIND_HDMI  &&  (::NTV2DeviceGetNumHDMIVideoInputs(deviceID)+::NTV2DeviceGetNumHDMIVideoOutputs(deviceID)) > 0)
+					insertIt = true;
+				else if (inKinds & NTV2_DEVICEKIND_ANALOG  &&  (::NTV2DeviceGetNumAnalogVideoInputs(deviceID)+::NTV2DeviceGetNumAnalogVideoOutputs(deviceID)) > 0)
+					insertIt = true;
+				else if (inKinds & NTV2_DEVICEKIND_SFP  &&  ::NTV2DeviceCanDoIP(deviceID))
+					insertIt = true;
+				else if (inKinds & NTV2_DEVICEKIND_EXTERNAL  &&  ::NTV2DeviceIsExternalToHost(deviceID))
+					insertIt = true;
+				else if (inKinds & NTV2_DEVICEKIND_4K  &&  ::NTV2DeviceCanDo4KVideo(deviceID))
+					insertIt = true;
+				else if (inKinds & NTV2_DEVICEKIND_12G  &&  ::NTV2DeviceCanDo12GSDI(deviceID))
+					insertIt = true;
+				else if (inKinds & NTV2_DEVICEKIND_6G  &&  ::NTV2DeviceCanDo12GSDI(deviceID))
+					insertIt = true;
+				else if (inKinds & NTV2_DEVICEKIND_CUSTOM_ANC  &&  ::NTV2DeviceCanDoCustomAnc(deviceID))
+					insertIt = true;
+				else if (inKinds & NTV2_DEVICEKIND_RELAYS  &&  ::NTV2DeviceHasSDIRelays(deviceID))
+					insertIt = true;
+				if (insertIt)
+					result.insert (deviceID);
+			}
+		}	//	for each supported device
 	return result;
 }
 

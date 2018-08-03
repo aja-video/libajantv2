@@ -549,11 +549,8 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	mVirtualDebug1			= virtualDebug1;
 	mEveryFrameTaskFilter	= everyFrameTaskFilter;
 
-	//	CP checks the kVRegAgentCheck virtual register to see if I'm still running...
-	uint32_t	count	(0);
-	mCard->ReadRegister(kVRegAgentCheck, count);
-	count++;
-	mCard->WriteRegister(kVRegAgentCheck, count);
+    //	CP checks the kVRegAgentCheck virtual register to see if I'm still running...
+    AgentIsAlive();
 
 	// If the daemon is not responsible for tasks just return
 	if (mVirtualDebug1 & NTV2_DRIVER_TASKS)
@@ -2158,6 +2155,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                         SetIPError((NTV2Channel)m2110TxVideoData.txVideoCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
                         m2110IpStatusData.txChStatus[i] = kIpStatusFail;
                     }
+                    AgentIsAlive();
                 }
             }
 
@@ -2183,6 +2181,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     txConfig.tos = 0x64;
 
                     // Audio specific
+                    txConfig.channel = m2110TxAudioData.txAudioCh[i].channel;
                     txConfig.numAudioChannels = m2110TxAudioData.txAudioCh[i].numAudioChannels;
                     txConfig.firstAudioChannel = m2110TxAudioData.txAudioCh[i].firstAudioChannel;
                     txConfig.audioPktInterval = m2110TxAudioData.txAudioCh[i].audioPktInterval;
@@ -2211,6 +2210,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                         printf("SetTxStreamConfiguration Audio ERROR %s\n", config2110->getLastError().c_str());
                         SetIPError((NTV2Channel)m2110TxAudioData.txAudioCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
                     }
+                    AgentIsAlive();
                 }
             }
 
@@ -2297,6 +2297,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                         SetIPError((NTV2Channel)m2110RxVideoData.rxVideoCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
                         m2110IpStatusData.rxChStatus[i] = kIpStatusFail;
                     }
+                    AgentIsAlive();
                 }
             }
             *videoFormatLast = mFb1VideoFormat;
@@ -2356,6 +2357,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                         printf("SetRxStreamConfiguration Audio ERROR %s\n", config2110->getLastError().c_str());
                         SetIPError(m2110RxAudioData.rxAudioCh[i].channel, kErrNetworkConfig, config2110->getLastErrorCode());
                     }
+                    AgentIsAlive();
                 }
             }
         }
@@ -2397,6 +2399,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     printf("DisableNetworkInterface\n");
                     config2110->DisableNetworkInterface(sfp);
                 }
+                AgentIsAlive();
             }
         }
 
@@ -4632,4 +4635,15 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 	else if (input == NTV2_AES_EBU_XLRSelect)
 		mCard->WriteRegister(kRegAud1Control, 1, kK2RegMaskKBoxAudioInputSelect, kK2RegShiftKBoxAudioInputSelect);
 
+}
+
+//-------------------------------------------------------------------------------------------------------
+//	AgentIsAlive - CP checks the kVRegAgentCheck virtual register to see if I'm still running...
+//-------------------------------------------------------------------------------------------------------
+void DeviceServices::AgentIsAlive()
+{
+    uint32_t count(0);
+    mCard->ReadRegister(kVRegAgentCheck, count);
+    count++;
+    mCard->WriteRegister(kVRegAgentCheck, count);
 }
