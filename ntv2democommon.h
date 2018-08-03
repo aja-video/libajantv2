@@ -156,6 +156,25 @@ class CNTV2DemoCommon
 {
 	public:
 	/**
+		@name	Device Functions
+	**/
+	///@{
+		/**
+			@param[in]	inKinds		Specifies the types of video formats returned. Defaults to non-4K/UHD formats.
+			@return		The supported ::NTV2VideoFormatSet.
+		**/
+		static bool							IsValidDevice (const std::string & inDeviceSpec);
+
+		/**
+			@param[in]	inKinds				Specifies the kinds of devices to be returned. Defaults to all available devices.
+			@return		A string that can be printed to show the available supported devices.
+			@note		These device identifier strings are mere conveniences for specifying devices in the command-line-based demo apps,
+						and are subject to change without notice. They are not intended to be canonical in any way.
+		**/
+		static std::string					GetDeviceStrings (const NTV2DeviceKinds inKinds = NTV2_DEVICEKIND_ALL);
+	///@}
+
+	/**
 		@name	Video Format Functions
 	**/
 	///@{
@@ -271,12 +290,17 @@ class CNTV2DemoCommon
 			@param[in]	inKinds				Specifies the types of timecode indexes returned. Defaults to all indexes.
 			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
 											warns if the timecode index is incompatible with that device.
+			@param[in]	inIsInputOnly		Optionally specifies if intended for timecode input (capture).
+											Defaults to 'true'. Specify 'false' to obtain the list of timecode indexes
+											that are valid for the given device for either input (capture) or output
+											(playout).
 			@return		A string that can be printed to show the available timecode indexes (or those that are supported by a given device).
 			@note		These timecode index strings are mere conveniences for specifying timecode indexes in the command-line-based demo apps,
 						and are subject to change without notice. They are not intended to be canonical in any way.
 		**/
 		static std::string					GetTCIndexStrings (const NTV2TCIndexKinds inKinds = TC_INDEXES_ALL,
-																const std::string inDeviceSpecifier = std::string ());
+																const std::string inDeviceSpecifier = std::string(),
+																const bool inIsInputOnly = true);
 
 		/**
 			@brief		Returns the ::NTV2TCIndex that matches the given string.

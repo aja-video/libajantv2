@@ -116,72 +116,72 @@ void NTV2Burn::Quit (void)
 
 AJAStatus NTV2Burn::Init (void)
 {
-	AJAStatus	status	(AJA_STATUS_SUCCESS);
+	AJAStatus	status(AJA_STATUS_SUCCESS);
 
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mDeviceSpecifier, mDevice))
 		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not found" << endl;  return AJA_STATUS_OPEN;}
 
-    if (!mDevice.IsDeviceReady (false))
+    if (!mDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	ULWord	appSignature	(0);
 	int32_t	appPID			(0);
 	mDevice.GetStreamingApplication (&appSignature, &appPID);	//	Who currently "owns" the device?
-	mDevice.GetEveryFrameServices (mSavedTaskMode);				//	Save the current device state
+	mDevice.GetEveryFrameServices(mSavedTaskMode);				//	Save the current device state
 	if (!mDoMultiChannel)
 	{
-		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))
+		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<uint32_t>(AJAProcess::GetPid())))
 		{
 			cerr << "## ERROR:  Unable to acquire device because another app (pid " << appPID << ") owns it" << endl;
 			return AJA_STATUS_BUSY;		//	Some other app is using the device
 		}
-		mDevice.SetEveryFrameServices (NTV2_OEM_TASKS);			//	Set the OEM service level
-		mDevice.ClearRouting ();								//	Clear the current device routing (since I "own" the device)
+		mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Set the OEM service level
+		mDevice.ClearRouting();									//	Clear the current device routing (since I "own" the device)
 	}
 	else
-		mDevice.SetEveryFrameServices (NTV2_OEM_TASKS);			//	Force OEM tasks
+		mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Force OEM tasks
 
-	mDeviceID = mDevice.GetDeviceID ();							//	Keep the device ID handy since it will be used frequently
+	mDeviceID = mDevice.GetDeviceID();							//	Keep the device ID handy since it will be used frequently
 
 	//	Configure the SDI relays if present
-	if (::NTV2DeviceHasSDIRelays (mDeviceID))
+	if (::NTV2DeviceHasSDIRelays(mDeviceID))
 	{
 		//	Note that if the board's jumpers are not set in the position
 		//	to enable the watchdog timer, these calls will have no effect.
-		mDevice.SetSDIWatchdogEnable12 (true);
-		mDevice.SetSDIWatchdogEnable34 (true);
+		mDevice.SetSDIWatchdogEnable12(true);
+		mDevice.SetSDIWatchdogEnable34(true);
 
 		//	Set timeout delay to 2 seconds expressed in multiples of 8 ns
 		//	and take the relays out of bypass...
-		mDevice.SetSDIWatchdogTimeout (2 * 125000000);
-		mDevice.KickSDIWatchdog ();
+		mDevice.SetSDIWatchdogTimeout(2 * 125000000);
+		mDevice.KickSDIWatchdog();
 
 		//	Give the mechanical relays some time to switch...
-		AJATime::Sleep (500);
+		AJATime::Sleep(500);
 	}
 
 	//	Make sure the device actually supports custom anc before using it...
 	if (mWithAnc)
-		mWithAnc = ::NTV2DeviceCanDoCustomAnc (mDeviceID);
+		mWithAnc = ::NTV2DeviceCanDoCustomAnc(mDeviceID);
 
 	//	Set up the video and audio...
-	status = SetupVideo ();
-	if (AJA_SUCCESS (status))
-		status = SetupAudio ();
+	status = SetupVideo();
+	if (AJA_SUCCESS(status))
+		status = SetupAudio();
 
 	//	Set up the circular buffers...
-	if (AJA_SUCCESS (status))
-		status = SetupHostBuffers ();
+	if (AJA_SUCCESS(status))
+		status = SetupHostBuffers();
 
 	//	Set up the signal routing...
-	if (AJA_SUCCESS (status))
-		RouteInputSignal ();
-	if (AJA_SUCCESS (status))
-		RouteOutputSignal ();
+	if (AJA_SUCCESS(status))
+		RouteInputSignal();
+	if (AJA_SUCCESS(status))
+		RouteOutputSignal();
 
 	//	Lastly, prepare my AJATimeCodeBurn instance...
-	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mPixelFormat), mFormatDescriptor.numPixels, mFormatDescriptor.numLines);
+	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat(mPixelFormat), mFormatDescriptor.numPixels, mFormatDescriptor.numLines);
 
 	return status;
 
@@ -197,26 +197,32 @@ AJAStatus NTV2Burn::SetupVideo (void)
 		{cerr << "## ERROR:  Device does not have the specified input source" << endl;  return AJA_STATUS_BAD_PARAM;}
 
 	//	Pick an input NTV2Channel from the input source, and enable its frame buffer...
-	mInputChannel = NTV2_INPUT_SOURCE_IS_SDI (mInputSource) ? ::NTV2InputSourceToChannel (mInputSource) : NTV2_CHANNEL2;	//	NTV2_CHANNEL1;
+	mInputChannel = NTV2_INPUT_SOURCE_IS_ANALOG(mInputSource) ? NTV2_CHANNEL1 : ::NTV2InputSourceToChannel(mInputSource);
 	mDevice.EnableChannel (mInputChannel);		//	Enable the input frame buffer
 
 	//	Pick an appropriate output NTV2Channel, and enable its frame buffer...
 	switch (mInputSource)
 	{
-		case NTV2_INPUTSOURCE_SDI1:		mOutputChannel = (numFrameStores == 2 || numFrameStores > 4) ? NTV2_CHANNEL2 : NTV2_CHANNEL3;	break;
-		case NTV2_INPUTSOURCE_SDI2:		mOutputChannel = (numFrameStores > 4) ? NTV2_CHANNEL3 : NTV2_CHANNEL4;							break;
-		case NTV2_INPUTSOURCE_SDI3:		mOutputChannel = NTV2_CHANNEL4;																	break;
-		case NTV2_INPUTSOURCE_SDI4:		mOutputChannel = (numFrameStores > 4) ? NTV2_CHANNEL5 : NTV2_CHANNEL3;							break;
-		case NTV2_INPUTSOURCE_SDI5: 	mOutputChannel = NTV2_CHANNEL6;																	break;
-		case NTV2_INPUTSOURCE_SDI6:		mOutputChannel = NTV2_CHANNEL7;																	break;
-		case NTV2_INPUTSOURCE_SDI7:		mOutputChannel = NTV2_CHANNEL8;																	break;
-		case NTV2_INPUTSOURCE_SDI8:		mOutputChannel = NTV2_CHANNEL7;																	break;
+		case NTV2_INPUTSOURCE_SDI1:		mOutputChannel = numFrameStores == 2 || numFrameStores > 4 ? NTV2_CHANNEL2 : NTV2_CHANNEL3;	break;
+
+		case NTV2_INPUTSOURCE_HDMI2:
+		case NTV2_INPUTSOURCE_SDI2:		mOutputChannel = numFrameStores > 4 ? NTV2_CHANNEL3 : NTV2_CHANNEL4;						break;
+
+		case NTV2_INPUTSOURCE_HDMI3:
+		case NTV2_INPUTSOURCE_SDI3:		mOutputChannel = NTV2_CHANNEL4;																break;
+
+		case NTV2_INPUTSOURCE_HDMI4:
+		case NTV2_INPUTSOURCE_SDI4:		mOutputChannel = numFrameStores > 4 ? NTV2_CHANNEL5 : NTV2_CHANNEL3;						break;
+
+		case NTV2_INPUTSOURCE_SDI5: 	mOutputChannel = NTV2_CHANNEL6;																break;
+		case NTV2_INPUTSOURCE_SDI6:		mOutputChannel = NTV2_CHANNEL7;																break;
+		case NTV2_INPUTSOURCE_SDI7:		mOutputChannel = NTV2_CHANNEL8;																break;
+		case NTV2_INPUTSOURCE_SDI8:		mOutputChannel = NTV2_CHANNEL7;																break;
 
 		case NTV2_INPUTSOURCE_ANALOG1:
 		case NTV2_INPUTSOURCE_HDMI1:	mOutputChannel = numFrameStores < 3 ? NTV2_CHANNEL2 : NTV2_CHANNEL3;
 										mAudioSystem = NTV2_AUDIOSYSTEM_2;
 										break;
-
 		default:
 		case NTV2_INPUTSOURCE_INVALID:	cerr << "## ERROR:  Bad input source" << endl;  return AJA_STATUS_BAD_PARAM;
 	}

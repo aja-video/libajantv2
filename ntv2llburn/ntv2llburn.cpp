@@ -175,20 +175,35 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 	if (!::NTV2DeviceCanDoInputSource (mDeviceID, mInputSource))
 		{cerr << "## ERROR:  This device cannot receive input from the specified source" << endl;	return AJA_STATUS_BAD_PARAM;}
 
-	mInputChannel = ::NTV2InputSourceToChannel(mInputSource);
+	//	Pick an input NTV2Channel from the input source, and enable its frame buffer...
+	mInputChannel = NTV2_INPUT_SOURCE_IS_ANALOG(mInputSource) ? NTV2_CHANNEL1 : ::NTV2InputSourceToChannel(mInputSource);
+	mDevice.EnableChannel (mInputChannel);		//	Enable the input frame buffer
+
+	//	Pick an appropriate output NTV2Channel, and enable its frame buffer...
 	switch (mInputSource)
 	{
-		case NTV2_INPUTSOURCE_ANALOG1:	mInputChannel = NTV2_CHANNEL1;  mOutputChannel = NTV2_CHANNEL3;								break;
-		case NTV2_INPUTSOURCE_HDMI1:	mInputChannel = NTV2_CHANNEL1;  mOutputChannel = NTV2_CHANNEL3;								break;
 		case NTV2_INPUTSOURCE_SDI1:		mOutputChannel = numFrameStores == 2 || numFrameStores > 4 ? NTV2_CHANNEL2 : NTV2_CHANNEL3;	break;
+
+		case NTV2_INPUTSOURCE_HDMI2:
 		case NTV2_INPUTSOURCE_SDI2:		mOutputChannel = numFrameStores > 4 ? NTV2_CHANNEL3 : NTV2_CHANNEL4;						break;
+
+		case NTV2_INPUTSOURCE_HDMI3:
 		case NTV2_INPUTSOURCE_SDI3:		mOutputChannel = NTV2_CHANNEL4;																break;
+
+		case NTV2_INPUTSOURCE_HDMI4:
 		case NTV2_INPUTSOURCE_SDI4:		mOutputChannel = numFrameStores > 4 ? NTV2_CHANNEL5 : NTV2_CHANNEL3;						break;
+
 		case NTV2_INPUTSOURCE_SDI5: 	mOutputChannel = NTV2_CHANNEL6;																break;
 		case NTV2_INPUTSOURCE_SDI6:		mOutputChannel = NTV2_CHANNEL7;																break;
 		case NTV2_INPUTSOURCE_SDI7:		mOutputChannel = NTV2_CHANNEL8;																break;
 		case NTV2_INPUTSOURCE_SDI8:		mOutputChannel = NTV2_CHANNEL7;																break;
-		default:	cerr << "## ERROR:  Bad input source" << endl;  return AJA_STATUS_BAD_PARAM;
+
+		case NTV2_INPUTSOURCE_ANALOG1:
+		case NTV2_INPUTSOURCE_HDMI1:	mOutputChannel = numFrameStores < 3 ? NTV2_CHANNEL2 : NTV2_CHANNEL3;
+										mAudioSystem = NTV2_AUDIOSYSTEM_2;
+										break;
+		default:
+		case NTV2_INPUTSOURCE_INVALID:	cerr << "## ERROR:  Bad input source" << endl;  return AJA_STATUS_BAD_PARAM;
 	}
 
 	bool	isTransmit	(false);

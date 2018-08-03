@@ -262,6 +262,7 @@ class DemoCommonInitializer
 				gString2InputSourceMap.insert(String2InputSourcePair(::NTV2InputSourceToString(inputSource, true), inputSource));
 				gString2InputSourceMap.insert(String2InputSourcePair(CNTV2DemoCommon::ToLower(::NTV2InputSourceToString (inputSource, true)), inputSource));
 			}	//	for each input source
+			gString2InputSourceMap.insert(String2InputSourcePair(string("hdmi"),NTV2_INPUTSOURCE_HDMI1));
 
 			//	TCIndexes...
 			for (uint16_t ndx (0);  ndx < NTV2_MAX_NUM_TIMECODE_INDEXES;  ndx++)
@@ -295,6 +296,108 @@ class DemoCommonInitializer
 static const DemoCommonInitializer	gInitializer;
 
 
+bool CNTV2DemoCommon::IsValidDevice (const string & inDeviceSpec)
+{
+	CNTV2Card	device;
+	const string	deviceSpec	(inDeviceSpec.empty() ? "0" : inDeviceSpec);
+	return CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, device);
+}
+
+
+static string DeviceFilterString (const NTV2DeviceKinds inKinds)
+{
+	if (inKinds == NTV2_DEVICEKIND_ALL)
+		return "any device";
+	else if (inKinds == NTV2_DEVICEKIND_NONE)
+		return "no device";
+
+	vector<string>	strs;
+	if (inKinds & NTV2_DEVICEKIND_INPUT)
+		strs.push_back("capture");
+	if (inKinds & NTV2_DEVICEKIND_OUTPUT)
+		strs.push_back("playout");
+	if (inKinds & NTV2_DEVICEKIND_SDI)
+		strs.push_back("SDI");
+	if (inKinds & NTV2_DEVICEKIND_HDMI)
+		strs.push_back("HDMI");
+	if (inKinds & NTV2_DEVICEKIND_ANALOG)
+		strs.push_back("analog video");
+	if (inKinds & NTV2_DEVICEKIND_SFP)
+		strs.push_back("IP/SFPs");
+	if (inKinds & NTV2_DEVICEKIND_EXTERNAL)
+		strs.push_back("Thunderbolt/PCMCIA");
+	if (inKinds & NTV2_DEVICEKIND_4K)
+		strs.push_back("4K");
+	if (inKinds & NTV2_DEVICEKIND_12G)
+		strs.push_back("12G SDI");
+	if (inKinds & NTV2_DEVICEKIND_6G)
+		strs.push_back("6G SDI");
+	if (inKinds & NTV2_DEVICEKIND_CUSTOM_ANC)
+		strs.push_back("custom Anc");
+	if (inKinds & NTV2_DEVICEKIND_RELAYS)
+		strs.push_back("SDI relays");
+	if (strs.empty())
+		return "??";
+
+	ostringstream	oss;
+	for (vector<string>::const_iterator it(strs.begin());  it != strs.end();  )
+	{
+		oss << *it;
+		if (++it != strs.end())
+			oss << " | ";
+	}
+	return oss.str();
+}
+
+
+string CNTV2DemoCommon::GetDeviceStrings (const NTV2DeviceKinds inKinds)
+{
+	ostringstream			oss, hdr;
+	CNTV2Card				device;
+	ULWord					ndx(0);
+	const NTV2DeviceIDSet	supportedDevices(::NTV2GetSupportedDevices(inKinds));
+	const string			filterString(DeviceFilterString(inKinds));
+
+	typedef map<NTV2DeviceID,UWord>	DeviceTallies;
+	DeviceTallies	tallies;
+
+	for (ndx = 0;  CNTV2DeviceScanner::GetDeviceAtIndex(ndx, device);  ndx++)
+	{
+		const NTV2DeviceID	deviceID(device.GetDeviceID());
+		string	serialNum;
+		oss	<< endl
+			<< DEC(ndx);
+		if (tallies.find(deviceID) == tallies.end())
+		{
+			tallies[deviceID] = 1;
+			oss << endl
+				<< ToLower(::NTV2DeviceIDToString(deviceID));
+		}
+		else
+		{
+			const UWord num(tallies[deviceID]);
+			tallies.erase(deviceID);
+			tallies[deviceID] = num+1;
+		}
+		if (device.GetSerialNumberString(serialNum))
+			oss << endl
+				<< serialNum;
+		if (inKinds != NTV2_DEVICEKIND_ALL  &&  inKinds != NTV2_DEVICEKIND_NONE)
+			if (supportedDevices.find(deviceID) == supportedDevices.end())
+				oss << "\t## Doesn't support one of " << filterString;
+		oss << endl;
+	}
+
+	if (!ndx)
+		return string("No devices\n");
+	hdr << DEC(ndx) << (ndx == 1 ? " device" : " devices") << " found:" << endl
+		<< setw(16) << left << "Legal -d Values" << endl
+		<< setw(16) << left << "----------------";
+	hdr << oss.str();
+	return hdr.str();
+}
+
+
 const NTV2VideoFormatSet &	CNTV2DemoCommon::GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds)
 {
 	return inKinds == VIDEO_FORMATS_ALL  ?  gAllFormats  :  (inKinds == VIDEO_FORMATS_4KUHD ? g4KFormats : gNon4KFormats);
@@ -303,29 +406,29 @@ const NTV2VideoFormatSet &	CNTV2DemoCommon::GetSupportedVideoFormats (const NTV2
 
 string CNTV2DemoCommon::GetVideoFormatStrings (const NTV2VideoFormatKinds inKinds, const string inDeviceSpecifier)
 {
-	const NTV2VideoFormatSet &	formatSet	(GetSupportedVideoFormats (inKinds));
+	const NTV2VideoFormatSet &	formatSet	(GetSupportedVideoFormats(inKinds));
 	ostringstream				oss;
 	CNTV2Card					theDevice;
-	if (!inDeviceSpecifier.empty ())
+	if (!inDeviceSpecifier.empty())
 		CNTV2DeviceScanner::GetFirstDeviceFromArgument (inDeviceSpecifier, theDevice);
 
-	oss	<< setw (25) << left << "Video Format"				<< "\t" << setw (16) << left << "Legal -v Values" << endl
-		<< setw (25) << left << "------------------------"	<< "\t" << setw (16) << left << "----------------" << endl;
-	for (NTV2VideoFormatSetConstIter iter (formatSet.begin ());  iter != formatSet.end ();  ++iter)
+	oss	<< setw(25) << left << "Video Format"				<< "\t" << setw(16) << left << "Legal -v Values" << endl
+		<< setw(25) << left << "------------------------"	<< "\t" << setw(16) << left << "----------------" << endl;
+	for (NTV2VideoFormatSetConstIter iter(formatSet.begin());  iter != formatSet.end();  ++iter)
 	{
 		string	formatName	(::NTV2VideoFormatToString (*iter));
-		for (String2VideoFormatMapConstIter it (gString2VideoFormatMap.begin ());  it != gString2VideoFormatMap.end ();  ++it)
+		for (String2VideoFormatMapConstIter it(gString2VideoFormatMap.begin());  it != gString2VideoFormatMap.end();  ++it)
 			if (*iter == it->second)
 			{
-				oss << setw (25) << left << formatName << "\t" << setw (16) << left << it->first;
-				if (!inDeviceSpecifier.empty ()  &&  theDevice.IsOpen ()  &&  !::NTV2DeviceCanDoVideoFormat (theDevice.GetDeviceID (), *iter))
-					oss << "\t## Incompatible with " << theDevice.GetDisplayName ();
+				oss << setw(25) << left << formatName << "\t" << setw(16) << left << it->first;
+				if (!inDeviceSpecifier.empty()  &&  theDevice.IsOpen()  &&  !::NTV2DeviceCanDoVideoFormat(theDevice.GetDeviceID(), *iter))
+					oss << "\t## Incompatible with " << theDevice.GetDisplayName();
 				oss << endl;
-				formatName.clear ();
+				formatName.clear();
 			}
 		oss << endl;
 	}
-	return oss.str ();
+	return oss.str();
 }
 
 
@@ -490,7 +593,8 @@ const NTV2TCIndexes CNTV2DemoCommon::GetSupportedTCIndexes (const NTV2TCIndexKin
 }
 
 string CNTV2DemoCommon::GetTCIndexStrings (const NTV2TCIndexKinds inKinds,
-											const string inDeviceSpecifier)
+											const string inDeviceSpecifier,
+											const bool inIsInputOnly)
 {
 	const NTV2TCIndexes &	tcIndexes	(GetSupportedTCIndexes (inKinds));
 	ostringstream			oss;
@@ -507,8 +611,14 @@ string CNTV2DemoCommon::GetTCIndexStrings (const NTV2TCIndexKinds inKinds,
 			if (*iter == it->second)
 			{
 				oss << setw (25) << left << tcNdxName << "\t" << setw (16) << left << it->first;
-				if (!inDeviceSpecifier.empty ()  &&  theDevice.IsOpen ()  &&  !::NTV2DeviceCanDoTCIndex (theDevice.GetDeviceID(), *iter))
-					oss << "\t## Incompatible with " << theDevice.GetDisplayName ();
+				if (!inDeviceSpecifier.empty ()  &&  theDevice.IsOpen ())
+				{
+					const NTV2DeviceID	deviceID(theDevice.GetDeviceID());
+					const bool canDoTCIndex	(inIsInputOnly	? ::NTV2DeviceCanDoInputTCIndex(deviceID, *iter)
+															: ::NTV2DeviceCanDoTCIndex(deviceID, *iter));
+					if (!canDoTCIndex)
+						oss << "\t## Incompatible with " << theDevice.GetDisplayName();
+				}
 				oss << endl;
 				tcNdxName.clear ();
 			}
