@@ -852,6 +852,56 @@ bool NTV2DeviceCanDoTCIndex (const NTV2DeviceID inDeviceID, const NTV2TCIndex in
 	return false;
 }
 
+bool NTV2DeviceCanDoInputTCIndex (const NTV2DeviceID inDeviceID, const NTV2TCIndex inTCIndex)
+{
+	const UWord	maxNumLTCs	(NTV2DeviceGetNumLTCInputs(inDeviceID));
+	const UWord	maxNumSDIs	(NTV2DeviceGetNumVideoInputs(inDeviceID));
+
+	if (NTV2_IS_ATC_VITC2_TIMECODE_INDEX(inTCIndex)  &&  !NTV2DeviceCanDoVITC2(inDeviceID))
+		return false;	//	Can't do VITC2
+
+	switch (inTCIndex)
+	{
+		case NTV2_TCINDEX_DEFAULT:		return true;	//	All devices support this index
+
+		case NTV2_TCINDEX_LTC1:			return maxNumLTCs > 0;
+		case NTV2_TCINDEX_LTC2:			return maxNumLTCs > 1;
+
+		case NTV2_TCINDEX_SDI1:
+		case NTV2_TCINDEX_SDI1_LTC:
+		case NTV2_TCINDEX_SDI1_2:		return maxNumSDIs > 0;
+
+		case NTV2_TCINDEX_SDI2:
+		case NTV2_TCINDEX_SDI2_LTC:
+		case NTV2_TCINDEX_SDI2_2:		return maxNumSDIs > 1;
+
+		case NTV2_TCINDEX_SDI3:
+		case NTV2_TCINDEX_SDI3_LTC:
+		case NTV2_TCINDEX_SDI3_2:		return maxNumSDIs > 2;
+
+		case NTV2_TCINDEX_SDI4:
+		case NTV2_TCINDEX_SDI4_LTC:
+		case NTV2_TCINDEX_SDI4_2:		return maxNumSDIs > 3;
+
+		case NTV2_TCINDEX_SDI5:
+		case NTV2_TCINDEX_SDI5_LTC:
+		case NTV2_TCINDEX_SDI5_2:		return maxNumSDIs > 4;
+
+		case NTV2_TCINDEX_SDI6:
+		case NTV2_TCINDEX_SDI6_LTC:
+		case NTV2_TCINDEX_SDI6_2:
+		case NTV2_TCINDEX_SDI7:
+		case NTV2_TCINDEX_SDI7_LTC:
+		case NTV2_TCINDEX_SDI7_2:
+		case NTV2_TCINDEX_SDI8:
+		case NTV2_TCINDEX_SDI8_LTC:
+		case NTV2_TCINDEX_SDI8_2:		return maxNumSDIs > 5;
+
+		default:						break;
+	}
+	return false;
+}
+
 
 bool NTV2DeviceCanDoLTCInN (NTV2DeviceID boardID, UWord index0)
 {

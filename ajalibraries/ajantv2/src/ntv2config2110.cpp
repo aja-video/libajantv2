@@ -2216,6 +2216,24 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
                 }
             }
         }
+
+        rv = getDescriptionValue(index,"a=ptime",value);
+        if (rv > index)
+        {
+            tokens = split(value.c_str(), ' ');
+            if ((tokens.size() >= 1)&& !tokens[0].empty())
+            {
+                tokens = split(tokens[0].c_str(), '.');
+                if (tokens.size() >= 2)
+                {
+                    if ((atoi(tokens[0].c_str()) == 1) && (atoi(tokens[1].c_str()) == 0))
+                        rxConfig.audioPktInterval = PACKET_INTERVAL_1mS;
+                    else if ((atoi(tokens[0].c_str()) == 0) && (atoi(tokens[1].c_str()) == 125))
+                        rxConfig.audioPktInterval = PACKET_INTERVAL_125uS;
+                }
+            }
+        }
+
         rxConfig.rxMatch = rxMatch;
         return true;
     }
