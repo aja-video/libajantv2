@@ -240,6 +240,7 @@ public:
     int32_t               _mcsStep;
     CNTV2MCSfile	_mcsFile;
 	std::vector<uint8_t> _partitionBuffer;
+    uint32_t        _failSafePadding;
 
 	typedef enum {
 		READID_COMMAND=0x9F,
