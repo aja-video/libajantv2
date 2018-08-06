@@ -549,11 +549,8 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	mVirtualDebug1			= virtualDebug1;
 	mEveryFrameTaskFilter	= everyFrameTaskFilter;
 
-	//	CP checks the kVRegAgentCheck virtual register to see if I'm still running...
-	uint32_t	count	(0);
-	mCard->ReadRegister(kVRegAgentCheck, count);
-	count++;
-	mCard->WriteRegister(kVRegAgentCheck, count);
+    //	CP checks the kVRegAgentCheck virtual register to see if I'm still running...
+    AgentIsAlive();
 
 	// If the daemon is not responsible for tasks just return
 	if (mVirtualDebug1 & NTV2_DRIVER_TASKS)
@@ -2131,6 +2128,11 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     txConfig.videoFormat = Convert21104KFormat(mFb1VideoFormat);
                     txConfig.videoSamples = VPIDSampling_YUV_422;
 
+                    // Start by turning off the video stream
+                    printf("SetTxVideoStream off %d\n", m2110TxVideoData.txVideoCh[i].stream);
+                    config2110->SetTxStreamEnable(m2110TxVideoData.txVideoCh[i].stream, false, false);
+                    m2110IpStatusData.txChStatus[i] = kIpStatusStopped;
+
                     if (config2110->SetTxStreamConfiguration(m2110TxVideoData.txVideoCh[i].stream, txConfig) == true)
                     {
                         printf("SetTxStreamConfiguration Video OK\n");
@@ -2146,13 +2148,6 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                                                           (bool)m2110TxVideoData.txVideoCh[i].sfpEnable[1]);
                             m2110IpStatusData.txChStatus[i] = kIpStatusRunning;
                         }
-                        else
-                        {
-                            printf("SetTxVideoStream off %d\n", m2110TxVideoData.txVideoCh[i].stream);
-                            config2110->SetTxStreamEnable(m2110TxVideoData.txVideoCh[i].stream, false, false);
-                            m2110IpStatusData.txChStatus[i] = kIpStatusStopped;
-
-                        }
                     }
                     else
                     {
@@ -2160,6 +2155,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                         SetIPError((NTV2Channel)m2110TxVideoData.txVideoCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
                         m2110IpStatusData.txChStatus[i] = kIpStatusFail;
                     }
+                    AgentIsAlive();
                 }
             }
 
@@ -2185,10 +2181,14 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     txConfig.tos = 0x64;
 
                     // Audio specific
+                    txConfig.channel = m2110TxAudioData.txAudioCh[i].channel;
                     txConfig.numAudioChannels = m2110TxAudioData.txAudioCh[i].numAudioChannels;
                     txConfig.firstAudioChannel = m2110TxAudioData.txAudioCh[i].firstAudioChannel;
                     txConfig.audioPktInterval = m2110TxAudioData.txAudioCh[i].audioPktInterval;
 
+                    // Start by turning off the audio stream
+                    printf("SetTxAudioStream off %d\n", m2110TxAudioData.txAudioCh[i].stream);
+                    config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].stream, false, false);
 
                     if (config2110->SetTxStreamConfiguration(m2110TxAudioData.txAudioCh[i].stream, txConfig) == true)
                     {
@@ -2204,20 +2204,15 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                                                           (bool)m2110TxAudioData.txAudioCh[i].sfpEnable[0],
                                                           (bool)m2110TxAudioData.txAudioCh[i].sfpEnable[1]);
                         }
-                        else
-                        {
-                            printf("SetTxAudioStream off %d\n", m2110TxAudioData.txAudioCh[i].stream);
-                            config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].stream, false, false);
-                        }
                     }
                     else
                     {
                         printf("SetTxStreamConfiguration Audio ERROR %s\n", config2110->getLastError().c_str());
                         SetIPError((NTV2Channel)m2110TxAudioData.txAudioCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
                     }
+                    AgentIsAlive();
                 }
             }
-            *videoFormatLast = mFb1VideoFormat;
 
             rx_2110Config rxConfig;
             eSFP sfp = SFP_1;
@@ -2226,6 +2221,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
             for (uint32_t i=0; i<m2110RxVideoData.numRxVideoChannels; i++)
             {
                 if (memcmp(&m2110RxVideoData.rxVideoCh[i], &s2110RxVideoDataLast->rxVideoCh[i], sizeof(RxVideoChData2110)) != 0 ||
+                    *videoFormatLast != mFb1VideoFormat ||
                     ipServiceForceConfig)
                 {
                     rxConfig.init();
@@ -2276,6 +2272,10 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     rxConfig.videoSamples = VPIDSampling_YUV_422;
                     printf("Format (%d, %d, %d)\n", i, mFollowInputFormat, rxConfig.videoFormat);
 
+                    // Start by turning off the video receiver
+                    printf("SetRxVideoStream off %d\n", m2110RxVideoData.rxVideoCh[i].stream);
+                    config2110->SetRxStreamEnable(sfp, m2110RxVideoData.rxVideoCh[i].stream, false);
+                    m2110IpStatusData.rxChStatus[i] = kIpStatusStopped;
 
                     if (config2110->SetRxStreamConfiguration(sfp, m2110RxVideoData.rxVideoCh[i].stream, rxConfig) == true)
                     {
@@ -2290,12 +2290,6 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                             config2110->SetRxStreamEnable(sfp, m2110RxVideoData.rxVideoCh[i].stream, true);
                             m2110IpStatusData.rxChStatus[i] = kIpStatusRunning;
                         }
-                        else
-                        {
-                            printf("SetRxVideoStream off %d\n", m2110RxVideoData.rxVideoCh[i].stream);
-                            config2110->SetRxStreamEnable(sfp, m2110RxVideoData.rxVideoCh[i].stream, false);
-                            m2110IpStatusData.rxChStatus[i] = kIpStatusStopped;
-                        }
                     }
                     else
                     {
@@ -2303,8 +2297,10 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                         SetIPError((NTV2Channel)m2110RxVideoData.rxVideoCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
                         m2110IpStatusData.rxChStatus[i] = kIpStatusFail;
                     }
+                    AgentIsAlive();
                 }
             }
+            *videoFormatLast = mFb1VideoFormat;
 
             // See if any receive audio channels need configuring/enabling
             for (uint32_t i=0; i<m2110RxAudioData.numRxAudioChannels; i++)
@@ -2339,6 +2335,10 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     rxConfig.numAudioChannels = m2110RxAudioData.rxAudioCh[i].numAudioChannels;
                     rxConfig.audioPktInterval = m2110RxAudioData.rxAudioCh[i].audioPktInterval;
 
+                    // Start by turning off the audio receiver
+                    printf("SetRxAudioStream off %d\n", m2110RxAudioData.rxAudioCh[i].stream);
+                    config2110->SetRxStreamEnable(sfp, m2110RxAudioData.rxAudioCh[i].stream, false);
+
                     if (config2110->SetRxStreamConfiguration(sfp, m2110RxAudioData.rxAudioCh[i].stream, rxConfig) == true)
                     {
                         printf("SetRxStreamConfiguration Audio OK\n");
@@ -2351,17 +2351,13 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                             printf("SetRxAudioStream on %d\n", m2110RxAudioData.rxAudioCh[i].stream);
                             config2110->SetRxStreamEnable(sfp, m2110RxAudioData.rxAudioCh[i].stream, true);
                         }
-                        else
-                        {
-                            printf("SetRxAudioStream off %d\n", m2110RxAudioData.rxAudioCh[i].stream);
-                            config2110->SetRxStreamEnable(sfp, m2110RxAudioData.rxAudioCh[i].stream, false);
-                        }
                     }
                     else
                     {
                         printf("SetRxStreamConfiguration Audio ERROR %s\n", config2110->getLastError().c_str());
                         SetIPError(m2110RxAudioData.rxAudioCh[i].channel, kErrNetworkConfig, config2110->getLastErrorCode());
                     }
+                    AgentIsAlive();
                 }
             }
         }
@@ -2403,6 +2399,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     printf("DisableNetworkInterface\n");
                     config2110->DisableNetworkInterface(sfp);
                 }
+                AgentIsAlive();
             }
         }
 
@@ -4638,4 +4635,15 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 	else if (input == NTV2_AES_EBU_XLRSelect)
 		mCard->WriteRegister(kRegAud1Control, 1, kK2RegMaskKBoxAudioInputSelect, kK2RegShiftKBoxAudioInputSelect);
 
+}
+
+//-------------------------------------------------------------------------------------------------------
+//	AgentIsAlive - CP checks the kVRegAgentCheck virtual register to see if I'm still running...
+//-------------------------------------------------------------------------------------------------------
+void DeviceServices::AgentIsAlive()
+{
+    uint32_t count(0);
+    mCard->ReadRegister(kVRegAgentCheck, count);
+    count++;
+    mCard->WriteRegister(kVRegAgentCheck, count);
 }

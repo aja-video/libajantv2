@@ -187,6 +187,7 @@ public:
 	NTV2AudioSystem GetHostAudioSystem();
 
 	void SetAudioInputSelect(NTV2InputAudioSelect input);
+    void AgentIsAlive();
 
 public:
 	CNTV2Card*				mCard;

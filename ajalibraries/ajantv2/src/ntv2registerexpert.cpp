@@ -439,7 +439,9 @@ private:
 														"Ignore DID 1-4",		"Ignore DID 5-8",		"Ignore DID 9-12",
 														"Ignore DID 13-16",		"Ignore DID 17-20",		"Analog Start Line",
 														"Analog F1 Y Filter",	"Analog F2 Y Filter",	"Analog F1 C Filter",
-														"Analog F2 C Filter"	};
+														"Analog F2 C Filter"	"",						"",
+														"",						"",						"",
+														"Analog Act Line Len",	""};
 		static const string	AncInsRegNames []	=	{	"Field Bytes",			"Control",				"F1 Start Address",
 														"F2 Start Address",		"Pixel Delays",			"First Active Lines",
 														"Pixels Per Line",		"Lines Per Frame",		"Field ID Lines",
@@ -448,16 +450,16 @@ private:
 		static const uint32_t	AncExtPerChlRegBase []	=	{	0x1000,	0x1040,	0x1080,	0x10C0,	0x1100,	0x1140,	0x1180,	0x11C0	};
 		static const uint32_t	AncInsPerChlRegBase []	=	{	0x1200,	0x1240,	0x1280,	0x12C0,	0x1300,	0x1340,	0x1380,	0x13C0	};
 		
+		NTV2_ASSERT(sizeof(AncExtRegNames[0]) == sizeof(AncExtRegNames[1]));
+		NTV2_ASSERT(size_t(regAncExt_LAST) == sizeof(AncExtRegNames)/sizeof(AncExtRegNames[0]));
+		NTV2_ASSERT(size_t(regAncIns_LAST) == sizeof(AncInsRegNames)/sizeof(string));
 		for (ULWord offsetNdx (0);  offsetNdx < 8;  offsetNdx++)
 		{
 			for (ULWord reg(regAncExtControl);  reg < regAncExt_LAST;  reg++)
 			{
+				if (AncExtRegNames[reg].empty())	continue;
 				ostringstream	oss;	oss << "Extract " << (offsetNdx+1) << " " << AncExtRegNames[reg];
 				DefineRegName (AncExtPerChlRegBase[offsetNdx] + reg,	oss.str());
-			}
-			{
-				ostringstream	oss;	oss << "Extract " << (offsetNdx+1) << " Active Line Length";
-				DefineRegName (AncExtPerChlRegBase[offsetNdx] + 27,	oss.str());
 			}
 			for (ULWord reg(regAncInsFieldBytes);  reg < regAncIns_LAST;  reg++)
 			{
@@ -489,7 +491,7 @@ private:
 			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtField2AnalogYFilter,			"",	mDecodeAncExtAnalogFilter,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
 			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtField1AnalogCFilter,			"",	mDecodeAncExtAnalogFilter,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
 			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtField2AnalogCFilter,			"",	mDecodeAncExtAnalogFilter,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtControl + 27,					"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtAnalogActiveLineLength,		"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
 			
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsFieldBytes,					"",	mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsControl,						"",	mDecodeAncInsControlReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
@@ -502,10 +504,10 @@ private:
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsFieldIDLines,					"",	mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlankCStartLine,				"",	mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlankField1CLines,				"",	mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlandField2CLines,				"",	mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlankField2CLines,				"",	mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 		}
 	}	//	SetupAncInsExt
-	
+
 	void SetupHDMIRegs(void)
 	{
 		DefineRegister (kRegHDMIOutControl,							"",	mDecodeHDMIOutputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);

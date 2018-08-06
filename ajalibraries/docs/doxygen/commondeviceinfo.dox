@@ -101,6 +101,12 @@
 	-	Active loop-through, input terminated by 75 ohms to ground
 	-	<b>Input level:</b>  0.5 Volts peak-to-peak to 2.0 Volts peak-to-peak
 
+	<b>Analog LTC Input(s)</b>
+	-	Designed to work with inverted or non-inverted inputs
+	-	Input impedence 75Ω, coax or other single-ended connection is recommended
+	-	There is no differential termination on these inputs, so a balanced connection may not be reliable
+	-	Designed to meet SMPTE spec, 0.5V to 4.5Vp-p
+
 	<b>HDMI Input, Output</b>
 	-	Connector: Type-A (unless otherwise noted)
 

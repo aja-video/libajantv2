@@ -273,7 +273,7 @@ public:
     bool        GetIPServicesControl(bool & enable, bool & forceReconfig);
 
     std::string GetTxSDPUrl(const eSFP sfp, const NTV2Stream stream);
-    std::string GetTxSDP(const NTV2Stream stream);
+    std::string GetTxSDP(const eSFP sfp, const NTV2Stream stream);
     bool        GetRxSDP(std::string url, std::string & sdp);
     bool        ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream, rx_2110Config & rxConfig);
 
@@ -340,9 +340,9 @@ protected:
 
     bool		ConfigurePTP(const eSFP sfp, const std::string localIPAddress);
 
-    bool        GenSDP(const NTV2Stream stream, bool pushit=true);
-    bool        GenSDPVideoStream(std::stringstream & sdp, const NTV2Stream stream, std::string gmInfo);
-    bool        GenSDPAudioStream(std::stringstream & sdp, const NTV2Stream stream, std::string gmInfo);
+    bool        GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushit=true);
+    bool        GenSDPVideoStream(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, std::string gmInfo);
+    bool        GenSDPAudioStream(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, std::string gmInfo);
 
     NTV2StreamType  StreamType(const NTV2Stream stream);
     NTV2Channel VideoStreamToChannel(const NTV2Stream stream);
@@ -359,7 +359,7 @@ private:
     int         getDescriptionValue(int startLine, std::string type, std::string & value);
     std::string getVideoDescriptionValue(std::string type);
 
-    std::stringstream txsdp[NTV2_MAX_NUM_STREAMS];
+    std::stringstream txsdp;
 
     uint32_t    _numRx0Chans;
     uint32_t    _numRx1Chans;
