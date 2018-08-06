@@ -8,7 +8,7 @@
 
 #include "ajaexport.h"
 #include "ajatypes.h"
-#include "mtv2fixed.h"
+#include "ntv2fixed.h"
 #include "ntv2videodefines.h"
 
 
