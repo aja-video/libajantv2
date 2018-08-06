@@ -10,7 +10,7 @@
 #include "ntv2rp188.h"
 #include "ntv2debug.h"
 #include "ntv2utils.h"
-#include "audiodefines.h"
+#include "ntv2audiodefines.h"
 #include "ajabase/common/circularbuffer.h"
 
 #include "ntv2texture.h"
