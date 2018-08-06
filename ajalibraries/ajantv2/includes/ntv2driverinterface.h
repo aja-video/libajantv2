@@ -12,7 +12,7 @@
 #include "ajatypes.h"
 #include "ntv2enums.h"
 #include "ntv2videodefines.h"
-#include "audiodefines.h"
+#include "ntv2audiodefines.h"
 
 #include "ntv2nubtypes.h"
 #include "ntv2publicinterface.h"

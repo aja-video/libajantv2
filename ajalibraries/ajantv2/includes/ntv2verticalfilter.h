@@ -11,7 +11,7 @@
 #include "ajaexport.h"
 #include "ajatypes.h"
 #include "ntv2videodefines.h"
-#include "fixed.h"
+#include "ntv2fixed.h"
 
 
 AJAExport void	VerticalFilterLine (	RGBAlphaPixel *	topLine,

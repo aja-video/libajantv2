@@ -6,7 +6,7 @@
 
 #include "ntv2card.h"
 #include "ntv2transcode.h"
-#include "fixed.h"
+#include "ntv2fixed.h"
 #include <assert.h>
 
 

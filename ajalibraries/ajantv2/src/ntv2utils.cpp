@@ -8,7 +8,7 @@
 #include "ntv2formatdescriptor.h"
 #include "ntv2registerexpert.h"
 #include "ntv2videodefines.h"
-#include "audiodefines.h"
+#include "ntv2audiodefines.h"
 #include "ntv2endian.h"
 #include "ntv2debug.h"
 #include "ntv2transcode.h"

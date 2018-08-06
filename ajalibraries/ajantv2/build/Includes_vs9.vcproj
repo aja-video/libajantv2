@@ -73,15 +73,11 @@
 			>
 		</File>
 		<File
-			RelativePath="audiodefines.h"
+			RelativePath="ntv2audiodefines.h"
 			>
 		</File>
 		<File
-			RelativePath="Fixed.h"
-			>
-		</File>
-		<File
-			RelativePath="ntv2abcdiskio.h"
+			RelativePath="ntv2fixed.h"
 			>
 		</File>
 		<File
@@ -117,7 +113,7 @@
 			>
 		</File>
 		<File
-			RelativePath="VideoDefines.h"
+			RelativePath="ntv2videodefines.h"
 			>
 		</File>
 	</Files>

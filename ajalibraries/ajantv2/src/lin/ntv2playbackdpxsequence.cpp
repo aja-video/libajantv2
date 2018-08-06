@@ -17,7 +17,7 @@
 #include "ntv2utils.h"
 #include "ntv2boardscan.h"
 #include "ntv2boardfeatures.h"
-#include "audiodefines.h"
+#include "ntv2audiodefines.h"
 #include "fixed.h"
 #if defined(MSWindows)
 #  include "cpu.h"
