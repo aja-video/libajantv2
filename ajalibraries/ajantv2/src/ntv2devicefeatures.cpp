@@ -60,7 +60,7 @@ bool NTV2DeviceCanDo292Out(NTV2DeviceID boardID, UWord index0)
 	case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut4);
 	default:	return false;
 	}
-}	//	NTV2DeviceCanDo3GOut
+}	//	NTV2DeviceCanDo292Out
 
 bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 {
@@ -88,8 +88,45 @@ bool NTV2DeviceCanDo12GOut(NTV2DeviceID boardID, UWord index0)
 		case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut4);
 		default:	return false;
 	}
-}	//	NTV2DeviceCanDo3GOut
+}	//	NTV2DeviceCanDo12GOut
 
+bool NTV2DeviceCanDo292In(NTV2DeviceID boardID, UWord index0)
+{
+    switch (index0)
+    {
+    case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn1);
+    case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn2);
+    default:	return false;
+    }
+}	//	NTV2DeviceCanDo292In
+
+bool NTV2DeviceCanDo3GIn(NTV2DeviceID boardID, UWord index0)
+{
+    switch (index0)
+    {
+        case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn1);
+        case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn2);
+        case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn3);
+        case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn4);
+        case 4:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn5);
+        case 5:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn6);
+        case 6:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn7);
+        case 7:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn8);
+        default:	return false;
+    }
+}	//	NTV2DeviceCanDo3GIn
+
+bool NTV2DeviceCanDo12GIn(NTV2DeviceID boardID, UWord index0)
+{
+    switch (index0)
+    {
+        case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn1);
+        case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn2);
+        case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn3);
+        case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn4);
+        default:	return false;
+    }
+}	//	NTV2DeviceCanDo12GIn
 
 bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0)
 {
@@ -211,6 +248,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
     case DEVICE_ID_KONAIP_2110:
     case DEVICE_ID_KONAHDMI:
 	case DEVICE_ID_KONA5:
+    case DEVICE_ID_KONA5_12G:
         switch (inFrameGeometry)
 		{
 		case NTV2_FG_4x1920x1080:
@@ -313,6 +351,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
 	case DEVICE_ID_KONA1:
     case DEVICE_ID_KONAHDMI:
 	case DEVICE_ID_KONA5:
+    case DEVICE_ID_KONA5_12G:
         return 111;
 	case DEVICE_ID_KONA3G:
 		return 56; // ufc uses 8 
@@ -375,6 +414,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
     case DEVICE_ID_KONAIP_2110:
     case DEVICE_ID_KONAHDMI:
 	case DEVICE_ID_KONA5:
+    case DEVICE_ID_KONA5_12G:
         switch (inFrameGeometry)
 		{
 		case NTV2_FG_4x1920x1080:

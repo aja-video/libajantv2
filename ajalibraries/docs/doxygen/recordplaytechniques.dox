@@ -26,6 +26,8 @@ This page describes the basics of capturing and playing real-time video, then de
 -	\ref ntv2capture
 -	\ref ntv2capture4k
 
+
+
 @section	aboutpingpong	Ping-Pong
 
 The “ping-pong” method is a good choice when lower latency is required.
@@ -42,9 +44,28 @@ making DMA transfers at the right time, keeping the audio synchronized with the 
 
 Any unexpected delays or slow-downs in frame processing or DMA transfers will cause visual distortion.
 
+The low-latency model can support either field or frame mode processing. In this model, a time-critical user-mode thread
+is used to manage capture and/or playback in real-time.
+
+For capture, full frames or separate fields can be transferred immediately after the VBI is received. Audio can be transferred
+based on the actual number of audio samples that have been written into the device audio buffer.
+
+For playback, frames written to the device frame buffer can be set to go on-air any time before the VBI. Field-mode processing
+here is a little tricky, as once the first field is on-air, the second field will go on-air ready-or-not, so the application
+must make some real-time decisions if it needs to drop a field. Low-latency client software can be written with a delay
+parameter that would allow for some variation in the application’s video processing time while maintaining a fixed delay,
+but it may not provide the reliability of the kernel queuing model.
+
+Some relevant API calls:
+-	Use CNTV2Card::WaitForInputVerticalInterrupt (capture) or CNTV2Card::WaitForOutputVerticalInterrupt (playout) to wait for
+	the field VBI of interlaced video, or the frame VBI of progressive video.
+-	CNTV2Card::WaitForInputFieldID can be used to wait for the frame VBI of interlaced video.
+-	CNTV2Card::DMAReadFrame (capture) or CNTV2Card::DMAWriteFrame (playout) will transfer frame data.
+-	CNTV2Card::DMAReadSegments (capture) or CNTV2Card::DMAWriteSegments (playout) can transfer one field’s lines to/from a
+	half-height buffer on the host.
+
 Ping-Pong Capture/Playout Demos:
 -	@subpage	ntv2llburn
-
 
 
 @section	aboutautocirculate	AutoCirculate
@@ -246,14 +267,6 @@ aren’t received by the hardware, the driver’s ISR won’t get called, and Au
 -	If AutoCirculate is stuck in the <b>Running</b> or <b>Paused</b> state, then interrupts stopped being delivered to the
 	\ref vidop-fs sometime after the application successfully called CNTV2Card::AutoCirculateTransfer.
 
-<b>How Many Frames to Circulate?</b>
-
-This choice can depend on a number of factors that each affect how many frames are available for buffering on the device:
--	The application’s frame-dropping tolerance;
--	The hardware devices it may need to run on (some devices have less SDRAM);
--	The largest video raster expected;
--	The frame buffer (pixel) format to be used.
-
 To obtain the size of your host-based video buffer, in bytes (to accommodate a single frame), try…
 -	::GetVideoActiveSize — returns the minimum number of bytes (including VANC lines for “tall” geometries);
 -	::GetVideoWriteSize — this calls ::GetVideoActiveSize, but pads up to the nearest 4K page size multiple;
@@ -278,6 +291,7 @@ To do this, call CNTV2Card::AutoCirculateTransfer for each frame you wish to pre
 After each such call, the <b>Transfer Frame</b> will “bump” to the next frame slot, and the <b>Buffer Level</b> will increment.
 After preloading, you can safely call CNTV2Card::AutoCirculateStart, and continue to transfer additional frames to the device,
 with the goal of keeping the <b>Transfer Frame</b> ahead of the <b>Active Frame</b> being played by the hardware.
+
 
 @subsection	autocirculateinterlace	Interlaced Versus Progressive Video
 
@@ -316,6 +330,33 @@ It is possible (and sometimes even desireable) to transfer each field of interla
 by calling CNTV2Card::AutoCirculateTransfer every time through the loop (without checking the <b>Buffer Level</b>).
 See the NTV2FieldBurn demonstration application for more details.
 
+
+@subsection  autocirculatelowlatency  Latency and Field-Based Operation Considerations
+
+The NTV2 firmware and AutoCirculate have always been frame-based. Field mode hasn’t been added to AutoCirculate, since the
+kernel queuing model it uses doesn’t really support low-latency well. It is very good at reliably capturing and playing
+frames without dropping, as long as the queue is large enough to absorb user-mode latency. The kernel queue is managed
+once per frame just after the video VBI. This gives the client software an entire frame-time to program the hardware for
+the next frame.
+
+For capture, the frame written to the device frame buffer during the previous frame time is available for transfer after
+the vertical interrupt is received. However, audio can’t be transferred immediately, since audio is captured continuously,
+and all audio for the previous frame may not have been flushed to the device frame buffer yet. For this reason, AJA usually
+recommends transferring video and audio when there’s at least two frames in the queue — which obviously isn’t good for
+low-latency applications.
+
+For playback, when the frame interrupt is received, the frame to display after the next VBI must be set in the hardware.
+Since this is a whole frame early, you essentially end up with two frames in the queue for playback as well. This is why
+we wrote the \ref ntv2llburn, a low-latency demo that works without AutoCirculate.
+
+<b>How many frames to circulate?</b> This choice can depend on a number of factors that each affect how many frames are
+available for buffering on the device:
+-	The application’s frame-dropping tolerance;
+-	The hardware devices it may need to run on (some devices have very little SDRAM);
+-	The largest video raster expected;
+-	The frame buffer (pixel) format to be used.
+
+
 @subsection	autocirculatemon	Monitoring AutoCirculate Activity with “NTV2Watcher” Tool
 
 \ref usingntv2watcher has an \ref inspectorac that shows AutoCirculate activity in near-real-time for all possible channels
@@ -325,5 +366,11 @@ on any AJA device attached to the host.
 
 You can right-click in the AutoCirculate channel column to pop up a menu to control AutoCirculate activity on that channel.
 This is handy for manually pausing, resuming, stopping or restarting AutoCirculate while your application runs.
+
+While AutoCirculate is paused, you can inspect, in great detail…
+-	the captured (or queued) per-frame timecodes (in the \ref inspectorac).
+-	the captured (or queued) video frames (using the \ref inspectorframebuffer).
+-	the captured (or queued) audio samples (using the \ref inspectoraudio).
+-	the captured (or queued) ancillary data (using the \ref inspectoranc).
 
 **/
