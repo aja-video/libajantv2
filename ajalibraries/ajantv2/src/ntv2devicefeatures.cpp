@@ -60,7 +60,7 @@ bool NTV2DeviceCanDo292Out(NTV2DeviceID boardID, UWord index0)
 	case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut4);
 	default:	return false;
 	}
-}	//	NTV2DeviceCanDo3GOut
+}	//	NTV2DeviceCanDo292Out
 
 bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 {
@@ -88,8 +88,45 @@ bool NTV2DeviceCanDo12GOut(NTV2DeviceID boardID, UWord index0)
 		case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut4);
 		default:	return false;
 	}
-}	//	NTV2DeviceCanDo3GOut
+}	//	NTV2DeviceCanDo12GOut
 
+bool NTV2DeviceCanDo292In(NTV2DeviceID boardID, UWord index0)
+{
+    switch (index0)
+    {
+    case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn1);
+    case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn2);
+    default:	return false;
+    }
+}	//	NTV2DeviceCanDo292In
+
+bool NTV2DeviceCanDo3GIn(NTV2DeviceID boardID, UWord index0)
+{
+    switch (index0)
+    {
+        case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn1);
+        case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn2);
+        case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn3);
+        case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn4);
+        case 4:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn5);
+        case 5:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn6);
+        case 6:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn7);
+        case 7:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn8);
+        default:	return false;
+    }
+}	//	NTV2DeviceCanDo3GIn
+
+bool NTV2DeviceCanDo12GIn(NTV2DeviceID boardID, UWord index0)
+{
+    switch (index0)
+    {
+        case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn1);
+        case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn2);
+        case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn3);
+        case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn4);
+        default:	return false;
+    }
+}	//	NTV2DeviceCanDo12GIn
 
 bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0)
 {
