@@ -45,7 +45,8 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram ()
 		_deviceID			(0),
 		_bQuiet				(false),
         _mcsStep(0),
-        _spiFlash(NULL)
+        _spiFlash(NULL),
+        _failSafePadding(0)
 {
 }
 
@@ -73,7 +74,8 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram (const UWord boardNumber)
         _deviceID           (0),
         _bQuiet             (false),
         _mcsStep            (0),
-        _spiFlash(NULL)
+        _spiFlash(NULL),
+        _failSafePadding(0)
 {
 	SetDeviceProperties();
 }
@@ -190,18 +192,21 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		_flashSize = 16 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
         _sectorSize = 256 * 1024;
+        _failSafePadding = 1;
 		knownChip = true;
 		break;
     case 0x00010220://CYPRESS f25fl512
 		_flashSize = 64 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 256 * 1024;
+        _failSafePadding = 1;
 		knownChip = true;
 		break;
     case 0x009d6019://ISSI
         _flashSize = 64 * 1024 * 1024;
         _bankSize = 16 * 1024 * 1024;
         _sectorSize = 64 * 1024;
+        _failSafePadding = 4;
         knownChip = true;
         break;
     case 0x00C84018://GIGADEVICE GD25Q127CFIG
@@ -210,12 +215,14 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		_flashSize = 16 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 64 * 1024;
+        _failSafePadding = 4;
 		knownChip = true;
 		break;
     case 0x00010219://CYPRESS S25FL256
 		_flashSize = 32 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 64 * 1024;
+        _failSafePadding = 4;
 		knownChip = true;
         break;
 	default:
@@ -232,7 +239,7 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 	if (::NTV2DeviceHasSPIv2(GetDeviceID()))
 	{
 		_numSectorsMain = _flashSize / _sectorSize / 2;
-		_numSectorsFailSafe = (_flashSize / _sectorSize / 2) - 1;
+        _numSectorsFailSafe = (_flashSize / _sectorSize / 2) - _failSafePadding;
 		_mainOffset = 0;
 		_failSafeOffset = 8 * 1024 * 1024;
 		_macOffset = _bankSize - (2 * _sectorSize);
@@ -261,7 +268,7 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 			//SPIV3 This gets a little weird both main and failsafe have an offset of 0
 			//and the real offset is controlled by a bank selector switch in firmware
 			_numSectorsMain = _flashSize / _sectorSize / 2;
-			_numSectorsFailSafe = (_flashSize / _sectorSize / 2) - 1;
+            _numSectorsFailSafe = (_flashSize / _sectorSize / 2) - _failSafePadding;
 			_mainOffset = 0;
 			_failSafeOffset = 0;// but is really 16*1024*1024;
 			_macOffset = _bankSize - (2 * _sectorSize);
@@ -289,7 +296,7 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 	else if(NTV2DeviceHasSPIv5(GetDeviceID()))
 	{
 		_numSectorsMain = _flashSize / _sectorSize / 2;
-		_numSectorsFailSafe = (_flashSize / _sectorSize / 2) - 1;
+        _numSectorsFailSafe = (_flashSize / _sectorSize / 2) - _failSafePadding;
 		_mainOffset = 0;
 		_failSafeOffset = 0;// but is really 32*1024*1024;
 		status = true;
