@@ -2326,19 +2326,20 @@ typedef enum NTV2OutputCrosspointID
     NTV2_XptHDMIIn3RGB					= 0xFC,
     NTV2_XptHDMIIn4						= 0x7D,
     NTV2_XptHDMIIn4RGB					= 0xFD,
- #if 1	// deprecate these
-    NTV2_XptHDMIIn						= NTV2_XptHDMIIn1,
-    NTV2_XptHDMIInQ2					= NTV2_XptHDMIIn1Q2,
-    NTV2_XptHDMIInQ3					= NTV2_XptHDMIIn1Q3,
-    NTV2_XptHDMIInQ4					= NTV2_XptHDMIIn1Q4,
-    NTV2_XptHDMIInRGB					= NTV2_XptHDMIIn1RGB,
-    NTV2_XptHDMIInQ2RGB					= NTV2_XptHDMIIn1Q2RGB,
-    NTV2_XptHDMIInQ3RGB					= NTV2_XptHDMIIn1Q3RGB,
-    NTV2_XptHDMIInQ4RGB					= NTV2_XptHDMIIn1Q4RGB,
-#endif
     NTV2_XptRuntimeCalc					= 0xFF,
     NTV2_LAST_OUTPUT_CROSSPOINT			= 0xFF,
     NTV2_OUTPUT_CROSSPOINT_INVALID		= 0xFF
+    #if !defined(NTV2_DEPRECATE_14_3)
+		,
+		NTV2_XptHDMIIn					= NTV2_XptHDMIIn1,
+		NTV2_XptHDMIInQ2				= NTV2_XptHDMIIn1Q2,
+		NTV2_XptHDMIInQ3				= NTV2_XptHDMIIn1Q3,
+		NTV2_XptHDMIInQ4				= NTV2_XptHDMIIn1Q4,
+		NTV2_XptHDMIInRGB				= NTV2_XptHDMIIn1RGB,
+		NTV2_XptHDMIInQ2RGB				= NTV2_XptHDMIIn1Q2RGB,
+		NTV2_XptHDMIInQ3RGB				= NTV2_XptHDMIIn1Q3RGB,
+		NTV2_XptHDMIInQ4RGB				= NTV2_XptHDMIIn1Q4RGB
+    #endif
     #if !defined (NTV2_DEPRECATE)
         ,
         NTV2_XptFS1SecondConverter		= 0x18,
@@ -3892,14 +3893,14 @@ typedef enum
     #define		NTV2K2_XptDuallinkOut4DS2			NTV2_XptDuallinkOut4DS2				///< @deprecated	Use NTV2_XptDuallinkOut4DS2 instead.
     #define		NTV2K2_XptAlphaOut					NTV2_XptAlphaOut					///< @deprecated	Use NTV2_XptAlphaOut instead.
     #define		NTV2K2_XptAnalogIn					NTV2_XptAnalogIn					///< @deprecated	Use NTV2_XptAnalogIn instead.
-    #define		NTV2K2_XptHDMIIn					NTV2_XptHDMIIn						///< @deprecated	Use NTV2_XptHDMIIn instead.
-    #define		NTV2K2_XptHDMIInQ2					NTV2_XptHDMIInQ2					///< @deprecated	Use NTV2_XptHDMIInQ2 instead.
-    #define		NTV2K2_XptHDMIInQ3					NTV2_XptHDMIInQ3					///< @deprecated	Use NTV2_XptHDMIInQ3 instead.
-    #define		NTV2K2_XptHDMIInQ4					NTV2_XptHDMIInQ4					///< @deprecated	Use NTV2_XptHDMIInQ4 instead.
-    #define		NTV2K2_XptHDMIInRGB					NTV2_XptHDMIInRGB					///< @deprecated	Use NTV2_XptHDMIInRGB instead.
-    #define		NTV2K2_XptHDMIInQ2RGB				NTV2_XptHDMIInQ2RGB					///< @deprecated	Use NTV2_XptHDMIInQ2RGB instead.
-    #define		NTV2K2_XptHDMIInQ3RGB				NTV2_XptHDMIInQ3RGB					///< @deprecated	Use NTV2_XptHDMIInQ3RGB instead.
-    #define		NTV2K2_XptHDMIInQ4RGB				NTV2_XptHDMIInQ4RGB					///< @deprecated	Use NTV2_XptHDMIInQ4RGB instead.
+    #define		NTV2K2_XptHDMIIn					NTV2_XptHDMIIn1						///< @deprecated	Use NTV2_XptHDMIIn1 instead.
+    #define		NTV2K2_XptHDMIInQ2					NTV2_XptHDMIIn1Q2					///< @deprecated	Use NTV2_XptHDMIIn1Q2 instead.
+    #define		NTV2K2_XptHDMIInQ3					NTV2_XptHDMIIn1Q3					///< @deprecated	Use NTV2_XptHDMIIn1Q3 instead.
+    #define		NTV2K2_XptHDMIInQ4					NTV2_XptHDMIIn1Q4					///< @deprecated	Use NTV2_XptHDMIIn1Q4 instead.
+    #define		NTV2K2_XptHDMIInRGB					NTV2_XptHDMIIn1RGB					///< @deprecated	Use NTV2_XptHDMIIn1RGB instead.
+    #define		NTV2K2_XptHDMIInQ2RGB				NTV2_XptHDMIIn1Q2RGB				///< @deprecated	Use NTV2_XptHDMIIn1Q2RGB instead.
+    #define		NTV2K2_XptHDMIInQ3RGB				NTV2_XptHDMIIn1Q3RGB				///< @deprecated	Use NTV2_XptHDMIIn1Q3RGB instead.
+    #define		NTV2K2_XptHDMIInQ4RGB				NTV2_XptHDMIIn1Q4RGB				///< @deprecated	Use NTV2_XptHDMIIn1Q4RGB instead.
     #define		NTV2K2_XptFS1SecondConverter		NTV2_XptFS1SecondConverter			///< @deprecated	This is obsolete.
     #define		NTV2KS_XptFS1ProcAmp				NTV2_XptFS1ProcAmp					///< @deprecated	This is obsolete.
     #define		NTV2KS_XptFS1TestSignalGenerator	NTV2_XptFS1TestSignalGenerator		///< @deprecated	This is obsolete.

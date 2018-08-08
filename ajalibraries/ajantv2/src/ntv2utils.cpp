@@ -5643,7 +5643,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 					outRouter.addWithValue (::GetAnalogOutInputSelectEntry (), NTV2_XptAnalogIn);
 					break;
 				case NTV2_INPUTSOURCE_HDMI1:
-					outRouter.addWithValue (::GetHDMIOutInputSelectEntry (), NTV2_XptHDMIIn);
+					outRouter.addWithValue (::GetHDMIOutInputSelectEntry (), NTV2_XptHDMIIn1);
 					break;
 				default:
 					return false;
@@ -5684,7 +5684,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptAnalogIn);
 						break;
 					case NTV2_INPUTSOURCE_HDMI1:
-						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptHDMIIn);
+						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptHDMIIn1);
 						break;
 					default:
 						return false;
@@ -5708,7 +5708,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptAnalogIn);
 					break;
 				case NTV2_INPUTSOURCE_HDMI1:
-					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptHDMIIn);
+					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptHDMIIn1);
 					break;
 				default:
 					return false;
@@ -5743,7 +5743,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptAnalogIn);
 						break;
 					case NTV2_INPUTSOURCE_HDMI1:
-						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptHDMIIn);
+						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptHDMIIn1);
 						break;
 					default:
 						return false;
@@ -5765,7 +5765,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptAnalogIn);
 					break;
 				case NTV2_INPUTSOURCE_HDMI1:
-					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptHDMIIn);
+					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptHDMIIn1);
 					break;
 				default:
 					return false;
@@ -5787,7 +5787,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 				outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptAnalogIn);
 				break;
 			case NTV2_INPUTSOURCE_HDMI1:
-				outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptHDMIIn);
+				outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptHDMIIn1);
 				break;
 			default:
 				return false;
@@ -5818,7 +5818,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 					outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptAnalogIn);
 					break;
 				case NTV2_INPUTSOURCE_HDMI1:
-					outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptHDMIIn);
+					outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptHDMIIn1);
 					break;
 				default:
 					return false;
@@ -5838,7 +5838,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 					outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptAnalogIn);
 					break;
 				case NTV2_INPUTSOURCE_HDMI1:
-					outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptHDMIIn);
+					outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptHDMIIn1);
 					break;
 				default:
 					return false;

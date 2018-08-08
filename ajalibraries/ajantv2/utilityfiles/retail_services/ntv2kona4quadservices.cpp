@@ -1268,8 +1268,8 @@ void Kona4QuadServices::SetDeviceXPointPlayback ()
 				}
 				else if (mVirtualInputSelect == NTV2_Input5Select)
 				{
-					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptHDMIIn);
-					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptHDMIIn);
+					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptHDMIIn1);
+					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptHDMIIn1);
 				}
 				else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 				{
@@ -1326,8 +1326,8 @@ void Kona4QuadServices::SetDeviceXPointPlayback ()
 				}
 				else if (mVirtualInputSelect == NTV2_Input5Select)
 				{
-					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptHDMIIn);
-					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptHDMIIn);
+					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptHDMIIn1);
+					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptHDMIIn1);
 				}
 				else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
 				{
@@ -1636,13 +1636,13 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 		{
 			if (bInRGB)
 			{
-				in4kRGB1 = NTV2_XptHDMIInRGB;	in4kRGB2 = NTV2_XptHDMIInQ2RGB;
-				in4kRGB3 = NTV2_XptHDMIInQ3RGB;	in4kRGB4 = NTV2_XptHDMIInQ4RGB;
+				in4kRGB1 = NTV2_XptHDMIIn1RGB;		in4kRGB2 = NTV2_XptHDMIIn1Q2RGB;
+				in4kRGB3 = NTV2_XptHDMIIn1Q3RGB;	in4kRGB4 = NTV2_XptHDMIIn1Q4RGB;
 			}
 			else
 			{
-				in4kYUV1 = NTV2_XptHDMIIn;		in4kYUV2 = NTV2_XptHDMIInQ2;
-				in4kYUV3 = NTV2_XptHDMIInQ3;	in4kYUV4 = NTV2_XptHDMIInQ4;
+				in4kYUV1 = NTV2_XptHDMIIn1;		in4kYUV2 = NTV2_XptHDMIIn1Q2;
+				in4kYUV3 = NTV2_XptHDMIIn1Q3;	in4kYUV4 = NTV2_XptHDMIIn1Q4;
 			}
 		}
 		else if (bInRGB)	// SDI-RGB
@@ -1793,7 +1793,7 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 		{
 			if(bHdmiIn)
 			{
-				mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptHDMIIn);
+				mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptHDMIIn1);
 			}
 			else
 			{
@@ -2331,7 +2331,7 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 		{
 			if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 			{
-				mCard->Connect (NTV2_XptFrameBuffer1Input, bHdmiIn ? NTV2_XptHDMIIn : NTV2_XptDuallinkIn1);
+				mCard->Connect (NTV2_XptFrameBuffer1Input, bHdmiIn ? NTV2_XptHDMIIn1 : NTV2_XptDuallinkIn1);
 			}
 			else
 			{
@@ -2351,7 +2351,7 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptFrameBuffer1Input, bHdmiIn ? NTV2_XptHDMIIn : inHdYUV1);
+			mCard->Connect (NTV2_XptFrameBuffer1Input, bHdmiIn ? NTV2_XptHDMIIn1 : inHdYUV1);
 		}
 	}
 
@@ -2496,7 +2496,7 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 			{
 				if (bHdmiIn)
 				{
-					mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptHDMIInQ3);
+					mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptHDMIIn1Q3);
 				}
 				else
 				{
@@ -2758,7 +2758,7 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptSDIOut3Input, bHdmiIn ? NTV2_XptHDMIIn : inHdYUV1);
+			mCard->Connect (NTV2_XptSDIOut3Input, bHdmiIn ? NTV2_XptHDMIIn1 : inHdYUV1);
 		}
 		mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
 	}
@@ -2835,7 +2835,7 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptSDIOut4Input, bHdmiIn ? NTV2_XptHDMIIn : inHdYUV1);
+			mCard->Connect (NTV2_XptSDIOut4Input, bHdmiIn ? NTV2_XptHDMIIn1 : inHdYUV1);
 		}
 		mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 	}

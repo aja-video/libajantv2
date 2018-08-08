@@ -1256,8 +1256,8 @@ void Kona5Services::SetDeviceXPointPlayback ()
                 }
                 else if (mVirtualInputSelect == NTV2_Input5Select)
                 {
-                    mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptHDMIIn);
-                    mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptHDMIIn);
+                    mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptHDMIIn1);
+                    mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptHDMIIn1);
                 }
                 else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
                 {
@@ -1314,8 +1314,8 @@ void Kona5Services::SetDeviceXPointPlayback ()
                 }
                 else if (mVirtualInputSelect == NTV2_Input5Select)
                 {
-                    mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptHDMIIn);
-                    mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptHDMIIn);
+                    mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptHDMIIn1);
+                    mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptHDMIIn1);
                 }
                 else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
                 {
