@@ -82,8 +82,8 @@ int main (int argc, const char ** argv)
 	else if (!pixelFormatStr.empty () && !NTV2_IS_VALID_FRAME_BUFFER_FORMAT (pixelFormat))
 		{cerr << "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 2;}
 
-	if (channelNumber != 1 && channelNumber != 5)
-		{cerr << "## ERROR:  Invalid channel number '" << channelNumber << "' -- expected 1 or 5" << endl;  return 2;}
+//	if (channelNumber != 1 && channelNumber != 5)
+//		{cerr << "## ERROR:  Invalid channel number '" << channelNumber << "' -- expected 1 or 5" << endl;  return 2;}
 
 	Player4KConfig	config;
 

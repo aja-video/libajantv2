@@ -275,7 +275,7 @@ class NTV2Player4K
 		const std::string			mDeviceSpecifier;			///< @brief	Specifies the device I should use
 		const bool					mWithAudio;					///< @brief	Capture and playout audio?
 		const bool					mUseHDMIOut;				///< @brief	Enable HDMI output?
-		const NTV2Channel			mChannel;					///< @brief	The channel I'm using
+		NTV2Channel					mChannel;					///< @brief	The channel I'm using
 		NTV2Crosspoint				mChannelSpec;				///< @brief	The AutoCirculate channel spec I'm using
 		NTV2VideoFormat				mVideoFormat;				///< @brief	My video format
 		NTV2FrameBufferFormat		mPixelFormat;				///< @brief	My pixel format
