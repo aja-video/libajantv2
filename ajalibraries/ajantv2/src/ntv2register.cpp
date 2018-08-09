@@ -1033,6 +1033,9 @@ bool CNTV2Card::SetQuadFrameEnable (const ULWord inValue, const NTV2Channel inCh
 {
 	bool status = true;
 
+	if (!NTV2_IS_VALID_CHANNEL(inChannel))
+		return false;
+
 	if (!::NTV2DeviceCanDo4KVideo(_boardID))
 		return false;
 
@@ -1040,7 +1043,31 @@ bool CNTV2Card::SetQuadFrameEnable (const ULWord inValue, const NTV2Channel inCh
 	// Set false (0) to disable this mode
 	if(inValue)
 	{
-		if(NTV2DeviceCanDo425Mux(_boardID))
+		if (::NTV2DeviceCanDo12gRouting(_boardID))
+		{
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
+			if (!status)
+				return false;
+
+			if (!IsMultiFormatActive())
+			{
+					status = WriteRegister(kRegGlobalControl, 1, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+					WriteRegister(kRegGlobalControlCh2, 1, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+					WriteRegister(kRegGlobalControlCh3, 1, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+					WriteRegister(kRegGlobalControlCh4, 1, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+					CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
+			}
+			else
+			{
+				status = WriteRegister(gChannelToGlobalControlRegNum[inChannel], 1, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
+			}
+		}
+		else if(NTV2DeviceCanDo425Mux(_boardID))
 		{
 			if (!IsMultiFormatActive())
 			{
@@ -1119,10 +1146,19 @@ bool CNTV2Card::SetQuadFrameEnable (const ULWord inValue, const NTV2Channel inCh
 				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
 				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
 				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78) &&
+				WriteRegister(kRegGlobalControl, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+				WriteRegister(kRegGlobalControlCh2, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+				WriteRegister(kRegGlobalControlCh3, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+				WriteRegister(kRegGlobalControlCh4, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
 		}
 		else if (smpte425Enabled)
 		{
+			if (::NTV2DeviceCanDo12gRouting(_boardID))
+			{
+				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+						WriteRegister(gChannelToGlobalControlRegNum[inChannel], 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
+			}
 			// disable 425 and squares
 			if (inChannel < NTV2_CHANNEL3)
 			{
@@ -1152,7 +1188,11 @@ bool CNTV2Card::SetQuadFrameEnable (const ULWord inValue, const NTV2Channel inCh
 			{
 				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
 					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
+					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
+					WriteRegister(kRegGlobalControl, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+					WriteRegister(kRegGlobalControlCh2, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+					WriteRegister(kRegGlobalControlCh3, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+					WriteRegister(kRegGlobalControlCh4, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
 			}
 			else
 			{
@@ -1177,7 +1217,7 @@ bool CNTV2Card::GetQuadFrameEnable (ULWord & outValue, const NTV2Channel inChann
 	bool	status2		(true);
 	bool	s425Enabled	(false);
 	bool	status1 = Get4kSquaresEnable (quadEnabled, inChannel);
-	if (::NTV2DeviceCanDo425Mux (_boardID))
+	if (::NTV2DeviceCanDo425Mux (_boardID) || ::NTV2DeviceCanDo12gRouting(_boardID))
 		status2 = GetTsiFrameEnable (s425Enabled, inChannel);
 
 	outValue = (status1 & status2) ? ((quadEnabled | s425Enabled) ? 1 : 0) : 0;
@@ -1209,6 +1249,10 @@ bool CNTV2Card::Set4kSquaresEnable (const bool inEnable, NTV2Channel inChannel)
 				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
 				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
 				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78) &&
+				WriteRegister(kRegGlobalControl, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+				WriteRegister(kRegGlobalControlCh2, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+				WriteRegister(kRegGlobalControlCh3, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+				WriteRegister(kRegGlobalControlCh4, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
 				CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
 		}
 		else if (inChannel < NTV2_CHANNEL5)
@@ -1259,7 +1303,7 @@ bool CNTV2Card::SetTsiFrameEnable (const bool enable, const NTV2Channel inChanne
 {
 	bool status = true;
 
-	if(!NTV2DeviceCanDo425Mux(_boardID))
+	if(!::NTV2DeviceCanDo425Mux(_boardID) && !::NTV2DeviceCanDo12gRouting(_boardID))
 		return false;
 	if (!NTV2_IS_VALID_CHANNEL(inChannel))
 		return false;
@@ -1271,8 +1315,32 @@ bool CNTV2Card::SetTsiFrameEnable (const bool enable, const NTV2Channel inChanne
 
 	if(enable)
 	{
+		if (::NTV2DeviceCanDo12gRouting(_boardID))
+		{
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
+			if (!status)
+				return false;
+
+			if (!IsMultiFormatActive())
+			{
+					status = WriteRegister(kRegGlobalControl, 1, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+					WriteRegister(kRegGlobalControlCh2, 1, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+					WriteRegister(kRegGlobalControlCh3, 1, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+					WriteRegister(kRegGlobalControlCh4, 1, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+					CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
+			}
+			else
+			{
+				status = WriteRegister(gChannelToGlobalControlRegNum[inChannel], 1, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
+			}
+		}
 		// enable 425 mode, disable squares
-		if (!IsMultiFormatActive())
+		else if (!IsMultiFormatActive())
 		{
 			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
 				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
@@ -1322,7 +1390,7 @@ bool CNTV2Card::SetTsiFrameEnable (const bool enable, const NTV2Channel inChanne
 bool CNTV2Card::GetTsiFrameEnable (bool & outIsEnabled, const NTV2Channel inChannel)
 {
 	outIsEnabled = false;
-	if (!::NTV2DeviceCanDo425Mux (_boardID))
+	if (!::NTV2DeviceCanDo425Mux (_boardID) && !::NTV2DeviceCanDo12gRouting(_boardID))
 		return false;
 	if (!NTV2_IS_VALID_CHANNEL(inChannel))
 		return false;
@@ -1331,14 +1399,21 @@ bool CNTV2Card::GetTsiFrameEnable (bool & outIsEnabled, const NTV2Channel inChan
 	ULWord	returnVal	(0);
 	bool	readOkay	(false);
 
-	if (inChannel < NTV2_CHANNEL3)
-		readOkay = ReadRegister (kRegGlobalControl2, returnVal, kRegMask425FB12, kRegShift425FB12);
-	else if (inChannel < NTV2_CHANNEL5)
-		readOkay = ReadRegister (kRegGlobalControl2, returnVal, kRegMask425FB34, kRegShift425FB34);
-	else if (inChannel < NTV2_CHANNEL7)
-		readOkay = ReadRegister (kRegGlobalControl2, returnVal, kRegMask425FB56, kRegShift425FB56);
+	if (::NTV2DeviceCanDo12gRouting(_boardID))
+	{
+		readOkay = ReadRegister(gChannelToGlobalControlRegNum[inChannel], returnVal, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
+	}
 	else
-		readOkay = ReadRegister(kRegGlobalControl2, returnVal, kRegMask425FB78, kRegShift425FB78);
+	{
+		if (inChannel < NTV2_CHANNEL3)
+			readOkay = ReadRegister (kRegGlobalControl2, returnVal, kRegMask425FB12, kRegShift425FB12);
+		else if (inChannel < NTV2_CHANNEL5)
+			readOkay = ReadRegister (kRegGlobalControl2, returnVal, kRegMask425FB34, kRegShift425FB34);
+		else if (inChannel < NTV2_CHANNEL7)
+			readOkay = ReadRegister (kRegGlobalControl2, returnVal, kRegMask425FB56, kRegShift425FB56);
+		else
+			readOkay = ReadRegister(kRegGlobalControl2, returnVal, kRegMask425FB78, kRegShift425FB78);
+	}
 
 	outIsEnabled = readOkay ? returnVal : 0;
 	return readOkay;
