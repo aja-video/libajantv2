@@ -737,7 +737,7 @@ void NTV2Capture4K::SetupInputAutoCirculate (void)
 	}
 	mDevice.AutoCirculateInitForInput (mInputChannel,	7,	//	Number of frames to circulate
 											mWithAudio ? mAudioSystem : NTV2_AUDIOSYSTEM_INVALID,	//	Which audio system (if any)?
-											AUTOCIRCULATE_WITH_RP188,
+											AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC,
 											1, startFrame, endFrame);								//	Include timecode
 }	//	SetupInputAutoCirculate
 
