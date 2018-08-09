@@ -231,7 +231,6 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 	GetFrameRate(frameRate, channel);
     inFrameRate = GetNTV2FrameRateFromVideoFormat(value);
     NTV2FrameGeometry inFrameGeometry = GetNTV2FrameGeometryFromVideoFormat(value);
-
 	
 #if !defined (NTV2_DEPRECATE)
 	// If switching from high def to standard def or vice versa
@@ -765,9 +764,14 @@ bool CNTV2Card::SetStandard (NTV2Standard value, NTV2Channel channel)
 {
 	if (!IsMultiFormatActive ())
 		channel = NTV2_CHANNEL1;
+	NTV2Standard newStandard = value;
+	if (NTV2_IS_QUAD_STANDARD(newStandard))
+	{
+		newStandard = GetQuarterSizedStandard(newStandard);
+	}
 
 	return WriteRegister (gChannelToGlobalControlRegNum [channel],
-						  value,
+						  newStandard,
 						  kRegMaskStandard,
 						  kRegShiftStandard);
 }
@@ -779,7 +783,15 @@ bool CNTV2Card::GetStandard (NTV2Standard & outValue, NTV2Channel inChannel)
 {
 	if (!IsMultiFormatActive ())
 		inChannel = NTV2_CHANNEL1;
-	return CNTV2DriverInterface::ReadRegister (gChannelToGlobalControlRegNum[inChannel], outValue, kRegMaskStandard, kRegShiftStandard);
+	bool status = CNTV2DriverInterface::ReadRegister (gChannelToGlobalControlRegNum[inChannel], outValue, kRegMaskStandard, kRegShiftStandard);
+	if (status && (::NTV2DeviceCanDo4KVideo(_boardID) || NTV2DeviceCanDo425Mux(_boardID)))
+	{
+		ULWord	quadFrameEnabled(0);
+		status = GetQuadFrameEnable(quadFrameEnabled, inChannel);
+		if (status  &&  quadFrameEnabled)
+			outValue = Get4xSizedStandard(outValue);
+	}
+	return status;
 }
 
 // Method: IsProgressiveStandard	
