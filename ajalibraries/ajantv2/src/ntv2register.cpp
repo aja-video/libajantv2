@@ -259,10 +259,7 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 		//This will handle 4k formats
 		if (NTV2_IS_QUAD_FRAME_FORMAT(value))
 		{
-            if(NTV2_IS_SQUARE_DIVISION_FORMAT(value))
-                SetQuadFrameEnable(true, channel);
-            else
-                SetTsiFrameEnable(true, channel);
+            SetQuadFrameEnable(true, channel);
 		}
 		else
 		{
@@ -1045,162 +1042,21 @@ bool CNTV2Card::SetQuadFrameEnable (const ULWord inValue, const NTV2Channel inCh
 	{
 		if (::NTV2DeviceCanDo12gRouting(_boardID))
 		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
-			if (!status)
-				return false;
-
-			if (!IsMultiFormatActive())
-			{
-					status = WriteRegister(kRegGlobalControl, 1, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
-					WriteRegister(kRegGlobalControlCh2, 1, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
-					WriteRegister(kRegGlobalControlCh3, 1, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
-					WriteRegister(kRegGlobalControlCh4, 1, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
-					CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
-			}
-			else
-			{
-				status = WriteRegister(gChannelToGlobalControlRegNum[inChannel], 1, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
-			}
+			SetTsiFrameEnable(true, inChannel);
 		}
 		else if(NTV2DeviceCanDo425Mux(_boardID))
 		{
-			if (!IsMultiFormatActive())
-			{
-				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
-					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12) &&
-					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34) &&
-					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56) &&
-					WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78) &&
-					CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
-			}
-			else if (inChannel < NTV2_CHANNEL3)
-			{
-				status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB12, kRegShift425FB12) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
-					CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL2);
-			}
-			else if (inChannel < NTV2_CHANNEL5)
-			{
-				status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB34, kRegShift425FB34) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
-					CopyVideoFormat(inChannel, NTV2_CHANNEL3, NTV2_CHANNEL4);
-			}
-			else if (inChannel < NTV2_CHANNEL7)
-			{
-				status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB56, kRegShift425FB56) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
-					CopyVideoFormat(inChannel, NTV2_CHANNEL5, NTV2_CHANNEL6);
-			}
-			else
-			{
-				status = WriteRegister(kRegGlobalControl2, 1, kRegMask425FB78, kRegShift425FB78) &&
-					WriteRegister (kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
-					CopyVideoFormat(inChannel, NTV2_CHANNEL7, NTV2_CHANNEL8);
-			}
+			SetTsiFrameEnable(true, inChannel);
 		}
 		else
 		{
-			if (!IsMultiFormatActive())
-			{
-				status = WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode) &&
-					WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78) &&
-					CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
-			}
-			else if (inChannel < NTV2_CHANNEL5)
-			{
-				status = WriteRegister (kRegGlobalControl2, 1, kRegMaskQuadMode, kRegShiftQuadMode) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
-					CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL4);
-			}
-			else
-			{
-				status = WriteRegister(kRegGlobalControl2, 1, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78) &&
-					CopyVideoFormat(inChannel, NTV2_CHANNEL5, NTV2_CHANNEL8);
-			}
+			Set4kSquaresEnable(true, inChannel);
 		}
 	}
 	else
 	{
-		bool smpte425Enabled = false;
-		GetTsiFrameEnable(smpte425Enabled, inChannel);
-		bool squaresEnabled = false;
-		Get4kSquaresEnable(squaresEnabled, inChannel);
-
-		if (!IsMultiFormatActive())
-		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78) &&
-				WriteRegister(kRegGlobalControl, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
-				WriteRegister(kRegGlobalControlCh2, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
-				WriteRegister(kRegGlobalControlCh3, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
-				WriteRegister(kRegGlobalControlCh4, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
-		}
-		else if (smpte425Enabled)
-		{
-			if (::NTV2DeviceCanDo12gRouting(_boardID))
-			{
-				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
-						WriteRegister(gChannelToGlobalControlRegNum[inChannel], 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
-			}
-			// disable 425 and squares
-			if (inChannel < NTV2_CHANNEL3)
-			{
-				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12);
-			}
-			else if (inChannel < NTV2_CHANNEL5)
-			{
-				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
-			}
-			else if (inChannel < NTV2_CHANNEL7)
-			{
-				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56);
-			}
-			else
-			{
-				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
-			}
-		}
-		else if (squaresEnabled)
-		{
-			// disable squares and 425
-			if (inChannel < NTV2_CHANNEL5)
-			{
-				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
-					WriteRegister(kRegGlobalControl, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
-					WriteRegister(kRegGlobalControlCh2, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
-					WriteRegister(kRegGlobalControlCh3, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
-					WriteRegister(kRegGlobalControlCh4, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
-			}
-			else
-			{
-				status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
-					WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
-			}
-		}
+		SetTsiFrameEnable(false, inChannel);
+		Set4kSquaresEnable(false, inChannel);
 	}
 
 	return (status);
@@ -1231,11 +1087,6 @@ bool CNTV2Card::Set4kSquaresEnable (const bool inEnable, NTV2Channel inChannel)
 	if(!::NTV2DeviceCanDo4KVideo(_boardID))
 		return false;
 	if (!NTV2_IS_VALID_CHANNEL(inChannel))
-		return false;
-
-	ULWord quadEnable = 0;
-	GetQuadFrameEnable(quadEnable, inChannel);
-	if (quadEnable == 0)
 		return false;
 
 	if (inEnable)
@@ -1272,8 +1123,22 @@ bool CNTV2Card::Set4kSquaresEnable (const bool inEnable, NTV2Channel inChannel)
 	}
 	else
 	{
-		// enable tsi
-		status = SetTsiFrameEnable (true, inChannel);
+		if (!IsMultiFormatActive())
+		{
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
+			CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
+		}
+		else if (inChannel < NTV2_CHANNEL5)
+		{
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+				CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL4);
+		}
+		else
+		{
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
+				CopyVideoFormat(inChannel, NTV2_CHANNEL5, NTV2_CHANNEL8);
+		}
 	}
 
 	return status;
@@ -1306,11 +1171,6 @@ bool CNTV2Card::SetTsiFrameEnable (const bool enable, const NTV2Channel inChanne
 	if(!::NTV2DeviceCanDo425Mux(_boardID) && !::NTV2DeviceCanDo12gRouting(_boardID))
 		return false;
 	if (!NTV2_IS_VALID_CHANNEL(inChannel))
-		return false;
-
-	ULWord quadEnable = 0;
-	GetQuadFrameEnable(quadEnable, inChannel);
-	if (quadEnable == 0)
 		return false;
 
 	if(enable)
@@ -1377,8 +1237,50 @@ bool CNTV2Card::SetTsiFrameEnable (const bool enable, const NTV2Channel inChanne
 	}
 	else
 	{
-		// enable squares
-		status = Set4kSquaresEnable (true, inChannel);
+		if (::NTV2DeviceCanDo12gRouting(_boardID))
+		{
+			if (!IsMultiFormatActive())
+			{
+				status = WriteRegister(kRegGlobalControl, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+					WriteRegister(kRegGlobalControlCh2, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+					WriteRegister(kRegGlobalControlCh3, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+					WriteRegister(kRegGlobalControlCh4, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
+					CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
+			}
+			else
+			{
+				status = WriteRegister(gChannelToGlobalControlRegNum[inChannel], 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
+			}
+		}
+		// enable 425 mode, disable squares
+		else if (!IsMultiFormatActive())
+		{
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78) &&
+				CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
+		}
+		else if (inChannel < NTV2_CHANNEL3)
+		{
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
+				CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL2);
+		}
+		else if (inChannel < NTV2_CHANNEL5)
+		{
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
+				CopyVideoFormat(inChannel, NTV2_CHANNEL3, NTV2_CHANNEL4);
+		}
+		else if (inChannel < NTV2_CHANNEL7)
+		{
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
+				CopyVideoFormat(inChannel, NTV2_CHANNEL5, NTV2_CHANNEL6);
+		}
+		else
+		{
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78) &&
+				CopyVideoFormat(inChannel, NTV2_CHANNEL7, NTV2_CHANNEL8);
+		}
 	}
 
 	return status;
