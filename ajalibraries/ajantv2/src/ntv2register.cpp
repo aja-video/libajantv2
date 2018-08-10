@@ -224,6 +224,9 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 		GetVideoVOffset (vOffset);
 	}
 
+	if (NTV2_IS_TSI_FORMAT(value) && !NTV2DeviceCanDo12gRouting(GetDeviceID()))
+		return false;
+
     NTV2Standard standard, inStandard;
 	GetStandard(standard, channel);
     inStandard = GetNTV2StandardFromVideoFormat(value);
