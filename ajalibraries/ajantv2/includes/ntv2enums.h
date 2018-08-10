@@ -778,6 +778,20 @@ typedef enum _NTV2VideoFormat
         (__f__) <= NTV2_FORMAT_4096x2160p_12000 )                   \
     )
 
+#define NTV2_IS_6G_FORMAT(__f__)									\
+    (	((__f__) >= NTV2_FORMAT_3840x2160psf_2398 &&                  \
+        (__f__) <= NTV2_FORMAT_3840x2160psf_3000)     ||              \
+        ((__f__) >= NTV2_FORMAT_4096x2160psf_2398 &&                  \
+        (__f__) <= NTV2_FORMAT_4096x2160psf_3000 )                   \
+    )
+
+#define NTV2_IS_12G_FORMAT(__f__)									\
+    (	((__f__) >= NTV2_FORMAT_3840x2160p_5000 &&                  \
+        (__f__) <= NTV2_FORMAT_3840x2160p_6000)     ||              \
+        ((__f__) >= NTV2_FORMAT_4096x2160p_5000 &&                  \
+        (__f__) <= NTV2_FORMAT_4096x2160p_12000 )                   \
+    )
+
 #define NTV2_IS_3Gb_FORMAT(__f__)									\
     (	(__f__) == NTV2_FORMAT_1080p_5000_B ||						\
         (__f__) == NTV2_FORMAT_1080p_5994_B ||						\
