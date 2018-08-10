@@ -2059,11 +2059,12 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
     bool ipServiceEnable, ipServiceForceConfig;
 
     config2110->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
+    ipServiceEnable = true;
     if (ipServiceEnable)
     {
         tx_2110Config txConfig;
 
-        // Handle rest case
+        // Handle reset case
         if ((m2110TxVideoData.numTxVideoChannels == 0) &&
             (m2110TxAudioData.numTxAudioChannels == 0) &&
             (m2110RxVideoData.numRxVideoChannels == 0) &&
