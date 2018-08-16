@@ -14,6 +14,7 @@
 #include "ntv2registersmb.h"
 #include "ntv2konaflashprogram.h"
 #include "ntv2konaflashprogram.h"
+#include "ntv2vpid.h"
 #include <math.h>
 #include <assert.h>
 #if defined (AJALinux)
@@ -4592,28 +4593,28 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (NTV2InputSource inSource, const 
 	}
 }
 
-#include "ntv2vpid.h"
 NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool inIsProgressivePicture)
 {
 	ULWord status (0), threeGStatus (0);
-	if (IS_CHANNEL_INVALID (inChannel))
-		return NTV2_FORMAT_UNKNOWN;
+    ULWord vpidDS1 = 0, vpidDS2 = 0;
+    bool bHaveVPID = false;
+    CNTV2VPID inputVPID;
+    if (IS_CHANNEL_INVALID (inChannel))
+        return NTV2_FORMAT_UNKNOWN;
+
+    if(GetVPIDValidA(inChannel))
+    {
+        bHaveVPID = true;
+        ReadSDIInVPID(inChannel, vpidDS1, vpidDS2);
+        inputVPID.SetVPID(vpidDS1);
+    }
 	switch (inChannel)
 	{
 	case NTV2_CHANNEL1:
 		if (ReadRegister(kRegInputStatus, status))
-		{
-            ULWord vpidDS1 = 0, vpidDS2 = 0;
-            CNTV2VPID inputVPID;
-            bool bHaveVPID = false;
-            if(GetVPIDValidA(inChannel))
-            {
-                bHaveVPID = true;
-                ReadSDIInVPID(inChannel, vpidDS1, vpidDS2);
-                inputVPID.SetVPID(vpidDS1);
-            }
-			//	Now it is really ugly
-            if (::NTV2DeviceCanDo12GIn(_boardID, 0) && ReadRegister(kRegSDIInput3GStatus, threeGStatus))
+        {
+            ReadRegister(kRegSDIInput3GStatus, threeGStatus);
+            if (::NTV2DeviceCanDo12GIn(_boardID, 0))
 			{
 				NTV2VideoFormat format =  GetNTV2VideoFormat(NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
 									((status >> 27) & BIT_3) | ((status >> 4) & 0x7),				//input geometry
@@ -4624,12 +4625,12 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 				GetSDIInput6GPresent(is6G, inChannel);
 				GetSDIInput12GPresent(is12G, inChannel);
 				if(is6G || is12G)
-					return GetQuadSizedVideoFormat(format);
+                    return GetQuadSizedVideoFormat(format, !NTV2DeviceCanDo12gRouting(GetDeviceID()) ? true : false);
 				else
 					return format;
 
 			}
-            else if (::NTV2DeviceCanDo3GIn(_boardID, 0) && ReadRegister(kRegSDIInput3GStatus, threeGStatus))
+            else if (::NTV2DeviceCanDo3GIn(_boardID, 0))
 			{
 				return GetNTV2VideoFormat(NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
 					((status >> 27) & BIT_3) | ((status >> 4) & 0x7),				//input geometry
@@ -4652,8 +4653,8 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 	case NTV2_CHANNEL2:
 		if (ReadRegister(kRegInputStatus, status))
 		{
-			//	Now it is really ugly
-			if (::NTV2DeviceCanDo12GSDI(_boardID) && ReadRegister(kRegSDIInput3GStatus, threeGStatus))
+            ReadRegister(kRegSDIInput3GStatus, threeGStatus);
+            if (::NTV2DeviceCanDo12GIn(_boardID, 1))
 			{
 				NTV2VideoFormat format =  GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 															  ((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
@@ -4664,12 +4665,12 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 				GetSDIInput6GPresent(is6G, inChannel);
 				GetSDIInput12GPresent(is12G, inChannel);
 				if(is6G || is12G)
-					return GetQuadSizedVideoFormat(format);
+                    return GetQuadSizedVideoFormat(format, false);
 				else
 					return format;
 
 			}
-			else if (::NTV2DeviceCanDo3GOut(_boardID, 1) && ReadRegister(kRegSDIInput3GStatus, threeGStatus))
+            else if (::NTV2DeviceCanDo3GIn(_boardID, 1))
 			{
 				//This is a hack, LHI does not have a second input
 				if ((_boardID == DEVICE_ID_KONALHI || _boardID == DEVICE_ID_KONALHIDVI) && ((threeGStatus & kRegMaskSDIIn3GbpsSMPTELevelBMode) >> 1) && (threeGStatus & kRegMaskSDIIn3GbpsMode))
@@ -4704,8 +4705,8 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 	case NTV2_CHANNEL3:
 		if (ReadRegister(kRegInputStatus2, status))
 		{
-			//	Now it is really ugly
-			if (::NTV2DeviceCanDo12GSDI(_boardID) && ReadRegister(kRegSDIInput3GStatus2, threeGStatus))
+            ReadRegister(kRegSDIInput3GStatus2, threeGStatus);
+            if (::NTV2DeviceCanDo12GIn(_boardID, 2))
 			{
 				NTV2VideoFormat format =  GetNTV2VideoFormat (NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
 															  ((status >> 27) & BIT_3) | ((status >> 4) & 0x7),				//input geometry
@@ -4716,12 +4717,12 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 				GetSDIInput6GPresent(is6G, inChannel);
 				GetSDIInput12GPresent(is12G, inChannel);
 				if(is6G || is12G)
-					return GetQuadSizedVideoFormat(format);
+                    return GetQuadSizedVideoFormat(format, false);
 				else
 					return format;
 
 			}
-			else if ((::NTV2DeviceCanDo3GOut(_boardID, 2) || ::NTV2DeviceCanDo12GOut(_boardID, 2)) && ReadRegister(kRegSDIInput3GStatus2, threeGStatus))
+            else if (::NTV2DeviceCanDo3GIn(_boardID, 2))
 			{
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
 					((status >> 27) & BIT_3) | ((status >> 4) & 0x7),			//input geometry
@@ -4744,8 +4745,8 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 	case NTV2_CHANNEL4:
 		if (ReadRegister(kRegInputStatus2, status))
 		{
-			//	Now it is really ugly
-			if (::NTV2DeviceCanDo12GSDI(_boardID) && ReadRegister(kRegSDIInput3GStatus2, threeGStatus))
+            ReadRegister(kRegSDIInput3GStatus2, threeGStatus);
+            if (::NTV2DeviceCanDo12GIn(_boardID, 3))
 			{
 				NTV2VideoFormat format = GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 															 ((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
@@ -4756,31 +4757,27 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 				GetSDIInput6GPresent(is6G, inChannel);
 				GetSDIInput12GPresent(is12G, inChannel);
 				if(is6G || is12G)
-					return GetQuadSizedVideoFormat(format);
+                    return GetQuadSizedVideoFormat(format, false);
 				else
 					return format;
 
 			}
-			else if (ReadRegister(kRegInputStatus2, status))
-			{
-				//	Now it is really ugly
-				if (::NTV2DeviceCanDo3GOut(_boardID, 3) && ReadRegister(kRegSDIInput3GStatus2, threeGStatus))
-				{
-					return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
-						((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
-						(status & BIT_15) >> 15,											//progressive transport
-						(threeGStatus & BIT_8) >> 8,										//3G
-						inIsProgressivePicture);												//progressive picture
-				}
-				else
-				{
-					return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
-						((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
-						(status & BIT_15) >> 15,											//progressive transport
-						false,																//3G
-						inIsProgressivePicture);												//progressive picture
-				}
-			}
+            else if (::NTV2DeviceCanDo3GIn(_boardID, 3))
+            {
+                return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
+                    ((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
+                    (status & BIT_15) >> 15,											//progressive transport
+                    (threeGStatus & BIT_8) >> 8,										//3G
+                    inIsProgressivePicture);												//progressive picture
+            }
+            else
+            {
+                return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
+                    ((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
+                    (status & BIT_15) >> 15,											//progressive transport
+                    false,																//3G
+                    inIsProgressivePicture);												//progressive picture
+            }
 		}
 		else
 			return NTV2_FORMAT_UNKNOWN;
@@ -4788,7 +4785,8 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 	case NTV2_CHANNEL5:
 		if (ReadRegister(kRegInput56Status, status))
 		{
-			if (ReadRegister(kRegSDI5678Input3GStatus, threeGStatus))
+            ReadRegister(kRegSDI5678Input3GStatus, threeGStatus);
+            if (::NTV2DeviceCanDo3GIn(_boardID, 4))
 			{
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
 					((status >> 27) & BIT_3) | ((status >> 4) & 0x7),			//input geometry
@@ -4802,7 +4800,8 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 	case NTV2_CHANNEL6:
 		if (ReadRegister(kRegInput56Status, status))
 		{
-			if (ReadRegister(kRegSDI5678Input3GStatus, threeGStatus))
+            ReadRegister(kRegSDI5678Input3GStatus, threeGStatus);
+            if (::NTV2DeviceCanDo3GIn(_boardID, 6))
 			{
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 					((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
@@ -4816,7 +4815,8 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 	case NTV2_CHANNEL7:
 		if (ReadRegister(kRegInput78Status, status))
 		{
-			if (ReadRegister(kRegSDI5678Input3GStatus, threeGStatus))
+            ReadRegister(kRegSDI5678Input3GStatus, threeGStatus);
+            if (::NTV2DeviceCanDo3GIn(_boardID, 7))
 			{
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
 					((status >> 27) & BIT_3) | ((status >> 4) & 0x7),			//input geometry
@@ -4830,7 +4830,8 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 	case NTV2_CHANNEL8:
 		if (ReadRegister(kRegInput78Status, status))
 		{
-			if (ReadRegister(kRegSDI5678Input3GStatus, threeGStatus))
+            ReadRegister(kRegSDI5678Input3GStatus, threeGStatus);
+            if (::NTV2DeviceCanDo3GIn(_boardID, 7))
 			{
 				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
 					((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
