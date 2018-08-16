@@ -1,0 +1,86 @@
+/**
+	@page			ntv2devices
+
+	@section		ntv2hwkona
+
+	<hr>
+	@subsection		kona5		KONA 5
+
+	This page describes the KONA 5 capture/playout board in its OEM mode of operation.
+	It’s identified by ::DEVICE_ID_KONA5.
+
+	@image	html	kona5.png
+	@image	html	kona5end.png
+
+	The KONA 5 has a breakout connector on the top, followed by the HDMI output, then four
+	12G SDI connectors and a reference input connector. The SDI connectors are bidirectional,
+	and can be configured as inputs or outputs under software control.
+
+	@par	PCI Interface
+
+	-	PCI device ID: <b>0xEB1F</b>
+	-	Four-lane gen 2 PCI Express
+	-	2 DMA engines
+	-	Legacy and MSI interrupt delivery supported
+
+	@par	Inputs & Outputs
+
+	-	4 × SDI bi-directional (under software control)
+	-	1 × HDMI output (HDMI v2.0a subset with v1.4 connection, to support HDR InfoFrame metadata and UHD/4K@60 4:2:0 YUV)
+	-	1 × analog component video output
+	-	2 × reference/LTC inputs
+	-	2 × LTC outputs
+	-	1 × RS-422 serial port
+
+	@par	Frame Buffer
+
+	-	512 MB SDRAM
+	-	64 × 8MB frames
+	-	32 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+
+	@par	Audio
+
+	-	4 subsystems
+	-	16 channels (max.) per subsystem
+	-	16 channels (max.) of AES audio
+	-	First subsystem's buffer memory starts 8MB from end of memory
+	-	AES audio inputs support asynchronous audio, 32Hz-96kHz, sample-rate converted to 48kHz
+
+	@par	Video Formats
+
+	-	Supports all standard video formats, plus 2K, 4K and UHD formats, including 4Kp60.
+
+	@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
+
+	@par	Ancillary Data
+
+	-	Anc inserters and extractors (use AUTOCIRCULATE_TRANSFER)
+	-	\ref vancframegeometries
+
+	@par	Video Processing
+
+	-	2 independent Mixer/Keyer widgets, each with its own Mix Coefficient
+	-	Can mix keys on and off
+	-	Can differentiate between shaped and unshaped video
+
+	@par	External Connectivity
+
+	-	Optional \ref aja103226 provides access to other inputs and outputs
+	-	Optional \ref ajak3gbox provides convenient access to most of the board's inputs and outputs in a 1U rack-mountable chassis
+
+	@par	Firmware
+	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/137/25>
+
+	@par	Physical
+
+	-	Size (W × D × H):  0.75" × 8.25" × 5.0" (19.05mm × 209.55mm × 127mm)
+	-	Weight: 0.7 lb (0.4 kg)
+
+	@par	Environment
+
+	-	Safe Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
+	-	Operating Relative Humidity: 10-90% non-condensing
+	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
+	-	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
+
+**/
