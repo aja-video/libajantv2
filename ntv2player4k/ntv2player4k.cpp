@@ -137,10 +137,42 @@ AJAStatus NTV2Player4K::Init (void)
 	if (NTV2_IS_4K_HFR_VIDEO_FORMAT (mVideoFormat) && mDoRGBOnWire)
 		{cerr << "## ERROR:  High frame rate RGB output is not supported" << endl;  return AJA_STATUS_BAD_PARAM;}
 
-	if (mChannel == NTV2_CHANNEL5 && ::NTV2DeviceGetNumFrameStores (mDeviceID) < 5)
-		return AJA_STATUS_FEATURE;
+	if (UWord (mChannel) >= ::NTV2DeviceGetNumFrameStores (mDeviceID))
+	{
+		cerr	<< "## ERROR:  Cannot use channel '" << mChannel+1 << "' -- device only supports channel 1"
+				<< (::NTV2DeviceGetNumFrameStores (mDeviceID) > 1  ?  string (" thru ") + string (1, uint8_t (::NTV2DeviceGetNumFrameStores (mDeviceID)+'0'))  :  "") << endl;
+		return AJA_STATUS_UNSUPPORTED;
+	}
 
-	mAudioSystem = (mChannel == NTV2_CHANNEL1 ? NTV2_AUDIOSYSTEM_1 : NTV2_AUDIOSYSTEM_5);
+	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+	{
+		mDoTsiRouting = false;
+	}
+	else if (mDoTsiRouting)
+	{
+		switch (mChannel)
+		{
+		case NTV2_CHANNEL1:
+		case NTV2_CHANNEL2:
+		default:
+			mChannel = NTV2_CHANNEL1; break;
+		case NTV2_CHANNEL3:
+		case NTV2_CHANNEL4:
+			mChannel = NTV2_CHANNEL3; break;
+		case NTV2_CHANNEL5:
+		case NTV2_CHANNEL6:
+			mChannel = NTV2_CHANNEL5; break;
+		case NTV2_CHANNEL7:
+		case NTV2_CHANNEL8:
+			mChannel = NTV2_CHANNEL7; break;
+		}
+	}
+	else
+	{
+		mChannel = (mChannel < NTV2_CHANNEL5)? NTV2_CHANNEL1 : NTV2_CHANNEL5;
+	}
+
+	mAudioSystem = ::NTV2ChannelToAudioSystem (mChannel);
 
 	if (!mDoMultiChannel)
 	{
@@ -192,13 +224,17 @@ AJAStatus NTV2Player4K::SetUpVideo ()
 	mDevice.SetEnableVANCData (false, false);
 
 	//	Configure output for HFR Level A and RGB Level B
-	const NTV2Channel	startChannel	(mChannel);
-	const NTV2Channel	endChannel		(mChannel == NTV2_CHANNEL1 ? NTV2_CHANNEL4 : NTV2_CHANNEL8);
-
-	for (NTV2Channel chan (startChannel); chan < endChannel; chan = NTV2Channel (chan + 1))
+	if (!::NTV2DeviceCanDo12gRouting(mDeviceID))
 	{
-		mDevice.SetSDIOutLevelAtoLevelBConversion (chan, false);
-		mDevice.SetSDIOutRGBLevelAConversion (chan, false);
+		const NTV2Channel	startChannel	(mChannel);
+		const NTV2Channel	endChannel		(mChannel == NTV2_CHANNEL1 ? NTV2_CHANNEL4 : NTV2_CHANNEL8);
+
+		for (NTV2Channel chan (startChannel); chan < endChannel; chan = NTV2Channel (chan + 1))
+		{
+			mDevice.SetSDIOutLevelAtoLevelBConversion (chan, false);
+			mDevice.SetSDIOutRGBLevelAConversion (chan, false);
+		}
+
 	}
 
 	//	Set the frame buffer pixel format for all the channels on the device.
@@ -206,29 +242,73 @@ AJAStatus NTV2Player4K::SetUpVideo ()
 	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mPixelFormat))
 		mPixelFormat = NTV2_FBF_8BIT_YCBCR;
 
-	if (mChannel == NTV2_CHANNEL1)
+	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
 	{
-		mDevice.SetFrameBufferFormat (NTV2_CHANNEL1, mPixelFormat);
-		mDevice.SetFrameBufferFormat (NTV2_CHANNEL2, mPixelFormat);
-		mDevice.SetFrameBufferFormat (NTV2_CHANNEL3, mPixelFormat);
-		mDevice.SetFrameBufferFormat (NTV2_CHANNEL4, mPixelFormat);
-		mDevice.EnableChannel (NTV2_CHANNEL1);
-		mDevice.EnableChannel (NTV2_CHANNEL2);
-		mDevice.EnableChannel (NTV2_CHANNEL3);
-		mDevice.EnableChannel (NTV2_CHANNEL4);
-		mDevice.SubscribeOutputVerticalEvent (NTV2_CHANNEL1);
+		mDevice.SetFrameBufferFormat (mChannel, mPixelFormat);
+		mDevice.EnableChannel (mChannel);
+		mDevice.SubscribeOutputVerticalEvent (mChannel);
+	}
+	else if (mDoTsiRouting)
+	{
+		if (mChannel == NTV2_CHANNEL1)
+		{
+			mDevice.SetFrameBufferFormat (NTV2_CHANNEL1, mPixelFormat);
+			mDevice.SetFrameBufferFormat (NTV2_CHANNEL2, mPixelFormat);
+			mDevice.EnableChannel (NTV2_CHANNEL1);
+			mDevice.EnableChannel (NTV2_CHANNEL2);
+			mDevice.SubscribeOutputVerticalEvent (NTV2_CHANNEL1);
+		}
+		else if (mChannel == NTV2_CHANNEL3)
+		{
+			mDevice.SetFrameBufferFormat (NTV2_CHANNEL3, mPixelFormat);
+			mDevice.SetFrameBufferFormat (NTV2_CHANNEL4, mPixelFormat);
+			mDevice.EnableChannel (NTV2_CHANNEL3);
+			mDevice.EnableChannel (NTV2_CHANNEL4);
+			mDevice.SubscribeOutputVerticalEvent (NTV2_CHANNEL3);
+		}
+		else if (mChannel == NTV2_CHANNEL5)
+		{
+			mDevice.SetFrameBufferFormat (NTV2_CHANNEL5, mPixelFormat);
+			mDevice.SetFrameBufferFormat (NTV2_CHANNEL6, mPixelFormat);
+			mDevice.EnableChannel (NTV2_CHANNEL5);
+			mDevice.EnableChannel (NTV2_CHANNEL6);
+			mDevice.SubscribeOutputVerticalEvent (NTV2_CHANNEL5);
+		}
+		else
+		{
+			mDevice.SetFrameBufferFormat (NTV2_CHANNEL7, mPixelFormat);
+			mDevice.SetFrameBufferFormat (NTV2_CHANNEL8, mPixelFormat);
+			mDevice.EnableChannel (NTV2_CHANNEL7);
+			mDevice.EnableChannel (NTV2_CHANNEL8);
+			mDevice.SubscribeOutputVerticalEvent (NTV2_CHANNEL7);
+		}
 	}
 	else
 	{
-		mDevice.SetFrameBufferFormat (NTV2_CHANNEL5, mPixelFormat);
-		mDevice.SetFrameBufferFormat (NTV2_CHANNEL6, mPixelFormat);
-		mDevice.SetFrameBufferFormat (NTV2_CHANNEL7, mPixelFormat);
-		mDevice.SetFrameBufferFormat (NTV2_CHANNEL8, mPixelFormat);
-		mDevice.EnableChannel (NTV2_CHANNEL5);
-		mDevice.EnableChannel (NTV2_CHANNEL6);
-		mDevice.EnableChannel (NTV2_CHANNEL7);
-		mDevice.EnableChannel (NTV2_CHANNEL8);
-		mDevice.SubscribeOutputVerticalEvent (NTV2_CHANNEL5);
+		if (mChannel == NTV2_CHANNEL1)
+		{
+			mDevice.SetFrameBufferFormat (NTV2_CHANNEL1, mPixelFormat);
+			mDevice.SetFrameBufferFormat (NTV2_CHANNEL2, mPixelFormat);
+			mDevice.SetFrameBufferFormat (NTV2_CHANNEL3, mPixelFormat);
+			mDevice.SetFrameBufferFormat (NTV2_CHANNEL4, mPixelFormat);
+			mDevice.EnableChannel (NTV2_CHANNEL1);
+			mDevice.EnableChannel (NTV2_CHANNEL2);
+			mDevice.EnableChannel (NTV2_CHANNEL3);
+			mDevice.EnableChannel (NTV2_CHANNEL4);
+			mDevice.SubscribeOutputVerticalEvent (NTV2_CHANNEL1);
+		}
+		else
+		{
+			mDevice.SetFrameBufferFormat (NTV2_CHANNEL5, mPixelFormat);
+			mDevice.SetFrameBufferFormat (NTV2_CHANNEL6, mPixelFormat);
+			mDevice.SetFrameBufferFormat (NTV2_CHANNEL7, mPixelFormat);
+			mDevice.SetFrameBufferFormat (NTV2_CHANNEL8, mPixelFormat);
+			mDevice.EnableChannel (NTV2_CHANNEL5);
+			mDevice.EnableChannel (NTV2_CHANNEL6);
+			mDevice.EnableChannel (NTV2_CHANNEL7);
+			mDevice.EnableChannel (NTV2_CHANNEL8);
+			mDevice.SubscribeOutputVerticalEvent (NTV2_CHANNEL5);
+		}
 	}
 
 	if(mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_2110 ||
@@ -264,19 +344,27 @@ AJAStatus NTV2Player4K::SetUpAudio ()
 	//	How big should the on-device audio buffer be?   1MB? 2MB? 4MB? 8MB?
 	//	For this demo, 4MB will work best across all platforms (Windows, Mac & Linux)...
 	mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, mAudioSystem);
-	if(mAudioSystem == NTV2_AUDIOSYSTEM_1)
+	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
 	{
-		mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL1, mAudioSystem);
-		mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL2, mAudioSystem);
-		mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL3, mAudioSystem);
-		mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL4, mAudioSystem);
+		mDevice.SetSDIOutputAudioSystem (mChannel, mAudioSystem);
 	}
 	else
 	{
-		mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL5, mAudioSystem);
-		mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL6, mAudioSystem);
-		mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL7, mAudioSystem);
-		mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL8, mAudioSystem);
+		if((mAudioSystem == NTV2_AUDIOSYSTEM_1) ||
+		   (mAudioSystem == NTV2_AUDIOSYSTEM_3))
+		{
+			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL1, mAudioSystem);
+			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL2, mAudioSystem);
+			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL3, mAudioSystem);
+			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL4, mAudioSystem);
+		}
+		else
+		{
+			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL5, mAudioSystem);
+			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL6, mAudioSystem);
+			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL7, mAudioSystem);
+			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL8, mAudioSystem);
+		}
 	}
 	//	If the last app using the device left it in end-to-end mode (input passthru),
 	//	then loopback must be disabled, or else the output will contain whatever audio
@@ -403,7 +491,11 @@ void NTV2Player4K::RouteOutputSignal (void)
 			return;
 	}
 
-	if (mDoTsiRouting)
+	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+	{
+		mDevice.SetTsiFrameEnable  (true,  mChannel);
+	}
+	else if (mDoTsiRouting)
 	{
 		mDevice.SetTsiFrameEnable  (true,  mChannel);
 	}
@@ -420,19 +512,26 @@ void NTV2Player4K::RouteOutputSignal (void)
 	//	but only if the device supports bi-directional SDI.
 	if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID))
 	{
-		if(mChannel == NTV2_CHANNEL1)
+		if (::NTV2DeviceCanDo12gRouting(mDeviceID))
 		{
-			mDevice.SetSDITransmitEnable (NTV2_CHANNEL1, true);
-			mDevice.SetSDITransmitEnable (NTV2_CHANNEL2, true);
-			mDevice.SetSDITransmitEnable (NTV2_CHANNEL3, true);
-			mDevice.SetSDITransmitEnable (NTV2_CHANNEL4, true);
+			mDevice.SetSDITransmitEnable (mChannel, true);
 		}
 		else
 		{
-			mDevice.SetSDITransmitEnable (NTV2_CHANNEL5, true);
-			mDevice.SetSDITransmitEnable (NTV2_CHANNEL6, true);
-			mDevice.SetSDITransmitEnable (NTV2_CHANNEL7, true);
-			mDevice.SetSDITransmitEnable (NTV2_CHANNEL8, true);
+			if(mChannel == NTV2_CHANNEL1)
+			{
+				mDevice.SetSDITransmitEnable (NTV2_CHANNEL1, true);
+				mDevice.SetSDITransmitEnable (NTV2_CHANNEL2, true);
+				mDevice.SetSDITransmitEnable (NTV2_CHANNEL3, true);
+				mDevice.SetSDITransmitEnable (NTV2_CHANNEL4, true);
+			}
+			else
+			{
+				mDevice.SetSDITransmitEnable (NTV2_CHANNEL5, true);
+				mDevice.SetSDITransmitEnable (NTV2_CHANNEL6, true);
+				mDevice.SetSDITransmitEnable (NTV2_CHANNEL7, true);
+				mDevice.SetSDITransmitEnable (NTV2_CHANNEL8, true);
+			}
 		}
 	}
 
@@ -507,7 +606,11 @@ void NTV2Player4K::RouteHDMIOutput (void)
 			|| ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v3)
 			|| ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v4)) )
 	{
-		if(mDoTsiRouting)
+		if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+		{
+			mDevice.Connect (NTV2_XptHDMIOutInput, ::GetFrameBufferOutputXptFromChannel (mChannel,  isRGB,  false/*is425*/));
+		}
+		else if(mDoTsiRouting)
 		{
 			if (isRGB)
 			{
@@ -668,19 +771,26 @@ void NTV2Player4K::RouteFsToCsc (void)
 
 void NTV2Player4K::RouteFsToSDIOut (void)
 {
-	if (mChannel == NTV2_CHANNEL1)
+	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
 	{
-		mDevice.Connect (NTV2_XptSDIOut1Input,	NTV2_XptFrameBuffer1YUV);
-		mDevice.Connect (NTV2_XptSDIOut2Input,	NTV2_XptFrameBuffer2YUV);
-		mDevice.Connect (NTV2_XptSDIOut3Input,	NTV2_XptFrameBuffer3YUV);
-		mDevice.Connect (NTV2_XptSDIOut4Input,	NTV2_XptFrameBuffer4YUV);
+		mDevice.Connect (::GetSDIOutputInputXpt (mChannel, false/*isDS2*/), ::GetFrameBufferOutputXptFromChannel (mChannel,  false/*isRGB*/,  false/*is425*/));
 	}
-	else if (mChannel == NTV2_CHANNEL5)
+	else
 	{
-		mDevice.Connect (NTV2_XptSDIOut5Input,	NTV2_XptFrameBuffer5YUV);
-		mDevice.Connect (NTV2_XptSDIOut6Input,	NTV2_XptFrameBuffer6YUV);
-		mDevice.Connect (NTV2_XptSDIOut7Input,	NTV2_XptFrameBuffer7YUV);
-		mDevice.Connect (NTV2_XptSDIOut8Input,	NTV2_XptFrameBuffer8YUV);
+		if (mChannel == NTV2_CHANNEL1)
+		{
+			mDevice.Connect (NTV2_XptSDIOut1Input,	NTV2_XptFrameBuffer1YUV);
+			mDevice.Connect (NTV2_XptSDIOut2Input,	NTV2_XptFrameBuffer2YUV);
+			mDevice.Connect (NTV2_XptSDIOut3Input,	NTV2_XptFrameBuffer3YUV);
+			mDevice.Connect (NTV2_XptSDIOut4Input,	NTV2_XptFrameBuffer4YUV);
+		}
+		else if (mChannel == NTV2_CHANNEL5)
+		{
+			mDevice.Connect (NTV2_XptSDIOut5Input,	NTV2_XptFrameBuffer5YUV);
+			mDevice.Connect (NTV2_XptSDIOut6Input,	NTV2_XptFrameBuffer6YUV);
+			mDevice.Connect (NTV2_XptSDIOut7Input,	NTV2_XptFrameBuffer7YUV);
+			mDevice.Connect (NTV2_XptSDIOut8Input,	NTV2_XptFrameBuffer8YUV);
+		}
 	}
 }	//	RouteFsToSDIOut
 
@@ -942,6 +1052,32 @@ void NTV2Player4K::PlayFrames (void)
 	}
 
 	//	Initialize & start AutoCirculate...
+	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+	{
+		uint32_t startNum = 0;
+		uint32_t endNum = 0;
+
+		switch (mChannel)
+		{
+		case NTV2_CHANNEL1:
+		default:
+			startNum = 0;
+			break;
+		case NTV2_CHANNEL2:
+			startNum = numberOfACFramesPerChannel;
+			break;
+		case NTV2_CHANNEL3:
+			startNum = 64;
+			break;
+		case NTV2_CHANNEL4:
+			startNum = 64 + numberOfACFramesPerChannel;
+			break;
+		}
+		endNum = startNum + numberOfACFramesPerChannel - 1;
+		mDevice.AutoCirculateInitForOutput (mChannel, numberOfACFramesPerChannel, mAudioSystem, AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC,
+											1 /*numChannels*/, startNum,  endNum);
+	}
+	else
 	{
 		const uint8_t	startNum	(mChannel < 4	?								0	:	numberOfACFramesPerChannel);		//	Ch1: frames 0-6
 		const uint8_t	endNum		(mChannel < 4	?	numberOfACFramesPerChannel-1	:	numberOfACFramesPerChannel*2-1);	//	Ch5: frames 7-13

@@ -171,8 +171,23 @@ AJAStatus NTV2Capture4K::Init (void)
 	}
 	else
 	{
-		if (mInputChannel < NTV2_CHANNEL5) mInputChannel = NTV2_CHANNEL1;
-		else mInputChannel = NTV2_CHANNEL5;
+		if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+		{
+			mDoTsiRouting = false;
+		}
+		else if (mDoTsiRouting)
+		{
+			if (mInputChannel < NTV2_CHANNEL3) mInputChannel = NTV2_CHANNEL1;
+			else if (mInputChannel < NTV2_CHANNEL5) mInputChannel = NTV2_CHANNEL3;
+			else if (mInputChannel < NTV2_CHANNEL7) mInputChannel = NTV2_CHANNEL5;
+			else mInputChannel = NTV2_CHANNEL7;
+
+		}
+		else
+		{
+			if (mInputChannel < NTV2_CHANNEL5) mInputChannel = NTV2_CHANNEL1;
+			else mInputChannel = NTV2_CHANNEL5;
+		}
 	}
 
 	//	Set up the video and audio...
@@ -207,19 +222,26 @@ AJAStatus NTV2Capture4K::SetupVideo (void)
 	//	and only if the input being used is an SDI input...
 	if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
 	{
-		switch (::NTV2DeviceGetNumFrameStores(mDeviceID))
+		if (::NTV2DeviceCanDo12gRouting(mDeviceID))
 		{
-		case 8:
-			mDevice.SetSDITransmitEnable(NTV2_CHANNEL8, false);
-			mDevice.SetSDITransmitEnable(NTV2_CHANNEL7, false);
-			mDevice.SetSDITransmitEnable(NTV2_CHANNEL6, false);
-			mDevice.SetSDITransmitEnable(NTV2_CHANNEL5, false);
-		case 4:
-			mDevice.SetSDITransmitEnable(NTV2_CHANNEL4, false);
-			mDevice.SetSDITransmitEnable(NTV2_CHANNEL3, false);
-			mDevice.SetSDITransmitEnable(NTV2_CHANNEL2, false);
-			mDevice.SetSDITransmitEnable(NTV2_CHANNEL1, false);
-			break;
+			mDevice.SetSDITransmitEnable (mInputChannel, false);
+		}
+		else
+		{
+			switch (::NTV2DeviceGetNumFrameStores(mDeviceID))
+			{
+			case 8:
+				mDevice.SetSDITransmitEnable(NTV2_CHANNEL8, false);
+				mDevice.SetSDITransmitEnable(NTV2_CHANNEL7, false);
+				mDevice.SetSDITransmitEnable(NTV2_CHANNEL6, false);
+				mDevice.SetSDITransmitEnable(NTV2_CHANNEL5, false);
+			case 4:
+				mDevice.SetSDITransmitEnable(NTV2_CHANNEL4, false);
+				mDevice.SetSDITransmitEnable(NTV2_CHANNEL3, false);
+				mDevice.SetSDITransmitEnable(NTV2_CHANNEL2, false);
+				mDevice.SetSDITransmitEnable(NTV2_CHANNEL1, false);
+				break;
+			}
 		}
 	}
 
@@ -240,7 +262,11 @@ AJAStatus NTV2Capture4K::SetupVideo (void)
 	CNTV2DemoCommon::Get4KInputFormat(mVideoFormat);
 	mDevice.SetVideoFormat(mVideoFormat, false, false, mInputChannel);
 
-	if(mDoTsiRouting)
+	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+	{
+		mDevice.SetTsiFrameEnable(true, mInputChannel);
+	}
+	else if(mDoTsiRouting)
 		mDevice.SetTsiFrameEnable(true, mInputChannel);
 	else
 		mDevice.Set4kSquaresEnable(true, mInputChannel);
@@ -255,7 +281,12 @@ AJAStatus NTV2Capture4K::SetupVideo (void)
 		mPixelFormat = NTV2_FBF_8BIT_YCBCR;
 
 	//	...and set all buffers pixel format...
-	if(mDoTsiRouting)
+	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+	{
+		mDevice.SetFrameBufferFormat(mInputChannel, mPixelFormat);
+		mDevice.SetEnableVANCData(false, false, mInputChannel);
+	}
+	else if(mDoTsiRouting)
 	{
 		if (mInputChannel < NTV2_CHANNEL3)
 		{
@@ -499,7 +530,11 @@ void NTV2Capture4K::RouteInputSignal(void)
 	}
 	else
 	{
-		if (mInputChannel == NTV2_CHANNEL1)
+		if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+		{
+			mDevice.Connect (::GetFrameBufferInputXptFromChannel (mInputChannel), ::GetInputSourceOutputXpt (mInputSource, false, false, 0));
+		}
+		else if (mInputChannel == NTV2_CHANNEL1)
 		{
 			if (IsRGBFormat(mPixelFormat))
 			{
@@ -621,7 +656,34 @@ void NTV2Capture4K::SetupInputAutoCirculate (void)
 {
 	//	Tell capture AutoCirculate to use 7 frame buffers on the device...
 	ULWord startFrame = 0, endFrame = 7;
-	if (mDoTsiRouting)
+	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+	{
+		if (mInputChannel == NTV2_CHANNEL2)
+		{
+			mDevice.AutoCirculateStop(NTV2_CHANNEL2);
+			startFrame = 7;
+			endFrame = 13;
+		}
+		else if (mInputChannel == NTV2_CHANNEL3)
+		{
+			mDevice.AutoCirculateStop(NTV2_CHANNEL3);
+			startFrame = 64;
+			endFrame = 70;
+		}
+		else if (mInputChannel == NTV2_CHANNEL4)
+		{
+			mDevice.AutoCirculateStop(NTV2_CHANNEL4);
+			startFrame = 71;
+			endFrame = 77;
+		}
+		else
+		{
+			mDevice.AutoCirculateStop(NTV2_CHANNEL1);
+			startFrame = 0;
+			endFrame = 6;
+		}
+	}
+	else if (mDoTsiRouting)
 	{
 		if (mInputChannel < NTV2_CHANNEL3)
 		{
@@ -675,7 +737,7 @@ void NTV2Capture4K::SetupInputAutoCirculate (void)
 	}
 	mDevice.AutoCirculateInitForInput (mInputChannel,	7,	//	Number of frames to circulate
 											mWithAudio ? mAudioSystem : NTV2_AUDIOSYSTEM_INVALID,	//	Which audio system (if any)?
-											AUTOCIRCULATE_WITH_RP188,
+											AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC,
 											1, startFrame, endFrame);								//	Include timecode
 }	//	SetupInputAutoCirculate
 
