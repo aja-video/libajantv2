@@ -2406,9 +2406,6 @@ typedef enum NTV2OutputCrosspointID
     NTV2_XptHDMIIn3						= 0x7C,
     NTV2_XptHDMIIn3RGB					= NTV2_XptHDMIIn3 | 0x80,
     NTV2_XptHDMIIn4						= 0x7D,
-<<<<<<< HEAD
-    NTV2_XptHDMIIn4RGB					= 0xFD,
-=======
     NTV2_XptHDMIIn4RGB					= NTV2_XptHDMIIn4 | 0x80,
     NTV2_XptDuallinkIn1					= 0x83,
     NTV2_XptLUT2RGB						= 0x8D,
@@ -2430,7 +2427,6 @@ typedef enum NTV2OutputCrosspointID
     NTV2_XptLUT6Out						= 0xDF,
     NTV2_XptLUT7Out						= 0xE0,
     NTV2_XptLUT8Out						= 0xE1,
->>>>>>> master
     NTV2_XptRuntimeCalc					= 0xFF,
     NTV2_LAST_OUTPUT_CROSSPOINT			= 0xFF,
     NTV2_OUTPUT_CROSSPOINT_INVALID		= 0xFF
