@@ -786,7 +786,7 @@ bool NTV2DeviceGetSupportedVideoFormats (const NTV2DeviceID inDeviceID, NTV2Vide
 
 	outFormats.clear ();
 
-	for (unsigned formatIndex (1);  formatIndex < NTV2_FORMAT_END_HIGH_DEF_FORMATS2;  formatIndex++)
+    for (unsigned formatIndex (1);  formatIndex < NTV2_FORMAT_END_4K_TSI_DEF_FORMATS;  formatIndex++)
 	{
 		const NTV2VideoFormat	videoFormat	(static_cast <NTV2VideoFormat> (formatIndex));
 
@@ -798,6 +798,8 @@ bool NTV2DeviceGetSupportedVideoFormats (const NTV2DeviceID inDeviceID, NTV2Vide
 			formatIndex = NTV2_FORMAT_FIRST_4K_DEF_FORMAT - 1;
 		else if (formatIndex == NTV2_FORMAT_END_4K_DEF_FORMATS)
 			formatIndex = NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT2;
+        else if (formatIndex == NTV2_FORMAT_END_HIGH_DEF_FORMATS2)
+            formatIndex = NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT - 1;
 		else if (::NTV2DeviceCanDoVideoFormat (inDeviceID, videoFormat))
 		{
 			try

@@ -405,6 +405,7 @@
     <ClInclude Include="..\includes\ntv2debug.h" />
     <ClInclude Include="..\includes\ntv2devicefeatures.h" />
     <ClInclude Include="..\includes\ntv2devicefeatures.hh" />
+    <ClInclude Include="..\includes\ntv2enums.h" />
     <ClInclude Include="..\includes\ntv2formatdescriptor.h" />
     <ClInclude Include="..\includes\ntv2registerexpert.h" />
     <ClInclude Include="..\includes\ntv2spiinterface.h" />

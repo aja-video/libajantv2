@@ -303,15 +303,20 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 	}
 	else
 	{
-		//This includes legacy boards such as LHi, Corvid 1...
-		//SPI is devided up into 4 logical blocks of 4M each
-		//Without history explained main is at offset 0 and failsafe is at offset 12
-		_numSectorsMain = _flashSize / _sectorSize / 4;
-		_numSectorsFailSafe = (_flashSize / _sectorSize / 4) - 1;
-		_mainOffset = 0;
-		_failSafeOffset = 12 * 1024 * 1024;
-		_macOffset = _bankSize - (2 * _sectorSize);
-		status = true;
+        if(NTV2DeviceHasSPIFlash(GetDeviceID()))
+        {
+            //This includes legacy boards such as LHi, Corvid 1...
+            //SPI is devided up into 4 logical blocks of 4M each
+            //Without history explained main is at offset 0 and failsafe is at offset 12
+            _numSectorsMain = _flashSize / _sectorSize / 4;
+            _numSectorsFailSafe = (_flashSize / _sectorSize / 4) - 1;
+            _mainOffset = 0;
+            _failSafeOffset = 12 * 1024 * 1024;
+            _macOffset = _bankSize - (2 * _sectorSize);
+            status = true;
+        }
+        else
+            status = false;
 	}
 
     if (_spiFlash)
@@ -827,7 +832,7 @@ bool CNTV2KonaFlashProgram::WaitForFlashNOTBusy()
     bool busy  = true;
 	int i = 0;
 	uint32_t regValue;
-	while(i<1)
+    while(i<1)
 	{
 		ReadRegister(kRegBoardID, regValue);
 		i++;

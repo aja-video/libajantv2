@@ -347,9 +347,11 @@ AJAExport ULWord GetVideoWriteSize (const NTV2VideoFormat inVideoFormat,
 									const NTV2VANCMode inVancMode = NTV2_VANCMODE_OFF);
 
 AJAExport NTV2VideoFormat GetQuarterSizedVideoFormat(NTV2VideoFormat videoFormat);
-AJAExport NTV2VideoFormat GetQuadSizedVideoFormat(NTV2VideoFormat videoFormat);
+AJAExport NTV2VideoFormat GetQuadSizedVideoFormat(NTV2VideoFormat videoFormat, bool isSquareDivision = true);
 AJAExport NTV2FrameGeometry GetQuarterSizedGeometry(NTV2FrameGeometry geometry);
 AJAExport NTV2FrameGeometry Get4xSizedGeometry(NTV2FrameGeometry geometry);
+AJAExport NTV2Standard GetQuarterSizedStandard(NTV2Standard geometry);
+AJAExport NTV2Standard Get4xSizedStandard(NTV2Standard geometry, bool bIs4k = false);
 
 AJAExport double GetFramesPerSecond(NTV2FrameRate frameRate);
 AJAExport double GetFrameTime(NTV2FrameRate frameRate);

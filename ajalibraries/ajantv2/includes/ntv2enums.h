@@ -95,6 +95,7 @@ typedef enum
     DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief	See \ref konalhi
     DEVICE_ID_TTAP						= 0x10416000,	///< @brief	See \ref ttap
     DEVICE_ID_KONA5						= 0x10798400,	///< @brief	See \ref kona5
+    DEVICE_ID_KONA5_12G					= 0x10798401,	///< @brief	See \ref kona5
 #if !defined (NTV2_DEPRECATE_12_6)
     DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
 #endif	//	NTV2_DEPRECATE_12_6
@@ -452,6 +453,8 @@ typedef enum _NTV2VideoFormat
 	,NTV2_FORMAT_FIRST_2K_DEF_FORMAT			= 64
 	,NTV2_FORMAT_FIRST_4K_DEF_FORMAT			= 80
 	,NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT2			= 110
+    ,NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT       = 200
+    ,NTV2_FORMAT_FIRST_4K_TSI_DEF_FORMAT        = 250
 
 	,NTV2_FORMAT_1080i_5000					= NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT
 	,NTV2_FORMAT_1080i_5994
@@ -546,7 +549,40 @@ typedef enum _NTV2VideoFormat
 	,NTV2_FORMAT_1080p_2K_6000_B
 	,NTV2_FORMAT_END_HIGH_DEF_FORMATS2
 
-	,NTV2_MAX_NUM_VIDEO_FORMATS = NTV2_FORMAT_END_HIGH_DEF_FORMATS2
+    ,NTV2_FORMAT_3840x2160psf_2398		= NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT
+    ,NTV2_FORMAT_3840x2160psf_2400
+    ,NTV2_FORMAT_3840x2160psf_2500
+    ,NTV2_FORMAT_3840x2160p_2398
+    ,NTV2_FORMAT_3840x2160p_2400
+    ,NTV2_FORMAT_3840x2160p_2500
+    ,NTV2_FORMAT_3840x2160p_2997
+    ,NTV2_FORMAT_3840x2160p_3000
+    ,NTV2_FORMAT_3840x2160psf_2997
+    ,NTV2_FORMAT_3840x2160psf_3000
+    ,NTV2_FORMAT_3840x2160p_5000
+    ,NTV2_FORMAT_3840x2160p_5994
+    ,NTV2_FORMAT_3840x2160p_6000
+
+    ,NTV2_FORMAT_4096x2160psf_2398		= NTV2_FORMAT_FIRST_4K_TSI_DEF_FORMAT
+    ,NTV2_FORMAT_4096x2160psf_2400
+    ,NTV2_FORMAT_4096x2160psf_2500
+    ,NTV2_FORMAT_4096x2160p_2398
+    ,NTV2_FORMAT_4096x2160p_2400
+    ,NTV2_FORMAT_4096x2160p_2500
+    ,NTV2_FORMAT_4096x2160p_2997
+    ,NTV2_FORMAT_4096x2160p_3000
+    ,NTV2_FORMAT_4096x2160psf_2997
+    ,NTV2_FORMAT_4096x2160psf_3000
+    ,NTV2_FORMAT_4096x2160p_4795
+    ,NTV2_FORMAT_4096x2160p_4800
+    ,NTV2_FORMAT_4096x2160p_5000
+    ,NTV2_FORMAT_4096x2160p_5994
+    ,NTV2_FORMAT_4096x2160p_6000
+    ,NTV2_FORMAT_4096x2160p_11988
+    ,NTV2_FORMAT_4096x2160p_12000
+    ,NTV2_FORMAT_END_4K_TSI_DEF_FORMATS
+
+	,NTV2_MAX_NUM_VIDEO_FORMATS = NTV2_FORMAT_END_4K_TSI_DEF_FORMATS
 } NTV2VideoFormat;
 
 
@@ -621,16 +657,27 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_1080p_2K_4795_B	)
 
 #define NTV2_IS_4K_VIDEO_FORMAT(__f__)								\
-    (	(__f__) >= NTV2_FORMAT_FIRST_4K_DEF_FORMAT &&				\
-        (__f__) < NTV2_FORMAT_END_4K_DEF_FORMATS	)
+    (	((__f__) >= NTV2_FORMAT_FIRST_4K_DEF_FORMAT &&				\
+        (__f__) < NTV2_FORMAT_END_4K_DEF_FORMATS	)   ||          \
+        ((__f__) >= NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT &&         \
+        (__f__) < NTV2_FORMAT_END_4K_TSI_DEF_FORMATS)               \
+    )
 
 #define NTV2_IS_4K_HFR_VIDEO_FORMAT(__f__)							\
-    (	(__f__) >= NTV2_FORMAT_4x1920x1080p_5000	&&				\
-        (__f__) <= NTV2_FORMAT_4x2048x1080p_12000	)
+    (	((__f__) >= NTV2_FORMAT_4x1920x1080p_5000	&&				\
+        (__f__) <= NTV2_FORMAT_4x2048x1080p_12000	)   ||          \
+        ((__f__) >= NTV2_FORMAT_3840x2160p_5000     &&              \
+        (__f__) <= NTV2_FORMAT_3840x2160p_6000      )   ||          \
+        ((__f__) >= NTV2_FORMAT_4096x2160p_5000     &&              \
+        (__f__) <= NTV2_FORMAT_4096x2160p_12000)                    \
+    )
 
 #define NTV2_IS_QUAD_FRAME_FORMAT(__f__)							\
-    (	(__f__) >= NTV2_FORMAT_FIRST_4K_DEF_FORMAT &&				\
-        (__f__) < NTV2_FORMAT_END_4K_DEF_FORMATS	)
+    (	((__f__) >= NTV2_FORMAT_FIRST_4K_DEF_FORMAT &&				\
+        (__f__) < NTV2_FORMAT_END_4K_DEF_FORMATS	)   ||          \
+        ((__f__) >= NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT    &&      \
+        (__f__) < NTV2_FORMAT_END_4K_TSI_DEF_FORMATS    )           \
+    )
 
 #define NTV2_IS_4K_4096_VIDEO_FORMAT(__f__)							\
     (	(__f__) == NTV2_FORMAT_4x2048x1080p_2398	||				\
@@ -649,7 +696,10 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_4x2048x1080p_5994	||				\
         (__f__) == NTV2_FORMAT_4x2048x1080p_6000	||				\
         (__f__) == NTV2_FORMAT_4x2048x1080p_11988	||				\
-        (__f__) == NTV2_FORMAT_4x2048x1080p_12000	)
+        (__f__) == NTV2_FORMAT_4x2048x1080p_12000	||              \
+        ((__f__) >= NTV2_FORMAT_FIRST_4K_TSI_DEF_FORMAT &&          \
+        (__f__) < NTV2_FORMAT_END_4K_TSI_DEF_FORMATS    )           \
+    )
 
 #define NTV2_IS_4K_QUADHD_VIDEO_FORMAT(__f__)						\
     (	(__f__) == NTV2_FORMAT_4x1920x1080p_2398	||				\
@@ -664,7 +714,10 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_4x1920x1080psf_3000	||				\
         (__f__) == NTV2_FORMAT_4x1920x1080p_5000	||				\
         (__f__) == NTV2_FORMAT_4x1920x1080p_5994	||				\
-        (__f__) == NTV2_FORMAT_4x1920x1080p_6000	)
+        (__f__) == NTV2_FORMAT_4x1920x1080p_6000	||              \
+        ((__f__) >= NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT    &&      \
+        (__f__) < NTV2_FORMAT_FIRST_4K_TSI_DEF_FORMAT   )           \
+    )
 
 #define NTV2_IS_372_DUALLINK_FORMAT(__f__)							\
     (	(__f__) == NTV2_FORMAT_1080p_5000_B	||						\
@@ -718,7 +771,26 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_4x2048x1080p_5994	||				\
         (__f__) == NTV2_FORMAT_4x2048x1080p_6000	||				\
         (__f__) == NTV2_FORMAT_4x2048x1080p_11988	||				\
-        (__f__) == NTV2_FORMAT_4x2048x1080p_12000	)
+        (__f__) == NTV2_FORMAT_4x2048x1080p_12000	||              \
+        ((__f__) >= NTV2_FORMAT_3840x2160p_5000 &&                  \
+        (__f__) <= NTV2_FORMAT_3840x2160p_6000)     ||              \
+        ((__f__) >= NTV2_FORMAT_4096x2160p_5000 &&                  \
+        (__f__) <= NTV2_FORMAT_4096x2160p_12000 )                   \
+    )
+
+#define NTV2_IS_6G_FORMAT(__f__)									\
+    (	((__f__) >= NTV2_FORMAT_3840x2160psf_2398 &&                  \
+        (__f__) <= NTV2_FORMAT_3840x2160psf_3000)     ||              \
+        ((__f__) >= NTV2_FORMAT_4096x2160psf_2398 &&                  \
+        (__f__) <= NTV2_FORMAT_4096x2160psf_3000 )                   \
+    )
+
+#define NTV2_IS_12G_FORMAT(__f__)									\
+    (	((__f__) >= NTV2_FORMAT_3840x2160p_5000 &&                  \
+        (__f__) <= NTV2_FORMAT_3840x2160p_6000)     ||              \
+        ((__f__) >= NTV2_FORMAT_4096x2160p_5000 &&                  \
+        (__f__) <= NTV2_FORMAT_4096x2160p_12000 )                   \
+    )
 
 #define NTV2_IS_3Gb_FORMAT(__f__)									\
     (	(__f__) == NTV2_FORMAT_1080p_5000_B ||						\
@@ -756,7 +828,18 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_4x2048x1080psf_2400 ||				\
         (__f__) == NTV2_FORMAT_4x2048x1080psf_2500 ||				\
         (__f__) == NTV2_FORMAT_4x2048x1080psf_2997 ||				\
-        (__f__) == NTV2_FORMAT_4x2048x1080psf_3000	)
+        (__f__) == NTV2_FORMAT_4x2048x1080psf_3000 ||               \
+        (__f__) == NTV2_FORMAT_3840x2160psf_2398 ||                 \
+        (__f__) == NTV2_FORMAT_3840x2160psf_2400 ||                 \
+        (__f__) == NTV2_FORMAT_3840x2160psf_2500 ||                 \
+        (__f__) == NTV2_FORMAT_3840x2160psf_2997 ||                 \
+        (__f__) == NTV2_FORMAT_3840x2160psf_3000 ||                 \
+        (__f__) == NTV2_FORMAT_4096x2160psf_2398 ||                 \
+        (__f__) == NTV2_FORMAT_4096x2160psf_2400 ||                 \
+        (__f__) == NTV2_FORMAT_4096x2160psf_2500 ||                 \
+        (__f__) == NTV2_FORMAT_4096x2160psf_2997 ||                 \
+        (__f__) == NTV2_FORMAT_4096x2160psf_3000                    \
+    )
 
 #define NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(__f__)			\
     (	(__f__) != NTV2_FORMAT_1080i_5000 &&						\
@@ -781,7 +864,16 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_4x2048x1080p_4800 ||					\
         (__f__) == NTV2_FORMAT_4x2048x1080p_5000 ||					\
         (__f__) == NTV2_FORMAT_4x2048x1080p_5994 ||					\
-        (__f__) == NTV2_FORMAT_4x2048x1080p_6000	)
+        (__f__) == NTV2_FORMAT_4x2048x1080p_6000 ||                 \
+        (__f__) == NTV2_FORMAT_3840x2160p_5000 ||					\
+        (__f__) == NTV2_FORMAT_3840x2160p_5994 ||					\
+        (__f__) == NTV2_FORMAT_3840x2160p_6000 ||					\
+        (__f__) == NTV2_FORMAT_4096x2160p_4795 ||					\
+        (__f__) == NTV2_FORMAT_4096x2160p_4800 ||					\
+        (__f__) == NTV2_FORMAT_4096x2160p_5000 ||					\
+        (__f__) == NTV2_FORMAT_4096x2160p_5994 ||					\
+        (__f__) == NTV2_FORMAT_4096x2160p_6000                      \
+    )
 
 #define NTV2_VIDEO_FORMAT_IS_B(__f__)								\
     (	(__f__) == NTV2_FORMAT_1080p_5000_B ||						\
@@ -820,6 +912,15 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_1080p_2K_5000_A ||                   \
         (__f__) == NTV2_FORMAT_1080p_2K_5994_A ||                   \
         (__f__) == NTV2_FORMAT_1080p_2K_6000_A	)
+
+#define NTV2_IS_TSI_FORMAT(__f__)									\
+    (	((__f__) >= NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT    &&      \
+        (__f__) < NTV2_FORMAT_FIRST_4K_TSI_DEF_FORMAT   ) 	)
+
+
+#define NTV2_IS_SQUARE_DIVISION_FORMAT(__f__)									\
+    (	((__f__) >= NTV2_FORMAT_FIRST_4K_DEF_FORMAT    &&      \
+        (__f__) < NTV2_FORMAT_END_4K_DEF_FORMATS   ) 	)
 
 /**
 	@brief		Identifies the mode of a frame store, either Capture (Input) or Display (Output).
@@ -2156,176 +2257,180 @@ typedef enum
 **/
 typedef enum NTV2OutputCrosspointID
 {
-    NTV2_XptBlack						= 0x0,
-    NTV2_XptSDIIn1						= 0x1,
-    NTV2_XptSDIIn1DS2					= 0x1E,
-    NTV2_XptSDIIn2						= 0x2,
-    NTV2_XptSDIIn2DS2					= 0x1F,
-    NTV2_XptLUT1YUV						= 0x4,
-    NTV2_XptCSC1VidYUV					= 0x5,
-    NTV2_XptConversionModule			= 0x6,
-    NTV2_XptCompressionModule			= 0x7,
-    NTV2_XptFrameBuffer1YUV				= 0x8,
-    NTV2_XptFrameSync1YUV				= 0x9,
-    NTV2_XptFrameSync2YUV				= 0xA,
-    NTV2_XptDuallinkOut1				= 0xB,
-    NTV2_XptDuallinkOut1DS2				= 0x26,
+    NTV2_XptBlack						= 0x00,
+    NTV2_XptSDIIn1						= 0x01,
+    NTV2_XptSDIIn2						= 0x02,
+    NTV2_XptLUT1YUV						= 0x04,	//	Obsolete?
+    NTV2_XptLUT1RGB						= NTV2_XptLUT1YUV | 0x80,
+    NTV2_XptCSC1VidYUV					= 0x05,
+    NTV2_XptCSC1VidRGB					= NTV2_XptCSC1VidYUV | 0x80,
+    NTV2_XptConversionModule			= 0x06,
+    NTV2_XptCompressionModule			= 0x07,
+    NTV2_XptFrameBuffer1YUV				= 0x08,
+    NTV2_XptFrameBuffer1RGB				= NTV2_XptFrameBuffer1YUV | 0x80,
+    NTV2_XptFrameSync1YUV				= 0x09,
+    NTV2_XptFrameSync1RGB				= NTV2_XptFrameSync1YUV | 0x80,
+    NTV2_XptFrameSync2YUV				= 0x0A,
+    NTV2_XptFrameSync2RGB				= NTV2_XptFrameSync2YUV | 0x80,
+    NTV2_XptDuallinkOut1				= 0x0B,
+    NTV2_XptAlphaOut					= 0x0C,
+    NTV2_XptCSC1KeyYUV					= 0x0E,
+    NTV2_XptFrameBuffer2YUV				= 0x0F,
+    NTV2_XptFrameBuffer2RGB				= NTV2_XptFrameBuffer2YUV | 0x80,
+    NTV2_XptCSC2VidYUV					= 0x10,
+    NTV2_XptCSC2VidRGB					= NTV2_XptCSC2VidYUV | 0x80,
+    NTV2_XptCSC2KeyYUV					= 0x11,
+    NTV2_XptMixer1VidYUV				= 0x12,
+    NTV2_XptMixer1KeyYUV				= 0x13,
+    NTV2_XptWaterMarkerYUV				= 0x14,
+    NTV2_XptAnalogIn					= 0x16,
+    NTV2_XptHDMIIn1						= 0x17,
+    NTV2_XptWaterMarker2YUV				= 0x1A,
     NTV2_XptDuallinkOut2				= 0x1C,
+    NTV2_XptTestPatternYUV				= 0x1D,
+    NTV2_XptSDIIn1DS2					= 0x1E,
+    NTV2_XptSDIIn2DS2					= 0x1F,
+    NTV2_XptMixer2VidYUV				= 0x20,
+    NTV2_XptMixer2KeyYUV				= 0x21,
+    NTV2_XptStereoCompressorOut			= 0x23,
+    NTV2_XptFrameBuffer3YUV				= 0x24,
+    NTV2_XptFrameBuffer3RGB				= NTV2_XptFrameBuffer3YUV | 0x80,
+    NTV2_XptFrameBuffer4YUV				= 0x25,
+    NTV2_XptFrameBuffer4RGB				= NTV2_XptFrameBuffer4YUV | 0x80,
+    NTV2_XptDuallinkOut1DS2				= 0x26,
     NTV2_XptDuallinkOut2DS2				= 0x27,
+    NTV2_XptDCIMixerVidYUV				= 0x22,
+    NTV2_XptDCIMixerVidRGB				= NTV2_XptDCIMixerVidYUV | 0x80,
+    NTV2_XptCSC5VidYUV					= 0x2C,
+    NTV2_XptCSC5VidRGB					= NTV2_XptCSC5VidYUV | 0x80,
+    NTV2_XptCSC5KeyYUV					= 0x2D,
+    NTV2_XptSDIIn3						= 0x30,
+    NTV2_XptSDIIn4						= 0x31,
+    NTV2_XptSDIIn3DS2					= 0x32,
+    NTV2_XptSDIIn4DS2					= 0x33,
     NTV2_XptDuallinkOut3				= 0x36,
     NTV2_XptDuallinkOut3DS2				= 0x37,
     NTV2_XptDuallinkOut4				= 0x38,
     NTV2_XptDuallinkOut4DS2				= 0x39,
-    NTV2_XptAlphaOut					= 0xC,
-    NTV2_XptAnalogIn					= 0x16,
-    NTV2_XptHDMIIn1						= 0x17,
-    NTV2_XptHDMIIn1Q2					= 0x41,
-    NTV2_XptHDMIIn1Q3					= 0x42,
-    NTV2_XptHDMIIn1Q4					= 0x43,
-    NTV2_XptHDMIIn1RGB					= 0x97,
-    NTV2_XptHDMIIn1Q2RGB				= 0xC1,
-    NTV2_XptHDMIIn1Q3RGB				= 0xC2,
-    NTV2_XptHDMIIn1Q4RGB				= 0xC3,
-    NTV2_XptDuallinkIn1					= 0x83,
-    NTV2_XptDuallinkIn2					= 0xA8,
-    NTV2_XptDuallinkIn3					= 0xB4,
-    NTV2_XptDuallinkIn4					= 0xB5,
-    NTV2_XptLUT1RGB						= 0x84,
-    NTV2_XptCSC1VidRGB					= 0x85,
-    NTV2_XptFrameBuffer1RGB				= 0x88,
-    NTV2_XptFrameSync1RGB				= 0x89,
-    NTV2_XptFrameSync2RGB				= 0x8A,
-    NTV2_XptLUT2RGB						= 0x8D,
-    NTV2_XptCSC1KeyYUV					= 0xE,
-    NTV2_XptFrameBuffer2YUV				= 0xF,
-    NTV2_XptFrameBuffer2RGB				= 0x8F,
-    NTV2_XptCSC2VidYUV					= 0x10,
-    NTV2_XptCSC2VidRGB					= 0x90,
-    NTV2_XptCSC2KeyYUV					= 0x11,
-    NTV2_XptMixer1VidYUV				= 0x12,
-    NTV2_XptMixer1KeyYUV				= 0x13,
-    NTV2_XptWaterMarkerRGB				= 0x94,
-    NTV2_XptWaterMarkerYUV				= 0x14,
-    NTV2_XptWaterMarker2RGB				= 0x9A,
-    NTV2_XptWaterMarker2YUV				= 0x1A,
-    NTV2_XptIICTRGB						= 0x95,
-    NTV2_XptIICT2RGB					= 0x9B,
-    NTV2_XptTestPatternYUV				= 0x1D,
-    NTV2_XptDCIMixerVidYUV				= 0x22,
-    NTV2_XptDCIMixerVidRGB				= 0xA2,
-    NTV2_XptMixer2VidYUV				= 0x20,
-    NTV2_XptMixer2KeyYUV				= 0x21,
-    NTV2_XptStereoCompressorOut			= 0x23,
-    NTV2_XptLUT3Out						= 0xA9,
-    NTV2_XptLUT4Out						= 0xAA,
-    NTV2_XptFrameBuffer3YUV				= 0x24,
-    NTV2_XptFrameBuffer3RGB				= 0xA4,
-    NTV2_XptFrameBuffer4YUV				= 0x25,
-    NTV2_XptFrameBuffer4RGB				= 0xA5,
-    NTV2_XptSDIIn3						= 0x30,
-    NTV2_XptSDIIn3DS2					= 0x32,
-    NTV2_XptSDIIn4						= 0x31,
-    NTV2_XptSDIIn4DS2					= 0x33,
     NTV2_XptCSC3VidYUV					= 0x3A,
-    NTV2_XptCSC3VidRGB					= 0xBA,
+    NTV2_XptCSC3VidRGB					= NTV2_XptCSC3VidYUV | 0x80,
     NTV2_XptCSC3KeyYUV					= 0x3B,
     NTV2_XptCSC4VidYUV					= 0x3C,
-    NTV2_XptCSC4VidRGB					= 0xBC,
+    NTV2_XptCSC4VidRGB					= NTV2_XptCSC4VidYUV | 0x80,
     NTV2_XptCSC4KeyYUV					= 0x3D,
-    NTV2_XptCSC5VidYUV					= 0x2C,
-    NTV2_XptCSC5VidRGB					= 0xAC,
-    NTV2_XptCSC5KeyYUV					= 0x2D,
-    NTV2_XptLUT5Out						= 0xAB,
     NTV2_XptDuallinkOut5				= 0x3E,
     NTV2_XptDuallinkOut5DS2				= 0x3F,
+    NTV2_XptHDMIIn1Q2					= 0x41,
+    NTV2_XptHDMIIn1Q2RGB				= NTV2_XptHDMIIn1Q2 | 0x80,
+    NTV2_XptHDMIIn1Q3					= 0x42,
+    NTV2_XptHDMIIn1Q3RGB				= NTV2_XptHDMIIn1Q3 | 0x80,
+    NTV2_XptHDMIIn1Q4					= 0x43,
+    NTV2_XptHDMIIn1Q4RGB				= NTV2_XptHDMIIn1Q4 | 0x80,
     NTV2_Xpt4KDownConverterOut			= 0x44,
-    NTV2_Xpt4KDownConverterOutRGB		= 0xC4,
-    NTV2_XptFrameBuffer5YUV				= 0x51,
-    NTV2_XptFrameBuffer5RGB				= 0xD1,
-    NTV2_XptFrameBuffer6YUV				= 0x52,
-    NTV2_XptFrameBuffer6RGB				= 0xD2,
-    NTV2_XptFrameBuffer7YUV				= 0x53,
-    NTV2_XptFrameBuffer7RGB				= 0xD3,
-    NTV2_XptFrameBuffer8YUV				= 0x54,
-    NTV2_XptFrameBuffer8RGB				= 0xD4,
+    NTV2_Xpt4KDownConverterOutRGB		= NTV2_Xpt4KDownConverterOut | 0x80,
     NTV2_XptSDIIn5						= 0x45,
-    NTV2_XptSDIIn5DS2					= 0x47,
     NTV2_XptSDIIn6						= 0x46,
+    NTV2_XptSDIIn5DS2					= 0x47,
     NTV2_XptSDIIn6DS2					= 0x48,
     NTV2_XptSDIIn7						= 0x49,
-    NTV2_XptSDIIn7DS2					= 0x4B,
     NTV2_XptSDIIn8						= 0x4A,
+    NTV2_XptSDIIn7DS2					= 0x4B,
     NTV2_XptSDIIn8DS2					= 0x4C,
+    NTV2_XptFrameBuffer5YUV				= 0x51,
+    NTV2_XptFrameBuffer5RGB				= NTV2_XptFrameBuffer5YUV | 0x80,
+    NTV2_XptFrameBuffer6YUV				= 0x52,
+    NTV2_XptFrameBuffer6RGB				= NTV2_XptFrameBuffer6YUV | 0x80,
+    NTV2_XptFrameBuffer7YUV				= 0x53,
+    NTV2_XptFrameBuffer7RGB				= NTV2_XptFrameBuffer7YUV | 0x80,
+    NTV2_XptFrameBuffer8YUV				= 0x54,
+    NTV2_XptFrameBuffer8RGB				= NTV2_XptFrameBuffer8YUV | 0x80,
+    NTV2_XptMixer3VidYUV				= 0x55,
+    NTV2_XptMixer3KeyYUV				= 0x56,
+    NTV2_XptMixer4VidYUV				= 0x57,
+    NTV2_XptMixer4KeyYUV				= 0x58,
     NTV2_XptCSC6VidYUV					= 0x59,
-    NTV2_XptCSC6VidRGB					= 0xD9,
+    NTV2_XptCSC6VidRGB					= NTV2_XptCSC6VidYUV | 0x80,
     NTV2_XptCSC6KeyYUV					= 0x5A,
     NTV2_XptCSC7VidYUV					= 0x5B,
-    NTV2_XptCSC7VidRGB					= 0xDB,
+    NTV2_XptCSC7VidRGB					= NTV2_XptCSC7VidYUV | 0x80,
     NTV2_XptCSC7KeyYUV					= 0x5C,
     NTV2_XptCSC8VidYUV					= 0x5D,
-    NTV2_XptCSC8VidRGB					= 0xDD,
+    NTV2_XptCSC8VidRGB					= NTV2_XptCSC8VidYUV | 0x80,
     NTV2_XptCSC8KeyYUV					= 0x5E,
-    NTV2_XptLUT6Out						= 0xDF,
-    NTV2_XptLUT7Out						= 0xE0,
-    NTV2_XptLUT8Out						= 0xE1,
     NTV2_XptDuallinkOut6				= 0x62,
     NTV2_XptDuallinkOut6DS2				= 0x63,
     NTV2_XptDuallinkOut7				= 0x64,
     NTV2_XptDuallinkOut7DS2				= 0x65,
     NTV2_XptDuallinkOut8				= 0x66,
     NTV2_XptDuallinkOut8DS2				= 0x67,
-    NTV2_XptMixer3VidYUV				= 0x55,
-    NTV2_XptMixer3KeyYUV				= 0x56,
-    NTV2_XptMixer4VidYUV				= 0x57,
-    NTV2_XptMixer4KeyYUV				= 0x58,
+    NTV2_Xpt425Mux1AYUV					= 0x68,
+    NTV2_Xpt425Mux1ARGB					= NTV2_Xpt425Mux1AYUV | 0x80,
+    NTV2_Xpt425Mux1BYUV					= 0x69,
+    NTV2_Xpt425Mux1BRGB					= NTV2_Xpt425Mux1BYUV | 0x80,
+    NTV2_Xpt425Mux2AYUV					= 0x6A,
+    NTV2_Xpt425Mux2ARGB					= NTV2_Xpt425Mux2AYUV | 0x80,
+    NTV2_Xpt425Mux2BYUV					= 0x6B,
+    NTV2_Xpt425Mux2BRGB					= NTV2_Xpt425Mux2BYUV | 0x80,
+    NTV2_Xpt425Mux3AYUV					= 0x6C,
+    NTV2_Xpt425Mux3ARGB					= NTV2_Xpt425Mux3AYUV | 0x80,
+    NTV2_Xpt425Mux3BYUV					= 0x6D,
+    NTV2_Xpt425Mux3BRGB					= NTV2_Xpt425Mux3BYUV | 0x80,
+    NTV2_Xpt425Mux4AYUV					= 0x6E,
+    NTV2_Xpt425Mux4ARGB					= NTV2_Xpt425Mux4AYUV | 0x80,
+    NTV2_Xpt425Mux4BYUV					= 0x6F,
+    NTV2_Xpt425Mux4BRGB					= NTV2_Xpt425Mux4BYUV | 0x80,
+    NTV2_XptFrameBuffer1_425YUV			= 0x70,
+    NTV2_XptFrameBuffer1_425RGB			= NTV2_XptFrameBuffer1_425YUV | 0x80,
+    NTV2_XptFrameBuffer2_425YUV			= 0x71,
+    NTV2_XptFrameBuffer2_425RGB			= NTV2_XptFrameBuffer2_425YUV | 0x80,
+    NTV2_XptFrameBuffer3_425YUV			= 0x72,
+    NTV2_XptFrameBuffer3_425RGB			= NTV2_XptFrameBuffer3_425YUV | 0x80,
+    NTV2_XptFrameBuffer4_425YUV			= 0x73,
+    NTV2_XptFrameBuffer4_425RGB			= NTV2_XptFrameBuffer4_425YUV | 0x80,
+    NTV2_XptFrameBuffer5_425YUV			= 0x74,
+    NTV2_XptFrameBuffer5_425RGB			= NTV2_XptFrameBuffer5_425YUV | 0x80,
+    NTV2_XptFrameBuffer6_425YUV			= 0x75,
+    NTV2_XptFrameBuffer6_425RGB			= NTV2_XptFrameBuffer6_425YUV | 0x80,
+    NTV2_XptFrameBuffer7_425YUV			= 0x76,
+    NTV2_XptFrameBuffer7_425RGB			= NTV2_XptFrameBuffer7_425YUV | 0x80,
+    NTV2_XptFrameBuffer8_425YUV			= 0x77,
+    NTV2_XptFrameBuffer8_425RGB			= NTV2_XptFrameBuffer8_425YUV | 0x80,
+    NTV2_XptHDMIIn2						= 0x78,
+    NTV2_XptHDMIIn2RGB					= NTV2_XptHDMIIn2 | 0x80,
+    NTV2_XptHDMIIn2Q2					= 0x79,
+    NTV2_XptHDMIIn2Q2RGB				= NTV2_XptHDMIIn2Q2 | 0x80,
+    NTV2_XptHDMIIn2Q3					= 0x7A,
+    NTV2_XptHDMIIn2Q3RGB				= NTV2_XptHDMIIn2Q3 | 0x80,
+    NTV2_XptHDMIIn2Q4					= 0x7B,
+    NTV2_XptHDMIIn2Q4RGB				= NTV2_XptHDMIIn2Q4 | 0x80,
+    NTV2_XptHDMIIn3						= 0x7C,
+    NTV2_XptHDMIIn3RGB					= NTV2_XptHDMIIn3 | 0x80,
+    NTV2_XptHDMIIn4						= 0x7D,
+<<<<<<< HEAD
+    NTV2_XptHDMIIn4RGB					= 0xFD,
+=======
+    NTV2_XptHDMIIn4RGB					= NTV2_XptHDMIIn4 | 0x80,
+    NTV2_XptDuallinkIn1					= 0x83,
+    NTV2_XptLUT2RGB						= 0x8D,
+    NTV2_XptWaterMarkerRGB				= 0x94,
+    NTV2_XptIICTRGB						= 0x95,
+    NTV2_XptHDMIIn1RGB					= 0x97,
+    NTV2_XptWaterMarker2RGB				= 0x9A,
+    NTV2_XptIICT2RGB					= 0x9B,
+    NTV2_XptDuallinkIn2					= 0xA8,
+    NTV2_XptLUT3Out						= 0xA9,
+    NTV2_XptLUT4Out						= 0xAA,
+    NTV2_XptLUT5Out						= 0xAB,
+    NTV2_XptDuallinkIn3					= 0xB4,
+    NTV2_XptDuallinkIn4					= 0xB5,
     NTV2_XptDuallinkIn5					= 0xCD,
     NTV2_XptDuallinkIn6					= 0xCE,
     NTV2_XptDuallinkIn7					= 0xCF,
     NTV2_XptDuallinkIn8					= 0xD0,
-    NTV2_Xpt425Mux1AYUV					= 0x68,
-    NTV2_Xpt425Mux1ARGB					= 0xE8,
-    NTV2_Xpt425Mux1BYUV					= 0x69,
-    NTV2_Xpt425Mux1BRGB					= 0xE9,
-    NTV2_Xpt425Mux2AYUV					= 0x6A,
-    NTV2_Xpt425Mux2ARGB					= 0xEA,
-    NTV2_Xpt425Mux2BYUV					= 0x6B,
-    NTV2_Xpt425Mux2BRGB					= 0xEB,
-    NTV2_Xpt425Mux3AYUV					= 0x6C,
-    NTV2_Xpt425Mux3ARGB					= 0xEC,
-    NTV2_Xpt425Mux3BYUV					= 0x6D,
-    NTV2_Xpt425Mux3BRGB					= 0xED,
-    NTV2_Xpt425Mux4AYUV					= 0x6E,
-    NTV2_Xpt425Mux4ARGB					= 0xEE,
-    NTV2_Xpt425Mux4BYUV					= 0x6F,
-    NTV2_Xpt425Mux4BRGB					= 0xEF,
-    NTV2_XptFrameBuffer1_425YUV			= 0x70,
-    NTV2_XptFrameBuffer1_425RGB			= 0xF0,
-    NTV2_XptFrameBuffer2_425YUV			= 0x71,
-    NTV2_XptFrameBuffer2_425RGB			= 0xF1,
-    NTV2_XptFrameBuffer3_425YUV			= 0x72,
-    NTV2_XptFrameBuffer3_425RGB			= 0xF2,
-    NTV2_XptFrameBuffer4_425YUV			= 0x73,
-    NTV2_XptFrameBuffer4_425RGB			= 0xF3,
-    NTV2_XptFrameBuffer5_425YUV			= 0x74,
-    NTV2_XptFrameBuffer5_425RGB			= 0xF4,
-    NTV2_XptFrameBuffer6_425YUV			= 0x75,
-    NTV2_XptFrameBuffer6_425RGB			= 0xF5,
-    NTV2_XptFrameBuffer7_425YUV			= 0x76,
-    NTV2_XptFrameBuffer7_425RGB			= 0xF6,
-    NTV2_XptFrameBuffer8_425YUV			= 0x77,
-    NTV2_XptFrameBuffer8_425RGB			= 0xF7,
-    NTV2_XptHDMIIn2						= 0x78,
-    NTV2_XptHDMIIn2Q2					= 0x79,
-    NTV2_XptHDMIIn2Q3					= 0x7A,
-    NTV2_XptHDMIIn2Q4					= 0x7B,
-    NTV2_XptHDMIIn2RGB					= 0xF8,
-    NTV2_XptHDMIIn2Q2RGB				= 0xF9,
-    NTV2_XptHDMIIn2Q3RGB				= 0xFA,
-    NTV2_XptHDMIIn2Q4RGB				= 0xFB,
-    NTV2_XptHDMIIn3						= 0x7C,
-    NTV2_XptHDMIIn3RGB					= 0xFC,
-    NTV2_XptHDMIIn4						= 0x7D,
-    NTV2_XptHDMIIn4RGB					= 0xFD,
+    NTV2_XptLUT6Out						= 0xDF,
+    NTV2_XptLUT7Out						= 0xE0,
+    NTV2_XptLUT8Out						= 0xE1,
+>>>>>>> master
     NTV2_XptRuntimeCalc					= 0xFF,
     NTV2_LAST_OUTPUT_CROSSPOINT			= 0xFF,
     NTV2_OUTPUT_CROSSPOINT_INVALID		= 0xFF
@@ -2352,12 +2457,12 @@ typedef enum NTV2OutputCrosspointID
         NTV2_XptDuallinkOut				= NTV2_XptDuallinkOut1,		///< @deprecated	Use NTV2_XptDuallinkOut1 instead.
         NTV2_XptDuallinkOutDS2			= NTV2_XptDuallinkOut1DS2	///< @deprecated	Use NTV2_XptDuallinkOut1DS2 instead.
     #endif	//	!defined (NTV2_DEPRECATE)
-} NTV2OutputCrosspointID;
+} NTV2OutputCrosspointID, NTV2OutputXptID;
 
 typedef NTV2OutputCrosspointID	NTV2CrosspointID;	///< @deprecated	Use ::NTV2OutputCrosspointID instead.
 
 #define	NTV2_IS_VALID_OutputCrosspointID(__s__)			((__s__) >= NTV2_XptBlack && (__s__) < NTV2_OUTPUT_CROSSPOINT_INVALID)
-
+#define	NTV2_IS_RGB_OutputCrosspointID(__s__)			(((unsigned char)(__s__)) & 0x80)
 
 /**
     @brief	Identifies a widget input that potentially can accept a signal emitted
@@ -2502,7 +2607,7 @@ typedef enum NTV2InputCrosspointID
     NTV2_XptFrameSync1Input			= 0x85,	//	deprecate?
     NTV2_LAST_INPUT_CROSSPOINT		= 0x85,
     NTV2_INPUT_CROSSPOINT_INVALID	= 0xFFFFFFFF
-} NTV2InputCrosspointID;
+} NTV2InputCrosspointID, NTV2InputXptID;
 
 #define	NTV2_IS_VALID_InputCrosspointID(__s__)			((__s__) >= NTV2_FIRST_INPUT_CROSSPOINT && (__s__) <= NTV2_LAST_INPUT_CROSSPOINT)
 
@@ -2957,6 +3062,7 @@ typedef enum
     NTV2_BITFILE_KONA1				= 54,
     NTV2_BITFILE_KONAHDMI           = 55,
 	NTV2_BITFILE_KONA5_MAIN			= 56,
+    NTV2_BITFILE_KONA5_12G_MAIN     = 56,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 

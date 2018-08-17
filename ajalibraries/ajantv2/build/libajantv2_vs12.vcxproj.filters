@@ -512,6 +512,9 @@
     <ClInclude Include="..\includes\ntv2supportlogger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\includes\ntv2enums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\ajaanc\includes\ancillarydata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
