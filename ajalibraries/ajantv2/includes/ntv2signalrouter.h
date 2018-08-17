@@ -13,52 +13,57 @@
 #include <set>
 
 
-typedef std::set <NTV2OutputCrosspointID>			NTV2OutputCrosspointIDSet;				///< @brief	A collection of distinct NTV2OutputCrosspointID values.
-typedef NTV2OutputCrosspointIDSet::const_iterator	NTV2OutputCrosspointIDSetConstIter;		///< @brief	A const iterator for iterating over an NTV2OutputCrosspointIDSet.
-typedef NTV2OutputCrosspointIDSet::iterator			NTV2OutputCrosspointIDSetIter;			///< @brief	A non-const iterator for iterating over an NTV2OutputCrosspointIDSet.
+typedef std::set <NTV2OutputCrosspointID>			NTV2OutputCrosspointIDSet,			NTV2OutputXptIDSet;				///< @brief	A collection of distinct NTV2OutputCrosspointID values.
+typedef NTV2OutputCrosspointIDSet::const_iterator	NTV2OutputCrosspointIDSetConstIter,	NTV2OutputXptIDSetConstIter;	///< @brief	A const iterator for iterating over an NTV2OutputCrosspointIDSet.
+typedef NTV2OutputCrosspointIDSet::iterator			NTV2OutputCrosspointIDSetIter,		NTV2OutputXptIDSetIter;			///< @brief	A non-const iterator for iterating over an NTV2OutputCrosspointIDSet.
 
-AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2OutputCrosspointIDSet & inObj);
+AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2OutputXptIDSet & inObj);
 
-typedef NTV2OutputCrosspointIDSet					NTV2CrosspointIDSet;					///< @deprecated	Use NTV2OutputCrosspointIDSet instead.
+typedef NTV2OutputCrosspointIDSet					NTV2CrosspointIDSet;				///< @deprecated	Use NTV2OutputCrosspointIDSet instead.
 
-typedef std::set <NTV2InputCrosspointID>			NTV2InputCrosspointIDSet;				///< @brief	A collection of distinct NTV2InputCrosspointID values.
-typedef NTV2InputCrosspointIDSet::const_iterator	NTV2InputCrosspointIDSetConstIter;		///< @brief	A const iterator for iterating over an NTV2InputCrosspointIDSet.
-typedef NTV2InputCrosspointIDSet::iterator			NTV2InputCrosspointIDSetIter;			///< @brief	A non-const iterator for iterating over an NTV2InputCrosspointIDSet.
+typedef std::set <NTV2InputCrosspointID>			NTV2InputCrosspointIDSet,			NTV2InputXptIDSet;			///< @brief	A collection of distinct NTV2InputCrosspointID values.
+typedef NTV2InputCrosspointIDSet::const_iterator	NTV2InputCrosspointIDSetConstIter,	NTV2InputXptIDSetConstIter;	///< @brief	A const iterator for iterating over an NTV2InputCrosspointIDSet.
+typedef NTV2InputCrosspointIDSet::iterator			NTV2InputCrosspointIDSetIter,		NTV2InputXptIDSetIter;		///< @brief	A non-const iterator for iterating over an NTV2InputCrosspointIDSet.
 
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2InputCrosspointIDSet & inObj);
 
-typedef std::set <NTV2WidgetID>						NTV2WidgetIDSet;						///< @brief	A collection of distinct NTV2WidgetID values.
-typedef NTV2WidgetIDSet::const_iterator				NTV2WidgetIDSetConstIter;				///< @brief	An iterator for iterating over a read-only NTV2WidgetIDSet.
+typedef std::set <NTV2WidgetID>						NTV2WidgetIDSet;			///< @brief	A collection of distinct NTV2WidgetID values.
+typedef NTV2WidgetIDSet::const_iterator				NTV2WidgetIDSetConstIter;	///< @brief	An iterator for iterating over a read-only NTV2WidgetIDSet.
 
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2WidgetIDSet & inObj);
 
 
-typedef std::pair <NTV2InputCrosspointID, NTV2OutputCrosspointID>	NTV2SignalConnection;	///< @brief	This links an NTV2InputCrosspointID and an NTV2OutputCrosspointID.
+typedef std::pair <NTV2InputCrosspointID, NTV2OutputCrosspointID>	NTV2SignalConnection, NTV2Connection;	///< @brief	This links an NTV2InputCrosspointID and an NTV2OutputCrosspointID.
+typedef std::map <NTV2InputCrosspointID, NTV2OutputCrosspointID>	NTV2ActualConnections;		///< @brief	A map of zero or more one-to-one actual NTV2InputCrosspointID to NTV2OutputCrosspointID connections.
+typedef NTV2ActualConnections::const_iterator						NTV2ActualConnectionsConstIter;
+typedef std::multimap <NTV2InputCrosspointID, NTV2OutputXptID>		NTV2PossibleConnections;	///< @brief	A map of zero or more one-to-many possible NTV2InputCrosspointID to NTV2OutputCrosspointID connections.
+typedef NTV2PossibleConnections::const_iterator						NTV2PossibleConnectionsConstIter;
 
-typedef	std::map <std::string, NTV2InputCrosspointID>			String2InputXpt;
+typedef	std::map <std::string, NTV2InputXptID>		String2InputXpt;
 typedef String2InputXpt::const_iterator				String2InputXptConstIter;
 
-typedef	std::map <NTV2InputCrosspointID, std::string>			InputXpt2String;
+typedef	std::map <NTV2InputXptID, std::string>		InputXpt2String;
 typedef InputXpt2String::const_iterator				InputXpt2StringConstIter;
 
-typedef std::map <NTV2InputCrosspointID, NTV2WidgetID>	InputXpt2WidgetID;
+typedef std::map <NTV2InputXptID, NTV2WidgetID>		InputXpt2WidgetID;
 typedef	InputXpt2WidgetID::const_iterator			InputXpt2WidgetIDConstIter;
 
-typedef	std::map <std::string, NTV2OutputCrosspointID>		String2OutputXpt;
+typedef	std::map <std::string, NTV2OutputXptID>		String2OutputXpt;
 typedef String2OutputXpt::const_iterator			String2OutputXptConstIter;
 
-typedef	std::map <NTV2OutputCrosspointID, std::string>		OutputXpt2String;
+typedef	std::map <NTV2OutputXptID, std::string>		OutputXpt2String;
 typedef OutputXpt2String::const_iterator			OutputXpt2StringConstIter;
 
-typedef std::map <NTV2OutputCrosspointID, NTV2WidgetID>	OutputXpt2WidgetID;
-typedef	OutputXpt2WidgetID::const_iterator			OutputXpt2WidgetIDConstIter;
+typedef std::multimap <NTV2OutputXptID, NTV2WidgetID>	OutputXpt2WidgetIDs;
+typedef std::pair <NTV2OutputXptID, NTV2WidgetID>		OutputXpt2WidgetIDPair;
+typedef	OutputXpt2WidgetIDs::const_iterator				OutputXpt2WidgetIDsConstIter;
 
-typedef std::pair <NTV2WidgetID, NTV2OutputCrosspointID>		Widget2OutputXptPair;
-typedef std::multimap <NTV2WidgetID, NTV2OutputCrosspointID>	Widget2OutputXpts;
+typedef std::pair <NTV2WidgetID, NTV2OutputXptID>		Widget2OutputXptPair;
+typedef std::multimap <NTV2WidgetID, NTV2OutputXptID>	Widget2OutputXpts;
 typedef Widget2OutputXpts::const_iterator				Widget2OutputXptsConstIter;
 
-typedef std::pair <NTV2WidgetID, NTV2InputCrosspointID>		Widget2InputXptPair;
-typedef std::multimap <NTV2WidgetID, NTV2InputCrosspointID>	Widget2InputXpts;
+typedef std::pair <NTV2WidgetID, NTV2InputXptID>		Widget2InputXptPair;
+typedef std::multimap <NTV2WidgetID, NTV2InputXptID>	Widget2InputXpts;
 typedef Widget2InputXpts::const_iterator				Widget2InputXptsConstIter;
 
 /**
@@ -201,11 +206,9 @@ class AJAExport CNTV2SignalRouter
 
 	//	Instance Data
 	private:
-		typedef std::map <NTV2InputCrosspointID, NTV2OutputCrosspointID>	MyConnections;
-		typedef MyConnections::const_iterator								MyConnectionsConstIter;
-                typedef MyConnections::iterator										MyConnectionsIter;
+        typedef NTV2ActualConnections::iterator		NTV2ActualConnectionsIter;
 
-		MyConnections								mConnections;		///< @brief	My collection of NTV2SignalConnections
+		NTV2ActualConnections						mConnections;		///< @brief	My collection of NTV2SignalConnections
 
 
 	//	Class Methods
@@ -220,28 +223,28 @@ class AJAExport CNTV2SignalRouter
 			@param[in]	inInputXpt		Specifies the NTV2InputCrosspointID of interest.
 			@return		A string containing the most compact human-readable representation of the input crosspoint.
 		**/
-		static std::string							NTV2InputCrosspointIDToString (const NTV2InputCrosspointID inInputXpt);
+		static std::string			NTV2InputCrosspointIDToString (const NTV2InputCrosspointID inInputXpt);
 
 		/**
 			@brief		Returns a string containing the most compact human-readable form for a given output crosspoint.
 			@param[in]	inOutputXpt		Specifies the NTV2OutputCrosspointID of interest.
 			@return		A string containing the most compact human-readable representation of the output crosspoint.
 		**/
-		static std::string							NTV2OutputCrosspointIDToString (const NTV2OutputCrosspointID inOutputXpt);
+		static std::string			NTV2OutputCrosspointIDToString (const NTV2OutputCrosspointID inOutputXpt);
 
 		/**
 			@brief		Returns a string containing the most compact human-readable form for a given input crosspoint.
-			@param[in]	inStr		Specifies the string to convert into an NTV2InputCrosspointID.
+			@param[in]	inStr		Specifies the string to convert into an NTV2InputXptID.
 			@return		The corresponding input crosspoint.
 		**/
-		static NTV2InputCrosspointID				StringToNTV2InputCrosspointID (const std::string & inStr);
+		static NTV2InputXptID		StringToNTV2InputCrosspointID (const std::string & inStr);
 
 		/**
 			@brief		Returns the output crosspoint that corresponds to the given string.
-			@param[in]	inStr		Specifies the string to convert into an NTV2OutputCrosspointID.
+			@param[in]	inStr		Specifies the string to convert into an NTV2OutputXptID.
 			@return		The corresponding output crosspoint.
 		**/
-		static NTV2OutputCrosspointID				StringToNTV2OutputCrosspointID (const std::string & inStr);
+		static NTV2OutputXptID		StringToNTV2OutputCrosspointID (const std::string & inStr);
 
 		/**
 			@brief		Returns the widget IDs supported by the given device.
@@ -249,16 +252,29 @@ class AJAExport CNTV2SignalRouter
 			@param[out]	outWidgets		Receives the NTV2WidgetIDSet of widgets that are supported by the given device.
 			@return		True if successful;  otherwise false.
 		**/
-		static bool									GetWidgetIDs (const NTV2DeviceID inDeviceID, NTV2WidgetIDSet & outWidgets);
+		static bool					GetWidgetIDs (const NTV2DeviceID inDeviceID, NTV2WidgetIDSet & outWidgets);
+
+		/**
+			@brief		Returns the widgets that "own" the specified output crosspoint.
+			@param[in]	inOutputXpt		Specifies the output crosspoint of interest.
+			@param[out]	outWidgetIDs	Receives the NTV2WidgetIDSet containing the widgets that "own" the output
+										crosspoint (or an empty set upon failure).
+			@return		True if successful;  otherwise false.
+		**/
+		static bool					GetWidgetsForOutput (const NTV2OutputCrosspointID inOutputXpt, NTV2WidgetIDSet & outWidgetIDs);
 
 		/**
 			@brief		Returns the widget that "owns" the specified output crosspoint.
 			@param[in]	inOutputXpt		Specifies the output crosspoint of interest.
 			@param[out]	outWidgetID		Receives the NTV2WidgetID of the widget that "owns" the output crosspoint
 										(or NTV2_WIDGET_INVALID upon failure).
+			@param[in]	inDeviceID		Optionally specifies a device ID to resolve any ambiguity if more than
+										one NTV2WidgetID is associated with the given NTV2OutputXptID.
+										Defaults to ::DEVICE_ID_NOTFOUND.
+			@note		The default behavior is to answer with the first NTV2WidgetID found in the NTV2WidgetIDSet.
 			@return		True if successful;  otherwise false.
 		**/
-		static bool									GetWidgetForOutput (const NTV2OutputCrosspointID inOutputXpt, NTV2WidgetID & outWidgetID);
+		static bool					GetWidgetForOutput (const NTV2OutputCrosspointID inOutputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDevice = DEVICE_ID_NOTFOUND);
 
 		/**
 			@brief		Returns the widget that "owns" the specified input crosspoint.
@@ -267,7 +283,7 @@ class AJAExport CNTV2SignalRouter
 										(or NTV2_WIDGET_INVALID upon failure).
 			@return		True if successful;  otherwise false.
 		**/
-		static bool									GetWidgetForInput (const NTV2InputCrosspointID inInputXpt, NTV2WidgetID & outWidgetID);
+		static bool					GetWidgetForInput (const NTV2InputCrosspointID inInputXpt, NTV2WidgetID & outWidgetID);
 
 		/**
 			@brief		Returns the input crosspoints known to be "owned" by the given widget.
@@ -276,7 +292,7 @@ class AJAExport CNTV2SignalRouter
 										(or empty upon failure).
 			@return		True if successful;  otherwise false.
 		**/
-		static bool									GetWidgetInputs (const NTV2WidgetID inWidgetID, NTV2InputCrosspointIDSet & outInputs);
+		static bool					GetWidgetInputs (const NTV2WidgetID inWidgetID, NTV2InputCrosspointIDSet & outInputs);
 
 		/**
 			@brief		Returns all known widget input crosspoints for the given device.
@@ -284,7 +300,7 @@ class AJAExport CNTV2SignalRouter
 			@param[out]	outInputs		Receives the NTV2InputCrosspointIDs (or empty upon failure).
 			@return		True if successful;  otherwise false.
 		**/
-		static bool									GetAllWidgetInputs (const NTV2DeviceID inDeviceID, NTV2InputCrosspointIDSet & outInputs);
+		static bool					GetAllWidgetInputs (const NTV2DeviceID inDeviceID, NTV2InputCrosspointIDSet & outInputs);
 
 		/**
 			@brief		Returns all routing registers for the given set of input crosspoints.
@@ -292,16 +308,16 @@ class AJAExport CNTV2SignalRouter
 			@param[out]	outRegInfos		Receives the NTV2RegInfo collection (empty upon failure).
 			@return		True if successful;  otherwise false.
 		**/
-		static bool									GetAllRoutingRegInfos (const NTV2InputCrosspointIDSet & inInputs, NTV2RegisterWrites & outRegInfos);
+		static bool					GetAllRoutingRegInfos (const NTV2InputCrosspointIDSet & inInputs, NTV2RegisterWrites & outRegInfos);
 
 		/**
 			@brief		Returns the output crosspoints known to be "owned" by the given widget.
 			@param[in]	inWidgetID		Specifies the NTV2WidgetID of the widget of interest.
-			@param[out]	outInputs		Receives the set of NTV2OutputCrosspointIDs that are "owned" by the widget
+			@param[out]	outOutputs		Receives the set of NTV2OutputCrosspointIDs that are "owned" by the widget
 										(or empty upon failure).
 			@return		True if successful;  otherwise false.
 		**/
-		static bool									GetWidgetOutputs (const NTV2WidgetID inWidgetID, NTV2OutputCrosspointIDSet & outInputs);
+		static bool					GetWidgetOutputs (const NTV2WidgetID inWidgetID, NTV2OutputCrosspointIDSet & outOutputs);
 
 		/**
 			@brief		Sets the router from the given string.
@@ -310,18 +326,18 @@ class AJAExport CNTV2SignalRouter
 										It will be empty if this function fails.
 			@return		True if successful;  otherwise false.
 		**/
-		static bool									CreateFromString (const std::string & inString, CNTV2SignalRouter & outRouter);
+		static bool					CreateFromString (const std::string & inString, CNTV2SignalRouter & outRouter);
 
-		static bool									Initialize (void);		///< @brief	Initializes my tables.
-		static bool									Deinitialize (void);	///< @brief	Deinitializes (frees) my tables.
-		static bool									IsInitialized (void);	///< @brief	Returns true if my tables are initialized.
+		static bool					Initialize (void);		///< @brief	Initializes my tables.
+		static bool					Deinitialize (void);	///< @brief	Deinitializes (frees) my tables.
+		static bool					IsInitialized (void);	///< @brief	Returns true if my tables are initialized.
 
         static String2InputXpt		gString2InputXpt;
         static InputXpt2String		gInputXpt2String;
         static InputXpt2WidgetID	gInputXpt2WidgetID;
         static String2OutputXpt		gString2OutputXpt;
         static OutputXpt2String		gOutputXpt2String;
-        static OutputXpt2WidgetID	gOutputXpt2WidgetID;
+        static OutputXpt2WidgetIDs	gOutputXpt2WidgetIDs;
         static Widget2OutputXpts	gWidget2OutputXpts;
         static Widget2InputXpts		gWidget2InputXpts;
 
