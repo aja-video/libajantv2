@@ -1193,16 +1193,27 @@ bool NTV2_POINTER::CopyFrom (const NTV2_POINTER & inSrcBuffer, const NTV2Segment
 	if (elementSize != 1  &&  elementSize != 2  &&  elementSize != 4  &&  elementSize != 8)
 		return false;	//	Illegal element size
 
+	const bool	bClearExcess	(false);
 	ULWord		bytesPerSegment	(elementSize * inXferInfo.getSegmentLength());
 	ULWord		totalSegments	(inXferInfo.getSegmentCount());
 	ULWord		totalElements	(totalSegments * inXferInfo.getSegmentLength());
-	ULWord		totalBytes		(totalElements * elementSize);
-	const bool	bClearExcess	(false);
+	ULWord		totalSrcBytes	(inXferInfo.getSourceOffset());
+	ULWord		totalDstBytes	(inXferInfo.getDestOffset());
+	if (inXferInfo.getSourcePitch())
+		totalSrcBytes += inXferInfo.getSourcePitch() * elementSize;
+	else
+		totalSrcBytes += totalElements * elementSize;
+	if (inXferInfo.getDestPitch())
+		totalDstBytes += inXferInfo.getDestPitch() * elementSize;
+	else
+		totalDstBytes += totalElements * elementSize;
 
-	if (GetByteCount() < totalBytes)
+	if (inSrcBuffer.GetByteCount() < totalSrcBytes)
 		return false;	//	Too small
-	if (bClearExcess  &&  GetByteCount() > totalBytes)
-		::memset(GetHostAddress(totalBytes), 0, GetByteCount() - totalBytes);
+	if (GetByteCount() < totalDstBytes)
+		return false;	//	Too small
+	if (bClearExcess  &&  GetByteCount() > totalDstBytes)
+		::memset(GetHostAddress(totalDstBytes), 0, GetByteCount() - totalDstBytes);
 
 	//	Copy every segment...
 	ULWord	dstByteOffset(0), srcByteOffset(0);

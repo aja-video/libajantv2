@@ -220,6 +220,15 @@ public:
 	bool							GetLineOffsetFromSMPTELine (const ULWord inSMPTELine, ULWord & outLineOffset) const;
 
 	/**
+		@brief		Sets the given ::NTV2SegmentedXferInfo to match my raster, as a source or destination.
+		@param		inSegmentInfo	Specifies the segmented transfer object to modify.
+		@param[in]	inIsSource		Specify 'true' (the default) to set the "source" aspect of the transfer
+									info object;  otherwise 'false' to set the "destination" aspect of it.
+		@return		A non-const reference to the ::NTV2SegmentedXferInfo object.
+	**/
+	NTV2SegmentedXferInfo &			GetSegmentedXferInfo (NTV2SegmentedXferInfo & inSegmentInfo, const bool inIsSource = true) const;
+
+	/**
 		@return	True if I'm equal to the given NTV2FormatDescriptor.
 		@param[in]	inRHS	The right-hand-side operand that I'll be compared with.
 	**/

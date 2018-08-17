@@ -5628,7 +5628,7 @@ typedef enum
 										mInitialSrcOffset	(0),
 										mInitialDstOffset	(0),
 										mSrcElementsPerRow	(0),
-										mDstElementsPerRow	(0)		{}
+										mDstElementsPerRow	(0)		{setElementLength(1);}
 
 				// Inquiry -- Essentials
 				inline bool		isValid (void) const				{return getSegmentCount() && getSegmentLength() ? true : false;}
@@ -5650,12 +5650,12 @@ typedef enum
 				inline NTV2SegmentedXferInfo &	setSegmentCount (const ULWord inNumSegments)		{mNumSegments = inNumSegments;  return *this;}
 				inline NTV2SegmentedXferInfo &	setSegmentLength (const ULWord inNumElements)	{mElementsPerSegment = inNumElements;  return *this;}
 				inline NTV2SegmentedXferInfo &	setSourceInfo (const ULWord inOffset, const ULWord inPitch)
-											{mInitialSrcOffset = inOffset;  mSrcElementsPerRow = inPitch;  return *this;}
+											{return setSourceOffset(inOffset).setSourcePitch(inPitch);}
 				inline NTV2SegmentedXferInfo &	setSourceOffset (const ULWord inOffset)			{mInitialSrcOffset = inOffset;  return *this;}
 				inline NTV2SegmentedXferInfo &	setSourcePitch (const ULWord inPitch)			{mSrcElementsPerRow = inPitch;  return *this;}
 				inline NTV2SegmentedXferInfo &	setSourceDirection (const bool inTopDown)		{mFlags = (0xFFFFFFFF - BIT(8)); if (!inTopDown) mFlags |= BIT(8);  return *this;}
 				inline NTV2SegmentedXferInfo &	setDestInfo (const ULWord inOffset, const ULWord inPitch)
-											{mInitialDstOffset = inOffset;  mDstElementsPerRow = inPitch;  return *this;}
+											{return setDestOffset(inOffset).setDestPitch(inPitch);}
 				inline NTV2SegmentedXferInfo &	setDestOffset (const ULWord inOffset)			{mInitialDstOffset = inOffset;  return *this;}
 				inline NTV2SegmentedXferInfo &	setDestPitch (const ULWord inPitch)				{mDstElementsPerRow = inPitch;  return *this;}
 				inline NTV2SegmentedXferInfo &	setDestDirection (const bool inTopDown)			{mFlags = (0xFFFFFFFF - BIT(9)); if (!inTopDown) mFlags |= BIT(9);  return *this;}
