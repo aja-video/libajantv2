@@ -7212,43 +7212,82 @@ string NTV2StandardToString (const NTV2Standard inValue, const bool inForRetailD
 string NTV2FrameBufferFormatToString (const NTV2FrameBufferFormat inValue,	const bool inForRetailDisplay)
 {
 	if (inForRetailDisplay)
-		return frameBufferFormats [inValue];	//	frameBufferFormatString (inValue);
-
-	switch (inValue)
 	{
-		case NTV2_FBF_10BIT_YCBCR:				return "NTV2_FBF_10BIT_YCBCR";
-		case NTV2_FBF_8BIT_YCBCR:				return "NTV2_FBF_8BIT_YCBCR";
-		case NTV2_FBF_ARGB:						return "NTV2_FBF_ARGB";
-		case NTV2_FBF_RGBA:						return "NTV2_FBF_RGBA";
-		case NTV2_FBF_10BIT_RGB:				return "NTV2_FBF_10BIT_RGB";
-		case NTV2_FBF_8BIT_YCBCR_YUY2:			return "NTV2_FBF_8BIT_YCBCR_YUY2";
-		case NTV2_FBF_ABGR:						return "NTV2_FBF_ABGR";
-		case NTV2_FBF_10BIT_DPX:				return "NTV2_FBF_10BIT_DPX";
-		case NTV2_FBF_10BIT_YCBCR_DPX:			return "NTV2_FBF_10BIT_YCBCR_DPX";
-		case NTV2_FBF_8BIT_DVCPRO:				return "NTV2_FBF_8BIT_DVCPRO";
-		case NTV2_FBF_8BIT_YCBCR_420PL3:		return "NTV2_FBF_8BIT_YCBCR_420PL3";
-		case NTV2_FBF_8BIT_HDV:					return "NTV2_FBF_8BIT_HDV";
-		case NTV2_FBF_24BIT_RGB:				return "NTV2_FBF_24BIT_RGB";
-		case NTV2_FBF_24BIT_BGR:				return "NTV2_FBF_24BIT_BGR";
-		case NTV2_FBF_10BIT_YCBCRA:				return "NTV2_FBF_10BIT_YCBCRA";
-        case NTV2_FBF_10BIT_DPX_LE:             return "NTV2_FBF_10BIT_DPX_LE";
-		case NTV2_FBF_48BIT_RGB:				return "NTV2_FBF_48BIT_RGB";
-		case NTV2_FBF_PRORES:					return "NTV2_FBF_PRORES";
-		case NTV2_FBF_PRORES_DVCPRO:			return "NTV2_FBF_PRORES_DVCPRO";
-		case NTV2_FBF_PRORES_HDV:				return "NTV2_FBF_PRORES_HDV";
-		case NTV2_FBF_10BIT_RGB_PACKED:			return "NTV2_FBF_10BIT_RGB_PACKED";
-		case NTV2_FBF_10BIT_ARGB:				return "NTV2_FBF_10BIT_ARGB";
-		case NTV2_FBF_16BIT_ARGB:				return "NTV2_FBF_16BIT_ARGB";
-		case NTV2_FBF_8BIT_YCBCR_422PL3:		return "NTV2_FBF_8BIT_YCBCR_422PL3";
-		case NTV2_FBF_10BIT_RAW_RGB:			return "NTV2_FBF_10BIT_RAW_RGB";
-		case NTV2_FBF_10BIT_RAW_YCBCR:			return "NTV2_FBF_10BIT_RAW_YCBCR";
-		case NTV2_FBF_10BIT_YCBCR_420PL3_LE:	return "NTV2_FBF_10BIT_YCBCR_420PL3_LE";
-		case NTV2_FBF_10BIT_YCBCR_422PL3_LE:	return "NTV2_FBF_10BIT_YCBCR_422PL3_LE";
-		case NTV2_FBF_10BIT_YCBCR_420PL2:		return "NTV2_FBF_10BIT_YCBCR_420PL2";
-		case NTV2_FBF_10BIT_YCBCR_422PL2:		return "NTV2_FBF_10BIT_YCBCR_422PL2";
-		case NTV2_FBF_8BIT_YCBCR_420PL2:		return "NTV2_FBF_8BIT_YCBCR_420PL2";
-		case NTV2_FBF_8BIT_YCBCR_422PL2:		return "NTV2_FBF_8BIT_YCBCR_422PL2";
-		case NTV2_FBF_INVALID:					return "NTV2_FBF_INVALID";
+		switch (inValue)
+		{
+			case NTV2_FBF_10BIT_YCBCR:				return "YUV-10";
+			case NTV2_FBF_8BIT_YCBCR:				return "YUV-8";
+			case NTV2_FBF_ARGB:						return "RGBA-8";
+			case NTV2_FBF_RGBA:						return "ARGB-8";
+			case NTV2_FBF_10BIT_RGB:				return "RGB-10";
+			case NTV2_FBF_8BIT_YCBCR_YUY2:			return "YUY2-8";
+			case NTV2_FBF_ABGR:						return "ABGR-8";
+			case NTV2_FBF_10BIT_DPX:				return "RGB-10";
+			case NTV2_FBF_10BIT_YCBCR_DPX:			return "YUV-DPX10";
+			case NTV2_FBF_8BIT_DVCPRO:				return "DVCProHD";
+			case NTV2_FBF_8BIT_YCBCR_420PL3:		return "QRez";
+			case NTV2_FBF_8BIT_HDV:					return "HDV";
+			case NTV2_FBF_24BIT_RGB:				return "RGB-8";
+			case NTV2_FBF_24BIT_BGR:				return "BGR-8";
+			case NTV2_FBF_10BIT_YCBCRA:				return "YUVA-10";
+			case NTV2_FBF_10BIT_DPX_LE:             return "RGB-L10";
+			case NTV2_FBF_48BIT_RGB:				return "RGB-12";
+			case NTV2_FBF_PRORES:					return "ProRes-422";
+			case NTV2_FBF_PRORES_DVCPRO:			return "ProRes-DVC";
+			case NTV2_FBF_PRORES_HDV:				return "ProRes-HDV";
+			case NTV2_FBF_10BIT_RGB_PACKED:			return "RGB-P10";
+			case NTV2_FBF_10BIT_ARGB:				return "ARGB-10";
+			case NTV2_FBF_16BIT_ARGB:				return "ARGB-16";
+			case NTV2_FBF_8BIT_YCBCR_422PL3:		return "YUV-P8";
+			case NTV2_FBF_10BIT_RAW_RGB:			return "RAW-RGB10";
+			case NTV2_FBF_10BIT_RAW_YCBCR:			return "RAW-YUV10";
+			case NTV2_FBF_10BIT_YCBCR_420PL3_LE:	return "YUV-P420-L10";
+			case NTV2_FBF_10BIT_YCBCR_422PL3_LE:	return "YUV-P-L10";
+			case NTV2_FBF_10BIT_YCBCR_420PL2:		return "YUV-P420-10";
+			case NTV2_FBF_10BIT_YCBCR_422PL2:		return "YUV-P-10";
+			case NTV2_FBF_8BIT_YCBCR_420PL2:		return "YUV-P420-8";
+			case NTV2_FBF_8BIT_YCBCR_422PL2:		return "YUV-P-8";
+			case NTV2_FBF_INVALID:					return "Unknown";
+		}
+	}
+	else
+	{
+		switch (inValue)
+		{
+			case NTV2_FBF_10BIT_YCBCR:				return "NTV2_FBF_10BIT_YCBCR";
+			case NTV2_FBF_8BIT_YCBCR:				return "NTV2_FBF_8BIT_YCBCR";
+			case NTV2_FBF_ARGB:						return "NTV2_FBF_ARGB";
+			case NTV2_FBF_RGBA:						return "NTV2_FBF_RGBA";
+			case NTV2_FBF_10BIT_RGB:				return "NTV2_FBF_10BIT_RGB";
+			case NTV2_FBF_8BIT_YCBCR_YUY2:			return "NTV2_FBF_8BIT_YCBCR_YUY2";
+			case NTV2_FBF_ABGR:						return "NTV2_FBF_ABGR";
+			case NTV2_FBF_10BIT_DPX:				return "NTV2_FBF_10BIT_DPX";
+			case NTV2_FBF_10BIT_YCBCR_DPX:			return "NTV2_FBF_10BIT_YCBCR_DPX";
+			case NTV2_FBF_8BIT_DVCPRO:				return "NTV2_FBF_8BIT_DVCPRO";
+			case NTV2_FBF_8BIT_YCBCR_420PL3:		return "NTV2_FBF_8BIT_YCBCR_420PL3";
+			case NTV2_FBF_8BIT_HDV:					return "NTV2_FBF_8BIT_HDV";
+			case NTV2_FBF_24BIT_RGB:				return "NTV2_FBF_24BIT_RGB";
+			case NTV2_FBF_24BIT_BGR:				return "NTV2_FBF_24BIT_BGR";
+			case NTV2_FBF_10BIT_YCBCRA:				return "NTV2_FBF_10BIT_YCBCRA";
+			case NTV2_FBF_10BIT_DPX_LE:             return "NTV2_FBF_10BIT_DPX_LE";
+			case NTV2_FBF_48BIT_RGB:				return "NTV2_FBF_48BIT_RGB";
+			case NTV2_FBF_PRORES:					return "NTV2_FBF_PRORES";
+			case NTV2_FBF_PRORES_DVCPRO:			return "NTV2_FBF_PRORES_DVCPRO";
+			case NTV2_FBF_PRORES_HDV:				return "NTV2_FBF_PRORES_HDV";
+			case NTV2_FBF_10BIT_RGB_PACKED:			return "NTV2_FBF_10BIT_RGB_PACKED";
+			case NTV2_FBF_10BIT_ARGB:				return "NTV2_FBF_10BIT_ARGB";
+			case NTV2_FBF_16BIT_ARGB:				return "NTV2_FBF_16BIT_ARGB";
+			case NTV2_FBF_8BIT_YCBCR_422PL3:		return "NTV2_FBF_8BIT_YCBCR_422PL3";
+			case NTV2_FBF_10BIT_RAW_RGB:			return "NTV2_FBF_10BIT_RAW_RGB";
+			case NTV2_FBF_10BIT_RAW_YCBCR:			return "NTV2_FBF_10BIT_RAW_YCBCR";
+			case NTV2_FBF_10BIT_YCBCR_420PL3_LE:	return "NTV2_FBF_10BIT_YCBCR_420PL3_LE";
+			case NTV2_FBF_10BIT_YCBCR_422PL3_LE:	return "NTV2_FBF_10BIT_YCBCR_422PL3_LE";
+			case NTV2_FBF_10BIT_YCBCR_420PL2:		return "NTV2_FBF_10BIT_YCBCR_420PL2";
+			case NTV2_FBF_10BIT_YCBCR_422PL2:		return "NTV2_FBF_10BIT_YCBCR_422PL2";
+			case NTV2_FBF_8BIT_YCBCR_420PL2:		return "NTV2_FBF_8BIT_YCBCR_420PL2";
+			case NTV2_FBF_8BIT_YCBCR_422PL2:		return "NTV2_FBF_8BIT_YCBCR_422PL2";
+			case NTV2_FBF_INVALID:					return "NTV2_FBF_INVALID";
+		}
 	}
 	return string ();
 }
