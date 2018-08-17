@@ -13,6 +13,7 @@
 //	Most of the device features functions are generated using a Python script from '.csv' files exported from a spreadsheet.
 //	The script writes the declarations into 'ntv2devicefeatures.hh', and implementations into 'ntv2devicefeatures.hpp'...
 #include "ntv2devicefeatures.hpp"
+/**	These "can connect" headers have problems -- this will be fixed in SDK 15.0
 #include "xpt_c44.h"
 #include "xpt_c88.h"
 #include "xpt_io4k.h"
@@ -26,7 +27,7 @@
 #include "xpt_kip_j2k1rxtx.h"
 #include "xpt_kip_j2k2tx.h"
 #include "xpt_kip_2100_4tx.h"
-#include "xpt_kip_2100_1rxtx.h"
+#include "xpt_kip_2100_1rxtx.h"		**/
 
 ///////////////////////////////////////////////////////////////////////////
 //	The rest of the non-sdkgen-generated function implementations follow...
@@ -807,7 +808,9 @@ bool NTV2DeviceGetVideoFormatFromState_Ex2(	NTV2VideoFormat *		pOutValue,
 
 
 bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt)
-{
+{	(void) inDeviceID;  (void) inInputXpt;  (void) inOutputXpt;
+	//	In SDK 15, this will be re-done to fix missing connections
+	/*
     switch(inDeviceID)
     {
         case DEVICE_ID_CORVID44:
@@ -848,6 +851,8 @@ bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspo
         default:
             return true;
     }
+	*/
+	return false;
 }
 
 

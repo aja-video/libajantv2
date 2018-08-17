@@ -5701,19 +5701,19 @@ bool CNTV2Card::GetRouting (CNTV2SignalRouter & outRouting)
 	//	Inspect every input of every widget...
 	for (NTV2WidgetIDSetConstIter pWidgetID (validWidgets.begin ());  pWidgetID != validWidgets.end ();  ++pWidgetID)
 	{
-		const NTV2WidgetID			curWidgetID	(*pWidgetID);
-		NTV2InputCrosspointIDSet	inputs;
+		const NTV2WidgetID	curWidgetID	(*pWidgetID);
+		NTV2InputXptIDSet	inputs;
 
 		CNTV2SignalRouter::GetWidgetInputs (curWidgetID, inputs);
-		//cerr	<< endl << "## DEBUG:  GetRouting:  Widget '" << ::NTV2WidgetIDToString (curWidgetID, true) << "' ("
+		//cerr	<< "## DEBUG:  GetRouting:  Widget '" << ::NTV2WidgetIDToString (curWidgetID, true) << "' ("
 		//		<< ::NTV2WidgetIDToString (curWidgetID, false) << ") has " << inputs.size () << " input(s):  " << inputs << endl;
 
 		for (NTV2InputCrosspointIDSetConstIter pInputID (inputs.begin ());  pInputID != inputs.end ();  ++pInputID)
 		{
 			NTV2OutputCrosspointID	outputID	(NTV2_XptBlack);
 			if (!GetConnectedOutput (*pInputID, outputID))
-				;//cerr	<< "## DEBUG:  GetRouting:  'GetConnectedOutput' failed for input '" << ::NTV2InputCrosspointIDToString (*pInputID, true) << "' ("
-				//		<< ::NTV2InputCrosspointIDToString (*pInputID, false) << ")" << endl;
+				;//cerr	<< "## ERROR:  GetRouting:  'GetConnectedOutput' failed for input " << ::NTV2InputCrosspointIDToString (*pInputID)
+				//		<< " (" << ::NTV2InputCrosspointIDToString (*pInputID, true) << ")" << endl;
 			else if (outputID == NTV2_XptBlack)
 				;//cerr	<< "## DEBUG:  GetRouting:  'GetConnectedOutput' returned XptBlack for input '" << ::NTV2InputCrosspointIDToString (*pInputID, true)
 				//		<< "' (" << ::NTV2InputCrosspointIDToString (*pInputID, false) << ")" << endl;

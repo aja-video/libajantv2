@@ -39,20 +39,21 @@ typedef NTV2ActualConnections::const_iterator						NTV2ActualConnectionsConstIte
 typedef std::multimap <NTV2InputCrosspointID, NTV2OutputXptID>		NTV2PossibleConnections;	///< @brief	A map of zero or more one-to-many possible NTV2InputCrosspointID to NTV2OutputCrosspointID connections.
 typedef NTV2PossibleConnections::const_iterator						NTV2PossibleConnectionsConstIter;
 
-typedef	std::map <std::string, NTV2InputXptID>		String2InputXpt;
-typedef String2InputXpt::const_iterator				String2InputXptConstIter;
+typedef	std::map <std::string, NTV2InputXptID>			String2InputXpt;
+typedef String2InputXpt::const_iterator					String2InputXptConstIter;
 
-typedef	std::map <NTV2InputXptID, std::string>		InputXpt2String;
-typedef InputXpt2String::const_iterator				InputXpt2StringConstIter;
+typedef	std::map <NTV2InputXptID, std::string>			InputXpt2String;
+typedef InputXpt2String::const_iterator					InputXpt2StringConstIter;
 
-typedef std::map <NTV2InputXptID, NTV2WidgetID>		InputXpt2WidgetID;
-typedef	InputXpt2WidgetID::const_iterator			InputXpt2WidgetIDConstIter;
+typedef std::multimap <NTV2InputXptID, NTV2WidgetID>	InputXpt2WidgetIDs;
+typedef std::pair <NTV2InputXptID, NTV2WidgetID>		InputXpt2WidgetIDPair;
+typedef	InputXpt2WidgetIDs::const_iterator				InputXpt2WidgetIDsConstIter;
 
-typedef	std::map <std::string, NTV2OutputXptID>		String2OutputXpt;
-typedef String2OutputXpt::const_iterator			String2OutputXptConstIter;
+typedef	std::map <std::string, NTV2OutputXptID>			String2OutputXpt;
+typedef String2OutputXpt::const_iterator				String2OutputXptConstIter;
 
-typedef	std::map <NTV2OutputXptID, std::string>		OutputXpt2String;
-typedef OutputXpt2String::const_iterator			OutputXpt2StringConstIter;
+typedef	std::map <NTV2OutputXptID, std::string>			OutputXpt2String;
+typedef OutputXpt2String::const_iterator				OutputXpt2StringConstIter;
 
 typedef std::multimap <NTV2OutputXptID, NTV2WidgetID>	OutputXpt2WidgetIDs;
 typedef std::pair <NTV2OutputXptID, NTV2WidgetID>		OutputXpt2WidgetIDPair;
@@ -277,13 +278,25 @@ class AJAExport CNTV2SignalRouter
 		static bool					GetWidgetForOutput (const NTV2OutputCrosspointID inOutputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDevice = DEVICE_ID_NOTFOUND);
 
 		/**
+			@brief		Returns the widgets that "own" the specified input crosspoint.
+			@param[in]	inInputXpt		Specifies the input crosspoint of interest.
+			@param[out]	outWidgetIDs	Receives the NTV2WidgetIDSet containing the widgets that "own" the input
+										crosspoint (or an empty set upon failure).
+			@return		True if successful;  otherwise false.
+		**/
+		static bool					GetWidgetsForInput (const NTV2InputCrosspointID inInputXpt, NTV2WidgetIDSet & outWidgetIDs);
+
+		/**
 			@brief		Returns the widget that "owns" the specified input crosspoint.
 			@param[in]	inInputXpt		Specifies the input crosspoint of interest.
 			@param[out]	outWidgetID		Receives the NTV2WidgetID of the widget that "owns" the input crosspoint
 										(or NTV2_WIDGET_INVALID upon failure).
+			@param[in]	inDeviceID		Optionally specifies a device ID to resolve any ambiguity if more than
+										one NTV2WidgetID is associated with the given NTV2InputXptID.
+										Defaults to ::DEVICE_ID_NOTFOUND, which returns the first match.
 			@return		True if successful;  otherwise false.
 		**/
-		static bool					GetWidgetForInput (const NTV2InputCrosspointID inInputXpt, NTV2WidgetID & outWidgetID);
+		static bool					GetWidgetForInput (const NTV2InputCrosspointID inInputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDevice = DEVICE_ID_NOTFOUND);
 
 		/**
 			@brief		Returns the input crosspoints known to be "owned" by the given widget.
@@ -334,7 +347,7 @@ class AJAExport CNTV2SignalRouter
 
         static String2InputXpt		gString2InputXpt;
         static InputXpt2String		gInputXpt2String;
-        static InputXpt2WidgetID	gInputXpt2WidgetID;
+        static InputXpt2WidgetIDs	gInputXpt2WidgetIDs;
         static String2OutputXpt		gString2OutputXpt;
         static OutputXpt2String		gOutputXpt2String;
         static OutputXpt2WidgetIDs	gOutputXpt2WidgetIDs;

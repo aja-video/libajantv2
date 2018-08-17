@@ -6530,8 +6530,7 @@ string NTV2InputCrosspointIDToString (const NTV2InputCrosspointID inValue, const
 		case NTV2_XptMixer4BGVidInput:		return inForRetailDisplay	? "Mixer 4 BG Vid"			: "NTV2_XptMixer4BGVidInput";
 		case NTV2_XptMixer4FGKeyInput:		return inForRetailDisplay	? "Mixer 4 FG Key"			: "NTV2_XptMixer4FGKeyInput";
 		case NTV2_XptMixer4FGVidInput:		return inForRetailDisplay	? "Mixer 4 FG Vid"			: "NTV2_XptMixer4FGVidInput";
-		case NTV2_XptHDMIOutInput:			return inForRetailDisplay	? "HDMI Out"				: "NTV2_XptHDMIOutInput";
-		case NTV2_XptHDMIOutQ1Input:		return inForRetailDisplay	? "HDMI Out Q1"				: "NTV2_XptHDMIOutQ1Input";
+		case NTV2_XptHDMIOutInput:			return inForRetailDisplay	? "HDMI Out"				: "NTV2_XptHDMIOutInput";		//	case NTV2_XptHDMIOutQ1Input:	return inForRetailDisplay ? "HDMI Out Q1" : "NTV2_XptHDMIOutQ1Input";
 		case NTV2_XptHDMIOutQ2Input:		return inForRetailDisplay	? "HDMI Out Q2"				: "NTV2_XptHDMIOutQ2Input";
 		case NTV2_XptHDMIOutQ3Input:		return inForRetailDisplay	? "HDMI Out Q3"				: "NTV2_XptHDMIOutQ3Input";
 		case NTV2_XptHDMIOutQ4Input:		return inForRetailDisplay	? "HDMI Out Q4"				: "NTV2_XptHDMIOutQ4Input";
