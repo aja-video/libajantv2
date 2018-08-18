@@ -1,7 +1,7 @@
 /**
-	@page	ajabase		“libajabase” Class Library
+	@page	ajabase		“libajabase” Classes
 
-	This library is a handy collection of platform-independent classes, templates that provide several practical, basic services
+	This is a handy collection of platform-independent classes and templates that provide several practical, basic services
 	including…
 
 	- Memory Management
@@ -37,4 +37,9 @@
 		- AJAPersistence:  save/retrieve integer/string/blob data to/from a host user's registry/preferences store using string keys
 		- sqlite3:  the SQLite mini RDBMS
 		- AJAPnp:  get notified when AJA devices get attached/detached to/from the host
+
+	Full source code is provided.
+
+	The classes are compiled into the <b>libajantv2</b> library.
+
 **/
