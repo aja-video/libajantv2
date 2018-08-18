@@ -9,23 +9,28 @@
 
 #ifdef MSWindows
 	#ifndef AJASTATIC
-		#ifdef AJADLL
+		#if defined(AJADLL) || defined(AJA_WINDLL)
 			#pragma warning (disable : 4251)
-			#ifdef AJADLL_BUILD
-				#define AJAExport __declspec(dllexport)
+			#if defined(AJADLL_BUILD) || defined(AJA_DLL_BUILD)
+				#define AJAExport	__declspec(dllexport)	//	ajantv2 way
+				#define AJA_EXPORT	__declspec(dllexport)	//	ajabase way
 			#else
-				#define AJAExport __declspec(dllimport)
+				#define AJAExport	__declspec(dllimport)	//	ajantv2 way
+				#define AJA_EXPORT	__declspec(dllimport)	//	ajabase way
 			#endif
 		#else
-			#define AJAExport
+			#define AJAExport	//	ajantv2 way
+			#define	AJA_EXPORT	//	ajabase way
 			#ifndef AJA_NO_AUTOIMPORT
 			#endif
 		#endif
 	#else
-		#define AJAExport
+		#define AJAExport	//	ajantv2 way
+		#define	AJA_EXPORT	//	ajabase way
 	#endif
 #else
-	#define AJAExport
+	#define AJAExport	//	ajantv2 way
+	#define	AJA_EXPORT	//	ajabase way
 #endif
 
 #endif	//	AJAEXPORT_H
