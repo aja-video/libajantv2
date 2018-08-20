@@ -31,8 +31,6 @@ NTV2VideoFormat IoIP2110Services::GetSelectedInputVideoFormat(
                                                               NTV2VideoFormat fbVideoFormat,
                                                               NTV2ColorSpaceMode* inputColorSpace)
 {
-    bool inHfrB;
-    bool levelbtoaConvert;
     NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
     if (inputColorSpace)
         *inputColorSpace = NTV2_ColorSpaceModeYCbCr;
@@ -41,15 +39,9 @@ NTV2VideoFormat IoIP2110Services::GetSelectedInputVideoFormat(
     switch (mVirtualInputSelect)
     {
         case NTV2_Input1Select:
-            inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-            
-            // See if we need to translate this from a level B format to level A
-            inHfrB = IsVideoFormatB(inputFormat);
-            mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, levelbtoaConvert);
-            if (inHfrB && levelbtoaConvert)
-            {
-                inputFormat = GetCorrespondingAFormat(inputFormat);
-            }
+			inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
+			if (InputRequiresBToAConvertsion(NTV2_CHANNEL1))
+				inputFormat = GetCorrespondingAFormat(inputFormat);
             
             if (inputColorSpace)
                 *inputColorSpace = mSDIInput1ColorSpace;
@@ -63,15 +55,9 @@ NTV2VideoFormat IoIP2110Services::GetSelectedInputVideoFormat(
                 *inputColorSpace = mSDIInput1ColorSpace;
             break;
         case NTV2_Input2Select:
-            inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
-            
-            // See if we need to translate this from a level B format to level A
-            inHfrB = IsVideoFormatB(inputFormat);
-            mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, levelbtoaConvert);
-            if (inHfrB && levelbtoaConvert)
-            {
-                inputFormat = GetCorrespondingAFormat(inputFormat);
-            }
+			inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
+			if (InputRequiresBToAConvertsion(NTV2_CHANNEL2))
+				inputFormat = GetCorrespondingAFormat(inputFormat);
             
             if (inputColorSpace)
                 *inputColorSpace = mSDIInput1ColorSpace;
@@ -1711,24 +1697,21 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	mCard->SetTsiFrameEnable(b2pi, NTV2_CHANNEL1);
 
 	// SDI In 1
-	bool b3GbInEnabled;
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-    mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && (mVirtualInputSelect==NTV2_Input1Select)));
+	bool bConvertBToA; 
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL1)==true && mVirtualInputSelect==NTV2_Input1Select;
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
 
 	// SDI In 2
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-    mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, (b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && (mVirtualInputSelect==NTV2_Input2Select)));
-
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL2)==true && mVirtualInputSelect==NTV2_Input2Select;
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, bConvertBToA);
 
 	// SDI In 3
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL3);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, b4kHfr && b3GbInEnabled);
-
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL3);
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, bConvertBToA);
 
 	// SDI In 4
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL4);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, b4kHfr && b3GbInEnabled);
-	
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL4);
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, bConvertBToA);
 	
 	// Mixer/Keyer
 	mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptBlack);

@@ -2041,6 +2041,15 @@ NTV2FrameRate DeviceServices::HalfFrameRate(NTV2FrameRate rate)
 }
 
 
+bool DeviceServices::InputRequiresBToAConvertsion(NTV2Channel ch)
+{
+	bool b3GbInEnabled = false;
+	mCard->GetSDIInput3GbPresent(b3GbInEnabled, ch);
+	bool bConvert = b3GbInEnabled && IsVideoFormatA(mFb1VideoFormat);
+	return bConvert;
+}
+
+
 // MARK: -
 
 // IP common support routines

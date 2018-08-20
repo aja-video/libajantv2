@@ -31,8 +31,6 @@ NTV2VideoFormat Io4KPlusServices::GetSelectedInputVideoFormat(
 											NTV2VideoFormat fbVideoFormat,
 											NTV2ColorSpaceMode* inputColorSpace)
 {
-    bool inHfrB;
-    bool levelbtoaConvert;
 	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
 	if (inputColorSpace)
 		*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
@@ -42,14 +40,8 @@ NTV2VideoFormat Io4KPlusServices::GetSelectedInputVideoFormat(
     {
 		case NTV2_Input1Select:
 			inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-
-			// See if we need to translate this from a level B format to level A
-			inHfrB = IsVideoFormatB(inputFormat);
-			mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, levelbtoaConvert);
-			if (inHfrB && levelbtoaConvert)
-			{
+			if (InputRequiresBToAConvertsion(NTV2_CHANNEL1))
 				inputFormat = GetCorrespondingAFormat(inputFormat);
-			}
 
 			if (inputColorSpace)
 				*inputColorSpace = mSDIInput1ColorSpace;
@@ -64,15 +56,9 @@ NTV2VideoFormat Io4KPlusServices::GetSelectedInputVideoFormat(
 			break;
 
 		case NTV2_Input2Select:
-			inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
-
-			// See if we need to translate this from a level B format to level A
-			inHfrB = IsVideoFormatB(inputFormat);
-			mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, levelbtoaConvert);
-			if (inHfrB && levelbtoaConvert)
-			{
+			inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
+			if (InputRequiresBToAConvertsion(NTV2_CHANNEL2))
 				inputFormat = GetCorrespondingAFormat(inputFormat);
-			}
 
 			if (inputColorSpace)
 				*inputColorSpace = mSDIInput1ColorSpace;
@@ -1511,13 +1497,13 @@ void Io4KPlusServices::SetDeviceXPointCapture ()
 	bool						bSdiOutRGB			= mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb;
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b4k6gOut			= b4K && !b4kHfr && !bSdiOutRGB && 
 													  (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire || 
 													   m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
 	//bool						b4k12gOut			= b4K && (b4kHfr || bSdiOutRGB) && 
 	//												  (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire || 
 	//												   m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
-	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b2xQuadIn			= b4K && !b4kHfr && (mVirtualInputSelect == NTV2_Input2x4kSelect);
 	bool						b4xQuadIn			= b4K && (mVirtualInputSelect == NTV2_Input4x4kSelect);
 	bool						b2xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
@@ -1553,29 +1539,26 @@ void Io4KPlusServices::SetDeviceXPointCapture ()
 	NTV2CrosspointID			inHdRGB1;	
 	NTV2CrosspointID			in4kRGB1, in4kRGB2, in4kRGB3, in4kRGB4;
 	NTV2CrosspointID			in4kYUV1, in4kYUV2, in4kYUV3, in4kYUV4;
-	bool						b3GbInEnabled;
 	
     // Figure out what our input format is based on what is selected
     inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
-	bool inHfrB = IsVideoFormatB(inputFormat);
 	
 	// SDI In 1
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-    mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, 
-    	(b4kHfr && b3GbInEnabled) || (!b4K && b3GbInEnabled && inHfrB && (mVirtualInputSelect==NTV2_Input1Select)));
+	bool bConvertBToA; 
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL1)==true && mVirtualInputSelect==NTV2_Input1Select;
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
             
 	// SDI In 2
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-    mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, 
-    	(b4kHfr && b3GbInEnabled) || (!b4K && b3GbInEnabled && inHfrB && (mVirtualInputSelect==NTV2_Input2Select)));
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL2)==true && mVirtualInputSelect==NTV2_Input2Select;
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, bConvertBToA);
 
 	// SDI In 3
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL3);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, b4kHfr && b3GbInEnabled);
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL3);
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, bConvertBToA);
 
 	// SDI In 4
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL4);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, b4kHfr && b3GbInEnabled);
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL4);
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, bConvertBToA);
     
 
 	// input 1 select

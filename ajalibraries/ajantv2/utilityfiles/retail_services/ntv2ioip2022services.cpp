@@ -1562,7 +1562,6 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 
 	// Figure out what our input format is based on what is selected
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
-	bool inHfrB = IsVideoFormatB(inputFormat);
 
 	// input 1 select
 	inHdYUV1 = inHdYUV2 = inHdRGB1 = NTV2_XptBlack;
@@ -1700,24 +1699,21 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 	mCard->SetTsiFrameEnable(b2pi, NTV2_CHANNEL1);
 
 	// SDI In 1
-	bool b3GbInEnabled;
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, 
-		(b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && !b2FbLevelBHfr && (mVirtualInputSelect==NTV2_Input1Select)));
+	bool bConvertBToA; 
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL1)==true && mVirtualInputSelect==NTV2_Input1Select;
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
 
 	// SDI In 2
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, 
-		(b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && !b2FbLevelBHfr && (mVirtualInputSelect==NTV2_Input2Select)));
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL2)==true && mVirtualInputSelect==NTV2_Input2Select;
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, bConvertBToA);
 
 	// SDI In 3
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL3);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, b4kHfr && b3GbInEnabled);
-
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL3);
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, bConvertBToA);
 
 	// SDI In 4
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL4);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, b4kHfr && b3GbInEnabled);
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL4);
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, bConvertBToA);
 	
 	
 	// Mixer/Keyer
