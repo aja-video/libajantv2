@@ -195,7 +195,6 @@ ntv2DiscoverNubs(	int maxNubs, // Maximum number of nubs (size of sockaddr_in an
 			if (strcmp("0.0.0.0", inet_ntoa(((struct sockaddr_in *)&item->ifr_broadaddr)->sin_addr)))
 			{
 				retcode = ntv2DiscoverNubs( inet_ntoa(((struct sockaddr_in *)&item->ifr_broadaddr)->sin_addr),
-					boardMask,
 					maxNubs,
 					their_addr,
 					boardInventory,
