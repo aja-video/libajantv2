@@ -3698,6 +3698,16 @@ void DeviceServices::DisableRP188EtoE(NTV2WidgetID toOutputWgt)
 	mCard->WriteRegister(kRegLTCStatusControl, 0x0, kRegMaskLTC1InBypass, kRegShiftLTC1Bypass);
 }
 
+void DeviceServices::WriteAudioSourceSelect(ULWord inValue, NTV2Channel inChannel)
+{
+	// read modify write with mask that contains holes
+	ULWord mask = 0x0091ffff;
+	ULWord curValue = 0;
+	mCard->ReadAudioSource(curValue, inChannel);
+	ULWord regValue = (curValue & ~mask) | (inValue & mask);
+	mCard->WriteAudioSource(regValue, inChannel);
+}
+
 
 uint32_t DeviceServices::GetAudioDelayOffset(double frames)
 {

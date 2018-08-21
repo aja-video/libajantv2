@@ -163,7 +163,7 @@ public:
 	void SetBackgroundVideoCrosspoint(NTV2Crosspoint crosspoint);
 	void EnableRP188EtoE(NTV2WidgetID fromInputWgt, NTV2WidgetID toOutputWgt);
 	void DisableRP188EtoE(NTV2WidgetID toOutputWgt);
-
+	void WriteAudioSourceSelect(ULWord val, NTV2Channel ch=NTV2_CHANNEL1);
 
 	bool GetExtFrameGeometry(NTV2FrameGeometry geometry, NTV2FrameGeometry* value);
 	NTV2LHIVideoDACMode GetLHIVideoDACMode(NTV2VideoFormat format, NTV2AnalogType type, NTV2AnalogBlackLevel blackLevel);
