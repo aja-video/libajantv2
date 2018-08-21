@@ -1380,9 +1380,6 @@ public:
 	**/
 	AJA_VIRTUAL bool	ReadAudioLastIn (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool	WriteAudioSource (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool	ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
-
 	/**
 		@brief		Starts the playout side of the given ::NTV2AudioSystem, reading outgoing audio samples
 					from the Audio System's playout buffer.
@@ -1417,9 +1414,6 @@ public:
 					CNTV2Card::GetAudioOutputPause, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		IsAudioOutputRunning (const NTV2AudioSystem inAudioSystem, bool & outIsRunning);
-
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioOutput(inAudioSystem) : StartAudioOutput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioOutput or CNTV2Card::StopAudioOutput instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioOutputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioOutputRunning instead.
 
 	/**
 		@brief		Enables or disables the output of audio samples and advancement of the audio buffer
@@ -1478,9 +1472,6 @@ public:
 		@see		CNTV2Card::StartAudioInput, CNTV2Card::StopAudioInput, \ref audiocapture
 	**/
 	AJA_VIRTUAL bool		IsAudioInputRunning (const NTV2AudioSystem inAudioSystem, bool & outIsRunning);
-
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioInputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioInput(inAudioSystem) : StartAudioInput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioInput or CNTV2Card::StopAudioInput instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioInputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioInputRunning instead.
 
 	/**
 		@brief		Enables or disables audio capture for the given Audio System on the AJA device.
@@ -1893,6 +1884,13 @@ public:
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool		SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, const bool & inEraseModeEnabled);
+
+	AJA_VIRTUAL bool NTV2_SHOULD_BE_DEPRECATED(WriteAudioSource (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1));
+	AJA_VIRTUAL bool NTV2_SHOULD_BE_DEPRECATED(ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1));
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioOutput(inAudioSystem) : StartAudioOutput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioOutput or CNTV2Card::StopAudioOutput instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioOutputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioOutputRunning instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioInputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioInput(inAudioSystem) : StartAudioInput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioInput or CNTV2Card::StopAudioInput instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioInputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioInputRunning instead.
 	///@}
 
 	/**
