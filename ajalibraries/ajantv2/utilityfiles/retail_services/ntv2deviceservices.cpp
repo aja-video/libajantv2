@@ -4622,10 +4622,10 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 	}
 
 	// write the reg value to hardware
-	mCard->WriteAudioSource(regValue);
+	WriteAudioSourceSelect(regValue);
 	if(mCard->DeviceCanDoAudioMixer())
 	{
-		mCard->WriteAudioSource(regValue, NTV2_CHANNEL2);
+		WriteAudioSourceSelect(regValue, NTV2_CHANNEL2);
 		if (mAudioMixerOverrideState == false)
 			mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_2);
 		
