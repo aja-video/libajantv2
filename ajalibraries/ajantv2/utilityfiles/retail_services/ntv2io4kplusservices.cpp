@@ -56,7 +56,7 @@ NTV2VideoFormat Io4KPlusServices::GetSelectedInputVideoFormat(
 			break;
 
 		case NTV2_Input2Select:
-			inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
+			inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
 			if (InputRequiresBToAConvertsion(NTV2_CHANNEL2))
 				inputFormat = GetCorrespondingAFormat(inputFormat);
 
