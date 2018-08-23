@@ -162,7 +162,7 @@ public:
 	void SetBackgroundVideoCrosspoint(NTV2Crosspoint crosspoint);
 	void EnableRP188EtoE(NTV2WidgetID fromInputWgt, NTV2WidgetID toOutputWgt);
 	void DisableRP188EtoE(NTV2WidgetID toOutputWgt);
-
+	void WriteAudioSourceSelect(ULWord val, NTV2Channel ch=NTV2_CHANNEL1);
 
 	bool GetExtFrameGeometry(NTV2FrameGeometry geometry, NTV2FrameGeometry* value);
 	NTV2LHIVideoDACMode GetLHIVideoDACMode(NTV2VideoFormat format, NTV2AnalogType type, NTV2AnalogBlackLevel blackLevel);
@@ -181,6 +181,7 @@ public:
 	bool CanConvertFormat(NTV2VideoFormat inFormat, NTV2VideoFormat outFormat);
 	NTV2VideoFormat GetConversionCompatibleFormat(NTV2VideoFormat sourceFmt, NTV2VideoFormat secondaryFmt);
 	NTV2FrameRate HalfFrameRate(NTV2FrameRate rate);
+	bool InputRequiresBToAConvertsion(NTV2Channel ch);
 	
 	uint32_t GetAudioDelayOffset(double frames);
 	NTV2AudioSystem GetHostAudioSystem();

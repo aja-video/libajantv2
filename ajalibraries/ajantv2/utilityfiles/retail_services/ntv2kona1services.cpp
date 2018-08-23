@@ -411,25 +411,20 @@ void Kona1Services::SetDeviceXPointCapture ()
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
 	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
-	//bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
-	//bool						b4kHfr              = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	//bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
-	//bool						b2xQuadOut          = (b4K && !b4kHfr  && (mVirtualInputSelect == NTV2_Input2x4kSelect));
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;				// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)
 
 	// get selected input video format
 	NTV2VideoFormat	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
-	//bool inHfrB = IsVideoFormatB(inputFormat);
 
 	inputXptYUV1 = NTV2_XptSDIIn1;
 	inputXptYUV2 = NTV2_XptSDIIn1DS2;
 
 	// SDI In 1
-	bool b3GbInEnabled;
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, (b3GbInEnabled && inputColorSpace != NTV2_RGBSelect));
+	bool bConvertBToA; 
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL1)==true && mVirtualInputSelect==NTV2_Input1Select;
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
 
     if(mCard->GetVPIDValidA(NTV2_CHANNEL1))
     {

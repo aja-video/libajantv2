@@ -2041,6 +2041,15 @@ NTV2FrameRate DeviceServices::HalfFrameRate(NTV2FrameRate rate)
 }
 
 
+bool DeviceServices::InputRequiresBToAConvertsion(NTV2Channel ch)
+{
+	bool b3GbInEnabled = false;
+	mCard->GetSDIInput3GbPresent(b3GbInEnabled, ch);
+	bool bConvert = b3GbInEnabled && IsVideoFormatA(mFb1VideoFormat);
+	return bConvert;
+}
+
+
 // MARK: -
 
 // IP common support routines
@@ -3689,6 +3698,16 @@ void DeviceServices::DisableRP188EtoE(NTV2WidgetID toOutputWgt)
 	mCard->WriteRegister(kRegLTCStatusControl, 0x0, kRegMaskLTC1InBypass, kRegShiftLTC1Bypass);
 }
 
+void DeviceServices::WriteAudioSourceSelect(ULWord inValue, NTV2Channel inChannel)
+{
+	// read modify write with mask that contains holes
+	ULWord mask = 0x0091ffff;
+	ULWord curValue = 0;
+	mCard->ReadAudioSource(curValue, inChannel);
+	ULWord regValue = (curValue & ~mask) | (inValue & mask);
+	mCard->WriteAudioSource(regValue, inChannel);
+}
+
 
 uint32_t DeviceServices::GetAudioDelayOffset(double frames)
 {
@@ -4603,10 +4622,10 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 	}
 
 	// write the reg value to hardware
-	mCard->WriteAudioSource(regValue);
+	WriteAudioSourceSelect(regValue);
 	if(mCard->DeviceCanDoAudioMixer())
 	{
-		mCard->WriteAudioSource(regValue, NTV2_CHANNEL2);
+		WriteAudioSourceSelect(regValue, NTV2_CHANNEL2);
 		if (mAudioMixerOverrideState == false)
 			mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_2);
 		

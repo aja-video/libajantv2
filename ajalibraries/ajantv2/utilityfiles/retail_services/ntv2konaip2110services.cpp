@@ -1311,7 +1311,6 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b2xQuadOut			= false;	//(b4K && !b4kHfr && mVirtualInputSelect == NTV2_DualLink2xSdi4k);
-	bool						bStereoIn			= false;
 	int							bFb1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;		// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;		// Assume Channel 2 IS disabled by default
@@ -1328,7 +1327,6 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 	
 	// Figure out what our input format is based on what is selected
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
-	bool inHfrB = IsVideoFormatB(inputFormat);
 	
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1402,23 +1400,21 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 	
 	
 	// SDI In 1
-	bool b3GbInEnabled;
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, 
-		(b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && !b2FbLevelBHfr && (mVirtualInputSelect==NTV2_Input1Select)));
+	bool bConvertBToA; 
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL1)==true && mVirtualInputSelect==NTV2_Input1Select;
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
 	
 	// SDI In 2
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, 
-		(b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && !b2FbLevelBHfr && (mVirtualInputSelect==NTV2_Input2Select)));
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL2)==true && mVirtualInputSelect==NTV2_Input2Select;
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, bConvertBToA);
 	
 	// SDI In 3
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL3);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, b4kHfr && b3GbInEnabled);
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL3);
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, bConvertBToA);
 	
 	// SDI In 4
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL4);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, b4kHfr && b3GbInEnabled);
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL4);
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, bConvertBToA);
 	
 	
 	// Dual Link In 1
