@@ -212,6 +212,7 @@ public:
 	int32_t					mStreamingAppPID;
 	uint32_t				mStreamingAppType;
 	NTV2OutputVideoSelect	mVirtualDigitalOutput1Select;
+	NTV2OutputVideoSelect	mVirtualDigitalOutput2Select;
 	NTV2OutputVideoSelect	mVirtualHDMIOutputSelect;
 	NTV2OutputVideoSelect	mVirtualAnalogOutputSelect;
 	NTV2LutType				mLUTType;
