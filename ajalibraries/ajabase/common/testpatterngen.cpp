@@ -469,25 +469,21 @@ bool AJATestPatternGen::DrawColorQuandrantTSIFrame()
     rgbaPixelYellow.Green = fullRange;
     rgbaPixelYellow.Blue = lowRange;
     AJA_HDConvertRGBAlphatoYCbCr(&rgbaPixelYellow, &yCbCrPixelYellow);
-    //AJA_MakeUnPacked10BitYCbCrBuffer(pUnPackedUpperLineBuffer,yCbCrPixel.y,yCbCrPixel.cb,yCbCrPixel.cr,_frameWidth/2);
     rgbaPixelBlue.Alpha = 0;  // Upper right - blue
     rgbaPixelBlue.Red = midRange;
     rgbaPixelBlue.Green = fullRange;
     rgbaPixelBlue.Blue = fullRange;
     AJA_HDConvertRGBAlphatoYCbCr(&rgbaPixelBlue, &yCbCrPixelBlue);
-    //AJA_MakeUnPacked10BitYCbCrBuffer(&pUnPackedUpperLineBuffer[_frameWidth],yCbCrPixel.y,yCbCrPixel.cb,yCbCrPixel.cr,_frameWidth/2);
     rgbaPixelGreen.Alpha = 0;  // Lower left - green
     rgbaPixelGreen.Red = lowRange;
     rgbaPixelGreen.Green = fullRange;
     rgbaPixelGreen.Blue = lowRange;
     AJA_HDConvertRGBAlphatoYCbCr(&rgbaPixelGreen, &yCbCrPixelGreen);
-    //AJA_MakeUnPacked10BitYCbCrBuffer(pUnPackedLowerLineBuffer,yCbCrPixel.y,yCbCrPixel.cb,yCbCrPixel.cr,_frameWidth/2);
     rgbaPixelPink.Alpha = 0;  // Lower right - pink
     rgbaPixelPink.Red = fullRange;
     rgbaPixelPink.Green = lowRange;
     rgbaPixelPink.Blue = midRange;
     AJA_HDConvertRGBAlphatoYCbCr(&rgbaPixelPink, &yCbCrPixelPink);
-    //AJA_MakeUnPacked10BitYCbCrBuffer(&pUnPackedLowerLineBuffer[_frameWidth],yCbCrPixel.y,yCbCrPixel.cb,yCbCrPixel.cr,_frameWidth/2);
 
     for ( uint32_t count = 0; count < _frameWidth; count+=8 )
     {
