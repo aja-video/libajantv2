@@ -57,6 +57,10 @@
 
 static std::vector<std::string> sTypeLabelsVector;
 #define addTypeLabelToVector(x) sTypeLabelsVector.push_back(#x)
+
+static std::vector<std::string> sDBConnectionLabelsVector;
+#define addDBConnectionLabelToVector(x) sDBConnectionLabelsVector.push_back(#x)
+
 inline void initTypeLabels()
 {
     sTypeLabelsVector.clear();
@@ -66,6 +70,11 @@ inline void initTypeLabels()
     addTypeLabelToVector(AJAPersistenceTypeString);
     addTypeLabelToVector(AJAPersistenceTypeBlob);
     addTypeLabelToVector(AJAPersistenceTypeEnd);
+
+    sDBConnectionLabelsVector.clear();
+    addDBConnectionLabelToVector(AJAPersistenceDBConnectionRead);
+    addDBConnectionLabelToVector(AJAPersistenceDBConnectionWrite);
+    addDBConnectionLabelToVector(AJAPersistenceDBConnectionUtil);
 }
 
 inline std::string labelForPersistenceType(AJAPersistenceType type)
@@ -615,10 +624,11 @@ public:
                     {
                         // update was good
                         isGood = true;
+                        int checkpointMode = SQLITE_CHECKPOINT_FULL;
                         if (type == AJAPersistenceTypeBlob)
-                            mDb.Checkpoint("persistenceBlobs", SQLITE_CHECKPOINT_FULL);
+                            mDb.Checkpoint("persistenceBlobs", checkpointMode);
                         else
-                            mDb.Checkpoint("persistence", SQLITE_CHECKPOINT_FULL);
+                            mDb.Checkpoint("persistence", checkpointMode);
                     }
                 }
             }
@@ -698,25 +708,32 @@ private:
 // Start of Public Class AJAPersistence
 
 AJAPersistence::AJAPersistence()
-    : mDBImpl(NULL)
 {
+    for (int i=0;i<AJAPersistenceDBConnectionEnd;i++)
+        mDBImpl[i] = NULL;
+
     initTypeLabels();
     SetParams("null_device");
 }
 
 AJAPersistence::AJAPersistence(const std::string& appID, const std::string& deviceType, const std::string& deviceNumber, bool bSharePrefFile)
-    : mDBImpl(NULL)
 {
+    for (int i=0;i<AJAPersistenceDBConnectionEnd;i++)
+        mDBImpl[i] = NULL;
+
     initTypeLabels();
     SetParams(appID, deviceType, deviceNumber, bSharePrefFile);
 }
 
 AJAPersistence::~AJAPersistence()
 {
-    if (mDBImpl)
+    for(int i=0;i<AJAPersistenceDBConnectionEnd;i++)
     {
-        delete mDBImpl;
-        mDBImpl = NULL;
+        if (mDBImpl[i])
+        {
+            delete mDBImpl[i];
+            mDBImpl[i] = NULL;
+        }
     }
 }
 
@@ -737,17 +754,20 @@ void AJAPersistence::SetParams(const std::string& appID, const std::string& devi
     mstateKeyName += appID;
 
     bool shouldLog = should_we_log();
-    if (mDBImpl && lastStateKeyName != mstateKeyName)
+    for(int i=0;i<AJAPersistenceDBConnectionEnd;i++)
     {
-        AJA_LOG_INFO(shouldLog, "deleting existing db instance called from SetParams");
-        delete mDBImpl;
-        mDBImpl = NULL;
-    }
+        if (mDBImpl[i] && lastStateKeyName != mstateKeyName)
+        {
+            AJA_LOG_INFO(shouldLog, "deleting existing db, connection (" << sDBConnectionLabelsVector.at(i) << "), called from SetParams");
+            delete mDBImpl[i];
+            mDBImpl[i] = NULL;
+        }
 
-    if (mDBImpl == NULL)
-    {
-        AJA_LOG_INFO(shouldLog, "creating db instance called from SetParams");
-        mDBImpl = new AJAPersistenceDBImpl(mstateKeyName);
+        if (mDBImpl[i] == NULL && mappId != "null_device")
+        {
+            AJA_LOG_INFO(shouldLog, "creating db, connection (" << sDBConnectionLabelsVector.at(i) << "), called from SetParams");
+            mDBImpl[i] = new AJAPersistenceDBImpl(mstateKeyName);
+        }
     }
 }
 
@@ -773,8 +793,8 @@ bool AJAPersistence::SetValue(const std::string& key, void *value, AJAPersistenc
                                  ", and value of: \""    << dbgValue                      << "\"");
     }
     bool isGood = false;
-    if (mDBImpl)
-        isGood = mDBImpl->SetValue(key, value, type, blobSize, mboardId, mserialNumber);
+    if (mDBImpl[AJAPersistenceDBConnectionWrite])
+        isGood = mDBImpl[AJAPersistenceDBConnectionWrite]->SetValue(key, value, type, blobSize, mboardId, mserialNumber);
 
     return isGood;
 }
@@ -787,8 +807,8 @@ bool AJAPersistence::GetValue(const std::string& key, void *value, AJAPersistenc
 
     bool shouldLog = should_we_log();
     bool isGood = false;
-    if (mDBImpl)
-        isGood = mDBImpl->GetValue(key, value, type, blobSize, mboardId, mserialNumber);
+    if (mDBImpl[AJAPersistenceDBConnectionRead])
+        isGood = mDBImpl[AJAPersistenceDBConnectionRead]->GetValue(key, value, type, blobSize, mboardId, mserialNumber);
 
     if (shouldLog)
     {
@@ -813,8 +833,8 @@ bool AJAPersistence::GetValuesString(const std::string& keyQuery, std::vector<st
     AJA_LOG_READ(should_we_log(), "reading string values with query key: " << keyQuery);
 
     bool isGood = false;
-    if (mDBImpl)
-        isGood = mDBImpl->GetAllMatchingValues(keyQuery, keys, values, mboardId, mserialNumber);
+    if (mDBImpl[AJAPersistenceDBConnectionRead])
+        isGood = mDBImpl[AJAPersistenceDBConnectionRead]->GetAllMatchingValues(keyQuery, keys, values, mboardId, mserialNumber);
 
     return isGood;
 }
@@ -893,14 +913,14 @@ bool AJAPersistence::ClearPrefFile()
     bool bSuccess = true;
     if (FileExists())
     {
-        if (mDBImpl)
+        if (mDBImpl[AJAPersistenceDBConnectionUtil])
         {
-            AJA_LOG_INFO(shouldLog, "clearing existing tables in db instance called from ClearPrefFile");
-            bSuccess = mDBImpl->ClearTables();
+            AJA_LOG_INFO(shouldLog, "clearing existing tables in db, using connection (" << sDBConnectionLabelsVector.at(AJAPersistenceDBConnectionUtil) << "), called from ClearPrefFile");
+            bSuccess = mDBImpl[AJAPersistenceDBConnectionUtil]->ClearTables();
         }
         else
         {
-            AJA_LOG_NOTICE(shouldLog, "could not clear existing tables in db, instance not found, called from ClearPrefFile");
+            AJA_LOG_NOTICE(shouldLog, "could not clear existing tables in db, connection (" << sDBConnectionLabelsVector.at(AJAPersistenceDBConnectionUtil) << ") not found, called from ClearPrefFile");
             bSuccess = false;
         }
     }
@@ -918,18 +938,18 @@ bool AJAPersistence::DeletePrefFile()
 	bool bSuccess = true;
 	if (FileExists())
 	{
-        if (mDBImpl)
+        if (mDBImpl[AJAPersistenceDBConnectionUtil])
         {
-            AJA_LOG_INFO(shouldLog, "deleting existing db instance called from DeletePrefFile");
-            delete mDBImpl;
-            mDBImpl = NULL;
+            AJA_LOG_INFO(shouldLog, "deleting existing db, using connection (" << sDBConnectionLabelsVector.at(AJAPersistenceDBConnectionUtil) << "), called from DeletePrefFile");
+            delete mDBImpl[AJAPersistenceDBConnectionUtil];
+            mDBImpl[AJAPersistenceDBConnectionUtil] = NULL;
         }
 
 		int err = remove(mstateKeyName.c_str());
 		bSuccess = err != 0;
 
-        AJA_LOG_INFO(shouldLog, "creating db instance called from DeletePrefFile");
-        mDBImpl = new AJAPersistenceDBImpl(mstateKeyName);
+        AJA_LOG_INFO(shouldLog, "creating db, connection (" << sDBConnectionLabelsVector.at(AJAPersistenceDBConnectionUtil) << "), called from DeletePrefFile");
+        mDBImpl[AJAPersistenceDBConnectionUtil] = new AJAPersistenceDBImpl(mstateKeyName);
 	}
     else
     {
