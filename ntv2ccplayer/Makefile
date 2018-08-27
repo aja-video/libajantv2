@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2004 - 2017 AJA Video Systems, Inc.
+# Copyright (C) 2004 - 2018 AJA Video Systems, Inc.
 # Proprietary and Confidential information.
 # All righs reserved
 #
@@ -21,7 +21,7 @@ SRCS = main.cpp ntv2ccplayer.cpp ntv2democommon.cpp
 
 INCS = ntv2ccplayer.h ntv2democommon.h
 
-LIBS = -lajacc -lajaanc
+LIBS = -lajacc
 
 include $(DIR)/../../../../build/common.mk
 

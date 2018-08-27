@@ -1,7 +1,7 @@
 #
 # Top level Makefile for AJA Video demo applications
 #
-# Copyright (C) 2017 AJA Video Systems, Inc.
+# Copyright (C) 2018 AJA Video Systems, Inc.
 # Proprietary and Confidential information.
 #
 # Control Flags for Make
@@ -17,10 +17,10 @@ SUBDIRS = ntv2burn \
 		  ntv2ccgrabber \
 		  ntv2ccplayer \
 		  ntv2encodehevc \
-          	  ntv2encodehevcfile \
-          	  ntv2encodehevcvif \
+		  ntv2encodehevcfile \
+		  ntv2encodehevcvif \
 		  ntv2enumerateboards \
-          	  ntv2fieldburn \
+		  ntv2fieldburn \
 		  ntv2hdrsetup \
 		  ntv2llburn \
 		  ntv2outputtestpattern \
@@ -30,7 +30,7 @@ SUBDIRS = ntv2burn \
 
 ifndef AJA_NO_QT
 SUBDIRS := $(SUBDIRS) \
-          	  ntv2konaipjsonsetup \
+		  ntv2konaipjsonsetup \
 		  ntv2konaipj2ksetup \
 		  ntv2qtmultiinput \
 		  ntv2qtpreview
