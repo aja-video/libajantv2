@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2004 - 2017 AJA Video Systems, Inc.
+# Copyright (C) 2004 - 2018 AJA Video Systems, Inc.
 # Proprietary and Confidential information.
 # All righs reserved
 #
@@ -19,19 +19,70 @@ AJA_LIB_PATH = $(A_UBER_LIB)/lib$(AJA_LIB).a
 
 KERNEL_INCLUDES	:= /lib/modules/$(shell uname -r)/build
 
-VPATH := $(A_LIB_NTV2_SRC):$(A_LIB_NTV2_SRC_LINUX):$(A_LIB_NTV2_M31_PATH):$(A_LIB_NTV2_INC):$(A_LIB_BASE_PATH):$(KERNEL_INCLUDES):$(SRCDIR)
+VPATH := $(A_LIB_NTV2_SRC):$(A_LIB_NTV2_SRC_LINUX):$(A_LIB_NTV2_M31_PATH):$(A_LIB_NTV2_INC):$(A_LIB_ANC_PATH)/src:$(A_LIB_BASE_PATH):$(A_LIB_BASE_PATH)/common:$(A_LIB_BASE_PATH)/system:$(A_LIB_BASE_PATH)/system/linux:$(A_LIB_BASE_PATH)/pnp:$(A_LIB_BASE_PATH)/pnp/linux:$(A_LIB_BASE_PATH)/persistence:$(A_LIB_BASE_PATH)/network:$(KERNEL_INCLUDES):$(SRCDIR)
 
 CPPFLAGS := -D_REENTRANT -DAJASTATIC
 
-INCLUDES = -I$(KERNEL_INCLUDES)
+INCLUDES = -I$(KERNEL_INCLUDES) -I$(A_LIB_ANC_PATH)/includes
 
-AJA_LIB_SRCS = ntv2audio.cpp \
-		ntv2active.cpp \
+AJA_LIB_SRCS =\
+		ancillarydata.cpp \
+		ancillarydatafactory.cpp \
+		ancillarydata_cea608.cpp \
+		ancillarydata_cea608_line21.cpp \
+		ancillarydata_cea608_vanc.cpp \
+		ancillarydata_cea708.cpp \
+		ancillarydata_framestatusinfo524D.cpp \
+		ancillarydata_framestatusinfo5251.cpp \
+		ancillarydata_hdr_hdr10.cpp \
+		ancillarydata_hdr_hlg.cpp \
+		ancillarydata_hdr_sdr.cpp \
+		ancillarydata_timecode.cpp \
+		ancillarydata_timecode_atc.cpp \
+		ancillarydata_timecode_vitc.cpp \
+		ancillarylist.cpp \
+		atomic.cpp \
+	    audioutilities.cpp \
+		buffer.cpp \
+		common.cpp \
+		debug.cpp \
+		dpx_hdr.cpp \
+		dpxfileio.cpp \
+		event.cpp \
+		eventimpl.cpp \
+		file_io.cpp \
+		guid.cpp \
+		info.cpp \
+		infoimpl.cpp \
+		ip_socket.cpp \
+		lock.cpp \
+		lockimpl.cpp \
+		memory.cpp \
+		options_popt.cpp \
+		performance.cpp \
+		persistence.cpp \
+		pixelformat.cpp \
+		pnp.cpp \
+		pnpimpl.cpp \
+		process.cpp \
+		processimpl.cpp \
+		system.cpp \
+		systemtime.cpp \
+		testpatterngen.cpp \
+		thread.cpp \
+		threadimpl.cpp \
+		timebase.cpp \
+		timecode.cpp \
+		timecodeburn.cpp \
+		timer.cpp \
+		udp_socket.cpp \
+		videoutilities.cpp \
+		wavewriter.cpp \
+		ntv2audio.cpp \
 		ntv2anc.cpp \
 		ntv2autocirculate.cpp \
 		ntv2bitfile.cpp \
 		ntv2card.cpp \
-		ntv2colorcorrection.cpp \
 		ntv2config2022.cpp \
 		ntv2config2110.cpp \
 		ntv2configts2022.cpp \
@@ -41,8 +92,6 @@ AJA_LIB_SRCS = ntv2audio.cpp \
 		ntv2devicescanner.cpp \
 		ntv2discover.cpp \
 		ntv2dma.cpp \
-		ntv2dpx.cpp	\
-		ntv2draw.cpp \
 		ntv2hdmi.cpp \
 		ntv2hevc.cpp \
 		ntv2driverinterface.cpp \
@@ -56,8 +105,6 @@ AJA_LIB_SRCS = ntv2audio.cpp \
 		ntv2mcsfile.cpp \
 		ntv2nubaccess.cpp \
 		ntv2nubpktcom.cpp \
-		ntv2outputaudio.cpp \
-		ntv2procamp.cpp \
 		ntv2publicinterface.cpp \
 		ntv2register.cpp \
 		ntv2registerexpert.cpp \
@@ -66,11 +113,9 @@ AJA_LIB_SRCS = ntv2audio.cpp \
 		ntv2serialcontrol.cpp \
 		ntv2signalrouter.cpp \
 		ntv2spiinterface.cpp \
-		ntv2status.cpp \
 		ntv2subscriptions.cpp \
 		ntv2supportlogger.cpp \
 		ntv2testpattern.cpp \
-		ntv2tonegenerator.cpp \
 		ntv2transcode.cpp \
 		ntv2utf8.cpp \
 		ntv2utils.cpp \
@@ -78,10 +123,8 @@ AJA_LIB_SRCS = ntv2audio.cpp \
 		ntv2vidproc.cpp \
 		ntv2vpid.cpp \
 		ntv2vpidfromspec.cpp \
-		performancecounter.cpp \
 		ntv2task.cpp \
-		testpatterngen.cpp \
-		xena2vidproc.cpp \
+		ntv2testpatterngen.cpp \
         ntv2m31.cpp \
         ntv2m31cparam.cpp \
         ntv2m31ehparam.cpp \

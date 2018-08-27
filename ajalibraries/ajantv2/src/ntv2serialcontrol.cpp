@@ -8,9 +8,6 @@
 #include "ntv2devicescanner.h"
 #include "ntv2devicefeatures.h"
 #include <assert.h>
-#ifdef AJALinux
-# include "ntv2winlinhacks.h"
-#endif
 
 
 
