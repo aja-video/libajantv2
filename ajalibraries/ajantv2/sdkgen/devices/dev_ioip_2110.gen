@@ -163,7 +163,6 @@ NTV2DeviceCanDoCapture
 NTV2DeviceCanDoColorCorrection
 NTV2DeviceCanDoCustomAnc
 NTV2DeviceCanDoDSKOpacity
-NTV2DeviceCanDoDualLink
 NTV2DeviceCanDoFrameStore1Display
 NTV2DeviceCanDoHDVideo
 NTV2DeviceCanDoLTC

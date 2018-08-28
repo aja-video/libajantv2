@@ -116,6 +116,10 @@ bool AJATestPatternGen::DrawTestPattern( AJATestPatternSelect pattNum, uint32_t 
 			DrawQuandrantBorderFrame();
 			bResult = true;
 			break;
+        case AJA_TestPatt_ColorQuadrantTSI:
+            DrawColorQuandrantTSIFrame();
+            bResult = true;
+            break;
 		default:	// unknown test pattern ID?
 			break;
 	}
@@ -446,6 +450,104 @@ bool AJATestPatternGen::DrawColorQuandrantFrame()
 	return true;
 
 }
+
+bool AJATestPatternGen::DrawColorQuandrantTSIFrame()
+{
+    uint32_t* pPackedEvenLineBuffer= new uint32_t[_frameWidth*2];
+    uint16_t* pUnPackedEvenLineBuffer= new uint16_t[_frameWidth*2];
+    uint32_t* pPackedOddLineBuffer= new uint32_t[_frameWidth*2];
+    uint16_t* pUnPackedOddLineBuffer= new uint16_t[_frameWidth*2];
+
+    // Colors for the quadrants are from SMPTE 435-1-2009 section 6.4.2
+    static const unsigned char fullRange = 235;
+    static const unsigned char midRange  = 187;
+    static const unsigned char lowRange  = 140;
+    AJA_RGBAlphaPixel rgbaPixelYellow, rgbaPixelBlue, rgbaPixelGreen, rgbaPixelPink;
+    AJA_YCbCr10BitPixel yCbCrPixelYellow, yCbCrPixelBlue, yCbCrPixelGreen, yCbCrPixelPink;
+    rgbaPixelYellow.Alpha = 0;  // Upper left - yellow
+    rgbaPixelYellow.Red = fullRange;
+    rgbaPixelYellow.Green = fullRange;
+    rgbaPixelYellow.Blue = lowRange;
+    AJA_HDConvertRGBAlphatoYCbCr(&rgbaPixelYellow, &yCbCrPixelYellow);
+    rgbaPixelBlue.Alpha = 0;  // Upper right - blue
+    rgbaPixelBlue.Red = midRange;
+    rgbaPixelBlue.Green = fullRange;
+    rgbaPixelBlue.Blue = fullRange;
+    AJA_HDConvertRGBAlphatoYCbCr(&rgbaPixelBlue, &yCbCrPixelBlue);
+    rgbaPixelGreen.Alpha = 0;  // Lower left - green
+    rgbaPixelGreen.Red = lowRange;
+    rgbaPixelGreen.Green = fullRange;
+    rgbaPixelGreen.Blue = lowRange;
+    AJA_HDConvertRGBAlphatoYCbCr(&rgbaPixelGreen, &yCbCrPixelGreen);
+    rgbaPixelPink.Alpha = 0;  // Lower right - pink
+    rgbaPixelPink.Red = fullRange;
+    rgbaPixelPink.Green = lowRange;
+    rgbaPixelPink.Blue = midRange;
+    AJA_HDConvertRGBAlphatoYCbCr(&rgbaPixelPink, &yCbCrPixelPink);
+
+    for ( uint32_t count = 0; count < _frameWidth; count+=16 )
+    {
+        pUnPackedEvenLineBuffer[count] = yCbCrPixelYellow.cb;
+        pUnPackedEvenLineBuffer[count+1] = yCbCrPixelYellow.y;
+        pUnPackedEvenLineBuffer[count+2] = yCbCrPixelYellow.cr;
+        pUnPackedEvenLineBuffer[count+3] = yCbCrPixelYellow.y;
+
+        pUnPackedEvenLineBuffer[count+4] = yCbCrPixelYellow.cb;
+        pUnPackedEvenLineBuffer[count+5] = yCbCrPixelYellow.y;
+        pUnPackedEvenLineBuffer[count+6] = yCbCrPixelYellow.cr;
+        pUnPackedEvenLineBuffer[count+7] = yCbCrPixelYellow.y;
+
+        pUnPackedEvenLineBuffer[count+8] = yCbCrPixelBlue.cb;
+        pUnPackedEvenLineBuffer[count+9] = yCbCrPixelBlue.y;
+        pUnPackedEvenLineBuffer[count+10] = yCbCrPixelBlue.cr;
+        pUnPackedEvenLineBuffer[count+11] = yCbCrPixelBlue.y;
+
+        pUnPackedEvenLineBuffer[count+12] = yCbCrPixelBlue.cb;
+        pUnPackedEvenLineBuffer[count+13] = yCbCrPixelBlue.y;
+        pUnPackedEvenLineBuffer[count+14] = yCbCrPixelBlue.cr;
+        pUnPackedEvenLineBuffer[count+15] = yCbCrPixelBlue.y;
+    }
+
+    for ( uint32_t count = 0; count < _frameWidth; count+=16 )
+    {
+        pUnPackedOddLineBuffer[count] = yCbCrPixelGreen.cb;
+        pUnPackedOddLineBuffer[count+1] = yCbCrPixelGreen.y;
+        pUnPackedOddLineBuffer[count+2] = yCbCrPixelGreen.cr;
+        pUnPackedOddLineBuffer[count+3] = yCbCrPixelGreen.y;
+
+        pUnPackedOddLineBuffer[count+4] = yCbCrPixelGreen.cb;
+        pUnPackedOddLineBuffer[count+5] = yCbCrPixelGreen.y;
+        pUnPackedOddLineBuffer[count+6] = yCbCrPixelGreen.cr;
+        pUnPackedOddLineBuffer[count+7] = yCbCrPixelGreen.y;
+
+        pUnPackedOddLineBuffer[count+8] = yCbCrPixelPink.cb;
+        pUnPackedOddLineBuffer[count+9] = yCbCrPixelPink.y;
+        pUnPackedOddLineBuffer[count+10] = yCbCrPixelPink.cr;
+        pUnPackedOddLineBuffer[count+11] = yCbCrPixelPink.y;
+
+        pUnPackedOddLineBuffer[count+12] = yCbCrPixelPink.cb;
+        pUnPackedOddLineBuffer[count+13] = yCbCrPixelPink.y;
+        pUnPackedOddLineBuffer[count+14] = yCbCrPixelPink.cr;
+        pUnPackedOddLineBuffer[count+15] = yCbCrPixelPink.y;
+    }
+    AJA_ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedEvenLineBuffer, pPackedEvenLineBuffer,_frameWidth,_pixelFormat);
+    AJA_ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedOddLineBuffer, pPackedOddLineBuffer,_frameWidth,_pixelFormat);
+
+    for(uint32_t line = 0; line < _frameHeight; line+=2)
+    {
+        WriteLineToBuffer( _pixelFormat, _bayerPhase, line,_frameWidth, _linePitch, _pTestPatternBuffer,pPackedEvenLineBuffer);
+        WriteLineToBuffer( _pixelFormat, _bayerPhase, line + 1,_frameWidth, _linePitch, _pTestPatternBuffer,pPackedOddLineBuffer);
+    }
+
+    delete [] pUnPackedEvenLineBuffer;
+    delete [] pPackedEvenLineBuffer;
+    delete [] pUnPackedOddLineBuffer;
+    delete [] pPackedOddLineBuffer;
+
+    return true;
+
+}
+
 bool AJATestPatternGen::DrawQuandrantBorderFrame()
 {
 	uint32_t* pPackedRedLineBuffer= new uint32_t[_frameWidth*2];

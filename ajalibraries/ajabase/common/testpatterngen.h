@@ -32,6 +32,7 @@ enum AJATestPatternSelect
 	AJA_TestPatt_ZonePlate,
 	AJA_TestPatt_ColorQuadrant,
 	AJA_TestPatt_ColorQuadrantBorder,
+    AJA_TestPatt_ColorQuadrantTSI,
 	AJA_TestPatt_All
 };
 
@@ -68,6 +69,7 @@ protected:
 	virtual bool DrawZonePlateFrame();
 	virtual bool DrawQuandrantBorderFrame();
 	virtual bool DrawColorQuandrantFrame();
+    virtual bool DrawColorQuandrantTSIFrame();
 
 protected:
 	AJATestPatternSelect _patternNumber;
