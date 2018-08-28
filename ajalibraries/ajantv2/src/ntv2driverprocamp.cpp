@@ -11,7 +11,6 @@
 #ifdef AJALinux
 #include <linux/jiffies.h>
 #include "registerio.h"
-#include "ntv2driverdma.h"
 #include "driverdbg.h"
 #include "ntv2driverdbgmsgctl.h"
 #define ENABLE_DEBUG_PRINT
