@@ -58,9 +58,6 @@
 static std::vector<std::string> sTypeLabelsVector;
 #define addTypeLabelToVector(x) sTypeLabelsVector.push_back(#x)
 
-static std::vector<std::string> sDBConnectionLabelsVector;
-#define addDBConnectionLabelToVector(x) sDBConnectionLabelsVector.push_back(#x)
-
 inline void initTypeLabels()
 {
     sTypeLabelsVector.clear();
@@ -70,11 +67,6 @@ inline void initTypeLabels()
     addTypeLabelToVector(AJAPersistenceTypeString);
     addTypeLabelToVector(AJAPersistenceTypeBlob);
     addTypeLabelToVector(AJAPersistenceTypeEnd);
-
-    sDBConnectionLabelsVector.clear();
-    addDBConnectionLabelToVector(AJAPersistenceDBConnectionRead);
-    addDBConnectionLabelToVector(AJAPersistenceDBConnectionWrite);
-    addDBConnectionLabelToVector(AJAPersistenceDBConnectionUtil);
 }
 
 inline std::string labelForPersistenceType(AJAPersistenceType type)
@@ -86,6 +78,7 @@ inline std::string labelForPersistenceType(AJAPersistenceType type)
 }
 
 // Reduce the typing when using the logging macros
+//#define AJA_VERBOSE_LOGGING = 1
 #define AJA_LOG_DEBUG(_should_log_, _expr_)    if (_should_log_) { AJA_sDEBUG(AJA_DebugUnit_Persistence, _expr_); }
 #define AJA_LOG_INFO(_should_log_, _expr_)     if (_should_log_) { AJA_sINFO(AJA_DebugUnit_Persistence, _expr_); }
 #define AJA_LOG_NOTICE(_should_log_, _expr_)   if (_should_log_) { AJA_sNOTICE(AJA_DebugUnit_Persistence, _expr_); }
@@ -155,8 +148,10 @@ public:
             }
             else
             {
+#if AJA_VERBOSE_LOGGING
                 AJA_LOG_WRITE(shouldLog, "sqlite> successfully opened handle to DB at: " << mPath);
-                Execute("PRAGMA journal_mode=WAL;");
+#endif
+                Execute("PRAGMA journal_mode=DELETE;");
             }
         }
 
@@ -171,7 +166,9 @@ public:
             }
             else
             {
+#if AJA_VERBOSE_LOGGING
                 AJA_LOG_WRITE(shouldLog, "sqlite> successfully closed handle to DB at: " << mPath);
+#endif
             }
         }
 
@@ -624,11 +621,11 @@ public:
                     {
                         // update was good
                         isGood = true;
-                        int checkpointMode = SQLITE_CHECKPOINT_FULL;
+                        /*int checkpointMode = SQLITE_CHECKPOINT_FULL;
                         if (type == AJAPersistenceTypeBlob)
                             mDb.Checkpoint("persistenceBlobs", checkpointMode);
                         else
-                            mDb.Checkpoint("persistence", checkpointMode);
+                            mDb.Checkpoint("persistence", checkpointMode);*/
                     }
                 }
             }
@@ -709,32 +706,18 @@ private:
 
 AJAPersistence::AJAPersistence()
 {
-    for (int i=0;i<AJAPersistenceDBConnectionEnd;i++)
-        mDBImpl[i] = NULL;
-
     initTypeLabels();
     SetParams("null_device");
 }
 
 AJAPersistence::AJAPersistence(const std::string& appID, const std::string& deviceType, const std::string& deviceNumber, bool bSharePrefFile)
 {
-    for (int i=0;i<AJAPersistenceDBConnectionEnd;i++)
-        mDBImpl[i] = NULL;
-
     initTypeLabels();
     SetParams(appID, deviceType, deviceNumber, bSharePrefFile);
 }
 
 AJAPersistence::~AJAPersistence()
 {
-    for(int i=0;i<AJAPersistenceDBConnectionEnd;i++)
-    {
-        if (mDBImpl[i])
-        {
-            delete mDBImpl[i];
-            mDBImpl[i] = NULL;
-        }
-    }
 }
 
 void AJAPersistence::SetParams(const std::string& appID, const std::string& deviceType, const std::string& deviceNumber, bool bSharePrefFile)
@@ -754,20 +737,9 @@ void AJAPersistence::SetParams(const std::string& appID, const std::string& devi
     mstateKeyName += appID;
 
     bool shouldLog = should_we_log();
-    for(int i=0;i<AJAPersistenceDBConnectionEnd;i++)
+    if (mappId != "null_device")
     {
-        if (mDBImpl[i] && lastStateKeyName != mstateKeyName)
-        {
-            AJA_LOG_INFO(shouldLog, "deleting existing db, connection (" << sDBConnectionLabelsVector.at(i) << "), called from SetParams");
-            delete mDBImpl[i];
-            mDBImpl[i] = NULL;
-        }
-
-        if (mDBImpl[i] == NULL && mappId != "null_device")
-        {
-            AJA_LOG_INFO(shouldLog, "creating db, connection (" << sDBConnectionLabelsVector.at(i) << "), called from SetParams");
-            mDBImpl[i] = new AJAPersistenceDBImpl(mstateKeyName);
-        }
+        AJA_LOG_INFO(shouldLog, "setting db params, mstateKeyName is " << mstateKeyName << ", called from SetParams");
     }
 }
 
@@ -792,9 +764,8 @@ bool AJAPersistence::SetValue(const std::string& key, void *value, AJAPersistenc
                                  ", with dev_num: \""    << mserialNumber                 << "\"" <<
                                  ", and value of: \""    << dbgValue                      << "\"");
     }
-    bool isGood = false;
-    if (mDBImpl[AJAPersistenceDBConnectionWrite])
-        isGood = mDBImpl[AJAPersistenceDBConnectionWrite]->SetValue(key, value, type, blobSize, mboardId, mserialNumber);
+    AJAPersistenceDBImpl db(mstateKeyName);
+    bool isGood = db.SetValue(key, value, type, blobSize, mboardId, mserialNumber);
 
     return isGood;
 }
@@ -807,8 +778,11 @@ bool AJAPersistence::GetValue(const std::string& key, void *value, AJAPersistenc
 
     bool shouldLog = should_we_log();
     bool isGood = false;
-    if (mDBImpl[AJAPersistenceDBConnectionRead])
-        isGood = mDBImpl[AJAPersistenceDBConnectionRead]->GetValue(key, value, type, blobSize, mboardId, mserialNumber);
+
+    {
+        AJAPersistenceDBImpl db(mstateKeyName);
+        isGood = db.GetValue(key, value, type, blobSize, mboardId, mserialNumber);
+    }
 
     if (shouldLog)
     {
@@ -832,9 +806,8 @@ bool AJAPersistence::GetValuesString(const std::string& keyQuery, std::vector<st
 
     AJA_LOG_READ(should_we_log(), "reading string values with query key: " << keyQuery);
 
-    bool isGood = false;
-    if (mDBImpl[AJAPersistenceDBConnectionRead])
-        isGood = mDBImpl[AJAPersistenceDBConnectionRead]->GetAllMatchingValues(keyQuery, keys, values, mboardId, mserialNumber);
+    AJAPersistenceDBImpl db(mstateKeyName);
+    bool isGood = db.GetAllMatchingValues(keyQuery, keys, values, mboardId, mserialNumber);
 
     return isGood;
 }
@@ -913,16 +886,9 @@ bool AJAPersistence::ClearPrefFile()
     bool bSuccess = true;
     if (FileExists())
     {
-        if (mDBImpl[AJAPersistenceDBConnectionUtil])
-        {
-            AJA_LOG_INFO(shouldLog, "clearing existing tables in db, using connection (" << sDBConnectionLabelsVector.at(AJAPersistenceDBConnectionUtil) << "), called from ClearPrefFile");
-            bSuccess = mDBImpl[AJAPersistenceDBConnectionUtil]->ClearTables();
-        }
-        else
-        {
-            AJA_LOG_NOTICE(shouldLog, "could not clear existing tables in db, connection (" << sDBConnectionLabelsVector.at(AJAPersistenceDBConnectionUtil) << ") not found, called from ClearPrefFile");
-            bSuccess = false;
-        }
+        AJAPersistenceDBImpl db(mstateKeyName);
+        AJA_LOG_INFO(shouldLog, "clearing existing tables in db, called from ClearPrefFile");
+        bSuccess = db.ClearTables();
     }
     else
     {
@@ -938,18 +904,8 @@ bool AJAPersistence::DeletePrefFile()
 	bool bSuccess = true;
 	if (FileExists())
 	{
-        if (mDBImpl[AJAPersistenceDBConnectionUtil])
-        {
-            AJA_LOG_INFO(shouldLog, "deleting existing db, using connection (" << sDBConnectionLabelsVector.at(AJAPersistenceDBConnectionUtil) << "), called from DeletePrefFile");
-            delete mDBImpl[AJAPersistenceDBConnectionUtil];
-            mDBImpl[AJAPersistenceDBConnectionUtil] = NULL;
-        }
-
 		int err = remove(mstateKeyName.c_str());
 		bSuccess = err != 0;
-
-        AJA_LOG_INFO(shouldLog, "creating db, connection (" << sDBConnectionLabelsVector.at(AJAPersistenceDBConnectionUtil) << "), called from DeletePrefFile");
-        mDBImpl[AJAPersistenceDBConnectionUtil] = new AJAPersistenceDBImpl(mstateKeyName);
 	}
     else
     {
