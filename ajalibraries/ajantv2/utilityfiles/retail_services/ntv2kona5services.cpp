@@ -1579,19 +1579,23 @@ void Kona5Services::SetDeviceXPointCapture ()
     if (b2piIn)
         b2xQuadIn = b4xQuadIn = false;
 
-    // override inputColorSpace for SMTE425
-    if (b2piIn)
-    {
-        VPIDSampling sample = parser.GetSampling();
-        if (sample == VPIDSampling_YUV_422)
-        {
-            inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-        }
-        else
-        {
-            inputColorSpace = NTV2_ColorSpaceModeRgb;
-        }
-    }
+    // override inputColorSpace
+	if (mSDIInput1ColorSpace == NTV2_ColorSpaceModeAuto)
+	{
+		VPIDSampling sample = parser.GetSampling();
+		if (sample == VPIDSampling_YUV_422)
+		{
+			inputColorSpace = NTV2_ColorSpaceModeYCbCr;
+		}
+		else
+		{
+			inputColorSpace = NTV2_ColorSpaceModeRgb;
+		}
+	}
+	else
+	{
+		inputColorSpace = mSDIInput1ColorSpace;
+	}
 
     // other bools
     b2pi		= b2piIn;

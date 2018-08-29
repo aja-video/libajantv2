@@ -229,6 +229,7 @@ public:
 	NTV2ColorSpaceType		mColorSpaceType;
 	NTV2ColorSpaceMode		mSDIOutput1ColorSpace;
 	NTV2RGBRangeMode		mSDIOutput1RGBRange;
+	
     rx2022Config            mRx2022Config1;
     rx2022Config            mRx2022Config2;
     tx2022Config            mTx2022Config3;
@@ -265,9 +266,7 @@ public:
 	NTV2ColorSpaceMode 		mSDIInput2ColorSpace;
 	NTV2RGBRangeMode		mSDIInput1RGBRange;
 	NTV2RGBRangeMode		mSDIInput2RGBRange;
-	NTV2Stereo3DMode		mSDIInput1Stereo3DMode;
 	NTV2RGBRangeMode		mFrameBuffer1RGBRange;
-	NTV2Stereo3DMode		mFrameBuffer1Stereo3DMode;
 	NTV2AnalogBlackLevel	mVirtualAnalogOutBlackLevel;
 	NTV2AnalogType			mVirtualAnalogOutputType;
 	NTV2AnalogBlackLevel	mVirtualAnalogInBlackLevel;

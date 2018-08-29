@@ -1615,8 +1615,7 @@ void Io4KServices::SetDeviceXPointCapture ()
 		if (b2piIn)
 			b2xQuadIn = b4xQuadIn = false;
 
-		// override inputColorSpace for SMTE425
-		if (b2piIn)
+		if (mSDIInput1ColorSpace == NTV2_ColorSpaceModeAuto)
 		{
 			VPIDSampling sample = parser.GetSampling();
 			if (sample == VPIDSampling_YUV_422)
@@ -1627,6 +1626,10 @@ void Io4KServices::SetDeviceXPointCapture ()
 			{
 				inputColorSpace = NTV2_ColorSpaceModeRgb;
 			}
+		}
+		else
+		{
+			inputColorSpace = mSDIInput1ColorSpace;
 		}
 	}
 	

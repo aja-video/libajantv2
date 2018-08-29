@@ -203,12 +203,12 @@ void DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVRegRGB10Range, mRGB10Range);
 	AsDriverInterface(mCard)->ReadRegister(kVRegColorSpaceMode, mColorSpaceType);
 	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1RGBRange, mSDIOutput1RGBRange);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1ColorSpaceMode, mSDIInput1ColorSpace);
+	//AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput2ColorSpaceMode, mSDIInput2ColorSpace);
 	
 	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1RGBRange, mSDIInput1RGBRange);
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput2RGBRange, mSDIInput2RGBRange);
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1Stereo3DMode, mSDIInput1Stereo3DMode);
+	//AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput2RGBRange, mSDIInput2RGBRange);
 	AsDriverInterface(mCard)->ReadRegister(kVRegFrameBuffer1RGBRange, mFrameBuffer1RGBRange);
-	AsDriverInterface(mCard)->ReadRegister(kVRegFrameBuffer1Stereo3DMode, mFrameBuffer1Stereo3DMode);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutBlackLevel, mVirtualAnalogOutBlackLevel);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutputType, mVirtualAnalogOutputType);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogInBlackLevel, mVirtualAnalogInBlackLevel);
@@ -437,6 +437,10 @@ void DeviceServices::UpdateAutoState()
 	// out range						
 	mSDIOutput1RGBRange = mSDIOutput1RGBRange == NTV2_RGBRangeAuto ?
 							NTV2_RGBRangeFull : mSDIOutput1RGBRange;
+							
+	// in cs - auto determined by vpid
+							
+	// in range - auto determined by vpid
 	
 	// 4k transport
 	NTV24kTransportType tranport4k = NTV2_4kTransport_PixelInterleave;
