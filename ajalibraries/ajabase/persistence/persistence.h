@@ -23,17 +23,6 @@ enum AJAPersistenceType
 	AJAPersistenceTypeEnd
 };
 
-class AJAPersistenceDBImpl;
-
-enum AJAPersistenceDBConnection
-{
-    AJAPersistenceDBConnectionRead,
-    AJAPersistenceDBConnectionWrite,
-    AJAPersistenceDBConnectionUtil,
-
-    AJAPersistenceDBConnectionEnd
-};
-
 /**
  * Class used to talk to the board in such a way as to maintain a persistant state 
  * across apps and reboots.
@@ -69,8 +58,6 @@ private:
 	std::string				mstateKeyName;
 
     AJASystemInfo           mSysInfo;
-
-    AJAPersistenceDBImpl*   mDBImpl[AJAPersistenceDBConnectionEnd];
 };
 
 #endif	//	AJAPersistence_H
