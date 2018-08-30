@@ -600,169 +600,60 @@ void CNTV2DeviceScanner::SetVideoAttributes (NTV2DeviceInfo & info)
 
 }	//	SetVideoAttributes
 
-#if !defined (NTV2_DEPRECATE)
-	void CNTV2DeviceScanner::SetAudioAttributes(NTV2DeviceInfo & info, CNTV2Card & inBoard) const
+void CNTV2DeviceScanner::SetAudioAttributes(NTV2DeviceInfo & info, CNTV2Card & inBoard) const
+{
+	//	Start with empty lists...
+	info.audioSampleRateList.clear();
+	info.audioNumChannelsList.clear();
+	info.audioBitsPerSampleList.clear();
+	info.audioInSourceList.clear();
+	info.audioOutSourceList.clear();
+
+
+	if (::NTV2DeviceGetNumAudioSystems(info.deviceID))
 	{
-		//	Start with empty lists...
-		info.audioSampleRateList.clear();
-		info.audioNumChannelsList.clear();
-		info.audioBitsPerSampleList.clear();
-		info.audioInSourceList.clear();
-		info.audioOutSourceList.clear();
+		ULWord audioControl;
+		inBoard.ReadRegister(kRegAud1Control, audioControl);
 
+		//audioSampleRateList
+		info.audioSampleRateList.push_back(k48KHzSampleRate);
+		if (::NTV2DeviceCanDoAudio96K(info.deviceID))
+			info.audioSampleRateList.push_back(k96KHzSampleRate);
 
-		if (::NTV2DeviceCanDoAudioN(info.deviceID, 0))
-		{
-			ULWord audioControl;
-			inBoard.ReadRegister(kRegAud1Control, &audioControl);
+		//audioBitsPerSampleList
+		info.audioBitsPerSampleList.push_back(k32bitsPerSample);
 
-			//audioSampleRateList
-			info.audioSampleRateList.push_back(k48KHzSampleRate);
-			if (::NTV2DeviceCanDoAudio96K(info.deviceID))
-				info.audioSampleRateList.push_back(k96KHzSampleRate);
+		//audioInSourceList
+		info.audioInSourceList.push_back(kSourceSDI);
+		if (audioControl & BIT(21))
+			info.audioInSourceList.push_back(kSourceAES);
+		if (::NTV2DeviceCanDoAnalogAudio(info.deviceID))
+			info.audioInSourceList.push_back(kSourceAnalog);
 
-			//audioBitsPerSampleList
-			info.audioBitsPerSampleList.push_back(k32bitsPerSample);
+		//audioOutSourceList
+		info.audioOutSourceList.push_back(kSourceAll);
 
-			//audioInSourceList
-			info.audioInSourceList.push_back(kSourceSDI);
-			if (audioControl & BIT(21))
-				info.audioInSourceList.push_back(kSourceAES);
-			if (::NTV2DeviceCanDoAnalogAudio(info.deviceID))
-				info.audioInSourceList.push_back(kSourceAnalog);
+		//audioNumChannelsList
+		if (::NTV2DeviceCanDoAudio2Channels(info.deviceID))
+			info.audioNumChannelsList.push_back(kNumAudioChannels2);
+		if (::NTV2DeviceCanDoAudio6Channels(info.deviceID))
+			info.audioNumChannelsList.push_back(kNumAudioChannels6);
+		if (::NTV2DeviceCanDoAudio8Channels(info.deviceID))
+			info.audioNumChannelsList.push_back(kNumAudioChannels8);
 
-			//audioOutSourceList
-			info.audioOutSourceList.push_back(kSourceAll);
-
-			//audioNumChannelsList
-			if (::NTV2DeviceCanDoAudio2Channels(info.deviceID))
-				info.audioNumChannelsList.push_back(kNumAudioChannels2);
-			if (::NTV2DeviceCanDoAudio6Channels(info.deviceID))
-				info.audioNumChannelsList.push_back(kNumAudioChannels6);
-			if (::NTV2DeviceCanDoAudio8Channels(info.deviceID))
-				info.audioNumChannelsList.push_back(kNumAudioChannels8);
-
-			info.numAudioStreams = ::NTV2DeviceGetNumAudioStreams(info.deviceID);
-		}
-
-		info.numAnalogAudioInputChannels = ::NTV2DeviceGetNumAnalogAudioInputChannels(info.deviceID);
-		info.numAESAudioInputChannels = ::NTV2DeviceGetNumAESAudioInputChannels(info.deviceID);
-		info.numEmbeddedAudioInputChannels = ::NTV2DeviceGetNumEmbeddedAudioInputChannels(info.deviceID);
-		info.numHDMIAudioInputChannels = ::NTV2DeviceGetNumHDMIAudioInputChannels(info.deviceID);
-		info.numAnalogAudioOutputChannels = ::NTV2DeviceGetNumAnalogAudioOutputChannels(info.deviceID);
-		info.numAESAudioOutputChannels = ::NTV2DeviceGetNumAESAudioOutputChannels(info.deviceID);
-		info.numEmbeddedAudioOutputChannels = ::NTV2DeviceGetNumEmbeddedAudioOutputChannels(info.deviceID);
-		info.numHDMIAudioOutputChannels = ::NTV2DeviceGetNumHDMIAudioOutputChannels(info.deviceID);
+		info.numAudioStreams = ::NTV2DeviceGetNumAudioSystems(info.deviceID);
 	}
-	void CNTV2DeviceScanner::SetAudioAttributes (NTV2DeviceInfo & info, CNTV2Status & inBoard) const
-	{	
-		//	Start with empty lists...
-		info.audioSampleRateList.clear();
-		info.audioNumChannelsList.clear();
-		info.audioBitsPerSampleList.clear();
-		info.audioInSourceList.clear();
-		info.audioOutSourceList.clear();
 
+	info.numAnalogAudioInputChannels = ::NTV2DeviceGetNumAnalogAudioInputChannels(info.deviceID);
+	info.numAESAudioInputChannels = ::NTV2DeviceGetNumAESAudioInputChannels(info.deviceID);
+	info.numEmbeddedAudioInputChannels = ::NTV2DeviceGetNumEmbeddedAudioInputChannels(info.deviceID);
+	info.numHDMIAudioInputChannels = ::NTV2DeviceGetNumHDMIAudioInputChannels(info.deviceID);
+	info.numAnalogAudioOutputChannels = ::NTV2DeviceGetNumAnalogAudioOutputChannels(info.deviceID);
+	info.numAESAudioOutputChannels = ::NTV2DeviceGetNumAESAudioOutputChannels(info.deviceID);
+	info.numEmbeddedAudioOutputChannels = ::NTV2DeviceGetNumEmbeddedAudioOutputChannels(info.deviceID);
+	info.numHDMIAudioOutputChannels = ::NTV2DeviceGetNumHDMIAudioOutputChannels(info.deviceID);
 
-		if (::NTV2DeviceCanDoAudioN(info.deviceID, 0))
-		{
-			ULWord audioControl;
-			inBoard.ReadRegister(kRegAud1Control, &audioControl);
-
-			//audioSampleRateList
-			info.audioSampleRateList.push_back(k48KHzSampleRate);
-			if (::NTV2DeviceCanDoAudio96K(info.deviceID))
-				info.audioSampleRateList.push_back(k96KHzSampleRate);
-
-			//audioBitsPerSampleList
-			info.audioBitsPerSampleList.push_back(k32bitsPerSample);
-
-			//audioInSourceList
-			info.audioInSourceList.push_back(kSourceSDI);
-			if (audioControl & BIT(21))
-				info.audioInSourceList.push_back(kSourceAES);
-			if (::NTV2DeviceCanDoAnalogAudio(info.deviceID))
-				info.audioInSourceList.push_back(kSourceAnalog);
-
-			//audioOutSourceList
-			info.audioOutSourceList.push_back(kSourceAll);
-
-			//audioNumChannelsList
-			if (::NTV2DeviceCanDoAudio2Channels(info.deviceID))
-				info.audioNumChannelsList.push_back(kNumAudioChannels2);
-			if (::NTV2DeviceCanDoAudio6Channels(info.deviceID))
-				info.audioNumChannelsList.push_back(kNumAudioChannels6);
-			if (::NTV2DeviceCanDoAudio8Channels(info.deviceID))
-				info.audioNumChannelsList.push_back(kNumAudioChannels8);
-
-			info.numAudioStreams = ::NTV2DeviceGetNumAudioStreams(info.deviceID);
-		}
-
-		info.numAnalogAudioInputChannels = ::NTV2DeviceGetNumAnalogAudioInputChannels(info.deviceID);
-		info.numAESAudioInputChannels = ::NTV2DeviceGetNumAESAudioInputChannels(info.deviceID);
-		info.numEmbeddedAudioInputChannels = ::NTV2DeviceGetNumEmbeddedAudioInputChannels(info.deviceID);
-		info.numHDMIAudioInputChannels = ::NTV2DeviceGetNumHDMIAudioInputChannels(info.deviceID);
-		info.numAnalogAudioOutputChannels = ::NTV2DeviceGetNumAnalogAudioOutputChannels(info.deviceID);
-		info.numAESAudioOutputChannels = ::NTV2DeviceGetNumAESAudioOutputChannels(info.deviceID);
-		info.numEmbeddedAudioOutputChannels = ::NTV2DeviceGetNumEmbeddedAudioOutputChannels(info.deviceID);
-		info.numHDMIAudioOutputChannels = ::NTV2DeviceGetNumHDMIAudioOutputChannels(info.deviceID);
-	}	//	SetAudioAttributes
-#else
-	void CNTV2DeviceScanner::SetAudioAttributes(NTV2DeviceInfo & info, CNTV2Card & inBoard) const
-	{
-		//	Start with empty lists...
-		info.audioSampleRateList.clear();
-		info.audioNumChannelsList.clear();
-		info.audioBitsPerSampleList.clear();
-		info.audioInSourceList.clear();
-		info.audioOutSourceList.clear();
-
-
-		if (::NTV2DeviceGetNumAudioSystems(info.deviceID))
-		{
-			ULWord audioControl;
-			inBoard.ReadRegister(kRegAud1Control, audioControl);
-
-			//audioSampleRateList
-			info.audioSampleRateList.push_back(k48KHzSampleRate);
-			if (::NTV2DeviceCanDoAudio96K(info.deviceID))
-				info.audioSampleRateList.push_back(k96KHzSampleRate);
-
-			//audioBitsPerSampleList
-			info.audioBitsPerSampleList.push_back(k32bitsPerSample);
-
-			//audioInSourceList
-			info.audioInSourceList.push_back(kSourceSDI);
-			if (audioControl & BIT(21))
-				info.audioInSourceList.push_back(kSourceAES);
-			if (::NTV2DeviceCanDoAnalogAudio(info.deviceID))
-				info.audioInSourceList.push_back(kSourceAnalog);
-
-			//audioOutSourceList
-			info.audioOutSourceList.push_back(kSourceAll);
-
-			//audioNumChannelsList
-			if (::NTV2DeviceCanDoAudio2Channels(info.deviceID))
-				info.audioNumChannelsList.push_back(kNumAudioChannels2);
-			if (::NTV2DeviceCanDoAudio6Channels(info.deviceID))
-				info.audioNumChannelsList.push_back(kNumAudioChannels6);
-			if (::NTV2DeviceCanDoAudio8Channels(info.deviceID))
-				info.audioNumChannelsList.push_back(kNumAudioChannels8);
-
-			info.numAudioStreams = ::NTV2DeviceGetNumAudioSystems(info.deviceID);
-		}
-
-		info.numAnalogAudioInputChannels = ::NTV2DeviceGetNumAnalogAudioInputChannels(info.deviceID);
-		info.numAESAudioInputChannels = ::NTV2DeviceGetNumAESAudioInputChannels(info.deviceID);
-		info.numEmbeddedAudioInputChannels = ::NTV2DeviceGetNumEmbeddedAudioInputChannels(info.deviceID);
-		info.numHDMIAudioInputChannels = ::NTV2DeviceGetNumHDMIAudioInputChannels(info.deviceID);
-		info.numAnalogAudioOutputChannels = ::NTV2DeviceGetNumAnalogAudioOutputChannels(info.deviceID);
-		info.numAESAudioOutputChannels = ::NTV2DeviceGetNumAESAudioOutputChannels(info.deviceID);
-		info.numEmbeddedAudioOutputChannels = ::NTV2DeviceGetNumEmbeddedAudioOutputChannels(info.deviceID);
-		info.numHDMIAudioOutputChannels = ::NTV2DeviceGetNumHDMIAudioOutputChannels(info.deviceID);
-
-	}	//	SetAudioAttributes
-#endif
+}	//	SetAudioAttributes
 
 
 //	Sort functor based on PCI slot number...

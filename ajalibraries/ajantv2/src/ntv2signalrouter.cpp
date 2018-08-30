@@ -688,7 +688,7 @@ AJA_LOCAL_STATIC	const NTV2RoutingEntry Mixer4BGVidInputSelectEntry		=	{kRegXptS
 AJA_LOCAL_STATIC	const NTV2RoutingEntry Mixer4FGKeyInputSelectEntry		=	{kRegXptSelectGroup29,		kK2RegMaskMixer4FGKeyInputSelect,			kK2RegShiftMixer4FGKeyInputSelect,			0};
 AJA_LOCAL_STATIC	const NTV2RoutingEntry Mixer4FGVidInputSelectEntry		=	{kRegXptSelectGroup29,		kK2RegMaskMixer4FGVidInputSelect,			kK2RegShiftMixer4FGVidInputSelect,			0};
 AJA_LOCAL_STATIC	const NTV2RoutingEntry HDMIOutInputSelectEntry			=	{kRegXptSelectGroup6,		kK2RegMaskHDMIOutInputSelect,				kK2RegShiftHDMIOutInputSelect,				0};
-AJA_LOCAL_STATIC	const NTV2RoutingEntry HDMIOutQ1InputSelectEntry		=	{kRegXptSelectGroup6,		kK2RegMaskHDMIOutInputSelect,				kK2RegShiftHDMIOutInputSelect,				0};
+AJA_LOCAL_STATIC	const NTV2RoutingEntry HDMIOutQ1InputSelectEntry		=	HDMIOutInputSelectEntry;
 AJA_LOCAL_STATIC	const NTV2RoutingEntry HDMIOutQ2InputSelectEntry		=	{kRegXptSelectGroup20,		kK2RegMaskHDMIOutV2Q2InputSelect,			kK2RegShiftHDMIOutV2Q2InputSelect,			0};
 AJA_LOCAL_STATIC	const NTV2RoutingEntry HDMIOutQ3InputSelectEntry		=	{kRegXptSelectGroup20,		kK2RegMaskHDMIOutV2Q3InputSelect,			kK2RegShiftHDMIOutV2Q3InputSelect,			0};
 AJA_LOCAL_STATIC	const NTV2RoutingEntry HDMIOutQ4InputSelectEntry		=	{kRegXptSelectGroup20,		kK2RegMaskHDMIOutV2Q4InputSelect,			kK2RegShiftHDMIOutV2Q4InputSelect,			0};
@@ -1108,7 +1108,7 @@ const NTV2RoutingEntry & CNTV2SignalRouter::GetInputSelectEntry (const NTV2Input
         case NTV2_XptMixer4FGKeyInput:		return Mixer4FGKeyInputSelectEntry;
         case NTV2_XptMixer4FGVidInput:		return Mixer4FGVidInputSelectEntry;
         case NTV2_XptHDMIOutInput:			return HDMIOutInputSelectEntry;
-        case NTV2_XptHDMIOutQ1Input:		return HDMIOutQ1InputSelectEntry;
+// DUPE case NTV2_XptHDMIOutQ1Input:		return HDMIOutQ1InputSelectEntry;
         case NTV2_XptHDMIOutQ2Input:		return HDMIOutQ2InputSelectEntry;
         case NTV2_XptHDMIOutQ3Input:		return HDMIOutQ3InputSelectEntry;
         case NTV2_XptHDMIOutQ4Input:		return HDMIOutQ4InputSelectEntry;

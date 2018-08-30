@@ -2042,36 +2042,6 @@ SegmentTestPatternData NTV2TestPatternSegments[] =
 const UWord numSegmentTestPatterns = sizeof(NTV2TestPatternSegments)/sizeof(SegmentTestPatternData);
 
 
-#if !defined (NTV2_DEPRECATE)
-
-	CNTV2TestPattern::CNTV2TestPattern(	UWord inDeviceIndex,
-										bool inDisplayErrors,
-										UWord dwCardTypes,
-										bool autoRouteOnXena2, 
-										const char hostname[],
-										NTV2Channel channel)
-		:   CNTV2Status (inDeviceIndex, inDisplayErrors, dwCardTypes, hostname) ,_autoRouteOnXena2(autoRouteOnXena2)
-	{
-		InitNTV2TestPattern ();
-		SetChannel (channel);
-	}
-
-
-	CNTV2TestPattern::CNTV2TestPattern()
-	{
-		_autoRouteOnXena2 = false;
-		InitNTV2TestPattern();
-	}
-
-
-	CNTV2TestPattern::~CNTV2TestPattern()
-	{
-		// board closed in CNTV2Card destructor
-	}
-
-#endif	//	!defined (NTV2_DEPRECATE)
-
-
 void CNTV2Card::InitNTV2TestPattern (void)
 {
 	SetChannel (NTV2_CHANNEL1);

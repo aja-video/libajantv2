@@ -1832,18 +1832,23 @@ public:
 	AJA_VIRTUAL bool		SetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, const NTV2AudioSystem inSrcAudioSystem, const NTV2Audio4ChannelSelect inSrcAudioChannels);
 
 	/**
-		@brief		Sets the audio monitor output source to a specified audio system and channel pair. (The audio monitor is
-					typically the L+R RCA jacks.)
-		@param[in]	inAudioSystem	Specifies the audio system to use. (This really should be an NTV2AudioSystem.)
-		@param[in]	inChannelPair	Specifies the audio channel pair to use. (This really should be an NTV2AudioChannelPair.)
+		@brief		Sets the audio monitor output source to a specified audio system and channel pair. (The audio monitor
+					is typically the L+R RCA jacks on a breakout box, or the headphone jack on an Io device.)
+		@param[in]	inAudioSystem	Specifies the audio system to use.
+		@param[in]	inChannelPair	Specifies the audio channel pair to use.
+		@bug		The \c inChannelPair parameter really should be an ::NTV2AudioChannelPair.
+					The \c inAudioSystem parameter really should be an ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool		SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inChannelPair, const NTV2Channel inAudioSystem = NTV2_CHANNEL1);
 
 	/**
-		@brief		Answers with the current audio monitor output source. (The audio monitor is typically the L+R RCA jacks.)
-		@param[in]	outAudioSystem		Receives the current audio system being used. (This really should be an NTV2AudioSystem.)
-		@param[in]	outChannelPair		Receives the current audio channel pair being used. (This really should be an NTV2AudioChannelPair.)
+		@brief		Answers with the current audio monitor output source. (The audio monitor is typically the L+R RCA jacks on a breakout box,
+					or the headphone jack on an Io device.)
+		@param[in]	outAudioSystem		Receives the current audio system being used.
+		@param[in]	outChannelPair		Receives the current audio channel pair being used.
+		@bug		The \c outChannelPair parameter really should be an ::NTV2AudioChannelPair.
+					The \c outAudioSystem parameter really should be an ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool		GetAudioOutputMonitorSource (NTV2AudioMonitorSelect & outChannelPair, NTV2Channel & outAudioSystem);
@@ -5345,7 +5350,6 @@ public:
 		NUM_COLORS
 	} ColorCorrectionColor;	//	From CNTV2ColorCorrection
 
-#if defined (NTV2_DEPRECATE)
 				//////////////////////////////////////////////////////////
 	public:		//////////	From CNTV2TestPattern			//////////////
 				//////////////////////////////////////////////////////////
@@ -5449,8 +5453,6 @@ public:
 		#ifdef AJALinux
 			AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void			SetMatteColor (AJARgb rgbColor));							///< Originally in CNTV2VidProc class.
 		#endif
-
-#endif	//	defined (NTV2_DEPRECATE)
 
 	//	These functions can't be deprecated until CNTV2VidProc and CNTV2TestPattern go away...
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteVideoProcessingControlCrosspoint (const ULWord inValue))	{return WriteRegister(kRegVidProcXptControl, inValue);}
