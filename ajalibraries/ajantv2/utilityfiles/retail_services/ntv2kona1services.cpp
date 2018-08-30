@@ -426,25 +426,6 @@ void Kona1Services::SetDeviceXPointCapture ()
 	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL1)==true && mVirtualInputSelect==NTV2_Input1Select;
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
 
-    if(mCard->GetVPIDValidA(NTV2_CHANNEL1))
-    {
-        ULWord vpida = 0, vpidb	= 0;
-        mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
-        //debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
-
-        CNTV2VPID parser;
-        parser.SetVPID(vpida);
-        VPIDSampling sample = parser.GetSampling();
-        if (sample == VPIDSampling_YUV_422)
-        {
-            inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-        }
-        else
-        {
-            inputColorSpace = NTV2_ColorSpaceModeRgb;
-        }
-    }
-
 	// Dual Link In 1
 	if (inputColorSpace == NTV2_RGBSelect)
 	{

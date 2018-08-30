@@ -44,7 +44,7 @@ NTV2VideoFormat IoIP2110Services::GetSelectedInputVideoFormat(
 				inputFormat = GetCorrespondingAFormat(inputFormat);
             
             if (inputColorSpace)
-                *inputColorSpace = mSDIInput1ColorSpace;
+                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
             break;
             
         case NTV2_Input2xDLHDSelect:
@@ -52,16 +52,18 @@ NTV2VideoFormat IoIP2110Services::GetSelectedInputVideoFormat(
         case NTV2_Input2x4kSelect:
             inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
             if (inputColorSpace)
-                *inputColorSpace = mSDIInput1ColorSpace;
+                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
             break;
+            
         case NTV2_Input2Select:
 			inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
 			if (InputRequiresBToAConvertsion(NTV2_CHANNEL2))
 				inputFormat = GetCorrespondingAFormat(inputFormat);
             
             if (inputColorSpace)
-                *inputColorSpace = mSDIInput1ColorSpace;
+                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL2, mSDIInput2ColorSpace);
             break;
+            
         case NTV2_Input5Select:	// HDMI
         {
             // dynamically use input color space for
@@ -1606,12 +1608,8 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	
 	else // 425
 	{
-		ULWord vpida = 0, vpidb	= 0;
-		mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);	
-		//debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
-	
 		CNTV2VPID parser;
-		parser.SetVPID(vpida);
+		parser.SetVPID(mVpid1a);
 		VPIDStandard std = parser.GetStandard();
 		bVpid2x2piIn  = std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb;
 		bVpid4x2piInA = std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb;
@@ -1621,20 +1619,6 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 		bVpid2x2piIn	= bVpid6GIn;
 		bVpid4x2piInA	= bVpid12GIn;
 		b2piIn			= bVpid2x2piIn || bVpid4x2piInA || bVpid4x2piInB;
-
-		// override inputColorSpace for SMTE425
-		if (b2piIn)
-		{
-			VPIDSampling sample = parser.GetSampling();
-			if (sample == VPIDSampling_YUV_422)
-			{
-				inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-			}
-			else
-			{
-				inputColorSpace = NTV2_ColorSpaceModeRgb;
-			}
-		}
 	}
 	
 	// other bools
@@ -3099,13 +3083,10 @@ void IoIP2110Services::SetDeviceMiscRegisters ()
 		}
 		else
 		{
-			ULWord vpida = 0;
-			ULWord vpidb = 0;
-
-			if (mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb))
+			if (mVpid1Valid)
 			{
 				CNTV2VPID parser;
-				parser.SetVPID(vpida);
+				parser.SetVPID(mVpid1a);
 				VPIDStandard std = parser.GetStandard();
 				switch (std)
 				{
@@ -3121,8 +3102,8 @@ void IoIP2110Services::SetDeviceMiscRegisters ()
 					break;
 				case VPIDStandard_2160_DualLink:
 					b3GbOut = true;
-                    b4xIo = false;
-                    b2pi  = true;
+					b4xIo = false;
+					b2pi  = true;
 					break;
 				case VPIDStandard_2160_QuadLink_3Ga:
 				case VPIDStandard_2160_QuadDualLink_3Gb:

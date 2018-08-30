@@ -35,9 +35,8 @@ NTV2VideoFormat Kona4QuadServices::GetSelectedInputVideoFormat(
 			inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
 			if (InputRequiresBToAConvertsion(NTV2_CHANNEL1))
 				inputFormat = GetCorrespondingAFormat(inputFormat);
-            
             if (inputColorSpace)
-                *inputColorSpace = mSDIInput1ColorSpace;
+                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
             break;
             
         case NTV2_Input2xDLHDSelect:
@@ -45,15 +44,15 @@ NTV2VideoFormat Kona4QuadServices::GetSelectedInputVideoFormat(
         case NTV2_Input2x4kSelect:
             inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
             if (inputColorSpace)
-                *inputColorSpace = mSDIInput1ColorSpace;
+                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
             break;
+            
         case NTV2_Input2Select:
 			inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
 			if (InputRequiresBToAConvertsion(NTV2_CHANNEL2))
 				inputFormat = GetCorrespondingAFormat(inputFormat);
-            
             if (inputColorSpace)
-                *inputColorSpace = mSDIInput1ColorSpace;
+                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL2, mSDIInput2ColorSpace);
             break;
         default:
             break;
@@ -1566,12 +1565,8 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 	
 	// 425 or Quads
 	{
-		ULWord vpida = 0, vpidb	= 0;
-		mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);	
-		//debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
-	
 		CNTV2VPID parser;
-		parser.SetVPID(vpida);
+		parser.SetVPID(mVpid1a);
 		VPIDStandard std = parser.GetStandard();
 		bVpid2x2piIn  = std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb;
 		bVpid4x2piInA = std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb;
@@ -1588,20 +1583,6 @@ void Kona4QuadServices::SetDeviceXPointCapture()
 		// quad in
 		if (b2piIn)
 			b2xQuadIn = b4xQuadIn = false;
-
-		// override inputColorSpace for SMTE425
-		if (b2piIn)
-		{
-			VPIDSampling sample = parser.GetSampling();
-			if (sample == VPIDSampling_YUV_422)
-			{
-				inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-			}
-			else
-			{
-				inputColorSpace = NTV2_ColorSpaceModeRgb;
-			}
-		}
 	}
 	
 	// other bools
@@ -3060,14 +3041,10 @@ void Kona4QuadServices::SetDeviceMiscRegisters()
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)
 	{
-		ULWord vpida = 0;
-		ULWord vpidb = 0;
-		mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
-
-		if (mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb))
+		if (mVpid1Valid)
 		{
 			CNTV2VPID parser;
-			parser.SetVPID(vpida);
+			parser.SetVPID(mVpid1a);
 			VPIDStandard std = parser.GetStandard();
 			switch (std)
 			{

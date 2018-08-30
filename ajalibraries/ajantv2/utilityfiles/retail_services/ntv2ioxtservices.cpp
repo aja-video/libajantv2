@@ -34,13 +34,13 @@ NTV2VideoFormat IoXTServices::GetSelectedInputVideoFormat(
 	{
 		inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
 		if (inputColorSpace)
-			*inputColorSpace = mSDIInput1ColorSpace;
+			*inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
 	}
 	else if (mVirtualInputSelect == NTV2_Input2Select)
 	{
 		inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
 		if (inputColorSpace)
-			*inputColorSpace = mSDIInput2ColorSpace;
+			*inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL2, mSDIInput2ColorSpace);
 	}
 	else if (mVirtualInputSelect == NTV2_Input3Select)
 	{

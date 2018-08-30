@@ -68,7 +68,7 @@ NTV2VideoFormat Kona5Services::GetSelectedInputVideoFormat(
             }
 
             if (inputColorSpace)
-                *inputColorSpace = mSDIInput1ColorSpace;
+                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
             break;
 
         case NTV2_Input2xDLHDSelect:
@@ -76,8 +76,9 @@ NTV2VideoFormat Kona5Services::GetSelectedInputVideoFormat(
         case NTV2_Input2x4kSelect:
             inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
             if (inputColorSpace)
-                *inputColorSpace = mSDIInput1ColorSpace;
+                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
             break;
+            
         case NTV2_Input2Select:
             inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
 
@@ -90,7 +91,7 @@ NTV2VideoFormat Kona5Services::GetSelectedInputVideoFormat(
             }
 
             if (inputColorSpace)
-                *inputColorSpace = mSDIInput1ColorSpace;
+                *inputColorSpace =  GetSDIInputColorSpace(NTV2_CHANNEL2, mSDIInput2ColorSpace);
             break;
         default:
             break;
@@ -1559,12 +1560,8 @@ void Kona5Services::SetDeviceXPointCapture ()
         inHdRGB1 = NTV2_XptDuallinkIn1;
     }
 
-    ULWord vpida = 0, vpidb	= 0;
-    mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
-    //debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
-
     CNTV2VPID parser;
-    parser.SetVPID(vpida);
+    parser.SetVPID(mVpid1a);
     VPIDStandard std = parser.GetStandard();
     bVpid2x2piIn  = std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb;
     bVpid4x2piInA = std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb;
@@ -1578,24 +1575,6 @@ void Kona5Services::SetDeviceXPointCapture ()
     // quad in
     if (b2piIn)
         b2xQuadIn = b4xQuadIn = false;
-
-    // override inputColorSpace
-	if (mSDIInput1ColorSpace == NTV2_ColorSpaceModeAuto)
-	{
-		VPIDSampling sample = parser.GetSampling();
-		if (sample == VPIDSampling_YUV_422)
-		{
-			inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-		}
-		else
-		{
-			inputColorSpace = NTV2_ColorSpaceModeRgb;
-		}
-	}
-	else
-	{
-		inputColorSpace = mSDIInput1ColorSpace;
-	}
 
     // other bools
     b2pi		= b2piIn;

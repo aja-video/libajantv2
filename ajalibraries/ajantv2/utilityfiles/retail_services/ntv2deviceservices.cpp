@@ -233,7 +233,24 @@ void DeviceServices::ReadDriverState (void)
 	mCard->GetVideoFormat(mFb1VideoFormat);
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, mFb1Format);
 	mCard->GetMode(NTV2_CHANNEL1, mFb1Mode);
-	
+	// vpid
+	if (NTV2DeviceCanDoDualLink(mDeviceID) == false)
+	{
+		if (NTV2DeviceGetNumVideoInputs(mDeviceID) > 0)
+			mVpid1Valid = mCard->ReadSDIInVPID(NTV2_CHANNEL1, mVpid1a, mVpid1b);
+		else
+			mVpid1a = mVpid1b = mVpid1Valid = 0;
+		
+		if (NTV2DeviceGetNumVideoInputs(mDeviceID) > 1)
+			mVpid2Valid = mCard->ReadSDIInVPID(NTV2_CHANNEL2, mVpid2a, mVpid2b);
+		else
+			mVpid2a = mVpid2b = mVpid2Valid = 0;
+	}
+	else
+	{
+		mVpid1a = mVpid1b = mVpid1Valid = mVpid2a = mVpid2b = mVpid2Valid = 0;
+	}
+
 	// basic Ch2 HW registers
 	if (NTV2DeviceGetNumberFrameBuffers(mDeviceID) > 1)
 		mCard->GetFrameBufferFormat(NTV2_CHANNEL2, mFb2Format);
@@ -460,6 +477,35 @@ void DeviceServices::UpdateAutoState()
 }
 
 
+
+//-------------------------------------------------------------------------------------------------------
+//	GetSDIInputColorSpace
+//-------------------------------------------------------------------------------------------------------
+NTV2ColorSpaceMode DeviceServices::GetSDIInputColorSpace(NTV2Channel inChannel, NTV2ColorSpaceMode inMode)
+{
+	NTV2ColorSpaceMode outMode = inMode;
+	
+	if (NTV2DeviceCanDoDualLink(mDeviceID) == false)
+		return NTV2_ColorSpaceModeYCbCr;
+	
+	if (mSDIInput1ColorSpace == NTV2_ColorSpaceModeAuto)
+	{
+		CNTV2VPID parser;
+		parser.SetVPID(inChannel == NTV2_CHANNEL2 ? mVpid2a : mVpid1a);
+		VPIDSampling sample = parser.GetSampling();
+		if (sample == VPIDSampling_YUV_422)
+		{
+			outMode = NTV2_ColorSpaceModeYCbCr;
+		}
+		else
+		{
+			outMode = NTV2_ColorSpaceModeRgb;
+		}
+	}
+	return outMode;
+}
+
+
 //-------------------------------------------------------------------------------------------------------
 //	GetSelectedInputVideoFormat
 //	Note:	Determine input video format based on input select and fbVideoFormat
@@ -482,13 +528,13 @@ NTV2VideoFormat DeviceServices::GetSelectedInputVideoFormat(
         case NTV2_Input4x4kSelect:
             inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
             if (inputColorSpace)
-                *inputColorSpace = mSDIInput1ColorSpace;
+                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
             break;
 
         case NTV2_Input2Select:
             inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
             if (inputColorSpace)
-                *inputColorSpace = mSDIInput2ColorSpace;
+                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL2, mSDIInput2ColorSpace);
             break;
 
         default:
@@ -1928,24 +1974,24 @@ NTV2VideoFormat DeviceServices::GetConversionCompatibleFormat(NTV2VideoFormat so
 NTV2VideoFormat DeviceServices::GetSdiInVideoFormatWithVpid(int32_t index)
 {
 	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-	ULWord vpida = 0;
-	ULWord vpidb = 0;
 
-	if (mCard->ReadSDIInVPID((NTV2Channel)index, vpida, vpidb))
+	if (index == 0 && mVpid1Valid == true && mVpid1a != 0)
 	{
-		// if there is a vpid - use it to determine format
-		if (vpida != 0)
-		{
-			CNTV2VPID parser;
-			parser.SetVPID(vpida);
-			inputFormat = parser.GetVideoFormat();
-
-			if (mVirtualInputSelect == NTV2_Input4x4kSelect || mVirtualInputSelect == NTV2_Input2x4kSelect)
-			{
-				inputFormat = GetQuadSizedVideoFormat(inputFormat);
-			}
-		}
+		CNTV2VPID parser;
+		parser.SetVPID(mVpid1a);
+		inputFormat = parser.GetVideoFormat();
+		if (mVirtualInputSelect == NTV2_Input4x4kSelect || mVirtualInputSelect == NTV2_Input2x4kSelect)
+			inputFormat = GetQuadSizedVideoFormat(inputFormat);
 	}
+	else if (index == 1 && mVpid2Valid == true && mVpid2a != 0)
+	{
+		CNTV2VPID parser;
+		parser.SetVPID(mVpid2a);
+		inputFormat = parser.GetVideoFormat();
+		if (mVirtualInputSelect == NTV2_Input4x4kSelect || mVirtualInputSelect == NTV2_Input2x4kSelect)
+			inputFormat = GetQuadSizedVideoFormat(inputFormat);
+	}
+	
 	return inputFormat;
 }
 
