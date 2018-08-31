@@ -9,7 +9,7 @@
 #include "ntv2formatdescriptor.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2debug.h"
-#include "ajabase/common/testpatterngen.h"
+#include "ntv2testpatterngen.h"
 #include "ajabase/common/timecode.h"
 #include "ajabase/system/memory.h"
 #include "ajabase/system/thread.h"
@@ -1157,23 +1157,23 @@ void NTV2Player4K::ProduceFrameThreadStatic (AJAThread * pThread, void * pContex
 
 void NTV2Player4K::SetUpTestPatternVideoBuffers (void)
 {
-	AJATestPatternSelect	testPatternTypes []	=	{AJA_TestPatt_ColorBars100,
-													AJA_TestPatt_ColorBars75,
-													AJA_TestPatt_Ramp,
-													AJA_TestPatt_MultiBurst,
-													AJA_TestPatt_LineSweep,
-													AJA_TestPatt_CheckField,
-													AJA_TestPatt_FlatField,
-													AJA_TestPatt_MultiPattern,
-													AJA_TestPatt_Black,
-													AJA_TestPatt_White,
-													AJA_TestPatt_Border,
-													AJA_TestPatt_LinearRamp,
-													AJA_TestPatt_SlantRamp,
-													AJA_TestPatt_ZonePlate,
-													AJA_TestPatt_ColorQuadrant,
-													AJA_TestPatt_ColorQuadrantBorder};
-	mNumTestPatterns = sizeof (testPatternTypes) / sizeof (AJATestPatternSelect);
+	NTV2TestPatternSelect	testPatternTypes []	=	{NTV2_TestPatt_ColorBars100,
+													NTV2_TestPatt_ColorBars75,
+													NTV2_TestPatt_Ramp,
+													NTV2_TestPatt_MultiBurst,
+													NTV2_TestPatt_LineSweep,
+													NTV2_TestPatt_CheckField,
+													NTV2_TestPatt_FlatField,
+													NTV2_TestPatt_MultiPattern,
+													NTV2_TestPatt_Black,
+													NTV2_TestPatt_White,
+													NTV2_TestPatt_Border,
+													NTV2_TestPatt_LinearRamp,
+													NTV2_TestPatt_SlantRamp,
+													NTV2_TestPatt_ZonePlate,
+													NTV2_TestPatt_ColorQuadrant,
+													NTV2_TestPatt_ColorQuadrantBorder};
+	mNumTestPatterns = sizeof (testPatternTypes) / sizeof (NTV2TestPatternSelect);
 	mTestPatternVideoBuffers = new uint8_t * [mNumTestPatterns];
 
 	//	Set up one video buffer for each of the several predefined patterns...
@@ -1183,18 +1183,18 @@ void NTV2Player4K::SetUpTestPatternVideoBuffers (void)
 		mTestPatternVideoBuffers [testPatternIndex] = reinterpret_cast <uint8_t *>
 													  (AJAMemory::AllocateAligned (mVideoBufferSize, BUFFER_ALIGNMENT));
 
-		//	Use a convenient AJA test pattern generator object to populate an AJATestPatternBuffer with test pattern data...
-		AJATestPatternBuffer	testPatternBuffer;
-		AJATestPatternGen		testPatternGen;
+		//	Use the test pattern generator to fill an NTV2TestPatternBuffer...
+		NTV2TestPatternBuffer	testPatternBuffer;
+		NTV2TestPatternGen		testPatternGen;
 		NTV2FormatDescriptor	formatDesc	(mVideoFormat, mPixelFormat, mVancMode);
 
 		testPatternGen.DrawTestPattern (testPatternTypes [testPatternIndex],
 										formatDesc.numPixels,
 										formatDesc.numLines,
-										CNTV2DemoCommon::GetAJAPixelFormat (mPixelFormat),
+										mPixelFormat,
 										testPatternBuffer);
 
-		//	Copy the contents of the AJATestPatternBuffer into my 'C' array, for quick "memcpy" into each frame...
+		//	Copy the contents of the test pattern buffer into my 'C' array, for quick "memcpy" into each frame...
 		const size_t	testPatternSize		(testPatternBuffer.size ());
 		uint8_t * const	pVideoBuffer		(mTestPatternVideoBuffers [testPatternIndex]);
 		for (size_t ndx = 0; ndx < testPatternSize; ndx++)

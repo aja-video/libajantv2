@@ -12,8 +12,8 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
 #include "ntv2utils.h"
+#include "ntv2testpatterngen.h"
 #include "ajabase/common/types.h"
-#include "ajabase/common/testpatterngen.h"
 #include "ajabase/common/videotypes.h"
 #include "ajabase/system/process.h"
 

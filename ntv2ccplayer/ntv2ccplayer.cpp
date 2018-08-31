@@ -14,7 +14,7 @@
 #include "ajabase/common/ajarefptr.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/process.h"
-#include "ajabase/common/testpatterngen.h"
+#include "ntv2testpatterngen.h"
 #include "ajabase/common/videotypes.h"
 #include "ajaanc/includes/ancillarylist.h"
 #include "ajaanc/includes/ancillarydata_cea608_line21.h"
@@ -826,12 +826,12 @@ AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 	mVideoBuffer.Allocate(::GetVideoWriteSize(mVideoFormat, mPixelFormat, mVancMode));
 
 	//	Generate the test pattern...
-	AJATestPatternBuffer		testPatternBuffer;
-	AJATestPatternGen			testPatternGen;
+	NTV2TestPatternBuffer		testPatternBuffer;
+	NTV2TestPatternGen			testPatternGen;
 	const NTV2FormatDescriptor	formatDesc	(mVideoFormat, mPixelFormat, mVancMode);
 
-	if (!testPatternGen.DrawTestPattern (AJA_TestPatt_FlatField,  formatDesc.GetRasterWidth (),  formatDesc.GetVisibleRasterHeight (),
-										CNTV2DemoCommon::GetAJAPixelFormat (mPixelFormat), testPatternBuffer))
+	if (!testPatternGen.DrawTestPattern (NTV2_TestPatt_FlatField,  formatDesc.GetRasterWidth (),  formatDesc.GetVisibleRasterHeight (),
+										mPixelFormat, testPatternBuffer))
 	{
 		cerr << "## ERROR:  DrawTestPattern failed, formatDesc: " << formatDesc << endl;
 		return AJA_STATUS_FAIL;

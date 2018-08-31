@@ -177,12 +177,12 @@ AJAStatus NTV2OutputTestPattern::EmitPattern (const UWord testPatternIndex)
 	NTV2FormatDescriptor	fd	(mVideoFormat, mPixelFormat, mVancMode);
 
 	//	Write the requested test pattern into host buffer...
-	AJATestPatternGen		testPatternGen;
-	AJATestPatternBuffer	testPatternBuffer;
-	testPatternGen.DrawTestPattern ((AJATestPatternSelect) testPatternIndex,
+	NTV2TestPatternGen		testPatternGen;
+	NTV2TestPatternBuffer	testPatternBuffer;
+	testPatternGen.DrawTestPattern (NTV2TestPatternSelect(testPatternIndex),
 									fd.numPixels,
 									fd.numLines,
-									CNTV2DemoCommon::GetAJAPixelFormat (mPixelFormat),
+									mPixelFormat,
 									testPatternBuffer);
 
 	//	Find out which frame is currently being output from the frame store...

@@ -49,8 +49,8 @@ int main (int argc, const char ** argv)
 	const NTV2Channel	channel	(::GetNTV2ChannelForIndex (channelNumber - 1));
 	if (!NTV2_IS_VALID_CHANNEL (channel))
 		{cerr << "## ERROR:  Invalid channel number " << channelNumber << " -- expected 1 thru 8" << endl;  return 2;}
-	if (testPatternIndex >= uint32_t(AJA_TestPatt_All))
-		{cerr << "## ERROR:  Invalid test pattern index " << testPatternIndex << " -- expected 0 thru " << (uint32_t(AJA_TestPatt_All)-1) << endl;  return 2;}
+	if (testPatternIndex >= uint32_t(NTV2_TestPatt_All))
+		{cerr << "## ERROR:  Invalid test pattern index " << testPatternIndex << " -- expected 0 thru " << (uint32_t(NTV2_TestPatt_All)-1) << endl;  return 2;}
 
 	//  Create the object that will display the test pattern...
 	NTV2OutputTestPattern outputTestPattern (pDeviceSpec ? string (pDeviceSpec) : "0", channel);
