@@ -397,6 +397,9 @@
 	internally revert to Free-Run if the reference signal disappears or is incompatible with
 	the output video format.
 
+	@note	AJA recommends setting the device reference to ::NTV2_REFERENCE_FREERUN when
+			there is no signal at the external reference connector.
+
 
 	@subsection	fieldframeinterrupts	Field/Frame Interrupts
 
@@ -416,11 +419,41 @@
 	line of the frame (i.e. the “bottom field” or “field1”). Each field starts with a video sync —
 	however, the hardware registers are only updated at the “field0” (first field in time) sync.
 	Each of the syncs (“field0” and “field1”) produces an interrupt to the driver,
-	but the CNTV2Card::WaitForOutputFieldID method checks a hardware register and returns only
-	when “field0” is detected (not “field1”). For progressive video, all syncs are flagged by the
-	hardware as “field0” syncs, so registers are updated for the next frame and the
-	CNTV2Card::WaitForOutputFieldID method works as expected.
+	but CNTV2Card::WaitForInputFieldID (or CNTV2Card::WaitForOutputFieldID) check a hardware register
+	and return only when “field0” is detected (not “field1”). For progressive video, all syncs are
+	flagged by the hardware as “field0” syncs, so registers are updated for the next frame and the
+	CNTV2Card::WaitForInputFieldID (or CNTV2Card::WaitForOutputFieldID) work as expected.
 
+	To wait for an event (such as a VBI) from a particular Frame Store, your application should
+	subscribe to it by calling CNTV2Card::SubscribeInputVerticalEvent or CNTV2Card::SubscribeOutputVerticalEvent.
+
+	Once subscribed, to efficiently wait for an input vertical interrupt, call CNTV2Card::WaitForInputFieldID or
+	CNTV2Card::WaitForInputVerticalInterrupt, referencing the Frame Store that’s configured for capture,
+	and that’s routed (directly or indirectly) from an input that has a valid video signal.
+
+	To efficiently wait for an output vertical interrupt, call CNTV2Card::WaitForOutputFieldID or
+	CNTV2Card::WaitForOutputVerticalInterrupt, referencing the Frame Store that’s configured for playout.
+
+	You can inquire as to the number of input or output vertical events that have successfully been waited
+	on and fired by calling CNTV2Card::GetInputVerticalEventCount or CNTV2Card::GetOutputVerticalEventCount.
+	By calling either of these methods before and after calling the “wait for input/output” function, you
+	can determine if indeed the interrupt event actually triggered. Call CNTV2Card::SetInputVerticalEventCount
+	or CNTV2Card::SetOutputVerticalEventCount to reset the tally counter.
+
+	Normally it’s not necessary to explicitly unsubscribe the CNTV2Card instance’s event subscriptions, as
+	its destructor automatically calls CNTV2Card::Close, but it’s considered a good practice.
+
+	@note	On <b>Windows</b>, the AJA NTV2 driver supplies a finite number of event subscription handles
+			to client applications, which get consumed when subscribed (via CNTV2Card::SubscribeInputVerticalEvent,
+			CNTV2Card::SubscribeOutputVerticalEvent, CNTV2Card::SubscribeEvent). They’re made available
+			again to other clients when unsubscribed (via CNTV2Card::UnsubscribeInputVerticalEvent,
+			CNTV2Card::UnsubscribeOutputVerticalEvent, CNTV2Card::UnsubscribeEvent), and automatically when
+			the CNTV2Card object is closed or destroyed (via CNTV2Card::Close). However, abnormal program
+			terminations, crashes, or force-quitting from a debugger will prevent this handle clean-up,
+			which can result in their exhaustion. The only recovery at this point is to close all running
+			NTV2 client applications (including the AJA Service, if the “retail” software is installed and
+			running), then manually disabling and re-enabling the AJA driver. (Of course you can always
+			recover by restarting the machine.)
 
 	@subsection	vidop-fbconflict	When Frame Stores Access the Same Frame Buffer Memory
 
