@@ -15,13 +15,11 @@
 #include <map>
 #include <iomanip>
 #include "ntv2devicefeatures.h"
-#if defined (USE_AJALOCK)
-	#include "ajabase/system/lock.h"
-	typedef AJALock		PMutex;
-	typedef AJAAutoLock	PThreadLocker;
-#else
-	#include "ntv2macmutex.h"
-#endif
+#include "ajabase/system/lock.h"
+#include "ajabase/system/debugshare.h"
+#include "ajabase/system/debug.h"
+#include "ajabase/system/atomic.h"
+
 #if !defined (NTV2_NULL_DEVICE)
 	extern "C"
 	{
@@ -37,70 +35,29 @@ static const char * GetKernErrStr (const kern_return_t inError);
 
 //	MacDriverInterface-specific Logging Macros
 
-#define	HEX2(__x__)				"0x" << hex << setw (2)  << setfill ('0') << (0xFF       & uint8_t (__x__)) << dec
-#define	HEX4(__x__)				"0x" << hex << setw (4)  << setfill ('0') << (0xFFFF     & uint16_t(__x__)) << dec
-#define	HEX8(__x__)				"0x" << hex << setw (8)  << setfill ('0') << (0xFFFFFFFF & uint32_t(__x__)) << dec
-#define	HEX16(__x__)			"0x" << hex << setw (16) << setfill ('0') <<               uint64_t(__x__)  << dec
-#define KR(_kr_)				"kernResult=" << HEX8(_kr_) << "(" << GetKernErrStr (_kr_) << ")"
-#define INSTP(_p_)				" instance=" << HEX16(uint64_t(_p_))
+#define	HEX2(__x__)			"0x" << hex << setw(2)  << setfill('0') << (0xFF       & uint8_t (__x__)) << dec
+#define	HEX4(__x__)			"0x" << hex << setw(4)  << setfill('0') << (0xFFFF     & uint16_t(__x__)) << dec
+#define	HEX8(__x__)			"0x" << hex << setw(8)  << setfill('0') << (0xFFFFFFFF & uint32_t(__x__)) << dec
+#define	HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') <<               uint64_t(__x__)  << dec
+#define KR(_kr_)			"kernResult=" << HEX8(_kr_) << "(" << GetKernErrStr(_kr_) << ")"
+#define INSTP(_p_)			" instance=" << HEX16(uint64_t(_p_))
 
-#if defined (_DEBUG)
-	#define	MDIDB(__lvl__, __x__)	do {																										\
-										ostringstream   oss;																					\
-										pthread_t		curThrdID	(::pthread_self ());														\
-										oss << "## " << __lvl__ << ":  " << HEX16(curThrdID) << ":  " << string(__func__) << ":  " << __x__;	\
-										cerr << oss.str () << endl;																				\
-									} while (false)
-#else
-	#define	MDIDB(__lvl__, __x__)	do {																										\
-										ostringstream   oss;																					\
-										pthread_t		curThrdID	(::pthread_self ());														\
-										oss << "## " << __lvl__ << ":  " << HEX16(curThrdID) << ":  " << string(__func__) << ":  " << __x__;	\
-										syslog (3, "%s\n", oss.str ().c_str ());																\
-									} while (false)
-#endif
-
-#define	MDIFAIL(__x__)			MDIDB ("ERROR",		__x__)
-#define	MDIWARN(__x__)			MDIDB ("WARNING",	__x__)
-#define	MDINOTE(__x__)			MDIDB ("NOTE",		__x__)
-#if defined (_DEBUG)
-	#define	MDIDBG(__x__)		MDIDB ("DEBUG",		__x__)
-#else
-	#define	MDIDBG(__x__)
-#endif
-
-#define	MDIFAILIF(__uccc__, __x__)		do {													\
-											if (gErrorLogging & (uint64_t (1) << (__uccc__)))	\
-												MDIFAIL(__x__);									\
-										} while (false)
-
-#define	MDIWARNIF(__uccc__, __x__)		do {													\
-											if (gErrorLogging & (uint64_t (1) << (__uccc__)))	\
-												MDIWARN(__x__);									\
-										} while (false)
-
-#define	MDINOTEIF(__uccc__, __x__)		do {													\
-											if (gErrorLogging & (uint64_t (1) << (__uccc__)))	\
-												MDINOTE(__x__);									\
-										} while (false)
-
-#define	MDIDBGIF(__uccc__, __x__)		do {													\
-											if (gErrorLogging & (uint64_t (1) << (__uccc__)))	\
-												MDIDBG(__x__);									\
-										} while (false)
+#define	MDIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, __func__ << ": " << __x__)
+#define	MDIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, __func__ << ": " << __x__)
+#define	MDINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, __func__ << ": " << __x__)
+#define	MDIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface, __func__ << ": " << __x__)
+#define	MDIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface, __func__ << ": " << __x__)
 
 
-#define							kMaxNumDevices			(32)						///	Limit to 32 devices
-static const string				sNTV2PCIDriverName		("com_aja_iokit_ntv2");		///	This should be the only place the driver's IOService name is defined
-static uint64_t					gErrorLogging			(0x0000000000000000);		///	Log errors? (one flag bit per UserClientCommandCode)
-static unsigned					gnBoardMaps;										///	Instance counter -- should never exceed one
-static uint64_t					RECHECK_INTERVAL		(100LL);					///	Number of calls to DeviceMap::GetConnection before connection recheck performed
-#define							NTV2_IGNORE_IOREG_BUSY	(true)						///	If defined, ignore IORegistry busy state;
+#define						kMaxNumDevices			(32)						///	Limit to 32 devices
+static const string			sNTV2PCIDriverName		("com_aja_iokit_ntv2");		///	This should be the only place the driver's IOService name is defined
+static unsigned				gnBoardMaps;										///	Instance counter -- should never exceed one
+static uint64_t				RECHECK_INTERVAL		(1024LL);					///	Number of calls to DeviceMap::GetConnection before connection recheck performed
+#define						NTV2_IGNORE_IOREG_BUSY	(true)						///	If defined, ignore IORegistry busy state;
 																					///	otherwise wait for non-busy IORegistry before making new connections
 #if !defined(NTV2_IGNORE_IOREG_BUSY)
 	///	Max wait times for IORegistry to settle for hot plug/unplug...
-	static unsigned int			FIVE_SECONDS			(5);
-	static unsigned int			TWO_SECONDS				(2);
+	static unsigned int		TWO_SECONDS				(2);
 #endif
 
 #if !defined (NTV2_NULL_DEVICE)
@@ -178,7 +135,7 @@ class DeviceMap
 				mDriverVersion	(0)
 		{
 			NTV2_ASSERT (gnBoardMaps == 0  &&  "Attempt to create more than one DeviceMap");
-			gnBoardMaps++;
+			AJAAtomic::Increment(&gnBoardMaps);
 			::memset (&mIOConnections, 0, sizeof (mIOConnections));
 			::memset (&mRecheckTally, 0, sizeof (mRecheckTally));
 
@@ -190,23 +147,23 @@ class DeviceMap
 				return;
 			}
 			NTV2_ASSERT (mMasterPort && "No MasterPort!");
-			MDINOTEIF (kMacDeviceMapDebugLog_DeviceMapLifespan, "DeviceMap singleton created");
+			MDINOTE ("DeviceMap singleton created");
 		}
 
 
 		~DeviceMap ()
 		{
 			mStopping = true;
-			PThreadLocker autoLock (&mMutex);
+			AJAAutoLock autoLock (&mMutex);
 			Reset ();
-			MDINOTEIF (kMacDeviceMapDebugLog_DeviceMapLifespan, "DeviceMap singleton destroyed");
+			MDINOTE ("DeviceMap singleton destroyed");
 			gnBoardMaps--;
 		}
 
 
 		void Reset (const bool inResetMasterPort = false)
 		{
-			PThreadLocker autoLock (&mMutex);
+			AJAAutoLock autoLock (&mMutex);
 			//	Clear the device map...
 			for (UWord ndx (0);  ndx < kMaxNumDevices;  ++ndx)
 			{
@@ -215,7 +172,7 @@ class DeviceMap
 				{
 					OS_IOServiceClose (connection);
 					mIOConnections [ndx] = 0;
-					MDINOTEIF (kMacDeviceMapDebugLog_ConnectionClose, "Device " << ndx << " connection " << HEX8 (connection) << " closed");
+					MDINOTE ("Device " << ndx << " connection " << HEX8 (connection) << " closed");
 				}
 			}	//	for each connection in the map
 			if (inResetMasterPort)
@@ -224,7 +181,7 @@ class DeviceMap
 				if (error != kIOReturnSuccess)
 					MDIFAIL (KR(error) << "Unable to reset master port");
 				else
-					MDINOTEIF (kMacDeviceMapDebugLog_DeviceMapLifespan, "reset mMasterPort=" << HEX8 (mMasterPort));
+					MDINOTE ("reset mMasterPort=" << HEX8 (mMasterPort));
 			}
 		}
 
@@ -233,18 +190,18 @@ class DeviceMap
 		{
 			if (inDeviceIndex >= kMaxNumDevices)
 			{
-				MDIWARNIF (kMacDeviceMapDebugLog_ParamError, "Bad device index " << inDeviceIndex << ", GetConnection fail");
+				MDIWARN ("Bad device index " << inDeviceIndex << ", GetConnection fail");
 				return 0;
 			}
 
-			PThreadLocker autoLock (&mMutex);
+			AJAAutoLock autoLock (&mMutex);
 			const io_connect_t	connection	(mIOConnections [inDeviceIndex]);
-			if (connection)
+			if (connection  &&  RECHECK_INTERVAL)
 			{
 				uint64_t &	recheckTally	(mRecheckTally [inDeviceIndex]);
 				if (++recheckTally % RECHECK_INTERVAL == 0)
 				{
-					MDINOTEIF (kMacDeviceMapDebugLog_CheckConnection, "Device " << inDeviceIndex << " connection " << HEX8 (connection) << " expired, checking connection");
+					MDIDBG ("Device " << inDeviceIndex << " connection " << HEX8 (connection) << " expired, checking connection");
 					if (!ConnectionIsStillOkay (inDeviceIndex))
 					{
 						MDIFAIL ("Device " << inDeviceIndex << " connection " << HEX8 (connection) << " invalid, resetting DeviceMap");
@@ -282,7 +239,7 @@ class DeviceMap
 			NTV2_ASSERT (mMasterPort && "No MasterPort!");
 
 			//	Create an iterator to search for our driver...
-			error = OS_IOServiceGetMatchingServices (mMasterPort, OS_IOServiceMatching (CNTV2MacDriverInterface::GetIOServiceName ()), &ioIterator);
+			error = OS_IOServiceGetMatchingServices (mMasterPort, OS_IOServiceMatching(CNTV2MacDriverInterface::GetIOServiceName()), &ioIterator);
 			if (error != kIOReturnSuccess)
 			{
 				MDIFAIL (KR(error) << " -- IOServiceGetMatchingServices failed, no match for '" << sNTV2PCIDriverName << "', device index " << inDeviceIndex << " requested");
@@ -322,7 +279,7 @@ class DeviceMap
 			//	All good -- cache the connection handle...
 			mIOConnections [inDeviceIndex] = ioConnect;
 			mRecheckTally [inDeviceIndex] = 0;
-			MDINOTEIF (kMacDeviceMapDebugLog_ConnectionOpen, "Device " << inDeviceIndex << " connection " << HEX8 (ioConnect) << " opened");
+			MDINOTE ("Device " << inDeviceIndex << " connection " << HEX8 (ioConnect) << " opened");
 			return ioConnect;
 
 		}	//	GetConnection
@@ -330,7 +287,7 @@ class DeviceMap
 
 		void Dump (const UWord inMaxNumDevices = 10) const
 		{
-			PThreadLocker autoLock (&mMutex);
+			AJAAutoLock autoLock (&mMutex);
 			for (UWord ndx (0);  ndx < inMaxNumDevices;  ++ndx)
 				MDIDBG ("    [" << ndx << "]:  con=" << HEX8 (mIOConnections [ndx]));
 		}
@@ -339,7 +296,7 @@ class DeviceMap
 		UWord GetConnectionCount (void) const
 		{
 			UWord	tally	(0);
-			PThreadLocker autoLock (&mMutex);
+			AJAAutoLock autoLock (&mMutex);
 			for (UWord ndx (0);  ndx < kMaxNumDevices;  ++ndx)
 				if (mIOConnections [ndx])
 					tally++;
@@ -352,7 +309,7 @@ class DeviceMap
 		ULWord GetConnectionChecksum (void) const
 		{
 			ULWord	checksum	(0);
-			PThreadLocker autoLock (&mMutex);
+			AJAAutoLock autoLock (&mMutex);
 			for (UWord ndx (0);  ndx < kMaxNumDevices;  ++ndx)
 				if (mIOConnections [ndx])
 					checksum += mIOConnections [ndx];
@@ -369,7 +326,7 @@ class DeviceMap
 		{
 			if (inDeviceIndex >= kMaxNumDevices)
 			{
-				MDIWARNIF (kMacDeviceMapDebugLog_ParamError, "ConnectionIsStillOkay:  bad 'inDeviceIndex' parameter " << inDeviceIndex);
+				MDIWARN ("ConnectionIsStillOkay:  bad 'inDeviceIndex' parameter " << inDeviceIndex);
 				return 0;
 			}
 
@@ -385,6 +342,20 @@ class DeviceMap
 			return false;
 		}
 
+		uint64_t	SetConnectionCheckInterval (const uint64_t inNewInterval)
+		{
+			uint64_t	oldValue	(RECHECK_INTERVAL);
+			if (oldValue != inNewInterval)
+			{
+				RECHECK_INTERVAL = inNewInterval;
+				if (RECHECK_INTERVAL)
+					MDINOTE ("connection recheck interval changed to" << HEX16(RECHECK_INTERVAL) << ", was" << HEX16(oldValue));
+				else
+					MDINOTE ("connection rechecking disabled, was" << HEX16(oldValue));
+			}
+			return oldValue;
+		}
+
 	private:
 		bool WaitForBusToSettle (void)
 		{
@@ -396,16 +367,16 @@ class DeviceMap
 			else if (busyState)
 			{
 				#if defined (NTV2_IGNORE_IOREG_BUSY)
-					MDINOTEIF (kMacDeviceMapDebugLog_IORegistryActivity, "IOKitGetBusyState reported BUSY");
+					MDINOTE ("IOKitGetBusyState reported BUSY");
 					return true;	//	IORegistry busy, but so what?
 				#else
 					mach_timespec_t	maxWaitTime	= {TWO_SECONDS, 0};
-					MDINOTEIF (kMacDeviceMapDebugLog_IORegistryActivity, "IOKitGetBusyState reported BUSY -- waiting for IORegistry to stabilize...");
+					MDINOTE ("IOKitGetBusyState reported BUSY -- waiting for IORegistry to stabilize...");
 
 					kr = OS_IOKitWaitQuiet (mMasterPort, &maxWaitTime);
 					if (kr == kIOReturnSuccess)
 						return true;
-					MDIFAILIF (kMacDeviceMapDebugLog_IORegistryActivity, "IOKitWaitQuiet timed out -- " << KR(kr));
+					MDIFAIL ("IOKitWaitQuiet timed out -- " << KR(kr));
 				#endif	//	defined (NTV2_IGNORE_IOREG_BUSY)
 			}
 			else
@@ -418,7 +389,7 @@ class DeviceMap
 		{
 			if (!inConnection)
 			{
-				MDIWARNIF (kMacDeviceMapDebugLog_ParamError, "CheckDriverVersion:  bad 'inConnection' parameter " << inConnection);
+				MDIWARN ("CheckDriverVersion:  bad 'inConnection' parameter " << inConnection);
 				return false;
 			}
 
@@ -443,7 +414,7 @@ class DeviceMap
 	private:
 		io_connect_t	mIOConnections	[kMaxNumDevices];	//	My io_connect_t map
 		uint64_t		mRecheckTally	[kMaxNumDevices];	//	Used to calc when it's time to test if connection still ok
-		mutable PMutex	mMutex;								//	My guard mutex
+		mutable AJALock	mMutex;								//	My guard mutex
 		mach_port_t		mMasterPort;						//	Handy master port
 		bool			mStopping;							//	Don't open new connections if I'm stopping
 		uint32_t		mDriverVersion;						//	Handy driver version
@@ -452,19 +423,17 @@ class DeviceMap
 
 
 static DeviceMap		gDeviceMap;		//	The DeviceMap singleton
-#if defined (_DEBUG)
-	static MDIStats			gClientStats;	//	Client stats
+static MDIStats			gClientStats;	//	Client stats
 
-	MDIStats::~MDIStats()
-	{
-		//MDIDBG (dec << fConstructCount << " construct(s), " << fDestructCount << " destruct(s), " << fOpenCount << " open(s), " << fCloseCount << " close(s)");
-	}
+MDIStats::~MDIStats()
+{
+	//MDIDBG (dec << fConstructCount << " construct(s), " << fDestructCount << " destruct(s), " << fOpenCount << " open(s), " << fCloseCount << " close(s)");
+}
 
-	void CNTV2MacDriverInterface::GetClientStats (MDIStats & outStats)
-	{
-		outStats = gClientStats;
-	}
-#endif	//	defined (_DEBUG)
+void CNTV2MacDriverInterface::GetClientStats (MDIStats & outStats)
+{
+	outStats = gClientStats;
+}
 
 
 const char * CNTV2MacDriverInterface::GetIOServiceName (void)
@@ -483,10 +452,8 @@ CNTV2MacDriverInterface::CNTV2MacDriverInterface( void )
 {
 	_boardOpened = false;
 	_boardNumber = 0;
-#if defined (_DEBUG)
-	gClientStats.fConstructCount++;
-#endif	//	defined (_DEBUG)
-	MDIDBGIF (kMacDeviceMapDebugLog_MDILifespan, " CNTV2MacDriverInterface" << INSTP(this));
+	AJAAtomic::Increment(&(gClientStats.fConstructCount));
+	MDIDBG (INSTP(this));
 }
 
 
@@ -495,10 +462,8 @@ CNTV2MacDriverInterface::CNTV2MacDriverInterface( void )
 //--------------------------------------------------------------------------------------------------------------------
 CNTV2MacDriverInterface::~CNTV2MacDriverInterface( void )
 {
-#if defined (_DEBUG)
-	gClientStats.fDestructCount++;
-#endif	//	defined (_DEBUG)
-	MDIDBGIF (kMacDeviceMapDebugLog_MDILifespan, " CNTV2MacDriverInterface" << INSTP(this));
+	AJAAtomic::Increment(&(gClientStats.fDestructCount));
+	MDIDBG (INSTP(this));
 }
 
 
@@ -553,9 +518,7 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 			}
 		}
 		
-		#if defined (_DEBUG)
-			gClientStats.fOpenCount++;
-		#endif	//	defined (_DEBUG)
+		AJAAtomic::Increment(&(gClientStats.fOpenCount));
 	}
 
 	if (IsOpen ())
@@ -573,7 +536,7 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 				_boardOpened = false;
 				return false;
 			}
-			MDIDBGIF (kMacDeviceMapDebugLog_OpenClose, " CNTV2MacDriverInterface" << INSTP(this) << " retry succeeded, ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber, false)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
+			MDIDBG (INSTP(this) << " retry succeeded, ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber, false)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
 		}
 		if (legalDeviceIDs.find (_boardID) == legalDeviceIDs.end ())
 		{
@@ -594,7 +557,7 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 
 		InitMemberVariablesOnOpen (fg, NTV2FrameBufferFormat((returnVal1&0x0f) | ((returnVal2&0x1)<<4)));
 	}
-	MDIDBGIF (kMacDeviceMapDebugLog_OpenClose, " CNTV2MacDriverInterface" << INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber, false)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
+	MDIDBG (INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber, false)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
 
 	return IsOpen ();
 
@@ -636,10 +599,8 @@ bool CNTV2MacDriverInterface::Close (void)
 		return CloseRemote ();
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 
-#if defined (_DEBUG)
-	gClientStats.fCloseCount++;
-#endif	//	defined (_DEBUG)
-	MDIDBGIF (kMacDeviceMapDebugLog_OpenClose, "CNTV2MacDriverInterface" << INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
+	AJAAtomic::Increment(&(gClientStats.fCloseCount));
+	MDIDBG (INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
 
 	_boardOpened = false;
 	_boardNumber = 0;
@@ -827,7 +788,7 @@ bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outR
 	{
 		if (!CNTV2DriverInterface::ReadRegister (inRegNum, outRegValue, inRegMask, inRegShift))
 		{
-			MDIFAILIF (kDriverReadRegister, INSTP(this) << ":  NTV2ReadRegisterRemote failed");
+			MDIFAIL (INSTP(this) << ":  NTV2ReadRegisterRemote failed");
 			return false;
 		}
 		return true;
@@ -857,8 +818,8 @@ bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outR
 			return true;
 		else
 		{
-			MDIFAILIF (kDriverReadRegister, KR(kernResult) << INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(GetIOConnect(false))
-											<< " -- reg=" << DEC(inRegNum) << ", mask=" << HEX8(inRegMask) << ", shift=" << HEX8(inRegShift));
+			MDIFAIL (KR(kernResult) << INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(GetIOConnect(false))
+						<< " -- reg=" << DEC(inRegNum) << ", mask=" << HEX8(inRegMask) << ", shift=" << HEX8(inRegShift));
 			return false;
 		}
 	}
@@ -881,7 +842,7 @@ bool CNTV2MacDriverInterface::WriteRegister( ULWord registerNumber,
 	{
 		if (!CNTV2DriverInterface::WriteRegister (registerNumber, registerValue, registerMask, registerShift))
 		{
-			MDIFAILIF (kDriverWriteRegister, INSTP(this) << ":  NTV2WriteRegisterRemote failed");
+			MDIFAIL (INSTP(this) << ":  NTV2WriteRegisterRemote failed");
 			return false;
 		}
 		return true;
@@ -910,8 +871,8 @@ bool CNTV2MacDriverInterface::WriteRegister( ULWord registerNumber,
 			return true;
 		else
 		{
-			MDIFAILIF (kDriverWriteRegister, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()) << " -- reg=" << registerNumber << ", val=" << HEX8(registerValue)
-												 << ", mask=" << HEX8(registerMask) << ", shift=" << HEX8(registerShift));
+			MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()) << " -- reg=" << registerNumber << ", val=" << HEX8(registerValue)
+					 << ", mask=" << HEX8(registerMask) << ", shift=" << HEX8(registerShift));
 			return false;
 		}
 	}
@@ -947,7 +908,7 @@ UInt32 CNTV2MacDriverInterface::GetDriverVersion( NumVersion *version )
 			driverVers = (UInt32) scalarO_64[1];
 		}
 		else
-			MDIFAILIF (kDriverGetDrvrVersion, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+			MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 	}
 
 	if (version)
@@ -983,7 +944,7 @@ bool CNTV2MacDriverInterface::StartDriver( DriverStartPhase phase )
         return true;
 	else
 	{
-		MDIFAILIF (kDriverStartDriver, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1018,7 +979,7 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplication( ULWord appType, int32
         return true;
 	else
 	{
-		MDIFAILIF (kDriverAcquireStreamForApplication, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1049,7 +1010,7 @@ bool CNTV2MacDriverInterface::ReleaseStreamForApplication( ULWord appType, int32
         return true;
 	else
 	{
-		MDIFAILIF (kDriverReleaseStreamForApplication, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1086,7 +1047,7 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplicationWithReference( ULWord a
         return true;
 	else
 	{
-		MDIFAILIF (kDriverAcquireStreamForApplicationWithReference, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1119,7 +1080,7 @@ bool CNTV2MacDriverInterface::ReleaseStreamForApplicationWithReference( ULWord a
         return true;
 	else
 	{
-		MDIFAILIF (kDriverReleaseStreamForApplicationWithReference, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1149,7 +1110,7 @@ bool CNTV2MacDriverInterface::KernelLog( void* dataPtr, UInt32 dataSize )
         return true;
 	else
 	{
-		MDIFAILIF (kDriverKernelLog, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1185,7 +1146,7 @@ bool CNTV2MacDriverInterface::SetStreamingApplication( ULWord appType, int32_t p
         return true;
 	else
 	{
-		MDIFAILIF (kDriverSetStreamForApplication, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1215,7 +1176,7 @@ bool CNTV2MacDriverInterface::GetStreamingApplication( ULWord *appType, int32_t 
         return true;
 	else
 	{
-		MDIFAILIF (kDriverGetStreamForApplication, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1250,7 +1211,7 @@ bool CNTV2MacDriverInterface::SetDefaultDeviceForPID( int32_t pid )
         return true;
 	else
 	{
-		MDIFAILIF (kDriverSetDefaultDeviceForPID, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1282,6 +1243,8 @@ bool CNTV2MacDriverInterface::IsDefaultDeviceForPID( int32_t pid )
 											   1,						// the number of scalar input values.
 											   &scalarO_64,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
+	if (kernResult != KERN_SUCCESS)
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 	return (bool) scalarO_64;
 }
 
@@ -1308,7 +1271,7 @@ bool CNTV2MacDriverInterface::LockFormat( void )
         return true;
 	else
 	{
-		MDIFAILIF (kDriverLockFormat, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1338,7 +1301,7 @@ bool CNTV2MacDriverInterface::SetAVSyncPattern( void* dataPtr, UInt32 dataSize )
         return true;
 	else
 	{
-		MDIFAILIF (kDriverSetAVSyncPattern, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1368,7 +1331,7 @@ bool CNTV2MacDriverInterface::TriggerAVSync( NTV2Crosspoint channelSpec, UInt32 
         return true;
 	else
 	{
-		MDIFAILIF (kDriverTriggerAVSync, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1412,7 +1375,7 @@ bool CNTV2MacDriverInterface::WaitForInterrupt( INTERRUPT_ENUMS type, unsigned i
 		UInt32 interruptOccured = (uint32_t) scalarO_64;
 
 		if (kernResult != KERN_SUCCESS)
-			MDIFAILIF (kDriverWaitForInterrupt, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+			MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 
 		if (kernResult == KERN_SUCCESS && interruptOccured)
 		{
@@ -1455,7 +1418,7 @@ bool CNTV2MacDriverInterface::GetInterruptCount( INTERRUPT_ENUMS eInterrupt, ULW
         return true;
 	else
 	{
-		MDIFAILIF (kDriverGetInterruptCount, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1486,7 +1449,7 @@ bool CNTV2MacDriverInterface::WaitForChangeEvent( UInt32 timeout )
 											   &scalarO_64,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
 	if (kernResult != KERN_SUCCESS)
-		MDIFAILIF (kDriverWaitForChangeEvent, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 	return (bool) scalarO_64;
 }
 
@@ -1517,7 +1480,7 @@ bool CNTV2MacDriverInterface::GetTime( UInt32 *time, UInt32 *scale )
         return true;
 	else
 	{
-		MDIFAILIF (kDriverGetTime, KR(kernResult) << INSTP(this));
+		MDIFAIL (KR(kernResult) << INSTP(this));
 		return false;
 	}
 }
@@ -1566,7 +1529,7 @@ bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
         return true;
 	else
 	{
-		MDIFAILIF (kDriverDMATransfer, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect())
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect())
 					<< ", eng=" << inDMAEngine << ", frm=" << inFrameNumber << ", off=" << HEX8(inOffsetBytes) << ", len=" << HEX8(inByteCount) << ", " << (inIsRead ? "R" : "W"));
 		return false;
 	}
@@ -1624,7 +1587,7 @@ bool CNTV2MacDriverInterface::DmaTransfer( NTV2DMAEngine DMAEngine,
         return true;
 	else
 	{
-		MDIFAILIF (kDriverDMATransferEx, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1675,7 +1638,7 @@ bool CNTV2MacDriverInterface::RestoreHardwareProcampRegisters( void )
         return true;
 	else
 	{
-		MDIFAILIF (kDriverRestoreProcAmpRegisters, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1714,7 +1677,7 @@ bool CNTV2MacDriverInterface::SystemControl( void* dataPtr, SystemControlCode co
         return true;
 	else
 	{
-		MDIFAILIF (kDriverSystemControl, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1753,7 +1716,7 @@ bool CNTV2MacDriverInterface::SystemStatus( void* dataPtr, SystemStatusCode stat
         return true;
 	else
 	{
-		MDIFAILIF (kDriverSystemStatus, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1784,7 +1747,7 @@ bool CNTV2MacDriverInterface::SetDebugFilterStrings( const char* includeString,c
         return true;
 	else
 	{
-		MDIFAILIF (kDriverSetDebugFilterStrings, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1816,7 +1779,7 @@ bool CNTV2MacDriverInterface::GetDebugFilterStrings( char* includeString,char* e
 	}
 	else
 	{
-		MDIFAILIF (kDriverGetDebugFilterStrings, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 }
@@ -1834,7 +1797,7 @@ bool CNTV2MacDriverInterface::AutoCirculate( AUTOCIRCULATE_DATA &autoCircData )
 	{
 		if (!CNTV2DriverInterface::AutoCirculate (autoCircData))
 		{
-			MDIFAILIF (kDriverAutoCirculateControl, INSTP(this) << ":  NTV2AutoCirculateRemote failed");
+			MDIFAIL (INSTP(this) << ":  NTV2AutoCirculateRemote failed");
 			success = false;
 		}
 	}
@@ -1981,7 +1944,7 @@ bool CNTV2MacDriverInterface::AutoCirculate( AUTOCIRCULATE_DATA &autoCircData )
 
 		success = (kernResult == KERN_SUCCESS);
 		if (kernResult != KERN_SUCCESS && kernResult != kIOReturnOffline)
-			MDIFAILIF (whichMethod, KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()) << " -- eCommand=" << autoCircData.eCommand);
+			MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()) << ", eCmd=" << autoCircData.eCommand);
 	}
 
 	return success;
@@ -2016,7 +1979,7 @@ bool CNTV2MacDriverInterface::NTV2Message (NTV2_HEADER * pInOutMessage)
 											   NULL,				//	array of scalar (64-bit) output values
 											   &numScalarOutputs);	//	pointer (in: number of scalar output values capable of receiving;  out: actual number of scalar output values)
 	if (kernResult != KERN_SUCCESS && kernResult != kIOReturnOffline)
-		MDIFAILIF (kDriverNTV2Message, KR(kernResult) << INSTP(this) << ", con=" << HEX8(connection) << endl << "     msg:  " << *pInOutMessage);
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(connection) << endl << *pInOutMessage);
 
 	//cerr << (kernResult == KERN_SUCCESS ? "KERN_SUCCESS: " : "(Failed): ") << *pInOutMessage << endl;
 	return kernResult == KERN_SUCCESS;
@@ -2593,13 +2556,6 @@ void CNTV2MacDriverInterface::CopyTo_AUTOCIRCULATE_TASK_STRUCT_64 (AUTOCIRCULATE
 }
 
 
-void CNTV2MacDriverInterface::SetDebugLogging (const uint64_t inWhichUserClientCommands)
-{
-	gErrorLogging = inWhichUserClientCommands;
-	cerr << "CNTV2MacDriverInterface::SetDebugLogging 0x" << hex << gErrorLogging << dec << endl;
-}
-
-
 void CNTV2MacDriverInterface::DumpDeviceMap (void)
 {
 	gDeviceMap.Dump ();
@@ -2688,26 +2644,3 @@ static const char * GetKernErrStr (const kern_return_t inError)
 		default:						return "";
 	}
 }	//	GetKernErrStr
-
-
-class MDIEnvVarReader
-{
-	public:
-		MDIEnvVarReader ()
-		{
-			//	To allow some logging flexibility at runtime... set the 'NTV2CLIENTLOG' environment variable to a
-			//	hex string value '0x0000000000000000' that will be interpreted as a uint64_t...
-			const char *	pVarName("NTV2CLIENTLOG");
-			const string	sEnvLog	(::getenv (pVarName) ? ::getenv (pVarName) : "");
-			if (sEnvLog.length () == 18 && sEnvLog.find ("0x") == 0)
-			{
-				ULWord64			logMask (0);
-				std::stringstream	ss;
-				ss << hex << sEnvLog.substr (2, 16);
-				ss >> logMask;
-				CNTV2MacDriverInterface::SetDebugLogging (logMask);
-			}
-		}
-};	//	MDIEnvVarReader
-
-static MDIEnvVarReader	gMDIEnvVarReader;

@@ -13,34 +13,15 @@
 #include "ntv2driverinterface.h"
 
 
-/**
-	@brief	These bit numbers control debug logging to stderr/cerr via "SetDebugLogging" class member function
-			or via "NTV2CLIENTLOG" environment variable at client startup.
-**/
-enum
+typedef struct MDIStats
 {
-	kMacDeviceMapDebugLog_ConnectionOpen		= 55,	///< @brief	Log IOKit connection opens
-	kMacDeviceMapDebugLog_ConnectionClose		= 56,	///< @brief	Log when IOKit connections are closed
-	kMacDeviceMapDebugLog_CheckConnection		= 57,	///< @brief	Log when IOKit connections are rechecked (VERY NOISY!)
-	kMacDeviceMapDebugLog_OpenClose				= 59,	///< @brief	Log CNTV2Card Opens and Closes
-	kMacDeviceMapDebugLog_MDILifespan			= 60,	///< @brief	Log CNTV2MacDriverInterface instance lifespans
-	kMacDeviceMapDebugLog_ParamError			= 61,	///< @brief	Log param errors
-	kMacDeviceMapDebugLog_IORegistryActivity	= 62,	///< @brief	Log IORegistry activity
-	kMacDeviceMapDebugLog_DeviceMapLifespan		= 63	///< @brief	Log DeviceMap lifespan
-};
-
-
-#if defined (_DEBUG)
-	typedef struct MDIStats
-	{
-		inline MDIStats ()	: fConstructCount(0), fDestructCount(0), fOpenCount(0), fCloseCount(0)	{}
-		~MDIStats();
-		uint32_t	fConstructCount;	///< @brief	Number of constructor calls made
-		uint32_t	fDestructCount;		///< @brief	Number of destructor calls made
-		uint32_t	fOpenCount;			///< @brief	Number of local Open calls made
-		uint32_t	fCloseCount;		///< @brief	Number of local Close calls made
-	} MDIStats;
-#endif	//	defined (_DEBUG)
+	inline MDIStats ()	: fConstructCount(0), fDestructCount(0), fOpenCount(0), fCloseCount(0)	{}
+	~MDIStats();
+	uint32_t	fConstructCount;	///< @brief	Number of constructor calls made
+	uint32_t	fDestructCount;		///< @brief	Number of destructor calls made
+	uint32_t	fOpenCount;			///< @brief	Number of local Open calls made
+	uint32_t	fCloseCount;		///< @brief	Number of local Close calls made
+} MDIStats;
 
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -236,13 +217,10 @@ public:
 
 public:
 	static const char *	GetIOServiceName (void);	//	For internal use only
-	static void			SetDebugLogging (const uint64_t inWhichUserClientCommands);
 	static void			DumpDeviceMap (void);
 	static UWord		GetConnectionCount (void);
 	static ULWord		GetConnectionChecksum (void);
-#if defined (_DEBUG)
 	static void			GetClientStats (MDIStats & outStats);
-#endif	//	defined (_DEBUG)
 
 private:
 	virtual io_connect_t		GetIOConnect (const bool inDoNotAllocate = false) const;	//	For internal use only
