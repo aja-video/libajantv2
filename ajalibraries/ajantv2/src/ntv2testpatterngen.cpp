@@ -15,6 +15,9 @@
 #include "ntv2resample.h"
 #include "math.h"
 
+
+using namespace std;
+
 typedef struct
 {
 	int					startLine;
@@ -1520,9 +1523,9 @@ static const uint32_t FlatField_Pluge_576_0[] =
 };
 
 #ifndef HD_NUMACTIVELINES_2K
-#define HD_NUMACTIVELINES_2K          1556  
+	#define HD_NUMACTIVELINES_2K      1556  
 #endif
-static SegmentTestPatternData NTV2TestPatternSegments[] = 
+static const SegmentTestPatternData NTV2TestPatternSegments[] = 
 {
 	{
 		"100% ColorBars",
@@ -2054,9 +2057,26 @@ static SegmentTestPatternData NTV2TestPatternSegments[] =
 
 const uint32_t numSegmentTestPatterns = sizeof(NTV2TestPatternSegments)/sizeof(SegmentTestPatternData);
 
+static NTV2TestPatternNames sTestPatternNames;
+
+const NTV2TestPatternNames & NTV2TestPatternGen::getTestPatternNames (void)
+{
+	return sTestPatternNames;
+}
+
+#if !defined(NTV2_DEPRECATE_15_0)
+	NTV2TestPatternList & NTV2TestPatternGen::getTestPatternList (void)
+	{
+		static NTV2TestPatternList	result;
+		if (result.empty())
+			for (size_t ndx(0);  ndx < sTestPatternNames.size();  ndx++)
+				result.push_back(sTestPatternNames[ndx].c_str());
+		return result;
+	}
+#endif // NTV2_DEPRECATE_15_0
+
 
 //*********************************************************************************
-
 // CTestPattern
 
 NTV2TestPatternGen::NTV2TestPatternGen() :
@@ -2074,20 +2094,20 @@ NTV2TestPatternGen::~NTV2TestPatternGen()
 
 void NTV2TestPatternGen::Init()
 {
-	for(uint32_t tpCount = 0; tpCount < numSegmentTestPatterns; tpCount++)
+	if (sTestPatternNames.empty())
 	{
-		_testPatternList.push_back(NTV2TestPatternSegments[tpCount].name);
+		for (uint32_t tpCount(0);  tpCount < numSegmentTestPatterns;  tpCount++)
+			sTestPatternNames.push_back(string(NTV2TestPatternSegments[tpCount].name));
+		sTestPatternNames.push_back(string("Black"));
+		sTestPatternNames.push_back(string("White"));
+		sTestPatternNames.push_back(string("Border"));
+		sTestPatternNames.push_back(string("Linear Ramp"));
+		sTestPatternNames.push_back(string("Slant Ramp"));
+		sTestPatternNames.push_back(string("Zone Plate"));
+		sTestPatternNames.push_back(string("Color Quadrant"));
+		sTestPatternNames.push_back(string("Color Quadrant Border"));
+		sTestPatternNames.push_back(string("Color Quadrant Tsi"));
 	}
-	_testPatternList.push_back("Black");
-	_testPatternList.push_back("White");
-	_testPatternList.push_back("Border");
-	_testPatternList.push_back("Linear Ramp");
-	_testPatternList.push_back("Slant Ramp");
-	_testPatternList.push_back("Zone Plate");
-	_testPatternList.push_back("Color Quadrant");
-	_testPatternList.push_back("Color Quadrant Border");
-	_testPatternList.push_back("Color Quadrant Tsi");
-
 }
 
 
@@ -2178,18 +2198,18 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 	bool b4K = false;
 	int standard;
 
-		// which video standard are we?
+	// which video standard are we?
 	if (!GetStandard(standard, b4K))
 		return false;
 
-		// find the appropriate test pattern descriptor
-	SegmentTestPatternData *pTestPatternSegmentData = &NTV2TestPatternSegments[_patternNumber];
+	// find the appropriate test pattern descriptor
+	const SegmentTestPatternData & testPatternSegmentData (NTV2TestPatternSegments[_patternNumber]);
 
-		// walk through the segments
+	// walk through the segments
 	for (int segmentCount = 0; segmentCount < NumTestPatternSegments; segmentCount++ )
 	{
-		SegmentDescriptor *	segmentDescriptor = &pTestPatternSegmentData->segmentDescriptor[standard][segmentCount];
-		const uint32_t *	data = segmentDescriptor->data;
+		const SegmentDescriptor &	segmentDescriptor (testPatternSegmentData.segmentDescriptor[standard][segmentCount]);
+		const uint32_t *	data = segmentDescriptor.data;
 		if ( data != NULL )
 		{
 
@@ -2206,8 +2226,8 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 				UnPack10BitYCbCrBuffer(_pPackedLineBuffer, _pUnPackedLineBuffer, _frameWidth);
 			}
 
-			int startLine = segmentDescriptor->startLine;
-			int numLines  = (segmentDescriptor->endLine - startLine) + 1;
+			int startLine = segmentDescriptor.startLine;
+			int numLines  = (segmentDescriptor.endLine - startLine) + 1;
 
 			if ( b4K )
 			{

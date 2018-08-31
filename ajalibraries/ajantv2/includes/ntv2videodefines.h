@@ -5,6 +5,7 @@
 **/
 #ifndef VIDEODEFINES_H
 #define VIDEODEFINES_H
+#include "ajatypes.h"
 
 #define PI_FLOAT (3.141592654)
 

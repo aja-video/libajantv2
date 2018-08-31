@@ -7,6 +7,7 @@
 #ifndef AJA_TESTPATTERN_GEN
 #define AJA_TESTPATTERN_GEN
 
+#if !defined(NTV2_DEPRECATE_15_0)
 #include "types.h"
 #include "videotypes.h"
 #include "videoutilities.h"
@@ -88,5 +89,7 @@ protected:
 	AJA_BayerColorPhase _bayerPhase;
 
 };	//	AJATestPatternGen
+
+#endif	//	!defined(NTV2_DEPRECATE_15_0)
 
 #endif	//	AJA_TESTPATTERN_GEN

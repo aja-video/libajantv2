@@ -5189,7 +5189,7 @@ typedef enum
 	kRP188SourceLTCPort			= 0xFE		// used in ioHD
 } RP188SourceSelect;
 
-// note: this order is determined by NTV2TestPatternSegments in testpatterndata.h
+// note: this order mimics (somewhat) that of NTV2TestPatternSelect in "ntv2testpatterngen.h"
 typedef enum
 {
 	kTestPatternColorBar100,		// 100% Bars
@@ -5197,13 +5197,13 @@ typedef enum
 	kTestPatternRamp,				// Ramp
 	kTestPatternMultiburst,			// Mulitburst
 	kTestPatternLinesweep,			// Line Sweep
-	kTestPatternPathological,		// Pathogical
+	kTestPatternPathological,		// Pathological
 	kTestPatternFlatField,			// Flat Field (50%)
 	kTestPatternMultiPattern,		// a swath of everything
 	kTestPatternBlack,				// Black
 	kTestPatternBorder,				// Border
 	kTestPatternCustom				// Custom ("Load File...")
-	
+
 } TestPatternSelect;
 
 enum TestPatternFormat

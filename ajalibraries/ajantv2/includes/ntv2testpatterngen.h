@@ -12,9 +12,13 @@
 #include "ntv2enums.h"
 #include "ntv2utils.h"
 #include <vector>
+#include <string>
 
 typedef std::vector <uint8_t>		NTV2TestPatternBuffer;
-typedef std::vector <const char *>	NTV2TestPatternList;
+#if !defined(NTV2_DEPRECATE_15_0)
+	typedef std::vector <const char *>	NTV2TestPatternList;
+#endif//!defined(NTV2_DEPRECATE_15_0)
+typedef std::vector <std::string>	NTV2TestPatternNames;
 
 
 enum NTV2TestPatternSelect
@@ -42,8 +46,8 @@ enum NTV2TestPatternSelect
 
 /**
 	@brief	The NTV2 test pattern generator.
-	@bug	Won't work for planar formats. Needs a new DrawTestPattern method that accepts
-			an NTV2FormatDescriptor and NTV2_POINTER (see below).
+	@bug	::NTV2TestPatternGen doesn't work for planar formats.
+	@todo	Needs a new DrawTestPattern method that accepts an ::NTV2FormatDescriptor and ::NTV2_POINTER.
 **/
 class AJAExport NTV2TestPatternGen
 {
@@ -63,8 +67,10 @@ public:
 	inline void				setAlphaFromLuma (bool alphaFromLuma)			{_bAlphaFromLuma = alphaFromLuma;}
 	inline bool				getAlphaFromLuma (void) const					{return _bAlphaFromLuma;}
 
-	//const NTV2TestPatternList &	getTestPatternList (void) const				{return _testPatternList;}
-	NTV2TestPatternList &		getTestPatternList (void)					{return _testPatternList;}
+	static const NTV2TestPatternNames &	getTestPatternNames (void);
+#if !defined(NTV2_DEPRECATE_15_0)
+	static NTV2_SHOULD_BE_DEPRECATED (NTV2TestPatternList &		getTestPatternList (void));
+#endif	//	!defined(NTV2_DEPRECATE_15_0)
 
 protected:
 	virtual bool	DrawSegmentedTestPattern ();
@@ -83,7 +89,6 @@ protected:
 
 protected:
 	NTV2TestPatternSelect	_patternNumber;
-	NTV2TestPatternList		_testPatternList;
 	uint32_t	_frameWidth;     
 	uint32_t	_frameHeight;     
 	uint32_t	_linePitch;     
