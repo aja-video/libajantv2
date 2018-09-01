@@ -321,26 +321,7 @@ bool CNTV2Card::GetVideoFormat (NTV2VideoFormat & outValue, NTV2Channel inChanne
     if(NTV2_IS_QUAD_FRAME_GEOMETRY(frameGeometry))
         Get4kSquaresEnable(isSquares, inChannel);
 
-	#if defined (NTV2_DEPRECATE)
-        //return ::NTV2DeviceGetVideoFormatFromState_Ex (&outValue,  frameRate,  frameGeometry,  standard,  smpte372Enabled,  progressivePicture);
-        return ::NTV2DeviceGetVideoFormatFromState_Ex2 (&outValue, frameRate, frameGeometry, standard, smpte372Enabled, progressivePicture, isSquares);
-	#else
-		if (!::NTV2DeviceGetVideoFormatFromState_Ex (&outValue,  frameRate,  frameGeometry,  standard,  smpte372Enabled,  progressivePicture))
-		{
-			switch (standard)
-			{
-				case NTV2_STANDARD_1080:	DisplayNTV2Error ("Unsupported standard 1080 frame rate requested.");	break;
-				case NTV2_STANDARD_1080p:	DisplayNTV2Error ("Unsupported 1080p frame rate requested.");			break;
-				case NTV2_STANDARD_720:		DisplayNTV2Error ("Unsupported 720 frame rate requested.");				break;
-				case NTV2_STANDARD_525:		DisplayNTV2Error ("Unsupported 525 frame rate requested.");				break;
-				case NTV2_STANDARD_625:		DisplayNTV2Error ("Unsupported 625 frame rate requested.");				break;
-				case NTV2_STANDARD_2K:		DisplayNTV2Error ("Unsupported 2K frame rate requested.");				break;
-				default:					DisplayNTV2Error ("Unsupported video standard requested.");				break;
-			}
-			return false;
-		}
-		return true;
-	#endif
+    return ::NTV2DeviceGetVideoFormatFromState_Ex2 (&outValue, frameRate, frameGeometry, standard, smpte372Enabled, progressivePicture, isSquares);
 }
 
 bool CNTV2Card::GetSupportedVideoFormats (NTV2VideoFormatSet & outFormats)
