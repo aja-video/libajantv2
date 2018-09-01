@@ -16,7 +16,6 @@
 #include <iomanip>
 #include "ntv2devicefeatures.h"
 #include "ajabase/system/lock.h"
-#include "ajabase/system/debugshare.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/system/atomic.h"
 
