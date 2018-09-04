@@ -265,6 +265,7 @@ public:
     bool        SetPTPMaster(const std::string ptpMaster);
     bool        GetPTPMaster(std::string & ptpMaster);
     bool        GetPTPStatus(PTPStatus & ptpStatus);
+    bool        PLLReset();
 
     bool        Set4KModeEnable(const bool enable);
     bool        Get4KModeEnable(bool & enable);
