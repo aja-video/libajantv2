@@ -127,17 +127,21 @@ static const ULWord	gChannelToTSLastInputVertHi []		= {	kVRegTimeStampLastInput1
 															kVRegTimeStampLastInput5VerticalHi, kVRegTimeStampLastInput6VerticalHi, kVRegTimeStampLastInput7VerticalHi, kVRegTimeStampLastInput8VerticalHi, 0};
 static std::string GetKernErrStr (const DWORD inError)
 {
-		LPVOID lpMsgBuf(NULL);
-		FormatMessage (	FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-						NULL,
-						inError,
-						MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-						(LPTSTR) &lpMsgBuf,
-						0,
-						NULL);
-		const string result (lpMsgBuf ? reinterpret_cast<const char*>(lpMsgBuf) : "");
-		LocalFree (lpMsgBuf);
-		return result;
+	LPVOID lpMsgBuf(NULL);
+	FormatMessage (	FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+					NULL,
+					inError,
+					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+					(LPTSTR) &lpMsgBuf,
+					0,
+					NULL);
+	string result (lpMsgBuf ? reinterpret_cast<const char*>(lpMsgBuf) : "");
+	LocalFree (lpMsgBuf);
+//	Truncate at <CR><LF>...
+	const size_t	crPos(result.find(".\r"));
+	if (crPos != string::npos)
+		result.resize(crPos);
+	return result;
 }
 
 
