@@ -2139,7 +2139,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
             PTPStatus   ptpStatus;
 
             config2110->GetPTPStatus(ptpStatus);
-            if (ptpStatus.PTP_packetStatus == TRUE)
+            if (ptpStatus.PTP_packetStatus == true)
             {
                 // Everything is good, so lets check again in 2 seconds
                 mResetPLLCounter = (framesPerSecNum/framesPerSecDen) * 2;
