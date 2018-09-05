@@ -3345,7 +3345,7 @@ typedef enum
     NTV2_INVALID_HDMI_PROTOCOL	= NTV2_MAX_NUM_HDMIProtocols
 } NTV2HDMIProtocol;
 
-#define	NTV2_IS_VALID_HDMI_PROTOCOL(__x__)	((__x__) < NTV2_MAX_NUM_LHIHDMIColorSpaces)
+#define	NTV2_IS_VALID_HDMI_PROTOCOL(__x__)	((__x__) >= NTV2_HDMIProtocolHDMI  &&  (__x__) < NTV2_MAX_NUM_HDMIProtocols)
 
 
 // Bit depth on HDMI interface
