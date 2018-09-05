@@ -56,6 +56,7 @@ typedef struct
     uint32_t                payload;
     NTV2VideoFormat         videoFormat;
     uint32_t                enable;
+    uint32_t                unused[4];
 } TxVideoChData2110;
 
 typedef struct
@@ -73,6 +74,7 @@ typedef struct
     uint32_t                firstAudioChannel;
     eNTV2PacketInterval     audioPktInterval;
     uint32_t                enable;
+    uint32_t                unused[4];
 } TxAudioChData2110;
 
 typedef struct
@@ -89,6 +91,7 @@ typedef struct
     uint32_t                payload;
     NTV2VideoFormat         videoFormat;
     uint32_t                enable;
+    uint32_t                unused[4];
 } RxVideoChData2110;
 
 typedef struct
@@ -107,6 +110,7 @@ typedef struct
     uint32_t                numAudioChannels;
     eNTV2PacketInterval     audioPktInterval;
     uint32_t                enable;
+    uint32_t                unused[4];
 } RxAudioChData2110;
 
 typedef struct
@@ -116,12 +120,14 @@ typedef struct
     char                    subnetMask[IP_STRSIZE];
     char                    gateWay[IP_STRSIZE];
     uint32_t                enable;
+    uint32_t                unused[4];
 } SFPData2110;
 
 typedef struct
 {
     uint32_t				txChStatus[4];
     uint32_t				rxChStatus[4];
+    uint32_t                unused[4];
 } IpStatus2110;
 
 typedef struct
@@ -130,6 +136,7 @@ typedef struct
     char                    ptpMasterIP[IP_STRSIZE];
     uint32_t                numSFPs;
     SFPData2110             sfp[2];
+    uint32_t                unused[4];
 } NetworkData2110;
 
 typedef struct
