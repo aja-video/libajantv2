@@ -1276,6 +1276,7 @@ typedef enum
 	kRegMaskLED					= BIT(16) + BIT(17) + BIT(18) + BIT(19),
 	kRegMaskRegClocking			= BIT(21) + BIT(20),
 	kRegMaskDualLinkInEnable	= BIT(23),
+	kRegMaskQuadTsiEnable		= BIT(24),
 	kRegMaskBankSelect			= BIT(25) + BIT(26),
 	kRegMaskDualLinkOutEnable	= BIT(27),
 	kRegMaskRP188ModeCh1		= BIT(28),
@@ -2417,6 +2418,7 @@ typedef enum
 	kRegShiftLED						= 16,
 	kRegShiftRegClocking				= 20,
 	kRegShiftDualLinkInput				= 23,
+	kRegShiftQuadTsiEnable				= 24,
 	kRegShiftBankSelect					= 25,
 	kRegShiftDualLinKOutput				= 27,
 	kRegShiftRP188ModeCh1				= 28,
@@ -5187,7 +5189,7 @@ typedef enum
 	kRP188SourceLTCPort			= 0xFE		// used in ioHD
 } RP188SourceSelect;
 
-// note: this order is determined by NTV2TestPatternSegments in testpatterndata.h
+// note: this order mimics (somewhat) that of NTV2TestPatternSelect in "ntv2testpatterngen.h"
 typedef enum
 {
 	kTestPatternColorBar100,		// 100% Bars
@@ -5195,13 +5197,13 @@ typedef enum
 	kTestPatternRamp,				// Ramp
 	kTestPatternMultiburst,			// Mulitburst
 	kTestPatternLinesweep,			// Line Sweep
-	kTestPatternPathological,		// Pathogical
+	kTestPatternPathological,		// Pathological
 	kTestPatternFlatField,			// Flat Field (50%)
 	kTestPatternMultiPattern,		// a swath of everything
 	kTestPatternBlack,				// Black
 	kTestPatternBorder,				// Border
 	kTestPatternCustom				// Custom ("Load File...")
-	
+
 } TestPatternSelect;
 
 enum TestPatternFormat
@@ -5555,9 +5557,9 @@ typedef enum
 			#define	xHEXN(__x__,__n__)		"0x" << HEXN((__x__),(__n__))
 			#define	HEX0N(__x__,__n__)		std::hex << std::uppercase << std::setw(int(__n__)) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ') << std::nouppercase
 			#define	xHEX0N(__x__,__n__)		"0x" << HEX0N((__x__),(__n__))
-			#define	DEC(__x__)				std::dec << (__x__)
-			#define	DECN(__x__,__n__)		std::dec << std::setw(int(__n__)) << (__x__)
-			#define	DEC0N(__x__,__n__)		std::dec << std::setw(int(__n__)) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
+			#define	DEC(__x__)				std::dec << std::right << (__x__)
+			#define	DECN(__x__,__n__)		std::dec << std::setw(int(__n__)) << std::right << (__x__)
+			#define	DEC0N(__x__,__n__)		std::dec << std::setw(int(__n__)) << std::setfill('0') << std::right << (__x__) << std::dec << std::setfill(' ')
 			#define	OCT(__x__)				std::oct << (__x__) << std::dec
 			#define	OCT0N(__x__,__n__)		std::oct << std::setw(int(__n__)) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ')
 			#define	oOCT(__x__)				"o" << std::oct << (__x__) << std::dec

@@ -15,7 +15,6 @@
 
 #if defined(AJALinux)
 	#include <stdio.h>
-	#include "ntv2winlinhacks.h"
 #endif
 #include <sstream>
 

@@ -41,6 +41,9 @@ typedef enum
     kIpStatusRunning        = 2
 } IpChStatusState ;
 
+// force 1 byte alignment so can work across 32/64 bit apps
+#pragma pack(push,1)
+
 typedef struct
 {
     NTV2Stream              stream;
@@ -158,6 +161,7 @@ typedef struct
     uint32_t                placeHolder;
 } AncVData2110;
 
+#pragma pack(pop)
 
 inline NTV2Stream ChToVideoStream(int ch)
 	{ return (NTV2Stream)(NTV2_VIDEO1_STREAM+ch); }
@@ -265,6 +269,7 @@ public:
     bool        SetPTPMaster(const std::string ptpMaster);
     bool        GetPTPMaster(std::string & ptpMaster);
     bool        GetPTPStatus(PTPStatus & ptpStatus);
+    bool        PLLReset();
 
     bool        Set4KModeEnable(const bool enable);
     bool        Get4KModeEnable(bool & enable);

@@ -1,6 +1,6 @@
 /**
-	@file		testpatterngen.h
-	@brief		Contains the implementation of the AJATestPatternGenEx class.
+	@file		testpatterngen.cpp
+	@brief		Contains the implementation of the NTV2TestPatternGen class.
 	@copyright	(C) 2010-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
@@ -10,11 +10,30 @@
 #endif
 
 #include "ntv2utils.h"
-#include "testpatterngen.h"
-#include "testpatterngendata.h"
+#include "ntv2testpatterngen.h"
 #include "ntv2transcode.h"
 #include "ntv2resample.h"
 #include "math.h"
+
+
+using namespace std;
+
+typedef struct
+{
+	int					startLine;
+	int					endLine;
+	const uint32_t *	data;
+} SegmentDescriptor;
+
+const uint16_t NumTestPatternSegments = 8;
+const uint16_t AJA_NUM_STANDARDS = 6;
+
+typedef struct
+{
+	const char *		name;
+	SegmentDescriptor	segmentDescriptor [AJA_NUM_STANDARDS] [NumTestPatternSegments];
+
+} SegmentTestPatternData;
 
 
 uint32_t MakeSineWaveVideoEx(double radians, bool bChroma,double Gain);
@@ -1504,9 +1523,9 @@ static const uint32_t FlatField_Pluge_576_0[] =
 };
 
 #ifndef HD_NUMACTIVELINES_2K
-#define HD_NUMACTIVELINES_2K          1556  
+	#define HD_NUMACTIVELINES_2K      1556  
 #endif
-static SegmentTestPatternData NTV2TestPatternSegments[] = 
+static const SegmentTestPatternData NTV2TestPatternSegments[] = 
 {
 	{
 		"100% ColorBars",
@@ -2038,12 +2057,29 @@ static SegmentTestPatternData NTV2TestPatternSegments[] =
 
 const uint32_t numSegmentTestPatterns = sizeof(NTV2TestPatternSegments)/sizeof(SegmentTestPatternData);
 
+static NTV2TestPatternNames sTestPatternNames;
+
+const NTV2TestPatternNames & NTV2TestPatternGen::getTestPatternNames (void)
+{
+	return sTestPatternNames;
+}
+
+#if !defined(NTV2_DEPRECATE_15_0)
+	NTV2TestPatternList & NTV2TestPatternGen::getTestPatternList (void)
+	{
+		static NTV2TestPatternList	result;
+		if (result.empty())
+			for (size_t ndx(0);  ndx < sTestPatternNames.size();  ndx++)
+				result.push_back(sTestPatternNames[ndx].c_str());
+		return result;
+	}
+#endif // NTV2_DEPRECATE_15_0
+
 
 //*********************************************************************************
-
 // CTestPattern
 
-AJATestPatternGenEx::AJATestPatternGenEx() :
+NTV2TestPatternGen::NTV2TestPatternGen() :
 	_sliderValue(DEFAULT_PATT_GAIN),
 	_signalMask(NTV2_SIGNALMASK_ALL)
 {
@@ -2051,34 +2087,34 @@ AJATestPatternGenEx::AJATestPatternGenEx() :
 }
 
 
-AJATestPatternGenEx::~AJATestPatternGenEx()
+NTV2TestPatternGen::~NTV2TestPatternGen()
 {
 
 }
 
-void AJATestPatternGenEx::Init()
+void NTV2TestPatternGen::Init()
 {
-	for(uint32_t tpCount = 0; tpCount < numSegmentTestPatterns; tpCount++)
+	if (sTestPatternNames.empty())
 	{
-		_testPatternList.push_back(NTV2TestPatternSegments[tpCount].name);
+		for (uint32_t tpCount(0);  tpCount < numSegmentTestPatterns;  tpCount++)
+			sTestPatternNames.push_back(string(NTV2TestPatternSegments[tpCount].name));
+		sTestPatternNames.push_back(string("Black"));
+		sTestPatternNames.push_back(string("White"));
+		sTestPatternNames.push_back(string("Border"));
+		sTestPatternNames.push_back(string("Linear Ramp"));
+		sTestPatternNames.push_back(string("Slant Ramp"));
+		sTestPatternNames.push_back(string("Zone Plate"));
+		sTestPatternNames.push_back(string("Color Quadrant"));
+		sTestPatternNames.push_back(string("Color Quadrant Border"));
+		sTestPatternNames.push_back(string("Color Quadrant Tsi"));
 	}
-	_testPatternList.push_back("Black");
-	_testPatternList.push_back("White");
-	_testPatternList.push_back("Border");
-	_testPatternList.push_back("Linear Ramp");
-	_testPatternList.push_back("Slant Ramp");
-	_testPatternList.push_back("Zone Plate");
-	_testPatternList.push_back("Color Quadrant");
-	_testPatternList.push_back("Color Quadrant Border");
-	_testPatternList.push_back("Color Quadrant Tsi");
-
 }
 
 
 // DrawTestPattern()
 //	Note: "dSlider" is expected to range between 0.0 and 1.0
 //
-bool AJATestPatternGenEx::DrawTestPattern( AJATestPatternSelectEx pattNum, uint32_t frameWidth, uint32_t frameHeight, NTV2FrameBufferFormat pixelFormat, AJATestPatternBufferEx &testPatternBuffer )
+bool NTV2TestPatternGen::DrawTestPattern (NTV2TestPatternSelect pattNum, uint32_t frameWidth, uint32_t frameHeight, NTV2FrameBufferFormat pixelFormat, NTV2TestPatternBuffer &testPatternBuffer )
 {
 	bool bResult = false;
 
@@ -2107,42 +2143,42 @@ bool AJATestPatternGenEx::DrawTestPattern( AJATestPatternSelectEx pattNum, uint3
 	MakeUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer,CCIR601_10BIT_BLACK,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET,_frameWidth);
 	switch (pattNum)
 	{
-		case AJA_TestPattEx_ColorBars100:
-		case AJA_TestPattEx_ColorBars75:
-		case AJA_TestPattEx_Ramp:
-		case AJA_TestPattEx_MultiBurst:
-		case AJA_TestPattEx_LineSweep:
-		case AJA_TestPattEx_CheckField:
-		case AJA_TestPattEx_FlatField:
-		case AJA_TestPattEx_MultiPattern:
+		case NTV2_TestPatt_ColorBars100:
+		case NTV2_TestPatt_ColorBars75:
+		case NTV2_TestPatt_Ramp:
+		case NTV2_TestPatt_MultiBurst:
+		case NTV2_TestPatt_LineSweep:
+		case NTV2_TestPatt_CheckField:
+		case NTV2_TestPatt_FlatField:
+		case NTV2_TestPatt_MultiPattern:
 			bResult = DrawSegmentedTestPattern();
 			break;
 
-		case AJA_TestPattEx_Black:
+		case NTV2_TestPatt_Black:
 			bResult = DrawYCbCrFrame(CCIR601_10BIT_BLACK,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET);
 			break;
-		case AJA_TestPattEx_White:
+		case NTV2_TestPatt_White:
 			bResult = DrawYCbCrFrame(CCIR601_10BIT_WHITE,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET);
 			break;
-		case AJA_TestPattEx_Border:
+		case NTV2_TestPatt_Border:
 			bResult = DrawBorderFrame();
 			break;
-		case AJA_TestPattEx_SlantRamp:
+		case NTV2_TestPatt_SlantRamp:
 			bResult = DrawSlantRampFrame();
 			break;
-		case AJA_TestPattEx_ZonePlate:
+		case NTV2_TestPatt_ZonePlate:
 			bResult = DrawZonePlateFrame();
 			break;
-		case AJA_TestPattEx_ColorQuadrant:
+		case NTV2_TestPatt_ColorQuadrant:
 			bResult = DrawColorQuandrantFrame();
 			break;
-		case AJA_TestPattEx_ColorQuadrantBorder:
+		case NTV2_TestPatt_ColorQuadrantBorder:
 			bResult = DrawQuandrantBorderFrame();
 			break;
-		case AJA_TestPattEx_LinearRamp:
+		case NTV2_TestPatt_LinearRamp:
 			bResult = DrawLinearRampFrame();
 			break;
-		case AJA_TestPattEx_ColorQuadrantTsi:
+		case NTV2_TestPatt_ColorQuadrantTsi:
 			bResult = DrawColorQuandrantFrameTsi();
 			break;
 		default:	// unknown test pattern ID?
@@ -2156,24 +2192,24 @@ bool AJATestPatternGenEx::DrawTestPattern( AJATestPatternSelectEx pattNum, uint3
 }
 
 
-bool AJATestPatternGenEx::DrawSegmentedTestPattern()
+bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 {
 	bool bResult = true;
 	bool b4K = false;
 	int standard;
 
-		// which video standard are we?
+	// which video standard are we?
 	if (!GetStandard(standard, b4K))
 		return false;
 
-		// find the appropriate test pattern descriptor
-	SegmentTestPatternData *pTestPatternSegmentData = &NTV2TestPatternSegments[_patternNumber];
+	// find the appropriate test pattern descriptor
+	const SegmentTestPatternData & testPatternSegmentData (NTV2TestPatternSegments[_patternNumber]);
 
-		// walk through the segments
+	// walk through the segments
 	for (int segmentCount = 0; segmentCount < NumTestPatternSegments; segmentCount++ )
 	{
-		SegmentDescriptor *	segmentDescriptor = &pTestPatternSegmentData->segmentDescriptor[standard][segmentCount];
-		const uint32_t *	data = segmentDescriptor->data;
+		const SegmentDescriptor &	segmentDescriptor (testPatternSegmentData.segmentDescriptor[standard][segmentCount]);
+		const uint32_t *	data = segmentDescriptor.data;
 		if ( data != NULL )
 		{
 
@@ -2190,8 +2226,8 @@ bool AJATestPatternGenEx::DrawSegmentedTestPattern()
 				UnPack10BitYCbCrBuffer(_pPackedLineBuffer, _pUnPackedLineBuffer, _frameWidth);
 			}
 
-			int startLine = segmentDescriptor->startLine;
-			int numLines  = (segmentDescriptor->endLine - startLine) + 1;
+			int startLine = segmentDescriptor.startLine;
+			int numLines  = (segmentDescriptor.endLine - startLine) + 1;
 
 			if ( b4K )
 			{
@@ -2221,7 +2257,7 @@ bool AJATestPatternGenEx::DrawSegmentedTestPattern()
 			}
 
 			// go through hoops to mask out undesired components
-			if (_patternNumber == AJA_TestPattEx_MultiBurst || _patternNumber == AJA_TestPattEx_LineSweep )// || _patternNumber == AJA_TestPattEx_Ramp)
+			if (_patternNumber == NTV2_TestPatt_MultiBurst || _patternNumber == NTV2_TestPatt_LineSweep )// || _patternNumber == NTV2_TestPatt_Ramp)
 			{
 				_signalMask = NTV2_SIGNALMASK_Y;		// just assume that Multiburst and LineSweep are "Y Only"
 				MaskUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer, (uint16_t)_signalMask , _frameWidth);
@@ -2245,7 +2281,7 @@ bool AJATestPatternGenEx::DrawSegmentedTestPattern()
 	return bResult;
 }
 
-bool AJATestPatternGenEx::DrawYCbCrFrame(uint16_t Y, uint16_t Cb, uint16_t Cr)
+bool NTV2TestPatternGen::DrawYCbCrFrame(uint16_t Y, uint16_t Cb, uint16_t Cr)
 {
 	// Make a BlackLine
 	MakeUnPacked10BitYCbCrBuffer( _pUnPackedLineBuffer, Y , Cb , Cr ,_frameWidth );
@@ -2260,7 +2296,7 @@ bool AJATestPatternGenEx::DrawYCbCrFrame(uint16_t Y, uint16_t Cb, uint16_t Cr)
 	return true;
 }
 
-bool AJATestPatternGenEx::DrawLinearRampFrame()
+bool NTV2TestPatternGen::DrawLinearRampFrame()
 {
 	// Ramp from 0x40-0x3AC
 	uint16_t value = 0x40;
@@ -2284,7 +2320,7 @@ bool AJATestPatternGenEx::DrawLinearRampFrame()
 }
 
 
-bool AJATestPatternGenEx::DrawSlantRampFrame()
+bool NTV2TestPatternGen::DrawSlantRampFrame()
 {
 	// Ramp from 0x40-0x3AC
 	for ( uint32_t line = 0; line < _frameHeight; line++ )
@@ -2307,7 +2343,7 @@ bool AJATestPatternGenEx::DrawSlantRampFrame()
 	return true;
 }
 
-bool AJATestPatternGenEx::DrawBorderFrame()
+bool NTV2TestPatternGen::DrawBorderFrame()
 {
 	uint32_t* pPackedWhiteLineBuffer= new uint32_t[_frameWidth*2];
 	uint32_t* pPackedEdgeLineBuffer= new uint32_t[_frameWidth*2];
@@ -2346,7 +2382,7 @@ bool AJATestPatternGenEx::DrawBorderFrame()
 }
 
 const double kPi = 3.1415926535898;
-bool AJATestPatternGenEx::DrawZonePlateFrame()
+bool NTV2TestPatternGen::DrawZonePlateFrame()
 {
 	double pattScale = (kPi*.5 ) / (_frameWidth + 1);
 
@@ -2374,7 +2410,7 @@ bool AJATestPatternGenEx::DrawZonePlateFrame()
 
 
 
-bool AJATestPatternGenEx::DrawColorQuandrantFrame()
+bool NTV2TestPatternGen::DrawColorQuandrantFrame()
 {
 	uint32_t* pPackedUpperLineBuffer= new uint32_t[_frameWidth*2];
 	uint16_t* pUnPackedUpperLineBuffer= new uint16_t[_frameWidth*2];
@@ -2435,7 +2471,7 @@ bool AJATestPatternGenEx::DrawColorQuandrantFrame()
 	return true;
 
 }
-bool AJATestPatternGenEx::DrawQuandrantBorderFrame()
+bool NTV2TestPatternGen::DrawQuandrantBorderFrame()
 {
 	uint32_t* pPackedRedLineBuffer= new uint32_t[_frameWidth*2];
 	uint16_t* pUnPackedRedLineBuffer= new uint16_t[_frameWidth*2];
@@ -2533,7 +2569,7 @@ bool AJATestPatternGenEx::DrawQuandrantBorderFrame()
 	return true;
 }
 
-bool AJATestPatternGenEx::DrawColorQuandrantFrameTsi()
+bool NTV2TestPatternGen::DrawColorQuandrantFrameTsi()
 {
 	uint32_t* pPackedUpperLineBuffer= new uint32_t[_frameWidth*2];
 	uint16_t* pUnPackedUpperLineBuffer= new uint16_t[_frameWidth*2];
@@ -2622,7 +2658,7 @@ bool AJATestPatternGenEx::DrawColorQuandrantFrameTsi()
 
 }
 
-bool AJATestPatternGenEx::GetStandard(int &standard, bool &b4K)
+bool NTV2TestPatternGen::GetStandard(int &standard, bool &b4K)
 {
 	bool bResult = true;
 	b4K = false;
@@ -2662,7 +2698,7 @@ bool AJATestPatternGenEx::GetStandard(int &standard, bool &b4K)
 }
 
 
-bool AJATestPatternGenEx::IsSDStandard()
+bool NTV2TestPatternGen::IsSDStandard()
 {
 	int standard;
 	bool b4K;

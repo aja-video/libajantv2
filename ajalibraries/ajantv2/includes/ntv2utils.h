@@ -10,7 +10,7 @@
 #include "ajaexport.h"
 #include "ajatypes.h"
 #include "ntv2enums.h"
-#include "videodefines.h"
+#include "ntv2videodefines.h"
 #include "ntv2publicinterface.h"
 #include "ntv2formatdescriptor.h"
 #include "ntv2m31publicinterface.h"
@@ -347,9 +347,11 @@ AJAExport ULWord GetVideoWriteSize (const NTV2VideoFormat inVideoFormat,
 									const NTV2VANCMode inVancMode = NTV2_VANCMODE_OFF);
 
 AJAExport NTV2VideoFormat GetQuarterSizedVideoFormat(NTV2VideoFormat videoFormat);
-AJAExport NTV2VideoFormat GetQuadSizedVideoFormat(NTV2VideoFormat videoFormat);
+AJAExport NTV2VideoFormat GetQuadSizedVideoFormat(NTV2VideoFormat videoFormat, bool isSquareDivision = true);
 AJAExport NTV2FrameGeometry GetQuarterSizedGeometry(NTV2FrameGeometry geometry);
 AJAExport NTV2FrameGeometry Get4xSizedGeometry(NTV2FrameGeometry geometry);
+AJAExport NTV2Standard GetQuarterSizedStandard(NTV2Standard geometry);
+AJAExport NTV2Standard Get4xSizedStandard(NTV2Standard geometry, bool bIs4k = false);
 
 AJAExport double GetFramesPerSecond(NTV2FrameRate frameRate);
 AJAExport double GetFrameTime(NTV2FrameRate frameRate);
@@ -890,10 +892,11 @@ typedef NTV2DeviceIDSet::iterator		NTV2DeviceIDSetIter;		///< @brief	A convenien
 typedef NTV2DeviceIDSet::const_iterator	NTV2DeviceIDSetConstIter;	///< @brief	A convenient const iterator for NTV2DeviceIDSet.
 
 /**
-	@brief	Returns an NTV2DeviceIDSet of devices supported by the SDK.
-	@return	An NTV2DeviceIDSet of devices supported by the SDK.
+	@brief		Returns an NTV2DeviceIDSet of devices supported by the SDK.
+	@param[in]	inKinds		Optionally specifies an ::NTV2DeviceKinds filter. Defaults to ::NTV2_DEVICEKIND_ALL.
+	@return		An ::NTV2DeviceIDSet of devices supported by the SDK.
 **/
-AJAExport NTV2DeviceIDSet NTV2GetSupportedDevices		(void);
+AJAExport NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds = NTV2_DEVICEKIND_ALL);
 
 AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DeviceIDSet & inSet);		///<	@brief	Handy ostream writer for NTV2DeviceIDSet.
 

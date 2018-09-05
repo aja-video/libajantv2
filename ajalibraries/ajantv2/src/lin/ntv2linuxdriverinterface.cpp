@@ -31,15 +31,14 @@
 
 using namespace std;
 
-static const string	kAJANTV2("ajantv2");
-
-
 /////////////////////////////////////////////////////////////////////////////////////
 // Board Open / Close methods
 /////////////////////////////////////////////////////////////////////////////////////
 bool
 CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & hostName)
 {
+	static const string	kAJANTV2("ajantv2");
+
 	if (IsOpen()  &&  inDeviceIndexNumber == _boardNumber)
 	{
 #if defined (NTV2_NUB_CLIENT_SUPPORT)

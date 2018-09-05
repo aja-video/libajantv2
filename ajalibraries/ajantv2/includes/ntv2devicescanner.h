@@ -8,7 +8,7 @@
 #define NTV2DEVICESCANNER_H
 
 #include "ajaexport.h"
-#include "ntv2status.h"
+#include "ntv2card.h"
 #include "string.h"
 #include <vector>
 #include <algorithm>
@@ -356,12 +356,7 @@ public:
 
 
 private:
-#if !defined (NTV2_DEPRECATE)
 	virtual void	SetAudioAttributes(NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice) const;
-	virtual void	SetAudioAttributes (NTV2DeviceInfo & inDeviceInfo, CNTV2Status & inDevice) const;
-#else
-	virtual void	SetAudioAttributes(NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice) const;
-#endif
 	virtual void	SetVideoAttributes (NTV2DeviceInfo & inDevicInfo);
 	virtual void	DeepCopy (const CNTV2DeviceScanner & inDeviceScanner);
 

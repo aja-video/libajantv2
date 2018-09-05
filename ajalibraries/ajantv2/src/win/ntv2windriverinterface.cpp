@@ -16,6 +16,7 @@
 #include "ntv2nubtypes.h"
 #include "ntv2debug.h"
 #include "winioctl.h"
+#include "ajabase/system/debug.h"
 #include <sstream>
 
 using namespace std;
@@ -124,6 +125,41 @@ static const ULWord	gChannelToTSLastInputVertLo []		= {	kVRegTimeStampLastInput1
 
 static const ULWord	gChannelToTSLastInputVertHi []		= {	kVRegTimeStampLastInput1VerticalHi, kVRegTimeStampLastInput2VerticalHi, kVRegTimeStampLastInput3VerticalHi, kVRegTimeStampLastInput4VerticalHi,
 															kVRegTimeStampLastInput5VerticalHi, kVRegTimeStampLastInput6VerticalHi, kVRegTimeStampLastInput7VerticalHi, kVRegTimeStampLastInput8VerticalHi, 0};
+static std::string GetKernErrStr (const DWORD inError)
+{
+	LPVOID lpMsgBuf(NULL);
+	FormatMessage (	FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+					NULL,
+					inError,
+					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+					(LPTSTR) &lpMsgBuf,
+					0,
+					NULL);
+	string result (lpMsgBuf ? reinterpret_cast<const char*>(lpMsgBuf) : "");
+	LocalFree (lpMsgBuf);
+//	Truncate at <CR><LF>...
+	const size_t	crPos(result.find(".\r"));
+	if (crPos != string::npos)
+		result.resize(crPos);
+	return result;
+}
+
+
+//	WinDriverInterface Logging Macros
+#define	HEX2(__x__)			"0x" << hex << setw(2)  << setfill('0') << (0xFF       & uint8_t (__x__)) << dec
+#define	HEX4(__x__)			"0x" << hex << setw(4)  << setfill('0') << (0xFFFF     & uint16_t(__x__)) << dec
+#define	HEX8(__x__)			"0x" << hex << setw(8)  << setfill('0') << (0xFFFFFFFF & uint32_t(__x__)) << dec
+#define	HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') <<               uint64_t(__x__)  << dec
+#define KR(_kr_)			"kernResult=" << HEX8(_kr_) << "(" << GetKernErrStr(_kr_) << ")"
+#define INSTP(_p_)			" instance=" << HEX16(uint64_t(_p_))
+
+#define	WDIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, __FUNCTION__ << ": " << __x__)
+#define	WDIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, __FUNCTION__ << ": " << __x__)
+#define	WDINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, __FUNCTION__ << ": " << __x__)
+#define	WDIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface, __FUNCTION__ << ": " << __x__)
+#define	WDIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface, __FUNCTION__ << ": " << __x__)
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Board Open / Close methods
@@ -159,8 +195,6 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 	_remoteHandle = (LWord)INVALID_NUB_HANDLE;
 #endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
 	_hDevice = INVALID_HANDLE_VALUE;
-	//_boardType = eBoardType;
-	//eBoardType = _boardType;
 	ULWord deviceID = 0x0;
 
 #define BOARDSTRMAX	32
@@ -169,10 +203,11 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 		ostringstream	oss;
 		oss << hostName << ":ntv2" << inDeviceIndexNumber;
 	#if defined(NTV2_NUB_CLIENT_SUPPORT)
-		if (!OpenRemote(inDeviceIndexNumber, _displayErrorMessage, 256, hostName.c_str()))
+		if (!OpenRemote(inDeviceIndexNumber, _displayErrorMessage, 256, oss.str().c_str()))
 	#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
 		{
-			DisplayNTV2Error("Failed to open board on remote host.");
+			WDIFAIL("Failed to open remote device '" << oss.str() << "'");
+			return false;
 		}
 	}
 	else
@@ -1194,7 +1229,7 @@ bool CNTV2WinDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine, bool bRead, 
 							   ULWord * pFrameBuffer, ULWord offsetBytes, ULWord bytes,
 							   bool bSync)
 {
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	KSPROPERTY_AJAPROPS_DMA_S propStruct;
 	DWORD dwBytesReturned = 0;
@@ -1215,48 +1250,28 @@ bool CNTV2WinDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine, bool bRead, 
 	propStruct.ulAudNumBytes = 0;
 	propStruct.bSync		 = bSync;
 
-	BOOL fRet = FALSE;
-	fRet = DeviceIoControl(_hDevice,
-							IOCTL_AJAPROPS_DMA,
-							&propStruct,
-							sizeof(KSPROPERTY_AJAPROPS_DMA_S),
-							&propStruct,
-							sizeof(KSPROPERTY_AJAPROPS_DMA_S),
-							&dwBytesReturned,
-							NULL);
-	if (fRet)
-		return true;
-	else
-	{
-#if defined (_DEBUG)
-		LPVOID lpMsgBuf;
-		FormatMessage(
-			FORMAT_MESSAGE_ALLOCATE_BUFFER |
-			FORMAT_MESSAGE_FROM_SYSTEM |
-			FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL,
-			GetLastError(),
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-			(LPTSTR) &lpMsgBuf,
-			0,
-			NULL
-			);
-
-		printf ("DmaTransfer failed: %s\n", (char *) lpMsgBuf);
-		LocalFree (lpMsgBuf);
-#endif
-		DisplayNTV2Error ("DmaTransfer failed");
-
-		return false;
-	}
+	BOOL fRet = DeviceIoControl(_hDevice,
+								IOCTL_AJAPROPS_DMA,
+								&propStruct,
+								sizeof(KSPROPERTY_AJAPROPS_DMA_S),
+								&propStruct,
+								sizeof(KSPROPERTY_AJAPROPS_DMA_S),
+								&dwBytesReturned,
+								NULL);
+	const DWORD kernResult(GetLastError());
+	if (!fRet)
+		WDIFAIL (KR(kernResult) << INSTP(this) << ", eng=" << DMAEngine << ", frm=" << frameNumber
+				<< ", off=" << HEX8(offsetBytes) << ", len=" << HEX8(bytes) << ", " << (bRead ? "R" : "W"));
+	return fRet ? true : false;
 }
+
 
  bool CNTV2WinDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine, bool bRead, ULWord frameNumber,
 							   ULWord* pFrameBuffer, ULWord offsetBytes, ULWord bytes,
 							   ULWord videoNumSegments, ULWord videoSegmentHostPitch, ULWord videoSegmentCardPitch,
 							   bool bSync)
 {
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	KSPROPERTY_AJAPROPS_DMA_EX_S propStruct;
 	DWORD dwBytesReturned = 0;
@@ -1280,40 +1295,19 @@ bool CNTV2WinDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine, bool bRead, 
 	propStruct.ulVidSegmentCardPitch = videoSegmentCardPitch;
 	propStruct.bSync = bSync;
 
-  	BOOL fRet = FALSE;
-	fRet = DeviceIoControl(_hDevice,
-							IOCTL_AJAPROPS_DMA_EX,
-							&propStruct,
-							sizeof(KSPROPERTY_AJAPROPS_DMA_EX_S),
-							&propStruct,
-							sizeof(KSPROPERTY_AJAPROPS_DMA_EX_S),
-							&dwBytesReturned,
-							NULL);
-	if (fRet)
-		return true;
-	else
-	{
-#if defined (_DEBUG)
-		LPVOID lpMsgBuf;
-		FormatMessage(
-			FORMAT_MESSAGE_ALLOCATE_BUFFER |
-			FORMAT_MESSAGE_FROM_SYSTEM |
-			FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL,
-			GetLastError(),
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-			(LPTSTR) &lpMsgBuf,
-			0,
-			NULL
-			);
-
-		_tprintf (_T("DmaTransfer failed: %s\n"), (char *) lpMsgBuf);
-		LocalFree (lpMsgBuf);
-#endif
-		DisplayNTV2Error ("DmaTransfer failed");
-
-		return false;
-	}
+  	BOOL fRet = DeviceIoControl(_hDevice,
+								IOCTL_AJAPROPS_DMA_EX,
+								&propStruct,
+								sizeof(KSPROPERTY_AJAPROPS_DMA_EX_S),
+								&propStruct,
+								sizeof(KSPROPERTY_AJAPROPS_DMA_EX_S),
+								&dwBytesReturned,
+								NULL);
+	const DWORD kernResult(GetLastError());
+	if (!fRet)
+		WDIFAIL (KR(kernResult) << INSTP(this) << ", eng=" << DMAEngine << ", frm=" << frameNumber
+				<< ", off=" << HEX8(offsetBytes) << ", len=" << HEX8(bytes) << ", " << (bRead ? "R" : "W"));
+	return fRet ? true : false;
 }
 
 bool CNTV2WinDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine,
@@ -1327,11 +1321,11 @@ bool CNTV2WinDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine,
 										   ULWord videoSegmentCardPitch,
 										   PCHANNEL_P2P_STRUCT pP2PData)
 {
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	if (pP2PData == NULL)
 	{
-		printf ("DmaTransfer failed: pP2PData == NULL");
+		WDIFAIL ("pP2PData == NULL");
 		return false;
 	}
 
@@ -1355,7 +1349,7 @@ bool CNTV2WinDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine,
 		// check for valid p2p struct
 		if (pP2PData->p2pSize != sizeof(CHANNEL_P2P_STRUCT))
 		{
-			printf ("DmaTransfer failed: pP2PData->p2pSize != sizeof(CHANNEL_P2P_STRUCT)");
+			WDIFAIL ("pP2PData->p2pSize " << pP2PData->p2pSize << " != sizeof(CHANNEL_P2P_STRUCT) " <<  sizeof(CHANNEL_P2P_STRUCT));
 			return false;
 		}
 
@@ -1376,56 +1370,43 @@ bool CNTV2WinDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine,
 	propStruct.ulVideoBusSize = pP2PData->videoBusSize;
 	propStruct.ulMessageData = pP2PData->messageData;
 
-	BOOL fRet = FALSE;
-	fRet = DeviceIoControl(_hDevice,
-							IOCTL_AJAPROPS_DMA_P2P,
-							&propStruct,
-							sizeof(KSPROPERTY_AJAPROPS_DMA_P2P_S),
-							&propStruct,
-							sizeof(KSPROPERTY_AJAPROPS_DMA_P2P_S),
-							&dwBytesReturned,
-							NULL);
-	if (fRet)
+	BOOL fRet = DeviceIoControl(_hDevice,
+								IOCTL_AJAPROPS_DMA_P2P,
+								&propStruct,
+								sizeof(KSPROPERTY_AJAPROPS_DMA_P2P_S),
+								&propStruct,
+								sizeof(KSPROPERTY_AJAPROPS_DMA_P2P_S),
+								&dwBytesReturned,
+								NULL);
+	const DWORD kernResult(GetLastError());
+	if (!fRet)
 	{
-		if (bTarget)
-		{
-			// check for data returned
-			if (dwBytesReturned != sizeof(KSPROPERTY_AJAPROPS_DMA_P2P_S))
-			{
-				return false;
-			}
-
-			// fill in p2p data
-			pP2PData->videoBusAddress = propStruct.ullVideoBusAddress;
-			pP2PData->messageBusAddress = propStruct.ullMessageBusAddress;
-			pP2PData->videoBusSize = propStruct.ulVideoBusSize;
-			pP2PData->messageData = propStruct.ulMessageData;
-		}
-		return true;
-	}
-	else
-	{
-#if defined (_DEBUG)
-		LPVOID lpMsgBuf;
-		FormatMessage(
-			FORMAT_MESSAGE_ALLOCATE_BUFFER |
-			FORMAT_MESSAGE_FROM_SYSTEM |
-			FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL,
-			GetLastError(),
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-			(LPTSTR) &lpMsgBuf,
-			0,
-			NULL
-			);
-
-		printf ("DmaTransfer failed: %s\n", (char *) lpMsgBuf);
-		LocalFree (lpMsgBuf);
-#endif
-		DisplayNTV2Error ("DmaTransfer failed");
-
+		WDIFAIL (KR(kernResult) << INSTP(this) << ", eng=" << DMAEngine << " ch=" << DMAChannel << ", frm=" << frameNumber
+				<< ", off=" << HEX8(frameOffset) << ", vSiz=" << HEX8(videoSize) << "#segs=" << videoNumSegments
+				<< " hostPitch=" << videoSegmentHostPitch << " cardPitch=" << videoSegmentCardPitch
+				<< ", target=" << (bTarget ? "T" : "F"));
 		return false;
 	}
+	if (bTarget)
+	{
+		// check for data returned
+		if (dwBytesReturned != sizeof(KSPROPERTY_AJAPROPS_DMA_P2P_S))
+		{
+			WDIFAIL (KR(kernResult) << INSTP(this) << ", eng=" << DMAEngine << " ch=" << DMAChannel << ", frm=" << frameNumber
+					<< ", off=" << HEX8(frameOffset) << ", vSiz=" << HEX8(videoSize) << "#segs=" << videoNumSegments
+					<< " hostPitch=" << videoSegmentHostPitch << " cardPitch=" << videoSegmentCardPitch
+					<< ", target=" << (bTarget ? "T" : "F") << " p2pBytesRet=" << HEX8(dwBytesReturned)
+					<< " p2pSize=" << HEX8(sizeof(KSPROPERTY_AJAPROPS_DMA_P2P_S)));
+			return false;
+		}
+
+		// fill in p2p data
+		pP2PData->videoBusAddress = propStruct.ullVideoBusAddress;
+		pP2PData->messageBusAddress = propStruct.ullMessageBusAddress;
+		pP2PData->videoBusSize = propStruct.ulVideoBusSize;
+		pP2PData->messageData = propStruct.ulMessageData;
+	}
+	return true;
 }
 
 bool CNTV2WinDriverInterface::MapMemory (PVOID pvUserVa, ULWord ulNumBytes, bool bMap, ULWord* ulUser)

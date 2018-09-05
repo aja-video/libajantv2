@@ -251,18 +251,18 @@ void KonaLHePlusServices::SetDeviceXPointPlayback ()
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync2YUV);
 	}
-	else if ( (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
-			  || (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
+	else if ( (mVirtualDigitalOutput2Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
+			  || (   (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
 			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync1YUV);
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)			// Secondary
+	else if (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)			// Secondary
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptConversionModule);
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)				// Video+Key
+	else if (mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)				// Video+Key
 	{
 		if (bDSKOn)
 		{
@@ -668,14 +668,14 @@ void KonaLHePlusServices::SetDeviceXPointCapture ()
 	
 	
 	// SDI Out 2 
-	if (	(mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
-		      || (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)		// or if "Secondary" AND Secondary == Primary and not SD format
+	if (	(mVirtualDigitalOutput2Select == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
+		      || (   (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)		// or if "Secondary" AND Secondary == Primary and not SD format
 			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync1YUV);
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)
+	else if (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync2YUV);
 	}
@@ -917,28 +917,4 @@ void KonaLHePlusServices::SetDeviceMiscRegisters ()
 				mADCStabilizeCount--;
 		}
 	}
-	//else
-		//mADCStabilizeCount = kADCStabilizeCount;
-	
-	
-	// Finish VPID for SDI 1 Out / SDI 2 Out 
-	/* Not supported yet
-	{
-		// don't overwrite if e-to-e and input and outputs match
-		ULWord overwrite =	!(mFb1Mode == NTV2_MODE_CAPTURE);
-		
-		mCard->WriteRegister(kRegSDIOut1Control, overwrite, kRegMaskVPIDInsertionOverwrite);
-		mCard->WriteRegister(kRegSDIOut2Control, overwrite, kRegMaskVPIDInsertionOverwrite);
-		
-		// enable VPID write
-		mCard->WriteRegister(kRegSDIOut1Control, 1, kRegMaskVPIDInsertionEnable);
-		mCard->WriteRegister(kRegSDIOut2Control, 1, kRegMaskVPIDInsertionEnable);
-
-		// write VPID for SDI 1
-		mCard->WriteRegister(kRegSDIOut1VPIDA, vpidOut1a);
-		
-		// write VPID for SDI 2
-		mCard->WriteRegister(kRegSDIOut2VPIDA, vpidOut2a);
-	}
-	*/
 }

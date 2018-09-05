@@ -91,60 +91,330 @@
 		B41B5E2416E5330C00A9E0DC /* ntv2autocirculate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DBD16E5330C00A9E0DC /* ntv2autocirculate.cpp */; };
 		B41B5E2F16E5330C00A9E0DC /* ntv2card.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DC816E5330C00A9E0DC /* ntv2card.cpp */; };
 		B41B5E3016E5330C00A9E0DC /* ntv2card.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DC916E5330C00A9E0DC /* ntv2card.h */; };
-		B41B5E3316E5330C00A9E0DC /* ntv2colorcorrection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DCC16E5330C00A9E0DC /* ntv2colorcorrection.cpp */; };
-		B41B5E3416E5330C00A9E0DC /* ntv2colorcorrection.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DCD16E5330C00A9E0DC /* ntv2colorcorrection.h */; };
 		B41B5E3516E5330C00A9E0DC /* ntv2debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DCE16E5330C00A9E0DC /* ntv2debug.cpp */; };
 		B41B5E3616E5330C00A9E0DC /* ntv2debug.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DCF16E5330C00A9E0DC /* ntv2debug.h */; };
 		B41B5E3716E5330C00A9E0DC /* ntv2discover.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DD016E5330C00A9E0DC /* ntv2discover.cpp */; };
 		B41B5E3816E5330C00A9E0DC /* ntv2discover.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DD116E5330C00A9E0DC /* ntv2discover.h */; };
-		B41B5E3916E5330C00A9E0DC /* ntv2diskio.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DD216E5330C00A9E0DC /* ntv2diskio.h */; };
 		B41B5E3A16E5330C00A9E0DC /* ntv2dma.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DD316E5330C00A9E0DC /* ntv2dma.cpp */; };
 		B41B5E3B16E5330C00A9E0DC /* ntv2driverinterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DD416E5330C00A9E0DC /* ntv2driverinterface.cpp */; };
 		B41B5E3C16E5330C00A9E0DC /* ntv2driverinterface.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DD516E5330C00A9E0DC /* ntv2driverinterface.h */; };
-		B41B5E4216E5330C00A9E0DC /* ntv2fltknetprefs.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DDB16E5330C00A9E0DC /* ntv2fltknetprefs.h */; };
 		B41B5E4516E5330C00A9E0DC /* ntv2interrupts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DDE16E5330C00A9E0DC /* ntv2interrupts.cpp */; };
 		B41B5E4816E5330C00A9E0DC /* ntv2nubaccess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DE116E5330C00A9E0DC /* ntv2nubaccess.cpp */; };
 		B41B5E4916E5330C00A9E0DC /* ntv2nubaccess.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DE216E5330C00A9E0DC /* ntv2nubaccess.h */; };
 		B41B5E4A16E5330C00A9E0DC /* ntv2nubpktcom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DE316E5330C00A9E0DC /* ntv2nubpktcom.cpp */; };
 		B41B5E4B16E5330C00A9E0DC /* ntv2nubpktcom.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DE416E5330C00A9E0DC /* ntv2nubpktcom.h */; };
 		B41B5E4C16E5330C00A9E0DC /* ntv2nubtypes.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DE516E5330C00A9E0DC /* ntv2nubtypes.h */; };
-		B41B5E5116E5330C00A9E0DC /* ntv2procamp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DEA16E5330C00A9E0DC /* ntv2procamp.cpp */; };
-		B41B5E5216E5330C00A9E0DC /* ntv2procamp.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DEB16E5330C00A9E0DC /* ntv2procamp.h */; };
 		B41B5E5316E5330C00A9E0DC /* ntv2register.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DEC16E5330C00A9E0DC /* ntv2register.cpp */; };
 		B41B5E5416E5330C00A9E0DC /* ntv2rp188.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DED16E5330C00A9E0DC /* ntv2rp188.cpp */; };
 		B41B5E5516E5330C00A9E0DC /* ntv2rp188.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DEE16E5330C00A9E0DC /* ntv2rp188.h */; };
 		B41B5E5616E5330C00A9E0DC /* ntv2rp215.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DEF16E5330C00A9E0DC /* ntv2rp215.cpp */; };
 		B41B5E5716E5330C00A9E0DC /* ntv2rp215.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DF016E5330C00A9E0DC /* ntv2rp215.h */; };
-		B41B5E5816E5330C00A9E0DC /* ntv2status.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DF116E5330C00A9E0DC /* ntv2status.cpp */; };
-		B41B5E5916E5330C00A9E0DC /* ntv2status.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DF216E5330C00A9E0DC /* ntv2status.h */; };
 		B41B5E5A16E5330C00A9E0DC /* ntv2subscriptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DF316E5330C00A9E0DC /* ntv2subscriptions.cpp */; };
 		B41B5E5B16E5330C00A9E0DC /* ntv2task.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DF416E5330C00A9E0DC /* ntv2task.cpp */; };
 		B41B5E5C16E5330C00A9E0DC /* ntv2task.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DF516E5330C00A9E0DC /* ntv2task.h */; };
 		B41B5E5D16E5330C00A9E0DC /* ntv2testpattern.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DF616E5330C00A9E0DC /* ntv2testpattern.cpp */; };
-		B41B5E5E16E5330C00A9E0DC /* ntv2testpattern.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DF716E5330C00A9E0DC /* ntv2testpattern.h */; };
 		B41B5E6116E5330C00A9E0DC /* ntv2utf8.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DFA16E5330C00A9E0DC /* ntv2utf8.cpp */; };
 		B41B5E6216E5330C00A9E0DC /* ntv2utf8.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DFB16E5330C00A9E0DC /* ntv2utf8.h */; };
 		B41B5E6316E5330C00A9E0DC /* ntv2utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DFC16E5330C00A9E0DC /* ntv2utils.cpp */; };
 		B41B5E6416E5330C00A9E0DC /* ntv2utils.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DFD16E5330C00A9E0DC /* ntv2utils.h */; };
-		B41B5E6616E5330C00A9E0DC /* ntv2videofile.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DFF16E5330C00A9E0DC /* ntv2videofile.h */; };
 		B41B5E6716E5330C00A9E0DC /* ntv2vidproc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5E0016E5330C00A9E0DC /* ntv2vidproc.cpp */; };
-		B41B5E6816E5330C00A9E0DC /* ntv2vidproc.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E0116E5330C00A9E0DC /* ntv2vidproc.h */; };
-		B41B5E6916E5330C00A9E0DC /* ntv2vidprocmasks.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E0216E5330C00A9E0DC /* ntv2vidprocmasks.h */; };
 		B41B5E6A16E5330C00A9E0DC /* ntv2vpid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5E0316E5330C00A9E0DC /* ntv2vpid.cpp */; };
 		B41B5E6B16E5330C00A9E0DC /* ntv2vpid.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E0416E5330C00A9E0DC /* ntv2vpid.h */; };
-		B41B5E7216E5330C00A9E0DC /* testpatterndata.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E0B16E5330C00A9E0DC /* testpatterndata.h */; };
-		B41B5E7316E5330C00A9E0DC /* testpatterngen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5E0C16E5330C00A9E0DC /* testpatterngen.cpp */; };
-		B41B5E7416E5330C00A9E0DC /* testpatterngen.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E0D16E5330C00A9E0DC /* testpatterngen.h */; };
-		B41B5E7516E5330C00A9E0DC /* testpatterngendata.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E0E16E5330C00A9E0DC /* testpatterngendata.h */; };
 		B41B5E7816E5330C00A9E0DC /* ntv2verticalfilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5E1116E5330C00A9E0DC /* ntv2verticalfilter.cpp */; };
 		B41B5E7916E5330C00A9E0DC /* ntv2verticalfilter.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E1216E5330C00A9E0DC /* ntv2verticalfilter.h */; };
-		B41B5E7E16E5330C00A9E0DC /* xena2vidproc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5E1716E5330C00A9E0DC /* xena2vidproc.cpp */; };
-		B41B5E7F16E5330C00A9E0DC /* xena2vidproc.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E1816E5330C00A9E0DC /* xena2vidproc.h */; };
 		B41B5E8016E5330C00A9E0DC /* ntv2serialcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5E1916E5330C00A9E0DC /* ntv2serialcontrol.cpp */; };
 		B41B5E8116E5330C00A9E0DC /* ntv2serialcontrol.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E1A16E5330C00A9E0DC /* ntv2serialcontrol.h */; };
 		B41B5E9716E537C600A9E0DC /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B41B5E9616E537C600A9E0DC /* IOKit.framework */; };
 		B455DE3C2106319E002A69FD /* ntv2anc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DE3B2106319E002A69FD /* ntv2anc.cpp */; };
 		B455DE3D21063546002A69FD /* ntv2anc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DE3B2106319E002A69FD /* ntv2anc.cpp */; };
+		B455DE9C210F94C0002A69FD /* ntv2testpatterngen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DE9B210F94C0002A69FD /* ntv2testpatterngen.cpp */; };
+		B455DE9F210F9533002A69FD /* ntv2testpatterngen.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DE9D210F9533002A69FD /* ntv2testpatterngen.h */; };
+		B455DEA0210F9533002A69FD /* ntv2videodefines.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DE9E210F9533002A69FD /* ntv2videodefines.h */; };
+		B455DECE210F95E9002A69FD /* ajarefptr.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEA4210F95E9002A69FD /* ajarefptr.h */; };
+		B455DECF210F95E9002A69FD /* audioutilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEA5210F95E9002A69FD /* audioutilities.cpp */; };
+		B455DED0210F95E9002A69FD /* audioutilities.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEA6210F95E9002A69FD /* audioutilities.h */; };
+		B455DED1210F95E9002A69FD /* buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEA7210F95E9002A69FD /* buffer.cpp */; };
+		B455DED2210F95E9002A69FD /* buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEA8210F95E9002A69FD /* buffer.h */; };
+		B455DED3210F95E9002A69FD /* bytestream.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEA9210F95E9002A69FD /* bytestream.h */; };
+		B455DED4210F95E9002A69FD /* circularbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEAA210F95E9002A69FD /* circularbuffer.h */; };
+		B455DED5210F95E9002A69FD /* cli_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEAB210F95E9002A69FD /* cli_utils.h */; };
+		B455DED6210F95E9002A69FD /* common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEAC210F95E9002A69FD /* common.cpp */; };
+		B455DED7210F95E9002A69FD /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEAD210F95E9002A69FD /* common.h */; };
+		B455DED8210F95E9002A69FD /* dpx_hdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEAE210F95E9002A69FD /* dpx_hdr.cpp */; };
+		B455DED9210F95E9002A69FD /* dpx_hdr.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEAF210F95E9002A69FD /* dpx_hdr.h */; };
+		B455DEDA210F95E9002A69FD /* dpxfileio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEB0210F95E9002A69FD /* dpxfileio.cpp */; };
+		B455DEDB210F95E9002A69FD /* dpxfileio.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEB1210F95E9002A69FD /* dpxfileio.h */; };
+		B455DEDC210F95E9002A69FD /* export.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEB2210F95E9002A69FD /* export.h */; };
+		B455DEDD210F95E9002A69FD /* guid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEB3210F95E9002A69FD /* guid.cpp */; };
+		B455DEDE210F95E9002A69FD /* guid.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEB4210F95E9002A69FD /* guid.h */; };
+		B455DEDF210F95E9002A69FD /* options_popt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEB5210F95E9002A69FD /* options_popt.cpp */; };
+		B455DEE0210F95E9002A69FD /* options_popt.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEB6210F95E9002A69FD /* options_popt.h */; };
+		B455DEE1210F95E9002A69FD /* performance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEB7210F95E9002A69FD /* performance.cpp */; };
+		B455DEE2210F95E9002A69FD /* performance.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEB8210F95E9002A69FD /* performance.h */; };
+		B455DEE3210F95E9002A69FD /* pixelformat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEB9210F95E9002A69FD /* pixelformat.cpp */; };
+		B455DEE4210F95E9002A69FD /* pixelformat.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEBA210F95E9002A69FD /* pixelformat.h */; };
+		B455DEE5210F95E9002A69FD /* public.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEBB210F95E9002A69FD /* public.h */; };
+		B455DEE6210F95E9002A69FD /* rawfile.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEBC210F95E9002A69FD /* rawfile.h */; };
+		B455DEE7210F95E9002A69FD /* testpatterndata.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEBD210F95E9002A69FD /* testpatterndata.h */; };
+		B455DEE8210F95E9002A69FD /* testpatterngen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEBE210F95E9002A69FD /* testpatterngen.cpp */; };
+		B455DEE9210F95E9002A69FD /* testpatterngen.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEBF210F95E9002A69FD /* testpatterngen.h */; };
+		B455DEEA210F95E9002A69FD /* timebase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEC0210F95E9002A69FD /* timebase.cpp */; };
+		B455DEEB210F95E9002A69FD /* timebase.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEC1210F95E9002A69FD /* timebase.h */; };
+		B455DEEC210F95E9002A69FD /* timecode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEC2210F95E9002A69FD /* timecode.cpp */; };
+		B455DEED210F95E9002A69FD /* timecode.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEC3210F95E9002A69FD /* timecode.h */; };
+		B455DEEE210F95E9002A69FD /* timecodeburn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEC4210F95E9002A69FD /* timecodeburn.cpp */; };
+		B455DEEF210F95E9002A69FD /* timecodeburn.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEC5210F95E9002A69FD /* timecodeburn.h */; };
+		B455DEF0210F95E9002A69FD /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEC6210F95E9002A69FD /* timer.cpp */; };
+		B455DEF1210F95E9002A69FD /* timer.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEC7210F95E9002A69FD /* timer.h */; };
+		B455DEF2210F95E9002A69FD /* types.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEC8210F95E9002A69FD /* types.h */; };
+		B455DEF3210F95E9002A69FD /* videotypes.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEC9210F95E9002A69FD /* videotypes.h */; };
+		B455DEF4210F95E9002A69FD /* videoutilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DECA210F95E9002A69FD /* videoutilities.cpp */; };
+		B455DEF5210F95E9002A69FD /* videoutilities.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DECB210F95E9002A69FD /* videoutilities.h */; };
+		B455DEF6210F95E9002A69FD /* wavewriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DECC210F95E9002A69FD /* wavewriter.cpp */; };
+		B455DEF7210F95E9002A69FD /* wavewriter.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DECD210F95E9002A69FD /* wavewriter.h */; };
+		B455DEFF210F9626002A69FD /* ip_socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEF9210F9626002A69FD /* ip_socket.cpp */; };
+		B455DF00210F9626002A69FD /* ip_socket.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEFA210F9626002A69FD /* ip_socket.h */; };
+		B455DF01210F9626002A69FD /* tcp_socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEFB210F9626002A69FD /* tcp_socket.cpp */; };
+		B455DF02210F9626002A69FD /* tcp_socket.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEFC210F9626002A69FD /* tcp_socket.h */; };
+		B455DF03210F9626002A69FD /* udp_socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEFD210F9626002A69FD /* udp_socket.cpp */; };
+		B455DF04210F9626002A69FD /* udp_socket.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEFE210F9626002A69FD /* udp_socket.h */; };
+		B455DF0A210F9662002A69FD /* persistence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF06210F9662002A69FD /* persistence.cpp */; };
+		B455DF0B210F9662002A69FD /* persistence.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF07210F9662002A69FD /* persistence.h */; };
+		B455DF0C210F9662002A69FD /* sqlite3.c in Sources */ = {isa = PBXBuildFile; fileRef = B455DF08210F9662002A69FD /* sqlite3.c */; };
+		B455DF0D210F9662002A69FD /* sqlite3.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF09210F9662002A69FD /* sqlite3.h */; };
+		B455DF11210F9698002A69FD /* pnp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF0F210F9698002A69FD /* pnp.cpp */; };
+		B455DF12210F9698002A69FD /* pnp.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF10210F9698002A69FD /* pnp.h */; };
+		B455DF1A210F96BD002A69FD /* devicenotifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF14210F96BD002A69FD /* devicenotifier.cpp */; };
+		B455DF1B210F96BD002A69FD /* devicenotifier.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF15210F96BD002A69FD /* devicenotifier.h */; };
+		B455DF1C210F96BD002A69FD /* masterport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF16210F96BD002A69FD /* masterport.cpp */; };
+		B455DF1D210F96BD002A69FD /* masterport.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF17210F96BD002A69FD /* masterport.h */; };
+		B455DF1E210F96BD002A69FD /* pnpimpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF18210F96BD002A69FD /* pnpimpl.cpp */; };
+		B455DF1F210F96BD002A69FD /* pnpimpl.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF19210F96BD002A69FD /* pnpimpl.h */; };
+		B455DF3C210F9703002A69FD /* atomic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF22210F9703002A69FD /* atomic.cpp */; };
+		B455DF3D210F9703002A69FD /* atomic.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF23210F9703002A69FD /* atomic.h */; };
+		B455DF3E210F9703002A69FD /* debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF24210F9703002A69FD /* debug.cpp */; };
+		B455DF3F210F9703002A69FD /* debug.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF25210F9703002A69FD /* debug.h */; };
+		B455DF40210F9703002A69FD /* debugshare.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF26210F9703002A69FD /* debugshare.h */; };
+		B455DF41210F9703002A69FD /* diskstatus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF27210F9703002A69FD /* diskstatus.cpp */; };
+		B455DF42210F9703002A69FD /* diskstatus.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF28210F9703002A69FD /* diskstatus.h */; };
+		B455DF43210F9703002A69FD /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF29210F9703002A69FD /* event.cpp */; };
+		B455DF44210F9703002A69FD /* event.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF2A210F9703002A69FD /* event.h */; };
+		B455DF45210F9703002A69FD /* file_io.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF2B210F9703002A69FD /* file_io.h */; };
+		B455DF46210F9703002A69FD /* info.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF2C210F9703002A69FD /* info.cpp */; };
+		B455DF47210F9703002A69FD /* info.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF2D210F9703002A69FD /* info.h */; };
+		B455DF48210F9703002A69FD /* lock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF2E210F9703002A69FD /* lock.cpp */; };
+		B455DF49210F9703002A69FD /* lock.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF2F210F9703002A69FD /* lock.h */; };
+		B455DF4A210F9703002A69FD /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF30210F9703002A69FD /* log.cpp */; };
+		B455DF4B210F9703002A69FD /* log.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF31210F9703002A69FD /* log.h */; };
+		B455DF4C210F9703002A69FD /* memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF32210F9703002A69FD /* memory.cpp */; };
+		B455DF4D210F9703002A69FD /* memory.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF33210F9703002A69FD /* memory.h */; };
+		B455DF4E210F9703002A69FD /* process.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF34210F9703002A69FD /* process.cpp */; };
+		B455DF4F210F9703002A69FD /* process.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF35210F9703002A69FD /* process.h */; };
+		B455DF50210F9703002A69FD /* system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF36210F9703002A69FD /* system.cpp */; };
+		B455DF51210F9703002A69FD /* system.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF37210F9703002A69FD /* system.h */; };
+		B455DF52210F9703002A69FD /* systemtime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF38210F9703002A69FD /* systemtime.cpp */; };
+		B455DF53210F9703002A69FD /* systemtime.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF39210F9703002A69FD /* systemtime.h */; };
+		B455DF54210F9703002A69FD /* thread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF3A210F9703002A69FD /* thread.cpp */; };
+		B455DF55210F9703002A69FD /* thread.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF3B210F9703002A69FD /* thread.h */; };
+		B455DF63210F9719002A69FD /* eventimpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF56210F9719002A69FD /* eventimpl.cpp */; };
+		B455DF64210F9719002A69FD /* eventimpl.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF57210F9719002A69FD /* eventimpl.h */; };
+		B455DF65210F9719002A69FD /* file_io.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF58210F9719002A69FD /* file_io.cpp */; };
+		B455DF66210F9719002A69FD /* infoimpl.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF59210F9719002A69FD /* infoimpl.h */; };
+		B455DF67210F9719002A69FD /* infoimpl.mm in Sources */ = {isa = PBXBuildFile; fileRef = B455DF5A210F9719002A69FD /* infoimpl.mm */; };
+		B455DF68210F9719002A69FD /* lockimpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF5B210F9719002A69FD /* lockimpl.cpp */; };
+		B455DF69210F9719002A69FD /* lockimpl.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF5C210F9719002A69FD /* lockimpl.h */; };
+		B455DF6A210F9719002A69FD /* processimpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF5D210F9719002A69FD /* processimpl.cpp */; };
+		B455DF6B210F9719002A69FD /* processimpl.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF5E210F9719002A69FD /* processimpl.h */; };
+		B455DF6C210F9719002A69FD /* pthreadsextra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF5F210F9719002A69FD /* pthreadsextra.cpp */; };
+		B455DF6D210F9719002A69FD /* pthreadsextra.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF60210F9719002A69FD /* pthreadsextra.h */; };
+		B455DF6E210F9719002A69FD /* threadimpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF61210F9719002A69FD /* threadimpl.cpp */; };
+		B455DF6F210F9719002A69FD /* threadimpl.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF62210F9719002A69FD /* threadimpl.h */; };
+		B455DF70210F9734002A69FD /* eventimpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF56210F9719002A69FD /* eventimpl.cpp */; };
+		B455DF71210F9734002A69FD /* eventimpl.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF57210F9719002A69FD /* eventimpl.h */; };
+		B455DF72210F9734002A69FD /* file_io.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF58210F9719002A69FD /* file_io.cpp */; };
+		B455DF73210F9734002A69FD /* infoimpl.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF59210F9719002A69FD /* infoimpl.h */; };
+		B455DF74210F9734002A69FD /* infoimpl.mm in Sources */ = {isa = PBXBuildFile; fileRef = B455DF5A210F9719002A69FD /* infoimpl.mm */; };
+		B455DF75210F9734002A69FD /* lockimpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF5B210F9719002A69FD /* lockimpl.cpp */; };
+		B455DF76210F9734002A69FD /* lockimpl.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF5C210F9719002A69FD /* lockimpl.h */; };
+		B455DF77210F9734002A69FD /* processimpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF5D210F9719002A69FD /* processimpl.cpp */; };
+		B455DF78210F9734002A69FD /* processimpl.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF5E210F9719002A69FD /* processimpl.h */; };
+		B455DF79210F9734002A69FD /* pthreadsextra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF5F210F9719002A69FD /* pthreadsextra.cpp */; };
+		B455DF7A210F9734002A69FD /* pthreadsextra.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF60210F9719002A69FD /* pthreadsextra.h */; };
+		B455DF7B210F9734002A69FD /* threadimpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF61210F9719002A69FD /* threadimpl.cpp */; };
+		B455DF7C210F9734002A69FD /* threadimpl.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF62210F9719002A69FD /* threadimpl.h */; };
+		B455DF7D210F9739002A69FD /* atomic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF22210F9703002A69FD /* atomic.cpp */; };
+		B455DF7E210F9739002A69FD /* atomic.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF23210F9703002A69FD /* atomic.h */; };
+		B455DF7F210F9739002A69FD /* debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF24210F9703002A69FD /* debug.cpp */; };
+		B455DF80210F9739002A69FD /* debug.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF25210F9703002A69FD /* debug.h */; };
+		B455DF81210F9739002A69FD /* debugshare.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF26210F9703002A69FD /* debugshare.h */; };
+		B455DF82210F9739002A69FD /* diskstatus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF27210F9703002A69FD /* diskstatus.cpp */; };
+		B455DF83210F9739002A69FD /* diskstatus.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF28210F9703002A69FD /* diskstatus.h */; };
+		B455DF84210F9739002A69FD /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF29210F9703002A69FD /* event.cpp */; };
+		B455DF85210F9739002A69FD /* event.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF2A210F9703002A69FD /* event.h */; };
+		B455DF86210F9739002A69FD /* file_io.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF2B210F9703002A69FD /* file_io.h */; };
+		B455DF87210F9739002A69FD /* info.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF2C210F9703002A69FD /* info.cpp */; };
+		B455DF88210F9739002A69FD /* info.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF2D210F9703002A69FD /* info.h */; };
+		B455DF89210F9739002A69FD /* lock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF2E210F9703002A69FD /* lock.cpp */; };
+		B455DF8A210F9739002A69FD /* lock.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF2F210F9703002A69FD /* lock.h */; };
+		B455DF8B210F9739002A69FD /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF30210F9703002A69FD /* log.cpp */; };
+		B455DF8C210F9739002A69FD /* log.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF31210F9703002A69FD /* log.h */; };
+		B455DF8D210F9739002A69FD /* memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF32210F9703002A69FD /* memory.cpp */; };
+		B455DF8E210F9739002A69FD /* memory.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF33210F9703002A69FD /* memory.h */; };
+		B455DF8F210F9739002A69FD /* process.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF34210F9703002A69FD /* process.cpp */; };
+		B455DF90210F9739002A69FD /* process.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF35210F9703002A69FD /* process.h */; };
+		B455DF91210F9739002A69FD /* system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF36210F9703002A69FD /* system.cpp */; };
+		B455DF92210F9739002A69FD /* system.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF37210F9703002A69FD /* system.h */; };
+		B455DF93210F9739002A69FD /* systemtime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF38210F9703002A69FD /* systemtime.cpp */; };
+		B455DF94210F9739002A69FD /* systemtime.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF39210F9703002A69FD /* systemtime.h */; };
+		B455DF95210F9739002A69FD /* thread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF3A210F9703002A69FD /* thread.cpp */; };
+		B455DF96210F9739002A69FD /* thread.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF3B210F9703002A69FD /* thread.h */; };
+		B455DF97210F974F002A69FD /* pnp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF0F210F9698002A69FD /* pnp.cpp */; };
+		B455DF98210F974F002A69FD /* pnp.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF10210F9698002A69FD /* pnp.h */; };
+		B455DF99210F9754002A69FD /* devicenotifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF14210F96BD002A69FD /* devicenotifier.cpp */; };
+		B455DF9A210F9754002A69FD /* devicenotifier.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF15210F96BD002A69FD /* devicenotifier.h */; };
+		B455DF9B210F9754002A69FD /* masterport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF16210F96BD002A69FD /* masterport.cpp */; };
+		B455DF9C210F9754002A69FD /* masterport.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF17210F96BD002A69FD /* masterport.h */; };
+		B455DF9D210F9754002A69FD /* pnpimpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF18210F96BD002A69FD /* pnpimpl.cpp */; };
+		B455DF9E210F9754002A69FD /* pnpimpl.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF19210F96BD002A69FD /* pnpimpl.h */; };
+		B455DF9F210F975C002A69FD /* persistence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DF06210F9662002A69FD /* persistence.cpp */; };
+		B455DFA0210F975C002A69FD /* persistence.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF07210F9662002A69FD /* persistence.h */; };
+		B455DFA1210F975C002A69FD /* sqlite3.c in Sources */ = {isa = PBXBuildFile; fileRef = B455DF08210F9662002A69FD /* sqlite3.c */; };
+		B455DFA2210F975C002A69FD /* sqlite3.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DF09210F9662002A69FD /* sqlite3.h */; };
+		B455DFA3210F9762002A69FD /* ip_socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEF9210F9626002A69FD /* ip_socket.cpp */; };
+		B455DFA4210F9762002A69FD /* ip_socket.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEFA210F9626002A69FD /* ip_socket.h */; };
+		B455DFA5210F9762002A69FD /* tcp_socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEFB210F9626002A69FD /* tcp_socket.cpp */; };
+		B455DFA6210F9762002A69FD /* tcp_socket.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEFC210F9626002A69FD /* tcp_socket.h */; };
+		B455DFA7210F9762002A69FD /* udp_socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEFD210F9626002A69FD /* udp_socket.cpp */; };
+		B455DFA8210F9762002A69FD /* udp_socket.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEFE210F9626002A69FD /* udp_socket.h */; };
+		B455DFA9210F9768002A69FD /* ajarefptr.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEA4210F95E9002A69FD /* ajarefptr.h */; };
+		B455DFAA210F9768002A69FD /* audioutilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEA5210F95E9002A69FD /* audioutilities.cpp */; };
+		B455DFAB210F9768002A69FD /* audioutilities.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEA6210F95E9002A69FD /* audioutilities.h */; };
+		B455DFAC210F9768002A69FD /* buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEA7210F95E9002A69FD /* buffer.cpp */; };
+		B455DFAD210F9768002A69FD /* buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEA8210F95E9002A69FD /* buffer.h */; };
+		B455DFAE210F9768002A69FD /* bytestream.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEA9210F95E9002A69FD /* bytestream.h */; };
+		B455DFAF210F9768002A69FD /* circularbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEAA210F95E9002A69FD /* circularbuffer.h */; };
+		B455DFB0210F9768002A69FD /* cli_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEAB210F95E9002A69FD /* cli_utils.h */; };
+		B455DFB1210F9768002A69FD /* common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEAC210F95E9002A69FD /* common.cpp */; };
+		B455DFB2210F9768002A69FD /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEAD210F95E9002A69FD /* common.h */; };
+		B455DFB3210F9768002A69FD /* dpx_hdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEAE210F95E9002A69FD /* dpx_hdr.cpp */; };
+		B455DFB4210F9768002A69FD /* dpx_hdr.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEAF210F95E9002A69FD /* dpx_hdr.h */; };
+		B455DFB5210F9768002A69FD /* dpxfileio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEB0210F95E9002A69FD /* dpxfileio.cpp */; };
+		B455DFB6210F9768002A69FD /* dpxfileio.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEB1210F95E9002A69FD /* dpxfileio.h */; };
+		B455DFB7210F9768002A69FD /* export.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEB2210F95E9002A69FD /* export.h */; };
+		B455DFB8210F9768002A69FD /* guid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEB3210F95E9002A69FD /* guid.cpp */; };
+		B455DFB9210F9768002A69FD /* guid.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEB4210F95E9002A69FD /* guid.h */; };
+		B455DFBA210F9768002A69FD /* options_popt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEB5210F95E9002A69FD /* options_popt.cpp */; };
+		B455DFBB210F9768002A69FD /* options_popt.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEB6210F95E9002A69FD /* options_popt.h */; };
+		B455DFBC210F9768002A69FD /* performance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEB7210F95E9002A69FD /* performance.cpp */; };
+		B455DFBD210F9768002A69FD /* performance.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEB8210F95E9002A69FD /* performance.h */; };
+		B455DFBE210F9768002A69FD /* pixelformat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEB9210F95E9002A69FD /* pixelformat.cpp */; };
+		B455DFBF210F9768002A69FD /* pixelformat.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEBA210F95E9002A69FD /* pixelformat.h */; };
+		B455DFC0210F9768002A69FD /* public.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEBB210F95E9002A69FD /* public.h */; };
+		B455DFC1210F9768002A69FD /* rawfile.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEBC210F95E9002A69FD /* rawfile.h */; };
+		B455DFC2210F9768002A69FD /* testpatterndata.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEBD210F95E9002A69FD /* testpatterndata.h */; };
+		B455DFC3210F9768002A69FD /* testpatterngen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEBE210F95E9002A69FD /* testpatterngen.cpp */; };
+		B455DFC4210F9768002A69FD /* testpatterngen.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEBF210F95E9002A69FD /* testpatterngen.h */; };
+		B455DFC5210F9768002A69FD /* timebase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEC0210F95E9002A69FD /* timebase.cpp */; };
+		B455DFC6210F9768002A69FD /* timebase.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEC1210F95E9002A69FD /* timebase.h */; };
+		B455DFC7210F9768002A69FD /* timecode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEC2210F95E9002A69FD /* timecode.cpp */; };
+		B455DFC8210F9768002A69FD /* timecode.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEC3210F95E9002A69FD /* timecode.h */; };
+		B455DFC9210F9768002A69FD /* timecodeburn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEC4210F95E9002A69FD /* timecodeburn.cpp */; };
+		B455DFCA210F9768002A69FD /* timecodeburn.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEC5210F95E9002A69FD /* timecodeburn.h */; };
+		B455DFCB210F9768002A69FD /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DEC6210F95E9002A69FD /* timer.cpp */; };
+		B455DFCC210F9768002A69FD /* timer.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEC7210F95E9002A69FD /* timer.h */; };
+		B455DFCD210F9768002A69FD /* types.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEC8210F95E9002A69FD /* types.h */; };
+		B455DFCE210F9768002A69FD /* videotypes.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DEC9210F95E9002A69FD /* videotypes.h */; };
+		B455DFCF210F9768002A69FD /* videoutilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DECA210F95E9002A69FD /* videoutilities.cpp */; };
+		B455DFD0210F9768002A69FD /* videoutilities.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DECB210F95E9002A69FD /* videoutilities.h */; };
+		B455DFD1210F9768002A69FD /* wavewriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DECC210F95E9002A69FD /* wavewriter.cpp */; };
+		B455DFD2210F9768002A69FD /* wavewriter.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DECD210F95E9002A69FD /* wavewriter.h */; };
+		B455DFE5210F97C5002A69FD /* ancillarydata_cea608_line21.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFD6210F97C5002A69FD /* ancillarydata_cea608_line21.cpp */; };
+		B455DFE6210F97C5002A69FD /* ancillarydata_cea608_vanc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFD7210F97C5002A69FD /* ancillarydata_cea608_vanc.cpp */; };
+		B455DFE7210F97C5002A69FD /* ancillarydata_cea608.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFD8210F97C5002A69FD /* ancillarydata_cea608.cpp */; };
+		B455DFE8210F97C5002A69FD /* ancillarydata_cea708.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFD9210F97C5002A69FD /* ancillarydata_cea708.cpp */; };
+		B455DFE9210F97C5002A69FD /* ancillarydata_framestatusinfo524D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFDA210F97C5002A69FD /* ancillarydata_framestatusinfo524D.cpp */; };
+		B455DFEA210F97C5002A69FD /* ancillarydata_framestatusinfo5251.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFDB210F97C5002A69FD /* ancillarydata_framestatusinfo5251.cpp */; };
+		B455DFEB210F97C5002A69FD /* ancillarydata_hdr_hdr10.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFDC210F97C5002A69FD /* ancillarydata_hdr_hdr10.cpp */; };
+		B455DFEC210F97C5002A69FD /* ancillarydata_hdr_hlg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFDD210F97C5002A69FD /* ancillarydata_hdr_hlg.cpp */; };
+		B455DFED210F97C5002A69FD /* ancillarydata_hdr_sdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFDE210F97C5002A69FD /* ancillarydata_hdr_sdr.cpp */; };
+		B455DFEE210F97C5002A69FD /* ancillarydata_timecode_atc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFDF210F97C5002A69FD /* ancillarydata_timecode_atc.cpp */; };
+		B455DFEF210F97C5002A69FD /* ancillarydata_timecode_vitc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFE0210F97C5002A69FD /* ancillarydata_timecode_vitc.cpp */; };
+		B455DFF0210F97C5002A69FD /* ancillarydata_timecode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFE1210F97C5002A69FD /* ancillarydata_timecode.cpp */; };
+		B455DFF1210F97C5002A69FD /* ancillarydata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFE2210F97C5002A69FD /* ancillarydata.cpp */; };
+		B455DFF2210F97C5002A69FD /* ancillarydatafactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFE3210F97C5002A69FD /* ancillarydatafactory.cpp */; };
+		B455DFF3210F97C5002A69FD /* ancillarylist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFE4210F97C5002A69FD /* ancillarylist.cpp */; };
+		B455DFF4210F97CD002A69FD /* ancillarydata_cea608_line21.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFD6210F97C5002A69FD /* ancillarydata_cea608_line21.cpp */; };
+		B455DFF5210F97CD002A69FD /* ancillarydata_cea608_vanc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFD7210F97C5002A69FD /* ancillarydata_cea608_vanc.cpp */; };
+		B455DFF6210F97CD002A69FD /* ancillarydata_cea608.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFD8210F97C5002A69FD /* ancillarydata_cea608.cpp */; };
+		B455DFF7210F97CD002A69FD /* ancillarydata_cea708.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFD9210F97C5002A69FD /* ancillarydata_cea708.cpp */; };
+		B455DFF8210F97CD002A69FD /* ancillarydata_framestatusinfo524D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFDA210F97C5002A69FD /* ancillarydata_framestatusinfo524D.cpp */; };
+		B455DFF9210F97CD002A69FD /* ancillarydata_framestatusinfo5251.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFDB210F97C5002A69FD /* ancillarydata_framestatusinfo5251.cpp */; };
+		B455DFFA210F97CD002A69FD /* ancillarydata_hdr_hdr10.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFDC210F97C5002A69FD /* ancillarydata_hdr_hdr10.cpp */; };
+		B455DFFB210F97CD002A69FD /* ancillarydata_hdr_hlg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFDD210F97C5002A69FD /* ancillarydata_hdr_hlg.cpp */; };
+		B455DFFC210F97CD002A69FD /* ancillarydata_hdr_sdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFDE210F97C5002A69FD /* ancillarydata_hdr_sdr.cpp */; };
+		B455DFFD210F97CD002A69FD /* ancillarydata_timecode_atc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFDF210F97C5002A69FD /* ancillarydata_timecode_atc.cpp */; };
+		B455DFFE210F97CD002A69FD /* ancillarydata_timecode_vitc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFE0210F97C5002A69FD /* ancillarydata_timecode_vitc.cpp */; };
+		B455DFFF210F97CD002A69FD /* ancillarydata_timecode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFE1210F97C5002A69FD /* ancillarydata_timecode.cpp */; };
+		B455E000210F97CD002A69FD /* ancillarydata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFE2210F97C5002A69FD /* ancillarydata.cpp */; };
+		B455E001210F97CD002A69FD /* ancillarydatafactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFE3210F97C5002A69FD /* ancillarydatafactory.cpp */; };
+		B455E002210F97CD002A69FD /* ancillarylist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DFE4210F97C5002A69FD /* ancillarylist.cpp */; };
+		B455E012210F97D6002A69FD /* ancillarydata_cea608_line21.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E003210F97D6002A69FD /* ancillarydata_cea608_line21.h */; };
+		B455E013210F97D6002A69FD /* ancillarydata_cea608_vanc.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E004210F97D6002A69FD /* ancillarydata_cea608_vanc.h */; };
+		B455E014210F97D6002A69FD /* ancillarydata_cea608.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E005210F97D6002A69FD /* ancillarydata_cea608.h */; };
+		B455E015210F97D6002A69FD /* ancillarydata_cea708.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E006210F97D6002A69FD /* ancillarydata_cea708.h */; };
+		B455E016210F97D6002A69FD /* ancillarydata_framestatusinfo524D.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E007210F97D6002A69FD /* ancillarydata_framestatusinfo524D.h */; };
+		B455E017210F97D6002A69FD /* ancillarydata_framestatusinfo5251.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E008210F97D6002A69FD /* ancillarydata_framestatusinfo5251.h */; };
+		B455E018210F97D6002A69FD /* ancillarydata_hdr_hdr10.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E009210F97D6002A69FD /* ancillarydata_hdr_hdr10.h */; };
+		B455E019210F97D6002A69FD /* ancillarydata_hdr_hlg.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E00A210F97D6002A69FD /* ancillarydata_hdr_hlg.h */; };
+		B455E01A210F97D6002A69FD /* ancillarydata_hdr_sdr.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E00B210F97D6002A69FD /* ancillarydata_hdr_sdr.h */; };
+		B455E01B210F97D6002A69FD /* ancillarydata_timecode_atc.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E00C210F97D6002A69FD /* ancillarydata_timecode_atc.h */; };
+		B455E01C210F97D6002A69FD /* ancillarydata_timecode_vitc.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E00D210F97D6002A69FD /* ancillarydata_timecode_vitc.h */; };
+		B455E01D210F97D6002A69FD /* ancillarydata_timecode.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E00E210F97D6002A69FD /* ancillarydata_timecode.h */; };
+		B455E01E210F97D6002A69FD /* ancillarydata.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E00F210F97D6002A69FD /* ancillarydata.h */; };
+		B455E01F210F97D6002A69FD /* ancillarydatafactory.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E010210F97D6002A69FD /* ancillarydatafactory.h */; };
+		B455E020210F97D6002A69FD /* ancillarylist.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E011210F97D6002A69FD /* ancillarylist.h */; };
+		B455E021210F97DE002A69FD /* ancillarydata_cea608_line21.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E003210F97D6002A69FD /* ancillarydata_cea608_line21.h */; };
+		B455E022210F97DE002A69FD /* ancillarydata_cea608_vanc.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E004210F97D6002A69FD /* ancillarydata_cea608_vanc.h */; };
+		B455E023210F97DE002A69FD /* ancillarydata_cea608.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E005210F97D6002A69FD /* ancillarydata_cea608.h */; };
+		B455E024210F97DE002A69FD /* ancillarydata_cea708.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E006210F97D6002A69FD /* ancillarydata_cea708.h */; };
+		B455E025210F97DE002A69FD /* ancillarydata_framestatusinfo524D.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E007210F97D6002A69FD /* ancillarydata_framestatusinfo524D.h */; };
+		B455E026210F97DE002A69FD /* ancillarydata_framestatusinfo5251.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E008210F97D6002A69FD /* ancillarydata_framestatusinfo5251.h */; };
+		B455E027210F97DE002A69FD /* ancillarydata_hdr_hdr10.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E009210F97D6002A69FD /* ancillarydata_hdr_hdr10.h */; };
+		B455E028210F97DE002A69FD /* ancillarydata_hdr_hlg.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E00A210F97D6002A69FD /* ancillarydata_hdr_hlg.h */; };
+		B455E029210F97DE002A69FD /* ancillarydata_hdr_sdr.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E00B210F97D6002A69FD /* ancillarydata_hdr_sdr.h */; };
+		B455E02A210F97DE002A69FD /* ancillarydata_timecode_atc.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E00C210F97D6002A69FD /* ancillarydata_timecode_atc.h */; };
+		B455E02B210F97DE002A69FD /* ancillarydata_timecode_vitc.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E00D210F97D6002A69FD /* ancillarydata_timecode_vitc.h */; };
+		B455E02C210F97DE002A69FD /* ancillarydata_timecode.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E00E210F97D6002A69FD /* ancillarydata_timecode.h */; };
+		B455E02D210F97DE002A69FD /* ancillarydata.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E00F210F97D6002A69FD /* ancillarydata.h */; };
+		B455E02E210F97DE002A69FD /* ancillarydatafactory.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E010210F97D6002A69FD /* ancillarydatafactory.h */; };
+		B455E02F210F97DE002A69FD /* ancillarylist.h in Headers */ = {isa = PBXBuildFile; fileRef = B455E011210F97D6002A69FD /* ancillarylist.h */; };
+		B455E030210F9C25002A69FD /* ntv2testpatterngen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B455DE9B210F94C0002A69FD /* ntv2testpatterngen.cpp */; };
+		B455E031210F9C5A002A69FD /* ntv2macpublicinterface.h in Headers */ = {isa = PBXBuildFile; fileRef = B42AA905182AA42500E0584A /* ntv2macpublicinterface.h */; };
+		B455E032210F9C5A002A69FD /* ntv2macpublicinterface.h in Headers */ = {isa = PBXBuildFile; fileRef = B42AA905182AA42500E0584A /* ntv2macpublicinterface.h */; };
+		B455E033210F9C6F002A69FD /* ajatypes.h in Headers */ = {isa = PBXBuildFile; fileRef = B42AA900182AA42500E0584A /* ajatypes.h */; };
+		B455E034210F9C6F002A69FD /* ntv2audiodefines.h in Headers */ = {isa = PBXBuildFile; fileRef = B42AA901182AA42500E0584A /* ntv2audiodefines.h */; };
+		B455E036210F9C6F002A69FD /* ntv2fixed.h in Headers */ = {isa = PBXBuildFile; fileRef = B40DB00C1ACDC69D007697DF /* ntv2fixed.h */; };
+		B455E037210F9C6F002A69FD /* ntv2bft.h in Headers */ = {isa = PBXBuildFile; fileRef = B4F8B2161B98D10F00257B92 /* ntv2bft.h */; };
+		B455E038210F9C6F002A69FD /* ntv2endian.h in Headers */ = {isa = PBXBuildFile; fileRef = B42AA903182AA42500E0584A /* ntv2endian.h */; };
+		B455E039210F9C6F002A69FD /* ntv2enums.h in Headers */ = {isa = PBXBuildFile; fileRef = B42AA904182AA42500E0584A /* ntv2enums.h */; };
+		B455E03A210F9C6F002A69FD /* ntv2formatdescriptor.h in Headers */ = {isa = PBXBuildFile; fileRef = B411E93B1DDBD9C100B9E206 /* ntv2formatdescriptor.h */; };
+		B455E03B210F9C6F002A69FD /* ntv2publicinterface.h in Headers */ = {isa = PBXBuildFile; fileRef = B42AA906182AA42500E0584A /* ntv2publicinterface.h */; };
+		B455E03C210F9C6F002A69FD /* ntv2registerexpert.h in Headers */ = {isa = PBXBuildFile; fileRef = B411E93C1DDBD9C100B9E206 /* ntv2registerexpert.h */; };
+		B455E03D210F9C6F002A69FD /* ntv2testpatterngen.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DE9D210F9533002A69FD /* ntv2testpatterngen.h */; };
+		B455E03E210F9C6F002A69FD /* ntv2videodefines.h in Headers */ = {isa = PBXBuildFile; fileRef = B455DE9E210F9533002A69FD /* ntv2videodefines.h */; };
+		B455E03F210F9C6F002A69FD /* ntv2virtualregisters.h in Headers */ = {isa = PBXBuildFile; fileRef = B42AA907182AA42500E0584A /* ntv2virtualregisters.h */; };
+		B455E040210F9C6F002A69FD /* ntv2vpidfromspec.h in Headers */ = {isa = PBXBuildFile; fileRef = B4FE2EDB1C7E8A7500C5627A /* ntv2vpidfromspec.h */; };
+		B455E041210F9C70002A69FD /* ajatypes.h in Headers */ = {isa = PBXBuildFile; fileRef = B42AA900182AA42500E0584A /* ajatypes.h */; };
+		B455E042210F9C70002A69FD /* ntv2audiodefines.h in Headers */ = {isa = PBXBuildFile; fileRef = B42AA901182AA42500E0584A /* ntv2audiodefines.h */; };
+		B455E044210F9C70002A69FD /* ntv2fixed.h in Headers */ = {isa = PBXBuildFile; fileRef = B40DB00C1ACDC69D007697DF /* ntv2fixed.h */; };
+		B455E045210F9C70002A69FD /* ntv2bft.h in Headers */ = {isa = PBXBuildFile; fileRef = B4F8B2161B98D10F00257B92 /* ntv2bft.h */; };
+		B455E046210F9C70002A69FD /* ntv2endian.h in Headers */ = {isa = PBXBuildFile; fileRef = B42AA903182AA42500E0584A /* ntv2endian.h */; };
+		B455E047210F9C70002A69FD /* ntv2enums.h in Headers */ = {isa = PBXBuildFile; fileRef = B42AA904182AA42500E0584A /* ntv2enums.h */; };
+		B455E048210F9C70002A69FD /* ntv2formatdescriptor.h in Headers */ = {isa = PBXBuildFile; fileRef = B411E93B1DDBD9C100B9E206 /* ntv2formatdescriptor.h */; };
+		B455E049210F9C70002A69FD /* ntv2publicinterface.h in Headers */ = {isa = PBXBuildFile; fileRef = B42AA906182AA42500E0584A /* ntv2publicinterface.h */; };
+		B455E04A210F9C70002A69FD /* ntv2registerexpert.h in Headers */ = {isa = PBXBuildFile; fileRef = B411E93C1DDBD9C100B9E206 /* ntv2registerexpert.h */; };
+		B455E04B210F9C70002A69FD /* ntv2virtualregisters.h in Headers */ = {isa = PBXBuildFile; fileRef = B42AA907182AA42500E0584A /* ntv2virtualregisters.h */; };
+		B455E04C210F9C70002A69FD /* ntv2vpidfromspec.h in Headers */ = {isa = PBXBuildFile; fileRef = B4FE2EDB1C7E8A7500C5627A /* ntv2vpidfromspec.h */; };
 		B462E8BD2076F72E0003262A /* ntv2hdmi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B462E8BC2076F72E0003262A /* ntv2hdmi.cpp */; };
 		B462E8BE2076F7440003262A /* ntv2hdmi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B462E8BC2076F72E0003262A /* ntv2hdmi.cpp */; };
 		B480B6441C6291E1003210EE /* ntv2hevc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B480B6431C6291E1003210EE /* ntv2hevc.cpp */; };
@@ -153,6 +423,8 @@
 		B4940CA81AF1B23500189CAB /* ntv2devicefeatures.hh in Headers */ = {isa = PBXBuildFile; fileRef = B4940CA61AF1B23500189CAB /* ntv2devicefeatures.hh */; };
 		B4A4507B1AA15583003AED85 /* ntv2devicefeatures.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B4A4507A1AA15583003AED85 /* ntv2devicefeatures.hpp */; };
 		B4A4507C1AA15583003AED85 /* ntv2devicefeatures.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B4A4507A1AA15583003AED85 /* ntv2devicefeatures.hpp */; };
+		B4AC26B72118CF1600EDB0D5 /* ntv2debugmacros.h in Headers */ = {isa = PBXBuildFile; fileRef = B4AC26B62118CF1600EDB0D5 /* ntv2debugmacros.h */; };
+		B4AC26B82118CF3500EDB0D5 /* ntv2debugmacros.h in Headers */ = {isa = PBXBuildFile; fileRef = B4AC26B62118CF1600EDB0D5 /* ntv2debugmacros.h */; };
 		B4ACCA961C47226D00655C50 /* ntv2enhancedcsc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4ACCA8E1C47226D00655C50 /* ntv2enhancedcsc.cpp */; };
 		B4ACCA971C47226D00655C50 /* ntv2enhancedcsc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4ACCA8E1C47226D00655C50 /* ntv2enhancedcsc.cpp */; };
 		B4ACCA981C47226D00655C50 /* ntv2enhancedcsc.h in Headers */ = {isa = PBXBuildFile; fileRef = B4ACCA8F1C47226D00655C50 /* ntv2enhancedcsc.h */; };
@@ -171,7 +443,6 @@
 		B4CE1CE816E53B560092B564 /* ntv2macmutex.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1CE516E53B560092B564 /* ntv2macmutex.h */; };
 		B4CE1E0C16E582A10092B564 /* ntv2autocirculate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DBD16E5330C00A9E0DC /* ntv2autocirculate.cpp */; };
 		B4CE1E1216E582A10092B564 /* ntv2card.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DC816E5330C00A9E0DC /* ntv2card.cpp */; };
-		B4CE1E1416E582A10092B564 /* ntv2colorcorrection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DCC16E5330C00A9E0DC /* ntv2colorcorrection.cpp */; };
 		B4CE1E1516E582A10092B564 /* ntv2debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DCE16E5330C00A9E0DC /* ntv2debug.cpp */; };
 		B4CE1E1616E582A10092B564 /* ntv2discover.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DD016E5330C00A9E0DC /* ntv2discover.cpp */; };
 		B4CE1E1716E582A10092B564 /* ntv2dma.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DD316E5330C00A9E0DC /* ntv2dma.cpp */; };
@@ -179,11 +450,9 @@
 		B4CE1E1916E582A10092B564 /* ntv2interrupts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DDE16E5330C00A9E0DC /* ntv2interrupts.cpp */; };
 		B4CE1E1A16E582A10092B564 /* ntv2nubaccess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DE116E5330C00A9E0DC /* ntv2nubaccess.cpp */; };
 		B4CE1E1B16E582A10092B564 /* ntv2nubpktcom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DE316E5330C00A9E0DC /* ntv2nubpktcom.cpp */; };
-		B4CE1E1E16E582A10092B564 /* ntv2procamp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DEA16E5330C00A9E0DC /* ntv2procamp.cpp */; };
 		B4CE1E1F16E582A10092B564 /* ntv2register.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DEC16E5330C00A9E0DC /* ntv2register.cpp */; };
 		B4CE1E2016E582A10092B564 /* ntv2rp188.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DED16E5330C00A9E0DC /* ntv2rp188.cpp */; };
 		B4CE1E2116E582A10092B564 /* ntv2rp215.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DEF16E5330C00A9E0DC /* ntv2rp215.cpp */; };
-		B4CE1E2216E582A10092B564 /* ntv2status.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DF116E5330C00A9E0DC /* ntv2status.cpp */; };
 		B4CE1E2316E582A10092B564 /* ntv2subscriptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DF316E5330C00A9E0DC /* ntv2subscriptions.cpp */; };
 		B4CE1E2416E582A10092B564 /* ntv2task.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DF416E5330C00A9E0DC /* ntv2task.cpp */; };
 		B4CE1E2516E582A10092B564 /* ntv2testpattern.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DF616E5330C00A9E0DC /* ntv2testpattern.cpp */; };
@@ -191,40 +460,25 @@
 		B4CE1E2816E582A10092B564 /* ntv2utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5DFC16E5330C00A9E0DC /* ntv2utils.cpp */; };
 		B4CE1E2916E582A10092B564 /* ntv2vidproc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5E0016E5330C00A9E0DC /* ntv2vidproc.cpp */; };
 		B4CE1E2A16E582A10092B564 /* ntv2vpid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5E0316E5330C00A9E0DC /* ntv2vpid.cpp */; };
-		B4CE1E2E16E582A10092B564 /* testpatterngen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5E0C16E5330C00A9E0DC /* testpatterngen.cpp */; };
 		B4CE1E3016E582A10092B564 /* ntv2verticalfilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5E1116E5330C00A9E0DC /* ntv2verticalfilter.cpp */; };
-		B4CE1E3316E582A10092B564 /* xena2vidproc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5E1716E5330C00A9E0DC /* xena2vidproc.cpp */; };
 		B4CE1E3416E582A10092B564 /* ntv2serialcontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B41B5E1916E5330C00A9E0DC /* ntv2serialcontrol.cpp */; };
 		B4CE1E3516E582A10092B564 /* ntv2macdriverinterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CE1CE316E53B560092B564 /* ntv2macdriverinterface.cpp */; };
 		B4CE1E3616E582B90092B564 /* ajaexport.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DB416E5330C00A9E0DC /* ajaexport.h */; };
 		B4CE1E3716E582B90092B564 /* basemachinecontrol.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DB516E5330C00A9E0DC /* basemachinecontrol.h */; };
 		B4CE1E4116E582B90092B564 /* ntv2card.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DC916E5330C00A9E0DC /* ntv2card.h */; };
-		B4CE1E4316E582B90092B564 /* ntv2colorcorrection.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DCD16E5330C00A9E0DC /* ntv2colorcorrection.h */; };
 		B4CE1E4416E582B90092B564 /* ntv2debug.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DCF16E5330C00A9E0DC /* ntv2debug.h */; };
 		B4CE1E4516E582B90092B564 /* ntv2discover.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DD116E5330C00A9E0DC /* ntv2discover.h */; };
-		B4CE1E4616E582B90092B564 /* ntv2diskio.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DD216E5330C00A9E0DC /* ntv2diskio.h */; };
 		B4CE1E4716E582B90092B564 /* ntv2driverinterface.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DD516E5330C00A9E0DC /* ntv2driverinterface.h */; };
-		B4CE1E4A16E582B90092B564 /* ntv2fltknetprefs.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DDB16E5330C00A9E0DC /* ntv2fltknetprefs.h */; };
 		B4CE1E4D16E582B90092B564 /* ntv2nubaccess.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DE216E5330C00A9E0DC /* ntv2nubaccess.h */; };
 		B4CE1E4E16E582B90092B564 /* ntv2nubpktcom.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DE416E5330C00A9E0DC /* ntv2nubpktcom.h */; };
 		B4CE1E4F16E582B90092B564 /* ntv2nubtypes.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DE516E5330C00A9E0DC /* ntv2nubtypes.h */; };
-		B4CE1E5216E582B90092B564 /* ntv2procamp.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DEB16E5330C00A9E0DC /* ntv2procamp.h */; };
 		B4CE1E5316E582B90092B564 /* ntv2rp188.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DEE16E5330C00A9E0DC /* ntv2rp188.h */; };
 		B4CE1E5416E582B90092B564 /* ntv2rp215.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DF016E5330C00A9E0DC /* ntv2rp215.h */; };
-		B4CE1E5516E582B90092B564 /* ntv2status.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DF216E5330C00A9E0DC /* ntv2status.h */; };
 		B4CE1E5616E582B90092B564 /* ntv2task.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DF516E5330C00A9E0DC /* ntv2task.h */; };
-		B4CE1E5716E582B90092B564 /* ntv2testpattern.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DF716E5330C00A9E0DC /* ntv2testpattern.h */; };
 		B4CE1E5916E582B90092B564 /* ntv2utf8.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DFB16E5330C00A9E0DC /* ntv2utf8.h */; };
 		B4CE1E5A16E582B90092B564 /* ntv2utils.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DFD16E5330C00A9E0DC /* ntv2utils.h */; };
-		B4CE1E5B16E582B90092B564 /* ntv2videofile.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5DFF16E5330C00A9E0DC /* ntv2videofile.h */; };
-		B4CE1E5C16E582B90092B564 /* ntv2vidproc.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E0116E5330C00A9E0DC /* ntv2vidproc.h */; };
-		B4CE1E5D16E582B90092B564 /* ntv2vidprocmasks.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E0216E5330C00A9E0DC /* ntv2vidprocmasks.h */; };
 		B4CE1E5E16E582B90092B564 /* ntv2vpid.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E0416E5330C00A9E0DC /* ntv2vpid.h */; };
-		B4CE1E6216E582B90092B564 /* testpatterndata.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E0B16E5330C00A9E0DC /* testpatterndata.h */; };
-		B4CE1E6316E582B90092B564 /* testpatterngen.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E0D16E5330C00A9E0DC /* testpatterngen.h */; };
-		B4CE1E6416E582B90092B564 /* testpatterngendata.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E0E16E5330C00A9E0DC /* testpatterngendata.h */; };
 		B4CE1E6616E582B90092B564 /* ntv2verticalfilter.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E1216E5330C00A9E0DC /* ntv2verticalfilter.h */; };
-		B4CE1E6916E582B90092B564 /* xena2vidproc.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E1816E5330C00A9E0DC /* xena2vidproc.h */; };
 		B4CE1E6A16E582B90092B564 /* ntv2serialcontrol.h in Headers */ = {isa = PBXBuildFile; fileRef = B41B5E1A16E5330C00A9E0DC /* ntv2serialcontrol.h */; };
 		B4CE1E6B16E582B90092B564 /* ntv2macdriverinterface.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1CE416E53B560092B564 /* ntv2macdriverinterface.h */; };
 		B4CE1E6C16E582B90092B564 /* ntv2macmutex.h in Headers */ = {isa = PBXBuildFile; fileRef = B4CE1CE516E53B560092B564 /* ntv2macmutex.h */; };
@@ -283,7 +537,7 @@
 		B408066C1A3776A5002C35ED /* ntv2devicefeatures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2devicefeatures.h; path = ../includes/ntv2devicefeatures.h; sourceTree = SOURCE_ROOT; };
 		B408066D1A3776A5002C35ED /* ntv2devicescanner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2devicescanner.cpp; path = ../src/ntv2devicescanner.cpp; sourceTree = SOURCE_ROOT; };
 		B408066E1A3776A5002C35ED /* ntv2devicescanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2devicescanner.h; path = ../includes/ntv2devicescanner.h; sourceTree = SOURCE_ROOT; };
-		B40DB00C1ACDC69D007697DF /* fixed.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fixed.h; path = ../includes/fixed.h; sourceTree = SOURCE_ROOT; };
+		B40DB00C1ACDC69D007697DF /* ntv2fixed.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ntv2fixed.h; path = ../includes/ntv2fixed.h; sourceTree = SOURCE_ROOT; };
 		B411E93B1DDBD9C100B9E206 /* ntv2formatdescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2formatdescriptor.h; path = ../includes/ntv2formatdescriptor.h; sourceTree = SOURCE_ROOT; };
 		B411E93C1DDBD9C100B9E206 /* ntv2registerexpert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2registerexpert.h; path = ../includes/ntv2registerexpert.h; sourceTree = SOURCE_ROOT; };
 		B411E93F1DDBD9FF00B9E206 /* ntv2formatdescriptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2formatdescriptor.cpp; path = ../src/ntv2formatdescriptor.cpp; sourceTree = SOURCE_ROOT; };
@@ -294,74 +548,185 @@
 		B41B5DBD16E5330C00A9E0DC /* ntv2autocirculate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2autocirculate.cpp; path = ../src/ntv2autocirculate.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5DC816E5330C00A9E0DC /* ntv2card.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2card.cpp; path = ../src/ntv2card.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5DC916E5330C00A9E0DC /* ntv2card.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2card.h; path = ../includes/ntv2card.h; sourceTree = SOURCE_ROOT; };
-		B41B5DCC16E5330C00A9E0DC /* ntv2colorcorrection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2colorcorrection.cpp; path = ../src/ntv2colorcorrection.cpp; sourceTree = SOURCE_ROOT; };
-		B41B5DCD16E5330C00A9E0DC /* ntv2colorcorrection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2colorcorrection.h; path = ../includes/ntv2colorcorrection.h; sourceTree = SOURCE_ROOT; };
 		B41B5DCE16E5330C00A9E0DC /* ntv2debug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2debug.cpp; path = ../src/ntv2debug.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5DCF16E5330C00A9E0DC /* ntv2debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2debug.h; path = ../includes/ntv2debug.h; sourceTree = SOURCE_ROOT; };
 		B41B5DD016E5330C00A9E0DC /* ntv2discover.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2discover.cpp; path = ../src/ntv2discover.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5DD116E5330C00A9E0DC /* ntv2discover.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2discover.h; path = ../includes/ntv2discover.h; sourceTree = SOURCE_ROOT; };
-		B41B5DD216E5330C00A9E0DC /* ntv2diskio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2diskio.h; path = ../includes/ntv2diskio.h; sourceTree = SOURCE_ROOT; };
 		B41B5DD316E5330C00A9E0DC /* ntv2dma.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2dma.cpp; path = ../src/ntv2dma.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5DD416E5330C00A9E0DC /* ntv2driverinterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2driverinterface.cpp; path = ../src/ntv2driverinterface.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5DD516E5330C00A9E0DC /* ntv2driverinterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2driverinterface.h; path = ../includes/ntv2driverinterface.h; sourceTree = SOURCE_ROOT; };
-		B41B5DDA16E5330C00A9E0DC /* ntv2fltknetprefs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2fltknetprefs.cpp; path = ../src/ntv2fltknetprefs.cpp; sourceTree = SOURCE_ROOT; };
-		B41B5DDB16E5330C00A9E0DC /* ntv2fltknetprefs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2fltknetprefs.h; path = ../includes/ntv2fltknetprefs.h; sourceTree = SOURCE_ROOT; };
 		B41B5DDE16E5330C00A9E0DC /* ntv2interrupts.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2interrupts.cpp; path = ../src/ntv2interrupts.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5DE116E5330C00A9E0DC /* ntv2nubaccess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2nubaccess.cpp; path = ../src/ntv2nubaccess.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5DE216E5330C00A9E0DC /* ntv2nubaccess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2nubaccess.h; path = ../includes/ntv2nubaccess.h; sourceTree = SOURCE_ROOT; };
 		B41B5DE316E5330C00A9E0DC /* ntv2nubpktcom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2nubpktcom.cpp; path = ../src/ntv2nubpktcom.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5DE416E5330C00A9E0DC /* ntv2nubpktcom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2nubpktcom.h; path = ../includes/ntv2nubpktcom.h; sourceTree = SOURCE_ROOT; };
 		B41B5DE516E5330C00A9E0DC /* ntv2nubtypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2nubtypes.h; path = ../includes/ntv2nubtypes.h; sourceTree = SOURCE_ROOT; };
-		B41B5DEA16E5330C00A9E0DC /* ntv2procamp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2procamp.cpp; path = ../src/ntv2procamp.cpp; sourceTree = SOURCE_ROOT; };
-		B41B5DEB16E5330C00A9E0DC /* ntv2procamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2procamp.h; path = ../includes/ntv2procamp.h; sourceTree = SOURCE_ROOT; };
 		B41B5DEC16E5330C00A9E0DC /* ntv2register.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2register.cpp; path = ../src/ntv2register.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5DED16E5330C00A9E0DC /* ntv2rp188.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2rp188.cpp; path = ../src/ntv2rp188.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5DEE16E5330C00A9E0DC /* ntv2rp188.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2rp188.h; path = ../includes/ntv2rp188.h; sourceTree = SOURCE_ROOT; };
 		B41B5DEF16E5330C00A9E0DC /* ntv2rp215.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2rp215.cpp; path = ../src/ntv2rp215.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5DF016E5330C00A9E0DC /* ntv2rp215.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2rp215.h; path = ../includes/ntv2rp215.h; sourceTree = SOURCE_ROOT; };
-		B41B5DF116E5330C00A9E0DC /* ntv2status.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2status.cpp; path = ../src/ntv2status.cpp; sourceTree = SOURCE_ROOT; };
-		B41B5DF216E5330C00A9E0DC /* ntv2status.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2status.h; path = ../includes/ntv2status.h; sourceTree = SOURCE_ROOT; };
 		B41B5DF316E5330C00A9E0DC /* ntv2subscriptions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2subscriptions.cpp; path = ../src/ntv2subscriptions.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5DF416E5330C00A9E0DC /* ntv2task.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2task.cpp; path = ../src/ntv2task.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5DF516E5330C00A9E0DC /* ntv2task.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2task.h; path = ../includes/ntv2task.h; sourceTree = SOURCE_ROOT; };
 		B41B5DF616E5330C00A9E0DC /* ntv2testpattern.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2testpattern.cpp; path = ../src/ntv2testpattern.cpp; sourceTree = SOURCE_ROOT; };
-		B41B5DF716E5330C00A9E0DC /* ntv2testpattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2testpattern.h; path = ../includes/ntv2testpattern.h; sourceTree = SOURCE_ROOT; };
 		B41B5DFA16E5330C00A9E0DC /* ntv2utf8.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2utf8.cpp; path = ../src/ntv2utf8.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5DFB16E5330C00A9E0DC /* ntv2utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2utf8.h; path = ../includes/ntv2utf8.h; sourceTree = SOURCE_ROOT; };
 		B41B5DFC16E5330C00A9E0DC /* ntv2utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2utils.cpp; path = ../src/ntv2utils.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5DFD16E5330C00A9E0DC /* ntv2utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2utils.h; path = ../includes/ntv2utils.h; sourceTree = SOURCE_ROOT; };
-		B41B5DFE16E5330C00A9E0DC /* ntv2videofile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2videofile.cpp; path = ../src/ntv2videofile.cpp; sourceTree = SOURCE_ROOT; };
-		B41B5DFF16E5330C00A9E0DC /* ntv2videofile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2videofile.h; path = ../includes/ntv2videofile.h; sourceTree = SOURCE_ROOT; };
 		B41B5E0016E5330C00A9E0DC /* ntv2vidproc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2vidproc.cpp; path = ../src/ntv2vidproc.cpp; sourceTree = SOURCE_ROOT; };
-		B41B5E0116E5330C00A9E0DC /* ntv2vidproc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2vidproc.h; path = ../includes/ntv2vidproc.h; sourceTree = SOURCE_ROOT; };
-		B41B5E0216E5330C00A9E0DC /* ntv2vidprocmasks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2vidprocmasks.h; path = ../includes/ntv2vidprocmasks.h; sourceTree = SOURCE_ROOT; };
 		B41B5E0316E5330C00A9E0DC /* ntv2vpid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2vpid.cpp; path = ../src/ntv2vpid.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5E0416E5330C00A9E0DC /* ntv2vpid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2vpid.h; path = ../includes/ntv2vpid.h; sourceTree = SOURCE_ROOT; };
-		B41B5E0B16E5330C00A9E0DC /* testpatterndata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testpatterndata.h; path = ../includes/testpatterndata.h; sourceTree = SOURCE_ROOT; };
-		B41B5E0C16E5330C00A9E0DC /* testpatterngen.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testpatterngen.cpp; path = ../src/testpatterngen.cpp; sourceTree = SOURCE_ROOT; };
-		B41B5E0D16E5330C00A9E0DC /* testpatterngen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testpatterngen.h; path = ../includes/testpatterngen.h; sourceTree = SOURCE_ROOT; };
-		B41B5E0E16E5330C00A9E0DC /* testpatterngendata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testpatterngendata.h; path = ../includes/testpatterngendata.h; sourceTree = SOURCE_ROOT; };
 		B41B5E1116E5330C00A9E0DC /* ntv2verticalfilter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2verticalfilter.cpp; path = ../src/ntv2verticalfilter.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5E1216E5330C00A9E0DC /* ntv2verticalfilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2verticalfilter.h; path = ../includes/ntv2verticalfilter.h; sourceTree = SOURCE_ROOT; };
-		B41B5E1716E5330C00A9E0DC /* xena2vidproc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xena2vidproc.cpp; path = ../src/xena2vidproc.cpp; sourceTree = SOURCE_ROOT; };
-		B41B5E1816E5330C00A9E0DC /* xena2vidproc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xena2vidproc.h; path = ../includes/xena2vidproc.h; sourceTree = SOURCE_ROOT; };
 		B41B5E1916E5330C00A9E0DC /* ntv2serialcontrol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2serialcontrol.cpp; path = ../src/ntv2serialcontrol.cpp; sourceTree = SOURCE_ROOT; };
 		B41B5E1A16E5330C00A9E0DC /* ntv2serialcontrol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2serialcontrol.h; path = ../includes/ntv2serialcontrol.h; sourceTree = SOURCE_ROOT; };
 		B41B5E9616E537C600A9E0DC /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		B42AA900182AA42500E0584A /* ajatypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ajatypes.h; path = ../includes/ajatypes.h; sourceTree = SOURCE_ROOT; };
-		B42AA901182AA42500E0584A /* audiodefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = audiodefines.h; path = ../includes/audiodefines.h; sourceTree = SOURCE_ROOT; };
-		B42AA902182AA42500E0584A /* debugMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = debugMacros.h; path = ../includes/debugMacros.h; sourceTree = SOURCE_ROOT; };
+		B42AA901182AA42500E0584A /* ntv2audiodefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ntv2audiodefines.h; path = ../includes/ntv2audiodefines.h; sourceTree = SOURCE_ROOT; };
 		B42AA903182AA42500E0584A /* ntv2endian.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ntv2endian.h; path = ../includes/ntv2endian.h; sourceTree = SOURCE_ROOT; };
 		B42AA904182AA42500E0584A /* ntv2enums.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ntv2enums.h; path = ../includes/ntv2enums.h; sourceTree = SOURCE_ROOT; };
 		B42AA905182AA42500E0584A /* ntv2macpublicinterface.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ntv2macpublicinterface.h; path = ../src/mac/ntv2macpublicinterface.h; sourceTree = SOURCE_ROOT; };
 		B42AA906182AA42500E0584A /* ntv2publicinterface.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ntv2publicinterface.h; path = ../includes/ntv2publicinterface.h; sourceTree = SOURCE_ROOT; };
 		B42AA907182AA42500E0584A /* ntv2virtualregisters.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ntv2virtualregisters.h; path = ../includes/ntv2virtualregisters.h; sourceTree = SOURCE_ROOT; };
-		B42AA908182AA42500E0584A /* videodefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = videodefines.h; path = ../includes/videodefines.h; sourceTree = SOURCE_ROOT; };
 		B455DE3B2106319E002A69FD /* ntv2anc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2anc.cpp; path = ../src/ntv2anc.cpp; sourceTree = SOURCE_ROOT; };
+		B455DE9B210F94C0002A69FD /* ntv2testpatterngen.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ntv2testpatterngen.cpp; sourceTree = "<group>"; };
+		B455DE9D210F9533002A69FD /* ntv2testpatterngen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ntv2testpatterngen.h; sourceTree = "<group>"; };
+		B455DE9E210F9533002A69FD /* ntv2videodefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ntv2videodefines.h; sourceTree = "<group>"; };
+		B455DEA4210F95E9002A69FD /* ajarefptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ajarefptr.h; path = ../../ajabase/common/ajarefptr.h; sourceTree = SOURCE_ROOT; };
+		B455DEA5210F95E9002A69FD /* audioutilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = audioutilities.cpp; path = ../../ajabase/common/audioutilities.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEA6210F95E9002A69FD /* audioutilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audioutilities.h; path = ../../ajabase/common/audioutilities.h; sourceTree = SOURCE_ROOT; };
+		B455DEA7210F95E9002A69FD /* buffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = buffer.cpp; path = ../../ajabase/common/buffer.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEA8210F95E9002A69FD /* buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = buffer.h; path = ../../ajabase/common/buffer.h; sourceTree = SOURCE_ROOT; };
+		B455DEA9210F95E9002A69FD /* bytestream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bytestream.h; path = ../../ajabase/common/bytestream.h; sourceTree = SOURCE_ROOT; };
+		B455DEAA210F95E9002A69FD /* circularbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = circularbuffer.h; path = ../../ajabase/common/circularbuffer.h; sourceTree = SOURCE_ROOT; };
+		B455DEAB210F95E9002A69FD /* cli_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cli_utils.h; path = ../../ajabase/common/cli_utils.h; sourceTree = SOURCE_ROOT; };
+		B455DEAC210F95E9002A69FD /* common.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = common.cpp; path = ../../ajabase/common/common.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEAD210F95E9002A69FD /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = common.h; path = ../../ajabase/common/common.h; sourceTree = SOURCE_ROOT; };
+		B455DEAE210F95E9002A69FD /* dpx_hdr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dpx_hdr.cpp; path = ../../ajabase/common/dpx_hdr.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEAF210F95E9002A69FD /* dpx_hdr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dpx_hdr.h; path = ../../ajabase/common/dpx_hdr.h; sourceTree = SOURCE_ROOT; };
+		B455DEB0210F95E9002A69FD /* dpxfileio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dpxfileio.cpp; path = ../../ajabase/common/dpxfileio.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEB1210F95E9002A69FD /* dpxfileio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dpxfileio.h; path = ../../ajabase/common/dpxfileio.h; sourceTree = SOURCE_ROOT; };
+		B455DEB2210F95E9002A69FD /* export.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = export.h; path = ../../ajabase/common/export.h; sourceTree = SOURCE_ROOT; };
+		B455DEB3210F95E9002A69FD /* guid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guid.cpp; path = ../../ajabase/common/guid.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEB4210F95E9002A69FD /* guid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guid.h; path = ../../ajabase/common/guid.h; sourceTree = SOURCE_ROOT; };
+		B455DEB5210F95E9002A69FD /* options_popt.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = options_popt.cpp; path = ../../ajabase/common/options_popt.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEB6210F95E9002A69FD /* options_popt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = options_popt.h; path = ../../ajabase/common/options_popt.h; sourceTree = SOURCE_ROOT; };
+		B455DEB7210F95E9002A69FD /* performance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = performance.cpp; path = ../../ajabase/common/performance.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEB8210F95E9002A69FD /* performance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = performance.h; path = ../../ajabase/common/performance.h; sourceTree = SOURCE_ROOT; };
+		B455DEB9210F95E9002A69FD /* pixelformat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pixelformat.cpp; path = ../../ajabase/common/pixelformat.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEBA210F95E9002A69FD /* pixelformat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pixelformat.h; path = ../../ajabase/common/pixelformat.h; sourceTree = SOURCE_ROOT; };
+		B455DEBB210F95E9002A69FD /* public.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = public.h; path = ../../ajabase/common/public.h; sourceTree = SOURCE_ROOT; };
+		B455DEBC210F95E9002A69FD /* rawfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = rawfile.h; path = ../../ajabase/common/rawfile.h; sourceTree = SOURCE_ROOT; };
+		B455DEBD210F95E9002A69FD /* testpatterndata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testpatterndata.h; path = ../../ajabase/common/testpatterndata.h; sourceTree = SOURCE_ROOT; };
+		B455DEBE210F95E9002A69FD /* testpatterngen.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testpatterngen.cpp; path = ../../ajabase/common/testpatterngen.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEBF210F95E9002A69FD /* testpatterngen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testpatterngen.h; path = ../../ajabase/common/testpatterngen.h; sourceTree = SOURCE_ROOT; };
+		B455DEC0210F95E9002A69FD /* timebase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = timebase.cpp; path = ../../ajabase/common/timebase.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEC1210F95E9002A69FD /* timebase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timebase.h; path = ../../ajabase/common/timebase.h; sourceTree = SOURCE_ROOT; };
+		B455DEC2210F95E9002A69FD /* timecode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = timecode.cpp; path = ../../ajabase/common/timecode.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEC3210F95E9002A69FD /* timecode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timecode.h; path = ../../ajabase/common/timecode.h; sourceTree = SOURCE_ROOT; };
+		B455DEC4210F95E9002A69FD /* timecodeburn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = timecodeburn.cpp; path = ../../ajabase/common/timecodeburn.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEC5210F95E9002A69FD /* timecodeburn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timecodeburn.h; path = ../../ajabase/common/timecodeburn.h; sourceTree = SOURCE_ROOT; };
+		B455DEC6210F95E9002A69FD /* timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = timer.cpp; path = ../../ajabase/common/timer.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEC7210F95E9002A69FD /* timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timer.h; path = ../../ajabase/common/timer.h; sourceTree = SOURCE_ROOT; };
+		B455DEC8210F95E9002A69FD /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = types.h; path = ../../ajabase/common/types.h; sourceTree = SOURCE_ROOT; };
+		B455DEC9210F95E9002A69FD /* videotypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = videotypes.h; path = ../../ajabase/common/videotypes.h; sourceTree = SOURCE_ROOT; };
+		B455DECA210F95E9002A69FD /* videoutilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = videoutilities.cpp; path = ../../ajabase/common/videoutilities.cpp; sourceTree = SOURCE_ROOT; };
+		B455DECB210F95E9002A69FD /* videoutilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = videoutilities.h; path = ../../ajabase/common/videoutilities.h; sourceTree = SOURCE_ROOT; };
+		B455DECC210F95E9002A69FD /* wavewriter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = wavewriter.cpp; path = ../../ajabase/common/wavewriter.cpp; sourceTree = SOURCE_ROOT; };
+		B455DECD210F95E9002A69FD /* wavewriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wavewriter.h; path = ../../ajabase/common/wavewriter.h; sourceTree = SOURCE_ROOT; };
+		B455DEF9210F9626002A69FD /* ip_socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ip_socket.cpp; path = ../../ajabase/network/ip_socket.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEFA210F9626002A69FD /* ip_socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ip_socket.h; path = ../../ajabase/network/ip_socket.h; sourceTree = SOURCE_ROOT; };
+		B455DEFB210F9626002A69FD /* tcp_socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tcp_socket.cpp; path = ../../ajabase/network/tcp_socket.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEFC210F9626002A69FD /* tcp_socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tcp_socket.h; path = ../../ajabase/network/tcp_socket.h; sourceTree = SOURCE_ROOT; };
+		B455DEFD210F9626002A69FD /* udp_socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = udp_socket.cpp; path = ../../ajabase/network/udp_socket.cpp; sourceTree = SOURCE_ROOT; };
+		B455DEFE210F9626002A69FD /* udp_socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = udp_socket.h; path = ../../ajabase/network/udp_socket.h; sourceTree = SOURCE_ROOT; };
+		B455DF06210F9662002A69FD /* persistence.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = persistence.cpp; path = ../../ajabase/persistence/persistence.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF07210F9662002A69FD /* persistence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = persistence.h; path = ../../ajabase/persistence/persistence.h; sourceTree = SOURCE_ROOT; };
+		B455DF08210F9662002A69FD /* sqlite3.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = sqlite3.c; path = ../../ajabase/persistence/sqlite3.c; sourceTree = SOURCE_ROOT; };
+		B455DF09210F9662002A69FD /* sqlite3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sqlite3.h; path = ../../ajabase/persistence/sqlite3.h; sourceTree = SOURCE_ROOT; };
+		B455DF0F210F9698002A69FD /* pnp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pnp.cpp; path = ../../ajabase/pnp/pnp.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF10210F9698002A69FD /* pnp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pnp.h; path = ../../ajabase/pnp/pnp.h; sourceTree = SOURCE_ROOT; };
+		B455DF14210F96BD002A69FD /* devicenotifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = devicenotifier.cpp; path = ../../ajabase/pnp/mac/devicenotifier.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF15210F96BD002A69FD /* devicenotifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = devicenotifier.h; path = ../../ajabase/pnp/mac/devicenotifier.h; sourceTree = SOURCE_ROOT; };
+		B455DF16210F96BD002A69FD /* masterport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = masterport.cpp; path = ../../ajabase/pnp/mac/masterport.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF17210F96BD002A69FD /* masterport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = masterport.h; path = ../../ajabase/pnp/mac/masterport.h; sourceTree = SOURCE_ROOT; };
+		B455DF18210F96BD002A69FD /* pnpimpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pnpimpl.cpp; path = ../../ajabase/pnp/mac/pnpimpl.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF19210F96BD002A69FD /* pnpimpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pnpimpl.h; path = ../../ajabase/pnp/mac/pnpimpl.h; sourceTree = SOURCE_ROOT; };
+		B455DF22210F9703002A69FD /* atomic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = atomic.cpp; path = ../../ajabase/system/atomic.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF23210F9703002A69FD /* atomic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = atomic.h; path = ../../ajabase/system/atomic.h; sourceTree = SOURCE_ROOT; };
+		B455DF24210F9703002A69FD /* debug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = debug.cpp; path = ../../ajabase/system/debug.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF25210F9703002A69FD /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = debug.h; path = ../../ajabase/system/debug.h; sourceTree = SOURCE_ROOT; };
+		B455DF26210F9703002A69FD /* debugshare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = debugshare.h; path = ../../ajabase/system/debugshare.h; sourceTree = SOURCE_ROOT; };
+		B455DF27210F9703002A69FD /* diskstatus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = diskstatus.cpp; path = ../../ajabase/system/diskstatus.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF28210F9703002A69FD /* diskstatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = diskstatus.h; path = ../../ajabase/system/diskstatus.h; sourceTree = SOURCE_ROOT; };
+		B455DF29210F9703002A69FD /* event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = event.cpp; path = ../../ajabase/system/event.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF2A210F9703002A69FD /* event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = event.h; path = ../../ajabase/system/event.h; sourceTree = SOURCE_ROOT; };
+		B455DF2B210F9703002A69FD /* file_io.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = file_io.h; path = ../../ajabase/system/file_io.h; sourceTree = SOURCE_ROOT; };
+		B455DF2C210F9703002A69FD /* info.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = info.cpp; path = ../../ajabase/system/info.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF2D210F9703002A69FD /* info.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = info.h; path = ../../ajabase/system/info.h; sourceTree = SOURCE_ROOT; };
+		B455DF2E210F9703002A69FD /* lock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lock.cpp; path = ../../ajabase/system/lock.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF2F210F9703002A69FD /* lock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lock.h; path = ../../ajabase/system/lock.h; sourceTree = SOURCE_ROOT; };
+		B455DF30210F9703002A69FD /* log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = log.cpp; path = ../../ajabase/system/log.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF31210F9703002A69FD /* log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = log.h; path = ../../ajabase/system/log.h; sourceTree = SOURCE_ROOT; };
+		B455DF32210F9703002A69FD /* memory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = memory.cpp; path = ../../ajabase/system/memory.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF33210F9703002A69FD /* memory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = memory.h; path = ../../ajabase/system/memory.h; sourceTree = SOURCE_ROOT; };
+		B455DF34210F9703002A69FD /* process.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = process.cpp; path = ../../ajabase/system/process.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF35210F9703002A69FD /* process.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = process.h; path = ../../ajabase/system/process.h; sourceTree = SOURCE_ROOT; };
+		B455DF36210F9703002A69FD /* system.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = system.cpp; path = ../../ajabase/system/system.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF37210F9703002A69FD /* system.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = system.h; path = ../../ajabase/system/system.h; sourceTree = SOURCE_ROOT; };
+		B455DF38210F9703002A69FD /* systemtime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = systemtime.cpp; path = ../../ajabase/system/systemtime.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF39210F9703002A69FD /* systemtime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = systemtime.h; path = ../../ajabase/system/systemtime.h; sourceTree = SOURCE_ROOT; };
+		B455DF3A210F9703002A69FD /* thread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = thread.cpp; path = ../../ajabase/system/thread.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF3B210F9703002A69FD /* thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = thread.h; path = ../../ajabase/system/thread.h; sourceTree = SOURCE_ROOT; };
+		B455DF56210F9719002A69FD /* eventimpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = eventimpl.cpp; path = ../../ajabase/system/mac/eventimpl.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF57210F9719002A69FD /* eventimpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = eventimpl.h; path = ../../ajabase/system/mac/eventimpl.h; sourceTree = SOURCE_ROOT; };
+		B455DF58210F9719002A69FD /* file_io.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file_io.cpp; path = ../../ajabase/system/mac/file_io.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF59210F9719002A69FD /* infoimpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = infoimpl.h; path = ../../ajabase/system/mac/infoimpl.h; sourceTree = SOURCE_ROOT; };
+		B455DF5A210F9719002A69FD /* infoimpl.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = infoimpl.mm; path = ../../ajabase/system/mac/infoimpl.mm; sourceTree = SOURCE_ROOT; };
+		B455DF5B210F9719002A69FD /* lockimpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lockimpl.cpp; path = ../../ajabase/system/mac/lockimpl.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF5C210F9719002A69FD /* lockimpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lockimpl.h; path = ../../ajabase/system/mac/lockimpl.h; sourceTree = SOURCE_ROOT; };
+		B455DF5D210F9719002A69FD /* processimpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = processimpl.cpp; path = ../../ajabase/system/mac/processimpl.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF5E210F9719002A69FD /* processimpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = processimpl.h; path = ../../ajabase/system/mac/processimpl.h; sourceTree = SOURCE_ROOT; };
+		B455DF5F210F9719002A69FD /* pthreadsextra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pthreadsextra.cpp; path = ../../ajabase/system/mac/pthreadsextra.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF60210F9719002A69FD /* pthreadsextra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pthreadsextra.h; path = ../../ajabase/system/mac/pthreadsextra.h; sourceTree = SOURCE_ROOT; };
+		B455DF61210F9719002A69FD /* threadimpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = threadimpl.cpp; path = ../../ajabase/system/mac/threadimpl.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF62210F9719002A69FD /* threadimpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = threadimpl.h; path = ../../ajabase/system/mac/threadimpl.h; sourceTree = SOURCE_ROOT; };
+		B455DFD6210F97C5002A69FD /* ancillarydata_cea608_line21.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata_cea608_line21.cpp; path = ../../ajaanc/src/ancillarydata_cea608_line21.cpp; sourceTree = SOURCE_ROOT; };
+		B455DFD7210F97C5002A69FD /* ancillarydata_cea608_vanc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata_cea608_vanc.cpp; path = ../../ajaanc/src/ancillarydata_cea608_vanc.cpp; sourceTree = SOURCE_ROOT; };
+		B455DFD8210F97C5002A69FD /* ancillarydata_cea608.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata_cea608.cpp; path = ../../ajaanc/src/ancillarydata_cea608.cpp; sourceTree = SOURCE_ROOT; };
+		B455DFD9210F97C5002A69FD /* ancillarydata_cea708.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata_cea708.cpp; path = ../../ajaanc/src/ancillarydata_cea708.cpp; sourceTree = SOURCE_ROOT; };
+		B455DFDA210F97C5002A69FD /* ancillarydata_framestatusinfo524D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata_framestatusinfo524D.cpp; path = ../../ajaanc/src/ancillarydata_framestatusinfo524D.cpp; sourceTree = SOURCE_ROOT; };
+		B455DFDB210F97C5002A69FD /* ancillarydata_framestatusinfo5251.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata_framestatusinfo5251.cpp; path = ../../ajaanc/src/ancillarydata_framestatusinfo5251.cpp; sourceTree = SOURCE_ROOT; };
+		B455DFDC210F97C5002A69FD /* ancillarydata_hdr_hdr10.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata_hdr_hdr10.cpp; path = ../../ajaanc/src/ancillarydata_hdr_hdr10.cpp; sourceTree = SOURCE_ROOT; };
+		B455DFDD210F97C5002A69FD /* ancillarydata_hdr_hlg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata_hdr_hlg.cpp; path = ../../ajaanc/src/ancillarydata_hdr_hlg.cpp; sourceTree = SOURCE_ROOT; };
+		B455DFDE210F97C5002A69FD /* ancillarydata_hdr_sdr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata_hdr_sdr.cpp; path = ../../ajaanc/src/ancillarydata_hdr_sdr.cpp; sourceTree = SOURCE_ROOT; };
+		B455DFDF210F97C5002A69FD /* ancillarydata_timecode_atc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata_timecode_atc.cpp; path = ../../ajaanc/src/ancillarydata_timecode_atc.cpp; sourceTree = SOURCE_ROOT; };
+		B455DFE0210F97C5002A69FD /* ancillarydata_timecode_vitc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata_timecode_vitc.cpp; path = ../../ajaanc/src/ancillarydata_timecode_vitc.cpp; sourceTree = SOURCE_ROOT; };
+		B455DFE1210F97C5002A69FD /* ancillarydata_timecode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata_timecode.cpp; path = ../../ajaanc/src/ancillarydata_timecode.cpp; sourceTree = SOURCE_ROOT; };
+		B455DFE2210F97C5002A69FD /* ancillarydata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydata.cpp; path = ../../ajaanc/src/ancillarydata.cpp; sourceTree = SOURCE_ROOT; };
+		B455DFE3210F97C5002A69FD /* ancillarydatafactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarydatafactory.cpp; path = ../../ajaanc/src/ancillarydatafactory.cpp; sourceTree = SOURCE_ROOT; };
+		B455DFE4210F97C5002A69FD /* ancillarylist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ancillarylist.cpp; path = ../../ajaanc/src/ancillarylist.cpp; sourceTree = SOURCE_ROOT; };
+		B455E003210F97D6002A69FD /* ancillarydata_cea608_line21.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_cea608_line21.h; path = ../../ajaanc/includes/ancillarydata_cea608_line21.h; sourceTree = SOURCE_ROOT; };
+		B455E004210F97D6002A69FD /* ancillarydata_cea608_vanc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_cea608_vanc.h; path = ../../ajaanc/includes/ancillarydata_cea608_vanc.h; sourceTree = SOURCE_ROOT; };
+		B455E005210F97D6002A69FD /* ancillarydata_cea608.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_cea608.h; path = ../../ajaanc/includes/ancillarydata_cea608.h; sourceTree = SOURCE_ROOT; };
+		B455E006210F97D6002A69FD /* ancillarydata_cea708.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_cea708.h; path = ../../ajaanc/includes/ancillarydata_cea708.h; sourceTree = SOURCE_ROOT; };
+		B455E007210F97D6002A69FD /* ancillarydata_framestatusinfo524D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_framestatusinfo524D.h; path = ../../ajaanc/includes/ancillarydata_framestatusinfo524D.h; sourceTree = SOURCE_ROOT; };
+		B455E008210F97D6002A69FD /* ancillarydata_framestatusinfo5251.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_framestatusinfo5251.h; path = ../../ajaanc/includes/ancillarydata_framestatusinfo5251.h; sourceTree = SOURCE_ROOT; };
+		B455E009210F97D6002A69FD /* ancillarydata_hdr_hdr10.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_hdr_hdr10.h; path = ../../ajaanc/includes/ancillarydata_hdr_hdr10.h; sourceTree = SOURCE_ROOT; };
+		B455E00A210F97D6002A69FD /* ancillarydata_hdr_hlg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_hdr_hlg.h; path = ../../ajaanc/includes/ancillarydata_hdr_hlg.h; sourceTree = SOURCE_ROOT; };
+		B455E00B210F97D6002A69FD /* ancillarydata_hdr_sdr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_hdr_sdr.h; path = ../../ajaanc/includes/ancillarydata_hdr_sdr.h; sourceTree = SOURCE_ROOT; };
+		B455E00C210F97D6002A69FD /* ancillarydata_timecode_atc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_timecode_atc.h; path = ../../ajaanc/includes/ancillarydata_timecode_atc.h; sourceTree = SOURCE_ROOT; };
+		B455E00D210F97D6002A69FD /* ancillarydata_timecode_vitc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_timecode_vitc.h; path = ../../ajaanc/includes/ancillarydata_timecode_vitc.h; sourceTree = SOURCE_ROOT; };
+		B455E00E210F97D6002A69FD /* ancillarydata_timecode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata_timecode.h; path = ../../ajaanc/includes/ancillarydata_timecode.h; sourceTree = SOURCE_ROOT; };
+		B455E00F210F97D6002A69FD /* ancillarydata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydata.h; path = ../../ajaanc/includes/ancillarydata.h; sourceTree = SOURCE_ROOT; };
+		B455E010210F97D6002A69FD /* ancillarydatafactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydatafactory.h; path = ../../ajaanc/includes/ancillarydatafactory.h; sourceTree = SOURCE_ROOT; };
+		B455E011210F97D6002A69FD /* ancillarylist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarylist.h; path = ../../ajaanc/includes/ancillarylist.h; sourceTree = SOURCE_ROOT; };
 		B462E8BC2076F72E0003262A /* ntv2hdmi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2hdmi.cpp; path = ../src/ntv2hdmi.cpp; sourceTree = SOURCE_ROOT; };
 		B480B6431C6291E1003210EE /* ntv2hevc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2hevc.cpp; path = ../src/ntv2hevc.cpp; sourceTree = SOURCE_ROOT; };
 		B4940CA61AF1B23500189CAB /* ntv2devicefeatures.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ntv2devicefeatures.hh; path = ../includes/ntv2devicefeatures.hh; sourceTree = SOURCE_ROOT; };
 		B4A4507A1AA15583003AED85 /* ntv2devicefeatures.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ntv2devicefeatures.hpp; path = ../src/ntv2devicefeatures.hpp; sourceTree = SOURCE_ROOT; };
+		B4AC26B62118CF1600EDB0D5 /* ntv2debugmacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2debugmacros.h; path = ../includes/ntv2debugmacros.h; sourceTree = SOURCE_ROOT; };
 		B4ACCA8E1C47226D00655C50 /* ntv2enhancedcsc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2enhancedcsc.cpp; path = ../src/ntv2enhancedcsc.cpp; sourceTree = SOURCE_ROOT; };
 		B4ACCA8F1C47226D00655C50 /* ntv2enhancedcsc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2enhancedcsc.h; path = ../includes/ntv2enhancedcsc.h; sourceTree = SOURCE_ROOT; };
 		B4CC230F1C5AE48A00171CB6 /* ntv2resample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2resample.cpp; path = ../src/ntv2resample.cpp; sourceTree = SOURCE_ROOT; };
@@ -413,9 +778,9 @@
 		0867D691FE84028FC02AAC07 /* ajantv2 */ = {
 			isa = PBXGroup;
 			children = (
-				B42AA909182AA44300E0584A /* includes */,
-				B41B5DAC16E5329000A9E0DC /* src */,
-				B4CE1CE216E53B180092B564 /* mac */,
+				B455DFD3210F9788002A69FD /* ajaanc */,
+				B455DEA2210F95A2002A69FD /* ajabase */,
+				B455DEA1210F955E002A69FD /* ajantv2 */,
 				0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */,
 				034768DDFF38A45A11DB9C8B /* Products */,
 			);
@@ -434,12 +799,12 @@
 		B41B5DAC16E5329000A9E0DC /* src */ = {
 			isa = PBXGroup;
 			children = (
+				B4CE1CE216E53B180092B564 /* mac */,
 				B455DE3B2106319E002A69FD /* ntv2anc.cpp */,
 				B4058554195A1A7C00425B9E /* ntv2audio.cpp */,
 				B41B5DBD16E5330C00A9E0DC /* ntv2autocirculate.cpp */,
 				B4040C8119DDA5F100B5539D /* ntv2bitfile.cpp */,
 				B41B5DC816E5330C00A9E0DC /* ntv2card.cpp */,
-				B41B5DCC16E5330C00A9E0DC /* ntv2colorcorrection.cpp */,
 				B4F90FAD1C485204004723C9 /* ntv2config2022.cpp */,
 				7D5732711FD9CB3800862AD2 /* ntv2config2110.cpp */,
 				8A6F1B081CBEE58B008A0557 /* ntv2configts2022.cpp */,
@@ -452,7 +817,6 @@
 				B41B5DD316E5330C00A9E0DC /* ntv2dma.cpp */,
 				B41B5DD416E5330C00A9E0DC /* ntv2driverinterface.cpp */,
 				B4ACCA8E1C47226D00655C50 /* ntv2enhancedcsc.cpp */,
-				B41B5DDA16E5330C00A9E0DC /* ntv2fltknetprefs.cpp */,
 				B411E93F1DDBD9FF00B9E206 /* ntv2formatdescriptor.cpp */,
 				B462E8BC2076F72E0003262A /* ntv2hdmi.cpp */,
 				B480B6431C6291E1003210EE /* ntv2hevc.cpp */,
@@ -463,7 +827,6 @@
 				B40064DB1CC9401000389528 /* ntv2mcsfile.cpp */,
 				B41B5DE116E5330C00A9E0DC /* ntv2nubaccess.cpp */,
 				B41B5DE316E5330C00A9E0DC /* ntv2nubpktcom.cpp */,
-				B41B5DEA16E5330C00A9E0DC /* ntv2procamp.cpp */,
 				B407BBA51D2583FF00099DDA /* ntv2publicinterface.cpp */,
 				B41B5DEC16E5330C00A9E0DC /* ntv2register.cpp */,
 				B411E9401DDBD9FF00B9E206 /* ntv2registerexpert.cpp */,
@@ -473,21 +836,18 @@
 				B41B5E1916E5330C00A9E0DC /* ntv2serialcontrol.cpp */,
 				B405856B196B305500425B9E /* ntv2signalrouter.cpp */,
 				A4FF3B0F1FCE11AB006F2E90 /* ntv2spiinterface.cpp */,
-				B41B5DF116E5330C00A9E0DC /* ntv2status.cpp */,
 				B41B5DF316E5330C00A9E0DC /* ntv2subscriptions.cpp */,
 				A4C6843C1FFFE8E3004FC89D /* ntv2supportlogger.cpp */,
 				B41B5DF416E5330C00A9E0DC /* ntv2task.cpp */,
 				B41B5DF616E5330C00A9E0DC /* ntv2testpattern.cpp */,
+				B455DE9B210F94C0002A69FD /* ntv2testpatterngen.cpp */,
 				B4CC23111C5AE48A00171CB6 /* ntv2transcode.cpp */,
 				B41B5DFA16E5330C00A9E0DC /* ntv2utf8.cpp */,
 				B41B5DFC16E5330C00A9E0DC /* ntv2utils.cpp */,
 				B41B5E1116E5330C00A9E0DC /* ntv2verticalfilter.cpp */,
-				B41B5DFE16E5330C00A9E0DC /* ntv2videofile.cpp */,
 				B41B5E0016E5330C00A9E0DC /* ntv2vidproc.cpp */,
 				B41B5E0316E5330C00A9E0DC /* ntv2vpid.cpp */,
 				B4FE2EDA1C7E8A7500C5627A /* ntv2vpidfromspec.cpp */,
-				B41B5E0C16E5330C00A9E0DC /* testpatterngen.cpp */,
-				B41B5E1716E5330C00A9E0DC /* xena2vidproc.cpp */,
 			);
 			name = src;
 			path = ../src;
@@ -498,29 +858,26 @@
 			children = (
 				B41B5DB416E5330C00A9E0DC /* ajaexport.h */,
 				B42AA900182AA42500E0584A /* ajatypes.h */,
-				B42AA901182AA42500E0584A /* audiodefines.h */,
+				B42AA901182AA42500E0584A /* ntv2audiodefines.h */,
 				B41B5DB516E5330C00A9E0DC /* basemachinecontrol.h */,
-				B42AA902182AA42500E0584A /* debugMacros.h */,
-				B40DB00C1ACDC69D007697DF /* fixed.h */,
+				B40DB00C1ACDC69D007697DF /* ntv2fixed.h */,
 				B4F8B2161B98D10F00257B92 /* ntv2bft.h */,
 				B4040C8219DDA5F100B5539D /* ntv2bitfile.h */,
 				B41B5DC916E5330C00A9E0DC /* ntv2card.h */,
-				B41B5DCD16E5330C00A9E0DC /* ntv2colorcorrection.h */,
 				B4F90FAE1C485204004723C9 /* ntv2config2022.h */,
 				7D5732741FD9CB4E00862AD2 /* ntv2config2110.h */,
 				8A6F1B091CBEE58B008A0557 /* ntv2configts2022.h */,
 				B40640FD1B825F5C0037C033 /* ntv2cscmatrix.h */,
 				B41B5DCF16E5330C00A9E0DC /* ntv2debug.h */,
+				B4AC26B62118CF1600EDB0D5 /* ntv2debugmacros.h */,
 				B408066C1A3776A5002C35ED /* ntv2devicefeatures.h */,
 				B4940CA61AF1B23500189CAB /* ntv2devicefeatures.hh */,
 				B408066E1A3776A5002C35ED /* ntv2devicescanner.h */,
 				B41B5DD116E5330C00A9E0DC /* ntv2discover.h */,
-				B41B5DD216E5330C00A9E0DC /* ntv2diskio.h */,
 				B41B5DD516E5330C00A9E0DC /* ntv2driverinterface.h */,
 				B42AA903182AA42500E0584A /* ntv2endian.h */,
 				B4ACCA8F1C47226D00655C50 /* ntv2enhancedcsc.h */,
 				B42AA904182AA42500E0584A /* ntv2enums.h */,
-				B41B5DDB16E5330C00A9E0DC /* ntv2fltknetprefs.h */,
 				B411E93B1DDBD9C100B9E206 /* ntv2formatdescriptor.h */,
 				B40064E51CC9409400389528 /* ntv2konaflashprogram.h */,
 				A49A335D1C7252FD0082D491 /* ntv2mailbox.h */,
@@ -529,7 +886,6 @@
 				B41B5DE216E5330C00A9E0DC /* ntv2nubaccess.h */,
 				B41B5DE416E5330C00A9E0DC /* ntv2nubpktcom.h */,
 				B41B5DE516E5330C00A9E0DC /* ntv2nubtypes.h */,
-				B41B5DEB16E5330C00A9E0DC /* ntv2procamp.h */,
 				B42AA906182AA42500E0584A /* ntv2publicinterface.h */,
 				B411E93C1DDBD9C100B9E206 /* ntv2registerexpert.h */,
 				B40064DD1CC9401000389528 /* ntv2registers2022.h */,
@@ -539,29 +895,257 @@
 				B41B5E1A16E5330C00A9E0DC /* ntv2serialcontrol.h */,
 				B405856C196B305500425B9E /* ntv2signalrouter.h */,
 				A4FF3B0D1FCE119B006F2E90 /* ntv2spiinterface.h */,
-				B41B5DF216E5330C00A9E0DC /* ntv2status.h */,
 				A4C684391FFFE8AD004FC89D /* ntv2supportlogger.h */,
 				B41B5DF516E5330C00A9E0DC /* ntv2task.h */,
-				B41B5DF716E5330C00A9E0DC /* ntv2testpattern.h */,
+				B455DE9D210F9533002A69FD /* ntv2testpatterngen.h */,
 				B4CC23121C5AE48A00171CB6 /* ntv2transcode.h */,
 				B4146AB81CE0F43700FDF78D /* ntv2tshelper.h */,
 				B41B5DFB16E5330C00A9E0DC /* ntv2utf8.h */,
 				B41B5DFD16E5330C00A9E0DC /* ntv2utils.h */,
 				B41B5E1216E5330C00A9E0DC /* ntv2verticalfilter.h */,
-				B41B5DFF16E5330C00A9E0DC /* ntv2videofile.h */,
-				B41B5E0116E5330C00A9E0DC /* ntv2vidproc.h */,
-				B41B5E0216E5330C00A9E0DC /* ntv2vidprocmasks.h */,
+				B455DE9E210F9533002A69FD /* ntv2videodefines.h */,
 				B42AA907182AA42500E0584A /* ntv2virtualregisters.h */,
 				B41B5E0416E5330C00A9E0DC /* ntv2vpid.h */,
 				B4FE2EDB1C7E8A7500C5627A /* ntv2vpidfromspec.h */,
-				B41B5E0B16E5330C00A9E0DC /* testpatterndata.h */,
-				B41B5E0D16E5330C00A9E0DC /* testpatterngen.h */,
-				B41B5E0E16E5330C00A9E0DC /* testpatterngendata.h */,
-				B42AA908182AA42500E0584A /* videodefines.h */,
-				B41B5E1816E5330C00A9E0DC /* xena2vidproc.h */,
 			);
 			name = includes;
 			path = ../includes;
+			sourceTree = SOURCE_ROOT;
+		};
+		B455DEA1210F955E002A69FD /* ajantv2 */ = {
+			isa = PBXGroup;
+			children = (
+				B42AA909182AA44300E0584A /* includes */,
+				B41B5DAC16E5329000A9E0DC /* src */,
+			);
+			name = ajantv2;
+			path = ..;
+			sourceTree = SOURCE_ROOT;
+		};
+		B455DEA2210F95A2002A69FD /* ajabase */ = {
+			isa = PBXGroup;
+			children = (
+				B455DEA3210F95C1002A69FD /* common */,
+				B455DEF8210F9606002A69FD /* network */,
+				B455DF05210F9642002A69FD /* persistence */,
+				B455DF0E210F9678002A69FD /* pnp */,
+				B455DF20210F96D0002A69FD /* system */,
+			);
+			name = ajabase;
+			path = ../../ajabase;
+			sourceTree = SOURCE_ROOT;
+		};
+		B455DEA3210F95C1002A69FD /* common */ = {
+			isa = PBXGroup;
+			children = (
+				B455DEA4210F95E9002A69FD /* ajarefptr.h */,
+				B455DEA5210F95E9002A69FD /* audioutilities.cpp */,
+				B455DEA6210F95E9002A69FD /* audioutilities.h */,
+				B455DEA7210F95E9002A69FD /* buffer.cpp */,
+				B455DEA8210F95E9002A69FD /* buffer.h */,
+				B455DEA9210F95E9002A69FD /* bytestream.h */,
+				B455DEAA210F95E9002A69FD /* circularbuffer.h */,
+				B455DEAB210F95E9002A69FD /* cli_utils.h */,
+				B455DEAC210F95E9002A69FD /* common.cpp */,
+				B455DEAD210F95E9002A69FD /* common.h */,
+				B455DEAE210F95E9002A69FD /* dpx_hdr.cpp */,
+				B455DEAF210F95E9002A69FD /* dpx_hdr.h */,
+				B455DEB0210F95E9002A69FD /* dpxfileio.cpp */,
+				B455DEB1210F95E9002A69FD /* dpxfileio.h */,
+				B455DEB2210F95E9002A69FD /* export.h */,
+				B455DEB3210F95E9002A69FD /* guid.cpp */,
+				B455DEB4210F95E9002A69FD /* guid.h */,
+				B455DEB5210F95E9002A69FD /* options_popt.cpp */,
+				B455DEB6210F95E9002A69FD /* options_popt.h */,
+				B455DEB7210F95E9002A69FD /* performance.cpp */,
+				B455DEB8210F95E9002A69FD /* performance.h */,
+				B455DEB9210F95E9002A69FD /* pixelformat.cpp */,
+				B455DEBA210F95E9002A69FD /* pixelformat.h */,
+				B455DEBB210F95E9002A69FD /* public.h */,
+				B455DEBC210F95E9002A69FD /* rawfile.h */,
+				B455DEBD210F95E9002A69FD /* testpatterndata.h */,
+				B455DEBE210F95E9002A69FD /* testpatterngen.cpp */,
+				B455DEBF210F95E9002A69FD /* testpatterngen.h */,
+				B455DEC0210F95E9002A69FD /* timebase.cpp */,
+				B455DEC1210F95E9002A69FD /* timebase.h */,
+				B455DEC2210F95E9002A69FD /* timecode.cpp */,
+				B455DEC3210F95E9002A69FD /* timecode.h */,
+				B455DEC4210F95E9002A69FD /* timecodeburn.cpp */,
+				B455DEC5210F95E9002A69FD /* timecodeburn.h */,
+				B455DEC6210F95E9002A69FD /* timer.cpp */,
+				B455DEC7210F95E9002A69FD /* timer.h */,
+				B455DEC8210F95E9002A69FD /* types.h */,
+				B455DEC9210F95E9002A69FD /* videotypes.h */,
+				B455DECA210F95E9002A69FD /* videoutilities.cpp */,
+				B455DECB210F95E9002A69FD /* videoutilities.h */,
+				B455DECC210F95E9002A69FD /* wavewriter.cpp */,
+				B455DECD210F95E9002A69FD /* wavewriter.h */,
+			);
+			name = common;
+			path = ../../ajabase/common;
+			sourceTree = SOURCE_ROOT;
+		};
+		B455DEF8210F9606002A69FD /* network */ = {
+			isa = PBXGroup;
+			children = (
+				B455DEF9210F9626002A69FD /* ip_socket.cpp */,
+				B455DEFA210F9626002A69FD /* ip_socket.h */,
+				B455DEFB210F9626002A69FD /* tcp_socket.cpp */,
+				B455DEFC210F9626002A69FD /* tcp_socket.h */,
+				B455DEFD210F9626002A69FD /* udp_socket.cpp */,
+				B455DEFE210F9626002A69FD /* udp_socket.h */,
+			);
+			name = network;
+			path = ../../ajabase/network;
+			sourceTree = SOURCE_ROOT;
+		};
+		B455DF05210F9642002A69FD /* persistence */ = {
+			isa = PBXGroup;
+			children = (
+				B455DF06210F9662002A69FD /* persistence.cpp */,
+				B455DF07210F9662002A69FD /* persistence.h */,
+				B455DF08210F9662002A69FD /* sqlite3.c */,
+				B455DF09210F9662002A69FD /* sqlite3.h */,
+			);
+			name = persistence;
+			path = ../../ajabase/persistence;
+			sourceTree = SOURCE_ROOT;
+		};
+		B455DF0E210F9678002A69FD /* pnp */ = {
+			isa = PBXGroup;
+			children = (
+				B455DF13210F96A6002A69FD /* mac */,
+				B455DF0F210F9698002A69FD /* pnp.cpp */,
+				B455DF10210F9698002A69FD /* pnp.h */,
+			);
+			name = pnp;
+			path = ../../ajabase/pnp;
+			sourceTree = SOURCE_ROOT;
+		};
+		B455DF13210F96A6002A69FD /* mac */ = {
+			isa = PBXGroup;
+			children = (
+				B455DF14210F96BD002A69FD /* devicenotifier.cpp */,
+				B455DF15210F96BD002A69FD /* devicenotifier.h */,
+				B455DF16210F96BD002A69FD /* masterport.cpp */,
+				B455DF17210F96BD002A69FD /* masterport.h */,
+				B455DF18210F96BD002A69FD /* pnpimpl.cpp */,
+				B455DF19210F96BD002A69FD /* pnpimpl.h */,
+			);
+			name = mac;
+			path = ../../ajabase/pnp/mac;
+			sourceTree = SOURCE_ROOT;
+		};
+		B455DF20210F96D0002A69FD /* system */ = {
+			isa = PBXGroup;
+			children = (
+				B455DF22210F9703002A69FD /* atomic.cpp */,
+				B455DF23210F9703002A69FD /* atomic.h */,
+				B455DF24210F9703002A69FD /* debug.cpp */,
+				B455DF25210F9703002A69FD /* debug.h */,
+				B455DF26210F9703002A69FD /* debugshare.h */,
+				B455DF27210F9703002A69FD /* diskstatus.cpp */,
+				B455DF28210F9703002A69FD /* diskstatus.h */,
+				B455DF29210F9703002A69FD /* event.cpp */,
+				B455DF2A210F9703002A69FD /* event.h */,
+				B455DF2B210F9703002A69FD /* file_io.h */,
+				B455DF2C210F9703002A69FD /* info.cpp */,
+				B455DF2D210F9703002A69FD /* info.h */,
+				B455DF2E210F9703002A69FD /* lock.cpp */,
+				B455DF2F210F9703002A69FD /* lock.h */,
+				B455DF30210F9703002A69FD /* log.cpp */,
+				B455DF31210F9703002A69FD /* log.h */,
+				B455DF32210F9703002A69FD /* memory.cpp */,
+				B455DF33210F9703002A69FD /* memory.h */,
+				B455DF34210F9703002A69FD /* process.cpp */,
+				B455DF35210F9703002A69FD /* process.h */,
+				B455DF36210F9703002A69FD /* system.cpp */,
+				B455DF37210F9703002A69FD /* system.h */,
+				B455DF38210F9703002A69FD /* systemtime.cpp */,
+				B455DF39210F9703002A69FD /* systemtime.h */,
+				B455DF3A210F9703002A69FD /* thread.cpp */,
+				B455DF3B210F9703002A69FD /* thread.h */,
+				B455DF21210F96EB002A69FD /* mac */,
+			);
+			name = system;
+			path = ../../ajabase/system;
+			sourceTree = SOURCE_ROOT;
+		};
+		B455DF21210F96EB002A69FD /* mac */ = {
+			isa = PBXGroup;
+			children = (
+				B455DF56210F9719002A69FD /* eventimpl.cpp */,
+				B455DF57210F9719002A69FD /* eventimpl.h */,
+				B455DF58210F9719002A69FD /* file_io.cpp */,
+				B455DF59210F9719002A69FD /* infoimpl.h */,
+				B455DF5A210F9719002A69FD /* infoimpl.mm */,
+				B455DF5B210F9719002A69FD /* lockimpl.cpp */,
+				B455DF5C210F9719002A69FD /* lockimpl.h */,
+				B455DF5D210F9719002A69FD /* processimpl.cpp */,
+				B455DF5E210F9719002A69FD /* processimpl.h */,
+				B455DF5F210F9719002A69FD /* pthreadsextra.cpp */,
+				B455DF60210F9719002A69FD /* pthreadsextra.h */,
+				B455DF61210F9719002A69FD /* threadimpl.cpp */,
+				B455DF62210F9719002A69FD /* threadimpl.h */,
+			);
+			name = mac;
+			path = ../../ajabase/system/mac;
+			sourceTree = SOURCE_ROOT;
+		};
+		B455DFD3210F9788002A69FD /* ajaanc */ = {
+			isa = PBXGroup;
+			children = (
+				B455DFD4210F979F002A69FD /* includes */,
+				B455DFD5210F97B4002A69FD /* src */,
+			);
+			name = ajaanc;
+			path = ../../ajaanc;
+			sourceTree = SOURCE_ROOT;
+		};
+		B455DFD4210F979F002A69FD /* includes */ = {
+			isa = PBXGroup;
+			children = (
+				B455E003210F97D6002A69FD /* ancillarydata_cea608_line21.h */,
+				B455E004210F97D6002A69FD /* ancillarydata_cea608_vanc.h */,
+				B455E005210F97D6002A69FD /* ancillarydata_cea608.h */,
+				B455E006210F97D6002A69FD /* ancillarydata_cea708.h */,
+				B455E007210F97D6002A69FD /* ancillarydata_framestatusinfo524D.h */,
+				B455E008210F97D6002A69FD /* ancillarydata_framestatusinfo5251.h */,
+				B455E009210F97D6002A69FD /* ancillarydata_hdr_hdr10.h */,
+				B455E00A210F97D6002A69FD /* ancillarydata_hdr_hlg.h */,
+				B455E00B210F97D6002A69FD /* ancillarydata_hdr_sdr.h */,
+				B455E00C210F97D6002A69FD /* ancillarydata_timecode_atc.h */,
+				B455E00D210F97D6002A69FD /* ancillarydata_timecode_vitc.h */,
+				B455E00E210F97D6002A69FD /* ancillarydata_timecode.h */,
+				B455E00F210F97D6002A69FD /* ancillarydata.h */,
+				B455E010210F97D6002A69FD /* ancillarydatafactory.h */,
+				B455E011210F97D6002A69FD /* ancillarylist.h */,
+			);
+			name = includes;
+			path = ../../ajaanc/includes;
+			sourceTree = SOURCE_ROOT;
+		};
+		B455DFD5210F97B4002A69FD /* src */ = {
+			isa = PBXGroup;
+			children = (
+				B455DFD6210F97C5002A69FD /* ancillarydata_cea608_line21.cpp */,
+				B455DFD7210F97C5002A69FD /* ancillarydata_cea608_vanc.cpp */,
+				B455DFD8210F97C5002A69FD /* ancillarydata_cea608.cpp */,
+				B455DFD9210F97C5002A69FD /* ancillarydata_cea708.cpp */,
+				B455DFDA210F97C5002A69FD /* ancillarydata_framestatusinfo524D.cpp */,
+				B455DFDB210F97C5002A69FD /* ancillarydata_framestatusinfo5251.cpp */,
+				B455DFDC210F97C5002A69FD /* ancillarydata_hdr_hdr10.cpp */,
+				B455DFDD210F97C5002A69FD /* ancillarydata_hdr_hlg.cpp */,
+				B455DFDE210F97C5002A69FD /* ancillarydata_hdr_sdr.cpp */,
+				B455DFDF210F97C5002A69FD /* ancillarydata_timecode_atc.cpp */,
+				B455DFE0210F97C5002A69FD /* ancillarydata_timecode_vitc.cpp */,
+				B455DFE1210F97C5002A69FD /* ancillarydata_timecode.cpp */,
+				B455DFE2210F97C5002A69FD /* ancillarydata.cpp */,
+				B455DFE3210F97C5002A69FD /* ancillarydatafactory.cpp */,
+				B455DFE4210F97C5002A69FD /* ancillarylist.cpp */,
+			);
+			name = src;
+			path = ../../ajaanc;
 			sourceTree = SOURCE_ROOT;
 		};
 		B4CE1CE216E53B180092B564 /* mac */ = {
@@ -583,57 +1167,129 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B455DFA9210F9768002A69FD /* ajarefptr.h in Headers */,
 				B40064E11CC9401000389528 /* ntv2mcsfile.h in Headers */,
+				B455E02D210F97DE002A69FD /* ancillarydata.h in Headers */,
+				B455DFC6210F9768002A69FD /* timebase.h in Headers */,
+				B455DF81210F9739002A69FD /* debugshare.h in Headers */,
 				B4CE1E3616E582B90092B564 /* ajaexport.h in Headers */,
+				B455DF73210F9734002A69FD /* infoimpl.h in Headers */,
+				B455DFCE210F9768002A69FD /* videotypes.h in Headers */,
+				B455E027210F97DE002A69FD /* ancillarydata_hdr_hdr10.h in Headers */,
+				B455E02E210F97DE002A69FD /* ancillarydatafactory.h in Headers */,
+				B455E02F210F97DE002A69FD /* ancillarylist.h in Headers */,
+				B455DFB9210F9768002A69FD /* guid.h in Headers */,
 				B4CE1E3716E582B90092B564 /* basemachinecontrol.h in Headers */,
+				B455DFA8210F9762002A69FD /* udp_socket.h in Headers */,
+				B455DF78210F9734002A69FD /* processimpl.h in Headers */,
+				B455E039210F9C6F002A69FD /* ntv2enums.h in Headers */,
 				B4CC23171C5AE48A00171CB6 /* ntv2resample.h in Headers */,
+				B455E02A210F97DE002A69FD /* ancillarydata_timecode_atc.h in Headers */,
 				B4F90FB21C485204004723C9 /* ntv2config2022.h in Headers */,
 				8A6F1B0D1CBEE58B008A0557 /* ntv2configts2022.h in Headers */,
+				B455DFB2210F9768002A69FD /* common.h in Headers */,
+				B455E03B210F9C6F002A69FD /* ntv2publicinterface.h in Headers */,
 				B4CE1E4116E582B90092B564 /* ntv2card.h in Headers */,
-				B4CE1E4316E582B90092B564 /* ntv2colorcorrection.h in Headers */,
 				B40806761A3776A5002C35ED /* ntv2devicescanner.h in Headers */,
+				B455E024210F97DE002A69FD /* ancillarydata_cea708.h in Headers */,
+				B455DF76210F9734002A69FD /* lockimpl.h in Headers */,
 				B4CE1E4416E582B90092B564 /* ntv2debug.h in Headers */,
+				B455E038210F9C6F002A69FD /* ntv2endian.h in Headers */,
+				B455E037210F9C6F002A69FD /* ntv2bft.h in Headers */,
 				B4CE1E4516E582B90092B564 /* ntv2discover.h in Headers */,
-				B4CE1E4616E582B90092B564 /* ntv2diskio.h in Headers */,
 				B4CE1E4716E582B90092B564 /* ntv2driverinterface.h in Headers */,
 				B4058570196B305500425B9E /* ntv2signalrouter.h in Headers */,
-				B4CE1E4A16E582B90092B564 /* ntv2fltknetprefs.h in Headers */,
 				B40064E31CC9401000389528 /* ntv2registers2022.h in Headers */,
 				B40806721A3776A5002C35ED /* ntv2devicefeatures.h in Headers */,
 				B4CE1E4D16E582B90092B564 /* ntv2nubaccess.h in Headers */,
+				B455DFCC210F9768002A69FD /* timer.h in Headers */,
+				B455DFC2210F9768002A69FD /* testpatterndata.h in Headers */,
+				B455E026210F97DE002A69FD /* ancillarydata_framestatusinfo5251.h in Headers */,
+				B455DFD0210F9768002A69FD /* videoutilities.h in Headers */,
+				B455E02B210F97DE002A69FD /* ancillarydata_timecode_vitc.h in Headers */,
+				B455E021210F97DE002A69FD /* ancillarydata_cea608_line21.h in Headers */,
+				B455DF71210F9734002A69FD /* eventimpl.h in Headers */,
 				B4CE1E4E16E582B90092B564 /* ntv2nubpktcom.h in Headers */,
 				B4CE1E4F16E582B90092B564 /* ntv2nubtypes.h in Headers */,
+				B455DFA2210F975C002A69FD /* sqlite3.h in Headers */,
+				B455DF8C210F9739002A69FD /* log.h in Headers */,
+				B455E025210F97DE002A69FD /* ancillarydata_framestatusinfo524D.h in Headers */,
+				B455DF7A210F9734002A69FD /* pthreadsextra.h in Headers */,
 				A4EB2B8C1FCE28B1009BB52E /* ntv2spiinterface.h in Headers */,
-				B4CE1E5216E582B90092B564 /* ntv2procamp.h in Headers */,
 				B4CE1E5316E582B90092B564 /* ntv2rp188.h in Headers */,
 				A4C6843B1FFFE8CB004FC89D /* ntv2supportlogger.h in Headers */,
 				B4CE1E5416E582B90092B564 /* ntv2rp215.h in Headers */,
-				B4CE1E5516E582B90092B564 /* ntv2status.h in Headers */,
+				B455E029210F97DE002A69FD /* ancillarydata_hdr_sdr.h in Headers */,
+				B455E033210F9C6F002A69FD /* ajatypes.h in Headers */,
+				B455E028210F97DE002A69FD /* ancillarydata_hdr_hlg.h in Headers */,
 				B4CE1E5616E582B90092B564 /* ntv2task.h in Headers */,
+				B455DFB7210F9768002A69FD /* export.h in Headers */,
+				B455DF98210F974F002A69FD /* pnp.h in Headers */,
 				7D5732761FD9CB4E00862AD2 /* ntv2config2110.h in Headers */,
+				B455DFB6210F9768002A69FD /* dpxfileio.h in Headers */,
+				B455E031210F9C5A002A69FD /* ntv2macpublicinterface.h in Headers */,
+				B455DF9E210F9754002A69FD /* pnpimpl.h in Headers */,
+				B455DF9C210F9754002A69FD /* masterport.h in Headers */,
 				B4A4507C1AA15583003AED85 /* ntv2devicefeatures.hpp in Headers */,
 				A49A33671C7252FD0082D491 /* ntv2mbcontroller.h in Headers */,
-				B4CE1E5716E582B90092B564 /* ntv2testpattern.h in Headers */,
+				B455DFC4210F9768002A69FD /* testpatterngen.h in Headers */,
+				B455DFD2210F9768002A69FD /* wavewriter.h in Headers */,
+				B455DF90210F9739002A69FD /* process.h in Headers */,
 				B4CE1E5916E582B90092B564 /* ntv2utf8.h in Headers */,
+				B455E02C210F97DE002A69FD /* ancillarydata_timecode.h in Headers */,
 				B40064E91CC9409400389528 /* ntv2konaflashprogram.h in Headers */,
+				B455DFBB210F9768002A69FD /* options_popt.h in Headers */,
 				B4CE1E5A16E582B90092B564 /* ntv2utils.h in Headers */,
-				B4CE1E5B16E582B90092B564 /* ntv2videofile.h in Headers */,
+				B455E034210F9C6F002A69FD /* ntv2audiodefines.h in Headers */,
+				B455DF86210F9739002A69FD /* file_io.h in Headers */,
+				B455DF9A210F9754002A69FD /* devicenotifier.h in Headers */,
+				B455DF88210F9739002A69FD /* info.h in Headers */,
 				B4040C8619DDA5F100B5539D /* ntv2bitfile.h in Headers */,
-				B4CE1E5C16E582B90092B564 /* ntv2vidproc.h in Headers */,
+				B455DF83210F9739002A69FD /* diskstatus.h in Headers */,
+				B455DFBF210F9768002A69FD /* pixelformat.h in Headers */,
+				B455DFB0210F9768002A69FD /* cli_utils.h in Headers */,
+				B455DF8E210F9739002A69FD /* memory.h in Headers */,
+				B455DF85210F9739002A69FD /* event.h in Headers */,
+				B455DFA0210F975C002A69FD /* persistence.h in Headers */,
+				B455E023210F97DE002A69FD /* ancillarydata_cea608.h in Headers */,
+				B455DFA4210F9762002A69FD /* ip_socket.h in Headers */,
+				B455E03D210F9C6F002A69FD /* ntv2testpatterngen.h in Headers */,
+				B455DF96210F9739002A69FD /* thread.h in Headers */,
+				B455E022210F97DE002A69FD /* ancillarydata_cea608_vanc.h in Headers */,
+				B455E03F210F9C6F002A69FD /* ntv2virtualregisters.h in Headers */,
+				B455DFAB210F9768002A69FD /* audioutilities.h in Headers */,
+				B455DF8A210F9739002A69FD /* lock.h in Headers */,
+				B455DF92210F9739002A69FD /* system.h in Headers */,
 				B40641011B825F5C0037C033 /* ntv2cscmatrix.h in Headers */,
+				B455E03E210F9C6F002A69FD /* ntv2videodefines.h in Headers */,
+				B455E036210F9C6F002A69FD /* ntv2fixed.h in Headers */,
+				B455DFAD210F9768002A69FD /* buffer.h in Headers */,
+				B455DFB4210F9768002A69FD /* dpx_hdr.h in Headers */,
+				B455DFA6210F9762002A69FD /* tcp_socket.h in Headers */,
 				B4146ABC1CE0F43800FDF78D /* ntv2tshelper.h in Headers */,
-				B4CE1E5D16E582B90092B564 /* ntv2vidprocmasks.h in Headers */,
+				B455DF80210F9739002A69FD /* debug.h in Headers */,
+				B455DF7E210F9739002A69FD /* atomic.h in Headers */,
+				B455DFC0210F9768002A69FD /* public.h in Headers */,
+				B455DFCD210F9768002A69FD /* types.h in Headers */,
+				B455E040210F9C6F002A69FD /* ntv2vpidfromspec.h in Headers */,
 				B4CC231B1C5AE48A00171CB6 /* ntv2transcode.h in Headers */,
+				B455E03C210F9C6F002A69FD /* ntv2registerexpert.h in Headers */,
 				B4CE1E5E16E582B90092B564 /* ntv2vpid.h in Headers */,
-				B4CE1E6216E582B90092B564 /* testpatterndata.h in Headers */,
-				B4CE1E6316E582B90092B564 /* testpatterngen.h in Headers */,
-				B4CE1E6416E582B90092B564 /* testpatterngendata.h in Headers */,
 				B4CE1E6616E582B90092B564 /* ntv2verticalfilter.h in Headers */,
+				B455E03A210F9C6F002A69FD /* ntv2formatdescriptor.h in Headers */,
+				B455DF94210F9739002A69FD /* systemtime.h in Headers */,
 				A49A33631C7252FD0082D491 /* ntv2mailbox.h in Headers */,
+				B455DFBD210F9768002A69FD /* performance.h in Headers */,
+				B455DFAE210F9768002A69FD /* bytestream.h in Headers */,
+				B455DF7C210F9734002A69FD /* threadimpl.h in Headers */,
+				B4AC26B82118CF3500EDB0D5 /* ntv2debugmacros.h in Headers */,
+				B455DFC1210F9768002A69FD /* rawfile.h in Headers */,
 				B4ACCA991C47226D00655C50 /* ntv2enhancedcsc.h in Headers */,
+				B455DFCA210F9768002A69FD /* timecodeburn.h in Headers */,
+				B455DFC8210F9768002A69FD /* timecode.h in Headers */,
 				B4940CA81AF1B23500189CAB /* ntv2devicefeatures.hh in Headers */,
-				B4CE1E6916E582B90092B564 /* xena2vidproc.h in Headers */,
 				B4CE1E6A16E582B90092B564 /* ntv2serialcontrol.h in Headers */,
+				B455DFAF210F9768002A69FD /* circularbuffer.h in Headers */,
 				B4CE1E6B16E582B90092B564 /* ntv2macdriverinterface.h in Headers */,
 				B4CE1E6C16E582B90092B564 /* ntv2macmutex.h in Headers */,
 			);
@@ -647,55 +1303,127 @@
 				B41B5E1B16E5330C00A9E0DC /* ajaexport.h in Headers */,
 				B41B5E1C16E5330C00A9E0DC /* basemachinecontrol.h in Headers */,
 				B4A4507B1AA15583003AED85 /* ntv2devicefeatures.hpp in Headers */,
+				B455E01B210F97D6002A69FD /* ancillarydata_timecode_atc.h in Headers */,
+				B455E032210F9C5A002A69FD /* ntv2macpublicinterface.h in Headers */,
+				B455DEDC210F95E9002A69FD /* export.h in Headers */,
+				B455DF64210F9719002A69FD /* eventimpl.h in Headers */,
+				B455E019210F97D6002A69FD /* ancillarydata_hdr_hlg.h in Headers */,
+				B455DF4D210F9703002A69FD /* memory.h in Headers */,
+				B455DF49210F9703002A69FD /* lock.h in Headers */,
+				B455DF6F210F9719002A69FD /* threadimpl.h in Headers */,
 				B4CC23161C5AE48A00171CB6 /* ntv2resample.h in Headers */,
+				B455DF1F210F96BD002A69FD /* pnpimpl.h in Headers */,
 				8A6F1B0C1CBEE58B008A0557 /* ntv2configts2022.h in Headers */,
+				B455DEA0210F9533002A69FD /* ntv2videodefines.h in Headers */,
+				B455DF1B210F96BD002A69FD /* devicenotifier.h in Headers */,
 				B4F90FB11C485204004723C9 /* ntv2config2022.h in Headers */,
+				B455DF0D210F9662002A69FD /* sqlite3.h in Headers */,
+				B455DF4F210F9703002A69FD /* process.h in Headers */,
+				B455DF02210F9626002A69FD /* tcp_socket.h in Headers */,
+				B455DED9210F95E9002A69FD /* dpx_hdr.h in Headers */,
+				B455E018210F97D6002A69FD /* ancillarydata_hdr_hdr10.h in Headers */,
+				B455E014210F97D6002A69FD /* ancillarydata_cea608.h in Headers */,
+				B455E017210F97D6002A69FD /* ancillarydata_framestatusinfo5251.h in Headers */,
+				B455E046210F9C70002A69FD /* ntv2endian.h in Headers */,
 				B41B5E3016E5330C00A9E0DC /* ntv2card.h in Headers */,
-				B41B5E3416E5330C00A9E0DC /* ntv2colorcorrection.h in Headers */,
 				B40806751A3776A5002C35ED /* ntv2devicescanner.h in Headers */,
+				B455E044210F9C70002A69FD /* ntv2fixed.h in Headers */,
+				B455E049210F9C70002A69FD /* ntv2publicinterface.h in Headers */,
 				B41B5E3616E5330C00A9E0DC /* ntv2debug.h in Headers */,
+				B455DF3F210F9703002A69FD /* debug.h in Headers */,
+				B455DF12210F9698002A69FD /* pnp.h in Headers */,
+				B455DECE210F95E9002A69FD /* ajarefptr.h in Headers */,
+				B455DEE4210F95E9002A69FD /* pixelformat.h in Headers */,
 				B41B5E3816E5330C00A9E0DC /* ntv2discover.h in Headers */,
-				B41B5E3916E5330C00A9E0DC /* ntv2diskio.h in Headers */,
+				B455E047210F9C70002A69FD /* ntv2enums.h in Headers */,
+				B455E01E210F97D6002A69FD /* ancillarydata.h in Headers */,
+				B455DF3D210F9703002A69FD /* atomic.h in Headers */,
+				B455DF44210F9703002A69FD /* event.h in Headers */,
 				B41B5E3C16E5330C00A9E0DC /* ntv2driverinterface.h in Headers */,
+				B455E01F210F97D6002A69FD /* ancillarydatafactory.h in Headers */,
 				B405856F196B305500425B9E /* ntv2signalrouter.h in Headers */,
+				B455DEEB210F95E9002A69FD /* timebase.h in Headers */,
 				B40064E21CC9401000389528 /* ntv2registers2022.h in Headers */,
-				B41B5E4216E5330C00A9E0DC /* ntv2fltknetprefs.h in Headers */,
+				B455DEEF210F95E9002A69FD /* timecodeburn.h in Headers */,
+				B455DEE0210F95E9002A69FD /* options_popt.h in Headers */,
+				B455E042210F9C70002A69FD /* ntv2audiodefines.h in Headers */,
 				B40806711A3776A5002C35ED /* ntv2devicefeatures.h in Headers */,
+				B455E01D210F97D6002A69FD /* ancillarydata_timecode.h in Headers */,
+				B455E012210F97D6002A69FD /* ancillarydata_cea608_line21.h in Headers */,
 				B41B5E4916E5330C00A9E0DC /* ntv2nubaccess.h in Headers */,
+				B455DF6D210F9719002A69FD /* pthreadsextra.h in Headers */,
+				B455DF6B210F9719002A69FD /* processimpl.h in Headers */,
+				B455DEF5210F95E9002A69FD /* videoutilities.h in Headers */,
+				B455DE9F210F9533002A69FD /* ntv2testpatterngen.h in Headers */,
+				B455DF4B210F9703002A69FD /* log.h in Headers */,
 				B41B5E4B16E5330C00A9E0DC /* ntv2nubpktcom.h in Headers */,
 				A4FF3B0E1FCE119B006F2E90 /* ntv2spiinterface.h in Headers */,
 				B41B5E4C16E5330C00A9E0DC /* ntv2nubtypes.h in Headers */,
-				B41B5E5216E5330C00A9E0DC /* ntv2procamp.h in Headers */,
+				B455E016210F97D6002A69FD /* ancillarydata_framestatusinfo524D.h in Headers */,
 				A4C6843A1FFFE8AD004FC89D /* ntv2supportlogger.h in Headers */,
+				B455DF51210F9703002A69FD /* system.h in Headers */,
+				B455E013210F97D6002A69FD /* ancillarydata_cea608_vanc.h in Headers */,
+				B455DF55210F9703002A69FD /* thread.h in Headers */,
 				B41B5E5516E5330C00A9E0DC /* ntv2rp188.h in Headers */,
 				B41B5E5716E5330C00A9E0DC /* ntv2rp215.h in Headers */,
-				B41B5E5916E5330C00A9E0DC /* ntv2status.h in Headers */,
 				7D5732751FD9CB4E00862AD2 /* ntv2config2110.h in Headers */,
+				B455E048210F9C70002A69FD /* ntv2formatdescriptor.h in Headers */,
+				B455DEE2210F95E9002A69FD /* performance.h in Headers */,
+				B455DEF2210F95E9002A69FD /* types.h in Headers */,
 				B41B5E5C16E5330C00A9E0DC /* ntv2task.h in Headers */,
 				A49A33661C7252FD0082D491 /* ntv2mbcontroller.h in Headers */,
-				B41B5E5E16E5330C00A9E0DC /* ntv2testpattern.h in Headers */,
+				B455DF40210F9703002A69FD /* debugshare.h in Headers */,
+				B455DEE5210F95E9002A69FD /* public.h in Headers */,
 				B41B5E6216E5330C00A9E0DC /* ntv2utf8.h in Headers */,
+				B455DEE6210F95E9002A69FD /* rawfile.h in Headers */,
 				B40064E81CC9409400389528 /* ntv2konaflashprogram.h in Headers */,
+				B455DEDE210F95E9002A69FD /* guid.h in Headers */,
+				B455DED4210F95E9002A69FD /* circularbuffer.h in Headers */,
+				B455DF04210F9626002A69FD /* udp_socket.h in Headers */,
+				B455DF00210F9626002A69FD /* ip_socket.h in Headers */,
+				B455E045210F9C70002A69FD /* ntv2bft.h in Headers */,
+				B455DED3210F95E9002A69FD /* bytestream.h in Headers */,
 				B41B5E6416E5330C00A9E0DC /* ntv2utils.h in Headers */,
-				B41B5E6616E5330C00A9E0DC /* ntv2videofile.h in Headers */,
+				B455DF45210F9703002A69FD /* file_io.h in Headers */,
+				B455DF0B210F9662002A69FD /* persistence.h in Headers */,
+				B455DEED210F95E9002A69FD /* timecode.h in Headers */,
+				B455E04B210F9C70002A69FD /* ntv2virtualregisters.h in Headers */,
+				B455E020210F97D6002A69FD /* ancillarylist.h in Headers */,
 				B4040C8519DDA5F100B5539D /* ntv2bitfile.h in Headers */,
-				B41B5E6816E5330C00A9E0DC /* ntv2vidproc.h in Headers */,
+				B455DED0210F95E9002A69FD /* audioutilities.h in Headers */,
+				B455DF53210F9703002A69FD /* systemtime.h in Headers */,
 				B40641001B825F5C0037C033 /* ntv2cscmatrix.h in Headers */,
+				B455DEE7210F95E9002A69FD /* testpatterndata.h in Headers */,
+				B455E01C210F97D6002A69FD /* ancillarydata_timecode_vitc.h in Headers */,
+				B455E01A210F97D6002A69FD /* ancillarydata_hdr_sdr.h in Headers */,
 				B4146ABB1CE0F43800FDF78D /* ntv2tshelper.h in Headers */,
-				B41B5E6916E5330C00A9E0DC /* ntv2vidprocmasks.h in Headers */,
 				B4CC231A1C5AE48A00171CB6 /* ntv2transcode.h in Headers */,
 				B41B5E6B16E5330C00A9E0DC /* ntv2vpid.h in Headers */,
-				B41B5E7216E5330C00A9E0DC /* testpatterndata.h in Headers */,
-				B41B5E7416E5330C00A9E0DC /* testpatterngen.h in Headers */,
-				B41B5E7516E5330C00A9E0DC /* testpatterngendata.h in Headers */,
 				B41B5E7916E5330C00A9E0DC /* ntv2verticalfilter.h in Headers */,
+				B455DED7210F95E9002A69FD /* common.h in Headers */,
+				B455DEF3210F95E9002A69FD /* videotypes.h in Headers */,
+				B455E04C210F9C70002A69FD /* ntv2vpidfromspec.h in Headers */,
+				B455DED2210F95E9002A69FD /* buffer.h in Headers */,
+				B455DED5210F95E9002A69FD /* cli_utils.h in Headers */,
+				B455DEDB210F95E9002A69FD /* dpxfileio.h in Headers */,
+				B455DF66210F9719002A69FD /* infoimpl.h in Headers */,
+				B455E041210F9C70002A69FD /* ajatypes.h in Headers */,
+				B455DF69210F9719002A69FD /* lockimpl.h in Headers */,
+				B455DF47210F9703002A69FD /* info.h in Headers */,
 				A49A33621C7252FD0082D491 /* ntv2mailbox.h in Headers */,
 				B4ACCA981C47226D00655C50 /* ntv2enhancedcsc.h in Headers */,
-				B41B5E7F16E5330C00A9E0DC /* xena2vidproc.h in Headers */,
 				B41B5E8116E5330C00A9E0DC /* ntv2serialcontrol.h in Headers */,
 				B4CE1CE716E53B560092B564 /* ntv2macdriverinterface.h in Headers */,
+				B4AC26B72118CF1600EDB0D5 /* ntv2debugmacros.h in Headers */,
 				B4CE1CE816E53B560092B564 /* ntv2macmutex.h in Headers */,
+				B455DF42210F9703002A69FD /* diskstatus.h in Headers */,
+				B455E04A210F9C70002A69FD /* ntv2registerexpert.h in Headers */,
+				B455DEE9210F95E9002A69FD /* testpatterngen.h in Headers */,
+				B455DEF1210F95E9002A69FD /* timer.h in Headers */,
+				B455DEF7210F95E9002A69FD /* wavewriter.h in Headers */,
 				B4940CA71AF1B23500189CAB /* ntv2devicefeatures.hh in Headers */,
+				B455DF1D210F96BD002A69FD /* masterport.h in Headers */,
+				B455E015210F97D6002A69FD /* ancillarydata_cea708.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -776,55 +1504,110 @@
 			buildActionMask = 2147483647;
 			files = (
 				A49A33651C7252FD0082D491 /* ntv2mbcontroller.cpp in Sources */,
+				B455DFC3210F9768002A69FD /* testpatterngen.cpp in Sources */,
+				B455DFFF210F97CD002A69FD /* ancillarydata_timecode.cpp in Sources */,
+				B455DF74210F9734002A69FD /* infoimpl.mm in Sources */,
 				B480B6451C6291E1003210EE /* ntv2hevc.cpp in Sources */,
 				B4CE1E0C16E582A10092B564 /* ntv2autocirculate.cpp in Sources */,
+				B455DF82210F9739002A69FD /* diskstatus.cpp in Sources */,
 				B4CC23191C5AE48A00171CB6 /* ntv2transcode.cpp in Sources */,
+				B455DFF7210F97CD002A69FD /* ancillarydata_cea708.cpp in Sources */,
 				B4CE1E1216E582A10092B564 /* ntv2card.cpp in Sources */,
 				B40064DF1CC9401000389528 /* ntv2mcsfile.cpp in Sources */,
-				B4CE1E1416E582A10092B564 /* ntv2colorcorrection.cpp in Sources */,
+				B455DFC5210F9768002A69FD /* timebase.cpp in Sources */,
 				B4F90FB01C485204004723C9 /* ntv2config2022.cpp in Sources */,
 				B4CE1E1516E582A10092B564 /* ntv2debug.cpp in Sources */,
 				B4CE1E1616E582A10092B564 /* ntv2discover.cpp in Sources */,
+				B455DF72210F9734002A69FD /* file_io.cpp in Sources */,
 				B4CE1E1716E582A10092B564 /* ntv2dma.cpp in Sources */,
+				B455DF79210F9734002A69FD /* pthreadsextra.cpp in Sources */,
 				B4CE1E1816E582A10092B564 /* ntv2driverinterface.cpp in Sources */,
+				B455DF97210F974F002A69FD /* pnp.cpp in Sources */,
 				B4CE1E1916E582A10092B564 /* ntv2interrupts.cpp in Sources */,
 				B4CE1E1A16E582A10092B564 /* ntv2nubaccess.cpp in Sources */,
+				B455DFB5210F9768002A69FD /* dpxfileio.cpp in Sources */,
+				B455DFBC210F9768002A69FD /* performance.cpp in Sources */,
 				B4CE1E1B16E582A10092B564 /* ntv2nubpktcom.cpp in Sources */,
+				B455DFAC210F9768002A69FD /* buffer.cpp in Sources */,
+				B455DFCB210F9768002A69FD /* timer.cpp in Sources */,
+				B455DFBA210F9768002A69FD /* options_popt.cpp in Sources */,
+				B455DFBE210F9768002A69FD /* pixelformat.cpp in Sources */,
+				B455DF99210F9754002A69FD /* devicenotifier.cpp in Sources */,
 				B4058556195A1A7C00425B9E /* ntv2audio.cpp in Sources */,
+				B455DF9F210F975C002A69FD /* persistence.cpp in Sources */,
 				B455DE3D21063546002A69FD /* ntv2anc.cpp in Sources */,
 				B4FE2EDD1C7E8A7500C5627A /* ntv2vpidfromspec.cpp in Sources */,
-				B4CE1E1E16E582A10092B564 /* ntv2procamp.cpp in Sources */,
 				B4CE1E1F16E582A10092B564 /* ntv2register.cpp in Sources */,
 				B40064E71CC9409400389528 /* ntv2konaflashprogram.cpp in Sources */,
+				B455DF75210F9734002A69FD /* lockimpl.cpp in Sources */,
+				B455DFC9210F9768002A69FD /* timecodeburn.cpp in Sources */,
+				B455DFB8210F9768002A69FD /* guid.cpp in Sources */,
 				B4CC23151C5AE48A00171CB6 /* ntv2resample.cpp in Sources */,
+				B455DF87210F9739002A69FD /* info.cpp in Sources */,
+				B455DFF8210F97CD002A69FD /* ancillarydata_framestatusinfo524D.cpp in Sources */,
+				B455DF9B210F9754002A69FD /* masterport.cpp in Sources */,
+				B455DF8D210F9739002A69FD /* memory.cpp in Sources */,
 				B4CE1E2016E582A10092B564 /* ntv2rp188.cpp in Sources */,
 				B411E9431DDBDA0900B9E206 /* ntv2formatdescriptor.cpp in Sources */,
 				B4ACCA971C47226D00655C50 /* ntv2enhancedcsc.cpp in Sources */,
+				B455DFF5210F97CD002A69FD /* ancillarydata_cea608_vanc.cpp in Sources */,
 				B462E8BE2076F7440003262A /* ntv2hdmi.cpp in Sources */,
+				B455DF93210F9739002A69FD /* systemtime.cpp in Sources */,
+				B455DFA7210F9762002A69FD /* udp_socket.cpp in Sources */,
+				B455DFC7210F9768002A69FD /* timecode.cpp in Sources */,
+				B455DF7D210F9739002A69FD /* atomic.cpp in Sources */,
+				B455DFFD210F97CD002A69FD /* ancillarydata_timecode_atc.cpp in Sources */,
+				B455DFB3210F9768002A69FD /* dpx_hdr.cpp in Sources */,
+				B455DF91210F9739002A69FD /* system.cpp in Sources */,
+				B455DF84210F9739002A69FD /* event.cpp in Sources */,
 				B4CE1E2116E582A10092B564 /* ntv2rp215.cpp in Sources */,
-				B4CE1E2216E582A10092B564 /* ntv2status.cpp in Sources */,
+				B455DF8B210F9739002A69FD /* log.cpp in Sources */,
+				B455E002210F97CD002A69FD /* ancillarylist.cpp in Sources */,
 				8A6F1B0F1CBEE70C008A0557 /* ntv2configts2022.cpp in Sources */,
 				B405856E196B305500425B9E /* ntv2signalrouter.cpp in Sources */,
 				A4EB2B8D1FCE28E7009BB52E /* ntv2spiinterface.cpp in Sources */,
+				B455DF8F210F9739002A69FD /* process.cpp in Sources */,
+				B455DF9D210F9754002A69FD /* pnpimpl.cpp in Sources */,
+				B455DFA3210F9762002A69FD /* ip_socket.cpp in Sources */,
 				B4CE1E2316E582A10092B564 /* ntv2subscriptions.cpp in Sources */,
 				B4040C8419DDA5F100B5539D /* ntv2bitfile.cpp in Sources */,
+				B455DF89210F9739002A69FD /* lock.cpp in Sources */,
+				B455DFB1210F9768002A69FD /* common.cpp in Sources */,
+				B455DFFB210F97CD002A69FD /* ancillarydata_hdr_hlg.cpp in Sources */,
 				B4CE1E2416E582A10092B564 /* ntv2task.cpp in Sources */,
 				B4CE1E2516E582A10092B564 /* ntv2testpattern.cpp in Sources */,
 				B4CE1E2716E582A10092B564 /* ntv2utf8.cpp in Sources */,
 				B4CE1E2816E582A10092B564 /* ntv2utils.cpp in Sources */,
+				B455DF70210F9734002A69FD /* eventimpl.cpp in Sources */,
+				B455E000210F97CD002A69FD /* ancillarydata.cpp in Sources */,
 				B407BBA71D2583FF00099DDA /* ntv2publicinterface.cpp in Sources */,
+				B455DFA1210F975C002A69FD /* sqlite3.c in Sources */,
+				B455DF7F210F9739002A69FD /* debug.cpp in Sources */,
+				B455E030210F9C25002A69FD /* ntv2testpatterngen.cpp in Sources */,
 				B40806701A3776A5002C35ED /* ntv2devicefeatures.cpp in Sources */,
 				B4CE1E2916E582A10092B564 /* ntv2vidproc.cpp in Sources */,
+				B455DFFE210F97CD002A69FD /* ancillarydata_timecode_vitc.cpp in Sources */,
+				B455DF77210F9734002A69FD /* processimpl.cpp in Sources */,
 				B40806741A3776A5002C35ED /* ntv2devicescanner.cpp in Sources */,
+				B455DF95210F9739002A69FD /* thread.cpp in Sources */,
+				B455DFF9210F97CD002A69FD /* ancillarydata_framestatusinfo5251.cpp in Sources */,
+				B455DFF6210F97CD002A69FD /* ancillarydata_cea608.cpp in Sources */,
 				B40640FF1B825F5C0037C033 /* ntv2cscmatrix.cpp in Sources */,
+				B455DFFC210F97CD002A69FD /* ancillarydata_hdr_sdr.cpp in Sources */,
+				B455DFAA210F9768002A69FD /* audioutilities.cpp in Sources */,
 				B4CE1E2A16E582A10092B564 /* ntv2vpid.cpp in Sources */,
-				B4CE1E2E16E582A10092B564 /* testpatterngen.cpp in Sources */,
 				B4CE1E3016E582A10092B564 /* ntv2verticalfilter.cpp in Sources */,
+				B455DFF4210F97CD002A69FD /* ancillarydata_cea608_line21.cpp in Sources */,
+				B455E001210F97CD002A69FD /* ancillarydatafactory.cpp in Sources */,
 				7D5732731FD9CB3800862AD2 /* ntv2config2110.cpp in Sources */,
-				B4CE1E3316E582A10092B564 /* xena2vidproc.cpp in Sources */,
 				B4CE1E3416E582A10092B564 /* ntv2serialcontrol.cpp in Sources */,
 				B4CE1E3516E582A10092B564 /* ntv2macdriverinterface.cpp in Sources */,
 				A4C6843E1FFFE8F1004FC89D /* ntv2supportlogger.cpp in Sources */,
+				B455DFA5210F9762002A69FD /* tcp_socket.cpp in Sources */,
+				B455DFCF210F9768002A69FD /* videoutilities.cpp in Sources */,
+				B455DFD1210F9768002A69FD /* wavewriter.cpp in Sources */,
+				B455DFFA210F97CD002A69FD /* ancillarydata_hdr_hdr10.cpp in Sources */,
+				B455DF7B210F9734002A69FD /* threadimpl.cpp in Sources */,
 				B411E9441DDBDA0900B9E206 /* ntv2registerexpert.cpp in Sources */,
 				A49A33611C7252FD0082D491 /* ntv2mailbox.cpp in Sources */,
 			);
@@ -834,56 +1617,111 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B455DF3C210F9703002A69FD /* atomic.cpp in Sources */,
 				A49A33641C7252FD0082D491 /* ntv2mbcontroller.cpp in Sources */,
+				B455DF0A210F9662002A69FD /* persistence.cpp in Sources */,
+				B455DF43210F9703002A69FD /* event.cpp in Sources */,
+				B455DF54210F9703002A69FD /* thread.cpp in Sources */,
 				B480B6441C6291E1003210EE /* ntv2hevc.cpp in Sources */,
+				B455DFE6210F97C5002A69FD /* ancillarydata_cea608_vanc.cpp in Sources */,
+				B455DEE1210F95E9002A69FD /* performance.cpp in Sources */,
+				B455DF0C210F9662002A69FD /* sqlite3.c in Sources */,
+				B455DEDD210F95E9002A69FD /* guid.cpp in Sources */,
+				B455DEDA210F95E9002A69FD /* dpxfileio.cpp in Sources */,
 				B41B5E2416E5330C00A9E0DC /* ntv2autocirculate.cpp in Sources */,
 				B4CC23181C5AE48A00171CB6 /* ntv2transcode.cpp in Sources */,
+				B455DEEA210F95E9002A69FD /* timebase.cpp in Sources */,
+				B455DFEE210F97C5002A69FD /* ancillarydata_timecode_atc.cpp in Sources */,
+				B455DF11210F9698002A69FD /* pnp.cpp in Sources */,
 				B41B5E2F16E5330C00A9E0DC /* ntv2card.cpp in Sources */,
 				B40064DE1CC9401000389528 /* ntv2mcsfile.cpp in Sources */,
-				B41B5E3316E5330C00A9E0DC /* ntv2colorcorrection.cpp in Sources */,
 				B4F90FAF1C485204004723C9 /* ntv2config2022.cpp in Sources */,
+				B455DED6210F95E9002A69FD /* common.cpp in Sources */,
 				B41B5E3516E5330C00A9E0DC /* ntv2debug.cpp in Sources */,
+				B455DED8210F95E9002A69FD /* dpx_hdr.cpp in Sources */,
+				B455DFE5210F97C5002A69FD /* ancillarydata_cea608_line21.cpp in Sources */,
 				B41B5E3716E5330C00A9E0DC /* ntv2discover.cpp in Sources */,
+				B455DF6A210F9719002A69FD /* processimpl.cpp in Sources */,
+				B455DFEA210F97C5002A69FD /* ancillarydata_framestatusinfo5251.cpp in Sources */,
+				B455DEF6210F95E9002A69FD /* wavewriter.cpp in Sources */,
+				B455DECF210F95E9002A69FD /* audioutilities.cpp in Sources */,
 				B41B5E3A16E5330C00A9E0DC /* ntv2dma.cpp in Sources */,
 				B41B5E3B16E5330C00A9E0DC /* ntv2driverinterface.cpp in Sources */,
 				B41B5E4516E5330C00A9E0DC /* ntv2interrupts.cpp in Sources */,
+				B455DF68210F9719002A69FD /* lockimpl.cpp in Sources */,
+				B455DF4E210F9703002A69FD /* process.cpp in Sources */,
 				B41B5E4816E5330C00A9E0DC /* ntv2nubaccess.cpp in Sources */,
 				B41B5E4A16E5330C00A9E0DC /* ntv2nubpktcom.cpp in Sources */,
 				B4058555195A1A7C00425B9E /* ntv2audio.cpp in Sources */,
 				B455DE3C2106319E002A69FD /* ntv2anc.cpp in Sources */,
 				B4FE2EDC1C7E8A7500C5627A /* ntv2vpidfromspec.cpp in Sources */,
-				B41B5E5116E5330C00A9E0DC /* ntv2procamp.cpp in Sources */,
+				B455DFEB210F97C5002A69FD /* ancillarydata_hdr_hdr10.cpp in Sources */,
 				B41B5E5316E5330C00A9E0DC /* ntv2register.cpp in Sources */,
 				B40064E61CC9409400389528 /* ntv2konaflashprogram.cpp in Sources */,
+				B455DF4C210F9703002A69FD /* memory.cpp in Sources */,
+				B455DFF1210F97C5002A69FD /* ancillarydata.cpp in Sources */,
+				B455DF50210F9703002A69FD /* system.cpp in Sources */,
 				B4CC23141C5AE48A00171CB6 /* ntv2resample.cpp in Sources */,
+				B455DEEE210F95E9002A69FD /* timecodeburn.cpp in Sources */,
 				B41B5E5416E5330C00A9E0DC /* ntv2rp188.cpp in Sources */,
+				B455DFF3210F97C5002A69FD /* ancillarylist.cpp in Sources */,
+				B455DF3E210F9703002A69FD /* debug.cpp in Sources */,
 				B411E9411DDBD9FF00B9E206 /* ntv2formatdescriptor.cpp in Sources */,
+				B455DF67210F9719002A69FD /* infoimpl.mm in Sources */,
 				B4ACCA961C47226D00655C50 /* ntv2enhancedcsc.cpp in Sources */,
 				B462E8BD2076F72E0003262A /* ntv2hdmi.cpp in Sources */,
+				B455DFEC210F97C5002A69FD /* ancillarydata_hdr_hlg.cpp in Sources */,
 				B41B5E5616E5330C00A9E0DC /* ntv2rp215.cpp in Sources */,
-				B41B5E5816E5330C00A9E0DC /* ntv2status.cpp in Sources */,
 				8A6F1B0E1CBEE70C008A0557 /* ntv2configts2022.cpp in Sources */,
+				B455DF46210F9703002A69FD /* info.cpp in Sources */,
 				B405856D196B305500425B9E /* ntv2signalrouter.cpp in Sources */,
 				A4FF3B101FCE11AB006F2E90 /* ntv2spiinterface.cpp in Sources */,
+				B455DF41210F9703002A69FD /* diskstatus.cpp in Sources */,
 				B41B5E5A16E5330C00A9E0DC /* ntv2subscriptions.cpp in Sources */,
+				B455DF63210F9719002A69FD /* eventimpl.cpp in Sources */,
+				B455DFE7210F97C5002A69FD /* ancillarydata_cea608.cpp in Sources */,
+				B455DF03210F9626002A69FD /* udp_socket.cpp in Sources */,
 				B4040C8319DDA5F100B5539D /* ntv2bitfile.cpp in Sources */,
 				B41B5E5B16E5330C00A9E0DC /* ntv2task.cpp in Sources */,
 				B41B5E5D16E5330C00A9E0DC /* ntv2testpattern.cpp in Sources */,
+				B455DEEC210F95E9002A69FD /* timecode.cpp in Sources */,
+				B455DF01210F9626002A69FD /* tcp_socket.cpp in Sources */,
+				B455DEF4210F95E9002A69FD /* videoutilities.cpp in Sources */,
 				B41B5E6116E5330C00A9E0DC /* ntv2utf8.cpp in Sources */,
 				B41B5E6316E5330C00A9E0DC /* ntv2utils.cpp in Sources */,
 				B407BBA61D2583FF00099DDA /* ntv2publicinterface.cpp in Sources */,
+				B455DE9C210F94C0002A69FD /* ntv2testpatterngen.cpp in Sources */,
+				B455DEFF210F9626002A69FD /* ip_socket.cpp in Sources */,
+				B455DF4A210F9703002A69FD /* log.cpp in Sources */,
+				B455DED1210F95E9002A69FD /* buffer.cpp in Sources */,
+				B455DEDF210F95E9002A69FD /* options_popt.cpp in Sources */,
+				B455DF65210F9719002A69FD /* file_io.cpp in Sources */,
+				B455DFF0210F97C5002A69FD /* ancillarydata_timecode.cpp in Sources */,
+				B455DFE8210F97C5002A69FD /* ancillarydata_cea708.cpp in Sources */,
 				B408066F1A3776A5002C35ED /* ntv2devicefeatures.cpp in Sources */,
+				B455DEE8210F95E9002A69FD /* testpatterngen.cpp in Sources */,
 				B41B5E6716E5330C00A9E0DC /* ntv2vidproc.cpp in Sources */,
+				B455DF52210F9703002A69FD /* systemtime.cpp in Sources */,
 				B40806731A3776A5002C35ED /* ntv2devicescanner.cpp in Sources */,
 				B40640FE1B825F5C0037C033 /* ntv2cscmatrix.cpp in Sources */,
+				B455DF1A210F96BD002A69FD /* devicenotifier.cpp in Sources */,
 				B41B5E6A16E5330C00A9E0DC /* ntv2vpid.cpp in Sources */,
-				B41B5E7316E5330C00A9E0DC /* testpatterngen.cpp in Sources */,
+				B455DFF2210F97C5002A69FD /* ancillarydatafactory.cpp in Sources */,
 				B41B5E7816E5330C00A9E0DC /* ntv2verticalfilter.cpp in Sources */,
+				B455DFEF210F97C5002A69FD /* ancillarydata_timecode_vitc.cpp in Sources */,
+				B455DEE3210F95E9002A69FD /* pixelformat.cpp in Sources */,
+				B455DF1C210F96BD002A69FD /* masterport.cpp in Sources */,
+				B455DF6E210F9719002A69FD /* threadimpl.cpp in Sources */,
+				B455DEF0210F95E9002A69FD /* timer.cpp in Sources */,
+				B455DF48210F9703002A69FD /* lock.cpp in Sources */,
 				7D5732721FD9CB3800862AD2 /* ntv2config2110.cpp in Sources */,
-				B41B5E7E16E5330C00A9E0DC /* xena2vidproc.cpp in Sources */,
 				B41B5E8016E5330C00A9E0DC /* ntv2serialcontrol.cpp in Sources */,
 				B4CE1CE616E53B560092B564 /* ntv2macdriverinterface.cpp in Sources */,
 				A4C6843D1FFFE8E3004FC89D /* ntv2supportlogger.cpp in Sources */,
+				B455DFED210F97C5002A69FD /* ancillarydata_hdr_sdr.cpp in Sources */,
+				B455DF6C210F9719002A69FD /* pthreadsextra.cpp in Sources */,
+				B455DFE9210F97C5002A69FD /* ancillarydata_framestatusinfo524D.cpp in Sources */,
+				B455DF1E210F96BD002A69FD /* pnpimpl.cpp in Sources */,
 				B411E9421DDBD9FF00B9E206 /* ntv2registerexpert.cpp in Sources */,
 				A49A33601C7252FD0082D491 /* ntv2mailbox.cpp in Sources */,
 			);
@@ -984,7 +1822,7 @@
 				SDKROOT = macosx;
 				STRIP_INSTALLED_PRODUCT = NO;
 				SYMROOT = ../../../lib;
-				USER_HEADER_SEARCH_PATHS = "../includes ../src/mac";
+				USER_HEADER_SEARCH_PATHS = "../includes ../src/mac ../../";
 			};
 			name = Debug;
 		};
@@ -1040,7 +1878,7 @@
 				);
 				SDKROOT = macosx;
 				SYMROOT = ../../../lib;
-				USER_HEADER_SEARCH_PATHS = "../includes ../src/mac";
+				USER_HEADER_SEARCH_PATHS = "../includes ../src/mac ../../";
 			};
 			name = Release;
 		};

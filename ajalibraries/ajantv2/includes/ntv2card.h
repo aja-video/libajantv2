@@ -1380,9 +1380,6 @@ public:
 	**/
 	AJA_VIRTUAL bool	ReadAudioLastIn (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool	WriteAudioSource (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool	ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
-
 	/**
 		@brief		Starts the playout side of the given ::NTV2AudioSystem, reading outgoing audio samples
 					from the Audio System's playout buffer.
@@ -1417,9 +1414,6 @@ public:
 					CNTV2Card::GetAudioOutputPause, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		IsAudioOutputRunning (const NTV2AudioSystem inAudioSystem, bool & outIsRunning);
-
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioOutput(inAudioSystem) : StartAudioOutput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioOutput or CNTV2Card::StopAudioOutput instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioOutputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioOutputRunning instead.
 
 	/**
 		@brief		Enables or disables the output of audio samples and advancement of the audio buffer
@@ -1478,9 +1472,6 @@ public:
 		@see		CNTV2Card::StartAudioInput, CNTV2Card::StopAudioInput, \ref audiocapture
 	**/
 	AJA_VIRTUAL bool		IsAudioInputRunning (const NTV2AudioSystem inAudioSystem, bool & outIsRunning);
-
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioInputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioInput(inAudioSystem) : StartAudioInput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioInput or CNTV2Card::StopAudioInput instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioInputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioInputRunning instead.
 
 	/**
 		@brief		Enables or disables audio capture for the given Audio System on the AJA device.
@@ -1841,18 +1832,23 @@ public:
 	AJA_VIRTUAL bool		SetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, const NTV2AudioSystem inSrcAudioSystem, const NTV2Audio4ChannelSelect inSrcAudioChannels);
 
 	/**
-		@brief		Sets the audio monitor output source to a specified audio system and channel pair. (The audio monitor is
-					typically the L+R RCA jacks.)
-		@param[in]	inAudioSystem	Specifies the audio system to use. (This really should be an NTV2AudioSystem.)
-		@param[in]	inChannelPair	Specifies the audio channel pair to use. (This really should be an NTV2AudioChannelPair.)
+		@brief		Sets the audio monitor output source to a specified audio system and channel pair. (The audio monitor
+					is typically the L+R RCA jacks on a breakout box, or the headphone jack on an Io device.)
+		@param[in]	inAudioSystem	Specifies the audio system to use.
+		@param[in]	inChannelPair	Specifies the audio channel pair to use.
+		@bug		The \c inChannelPair parameter really should be an ::NTV2AudioChannelPair.
+					The \c inAudioSystem parameter really should be an ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool		SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inChannelPair, const NTV2Channel inAudioSystem = NTV2_CHANNEL1);
 
 	/**
-		@brief		Answers with the current audio monitor output source. (The audio monitor is typically the L+R RCA jacks.)
-		@param[in]	outAudioSystem		Receives the current audio system being used. (This really should be an NTV2AudioSystem.)
-		@param[in]	outChannelPair		Receives the current audio channel pair being used. (This really should be an NTV2AudioChannelPair.)
+		@brief		Answers with the current audio monitor output source. (The audio monitor is typically the L+R RCA jacks on a breakout box,
+					or the headphone jack on an Io device.)
+		@param[in]	outAudioSystem		Receives the current audio system being used.
+		@param[in]	outChannelPair		Receives the current audio channel pair being used.
+		@bug		The \c outChannelPair parameter really should be an ::NTV2AudioChannelPair.
+					The \c outAudioSystem parameter really should be an ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool		GetAudioOutputMonitorSource (NTV2AudioMonitorSelect & outChannelPair, NTV2Channel & outAudioSystem);
@@ -1893,6 +1889,13 @@ public:
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool		SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, const bool & inEraseModeEnabled);
+
+	AJA_VIRTUAL bool NTV2_SHOULD_BE_DEPRECATED(WriteAudioSource (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1));
+	AJA_VIRTUAL bool NTV2_SHOULD_BE_DEPRECATED(ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1));
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioOutput(inAudioSystem) : StartAudioOutput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioOutput or CNTV2Card::StopAudioOutput instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioOutputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioOutputRunning instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioInputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioInput(inAudioSystem) : StartAudioInput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioInput or CNTV2Card::StopAudioInput instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioInputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioInputRunning instead.
 	///@}
 
 	/**
@@ -2105,7 +2108,7 @@ public:
 	///@{
 	AJA_VIRTUAL bool	ReadFlashProgramControl(ULWord & outValue);
 	AJA_VIRTUAL bool	IsXilinxProgrammed();
-	AJA_VIRTUAL bool	ProgramMainFlash(const char *fileName);
+    AJA_VIRTUAL bool	ProgramMainFlash(const char *fileName, bool bForceUpdate = false);
 	AJA_VIRTUAL bool	GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct);
 
     /**
@@ -2396,6 +2399,7 @@ public:
 		@brief		Causes me to be notified when the given event/interrupt is triggered for the AJA device.
 		@param[in]	inEventCode		Specifies the INTERRUPT_ENUMS of interest.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::UnsubscribeEvent, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	SubscribeEvent (const INTERRUPT_ENUMS inEventCode);						//	GENERIC!
 
@@ -2403,6 +2407,11 @@ public:
 		@brief		Causes me to be notified when an output vertical blanking interrupt is generated for the given output channel.
 		@param[in]	inChannel	Specifies the output channel of interest.
 		@return		True if successful; otherwise false.
+		@return		True if successful; otherwise false. A <b>false</b> result usually indicates communication has been
+					lost to the device, or on the Windows platform, there are no more event subscription handles available.
+		@note		<b>Windows Users:</b> AJA recommends calling this function on the same thread that will call
+					CNTV2Card::WaitForOutputVerticalInterrupt or CNTV2Card::WaitForOutputFieldID.
+		@see		CNTV2Card::UnsubscribeOutputVerticalEvent, CNTV2Card::SubscribeEvent, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	SubscribeOutputVerticalEvent (const NTV2Channel inChannel);
 
@@ -2411,6 +2420,9 @@ public:
 		@brief		Causes me to be notified when an input vertical blanking interrupt occurs on the given input channel.
 		@param[in]	inChannel	Specifies the input channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
+		@note		<b>Windows Users:</b> AJA recommends calling this function on the same thread that will call
+					CNTV2Card::WaitForInputVerticalInterrupt or CNTV2Card::WaitForInputFieldID.
+		@see		CNTV2Card::UnsubscribeInputVerticalEvent, CNTV2Card::SubscribeEvent, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	SubscribeInputVerticalEvent (const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -2422,6 +2434,7 @@ public:
 		@brief		Unregisters me so I'm no longer notified when the given event/interrupt is triggered on the AJA device.
 		@param[in]	inEventCode		Specifies the INTERRUPT_ENUMS of interest.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::SubscribeEvent, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	UnsubscribeEvent (const INTERRUPT_ENUMS inEventCode);						//	GENERIC!
 
@@ -2430,6 +2443,7 @@ public:
 		@param[in]	inChannel	Specifies the output channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 		@details	This function undoes the effect of a prior call to SubscribeOutputVerticalEvent.
+		@see		CNTV2Card::SubscribeOutputVerticalEvent, CNTV2Card::UnsubscribeEvent, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	UnsubscribeOutputVerticalEvent (const NTV2Channel inChannel);
 
@@ -2438,6 +2452,7 @@ public:
 		@param[in]	inChannel	Specifies the input channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 		@details	This function undoes the effects of a prior call to SubscribeInputVerticalEvent.
+		@see		CNTV2Card::SubscribeInputVerticalEvent, CNTV2Card::UnsubscribeEvent, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	UnsubscribeInputVerticalEvent (const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -2450,6 +2465,7 @@ public:
 		@param[out]	outCount	Receives the number of output VBIs handled by the driver since it was loaded.
 		@param[in]	inChannel	Specifies the output channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::SetOutputVerticalEventCount, CNTV2Card::GetInterruptEventCount, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	GetOutputVerticalInterruptCount (ULWord & outCount, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -2458,6 +2474,7 @@ public:
 		@param[out]	outCount	Receives the number of input VBIs handled by the driver since it was loaded.
 		@param[in]	inChannel	Specifies the input channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::SetInputVerticalEventCount, CNTV2Card::GetInterruptEventCount, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	GetInputVerticalInterruptCount (ULWord & outCount, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -2467,6 +2484,7 @@ public:
 		@param[in]	inEventCode		Specifies the interrupt of interest.
 		@param[out]	outCount		Receives the number of interrupt events that I successfully waited for.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetInterruptEventCount, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	GetInterruptEventCount (const INTERRUPT_ENUMS inEventCode, ULWord & outCount);
 
@@ -2475,6 +2493,7 @@ public:
 		@param[out]	outCount		Receives the number of output interrupt events that were successfully waited for.
 		@param[in]	inChannel		Specifies the NTV2Channel of interest.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetOutputVerticalEventCount, CNTV2Card::GetInterruptEventCount, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	GetOutputVerticalEventCount (ULWord & outCount, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -2483,6 +2502,7 @@ public:
 		@param[out]	outCount		Receives the number of input interrupt events that were successfully waited for.
 		@param[in]	inChannel		Specifies the NTV2Channel of interest.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetInputVerticalEventCount, CNTV2Card::GetInterruptEventCount, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	GetInputVerticalEventCount (ULWord & outCount, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -2492,6 +2512,7 @@ public:
 		@param[in]	inEventCode		Specifies the interrupt type.
 		@param[in]	inCount			Specifies the new count value. Use zero to reset the tally.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetInterruptEventCount, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	SetInterruptEventCount (const INTERRUPT_ENUMS inEventCode, const ULWord inCount);
 
@@ -2500,6 +2521,7 @@ public:
 		@param[in]	inCount			Specifies the new count value. Use zero to reset the tally.
 		@param[in]	inChannel		Specifies the [output] channel.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetOutputVerticalEventCount, CNTV2Card::SetInterruptEventCount, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	SetOutputVerticalEventCount (const ULWord inCount, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -2508,6 +2530,7 @@ public:
 		@param[in]	inCount			Specifies the new count value. Use zero to reset the tally.
 		@param[in]	inChannel		Specifies the [input] channel.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetInputVerticalEventCount, CNTV2Card::SetInterruptEventCount, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	SetInputVerticalEventCount (const ULWord inCount, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -2522,12 +2545,11 @@ public:
 									Defaults to ::NTV2_CHANNEL1. Note that this parameter is irrelevant for all currently
 									supported NTV2 devices, which use one common hardware clock that drives all SDI outputs.
 		@param[in]	inRepeatCount	Specifies the number of output VBIs to wait for until returning. Defaults to 1.
-		@return		True if successful; otherwise false.
+		@return		True if successful; otherwise false. A <b>false</b> result usually indicates the wait timed out.
 		@note		The device's timing reference source affects how often -- or even if -- the VBI occurs.
 					See \ref deviceclockingandsync for more information.
 		@note		For interlaced video, callers that need to know whether the field or frame interrupt occurred should
 					call CNTV2Card::WaitForOutputFieldID instead.
-		@note		If the wait period exceeds about 50 milliseconds, the function will fail and return false.
 		@bug		On the Windows platform, the SDK uses an event to wait on, which only gets cleared by a prior call to
 					WaitForOutputVerticalInterrupt. This is historically different from Linux and MacOS, where the event
 					is always cleared before the Wait. Each method has advantages and disadvantages. To work around this:
@@ -2535,6 +2557,7 @@ public:
 						that an interrupt really occurred;
 					-	Call CNTV2WinDriverInterface::GetInterruptEvent to obtain the Windows event \c HANDLE, and
 						manually clear it before calling this function.
+		@see		CNTV2Card::WaitForOutputFieldID, \ref fieldframeinterrupts, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool	WaitForOutputVerticalInterrupt (const NTV2Channel inChannel = NTV2_CHANNEL1, UWord inRepeatCount = 1);
 
@@ -2547,10 +2570,9 @@ public:
 		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel (a zero-based index number).
 								Defaults to ::NTV2_CHANNEL1. Note that this parameter is irrelevant for all currently
 								supported NTV2 devices, which use one common hardware clock that drives all SDI outputs.
-		@return		True if successful; otherwise false.
+		@return		True if successful; otherwise false. A <b>false</b> result usually indicates the wait timed out.
 		@note		The device's timing reference source affects how often -- or even if -- the VBI occurs.
 					See \ref deviceclockingandsync for more information.
-		@note		If the wait period exceeds about 50 milliseconds, the function will fail and return false.
 		@bug		On the Windows platform, the SDK uses an event to wait on, which only gets cleared by a prior call to
 					CNTV2Card::WaitForOutputFieldID. This is historically different from Linux and MacOS, where the event
 					is always cleared before the Wait. Each method has advantages and disadvantages. To work around this:
@@ -2558,6 +2580,7 @@ public:
 						that an interrupt really occurred;
 					-	Call CNTV2WinDriverInterface::GetInterruptEvent to get the event handle, and manually clear the
 						event before calling this function.
+		@see		CNTV2Card::WaitForOutputVerticalInterrupt, \ref fieldframeinterrupts, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool	WaitForOutputFieldID (const NTV2FieldID inFieldID, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -2567,9 +2590,9 @@ public:
 		@param[in]	inChannel		Specifies the Frame Store of interest as an ::NTV2Channel (a zero-based index number).
 									Defaults to ::NTV2_CHANNEL1.
 		@param[in]	inRepeatCount	Specifies the number of input VBIs to wait for until returning. Defaults to 1.
-		@return		True if successful; otherwise false.
-		@note		If the wait period exceeds about 50 milliseconds, the function will fail and return false.
-					This can happen if the Frame Store is configured for playout, or if its input is not receiving a valid signal.
+		@return		True if successful; otherwise false. A <b>false</b> result usually indicates the wait timed out,
+					which is often due to the Frame Store being configured for playout, or if its input is not receiving
+					a valid signal.
 		@bug		On the Windows platform, the SDK uses an event to wait on, which only gets cleared by a previous call to
 					Wait. Unfortunately, this is historically different from Linux and MacOS, where the event is always
 					cleared before the Wait. Each method has advantages and disadvantages. To work around this:
@@ -2577,6 +2600,7 @@ public:
 						interrupt really occurred;
 					-	Call CNTV2WinDriverInterface::GetInterruptEvent to get the event handle, and manually clear the
 						event before calling this function.
+		@see		CNTV2Card::WaitForInputFieldID, \ref fieldframeinterrupts, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool	WaitForInputVerticalInterrupt (const NTV2Channel inChannel = NTV2_CHANNEL1, UWord inRepeatCount = 1);
 
@@ -2588,9 +2612,9 @@ public:
 								interrupt of interlaced or Psf video.
 		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel (a zero-based index number).
 								Defaults to ::NTV2_CHANNEL1.
-		@return		True if successful; otherwise false.
-		@note		If the wait period exceeds about 50 milliseconds, the function will fail and return false.
-					This can happen if the Frame Store is configured for playout, or if its input is not receiving a valid signal.
+		@return		True if successful; otherwise false. A <b>false</b> result usually indicates the wait timed out,
+					which is often due to the Frame Store being configured for playout, or if its input is not receiving
+					a valid signal.
 		@bug		On the Windows platform, the SDK uses an event to wait on, which only gets cleared by a previous call to
 					Wait. Unfortunately, this is historically different from Linux and MacOS, where the event is always
 					cleared before the Wait. Each method has advantages and disadvantages. To work around this:
@@ -2598,6 +2622,7 @@ public:
 						interrupt really occurred;
 					-	Call CNTV2WinDriverInterface::GetInterruptEvent to get the event handle, and manually clear the
 						event before calling this function.
+		@see		CNTV2Card::WaitForInputVerticalInterrupt, \ref fieldframeinterrupts, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool	WaitForInputFieldID (const NTV2FieldID inFieldID, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -3628,7 +3653,7 @@ public:
 	//		The improved GetNTV2VideoFormat function may return a new CNTV2SDIVideoInfo object that can be interrogated about many things.
 	//		@note			This function originated in CNTV2Status.
 	static NTV2VideoFormat		GetNTV2VideoFormat (NTV2FrameRate frameRate, UByte inputGeometry, bool progressiveTransport, bool isThreeG, bool progressivePicture=false);
-	static NTV2VideoFormat		GetNTV2VideoFormat (NTV2FrameRate frameRate, NTV2Standard standard, bool isThreeG, UByte inputGeometry=0, bool progressivePicture=false);
+    static NTV2VideoFormat		GetNTV2VideoFormat (NTV2FrameRate frameRate, NTV2Standard standard, bool isThreeG, UByte inputGeometry=0, bool progressivePicture=false, bool isSquareDivision = true);
 	//	--------------------------------------------
 
 	#if !defined (NTV2_DEPRECATE)
@@ -5347,7 +5372,6 @@ public:
 		NUM_COLORS
 	} ColorCorrectionColor;	//	From CNTV2ColorCorrection
 
-#if defined (NTV2_DEPRECATE)
 				//////////////////////////////////////////////////////////
 	public:		//////////	From CNTV2TestPattern			//////////////
 				//////////////////////////////////////////////////////////
@@ -5451,8 +5475,6 @@ public:
 		#ifdef AJALinux
 			AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void			SetMatteColor (AJARgb rgbColor));							///< Originally in CNTV2VidProc class.
 		#endif
-
-#endif	//	defined (NTV2_DEPRECATE)
 
 	//	These functions can't be deprecated until CNTV2VidProc and CNTV2TestPattern go away...
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteVideoProcessingControlCrosspoint (const ULWord inValue))	{return WriteRegister(kRegVidProcXptControl, inValue);}
@@ -5950,7 +5972,13 @@ private:
 };	//	CNTV2Card
 
 
-typedef CNTV2Card	CNTV2Device;	///< @brief	Instances of this class are able to interrogate and control an NTV2 AJA video/audio capture/playout device.
+typedef CNTV2Card	CNTV2Device;			///< @brief	Instances of this class are able to interrogate and control an NTV2 AJA video/audio capture/playout device.
+typedef	CNTV2Card	CNTV2Status;			///< @deprecated	Use CNTV2Card instead.
+typedef	CNTV2Card	CNTV2TestPattern;		///< @deprecated	Use CNTV2Card instead.
+typedef CNTV2Card	CNTV2VidProc;			///< @deprecated	Use CNTV2Card instead
+typedef	CNTV2Card	CNTV2ColorCorrection;	///< @deprecated	Use CNTV2Card instead.
+typedef	CNTV2Card	CNTV2ProcAmp;			///< @deprecated	Use CNTV2Card instead.
+typedef	CNTV2Card	CXena2VidProc;			///< @deprecated	Use CNTV2Card instead.
 
 #define SetTablesToHardware						LoadLUTTables
 #define GetTablesFromHardware					GetLUTTables

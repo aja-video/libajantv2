@@ -8,8 +8,8 @@
 
 #include "ajaexport.h"
 #include "ajatypes.h"
-#include "fixed.h"
-#include "videodefines.h"
+#include "ntv2fixed.h"
+#include "ntv2videodefines.h"
 
 
 // ReSampleLine

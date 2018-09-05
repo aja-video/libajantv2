@@ -4,41 +4,13 @@
 	@copyright	(C) 2004-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
-#include "ntv2vidproc.h"
-#include "ntv2vidprocmasks.h"
+#include "ntv2card.h"
 #include "ntv2transcode.h"
-#include "fixed.h"
+#include "ntv2fixed.h"
 #include <assert.h>
-#if defined (NTV2_DEPRECATE)
-	#define	CNTV2VIDPROCCLASS	CNTV2Card
-#else
-	#define	CNTV2VIDPROCCLASS	CNTV2VidProc
 
 
-	CNTV2VidProc::CNTV2VidProc(UWord boardNumber,bool displayErrorMessage,UWord ulBoardType )
-	:   CNTV2TestPattern(boardNumber, displayErrorMessage,  ulBoardType)
-	{
-	}
-
-	CNTV2VidProc::CNTV2VidProc (UWord		inDeviceIndex,
-								bool		inDisplayErrors,
-								UWord		inDeviceTypes,
-								bool		inAutoRoute,
-								const char	pInHostName[])
-		:	CNTV2TestPattern (inDeviceIndex, inDisplayErrors, inDeviceTypes, inAutoRoute, pInHostName)
-	{
-	}
-
-
-	CNTV2VidProc::~CNTV2VidProc()
-	{
-		// board closed in CNTV2Card destructor
-	}
-
-#endif	//	!defined (NTV2_DEPRECATE)
-
-
-void CNTV2VIDPROCCLASS::SetupDefaultVidProc()
+void CNTV2Card::SetupDefaultVidProc()
 {
 	// Setup for Horizontal Split between input 1 and channel 1
 	SetForegroundVideoCrosspoint(NTV2CROSSPOINT_CHANNEL1);
@@ -51,7 +23,7 @@ void CNTV2VIDPROCCLASS::SetupDefaultVidProc()
 	SetMixCoefficient(FIXED_ONE);
 }
 
-void CNTV2VIDPROCCLASS::DisableVidProc()
+void CNTV2Card::DisableVidProc()
 {
 	// Channel 1 to go out Output 1 and 
 	// Channel 2 to go out Output 2.
@@ -63,7 +35,7 @@ void CNTV2VIDPROCCLASS::DisableVidProc()
 	SetMixCoefficient(FIXED_ONE);
 }
 
-void CNTV2VIDPROCCLASS::SetForegroundVideoCrosspoint (NTV2Crosspoint crosspoint)
+void CNTV2Card::SetForegroundVideoCrosspoint (NTV2Crosspoint crosspoint)
 {
 	ULWord regValue;
 
@@ -73,7 +45,7 @@ void CNTV2VIDPROCCLASS::SetForegroundVideoCrosspoint (NTV2Crosspoint crosspoint)
 	WriteVideoProcessingControlCrosspoint(regValue);
 }
 
-void CNTV2VIDPROCCLASS::SetForegroundKeyCrosspoint(NTV2Crosspoint crosspoint)
+void CNTV2Card::SetForegroundKeyCrosspoint(NTV2Crosspoint crosspoint)
 {
 	ULWord regValue;
 
@@ -84,7 +56,7 @@ void CNTV2VIDPROCCLASS::SetForegroundKeyCrosspoint(NTV2Crosspoint crosspoint)
 
 }
 
-void CNTV2VIDPROCCLASS::SetBackgroundVideoCrosspoint(NTV2Crosspoint crosspoint)
+void CNTV2Card::SetBackgroundVideoCrosspoint(NTV2Crosspoint crosspoint)
 {
 	ULWord regValue;
 
@@ -95,7 +67,7 @@ void CNTV2VIDPROCCLASS::SetBackgroundVideoCrosspoint(NTV2Crosspoint crosspoint)
 
 }
 
-void CNTV2VIDPROCCLASS::SetBackgroundKeyCrosspoint(NTV2Crosspoint crosspoint)
+void CNTV2Card::SetBackgroundKeyCrosspoint(NTV2Crosspoint crosspoint)
 {
 	ULWord regValue;
 
@@ -106,7 +78,7 @@ void CNTV2VIDPROCCLASS::SetBackgroundKeyCrosspoint(NTV2Crosspoint crosspoint)
 
 }
 //
-NTV2Crosspoint CNTV2VIDPROCCLASS::GetForegroundVideoCrosspoint()
+NTV2Crosspoint CNTV2Card::GetForegroundVideoCrosspoint()
 {
 	ULWord regValue;
 	
@@ -117,7 +89,7 @@ NTV2Crosspoint CNTV2VIDPROCCLASS::GetForegroundVideoCrosspoint()
 	return static_cast<NTV2Crosspoint>(regValue);
 }
 
-NTV2Crosspoint CNTV2VIDPROCCLASS::GetForegroundKeyCrosspoint()
+NTV2Crosspoint CNTV2Card::GetForegroundKeyCrosspoint()
 {
 	ULWord regValue;
 
@@ -128,7 +100,7 @@ NTV2Crosspoint CNTV2VIDPROCCLASS::GetForegroundKeyCrosspoint()
 
 }
 
-NTV2Crosspoint CNTV2VIDPROCCLASS::GetBackgroundVideoCrosspoint()
+NTV2Crosspoint CNTV2Card::GetBackgroundVideoCrosspoint()
 {
 	ULWord regValue;
 
@@ -139,7 +111,7 @@ NTV2Crosspoint CNTV2VIDPROCCLASS::GetBackgroundVideoCrosspoint()
 
 }
 
-NTV2Crosspoint CNTV2VIDPROCCLASS::GetBackgroundKeyCrosspoint()
+NTV2Crosspoint CNTV2Card::GetBackgroundKeyCrosspoint()
 {
 	ULWord regValue;
 
@@ -150,7 +122,7 @@ NTV2Crosspoint CNTV2VIDPROCCLASS::GetBackgroundKeyCrosspoint()
 
 }
 //
-void CNTV2VIDPROCCLASS::SetCh1VidProcMode(NTV2Ch1VidProcMode vidProcMode)
+void CNTV2Card::SetCh1VidProcMode(NTV2Ch1VidProcMode vidProcMode)
 {
 	ULWord regValue;
 	
@@ -168,7 +140,7 @@ void CNTV2VIDPROCCLASS::SetCh1VidProcMode(NTV2Ch1VidProcMode vidProcMode)
 	WriteVideoProcessingControl(regValue);
 }
 
-NTV2Ch1VidProcMode CNTV2VIDPROCCLASS::GetCh1VidProcMode()
+NTV2Ch1VidProcMode CNTV2Card::GetCh1VidProcMode()
 {
 	ULWord				regValue		(0);
 	NTV2Ch1VidProcMode	ch1VidProcMode	(NTV2VIDPROCMODE_INVALID);
@@ -189,7 +161,7 @@ NTV2Ch1VidProcMode CNTV2VIDPROCCLASS::GetCh1VidProcMode()
 	return ch1VidProcMode;
 }
 
-void CNTV2VIDPROCCLASS::SetCh2OutputMode(NTV2Ch2OutputMode outputMode)
+void CNTV2Card::SetCh2OutputMode(NTV2Ch2OutputMode outputMode)
 {
 	ULWord	regValue;
 	ReadVideoProcessingControl(&regValue);
@@ -206,7 +178,7 @@ void CNTV2VIDPROCCLASS::SetCh2OutputMode(NTV2Ch2OutputMode outputMode)
 	WriteVideoProcessingControl(regValue);
 }
 
-NTV2Ch2OutputMode CNTV2VIDPROCCLASS::GetCh2OutputMode()
+NTV2Ch2OutputMode CNTV2Card::GetCh2OutputMode()
 {
 	ULWord regValue;
 
@@ -218,7 +190,7 @@ NTV2Ch2OutputMode CNTV2VIDPROCCLASS::GetCh2OutputMode()
 	
 }
 
-void CNTV2VIDPROCCLASS::SetSplitMode(NTV2SplitMode splitMode)
+void CNTV2Card::SetSplitMode(NTV2SplitMode splitMode)
 {
 	ULWord regValue;
 
@@ -228,7 +200,7 @@ void CNTV2VIDPROCCLASS::SetSplitMode(NTV2SplitMode splitMode)
 	WriteSplitControl(regValue);
 }
 
-NTV2SplitMode CNTV2VIDPROCCLASS::GetSplitMode()
+NTV2SplitMode CNTV2Card::GetSplitMode()
 {
 	ULWord regValue;
 
@@ -240,7 +212,7 @@ NTV2SplitMode CNTV2VIDPROCCLASS::GetSplitMode()
 }
 
 
-void CNTV2VIDPROCCLASS::SetSplitParameters(Fixed_ position, Fixed_ softness)
+void CNTV2Card::SetSplitParameters(Fixed_ position, Fixed_ softness)
 {
 	ULWord max = 0, offset = 0;
 	NTV2FrameDimensions	frameBufferSize	(GetActiveFrameDimensions ());
@@ -339,7 +311,7 @@ void CNTV2VIDPROCCLASS::SetSplitParameters(Fixed_ position, Fixed_ softness)
 
 }
 
-void CNTV2VIDPROCCLASS::SetSlitParameters(Fixed_ start, Fixed_ width)
+void CNTV2Card::SetSlitParameters(Fixed_ start, Fixed_ width)
 {
 	LWord max = 0, maxWidth = 0, offset = 0;
 	NTV2FrameDimensions	frameBufferSize	(GetActiveFrameDimensions ());
@@ -416,12 +388,12 @@ void CNTV2VIDPROCCLASS::SetSlitParameters(Fixed_ start, Fixed_ width)
 
 }
 
-void CNTV2VIDPROCCLASS::SetMixCoefficient(Fixed_ coefficient)
+void CNTV2Card::SetMixCoefficient(Fixed_ coefficient)
 {
 	WriteMixerCoefficient(coefficient);
 }
 
-Fixed_ CNTV2VIDPROCCLASS::GetMixCoefficient()
+Fixed_ CNTV2Card::GetMixCoefficient()
 {
 	ULWord coefficient;
 	ReadMixerCoefficient(&coefficient);
@@ -429,7 +401,7 @@ Fixed_ CNTV2VIDPROCCLASS::GetMixCoefficient()
 	return static_cast<Fixed_>(coefficient);
 }
 
-void CNTV2VIDPROCCLASS::SetMatteColor(YCbCr10BitPixel ycbcrPixel)
+void CNTV2Card::SetMatteColor(YCbCr10BitPixel ycbcrPixel)
 {
 	ULWord packedValue;
 
@@ -447,7 +419,7 @@ void CNTV2VIDPROCCLASS::SetMatteColor(YCbCr10BitPixel ycbcrPixel)
 }
 
 #ifdef MSWindows
-	void CNTV2VIDPROCCLASS::SetMatteColor(COLORREF rgbColor)
+	void CNTV2Card::SetMatteColor(COLORREF rgbColor)
 	{
 
 		RGBAlphaPixel RGBMatte;
@@ -463,7 +435,7 @@ void CNTV2VIDPROCCLASS::SetMatteColor(YCbCr10BitPixel ycbcrPixel)
 #endif	//	MSWindows
 
 #ifdef AJALinux
-	void CNTV2VIDPROCCLASS::SetMatteColor(AJARgb rgbColor)
+	void CNTV2Card::SetMatteColor(AJARgb rgbColor)
 	{
 
 		RGBAlphaPixel RGBMatte;

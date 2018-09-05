@@ -204,6 +204,8 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
             return AJA_STATUS_FAIL;
         }
 
+        if(m_forceUpdate)
+            kfp.SetMBReset();
         rv = kfp.ProgramFromMCS(true);
         if (!rv)
         {
@@ -274,7 +276,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 	if (REALLY_UPDATE)
 	{
 		//	ProgramMainFlash used to be able to throw (because XilinxBitfile could throw), but with 12.1 SDK, this is no longer the case.
-            m_updateSuccessful = m_device.ProgramMainFlash (m_bitfilePath.c_str ());
+        m_updateSuccessful = m_device.ProgramMainFlash (m_bitfilePath.c_str (), m_forceUpdate);
 		if (!m_updateSuccessful)
 		{
 			cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  'ProgramMainFlash' failed" << endl
@@ -470,7 +472,11 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
 	case DEVICE_ID_KONA4UFC:
 		return (designName == GetPrimaryDesignName(DEVICE_ID_KONA4));
 	case DEVICE_ID_KONA5:
-		return (designName == GetPrimaryDesignName(DEVICE_ID_KONA5));
+        return (designName == GetPrimaryDesignName(DEVICE_ID_KONA5) ||
+                designName == "kona5_12g");
+    case DEVICE_ID_KONA5_12G:
+        return (designName == GetPrimaryDesignName(DEVICE_ID_KONA5_12G) ||
+                designName == "kona5");
 	case DEVICE_ID_IO4K:
 		return (designName == GetPrimaryDesignName(DEVICE_ID_IO4KUFC));
 	case DEVICE_ID_IO4KUFC:

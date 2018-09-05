@@ -238,6 +238,14 @@ public:
 	 */
     static bool IsActive(int32_t index);
 
+	/**
+	 *	Is the debug system open?
+	 *
+     *	@return		true                    Debug system is open and ready for use.
+     *				false                   Debug system not open.
+	 */
+    static bool IsOpen(void);
+
 	/** 
 	 *	Is this class built with AJA_DEBUG defined. 
 	 *

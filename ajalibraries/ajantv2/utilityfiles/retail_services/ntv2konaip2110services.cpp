@@ -1311,7 +1311,6 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b2xQuadOut			= false;	//(b4K && !b4kHfr && mVirtualInputSelect == NTV2_DualLink2xSdi4k);
-	bool						bStereoIn			= false;
 	int							bFb1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;		// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;		// Assume Channel 2 IS disabled by default
@@ -1328,7 +1327,6 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 	
 	// Figure out what our input format is based on what is selected
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
-	bool inHfrB = IsVideoFormatB(inputFormat);
 	
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1364,61 +1362,36 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 		}
 	}
 	
-	// SMPTE 425 (2pi)
-	ULWord vpida		= 0;
-	ULWord vpidb		= 0;
-	bool b2x2piIn		= false;
-	bool b4x2piInA		= false;
-	bool b4x2piInB		= false;
-	
-	mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
-	//debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
-	CNTV2VPID parser;
-	parser.SetVPID(vpida);
-	VPIDStandard std = parser.GetStandard();
-	//b2x2piIn  = (std == VPIDStandard_2160_DualLink);
-	b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
-	b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
+	//CNTV2VPID parser;
+	//parser.SetVPID(mVpid1a);
+	//VPIDStandard std = parser.GetStandard();
+	bool b2x2piIn  = false; // (std == VPIDStandard_2160_DualLink);
+	//bool b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
+	//bool b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
 	
 	//bool b2piIn = (b2x2piIn || b4x2piInA || b4x2piInB);
 	bool b2piIn = b4K;
-	
-	// override inputColorSpace for SMTE425
-	if (b2piIn)
-	{
-		VPIDSampling sample = parser.GetSampling();
-		if (sample == VPIDSampling_YUV_422)
-		{
-			inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-		}
-		else
-		{
-			inputColorSpace = NTV2_ColorSpaceModeRgb;
-		}
-	}
 	
 	// select square division or 2 pixel interleave in frame buffer
 	mCard->SetTsiFrameEnable(b2piIn, NTV2_CHANNEL1);
 	
 	
 	// SDI In 1
-	bool b3GbInEnabled;
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, 
-		(b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && !b2FbLevelBHfr && (mVirtualInputSelect==NTV2_Input1Select)));
+	bool bConvertBToA; 
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL1)==true && mVirtualInputSelect==NTV2_Input1Select;
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
 	
 	// SDI In 2
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, 
-		(b4kHfr && b3GbInEnabled) || (!b4K && inHfrB && !b2FbLevelBHfr && (mVirtualInputSelect==NTV2_Input2Select)));
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL2)==true && mVirtualInputSelect==NTV2_Input2Select;
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, bConvertBToA);
 	
 	// SDI In 3
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL3);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, b4kHfr && b3GbInEnabled);
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL3);
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, bConvertBToA);
 	
 	// SDI In 4
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL4);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, b4kHfr && b3GbInEnabled);
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL4);
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, bConvertBToA);
 	
 	
 	// Dual Link In 1
@@ -2155,6 +2128,31 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
             }
         }
 
+        // Check PLL stauts to make sure we are getting packets and if not reset it
+        mResetPLLCounter--;
+        if (mResetPLLCounter <= 0)
+        {
+            uint32_t    framesPerSecNum;
+            uint32_t    framesPerSecDen;
+            GetFramesPerSecond (primaryFrameRate, framesPerSecNum, framesPerSecDen);
+
+            PTPStatus   ptpStatus;
+
+            config2110->GetPTPStatus(ptpStatus);
+            if (ptpStatus.PTP_packetStatus == true)
+            {
+                // Everything is good, so lets check again in 2 seconds
+                mResetPLLCounter = (framesPerSecNum/framesPerSecDen) * 2;
+            }
+            else
+            {
+                // No packets so lets kick it and look again in 10 seconds
+                printf("PLL no packets, resetting PLL.\n");
+                config2110->PLLReset();
+                mResetPLLCounter = (framesPerSecNum/framesPerSecDen) * 10;
+            }
+        }
+
         // Configure all of the 2110 IP settings
         EveryFrameTask2110(config2110, &mFb1VideoFormatLast, &m2110NetworkLast,
                            &m2110TxVideoDataLast, &m2110TxAudioDataLast,
@@ -2188,14 +2186,10 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)
 	{
-		ULWord vpida = 0;
-		ULWord vpidb = 0;
-		mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
-		
-		if (mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb))
+		if (mVpid1Valid)
 		{
 			CNTV2VPID parser;
-			parser.SetVPID(vpida);
+			parser.SetVPID(mVpid1a);
 			VPIDStandard std = parser.GetStandard();
 			switch (std)
 			{

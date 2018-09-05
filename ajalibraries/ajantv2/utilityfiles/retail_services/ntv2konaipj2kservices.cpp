@@ -632,7 +632,6 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 
 	// Figure out what our input format is based on what is selected
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
-	bool inHfrB = IsVideoFormatB(inputFormat);
 
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -660,60 +659,34 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 	}
 
-	// SMPTE 425 (2pi)
-	ULWord vpida		= 0;
-	ULWord vpidb		= 0;
-	bool b2x2piIn		= false;
-	bool b4x2piInA		= false;
-	bool b4x2piInB		= false;
-		
-	mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
-	//debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
 	CNTV2VPID parser;
-	parser.SetVPID(vpida);
+	parser.SetVPID(mVpid1a);
 	VPIDStandard std = parser.GetStandard();
-	b2x2piIn  = (std == VPIDStandard_2160_DualLink);
-	b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
-	b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
-
+	bool b2x2piIn  = (std == VPIDStandard_2160_DualLink);
+	bool b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
+	bool b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
 	bool b2piIn = (b2x2piIn || b4x2piInA || b4x2piInB);
-
-	// override inputColorSpace for SMTE425
-	if (b2piIn)
-	{
-		VPIDSampling sample = parser.GetSampling();
-		if (sample == VPIDSampling_YUV_422)
-		{
-			inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-		}
-		else
-		{
-			inputColorSpace = NTV2_ColorSpaceModeRgb;
-		}
-	}
 
 	// select square division or 2 pixel interleave in frame buffer
 	mCard->Set425FrameEnable(b2piIn, NTV2_CHANNEL1);
 	
 
 	// SDI In 1
-	bool b3GbInEnabled;
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL1);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, 
-		(b3GbInEnabled) || (inHfrB && !b2FbLevelBHfr && (mVirtualInputSelect==NTV2_Input1Select)));
+	bool bConvertBToA; 
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL1)==true && mVirtualInputSelect==NTV2_Input1Select;
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
 	
 	// SDI In 2
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL2);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, 
-		(b3GbInEnabled) || (inHfrB && !b2FbLevelBHfr && (mVirtualInputSelect==NTV2_Input1Select)));
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL2)==true && mVirtualInputSelect==NTV2_Input2Select;
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, bConvertBToA);
 	
 	// SDI In 3
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL3);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, b3GbInEnabled);
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL3);
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, bConvertBToA);
 	
 	// SDI In 4
-	mCard->GetSDIInput3GbPresent(b3GbInEnabled, NTV2_CHANNEL4);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, b3GbInEnabled);
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL4);
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, bConvertBToA);
 	
 	
 	// Dual Link In 1
@@ -1466,14 +1439,10 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)
 	{
-		ULWord vpida = 0;
-		ULWord vpidb = 0;
-		mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
-
-		if (mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb))
+		if (mVpid1Valid)
 		{
 			CNTV2VPID parser;
-			parser.SetVPID(vpida);
+			parser.SetVPID(mVpid1a);
 			VPIDStandard std = parser.GetStandard();
 			switch (std)
 			{

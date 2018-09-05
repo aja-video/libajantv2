@@ -1316,11 +1316,7 @@
 					"$(OTHER_CFLAGS)",
 					"-Wreorder",
 				);
-				OTHER_LDFLAGS = (
-					"-lajantv2d",
-					"-lajabased",
-					"-lajaancd",
-				);
+				OTHER_LDFLAGS = "-lajantv2d";
 				SDKROOT = macosx;
 				STRIP_INSTALLED_PRODUCT = NO;
 				SYMROOT = ../../../bin;
@@ -1380,11 +1376,7 @@
 					"$(OTHER_CFLAGS)",
 					"-Wreorder",
 				);
-				OTHER_LDFLAGS = (
-					"-lajantv2",
-					"-lajabase",
-					"-lajaanc",
-				);
+				OTHER_LDFLAGS = "-lajantv2";
 				SDKROOT = macosx;
 				SYMROOT = ../../../bin;
 				USER_HEADER_SEARCH_PATHS = "../includes ../src/mac ../../../ajaapps/crossplatform/demoapps ../..";

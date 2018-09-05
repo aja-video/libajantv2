@@ -186,7 +186,7 @@ void DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVRegDualStreamTransportType, mDualStreamTransportType);
 	AsDriverInterface(mCard)->ReadRegister(kVRegDSKMode, mDSKMode);
 	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput1Select, mVirtualDigitalOutput1Select);
-	//AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput2Select, mVirtualDigitalOutput1Select);
+	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput2Select, mVirtualDigitalOutput2Select);
 	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1ColorSpaceMode, mSDIOutput1ColorSpace);
 	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutputSelect, mVirtualHDMIOutputSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutputSelect, mVirtualAnalogOutputSelect);
@@ -203,12 +203,12 @@ void DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVRegRGB10Range, mRGB10Range);
 	AsDriverInterface(mCard)->ReadRegister(kVRegColorSpaceMode, mColorSpaceType);
 	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1RGBRange, mSDIOutput1RGBRange);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1ColorSpaceMode, mSDIInput1ColorSpace);
+	//AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput2ColorSpaceMode, mSDIInput2ColorSpace);
 	
 	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1RGBRange, mSDIInput1RGBRange);
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput2RGBRange, mSDIInput2RGBRange);
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1Stereo3DMode, mSDIInput1Stereo3DMode);
+	//AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput2RGBRange, mSDIInput2RGBRange);
 	AsDriverInterface(mCard)->ReadRegister(kVRegFrameBuffer1RGBRange, mFrameBuffer1RGBRange);
-	AsDriverInterface(mCard)->ReadRegister(kVRegFrameBuffer1Stereo3DMode, mFrameBuffer1Stereo3DMode);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutBlackLevel, mVirtualAnalogOutBlackLevel);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutputType, mVirtualAnalogOutputType);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogInBlackLevel, mVirtualAnalogInBlackLevel);
@@ -233,7 +233,24 @@ void DeviceServices::ReadDriverState (void)
 	mCard->GetVideoFormat(mFb1VideoFormat);
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, mFb1Format);
 	mCard->GetMode(NTV2_CHANNEL1, mFb1Mode);
-	
+	// vpid
+	if (NTV2DeviceCanDoDualLink(mDeviceID) == false)
+	{
+		if (NTV2DeviceGetNumVideoInputs(mDeviceID) > 0)
+			mVpid1Valid = mCard->ReadSDIInVPID(NTV2_CHANNEL1, mVpid1a, mVpid1b);
+		else
+			mVpid1a = mVpid1b = mVpid1Valid = 0;
+		
+		if (NTV2DeviceGetNumVideoInputs(mDeviceID) > 1)
+			mVpid2Valid = mCard->ReadSDIInVPID(NTV2_CHANNEL2, mVpid2a, mVpid2b);
+		else
+			mVpid2a = mVpid2b = mVpid2Valid = 0;
+	}
+	else
+	{
+		mVpid1a = mVpid1b = mVpid1Valid = mVpid2a = mVpid2b = mVpid2Valid = 0;
+	}
+
 	// basic Ch2 HW registers
 	if (NTV2DeviceGetNumberFrameBuffers(mDeviceID) > 1)
 		mCard->GetFrameBufferFormat(NTV2_CHANNEL2, mFb2Format);
@@ -437,6 +454,10 @@ void DeviceServices::UpdateAutoState()
 	// out range						
 	mSDIOutput1RGBRange = mSDIOutput1RGBRange == NTV2_RGBRangeAuto ?
 							NTV2_RGBRangeFull : mSDIOutput1RGBRange;
+							
+	// in cs - auto determined by vpid
+							
+	// in range - auto determined by vpid
 	
 	// 4k transport
 	NTV24kTransportType tranport4k = NTV2_4kTransport_PixelInterleave;
@@ -453,6 +474,35 @@ void DeviceServices::UpdateAutoState()
 		
 	mDualStreamTransportType = mDualStreamTransportType == NTV2_SDITransport_Auto ? 
 				transport3g : mDualStreamTransportType;
+}
+
+
+
+//-------------------------------------------------------------------------------------------------------
+//	GetSDIInputColorSpace
+//-------------------------------------------------------------------------------------------------------
+NTV2ColorSpaceMode DeviceServices::GetSDIInputColorSpace(NTV2Channel inChannel, NTV2ColorSpaceMode inMode)
+{
+	NTV2ColorSpaceMode outMode = inMode;
+	
+	if (NTV2DeviceCanDoDualLink(mDeviceID) == false)
+		return NTV2_ColorSpaceModeYCbCr;
+	
+	if (mSDIInput1ColorSpace == NTV2_ColorSpaceModeAuto)
+	{
+		CNTV2VPID parser;
+		parser.SetVPID(inChannel == NTV2_CHANNEL2 ? mVpid2a : mVpid1a);
+		VPIDSampling sample = parser.GetSampling();
+		if (sample == VPIDSampling_YUV_422)
+		{
+			outMode = NTV2_ColorSpaceModeYCbCr;
+		}
+		else
+		{
+			outMode = NTV2_ColorSpaceModeRgb;
+		}
+	}
+	return outMode;
 }
 
 
@@ -478,13 +528,13 @@ NTV2VideoFormat DeviceServices::GetSelectedInputVideoFormat(
         case NTV2_Input4x4kSelect:
             inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
             if (inputColorSpace)
-                *inputColorSpace = mSDIInput1ColorSpace;
+                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
             break;
 
         case NTV2_Input2Select:
             inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
             if (inputColorSpace)
-                *inputColorSpace = mSDIInput2ColorSpace;
+                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL2, mSDIInput2ColorSpace);
             break;
 
         default:
@@ -549,11 +599,8 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	mVirtualDebug1			= virtualDebug1;
 	mEveryFrameTaskFilter	= everyFrameTaskFilter;
 
-	//	CP checks the kVRegAgentCheck virtual register to see if I'm still running...
-	uint32_t	count	(0);
-	mCard->ReadRegister(kVRegAgentCheck, count);
-	count++;
-	mCard->WriteRegister(kVRegAgentCheck, count);
+    //	CP checks the kVRegAgentCheck virtual register to see if I'm still running...
+    AgentIsAlive();
 
 	// If the daemon is not responsible for tasks just return
 	if (mVirtualDebug1 & NTV2_DRIVER_TASKS)
@@ -1927,24 +1974,24 @@ NTV2VideoFormat DeviceServices::GetConversionCompatibleFormat(NTV2VideoFormat so
 NTV2VideoFormat DeviceServices::GetSdiInVideoFormatWithVpid(int32_t index)
 {
 	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-	ULWord vpida = 0;
-	ULWord vpidb = 0;
 
-	if (mCard->ReadSDIInVPID((NTV2Channel)index, vpida, vpidb))
+	if (index == 0 && mVpid1Valid == true && mVpid1a != 0)
 	{
-		// if there is a vpid - use it to determine format
-		if (vpida != 0)
-		{
-			CNTV2VPID parser;
-			parser.SetVPID(vpida);
-			inputFormat = parser.GetVideoFormat();
-
-			if (mVirtualInputSelect == NTV2_Input4x4kSelect || mVirtualInputSelect == NTV2_Input2x4kSelect)
-			{
-				inputFormat = GetQuadSizedVideoFormat(inputFormat);
-			}
-		}
+		CNTV2VPID parser;
+		parser.SetVPID(mVpid1a);
+		inputFormat = parser.GetVideoFormat();
+		if (mVirtualInputSelect == NTV2_Input4x4kSelect || mVirtualInputSelect == NTV2_Input2x4kSelect)
+			inputFormat = GetQuadSizedVideoFormat(inputFormat);
 	}
+	else if (index == 1 && mVpid2Valid == true && mVpid2a != 0)
+	{
+		CNTV2VPID parser;
+		parser.SetVPID(mVpid2a);
+		inputFormat = parser.GetVideoFormat();
+		if (mVirtualInputSelect == NTV2_Input4x4kSelect || mVirtualInputSelect == NTV2_Input2x4kSelect)
+			inputFormat = GetQuadSizedVideoFormat(inputFormat);
+	}
+	
 	return inputFormat;
 }
 
@@ -2044,6 +2091,15 @@ NTV2FrameRate DeviceServices::HalfFrameRate(NTV2FrameRate rate)
 }
 
 
+bool DeviceServices::InputRequiresBToAConvertsion(NTV2Channel ch)
+{
+	bool b3GbInEnabled = false;
+	mCard->GetSDIInput3GbPresent(b3GbInEnabled, ch);
+	bool bConvert = b3GbInEnabled && IsVideoFormatA(mFb1VideoFormat);
+	return bConvert;
+}
+
+
 // MARK: -
 
 // IP common support routines
@@ -2062,11 +2118,12 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
     bool ipServiceEnable, ipServiceForceConfig;
 
     config2110->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
+    ipServiceEnable = true;
     if (ipServiceEnable)
     {
         tx_2110Config txConfig;
 
-        // Handle rest case
+        // Handle reset case
         if ((m2110TxVideoData.numTxVideoChannels == 0) &&
             (m2110TxAudioData.numTxAudioChannels == 0) &&
             (m2110RxVideoData.numRxVideoChannels == 0) &&
@@ -2158,6 +2215,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                         SetIPError((NTV2Channel)m2110TxVideoData.txVideoCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
                         m2110IpStatusData.txChStatus[i] = kIpStatusFail;
                     }
+                    AgentIsAlive();
                 }
             }
 
@@ -2183,6 +2241,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     txConfig.tos = 0x64;
 
                     // Audio specific
+                    txConfig.channel = m2110TxAudioData.txAudioCh[i].channel;
                     txConfig.numAudioChannels = m2110TxAudioData.txAudioCh[i].numAudioChannels;
                     txConfig.firstAudioChannel = m2110TxAudioData.txAudioCh[i].firstAudioChannel;
                     txConfig.audioPktInterval = m2110TxAudioData.txAudioCh[i].audioPktInterval;
@@ -2211,6 +2270,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                         printf("SetTxStreamConfiguration Audio ERROR %s\n", config2110->getLastError().c_str());
                         SetIPError((NTV2Channel)m2110TxAudioData.txAudioCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
                     }
+                    AgentIsAlive();
                 }
             }
 
@@ -2297,6 +2357,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                         SetIPError((NTV2Channel)m2110RxVideoData.rxVideoCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
                         m2110IpStatusData.rxChStatus[i] = kIpStatusFail;
                     }
+                    AgentIsAlive();
                 }
             }
             *videoFormatLast = mFb1VideoFormat;
@@ -2356,6 +2417,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                         printf("SetRxStreamConfiguration Audio ERROR %s\n", config2110->getLastError().c_str());
                         SetIPError(m2110RxAudioData.rxAudioCh[i].channel, kErrNetworkConfig, config2110->getLastErrorCode());
                     }
+                    AgentIsAlive();
                 }
             }
         }
@@ -2397,6 +2459,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     printf("DisableNetworkInterface\n");
                     config2110->DisableNetworkInterface(sfp);
                 }
+                AgentIsAlive();
             }
         }
 
@@ -3685,6 +3748,16 @@ void DeviceServices::DisableRP188EtoE(NTV2WidgetID toOutputWgt)
 	mCard->WriteRegister(kRegLTCStatusControl, 0x0, kRegMaskLTC1InBypass, kRegShiftLTC1Bypass);
 }
 
+void DeviceServices::WriteAudioSourceSelect(ULWord inValue, NTV2Channel inChannel)
+{
+	// read modify write with mask that contains holes
+	ULWord mask = 0x0091ffff;
+	ULWord curValue = 0;
+	mCard->ReadAudioSource(curValue, inChannel);
+	ULWord regValue = (curValue & ~mask) | (inValue & mask);
+	mCard->WriteAudioSource(regValue, inChannel);
+}
+
 
 uint32_t DeviceServices::GetAudioDelayOffset(double frames)
 {
@@ -4599,10 +4672,10 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 	}
 
 	// write the reg value to hardware
-	mCard->WriteAudioSource(regValue);
+	WriteAudioSourceSelect(regValue);
 	if(mCard->DeviceCanDoAudioMixer())
 	{
-		mCard->WriteAudioSource(regValue, NTV2_CHANNEL2);
+		WriteAudioSourceSelect(regValue, NTV2_CHANNEL2);
 		if (mAudioMixerOverrideState == false)
 			mCard->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_ON, NTV2_AUDIOSYSTEM_2);
 		
@@ -4632,4 +4705,15 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 	else if (input == NTV2_AES_EBU_XLRSelect)
 		mCard->WriteRegister(kRegAud1Control, 1, kK2RegMaskKBoxAudioInputSelect, kK2RegShiftKBoxAudioInputSelect);
 
+}
+
+//-------------------------------------------------------------------------------------------------------
+//	AgentIsAlive - CP checks the kVRegAgentCheck virtual register to see if I'm still running...
+//-------------------------------------------------------------------------------------------------------
+void DeviceServices::AgentIsAlive()
+{
+    uint32_t count(0);
+    mCard->ReadRegister(kVRegAgentCheck, count);
+    count++;
+    mCard->WriteRegister(kVRegAgentCheck, count);
 }

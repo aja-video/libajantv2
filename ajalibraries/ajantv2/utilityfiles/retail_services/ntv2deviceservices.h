@@ -9,8 +9,7 @@
 
 #include "ntv2utils.h"
 #include "ntv2vpid.h"
-#include "ntv2vidproc.h"
-#include "ntv2vidprocmasks.h"
+#include "ntv2card.h"
 #include "ntv2config2022.h"
 #include "virtualregistermodel.h"
 
@@ -94,6 +93,7 @@ public:
 	virtual void SetDeviceMiscRegisters();
 	
 	virtual NTV2VideoFormat GetLockedInputVideoFormat();
+	virtual NTV2ColorSpaceMode GetSDIInputColorSpace(NTV2Channel inChannel, NTV2ColorSpaceMode inMode);
 	virtual NTV2VideoFormat GetSelectedInputVideoFormat(NTV2VideoFormat referenceFormat, NTV2ColorSpaceMode* inputColorSpace=NULL);
     virtual NTV2VideoFormat GetCorrespondingAFormat(NTV2VideoFormat bVideoFormat);
 	virtual void SetDeviceXPointPlaybackRaw();
@@ -163,7 +163,7 @@ public:
 	void SetBackgroundVideoCrosspoint(NTV2Crosspoint crosspoint);
 	void EnableRP188EtoE(NTV2WidgetID fromInputWgt, NTV2WidgetID toOutputWgt);
 	void DisableRP188EtoE(NTV2WidgetID toOutputWgt);
-
+	void WriteAudioSourceSelect(ULWord val, NTV2Channel ch=NTV2_CHANNEL1);
 
 	bool GetExtFrameGeometry(NTV2FrameGeometry geometry, NTV2FrameGeometry* value);
 	NTV2LHIVideoDACMode GetLHIVideoDACMode(NTV2VideoFormat format, NTV2AnalogType type, NTV2AnalogBlackLevel blackLevel);
@@ -182,11 +182,13 @@ public:
 	bool CanConvertFormat(NTV2VideoFormat inFormat, NTV2VideoFormat outFormat);
 	NTV2VideoFormat GetConversionCompatibleFormat(NTV2VideoFormat sourceFmt, NTV2VideoFormat secondaryFmt);
 	NTV2FrameRate HalfFrameRate(NTV2FrameRate rate);
+	bool InputRequiresBToAConvertsion(NTV2Channel ch);
 	
 	uint32_t GetAudioDelayOffset(double frames);
 	NTV2AudioSystem GetHostAudioSystem();
 
 	void SetAudioInputSelect(NTV2InputAudioSelect input);
+    void AgentIsAlive();
 
 public:
 	CNTV2Card*				mCard;
@@ -210,6 +212,7 @@ public:
 	int32_t					mStreamingAppPID;
 	uint32_t				mStreamingAppType;
 	NTV2OutputVideoSelect	mVirtualDigitalOutput1Select;
+	NTV2OutputVideoSelect	mVirtualDigitalOutput2Select;
 	NTV2OutputVideoSelect	mVirtualHDMIOutputSelect;
 	NTV2OutputVideoSelect	mVirtualAnalogOutputSelect;
 	NTV2LutType				mLUTType;
@@ -227,6 +230,7 @@ public:
 	NTV2ColorSpaceType		mColorSpaceType;
 	NTV2ColorSpaceMode		mSDIOutput1ColorSpace;
 	NTV2RGBRangeMode		mSDIOutput1RGBRange;
+	
     rx2022Config            mRx2022Config1;
     rx2022Config            mRx2022Config2;
     tx2022Config            mTx2022Config3;
@@ -254,18 +258,21 @@ public:
 	NTV2FrameBufferFormat	mFb1Format;
 	NTV2FrameBufferFormat	mFb2Format;
 	NTV2Mode				mFb1Mode;
+	bool					mVpid1Valid;
+	ULWord					mVpid1a;
+	ULWord					mVpid1b;
+	bool					mVpid2Valid;
+	ULWord					mVpid2a;
+	ULWord					mVpid2b;
 
 	// calculated valule, selected by user
 	NTV2VideoFormat			mSelectedInputVideoFormat;
 	//NTV2SDIInputFormatSelect mSDIInputFormatSelect;
-	
 	NTV2ColorSpaceMode 		mSDIInput1ColorSpace;
 	NTV2ColorSpaceMode 		mSDIInput2ColorSpace;
 	NTV2RGBRangeMode		mSDIInput1RGBRange;
 	NTV2RGBRangeMode		mSDIInput2RGBRange;
-	NTV2Stereo3DMode		mSDIInput1Stereo3DMode;
 	NTV2RGBRangeMode		mFrameBuffer1RGBRange;
-	NTV2Stereo3DMode		mFrameBuffer1Stereo3DMode;
 	NTV2AnalogBlackLevel	mVirtualAnalogOutBlackLevel;
 	NTV2AnalogType			mVirtualAnalogOutputType;
 	NTV2AnalogBlackLevel	mVirtualAnalogInBlackLevel;

@@ -4,14 +4,14 @@
 	@copyright	(C) 2010-2018 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
 **/
 #include "ntv2bitfile.h"
+#include "ntv2card.h"
+#include "ntv2utils.h"
 #include <iostream>
-#include "ntv2status.h"
 #include <sys/stat.h>
 #include <assert.h>
 #if defined (AJALinux) || defined (AJAMac)
 	#include <arpa/inet.h>
 #endif
-#include "ntv2utils.h"
 #include <map>
 
 using namespace std;
@@ -398,6 +398,7 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
 		case DEVICE_ID_KONA1:			return "kona1";
         case DEVICE_ID_KONAHDMI:		return "kona_hdmi_4rx";
         case DEVICE_ID_KONA5:           return "kona5";
+        case DEVICE_ID_KONA5_12G:       return "kona5_12g";
         default:
 			break;
 	}
@@ -436,7 +437,10 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
         case DEVICE_ID_IOIP_2110:	return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110) == _designName;
 		case DEVICE_ID_KONAHDMI:	return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_KONAHDMI) == _designName
 											|| _designName == "Corvid_HDMI_4Rx_Top";
-        case DEVICE_ID_KONA5:		return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5) == _designName;
+        case DEVICE_ID_KONA5:		return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5) == _designName
+                                            || _designName == "kona5_12g";;
+        case DEVICE_ID_KONA5_12G:		return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_12G) == _designName
+                                            || _designName == "Kona5";
 		default:					break;
 	}
 	return false;

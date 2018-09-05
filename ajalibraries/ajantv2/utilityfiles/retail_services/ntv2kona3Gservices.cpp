@@ -284,15 +284,15 @@ void Kona3GServices::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if ( (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
-			  || (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
+	else if ( (mVirtualDigitalOutput2Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
+			  || (   (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
 			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)			// Secondary
+	else if (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)			// Secondary
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptConversionModule);
 		mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
@@ -303,7 +303,7 @@ void Kona3GServices::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptSDIOut2Input, b3GbOut ? NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut1DS2);
 		mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)				// Video+Key
+	else if (mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)				// Video+Key
 	{
 		if (bDSKOn)
 		{
@@ -920,8 +920,8 @@ void Kona3GServices::SetDeviceXPointCapture ()
 	
 	// SDI Out 2
 	if (b2FbLevelBHfr ||																// Dual Stream - p60b
-		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
-		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)						// Video + Key
+		mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||					// Stereo 3D
+		mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{
 		if (b3GbOut)
 		{
@@ -946,8 +946,8 @@ void Kona3GServices::SetDeviceXPointCapture ()
 			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptDuallinkOut1DS2);						// 2 wires
 		}
 	}
-	else if ( (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
-		      || (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)		// or if "Secondary" AND Secondary == Primary and not SD format
+	else if ( (mVirtualDigitalOutput2Select == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
+		      || (   (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)		// or if "Secondary" AND Secondary == Primary and not SD format
 			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
@@ -960,7 +960,7 @@ void Kona3GServices::SetDeviceXPointCapture ()
 			mCard->Connect (NTV2_XptSDIOut2Input, frameSync1YUV);
 		}
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)
+	else if (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync2YUV);
 	}

@@ -89,8 +89,8 @@
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\includes;..\src;..\src\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;MSWindows;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;AJASTATIC;NO_WGLIB;NO_PAINTLIB;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\includes;..\src;..\src\win;..\..;..\..\..;..\..\ajaanc\includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;MSWindows;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;AJASTATIC;NO_WGLIB;NO_PAINTLIB;_WINSOCK_DEPRECATED_NO_WARNINGS;AJA_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -102,7 +102,7 @@
     </ClCompile>
     <Lib>
       <AdditionalOptions>/IGNORE:4006 /IGNORE:4221 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>psapi.lib;setupapi.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>psapi.lib;setupapi.lib;Ws2_32.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
@@ -117,16 +117,18 @@
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\includes;..\src;..\src\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;_WIN64;_DEBUG;_LIB;MSWindows;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;NO_PAINTLIB;NO_WGLIB;AJASTATIC;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\includes;..\src;..\src\win;..\..;..\..\..;..\..\ajaanc\includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;_WIN64;_DEBUG;_LIB;MSWindows;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;NO_PAINTLIB;NO_WGLIB;AJASTATIC;_WINSOCK_DEPRECATED_NO_WARNINGS;AJA_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PrecompiledHeader />
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
+      <PrecompiledHeaderFile />
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -147,8 +149,8 @@
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\includes;..\src;..\src\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;MSWindows;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;AJASTATIC;NO_WGLIB;NO_PAINTLIB;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\includes;..\src;..\src\win;..\..;..\..\..;..\..\ajaanc\includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;MSWindows;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;AJASTATIC;NO_WGLIB;NO_PAINTLIB;_WINSOCK_DEPRECATED_NO_WARNINGS;AJA_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader />
@@ -162,7 +164,7 @@
     </ResourceCompile>
     <Lib>
       <AdditionalOptions>/IGNORE:4006 /IGNORE:4221 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>psapi.lib;setupapi.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>psapi.lib;setupapi.lib;Ws2_32.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(TargetDir)$(TargetFileName)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
@@ -178,8 +180,8 @@
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\includes;..\src;..\src\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;MSWindows;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;NO_PAINTLIB;NO_WGLIB;AJASTATIC;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\includes;..\src;..\src\win;..\..;..\..\..;..\..\ajaanc\includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;MSWindows;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;NO_PAINTLIB;NO_WGLIB;AJASTATIC;_WINSOCK_DEPRECATED_NO_WARNINGS;AJA_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -203,6 +205,64 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\ajaanc\src\ancillarydata.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="..\..\ajaanc\src\ancillarydatafactory.cpp" />
+    <ClCompile Include="..\..\ajaanc\src\ancillarydata_cea608.cpp" />
+    <ClCompile Include="..\..\ajaanc\src\ancillarydata_cea608_line21.cpp" />
+    <ClCompile Include="..\..\ajaanc\src\ancillarydata_cea608_vanc.cpp" />
+    <ClCompile Include="..\..\ajaanc\src\ancillarydata_cea708.cpp" />
+    <ClCompile Include="..\..\ajaanc\src\ancillarydata_framestatusinfo524D.cpp" />
+    <ClCompile Include="..\..\ajaanc\src\ancillarydata_framestatusinfo5251.cpp" />
+    <ClCompile Include="..\..\ajaanc\src\ancillarydata_hdr_hdr10.cpp" />
+    <ClCompile Include="..\..\ajaanc\src\ancillarydata_hdr_hlg.cpp" />
+    <ClCompile Include="..\..\ajaanc\src\ancillarydata_hdr_sdr.cpp" />
+    <ClCompile Include="..\..\ajaanc\src\ancillarydata_timecode.cpp" />
+    <ClCompile Include="..\..\ajaanc\src\ancillarydata_timecode_atc.cpp" />
+    <ClCompile Include="..\..\ajaanc\src\ancillarydata_timecode_vitc.cpp" />
+    <ClCompile Include="..\..\ajaanc\src\ancillarylist.cpp" />
+    <ClCompile Include="..\..\ajabase\common\audioutilities.cpp" />
+    <ClCompile Include="..\..\ajabase\common\buffer.cpp" />
+    <ClCompile Include="..\..\ajabase\common\common.cpp" />
+    <ClCompile Include="..\..\ajabase\common\dpxfileio.cpp" />
+    <ClCompile Include="..\..\ajabase\common\dpx_hdr.cpp" />
+    <ClCompile Include="..\..\ajabase\common\guid.cpp" />
+    <ClCompile Include="..\..\ajabase\common\options_popt.cpp" />
+    <ClCompile Include="..\..\ajabase\common\performance.cpp" />
+    <ClCompile Include="..\..\ajabase\common\pixelformat.cpp" />
+    <ClCompile Include="..\..\ajabase\common\testpatterngen.cpp" />
+    <ClCompile Include="..\..\ajabase\common\timebase.cpp" />
+    <ClCompile Include="..\..\ajabase\common\timecode.cpp" />
+    <ClCompile Include="..\..\ajabase\common\timecodeburn.cpp" />
+    <ClCompile Include="..\..\ajabase\common\timer.cpp" />
+    <ClCompile Include="..\..\ajabase\common\videoutilities.cpp" />
+    <ClCompile Include="..\..\ajabase\common\wavewriter.cpp" />
+    <ClCompile Include="..\..\ajabase\network\ip_socket.cpp" />
+    <ClCompile Include="..\..\ajabase\network\tcp_socket.cpp" />
+    <ClCompile Include="..\..\ajabase\network\udp_socket.cpp" />
+    <ClCompile Include="..\..\ajabase\persistence\persistence.cpp" />
+    <ClCompile Include="..\..\ajabase\persistence\sqlite3.c" />
+    <ClCompile Include="..\..\ajabase\pnp\pnp.cpp" />
+    <ClCompile Include="..\..\ajabase\pnp\windows\pnpimpl.cpp" />
+    <ClCompile Include="..\..\ajabase\system\atomic.cpp" />
+    <ClCompile Include="..\..\ajabase\system\debug.cpp" />
+    <ClCompile Include="..\..\ajabase\system\diskstatus.cpp" />
+    <ClCompile Include="..\..\ajabase\system\event.cpp" />
+    <ClCompile Include="..\..\ajabase\system\info.cpp" />
+    <ClCompile Include="..\..\ajabase\system\lock.cpp" />
+    <ClCompile Include="..\..\ajabase\system\log.cpp" />
+    <ClCompile Include="..\..\ajabase\system\memory.cpp" />
+    <ClCompile Include="..\..\ajabase\system\process.cpp" />
+    <ClCompile Include="..\..\ajabase\system\system.cpp" />
+    <ClCompile Include="..\..\ajabase\system\systemtime.cpp" />
+    <ClCompile Include="..\..\ajabase\system\thread.cpp" />
+    <ClCompile Include="..\..\ajabase\system\windows\eventimpl.cpp" />
+    <ClCompile Include="..\..\ajabase\system\windows\file_io.cpp" />
+    <ClCompile Include="..\..\ajabase\system\windows\infoimpl.cpp" />
+    <ClCompile Include="..\..\ajabase\system\windows\lockimpl.cpp" />
+    <ClCompile Include="..\..\ajabase\system\windows\processimpl.cpp" />
+    <ClCompile Include="..\..\ajabase\system\windows\threadimpl.cpp" />
     <ClCompile Include="..\codecs\hevc\m31\ntv2m31.cpp" />
     <ClCompile Include="..\codecs\hevc\m31\ntv2m31cparam.cpp" />
     <ClCompile Include="..\codecs\hevc\m31\ntv2m31ehparam.cpp" />
@@ -214,7 +274,6 @@
     <ClCompile Include="..\src\ntv2autocirculate.cpp" />
     <ClCompile Include="..\src\ntv2bitfile.cpp" />
     <ClCompile Include="..\src\ntv2card.cpp" />
-    <ClCompile Include="..\src\ntv2colorcorrection.cpp" />
     <ClCompile Include="..\src\ntv2config2022.cpp" />
     <ClCompile Include="..\src\ntv2configts2022.cpp" />
     <ClCompile Include="..\src\ntv2debug.cpp" />
@@ -233,7 +292,6 @@
     <ClCompile Include="..\src\ntv2mcsfile.cpp" />
     <ClCompile Include="..\src\ntv2nubaccess.cpp" />
     <ClCompile Include="..\src\ntv2nubpktcom.cpp" />
-    <ClCompile Include="..\src\ntv2procamp.cpp" />
     <ClCompile Include="..\src\ntv2publicinterface.cpp" />
     <ClCompile Include="..\src\ntv2register.cpp" />
     <ClCompile Include="..\src\ntv2registerexpert.cpp">
@@ -245,11 +303,11 @@
     <ClCompile Include="..\src\ntv2rp215.cpp" />
     <ClCompile Include="..\src\ntv2signalrouter.cpp" />
     <ClCompile Include="..\src\ntv2spiinterface.cpp" />
-    <ClCompile Include="..\src\ntv2status.cpp" />
     <ClCompile Include="..\src\ntv2subscriptions.cpp" />
     <ClCompile Include="..\src\ntv2supportlogger.cpp" />
     <ClCompile Include="..\src\ntv2task.cpp" />
     <ClCompile Include="..\src\ntv2testpattern.cpp" />
+    <ClCompile Include="..\src\ntv2testpatterngen.cpp" />
     <ClCompile Include="..\src\ntv2transcode.cpp" />
     <ClCompile Include="..\src\ntv2utf8.cpp" />
     <ClCompile Include="..\src\ntv2utils.cpp">
@@ -260,12 +318,77 @@
     <ClCompile Include="..\src\ntv2vidproc.cpp" />
     <ClCompile Include="..\src\ntv2vpid.cpp" />
     <ClCompile Include="..\src\ntv2vpidfromspec.cpp" />
-    <ClCompile Include="..\src\testpatterngen.cpp" />
-    <ClCompile Include="..\src\xena2vidproc.cpp" />
     <ClCompile Include="..\src\ntv2serialcontrol.cpp" />
     <ClCompile Include="..\src\win\ntv2windriverinterface.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\ajaanc\includes\ancillarydata.h" />
+    <ClInclude Include="..\..\ajaanc\includes\ancillarydatafactory.h" />
+    <ClInclude Include="..\..\ajaanc\includes\ancillarydata_cea608.h" />
+    <ClInclude Include="..\..\ajaanc\includes\ancillarydata_cea608_line21.h" />
+    <ClInclude Include="..\..\ajaanc\includes\ancillarydata_cea608_vanc.h" />
+    <ClInclude Include="..\..\ajaanc\includes\ancillarydata_cea708.h" />
+    <ClInclude Include="..\..\ajaanc\includes\ancillarydata_framestatusinfo524D.h" />
+    <ClInclude Include="..\..\ajaanc\includes\ancillarydata_framestatusinfo5251.h" />
+    <ClInclude Include="..\..\ajaanc\includes\ancillarydata_hdr_hdr10.h" />
+    <ClInclude Include="..\..\ajaanc\includes\ancillarydata_hdr_hlg.h" />
+    <ClInclude Include="..\..\ajaanc\includes\ancillarydata_hdr_sdr.h" />
+    <ClInclude Include="..\..\ajaanc\includes\ancillarydata_timecode.h" />
+    <ClInclude Include="..\..\ajaanc\includes\ancillarydata_timecode_atc.h" />
+    <ClInclude Include="..\..\ajaanc\includes\ancillarydata_timecode_vitc.h" />
+    <ClInclude Include="..\..\ajaanc\includes\ancillarylist.h" />
+    <ClInclude Include="..\..\ajabase\common\ajarefptr.h" />
+    <ClInclude Include="..\..\ajabase\common\audioutilities.h" />
+    <ClInclude Include="..\..\ajabase\common\buffer.h" />
+    <ClInclude Include="..\..\ajabase\common\bytestream.h" />
+    <ClInclude Include="..\..\ajabase\common\circularbuffer.h" />
+    <ClInclude Include="..\..\ajabase\common\cli_utils.h" />
+    <ClInclude Include="..\..\ajabase\common\common.h" />
+    <ClInclude Include="..\..\ajabase\common\dpxfileio.h" />
+    <ClInclude Include="..\..\ajabase\common\dpx_hdr.h" />
+    <ClInclude Include="..\..\ajabase\common\export.h" />
+    <ClInclude Include="..\..\ajabase\common\guid.h" />
+    <ClInclude Include="..\..\ajabase\common\options_popt.h" />
+    <ClInclude Include="..\..\ajabase\common\performance.h" />
+    <ClInclude Include="..\..\ajabase\common\pixelformat.h" />
+    <ClInclude Include="..\..\ajabase\common\public.h" />
+    <ClInclude Include="..\..\ajabase\common\rawfile.h" />
+    <ClInclude Include="..\..\ajabase\common\testpatterndata.h" />
+    <ClInclude Include="..\..\ajabase\common\testpatterngen.h" />
+    <ClInclude Include="..\..\ajabase\common\timebase.h" />
+    <ClInclude Include="..\..\ajabase\common\timecode.h" />
+    <ClInclude Include="..\..\ajabase\common\timecodeburn.h" />
+    <ClInclude Include="..\..\ajabase\common\timer.h" />
+    <ClInclude Include="..\..\ajabase\common\types.h" />
+    <ClInclude Include="..\..\ajabase\common\videotypes.h" />
+    <ClInclude Include="..\..\ajabase\common\videoutilities.h" />
+    <ClInclude Include="..\..\ajabase\common\wavewriter.h" />
+    <ClInclude Include="..\..\ajabase\network\ip_socket.h" />
+    <ClInclude Include="..\..\ajabase\network\tcp_socket.h" />
+    <ClInclude Include="..\..\ajabase\network\udp_socket.h" />
+    <ClInclude Include="..\..\ajabase\persistence\persistence.h" />
+    <ClInclude Include="..\..\ajabase\persistence\sqlite3.h" />
+    <ClInclude Include="..\..\ajabase\pnp\pnp.h" />
+    <ClInclude Include="..\..\ajabase\pnp\windows\pnpimpl.h" />
+    <ClInclude Include="..\..\ajabase\system\atomic.h" />
+    <ClInclude Include="..\..\ajabase\system\debug.h" />
+    <ClInclude Include="..\..\ajabase\system\debugshare.h" />
+    <ClInclude Include="..\..\ajabase\system\diskstatus.h" />
+    <ClInclude Include="..\..\ajabase\system\event.h" />
+    <ClInclude Include="..\..\ajabase\system\file_io.h" />
+    <ClInclude Include="..\..\ajabase\system\info.h" />
+    <ClInclude Include="..\..\ajabase\system\lock.h" />
+    <ClInclude Include="..\..\ajabase\system\log.h" />
+    <ClInclude Include="..\..\ajabase\system\memory.h" />
+    <ClInclude Include="..\..\ajabase\system\process.h" />
+    <ClInclude Include="..\..\ajabase\system\system.h" />
+    <ClInclude Include="..\..\ajabase\system\systemtime.h" />
+    <ClInclude Include="..\..\ajabase\system\thread.h" />
+    <ClInclude Include="..\..\ajabase\system\windows\eventimpl.h" />
+    <ClInclude Include="..\..\ajabase\system\windows\infoimpl.h" />
+    <ClInclude Include="..\..\ajabase\system\windows\lockimpl.h" />
+    <ClInclude Include="..\..\ajabase\system\windows\processimpl.h" />
+    <ClInclude Include="..\..\ajabase\system\windows\threadimpl.h" />
     <ClInclude Include="..\codecs\hevc\m31\ntv2m31.h" />
     <ClInclude Include="..\codecs\hevc\m31\ntv2m31cparam.h" />
     <ClInclude Include="..\codecs\hevc\m31\ntv2m31ehparam.h" />
@@ -282,6 +405,7 @@
     <ClInclude Include="..\includes\ntv2debug.h" />
     <ClInclude Include="..\includes\ntv2devicefeatures.h" />
     <ClInclude Include="..\includes\ntv2devicefeatures.hh" />
+    <ClInclude Include="..\includes\ntv2enums.h" />
     <ClInclude Include="..\includes\ntv2formatdescriptor.h" />
     <ClInclude Include="..\includes\ntv2registerexpert.h" />
     <ClInclude Include="..\includes\ntv2spiinterface.h" />

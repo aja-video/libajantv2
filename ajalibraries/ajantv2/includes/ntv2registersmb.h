@@ -40,6 +40,7 @@
 
 #define PLL_CONFIG_PCR                  BIT(0)
 #define PLL_CONFIG_PTP                  BIT(1)
+#define PLL_CONFIG_RESET                BIT(20)
 #define PLL_CONFIG_DCO_MODE             BIT(28)
 
 

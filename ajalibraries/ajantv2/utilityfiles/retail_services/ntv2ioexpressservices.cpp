@@ -105,7 +105,7 @@ void IoExpressServices::SetDeviceXPointPlayback ()
 		else if (mVirtualInputSelect == NTV2_Input2Select)
 		{
 			// Select input 2 (0x17)
-			mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptHDMIIn);
+			mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptHDMIIn1);
 		}
 	}
 
@@ -214,7 +214,7 @@ void IoExpressServices::SetDeviceXPointCapture()
 	else if (mVirtualInputSelect == NTV2_Input2Select)
 	{
 		// Select input 2 (0x17)
-		inputSelectPrimary = NTV2_XptHDMIIn;
+		inputSelectPrimary = NTV2_XptHDMIIn1;
 		//inputSelectSecondary = NTV2_XptBlack;
 	}
 	

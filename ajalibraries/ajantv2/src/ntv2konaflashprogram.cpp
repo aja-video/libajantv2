@@ -44,8 +44,9 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram ()
         _flashID            (MAIN_FLASHBLOCK),
 		_deviceID			(0),
 		_bQuiet				(false),
-        _mcsStep(0),
-        _spiFlash(NULL)
+        _mcsStep            (0),
+        _failSafePadding    (0),
+        _spiFlash           (NULL)
 {
 }
 
@@ -73,7 +74,8 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram (const UWord boardNumber)
         _deviceID           (0),
         _bQuiet             (false),
         _mcsStep            (0),
-        _spiFlash(NULL)
+        _failSafePadding    (0),
+        _spiFlash           (NULL)
 {
 	SetDeviceProperties();
 }
@@ -97,24 +99,28 @@ void CNTV2KonaFlashProgram::SetQuietMode()
     }
 }
 
+void CNTV2KonaFlashProgram::SetMBReset()
+{
+    if (IsKonaIPDevice())
+    {
+        //Hold MB in reset
+        if(GetDeviceID() == DEVICE_ID_IOIP_2022 || GetDeviceID() == DEVICE_ID_IOIP_2110)
+        {
+            WriteRegister(SAREK_REGS + kRegSarekControl, 0x02);
+        }
+        else if(GetDeviceID() == DEVICE_ID_KONAIP_2022 || GetDeviceID() == DEVICE_ID_KONAIP_2110)
+        {
+            WriteRegister(SAREK_REGS + kRegSarekControl, 0x01);
+        }
+        //Take SPI bus control
+        WriteRegister(SAREK_REGS + kRegSarekSpiSelect, 0x01);
+    }
+}
+
 bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, uint32_t index)
 {
 	if (!Open (boardNumber))
 		return false;
-
-	// if board is a sarek with microblaze - ensure access to flash
-	CNTV2Card	device;
-	CNTV2DeviceScanner::GetDeviceAtIndex(boardNumber, device);
-	if (device.IsKonaIPDevice())
-	{
-		uint32_t regVal = 0;
-		device.ReadRegister(SAREK_REGS + kRegSarekFwCfg, regVal);
-		if (regVal & SAREK_MB_PRESENT)
-		{
-			// take access
-			device.WriteRegister(SAREK_REGS + kRegSarekSpiSelect, 0x01);
-		}
-	}
 
 	if (!SetDeviceProperties())
 		return false;
@@ -186,18 +192,21 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		_flashSize = 16 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
         _sectorSize = 256 * 1024;
+        _failSafePadding = 1;
 		knownChip = true;
 		break;
     case 0x00010220://CYPRESS f25fl512
 		_flashSize = 64 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 256 * 1024;
+        _failSafePadding = 1;
 		knownChip = true;
 		break;
     case 0x009d6019://ISSI
         _flashSize = 64 * 1024 * 1024;
         _bankSize = 16 * 1024 * 1024;
         _sectorSize = 64 * 1024;
+        _failSafePadding = 4;
         knownChip = true;
         break;
     case 0x00C84018://GIGADEVICE GD25Q127CFIG
@@ -206,12 +215,14 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		_flashSize = 16 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 64 * 1024;
+        _failSafePadding = 4;
 		knownChip = true;
 		break;
     case 0x00010219://CYPRESS S25FL256
 		_flashSize = 32 * 1024 * 1024;
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 64 * 1024;
+        _failSafePadding = 4;
 		knownChip = true;
         break;
 	default:
@@ -228,7 +239,7 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 	if (::NTV2DeviceHasSPIv2(GetDeviceID()))
 	{
 		_numSectorsMain = _flashSize / _sectorSize / 2;
-		_numSectorsFailSafe = (_flashSize / _sectorSize / 2) - 1;
+        _numSectorsFailSafe = (_flashSize / _sectorSize / 2) - _failSafePadding;
 		_mainOffset = 0;
 		_failSafeOffset = 8 * 1024 * 1024;
 		_macOffset = _bankSize - (2 * _sectorSize);
@@ -257,7 +268,7 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 			//SPIV3 This gets a little weird both main and failsafe have an offset of 0
 			//and the real offset is controlled by a bank selector switch in firmware
 			_numSectorsMain = _flashSize / _sectorSize / 2;
-			_numSectorsFailSafe = (_flashSize / _sectorSize / 2) - 1;
+            _numSectorsFailSafe = (_flashSize / _sectorSize / 2) - _failSafePadding;
 			_mainOffset = 0;
 			_failSafeOffset = 0;// but is really 16*1024*1024;
 			_macOffset = _bankSize - (2 * _sectorSize);
@@ -285,22 +296,27 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 	else if(NTV2DeviceHasSPIv5(GetDeviceID()))
 	{
 		_numSectorsMain = _flashSize / _sectorSize / 2;
-		_numSectorsFailSafe = (_flashSize / _sectorSize / 2) - 1;
+        _numSectorsFailSafe = (_flashSize / _sectorSize / 2) - _failSafePadding;
 		_mainOffset = 0;
 		_failSafeOffset = 0;// but is really 32*1024*1024;
 		status = true;
 	}
 	else
 	{
-		//This includes legacy boards such as LHi, Corvid 1...
-		//SPI is devided up into 4 logical blocks of 4M each
-		//Without history explained main is at offset 0 and failsafe is at offset 12
-		_numSectorsMain = _flashSize / _sectorSize / 4;
-		_numSectorsFailSafe = (_flashSize / _sectorSize / 4) - 1;
-		_mainOffset = 0;
-		_failSafeOffset = 12 * 1024 * 1024;
-		_macOffset = _bankSize - (2 * _sectorSize);
-		status = true;
+        if(NTV2DeviceHasSPIFlash(GetDeviceID()))
+        {
+            //This includes legacy boards such as LHi, Corvid 1...
+            //SPI is devided up into 4 logical blocks of 4M each
+            //Without history explained main is at offset 0 and failsafe is at offset 12
+            _numSectorsMain = _flashSize / _sectorSize / 4;
+            _numSectorsFailSafe = (_flashSize / _sectorSize / 4) - 1;
+            _mainOffset = 0;
+            _failSafeOffset = 12 * 1024 * 1024;
+            _macOffset = _bankSize - (2 * _sectorSize);
+            status = true;
+        }
+        else
+            status = false;
 	}
 
     if (_spiFlash)
@@ -816,7 +832,7 @@ bool CNTV2KonaFlashProgram::WaitForFlashNOTBusy()
     bool busy  = true;
 	int i = 0;
 	uint32_t regValue;
-	while(i<1)
+    while(i<1)
 	{
 		ReadRegister(kRegBoardID, regValue);
 		i++;

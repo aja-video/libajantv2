@@ -7,6 +7,7 @@
 **/
 
 #include "ntv2driverprocamp.h"
+#if defined(NTV2_BUILDING_DRIVER)
 
 #ifdef AJALinux
 #include <linux/jiffies.h>
@@ -762,3 +763,4 @@ static bool I2CWriteControl(ULWord deviceNumber, ULWord value)
 	return false;	// Not implemented for Windows yet.
 }
 
+#endif	//	defined(NTV2_BUILDING_DRIVER)

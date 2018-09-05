@@ -49,6 +49,12 @@ public:
 	 */
 	virtual AJAStatus Unlock();
 
+	/**
+	 *	@return		True if valid (has implementation).
+	 *				False if not valid.
+	 */
+	virtual inline bool IsValid(void) const {return mpImpl != NULL;}
+
 private:
 
 	AJALockImpl* mpImpl;

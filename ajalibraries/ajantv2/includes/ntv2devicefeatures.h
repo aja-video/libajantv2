@@ -45,6 +45,9 @@ AJAExport bool NTV2DeviceCanDoAudioIn(const NTV2DeviceID inDeviceID);
 AJAExport bool NTV2DeviceCanDo292Out(NTV2DeviceID boardID, UWord index0);
 AJAExport bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0);
 AJAExport bool NTV2DeviceCanDo12GOut(NTV2DeviceID boardID, UWord index0);
+AJAExport bool NTV2DeviceCanDo292In(NTV2DeviceID boardID, UWord index0);
+AJAExport bool NTV2DeviceCanDo3GIn(NTV2DeviceID boardID, UWord index0);
+AJAExport bool NTV2DeviceCanDo12GIn(NTV2DeviceID boardID, UWord index0);
 AJAExport bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0);
 
 /**
@@ -85,17 +88,26 @@ AJAExport bool NTV2DeviceGetVideoFormatFromState (	NTV2VideoFormat *		pOutValue,
 													const NTV2FrameRate		inFrameRate,
 													const NTV2FrameGeometry	inFrameGeometry,
 													const NTV2Standard		inStandard,
-													const ULWord			inIsSMPTE372Enabled);
+                                                    const ULWord			inIsSMPTE372Enabled);
 
 AJAExport bool NTV2DeviceGetVideoFormatFromState_Ex (	NTV2VideoFormat *		pOutValue,
 														const NTV2FrameRate		inFrameRate,
 														const NTV2FrameGeometry	inFrameGeometry,
 														const NTV2Standard		inStandard,
 														const ULWord			inIsSMPTE372Enabled,
-														const bool				inIsProgressivePicture);
+                                                        const bool				inIsProgressivePicture);
+
+AJAExport bool NTV2DeviceGetVideoFormatFromState_Ex2 (	NTV2VideoFormat *		pOutValue,
+                                                        const NTV2FrameRate		inFrameRate,
+                                                        const NTV2FrameGeometry	inFrameGeometry,
+                                                        const NTV2Standard		inStandard,
+                                                        const ULWord			inIsSMPTE372Enabled,
+                                                        const bool				inIsProgressivePicture,
+                                                        const bool              inIsSquareDivision);
 
 AJAExport bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt);	///< @note	!!! NOT IMPLEMENTED YET !!!
 AJAExport bool NTV2DeviceCanDoTCIndex (const NTV2DeviceID inDeviceID, const NTV2TCIndex inTCIndex);	///< @return	True if the device having the given ID supports the specified NTV2TCIndex.
+AJAExport bool NTV2DeviceCanDoInputTCIndex (const NTV2DeviceID inDeviceID, const NTV2TCIndex inTCIndex);	///< @return	True if the device having the given ID supports the specified NTV2TCIndex for input.
 AJAExport NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID);
 AJAExport NTV2AudioSystem NTV2DeviceGetHostAudioSystem(const NTV2DeviceID inDeviceID);
 AJAExport bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID);

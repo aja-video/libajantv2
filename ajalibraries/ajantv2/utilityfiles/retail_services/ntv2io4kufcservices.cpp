@@ -34,13 +34,13 @@ NTV2VideoFormat Io4KUfcServices::GetSelectedInputVideoFormat(
 	{
 		inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
 		if (inputColorSpace)
-			*inputColorSpace = mSDIInput1ColorSpace;
+			*inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
 	}
 	else if (mVirtualInputSelect == NTV2_Input2Select)
 	{
 		inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
 		if (inputColorSpace)
-			*inputColorSpace = mSDIInput2ColorSpace;
+			*inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL2, mSDIInput2ColorSpace);;
 	}
 	else if (mVirtualInputSelect == NTV2_Input3Select)	// HDMI
 	{
@@ -347,8 +347,8 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if ( (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
-			  || (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
+	else if ( (mVirtualDigitalOutput2Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
+			  || (   (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
 			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
@@ -371,7 +371,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
             mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
         }
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)			// Secondary
+	else if (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)			// Secondary
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptConversionModule);
 		mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
@@ -382,7 +382,7 @@ void Io4KUfcServices::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptSDIOut2Input, b3GbOut ? NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut1DS2);
 		mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)				// Video+Key
+	else if (mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)				// Video+Key
 	{
 		if (bDSKOn)
 		{
@@ -747,7 +747,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 	// input 3 select
 	else if (mVirtualInputSelect == NTV2_Input3Select)
 	{
-		inputXptYUV1 = NTV2_XptHDMIIn;
+		inputXptYUV1 = NTV2_XptHDMIIn1;
 		inputXptYUV2 = NTV2_XptBlack;
 		bHdmiIn = true;
 	}
@@ -859,7 +859,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 		if (bHdmiIn)
 		{
 			if (inputColorSpace == NTV2_ColorSpaceModeRgb)
-				mCard->Connect (NTV2_XptLUT1Input, NTV2_XptHDMIInRGB);
+				mCard->Connect (NTV2_XptLUT1Input, NTV2_XptHDMIIn1RGB);
 			else
 				mCard->Connect (NTV2_XptLUT1Input, NTV2_XptBlack);
 		}
@@ -886,7 +886,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 	// provides SMPTE <-> Full conversion
 	if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 	{
-		mCard->Connect (NTV2_XptLUT2Input, bHdmiIn ? NTV2_XptHDMIInRGB : NTV2_XptDuallinkIn1);
+		mCard->Connect (NTV2_XptLUT2Input, bHdmiIn ? NTV2_XptHDMIIn1RGB : NTV2_XptDuallinkIn1);
 		mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL2,						// NOTE: conflicts with CC in AC
 										mSDIInput1RGBRange == NTV2_RGBRangeFull ? 
 										kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
@@ -904,7 +904,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 		{
 			if (mSDIInput1RGBRange == mSDIOutput1RGBRange && mLUTType != NTV2_LUTCustom)
 			{
-				mCard->Connect (NTV2_XptDualLinkOut1Input, bHdmiIn ? NTV2_XptHDMIInRGB : NTV2_XptDuallinkIn1);
+				mCard->Connect (NTV2_XptDualLinkOut1Input, bHdmiIn ? NTV2_XptHDMIIn1RGB : NTV2_XptDuallinkIn1);
 			}
 			else
 			{
@@ -923,7 +923,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptDualLinkOut1Input, bHdmiIn ? NTV2_XptHDMIInRGB : NTV2_XptDuallinkIn1);
+			mCard->Connect (NTV2_XptDualLinkOut1Input, bHdmiIn ? NTV2_XptHDMIIn1RGB : NTV2_XptDuallinkIn1);
 		}
 	}
 	
@@ -943,7 +943,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 		{
 			if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 			{
-				mCard->Connect (NTV2_XptFrameBuffer1Input, bHdmiIn ? NTV2_XptHDMIIn : NTV2_XptDuallinkIn1);		// no range change
+				mCard->Connect (NTV2_XptFrameBuffer1Input, bHdmiIn ? NTV2_XptHDMIIn1 : NTV2_XptDuallinkIn1);		// no range change
 			}
 			else
 			{
@@ -1053,8 +1053,8 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 	
 	// SDI Out 2
 	if (b2FbLevelBHfr ||															// Dual Stream - p60b
-		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
-		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)					// Video + Key
+		mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||					// Stereo 3D
+		mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)					// Video + Key
 	{
 		if (b3GbOut)
 		{
@@ -1079,8 +1079,8 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptDuallinkOut1DS2);				// 2 wires
 		}
 	}
-	else if ( (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
-		      || (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
+	else if ( (mVirtualDigitalOutput2Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
+		      || (   (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
 			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
@@ -1093,7 +1093,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 			mCard->Connect (NTV2_XptSDIOut2Input, frameSync1YUV);
 		}
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)
+	else if (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync2YUV);
 	}

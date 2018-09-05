@@ -9,7 +9,7 @@
 
 #include "ajabase/common/common.h"
 
-class AJASystemInfoImpl
+class AJA_EXPORT AJASystemInfoImpl
 {
 public:
 

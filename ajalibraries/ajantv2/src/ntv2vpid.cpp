@@ -23,6 +23,8 @@ static NTV2VideoFormat	stTable2048i		[VPIDPictureRate_ReservedF + 1];
 static NTV2VideoFormat	stTable1920i		[VPIDPictureRate_ReservedF + 1];
 static NTV2VideoFormat	stTable3840pSID		[VPIDPictureRate_ReservedF + 1];
 static NTV2VideoFormat	stTable4096pSID		[VPIDPictureRate_ReservedF + 1];
+static NTV2VideoFormat	stTable3840pTSI		[VPIDPictureRate_ReservedF + 1];
+static NTV2VideoFormat	stTable4096pTSI		[VPIDPictureRate_ReservedF + 1];
 static bool				stTablesInitialized	(false);
 
 class VPIDTableInitializer
@@ -121,6 +123,24 @@ class VPIDTableInitializer
 			stTable4096pSID[VPIDPictureRate_5000] = NTV2_FORMAT_4x2048x1080p_5000;
 			stTable4096pSID[VPIDPictureRate_5994] = NTV2_FORMAT_4x2048x1080p_5994;
 			stTable4096pSID[VPIDPictureRate_6000] = NTV2_FORMAT_4x2048x1080p_6000;
+
+            stTable3840pSID[VPIDPictureRate_2398] = NTV2_FORMAT_3840x2160p_2398;
+            stTable3840pSID[VPIDPictureRate_2400] = NTV2_FORMAT_3840x2160p_2400;
+            stTable3840pSID[VPIDPictureRate_2500] = NTV2_FORMAT_3840x2160p_2500;
+            stTable3840pSID[VPIDPictureRate_2997] = NTV2_FORMAT_3840x2160p_2997;
+            stTable3840pSID[VPIDPictureRate_3000] = NTV2_FORMAT_3840x2160p_3000;
+            stTable3840pSID[VPIDPictureRate_5000] = NTV2_FORMAT_3840x2160p_5000;
+            stTable3840pSID[VPIDPictureRate_5994] = NTV2_FORMAT_3840x2160p_5994;
+            stTable3840pSID[VPIDPictureRate_6000] = NTV2_FORMAT_3840x2160p_6000;
+
+            stTable4096pSID[VPIDPictureRate_2398] = NTV2_FORMAT_4096x2160p_2398;
+            stTable4096pSID[VPIDPictureRate_2400] = NTV2_FORMAT_4096x2160p_2400;
+            stTable4096pSID[VPIDPictureRate_2500] = NTV2_FORMAT_4096x2160p_2500;
+            stTable4096pSID[VPIDPictureRate_2997] = NTV2_FORMAT_4096x2160p_2997;
+            stTable4096pSID[VPIDPictureRate_3000] = NTV2_FORMAT_4096x2160p_3000;
+            stTable4096pSID[VPIDPictureRate_5000] = NTV2_FORMAT_4096x2160p_5000;
+            stTable4096pSID[VPIDPictureRate_5994] = NTV2_FORMAT_4096x2160p_5994;
+            stTable4096pSID[VPIDPictureRate_6000] = NTV2_FORMAT_4096x2160p_6000;
 			stTablesInitialized = true;
 		}	//	constructor
 

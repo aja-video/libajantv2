@@ -14,7 +14,8 @@
 	#if !defined(_WIN32_WINNT)
         #define _WIN32_WINNT 0x0600
 	#endif
-    #include <Windows.h>
+	#include <WinSock2.h>	//	NOTE:	This must be included BEFORE <Windows.h> to avoid "macro redefinition" errors.
+    #include <Windows.h>	//			http://www.zachburlingame.com/2011/05/resolving-redefinition-errors-betwen-ws2def-h-and-winsock-h/
 	#include <stdio.h>
 	#include <tchar.h>
 	#include <winioctl.h>

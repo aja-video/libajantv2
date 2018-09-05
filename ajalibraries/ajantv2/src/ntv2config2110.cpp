@@ -1177,6 +1177,28 @@ bool CNTV2Config2110::GetPTPStatus(PTPStatus & ptpStatus)
     return true;
 }
 
+bool CNTV2Config2110::PLLReset()
+{
+    uint32_t val = 0;
+    mDevice.ReadRegister(SAREK_PLL + kRegPll_Config, val);
+
+    val |= PLL_CONFIG_RESET;
+    mDevice.WriteRegister(SAREK_PLL + kRegPll_Config, val);
+
+    // Wait just a bit
+    #if defined(AJAWindows) || defined(MSWindows)
+        ::Sleep (RESET_MILLISECONDS);
+    #else
+        usleep (RESET_MILLISECONDS * 1000);
+    #endif
+
+    val &= ~PLL_CONFIG_RESET;
+    mDevice.WriteRegister(SAREK_PLL + kRegPll_Config, val);
+
+
+    return true;
+}
+
 bool CNTV2Config2110::Set4KModeEnable(const bool enable)
 {
     if (!mDevice.IsMBSystemReady())
@@ -2216,6 +2238,24 @@ bool CNTV2Config2110::ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream,
                 }
             }
         }
+
+        rv = getDescriptionValue(index,"a=ptime",value);
+        if (rv > index)
+        {
+            tokens = split(value.c_str(), ' ');
+            if ((tokens.size() >= 1)&& !tokens[0].empty())
+            {
+                tokens = split(tokens[0].c_str(), '.');
+                if (tokens.size() >= 2)
+                {
+                    if ((atoi(tokens[0].c_str()) == 1) && (atoi(tokens[1].c_str()) == 0))
+                        rxConfig.audioPktInterval = PACKET_INTERVAL_1mS;
+                    else if ((atoi(tokens[0].c_str()) == 0) && (atoi(tokens[1].c_str()) == 125))
+                        rxConfig.audioPktInterval = PACKET_INTERVAL_125uS;
+                }
+            }
+        }
+
         rxConfig.rxMatch = rxMatch;
         return true;
     }

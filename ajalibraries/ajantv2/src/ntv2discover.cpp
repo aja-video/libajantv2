@@ -43,7 +43,7 @@ isDiscoverRespPacket(NTV2NubPkt *pPkt)
 }
 
 static NTV2NubPkt *
-BuildDiscoverQueryPacket(UWord boardMask)
+BuildDiscoverQueryPacket(void)
 {
 	NTV2NubPkt *pPkt;
 	char *p;
@@ -58,7 +58,7 @@ BuildDiscoverQueryPacket(UWord boardMask)
 	NTV2DiscoverQueryPayload *pDiscoverQueryPayload = 
 		(NTV2DiscoverQueryPayload *)p;
 
-	pDiscoverQueryPayload->boardMask = htonl((ULWord)boardMask);
+	pDiscoverQueryPayload->boardMask = htonl(ULWord(256));
 	
 	return pPkt;
 }
@@ -98,8 +98,7 @@ extractBoardInventory(NTV2NubPkt *pPkt, NTV2DiscoverRespPayload *boardInventory,
 
 // Discover nubs on all interfaces
 int
-ntv2DiscoverNubs(	UWord boardMask,
-					int maxNubs, // Maximum number of nubs (size of sockaddr_in and boardInventory arrays)
+ntv2DiscoverNubs(	int maxNubs, // Maximum number of nubs (size of sockaddr_in and boardInventory arrays)
 					struct sockaddr_in their_addr[],			// Array of responders
 					NTV2DiscoverRespPayload boardInventory[],	// Available boards for each responder
 					int &nubsFound,
@@ -147,7 +146,6 @@ ntv2DiscoverNubs(	UWord boardMask,
 		if (strcmp("0.0.0.0", inet_ntoa(pAddress->sin_addr)))
 		{
 			retcode = ntv2DiscoverNubs( inet_ntoa(pAddress->sin_addr),
-				boardMask,
 				maxNubs,
 				their_addr,
 				boardInventory,
@@ -197,7 +195,6 @@ ntv2DiscoverNubs(	UWord boardMask,
 			if (strcmp("0.0.0.0", inet_ntoa(((struct sockaddr_in *)&item->ifr_broadaddr)->sin_addr)))
 			{
 				retcode = ntv2DiscoverNubs( inet_ntoa(((struct sockaddr_in *)&item->ifr_broadaddr)->sin_addr),
-					boardMask,
 					maxNubs,
 					their_addr,
 					boardInventory,
@@ -224,8 +221,7 @@ ntv2DiscoverNubs(	UWord boardMask,
 
 // Discover nubs at a particular host or particular address
 int
-ntv2DiscoverNubs(	char *hostname,
-					UWord boardMask,
+ntv2DiscoverNubs(	const char *hostname,
 					int maxNubs, // Maximum number of nubs (size of sockaddr_in and boardInventory arrays)
 					struct sockaddr_in their_addr[],			// Array of responders
 					NTV2DiscoverRespPayload boardInventory[],	// Available boards for each responder
@@ -274,7 +270,7 @@ ntv2DiscoverNubs(	char *hostname,
 	their_addr[nubsFound].sin_addr = *((struct in_addr *)he->h_addr);
 	memset(&(their_addr[nubsFound].sin_zero), '\0', 8);  // zero the rest of the struct
 
-	NTV2NubPkt *pPkt = BuildDiscoverQueryPacket(boardMask);
+	NTV2NubPkt *pPkt = BuildDiscoverQueryPacket();
 
 	int len =  pPkt == 0 ? 0 : sizeof(NTV2NubPktHeader) + pPkt->hdr.dataLength;
 

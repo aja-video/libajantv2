@@ -7,65 +7,30 @@
 #ifndef AJA_EXPORT_H
 #define AJA_EXPORT_H
 
-#if defined(AJA_WINDOWS)
-	#if defined(AJA_WINDLL)
-		#pragma warning (disable : 4251)
-		#if defined(AJA_DLL_BUILD)
-			#define AJA_EXPORT __declspec(dllexport)
-			#pragma comment (lib, "comctl32.lib")
-			#pragma comment (lib, "wsock32.lib")
-			#pragma comment (lib, "winmm")
-			#pragma comment (lib, "setupapi.lib")
-			#pragma comment (lib, "odbc32.lib")
-			#pragma comment (lib, "shlwapi.lib")
-            #pragma comment (lib, "netapi32.lib")
+#ifdef MSWindows
+	#ifndef AJASTATIC
+		#if defined(AJADLL) || defined(AJA_WINDLL)
+			#pragma warning (disable : 4251)
+			#if defined(AJADLL_BUILD) || defined(AJA_DLL_BUILD)
+				#define AJAExport	__declspec(dllexport)	//	ajantv2 way
+				#define AJA_EXPORT	__declspec(dllexport)	//	ajabase way
+			#else
+				#define AJAExport	__declspec(dllimport)	//	ajantv2 way
+				#define AJA_EXPORT	__declspec(dllimport)	//	ajabase way
+			#endif
 		#else
-			#define AJA_EXPORT __declspec(dllimport)
-            #if !defined(AJA_NO_AUTOIMPORT)
-                #if defined(AJA_DEBUG)
-                    #if defined(_WIN64)
-                        #pragma comment (lib, "libajabasedlld")
-                    #else
-                        #pragma comment (lib, "libajabasedll_32d")
-                    #endif
-                #else
-                    #if defined(_WIN64)
-                        #pragma comment (lib, "libajabasedll")
-                    #else
-                        #pragma comment (lib, "libajabasedll_32")
-                    #endif
-                #endif
-            #endif
+			#define AJAExport	//	ajantv2 way
+			#define	AJA_EXPORT	//	ajabase way
+			#ifndef AJA_NO_AUTOIMPORT
+			#endif
 		#endif
 	#else
-		#define AJA_EXPORT
-#if !defined(AJA_NO_AUTOIMPORT)
-    #if !defined AJA_BASE_OBJ
-			#if defined(AJA_DEBUG)
-				#if defined(_WIN64)
-                    #pragma comment (lib, "libajabased")
-				#else
-                    #pragma comment (lib, "libajabase_32d")
-				#endif
-			#else
-				#if defined(_WIN64)
-                    #pragma comment (lib, "libajabase")
-				#else
-                    #pragma comment (lib, "libajabase_32")
-				#endif
-			#endif
-			#pragma comment (lib, "comctl32.lib")
-			#pragma comment (lib, "wsock32.lib")
-			#pragma comment (lib, "winmm")
-			#pragma comment (lib, "setupapi.lib")
-			#pragma comment (lib, "odbc32.lib")
-            #pragma comment (lib, "shlwapi.lib")
-            #pragma comment (lib, "netapi32.lib")
-		#endif
-#endif
+		#define AJAExport	//	ajantv2 way
+		#define	AJA_EXPORT	//	ajabase way
 	#endif
 #else
-	#define AJA_EXPORT
+	#define AJAExport	//	ajantv2 way
+	#define	AJA_EXPORT	//	ajabase way
 #endif
 
 #endif	//	AJA_EXPORT_H

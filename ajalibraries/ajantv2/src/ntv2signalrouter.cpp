@@ -15,21 +15,23 @@
 
 using namespace std;
 
+//#define	DUMP_WIDGETID_TO_INPUT_XPTS_MMAP
+
 String2InputXpt		CNTV2SignalRouter::gString2InputXpt;
 InputXpt2String		CNTV2SignalRouter::gInputXpt2String;
-InputXpt2WidgetID	CNTV2SignalRouter::gInputXpt2WidgetID;
+InputXpt2WidgetIDs	CNTV2SignalRouter::gInputXpt2WidgetIDs;
 String2OutputXpt	CNTV2SignalRouter::gString2OutputXpt;
 OutputXpt2String	CNTV2SignalRouter::gOutputXpt2String;
-OutputXpt2WidgetID	CNTV2SignalRouter::gOutputXpt2WidgetID;
+OutputXpt2WidgetIDs	CNTV2SignalRouter::gOutputXpt2WidgetIDs;
 Widget2OutputXpts	CNTV2SignalRouter::gWidget2OutputXpts;
 Widget2InputXpts	CNTV2SignalRouter::gWidget2InputXpts;
 
-ostream & operator << (ostream & inOutStream, const NTV2OutputCrosspointIDSet & inObj)
+ostream & operator << (ostream & inOutStream, const NTV2OutputXptIDSet & inObj)
 {
-    NTV2OutputCrosspointIDSetConstIter	iter (inObj.begin ());
+    NTV2OutputXptIDSetConstIter	iter (inObj.begin ());
     while (iter != inObj.end ())
     {
-        inOutStream << ::NTV2OutputCrosspointIDToString (*iter, true);
+        inOutStream << ::NTV2OutputCrosspointIDToString (*iter, false);
         ++iter;
         if (iter == inObj.end ())
             break;
@@ -39,12 +41,12 @@ ostream & operator << (ostream & inOutStream, const NTV2OutputCrosspointIDSet & 
 }
 
 
-ostream & operator << (ostream & inOutStream, const NTV2InputCrosspointIDSet & inObj)
+ostream & operator << (ostream & inOutStream, const NTV2InputXptIDSet & inObj)
 {
-    NTV2InputCrosspointIDSetConstIter	iter (inObj.begin ());
+    NTV2InputXptIDSetConstIter	iter (inObj.begin ());
     while (iter != inObj.end ())
     {
-        inOutStream << ::NTV2InputCrosspointIDToString (*iter, true);
+        inOutStream << ::NTV2InputCrosspointIDToString (*iter, false);
         ++iter;
         if (iter == inObj.end ())
             break;
@@ -157,8 +159,8 @@ bool CNTV2SignalRouter::HasInput (const NTV2InputCrosspointID inSignalInput) con
 
 bool CNTV2SignalRouter::HasConnection (const NTV2InputCrosspointID inSignalInput, const NTV2OutputCrosspointID inSignalOutput) const
 {
-    MyConnectionsConstIter	iter	(mConnections.find (inSignalInput));
-    if (iter == mConnections.end ())
+    NTV2ActualConnectionsConstIter	iter (mConnections.find (inSignalInput));
+    if (iter == mConnections.end())
         return false;
     return iter->second == inSignalOutput;
 }
@@ -166,8 +168,8 @@ bool CNTV2SignalRouter::HasConnection (const NTV2InputCrosspointID inSignalInput
 
 bool CNTV2SignalRouter::RemoveConnection (const NTV2InputCrosspointID inSignalInput, const NTV2OutputCrosspointID inSignalOutput)
 {
-    MyConnectionsIter	iter	(mConnections.find (inSignalInput));
-    if (iter == mConnections.end ())
+    NTV2ActualConnectionsIter	iter (mConnections.find (inSignalInput));
+    if (iter == mConnections.end())
         return false;	//	Not in map
     if (iter->second != inSignalOutput)
         return false;	//	No match
@@ -180,10 +182,10 @@ static const ULWord	sSignalRouterRegMasks[]		=	{	0x000000FF,	0x0000FF00,	0x00FF0
 static const ULWord	sSignalRouterRegShifts[]	=	{	         0,	         8,	        16,	        24	};
 
 
-bool CNTV2SignalRouter::ResetFromRegisters (const NTV2InputCrosspointIDSet & inInputs, const NTV2RegisterReads & inRegReads)
+bool CNTV2SignalRouter::ResetFromRegisters (const NTV2InputXptIDSet & inInputs, const NTV2RegisterReads & inRegReads)
 {
     Reset();
-    for (NTV2InputCrosspointIDSetConstIter it(inInputs.begin());  it != inInputs.end();  ++it)
+    for (NTV2InputXptIDSetConstIter it(inInputs.begin());  it != inInputs.end();  ++it)
     {
         uint32_t	regNum(0),	maskNdx(0);
         CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo (*it, regNum, maskNdx);
@@ -209,7 +211,7 @@ bool CNTV2SignalRouter::GetRegisterWrites (NTV2RegisterWrites & outRegWrites) co
 {
     outRegWrites.clear ();
 
-    for (MyConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
+    for (NTV2ActualConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
     {
         const NTV2InputCrosspointID		inputXpt	(iter->first);
         const NTV2OutputCrosspointID	outputXpt	(iter->second);
@@ -243,12 +245,13 @@ ostream & CNTV2SignalRouter::Print (ostream & inOutStream, const bool inForRetai
     if (inForRetailDisplay)
     {
         inOutStream << mConnections.size () << " routing entries:" << endl;
-        for (MyConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
-            inOutStream << ::NTV2InputCrosspointIDToString (iter->first, inForRetailDisplay) << " <== " << ::NTV2OutputCrosspointIDToString (iter->second, inForRetailDisplay) << endl;
+        for (NTV2ActualConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
+            inOutStream << ::NTV2InputCrosspointIDToString (iter->first, inForRetailDisplay)
+						<< " <== " << ::NTV2OutputCrosspointIDToString (iter->second, inForRetailDisplay) << endl;
     }
     else
     {
-        for (MyConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
+        for (NTV2ActualConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
             inOutStream << CNTV2SignalRouter::NTV2InputCrosspointIDToString (iter->first) << " <== " << CNTV2SignalRouter::NTV2OutputCrosspointIDToString (iter->second) << endl;
     }
     return inOutStream;
@@ -277,7 +280,7 @@ bool CNTV2SignalRouter::PrintCode (string & outCode, const PrintCodeConfig & inC
         oss << ";" << inConfig.mLineBreakText;
     }
 
-    for (MyConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
+    for (NTV2ActualConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
     {
         const string	inXptStr	(::NTV2InputCrosspointIDToString (iter->first, false));
         const string	outXptStr	(::NTV2OutputCrosspointIDToString (iter->second, false));
@@ -685,7 +688,7 @@ AJA_LOCAL_STATIC	const NTV2RoutingEntry Mixer4BGVidInputSelectEntry		=	{kRegXptS
 AJA_LOCAL_STATIC	const NTV2RoutingEntry Mixer4FGKeyInputSelectEntry		=	{kRegXptSelectGroup29,		kK2RegMaskMixer4FGKeyInputSelect,			kK2RegShiftMixer4FGKeyInputSelect,			0};
 AJA_LOCAL_STATIC	const NTV2RoutingEntry Mixer4FGVidInputSelectEntry		=	{kRegXptSelectGroup29,		kK2RegMaskMixer4FGVidInputSelect,			kK2RegShiftMixer4FGVidInputSelect,			0};
 AJA_LOCAL_STATIC	const NTV2RoutingEntry HDMIOutInputSelectEntry			=	{kRegXptSelectGroup6,		kK2RegMaskHDMIOutInputSelect,				kK2RegShiftHDMIOutInputSelect,				0};
-AJA_LOCAL_STATIC	const NTV2RoutingEntry HDMIOutQ1InputSelectEntry		=	{kRegXptSelectGroup6,		kK2RegMaskHDMIOutInputSelect,				kK2RegShiftHDMIOutInputSelect,				0};
+AJA_LOCAL_STATIC	const NTV2RoutingEntry HDMIOutQ1InputSelectEntry		=	HDMIOutInputSelectEntry;
 AJA_LOCAL_STATIC	const NTV2RoutingEntry HDMIOutQ2InputSelectEntry		=	{kRegXptSelectGroup20,		kK2RegMaskHDMIOutV2Q2InputSelect,			kK2RegShiftHDMIOutV2Q2InputSelect,			0};
 AJA_LOCAL_STATIC	const NTV2RoutingEntry HDMIOutQ3InputSelectEntry		=	{kRegXptSelectGroup20,		kK2RegMaskHDMIOutV2Q3InputSelect,			kK2RegShiftHDMIOutV2Q3InputSelect,			0};
 AJA_LOCAL_STATIC	const NTV2RoutingEntry HDMIOutQ4InputSelectEntry		=	{kRegXptSelectGroup20,		kK2RegMaskHDMIOutV2Q4InputSelect,			kK2RegShiftHDMIOutV2Q4InputSelect,			0};
@@ -1105,7 +1108,7 @@ const NTV2RoutingEntry & CNTV2SignalRouter::GetInputSelectEntry (const NTV2Input
         case NTV2_XptMixer4FGKeyInput:		return Mixer4FGKeyInputSelectEntry;
         case NTV2_XptMixer4FGVidInput:		return Mixer4FGVidInputSelectEntry;
         case NTV2_XptHDMIOutInput:			return HDMIOutInputSelectEntry;
-        case NTV2_XptHDMIOutQ1Input:		return HDMIOutQ1InputSelectEntry;
+// DUPE case NTV2_XptHDMIOutQ1Input:		return HDMIOutQ1InputSelectEntry;
         case NTV2_XptHDMIOutQ2Input:		return HDMIOutQ2InputSelectEntry;
         case NTV2_XptHDMIOutQ3Input:		return HDMIOutQ3InputSelectEntry;
         case NTV2_XptHDMIOutQ4Input:		return HDMIOutQ4InputSelectEntry;
@@ -1201,7 +1204,7 @@ static string Trim (const string & inStr)
 
 string CNTV2SignalRouter::NTV2InputCrosspointIDToString (const NTV2InputCrosspointID inInputXpt)
 {
-    assert (!gInputXpt2String.empty ());
+    NTV2_ASSERT(!gInputXpt2String.empty ());
     InputXpt2StringConstIter	iter	(gInputXpt2String.find (inInputXpt));
     return iter != gInputXpt2String.end () ? iter->second : "";
 }
@@ -1209,7 +1212,7 @@ string CNTV2SignalRouter::NTV2InputCrosspointIDToString (const NTV2InputCrosspoi
 
 string CNTV2SignalRouter::NTV2OutputCrosspointIDToString (const NTV2OutputCrosspointID inOutputXpt)
 {
-    assert (!gOutputXpt2String.empty ());
+    NTV2_ASSERT(!gOutputXpt2String.empty ());
     OutputXpt2StringConstIter	iter	(gOutputXpt2String.find (inOutputXpt));
     return iter != gOutputXpt2String.end () ? iter->second : "";
 }
@@ -1217,7 +1220,7 @@ string CNTV2SignalRouter::NTV2OutputCrosspointIDToString (const NTV2OutputCrossp
 
 NTV2InputCrosspointID CNTV2SignalRouter::StringToNTV2InputCrosspointID (const std::string & inStr)
 {
-    assert (!gString2InputXpt.empty ());
+    NTV2_ASSERT(!gString2InputXpt.empty ());
     string	str	(ToLower (Trim (inStr)));
     String2InputXptConstIter	iter	(gString2InputXpt.find (str));
     return iter != gString2InputXpt.end () ? iter->second : NTV2_INPUT_CROSSPOINT_INVALID;
@@ -1226,7 +1229,7 @@ NTV2InputCrosspointID CNTV2SignalRouter::StringToNTV2InputCrosspointID (const st
 
 NTV2OutputCrosspointID CNTV2SignalRouter::StringToNTV2OutputCrosspointID (const std::string & inStr)
 {
-    assert (!gString2OutputXpt.empty ());
+    NTV2_ASSERT(!gString2OutputXpt.empty ());
     string	str	(ToLower (Trim (inStr)));
     String2OutputXptConstIter	iter	(gString2OutputXpt.find (str));
     return iter != gString2OutputXpt.end () ? iter->second : NTV2_XptBlack;
@@ -1236,34 +1239,78 @@ NTV2OutputCrosspointID CNTV2SignalRouter::StringToNTV2OutputCrosspointID (const 
 bool CNTV2SignalRouter::GetWidgetIDs (const NTV2DeviceID inDeviceID, NTV2WidgetIDSet & outWidgets)
 {
     outWidgets.clear();
-	for (NTV2WidgetID widgetID((NTV2WidgetID)NTV2_WIDGET_FIRST);  NTV2_IS_VALID_WIDGET(widgetID);  widgetID = NTV2WidgetID(widgetID+1))
+	for (NTV2WidgetID widgetID(NTV2WidgetID(NTV2_WIDGET_FIRST));  NTV2_IS_VALID_WIDGET(widgetID);  widgetID = NTV2WidgetID(widgetID+1))
         if (::NTV2DeviceCanDoWidget (inDeviceID, widgetID))
             outWidgets.insert(widgetID);
     return !outWidgets.empty();
 }
 
 
-bool CNTV2SignalRouter::GetWidgetForInput (const NTV2InputCrosspointID inInputXpt, NTV2WidgetID & outWidgetID)
+bool CNTV2SignalRouter::GetWidgetsForInput (const NTV2InputCrosspointID inInputXpt, NTV2WidgetIDSet & outWidgetIDs)
 {
-    assert (!gInputXpt2WidgetID.empty ());
-    InputXpt2WidgetIDConstIter	iter	(gInputXpt2WidgetID.find (inInputXpt));
-    outWidgetID = (iter != gInputXpt2WidgetID.end ()) ? iter->second : NTV2_WIDGET_INVALID;
-    return outWidgetID != NTV2_WIDGET_INVALID;
+	NTV2_ASSERT(!gInputXpt2WidgetIDs.empty());
+	outWidgetIDs.clear();
+	for (InputXpt2WidgetIDsConstIter iter(gInputXpt2WidgetIDs.find(inInputXpt));
+		iter != gInputXpt2WidgetIDs.end()  &&  iter->first == inInputXpt;
+		++iter)
+			outWidgetIDs.insert(iter->second);
+	return !outWidgetIDs.empty();
 }
 
 
-bool CNTV2SignalRouter::GetWidgetForOutput (const NTV2OutputCrosspointID inOutputXpt, NTV2WidgetID & outWidgetID)
+bool CNTV2SignalRouter::GetWidgetForInput (const NTV2InputCrosspointID inInputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDeviceID)
 {
-    assert (!gOutputXpt2WidgetID.empty ());
-    OutputXpt2WidgetIDConstIter	iter	(gOutputXpt2WidgetID.find (inOutputXpt));
-    outWidgetID = (iter != gOutputXpt2WidgetID.end ()) ? iter->second : NTV2_WIDGET_INVALID;
-    return outWidgetID != NTV2_WIDGET_INVALID;
+	outWidgetID = NTV2_WIDGET_INVALID;
+	NTV2WidgetIDSet	wgts;
+	if (!GetWidgetsForInput(inInputXpt, wgts))
+		return false;
+	if (inDeviceID == DEVICE_ID_NOTFOUND)
+		outWidgetID = *(wgts.begin());
+	else
+		for (NTV2WidgetIDSetConstIter it(wgts.begin());  it != wgts.end();  ++it)
+			if (::NTV2DeviceCanDoWidget(inDeviceID, *it))
+			{
+				outWidgetID = *it;
+				break;
+			}
+	return outWidgetID != NTV2_WIDGET_INVALID;
+}
+
+
+bool CNTV2SignalRouter::GetWidgetsForOutput (const NTV2OutputCrosspointID inOutputXpt, NTV2WidgetIDSet & outWidgetIDs)
+{
+	NTV2_ASSERT(!gOutputXpt2WidgetIDs.empty());
+	outWidgetIDs.clear();
+	for (OutputXpt2WidgetIDsConstIter iter(gOutputXpt2WidgetIDs.find(inOutputXpt));
+		iter != gOutputXpt2WidgetIDs.end()  &&  iter->first == inOutputXpt;
+		++iter)
+			outWidgetIDs.insert(iter->second);
+	return !outWidgetIDs.empty();
+}
+
+
+bool CNTV2SignalRouter::GetWidgetForOutput (const NTV2OutputCrosspointID inOutputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDeviceID)
+{
+	outWidgetID = NTV2_WIDGET_INVALID;
+	NTV2WidgetIDSet	wgts;
+	if (!GetWidgetsForOutput(inOutputXpt, wgts))
+		return false;
+	if (inDeviceID == DEVICE_ID_NOTFOUND)
+		outWidgetID = *(wgts.begin());
+	else
+		for (NTV2WidgetIDSetConstIter it(wgts.begin());  it != wgts.end();  ++it)
+			if (::NTV2DeviceCanDoWidget(inDeviceID, *it))
+			{
+				outWidgetID = *it;
+				break;
+			}
+	return outWidgetID != NTV2_WIDGET_INVALID;
 }
 
 
 bool CNTV2SignalRouter::GetWidgetInputs (const NTV2WidgetID inWidgetID, NTV2InputCrosspointIDSet & outInputs)
 {
-    assert (!gWidget2InputXpts.empty ());
+    NTV2_ASSERT(!gWidget2InputXpts.empty ());
     outInputs.clear ();
 
     Widget2InputXptsConstIter	iter	(gWidget2InputXpts.find (inWidgetID));
@@ -1299,7 +1346,7 @@ bool CNTV2SignalRouter::GetAllRoutingRegInfos (const NTV2InputCrosspointIDSet & 
 
     std::set<uint32_t>	regNums;
     uint32_t			regNum(0),	maskNdx(0);
-    for (NTV2InputCrosspointIDSetConstIter it(inInputs.begin());  it != inInputs.end();  ++it)
+    for (NTV2InputXptIDSetConstIter it(inInputs.begin());  it != inInputs.end();  ++it)
         if (CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo (*it, regNum, maskNdx))
             if (regNums.find(regNum) == regNums.end())
                 outRegInfos.push_back(NTV2RegInfo(regNum));
@@ -1309,7 +1356,7 @@ bool CNTV2SignalRouter::GetAllRoutingRegInfos (const NTV2InputCrosspointIDSet & 
 
 bool CNTV2SignalRouter::GetWidgetOutputs (const NTV2WidgetID inWidgetID, NTV2OutputCrosspointIDSet & outOutputs)
 {
-    assert (!gWidget2OutputXpts.empty ());
+    NTV2_ASSERT(!gWidget2OutputXpts.empty ());
     outOutputs.clear ();
 
     Widget2OutputXptsConstIter	iter	(gWidget2OutputXpts.find (inWidgetID));
@@ -1346,10 +1393,10 @@ bool CNTV2SignalRouter::CreateFromString (const string & inString, CNTV2SignalRo
             //		<< "           Input String:  '" << stringToParse << "'" << endl;
             return false;
         }
-        const string			leftPiece	(Trim (pEachLine->substr (0, pos)));
-        const string			rightPiece	(Trim (pEachLine->substr (pos + 3, pEachLine->length ())));
-        NTV2InputCrosspointID	inputXpt	(StringToNTV2InputCrosspointID (leftPiece));
-        NTV2OutputCrosspointID	outputXpt	(StringToNTV2OutputCrosspointID (rightPiece));
+        const string	leftPiece	(Trim (pEachLine->substr (0, pos)));
+        const string	rightPiece	(Trim (pEachLine->substr (pos + 3, pEachLine->length ())));
+        NTV2InputXptID	inputXpt	(StringToNTV2InputCrosspointID (leftPiece));
+        NTV2OutputXptID	outputXpt	(StringToNTV2OutputCrosspointID (rightPiece));
         //cerr << " L'" << leftPiece << "',  R'" << rightPiece << "'" << endl;
         if (inputXpt == NTV2_INPUT_CROSSPOINT_INVALID)
         {
@@ -1370,7 +1417,7 @@ bool CNTV2SignalRouter::CreateFromString (const string & inString, CNTV2SignalRo
 
 bool CNTV2SignalRouter::Initialize (void)
 {
-    assert (!IsInitialized ());
+    NTV2_ASSERT(!IsInitialized ());
 
     //	gInputXpt2String	--	widgets with inputs & outputs
     gInputXpt2String [NTV2_Xpt425Mux1AInput]		= "425Mux1a";
@@ -1772,334 +1819,345 @@ bool CNTV2SignalRouter::Initialize (void)
     gString2OutputXpt ["sdiin7ds2"]		= NTV2_XptSDIIn7DS2;
     gString2OutputXpt ["sdiin8ds2"]		= NTV2_XptSDIIn8DS2;
 
-    //	gInputXpt2WidgetID
-    gInputXpt2WidgetID [NTV2_Xpt425Mux1AInput]			= NTV2_Wgt425Mux1;
-    gInputXpt2WidgetID [NTV2_Xpt425Mux1BInput]			= NTV2_Wgt425Mux1;
-    gInputXpt2WidgetID [NTV2_Xpt425Mux2AInput]			= NTV2_Wgt425Mux2;
-    gInputXpt2WidgetID [NTV2_Xpt425Mux2BInput]			= NTV2_Wgt425Mux2;
-    gInputXpt2WidgetID [NTV2_Xpt425Mux3AInput]			= NTV2_Wgt425Mux3;
-    gInputXpt2WidgetID [NTV2_Xpt425Mux3BInput]			= NTV2_Wgt425Mux3;
-    gInputXpt2WidgetID [NTV2_Xpt425Mux4AInput]			= NTV2_Wgt425Mux4;
-    gInputXpt2WidgetID [NTV2_Xpt425Mux4BInput]			= NTV2_Wgt425Mux4;
-    gInputXpt2WidgetID [NTV2_Xpt4KDCQ1Input]			= NTV2_Wgt4KDownConverter;
-    gInputXpt2WidgetID [NTV2_Xpt4KDCQ2Input]			= NTV2_Wgt4KDownConverter;
-    gInputXpt2WidgetID [NTV2_Xpt4KDCQ3Input]			= NTV2_Wgt4KDownConverter;
-    gInputXpt2WidgetID [NTV2_Xpt4KDCQ4Input]			= NTV2_Wgt4KDownConverter;
-    gInputXpt2WidgetID [NTV2_XptCSC1KeyInput]			= NTV2_WgtCSC1;
-    gInputXpt2WidgetID [NTV2_XptCSC1VidInput]			= NTV2_WgtCSC1;
-    gInputXpt2WidgetID [NTV2_XptCSC2KeyInput]			= NTV2_WgtCSC2;
-    gInputXpt2WidgetID [NTV2_XptCSC2VidInput]			= NTV2_WgtCSC2;
-    gInputXpt2WidgetID [NTV2_XptCSC3KeyInput]			= NTV2_WgtCSC3;
-    gInputXpt2WidgetID [NTV2_XptCSC3VidInput]			= NTV2_WgtCSC3;
-    gInputXpt2WidgetID [NTV2_XptCSC4KeyInput]			= NTV2_WgtCSC4;
-    gInputXpt2WidgetID [NTV2_XptCSC4VidInput]			= NTV2_WgtCSC4;
-    gInputXpt2WidgetID [NTV2_XptCSC5KeyInput]			= NTV2_WgtCSC5;
-    gInputXpt2WidgetID [NTV2_XptCSC5VidInput]			= NTV2_WgtCSC5;
-    gInputXpt2WidgetID [NTV2_XptCSC6KeyInput]			= NTV2_WgtCSC6;
-    gInputXpt2WidgetID [NTV2_XptCSC6VidInput]			= NTV2_WgtCSC6;
-    gInputXpt2WidgetID [NTV2_XptCSC7KeyInput]			= NTV2_WgtCSC7;
-    gInputXpt2WidgetID [NTV2_XptCSC7VidInput]			= NTV2_WgtCSC7;
-    gInputXpt2WidgetID [NTV2_XptCSC8KeyInput]			= NTV2_WgtCSC8;
-    gInputXpt2WidgetID [NTV2_XptCSC8VidInput]			= NTV2_WgtCSC8;
-    gInputXpt2WidgetID [NTV2_XptDualLinkIn1Input]		= NTV2_WgtDualLinkV2In1;
-    gInputXpt2WidgetID [NTV2_XptDualLinkIn1DSInput]		= NTV2_WgtDualLinkV2In1;
-    gInputXpt2WidgetID [NTV2_XptDualLinkIn2Input]		= NTV2_WgtDualLinkV2In2;
-    gInputXpt2WidgetID [NTV2_XptDualLinkIn2DSInput]		= NTV2_WgtDualLinkV2In2;
-    gInputXpt2WidgetID [NTV2_XptDualLinkIn3Input]		= NTV2_WgtDualLinkV2In3;
-    gInputXpt2WidgetID [NTV2_XptDualLinkIn3DSInput]		= NTV2_WgtDualLinkV2In3;
-    gInputXpt2WidgetID [NTV2_XptDualLinkIn4Input]		= NTV2_WgtDualLinkV2In4;
-    gInputXpt2WidgetID [NTV2_XptDualLinkIn4DSInput]		= NTV2_WgtDualLinkV2In4;
-    gInputXpt2WidgetID [NTV2_XptDualLinkIn5Input]		= NTV2_WgtDualLinkV2In5;
-    gInputXpt2WidgetID [NTV2_XptDualLinkIn5DSInput]		= NTV2_WgtDualLinkV2In5;
-    gInputXpt2WidgetID [NTV2_XptDualLinkIn6Input]		= NTV2_WgtDualLinkV2In6;
-    gInputXpt2WidgetID [NTV2_XptDualLinkIn6DSInput]		= NTV2_WgtDualLinkV2In6;
-    gInputXpt2WidgetID [NTV2_XptDualLinkIn7Input]		= NTV2_WgtDualLinkV2In7;
-    gInputXpt2WidgetID [NTV2_XptDualLinkIn7DSInput]		= NTV2_WgtDualLinkV2In7;
-    gInputXpt2WidgetID [NTV2_XptDualLinkIn8Input]		= NTV2_WgtDualLinkV2In8;
-    gInputXpt2WidgetID [NTV2_XptDualLinkIn8DSInput]		= NTV2_WgtDualLinkV2In8;
-    gInputXpt2WidgetID [NTV2_XptDualLinkOut1Input]		= NTV2_WgtDualLinkV2Out1;
-    gInputXpt2WidgetID [NTV2_XptDualLinkOut2Input]		= NTV2_WgtDualLinkV2Out2;
-    gInputXpt2WidgetID [NTV2_XptDualLinkOut3Input]		= NTV2_WgtDualLinkV2Out3;
-    gInputXpt2WidgetID [NTV2_XptDualLinkOut4Input]		= NTV2_WgtDualLinkV2Out4;
-    gInputXpt2WidgetID [NTV2_XptDualLinkOut5Input]		= NTV2_WgtDualLinkV2Out5;
-    gInputXpt2WidgetID [NTV2_XptDualLinkOut6Input]		= NTV2_WgtDualLinkV2Out6;
-    gInputXpt2WidgetID [NTV2_XptDualLinkOut7Input]		= NTV2_WgtDualLinkV2Out7;
-    gInputXpt2WidgetID [NTV2_XptDualLinkOut8Input]		= NTV2_WgtDualLinkV2Out8;
-    gInputXpt2WidgetID [NTV2_XptFrameBuffer1Input]		= NTV2_WgtFrameBuffer1;
-    gInputXpt2WidgetID [NTV2_XptFrameBuffer1BInput]		= NTV2_WgtFrameBuffer1;
-    gInputXpt2WidgetID [NTV2_XptFrameBuffer2Input]		= NTV2_WgtFrameBuffer2;
-    gInputXpt2WidgetID [NTV2_XptFrameBuffer2BInput]		= NTV2_WgtFrameBuffer2;
-    gInputXpt2WidgetID [NTV2_XptFrameBuffer3Input]		= NTV2_WgtFrameBuffer3;
-    gInputXpt2WidgetID [NTV2_XptFrameBuffer3BInput]		= NTV2_WgtFrameBuffer3;
-    gInputXpt2WidgetID [NTV2_XptFrameBuffer4Input]		= NTV2_WgtFrameBuffer4;
-    gInputXpt2WidgetID [NTV2_XptFrameBuffer4BInput]		= NTV2_WgtFrameBuffer4;
-    gInputXpt2WidgetID [NTV2_XptFrameBuffer5Input]		= NTV2_WgtFrameBuffer5;
-    gInputXpt2WidgetID [NTV2_XptFrameBuffer5BInput]		= NTV2_WgtFrameBuffer5;
-    gInputXpt2WidgetID [NTV2_XptFrameBuffer6Input]		= NTV2_WgtFrameBuffer6;
-    gInputXpt2WidgetID [NTV2_XptFrameBuffer6BInput]		= NTV2_WgtFrameBuffer6;
-    gInputXpt2WidgetID [NTV2_XptFrameBuffer7Input]		= NTV2_WgtFrameBuffer7;
-    gInputXpt2WidgetID [NTV2_XptFrameBuffer7BInput]		= NTV2_WgtFrameBuffer7;
-    gInputXpt2WidgetID [NTV2_XptFrameBuffer8Input]		= NTV2_WgtFrameBuffer8;
-    gInputXpt2WidgetID [NTV2_XptFrameBuffer8BInput]		= NTV2_WgtFrameBuffer8;
-    gInputXpt2WidgetID [NTV2_XptLUT1Input]				= NTV2_WgtLUT1;
-    gInputXpt2WidgetID [NTV2_XptLUT2Input]				= NTV2_WgtLUT2;
-    gInputXpt2WidgetID [NTV2_XptLUT3Input]				= NTV2_WgtLUT3;
-    gInputXpt2WidgetID [NTV2_XptLUT4Input]				= NTV2_WgtLUT4;
-    gInputXpt2WidgetID [NTV2_XptLUT5Input]				= NTV2_WgtLUT5;
-    gInputXpt2WidgetID [NTV2_XptLUT6Input]				= NTV2_WgtLUT6;
-    gInputXpt2WidgetID [NTV2_XptLUT7Input]				= NTV2_WgtLUT7;
-    gInputXpt2WidgetID [NTV2_XptLUT8Input]				= NTV2_WgtLUT8;
-    gInputXpt2WidgetID [NTV2_XptMixer1BGKeyInput]		= NTV2_WgtMixer1;
-    gInputXpt2WidgetID [NTV2_XptMixer1BGVidInput]		= NTV2_WgtMixer1;
-    gInputXpt2WidgetID [NTV2_XptMixer1FGKeyInput]		= NTV2_WgtMixer1;
-    gInputXpt2WidgetID [NTV2_XptMixer1FGVidInput]		= NTV2_WgtMixer1;
-    gInputXpt2WidgetID [NTV2_XptMixer2BGKeyInput]		= NTV2_WgtMixer2;
-    gInputXpt2WidgetID [NTV2_XptMixer2BGVidInput]		= NTV2_WgtMixer2;
-    gInputXpt2WidgetID [NTV2_XptMixer2FGKeyInput]		= NTV2_WgtMixer2;
-    gInputXpt2WidgetID [NTV2_XptMixer2FGVidInput]		= NTV2_WgtMixer2;
-    gInputXpt2WidgetID [NTV2_XptMixer3BGKeyInput]		= NTV2_WgtMixer3;
-    gInputXpt2WidgetID [NTV2_XptMixer3BGVidInput]		= NTV2_WgtMixer3;
-    gInputXpt2WidgetID [NTV2_XptMixer3FGKeyInput]		= NTV2_WgtMixer3;
-    gInputXpt2WidgetID [NTV2_XptMixer3FGVidInput]		= NTV2_WgtMixer3;
-    gInputXpt2WidgetID [NTV2_XptMixer4BGKeyInput]		= NTV2_WgtMixer4;
-    gInputXpt2WidgetID [NTV2_XptMixer4BGVidInput]		= NTV2_WgtMixer4;
-    gInputXpt2WidgetID [NTV2_XptMixer4FGKeyInput]		= NTV2_WgtMixer4;
-    gInputXpt2WidgetID [NTV2_XptMixer4FGVidInput]		= NTV2_WgtMixer4;
-    gInputXpt2WidgetID [NTV2_XptIICT1Input]				= NTV2_WgtIICT1;
-    gInputXpt2WidgetID [NTV2_XptIICT2Input]				= NTV2_WgtIICT2;
-    gInputXpt2WidgetID [NTV2_XptStereoLeftInput]		= NTV2_WgtStereoCompressor;
-    gInputXpt2WidgetID [NTV2_XptStereoRightInput]		= NTV2_WgtStereoCompressor;
-    gInputXpt2WidgetID [NTV2_XptWaterMarker1Input]		= NTV2_WgtWaterMarker1;
-    gInputXpt2WidgetID [NTV2_XptWaterMarker2Input]		= NTV2_WgtWaterMarker2;
-    gInputXpt2WidgetID [NTV2_XptFrameSync1Input]		= NTV2_WgtFrameSync1;
-    gInputXpt2WidgetID [NTV2_XptFrameSync2Input]		= NTV2_WgtFrameSync2;
-    gInputXpt2WidgetID [NTV2_XptCompressionModInput]	= NTV2_WgtCompression1;
-    gInputXpt2WidgetID [NTV2_XptConversionModInput]		= NTV2_WgtUpDownConverter1;
-    gInputXpt2WidgetID [NTV2_XptConversionMod2Input]	= NTV2_WgtUpDownConverter2;
-    gInputXpt2WidgetID [NTV2_XptAnalogOutInput]			= NTV2_WgtAnalogOut1;
-    gInputXpt2WidgetID [NTV2_XptAnalogOutCompositeOut]	= NTV2_WgtAnalogCompositeOut1;
-    gInputXpt2WidgetID [NTV2_XptSDIOut1Input]			= NTV2_WgtSDIOut1;
-//	gInputXpt2WidgetID [NTV2_XptSDIOut1Input]			= NTV2_Wgt3GSDIOut1;	Isn't this also true? Do we need a multimap?
-    gInputXpt2WidgetID [NTV2_XptSDIOut1InputDS2]		= NTV2_Wgt3GSDIOut1;
-    gInputXpt2WidgetID [NTV2_XptSDIOut2Input]			= NTV2_WgtSDIOut2;
-//	gInputXpt2WidgetID [NTV2_XptSDIOut2Input]			= NTV2_Wgt3GSDIOut2;	Isn't this also true? Do we need a multimap?
-    gInputXpt2WidgetID [NTV2_XptSDIOut2InputDS2]		= NTV2_Wgt3GSDIOut2;
-    gInputXpt2WidgetID [NTV2_XptSDIOut3Input]			= NTV2_WgtSDIOut3;
-//	gInputXpt2WidgetID [NTV2_XptSDIOut3Input]			= NTV2_Wgt3GSDIOut3;	Isn't this also true? Do we need a multimap?
-    gInputXpt2WidgetID [NTV2_XptSDIOut3InputDS2]		= NTV2_Wgt3GSDIOut3;
-    gInputXpt2WidgetID [NTV2_XptSDIOut4Input]			= NTV2_WgtSDIOut4;
-//	gInputXpt2WidgetID [NTV2_XptSDIOut4Input]			= NTV2_Wgt3GSDIOut4;	Isn't this also true? Do we need a multimap?
-    gInputXpt2WidgetID [NTV2_XptSDIOut4InputDS2]		= NTV2_Wgt3GSDIOut4;
-    gInputXpt2WidgetID [NTV2_XptSDIOut5Input]			= NTV2_Wgt3GSDIOut5;
-//	gInputXpt2WidgetID [NTV2_XptSDIOut5Input]			= NTV2_WgtSDIMonOut1;	Isn't this also true? Do we need a multimap?
-    gInputXpt2WidgetID [NTV2_XptSDIOut5InputDS2]		= NTV2_Wgt3GSDIOut5;
-    gInputXpt2WidgetID [NTV2_XptSDIOut6Input]			= NTV2_Wgt3GSDIOut6;
-    gInputXpt2WidgetID [NTV2_XptSDIOut6InputDS2]		= NTV2_Wgt3GSDIOut6;
-    gInputXpt2WidgetID [NTV2_XptSDIOut7Input]			= NTV2_Wgt3GSDIOut7;
-    gInputXpt2WidgetID [NTV2_XptSDIOut7InputDS2]		= NTV2_Wgt3GSDIOut7;
-    gInputXpt2WidgetID [NTV2_XptSDIOut8Input]			= NTV2_Wgt3GSDIOut8;
-    gInputXpt2WidgetID [NTV2_XptSDIOut8InputDS2]		= NTV2_Wgt3GSDIOut8;
-    gInputXpt2WidgetID [NTV2_XptHDMIOutInput]			= NTV2_WgtHDMIOut1;
-//	gInputXpt2WidgetID [NTV2_XptHDMIOutInput]			= NTV2_WgtHDMIOut1v2;	Isn't this also true? Do we need a multimap?
-//	gInputXpt2WidgetID [NTV2_XptHDMIOutQ1Input]			= NTV2_WgtHDMIOut1v2;	Isn't this also true? Do we need a multimap?
-//	gInputXpt2WidgetID [NTV2_XptHDMIOutQ2Input]			= NTV2_WgtHDMIOut1v2;	Isn't this also true? Do we need a multimap?
-//	gInputXpt2WidgetID [NTV2_XptHDMIOutQ3Input]			= NTV2_WgtHDMIOut1v2;	Isn't this also true? Do we need a multimap?
-//	gInputXpt2WidgetID [NTV2_XptHDMIOutQ4Input]			= NTV2_WgtHDMIOut1v2;	Isn't this also true? Do we need a multimap?
-//	gInputXpt2WidgetID [NTV2_XptHDMIOutInput]			= NTV2_WgtHDMIOut1v3;	Isn't this also true? Do we need a multimap?
-    gInputXpt2WidgetID [NTV2_XptHDMIOutQ1Input]			= NTV2_WgtHDMIOut1v3;
-    gInputXpt2WidgetID [NTV2_XptHDMIOutQ2Input]			= NTV2_WgtHDMIOut1v3;
-    gInputXpt2WidgetID [NTV2_XptHDMIOutQ3Input]			= NTV2_WgtHDMIOut1v3;
-    gInputXpt2WidgetID [NTV2_XptHDMIOutQ4Input]			= NTV2_WgtHDMIOut1v3;
+	//	gInputXpt2WidgetIDs
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_Xpt425Mux1AInput,			NTV2_Wgt425Mux1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_Xpt425Mux1BInput,			NTV2_Wgt425Mux1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_Xpt425Mux2AInput,			NTV2_Wgt425Mux2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_Xpt425Mux2BInput,			NTV2_Wgt425Mux2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_Xpt425Mux3AInput,			NTV2_Wgt425Mux3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_Xpt425Mux3BInput,			NTV2_Wgt425Mux3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_Xpt425Mux4AInput,			NTV2_Wgt425Mux4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_Xpt425Mux4BInput,			NTV2_Wgt425Mux4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_Xpt4KDCQ1Input,				NTV2_Wgt4KDownConverter));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_Xpt4KDCQ2Input,				NTV2_Wgt4KDownConverter));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_Xpt4KDCQ3Input,				NTV2_Wgt4KDownConverter));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_Xpt4KDCQ4Input,				NTV2_Wgt4KDownConverter));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCSC1KeyInput,			NTV2_WgtCSC1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCSC1VidInput,			NTV2_WgtCSC1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCSC2KeyInput,			NTV2_WgtCSC2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCSC2VidInput,			NTV2_WgtCSC2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCSC3KeyInput,			NTV2_WgtCSC3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCSC3VidInput,			NTV2_WgtCSC3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCSC4KeyInput,			NTV2_WgtCSC4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCSC4VidInput,			NTV2_WgtCSC4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCSC5KeyInput,			NTV2_WgtCSC5));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCSC5VidInput,			NTV2_WgtCSC5));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCSC6KeyInput,			NTV2_WgtCSC6));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCSC6VidInput,			NTV2_WgtCSC6));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCSC7KeyInput,			NTV2_WgtCSC7));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCSC7VidInput,			NTV2_WgtCSC7));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCSC8KeyInput,			NTV2_WgtCSC8));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCSC8VidInput,			NTV2_WgtCSC8));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkIn1Input,		NTV2_WgtDualLinkV2In1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkIn1DSInput,		NTV2_WgtDualLinkV2In1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkIn2Input,		NTV2_WgtDualLinkV2In2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkIn2DSInput,		NTV2_WgtDualLinkV2In2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkIn3Input,		NTV2_WgtDualLinkV2In3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkIn3DSInput,		NTV2_WgtDualLinkV2In3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkIn4Input,		NTV2_WgtDualLinkV2In4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkIn4DSInput,		NTV2_WgtDualLinkV2In4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkIn5Input,		NTV2_WgtDualLinkV2In5));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkIn5DSInput,		NTV2_WgtDualLinkV2In5));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkIn6Input,		NTV2_WgtDualLinkV2In6));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkIn6DSInput,		NTV2_WgtDualLinkV2In6));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkIn7Input,		NTV2_WgtDualLinkV2In7));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkIn7DSInput,		NTV2_WgtDualLinkV2In7));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkIn8Input,		NTV2_WgtDualLinkV2In8));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkIn8DSInput,		NTV2_WgtDualLinkV2In8));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkOut1Input,		NTV2_WgtDualLinkV2Out1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkOut2Input,		NTV2_WgtDualLinkV2Out2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkOut3Input,		NTV2_WgtDualLinkV2Out3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkOut4Input,		NTV2_WgtDualLinkV2Out4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkOut5Input,		NTV2_WgtDualLinkV2Out5));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkOut6Input,		NTV2_WgtDualLinkV2Out6));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkOut7Input,		NTV2_WgtDualLinkV2Out7));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptDualLinkOut8Input,		NTV2_WgtDualLinkV2Out8));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameBuffer1Input,		NTV2_WgtFrameBuffer1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameBuffer1BInput,		NTV2_WgtFrameBuffer1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameBuffer2Input,		NTV2_WgtFrameBuffer2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameBuffer2BInput,		NTV2_WgtFrameBuffer2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameBuffer3Input,		NTV2_WgtFrameBuffer3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameBuffer3BInput,		NTV2_WgtFrameBuffer3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameBuffer4Input,		NTV2_WgtFrameBuffer4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameBuffer4BInput,		NTV2_WgtFrameBuffer4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameBuffer5Input,		NTV2_WgtFrameBuffer5));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameBuffer5BInput,		NTV2_WgtFrameBuffer5));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameBuffer6Input,		NTV2_WgtFrameBuffer6));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameBuffer6BInput,		NTV2_WgtFrameBuffer6));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameBuffer7Input,		NTV2_WgtFrameBuffer7));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameBuffer7BInput,		NTV2_WgtFrameBuffer7));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameBuffer8Input,		NTV2_WgtFrameBuffer8));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameBuffer8BInput,		NTV2_WgtFrameBuffer8));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptLUT1Input,				NTV2_WgtLUT1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptLUT2Input,				NTV2_WgtLUT2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptLUT3Input,				NTV2_WgtLUT3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptLUT4Input,				NTV2_WgtLUT4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptLUT5Input,				NTV2_WgtLUT5));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptLUT6Input,				NTV2_WgtLUT6));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptLUT7Input,				NTV2_WgtLUT7));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptLUT8Input,				NTV2_WgtLUT8));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer1BGKeyInput,		NTV2_WgtMixer1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer1BGVidInput,		NTV2_WgtMixer1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer1FGKeyInput,		NTV2_WgtMixer1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer1FGVidInput,		NTV2_WgtMixer1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer2BGKeyInput,		NTV2_WgtMixer2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer2BGVidInput,		NTV2_WgtMixer2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer2FGKeyInput,		NTV2_WgtMixer2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer2FGVidInput,		NTV2_WgtMixer2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer3BGKeyInput,		NTV2_WgtMixer3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer3BGVidInput,		NTV2_WgtMixer3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer3FGKeyInput,		NTV2_WgtMixer3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer3FGVidInput,		NTV2_WgtMixer3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer4BGKeyInput,		NTV2_WgtMixer4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer4BGVidInput,		NTV2_WgtMixer4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer4FGKeyInput,		NTV2_WgtMixer4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer4FGVidInput,		NTV2_WgtMixer4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptIICT1Input,				NTV2_WgtIICT1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptIICT2Input,				NTV2_WgtIICT2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptStereoLeftInput,			NTV2_WgtStereoCompressor));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptStereoRightInput,		NTV2_WgtStereoCompressor));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptWaterMarker1Input,		NTV2_WgtWaterMarker1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptWaterMarker2Input,		NTV2_WgtWaterMarker2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameSync1Input,			NTV2_WgtFrameSync1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptFrameSync2Input,			NTV2_WgtFrameSync2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptCompressionModInput,		NTV2_WgtCompression1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptConversionModInput,		NTV2_WgtUpDownConverter1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptConversionMod2Input,		NTV2_WgtUpDownConverter2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptAnalogOutInput,			NTV2_WgtAnalogOut1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptAnalogOutCompositeOut,	NTV2_WgtAnalogCompositeOut1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut1Input,			NTV2_WgtSDIOut1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut1Input,			NTV2_Wgt3GSDIOut1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut1InputDS2,			NTV2_Wgt3GSDIOut1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut2Input,			NTV2_WgtSDIOut2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut2Input,			NTV2_Wgt3GSDIOut2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut2InputDS2,			NTV2_Wgt3GSDIOut2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut3Input,			NTV2_WgtSDIOut3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut3Input,			NTV2_Wgt3GSDIOut3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut3InputDS2,			NTV2_Wgt3GSDIOut3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut4Input,			NTV2_WgtSDIOut4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut4Input,			NTV2_Wgt3GSDIOut4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut4InputDS2,			NTV2_Wgt3GSDIOut4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut5Input,			NTV2_Wgt3GSDIOut5));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut5Input,			NTV2_WgtSDIMonOut1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut5InputDS2,			NTV2_Wgt3GSDIOut5));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut6Input,			NTV2_Wgt3GSDIOut6));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut6InputDS2,			NTV2_Wgt3GSDIOut6));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut7Input,			NTV2_Wgt3GSDIOut7));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut7InputDS2,			NTV2_Wgt3GSDIOut7));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut8Input,			NTV2_Wgt3GSDIOut8));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut8InputDS2,			NTV2_Wgt3GSDIOut8));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutInput,			NTV2_WgtHDMIOut1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutInput,			NTV2_WgtHDMIOut1v2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutQ1Input,			NTV2_WgtHDMIOut1v2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutQ2Input,			NTV2_WgtHDMIOut1v2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutQ3Input,			NTV2_WgtHDMIOut1v2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutQ4Input,			NTV2_WgtHDMIOut1v2));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutInput,			NTV2_WgtHDMIOut1v3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutQ1Input,			NTV2_WgtHDMIOut1v3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutQ2Input,			NTV2_WgtHDMIOut1v3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutQ3Input,			NTV2_WgtHDMIOut1v3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutQ4Input,			NTV2_WgtHDMIOut1v3));
 
     //	gWidget2InputXpts
-    for (InputXpt2WidgetIDConstIter iter (gInputXpt2WidgetID.begin ());  iter != gInputXpt2WidgetID.end ();  ++iter)
+    for (InputXpt2WidgetIDsConstIter iter (gInputXpt2WidgetIDs.begin ());  iter != gInputXpt2WidgetIDs.end ();  ++iter)
         gWidget2InputXpts.insert (Widget2InputXptPair (iter->second, iter->first));
-    gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_Wgt3GSDIOut1, NTV2_XptSDIOut1Input));	//	Hack!
-    gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_Wgt3GSDIOut2, NTV2_XptSDIOut2Input));	//	Hack!
-    gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_Wgt3GSDIOut3, NTV2_XptSDIOut3Input));	//	Hack!
-    gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_Wgt3GSDIOut4, NTV2_XptSDIOut4Input));	//	Hack!
-    gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtSDIMonOut1, NTV2_XptSDIOut5Input));	//	Hack!
-    gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIIn1v2, NTV2_XptHDMIOutInput));	//	Hack!
-    gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIIn1v2, NTV2_XptHDMIOutQ1Input));	//	Hack!
-    gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIIn1v2, NTV2_XptHDMIOutQ2Input));	//	Hack!
-    gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIIn1v2, NTV2_XptHDMIOutQ3Input));	//	Hack!
-    gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIIn1v2, NTV2_XptHDMIOutQ4Input));	//	Hack!
-    gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIIn1v3, NTV2_XptHDMIOutInput));	//	Hack!
-    gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIIn1v3, NTV2_XptHDMIOutQ1Input));	//	Hack!
-    gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIIn1v3, NTV2_XptHDMIOutQ2Input));	//	Hack!
-    gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIIn1v3, NTV2_XptHDMIOutQ3Input));	//	Hack!
-    gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIIn1v3, NTV2_XptHDMIOutQ4Input));	//	Hack!
-
-    //	gOutputXpt2WidgetID
-    gOutputXpt2WidgetID [NTV2_XptAnalogIn]				= NTV2_WgtAnalogIn1;
-    gOutputXpt2WidgetID [NTV2_XptTestPatternYUV]		= NTV2_WgtTestPattern1;
-    gOutputXpt2WidgetID [NTV2_XptSDIIn1]				= NTV2_WgtSDIIn1;
-    gOutputXpt2WidgetID [NTV2_XptSDIIn1DS2]				= NTV2_Wgt3GSDIIn1;
-    gOutputXpt2WidgetID [NTV2_XptSDIIn2]				= NTV2_WgtSDIIn2;
-    gOutputXpt2WidgetID [NTV2_XptSDIIn2DS2]				= NTV2_Wgt3GSDIIn2;
-    gOutputXpt2WidgetID [NTV2_XptSDIIn3]				= NTV2_Wgt3GSDIIn3;
-    gOutputXpt2WidgetID [NTV2_XptSDIIn3DS2]				= NTV2_Wgt3GSDIIn3;
-    gOutputXpt2WidgetID [NTV2_XptSDIIn4]				= NTV2_Wgt3GSDIIn4;
-    gOutputXpt2WidgetID [NTV2_XptSDIIn4DS2]				= NTV2_Wgt3GSDIIn4;
-    gOutputXpt2WidgetID [NTV2_XptSDIIn5]				= NTV2_Wgt3GSDIIn5;
-    gOutputXpt2WidgetID [NTV2_XptSDIIn5DS2]				= NTV2_Wgt3GSDIIn5;
-    gOutputXpt2WidgetID [NTV2_XptSDIIn6]				= NTV2_Wgt3GSDIIn6;
-    gOutputXpt2WidgetID [NTV2_XptSDIIn6DS2]				= NTV2_Wgt3GSDIIn6;
-    gOutputXpt2WidgetID [NTV2_XptSDIIn7]				= NTV2_Wgt3GSDIIn7;
-    gOutputXpt2WidgetID [NTV2_XptSDIIn7DS2]				= NTV2_Wgt3GSDIIn7;
-    gOutputXpt2WidgetID [NTV2_XptSDIIn8]				= NTV2_Wgt3GSDIIn8;
-    gOutputXpt2WidgetID [NTV2_XptSDIIn8DS2]				= NTV2_Wgt3GSDIIn8;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn1]				= NTV2_WgtHDMIIn1;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn1Q2]				= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn1Q2RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn1Q3]				= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn1Q3RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn1Q4]				= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn1Q4RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn1RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn2]				= NTV2_WgtHDMIIn1;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn2Q2]				= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn2Q2RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn2Q3]				= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn2Q3RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn2Q4]				= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn2Q4RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn2RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn3]				= NTV2_WgtHDMIIn1;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn3RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn4]				= NTV2_WgtHDMIIn1;
-    gOutputXpt2WidgetID [NTV2_XptHDMIIn4RGB]			= NTV2_WgtHDMIIn1v3;
-    gOutputXpt2WidgetID [NTV2_Xpt425Mux1ARGB]			= NTV2_Wgt425Mux1;
-    gOutputXpt2WidgetID [NTV2_Xpt425Mux1AYUV]			= NTV2_Wgt425Mux1;
-    gOutputXpt2WidgetID [NTV2_Xpt425Mux1BRGB]			= NTV2_Wgt425Mux1;
-    gOutputXpt2WidgetID [NTV2_Xpt425Mux1BYUV]			= NTV2_Wgt425Mux1;
-    gOutputXpt2WidgetID [NTV2_Xpt425Mux2ARGB]			= NTV2_Wgt425Mux2;
-    gOutputXpt2WidgetID [NTV2_Xpt425Mux2AYUV]			= NTV2_Wgt425Mux2;
-    gOutputXpt2WidgetID [NTV2_Xpt425Mux2BRGB]			= NTV2_Wgt425Mux2;
-    gOutputXpt2WidgetID [NTV2_Xpt425Mux2BYUV]			= NTV2_Wgt425Mux2;
-    gOutputXpt2WidgetID [NTV2_Xpt425Mux3ARGB]			= NTV2_Wgt425Mux3;
-    gOutputXpt2WidgetID [NTV2_Xpt425Mux3AYUV]			= NTV2_Wgt425Mux3;
-    gOutputXpt2WidgetID [NTV2_Xpt425Mux3BRGB]			= NTV2_Wgt425Mux3;
-    gOutputXpt2WidgetID [NTV2_Xpt425Mux3BYUV]			= NTV2_Wgt425Mux3;
-    gOutputXpt2WidgetID [NTV2_Xpt425Mux4ARGB]			= NTV2_Wgt425Mux4;
-    gOutputXpt2WidgetID [NTV2_Xpt425Mux4AYUV]			= NTV2_Wgt425Mux4;
-    gOutputXpt2WidgetID [NTV2_Xpt425Mux4BRGB]			= NTV2_Wgt425Mux4;
-    gOutputXpt2WidgetID [NTV2_Xpt425Mux4BYUV]			= NTV2_Wgt425Mux4;
-    gOutputXpt2WidgetID [NTV2_Xpt4KDownConverterOut]	= NTV2_Wgt4KDownConverter;
-    gOutputXpt2WidgetID [NTV2_Xpt4KDownConverterOutRGB]	= NTV2_Wgt4KDownConverter;
-    gOutputXpt2WidgetID [NTV2_XptCSC1KeyYUV]			= NTV2_WgtCSC1;
-    gOutputXpt2WidgetID [NTV2_XptCSC1VidRGB]			= NTV2_WgtCSC1;
-    gOutputXpt2WidgetID [NTV2_XptCSC1VidYUV]			= NTV2_WgtCSC1;
-    gOutputXpt2WidgetID [NTV2_XptCSC2KeyYUV]			= NTV2_WgtCSC2;
-    gOutputXpt2WidgetID [NTV2_XptCSC2VidRGB]			= NTV2_WgtCSC2;
-    gOutputXpt2WidgetID [NTV2_XptCSC2VidYUV]			= NTV2_WgtCSC2;
-    gOutputXpt2WidgetID [NTV2_XptCSC3KeyYUV]			= NTV2_WgtCSC3;
-    gOutputXpt2WidgetID [NTV2_XptCSC3VidRGB]			= NTV2_WgtCSC3;
-    gOutputXpt2WidgetID [NTV2_XptCSC3VidYUV]			= NTV2_WgtCSC3;
-    gOutputXpt2WidgetID [NTV2_XptCSC4KeyYUV]			= NTV2_WgtCSC4;
-    gOutputXpt2WidgetID [NTV2_XptCSC4VidRGB]			= NTV2_WgtCSC4;
-    gOutputXpt2WidgetID [NTV2_XptCSC4VidYUV]			= NTV2_WgtCSC4;
-    gOutputXpt2WidgetID [NTV2_XptCSC5KeyYUV]			= NTV2_WgtCSC5;
-    gOutputXpt2WidgetID [NTV2_XptCSC5VidRGB]			= NTV2_WgtCSC5;
-    gOutputXpt2WidgetID [NTV2_XptCSC5VidYUV]			= NTV2_WgtCSC5;
-    gOutputXpt2WidgetID [NTV2_XptCSC6KeyYUV]			= NTV2_WgtCSC6;
-    gOutputXpt2WidgetID [NTV2_XptCSC6VidRGB]			= NTV2_WgtCSC6;
-    gOutputXpt2WidgetID [NTV2_XptCSC6VidYUV]			= NTV2_WgtCSC6;
-    gOutputXpt2WidgetID [NTV2_XptCSC7KeyYUV]			= NTV2_WgtCSC7;
-    gOutputXpt2WidgetID [NTV2_XptCSC7VidRGB]			= NTV2_WgtCSC7;
-    gOutputXpt2WidgetID [NTV2_XptCSC7VidYUV]			= NTV2_WgtCSC7;
-    gOutputXpt2WidgetID [NTV2_XptCSC8KeyYUV]			= NTV2_WgtCSC8;
-    gOutputXpt2WidgetID [NTV2_XptCSC8VidRGB]			= NTV2_WgtCSC8;
-    gOutputXpt2WidgetID [NTV2_XptCSC8VidYUV]			= NTV2_WgtCSC8;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkIn1]			= NTV2_WgtDualLinkV2In1;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkIn2]			= NTV2_WgtDualLinkV2In2;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkIn3]			= NTV2_WgtDualLinkV2In3;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkIn4]			= NTV2_WgtDualLinkV2In4;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkIn5]			= NTV2_WgtDualLinkV2In5;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkIn6]			= NTV2_WgtDualLinkV2In6;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkIn7]			= NTV2_WgtDualLinkV2In7;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkIn8]			= NTV2_WgtDualLinkV2In8;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkOut1]			= NTV2_WgtDualLinkV2Out1;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkOut1DS2]		= NTV2_WgtDualLinkV2Out1;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkOut2]			= NTV2_WgtDualLinkV2Out2;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkOut2DS2]		= NTV2_WgtDualLinkV2Out2;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkOut3]			= NTV2_WgtDualLinkV2Out3;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkOut3DS2]		= NTV2_WgtDualLinkV2Out3;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkOut4]			= NTV2_WgtDualLinkV2Out4;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkOut4DS2]		= NTV2_WgtDualLinkV2Out4;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkOut5]			= NTV2_WgtDualLinkV2Out5;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkOut5DS2]		= NTV2_WgtDualLinkV2Out5;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkOut6]			= NTV2_WgtDualLinkV2Out6;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkOut6DS2]		= NTV2_WgtDualLinkV2Out6;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkOut7]			= NTV2_WgtDualLinkV2Out7;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkOut7DS2]		= NTV2_WgtDualLinkV2Out7;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkOut8]			= NTV2_WgtDualLinkV2Out8;
-    gOutputXpt2WidgetID [NTV2_XptDuallinkOut8DS2]		= NTV2_WgtDualLinkV2Out8;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer1_425RGB]	= NTV2_WgtFrameBuffer1;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer1_425YUV]	= NTV2_WgtFrameBuffer1;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer1RGB]		= NTV2_WgtFrameBuffer1;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer1YUV]		= NTV2_WgtFrameBuffer1;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer2_425RGB]	= NTV2_WgtFrameBuffer2;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer2_425YUV]	= NTV2_WgtFrameBuffer2;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer2RGB]		= NTV2_WgtFrameBuffer2;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer2YUV]		= NTV2_WgtFrameBuffer2;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer3_425RGB]	= NTV2_WgtFrameBuffer3;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer3_425YUV]	= NTV2_WgtFrameBuffer3;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer3RGB]		= NTV2_WgtFrameBuffer3;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer3YUV]		= NTV2_WgtFrameBuffer3;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer4_425RGB]	= NTV2_WgtFrameBuffer4;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer4_425YUV]	= NTV2_WgtFrameBuffer4;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer4RGB]		= NTV2_WgtFrameBuffer4;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer4YUV]		= NTV2_WgtFrameBuffer4;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer5_425RGB]	= NTV2_WgtFrameBuffer5;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer5_425YUV]	= NTV2_WgtFrameBuffer5;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer5RGB]		= NTV2_WgtFrameBuffer5;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer5YUV]		= NTV2_WgtFrameBuffer5;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer6_425RGB]	= NTV2_WgtFrameBuffer6;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer6_425YUV]	= NTV2_WgtFrameBuffer6;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer6RGB]		= NTV2_WgtFrameBuffer6;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer6YUV]		= NTV2_WgtFrameBuffer6;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer7_425RGB]	= NTV2_WgtFrameBuffer7;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer7_425YUV]	= NTV2_WgtFrameBuffer7;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer7RGB]		= NTV2_WgtFrameBuffer7;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer7YUV]		= NTV2_WgtFrameBuffer7;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer8_425RGB]	= NTV2_WgtFrameBuffer8;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer8_425YUV]	= NTV2_WgtFrameBuffer8;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer8RGB]		= NTV2_WgtFrameBuffer8;
-    gOutputXpt2WidgetID [NTV2_XptFrameBuffer8YUV]		= NTV2_WgtFrameBuffer8;
-    gOutputXpt2WidgetID [NTV2_XptLUT1RGB]				= NTV2_WgtLUT1;
-    gOutputXpt2WidgetID [NTV2_XptLUT1YUV]				= NTV2_WgtLUT1;
-    gOutputXpt2WidgetID [NTV2_XptLUT2RGB]				= NTV2_WgtLUT2;
-    gOutputXpt2WidgetID [NTV2_XptLUT3Out]				= NTV2_WgtLUT3;
-    gOutputXpt2WidgetID [NTV2_XptLUT4Out]				= NTV2_WgtLUT4;
-    gOutputXpt2WidgetID [NTV2_XptLUT5Out]				= NTV2_WgtLUT5;
-    gOutputXpt2WidgetID [NTV2_XptLUT6Out]				= NTV2_WgtLUT6;
-    gOutputXpt2WidgetID [NTV2_XptLUT7Out]				= NTV2_WgtLUT7;
-    gOutputXpt2WidgetID [NTV2_XptLUT8Out]				= NTV2_WgtLUT8;
-    gOutputXpt2WidgetID [NTV2_XptMixer1KeyYUV]			= NTV2_WgtMixer1;
-    gOutputXpt2WidgetID [NTV2_XptMixer1VidYUV]			= NTV2_WgtMixer1;
-    gOutputXpt2WidgetID [NTV2_XptMixer2KeyYUV]			= NTV2_WgtMixer2;
-    gOutputXpt2WidgetID [NTV2_XptMixer2VidYUV]			= NTV2_WgtMixer2;
-    gOutputXpt2WidgetID [NTV2_XptMixer3KeyYUV]			= NTV2_WgtMixer3;
-    gOutputXpt2WidgetID [NTV2_XptMixer3VidYUV]			= NTV2_WgtMixer3;
-    gOutputXpt2WidgetID [NTV2_XptMixer4KeyYUV]			= NTV2_WgtMixer4;
-    gOutputXpt2WidgetID [NTV2_XptMixer4VidYUV]			= NTV2_WgtMixer4;
-    gOutputXpt2WidgetID [NTV2_XptIICTRGB]				= NTV2_WgtIICT1;
-    gOutputXpt2WidgetID [NTV2_XptIICT2RGB]				= NTV2_WgtIICT2;
-    gOutputXpt2WidgetID [NTV2_XptStereoCompressorOut]	= NTV2_WgtStereoCompressor;
-    gOutputXpt2WidgetID [NTV2_XptWaterMarkerRGB]		= NTV2_WgtWaterMarker1;
-    gOutputXpt2WidgetID [NTV2_XptWaterMarkerYUV]		= NTV2_WgtWaterMarker1;
-    gOutputXpt2WidgetID [NTV2_XptWaterMarker2RGB]		= NTV2_WgtWaterMarker2;
-    gOutputXpt2WidgetID [NTV2_XptWaterMarker2YUV]		= NTV2_WgtWaterMarker2;
-    gOutputXpt2WidgetID [NTV2_XptFrameSync1RGB]			= NTV2_WgtFrameSync1;
-    gOutputXpt2WidgetID [NTV2_XptFrameSync1YUV]			= NTV2_WgtFrameSync1;
-    gOutputXpt2WidgetID [NTV2_XptFrameSync2RGB]			= NTV2_WgtFrameSync2;
-    gOutputXpt2WidgetID [NTV2_XptFrameSync2YUV]			= NTV2_WgtFrameSync2;
-    gOutputXpt2WidgetID [NTV2_XptCompressionModule]		= NTV2_WgtCompression1;
+/*	gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_Wgt3GSDIOut1, NTV2_XptSDIOut1Input));		//	Hack!
+	gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_Wgt3GSDIOut2, NTV2_XptSDIOut2Input));		//	Hack!
+	gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_Wgt3GSDIOut3, NTV2_XptSDIOut3Input));		//	Hack!
+	gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_Wgt3GSDIOut4, NTV2_XptSDIOut4Input));		//	Hack!
+	gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtSDIMonOut1, NTV2_XptSDIOut5Input));		//	Hack!
+	gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIOut1v2, NTV2_XptHDMIOutInput));		//	Hack!
+	gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIOut1v2, NTV2_XptHDMIOutQ1Input));	//	Hack!
+	gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIOut1v2, NTV2_XptHDMIOutQ2Input));	//	Hack!
+	gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIOut1v2, NTV2_XptHDMIOutQ3Input));	//	Hack!
+	gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIOut1v2, NTV2_XptHDMIOutQ4Input));	//	Hack!
+	gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIOut1v3, NTV2_XptHDMIOutInput));		//	Hack!
+	gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIOut1v3, NTV2_XptHDMIOutQ1Input));	//	Hack!
+	gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIOut1v3, NTV2_XptHDMIOutQ2Input));	//	Hack!
+	gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIOut1v3, NTV2_XptHDMIOutQ3Input));	//	Hack!
+	gWidget2InputXpts.insert (Widget2InputXptPair (NTV2_WgtHDMIOut1v3, NTV2_XptHDMIOutQ4Input));	//	Hack!
+*/
+	//	gOutputXpt2WidgetIDs
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptAnalogIn,				NTV2_WgtAnalogIn1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptTestPatternYUV,		NTV2_WgtTestPattern1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn1,				NTV2_WgtSDIIn1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn1,				NTV2_Wgt3GSDIIn1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn1DS2,				NTV2_Wgt3GSDIIn1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn2,				NTV2_WgtSDIIn2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn2,				NTV2_Wgt3GSDIIn2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn2DS2,				NTV2_Wgt3GSDIIn2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn3,				NTV2_Wgt3GSDIIn3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn3DS2,				NTV2_Wgt3GSDIIn3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn4,				NTV2_Wgt3GSDIIn4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn4DS2,				NTV2_Wgt3GSDIIn4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn5,				NTV2_Wgt3GSDIIn5));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn5DS2,				NTV2_Wgt3GSDIIn5));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn6,				NTV2_Wgt3GSDIIn6));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn6DS2,				NTV2_Wgt3GSDIIn6));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn7,				NTV2_Wgt3GSDIIn7));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn7DS2,				NTV2_Wgt3GSDIIn7));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn8,				NTV2_Wgt3GSDIIn8));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn8DS2,				NTV2_Wgt3GSDIIn8));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn1,				NTV2_WgtHDMIIn1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn1,				NTV2_WgtHDMIIn1v2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn1,				NTV2_WgtHDMIIn1v3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn1Q2,				NTV2_WgtHDMIIn1v3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn1Q2RGB,			NTV2_WgtHDMIIn1v3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn1Q3,				NTV2_WgtHDMIIn1v3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn1Q3RGB,			NTV2_WgtHDMIIn1v3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn1Q4,				NTV2_WgtHDMIIn1v3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn1Q4RGB,			NTV2_WgtHDMIIn1v3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn1RGB,			NTV2_WgtHDMIIn1v3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn2,				NTV2_WgtHDMIIn2v4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn2Q2,				NTV2_WgtHDMIIn2v4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn2Q2RGB,			NTV2_WgtHDMIIn2v4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn2Q3,				NTV2_WgtHDMIIn2v4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn2Q3RGB,			NTV2_WgtHDMIIn2v4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn2Q4,				NTV2_WgtHDMIIn2v4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn2Q4RGB,			NTV2_WgtHDMIIn2v4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn2RGB,			NTV2_WgtHDMIIn2v4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn3,				NTV2_WgtHDMIIn3v4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn3RGB,			NTV2_WgtHDMIIn3v4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn4,				NTV2_WgtHDMIIn4v4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn4RGB,			NTV2_WgtHDMIIn4v4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux1ARGB,			NTV2_Wgt425Mux1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux1AYUV,			NTV2_Wgt425Mux1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux1BRGB,			NTV2_Wgt425Mux1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux1BYUV,			NTV2_Wgt425Mux1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux2ARGB,			NTV2_Wgt425Mux2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux2AYUV,			NTV2_Wgt425Mux2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux2BRGB,			NTV2_Wgt425Mux2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux2BYUV,			NTV2_Wgt425Mux2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux3ARGB,			NTV2_Wgt425Mux3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux3AYUV,			NTV2_Wgt425Mux3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux3BRGB,			NTV2_Wgt425Mux3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux3BYUV,			NTV2_Wgt425Mux3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux4ARGB,			NTV2_Wgt425Mux4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux4AYUV,			NTV2_Wgt425Mux4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux4BRGB,			NTV2_Wgt425Mux4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux4BYUV,			NTV2_Wgt425Mux4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt4KDownConverterOut,	NTV2_Wgt4KDownConverter));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt4KDownConverterOutRGB,	NTV2_Wgt4KDownConverter));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC1KeyYUV,			NTV2_WgtCSC1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC1VidRGB,			NTV2_WgtCSC1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC1VidYUV,			NTV2_WgtCSC1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC2KeyYUV,			NTV2_WgtCSC2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC2VidRGB,			NTV2_WgtCSC2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC2VidYUV,			NTV2_WgtCSC2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC3KeyYUV,			NTV2_WgtCSC3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC3VidRGB,			NTV2_WgtCSC3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC3VidYUV,			NTV2_WgtCSC3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC4KeyYUV,			NTV2_WgtCSC4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC4VidRGB,			NTV2_WgtCSC4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC4VidYUV,			NTV2_WgtCSC4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC5KeyYUV,			NTV2_WgtCSC5));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC5VidRGB,			NTV2_WgtCSC5));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC5VidYUV,			NTV2_WgtCSC5));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC6KeyYUV,			NTV2_WgtCSC6));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC6VidRGB,			NTV2_WgtCSC6));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC6VidYUV,			NTV2_WgtCSC6));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC7KeyYUV,			NTV2_WgtCSC7));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC7VidRGB,			NTV2_WgtCSC7));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC7VidYUV,			NTV2_WgtCSC7));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC8KeyYUV,			NTV2_WgtCSC8));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC8VidRGB,			NTV2_WgtCSC8));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCSC8VidYUV,			NTV2_WgtCSC8));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkIn1,			NTV2_WgtDualLinkV2In1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkIn2,			NTV2_WgtDualLinkV2In2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkIn3,			NTV2_WgtDualLinkV2In3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkIn4,			NTV2_WgtDualLinkV2In4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkIn5,			NTV2_WgtDualLinkV2In5));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkIn6,			NTV2_WgtDualLinkV2In6));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkIn7,			NTV2_WgtDualLinkV2In7));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkIn8,			NTV2_WgtDualLinkV2In8));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut1,			NTV2_WgtDualLinkV2Out1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut1DS2,		NTV2_WgtDualLinkV2Out1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut2,			NTV2_WgtDualLinkV2Out2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut2DS2,		NTV2_WgtDualLinkV2Out2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut3,			NTV2_WgtDualLinkV2Out3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut3DS2,		NTV2_WgtDualLinkV2Out3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut4,			NTV2_WgtDualLinkV2Out4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut4DS2,		NTV2_WgtDualLinkV2Out4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut5,			NTV2_WgtDualLinkV2Out5));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut5DS2,		NTV2_WgtDualLinkV2Out5));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut6,			NTV2_WgtDualLinkV2Out6));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut6DS2,		NTV2_WgtDualLinkV2Out6));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut7,			NTV2_WgtDualLinkV2Out7));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut7DS2,		NTV2_WgtDualLinkV2Out7));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut8,			NTV2_WgtDualLinkV2Out8));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut8DS2,		NTV2_WgtDualLinkV2Out8));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer1_425RGB,	NTV2_WgtFrameBuffer1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer1_425YUV,	NTV2_WgtFrameBuffer1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer1RGB,		NTV2_WgtFrameBuffer1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer1YUV,		NTV2_WgtFrameBuffer1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer2_425RGB,	NTV2_WgtFrameBuffer2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer2_425YUV,	NTV2_WgtFrameBuffer2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer2RGB,		NTV2_WgtFrameBuffer2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer2YUV,		NTV2_WgtFrameBuffer2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer3_425RGB,	NTV2_WgtFrameBuffer3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer3_425YUV,	NTV2_WgtFrameBuffer3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer3RGB,		NTV2_WgtFrameBuffer3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer3YUV,		NTV2_WgtFrameBuffer3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer4_425RGB,	NTV2_WgtFrameBuffer4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer4_425YUV,	NTV2_WgtFrameBuffer4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer4RGB,		NTV2_WgtFrameBuffer4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer4YUV,		NTV2_WgtFrameBuffer4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer5_425RGB,	NTV2_WgtFrameBuffer5));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer5_425YUV,	NTV2_WgtFrameBuffer5));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer5RGB,		NTV2_WgtFrameBuffer5));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer5YUV,		NTV2_WgtFrameBuffer5));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer6_425RGB,	NTV2_WgtFrameBuffer6));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer6_425YUV,	NTV2_WgtFrameBuffer6));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer6RGB,		NTV2_WgtFrameBuffer6));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer6YUV,		NTV2_WgtFrameBuffer6));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer7_425RGB,	NTV2_WgtFrameBuffer7));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer7_425YUV,	NTV2_WgtFrameBuffer7));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer7RGB,		NTV2_WgtFrameBuffer7));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer7YUV,		NTV2_WgtFrameBuffer7));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer8_425RGB,	NTV2_WgtFrameBuffer8));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer8_425YUV,	NTV2_WgtFrameBuffer8));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer8RGB,		NTV2_WgtFrameBuffer8));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer8YUV,		NTV2_WgtFrameBuffer8));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT1RGB,				NTV2_WgtLUT1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT1YUV,				NTV2_WgtLUT1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT2RGB,				NTV2_WgtLUT2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT3Out,				NTV2_WgtLUT3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT4Out,				NTV2_WgtLUT4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT5Out,				NTV2_WgtLUT5));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT6Out,				NTV2_WgtLUT6));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT7Out,				NTV2_WgtLUT7));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT8Out,				NTV2_WgtLUT8));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMixer1KeyYUV,			NTV2_WgtMixer1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMixer1VidYUV,			NTV2_WgtMixer1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMixer2KeyYUV,			NTV2_WgtMixer2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMixer2VidYUV,			NTV2_WgtMixer2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMixer3KeyYUV,			NTV2_WgtMixer3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMixer3VidYUV,			NTV2_WgtMixer3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMixer4KeyYUV,			NTV2_WgtMixer4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMixer4VidYUV,			NTV2_WgtMixer4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptIICTRGB,				NTV2_WgtIICT1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptIICT2RGB,				NTV2_WgtIICT2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptStereoCompressorOut,	NTV2_WgtStereoCompressor));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptWaterMarkerRGB,		NTV2_WgtWaterMarker1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptWaterMarkerYUV,		NTV2_WgtWaterMarker1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptWaterMarker2RGB,		NTV2_WgtWaterMarker2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptWaterMarker2YUV,		NTV2_WgtWaterMarker2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameSync1RGB,			NTV2_WgtFrameSync1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameSync1YUV,			NTV2_WgtFrameSync1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameSync2RGB,			NTV2_WgtFrameSync2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameSync2YUV,			NTV2_WgtFrameSync2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCompressionModule,		NTV2_WgtCompression1));
 
     //	gWidget2OutputXpts
-    for (OutputXpt2WidgetIDConstIter iter (gOutputXpt2WidgetID.begin ());  iter != gOutputXpt2WidgetID.end ();  ++iter)
+    for (OutputXpt2WidgetIDsConstIter iter (gOutputXpt2WidgetIDs.begin ());  iter != gOutputXpt2WidgetIDs.end ();  ++iter)
         gWidget2OutputXpts.insert (Widget2OutputXptPair (iter->second, iter->first));
+
+#if defined(DUMP_WIDGETID_TO_INPUT_XPTS_MMAP)
+	for (Widget2InputXptsConstIter it(gWidget2InputXpts.begin());  it != gWidget2InputXpts.end();  ++it)
+		cout	<< ::NTV2WidgetIDToString(it->first,false) << " ('" << ::NTV2WidgetIDToString(it->first,true)
+				<< "', " << DEC(it->first) << ") => " << ::NTV2InputCrosspointIDToString(it->second,false)
+				<< " (" << ::NTV2InputCrosspointIDToString(it->second,true) << ", " << DEC(it->second) << ")" << endl;
+#endif	//	defined(DUMP_WIDGETID_TO_INPUT_XPTS_MMAP)
 
     return IsInitialized ();
 
@@ -2110,21 +2168,20 @@ bool CNTV2SignalRouter::Deinitialize (void)
 {
     gInputXpt2String.clear ();
     gString2InputXpt.clear ();
-    gInputXpt2WidgetID.clear ();
+    gInputXpt2WidgetIDs.clear ();
     gOutputXpt2String.clear ();
     gString2OutputXpt.clear ();
-    gOutputXpt2WidgetID.clear ();
+    gOutputXpt2WidgetIDs.clear ();
     gWidget2InputXpts.clear ();
     gWidget2OutputXpts.clear ();
-    return gInputXpt2String.empty () && gString2InputXpt.empty () && gInputXpt2WidgetID.empty () && gWidget2InputXpts.empty ()
-        && gOutputXpt2String.empty () && gString2OutputXpt.empty () && gOutputXpt2WidgetID.empty () && gWidget2OutputXpts.empty ();
+    return !IsInitialized();
 }
 
 
 bool CNTV2SignalRouter::IsInitialized (void)
 {
-    return !gInputXpt2String.empty () && !gString2InputXpt.empty () && !gInputXpt2WidgetID.empty () && !gWidget2InputXpts.empty ()
-        && !gOutputXpt2String.empty () && !gString2OutputXpt.empty () && !gOutputXpt2WidgetID.empty () && !gWidget2OutputXpts.empty ();
+    return !gInputXpt2String.empty () && !gString2InputXpt.empty () && !gInputXpt2WidgetIDs.empty () && !gWidget2InputXpts.empty ()
+        && !gOutputXpt2String.empty () && !gString2OutputXpt.empty () && !gOutputXpt2WidgetIDs.empty () && !gWidget2OutputXpts.empty ();
 }
 
 
