@@ -131,8 +131,8 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 	}
 
 	// 2 pixel interleave for 4k else not
-	mCard->SetTsiFrameEnable(b4K, NTV2_CHANNEL1);
-	mCard->SetTsiFrameEnable(b4K, NTV2_CHANNEL2);
+    AdjustFor4kQuadOrTsi(NTV2_CHANNEL1);
+    AdjustFor4kQuadOrTsi(NTV2_CHANNEL2);
 	
 	// CSCs
 	if (inputColorSpace == NTV2_ColorSpaceModeRgb)

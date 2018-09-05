@@ -65,7 +65,7 @@ void Corvid44Services::SetDeviceXPointPlayback ()
 	}
 	
 	// select square division or 2 pixel interleave in frame buffer
-	mCard->SetTsiFrameEnable(b2pi,NTV2_CHANNEL1);
+    AdjustFor4kQuadOrTsi();
 
 	// Figure out what our input format is based on what is selected 
 	GetSelectedInputVideoFormat(mFb1VideoFormat);
@@ -1163,7 +1163,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 	bool b2piIn = (b2x2piIn || b4x2piInA || b4x2piInB);
 
 	// select square division or 2 pixel interleave in frame buffer
-	mCard->SetTsiFrameEnable(b2piIn, NTV2_CHANNEL1);
+    AdjustFor4kQuadOrTsi();
 	
 	// SDI In 1
 	bool bConvertBToA; 

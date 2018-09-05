@@ -158,9 +158,8 @@ void Kona5Services::SetDeviceXPointPlayback ()
             mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
         }
     }
-
-    // select square division or 2 pixel interleave in frame buffer
-    mCard->SetTsiFrameEnable(b2pi,NTV2_CHANNEL1);
+    
+    AdjustFor4kQuadOrTsi();
 
     // input 1 select
     if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1602,7 +1601,7 @@ void Kona5Services::SetDeviceXPointCapture ()
     }
 
     // select square division or 2 pixel interleave in frame buffer
-    mCard->SetTsiFrameEnable(b2pi, NTV2_CHANNEL1);
+    AdjustFor4kQuadOrTsi();
 
     // Mixer/Keyer
     mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptBlack);

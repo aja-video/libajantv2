@@ -3790,6 +3790,30 @@ NTV2AudioSystem	DeviceServices::GetHostAudioSystem()
 }
 
 
+
+// select square division or 2 pixel interleave in frame buffer
+void DeviceServices::AdjustFor4kQuadOrTsi(NTV2Channel ch)
+{
+    if (NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat))
+    {
+    	bool bEnabled = false;
+   		bool b4kQuad = (m4kTransportOutSelection != NTV2_4kTransport_PixelInterleave);
+   		if (b4kQuad)
+   		{
+   			mCard->Get4kSquaresEnable(bEnabled, ch);
+   			if (bEnabled == false)
+				mCard->Set4kSquaresEnable(true, ch);
+   		}
+   		else
+   		{
+   			mCard->GetTsiFrameEnable(bEnabled, ch);
+   			if (bEnabled == false)
+				mCard->SetTsiFrameEnable(true, ch);
+   		}
+    }
+}
+
+
 //
 // MARK: Base Service -
 //
