@@ -23,22 +23,6 @@ Kona5Services::~Kona5Services()
 
 
 //-------------------------------------------------------------------------------------------------------
-//	UpdateAutoState
-//-------------------------------------------------------------------------------------------------------
-void Kona5Services::UpdateAutoState (void)
-{
-	// auto mode from transport
-	if (mDualStreamTransportType == NTV2_SDITransport_Auto)
-	{
-		if (IsVideoFormatA(mFb1VideoFormat))
-			mDualStreamTransportType = NTV2_SDITransport_3Ga;
-		else
-			mDualStreamTransportType = NTV2_SDITransport_DualLink_3Gb;
-	}
-}
-
-
-//-------------------------------------------------------------------------------------------------------
 //	GetSelectedInputVideoFormat
 //	Note:	Determine input video format based on input select and fbVideoFormat
 //			which currently is videoformat of ch1-framebuffer
