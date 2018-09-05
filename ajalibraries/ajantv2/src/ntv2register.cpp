@@ -754,6 +754,10 @@ bool CNTV2Card::SetStandard (NTV2Standard value, NTV2Channel channel)
 	{
 		newStandard = GetQuarterSizedStandard(newStandard);
 	}
+	if (NTV2_IS_2K1080_STANDARD(newStandard))
+	{
+		newStandard = NTV2_STANDARD_1080p;
+	}
 
 	return WriteRegister (gChannelToGlobalControlRegNum [channel],
 						  newStandard,

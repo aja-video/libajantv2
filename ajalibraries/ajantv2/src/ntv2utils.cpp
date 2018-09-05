@@ -1948,9 +1948,10 @@ NTV2Standard GetQuarterSizedStandard(NTV2Standard standard)
 	{
 	case NTV2_STANDARD_3840x2160p:
 	case NTV2_STANDARD_3840HFR:
+		return NTV2_STANDARD_1080p;
 	case NTV2_STANDARD_4096x2160p:
 	case NTV2_STANDARD_4096HFR:
-		return NTV2_STANDARD_1080p;
+		return NTV2_STANDARD_2Kx1080p;
 	default:
 		return standard;
 	}
