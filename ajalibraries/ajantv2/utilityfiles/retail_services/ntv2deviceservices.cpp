@@ -234,7 +234,7 @@ void DeviceServices::ReadDriverState (void)
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, mFb1Format);
 	mCard->GetMode(NTV2_CHANNEL1, mFb1Mode);
 	// vpid
-	if (NTV2DeviceCanDoDualLink(mDeviceID) == false)
+	if (NTV2DeviceCanDoDualLink(mDeviceID) == true)
 	{
 		if (NTV2DeviceGetNumVideoInputs(mDeviceID) > 0)
 			mVpid1Valid = mCard->ReadSDIInVPID(NTV2_CHANNEL1, mVpid1a, mVpid1b);

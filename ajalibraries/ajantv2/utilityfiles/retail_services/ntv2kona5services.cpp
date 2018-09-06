@@ -1476,8 +1476,7 @@ void Kona5Services::SetDeviceXPointCapture ()
                                                         (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
 
     // swap quad mode
-    ULWord						selectSwapQuad		= 0;
-    mCard->ReadRegister(kVRegSwizzle4kInput, selectSwapQuad);
+    ULWord						selectSwapQuad		= 0; mCard->ReadRegister(kVRegSwizzle4kInput, selectSwapQuad);
     bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_Input4x4kSelect && selectSwapQuad != 0;
 
     // SMPTE 425 (2pi)
