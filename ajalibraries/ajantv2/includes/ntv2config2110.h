@@ -25,13 +25,13 @@
 
 typedef enum
 {
-    kNetworkData2110        = NTV2_FOURCC('n','t','1','0'), // 4CC of network config data
-    kTransmitVideoData2110  = NTV2_FOURCC('t','v','1','0'), // 4CC of video transmit config data
-    kTransmitAudioData2110  = NTV2_FOURCC('t','a','1','0'), // 4CC of audio transmit config data
-    kReceiveVideoData2110   = NTV2_FOURCC('r','v','1','0'), // 4CC of video receive config data
-    kReceiveAudioData2110   = NTV2_FOURCC('r','a','1','0'), // 4CC of audio receive config data
-    kAncVData2110           = NTV2_FOURCC('a','n','1','0'), // 4CC of anc config data
-    kChStatusData2110       = NTV2_FOURCC('s','t','1','0')  // 4CC of channel status config data
+    kNetworkData2110        = NTV2_FOURCC('n','t','1','1'), // 4CC of network config data
+    kTransmitVideoData2110  = NTV2_FOURCC('t','v','1','1'), // 4CC of video transmit config data
+    kTransmitAudioData2110  = NTV2_FOURCC('t','a','1','1'), // 4CC of audio transmit config data
+    kReceiveVideoData2110   = NTV2_FOURCC('r','v','1','1'), // 4CC of video receive config data
+    kReceiveAudioData2110   = NTV2_FOURCC('r','a','1','1'), // 4CC of audio receive config data
+    kAncVData2110           = NTV2_FOURCC('a','n','1','1'), // 4CC of anc config data
+    kChStatusData2110       = NTV2_FOURCC('s','t','1','1')  // 4CC of channel status config data
 } VirtualDataTag2110 ;
 
 typedef enum
