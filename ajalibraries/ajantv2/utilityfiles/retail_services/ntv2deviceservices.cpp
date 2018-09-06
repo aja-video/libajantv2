@@ -3797,7 +3797,8 @@ void DeviceServices::AdjustFor4kQuadOrTsi(NTV2Channel ch)
     if (NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat))
     {
     	bool bEnabled = false;
-   		bool b4kQuad = (m4kTransportOutSelection != NTV2_4kTransport_PixelInterleave);
+   		bool b4kQuad = (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire ||
+   						m4kTransportOutSelection == NTV2_4kTransport_Quadrants_4wire);
    		if (b4kQuad)
    		{
    			mCard->Get4kSquaresEnable(bEnabled, ch);
