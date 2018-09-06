@@ -103,6 +103,82 @@ aja_sysctl(const char *name, std::string &result)
     return ret;
 }
 
+CFDictionaryRef find_dict_for_data_type(const CFArrayRef inArray, CFStringRef inDataType)
+{
+    for (CFIndex i = 0; i<CFArrayGetCount(inArray); i++)
+    {
+        CFDictionaryRef theDictionary = CFDictionaryRef(CFArrayGetValueAtIndex(inArray, i));
+
+        // If the CFDictionary at this index has a key/value pair with the value equal to inDataType,
+        // retain and return it, caller is responsible for releasing it.
+        if (CFDictionaryContainsValue(theDictionary, inDataType))
+        {
+            CFRetain(theDictionary);
+            return theDictionary;
+        }
+    }
+    return NULL;
+}
+
+CFArrayRef get_items_array_from_dict(const CFDictionaryRef inDictionary)
+{
+    CFArrayRef itemsArray = CFArrayRef(CFDictionaryGetValue(inDictionary, CFSTR("_items")));
+    if (itemsArray != NULL)
+    {
+        // retain and return it, caller is responsible for releasing it.
+        CFRetain(itemsArray);
+    }
+    return itemsArray;
+}
+
+std::string
+aja_getgputype()
+{
+    // get the display information from system_profiler, in xml form
+    std::vector<char> streamBuffer(512*512);
+    FILE *sys_profile = popen("system_profiler SPDisplaysDataType -xml", "r");
+    size_t bytesRead = fread(&streamBuffer[0], sizeof(char), streamBuffer.size(), sys_profile);
+    pclose(sys_profile);
+
+    // read in the raw xml string and convert to an xml data structure
+    CFDataRef xmlData = CFDataCreate(kCFAllocatorDefault, (const UInt8*)&streamBuffer[0], bytesRead);
+    CFStringRef errorString;
+    CFArrayRef propertyArray = CFArrayRef(CFPropertyListCreateFromXMLData(kCFAllocatorDefault, xmlData, kCFPropertyListImmutable, &errorString));
+
+    std::ostringstream oss;
+
+    CFDictionaryRef hwInfoDict = find_dict_for_data_type(propertyArray, CFSTR("SPDisplaysDataType"));
+    if (hwInfoDict != NULL)
+    {
+        CFArrayRef itemsArray = get_items_array_from_dict(hwInfoDict);
+        if (itemsArray != NULL)
+        {
+            // each item in array is a dictionary
+            for (CFIndex i=0; i < CFArrayGetCount(itemsArray); i++)
+            {
+                // find the string for key "sppci_model" which is the human readable name of the graphics card
+                CFDictionaryRef dict = CFDictionaryRef(CFArrayGetValueAtIndex(itemsArray, i));
+                CFStringRef key = CFSTR("sppci_model");
+                CFStringRef outputString = CFStringRef(CFDictionaryGetValue(dict, key));
+
+                std::vector<char> tmp(CFStringGetLength(outputString)+1);
+                if (CFStringGetCString(outputString, &tmp[0], tmp.size(), kCFStringEncodingUTF8))
+                {
+                    if (i != 0)
+                    {
+                        oss << ", ";
+                    }
+                    oss << &tmp[0];
+                }
+                CFRelease(outputString);
+            }
+            CFRelease(itemsArray);
+        }
+        CFRelease(hwInfoDict);
+    }
+    return oss.str();
+}
+
 AJASystemInfoImpl::AJASystemInfoImpl(int units)
 {
     mMemoryUnits = units;
@@ -175,6 +251,8 @@ AJASystemInfoImpl::Rescan()
             ret = AJA_STATUS_SUCCESS;
         }
     }
+
+    mValueMap[int(AJA_SystemInfoTag_GPU_Type)] = aja_getgputype();
 
     // Paths
     const char* homePath = getenv("HOME");

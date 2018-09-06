@@ -242,6 +242,30 @@ aja_getcpucores()
     return oss.str();
 }
 
+std::string
+aja_getgputype()
+{
+    std::ostringstream oss;
+    DISPLAY_DEVICE devInfo;
+    devInfo.cb = sizeof(DISPLAY_DEVICE);
+    DWORD loopDevNum = 0;
+    std::map<std::string, int> foundMap;
+    while (EnumDisplayDevices(NULL, loopDevNum, &devInfo, 0))
+    {
+        std::string name = devInfo.DeviceString;
+        if (foundMap.find(name) == foundMap.end())
+        {
+            if (foundMap.empty() == false)
+                oss << ", ";
+
+            oss << name;
+            foundMap[name] = 1;
+        }
+        loopDevNum++;
+    }
+    return oss.str();
+}
+
 void
 aja_getmemory(AJASystemInfoMemoryUnit units, std::string &total, std::string &used, std::string &free)
 {
@@ -335,6 +359,8 @@ AJASystemInfoImpl::Rescan()
                   mValueMap[int(AJA_SystemInfoTag_Mem_Total)],
                   mValueMap[int(AJA_SystemInfoTag_Mem_Used)],
                   mValueMap[int(AJA_SystemInfoTag_Mem_Free)]);
+    mValueMap[int(AJA_SystemInfoTag_GPU_Type)] = aja_getgputype();
+
 
     // Paths
     std::string path;
