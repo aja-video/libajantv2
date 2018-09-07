@@ -207,7 +207,7 @@ public:
 	uint32_t				mVirtualDebug1;
 	uint32_t				mEveryFrameTaskFilter;
 	uint32_t				mDefaultInput;
-	NTV2SDITransportType	mDualStreamTransportType;
+	NTV2SDITransportType	mSdiOutTransportType;
 	NTV24kTransportType		m4kTransportOutSelection;
 	NTV2DSKMode				mDSKMode;
 	int32_t					mStreamingAppPID;

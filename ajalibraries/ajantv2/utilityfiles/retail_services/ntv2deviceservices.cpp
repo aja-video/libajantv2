@@ -183,7 +183,7 @@ void DeviceServices::ReadDriverState (void)
 	mCard->ReadRegister(kVRegFollowInputFormat, mFollowInputFormat);
 	mCard->ReadRegister(kVRegVANCMode, mVANCMode);
 	mCard->ReadRegister(kVRegDefaultInput, mDefaultInput);
-	AsDriverInterface(mCard)->ReadRegister(kVRegDualStreamTransportType, mDualStreamTransportType);
+	AsDriverInterface(mCard)->ReadRegister(kVRegDualStreamTransportType, mSdiOutTransportType);
 	AsDriverInterface(mCard)->ReadRegister(kVRegDSKMode, mDSKMode);
 	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput1Select, mVirtualDigitalOutput1Select);
 	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput2Select, mVirtualDigitalOutput2Select);
@@ -432,8 +432,8 @@ void DeviceServices::ReadDriverState (void)
 //-------------------------------------------------------------------------------------------------------
 void DeviceServices::UpdateAutoState()
 {
-	mDualStreamTransportType = 
-		RetailSupport::AutoSelect3GTransport(mDeviceID, mDualStreamTransportType, mFb1VideoFormat);
+	mSdiOutTransportType = 
+		RetailSupport::AutoSelect3GTransport(mDeviceID, mSdiOutTransportType, mFb1VideoFormat);
 	
 	// out select sdi
 	mVirtualDigitalOutput1Select = mVirtualDigitalOutput1Select == NTV2_AutoOutputSelect ?
@@ -455,9 +455,18 @@ void DeviceServices::UpdateAutoState()
 	mSDIOutput1RGBRange = mSDIOutput1RGBRange == NTV2_RGBRangeAuto ?
 							NTV2_RGBRangeFull : mSDIOutput1RGBRange;
 							
-	// in cs - auto determined by vpid
-							
-	// in range - auto determined by vpid
+	// in range
+	mSDIInput1RGBRange = mSDIInput1RGBRange == NTV2_RGBRangeAuto ?
+							NTV2_RGBRangeFull : mSDIInput1RGBRange;
+	mSDIInput2RGBRange = mSDIInput2RGBRange == NTV2_RGBRangeAuto ?
+							NTV2_RGBRangeFull : mSDIInput2RGBRange;
+	
+	// in cs - TBD determined by vpid
+    //CNTV2VPID parser; parser.SetVPID(mVpid1a);
+	mSDIInput1ColorSpace = mSDIInput1ColorSpace == NTV2_ColorSpaceModeAuto ?
+							NTV2_ColorSpaceModeYCbCr : mSDIInput1ColorSpace;
+	mSDIInput2ColorSpace = mSDIInput2ColorSpace == NTV2_ColorSpaceModeAuto ?
+							NTV2_ColorSpaceModeYCbCr : mSDIInput2ColorSpace;
 	
 	// 4k transport
 	NTV24kTransportType tranport4k = NTV2_4kTransport_PixelInterleave;
@@ -472,8 +481,8 @@ void DeviceServices::UpdateAutoState()
 	if (::NTV2DeviceCanDo3GOut(mDeviceID, 0) == false)
 		transport3g	= NTV2_SDITransport_DualLink_1_5;
 		
-	mDualStreamTransportType = mDualStreamTransportType == NTV2_SDITransport_Auto ? 
-				transport3g : mDualStreamTransportType;
+	mSdiOutTransportType = mSdiOutTransportType == NTV2_SDITransport_Auto ? 
+				transport3g : mSdiOutTransportType;
 }
 
 

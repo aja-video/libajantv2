@@ -29,7 +29,7 @@ void Kona1Services::SetDeviceXPointPlayback ()
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						bSdiOutRGB			= mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb;
-	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	bool						b3GbOut				= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);
 	int							bFb1Disable			= 0;						// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	bool						bDSKGraphicMode		= mDSKMode == NTV2_DSKModeGraphicOverMatte || 
@@ -410,7 +410,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
-	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	bool						b3GbOut				= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;				// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)

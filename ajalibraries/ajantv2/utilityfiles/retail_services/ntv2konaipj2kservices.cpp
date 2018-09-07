@@ -60,7 +60,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	bool						b3GbOut				= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);
 	int							bFb1Disable			= 0;						// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
@@ -621,7 +621,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 	NTV2VideoFormat				inputFormat      	= NTV2_FORMAT_UNKNOWN;
 	NTV2RGBRangeMode			frambBufferRange 	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
-	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	bool						b3GbOut				= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b2FbLevelBHfr    	= IsVideoFormatB(mFb1VideoFormat);
 	int							bFb1Disable 		= 0;		// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable 		= 1;		// Assume Channel 2 IS disabled by default
@@ -1429,12 +1429,12 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 		((bSdiOutRGB == true) ||
 		(mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 		(mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-		(bFbLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
+		(bFbLevelA == true && mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 		(IsVideoFormatB(mFb1VideoFormat) == true));
 
 	// all 3Gb transport out
 	// b3GbOut = (b1x3GbOut + !2wire) | (4k + rgb) | (4khfr + 3gb)
-	bool b3GbOut = (b1x3GbOut == true && mDualStreamTransportType != NTV2_SDITransport_DualLink_1_5);
+	bool b3GbOut = (b1x3GbOut == true && mSdiOutTransportType != NTV2_SDITransport_DualLink_1_5);
 
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)

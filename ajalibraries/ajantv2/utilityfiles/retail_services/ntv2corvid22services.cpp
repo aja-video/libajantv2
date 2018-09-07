@@ -35,7 +35,7 @@ void Corvid22Services::SetDeviceXPointPlayback ()
 		
 	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
-	bool b3GbOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
+	bool b3GbOut	= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
 	
 	// make sure frame DualLink B mode (SMPTE 372), Stereo
 	if (b2FbLevelBHfr || bStereoOut)
@@ -414,7 +414,7 @@ void Corvid22Services::SetDeviceXPointCapture ()
 
 	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
-	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	bool						b3GbOut				= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);
 	int							bFb1Disable 		= 0;				// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable 		= 1;				// Assume Channel 2 IS disabled by default
 	
