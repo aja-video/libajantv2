@@ -18,6 +18,7 @@
 #include "ajabase/common/timer.h"
 #include "ajabase/persistence/persistence.h"
 #include "ajabase/system/atomic.h"
+#include "ajabase/system/info.h"
 #include "ajabase/system/systemtime.h"
 
 #include <clocale>
@@ -780,3 +781,14 @@ TEST_SUITE("performance -- functions in ajabase/common/performance.h");
     }
 
 TEST_SUITE_END(); //performance
+
+void info_marker() {}
+TEST_SUITE("info -- functions in ajabase/system/info.h");
+
+    TEST_CASE("AJASystemInfo")
+    {
+        // just create an instance to make sure everything works at runtime
+        AJASystemInfo i;
+    }
+
+TEST_SUITE_END(); //info
