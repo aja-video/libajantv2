@@ -319,7 +319,12 @@ bool CNTV2Card::GetVideoFormat (NTV2VideoFormat & outValue, NTV2Channel inChanne
 
     bool isSquares = false;
     if(NTV2_IS_QUAD_FRAME_GEOMETRY(frameGeometry))
-        Get4kSquaresEnable(isSquares, inChannel);
+    {
+        if(!NTV2DeviceCanDo12gRouting(GetDeviceID()))
+            isSquares = true;
+        else
+            Get4kSquaresEnable(isSquares, inChannel);
+    }
 
     return ::NTV2DeviceGetVideoFormatFromState_Ex2 (&outValue, frameRate, frameGeometry, standard, smpte372Enabled, progressivePicture, isSquares);
 }
