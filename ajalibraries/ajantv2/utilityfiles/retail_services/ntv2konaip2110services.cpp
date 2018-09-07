@@ -22,6 +22,8 @@ KonaIP2110Services::KonaIP2110Services()
     memset(&m2110TxAudioDataLast, 0, sizeof(TransmitAudioData2110));
     memset(&m2110RxVideoDataLast, 0, sizeof(ReceiveVideoData2110));
     memset(&m2110RxAudioDataLast, 0, sizeof(ReceiveAudioData2110));
+
+    mResetPLLCounter = 60;
 }
 
 KonaIP2110Services::~KonaIP2110Services()
@@ -2116,8 +2118,30 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
         if (config2110 == NULL)
         {
             config2110 = new CNTV2Config2110(*mCard);
+        }
+
+        // Here we protect against Windows fast boot mode where everythign in the agent is cached
+        // and restored at a restart or power up.  This will detect that condition because the network
+        // in the hardware will not be configued.  In this case make sure we clear out our local cache
+        // of the HW settings.
+        IPVNetConfig    hwNetConfig1, hwNetConfig2;
+
+        config2110->GetNetworkConfiguration(SFP_1, hwNetConfig1);
+        config2110->GetNetworkConfiguration(SFP_2, hwNetConfig2);
+        if ((hwNetConfig1.ipc_ip == 0) && (hwNetConfig1.ipc_subnet == 0) && (hwNetConfig1.ipc_gateway == 0) &&
+            (hwNetConfig2.ipc_ip == 0) && (hwNetConfig2.ipc_subnet == 0) && (hwNetConfig2.ipc_gateway == 0))
+        {
+            printf("Power on state or not configured\n");
+
+            memset(&m2110NetworkLast, 0, sizeof(NetworkData2110));
+            memset(&m2110TxVideoDataLast, 0, sizeof(TransmitVideoData2110));
+            memset(&m2110TxAudioDataLast, 0, sizeof(TransmitAudioData2110));
+            memset(&m2110RxVideoDataLast, 0, sizeof(ReceiveVideoData2110));
+            memset(&m2110RxAudioDataLast, 0, sizeof(ReceiveAudioData2110));
+
+            mResetPLLCounter = 60;
+
             ipServiceEnable = false;
-            // For some reason on Windows this doesn't immediately happen so make sure it gets set
             while (ipServiceEnable == false)
             {
                 AJATime::Sleep(10);

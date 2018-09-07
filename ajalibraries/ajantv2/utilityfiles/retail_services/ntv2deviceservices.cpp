@@ -2127,7 +2127,6 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
     bool ipServiceEnable, ipServiceForceConfig;
 
     config2110->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
-    ipServiceEnable = true;
     if (ipServiceEnable)
     {
         tx_2110Config txConfig;
