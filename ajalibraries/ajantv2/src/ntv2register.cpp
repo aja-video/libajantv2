@@ -3842,7 +3842,7 @@ bool CNTV2Card::SetColorSpaceMethod (const NTV2ColorSpaceMethod inCSCMethod, con
 			break;
 		case NTV2_CSC_Method_Enhanced:
 			//	Enable enhanced mode, but not 4K
-			value |= kK2RegShiftEnhancedCSCEnable;
+			value |= kK2RegMaskEnhancedCSCEnable;
 			break;
 		case NTV2_CSC_Method_Enhanced_4K:
 			//	4K mode uses a block of four CSCs. You must set the first converter in the group.
