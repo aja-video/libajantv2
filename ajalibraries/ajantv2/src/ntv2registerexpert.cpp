@@ -164,40 +164,16 @@ public:
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel5);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel6);
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel7);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel8);
 
-		//	Anc Ins/Ext
-		SetupAncInsExt();
-		
-		//	Xpt Select
-		SetupXptSelect();
-		
-		//	DMA
-		SetupDMARegs();
-		
-		//	Timecode
-		SetupTimecodeRegs();
-		
-		//	Audio
-		SetupAudioRegs();
-		
-		//	VidProc/Mixer/Keyer
-		DefineRegister	(kRegVidProc1Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Channel2);
-		DefineRegister	(kRegVidProc2Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel3,	kRegClass_Channel4);
-		DefineRegister	(kRegVidProc3Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel5,	kRegClass_Channel6);
-		DefineRegister	(kRegVidProc4Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel7,	kRegClass_Channel8);
-		DefineRegister	(kRegSplitControl,		"",	mSplitControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
-		DefineRegister	(kRegFlatMatteValue,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
-		DefineRegister	(kRegMixer1Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
-		DefineRegister	(kRegMixer2Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel2,	kRegClass_NULL);
-		DefineRegister	(kRegMixer3Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel3,	kRegClass_NULL);
-		DefineRegister	(kRegMixer4Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel4,	kRegClass_NULL);
-
-		//	HDMI
-		SetupHDMIRegs();
-
-		SetupSDIError();
-		
-		//	Virtuals
-		SetupVRegs();
+		SetupAncInsExt();		//	Anc Ins/Ext
+		SetupXptSelect();		//	Xpt Select
+		SetupDMARegs();			//	DMA
+		SetupTimecodeRegs();	//	Timecode
+		SetupAudioRegs();		//	Audio
+		SetupMixerKeyerRegs();	//	Mixer/Keyer
+		SetupHDMIRegs();		//	HDMI
+		SetupSDIErrorRegs();	//	SDIError
+		SetupCSCRegs();			//	CSCs
+		SetupVRegs();			//	Virtuals
 		
 		//Print (cout);	//	For debugging
 	}	//	constructor
@@ -656,8 +632,8 @@ private:
 		DefineRegister (0x1d60,	"reg_hdmiout4_i2ccontrol",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
 		DefineRegister (0x1d61,	"reg_hdmiout4_i2cedid",					mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
 	}
-	
-	void SetupSDIError(void)
+
+	void SetupSDIErrorRegs(void)
 	{
 		static const ULWord	baseNum[]	=	{kRegRXSDI1Status,	kRegRXSDI2Status,	kRegRXSDI3Status,	kRegRXSDI4Status,	kRegRXSDI5Status,	kRegRXSDI6Status,	kRegRXSDI7Status,	kRegRXSDI8Status};
 		static const string	suffixes []	=	{"Status",	"CRCErrorCount",	"FrameCountLow",	"FrameCountHigh",	"FrameRefCountLow",	"FrameRefCountHigh"};
@@ -678,8 +654,59 @@ private:
 			}
 		DefineRegister (kRegRXSDIFreeRunningClockLow, "kRegRXSDIFreeRunningClockLow", mDefaultRegDecoder, READONLY, kRegClass_SDIError, kRegClass_NULL, kRegClass_NULL);
 		DefineRegister (kRegRXSDIFreeRunningClockHigh, "kRegRXSDIFreeRunningClockHigh", mDefaultRegDecoder, READONLY, kRegClass_SDIError, kRegClass_NULL, kRegClass_NULL);
-	}	//	SetupSDIError
-	
+	}	//	SetupSDIErrorRegs
+
+	void SetupCSCRegs(void)
+	{
+		static const string	sChan[8] = {kRegClass_Channel1, kRegClass_Channel2, kRegClass_Channel3, kRegClass_Channel4, kRegClass_Channel5, kRegClass_Channel6, kRegClass_Channel7, kRegClass_Channel8};
+		for (unsigned num(0);  num < 8;  num++)
+		{
+			ostringstream ossRegName;  ossRegName << "kRegEnhancedCSC" << (num+1);
+			const string & chanClass (sChan[num]);						const string rootName    (ossRegName.str());
+			const string modeName    (rootName + "Mode");				const string inOff01Name (rootName + "InOffset0_1");			const string inOff2Name  (rootName + "InOffset2");
+			const string coeffA0Name (rootName + "CoeffA0");			const string coeffA1Name (rootName + "CoeffA1");				const string coeffA2Name (rootName + "CoeffA2");
+			const string coeffB0Name (rootName + "CoeffB0");			const string coeffB1Name (rootName + "CoeffB1");				const string coeffB2Name (rootName + "CoeffB2");
+			const string coeffC0Name (rootName + "CoeffC0");			const string coeffC1Name (rootName + "CoeffC1");				const string coeffC2Name (rootName + "CoeffC2");
+			const string outOffABName(rootName + "OutOffsetA_B");		const string outOffCName (rootName + "OutOffsetC");
+			const string keyModeName (rootName + "KeyMode");			const string keyClipOffName (rootName + "KeyClipOffset");		const string keyGainName (rootName + "KeyGain");
+			DefineRegister (64*num + kRegEnhancedCSC1Mode,			modeName,			mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1InOffset0_1,	inOff01Name,		mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1InOffset2,		inOff2Name,			mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffA0,		coeffA0Name,		mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffA1,		coeffA1Name,		mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffA2,		coeffA2Name,		mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffB0,		coeffB0Name,		mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffB1,		coeffB1Name,		mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffB2,		coeffB2Name,		mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffC0,		coeffC0Name,		mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffC1,		coeffC1Name,		mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffC2,		coeffC2Name,		mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1OutOffsetA_B,	outOffABName,		mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1OutOffsetC,	outOffCName,		mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1KeyMode,		keyModeName,		mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1KeyClipOffset,	keyClipOffName,		mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1KeyGain,		keyGainName,		mDefaultRegDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+		}
+	}	//	SetupCSCRegs
+
+	void SetupMixerKeyerRegs(void)
+	{
+		//	VidProc/Mixer/Keyer
+		DefineRegister	(kRegVidProc1Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Channel2);
+		DefineRegister	(kRegVidProc2Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel3,	kRegClass_Channel4);
+		DefineRegister	(kRegVidProc3Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel5,	kRegClass_Channel6);
+		DefineRegister	(kRegVidProc4Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel7,	kRegClass_Channel8);
+		DefineRegister	(kRegSplitControl,		"",	mSplitControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
+		DefineRegister	(kRegFlatMatteValue,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
+		DefineRegister	(kRegFlatMatte2Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
+		DefineRegister	(kRegFlatMatte3Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
+		DefineRegister	(kRegFlatMatte4Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
+		DefineRegister	(kRegMixer1Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
+		DefineRegister	(kRegMixer2Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel2,	kRegClass_NULL);
+		DefineRegister	(kRegMixer3Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel3,	kRegClass_NULL);
+		DefineRegister	(kRegMixer4Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel4,	kRegClass_NULL);
+	}
+
 	void SetupVRegs(void)
 	{
 		DefineRegName	(kVRegLinuxDriverVersion,				"kVRegLinuxDriverVersion");
@@ -1135,24 +1162,35 @@ public:
 		return result;
 	}
 	
+
 	NTV2RegNumSet	GetRegistersForDevice (const NTV2DeviceID inDeviceID, const bool inIncludeVirtuals) const
 	{
+		static const string	chanClasses[] = {kRegClass_Channel1, kRegClass_Channel2, kRegClass_Channel3, kRegClass_Channel4, kRegClass_Channel5, kRegClass_Channel6, kRegClass_Channel7, kRegClass_Channel8};
 		NTV2RegNumSet		result;
-		const uint32_t		maxRegNum	(::NTV2DeviceGetMaxRegisterNumber (inDeviceID));
+		const uint32_t		maxRegNum	(::NTV2DeviceGetMaxRegisterNumber(inDeviceID));
+
 		for (uint32_t regNum (0);  regNum <= maxRegNum;  regNum++)
-			result.insert (regNum);
-		if (::NTV2DeviceCanDoCustomAnc (inDeviceID))
+			result.insert(regNum);
+
+		if (::NTV2DeviceCanDoCustomAnc(inDeviceID))
 		{
-			const NTV2RegNumSet	ancRegs	(GetRegistersForClass (kRegClass_Anc));
-			for (NTV2RegNumSetConstIter it (ancRegs.begin());  it != ancRegs.end();  ++it)
-				result.insert (*it);
+			const NTV2RegNumSet	ancRegs			(GetRegistersForClass(kRegClass_Anc));
+			const UWord			numFrameStores	(::NTV2DeviceGetNumFrameStores(inDeviceID));
+			NTV2RegNumSet		allChanRegs;	//	For just those channels it supports
+			for (UWord num(0);  num < numFrameStores;  num++)
+			{
+				const NTV2RegNumSet chRegs (GetRegistersForClass(chanClasses[num]));
+				allChanRegs.insert(chRegs.begin(), chRegs.end());
+			}
+			std::set_intersection (ancRegs.begin(), ancRegs.end(),  allChanRegs.begin(), allChanRegs.end(),  std::inserter(result, result.begin()));
 		}
-		if (::NTV2DeviceCanDoSDIErrorChecks (inDeviceID))
+
+		if (::NTV2DeviceCanDoSDIErrorChecks(inDeviceID))
 		{
-			const NTV2RegNumSet	ancRegs	(GetRegistersForClass (kRegClass_SDIError));
-			for (NTV2RegNumSetConstIter it (ancRegs.begin());  it != ancRegs.end();  ++it)
-				result.insert (*it);
+			const NTV2RegNumSet	sdiErrRegs	(GetRegistersForClass(kRegClass_SDIError));
+			result.insert(sdiErrRegs.begin(), sdiErrRegs.end());
 		}
+
 		if (::NTV2DeviceCanDoAudioMixer(inDeviceID))
 		{
 			for (ULWord regNum(kRegAudioMixerInputSelects);  regNum <= kRegAudioMixerAux2GainCh2;  regNum++)
@@ -1160,9 +1198,24 @@ public:
 			for (ULWord regNum(kRegAudioMixerAux1InputLevels);  regNum <= kRegAudioMixerMixedChannelOutputLevels; regNum++)
 				result.insert(regNum);
 		}
+
 		if (::NTV2DeviceHasXilinxDMA(inDeviceID))
 		{
 		}
+
+		if (::NTV2DeviceCanDoEnhancedCSC(inDeviceID))
+		{
+			const NTV2RegNumSet	ecscRegs	(GetRegistersForClass(kRegClass_Color));
+			const UWord			numCSCs		(::NTV2DeviceGetNumCSCs(inDeviceID));
+			NTV2RegNumSet		allChanRegs;	//	For just those CSCs it supports
+			for (UWord num(0);  num < numCSCs;  num++)
+			{
+				const NTV2RegNumSet chRegs (GetRegistersForClass(chanClasses[num]));
+				allChanRegs.insert(chRegs.begin(), chRegs.end());
+			}
+			std::set_intersection (ecscRegs.begin(), ecscRegs.end(),  allChanRegs.begin(), allChanRegs.end(),  std::inserter(result, result.begin()));
+		}
+
 		if (inDeviceID == DEVICE_ID_IO4KPLUS)
 		{
 			for (ULWord regNum = 0x1d00; regNum <= 0x1d1f; regNum++)
@@ -1170,6 +1223,7 @@ public:
 			for (ULWord regNum = 0x1d40; regNum <= 0x1d5f; regNum++)
 				result.insert(regNum);
 		}
+
 		if (inDeviceID == DEVICE_ID_KONAHDMI)
 		{
 			for (ULWord regNum = 0x1d00; regNum <= 0x1d1f; regNum++)
@@ -1181,14 +1235,15 @@ public:
 			for (ULWord regNum = 0x3000; regNum <= 0x301f; regNum++)
 				result.insert(regNum);
 		}
+
 		if (inIncludeVirtuals)
 		{
-			const NTV2RegNumSet	vRegs	(GetRegistersForClass (kRegClass_Virtual));
-			for (NTV2RegNumSetConstIter it (vRegs.begin());  it != vRegs.end();  ++it)
-				result.insert (*it);
+			const NTV2RegNumSet	vRegs	(GetRegistersForClass(kRegClass_Virtual));
+			result.insert(vRegs.begin(), vRegs.end());
 		}
 		return result;
 	}
+
 	
 	NTV2RegNumSet	GetRegistersWithName (const string & inName, const int inMatchStyle = EXACTMATCH) const
 	{
