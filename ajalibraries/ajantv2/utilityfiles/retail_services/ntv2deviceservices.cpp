@@ -183,7 +183,7 @@ void DeviceServices::ReadDriverState (void)
 	mCard->ReadRegister(kVRegFollowInputFormat, mFollowInputFormat);
 	mCard->ReadRegister(kVRegVANCMode, mVANCMode);
 	mCard->ReadRegister(kVRegDefaultInput, mDefaultInput);
-	AsDriverInterface(mCard)->ReadRegister(kVRegDualStreamTransportType, mDualStreamTransportType);
+	AsDriverInterface(mCard)->ReadRegister(kVRegDualStreamTransportType, mSdiOutTransportType);
 	AsDriverInterface(mCard)->ReadRegister(kVRegDSKMode, mDSKMode);
 	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput1Select, mVirtualDigitalOutput1Select);
 	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput2Select, mVirtualDigitalOutput2Select);
@@ -234,7 +234,7 @@ void DeviceServices::ReadDriverState (void)
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, mFb1Format);
 	mCard->GetMode(NTV2_CHANNEL1, mFb1Mode);
 	// vpid
-	if (NTV2DeviceCanDoDualLink(mDeviceID) == false)
+	if (NTV2DeviceCanDoDualLink(mDeviceID) == true)
 	{
 		if (NTV2DeviceGetNumVideoInputs(mDeviceID) > 0)
 			mVpid1Valid = mCard->ReadSDIInVPID(NTV2_CHANNEL1, mVpid1a, mVpid1b);
@@ -432,8 +432,8 @@ void DeviceServices::ReadDriverState (void)
 //-------------------------------------------------------------------------------------------------------
 void DeviceServices::UpdateAutoState()
 {
-	mDualStreamTransportType = 
-		RetailSupport::AutoSelect3GTransport(mDeviceID, mDualStreamTransportType, mFb1VideoFormat);
+	mSdiOutTransportType = 
+		RetailSupport::AutoSelect3GTransport(mDeviceID, mSdiOutTransportType, mFb1VideoFormat);
 	
 	// out select sdi
 	mVirtualDigitalOutput1Select = mVirtualDigitalOutput1Select == NTV2_AutoOutputSelect ?
@@ -455,9 +455,18 @@ void DeviceServices::UpdateAutoState()
 	mSDIOutput1RGBRange = mSDIOutput1RGBRange == NTV2_RGBRangeAuto ?
 							NTV2_RGBRangeFull : mSDIOutput1RGBRange;
 							
-	// in cs - auto determined by vpid
-							
-	// in range - auto determined by vpid
+	// in range
+	mSDIInput1RGBRange = mSDIInput1RGBRange == NTV2_RGBRangeAuto ?
+							NTV2_RGBRangeFull : mSDIInput1RGBRange;
+	mSDIInput2RGBRange = mSDIInput2RGBRange == NTV2_RGBRangeAuto ?
+							NTV2_RGBRangeFull : mSDIInput2RGBRange;
+	
+	// in cs - TBD determined by vpid
+    //CNTV2VPID parser; parser.SetVPID(mVpid1a);
+	mSDIInput1ColorSpace = mSDIInput1ColorSpace == NTV2_ColorSpaceModeAuto ?
+							NTV2_ColorSpaceModeYCbCr : mSDIInput1ColorSpace;
+	mSDIInput2ColorSpace = mSDIInput2ColorSpace == NTV2_ColorSpaceModeAuto ?
+							NTV2_ColorSpaceModeYCbCr : mSDIInput2ColorSpace;
 	
 	// 4k transport
 	NTV24kTransportType tranport4k = NTV2_4kTransport_PixelInterleave;
@@ -472,8 +481,8 @@ void DeviceServices::UpdateAutoState()
 	if (::NTV2DeviceCanDo3GOut(mDeviceID, 0) == false)
 		transport3g	= NTV2_SDITransport_DualLink_1_5;
 		
-	mDualStreamTransportType = mDualStreamTransportType == NTV2_SDITransport_Auto ? 
-				transport3g : mDualStreamTransportType;
+	mSdiOutTransportType = mSdiOutTransportType == NTV2_SDITransport_Auto ? 
+				transport3g : mSdiOutTransportType;
 }
 
 
@@ -2118,7 +2127,6 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
     bool ipServiceEnable, ipServiceForceConfig;
 
     config2110->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
-    ipServiceEnable = true;
     if (ipServiceEnable)
     {
         tx_2110Config txConfig;
@@ -3787,6 +3795,31 @@ NTV2AudioSystem	DeviceServices::GetHostAudioSystem()
 		hostAudioSystem = (NTV2AudioSystem)audioSystem;
 	}
 	return hostAudioSystem;
+}
+
+
+
+// select square division or 2 pixel interleave in frame buffer
+void DeviceServices::AdjustFor4kQuadOrTsi(NTV2Channel ch)
+{
+    if (NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat))
+    {
+    	bool bEnabled = false;
+   		bool b4kQuad = (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire ||
+   						m4kTransportOutSelection == NTV2_4kTransport_Quadrants_4wire);
+   		if (b4kQuad)
+   		{
+   			mCard->Get4kSquaresEnable(bEnabled, ch);
+   			if (bEnabled == false)
+				mCard->Set4kSquaresEnable(true, ch);
+   		}
+   		else
+   		{
+   			mCard->GetTsiFrameEnable(bEnabled, ch);
+   			if (bEnabled == false)
+				mCard->SetTsiFrameEnable(true, ch);
+   		}
+    }
 }
 
 

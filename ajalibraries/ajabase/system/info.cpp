@@ -57,6 +57,7 @@ AJASystemInfo::Rescan()
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Total)] = "Memory Total";
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Used)] = "Memory Used";
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Free)] = "Memory Free";
+        mpImpl->mLabelMap[int(AJA_SystemInfoTag_GPU_Type)] = "GPU Type";
 
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_UserHome)] = "User Home Path";
         mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = "User Persistence Store Path";

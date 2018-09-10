@@ -186,6 +186,7 @@ public:
 	
 	uint32_t GetAudioDelayOffset(double frames);
 	NTV2AudioSystem GetHostAudioSystem();
+	void AdjustFor4kQuadOrTsi(NTV2Channel ch=NTV2_CHANNEL1);
 
 	void SetAudioInputSelect(NTV2InputAudioSelect input);
     void AgentIsAlive();
@@ -206,7 +207,7 @@ public:
 	uint32_t				mVirtualDebug1;
 	uint32_t				mEveryFrameTaskFilter;
 	uint32_t				mDefaultInput;
-	NTV2SDITransportType	mDualStreamTransportType;
+	NTV2SDITransportType	mSdiOutTransportType;
 	NTV24kTransportType		m4kTransportOutSelection;
 	NTV2DSKMode				mDSKMode;
 	int32_t					mStreamingAppPID;

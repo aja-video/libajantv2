@@ -133,6 +133,112 @@ std::string aja_osversion()
     return out;
 }
 
+void get_vendor_and_device(std::map<std::string, std::string>& inDevicePart,
+                           std::vector<std::string>& outFoundDevices)
+{
+    if (inDevicePart.size() >= 2)
+    {
+        std::string vend;
+        std::string device;
+
+        if (inDevicePart.find("SVendor") != inDevicePart.end())
+            vend = inDevicePart.at("SVendor");
+        else if (inDevicePart.find("Vendor") != inDevicePart.end())
+            vend = inDevicePart.at("Vendor");
+
+        if (inDevicePart.find("SDevice") != inDevicePart.end())
+            device = inDevicePart.at("SDevice");
+        else if (inDevicePart.find("Device") != inDevicePart.end())
+            device = inDevicePart.at("Device");
+
+        outFoundDevices.push_back(vend + " " + device);
+    }
+}
+
+std::string aja_getgputype()
+{
+    std::string out;
+    out = aja_cmd("lspci -vmm | grep VGA -A 4");
+
+    // The following are some real world lspci results the code has been tested against and a few made up samples
+
+    // CentOS 7 running under VirtualBox
+    //out = "Class:\tVGA compatible controller\nVendor:\tInnoTek Systemberatung GmbH\nDevice:\tVirtualBox Graphics Adapter\n\nSlot:\t00:03.0";
+    // Ubuntu 18.04 with NVIDIA Quadro K600
+    //out = "Class:\tVGA compatible controller\nVendor:\tNVIDIA Corporation\nDevice:\tGK107GL [Quadro K600]\nSVendor:\tNVIDIA Corporation\nSDevice:\tGK107GL [Quadro K600]";
+    // Ubuntu 18.04 with 2x NVIDIA Quadro K600
+    //out = "Class:\tVGA compatible controller\nVendor:\tNVIDIA Corporation\nDevice:\tGK107GL [Quadro K600]\nSVendor:\tNVIDIA Corporation\nSDevice:\tGK107GL [Quadro K600]\n--\nClass:\tVGA compatible controller\nVendor:\tNVIDIA Corporation\nDevice:\tGK107GL [Quadro K600]\nSVendor:\tNVIDIA Corporation\nSDevice:\tGK107GL [Quadro K600]";
+    // CentOS 7 running as a VM (not sure which hypervisor)
+    //out = "Class:\tVGA compatible controller\nVendor:\tVendor 1234\nDevice:\t Device 1111\nSVendor:\tRed Hat, Inc.\nSDevice:\tDevice 1100";
+    // If no VGA found or lspci fails
+    //out = "";
+    // VGA found but no vendor or device keys
+    //out = "Class:\tVGA compatible controller\nPhySlot:\t1\nRev:\t02";
+    // VGA found but a value contains colons
+    //out = "Class:\tVGA compatible controller\nVendor:\tFake vendor with : colon in name, twice : end\nDevice:\tGeneric:VGA";
+
+    std::ostringstream oss;
+    std::vector<std::string> lines = aja::split(out, '\n');
+    if (lines.empty() == false)
+    {
+        std::vector<std::string>::iterator it;
+        std::vector<std::string> foundDevices;
+        std::map<std::string, std::string> deviceParts;
+        for(it=lines.begin();it!=lines.end();++it)
+        {
+            if (*it == "--" || *it == "")
+            {
+                if (deviceParts.size() >= 2)
+                {
+                    get_vendor_and_device(deviceParts, foundDevices);
+                    deviceParts.clear();
+                }
+                continue;
+            }
+
+            std::vector<std::string> cols = aja::split(*it, ':');
+            if (cols.size() > 1)
+            {
+                std::string key = aja::strip(cols.at(0));
+                std::string val = cols.at(1);
+                // handle any values that contain colons by concating back together
+                for(size_t i=2;i<cols.size();++i)
+                {
+                    val = val + ":" + cols.at(i);
+                }
+                val = aja::strip(val);
+
+                if (key == "Class")
+                {
+                    deviceParts.clear();
+                    continue;
+                }
+                else if (key == "Vendor" || key == "Device" ||
+                         key == "SVendor" || key == "SDevice")
+                {
+                    deviceParts[key] = val;
+                }
+            }
+        }
+
+        if (deviceParts.size() >= 2)
+        {
+            get_vendor_and_device(deviceParts, foundDevices);
+            deviceParts.clear();
+        }
+
+        for(size_t i=0;i<foundDevices.size();++i)
+        {
+            if (i != 0)
+            {
+                oss << ", ";
+            }
+            oss << foundDevices.at(i);
+        }
+    }
+    return oss.str();
+}
+
 AJASystemInfoImpl::AJASystemInfoImpl(int units)
 {
     mMemoryUnits = units;
@@ -194,6 +300,8 @@ AJASystemInfoImpl::Rescan()
         // assume it is in bytes?
         std::istringstream(memFreeStr) >> memfreebytes;
     }
+
+    mValueMap[int(AJA_SystemInfoTag_GPU_Type)] = aja_getgputype();
 
     std::string unitsLabel;
     double divisor = 1.0;

@@ -20,7 +20,6 @@ public:
 	Kona5Services();
 	~Kona5Services();
 	
-	virtual void UpdateAutoState (void);
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();
 	virtual void SetDeviceMiscRegisters ();

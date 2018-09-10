@@ -319,7 +319,12 @@ bool CNTV2Card::GetVideoFormat (NTV2VideoFormat & outValue, NTV2Channel inChanne
 
     bool isSquares = false;
     if(NTV2_IS_QUAD_FRAME_GEOMETRY(frameGeometry))
-        Get4kSquaresEnable(isSquares, inChannel);
+    {
+        if(!NTV2DeviceCanDo12gRouting(GetDeviceID()))
+            isSquares = true;
+        else
+            Get4kSquaresEnable(isSquares, inChannel);
+    }
 
     return ::NTV2DeviceGetVideoFormatFromState_Ex2 (&outValue, frameRate, frameGeometry, standard, smpte372Enabled, progressivePicture, isSquares);
 }
@@ -753,6 +758,10 @@ bool CNTV2Card::SetStandard (NTV2Standard value, NTV2Channel channel)
 	if (NTV2_IS_QUAD_STANDARD(newStandard))
 	{
 		newStandard = GetQuarterSizedStandard(newStandard);
+	}
+	if (NTV2_IS_2K1080_STANDARD(newStandard))
+	{
+		newStandard = NTV2_STANDARD_1080p;
 	}
 
 	return WriteRegister (gChannelToGlobalControlRegNum [channel],
@@ -3838,7 +3847,7 @@ bool CNTV2Card::SetColorSpaceMethod (const NTV2ColorSpaceMethod inCSCMethod, con
 			break;
 		case NTV2_CSC_Method_Enhanced:
 			//	Enable enhanced mode, but not 4K
-			value |= kK2RegShiftEnhancedCSCEnable;
+			value |= kK2RegMaskEnhancedCSCEnable;
 			break;
 		case NTV2_CSC_Method_Enhanced_4K:
 			//	4K mode uses a block of four CSCs. You must set the first converter in the group.

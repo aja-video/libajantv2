@@ -25,13 +25,13 @@
 
 typedef enum
 {
-    kNetworkData2110        = NTV2_FOURCC('n','t','1','0'), // 4CC of network config data
-    kTransmitVideoData2110  = NTV2_FOURCC('t','v','1','0'), // 4CC of video transmit config data
-    kTransmitAudioData2110  = NTV2_FOURCC('t','a','1','0'), // 4CC of audio transmit config data
-    kReceiveVideoData2110   = NTV2_FOURCC('r','v','1','0'), // 4CC of video receive config data
-    kReceiveAudioData2110   = NTV2_FOURCC('r','a','1','0'), // 4CC of audio receive config data
-    kAncVData2110           = NTV2_FOURCC('a','n','1','0'), // 4CC of anc config data
-    kChStatusData2110       = NTV2_FOURCC('s','t','1','0')  // 4CC of channel status config data
+    kNetworkData2110        = NTV2_FOURCC('n','t','1','1'), // 4CC of network config data
+    kTransmitVideoData2110  = NTV2_FOURCC('t','v','1','1'), // 4CC of video transmit config data
+    kTransmitAudioData2110  = NTV2_FOURCC('t','a','1','1'), // 4CC of audio transmit config data
+    kReceiveVideoData2110   = NTV2_FOURCC('r','v','1','1'), // 4CC of video receive config data
+    kReceiveAudioData2110   = NTV2_FOURCC('r','a','1','1'), // 4CC of audio receive config data
+    kAncVData2110           = NTV2_FOURCC('a','n','1','1'), // 4CC of anc config data
+    kChStatusData2110       = NTV2_FOURCC('s','t','1','1')  // 4CC of channel status config data
 } VirtualDataTag2110 ;
 
 typedef enum
@@ -56,6 +56,7 @@ typedef struct
     uint32_t                payload;
     NTV2VideoFormat         videoFormat;
     uint32_t                enable;
+    uint32_t                unused[4];
 } TxVideoChData2110;
 
 typedef struct
@@ -73,6 +74,7 @@ typedef struct
     uint32_t                firstAudioChannel;
     eNTV2PacketInterval     audioPktInterval;
     uint32_t                enable;
+    uint32_t                unused[4];
 } TxAudioChData2110;
 
 typedef struct
@@ -89,6 +91,7 @@ typedef struct
     uint32_t                payload;
     NTV2VideoFormat         videoFormat;
     uint32_t                enable;
+    uint32_t                unused[4];
 } RxVideoChData2110;
 
 typedef struct
@@ -107,6 +110,7 @@ typedef struct
     uint32_t                numAudioChannels;
     eNTV2PacketInterval     audioPktInterval;
     uint32_t                enable;
+    uint32_t                unused[4];
 } RxAudioChData2110;
 
 typedef struct
@@ -116,12 +120,14 @@ typedef struct
     char                    subnetMask[IP_STRSIZE];
     char                    gateWay[IP_STRSIZE];
     uint32_t                enable;
+    uint32_t                unused[4];
 } SFPData2110;
 
 typedef struct
 {
     uint32_t				txChStatus[4];
     uint32_t				rxChStatus[4];
+    uint32_t                unused[4];
 } IpStatus2110;
 
 typedef struct
@@ -130,6 +136,7 @@ typedef struct
     char                    ptpMasterIP[IP_STRSIZE];
     uint32_t                numSFPs;
     SFPData2110             sfp[2];
+    uint32_t                unused[4];
 } NetworkData2110;
 
 typedef struct

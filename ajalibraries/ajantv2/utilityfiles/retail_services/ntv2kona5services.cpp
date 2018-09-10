@@ -23,22 +23,6 @@ Kona5Services::~Kona5Services()
 
 
 //-------------------------------------------------------------------------------------------------------
-//	UpdateAutoState
-//-------------------------------------------------------------------------------------------------------
-void Kona5Services::UpdateAutoState (void)
-{
-	// auto mode from transport
-	if (mDualStreamTransportType == NTV2_SDITransport_Auto)
-	{
-		if (IsVideoFormatA(mFb1VideoFormat))
-			mDualStreamTransportType = NTV2_SDITransport_3Ga;
-		else
-			mDualStreamTransportType = NTV2_SDITransport_DualLink_3Gb;
-	}
-}
-
-
-//-------------------------------------------------------------------------------------------------------
 //	GetSelectedInputVideoFormat
 //	Note:	Determine input video format based on input select and fbVideoFormat
 //			which currently is videoformat of ch1-framebuffer
@@ -121,8 +105,8 @@ void Kona5Services::SetDeviceXPointPlayback ()
     bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
     bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						bSdiOutRGB			= mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb;
-    bool						b3GaOutRGB			= (mDualStreamTransportType == NTV2_SDITransport_3Ga) && bSdiOutRGB;
-    bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) || b3GaOutRGB;
+    bool						b3GaOutRGB			= (mSdiOutTransportType == NTV2_SDITransport_3Ga) && bSdiOutRGB;
+    bool						b3GbOut				= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb) || b3GaOutRGB;
     bool						b2pi                = (b4K && m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);	// 2 pixed interleaved
     bool						b2xQuadOut			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
     bool						b4k6gOut			= (b4K && !b4kHfr && !bSdiOutRGB && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
@@ -174,9 +158,8 @@ void Kona5Services::SetDeviceXPointPlayback ()
             mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
         }
     }
-
-    // select square division or 2 pixel interleave in frame buffer
-    mCard->SetTsiFrameEnable(b2pi,NTV2_CHANNEL1);
+    
+    AdjustFor4kQuadOrTsi();
 
     // input 1 select
     if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1466,7 +1449,7 @@ void Kona5Services::SetDeviceXPointCapture ()
     bool						bFb1RGB				= IsRGBFormat(mFb1Format);
     NTV2VideoFormat				inputFormat			= NTV2_FORMAT_UNKNOWN;
     NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
-    bool						b3GbOut				= mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb;
+    bool						b3GbOut				= mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb;
 	bool						bSdiOutRGB			= mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb;
     bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
     bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
@@ -1493,8 +1476,7 @@ void Kona5Services::SetDeviceXPointCapture ()
                                                         (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
 
     // swap quad mode
-    ULWord						selectSwapQuad		= 0;
-    mCard->ReadRegister(kVRegSwizzle4kInput, selectSwapQuad);
+    ULWord						selectSwapQuad		= 0; mCard->ReadRegister(kVRegSwizzle4kInput, selectSwapQuad);
     bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_Input4x4kSelect && selectSwapQuad != 0;
 
     // SMPTE 425 (2pi)
@@ -1618,7 +1600,7 @@ void Kona5Services::SetDeviceXPointCapture ()
     }
 
     // select square division or 2 pixel interleave in frame buffer
-    mCard->SetTsiFrameEnable(b2pi, NTV2_CHANNEL1);
+    AdjustFor4kQuadOrTsi();
 
     // Mixer/Keyer
     mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptBlack);
@@ -2868,7 +2850,7 @@ void Kona5Services::SetDeviceMiscRegisters ()
     bool					b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
     bool					bHfr				= NTV2_IS_3G_FORMAT(mFb1VideoFormat);
     bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect);
-    bool					b3GaOutRGB			= (mDualStreamTransportType == NTV2_SDITransport_3Ga) && bSdiOutRGB;
+    bool					b3GaOutRGB			= (mSdiOutTransportType == NTV2_SDITransport_3Ga) && bSdiOutRGB;
     bool					b4k6gOut			= (b4K && !b4kHfr && !bSdiOutRGB && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
     bool					b4k12gOut			= (b4K && (b4kHfr || bSdiOutRGB) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
     NTV2FrameRate			primaryFrameRate	= GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
@@ -2879,7 +2861,7 @@ void Kona5Services::SetDeviceMiscRegisters ()
                             ((bSdiOutRGB == true) ||
                              (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
                              (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-                             (bFbLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
+                             (bFbLevelA == true && mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb) ||
                              (IsVideoFormatB(mFb1VideoFormat) == true)  );
 
     bool b2xQuadOut = (    ((mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire))
@@ -2888,9 +2870,9 @@ void Kona5Services::SetDeviceMiscRegisters ()
 
     // all 3Gb transport out
     // b3GbOut = (b1x3GbOut + !2wire) | (4k + rgb) | (4khfr + 3gb)
-    bool b3GbOut =	(b1x3GbOut == true && mDualStreamTransportType != NTV2_SDITransport_DualLink_1_5) ||
+    bool b3GbOut =	(b1x3GbOut == true && mSdiOutTransportType != NTV2_SDITransport_DualLink_1_5) ||
                             (b4K == true && bSdiOutRGB == true) ||
-                            (b4kHfr == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
+                            (b4kHfr == true && mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb) ||
                             b2xQuadOut || b2xQuadIn;
 
     GeneralFrameFormat genFormat = GetGeneralFrameFormat(mFb1Format);
@@ -3257,8 +3239,8 @@ void Kona5Services::SetDeviceMiscRegisters ()
     if (b4K)
     {
         if (b4kHfr)
-            sdi5_3GbTransportOut = 	(mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
-                                    (mDualStreamTransportType == NTV2_SDITransport_OctLink_3Gb);
+            sdi5_3GbTransportOut = 	(mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb) ||
+                                    (mSdiOutTransportType == NTV2_SDITransport_OctLink_3Gb);
         else
             sdi5_3GbTransportOut = 	(bSdiOutRGB && !b2pi);	// UHD 29.97 YUV playback and RGB but not if TSI
     }
@@ -3266,7 +3248,7 @@ void Kona5Services::SetDeviceMiscRegisters ()
     {
         if (bHfr)
             sdi5_3GbTransportOut = 	IsVideoFormatB(mFb1VideoFormat) ||
-                                    (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+                                    (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);
         else
             sdi5_3GbTransportOut = 	b3GbOut || bSdiOutRGB;
     }
