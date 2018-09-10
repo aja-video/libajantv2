@@ -17,13 +17,7 @@ KonaIP2110Services::KonaIP2110Services()
 
     mFb1VideoFormatLast = NTV2_FORMAT_UNKNOWN;
 
-    memset(&m2110NetworkLast, 0, sizeof(NetworkData2110));
-    memset(&m2110TxVideoDataLast, 0, sizeof(TransmitVideoData2110));
-    memset(&m2110TxAudioDataLast, 0, sizeof(TransmitAudioData2110));
-    memset(&m2110RxVideoDataLast, 0, sizeof(ReceiveVideoData2110));
-    memset(&m2110RxAudioDataLast, 0, sizeof(ReceiveAudioData2110));
-
-    mResetPLLCounter = 60;
+    Init();
 }
 
 KonaIP2110Services::~KonaIP2110Services()
@@ -35,6 +29,30 @@ KonaIP2110Services::~KonaIP2110Services()
     }
 }
 
+void KonaIP2110Services::Init()
+{
+    memset(&m2110NetworkLast, 0, sizeof(NetworkData2110));
+    memset(&m2110TxVideoDataLast, 0, sizeof(TransmitVideoData2110));
+    memset(&m2110TxAudioDataLast, 0, sizeof(TransmitAudioData2110));
+    memset(&m2110RxVideoDataLast, 0, sizeof(ReceiveVideoData2110));
+    memset(&m2110RxAudioDataLast, 0, sizeof(ReceiveAudioData2110));
+
+    mResetPLLCounter = 60;
+
+    if (config2110 != NULL)
+    {
+        bool ipServiceEnable, ipServiceForceConfig;
+
+        ipServiceEnable = false;
+        while (ipServiceEnable == false)
+        {
+            AJATime::Sleep(10);
+
+            config2110->SetIPServicesControl(true, false);
+            config2110->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
+        }
+    }
+}
 
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
@@ -2113,11 +2131,10 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 
     if (mCard->IsDeviceReady(true) == true)
     {
-        bool ipServiceEnable, ipServiceForceConfig;
-
         if (config2110 == NULL)
         {
             config2110 = new CNTV2Config2110(*mCard);
+            Init();
         }
 
         // Here we protect against Windows fast boot mode where everythign in the agent is cached
@@ -2132,23 +2149,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
             (hwNetConfig2.ipc_ip == 0) && (hwNetConfig2.ipc_subnet == 0) && (hwNetConfig2.ipc_gateway == 0))
         {
             printf("Power on state or not configured\n");
-
-            memset(&m2110NetworkLast, 0, sizeof(NetworkData2110));
-            memset(&m2110TxVideoDataLast, 0, sizeof(TransmitVideoData2110));
-            memset(&m2110TxAudioDataLast, 0, sizeof(TransmitAudioData2110));
-            memset(&m2110RxVideoDataLast, 0, sizeof(ReceiveVideoData2110));
-            memset(&m2110RxAudioDataLast, 0, sizeof(ReceiveAudioData2110));
-
-            mResetPLLCounter = 60;
-
-            ipServiceEnable = false;
-            while (ipServiceEnable == false)
-            {
-                AJATime::Sleep(10);
-
-                config2110->SetIPServicesControl(true, false);
-                config2110->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
-            }
+            Init();
         }
 
         // Check PLL stauts to make sure we are getting packets and if not reset it
