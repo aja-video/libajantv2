@@ -5281,14 +5281,15 @@ public:
 	static NTV2DIDSet	AncExtractGetDefaultDIDs (void);
 
 
-	//	Old Anc API Names:
-	//	(These will be deprecated in a future SDK)
-	#define	GetAncInserterRunState				AncInsertIsEnabled
-	#define	GetAncExtractorRunState				AncExtractIsEnabled
-	#define	GetAncExtractorFilterDIDs			AncExtractGetFilterDIDs
-	#define	SetAncExtractorFilterDIDs			AncExtractSetFilterDIDs
-	#define	GetMaxNumAncExtractorFilterDIDs		AncExtractGetMaxNumFilterDIDs
-	#define	GetDefaultAncExtractorDIDs			AncExtractGetDefaultDIDs
+#if !defined(NTV2_DEPRECATE_14_3)
+	//	Deprecated Anc APIs  (to be deprecated in a future SDK):
+	AJA_VIRTUAL	inline NTV2_DEPRECATED_f(bool	GetAncInserterRunState (const UWord inSDIOutput, bool & outIsRunning))			{return AncInsertIsEnabled(inSDIOutput, outIsRunning);}	///< @deprecated	Use AncInsertIsEnabled instead.
+	AJA_VIRTUAL	inline NTV2_DEPRECATED_f(bool	GetAncExtractorRunState (const UWord inSDIInput, bool & outIsRunning))			{return AncExtractIsEnabled(inSDIInput, outIsRunning);}	///< @deprecated	Use AncExtractIsEnabled instead.
+	AJA_VIRTUAL	inline NTV2_DEPRECATED_f(bool	GetAncExtractorFilterDIDs (const UWord inSDIInput, NTV2DIDSet & outDIDs))		{return AncExtractGetFilterDIDs(inSDIInput, outDIDs);}	///< @deprecated	Use AncExtractGetFilterDIDs instead.
+	AJA_VIRTUAL	inline NTV2_DEPRECATED_f(bool	SetAncExtractorFilterDIDs (const UWord inSDIInput, const NTV2DIDSet & inDIDs))	{return AncExtractSetFilterDIDs(inSDIInput, inDIDs);}	///< @deprecated	Use AncExtractSetFilterDIDs instead.
+	static		inline NTV2_DEPRECATED_f(UWord	GetMaxNumAncExtractorFilterDIDs(void))											{return AncExtractGetMaxNumFilterDIDs();}				///< @deprecated	Use AncExtractGetMaxNumFilterDIDs instead.
+	static		inline NTV2_DEPRECATED_f(NTV2DIDSet	GetDefaultAncExtractorDIDs(void))											{return AncExtractGetDefaultDIDs();}					///< @deprecated	Use AncExtractGetDefaultDIDs instead.
+#endif	//	NTV2_DEPRECATE_14_3
 	///@}
 
 	/**

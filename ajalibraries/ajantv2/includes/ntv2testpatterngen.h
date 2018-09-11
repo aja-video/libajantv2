@@ -1,11 +1,11 @@
 /**
 	@file		ajantv2/includes/testpatterngen.h
-	@brief		Declares the AJATestPatternGenEx class.
+	@brief		Declares the NTV2TestPatternGen class.
 	@copyright	(C) 2010-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
-#ifndef NTV2_TESTPATTERN_GEN_EX
-#define NTV2_TESTPATTERN_GEN_EX
+#ifndef NTV2_TESTPATTERN_GEN_
+#define NTV2_TESTPATTERN_GEN_
 
 #include "ajaexport.h"
 #include "ntv2videodefines.h"
@@ -14,13 +14,15 @@
 #include <vector>
 #include <string>
 
-typedef std::vector <uint8_t>		NTV2TestPatternBuffer;
+typedef std::vector <uint8_t>		NTV2TestPatternBuffer;	///< @brief	A byte vector that stores a complete video frame.
 #if !defined(NTV2_DEPRECATE_15_0)
-	typedef std::vector <const char *>	NTV2TestPatternList;
+	typedef std::vector <const char *>	NTV2TestPatternList;	///< @deprecated	Use NTV2TestPatternNames instead.
 #endif//!defined(NTV2_DEPRECATE_15_0)
-typedef std::vector <std::string>	NTV2TestPatternNames;
+typedef std::vector <std::string>	NTV2TestPatternNames;	///< @brief	A list (std::vector) of pattern names.
 
-
+/**
+	@brief	Identifies a predefined NTV2 test pattern.
+**/
 enum NTV2TestPatternSelect
 {
 	NTV2_TestPatt_ColorBars100,
@@ -106,4 +108,29 @@ protected:
 
 };	//	NTV2TestPatternGen
 
-#endif	//	NTV2_TESTPATTERN_GEN_EX
+#if !defined(NTV2_DEPRECATE_14_3)
+	typedef	NTV2TestPatternGen					AJATestPatternGenEx;				///< @deprecated	Use NTV2TestPatternGen instead.
+	typedef NTV2TestPatternBuffer				AJATestPatternBufferEx;				///< @deprecated	Use NTV2TestPatternBuffer instead.
+	typedef	NTV2TestPatternList					AJATestPatternListEx;				///< @deprecated	Use NTV2TestPatternNames instead.
+	typedef NTV2TestPatternSelect				AJATestPatternSelectEx;				///< @deprecated	Use NTV2TestPatternSelect instead.
+	#define	AJA_TestPattEx_ColorBars100			NTV2_TestPatt_ColorBars100			///< @deprecated	Use NTV2_TestPatt_ColorBars100 instead.
+	#define	AJA_TestPattEx_ColorBars75			NTV2_TestPatt_ColorBars75			///< @deprecated	Use NTV2_TestPatt_ColorBars75 instead.
+	#define	AJA_TestPattEx_Ramp					NTV2_TestPatt_Ramp					///< @deprecated	Use NTV2_TestPatt_Ramp instead.
+	#define	AJA_TestPattEx_MultiBurst			NTV2_TestPatt_MultiBurst			///< @deprecated	Use NTV2_TestPatt_MultiBurst instead.
+	#define	AJA_TestPattEx_LineSweep			NTV2_TestPatt_LineSweep				///< @deprecated	Use NTV2_TestPatt_LineSweep instead.
+	#define	AJA_TestPattEx_CheckField			NTV2_TestPatt_CheckField			///< @deprecated	Use NTV2_TestPatt_CheckField instead.
+	#define	AJA_TestPattEx_FlatField			NTV2_TestPatt_FlatField				///< @deprecated	Use NTV2_TestPatt_FlatField instead.
+	#define	AJA_TestPattEx_MultiPattern			NTV2_TestPatt_MultiPattern			///< @deprecated	Use NTV2_TestPatt_MultiPattern instead.
+	#define	AJA_TestPattEx_Black				NTV2_TestPatt_Black					///< @deprecated	Use NTV2_TestPatt_Black instead.
+	#define	AJA_TestPattEx_White				NTV2_TestPatt_White					///< @deprecated	Use NTV2_TestPatt_White instead.
+	#define	AJA_TestPattEx_Border				NTV2_TestPatt_Border				///< @deprecated	Use NTV2_TestPatt_Border instead.
+	#define	AJA_TestPattEx_LinearRamp			NTV2_TestPatt_LinearRamp			///< @deprecated	Use NTV2_TestPatt_LinearRamp instead.
+	#define	AJA_TestPattEx_SlantRamp			NTV2_TestPatt_SlantRamp				///< @deprecated	Use NTV2_TestPatt_SlantRamp instead.
+	#define	AJA_TestPattEx_ZonePlate			NTV2_TestPatt_ZonePlate				///< @deprecated	Use NTV2_TestPatt_ZonePlate instead.
+	#define	AJA_TestPattEx_ColorQuadrant		NTV2_TestPatt_ColorQuadrant			///< @deprecated	Use NTV2_TestPatt_ColorQuadrant instead.
+	#define	AJA_TestPattEx_ColorQuadrantBorder	NTV2_TestPatt_ColorQuadrantBorder	///< @deprecated	Use NTV2_TestPatt_ColorQuadrantBorder instead.
+	#define	AJA_TestPattEx_ColorQuadrantTsi		NTV2_TestPatt_ColorQuadrantTsi		///< @deprecated	Use NTV2_TestPatt_ColorQuadrantTsi instead.
+	#define	AJA_TestPattEx_All					NTV2_TestPatt_All					///< @deprecated	Use NTV2_TestPatt_All instead.
+#endif	//	NTV2_DEPRECATE_14_3
+
+#endif	//	NTV2_TESTPATTERN_GEN_
