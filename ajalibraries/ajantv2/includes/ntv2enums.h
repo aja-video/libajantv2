@@ -1999,7 +1999,7 @@ typedef enum
     NTV2_RGBSelect,
     NTV2_Stereo3DSelect,
     NTV2_NUM_SDIInputFormats
-} NTV2SDIInputFormatSelect;
+} NTV2SDIInputFormatSelect;				// Deprecated
 
 
 typedef enum

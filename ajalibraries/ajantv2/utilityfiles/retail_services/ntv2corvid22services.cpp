@@ -418,9 +418,9 @@ void Corvid22Services::SetDeviceXPointCapture ()
 	int							bFb1Disable 		= 0;				// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable 		= 1;				// Assume Channel 2 IS disabled by default
 	
-	NTV2CrosspointID			inputXptYUV1 		= NTV2_XptBlack;				// Input source selected single stream
-	NTV2CrosspointID			inputXptYUV2 		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	NTV2ColorSpaceMode	inputColorSpace 	= mSDIInput1ColorSpace;	// Input format select (YUV, RGB, etc)
+	NTV2CrosspointID			inputXptYUV1 		= NTV2_XptBlack;		// Input source selected single stream
+	NTV2CrosspointID			inputXptYUV2 		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
+	NTV2ColorSpaceMode			inputColorSpace 	= mSDIInput1ColorSpace;	// Input format select (YUV, RGB, etc)
 	
 	// Figure out what our input format is based on what is selected
 	GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);

@@ -38,7 +38,7 @@ void Kona1Services::SetDeviceXPointPlayback ()
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || 
 													  mDSKMode == NTV2_DSKModeFBOverVideoIn || 
 													  (bFb2RGB && bDSKGraphicMode);
-	bool						bInRGB				= mSDIInput1ColorSpace == NTV2_RGBSelect;
+	bool						bInRGB				= mSDIInput1ColorSpace == NTV2_ColorSpaceModeRgb;
 		
 	// make sure frame DualLink B mode (SMPTE 372), Stereo
 	if (b2FbLevelBHfr || bStereoOut)
@@ -427,7 +427,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
 
 	// Dual Link In 1
-	if (inputColorSpace == NTV2_RGBSelect)
+	if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptDualLinkIn1Input, inputXptYUV1);
 		mCard->Connect (NTV2_XptDualLinkIn1DSInput, inputXptYUV2);
@@ -442,7 +442,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 	}
 
 	// CSC 1
-	if (inputColorSpace != NTV2_RGBSelect)
+	if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 	{
 			mCard->Connect (NTV2_XptCSC1VidInput, inputXptYUV1);
 	}
@@ -452,7 +452,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 	}
 
 	// LUT 1
-	if (inputColorSpace != NTV2_RGBSelect)
+	if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
 		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
@@ -478,7 +478,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 	if (inputFormat == mFb1VideoFormat)
 	{
 		// Input is NOT secondary
-		if (inputColorSpace != NTV2_RGBSelect)
+		if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptLUT1RGB);
 		}
@@ -500,7 +500,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 		// Input is Secondary format
 		// NOTE: This is the same logic as above but we can't do the dual link case because we would
 		// need two LUT's to convert RGB to YUB then back again.
-		if (inputColorSpace != NTV2_RGBSelect)
+		if (inputColorSpace != NTV2_ColorSpaceModeRgb)
 		{
 			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptLUT1RGB);
 		}
@@ -513,7 +513,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 	// Frame Buffer 1
 	if (bFb1RGB)
 	{
-		if (inputColorSpace == NTV2_RGBSelect)
+		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 			{

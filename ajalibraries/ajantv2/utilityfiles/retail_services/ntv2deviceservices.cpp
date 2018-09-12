@@ -206,8 +206,6 @@ void DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1ColorSpaceMode, mSDIInput1ColorSpace);
 	//AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput2ColorSpaceMode, mSDIInput2ColorSpace);
 	
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1RGBRange, mSDIInput1RGBRange);
-	//AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput2RGBRange, mSDIInput2RGBRange);
 	AsDriverInterface(mCard)->ReadRegister(kVRegFrameBuffer1RGBRange, mFrameBuffer1RGBRange);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutBlackLevel, mVirtualAnalogOutBlackLevel);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutputType, mVirtualAnalogOutputType);
@@ -224,8 +222,9 @@ void DeviceServices::ReadDriverState (void)
 	mCard->ReadRegister(kVRegFramesPerVertical, mRegFramesPerVertical);
 	AsDriverInterface(mCard)->ReadRegister(kVReg4kOutputTransportSelection, m4kTransportOutSelection);
 	
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1RGBRange, mSDIInput1RGBRange);
 	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1FormatSelect, mSDIInput1ColorSpace);
-	//AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput2FormatSelect, mSDIInput2ColorSpace);
+	mSDIInput2RGBRange = mSDIInput1RGBRange;
 	mSDIInput2ColorSpace = mSDIInput1ColorSpace;	// for now
 	
 	// basic Ch1 HW registers 
@@ -458,8 +457,7 @@ void DeviceServices::UpdateAutoState()
 	// in range
 	mSDIInput1RGBRange = mSDIInput1RGBRange == NTV2_RGBRangeAuto ?
 							NTV2_RGBRangeFull : mSDIInput1RGBRange;
-	mSDIInput2RGBRange = mSDIInput2RGBRange == NTV2_RGBRangeAuto ?
-							NTV2_RGBRangeFull : mSDIInput2RGBRange;
+	mSDIInput2RGBRange = mSDIInput1RGBRange;
 	
 	// in color space - use vpid
 	mSDIInput1ColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
@@ -491,7 +489,7 @@ NTV2ColorSpaceMode DeviceServices::GetSDIInputColorSpace(NTV2Channel inChannel, 
 {
 	NTV2ColorSpaceMode outMode = inMode;
 	
-	if (NTV2DeviceCanDo3GIn(mDeviceID,0) == false)
+	if (RetailSupport::CanDo3g(mDeviceID) == false)
 		return NTV2_ColorSpaceModeYCbCr;
 	
 	if (mSDIInput1ColorSpace == NTV2_ColorSpaceModeAuto)
@@ -1206,7 +1204,7 @@ NTV2RGB10Range DeviceServices::GetCSCRange()
 		else	// mFb1Mode == NTV2_MODE_CAPTURE
 		{
 			// follow input RGB range
-			if (mSDIInput1ColorSpace == NTV2_RGBSelect)
+			if (mSDIInput1ColorSpace == NTV2_ColorSpaceModeRgb)
 			{
 				cscRange = (mSDIInput1RGBRange == NTV2_RGBRangeFull) ? NTV2_RGB10RangeFull : NTV2_RGB10RangeSMPTE;
 			}
@@ -3386,7 +3384,7 @@ bool DeviceServices::UpdateK2LUTSelect()
 			wantedLUT = (fbRange == mSDIOutput1RGBRange) ? NTV2_LUTLinear : NTV2_LUTRGBRangeFull_SMPTE;
 		}
 		
-		else if (mFb1Mode == NTV2_MODE_CAPTURE && bFb1RGB == true && mSDIInput1ColorSpace == NTV2_RGBSelect)
+		else if (mFb1Mode == NTV2_MODE_CAPTURE && bFb1RGB == true && mSDIInput1ColorSpace == NTV2_ColorSpaceModeRgb)
 		{
 			wantedLUT = NTV2_LUTRGBRangeFull_SMPTE;
 		}

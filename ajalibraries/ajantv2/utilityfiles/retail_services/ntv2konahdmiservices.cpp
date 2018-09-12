@@ -205,7 +205,7 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 			mCard->Connect(NTV2_Xpt425Mux2BInput, b4K ? NTV2_XptCSC4VidRGB : NTV2_XptBlack);
 		}
 	}
-	else//inputFormatSelect == NTV2_YUVSelect
+	else	//inputColorSpace == NTV2_ColorSpaceModeYCbCr
 	{
 		if(bFb1RGB)
 		{
