@@ -1123,7 +1123,8 @@ typedef enum
 
 
 /**
-	@brief		Used for device selection/filtering.
+	@brief		These enum values are used for device selection/filtering.
+	@see		::NTV2GetSupportedDevices
 **/
 typedef enum _NTV2DeviceKinds
 {

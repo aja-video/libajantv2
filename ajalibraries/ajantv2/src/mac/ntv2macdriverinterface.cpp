@@ -2555,6 +2555,13 @@ void CNTV2MacDriverInterface::CopyTo_AUTOCIRCULATE_TASK_STRUCT_64 (AUTOCIRCULATE
 }
 
 
+#if !defined(NTV2_DEPRECATE_14_3)
+	void CNTV2MacDriverInterface::SetDebugLogging (const uint64_t inWhichUserClientCommands)
+	{	(void) inWhichUserClientCommands;	//	Ignored -- replaced by AJADebug logging facility
+	}
+#endif
+
+
 void CNTV2MacDriverInterface::DumpDeviceMap (void)
 {
 	gDeviceMap.Dump ();

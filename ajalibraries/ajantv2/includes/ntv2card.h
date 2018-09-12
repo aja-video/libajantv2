@@ -4671,8 +4671,7 @@ public:
 	**/
 	///@{
 	/**
-		@brief		Assuming the device has bi-directional SDI connectors, this function determines whether
-					a given SDI connector will behave as an input or an output.
+		@brief		Answers whether the specified SDI connector is acting as an input or an output.
 		@return		True if successful; otherwise false.
 		@param[in]	inChannel		Specifies the SDI connector to be affected as an ::NTV2Channel (a zero-based index number).
 		@param[in]	inEnable		If true, specifies that the channel connector is to be used as an output.
@@ -4681,33 +4680,36 @@ public:
 					it may take the hardware on the device up to approximately 10 frames to synchronize with
 					the input signal such that the device can accurately report the video format seen at the
 					input.
+		@see		::NTV2DeviceHasBiDirectionalSDI, \ref devicesignalinputsoutputs
 	**/
-	AJA_VIRTUAL bool		SetSDITransmitEnable (NTV2Channel inChannel, bool inEnable);
+	AJA_VIRTUAL bool		SetSDITransmitEnable (const NTV2Channel inChannel, const bool inEnable);
 
 	/**
-		@brief		Assuming the device has bi-directional SDI connectors, this function answers if a given SDI
-					channel is currently acting as an input or an output.
-		@return		True if successful; otherwise false.
+		@brief		Answers whether or not the specified SDI connector is currently acting as a transmitter
+					(i.e. an output).
 		@param[in]	inChannel		Specifies the SDI connector to be affected as an ::NTV2Channel (a zero-based index number).
-		@param[in]	outEnabled		Receives true if the SDI channel connector is transmitting, or false if it's acting as an input.
+		@param[in]	outEnabled		Receives true if the SDI channel connector is currently a transmitter (output),
+									or false if it's acting as an input.
+		@return		True if successful; otherwise false.
+		@see		::NTV2DeviceHasBiDirectionalSDI, \ref devicesignalinputsoutputs
 	**/
-	AJA_VIRTUAL bool		GetSDITransmitEnable (NTV2Channel inChannel, bool & outEnabled);
+	AJA_VIRTUAL bool		GetSDITransmitEnable (const NTV2Channel inChannel, bool & outEnabled);
 	///@}
 
-	AJA_VIRTUAL bool		SetSDIOut2Kx1080Enable (NTV2Channel inChannel, const bool inIsEnabled);
-	AJA_VIRTUAL bool		GetSDIOut2Kx1080Enable (NTV2Channel inChannel, bool & outIsEnabled);
+	AJA_VIRTUAL bool		SetSDIOut2Kx1080Enable (const NTV2Channel inChannel, const bool inIsEnabled);
+	AJA_VIRTUAL bool		GetSDIOut2Kx1080Enable (const NTV2Channel inChannel, bool & outIsEnabled);
 
-	AJA_VIRTUAL bool		SetSDIOut3GEnable (NTV2Channel inChannel, bool enable);
-	AJA_VIRTUAL bool		GetSDIOut3GEnable (NTV2Channel inChannel, bool & outIsEnabled);
+	AJA_VIRTUAL bool		SetSDIOut3GEnable (const NTV2Channel inChannel,const bool inEnable);
+	AJA_VIRTUAL bool		GetSDIOut3GEnable (const NTV2Channel inChannel, bool & outIsEnabled);
 
-	AJA_VIRTUAL bool		SetSDIOut3GbEnable (NTV2Channel inChannel, bool enable);
-	AJA_VIRTUAL bool		GetSDIOut3GbEnable (NTV2Channel inChannel, bool & outIsEnabled);
+	AJA_VIRTUAL bool		SetSDIOut3GbEnable (const NTV2Channel inChannel, const bool inEnable);
+	AJA_VIRTUAL bool		GetSDIOut3GbEnable (const NTV2Channel inChannel, bool & outIsEnabled);
 
-	AJA_VIRTUAL bool		SetSDIOut6GEnable(NTV2Channel inChannel, bool enable);
-	AJA_VIRTUAL bool		GetSDIOut6GEnable(NTV2Channel inChannel, bool & outIsEnabled);
+	AJA_VIRTUAL bool		SetSDIOut6GEnable(const NTV2Channel inChannel, const bool inEnable);
+	AJA_VIRTUAL bool		GetSDIOut6GEnable(const NTV2Channel inChannel, bool & outIsEnabled);
 
-	AJA_VIRTUAL bool		SetSDIOut12GEnable(NTV2Channel inChannel, bool enable);
-	AJA_VIRTUAL bool		GetSDIOut12GEnable(NTV2Channel inChannel, bool & outIsEnabled);
+	AJA_VIRTUAL bool		SetSDIOut12GEnable(const NTV2Channel inChannel, const bool inEnable);
+	AJA_VIRTUAL bool		GetSDIOut12GEnable(const NTV2Channel inChannel, bool & outIsEnabled);
 
 
 	/**
@@ -5028,21 +5030,23 @@ public:
 
 	/**
 		@brief		Enables or disables multi-format (per channel) device operation.
-					If enabled, each device channel can handle a different video format (provided it's in the same clock family).
-					If disabled, all device channels have the same video format. See \ref deviceclockingandsync for more information.
+					If enabled, each device channel can handle a different video format (subject to certain limitations).
+					If disabled, all device channels have the same video format.
 		@return		True if successful; otherwise false.
 		@param[in]	inEnable	If true, sets the device in multi-format mode.
 								If false, sets the device in uni-format mode.
+		@see		::NTV2DeviceCanDoMultiFormat, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool	   SetMultiFormatMode (const bool inEnable);
 
 	/**
 		@brief		Answers if the device is operating in multiple-format per channel (independent channel) mode or not.
-					If enabled, each device channel can accommodate a different video format (provided it's in the same clock family).
-					If disabled, all device channels have the same video format. See \ref deviceclockingandsync for more information.
+					If enabled, each device channel can accommodate a different video format (subject to certain limitations).
+					If disabled, all device channels have the same video format.
 		@return		True if successful; otherwise false.
 		@param[in]	outIsEnabled	Receives true if the device is currently in multi-format mode,
 									or false if it's in uni-format mode.
+		@see		::NTV2DeviceCanDoMultiFormat, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool		GetMultiFormatMode (bool & outIsEnabled);
 
@@ -5281,14 +5285,15 @@ public:
 	static NTV2DIDSet	AncExtractGetDefaultDIDs (void);
 
 
-	//	Old Anc API Names:
-	//	(These will be deprecated in a future SDK)
-	#define	GetAncInserterRunState				AncInsertIsEnabled
-	#define	GetAncExtractorRunState				AncExtractIsEnabled
-	#define	GetAncExtractorFilterDIDs			AncExtractGetFilterDIDs
-	#define	SetAncExtractorFilterDIDs			AncExtractSetFilterDIDs
-	#define	GetMaxNumAncExtractorFilterDIDs		AncExtractGetMaxNumFilterDIDs
-	#define	GetDefaultAncExtractorDIDs			AncExtractGetDefaultDIDs
+#if !defined(NTV2_DEPRECATE_14_3)
+	//	Deprecated Anc APIs  (to be deprecated in a future SDK):
+	AJA_VIRTUAL	inline NTV2_DEPRECATED_f(bool	GetAncInserterRunState (const UWord inSDIOutput, bool & outIsRunning))			{return AncInsertIsEnabled(inSDIOutput, outIsRunning);}	///< @deprecated	Use AncInsertIsEnabled instead.
+	AJA_VIRTUAL	inline NTV2_DEPRECATED_f(bool	GetAncExtractorRunState (const UWord inSDIInput, bool & outIsRunning))			{return AncExtractIsEnabled(inSDIInput, outIsRunning);}	///< @deprecated	Use AncExtractIsEnabled instead.
+	AJA_VIRTUAL	inline NTV2_DEPRECATED_f(bool	GetAncExtractorFilterDIDs (const UWord inSDIInput, NTV2DIDSet & outDIDs))		{return AncExtractGetFilterDIDs(inSDIInput, outDIDs);}	///< @deprecated	Use AncExtractGetFilterDIDs instead.
+	AJA_VIRTUAL	inline NTV2_DEPRECATED_f(bool	SetAncExtractorFilterDIDs (const UWord inSDIInput, const NTV2DIDSet & inDIDs))	{return AncExtractSetFilterDIDs(inSDIInput, inDIDs);}	///< @deprecated	Use AncExtractSetFilterDIDs instead.
+	static		inline NTV2_DEPRECATED_f(UWord	GetMaxNumAncExtractorFilterDIDs(void))											{return AncExtractGetMaxNumFilterDIDs();}				///< @deprecated	Use AncExtractGetMaxNumFilterDIDs instead.
+	static		inline NTV2_DEPRECATED_f(NTV2DIDSet	GetDefaultAncExtractorDIDs(void))											{return AncExtractGetDefaultDIDs();}					///< @deprecated	Use AncExtractGetDefaultDIDs instead.
+#endif	//	NTV2_DEPRECATE_14_3
 	///@}
 
 	/**
