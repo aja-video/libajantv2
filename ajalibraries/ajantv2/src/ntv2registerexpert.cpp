@@ -7,10 +7,6 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
 #include "ntv2debug.h"
-#if defined(AJALinux)
-#include <string.h>  // For memset
-#include <stdint.h>
-#endif
 #include "ajabase/common/common.h"
 #include <algorithm>
 #include <sstream>
