@@ -217,6 +217,9 @@ public:
 
 public:
 	static const char *	GetIOServiceName (void);	//	For internal use only
+#if !defined(NTV2_DEPRECATE_14_3)
+	static void			SetDebugLogging (const uint64_t inWhichUserClientCommands);
+#endif
 	static void			DumpDeviceMap (void);
 	static UWord		GetConnectionCount (void);
 	static ULWord		GetConnectionChecksum (void);

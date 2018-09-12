@@ -6228,15 +6228,13 @@ bool CNTV2Card::GetColorSpaceCustomCoefficients(ColorSpaceConverterCustomCoeffic
 			&&	ReadRegister (sRegsCoeffs910[inChannel],	outCoefficients.Coefficient10,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh);
 }
 
-// 12/7/2006 - to incerase accuracy and decrease generational
-// degredation, the width of the coefficients for the colospace
-// converter matrix went from 10 to 12 bit (with the MSB being a sign
-// bit).  So as not to break existing, compiled code, we added new API
-// calls for use with these wider coefficients.  The values had to be
-// munged a bit to fit in the register since the low coefficient ended
-// on the 0 bit... the high coefficient was simple widened to 13 bits
-// total.  The 2 LSBs of the low coefficient are written *in front*
-// of the 11 MSBa hence the shifting and masking below. - jac
+// 12/7/2006	To increase accuracy and decrease generational degredation, the width of the coefficients
+//				for the colorspace converter matrix went from 10 to 12 bit (with the MSB being a sign
+//				bit).  So as not to break existing, compiled code, we added new API calls for use with
+//				these wider coefficients.  The values had to be munged a bit to fit in the register, since
+//				the low coefficient ended on the 0 bit ... the hi coefficient was simply widened to 13 bits
+//				total.  The 2 LSBs of the low coefficient are written *in front* of the 11 MSBs, hence the
+//				shifting and masking below. - jac
 bool CNTV2Card::SetColorSpaceCustomCoefficients12Bit (const ColorSpaceConverterCustomCoefficients & inCoefficients, const NTV2Channel inChannel)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
@@ -6272,15 +6270,13 @@ bool CNTV2Card::SetColorSpaceCustomCoefficients12Bit (const ColorSpaceConverterC
 		&&  WriteRegister (sRegsCoeffs910[inChannel],	inCoefficients.Coefficient10,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh);
 }
 
-// 12/7/2006 - to incerase accuracy and decrease generational
-// degredation, the width of the coefficients for the colospace
-// converter matrix went from 10 to 12 bit (with the MSB being a sign
-// bit).  So as not to break existing, compiled code, we added new API
-// calls for use with these wider coefficients.  The values had to be
-// munged a bit to fit in the register since the low coefficient ended
-// on the 0 bit... the high coefficient was simple widened to 13 bits
-// total.  The 2 LSBs of the low coefficient are writtent *in front*
-// of the 11 MSBa hence the shifting and masking below. - jac
+// 12/7/2006	To increase accuracy and decrease generational degredation, the width of the coefficients
+//				for the colorspace converter matrix went from 10 to 12 bit (with the MSB being a sign
+//				bit).  So as not to break existing, compiled code, we added new API calls for use with
+//				these wider coefficients.  The values had to be munged a bit to fit in the register, since
+//				the low coefficient ended on the 0 bit ... the hi coefficient was simply widened to 13 bits
+//				total.  The 2 LSBs of the low coefficient are written *in front* of the 11 MSBs, hence the
+//				shifting and masking below. - jac
 bool CNTV2Card::GetColorSpaceCustomCoefficients12Bit (ColorSpaceConverterCustomCoefficients & outCoefficients, const NTV2Channel inChannel)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
