@@ -1608,9 +1608,8 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 	
 	else // 425
 	{
-		CNTV2VPID parser;
-		parser.SetVPID(mVpid1a);
-		VPIDStandard std = parser.GetStandard();
+		mVpidParser.SetVPID(mVpid1a);
+		VPIDStandard std = mVpidParser.GetStandard();
 		bVpid2x2piIn  = std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb;
 		bVpid4x2piInA = std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb;
 		bVpid4x2piInB = std == VPIDStandard_2160_QuadDualLink_3Gb;
@@ -3109,9 +3108,8 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
 		{
 			if (mVpid1Valid)
 			{
-				CNTV2VPID parser;
-				parser.SetVPID(mVpid1a);
-				VPIDStandard std = parser.GetStandard();
+				mVpidParser.SetVPID(mVpid1a);
+				VPIDStandard std = mVpidParser.GetStandard();
 				switch (std)
 				{
 				case VPIDStandard_2160_Single_12Gb:

@@ -1542,9 +1542,8 @@ void Kona5Services::SetDeviceXPointCapture ()
         inHdRGB1 = NTV2_XptDuallinkIn1;
     }
 
-    CNTV2VPID parser;
-    parser.SetVPID(mVpid1a);
-    VPIDStandard std = parser.GetStandard();
+    mVpidParser.SetVPID(mVpid1a);
+    VPIDStandard std = mVpidParser.GetStandard();
     bVpid2x2piIn  = std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb;
     bVpid4x2piInA = std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb;
     bVpid4x2piInB = std == VPIDStandard_2160_QuadDualLink_3Gb;
@@ -2892,9 +2891,8 @@ void Kona5Services::SetDeviceMiscRegisters ()
 
             if (mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb))
             {
-                CNTV2VPID parser;
-                parser.SetVPID(vpida);
-                VPIDStandard std = parser.GetStandard();
+                mVpidParser.SetVPID(vpida);
+                VPIDStandard std = mVpidParser.GetStandard();
                 switch (std)
                 {
                 case VPIDStandard_2160_Single_12Gb:

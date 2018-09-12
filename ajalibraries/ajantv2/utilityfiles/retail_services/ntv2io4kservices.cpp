@@ -3089,9 +3089,8 @@ void Io4KServices::SetDeviceMiscRegisters ()
 		{
 			if (mVpid1Valid)
 			{
-				CNTV2VPID parser;
-				parser.SetVPID(mVpid1a);
-				VPIDStandard std = parser.GetStandard();
+				mVpidParser.SetVPID(mVpid1a);
+				VPIDStandard std = mVpidParser.GetStandard();
 				switch (std)
 				{
 				case VPIDStandard_2160_DualLink:

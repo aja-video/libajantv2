@@ -199,6 +199,7 @@ public:
 	uint32_t				mADCStabilizeCount;	
 	HDMIOutColorSpaceMode	mHDMIOutColorSpaceModeStatus;	
 	uint32_t				mADCLockScanTestFormat;
+	CNTV2VPID 				mVpidParser;
 	
 	// virtual register
 	DefaultVideoOutMode		mDefaultVideoOutMode;

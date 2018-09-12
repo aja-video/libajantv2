@@ -1460,9 +1460,8 @@ void KonaIP22Services::SetDeviceXPointCapture()
 		}
 	}
 
-	CNTV2VPID parser;
-	parser.SetVPID(mVpid1a);
-	VPIDStandard std = parser.GetStandard();
+	mVpidParser.SetVPID(mVpid1a);
+	VPIDStandard std = mVpidParser.GetStandard();
 	bool b2x2piIn  = (std == VPIDStandard_2160_DualLink);
 	bool b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
 	bool b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
@@ -2478,9 +2477,8 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 	{
 		if (mVpid1Valid)
 		{
-			CNTV2VPID parser;
-			parser.SetVPID(mVpid1a);
-			VPIDStandard std = parser.GetStandard();
+			mVpidParser.SetVPID(mVpid1a);
+			VPIDStandard std = mVpidParser.GetStandard();
 			switch (std)
 			{
 			case VPIDStandard_2160_DualLink:

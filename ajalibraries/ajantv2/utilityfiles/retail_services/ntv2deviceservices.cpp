@@ -461,12 +461,9 @@ void DeviceServices::UpdateAutoState()
 	mSDIInput2RGBRange = mSDIInput2RGBRange == NTV2_RGBRangeAuto ?
 							NTV2_RGBRangeFull : mSDIInput2RGBRange;
 	
-	// in cs - TBD determined by vpid
-    //CNTV2VPID parser; parser.SetVPID(mVpid1a);
-	mSDIInput1ColorSpace = mSDIInput1ColorSpace == NTV2_ColorSpaceModeAuto ?
-							NTV2_ColorSpaceModeYCbCr : mSDIInput1ColorSpace;
-	mSDIInput2ColorSpace = mSDIInput2ColorSpace == NTV2_ColorSpaceModeAuto ?
-							NTV2_ColorSpaceModeYCbCr : mSDIInput2ColorSpace;
+	// in color space - use vpid
+	mSDIInput1ColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
+	mSDIInput2ColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL2, mSDIInput2ColorSpace);
 	
 	// 4k transport
 	NTV24kTransportType tranport4k = NTV2_4kTransport_PixelInterleave;
@@ -494,22 +491,27 @@ NTV2ColorSpaceMode DeviceServices::GetSDIInputColorSpace(NTV2Channel inChannel, 
 {
 	NTV2ColorSpaceMode outMode = inMode;
 	
-	if (NTV2DeviceCanDoDualLink(mDeviceID) == false)
+	if (NTV2DeviceCanDo3GIn(mDeviceID,0) == false)
 		return NTV2_ColorSpaceModeYCbCr;
 	
 	if (mSDIInput1ColorSpace == NTV2_ColorSpaceModeAuto)
 	{
-		CNTV2VPID parser;
-		parser.SetVPID(inChannel == NTV2_CHANNEL2 ? mVpid2a : mVpid1a);
-		VPIDSampling sample = parser.GetSampling();
-		if (sample == VPIDSampling_YUV_422)
+		outMode = NTV2_ColorSpaceModeYCbCr;
+		VPIDSampling sample = VPIDSampling_YUV_422;
+		
+		if (inChannel == NTV2_CHANNEL1 && mVpid1Valid == true)
 		{
-			outMode = NTV2_ColorSpaceModeYCbCr;
+			mVpidParser.SetVPID(mVpid1a);
+			sample = mVpidParser.GetSampling();
 		}
-		else
+		else if (inChannel == NTV2_CHANNEL2 && mVpid2Valid == true)
 		{
-			outMode = NTV2_ColorSpaceModeRgb;
+			mVpidParser.SetVPID(mVpid2a);
+			sample = mVpidParser.GetSampling();
 		}
+		
+		outMode = 	(sample == VPIDSampling_YUV_422) ?
+					NTV2_ColorSpaceModeYCbCr : NTV2_ColorSpaceModeRgb;
 	}
 	return outMode;
 }
@@ -1986,17 +1988,15 @@ NTV2VideoFormat DeviceServices::GetSdiInVideoFormatWithVpid(int32_t index)
 
 	if (index == 0 && mVpid1Valid == true && mVpid1a != 0)
 	{
-		CNTV2VPID parser;
-		parser.SetVPID(mVpid1a);
-		inputFormat = parser.GetVideoFormat();
+		mVpidParser.SetVPID(mVpid1a);
+		inputFormat = mVpidParser.GetVideoFormat();
 		if (mVirtualInputSelect == NTV2_Input4x4kSelect || mVirtualInputSelect == NTV2_Input2x4kSelect)
 			inputFormat = GetQuadSizedVideoFormat(inputFormat);
 	}
 	else if (index == 1 && mVpid2Valid == true && mVpid2a != 0)
 	{
-		CNTV2VPID parser;
-		parser.SetVPID(mVpid2a);
-		inputFormat = parser.GetVideoFormat();
+		mVpidParser.SetVPID(mVpid2a);
+		inputFormat = mVpidParser.GetVideoFormat();
 		if (mVirtualInputSelect == NTV2_Input4x4kSelect || mVirtualInputSelect == NTV2_Input2x4kSelect)
 			inputFormat = GetQuadSizedVideoFormat(inputFormat);
 	}
