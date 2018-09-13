@@ -111,7 +111,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	}
 	
 	// select square division or 2 pixel interleave in frame buffer
-    AdjustFor4kQuadOrTsi();
+    AdjustFor4kQuadOrTpiOut();
 	
 	// Figure out what our input format is based on what is selected
 	GetSelectedInputVideoFormat(mFb1VideoFormat);
@@ -1392,7 +1392,7 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 	bool b2piIn = b4K;
 	
 	// select square division or 2 pixel interleave in frame buffer
-    AdjustFor4kQuadOrTsi();
+    AdjustFor4kQuadOrTpiIn(inputFormat, b2piIn);
 	
 	// SDI In 1
 	bool bConvertBToA; 

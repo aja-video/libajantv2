@@ -186,7 +186,9 @@ public:
 	
 	uint32_t GetAudioDelayOffset(double frames);
 	NTV2AudioSystem GetHostAudioSystem();
-	void AdjustFor4kQuadOrTsi(NTV2Channel ch=NTV2_CHANNEL1);
+	void AdjustFor4kQuadOrTpiOut();
+	void AdjustFor4kQuadOrTpiIn(NTV2VideoFormat inputFormat, bool b2pi);
+	void Set4kTpiState(bool b2pi);
 
 	void SetAudioInputSelect(NTV2InputAudioSelect input);
     void AgentIsAlive();

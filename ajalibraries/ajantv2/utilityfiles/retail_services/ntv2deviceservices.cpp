@@ -3796,26 +3796,42 @@ NTV2AudioSystem	DeviceServices::GetHostAudioSystem()
 
 
 // select square division or 2 pixel interleave in frame buffer
-void DeviceServices::AdjustFor4kQuadOrTsi(NTV2Channel ch)
+void DeviceServices::AdjustFor4kQuadOrTpiOut()
 {
     if (NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat))
     {
-    	bool bEnabled = false;
-   		bool b4kQuad = (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire ||
-   						m4kTransportOutSelection == NTV2_4kTransport_Quadrants_4wire);
-   		if (b4kQuad)
-   		{
-   			mCard->Get4kSquaresEnable(bEnabled, ch);
-   			if (bEnabled == false)
-				mCard->Set4kSquaresEnable(true, ch);
-   		}
-   		else
-   		{
-   			mCard->GetTsiFrameEnable(bEnabled, ch);
-   			if (bEnabled == false)
-				mCard->SetTsiFrameEnable(true, ch);
-   		}
+   		bool bTpi = (m4kTransportOutSelection != NTV2_4kTransport_Quadrants_2wire &&
+					 m4kTransportOutSelection != NTV2_4kTransport_Quadrants_4wire);
+   		Set4kTpiState(bTpi);
     }
+}
+
+
+// select square division or 2 pixel interleave in frame buffer
+void DeviceServices::AdjustFor4kQuadOrTpiIn(NTV2VideoFormat inputFormat, bool b2pi)
+{
+    if (NTV2_IS_4K_VIDEO_FORMAT(inputFormat))
+    {
+   		Set4kTpiState(b2pi);
+    }
+}
+
+// true to tpi, false for quads
+void DeviceServices::Set4kTpiState(bool bTpi)
+{
+	bool bEnabled = false;
+	if (bTpi)
+	{
+		mCard->GetTsiFrameEnable(bEnabled, NTV2_CHANNEL1);
+		if (bEnabled == false)
+			mCard->SetTsiFrameEnable(true, NTV2_CHANNEL1);
+	}
+	else // quad
+	{
+		mCard->Get4kSquaresEnable(bEnabled, NTV2_CHANNEL1);
+		if (bEnabled == false)
+			mCard->Set4kSquaresEnable(true, NTV2_CHANNEL1);
+	}
 }
 
 

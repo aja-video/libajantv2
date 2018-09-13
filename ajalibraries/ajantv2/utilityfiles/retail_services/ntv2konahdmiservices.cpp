@@ -131,8 +131,8 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 	}
 
 	// 2 pixel interleave for 4k else not
-    AdjustFor4kQuadOrTsi(NTV2_CHANNEL1);
-    AdjustFor4kQuadOrTsi(NTV2_CHANNEL2);
+	if (b4K)
+    	Set4kTpiState(true);
 	
 	// CSCs
 	if (inputColorSpace == NTV2_ColorSpaceModeRgb)
