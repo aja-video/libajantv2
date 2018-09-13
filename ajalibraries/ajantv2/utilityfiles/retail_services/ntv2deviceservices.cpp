@@ -203,8 +203,6 @@ void DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVRegRGB10Range, mRGB10Range);
 	AsDriverInterface(mCard)->ReadRegister(kVRegColorSpaceMode, mColorSpaceType);
 	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1RGBRange, mSDIOutput1RGBRange);
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1ColorSpaceMode, mSDIInput1ColorSpace);
-	//AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput2ColorSpaceMode, mSDIInput2ColorSpace);
 	
 	AsDriverInterface(mCard)->ReadRegister(kVRegFrameBuffer1RGBRange, mFrameBuffer1RGBRange);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutBlackLevel, mVirtualAnalogOutBlackLevel);
@@ -223,7 +221,7 @@ void DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVReg4kOutputTransportSelection, m4kTransportOutSelection);
 	
 	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1RGBRange, mSDIInput1RGBRange);
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1FormatSelect, mSDIInput1ColorSpace);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1ColorSpaceMode, mSDIInput1ColorSpace);
 	mSDIInput2RGBRange = mSDIInput1RGBRange;
 	mSDIInput2ColorSpace = mSDIInput1ColorSpace;	// for now
 	
