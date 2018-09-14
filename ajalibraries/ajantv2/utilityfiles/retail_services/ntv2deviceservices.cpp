@@ -1217,7 +1217,7 @@ NTV2RGB10Range DeviceServices::GetCSCRange()
 	else if (mDeviceID == DEVICE_ID_KONAHDMI)
 	{
 		NTV2InputVideoType inType = RetailSupport::GetInputVideoTypeForIndex(mDeviceID, mVirtualInputSelect);
-		if (inType >= NTV2_InputSelectHDMI1 && inType <= NTV2_InputSelectHDMI4)
+		if (inType >= NTV2_InputVideoHdmi1 && inType <= NTV2_InputVideoHdmi4)
 		{
 			NTV2HDMIRange rgbRange = NTV2_HDMIRangeFull;
 			mCard->GetHDMIInputRange(rgbRange, NTV2_CHANNEL1);
