@@ -857,6 +857,8 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	}
 	// Set misc registers
 	SetDeviceMiscRegisters();
+	
+	mCard->WriteRegister(kVRegServicesModeFinal, mFb1Mode);
 }
 
 
