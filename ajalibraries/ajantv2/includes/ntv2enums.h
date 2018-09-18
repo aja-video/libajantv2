@@ -610,6 +610,10 @@ typedef enum _NTV2VideoFormat
         NTV2_IS_2K_1080_VIDEO_FORMAT(__f__)	||						\
         NTV2_IS_4K_VIDEO_FORMAT(__f__)		)
 
+#define NTV2_IS_PAL_VIDEO_FORMAT(__f__)								\
+    (	(__f__) == NTV2_FORMAT_1080i_5000	||						\
+        (__f__) == NTV2_FORMAT_625_5000)
+
 #define NTV2_IS_HD_VIDEO_FORMAT(__f__)								\
     (	(__f__) != NTV2_FORMAT_UNKNOWN	&&							\
         (((__f__) >= NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT	&&			\

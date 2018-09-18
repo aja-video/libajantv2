@@ -74,6 +74,7 @@
 	typedef unsigned char			UByte;
 	typedef char					SByte;
 #endif
+#define AJA_NULL (reinterpret_cast<void*>(0))
 
 // Platform dependent
 									//////////////////////////////////////////////////////////////////
