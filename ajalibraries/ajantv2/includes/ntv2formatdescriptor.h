@@ -85,13 +85,13 @@ public:
 					then sum the byte counts for each plane.
 		@param[in]	inPlaneIndex0		Specifies the plane of interest. Defaults to zero.
 	**/
-	inline ULWord	GetTotalRasterBytes (const UWord inPlaneIndex0 = 0) const	{return inPlaneIndex0 < mNumPlanes ? numLines * mLinePitch[inPlaneIndex0] : 0;}
+	inline ULWord	GetTotalRasterBytes (const UWord inPlaneIndex0 = 0) const	{return GetFullRasterHeight() * GetBytesPerRow(inPlaneIndex0);}
 
 	/**
 		@return		The total number of bytes required to hold the visible raster.
 		@param[in]	inPlaneIndex0	Specifies the plane of interest. Defaults to zero.
 	**/
-	inline ULWord	GetVisibleRasterBytes (const UWord inPlaneIndex0 = 0) const	{return inPlaneIndex0 < mNumPlanes ? ((numLines - firstActiveLine) * mLinePitch[inPlaneIndex0]) : 0;}
+	inline ULWord	GetVisibleRasterBytes (const UWord inPlaneIndex0 = 0) const	{return GetVisibleRasterHeight() * GetBytesPerRow(inPlaneIndex0);}
 
 	/**
 		@return		The number of bytes per row/line of the raster.
@@ -127,7 +127,7 @@ public:
 		@return	The height of the raster, in lines.
 		@param[in]	inVisibleOnly	Specify true to return just the visible height;  otherwise false (the default) to return the full height.
 	**/
-	inline ULWord	GetRasterHeight (const bool inVisibleOnly = false) const		{return inVisibleOnly ? GetVisibleRasterHeight() : numLines;}
+	inline ULWord	GetRasterHeight (const bool inVisibleOnly = false) const		{return inVisibleOnly ? GetVisibleRasterHeight() : GetFullRasterHeight();}
 
 	/**
 		@return		The full height of the raster, in lines (including VANC, if any).
@@ -142,7 +142,7 @@ public:
 	/**
 		@return		The visible height of the raster, in lines (excluding VANC, if any).
 	**/
-	inline ULWord	GetVisibleRasterHeight (void) const								{return numLines - firstActiveLine;}
+	inline ULWord	GetVisibleRasterHeight (void) const								{return GetFullRasterHeight() - GetFirstActiveLine();}
 
 	/**
 		@return		A pointer to the start of the given row in the given buffer, or NULL if row index is bad

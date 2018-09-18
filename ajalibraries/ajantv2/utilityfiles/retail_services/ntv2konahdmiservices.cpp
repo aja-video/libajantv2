@@ -131,8 +131,8 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 	}
 
 	// 2 pixel interleave for 4k else not
-	mCard->SetTsiFrameEnable(b4K, NTV2_CHANNEL1);
-	mCard->SetTsiFrameEnable(b4K, NTV2_CHANNEL2);
+	if (b4K)
+    	Set4kTpiState(true);
 	
 	// CSCs
 	if (inputColorSpace == NTV2_ColorSpaceModeRgb)
@@ -205,7 +205,7 @@ void KonaHDMIServices::SetDeviceXPointCapture ()
 			mCard->Connect(NTV2_Xpt425Mux2BInput, b4K ? NTV2_XptCSC4VidRGB : NTV2_XptBlack);
 		}
 	}
-	else//inputFormatSelect == NTV2_YUVSelect
+	else	//inputColorSpace == NTV2_ColorSpaceModeYCbCr
 	{
 		if(bFb1RGB)
 		{

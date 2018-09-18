@@ -1,12 +1,9 @@
 /**
-	@page	ajaanc		“libajaanc” Ancillary Data Library
+	@page	ajaanc		Ancillary Data Classes
 
-	The AJA Ancillary Data Library (AJAAncLib) is a suite of classes and data types which allow end-users to easily encode or decode
-	ancillary data using nearly any NTV2-compatible AJA device using the C++ programming language.
-	The code operates on Windows/VisualStudio, MacOS/Xcode and Linux/gcc.
-
-	The purpose of the library is to enable third-parties to easily access and/or control the ancillary data entering or leaving
-	an AJA NTV2 device. The library currently is very focused on CEA-608.
+	The Ancillary Data Classes allow client software to easily encode or decode ancillary data to or
+	from host buffers in a manner that is compatible with the ways in which NTV2 devices transmit and/or
+	receive ancillary data.
 
 	@par	Demonstration Applications
 	-	\ref ntv2ccgrabber

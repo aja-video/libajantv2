@@ -7,8 +7,8 @@
 #include "ntv2utils.h"
 #include "ntv2formatdescriptor.h"
 #include "ntv2registerexpert.h"
-#include "videodefines.h"
-#include "audiodefines.h"
+#include "ntv2videodefines.h"
+#include "ntv2audiodefines.h"
 #include "ntv2endian.h"
 #include "ntv2debug.h"
 #include "ntv2transcode.h"
@@ -1948,9 +1948,10 @@ NTV2Standard GetQuarterSizedStandard(NTV2Standard standard)
 	{
 	case NTV2_STANDARD_3840x2160p:
 	case NTV2_STANDARD_3840HFR:
+		return NTV2_STANDARD_1080p;
 	case NTV2_STANDARD_4096x2160p:
 	case NTV2_STANDARD_4096HFR:
-		return NTV2_STANDARD_1080p;
+		return NTV2_STANDARD_2Kx1080p;
 	default:
 		return standard;
 	}
@@ -2281,6 +2282,7 @@ NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(const NTV2VideoFormat inVi
 		case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
 		case NTV2_FORMAT_END_2K_DEF_FORMATS:
 		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
+		case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
 			break;	// Unsupported
 #else
 		default:
@@ -3247,6 +3249,7 @@ NTV2FrameRate GetNTV2FrameRateFromVideoFormat(NTV2VideoFormat videoFormat)
 	case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
 	case NTV2_FORMAT_END_2K_DEF_FORMATS:
 	case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
+	case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
 		break;
 #else
 	default:
@@ -3613,6 +3616,7 @@ ULWord GetDisplayWidth (const NTV2VideoFormat videoFormat)
 		case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
 		case NTV2_FORMAT_END_2K_DEF_FORMATS:
 		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
+		case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
 #else
 		default:
 #endif
@@ -3762,6 +3766,7 @@ ULWord GetDisplayHeight (const NTV2VideoFormat videoFormat)
 		case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
 		case NTV2_FORMAT_END_2K_DEF_FORMATS:
 		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
+		case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
 #else
 		default:
 #endif
@@ -3985,43 +3990,45 @@ string NTV2SmpteLineNumber::PrintLineNumber (const ULWord inLineOffset, const NT
 
 
 
-//	More UI-friendly versions of above (used in Cables app)...
-AJA_LOCAL_STATIC const char * frameBufferFormats [NTV2_FBF_NUMFRAMEBUFFERFORMATS+1] =
-{
-	"10 Bit YCbCr",						//	NTV2_FBF_10BIT_YCBCR			//	0
-	"8 Bit YCbCr - UYVY",				//	NTV2_FBF_8BIT_YCBCR				//	1
-	"8 Bit ARGB",						//	NTV2_FBF_ARGB					//	2
-	"8 Bit RGBA",						//	NTV2_FBF_RGBA					//	3
-	"10 Bit RGB",						//	NTV2_FBF_10BIT_RGB				//	4
-	"8 Bit YCbCr - YUY2",				//	NTV2_FBF_8BIT_YCBCR_YUY2		//	5
-	"8 Bit ABGR",						//	NTV2_FBF_ABGR					//	6
-	"10 Bit RGB - DPX compatible",		//	NTV2_FBF_10BIT_DPX				//	7
-	"10 Bit YCbCr - DPX compatible",	//	NTV2_FBF_10BIT_YCBCR_DPX		//	8
-	"8 Bit DVCPro YCbCr - UYVY",		//	NTV2_FBF_8BIT_DVCPRO			//	9
-	"8 Bit YCbCr 420 3-plane [I420]",	//	NTV2_FBF_8BIT_YCBCR_420PL3		//	10
-	"8 Bit HDV YCbCr - UYVY",			//	NTV2_FBF_8BIT_HDV				//	11
-	"24 Bit RGB",						//	NTV2_FBF_24BIT_RGB				//	12
-	"24 Bit BGR",						//	NTV2_FBF_24BIT_BGR				//	13
-	"10 Bit YCbCrA",					//	NTV2_FBF_10BIT_YCBCRA			//	14
-    "10 Bit RGB - DPX LE",              //	NTV2_FBF_10BIT_DPX_LE           //	15
-	"48 Bit RGB",						//	NTV2_FBF_48BIT_RGB				//	16
-	"10 Bit YCbCr - Compressed",		//	NTV2_FBF_PRORES					//	17
-	"10 Bit YCbCr DVCPro - Compressed",	//	NTV2_FBF_PRORES_DVCPRO			//	18
-	"10 Bit YCbCr HDV - Compressed",	//	NTV2_FBF_PRORES_HDV				//	19
-	"10 Bit RGB Packed",				//	NTV2_FBF_10BIT_RGB_PACKED		//	20
-	"10 Bit ARGB",						//	NTV2_FBF_10BIT_ARGB				//	21
-	"16 Bit ARGB",						//	NTV2_FBF_16BIT_ARGB				//	22
-	"8 Bit YCbCr 422 3-plane [Y42B]",	//	NTV2_FBF_8BIT_YCBCR_422PL3		//	23
-	"10 Bit Raw RGB",					//	NTV2_FBF_10BIT_RGB				//	24
-	"10 Bit Raw YCbCr",					//	NTV2_FBF_10BIT_YCBCR			//	25
-	"10 Bit YCbCr 420 3-plane LE",		//	NTV2_FBF_10BIT_YCBCR_420PL3_LE	//	26
-	"10 Bit YCbCr 422 3-plane LE",		//	NTV2_FBF_10BIT_YCBCR_422PL3_LE	//	27
-	"10 Bit YCbCr 420 2-Plane",			//	NTV2_FBF_10BIT_YCBCR_420PL2		//	28
-	"10 Bit YCbCr 422 2-Plane",			//	NTV2_FBF_10BIT_YCBCR_422PL2		//	29
-	"8 Bit YCbCr 420 2-Plane",			//	NTV2_FBF_8BIT_YCBCR_420PL2		//	30
-	"8 Bit YCbCr 422 2-Plane",			//	NTV2_FBF_8BIT_YCBCR_422PL2		//	31
-	""									//	NTV2_FBF_INVALID				//	32
-};
+#if !defined (NTV2_DEPRECATE)
+	//	More UI-friendly versions of above (used in Cables app)...
+	AJA_LOCAL_STATIC const char * frameBufferFormats [NTV2_FBF_NUMFRAMEBUFFERFORMATS+1] =
+	{
+		"10 Bit YCbCr",						//	NTV2_FBF_10BIT_YCBCR			//	0
+		"8 Bit YCbCr - UYVY",				//	NTV2_FBF_8BIT_YCBCR				//	1
+		"8 Bit ARGB",						//	NTV2_FBF_ARGB					//	2
+		"8 Bit RGBA",						//	NTV2_FBF_RGBA					//	3
+		"10 Bit RGB",						//	NTV2_FBF_10BIT_RGB				//	4
+		"8 Bit YCbCr - YUY2",				//	NTV2_FBF_8BIT_YCBCR_YUY2		//	5
+		"8 Bit ABGR",						//	NTV2_FBF_ABGR					//	6
+		"10 Bit RGB - DPX compatible",		//	NTV2_FBF_10BIT_DPX				//	7
+		"10 Bit YCbCr - DPX compatible",	//	NTV2_FBF_10BIT_YCBCR_DPX		//	8
+		"8 Bit DVCPro YCbCr - UYVY",		//	NTV2_FBF_8BIT_DVCPRO			//	9
+		"8 Bit YCbCr 420 3-plane [I420]",	//	NTV2_FBF_8BIT_YCBCR_420PL3		//	10
+		"8 Bit HDV YCbCr - UYVY",			//	NTV2_FBF_8BIT_HDV				//	11
+		"24 Bit RGB",						//	NTV2_FBF_24BIT_RGB				//	12
+		"24 Bit BGR",						//	NTV2_FBF_24BIT_BGR				//	13
+		"10 Bit YCbCrA",					//	NTV2_FBF_10BIT_YCBCRA			//	14
+		"10 Bit RGB - DPX LE",              //	NTV2_FBF_10BIT_DPX_LE           //	15
+		"48 Bit RGB",						//	NTV2_FBF_48BIT_RGB				//	16
+		"10 Bit YCbCr - Compressed",		//	NTV2_FBF_PRORES					//	17
+		"10 Bit YCbCr DVCPro - Compressed",	//	NTV2_FBF_PRORES_DVCPRO			//	18
+		"10 Bit YCbCr HDV - Compressed",	//	NTV2_FBF_PRORES_HDV				//	19
+		"10 Bit RGB Packed",				//	NTV2_FBF_10BIT_RGB_PACKED		//	20
+		"10 Bit ARGB",						//	NTV2_FBF_10BIT_ARGB				//	21
+		"16 Bit ARGB",						//	NTV2_FBF_16BIT_ARGB				//	22
+		"8 Bit YCbCr 422 3-plane [Y42B]",	//	NTV2_FBF_8BIT_YCBCR_422PL3		//	23
+		"10 Bit Raw RGB",					//	NTV2_FBF_10BIT_RGB				//	24
+		"10 Bit Raw YCbCr",					//	NTV2_FBF_10BIT_YCBCR			//	25
+		"10 Bit YCbCr 420 3-plane LE",		//	NTV2_FBF_10BIT_YCBCR_420PL3_LE	//	26
+		"10 Bit YCbCr 422 3-plane LE",		//	NTV2_FBF_10BIT_YCBCR_422PL3_LE	//	27
+		"10 Bit YCbCr 420 2-Plane",			//	NTV2_FBF_10BIT_YCBCR_420PL2		//	28
+		"10 Bit YCbCr 422 2-Plane",			//	NTV2_FBF_10BIT_YCBCR_422PL2		//	29
+		"8 Bit YCbCr 420 2-Plane",			//	NTV2_FBF_8BIT_YCBCR_420PL2		//	30
+		"8 Bit YCbCr 422 2-Plane",			//	NTV2_FBF_8BIT_YCBCR_422PL2		//	31
+		""									//	NTV2_FBF_INVALID				//	32
+	};
+#endif	//	!defined (NTV2_DEPRECATE)
 
 
 //	More UI-friendly versions of above (used in Cables app)...
@@ -5846,7 +5853,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 					outRouter.addWithValue (::GetAnalogOutInputSelectEntry (), NTV2_XptAnalogIn);
 					break;
 				case NTV2_INPUTSOURCE_HDMI1:
-					outRouter.addWithValue (::GetHDMIOutInputSelectEntry (), NTV2_XptHDMIIn);
+					outRouter.addWithValue (::GetHDMIOutInputSelectEntry (), NTV2_XptHDMIIn1);
 					break;
 				default:
 					return false;
@@ -5887,7 +5894,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptAnalogIn);
 						break;
 					case NTV2_INPUTSOURCE_HDMI1:
-						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptHDMIIn);
+						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptHDMIIn1);
 						break;
 					default:
 						return false;
@@ -5911,7 +5918,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptAnalogIn);
 					break;
 				case NTV2_INPUTSOURCE_HDMI1:
-					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptHDMIIn);
+					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptHDMIIn1);
 					break;
 				default:
 					return false;
@@ -5946,7 +5953,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptAnalogIn);
 						break;
 					case NTV2_INPUTSOURCE_HDMI1:
-						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptHDMIIn);
+						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptHDMIIn1);
 						break;
 					default:
 						return false;
@@ -5968,7 +5975,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptAnalogIn);
 					break;
 				case NTV2_INPUTSOURCE_HDMI1:
-					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptHDMIIn);
+					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptHDMIIn1);
 					break;
 				default:
 					return false;
@@ -5990,7 +5997,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 				outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptAnalogIn);
 				break;
 			case NTV2_INPUTSOURCE_HDMI1:
-				outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptHDMIIn);
+				outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptHDMIIn1);
 				break;
 			default:
 				return false;
@@ -6021,7 +6028,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 					outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptAnalogIn);
 					break;
 				case NTV2_INPUTSOURCE_HDMI1:
-					outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptHDMIIn);
+					outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptHDMIIn1);
 					break;
 				default:
 					return false;
@@ -6041,7 +6048,7 @@ AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
 					outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptAnalogIn);
 					break;
 				case NTV2_INPUTSOURCE_HDMI1:
-					outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptHDMIIn);
+					outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptHDMIIn1);
 					break;
 				default:
 					return false;
@@ -6530,8 +6537,7 @@ string NTV2InputCrosspointIDToString (const NTV2InputCrosspointID inValue, const
 		case NTV2_XptMixer4BGVidInput:		return inForRetailDisplay	? "Mixer 4 BG Vid"			: "NTV2_XptMixer4BGVidInput";
 		case NTV2_XptMixer4FGKeyInput:		return inForRetailDisplay	? "Mixer 4 FG Key"			: "NTV2_XptMixer4FGKeyInput";
 		case NTV2_XptMixer4FGVidInput:		return inForRetailDisplay	? "Mixer 4 FG Vid"			: "NTV2_XptMixer4FGVidInput";
-		case NTV2_XptHDMIOutInput:			return inForRetailDisplay	? "HDMI Out"				: "NTV2_XptHDMIOutInput";
-		case NTV2_XptHDMIOutQ1Input:		return inForRetailDisplay	? "HDMI Out Q1"				: "NTV2_XptHDMIOutQ1Input";
+		case NTV2_XptHDMIOutInput:			return inForRetailDisplay	? "HDMI Out"				: "NTV2_XptHDMIOutInput";		//	case NTV2_XptHDMIOutQ1Input:	return inForRetailDisplay ? "HDMI Out Q1" : "NTV2_XptHDMIOutQ1Input";
 		case NTV2_XptHDMIOutQ2Input:		return inForRetailDisplay	? "HDMI Out Q2"				: "NTV2_XptHDMIOutQ2Input";
 		case NTV2_XptHDMIOutQ3Input:		return inForRetailDisplay	? "HDMI Out Q3"				: "NTV2_XptHDMIOutQ3Input";
 		case NTV2_XptHDMIOutQ4Input:		return inForRetailDisplay	? "HDMI Out Q4"				: "NTV2_XptHDMIOutQ4Input";

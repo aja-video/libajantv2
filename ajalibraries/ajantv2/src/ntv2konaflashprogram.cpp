@@ -44,9 +44,9 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram ()
         _flashID            (MAIN_FLASHBLOCK),
 		_deviceID			(0),
 		_bQuiet				(false),
-        _mcsStep(0),
-        _spiFlash(NULL),
-        _failSafePadding(0)
+        _mcsStep            (0),
+        _failSafePadding    (0),
+        _spiFlash           (NULL)
 {
 }
 
@@ -74,8 +74,8 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram (const UWord boardNumber)
         _deviceID           (0),
         _bQuiet             (false),
         _mcsStep            (0),
-        _spiFlash(NULL),
-        _failSafePadding(0)
+        _failSafePadding    (0),
+        _spiFlash           (NULL)
 {
 	SetDeviceProperties();
 }

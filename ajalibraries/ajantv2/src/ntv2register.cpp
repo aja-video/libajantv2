@@ -319,28 +319,14 @@ bool CNTV2Card::GetVideoFormat (NTV2VideoFormat & outValue, NTV2Channel inChanne
 
     bool isSquares = false;
     if(NTV2_IS_QUAD_FRAME_GEOMETRY(frameGeometry))
-        Get4kSquaresEnable(isSquares, inChannel);
+    {
+        if(!NTV2DeviceCanDo12gRouting(GetDeviceID()))
+            isSquares = true;
+        else
+            Get4kSquaresEnable(isSquares, inChannel);
+    }
 
-	#if defined (NTV2_DEPRECATE)
-        //return ::NTV2DeviceGetVideoFormatFromState_Ex (&outValue,  frameRate,  frameGeometry,  standard,  smpte372Enabled,  progressivePicture);
-        return ::NTV2DeviceGetVideoFormatFromState_Ex2 (&outValue, frameRate, frameGeometry, standard, smpte372Enabled, progressivePicture, isSquares);
-	#else
-		if (!::NTV2DeviceGetVideoFormatFromState_Ex (&outValue,  frameRate,  frameGeometry,  standard,  smpte372Enabled,  progressivePicture))
-		{
-			switch (standard)
-			{
-				case NTV2_STANDARD_1080:	DisplayNTV2Error ("Unsupported standard 1080 frame rate requested.");	break;
-				case NTV2_STANDARD_1080p:	DisplayNTV2Error ("Unsupported 1080p frame rate requested.");			break;
-				case NTV2_STANDARD_720:		DisplayNTV2Error ("Unsupported 720 frame rate requested.");				break;
-				case NTV2_STANDARD_525:		DisplayNTV2Error ("Unsupported 525 frame rate requested.");				break;
-				case NTV2_STANDARD_625:		DisplayNTV2Error ("Unsupported 625 frame rate requested.");				break;
-				case NTV2_STANDARD_2K:		DisplayNTV2Error ("Unsupported 2K frame rate requested.");				break;
-				default:					DisplayNTV2Error ("Unsupported video standard requested.");				break;
-			}
-			return false;
-		}
-		return true;
-	#endif
+    return ::NTV2DeviceGetVideoFormatFromState_Ex2 (&outValue, frameRate, frameGeometry, standard, smpte372Enabled, progressivePicture, isSquares);
 }
 
 bool CNTV2Card::GetSupportedVideoFormats (NTV2VideoFormatSet & outFormats)
@@ -772,6 +758,10 @@ bool CNTV2Card::SetStandard (NTV2Standard value, NTV2Channel channel)
 	if (NTV2_IS_QUAD_STANDARD(newStandard))
 	{
 		newStandard = GetQuarterSizedStandard(newStandard);
+	}
+	if (NTV2_IS_2K1080_STANDARD(newStandard))
+	{
+		newStandard = NTV2_STANDARD_1080p;
 	}
 
 	return WriteRegister (gChannelToGlobalControlRegNum [channel],
@@ -3857,7 +3847,7 @@ bool CNTV2Card::SetColorSpaceMethod (const NTV2ColorSpaceMethod inCSCMethod, con
 			break;
 		case NTV2_CSC_Method_Enhanced:
 			//	Enable enhanced mode, but not 4K
-			value |= kK2RegShiftEnhancedCSCEnable;
+			value |= kK2RegMaskEnhancedCSCEnable;
 			break;
 		case NTV2_CSC_Method_Enhanced_4K:
 			//	4K mode uses a block of four CSCs. You must set the first converter in the group.
@@ -4597,14 +4587,12 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 {
 	ULWord status (0), threeGStatus (0);
     ULWord vpidDS1 = 0, vpidDS2 = 0;
-    bool bHaveVPID = false;
     CNTV2VPID inputVPID;
     if (IS_CHANNEL_INVALID (inChannel))
         return NTV2_FORMAT_UNKNOWN;
 
     if(GetVPIDValidA(inChannel))
     {
-        bHaveVPID = true;
         ReadSDIInVPID(inChannel, vpidDS1, vpidDS2);
         inputVPID.SetVPID(vpidDS1);
     }
@@ -5701,19 +5689,19 @@ bool CNTV2Card::GetRouting (CNTV2SignalRouter & outRouting)
 	//	Inspect every input of every widget...
 	for (NTV2WidgetIDSetConstIter pWidgetID (validWidgets.begin ());  pWidgetID != validWidgets.end ();  ++pWidgetID)
 	{
-		const NTV2WidgetID			curWidgetID	(*pWidgetID);
-		NTV2InputCrosspointIDSet	inputs;
+		const NTV2WidgetID	curWidgetID	(*pWidgetID);
+		NTV2InputXptIDSet	inputs;
 
 		CNTV2SignalRouter::GetWidgetInputs (curWidgetID, inputs);
-		//cerr	<< endl << "## DEBUG:  GetRouting:  Widget '" << ::NTV2WidgetIDToString (curWidgetID, true) << "' ("
+		//cerr	<< "## DEBUG:  GetRouting:  Widget '" << ::NTV2WidgetIDToString (curWidgetID, true) << "' ("
 		//		<< ::NTV2WidgetIDToString (curWidgetID, false) << ") has " << inputs.size () << " input(s):  " << inputs << endl;
 
 		for (NTV2InputCrosspointIDSetConstIter pInputID (inputs.begin ());  pInputID != inputs.end ();  ++pInputID)
 		{
 			NTV2OutputCrosspointID	outputID	(NTV2_XptBlack);
 			if (!GetConnectedOutput (*pInputID, outputID))
-				;//cerr	<< "## DEBUG:  GetRouting:  'GetConnectedOutput' failed for input '" << ::NTV2InputCrosspointIDToString (*pInputID, true) << "' ("
-				//		<< ::NTV2InputCrosspointIDToString (*pInputID, false) << ")" << endl;
+				;//cerr	<< "## ERROR:  GetRouting:  'GetConnectedOutput' failed for input " << ::NTV2InputCrosspointIDToString (*pInputID)
+				//		<< " (" << ::NTV2InputCrosspointIDToString (*pInputID, true) << ")" << endl;
 			else if (outputID == NTV2_XptBlack)
 				;//cerr	<< "## DEBUG:  GetRouting:  'GetConnectedOutput' returned XptBlack for input '" << ::NTV2InputCrosspointIDToString (*pInputID, true)
 				//		<< "' (" << ::NTV2InputCrosspointIDToString (*pInputID, false) << ")" << endl;
@@ -6238,15 +6226,13 @@ bool CNTV2Card::GetColorSpaceCustomCoefficients(ColorSpaceConverterCustomCoeffic
 			&&	ReadRegister (sRegsCoeffs910[inChannel],	outCoefficients.Coefficient10,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh);
 }
 
-// 12/7/2006 - to incerase accuracy and decrease generational
-// degredation, the width of the coefficients for the colospace
-// converter matrix went from 10 to 12 bit (with the MSB being a sign
-// bit).  So as not to break existing, compiled code, we added new API
-// calls for use with these wider coefficients.  The values had to be
-// munged a bit to fit in the register since the low coefficient ended
-// on the 0 bit... the high coefficient was simple widened to 13 bits
-// total.  The 2 LSBs of the low coefficient are written *in front*
-// of the 11 MSBa hence the shifting and masking below. - jac
+// 12/7/2006	To increase accuracy and decrease generational degredation, the width of the coefficients
+//				for the colorspace converter matrix went from 10 to 12 bit (with the MSB being a sign
+//				bit).  So as not to break existing, compiled code, we added new API calls for use with
+//				these wider coefficients.  The values had to be munged a bit to fit in the register, since
+//				the low coefficient ended on the 0 bit ... the hi coefficient was simply widened to 13 bits
+//				total.  The 2 LSBs of the low coefficient are written *in front* of the 11 MSBs, hence the
+//				shifting and masking below. - jac
 bool CNTV2Card::SetColorSpaceCustomCoefficients12Bit (const ColorSpaceConverterCustomCoefficients & inCoefficients, const NTV2Channel inChannel)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
@@ -6282,15 +6268,13 @@ bool CNTV2Card::SetColorSpaceCustomCoefficients12Bit (const ColorSpaceConverterC
 		&&  WriteRegister (sRegsCoeffs910[inChannel],	inCoefficients.Coefficient10,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh);
 }
 
-// 12/7/2006 - to incerase accuracy and decrease generational
-// degredation, the width of the coefficients for the colospace
-// converter matrix went from 10 to 12 bit (with the MSB being a sign
-// bit).  So as not to break existing, compiled code, we added new API
-// calls for use with these wider coefficients.  The values had to be
-// munged a bit to fit in the register since the low coefficient ended
-// on the 0 bit... the high coefficient was simple widened to 13 bits
-// total.  The 2 LSBs of the low coefficient are writtent *in front*
-// of the 11 MSBa hence the shifting and masking below. - jac
+// 12/7/2006	To increase accuracy and decrease generational degredation, the width of the coefficients
+//				for the colorspace converter matrix went from 10 to 12 bit (with the MSB being a sign
+//				bit).  So as not to break existing, compiled code, we added new API calls for use with
+//				these wider coefficients.  The values had to be munged a bit to fit in the register, since
+//				the low coefficient ended on the 0 bit ... the hi coefficient was simply widened to 13 bits
+//				total.  The 2 LSBs of the low coefficient are written *in front* of the 11 MSBs, hence the
+//				shifting and masking below. - jac
 bool CNTV2Card::GetColorSpaceCustomCoefficients12Bit (ColorSpaceConverterCustomCoefficients & outCoefficients, const NTV2Channel inChannel)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
@@ -6940,91 +6924,82 @@ bool CNTV2Card::GetSDIOut2Kx1080Enable(NTV2Channel inChannel, bool & outIsEnable
 	return retVal;
 }
 
-bool CNTV2Card::SetSDIOut3GEnable(NTV2Channel inChannel, bool enable)
-{
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
-	return WriteRegister (gChannelToSDIOutControlRegNum [inChannel], enable, kLHIRegMaskSDIOut3GbpsMode, kLHIRegShiftSDIOut3GbpsMode);
-}
-
-bool CNTV2Card::GetSDIOut3GEnable(NTV2Channel inChannel, bool & outIsEnabled)
-{
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
-	ULWord		tempVal	(0);
-	const bool	retVal	(ReadRegister (gChannelToSDIOutControlRegNum [inChannel], tempVal, kLHIRegMaskSDIOut3GbpsMode, kLHIRegShiftSDIOut3GbpsMode));
-	outIsEnabled = static_cast <bool> (tempVal);
-	return retVal;
-}
-
-
-bool CNTV2Card::SetSDIOut3GbEnable(NTV2Channel inChannel, bool enable)
-{
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
-	return WriteRegister (gChannelToSDIOutControlRegNum [inChannel], enable, kLHIRegMaskSDIOutSMPTELevelBMode, kLHIRegShiftSDIOutSMPTELevelBMode);
-}
-
-bool CNTV2Card::GetSDIOut3GbEnable(NTV2Channel inChannel, bool & outIsEnabled)
-{
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
-	ULWord		tempVal	(0);
-	const bool	retVal	(ReadRegister (gChannelToSDIOutControlRegNum [inChannel], tempVal, kLHIRegMaskSDIOutSMPTELevelBMode, kLHIRegShiftSDIOutSMPTELevelBMode));
-	outIsEnabled = static_cast <bool> (tempVal);
-	return retVal;
-}
-
-bool CNTV2Card::SetSDIOut6GEnable(NTV2Channel inChannel, bool enable)
+bool CNTV2Card::SetSDIOut3GEnable (const NTV2Channel inChannel, const bool inEnable)
 {
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	NTV2Channel newChannel = inChannel;
-	if (!NTV2DeviceCanDo12gRouting(GetDeviceID()))
-		newChannel = NTV2_CHANNEL3;
-	WriteRegister(gChannelToSDIOutControlRegNum[newChannel], 0, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
-	return WriteRegister(gChannelToSDIOutControlRegNum[newChannel], enable, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
+	return WriteRegister (gChannelToSDIOutControlRegNum[inChannel], inEnable, kLHIRegMaskSDIOut3GbpsMode, kLHIRegShiftSDIOut3GbpsMode);
 }
 
-bool CNTV2Card::GetSDIOut6GEnable(NTV2Channel inChannel, bool & outIsEnabled)
+bool CNTV2Card::GetSDIOut3GEnable (const NTV2Channel inChannel, bool & outIsEnabled)
 {
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	ULWord		is6G(0), is12G(0);
-	NTV2Channel newChannel = inChannel;
+	return CNTV2DriverInterface::ReadRegister (gChannelToSDIOutControlRegNum[inChannel], outIsEnabled, kLHIRegMaskSDIOut3GbpsMode, kLHIRegShiftSDIOut3GbpsMode);
+}
+
+
+bool CNTV2Card::SetSDIOut3GbEnable (const NTV2Channel inChannel, const bool inEnable)
+{
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+	return WriteRegister (gChannelToSDIOutControlRegNum[inChannel], inEnable, kLHIRegMaskSDIOutSMPTELevelBMode, kLHIRegShiftSDIOutSMPTELevelBMode);
+}
+
+bool CNTV2Card::GetSDIOut3GbEnable (const NTV2Channel inChannel, bool & outIsEnabled)
+{
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+	return CNTV2DriverInterface::ReadRegister (gChannelToSDIOutControlRegNum[inChannel], outIsEnabled, kLHIRegMaskSDIOutSMPTELevelBMode, kLHIRegShiftSDIOutSMPTELevelBMode);
+}
+
+bool CNTV2Card::SetSDIOut6GEnable (const NTV2Channel inChannel, const bool inEnable)
+{
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+	NTV2Channel channel (inChannel);
 	if (!NTV2DeviceCanDo12gRouting(GetDeviceID()))
-		newChannel = NTV2_CHANNEL3;
-	bool retVal = ReadRegister(gChannelToSDIOutControlRegNum[newChannel], is6G, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
-	retVal = ReadRegister(gChannelToSDIOutControlRegNum[newChannel], is12G, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
-	if (is6G == 1 && is12G == 0)
+		channel = NTV2_CHANNEL3;
+	return WriteRegister(gChannelToSDIOutControlRegNum[channel], 0, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode)
+		&& WriteRegister(gChannelToSDIOutControlRegNum[channel], inEnable, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
+}
+
+bool CNTV2Card::GetSDIOut6GEnable (const NTV2Channel inChannel, bool & outIsEnabled)
+{
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+	bool	is6G(false), is12G(false);
+	NTV2Channel channel (inChannel);
+	if (!NTV2DeviceCanDo12gRouting(GetDeviceID()))
+		channel = NTV2_CHANNEL3;
+	const bool result (CNTV2DriverInterface::ReadRegister(gChannelToSDIOutControlRegNum[channel], is6G, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode)
+						&& CNTV2DriverInterface::ReadRegister(gChannelToSDIOutControlRegNum[channel], is12G, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode));
+	if (is6G && !is12G)
 		outIsEnabled = true;
 	else
 		outIsEnabled = false;
-	return outIsEnabled;
+	return result;
 }
 
-bool CNTV2Card::SetSDIOut12GEnable(NTV2Channel inChannel, bool enable)
+bool CNTV2Card::SetSDIOut12GEnable (const NTV2Channel inChannel, const bool inEnable)
 {
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	NTV2Channel newChannel = inChannel;
+	NTV2Channel channel (inChannel);
 	if (!NTV2DeviceCanDo12gRouting(GetDeviceID()))
-		newChannel = NTV2_CHANNEL3;
-	WriteRegister(gChannelToSDIOutControlRegNum[newChannel], 0, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
-	return WriteRegister(gChannelToSDIOutControlRegNum[newChannel], enable, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
+		channel = NTV2_CHANNEL3;
+	return WriteRegister(gChannelToSDIOutControlRegNum[channel], 0, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode)
+		&& WriteRegister(gChannelToSDIOutControlRegNum[channel], inEnable, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
 }
 
-bool CNTV2Card::GetSDIOut12GEnable(NTV2Channel inChannel, bool & outIsEnabled)
+bool CNTV2Card::GetSDIOut12GEnable(const NTV2Channel inChannel, bool & outIsEnabled)
 {
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	ULWord		tempVal(0);
-	NTV2Channel newChannel = inChannel;
+	NTV2Channel channel (inChannel);
 	if (!NTV2DeviceCanDo12gRouting(GetDeviceID()))
-		newChannel = NTV2_CHANNEL3;
-	const bool	retVal(ReadRegister(gChannelToSDIOutControlRegNum[newChannel], tempVal, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode));
-	outIsEnabled = static_cast <bool> (tempVal);
-	return retVal;
+		channel = NTV2_CHANNEL3;
+	return CNTV2DriverInterface::ReadRegister(gChannelToSDIOutControlRegNum[channel], outIsEnabled, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
 }
 
 

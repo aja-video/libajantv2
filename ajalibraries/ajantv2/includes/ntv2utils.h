@@ -10,7 +10,7 @@
 #include "ajaexport.h"
 #include "ajatypes.h"
 #include "ntv2enums.h"
-#include "videodefines.h"
+#include "ntv2videodefines.h"
 #include "ntv2publicinterface.h"
 #include "ntv2formatdescriptor.h"
 #include "ntv2m31publicinterface.h"

@@ -23,7 +23,7 @@ web browser at <https://sdksupport.aja.com/>.
 
 @note	On MacOS, if the .zip file was downloaded using a web browser, it will have a “quarantine” attribute.
 		AJA recommends clearing this attribute prior to unzipping, to avoid quarantining the unzipped SDK,
-		which may interfere with your development. To remove the quarantine attributes, open a Terminal window and enter the command:
+		which may interfere with your development. To remove the quarantine attributes, enter this command in a Terminal window:
 		<tt>xattr -c ~/Downloads/ntv2sdk*.zip</tt>
 
 
@@ -45,38 +45,40 @@ This section explores the contents of the SDK, which is nearly identical on all 
 	-	<b>ajaapps</b> — Contains sources used to build applications and tools.
 		-	<b>crossplatform  </b>
 			-	<b>demoapps</b> — Contains sources for \ref demoapps.
+			-	<b>supportlog</b> — Contains sources for the <b>supportlog</b> command-line tool.
 		-	<b>lin  </b><i>(Linux-only apps)</i>
-		-	<b>mac  </b><i>(MacOS-only apps)</i>
 		-	<b>win  </b><i>(Windows-only apps)</i>
 	-	<b>ajadriver  </b><i>(Linux only)</i>
 		-	<b>linux</b> — Device driver source code <i>(Linux only)</i>.
 	-	<b>ajalibraries</b>
-		-	<b>ajabase</b> — Contains \ref ajabase, which has several platform-independent utility classes for threading, locking, memory allocation, plug-and-play, etc.
-		-	<b>ajaanc</b> — Contains \ref ajaanc, handy for parsing and manipulating ancillary data.
-		-	<b>ajacc</b> — Contains the \ref ajacc, handy for encoding, decoding and rendering CEA-608/708 captions.
+		-	<b>ajabase</b> — Contains \ref ajabase, which has several platform-independent utility classes for threading,
+			locking, memory allocation, plug-and-play, logging, etc. Starting in SDK 15.0, these classes are provided in
+			‘libajantv2’, not in ‘libajabase’.
+		-	<b>ajaanc</b> — Contains \ref ajaanc, a set of handy classes for parsing and manipulating ancillary data packets.
+			Starting in SDK 15.0, these classes are no longer proprietary, and are provided in ‘libajantv2’, not in ‘libajaanc’.
+		-	<b>ajacc</b> — Contains the \ref ajacc, a proprietary class library handy for encoding, decoding and rendering CEA-608/708 captions.
 		-	<b>ajantv2</b> — Contains the \ref ajantv2.
-			-	<b>build</b> — <i>(MacOS & Windows only)</i>  Project solution files for building the SDK, tools and demo applications using Visual Studio (Windows) or Xcode (MacOS).
+			-	<b>build</b> — <i>(MacOS & Windows only)</i>  Project solution files for building the SDK, tools and demo
+				applications using Visual Studio (Windows) or Xcode (MacOS).
 			-	<b>codecs</b> — Principal user level NTV2 HEVC classes and header files (\ref corvidhevc only, <i>Windows and Linux only</i>).
 				See \ref hevcsupplement.
-			-	<b>includes</b> — SDK header/include files.
-			-	<b>src</b> — SDK implementation source files (with platform-specific subdirectories).
+			-	<b>includes</b> — the NTV2 class header/include files.
+			-	<b>src</b> — the NTV2 implementation source files (with platform-specific subdirectories).
 	-	<b>bin</b> — Destination directory for all executables and requisite dynamically-loaded libraries.
 		Also contains all pre-built \ref toolsandutilities.
 	-	<b>build</b> — Provided for developers who prefer to use <a href="https://doc.qt.io/" target="_qt">Qt</a>
 		and/or <a href="https://doc.qt.io/qtcreator/" target="_qtcreator">Qt Creator</a>.
 		See \ref gs-qtbuild.
 	-	<b>docs</b> — Contains a webloc file that points to the NTV2 online API documentation.
-	-	<b>lib</b> — Destination directory for all static libraries.
+	-	<b>lib</b> — Contains the pre-built libraries. This is the destination directory for all static library builds.
 	-	<b>gpustuff</b> — <i>(Linux & Windows only)</i>
 
 
 @subsection		gs-contents-libs	SDK Libraries
 
 The SDK distribution comes with the following libraries:
--	\ref ajabase
--	\ref ajantv2
+-	\ref ajantv2 which, starting with SDK 15.0, includes \ref ajabase and \ref ajaanc
 -	\ref ajacc
--	\ref ajaanc
 
 On Windows, pre-built versions of the debug versions of the static and dynamic libraries are not installed.
 These can be built using the provided Visual Studio project files.
@@ -277,12 +279,10 @@ The \ref ajantv2 source code is provided, and the libraries can be built with de
 @note	The \ref ajantv2, \ref ajabase and \ref ajaanc included in the SDK are built to link with the latest C++11 standard library.
 		If your application must use the older \c stdc++ standard libraries, you must rebuild them to reference the stdc++ standard library:
 		\code{.sh}
-		$ xcrun xcodebuild -project ajalibraries/ajantv2/build/ajantv2.xcodeproj  -target libajantv2  -configuration Debug  CLANG_CXX_LIBRARY=libstdc++  clean build
-		$ xcrun xcodebuild -project ajalibraries/ajabase/build/ajabase.xcodeproj  -target ajabase     -configuration Debug  CLANG_CXX_LIBRARY=libstdc++  clean build
-		$ xcrun xcodebuild -project ajalibraries/ajaanc/build/ajaanc.xcodeproj    -target staticlib   -configuration Debug  CLANG_CXX_LIBRARY=libstdc++  clean build
+		$ xcrun xcodebuild -workspace ntv2.xcworkspace  -scheme 'All - libs and demos'  -configuration Debug  CLANG_CXX_LIBRARY=libstdc++  clean build
 		\endcode
-		If you use the \ref ajacc, AJA supplies a stdc++-compatible version of this library inside the \c lib/libstdc++ folder.
-		Swap them with their counterparts in the \c lib folder.
+		If you use the \ref ajacc, AJA supplies a stdc++-compatible version of this library inside the <b>lib/libstdc++</b> folder.
+		Swap them with their counterparts in the <b>lib</b> folder.
 
 
 @subsection		gs-winsdkbuild	Building on Windows
@@ -312,8 +312,6 @@ To get started, look for the <b>build</b> folder in the SDK:
 -	<b>ntv2sdkPPP_XX.YY.ZZ.nn</b> — The extracted SDK folder.
 	-	<b>build</b> — This folder contains a complete <b>qmake</b> build structure that builds the NTV2 libraries and demo applications.
 		-	<b>_ntv2demos.pro</b> — This is the “solution file” or “project file” that builds everything — the libraries and the demonstration applications.
-		-	<b>ajaanc</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajaanc.
-		-	<b>ajabase</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajabase.
 		-	<b>ajacc</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to link with the \ref ajacc.
 		-	<b>ajantv2</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajantv2.
 		-	<b>config.pri</b> — This is the starting point for all the <b>qmake</b> magic used in all the <b>.pro</b> files. It defines common locations like the <b>bin</b> and <b>lib</b> directories.
@@ -376,8 +374,8 @@ Many OEM developers choose to create their own NTV2-based Xcode projects “from
 -	Add the following header search paths:
 	-	\c sdkdir/ajalibraries/ajantv2/includes
 	-	\c sdkdir/ajalibraries/ajantv2/src/mac
-	-	\c sdkdir/ajalibraries/ajabase (only if the \ref ajabase is needed)
-	-	\c sdkdir/ajalibraries/ajaanc (only if the \ref ajaanc is needed)
+	-	\c sdkdir/ajalibraries/ajabase
+	-	\c sdkdir/ajalibraries/ajaanc
 	-	\c sdkdir/ajalibraries/ajacc (only if the \ref ajacc is needed)
 -	It is not necessary to always search “user” header paths.
 -	Use inch marks (i.e. "), and not angle brackets (i.e. <>) when quoting AJA header file names in \c #include statements.
@@ -385,8 +383,6 @@ Many OEM developers choose to create their own NTV2-based Xcode projects “from
 	-	\c sdkdir/lib
 -	Add the following to the “Other Linker Flags” setting:
 	-	\c -lajantv2 (Release) or <b>-lajantv2d</b> (Debug)
-	-	\c -lajabase (Release) or <b>-lajabased</b> (Debug), if needed
-	-	\c -lajaanc, if the \ref ajaanc is needed
 	-	\c -lajacc, if the \ref ajacc is needed
 
 @warning	The libraries shipped with the SDK for MacOS are \c x86_64 (64-bit) only.
@@ -415,12 +411,13 @@ Many OEM developers choose to create their own solution and project files “fro
 -	Add the following header search paths:
 	-	\c sdkdir\\ajalibraries\\ajantv2\\includes
 	-	\c sdkdir\\ajalibraries\\ajantv2\\src\\win
-	-	\c sdkdir\\ajalibraries\\ajabase (if \ref ajabase needed)
+	-	\c sdkdir\\ajalibraries\\ajabase
 	-	\c sdkdir\\ajalibraries\\ajacc (if \ref ajacc needed)
-	-	\c sdkdir\\ajalibraries\\ajaanc (if \ref ajaanc needed)
+	-	\c sdkdir\\ajalibraries\\ajaanc
 -	The preprocessor should always search “user” header paths.
 -	Add the following library search paths:
-	-	\c sdkdir\\bin
+	-	For DLLs, \c sdkdir\\bin
+	-	For LIBs, \c sdkdir\\lib
 -	Add the appropriate SDK <b>.vcproj</b> file(s) to your solution as needed, then make your build target(s) dependent upon them. This will configure the linker properly.
 -	It’s important to link with the correct runtime libraries. When using AJA’s static libraries, link with Multi-threaded \c /MT or Multi-threaded debug \c /Mtd
 	runtime libraries. When using AJA’s dynamic libraries, link with Multi-threaded-DLL \c /MD or Multi-threaded DLL debug \c /MDd runtime libraries.

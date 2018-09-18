@@ -4,14 +4,14 @@
 	@copyright	(C) 2010-2018 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
 **/
 #include "ntv2bitfile.h"
+#include "ntv2card.h"
+#include "ntv2utils.h"
 #include <iostream>
-#include "ntv2status.h"
 #include <sys/stat.h>
 #include <assert.h>
 #if defined (AJALinux) || defined (AJAMac)
 	#include <arpa/inet.h>
 #endif
-#include "ntv2utils.h"
 #include <map>
 
 using namespace std;

@@ -33,7 +33,7 @@ NTV2VideoFormat CorvidServices::GetSelectedInputVideoFormat(
 	{
 		inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
 		if (inputColorSpace)
-			*inputColorSpace = mSDIInput1ColorSpace;
+			*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
 	}
 	inputFormat = GetTransportCompatibleFormat(inputFormat, fbVideoFormat);
 	

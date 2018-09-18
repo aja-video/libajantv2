@@ -7,10 +7,7 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
 #include "ntv2debug.h"
-#if defined(AJALinux)
-#include <string.h>  // For memset
-#include <stdint.h>
-#endif
+#include "ajabase/common/common.h"
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
@@ -81,6 +78,8 @@ using namespace std;
 
 static const string	gChlClasses[8]	=	{	kRegClass_Channel1,	kRegClass_Channel2,	kRegClass_Channel3,	kRegClass_Channel4,
 											kRegClass_Channel5,	kRegClass_Channel6,	kRegClass_Channel7,	kRegClass_Channel8	};
+static const string sSpace(" ");
+static const string sNull;
 
 //	@todo	Need to handle multi-register sparse bits.
 //			Search for MULTIREG_SPARSE_BITS -- it's where we need to improve how we present related information that's stored in more than one register.
@@ -164,40 +163,16 @@ public:
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel5);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel6);
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel7);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel8);
 
-		//	Anc Ins/Ext
-		SetupAncInsExt();
-		
-		//	Xpt Select
-		SetupXptSelect();
-		
-		//	DMA
-		SetupDMARegs();
-		
-		//	Timecode
-		SetupTimecodeRegs();
-		
-		//	Audio
-		SetupAudioRegs();
-		
-		//	VidProc/Mixer/Keyer
-		DefineRegister	(kRegVidProc1Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Channel2);
-		DefineRegister	(kRegVidProc2Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel3,	kRegClass_Channel4);
-		DefineRegister	(kRegVidProc3Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel5,	kRegClass_Channel6);
-		DefineRegister	(kRegVidProc4Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel7,	kRegClass_Channel8);
-		DefineRegister	(kRegSplitControl,		"",	mSplitControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
-		DefineRegister	(kRegFlatMatteValue,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
-		DefineRegister	(kRegMixer1Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
-		DefineRegister	(kRegMixer2Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel2,	kRegClass_NULL);
-		DefineRegister	(kRegMixer3Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel3,	kRegClass_NULL);
-		DefineRegister	(kRegMixer4Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel4,	kRegClass_NULL);
-
-		//	HDMI
-		SetupHDMIRegs();
-
-		SetupSDIError();
-		
-		//	Virtuals
-		SetupVRegs();
+		SetupAncInsExt();		//	Anc Ins/Ext
+		SetupXptSelect();		//	Xpt Select
+		SetupDMARegs();			//	DMA
+		SetupTimecodeRegs();	//	Timecode
+		SetupAudioRegs();		//	Audio
+		SetupMixerKeyerRegs();	//	Mixer/Keyer
+		SetupHDMIRegs();		//	HDMI
+		SetupSDIErrorRegs();	//	SDIError
+		SetupCSCRegs();			//	CSCs
+		SetupVRegs();			//	Virtuals
 		
 		//Print (cout);	//	For debugging
 	}	//	constructor
@@ -656,8 +631,8 @@ private:
 		DefineRegister (0x1d60,	"reg_hdmiout4_i2ccontrol",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
 		DefineRegister (0x1d61,	"reg_hdmiout4_i2cedid",					mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
 	}
-	
-	void SetupSDIError(void)
+
+	void SetupSDIErrorRegs(void)
 	{
 		static const ULWord	baseNum[]	=	{kRegRXSDI1Status,	kRegRXSDI2Status,	kRegRXSDI3Status,	kRegRXSDI4Status,	kRegRXSDI5Status,	kRegRXSDI6Status,	kRegRXSDI7Status,	kRegRXSDI8Status};
 		static const string	suffixes []	=	{"Status",	"CRCErrorCount",	"FrameCountLow",	"FrameCountHigh",	"FrameRefCountLow",	"FrameRefCountHigh"};
@@ -678,8 +653,73 @@ private:
 			}
 		DefineRegister (kRegRXSDIFreeRunningClockLow, "kRegRXSDIFreeRunningClockLow", mDefaultRegDecoder, READONLY, kRegClass_SDIError, kRegClass_NULL, kRegClass_NULL);
 		DefineRegister (kRegRXSDIFreeRunningClockHigh, "kRegRXSDIFreeRunningClockHigh", mDefaultRegDecoder, READONLY, kRegClass_SDIError, kRegClass_NULL, kRegClass_NULL);
-	}	//	SetupSDIError
-	
+	}	//	SetupSDIErrorRegs
+
+	void SetupCSCRegs(void)
+	{
+		static const string	sChan[8] = {kRegClass_Channel1, kRegClass_Channel2, kRegClass_Channel3, kRegClass_Channel4, kRegClass_Channel5, kRegClass_Channel6, kRegClass_Channel7, kRegClass_Channel8};
+		for (unsigned num(0);  num < 8;  num++)
+		{
+			ostringstream ossRegName;  ossRegName << "kRegEnhancedCSC" << (num+1);
+			const string & chanClass (sChan[num]);						const string rootName    (ossRegName.str());
+			const string modeName    (rootName + "Mode");				const string inOff01Name (rootName + "InOffset0_1");			const string inOff2Name  (rootName + "InOffset2");
+			const string coeffA0Name (rootName + "CoeffA0");			const string coeffA1Name (rootName + "CoeffA1");				const string coeffA2Name (rootName + "CoeffA2");
+			const string coeffB0Name (rootName + "CoeffB0");			const string coeffB1Name (rootName + "CoeffB1");				const string coeffB2Name (rootName + "CoeffB2");
+			const string coeffC0Name (rootName + "CoeffC0");			const string coeffC1Name (rootName + "CoeffC1");				const string coeffC2Name (rootName + "CoeffC2");
+			const string outOffABName(rootName + "OutOffsetA_B");		const string outOffCName (rootName + "OutOffsetC");
+			const string keyModeName (rootName + "KeyMode");			const string keyClipOffName (rootName + "KeyClipOffset");		const string keyGainName (rootName + "KeyGain");
+			DefineRegister (64*num + kRegEnhancedCSC1Mode,			modeName,			mEnhCSCModeDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1InOffset0_1,	inOff01Name,		mEnhCSCOffsetDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1InOffset2,		inOff2Name,			mEnhCSCOffsetDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffA0,		coeffA0Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffA1,		coeffA1Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffA2,		coeffA2Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffB0,		coeffB0Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffB1,		coeffB1Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffB2,		coeffB2Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffC0,		coeffC0Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffC1,		coeffC1Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffC2,		coeffC2Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1OutOffsetA_B,	outOffABName,		mEnhCSCOffsetDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1OutOffsetC,	outOffCName,		mEnhCSCOffsetDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1KeyMode,		keyModeName,		mEnhCSCKeyModeDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1KeyClipOffset,	keyClipOffName,		mEnhCSCOffsetDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1KeyGain,		keyGainName,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+		}
+		static const NTV2RegisterNumber	sECSCRegs[8][5]	=	{	{	kRegCSCoefficients1_2,	kRegCSCoefficients3_4,	kRegCSCoefficients5_6,	kRegCSCoefficients7_8,	kRegCSCoefficients9_10	},
+																{	kRegCS2Coefficients1_2,	kRegCS2Coefficients3_4,	kRegCS2Coefficients5_6,	kRegCS2Coefficients7_8,	kRegCS2Coefficients9_10	},
+																{	kRegCS3Coefficients1_2,	kRegCS3Coefficients3_4,	kRegCS3Coefficients5_6,	kRegCS3Coefficients7_8,	kRegCS3Coefficients9_10	},
+																{	kRegCS4Coefficients1_2,	kRegCS4Coefficients3_4,	kRegCS4Coefficients5_6,	kRegCS4Coefficients7_8,	kRegCS4Coefficients9_10	},
+																{	kRegCS5Coefficients1_2,	kRegCS5Coefficients3_4,	kRegCS5Coefficients5_6,	kRegCS5Coefficients7_8,	kRegCS5Coefficients9_10	},
+																{	kRegCS6Coefficients1_2,	kRegCS6Coefficients3_4,	kRegCS6Coefficients5_6,	kRegCS6Coefficients7_8,	kRegCS6Coefficients9_10	},
+																{	kRegCS7Coefficients1_2,	kRegCS7Coefficients3_4,	kRegCS7Coefficients5_6,	kRegCS7Coefficients7_8,	kRegCS7Coefficients9_10	},
+																{	kRegCS8Coefficients1_2,	kRegCS8Coefficients3_4,	kRegCS8Coefficients5_6,	kRegCS8Coefficients7_8,	kRegCS8Coefficients9_10	}	};
+		for (unsigned chan(0);  chan < 8;  chan++)
+		{
+			const string & chanClass (sChan[chan]);
+			for (unsigned num(0);  num < 5;  num++)
+				DefineRegister (sECSCRegs[chan][num],		"",		mDefaultRegDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+		}
+	}	//	SetupCSCRegs
+
+	void SetupMixerKeyerRegs(void)
+	{
+		//	VidProc/Mixer/Keyer
+		DefineRegister	(kRegVidProc1Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Channel2);
+		DefineRegister	(kRegVidProc2Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel3,	kRegClass_Channel4);
+		DefineRegister	(kRegVidProc3Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel5,	kRegClass_Channel6);
+		DefineRegister	(kRegVidProc4Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel7,	kRegClass_Channel8);
+		DefineRegister	(kRegSplitControl,		"",	mSplitControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
+		DefineRegister	(kRegFlatMatteValue,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Color);
+		DefineRegister	(kRegFlatMatte2Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Color);
+		DefineRegister	(kRegFlatMatte3Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Color);
+		DefineRegister	(kRegFlatMatte4Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Color);
+		DefineRegister	(kRegMixer1Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
+		DefineRegister	(kRegMixer2Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel2,	kRegClass_NULL);
+		DefineRegister	(kRegMixer3Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel3,	kRegClass_NULL);
+		DefineRegister	(kRegMixer4Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel4,	kRegClass_NULL);
+	}
+
 	void SetupVRegs(void)
 	{
 		DefineRegName	(kVRegLinuxDriverVersion,				"kVRegLinuxDriverVersion");
@@ -1135,24 +1175,35 @@ public:
 		return result;
 	}
 	
+
 	NTV2RegNumSet	GetRegistersForDevice (const NTV2DeviceID inDeviceID, const bool inIncludeVirtuals) const
 	{
+		static const string	chanClasses[] = {kRegClass_Channel1, kRegClass_Channel2, kRegClass_Channel3, kRegClass_Channel4, kRegClass_Channel5, kRegClass_Channel6, kRegClass_Channel7, kRegClass_Channel8};
 		NTV2RegNumSet		result;
-		const uint32_t		maxRegNum	(::NTV2DeviceGetMaxRegisterNumber (inDeviceID));
+		const uint32_t		maxRegNum	(::NTV2DeviceGetMaxRegisterNumber(inDeviceID));
+
 		for (uint32_t regNum (0);  regNum <= maxRegNum;  regNum++)
-			result.insert (regNum);
-		if (::NTV2DeviceCanDoCustomAnc (inDeviceID))
+			result.insert(regNum);
+
+		if (::NTV2DeviceCanDoCustomAnc(inDeviceID))
 		{
-			const NTV2RegNumSet	ancRegs	(GetRegistersForClass (kRegClass_Anc));
-			for (NTV2RegNumSetConstIter it (ancRegs.begin());  it != ancRegs.end();  ++it)
-				result.insert (*it);
+			const NTV2RegNumSet	ancRegs			(GetRegistersForClass(kRegClass_Anc));
+			const UWord			numFrameStores	(::NTV2DeviceGetNumFrameStores(inDeviceID));
+			NTV2RegNumSet		allChanRegs;	//	For just those channels it supports
+			for (UWord num(0);  num < numFrameStores;  num++)
+			{
+				const NTV2RegNumSet chRegs (GetRegistersForClass(chanClasses[num]));
+				allChanRegs.insert(chRegs.begin(), chRegs.end());
+			}
+			std::set_intersection (ancRegs.begin(), ancRegs.end(),  allChanRegs.begin(), allChanRegs.end(),  std::inserter(result, result.begin()));
 		}
-		if (::NTV2DeviceCanDoSDIErrorChecks (inDeviceID))
+
+		if (::NTV2DeviceCanDoSDIErrorChecks(inDeviceID))
 		{
-			const NTV2RegNumSet	ancRegs	(GetRegistersForClass (kRegClass_SDIError));
-			for (NTV2RegNumSetConstIter it (ancRegs.begin());  it != ancRegs.end();  ++it)
-				result.insert (*it);
+			const NTV2RegNumSet	sdiErrRegs	(GetRegistersForClass(kRegClass_SDIError));
+			result.insert(sdiErrRegs.begin(), sdiErrRegs.end());
 		}
+
 		if (::NTV2DeviceCanDoAudioMixer(inDeviceID))
 		{
 			for (ULWord regNum(kRegAudioMixerInputSelects);  regNum <= kRegAudioMixerAux2GainCh2;  regNum++)
@@ -1160,17 +1211,25 @@ public:
 			for (ULWord regNum(kRegAudioMixerAux1InputLevels);  regNum <= kRegAudioMixerMixedChannelOutputLevels; regNum++)
 				result.insert(regNum);
 		}
+
 		if (::NTV2DeviceHasXilinxDMA(inDeviceID))
 		{
 		}
-		if (inDeviceID == DEVICE_ID_IO4KPLUS)
+
+		if (::NTV2DeviceCanDoEnhancedCSC(inDeviceID))
 		{
-			for (ULWord regNum = 0x1d00; regNum <= 0x1d1f; regNum++)
-				result.insert(regNum);
-			for (ULWord regNum = 0x1d40; regNum <= 0x1d5f; regNum++)
-				result.insert(regNum);
+			const NTV2RegNumSet	ecscRegs	(GetRegistersForClass(kRegClass_Color));
+			const UWord			numCSCs		(::NTV2DeviceGetNumCSCs(inDeviceID));
+			NTV2RegNumSet		allChanRegs;	//	For just those CSCs it supports
+			for (UWord num(0);  num < numCSCs;  num++)
+			{
+				const NTV2RegNumSet chRegs (GetRegistersForClass(chanClasses[num]));
+				allChanRegs.insert(chRegs.begin(), chRegs.end());
+			}
+			std::set_intersection (ecscRegs.begin(), ecscRegs.end(),  allChanRegs.begin(), allChanRegs.end(),  std::inserter(result, result.begin()));
 		}
-		if (inDeviceID == DEVICE_ID_KONAHDMI)
+
+		if (::NTV2DeviceGetNumHDMIVideoInputs(inDeviceID) > 1)	//	KonaHDMI
 		{
 			for (ULWord regNum = 0x1d00; regNum <= 0x1d1f; regNum++)
 				result.insert(regNum);
@@ -1181,14 +1240,22 @@ public:
 			for (ULWord regNum = 0x3000; regNum <= 0x301f; regNum++)
 				result.insert(regNum);
 		}
+		else if (NTV2DeviceGetHDMIVersion(inDeviceID) > 3)		//	Io4KPlus, IoIP2022, IoIP2110, Kona5, KonaHDMI
+		{	//	v4 HDMI: Io4K+, IoIP2022, IoIP2110, Kona5, KonaHDMI...
+			for (ULWord regNum = 0x1d00; regNum <= 0x1d1f; regNum++)
+				result.insert(regNum);
+			for (ULWord regNum = 0x1d40; regNum <= 0x1d5f; regNum++)
+				result.insert(regNum);
+		}
+
 		if (inIncludeVirtuals)
 		{
-			const NTV2RegNumSet	vRegs	(GetRegistersForClass (kRegClass_Virtual));
-			for (NTV2RegNumSetConstIter it (vRegs.begin());  it != vRegs.end();  ++it)
-				result.insert (*it);
+			const NTV2RegNumSet	vRegs	(GetRegistersForClass(kRegClass_Virtual));
+			result.insert(vRegs.begin(), vRegs.end());
 		}
 		return result;
 	}
+
 	
 	NTV2RegNumSet	GetRegistersWithName (const string & inName, const int inMatchStyle = EXACTMATCH) const
 	{
@@ -2546,7 +2613,7 @@ private:
 		}
 		virtual	~DecodeSplitControl()	{}
 	}	mSplitControlRegDecoder;
-	
+
 	struct DecodeFlatMatteValue : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -2562,7 +2629,153 @@ private:
 		}
 		virtual	~DecodeFlatMatteValue()	{}
 	}	mFlatMatteValueRegDecoder;
-	
+
+	struct DecodeEnhancedCSCMode : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+			static const string	sFiltSel[]  = {"Full", "Simple", "None", "?"};
+			static const string	sEdgeCtrl[] = {"black", "extended pixels"};
+			static const string	sPixFmts[]  = {"RGB 4:4:4", "YCbCr 4:4:4", "YCbCr 4:2:2", "?"};
+			const uint32_t	filterSelect	((inRegValue >> 12) & 0x3);
+			const uint32_t	edgeControl		((inRegValue >> 8) & 0x1);
+			const uint32_t	outPixFmt		((inRegValue >> 4) & 0x3);
+			const uint32_t	inpPixFmt		(inRegValue & 0x3);
+			ostringstream	oss;
+			oss	<< "Filter select: "		<< sFiltSel[filterSelect]					<< endl
+				<< "Filter edge control: "	<< "Filter to " << sEdgeCtrl[edgeControl]	<< endl
+				<< "Output pixel format: "	<< sPixFmts[outPixFmt]						<< endl
+				<< "Input pixel format: "	<< sPixFmts[inpPixFmt];
+			return oss.str();
+		}
+		virtual	~DecodeEnhancedCSCMode()	{}
+	}	mEnhCSCModeDecoder;
+
+	struct DecodeEnhancedCSCOffset : public Decoder
+	{
+		static string U10Dot6ToFloat (const uint32_t inOffset)
+		{
+			double result (double((inOffset >> 6) & 0x3FF));
+			result += double(inOffset & 0x3F) / 64.0;
+			ostringstream	oss;  oss << fDEC(result,12,5);  string resultStr(oss.str());
+			return aja::replace (resultStr, sSpace, sNull);
+		}
+		static string U12Dot4ToFloat (const uint32_t inOffset)
+		{
+			double result (double((inOffset >> 4) & 0xFFF));
+			result += double(inOffset & 0xF) / 16.0;
+			ostringstream	oss;  oss << fDEC(result,12,4);  string resultStr(oss.str());
+			return aja::replace (resultStr, sSpace, sNull);
+		}
+		static string S13Dot2ToFloat (const uint32_t inOffset)
+		{
+			double result (double((inOffset >> 2) & 0x1FFF));
+			result += double(inOffset & 0x3) / 4.0;
+			if (inOffset & BIT(15))
+				result = -result;
+			ostringstream	oss;  oss << fDEC(result,12,2);  string resultStr(oss.str());
+			return aja::replace (resultStr, sSpace, sNull);
+		}
+		static string S11Dot4ToFloat (const uint32_t inOffset)
+		{
+			double result (double((inOffset >> 4) & 0x7FF));
+			result += double(inOffset & 0xF) / 16.0;
+			if (inOffset & BIT(15))
+				result = -result;
+			ostringstream	oss;  oss << fDEC(result,12,4);  string resultStr(oss.str());
+			return aja::replace (resultStr, sSpace, sNull);
+		}
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;
+			const uint32_t	regNum (inRegNum & 0x1F);
+			const uint32_t	lo (inRegValue & 0x0000FFFF);
+			const uint32_t	hi (inRegValue & 0xFFFF0000);
+			ostringstream	oss;
+			switch (regNum)
+			{
+				case 1:		oss << "Component 0 input offset: "		<< U12Dot4ToFloat(lo)	<< " (12-bit), "	<< U10Dot6ToFloat(lo)	<< " (10-bit)"	<< endl
+								<< "Component 1 input offset: "		<< U12Dot4ToFloat(hi)	<< " (12-bit), "	<< U10Dot6ToFloat(hi)	<< " (10-bit)";
+							break;
+				case 2:		oss	<< "Component 2 input offset: "		<< U12Dot4ToFloat(lo)	<< " (12-bit), "	<< U10Dot6ToFloat(lo)	<< " (10-bit)";
+							break;
+				case 12:	oss	<< "Component A output offset: "	<< U12Dot4ToFloat(lo)	<< " (12-bit), "	<< U10Dot6ToFloat(lo)	<< " (10-bit)"	<< endl
+								<< "Component B output offset: "	<< U12Dot4ToFloat(hi)	<< " (12-bit), "	<< U10Dot6ToFloat(hi)	<< " (10-bit)";
+							break;
+				case 13:	oss	<< "Component C output offset: "	<< U12Dot4ToFloat(lo)	<< " (12-bit), "	<< U10Dot6ToFloat(lo)	<< " (10-bit)";
+							break;
+				case 15:	oss	<< "Key input offset: "				<< S13Dot2ToFloat(lo)	<< " (12-bit), "	<< S11Dot4ToFloat(lo)	<< " (10-bit)"	<< endl
+								<< "Key output offset: "			<< U12Dot4ToFloat(hi)	<< " (12-bit), "	<< U10Dot6ToFloat(hi)	<< " (10-bit)";
+							break;
+				default:	break;
+			}
+			return oss.str();
+		}
+		virtual	~DecodeEnhancedCSCOffset()	{}
+	}	mEnhCSCOffsetDecoder;
+
+	struct DecodeEnhancedCSCKeyMode : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+			static const string	sSrcSel[] = {"Key Input", "Video Y Input"};
+			static const string	sRange[]  = {"Full Range", "SMPTE Range"};
+			const uint32_t	keySrcSelect	(inRegValue & 0x1);
+			const uint32_t	keyOutRange		((inRegValue >> 4) & 0x1);
+			ostringstream	oss;
+			oss	<< "Key Source Select: "	<< sSrcSel[keySrcSelect]		<< endl
+				<< "Key Output Range: "		<< sRange[keyOutRange];
+			return oss.str();
+		}
+		virtual	~DecodeEnhancedCSCKeyMode()	{}
+	}	mEnhCSCKeyModeDecoder;
+
+	struct DecodeEnhancedCSCCoefficient : public Decoder
+	{
+		static string S2Dot15ToFloat (const uint32_t inCoefficient)
+		{
+			double result = (double((inCoefficient >> 15) & 0x3));
+			result += double(inCoefficient & 0x7FFF) / 32768.0;
+			if (inCoefficient & BIT(17))
+				result = -result;
+			ostringstream	oss;  oss << fDEC(result,12,10);  string resultStr(oss.str());
+			return aja::replace(resultStr, sSpace, sNull);
+		}
+		static string S12Dot12ToFloat (const uint32_t inCoefficient)
+		{
+			double result(double((inCoefficient >> 12) & 0xFFF));
+			result += double(inCoefficient & 0xFFF) / 4096.0;
+			if (inCoefficient & BIT(24))
+				result = -result;
+			ostringstream	oss;  oss << fDEC(result,12,6);  string resultStr(oss.str());
+			return aja::replace(resultStr, sSpace, sNull);
+		}
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;
+			uint32_t		regNum (inRegNum & 0x1F);
+			ostringstream	oss;
+			if (regNum > 2 && regNum < 12)
+			{
+				regNum -= 3;
+				static const string	sCoeffNames[] = {"A0", "A1", "A2", "B0", "B1", "B2", "C0", "C1", "C2"};
+				const uint32_t	coeff	((inRegValue >> 9) & 0x0003FFFF);
+				oss	<< sCoeffNames[regNum] << " coefficient: "	<< S2Dot15ToFloat(coeff) << " (" << xHEX0N(coeff,8) << ")";
+			}
+			else if (regNum == 16)
+			{
+				const uint32_t	gain	((inRegValue >> 4) & 0x01FFFFFF);
+				oss	<< "Key gain: "								<< S12Dot12ToFloat(gain) << " (" << HEX0N(gain,8) << ")";
+			}
+			return oss.str();
+		}
+		virtual	~DecodeEnhancedCSCCoefficient()	{}
+	}	mEnhCSCCoeffDecoder;
+
 	struct DecodeSDIErrorStatus : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const

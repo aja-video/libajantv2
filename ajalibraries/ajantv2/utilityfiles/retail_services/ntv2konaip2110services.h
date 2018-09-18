@@ -19,7 +19,8 @@ class KonaIP2110Services : public DeviceServices
 public:
 	KonaIP2110Services();
     ~KonaIP2110Services();
-	
+
+    virtual void Init();
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();
 	virtual void SetDeviceMiscRegisters ();
@@ -32,6 +33,8 @@ protected:
     TransmitAudioData2110   m2110TxAudioDataLast;
     ReceiveVideoData2110    m2110RxVideoDataLast;
     ReceiveAudioData2110    m2110RxAudioDataLast;
+
+    int32_t                mResetPLLCounter;
 
     NTV2VideoFormat         mFb1VideoFormatLast;
 };

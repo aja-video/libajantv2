@@ -1123,7 +1123,8 @@ typedef enum
 
 
 /**
-	@brief		Used for device selection/filtering.
+	@brief		These enum values are used for device selection/filtering.
+	@see		::NTV2GetSupportedDevices
 **/
 typedef enum _NTV2DeviceKinds
 {
@@ -1999,7 +2000,7 @@ typedef enum
     NTV2_RGBSelect,
     NTV2_Stereo3DSelect,
     NTV2_NUM_SDIInputFormats
-} NTV2SDIInputFormatSelect;
+} NTV2SDIInputFormatSelect;				// Deprecated
 
 
 typedef enum
@@ -2017,7 +2018,7 @@ typedef enum
 	NTV2_HDMI2Select,
     NTV2_HDMI3Select,
     NTV2_HDMI4Select,
-    NTV2_Auto,
+    NTV2_AutoAudioSelect,
     NTV2_MAX_NUM_InputAudioSelectEnums
 } NTV2InputAudioSelect;
 
@@ -2569,39 +2570,39 @@ typedef enum NTV2InputCrosspointID
     NTV2_XptMixer4FGKeyInput		= 0x63,
     NTV2_XptMixer4FGVidInput		= 0x64,
     NTV2_XptHDMIOutInput			= 0x65,
-    NTV2_XptHDMIOutQ1Input			= 0x66,
-    NTV2_XptHDMIOutQ2Input			= 0x67,
-    NTV2_XptHDMIOutQ3Input			= 0x68,
-    NTV2_XptHDMIOutQ4Input			= 0x69,
-    NTV2_Xpt4KDCQ1Input				= 0x6A,
-    NTV2_Xpt4KDCQ2Input				= 0x6B,
-    NTV2_Xpt4KDCQ3Input				= 0x6C,
-    NTV2_Xpt4KDCQ4Input				= 0x6D,
-    NTV2_Xpt425Mux1AInput			= 0x6E,
-    NTV2_Xpt425Mux1BInput			= 0x6F,
-    NTV2_Xpt425Mux2AInput			= 0x70,
-    NTV2_Xpt425Mux2BInput			= 0x71,
-    NTV2_Xpt425Mux3AInput			= 0x72,
-    NTV2_Xpt425Mux3BInput			= 0x73,
-    NTV2_Xpt425Mux4AInput			= 0x74,
-    NTV2_Xpt425Mux4BInput			= 0x75,
-    NTV2_XptAnalogOutInput			= 0x76,
-    NTV2_XptIICT2Input				= 0x77,	//	deprecate?
-    NTV2_XptAnalogOutCompositeOut	= 0x78,	//	deprecate?
-    NTV2_XptStereoLeftInput			= 0x79,	//	deprecate?
-    NTV2_XptStereoRightInput		= 0x7A,	//	deprecate?
-    NTV2_XptProAmpInput				= 0x7B,	//	deprecate?
-    NTV2_XptIICT1Input				= 0x7C,	//	deprecate?
-    NTV2_XptWaterMarker1Input		= 0x7D,	//	deprecate?
-    NTV2_XptWaterMarker2Input		= 0x7E,	//	deprecate?
-    NTV2_XptUpdateRegister			= 0x7F,	//	deprecate?
-    NTV2_XptConversionMod2Input		= 0x80,	//	deprecate?
-    NTV2_XptCompressionModInput		= 0x81,	//	deprecate?
-    NTV2_XptConversionModInput		= 0x82,	//	deprecate?
-    NTV2_XptCSC1KeyFromInput2		= 0x83,	//	deprecate?
-    NTV2_XptFrameSync2Input			= 0x84,	//	deprecate?
-    NTV2_XptFrameSync1Input			= 0x85,	//	deprecate?
-    NTV2_LAST_INPUT_CROSSPOINT		= 0x85,
+    NTV2_XptHDMIOutQ1Input			= NTV2_XptHDMIOutInput,
+    NTV2_XptHDMIOutQ2Input			= 0x66,
+    NTV2_XptHDMIOutQ3Input			= 0x67,
+    NTV2_XptHDMIOutQ4Input			= 0x68,
+    NTV2_Xpt4KDCQ1Input				= 0x69,
+    NTV2_Xpt4KDCQ2Input				= 0x6A,
+    NTV2_Xpt4KDCQ3Input				= 0x6B,
+    NTV2_Xpt4KDCQ4Input				= 0x6C,
+    NTV2_Xpt425Mux1AInput			= 0x6D,
+    NTV2_Xpt425Mux1BInput			= 0x6E,
+    NTV2_Xpt425Mux2AInput			= 0x6F,
+    NTV2_Xpt425Mux2BInput			= 0x70,
+    NTV2_Xpt425Mux3AInput			= 0x71,
+    NTV2_Xpt425Mux3BInput			= 0x72,
+    NTV2_Xpt425Mux4AInput			= 0x73,
+    NTV2_Xpt425Mux4BInput			= 0x74,
+    NTV2_XptAnalogOutInput			= 0x75,
+    NTV2_XptIICT2Input				= 0x76,	//	deprecate?
+    NTV2_XptAnalogOutCompositeOut	= 0x77,	//	deprecate?
+    NTV2_XptStereoLeftInput			= 0x78,	//	deprecate?
+    NTV2_XptStereoRightInput		= 0x79,	//	deprecate?
+    NTV2_XptProAmpInput				= 0x7A,	//	deprecate?
+    NTV2_XptIICT1Input				= 0x7B,	//	deprecate?
+    NTV2_XptWaterMarker1Input		= 0x7C,	//	deprecate?
+    NTV2_XptWaterMarker2Input		= 0x7D,	//	deprecate?
+    NTV2_XptUpdateRegister			= 0x7E,	//	deprecate?
+    NTV2_XptConversionMod2Input		= 0x7F,	//	deprecate?
+    NTV2_XptCompressionModInput		= 0x80,	//	deprecate?
+    NTV2_XptConversionModInput		= 0x81,	//	deprecate?
+    NTV2_XptCSC1KeyFromInput2		= 0x82,	//	deprecate?
+    NTV2_XptFrameSync2Input			= 0x83,	//	deprecate?
+    NTV2_XptFrameSync1Input			= 0x84,	//	deprecate?
+    NTV2_LAST_INPUT_CROSSPOINT		= 0x84,
     NTV2_INPUT_CROSSPOINT_INVALID	= 0xFFFFFFFF
 } NTV2InputCrosspointID, NTV2InputXptID;
 
@@ -3345,7 +3346,7 @@ typedef enum
     NTV2_INVALID_HDMI_PROTOCOL	= NTV2_MAX_NUM_HDMIProtocols
 } NTV2HDMIProtocol;
 
-#define	NTV2_IS_VALID_HDMI_PROTOCOL(__x__)	((__x__) < NTV2_MAX_NUM_LHIHDMIColorSpaces)
+#define	NTV2_IS_VALID_HDMI_PROTOCOL(__x__)	((__x__) >= NTV2_HDMIProtocolHDMI  &&  (__x__) < NTV2_MAX_NUM_HDMIProtocols)
 
 
 // Bit depth on HDMI interface

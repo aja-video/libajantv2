@@ -32,7 +32,7 @@ void Corvid44Services::SetDeviceXPointPlayback ()
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool						bSdiOutRGB			= mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb;
-	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	bool						b3GbOut				= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b2pi                = (b4K && m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);	// 2 pixed interleaved
 	bool						b2xQuadOut			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
 	int							bFb1Disable			= 0;						// Assume Channel 1 is NOT disabled by default
@@ -43,7 +43,7 @@ void Corvid44Services::SetDeviceXPointPlayback ()
 	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
 								bDSKOn				= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
-	NTV2ColorSpaceMode            inputColorSpace	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
+	NTV2ColorSpaceMode			inputColorSpace		= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	
@@ -65,7 +65,7 @@ void Corvid44Services::SetDeviceXPointPlayback ()
 	}
 	
 	// select square division or 2 pixel interleave in frame buffer
-	mCard->SetTsiFrameEnable(b2pi,NTV2_CHANNEL1);
+    AdjustFor4kQuadOrTpiOut();
 
 	// Figure out what our input format is based on what is selected 
 	GetSelectedInputVideoFormat(mFb1VideoFormat);
@@ -1102,7 +1102,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
-	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	bool						b3GbOut				= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr              = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
@@ -1153,40 +1153,16 @@ void Corvid44Services::SetDeviceXPointCapture ()
 		}
 	}
 
-	// SMPTE 425 (2pi)
-	ULWord vpida		= 0;
-	ULWord vpidb		= 0;
-	bool b2x2piIn		= false;
-	bool b4x2piInA		= false;
-	bool b4x2piInB		= false;
-		
-	mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
-	//debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
-	CNTV2VPID parser;
-	parser.SetVPID(vpida);
-	VPIDStandard std = parser.GetStandard();
-	b2x2piIn  = (std == VPIDStandard_2160_DualLink);
-	b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
-	b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
+	mVpidParser.SetVPID(mVpid1a);
+	VPIDStandard std = mVpidParser.GetStandard();
+	bool b2x2piIn  = (std == VPIDStandard_2160_DualLink);
+	bool b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
+	bool b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
 
 	bool b2piIn = (b2x2piIn || b4x2piInA || b4x2piInB);
 
-	// override inputColorSpace for SMTE425
-	if (b2piIn)
-	{
-		VPIDSampling sample = parser.GetSampling();
-		if (sample == VPIDSampling_YUV_422)
-		{
-			inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-		}
-		else
-		{
-			inputColorSpace = NTV2_ColorSpaceModeRgb;
-		}
-	}
-
 	// select square division or 2 pixel interleave in frame buffer
-	mCard->SetTsiFrameEnable(b2piIn, NTV2_CHANNEL1);
+    AdjustFor4kQuadOrTpiIn(inputFormat, b2piIn);
 	
 	// SDI In 1
 	bool bConvertBToA; 
@@ -1993,7 +1969,7 @@ void Corvid44Services::SetDeviceMiscRegisters ()
 							((bSdiOutRGB == true) ||
 							 (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 							 (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-							 (bFbLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
+							 (bFbLevelA == true && mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 							 (IsVideoFormatB(mFb1VideoFormat) == true)  );
 
 	bool b2wire4kOut = (mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
@@ -2001,9 +1977,9 @@ void Corvid44Services::SetDeviceMiscRegisters ()
 	
 	// all 3Gb transport out
 	// b3GbOut = (b1x3GbOut + !2wire) | (4k + rgb) | (4khfr + 3gb)
-	bool b3GbOut =	(b1x3GbOut == true && mDualStreamTransportType != NTV2_SDITransport_DualLink_1_5) ||
+	bool b3GbOut =	(b1x3GbOut == true && mSdiOutTransportType != NTV2_SDITransport_DualLink_1_5) ||
 							(b4K == true && bSdiOutRGB == true) ||
-							(b4kHfr == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
+							(b4kHfr == true && mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 							b2wire4kOut || b2wire4kIn;
 	
 	GeneralFrameFormat genFormat = GetGeneralFrameFormat(mFb1Format);
@@ -2013,30 +1989,22 @@ void Corvid44Services::SetDeviceMiscRegisters ()
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)
 	{
-		ULWord vpida = 0;
-		ULWord vpidb = 0;
-		mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
-
-		if (mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb))
+		mVpidParser.SetVPID(mVpid1a);
+		VPIDStandard std = mVpidParser.GetStandard();
+		switch (std)
 		{
-			CNTV2VPID parser;
-			parser.SetVPID(vpida);
-			VPIDStandard std = parser.GetStandard();
-			switch (std)
-			{
-			case VPIDStandard_2160_DualLink:
-				b3GbOut = true;
-				b4xIo = false;
-				b2pi  = true;
-				break;
-			case VPIDStandard_2160_QuadLink_3Ga:
-			case VPIDStandard_2160_QuadDualLink_3Gb:
-				b4xIo = true;
-				b2pi = true;
-				break;
-			default:
-				break;
-			}
+		case VPIDStandard_2160_DualLink:
+			b3GbOut = true;
+			b4xIo = false;
+			b2pi  = true;
+			break;
+		case VPIDStandard_2160_QuadLink_3Ga:
+		case VPIDStandard_2160_QuadDualLink_3Gb:
+			b4xIo = true;
+			b2pi = true;
+			break;
+		default:
+			break;
 		}
 
 		if (b2wire4kIn)

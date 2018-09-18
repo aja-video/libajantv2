@@ -37,7 +37,7 @@ void Kona4UfcServices::SetDeviceXPointPlayback ()
 		
 	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
-	bool b3GbOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
+	bool b3GbOut	= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
 	bool bEanbleConverter	= false;
 
     bool bFb1HdrRGB        = (mFb1Format == NTV2_FBF_48BIT_RGB) ? true : false;
@@ -303,8 +303,8 @@ void Kona4UfcServices::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if ( (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
-			  || (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
+	else if ( (mVirtualDigitalOutput2Select == NTV2_PrimaryOutputSelect)			// if our output is "Primary"
+			  || (   (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)	// or if "Secondary" AND Secondary == Primary and not SD format
 			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
@@ -327,7 +327,7 @@ void Kona4UfcServices::SetDeviceXPointPlayback ()
             mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
         }
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)			// Secondary
+	else if (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)			// Secondary
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptConversionModule);
 		mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
@@ -338,7 +338,7 @@ void Kona4UfcServices::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptSDIOut2Input, b3GbOut ? NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut1DS2);
 		mCard->Connect (NTV2_XptSDIOut2InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)				// Video+Key
+	else if (mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)				// Video+Key
 	{
 		if (bDSKOn)
 		{
@@ -644,7 +644,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
 	bool 						bFb1Compressed 		= IsFormatCompressed(mFb1Format);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
-	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	bool						b3GbOut				= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool						bEanbleConverter	= false;
 	int							bFb1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;		// Assume Channel 2 IS disabled by default
@@ -963,8 +963,8 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	
 	// SDI Out 2
 	if (b2FbLevelBHfr ||																// Dual Stream - p60b
-		mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
-		mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)						// Video + Key
+		mVirtualDigitalOutput2Select == NTV2_StereoOutputSelect ||					// Stereo 3D
+		mVirtualDigitalOutput2Select == NTV2_VideoPlusKeySelect)						// Video + Key
 	{
 		if (b3GbOut)
 		{
@@ -989,8 +989,8 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptDuallinkOut1DS2);						// 2 wires
 		}
 	}
-	else if ( (mVirtualDigitalOutput1Select == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
-		      || (   (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)		// or if "Secondary" AND Secondary == Primary and not SD format
+	else if ( (mVirtualDigitalOutput2Select == NTV2_PrimaryOutputSelect)				// if our output is "Primary"
+		      || (   (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)		// or if "Secondary" AND Secondary == Primary and not SD format
 			      && (mVirtualSecondaryFormatSelect == mFb1VideoFormat)
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
@@ -1003,7 +1003,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 			mCard->Connect (NTV2_XptSDIOut2Input, frameSync1YUV);
 		}
 	}
-	else if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)
+	else if (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync2YUV);
 	}
@@ -1078,7 +1078,7 @@ void Kona4UfcServices::SetDeviceMiscRegisters ()
 	mCard->GetFrameGeometry(primaryGeometry);
 	
 	// VPID
-	//bool					b3GbOut	= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+	//bool					b3GbOut	= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);
 	bool					bSdiOutRGB			= (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb);
 	//bool					bDualStreamOut		= (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
 												  (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||

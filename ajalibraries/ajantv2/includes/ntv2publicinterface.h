@@ -5189,7 +5189,7 @@ typedef enum
 	kRP188SourceLTCPort			= 0xFE		// used in ioHD
 } RP188SourceSelect;
 
-// note: this order is determined by NTV2TestPatternSegments in testpatterndata.h
+// note: this order mimics (somewhat) that of NTV2TestPatternSelect in "ntv2testpatterngen.h"
 typedef enum
 {
 	kTestPatternColorBar100,		// 100% Bars
@@ -5197,13 +5197,13 @@ typedef enum
 	kTestPatternRamp,				// Ramp
 	kTestPatternMultiburst,			// Mulitburst
 	kTestPatternLinesweep,			// Line Sweep
-	kTestPatternPathological,		// Pathogical
+	kTestPatternPathological,		// Pathological
 	kTestPatternFlatField,			// Flat Field (50%)
 	kTestPatternMultiPattern,		// a swath of everything
 	kTestPatternBlack,				// Black
 	kTestPatternBorder,				// Border
 	kTestPatternCustom				// Custom ("Load File...")
-	
+
 } TestPatternSelect;
 
 enum TestPatternFormat
@@ -5587,7 +5587,7 @@ typedef enum
 			#define	bBIN08(__x__)			"b"	<< BIN08(__x__)
 			#define	bBIN04(__x__)			"b"	<< BIN04(__x__)
 			#define	bBIN0N(__x__,__n__)		"b"	<< BIN0N(__x__,__n__)
-			#define	fDEC(__x__,__w__,__p__)	std::fixed << std::setw(__w__) << std::setprecision(__p__) << (__x__) << std::dec
+			#define	fDEC(__x__,__w__,__p__)	std::dec << std::fixed << std::setw(__w__) << std::setprecision(__p__) << (__x__)
 		#else
 			#define	NTV2_STRUCT_BEGIN(__struct_name__)		typedef struct __struct_name__ {
 			#define	NTV2_STRUCT_END(__struct_name__)		} __struct_name__;

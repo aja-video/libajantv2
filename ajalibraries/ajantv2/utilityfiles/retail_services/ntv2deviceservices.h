@@ -9,8 +9,7 @@
 
 #include "ntv2utils.h"
 #include "ntv2vpid.h"
-#include "ntv2vidproc.h"
-#include "ntv2vidprocmasks.h"
+#include "ntv2card.h"
 #include "ntv2config2022.h"
 #include "virtualregistermodel.h"
 
@@ -94,6 +93,7 @@ public:
 	virtual void SetDeviceMiscRegisters();
 	
 	virtual NTV2VideoFormat GetLockedInputVideoFormat();
+	virtual NTV2ColorSpaceMode GetSDIInputColorSpace(NTV2Channel inChannel, NTV2ColorSpaceMode inMode);
 	virtual NTV2VideoFormat GetSelectedInputVideoFormat(NTV2VideoFormat referenceFormat, NTV2ColorSpaceMode* inputColorSpace=NULL);
     virtual NTV2VideoFormat GetCorrespondingAFormat(NTV2VideoFormat bVideoFormat);
 	virtual void SetDeviceXPointPlaybackRaw();
@@ -186,6 +186,9 @@ public:
 	
 	uint32_t GetAudioDelayOffset(double frames);
 	NTV2AudioSystem GetHostAudioSystem();
+	void AdjustFor4kQuadOrTpiOut();
+	void AdjustFor4kQuadOrTpiIn(NTV2VideoFormat inputFormat, bool b2pi);
+	void Set4kTpiState(bool b2pi);
 
 	void SetAudioInputSelect(NTV2InputAudioSelect input);
     void AgentIsAlive();
@@ -198,6 +201,7 @@ public:
 	uint32_t				mADCStabilizeCount;	
 	HDMIOutColorSpaceMode	mHDMIOutColorSpaceModeStatus;	
 	uint32_t				mADCLockScanTestFormat;
+	CNTV2VPID 				mVpidParser;
 	
 	// virtual register
 	DefaultVideoOutMode		mDefaultVideoOutMode;
@@ -206,17 +210,19 @@ public:
 	uint32_t				mVirtualDebug1;
 	uint32_t				mEveryFrameTaskFilter;
 	uint32_t				mDefaultInput;
-	NTV2SDITransportType	mDualStreamTransportType;
+	NTV2SDITransportType	mSdiOutTransportType;
 	NTV24kTransportType		m4kTransportOutSelection;
 	NTV2DSKMode				mDSKMode;
 	int32_t					mStreamingAppPID;
 	uint32_t				mStreamingAppType;
 	NTV2OutputVideoSelect	mVirtualDigitalOutput1Select;
+	NTV2OutputVideoSelect	mVirtualDigitalOutput2Select;
 	NTV2OutputVideoSelect	mVirtualHDMIOutputSelect;
 	NTV2OutputVideoSelect	mVirtualAnalogOutputSelect;
 	NTV2LutType				mLUTType;
 	NTV2LutType				mLUT2Type;
 	NTV2InputVideoSelect	mVirtualInputSelect;
+	NTV2InputAudioSelect	mInputAudioSelect;
 	NTV2VideoFormat			mVirtualSecondaryFormatSelect;
 	bool					mIsoConvertEnable;
 	uint32_t				mDSKAudioMode;
@@ -229,6 +235,7 @@ public:
 	NTV2ColorSpaceType		mColorSpaceType;
 	NTV2ColorSpaceMode		mSDIOutput1ColorSpace;
 	NTV2RGBRangeMode		mSDIOutput1RGBRange;
+	
     rx2022Config            mRx2022Config1;
     rx2022Config            mRx2022Config2;
     tx2022Config            mTx2022Config3;
@@ -256,18 +263,20 @@ public:
 	NTV2FrameBufferFormat	mFb1Format;
 	NTV2FrameBufferFormat	mFb2Format;
 	NTV2Mode				mFb1Mode;
+	bool					mVpid1Valid;
+	ULWord					mVpid1a;
+	ULWord					mVpid1b;
+	bool					mVpid2Valid;
+	ULWord					mVpid2a;
+	ULWord					mVpid2b;
 
 	// calculated valule, selected by user
 	NTV2VideoFormat			mSelectedInputVideoFormat;
-	//NTV2SDIInputFormatSelect mSDIInputFormatSelect;
-	
 	NTV2ColorSpaceMode 		mSDIInput1ColorSpace;
 	NTV2ColorSpaceMode 		mSDIInput2ColorSpace;
 	NTV2RGBRangeMode		mSDIInput1RGBRange;
 	NTV2RGBRangeMode		mSDIInput2RGBRange;
-	NTV2Stereo3DMode		mSDIInput1Stereo3DMode;
 	NTV2RGBRangeMode		mFrameBuffer1RGBRange;
-	NTV2Stereo3DMode		mFrameBuffer1Stereo3DMode;
 	NTV2AnalogBlackLevel	mVirtualAnalogOutBlackLevel;
 	NTV2AnalogType			mVirtualAnalogOutputType;
 	NTV2AnalogBlackLevel	mVirtualAnalogInBlackLevel;

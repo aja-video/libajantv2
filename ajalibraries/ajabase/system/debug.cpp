@@ -44,6 +44,9 @@ AJADebug::~AJADebug()
 AJAStatus 
 AJADebug::Open(bool incrementRefCount)
 {
+	if (!sLock.IsValid())
+		return AJA_STATUS_INITIALIZE;
+
 	AJAAutoLock lock(&sLock);
 
 	// set the debug flag
@@ -144,6 +147,8 @@ AJADebug::Open(bool incrementRefCount)
             addDebugGroupToLabelVector(AJA_DebugUnit_PnP);
             addDebugGroupToLabelVector(AJA_DebugUnit_Persistence);
             addDebugGroupToLabelVector(AJA_DebugUnit_Avid);
+            addDebugGroupToLabelVector(AJA_DebugUnit_DriverInterface);
+            addDebugGroupToLabelVector(AJA_DebugUnit_AutoCirculate);
 
             for(int i=AJA_DebugUnit_FirstUnused;i<AJA_DebugUnit_Size;i++)
             {
@@ -321,6 +326,13 @@ AJADebug::IsActive(int32_t index)
 	}
 
     return true;
+}
+
+
+bool
+AJADebug::IsOpen(void)
+{
+	return spShare != NULL;
 }
 
 

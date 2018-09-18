@@ -1177,6 +1177,28 @@ bool CNTV2Config2110::GetPTPStatus(PTPStatus & ptpStatus)
     return true;
 }
 
+bool CNTV2Config2110::PLLReset()
+{
+    uint32_t val = 0;
+    mDevice.ReadRegister(SAREK_PLL + kRegPll_Config, val);
+
+    val |= PLL_CONFIG_RESET;
+    mDevice.WriteRegister(SAREK_PLL + kRegPll_Config, val);
+
+    // Wait just a bit
+    #if defined(AJAWindows) || defined(MSWindows)
+        ::Sleep (RESET_MILLISECONDS);
+    #else
+        usleep (RESET_MILLISECONDS * 1000);
+    #endif
+
+    val &= ~PLL_CONFIG_RESET;
+    mDevice.WriteRegister(SAREK_PLL + kRegPll_Config, val);
+
+
+    return true;
+}
+
 bool CNTV2Config2110::Set4KModeEnable(const bool enable)
 {
     if (!mDevice.IsMBSystemReady())
@@ -1712,7 +1734,7 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
         GenSDPAudioStream(sdp, sfp, stream, gmInfo);
     }
     
-    cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
+    //cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
 
     if (pushit)
         rv = PushSDP(filename,sdp);

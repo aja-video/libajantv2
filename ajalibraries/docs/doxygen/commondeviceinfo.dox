@@ -31,6 +31,12 @@
 	<hr size="50px">
 	@section	devicesignalinputsoutputs		Signal Inputs & Outputs
 
+	@par	Breakout Boxes and Cables
+
+	On some devices, certain signal connectors are accessible only through a breakout cable or breakout box.
+	-	To determine if the device can support a breakout box, call ::NTV2DeviceCanDoBreakoutBox.
+	-	To determine if a breakout box is connected, call CNTV2Card::GetBreakoutHardware.
+
 	@par	SDI Connectors
 
 	Most AJA devices have at least one SDI connector.
@@ -46,13 +52,14 @@
 		-	For example, the \ref io4kquad has four bi-directional SDI jacks plus an additional monitor (output-only) jack,
 			so for that device, ::NTV2DeviceGetNumVideoInputs returns 4 and ::NTV2DeviceGetNumVideoOutputs returns 5.
 
+	All SDI connectors on NTV2 devices can receive or transmit 1.5 Gbps signals, and almost all will handle 3Gbps.
+	-	To determine if its SDI spigots can handle 6Gbps or 12Gbps, call NTV2DeviceCanDo12GSDI.
+
 	@par	Analog Video Connectors
 
 	Some older AJA devices have analog video connectors (remember the old RCA component-level jacks?).
-	Board products require connecting a breakout cable or breakout box to the board to access these signals.
 	-	To determine the number of analog video inputs the device has, call ::NTV2DeviceGetNumAnalogVideoInputs.
 	-	To determine the number of analog video outputs the device has, call ::NTV2DeviceGetNumAnalogVideoOutputs.
-	-	To determine if the device can support a breakout box, call ::NTV2DeviceCanDoBreakoutBox.
 
 	@par	HDMI Connectors
 
@@ -83,6 +90,7 @@
 
 	Most AJA devices have a single RS-422 connector that can be used to control tape deck transports and for other purposes.
 	-	To determine the number of serial ports on a device, call ::NTV2DeviceGetNumSerialPorts.
+	-	To determine if the serial port is programmable (for baud rate, parity, stop bits, etc.), call ::NTV2DeviceCanDoProgrammableRS422.
 
 	@subsection	commonelectricalchars		Common Electrical Characteristics
 
@@ -142,8 +150,9 @@
 
 	@par		Data Transfer
 
-	Direct Memory Access (DMA) is the only supported method of moving data between host memory and the hardware. All NTV2 devices have at least one DMA engine.
-	(Programmed Input/Output, a.k.a. PIO is not supported in AJA devices.)
+	Direct Memory Access (DMA) is the only supported method of moving data between host memory
+	and the hardware. All NTV2 devices have at least one DMA engine.
+	(Programmed Input/Output, a.k.a. PIO is no longer supported.)
 	-	To determine the number of DMA engines for a device, call ::NTV2DeviceGetNumDMAEngines.
 
 	@par		Device Frame Buffer
@@ -155,22 +164,39 @@
 
 	@par		Frame Buffer Layout
 
-	The device’s SDRAM is partitioned into a number of equal-sized video frames. These video
-	frames are indexed using a zero-based index number. The first byte of the first frame
-	(frame zero) starts at the lowest SDRAM address, and subsequent frames are located at
-	higher addresses from there. Devices that can handle larger frame sizes (e.g., 2K, 4K,
-	and VANC modes) and/or RGB frame data will partition their RAM storage into half as many
-	frames when those modes and/or formats are in use. 4K and UHD frames require four times
-	the storage as non-quad frames.
+	The device’s SDRAM is partitioned into a number of equal-sized video <b>frames</b>. The video
+	<b>frame size</b> is always a multiple of 8MB — i.e. 8MB, 16MB or 32MB. On older devices, it’s
+	automatically set by the firmware based on ::NTV2VideoFormat, ::NTV2FrameBufferFormat and
+	::NTV2VANCMode. This legacy behavior is retained in newer devices, but can be overridden
+	programmatically.
+	-	To determine if the ::NTV2Framesize can be changed programmatically,
+		call ::NTV2DeviceSoftwareCanChangeFrameBufferSize.
+	-	To determine the SDRAM that the device has for storing video and audio data,
+		call ::NTV2DeviceGetActiveMemorySize.
+	-	To determine the current ::NTV2Framesize for the device,
+		call CNTV2Card::GetFrameBufferSize;
+	-	To change (override) the current ::NTV2Framesize for the device,
+		call CNTV2Card::SetFrameBufferSize.
 
 	@image	html	hwref-fig1-sdramfblayout.png
 
-	@warning	On multi-channel devices, changing a Frame Store’s frame buffer format and/or
-				video format that results in a 8MB/16MB frame size change (or vice-versa)
-				while another channel is ingesting or playing video using AutoCirculate will
-				result in at least one bad frame of video in the stream as the device’s memory
+	Video frames are indexed using a zero-based index number. The first byte of the first frame
+	(frame zero) starts at the lowest SDRAM address, and subsequent frames are located at higher
+	addresses from there, as a byte-multiple of the current ::NTV2Framesize. Obviously, larger
+	rasters (e.g. ::NTV2_FG_1920x1080 versus ::NTV2_FG_720x486) and/or deeper frame buffer formats
+	(e.g. ::NTV2_FBF_48BIT_RGB versus ::NTV2_FBF_8BIT_YCBCR) will necessarily result in half as many
+	available frame buffers … while 4K/UHD frames will result in a fourth as many frames.
+	-	To determine the minimum number of 8MB chunks to safely accommodate a given ::NTV2FrameGeometry
+		and ::NTV2FrameBufferFormat, call ::Get8MBFrameSizeFactor.
+
+	@warning	On multi-channel devices, changing a Frame Store’s ::NTV2FrameBufferFormat and/or
+				::NTV2VideoFormat (and/or ::NTV2VANCMode) that results in a 8MB/16MB frame size
+				change (or vice-versa) while another channel is ingesting or playing video will
+				result in at least one bad frame of video in the stream once the device’s memory
 				layout is changed. It can even cause the “start” and “end” frames being
-				AutoCirculated to refer to frames that no longer exist on the device.
+				AutoCirculated to refer to frames that no longer exist on the device. To prevent
+				this, call CNTV2Card::SetFrameBufferSize to pre-configure the device to use the
+				largest expected ::NTV2Framesize when your application starts.
 
 	Video data in the device frame buffer is always stored full-frame. Interlaced video is
 	always stored in the frame buffer with the first line of Field 1 (F1L1) at the top of the
@@ -253,7 +279,8 @@
 	Some AJA devices have only one Frame Store, so that device is limited to Capturing or Playing
 	one single stream of video at a time.
 
-	Some older AJA devices with two Frame Stores dedicate the first to Capture and the other to Playout.
+	Some older AJA devices with two Frame Stores dedicate the first to ::NTV2_MODE_CAPTURE and the other
+	to ::NTV2_MODE_DISPLAY.
 
 	@note	In NTV2 parlance, the terms <b>Channel</b> and <b>Frame Store</b> are often used interchangeably.
 
@@ -262,8 +289,8 @@
 
 	In the SDK, Frame Stores are identified by an ::NTV2Channel enumeration and sometimes by a zero-based
 	unsigned integer value, where zero corresponds to ::NTV2_CHANNEL1.
-	Call ::NTV2DeviceGetNumFrameStores to determine the number of Frame Stores on a given device.
-	This will tell you how many Channels are available for simultaneous Capture and/or Playout streams.
+	-	Call ::NTV2DeviceGetNumFrameStores to determine the number of Frame Stores on a given device.
+		This will tell you how many Channels are available for simultaneous Capture and/or Playout streams.
 
 
 	@subsection	independentmode		Multi-Format / “Independent” Mode
@@ -294,7 +321,7 @@
 			video formats are multi-format compatible.
 			Call ::IsMultiFormatCompatible(const NTV2FrameRate, const NTV2FrameRate) to see if two frame
 			rates are multi-format compatible.
-			See \ref deviceclockingandsync for more details.
+			See \ref deviceclockingandsync for more details (below).
 
 
 	@subsection	vidop-fbaccess		Frame Buffer Access
@@ -370,6 +397,9 @@
 	internally revert to Free-Run if the reference signal disappears or is incompatible with
 	the output video format.
 
+	@note	AJA recommends setting the device reference to ::NTV2_REFERENCE_FREERUN when
+			there is no signal at the external reference connector.
+
 
 	@subsection	fieldframeinterrupts	Field/Frame Interrupts
 
@@ -389,11 +419,41 @@
 	line of the frame (i.e. the “bottom field” or “field1”). Each field starts with a video sync —
 	however, the hardware registers are only updated at the “field0” (first field in time) sync.
 	Each of the syncs (“field0” and “field1”) produces an interrupt to the driver,
-	but the CNTV2Card::WaitForOutputFieldID method checks a hardware register and returns only
-	when “field0” is detected (not “field1”). For progressive video, all syncs are flagged by the
-	hardware as “field0” syncs, so registers are updated for the next frame and the
-	CNTV2Card::WaitForOutputFieldID method works as expected.
+	but CNTV2Card::WaitForInputFieldID (or CNTV2Card::WaitForOutputFieldID) check a hardware register
+	and return only when “field0” is detected (not “field1”). For progressive video, all syncs are
+	flagged by the hardware as “field0” syncs, so registers are updated for the next frame and the
+	CNTV2Card::WaitForInputFieldID (or CNTV2Card::WaitForOutputFieldID) work as expected.
 
+	To wait for an event (such as a VBI) from a particular Frame Store, your application should
+	subscribe to it by calling CNTV2Card::SubscribeInputVerticalEvent or CNTV2Card::SubscribeOutputVerticalEvent.
+
+	Once subscribed, to efficiently wait for an input vertical interrupt, call CNTV2Card::WaitForInputFieldID or
+	CNTV2Card::WaitForInputVerticalInterrupt, referencing the Frame Store that’s configured for capture,
+	and that’s routed (directly or indirectly) from an input that has a valid video signal.
+
+	To efficiently wait for an output vertical interrupt, call CNTV2Card::WaitForOutputFieldID or
+	CNTV2Card::WaitForOutputVerticalInterrupt, referencing the Frame Store that’s configured for playout.
+
+	You can inquire as to the number of input or output vertical events that have successfully been waited
+	on and fired by calling CNTV2Card::GetInputVerticalEventCount or CNTV2Card::GetOutputVerticalEventCount.
+	By calling either of these methods before and after calling the “wait for input/output” function, you
+	can determine if indeed the interrupt event actually triggered. Call CNTV2Card::SetInputVerticalEventCount
+	or CNTV2Card::SetOutputVerticalEventCount to reset the tally counter.
+
+	Normally it’s not necessary to explicitly unsubscribe the CNTV2Card instance’s event subscriptions, as
+	its destructor automatically calls CNTV2Card::Close, but it’s considered a good practice.
+
+	@note	On <b>Windows</b>, the AJA NTV2 driver supplies a finite number of event subscription handles
+			to client applications, which get consumed when subscribed (via CNTV2Card::SubscribeInputVerticalEvent,
+			CNTV2Card::SubscribeOutputVerticalEvent, CNTV2Card::SubscribeEvent). They’re made available
+			again to other clients when unsubscribed (via CNTV2Card::UnsubscribeInputVerticalEvent,
+			CNTV2Card::UnsubscribeOutputVerticalEvent, CNTV2Card::UnsubscribeEvent), and automatically when
+			the CNTV2Card object is closed or destroyed (via CNTV2Card::Close). However, abnormal program
+			terminations, crashes, or force-quitting from a debugger will prevent this handle clean-up,
+			which can result in their exhaustion. The only recovery at this point is to close all running
+			NTV2 client applications (including the AJA Service, if the “retail” software is installed and
+			running), then manually disabling and re-enabling the AJA driver. (Of course you can always
+			recover by restarting the machine.)
 
 	@subsection	vidop-fbconflict	When Frame Stores Access the Same Frame Buffer Memory
 

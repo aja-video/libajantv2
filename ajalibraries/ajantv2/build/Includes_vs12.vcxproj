@@ -64,9 +64,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ajatypes.h" />
-    <ClInclude Include="audiodefines.h" />
-    <ClInclude Include="Fixed.h" />
-    <ClInclude Include="ntv2abcdiskio.h" />
+    <ClInclude Include="ntv2audiodefines.h" />
+    <ClInclude Include="ntv2fixed.h" />
     <ClInclude Include="ntv2circularbuffer.h" />
     <ClInclude Include="ntv2endian.h" />
     <ClInclude Include="ntv2enums.h" />
@@ -75,7 +74,7 @@
     <ClInclude Include="ntv2virtualregisters.h" />
     <ClInclude Include="ntv2winpublicinterface.h" />
     <ClInclude Include="remotecontrol.h" />
-    <ClInclude Include="VideoDefines.h" />
+    <ClInclude Include="ntv2videodefines.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
