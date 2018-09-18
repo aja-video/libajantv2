@@ -222,6 +222,7 @@ public:
 	NTV2LutType				mLUTType;
 	NTV2LutType				mLUT2Type;
 	NTV2InputVideoSelect	mVirtualInputSelect;
+	NTV2InputAudioSelect	mInputAudioSelect;
 	NTV2VideoFormat			mVirtualSecondaryFormatSelect;
 	bool					mIsoConvertEnable;
 	uint32_t				mDSKAudioMode;

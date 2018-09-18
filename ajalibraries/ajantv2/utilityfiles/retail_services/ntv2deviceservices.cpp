@@ -192,6 +192,7 @@ void DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutputSelect, mVirtualAnalogOutputSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegLUTType, mLUTType);
 	AsDriverInterface(mCard)->ReadRegister(kVRegInputSelect, mVirtualInputSelect);
+	AsDriverInterface(mCard)->ReadRegister(kVRegAudioInputSelect, mInputAudioSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegSecondaryFormatSelect, mVirtualSecondaryFormatSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegIsoConvertEnable, mIsoConvertEnable);
 	mCard->ReadRegister(kVRegDSKAudioMode, mDSKAudioMode);
@@ -456,6 +457,30 @@ void DeviceServices::UpdateAutoState()
 	mSDIInput1RGBRange = mSDIInput1RGBRange == NTV2_RGBRangeAuto ?
 							NTV2_RGBRangeFull : mSDIInput1RGBRange;
 	mSDIInput2RGBRange = mSDIInput1RGBRange;
+	
+	
+	// video input select
+	if (mVirtualInputSelect == NTV2_InputAutoSelect)
+	{
+		mVirtualInputSelect = NTV2_Input1Select;
+	}
+	
+	// audio input select
+	/*
+	if (ds.audioSelect_ == NTV2_AutoAudioSelect)
+	{
+		if (count > 0)
+			ds.audioSelect = NTV2_Input1Embedded1_8Select;
+		else
+			ds.audioSelect = NTV2_HDMISelect;
+		
+		// TBD more here
+	}
+	else
+	{
+		ds.audioSelect = ds.audioSelect_;
+	}
+	*/
 	
 	// in color space - use vpid
 	mSDIInput1ColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
@@ -3858,9 +3883,7 @@ void DeviceServices::SetDeviceXPointCapture()
         (mDeviceID != DEVICE_ID_KONAIP_2110) &&
 		(mDeviceID != DEVICE_ID_IOIP_2110))
 	{
-		uint32_t audioInputSelect;
-		mCard->ReadRegister(kVRegAudioInputSelect, audioInputSelect);
-		SetAudioInputSelect((NTV2InputAudioSelect)audioInputSelect);
+		SetAudioInputSelect(mInputAudioSelect);
 
 		// The reference (genlock) source: if it's a video input, make sure it matches our current selection
 		ReferenceSelect refSelect = NTV2DeviceHasGenlockv2(mDeviceID) ? kVideoIn : mCaptureReferenceSelect;
@@ -3954,10 +3977,7 @@ void DeviceServices::SetDeviceXPointCapture()
     else if ((mDeviceID == DEVICE_ID_KONAIP_2110) ||
              (mDeviceID == DEVICE_ID_IOIP_2110))
     {
-        uint32_t audioInputSelect;
-        mCard->ReadRegister(kVRegAudioInputSelect, audioInputSelect);
-        SetAudioInputSelect((NTV2InputAudioSelect)audioInputSelect);
-
+        SetAudioInputSelect(mInputAudioSelect);
         mCard->SetReference(NTV2_REFERENCE_SFP1_PTP);
     }
 	// For J2K devices we don't set the audio input select reg, audio input
@@ -4028,12 +4048,7 @@ void DeviceServices::SetDeviceXPointPlayback()
 	if ((!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop) || !NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtMixer1))
 		bDSKOn = false;
 	
-	//if (mCard->DeviceCanDoAudioMixer())
-	{
-		uint32_t audioInputSelect;
-		mCard->ReadRegister(kVRegAudioInputSelect, audioInputSelect);
-		SetAudioInputSelect((NTV2InputAudioSelect)audioInputSelect);
-	}
+	SetAudioInputSelect(mInputAudioSelect);
 
 	if(bDSKOn)
 	{
@@ -4751,8 +4766,8 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 		mCard->WriteRegister(kRegAud1Control, 0, kK2RegMaskKBoxAudioInputSelect, kK2RegShiftKBoxAudioInputSelect);
 	else if (input == NTV2_AES_EBU_XLRSelect)
 		mCard->WriteRegister(kRegAud1Control, 1, kK2RegMaskKBoxAudioInputSelect, kK2RegShiftKBoxAudioInputSelect);
-
 }
+
 
 //-------------------------------------------------------------------------------------------------------
 //	AgentIsAlive - CP checks the kVRegAgentCheck virtual register to see if I'm still running...
