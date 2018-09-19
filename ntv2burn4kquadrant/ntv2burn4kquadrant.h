@@ -22,7 +22,6 @@
 #include "ajabase/system/thread.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
-#include "ajabase/system/lock.h"
 
 
 /**
@@ -116,16 +115,6 @@ class NTV2Burn4KQuadrant
 		virtual void		SetupHostBuffers (void);
 
 		/**
-			@brief	Initializes AutoCirculate on my capture side.
-		**/
-		virtual void		SetupInputAutoCirculate (void);
-
-		/**
-			@brief	Initializes AutoCirculate on my playout side.
-		**/
-		virtual void		SetupOutputAutoCirculate (void);
-
-		/**
 			@brief	Starts my playout thread.
 		**/
 		virtual void		StartPlayThread (void);
@@ -183,7 +172,6 @@ class NTV2Burn4KQuadrant
 	private:
 		AJAThread *					mPlayThread;			///< @brief	My playout thread object
 		AJAThread *					mCaptureThread;			///< @brief	My capture thread object
-		AJALock *					mLock;					///< @brief	Mutex to guard AutoCirculateInit
 		CNTV2Card					mInputDevice;			///< @brief	My CNTV2Card input instance
 		CNTV2Card					mOutputDevice;			///< @brief	My CNTV2Card output instance
 		bool						mSingleDevice;			///< @brief	Using single 8-channel device (4K I/O on one device)?

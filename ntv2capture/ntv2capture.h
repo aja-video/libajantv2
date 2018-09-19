@@ -144,7 +144,6 @@ class NTV2Capture
 
 		AJAThread *					mConsumerThread;		///< @brief	My consumer thread object -- consumes the captured frames.
 		AJAThread *					mProducerThread;		///< @brief	My producer thread object -- does the frame capturing
-		AJALock *					mLock;					///< @brief	Global mutex to avoid device frame buffer allocation race condition
 		CNTV2Card					mDevice;				///< @brief	My CNTV2Card instance. This is what I use to talk to the device.
 		NTV2DeviceID				mDeviceID;				///< @brief	My device identifier
 		const std::string			mDeviceSpecifier;		///< @brief	The device specifier string

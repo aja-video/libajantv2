@@ -14,6 +14,7 @@
 #include "ajabase/common/ajarefptr.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/process.h"
+#include "ajabase/system/lock.h"
 #include "ntv2testpatterngen.h"
 #include "ajabase/common/videotypes.h"
 #include "ajaanc/includes/ancillarylist.h"
@@ -661,7 +662,6 @@ static NTV2CCPlayer *	gApp	(NULL);
 NTV2CCPlayer::NTV2CCPlayer (const CCPlayerConfig & inConfigData)
 	:	mConfig					(inConfigData),
 		mPlayThread				(NULL),
-		mLock					(new AJALock (CNTV2DemoCommon::GetGlobalMutexName ())),
 		mCurrentFrame			(0),
 		mDroppedFrameTally		(0),
 		mDeviceID				(DEVICE_ID_NOTFOUND),
@@ -1334,10 +1334,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	mDevice.AutoCirculateStop (mOutputChannel);			//	Maybe some other app left this A/C channel running
 	if (NTV2_IS_SD_VIDEO_FORMAT (mVideoFormat)  &&  mConfig.fSuppressLine21  &&  mConfig.fForceVanc)
 		cerr << "## WARNING:  SD video with '--noline21' option and '--vanc' option (or no device Anc inserter) will produce no captions" << endl;
-	{
-		AJAAutoLock	autoLock (mLock);	//	Avoid AutoCirculate buffer collisions
-		mDevice.AutoCirculateInitForOutput (mOutputChannel,  7,  audioSystem,  acOptionFlags);
-	}
+	mDevice.AutoCirculateInitForOutput (mOutputChannel,  7,  audioSystem,  acOptionFlags);
 	mDevice.AutoCirculateStart (mOutputChannel);
 
 	while (!mPlayerQuit)

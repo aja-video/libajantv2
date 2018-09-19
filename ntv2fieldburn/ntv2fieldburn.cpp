@@ -32,7 +32,6 @@ NTV2FieldBurn::NTV2FieldBurn (const string &				inDeviceSpecifier,
 
 	:	mPlayThread			(NULL),
 		mCaptureThread		(NULL),
-		mLock				(new AJALock (CNTV2DemoCommon::GetGlobalMutexName ())),
 		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mDeviceSpecifier	(inDeviceSpecifier),
 		mInputChannel		(NTV2_CHANNEL_INVALID),
@@ -63,9 +62,6 @@ NTV2FieldBurn::~NTV2FieldBurn ()
 
 	delete mCaptureThread;
 	mCaptureThread = NULL;
-
-	delete mLock;
-	mLock = NULL;
 
 	//	Unsubscribe from input vertical event...
 	mDevice.UnsubscribeInputVerticalEvent (mInputChannel);
@@ -512,10 +508,7 @@ void NTV2FieldBurn::PlayFrames (void)
 	outputXferField2.acInVideoDMAOffset	= mFormatDescriptor.linePitch * 4;	//  F2 starts on 2nd line in device buffer
 
 	//	Initialize the AutoCirculate output channel...
-	{
-		AJAAutoLock	autoLock (mLock);	//	Avoid AutoCirculate buffer collisions
-		mDevice.AutoCirculateInitForOutput (mOutputChannel, 7, mAudioSystem, AUTOCIRCULATE_WITH_RP188);
-	}
+	mDevice.AutoCirculateInitForOutput (mOutputChannel, 7, mAudioSystem, AUTOCIRCULATE_WITH_RP188);
 
 	//	Start AutoCirculate running...
 	mDevice.AutoCirculateStart (mOutputChannel);
@@ -620,10 +613,7 @@ void NTV2FieldBurn::CaptureFrames (void)
 	mDevice.AutoCirculateStop (mInputChannel);
 
 	//	Initialize AutoCirculate...
-	{
-		AJAAutoLock	autoLock (mLock);	//	Avoid AutoCirculate buffer collisions
-		mDevice.AutoCirculateInitForInput (mInputChannel, 7, mAudioSystem, AUTOCIRCULATE_WITH_RP188);
-	}
+	mDevice.AutoCirculateInitForInput (mInputChannel, 7, mAudioSystem, AUTOCIRCULATE_WITH_RP188);
 
 	//	Start AutoCirculate running...
 	mDevice.AutoCirculateStart (mInputChannel);

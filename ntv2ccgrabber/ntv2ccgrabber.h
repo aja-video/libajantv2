@@ -251,7 +251,6 @@ class NTV2CCGrabber
 		typedef	AJACircularBuffer <AVDataBuffer *>	MyCircularBuffer;
 
 		AJAThread *					mCaptureThread;		///< @brief	My capture thread object
-		AJALock *					mLock;				///< @brief	Global mutex to avoid device frame buffer allocation race condition
 		CNTV2Card					mDevice;			///< @brief	My CNTV2Card instance
 		NTV2DeviceID				mDeviceID;			///< @brief	My device identifier
 		const std::string			mDeviceSpecifier;	///< @brief	The device specifier string

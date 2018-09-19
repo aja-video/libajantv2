@@ -30,7 +30,6 @@ NTV2Capture::NTV2Capture (const string					inDeviceSpecifier,
 
 	:	mConsumerThread		(NULL),
 		mProducerThread		(NULL),
-		mLock				(new AJALock (CNTV2DemoCommon::GetGlobalMutexName ())),
 		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mDeviceSpecifier	(inDeviceSpecifier),
 		mInputChannel		(inChannel),
@@ -403,12 +402,9 @@ void NTV2Capture::CaptureFrames (void)
 	mDevice.AutoCirculateStop (mInputChannel);	//	Just in case
 
 	//	Tell AutoCirculate to use 7 frame buffers for capturing from the device...
-	{
-		AJAAutoLock	autoLock (mLock);	//	Avoid A/C buffer collisions with other processes
-		mDevice.AutoCirculateInitForInput (mInputChannel,	7,	//	Number of frames to circulate
-											mAudioSystem,		//	Which audio system (if any)?
-											acOptions);			//	Include timecode (and maybe Anc too)
-	}
+	mDevice.AutoCirculateInitForInput (mInputChannel,	7,	//	Number of frames to circulate
+										mAudioSystem,		//	Which audio system (if any)?
+										acOptions);			//	Include timecode (and maybe Anc too)
 	
 	//	Start AutoCirculate running...
 	mDevice.AutoCirculateStart (mInputChannel);

@@ -29,7 +29,6 @@ NTV2Burn4KQuadrant::NTV2Burn4KQuadrant (const string &				inInputDeviceSpecifier
 
 	:	mPlayThread				(NULL),
 		mCaptureThread			(NULL),
-		mLock					(new AJALock (CNTV2DemoCommon::GetGlobalMutexName ())),
 		mSingleDevice			(false),
 		mInputDeviceSpecifier	(inInputDeviceSpecifier),
 		mOutputDeviceSpecifier	(inOutputDeviceSpecifier),
@@ -218,8 +217,6 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 	SetupHostBuffers ();
 	RouteInputSignal ();
 	RouteOutputSignal ();
-	SetupInputAutoCirculate ();
-	SetupOutputAutoCirculate ();
 
 	//	Lastly, prepare my timecode burner instance...
 	NTV2FormatDescriptor	fd	(mVideoFormat, mPixelFormat, mVancMode);
@@ -546,44 +543,6 @@ void NTV2Burn4KQuadrant::RouteOutputSignal (void)
 }	//	RouteOutputSignal
 
 
-void NTV2Burn4KQuadrant::SetupInputAutoCirculate (void)
-{
-	mInputDevice.AutoCirculateStop(NTV2_CHANNEL1);
-	mInputDevice.AutoCirculateStop(NTV2_CHANNEL2);
-	mInputDevice.AutoCirculateStop(NTV2_CHANNEL3);
-	mInputDevice.AutoCirculateStop(NTV2_CHANNEL4);
-	AJATime::Sleep(1000);
-	{
-		AJAAutoLock	autoLock (mLock);	//	Avoid AutoCirculate buffer collisions
-		mInputDevice.AutoCirculateInitForInput(mInputChannel, 5, mInputAudioSystem, AUTOCIRCULATE_WITH_RP188);
-	}
-}	//	SetupInputAutoCirculate
-
-
-void NTV2Burn4KQuadrant::SetupOutputAutoCirculate (void)
-{
-	if (mSingleDevice)
-	{
-		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL5);
-		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL6);
-		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL7);
-		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL8);
-	}
-	else
-	{
-		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL1);
-		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL2);
-		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL3);
-		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL4);
-	}
-	AJATime::Sleep(1000);
-	{
-		AJAAutoLock	autoLock (mLock);	//	Avoid AutoCirculate buffer collisions
-		mOutputDevice.AutoCirculateInitForOutput(mOutputChannel, 5, mOutputAudioSystem, AUTOCIRCULATE_WITH_RP188);
-	}
-}	//	SetupOutputAutoCirculate
-
-
 AJAStatus NTV2Burn4KQuadrant::Run ()
 {
 	//	Start the playout and capture threads...
@@ -625,6 +584,23 @@ void NTV2Burn4KQuadrant::PlayThreadStatic (AJAThread * pThread, void * pContext)
 void NTV2Burn4KQuadrant::PlayFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	outputXferInfo;
+
+	if (mSingleDevice)
+	{
+		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL5);
+		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL6);
+		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL7);
+		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL8);
+	}
+	else
+	{
+		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL1);
+		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL2);
+		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL3);
+		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL4);
+	}
+	AJATime::Sleep (1000);
+	mOutputDevice.AutoCirculateInitForOutput (mOutputChannel, 5, mOutputAudioSystem, AUTOCIRCULATE_WITH_RP188);
 
 	//	Start AutoCirculate running...
 	mOutputDevice.AutoCirculateStart (mOutputChannel);
@@ -696,6 +672,13 @@ void NTV2Burn4KQuadrant::CaptureThreadStatic (AJAThread * pThread, void * pConte
 void NTV2Burn4KQuadrant::CaptureFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	inputXferInfo;
+
+	mInputDevice.AutoCirculateStop (NTV2_CHANNEL1);
+	mInputDevice.AutoCirculateStop (NTV2_CHANNEL2);
+	mInputDevice.AutoCirculateStop (NTV2_CHANNEL3);
+	mInputDevice.AutoCirculateStop (NTV2_CHANNEL4);
+	AJATime::Sleep (1000);
+	mInputDevice.AutoCirculateInitForInput (mInputChannel, 5, mInputAudioSystem, AUTOCIRCULATE_WITH_RP188);
 
 	//	Enable analog LTC input (some LTC inputs are shared with reference input)
 	mInputDevice.SetLTCInputEnable (true);

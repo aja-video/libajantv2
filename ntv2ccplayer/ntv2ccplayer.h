@@ -11,7 +11,6 @@
 #include "ntv2devicescanner.h"
 #include "ntv2democommon.h"
 #include "ajabase/system/thread.h"
-#include "ajabase/system/lock.h"
 #include "ajacc/includes/ajacc.h"
 #include <vector>
 
@@ -225,7 +224,6 @@ class NTV2CCPlayer
 		CCPlayerConfig				mConfig;							///< @brief	My configuration
 		AJAThread *					mPlayThread;						///< @brief	My playout (consumer) thread object
 		AJAThread *					mGeneratorThreads [NTV2_CC608_XDS];	///< @brief	My caption generator threads -- one per caption channel
-		AJALock *					mLock;								///< @brief	Global mutex to avoid device frame buffer allocation race condition
 
 		uint32_t					mCurrentFrame;						///< @brief	My current frame number (used for timing)
 		uint32_t					mDroppedFrameTally;					///< @brief	My current dropped frame tally

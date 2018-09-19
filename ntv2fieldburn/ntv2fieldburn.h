@@ -14,7 +14,6 @@
 #include "ajabase/common/types.h"
 #include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/thread.h"
-#include "ajabase/system/lock.h"
 #include "ajabase/common/timecodeburn.h"
 
 
@@ -157,7 +156,6 @@ class NTV2FieldBurn
 	private:
 		AJAThread *					mPlayThread;		///< @brief	My playout thread object
 		AJAThread *					mCaptureThread;		///< @brief	My capture thread object
-		AJALock *					mLock;				///< @brief	My mutex object
 		CNTV2Card					mDevice;			///< @brief	My CNTV2Card instance
 		NTV2DeviceID				mDeviceID;			///< @brief	My device identifier
 		const std::string			mDeviceSpecifier;	///< @brief	Specifies which device I should use

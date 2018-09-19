@@ -34,7 +34,6 @@ NTV2CCGrabber::NTV2CCGrabber (	const string			inDeviceSpecifier,
 								const NTV2Channel		inInputChannel)
 
 	:	mCaptureThread		(NULL),
-		mLock				(new AJALock (CNTV2DemoCommon::GetGlobalMutexName ())),
 		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mDeviceSpecifier	(inDeviceSpecifier),
 		mInputChannel		(inInputChannel),
@@ -526,7 +525,9 @@ void NTV2CCGrabber::CaptureFrames (void)
 													false,			//	Don't keep VANC settings
 													mInputChannel);	//	Specify channel (in case this is a multichannel device)
 
-		//	To simplify things, always enable VANC geometry...
+		//	To simplify things, always enable VANC geometry.
+		//	Note that if CCGrabber is ever modified to work with 4K/UHD,
+		//	this won't work, since VANC geometries aren't supported in 4K.
 		mDevice.SetEnableVANCData (true, false, mInputChannel);		//	"Tall" format is sufficient to grab captions
 		if (::Is8BitFrameBufferFormat (mCaptureFBF))
 			mDevice.SetVANCShiftMode (mInputChannel, NTV2_VANCDATA_8BITSHIFT_ENABLE);	//	8-bit FBFs require VANC bit shift
@@ -543,10 +544,7 @@ void NTV2CCGrabber::CaptureFrames (void)
 			StartPlayThread ();			//	Start a new playout thread
 
 		mDevice.AutoCirculateStop (mInputChannel);
-		{
-			AJAAutoLock	autoLock (mLock);	//	Avoid AutoCirculate buffer reservation collisions
-			mDevice.AutoCirculateInitForInput (mInputChannel, 7, mAudioSystem, AUTOCIRCULATE_WITH_RP188 | (mForceVanc ? 0 : AUTOCIRCULATE_WITH_ANC));
-		}
+		mDevice.AutoCirculateInitForInput (mInputChannel, 7, mAudioSystem, AUTOCIRCULATE_WITH_RP188 | (mForceVanc ? 0 : AUTOCIRCULATE_WITH_ANC));
 
 		//	Start AutoCirculate running...
 		mDevice.AutoCirculateStart (mInputChannel);
@@ -930,12 +928,9 @@ void NTV2CCGrabber::PlayFrames (void)
 	SetupOutputVideo (videoFormat);		//	Set up device output
 	RouteOutputSignal (videoFormat);	//	Set up output signal routing
 	mDevice.GetVANCMode (vancMode, mInputChannel);
-	{
-		AJAAutoLock	autoLock (mLock);	//	Mutex avoids A/C buffer reservation collisions
-		if (mDevice.AutoCirculateInitForOutput (mOutputChannel, 2))	//	Let A/C reserve buffer pair
-			if (mDevice.AutoCirculateGetStatus (mOutputChannel, acStatus))	//	Find out which buffers we got
-				fbNum = acStatus.acStartFrame;	//	Use them
-	}
+	if (mDevice.AutoCirculateInitForOutput (mOutputChannel, 2))	//	Let A/C reserve buffer pair
+		if (mDevice.AutoCirculateGetStatus (mOutputChannel, acStatus))	//	Find out which buffers we got
+			fbNum = acStatus.acStartFrame;	//	Use them
 
 	const NTV2FormatDescriptor	formatDesc		(videoFormat, mPlayoutFBF, vancMode);
 	const ULWord				bytesPerRow		(formatDesc.GetBytesPerRow ());
