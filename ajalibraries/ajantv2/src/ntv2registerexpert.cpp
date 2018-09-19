@@ -1618,25 +1618,40 @@ private:
 			(void) inRegNum;
 			(void) inDeviceID;
 			ostringstream	oss;
-			oss	<< "Device Version: "				<< xHEX0N(inRegValue & kRegMaskHardwareVersion, 1)	<< endl
-				<< "FPGA Version: "					<< xHEX0N(inRegValue & kRegMaskFPGAVersion, 2)		<< endl;
+			oss	<< "Input 1 Vertical Blank: "		<< ActInact(inRegValue & BIT(20))					<< endl
+				<< "Input 1 Field ID: "				<< (inRegValue & BIT(21) ? "1" : "0")				<< endl
+				<< "Input 1 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(30))					<< endl
+				<< "Input 2 Vertical Blank: "		<< ActInact(inRegValue & BIT(18))					<< endl
+				<< "Input 2 Field ID: "				<< (inRegValue & BIT(19) ? "1" : "0")				<< endl
+				<< "Input 2 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(29))					<< endl
+				<< "Output 1 Vertical Blank: "		<< ActInact(inRegValue & BIT(22))					<< endl
+				<< "Output 1 Field ID: "			<< (inRegValue & BIT(23) ? "1" : "0")				<< endl
+				<< "Output 1 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(31))					<< endl
+				<< "Output 2 Vertical Blank: "		<< ActInact(inRegValue & BIT(4))					<< endl
+				<< "Output 2 Field ID: "			<< (inRegValue & BIT(5) ? "1" : "0")				<< endl
+				<< "Output 2 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(8))					<< endl;
+			if (::NTV2DeviceGetNumVideoOutputs(inDeviceID) > 2)
+				oss	<< "Output 3 Vertical Blank: "		<< ActInact(inRegValue & BIT(2))				<< endl
+					<< "Output 3 Field ID: "			<< (inRegValue & BIT(3) ? "1" : "0")			<< endl
+					<< "Output 3 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(7))				<< endl
+					<< "Output 4 Vertical Blank: "		<< ActInact(inRegValue & BIT(0))				<< endl
+					<< "Output 4 Field ID: "			<< (inRegValue & BIT(1) ? "1" : "0")			<< endl
+					<< "Output 4 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(6))				<< endl;
+			oss	<< "Aux Vertical Interrupt: "		<< ActInact(inRegValue & BIT(12))					<< endl
+				<< "I2C 1 Interrupt: "				<< ActInact(inRegValue & BIT(14))					<< endl
+				<< "I2C 2 Interrupt: "				<< ActInact(inRegValue & BIT(13))					<< endl
+				<< "Chunk Rate Interrupt: "			<< ActInact(inRegValue & BIT(16))					<< endl;
 			if (::NTV2DeviceGetNumSerialPorts(inDeviceID))
-				oss	<< "Uart 1 Rx Interrupt: "		<< ActInact(inRegValue & BIT(15))					<< endl
+				oss	<< "Generic UART Interrupt: "	<< ActInact(inRegValue & BIT(9))					<< endl
+					<< "Uart 1 Rx Interrupt: "		<< ActInact(inRegValue & BIT(15))					<< endl
 					<< "Uart 1 Tx Interrupt: "		<< ActInact(inRegValue & BIT(24))					<< endl;
 			if (::NTV2DeviceGetNumSerialPorts(inDeviceID) > 1)
 				oss	<< "Uart 2 Tx Interrupt: "		<< ActInact(inRegValue & BIT(26))					<< endl;
 			if (::NTV2DeviceGetNumLTCInputs(inDeviceID))
 				oss	<< "LTC In 1 Present: "			<< YesNo(inRegValue & BIT(17))						<< endl;
-			oss	<< "Input 1 Vertical Blank: "		<< ActInact(inRegValue & BIT(20))					<< endl
-				<< "Input 1 Field ID: "				<< (inRegValue & BIT(21) ? "1" : "0")				<< endl
-				<< "Input 2 Vertical Blank: "		<< ActInact(inRegValue & BIT(18))					<< endl
-				<< "Input 2 Field ID: "				<< (inRegValue & BIT(19) ? "1" : "0")				<< endl
-				<< "Output Vertical Blank: "		<< ActInact(inRegValue & BIT(22))					<< endl
-				<< "Output Field ID: "				<< (inRegValue & BIT(23) ? "1" : "0")				<< endl
-				<< "Wrap Rate Interrupt: "			<< ActInact(inRegValue & BIT(25))					<< endl
-				<< "Input 1 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(30))					<< endl
-				<< "Input 2 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(29))					<< endl
-				<< "Output Vertical Interrupt: "	<< ActInact(inRegValue & BIT(31));
+			oss	<< "Wrap Rate Interrupt: "			<< ActInact(inRegValue & BIT(25))					<< endl
+				<< "Audio Out Wrap Interrupt: "		<< ActInact(inRegValue & BIT(27))					<< endl
+				<< "Audio 50Hz Interrupt: "			<< ActInact(inRegValue & BIT(28));
 			return oss.str();
 		}
 		virtual	~DecodeStatusReg()	{}
