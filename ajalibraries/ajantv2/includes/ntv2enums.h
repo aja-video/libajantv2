@@ -1934,24 +1934,24 @@ typedef enum
 
 typedef enum
 {
-    NTV2_480iADCComponentBeta,
-    NTV2_480iADCComponentSMPTE,
-    NTV2_480iADCSVideoUS,
-    NTV2_480iADCCompositeUS,
-    NTV2_480iADCComponentBetaJapan,
-    NTV2_480iADCComponentSMPTEJapan,
-    NTV2_480iADCSVideoJapan,
-    NTV2_480iADCCompositeJapan,
-    NTV2_576iADCComponentBeta,
-    NTV2_576iADCComponentSMPTE,
-    NTV2_576iADCSVideo,
-    NTV2_576iADCComposite,
-    NTV2_720p_60,	//	60 + 59.94
-    NTV2_1080i_30,	//	30 + 29.97
-    NTV2_720p_50,
-    NTV2_1080i_25,
-    NTV2_1080pSF24,	// 24 + 23.98
-    NTV2_MAX_NUM_LSVideoADCModes
+    NTV2_480iADCComponentBeta,			//	0
+    NTV2_480iADCComponentSMPTE,			//	1
+    NTV2_480iADCSVideoUS,				//	2
+    NTV2_480iADCCompositeUS,			//	3
+    NTV2_480iADCComponentBetaJapan,		//	4
+    NTV2_480iADCComponentSMPTEJapan,	//	5
+    NTV2_480iADCSVideoJapan,			//	6
+    NTV2_480iADCCompositeJapan,			//	7
+    NTV2_576iADCComponentBeta,			//	8
+    NTV2_576iADCComponentSMPTE,			//	9
+    NTV2_576iADCSVideo,					//	10
+    NTV2_576iADCComposite,				//	11
+    NTV2_720p_60,	//	60 + 59.94		//	12
+    NTV2_1080i_30,	//	30 + 29.97		//	13
+    NTV2_720p_50,						//	14
+    NTV2_1080i_25,						//	15
+    NTV2_1080pSF24,	// 24 + 23.98		//	16
+    NTV2_MAX_NUM_LSVideoADCModes		//	17
 } NTV2LSVideoADCMode;
 
 
