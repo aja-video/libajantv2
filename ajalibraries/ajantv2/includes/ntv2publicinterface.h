@@ -5508,6 +5508,7 @@ typedef enum
 
 		//	NTV2_POINTER FLAGS
 		#define	NTV2_POINTER_ALLOCATED				BIT(0)		///< @brief	Allocated using Allocate function?
+		#define	NTV2_POINTER_PAGE_ALIGNED			BIT(1)		///< @brief	Allocated page-aligned?
 
 
 		//	AUTOCIRCULATE OPTION FLAGS
@@ -5670,7 +5671,7 @@ typedef enum
 					@param[in]	inByteCount		Specifies the size of the allocated buffer, in bytes. If non-zero, causes Allocate to be called, and
 												if successful, zeroes the buffer. If zero, I don't allocate anything, and my host pointer will be NULL.
 				**/
-				explicit		NTV2_POINTER (const size_t inByteCount = 0);
+								NTV2_POINTER (const size_t inByteCount = 0);
 
 				/**
 					@brief		Constructs me from another NTV2_POINTER instance.
@@ -5786,10 +5787,18 @@ typedef enum
 								I assume full responsibility for any memory that I allocate.
 					@param[in]	inByteCount		Specifies the number of bytes to allocate.
 												Specifying zero is the same as calling Set(NULL, 0).
+					@param[in]	inPageAligned	Optionally specifies page alignment. If true, allocates a
+												page-aligned block. If false (default), uses operator new.
 					@return		True if successful;  otherwise false.
 					@note		Any memory that I was referencing prior to this call that I was responsible for will automatically be freed.
 				**/
-				bool			Allocate (const size_t inByteCount);
+				bool			Allocate (const size_t inByteCount, const bool inPageAligned = false);
+
+				/**
+					@brief		Deallocates my user-space storage (if I own it -- i.e. from a prior call to Allocate).
+					@return		True if successful;  otherwise false.
+				**/
+				bool			Deallocate (void);
 
 				/**
 					@brief		Fills me with the given UByte value.
@@ -6105,6 +6114,23 @@ typedef enum
 					@return						True if successful;  otherwise false.
 				**/
 				bool							PutU8s (const std::vector<uint8_t> & inU8s, const size_t inU8Offset = 0);
+				///@}
+
+				/**
+					@name	Default Page Size
+				**/
+				///@{
+				/**
+					@return		Default page size, in bytes.
+				**/
+				static size_t					DefaultPageSize (void);
+
+				/**
+					@brief		Changes the default page size for use in future page-aligned allocations.
+					@param[in]	inNewSize		The new page size value, in bytes. Must be a power of 2.
+					@return		True if successful;  otherwise false.
+				**/
+				static bool						SetDefaultPageSize (const size_t inNewSize);
 				///@}
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_POINTER)
