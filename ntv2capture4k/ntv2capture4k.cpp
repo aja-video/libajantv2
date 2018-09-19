@@ -31,7 +31,6 @@ NTV2Capture4K::NTV2Capture4K (const string					inDeviceSpecifier,
 
 	:	mConsumerThread		(NULL),
 		mProducerThread		(NULL),
-		mLock				(new AJALock (CNTV2DemoCommon::GetGlobalMutexName ())),
 		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mDeviceSpecifier	(inDeviceSpecifier),
 		mWithAudio			(withAudio),
@@ -735,10 +734,10 @@ void NTV2Capture4K::SetupInputAutoCirculate (void)
 			endFrame = 20;
 		}
 	}
-	mDevice.AutoCirculateInitForInput (mInputChannel,	7,	//	Number of frames to circulate
-											mWithAudio ? mAudioSystem : NTV2_AUDIOSYSTEM_INVALID,	//	Which audio system (if any)?
-											AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC,
-											1, startFrame, endFrame);								//	Include timecode
+	mDevice.AutoCirculateInitForInput (mInputChannel,	0,	//	0 frames == explicitly set start & end frames
+										mWithAudio ? mAudioSystem : NTV2_AUDIOSYSTEM_INVALID,	//	Which audio system (if any)?
+										AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC,		//	Include timecode & custom Anc
+										1, startFrame, endFrame);
 }	//	SetupInputAutoCirculate
 
 
