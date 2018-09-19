@@ -2968,10 +2968,6 @@ public:
 					settings should agree with what CNTV2Card::AutoCirculateInitForInput is being asked to do. For example, setting the device
 					output to "Test Pattern" in the <b>AJA ControlPanel</b>, then calling CNTV2Card::AutoCirculateInitForInput is contradictory,
 					because AutoCirculate is being asked to capture from a device that's configured for playout.
-		@bug		When zero is passed to \c inFrameCount, this function uses a frame buffer allocator that is not thread-safe.
-					If this allocator is called from 2 or more threads (or processes), a race condition exists that may result in at least
-					two of the channels having overlapping frame buffer ranges. This will be addressed in a future SDK. Meanwhile, clients
-					can gate calls to CNTV2Card::AutoCirculateInitForInput and/or CNTV2Card::AutoCirculateInitForOutput using a Mutex or Critical Section.
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForOutput, \ref autocirculatecapture
 	**/
 
@@ -3020,10 +3016,6 @@ public:
 					settings should agree with what CNTV2Card::AutoCirculateInitForOutput is being asked to do. For example, setting the device
 					output to "Input Passthrough" in the <b>AJA ControlPanel</b>, then calling CNTV2Card::AutoCirculateInitForOutput is contradictory,
 					because AutoCirculate is being asked to play video from a device that's configured for input.
-		@bug		When zero is passed to \c inFrameCount, this function uses a frame buffer allocator that is not thread-safe.
-					If this allocator is called from 2 or more threads (or processes), a race condition exists that may result in at least
-					two of the channels having overlapping frame buffer ranges. This will be addressed in a future SDK. Meanwhile, clients
-					can gate calls to CNTV2Card::AutoCirculateInitForInput and/or CNTV2Card::AutoCirculateInitForOutput using a Mutex or Critical Section.
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForInput, \ref autocirculateplayout
 	**/
 
