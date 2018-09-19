@@ -26,12 +26,6 @@
 
 class NTV2Player
 {
-	public:
-		/**
-			@brief Signature of a function call for requesting frames to be played.
-		**/
-		typedef AJAStatus (NTV2PlayerCallback)(void * pInstance, const AVDataBuffer * const playData);
-
 	//	Public Instance Methods
 	public:
 		/**
@@ -92,16 +86,6 @@ class NTV2Player
 		**/
 		virtual void			GetACStatus (ULWord & outGoodFrames, ULWord & outDroppedFrames, ULWord & outBufferLevel);
 
-		/**
-			@brief	Returns the current callback function for requesting frames to be played.
-		**/
-		virtual void			GetCallback (void ** const pInstance, NTV2PlayerCallback ** const callback);
-
-		/**
-			@brief	Sets a callback function for requesting frames to be played.
-		**/
-		virtual bool			SetCallback (void * const pInstance, NTV2PlayerCallback * const callback);
-
 
 	//	Protected Instance Methods
 	protected:
@@ -124,11 +108,6 @@ class NTV2Player
 			@brief	Sets up my circular buffers.
 		**/
 		virtual void			SetUpHostBuffers (void);
-
-		/**
-			@brief	Initializes playout AutoCirculate.
-		**/
-		virtual void			SetUpOutputAutoCirculate (void);
 
 		/**
 			@brief	Creates my test pattern buffers.
@@ -208,7 +187,6 @@ class NTV2Player
 
 		AJAThread *					mConsumerThread;			///< @brief	My playout (consumer) thread object
 		AJAThread *					mProducerThread;			///< @brief	My generator (producer) thread object
-		AJALock *					mLock;						///< @brief	Global mutex to avoid device frame buffer allocation race condition
 
 		uint32_t					mCurrentFrame;				///< @brief	My current frame number (used to generate timecode)
 		ULWord						mCurrentSample;				///< @brief	My current audio sample (maintains audio tone generator state)
@@ -229,7 +207,9 @@ class NTV2Player
 		bool						mGlobalQuit;				///< @brief	Set "true" to gracefully stop
 		bool						mDoLevelConversion;			///< @brief	Demonstrates a level A to level B conversion
 		bool						mDoMultiChannel;			///< @brief	Demonstrates how to configure the board for multi-format
+		bool						mTCUseVITC;					///< @brief	True=VITC, false=LTC
 		AJATimeCodeBurn				mTCBurner;					///< @brief	My timecode burner
+		NTV2TCIndexes				mTCIndexes;					///< @brief	Timecode indexes to use
 		uint32_t					mVideoBufferSize;			///< @brief	My video buffer size, in bytes
 		uint32_t					mAudioBufferSize;			///< @brief	My audio buffer size, in bytes
 
@@ -238,9 +218,6 @@ class NTV2Player
 
 		AVDataBuffer				mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
 		MyCirculateBuffer			mAVCircularBuffer;						///< @brief	My ring buffer
-
-		void *						mCallbackUserData;			///< @brief	User data to be passed to the callback function
-		NTV2PlayerCallback *		mCallback;					///< @brief	Address of callback function
 		AJAAncillaryDataType		mAncType;
 
 };	//	NTV2Player

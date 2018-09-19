@@ -59,7 +59,6 @@ NTV2Player::NTV2Player (const string &				inDeviceSpecifier,
 
 	:	mConsumerThread				(NULL),
 		mProducerThread				(NULL),
-		mLock						(new AJALock (CNTV2DemoCommon::GetGlobalMutexName ())),
 		mCurrentFrame				(0),
 		mCurrentSample				(0),
 		mToneFrequency				(440.0),
@@ -77,12 +76,11 @@ NTV2Player::NTV2Player (const string &				inDeviceSpecifier,
 		mGlobalQuit					(false),
 		mDoLevelConversion			(inLevelConversion),
 		mDoMultiChannel				(inDoMultiChannel),
+		mTCUseVITC					(true),
 		mVideoBufferSize			(0),
 		mAudioBufferSize			(0),
 		mTestPatternVideoBuffers	(NULL),
 		mNumTestPatterns			(0),
-		mCallbackUserData			(NULL),
-		mCallback					(NULL),
 		mAncType					(inSendHDRType)
 {
 	::memset (mAVHostBuffer, 0, sizeof (mAVHostBuffer));
@@ -204,7 +202,6 @@ AJAStatus NTV2Player::Init (void)
 
 	//	Set up the device signal routing, and playout AutoCirculate...
 	RouteOutputSignal ();
-	SetUpOutputAutoCirculate ();
 
 	//	Lastly, prepare my AJATimeCodeBurn instance...
 	const NTV2FormatDescriptor	fd (mVideoFormat, mPixelFormat, mVancMode);
@@ -341,48 +338,64 @@ void NTV2Player::SetUpHostBuffers ()
 
 void NTV2Player::RouteOutputSignal ()
 {
-	const NTV2Standard		outputStandard	(::GetNTV2StandardFromVideoFormat (mVideoFormat));
-	const UWord				numVideoOutputs	(::NTV2DeviceGetNumVideoOutputs (mDeviceID));
-	bool					isRGB			(::IsRGBFormat (mPixelFormat));
+	const NTV2Standard	outputStandard	(::GetNTV2StandardFromVideoFormat (mVideoFormat));
+	const UWord			numSDIOutputs	(::NTV2DeviceGetNumVideoOutputs (mDeviceID));
+	bool				isRGB			(::IsRGBFormat (mPixelFormat));
+	const bool			isInterlaced	(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mVideoFormat));
 
-	//	If device has no RGB conversion capability for the desired channel, use YUV instead
-	if (UWord (mOutputChannel) > ::NTV2DeviceGetNumCSCs (mDeviceID))
-		isRGB = false;
+	//	Since this function figures out which SDI spigots will be set up for output,
+	//	it also sets the "mTCIndexes" member, which determines which timecodes will
+	//	be transmitted (and on which SDI spigots)...
+	mTCIndexes.clear();
 
-	NTV2OutputCrosspointID	cscVidOutXpt	(::GetCSCOutputXptFromChannel (mOutputChannel,  false/*isKey*/,  !isRGB/*isRGB*/));
-	NTV2OutputCrosspointID	fsVidOutXpt		(::GetFrameBufferOutputXptFromChannel (mOutputChannel,  isRGB/*isRGB*/,  false/*is425*/));
+	if (UWord(mOutputChannel) > ::NTV2DeviceGetNumCSCs(mDeviceID))	//	No CSC for this channel?
+		isRGB = false;	//	Use YUV, since this device has no RGB conversion capability for this channel
+
+	const NTV2OutputCrosspointID	cscVidOutXpt	(::GetCSCOutputXptFromChannel (mOutputChannel,  false/*isKey*/,  !isRGB/*isRGB*/));
+	const NTV2OutputCrosspointID	fsVidOutXpt		(::GetFrameBufferOutputXptFromChannel (mOutputChannel,  isRGB/*isRGB*/,  false/*is425*/));
 	if (isRGB)
 		mDevice.Connect (::GetCSCInputXptFromChannel (mOutputChannel, false/*isKeyInput*/),  fsVidOutXpt);
 
 	if (mDoMultiChannel)
 	{
-		//	Multiformat --- route the one SDI output to the CSC video output (RGB) or FrameStore output (YUV)...
+		//	Multiformat --- We may be sharing the device with other processes, so route only one SDI output...
 		if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID))
 			mDevice.SetSDITransmitEnable (mOutputChannel, true);
 
 		mDevice.Connect (::GetSDIOutputInputXpt (mOutputChannel, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt);
+		mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (mOutputChannel, !mTCUseVITC));
+		if (isInterlaced)	//	Not really necessary -- NTV2 devices send VITC2 if sending VITC1
+			mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (mOutputChannel, !mTCUseVITC, true));
 		mDevice.SetSDIOutputStandard (mOutputChannel, outputStandard);
 	}
 	else
 	{
-		//	Not multiformat:  Route all possible SDI outputs to CSC video output (RGB) or FrameStore output (YUV)...
-		mDevice.ClearRouting ();
+		//	Not multiformat:  We own the whole device, so connect all possible SDI outputs...
+		const UWord	numFrameStores(::NTV2DeviceGetNumFrameStores(mDeviceID));
+		mDevice.ClearRouting();		//	Start with clean slate
 
 		if (isRGB)
 			mDevice.Connect (::GetCSCInputXptFromChannel (mOutputChannel, false/*isKeyInput*/),  fsVidOutXpt);
 
-		for (NTV2Channel chan (NTV2_CHANNEL1);  ULWord (chan) < numVideoOutputs;  chan = NTV2Channel (chan + 1))
+		for (NTV2Channel chan(NTV2_CHANNEL1);  ULWord(chan) < numSDIOutputs;  chan = NTV2Channel(chan+1))
 		{
+			if (chan != mOutputChannel  &&  chan < numFrameStores)
+				mDevice.DisableChannel(chan);				//	Disable unused FrameStore
 			if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID))
-				mDevice.SetSDITransmitEnable (chan, true);		//	Make it an output
+				mDevice.SetSDITransmitEnable (chan, true);	//	Make it an output
 
 			mDevice.Connect (::GetSDIOutputInputXpt (chan, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt);
 			mDevice.SetSDIOutputStandard (chan, outputStandard);
-		}	//	for each output spigot
+			mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (chan, !mTCUseVITC));	//	Add this SDI spigot's timecode index
+			if (isInterlaced)	//	Not really necessary -- NTV2 devices send VITC2 if sending VITC1
+				mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (chan, !mTCUseVITC, true));
+		}	//	for each SDI output spigot
 
+		//	And connect analog video output, if the device has one...
 		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtAnalogOut1))
 			mDevice.Connect (::GetOutputDestInputXpt (NTV2_OUTPUTDESTINATION_ANALOG),  isRGB ? cscVidOutXpt : fsVidOutXpt);
 
+		//	And connect HDMI video output, if the device has one...
 		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1)
 			|| ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v2)
             || ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v3)
@@ -391,21 +404,6 @@ void NTV2Player::RouteOutputSignal ()
 	}
 
 }	//	RouteOutputSignal
-
-
-void NTV2Player::SetUpOutputAutoCirculate ()
-{
-	const uint32_t	buffersPerChannel (7);		//	Sufficient and safe for all devices & FBFs
-
-	mDevice.AutoCirculateStop (mOutputChannel);
-	{
-		AJAAutoLock	autoLock (mLock);	//	Avoid AutoCirculate buffer collisions
-		mDevice.AutoCirculateInitForOutput (mOutputChannel, buffersPerChannel,
-											mWithAudio ? mAudioSystem : NTV2_AUDIOSYSTEM_INVALID,	//	Which audio system?
-											AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC);								//	Add RP188 timecode!
-	}
-
-}	//	SetUpOutputAutoCirculate
 
 
 AJAStatus NTV2Player::Run ()
@@ -450,36 +448,46 @@ void NTV2Player::ConsumerThreadStatic (AJAThread * pThread, void * pContext)		//
 
 void NTV2Player::PlayFrames (void)
 {
-	AUTOCIRCULATE_TRANSFER		mOutputXferInfo;
+	ULWord					acOpts		(AUTOCIRCULATE_WITH_RP188);	//	Add timecode
+	const bool				isInterlace	(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mVideoFormat));
+	const bool				isPAL		(NTV2_IS_PAL_VIDEO_FORMAT(mVideoFormat));
+	NTV2_POINTER			ancBuffer;
+	AUTOCIRCULATE_TRANSFER	xferInfo;
 
-	uint32_t*	fAncBuffer = mAncType != AJAAncillaryDataType_Unknown ? reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (NTV2_ANCSIZE_MAX, AJA_PAGE_SIZE)) : NULL;
-	uint32_t	fAncBufferSize = mAncType != AJAAncillaryDataType_Unknown ? NTV2_ANCSIZE_MAX : 0;
-	::memset((void*)fAncBuffer, 0x00, fAncBufferSize);
+	if (mAncType != AJAAncillaryDataType_Unknown)
+		ancBuffer.Allocate(NTV2_ANCSIZE_MAX, true);	//	true == page-aligned
+	if (::NTV2DeviceCanDoCustomAnc(mDeviceID))
+		acOpts |= AUTOCIRCULATE_WITH_ANC;
+
+	mDevice.AutoCirculateStop (mOutputChannel);
+	mDevice.AutoCirculateInitForOutput (mOutputChannel, 7,	//	7 frame cushion sufficient for all devices & FBFs
+										mWithAudio ? mAudioSystem : NTV2_AUDIOSYSTEM_INVALID,	//	Which audio system?
+										acOpts);
 	uint32_t	packetSize = 0;
 	switch(mAncType)
 	{
-	case AJAAncillaryDataType_HDR_SDR:
-	{
-		AJAAncillaryData_HDR_SDR sdrPacket;
-		sdrPacket.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
-		break;
-	}
-	case AJAAncillaryDataType_HDR_HDR10:
-	{
-		AJAAncillaryData_HDR_HDR10 hdr10Packet;
-		hdr10Packet.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
-		break;
-	}
-	case AJAAncillaryDataType_HDR_HLG:
-	{
-		AJAAncillaryData_HDR_HLG hlgPacket;
-		hlgPacket.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
-		break;
-	}
-	default:	break;
+		case AJAAncillaryDataType_HDR_SDR:
+		{
+			AJAAncillaryData_HDR_SDR sdrPacket;
+			sdrPacket.GenerateTransmitData((uint8_t*)ancBuffer.GetHostPointer(), ancBuffer.GetByteCount(), packetSize);
+			break;
+		}
+		case AJAAncillaryDataType_HDR_HDR10:
+		{
+			AJAAncillaryData_HDR_HDR10 hdr10Packet;
+			hdr10Packet.GenerateTransmitData((uint8_t*)ancBuffer.GetHostPointer(), ancBuffer.GetByteCount(), packetSize);
+			break;
+		}
+		case AJAAncillaryDataType_HDR_HLG:
+		{
+			AJAAncillaryData_HDR_HLG hlgPacket;
+			hlgPacket.GenerateTransmitData((uint8_t*)ancBuffer.GetHostPointer(), ancBuffer.GetByteCount(), packetSize);
+			break;
+		}
+		default:	break;
 	}
 
-	mDevice.AutoCirculateStart (mOutputChannel);	//	Start it running
+	mDevice.AutoCirculateStart(mOutputChannel);	//	Start it running
 
 	while (!mGlobalQuit)
 	{
@@ -487,29 +495,40 @@ void NTV2Player::PlayFrames (void)
 		mDevice.AutoCirculateGetStatus (mOutputChannel, outputStatus);
 
 		//	Check if there's room for another frame on the card...
-		if (outputStatus.GetNumAvailableOutputFrames () > 1)
+		if (outputStatus.GetNumAvailableOutputFrames() > 1)
 		{
 			//	Wait for the next frame to become ready to "consume"...
 			AVDataBuffer *	playData	(mAVCircularBuffer.StartConsumeNextBuffer ());
 			if (playData)
 			{
 				//	Include timecode in output signal...
-				mOutputXferInfo.SetOutputTimeCode (NTV2_RP188 (playData->fRP188Data), ::NTV2ChannelToTimecodeIndex (mOutputChannel));
+				NTV2TimeCodes		tcMap;
+				const NTV2_RP188	tcF1	(playData->fRP188Data);
+				NTV2_RP188			tcF2	(tcF1);
+				if (isInterlace)
+				{	//	Set bit 27 of Hi word (PAL) or Lo word (NTSC)
+					if (isPAL) tcF2.fHi |=  BIT(27);	else tcF2.fLo |=  BIT(27);
+				}
+
+				//	Put timecodes into xfer object...
+				for (NTV2TCIndexesConstIter it(mTCIndexes.begin());  it != mTCIndexes.end();  ++it)
+					tcMap[*it] = NTV2_IS_ATC_VITC2_TIMECODE_INDEX(*it) ? tcF2 : tcF1;
+				xferInfo.SetOutputTimeCodes(tcMap);
 
 				//	Transfer the timecode-burned frame to the device for playout...
-				mOutputXferInfo.SetVideoBuffer (playData->fVideoBuffer, playData->fVideoBufferSize);
-				mOutputXferInfo.SetAudioBuffer (mWithAudio ? playData->fAudioBuffer : NULL, mWithAudio ? playData->fAudioBufferSize : 0);
-				mOutputXferInfo.SetAncBuffers(fAncBuffer, NTV2_ANCSIZE_MAX, NULL, 0);
-				mDevice.AutoCirculateTransfer (mOutputChannel, mOutputXferInfo);
-				mAVCircularBuffer.EndConsumeNextBuffer ();	//	Signal that the frame has been "consumed"
+				xferInfo.SetVideoBuffer (playData->fVideoBuffer, playData->fVideoBufferSize);
+				xferInfo.SetAudioBuffer (mWithAudio ? playData->fAudioBuffer : NULL, mWithAudio ? playData->fAudioBufferSize : 0);
+				xferInfo.SetAncBuffers((ULWord*)ancBuffer.GetHostPointer(), ancBuffer.GetByteCount(), NULL, 0);
+				mDevice.AutoCirculateTransfer (mOutputChannel, xferInfo);
+				mAVCircularBuffer.EndConsumeNextBuffer();	//	Signal that the frame has been "consumed"
 			}
 		}
 		else
-			mDevice.WaitForOutputVerticalInterrupt (mOutputChannel);
+			mDevice.WaitForOutputVerticalInterrupt(mOutputChannel);
 	}	//	loop til quit signaled
 
 	//	Stop AutoCirculate...
-	mDevice.AutoCirculateStop (mOutputChannel);
+	mDevice.AutoCirculateStop(mOutputChannel);
 	//delete [] fAncBuffer;
 
 }	//	PlayFrames
@@ -639,40 +658,32 @@ void NTV2Player::ProduceFrames (void)
 			continue;
 		}
 
-		if (mCallback)
+		//	Copy my pre-made test pattern into my video buffer...
+		::memcpy (frameData->fVideoBuffer, mTestPatternVideoBuffers [testPatternIndex], mVideoBufferSize);
+
+		const	NTV2FrameRate	ntv2FrameRate	(::GetNTV2FrameRateFromVideoFormat (mVideoFormat));
+		const	TimecodeFormat	tcFormat		(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat (ntv2FrameRate));
+		const	CRP188			rp188Info		(mCurrentFrame++, 0, 0, 10, tcFormat);
+		string					timeCodeString;
+
+		rp188Info.GetRP188Reg (frameData->fRP188Data);
+		rp188Info.GetRP188Str (timeCodeString);
+
+		//	Burn the current timecode into the test pattern image that's now in my video buffer...
+		mTCBurner.BurnTimeCode (reinterpret_cast <char *> (frameData->fVideoBuffer), timeCodeString.c_str (), 80);
+
+		//	Generate audio tone data...
+		frameData->fAudioBufferSize		= mWithAudio ? AddTone (frameData->fAudioBuffer) : 0;
+
+		//	Every few seconds, change the test pattern and tone frequency...
+		const double	currentTime	(timeBase.FramesToSeconds (mCurrentFrame));
+		if (currentTime > timeOfLastSwitch + 4.0)
 		{
-			// Get the frame to play from whomever requested the callback
-			mCallback (mCallbackUserData, frameData);
-		}
-		else
-		{
-			//	Copy my pre-made test pattern into my video buffer...
-			::memcpy (frameData->fVideoBuffer, mTestPatternVideoBuffers [testPatternIndex], mVideoBufferSize);
-
-			const	NTV2FrameRate	ntv2FrameRate	(::GetNTV2FrameRateFromVideoFormat (mVideoFormat));
-			const	TimecodeFormat	tcFormat		(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat (ntv2FrameRate));
-			const	CRP188			rp188Info		(mCurrentFrame++, 0, 0, 10, tcFormat);
-			string					timeCodeString;
-
-			rp188Info.GetRP188Reg (frameData->fRP188Data);
-			rp188Info.GetRP188Str (timeCodeString);
-
-			//	Burn the current timecode into the test pattern image that's now in my video buffer...
-			mTCBurner.BurnTimeCode (reinterpret_cast <char *> (frameData->fVideoBuffer), timeCodeString.c_str (), 80);
-
-			//	Generate audio tone data...
-			frameData->fAudioBufferSize		= mWithAudio ? AddTone (frameData->fAudioBuffer) : 0;
-
-			//	Every few seconds, change the test pattern and tone frequency...
-			const double	currentTime	(timeBase.FramesToSeconds (mCurrentFrame));
-			if (currentTime > timeOfLastSwitch + 4.0)
-			{
-				frequencyIndex = (frequencyIndex + 1) % gNumFrequencies;
-				testPatternIndex = (testPatternIndex + 1) % mNumTestPatterns;
-				mToneFrequency = gFrequencies [frequencyIndex];
-				timeOfLastSwitch = currentTime;
-			}	//	if time to switch test pattern & tone frequency
-		}
+			frequencyIndex = (frequencyIndex + 1) % gNumFrequencies;
+			testPatternIndex = (testPatternIndex + 1) % mNumTestPatterns;
+			mToneFrequency = gFrequencies [frequencyIndex];
+			timeOfLastSwitch = currentTime;
+		}	//	if time to switch test pattern & tone frequency
 
 		//	Signal that I'm done producing the buffer -- it's now available for playout...
 		mAVCircularBuffer.EndProduceNextBuffer ();
@@ -775,19 +786,3 @@ void NTV2Player::DisableRP188Bypass (void)
 		mDevice.WriteRegister (regNum, 0, BIT(23), 23);
 
 }	//	DisableRP188Bypass
-
-
-void NTV2Player::GetCallback (void ** const pInstance, NTV2PlayerCallback ** const callback)
-{
-	*pInstance = mCallbackUserData;
-	*callback = mCallback;
-}	//	GetCallback
-
-
-bool NTV2Player::SetCallback (void * const pInUserData, NTV2PlayerCallback * const callback)
-{
-	mCallbackUserData = pInUserData;
-	mCallback = callback;
-
-	return true;
-}	//	SetCallback
