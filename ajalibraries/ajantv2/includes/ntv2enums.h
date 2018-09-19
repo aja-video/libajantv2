@@ -1140,7 +1140,7 @@ typedef enum _NTV2DeviceKinds
 	NTV2_DEVICEKIND_ANALOG		= 0x0010,	///< @brief	Specifies devices with analog video connectors.
 	NTV2_DEVICEKIND_SFP			= 0x0020,	///< @brief	Specifies devices with SFP connectors.
 	NTV2_DEVICEKIND_IP			= NTV2_DEVICEKIND_SFP,
-	NTV2_DEVICEKIND_EXTERNAL	= 0x0040,	///< @brief	Specifies external devices (e.g. Firewire, USB).
+	NTV2_DEVICEKIND_EXTERNAL	= 0x0040,	///< @brief	Specifies external devices (e.g. Thunderbolt).
 	NTV2_DEVICEKIND_4K			= 0x0080,	///< @brief	Specifies devices that can do 4K video.
 	NTV2_DEVICEKIND_8K			= 0x0100,	///< @brief	Specifies devices that can do 8K video.
 //	NTV2_DEVICEKIND_HFR			= 0x0200,	///< @brief	Specifies devices that can handle HFR video.
