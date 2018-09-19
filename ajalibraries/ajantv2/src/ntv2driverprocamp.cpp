@@ -217,9 +217,7 @@ bool GetVirtualProcampRegister(	VirtualRegisterNum virtualRegisterNum,
 /*****************************************************************************************
  *	RestoreHardwareProcampRegisters
  *****************************************************************************************/
-// Call this function to restore ProcAmp registers (from virtual register) after a Xilinx
-// bitfile load. Note that if you change the ADCMode (Xilinx), it also wipes out the ProcAmp
-// registers
+// Call this function to restore ProcAmp registers (from virtual register)
 
 
 #ifdef AJAMac  
