@@ -27,11 +27,11 @@ using namespace std;
 #define ACINSTP(_p_)		" inst=" << HEX16(uint64_t(_p_))
 #define ACTHIS				ACINSTP(this)
 
-#define	ACFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_AutoCirculate, __func__ << ": " << __x__)
-#define	ACWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_AutoCirculate, __func__ << ": " << __x__)
-#define	ACNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_AutoCirculate, __func__ << ": " << __x__)
-#define	ACINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_AutoCirculate, __func__ << ": " << __x__)
-#define	ACDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_AutoCirculate, __func__ << ": " << __x__)
+#define	ACFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_AutoCirculate, AJAFUNC << ": " << __x__)
+#define	ACWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_AutoCirculate, AJAFUNC << ": " << __x__)
+#define	ACNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_AutoCirculate, AJAFUNC << ": " << __x__)
+#define	ACINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_AutoCirculate, AJAFUNC << ": " << __x__)
+#define	ACDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_AutoCirculate, AJAFUNC << ": " << __x__)
 
 
 static const char	gFBAllocLockName[]	=	"com.aja.ntv2.mutex.FBAlloc";
