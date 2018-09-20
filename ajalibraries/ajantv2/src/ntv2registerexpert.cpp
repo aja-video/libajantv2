@@ -2324,23 +2324,33 @@ private:
             static const string	sHDMIStdV1[]	=	{	"1080i",	"720p",	"480i",	"576i",	"1080p",	"SXGA",	""	};
 			static const string	sHDMIStdV2V3[]	=	{	"1080i",	"720p",	"480i",	"576i",	"1080p",	"1556i",	"2Kx1080p",	"2Kx1080i",	"UHD",	"4K",	""	};
 			static const string	sVidRates[]		=	{	"",	"60.00",	"59.94",	"30.00",	"29.97",	"25.00",	"24.00",	"23.98",	"",	"",	""	};
+			static const string	sSrcSampling[]	=	{	"YC422",	"RGB",	"YC420",	"Unknown/invalid"	};
+			static const string	sBitDepth[]		=	{	"8",		"10",	"12",		"Unknown/invalid"	};
             const ULWord	hdmiVers		(::NTV2DeviceGetHDMIVersion(inDeviceID));
             const ULWord	rawVideoStd		(inRegValue & kRegMaskHDMIOutV2VideoStd);
 			const string	hdmiVidStdStr	(hdmiVers > 1 ? sHDMIStdV2V3[rawVideoStd] : (hdmiVers == 1 ? sHDMIStdV1[rawVideoStd] : ""));
 			const string	vidStdStr		(::NTV2StandardToString (NTV2Standard(rawVideoStd), true));
+			const uint32_t	srcSampling		((inRegValue & kRegMaskHDMISampling) >> kRegShiftHDMISampling);
+			const uint32_t	srcBPC			((inRegValue & (BIT(16)|BIT(17))) >> 16);
+			const uint32_t	txBitDepth		((inRegValue & (BIT(20)|BIT(21))) >> 20);
 			oss << "Video Standard: " << hdmiVidStdStr;
 			if (hdmiVidStdStr != vidStdStr)
 				oss << " (" << vidStdStr << ")";
 			oss	<< endl
-				<< "Color Mode: "		<< ((inRegValue & BIT( 8))	? "RGB"			: "YCbCr")		<< endl
-				<< "Video Rate: "		<< sVidRates[(inRegValue & kLHIRegMaskHDMIOutFPS) >> kLHIRegShiftHDMIOutFPS]  << endl
-				<< "Scan Mode: "		<< ((inRegValue & BIT(13))	? "Progressive"	: "Interlaced")	<< endl
-				<< "Bit Depth: "		<< ((inRegValue & BIT(14))	? "10-bit"		: "8-bit")		<< endl
-				<< "Color Sampling: "	<< ((inRegValue & BIT(15))	? "4:4:4"		: "4:2:2")		<< endl
-				<< "Output Range: "		<< ((inRegValue & BIT(28))	? "Full"		: "SMPTE")		<< endl
-				<< "Audio Channels: "	<< ((inRegValue & BIT(29))	? "8"			: "2")			<< endl
-				<< "Output: "			<< ((inRegValue & BIT(30))	? "DVI"			: "HDMI")		<< endl
-			<< "Audio Loopback: "	<< OnOff(inRegValue & BIT(31));
+				<< "Color Mode: "				<< ((inRegValue & BIT( 8))	? "RGB"			: "YCbCr")		<< endl
+				<< "Video Rate: "				<< sVidRates[(inRegValue & kLHIRegMaskHDMIOutFPS) >> kLHIRegShiftHDMIOutFPS]  << endl
+				<< "Scan Mode: "				<< ((inRegValue & BIT(13))	? "Progressive"	: "Interlaced")	<< endl
+				<< "Bit Depth: "				<< ((inRegValue & BIT(14))	? "10-bit"		: "8-bit")		<< endl
+				<< "Output Color Sampling: "	<< ((inRegValue & BIT(15))	? "4:4:4"		: "4:2:2")		<< endl
+				<< "Output Bit Depth: "			<< sBitDepth[txBitDepth]									<< endl
+				<< "Src Color Sampling: "		<< sSrcSampling[srcSampling]								<< endl
+				<< "Src Bits Per Component: "	<< sBitDepth[srcBPC]										<< endl
+				<< "Output Range: "				<< ((inRegValue & BIT(28))	? "Full"		: "SMPTE")		<< endl
+				<< "Audio Channels: "			<< ((inRegValue & BIT(29))	? "8"			: "2")			<< endl
+				<< "Output: "					<< ((inRegValue & BIT(30))	? "DVI"			: "HDMI");
+			if (::NTV2DeviceGetNumHDMIVideoInputs(inDeviceID) && ::NTV2DeviceGetNumHDMIVideoOutputs(inDeviceID))
+				oss	<< endl
+					<< "Audio Loopback: "		<< OnOff(inRegValue & BIT(31));
 			return oss.str();
 		}
 		virtual	~DecodeHDMIOutputControl()	{}

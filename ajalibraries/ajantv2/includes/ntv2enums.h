@@ -3910,9 +3910,16 @@ typedef enum
 
 typedef enum
 {
-    NTV2_HDMI_422 = 0,
-    NTV2_HDMI_420 = 2
+	NTV2_HDMI_YC422	= 0,				///< @brief			Specifies YCbCr 4:2:2 color space.
+	NTV2_HDMI_RGB	= 1,				///< @brief			Specifies RGB color space.
+	NTV2_HDMI_YC420	= 2,				///< @brief			Specifies YCbCr 4:2:0 color space.
+	NTV2_HDMI_422	= NTV2_HDMI_YC422,	///< @deprecated	Use NTV2_HDMI_YC422 instead.
+	NTV2_HDMI_420	= NTV2_HDMI_YC420,	///< @deprecated	Use NTV2_HDMI_YC420 instead.
+	NTV2_NUM_HDMICOLORSPACEVALS	= 3,
+	NTV2_HDMI_INVALID			= NTV2_NUM_HDMICOLORSPACEVALS
 } NTV2HDMISampleStructure;
+
+#define	NTV2_IS_VALID_HDMI_SAMPLE_STRUCT(_x_)	((_x_) >= NTV2_HDMI_YC422  &&  (_x_) < NTV2_NUM_HDMICOLORSPACEVALS)
 
 typedef enum
 {
