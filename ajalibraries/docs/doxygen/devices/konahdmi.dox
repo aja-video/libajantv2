@@ -33,13 +33,13 @@
 
 	@par	Audio
 
-	-	4 subsystems
+	-	4 audio systems
 	-	Maximum number of audio channels, per-subsystem:
 		-	Quad-stream mode:
 			-	32 channels (max.)
 		-	Single-stream mode:
 			-	8 channels (max.)
-	-	First subsystem's buffer memory starts 8MB from end of memory
+	-	First audio system’s 8MB buffer memory ends at the end of SDRAM
 
 	@par	Video Formats
 

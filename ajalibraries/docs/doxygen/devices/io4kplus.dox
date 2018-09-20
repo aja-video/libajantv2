@@ -45,14 +45,14 @@
 
 	@par	Audio
 
-	-	5 subsystems, 1 reserved for Mic input
-	-	16 channels (max.) per subsystem
-	-	First subsystem's buffer memory starts 8MB from end of memory
+	-	5 audio systems, 1 reserved for Mic input
+	-	16 channels (max.) per audio system
 	-	24-bit D/A 48kHz balanced analog audio I/O (requires breakout cable):
 		-	8-channels input-only
 		-	8-channels output-only
 		-	4-channels input and 4-channels output
 	-	Audio I/O to/from HDMI supports 2 or 8 audio channels
+	-	First audio system’s 8MB buffer memory ends at the end of SDRAM
 
 	@par	Video Formats
 
