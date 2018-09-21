@@ -517,6 +517,8 @@ public:
 	 */
 	static int64_t DebugTime();
 
+	static void * GetPrivateDataLoc (void);
+	static size_t GetPrivateDataLen (void);
 private:
 };
 
