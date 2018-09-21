@@ -1,0 +1,86 @@
+/**
+@page	toolsandutilities
+
+@section		usingsupportlog		‘supportlog’ Command-Line Utility
+
+
+@par	Description
+
+A command-line tool that generates a support log file that contains state information about the
+device and driver for one or more connected AJA devices.
+
+
+@par	Synopsis
+
+\code{.sh}
+	supportlog [OPTION...]
+	  -d, --device=index#|serial#|model      Which device to use
+	  -s, --stdout                           Dump to stdout instead of file
+	  -w  --wait=seconds                     Time to wait before capturing
+	Help options:
+	  -?, --help                             Show this help message
+	      --usage                            Show brief usage message
+\endcode
+
+-	The executable is shipped pre-built with the SDK, and appears in the “<b>bin</b>” directory.
+-	Source code is provided in the Linux SDK.
+
+
+
+@par	Device Selection
+
+By default, <b>supportlog</b> generates a support log for the first device found.
+\code{.sh}
+$ ./bin/supportlog
+\endcode
+
+This is no different than specifying device zero:
+\code{.sh}
+$ ./bin/supportlog  --device 0
+\endcode
+
+You can also specify a device by model name. For example, if a Kona4 was installed in the host system:
+\code{.sh}
+$ ./bin/supportlog  --device kona4
+\endcode
+
+You can also specify a device by serial number:
+\code{.sh}
+$ ./bin/supportlog  --device 00T12345
+\endcode
+
+
+
+@par	Log Files
+
+Log files are always written into the currently logged-in user’s home directory:
+\code{.sh}
+$ ls ~/*log
+-rw-r--r--  1 demo  staff   130K Sep 20 15:53 /Users/demo/aja_supportlog_0_1537484005.log
+-rw-r--r--  1 demo  staff   226K Sep 20 15:53 /Users/demo/aja_supportlog_1_1537484005.log
+-rw-r--r--  1 demo  staff   272K Sep 20 15:53 /Users/demo/aja_supportlog_2_1537484005.log
+\endcode
+
+The name of the log file contains the device index number, and a 10-digit number that’s based on the date
+and time it was generated. If the host file system enumerates files lexically by name, within a single device
+index’s group, they should appear sorted oldest-to-newest.
+
+To write a log file to a specific directory with a different name, use the “<tt>--stdout</tt>” option along
+with standard shell redirection directives to pipe the output into the desired file and path:
+\code{.sh}
+$ ./bin/supportlog  --stdout  >./my_support_log.txt
+\endcode
+
+
+
+@par	Delaying Log Capture
+
+Sometimes it’s desirable to capture the log after a certain length of time, often to give the operator time
+to configure something. Use the “<tt>--wait</tt>” option to specify a delay time.
+For example, to capture a log after delaying 10 seconds:
+\code{.sh}
+$ ./bin/supportlog  --wait 10
+\endcode
+
+
+**/
