@@ -21,8 +21,8 @@
 		-	<a href="https://itunes.apple.com/us/app/aja-datacalc/id343454572?mt=8">iOS</a>
 		-	<a href="https://play.google.com/store/apps/details?id=com.aja.datacalc">Android</a>
 
-	-	<b>supportlog</b> -- Sometimes when diagnosing an issue, AJA’s OEM SDK support staff may request a “register dump” or “register log”.
-		This log file can be generated using the <b>supportlog</b> command line tool or from \ref usingntv2watcher.
+	-	\ref usingsupportlog -- Sometimes when diagnosing an issue, AJA’s OEM SDK support staff may request a “register dump” or “register log”.
+		This log file can be generated using \ref usingsupportlog or \ref usingntv2watcher.
 		See the Knowledgebase article <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/168">How to Generate a ‘Support Log’</a> for more information.
 
 	-	<b>ntv2firmwareinstaller</b> -- A command-line tool used to “flash” new firmware into a connected AJA device.

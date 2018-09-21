@@ -40,10 +40,10 @@
 
 	@par	Audio
 
-	-	2 subsystems
-	-	16 channels (max.) per subsystem
+	-	2 audio systems
+	-	16 channels (max.) per audio system
 	-	16 channels (max.) of AES audio
-	-	First subsystem's buffer memory starts 8MB from end of last frame
+	-	First audio system’s 8MB buffer memory ends at the end of SDRAM
 	-	AES audio inputs support asynchronous audio, 32Hz-96kHz, sample-rate converted to 48kHz
 
 	@par	Video Formats
