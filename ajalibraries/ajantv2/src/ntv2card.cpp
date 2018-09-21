@@ -96,8 +96,6 @@ CNTV2Card::~CNTV2Card ()
 
 NTV2DeviceID CNTV2Card::GetDeviceID (void)
 {
-	return DEVICE_ID_KONAIP_2110;
-
 	ULWord	value	(0);
 	if (_boardOpened && ReadRegister (kRegBoardID, value))
 	{
