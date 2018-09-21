@@ -170,7 +170,7 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	}
 	
 	// select square division or 2 pixel interleave in frame buffer
-    AdjustFor4kQuadOrTsi();
+    AdjustFor4kQuadOrTpiOut();
 
 	// Figure out what our input format is based on what is selected 
 	GetSelectedInputVideoFormat(mFb1VideoFormat);
@@ -1608,9 +1608,8 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 	
 	else // 425
 	{
-		CNTV2VPID parser;
-		parser.SetVPID(mVpid1a);
-		VPIDStandard std = parser.GetStandard();
+		mVpidParser.SetVPID(mVpid1a);
+		VPIDStandard std = mVpidParser.GetStandard();
 		bVpid2x2piIn  = std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb;
 		bVpid4x2piInA = std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb;
 		bVpid4x2piInB = std == VPIDStandard_2160_QuadDualLink_3Gb;
@@ -1677,7 +1676,7 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 	}
 	
 	// select square division or 2 pixel interleave in frame buffer
-    AdjustFor4kQuadOrTsi();
+    AdjustFor4kQuadOrTpiIn(inputFormat, b2pi);
 
 	// SDI In 1
 	bool bConvertBToA; 
@@ -3109,9 +3108,8 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
 		{
 			if (mVpid1Valid)
 			{
-				CNTV2VPID parser;
-				parser.SetVPID(mVpid1a);
-				VPIDStandard std = parser.GetStandard();
+				mVpidParser.SetVPID(mVpid1a);
+				VPIDStandard std = mVpidParser.GetStandard();
 				switch (std)
 				{
 				case VPIDStandard_2160_Single_12Gb:

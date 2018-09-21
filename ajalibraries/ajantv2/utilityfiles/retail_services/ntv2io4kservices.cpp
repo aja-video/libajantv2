@@ -131,7 +131,7 @@ void Io4KServices::SetDeviceXPointPlayback ()
 	ULWord						selectSwapQuad		= 0;
 	mCard->ReadRegister(kVRegSwizzle4kOutput, selectSwapQuad);
 	bool						bQuadSwap			= b4K && !b4k12gOut && !b4k6gOut && (selectSwapQuad != 0);	
-	bool						bInRGB				= inputColorSpace == NTV2_RGBSelect;
+	bool						bInRGB				= inputColorSpace == NTV2_ColorSpaceModeRgb;
 
 	// make sure formats/modes match for multibuffer modes
 	if (b4K || b2FbLevelBHfr || bStereoOut)
@@ -151,7 +151,7 @@ void Io4KServices::SetDeviceXPointPlayback ()
 	}
 	
 	// select square division or 2 pixel interleave in frame buffer
-    AdjustFor4kQuadOrTsi();
+    AdjustFor4kQuadOrTpiOut();
 	
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1669,7 +1669,7 @@ void Io4KServices::SetDeviceXPointCapture ()
 	}
 	
 	// select square division or 2 pixel interleave in frame buffer
-    AdjustFor4kQuadOrTsi();
+    AdjustFor4kQuadOrTpiIn(inputFormat, b2pi);
 	
 	// Mixer/Keyer
 	mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptBlack);
@@ -3089,9 +3089,8 @@ void Io4KServices::SetDeviceMiscRegisters ()
 		{
 			if (mVpid1Valid)
 			{
-				CNTV2VPID parser;
-				parser.SetVPID(mVpid1a);
-				VPIDStandard std = parser.GetStandard();
+				mVpidParser.SetVPID(mVpid1a);
+				VPIDStandard std = mVpidParser.GetStandard();
 				switch (std)
 				{
 				case VPIDStandard_2160_DualLink:

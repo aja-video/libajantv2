@@ -18,6 +18,10 @@ The<b>AJA Logger</b>’s user interface consists of one main window, the main wi
 -	A <b>Status Bar</b> at the bottom that shows logging activity statistics.
 
 
+@bug	On Windows, elevated user privileges are required to create the ::AJADebug facility’s global shared
+		memory region. Before any kind of logging can be done, an ::AJADebug client (any software that calls
+		AJADebug::Open) must be “Run as Administrator”. Once this has been done, ::AJADebug clients can log
+		messages, and ‘ajalogger.exe’ will operate under ordinary user privileges.
 
 
 

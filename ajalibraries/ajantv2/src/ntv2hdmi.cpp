@@ -251,16 +251,20 @@ bool CNTV2Card::SetHDMIV2TxBypass (const bool bypass)
 	}
 #endif	//	!defined (NTV2_DEPRECATE)
 
-bool CNTV2Card::SetHDMIOutSampleStructure (const NTV2HDMISampleStructure value)		
+bool CNTV2Card::SetHDMIOutSampleStructure (const NTV2HDMISampleStructure inValue)		
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-			&& WriteRegister (kRegHDMIOutControl, ULWord(value), kRegMaskHDMISampling, kRegShiftHDMISampling);
+	if (!NTV2_IS_VALID_HDMI_SAMPLE_STRUCT(inValue))
+		return false;
+	if (::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) == 0)
+		return false;
+	return WriteRegister (kRegHDMIOutControl, ULWord(inValue), kRegMaskHDMISampling, kRegShiftHDMISampling);
 }
 
 bool CNTV2Card::GetHDMIOutSampleStructure (NTV2HDMISampleStructure & outValue)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-			&& CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, outValue, kRegMaskHDMISampling, kRegShiftHDMISampling);
+	if (::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) == 0)
+		return false;
+	return CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, outValue, kRegMaskHDMISampling, kRegShiftHDMISampling);
 }
 
 bool CNTV2Card::SetHDMIOutVideoFPS (const NTV2FrameRate value)				

@@ -7,15 +7,36 @@
 #include "ntv2card.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
+#include "ajabase/system/lock.h"
+#include "ajabase/system/debug.h"
+#include "ajaanc/includes/ancillarylist.h"
 #include <iomanip>
 #include <assert.h>
+
+
 using namespace std;
+
 
 #if defined(_DEBUG)
 	//	Debug builds can clear Anc buffers during A/C capture
 	#define	AJA_NTV2_CLEAR_DEVICE_ANC_BUFFER_AFTER_CAPTURE_XFER		//	Requires non-zero kVRegZeroDeviceAncPostCapture
 	#define AJA_NTV2_CLEAR_HOST_ANC_BUFFER_TAIL_AFTER_CAPTURE_XFER	//	Requires non-zero kVRegZeroHostAncPostCapture
 #endif	//	_DEBUG
+
+//	Logging Macros
+#define ACINSTP(_p_)		" inst=" << HEX16(uint64_t(_p_))
+#define ACTHIS				ACINSTP(this)
+
+#define	ACFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_AutoCirculate, AJAFUNC << ": " << __x__)
+#define	ACWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_AutoCirculate, AJAFUNC << ": " << __x__)
+#define	ACNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_AutoCirculate, AJAFUNC << ": " << __x__)
+#define	ACINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_AutoCirculate, AJAFUNC << ": " << __x__)
+#define	ACDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_AutoCirculate, AJAFUNC << ": " << __x__)
+
+
+static const char	gFBAllocLockName[]	=	"com.aja.ntv2.mutex.FBAlloc";
+static AJALock		gFBAllocLock(gFBAllocLockName);	//	New in SDK 15:	Global mutex to avoid device frame buffer allocation race condition
+
 
 #if !defined (NTV2_DEPRECATE_12_6)
 static const NTV2Channel gCrosspointToChannel [] = {	/* NTV2CROSSPOINT_CHANNEL1	==>	*/	NTV2_CHANNEL1,
@@ -483,7 +504,6 @@ bool   CNTV2Card::GetAutoCirculate(NTV2Crosspoint channelSpec, AUTOCIRCULATE_STA
 
 bool CNTV2Card::FindUnallocatedFrames (const UByte inFrameCount, LWord & outStartFrame, LWord & outEndFrame)
 {
-	//	Look for a contiguous group of available frame buffers...
 	AUTOCIRCULATE_STATUS			acStatus;
 	typedef	std::set <uint16_t>		U16Set;
 	typedef U16Set::const_iterator	U16SetConstIter;
@@ -491,6 +511,7 @@ bool CNTV2Card::FindUnallocatedFrames (const UByte inFrameCount, LWord & outStar
 	ULWord							isQuadMode1	(0);
 	ULWord							isQuadMode5	(0);
 
+	//	Look for a contiguous group of available frame buffers...
 	outStartFrame = outEndFrame = 0;
 	if (!_boardOpened)
 		return false;
@@ -540,10 +561,14 @@ bool CNTV2Card::FindUnallocatedFrames (const UByte inFrameCount, LWord & outStar
 	}
 
 	if (startFrameNumber > finalFrameNumber || endFrameNumber > finalFrameNumber)
+	{
+		ACFAIL("Cannot find " << DEC(inFrameCount) << " unallocated frames");
 		return false;
+	}
 
 	outStartFrame = LWord(startFrameNumber);
 	outEndFrame = LWord(endFrameNumber);
+	ACDBG("Found unused " << DEC(UWord(inFrameCount)) << "-frame block (frames " << DEC(outStartFrame) << "-" << DEC(outEndFrame) << ")");
 	return true;
 
 }	//	FindUnallocatedFrames
@@ -575,23 +600,43 @@ bool CNTV2Card::AutoCirculateInitForInput (	const NTV2Channel		inChannel,
 											const UByte				inStartFrameNumber,
 											const UByte				inEndFrameNumber)
 {
-	LWord	startFrameNumber(0);
-	LWord	endFrameNumber	(0);
-
-	if (!NTV2_IS_VALID_CHANNEL (inChannel))
+	if (!NTV2_IS_VALID_CHANNEL(inChannel))
 		return false;	//	Must be valid channel
 	if (inNumChannels == 0)
 		return false;	//	At least one channel
+	if (!gFBAllocLock.IsValid())
+		return false;	//	Mutex not ready
 
-	if ((inEndFrameNumber - inStartFrameNumber) != 0)
+	AJAAutoLock	autoLock (&gFBAllocLock);	//	Avoid AutoCirculate buffer collisions
+	LWord	startFrameNumber(static_cast <LWord>(inStartFrameNumber));
+	LWord	endFrameNumber	(static_cast <LWord>(inEndFrameNumber));
+	if (inFrameCount)
 	{
-		startFrameNumber = inStartFrameNumber;
-		endFrameNumber = inEndFrameNumber;
-	}
-	else if (!FindUnallocatedFrames (inFrameCount, startFrameNumber, endFrameNumber))
-		return false;
+		if (inEndFrameNumber - inStartFrameNumber)
+			ACWARN ("Start and End frame numbers (" << DEC(startFrameNumber) << ", " << DEC(endFrameNumber)
+					<< ") specified with non-zero frame count (" << DEC(uint16_t(inFrameCount)) << ")");
 
-#if defined(_DEBUG)	//	Look for interference from other framestores...
+		if (!FindUnallocatedFrames (inFrameCount, startFrameNumber, endFrameNumber))
+			return false;
+	}
+	else if (endFrameNumber == 0  &&  startFrameNumber == 0)
+	{
+		ACFAIL ("Zero frames requested");
+		return false;	//	inFrameCount zero
+	}
+
+	if (endFrameNumber < startFrameNumber)
+	{
+		ACFAIL ("End frame (" << DEC(endFrameNumber) << ") < Start frame (" << DEC(startFrameNumber) << ")");
+		return false;	//	endFrame must be > startFrame
+	}
+	if ((endFrameNumber - startFrameNumber + 1) < 2)
+	{
+		ACFAIL ("Frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber) << " < 2 frames");
+		return false;	//	must be at least 2 frames
+	}
+
+	//	Warn about interference from other channels...
 	for (UWord chan(0);  chan < ::NTV2DeviceGetNumFrameStores(_boardID);  chan++)
 	{
 		ULWord		frameNum(0);
@@ -602,11 +647,10 @@ bool CNTV2Card::AutoCirculateInitForInput (	const NTV2Channel		inChannel,
 				if (GetMode(NTV2Channel(chan), mode)  &&  mode == NTV2_MODE_INPUT)	//	Channel is capturing
 					if (GetInputFrame(NTV2Channel(chan), frameNum))
 						if (frameNum >= ULWord(startFrameNumber)  &&  frameNum <= ULWord(endFrameNumber))	//	Frame in range
-							cerr << "WARNING: FrameStore " << DEC(chan+1) << " is writing into frame " << DEC(frameNum)
-								<< ", which will corrupt FrameStore " << DEC(inChannel+1) << " AutoCirculate input from frames "
-								<< DEC(startFrameNumber) << "-" << DEC(endFrameNumber) << endl;
+							ACWARN ("FrameStore " << DEC(chan+1) << " is writing frame " << DEC(frameNum)
+									<< " -- will corrupt AutoCirculate channel " << DEC(inChannel+1) << " input frames "
+									<< DEC(startFrameNumber) << "-" << DEC(endFrameNumber));
 	}
-#endif	//	defined(_DEBUG)
 
 	//	Fill in our OS independent data structure...
 	AUTOCIRCULATE_DATA	autoCircData	(eInitAutoCirc);
@@ -627,7 +671,12 @@ bool CNTV2Card::AutoCirculateInitForInput (	const NTV2Channel		inChannel,
 	autoCircData.bVal7 = inOptionFlags & AUTOCIRCULATE_WITH_ANC ? true : false;
 	autoCircData.bVal8 = inOptionFlags & AUTOCIRCULATE_WITH_LTC ? true : false;
 
-	return AutoCirculate (autoCircData);	//	Call the OS-specific method
+	const bool result (AutoCirculate(autoCircData));	//	Call the OS-specific method
+	if (result)
+		ACINFO("Channel " << DEC(inChannel+1) << " initialized using frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber));
+	else
+		ACFAIL("Channel " << DEC(inChannel+1) << " initialization failed");
+	return result;
 
 }	//	AutoCirculateInitForInput
 
@@ -640,23 +689,42 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 											const UByte				inStartFrameNumber,
 											const UByte				inEndFrameNumber)
 {
-	LWord	startFrameNumber(0);
-	LWord	endFrameNumber	(0);
-
-	if (!NTV2_IS_VALID_CHANNEL (inChannel))
+	if (!NTV2_IS_VALID_CHANNEL(inChannel))
 		return false;	//	Must be valid channel
 	if (inNumChannels == 0)
 		return false;	//	At least one channel
+	if (!gFBAllocLock.IsValid())
+		return false;	//	Mutex not ready
 
-	if ((inEndFrameNumber - inStartFrameNumber) != 0)
+	AJAAutoLock	autoLock (&gFBAllocLock);	//	Avoid AutoCirculate buffer collisions
+	LWord	startFrameNumber(static_cast <LWord>(inStartFrameNumber));
+	LWord	endFrameNumber	(static_cast <LWord>(inEndFrameNumber));
+	if (inFrameCount)
 	{
-		startFrameNumber = inStartFrameNumber;
-		endFrameNumber = inEndFrameNumber;
-	}
-	else if (!FindUnallocatedFrames (inFrameCount, startFrameNumber, endFrameNumber))
-		return false;
+		if (inEndFrameNumber - inStartFrameNumber)
+			ACWARN ("Start and End frame numbers (" << DEC(startFrameNumber) << ", " << DEC(endFrameNumber)
+					<< ") specified with non-zero frame count (" << DEC(uint16_t(inFrameCount)) << ")");
 
-#if defined(_DEBUG)	//	Look for interference from other framestores...
+		if (!FindUnallocatedFrames (inFrameCount, startFrameNumber, endFrameNumber))
+			return false;
+	}
+	else if (endFrameNumber == 0  &&  startFrameNumber == 0)
+	{
+		ACFAIL ("Zero frames requested");
+		return false;	//	inFrameCount zero
+	}
+
+	if (endFrameNumber < startFrameNumber)
+	{
+		ACFAIL ("End frame (" << DEC(endFrameNumber) << ") < Start frame (" << DEC(startFrameNumber) << ")");
+		return false;	//	endFrame must be > startFrame
+	}
+	if ((endFrameNumber - startFrameNumber + 1) < 2)
+	{
+		ACFAIL ("Frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber) << " < 2 frames");
+		return false;	//	must be at least 2 frames
+	}
+
 	for (UWord chan(0);  chan < ::NTV2DeviceGetNumFrameStores(_boardID);  chan++)
 	{
 		ULWord		frameNum(0);
@@ -667,11 +735,10 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 				if (GetMode(NTV2Channel(chan), mode)  &&  mode == NTV2_MODE_INPUT)	//	Channel is capturing
 					if (GetInputFrame(NTV2Channel(chan), frameNum))
 						if (frameNum >= ULWord(startFrameNumber)  &&  frameNum <= ULWord(endFrameNumber))	//	Frame in range
-							cerr << "WARNING: FrameStore " << DEC(chan+1) << " is writing into frame " << DEC(frameNum)
-								<< ", which will corrupt FrameStore " << DEC(inChannel+1) << " AutoCirculate output from frames "
-								<< DEC(startFrameNumber) << "-" << DEC(endFrameNumber) << endl;
+							ACWARN("FrameStore " << DEC(chan+1) << " is writing frame " << DEC(frameNum)
+								<< " -- will corrupt AutoCirculate channel " << DEC(inChannel+1) << " output frames "
+								<< DEC(startFrameNumber) << "-" << DEC(endFrameNumber));
 	}
-#endif	//	defined(_DEBUG)
 
 	//	Fill in our OS independent data structure...
 	AUTOCIRCULATE_DATA	autoCircData	(eInitAutoCirc);
@@ -692,7 +759,12 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 	autoCircData.bVal7 = ((inOptionFlags & AUTOCIRCULATE_WITH_ANC) != 0) ? true : false;
 	autoCircData.bVal8 = ((inOptionFlags & AUTOCIRCULATE_WITH_LTC) != 0) ? true : false;
 
-	return AutoCirculate (autoCircData);	//	Call the OS-specific method
+	const bool result (AutoCirculate(autoCircData));	//	Call the OS-specific method
+	if (result)
+		ACINFO("Channel " << DEC(inChannel+1) << " initialized using frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber));
+	else
+		ACFAIL("Channel " << DEC(inChannel+1) << " initialization failed");
+	return result;
 
 }	//	AutoCirculateInitForOutput
 
@@ -704,7 +776,12 @@ bool CNTV2Card::AutoCirculateStart (const NTV2Channel inChannel, const ULWord64 
 	autoCircData.lVal2 = static_cast <LWord> (inStartTime & 0xFFFFFFFF);
 	if (!GetCurrentACChannelCrosspoint (*this, inChannel, autoCircData.channelSpec))
 		return false;
-	return AutoCirculate (autoCircData);
+	const bool result (AutoCirculate(autoCircData));
+	if (result)
+		ACINFO("Started channel " << DEC(inChannel+1));
+	else
+		ACFAIL("Failed to start channel " << DEC(inChannel+1));
+	return result;
 }
 
 
@@ -723,16 +800,28 @@ bool CNTV2Card::AutoCirculateStop (const NTV2Channel inChannel, const bool inAbo
 	const bool	stopInputFailed		(!AutoCirculate (stopInput));
 	const bool	stopOutputFailed	(!AutoCirculate (stopOutput));
 	if (stopInputFailed && stopOutputFailed)
+	{
+		ACFAIL("Failed to stop channel " << DEC(inChannel+1));
 		return false;	//	Both failed
+	}
 	if (inAbort)
+	{
+		ACINFO("Aborted channel " << DEC(inChannel+1));
 		return true;	//	In abort case, no more to do!
+	}
 
 	//	Wait until driver changes AC state to DISABLED...
-	bool result = GetMode (inChannel, mode);
-	if (NTV2_IS_INPUT_MODE (mode))		WaitForInputFieldID (NTV2_FIELD0, inChannel);
-	if (NTV2_IS_OUTPUT_MODE (mode))		WaitForOutputFieldID (NTV2_FIELD0, inChannel);
-	if (AutoCirculateGetStatus (inChannel, acStatus)  &&  acStatus.acState != NTV2_AUTOCIRCULATE_DISABLED)
-		return AutoCirculateStop (inChannel, true);	//	something's wrong -- abort (WARNING: RECURSIVE CALL!)
+	bool result (GetMode(inChannel, mode));
+	if (NTV2_IS_INPUT_MODE(mode))
+		WaitForInputFieldID(NTV2_FIELD0, inChannel);
+	if (NTV2_IS_OUTPUT_MODE(mode))
+		WaitForOutputFieldID(NTV2_FIELD0, inChannel);
+	if (AutoCirculateGetStatus(inChannel, acStatus)  &&  acStatus.acState != NTV2_AUTOCIRCULATE_DISABLED)
+	{
+		ACWARN("Failed to stop channel " << DEC(inChannel+1) << " -- retrying with ABORT");
+		return AutoCirculateStop(inChannel, true);	//	something's wrong -- abort (WARNING: RECURSIVE CALL!)
+	}
+	ACINFO("Stopped channel " << DEC(inChannel+1));
 	return result;
 
 }	//	AutoCirculateStop
@@ -745,7 +834,13 @@ bool CNTV2Card::AutoCirculatePause (const NTV2Channel inChannel)
 	autoCircData.bVal1		= false;
 	if (!GetCurrentACChannelCrosspoint (*this, inChannel, autoCircData.channelSpec))
 		return false;
-	return AutoCirculate (autoCircData);
+
+	const bool result(AutoCirculate(autoCircData));
+	if (result)
+		ACINFO("Paused channel " << DEC(inChannel+1));
+	else
+		ACFAIL("Failed to pause channel " << DEC(inChannel+1));
+	return result;
 
 }	//	AutoCirculatePause
 
@@ -758,7 +853,13 @@ bool CNTV2Card::AutoCirculateResume (const NTV2Channel inChannel, const bool inC
 	autoCircData.bVal2 = inClearDropCount;
 	if (!GetCurrentACChannelCrosspoint (*this, inChannel, autoCircData.channelSpec))
 		return false;
-	return AutoCirculate (autoCircData);
+
+	const bool result(AutoCirculate(autoCircData));
+	if (result)
+		ACINFO("Resumed channel " << DEC(inChannel+1));
+	else
+		ACFAIL("Failed to resume channel " << DEC(inChannel+1));
+	return result;
 
 }	//	AutoCirculateResume
 
@@ -770,7 +871,13 @@ bool CNTV2Card::AutoCirculateFlush (const NTV2Channel inChannel, const bool inCl
     autoCircData.bVal1 = inClearDropCount;
 	if (!GetCurrentACChannelCrosspoint (*this, inChannel, autoCircData.channelSpec))
 		return false;
-	return AutoCirculate (autoCircData);
+
+	const bool result(AutoCirculate(autoCircData));
+	if (result)
+		ACINFO("Flushed channel " << DEC(inChannel+1) << ", " << (inClearDropCount?"cleared":"retained") << " drop count");
+	else
+		ACFAIL("Failed to flush channel " << DEC(inChannel+1));
+	return result;
 
 }	//	AutoCirculateFlush
 
@@ -782,7 +889,13 @@ bool CNTV2Card::AutoCirculatePreRoll (const NTV2Channel inChannel, const ULWord 
 	autoCircData.lVal1 = inPreRollFrames;
 	if (!GetCurrentACChannelCrosspoint (*this, inChannel, autoCircData.channelSpec))
 		return false;
-	return AutoCirculate (autoCircData);
+
+	const bool result(AutoCirculate(autoCircData));
+	if (result)
+		ACINFO("Prerolled " << DEC(inPreRollFrames) << " frame(s) on channel " << DEC(inChannel+1));
+	else
+		ACFAIL("Failed to preroll " << DEC(inPreRollFrames) << " frame(s) on channel " << DEC(inChannel+1));
+	return result;
 
 }	//	AutoCirculatePreRoll
 
@@ -805,7 +918,12 @@ bool CNTV2Card::AutoCirculateGetStatus (const NTV2Channel inChannel, AUTOCIRCULA
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 		return false;
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-	return NTV2Message (reinterpret_cast <NTV2_HEADER *> (&outStatus));
+	const bool result(NTV2Message(reinterpret_cast<NTV2_HEADER *>(&outStatus)));
+	if (result)
+		ACDBG("GetStatus successful on channel " << DEC(inChannel+1));
+	else
+		ACFAIL("Failed to get status on channel " << DEC(inChannel+1));
+	return result;
 
 }	//	AutoCirculateGetStatus
 
@@ -827,7 +945,13 @@ bool CNTV2Card::AutoCirculateSetActiveFrame (const NTV2Channel inChannel, const 
 	autoCircData.lVal1 = inNewActiveFrame;
 	if (!GetCurrentACChannelCrosspoint (*this, inChannel, autoCircData.channelSpec))
 		return false;
-	return AutoCirculate (autoCircData);
+
+	const bool result(AutoCirculate(autoCircData));
+	if (result)
+		ACINFO("Set active frame to " << DEC(inNewActiveFrame) << " on channel " << DEC(inChannel+1));
+	else
+		ACFAIL("Failed to set active frame to " << DEC(inNewActiveFrame) << " on channel " << DEC(inChannel+1));
+	return result;
 
 }	//	AutoCirculateSetActiveFrame
 
@@ -962,6 +1086,10 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			}
 		}
 	#endif	//	AJA_NTV2_CLEAR_HOST_ANC_BUFFER_TAIL_AFTER_CAPTURE_XFER
+	if (result)
+		ACDBG("Transfer successful for channel " << DEC(inChannel+1));
+	else
+		ACFAIL("Transfer failed on channel " << DEC(inChannel+1));
 	return result;
 
 }	//	AutoCirculateTransfer

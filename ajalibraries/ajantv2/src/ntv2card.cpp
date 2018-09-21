@@ -930,4 +930,4 @@ ostream &	operator << (ostream & inOutStr, const NTV2DIDSet & inDIDs)
 #endif	//	!defined (NTV2_DEPRECATE)
 
 
-NTV2_POINTER CNTV2Card::NULL_POINTER (NULL, 0);
+NTV2_POINTER CNTV2Card::NULL_POINTER (AJA_NULL, 0);

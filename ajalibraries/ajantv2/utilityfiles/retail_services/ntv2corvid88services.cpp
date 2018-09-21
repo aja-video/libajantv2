@@ -69,7 +69,7 @@ void Corvid88Services::SetDeviceXPointPlayback ()
 	}
 	
 	// select square division or 2 pixel interleave in frame buffer
-    AdjustFor4kQuadOrTsi();
+    AdjustFor4kQuadOrTpiOut();
 
 	// Figure out what our input format is based on what is selected 
 	GetSelectedInputVideoFormat(mFb1VideoFormat);
@@ -1174,16 +1174,15 @@ void Corvid88Services::SetDeviceXPointCapture ()
 		}
 	}
 
-	CNTV2VPID parser;
-	parser.SetVPID(mVpid1a);
-	VPIDStandard std = parser.GetStandard();
+	mVpidParser.SetVPID(mVpid1a);
+	VPIDStandard std = mVpidParser.GetStandard();
 	bool b2x2piIn  = (std == VPIDStandard_2160_DualLink);
 	bool b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
 	bool b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
 	bool b2piIn = (b2x2piIn || b4x2piInA || b4x2piInB);
 
 	// select square division or 2 pixel interleave in frame buffer
-    AdjustFor4kQuadOrTsi();
+    AdjustFor4kQuadOrTpiIn(inputFormat, b2piIn);
 
 	// SDI In 1
 	bool bConvertBToA; 
@@ -2025,9 +2024,8 @@ void Corvid88Services::SetDeviceMiscRegisters ()
 
 		if (mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb))
 		{
-			CNTV2VPID parser;
-			parser.SetVPID(vpida);
-			VPIDStandard std = parser.GetStandard();
+			mVpidParser.SetVPID(vpida);
+			VPIDStandard std = mVpidParser.GetStandard();
 			switch (std)
 			{
 			case VPIDStandard_2160_DualLink:

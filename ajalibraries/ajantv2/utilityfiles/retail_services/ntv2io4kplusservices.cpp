@@ -159,7 +159,7 @@ void Io4KPlusServices::SetDeviceXPointPlayback ()
 	}
 	
 	// select square division or 2 pixel interleave in frame buffer
-    AdjustFor4kQuadOrTsi();
+    AdjustFor4kQuadOrTpiOut();
 	
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1601,9 +1601,8 @@ void Io4KPlusServices::SetDeviceXPointCapture ()
 	
 	else // 425 or Quads
 	{
-		CNTV2VPID parser;
-		parser.SetVPID(mVpid1a);
-		VPIDStandard std = parser.GetStandard();
+		mVpidParser.SetVPID(mVpid1a);
+		VPIDStandard std = mVpidParser.GetStandard();
 		bVpid2x2piIn  = std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb;
 		bVpid4x2piInA = std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb;
 		bVpid4x2piInB = std == VPIDStandard_2160_QuadDualLink_3Gb;
@@ -1675,7 +1674,7 @@ void Io4KPlusServices::SetDeviceXPointCapture ()
 	}
 	
 	// select square division or 2 pixel interleave in frame buffer
-    AdjustFor4kQuadOrTsi();
+    AdjustFor4kQuadOrTpiIn(inputFormat, b2pi);
 	
 	// Mixer/Keyer
 	mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptBlack);
@@ -3108,9 +3107,8 @@ void Io4KPlusServices::SetDeviceMiscRegisters ()
 		{
 			if (mVpid1Valid)
 			{
-				CNTV2VPID parser;
-				parser.SetVPID(mVpid1a);
-				VPIDStandard std = parser.GetStandard();
+				mVpidParser.SetVPID(mVpid1a);
+				VPIDStandard std = mVpidParser.GetStandard();
 				switch (std)
 				{
 				case VPIDStandard_2160_Single_12Gb:

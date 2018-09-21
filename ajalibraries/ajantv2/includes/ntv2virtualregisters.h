@@ -475,8 +475,9 @@ typedef enum
 	kVRegHdmiHdrOutMode						= VIRTUALREG_START+527,
 
     kVRegServicesForceInit                  = VIRTUALREG_START+528,		// set true when power state changes
+    kVRegServicesModeFinal               	= VIRTUALREG_START+529,	
 
-    kVRegLastAJA							= VIRTUALREG_START+529,		///< @brief	The last AJA virtual register slot
+    kVRegLastAJA							= VIRTUALREG_START+530,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 

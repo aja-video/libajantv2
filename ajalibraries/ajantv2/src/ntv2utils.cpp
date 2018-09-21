@@ -4824,12 +4824,11 @@ static const NTV2TCIndex gChanVITC2[]	= {	NTV2_TCINDEX_SDI1_2, NTV2_TCINDEX_SDI2
 static const NTV2TCIndex gChanATCLTC[]	= {	NTV2_TCINDEX_SDI1_LTC, NTV2_TCINDEX_SDI2_LTC, NTV2_TCINDEX_SDI3_LTC, NTV2_TCINDEX_SDI4_LTC, NTV2_TCINDEX_SDI5_LTC, NTV2_TCINDEX_SDI6_LTC, NTV2_TCINDEX_SDI7_LTC, NTV2_TCINDEX_SDI8_LTC};
 
 
-NTV2TCIndex NTV2ChannelToTimecodeIndex (const NTV2Channel inChannel, const bool inEmbeddedLTC)
+NTV2TCIndex NTV2ChannelToTimecodeIndex (const NTV2Channel inChannel, const bool inEmbeddedLTC, const bool inIsF2)
 {
 	if (NTV2_IS_VALID_CHANNEL(inChannel))
-		return inEmbeddedLTC ? gChanATCLTC[inChannel] : gChanVITC1[inChannel];
-	else
-		return NTV2_TCINDEX_INVALID;
+		return inEmbeddedLTC ? gChanATCLTC[inChannel] : (inIsF2 ? gChanVITC2[inChannel] : gChanVITC1[inChannel]);
+	return NTV2_TCINDEX_INVALID;
 }
 
 
@@ -6929,18 +6928,18 @@ string NTV2TCIndexToString (const NTV2TCIndex inValue, const bool inCompactDispl
 	switch (inValue)
 	{
 		case NTV2_TCINDEX_DEFAULT:	return inCompactDisplay ? "DEFAULT"		: "NTV2_TCINDEX_DEFAULT";
-		case NTV2_TCINDEX_SDI1:		return inCompactDisplay ? "SDI1"		: "NTV2_TCINDEX_SDI1";
-		case NTV2_TCINDEX_SDI2:		return inCompactDisplay ? "SDI2"		: "NTV2_TCINDEX_SDI2";
-		case NTV2_TCINDEX_SDI3:		return inCompactDisplay ? "SDI3"		: "NTV2_TCINDEX_SDI3";
-		case NTV2_TCINDEX_SDI4:		return inCompactDisplay ? "SDI4"		: "NTV2_TCINDEX_SDI4";
+		case NTV2_TCINDEX_SDI1:		return inCompactDisplay ? "SDI1-VITC"	: "NTV2_TCINDEX_SDI1";
+		case NTV2_TCINDEX_SDI2:		return inCompactDisplay ? "SDI2-VITC"	: "NTV2_TCINDEX_SDI2";
+		case NTV2_TCINDEX_SDI3:		return inCompactDisplay ? "SDI3-VITC"	: "NTV2_TCINDEX_SDI3";
+		case NTV2_TCINDEX_SDI4:		return inCompactDisplay ? "SDI4-VITC"	: "NTV2_TCINDEX_SDI4";
 		case NTV2_TCINDEX_SDI1_LTC:	return inCompactDisplay ? "SDI1-LTC"	: "NTV2_TCINDEX_SDI1_LTC";
 		case NTV2_TCINDEX_SDI2_LTC:	return inCompactDisplay ? "SDI2-LTC"	: "NTV2_TCINDEX_SDI2_LTC";
 		case NTV2_TCINDEX_LTC1:		return inCompactDisplay ? "LTC1"		: "NTV2_TCINDEX_LTC1";
 		case NTV2_TCINDEX_LTC2:		return inCompactDisplay ? "LTC2"		: "NTV2_TCINDEX_LTC2";
-		case NTV2_TCINDEX_SDI5:		return inCompactDisplay ? "SDI5"		: "NTV2_TCINDEX_SDI5";
-		case NTV2_TCINDEX_SDI6:		return inCompactDisplay ? "SDI6"		: "NTV2_TCINDEX_SDI6";
-		case NTV2_TCINDEX_SDI7:		return inCompactDisplay ? "SDI7"		: "NTV2_TCINDEX_SDI7";
-		case NTV2_TCINDEX_SDI8:		return inCompactDisplay ? "SDI8"		: "NTV2_TCINDEX_SDI8";
+		case NTV2_TCINDEX_SDI5:		return inCompactDisplay ? "SDI5-VITC"	: "NTV2_TCINDEX_SDI5";
+		case NTV2_TCINDEX_SDI6:		return inCompactDisplay ? "SDI6-VITC"	: "NTV2_TCINDEX_SDI6";
+		case NTV2_TCINDEX_SDI7:		return inCompactDisplay ? "SDI7-VITC"	: "NTV2_TCINDEX_SDI7";
+		case NTV2_TCINDEX_SDI8:		return inCompactDisplay ? "SDI8-VITC"	: "NTV2_TCINDEX_SDI8";
 		case NTV2_TCINDEX_SDI3_LTC:	return inCompactDisplay ? "SDI3-LTC"	: "NTV2_TCINDEX_SDI3_LTC";
 		case NTV2_TCINDEX_SDI4_LTC:	return inCompactDisplay ? "SDI4-LTC"	: "NTV2_TCINDEX_SDI4_LTC";
 		case NTV2_TCINDEX_SDI5_LTC:	return inCompactDisplay ? "SDI5-LTC"	: "NTV2_TCINDEX_SDI5_LTC";

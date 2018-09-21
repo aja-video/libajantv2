@@ -30,8 +30,9 @@
 	-	16 × 8MB frames
 
 	@par	Audio
-	-	1 subsystem
-	-	8 channels (max.) per subsystem
+	-	1 audio system
+	-	8 channels (max.) per audio system
+	-	Audio system’s 8MB buffer memory starts at first byte of last frame
 
 	@par	Video Formats
 	-	Supports most standard SD and HD video formats up to 1080p30 and 2Kp25.

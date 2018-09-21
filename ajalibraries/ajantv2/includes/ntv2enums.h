@@ -610,6 +610,10 @@ typedef enum _NTV2VideoFormat
         NTV2_IS_2K_1080_VIDEO_FORMAT(__f__)	||						\
         NTV2_IS_4K_VIDEO_FORMAT(__f__)		)
 
+#define NTV2_IS_PAL_VIDEO_FORMAT(__f__)								\
+    (	(__f__) == NTV2_FORMAT_1080i_5000	||						\
+        (__f__) == NTV2_FORMAT_625_5000)
+
 #define NTV2_IS_HD_VIDEO_FORMAT(__f__)								\
     (	(__f__) != NTV2_FORMAT_UNKNOWN	&&							\
         (((__f__) >= NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT	&&			\
@@ -1123,7 +1127,8 @@ typedef enum
 
 
 /**
-	@brief		Used for device selection/filtering.
+	@brief		These enum values are used for device selection/filtering.
+	@see		::NTV2GetSupportedDevices
 **/
 typedef enum _NTV2DeviceKinds
 {
@@ -1135,7 +1140,7 @@ typedef enum _NTV2DeviceKinds
 	NTV2_DEVICEKIND_ANALOG		= 0x0010,	///< @brief	Specifies devices with analog video connectors.
 	NTV2_DEVICEKIND_SFP			= 0x0020,	///< @brief	Specifies devices with SFP connectors.
 	NTV2_DEVICEKIND_IP			= NTV2_DEVICEKIND_SFP,
-	NTV2_DEVICEKIND_EXTERNAL	= 0x0040,	///< @brief	Specifies external devices (e.g. Firewire, USB).
+	NTV2_DEVICEKIND_EXTERNAL	= 0x0040,	///< @brief	Specifies external devices (e.g. Thunderbolt).
 	NTV2_DEVICEKIND_4K			= 0x0080,	///< @brief	Specifies devices that can do 4K video.
 	NTV2_DEVICEKIND_8K			= 0x0100,	///< @brief	Specifies devices that can do 8K video.
 //	NTV2_DEVICEKIND_HFR			= 0x0200,	///< @brief	Specifies devices that can handle HFR video.
@@ -1929,24 +1934,24 @@ typedef enum
 
 typedef enum
 {
-    NTV2_480iADCComponentBeta,
-    NTV2_480iADCComponentSMPTE,
-    NTV2_480iADCSVideoUS,
-    NTV2_480iADCCompositeUS,
-    NTV2_480iADCComponentBetaJapan,
-    NTV2_480iADCComponentSMPTEJapan,
-    NTV2_480iADCSVideoJapan,
-    NTV2_480iADCCompositeJapan,
-    NTV2_576iADCComponentBeta,
-    NTV2_576iADCComponentSMPTE,
-    NTV2_576iADCSVideo,
-    NTV2_576iADCComposite,
-    NTV2_720p_60,	//	60 + 59.94
-    NTV2_1080i_30,	//	30 + 29.97
-    NTV2_720p_50,
-    NTV2_1080i_25,
-    NTV2_1080pSF24,	// 24 + 23.98
-    NTV2_MAX_NUM_LSVideoADCModes
+    NTV2_480iADCComponentBeta,			//	0
+    NTV2_480iADCComponentSMPTE,			//	1
+    NTV2_480iADCSVideoUS,				//	2
+    NTV2_480iADCCompositeUS,			//	3
+    NTV2_480iADCComponentBetaJapan,		//	4
+    NTV2_480iADCComponentSMPTEJapan,	//	5
+    NTV2_480iADCSVideoJapan,			//	6
+    NTV2_480iADCCompositeJapan,			//	7
+    NTV2_576iADCComponentBeta,			//	8
+    NTV2_576iADCComponentSMPTE,			//	9
+    NTV2_576iADCSVideo,					//	10
+    NTV2_576iADCComposite,				//	11
+    NTV2_720p_60,	//	60 + 59.94		//	12
+    NTV2_1080i_30,	//	30 + 29.97		//	13
+    NTV2_720p_50,						//	14
+    NTV2_1080i_25,						//	15
+    NTV2_1080pSF24,	// 24 + 23.98		//	16
+    NTV2_MAX_NUM_LSVideoADCModes		//	17
 } NTV2LSVideoADCMode;
 
 
@@ -1999,7 +2004,7 @@ typedef enum
     NTV2_RGBSelect,
     NTV2_Stereo3DSelect,
     NTV2_NUM_SDIInputFormats
-} NTV2SDIInputFormatSelect;
+} NTV2SDIInputFormatSelect;				// Deprecated
 
 
 typedef enum
@@ -2017,7 +2022,7 @@ typedef enum
 	NTV2_HDMI2Select,
     NTV2_HDMI3Select,
     NTV2_HDMI4Select,
-    NTV2_Auto,
+    NTV2_AutoAudioSelect,
     NTV2_MAX_NUM_InputAudioSelectEnums
 } NTV2InputAudioSelect;
 
@@ -3905,9 +3910,16 @@ typedef enum
 
 typedef enum
 {
-    NTV2_HDMI_422 = 0,
-    NTV2_HDMI_420 = 2
+	NTV2_HDMI_YC422	= 0,				///< @brief			Specifies YCbCr 4:2:2 color space.
+	NTV2_HDMI_RGB	= 1,				///< @brief			Specifies RGB color space.
+	NTV2_HDMI_YC420	= 2,				///< @brief			Specifies YCbCr 4:2:0 color space.
+	NTV2_HDMI_422	= NTV2_HDMI_YC422,	///< @deprecated	Use NTV2_HDMI_YC422 instead.
+	NTV2_HDMI_420	= NTV2_HDMI_YC420,	///< @deprecated	Use NTV2_HDMI_YC420 instead.
+	NTV2_NUM_HDMICOLORSPACEVALS	= 3,
+	NTV2_HDMI_INVALID			= NTV2_NUM_HDMICOLORSPACEVALS
 } NTV2HDMISampleStructure;
+
+#define	NTV2_IS_VALID_HDMI_SAMPLE_STRUCT(_x_)	((_x_) >= NTV2_HDMI_YC422  &&  (_x_) < NTV2_NUM_HDMICOLORSPACEVALS)
 
 typedef enum
 {

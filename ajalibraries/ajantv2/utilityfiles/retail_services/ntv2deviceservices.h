@@ -186,7 +186,9 @@ public:
 	
 	uint32_t GetAudioDelayOffset(double frames);
 	NTV2AudioSystem GetHostAudioSystem();
-	void AdjustFor4kQuadOrTsi(NTV2Channel ch=NTV2_CHANNEL1);
+	void AdjustFor4kQuadOrTpiOut();
+	void AdjustFor4kQuadOrTpiIn(NTV2VideoFormat inputFormat, bool b2pi);
+	void Set4kTpiState(bool b2pi);
 
 	void SetAudioInputSelect(NTV2InputAudioSelect input);
     void AgentIsAlive();
@@ -199,6 +201,7 @@ public:
 	uint32_t				mADCStabilizeCount;	
 	HDMIOutColorSpaceMode	mHDMIOutColorSpaceModeStatus;	
 	uint32_t				mADCLockScanTestFormat;
+	CNTV2VPID 				mVpidParser;
 	
 	// virtual register
 	DefaultVideoOutMode		mDefaultVideoOutMode;
@@ -219,6 +222,7 @@ public:
 	NTV2LutType				mLUTType;
 	NTV2LutType				mLUT2Type;
 	NTV2InputVideoSelect	mVirtualInputSelect;
+	NTV2InputAudioSelect	mInputAudioSelect;
 	NTV2VideoFormat			mVirtualSecondaryFormatSelect;
 	bool					mIsoConvertEnable;
 	uint32_t				mDSKAudioMode;
@@ -268,7 +272,6 @@ public:
 
 	// calculated valule, selected by user
 	NTV2VideoFormat			mSelectedInputVideoFormat;
-	//NTV2SDIInputFormatSelect mSDIInputFormatSelect;
 	NTV2ColorSpaceMode 		mSDIInput1ColorSpace;
 	NTV2ColorSpaceMode 		mSDIInput2ColorSpace;
 	NTV2RGBRangeMode		mSDIInput1RGBRange;

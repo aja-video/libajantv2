@@ -1,6 +1,6 @@
 /**
     @file		ntv2supportlogger.h
-    @brief		Provides a simple way to log the status of NTV2 subsections
+    @brief		Declares the CNTV2SupportLogger class.
     @copyright	(C) 2017 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
 **/
 
@@ -22,30 +22,71 @@ typedef enum
     NTV2_SupportLoggerSectionsAll           = 0xFFFFFFFF
 } NTV2SupportLoggerSections;
 
+/**
+	@brief	Generates a standard support log (register log) for any NTV2 device attached to the host.
+			To write the log into a file, open a std::ofstream, then stream this object into it.
+	@bug	This class currently excludes bank-selected registers, so support logs for \ref konaip and
+			\ref ioip will be incomplete. This will be addressed in a future SDK.
+**/
 class AJAExport CNTV2SupportLogger
 {
 public:
 
+	/**
+		@brief		Construct from CNTV2Card instance.
+		@param[in]	card		Specifies the CNTV2Card instance of the device to be logged. The instance should already be open.
+		@param[in]	sections	Optionally specifies which sections to include in the log. Defaults to all sections.
+	**/
     CNTV2SupportLogger(CNTV2Card& card,
                        NTV2SupportLoggerSections sections = NTV2_SupportLoggerSectionsAll);
 
+	/**
+		@brief		Default constructor.
+		@param[in]	cardIndex	Optionally specifies the zero-based index of the CNTV2Card device to be logged.
+								Defaults to zero, the first device found.
+		@param[in]	sections	Optionally specifies which sections to include in the log. Defaults to all sections.
+	**/
     CNTV2SupportLogger(int cardIndex = 0,
                        NTV2SupportLoggerSections sections = NTV2_SupportLoggerSectionsAll);
 
-    virtual ~CNTV2SupportLogger();
+    virtual ~CNTV2SupportLogger();	///< @brief	My default destructor
 
-    static int Version();
+    static int Version();	///< @return	The current version of log file this will produce.
 
+	/**
+		@brief		Prepends arbitrary string data to my support log, ahead of a given section.
+		@param[in]	section			Specifies the NTV2SupportLoggerSection to prepend.
+		@param[in]	sectionData		Specifies the text data to prepend.
+	**/
     void PrependToSection(uint32_t section, const std::string& sectionData);
 
+	/**
+		@brief		Appends arbitrary string data to my support log, after a given section.
+		@param[in]	section			Specifies the NTV2SupportLoggerSection to append.
+		@param[in]	sectionData		Specifies the text data to append.
+	**/
     void AppendToSection(uint32_t section, const std::string& sectionData);
 
+	/**
+		@brief		Adds header text to my log.
+		@param[in]	sectionName		Specifies the section name.
+		@param[in]	sectionData		Specifies the header text.
+	**/
     void AddHeader(const std::string& sectionName, const std::string& sectionData);
 
+	/**
+		@brief		Adds footer text to my log.
+		@param[in]	sectionName		Specifies the section name.
+		@param[in]	sectionData		Specifies the footer text.
+	**/
     void AddFooter(const std::string& sectionName, const std::string& sectionData);
 
-    std::string ToString();
+    std::string ToString();		///< @return	My entire support log as a standard string.
 
+	/**
+		@brief		Writes my support log into a string object.
+		@param[out]	outString	Receives my entire support log as a standard string, replacing its contents.
+	**/
     void ToString(std::string& outString);
 
 	bool LoadFromLog (const std::string & inLogFilePath, const bool bForceLoad);
@@ -67,6 +108,13 @@ private:
     std::map<uint32_t, std::string> mAppendMap;
 };
 
+
+/**
+	@brief		Writes a given CNTV2SupportLogger's text into the given output stream.
+	@param		outStream		Specifies the output stream to be written.
+	@param[in]	inData			Specifies the CNTV2SupportLogger.
+	@return		A reference to the same output stream that was specified in "outStream".
+**/
 AJAExport std::ostream & operator << (std::ostream & outStream, const CNTV2SupportLogger & inData);
 
 #endif // NTV2SUPPORTLOGGER_H

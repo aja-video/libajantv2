@@ -43,7 +43,7 @@ void Corvid44Services::SetDeviceXPointPlayback ()
 	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
 								bDSKOn				= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
-	NTV2ColorSpaceMode            inputColorSpace	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
+	NTV2ColorSpaceMode			inputColorSpace		= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	
@@ -65,7 +65,7 @@ void Corvid44Services::SetDeviceXPointPlayback ()
 	}
 	
 	// select square division or 2 pixel interleave in frame buffer
-    AdjustFor4kQuadOrTsi();
+    AdjustFor4kQuadOrTpiOut();
 
 	// Figure out what our input format is based on what is selected 
 	GetSelectedInputVideoFormat(mFb1VideoFormat);
@@ -1153,9 +1153,8 @@ void Corvid44Services::SetDeviceXPointCapture ()
 		}
 	}
 
-	CNTV2VPID parser;
-	parser.SetVPID(mVpid1a);
-	VPIDStandard std = parser.GetStandard();
+	mVpidParser.SetVPID(mVpid1a);
+	VPIDStandard std = mVpidParser.GetStandard();
 	bool b2x2piIn  = (std == VPIDStandard_2160_DualLink);
 	bool b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
 	bool b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
@@ -1163,7 +1162,7 @@ void Corvid44Services::SetDeviceXPointCapture ()
 	bool b2piIn = (b2x2piIn || b4x2piInA || b4x2piInB);
 
 	// select square division or 2 pixel interleave in frame buffer
-    AdjustFor4kQuadOrTsi();
+    AdjustFor4kQuadOrTpiIn(inputFormat, b2piIn);
 	
 	// SDI In 1
 	bool bConvertBToA; 
@@ -1990,9 +1989,8 @@ void Corvid44Services::SetDeviceMiscRegisters ()
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)
 	{
-		CNTV2VPID parser;
-		parser.SetVPID(mVpid1a);
-		VPIDStandard std = parser.GetStandard();
+		mVpidParser.SetVPID(mVpid1a);
+		VPIDStandard std = mVpidParser.GetStandard();
 		switch (std)
 		{
 		case VPIDStandard_2160_DualLink:
