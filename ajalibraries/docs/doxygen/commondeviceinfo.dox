@@ -44,16 +44,17 @@
 	-	To determine the number of SDI output jacks the device has, call ::NTV2DeviceGetNumVideoOutputs.
 
 	Some SDI connectors are permanently configured as inputs, others as outputs, but on some devices, they’re software-configurable.
-	This means your application can, by calling a function in the NTV2 SDK, instruct the device to reconfigure one of its SDI jacks from an
-	input to an output (or vice-versa).
+	This means your application can instruct the device to reconfigure one of its SDI jacks from an input to an output (or vice-versa).
 	-	To determine if a device has software-configurable SDI connectors, call ::NTV2DeviceHasBiDirectionalSDI.
 	-	If a device has bi-directional SDI connectors, the ::NTV2DeviceGetNumVideoInputs and ::NTV2DeviceGetNumVideoOutputs will reflect
 		the maximum possible number of inputs and outputs.
 		-	For example, the \ref io4kquad has four bi-directional SDI jacks plus an additional monitor (output-only) jack,
 			so for that device, ::NTV2DeviceGetNumVideoInputs returns 4 and ::NTV2DeviceGetNumVideoOutputs returns 5.
+	-	To determine if an SDI connector is currently configured to transmit, call CNTV2Card::GetSDITransmitEnable.
+	-	To change an SDI connector’s function to receive or transmit, call CNTV2Card::SetSDITransmitEnable.
 
 	All SDI connectors on NTV2 devices can receive or transmit 1.5 Gbps signals, and almost all will handle 3Gbps.
-	-	To determine if its SDI spigots can handle 6Gbps or 12Gbps, call NTV2DeviceCanDo12GSDI.
+	-	To determine if its SDI spigots can handle 6Gbps or 12Gbps, call ::NTV2DeviceCanDo12GSDI.
 
 	@par	Analog Video Connectors
 
