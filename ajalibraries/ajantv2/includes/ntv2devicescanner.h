@@ -70,6 +70,8 @@ typedef struct NTV2DeviceInfo
     bool                            has3GLevelConversion;               ///< @brief	Supports 3G Level Conversion?
 	bool							proResSupport;						///< @brief	Supports ProRes?
 	bool							sdi3GSupport;						///< @brief	Supports 3G?
+	bool							sdi12GSupport;						///< @brief	Supports 12G?
+	bool							ipSupport;							///< @brief	Supports IP IO?
 	bool							ltcInSupport;						///< @brief	Accepts LTC input?
 	bool							ltcOutSupport;						///< @brief	Supports LTC output?
 	bool							ltcInOnRefPort;						///< @brief	Supports LTC on reference input?
