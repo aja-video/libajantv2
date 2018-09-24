@@ -5493,6 +5493,7 @@ typedef enum
 		#define	AUTOCIRCULATE_TYPE_GETREGS		NTV2_FOURCC ('r', 'e', 'g', 'R')	///< @brief	Identifies NTV2GetRegisters struct
 		#define	AUTOCIRCULATE_TYPE_SETREGS		NTV2_FOURCC ('r', 'e', 'g', 'W')	///< @brief	Identifies NTV2SetRegisters struct
 		#define	AUTOCIRCULATE_TYPE_SDISTATS		NTV2_FOURCC ('s', 'd', 'i', 'S')	///< @brief	Identifies NTV2SDIStatus struct
+        #define	NTV2_TYPE_AJADEBUGLOGGING		NTV2_FOURCC ('d', 'b', 'l', 'g')	///< @brief	Identifies NTV2DebugLogging struct
 
 		#define	NTV2_IS_VALID_STRUCT_TYPE(_x_)	(	(_x_) == AUTOCIRCULATE_TYPE_STATUS		||	\
 													(_x_) == AUTOCIRCULATE_TYPE_XFER		||	\
@@ -5503,7 +5504,8 @@ typedef enum
 													(_x_) == AUTOCIRCULATE_TYPE_SETREGS		||	\
 													(_x_) == AUTOCIRCULATE_TYPE_SDISTATS	||	\
                                                     (_x_) == NTV2_TYPE_BANKGETSET			||	\
-                                                    (_x_) == NTV2_TYPE_VIRTUAL_DATA_RW      )
+                                                    (_x_) == NTV2_TYPE_VIRTUAL_DATA_RW		||	\
+                                                    (_x_) == NTV2_TYPE_AJADEBUGLOGGING	)
 
 
 		//	NTV2_POINTER FLAGS
@@ -7504,6 +7506,39 @@ typedef enum
 		NTV2_STRUCT_END (AUTOCIRCULATE_TRANSFER)
 
 
+        /**
+            @brief	This is used to enable or disable AJADebug logging in the driver.
+            @note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
+        **/
+        NTV2_STRUCT_BEGIN (NTV2DebugLogging)
+            NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
+                NTV2_POINTER	mSharedMemory;		///< @brief	Virtual address of AJADebug shared memory in calling process' context,
+													//			and its length. The AJADebug logging facility owns and manages this memory.
+													//			If NULL or zero length, debug logging will be disabled in the driver.
+													//			If non-NULL and zero length, debug logging will be enabled in the driver.
+                ULWord			mSpares[32];		///< @brief	Reserved for future use.
+            NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
+
+            #if !defined (NTV2_BUILDING_DRIVER)
+                /**
+                    @brief	Constructs an NTV2DebugLogging struct.
+                    @param[in]	inEnable            False to disable (the default), or True to enable.
+                **/
+                explicit	NTV2DebugLogging (const bool inEnable = false);
+
+                /**
+                    @brief	Prints a human-readable representation of me to the given output stream.
+                    @param	inOutStream		Specifies the output stream to use.
+                    @return	A reference to the output stream.
+                **/
+                std::ostream &	Print (std::ostream & inOutStream) const;
+
+                NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
+
+            #endif	//	!defined (NTV2_BUILDING_DRIVER)
+        NTV2_STRUCT_END (NTV2DebugLogging)
+
+
 		#if !defined (NTV2_BUILDING_DRIVER)
 			typedef std::set <NTV2VideoFormat>					NTV2VideoFormatSet;					///< @brief	A set of distinct NTV2VideoFormat values.
 			typedef NTV2VideoFormatSet::const_iterator			NTV2VideoFormatSetConstIter;		///< @brief	A handy const iterator for iterating over an NTV2VideoFormatSet.
@@ -7826,6 +7861,14 @@ typedef enum
 				@return	The ostream being used.
 			**/
 			AJAExport inline std::ostream &	operator << (std::ostream & inOutStream, const NTV2SDIInputStatus & inObj)	{return inObj.Print (inOutStream);}
+
+			/**
+				@brief	Streams the given NTV2DebugLogging struct to the specified ostream in a human-readable format.
+				@param		inOutStream		Specifies the ostream to use.
+				@param[in]	inObj			Specifies the NTV2DebugLogging to be streamed.
+				@return	The ostream being used.
+			**/
+			AJAExport inline std::ostream &	operator << (std::ostream & inOutStream, const NTV2DebugLogging & inObj)	{return inObj.Print (inOutStream);}
 		#endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 		#if defined (AJAMac)

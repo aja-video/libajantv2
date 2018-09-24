@@ -9,6 +9,7 @@
 #include "ntv2utils.h"
 #include "ntv2endian.h"
 #include "ajabase/system/memory.h"
+#include "ajabase/system/debug.h"
 #include <iomanip>
 #include <locale>		//	For std::locale, std::numpunct, std::use_facet
 #include <assert.h>
@@ -152,11 +153,11 @@ ostream & NTV2_HEADER::Print (ostream & inOutStream) const
 	if (NTV2_IS_VALID_HEADER_TAG (fHeaderTag))
 		inOutStream << NTV2_4CC_AS_STRING (fHeaderTag);
 	else
-		inOutStream << "BAD-" << hex << fHeaderTag << dec;
+		inOutStream << "BAD-" << HEX0N(fHeaderTag,8);
 	if (NTV2_IS_VALID_STRUCT_TYPE (fType))
 		inOutStream << NTV2_4CC_AS_STRING (fType);
 	else
-		inOutStream << "|BAD-" << hex << fType << dec;
+		inOutStream << "|BAD-" << HEX0N(fType,8);
 	inOutStream << " v" << fHeaderVersion << " vers=" << fVersion << " sz=" << fSizeInBytes;
 	return inOutStream << "]";
 }
@@ -2082,6 +2083,21 @@ bool AUTOCIRCULATE_TRANSFER::GetInputTimeCodes (NTV2TimeCodes & outTimeCodes, co
 {
 	NTV2_ASSERT_STRUCT_VALID;
 	return acTransferStatus.acFrameStamp.GetInputTimeCodes (outTimeCodes, inSDIInput, inValidOnly);
+}
+
+
+NTV2DebugLogging::NTV2DebugLogging(const bool inEnable)
+	:	mHeader				(NTV2_TYPE_AJADEBUGLOGGING, sizeof (NTV2DebugLogging)),
+		mSharedMemory		(inEnable ? AJADebug::GetPrivateDataLoc() : NULL,  inEnable ? AJADebug::GetPrivateDataLen() : 0)
+{
+}
+
+
+ostream & NTV2DebugLogging::Print (ostream & inOutStream) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	inOutStream	<< mHeader << ", sharedMem=" << mSharedMemory << ", " << mTrailer;
+	return inOutStream;
 }
 
 

@@ -1187,3 +1187,23 @@ std::string AJAStatusToString (const AJAStatus inStatus)
 	}
 	return "<bad AJAStatus>";
 }
+
+
+void *
+AJADebug::GetPrivateDataLoc()
+{
+	if (!sLock.IsValid())
+		return NULL;
+	AJAAutoLock lock(&sLock);
+	return spShare;
+}
+
+
+size_t
+AJADebug::GetPrivateDataLen()
+{
+	if (!sLock.IsValid())
+		return 0;
+	AJAAutoLock lock(&sLock);
+	return spShare ? sizeof(AJADebugShare) : 0;
+}

@@ -21,7 +21,7 @@ namespace aja
 static const std::string WHITESPACE(" \t\n\r");
 
 /**
- *	Replace a substring within a string with a new string
+ *	Replaces all occurrences of a substring within a string with a new string
  *
  *  @param[in,out]  str  The string to modify
  *  @param[in]      from The substring to look for
