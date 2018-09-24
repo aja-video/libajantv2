@@ -2018,13 +2018,9 @@ void Corvid88Services::SetDeviceMiscRegisters ()
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)
 	{
-		ULWord vpida = 0;
-		ULWord vpidb = 0;
-		mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
-
-		if (mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb))
+		if (mVpid1Valid)
 		{
-			mVpidParser.SetVPID(vpida);
+			mVpidParser.SetVPID(mVpid1a);
 			VPIDStandard std = mVpidParser.GetStandard();
 			switch (std)
 			{
