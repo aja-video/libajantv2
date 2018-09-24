@@ -2886,12 +2886,9 @@ void Kona5Services::SetDeviceMiscRegisters ()
     {
         // special case: input-passthru (capture) HDMI In selected, AND 4K, then turn on SDI1Out, SDI2Out
         {
-            ULWord vpida = 0;
-            ULWord vpidb = 0;
-
-            if (mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb))
+            if (mVpid1Valid)
             {
-                mVpidParser.SetVPID(vpida);
+                mVpidParser.SetVPID(mVpid1a);
                 VPIDStandard std = mVpidParser.GetStandard();
                 switch (std)
                 {
