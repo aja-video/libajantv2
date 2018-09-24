@@ -376,7 +376,7 @@ bool CNTV2ConfigTs2022::SetupJ2KDecoder(const j2kDecoderConfig &config)
     mDevice.WriteRegister(SAREK_IPX_J2K_DECODER_1 + kRegJ2kPrpMainCsr, 0x10);   // prp mode play
     mDevice.WriteRegister(SAREK_IPX_J2K_DECODER_1 + kRegJ2kPopMainCsr, 0x12);   // pop mode play once
 
-    mDevice.WriteRegister(SAREK_REGS2 + kRegSarekModeSelect, uint32_t(config.selectionMode));
+    mDevice.WriteRegister(SAREK_REGS2 + kRegSarekModeSelect,     uint32_t(config.selectionMode));
     mDevice.WriteRegister(SAREK_REGS2 + kRegSarekProgNumSelect,  config.programNumber);
     mDevice.WriteRegister(SAREK_REGS2 + kRegSarekProgPIDSelect,  config.programPID);
     mDevice.WriteRegister(SAREK_REGS2 + kRegSarekAudioNumSelect, config.audioNumber);
@@ -390,8 +390,7 @@ bool CNTV2ConfigTs2022::SetupJ2KDecoder(const j2kDecoderConfig &config)
 
 bool CNTV2ConfigTs2022::ReadbackJ2KDecoder(j2kDecoderConfig &config)
 {
-	CNTV2DriverInterface &	device(mDevice);
-    device.ReadRegister(SAREK_REGS2 + kRegSarekModeSelect, config.selectionMode);
+    mDevice.ReadRegister(SAREK_REGS2 + kRegSarekModeSelect,     (uint32_t&)config.selectionMode);
     mDevice.ReadRegister(SAREK_REGS2 + kRegSarekProgNumSelect,  config.programNumber);
     mDevice.ReadRegister(SAREK_REGS2 + kRegSarekProgPIDSelect,  config.programPID);
     mDevice.ReadRegister(SAREK_REGS2 + kRegSarekAudioNumSelect, config.audioNumber);
