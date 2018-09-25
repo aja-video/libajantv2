@@ -587,7 +587,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         // Until we support -7, only use one link
         if (sfp == SFP_1)
         {
-            rxChannelConfig.rxMatch     = receiveVideo2110.rxVideoCh[i].rxMatch[0];
+            rxChannelConfig.rxMatch     = 0x14;  // PSM hard code for now, need to look at params set
             rxChannelConfig.sourceIP    = receiveVideo2110.rxVideoCh[i].sourceIP[0];
             rxChannelConfig.destIP      = receiveVideo2110.rxVideoCh[i].destIP[0];
             rxChannelConfig.sourcePort  = receiveVideo2110.rxVideoCh[i].sourcePort[0];
@@ -595,7 +595,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
         else
         {
-            rxChannelConfig.rxMatch     = receiveVideo2110.rxVideoCh[i].rxMatch[1];
+            rxChannelConfig.rxMatch     = 0x14;  // PSM hard code for now, need to look at params set
             rxChannelConfig.sourceIP    = receiveVideo2110.rxVideoCh[i].sourceIP[1];
             rxChannelConfig.destIP      = receiveVideo2110.rxVideoCh[i].destIP[1];
             rxChannelConfig.sourcePort  = receiveVideo2110.rxVideoCh[i].sourcePort[1];
@@ -603,7 +603,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
         rxChannelConfig.ssrc            = receiveVideo2110.rxVideoCh[i].vlan;
         rxChannelConfig.vlan            = receiveVideo2110.rxVideoCh[i].ssrc;
-        rxChannelConfig.payload         = receiveVideo2110.rxVideoCh[i].payload;
+        rxChannelConfig.payloadType     = receiveVideo2110.rxVideoCh[i].payloadType;
 
         rxChannelConfig.videoFormat     = receiveVideo2110.rxVideoCh[i].videoFormat;
         rxChannelConfig.videoSamples    = VPIDSampling_YUV_422;
@@ -647,7 +647,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         // Until we support -7, only use one link
         if (sfp == SFP_1)
         {
-            rxChannelConfig.rxMatch     = receiveAudio2110.rxAudioCh[i].rxMatch[0];
+            rxChannelConfig.rxMatch     = 0x14;  // PSM hard code for now, need to look at params set
             rxChannelConfig.sourceIP    = receiveAudio2110.rxAudioCh[i].sourceIP[0];
             rxChannelConfig.destIP      = receiveAudio2110.rxAudioCh[i].destIP[0];
             rxChannelConfig.sourcePort  = receiveAudio2110.rxAudioCh[i].sourcePort[0];
@@ -655,7 +655,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
         else
         {
-            rxChannelConfig.rxMatch     = receiveAudio2110.rxAudioCh[i].rxMatch[1];
+            rxChannelConfig.rxMatch     = 0x14;  // PSM hard code for now, need to look at params set
             rxChannelConfig.sourceIP    = receiveAudio2110.rxAudioCh[i].sourceIP[1];
             rxChannelConfig.destIP      = receiveAudio2110.rxAudioCh[i].destIP[1];
             rxChannelConfig.sourcePort  = receiveAudio2110.rxAudioCh[i].sourcePort[1];
@@ -663,7 +663,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
         rxChannelConfig.ssrc            = receiveAudio2110.rxAudioCh[i].vlan;
         rxChannelConfig.vlan            = receiveAudio2110.rxAudioCh[i].ssrc;
-        rxChannelConfig.payload         = receiveAudio2110.rxAudioCh[i].payload;
+        rxChannelConfig.payloadType     = receiveAudio2110.rxAudioCh[i].payloadType;
         rxChannelConfig.numAudioChannels    = receiveAudio2110.rxAudioCh[i].numAudioChannels;
         rxChannelConfig.audioPktInterval    = receiveAudio2110.rxAudioCh[i].audioPktInterval;
 
@@ -705,7 +705,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         txChannelConfig.remoteIP[1]     = transmitVideo2110.txVideoCh[i].remoteIP[1];
         txChannelConfig.remotePort[1]   = transmitVideo2110.txVideoCh[i].remotePort[1];
 
-        txChannelConfig.payload         = transmitVideo2110.txVideoCh[i].payload;
+        txChannelConfig.payloadType     = transmitVideo2110.txVideoCh[i].payloadType;
         txChannelConfig.ssrc            = transmitVideo2110.txVideoCh[i].ssrc;
         txChannelConfig.ttl             = transmitVideo2110.txVideoCh[i].ttl;
         txChannelConfig.videoFormat     = transmitVideo2110.txVideoCh[i].videoFormat;
@@ -749,7 +749,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         txChannelConfig.remoteIP[1]     = transmitAudio2110.txAudioCh[i].remoteIP[1];
         txChannelConfig.remotePort[1]   = transmitAudio2110.txAudioCh[i].remotePort[1];
 
-        txChannelConfig.payload         = transmitAudio2110.txAudioCh[i].payload;
+        txChannelConfig.payloadType     = transmitAudio2110.txAudioCh[i].payloadType;
         txChannelConfig.ssrc            = transmitAudio2110.txAudioCh[i].ssrc;
         txChannelConfig.ttl             = transmitAudio2110.txAudioCh[i].ttl;
 
