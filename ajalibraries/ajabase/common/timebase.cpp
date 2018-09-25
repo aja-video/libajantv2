@@ -190,7 +190,7 @@ double AJATimeBase::FramesToSeconds(int64_t frames) const
 	return (double)frames * (double)mFrameDuration / (double)mFrameTimeScale;
 }
 
-float AJATimeBase::GetFramesPerSecond(void)
+float AJATimeBase::GetFramesPerSecond(void) const
 {
 	float val = 0.f;
 	if (mFrameDuration)
@@ -198,7 +198,7 @@ float AJATimeBase::GetFramesPerSecond(void)
 	return val;
 }
 
-double AJATimeBase::GetFramesPerSecondDouble(void)
+double AJATimeBase::GetFramesPerSecondDouble(void) const
 {
 	double val = 0.;
 	if (mFrameDuration)
@@ -266,11 +266,6 @@ int64_t AJATimeBase::SecondsToTicks(double seconds, bool round)
 	return Convert((int64_t)(seconds * 1000000000.0), 1000000000, mTickRate, round, true);
 }
 
-int64_t AJATimeBase::SecondsToMicroseconds(double seconds, bool round)
-{
-	return Convert((int64_t)(seconds * 1000000.0), 1000000, 1000000, round, false);
-}
-
 int64_t AJATimeBase::MicrosecondsToFrames(int64_t microseconds, bool round)
 {
 	return Convert(microseconds, 1000000, 1, mFrameTimeScale, mFrameDuration, round, true);
@@ -284,6 +279,11 @@ int64_t AJATimeBase::MicrosecondsToSamples(int64_t microseconds, bool round)
 int64_t AJATimeBase::MicrosecondsToTicks(int64_t microseconds, bool round)
 {
 	return Convert(microseconds, 1000000, mTickRate, round, true);
+}
+
+int64_t AJATimeBase::SecondsToMicroseconds(double seconds, bool round)
+{
+	return Convert((int64_t)(seconds * 1000000.0), 1000000, 1000000, round, false);
 }
 
 double AJATimeBase::MicrosecondsToSeconds(int64_t microseconds)
@@ -312,7 +312,7 @@ bool AJATimeBase::IsCloseTo(int64_t frameTimeScale, int64_t frameDuration) const
 	return IsCloseTo(tb);
 }
 
-bool AJATimeBase::IsNonIntegralRatio()
+bool AJATimeBase::IsNonIntegralRatio (void) const
 {
 	return ((mFrameTimeScale % mFrameDuration) != 0) ? true : false;
 }

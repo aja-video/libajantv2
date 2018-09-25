@@ -130,7 +130,7 @@ AJAAncillaryDataType AJAAncillaryData_Timecode_VITC::RecognizeThisAncillaryData 
 	//       we're assuming it was for the sake of getting captioning data (NTSC/525-line).
 	//       The only way we could know "for sure" would be to run ParsePayloadData() on
 	//       the payload data, but that's not a static method so you'd have to recast the
-	//		 NTV4AncillaryData object anyway!
+	//		 AJAAncillaryData object anyway!
 	if (pInAncData->GetDataCoding() == AJAAncillaryDataCoding_Analog)
 		if (pInAncData->GetLocationLineNumber() == 14 || pInAncData->GetLocationLineNumber() == 277)
 		return AJAAncillaryDataType_Timecode_VITC;
