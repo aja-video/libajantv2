@@ -15,6 +15,7 @@
 #include "ntv2konaflashprogram.h"
 #include "ntv2konaflashprogram.h"
 #include "ntv2vpid.h"
+#include "ajabase/system/debug.h"
 #include <math.h>
 #include <assert.h>
 #if defined (AJALinux)
@@ -23,6 +24,18 @@
 	#pragma warning(disable: 4800)
 #endif
 #include <deque>
+
+#define	CVIDFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
+#define	CVIDWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
+#define	CVIDNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
+#define	CVIDINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
+#define	CVIDDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
+
+#define	ROUTEFAIL(__x__)	AJA_sERROR  (AJA_DebugUnit_RoutingGeneric, AJAFUNC << ": " << __x__)
+#define	ROUTEWARN(__x__)	AJA_sWARNING(AJA_DebugUnit_RoutingGeneric, AJAFUNC << ": " << __x__)
+#define	ROUTENOTE(__x__)	AJA_sNOTICE (AJA_DebugUnit_RoutingGeneric, AJAFUNC << ": " << __x__)
+#define	ROUTEINFO(__x__)	AJA_sINFO   (AJA_DebugUnit_RoutingGeneric, AJAFUNC << ": " << __x__)
+#define	ROUTEDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_RoutingGeneric, AJAFUNC << ": " << __x__)
 
 using namespace std;
 
@@ -2620,12 +2633,15 @@ bool CNTV2Card::GetVideoLimiting (NTV2VideoLimiting & outValue)
 // wideVANC is a kludge so we can be backards compatible.
 bool CNTV2Card::SetEnableVANCData (const bool inVANCenable, const bool inTallerVANC, const NTV2Channel inChannel)
 {
-	const NTV2Channel	channel	(IsMultiFormatActive () ? inChannel : NTV2_CHANNEL1);
-	if (IS_CHANNEL_INVALID (channel))
+	const NTV2Channel	channel	(IsMultiFormatActive() ? inChannel : NTV2_CHANNEL1);
+	if (IS_CHANNEL_INVALID(channel))
 		return false;
 
 	NTV2Standard standard;
 	GetStandard (standard, channel);
+	if (NTV2_IS_QUAD_STANDARD(standard)  &&  (inVANCenable || inTallerVANC))
+		return false;	//	Tall/taller VANC not supported in 4K/UHD
+
 	NTV2FrameGeometry frameGeometry;
 	GetFrameGeometry (frameGeometry, channel);
 	return SetVANCMode (NTV2VANCModeFromBools (inVANCenable, inTallerVANC), standard, frameGeometry, channel);
@@ -2655,10 +2671,8 @@ bool CNTV2Card::SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard i
 
 		case NTV2_STANDARD_720:
 			frameGeometry = NTV2_IS_VANCMODE_ON (inVancMode) ? NTV2_FG_1280x740 : NTV2_FG_1280x720;
-			#if !defined (_DEBUG)
-				if (NTV2_IS_VANCMODE_TALLER (inVancMode))
-					cerr << "## WARNING:  CNTV2Card::SetVANCMode:  'taller' geometry requested for 720p video standard -- using 'tall' geometry instead" << endl;
-			#endif
+			if (NTV2_IS_VANCMODE_TALLER (inVancMode))
+				CVIDWARN("'taller' mode requested for 720p -- using 'tall' geometry instead");
 			break;
 
 		case NTV2_STANDARD_525:
@@ -2671,10 +2685,8 @@ bool CNTV2Card::SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard i
 
 		case NTV2_STANDARD_2K:
 			frameGeometry = NTV2_IS_VANCMODE_ON (inVancMode) ? NTV2_FG_2048x1588 : NTV2_FG_2048x1556;
-			#if !defined (_DEBUG)
-				if (NTV2_IS_VANCMODE_TALLER (inVancMode))
-					cerr << "## WARNING:  CNTV2Card::SetVANCMode:  'taller' geometry requested for 2K video standard -- using 'tall' geometry instead" << endl;
-			#endif
+			if (NTV2_IS_VANCMODE_TALLER (inVancMode))
+				CVIDWARN("'taller' mode requested for 2K standard '" << ::NTV2StandardToString(inStandard) << "' -- using 'tall' instead");
 			break;
 
 		case NTV2_STANDARD_2Kx1080p:
@@ -2686,17 +2698,15 @@ bool CNTV2Card::SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard i
 		case NTV2_STANDARD_4096x2160p:
 		case NTV2_STANDARD_3840HFR:
 		case NTV2_STANDARD_4096HFR:
-			#if !defined (_DEBUG)
-				if (NTV2_IS_VANCMODE_ON (inVancMode))
-					cerr << "## WARNING:  CNTV2Card::SetVANCMode:  'tall' or 'taller' geometry requested for 4K video standard -- using non-VANC geometry instead" << endl;
-			#endif
+			if (NTV2_IS_VANCMODE_ON(inVancMode))
+				CVIDWARN("'tall' or 'taller' mode requested for quad standard '" << ::NTV2StandardToString(inStandard) << "' -- using non-VANC geometry instead");
 			break;
 
-		#if !defined (_DEBUG)
-		default:
-		#endif	//	_DEBUG
-		case NTV2_STANDARD_INVALID:
-			return false;
+	#if defined(_DEBUG)
+		case NTV2_STANDARD_INVALID:		return false;
+	#else
+		default:						return false;
+	#endif	//	_DEBUG
 	}
 	SetFrameGeometry (frameGeometry, false/*ajaRetail*/, inChannel);
 
@@ -5581,6 +5591,9 @@ bool CNTV2Card::GetConnectedInput (const NTV2OutputCrosspointID inOutputXpt, NTV
 
 bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, const bool inValidate)
 {
+	if (inOutputXpt == NTV2_XptBlack)
+		return Disconnect (inInputXpt);
+
 	const ULWord	maxRegNum	(::NTV2DeviceGetMaxRegisterNumber(_boardID));
 	uint32_t		regNum		(0);
 	uint32_t		ndx			(0);
@@ -5588,7 +5601,6 @@ bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2Outpu
 
 	if (!CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo(inInputXpt, regNum, ndx))
 		return false;
-
 	if (!regNum)
 		return false;	//	Register number is zero
 	if (ndx > 3)
@@ -5596,18 +5608,56 @@ bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2Outpu
 	if (regNum > maxRegNum)
 		return false;	//	This device doesn't have that routing register
 
-	if (inValidate)
-		CanConnect(inInputXpt, inOutputXpt, canConnect);
-	if (!canConnect)
-		return false;
+	if (inValidate)		//	If caller requested xpt validation
+		if (CanConnect(inInputXpt, inOutputXpt, canConnect))	//	If answer can be trusted
+			if (!canConnect)	//	If route not valid
+			{
+				ROUTEFAIL (GetDisplayName() << ": Cannot connect " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(inOutputXpt)
+							<< ": reg=" << DEC(regNum) << " val=" << DEC(inOutputXpt) << " mask=" << xHEX0N(sMasks[ndx],8) << " shift=" << DEC(sShifts[ndx]));
+				return false;
+			}
 
-	return WriteRegister(regNum, inOutputXpt, sMasks[ndx], sShifts[ndx]);
+	ULWord	outputXpt(0);
+	ReadRegister(regNum, outputXpt, sMasks[ndx], sShifts[ndx]);
+	const bool result (WriteRegister(regNum, inOutputXpt, sMasks[ndx], sShifts[ndx]));
+	if (!result)
+		ROUTEFAIL(GetDisplayName() << ": Failed to connect " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(inOutputXpt)
+					<< ": reg=" << DEC(regNum) << " val=" << DEC(inOutputXpt) << " mask=" << xHEX0N(sMasks[ndx],8) << " shift=" << DEC(sShifts[ndx]));
+	else if (outputXpt  &&  inOutputXpt != outputXpt)
+		ROUTENOTE(GetDisplayName() << ": Connected " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(inOutputXpt)
+					<< " -- was from " << ::NTV2OutputCrosspointIDToString(NTV2OutputXptID(outputXpt)));
+	else if (!outputXpt  &&  inOutputXpt != outputXpt)
+		ROUTENOTE(GetDisplayName() << ": Connected " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(inOutputXpt) << " -- was disconnected");
+	//else	ROUTEDBG(GetDisplayName() << ": Connection " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(inOutputXpt) << " unchanged -- already connected");
+	return result;
 }
 
 
 bool CNTV2Card::Disconnect (const NTV2InputCrosspointID inInputXpt)
 {
-	return Connect (inInputXpt, NTV2_XptBlack);
+	const ULWord	maxRegNum	(::NTV2DeviceGetMaxRegisterNumber(_boardID));
+	uint32_t		regNum		(0);
+	uint32_t		ndx			(0);
+	ULWord			outputXpt	(0);
+
+	if (!CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo(inInputXpt, regNum, ndx))
+		return false;
+	if (!regNum)
+		return false;	//	Register number is zero
+	if (ndx > 3)
+		return false;	//	Bad index
+	if (regNum > maxRegNum)
+		return false;	//	This device doesn't have that routing register
+
+	const bool changed (ReadRegister(regNum, outputXpt, sMasks[ndx], sShifts[ndx])  &&  outputXpt);
+	const bool result (WriteRegister(regNum, NTV2_XptBlack, sMasks[ndx], sShifts[ndx]));
+	if (result && changed)
+		ROUTENOTE(GetDisplayName() << ": Disconnected " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(NTV2OutputXptID(outputXpt)));
+	else if (!result)
+		ROUTEFAIL(GetDisplayName() << ": Failed to disconnect " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(NTV2OutputXptID(outputXpt))
+					<< ": reg=" << DEC(regNum) << " val=0 mask=" << xHEX0N(sMasks[ndx],8) << " shift=" << DEC(sShifts[ndx]));
+	//else	ROUTEDBG(GetDisplayName() << ": " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(NTV2OutputXptID(outputXpt)) << " already disconnected");
+	return result;
 }
 
 
@@ -5663,12 +5713,23 @@ bool CNTV2Card::ClearRouting (void)
 	const NTV2RegNumSet	routingRegisters	(CNTV2RegisterExpert::GetRegistersForClass (kRegClass_Routing));
 	const ULWord		maxRegisterNumber	(::NTV2DeviceGetMaxRegisterNumber (_boardID));
 	unsigned			nFailures			(0);
+	ULWord				tally				(0);
 
 	for (NTV2RegNumSetConstIter it (routingRegisters.begin());  it != routingRegisters.end();  ++it)	//	for each routing register
 		if (*it <= maxRegisterNumber)																	//		if it's valid for this board
+		{	ULWord	num(0);
+			if (ReadRegister (*it, num))
+				tally += num;
 			if (!WriteRegister (*it, 0))																//			then if WriteRegister fails
 				nFailures++;																			//				then bump the failure tally
+		}
 
+	if (tally && !nFailures)
+		ROUTEINFO(GetDisplayName() << ": Routing cleared");
+	else if (!nFailures)
+		ROUTEDBG(GetDisplayName() << ": Routing already clear, nothing changed");
+	else
+		ROUTEFAIL(GetDisplayName() << ": " << DEC(nFailures) << " register write(s) failed");
 	return nFailures == 0;
 
 }	//	ClearRouting
@@ -5683,8 +5744,7 @@ bool CNTV2Card::GetRouting (CNTV2SignalRouter & outRouting)
 	if (!CNTV2SignalRouter::GetWidgetIDs (GetDeviceID(), validWidgets))
 		return false;
 
-	//cerr	<< "## DEBUG: GetRouting: Device '" << ::NTV2DeviceIDToString (GetDeviceID ()) << "' has " << validWidgets.size () << " widgets:  "
-	//		<< validWidgets << endl;
+	ROUTEDBG(GetDisplayName() << ": '" << ::NTV2DeviceIDToString(GetDeviceID()) << "' has " << validWidgets.size() << " widgets: " << validWidgets);
 
 	//	Inspect every input of every widget...
 	for (NTV2WidgetIDSetConstIter pWidgetID (validWidgets.begin ());  pWidgetID != validWidgets.end ();  ++pWidgetID)
@@ -5693,28 +5753,24 @@ bool CNTV2Card::GetRouting (CNTV2SignalRouter & outRouting)
 		NTV2InputXptIDSet	inputs;
 
 		CNTV2SignalRouter::GetWidgetInputs (curWidgetID, inputs);
-		//cerr	<< "## DEBUG:  GetRouting:  Widget '" << ::NTV2WidgetIDToString (curWidgetID, true) << "' ("
-		//		<< ::NTV2WidgetIDToString (curWidgetID, false) << ") has " << inputs.size () << " input(s):  " << inputs << endl;
+		ROUTEDBG(GetDisplayName() << ": " << ::NTV2WidgetIDToString(curWidgetID) << " (" << ::NTV2WidgetIDToString(curWidgetID, true) << ") has " << inputs.size() << " input(s):  " << inputs);
 
 		for (NTV2InputCrosspointIDSetConstIter pInputID (inputs.begin ());  pInputID != inputs.end ();  ++pInputID)
 		{
 			NTV2OutputCrosspointID	outputID	(NTV2_XptBlack);
 			if (!GetConnectedOutput (*pInputID, outputID))
-				;//cerr	<< "## ERROR:  GetRouting:  'GetConnectedOutput' failed for input " << ::NTV2InputCrosspointIDToString (*pInputID)
-				//		<< " (" << ::NTV2InputCrosspointIDToString (*pInputID, true) << ")" << endl;
+				ROUTEDBG(GetDisplayName() << ": 'GetConnectedOutput' failed for input " << ::NTV2InputCrosspointIDToString(*pInputID) << " (" << ::NTV2InputCrosspointIDToString(*pInputID, true) << ")");
 			else if (outputID == NTV2_XptBlack)
-				;//cerr	<< "## DEBUG:  GetRouting:  'GetConnectedOutput' returned XptBlack for input '" << ::NTV2InputCrosspointIDToString (*pInputID, true)
-				//		<< "' (" << ::NTV2InputCrosspointIDToString (*pInputID, false) << ")" << endl;
+				ROUTEDBG(GetDisplayName() << ": 'GetConnectedOutput' returned XptBlack for input '" << ::NTV2InputCrosspointIDToString(*pInputID, true) << "' (" << ::NTV2InputCrosspointIDToString(*pInputID, false) << ")");
 			else
 			{
 				outRouting.AddConnection (*pInputID, outputID);		//	Record this connection...
-				//cerr	<< "## DEBUG:  GetRouting:  Connection found -- from input '" << ::NTV2InputCrosspointIDToString (*pInputID, true) << "' ("
-				//		<< ::NTV2InputCrosspointIDToString (*pInputID, false) << ") <== to output '" << ::NTV2OutputCrosspointIDToString (outputID, true)
-				//		<< "' (" << ::NTV2OutputCrosspointIDToString (outputID, false) << ")" << endl;
+				ROUTEDBG(GetDisplayName() << ": Connection found -- from input '" << ::NTV2InputCrosspointIDToString(*pInputID, true) << "' (" << ::NTV2InputCrosspointIDToString(*pInputID, false)
+						<< ") <== to output '" << ::NTV2OutputCrosspointIDToString(outputID, true) << "' (" << ::NTV2OutputCrosspointIDToString(outputID, false) << ")");
 			}
 		}	//	for each input
 	}	//	for each valid widget
-	//cerr << "## DEBUG:  GetRouting returning "; outRouting.Print (cerr, true);
+	ROUTEDBG(GetDisplayName() << ": Returning " << outRouting);
 	return true;
 
 }	//	GetRouting
@@ -5775,6 +5831,7 @@ bool CNTV2Card::GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRo
 		}	//	if connected to something other than "black" output crosspoint
 	}	//	loop til inputXptQueue empty
 
+	ROUTEDBG(GetDisplayName() << ": Channel " << DEC(inChannel+1) << " routing: " << outRouting);
 	return true;
 
 }	//	GetRoutingForChannel
@@ -7626,7 +7683,7 @@ bool CNTV2Card::WriteRegisters (const NTV2RegisterWrites & inRegWrites)
 	}
 	if (result  &&  setRegsParams.mInNumRegisters  &&  setRegsParams.mOutNumFailures)
 		result = false;	//	fail if any writes failed
-	if (!result)	cerr << "## DEBUG:  CNTV2Card::WriteRegisters failed:  setRegsParams:  " << setRegsParams << endl;
+	if (!result)	CVIDFAIL("Failed: setRegsParams: " << setRegsParams);
 	return result;
 }
 

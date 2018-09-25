@@ -48,9 +48,9 @@
 
 	@par	Audio
 
-	-	1 subsystem
-	-	8 channels (max.) per subsystem
-	-	First subsystem's buffer memory starts at first byte of last frame
+	-	1 audio system
+	-	8 channels (max.) per audio system
+	-	Audio system’s 8MB buffer memory starts at first byte of last frame
 
 	@par	Video Formats
 

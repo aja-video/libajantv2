@@ -484,15 +484,16 @@ AJAExport INTERRUPT_ENUMS		NTV2ChannelToOutputInterrupt (const NTV2Channel inCha
 	@brief		Converts the given NTV2Channel value into the equivalent NTV2TCIndex value.
 	@param[in]	inChannel		Specifies the NTV2Channel to be converted.
 	@param[in]	inEmbeddedLTC	Specify true for embedded LTC. Defaults to false.
+	@param[in]	inIsF2			Specify true for VITC2. Defaults to false.
 	@return		The equivalent NTV2TCIndex value.
 **/
-AJAExport NTV2TCIndex			NTV2ChannelToTimecodeIndex (const NTV2Channel inChannel, const bool inEmbeddedLTC = false);
+AJAExport NTV2TCIndex			NTV2ChannelToTimecodeIndex (const NTV2Channel inChannel, const bool inEmbeddedLTC = false, const bool inIsF2 = false);
 
 /**
-	@return		The NTV2TCIndexes that are associated with the given SDI input.
-	@param[in]	inSDIInput		Specifies the SDI input of interest as an NTV2Channel.
+	@return		The NTV2TCIndexes that are associated with the given SDI connector.
+	@param[in]	inSDIConnector	The SDI connector of interest, specified as an NTV2Channel (a zero-based index number).
 **/
-AJAExport NTV2TCIndexes			GetTCIndexesForSDIInput (const NTV2Channel inSDIInput);
+AJAExport NTV2TCIndexes			GetTCIndexesForSDIConnector (const NTV2Channel inSDIConnector);
 
 /**
 	@brief		Converts the given NTV2TCIndex value into the appropriate NTV2Channel value.
@@ -509,6 +510,7 @@ AJAExport NTV2Channel			NTV2TimecodeIndexToChannel (const NTV2TCIndex inTCIndex)
 AJAExport NTV2InputSource		NTV2TimecodeIndexToInputSource (const NTV2TCIndex inTCIndex);
 
 
+#define	GetTCIndexesForSDIInput			GetTCIndexesForSDIConnector
 #define	NTV2ChannelToCaptureCrosspoint	NTV2ChannelToInputCrosspoint
 #define	NTV2ChannelToIngestCrosspoint	NTV2ChannelToInputCrosspoint
 #define	NTV2ChannelToInputChannelSpec	NTV2ChannelToInputCrosspoint

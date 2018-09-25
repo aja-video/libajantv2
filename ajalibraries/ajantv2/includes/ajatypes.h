@@ -74,6 +74,7 @@
 	typedef unsigned char			UByte;
 	typedef char					SByte;
 #endif
+#define AJA_NULL (reinterpret_cast<void*>(0))
 
 // Platform dependent
 									//////////////////////////////////////////////////////////////////
@@ -109,6 +110,7 @@
 	typedef UINT_PTR	AJASocket;
 
 	#define AJATargetBigEndian  0
+	#define	AJAFUNC		__FUNCTION__
 
 									//////////////////////////////////////////////////////////////////
 #elif defined (AJAMac)				////////////////////////	MAC		//////////////////////////////
@@ -122,6 +124,7 @@
 	typedef int						AJASocket;
 
 	#define AJATargetBigEndian  TARGET_RT_BIG_ENDIAN
+	#define	AJAFUNC		__func__
 
 	#define MAX_PATH 4096
 
@@ -183,6 +186,7 @@
 	typedef int					AJASocket;
 
 	#define AJATargetBigEndian  0
+	#define	AJAFUNC		__func__
 
 	#if defined (MODULE)
 		#define NTV2_BUILDING_DRIVER

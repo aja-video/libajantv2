@@ -191,7 +191,7 @@ public:
 	/**
 		@brief		Sets my FieldID flag.
 		@param[in]	bFlag		false = field 1 (0), true = field 2 (1)
- 		@param[in]	tcFmt	  	NTV4AncillaryData_Timecode_Format associated with timecode (default is handled as 30-frame timecode).
+ 		@param[in]	tcFmt	  	AJAAncillaryData_Timecode_Format associated with timecode (default is handled as 30-frame timecode).
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus SetFieldIdFlag (bool  bFlag, AJAAncillaryData_Timecode_Format tcFmt = AJAAncillaryData_Timecode_Format_Unknown);
@@ -201,7 +201,7 @@ public:
 	/**
 		@brief		Sets my drop frame flag.
 		@param[in]	bFlag		false = non-dropframe format, true = drop frame
- 		@param[in]	tcFmt	  	NTV4AncillaryData_Timecode_Format associated with timecode (default is handled as 30-frame timecode).
+ 		@param[in]	tcFmt	  	AJAAncillaryData_Timecode_Format associated with timecode (default is handled as 30-frame timecode).
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus SetDropFrameFlag (bool  bFlag, AJAAncillaryData_Timecode_Format tcFmt = AJAAncillaryData_Timecode_Format_Unknown);
@@ -211,7 +211,7 @@ public:
 	/**
 		@brief		Sets my color frame flag.
 		@param[in]	bFlag		false = no relation between color frames and timecode values, true = timecode values are aligned with color frames (see SMPTE-12M).
- 		@param[in]	tcFmt	  	NTV4AncillaryData_Timecode_Format associated with timecode (default is handled as 30-frame timecode).
+ 		@param[in]	tcFmt	  	AJAAncillaryData_Timecode_Format associated with timecode (default is handled as 30-frame timecode).
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus SetColorFrameFlag (bool  bFlag, AJAAncillaryData_Timecode_Format tcFmt = AJAAncillaryData_Timecode_Format_Unknown);

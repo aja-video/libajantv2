@@ -1618,25 +1618,40 @@ private:
 			(void) inRegNum;
 			(void) inDeviceID;
 			ostringstream	oss;
-			oss	<< "Device Version: "				<< xHEX0N(inRegValue & kRegMaskHardwareVersion, 1)	<< endl
-				<< "FPGA Version: "					<< xHEX0N(inRegValue & kRegMaskFPGAVersion, 2)		<< endl;
+			oss	<< "Input 1 Vertical Blank: "		<< ActInact(inRegValue & BIT(20))					<< endl
+				<< "Input 1 Field ID: "				<< (inRegValue & BIT(21) ? "1" : "0")				<< endl
+				<< "Input 1 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(30))					<< endl
+				<< "Input 2 Vertical Blank: "		<< ActInact(inRegValue & BIT(18))					<< endl
+				<< "Input 2 Field ID: "				<< (inRegValue & BIT(19) ? "1" : "0")				<< endl
+				<< "Input 2 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(29))					<< endl
+				<< "Output 1 Vertical Blank: "		<< ActInact(inRegValue & BIT(22))					<< endl
+				<< "Output 1 Field ID: "			<< (inRegValue & BIT(23) ? "1" : "0")				<< endl
+				<< "Output 1 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(31))					<< endl
+				<< "Output 2 Vertical Blank: "		<< ActInact(inRegValue & BIT(4))					<< endl
+				<< "Output 2 Field ID: "			<< (inRegValue & BIT(5) ? "1" : "0")				<< endl
+				<< "Output 2 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(8))					<< endl;
+			if (::NTV2DeviceGetNumVideoOutputs(inDeviceID) > 2)
+				oss	<< "Output 3 Vertical Blank: "		<< ActInact(inRegValue & BIT(2))				<< endl
+					<< "Output 3 Field ID: "			<< (inRegValue & BIT(3) ? "1" : "0")			<< endl
+					<< "Output 3 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(7))				<< endl
+					<< "Output 4 Vertical Blank: "		<< ActInact(inRegValue & BIT(0))				<< endl
+					<< "Output 4 Field ID: "			<< (inRegValue & BIT(1) ? "1" : "0")			<< endl
+					<< "Output 4 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(6))				<< endl;
+			oss	<< "Aux Vertical Interrupt: "		<< ActInact(inRegValue & BIT(12))					<< endl
+				<< "I2C 1 Interrupt: "				<< ActInact(inRegValue & BIT(14))					<< endl
+				<< "I2C 2 Interrupt: "				<< ActInact(inRegValue & BIT(13))					<< endl
+				<< "Chunk Rate Interrupt: "			<< ActInact(inRegValue & BIT(16))					<< endl;
 			if (::NTV2DeviceGetNumSerialPorts(inDeviceID))
-				oss	<< "Uart 1 Rx Interrupt: "		<< ActInact(inRegValue & BIT(15))					<< endl
+				oss	<< "Generic UART Interrupt: "	<< ActInact(inRegValue & BIT(9))					<< endl
+					<< "Uart 1 Rx Interrupt: "		<< ActInact(inRegValue & BIT(15))					<< endl
 					<< "Uart 1 Tx Interrupt: "		<< ActInact(inRegValue & BIT(24))					<< endl;
 			if (::NTV2DeviceGetNumSerialPorts(inDeviceID) > 1)
 				oss	<< "Uart 2 Tx Interrupt: "		<< ActInact(inRegValue & BIT(26))					<< endl;
 			if (::NTV2DeviceGetNumLTCInputs(inDeviceID))
 				oss	<< "LTC In 1 Present: "			<< YesNo(inRegValue & BIT(17))						<< endl;
-			oss	<< "Input 1 Vertical Blank: "		<< ActInact(inRegValue & BIT(20))					<< endl
-				<< "Input 1 Field ID: "				<< (inRegValue & BIT(21) ? "1" : "0")				<< endl
-				<< "Input 2 Vertical Blank: "		<< ActInact(inRegValue & BIT(18))					<< endl
-				<< "Input 2 Field ID: "				<< (inRegValue & BIT(19) ? "1" : "0")				<< endl
-				<< "Output Vertical Blank: "		<< ActInact(inRegValue & BIT(22))					<< endl
-				<< "Output Field ID: "				<< (inRegValue & BIT(23) ? "1" : "0")				<< endl
-				<< "Wrap Rate Interrupt: "			<< ActInact(inRegValue & BIT(25))					<< endl
-				<< "Input 1 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(30))					<< endl
-				<< "Input 2 Vertical Interrupt: "	<< ActInact(inRegValue & BIT(29))					<< endl
-				<< "Output Vertical Interrupt: "	<< ActInact(inRegValue & BIT(31));
+			oss	<< "Wrap Rate Interrupt: "			<< ActInact(inRegValue & BIT(25))					<< endl
+				<< "Audio Out Wrap Interrupt: "		<< ActInact(inRegValue & BIT(27))					<< endl
+				<< "Audio 50Hz Interrupt: "			<< ActInact(inRegValue & BIT(28));
 			return oss.str();
 		}
 		virtual	~DecodeStatusReg()	{}
@@ -2309,23 +2324,33 @@ private:
             static const string	sHDMIStdV1[]	=	{	"1080i",	"720p",	"480i",	"576i",	"1080p",	"SXGA",	""	};
 			static const string	sHDMIStdV2V3[]	=	{	"1080i",	"720p",	"480i",	"576i",	"1080p",	"1556i",	"2Kx1080p",	"2Kx1080i",	"UHD",	"4K",	""	};
 			static const string	sVidRates[]		=	{	"",	"60.00",	"59.94",	"30.00",	"29.97",	"25.00",	"24.00",	"23.98",	"",	"",	""	};
+			static const string	sSrcSampling[]	=	{	"YC422",	"RGB",	"YC420",	"Unknown/invalid"	};
+			static const string	sBitDepth[]		=	{	"8",		"10",	"12",		"Unknown/invalid"	};
             const ULWord	hdmiVers		(::NTV2DeviceGetHDMIVersion(inDeviceID));
             const ULWord	rawVideoStd		(inRegValue & kRegMaskHDMIOutV2VideoStd);
 			const string	hdmiVidStdStr	(hdmiVers > 1 ? sHDMIStdV2V3[rawVideoStd] : (hdmiVers == 1 ? sHDMIStdV1[rawVideoStd] : ""));
 			const string	vidStdStr		(::NTV2StandardToString (NTV2Standard(rawVideoStd), true));
+			const uint32_t	srcSampling		((inRegValue & kRegMaskHDMISampling) >> kRegShiftHDMISampling);
+			const uint32_t	srcBPC			((inRegValue & (BIT(16)|BIT(17))) >> 16);
+			const uint32_t	txBitDepth		((inRegValue & (BIT(20)|BIT(21))) >> 20);
 			oss << "Video Standard: " << hdmiVidStdStr;
 			if (hdmiVidStdStr != vidStdStr)
 				oss << " (" << vidStdStr << ")";
 			oss	<< endl
-				<< "Color Mode: "		<< ((inRegValue & BIT( 8))	? "RGB"			: "YCbCr")		<< endl
-				<< "Video Rate: "		<< sVidRates[(inRegValue & kLHIRegMaskHDMIOutFPS) >> kLHIRegShiftHDMIOutFPS]  << endl
-				<< "Scan Mode: "		<< ((inRegValue & BIT(13))	? "Progressive"	: "Interlaced")	<< endl
-				<< "Bit Depth: "		<< ((inRegValue & BIT(14))	? "10-bit"		: "8-bit")		<< endl
-				<< "Color Sampling: "	<< ((inRegValue & BIT(15))	? "4:4:4"		: "4:2:2")		<< endl
-				<< "Output Range: "		<< ((inRegValue & BIT(28))	? "Full"		: "SMPTE")		<< endl
-				<< "Audio Channels: "	<< ((inRegValue & BIT(29))	? "8"			: "2")			<< endl
-				<< "Output: "			<< ((inRegValue & BIT(30))	? "DVI"			: "HDMI")		<< endl
-			<< "Audio Loopback: "	<< OnOff(inRegValue & BIT(31));
+				<< "Color Mode: "				<< ((inRegValue & BIT( 8))	? "RGB"			: "YCbCr")		<< endl
+				<< "Video Rate: "				<< sVidRates[(inRegValue & kLHIRegMaskHDMIOutFPS) >> kLHIRegShiftHDMIOutFPS]  << endl
+				<< "Scan Mode: "				<< ((inRegValue & BIT(13))	? "Progressive"	: "Interlaced")	<< endl
+				<< "Bit Depth: "				<< ((inRegValue & BIT(14))	? "10-bit"		: "8-bit")		<< endl
+				<< "Output Color Sampling: "	<< ((inRegValue & BIT(15))	? "4:4:4"		: "4:2:2")		<< endl
+				<< "Output Bit Depth: "			<< sBitDepth[txBitDepth]									<< endl
+				<< "Src Color Sampling: "		<< sSrcSampling[srcSampling]								<< endl
+				<< "Src Bits Per Component: "	<< sBitDepth[srcBPC]										<< endl
+				<< "Output Range: "				<< ((inRegValue & BIT(28))	? "Full"		: "SMPTE")		<< endl
+				<< "Audio Channels: "			<< ((inRegValue & BIT(29))	? "8"			: "2")			<< endl
+				<< "Output: "					<< ((inRegValue & BIT(30))	? "DVI"			: "HDMI");
+			if (::NTV2DeviceGetNumHDMIVideoInputs(inDeviceID) && ::NTV2DeviceGetNumHDMIVideoOutputs(inDeviceID))
+				oss	<< endl
+					<< "Audio Loopback: "		<< OnOff(inRegValue & BIT(31));
 			return oss.str();
 		}
 		virtual	~DecodeHDMIOutputControl()	{}

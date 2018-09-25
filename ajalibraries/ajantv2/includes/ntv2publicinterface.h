@@ -5493,6 +5493,7 @@ typedef enum
 		#define	AUTOCIRCULATE_TYPE_GETREGS		NTV2_FOURCC ('r', 'e', 'g', 'R')	///< @brief	Identifies NTV2GetRegisters struct
 		#define	AUTOCIRCULATE_TYPE_SETREGS		NTV2_FOURCC ('r', 'e', 'g', 'W')	///< @brief	Identifies NTV2SetRegisters struct
 		#define	AUTOCIRCULATE_TYPE_SDISTATS		NTV2_FOURCC ('s', 'd', 'i', 'S')	///< @brief	Identifies NTV2SDIStatus struct
+        #define	NTV2_TYPE_AJADEBUGLOGGING		NTV2_FOURCC ('d', 'b', 'l', 'g')	///< @brief	Identifies NTV2DebugLogging struct
 
 		#define	NTV2_IS_VALID_STRUCT_TYPE(_x_)	(	(_x_) == AUTOCIRCULATE_TYPE_STATUS		||	\
 													(_x_) == AUTOCIRCULATE_TYPE_XFER		||	\
@@ -5503,11 +5504,13 @@ typedef enum
 													(_x_) == AUTOCIRCULATE_TYPE_SETREGS		||	\
 													(_x_) == AUTOCIRCULATE_TYPE_SDISTATS	||	\
                                                     (_x_) == NTV2_TYPE_BANKGETSET			||	\
-                                                    (_x_) == NTV2_TYPE_VIRTUAL_DATA_RW      )
+                                                    (_x_) == NTV2_TYPE_VIRTUAL_DATA_RW		||	\
+                                                    (_x_) == NTV2_TYPE_AJADEBUGLOGGING	)
 
 
 		//	NTV2_POINTER FLAGS
 		#define	NTV2_POINTER_ALLOCATED				BIT(0)		///< @brief	Allocated using Allocate function?
+		#define	NTV2_POINTER_PAGE_ALIGNED			BIT(1)		///< @brief	Allocated page-aligned?
 
 
 		//	AUTOCIRCULATE OPTION FLAGS
@@ -5670,7 +5673,7 @@ typedef enum
 					@param[in]	inByteCount		Specifies the size of the allocated buffer, in bytes. If non-zero, causes Allocate to be called, and
 												if successful, zeroes the buffer. If zero, I don't allocate anything, and my host pointer will be NULL.
 				**/
-				explicit		NTV2_POINTER (const size_t inByteCount = 0);
+								NTV2_POINTER (const size_t inByteCount = 0);
 
 				/**
 					@brief		Constructs me from another NTV2_POINTER instance.
@@ -5786,10 +5789,18 @@ typedef enum
 								I assume full responsibility for any memory that I allocate.
 					@param[in]	inByteCount		Specifies the number of bytes to allocate.
 												Specifying zero is the same as calling Set(NULL, 0).
+					@param[in]	inPageAligned	Optionally specifies page alignment. If true, allocates a
+												page-aligned block. If false (default), uses operator new.
 					@return		True if successful;  otherwise false.
 					@note		Any memory that I was referencing prior to this call that I was responsible for will automatically be freed.
 				**/
-				bool			Allocate (const size_t inByteCount);
+				bool			Allocate (const size_t inByteCount, const bool inPageAligned = false);
+
+				/**
+					@brief		Deallocates my user-space storage (if I own it -- i.e. from a prior call to Allocate).
+					@return		True if successful;  otherwise false.
+				**/
+				bool			Deallocate (void);
 
 				/**
 					@brief		Fills me with the given UByte value.
@@ -6106,6 +6117,23 @@ typedef enum
 				**/
 				bool							PutU8s (const std::vector<uint8_t> & inU8s, const size_t inU8Offset = 0);
 				///@}
+
+				/**
+					@name	Default Page Size
+				**/
+				///@{
+				/**
+					@return		Default page size, in bytes.
+				**/
+				static size_t					DefaultPageSize (void);
+
+				/**
+					@brief		Changes the default page size for use in future page-aligned allocations.
+					@param[in]	inNewSize		The new page size value, in bytes. Must be a power of 2.
+					@return		True if successful;  otherwise false.
+				**/
+				static bool						SetDefaultPageSize (const size_t inNewSize);
+				///@}
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_POINTER)
 
@@ -6183,6 +6211,11 @@ typedef enum
 					@return		An equivalent RP188_STRUCT.
 				**/
 				inline operator		RP188_STRUCT () const							{RP188_STRUCT result;  result.DBB = fDBB;  result.Low = fLo;  result.High = fHi;  return result;}
+
+				/**
+					@return		True if I'm valid.
+				**/
+				inline operator		bool () const									{return IsValid();}
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_RP188)
 
@@ -7478,6 +7511,39 @@ typedef enum
 		NTV2_STRUCT_END (AUTOCIRCULATE_TRANSFER)
 
 
+        /**
+            @brief	This is used to enable or disable AJADebug logging in the driver.
+            @note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
+        **/
+        NTV2_STRUCT_BEGIN (NTV2DebugLogging)
+            NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
+                NTV2_POINTER	mSharedMemory;		///< @brief	Virtual address of AJADebug shared memory in calling process' context,
+													//			and its length. The AJADebug logging facility owns and manages this memory.
+													//			If NULL or zero length, debug logging will be disabled in the driver.
+													//			If non-NULL and zero length, debug logging will be enabled in the driver.
+                ULWord			mSpares[32];		///< @brief	Reserved for future use.
+            NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
+
+            #if !defined (NTV2_BUILDING_DRIVER)
+                /**
+                    @brief	Constructs an NTV2DebugLogging struct.
+                    @param[in]	inEnable            False to disable (the default), or True to enable.
+                **/
+                explicit	NTV2DebugLogging (const bool inEnable = false);
+
+                /**
+                    @brief	Prints a human-readable representation of me to the given output stream.
+                    @param	inOutStream		Specifies the output stream to use.
+                    @return	A reference to the output stream.
+                **/
+                std::ostream &	Print (std::ostream & inOutStream) const;
+
+                NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
+
+            #endif	//	!defined (NTV2_BUILDING_DRIVER)
+        NTV2_STRUCT_END (NTV2DebugLogging)
+
+
 		#if !defined (NTV2_BUILDING_DRIVER)
 			typedef std::set <NTV2VideoFormat>					NTV2VideoFormatSet;					///< @brief	A set of distinct NTV2VideoFormat values.
 			typedef NTV2VideoFormatSet::const_iterator			NTV2VideoFormatSetConstIter;		///< @brief	A handy const iterator for iterating over an NTV2VideoFormatSet.
@@ -7800,6 +7866,14 @@ typedef enum
 				@return	The ostream being used.
 			**/
 			AJAExport inline std::ostream &	operator << (std::ostream & inOutStream, const NTV2SDIInputStatus & inObj)	{return inObj.Print (inOutStream);}
+
+			/**
+				@brief	Streams the given NTV2DebugLogging struct to the specified ostream in a human-readable format.
+				@param		inOutStream		Specifies the ostream to use.
+				@param[in]	inObj			Specifies the NTV2DebugLogging to be streamed.
+				@return	The ostream being used.
+			**/
+			AJAExport inline std::ostream &	operator << (std::ostream & inOutStream, const NTV2DebugLogging & inObj)	{return inObj.Print (inOutStream);}
 		#endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 		#if defined (AJAMac)

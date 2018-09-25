@@ -48,10 +48,10 @@
 
 	@par	Audio
 
-	-	8 subsystems
-	-	16 channels (max.) per subsystem
-	-	First subsystem's buffer memory starts 8MB from end of memory
+	-	8 audio systems
+	-	16 channels (max.) per audio system
 	-	24-bit PCM, 48kHz sample rate, synchronous SDI embedded
+	-	First audio system’s 8MB buffer memory ends at the end of SDRAM
 
 	@par	Video Formats
 

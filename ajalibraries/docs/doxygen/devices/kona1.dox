@@ -35,9 +35,9 @@
 
 	@par	Audio
 
-	-	1 subsystem
-	-	16 audio channels (max.) per subsystem
-	-	First subsystem's buffer memory starts 8MB from end of memory
+	-	1 audio system
+	-	16 audio channels (max.) per audio system
+	-	First audio system’s 8MB buffer memory ends at the end of SDRAM
 
 	@par	Video Formats
 

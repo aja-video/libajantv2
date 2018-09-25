@@ -65,7 +65,9 @@
 
 
 /**
-    @brief	I provide information about registers and their values.
+    @brief	I provide "one-stop shopping" for information about registers and their values.
+	@bug	This class currently excludes bank-selected registers, so support logs for \ref konaip and
+			\ref ioip will be incomplete. This will be addressed in a future SDK.
 **/
 class AJAExport CNTV2RegisterExpert
 {

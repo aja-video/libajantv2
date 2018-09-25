@@ -27,9 +27,10 @@ web browser at <https://sdksupport.aja.com/>.
 		<tt>xattr -c ~/Downloads/ntv2sdk*.zip</tt>
 
 
-The SDK’s complete documentation set is available online. On the download page, look for the documentation link,
-whose URL is typically of the form:
-<tt>https://sdksupport.aja.com/docs/NTV2SDK_docs_x_y_z/</tt>
+The SDK’s complete documentation set is available online. The documentation link is on the download page.
+The URLs are typically of this form:
+-	<b>Release SDKs:</b>   <tt>https://sdksupport.aja.com/docs/NTV2SDK_docs_x_y_z/</tt>
+-	<b>Beta SDKs:</b>      <tt>https://sdksupport.aja.com/docs/NTV2SDK_docs_x_y_z_beta/</tt>
 ...where <tt>x</tt>, <tt>y</tt> and <tt>z</tt> are the SDK’s major, minor and point version numbers, respectively.
 The documentation is fully cross-referenced, searchable, and includes collaboration diagrams and call graphs.
 
@@ -45,7 +46,7 @@ This section explores the contents of the SDK, which is nearly identical on all 
 	-	<b>ajaapps</b> — Contains sources used to build applications and tools.
 		-	<b>crossplatform  </b>
 			-	<b>demoapps</b> — Contains sources for \ref demoapps.
-			-	<b>supportlog</b> — Contains sources for the <b>supportlog</b> command-line tool.
+			-	<b>supportlog</b> — Contains sources for \ref usingsupportlog.
 		-	<b>lin  </b><i>(Linux-only apps)</i>
 		-	<b>win  </b><i>(Windows-only apps)</i>
 	-	<b>ajadriver  </b><i>(Linux only)</i>

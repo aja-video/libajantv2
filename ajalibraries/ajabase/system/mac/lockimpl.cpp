@@ -23,7 +23,74 @@ AJALockImpl::AJALockImpl(const char* pName) :
 {
 	bool okSoFar = true;
 	bool freeAttr = false;
-
+#if 0
+	if (pName)
+	{
+		int key = ftok(NAMED_MEMORY, ID_TAG);
+		if (-1 == key)
+		{
+			printf("Unable to name shared memory\n");
+			exit(1);
+		}
+		
+		// Create the segment exclusively (if the segment already exists then a combination of IPC_CREAT | IPC_EXCL returns an error EEXIST)
+		int m_iShmid = shmget(key, TOTAL_SIZE, READ_WRITE_PERMISSIONS | IPC_CREAT | IPC_EXCL);
+		if (m_iShmid < 0)
+		{
+			if (EEXIST == errno)
+			{
+				// if the shared memory already exists we only fetch the id to that memory
+				m_iShmid = shmget(key, TOTAL_SIZE, READ_WRITE_PERMISSIONS);
+			}
+			if (m_iShmid < 0)
+			{
+				printf("Unable to create shared memory - %s\n",strerror(errno));
+				exit(1);
+			}
+			else
+				printf("Attached to the existing shared memory\n");
+		}
+		else
+			printf("Created new shared memory\n");
+		
+		// Now we attach the segment to our data space.
+		mutex = reinterpret_cast<pthread_mutex_t*>(shmat(m_iShmid, NULL, 0));
+		if (reinterpret_cast<pthread_mutex_t*>(-1) ==  mutex)
+		{
+			printf("Unable to attach shared memory to the process - %s\n",strerror(errno));
+			exit(1);
+		}
+		
+		// Now we can set this mutex to be shared between processes
+		pthread_mutex_t* mutex;
+		pthread_mutexattr_t mutexAttr;
+		ret = pthread_mutexattr_init(&mutexAttr);
+		if (ret != 0)
+		{
+			printf("pthread_mutexattr_init failed - err=%d\n",ret);
+			exit(1);
+		}
+		ret = pthread_mutexattr_setpshared(&mutexAttr, PTHREAD_PROCESS_SHARED);
+		if (ret != 0)
+		{
+			printf("pthread_mutexattr_setpshared failed - err=%d\n",ret);
+			exit(1);
+		}
+		ret = pthread_mutexattr_setrobust_np(&mutexAttr, PTHREAD_MUTEX_ROBUST_NP);
+		if (ret != 0)
+		{
+			printf("pthread_mutexattr_setrobust_np failed - err=%d\n",ret);
+			exit(1);
+		}
+		ret = pthread_mutex_init(mutex, &mutexAttr);
+		if (ret != 0)
+		{
+			printf("pthread_mutex_init failed - err=%d\n",ret);
+			exit(1);
+		}
+		// ------ Use the mutex from here on between processes
+	}
+#endif
 	// Set up the thread attributes
 	pthread_mutexattr_t attr;
 	int rc = pthread_mutexattr_init(&attr);

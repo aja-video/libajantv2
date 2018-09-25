@@ -297,18 +297,6 @@ public:
 	///@{
 
 	/**
-		@brief	Answers with a 4-byte value that uniquely identifies the kind of AJA device I'm talking to.
-		@return	The 4-byte value that identifies the kind of AJA device this is.
-	**/
-	AJA_VIRTUAL NTV2DeviceID		GetDeviceID (void);
-
-	/**
-		@brief	Answers with this device's zero-based index number (relative to other known devices).
-		@return	This device's zero-based index number.
-	**/
-	AJA_VIRTUAL inline UWord		GetIndexNumber (void) const		{return _boardNumber;}
-
-	/**
 		@brief	Answers with this device's display name.
 		@return	A string containing this device's display name.
 	**/
@@ -2968,10 +2956,6 @@ public:
 					settings should agree with what CNTV2Card::AutoCirculateInitForInput is being asked to do. For example, setting the device
 					output to "Test Pattern" in the <b>AJA ControlPanel</b>, then calling CNTV2Card::AutoCirculateInitForInput is contradictory,
 					because AutoCirculate is being asked to capture from a device that's configured for playout.
-		@bug		When zero is passed to \c inFrameCount, this function uses a frame buffer allocator that is not thread-safe.
-					If this allocator is called from 2 or more threads (or processes), a race condition exists that may result in at least
-					two of the channels having overlapping frame buffer ranges. This will be addressed in a future SDK. Meanwhile, clients
-					can gate calls to CNTV2Card::AutoCirculateInitForInput and/or CNTV2Card::AutoCirculateInitForOutput using a Mutex or Critical Section.
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForOutput, \ref autocirculatecapture
 	**/
 
@@ -3020,10 +3004,6 @@ public:
 					settings should agree with what CNTV2Card::AutoCirculateInitForOutput is being asked to do. For example, setting the device
 					output to "Input Passthrough" in the <b>AJA ControlPanel</b>, then calling CNTV2Card::AutoCirculateInitForOutput is contradictory,
 					because AutoCirculate is being asked to play video from a device that's configured for input.
-		@bug		When zero is passed to \c inFrameCount, this function uses a frame buffer allocator that is not thread-safe.
-					If this allocator is called from 2 or more threads (or processes), a race condition exists that may result in at least
-					two of the channels having overlapping frame buffer ranges. This will be addressed in a future SDK. Meanwhile, clients
-					can gate calls to CNTV2Card::AutoCirculateInitForInput and/or CNTV2Card::AutoCirculateInitForOutput using a Mutex or Critical Section.
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForInput, \ref autocirculateplayout
 	**/
 
@@ -5946,6 +5926,7 @@ protected:
 	AJA_VIRTUAL bool			IS_CHANNEL_INVALID (const NTV2Channel inChannel) const;
 	AJA_VIRTUAL bool			IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot) const;
 	AJA_VIRTUAL bool			IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot) const;
+	AJA_VIRTUAL bool			S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & inOutXferInfo);
 
 private:
 	// frame buffer sizing helpers

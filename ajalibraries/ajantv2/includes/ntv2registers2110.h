@@ -35,6 +35,7 @@
 #define SAREK_2110_TX_ARBITRATOR                (0x215000/4)
 #define SAREK_2110_DECAPSULATOR_0               (0x211000/4)
 #define SAREK_2110_DECAPSULATOR_1               (0x216000/4)
+#define SAREK_2110_VOIPFEC                      (0x217000/4)
 #define SAREK_2110_AUDIO_STREAMSELECT           (0x230000/4)
 
 #define SAREK_2110_TEST_GENERATOR               (0x308000/4)
@@ -187,6 +188,30 @@
 #define kRegTxVideoDecode3              0x0e
 #define kRegTxVideoDecode4              0x0f
 
+/////////////////////////////////////////////////////////////////////
+//
+// VOIP FEC
+//
+/////////////////////////////////////////////////////////////////////
+
+#define kRegVfec_control                (0x00/4)
+#define kRegVfec_status                 (0x04/4)
+#define kRegVfec_channel_access         (0x08/4)
+#define kRegVfec_sys_config             (0x0c/4)
+#define kRegVfec_version                (0x10/4)
+#define kRegVfec_fec_processing_delay   (0x20/4)
+#define kRegVfec_fec_packet_drop_cnt    (0x24/4)
+
+#define kRegVfec_chan_conf              (0x80/4)
+#define kRegVfec_valid_pkt_cnt          (0x90/4)
+#define kRegVfec_unrecv_pkt_cnt         (0x94/4)
+#define kRegVfec_corr_pkt_cnt           (0x98/4)
+#define kRegVfec_dup_pkt_cnt            (0x9c/4)
+#define kRegVfec_channel_status         (0xa8/4)
+#define kRegVfec_curr_buffer_depth      (0xac/4)
+#define kRegVfec_oor_pkt_cnt            (0xb0/4)
+#define kRegVfec_oor_ts_offset          (0xb4/4)
+#define kRegVfec_link_ts_diff           (0xb8/4)
 
 /////////////////////////////////////////////////////////////////////
 //

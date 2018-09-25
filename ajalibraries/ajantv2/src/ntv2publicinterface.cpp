@@ -8,6 +8,8 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
 #include "ntv2endian.h"
+#include "ajabase/system/memory.h"
+#include "ajabase/system/debug.h"
 #include <iomanip>
 #include <locale>		//	For std::locale, std::numpunct, std::use_facet
 #include <assert.h>
@@ -151,11 +153,11 @@ ostream & NTV2_HEADER::Print (ostream & inOutStream) const
 	if (NTV2_IS_VALID_HEADER_TAG (fHeaderTag))
 		inOutStream << NTV2_4CC_AS_STRING (fHeaderTag);
 	else
-		inOutStream << "BAD-" << hex << fHeaderTag << dec;
+		inOutStream << "BAD-" << HEX0N(fHeaderTag,8);
 	if (NTV2_IS_VALID_STRUCT_TYPE (fType))
 		inOutStream << NTV2_4CC_AS_STRING (fType);
 	else
-		inOutStream << "|BAD-" << hex << fType << dec;
+		inOutStream << "|BAD-" << HEX0N(fType,8);
 	inOutStream << " v" << fHeaderVersion << " vers=" << fVersion << " sz=" << fSizeInBytes;
 	return inOutStream << "]";
 }
@@ -1004,14 +1006,7 @@ NTV2_POINTER::~NTV2_POINTER ()
 
 bool NTV2_POINTER::Set (const void * pInUserPointer, const size_t inByteCount)
 {
-	if (fFlags & NTV2_POINTER_ALLOCATED)
-	{
-		if (GetHostPointer () && GetByteCount ())
-			delete [] (UByte *) GetHostPointer ();
-		fUserSpacePtr = 0;
-		fByteCount = 0;
-		fFlags &= ~NTV2_POINTER_ALLOCATED;
-	}
+	Deallocate();
 	fUserSpacePtr = NTV2_POINTER_TO_ULWORD64 (pInUserPointer);
 	fByteCount = static_cast <ULWord> (inByteCount);
 	return true;
@@ -1029,25 +1024,54 @@ bool NTV2_POINTER::SetAndFill (const void * pInUserPointer, const size_t inByteC
 }
 
 
-bool NTV2_POINTER::Allocate (const size_t inByteCount)
+bool NTV2_POINTER::Allocate (const size_t inByteCount, const bool inPageAligned)
 {
-	if (GetByteCount ()  &&  fFlags & NTV2_POINTER_ALLOCATED)	//	If already was Allocated
-		if (inByteCount == GetByteCount ())						//	If same byte count
+	if (GetByteCount()  &&  fFlags & NTV2_POINTER_ALLOCATED)	//	If already was Allocated
+		if (inByteCount == GetByteCount())						//	If same byte count
 		{
-			::memset (GetHostPointer (), 0, GetByteCount ());	//	Just zero it
-			return true;										//	And return true
+			::memset (GetHostPointer(), 0, GetByteCount());		//	Zero it...
+			return true;										//	...and return true
 		}
 
 	bool	result	(false);
 	if (inByteCount)
 	{
 		//	Allocate the byte array, and call Set...
-		result = Set (new UByte [inByteCount], inByteCount);
-		fFlags |= NTV2_POINTER_ALLOCATED;	//	Important:  set this flag so I can delete the array later
+		result = Set (inPageAligned  ?  AJAMemory::AllocateAligned(inByteCount, DefaultPageSize())  :  new UByte[inByteCount],
+					  inByteCount);
+		if (result)
+		{	//	SDK owns this memory -- set NTV2_POINTER_ALLOCATED bit -- I'm responsible for deleting
+			fFlags |= NTV2_POINTER_ALLOCATED;
+			if (inPageAligned)
+				fFlags |= NTV2_POINTER_PAGE_ALIGNED;		//	Set "page aligned" flag
+			::memset (GetHostPointer(), 0, inByteCount);	//	Zero it
+		}
 	}
 	else
 		result = Set (NULL, 0);
 	return result;
+}
+
+
+bool NTV2_POINTER::Deallocate (void)
+{
+	if (fFlags & NTV2_POINTER_ALLOCATED)
+	{
+		if (GetHostPointer() && GetByteCount())
+		{
+			if (fFlags & NTV2_POINTER_PAGE_ALIGNED)
+			{
+				AJAMemory::FreeAligned(GetHostPointer());
+				fFlags &= ~NTV2_POINTER_PAGE_ALIGNED;
+			}
+			else
+				delete [] reinterpret_cast<UByte*>(GetHostPointer());
+		}
+		fUserSpacePtr = 0;
+		fByteCount = 0;
+		fFlags &= ~NTV2_POINTER_ALLOCATED;
+	}
+	return true;
 }
 
 
@@ -1279,6 +1303,22 @@ bool NTV2_POINTER::GetRingChangedByteRange (const NTV2_POINTER & inBuffer, ULWor
 	return true;
 
 }	//	GetRingChangedByteRange
+
+
+static size_t	gDefaultPageSize	(AJA_PAGE_SIZE);
+
+size_t NTV2_POINTER::DefaultPageSize (void)
+{
+	return gDefaultPageSize;
+}
+
+bool NTV2_POINTER::SetDefaultPageSize (const size_t inNewSize)
+{
+	const bool result (inNewSize  &&  (!(inNewSize & (inNewSize - 1))));
+	if (result)
+		gDefaultPageSize = inNewSize;
+	return result;
+}
 
 
 FRAME_STAMP::FRAME_STAMP ()
@@ -1794,8 +1834,7 @@ void NTV2SegmentedDMAInfo::Reset (void)
 
 NTV2ColorCorrectionData::NTV2ColorCorrectionData ()
 	:	ccMode				(NTV2_CCMODE_INVALID),
-		ccSaturationValue	(0),
-		ccLookupTables		(NULL, 0)
+		ccSaturationValue	(0)
 {
 }
 
@@ -1835,10 +1874,6 @@ bool NTV2ColorCorrectionData::Set (const NTV2ColorCorrectionMode inMode, const U
 
 AUTOCIRCULATE_TRANSFER::AUTOCIRCULATE_TRANSFER ()
 	:	acHeader					(AUTOCIRCULATE_TYPE_XFER, sizeof (AUTOCIRCULATE_TRANSFER)),
-		acVideoBuffer				(NULL, 0),
-		acAudioBuffer				(NULL, 0),
-		acANCBuffer					(NULL, 0),
-		acANCField2Buffer			(NULL, 0),
 		acOutputTimeCodes			(NTV2_MAX_NUM_TIMECODE_INDEXES * sizeof (NTV2_RP188)),
 		acTransferStatus			(),
 		acInUserCookie				(0),
@@ -1849,7 +1884,6 @@ AUTOCIRCULATE_TRANSFER::AUTOCIRCULATE_TRANSFER ()
 		acFrameBufferOrientation	(NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN),
 		acVidProcInfo				(),
 		acVideoQuarterSizeExpand	(NTV2_QuarterSizeExpandOff),
-		acHDR10PlusDynamicMetaData	(NULL, 0),
 		acPeerToPeerFlags			(0),
 		acFrameRepeatCount			(1),
 		acDesiredFrame				(-1),
@@ -1880,7 +1914,6 @@ AUTOCIRCULATE_TRANSFER::AUTOCIRCULATE_TRANSFER (ULWord * pInVideoBuffer, const U
 		acFrameBufferOrientation	(NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN),
 		acVidProcInfo				(),
 		acVideoQuarterSizeExpand	(NTV2_QuarterSizeExpandOff),
-		acHDR10PlusDynamicMetaData	(NULL, 0),
 		acPeerToPeerFlags			(0),
 		acFrameRepeatCount			(1),
 		acDesiredFrame				(-1),
@@ -2053,13 +2086,25 @@ bool AUTOCIRCULATE_TRANSFER::GetInputTimeCodes (NTV2TimeCodes & outTimeCodes, co
 }
 
 
+NTV2DebugLogging::NTV2DebugLogging(const bool inEnable)
+	:	mHeader				(NTV2_TYPE_AJADEBUGLOGGING, sizeof (NTV2DebugLogging)),
+		mSharedMemory		(inEnable ? AJADebug::GetPrivateDataLoc() : NULL,  inEnable ? AJADebug::GetPrivateDataLen() : 0)
+{
+}
+
+
+ostream & NTV2DebugLogging::Print (ostream & inOutStream) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	inOutStream	<< mHeader << ", sharedMem=" << mSharedMemory << ", " << mTrailer;
+	return inOutStream;
+}
+
+
 NTV2GetRegisters::NTV2GetRegisters (const NTV2RegNumSet & inRegisterNumbers)
 	:	mHeader				(AUTOCIRCULATE_TYPE_GETREGS, sizeof (NTV2GetRegisters)),
 		mInNumRegisters		(ULWord (inRegisterNumbers.size ())),
-		mInRegisters		(NULL, 0),
-		mOutNumRegisters	(0),
-		mOutGoodRegisters	(NULL, 0),
-		mOutValues			(NULL, 0)
+		mOutNumRegisters	(0)
 {
 	NTV2_ASSERT_STRUCT_VALID;
 	ResetUsing (inRegisterNumbers);
@@ -2069,10 +2114,7 @@ NTV2GetRegisters::NTV2GetRegisters (const NTV2RegNumSet & inRegisterNumbers)
 NTV2GetRegisters::NTV2GetRegisters (NTV2RegisterReads & inRegReads)
 	:	mHeader				(AUTOCIRCULATE_TYPE_GETREGS, sizeof (NTV2GetRegisters)),
 		mInNumRegisters		(ULWord (inRegReads.size ())),
-		mInRegisters		(NULL, 0),
-		mOutNumRegisters	(0),
-		mOutGoodRegisters	(NULL, 0),
-		mOutValues			(NULL, 0)
+		mOutNumRegisters	(0)
 {
 	NTV2_ASSERT_STRUCT_VALID;
 	ResetUsing (inRegReads);
@@ -2199,9 +2241,7 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 NTV2SetRegisters::NTV2SetRegisters (const NTV2RegisterWrites & inRegWrites)
 	:	mHeader				(AUTOCIRCULATE_TYPE_SETREGS, sizeof (NTV2SetRegisters)),
 		mInNumRegisters		(ULWord (inRegWrites.size ())),
-		mInRegInfos			(NULL, 0),
-		mOutNumFailures		(0),
-		mOutBadRegIndexes	(NULL, 0)
+		mOutNumFailures		(0)
 {
 	ResetUsing (inRegWrites);
 }
@@ -2437,4 +2477,3 @@ ostream & NTV2VirtualData::Print (ostream & inOutStream) const
     inOutStream	<< mHeader << ", mTag=" << mTag << ", mIsWriting=" << mIsWriting;
     return inOutStream;
 }
-
