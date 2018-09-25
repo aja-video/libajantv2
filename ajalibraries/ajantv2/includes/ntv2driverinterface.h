@@ -13,10 +13,9 @@
 #include "ntv2enums.h"
 #include "ntv2videodefines.h"
 #include "ntv2audiodefines.h"
-
 #include "ntv2nubtypes.h"
 #include "ntv2publicinterface.h"
-
+#include "ntv2devicefeatures.h"
 #include <string>
 
 #if defined(AJALinux ) || defined(AJAMac)
@@ -50,6 +49,18 @@ public:
 	virtual ~CNTV2DriverInterface ();
 
 public:
+	/**
+		@brief	Answers with a 4-byte value that uniquely identifies the kind of AJA device I'm talking to.
+		@return	The 4-byte value that identifies the kind of AJA device this is.
+	**/
+	virtual NTV2DeviceID		GetDeviceID (void);
+
+	/**
+		@brief	Answers with this device's zero-based index number (relative to other known devices).
+		@return	This device's zero-based index number.
+	**/
+	virtual inline UWord		GetIndexNumber (void) const		{return _boardNumber;}
+
 	/**
 		@brief		Opens an AJA device so that it can be monitored and/or controlled.
 		@result		True if successful; otherwise false.
@@ -239,7 +250,10 @@ public:
     virtual bool		IsDeviceReady (bool inCheckValid = false);
 	virtual bool		IsMBSystemValid (void);
 	virtual bool		IsMBSystemReady (void);
-	virtual bool		IsKonaIPDevice (void);
+#if !defined(NTV2_DEPRECATE_15_0)
+	virtual inline bool	IsKonaIPDevice (void)			{return ::NTV2DeviceCanDoIP(GetDeviceID());}	///< @deprecated	Call CNTV2Card::IsIPDevice instead.
+#endif //	!defined(NTV2_DEPRECATE_12_7)
+	virtual inline bool	IsIPDevice (void)				{return ::NTV2DeviceCanDoIP(GetDeviceID());}	///< @return	True if I am an IP device (instead of SDI or HDMI).
 
 
     // Utility methods:

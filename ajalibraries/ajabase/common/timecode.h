@@ -132,12 +132,12 @@ public:
 	/**
 	 *	Set timecode via RP188 bytes.
 	 *
-	 *	@param[in]	inDBB	Specifies the DBB bits of the RP188 struct.
-	 *	@param[in]	inLo	Specifies the lo-order 32-bit word of the RP188 struct.
- 	 *	@param[in]	inHi	Specifies the hi-order 32-bit word of the RP188 struct.
- 	 *	@param[in]	timeBase                   Specifies the time base to use.
+	 *	@param[in]	inDBB		Specifies the DBB bits of the RP188 struct.
+	 *	@param[in]	inLo		Specifies the lo-order 32-bit word of the RP188 struct.
+ 	 *	@param[in]	inHi		Specifies the hi-order 32-bit word of the RP188 struct.
+ 	 *	@param[in]	inTimeBase	Specifies the time base to use.
 	 */
-	void                SetRP188(uint32_t inDBB, uint32_t inLo, uint32_t inHi, const AJATimeBase& timeBase);
+	void                SetRP188 (const uint32_t inDBB, const uint32_t inLo, const uint32_t inHi, const AJATimeBase & inTimeBase);
 	
 	/**
 	 *	Get RP188 register values using the given timebase, and drop frame.
@@ -190,7 +190,7 @@ public:
 	 *	@param[in]	inLo	Specifies the lo-order 32-bit word of the RP188 struct.
  	 *	@param[in]	inHi	Specifies the hi-order 32-bit word of the RP188 struct.
 	 */
-	static bool			QueryIsRP188DropFrame(uint32_t inDBB,uint32_t inLo,uint32_t inHi);
+	static bool			QueryIsRP188DropFrame (const uint32_t inDBB, const uint32_t inLo, const uint32_t inHi);
 	
 	AJATimeCode&		operator=(const AJATimeCode  &val);
 	AJATimeCode&		operator+=(const AJATimeCode &val);

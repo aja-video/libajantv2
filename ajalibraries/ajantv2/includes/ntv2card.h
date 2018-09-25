@@ -297,18 +297,6 @@ public:
 	///@{
 
 	/**
-		@brief	Answers with a 4-byte value that uniquely identifies the kind of AJA device I'm talking to.
-		@return	The 4-byte value that identifies the kind of AJA device this is.
-	**/
-	AJA_VIRTUAL NTV2DeviceID		GetDeviceID (void);
-
-	/**
-		@brief	Answers with this device's zero-based index number (relative to other known devices).
-		@return	This device's zero-based index number.
-	**/
-	AJA_VIRTUAL inline UWord		GetIndexNumber (void) const		{return _boardNumber;}
-
-	/**
 		@brief	Answers with this device's display name.
 		@return	A string containing this device's display name.
 	**/
@@ -5938,6 +5926,7 @@ protected:
 	AJA_VIRTUAL bool			IS_CHANNEL_INVALID (const NTV2Channel inChannel) const;
 	AJA_VIRTUAL bool			IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot) const;
 	AJA_VIRTUAL bool			IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot) const;
+	AJA_VIRTUAL bool			S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & inOutXferInfo);
 
 private:
 	// frame buffer sizing helpers
