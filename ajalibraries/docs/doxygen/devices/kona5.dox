@@ -62,13 +62,14 @@
 
 	@par	Frame Buffer
 
-	-	512 MB SDRAM
-	-	64 × 8MB frames
-	-	32 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	4GB SDRAM
+	-	512 × 8MB frames
+	-	256 × 16MB frames
+	-	128 × 32MB frames
 
 	@par	Audio
 
-	-	4 audio systems
+	-	4 audio systems + Mixer audio system
 	-	16 channels (max.) per audio system
 	-	16 channels (max.) of AES audio
 	-	First audio system’s 8MB buffer memory ends at the end of SDRAM
@@ -104,8 +105,7 @@
 
 	@par	External Connectivity
 
-	-	Optional \ref aja103226 provides access to other inputs and outputs
-	-	Optional \ref ajak3gbox provides convenient access to most of the board's inputs and outputs in a 1U rack-mountable chassis
+	-	Optional breakout cable provides access to other inputs and outputs
 
 	@par	Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/137/25>
