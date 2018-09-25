@@ -429,7 +429,7 @@ void NTV2Capture::CaptureFrames (void)
 
 			//	Do the transfer from the device into our host AVDataBuffer...
 			mDevice.AutoCirculateTransfer (mInputChannel, inputXfer);
-			captureData->fAudioBufferSize = inputXfer.GetCapturedAudioByteCount();
+			// inputXfer.GetCapturedAudioByteCount();  // this is the amount of audio captured
 
 			NTV2SDIInStatistics	sdiStats;
 			mDevice.ReadSDIStatistics (sdiStats);

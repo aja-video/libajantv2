@@ -857,7 +857,7 @@ void NTV2Capture4K::CaptureFrames (void)
 
 			//	Do the transfer from the device into our host AVDataBuffer...
 			mDevice.AutoCirculateTransfer (mInputChannel, mInputTransfer);
-			captureData->fAudioBufferSize = mInputTransfer.acTransferStatus.acAudioTransferSize;
+			// mInputTransfer.acTransferStatus.acAudioTransferSize;   // this is the amount of audio captured
 
 			NTV2SDIInStatistics	sdiStats;
 			mDevice.ReadSDIStatistics (sdiStats);
