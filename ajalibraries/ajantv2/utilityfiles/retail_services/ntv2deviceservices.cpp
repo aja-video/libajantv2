@@ -2211,7 +2211,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     txConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
                     txConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
                     txConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
-                    txConfig.payload = m2110TxVideoData.txVideoCh[i].payload;
+                    txConfig.payloadType = m2110TxVideoData.txVideoCh[i].payloadType;
                     txConfig.ttl = 0x40;
                     txConfig.tos = 0x64;
 
@@ -2267,7 +2267,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     txConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
                     txConfig.localPort[0] = m2110TxAudioData.txAudioCh[i].localPort[0];
                     txConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
-                    txConfig.payload = m2110TxAudioData.txAudioCh[i].payload;
+                    txConfig.payloadType = m2110TxAudioData.txAudioCh[i].payloadType;
                     txConfig.ttl = 0x40;
                     txConfig.tos = 0x64;
 
@@ -2320,7 +2320,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     {
                         // Use SFP 2 params
                         sfp = SFP_2;
-                        rxConfig.rxMatch = m2110RxVideoData.rxVideoCh[i].rxMatch[1];
+                        rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
                         rxConfig.sourceIP = m2110RxVideoData.rxVideoCh[i].sourceIP[1];
                         rxConfig.destIP = m2110RxVideoData.rxVideoCh[i].destIP[1];
                         rxConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[1];
@@ -2331,13 +2331,13 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     {
                         // Use SFP 1 params
                         sfp = SFP_1;
-                        rxConfig.rxMatch = m2110RxVideoData.rxVideoCh[i].rxMatch[0];
+                        rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
                         rxConfig.sourceIP = m2110RxVideoData.rxVideoCh[i].sourceIP[0];
                         rxConfig.destIP = m2110RxVideoData.rxVideoCh[i].destIP[0];
                         rxConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[0];
                         rxConfig.destPort = m2110RxVideoData.rxVideoCh[i].destPort[0];
                     }
-                    rxConfig.payload = m2110RxVideoData.rxVideoCh[i].payload;
+                    rxConfig.payloadType = m2110RxVideoData.rxVideoCh[i].payloadType;
 
                     // Video specific
                     if (mFollowInputFormat && (m2110RxVideoData.rxVideoCh[i].videoFormat != NTV2_FORMAT_UNKNOWN))
@@ -2403,7 +2403,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     {
                         // Use SFP 2 params
                         sfp = SFP_2;
-                        rxConfig.rxMatch = m2110RxAudioData.rxAudioCh[i].rxMatch[1];
+                        rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
                         rxConfig.sourceIP = m2110RxAudioData.rxAudioCh[i].sourceIP[1];
                         rxConfig.destIP = m2110RxAudioData.rxAudioCh[i].destIP[1];
                         rxConfig.sourcePort = m2110RxAudioData.rxAudioCh[i].sourcePort[1];
@@ -2414,13 +2414,13 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     {
                         // Use SFP 1 params
                         sfp = SFP_1;
-                        rxConfig.rxMatch = m2110RxAudioData.rxAudioCh[i].rxMatch[0];
+                        rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
                         rxConfig.sourceIP = m2110RxAudioData.rxAudioCh[i].sourceIP[0];
                         rxConfig.destIP = m2110RxAudioData.rxAudioCh[i].destIP[0];
                         rxConfig.sourcePort = m2110RxAudioData.rxAudioCh[i].sourcePort[0];
                         rxConfig.destPort = m2110RxAudioData.rxAudioCh[i].destPort[0];
                     }
-                    rxConfig.payload = m2110RxAudioData.rxAudioCh[i].payload;
+                    rxConfig.payloadType = m2110RxAudioData.rxAudioCh[i].payloadType;
 
                     // Audio specific
                     rxConfig.numAudioChannels = m2110RxAudioData.rxAudioCh[i].numAudioChannels;
