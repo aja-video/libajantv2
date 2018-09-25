@@ -152,23 +152,6 @@ bool CNTV2DriverInterface::ConfigureSubscription (bool bSubscribe, INTERRUPT_ENU
 }	//	ConfigureSubscription
 
 
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-
-#ifdef AJA_WINDOWS
-
-static bool winsock_inited = false;
-static WSADATA wsaData;
-
-static void initWinsock(void) {
-    int wret;
-    if (!winsock_inited)
-        wret = WSAStartup(MAKEWORD(2,2), &wsaData);
-    winsock_inited = true;
-}
-
-#endif
-
-
 NTV2DeviceID CNTV2DriverInterface::GetDeviceID (void)
 {
 	ULWord	value	(0);
@@ -184,6 +167,23 @@ NTV2DeviceID CNTV2DriverInterface::GetDeviceID (void)
 	else
 		return DEVICE_ID_NOTFOUND;
 }
+
+
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
+
+#ifdef AJA_WINDOWS
+
+static bool winsock_inited = false;
+static WSADATA wsaData;
+
+static void initWinsock(void) {
+    int wret;
+    if (!winsock_inited)
+        wret = WSAStartup(MAKEWORD(2,2), &wsaData);
+    winsock_inited = true;
+}
+
+#endif
 
 bool CNTV2DriverInterface::OpenRemote (UWord boardNumber, bool displayErrorMessage, UWord ulBoardType, const char *hostname)
 {
