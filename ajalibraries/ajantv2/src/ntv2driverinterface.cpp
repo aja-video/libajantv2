@@ -81,11 +81,11 @@ class DriverInterfaceGlobalInitializer
 static DriverInterfaceGlobalInitializer	gInitializerSingleton;
 
 
-#define	DIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, __func__ << ": " << __x__)
-#define	DIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, __func__ << ": " << __x__)
-#define	DINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, __func__ << ": " << __x__)
-#define	DIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface, __func__ << ": " << __x__)
-#define	DIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface, __func__ << ": " << __x__)
+#define	DIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
+#define	DIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
+#define	DINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
+#define	DIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
+#define	DIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
 
 
 CNTV2DriverInterface::CNTV2DriverInterface ()
