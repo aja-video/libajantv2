@@ -311,7 +311,7 @@ const char *NTV2VideoFormatString (NTV2VideoFormat fmt)
 		case NTV2_FORMAT_1080p_5000_A:				result = "NTV2_FORMAT_1080p_5000_A";		break;
 		case NTV2_FORMAT_1080p_5994_A:				result = "NTV2_FORMAT_1080p_5994_A";		break;
 		case NTV2_FORMAT_1080p_6000_A:				result = "NTV2_FORMAT_1080p_6000_A";		break;
-		case NTV2_FORMAT_END_HIGH_DEF_FORMATS:		result = "NTV2_FORMAT_UNKNOWN";				break;
+        //case NTV2_FORMAT_END_HIGH_DEF_FORMATS:		result = "NTV2_FORMAT_UNKNOWN";				break;
 		case NTV2_FORMAT_720p_2398:					result = "NTV2_FORMAT_720p_2398";			break;
 		case NTV2_FORMAT_720p_2500:					result = "NTV2_FORMAT_720p_2500";			break;
 		case NTV2_FORMAT_525_5994:					result = "NTV2_FORMAT_525_5994";			break;
@@ -320,13 +320,13 @@ const char *NTV2VideoFormatString (NTV2VideoFormat fmt)
 		case NTV2_FORMAT_525_2400:					result = "NTV2_FORMAT_525_2400";			break;
 		case NTV2_FORMAT_525psf_2997:				result = "NTV2_FORMAT_525psf_2997";			break;
 		case NTV2_FORMAT_625psf_2500:				result = "NTV2_FORMAT_625psf_2500";			break;
-		case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:	result = "NTV2_FORMAT_UNKNOWN";				break;
+        //case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:	result = "NTV2_FORMAT_UNKNOWN";				break;
 		case NTV2_FORMAT_2K_1498:					result = "NTV2_FORMAT_2K_1498";				break;
 		case NTV2_FORMAT_2K_1500:					result = "NTV2_FORMAT_2K_1500";				break;
 		case NTV2_FORMAT_2K_2398:					result = "NTV2_FORMAT_2K_2398";				break;
 		case NTV2_FORMAT_2K_2400:					result = "NTV2_FORMAT_2K_2400";				break;
 		case NTV2_FORMAT_2K_2500:					result = "NTV2_FORMAT_2K_2500";				break;
-		case NTV2_FORMAT_END_2K_DEF_FORMATS:		result = "NTV2_FORMAT_UNKNOWN";				break;
+        //case NTV2_FORMAT_END_2K_DEF_FORMATS:		result = "NTV2_FORMAT_UNKNOWN";				break;
 		case NTV2_FORMAT_4x1920x1080psf_2398:		result = "NTV2_FORMAT_4x1920x1080psf_2398";	break;
 		case NTV2_FORMAT_4x1920x1080psf_2400:		result = "NTV2_FORMAT_4x1920x1080psf_2400";	break;
 		case NTV2_FORMAT_4x1920x1080psf_2500:		result = "NTV2_FORMAT_4x1920x1080psf_2500";	break;
@@ -387,8 +387,8 @@ const char *NTV2VideoFormatString (NTV2VideoFormat fmt)
         case NTV2_FORMAT_4096x2160p_6000:       	result = "NTV2_FORMAT_4096x2160p_6000";	break;
         case NTV2_FORMAT_4096x2160p_11988:      	result = "NTV2_FORMAT_4096x2160p_11988";	break;
         case NTV2_FORMAT_4096x2160p_12000:      	result = "NTV2_FORMAT_4096x2160p_12000";	break;
-		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:		result = "NTV2_FORMAT_UNKNOWN";				break;
-        case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:    result = "NTV2_FORMAT_UNKNOWN";             break;
+        //case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:		result = "NTV2_FORMAT_UNKNOWN";				break;
+        //case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:    result = "NTV2_FORMAT_UNKNOWN";             break;
 //		case NTV2_MAX_NUM_VIDEO_FORMATS:			result = "NTV2_FORMAT_UNKNOWN";				break;
 #if !defined (_DEBUG)
 		default:

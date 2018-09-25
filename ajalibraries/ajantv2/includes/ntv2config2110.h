@@ -25,13 +25,13 @@
 
 typedef enum
 {
-    kNetworkData2110        = NTV2_FOURCC('n','t','1','1'), // 4CC of network config data
-    kTransmitVideoData2110  = NTV2_FOURCC('t','v','1','1'), // 4CC of video transmit config data
-    kTransmitAudioData2110  = NTV2_FOURCC('t','a','1','1'), // 4CC of audio transmit config data
-    kReceiveVideoData2110   = NTV2_FOURCC('r','v','1','1'), // 4CC of video receive config data
-    kReceiveAudioData2110   = NTV2_FOURCC('r','a','1','1'), // 4CC of audio receive config data
-    kAncVData2110           = NTV2_FOURCC('a','n','1','1'), // 4CC of anc config data
-    kChStatusData2110       = NTV2_FOURCC('s','t','1','1')  // 4CC of channel status config data
+    kNetworkData2110        = NTV2_FOURCC('n','t','1','2'), // 4CC of network config data
+    kTransmitVideoData2110  = NTV2_FOURCC('t','v','1','2'), // 4CC of video transmit config data
+    kTransmitAudioData2110  = NTV2_FOURCC('t','a','1','2'), // 4CC of audio transmit config data
+    kReceiveVideoData2110   = NTV2_FOURCC('r','v','1','2'), // 4CC of video receive config data
+    kReceiveAudioData2110   = NTV2_FOURCC('r','a','1','2'), // 4CC of audio receive config data
+    kAncVData2110           = NTV2_FOURCC('a','n','1','2'), // 4CC of anc config data
+    kChStatusData2110       = NTV2_FOURCC('s','t','1','2')  // 4CC of channel status config data
 } VirtualDataTag2110 ;
 
 typedef enum
@@ -53,7 +53,7 @@ typedef struct
     uint32_t                sfpEnable[2];
     uint32_t                ttl;
     uint32_t                ssrc;
-    uint32_t                payload;
+    uint32_t                payloadType;
     NTV2VideoFormat         videoFormat;
     uint32_t                enable;
     uint32_t                unused[4];
@@ -69,7 +69,7 @@ typedef struct
     uint32_t                sfpEnable[2];
     uint32_t                ttl;
     uint32_t                ssrc;
-    uint32_t                payload;
+    uint32_t                payloadType;
     uint32_t                numAudioChannels;
     uint32_t                firstAudioChannel;
     eNTV2PacketInterval     audioPktInterval;
@@ -84,11 +84,10 @@ typedef struct
     char                    destIP[2][IP_STRSIZE];
     uint32_t                sourcePort[2];
     uint32_t                destPort[2];
-    uint32_t                rxMatch[2];
     uint32_t                sfpEnable[2];
     uint32_t                vlan;
     uint32_t                ssrc;
-    uint32_t                payload;
+    uint32_t                payloadType;
     NTV2VideoFormat         videoFormat;
     uint32_t                enable;
     uint32_t                unused[4];
@@ -102,11 +101,10 @@ typedef struct
     char                    destIP[2][IP_STRSIZE];
     uint32_t                sourcePort[2];
     uint32_t                destPort[2];
-    uint32_t                rxMatch[2];
     uint32_t                sfpEnable[2];
     uint32_t                vlan;
     uint32_t                ssrc;
-    uint32_t                payload;
+    uint32_t                payloadType;
     uint32_t                numAudioChannels;
     eNTV2PacketInterval     audioPktInterval;
     uint32_t                enable;
@@ -199,7 +197,7 @@ public:
     std::string         remoteIP[2];        ///< @brief	Specifies remote (destination) IP address.
     uint32_t            localPort[2];		///< @brief	Specifies the local (source) port number.
     uint32_t            remotePort[2];		///< @brief	Specifies the remote (destination) port number.
-    uint16_t            payload;
+    uint16_t            payloadType;
     uint8_t             tos;                // type of service
     uint8_t             ttl;                // time to live
     uint32_t            ssrc;
@@ -234,7 +232,7 @@ public:
     uint32_t            destPort;           ///< @brief	Specifies the destination (target) port number (if RX_MATCH_2110_DEST_PORT set)
     uint32_t            ssrc;               ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2110_SSRC set)
     uint16_t            vlan;               ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2110_VLAN set)
-    uint16_t            payload;
+    uint16_t            payloadType;
     NTV2VideoFormat     videoFormat;
     VPIDSampling        videoSamples;
     uint32_t            numAudioChannels;
@@ -273,8 +271,15 @@ public:
     bool        GetTxPacketCount(NTV2Stream stream, uint32_t &packets);
     bool        GetTxByteCount(const eSFP sfp, uint64_t &bytes);
 
+#if defined(USE_SWPTP)
+    bool		SetPTPDomain(const uint8_t domain);
+    bool		GetPTPDomain(uint8_t &domain);
+    bool		SetPTPPreferredGrandMasterId(const uint8_t id[8]);
+    bool		GetPTPPreferredGrandMasterId(uint8_t (&id)[8]);
+#else
     bool        SetPTPMaster(const std::string ptpMaster);
     bool        GetPTPMaster(std::string & ptpMaster);
+#endif
     bool        GetPTPStatus(PTPStatus & ptpStatus);
     bool        PLLReset();
 

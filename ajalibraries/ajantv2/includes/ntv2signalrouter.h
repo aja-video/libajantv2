@@ -477,6 +477,21 @@ AJAExport NTV2InputCrosspointID		GetMixerFGInputXpt (const NTV2Channel inChannel
 **/
 AJAExport NTV2InputCrosspointID		GetMixerBGInputXpt (const NTV2Channel inChannel,  const bool inIsKey = false);
 
+/**
+    @return		The appropriate TSI Muxer's ::NTV2InputCrosspointID for the given ::NTV2Channel.
+    @param[in]	inChannel		Specifies the ::NTV2Channel of interest.
+    @param[in]	inLinkB			Specify true to obtain the second input crosspoint. Defaults to false.
+**/
+AJAExport NTV2InputCrosspointID     GetTSIMuxInputXptFromChannel(const NTV2Channel inChannel, const bool inLinkB = false);
+
+/**
+    @return		The appropriate TSI Muxer's ::NTV2OutputCrosspointID for the given ::NTV2Channel.
+    @param[in]	inChannel		Specifies the ::NTV2Channel of interest.
+    @param[in]	inLinkB			Specify true to obtain the second output crosspoint. Defaults to false.
+    @param[in]	inIsRGB			Specify true to obtain the RGB output crosspoints. Defaults to false.
+**/
+AJAExport NTV2OutputCrosspointID GetTSIMuxOutputXptFromChannel (const NTV2Channel inChannel, const bool inLinkB = false, const bool inIsRGB = false);
+
 
 //	Stream operators
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const CNTV2SignalRouter & inObj);
