@@ -359,8 +359,6 @@ public:
 	 */
 	static double MicrosecondsToSeconds(int64_t microseconds);
 
-
-protected:
 	static int64_t Convert(int64_t inValue, int64_t inRate, int64_t outRate, bool round, bool large);
 	static int64_t Convert(int64_t inValue, int64_t inScale, int64_t inDuration,
 						   int64_t outScale, int64_t outDuration, bool round, bool large);
