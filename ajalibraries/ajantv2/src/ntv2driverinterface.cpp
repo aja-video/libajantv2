@@ -13,7 +13,8 @@
 #include "ntv2bitfile.h"
 #include "ntv2registers2022.h"
 #include "ntv2spiinterface.h"
-
+#include "ntv2utils.h"
+#include "ajabase/system/debug.h"
 #include <string.h>
 #include <assert.h>
 #include <iostream>
@@ -23,8 +24,10 @@
 
 using namespace std;
 
+
 typedef map <INTERRUPT_ENUMS, string>	InterruptEnumStringMap;
 static InterruptEnumStringMap			gInterruptNames;
+
 
 class DriverInterfaceGlobalInitializer
 {
@@ -78,6 +81,13 @@ class DriverInterfaceGlobalInitializer
 static DriverInterfaceGlobalInitializer	gInitializerSingleton;
 
 
+#define	DIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
+#define	DIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
+#define	DINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
+#define	DIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
+#define	DIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
+
+
 CNTV2DriverInterface::CNTV2DriverInterface ()
 	:	_boardNumber					(0),
 		_boardOpened					(false),
@@ -125,13 +135,18 @@ CNTV2DriverInterface::~CNTV2DriverInterface ()
 
 bool CNTV2DriverInterface::ConfigureSubscription (bool bSubscribe, INTERRUPT_ENUMS eInterruptType, PULWord & hSubscription)
 {
-	if (bSubscribe)							//	If subscribing,
-		mEventCounts [eInterruptType] = 0;	//		clear this interrupt's event counter
-// 	#if defined (_DEBUG)
-// 	else
-// 		cerr << "## DEBUG:  Unsubscribing '" << gInterruptNames [eInterruptType] << "' (" << eInterruptType << "), " << mEventCounts [eInterruptType] << " event(s) received" << endl;
-// 	#endif
 	(void) hSubscription;
+	if (!NTV2_IS_VALID_INTERRUPT_ENUM(eInterruptType))
+		return false;
+	if (bSubscribe)
+	{										//	If subscribing,
+		mEventCounts [eInterruptType] = 0;	//		clear this interrupt's event counter
+		DIINFO("Subscribing '" << gInterruptNames[eInterruptType] << "' (" << UWord(eInterruptType)
+				<< "), event counter reset");
+	}
+ 	else
+		DIINFO("Unsubscribing '" << gInterruptNames[eInterruptType] << "' (" << UWord(eInterruptType) << "), "
+				<< mEventCounts[eInterruptType] << " event(s) received");
 	return true;
 
 }	//	ConfigureSubscription
@@ -152,6 +167,23 @@ static void initWinsock(void) {
 }
 
 #endif
+
+
+NTV2DeviceID CNTV2DriverInterface::GetDeviceID (void)
+{
+	ULWord	value	(0);
+	if (_boardOpened && ReadRegister (kRegBoardID, value))
+	{
+		const NTV2DeviceID	currentValue (static_cast <NTV2DeviceID> (value));
+		if (currentValue != _boardID)
+			DIWARN(xHEX0N(this,16) << ":  NTV2DeviceID " << xHEX0N(value,8) << " (" << ::NTV2DeviceIDToString(currentValue)
+					<< ") read from register " << kRegBoardID << " doesn't match _boardID " << xHEX0N(_boardID,8) << " ("
+					<< ::NTV2DeviceIDToString(_boardID) << ")");
+		return currentValue;
+	}
+	else
+		return DEVICE_ID_NOTFOUND;
+}
 
 bool CNTV2DriverInterface::OpenRemote (UWord boardNumber, bool displayErrorMessage, UWord ulBoardType, const char *hostname)
 {
@@ -812,34 +844,6 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 	return false;
 }
 
-bool CNTV2DriverInterface::IsKonaIPDevice()
-{
-	ULWord val = 0;
-	ULWord hexID = 0x0;
-	ReadRegister (kRegBoardID, hexID);
-	switch((NTV2DeviceID)hexID)
-	{
-	case DEVICE_ID_KONA4:
-	case DEVICE_ID_KONA4UFC:
-		ReadRegister((0x100000 + 0x80) / 4, val);
-		if (val != 0x00000000 && val != 0xffffffff)
-			return true;
-		else
-			return false;
-
-	case DEVICE_ID_KONAIP_2022:
-	case DEVICE_ID_KONAIP_4CH_2SFP:
-	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-	case DEVICE_ID_KONAIP_1RX_1TX_2110:
-	case DEVICE_ID_KONAIP_2110:
-    case DEVICE_ID_IOIP_2022:
-    case DEVICE_ID_IOIP_2110:
-		return true;
-	default:
-		return false;
-	}
-}
 
 #if !defined (NTV2_DEPRECATE)
 NTV2BoardType CNTV2DriverInterface::GetCompileFlag ()

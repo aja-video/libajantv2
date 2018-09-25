@@ -6211,6 +6211,11 @@ typedef enum
 					@return		An equivalent RP188_STRUCT.
 				**/
 				inline operator		RP188_STRUCT () const							{RP188_STRUCT result;  result.DBB = fDBB;  result.Low = fLo;  result.High = fHi;  return result;}
+
+				/**
+					@return		True if I'm valid.
+				**/
+				inline operator		bool () const									{return IsValid();}
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_RP188)
 

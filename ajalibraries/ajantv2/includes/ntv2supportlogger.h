@@ -25,8 +25,6 @@ typedef enum
 /**
 	@brief	Generates a standard support log (register log) for any NTV2 device attached to the host.
 			To write the log into a file, open a std::ofstream, then stream this object into it.
-	@bug	This class currently excludes bank-selected registers, so support logs for \ref konaip and
-			\ref ioip will be incomplete. This will be addressed in a future SDK.
 **/
 class AJAExport CNTV2SupportLogger
 {

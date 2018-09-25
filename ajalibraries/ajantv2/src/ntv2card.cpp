@@ -94,22 +94,6 @@ CNTV2Card::~CNTV2Card ()
 }	//	destructor
 
 
-NTV2DeviceID CNTV2Card::GetDeviceID (void)
-{
-	ULWord	value	(0);
-	if (_boardOpened && ReadRegister (kRegBoardID, value))
-	{
-		const NTV2DeviceID	currentValue (static_cast <NTV2DeviceID> (value));
-		if (currentValue != _boardID)
-			cerr	<< "## WARNING:  GetDeviceID:  0x" << hex << this << dec << ":  NTV2DeviceID " << ::NTV2DeviceIDToString (currentValue)
-					<< " read from register " << kRegBoardID << " doesn't match _boardID " << ::NTV2DeviceIDToString (_boardID) << endl;
-		return currentValue;
-	}
-	else
-		return DEVICE_ID_NOTFOUND;
-}
-
-
 Word CNTV2Card::GetDeviceVersion (void)
 {
 	ULWord	status	(0);
