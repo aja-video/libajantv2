@@ -4832,11 +4832,11 @@ NTV2TCIndex NTV2ChannelToTimecodeIndex (const NTV2Channel inChannel, const bool 
 }
 
 
-NTV2TCIndexes GetTCIndexesForSDIInput (const NTV2Channel inSDIInput)
+NTV2TCIndexes GetTCIndexesForSDIConnector (const NTV2Channel inSDI)
 {
 	NTV2TCIndexes	result;
-	if (NTV2_IS_VALID_CHANNEL(inSDIInput))
-		{result.insert(gChanVITC1[inSDIInput]);	result.insert(gChanVITC2[inSDIInput]);  result.insert(gChanATCLTC[inSDIInput]);}
+	if (NTV2_IS_VALID_CHANNEL(inSDI))
+		{result.insert(gChanVITC1[inSDI]);	result.insert(gChanVITC2[inSDI]);  result.insert(gChanATCLTC[inSDI]);}
 	return result;
 }
 
