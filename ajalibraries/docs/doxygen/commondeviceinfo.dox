@@ -91,7 +91,12 @@
 
 	Most AJA devices have a single RS-422 connector that can be used to control tape deck transports and for other purposes.
 	-	To determine the number of serial ports on a device, call ::NTV2DeviceGetNumSerialPorts.
-	-	To determine if the serial port is programmable (for baud rate, parity, stop bits, etc.), call ::NTV2DeviceCanDoProgrammableRS422.
+	-	To determine if the serial port is programmable (for baud rate, parity, etc.), call ::NTV2DeviceCanDoProgrammableRS422.
+		-	To determine the current baud rate, call CNTV2Card::GetRS422BaudRate. To change the baud rate, call CNTV2Card::SetRS422BaudRate.
+		-	To determine the current parity configuration, call CNTV2Card::GetRS422Parity. To change the baud rate, call CNTV2Card::SetRS422Parity.
+
+	@image	html	rs422pinout400.png
+
 
 	@subsection	commonelectricalchars		Common Electrical Characteristics
 

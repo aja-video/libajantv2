@@ -6,8 +6,10 @@
 	<hr>
 	@subsection		kona5		KONA 5
 
-	This page describes the KONA 5 capture/playout board in its OEM mode of operation.
-	It has two different firmware personalities identified by ::DEVICE_ID_KONA5_12G and ::DEVICE_ID_KONA5.
+	This page describes the KONA 5 capture/playout board.
+	It has two different firmware personalities:
+	-	::DEVICE_ID_KONA5 — “retail” personality, similar to the \ref io4kplus (4 × 3G FrameStores, one 12G/6G in & out);
+	-	::DEVICE_ID_KONA5_12G — “OEM” personality, with all-new 12G FrameStore architecture.  This page describes this mode of operation.
 
 	@image	html	kona5.png
 	@image	html	kona5end.png
@@ -42,23 +44,12 @@
 		-	Composite Sync (2V or 4V) or…
 		-	HD Tri-Level Sync (1V)
 		-	Reference input is terminated into 75Ω when Genlock set to ::NTV2_REFERENCE_EXTERNAL
-	-	1 × LTC output (via 1 × HD-BNC on Breakout Cable or K3G-Box)
+	-	1 × LTC output (via 1 × HD-BNC on Breakout Cable)
 	-	1 × LTC inputs — use one of:
-		-	1 × HD-BNC on Breakout Cable or K3G-Box
+		-	1 × HD-BNC on Breakout Cable
 		-	1 × HD-BNC at PCIe bracket
 		-	2-pin header on PCIe card
-	-	1 × RS-422 serial port, Sony 9-pin protocol (via Breakout Cable or K3G-Box)
-		-	Sony 9-pin protocol
-		-	9-pin “D” connector pinout (shell=GND):
-			-#	GND
-			-#	RX-
-			-#	TX+
-			-#	GND
-			-#	(No connection)
-			-#	GND
-			-#	RX+
-			-#	TX-
-			-#	GND
+	-	1 × RS-422 serial port, Sony 9-pin protocol (via Breakout Cable)
 
 	@par	Frame Buffer
 
