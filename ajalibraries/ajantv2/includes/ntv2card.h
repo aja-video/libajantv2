@@ -5043,24 +5043,55 @@ public:
 	**/
 	///@{
 	/**
-		@brief		Sets the parity control on the RS422 port specified by inChannel.
+		@brief		Sets the parity control on the specified RS422 serial port.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the RS422 port to be affected, which must be ::NTV2_CHANNEL1 or ::NTV2_CHANNEL2.
-		@param[in]	inRS422Parity	Specifies if parity should be used, and if so, whether it should be odd or even.
+		@param[in]	inSerialPort	Specifies the RS422 serial port to be affected, expressed as an ::NTV2Channel
+									(a zero-based index number). Call ::NTV2DeviceGetNumSerialPorts to determine
+									the number of available serial ports.
+		@param[in]	inParity		Specifies if parity should be used, and if so, whether it should be odd or even.
+		@note		This function only works with programmable RS422 devices.
+		@see		CNTV2Card::GetRS422Parity, CNTV2Card::SetRS422BaudRate, ::NTV2DeviceGetNumSerialPorts,
+					::NTV2DeviceCanDoProgrammableRS422
 	**/
-	AJA_VIRTUAL bool		SetRS422Parity  (const NTV2Channel inChannel, const NTV2_RS422_PARITY inRS422Parity);
-
-	AJA_VIRTUAL bool		GetRS422Parity (NTV2Channel inChannel, NTV2_RS422_PARITY & outRS422Parity);
+	AJA_VIRTUAL bool		SetRS422Parity  (const NTV2Channel inSerialPort, const NTV2_RS422_PARITY inParity);
 
 	/**
-		@brief		Sets the baud rate the RS422 port specified by inChannel.
+		@brief		Answers with the current parity control for the specified RS422 serial port.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the RS422 port to be affected, which must be ::NTV2_CHANNEL1 or ::NTV2_CHANNEL2.
-		@param[in]	inRS422BaudRate	Specifies the baud rate to be used for RS422 communications.
+		@param[in]	inSerialPort	Specifies the RS422 serial port of interest, expressed as an ::NTV2Channel
+									(a zero-based index number). Call ::NTV2DeviceGetNumSerialPorts to determine
+									the number of available serial ports.
+		@param[in]	outParity		Receives the serial port's current ::NTV2_RS422_PARITY setting.
+		@see		CNTV2Card::SetRS422Parity, CNTV2Card::GetRS422BaudRate, ::NTV2DeviceGetNumSerialPorts,
+					::NTV2DeviceCanDoProgrammableRS422
 	**/
-	AJA_VIRTUAL bool		SetRS422BaudRate  (const NTV2Channel inChannel, const NTV2_RS422_BAUD_RATE inRS422BaudRate);
+	AJA_VIRTUAL bool		GetRS422Parity (const NTV2Channel inSerialPort, NTV2_RS422_PARITY & outParity);
 
-	AJA_VIRTUAL bool		GetRS422BaudRate (NTV2Channel inChannel, NTV2_RS422_BAUD_RATE & outRS422BaudRate);
+	/**
+		@brief		Sets the baud rate of the specified RS422 serial port.
+		@return		True if successful; otherwise false.
+		@param[in]	inSerialPort	Specifies the RS422 serial port to be affected, expressed as an ::NTV2Channel
+									(a zero-based index number). Call ::NTV2DeviceGetNumSerialPorts to determine
+									the number of available serial ports.
+		@param[in]	inBaudRate		Specifies the ::NTV2_RS422_BAUD_RATE to be used. (The default baud rate upon
+									power-up or reset is ::NTV2_RS422_BAUD_RATE_38400.)
+		@note		This function only works with programmable RS422 devices.
+		@see		CNTV2Card::SetRS422Parity, CNTV2Card::GetRS422BaudRate, ::NTV2DeviceGetNumSerialPorts,
+					::NTV2DeviceCanDoProgrammableRS422
+	**/
+	AJA_VIRTUAL bool		SetRS422BaudRate  (const NTV2Channel inSerialPort, const NTV2_RS422_BAUD_RATE inBaudRate);
+
+	/**
+		@brief		Answers with the current baud rate of the specified RS422 serial port.
+		@return		True if successful; otherwise false.
+		@param[in]	inSerialPort	Specifies the RS422 serial port of interest, expressed as an ::NTV2Channel
+									(a zero-based index number). Call ::NTV2DeviceGetNumSerialPorts to determine
+									the number of available serial ports.
+		@param[out]	outBaudRate		Receives the ::NTV2_RS422_BAUD_RATE being used.
+		@see		CNTV2Card::GetRS422Parity, CNTV2Card::SetRS422BaudRate, ::NTV2DeviceGetNumSerialPorts,
+					::NTV2DeviceCanDoProgrammableRS422
+	**/
+	AJA_VIRTUAL bool		GetRS422BaudRate (const NTV2Channel inSerialPort, NTV2_RS422_BAUD_RATE & outBaudRate);
 
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadUartRxFifoSize (ULWord * pOutSizeInBytes));

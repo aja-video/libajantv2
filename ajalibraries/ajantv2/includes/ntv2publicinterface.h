@@ -7048,8 +7048,8 @@ typedef enum
 					FRAME_STAMP				acFrameStamp;			///< @brief	Frame stamp for the transferred frame.
 					ULWord					acAudioTransferSize;	///< @brief Number of bytes captured into the audio buffer.
 					ULWord					acAudioStartSample;		///< @brief	Starting audio sample (valid for capture only).
-					ULWord					acAncTransferSize;		///< @brief Total ancillary data bytes for field 1 transferred
-					ULWord					acAncField2TransferSize;///< @brief Total ancillary data bytes for field 2 transferred.
+					ULWord					acAncTransferSize;		///< @brief Total ancillary data bytes for field 1 transferred (capture only).
+					ULWord					acAncField2TransferSize;///< @brief Total ancillary data bytes for field 2 transferred (capture only).
 				NTV2_TRAILER			acTrailer;				///< @brief	The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
@@ -7067,6 +7067,39 @@ typedef enum
 					@return		The frame buffer number the frame was transferred to or from (or -1 if the transfer failed).
 				**/
 				inline LWord					GetTransferFrame (void) const							{return acTransferFrame;}
+
+				/**
+					@return		My state after the transfer.
+				**/
+				inline NTV2AutoCirculateState	GetState (void) const									{return acState;}
+
+				/**
+					@return		My buffer level after the transfer.
+				**/
+				inline ULWord					GetBufferLevel (void) const								{return acBufferLevel;}
+
+				/**
+					@return		The total number of frames successfully processed (not dropped) since AutoCirculateStart called.
+				**/
+				inline ULWord					GetProcessedFrameCount (void) const						{return acFramesProcessed;}
+
+				/**
+					@return		The total number of frames dropped since AutoCirculateStart called.
+				**/
+				inline ULWord					GetDroppedFrameCount (void) const						{return acFramesDropped;}
+
+				/**
+					@return		The number of audio bytes deposited/transferred into the host audio buffer after
+								the last successful CNTV2Card::AutoCirculateTransfer.
+				**/
+				inline ULWord					GetCapturedAudioByteCount (void) const					{return acAudioTransferSize;}
+
+				/**
+					@return		The number of ancillary data bytes deposited/transferred into the host anc buffer after
+								the last successful CNTV2Card::AutoCirculateTransfer.
+					@param[in]	inField2	Specify \c true for Field 2;  otherwise \c false (the default) for Field 1 (or progessive).
+				**/
+				inline ULWord					GetCapturedAncByteCount (const bool inField2 = false) const	{return inField2 ? acAncField2TransferSize : acAncTransferSize;}
 
 				NTV2_IS_STRUCT_VALID_IMPL(acHeader,acTrailer)
 
@@ -7448,21 +7481,21 @@ typedef enum
 				inline const FRAME_STAMP &				GetFrameInfo (void) const						{return acTransferStatus.acFrameStamp;}
 
 				/**
-					@return		The exact number of audio bytes transferred into my acAudioBuffer after the last successful
-								call made to CNTV2Card::AutoCirculateTransfer.
-					@note		This function is intended for capture/ingest, not playout.
+					@return		The number of audio bytes deposited/transferred into the host audio buffer after
+								the last successful CNTV2Card::AutoCirculateTransfer.
 				**/
-				inline ULWord							GetCapturedAudioByteCount (void) const			{return acTransferStatus.acAudioTransferSize;}
+				inline ULWord							GetCapturedAudioByteCount (void) const			{return acTransferStatus.GetCapturedAudioByteCount();}
 
 				inline NTV2_DEPRECATED_f(ULWord	GetAudioByteCount (void) const)					{return GetCapturedAudioByteCount ();}	///< @deprecated	Use GetCapturedAudioByteCount instead.
 
 				/**
-					@brief	Returns the number of actual ancillary data bytes that were transferred.
-					@param[in]	inField2	Specify true to get the Field 2 ancillary byte count.
+					@return		The number of ancillary data bytes deposited/transferred into the host anc buffer after
+								the last successful CNTV2Card::AutoCirculateTransfer.
+					@param[in]	inField2	Specify true to obtain the Field 2 ancillary byte count.
 											Specify false (the default) to return the Field 1 (or progessive) ancillary byte count.
-					@return	The number of actual ancillary data bytes that were transferred (F1 or F2).
 				**/
-				inline ULWord							GetAncByteCount (const bool inField2 = false) const		{return inField2 ? acTransferStatus.acAncField2TransferSize : acTransferStatus.acAncTransferSize;}
+				inline ULWord							GetCapturedAncByteCount (const bool inField2 = false) const	{return acTransferStatus.GetCapturedAncByteCount(inField2);}
+				inline NTV2_SHOULD_BE_DEPRECATED(ULWord	GetAncByteCount (const bool inField2 = false) const)	{return GetCapturedAncByteCount(inField2);}	///< @deprecated	Use GetCapturedAncByteCount instead.
 
 				/**
 					@return		My current frame buffer format.
@@ -7472,7 +7505,7 @@ typedef enum
 				/**
 					@return		The frame number that was transferred (or -1 if failed).
 				**/
-				inline LWord							GetTransferFrameNumber (void) const						{return acTransferStatus.acTransferFrame;}
+				inline LWord							GetTransferFrameNumber (void) const						{return acTransferStatus.GetTransferFrame();}
 				///@}
 
 				/**
