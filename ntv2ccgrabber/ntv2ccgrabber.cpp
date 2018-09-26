@@ -572,9 +572,9 @@ void NTV2CCGrabber::CaptureFrames (void)
 
 					if (mBurnCaptions)
 					{
-						pCaptureData->fAudioBufferSize	= mInputXferInfo.GetCapturedAudioByteCount ();	//	Actual audio byte count goes with captured frame
-						pCaptureData->fAncBufferSize	= mInputXferInfo.GetAncByteCount (false);		//	Actual F1 anc byte count goes with captured frame
-						pCaptureData->fAncF2BufferSize	= mInputXferInfo.GetAncByteCount (true);		//	Actual F2 anc byte count goes with captured frame
+						pCaptureData->fAudioBufferSize	= mInputXferInfo.GetCapturedAudioByteCount ();		//	Actual audio byte count goes with captured frame
+						pCaptureData->fAncBufferSize	= mInputXferInfo.GetCapturedAncByteCount (false);	//	Actual F1 anc byte count goes with captured frame
+						pCaptureData->fAncF2BufferSize	= mInputXferInfo.GetCapturedAncByteCount (true);	//	Actual F2 anc byte count goes with captured frame
 						NTV2_RP188	tc;
 						mInputXferInfo.GetInputTimeCode (tc, ::NTV2InputSourceToTimecodeIndex (mInputSource, false));		//	Try VITC
 						if (!tc.IsValid ())

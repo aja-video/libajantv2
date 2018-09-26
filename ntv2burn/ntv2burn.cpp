@@ -661,8 +661,8 @@ void NTV2Burn::CaptureFrames (void)
 
 			//	Remember the audio & anc data byte counts...
 			captureData->fAudioBufferSize	= NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem)  ?  inputXferInfo.GetCapturedAudioByteCount ()  :  0;
-			captureData->fAncBufferSize		= mWithAnc  ?  inputXferInfo.GetAncByteCount (false/*F1*/)  :  0;
-			captureData->fAncF2BufferSize	= mWithAnc  ?  inputXferInfo.GetAncByteCount ( true/*F2*/)  :  0;
+			captureData->fAncBufferSize		= mWithAnc  ?  inputXferInfo.GetCapturedAncByteCount (false/*F1*/)  :  0;
+			captureData->fAncF2BufferSize	= mWithAnc  ?  inputXferInfo.GetCapturedAncByteCount ( true/*F2*/)  :  0;
 
 			NTV2_RP188	defaultTC;
 			if (NTV2_IS_VALID_TIMECODE_INDEX (mTCSource) && InputSignalHasTimecode ())
