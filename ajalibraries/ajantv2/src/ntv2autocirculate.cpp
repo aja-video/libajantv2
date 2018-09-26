@@ -1084,8 +1084,8 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			{	//	Zero out everything past the last captured Anc byte in the client's host buffer(s)... 
 				NTV2_POINTER &	clientAncBufferF1	(inOutXferInfo.acANCBuffer);
 				NTV2_POINTER &	clientAncBufferF2	(inOutXferInfo.acANCField2Buffer);
-				const ULWord	ancF1ByteCount		(inOutXferInfo.GetAncByteCount(false));
-				const ULWord	ancF2ByteCount		(inOutXferInfo.GetAncByteCount(true));
+				const ULWord	ancF1ByteCount		(inOutXferInfo.GetCapturedAncByteCount(false));
+				const ULWord	ancF2ByteCount		(inOutXferInfo.GetCapturedAncByteCount(true));
 				void *			pF1TailEnd			(clientAncBufferF1.GetHostAddress(ancF1ByteCount));
 				void *			pF2TailEnd			(clientAncBufferF2.GetHostAddress(ancF2ByteCount));
 				if (pF1TailEnd  &&  clientAncBufferF1.GetByteCount() > ancF1ByteCount)
