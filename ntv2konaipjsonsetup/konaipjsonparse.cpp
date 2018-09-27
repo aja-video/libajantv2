@@ -155,12 +155,12 @@ bool CKonaIpJsonParse2110::SetJsonTransmitAudio(const QJsonArray& jsonArray)
     return success;
 }
 
-bool CKonaIpJsonParse2110::GetEnable(std::string enableBoolString)
+bool CKonaIpJsonParse2110::GetEnable(const std::string enableBoolString)
 {
     return (enableBoolString == "true");
 }
 
-QString CKonaIpJsonParse2110::GetEnable(bool enabled)
+QString CKonaIpJsonParse2110::GetEnable(const bool enabled)
 {
     if (enabled)
         return "true";
@@ -168,7 +168,7 @@ QString CKonaIpJsonParse2110::GetEnable(bool enabled)
         return "false";
 }
 
-NTV2Channel CKonaIpJsonParse2110::GetChannel(std::string channelString)
+NTV2Channel CKonaIpJsonParse2110::GetChannel(const std::string channelString)
 {
     NTV2Channel chan;
 
@@ -186,7 +186,7 @@ NTV2Channel CKonaIpJsonParse2110::GetChannel(std::string channelString)
     return chan;
 }
 
-QString CKonaIpJsonParse2110::GetChannel(NTV2Channel channel)
+QString CKonaIpJsonParse2110::GetChannel(const NTV2Channel channel)
 {
     QString str;
 
@@ -204,7 +204,7 @@ QString CKonaIpJsonParse2110::GetChannel(NTV2Channel channel)
     return str;
 }
 
-eSFP CKonaIpJsonParse2110::GetSfp(std::string sfpString)
+eSFP CKonaIpJsonParse2110::GetSfp(const std::string sfpString)
 {
     eSFP sfp;
 
@@ -218,7 +218,7 @@ eSFP CKonaIpJsonParse2110::GetSfp(std::string sfpString)
     return sfp;
 }
 
-QString CKonaIpJsonParse2110::GetSfp(eSFP sfp)
+QString CKonaIpJsonParse2110::GetSfp(const eSFP sfp)
 {
     QString str;
 
@@ -232,7 +232,7 @@ QString CKonaIpJsonParse2110::GetSfp(eSFP sfp)
     return str;
 }
 
-NTV2Stream CKonaIpJsonParse2110::GetVideoStream(std::string streamString)
+NTV2Stream CKonaIpJsonParse2110::GetVideoStream(const std::string streamString)
 {
     NTV2Stream stream;
 
@@ -250,7 +250,7 @@ NTV2Stream CKonaIpJsonParse2110::GetVideoStream(std::string streamString)
     return stream;
 }
 
-QString CKonaIpJsonParse2110::GetVideoStream(NTV2Stream stream)
+QString CKonaIpJsonParse2110::GetVideoStream(const NTV2Stream stream)
 {
     QString str;
 
@@ -268,7 +268,7 @@ QString CKonaIpJsonParse2110::GetVideoStream(NTV2Stream stream)
     return str;
 }
 
-NTV2Stream CKonaIpJsonParse2110::GetAudioStream(std::string streamString)
+NTV2Stream CKonaIpJsonParse2110::GetAudioStream(const std::string streamString)
 {
     NTV2Stream stream;
 
@@ -286,7 +286,7 @@ NTV2Stream CKonaIpJsonParse2110::GetAudioStream(std::string streamString)
     return stream;
 }
 
-QString CKonaIpJsonParse2110::GetAudioStream(NTV2Stream stream)
+QString CKonaIpJsonParse2110::GetAudioStream(const NTV2Stream stream)
 {
     QString str;
 
@@ -304,7 +304,7 @@ QString CKonaIpJsonParse2110::GetAudioStream(NTV2Stream stream)
     return str;
 }
 
-eNTV2PacketInterval CKonaIpJsonParse2110::GetAudioPktInterval(std::string pktIntervalString)
+eNTV2PacketInterval CKonaIpJsonParse2110::GetAudioPktInterval(const std::string pktIntervalString)
 {
     eNTV2PacketInterval pktInterval;
 
@@ -318,7 +318,7 @@ eNTV2PacketInterval CKonaIpJsonParse2110::GetAudioPktInterval(std::string pktInt
     return pktInterval;
 }
 
-QString CKonaIpJsonParse2110::GetAudioPktInterval(eNTV2PacketInterval pktInterval)
+QString CKonaIpJsonParse2110::GetAudioPktInterval(const eNTV2PacketInterval pktInterval)
 {
     QString str;
 
@@ -332,16 +332,58 @@ QString CKonaIpJsonParse2110::GetAudioPktInterval(eNTV2PacketInterval pktInterva
     return str;
 }
 
+void CKonaIpJsonParse2110::GetGrandMasterID(const std::string str, uint8_t (&id)[8])
+{
+    QString idstr = QString::fromStdString(str);
+    for (int i=0; i<8; i++)
+    {
+        id[i] = 0;
+    }
+
+    if (idstr != "")
+    {
+        if (idstr.contains('-') || idstr.contains(':'))
+        {
+            QByteArray vals = QByteArray::fromHex(idstr.toLatin1());
+            if (vals.size() == 8)
+            {
+                for (int i=0; i<8; i++)
+                {
+                    id[i] = vals[i];
+                }
+            }
+        }
+    }
+}
+
+QString CKonaIpJsonParse2110::GetGrandMasterID(const uint8_t id[8])
+{
+    QString str = QString::asprintf("%02X-%02X-%02X-%02X-%02X-%02X-%02X-%02X",
+            id[0], id[1], id[2], id[3], id[4], id[5], id[6], id[7]);
+    return str;
+}
+
 bool CKonaIpJsonParse2110::JsonToStructNetwork(const QJsonObject& topObj, NetworkData2110& n2110)
 {
     memset(&n2110, 0, sizeof(NetworkData2110));
+    std::string str;
 
     std::cout << "Network2110" << std::endl;
 
+#if defined(USE_SWPTP)
+    n2110.ptpDomain = topObj["ptpDomain"].toInt();
+    if (m_verbose) std::cout << " ptpDomain " << n2110.ptpDomain << std::endl;
+
+    str = topObj["ptpGrandMasterID"].toString().toStdString();
+    if (m_verbose) std::cout << " ptpGrandMasterID " << str.c_str() << std::endl;
+    GetGrandMasterID(str, n2110.ptpGrandMasterID);
+
+#else
     // ptpMasterIP
-    std::string str = topObj["ptpMasterIP"].toString().toStdString();
+    str = topObj["ptpMasterIP"].toString().toStdString();
     if (m_verbose) std::cout << " ptpMasterIP " << str.c_str() << std::endl;
     strncpy(n2110.ptpMasterIP, str.c_str(), kStrMax);
+#endif
 
     str = topObj["setup4k"].toString().toStdString();
     if (m_verbose) std::cout << " setup4k " << str.c_str() << std::endl;
@@ -385,7 +427,15 @@ bool CKonaIpJsonParse2110::JsonToStructNetwork(const QJsonObject& topObj, Networ
 
 bool CKonaIpJsonParse2110::StructToJsonNetwork(const NetworkData2110& n2110, QJsonObject& topObj)
 {
+#if defined(USE_SWPTP)
+    topObj.insert("ptpDomain", QJsonValue((int)n2110.ptpDomain));
+    topObj.insert("ptpGrandMasterID", QJsonValue(QString(GetGrandMasterID(n2110.ptpGrandMasterID))));
+
+#else
     topObj.insert("ptpMasterIP", QJsonValue(QString(n2110.ptpMasterIP)));
+#endif
+
+
     topObj.insert("setup4k", QJsonValue(QString(GetEnable(n2110.setup4k))));
 
     QJsonArray sfpArray;

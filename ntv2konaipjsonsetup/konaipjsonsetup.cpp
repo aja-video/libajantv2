@@ -530,13 +530,18 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     // fetch parsed newtwork struct
     NetworkData2110 net2110 = parse2110.m_net2110;
 
+#if defined(USE_SWPTP)
+
+#else
     // configure PTP master
     if (net2110.ptpMasterIP[0])
     {
-        device.SetReference(NTV2_REFERENCE_SFP1_PTP);
         config2110.SetPTPMaster(net2110.ptpMasterIP);
-        config2110.Set4KModeEnable(net2110.setup4k);
     }
+#endif
+
+    device.SetReference(NTV2_REFERENCE_SFP1_PTP);
+    config2110.Set4KModeEnable(net2110.setup4k);
 
     for (uint32_t i = 0; i < net2110.numSFPs; i++)
     {

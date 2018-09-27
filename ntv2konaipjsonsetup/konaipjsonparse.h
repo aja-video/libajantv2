@@ -59,18 +59,21 @@ public:
 						const TransmitAudioData2110& aTran2110,
 						QJsonObject& topObj);
 
-    bool GetEnable(std::string enableBoolString);
-    QString GetEnable(bool enabled);
-    NTV2Channel GetChannel(std::string channelString);
-    QString GetChannel(NTV2Channel channel);
-    eSFP GetSfp(std::string sfpString);
-    QString GetSfp(eSFP sfp);
-    NTV2Stream GetAudioStream(std::string streamString);
-    QString GetAudioStream(NTV2Stream stream);
-    eNTV2PacketInterval GetAudioPktInterval(std::string streamString);
-    QString GetAudioPktInterval(eNTV2PacketInterval stream);
-    NTV2Stream GetVideoStream(std::string streamString);
-    QString GetVideoStream(NTV2Stream stream);
+    bool GetEnable(const std::string enableBoolString);
+    QString GetEnable(const bool enabled);
+    NTV2Channel GetChannel(const std::string channelString);
+    QString GetChannel(const NTV2Channel channel);
+    eSFP GetSfp(const std::string sfpString);
+    QString GetSfp(const eSFP sfp);
+    NTV2Stream GetAudioStream(const std::string streamString);
+    QString GetAudioStream(const NTV2Stream stream);
+    eNTV2PacketInterval GetAudioPktInterval(const std::string streamString);
+    QString GetAudioPktInterval(const eNTV2PacketInterval stream);
+    NTV2Stream GetVideoStream(const std::string streamString);
+    QString GetVideoStream(const NTV2Stream stream);
+    void GetGrandMasterID(const std::string str, uint8_t (&id)[8]);
+    QString GetGrandMasterID(const uint8_t id[8]);
+
 
 public:
     bool                    m_verbose;
