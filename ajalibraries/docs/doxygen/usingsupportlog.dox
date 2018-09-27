@@ -82,5 +82,6 @@ For example, to capture a log after delaying 10 seconds:
 $ ./bin/supportlog  --wait 10
 \endcode
 
+<hr size="50px">
 
 **/
