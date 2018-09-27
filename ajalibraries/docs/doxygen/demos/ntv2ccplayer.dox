@@ -48,7 +48,7 @@ Plays video containing closed-caption data sourced from...
 The NTV2CCPlayer class used in the demo app is capable of simultaneously generating and injecting captions
 into more than one NTV2Line21Channel at independent rates and NTV2Line21Modes. For example, in "main.cpp"...
 
-@code
+@code{.cpp}
 	//
 	//	NOTE:	This is an example of how to inject different captions into separate caption channels.
 	//

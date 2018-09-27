@@ -50,6 +50,8 @@
 
 	@bug	Custom HANC insertion on playout is not supported (due to a thorny firmware issue).
 
+<hr size="50px">
+
 
 	@section	ancembeddedaudio	Embedded Audio
 
@@ -60,6 +62,8 @@
 	For playout, audio samples present in the audio output buffer will be embedded into outgoing HANC packets of SDI output(s) sourced
 	from it if the audio system is running -- otherwise silence (zeroes) will be embedded. Note that embedded audio output can be
 	suppressed (see CNTV2Card::SetAudioOutputEmbedderState).
+
+<hr size="50px">
 
 	@section	anctimecode			Timecode (RP-188, SMPTE-12M)
 
@@ -82,6 +86,8 @@
 
 	If the device supports LTC I/O, LTC input can be read by calling CNTV2Card::ReadAnalogLTCInput. LTC output is driven by a
 	separate control register, or can be driven directly by the corresponding LTC input output.
+
+<hr size="50px">
 
 	@section	anccapturingwithac	Capturing Anc Packets Using AutoCirculate
 
@@ -121,6 +127,8 @@
 	@note	In <b>Playout</b> mode, the KonaIP and IoIP 2110 firmware expect the total RTP packet bytecount to appear in the
 			<b>Sequence Number</b> field in the first longword of the RTP packet header.
 
+<hr size="50px">
+
 	@section	ancplayingwithac	Playing Anc Packets Using AutoCirculate
 
 	For transmitting Ancillary data packets from your own buffer, newer NTV2 devices (see ::NTV2DeviceCanDoCustomAnc) provide
@@ -133,6 +141,8 @@
 
 	@note	Because the outgoing line number can be specified, it's possible to overrun a line. Be certain that the data packets to be
 			inserted on a given line will fit for the output video standard.
+
+<hr size="50px">
 
 	@section	vancframegeometries		VANC Frame Geometries
 
