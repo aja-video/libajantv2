@@ -7,10 +7,14 @@
 #include "ajatypes.h"
 #include "ntv2enums.h"
 #include "ntv2democommon.h"
+#include "ntv2endian.h"
 
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
 
+#if defined (AJALinux) || defined (AJAMac)
+#include <arpa/inet.h>
+#endif
 
 using std::endl;
 using std::cout;
@@ -604,7 +608,6 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         // Until we support -7, only use one link
         if (sfp == SFP_1)
         {
-            rxChannelConfig.rxMatch     = 0x14;  // PSM hard code for now, need to look at params set
             rxChannelConfig.sourceIP    = receiveVideo2110.rxVideoCh[i].sourceIP[0];
             rxChannelConfig.destIP      = receiveVideo2110.rxVideoCh[i].destIP[0];
             rxChannelConfig.sourcePort  = receiveVideo2110.rxVideoCh[i].sourcePort[0];
@@ -612,7 +615,6 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
         else
         {
-            rxChannelConfig.rxMatch     = 0x14;  // PSM hard code for now, need to look at params set
             rxChannelConfig.sourceIP    = receiveVideo2110.rxVideoCh[i].sourceIP[1];
             rxChannelConfig.destIP      = receiveVideo2110.rxVideoCh[i].destIP[1];
             rxChannelConfig.sourcePort  = receiveVideo2110.rxVideoCh[i].sourcePort[1];
@@ -624,6 +626,29 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
         rxChannelConfig.videoFormat     = receiveVideo2110.rxVideoCh[i].videoFormat;
         rxChannelConfig.videoSamples    = VPIDSampling_YUV_422;
+
+        // Set RX match based on non zero passed in params
+        rxChannelConfig.rxMatch = 0;
+        uint32_t ip = 0;
+        ip = inet_addr(rxChannelConfig.sourceIP.c_str());
+        ip = NTV2EndianSwap32(ip);
+        if (ip)
+            rxChannelConfig.rxMatch |= RX_MATCH_2110_SOURCE_IP;
+        ip = inet_addr(rxChannelConfig.destIP.c_str());
+        ip = NTV2EndianSwap32(ip);
+        if (ip)
+            rxChannelConfig.rxMatch |= RX_MATCH_2110_DEST_IP;
+        if (rxChannelConfig.sourcePort)
+            rxChannelConfig.rxMatch |= RX_MATCH_2110_SOURCE_PORT;
+        if (rxChannelConfig.destPort)
+            rxChannelConfig.rxMatch |= RX_MATCH_2110_DEST_PORT;
+        if (rxChannelConfig.vlan)
+            rxChannelConfig.rxMatch |= RX_MATCH_2110_VLAN;
+        if (rxChannelConfig.payloadType)
+            rxChannelConfig.rxMatch |= RX_MATCH_2110_PAYLOAD;
+        if (rxChannelConfig.ssrc)
+            rxChannelConfig.rxMatch |= RX_MATCH_2110_SSRC;
+
 
         rv = config2110.SetRxStreamConfiguration (sfp,
                                                   receiveVideo2110.rxVideoCh[i].stream,
@@ -664,7 +689,6 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         // Until we support -7, only use one link
         if (sfp == SFP_1)
         {
-            rxChannelConfig.rxMatch     = 0x14;  // PSM hard code for now, need to look at params set
             rxChannelConfig.sourceIP    = receiveAudio2110.rxAudioCh[i].sourceIP[0];
             rxChannelConfig.destIP      = receiveAudio2110.rxAudioCh[i].destIP[0];
             rxChannelConfig.sourcePort  = receiveAudio2110.rxAudioCh[i].sourcePort[0];
@@ -672,7 +696,6 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
         else
         {
-            rxChannelConfig.rxMatch     = 0x14;  // PSM hard code for now, need to look at params set
             rxChannelConfig.sourceIP    = receiveAudio2110.rxAudioCh[i].sourceIP[1];
             rxChannelConfig.destIP      = receiveAudio2110.rxAudioCh[i].destIP[1];
             rxChannelConfig.sourcePort  = receiveAudio2110.rxAudioCh[i].sourcePort[1];
@@ -683,6 +706,28 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         rxChannelConfig.payloadType     = receiveAudio2110.rxAudioCh[i].payloadType;
         rxChannelConfig.numAudioChannels    = receiveAudio2110.rxAudioCh[i].numAudioChannels;
         rxChannelConfig.audioPktInterval    = receiveAudio2110.rxAudioCh[i].audioPktInterval;
+
+        // Set RX match based on non zero passed in params
+        rxChannelConfig.rxMatch = 0;
+        uint32_t ip = 0;
+        ip = inet_addr(rxChannelConfig.sourceIP.c_str());
+        ip = NTV2EndianSwap32(ip);
+        if (ip)
+            rxChannelConfig.rxMatch |= RX_MATCH_2110_SOURCE_IP;
+        ip = inet_addr(rxChannelConfig.destIP.c_str());
+        ip = NTV2EndianSwap32(ip);
+        if (ip)
+            rxChannelConfig.rxMatch |= RX_MATCH_2110_DEST_IP;
+        if (rxChannelConfig.sourcePort)
+            rxChannelConfig.rxMatch |= RX_MATCH_2110_SOURCE_PORT;
+        if (rxChannelConfig.destPort)
+            rxChannelConfig.rxMatch |= RX_MATCH_2110_DEST_PORT;
+        if (rxChannelConfig.vlan)
+            rxChannelConfig.rxMatch |= RX_MATCH_2110_VLAN;
+        if (rxChannelConfig.payloadType)
+            rxChannelConfig.rxMatch |= RX_MATCH_2110_PAYLOAD;
+        if (rxChannelConfig.ssrc)
+            rxChannelConfig.rxMatch |= RX_MATCH_2110_SSRC;
 
 
         rv = config2110.SetRxStreamConfiguration (sfp,
