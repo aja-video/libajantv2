@@ -531,6 +531,18 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     NetworkData2110 net2110 = parse2110.m_net2110;
 
 #if defined(USE_SWPTP)
+    // Only if a non zero domain was passed in
+    if (net2110.ptpDomain)
+    {
+        config2110.SetPTPDomain(net2110.ptpDomain);
+    }
+
+    // Only if a non zero grandMasterID was passed in
+    if (net2110.ptpGrandMasterID[0] || net2110.ptpGrandMasterID[1] || net2110.ptpGrandMasterID[2] || net2110.ptpGrandMasterID[3] ||
+        net2110.ptpGrandMasterID[4] || net2110.ptpGrandMasterID[5] || net2110.ptpGrandMasterID[6] || net2110.ptpGrandMasterID[7])
+    {
+        config2110.SetPTPPreferredGrandMasterId(net2110.ptpGrandMasterID);
+    }
 
 #else
     // configure PTP master
