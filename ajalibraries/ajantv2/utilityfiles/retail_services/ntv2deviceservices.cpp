@@ -168,14 +168,49 @@ DeviceServices::DeviceServices()
 	mDefaultVideoFormat				= NTV2_FORMAT_UNKNOWN;
 }
 
+void DeviceServices::SetCard(CNTV2Card* pCard)
+{
+	mCard = pCard;
+	int index = pCard->GetIndexNumber();
+	
+	// board info
+	CNTV2DeviceScanner scanner;
+	bool bFound = scanner.GetDeviceInfo(index, mBoardInfo, false);
+	if (bFound == false)
+		printf("Fail board info scan\n");
+	RetailSupport::AdjustDeviceInfoForApp(mBoardInfo);
+	
+	// model
+	mModel.SetCard(pCard, pCard->GetDeviceID(), index);
+	
+	// retail object
+	mRs = new RetailSupport(mDeviceState, mBoardInfo, mModel);
+	
+	// device state
+	mRs->InitDeviceState(mDeviceState);
+}
+
 #define	AsDriverInterface(_x_)		static_cast<CNTV2DriverInterface*>(_x_)
 
 //-------------------------------------------------------------------------------------------------------
 //	ReadDriverState
 //-------------------------------------------------------------------------------------------------------
 
+//#define USE_NEW_RETAIL
+
 void DeviceServices::ReadDriverState (void)
 {
+	// check the state of the hardware and see if anything has changed since last time
+	#ifdef USE_NEW_RETAIL
+	
+		bool bChanged = mRs->GetDeviceState(mDeviceState);
+		if (bChanged)
+		{
+		
+		}
+		
+	#endif
+
 	mCard->GetStreamingApplication(&mStreamingAppType, &mStreamingAppPID);
 	
 	AsDriverInterface(mCard)->ReadRegister(kVRegDefaultVideoFormat, mDefaultVideoFormat);

@@ -7,6 +7,8 @@
 #ifndef _DeviceServices_
 #define _DeviceServices_
 
+#include "devicestate.h"
+#include "retailsupport.h"
 #include "ntv2utils.h"
 #include "ntv2vpid.h"
 #include "ntv2card.h"
@@ -75,9 +77,6 @@ class DeviceServices
 {
 public:
 	static DeviceServices* CreateDeviceServices(NTV2DeviceID deviceID);	// factory
-	
-public:
-	uint32_t				mHDMIStartupCountDown;
 	
 public:
 			DeviceServices();
@@ -194,7 +193,14 @@ public:
     void AgentIsAlive();
 
 public:
+	
+	DeviceState				mDeviceState;
+	NTV2DeviceInfo			mBoardInfo;
+	VirtualRegisterModel 	mModel;
+	RetailSupport*			mRs;
 	CNTV2Card*				mCard;
+	
+	uint32_t 				mHDMIStartupCountDown;
 	
 	// set by every frame, not user
 	NTV2VideoFormat			mDefaultVideoFormat;
@@ -313,9 +319,10 @@ public:
 	int32_t					mAudioCapMixerSourceMainGain;
 	int32_t					mAudioCapMixerSourceAux1Gain;
 	int32_t					mAudioCapMixerSourceAux2Gain;
+	
+	
 
-	void SetCard (CNTV2Card* card)
-		{ mCard = card; }
+	void SetCard (CNTV2Card* pCard);
 };
 
 #endif
