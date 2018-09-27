@@ -147,7 +147,12 @@ typedef struct
 typedef struct
 {
     bool                    setup4k;
+#if defined(USE_SWPTP)
+    uint32_t                ptpDomain;
+    uint8_t                 ptpGrandMasterID[8];
+#else
     char                    ptpMasterIP[IP_STRSIZE];
+#endif
     uint32_t                numSFPs;
     SFPData2110             sfp[2];
     uint32_t                unused[4];
