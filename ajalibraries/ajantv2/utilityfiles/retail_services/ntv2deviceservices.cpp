@@ -201,15 +201,72 @@ void DeviceServices::SetCard(CNTV2Card* pCard)
 void DeviceServices::ReadDriverState (void)
 {
 	// check the state of the hardware and see if anything has changed since last time
-	#ifdef USE_NEW_RETAIL
+#ifdef USE_NEW_RETAIL
 	
-		bool bChanged = mRs->GetDeviceState(mDeviceState);
-		if (bChanged)
-		{
+	DeviceState& ds = mDeviceState;
+
+	bool bChanged = mRs->GetDeviceState(ds);
+	if (bChanged)
+	{
+		// sdi out
+		uint32_t sdiOutSize = ds.sdiOut.size();
+		if (sdiOutSize > 0)
+		{ 
+			mVirtualDigitalOutput1Select = ds.sdiOut[0].outSelect;
+			mSDIOutput1ColorSpace = ds.sdiOut[0].cs;
+			mSDIOutput1RGBRange = ds.sdiOut[0].rgbRange;
+			m4kTransportOutSelection = ds.sdiOut[0].transport4k;
+			mSdiOutTransportType = ds.sdiOut[0].transport3g;
+		}
+		if (sdiOutSize > 1) 
+			mVirtualDigitalOutput2Select = ds.sdiOut[1].outSelect;
 		
+		// input select
+		mVirtualInputSelect = ds.inputSelect;
+		mInputAudioSelect = ds.audioSelect;
+		
+		uint32_t sdiInSize = ds.sdiOut.size();
+		if (sdiInSize > 0)
+		{
+			mSDIInput1ColorSpace = ds.sdiIn[0].cs;
+			mSDIInput1RGBRange = ds.sdiIn[0].rgbRange;
 		}
 		
-	#endif
+		// hdmi out
+		mVirtualHDMIOutputSelect = ds.hdmiOutFormatSelect;
+
+		// analog out
+		mVirtualAnalogOutputSelect = ds.analogOutFormatSelect;
+	}
+		
+#else
+	
+	// sdi output 
+	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput1Select, mVirtualDigitalOutput1Select);
+	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput2Select, mVirtualDigitalOutput2Select);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1ColorSpaceMode, mSDIOutput1ColorSpace);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1RGBRange, mSDIOutput1RGBRange);
+	AsDriverInterface(mCard)->ReadRegister(kVReg4kOutputTransportSelection, m4kTransportOutSelection);
+	AsDriverInterface(mCard)->ReadRegister(kVRegDualStreamTransportType, mSdiOutTransportType);
+	
+	// input select
+	AsDriverInterface(mCard)->ReadRegister(kVRegInputSelect, mVirtualInputSelect);
+	AsDriverInterface(mCard)->ReadRegister(kVRegAudioInputSelect, mInputAudioSelect);
+	
+	// sdi in
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1ColorSpaceMode, mSDIInput1ColorSpace);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1RGBRange, mSDIInput1RGBRange);
+	
+	// hdmi out
+	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutputSelect, mVirtualHDMIOutputSelect);
+	
+	// analog out
+	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutputSelect, mVirtualAnalogOutputSelect);
+	
+	// auto set registers marked with "auto" enum
+	UpdateAutoState();
+	
+#endif
 
 	mCard->GetStreamingApplication(&mStreamingAppType, &mStreamingAppPID);
 	
@@ -218,16 +275,8 @@ void DeviceServices::ReadDriverState (void)
 	mCard->ReadRegister(kVRegFollowInputFormat, mFollowInputFormat);
 	mCard->ReadRegister(kVRegVANCMode, mVANCMode);
 	mCard->ReadRegister(kVRegDefaultInput, mDefaultInput);
-	AsDriverInterface(mCard)->ReadRegister(kVRegDualStreamTransportType, mSdiOutTransportType);
 	AsDriverInterface(mCard)->ReadRegister(kVRegDSKMode, mDSKMode);
-	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput1Select, mVirtualDigitalOutput1Select);
-	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput2Select, mVirtualDigitalOutput2Select);
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1ColorSpaceMode, mSDIOutput1ColorSpace);
-	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutputSelect, mVirtualHDMIOutputSelect);
-	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutputSelect, mVirtualAnalogOutputSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegLUTType, mLUTType);
-	AsDriverInterface(mCard)->ReadRegister(kVRegInputSelect, mVirtualInputSelect);
-	AsDriverInterface(mCard)->ReadRegister(kVRegAudioInputSelect, mInputAudioSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegSecondaryFormatSelect, mVirtualSecondaryFormatSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegIsoConvertEnable, mIsoConvertEnable);
 	mCard->ReadRegister(kVRegDSKAudioMode, mDSKAudioMode);
@@ -238,7 +287,6 @@ void DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVRegGammaMode, mGammaMode);
 	AsDriverInterface(mCard)->ReadRegister(kVRegRGB10Range, mRGB10Range);
 	AsDriverInterface(mCard)->ReadRegister(kVRegColorSpaceMode, mColorSpaceType);
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1RGBRange, mSDIOutput1RGBRange);
 	
 	AsDriverInterface(mCard)->ReadRegister(kVRegFrameBuffer1RGBRange, mFrameBuffer1RGBRange);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutBlackLevel, mVirtualAnalogOutBlackLevel);
@@ -254,10 +302,7 @@ void DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutAudioChannels, mHDMIOutAudioChannels);
 	mCard->ReadRegister(kVRegResetCycleCount, mRegResetCycleCount);
 	mCard->ReadRegister(kVRegFramesPerVertical, mRegFramesPerVertical);
-	AsDriverInterface(mCard)->ReadRegister(kVReg4kOutputTransportSelection, m4kTransportOutSelection);
 	
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1RGBRange, mSDIInput1RGBRange);
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1ColorSpaceMode, mSDIInput1ColorSpace);
 	mSDIInput2RGBRange = mSDIInput1RGBRange;
 	mSDIInput2ColorSpace = mSDIInput1ColorSpace;	// for now
 	
@@ -689,9 +734,6 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	
 	// read in virtual registers
 	ReadDriverState();
-	
-	// auto set registers marked with "auto" enum
-	UpdateAutoState();
 		
 	// Get the general format
 	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
