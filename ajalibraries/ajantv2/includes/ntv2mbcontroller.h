@@ -72,11 +72,11 @@ struct SFPStatus
 
 typedef enum
 {
-    PTP_LOCKED,
-    PTP_LOCKING,
-    PTP_NOT_LOCKED,
+    PTP_NO_PTP,
     PTP_ERROR,
-    PTP_NO_PTP
+    PTP_NOT_LOCKED,
+    PTP_LOCKING,
+    PTP_LOCKED
 } PTPLockStatus;
 
 struct PTPStatus
