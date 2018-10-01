@@ -534,7 +534,6 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     // fetch parsed newtwork struct
     NetworkData2110 net2110 = parse2110.m_net2110;
 
-#if defined(USE_SWPTP)
     // Only if a non zero domain was passed in
     if (net2110.ptpDomain)
     {
@@ -542,19 +541,11 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     }
 
     // Only if a non zero grandMasterID was passed in
-    if (net2110.ptpGrandMasterID[0] || net2110.ptpGrandMasterID[1] || net2110.ptpGrandMasterID[2] || net2110.ptpGrandMasterID[3] ||
-        net2110.ptpGrandMasterID[4] || net2110.ptpGrandMasterID[5] || net2110.ptpGrandMasterID[6] || net2110.ptpGrandMasterID[7])
+    if (net2110.ptpPreferredGMID[0] || net2110.ptpPreferredGMID[1] || net2110.ptpPreferredGMID[2] || net2110.ptpPreferredGMID[3] ||
+        net2110.ptpPreferredGMID[4] || net2110.ptpPreferredGMID[5] || net2110.ptpPreferredGMID[6] || net2110.ptpPreferredGMID[7])
     {
-        config2110.SetPTPPreferredGrandMasterId(net2110.ptpGrandMasterID);
+        config2110.SetPTPPreferredGrandMasterId(net2110.ptpPreferredGMID);
     }
-
-#else
-    // configure PTP master
-    if (net2110.ptpMasterIP[0])
-    {
-        config2110.SetPTPMaster(net2110.ptpMasterIP);
-    }
-#endif
 
     device.SetReference(NTV2_REFERENCE_SFP1_PTP);
     config2110.Set4KModeEnable(net2110.setup4k);

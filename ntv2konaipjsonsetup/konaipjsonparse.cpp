@@ -371,20 +371,12 @@ bool CKonaIpJsonParse2110::JsonToStructNetwork(const QJsonObject& topObj, Networ
 
     std::cout << "Network2110" << std::endl;
 
-#if defined(USE_SWPTP)
     n2110.ptpDomain = topObj["ptpDomain"].toInt();
     if (m_verbose) std::cout << " ptpDomain " << n2110.ptpDomain << std::endl;
 
-    str = topObj["ptpGrandMasterID"].toString().toStdString();
-    if (m_verbose) std::cout << " ptpGrandMasterID " << str.c_str() << std::endl;
-    GetGrandMasterID(str, n2110.ptpGrandMasterID);
-
-#else
-    // ptpMasterIP
-    str = topObj["ptpMasterIP"].toString().toStdString();
-    if (m_verbose) std::cout << " ptpMasterIP " << str.c_str() << std::endl;
-    strncpy(n2110.ptpMasterIP, str.c_str(), kStrMax);
-#endif
+    str = topObj["ptpPreferredGMID"].toString().toStdString();
+    if (m_verbose) std::cout << " ptpPreferredGMID " << str.c_str() << std::endl;
+    GetGrandMasterID(str, n2110.ptpPreferredGMID);
 
     str = topObj["setup4k"].toString().toStdString();
     if (m_verbose) std::cout << " setup4k " << str.c_str() << std::endl;
@@ -428,14 +420,8 @@ bool CKonaIpJsonParse2110::JsonToStructNetwork(const QJsonObject& topObj, Networ
 
 bool CKonaIpJsonParse2110::StructToJsonNetwork(const NetworkData2110& n2110, QJsonObject& topObj)
 {
-#if defined(USE_SWPTP)
     topObj.insert("ptpDomain", QJsonValue((int)n2110.ptpDomain));
-    topObj.insert("ptpGrandMasterID", QJsonValue(QString(GetGrandMasterID(n2110.ptpGrandMasterID))));
-
-#else
-    topObj.insert("ptpMasterIP", QJsonValue(QString(n2110.ptpMasterIP)));
-#endif
-
+    topObj.insert("ptpPreferredGMID", QJsonValue(QString(GetGrandMasterID(n2110.ptpPreferredGMID))));
 
     topObj.insert("setup4k", QJsonValue(QString(GetEnable(n2110.setup4k))));
 
