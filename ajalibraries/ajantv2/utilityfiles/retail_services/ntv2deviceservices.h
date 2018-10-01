@@ -81,7 +81,7 @@ public:
 public:
 			DeviceServices();
 	virtual	~DeviceServices() {}
-	virtual void ReadDriverState();
+	virtual bool ReadDriverState();
 	virtual void UpdateAutoState();
 
 	// override these

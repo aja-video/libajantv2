@@ -198,7 +198,7 @@ void DeviceServices::SetCard(CNTV2Card* pCard)
 
 //#define USE_NEW_RETAIL
 
-void DeviceServices::ReadDriverState (void)
+bool DeviceServices::ReadDriverState (void)
 {
 	// check the state of the hardware and see if anything has changed since last time
 #ifdef USE_NEW_RETAIL
@@ -206,20 +206,22 @@ void DeviceServices::ReadDriverState (void)
 	DeviceState& ds = mDeviceState;
 
 	bool bChanged = mRs->GetDeviceState(ds);
+	
+	// retrofit hack for now
 	if (bChanged)
 	{
 		// sdi out
 		uint32_t sdiOutSize = ds.sdiOut.size();
 		if (sdiOutSize > 0)
 		{ 
-			mVirtualDigitalOutput1Select = ds.sdiOut[0].outSelect;
-			mSDIOutput1ColorSpace = ds.sdiOut[0].cs;
-			mSDIOutput1RGBRange = ds.sdiOut[0].rgbRange;
-			m4kTransportOutSelection = ds.sdiOut[0].transport4k;
-			mSdiOutTransportType = ds.sdiOut[0].transport3g;
+			mVirtualDigitalOutput1Select = ds.sdiOut[0]->outSelect;
+			mSDIOutput1ColorSpace = ds.sdiOut[0]->cs;
+			mSDIOutput1RGBRange = ds.sdiOut[0]->rgbRange;
+			m4kTransportOutSelection = ds.sdiOut[0]->transport4k;
+			mSdiOutTransportType = ds.sdiOut[0]->transport3g;
 		}
 		if (sdiOutSize > 1) 
-			mVirtualDigitalOutput2Select = ds.sdiOut[1].outSelect;
+			mVirtualDigitalOutput2Select = ds.sdiOut[1]->outSelect;
 		
 		// input select
 		mVirtualInputSelect = ds.inputSelect;
@@ -228,8 +230,8 @@ void DeviceServices::ReadDriverState (void)
 		uint32_t sdiInSize = ds.sdiOut.size();
 		if (sdiInSize > 0)
 		{
-			mSDIInput1ColorSpace = ds.sdiIn[0].cs;
-			mSDIInput1RGBRange = ds.sdiIn[0].rgbRange;
+			mSDIInput1ColorSpace = ds.sdiIn[0]->cs;
+			mSDIInput1RGBRange = ds.sdiIn[0]->rgbRange;
 		}
 		
 		// hdmi out
@@ -238,7 +240,7 @@ void DeviceServices::ReadDriverState (void)
 		// analog out
 		mVirtualAnalogOutputSelect = ds.analogOutFormatSelect;
 	}
-		
+				
 #else
 	
 	// sdi output 
@@ -502,6 +504,8 @@ void DeviceServices::ReadDriverState (void)
             //printf("Failed to get 2110 Ip status params\n");
         }
     }
+    
+    return true;
 }
 
 
@@ -733,7 +737,9 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	}
 	
 	// read in virtual registers
-	ReadDriverState();
+	bool bChanged = ReadDriverState();
+	if (bChanged == false)
+		return;
 		
 	// Get the general format
 	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
