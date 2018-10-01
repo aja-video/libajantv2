@@ -72,6 +72,7 @@ typedef struct NTV2DeviceInfo
 	bool							sdi3GSupport;						///< @brief	Supports 3G?
 	bool							sdi12GSupport;						///< @brief	Supports 12G?
 	bool							ipSupport;							///< @brief	Supports IP IO?
+	bool							biDirectionalSDI;					///< @brief	Supports Bi-directional SDI
 	bool							ltcInSupport;						///< @brief	Accepts LTC input?
 	bool							ltcOutSupport;						///< @brief	Supports LTC output?
 	bool							ltcInOnRefPort;						///< @brief	Supports LTC on reference input?

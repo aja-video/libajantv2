@@ -482,6 +482,7 @@ ostream &	operator << (ostream & inOutStr, const NTV2DeviceInfo & inInfo)
 					<< "                         SDI 3G: " << (inInfo.sdi3GSupport ? "Y" : "N") << endl
 					<< "                        SDI 12G: " << (inInfo.sdi12GSupport ? "Y" : "N") << endl
 					<< "                             IP: " << (inInfo.ipSupport ? "Y" : "N") << endl
+					<< "             SDI Bi-Directional: " << (inInfo.biDirectionalSDI ? "Y" : "N") << endl
 					<< "                         LTC In: " << (inInfo.ltcInSupport ? "Y" : "N") << endl
 					<< "                        LTC Out: " << (inInfo.ltcOutSupport ? "Y" : "N") << endl
 					<< "             LTC In on Ref Port: " << (inInfo.ltcInOnRefPort ? "Y" : "N") << endl
@@ -589,6 +590,7 @@ void CNTV2DeviceScanner::SetVideoAttributes (NTV2DeviceInfo & info)
 	info.sdi3GSupport			= NTV2DeviceCanDo3GOut				(info.deviceID, 0);
     info.sdi12GSupport			= NTV2DeviceCanDo12GSDI				(info.deviceID);
     info.ipSupport				= NTV2DeviceCanDoIP					(info.deviceID);
+    info.biDirectionalSDI		= NTV2DeviceHasBiDirectionalSDI		(info.deviceID);
 	info.ltcInSupport			= NTV2DeviceGetNumLTCInputs			(info.deviceID) > 0;
 	info.ltcOutSupport			= NTV2DeviceGetNumLTCOutputs		(info.deviceID) > 0;
 	info.ltcInOnRefPort			= NTV2DeviceCanDoLTCInOnRefPort		(info.deviceID);
