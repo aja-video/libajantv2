@@ -24,7 +24,6 @@
 #define IP_STRSIZE          32
 
 
-#if defined(USE_SWPTP)
 typedef enum
 {
     kNetworkData2110        = NTV2_FOURCC('n','t','1','3'), // 4CC of network config data
@@ -35,20 +34,6 @@ typedef enum
     kAncVData2110           = NTV2_FOURCC('a','n','1','3'), // 4CC of anc config data
     kChStatusData2110       = NTV2_FOURCC('s','t','1','3')  // 4CC of channel status config data
 } VirtualDataTag2110 ;
-
-#else
-
-typedef enum
-{
-    kNetworkData2110        = NTV2_FOURCC('n','t','1','2'), // 4CC of network config data
-    kTransmitVideoData2110  = NTV2_FOURCC('t','v','1','2'), // 4CC of video transmit config data
-    kTransmitAudioData2110  = NTV2_FOURCC('t','a','1','2'), // 4CC of audio transmit config data
-    kReceiveVideoData2110   = NTV2_FOURCC('r','v','1','2'), // 4CC of video receive config data
-    kReceiveAudioData2110   = NTV2_FOURCC('r','a','1','2'), // 4CC of audio receive config data
-    kAncVData2110           = NTV2_FOURCC('a','n','1','2'), // 4CC of anc config data
-    kChStatusData2110       = NTV2_FOURCC('s','t','1','2')  // 4CC of channel status config data
-} VirtualDataTag2110 ;
-#endif
 
 typedef enum
 {
@@ -147,12 +132,8 @@ typedef struct
 typedef struct
 {
     bool                    setup4k;
-#if defined(USE_SWPTP)
     uint32_t                ptpDomain;
-    uint8_t                 ptpGrandMasterID[8];
-#else
-    char                    ptpMasterIP[IP_STRSIZE];
-#endif
+    uint8_t                 ptpPreferredGMID[8];
     uint32_t                numSFPs;
     SFPData2110             sfp[2];
     uint32_t                unused[4];
@@ -292,17 +273,11 @@ public:
     bool        GetTxPacketCount(NTV2Stream stream, uint32_t &packets);
     bool        GetTxByteCount(const eSFP sfp, uint64_t &bytes);
 
-#if defined(USE_SWPTP)
     bool		SetPTPDomain(const uint8_t domain);
     bool		GetPTPDomain(uint8_t &domain);
     bool		SetPTPPreferredGrandMasterId(const uint8_t id[8]);
     bool		GetPTPPreferredGrandMasterId(uint8_t (&id)[8]);
-#else
-    bool        SetPTPMaster(const std::string ptpMaster);
-    bool        GetPTPMaster(std::string & ptpMaster);
-#endif
     bool        GetPTPStatus(PTPStatus & ptpStatus);
-    bool        PLLReset();
 
     bool        Set4KModeEnable(const bool enable);
     bool        Get4KModeEnable(bool & enable);

@@ -37,8 +37,6 @@ void KonaIP2110Services::Init()
     memset(&m2110RxVideoDataLast, 0, sizeof(ReceiveVideoData2110));
     memset(&m2110RxAudioDataLast, 0, sizeof(ReceiveAudioData2110));
 
-    mResetPLLCounter = 60;
-
     if (config2110 != NULL)
     {
         bool ipServiceEnable, ipServiceForceConfig;
@@ -2149,31 +2147,6 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
         {
             printf("Power on state or not configured\n");
             Init();
-        }
-
-        // Check PLL stauts to make sure we are getting packets and if not reset it
-        mResetPLLCounter--;
-        if (mResetPLLCounter <= 0)
-        {
-            uint32_t    framesPerSecNum;
-            uint32_t    framesPerSecDen;
-            GetFramesPerSecond (primaryFrameRate, framesPerSecNum, framesPerSecDen);
-
-            PTPStatus   ptpStatus;
-
-            config2110->GetPTPStatus(ptpStatus);
-            if (ptpStatus.PTP_packetStatus == true)
-            {
-                // Everything is good, so lets check again in 2 seconds
-                mResetPLLCounter = (framesPerSecNum/framesPerSecDen) * 2;
-            }
-            else
-            {
-                // No packets so lets kick it and look again in 10 seconds
-                printf("PLL no packets, resetting PLL.\n");
-                config2110->PLLReset();
-                mResetPLLCounter = (framesPerSecNum/framesPerSecDen) * 10;
-            }
         }
 
         // Configure all of the 2110 IP settings
