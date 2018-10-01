@@ -2536,6 +2536,8 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
             *s2110NetworkLast = m2110Network;
 
             mCard->SetReference(NTV2_REFERENCE_SFP1_PTP);
+            config2110->SetPTPDomain(m2110Network.ptpDomain);
+            config2110->SetPTPPreferredGrandMasterId(m2110Network.ptpPreferredGMID);
 
             for (uint32_t i = 0; i < SFP_MAX_NUM_SFPS; i++)
             {
