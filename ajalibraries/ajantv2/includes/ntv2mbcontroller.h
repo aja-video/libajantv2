@@ -81,15 +81,9 @@ typedef enum
 
 struct PTPStatus
 {
-#if defined(USE_SWPTP)
     uint8_t PTP_gmId[8];		// GrandMasterID
     uint8_t PTP_masterId[8];	// MasterID
     PTPLockStatus PTP_LockedState;	// locked state
-#else
-    bool PTP_packetStatus;      // true indicates PTP packets
-    bool PTP_frequencyLocked;   // true indicates frequency locked
-    bool PTP_phaseLocked;       // true indicates phase locked
-#endif
 };
 
 

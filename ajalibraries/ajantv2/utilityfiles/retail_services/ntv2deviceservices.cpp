@@ -2536,7 +2536,6 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
             *s2110NetworkLast = m2110Network;
 
             mCard->SetReference(NTV2_REFERENCE_SFP1_PTP);
-            config2110->SetPTPMaster(m2110Network.ptpMasterIP);
 
             for (uint32_t i = 0; i < SFP_MAX_NUM_SFPS; i++)
             {
@@ -3340,7 +3339,6 @@ void DeviceServices::PrintDecoderConfig(const j2kDecoderConfig modelConfig, j2kD
 
 void DeviceServices::Print2110Network(const NetworkData2110 m2110Network)
 {
-    PrintChArray("ptpMaster", &m2110Network.ptpMasterIP[0]);
     PrintChArray("ptpMaster", &m2110Network.sfp[0].ipAddress[0]);
     //PrintChArray("ptpMaster", &m2110Network.sfp[0].subnetMask[0]);
     //PrintChArray("ptpMaster", &m2110Network.sfp[0].gateWay[0]);

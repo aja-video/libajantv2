@@ -1134,8 +1134,6 @@ bool CNTV2Config2110::GetTxStreamEnable(const NTV2Stream stream, bool & sfp1Enab
     return true;
 }
 
-#if defined(USE_SWPTP)
-
 bool CNTV2Config2110::SetPTPPreferredGrandMasterId(const uint8_t id[8])
 {
     uint32_t	val = ((uint32_t)id[0] << 24) | ((uint32_t)id[1] << 16) | ((uint32_t)id[2] << 8) | ((uint32_t)id[3] << 0);
@@ -1175,46 +1173,10 @@ bool CNTV2Config2110::GetPTPDomain(uint8_t &domain)
     return true;
 }
 
-#else
-
-bool  CNTV2Config2110::SetPTPMaster(const std::string ptpMaster)
-{
-    uint32_t addr = inet_addr(ptpMaster.c_str());
-    addr = NTV2EndianSwap32(addr);
-    if (addr != 0 && addr != 0xffffffff)
-    {
-        mDevice.WriteRegister(kRegPll_PTP_MstrIP + SAREK_PLL, addr);
-        mDevice.WriteRegister(kRegPll_PTP_Match + SAREK_PLL, 0x09);
-        return true;
-    }
-    else
-    {
-        mDevice.WriteRegister(kRegPll_PTP_MstrIP + SAREK_PLL, 0);
-        mDevice.WriteRegister(kRegPll_PTP_Match + SAREK_PLL, 0x07);
-        return false;
-    }
-}
-
-bool CNTV2Config2110::GetPTPMaster(std::string & ptpMaster)
-{
-    uint32_t val;
-    mDevice.ReadRegister(kRegPll_PTP_MstrIP + SAREK_PLL, val);
-    val = NTV2EndianSwap32(val);
-
-    struct in_addr addr;
-    addr.s_addr = val;
-    ptpMaster = inet_ntoa(addr);
-
-    return true;
-}
-
-#endif
-
 bool CNTV2Config2110::GetPTPStatus(PTPStatus & ptpStatus)
 {
     uint32_t val = 0;
 
-#if defined(USE_SWPTP)
     mDevice.ReadRegister(SAREK_PLL + kRegPll_swptp_GrandMasterIdHi, val);
     ptpStatus.PTP_gmId[0] = val >> 24;
     ptpStatus.PTP_gmId[1] = val >> 16;
@@ -1241,35 +1203,6 @@ bool CNTV2Config2110::GetPTPStatus(PTPStatus & ptpStatus)
 
     mDevice.ReadRegister(SAREK_PLL + kRegPll_swptp_LockedState, val);
     ptpStatus.PTP_LockedState = (PTPLockStatus)val;
-
-#else
-    mDevice.ReadRegister(SAREK_PLL + kRegPll_Status, val);
-    ptpStatus.PTP_packetStatus      = (val & BIT(16)) ? true : false;
-    ptpStatus.PTP_frequencyLocked   = (val & BIT(17)) ? true : false;
-    ptpStatus.PTP_phaseLocked       = (val & BIT(18)) ? true : false;
-#endif
-
-    return true;
-}
-
-bool CNTV2Config2110::PLLReset()
-{
-    uint32_t val = 0;
-    mDevice.ReadRegister(SAREK_PLL + kRegPll_Config, val);
-
-    val |= PLL_CONFIG_RESET;
-    mDevice.WriteRegister(SAREK_PLL + kRegPll_Config, val);
-
-    // Wait just a bit
-    #if defined(AJAWindows) || defined(MSWindows)
-        ::Sleep (RESET_MILLISECONDS);
-    #else
-        usleep (RESET_MILLISECONDS * 1000);
-    #endif
-
-    val &= ~PLL_CONFIG_RESET;
-    mDevice.WriteRegister(SAREK_PLL + kRegPll_Config, val);
-
 
     return true;
 }
