@@ -549,6 +549,8 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
     device.SetReference(NTV2_REFERENCE_SFP1_PTP);
     config2110.Set4KModeEnable(net2110.setup4k);
+    config2110.SetPTPDomain(net2110.ptpDomain);
+    config2110.SetPTPPreferredGrandMasterId(net2110.ptpPreferredGMID);
 
     for (uint32_t i = 0; i < net2110.numSFPs; i++)
     {
