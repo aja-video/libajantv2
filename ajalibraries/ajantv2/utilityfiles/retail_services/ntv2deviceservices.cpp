@@ -4096,14 +4096,14 @@ void DeviceServices::SetDeviceXPointCapture()
 
 void DeviceServices::SetDeviceXPointPlayback()
 {
-	bool bFb2RGB = IsRGBFormat(mFb2Format);
-	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
-	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
-	bool bDSKNeedsInputRef = false;
-
-	// don't let the DSK be ON if we're in Mac Desktop mode
-	if ((!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop) || !NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtMixer1))
-		bDSKOn = false;
+	bool bDSKNeedsInputRef 	= false;
+	bool bFb2RGB 			= IsRGBFormat(mFb2Format);
+	bool bDSKGraphicMode 	= mDSKMode == NTV2_DSKModeGraphicOverMatte || 
+							  mDSKMode == NTV2_DSKModeGraphicOverVideoIn || 
+							  mDSKMode == NTV2_DSKModeGraphicOverFB;
+	bool bDSKOn 			= mDSKMode == NTV2_DSKModeFBOverMatte || 
+							  mDSKMode == NTV2_DSKModeFBOverVideoIn || 
+							  (bFb2RGB && bDSKGraphicMode);
 	
 	SetAudioInputSelect(mInputAudioSelect);
 

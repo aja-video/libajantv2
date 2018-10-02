@@ -119,7 +119,6 @@ void IoIP2110Services::SetDeviceXPointPlayback ()
 	NTV2ColorSpaceMode			inputColorSpace		= mSDIInput1ColorSpace;	// Input format select (YUV, RGB, etc)
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;		// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	
     bool						bFb1HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
     bool						bFb2HdrRGB			= mFb2Format == NTV2_FBF_48BIT_RGB;
 	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
