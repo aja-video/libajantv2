@@ -2,7 +2,8 @@
 	"protocol":"2110",
 	"network2110":
 	{
-		"ptpMasterIP":"172.16.0.201",
+		"ptpPreferredGMID":"0-0-0-0-0-0-0-0",
+		"ptpDomain":0,
 		"setup4k":"false",
 		"sfps":
 		[
