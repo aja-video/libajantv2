@@ -98,7 +98,6 @@ public:
 	virtual void SetDeviceXPointPlaybackRaw();
 	virtual void SetDeviceXPointCaptureRaw();
 	virtual void SetDeviceMiscRegistersRaw(NTV2Mode mode) {(void)mode;}
-	virtual void DisableStartupSequence() {mStartupDisabled = true;}
 
     // common IP support routines
     virtual void EveryFrameTask2022(CNTV2Config2022* config2022, NTV2Mode* modeLast, NTV2VideoFormat* videoFormatLast);
@@ -297,9 +296,6 @@ public:
 	NTV2HDMIRange			mHDMIInRGBRange;
 	
 	uint32_t				mRegFramesPerVertical;		// frames per vertical interrupt (e.g. CION RAW)
-	uint32_t				mRegResetCycleCount;		// reset cycle count (power-cycle, or sleep)
-	uint32_t				mRegResetCycleCountLast;	// prev reset cycle count used to detect changes
-	bool					mStartupDisabled;			// sometime we don't want to do hw reset
 	int32_t					mInputFormatSelect;			// set and read by device services only
 	bool					mInputFormatLock;
 	NTV2VideoFormat			mLastInputFormatSelect;

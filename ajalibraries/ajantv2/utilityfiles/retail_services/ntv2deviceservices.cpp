@@ -160,8 +160,6 @@ DeviceServices::DeviceServices()
 	mADCLockScanTestFormat			= 0;
 	mStreamingAppPID				= 0;
 	mDefaultInput					= 0;
-	mRegResetCycleCountLast			= 0;
-	mStartupDisabled				= false;
 	mInputFormatSelect				= -1;
 	mInputFormatLock				= false;
 	mLastInputFormatSelect			= NTV2_FORMAT_UNKNOWN;
@@ -302,7 +300,6 @@ bool DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutStereoSelect, mHDMIOutStereoSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutStereoCodecSelect, mHDMIOutStereoCodecSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutAudioChannels, mHDMIOutAudioChannels);
-	mCard->ReadRegister(kVRegResetCycleCount, mRegResetCycleCount);
 	mCard->ReadRegister(kVRegFramesPerVertical, mRegFramesPerVertical);
 	
 	mSDIInput2RGBRange = mSDIInput1RGBRange;
@@ -938,34 +935,10 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	UpdateK2ColorSpaceMatrixSelect();
 	UpdateK2LUTSelect();
 
-	if (mStartupDisabled)
-	{
-		mHDMIStartupCountDown = 0;
-		mRegResetCycleCountLast = mRegResetCycleCount;
-	}
-	else if (mRegResetCycleCount != mRegResetCycleCountLast)
-	{
-
-		// reset condition
-		mRegResetCycleCountLast = mRegResetCycleCount;
-
-		// reinitialize HDMI hardware on reset cycle
-		mHDMIStartupCountDown = kHDMIStartupPhase0;
-
-		if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT1))
-			mCard->WriteRegister(kVRegLUTType, NTV2_LUTUnknown);
-		if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT2))
-			mCard->WriteRegister(kVRegLUT2Type, NTV2_LUTUnknown);
-		if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT3))
-			mCard->WriteRegister(kVRegLUT3Type, NTV2_LUTUnknown);
-		if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT4))
-			mCard->WriteRegister(kVRegLUT4Type, NTV2_LUTUnknown);
-		if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT5))
-			mCard->WriteRegister(kVRegLUT5Type, NTV2_LUTUnknown);
-	}
 	// Set misc registers
 	SetDeviceMiscRegisters();
 	
+	// mark completion on cycle - used in media composer
 	mCard->WriteRegister(kVRegServicesModeFinal, mFb1Mode);
 }
 
