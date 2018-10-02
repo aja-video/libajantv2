@@ -194,7 +194,7 @@ void DeviceServices::SetCard(CNTV2Card* pCard)
 //	ReadDriverState
 //-------------------------------------------------------------------------------------------------------
 
-//#define USE_NEW_RETAIL
+#define USE_NEW_RETAIL
 
 bool DeviceServices::ReadDriverState (void)
 {
@@ -204,9 +204,10 @@ bool DeviceServices::ReadDriverState (void)
 	DeviceState& ds = mDeviceState;
 
 	bool bChanged = mRs->GetDeviceState(ds);
+	(void) bChanged;
 	
 	// retrofit hack for now
-	if (bChanged)
+	//if (bChanged)
 	{
 		// sdi out
 		uint32_t sdiOutSize = ds.sdiOut.size();
