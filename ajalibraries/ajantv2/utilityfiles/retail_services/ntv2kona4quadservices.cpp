@@ -3081,26 +3081,6 @@ void Kona4QuadServices::SetDeviceMiscRegisters()
 
 
 	// HDMI output - initialization sequence
-	#ifdef HDMI_INIT
-	if (mHDMIStartupCountDown > 0)
-	{
-		// start initialization
-		if (mHDMIStartupCountDown == kHDMIStartupPhase0)
-			mCard->WriteRegister(kRegHDMIOutControl, 0x0, 0x0F000000);
-
-		else if (mHDMIStartupCountDown == kHDMIStartupPhase1)
-			mCard->WriteRegister(kRegHDMIOutControl, 0xC, 0x0F000000);
-
-		else if (mHDMIStartupCountDown == kHDMIStartupPhase2)
-			mCard->WriteRegister(kRegHDMIOutControl, 0xD, 0x0F000000);
-
-		else if (mHDMIStartupCountDown == kHDMIStartupPhase3)
-			mCard->WriteRegister(kRegHDMIOutControl, 0xC, 0x0F000000);
-
-		mHDMIStartupCountDown--;
-	}
-	else
-	#endif
 	{
 		if (b4K == true)
 		{
