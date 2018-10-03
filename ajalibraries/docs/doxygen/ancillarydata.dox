@@ -55,39 +55,179 @@
 
 	@section	ancembeddedaudio	Embedded Audio
 
-	@subsection	ancembeddedaudiocapture		Audio Capture
-
-	To capture embedded audio from HANC into the audio input buffer, set the audio source select register, for the specific
-	audio subsystem, to specify the desired embedded groups (see CNTV2Card::SetAudioSystemInputSource) and start the audio system running.
-	For playout, audio samples present in the audio output buffer will be embedded into outgoing HANC packets of SDI output(s) sourced
-	from it if the audio system is running -- otherwise silence (zeroes) will be embedded. Note that embedded audio output can be
-	suppressed (see CNTV2Card::SetAudioOutputEmbedderState).
+	See \ref audiooperation for full details.
 
 <hr size="50px">
+
+
 
 	@section	anctimecode			Timecode (RP-188, SMPTE-12M)
 
-	SMPTE 12M specifies the transmission of timecode in the ancillary data space. Any RP-188 data in the input video with DBB-1
-	data matching the device's current RP-188 source select filter will be placed into the device's RP-188 registers, and can be
-	read using CNTV2Card::GetRP188Data. When RP-188 output is enabled for a video channel (by passing ::NTV2_RP188_OUTPUT into
-	CNTV2Card::SetRP188Mode), whatever RP-188 data is in the RP-188 registers (call CNTV2Card::SetRP188Data to set it) is inserted
-	into the HANC area of the output video on the appropriate line:
-	-	720x486 -- lines 10 & 273
-	-	720x576 -- lines 7 & 320
-	-	1280x720 -- line 10
-	-	1920x1080 -- line 10
+	The timecode aspects of NTV2’s SDK and firmware goes far back to the early 2000s — when NTV2 devices were SD-only, and the
+	12M spec was still evolving. FPGA space was very tight in those days, including the number of registers available … which is
+	why the same registers were used for RP-188 capture and playout. (Newer NTV2 devices are finally starting to move away from
+	this old model, so eventually, we hope to deliver a simpler timecode API as well.)
 
-	RP-188 output lines for the "extended" frame geometries (incorporating VANC) are the same as their corresponding "normal" frame
-	geometry. These output lines are listed in the tables shown in the \ref vancframegeometries section (below).
+	In this ancient model, there are three timecode registers used for <i>both</i> an SDI input <i>and</i> an SDI output
+	(for example, SDI In 1 <i>and</i> SDI Out 1). One of the registers has DBB information;  the other two contain the lower-order
+	and upper-order 32-bits of timecode data. These latter two timecode registers are “write-only” for SDI output;  and “read-only”
+	for SDI input. In other words, reading those registers yields the received input timecode, while writing those registers sets
+	the output (playout) timecode.
 
-	Each of the RP-188 registers is bi-directional, but should be considered as two separate registers, one of which is write-only
-	and the other read-only; i.e., the value that you read from the register will not be the last value that you wrote, but rather
-	the current value from the input video. This can be confusing if you use the <b>Watcher</b> tool to modify these registers.
+	@note	This inability to read back what’s been written into the register is very different behavior from nearly all other NTV2
+			registers. Thus, it is not possible to fetch from the device the timecode value that’s about to be sent out the SDI
+			connector.
 
-	If the device supports LTC I/O, LTC input can be read by calling CNTV2Card::ReadAnalogLTCInput. LTC output is driven by a
-	separate control register, or can be driven directly by the corresponding LTC input output.
+	<b>Input</b>
+
+	Any RP-188 data in the SDI input video with DBB-1 data matching the input’s current RP-188 source select filter will be placed
+	into the input’s RP-188 registers, and can be read by calling CNTV2Card::GetRP188Data.
+
+	Applications using \ref autocirculatecapture can easily receive input timecode…
+	-	Pass ::AUTOCIRCULATE_WITH_RP188 to CNTV2Card::AutoCirculateInitForInput;
+	-	While processing frames, call CNTV2Card::AutoCirculateTransfer;
+	-	Call AUTOCIRCULATE_TRANSFER::GetInputTimeCodes, and look for the RP-188 timecode(s) of interest…
+		-	in the ::NTV2TimeCodes map, or…
+		-	in the ::NTV2TimeCodeList vector.
+
+	<b>Output</b>
+
+	When RP-188 output is enabled for an SDI output (by calling CNTV2Card::SetRP188Mode and passing it ::NTV2_RP188_OUTPUT),
+	whatever RP-188 data was written into the RP-188 registers is inserted into the HANC of the SDI output video on the
+	appropriate line (even when “tall” or “taller” \ref vancframegeometries are in use):
+	-	SD NTSC 720×486 — lines 10 & 273
+	-	SD PAL 720×576 — lines 7 & 320
+	-	HD 1280×720 & 1920×1080 & up — line 10
+
+	When not using AutoCirculate, to specify the RP-188 timecode to embed in the next outgoing frame (for a given SDI output
+	connector), call CNTV2Card::SetRP188Data.
+
+	When using \ref autocirculateplayout, AutoCirculate automatically writes the RP-188 register(s) at the proper time.
+	-	Pass ::AUTOCIRCULATE_WITH_RP188 to CNTV2Card::AutoCirculateInitForOutput.
+	-	Before calling CNTV2Card::AutoCirculateTransfer, call one of …
+		-	AUTOCIRCULATE_TRANSFER::SetOutputTimeCode …or…
+		-	AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes.
+		-	If more than one SDI output is connected to the FrameStore/Channel being AutoCirculated…
+			-	call AUTOCIRCULATE_TRANSFER::SetOutputTimeCode multiple times, for each desired SDI output’s timecode value;
+			-	call AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes once, passing it an ::NTV2TimeCodes map that contains the
+				timecodes to be written for each desired SDI output.
+
+	@note	Starting in SDK 15.0, when doing \ref autocirculateplayout with both ::AUTOCIRCULATE_WITH_RP188 and ::AUTOCIRCULATE_WITH_ANC
+			on an IP device (see ::NTV2DeviceCanDoIP) that supports SMPTE 2110 (see ::NTV2DeviceCanDo2110), CNTV2Card::AutoCirculateTransfer
+			will automatically add all channel-relevant timecodes found in the AUTOCIRCULATE_TRANSFER::acOutputTimeCodes buffer into
+			the relevant RTP packets in the AUTOCIRCULATE_TRANSFER::acANCBuffer and AUTOCIRCULATE_TRANSFER::acANCField2Buffer buffers
+			(see \ref ancrtpformat), augmenting what was already placed there. If this is not desired, and you’d prefer to use your
+			own timecode packets, then call CNTV2Card::AutoCirculateInitForOutput without specifying ::AUTOCIRCULATE_WITH_RP188,
+			then add the timecode packets yourself before calling AJAAncillaryList::GetIPTransmitData and
+			AUTOCIRCULATE_TRANSFER::SetAncBuffers (and CNTV2Card::AutoCirculateTransfer).
+
+	@subsection		ancanalogltc		Analog LTC
+
+	<b>Input</b>
+
+	On AJA devices having one or more analog LTC inputs — or devices that can receive LTC from the Reference Input — there are
+	two registers for each LTC input that store the received timecode:  one for the high-order 32-bits, the other for the low-order
+	32 bits. Historically, the LTC input circuitry has relied on the prevailing device reference frame rate to know when to fetch
+	and decode the incoming analog timecode signal and latch the detected timecode values.
+
+	@note	On newer multi-format-capable devices (see ::NTV2DeviceCanDoMultiFormat), the incoming LTC frame rate must match a
+			designated SDI input’s frame rate (see CNTV2Card::SetAnalogLTCInClockChannel). For older devices, the incoming LTC
+			frame rate must match the device reference frame rate (see \ref deviceclockingandsync).
+
+	To read LTC without AutoCirculate:
+	@code{.cpp}
+		CNTV2Card device;
+		// . . . 
+		NTV2_ASSERT(device.IsOpen()  &&  "Device must be open");
+		const NTV2DeviceID deviceID (device.GetDeviceID());
+		bool               canReadAnalogLTC (false);
+		bool		       isMultiFormatMode (false);
+		UWord              whichLTCInput(0);
+		NTV2Channel        whichSDIInputHasInputClock(NTV2_CHANNEL1);
+
+		// Check device capability...
+		if (::NTV2DeviceGetNumLTCInputs(deviceID)
+			|| (::NTV2DeviceGetNumReferenceVideoInputs(deviceID) && ::NTV2DeviceCanDoLTCInOnRefPort(deviceID)))
+				canReadAnalogLTC = true;
+
+		if (::NTV2DeviceCanDoLTCInOnRefPort(deviceID))
+			device.SetLTCInputEnable(true);
+		if (::NTV2DeviceCanDoMultiFormat(deviceID))
+			if (device.GetMultiFormatMode(isMultiFormatMode))
+				if (isMultiFormatMode)
+					device.SetAnalogLTCInClockChannel(whichLTCInput, whichSDIInputHasInputClock);
+
+		// Process frames...
+		while (::WaitForInputFieldID(NTV2_FIELD0, whichSDIInputHasInputClock))
+		{
+			NTV2_RP188	analogLTC;
+			bool        analogLTCPresent (false);
+			if (canReadAnalogLTC)
+				device.GetLTCInputPresent(analogLTCPresent);  // Anything there?
+			if (analogLTCPresent)
+				device.ReadAnalogLTCInput(whichLTCInput, analogLTC);
+			if (analogLTC.IsValid())
+			{
+				// Do something with the timecode data...
+				std::cout << analogLTC << std::endl;
+			}
+		}  // for each frame
+	@endcode
+
+	When using \ref autocirculatecapture, AutoCirculate automatically reads the LTC registers at the proper time,
+	and provides the captured timecode with each captured frame.
+	-	Pass ::AUTOCIRCULATE_WITH_LTC to CNTV2Card::AutoCirculateInitForInput.
+	-	After each successful call to CNTV2Card::AutoCirculateTransfer, look for the captured LTC returned
+		from AUTOCIRCULATE_TRANSFER::GetInputTimeCodes …
+		-	in the ::NTV2TimeCodes map — use ::NTV2_TCINDEX_LTC1 or ::NTV2_TCINDEX_LTC2 as the key;
+		-	in the ::NTV2TimeCodeList vector — use ::NTV2_TCINDEX_LTC1 or ::NTV2_TCINDEX_LTC2 as the index.
+
+
+	<b>Output</b>
+
+	LTC output is driven by a separate control register, or can be driven “end-to-end” by the corresponding LTC input.
+	Call ::NTV2DeviceGetNumLTCOutputs to discover the number of LTC outputs.
+
+	To write analog LTC when not using AutoCirculate, call WriteAnalogLTCOutput. After the next VBI, the given timecode
+	will be sent out the LTC output connector.
+
+	When using \ref autocirculatecapture, AutoCirculate automatically sets the LTC output registers at the proper time.
+	-	Pass ::AUTOCIRCULATE_WITH_LTC to CNTV2Card::AutoCirculateInitForOutput.
+	-	Before calling CNTV2Card::AutoCirculateTransfer, call one of …
+		-	AUTOCIRCULATE_TRANSFER::SetOutputTimeCode … or …
+		-	AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes …
+		-	…using ::NTV2_TCINDEX_LTC1 or ::NTV2_TCINDEX_LTC2 as the index (or key), as required.
+
+
+	@subsection		ancvpid		Video Payload IDentifier (VPID)
+
+	<b>Input</b>
+
+	On AJA devices with one or more SDI inputs (3G or faster), when a signal is present, the firmware automatically looks for and detects
+	VPID packets on link A (and link B, if present), and stores the extracted VPID data value(s) into separate register(s),
+	one per link.
+	-	To detect if a VPID anc packet was present on an SDI input’s “A” link, call CNTV2Card::GetVPIDValidA.
+	-	To detect if a VPID anc packet was present on an SDI input’s “B” link, call CNTV2Card::GetVPIDValidB.
+	-	To get the extracted VPID payload data values, call CNTV2Card::ReadSDIInVPID.
+
+	<b>Output</b>
+
+	On AJA devices with one or more SDI outputs (3G or faster), there are two VPID output payload registers for each SDI output
+	(one for Link A, another for Link B). When the driver is running in ::NTV2EveryFrameTaskMode ::NTV2_STANDARD_TASKS (retail)
+	or ::NTV2_OEM_TASKS, it will automatically write the proper VPID payload value(s) into these registers when the output video
+	standard is set. The SDI output’s anc embedder, upon seeing a valid VPID payload in the respective payload register, will
+	automatically insert a VPID packet in the outgoing SDI data stream.
+	-	Call CNTV2Card::GetSDIOutVPID to read the output VPID payload value(s) being used.
+	-	Call CNTV2Card::SetSDIOutVPID to set the output VPID payload value(s) to be transmitted — but be forewarned:
+		-	The calling application will “fight” with the driver as to which values will actually get transmitted.
+		-	To override the default output VPID payload values, …
+			-	Write a non-zero value to the ::kVRegDisableAutoVPID virtual register (using CNTV2Card::WriteRegister)
+				once when your program starts.
+			-	Don’t forget to set ::kVRegDisableAutoVPID back to zero when your program exits.
 
 <hr size="50px">
+
+
 
 	@section	anccapturingwithac	Capturing Anc Packets Using AutoCirculate
 
