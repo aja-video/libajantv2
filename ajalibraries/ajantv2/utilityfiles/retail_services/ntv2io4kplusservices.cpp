@@ -1497,12 +1497,8 @@ void Io4KPlusServices::SetDeviceXPointCapture ()
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
-	bool						b4k6gOut			= b4K && !b4kHfr && !bSdiOutRGB && 
-													  (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire || 
-													   m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
-	//bool						b4k12gOut			= b4K && (b4kHfr || bSdiOutRGB) && 
-	//												  (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire || 
-	//												   m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
+	bool						b4k6gOut			= b4K && !b4kHfr && !bSdiOutRGB && (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
+	//bool						b4k12gOut			= b4K && (b4kHfr || bSdiOutRGB) && (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	bool						b2xQuadIn			= b4K && !b4kHfr && (mVirtualInputSelect == NTV2_Input2x4kSelect);
 	bool						b4xQuadIn			= b4K && (mVirtualInputSelect == NTV2_Input4x4kSelect);
 	bool						b2xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
@@ -3101,6 +3097,7 @@ void Io4KPlusServices::SetDeviceMiscRegisters ()
 			mCard->SetSDITransmitEnable(NTV2_CHANNEL2, !b4k6gOut);
 			mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);		// 3,4 are for playback, unless 4K capture
 			mCard->SetSDITransmitEnable(NTV2_CHANNEL4, true);		// 3,4 are for playback, unless 4K capture
+			b2pi = true;
 		}
 		else 
 		{

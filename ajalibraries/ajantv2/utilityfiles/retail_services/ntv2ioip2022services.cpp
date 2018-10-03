@@ -110,8 +110,8 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	bool						b3GbOut				= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb) || b3GaOutRGB;
 	bool						b2pi                = (b4K && m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);	// 2 pixed interleaved
 	bool						b2xQuadOut			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
-	bool						b4k6gOut				= (b4K && !b4kHfr && !bSdiOutRGB && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
-	bool						b4k12gOut				= (b4K && (b4kHfr || bSdiOutRGB) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
+	bool						b4k6gOut			= (b4K && !b4kHfr && !bSdiOutRGB && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
+	bool						b4k12gOut			= (b4K && (b4kHfr || bSdiOutRGB) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	int							bFb1Disable			= 0;						// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
