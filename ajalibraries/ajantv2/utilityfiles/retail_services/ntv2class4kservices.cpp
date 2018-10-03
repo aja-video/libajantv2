@@ -1235,6 +1235,29 @@ void Class4kServices::SetDeviceXPointPlayback ()
 		// 4K Hdmi-to-Hdmi Bypass always disabled for playback
 		mCard->WriteRegister(kRegHDMIOutControl, false, kRegMaskHDMIV2TxBypass, kRegShiftHDMIV2TxBypass);
 	}
+	
+	
+	// Analog Out
+	if (bDoAnalogOut)
+	{
+		if (b4K)
+		{
+			switch (mVirtualAnalogOutputSelect)
+			{
+			default:
+			case NTV2_Quarter4k:
+				if (b2pi)
+					mCard->Connect (NTV2_XptAnalogOutInput, bSdiOutRGB ? NTV2_XptCSC1VidYUV : NTV2_XptFrameBuffer1_425YUV); 
+				else
+					mCard->Connect (NTV2_XptAnalogOutInput, bSdiOutRGB ? NTV2_XptCSC5VidYUV : NTV2_Xpt4KDownConverterOut); 
+				break;
+			};
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptAnalogOutInput, frameSync1YUV);
+		}
+	}
 
 	
 	//
@@ -3055,6 +3078,29 @@ void Class4kServices::SetDeviceXPointCapture ()
 
 		// 4K Hdmi-to-Hdmi Bypass always disabled for playback
 		mCard->WriteRegister(kRegHDMIOutControl, false, kRegMaskHDMIV2TxBypass, kRegShiftHDMIV2TxBypass);
+	}
+	
+	
+	// Analog Out
+	if (bDoAnalogOut)
+	{
+		if (b4K)
+		{
+			switch (mVirtualAnalogOutputSelect)
+			{
+			default:
+			case NTV2_Quarter4k:
+				if (b2pi)
+					mCard->Connect (NTV2_XptAnalogOutInput, bSdiOutRGB ? NTV2_XptCSC1VidYUV : in4kYUV1); 
+				else
+					mCard->Connect (NTV2_XptAnalogOutInput, bSdiOutRGB ? NTV2_XptCSC5VidYUV : NTV2_Xpt4KDownConverterOut); 
+				break;
+			};
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptAnalogOutInput, inHdYUV1);
+		}
 	}
 }
 
