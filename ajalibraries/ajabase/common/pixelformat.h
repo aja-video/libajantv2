@@ -96,9 +96,10 @@ public:
 	/**
 	 *  Static method to get a format out of table of all possible formats
 	 *
-	 *	@param[out]	fmt     fmt gets filled in with format for index.
+	 *	@param[in]	index   Zero-based index value.
+	 *	@param[out]	fmt     Receives format for index.
 	 *						Unmodified if index out of bounds.
-	 *	@return		returns true if index within bounds
+	 *	@return		true if index within bounds
 	 */
 	static bool		QueryFormatAtIndex(int index,AJAPixelFormat& fmt);
 

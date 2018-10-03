@@ -33,14 +33,14 @@ int64_t FileTime_to_POSIX(FILETIME ft)
 }
 
 bool
-AJAFileIO::FileExists(const wstring& fileName)
+AJAFileIO::FileExists(const std::wstring& fileName)
 {
 	struct _stat dummy;
 	return _wstat(fileName.c_str(), &dummy) != -1;
 }
 
 bool
-AJAFileIO::FileExists(const string& fileName)
+AJAFileIO::FileExists(const std::string& fileName)
 {
 	struct _stat dummy;
 	return _stat(fileName.c_str(), &dummy) != -1;
@@ -58,7 +58,7 @@ AJAFileIO::~AJAFileIO(void)
 
 AJAStatus
 AJAFileIO::Open(
-	const string&			fileName,
+	const std::string&		fileName,
 	const int				flags,
 	const int				properties)
 {
@@ -71,7 +71,7 @@ AJAFileIO::Open(
 
 AJAStatus
 AJAFileIO::Open(
-	const wstring&			fileName,
+	const std::wstring&		fileName,
 	const int				flags,
 	const int				properties)
 {
@@ -179,7 +179,7 @@ AJAFileIO::Write(const uint8_t* pBuffer, const uint32_t length) const
 
 
 uint32_t
-AJAFileIO::Write(const string& buffer) const
+AJAFileIO::Write(const std::string& buffer) const
 {
 	return (uint32_t)(Write((uint8_t*) buffer.c_str(), (uint32_t)buffer.length()));
 }
@@ -319,9 +319,9 @@ AJAFileIO::Delete(const wstring& fileName)
 
 AJAStatus
 AJAFileIO::ReadDirectory(
-				const string&   directory,
-				const string&   filePattern,
-				vector<string>& fileContainer)
+				const std::string&   directory,
+				const std::string&   filePattern,
+				std::vector<std::string>& fileContainer)
 {
 	WIN32_FIND_DATAA fileData;
 	HANDLE           hSearch;
@@ -359,9 +359,9 @@ AJAFileIO::ReadDirectory(
 
 AJAStatus
 AJAFileIO::ReadDirectory(
-				const wstring&   directory,
-				const wstring&   filePattern,
-				vector<wstring>& fileContainer)
+				const std::wstring&   directory,
+				const std::wstring&   filePattern,
+				std::vector<std::wstring>& fileContainer)
 {
 	WIN32_FIND_DATAW fileData;
 	HANDLE           hSearch;
@@ -400,8 +400,8 @@ AJAFileIO::ReadDirectory(
 
 AJAStatus
 AJAFileIO::DoesDirectoryContain(
-				const string& directory,
-				const string& filePattern)
+				const std::string& directory,
+				const std::string& filePattern)
 {
 	WIN32_FIND_DATAA fileData;
 	HANDLE           hSearch;
@@ -431,8 +431,8 @@ AJAFileIO::DoesDirectoryContain(
 
 AJAStatus
 AJAFileIO::DoesDirectoryContain(
-				const wstring& directory,
-				const wstring& filePattern)
+				const std::wstring& directory,
+				const std::wstring& filePattern)
 {
 	WIN32_FIND_DATAW fileData;
 	HANDLE           hSearch;
@@ -462,25 +462,25 @@ AJAFileIO::DoesDirectoryContain(
 
 
 AJAStatus
-AJAFileIO::DoesDirectoryExist(const string& directory)
+AJAFileIO::DoesDirectoryExist(const std::string& directory)
 {
 	return( (::GetFileAttributesA(directory.c_str()) != INVALID_FILE_ATTRIBUTES) ? AJA_STATUS_SUCCESS : AJA_STATUS_FAIL);
 }
 
 AJAStatus
-AJAFileIO::DoesDirectoryExist(const wstring& directory)
+AJAFileIO::DoesDirectoryExist(const std::wstring& directory)
 {
 	return( (::GetFileAttributesW(directory.c_str()) != INVALID_FILE_ATTRIBUTES) ? AJA_STATUS_SUCCESS : AJA_STATUS_FAIL);
 }
 
 AJAStatus
-AJAFileIO::IsDirectoryEmpty(const string& directory)
+AJAFileIO::IsDirectoryEmpty(const std::string& directory)
 {
 	return( DoesDirectoryContain(directory, "*") );
 }
 
 AJAStatus
-AJAFileIO::IsDirectoryEmpty(const wstring& directory)
+AJAFileIO::IsDirectoryEmpty(const std::wstring& directory)
 {
 	return( DoesDirectoryContain(directory, L"*") );
 }
