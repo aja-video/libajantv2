@@ -41,6 +41,15 @@ typedef enum
 #define AUDIO_DELAY_WRAPAROUND    8160    // for 4Mb buffer
 
 
+#define USE_CLASS4K_SERVICE		(true)
+enum
+{
+	kUseClass4kForIo4k			= (true && USE_CLASS4K_SERVICE),
+	kUseClass4kForKona			= (true && USE_CLASS4K_SERVICE),
+	kUseClass4kForCorvid		= (true && USE_CLASS4K_SERVICE)
+};
+
+
 //-------------------------------------------------------------------------------------------------------
 //	class HLState
 //-------------------------------------------------------------------------------------------------------
