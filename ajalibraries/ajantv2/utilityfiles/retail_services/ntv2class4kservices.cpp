@@ -136,6 +136,9 @@ void Class4kServices::SetDeviceXPointPlayback ()
 	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
 														 mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB10bit) ||
 													    (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
+													    
+	b4k6gOut					= b4k6gOut && bDo12G;
+	b4k12gOut					= b4k6gOut && bDo12G;
 	
 	// XPoint Init 
 	NTV2CrosspointID			XPt1, XPt2, XPt3, XPt4;
@@ -1536,7 +1539,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b4k6gOut			= (b4K && !b4kHfr && !bSdiOutRGB && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
-	//bool						b4k12gOut			= (b4K && (b4kHfr || bSdiOutRGB) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
+	bool						b4k12gOut			= (b4K && (b4kHfr || bSdiOutRGB) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	bool						b2xQuadIn			= b4K && !b4kHfr && (mVirtualInputSelect == NTV2_Input2x4kSelect);
 	bool						b4xQuadIn			= b4K && (mVirtualInputSelect == NTV2_Input4x4kSelect);
 	bool						b2xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
@@ -1554,6 +1557,8 @@ void Class4kServices::SetDeviceXPointCapture ()
 													    
 	bHdmiIn						= bHdmiIn && bDoHdmiIn;
 	bHdmiOutRGB					= bHdmiOutRGB && bDoHdmiOut;
+	b4k6gOut					= b4k6gOut && bDo12G;
+	b4k12gOut					= b4k6gOut && bDo12G;
 	
 	// swap quad mode
 	ULWord						selectSwapQuad		= 0;
@@ -3131,6 +3136,10 @@ void Class4kServices::SetDeviceMiscRegisters ()
 	bool					b4k12gOut			= (b4K && (b4kHfr || bSdiOutRGB) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	NTV2FrameRate			primaryFrameRate	= GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 	
+	bHdmiIn					= bHdmiIn && bDoHdmiIn;
+	b4k6gOut				= b4k6gOut && bDo12G;
+	b4k12gOut				= b4k6gOut && bDo12G;
+	
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)
 	bool b1x3GbOut =		(b4K == false) &&
@@ -3182,12 +3191,12 @@ void Class4kServices::SetDeviceMiscRegisters ()
 				switch (std)
 				{
 				case VPIDStandard_2160_Single_12Gb:
-					b4k12gOut = true;
+					b4k12gOut = true && bDo12G;
 					b4xSdiIn = false;
 					b2pi = true;
 					break;
 				case VPIDStandard_2160_Single_6Gb:
-					b4k6gOut = true;
+					b4k6gOut = true && bDo12G;
 					b4xSdiIn = false;
 					b2pi  = true;
 					break;
