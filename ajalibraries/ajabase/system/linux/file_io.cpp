@@ -35,7 +35,7 @@ AJAFileIO::~AJAFileIO(void)
 }
 
 bool
-AJAFileIO::FileExists(const wstring& fileName)
+AJAFileIO::FileExists(const std::wstring& fileName)
 {
 	string aString;
     aja::wstring_to_string(fileName, aString);
@@ -43,7 +43,7 @@ AJAFileIO::FileExists(const wstring& fileName)
 }
 
 bool
-AJAFileIO::FileExists(const string& fileName)
+AJAFileIO::FileExists(const std::string& fileName)
 {
 	struct stat dummy;
 	bool bExists = stat(fileName.c_str(), &dummy) != -1;
@@ -52,7 +52,7 @@ AJAFileIO::FileExists(const string& fileName)
 
 AJAStatus
 AJAFileIO::Open(
-    const wstring&        fileName,
+    const std::wstring&   fileName,
     int flags,
     int properties)
 {
@@ -65,7 +65,7 @@ AJAFileIO::Open(
 
 AJAStatus
 AJAFileIO::Open(
-	const string&			fileName,
+	const std::string&		fileName,
 	const int				flags,
 	const int	properties)
 {
@@ -222,7 +222,7 @@ AJAFileIO::Write(const uint8_t* pBuffer, const uint32_t length) const
 
 
 uint32_t
-AJAFileIO::Write(const string& buffer) const
+AJAFileIO::Write(const std::string& buffer) const
 {
 	return (Write((uint8_t*) buffer.c_str(), buffer.length()));
 }
@@ -307,7 +307,7 @@ AJAFileIO::FileInfo(int64_t& createTime, int64_t& modTime, int64_t& size)
 }
 
 AJAStatus
-AJAFileIO::Delete(const string& fileName)
+AJAFileIO::Delete(const std::string& fileName)
 {
 	AJAStatus status = AJA_STATUS_FAIL;
 
@@ -322,7 +322,7 @@ AJAFileIO::Delete(const string& fileName)
 }
 
 AJAStatus
-AJAFileIO::Delete(const wstring& fileName)
+AJAFileIO::Delete(const std::wstring& fileName)
 {
     AJAStatus status = AJA_STATUS_FAIL;
 
@@ -335,9 +335,9 @@ AJAFileIO::Delete(const wstring& fileName)
 
 AJAStatus
 AJAFileIO::ReadDirectory(
-				const string&   directory,
-				const string&   filePattern,
-				vector<string>& fileContainer)
+				const std::string&   directory,
+				const std::string&   filePattern,
+				std::vector<std::string>& fileContainer)
 {
 	AJAStatus       status = AJA_STATUS_FAIL;
 	struct dirent** ppNamelist;
@@ -408,9 +408,9 @@ AJAFileIO::ReadDirectory(
 
 AJAStatus
 AJAFileIO::ReadDirectory(
-                const wstring&   directory,
-                const wstring&   filePattern,
-                vector<wstring>& fileContainer)
+                const std::wstring&   directory,
+                const std::wstring&   filePattern,
+                std::vector<std::wstring>& fileContainer)
 {
     AJAStatus status = AJA_STATUS_FAIL;
 
@@ -431,8 +431,8 @@ AJAFileIO::ReadDirectory(
 
 AJAStatus
 AJAFileIO::DoesDirectoryContain(
-				const string& directory,
-				const string& filePattern)
+				const std::string& directory,
+				const std::string& filePattern)
 {
 	AJAStatus       status = AJA_STATUS_FAIL;
 	vector<string>  fileList;
@@ -453,8 +453,8 @@ AJAFileIO::DoesDirectoryContain(
 
 AJAStatus
 AJAFileIO::DoesDirectoryContain(
-                const wstring& directory,
-                const wstring& filePattern)
+                const std::wstring& directory,
+                const std::wstring& filePattern)
 {
     AJAStatus status = AJA_STATUS_FAIL;
     string aDir,aPat;
@@ -467,7 +467,7 @@ AJAFileIO::DoesDirectoryContain(
 
 
 AJAStatus
-AJAFileIO::DoesDirectoryExist(const string& directory)
+AJAFileIO::DoesDirectoryExist(const std::string& directory)
 {
 	AJAStatus status = AJA_STATUS_FAIL;
 
@@ -484,7 +484,7 @@ AJAFileIO::DoesDirectoryExist(const string& directory)
 }
 
 AJAStatus
-AJAFileIO::DoesDirectoryExist(const wstring& directory)
+AJAFileIO::DoesDirectoryExist(const std::wstring& directory)
 {
     AJAStatus status = AJA_STATUS_FAIL;
     string aDir;
@@ -495,7 +495,7 @@ AJAFileIO::DoesDirectoryExist(const wstring& directory)
 }
 
 AJAStatus
-AJAFileIO::IsDirectoryEmpty(const string& directory)
+AJAFileIO::IsDirectoryEmpty(const std::string& directory)
 {
 	if (AJA_STATUS_FAIL ==  DoesDirectoryContain(directory, "*"))
 		return AJA_STATUS_SUCCESS;
@@ -504,7 +504,7 @@ AJAFileIO::IsDirectoryEmpty(const string& directory)
 }
 
 AJAStatus
-AJAFileIO::IsDirectoryEmpty(const wstring& directory)
+AJAFileIO::IsDirectoryEmpty(const std::wstring& directory)
 {
     return( DoesDirectoryContain(directory, L"*") );
 }

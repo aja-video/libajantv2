@@ -2365,6 +2365,24 @@ bool CNTV2Card::Read3GInputStatus2Register(ULWord *pValue)				{return pValue ? R
 bool CNTV2Card::Read3GInput5678StatusRegister(ULWord *pValue)			{return pValue ? ReadRegister(kRegSDI5678Input3GStatus, *pValue) : false;}
 
 
+bool CNTV2Card::GetVPIDValidA(const NTV2Channel inChannel)
+{
+	ULWord value(0);
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+	return ReadRegister(gChannelToSDIInput3GStatusRegNum[inChannel], value, gChannelToSDIInVPIDLinkAValidMask[inChannel])
+			&&  value;
+}
+
+bool CNTV2Card::GetVPIDValidB(const NTV2Channel inChannel)
+{
+	ULWord value(0);
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+	return ReadRegister(gChannelToSDIInput3GStatusRegNum[inChannel], value, gChannelToSDIInVPIDLinkBValidMask[inChannel])
+			&&  value;
+}
+
 bool CNTV2Card::ReadSDIInVPID (const NTV2Channel inChannel, ULWord & outValue_A, ULWord & outValue_B)
 {
 	ULWord	status	(0);
@@ -7298,63 +7316,55 @@ bool CNTV2Card::GetEnable4KPSFOutMode(bool & outIsEnabled)
 
 bool CNTV2Card::GetSDITRSError (const NTV2Channel inChannel)
 {
-	ULWord value;
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
+	if (!::NTV2DeviceCanDoSDIErrorChecks(_boardID))
+		return 0;
+	if (IS_CHANNEL_INVALID(inChannel))
+		return 0;
+	ULWord value(0);
 	ReadRegister(gChannelToRXSDIStatusRegs[inChannel], value, kRegMaskSDIInTRSError, kRegShiftSDIInTRSError);
 	return value ? true : false;
 }
 
 bool CNTV2Card::GetSDILock (const NTV2Channel inChannel)
 {
-	ULWord value;
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
+	if (!::NTV2DeviceCanDoSDIErrorChecks(_boardID))
+		return 0;
+	if (IS_CHANNEL_INVALID(inChannel))
+		return 0;
+	ULWord value(0);
 	ReadRegister(gChannelToRXSDIStatusRegs[inChannel], value, kRegMaskSDIInLocked, kRegShiftSDIInLocked);
 	return value ? true : false;
 }
 
 ULWord CNTV2Card::GetSDIUnlockCount(const NTV2Channel inChannel)
 {
-	ULWord value;
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
+	if (!::NTV2DeviceCanDoSDIErrorChecks(_boardID))
+		return 0;
+	if (IS_CHANNEL_INVALID(inChannel))
+		return 0;
+	ULWord value(0);
 	ReadRegister(gChannelToRXSDIStatusRegs[inChannel], value, kRegMaskSDIInUnlockCount, kRegShiftSDIInUnlockCount);
 	return value;
 }
 
-bool CNTV2Card::GetVPIDValidA(const NTV2Channel inChannel)
-{
-	ULWord value;
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
-	ReadRegister(gChannelToRXSDIStatusRegs[inChannel], value, kRegMaskSDIInCRCErrorCountA, kRegShiftSDIInCRCErrorCountA);
-	return value ? true : false;
-}
-
-bool CNTV2Card::GetVPIDValidB(const NTV2Channel inChannel)
-{
-	ULWord value;
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
-	ReadRegister(gChannelToRXSDIStatusRegs[inChannel], value, kRegMaskSDIInCRCErrorCountB, kRegShiftSDIInCRCErrorCountB);
-	return value ? true : false;
-}
-
 ULWord CNTV2Card::GetCRCErrorCountA(const NTV2Channel inChannel)
 {
-	ULWord value;
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
+	if (!::NTV2DeviceCanDoSDIErrorChecks(_boardID))
+		return 0;
+	if (IS_CHANNEL_INVALID(inChannel))
+		return 0;
+	ULWord value(0);
 	ReadRegister(gChannelToRXSDICRCErrorCountRegs[inChannel], value, kRegMaskSDIInCRCErrorCountA, kRegShiftSDIInCRCErrorCountA);
 	return value;
 }
 
 ULWord CNTV2Card::GetCRCErrorCountB(const NTV2Channel inChannel)
 {
-	ULWord value;
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
+	if (!::NTV2DeviceCanDoSDIErrorChecks(_boardID))
+		return 0;
+	if (IS_CHANNEL_INVALID(inChannel))
+		return 0;
+	ULWord value(0);
 	ReadRegister(gChannelToRXSDICRCErrorCountRegs[inChannel], value, kRegMaskSDIInCRCErrorCountB, kRegShiftSDIInCRCErrorCountB);
 	return value;
 }

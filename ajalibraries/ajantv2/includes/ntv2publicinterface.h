@@ -6054,6 +6054,7 @@ typedef enum
 
 				/**
 					@brief		Answers with my contents as a character string.
+					@param[out]	outString		Receives the character string copied verbatim from my contents.
 					@param[in]	inU8Offset		The starting offset, in bytes, where copying will commence.
 					@param[in]	inMaxSize		Specifies the maximum number of 8-bit values to be returned.
 												Use zero for unlimited.

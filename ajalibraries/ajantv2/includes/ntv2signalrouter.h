@@ -275,7 +275,7 @@ class AJAExport CNTV2SignalRouter
 			@note		The default behavior is to answer with the first NTV2WidgetID found in the NTV2WidgetIDSet.
 			@return		True if successful;  otherwise false.
 		**/
-		static bool					GetWidgetForOutput (const NTV2OutputCrosspointID inOutputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDevice = DEVICE_ID_NOTFOUND);
+		static bool					GetWidgetForOutput (const NTV2OutputCrosspointID inOutputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDeviceID = DEVICE_ID_NOTFOUND);
 
 		/**
 			@brief		Returns the widgets that "own" the specified input crosspoint.
@@ -296,7 +296,7 @@ class AJAExport CNTV2SignalRouter
 										Defaults to ::DEVICE_ID_NOTFOUND, which returns the first match.
 			@return		True if successful;  otherwise false.
 		**/
-		static bool					GetWidgetForInput (const NTV2InputCrosspointID inInputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDevice = DEVICE_ID_NOTFOUND);
+		static bool					GetWidgetForInput (const NTV2InputCrosspointID inInputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDeviceID = DEVICE_ID_NOTFOUND);
 
 		/**
 			@brief		Returns the input crosspoints known to be "owned" by the given widget.

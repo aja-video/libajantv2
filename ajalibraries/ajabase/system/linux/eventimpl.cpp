@@ -13,7 +13,7 @@
 using std::string;
 
 // event implementation class (linux)
-AJAEventImpl::AJAEventImpl(bool manualReset, const string& name)
+AJAEventImpl::AJAEventImpl(bool manualReset, const std::string& name)
 	: mManualReset(manualReset)
 {
     AJA_UNUSED(name);
