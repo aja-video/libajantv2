@@ -160,8 +160,8 @@ class CNTV2DemoCommon
 	**/
 	///@{
 		/**
-			@param[in]	inKinds		Specifies the types of video formats returned. Defaults to non-4K/UHD formats.
-			@return		The supported ::NTV2VideoFormatSet.
+			@param[in]	inDeviceSpec	A string containing a decimal index number, device serial number, or a device model name.
+			@return		True if the specified device exists and can be opened.
 		**/
 		static bool							IsValidDevice (const std::string & inDeviceSpec);
 
@@ -218,7 +218,7 @@ class CNTV2DemoCommon
 	///@{
 		/**
 			@param[in]	inKinds		Specifies the types of pixel formats returned. Defaults to all formats.
-			@return		The supported ::NTV2PixelFormatSet.
+			@return		The supported ::NTV2FrameBufferFormatSet.
 		**/
 		static NTV2FrameBufferFormatSet		GetSupportedPixelFormats (const NTV2PixelFormatKinds inKinds = PIXEL_FORMATS_ALL);
 
