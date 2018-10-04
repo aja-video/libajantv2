@@ -77,6 +77,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
 	int							bFb4Disable			= 1;						// Assume Channel 4 IS disabled by default
+	bool						bQuadSwap			= b4K && (mQuadSwapOut != 0);	
 	bool						bFb2RGB				= IsRGBFormat(mFb2Format);
 	bool 						bDSKGraphicMode 	= mDSKMode == NTV2_DSKModeGraphicOverMatte || 
 													  mDSKMode == NTV2_DSKModeGraphicOverVideoIn || 
@@ -90,8 +91,6 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
     bool 						bFb1HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
     bool 						bFb2HdrRGB			= mFb2Format == NTV2_FBF_48BIT_RGB;
-	ULWord						selectSwapQuad		= 0; mCard->ReadRegister(kVRegSwizzle4kOutput, selectSwapQuad);
-	bool						bQuadSwap			= b4K && (selectSwapQuad != 0);	
 	
 	// make sure formats/modes match for multibuffer modes
 	if (b4K || b2FbLevelBHfr || bStereoOut)
@@ -1335,15 +1334,10 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 	int							bFb2Disable			= 1;		// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;		// Assume Channel 2 IS disabled by default
 	int							bFb4Disable			= 1;		// Assume Channel 2 IS disabled by default
-	
+	bool						bQuadSwap			= b4K && (mQuadSwapIn != 0);	
 	NTV2CrosspointID			inputXptYUV1 		= NTV2_XptBlack;				// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2 		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	NTV2ColorSpaceMode			inputColorSpace 	= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)
-	
-	// swap quad mode
-	ULWord						selectSwapQuad		= 0;
-	mCard->ReadRegister(kVRegSwizzle4kInput, selectSwapQuad);
-	bool						bQuadSwap			= b4K && (selectSwapQuad != 0);	
 	
 	// Figure out what our input format is based on what is selected
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);

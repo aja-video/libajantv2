@@ -240,6 +240,8 @@ public:
 	NTV2InputAudioSelect	mInputAudioSelect;
 	NTV2VideoFormat			mVirtualSecondaryFormatSelect;
 	bool					mIsoConvertEnable;
+	ULWord 					mQuadSwapIn;
+	ULWord 					mQuadSwapOut;
 	uint32_t				mDSKAudioMode;
 	uint32_t				mDSKForegroundMode;
 	uint32_t				mDSKForegroundFade;

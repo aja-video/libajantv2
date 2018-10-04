@@ -351,6 +351,19 @@ bool DeviceServices::ReadDriverState (void)
 	if (NTV2DeviceGetNumberFrameBuffers(mDeviceID) > 1)
 		mCard->GetFrameBufferFormat(NTV2_CHANNEL2, mFb2Format);
 	
+	// quad swap
+	if (mBoardInfo.has4KSupport == true && NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat) == true)
+	{
+		if (mFb1Mode == NTV2_MODE_CAPTURE)
+			mCard->ReadRegister(kVRegSwizzle4kInput, mQuadSwapIn);
+		else
+			mCard->ReadRegister(kVRegSwizzle4kOutput, mQuadSwapOut);
+	}
+	else 		
+		mQuadSwapOut = mQuadSwapIn = 0;
+
+	
+	
     if (mCard->DeviceCanDoAudioMixer())
 	{
 		AsDriverInterface(mCard)->ReadRegister(kVRegAudioMixerOverrideState,    mAudioMixerOverrideState);

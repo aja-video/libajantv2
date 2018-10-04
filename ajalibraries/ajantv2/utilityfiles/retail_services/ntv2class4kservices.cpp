@@ -121,6 +121,7 @@ void Class4kServices::SetDeviceXPointPlayback ()
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
 	int							bFb4Disable			= 1;						// Assume Channel 4 IS disabled by default
+	bool						bQuadSwap			= b4K && !b4k12gOut && !b4k6gOut && (mQuadSwapOut != 0);	
 	bool						bDSKGraphicMode		= mDSKMode == NTV2_DSKModeGraphicOverMatte || 
 													  mDSKMode == NTV2_DSKModeGraphicOverVideoIn || 
 													  mDSKMode == NTV2_DSKModeGraphicOverFB;
@@ -138,15 +139,12 @@ void Class4kServices::SetDeviceXPointPlayback ()
 													    (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
 													    
 	b4k6gOut					= b4k6gOut && bDo12G;
-	b4k12gOut					= b4k6gOut && bDo12G;
+	b4k12gOut					= b4k12gOut && bDo12G;
 	
 	// XPoint Init 
 	NTV2CrosspointID			XPt1, XPt2, XPt3, XPt4;
 																																								
 	// swap quad mode
-	ULWord						selectSwapQuad		= 0;
-	mCard->ReadRegister(kVRegSwizzle4kOutput, selectSwapQuad);
-	bool						bQuadSwap			= b4K && !b4k12gOut && !b4k6gOut && (selectSwapQuad != 0);	
 	bool						bInRGB				= inputColorSpace == NTV2_ColorSpaceModeRgb;
 
 	if(b4k12gOut || b4k6gOut) b2pi = true;
@@ -1543,12 +1541,11 @@ void Class4kServices::SetDeviceXPointCapture ()
 	bool						b2xQuadIn			= b4K && !b4kHfr && (mVirtualInputSelect == NTV2_Input2x4kSelect);
 	bool						b4xQuadIn			= b4K && (mVirtualInputSelect == NTV2_Input4x4kSelect);
 	bool						b2xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
-	//bool						b4xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_4wire);
-	int							bFb1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
-	int							bFb2Disable			= 1;		// Assume Channel 2 IS disabled by default
-	int							bFb3Disable			= 1;		// Assume Channel 2 IS disabled by default
-	int							bFb4Disable			= 1;		// Assume Channel 2 IS disabled by default
-	
+	int							bFb1Disable			= 0;
+	int							bFb2Disable			= 1;
+	int							bFb3Disable			= 1;
+	int							bFb4Disable			= 1;
+	bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_Input4x4kSelect && mQuadSwapIn != 0;
 	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)
 	bool						bHdmiIn             = mVirtualInputSelect == NTV2_Input5Select;
 	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
@@ -1558,12 +1555,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 	bHdmiIn						= bHdmiIn && bDoHdmiIn;
 	bHdmiOutRGB					= bHdmiOutRGB && bDoHdmiOut;
 	b4k6gOut					= b4k6gOut && bDo12G;
-	b4k12gOut					= b4k6gOut && bDo12G;
-	
-	// swap quad mode
-	ULWord						selectSwapQuad		= 0;
-	mCard->ReadRegister(kVRegSwizzle4kInput, selectSwapQuad);
-	bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_Input4x4kSelect && selectSwapQuad != 0;
+	b4k12gOut					= b4k12gOut && bDo12G;
 	
 	// SMPTE 425 (2pi)
 	bool						bVpid2x2piIn		= false;
@@ -3138,7 +3130,7 @@ void Class4kServices::SetDeviceMiscRegisters ()
 	
 	bHdmiIn					= bHdmiIn && bDoHdmiIn;
 	b4k6gOut				= b4k6gOut && bDo12G;
-	b4k12gOut				= b4k6gOut && bDo12G;
+	b4k12gOut				= b4k12gOut && bDo12G;
 	
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)
