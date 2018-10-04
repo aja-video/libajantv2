@@ -132,6 +132,7 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
 														 mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB10bit) ||
 													    (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
+	bool						bInRGB				= inputColorSpace == NTV2_ColorSpaceModeRgb;
 	
 	// XPoint Init 
 	NTV2CrosspointID			XPt1, XPt2, XPt3, XPt4;
@@ -145,7 +146,6 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
     mCard->WriteRegister(kVRegRxcEnable2, true);
 
 	// swap quad mode
-	bool						bInRGB				= inputColorSpace == NTV2_ColorSpaceModeRgb;
 
 
 	if(b4k12gOut || b4k6gOut) b2pi = true;

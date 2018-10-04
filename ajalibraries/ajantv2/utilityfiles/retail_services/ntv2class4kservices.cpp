@@ -137,15 +137,13 @@ void Class4kServices::SetDeviceXPointPlayback ()
 	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
 														 mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB10bit) ||
 													    (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
+	bool						bInRGB				= inputColorSpace == NTV2_ColorSpaceModeRgb;
 													    
 	b4k6gOut					= b4k6gOut && bDo12G;
 	b4k12gOut					= b4k12gOut && bDo12G;
 	
 	// XPoint Init 
 	NTV2CrosspointID			XPt1, XPt2, XPt3, XPt4;
-																																								
-	// swap quad mode
-	bool						bInRGB				= inputColorSpace == NTV2_ColorSpaceModeRgb;
 
 	if(b4k12gOut || b4k6gOut) b2pi = true;
 	// make sure formats/modes match for multibuffer modes
