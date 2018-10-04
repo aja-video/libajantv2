@@ -197,7 +197,7 @@ void DeviceServices::SetCard(CNTV2Card* pCard)
 	RetailSupport::AdjustDeviceInfoForApp(mBoardInfo);
 	
 	// model
-	mModel.SetCard(pCard, pCard->GetDeviceID(), index);
+	mModel.SetCard(pCard, pCard->GetDeviceID(), index, false);
 	
 	// retail object
 	mRs = new RetailSupport(mDeviceState, mBoardInfo, mModel);

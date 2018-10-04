@@ -90,6 +90,7 @@ public:
 public:
 			DeviceServices();
 	virtual	~DeviceServices() {}
+	virtual	void SetCard(CNTV2Card* pCard);
 	virtual bool ReadDriverState();
 	virtual void UpdateAutoState();
 
@@ -327,10 +328,6 @@ public:
 	int32_t					mAudioCapMixerSourceMainGain;
 	int32_t					mAudioCapMixerSourceAux1Gain;
 	int32_t					mAudioCapMixerSourceAux2Gain;
-	
-	
-
-	void SetCard (CNTV2Card* pCard);
 };
 
 #endif
