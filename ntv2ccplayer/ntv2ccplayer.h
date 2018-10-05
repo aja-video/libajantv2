@@ -18,13 +18,6 @@
 
 
 /**
-	@brief	I'm an ordered sequence of strings.
-**/
-typedef std::vector <std::string>	StringList;
-typedef StringList::const_iterator	StringListConstIter;
-
-
-/**
 	@brief	These are the actions that can be taken after the last file is "played".
 **/
 typedef enum _AtEndAction_
@@ -46,7 +39,7 @@ void SignalHandler (int inSignal);
 typedef struct CCGeneratorConfig
 {
 	public:
-		StringList				fFilesToPlay;			///<	A list of zero or more strings containing paths to text files to be "played"
+		NTV2StringList			fFilesToPlay;			///<	A list of zero or more strings containing paths to text files to be "played"
 		AtEndAction				fEndAction;				///<	The action to take after the file list has finished playing
 		NTV2Line21Mode			fCaptionMode;			///<	The CEA-608 caption mode to use
 		NTV2Line21Channel		fCaptionChannel;		///<	The caption channel to use
@@ -58,7 +51,7 @@ typedef struct CCGeneratorConfig
 			@brief	Constructs a default generator configuration.
 		**/
 		inline explicit	CCGeneratorConfig ()
-			:	fFilesToPlay		(StringList ()),
+			:	fFilesToPlay		(NTV2StringList()),
 				fEndAction			(AtEndAction_Quit),
 				fCaptionMode		(NTV2_CC608_CapModeRollUp4),
 				fCaptionChannel		(NTV2_CC608_CC1),

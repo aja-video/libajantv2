@@ -625,7 +625,7 @@ static CaptionSourceList GetCaptionSources (const StringList & inFilesToPlay, co
 	}
 	else
 	{
-		for (StringListConstIter pFilePath (inFilesToPlay.begin ());  pFilePath != inFilesToPlay.end ();  ++pFilePath)
+		for (NTV2StringListConstIter pFilePath (inFilesToPlay.begin ());  pFilePath != inFilesToPlay.end ();  ++pFilePath)
 		{
 			if (*pFilePath == "-")
 			{
