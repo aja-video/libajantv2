@@ -184,6 +184,10 @@ DeviceServices::DeviceServices()
 	mDefaultVideoFormat				= NTV2_FORMAT_UNKNOWN;
 }
 
+DeviceServices::~DeviceServices()
+{
+}
+
 void DeviceServices::SetCard(CNTV2Card* pCard)
 {
 	mCard = pCard;

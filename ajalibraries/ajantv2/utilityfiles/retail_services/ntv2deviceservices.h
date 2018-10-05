@@ -89,7 +89,7 @@ public:
 	
 public:
 			DeviceServices();
-	virtual	~DeviceServices() {}
+	virtual	~DeviceServices();
 	virtual	void SetCard(CNTV2Card* pCard);
 	virtual bool ReadDriverState();
 	virtual void UpdateAutoState();
