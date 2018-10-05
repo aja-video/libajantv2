@@ -64,9 +64,9 @@ static string GetLine21ChannelNames (string inDelimiterStr = "|")
 }	//	GetLine21ChannelNames
 
 
-static StringList Split (string inStr, const string inDelimiter = string(","))
+static NTV2StringList Split (string inStr, const string inDelimiter = string(","))
 {
-	StringList	result;
+	NTV2StringList	result;
 	size_t	pos	(inStr.find (inDelimiter));
 	while (pos != string::npos)
 	{
@@ -79,9 +79,9 @@ static StringList Split (string inStr, const string inDelimiter = string(","))
 	return result;
 }
 
-static void PrintStringList (const StringList & inStrList)
+static void PrintStringList (const NTV2StringList & inStrList)
 {
-	for (StringListConstIter it (inStrList.begin());  it != inStrList.end();  )
+	for (NTV2StringListConstIter it (inStrList.begin());  it != inStrList.end();  )
 	{
 		cerr << *it;
 		if (++it != inStrList.end ())
@@ -116,7 +116,7 @@ int main (int argc, const char ** argv)
 	int					bBreakNewLines	(0);				//	Newlines break rows instead of treated as whitespace?
 	int					bForceVanc		(0);				//	Force use of Vanc?
 	int					bSuppressLine21	(0);				//	Suppress line 21 waveform (SD only)?
-	StringList			pathList;							//	List of text files (paths) to "play"
+	NTV2StringList		pathList;							//	List of text files (paths) to "play"
 	poptContext			optionsContext; 					//	Context for parsing command line arguments
 	AJADebug::Open();
 
@@ -224,14 +224,14 @@ int main (int argc, const char ** argv)
 
 	//	Users can play one or more caption channels by specifying more than one, separating each with a comma:		--608chan cc2,cc4,tx1,tx2
 	//	You can vary the mode, end-action and rate for each caption channel in the same way:						--608mode pop,paint,roll  --rate 1500,800,300,600
-	const StringList	sCaptionChannels	(::Split (CNTV2DemoCommon::ToLower (pCaptionChannel	? pCaptionChannel	: "CC1")));
-	const StringList	sCaptionModes		(::Split (CNTV2DemoCommon::ToLower (pMode			? pMode				: "roll4")));
-	const StringList	sEndActions			(::Split (CNTV2DemoCommon::ToLower (pEndAction		? pEndAction		: "exit")));
-	const StringList	sCaptionRates		(::Split (CNTV2DemoCommon::ToLower (pCaptionRate	? pCaptionRate		: "500")));
-	size_t				ndx					(0);
-	size_t				fileNdx				(0);
+	const NTV2StringList	sCaptionChannels	(::Split (CNTV2DemoCommon::ToLower (pCaptionChannel	? pCaptionChannel	: "CC1")));
+	const NTV2StringList	sCaptionModes		(::Split (CNTV2DemoCommon::ToLower (pMode			? pMode				: "roll4")));
+	const NTV2StringList	sEndActions			(::Split (CNTV2DemoCommon::ToLower (pEndAction		? pEndAction		: "exit")));
+	const NTV2StringList	sCaptionRates		(::Split (CNTV2DemoCommon::ToLower (pCaptionRate	? pCaptionRate		: "500")));
+	size_t					ndx					(0);
+	size_t					fileNdx				(0);
 
-	for (StringListConstIter iter (sCaptionChannels.begin());  iter != sCaptionChannels.end();  ++iter, ++ndx)
+	for (NTV2StringListConstIter iter (sCaptionChannels.begin());  iter != sCaptionChannels.end();  ++iter, ++ndx)
 	{
 		CCGeneratorConfig	generatorConfig;
 

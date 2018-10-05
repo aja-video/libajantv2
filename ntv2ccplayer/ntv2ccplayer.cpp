@@ -603,7 +603,7 @@ class CaptionSource
 	@param[in]	inCharsPerMinute	Specifies the desired rate at which caption characters get produced.
 	@return		A list of newly-created CaptionSource instances.
 **/
-static CaptionSourceList GetCaptionSources (const StringList & inFilesToPlay, const double inCharsPerMinute)
+static CaptionSourceList GetCaptionSources (const NTV2StringList & inFilesToPlay, const double inCharsPerMinute)
 {
 	CaptionSourceList	result;
 	static istream *	pStdIn			(&cin);
@@ -1121,7 +1121,7 @@ void NTV2CCPlayer::GenerateCaptions (const NTV2Line21Channel inCCChannel)
 	const double				charsPerMinute		(ccGeneratorConfig.fCharsPerMinute);	//	Desired caption rate (in characters per minute)
 	const bool					newlinesMakeNewRows	(ccGeneratorConfig.fNewLinesAreNewRows);//	Newline characters cause row breaks?
 	const AtEndAction			endAction			(ccGeneratorConfig.fEndAction);			//	What to do after last file is done playing
-	StringList					filesToPlay			(ccGeneratorConfig.fFilesToPlay);		//	List of text files to play
+	NTV2StringList				filesToPlay			(ccGeneratorConfig.fFilesToPlay);		//	List of text files to play
 	unsigned					linesWanted			(3);									//	Desired number of lines to Enqueue in one shot (min 1, max 4)
 	bool						quitThisGenerator	(false);								//	Set true to exit this function/thread
 	const UWord					paintPopTopRow		(9);									//	PaintOn/PopOn only:	top display row
