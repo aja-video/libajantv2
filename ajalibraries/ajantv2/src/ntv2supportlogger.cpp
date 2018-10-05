@@ -490,7 +490,11 @@ void CNTV2SupportLogger::FetchInfoLog(std::ostringstream& oss)
 			AJASystemInfo::append(infoTable, "License Enable Mask",	xHEX0NStr(licenseStatus & 0xff,2));
         }
     }
-	oss << AJASystemInfo::ToString(infoTable) << endl;
+
+    //	Host info
+    AJASystemInfo	hostInfo;
+	oss << AJASystemInfo::ToString(infoTable) << endl
+		<< hostInfo.ToString() << endl;
 }
 
 void CNTV2SupportLogger::FetchRegisterLog(std::ostringstream& oss)
