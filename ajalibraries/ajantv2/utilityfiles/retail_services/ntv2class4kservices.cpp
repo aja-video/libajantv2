@@ -3173,7 +3173,7 @@ void Class4kServices::SetDeviceMiscRegisters ()
 		}
 		else 
 		{
-			bool b4xSdiIn = false;
+			bool b4xSdiIn = (mVirtualInputSelect == NTV2_Input4x4kSelect);
 			if (mVpid1Valid)
 			{
 				mVpidParser.SetVPID(mVpid1a);
