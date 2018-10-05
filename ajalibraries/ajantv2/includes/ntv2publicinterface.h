@@ -3723,6 +3723,7 @@ typedef enum
 	kRegXlnxChannelPerfCycleCountHigh			= 0x32,
 	kRegXlnxChannelPerfDataCountLow				= 0x33,
 	kRegXlnxChannelPerfDataCountHigh			= 0x34,
+	kRegXlnxChannelUserMaxReadRequestSize		= 0x44,
 
 	kRegXlnxIrqIdentifier						= 0x00,
 	kRegXlnxIrqUserInterruptEnable				= 0x01,
@@ -3779,7 +3780,10 @@ typedef enum
 	kRegMaskXlnxPerfCycleCountHigh				= 0x000003ff,
 
 	kRegMaskXlnxPerfDataCountMax				= 0x00010000,
-	kRegMaskXlnxPerfDataCountHigh				= 0x000003ff
+	kRegMaskXlnxPerfDataCountHigh				= 0x000003ff,
+
+	kRegMaskXlnxUserMaxReadRequestEff			= 0x00000070,
+	kRegMaskXlnxUserMaxReadRequestPgm			= 0x00000007
 
 } XlnxRegisterMask;
 
@@ -3818,7 +3822,10 @@ typedef enum
 	kRegShiftXlnxPerfCycleCountHigh				= 0,
 
 	kRegShiftXlnxPerfDataCountMax				= 16,
-	kRegShiftXlnxPerfDataCountHigh				= 0
+	kRegShiftXlnxPerfDataCountHigh				= 0,
+
+	kRegShiftXlnxUserMaxReadRequestEff			= 4,
+	kRegShiftXlnxUserMaxReadRequestPgm			= 0
 
 } XlnxRegisterShift;
 
