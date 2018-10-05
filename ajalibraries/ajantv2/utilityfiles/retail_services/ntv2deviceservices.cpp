@@ -232,8 +232,7 @@ bool DeviceServices::ReadDriverState (void)
 	//if (bChanged)
 	{
 		// sdi out
-		uint32_t sdiOutSize = ds.sdiOut.size();
-		if (sdiOutSize > 0)
+		if (ds.sdiOutSize > 0)
 		{ 
 			mVirtualDigitalOutput1Select = ds.sdiOut[0]->outSelect;
 			mSDIOutput1ColorSpace = ds.sdiOut[0]->cs;
@@ -241,15 +240,14 @@ bool DeviceServices::ReadDriverState (void)
 			m4kTransportOutSelection = ds.sdiOut[0]->transport4k;
 			mSdiOutTransportType = ds.sdiOut[0]->transport3g;
 		}
-		if (sdiOutSize > 1) 
+		if (ds.sdiOutSize > 1) 
 			mVirtualDigitalOutput2Select = ds.sdiOut[1]->outSelect;
 		
 		// input select
 		mVirtualInputSelect = ds.inputSelect;
 		mInputAudioSelect = ds.audioSelect;
 		
-		uint32_t sdiInSize = ds.sdiOut.size();
-		if (sdiInSize > 0)
+		if (ds.sdiOutSize > 0)
 		{
 			mSDIInput1ColorSpace = ds.sdiIn[0]->cs;
 			mSDIInput1RGBRange = ds.sdiIn[0]->rgbRange;
