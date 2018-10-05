@@ -51,6 +51,7 @@ typedef enum
 struct MacAddr
 {
 	uint8_t mac[6];
+	std::string AsString(void) const;
 };
 
 
