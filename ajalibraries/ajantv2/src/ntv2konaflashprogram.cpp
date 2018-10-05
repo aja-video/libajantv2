@@ -21,6 +21,15 @@ static unsigned char head13[]   = { 0x00, 0x09, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0x
 
 using namespace std;
 
+string MacAddr::AsString(void) const
+{
+	ostringstream	oss;
+	oss << xHEX0N(uint16_t(mac[0]),2) << ":" << xHEX0N(uint16_t(mac[1]),2) << ":" << xHEX0N(uint16_t(mac[2]),2)
+		<< ":" << xHEX0N(uint16_t(mac[3]),2) << ":" << xHEX0N(uint16_t(mac[4]),2) << ":" << xHEX0N(uint16_t(mac[5]),2);
+	return oss.str();
+}
+
+
 CNTV2KonaFlashProgram::CNTV2KonaFlashProgram ()
 	:	CNTV2Card (),
 		_bitFileBuffer		(NULL),
