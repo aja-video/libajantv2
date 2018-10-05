@@ -5186,7 +5186,7 @@ typedef enum
 	kRP188SourceEmbeddedLTC		= 0x0,		// NOTE these values are same as RP188 DBB channel select
 	kRP188SourceEmbeddedVITC1	= 0x1,
 	kRP188SourceEmbeddedVITC2	= 0x2,
-	kRP188SourceLTCPort			= 0xFE		// used in ioHD
+	kRP188SourceLTCPort			= 0xFE
 } RP188SourceSelect;
 
 // note: this order mimics (somewhat) that of NTV2TestPatternSelect in "ntv2testpatterngen.h"
