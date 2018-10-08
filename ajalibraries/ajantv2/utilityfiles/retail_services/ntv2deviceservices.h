@@ -219,9 +219,17 @@ public:
 	uint32_t				mADCLockScanTestFormat;
 	CNTV2VPID 				mVpidParser;
 	
-	// virtual register
-	DefaultVideoOutMode		mDefaultVideoOutMode;
+	// Input
 	uint32_t				mFollowInputFormat;
+	NTV2InputVideoSelect	mVirtualInputSelect;
+	NTV2InputAudioSelect	mInputAudioSelect;
+	NTV2ColorSpaceMode 		mSDIInput1ColorSpace;
+	NTV2ColorSpaceMode 		mSDIInput2ColorSpace;
+	NTV2RGBRangeMode		mSDIInput1RGBRange;
+	NTV2RGBRangeMode		mSDIInput2RGBRange;
+	
+	// Output
+	DefaultVideoOutMode		mDefaultVideoOutMode;
 	uint32_t				mVANCMode;
 	uint32_t				mVirtualDebug1;
 	uint32_t				mEveryFrameTaskFilter;
@@ -237,8 +245,6 @@ public:
 	NTV2OutputVideoSelect	mVirtualAnalogOutputSelect;
 	NTV2LutType				mLUTType;
 	NTV2LutType				mLUT2Type;
-	NTV2InputVideoSelect	mVirtualInputSelect;
-	NTV2InputAudioSelect	mInputAudioSelect;
 	NTV2VideoFormat			mVirtualSecondaryFormatSelect;
 	bool					mIsoConvertEnable;
 	ULWord 					mQuadSwapIn;
@@ -290,10 +296,6 @@ public:
 
 	// calculated valule, selected by user
 	NTV2VideoFormat			mSelectedInputVideoFormat;
-	NTV2ColorSpaceMode 		mSDIInput1ColorSpace;
-	NTV2ColorSpaceMode 		mSDIInput2ColorSpace;
-	NTV2RGBRangeMode		mSDIInput1RGBRange;
-	NTV2RGBRangeMode		mSDIInput2RGBRange;
 	NTV2RGBRangeMode		mFrameBuffer1RGBRange;
 	NTV2AnalogBlackLevel	mVirtualAnalogOutBlackLevel;
 	NTV2AnalogType			mVirtualAnalogOutputType;
