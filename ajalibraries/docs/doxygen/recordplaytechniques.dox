@@ -79,6 +79,9 @@ out (or capturing) those frames at the correct time.
 AutoCirculate makes it easy to stream audio & video data into and out of your application.
 
 AutoCirculate keeps ancillary data such as audio and timecode synchronized with the AutoCirculating video frames.
+-	\ref ancembeddedaudio
+-	\ref anctimecode
+-	\ref ancvpid
 
 The AJA device driver performs the bulk of the work involved in streaming audio and video to/from the AJA hardware.
 It helps to synchronize the audio with the video, detect dropped frames while streaming, time-stamps the frame data,
@@ -125,6 +128,12 @@ consume each frame, all will be well. If the host takes longer than 33 milliseco
 will start to fall behind, and the <b>Buffer Level</b> will increase. If this is allowed to continue, the <b>Active Frame</b> will
 overtake the <b>Transfer Frame</b>, which will result in “dropped” frames that never get transferred to the host.
 
+AutoCirculate continuously monitors the incoming Audio/Video sync, and if it detects a difference of more than about 10 milliseconds,
+it will attempt to resync the audio to the video. This resync involves restarting the audio engine, so a click or pop may be detected
+in the captured audio when it occurs.
+
+(See \ref anctimecode for more information about timecode capture and AutoCirculate.)
+
 
 AutoCirculate capture demos:
 -	@subpage	ntv2capture
@@ -154,6 +163,21 @@ As long as the host application that’s transferring frames takes less than 33 
 to produce each frame, all will be well. If the host takes longer than 33 milliseconds to produce a frame, the <b>Transfer Frame</b>
 will start to fall behind, and the <b>Buffer Level</b> will decrease. If this is allowed to continue, the <b>Active Frame</b> will
 overtake the <b>Transfer Frame</b>, which will result in “dropped” frames that will end up being played more than once.
+
+AutoCirculate assumes that the video and audio being transferred via CNTV2Card::AutoCirculateTransfer should be played together in-sync.
+It continuously monitors the sync, and if it detects a difference of more than about 10 milliseconds, it will resync the audio to the video.
+This resync involves restarting the audio engine, so a click or pop may be heard when it happens. The resync usually only happens when
+frames are dropped, during which the audio will be disabled until newly-transferred data arrives. (See \ref audioplayout for more information.)
+
+During a very long playback (occurring over many hours), if too many or too few samples are transferred, the sync may drift, which
+may require a correction. A classic example of this would be playing a sequence of MP4 videos that have no notion of, say, the NTSC
+5-frame cadence sequence. It can also easily happen when loop-playing a very short clip. One way to handle this is to track the number
+of video frames and audio samples delivered to AutoCirculate over the long term, then add or drop samples in the breaks between clips.
+Remember to reset the tracked frame and sample counts whenever the AUTOCIRCULATE_STATUS::GetDroppedFrameCount or
+AUTOCIRCULATE_TRANSFER_STATUS::acFramesDropped value changes (increases). See \ref audiosamplecount for more information.
+
+(See \ref anctimecode for more information about timecode playout and AutoCirculate.)
+
 
 AutoCirculate playout demos:
 -	@subpage	ntv2player

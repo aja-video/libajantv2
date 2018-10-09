@@ -14,20 +14,20 @@
 //	The script writes the declarations into 'ntv2devicefeatures.hh', and implementations into 'ntv2devicefeatures.hpp'...
 #include "ntv2devicefeatures.hpp"
 /**	These "can connect" headers have problems -- this will be fixed in SDK 15.0
-#include "xpt_c44.h"
-#include "xpt_c88.h"
-#include "xpt_io4k.h"
-#include "xpt_io4k_ufc.h"
-#include "xpt_io4kplus.h"
-#include "xpt_ioip_2022.h"
-#include "xpt_kona4_ufc.h"
-#include "xpt_kona4.h"
-#include "xpt_kip_4rxtx.h"
-#include "xpt_kip_2p2rxtc.h"
-#include "xpt_kip_j2k1rxtx.h"
-#include "xpt_kip_j2k2tx.h"
-#include "xpt_kip_2100_4tx.h"
-#include "xpt_kip_2100_1rxtx.h"		**/
+//#include "xpt_c44.h"
+//#include "xpt_c88.h"
+//#include "xpt_io4k.h"
+//#include "xpt_io4k_ufc.h"
+//#include "xpt_io4kplus.h"
+//#include "xpt_ioip_2022.h"
+//#include "xpt_kona4_ufc.h"
+//#include "xpt_kona4.h"
+//#include "xpt_kip_4rxtx.h"
+//#include "xpt_kip_2p2rxtc.h"
+//#include "xpt_kip_j2k1rxtx.h"
+//#include "xpt_kip_j2k2tx.h"
+//#include "xpt_kip_2100_4tx.h"
+//#include "xpt_kip_2100_1rxtx.h"		**/
 
 ///////////////////////////////////////////////////////////////////////////
 //	The rest of the non-sdkgen-generated function implementations follow...

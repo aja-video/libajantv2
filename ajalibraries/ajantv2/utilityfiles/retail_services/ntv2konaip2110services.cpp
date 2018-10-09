@@ -37,8 +37,6 @@ void KonaIP2110Services::Init()
     memset(&m2110RxVideoDataLast, 0, sizeof(ReceiveVideoData2110));
     memset(&m2110RxAudioDataLast, 0, sizeof(ReceiveAudioData2110));
 
-    mResetPLLCounter = 60;
-
     if (config2110 != NULL)
     {
         bool ipServiceEnable, ipServiceForceConfig;
@@ -79,19 +77,20 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
 	int							bFb4Disable			= 1;						// Assume Channel 4 IS disabled by default
+	bool						bQuadSwap			= b4K && (mQuadSwapOut != 0);	
 	bool						bFb2RGB				= IsRGBFormat(mFb2Format);
-	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
-	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
+	bool 						bDSKGraphicMode 	= mDSKMode == NTV2_DSKModeGraphicOverMatte || 
+													  mDSKMode == NTV2_DSKModeGraphicOverVideoIn || 
+													  mDSKMode == NTV2_DSKModeGraphicOverFB;
+	bool 						bDSKOn 				= mDSKMode == NTV2_DSKModeFBOverMatte || 
+													  mDSKMode == NTV2_DSKModeFBOverVideoIn || 
+													  (bFb2RGB && bDSKGraphicMode);
 	bDSKOn											= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
-	NTV2ColorSpaceMode            inputColorSpace	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
+	NTV2ColorSpaceMode			inputColorSpace		= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	
-	bool						bFb1HdrRGB			= (mFb1Format == NTV2_FBF_48BIT_RGB) ? true : false;
-	bool						bFb2HdrRGB			= (mFb2Format == NTV2_FBF_48BIT_RGB) ? true : false;
-	
-	ULWord						selectSwapQuad		= 0; mCard->ReadRegister(kVRegSwizzle4kOutput, selectSwapQuad);
-	bool						bQuadSwap			= b4K && (selectSwapQuad != 0);	
+    bool 						bFb1HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
+    bool 						bFb2HdrRGB			= mFb2Format == NTV2_FBF_48BIT_RGB;
 	
 	// make sure formats/modes match for multibuffer modes
 	if (b4K || b2FbLevelBHfr || bStereoOut)
@@ -200,7 +199,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	}
 	else if (bFb1RGB)
 	{
-		frameSync2RGB = bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
+        frameSync2RGB = bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux1ARGB : NTV2_XptFrameBuffer1RGB) : NTV2_XptLUT1RGB;
 	}
 	else
 	{
@@ -213,7 +212,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		if (bFb1RGB)
 		{
-			mCard->Connect (NTV2_XptCSC1VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
+            mCard->Connect (NTV2_XptCSC1VidInput, bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux1ARGB : NTV2_XptFrameBuffer1RGB) : NTV2_XptLUT1RGB);
 		}
 		else
 		{
@@ -242,7 +241,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		if (bFb1RGB)
 		{
-			mCard->Connect (NTV2_XptCSC2VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB);
+            mCard->Connect (NTV2_XptCSC2VidInput, bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux1BRGB : NTV2_XptFrameBuffer2RGB) : NTV2_XptLUT2RGB);
 		}
 		else
 		{
@@ -271,7 +270,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		if (bFb1RGB)
 		{
-			mCard->Connect (NTV2_XptCSC3VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out);
+            mCard->Connect (NTV2_XptCSC3VidInput, bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux2ARGB : NTV2_XptFrameBuffer3RGB) : NTV2_XptLUT3Out);
 		}
 		else
 		{
@@ -296,7 +295,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		if (bFb1RGB)
 		{
-			mCard->Connect (NTV2_XptCSC4VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out);
+            mCard->Connect (NTV2_XptCSC4VidInput, bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux2BRGB : NTV2_XptFrameBuffer4RGB) : NTV2_XptLUT4Out);
 		}
 		else
 		{
@@ -562,7 +561,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		if (bFb1RGB)
 		{
-			mCard->Connect (NTV2_XptDualLinkOut1Input, bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
+            mCard->Connect (NTV2_XptDualLinkOut1Input, bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux1ARGB : NTV2_XptFrameBuffer1RGB) : NTV2_XptLUT1RGB);
 		}
 		else
 		{
@@ -580,7 +579,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		if (bFb1RGB)
 		{
-			mCard->Connect (NTV2_XptDualLinkOut2Input, bFb1HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB);
+            mCard->Connect (NTV2_XptDualLinkOut2Input, bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux1BRGB : NTV2_XptFrameBuffer2RGB) : NTV2_XptLUT2RGB);
 		}
 		else
 		{
@@ -598,7 +597,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		if (bFb1RGB)
 		{
-			mCard->Connect (NTV2_XptDualLinkOut3Input, bFb1HdrRGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out);
+            mCard->Connect (NTV2_XptDualLinkOut3Input, bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux2ARGB : NTV2_XptFrameBuffer3RGB) : NTV2_XptLUT3Out);
 		}
 		else
 		{
@@ -616,7 +615,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		if (bFb1RGB)
 		{
-			mCard->Connect (NTV2_XptDualLinkOut4Input, bFb1HdrRGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out);
+            mCard->Connect (NTV2_XptDualLinkOut4Input, bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux2BRGB : NTV2_XptFrameBuffer4RGB) : NTV2_XptLUT4Out);
 		}
 		else
 		{
@@ -1335,15 +1334,10 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 	int							bFb2Disable			= 1;		// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;		// Assume Channel 2 IS disabled by default
 	int							bFb4Disable			= 1;		// Assume Channel 2 IS disabled by default
-	
+	bool						bQuadSwap			= b4K && (mQuadSwapIn != 0);	
 	NTV2CrosspointID			inputXptYUV1 		= NTV2_XptBlack;				// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2 		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	NTV2ColorSpaceMode			inputColorSpace 	= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)
-	
-	// swap quad mode
-	ULWord						selectSwapQuad		= 0;
-	mCard->ReadRegister(kVRegSwizzle4kInput, selectSwapQuad);
-	bool						bQuadSwap			= b4K && (selectSwapQuad != 0);	
 	
 	// Figure out what our input format is based on what is selected
 	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
@@ -2149,31 +2143,6 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
         {
             printf("Power on state or not configured\n");
             Init();
-        }
-
-        // Check PLL stauts to make sure we are getting packets and if not reset it
-        mResetPLLCounter--;
-        if (mResetPLLCounter <= 0)
-        {
-            uint32_t    framesPerSecNum;
-            uint32_t    framesPerSecDen;
-            GetFramesPerSecond (primaryFrameRate, framesPerSecNum, framesPerSecDen);
-
-            PTPStatus   ptpStatus;
-
-            config2110->GetPTPStatus(ptpStatus);
-            if (ptpStatus.PTP_packetStatus == true)
-            {
-                // Everything is good, so lets check again in 2 seconds
-                mResetPLLCounter = (framesPerSecNum/framesPerSecDen) * 2;
-            }
-            else
-            {
-                // No packets so lets kick it and look again in 10 seconds
-                printf("PLL no packets, resetting PLL.\n");
-                config2110->PLLReset();
-                mResetPLLCounter = (framesPerSecNum/framesPerSecDen) * 10;
-            }
         }
 
         // Configure all of the 2110 IP settings

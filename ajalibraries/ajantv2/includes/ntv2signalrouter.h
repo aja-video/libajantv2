@@ -275,7 +275,7 @@ class AJAExport CNTV2SignalRouter
 			@note		The default behavior is to answer with the first NTV2WidgetID found in the NTV2WidgetIDSet.
 			@return		True if successful;  otherwise false.
 		**/
-		static bool					GetWidgetForOutput (const NTV2OutputCrosspointID inOutputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDevice = DEVICE_ID_NOTFOUND);
+		static bool					GetWidgetForOutput (const NTV2OutputCrosspointID inOutputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDeviceID = DEVICE_ID_NOTFOUND);
 
 		/**
 			@brief		Returns the widgets that "own" the specified input crosspoint.
@@ -296,7 +296,7 @@ class AJAExport CNTV2SignalRouter
 										Defaults to ::DEVICE_ID_NOTFOUND, which returns the first match.
 			@return		True if successful;  otherwise false.
 		**/
-		static bool					GetWidgetForInput (const NTV2InputCrosspointID inInputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDevice = DEVICE_ID_NOTFOUND);
+		static bool					GetWidgetForInput (const NTV2InputCrosspointID inInputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDeviceID = DEVICE_ID_NOTFOUND);
 
 		/**
 			@brief		Returns the input crosspoints known to be "owned" by the given widget.
@@ -476,6 +476,21 @@ AJAExport NTV2InputCrosspointID		GetMixerFGInputXpt (const NTV2Channel inChannel
 	@see		::GetMixerFGInputXpt, ::GetMixerOutputXptFromChannel, \ref widget_mixkey
 **/
 AJAExport NTV2InputCrosspointID		GetMixerBGInputXpt (const NTV2Channel inChannel,  const bool inIsKey = false);
+
+/**
+    @return		The appropriate TSI Muxer's ::NTV2InputCrosspointID for the given ::NTV2Channel.
+    @param[in]	inChannel		Specifies the ::NTV2Channel of interest.
+    @param[in]	inLinkB			Specify true to obtain the second input crosspoint. Defaults to false.
+**/
+AJAExport NTV2InputCrosspointID     GetTSIMuxInputXptFromChannel(const NTV2Channel inChannel, const bool inLinkB = false);
+
+/**
+    @return		The appropriate TSI Muxer's ::NTV2OutputCrosspointID for the given ::NTV2Channel.
+    @param[in]	inChannel		Specifies the ::NTV2Channel of interest.
+    @param[in]	inLinkB			Specify true to obtain the second output crosspoint. Defaults to false.
+    @param[in]	inIsRGB			Specify true to obtain the RGB output crosspoints. Defaults to false.
+**/
+AJAExport NTV2OutputCrosspointID GetTSIMuxOutputXptFromChannel (const NTV2Channel inChannel, const bool inLinkB = false, const bool inIsRGB = false);
 
 
 //	Stream operators

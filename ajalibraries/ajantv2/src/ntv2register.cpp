@@ -2365,6 +2365,24 @@ bool CNTV2Card::Read3GInputStatus2Register(ULWord *pValue)				{return pValue ? R
 bool CNTV2Card::Read3GInput5678StatusRegister(ULWord *pValue)			{return pValue ? ReadRegister(kRegSDI5678Input3GStatus, *pValue) : false;}
 
 
+bool CNTV2Card::GetVPIDValidA(const NTV2Channel inChannel)
+{
+	ULWord value(0);
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+	return ReadRegister(gChannelToSDIInput3GStatusRegNum[inChannel], value, gChannelToSDIInVPIDLinkAValidMask[inChannel])
+			&&  value;
+}
+
+bool CNTV2Card::GetVPIDValidB(const NTV2Channel inChannel)
+{
+	ULWord value(0);
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+	return ReadRegister(gChannelToSDIInput3GStatusRegNum[inChannel], value, gChannelToSDIInVPIDLinkBValidMask[inChannel])
+			&&  value;
+}
+
 bool CNTV2Card::ReadSDIInVPID (const NTV2Channel inChannel, ULWord & outValue_A, ULWord & outValue_B)
 {
 	ULWord	status	(0);
@@ -7298,63 +7316,55 @@ bool CNTV2Card::GetEnable4KPSFOutMode(bool & outIsEnabled)
 
 bool CNTV2Card::GetSDITRSError (const NTV2Channel inChannel)
 {
-	ULWord value;
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
+	if (!::NTV2DeviceCanDoSDIErrorChecks(_boardID))
+		return 0;
+	if (IS_CHANNEL_INVALID(inChannel))
+		return 0;
+	ULWord value(0);
 	ReadRegister(gChannelToRXSDIStatusRegs[inChannel], value, kRegMaskSDIInTRSError, kRegShiftSDIInTRSError);
 	return value ? true : false;
 }
 
 bool CNTV2Card::GetSDILock (const NTV2Channel inChannel)
 {
-	ULWord value;
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
+	if (!::NTV2DeviceCanDoSDIErrorChecks(_boardID))
+		return 0;
+	if (IS_CHANNEL_INVALID(inChannel))
+		return 0;
+	ULWord value(0);
 	ReadRegister(gChannelToRXSDIStatusRegs[inChannel], value, kRegMaskSDIInLocked, kRegShiftSDIInLocked);
 	return value ? true : false;
 }
 
 ULWord CNTV2Card::GetSDIUnlockCount(const NTV2Channel inChannel)
 {
-	ULWord value;
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
+	if (!::NTV2DeviceCanDoSDIErrorChecks(_boardID))
+		return 0;
+	if (IS_CHANNEL_INVALID(inChannel))
+		return 0;
+	ULWord value(0);
 	ReadRegister(gChannelToRXSDIStatusRegs[inChannel], value, kRegMaskSDIInUnlockCount, kRegShiftSDIInUnlockCount);
 	return value;
 }
 
-bool CNTV2Card::GetVPIDValidA(const NTV2Channel inChannel)
-{
-	ULWord value;
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
-	ReadRegister(gChannelToRXSDIStatusRegs[inChannel], value, kRegMaskSDIInCRCErrorCountA, kRegShiftSDIInCRCErrorCountA);
-	return value ? true : false;
-}
-
-bool CNTV2Card::GetVPIDValidB(const NTV2Channel inChannel)
-{
-	ULWord value;
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
-	ReadRegister(gChannelToRXSDIStatusRegs[inChannel], value, kRegMaskSDIInCRCErrorCountB, kRegShiftSDIInCRCErrorCountB);
-	return value ? true : false;
-}
-
 ULWord CNTV2Card::GetCRCErrorCountA(const NTV2Channel inChannel)
 {
-	ULWord value;
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
+	if (!::NTV2DeviceCanDoSDIErrorChecks(_boardID))
+		return 0;
+	if (IS_CHANNEL_INVALID(inChannel))
+		return 0;
+	ULWord value(0);
 	ReadRegister(gChannelToRXSDICRCErrorCountRegs[inChannel], value, kRegMaskSDIInCRCErrorCountA, kRegShiftSDIInCRCErrorCountA);
 	return value;
 }
 
 ULWord CNTV2Card::GetCRCErrorCountB(const NTV2Channel inChannel)
 {
-	ULWord value;
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
+	if (!::NTV2DeviceCanDoSDIErrorChecks(_boardID))
+		return 0;
+	if (IS_CHANNEL_INVALID(inChannel))
+		return 0;
+	ULWord value(0);
 	ReadRegister(gChannelToRXSDICRCErrorCountRegs[inChannel], value, kRegMaskSDIInCRCErrorCountB, kRegShiftSDIInCRCErrorCountB);
 	return value;
 }
@@ -7470,12 +7480,13 @@ bool CNTV2Card::GetMultiFormatMode (bool & outEnabled)
 	return retVal;
 }
 
-bool CNTV2Card::SetRS422Parity (const NTV2Channel inChannel, const NTV2_RS422_PARITY inRS422Parity)
+bool CNTV2Card::SetRS422Parity (const NTV2Channel inChannel, const NTV2_RS422_PARITY inParity)
 {
+	if (!::NTV2DeviceCanDoProgrammableRS422(_boardID))
+		return false;	//	Non-programmable RS422
 	if (inChannel >= ::NTV2DeviceGetNumSerialPorts(_boardID))
 		return false;
-
-	if (inRS422Parity == NTV2_RS422_NO_PARITY)
+	if (inParity == NTV2_RS422_NO_PARITY)
 	{
 		return WriteRegister (gChannelToRS422ControlRegNum [inChannel], 1, kRegMaskRS422ParityDisable, kRegShiftRS422ParityDisable);
 	}
@@ -7486,91 +7497,77 @@ bool CNTV2Card::SetRS422Parity (const NTV2Channel inChannel, const NTV2_RS422_PA
 			return false;
 
 		tempVal &= ~kRegMaskRS422ParityDisable;
-		switch (inRS422Parity)
+		switch (inParity)
 		{
-		case NTV2_RS422_ODD_PARITY:
-			tempVal &= ~kRegMaskRS422ParitySense;
-			break;
-		case NTV2_RS422_EVEN_PARITY:
-			tempVal |=  kRegMaskRS422ParitySense;
-			break;
-		default:
-			return false;
+			case NTV2_RS422_ODD_PARITY:		tempVal &= ~kRegMaskRS422ParitySense;	break;
+			case NTV2_RS422_EVEN_PARITY:	tempVal |=  kRegMaskRS422ParitySense;	break;
+
+			case NTV2_RS422_PARITY_INVALID:
+			default:						return false;
 		}
 
 		return WriteRegister (gChannelToRS422ControlRegNum [inChannel], tempVal);
 	}
 }
 
-bool CNTV2Card::GetRS422Parity (const NTV2Channel inChannel, NTV2_RS422_PARITY & outRS422Parity)
+bool CNTV2Card::GetRS422Parity (const NTV2Channel inChannel, NTV2_RS422_PARITY & outParity)
 {
+	outParity = NTV2_RS422_PARITY_INVALID;
 	if (inChannel >= ::NTV2DeviceGetNumSerialPorts(_boardID))
 		return false;
 
 	ULWord	tempVal (0);
-	if (!ReadRegister (gChannelToRS422ControlRegNum[inChannel], tempVal))
-		return false;
+	if (::NTV2DeviceCanDoProgrammableRS422(_boardID))	//	Read register only if programmable RS422
+		if (!ReadRegister (gChannelToRS422ControlRegNum[inChannel], tempVal))
+			return false;
 
 	if (tempVal & kRegMaskRS422ParityDisable)
-	{
-		outRS422Parity = NTV2_RS422_NO_PARITY;
-	}
+		outParity = NTV2_RS422_NO_PARITY;
+	else if (tempVal & kRegMaskRS422ParitySense)
+		outParity = NTV2_RS422_EVEN_PARITY;
 	else
-	{
-		outRS422Parity = (tempVal & kRegMaskRS422ParitySense) ? NTV2_RS422_EVEN_PARITY : NTV2_RS422_ODD_PARITY;
-	}
+		outParity = NTV2_RS422_ODD_PARITY;	//	Default
 
 	return true;
 }
 
-bool CNTV2Card::SetRS422BaudRate (const NTV2Channel inChannel, NTV2_RS422_BAUD_RATE inRS422BaudRate)
+bool CNTV2Card::SetRS422BaudRate (const NTV2Channel inChannel, const NTV2_RS422_BAUD_RATE inBaudRate)
 {
+	if (!::NTV2DeviceCanDoProgrammableRS422(_boardID))
+		return false;	//	Non-programmable RS422
 	if (inChannel >= ::NTV2DeviceGetNumSerialPorts(_boardID))
-		return false;
+		return false;	//	No such serial port
 
 	ULWord	tempVal (0);
-	switch (inRS422BaudRate)
+	switch (inBaudRate)
 	{
-	case NTV2_RS422_BAUD_RATE_38400:
-		tempVal = 0;
-		break;
-	case NTV2_RS422_BAUD_RATE_19200:
-		tempVal = 1;
-		break;
-	case NTV2_RS422_BAUD_RATE_9600:
-		tempVal = 2;
-		break;
-	default:
-		return false;
+		case NTV2_RS422_BAUD_RATE_38400:	tempVal = 0;		break;
+		case NTV2_RS422_BAUD_RATE_19200:	tempVal = 1;		break;
+		case NTV2_RS422_BAUD_RATE_9600:		tempVal = 2;		break;
+		case NTV2_RS422_BAUD_RATE_INVALID:
+		default:							return false;
 	}
-
 	return WriteRegister (gChannelToRS422ControlRegNum [inChannel], tempVal, kRegMaskRS422BaudRate, kRegShiftRS422BaudRate);
 }
 
-bool CNTV2Card::GetRS422BaudRate (const NTV2Channel inChannel, NTV2_RS422_BAUD_RATE & outRS422BaudRate)
+bool CNTV2Card::GetRS422BaudRate (const NTV2Channel inChannel, NTV2_RS422_BAUD_RATE & outBaudRate)
 {
+	outBaudRate = NTV2_RS422_BAUD_RATE_INVALID;
 	if (inChannel >= ::NTV2DeviceGetNumSerialPorts(_boardID))
-		return false;
+		return false;	//	No such serial port
 
-	ULWord	tempVal (0);
-	if (!ReadRegister (gChannelToRS422ControlRegNum[inChannel], tempVal, kRegMaskRS422BaudRate, kRegShiftRS422BaudRate))
-		return false;
+	ULWord	tempVal (0);	//	Default to 38400
+	if (::NTV2DeviceCanDoProgrammableRS422(_boardID))	//	Read register only if programmable RS422
+		if (!ReadRegister (gChannelToRS422ControlRegNum[inChannel], tempVal, kRegMaskRS422BaudRate, kRegShiftRS422BaudRate))
+			return false;	//	ReadRegister failed
 
 	switch (tempVal)
 	{
-	case 0:
-		outRS422BaudRate = NTV2_RS422_BAUD_RATE_38400;
-		break;
-	case 1:
-		outRS422BaudRate = NTV2_RS422_BAUD_RATE_19200;
-		break;
-	case 2:
-		outRS422BaudRate = NTV2_RS422_BAUD_RATE_9600;
-		break;
-	default:
-		return false;
+		case 0:		outBaudRate = NTV2_RS422_BAUD_RATE_38400;	break;
+		case 1:		outBaudRate = NTV2_RS422_BAUD_RATE_19200;	break;
+		case 2:		outBaudRate = NTV2_RS422_BAUD_RATE_9600;	break;
+		default:	return false;
 	}
-
 	return true;
 }
 

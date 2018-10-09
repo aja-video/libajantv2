@@ -7,6 +7,8 @@
 #ifndef _DeviceServices_
 #define _DeviceServices_
 
+#include "devicestate.h"
+#include "retailsupport.h"
 #include "ntv2utils.h"
 #include "ntv2vpid.h"
 #include "ntv2card.h"
@@ -37,6 +39,15 @@ typedef enum
 } GeneralFrameFormat;
 
 #define AUDIO_DELAY_WRAPAROUND    8160    // for 4Mb buffer
+
+
+#define USE_CLASS4K_SERVICE		(true)
+enum
+{
+	kUseClass4kForIo4k			= (true && USE_CLASS4K_SERVICE),
+	kUseClass4kForKona			= (true && USE_CLASS4K_SERVICE),
+	kUseClass4kForCorvid		= (true && USE_CLASS4K_SERVICE)
+};
 
 
 //-------------------------------------------------------------------------------------------------------
@@ -77,12 +88,10 @@ public:
 	static DeviceServices* CreateDeviceServices(NTV2DeviceID deviceID);	// factory
 	
 public:
-	uint32_t				mHDMIStartupCountDown;
-	
-public:
 			DeviceServices();
-	virtual	~DeviceServices() {}
-	virtual void ReadDriverState();
+	virtual	~DeviceServices();
+	virtual	void SetCard(CNTV2Card* pCard);
+	virtual bool ReadDriverState();
 	virtual void UpdateAutoState();
 
 	// override these
@@ -99,7 +108,7 @@ public:
 	virtual void SetDeviceXPointPlaybackRaw();
 	virtual void SetDeviceXPointCaptureRaw();
 	virtual void SetDeviceMiscRegistersRaw(NTV2Mode mode) {(void)mode;}
-	virtual void DisableStartupSequence() {mStartupDisabled = true;}
+	virtual void DisableStartupSequence() {} // deprecated
 
     // common IP support routines
     virtual void EveryFrameTask2022(CNTV2Config2022* config2022, NTV2Mode* modeLast, NTV2VideoFormat* videoFormatLast);
@@ -194,7 +203,14 @@ public:
     void AgentIsAlive();
 
 public:
+	
+	DeviceState				mDeviceState;
+	NTV2DeviceInfo			mBoardInfo;
+	VirtualRegisterModel 	mModel;
+	RetailSupport*			mRs;
 	CNTV2Card*				mCard;
+	
+	uint32_t 				mHDMIStartupCountDown;
 	
 	// set by every frame, not user
 	NTV2VideoFormat			mDefaultVideoFormat;
@@ -225,6 +241,8 @@ public:
 	NTV2InputAudioSelect	mInputAudioSelect;
 	NTV2VideoFormat			mVirtualSecondaryFormatSelect;
 	bool					mIsoConvertEnable;
+	ULWord 					mQuadSwapIn;
+	ULWord 					mQuadSwapOut;
 	uint32_t				mDSKAudioMode;
 	uint32_t				mDSKForegroundMode;
 	uint32_t				mDSKForegroundFade;
@@ -291,9 +309,6 @@ public:
 	NTV2HDMIRange			mHDMIInRGBRange;
 	
 	uint32_t				mRegFramesPerVertical;		// frames per vertical interrupt (e.g. CION RAW)
-	uint32_t				mRegResetCycleCount;		// reset cycle count (power-cycle, or sleep)
-	uint32_t				mRegResetCycleCountLast;	// prev reset cycle count used to detect changes
-	bool					mStartupDisabled;			// sometime we don't want to do hw reset
 	int32_t					mInputFormatSelect;			// set and read by device services only
 	bool					mInputFormatLock;
 	NTV2VideoFormat			mLastInputFormatSelect;
@@ -313,9 +328,6 @@ public:
 	int32_t					mAudioCapMixerSourceMainGain;
 	int32_t					mAudioCapMixerSourceAux1Gain;
 	int32_t					mAudioCapMixerSourceAux2Gain;
-
-	void SetCard (CNTV2Card* card)
-		{ mCard = card; }
 };
 
 #endif

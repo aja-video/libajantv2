@@ -5,6 +5,7 @@
 //
 
 #include "retailsupport.h"
+#include "ntv2class4kservices.h"
 #include "ntv2ioxtservices.h"
 #include "ntv2io4kservices.h"
 #include "ntv2io4kufcservices.h"
@@ -46,7 +47,6 @@
 
 using namespace std;
 
-
 //-------------------------------------------------------------------------------------------------------
 //	static accessors
 //-------------------------------------------------------------------------------------------------------
@@ -77,7 +77,10 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 			pDeviceServices = new KonaIPJ2kServices();
 			break;
         case DEVICE_ID_KONA4:
-            pDeviceServices = new Kona4QuadServices();
+			if (kUseClass4kForKona)
+				pDeviceServices = new Class4kServices(deviceID);
+			else
+            	pDeviceServices = new Kona4QuadServices();
 			break;
 		case DEVICE_ID_KONA4UFC:
 			pDeviceServices = new Kona4UfcServices();
@@ -101,7 +104,10 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 			pDeviceServices = new IoXTServices();
 			break;
 		case DEVICE_ID_IO4K:
-			pDeviceServices = new Io4KServices();
+			if (kUseClass4kForIo4k)
+				pDeviceServices = new Class4kServices(deviceID);
+			else
+				pDeviceServices = new Io4KServices();
 			break;
 		case DEVICE_ID_IO4KUFC:
 			pDeviceServices = new Io4KUfcServices();
@@ -116,13 +122,22 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 			pDeviceServices = new Corvid3GServices();
 			break;
 		case DEVICE_ID_CORVID44:
-			pDeviceServices = new Corvid44Services();
+			if (kUseClass4kForCorvid)
+				pDeviceServices = new Class4kServices(deviceID);
+			else
+				pDeviceServices = new Corvid44Services();
 			break;
 		case DEVICE_ID_CORVID88:
-			pDeviceServices = new Corvid88Services();
+			if (kUseClass4kForCorvid)
+				pDeviceServices = new Class4kServices(deviceID);
+			else
+				pDeviceServices = new Corvid88Services();
 			break;
 		case DEVICE_ID_IO4KPLUS:
-			pDeviceServices = new Io4KPlusServices();
+			if (kUseClass4kForIo4k)
+				pDeviceServices = new Class4kServices(deviceID);
+			else
+				pDeviceServices = new Io4KPlusServices();
 			break;
 		case DEVICE_ID_KONA1:
 			pDeviceServices = new Kona1Services();
@@ -131,7 +146,10 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 			pDeviceServices = new KonaHDMIServices();
 			break;
 		case DEVICE_ID_KONA5:
-			pDeviceServices = new Kona5Services();
+			if (kUseClass4kForKona)
+				pDeviceServices = new Class4kServices(deviceID);
+			else
+				pDeviceServices = new Kona5Services();
 			break;
 		default:
 		case DEVICE_ID_CORVID1:
@@ -160,12 +178,36 @@ DeviceServices::DeviceServices()
 	mADCLockScanTestFormat			= 0;
 	mStreamingAppPID				= 0;
 	mDefaultInput					= 0;
-	mRegResetCycleCountLast			= 0;
-	mStartupDisabled				= false;
 	mInputFormatSelect				= -1;
 	mInputFormatLock				= false;
 	mLastInputFormatSelect			= NTV2_FORMAT_UNKNOWN;
 	mDefaultVideoFormat				= NTV2_FORMAT_UNKNOWN;
+}
+
+DeviceServices::~DeviceServices()
+{
+}
+
+void DeviceServices::SetCard(CNTV2Card* pCard)
+{
+	mCard = pCard;
+	int index = pCard->GetIndexNumber();
+	
+	// board info
+	CNTV2DeviceScanner scanner;
+	bool bFound = scanner.GetDeviceInfo(index, mBoardInfo, false);
+	if (bFound == false)
+		printf("Fail board info scan\n");
+	RetailSupport::AdjustDeviceInfoForApp(mBoardInfo);
+	
+	// model
+	mModel.SetCard(pCard, pCard->GetDeviceID(), index, false);
+	
+	// retail object
+	mRs = new RetailSupport(mDeviceState, mBoardInfo, mModel);
+	
+	// device state
+	mRs->InitDeviceState(mDeviceState);
 }
 
 #define	AsDriverInterface(_x_)		static_cast<CNTV2DriverInterface*>(_x_)
@@ -174,8 +216,79 @@ DeviceServices::DeviceServices()
 //	ReadDriverState
 //-------------------------------------------------------------------------------------------------------
 
-void DeviceServices::ReadDriverState (void)
+#define USE_NEW_RETAIL
+
+bool DeviceServices::ReadDriverState (void)
 {
+	// check the state of the hardware and see if anything has changed since last time
+#ifdef USE_NEW_RETAIL
+	
+	DeviceState& ds = mDeviceState;
+
+	bool bChanged = mRs->GetDeviceState(ds);
+	(void) bChanged;
+	
+	// retrofit hack for now
+	//if (bChanged)
+	{
+		// sdi out
+		if (ds.sdiOutSize > 0)
+		{ 
+			mVirtualDigitalOutput1Select = ds.sdiOut[0]->outSelect;
+			mSDIOutput1ColorSpace = ds.sdiOut[0]->cs;
+			mSDIOutput1RGBRange = ds.sdiOut[0]->rgbRange;
+			m4kTransportOutSelection = ds.sdiOut[0]->transport4k;
+			mSdiOutTransportType = ds.sdiOut[0]->transport3g;
+		}
+		if (ds.sdiOutSize > 1) 
+			mVirtualDigitalOutput2Select = ds.sdiOut[1]->outSelect;
+		
+		// input select
+		mVirtualInputSelect = ds.inputSelect;
+		mInputAudioSelect = ds.audioSelect;
+		
+		if (ds.sdiOutSize > 0)
+		{
+			mSDIInput1ColorSpace = ds.sdiIn[0]->cs;
+			mSDIInput1RGBRange = ds.sdiIn[0]->rgbRange;
+		}
+		
+		// hdmi out
+		mVirtualHDMIOutputSelect = ds.hdmiOutFormatSelect;
+
+		// analog out
+		mVirtualAnalogOutputSelect = ds.analogOutFormatSelect;
+	}
+				
+#else
+	
+	// sdi output 
+	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput1Select, mVirtualDigitalOutput1Select);
+	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput2Select, mVirtualDigitalOutput2Select);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1ColorSpaceMode, mSDIOutput1ColorSpace);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1RGBRange, mSDIOutput1RGBRange);
+	AsDriverInterface(mCard)->ReadRegister(kVReg4kOutputTransportSelection, m4kTransportOutSelection);
+	AsDriverInterface(mCard)->ReadRegister(kVRegDualStreamTransportType, mSdiOutTransportType);
+	
+	// input select
+	AsDriverInterface(mCard)->ReadRegister(kVRegInputSelect, mVirtualInputSelect);
+	AsDriverInterface(mCard)->ReadRegister(kVRegAudioInputSelect, mInputAudioSelect);
+	
+	// sdi in
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1ColorSpaceMode, mSDIInput1ColorSpace);
+	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1RGBRange, mSDIInput1RGBRange);
+	
+	// hdmi out
+	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutputSelect, mVirtualHDMIOutputSelect);
+	
+	// analog out
+	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutputSelect, mVirtualAnalogOutputSelect);
+	
+	// auto set registers marked with "auto" enum
+	UpdateAutoState();
+	
+#endif
+
 	mCard->GetStreamingApplication(&mStreamingAppType, &mStreamingAppPID);
 	
 	AsDriverInterface(mCard)->ReadRegister(kVRegDefaultVideoFormat, mDefaultVideoFormat);
@@ -183,16 +296,8 @@ void DeviceServices::ReadDriverState (void)
 	mCard->ReadRegister(kVRegFollowInputFormat, mFollowInputFormat);
 	mCard->ReadRegister(kVRegVANCMode, mVANCMode);
 	mCard->ReadRegister(kVRegDefaultInput, mDefaultInput);
-	AsDriverInterface(mCard)->ReadRegister(kVRegDualStreamTransportType, mSdiOutTransportType);
 	AsDriverInterface(mCard)->ReadRegister(kVRegDSKMode, mDSKMode);
-	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput1Select, mVirtualDigitalOutput1Select);
-	AsDriverInterface(mCard)->ReadRegister(kVRegDigitalOutput2Select, mVirtualDigitalOutput2Select);
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1ColorSpaceMode, mSDIOutput1ColorSpace);
-	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutputSelect, mVirtualHDMIOutputSelect);
-	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutputSelect, mVirtualAnalogOutputSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegLUTType, mLUTType);
-	AsDriverInterface(mCard)->ReadRegister(kVRegInputSelect, mVirtualInputSelect);
-	AsDriverInterface(mCard)->ReadRegister(kVRegAudioInputSelect, mInputAudioSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegSecondaryFormatSelect, mVirtualSecondaryFormatSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegIsoConvertEnable, mIsoConvertEnable);
 	mCard->ReadRegister(kVRegDSKAudioMode, mDSKAudioMode);
@@ -203,7 +308,6 @@ void DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVRegGammaMode, mGammaMode);
 	AsDriverInterface(mCard)->ReadRegister(kVRegRGB10Range, mRGB10Range);
 	AsDriverInterface(mCard)->ReadRegister(kVRegColorSpaceMode, mColorSpaceType);
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIOutput1RGBRange, mSDIOutput1RGBRange);
 	
 	AsDriverInterface(mCard)->ReadRegister(kVRegFrameBuffer1RGBRange, mFrameBuffer1RGBRange);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutBlackLevel, mVirtualAnalogOutBlackLevel);
@@ -217,12 +321,8 @@ void DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutStereoSelect, mHDMIOutStereoSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutStereoCodecSelect, mHDMIOutStereoCodecSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutAudioChannels, mHDMIOutAudioChannels);
-	mCard->ReadRegister(kVRegResetCycleCount, mRegResetCycleCount);
 	mCard->ReadRegister(kVRegFramesPerVertical, mRegFramesPerVertical);
-	AsDriverInterface(mCard)->ReadRegister(kVReg4kOutputTransportSelection, m4kTransportOutSelection);
 	
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1RGBRange, mSDIInput1RGBRange);
-	AsDriverInterface(mCard)->ReadRegister(kVRegSDIInput1ColorSpaceMode, mSDIInput1ColorSpace);
 	mSDIInput2RGBRange = mSDIInput1RGBRange;
 	mSDIInput2ColorSpace = mSDIInput1ColorSpace;	// for now
 	
@@ -252,6 +352,19 @@ void DeviceServices::ReadDriverState (void)
 	// basic Ch2 HW registers
 	if (NTV2DeviceGetNumberFrameBuffers(mDeviceID) > 1)
 		mCard->GetFrameBufferFormat(NTV2_CHANNEL2, mFb2Format);
+	
+	// quad swap
+	if (mBoardInfo.has4KSupport == true && NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat) == true)
+	{
+		if (mFb1Mode == NTV2_MODE_CAPTURE)
+			mCard->ReadRegister(kVRegSwizzle4kInput, mQuadSwapIn);
+		else
+			mCard->ReadRegister(kVRegSwizzle4kOutput, mQuadSwapOut);
+	}
+	else 		
+		mQuadSwapOut = mQuadSwapIn = 0;
+
+	
 	
     if (mCard->DeviceCanDoAudioMixer())
 	{
@@ -422,6 +535,8 @@ void DeviceServices::ReadDriverState (void)
             //printf("Failed to get 2110 Ip status params\n");
         }
     }
+    
+    return true;
 }
 
 
@@ -653,10 +768,9 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	}
 	
 	// read in virtual registers
-	ReadDriverState();
-	
-	// auto set registers marked with "auto" enum
-	UpdateAutoState();
+	bool bChanged = ReadDriverState();
+	if (bChanged == false)
+		return;
 		
 	// Get the general format
 	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
@@ -855,34 +969,10 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	UpdateK2ColorSpaceMatrixSelect();
 	UpdateK2LUTSelect();
 
-	if (mStartupDisabled)
-	{
-		mHDMIStartupCountDown = 0;
-		mRegResetCycleCountLast = mRegResetCycleCount;
-	}
-	else if (mRegResetCycleCount != mRegResetCycleCountLast)
-	{
-
-		// reset condition
-		mRegResetCycleCountLast = mRegResetCycleCount;
-
-		// reinitialize HDMI hardware on reset cycle
-		mHDMIStartupCountDown = kHDMIStartupPhase0;
-
-		if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT1))
-			mCard->WriteRegister(kVRegLUTType, NTV2_LUTUnknown);
-		if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT2))
-			mCard->WriteRegister(kVRegLUT2Type, NTV2_LUTUnknown);
-		if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT3))
-			mCard->WriteRegister(kVRegLUT3Type, NTV2_LUTUnknown);
-		if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT4))
-			mCard->WriteRegister(kVRegLUT4Type, NTV2_LUTUnknown);
-		if (::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtLUT5))
-			mCard->WriteRegister(kVRegLUT5Type, NTV2_LUTUnknown);
-	}
 	// Set misc registers
 	SetDeviceMiscRegisters();
 	
+	// mark completion on cycle - used in media composer
 	mCard->WriteRegister(kVRegServicesModeFinal, mFb1Mode);
 }
 
@@ -2211,7 +2301,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     txConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
                     txConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
                     txConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
-                    txConfig.payload = m2110TxVideoData.txVideoCh[i].payload;
+                    txConfig.payloadType = m2110TxVideoData.txVideoCh[i].payloadType;
                     txConfig.ttl = 0x40;
                     txConfig.tos = 0x64;
 
@@ -2267,7 +2357,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     txConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
                     txConfig.localPort[0] = m2110TxAudioData.txAudioCh[i].localPort[0];
                     txConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
-                    txConfig.payload = m2110TxAudioData.txAudioCh[i].payload;
+                    txConfig.payloadType = m2110TxAudioData.txAudioCh[i].payloadType;
                     txConfig.ttl = 0x40;
                     txConfig.tos = 0x64;
 
@@ -2320,7 +2410,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     {
                         // Use SFP 2 params
                         sfp = SFP_2;
-                        rxConfig.rxMatch = m2110RxVideoData.rxVideoCh[i].rxMatch[1];
+                        rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
                         rxConfig.sourceIP = m2110RxVideoData.rxVideoCh[i].sourceIP[1];
                         rxConfig.destIP = m2110RxVideoData.rxVideoCh[i].destIP[1];
                         rxConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[1];
@@ -2331,13 +2421,13 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     {
                         // Use SFP 1 params
                         sfp = SFP_1;
-                        rxConfig.rxMatch = m2110RxVideoData.rxVideoCh[i].rxMatch[0];
+                        rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
                         rxConfig.sourceIP = m2110RxVideoData.rxVideoCh[i].sourceIP[0];
                         rxConfig.destIP = m2110RxVideoData.rxVideoCh[i].destIP[0];
                         rxConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[0];
                         rxConfig.destPort = m2110RxVideoData.rxVideoCh[i].destPort[0];
                     }
-                    rxConfig.payload = m2110RxVideoData.rxVideoCh[i].payload;
+                    rxConfig.payloadType = m2110RxVideoData.rxVideoCh[i].payloadType;
 
                     // Video specific
                     if (mFollowInputFormat && (m2110RxVideoData.rxVideoCh[i].videoFormat != NTV2_FORMAT_UNKNOWN))
@@ -2403,7 +2493,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     {
                         // Use SFP 2 params
                         sfp = SFP_2;
-                        rxConfig.rxMatch = m2110RxAudioData.rxAudioCh[i].rxMatch[1];
+                        rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
                         rxConfig.sourceIP = m2110RxAudioData.rxAudioCh[i].sourceIP[1];
                         rxConfig.destIP = m2110RxAudioData.rxAudioCh[i].destIP[1];
                         rxConfig.sourcePort = m2110RxAudioData.rxAudioCh[i].sourcePort[1];
@@ -2414,13 +2504,13 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                     {
                         // Use SFP 1 params
                         sfp = SFP_1;
-                        rxConfig.rxMatch = m2110RxAudioData.rxAudioCh[i].rxMatch[0];
+                        rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
                         rxConfig.sourceIP = m2110RxAudioData.rxAudioCh[i].sourceIP[0];
                         rxConfig.destIP = m2110RxAudioData.rxAudioCh[i].destIP[0];
                         rxConfig.sourcePort = m2110RxAudioData.rxAudioCh[i].sourcePort[0];
                         rxConfig.destPort = m2110RxAudioData.rxAudioCh[i].destPort[0];
                     }
-                    rxConfig.payload = m2110RxAudioData.rxAudioCh[i].payload;
+                    rxConfig.payloadType = m2110RxAudioData.rxAudioCh[i].payloadType;
 
                     // Audio specific
                     rxConfig.numAudioChannels = m2110RxAudioData.rxAudioCh[i].numAudioChannels;
@@ -2459,7 +2549,8 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
             *s2110NetworkLast = m2110Network;
 
             mCard->SetReference(NTV2_REFERENCE_SFP1_PTP);
-            config2110->SetPTPMaster(m2110Network.ptpMasterIP);
+            config2110->SetPTPDomain(m2110Network.ptpDomain);
+            config2110->SetPTPPreferredGrandMasterId(m2110Network.ptpPreferredGMID);
 
             for (uint32_t i = 0; i < SFP_MAX_NUM_SFPS; i++)
             {
@@ -3263,7 +3354,6 @@ void DeviceServices::PrintDecoderConfig(const j2kDecoderConfig modelConfig, j2kD
 
 void DeviceServices::Print2110Network(const NetworkData2110 m2110Network)
 {
-    PrintChArray("ptpMaster", &m2110Network.ptpMasterIP[0]);
     PrintChArray("ptpMaster", &m2110Network.sfp[0].ipAddress[0]);
     //PrintChArray("ptpMaster", &m2110Network.sfp[0].subnetMask[0]);
     //PrintChArray("ptpMaster", &m2110Network.sfp[0].gateWay[0]);
@@ -4039,14 +4129,14 @@ void DeviceServices::SetDeviceXPointCapture()
 
 void DeviceServices::SetDeviceXPointPlayback()
 {
-	bool bFb2RGB = IsRGBFormat(mFb2Format);
-	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
-	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
-	bool bDSKNeedsInputRef = false;
-
-	// don't let the DSK be ON if we're in Mac Desktop mode
-	if ((!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop) || !NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtMixer1))
-		bDSKOn = false;
+	bool bDSKNeedsInputRef 	= false;
+	bool bFb2RGB 			= IsRGBFormat(mFb2Format);
+	bool bDSKGraphicMode 	= mDSKMode == NTV2_DSKModeGraphicOverMatte || 
+							  mDSKMode == NTV2_DSKModeGraphicOverVideoIn || 
+							  mDSKMode == NTV2_DSKModeGraphicOverFB;
+	bool bDSKOn 			= mDSKMode == NTV2_DSKModeFBOverMatte || 
+							  mDSKMode == NTV2_DSKModeFBOverVideoIn || 
+							  (bFb2RGB && bDSKGraphicMode);
 	
 	SetAudioInputSelect(mInputAudioSelect);
 

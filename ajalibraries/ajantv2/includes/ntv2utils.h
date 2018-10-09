@@ -405,6 +405,7 @@ AJAExport NTV2_SHOULD_BE_DEPRECATED(bool NTV2DeviceCanDoFormat(NTV2DeviceID		inD
 								framerate might be NTV2_FRAMERATE_3000, but since 2 links are coming out, the video rate
 								is effectively NTV2_FRAMERATE_6000. Defaults to false.
 	@return	The number of audio samples.
+	@see	See \ref audiosamplecount
 **/
 AJAExport ULWord				GetAudioSamplesPerFrame (NTV2FrameRate frameRate, NTV2AudioRate audioRate, ULWord cadenceFrame=0,bool smpte372Enabled=false);
 AJAExport LWord64				GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr (NTV2FrameRate frameRate, NTV2AudioRate audioRate, ULWord frameNbrNonInclusive);
@@ -617,6 +618,12 @@ AJAExport NTV2Channel NTV2OutputDestinationToChannel (const NTV2OutputDestinatio
 **/
 AJAExport NTV2OutputDestination NTV2ChannelToOutputDestination (const NTV2Channel inChannel);
 
+/**
+	@return		The frame rate family that the given ::NTV2FrameRate belongs to.
+				(This is the ::NTV2FrameRate of the family having the lowest ordinal value.)
+	@param[in]	inFrameRate		Specifies the frame rate of interest.
+**/
+AJAExport NTV2FrameRate GetFrameRateFamily (const NTV2FrameRate inFrameRate);
 
 /**
 	@brief	Compares two frame rates and returns true if they are "compatible" (with respect to a multiformat-capable device).

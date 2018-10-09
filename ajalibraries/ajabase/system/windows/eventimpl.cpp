@@ -12,7 +12,7 @@
 using std::string;
 
 // event implementation class (windows)
-AJAEventImpl::AJAEventImpl(bool manualReset, const string& name)
+AJAEventImpl::AJAEventImpl(bool manualReset, const std::string& name)
 	:mManualReset(manualReset)
 {
 	if (name == "")

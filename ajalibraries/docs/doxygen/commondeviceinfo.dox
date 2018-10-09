@@ -91,7 +91,12 @@
 
 	Most AJA devices have a single RS-422 connector that can be used to control tape deck transports and for other purposes.
 	-	To determine the number of serial ports on a device, call ::NTV2DeviceGetNumSerialPorts.
-	-	To determine if the serial port is programmable (for baud rate, parity, stop bits, etc.), call ::NTV2DeviceCanDoProgrammableRS422.
+	-	To determine if the serial port is programmable (for baud rate, parity, etc.), call ::NTV2DeviceCanDoProgrammableRS422.
+		-	To determine the current baud rate, call CNTV2Card::GetRS422BaudRate. To change the baud rate, call CNTV2Card::SetRS422BaudRate.
+		-	To determine the current parity configuration, call CNTV2Card::GetRS422Parity. To change the baud rate, call CNTV2Card::SetRS422Parity.
+
+	@image	html	rs422pinout400.png
+
 
 	@subsection	commonelectricalchars		Common Electrical Characteristics
 
@@ -990,6 +995,36 @@
 	Newer AJA devices can mark individual audio channel pairs as non-PCM (the ::NTV2DeviceCanDoPCMControl function returns true for
 	devices that support this capability). Use one of the overloaded versions of CNTV2Card::SetAudioPCMControl that accepts either a
 	single ::NTV2AudioChannelPair or an ::NTV2AudioChannelPairs set.
+
+
+	<hr size="50px">
+	@subsection	audiosamplecount	Correlating Audio Samples to Video Frames
+
+	Because AJA devices use fixed audio sample rates (i.e. 48000 samples per second), some video frame rates will necessarily result
+	in some frames having more audio samples than others. For example, the NTSC frame rate is exactly 30000/1001 frames per second — so by
+	converting frames to samples, the expected number of audio samples at any given frame time can be calculated. This is what
+	the ::GetAudioSamplesPerFrame utility function is for:
+	@code{.cpp}
+		//	Print the audio sample count cadence for NTSC 2997...
+		for (ULWord frame(0);  frame < 60;  )
+		{
+			std::cout << DEC(::GetAudioSamplesPerFrame(NTV2_FRAMERATE_2997, NTV2_AUDIO_48K, frame));
+			if (++frame < 60)
+				std::cout << ", ";
+			if (!(frame % 5))
+				std::cout << std::endl;
+		}
+	@endcode
+
+	-	<b>Capture</b>
+		-	<b>Without AutoCirculate</b> — the number of audio samples to associate with the current frame is provided by the
+			hardware’s <b>Record Head</b>. Just compare its new position with its old position from the previous frame.
+		-	<b>With AutoCirculate</b> — Use the AUTOCIRCULATE_TRANSFER::GetCapturedAudioByteCount function.
+	-	<b>Playout</b>
+		-	<b>Without AutoCirculate</b> — Use ::GetAudioSamplesPerFrame to calculate the number of audio samples to write for
+			the current frame.
+		-	<b>With AutoCirculate</b> — Use ::GetAudioSamplesPerFrame to calculate the number of audio samples to write for
+			the current frame.
 
 
 	<hr size="50px">

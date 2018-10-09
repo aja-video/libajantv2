@@ -1,5 +1,5 @@
 /**
-    @file		ntv2_2022_registers.h
+    @file		ntv2registersmb.h
     @brief		Defines the Sarek board's registers.
     @copyright	(C) 2014-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
@@ -415,6 +415,23 @@
 #define kRegPll_ptp_delay_req_cnt               0x2f
 #define kRegPll_ptp_delay_resp_cnt              0x30
 #define kRegPll_ptp_announce_cnt                0x31
+
+// additional registers used for SWPTP
+#define kRegPll_swptp_SetSecsHi					0x32		// R/W
+#define kRegPll_swptp_SetSecsLo					0x33		// R/W
+#define kRegPll_swptp_SetNanoSecs				0x34		// R/W
+#define kRegPll_swptp_JamNow					0x35		// R/W
+
+// redefinition of registers used for SWPTP
+#define kRegPll_swptp_Domain					0x04		// R/W
+#define kRegPll_swptp_PreferredGmIdHi			0x05		// R/W
+#define kRegPll_swptp_PreferredGmIdLo			0x06		// R/W
+#define kRegPll_swptp_GrandMasterIdHi			0x07		// R
+#define kRegPll_swptp_GrandMasterIdLo			0x08		// R
+#define kRegPll_swptp_MasterIdHi				0x09		// R
+#define kRegPll_swptp_MasterIdLo				0x0A		// R
+#define kRegPll_swptp_LockedState				0x0B		// R
+#define kRegPll_swptp_MasterOffset				0x0C		// R
 
 /////////////////////////////////////////////////////////////////////
 //

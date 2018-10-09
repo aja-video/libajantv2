@@ -130,4 +130,6 @@ JSON output is not supported when turning the fan on or off.
 -	<b>stdout</b> --- Normal output (e.g., brief, verbose or JSON output) is directed to this stream.
 -	<b>stderr</b> --- Warning and error messages are directed to this stream, usually followed by the tool exiting with a non-zero exit code.
 
+<hr size="50px">
+
 **/

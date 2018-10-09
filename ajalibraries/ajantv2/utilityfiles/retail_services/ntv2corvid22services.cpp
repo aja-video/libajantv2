@@ -23,19 +23,18 @@ void Corvid22Services::SetDeviceXPointPlayback ()
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback();
 	
-	bool bFb1RGB = IsRGBFormat(mFb1Format);
-	bool bFb2RGB = IsRGBFormat(mFb2Format);
-		
-	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
-	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
-		
-	// don't let the DSK be ON if we're in Mac Desktop mode
-	if (!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop)
-		bDSKOn = false;
-		
+	bool bFb1RGB 			= IsRGBFormat(mFb1Format);
+	bool bFb2RGB 			= IsRGBFormat(mFb2Format);
+	bool bDSKGraphicMode 	= mDSKMode == NTV2_DSKModeGraphicOverMatte || 
+							  mDSKMode == NTV2_DSKModeGraphicOverVideoIn || 
+							  mDSKMode == NTV2_DSKModeGraphicOverFB;
+	bool bDSKOn 			= mDSKMode == NTV2_DSKModeFBOverMatte || 
+							  mDSKMode == NTV2_DSKModeFBOverVideoIn || 
+							  (bFb2RGB && bDSKGraphicMode);
 	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
-	bool b3GbOut	= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
+	bool b3GbOut			= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);	
+	
 	
 	// make sure frame DualLink B mode (SMPTE 372), Stereo
 	if (b2FbLevelBHfr || bStereoOut)

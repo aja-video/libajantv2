@@ -59,20 +59,17 @@ void KonaLHiServices::SetDeviceXPointPlayback ()
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback();
 	
-	bool bDualStreamFB = IsVideoFormatB(mFb1VideoFormat);
-
-	bool bFb1RGB = IsRGBFormat(mFb1Format);
-	bool bFb2RGB = IsRGBFormat(mFb2Format);
-	bool bFb1Compressed = IsFormatCompressed(mFb1Format);
-		
-	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
-	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
-						
-	// don't let the DSK be ON if we're in Mac Desktop mode
-	if (!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop)
-		bDSKOn = false;
-	
-	bool bPassThrough = !mStreamingAppPID && (mDefaultVideoOutMode == kDefaultModeVideoIn);
+	bool bDualStreamFB 		= IsVideoFormatB(mFb1VideoFormat);
+	bool bFb1RGB 			= IsRGBFormat(mFb1Format);
+	bool bFb2RGB 			= IsRGBFormat(mFb2Format);
+	bool bFb1Compressed 	= IsFormatCompressed(mFb1Format);
+	bool bDSKGraphicMode 	= mDSKMode == NTV2_DSKModeGraphicOverMatte || 
+							  mDSKMode == NTV2_DSKModeGraphicOverVideoIn || 
+							  mDSKMode == NTV2_DSKModeGraphicOverFB;
+	bool bDSKOn 			= mDSKMode == NTV2_DSKModeFBOverMatte || 
+							  mDSKMode == NTV2_DSKModeFBOverVideoIn || 
+							  (bFb2RGB && bDSKGraphicMode);
+	bool bPassThrough 		= !mStreamingAppPID && (mDefaultVideoOutMode == kDefaultModeVideoIn);
 	
 	// Set (Compression Module) input
 	// Select frame buffer YUV

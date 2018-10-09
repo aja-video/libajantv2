@@ -47,9 +47,8 @@ void Corvid88Services::SetDeviceXPointPlayback ()
 	NTV2ColorSpaceMode            inputColorSpace	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	
-    bool						bFb1HdrRGB			= (mFb1Format == NTV2_FBF_48BIT_RGB) ? true : false;
-    bool						bFb2HdrRGB			= (mFb2Format == NTV2_FBF_48BIT_RGB) ? true : false;
+    bool						bFb1HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
+    bool						bFb2HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
 
 	// make sure formats/modes match for multibuffer modes
 	if (b4K || b2FbLevelBHfr || bStereoOut)
@@ -2018,13 +2017,9 @@ void Corvid88Services::SetDeviceMiscRegisters ()
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)
 	{
-		ULWord vpida = 0;
-		ULWord vpidb = 0;
-		mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
-
-		if (mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb))
+		if (mVpid1Valid)
 		{
-			mVpidParser.SetVPID(vpida);
+			mVpidParser.SetVPID(mVpid1a);
 			VPIDStandard std = mVpidParser.GetStandard();
 			switch (std)
 			{

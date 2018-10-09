@@ -392,7 +392,8 @@ typedef enum
     NTV2_FRAMERATE_INVALID = NTV2_FRAMERATE_UNKNOWN
 } NTV2FrameRate;
 
-#define	NTV2_IS_VALID_NTV2FrameRate(__r__)	((__r__) >= NTV2_FRAMERATE_6000 && (__r__) < NTV2_NUM_FRAMERATES)
+#define	NTV2_IS_VALID_NTV2FrameRate(__r__)		((__r__) >= NTV2_FRAMERATE_6000 && (__r__) < NTV2_NUM_FRAMERATES)
+#define	NTV2_IS_SUPPORTED_NTV2FrameRate(__r__)	((__r__) >= NTV2_FRAMERATE_6000 && (__r__) <= NTV2_FRAMERATE_1498)
 
 #define NTV2_IS_HIGH_NTV2FrameRate(__r__)							\
     (	(__r__) == NTV2_FRAMERATE_4795	||							\
@@ -3894,19 +3895,34 @@ typedef enum
     VPIDAudio_Reserved			= 0x3
 } VPIDAudio;
 
+/**
+    @brief	These enum values identify RS-422 serial port parity configuration.
+    @see	CNTV2Card::GetRS422Parity, CNTV2Card::SetRS422Parity
+**/
 typedef enum
 {
-    NTV2_RS422_NO_PARITY		= 0x0,
-    NTV2_RS422_ODD_PARITY		= 0x1,
-    NTV2_RS422_EVEN_PARITY		= 0x2
+    NTV2_RS422_NO_PARITY		= 0x0,	///< @brief	No parity
+    NTV2_RS422_ODD_PARITY		= 0x1,	///< @brief	Odd parity -- this is the power-up default
+    NTV2_RS422_EVEN_PARITY		= 0x2,	///< @brief	Even parity
+    NTV2_RS422_PARITY_INVALID	= 0xFF
 } NTV2_RS422_PARITY;
 
+#define	NTV2_IS_VALID_RS422_PARITY(_x_)		((_x_) == NTV2_RS422_NO_PARITY  ||  (_x_) == NTV2_RS422_ODD_PARITY  ||  (_x_) == NTV2_RS422_EVEN_PARITY)
+
+
+/**
+    @brief	These enum values identify RS-422 serial port baud rate configuration.
+    @see	CNTV2Card::GetRS422BaudRate, CNTV2Card::SetRS422BaudRate
+**/
 typedef enum
 {
-    NTV2_RS422_BAUD_RATE_38400	= 38400,
-    NTV2_RS422_BAUD_RATE_19200	= 19200,
-    NTV2_RS422_BAUD_RATE_9600	=  9600
+    NTV2_RS422_BAUD_RATE_38400	= 38400,	///< @brief	38400 baud -- this is the power-up default
+    NTV2_RS422_BAUD_RATE_19200	= 19200,	///< @brief	19200 baud
+    NTV2_RS422_BAUD_RATE_9600	=  9600,	///< @brief	9600 baud
+    NTV2_RS422_BAUD_RATE_INVALID = 0
 } NTV2_RS422_BAUD_RATE;
+
+#define	NTV2_IS_VALID_RS422_BAUD_RATE(_x_)	((_x_) == NTV2_RS422_BAUD_RATE_38400  ||  (_x_) == NTV2_RS422_BAUD_RATE_19200  ||  (_x_) == NTV2_RS422_BAUD_RATE_9600)
 
 typedef enum
 {

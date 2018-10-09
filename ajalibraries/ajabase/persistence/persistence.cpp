@@ -751,7 +751,7 @@ void AJAPersistence::GetParams(std::string& appID, std::string& deviceType, std:
     bSharePrefFile = mSharedPrefFile;
 }
 
-bool AJAPersistence::SetValue(const std::string& key, void *value, AJAPersistenceType type, int blobSize)
+bool AJAPersistence::SetValue(const std::string& key, void *value, AJAPersistenceType type, size_t blobSize)
 {
     bool shouldLog = should_we_log();
     if (shouldLog)
@@ -765,12 +765,12 @@ bool AJAPersistence::SetValue(const std::string& key, void *value, AJAPersistenc
                                  ", and value of: \""    << dbgValue                      << "\"");
     }
     AJAPersistenceDBImpl db(mstateKeyName);
-    bool isGood = db.SetValue(key, value, type, blobSize, mboardId, mserialNumber);
+    bool isGood = db.SetValue(key, value, type, int(blobSize), mboardId, mserialNumber);
 
     return isGood;
 }
 
-bool AJAPersistence::GetValue(const std::string& key, void *value, AJAPersistenceType type, int blobSize)
+bool AJAPersistence::GetValue(const std::string& key, void *value, AJAPersistenceType type, size_t blobSize)
 {
 	// with Get, don't create file if it does not exist
 	if (FileExists() == false)
@@ -781,7 +781,7 @@ bool AJAPersistence::GetValue(const std::string& key, void *value, AJAPersistenc
 
     {
         AJAPersistenceDBImpl db(mstateKeyName);
-        isGood = db.GetValue(key, value, type, blobSize, mboardId, mserialNumber);
+        isGood = db.GetValue(key, value, type, int(blobSize), mboardId, mserialNumber);
     }
 
     if (shouldLog)

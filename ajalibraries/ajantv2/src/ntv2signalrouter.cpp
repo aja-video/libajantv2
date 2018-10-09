@@ -575,6 +575,39 @@ NTV2InputCrosspointID GetMixerBGInputXpt (const NTV2Channel inChannel,  const bo
         return NTV2_INPUT_CROSSPOINT_INVALID;
 }
 
+NTV2InputCrosspointID GetTSIMuxInputXptFromChannel(const NTV2Channel inChannel, const bool inLinkB)
+{
+    static const NTV2InputCrosspointID	gDLInputs[] = { NTV2_Xpt425Mux1AInput, NTV2_Xpt425Mux2AInput, NTV2_Xpt425Mux3AInput, NTV2_Xpt425Mux4AInput,
+                                                      NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID};
+    static const NTV2InputCrosspointID	gDLBInputs[] = { NTV2_Xpt425Mux1BInput, NTV2_Xpt425Mux2BInput, NTV2_Xpt425Mux3BInput, NTV2_Xpt425Mux4BInput,
+                                                       NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID};
+    if (NTV2_IS_VALID_CHANNEL(inChannel))
+        return inLinkB ? gDLBInputs[inChannel] : gDLInputs[inChannel];
+    else
+        return NTV2_INPUT_CROSSPOINT_INVALID;
+}
+
+NTV2OutputCrosspointID GetTSIMuxOutputXptFromChannel (const NTV2Channel inChannel, const bool inLinkB, const bool inIsRGB)
+{
+    static const NTV2OutputCrosspointID	gMuxARGBOutputs []	=	{	NTV2_Xpt425Mux1ARGB,		NTV2_Xpt425Mux2ARGB,		NTV2_Xpt425Mux3ARGB,		NTV2_Xpt425Mux4ARGB,
+                                                                    NTV2_XptBlack,              NTV2_XptBlack,              NTV2_XptBlack,              NTV2_XptBlack};
+    static const NTV2OutputCrosspointID	gMuxAYUVOutputs []	=	{	NTV2_Xpt425Mux1AYUV,		NTV2_Xpt425Mux2AYUV,		NTV2_Xpt425Mux3AYUV,		NTV2_Xpt425Mux4AYUV,
+                                                                    NTV2_XptBlack,              NTV2_XptBlack,              NTV2_XptBlack,              NTV2_XptBlack};
+    static const NTV2OutputCrosspointID	gMuxBRGBOutputs []	=	{	NTV2_Xpt425Mux1BRGB,		NTV2_Xpt425Mux2BRGB,		NTV2_Xpt425Mux3BRGB,		NTV2_Xpt425Mux4BRGB,
+                                                                    NTV2_XptBlack,              NTV2_XptBlack,              NTV2_XptBlack,              NTV2_XptBlack};
+    static const NTV2OutputCrosspointID	gMuxBYUVOutputs []	=	{	NTV2_Xpt425Mux1BYUV,		NTV2_Xpt425Mux2BYUV,		NTV2_Xpt425Mux3BYUV,		NTV2_Xpt425Mux4BYUV,
+                                                                    NTV2_XptBlack,              NTV2_XptBlack,              NTV2_XptBlack,              NTV2_XptBlack};
+    if (NTV2_IS_VALID_CHANNEL (inChannel))
+    {
+        if (inLinkB)
+            return inIsRGB ? gMuxBRGBOutputs[inChannel] : gMuxBYUVOutputs[inChannel];
+        else
+            return inIsRGB  ?  gMuxARGBOutputs [inChannel]  :  gMuxAYUVOutputs [inChannel];
+    }
+    else
+        return NTV2_OUTPUT_CROSSPOINT_INVALID;
+}
+
 
 #if !defined (NTV2_DEPRECATE_12_5)
 //////////	Per-widget input crosspoint selection register/mask/shift values
