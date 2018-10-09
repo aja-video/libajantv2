@@ -618,6 +618,12 @@ AJAExport NTV2Channel NTV2OutputDestinationToChannel (const NTV2OutputDestinatio
 **/
 AJAExport NTV2OutputDestination NTV2ChannelToOutputDestination (const NTV2Channel inChannel);
 
+/**
+	@return		The frame rate family that the given ::NTV2FrameRate belongs to.
+				(This is the ::NTV2FrameRate of the family having the lowest ordinal value.)
+	@param[in]	inFrameRate		Specifies the frame rate of interest.
+**/
+AJAExport NTV2FrameRate GetFrameRateFamily (const NTV2FrameRate inFrameRate);
 
 /**
 	@brief	Compares two frame rates and returns true if they are "compatible" (with respect to a multiformat-capable device).

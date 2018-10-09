@@ -13,6 +13,7 @@
 #include "ntv2debug.h"
 #include "ntv2transcode.h"
 #include "ntv2devicefeatures.h"
+#include "ajabase/system/lock.h"
 #if defined(AJALinux)
 	#include <string.h>  // For memset
 	#include <stdint.h>
@@ -2912,45 +2913,32 @@ ULWord GetScaleFromFrameRate(NTV2FrameRate frameRate)
 {
 	switch (frameRate)
 	{
-	case NTV2_FRAMERATE_12000:
-		return 12000;
-	case NTV2_FRAMERATE_11988:
-		return 11988;
-	case NTV2_FRAMERATE_6000:
-		return 6000;
-	case NTV2_FRAMERATE_5994:
-		return 5994;
-	case NTV2_FRAMERATE_5000:
-		return 5000;
-	case NTV2_FRAMERATE_4800:
-		return 4800;
-	case NTV2_FRAMERATE_4795:
-		return 4795;
-	case NTV2_FRAMERATE_3000:
-		return 3000;
-	case NTV2_FRAMERATE_2997:
-		return 2997;
-	case NTV2_FRAMERATE_2500:
-		return 2500;
-	case NTV2_FRAMERATE_2400:
-		return 2400;
-	case NTV2_FRAMERATE_2398:
-		return 2398;
-	case NTV2_FRAMERATE_1900:
-		return 1900;
-	case NTV2_FRAMERATE_1898:
-		return 1898;
-	case NTV2_FRAMERATE_1800:
-		return 1800;
-	case NTV2_FRAMERATE_1798:
-		return 1798;
-	case NTV2_FRAMERATE_1500:
-		return 1500;
-	case NTV2_FRAMERATE_1498:
-		return 1498;
-	default:
-		return 0;
+		case NTV2_FRAMERATE_12000:		return 12000;
+		case NTV2_FRAMERATE_11988:		return 11988;
+		case NTV2_FRAMERATE_6000:		return 6000;
+		case NTV2_FRAMERATE_5994:		return 5994;
+		case NTV2_FRAMERATE_5000:		return 5000;
+		case NTV2_FRAMERATE_4800:		return 4800;
+		case NTV2_FRAMERATE_4795:		return 4795;
+		case NTV2_FRAMERATE_3000:		return 3000;
+		case NTV2_FRAMERATE_2997:		return 2997;
+		case NTV2_FRAMERATE_2500:		return 2500;
+		case NTV2_FRAMERATE_2400:		return 2400;
+		case NTV2_FRAMERATE_2398:		return 2398;
+		case NTV2_FRAMERATE_1900:		return 1900;
+		case NTV2_FRAMERATE_1898:		return 1898;
+		case NTV2_FRAMERATE_1800:		return 1800;
+		case NTV2_FRAMERATE_1798:		return 1798;
+		case NTV2_FRAMERATE_1500:		return 1500;
+		case NTV2_FRAMERATE_1498:		return 1498;
+		case NTV2_FRAMERATE_UNKNOWN:	break;
+	#if defined(_DEBUG)
+		case NTV2_NUM_FRAMERATES:		break;
+	#else
+		default:						break;
+	#endif
 	}
+	return 0;
 }
 
 // GetFrameRateFromScale(long scale, long duration, NTV2FrameRate playFrameRate)
@@ -2966,48 +2954,20 @@ NTV2FrameRate GetFrameRateFromScale(long scale, long duration, NTV2FrameRate pla
 	{
 		switch (scale)
 		{
-			case 12000:
-				result = NTV2_FRAMERATE_12000;
-				break;
-			case 11988:
-				result = NTV2_FRAMERATE_11988;
-				break;
-			case 6000:
-				result = NTV2_FRAMERATE_6000;
-				break;
-			case 5994:
-				result = NTV2_FRAMERATE_5994;
-				break;
-			case 5000:
-				result = NTV2_FRAMERATE_5000;
-				break;
-			case 4800:
-				result = NTV2_FRAMERATE_4800;
-				break;
-			case 4795:
-				result = NTV2_FRAMERATE_4795;
-				break;
-			case 3000:
-				result = NTV2_FRAMERATE_3000;
-				break;
-			case 2997:
-				result = NTV2_FRAMERATE_2997;
-				break;
-			case 2500:
-				result = NTV2_FRAMERATE_2500;
-				break;
-			case 2400:
-				result = NTV2_FRAMERATE_2400;
-				break;
-			case 2398:
-				result = NTV2_FRAMERATE_2398;
-				break;
-			case 1500:
-				result = NTV2_FRAMERATE_1500;
-				break;
-			case 1498:
-				result = NTV2_FRAMERATE_1498;
-				break;
+			case 12000:	result = NTV2_FRAMERATE_12000;	break;
+			case 11988:	result = NTV2_FRAMERATE_11988;	break;
+			case 6000:	result = NTV2_FRAMERATE_6000;	break;
+			case 5994:	result = NTV2_FRAMERATE_5994;	break;
+			case 5000:	result = NTV2_FRAMERATE_5000;	break;
+			case 4800:	result = NTV2_FRAMERATE_4800;	break;
+			case 4795:	result = NTV2_FRAMERATE_4795;	break;
+			case 3000:	result = NTV2_FRAMERATE_3000;	break;
+			case 2997:	result = NTV2_FRAMERATE_2997;	break;
+			case 2500:	result = NTV2_FRAMERATE_2500;	break;
+			case 2400:	result = NTV2_FRAMERATE_2400;	break;
+			case 2398:	result = NTV2_FRAMERATE_2398;	break;
+			case 1500:	result = NTV2_FRAMERATE_1500;	break;
+			case 1498:	result = NTV2_FRAMERATE_1498;	break;
 		}
 	}
 	else if (duration == 0)
@@ -5172,19 +5132,68 @@ ULWord NTV2AudioBufferSizeToByteCount (const NTV2AudioBufferSize inBufferSize)
 	return 0;
 }
 
+typedef	std::set<NTV2FrameRate>					NTV2FrameRates;
+typedef NTV2FrameRates::const_iterator			NTV2FrameRatesConstIter;
+typedef std::vector<NTV2FrameRates>				NTV2FrameRateFamilies;
+typedef NTV2FrameRateFamilies::const_iterator	NTV2FrameRateFamiliesConstIter;
+
+static NTV2FrameRateFamilies	sFRFamilies;
+static AJALock					sFRFamMutex;
+
+
+static bool CheckFrameRateFamiliesInitialized (void)
+{
+	if (!sFRFamMutex.IsValid())
+		return false;
+
+	AJAAutoLock autoLock (&sFRFamMutex);
+	if (sFRFamilies.empty())
+	{
+		NTV2FrameRates	FR1498, FR1500, FR2398, FR2400, FR2500;
+		FR1498.insert(NTV2_FRAMERATE_1498); FR1498.insert(NTV2_FRAMERATE_2997); FR1498.insert(NTV2_FRAMERATE_5994); FR1498.insert(NTV2_FRAMERATE_11988);
+		sFRFamilies.push_back(FR1498);
+		FR1500.insert(NTV2_FRAMERATE_1500); FR1500.insert(NTV2_FRAMERATE_3000); FR1500.insert(NTV2_FRAMERATE_6000); FR1500.insert(NTV2_FRAMERATE_12000);
+		sFRFamilies.push_back(FR1500);
+		FR2398.insert(NTV2_FRAMERATE_2398); FR2398.insert(NTV2_FRAMERATE_4795);
+		sFRFamilies.push_back(FR2398);
+		FR2400.insert(NTV2_FRAMERATE_2400); FR2400.insert(NTV2_FRAMERATE_4800);
+		sFRFamilies.push_back(FR2400);
+		FR2500.insert(NTV2_FRAMERATE_2500); FR2500.insert(NTV2_FRAMERATE_5000);
+		sFRFamilies.push_back(FR2500);
+	}
+	return !sFRFamilies.empty();
+}
+
+
+NTV2FrameRate GetFrameRateFamily (const NTV2FrameRate inFrameRate)
+{
+	if (CheckFrameRateFamiliesInitialized())
+		for (NTV2FrameRateFamiliesConstIter it(sFRFamilies.begin());  it != sFRFamilies.end();  ++it)
+		{
+			const NTV2FrameRates &	family (*it);
+			NTV2FrameRatesConstIter	iter(family.find(inFrameRate));
+			if (iter != family.end())
+				return *(family.begin());
+		}
+	return NTV2_FRAMERATE_INVALID;
+}
+
 
 bool IsMultiFormatCompatible (const NTV2FrameRate inFrameRate1, const NTV2FrameRate inFrameRate2)
 {
 	if (inFrameRate1 == inFrameRate2)
 		return true;
 
-	ULWord scale1 = GetScaleFromFrameRate (inFrameRate1);
-	ULWord scale2 = GetScaleFromFrameRate (inFrameRate2);
+	if (!NTV2_IS_SUPPORTED_NTV2FrameRate(inFrameRate1) || !NTV2_IS_SUPPORTED_NTV2FrameRate(inFrameRate2))
+		return false;
 
-	if (scale1 < scale2)
-		return (scale2 % scale1) == 0;
-	else
-		return (scale1 % scale2) == 0;
+	const NTV2FrameRate	frFamily1 (GetFrameRateFamily(inFrameRate1));
+	const NTV2FrameRate	frFamily2 (GetFrameRateFamily(inFrameRate2));
+
+	if (!NTV2_IS_SUPPORTED_NTV2FrameRate(frFamily1)  ||  !NTV2_IS_SUPPORTED_NTV2FrameRate(frFamily2))
+		return false;	//	Probably uninitialized
+
+	return frFamily1 == frFamily2;
 
 }	//	IsMultiFormatCompatible (NTV2FrameRate)
 
