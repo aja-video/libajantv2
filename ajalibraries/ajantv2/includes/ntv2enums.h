@@ -392,7 +392,8 @@ typedef enum
     NTV2_FRAMERATE_INVALID = NTV2_FRAMERATE_UNKNOWN
 } NTV2FrameRate;
 
-#define	NTV2_IS_VALID_NTV2FrameRate(__r__)	((__r__) >= NTV2_FRAMERATE_6000 && (__r__) < NTV2_NUM_FRAMERATES)
+#define	NTV2_IS_VALID_NTV2FrameRate(__r__)		((__r__) >= NTV2_FRAMERATE_6000 && (__r__) < NTV2_NUM_FRAMERATES)
+#define	NTV2_IS_SUPPORTED_NTV2FrameRate(__r__)	((__r__) >= NTV2_FRAMERATE_6000 && (__r__) <= NTV2_FRAMERATE_1498)
 
 #define NTV2_IS_HIGH_NTV2FrameRate(__r__)							\
     (	(__r__) == NTV2_FRAMERATE_4795	||							\

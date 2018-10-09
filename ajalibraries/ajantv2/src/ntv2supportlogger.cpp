@@ -259,8 +259,7 @@ static bool getBitfileDate(CNTV2Card& device, std::string &bitFileDateString, NT
 
 AJAExport std::ostream & operator << (std::ostream & outStream, const CNTV2SupportLogger & inData)
 {
-    CNTV2SupportLogger* instance = (CNTV2SupportLogger*)&inData;
-    outStream << instance->ToString();
+    outStream << inData.ToString();
     return outStream;
 }
 
@@ -280,7 +279,7 @@ CNTV2SupportLogger::~CNTV2SupportLogger()
 {
 }
 
-int CNTV2SupportLogger::Version()
+int CNTV2SupportLogger::Version(void)
 {
     // Bump this whenever the formatting of the support log changes drastically
     return 2;
@@ -348,7 +347,7 @@ void CNTV2SupportLogger::AddFooter(const std::string& sectionName, const std::st
             oss << mAppendMap.at(_SectionEnum_); \
     }
 
-std::string CNTV2SupportLogger::ToString()
+std::string CNTV2SupportLogger::ToString(void) const
 {
     ostringstream oss;
 
@@ -405,7 +404,7 @@ std::string CNTV2SupportLogger::ToString()
     return oss.str();
 }
 
-void CNTV2SupportLogger::ToString(std::string& outString)
+void CNTV2SupportLogger::ToString(std::string& outString) const
 {
     outString = ToString();
 }
@@ -414,7 +413,7 @@ static inline std::string HEX0NStr(const uint32_t inNum, const uint16_t inWidth)
 static inline std::string xHEX0NStr(const uint32_t inNum, const uint16_t inWidth)	{ostringstream	oss;  oss << xHEX0N(inNum,inWidth);  return oss.str();}
 template <class T> std::string DECStr (const T & inT)					{ostringstream	oss;  oss << DEC(inT);  return oss.str();}
 
-void CNTV2SupportLogger::FetchInfoLog(std::ostringstream& oss)
+void CNTV2SupportLogger::FetchInfoLog(std::ostringstream& oss) const
 {
     string str;
 	AJASystemInfo::LabelValuePairs	infoTable;
@@ -497,7 +496,7 @@ void CNTV2SupportLogger::FetchInfoLog(std::ostringstream& oss)
 		<< hostInfo.ToString() << endl;
 }
 
-void CNTV2SupportLogger::FetchRegisterLog(std::ostringstream& oss)
+void CNTV2SupportLogger::FetchRegisterLog(std::ostringstream& oss) const
 {
     NTV2RegisterReads	regs;
     const NTV2DeviceID	deviceID	(mDevice.GetDeviceID());
@@ -541,7 +540,7 @@ void CNTV2SupportLogger::FetchRegisterLog(std::ostringstream& oss)
     }
 }
 
-void CNTV2SupportLogger::FetchAutoCirculateLog(std::ostringstream& oss)
+void CNTV2SupportLogger::FetchAutoCirculateLog(std::ostringstream& oss) const
 {
     ULWord					appSignature	(0);
     int32_t					appPID			(0);
@@ -637,7 +636,7 @@ void CNTV2SupportLogger::FetchAutoCirculateLog(std::ostringstream& oss)
     }	//	for each channel
 }
 
-void CNTV2SupportLogger::FetchAudioLog(std::ostringstream& oss)
+void CNTV2SupportLogger::FetchAudioLog(std::ostringstream& oss) const
 {
 
     const UWord		maxNumChannels		(::NTV2DeviceGetMaxAudioChannels(mDevice.GetDeviceID()));
@@ -735,7 +734,7 @@ void CNTV2SupportLogger::FetchAudioLog(std::ostringstream& oss)
     }
 }
 
-void CNTV2SupportLogger::FetchRoutingLog(std::ostringstream& oss)
+void CNTV2SupportLogger::FetchRoutingLog(std::ostringstream& oss) const
 {
     //	Dump routing info...
     CNTV2SignalRouter	router;
