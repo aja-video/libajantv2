@@ -45,8 +45,12 @@ This section explores the contents of the SDK, which is nearly identical on all 
 	version number, <i>ZZ</i> is the point release number, and <i>nn</i> is the build number.
 	-	<b>ajaapps</b> — Contains sources used to build applications and tools.
 		-	<b>crossplatform  </b>
+			-	<b>ajalogger</b> — Contains sources for \ref usingajalogger.
 			-	<b>demoapps</b> — Contains sources for \ref demoapps.
+			-	<b>pciwhacker</b> <i>(Linux only)</i> — Contains sources for “PCI Whacker”, a command-line tool that measures
+				PCI throughput, similar to what the \ref systest-dev does in \ref usingsystemtest.
 			-	<b>supportlog</b> — Contains sources for \ref usingsupportlog.
+			-	<b>xenacablesfltk</b> <i>(Linux only)</i> — Contains sources for building \ref usingcables.
 		-	<b>lin  </b><i>(Linux-only apps)</i>
 		-	<b>win  </b><i>(Windows-only apps)</i>
 	-	<b>ajadriver  </b><i>(Linux only)</i>

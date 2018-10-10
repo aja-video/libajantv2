@@ -76,7 +76,7 @@ $ ./bin/supportlog  --stdout  >./my_support_log.txt
 @par	Delaying Log Capture
 
 Sometimes it’s desirable to capture the log after a certain length of time, often to give the operator time
-to configure something. Use the “<tt>--wait</tt>” option to specify a delay time.
+to change something. Use the “<tt>--wait</tt>” option to specify a delay time.
 For example, to capture a log after delaying 10 seconds:
 \code{.sh}
 $ ./bin/supportlog  --wait 10

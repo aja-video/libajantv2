@@ -327,7 +327,8 @@
 			video formats are multi-format compatible.
 			Call ::IsMultiFormatCompatible(const NTV2FrameRate, const NTV2FrameRate) to see if two frame
 			rates are multi-format compatible.
-			See \ref deviceclockingandsync for more details (below).
+			Call ::GetFrameRateFamily to determine the frame-rate “family” that a given ::NTV2FrameRate
+			belongs to. See \ref deviceclockingandsync for more details (below).
 
 
 	@subsection	vidop-fbaccess		Frame Buffer Access
