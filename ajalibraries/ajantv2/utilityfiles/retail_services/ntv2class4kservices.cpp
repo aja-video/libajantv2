@@ -1543,6 +1543,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 	int							bFb2Disable			= 1;
 	int							bFb3Disable			= 1;
 	int							bFb4Disable			= 1;
+	bool 						bFbLevelA 			= IsVideoFormatA(mFb1VideoFormat);
 	bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_Input4x4kSelect && mQuadSwapIn != 0;
 	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)
 	bool						bHdmiIn             = mVirtualInputSelect == NTV2_Input5Select;
@@ -1575,20 +1576,19 @@ void Class4kServices::SetDeviceXPointCapture ()
     inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
 	
 	// SDI In 1
-	bool bConvertBToA; 
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL1)==true && mVirtualInputSelect==NTV2_Input1Select;
+	bool bConvertBToA = bFbLevelA && mDs.sdiIn[0]->isEnabled && mDs.sdiIn[0]->is3Gb;
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
             
 	// SDI In 2
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL2)==true && mVirtualInputSelect==NTV2_Input2Select;
+	bConvertBToA = bFbLevelA && mDs.sdiIn[1]->isEnabled && mDs.sdiIn[1]->is3Gb;
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, bConvertBToA);
 
 	// SDI In 3
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL3);
+	bConvertBToA = bFbLevelA && mDs.sdiIn[2]->isEnabled && mDs.sdiIn[2]->is3Gb;
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, bConvertBToA);
 
 	// SDI In 4
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL4);
+	bConvertBToA = bFbLevelA && mDs.sdiIn[3]->isEnabled && mDs.sdiIn[3]->is3Gb;
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, bConvertBToA);
     
 
@@ -3153,77 +3153,15 @@ void Class4kServices::SetDeviceMiscRegisters ()
 					   
 	bool b2pi 		= b4K && (m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave ||
 						  	  m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
-	bool b4xSdiOut 	= b4K && ((m4kTransportOutSelection == NTV2_4kTransport_Quadrants_4wire) ||
-						  	  (b2pi && (bSdiOutRGB || b4kHfr)));
 
 	//HACK: We need to disable the sample rate converter for now - 9/27/17. We do not support 44.1 audio until firmware is fixed
 	mCard->SetEncodedAudioMode(NTV2_ENCODED_AUDIO_SRC_DISABLED, NTV2_AUDIOSYSTEM_1);
 	
-	// enable/disable transmission (in/out polarity) for each SDI channel
-	if (mFb1Mode == NTV2_MODE_CAPTURE)
-	{
-		// special case: input-passthru (capture) HDMI In selected, AND 4K, then turn on SDI1Out, SDI2Out
-		if (bHdmiIn)
-		{
-			b2pi = b4K;
-			mCard->SetSDITransmitEnable(NTV2_CHANNEL1, b4xSdiOut);
-			mCard->SetSDITransmitEnable(NTV2_CHANNEL2, b4xSdiOut);
-			mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);		// 3,4 are for playback, unless 4K capture
-			mCard->SetSDITransmitEnable(NTV2_CHANNEL4, true);		// 3,4 are for playback, unless 4K capture
-		}
-		else 
-		{
-			bool b4xSdiIn = (mVirtualInputSelect == NTV2_Input4x4kSelect);
-			if (mVpid1Valid)
-			{
-				mVpidParser.SetVPID(mVpid1a);
-				VPIDStandard std = mVpidParser.GetStandard();
-				switch (std)
-				{
-				case VPIDStandard_2160_Single_12Gb:
-					b4k12gOut = true && bDo12G;
-					b4xSdiIn = false;
-					b2pi = true;
-					break;
-				case VPIDStandard_2160_Single_6Gb:
-					b4k6gOut = true && bDo12G;
-					b4xSdiIn = false;
-					b2pi  = true;
-					break;
-				case VPIDStandard_2160_DualLink:
-					b3GbOut = true;
-					b4xSdiIn = false;
-					b2pi  = true;
-					break;
-				case VPIDStandard_2160_QuadLink_3Ga:
-				case VPIDStandard_2160_QuadDualLink_3Gb:
-					b4xSdiIn = true;
-					b2pi = true;
-					break;
-				default:
-					break;
-				}
-			}
-
-			if (b2xQuadIn)
-				b4xSdiIn = false;
-
-			// 3,4 are for plaback, unless 4x capture
-			mCard->SetSDITransmitEnable(NTV2_CHANNEL1, false);
-			mCard->SetSDITransmitEnable(NTV2_CHANNEL2, false);
-			mCard->SetSDITransmitEnable(NTV2_CHANNEL3, !b4xSdiIn);
-			mCard->SetSDITransmitEnable(NTV2_CHANNEL4, !b4xSdiIn);
-		}
-	}
-	else // (mFb1Mode == NTV2_MODE_OUTPUT)
-	{
-		// 1,2 are for capture, unless 4x playback
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL1, b4xSdiOut);		
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL2, b4xSdiOut);	
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL4, true);
-	}
-
+	mCard->SetSDITransmitEnable(NTV2_CHANNEL1, mDs.sdiOut[0]->isEnabled);
+	mCard->SetSDITransmitEnable(NTV2_CHANNEL2, mDs.sdiOut[1]->isEnabled);
+	mCard->SetSDITransmitEnable(NTV2_CHANNEL3, mDs.sdiOut[2]->isEnabled);
+	mCard->SetSDITransmitEnable(NTV2_CHANNEL4, mDs.sdiOut[3]->isEnabled);
+	
 	if (b4k12gOut)
 	{
 		mCard->SetSDIOut12GEnable(NTV2_CHANNEL3, true);

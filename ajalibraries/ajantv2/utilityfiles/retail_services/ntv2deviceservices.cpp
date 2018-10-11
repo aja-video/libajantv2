@@ -204,10 +204,10 @@ void DeviceServices::SetCard(CNTV2Card* pCard)
 	mModel.SetCard(pCard, pCard->GetDeviceID(), index, false);
 	
 	// retail object
-	mRs = new RetailSupport(mDeviceState, mBoardInfo, mModel);
+	mRs = new RetailSupport(mDs, mBoardInfo, mModel);
 	
 	// device state
-	mRs->InitDeviceState(mDeviceState);
+	mRs->InitDeviceState(mDs);
 }
 
 #define	AsDriverInterface(_x_)		static_cast<CNTV2DriverInterface*>(_x_)
@@ -223,7 +223,7 @@ bool DeviceServices::ReadDriverState (void)
 	// check the state of the hardware and see if anything has changed since last time
 #ifdef USE_NEW_RETAIL
 	
-	DeviceState& ds = mDeviceState;
+	DeviceState& ds = mDs;
 
 	bool bChanged = mRs->GetDeviceState(ds);
 	(void) bChanged;

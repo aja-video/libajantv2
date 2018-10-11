@@ -204,7 +204,7 @@ public:
 
 public:
 	
-	DeviceState				mDeviceState;
+	DeviceState				mDs;
 	NTV2DeviceInfo			mBoardInfo;
 	VirtualRegisterModel 	mModel;
 	RetailSupport*			mRs;
