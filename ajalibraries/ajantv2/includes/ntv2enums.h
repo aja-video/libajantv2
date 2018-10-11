@@ -1175,6 +1175,8 @@ typedef enum
     NTV2_STREAM_INVALID = NTV2_MAX_NUM_STREAMS
 } NTV2Stream;
 
+#define NTV2_STREAM_MASK_ALL ((1 << NTV2_MAX_NUM_STREAMS) - 1)
+
 
 /**
 	@brief		Identifies the kind of data that can be carried by an IP-based data stream.
