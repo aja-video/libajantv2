@@ -854,6 +854,7 @@ private:
 		DefineRegName	(kVRegReleaseApplication,				"kVRegReleaseApplication");
 		DefineRegName	(kVRegForceApplicationPID,				"kVRegForceApplicationPID");
 		DefineRegName	(kVRegForceApplicationCode,				"kVRegForceApplicationCode");
+		DefineRegName	(kVRegIpConfigStreamRefresh,			"kVRegIpConfigStreamRefresh");
 		DefineRegName	(kVRegProcAmpSDRegsInitialized,			"kVRegProcAmpSDRegsInitialized");
 		DefineRegName	(kVRegProcAmpStandardDefBrightness,		"kVRegProcAmpStandardDefBrightness");
 		DefineRegName	(kVRegProcAmpStandardDefContrast,		"kVRegProcAmpStandardDefContrast");
