@@ -15,6 +15,7 @@ KonaIP2110Services::KonaIP2110Services()
 {
     config2110 = NULL;
 
+	mFb1ModeLast = NTV2_MODE_INVALID;
     mFb1VideoFormatLast = NTV2_FORMAT_UNKNOWN;
 
     Init();
@@ -1410,17 +1411,18 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 	bool						b3GbOut				= mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb;
 	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect;
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
-	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
+	//bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
-	bool						b4k6gOut			= b4K && !b4kHfr && !bSdiOutRGB &&
-	(m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire ||
-	 m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
+	bool						b4k6gOut			= false;
+	//														b4K && !b4kHfr && !bSdiOutRGB &&
+	//														(m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire ||
+	// 														m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
 	//bool						b4k12gOut			= b4K && (b4kHfr || bSdiOutRGB) &&
 	//												  (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire ||
 	//												   m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
-	bool						b2xQuadIn			= b4K && !b4kHfr && (mVirtualInputSelect == NTV2_DualLink2xSdi4k);
-	bool						b4xQuadIn			= b4K && (mVirtualInputSelect == NTV2_DualLink4xSdi4k);
-	bool						b2xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
+	bool						b2xQuadIn			= false; //b4K && !b4kHfr && (mVirtualInputSelect == NTV2_DualLink2xSdi4k);
+	bool						b4xQuadIn			= false; // b4K && (mVirtualInputSelect == NTV2_DualLink4xSdi4k);
+	bool						b2xQuadOut			= false; // b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
 	//bool						b4xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_4wire);
 	bool						bStereoIn			= false;
 	int							bFb1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
@@ -2580,7 +2582,8 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 			}
 			else
 			{
-				mCard->Connect (NTV2_XptSDIOut1Input, in4kYUV1);
+				//mCard->Connect (NTV2_XptSDIOut1Input, in4kYUV1);
+				mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptBlack);
 				mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 			}
 		}
@@ -2615,7 +2618,8 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 			}
 			else
 			{
-				mCard->Connect (NTV2_XptSDIOut2Input, in4kYUV2);
+				//mCard->Connect (NTV2_XptSDIOut2Input, in4kYUV2);
+				mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptBlack);
 				mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 			}
 		}
@@ -2659,7 +2663,8 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 			}
 			else
 			{
-				mCard->Connect (NTV2_XptSDIOut3Input, in4kYUV3);
+				//mCard->Connect (NTV2_XptSDIOut3Input, in4kYUV3);
+				mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptBlack);
 				mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
 			}
 		}
@@ -2736,7 +2741,8 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 			}
 			else
 			{
-				mCard->Connect (NTV2_XptSDIOut4Input, in4kYUV4);
+				//mCard->Connect (NTV2_XptSDIOut4Input, in4kYUV4);
+				mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptBlack);
 				mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 			}
 		}
@@ -3016,7 +3022,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
         }
 
         // Configure all of the 2110 IP settings
-        EveryFrameTask2110(config2110, &mFb1VideoFormatLast, &m2110NetworkLast,
+        EveryFrameTask2110(config2110, &mFb1VideoFormatLast, &mFb1ModeLast, &m2110NetworkLast,
                            &m2110TxVideoDataLast, &m2110TxAudioDataLast,
                            &m2110RxVideoDataLast, &m2110RxAudioDataLast);
     }
@@ -3030,9 +3036,9 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	 (bFbLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 	 (IsVideoFormatB(mFb1VideoFormat) == true)  );
 
-	bool b2wire4kOut = (    ((mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire))
-						|| ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
-	bool b2wire4kIn =  (mFb1Mode == NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && mVirtualInputSelect  == NTV2_DualLink2xSdi4k);
+	bool b2wire4kOut = false;	//(    ((mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire))
+								//|| ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
+	bool b2wire4kIn =  false; //(mFb1Mode == NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && mVirtualInputSelect  == NTV2_DualLink2xSdi4k);
 
 	// all 3Gb transport out
 	// b3GbOut = (b1x3GbOut + !2wire) | (4k + rgb) | (4khfr + 3gb)
@@ -3092,8 +3098,8 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 
 			mCard->SetSDITransmitEnable(NTV2_CHANNEL1, false);
 			mCard->SetSDITransmitEnable(NTV2_CHANNEL2, false);
-			mCard->SetSDITransmitEnable(NTV2_CHANNEL3, !b4xIo);		// 3,4 are for playback, unless 4K capture
-			mCard->SetSDITransmitEnable(NTV2_CHANNEL4, !b4xIo);		// 3,4 are for playback, unless 4K capture
+			mCard->SetSDITransmitEnable(NTV2_CHANNEL3, !b4K);		// 3,4 are for playback, unless 4K capture
+			mCard->SetSDITransmitEnable(NTV2_CHANNEL4, !b4K);		// 3,4 are for playback, unless 4K capture
 		}
 	}
 	else
@@ -3102,8 +3108,8 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 		if (b2pi && !bSdiOutRGB && !b4kHfr)
 			b4xIo = false;										// low frame rate two pixel interleave YUV
 
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL1, b4xIo);		// 1,2 are for capture, unless 4K playback
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL2, b4xIo);		// 1,2 are for capture, unless 4K playback
+		mCard->SetSDITransmitEnable(NTV2_CHANNEL1, b4K);		// 1,2 are for capture, unless 4K playback
+		mCard->SetSDITransmitEnable(NTV2_CHANNEL2, b4K);		// 1,2 are for capture, unless 4K playback
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL4, true);
 	}

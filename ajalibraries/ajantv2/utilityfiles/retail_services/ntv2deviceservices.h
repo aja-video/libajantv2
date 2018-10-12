@@ -114,6 +114,7 @@ public:
     virtual void EveryFrameTask2022(CNTV2Config2022* config2022, NTV2Mode* modeLast, NTV2VideoFormat* videoFormatLast);
     virtual void EveryFrameTask2110(CNTV2Config2110* config2110,
                                     NTV2VideoFormat* videoFormatLast,
+									NTV2Mode* modeLast,
                                     NetworkData2110* s2110NetworkLast,
                                     TransmitVideoData2110* s2110TxVideoDataLast,
                                     TransmitAudioData2110* s2110TxAudioDataLast,
