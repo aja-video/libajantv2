@@ -59,6 +59,9 @@
 #define SAREK_10G_EMAC_1            (0x1a0000/4)
 #define SAREK_CSREGS                (0x080000/4)
 #define SAREK_ENET_FILTER           (0x109000/4)
+#define SAREK_AXIS_FILTER_0         (0x109000/4)
+#define SAREK_AXIS_FILTER_1         (0x10a000/4)
+
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -220,6 +223,13 @@
 #define SAREK_LICENSE_PRESENT       BIT(31)
 #define SAREK_LICENSE_VALID         BIT(30)
 #define SAREK_LICENSE_J2K           BIT(1)
+
+#define PLL_PCR                     BIT(0)
+#define PLL_PTP                     BIT(1)
+#define PLL_UNICAST_DELREQ          BIT(5)
+#define PLL_PCR_RESET               BIT(16)
+#define PLL_PTP_RESET               BIT(20)
+#define PLL_Si5345_DCO_MODE         BIT(28)
 
 #define SFP_1_NOT_PRESENT           BIT(0)
 #define SFP_1_TX_FAULT              BIT(1)
@@ -449,5 +459,26 @@
 #define kRegAXI_Lite_Cntrl_Match                7
 #define kRegAXI_Lite_Cntrl_Pll_Reset            8
 #define kRegAXI_Lite_Cntrl_Pll_Status           32
+
+/////////////////////////////////////////////////////////////////////
+//
+// Cochrane CS Regsiters
+//
+/////////////////////////////////////////////////////////////////////
+
+#define kRegCS_ps_gen_ctl           0
+#define kRegCS_hdmi_fmt             1
+#define kRegCS_hdmi_ctl             2
+#define kRegCS_top_gen_ctl          3
+#define kRegCS_sdi_fmt              4
+#define kRegCS_sdi_ctl              5
+#define kRegCS_sdi_vpid_a           6
+#define kRegCS_sdi_vpid_b           7
+#define kRegCS_audio_ctl            8
+#define kRegCS_firmware_id          32
+#define kRegCS_revisions            33
+#define kRegCS_compile_date         34
+#define kRegCS_compile_time         35
+#define kRegCS_audio_auto_delay     36
 
 #endif // REGISTERS_MB_H

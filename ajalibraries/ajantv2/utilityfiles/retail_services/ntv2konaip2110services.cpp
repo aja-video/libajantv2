@@ -59,62 +59,73 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback();
-	
+
 	//
-	// Kona4 Quad
+	// Io4K
 	//
-	
-	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
+
+	bool						bFb1RGB				= IsRGBFormat(mFb1Format);
+	bool						bFb2RGB				= IsRGBFormat(mFb2Format);
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
-	bool						bSdiOutRGB			= mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb;
-	bool						b3GbOut				= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);
-	bool						b2pi                = (b4K && m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);	// 2 pixed interleaved
+	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect;
+	bool						b3GaOutRGB			= (mDualStreamTransportType == NTV2_SDITransport_3Ga) && bSdiOutRGB;
+	bool						b3GbOut				= (mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) || b3GaOutRGB;
+	bool						b2pi                = (b4K && m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
 	bool						b2xQuadOut			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
+	bool						b4k6gOut			= false;
+	bool						b4k12gOut			= false;
 	int							bFb1Disable			= 0;						// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;						// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;						// Assume Channel 3 IS disabled by default
 	int							bFb4Disable			= 1;						// Assume Channel 4 IS disabled by default
-	bool						bQuadSwap			= b4K && (mQuadSwapOut != 0);	
-	bool						bFb2RGB				= IsRGBFormat(mFb2Format);
-	bool 						bDSKGraphicMode 	= mDSKMode == NTV2_DSKModeGraphicOverMatte || 
-													  mDSKMode == NTV2_DSKModeGraphicOverVideoIn || 
-													  mDSKMode == NTV2_DSKModeGraphicOverFB;
-	bool 						bDSKOn 				= mDSKMode == NTV2_DSKModeFBOverMatte || 
-													  mDSKMode == NTV2_DSKModeFBOverVideoIn || 
-													  (bFb2RGB && bDSKGraphicMode);
+	bool						bDSKGraphicMode		= mDSKMode == NTV2_DSKModeGraphicOverMatte ||
+	mDSKMode == NTV2_DSKModeGraphicOverVideoIn ||
+	mDSKMode == NTV2_DSKModeGraphicOverFB;
+	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte ||
+	mDSKMode == NTV2_DSKModeFBOverVideoIn ||
+	(bFb2RGB && bDSKGraphicMode);
 	bDSKOn											= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
-	NTV2ColorSpaceMode			inputColorSpace		= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
+	NTV2SDIInputFormatSelect	inputFormatSelect	= mSDIInput1FormatSelect;	// Input format select (YUV, RGB, Stereo 3D)
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-    bool 						bFb1HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
-    bool 						bFb2HdrRGB			= mFb2Format == NTV2_FBF_48BIT_RGB;
-	
+
+	bool						bFb1HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
+	bool						bFb2HdrRGB			= mFb2Format == NTV2_FBF_48BIT_RGB;
+	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
+														 mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB10bit) ||
+													   (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
+
+	// XPoint Init
+	NTV2CrosspointID			XPt1, XPt2, XPt3, XPt4;
+
+	ULWord						selectSwapQuad		= 0;
+	mCard->ReadRegister(kVRegSwizzle4kOutput, selectSwapQuad);
+	bool						bQuadSwap			= b4K && !b4k12gOut && !b4k6gOut && (selectSwapQuad != 0);
+	bool						bInRGB				= inputFormatSelect == NTV2_RGBSelect;
+
 	// make sure formats/modes match for multibuffer modes
 	if (b4K || b2FbLevelBHfr || bStereoOut)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 		bFb2RGB = IsRGBFormat(mFb1Format);
-		
+
 		if (b4K)
 		{
 			mCard->SetMode(NTV2_CHANNEL3, NTV2_MODE_DISPLAY);
 			mCard->SetFrameBufferFormat(NTV2_CHANNEL3, mFb1Format);
-			
+
 			mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_DISPLAY);
 			mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
 		}
 	}
-	
+
 	// select square division or 2 pixel interleave in frame buffer
-    AdjustFor4kQuadOrTpiOut();
-	
-	// Figure out what our input format is based on what is selected
-	GetSelectedInputVideoFormat(mFb1VideoFormat);
-	
+	mCard->SetTsiFrameEnable(b2pi,NTV2_CHANNEL1);
+
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
 	{
@@ -127,19 +138,25 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 		inputXptYuv1 = NTV2_XptSDIIn2;
 		inputXptYuv2 = NTV2_XptSDIIn2DS2;
 	}
+	// input 5 select
+	else if (mVirtualInputSelect == NTV2_Input5Select)
+	{
+		inputXptYuv1 = NTV2_XptHDMIIn;
+		inputXptYuv2 = NTV2_XptBlack;
+	}
 	// dual link select
-	else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
+	else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
 	{
 		inputXptYuv1 = NTV2_XptSDIIn1;
 		inputXptYuv2 = NTV2_XptSDIIn2;
 	}
-	
+
 	// Dual Link In 1
-	if (inputColorSpace == NTV2_ColorSpaceModeRgb)
+	if (bInRGB)
 	{
 		mCard->Connect (NTV2_XptDualLinkIn1Input, inputXptYuv1);
 		mCard->Connect (NTV2_XptDualLinkIn1DSInput, inputXptYuv2);
-		
+
 		inputXptYuv1 = NTV2_XptCSC1VidYUV;
 		inputXptYuv2 = NTV2_XptBlack;
 	}
@@ -148,8 +165,8 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptDualLinkIn1Input, NTV2_XptBlack);
 		mCard->Connect (NTV2_XptDualLinkIn1DSInput, NTV2_XptBlack);
 	}
-	
-	
+
+
 	// Frame Sync 1
 	NTV2CrosspointID frameSync1YUV;
 	if (bStereoOut || b2FbLevelBHfr)
@@ -178,7 +195,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 			frameSync1YUV = NTV2_XptFrameBuffer1YUV;
 		}
 	}
-	
+
 	// Frame Sync 2
 	NTV2CrosspointID frameSync2YUV = NTV2_XptBlack;
 	NTV2CrosspointID frameSync2RGB = NTV2_XptBlack;
@@ -199,20 +216,20 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	}
 	else if (bFb1RGB)
 	{
-        frameSync2RGB = bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux1ARGB : NTV2_XptFrameBuffer1RGB) : NTV2_XptLUT1RGB;
+		frameSync2RGB = bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
 	}
 	else
 	{
 		frameSync2RGB = NTV2_XptLUT1RGB;
 	}
-	
-	
+
+
 	// CSC 1
 	if (b4K)
 	{
 		if (bFb1RGB)
 		{
-            mCard->Connect (NTV2_XptCSC1VidInput, bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux1ARGB : NTV2_XptFrameBuffer1RGB) : NTV2_XptLUT1RGB);
+			mCard->Connect (NTV2_XptCSC1VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
 		}
 		else
 		{
@@ -234,14 +251,14 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer1YUV);
 	}
-	
-	
+
+
 	// CSC 2
 	if (b4K)
 	{
 		if (bFb1RGB)
 		{
-            mCard->Connect (NTV2_XptCSC2VidInput, bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux1BRGB : NTV2_XptFrameBuffer2RGB) : NTV2_XptLUT2RGB);
+			mCard->Connect (NTV2_XptCSC2VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB);
 		}
 		else
 		{
@@ -263,14 +280,14 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptFrameBuffer2YUV);
 	}
-	
-	
+
+
 	// CSC 3
 	if (b4K)
 	{
 		if (bFb1RGB)
 		{
-            mCard->Connect (NTV2_XptCSC3VidInput, bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux2ARGB : NTV2_XptFrameBuffer3RGB) : NTV2_XptLUT3Out);
+			mCard->Connect (NTV2_XptCSC3VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out);
 		}
 		else
 		{
@@ -288,14 +305,14 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		mCard->Connect (NTV2_XptCSC3VidInput, NTV2_XptBlack);
 	}
-	
-	
+
+
 	// CSC 4
 	if (b4K)
 	{
 		if (bFb1RGB)
 		{
-            mCard->Connect (NTV2_XptCSC4VidInput, bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux2BRGB : NTV2_XptFrameBuffer4RGB) : NTV2_XptLUT4Out);
+			mCard->Connect (NTV2_XptCSC4VidInput, bFb1HdrRGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out);
 		}
 		else
 		{
@@ -313,10 +330,27 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptBlack);
 	}
-	
-	
+
+
+	// CSC 5
+	if (b4K && !b2pi)
+	{
+		if (bSdiOutRGB)
+		{
+			mCard->Connect (NTV2_XptCSC5VidInput, NTV2_XptLUT5Out);
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptCSC5VidInput, NTV2_Xpt4KDownConverterOut);
+		}
+	}
+	else
+	{
+		mCard->Connect (NTV2_XptCSC5VidInput, NTV2_XptBlack);
+	}
+
+
 	// LUT 1
-	// note b4K is same processing as regular formats
 	if (bFb1RGB || bDSKOn)
 	{
 		if (!b2pi)
@@ -327,9 +361,9 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 		{
 			mCard->Connect (NTV2_XptLUT1Input, NTV2_Xpt425Mux1ARGB);
 		}
-		
+
 		// if RGB-to-RGB apply LUT converter
-		if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)
+		if (bSdiOutRGB)
 		{
 			mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL1,
 												 mRGB10Range == NTV2_RGB10RangeFull ?
@@ -345,8 +379,8 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
 		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
 	}
-	
-	
+
+
 	// LUT 2
 	if (b4K)
 	{
@@ -360,10 +394,10 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 			{
 				mCard->Connect (NTV2_XptLUT2Input, NTV2_Xpt425Mux1BRGB);
 			}
-			
-			
+
+
 			// if RGB-to-RGB apply LUT converter
-			if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)
+			if (bSdiOutRGB)
 			{
 				mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL2,
 													 mRGB10Range == NTV2_RGB10RangeFull ?
@@ -390,8 +424,8 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptCSC2VidRGB);
 		mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL2, kLUTBank_YUV2RGB);
 	}
-	
-	
+
+
 	// LUT 3
 	if (b4K)
 	{
@@ -405,31 +439,31 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 			{
 				mCard->Connect (NTV2_XptLUT3Input, NTV2_Xpt425Mux2ARGB);
 			}
-			
+
 			// if RGB-to-RGB apply LUT converter
-			if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)
+			if (bSdiOutRGB)
 			{
-				mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL3,
-													 mRGB10Range == NTV2_RGB10RangeFull ?
-													 kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
+				mCard->SetColorCorrectionOutputBank(  NTV2_CHANNEL3,
+													mRGB10Range == NTV2_RGB10RangeFull ?
+													kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 			}
 			else
 			{
-				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL3, kLUTBank_RGB2YUV);
+				mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL3, kLUTBank_RGB2YUV);
 			}
 		}
 		else
 		{
 			mCard->Connect (NTV2_XptLUT3Input, NTV2_XptCSC3VidRGB);
-			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL3, kLUTBank_YUV2RGB);
+			mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL3, kLUTBank_YUV2RGB);
 		}
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptLUT3Input, NTV2_XptBlack);
 	}
-	
-	
+
+
 	// LUT 4
 	if (b4K)
 	{
@@ -443,17 +477,17 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 			{
 				mCard->Connect (NTV2_XptLUT4Input, NTV2_Xpt425Mux2BRGB);
 			}
-			
+
 			// if RGB-to-RGB apply LUT converter
-			if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)
+			if (bSdiOutRGB)
 			{
-				mCard->SetColorCorrectionOutputBank (  NTV2_CHANNEL4,
-													 mRGB10Range == NTV2_RGB10RangeFull ?
-													 kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
+				mCard->SetColorCorrectionOutputBank(  NTV2_CHANNEL4,
+													mRGB10Range == NTV2_RGB10RangeFull ?
+													kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 			}
 			else
 			{
-				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL4, kLUTBank_RGB2YUV);
+				mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL4, kLUTBank_RGB2YUV);
 			}
 		}
 		else
@@ -466,102 +500,99 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		mCard->Connect (NTV2_XptLUT4Input, NTV2_XptBlack);
 	}
-	
-	
-	// Frame Buffer 1
-	mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptBlack);
-	mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_XptBlack);
-	
-	// Frame Buffer 2
-	mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptBlack);
-	mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_XptBlack);
-	
-	// Frame Buffer 3
-	mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptBlack);
-	mCard->Connect(NTV2_XptFrameBuffer3BInput, NTV2_XptBlack);
-	
-	// Frame Buffer 4
-	mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
-	mCard->Connect(NTV2_XptFrameBuffer4BInput, NTV2_XptBlack);
-	
-	// 4K Down Converter
-	if (b4K)
+
+
+	// LUT 5
+	// only used by HDMI Out in 4K Quad mode
+	if (b4K && !b2pi)
 	{
-		if (b4kHfr && !bFb1RGB)
+		if (bSdiOutRGB)
 		{
-			if (b2pi)
-			{
-				mCard->Connect (NTV2_Xpt4KDCQ1Input, NTV2_XptLUT1RGB);
-				mCard->Connect (NTV2_Xpt4KDCQ2Input, NTV2_XptLUT2RGB);
-				mCard->Connect (NTV2_Xpt4KDCQ3Input, NTV2_XptLUT3Out);
-				mCard->Connect (NTV2_Xpt4KDCQ4Input, NTV2_XptLUT4Out);
-				mCard->Enable4KDCRGBMode(true);
-			}
-			else
-			{
-				mCard->Connect (NTV2_Xpt4KDCQ1Input, NTV2_XptFrameBuffer1YUV);
-				mCard->Connect (NTV2_Xpt4KDCQ2Input, NTV2_XptFrameBuffer2YUV);
-				mCard->Connect (NTV2_Xpt4KDCQ3Input, NTV2_XptFrameBuffer3YUV);
-				mCard->Connect (NTV2_Xpt4KDCQ4Input, NTV2_XptFrameBuffer4YUV);
-				mCard->Enable4KDCRGBMode(false);
-			}
-		}
-		else if (bFb1HdrRGB)
-		{
-			if (b4kHfr)
-			{
-				// TODO: support 2pi
-				mCard->Connect (NTV2_Xpt4KDCQ1Input, NTV2_XptCSC1VidYUV);
-				mCard->Connect (NTV2_Xpt4KDCQ2Input, NTV2_XptCSC2VidYUV);
-				mCard->Connect (NTV2_Xpt4KDCQ3Input, NTV2_XptCSC3VidYUV);
-				mCard->Connect (NTV2_Xpt4KDCQ4Input, NTV2_XptCSC4VidYUV);
-				mCard->Enable4KDCRGBMode(false);
-			}
-			else
-			{
-				// TODO: support 2pi
-				mCard->Connect (NTV2_Xpt4KDCQ1Input, NTV2_XptFrameBuffer1YUV);
-				mCard->Connect (NTV2_Xpt4KDCQ2Input, NTV2_XptFrameBuffer2YUV);
-				mCard->Connect (NTV2_Xpt4KDCQ3Input, NTV2_XptFrameBuffer3YUV);
-				mCard->Connect (NTV2_Xpt4KDCQ4Input, NTV2_XptFrameBuffer4YUV);
-				mCard->Enable4KDCRGBMode(true);
-			}
+			mCard->Connect (NTV2_XptLUT5Input, NTV2_Xpt4KDownConverterOutRGB);
 		}
 		else
 		{
-			if (b4kHfr)
-			{
-				mCard->Connect (NTV2_Xpt4KDCQ1Input, NTV2_XptCSC1VidYUV);
-				mCard->Connect (NTV2_Xpt4KDCQ2Input, NTV2_XptCSC2VidYUV);
-				mCard->Connect (NTV2_Xpt4KDCQ3Input, NTV2_XptCSC3VidYUV);
-				mCard->Connect (NTV2_Xpt4KDCQ4Input, NTV2_XptCSC4VidYUV);
-				mCard->Enable4KDCRGBMode(false);
-			}
-			else
-			{
-				mCard->Connect (NTV2_Xpt4KDCQ1Input, NTV2_XptLUT1RGB);
-				mCard->Connect (NTV2_Xpt4KDCQ2Input, NTV2_XptLUT2RGB);
-				mCard->Connect (NTV2_Xpt4KDCQ3Input, NTV2_XptLUT3Out);
-				mCard->Connect (NTV2_Xpt4KDCQ4Input, NTV2_XptLUT4Out);
-				mCard->Enable4KDCRGBMode(true);
-			}
+			mCard->Connect (NTV2_XptLUT5Input, NTV2_XptCSC5VidRGB);
+		}
+
+		if (bSdiOutRGB && bHdmiOutRGB)
+		{
+			mCard->SetColorCorrectionOutputBank( NTV2_CHANNEL5, mRGB10Range == NTV2_RGB10RangeFull ?
+												kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
+		}
+		else if (bSdiOutRGB && !bHdmiOutRGB)
+		{
+			mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL5, kLUTBank_RGB2YUV);
+		}
+		else if (!bSdiOutRGB && bHdmiOutRGB)
+		{
+			mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL5, kLUTBank_YUV2RGB);
 		}
 	}
 	else
 	{
-		mCard->Connect (NTV2_Xpt4KDCQ1Input, NTV2_XptBlack);
-		mCard->Connect (NTV2_Xpt4KDCQ2Input, NTV2_XptBlack);
-		mCard->Connect (NTV2_Xpt4KDCQ3Input, NTV2_XptBlack);
-		mCard->Connect (NTV2_Xpt4KDCQ4Input, NTV2_XptBlack);
+		mCard->Connect (NTV2_XptLUT5Input, NTV2_XptBlack);
 	}
-	
-	
-	// DualLink Out 1
+
+
+	// Frame Buffer 1
+	mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptBlack);
+	mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_XptBlack);
+
+
+	// Frame Buffer 2
+	mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptBlack);
+	mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_XptBlack);
+
+
+	// Frame Buffer 3
+	mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptBlack);
+	mCard->Connect(NTV2_XptFrameBuffer3BInput, NTV2_XptBlack);
+
+
+	// Frame Buffer 4
+	mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
+	mCard->Connect(NTV2_XptFrameBuffer4BInput, NTV2_XptBlack);
+
+
+	// 4K Down Converter
+	XPt1 = XPt2 = XPt3 = XPt4 = NTV2_XptBlack;
+	// DC applies only to 4K Quad - for now
+	if (b4K && !b2pi)
+	{
+		// SDIOut-RGB
+		if (bSdiOutRGB)
+		{
+			// (FB-RGB: FB<-LUT<-DC) or (FB-YUV: FB<-CSC<-LUT<-DC)
+			XPt1 = NTV2_XptLUT1RGB;
+			XPt2 = NTV2_XptLUT2RGB;
+			XPt3 = NTV2_XptLUT3Out;
+			XPt4 = NTV2_XptLUT4Out;
+			mCard->Enable4KDCRGBMode(true);
+		}
+		// SDIOut-YUV
+		else
+		{
+			// (FB-RGB: FB<-LUT<-CSC<-DC) or (FB-YUV: FB<-DC)
+			XPt1 =  bFb1RGB ? NTV2_XptCSC1VidYUV : NTV2_XptFrameBuffer1YUV;
+			XPt2 =  bFb1RGB ? NTV2_XptCSC2VidYUV : NTV2_XptFrameBuffer2YUV;
+			XPt3 =  bFb1RGB ? NTV2_XptCSC3VidYUV : NTV2_XptFrameBuffer3YUV;
+			XPt4 =  bFb1RGB ? NTV2_XptCSC4VidYUV : NTV2_XptFrameBuffer4YUV;
+			mCard->Enable4KDCRGBMode(false);
+		}
+	}
+	mCard->Connect (NTV2_Xpt4KDCQ1Input, XPt1);
+	mCard->Connect (NTV2_Xpt4KDCQ2Input, XPt2);
+	mCard->Connect (NTV2_Xpt4KDCQ3Input, XPt3);
+	mCard->Connect (NTV2_Xpt4KDCQ4Input, XPt4);
+
+
+	// Dual Link Out 1
 	if (b4K)
 	{
 		if (bFb1RGB)
 		{
-            mCard->Connect (NTV2_XptDualLinkOut1Input, bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux1ARGB : NTV2_XptFrameBuffer1RGB) : NTV2_XptLUT1RGB);
+			mCard->Connect (NTV2_XptDualLinkOut1Input, bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
 		}
 		else
 		{
@@ -572,14 +603,14 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		mCard->Connect (NTV2_XptDualLinkOut1Input, bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : frameSync2RGB);
 	}
-	
-	
-	// DualLink Out 2
+
+
+	// Dual Link Out 2
 	if (b4K)
 	{
 		if (bFb1RGB)
 		{
-            mCard->Connect (NTV2_XptDualLinkOut2Input, bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux1BRGB : NTV2_XptFrameBuffer2RGB) : NTV2_XptLUT2RGB);
+			mCard->Connect (NTV2_XptDualLinkOut2Input, bFb1HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB);
 		}
 		else
 		{
@@ -590,14 +621,14 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		mCard->Connect (NTV2_XptDualLinkOut2Input, bFb2HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptBlack);
 	}
-	
-	
-	// DualLink Out 3
+
+
+	// Dual Link Out 3
 	if (b4K)
 	{
 		if (bFb1RGB)
 		{
-            mCard->Connect (NTV2_XptDualLinkOut3Input, bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux2ARGB : NTV2_XptFrameBuffer3RGB) : NTV2_XptLUT3Out);
+			mCard->Connect (NTV2_XptDualLinkOut3Input, bFb1HdrRGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out);
 		}
 		else
 		{
@@ -608,14 +639,14 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		mCard->Connect (NTV2_XptDualLinkOut3Input, NTV2_XptBlack);
 	}
-	
-	
-	// DualLink Out 4
+
+
+	// Dual Link Out 4
 	if (b4K)
 	{
 		if (bFb1RGB)
 		{
-            mCard->Connect (NTV2_XptDualLinkOut4Input, bFb1HdrRGB ? (b2pi ? NTV2_Xpt425Mux2BRGB : NTV2_XptFrameBuffer4RGB) : NTV2_XptLUT4Out);
+			mCard->Connect (NTV2_XptDualLinkOut4Input, bFb1HdrRGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out);
 		}
 		else
 		{
@@ -626,8 +657,23 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	{
 		mCard->Connect (NTV2_XptDualLinkOut4Input, NTV2_XptBlack);
 	}
-	
-	
+
+
+	// Dual Link Out 5
+	if (b4K && !b2pi)
+	{
+		mCard->Connect (NTV2_XptDualLinkOut5Input, bSdiOutRGB ? NTV2_Xpt4KDownConverterOutRGB : NTV2_XptBlack);
+	}
+	else if (b4K && b2pi)
+	{
+		mCard->Connect (NTV2_XptDualLinkOut5Input, bSdiOutRGB ? NTV2_XptLUT1RGB : NTV2_XptBlack);
+	}
+	else
+	{
+		mCard->Connect (NTV2_XptDualLinkOut5Input, bSdiOutRGB ? NTV2_XptLUT1RGB : NTV2_XptBlack);
+	}
+
+
 	// SDI Out 1
 	if (b4K)
 	{
@@ -676,8 +722,8 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptBlack);
 		mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 	}
-	
-	
+
+
 	// SDI Out 2
 	if (b4K)
 	{
@@ -726,8 +772,8 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptBlack);
 		mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 	}
-	
-	
+
+
 	// SDI Out 3 - acts like SDI 1 in non-4K mode
 	if (b4K)
 	{
@@ -768,6 +814,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 		}
 		else
 		{
+			// smpte 425
 			if (bFb1RGB)
 			{
 				mCard->Connect (NTV2_XptSDIOut3Input, bQuadSwap ?  NTV2_XptCSC1VidYUV : NTV2_XptCSC3VidYUV);
@@ -779,12 +826,12 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (b2FbLevelBHfr || bStereoOut)												// Stereo or LevelB
+	else if (b2FbLevelBHfr || bStereoOut)											// Stereo or LevelB
 	{
 		mCard->Connect (NTV2_XptSDIOut3Input, frameSync1YUV);
 		mCard->Connect (NTV2_XptSDIOut3InputDS2, b3GbOut ? frameSync2YUV : NTV2_XptBlack);
 	}
-	else if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)			// RGB Out
+	else if (bSdiOutRGB)															// RGB Out
 	{
 		mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut1);
 		mCard->Connect (NTV2_XptSDIOut3InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
@@ -820,8 +867,8 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
 		}
 	}
-	
-	
+
+
 	// SDI Out 4 - acts like SDI 2 in non-4K mode
 	if (b4K)
 	{
@@ -886,7 +933,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)			// RGB Out
+	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)			// RGB Out
 	{
 		mCard->Connect (NTV2_XptSDIOut4Input, b3GbOut ? NTV2_XptDuallinkOut1 : NTV2_XptDuallinkOut1DS2);
 		mCard->Connect (NTV2_XptSDIOut4InputDS2, b3GbOut ? NTV2_XptDuallinkOut1DS2 : NTV2_XptBlack);
@@ -922,30 +969,59 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 		}
 	}
-	
-	
+
+
+	// SDI Out 5
+	if (bSdiOutRGB)			// RGB Out - alway use DL
+	{
+		mCard->Connect (NTV2_XptSDIOut5Input, NTV2_XptDuallinkOut5);
+		mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptDuallinkOut5DS2);
+	}
+	// YUV Out 4K Quads
+	else if (b4K && !b2pi)
+	{
+		mCard->Connect (NTV2_XptSDIOut5Input, NTV2_Xpt4KDownConverterOut);
+		mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
+	}
+	// Stereo or LevelB
+	else if (b2FbLevelBHfr || bStereoOut)
+	{
+		mCard->Connect (NTV2_XptSDIOut5Input, frameSync1YUV);
+		mCard->Connect (NTV2_XptSDIOut5InputDS2, frameSync2YUV);
+	}
+	// YUV Out
+	else
+	{
+		if (bFb1RGB)
+		{
+			mCard->Connect (NTV2_XptSDIOut5Input, NTV2_XptCSC1VidYUV);
+		}
+
+		// FB-YUV
+		else
+		{
+			mCard->Connect (NTV2_XptSDIOut5Input, b2pi ? NTV2_Xpt425Mux1AYUV : NTV2_XptFrameBuffer1YUV);
+		}
+
+		mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
+	}
+
+
 	// HDMI Out
-	NTV2CrosspointID XPt1 = NTV2_XptBlack;
-	NTV2CrosspointID XPt2 = NTV2_XptBlack;
-	NTV2CrosspointID XPt3 = NTV2_XptBlack;
-	NTV2CrosspointID XPt4 = NTV2_XptBlack;
+	XPt1 = XPt2 = XPt3 = XPt4 = NTV2_XptBlack;
 	if (b4K)
 	{
-		if (b4kHfr && !bFb1RGB)
+		// 2si mode
+		if (b2pi)
 		{
-			// YUV to HDMI Out
-			if (b2pi)
+			// RGB-mode set
+			if (bHdmiOutRGB)
 			{
 				switch (mVirtualHDMIOutputSelect)
 				{
-					case NTV2_PrimaryOutputSelect:
-						XPt1 = NTV2_Xpt425Mux1AYUV;
-						XPt2 = NTV2_Xpt425Mux1BYUV;
-						XPt3 = NTV2_Xpt425Mux2AYUV;
-						XPt4 = NTV2_Xpt425Mux2BYUV;
-						break;
 					default:
-					case NTV2_4kHalfFrameRate:
+					case NTV2_PrimaryOutputSelect:
+					case NTV2_4kHalfFrameRate:		// unsupported for now
 						XPt1 = NTV2_XptLUT1RGB;
 						XPt2 = NTV2_XptLUT2RGB;
 						XPt3 = NTV2_XptLUT3Out;
@@ -958,77 +1034,66 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 					case NTV2_Quadrant4Select: XPt1 = NTV2_XptLUT4Out; break;
 				}
 			}
+
+			// YUV-mode set
 			else
 			{
 				switch (mVirtualHDMIOutputSelect)
 				{
-					case NTV2_PrimaryOutputSelect:
-						XPt1 = NTV2_XptFrameBuffer1YUV;
-						XPt2 = NTV2_XptFrameBuffer2YUV;
-						XPt3 = NTV2_XptFrameBuffer3YUV;
-						XPt4 = NTV2_XptFrameBuffer4YUV;
-						break;
 					default:
-					case NTV2_4kHalfFrameRate:
-						XPt1 = NTV2_XptLUT1RGB;
-						XPt2 = NTV2_XptLUT2RGB;
-						XPt3 = NTV2_XptLUT3Out;
-						XPt4 = NTV2_XptLUT4Out;
+					case NTV2_PrimaryOutputSelect:
+					case NTV2_4kHalfFrameRate:		// unsupported for now
+						XPt1 = bFb1RGB ? NTV2_XptCSC1VidYUV : NTV2_Xpt425Mux1AYUV;
+						XPt2 = bFb1RGB ? NTV2_XptCSC2VidYUV : NTV2_Xpt425Mux1BYUV;
+						XPt3 = bFb1RGB ? NTV2_XptCSC3VidYUV : NTV2_Xpt425Mux2AYUV;
+						XPt4 = bFb1RGB ? NTV2_XptCSC4VidYUV : NTV2_Xpt425Mux2BYUV;
 						break;
-					case NTV2_Quarter4k:       XPt1 = (b4kHfr) ? NTV2_Xpt4KDownConverterOut : NTV2_Xpt4KDownConverterOutRGB; break;
+					case NTV2_Quarter4k:       XPt1 = bFb1RGB ? NTV2_XptCSC1VidYUV : NTV2_Xpt425Mux1AYUV; break;
+					case NTV2_Quadrant1Select: XPt1 = bFb1RGB ? NTV2_XptCSC1VidYUV : NTV2_Xpt425Mux1AYUV; break;
+					case NTV2_Quadrant2Select: XPt1 = bFb1RGB ? NTV2_XptCSC2VidYUV : NTV2_Xpt425Mux1BYUV; break;
+					case NTV2_Quadrant3Select: XPt1 = bFb1RGB ? NTV2_XptCSC3VidYUV : NTV2_Xpt425Mux2AYUV; break;
+					case NTV2_Quadrant4Select: XPt1 = bFb1RGB ? NTV2_XptCSC4VidYUV : NTV2_Xpt425Mux2BYUV; break;
+				}
+			}
+		}
+
+		// quadrant mode
+		else
+		{
+			// RGB-mode set
+			if (bHdmiOutRGB)
+			{
+				switch (mVirtualHDMIOutputSelect)
+				{
+					default:
+					case NTV2_PrimaryOutputSelect:
+					case NTV2_4kHalfFrameRate:		// unsupported for now
+					case NTV2_Quarter4k:
+						XPt1 = bSdiOutRGB ? NTV2_Xpt4KDownConverterOutRGB : NTV2_XptLUT5Out;
+						break;
 					case NTV2_Quadrant1Select: XPt1 = NTV2_XptLUT1RGB; break;
 					case NTV2_Quadrant2Select: XPt1 = NTV2_XptLUT2RGB; break;
 					case NTV2_Quadrant3Select: XPt1 = NTV2_XptLUT3Out; break;
 					case NTV2_Quadrant4Select: XPt1 = NTV2_XptLUT4Out; break;
 				}
 			}
-		}
-		else
-		{
-			// RGB to HDMI Out
-			switch (mVirtualHDMIOutputSelect)
+
+			// YUV-mode set
+			else
 			{
-				default:
-				case NTV2_PrimaryOutputSelect:
-					if (b4kHfr)
-					{
-						XPt1 = bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptCSC1VidYUV;
-						XPt2 = bFb1HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptCSC2VidYUV;
-						XPt3 = bFb1HdrRGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptCSC3VidYUV;
-						XPt4 = bFb1HdrRGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptCSC4VidYUV;
-					}
-					else
-					{
-						XPt1 = bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
-						XPt2 = bFb1HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB;
-						XPt3 = bFb1HdrRGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out;
-						XPt4 = bFb1HdrRGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out;
-					}
-					break;
-				case NTV2_4kHalfFrameRate:
-					XPt1 = bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB;
-					XPt2 = bFb1HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB;
-					XPt3 = bFb1HdrRGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out;
-					XPt4 = bFb1HdrRGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out;
-					break;
-				case NTV2_Quarter4k:
-					if (b2pi)
-					{
-						XPt1 = NTV2_XptLUT1RGB;
-					}
-					else if (b4kHfr)
-					{
-						XPt1 = NTV2_Xpt4KDownConverterOut;
-					}
-					else
-					{
-						XPt1 = NTV2_Xpt4KDownConverterOutRGB;
-					}
-					break;
-				case NTV2_Quadrant1Select: XPt1 = bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB; break;
-				case NTV2_Quadrant2Select: XPt1 = bFb1HdrRGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptLUT2RGB; break;
-				case NTV2_Quadrant3Select: XPt1 = bFb1HdrRGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptLUT3Out; break;
-				case NTV2_Quadrant4Select: XPt1 = bFb1HdrRGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptLUT4Out; break;
+				switch (mVirtualHDMIOutputSelect)
+				{
+					default:
+					case NTV2_PrimaryOutputSelect:
+					case NTV2_4kHalfFrameRate:		// unsupported for now
+					case NTV2_Quarter4k:
+						XPt1 = bSdiOutRGB ? NTV2_XptCSC5VidYUV :  NTV2_Xpt4KDownConverterOut;
+						break;
+					case NTV2_Quadrant1Select: XPt1 = NTV2_XptCSC1VidYUV; break;
+					case NTV2_Quadrant2Select: XPt1 = NTV2_XptCSC2VidYUV; break;
+					case NTV2_Quadrant3Select: XPt1 = NTV2_XptCSC3VidYUV; break;
+					case NTV2_Quadrant4Select: XPt1 = NTV2_XptCSC4VidYUV; break;
+				}
 			}
 		}
 	}
@@ -1044,46 +1109,44 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	}
 	else
 	{
-		XPt1 = bFb1HdrRGB ? frameSync2RGB : NTV2_XptLUT1RGB;
+		if (bHdmiOutRGB)
+		{
+			XPt1 = bFb1HdrRGB ? frameSync2RGB : NTV2_XptLUT1RGB;
+		}
+		else
+		{
+			if (bFb1RGB)
+			{
+				XPt1 = NTV2_XptCSC1VidYUV;
+			}
+
+			// FB-YUV
+			else
+			{
+				XPt1 = b2pi ? NTV2_Xpt425Mux1AYUV : NTV2_XptFrameBuffer1YUV;
+			}
+		}
 	}
-	
-	mCard->Connect (NTV2_XptHDMIOutInput, XPt1);
+
+	mCard->Connect (NTV2_XptHDMIOutInput,	XPt1);
 	mCard->Connect (NTV2_XptHDMIOutQ2Input, XPt2);
 	mCard->Connect (NTV2_XptHDMIOutQ3Input, XPt3);
 	mCard->Connect (NTV2_XptHDMIOutQ4Input, XPt4);
-	
+
 	// 4K Hdmi-to-Hdmi Bypass always disabled for playback
 	mCard->WriteRegister(kRegHDMIOutControl, false, kRegMaskHDMIV2TxBypass, kRegShiftHDMIV2TxBypass);
-	
-	
-	// Analog Out
-	if (b4K)
-	{
-		switch (mVirtualAnalogOutputSelect)
-		{
-			default:
-			case NTV2_Quadrant1Select: mCard->Connect (NTV2_XptAnalogOutInput, bFb1RGB ? NTV2_XptCSC1VidYUV : NTV2_XptFrameBuffer1YUV); break;
-			case NTV2_Quadrant2Select: mCard->Connect (NTV2_XptAnalogOutInput, bFb1RGB ? NTV2_XptCSC2VidYUV : NTV2_XptFrameBuffer2YUV); break;
-			case NTV2_Quadrant3Select: mCard->Connect (NTV2_XptAnalogOutInput, bFb1RGB ? NTV2_XptCSC3VidYUV : NTV2_XptFrameBuffer3YUV); break;
-			case NTV2_Quadrant4Select: mCard->Connect (NTV2_XptAnalogOutInput, bFb1RGB ? NTV2_XptCSC4VidYUV : NTV2_XptFrameBuffer4YUV); break;
-		};
-	}
-	else
-	{
-		mCard->Connect (NTV2_XptAnalogOutInput, frameSync1YUV);
-	}
-	
-	
+
+
 	//
 	// Mixer/Keyer
 	//
-	
+
 	// default video proc mode
 	mCard->WriteRegister (kRegVidProc1Control, 0, ~kRegMaskVidProcLimiting);		// FG = Full, BG = Full, VidProc = FG On
-	
+
 	// The background video/key depends on the DSK mode
 	bool bNoKey = false;						// Assume we DO have a foreground key
-	
+
 	if (bDSKOn)
 	{
 		switch (mDSKMode)
@@ -1092,160 +1155,150 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 				// Foreground
 				if (bFb1RGB)
 				{
-					// The foreground video/key comes from the CSC 1 output (0x05/0x0E)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC1VidYUV);
 					mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptCSC1KeyYUV);
 				}
 				else
 				{
-					// The foreground video/key comes from the Channel 1 frame buffer (0x08 - key input is "don't care")
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptFrameBuffer1YUV);
 					mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptFrameBuffer1YUV);
 					bNoKey = true;
 				}
-				
-				// Background  (note: FB1 out is used for sync - it will be replaced by matte video
+
 				mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptFrameBuffer1YUV);
 				mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptFrameBuffer1YUV);
 				mCard->WriteRegister (kRegVidProc1Control, 1, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
 				break;
-				
+
 			case NTV2_DSKModeFBOverVideoIn:
 				// Foreground
 				if (bFb1RGB)
 				{
-					// The foreground video/key comes from the CSC 1 output (0x05/0x0E)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC1VidYUV);
 					mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptCSC1KeyYUV);
 				}
 				else
 				{
-					// The foreground video/key comes from the Channel 1 frame buffer (0x08 - key input is "don't care")
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptFrameBuffer1YUV);
 					mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptFrameBuffer1YUV);
 					bNoKey = true;
 				}
-				
+
 				// Background is video in
 				if (mVirtualInputSelect == NTV2_Input1Select)
 				{
-					// Select input 1 (0x01)
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptSDIIn1);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptSDIIn1);
 				}
 				else if (mVirtualInputSelect == NTV2_Input2Select)
 				{
-					// Select input 2 (0x02)
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptSDIIn2);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptSDIIn2);
 				}
-				else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
+				else if (mVirtualInputSelect == NTV2_Input5Select)
 				{
-					// Select dual link (0x83)
+					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptHDMIIn);
+					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptHDMIIn);
+				}
+				else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+				{
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptDuallinkIn1);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptDuallinkIn1);
 				}
 				break;
-				
+
 			case NTV2_DSKModeGraphicOverMatte:
 				// Foreground
 				if (bFb2RGB)
 				{
-					// The foreground video/key comes from the CSC 2 output (0x10/0x11)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV);
 					mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptCSC2KeyYUV);
 				}
 				else
 				{
-					// The foreground video/key comes from the Channel 2 frame buffer (0x0F - key input is "don't care")
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptFrameBuffer2YUV);
 					mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptFrameBuffer2YUV);
 					bNoKey = true;
 				}
-				
+
 				// Background (note: FB1 is used for sync - it will be replaced by matte video
 				mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptFrameBuffer1YUV);
 				mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptFrameBuffer1YUV);
 				bFb2Disable = 0;			// enable Ch 2
 				mCard->WriteRegister (kRegVidProc1Control, 1, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
 				break;
-				
+
 			case NTV2_DSKModeGraphicOverVideoIn:
 				// Foreground
 				if (bFb2RGB)
 				{
-					// The foreground video/key comes from the CSC 2 output (0x10/0x11)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV);
 					mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptCSC2KeyYUV);
 				}
 				else
 				{
-					// The foreground video/key comes from the Channel 2 frame buffer (0x0F - key input is "don't care")
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptFrameBuffer2YUV);
 					mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptFrameBuffer2YUV);
 					bNoKey = true;
 				}
-				
+
 				// Background is video in
 				if (mVirtualInputSelect == NTV2_Input1Select)
 				{
-					// Select input 1 (0x01)
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptSDIIn1);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptSDIIn1);
 				}
 				else if (mVirtualInputSelect == NTV2_Input2Select)
 				{
-					// Select input 2 (0x02)
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptSDIIn2);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptSDIIn2);
 				}
-				else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
+				else if (mVirtualInputSelect == NTV2_Input5Select)
 				{
-					// Select dual link (0x83)
+					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptHDMIIn);
+					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptHDMIIn);
+				}
+				else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
+				{
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptDuallinkIn1);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptDuallinkIn1);
 				}
-				
+
 				bFb1Disable = 1;			// disable Ch 1
 				bFb2Disable = 0;			// enable Ch 2
 				break;
-				
+
 			case NTV2_DSKModeGraphicOverFB:
 				// Foreground
 				if (bFb2RGB)
 				{
-					// The foreground video/key comes from the CSC 2 output (0x10/0x11)
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV);
 					mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptCSC2KeyYUV);
 				}
 				else
 				{
-					// The foreground video/key comes from the Channel 2 frame buffer (0x0F - key input is "don't care")
 					mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptFrameBuffer2YUV);
 					mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptFrameBuffer2YUV);
 					bNoKey = true;
 				}
-				
-				// Background is Frame Buffer 1
+
 				if (bFb1RGB)
 				{
-					// Select CSC1 (0x05/0x0E)
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptCSC1VidYUV);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptCSC1KeyYUV);
 				}
 				else
 				{
-					// Select frame buffer YUV (0x08)
 					mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptFrameBuffer1YUV);
 					mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptFrameBuffer1YUV);
 				}
 				bFb2Disable = 0;			// enable Ch 2
 				break;
-				
+
 			default:
 				break;
 		}
-		
+
 		if (bNoKey)
 			mCard->WriteRegister (kRegVidProc1Control, 0, kRegMaskVidProcFGControl, kRegShiftVidProcFGControl);		// FG = Full Raster
 		else
@@ -1255,12 +1308,12 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 			else
 				mCard->WriteRegister (kRegVidProc1Control, 2, kRegMaskVidProcFGControl, kRegShiftVidProcFGControl);		// FG = Unshaped, BG = Full, VidProc = FG On
 		}
-		
+
 		// write foreground fade
 		mCard->WriteRegister (kRegVidProc1Control, 1, kRegMaskVidProcMode, kRegShiftVidProcMode);					// Mix mode - "mix"
 		mCard->WriteRegister (kRegMixer1Coefficient, 0x10000 - mDSKForegroundFade); // Mix value 0x10000 (opaque) - 0x00000 (transparent)
 	}
-	
+
 	// Frame Buffer Disabling
 	if (b2FbLevelBHfr || bStereoOut)
 	{
@@ -1277,12 +1330,40 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 			bFb1Disable = bFb2Disable = bFb3Disable = bFb4Disable = 0;
 		}
 	}
-	mCard->WriteRegister(kRegCh1Control, bFb1Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh2Control, bFb2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh3Control, bFb3Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	mCard->WriteRegister(kRegCh4Control, bFb4Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	
-	// connect muxes
+	if(bFb1Disable)
+	{
+		mCard->DisableChannel(NTV2_CHANNEL1);
+		mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptBlack);
+	}
+	else
+		mCard->EnableChannel(NTV2_CHANNEL1);
+
+	if(bFb2Disable)
+	{
+		mCard->DisableChannel(NTV2_CHANNEL2);
+		mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptBlack);
+	}
+	else
+		mCard->EnableChannel(NTV2_CHANNEL2);
+
+	if(bFb3Disable)
+	{
+		mCard->DisableChannel(NTV2_CHANNEL3);
+		mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptBlack);
+	}
+	else
+		mCard->EnableChannel(NTV2_CHANNEL3);
+
+	if(bFb4Disable)
+	{
+		mCard->DisableChannel(NTV2_CHANNEL4);
+		mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
+	}
+	else
+		mCard->EnableChannel(NTV2_CHANNEL4);
+
+
+	// 425 Mux
 	if (b2pi)
 	{
 		if (bFb1RGB)
@@ -1311,6 +1392,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 	mCard->Connect(NTV2_Xpt425Mux3BInput, NTV2_XptBlack);
 	mCard->Connect(NTV2_Xpt425Mux4AInput, NTV2_XptBlack);
 	mCard->Connect(NTV2_Xpt425Mux4BInput, NTV2_XptBlack);
+
 }
 
 
@@ -1321,48 +1403,201 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 {
 	// call superclass first
 	DeviceServices::SetDeviceXPointCapture();
-	
+
+	bool						bFb1RGB				= IsRGBFormat(mFb1Format);
 	NTV2VideoFormat				inputFormat			= NTV2_FORMAT_UNKNOWN;
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
-	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
-	bool						b3GbOut				= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);
-	bool						b4K              	= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
+	bool						b3GbOut				= mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb;
+	bool						bSdiOutRGB			= mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect;
+	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
-	bool						b2xQuadOut			= false;	//(b4K && !b4kHfr && mVirtualInputSelect == NTV2_DualLink2xSdi4k);
+	bool						b4k6gOut			= b4K && !b4kHfr && !bSdiOutRGB &&
+	(m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire ||
+	 m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
+	//bool						b4k12gOut			= b4K && (b4kHfr || bSdiOutRGB) &&
+	//												  (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire ||
+	//												   m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
+	bool						b2xQuadIn			= b4K && !b4kHfr && (mVirtualInputSelect == NTV2_DualLink2xSdi4k);
+	bool						b4xQuadIn			= b4K && (mVirtualInputSelect == NTV2_DualLink4xSdi4k);
+	bool						b2xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
+	//bool						b4xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_4wire);
+	bool						bStereoIn			= false;
 	int							bFb1Disable			= 0;		// Assume Channel 1 is NOT disabled by default
 	int							bFb2Disable			= 1;		// Assume Channel 2 IS disabled by default
 	int							bFb3Disable			= 1;		// Assume Channel 2 IS disabled by default
 	int							bFb4Disable			= 1;		// Assume Channel 2 IS disabled by default
-	bool						bQuadSwap			= b4K && (mQuadSwapIn != 0);	
-	NTV2CrosspointID			inputXptYUV1 		= NTV2_XptBlack;				// Input source selected single stream
-	NTV2CrosspointID			inputXptYUV2 		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	NTV2ColorSpaceMode			inputColorSpace 	= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)
-	
+
+	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
+	bool						bHdmiIn             = false; //mVirtualInputSelect == NTV2_Input5Select;
+	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
+														 mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB10bit) ||
+													   (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
+
+	// swap quad mode
+	ULWord						selectSwapQuad		= 0;
+	mCard->ReadRegister(kVRegSwizzle4kInput, selectSwapQuad);
+	bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_DualLink4xSdi4k && selectSwapQuad != 0;
+
+	// SMPTE 425 (2pi)
+	bool						bVpid2x2piIn		= false;
+	bool						bVpid4x2piInA		= b4K;
+	bool						bVpid4x2piInB		= false;
+	bool						bVpid6GIn			= false;
+	bool						bVpid12GIn			= false;
+	bool						b2piIn				= false;
+	bool						b2pi				= b4K;
+	bool						bInRGB				= false;
+	bool						bHdmiInRGB			= false;
+	NTV2CrosspointID			XPt1, XPt2, XPt3, XPt4;
+	NTV2CrosspointID			inHdYUV1, inHdYUV2;
+	NTV2CrosspointID			inHdRGB1;
+	NTV2CrosspointID			in4kRGB1, in4kRGB2, in4kRGB3, in4kRGB4;
+	NTV2CrosspointID			in4kYUV1, in4kYUV2, in4kYUV3, in4kYUV4;
+
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
-	
+	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputFormatSelect);
+
+	// SDI In 1
+	bool bConvertBToA;
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL1)==true && mVirtualInputSelect==NTV2_Input1Select;
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
+
+	// SDI In 2
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL2)==true && mVirtualInputSelect==NTV2_Input2Select;
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, bConvertBToA);
+
+	// SDI In 3
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL3);
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, bConvertBToA);
+
+	// SDI In 4
+	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL4);
+	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, bConvertBToA);
+
 	// input 1 select
+	inHdYUV1 = inHdYUV2 = inHdRGB1 = NTV2_XptBlack;
 	if (mVirtualInputSelect == NTV2_Input1Select)
 	{
-		inputXptYUV1 = NTV2_XptSDIIn1;
-		inputXptYUV2 = NTV2_XptSDIIn1DS2;
+		inHdYUV1 = NTV2_XptSDIIn1;
+		inHdYUV2 = NTV2_XptSDIIn1DS2;
+		inHdRGB1 = NTV2_XptDuallinkIn1;
 	}
 	// input 2 select
 	else if (mVirtualInputSelect == NTV2_Input2Select)
 	{
-		inputXptYUV1 = NTV2_XptSDIIn2;
-		inputXptYUV2 = NTV2_XptSDIIn2DS2;
+		inHdYUV1 = NTV2_XptSDIIn2;
+		inHdYUV2 = NTV2_XptSDIIn2DS2;
+		inHdRGB1 = NTV2_XptDuallinkIn1;
+	}
+	// input 5 select HDMI
+	else if (mVirtualInputSelect == NTV2_Input5Select)
+	{
+		inHdYUV1 = NTV2_XptHDMIIn;
+		inHdYUV2 = NTV2_XptHDMIInQ2;
+		inHdRGB1 = NTV2_XptHDMIInRGB;
 	}
 	// dual link select
-	else if (mVirtualInputSelect == NTV2_Input2xDLHDSelect)
+	else if (mVirtualInputSelect == NTV2_DualLinkInputSelect)
 	{
-		inputXptYUV1 = NTV2_XptSDIIn1;
-		inputXptYUV2 = NTV2_XptSDIIn2;
+		inHdYUV1 = NTV2_XptSDIIn1;
+		inHdYUV2 = NTV2_XptSDIIn2;
+		inHdRGB1 = NTV2_XptDuallinkIn1;
 	}
-	
+
+	// HMDI In
+	if (bHdmiIn)
+	{
+		uint32_t valRgb = 0;
+		mCard->ReadRegister(kRegHDMIInputStatus, valRgb, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
+		bHdmiInRGB = valRgb != 0;
+	}
+
+	else // 425 or Quads
+	{
+		//ULWord vpida = 0, vpidb	= 0;
+		//mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
+		//debugOut("in  vpida = %08x  vpidb = %08x\n", true, vpida, vpidb);
+
+		//CNTV2VPID parser;
+		//parser.SetVPID(vpida);
+		//VPIDStandard std = parser.GetStandard();
+		//bVpid2x2piIn  = std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb;
+		//bVpid4x2piInA = std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb;
+		//bVpid4x2piInB = std == VPIDStandard_2160_QuadDualLink_3Gb;
+
+		// 6g/121g not supported
+		//mCard->GetSDIInput6GPresent(bVpid6GIn, NTV2_CHANNEL1);
+		//mCard->GetSDIInput12GPresent(bVpid12GIn, NTV2_CHANNEL1);
+
+		bVpid2x2piIn	= bVpid2x2piIn  || bVpid6GIn;
+		bVpid4x2piInA	= bVpid4x2piInA || bVpid12GIn;
+		b2piIn			= bVpid2x2piIn  || bVpid4x2piInA || bVpid4x2piInB;
+
+		// quad in
+		if (b2piIn)
+			b2xQuadIn = b4xQuadIn = false;
+
+		// override inputFormatSelect for SMTE425
+		if (b2piIn)
+		{
+			//VPIDSampling sample = parser.GetSampling();
+			VPIDSampling sample = VPIDSampling_YUV_422;
+			if (sample == VPIDSampling_YUV_422)
+			{
+				inputFormatSelect = NTV2_YUVSelect;
+			}
+			else
+			{
+				inputFormatSelect = NTV2_RGBSelect;
+			}
+		}
+	}
+
+	// other bools
+	bStereoIn	= inputFormatSelect == NTV2_Stereo3DSelect;
+	b2pi		= b2piIn || (bHdmiIn && b4K);
+	bInRGB		= (bHdmiIn == false && inputFormatSelect == NTV2_RGBSelect) ||
+	(bHdmiIn == true && bHdmiInRGB == true);
+
+
+	// 4K input routing
+	in4kRGB1 = in4kRGB2 = in4kRGB3 = in4kRGB4 = NTV2_XptBlack;
+	in4kYUV1 = in4kYUV2 = in4kYUV3 = in4kYUV4 = NTV2_XptBlack;
+	if (b4K)
+	{
+		if (bHdmiIn)
+		{
+			if (bInRGB)
+			{
+				in4kRGB1 = NTV2_XptHDMIInRGB;	in4kRGB2 = NTV2_XptHDMIInQ2RGB;
+				in4kRGB3 = NTV2_XptHDMIInQ3RGB;	in4kRGB4 = NTV2_XptHDMIInQ4RGB;
+			}
+			else
+			{
+				in4kYUV1 = NTV2_XptHDMIIn;		in4kYUV2 = NTV2_XptHDMIInQ2;
+				in4kYUV3 = NTV2_XptHDMIInQ3;	in4kYUV4 = NTV2_XptHDMIInQ4;
+			}
+		}
+		else if (bInRGB)	// SDI-RGB
+		{
+			in4kRGB1 = NTV2_XptDuallinkIn1;	in4kRGB2 = NTV2_XptDuallinkIn2;
+			in4kRGB3 = NTV2_XptDuallinkIn3;	in4kRGB4 = NTV2_XptDuallinkIn4;
+		}
+		else if (bVpid2x2piIn || b2xQuadIn)	// SDI-2Wire-YUV
+		{
+			in4kYUV1 = NTV2_XptSDIIn1;		in4kYUV2 = NTV2_XptSDIIn1DS2;
+			in4kYUV3 = NTV2_XptSDIIn2;		in4kYUV4 = NTV2_XptSDIIn2DS2;
+		}
+		else								// SDI-4Wire-YUV
+		{
+			in4kYUV1 = NTV2_XptSDIIn1;		in4kYUV2 = NTV2_XptSDIIn2;
+			in4kYUV3 = NTV2_XptSDIIn3;		in4kYUV4 = NTV2_XptSDIIn4;
+		}
+	}
+
 	// make sure formats/modes match for multibuffer modes
-	if (b4K || b2FbLevelBHfr)
+	if (b4K || b2FbLevelBHfr || bStereoIn)
 	{
 		mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
@@ -1370,193 +1605,252 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 		{
 			mCard->SetMode(NTV2_CHANNEL3, NTV2_MODE_CAPTURE);
 			mCard->SetFrameBufferFormat(NTV2_CHANNEL3, mFb1Format);
-			
+
 			mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_CAPTURE);
 			mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
 		}
 	}
-	
-	//mVpidParser(mVpid1a);
-	//VPIDStandard std = mVpidParser.GetStandard();
-	bool b2x2piIn  = false; // (std == VPIDStandard_2160_DualLink);
-	//bool b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
-	//bool b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
-	
-	//bool b2piIn = (b2x2piIn || b4x2piInA || b4x2piInB);
-	bool b2piIn = b4K;
-	
+
 	// select square division or 2 pixel interleave in frame buffer
-    AdjustFor4kQuadOrTpiIn(inputFormat, b2piIn);
-	
-	// SDI In 1
-	bool bConvertBToA; 
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL1)==true && mVirtualInputSelect==NTV2_Input1Select;
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
-	
-	// SDI In 2
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL2)==true && mVirtualInputSelect==NTV2_Input2Select;
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, bConvertBToA);
-	
-	// SDI In 3
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL3);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, bConvertBToA);
-	
-	// SDI In 4
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL4);
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, bConvertBToA);
-	
-	
+	mCard->SetTsiFrameEnable(b2pi, NTV2_CHANNEL1);
+
+	// Mixer/Keyer
+	mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptBlack);
+	mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptBlack);
+	mCard->Connect (NTV2_XptMixer1BGVidInput, NTV2_XptBlack);
+	mCard->Connect (NTV2_XptMixer1BGKeyInput, NTV2_XptBlack);
+	mCard->Connect (NTV2_XptMixer2FGVidInput, NTV2_XptBlack);
+	mCard->Connect (NTV2_XptMixer2FGKeyInput, NTV2_XptBlack);
+	mCard->Connect (NTV2_XptMixer2BGVidInput, NTV2_XptBlack);
+	mCard->Connect (NTV2_XptMixer2BGKeyInput, NTV2_XptBlack);
+
+
 	// Dual Link In 1
-	if (b4K && (inputColorSpace == NTV2_ColorSpaceModeRgb))
-	{
-		mCard->Connect (NTV2_XptDualLinkIn1Input, bQuadSwap ? NTV2_XptSDIIn3 : NTV2_XptSDIIn1);
-		mCard->Connect (NTV2_XptDualLinkIn1DSInput, bQuadSwap ? NTV2_XptSDIIn3DS2 : NTV2_XptSDIIn1DS2);
-	}
-	else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
-	{
-		mCard->Connect (NTV2_XptDualLinkIn1Input, inputXptYUV1);
-		mCard->Connect (NTV2_XptDualLinkIn1DSInput, inputXptYUV2);
-		
-		inputXptYUV1 = NTV2_XptCSC1VidYUV;
-		inputXptYUV2 = NTV2_XptBlack;
-	}
-	else
+	if (bHdmiIn)
 	{
 		mCard->Connect (NTV2_XptDualLinkIn1Input, NTV2_XptBlack);
 		mCard->Connect (NTV2_XptDualLinkIn1DSInput, NTV2_XptBlack);
 	}
-	
-	
-	// Dual Link In 2
-	if (b4K && (inputColorSpace == NTV2_ColorSpaceModeRgb))
-	{
-		mCard->Connect (NTV2_XptDualLinkIn2Input, bQuadSwap ? NTV2_XptSDIIn4 : NTV2_XptSDIIn2);
-		mCard->Connect (NTV2_XptDualLinkIn2DSInput, bQuadSwap ? NTV2_XptSDIIn4DS2 : NTV2_XptSDIIn2DS2);
-	}
 	else
+	{
+		if (b4K && bInRGB)
+		{
+			mCard->Connect (NTV2_XptDualLinkIn1Input, bQuadSwap ? NTV2_XptSDIIn3 : NTV2_XptSDIIn1);
+			mCard->Connect (NTV2_XptDualLinkIn1DSInput, bQuadSwap ? NTV2_XptSDIIn3DS2 : NTV2_XptSDIIn1DS2);
+		}
+		else if (bInRGB)
+		{
+			mCard->Connect (NTV2_XptDualLinkIn1Input, inHdYUV1);
+			mCard->Connect (NTV2_XptDualLinkIn1DSInput, inHdYUV2);
+
+			inHdYUV1 = NTV2_XptCSC1VidYUV;
+			inHdYUV2 = NTV2_XptBlack;
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptDualLinkIn1Input, NTV2_XptBlack);
+			mCard->Connect (NTV2_XptDualLinkIn1DSInput, NTV2_XptBlack);
+		}
+	}
+
+	// Dual Link In 2
+	if (bHdmiIn)
 	{
 		mCard->Connect (NTV2_XptDualLinkIn2Input, NTV2_XptBlack);
 		mCard->Connect (NTV2_XptDualLinkIn2DSInput, NTV2_XptBlack);
 	}
-	
-	
-	// Dual Link In 3
-	if (b4K && (inputColorSpace == NTV2_ColorSpaceModeRgb))
-	{
-		mCard->Connect (NTV2_XptDualLinkIn3Input, bQuadSwap ? NTV2_XptSDIIn1 : NTV2_XptSDIIn3);
-		mCard->Connect (NTV2_XptDualLinkIn3DSInput, bQuadSwap ? NTV2_XptSDIIn1DS2 : NTV2_XptSDIIn3DS2);
-	}
 	else
+	{
+		if (b4K && bInRGB)
+		{
+			mCard->Connect (NTV2_XptDualLinkIn2Input, bQuadSwap ? NTV2_XptSDIIn4 : NTV2_XptSDIIn2);
+			mCard->Connect (NTV2_XptDualLinkIn2DSInput, bQuadSwap ? NTV2_XptSDIIn4DS2 : NTV2_XptSDIIn2DS2);
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptDualLinkIn2Input, NTV2_XptBlack);
+			mCard->Connect (NTV2_XptDualLinkIn2DSInput, NTV2_XptBlack);
+		}
+	}
+
+
+	// Dual Link In 3
+	if (bHdmiIn)
 	{
 		mCard->Connect (NTV2_XptDualLinkIn3Input, NTV2_XptBlack);
 		mCard->Connect (NTV2_XptDualLinkIn3DSInput, NTV2_XptBlack);
 	}
-	
-	
-	// Dual Link In 4
-	if (b4K && (inputColorSpace == NTV2_ColorSpaceModeRgb))
-	{
-		mCard->Connect (NTV2_XptDualLinkIn4Input, bQuadSwap ? NTV2_XptSDIIn2 : NTV2_XptSDIIn4);
-		mCard->Connect (NTV2_XptDualLinkIn4DSInput, bQuadSwap ? NTV2_XptSDIIn2DS2 : NTV2_XptSDIIn4DS2);
-	}
 	else
+	{
+		if (b4K && bInRGB)
+		{
+			mCard->Connect (NTV2_XptDualLinkIn3Input, bQuadSwap ? NTV2_XptSDIIn1 : NTV2_XptSDIIn3);
+			mCard->Connect (NTV2_XptDualLinkIn3DSInput, bQuadSwap ? NTV2_XptSDIIn1DS2 : NTV2_XptSDIIn3DS2);
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptDualLinkIn3Input, NTV2_XptBlack);
+			mCard->Connect (NTV2_XptDualLinkIn3DSInput, NTV2_XptBlack);
+		}
+	}
+
+
+	// Dual Link In 4
+	if (bHdmiIn)
 	{
 		mCard->Connect (NTV2_XptDualLinkIn4Input, NTV2_XptBlack);
 		mCard->Connect (NTV2_XptDualLinkIn4DSInput, NTV2_XptBlack);
 	}
-	
-	
-	// CSC 1
-	if (b4K)
+	else
 	{
-		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
+		if (b4K && bInRGB)
 		{
-			mCard->Connect (NTV2_XptCSC1VidInput, bQuadSwap ? NTV2_XptLUT3Out : NTV2_XptLUT1RGB);
+			mCard->Connect (NTV2_XptDualLinkIn4Input, bQuadSwap ? NTV2_XptSDIIn2 : NTV2_XptSDIIn4);
+			mCard->Connect (NTV2_XptDualLinkIn4DSInput, bQuadSwap ? NTV2_XptSDIIn2DS2 : NTV2_XptSDIIn4DS2);
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptCSC1VidInput, bQuadSwap ? NTV2_XptSDIIn3 : NTV2_XptSDIIn1);
+			mCard->Connect (NTV2_XptDualLinkIn4Input, NTV2_XptBlack);
+			mCard->Connect (NTV2_XptDualLinkIn4DSInput, NTV2_XptBlack);
 		}
 	}
-	else if (inputColorSpace != NTV2_ColorSpaceModeRgb)
+
+
+	// CSC 1
+	if (b4K)
 	{
-		mCard->Connect (NTV2_XptCSC1VidInput, inputXptYUV1);
+		if (bInRGB)
+		{
+			mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptLUT1RGB);
+		}
+		else
+		{
+			if(bHdmiIn)
+			{
+				mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptHDMIIn);
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptCSC1VidInput, bQuadSwap ? NTV2_XptSDIIn3 : NTV2_XptSDIIn1);
+			}
+		}
+	}
+	else if (!bInRGB)
+	{
+		if (inputFormat == mFb1VideoFormat)
+		{
+			mCard->Connect (NTV2_XptCSC1VidInput, inHdYUV1);
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptBlack);
+		}
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptLUT1RGB);
 	}
-	
-	
+
+
 	// CSC 2
 	if (b4K)
 	{
-		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
+		if (bInRGB)
 		{
-			mCard->Connect (NTV2_XptCSC2VidInput, bQuadSwap ? NTV2_XptLUT4Out : NTV2_XptLUT2RGB);
+			mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptLUT2RGB);
+		}
+		else if (bQuadSwap)
+		{
+			mCard->Connect (NTV2_XptCSC2VidInput, NTV2_XptSDIIn4);
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptCSC2VidInput, bQuadSwap ? NTV2_XptSDIIn4 : NTV2_XptSDIIn2);
+			mCard->Connect (NTV2_XptCSC2VidInput, in4kYUV2);
 		}
 	}
 	else
 	{
-		mCard->Connect (NTV2_XptCSC2VidInput, inputXptYUV2);
+		mCard->Connect (NTV2_XptCSC2VidInput, inHdYUV2);
 	}
-	
-	
+
+
 	// CSC 3
 	if (b4K)
 	{
-		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
+		if (bInRGB)
 		{
-			mCard->Connect (NTV2_XptCSC3VidInput, bQuadSwap ? NTV2_XptLUT1RGB : NTV2_XptLUT3Out);
+			mCard->Connect (NTV2_XptCSC3VidInput, NTV2_XptLUT3Out);
+		}
+		else if (bQuadSwap)
+		{
+			mCard->Connect (NTV2_XptCSC3VidInput, NTV2_XptSDIIn1);
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptCSC3VidInput, bQuadSwap ? NTV2_XptSDIIn1 : NTV2_XptSDIIn3);
+			mCard->Connect (NTV2_XptCSC3VidInput, in4kYUV3);
 		}
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptCSC3VidInput, NTV2_XptBlack);
 	}
-	
-	
+
+
 	// CSC 4
 	if (b4K)
 	{
-		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
+		if (bInRGB)
 		{
-			mCard->Connect (NTV2_XptCSC4VidInput, bQuadSwap ? NTV2_XptLUT2RGB : NTV2_XptLUT4Out);
+			mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptLUT4Out);
+		}
+		else if (bQuadSwap)
+		{
+			mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptSDIIn2);
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptCSC4VidInput, bQuadSwap ? NTV2_XptSDIIn2 : NTV2_XptSDIIn4);
+			mCard->Connect (NTV2_XptCSC4VidInput, in4kYUV4);
 		}
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptCSC4VidInput, NTV2_XptBlack);
 	}
-	
-	
+
+
+	// CSC 5
+	if (b4K && !b2pi)
+	{
+		if (bSdiOutRGB)
+		{
+			mCard->Connect (NTV2_XptCSC5VidInput, NTV2_XptLUT5Out);
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptCSC5VidInput, NTV2_Xpt4KDownConverterOut);
+		}
+	}
+	else
+	{
+		mCard->Connect (NTV2_XptCSC5VidInput, NTV2_XptBlack);
+	}
+
+
 	// LUT 1
 	// note b4K processing is same
-	if (inputColorSpace != NTV2_ColorSpaceModeRgb)
+	if (!bInRGB)
 	{
 		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
 		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_YUV2RGB);
 	}
 	else
 	{
-		mCard->Connect (NTV2_XptLUT1Input, NTV2_XptDuallinkIn1);
-		
+		mCard->Connect(NTV2_XptLUT1Input, b4K ? in4kRGB1 : inHdRGB1);
+
 		// if RGB-to-RGB apply LUT converter
 		if (bFb1RGB)
 		{
-			mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL1,
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1,
 												 mSDIInput1RGBRange == NTV2_RGBRangeFull ?
 												 kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 		}
@@ -1565,59 +1859,48 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL1, kLUTBank_RGB2YUV);
 		}
 	}
-	
-	
+
+
 	// LUT 2
-	if (b4K)
+	if (!bInRGB)
 	{
-		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
-		{
-			mCard->Connect (NTV2_XptLUT2Input, NTV2_XptDuallinkIn2);
-			
-			// if RGB-to-RGB apply LUT converter
-			if (bFb1RGB)
-			{
-				mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL2,
-													 mSDIInput1RGBRange == NTV2_RGBRangeFull ?
-													 kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
-			}
-			else
-			{
-				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);
-			}
-		}
-		else
-		{
-			mCard->Connect (NTV2_XptLUT2Input, NTV2_XptCSC2VidRGB);
-			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_YUV2RGB);
-		}
-	}
-	else if (inputColorSpace == NTV2_ColorSpaceModeRgb)
-	{
-		// provides SMPTE <-> Full conversion
-		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptDuallinkIn1);
-		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2,	
-											 mSDIInput1RGBRange == NTV2_RGBRangeFull ?
-											 kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
+		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptCSC2VidRGB);
+		mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_YUV2RGB);
 	}
 	else
 	{
-		mCard->Connect (NTV2_XptLUT2Input, NTV2_XptCSC2VidRGB);
-		mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL2, kLUTBank_YUV2RGB);
+		mCard->Connect(NTV2_XptLUT2Input, in4kRGB2);
+
+		// if RGB-to-RGB apply LUT converter
+		if (bFb1RGB)
+		{
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2,
+												 mSDIInput1RGBRange == NTV2_RGBRangeFull ?
+												 kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
+		}
+		else
+		{
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL2, kLUTBank_RGB2YUV);
+		}
 	}
-	
-	
+
+
 	// LUT 3
 	if (b4K)
 	{
-		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
+		if (!bInRGB)
 		{
-			mCard->Connect (NTV2_XptLUT3Input, NTV2_XptDuallinkIn3);
-			
+			mCard->Connect (NTV2_XptLUT3Input, NTV2_XptCSC3VidRGB);
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL3, kLUTBank_YUV2RGB);
+		}
+		else
+		{
+			mCard->Connect(NTV2_XptLUT3Input, in4kRGB3);
+
 			// if RGB-to-RGB apply LUT converter
 			if (bFb1RGB)
 			{
-				mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL3,
+				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL3,
 													 mSDIInput1RGBRange == NTV2_RGBRangeFull ?
 													 kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 			}
@@ -1626,103 +1909,217 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL3, kLUTBank_RGB2YUV);
 			}
 		}
-		else
-		{
-			mCard->Connect (NTV2_XptLUT3Input, NTV2_XptCSC3VidRGB);
-			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL3, kLUTBank_YUV2RGB);
-		}
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptLUT3Input, NTV2_XptBlack);
 	}
-	
-	
+
+
 	// LUT 4
 	if (b4K)
 	{
-		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
+		if (!bInRGB)
 		{
-			mCard->Connect (NTV2_XptLUT4Input, NTV2_XptDuallinkIn4);
-			
+			mCard->Connect (NTV2_XptLUT4Input, NTV2_XptCSC4VidRGB);
+			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL4, kLUTBank_YUV2RGB);
+		}
+		else
+		{
+			mCard->Connect(NTV2_XptLUT4Input, in4kRGB4);
+
 			// if RGB-to-RGB apply LUT converter
 			if (bFb1RGB)
 			{
-				mCard->SetColorCorrectionOutputBank (	NTV2_CHANNEL4,
-													 mSDIInput1RGBRange == NTV2_RGBRangeFull ?
-													 kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
+				mCard->SetColorCorrectionOutputBank( NTV2_CHANNEL4,
+													mSDIInput1RGBRange == NTV2_RGBRangeFull ?
+													kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
 			}
 			else
 			{
 				mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL4, kLUTBank_RGB2YUV);
 			}
 		}
-		else
-		{
-			mCard->Connect (NTV2_XptLUT4Input, NTV2_XptCSC4VidRGB);
-			mCard->SetColorCorrectionOutputBank (NTV2_CHANNEL4, kLUTBank_YUV2RGB);
-		}
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptLUT4Input, NTV2_XptBlack);
 	}
-	
-	
-	// Dual Link Out 1,2,3,4 3 Out
-	if (inputFormat == mFb1VideoFormat)
+
+
+	// LUT 5
+	// only used by HDMI Out in 4K Quad mode
+	if (b4K && !b2pi)
 	{
-		// Input is NOT secondary
-		
-		if (inputColorSpace != NTV2_ColorSpaceModeRgb)
+		if (bSdiOutRGB)
 		{
-			mCard->Connect (NTV2_XptDualLinkOut3Input, NTV2_XptLUT1RGB);
-			mCard->Connect (NTV2_XptDualLinkOut4Input, NTV2_XptLUT1RGB);
+			mCard->Connect (NTV2_XptLUT5Input, NTV2_Xpt4KDownConverterOutRGB);
 		}
 		else
 		{
-			if (mSDIInput1RGBRange == mSDIOutput1RGBRange && mLUTType != NTV2_LUTCustom)
-			{
-				// no range change
-				mCard->Connect (NTV2_XptDualLinkOut3Input, NTV2_XptDuallinkIn1);
-				mCard->Connect (NTV2_XptDualLinkOut4Input, NTV2_XptDuallinkIn1);
-			}
-			else
-			{
-				mCard->Connect (NTV2_XptDualLinkOut3Input, NTV2_XptLUT1RGB);
-				mCard->Connect (NTV2_XptDualLinkOut4Input, NTV2_XptLUT1RGB);
-			}
+			mCard->Connect (NTV2_XptLUT5Input, NTV2_XptCSC5VidRGB);
+		}
+
+		if (bSdiOutRGB && bHdmiOutRGB)
+		{
+			mCard->SetColorCorrectionOutputBank( NTV2_CHANNEL5, mRGB10Range == NTV2_RGB10RangeFull ?
+												kLUTBank_FULL2SMPTE : kLUTBank_SMPTE2FULL);
+		}
+		else if (bSdiOutRGB && !bHdmiOutRGB)
+		{
+			mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL5, kLUTBank_RGB2YUV);
+		}
+		else if (!bSdiOutRGB && bHdmiOutRGB)
+		{
+			mCard->SetColorCorrectionOutputBank(NTV2_CHANNEL5, kLUTBank_YUV2RGB);
 		}
 	}
 	else
 	{
-		// Input is Secondary format
-		// NOTE: This is the same logic as above but we can't do the dual link case because we would
-		// need two LUT's to convert RGB to YUB then back again.
-		if (inputColorSpace != NTV2_ColorSpaceModeRgb)
+		mCard->Connect (NTV2_XptLUT5Input, NTV2_XptBlack);
+	}
+
+
+
+	// Dual Link Out 1
+	if (!bSdiOutRGB || !b4K)
+	{
+		mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptBlack);
+	}
+	else if (b4K)
+	{
+		if (bInRGB)
 		{
-			mCard->Connect (NTV2_XptDualLinkOut3Input, NTV2_XptLUT1RGB);
-			mCard->Connect (NTV2_XptDualLinkOut4Input, NTV2_XptLUT1RGB);
+			if (bFb1RGB)
+			{
+				mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptLUT1RGB);
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptDualLinkOut1Input, in4kRGB1);
+			}
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptDualLinkOut3Input, NTV2_XptDuallinkIn1);
-			mCard->Connect (NTV2_XptDualLinkOut4Input, NTV2_XptDuallinkIn1);
+			mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptLUT1RGB);
 		}
 	}
-	
-	
-	// 425 mux
-	if (b2piIn)
+	else
+	{
+		mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptBlack);
+	}
+
+
+	// Dual Link Out 2
+	if (!bSdiOutRGB || !b4K)
+	{
+		mCard->Connect (NTV2_XptDualLinkOut2Input, NTV2_XptBlack);
+	}
+	else if (b4K)
+	{
+		if (bInRGB)
+		{
+			if (bFb1RGB)
+			{
+				mCard->Connect (NTV2_XptDualLinkOut2Input, NTV2_XptLUT2RGB);
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptDualLinkOut2Input, in4kRGB2);
+			}
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptDualLinkOut2Input, NTV2_XptLUT2RGB);
+		}
+	}
+	else
+	{
+		mCard->Connect (NTV2_XptDualLinkOut2Input, NTV2_XptBlack);
+	}
+
+
+	// Dual Link Out 3
+	if (!bSdiOutRGB)
+	{
+		mCard->Connect (NTV2_XptDualLinkOut3Input, NTV2_XptBlack);
+	}
+	else
+	{
+		if (bInRGB)
+		{
+			if (bFb1RGB)
+			{
+				mCard->Connect (NTV2_XptDualLinkOut3Input, b4K ? NTV2_XptLUT3Out : NTV2_XptLUT1RGB);
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptDualLinkOut3Input, b4K ? in4kRGB3 : inHdRGB1);
+			}
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptDualLinkOut3Input, b4K ? NTV2_XptLUT3Out : NTV2_XptLUT1RGB);
+		}
+	}
+
+
+
+	// Dual Link Out 4
+	if (!bSdiOutRGB)
+	{
+		mCard->Connect (NTV2_XptDualLinkOut4Input, NTV2_XptBlack);
+	}
+	else
+	{
+		if (bInRGB)
+		{
+			if (bFb1RGB)
+			{
+				mCard->Connect (NTV2_XptDualLinkOut4Input, b4K ? NTV2_XptLUT4Out : NTV2_XptLUT1RGB);
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptDualLinkOut4Input, b4K ? in4kRGB4 : inHdRGB1);
+			}
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptDualLinkOut4Input, b4K ? NTV2_XptLUT4Out : NTV2_XptLUT1RGB);
+		}
+	}
+
+
+	// Dual Link Out 5
+	if (!bSdiOutRGB)
+	{
+		mCard->Connect (NTV2_XptDualLinkOut5Input, NTV2_XptBlack);
+	}
+	else if (b4K && !b2pi) // RGB-Quad
+	{
+		mCard->Connect (NTV2_XptDualLinkOut5Input, bSdiOutRGB ? NTV2_Xpt4KDownConverterOutRGB : NTV2_XptBlack);
+	}
+	else if (b4K && b2pi) // RGB-425
+	{
+		mCard->Connect (NTV2_XptDualLinkOut5Input, bInRGB ? in4kRGB1 : NTV2_XptLUT1RGB);
+	}
+	else
+	{
+		mCard->Connect (NTV2_XptDualLinkOut5Input, bInRGB ? inHdRGB1 : NTV2_XptLUT1RGB);
+	}
+
+
+	// 425 Mux
+	if (b4K && b2pi)
 	{
 		if (bFb1RGB)
 		{
-			if (inputColorSpace == NTV2_ColorSpaceModeRgb)
+			if (bInRGB)
 			{
-				mCard->Connect(NTV2_Xpt425Mux1AInput, NTV2_XptDuallinkIn1);
-				mCard->Connect(NTV2_Xpt425Mux1BInput, NTV2_XptDuallinkIn2);
-				mCard->Connect(NTV2_Xpt425Mux2AInput, NTV2_XptDuallinkIn3);
-				mCard->Connect(NTV2_Xpt425Mux2BInput, NTV2_XptDuallinkIn4);
+				mCard->Connect(NTV2_Xpt425Mux1AInput, in4kRGB1);
+				mCard->Connect(NTV2_Xpt425Mux1BInput, in4kRGB2);
+				mCard->Connect(NTV2_Xpt425Mux2AInput, in4kRGB3);
+				mCard->Connect(NTV2_Xpt425Mux2BInput, in4kRGB4);
 			}
 			else
 			{
@@ -1732,9 +2129,9 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 				mCard->Connect(NTV2_Xpt425Mux2BInput, NTV2_XptLUT4Out);
 			}
 		}
-		else
+		else // FB-YUV
 		{
-			if (inputColorSpace == NTV2_ColorSpaceModeRgb)
+			if (bInRGB)
 			{
 				mCard->Connect(NTV2_Xpt425Mux1AInput, NTV2_XptCSC1VidYUV);
 				mCard->Connect(NTV2_Xpt425Mux1BInput, NTV2_XptCSC2VidYUV);
@@ -1743,10 +2140,10 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 			}
 			else
 			{
-				mCard->Connect(NTV2_Xpt425Mux1AInput, NTV2_XptSDIIn1);
-				mCard->Connect(NTV2_Xpt425Mux1BInput, NTV2_XptSDIIn2);
-				mCard->Connect(NTV2_Xpt425Mux2AInput, NTV2_XptSDIIn3);
-				mCard->Connect(NTV2_Xpt425Mux2BInput, NTV2_XptSDIIn4);
+				mCard->Connect(NTV2_Xpt425Mux1AInput, in4kYUV1);
+				mCard->Connect(NTV2_Xpt425Mux1BInput, in4kYUV2);
+				mCard->Connect(NTV2_Xpt425Mux2AInput, in4kYUV3);
+				mCard->Connect(NTV2_Xpt425Mux2BInput, in4kYUV4);
 			}
 		}
 	}
@@ -1756,39 +2153,119 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 		mCard->Connect(NTV2_Xpt425Mux1BInput, NTV2_XptBlack);
 		mCard->Connect(NTV2_Xpt425Mux2AInput, NTV2_XptBlack);
 		mCard->Connect(NTV2_Xpt425Mux2BInput, NTV2_XptBlack);
-		
 		mCard->Connect(NTV2_Xpt425Mux3AInput, NTV2_XptBlack);
 		mCard->Connect(NTV2_Xpt425Mux3BInput, NTV2_XptBlack);
 		mCard->Connect(NTV2_Xpt425Mux4AInput, NTV2_XptBlack);
 		mCard->Connect(NTV2_Xpt425Mux4BInput, NTV2_XptBlack);
 	}
-	
-	
+
+
 	// Frame Buffer 1
-	if (b4K && b2piIn)
+	if (b2pi)
 	{
 		if (bFb1RGB)
 		{
-			mCard->Connect(NTV2_XptFrameBuffer1Input, bQuadSwap ? NTV2_Xpt425Mux2ARGB : NTV2_Xpt425Mux1ARGB);
-			mCard->Connect(NTV2_XptFrameBuffer1BInput, bQuadSwap ? NTV2_Xpt425Mux2BRGB : NTV2_Xpt425Mux1BRGB);
+			mCard->Connect(NTV2_XptFrameBuffer1Input, NTV2_Xpt425Mux1ARGB);
+			mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BRGB);
 		}
 		else
 		{
-			mCard->Connect(NTV2_XptFrameBuffer1Input, bQuadSwap ? NTV2_Xpt425Mux2AYUV : NTV2_Xpt425Mux1AYUV);
-			mCard->Connect(NTV2_XptFrameBuffer1BInput, bQuadSwap ? NTV2_Xpt425Mux2BYUV : NTV2_Xpt425Mux1BYUV);
+			mCard->Connect(NTV2_XptFrameBuffer1Input, NTV2_Xpt425Mux1AYUV);
+			mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BYUV);
 		}
 	}
-	else if (b2FbLevelBHfr)
+	else if (b4K)
 	{
-		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
+		if (bFb1RGB)
+		{
+			if (bInRGB)
+			{
+				if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
+				{
+					if(bHdmiIn)
+					{
+						mCard->Connect(NTV2_XptFrameBuffer1Input, NTV2_Xpt425Mux1ARGB);
+						mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BRGB);
+					}
+					else
+					{
+						mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptDuallinkIn1);
+						mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_XptBlack);
+					}
+				}
+				else
+				{
+					if(bHdmiIn)
+					{
+						mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptLUT1RGB);			// range change needed
+						mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_XptLUT2RGB);
+					}
+					else
+					{
+						mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptLUT1RGB);			// range change needed
+						mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_XptBlack);
+					}
+				}
+			}
+			else
+			{
+				if(bHdmiIn)
+				{
+					mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptLUT1RGB);	// CSC converted
+					mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_XptLUT2RGB);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptLUT1RGB);	// CSC converted
+					mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_XptBlack);
+				}
+			}
+		}
+		else // YUV
+		{
+			if (b2xQuadIn)
+			{
+				mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);
+			}
+			else if (bInRGB)
+			{
+				if(bHdmiIn)
+				{
+					mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidYUV);			// range change needed
+					mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_XptCSC2VidYUV);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidYUV);
+					mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_XptBlack);
+				}
+			}
+			else
+			{
+				if(bHdmiIn)
+				{
+					mCard->Connect(NTV2_XptFrameBuffer1Input, NTV2_Xpt425Mux1AYUV);
+					mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BYUV);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptFrameBuffer1Input, bQuadSwap ? NTV2_XptSDIIn3 : NTV2_XptSDIIn1);
+					mCard->Connect(NTV2_XptFrameBuffer1BInput, NTV2_XptBlack);
+				}
+			}
+		}
+	}
+	else if (b2FbLevelBHfr || bStereoIn)
+	{
+		mCard->Connect (NTV2_XptFrameBuffer1Input, inHdYUV1);
 	}
 	else if (bFb1RGB)
 	{
-		if (inputColorSpace == NTV2_ColorSpaceModeRgb)
+		if (bInRGB)
 		{
 			if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 			{
-				mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptDuallinkIn1);		// no range change
+				mCard->Connect (NTV2_XptFrameBuffer1Input, bHdmiIn ? NTV2_XptHDMIIn : NTV2_XptDuallinkIn1);
 			}
 			else
 			{
@@ -1802,51 +2279,230 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 	}
 	else
 	{
-		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
-	}
-	
-	
-	
-	// Frame Buffer 2
-	if (b4K && b2piIn) // same as b4K
-	{
-		if (bFb1RGB)
+		if (bInRGB)
 		{
-			mCard->Connect(NTV2_XptFrameBuffer2Input, bQuadSwap ? NTV2_Xpt425Mux1ARGB : NTV2_Xpt425Mux2ARGB);
-			mCard->Connect(NTV2_XptFrameBuffer2BInput, bQuadSwap ? NTV2_Xpt425Mux1BRGB : NTV2_Xpt425Mux2BRGB);
+			mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidYUV);
 		}
 		else
 		{
-			mCard->Connect(NTV2_XptFrameBuffer2Input, bQuadSwap ? NTV2_Xpt425Mux1AYUV : NTV2_Xpt425Mux2AYUV);
-			mCard->Connect(NTV2_XptFrameBuffer2BInput, bQuadSwap ? NTV2_Xpt425Mux1BYUV : NTV2_Xpt425Mux2BYUV);
+			mCard->Connect (NTV2_XptFrameBuffer1Input, bHdmiIn ? NTV2_XptHDMIIn : inHdYUV1);
 		}
 	}
-	else if (b2FbLevelBHfr)
+
+
+	// Frame Buffer 2
+	if (b2pi)
 	{
-		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
+		if (bFb1RGB)
+		{
+			mCard->Connect(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2ARGB);
+			mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BRGB);
+		}
+		else
+		{
+			mCard->Connect(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2AYUV);
+			mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BYUV);
+		}
+	}
+	else if (b4K)
+	{
+		if (bFb1RGB)
+		{
+			if (bInRGB)
+			{
+				if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
+				{
+					if(bHdmiIn)
+					{
+						mCard->Connect(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2ARGB);
+						mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BRGB);
+					}
+					else
+					{
+						mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptDuallinkIn2);
+						mCard->Connect (NTV2_XptFrameBuffer2BInput, NTV2_XptBlack);
+					}
+				}
+				else
+				{
+					if(bHdmiIn)
+					{
+						mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptLUT3Out);			// range change needed
+						mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_XptLUT4Out);
+					}
+					else
+					{
+						mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptLUT1RGB);			// range change needed
+						mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_XptBlack);
+					}
+				}
+			}
+			else
+			{
+				if(bHdmiIn)
+				{
+					mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptLUT3Out);	// CSC converted
+					mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_XptLUT4Out);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptLUT2RGB);	// CSC converted
+					mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_XptBlack);
+				}
+			}
+		}
+		else // YUV
+		{
+			if (b2xQuadIn)
+			{
+				mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptSDIIn1DS2);
+			}
+			else if (bInRGB)
+			{
+				if(bHdmiIn)
+				{
+					mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptCSC3VidYUV);			// range change needed
+					mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_XptCSC4VidYUV);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptCSC2VidYUV);
+					mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_XptBlack);
+				}
+			}
+			else
+			{
+				if(bHdmiIn)
+				{
+					mCard->Connect(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2AYUV);
+					mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BYUV);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptFrameBuffer2Input, bQuadSwap ? NTV2_XptSDIIn4 : NTV2_XptSDIIn2);
+					mCard->Connect(NTV2_XptFrameBuffer2BInput, NTV2_XptBlack);
+				}
+			}
+		}
+	}
+	else if (b2FbLevelBHfr || bStereoIn)
+	{
+		mCard->Connect (NTV2_XptFrameBuffer2Input, inHdYUV2);
 	}
 	else
 	{
 		mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptBlack);
 	}
-	
-	
+
+
 	// Frame Buffer 3
-	mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptBlack);
-	
-	
+	if (b4K & !b2pi)
+	{
+		if (bFb1RGB)
+		{
+			if (bInRGB)
+			{
+				if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
+				{
+					mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptDuallinkIn3);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptLUT3Out);			// range change needed
+				}
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptLUT3Out);				// CSC converted
+			}
+		}
+		else // YUV
+		{
+			if (b2xQuadIn)
+			{
+				mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptSDIIn2);
+			}
+			else if (bInRGB && !b2piIn)
+			{
+				mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptCSC3VidYUV);
+			}
+			else if (!b2piIn)
+			{
+				if (bHdmiIn)
+				{
+					mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptHDMIInQ3);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptFrameBuffer3Input, bQuadSwap ? NTV2_XptSDIIn1 : NTV2_XptSDIIn3);
+				}
+			}
+		}
+	}
+	else
+	{
+		mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptBlack);
+	}
+
+
 	// Frame Buffer 4
-	mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
-	
-	
+	if (b4K && !b2pi)
+	{
+		if (bFb1RGB)
+		{
+			if (bInRGB)
+			{
+				if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
+				{
+					mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptDuallinkIn4);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptLUT4Out);			// range change needed
+				}
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptLUT4Out);				// CSC converted
+			}
+		}
+		else // YUV
+		{
+			if (b2xQuadIn)
+			{
+				mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptSDIIn2DS2);
+			}
+			else if (bInRGB && !b2piIn)
+			{
+				mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptCSC4VidYUV);
+			}
+			else if (!b2piIn)
+			{
+				if (bHdmiIn)
+				{
+					mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptHDMIInQ4);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptFrameBuffer4Input, bQuadSwap ? NTV2_XptSDIIn2 : NTV2_XptSDIIn4);
+				}
+			}
+		}
+	}
+	else
+	{
+		mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptBlack);
+	}
+
+
 	// Frame Buffer Disabling
-	if (b2FbLevelBHfr)
+	if (b2FbLevelBHfr || bStereoIn)
 	{
 		bFb1Disable = bFb2Disable = false;
 	}
 	else if (b4K)
 	{
-		if (b2piIn)
+		if (b2piIn || bHdmiIn)
 		{
 			bFb1Disable = bFb2Disable = 0;
 		}
@@ -1859,59 +2515,171 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 	mCard->WriteRegister(kRegCh2Control, bFb2Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
 	mCard->WriteRegister(kRegCh3Control, bFb3Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
 	mCard->WriteRegister(kRegCh4Control, bFb4Disable, kRegMaskChannelDisable, kRegShiftChannelDisable);
-	
-	// 4K Down Converter (no quads)
-	mCard->Connect (NTV2_Xpt4KDCQ1Input, NTV2_XptBlack);
-	mCard->Connect (NTV2_Xpt4KDCQ2Input, NTV2_XptBlack);
-	mCard->Connect (NTV2_Xpt4KDCQ3Input, NTV2_XptBlack);
-	mCard->Connect (NTV2_Xpt4KDCQ4Input, NTV2_XptBlack);
-	
-	
+
+
+	// 4K Down Converter
+	XPt1 = XPt2 = XPt3 = XPt4 = NTV2_XptBlack;
+	// DC applies only to 4K Quad - for now
+	if (b4K && !b2pi)
+	{
+		// SDIOut-RGB
+		if (bSdiOutRGB)
+		{
+			XPt1 = bQuadSwap ? NTV2_XptLUT3Out : NTV2_XptLUT1RGB;
+			XPt2 = bQuadSwap ? NTV2_XptLUT4Out : NTV2_XptLUT2RGB;
+			XPt3 = bQuadSwap ? NTV2_XptLUT1RGB : NTV2_XptLUT3Out;
+			XPt4 = bQuadSwap ? NTV2_XptLUT2RGB : NTV2_XptLUT4Out;
+			mCard->Enable4KDCRGBMode(true);
+		}
+		// SDIOut-YUV
+		else
+		{
+			if (bQuadSwap)
+			{
+				XPt1 =  bInRGB ? NTV2_XptCSC3VidYUV : in4kYUV3;
+				XPt2 =  bInRGB ? NTV2_XptCSC4VidYUV : in4kYUV4;
+				XPt3 =  bInRGB ? NTV2_XptCSC1VidYUV : in4kYUV1;
+				XPt4 =  bInRGB ? NTV2_XptCSC2VidYUV : in4kYUV2;
+			}
+			else
+			{
+				XPt1 =  bInRGB ? NTV2_XptCSC1VidYUV : in4kYUV1;
+				XPt2 =  bInRGB ? NTV2_XptCSC2VidYUV : in4kYUV2;
+				XPt3 =  bInRGB ? NTV2_XptCSC3VidYUV : in4kYUV3;
+				XPt4 =  bInRGB ? NTV2_XptCSC4VidYUV : in4kYUV4;
+			}
+			mCard->Enable4KDCRGBMode(false);
+		}
+	}
+	mCard->Connect (NTV2_Xpt4KDCQ1Input, XPt1);
+	mCard->Connect (NTV2_Xpt4KDCQ2Input, XPt2);
+	mCard->Connect (NTV2_Xpt4KDCQ3Input, XPt3);
+	mCard->Connect (NTV2_Xpt4KDCQ4Input, XPt4);
+
+
+
 	// SDI Out 1
-	mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptBlack);
-	mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
-	
-	
+	if (b4K)
+	{
+		if (bSdiOutRGB)
+		{
+			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptDuallinkOut1);
+			mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptDuallinkOut1DS2);
+		}
+		else
+		{
+			if (b4k6gOut || b2xQuadOut || b2xQuadIn || bVpid2x2piIn)
+			{
+				mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptBlack);
+				mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
+			}
+			else if (bInRGB)
+			{
+				mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptCSC1VidYUV);
+				mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptSDIOut1Input, in4kYUV1);
+				mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
+			}
+		}
+	}
+	else
+	{
+		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptBlack);
+		mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
+	}
+
+
 	// SDI Out 2
-	mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptBlack);
-	mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
-	
-	
+	XPt1 = XPt2 = NTV2_XptBlack;
+	if (b4K)
+	{
+		if (bSdiOutRGB)
+		{
+			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptDuallinkOut2);
+			mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptDuallinkOut2DS2);
+		}
+		else // YUV
+		{
+			if (b4k6gOut || b2xQuadOut || b2xQuadIn || bVpid2x2piIn)
+			{
+				mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptBlack);
+				mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
+			}
+			else if (bInRGB)
+			{
+				mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptCSC2VidYUV);
+				mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptSDIOut2Input, in4kYUV2);
+				mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
+			}
+		}
+	}
+	else
+	{
+		mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptBlack);
+		mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
+	}
+
+
+
+
 	// SDI Out 3 - acts like SDI 1
 	if (b4K)
 	{
-		if (b2xQuadOut)
+		if (bSdiOutRGB)
 		{
-			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptSDIIn1);
-			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptSDIIn1DS2);
+			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);
+			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptDuallinkOut3DS2);
 		}
-		else if (b2x2piIn && !bFb1RGB)
+		else // YUV
 		{
-			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_Xpt425Mux3AYUV);
-			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_Xpt425Mux3BYUV);
-		}
-		else
-		{
-			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptBlack);
-			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
+			if (b4k6gOut || b2xQuadOut || b2xQuadIn || bVpid2x2piIn)
+			{
+				if (bInRGB)
+				{
+					mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC1VidYUV);
+					mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptCSC2VidYUV);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptSDIOut3Input, in4kYUV1);
+					mCard->Connect (NTV2_XptSDIOut3InputDS2, in4kYUV2);
+				}
+			}
+			else if (bInRGB)
+			{
+				mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC3VidYUV);
+				mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptSDIOut3Input, in4kYUV3);
+				mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
+			}
 		}
 	}
-	else if(IsVideoFormatB(mFb1VideoFormat) ||												// Dual Stream - p60b
-			mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
-			mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)						// Video + Key
+	else if (IsVideoFormatB(mFb1VideoFormat) ||											// Dual Stream - p60b
+			 mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||				// Stereo 3D
+			 mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)					// Video + Key
 	{
 		if (b3GbOut)
 		{
-			mCard->Connect (NTV2_XptSDIOut3Input, inputXptYUV1);
-			mCard->Connect (NTV2_XptSDIOut3InputDS2, inputXptYUV2);
+			mCard->Connect (NTV2_XptSDIOut3Input, inHdYUV1);
+			mCard->Connect (NTV2_XptSDIOut3InputDS2, inHdYUV2);
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptSDIOut3Input, inputXptYUV1);
+			mCard->Connect (NTV2_XptSDIOut3Input, inHdYUV1);
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)				// Same as RGB in this case
+	else if (bSdiOutRGB)				// Same as RGB in this case
 	{
 		if (b3GbOut)
 		{
@@ -1926,146 +2694,249 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 	}
 	else // NTV2_PrimaryOutputSelect													// Primary
 	{
-		mCard->Connect (NTV2_XptSDIOut3Input, inputXptYUV1);
+		if (bInRGB)
+		{
+			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC1VidYUV);
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptSDIOut3Input, bHdmiIn ? NTV2_XptHDMIIn : inHdYUV1);
+		}
 		mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
 	}
-	
-	
-	
+
+
 	// SDI Out 4 - acts like SDI 2
 	if (b4K)
 	{
-		if (b2xQuadOut)
+		if (bSdiOutRGB)
 		{
-			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptSDIIn2);
-			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptSDIIn2DS2);
+			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut4);
+			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptDuallinkOut4DS2);
 		}
-		else if (b2x2piIn && !bFb1RGB)
+		else // YUV
 		{
-			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_Xpt425Mux4AYUV);
-			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_Xpt425Mux4BYUV);
-		}
-		else
-		{
-			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptBlack);
-			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
+			if (b4k6gOut || b2xQuadOut || b2xQuadIn || bVpid2x2piIn)
+			{
+				if (bInRGB)
+				{
+					mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptCSC3VidYUV);
+					mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptCSC4VidYUV);
+				}
+				else
+				{
+					mCard->Connect (NTV2_XptSDIOut4Input, in4kYUV3);
+					mCard->Connect (NTV2_XptSDIOut4InputDS2, in4kYUV4);
+				}
+			}
+			else if (bInRGB)
+			{
+				mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptCSC4VidYUV);
+				mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptSDIOut4Input, in4kYUV4);
+				mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
+			}
 		}
 	}
-	else if (IsVideoFormatB(mFb1VideoFormat) ||												// Dual Stream - p60b
-			 mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||					// Stereo 3D
-			 mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)						// Video + Key
+	else if (IsVideoFormatB(mFb1VideoFormat) ||									// Dual Stream - p60b
+			 mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect ||			// Stereo 3D
+			 mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)			// Video + Key
 	{
 		if (b3GbOut)
 		{
-			mCard->Connect (NTV2_XptSDIOut4Input, inputXptYUV1);
-			mCard->Connect (NTV2_XptSDIOut4InputDS2, inputXptYUV2);
+			mCard->Connect (NTV2_XptSDIOut4Input, inHdYUV1);
+			mCard->Connect (NTV2_XptSDIOut4InputDS2, inHdYUV2);
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptSDIOut4Input, inputXptYUV2);
+			mCard->Connect (NTV2_XptSDIOut4Input, inHdYUV2);
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 		}
 	}
-	else if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)				// Same as RGB in this case
+	else if (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect)			// Same as RGB in this case
 	{
 		if (b3GbOut)
 		{
-			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut4);							// 1 3Gb wire
+			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut4);		// 1 3Gb wire
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptDuallinkOut4DS2);
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut3DS2);						// 2 wires
+			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut3DS2);		// 2 wires
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 		}
 	}
-	else // NTV2_PrimaryOutputSelect													// Primary
+	else // NTV2_PrimaryOutputSelect											// Primary
 	{
-		mCard->Connect (NTV2_XptSDIOut4Input, inputXptYUV1);
+		if (bInRGB)
+		{
+			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptCSC1VidYUV);
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptSDIOut4Input, bHdmiIn ? NTV2_XptHDMIIn : inHdYUV1);
+		}
 		mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 	}
-	
+
+
+	// SDI Out 5
+	if (bSdiOutRGB)			// RGB Out - alway use DL
+	{
+		mCard->Connect (NTV2_XptSDIOut5Input, NTV2_XptDuallinkOut5);
+		mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptDuallinkOut5DS2);
+	}
+	// YUV Out 4K Quads
+	else if (b4K && !b2pi)
+	{
+		mCard->Connect (NTV2_XptSDIOut5Input, NTV2_Xpt4KDownConverterOut);
+		mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
+	}
+	// YUV Out 4K 2pi
+	else if (b4K && b2pi)
+	{
+		if (b4k6gOut || b2xQuadOut || b2xQuadIn || bVpid2x2piIn)
+		{
+			if (bInRGB)
+			{
+				mCard->Connect (NTV2_XptSDIOut5Input, NTV2_XptCSC1VidYUV);
+				mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptSDIOut5Input, in4kYUV1);
+				mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
+			}
+		}
+		else if (bInRGB)
+		{
+			mCard->Connect (NTV2_XptSDIOut5Input, NTV2_XptCSC1VidYUV);
+			mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptSDIOut5Input, in4kYUV1);
+			mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
+		}
+	}
+	// Stereo or LevelB
+	else if (b2FbLevelBHfr || bStereoIn)
+	{
+		mCard->Connect (NTV2_XptSDIOut5Input, inHdYUV1);
+		mCard->Connect (NTV2_XptSDIOut5InputDS2, inHdYUV2);
+	}
+	// YUV Out
+	else
+	{
+		if (bInRGB)
+		{
+			mCard->Connect (NTV2_XptSDIOut5Input, NTV2_XptCSC1VidYUV);
+		}
+
+		// FB-YUV
+		else
+		{
+			mCard->Connect (NTV2_XptSDIOut5Input, inHdYUV1);
+		}
+
+		mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
+	}
+
+
 	// HDMI Out
-	NTV2CrosspointID XPt1 = NTV2_XptBlack;
-	NTV2CrosspointID XPt2 = NTV2_XptBlack;
-	NTV2CrosspointID XPt3 = NTV2_XptBlack;
-	NTV2CrosspointID XPt4 = NTV2_XptBlack;
+	XPt1 = XPt2 = XPt3 = XPt4 = NTV2_XptBlack;
 	if (b4K)
 	{
-		if (b4kHfr && (inputColorSpace != NTV2_ColorSpaceModeRgb))
+		// 2si mode
+		if (b2pi)
 		{
-			// YUV to HDMI Out
-			if (b2piIn)
+			// RGB-mode set
+			if (bHdmiOutRGB)
 			{
 				switch (mVirtualHDMIOutputSelect)
 				{
 					default:
 					case NTV2_PrimaryOutputSelect:
-						XPt1 = NTV2_XptSDIIn1;
-						XPt2 = NTV2_XptSDIIn2;
-						XPt3 = NTV2_XptSDIIn3;
-						XPt4 = NTV2_XptSDIIn4;
+					case NTV2_4kHalfFrameRate:		// unsupported for now
+						XPt1 = bInRGB ? in4kRGB1 : NTV2_XptLUT1RGB;
+						XPt2 = bInRGB ? in4kRGB2 : NTV2_XptLUT2RGB;
+						XPt3 = bInRGB ? in4kRGB3 : NTV2_XptLUT3Out;
+						XPt4 = bInRGB ? in4kRGB4 : NTV2_XptLUT4Out;
 						break;
-					case NTV2_4kHalfFrameRate:
-						XPt1 = NTV2_XptLUT1RGB;
-						XPt2 = NTV2_XptLUT2RGB;
-						XPt3 = NTV2_XptLUT3Out;
-						XPt4 = NTV2_XptLUT4Out;
-						break;
-					case NTV2_Quarter4k:       XPt1 = NTV2_XptLUT1RGB; break;
-					case NTV2_Quadrant1Select: XPt1 = NTV2_XptLUT1RGB; break;
-					case NTV2_Quadrant2Select: XPt1 = NTV2_XptLUT2RGB; break;
-					case NTV2_Quadrant3Select: XPt1 = NTV2_XptLUT3Out; break;
-					case NTV2_Quadrant4Select: XPt1 = NTV2_XptLUT4Out; break;
+					case NTV2_Quarter4k:       XPt1 = bInRGB ? in4kRGB1 : NTV2_XptLUT1RGB; break;
+					case NTV2_Quadrant1Select: XPt1 = bInRGB ? in4kRGB1 : NTV2_XptLUT1RGB; break;
+					case NTV2_Quadrant2Select: XPt1 = bInRGB ? in4kRGB2 : NTV2_XptLUT2RGB; break;
+					case NTV2_Quadrant3Select: XPt1 = bInRGB ? in4kRGB3 : NTV2_XptLUT3Out; break;
+					case NTV2_Quadrant4Select: XPt1 = bInRGB ? in4kRGB4 : NTV2_XptLUT4Out; break;
 				}
 			}
+
+			// YUV-mode set
 			else
 			{
 				switch (mVirtualHDMIOutputSelect)
 				{
 					default:
 					case NTV2_PrimaryOutputSelect:
-						XPt1 = NTV2_XptSDIIn1;
-						XPt2 = NTV2_XptSDIIn2;
-						XPt3 = NTV2_XptSDIIn3;
-						XPt4 = NTV2_XptSDIIn4;
+					case NTV2_4kHalfFrameRate:		// unsupported for now
+						XPt1 = bInRGB ? NTV2_XptCSC1VidYUV : in4kYUV1;
+						XPt2 = bInRGB ? NTV2_XptCSC2VidYUV : in4kYUV2;
+						XPt3 = bInRGB ? NTV2_XptCSC3VidYUV : in4kYUV3;
+						XPt4 = bInRGB ? NTV2_XptCSC4VidYUV : in4kYUV4;
 						break;
-					case NTV2_4kHalfFrameRate:
-						XPt1 = NTV2_XptLUT1RGB;
-						XPt2 = NTV2_XptLUT2RGB;
-						XPt3 = NTV2_XptLUT3Out;
-						XPt4 = NTV2_XptLUT4Out;
-						break;
-					case NTV2_Quarter4k:       XPt1 = NTV2_Xpt4KDownConverterOut; break;
-					case NTV2_Quadrant1Select: XPt1 = NTV2_XptSDIIn1; break;
-					case NTV2_Quadrant2Select: XPt1 = NTV2_XptSDIIn2; break;
-					case NTV2_Quadrant3Select: XPt1 = NTV2_XptSDIIn3; break;
-					case NTV2_Quadrant4Select: XPt1 = NTV2_XptSDIIn4; break;
+					case NTV2_Quarter4k:       XPt1 = bInRGB ? NTV2_XptCSC1VidYUV : in4kYUV1; break;
+					case NTV2_Quadrant1Select: XPt1 = bInRGB ? NTV2_XptCSC1VidYUV : in4kYUV1; break;
+					case NTV2_Quadrant2Select: XPt1 = bInRGB ? NTV2_XptCSC2VidYUV : in4kYUV2; break;
+					case NTV2_Quadrant3Select: XPt1 = bInRGB ? NTV2_XptCSC3VidYUV : in4kYUV3; break;
+					case NTV2_Quadrant4Select: XPt1 = bInRGB ? NTV2_XptCSC4VidYUV : in4kYUV4; break;
 				}
 			}
 		}
+
+		// quadrant mode
 		else
 		{
-			// RGB to HDMI out
-			switch (mVirtualHDMIOutputSelect)
+			// RGB-mode set
+			if (bHdmiOutRGB)
 			{
-				default:
-				case NTV2_4kHalfFrameRate:
-				case NTV2_PrimaryOutputSelect:
-					XPt1 = NTV2_XptLUT1RGB;
-					XPt2 = NTV2_XptLUT2RGB;
-					XPt3 = NTV2_XptLUT3Out;
-					XPt4 = NTV2_XptLUT4Out;
-					break;
-				case NTV2_Quarter4k:       XPt1 = (b2piIn) ? NTV2_XptLUT1RGB : NTV2_Xpt4KDownConverterOutRGB; break;
-				case NTV2_Quadrant1Select: XPt1 = NTV2_XptLUT1RGB; break;
-				case NTV2_Quadrant2Select: XPt1 = NTV2_XptLUT2RGB; break;
-				case NTV2_Quadrant3Select: XPt1 = NTV2_XptLUT3Out; break;
-				case NTV2_Quadrant4Select: XPt1 = NTV2_XptLUT4Out; break;
+				switch (mVirtualHDMIOutputSelect)
+				{
+					default:
+					case NTV2_PrimaryOutputSelect:
+					case NTV2_4kHalfFrameRate:		// unsupported for now
+					case NTV2_Quarter4k:
+						XPt1 = bSdiOutRGB ? NTV2_Xpt4KDownConverterOutRGB : NTV2_XptLUT5Out;
+						break;
+					case NTV2_Quadrant1Select: XPt1 = NTV2_XptLUT1RGB; break;
+					case NTV2_Quadrant2Select: XPt1 = NTV2_XptLUT2RGB; break;
+					case NTV2_Quadrant3Select: XPt1 = NTV2_XptLUT3Out; break;
+					case NTV2_Quadrant4Select: XPt1 = NTV2_XptLUT4Out; break;
+				}
+			}
+
+			// YUV-mode set
+			else
+			{
+				switch (mVirtualHDMIOutputSelect)
+				{
+					default:
+					case NTV2_PrimaryOutputSelect:
+					case NTV2_4kHalfFrameRate:		// unsupported for now
+					case NTV2_Quarter4k:
+						XPt1 = bSdiOutRGB ? NTV2_XptCSC5VidYUV :  NTV2_Xpt4KDownConverterOut;
+						break;
+					case NTV2_Quadrant1Select: XPt1 = NTV2_XptCSC1VidYUV; break;
+					case NTV2_Quadrant2Select: XPt1 = NTV2_XptCSC2VidYUV; break;
+					case NTV2_Quadrant3Select: XPt1 = NTV2_XptCSC3VidYUV; break;
+					case NTV2_Quadrant4Select: XPt1 = NTV2_XptCSC4VidYUV; break;
+				}
 			}
 		}
 	}
-	else if (b2FbLevelBHfr)
+	else if (b2FbLevelBHfr || bStereoIn)
 	{
 		// Stereo or LevelB
 		XPt1 = NTV2_XptLUT1RGB;
@@ -2073,31 +2944,29 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 	}
 	else
 	{
-		XPt1 = NTV2_XptLUT1RGB;
+		if (bHdmiOutRGB)
+		{
+			XPt1 = bInRGB ? inHdRGB1 : NTV2_XptLUT1RGB;
+		}
+		else
+		{
+			if (bInRGB)
+			{
+				XPt1 = NTV2_XptCSC1VidYUV;
+			}
+
+			// FB-YUV
+			else
+			{
+				XPt1 = inHdYUV1;
+			}
+		}
 	}
-	mCard->Connect (NTV2_XptHDMIOutInput, XPt1);
+	mCard->Connect (NTV2_XptHDMIOutInput,	XPt1);
 	mCard->Connect (NTV2_XptHDMIOutQ2Input, XPt2);
 	mCard->Connect (NTV2_XptHDMIOutQ3Input, XPt3);
 	mCard->Connect (NTV2_XptHDMIOutQ4Input, XPt4);
-	
-	// Analog Out
-	if (b4K)
-	{
-		switch (mVirtualAnalogOutputSelect)
-		{
-			default:
-			case NTV2_Quadrant1Select: mCard->Connect (NTV2_XptAnalogOutInput, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC1VidYUV : NTV2_XptSDIIn1); break;
-			case NTV2_Quadrant2Select: mCard->Connect (NTV2_XptAnalogOutInput, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC2VidYUV : NTV2_XptSDIIn2); break;
-			case NTV2_Quadrant3Select: mCard->Connect (NTV2_XptAnalogOutInput, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC3VidYUV : NTV2_XptSDIIn3); break;
-			case NTV2_Quadrant4Select: mCard->Connect (NTV2_XptAnalogOutInput, inputColorSpace == NTV2_ColorSpaceModeRgb ? NTV2_XptCSC4VidYUV : NTV2_XptSDIIn4); break;
-		};
-	}
-	else
-	{
-		mCard->Connect (NTV2_XptAnalogOutInput, inputXptYUV1);
-	}
 }
-
 
 //-------------------------------------------------------------------------------------------------------
 //	SetDeviceMiscRegisters
@@ -2106,7 +2975,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 {
 	// call superclass first
 	DeviceServices::SetDeviceMiscRegisters();
-	
+
 	NTV2Standard			primaryStandard;
 	NTV2FrameGeometry		primaryGeometry;
 
@@ -2114,13 +2983,14 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	mCard->GetFrameGeometry(primaryGeometry);
 
 	// VPID
-	bool					bFbLevelA = IsVideoFormatA(mFb1VideoFormat);
-	bool					b4K = NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
-	bool					b4kHfr = NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	//bool					bHfr = NTV2_IS_3G_FORMAT(mFb1VideoFormat);
-	
-	bool					bSdiOutRGB = (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb);
-	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
+	bool					bHdmiIn				= mVirtualInputSelect == NTV2_Input5Select;
+	bool					bFbLevelA			= IsVideoFormatA(mFb1VideoFormat);
+	bool					b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
+	bool					b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
+	bool					bHfr				= NTV2_IS_3G_FORMAT(mFb1VideoFormat);
+	bool					bSdiOutRGB			= (mVirtualDigitalOutput1Select == NTV2_RgbOutputSelect);
+	bool					b3GaOutRGB			= (mDualStreamTransportType == NTV2_SDITransport_3Ga) && bSdiOutRGB;
+	NTV2FrameRate			primaryFrameRate	= GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
 
     if (mCard->IsDeviceReady(true) == true)
     {
@@ -2153,98 +3023,142 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)
-	bool b1x3GbOut = (b4K == false) &&
+	bool b1x3GbOut =			(b4K == false) &&
 	((bSdiOutRGB == true) ||
-		(mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
-		(mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
-		(bFbLevelA == true && mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb) ||
-		(IsVideoFormatB(mFb1VideoFormat) == true));
-	
-	bool b2wire4kOut = (mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
-	bool b2wire4kIn =  (mFb1Mode == NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && mVirtualInputSelect  == NTV2_Input2x4kSelect);
-	
-	
+	 (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
+	 (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
+	 (bFbLevelA == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
+	 (IsVideoFormatB(mFb1VideoFormat) == true)  );
+
+	bool b2wire4kOut = (    ((mFb1Mode != NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire))
+						|| ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
+	bool b2wire4kIn =  (mFb1Mode == NTV2_MODE_CAPTURE) && (b4K && !b4kHfr && mVirtualInputSelect  == NTV2_DualLink2xSdi4k);
+
 	// all 3Gb transport out
 	// b3GbOut = (b1x3GbOut + !2wire) | (4k + rgb) | (4khfr + 3gb)
-	bool b3GbOut = (b1x3GbOut == true && mSdiOutTransportType != NTV2_SDITransport_DualLink_1_5) ||
+	bool b3GbOut =	(b1x3GbOut == true && mDualStreamTransportType != NTV2_SDITransport_DualLink_1_5) ||
 	(b4K == true && bSdiOutRGB == true) ||
-	(b4kHfr == true && mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb) ||
+	(b4kHfr == true && mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 	b2wire4kOut || b2wire4kIn;
-	
+
 	GeneralFrameFormat genFormat = GetGeneralFrameFormat(mFb1Format);
 	bool b4xIo = b4K == true || genFormat == FORMAT_RAW_UHFR;
-	bool b2pi  = false;
-	
+	bool b2pi  = b4K;
+
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)
 	{
-		if (mVpid1Valid)
+		// special case: input-passthru (capture) HDMI In selected, AND 4K, then turn on SDI1Out, SDI2Out
+		if (bHdmiIn == true && b4K == true)
 		{
-			mVpidParser.SetVPID(mVpid1a);
-			VPIDStandard std = mVpidParser.GetStandard();
-			switch (std)
-			{
-				case VPIDStandard_2160_DualLink:
-					b3GbOut = true;
-					b4xIo = false;
-					b2pi  = true;
-					break;
-				case VPIDStandard_2160_QuadLink_3Ga:
-				case VPIDStandard_2160_QuadDualLink_3Gb:
-					b4xIo = true;
-					b2pi = true;
-					break;
-				default:
-					break;
-			}
+			mCard->SetSDITransmitEnable(NTV2_CHANNEL1, true);
+			mCard->SetSDITransmitEnable(NTV2_CHANNEL2, true);
+			mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);		// 3,4 are for playback, unless 4K capture
+			mCard->SetSDITransmitEnable(NTV2_CHANNEL4, true);		// 3,4 are for playback, unless 4K capture
 		}
-		
-		//if (b2wire4kIn)
-		//	b4xIo = false;
-		
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL1, false);
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL2, false);
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL3, false);		// 3,4 are for playback, unless 4K capture
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL4, false);		// 3,4 are for playback, unless 4K capture
+		else
+		{
+			b2pi = b4K;
+			b4xIo = true;
+
+			//ULWord vpida = 0;
+			//ULWord vpidb = 0;
+			//mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
+
+			//if (mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb))
+			//{
+			//	CNTV2VPID parser;
+			//	parser.SetVPID(vpida);
+			//	VPIDStandard std = parser.GetStandard();
+			//	switch (std)
+			//	{
+			//		case VPIDStandard_2160_DualLink:
+			//			b3GbOut = true;
+			//			b4xIo = false;
+			//			b2pi  = true;
+			//			break;
+			//		case VPIDStandard_2160_QuadLink_3Ga:
+			//		case VPIDStandard_2160_QuadDualLink_3Gb:
+			//			b4xIo = true;
+			//			b2pi = true;
+			//			break;
+			//		default:
+			//			break;
+			//	}
+			//}
+
+			//if (b2wire4kIn)
+			//	b4xIo = false;
+
+			mCard->SetSDITransmitEnable(NTV2_CHANNEL1, false);
+			mCard->SetSDITransmitEnable(NTV2_CHANNEL2, false);
+			mCard->SetSDITransmitEnable(NTV2_CHANNEL3, !b4xIo);		// 3,4 are for playback, unless 4K capture
+			mCard->SetSDITransmitEnable(NTV2_CHANNEL4, !b4xIo);		// 3,4 are for playback, unless 4K capture
+		}
 	}
 	else
 	{
-		//b2pi = b4K && (m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
-		//if (b2pi && !bSdiOutRGB && !b4kHfr)
-		//	b4xIo = false;										// low frame rate two pixel interleave YUV
-		
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL1, true);		// 1,2 are for capture, unless 4K playback
-		mCard->SetSDITransmitEnable(NTV2_CHANNEL2, true);		// 1,2 are for capture, unless 4K playback
+		b2pi = b4K;
+		if (b2pi && !bSdiOutRGB && !b4kHfr)
+			b4xIo = false;										// low frame rate two pixel interleave YUV
+
+		mCard->SetSDITransmitEnable(NTV2_CHANNEL1, b4xIo);		// 1,2 are for capture, unless 4K playback
+		mCard->SetSDITransmitEnable(NTV2_CHANNEL2, b4xIo);		// 1,2 are for capture, unless 4K playback
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL3, true);
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL4, true);
 	}
-	
-	
+
 	// HDMI output - initialization sequence
+#ifdef HDMI_INIT
 	if (mHDMIStartupCountDown > 0)
 	{
 		// start initialization
 		if (mHDMIStartupCountDown == kHDMIStartupPhase0)
-			mCard->WriteRegister(kRegHDMIOutControl, 0x0, 0x0F000000);
-		
+			mCard->WriteRegister (kRegHDMIOutControl, 0x0, 0x0F000000);
+
 		else if (mHDMIStartupCountDown == kHDMIStartupPhase1)
-			mCard->WriteRegister(kRegHDMIOutControl, 0xC, 0x0F000000);
-		
+			mCard->WriteRegister (kRegHDMIOutControl, 0xC, 0x0F000000);
+
 		else if (mHDMIStartupCountDown == kHDMIStartupPhase2)
-			mCard->WriteRegister(kRegHDMIOutControl, 0xD, 0x0F000000);
-		
+			mCard->WriteRegister (kRegHDMIOutControl, 0xD, 0x0F000000);
+
 		else if (mHDMIStartupCountDown == kHDMIStartupPhase3)
-			mCard->WriteRegister(kRegHDMIOutControl, 0xC, 0x0F000000);
-		
+			mCard->WriteRegister (kRegHDMIOutControl, 0xC, 0x0F000000);
+
 		mHDMIStartupCountDown--;
 	}
 	else
+#endif
+
 	{
 		// set standard / mode
-		NTV2Standard standard = GetNTV2StandardFromVideoFormat(mFb1VideoFormat);
+		NTV2Standard v2Standard = GetHdmiV2StandardFromVideoFormat(mFb1VideoFormat);
 		NTV2FrameRate rate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
-		
-		if (b4K == true)
+
+		if (b4K && mFb1Mode == NTV2_MODE_CAPTURE && bHdmiIn)
+		{
+			// 4K mode and doing capture and HDMI is selected as input
+			mCard->SetHDMIV2Mode(NTV2_HDMI_V2_4K_CAPTURE);
+
+			// 4K mode downconverted
+			if (mVirtualHDMIOutputSelect == NTV2_Quarter4k)
+			{
+				switch(v2Standard)
+				{
+					case NTV2_STANDARD_3840x2160p:
+					case NTV2_STANDARD_3840HFR:
+						v2Standard = NTV2_STANDARD_1080p;
+						break;
+					case NTV2_STANDARD_4096x2160p:
+					case NTV2_STANDARD_4096HFR:
+						v2Standard = NTV2_STANDARD_2Kx1080p;
+						break;
+					default:
+						break;
+				}
+			}
+		}
+		else if (b4K == true)
 		{
 			// 4K mode
 			switch (mVirtualHDMIOutputSelect)
@@ -2261,15 +3175,15 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 				case NTV2_Quadrant4Select:
 				{
 					mCard->SetHDMIV2Mode(NTV2_HDMI_V2_HDSD_BIDIRECTIONAL);
-					switch (standard)
+					switch(v2Standard)
 					{
 						case NTV2_STANDARD_3840x2160p:
 						case NTV2_STANDARD_3840HFR:
-							standard = NTV2_STANDARD_1080p;
+							v2Standard = NTV2_STANDARD_1080p;
 							break;
 						case NTV2_STANDARD_4096x2160p:
 						case NTV2_STANDARD_4096HFR:
-							standard = NTV2_STANDARD_2Kx1080p;
+							v2Standard = NTV2_STANDARD_2Kx1080p;
 							break;
 						default:
 							break;
@@ -2282,22 +3196,22 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 		{
 			// SD or HD mode
 			mCard->SetHDMIV2Mode(NTV2_HDMI_V2_HDSD_BIDIRECTIONAL);
-			switch (standard)
+			switch (v2Standard)
 			{
 				case NTV2_STANDARD_3840x2160p:
 				case NTV2_STANDARD_3840HFR:
-					standard = NTV2_STANDARD_1080p;
+					v2Standard = NTV2_STANDARD_1080p;
 					break;
 				case NTV2_STANDARD_4096x2160p:
 				case NTV2_STANDARD_4096HFR:
-					standard = NTV2_STANDARD_2Kx1080p;
+					v2Standard = NTV2_STANDARD_2Kx1080p;
 					break;
 				case NTV2_STANDARD_1080:
-					switch (rate)
+					switch(rate)
 				{
 					case NTV2_FRAMERATE_2398:
 					case NTV2_FRAMERATE_2400:
-						standard = NTV2_STANDARD_1080p;
+						v2Standard = NTV2_STANDARD_1080p;
 						break;
 					default:
 						break;
@@ -2306,7 +3220,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 					break;
 			}
 		}
-		
+
 		// enable/disable two sample interleave i/o
 		if (b2pi)
 		{
@@ -2319,51 +3233,52 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 		{
 			mCard->SetHDMIOutTsiIO(false);
 		}
-		
+
 		// set fps
 		if (mVirtualHDMIOutputSelect == NTV2_4kHalfFrameRate)
 		{
 			//Only do this for formats that half rate supported
 			//50,5994,60
-			NTV2FrameRate tempRate = primaryFrameRate;
+			//NTV2FrameRate tempRate = primaryFrameRate;
 			bool decimate = false;
-			
-			switch (primaryFrameRate)
+
+			switch(primaryFrameRate)
 			{
 				case NTV2_FRAMERATE_6000:
 				case NTV2_FRAMERATE_5994:
 				case NTV2_FRAMERATE_5000:
 				case NTV2_FRAMERATE_4800:
 				case NTV2_FRAMERATE_4795:
-					tempRate = HalfFrameRate(primaryFrameRate);
+					//tempRate = HalfFrameRate(primaryFrameRate);
 					decimate = true;
 					break;
 				default:
 					break;
 			}
-			
-			switch (standard)
+
+			switch(v2Standard)
 			{
 				case NTV2_STANDARD_4096HFR:
-					standard = NTV2_STANDARD_4096x2160p;
+					v2Standard = NTV2_STANDARD_4096x2160p;
 					break;
 				case NTV2_STANDARD_3840HFR:
-					standard = NTV2_STANDARD_3840x2160p;
+					v2Standard = NTV2_STANDARD_3840x2160p;
 					break;
 				default:
 					break;
 			}
-			mCard->SetHDMIOutVideoFPS(tempRate);
+
+			//mCard->SetHDMIOutVideoFPS(tempRate);
 			mCard->SetHDMIOutDecimateMode(decimate); // turning on decimate turns off downconverter
-			mCard->SetHDMIOutLevelBMode(IsVideoFormatB(mFb1VideoFormat));
+			//mCard->SetHDMIOutLevelBMode(IsVideoFormatB(mFb1VideoFormat));
 		}
 		else
 		{
-			mCard->SetHDMIOutVideoFPS(primaryFrameRate);
+			//mCard->SetHDMIOutVideoFPS(primaryFrameRate);
 			mCard->SetHDMIOutDecimateMode(false);
-			mCard->SetHDMIOutLevelBMode(IsVideoFormatB(mFb1VideoFormat));
+			//mCard->SetHDMIOutLevelBMode(IsVideoFormatB(mFb1VideoFormat));
 		}
-		
+
 		// color space sample rate
 		switch (primaryFrameRate)
 		{
@@ -2381,49 +3296,49 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 				mCard->SetHDMIOutSampleStructure(NTV2_HDMI_422);
 				break;
 		}
-		
-		mCard->SetHDMIOutVideoStandard(standard);
-		
+
+		//mCard->SetHDMIOutVideoStandard(v2Standard);
+
 		// HDMI out colorspace auto-detect status
 		mHDMIOutColorSpaceModeStatus = mHDMIOutColorSpaceModeCtrl;
 		if (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect)
 		{
 			NTV2HDMIBitDepth bitDepth = NTV2_HDMI10Bit;
 			NTV2LHIHDMIColorSpace colorSpace = NTV2_LHIHDMIColorSpaceYCbCr;
-			
-			mCard->GetHDMIOutDownstreamColorSpace(colorSpace);
-			mCard->GetHDMIOutDownstreamBitDepth(bitDepth);
-			
+
+			mCard->GetHDMIOutDownstreamColorSpace (colorSpace);
+			mCard->GetHDMIOutDownstreamBitDepth (bitDepth);
+
 			if (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
 				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCYCbCr10bit;
-			
+
 			else if (bitDepth == NTV2_HDMI10Bit)
 				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB10bit;
-			
+
 			else
 				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB8bit;
 		}
-		
+
 		// set color space bits as specified
 		switch (mHDMIOutColorSpaceModeStatus)
 		{
 			case kHDMIOutCSCYCbCr10bit:
-				mCard->SetLHIHDMIOutColorSpace(NTV2_LHIHDMIColorSpaceYCbCr);
-				mCard->SetHDMIOutBitDepth(NTV2_HDMI10Bit);
+				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
+				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
 				break;
-				
+
 			case kHDMIOutCSCRGB10bit:
-				mCard->SetLHIHDMIOutColorSpace(NTV2_LHIHDMIColorSpaceRGB);
-				mCard->SetHDMIOutBitDepth(NTV2_HDMI10Bit);
+				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
+				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
 				break;
-				
+
 			default:
 			case kHDMIOutCSCRGB8bit:
-				mCard->SetLHIHDMIOutColorSpace(NTV2_LHIHDMIColorSpaceRGB);
-				mCard->SetHDMIOutBitDepth(NTV2_HDMI8Bit);
+				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
+				mCard->SetHDMIOutBitDepth (NTV2_HDMI8Bit);
 				break;
 		}
-		
+
 		// HDMI Out Protocol mode
 		switch (mHDMIOutProtocolMode)
 		{
@@ -2431,27 +3346,27 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 			case kHDMIOutProtocolAutoDetect:
 			{
 				ULWord detectedProtocol;
-				mCard->ReadRegister(kRegHDMIInputStatus, detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
-				mCard->WriteRegister(kRegHDMIOutControl, detectedProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+				mCard->ReadRegister (kRegHDMIInputStatus, detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
+				mCard->WriteRegister (kRegHDMIOutControl, detectedProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 			}
 				break;
-				
+
 			case kHDMIOutProtocolHDMI:
-				mCard->WriteRegister(kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 				break;
-				
+
 			case kHDMIOutProtocolDVI:
-				mCard->WriteRegister(kRegHDMIOutControl, NTV2_HDMIProtocolDVI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolDVI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 				break;
 		}
-		
+
 		// HDMI Out Stereo 3D
 		HDMIOutStereoSelect stereoSelect = mHDMIOutStereoSelect;
-		
+
 		// in auto mode, follow codec settings
 		if (stereoSelect == kHDMIOutStereoAuto)
 			stereoSelect = mHDMIOutStereoCodecSelect;
-		
+
 		switch (stereoSelect)
 		{
 			case kHDMIOutStereoSideBySide:
@@ -2468,59 +3383,81 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 				break;
 		}
 	}
-	
+
+
 	// 4K Down Converter
 	bool bPsf = IsPSF(mFb1VideoFormat);
 	mCard->Enable4KDCPSFInMode(bPsf);
 	mCard->Enable4KPSFOutMode(bPsf);
-	
-	
+
+
 	// special case - VANC 8bit pixel shift support
-	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format))
+	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format) )
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
-	
-	// Figure out what our input format is based on what is selected
-	GetSelectedInputVideoFormat(mFb1VideoFormat);
-	
-	//
-	// Analog-Out
-	//
-	
-	// Control video DAC mode (reg 128)
-	// Note: the hardware takes a video "hit" every time we write a value to this register - whether or not
-	//       the new value is different. So we're going to filter it ourselves and ONLY write a value if it
-	//       has actually changed.
-	NTV2LHIVideoDACMode curr2Mode, new2Mode;
-	NTV2Standard curr2Standard, new2Standard;
-	
-	// get current value
-	mCard->GetLHIVideoDACMode(curr2Mode);
-	mCard->GetLHIVideoDACStandard(curr2Standard);
-	
-	// Select DAC mode from framebufferformat
-	new2Mode = GetLHIVideoDACMode(mFb1VideoFormat, mVirtualAnalogOutputType, mVirtualAnalogOutBlackLevel);
-	new2Standard = primaryStandard;
-	
-	// write it only if the new value is different
-	if (curr2Mode != new2Mode)
-		mCard->SetLHIVideoDACMode(new2Mode);
-	if (curr2Standard != new2Standard)
-		mCard->SetLHIVideoDACStandard(new2Standard);
-	
-	
-	//
-	// SDI Out
-	//
+
 
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bFbLevelA && b3GbOut);
 
 	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bFbLevelA && b3GbOut);
 
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL3, bFbLevelA && b3GbOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL3, (bFbLevelA && b3GbOut) || ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
 
-	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL4, bFbLevelA && b3GbOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL4, (bFbLevelA && b3GbOut) || ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
+
+
+	//
+	// SDI Out 5 Notes
+	//
+	// In capture:
+	//  If it comes in on one wire, it goes out as it came in
+	//  If it comes in on 4 wires it goes out on the one wire through the downconverter as YUV out at frame rate
+	//     it came in
+	//  If it comes in on two wires, it could be a low frame rate quad format, which is downconverted to low frame rate
+	//     on single wire, or when high frame rate, goes out at 3G with leve set for SDI selection
+	//     Or it could be two 1.5 G signals which goes out as a 3G signal
+	// In playback:
+	//  If it is a quad signal it is downconverted to HD
+	//	   Otherwise it is passed through
+
+
+	//
+	// SDI Out
+	//
+
+	// Level A to B conversion
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL1, bFbLevelA && b3GbOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL2, bFbLevelA && b3GbOut);
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL3, (bFbLevelA && b3GbOut) || ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL4, (bFbLevelA && b3GbOut) || ((mFb1Mode == NTV2_MODE_CAPTURE) && bHdmiIn && b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire));
+	bool sdi5_3GbTransportOut = false;
+	if (b4K)
+	{
+		if (b4kHfr)
+			sdi5_3GbTransportOut = 	(mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb) ||
+			(mDualStreamTransportType == NTV2_SDITransport_OctLink_3Gb);
+		else
+			sdi5_3GbTransportOut = 	(bSdiOutRGB && !b2pi);	// UHD 29.97 YUV playback and RGB but not if TSI
+	}
+	else
+	{
+		if (bHfr)
+			sdi5_3GbTransportOut = 	IsVideoFormatB(mFb1VideoFormat) ||
+			(mDualStreamTransportType == NTV2_SDITransport_DualLink_3Gb);
+		else
+			sdi5_3GbTransportOut = 	b3GbOut || bSdiOutRGB;
+	}
+	mCard->SetSDIOutLevelAtoLevelBConversion(NTV2_CHANNEL5, (bFbLevelA && sdi5_3GbTransportOut) || (b4K && bSdiOutRGB));
+
+
+	// RGB LevelA option
+	mCard->SetSDIOutRGBLevelAConversion(NTV2_CHANNEL1, !bFbLevelA && b3GaOutRGB);
+	mCard->SetSDIOutRGBLevelAConversion(NTV2_CHANNEL2, !bFbLevelA && b3GaOutRGB);
+	mCard->SetSDIOutRGBLevelAConversion(NTV2_CHANNEL3, !bFbLevelA && b3GaOutRGB);
+	mCard->SetSDIOutRGBLevelAConversion(NTV2_CHANNEL4, !bFbLevelA && b3GaOutRGB);
+	mCard->SetSDIOutRGBLevelAConversion(NTV2_CHANNEL5, !bFbLevelA && b3GaOutRGB);
+
 
 	// Set HBlack RGB range bits - ALWAYS SMPTE
 	if (b4K)
@@ -2530,11 +3467,12 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	}
 	mCard->WriteRegister(kRegSDIOut3Control, NTV2_RGB10RangeSMPTE, kK2RegMaskSDIOutHBlankRGBRange, kK2RegShiftSDIOutHBlankRGBRange);
 	mCard->WriteRegister(kRegSDIOut4Control, NTV2_RGB10RangeSMPTE, kK2RegMaskSDIOutHBlankRGBRange, kK2RegShiftSDIOutHBlankRGBRange);
-	
-	
+	mCard->WriteRegister(kRegSDIOut5Control, NTV2_RGB10RangeSMPTE, kK2RegMaskSDIOutHBlankRGBRange, kK2RegShiftSDIOutHBlankRGBRange);
+
+
 	// Set VBlank RGB range bits - ALWAYS SMPTE
 	// Except when there is a full-range RGB frame buffer, and we go through the color space converter
-	if (mRGB10Range == NTV2_RGB10RangeFull && mSDIOutput1ColorSpace != NTV2_ColorSpaceModeRgb)
+	if (mRGB10Range == NTV2_RGB10RangeFull && mVirtualDigitalOutput1Select != NTV2_RgbOutputSelect)
 	{
 		mCard->WriteRegister(kRegCh1Control, NTV2_RGB10RangeFull, kRegMaskVBlankRGBRange, kRegShiftVBlankRGBRange);
 		mCard->WriteRegister(kRegCh2Control, NTV2_RGB10RangeFull, kRegMaskVBlankRGBRange, kRegShiftVBlankRGBRange);
@@ -2554,13 +3492,13 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 			mCard->WriteRegister(kRegCh4Control, NTV2_RGB10RangeSMPTE, kRegMaskVBlankRGBRange, kRegShiftVBlankRGBRange);
 		}
 	}
-	
+
 	// audio input delay
 	ULWord inputDelay = 0;			// not from hardware
 	mCard->ReadRegister(kVRegAudioInputDelay, inputDelay);
 	uint32_t offset = GetAudioDelayOffset(inputDelay / 10.0);	// scaled by a factor of 10
 	mCard->WriteRegister(kRegAud1Delay, offset, kRegMaskAudioInDelay, kRegShiftAudioInDelay);
-	
+
 	// audio output delay
 	ULWord outputDelay = 0;			// not from hardware
 	mCard->ReadRegister(kVRegAudioOutputDelay, outputDelay);
