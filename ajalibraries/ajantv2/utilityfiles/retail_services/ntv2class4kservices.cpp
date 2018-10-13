@@ -1574,22 +1574,6 @@ void Class4kServices::SetDeviceXPointCapture ()
 	
     // Figure out what our input format is based on what is selected
     inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
-	
-	// SDI In 1
-	bool bConvertBToA = bFbLevelA && mDs.sdiIn[0]->isEnabled && mDs.sdiIn[0]->is3Gb;
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
-            
-	// SDI In 2
-	bConvertBToA = bFbLevelA && mDs.sdiIn[1]->isEnabled && mDs.sdiIn[1]->is3Gb;
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, bConvertBToA);
-
-	// SDI In 3
-	bConvertBToA = bFbLevelA && mDs.sdiIn[2]->isEnabled && mDs.sdiIn[2]->is3Gb;
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, bConvertBToA);
-
-	// SDI In 4
-	bConvertBToA = bFbLevelA && mDs.sdiIn[3]->isEnabled && mDs.sdiIn[3]->is3Gb;
-	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, bConvertBToA);
     
 
 	// input 1 select
@@ -3157,10 +3141,19 @@ void Class4kServices::SetDeviceMiscRegisters ()
 	//HACK: We need to disable the sample rate converter for now - 9/27/17. We do not support 44.1 audio until firmware is fixed
 	mCard->SetEncodedAudioMode(NTV2_ENCODED_AUDIO_SRC_DISABLED, NTV2_AUDIOSYSTEM_1);
 	
-	mCard->SetSDITransmitEnable(NTV2_CHANNEL1, mDs.sdiOut[0]->isEnabled);
-	mCard->SetSDITransmitEnable(NTV2_CHANNEL2, mDs.sdiOut[1]->isEnabled);
-	mCard->SetSDITransmitEnable(NTV2_CHANNEL3, mDs.sdiOut[2]->isEnabled);
-	mCard->SetSDITransmitEnable(NTV2_CHANNEL4, mDs.sdiOut[3]->isEnabled);
+	// SDI Transmit
+	for (int i=0; i<4; i++)
+		mCard->SetSDITransmitEnable((NTV2Channel)i, mDs.sdiOut[0]->isOut);
+	
+	// SDI In levelB -> levelA conversion
+	for (int i=0; i<4; i++)
+	{
+		if (mDs.sdiIn[i]->isOut == false)
+		{
+			bool bConvertBToA = bFbLevelA && mDs.sdiIn[i]->is3Gb;
+			mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
+		}
+	}
 	
 	if (b4k12gOut)
 	{
