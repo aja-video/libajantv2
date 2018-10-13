@@ -78,10 +78,8 @@ out (or capturing) those frames at the correct time.
 
 AutoCirculate makes it easy to stream audio & video data into and out of your application.
 
-AutoCirculate keeps ancillary data such as audio and timecode synchronized with the AutoCirculating video frames.
--	\ref ancembeddedaudio
--	\ref anctimecode
--	\ref ancvpid
+AutoCirculate keeps \ref ancillarydata such as \ref ancembeddedaudio and \ref anctimecode synchronized with the AutoCirculating
+video frames.
 
 The AJA device driver performs the bulk of the work involved in streaming audio and video to/from the AJA hardware.
 It helps to synchronize the audio with the video, detect dropped frames while streaming, time-stamps the frame data,
@@ -111,7 +109,7 @@ Here, captured frames 6, 7, 8, 9, 0 and 1 have already been transferred into hos
 while frame 2 is currently being transferred to the host, while frame 5 on the AJA device is currently being
 overwritten by the incoming frame.
 
-As each <b>Incoming Frame</b> streams into the AJA device, its image data (plus audio and ancillary data) is recorded
+As each <b>Incoming Frame</b> streams into the AJA device, its image data (plus audio and other \ref ancillarydata) is recorded
 into the <b>Active Frame</b> of the device’s frame memory. 
 
 When AutoCirculate is running, frames get transferred using Direct Memory Access (DMA) from the device frame memory to host memory.
@@ -253,8 +251,8 @@ This process continues until a global quit flag is set, at which point the threa
 After CNTV2Card::AutoCirculateStart is called, the AJA device’s <b>Active Frame</b> will automatically change at every VBI to cycle
 continuously from the starting frame to the ending frame and back again until CNTV2Card::AutoCirculateStop is called.
 CNTV2Card::AutoCirculateTransfer is called repeatedly to transfer a buffered video frame (plus any associated audio, timecode,
-ancillary data, etc.) between the driver and the application. The <b>Active Frame</b>, buffer level, etc. are advanced automatically
-by the AJA device driver.
+\ref ancillarydata, etc.) between the driver and the application. The <b>Active Frame</b>, buffer level, etc. are advanced
+automatically by the AJA device driver.
 
 CNTV2Card::AutoCirculateGetStatus is used to determine whether a given channel is currently AutoCirculating, and if so, to
 report its current buffer level. It also supplies other data, such as its frame range (starting and ending frames) and its
@@ -395,6 +393,6 @@ While AutoCirculate is paused, you can inspect, in great detail…
 -	the captured (or queued) per-frame timecodes (in the \ref inspectorac).
 -	the captured (or queued) video frames (using the \ref inspectorframebuffer).
 -	the captured (or queued) audio samples (using the \ref inspectoraudio).
--	the captured (or queued) ancillary data (using the \ref inspectoranc).
+-	the captured (or queued) \ref ancillarydata (using the \ref inspectoranc).
 
 **/

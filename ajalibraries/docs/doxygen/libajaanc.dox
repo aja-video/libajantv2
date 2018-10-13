@@ -1,7 +1,7 @@
 /**
 	@page	ajaanc		Ancillary Data Classes
 
-	The Ancillary Data Classes allow client software to easily encode or decode ancillary data to or
+	The Ancillary Data Classes allow client software to easily encode or decode \ref ancillarydata to or
 	from host buffers in a manner that is compatible with the ways in which NTV2 devices transmit and/or
 	receive ancillary data.
 
