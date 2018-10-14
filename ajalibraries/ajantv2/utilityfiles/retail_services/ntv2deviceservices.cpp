@@ -3927,7 +3927,7 @@ void DeviceServices::AdjustFor4kQuadOrTpiOut()
 // select square division or 2 pixel interleave in frame buffer
 void DeviceServices::AdjustFor4kQuadOrTpiIn(NTV2VideoFormat inputFormat, bool b2pi)
 {
-    if (NTV2_IS_4K_VIDEO_FORMAT(inputFormat))
+    if (NTV2_IS_4K_VIDEO_FORMAT(inputFormat) && mFollowInputFormat)
     {
    		Set4kTpiState(b2pi);
     }
