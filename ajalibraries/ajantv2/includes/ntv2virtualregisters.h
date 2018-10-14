@@ -177,6 +177,7 @@ typedef enum
 	kVRegForceApplicationPID				= VIRTUALREG_START+187,
 	kVRegForceApplicationCode				= VIRTUALREG_START+188,
 	kVRegIpConfigStreamRefresh				= VIRTUALREG_START+189,
+	kVRegSDIInput1Raster					= VIRTUALREG_START+190,
 
 	// COMMON_VIRTUAL_REGS_PROCAMP_CONTROLS
 	kVRegProcAmpSDRegsInitialized			= VIRTUALREG_START+200,
