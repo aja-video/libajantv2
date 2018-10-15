@@ -327,15 +327,17 @@ The data bytes in the buffer consist of one or more packets having the following
 
 @section	ancrtpformat	IP/RTP Anc Buffer Data Format
 
-The data bytes in the ancillary data buffer will meet the RTP specification, which has the following format:
+The data in the ancillary data buffer matches the RTP specification:
 
 @image	html	fbf-rtp.png
 
-Clients are free to parse the data themselves, or call AJAAncillaryList::SetFromIPAncData to transform the buffer contents
-into an ::AJAAncillaryList containing one ::AJAAncillaryData instance per ancillary data packet.
+For <b>Capture</b>, clients can parse the data themselves, or AJAAncillaryList::SetFromIPAncData can be called to transform
+the buffer contents into an ::AJAAncillaryList containing one ::AJAAncillaryData instance per packet.
 
-@note	In <b>Playout</b> mode, the KonaIP and IoIP 2110 firmware expect the total RTP packet bytecount to appear in the
-		<b>Sequence Number</b> field in the first longword of the RTP packet header.
+For <b>Playout</b>, AJAAncillaryList::GetIPTransmitData can be called to fill the Anc data buffer from an ::AJAAncillaryList.
+Clients that generate the Anc data buffer contents themselves must set the <b>Sequence Number</b> field in the first longword
+of the RTP packet header to the total RTP packet bytecount, since AJA IP devices running 2110 firmware (\ref konaip and \ref ioip)
+expect it there.
 
 <hr size="50px">
 
