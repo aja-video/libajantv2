@@ -1988,6 +1988,14 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 		case NTV2_FORMAT_1080psf_2K_2398:
 		case NTV2_FORMAT_1080psf_2K_2400:
 		case NTV2_FORMAT_1080psf_2K_2500:
+		case NTV2_FORMAT_1080p_5000_B:
+		case NTV2_FORMAT_1080p_5994_B:
+		case NTV2_FORMAT_1080p_6000_B:
+		case NTV2_FORMAT_1080p_2K_4795_B:
+		case NTV2_FORMAT_1080p_2K_4800_B:
+		case NTV2_FORMAT_1080p_2K_5000_B:
+		case NTV2_FORMAT_1080p_2K_5994_B:
+		case NTV2_FORMAT_1080p_2K_6000_B:
 			standard = NTV2_STANDARD_1080;
 			break;
 		case NTV2_FORMAT_1080p_2500:
@@ -1998,9 +2006,6 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 		case NTV2_FORMAT_1080p_5000_A:
 		case NTV2_FORMAT_1080p_5994_A:
 		case NTV2_FORMAT_1080p_6000_A:
-		case NTV2_FORMAT_1080p_5000_B:
-		case NTV2_FORMAT_1080p_5994_B:
-		case NTV2_FORMAT_1080p_6000_B:
 			standard = NTV2_STANDARD_1080p;
 			break;
 		case NTV2_FORMAT_1080p_2K_2398:
@@ -2013,11 +2018,6 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 		case NTV2_FORMAT_1080p_2K_5000_A:
 		case NTV2_FORMAT_1080p_2K_5994_A:
 		case NTV2_FORMAT_1080p_2K_6000_A:
-		case NTV2_FORMAT_1080p_2K_4795_B:
-		case NTV2_FORMAT_1080p_2K_4800_B:
-		case NTV2_FORMAT_1080p_2K_5000_B:
-		case NTV2_FORMAT_1080p_2K_5994_B:
-		case NTV2_FORMAT_1080p_2K_6000_B:
 			standard = NTV2_STANDARD_2Kx1080p;
 			break;
 		case NTV2_FORMAT_720p_2398:
