@@ -178,7 +178,7 @@
 
 #define kRegVfec_control                (0x00/4)
 #define kRegVfec_status                 (0x04/4)
-#define kRegVfec_channel_accesss        (0x08/4)
+#define kRegVfec_channel_access			(0x08/4)
 #define kRegVfec_sys_config             (0x0c/4)
 #define kRegVfec_version                (0x10/4)
 #define kRegVfec_fec_processing_delay   (0x20/4)
