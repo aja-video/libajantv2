@@ -34,8 +34,7 @@ protected:
     ReceiveVideoData2110    m2110RxVideoDataLast;
     ReceiveAudioData2110    m2110RxAudioDataLast;
 
-    int32_t                mResetPLLCounter;
-
+	NTV2Mode				mFb1ModeLast;
     NTV2VideoFormat         mFb1VideoFormatLast;
 };
 

@@ -2231,6 +2231,7 @@ bool DeviceServices::InputRequiresBToAConvertsion(NTV2Channel ch)
 //-------------------------------------------------------------------------------------------------------
 void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
                                         NTV2VideoFormat* videoFormatLast,
+										NTV2Mode* modeLast,
                                         NetworkData2110* s2110NetworkLast,
                                         TransmitVideoData2110* s2110TxVideoDataLast,
                                         TransmitAudioData2110* s2110TxAudioDataLast,
@@ -2243,8 +2244,15 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
     if (ipServiceEnable)
     {
         tx_2110Config txConfig;
+		uint32_t vRegConfigStreamRefreshValue;
+		uint32_t vRegConfigStreamRefreshMask;
+
+		mCard->ReadRegister(kVRegIpConfigStreamRefresh, vRegConfigStreamRefreshValue);
+		vRegConfigStreamRefreshMask = vRegConfigStreamRefreshValue;
+		mCard->WriteRegister(kVRegIpConfigStreamRefresh, 0, vRegConfigStreamRefreshMask);
 
         // Handle reset case
+
         if ((m2110TxVideoData.numTxVideoChannels == 0) &&
             (m2110TxAudioData.numTxAudioChannels == 0) &&
             (m2110RxVideoData.numRxVideoChannels == 0) &&
@@ -2403,6 +2411,7 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
             {
                 if (memcmp(&m2110RxVideoData.rxVideoCh[i], &s2110RxVideoDataLast->rxVideoCh[i], sizeof(RxVideoChData2110)) != 0 ||
                     *videoFormatLast != mFb1VideoFormat ||
+					vRegConfigStreamRefreshValue & (1 << (i+ NTV2_VIDEO1_STREAM)) ||
                     ipServiceForceConfig)
                 {
                     rxConfig.init();
@@ -2486,7 +2495,9 @@ void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
             // See if any receive audio channels need configuring/enabling
             for (uint32_t i=0; i<m2110RxAudioData.numRxAudioChannels; i++)
             {
-                if (memcmp(&m2110RxAudioData.rxAudioCh[i], &s2110RxAudioDataLast->rxAudioCh[i], sizeof(RxAudioChData2110)) != 0 || ipServiceForceConfig)
+                if (memcmp(&m2110RxAudioData.rxAudioCh[i], &s2110RxAudioDataLast->rxAudioCh[i], sizeof(RxAudioChData2110)) != 0 ||
+					vRegConfigStreamRefreshValue & (1 << (i+ NTV2_AUDIO1_STREAM)) ||
+					ipServiceForceConfig)
                 {
                     rxConfig.init();
                     if (m2110RxAudioData.rxAudioCh[i].sfpEnable[1])
