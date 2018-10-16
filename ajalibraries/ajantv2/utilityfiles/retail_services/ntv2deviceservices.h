@@ -21,6 +21,7 @@
 #define ISO_CONVERT_FMT(fmt)	(mIsoConvertEnable && (fmt == NTV2_FORMAT_525_5994 || fmt == NTV2_FORMAT_625_5000))
 #endif
 
+#define HDMI_INIT			1
 #define kADCStabilizeCount	10
 #define kHDMIStartupPhase0	16
 #define kHDMIStartupPhase1	11
