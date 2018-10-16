@@ -3108,7 +3108,7 @@ void Class4kServices::SetDeviceMiscRegisters ()
 	bool					b3GaOutRGB			= (mSdiOutTransportType == NTV2_SDITransport_3Ga) && bSdiOutRGB;
 	bool					b4k6gOut			= (b4K && !b4kHfr && !bSdiOutRGB && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	bool					b4k12gOut			= (b4K && (b4kHfr || bSdiOutRGB) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
-	NTV2FrameRate			primaryFrameRate	= GetNTV2FrameRateFromVideoFormat (mFb1VideoFormat);
+	NTV2FrameRate			primaryFrameRate	= GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 	
 	bHdmiIn					= bHdmiIn && bDoHdmiIn;
 	b4k6gOut				= b4k6gOut && bDo12G;
@@ -3275,42 +3275,19 @@ void Class4kServices::SetDeviceMiscRegisters ()
 			mCard->SetHDMIOutTsiIO(false);
 		}
 		
-		// set fps
+		// HFPS
 		if (mVirtualHDMIOutputSelect == NTV2_4kHalfFrameRate)
 		{
-			//Only do this for formats that half rate supported
-			//50,5994,60
-			//NTV2FrameRate tempRate = primaryFrameRate;
-			bool decimate = false;
-
-			switch(primaryFrameRate)
-			{
-			case NTV2_FRAMERATE_6000:
-			case NTV2_FRAMERATE_5994:
-			case NTV2_FRAMERATE_5000:
-			case NTV2_FRAMERATE_4800:
-			case NTV2_FRAMERATE_4795:
-				//tempRate = HalfFrameRate(primaryFrameRate);
-				decimate = true;
-				break;
-			default:
-				break;
-			}
-
+			bool bDecimate = b4kHfr;
 			switch(v2Standard)
 			{
-			case NTV2_STANDARD_4096HFR:
-				v2Standard = NTV2_STANDARD_4096x2160p;
-				break;
-			case NTV2_STANDARD_3840HFR:
-				v2Standard = NTV2_STANDARD_3840x2160p;
-				break;
-			default:
-				break;
+			case NTV2_STANDARD_4096HFR: v2Standard = NTV2_STANDARD_4096x2160p; break;
+			case NTV2_STANDARD_3840HFR: v2Standard = NTV2_STANDARD_3840x2160p; break;
+			default: break;
 			}
 			
 			//mCard->SetHDMIOutVideoFPS(tempRate);
-			mCard->SetHDMIOutDecimateMode(decimate); // turning on decimate turns off downconverter
+			mCard->SetHDMIOutDecimateMode(bDecimate);
 			mCard->SetHDMIOutLevelBMode(IsVideoFormatB(mFb1VideoFormat));
 		}
 		else
@@ -3321,51 +3298,25 @@ void Class4kServices::SetDeviceMiscRegisters ()
 		}
 		
 		// color space sample rate
-		switch (primaryFrameRate)
+		if (mDs.hdmiOutColorSpaceCtrl == kHDMIOutCSCYCbCr8bit ||
+			mDs.hdmiOutColorSpaceCtrl == kHDMIOutCSCYCbCr10bit)
 		{
-			case NTV2_FRAMERATE_6000:
-			case NTV2_FRAMERATE_5994:
-			case NTV2_FRAMERATE_5000:
-			case NTV2_FRAMERATE_4800:
-			case NTV2_FRAMERATE_4795:
-			if (b4K == true && mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)
-					mCard->SetHDMIOutSampleStructure(NTV2_HDMI_420);
-				else
-					mCard->SetHDMIOutSampleStructure(NTV2_HDMI_422);
-				break;
-			default:
-				mCard->SetHDMIOutSampleStructure(NTV2_HDMI_422);
-				break;
-		}
-
-		//mCard->SetHDMIOutVideoStandard(v2Standard);
-		
-		// HDMI out colorspace auto-detect status
-		mHDMIOutColorSpaceModeStatus = mHDMIOutColorSpaceModeCtrl;
-		if (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect)
-		{
-			NTV2HDMIBitDepth bitDepth = NTV2_HDMI10Bit;
-			NTV2LHIHDMIColorSpace colorSpace = NTV2_LHIHDMIColorSpaceYCbCr;
-			
-			mCard->GetHDMIOutDownstreamColorSpace (colorSpace);
-			mCard->GetHDMIOutDownstreamBitDepth (bitDepth);
-			
-			if (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCYCbCr10bit;
-				
-			else if (bitDepth == NTV2_HDMI10Bit)
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB10bit;
-					
+			if (b4kHfr == true && mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)
+				mCard->SetHDMIOutSampleStructure(NTV2_HDMI_YC420);
 			else
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB8bit;
+				mCard->SetHDMIOutSampleStructure(NTV2_HDMI_YC422);
+		}
+		else // rgb
+		{
+			mCard->SetHDMIOutSampleStructure(NTV2_HDMI_RGB);
 		}
 		
 		// set color space bits as specified
-		switch (mHDMIOutColorSpaceModeStatus)
+		switch (mDs.hdmiOutColorSpaceCtrl)
 		{
 			case kHDMIOutCSCYCbCr8bit:
 				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
-				mCard->SetHDMIOutBitDepth (NTV2_HDMI8Bit);
+				mCard->SetHDMIOutBitDepth(NTV2_HDMI8Bit);
 				break;
 		
 			case kHDMIOutCSCYCbCr10bit:

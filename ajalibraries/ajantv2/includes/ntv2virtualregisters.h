@@ -152,7 +152,7 @@ typedef enum
 	kVRegAvailable164						= VIRTUALREG_START+164,
 	kVRegRP188SourceSelect					= VIRTUALREG_START+165,
 	kVRegQTCodecModeDebug					= VIRTUALREG_START+166,
-	kVRegHDMIOutColorSpaceModeStatus		= VIRTUALREG_START+167,
+	kVRegHDMIOutColorSpaceModeStatus		= VIRTUALREG_START+167,		// deprecated
 	kVRegDeviceOnline						= VIRTUALREG_START+168,
 	kVRegIsDefaultDevice					= VIRTUALREG_START+169,
 
