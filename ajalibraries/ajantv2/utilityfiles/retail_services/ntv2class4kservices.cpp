@@ -3143,7 +3143,7 @@ void Class4kServices::SetDeviceMiscRegisters ()
 	
 	// SDI Transmit
 	for (int i=0; i<4; i++)
-		mCard->SetSDITransmitEnable((NTV2Channel)i, mDs.sdiOut[0]->isOut);
+		mCard->SetSDITransmitEnable((NTV2Channel)i, mDs.sdiOut[i]->isOut);
 	
 	// SDI In levelB -> levelA conversion
 	for (int i=0; i<4; i++)
