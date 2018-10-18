@@ -124,29 +124,14 @@ void TTapServices::SetDeviceMiscRegisters ()
 		mCard->SetHDMIOutVideoStandard (primaryStandard);
 		mCard->SetHDMIOutVideoFPS (primaryFrameRate);
 		
-		// HDMI out colorspace auto-detect status 
-		mHDMIOutColorSpaceModeStatus = mHDMIOutColorSpaceModeCtrl;
-		if (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect)
+		// set color-space bit-depth
+		switch (mDs.hdmiOutColorSpace)
 		{
-			NTV2HDMIBitDepth bitDepth = NTV2_HDMI10Bit;
-			NTV2LHIHDMIColorSpace colorSpace = NTV2_LHIHDMIColorSpaceYCbCr;
-			
-			mCard->GetHDMIOutDownstreamColorSpace (colorSpace);
-			mCard->GetHDMIOutDownstreamBitDepth (bitDepth);
-			
-			if (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCYCbCr10bit;
-			
-			else if (bitDepth == NTV2_HDMI10Bit)
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB10bit;
-			
-			else
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB8bit;
-		}
+			case kHDMIOutCSCYCbCr8bit:
+				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
+				mCard->SetHDMIOutBitDepth(NTV2_HDMI8Bit);
+				break;
 		
-		// set color space bits as specified
-		switch (mHDMIOutColorSpaceModeStatus)
-		{
 			case kHDMIOutCSCYCbCr10bit:
 				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
 				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
@@ -165,21 +150,17 @@ void TTapServices::SetDeviceMiscRegisters ()
 		}
 		
 		// HDMI Out Protocol mode
-		switch (mHDMIOutProtocolMode)
+		switch (mDs.hdmiOutProtocol_)
 		{
 			default:
 			case kHDMIOutProtocolAutoDetect:
-				{
-					ULWord detectedProtocol;
-					mCard->ReadRegister (kRegHDMIInputStatus, detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
-					mCard->WriteRegister (kRegHDMIOutControl, detectedProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);				
-				}
+				mCard->WriteRegister(kRegHDMIOutControl, mDs.hdmiOutDsProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 				break;
-			
+				
 			case kHDMIOutProtocolHDMI:
 				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 				break;
-			
+				
 			case kHDMIOutProtocolDVI:
 				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolDVI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 				break;

@@ -3298,8 +3298,8 @@ void Class4kServices::SetDeviceMiscRegisters ()
 		}
 		
 		// color space sample rate
-		if (mDs.hdmiOutColorSpaceCtrl == kHDMIOutCSCYCbCr8bit ||
-			mDs.hdmiOutColorSpaceCtrl == kHDMIOutCSCYCbCr10bit)
+		if (mDs.hdmiOutColorSpace == kHDMIOutCSCYCbCr8bit ||
+			mDs.hdmiOutColorSpace == kHDMIOutCSCYCbCr10bit)
 		{
 			if (b4kHfr == true && mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)
 				mCard->SetHDMIOutSampleStructure(NTV2_HDMI_YC420);
@@ -3311,8 +3311,8 @@ void Class4kServices::SetDeviceMiscRegisters ()
 			mCard->SetHDMIOutSampleStructure(NTV2_HDMI_RGB);
 		}
 		
-		// set color space bits as specified
-		switch (mDs.hdmiOutColorSpaceCtrl)
+		// set color-space bit-depth 
+		switch (mDs.hdmiOutColorSpace)
 		{
 			case kHDMIOutCSCYCbCr8bit:
 				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
@@ -3337,16 +3337,12 @@ void Class4kServices::SetDeviceMiscRegisters ()
 		}
 		
 		// HDMI Out Protocol mode
-		switch (mHDMIOutProtocolMode)
+		switch (mDs.hdmiOutProtocol_)
 		{
 			default:
 			case kHDMIOutProtocolAutoDetect:
-			{
-				ULWord detectedProtocol;
-				mCard->ReadRegister (kRegHDMIInputStatus, detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
-				mCard->WriteRegister (kRegHDMIOutControl, detectedProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-			}
-			break;
+				mCard->WriteRegister(kRegHDMIOutControl, mDs.hdmiOutDsProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+				break;
 				
 			case kHDMIOutProtocolHDMI:
 				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
@@ -3358,27 +3354,7 @@ void Class4kServices::SetDeviceMiscRegisters ()
 		}
 		
 		// HDMI Out Stereo 3D
-		HDMIOutStereoSelect stereoSelect = mHDMIOutStereoSelect;
-		
-		// in auto mode, follow codec settings
-		if (stereoSelect == kHDMIOutStereoAuto)
-			stereoSelect = mHDMIOutStereoCodecSelect;
-			
-		switch (stereoSelect)
-		{
-			case kHDMIOutStereoSideBySide:
-				mCard->SetHDMIOut3DPresent(true);
-				mCard->SetHDMIOut3DMode(NTV2_HDMI3DSideBySide);
-				break;
-			case kHDMIOutStereoTopBottom:
-				mCard->SetHDMIOut3DPresent(true);
-				mCard->SetHDMIOut3DMode(NTV2_HDMI3DTopBottom);
-				break;
-			case kHDMIOutStereoOff:
-			default:
-				mCard->SetHDMIOut3DPresent(false);
-				break;
-		}
+		mCard->SetHDMIOut3DPresent(false);
 	}
 	
 	// 4K Down Converter

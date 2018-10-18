@@ -125,6 +125,8 @@ typedef enum
 	kVRegFrameBuffer1RGBRange				= VIRTUALREG_START+138,
 	kVRegFrameBuffer1Stereo3DMode			= VIRTUALREG_START+139,
 
+	kVRegHDMIInRgbRange						= VIRTUALREG_START+140,
+	kVRegHDMIOutRgbRange					= VIRTUALREG_START+141,
 	kVRegAnalogInBlackLevel					= VIRTUALREG_START+142,
 	kVRegAnalogInputType					= VIRTUALREG_START+143,
 	kVRegHDMIOutColorSpaceModeCtrl			= VIRTUALREG_START+144,

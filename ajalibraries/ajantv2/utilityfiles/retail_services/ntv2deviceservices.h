@@ -217,7 +217,6 @@ public:
 	// set by every frame, not user
 	NTV2VideoFormat			mDefaultVideoFormat;
 	uint32_t				mADCStabilizeCount;	
-	HDMIOutColorSpaceMode	mHDMIOutColorSpaceModeStatus;	
 	uint32_t				mADCLockScanTestFormat;
 	CNTV2VPID 				mVpidParser;
 	
@@ -306,9 +305,6 @@ public:
 	NTV2Standard			mVirtualAnalogInStandard;
 	
 	HDMIOutColorSpaceMode	mHDMIOutColorSpaceModeCtrl;	
-	HDMIOutProtocolMode		mHDMIOutProtocolMode;
-	HDMIOutStereoSelect		mHDMIOutStereoSelect;		// selection driven by user choice in CP
-	HDMIOutStereoSelect		mHDMIOutStereoCodecSelect;	// selection driver by codec settings
 	NTV2HDMIAudioChannels	mHDMIOutAudioChannels;
 	NTV2HDMIRange			mHDMIInRGBRange;
 	
