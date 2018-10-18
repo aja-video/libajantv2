@@ -168,7 +168,6 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 
 DeviceServices::DeviceServices()
 {
-	mHDMIStartupCountDown			= kHDMIStartupPhase0;
 	mADCStabilizeCount				= 0;
 	mDisplayReferenceSelect			= kFreeRun;
 	mCaptureReferenceSelect			= kVideoIn;

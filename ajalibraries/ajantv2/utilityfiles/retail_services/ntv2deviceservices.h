@@ -212,8 +212,6 @@ public:
 	RetailSupport*			mRs;
 	CNTV2Card*				mCard;
 	
-	uint32_t 				mHDMIStartupCountDown;
-	
 	// set by every frame, not user
 	NTV2VideoFormat			mDefaultVideoFormat;
 	uint32_t				mADCStabilizeCount;	

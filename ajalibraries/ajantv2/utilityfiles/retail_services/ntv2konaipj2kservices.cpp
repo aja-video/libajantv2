@@ -1464,141 +1464,85 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 		mCard->SetSDITransmitEnable(NTV2_CHANNEL2, true);
 	}
 
-	// HDMI output - initialization sequence
-	if (mHDMIStartupCountDown > 0)
+
+	// set standard / mode
+	NTV2Standard standard = GetNTV2StandardFromVideoFormat(mFb1VideoFormat);
+	NTV2FrameRate rate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
+
+	if (b4K == true)
 	{
-		// start initialization
-		if (mHDMIStartupCountDown == kHDMIStartupPhase0)
-			mCard->WriteRegister(kRegHDMIOutControl, 0x0, 0x0F000000);
-
-		else if (mHDMIStartupCountDown == kHDMIStartupPhase1)
-			mCard->WriteRegister(kRegHDMIOutControl, 0xC, 0x0F000000);
-
-		else if (mHDMIStartupCountDown == kHDMIStartupPhase2)
-			mCard->WriteRegister(kRegHDMIOutControl, 0xD, 0x0F000000);
-
-		else if (mHDMIStartupCountDown == kHDMIStartupPhase3)
-			mCard->WriteRegister(kRegHDMIOutControl, 0xC, 0x0F000000);
-
-		mHDMIStartupCountDown--;
-	}
-	else
-	{
-		// set standard / mode
-        NTV2Standard standard = GetNTV2StandardFromVideoFormat(mFb1VideoFormat);
-		NTV2FrameRate rate = GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
-
-		if (b4K == true)
+		// 4K mode
+		switch (mVirtualHDMIOutputSelect)
 		{
-			// 4K mode
-			switch (mVirtualHDMIOutputSelect)
-			{
-			default:
-			case NTV2_4kHalfFrameRate:
-			case NTV2_PrimaryOutputSelect:
-				mCard->SetHDMIV2Mode(NTV2_HDMI_V2_4K_PLAYBACK);
-				break;
-			case NTV2_Quarter4k:
-			case NTV2_Quadrant1Select:
-			case NTV2_Quadrant2Select:
-			case NTV2_Quadrant3Select:
-			case NTV2_Quadrant4Select:
-			{
-				mCard->SetHDMIV2Mode(NTV2_HDMI_V2_HDSD_BIDIRECTIONAL);
-                switch (standard)
-				{
-				case NTV2_STANDARD_3840x2160p:
-				case NTV2_STANDARD_3840HFR:
-                    standard = NTV2_STANDARD_1080p;
-					break;
-				case NTV2_STANDARD_4096x2160p:
-				case NTV2_STANDARD_4096HFR:
-                    standard = NTV2_STANDARD_2Kx1080p;
-					break;
-				default:
-					break;
-				}
-			}
+		default:
+		case NTV2_4kHalfFrameRate:
+		case NTV2_PrimaryOutputSelect:
+			mCard->SetHDMIV2Mode(NTV2_HDMI_V2_4K_PLAYBACK);
 			break;
-			};
-		}
-		else
+		case NTV2_Quarter4k:
+		case NTV2_Quadrant1Select:
+		case NTV2_Quadrant2Select:
+		case NTV2_Quadrant3Select:
+		case NTV2_Quadrant4Select:
 		{
-			// SD or HD mode
 			mCard->SetHDMIV2Mode(NTV2_HDMI_V2_HDSD_BIDIRECTIONAL);
-            switch (standard)
+			switch (standard)
 			{
 			case NTV2_STANDARD_3840x2160p:
 			case NTV2_STANDARD_3840HFR:
-                standard = NTV2_STANDARD_1080p;
+				standard = NTV2_STANDARD_1080p;
 				break;
 			case NTV2_STANDARD_4096x2160p:
 			case NTV2_STANDARD_4096HFR:
-                standard = NTV2_STANDARD_2Kx1080p;
+				standard = NTV2_STANDARD_2Kx1080p;
 				break;
-			case NTV2_STANDARD_1080:
-				switch (rate)
-				{
-				case NTV2_FRAMERATE_2398:
-				case NTV2_FRAMERATE_2400:
-                    standard = NTV2_STANDARD_1080p;
-					break;
-				default:
-					break;
-				}
 			default:
 				break;
 			}
 		}
-
-		// disable two sample interleave i/o
-		mCard->SetHDMIOutTsiIO(false);
-
-		// set fps
-		if (mVirtualHDMIOutputSelect == NTV2_4kHalfFrameRate)
+		break;
+		};
+	}
+	else
+	{
+		// SD or HD mode
+		mCard->SetHDMIV2Mode(NTV2_HDMI_V2_HDSD_BIDIRECTIONAL);
+		switch (standard)
 		{
-			//Only do this for formats that half rate supported
-			//50,5994,60
-			NTV2FrameRate tempRate = primaryFrameRate;
-			bool decimate = false;
-
-			switch (primaryFrameRate)
+		case NTV2_STANDARD_3840x2160p:
+		case NTV2_STANDARD_3840HFR:
+			standard = NTV2_STANDARD_1080p;
+			break;
+		case NTV2_STANDARD_4096x2160p:
+		case NTV2_STANDARD_4096HFR:
+			standard = NTV2_STANDARD_2Kx1080p;
+			break;
+		case NTV2_STANDARD_1080:
+			switch (rate)
 			{
-			case NTV2_FRAMERATE_6000:
-			case NTV2_FRAMERATE_5994:
-			case NTV2_FRAMERATE_5000:
-			case NTV2_FRAMERATE_4800:
-			case NTV2_FRAMERATE_4795:
-				tempRate = HalfFrameRate(primaryFrameRate);
-				decimate = true;
+			case NTV2_FRAMERATE_2398:
+			case NTV2_FRAMERATE_2400:
+				standard = NTV2_STANDARD_1080p;
 				break;
 			default:
 				break;
 			}
-
-            switch (standard)
-			{
-			case NTV2_STANDARD_4096HFR:
-                standard = NTV2_STANDARD_4096x2160p;
-				break;
-			case NTV2_STANDARD_3840HFR:
-                standard = NTV2_STANDARD_3840x2160p;
-				break;
-			default:
-				break;
-			}
-			mCard->SetHDMIOutVideoFPS(tempRate);
-			mCard->SetHDMIOutDecimateMode(decimate); // turning on decimate turns off downconverter
-			mCard->SetHDMIOutLevelBMode(IsVideoFormatB(mFb1VideoFormat));
+		default:
+			break;
 		}
-		else
-		{
-			mCard->SetHDMIOutVideoFPS(primaryFrameRate);
-			mCard->SetHDMIOutDecimateMode(false);
-			mCard->SetHDMIOutLevelBMode(IsVideoFormatB(mFb1VideoFormat));
-		}
+	}
 
-		// color space sample rate
+	// disable two sample interleave i/o
+	mCard->SetHDMIOutTsiIO(false);
+
+	// set fps
+	if (mVirtualHDMIOutputSelect == NTV2_4kHalfFrameRate)
+	{
+		//Only do this for formats that half rate supported
+		//50,5994,60
+		NTV2FrameRate tempRate = primaryFrameRate;
+		bool decimate = false;
+
 		switch (primaryFrameRate)
 		{
 		case NTV2_FRAMERATE_6000:
@@ -1606,71 +1550,108 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 		case NTV2_FRAMERATE_5000:
 		case NTV2_FRAMERATE_4800:
 		case NTV2_FRAMERATE_4795:
-			if (b4K == true && mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)
-				mCard->SetHDMIOutSampleStructure(NTV2_HDMI_420);
-			else
-				mCard->SetHDMIOutSampleStructure(NTV2_HDMI_422);
+			tempRate = HalfFrameRate(primaryFrameRate);
+			decimate = true;
 			break;
 		default:
-			mCard->SetHDMIOutSampleStructure(NTV2_HDMI_422);
 			break;
 		}
 
-        mCard->SetHDMIOutVideoStandard(standard);
-
-		// set color-space bit-depth 
-		switch (mDs.hdmiOutColorSpace)
+		switch (standard)
 		{
-			case kHDMIOutCSCYCbCr8bit:
-				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
-				mCard->SetHDMIOutBitDepth(NTV2_HDMI8Bit);
-				break;
-		
-			case kHDMIOutCSCYCbCr10bit:
-				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
-				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
-				break;
-				
-			case kHDMIOutCSCRGB10bit:
-				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
-				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
-				break;
-				
-			default:
-			case kHDMIOutCSCRGB8bit:
-				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
-				mCard->SetHDMIOutBitDepth (NTV2_HDMI8Bit);
-				break;
+		case NTV2_STANDARD_4096HFR:
+			standard = NTV2_STANDARD_4096x2160p;
+			break;
+		case NTV2_STANDARD_3840HFR:
+			standard = NTV2_STANDARD_3840x2160p;
+			break;
+		default:
+			break;
 		}
-
-		// HDMI Out Protocol mode
-		switch (mDs.hdmiOutProtocol_)
-		{
-			default:
-			case kHDMIOutProtocolAutoDetect:
-				mCard->WriteRegister(kRegHDMIOutControl, mDs.hdmiOutDsProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-				break;
-				
-			case kHDMIOutProtocolHDMI:
-				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-				break;
-				
-			case kHDMIOutProtocolDVI:
-				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolDVI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-				break;
-		}
-		
-		// HDMI Out rgb range
-		switch (mDs.hdmiOutRange)
-		{
-			default:
-			case NTV2_RGBRangeSMPTE:	mCard->SetHDMIOutRange(NTV2_HDMIRangeSMPTE);	break;
-			case NTV2_RGBRangeFull:		mCard->SetHDMIOutRange(NTV2_HDMIRangeFull);		break;
-		}
-
-		// HDMI Out Stereo 3D
-		mCard->SetHDMIOut3DPresent(false);
+		mCard->SetHDMIOutVideoFPS(tempRate);
+		mCard->SetHDMIOutDecimateMode(decimate); // turning on decimate turns off downconverter
+		mCard->SetHDMIOutLevelBMode(IsVideoFormatB(mFb1VideoFormat));
 	}
+	else
+	{
+		mCard->SetHDMIOutVideoFPS(primaryFrameRate);
+		mCard->SetHDMIOutDecimateMode(false);
+		mCard->SetHDMIOutLevelBMode(IsVideoFormatB(mFb1VideoFormat));
+	}
+
+	// color space sample rate
+	switch (primaryFrameRate)
+	{
+	case NTV2_FRAMERATE_6000:
+	case NTV2_FRAMERATE_5994:
+	case NTV2_FRAMERATE_5000:
+	case NTV2_FRAMERATE_4800:
+	case NTV2_FRAMERATE_4795:
+		if (b4K == true && mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)
+			mCard->SetHDMIOutSampleStructure(NTV2_HDMI_420);
+		else
+			mCard->SetHDMIOutSampleStructure(NTV2_HDMI_422);
+		break;
+	default:
+		mCard->SetHDMIOutSampleStructure(NTV2_HDMI_422);
+		break;
+	}
+
+	mCard->SetHDMIOutVideoStandard(standard);
+
+	// set color-space bit-depth 
+	switch (mDs.hdmiOutColorSpace)
+	{
+		case kHDMIOutCSCYCbCr8bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
+			mCard->SetHDMIOutBitDepth(NTV2_HDMI8Bit);
+			break;
+	
+		case kHDMIOutCSCYCbCr10bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
+			mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
+			break;
+			
+		case kHDMIOutCSCRGB10bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
+			mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
+			break;
+			
+		default:
+		case kHDMIOutCSCRGB8bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
+			mCard->SetHDMIOutBitDepth (NTV2_HDMI8Bit);
+			break;
+	}
+
+	// HDMI Out Protocol mode
+	switch (mDs.hdmiOutProtocol_)
+	{
+		default:
+		case kHDMIOutProtocolAutoDetect:
+			mCard->WriteRegister(kRegHDMIOutControl, mDs.hdmiOutDsProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+			break;
+			
+		case kHDMIOutProtocolHDMI:
+			mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+			break;
+			
+		case kHDMIOutProtocolDVI:
+			mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolDVI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+			break;
+	}
+	
+	// HDMI Out rgb range
+	switch (mDs.hdmiOutRange)
+	{
+		default:
+		case NTV2_RGBRangeSMPTE:	mCard->SetHDMIOutRange(NTV2_HDMIRangeSMPTE);	break;
+		case NTV2_RGBRangeFull:		mCard->SetHDMIOutRange(NTV2_HDMIRangeFull);		break;
+	}
+
+	// HDMI Out Stereo 3D
+	mCard->SetHDMIOut3DPresent(false);
+
 	
 	// 4K Down Converter
 	bool bPsf = IsPSF(mFb1VideoFormat);
