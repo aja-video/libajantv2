@@ -304,7 +304,6 @@ public:
 	NTV2AnalogType			mVirtualAnalogInType;
 	NTV2Standard			mVirtualAnalogInStandard;
 	
-	HDMIOutColorSpaceMode	mHDMIOutColorSpaceModeCtrl;	
 	NTV2HDMIAudioChannels	mHDMIOutAudioChannels;
 	NTV2HDMIRange			mHDMIInRGBRange;
 	

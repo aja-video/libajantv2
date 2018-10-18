@@ -421,11 +421,27 @@ void IoExpressServices::SetDeviceMiscRegisters ()
 				break;
 		}
 		
+		// HDMI Out rgb range
+		switch (mDs.hdmiOutRange)
+		{
+			default:
+			case NTV2_RGBRangeSMPTE:	mCard->SetHDMIOutRange(NTV2_HDMIRangeSMPTE);	break;
+			case NTV2_RGBRangeFull:		mCard->SetHDMIOutRange(NTV2_HDMIRangeFull);		break;
+		}
+		
 		// HDMI Out Stereo 3D
 		mCard->SetHDMIOut3DPresent(false);
 	}
 	
-		// special case - VANC 8bit pixel shift support
+	// HDMI In rgb range
+	switch (mDs.hdmiInRange)
+	{
+		default:
+		case NTV2_RGBRangeSMPTE:	mCard->SetHDMIInputRange(NTV2_HDMIRangeSMPTE);	break;
+		case NTV2_RGBRangeFull:		mCard->SetHDMIInputRange(NTV2_HDMIRangeFull);	break;
+	}
+	
+	// special case - VANC 8bit pixel shift support
 	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format) )
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else

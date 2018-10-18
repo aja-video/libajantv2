@@ -95,9 +95,7 @@ void KonaIP2110Services::SetDeviceXPointPlayback ()
 
 	bool						bFb1HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
 	bool						bFb2HdrRGB			= mFb2Format == NTV2_FBF_48BIT_RGB;
-	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
-														 mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB10bit) ||
-													   (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
+	bool						bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit;
 
 	// XPoint Init
 	NTV2CrosspointID			XPt1, XPt2, XPt3, XPt4;
@@ -1432,9 +1430,7 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 
 	NTV2SDIInputFormatSelect	inputFormatSelect	= NTV2_YUVSelect;				// Input format select (YUV, RGB, Stereo 3D)
 	bool						bHdmiIn             = false; //mVirtualInputSelect == NTV2_Input5Select;
-	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
-														 mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB10bit) ||
-													   (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
+	bool						bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit;
 
 	// swap quad mode
 	ULWord						selectSwapQuad		= 0;
@@ -3344,6 +3340,14 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 			case kHDMIOutProtocolDVI:
 				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolDVI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 				break;
+		}
+		
+		// HDMI Out rgb range
+		switch (mDs.hdmiOutRange)
+		{
+			default:
+			case NTV2_RGBRangeSMPTE:	mCard->SetHDMIOutRange(NTV2_HDMIRangeSMPTE);	break;
+			case NTV2_RGBRangeFull:		mCard->SetHDMIOutRange(NTV2_HDMIRangeFull);		break;
 		}
 
 		// HDMI Out Stereo 3D

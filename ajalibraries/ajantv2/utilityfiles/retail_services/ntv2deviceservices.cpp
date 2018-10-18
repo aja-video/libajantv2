@@ -256,17 +256,10 @@ bool DeviceServices::ReadDriverState (void)
 		if (ds.hdmiOutSize > 0)
 		{ 
 			mVirtualHDMIOutputSelect = ds.hdmiOutFormatSelect;
-			mHDMIOutColorSpaceModeCtrl = ds.hdmiOutColorSpace;
 		}
 
 		// analog out
 		mVirtualAnalogOutputSelect = ds.analogOutFormatSelect;
-		
-		// hdmi in
-		if (ds.hdmiInSize > 0)
-		{ 
-			
-		}
 	}
 				
 #else
@@ -289,7 +282,6 @@ bool DeviceServices::ReadDriverState (void)
 	
 	// hdmi out
 	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutputSelect, mVirtualHDMIOutputSelect);
-	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutColorSpaceModeCtrl, mHDMIOutColorSpaceModeCtrl);
 	
 	// hdmi in
 	
