@@ -42,6 +42,7 @@ typedef struct
 	RP188_STRUCT	fRP188Data;				///< @brief	For future use -- (see note)
 	RP188_STRUCT	fRP188Data2;			///< @brief	For future use -- (see note)
 	uint8_t *		fVideoBufferUnaligned;	///< @brief	For future use -- (see note)
+	uint32_t		fFrameFlags;			///< @brief Frame data flags
 } AVDataBuffer;
 
 
