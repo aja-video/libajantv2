@@ -388,6 +388,27 @@ bool CNTV2Card::GetInstalledBitfileInfo (ULWord & outNumBytes, std::string & out
 }
 
 
+bool CNTV2Card::IsFailSafeBitfileLoaded (bool & outIsSafeBoot)
+{
+	outIsSafeBoot = false;
+	if (!::NTV2DeviceCanReportFailSafeLoaded(_boardID))
+		return false;
+	return CNTV2DriverInterface::ReadRegister(kRegCPLDVersion, outIsSafeBoot, BIT(4), 4);
+}
+
+
+bool CNTV2Card::CanWarmBootFPGA (bool & outCanWarmBoot)
+{
+	outCanWarmBoot = false;	//	Definitely can't
+	ULWord	version(0);
+	if (!ReadRegister(kRegCPLDVersion, version, BIT(0)|BIT(1)))
+		return false;	//	Fail
+	if (version == 3)
+		outCanWarmBoot = true;	//	Definitely can
+	return true;
+}
+
+
 bool CNTV2Card::GetInput1Autotimed (void)
 {
 	ULWord	status	(0);

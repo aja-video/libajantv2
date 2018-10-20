@@ -201,6 +201,7 @@ NTV2DeviceCanChangeEmbeddedAudioClock
 NTV2DeviceHasBiDirectionalAnalogAudio
 NTV2DeviceHasGenlockv3
 NTV2DeviceCanDo12gRouting
+NTV2DeviceCanReportFailSafeLoaded
 
 
 // NTV2ConversionModes
