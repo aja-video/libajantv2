@@ -125,6 +125,8 @@ typedef enum
 	kVRegFrameBuffer1RGBRange				= VIRTUALREG_START+138,
 	kVRegFrameBuffer1Stereo3DMode			= VIRTUALREG_START+139,
 
+	kVRegHDMIInRgbRange						= VIRTUALREG_START+140,
+	kVRegHDMIOutRgbRange					= VIRTUALREG_START+141,
 	kVRegAnalogInBlackLevel					= VIRTUALREG_START+142,
 	kVRegAnalogInputType					= VIRTUALREG_START+143,
 	kVRegHDMIOutColorSpaceModeCtrl			= VIRTUALREG_START+144,
@@ -152,7 +154,7 @@ typedef enum
 	kVRegAvailable164						= VIRTUALREG_START+164,
 	kVRegRP188SourceSelect					= VIRTUALREG_START+165,
 	kVRegQTCodecModeDebug					= VIRTUALREG_START+166,
-	kVRegHDMIOutColorSpaceModeStatus		= VIRTUALREG_START+167,
+	kVRegHDMIOutColorSpaceModeStatus		= VIRTUALREG_START+167,		// deprecated
 	kVRegDeviceOnline						= VIRTUALREG_START+168,
 	kVRegIsDefaultDevice					= VIRTUALREG_START+169,
 

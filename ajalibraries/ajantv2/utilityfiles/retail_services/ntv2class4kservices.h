@@ -34,6 +34,7 @@ protected:
 	bool bDoCSC5;
 	bool bDoLUT5;
 	bool bDo12G;
+	bool bDo4kQuarter;
 };
 
 

@@ -168,9 +168,7 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 
 DeviceServices::DeviceServices()
 {
-	mHDMIStartupCountDown			= kHDMIStartupPhase0;
 	mADCStabilizeCount				= 0;
-	mHDMIOutColorSpaceModeStatus	= kHDMIOutCSCAutoDetect;
 	mDisplayReferenceSelect			= kFreeRun;
 	mCaptureReferenceSelect			= kVideoIn;
 	mVirtualAnalogInBlackLevel		= NTV2_Black75IRE;
@@ -254,7 +252,10 @@ bool DeviceServices::ReadDriverState (void)
 		}
 		
 		// hdmi out
-		mVirtualHDMIOutputSelect = ds.hdmiOutFormatSelect;
+		if (ds.hdmiOutSize > 0)
+		{ 
+			mVirtualHDMIOutputSelect = ds.hdmiOutFormatSelect;
+		}
 
 		// analog out
 		mVirtualAnalogOutputSelect = ds.analogOutFormatSelect;
@@ -280,6 +281,8 @@ bool DeviceServices::ReadDriverState (void)
 	
 	// hdmi out
 	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutputSelect, mVirtualHDMIOutputSelect);
+	
+	// hdmi in
 	
 	// analog out
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutputSelect, mVirtualAnalogOutputSelect);
@@ -315,11 +318,6 @@ bool DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogInBlackLevel, mVirtualAnalogInBlackLevel);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogInputType, mVirtualAnalogInType);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogInStandard, mVirtualAnalogInStandard);
-	
-	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutColorSpaceModeCtrl, mHDMIOutColorSpaceModeCtrl);
-	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutProtocolMode, mHDMIOutProtocolMode);
-	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutStereoSelect, mHDMIOutStereoSelect);
-	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutStereoCodecSelect, mHDMIOutStereoCodecSelect);
 	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutAudioChannels, mHDMIOutAudioChannels);
 	mCard->ReadRegister(kVRegFramesPerVertical, mRegFramesPerVertical);
 	
@@ -979,6 +977,10 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 
 void DeviceServices::SetDeviceMiscRegisters ()
 {
+//	if (mBoardInfo.numHDMIVidOutputs)
+//	{
+//		mDs.hdmiOutColorSpace
+//	}
 }
 
 

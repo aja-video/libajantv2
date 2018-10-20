@@ -122,9 +122,7 @@ void IoIP2110Services::SetDeviceXPointPlayback ()
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
     bool						bFb1HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
     bool						bFb2HdrRGB			= mFb2Format == NTV2_FBF_48BIT_RGB;
-	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
-														 mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB10bit) ||
-													    (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
+	bool						bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit;
 	bool						bInRGB				= inputColorSpace == NTV2_ColorSpaceModeRgb;
 	
 	// XPoint Init 
@@ -1514,9 +1512,7 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_Input4x4kSelect && mQuadSwapIn != 0;
 	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)
 	bool						bHdmiIn             = mVirtualInputSelect == NTV2_Input5Select;
-	bool						bHdmiOutRGB			= ( (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB8bit ||
-														 mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCRGB10bit) ||
-													    (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect && bFb1RGB == true) );
+	bool						bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit;
 	
 	// SMPTE 425 (2pi)
 	bool						bVpid2x2piIn		= false;
@@ -3308,31 +3304,14 @@ void IoIP2110Services::SetDeviceMiscRegisters ()
 				break;
 		}
 
-		//mCard->SetHDMIOutVideoStandard(v2Standard);
-		
-		// HDMI out colorspace auto-detect status
-		mHDMIOutColorSpaceModeStatus = mHDMIOutColorSpaceModeCtrl;
-		if (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect)
+		// set color-space bit-depth
+		switch (mDs.hdmiOutColorSpace)
 		{
-			NTV2HDMIBitDepth bitDepth = NTV2_HDMI10Bit;
-			NTV2LHIHDMIColorSpace colorSpace = NTV2_LHIHDMIColorSpaceYCbCr;
-			
-			mCard->GetHDMIOutDownstreamColorSpace (colorSpace);
-			mCard->GetHDMIOutDownstreamBitDepth (bitDepth);
-			
-			if (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCYCbCr10bit;
-				
-			else if (bitDepth == NTV2_HDMI10Bit)
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB10bit;
-					
-			else
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB8bit;
-		}
+			case kHDMIOutCSCYCbCr8bit:
+				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
+				mCard->SetHDMIOutBitDepth(NTV2_HDMI8Bit);
+				break;
 		
-		// set color space bits as specified
-		switch (mHDMIOutColorSpaceModeStatus)
-		{
 			case kHDMIOutCSCYCbCr10bit:
 				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
 				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
@@ -3351,16 +3330,12 @@ void IoIP2110Services::SetDeviceMiscRegisters ()
 		}
 		
 		// HDMI Out Protocol mode
-		switch (mHDMIOutProtocolMode)
+		switch (mDs.hdmiOutProtocol_)
 		{
 			default:
 			case kHDMIOutProtocolAutoDetect:
-			{
-				ULWord detectedProtocol;
-				mCard->ReadRegister (kRegHDMIInputStatus, detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
-				mCard->WriteRegister (kRegHDMIOutControl, detectedProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-			}
-			break;
+				mCard->WriteRegister(kRegHDMIOutControl, mDs.hdmiOutDsProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+				break;
 				
 			case kHDMIOutProtocolHDMI:
 				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
@@ -3371,28 +3346,24 @@ void IoIP2110Services::SetDeviceMiscRegisters ()
 				break;
 		}
 		
-		// HDMI Out Stereo 3D
-		HDMIOutStereoSelect stereoSelect = mHDMIOutStereoSelect;
-		
-		// in auto mode, follow codec settings
-		if (stereoSelect == kHDMIOutStereoAuto)
-			stereoSelect = mHDMIOutStereoCodecSelect;
-			
-		switch (stereoSelect)
+		// HDMI Out rgb range
+		switch (mDs.hdmiOutRange)
 		{
-			case kHDMIOutStereoSideBySide:
-				mCard->SetHDMIOut3DPresent(true);
-				mCard->SetHDMIOut3DMode(NTV2_HDMI3DSideBySide);
-				break;
-			case kHDMIOutStereoTopBottom:
-				mCard->SetHDMIOut3DPresent(true);
-				mCard->SetHDMIOut3DMode(NTV2_HDMI3DTopBottom);
-				break;
-			case kHDMIOutStereoOff:
 			default:
-				mCard->SetHDMIOut3DPresent(false);
-				break;
+			case NTV2_RGBRangeSMPTE:	mCard->SetHDMIOutRange(NTV2_HDMIRangeSMPTE);	break;
+			case NTV2_RGBRangeFull:		mCard->SetHDMIOutRange(NTV2_HDMIRangeFull);		break;
 		}
+		
+		// HDMI Out rgb range
+		switch (mDs.hdmiOutRange)
+		{
+			default:
+			case NTV2_RGBRangeSMPTE:	mCard->SetHDMIOutRange(NTV2_HDMIRangeSMPTE);	break;
+			case NTV2_RGBRangeFull:		mCard->SetHDMIOutRange(NTV2_HDMIRangeFull);		break;
+		}
+		
+		// HDMI Out Stereo 3D
+		mCard->SetHDMIOut3DPresent(false);
 	}
 	
 	// 4K Down Converter

@@ -394,7 +394,11 @@ void CNTV2MBController::SetIGMPGroup(eSFP port, NTV2Stream stream, uint32_t mcas
 void CNTV2MBController::UnsetIGMPGroup(eSFP port, NTV2Stream stream)
 {
     uint32_t offset = getIGMPCBOffset(port, stream);
-    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, 0);   // block not used
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, IGMPCB_STATE_BUSY);
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_MCAST_ADDR, 0);
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_SRC_ADDR,   0);
+
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, 0);
 }
 
 void CNTV2MBController::EnableIGMPGroup(eSFP port, NTV2Stream stream, bool enable)
