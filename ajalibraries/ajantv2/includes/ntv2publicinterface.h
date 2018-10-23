@@ -5531,10 +5531,9 @@ typedef enum
 		#define	AUTOCIRCULATE_WITH_AUDIO_CONTROL	BIT(7)		///< @brief	Use this to AutoCirculate with no audio but with audio control
 		#define	AUTOCIRCULATE_WITH_FIELDS			BIT(8)		///< @brief	Use this to AutoCirculate with fields as frames for interlaced formats
 
-		#define AUTOCIRCULATE_FRAME_PROGRESSIVE		BIT(20)		///< @brief Frame contains a progressive image
-		#define AUTOCIRCULATE_FRAME_INTERLACED		BIT(21)		///< @brief Frame contains an interlaced image
-		#define AUTOCIRCULATE_FRAME_FIELD0			BIT(22)		///< @brief Frame contains field 0 of an interlaced image (first field in time)
-		#define AUTOCIRCULATE_FRAME_FIELD1			BIT(23)		///< @brief Frame contains field 1 of an interlaced image (second field in time)
+		#define AUTOCIRCULATE_FRAME_FULL			BIT(20)		///< @brief Frame contains a full image
+		#define AUTOCIRCULATE_FRAME_FIELD0			BIT(21)		///< @brief Frame contains field 0 of an interlaced image (first field in time)
+		#define AUTOCIRCULATE_FRAME_FIELD1			BIT(22)		///< @brief Frame contains field 1 of an interlaced image (second field in time)
 
 		#define AUTOCIRCULATE_P2P_PREPARE			BIT(28)		///< @brief prepare p2p target for synchronous transfer (no message)
 		#define AUTOCIRCULATE_P2P_COMPLETE			BIT(29)		///< @brief complete synchronous p2p transfer
