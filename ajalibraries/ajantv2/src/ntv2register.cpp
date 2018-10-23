@@ -1152,21 +1152,18 @@ bool CNTV2Card::Set4kSquaresEnable (const bool inEnable, NTV2Channel inChannel)
 	}
 	else
 	{
-		if (!IsMultiFormatActive())
-		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
-			CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
-		}
+        if (!IsMultiFormatActive())
+        {
+            status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+                WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
+        }
 		else if (inChannel < NTV2_CHANNEL5)
 		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
-				CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL4);
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);
 		}
 		else
 		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
-				CopyVideoFormat(inChannel, NTV2_CHANNEL5, NTV2_CHANNEL8);
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
 		}
 	}
 
@@ -1273,42 +1270,36 @@ bool CNTV2Card::SetTsiFrameEnable (const bool enable, const NTV2Channel inChanne
 				status = WriteRegister(kRegGlobalControl, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
 					WriteRegister(kRegGlobalControlCh2, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
 					WriteRegister(kRegGlobalControlCh3, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
-					WriteRegister(kRegGlobalControlCh4, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
-					CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
+					WriteRegister(kRegGlobalControlCh4, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
 			}
 			else
 			{
 				status = WriteRegister(gChannelToGlobalControlRegNum[inChannel], 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
 			}
 		}
-		// enable 425 mode, disable squares
+        // disable 425 mode, enable squares
 		else if (!IsMultiFormatActive())
 		{
 			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
 				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
 				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78) &&
-				CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
 		}
 		else if (inChannel < NTV2_CHANNEL3)
 		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
-				CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL2);
+            status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12);
 		}
 		else if (inChannel < NTV2_CHANNEL5)
 		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
-				CopyVideoFormat(inChannel, NTV2_CHANNEL3, NTV2_CHANNEL4);
+            status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
 		}
 		else if (inChannel < NTV2_CHANNEL7)
 		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
-				CopyVideoFormat(inChannel, NTV2_CHANNEL5, NTV2_CHANNEL6);
+            status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56);
 		}
 		else
 		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78) &&
-				CopyVideoFormat(inChannel, NTV2_CHANNEL7, NTV2_CHANNEL8);
+            status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
 		}
 	}
 
