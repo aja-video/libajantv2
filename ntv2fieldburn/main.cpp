@@ -86,7 +86,7 @@ int main (int argc, const char ** argv)
 
 		//	Loop until someone tells us to stop...
 		cout	<< "           Capture  Playout  Capture  Playout" << endl
-				<< "   Frames   Frames   Frames   Buffer   Buffer" << endl
+				<< "   Fields   Fields   Fields   Buffer   Buffer" << endl
 				<< "Processed  Dropped  Dropped    Level    Level" << endl;
 		do
 		{

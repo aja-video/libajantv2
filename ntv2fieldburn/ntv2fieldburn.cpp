@@ -74,11 +74,6 @@ NTV2FieldBurn::~NTV2FieldBurn ()
 			AJAMemory::FreeAligned (mAVHostBuffer[bufferNdx].fVideoBuffer);
 			mAVHostBuffer[bufferNdx].fVideoBuffer = NULL;
 		}
-		if (mAVHostBuffer[bufferNdx].fVideoBuffer2)
-		{
-			AJAMemory::FreeAligned (mAVHostBuffer[bufferNdx].fVideoBuffer2);
-			mAVHostBuffer[bufferNdx].fVideoBuffer2 = NULL;
-		}
 		if (mAVHostBuffer[bufferNdx].fAudioBuffer)
 		{
 			AJAMemory::FreeAligned (mAVHostBuffer[bufferNdx].fAudioBuffer);
@@ -327,8 +322,7 @@ AJAStatus NTV2FieldBurn::SetupHostBuffers (void)
 	mAVCircularBuffer.SetAbortFlag (&mGlobalQuit);
 
 	//  Divide by two to make the buffers the size of a video field (half of a full frame)...
-//	mVideoBufferSize = GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancMode) / 2;
-	mVideoBufferSize = GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancMode);
+	mVideoBufferSize = GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancMode) / 2;
 
 	//	Allocate and add each in-host AVDataBuffer to my circular buffer member variable.
 	//	Note that DMA performance can be accelerated slightly by using page-aligned video buffers...
@@ -336,12 +330,6 @@ AJAStatus NTV2FieldBurn::SetupHostBuffers (void)
 	{
 		//	Allocate F1 & F2 video frame buffers...
 		mAVHostBuffer [bufferNdx].fVideoBuffer  = reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (mVideoBufferSize, AJA_PAGE_SIZE));
-		mAVHostBuffer [bufferNdx].fVideoBuffer2 = reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (mVideoBufferSize, AJA_PAGE_SIZE));
-
-		//  The DMA transfer of the field will be done as a group of lines, with each line considered a "segment".
-		//  IMPORTANT:	For segmented DMAs, AutoCirculateTransfer expects the video buffer size to be set to the segment size, in bytes.
-		//				The format descriptor's line pitch is the size of the line in 4-byte words, so multiply that by sizeof(ULWord)...
-//		mAVHostBuffer [bufferNdx].fVideoBufferSize = mFormatDescriptor.linePitch * 4;
 		mAVHostBuffer [bufferNdx].fVideoBufferSize = mVideoBufferSize;
 
 		//	Allocate audio buffer (unless --noaudio requested)...
@@ -356,7 +344,6 @@ AJAStatus NTV2FieldBurn::SetupHostBuffers (void)
 
 		//	Check for memory allocation failures...
 		if (!mAVHostBuffer[bufferNdx].fVideoBuffer
-			|| !mAVHostBuffer[bufferNdx].fVideoBuffer2
 			|| (NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem) && !mAVHostBuffer[bufferNdx].fAudioBuffer))
 				{
 					cerr << "## ERROR:  Allocation failed:  buffer " << (bufferNdx + 1) << " of " << CIRCULAR_BUFFER_SIZE << endl;
@@ -488,26 +475,10 @@ void NTV2FieldBurn::PlayThreadStatic (AJAThread * pThread, void * pContext)		//	
 
 void NTV2FieldBurn::PlayFrames (void)
 {
-	AUTOCIRCULATE_TRANSFER	outputXferField1;	//	Field 1 A/C output transfer info
-	AUTOCIRCULATE_TRANSFER	outputXferField2;	//	Field 2 A/C output transfer info
+	AUTOCIRCULATE_TRANSFER	outputXferField;	//	Field A/C output transfer info
 
 	//	Stop AutoCirculate on this channel, just in case some other app left it running...
 	mDevice.AutoCirculateStop (mOutputChannel);
-
-	//	Tell AutoCirculate to DMA F1's data as a group of "segments".
-	//	Each segment is one line long, and the segments are contiguous in host
-	//	memory, but are stored on every other line in the device frame buffer...
-//	outputXferField1.EnableSegmentedDMAs (mFormatDescriptor.numLines / 2,		//	number of segments:  number of lines per field, i.e. half the line count
-//											mFormatDescriptor.linePitch * 4,	//	number of active bytes per line
-//											mFormatDescriptor.linePitch * 4,	//	host bytes per line:  normal line pitch when reading from our half-height buffer
-//											mFormatDescriptor.linePitch * 8);	//	device bytes per line:  skip every other line when writing into device memory
-
-	//	F2 is identical to F1, except that F2 starts on 2nd line in device frame buffer...
-//	outputXferField2.EnableSegmentedDMAs (mFormatDescriptor.numLines / 2,		//	number of segments:  number of lines per field, i.e. half the line count
-//											mFormatDescriptor.linePitch * 4,	//	number of active bytes per line
-//											mFormatDescriptor.linePitch * 4,	//	host bytes per line:  normal line pitch when reading from our half-height buffer
-//											mFormatDescriptor.linePitch * 8);	//	device bytes per line:  skip every other line when writing into device memory
-//	outputXferField2.acInVideoDMAOffset	= mFormatDescriptor.linePitch * 4;	//  F2 starts on 2nd line in device buffer
 
 	//	Initialize the AutoCirculate output channel...
 	mDevice.AutoCirculateInitForOutput (mOutputChannel, 7, mAudioSystem, AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_FIELDS);
@@ -523,23 +494,18 @@ void NTV2FieldBurn::PlayFrames (void)
 		{
 			//	Prepare to transfer this timecode-burned field (F1) to the device for playout.
 			//	Set the outputXfer struct's video and audio buffers from playData's buffers...
-			outputXferField1.SetVideoBuffer (playData->fVideoBuffer, playData->fVideoBufferSize);
+			outputXferField.SetVideoBuffer (playData->fVideoBuffer, playData->fVideoBufferSize);
 			if (NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem))
-				outputXferField1.SetAudioBuffer (playData->fAudioBuffer, playData->fAudioBufferSize);	//	Audio transfer is done on F1 only
-			outputXferField1.acFrameFlags = playData->fFrameFlags;
+				outputXferField.SetAudioBuffer (playData->fAudioBuffer, playData->fAudioBufferSize);
+			outputXferField.acFrameFlags = playData->fFrameFlags;
 
 			//	Tell AutoCirculate to embed this frame's timecode into the SDI output.
 			//	To embed this same timecode into other SDI outputs, set the appropriate members of the acOutputTimeCodes array...
 			for (NTV2TCIndexesConstIter iter (mTCOutputs.begin ());  iter != mTCOutputs.end ();  ++iter)
-				outputXferField1.SetOutputTimeCode (NTV2_RP188 (playData->fRP188Data), *iter);
+				outputXferField.SetOutputTimeCode (NTV2_RP188 (playData->fRP188Data), *iter);
 
-			//	Transfer F1 to the device...
-			mDevice.AutoCirculateTransfer (mOutputChannel, outputXferField1);
-
-			//  Now transfer F2 to the same device frame buffer used for F1...
-			outputXferField2.acDesiredFrame = outputXferField1.acTransferStatus.acTransferFrame;
-			outputXferField2.SetVideoBuffer (playData->fVideoBuffer2, playData->fVideoBufferSize);
-//			mDevice.AutoCirculateTransfer (mOutputChannel, outputXferField2);
+			//	Transfer field to the device...
+			mDevice.AutoCirculateTransfer (mOutputChannel, outputXferField);
 
 			//	Signal that the frame has been "consumed"...
 			mAVCircularBuffer.EndConsumeNextBuffer ();
@@ -590,27 +556,8 @@ void NTV2FieldBurn::CaptureThreadStatic (AJAThread * pThread, void * pContext)		
 //
 void NTV2FieldBurn::CaptureFrames (void)
 {
-	AUTOCIRCULATE_TRANSFER	inputXferField1;	//	Field 1 A/C input transfer info
-	AUTOCIRCULATE_TRANSFER	inputXferField2;	//	Field 2 A/C input transfer info
+	AUTOCIRCULATE_TRANSFER	inputXferField;		//	Field A/C input transfer info
 	const NTV2TCIndex		timeCodeIndex	(::NTV2ChannelToTimecodeIndex (mInputChannel));
-
-	//	Use AutoCirculate's "segmented DMA" feature to transfer each field out of the device's
-	//	full-frame video buffer as a group of "segments".
-	//	Each segment is one line long, and the segments are contiguous in host memory,
-	//	but originate on alternating lines in the device's frame buffer...
-//	inputXferField1.EnableSegmentedDMAs (mFormatDescriptor.numLines / 2,		//	Number of segments:		number of lines per field, i.e. half the line count
-//											mFormatDescriptor.linePitch * 4,	//	Segment size, in bytes:	transfer this many bytes per segment (normal line pitch)
-//											mFormatDescriptor.linePitch * 4,	//	Host bytes per line:	normal line pitch when writing into our half-height buffer
-//											mFormatDescriptor.linePitch * 8);	//	Device bytes per line:	skip every other line when reading from device memory
-
-	//	IMPORTANT:	For segmented DMAs, the video buffer size must contain the number of bytes to
-	//				transfer per segment. This will be done just prior to calling AutoCirculateTransfer.
-
-//	inputXferField2.EnableSegmentedDMAs (mFormatDescriptor.numLines / 2,		//	Number of segments:		number of lines per field, i.e. half the line count
-//											mFormatDescriptor.linePitch * 4,	//	Segment size, in bytes:	transfer this many bytes per segment (normal line pitch)
-//											mFormatDescriptor.linePitch * 4,	//	Host bytes per line:	normal line pitch when writing into our half-height buffer
-//											mFormatDescriptor.linePitch * 8);	//	Device bytes per line:	skip every other line when reading from device memory
-//	inputXferField2.acInVideoDMAOffset	= mFormatDescriptor.linePitch * 4;		//  Field 2 starts on second line in device buffer
 
 	//	Stop AutoCirculate on this channel, just in case some other app left it running...
 	mDevice.AutoCirculateStop (mInputChannel);
@@ -633,22 +580,22 @@ void NTV2FieldBurn::CaptureFrames (void)
 			//	use it in the next transfer from the device...
 			AVDataBuffer *	captureData	(mAVCircularBuffer.StartProduceNextBuffer ());
 
-			inputXferField1.SetVideoBuffer (captureData->fVideoBuffer, captureData->fVideoBufferSize);
+			inputXferField.SetVideoBuffer (captureData->fVideoBuffer, captureData->fVideoBufferSize);
 			if (NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem))
-				inputXferField1.SetAudioBuffer (captureData->fAudioBuffer, captureData->fAudioBufferSize);
+				inputXferField.SetAudioBuffer (captureData->fAudioBuffer, NTV2_AUDIOSIZE_MAX);
 
-			//	Transfer Field 1 from the device into our host AVDataBuffer...
-			mDevice.AutoCirculateTransfer (mInputChannel, inputXferField1);
+			//	Transfer field from the device into our host AVDataBuffer...
+			mDevice.AutoCirculateTransfer (mInputChannel, inputXferField);
 
 			//	Remember the audio byte count, which can vary frame-by-frame...
-			captureData->fAudioBufferSize	= NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem)  ?  inputXferField1.GetCapturedAudioByteCount ()  :  0;
-			captureData->fFrameFlags = inputXferField1.GetFrameInfo().acFrameFlags;
+			captureData->fAudioBufferSize	= NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem)  ?  inputXferField.GetCapturedAudioByteCount ()  :  0;
+			captureData->fFrameFlags = inputXferField.GetFrameInfo().acFrameFlags;
 
 			NTV2_RP188	defaultTC;
 			if (NTV2_IS_VALID_TIMECODE_INDEX (timeCodeIndex) && InputSignalHasTimecode ())
 			{
 				//	Use the timecode that was captured by AutoCirculate...
-				inputXferField1.GetInputTimeCode (defaultTC, timeCodeIndex);
+				inputXferField.GetInputTimeCode (defaultTC, timeCodeIndex);
 				//NTV2TimeCodeList	tcList;																			//	DEBUG
 				//inputXferField1.GetInputTimeCodes (tcList);														//	DEBUG
 				//cerr << tcList << ", acRP188: " << inputXferField1.acTransferStatus.acFrameStamp.acRP188 << endl;	//	DEBUG
@@ -660,7 +607,7 @@ void NTV2FieldBurn::CaptureFrames (void)
 				//	Invent a timecode (based on frame count)...
 				const	NTV2FrameRate	ntv2FrameRate	(::GetNTV2FrameRateFromVideoFormat (mVideoFormat));
 				const	TimecodeFormat	tcFormat		(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat(ntv2FrameRate));
-				const	CRP188			inventedTC		(inputXferField1.acTransferStatus.acFramesProcessed/2, 0, 0, 10, tcFormat);
+				const	CRP188			inventedTC		(inputXferField.acTransferStatus.acFramesProcessed/2, 0, 0, 10, tcFormat);
 				inventedTC.GetRP188Reg (captureData->fRP188Data);	//	Stuff it in the captureData
 				//cerr << "## DEBUG:  InventedTC: " << inventedTC << "\r";
 			}
@@ -668,20 +615,14 @@ void NTV2FieldBurn::CaptureFrames (void)
 			string	tcStr;
 			tc.GetRP188Str (tcStr);
 
-			//  Transfer Field 2 from the same device frame buffer used for the Field 1...
-			inputXferField2.acDesiredFrame = inputXferField1.acTransferStatus.acTransferFrame;
-			inputXferField2.SetVideoBuffer (captureData->fVideoBuffer2, captureData->fVideoBufferSize);
-
-//			mDevice.AutoCirculateTransfer (mInputChannel, inputXferField2);
-
 			//	"Burn" the same timecode into both fields in the host AVDataBuffer while it's locked for our exclusive access...
 			if ((captureData->fFrameFlags & AUTOCIRCULATE_FRAME_FIELD0) != 0)
 			{
-				mTCBurner.BurnTimeCode (reinterpret_cast <char *> (inputXferField1.acVideoBuffer.GetHostPointer ()), tcStr.c_str (), 10);
+				mTCBurner.BurnTimeCode (reinterpret_cast <char *> (inputXferField.acVideoBuffer.GetHostPointer ()), tcStr.c_str (), 10);
 			}
 			else
 			{
-				mTCBurner.BurnTimeCode (reinterpret_cast <char *> (inputXferField1.acVideoBuffer.GetHostPointer ()), tcStr.c_str (), 30);
+				mTCBurner.BurnTimeCode (reinterpret_cast <char *> (inputXferField.acVideoBuffer.GetHostPointer ()), tcStr.c_str (), 30);
 			}
 
 			//	Signal that we're done "producing" the frame, making it available for future "consumption"...
