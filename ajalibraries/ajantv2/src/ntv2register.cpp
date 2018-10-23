@@ -723,23 +723,33 @@ NTV2FrameDimensions CNTV2Card::GetActiveFrameDimensions (const NTV2Channel inCha
 	NTV2FrameGeometry	geometry	(NTV2_FG_INVALID);
 	NTV2FrameDimensions	result;
 
-	if (IsXilinxProgrammed ()	//	If Xilinx not programmed, prevent returned size from being 4096 x 4096
-		&& GetStandard (standard, inChannel)
-			&& GetFrameGeometry (geometry, inChannel))
+	if (IsXilinxProgrammed()	//	If Xilinx not programmed, prevent returned size from being 4096 x 4096
+		&& GetStandard(standard, inChannel)
+			&& GetFrameGeometry(geometry, inChannel))
 				switch (standard)
 				{
 					case NTV2_STANDARD_1080:
 					case NTV2_STANDARD_1080p:
-						result.SetWidth (geometry == NTV2_FG_2048x1080 || geometry == NTV2_FG_4x2048x1080  ?  HD_NUMCOMPONENTPIXELS_1080_2K  :  HD_NUMCOMPONENTPIXELS_1080);
-						result.SetHeight (HD_NUMACTIVELINES_1080);
+						result.SetWidth(geometry == NTV2_FG_2048x1080 || geometry == NTV2_FG_4x2048x1080  ?  HD_NUMCOMPONENTPIXELS_1080_2K  :  HD_NUMCOMPONENTPIXELS_1080);
+						result.SetHeight(HD_NUMACTIVELINES_1080);
 						if (geometry == NTV2_FG_4x1920x1080  ||  geometry == NTV2_FG_4x2048x1080)
-							result.Set (result.Width () * 2,  result.Height () * 2);
+							result.Set(result.Width()*2,  result.Height()*2);
 						break;
-					case NTV2_STANDARD_720:		result.SetWidth (HD_NUMCOMPONENTPIXELS_720).SetHeight (HD_NUMACTIVELINES_720);	break;
-					case NTV2_STANDARD_525:		result.Set (NUMCOMPONENTPIXELS, NUMACTIVELINES_525);							break;
-					case NTV2_STANDARD_625:		result.Set (NUMCOMPONENTPIXELS, NUMACTIVELINES_625);							break;
-					case NTV2_STANDARD_2K:		result.Set (HD_NUMCOMPONENTPIXELS_2K, HD_NUMLINES_2K);							break;
-					default:																									break;
+					case NTV2_STANDARD_720:			result.SetWidth(HD_NUMCOMPONENTPIXELS_720).SetHeight(HD_NUMACTIVELINES_720);	break;
+					case NTV2_STANDARD_525:			result.Set(NUMCOMPONENTPIXELS, NUMACTIVELINES_525);								break;
+					case NTV2_STANDARD_625:			result.Set(NUMCOMPONENTPIXELS, NUMACTIVELINES_625);								break;
+					case NTV2_STANDARD_2K:			result.Set(HD_NUMCOMPONENTPIXELS_2K, HD_NUMLINES_2K);							break;
+					case NTV2_STANDARD_2Kx1080p:	result.Set(HD_NUMCOMPONENTPIXELS_1080_2K, HD_NUMACTIVELINES_1080);				break;
+					case NTV2_STANDARD_2Kx1080i:	result.Set(HD_NUMCOMPONENTPIXELS_1080_2K, HD_NUMACTIVELINES_1080);				break;
+					case NTV2_STANDARD_3840x2160p:	result.Set(HD_NUMCOMPONENTPIXELS_1080*2, HD_NUMACTIVELINES_1080*2);				break;
+					case NTV2_STANDARD_4096x2160p:	result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*2, HD_NUMACTIVELINES_1080*2);			break;
+					case NTV2_STANDARD_3840HFR:		result.Set(HD_NUMCOMPONENTPIXELS_1080*2, HD_NUMACTIVELINES_1080*2);				break;
+					case NTV2_STANDARD_4096HFR:		result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*2, HD_NUMACTIVELINES_1080*2);			break;
+				#if defined(_DEBUG)
+					case NTV2_NUM_STANDARDS:																						break;
+				#else
+					default:																										break;
+				#endif
 				}
 
 	return result;

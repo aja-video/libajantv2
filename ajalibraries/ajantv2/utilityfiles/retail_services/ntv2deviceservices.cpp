@@ -245,7 +245,7 @@ bool DeviceServices::ReadDriverState (void)
 		mVirtualInputSelect = ds.inputSelect;
 		mInputAudioSelect = ds.audioSelect;
 		
-		if (ds.sdiOutSize > 0)
+        if (ds.sdiInSize > 0)
 		{
 			mSDIInput1ColorSpace = ds.sdiIn[0]->cs;
 			mSDIInput1RGBRange = ds.sdiIn[0]->rgbRange;
