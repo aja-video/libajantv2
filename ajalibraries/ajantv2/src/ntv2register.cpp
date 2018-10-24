@@ -248,6 +248,7 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 	GetFrameRate(frameRate, channel);
     inFrameRate = GetNTV2FrameRateFromVideoFormat(value);
     NTV2FrameGeometry inFrameGeometry = GetNTV2FrameGeometryFromVideoFormat(value);
+	bool squares;
 	
 #if !defined (NTV2_DEPRECATE)
 	// If switching from high def to standard def or vice versa
@@ -275,7 +276,15 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 		//This will handle 4k formats
 		if (NTV2_IS_QUAD_FRAME_FORMAT(value))
 		{
-            SetQuadFrameEnable(true, channel);
+			Get4kSquaresEnable(&squares, channel);
+			if (squares)
+			{
+				Set4kSquaresEnable(true, channel);
+			}
+			else
+			{
+				SetQuadFrameEnable(true, channel);
+			}
 		}
 		else
 		{
