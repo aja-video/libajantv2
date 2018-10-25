@@ -5357,6 +5357,7 @@ public:
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool		GetDieTemperature (double & outTemp, const NTV2DieTempScale inTempScale = NTV2DieTempScale_Celsius);
+	AJA_VIRTUAL bool		GetDieVoltage (double & outVoltage);
 	///@}
 public:
 	#if !defined (NTV2_DEPRECATE)
