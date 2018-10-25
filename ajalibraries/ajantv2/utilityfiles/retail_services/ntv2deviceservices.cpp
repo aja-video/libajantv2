@@ -329,22 +329,22 @@ bool DeviceServices::ReadDriverState (void)
 	mCard->GetVideoFormat(mFb1VideoFormat);
 	mCard->GetFrameBufferFormat(NTV2_CHANNEL1, mFb1Format);
 	mCard->GetMode(NTV2_CHANNEL1, mFb1Mode);
+	
 	// vpid
-	if (NTV2DeviceCanDoDualLink(mDeviceID) == true)
+	mVpid1Valid = false;
+	mVpid1a = mVpid1b = 0;
+	mVpid1Valid = mCard->GetVPIDValidA(NTV2_CHANNEL1);
+	if(mVpid1Valid)
 	{
-		if (NTV2DeviceGetNumVideoInputs(mDeviceID) > 0)
-			mVpid1Valid = mCard->ReadSDIInVPID(NTV2_CHANNEL1, mVpid1a, mVpid1b);
-		else
-			mVpid1a = mVpid1b = mVpid1Valid = 0;
-		
-		if (NTV2DeviceGetNumVideoInputs(mDeviceID) > 1)
-			mVpid2Valid = mCard->ReadSDIInVPID(NTV2_CHANNEL2, mVpid2a, mVpid2b);
-		else
-			mVpid2a = mVpid2b = mVpid2Valid = 0;
+		mVpid1Valid = mCard->ReadSDIInVPID(NTV2_CHANNEL1, mVpid1a, mVpid1b);
 	}
-	else
+	
+	mVpid2Valid = false;
+	mVpid2a = mVpid2b = 0;
+	mVpid2Valid = mCard->GetVPIDValidA(NTV2_CHANNEL2);
+	if(mVpid2Valid)
 	{
-		mVpid1a = mVpid1b = mVpid1Valid = mVpid2a = mVpid2b = mVpid2Valid = 0;
+		mVpid2Valid = mCard->ReadSDIInVPID(NTV2_CHANNEL2, mVpid2a, mVpid2b);
 	}
 
 	// basic Ch2 HW registers
