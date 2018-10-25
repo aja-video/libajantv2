@@ -7,6 +7,7 @@
 #include "ajatypes.h"
 #include "ajaexport.h"
 #include "ntv2enums.h"
+#include "ntv2debug.h"
 #include "ntv2driverinterface.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2nubaccess.h"
@@ -23,62 +24,6 @@
 #include <map>
 
 using namespace std;
-
-
-typedef map <INTERRUPT_ENUMS, string>	InterruptEnumStringMap;
-static InterruptEnumStringMap			gInterruptNames;
-
-
-class DriverInterfaceGlobalInitializer
-{
-	public:
-		DriverInterfaceGlobalInitializer ()
-		{
-			gInterruptNames [eOutput1]				= "eOutput1";
-			gInterruptNames [eInterruptMask]		= "eInterruptMask";
-			gInterruptNames [eInput1]				= "eInput1";
-			gInterruptNames [eInput2]				= "eInput2";
-			gInterruptNames [eAudio]				= "eAudio";
-			gInterruptNames [eAudioInWrap]			= "eAudioInWrap";
-			gInterruptNames [eAudioOutWrap]			= "eAudioOutWrap";
-			gInterruptNames [eDMA1]					= "eDMA1";
-			gInterruptNames [eDMA2]					= "eDMA2";
-			gInterruptNames [eDMA3]					= "eDMA3";
-			gInterruptNames [eDMA4]					= "eDMA4";
-			gInterruptNames [eChangeEvent]			= "eChangeEvent";
-			gInterruptNames [eGetIntCount]			= "eGetIntCount";
-			gInterruptNames [eWrapRate]				= "eWrapRate";
-			gInterruptNames [eUart1Tx]				= "eUart1Tx";
-			gInterruptNames [eUart1Rx]				= "eUart1Rx";
-			gInterruptNames [eAuxVerticalInterrupt]	= "eAuxVerticalInterrupt";
-			gInterruptNames [ePushButtonChange]		= "ePushButtonChange";
-			gInterruptNames [eLowPower]				= "eLowPower";
-			gInterruptNames [eDisplayFIFO]			= "eDisplayFIFO";
-			gInterruptNames [eSATAChange]			= "eSATAChange";
-			gInterruptNames [eTemp1High]			= "eTemp1High";
-			gInterruptNames [eTemp2High]			= "eTemp2High";
-			gInterruptNames [ePowerButtonChange]	= "ePowerButtonChange";
-			gInterruptNames [eInput3]				= "eInput3";
-			gInterruptNames [eInput4]				= "eInput4";
-			gInterruptNames [eUart2Tx]				= "eUart2Tx";
-			gInterruptNames [eUart2Rx]				= "eUart2Rx";
-			gInterruptNames [eHDMIRxV2HotplugDetect]= "eHDMIRxV2HotplugDetect";
-			gInterruptNames [eInput5]				= "eInput5";
-			gInterruptNames [eInput6]				= "eInput6";
-			gInterruptNames [eInput7]				= "eInput7";
-			gInterruptNames [eInput8]				= "eInput8";
-			gInterruptNames [eInterruptMask2]		= "eInterruptMask2";
-			gInterruptNames [eOutput2]				= "eOutput2";
-			gInterruptNames [eOutput3]				= "eOutput3";
-			gInterruptNames [eOutput4]				= "eOutput4";
-			gInterruptNames [eOutput5]				= "eOutput5";
-			gInterruptNames [eOutput6]				= "eOutput6";
-			gInterruptNames [eOutput7]				= "eOutput7";
-			gInterruptNames [eOutput8]				= "eOutput8";
-		}
-};
-
-static DriverInterfaceGlobalInitializer	gInitializerSingleton;
 
 
 #define	DIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
@@ -141,11 +86,11 @@ bool CNTV2DriverInterface::ConfigureSubscription (bool bSubscribe, INTERRUPT_ENU
 	if (bSubscribe)
 	{										//	If subscribing,
 		mEventCounts [eInterruptType] = 0;	//		clear this interrupt's event counter
-		DIINFO("Subscribing '" << gInterruptNames[eInterruptType] << "' (" << UWord(eInterruptType)
+		DIINFO("Subscribing '" << ::NTV2InterruptEnumString(eInterruptType) << "' (" << UWord(eInterruptType)
 				<< "), event counter reset");
 	}
  	else
-		DIINFO("Unsubscribing '" << gInterruptNames[eInterruptType] << "' (" << UWord(eInterruptType) << "), "
+		DIINFO("Unsubscribing '" << ::NTV2InterruptEnumString(eInterruptType) << "' (" << UWord(eInterruptType) << "), "
 				<< mEventCounts[eInterruptType] << " event(s) received");
 	return true;
 
