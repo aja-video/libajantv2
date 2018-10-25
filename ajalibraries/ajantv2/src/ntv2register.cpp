@@ -7624,6 +7624,21 @@ bool CNTV2Card::GetDieTemperature (double & outTemp, const NTV2DieTempScale inTe
 	return true;
 }
 
+bool CNTV2Card::GetDieVoltage (double & outVoltage)
+{
+	outVoltage = 0.0;
+
+	//	Read the temperature...
+	ULWord			rawRegValue	(0);
+	if (!ReadRegister (kRegSysmonVccIntDieTemp, rawRegValue))
+		return false;
+
+	const UWord		coreVoltageRaw	((rawRegValue>>22) & 0x00003FF);
+	const double	coreVoltageFloat ((float)(((float)coreVoltageRaw)/ 1024.0 * 3.0));
+	outVoltage = coreVoltageFloat;
+	return true;
+}
+
 bool CNTV2Card::ReadRegisters (const NTV2RegNumSet & inRegisters,  NTV2RegisterValueMap & outValues)
 {
 	outValues.clear ();
