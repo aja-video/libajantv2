@@ -1066,6 +1066,56 @@ const char * NTV2RegisterNameString (const ULWord inRegNum)
 }
 
 
+const char * NTV2InterruptEnumString (const unsigned inInterruptEnum)
+{
+	static const char *	sNullString = "";
+	static const char * sInterruptEnumStrings[] = {	"eOutput1",					//	0
+													"eInterruptMask",			//	1
+													"eInput1",					//	2
+													"eInput2",					//	3
+													"eAudio",					//	4
+													"eAudioInWrap",				//	5
+													"eAudioOutWrap",			//	6
+													"eDMA1",					//	7
+													"eDMA2",					//	8
+													"eDMA3",					//	9
+													"eDMA4",					//	10
+													"eChangeEvent",				//	11
+													"eGetIntCount",				//	12
+													"eWrapRate",				//	13
+													"eUart1Tx",					//	14
+													"eUart1Rx",					//	15
+													"eAuxVerticalInterrupt",	//	16
+													"ePushButtonChange",		//	17
+													"eLowPower",				//	18
+													"eDisplayFIFO",				//	19
+													"eSATAChange",				//	20
+													"eTemp1High",				//	21
+													"eTemp2High",				//	22
+													"ePowerButtonChange",		//	23
+													"eInput3",					//	24
+													"eInput4",					//	25
+													"eUart2Tx",					//	26
+													"eUart2Rx",					//	27
+													"eHDMIRxV2HotplugDetect",	//	28
+													"eInput5",					//	29
+													"eInput6",					//	30
+													"eInput7",					//	31
+													"eInput8",					//	32
+													"eInterruptMask2",			//	33
+													"eOutput2",					//	34
+													"eOutput3",					//	35
+													"eOutput4",					//	36
+													"eOutput5",					//	37
+													"eOutput6",					//	38
+													"eOutput7",					//	39
+													"eOutput8"	};				//	40
+	NTV2_ASSERT(sizeof(sInterruptEnumStrings) / sizeof(void*) == size_t(eNumInterruptTypes));
+	if (inInterruptEnum >= unsigned(eOutput1)  &&  inInterruptEnum < unsigned(eNumInterruptTypes))
+		return sInterruptEnumStrings[inInterruptEnum];
+	return sNullString;
+}	//	NTV2InterruptEnumString
+
 #ifdef MSWindows
 
 #include <stdio.h>
