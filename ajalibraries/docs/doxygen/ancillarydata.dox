@@ -258,11 +258,20 @@ There are two ways to capture all Ancillary data packets:
 		-	SDK 15.0 or later required.
 		-	See \ref ntv2llburn for example of how to use CNTV2Card::AncExtractInit, CNTV2Card::AncExtractSetEnable,
 			CNTV2Card::AncExtractSetWriteParams, etc.
+	-	Default per-field ancillary data buffer capacity is 8K by default, or 16K per-frame, including overhead.
+		This can be changed on a per-device basis by setting a pair of virtual registers (using CNTV2Card::WriteRegister):
+		-	::kVRegAncField1Offset — This specifies the offset from the bottom of the 8MB/16MB frame where F1 ancillary
+			data will be written. Defaults to 16K (\c 0x00004000 ).
+		-	::kVRegAncField2Offset — This specifies the offset from the bottom of the 8MB/16MB frame where F2 ancillary
+			data will be written. Defaults to 8K (\c 0x00002000 ).
+		-	Recklessly setting these values can cause ancillary data to be written into the active video, thus corrupting
+			captured video frames.
+		-	Changing either of these values also affects Anc playout.
 
 
-@section	ancplayout	Anc Packet Playout
+@section	ancplayout	Custom Anc Packet Playout
 
-There are two ways to play out Ancillary data packets:
+There are two ways to play out custom Ancillary data packets:
 -	Use a VANC frame geometry (see CNTV2Card::SetVANCMode) — but there are caveats:
 	-	Only ::NTV2_FBF_10BIT_YCBCR or ::NTV2_FBF_8BIT_YCBCR buffer formats are officially supported. Others may work,
 		but are untested.
@@ -293,6 +302,15 @@ There are two ways to play out Ancillary data packets:
 		-	SDK 15.0 or later required.
 		-	See \ref ntv2llburn for example of how to use CNTV2Card::AncInsertInit, CNTV2Card::AncInsertSetEnable,
 			CNTV2Card::AncInsertSetReadParams, etc.
+	-	Default per-field ancillary data buffer capacity is 8K by default, or 16K per-frame, including overhead.
+		This can be changed on a per-device basis by setting a pair of virtual registers (using CNTV2Card::WriteRegister):
+		-	::kVRegAncField1Offset — This specifies the offset from the bottom of the 8MB/16MB frame where F1 ancillary
+			data will be read by the Anc inserter. Defaults to 16K (\c 0x00004000 ).
+		-	::kVRegAncField2Offset — This specifies the offset from the bottom of the 8MB/16MB frame where F2 ancillary
+			data will be read by the Anc inserter. Defaults to 8K (\c 0x00002000 ).
+		-	Recklessly setting these values can cause ancillary data to be transferred into the active video, thus corrupting
+			outgoing video frames.
+		-	Changing either of these values also affects Anc capture.
 
 @note	Because the outgoing line number can be specified when using the <b>Anc Inserter</b>, it's possible to
 		overrun a line. Be certain that the data packets to be inserted on a given line will fit for the output
