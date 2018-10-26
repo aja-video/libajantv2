@@ -2,7 +2,7 @@
 	"protocol":"2110",
 	"network2110":
 	{
-		"ptpPreferredGMID":"0-0-0-0-0-0-0-0",
+		"ptpPreferredGMID":"00-00-00-00-00-00-00-00",
 		"ptpDomain":0,
 		"setup4k":"false",
 		"sfps":
