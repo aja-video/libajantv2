@@ -7,6 +7,7 @@
 
 #include "ntv2publicinterface.h"
 #include "ntv2debug.h"
+#include <assert.h>
 
 
 #if !defined(NTV2_DEPRECATE_14_3)
@@ -1110,7 +1111,7 @@ const char * NTV2InterruptEnumString (const unsigned inInterruptEnum)
 													"eOutput6",					//	38
 													"eOutput7",					//	39
 													"eOutput8"	};				//	40
-	NTV2_ASSERT(sizeof(sInterruptEnumStrings) / sizeof(void*) == (unsigned)eNumInterruptTypes);
+	assert(sizeof(sInterruptEnumStrings) / sizeof(void*) == (unsigned)eNumInterruptTypes);
 	if (inInterruptEnum < (unsigned)eNumInterruptTypes)
 		return sInterruptEnumStrings[inInterruptEnum];
 	return sNullString;
