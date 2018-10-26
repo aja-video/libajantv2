@@ -276,7 +276,7 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 		//This will handle 4k formats
 		if (NTV2_IS_QUAD_FRAME_FORMAT(value))
 		{
-			Get4kSquaresEnable(&squares, channel);
+			Get4kSquaresEnable(squares, channel);
 			if (squares)
 			{
 				Set4kSquaresEnable(true, channel);
