@@ -974,6 +974,10 @@
 	current <b>Play Head</b> position. Audio data continues to be read from the <b>Output Buffer</b> until the end is reached, whereupon the
 	<b>Play Head</b> wraps back to the start of the buffer, where reading continues.
 
+	Newer AJA hardware firmware implements an adjustable output delay that can be applied while samples are being read from the
+	<b>Audio Output Buffer</b>. Call ::NTV2DeviceCanDoAudioDelay to determine if this feature is available. Call CNTV2Card::GetAudioOutputDelay
+	to obtain the current delay value. Call CNTV2Card::SetAudioOutputDelay to change it.
+
 	The playout engine has an optional <b>Erase Mode</b>, in which it will automatically clear (zero) the <b>Output Buffer</b> memory immediately behind
 	the <b>Play Head</b> as it runs. If the host application fails to transfer new samples into the <b>Audio Output Buffer</b>, the buffer will eventually
 	contain all zeroes, and the output embedder will thereafter only transmit silence. Use the CNTV2Card::SetAudioOutputEraseMode function
