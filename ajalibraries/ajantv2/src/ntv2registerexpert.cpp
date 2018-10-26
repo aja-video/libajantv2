@@ -7,6 +7,8 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
 #include "ntv2debug.h"
+#include "ntv2endian.h"
+#include "ntv2vpid.h"
 #include "ajabase/common/common.h"
 #include <algorithm>
 #include <sstream>
@@ -162,6 +164,40 @@ public:
 		DefineRegister (kRegSDITransmitControl,	"",	mDecodeSDITransmitCtrl,		READWRITE,	kRegClass_Channel1,	kRegClass_Channel2,	kRegClass_Channel3);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel4);
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel5);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel6);
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel7);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel8);
+
+		DefineRegister (kRegCh1InputFrame,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel1,	kRegClass_NULL);
+		DefineRegister (kRegSDIIn1VPIDA,		"",	mVPIDInpRegDecoder,			READONLY,	kRegClass_VPID,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (kRegSDIIn1VPIDB,		"",	mVPIDInpRegDecoder,			READONLY,	kRegClass_VPID,		kRegClass_Input,	kRegClass_Channel1);
+		DefineRegister (kRegSDIOut1VPIDA,		"",	mVPIDOutRegDecoder,			READWRITE,	kRegClass_VPID,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (kRegSDIOut1VPIDB,		"",	mVPIDOutRegDecoder,			READWRITE,	kRegClass_VPID,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (kRegSDIOut2VPIDA,		"",	mVPIDOutRegDecoder,			READWRITE,	kRegClass_VPID,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (kRegSDIOut2VPIDB,		"",	mVPIDOutRegDecoder,			READWRITE,	kRegClass_VPID,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (kRegSDIIn2VPIDA,		"",	mVPIDInpRegDecoder,			READONLY,	kRegClass_VPID,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (kRegSDIIn2VPIDB,		"",	mVPIDInpRegDecoder,			READONLY,	kRegClass_VPID,		kRegClass_Input,	kRegClass_Channel2);
+		DefineRegister (kRegSDIOut3VPIDA,		"",	mVPIDOutRegDecoder,			READWRITE,	kRegClass_VPID,		kRegClass_Output,	kRegClass_Channel3);
+		DefineRegister (kRegSDIOut3VPIDB,		"",	mVPIDOutRegDecoder,			READWRITE,	kRegClass_VPID,		kRegClass_Output,	kRegClass_Channel3);
+		DefineRegister (kRegSDIOut4VPIDA,		"",	mVPIDOutRegDecoder,			READWRITE,	kRegClass_VPID,		kRegClass_Output,	kRegClass_Channel4);
+		DefineRegister (kRegSDIOut4VPIDB,		"",	mVPIDOutRegDecoder,			READWRITE,	kRegClass_VPID,		kRegClass_Output,	kRegClass_Channel4);
+		DefineRegister (kRegSDIIn3VPIDA,		"",	mVPIDInpRegDecoder,			READONLY,	kRegClass_VPID,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (kRegSDIIn3VPIDB,		"",	mVPIDInpRegDecoder,			READONLY,	kRegClass_VPID,		kRegClass_Input,	kRegClass_Channel3);
+		DefineRegister (kRegSDIIn4VPIDA,		"",	mVPIDInpRegDecoder,			READONLY,	kRegClass_VPID,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (kRegSDIIn4VPIDB,		"",	mVPIDInpRegDecoder,			READONLY,	kRegClass_VPID,		kRegClass_Input,	kRegClass_Channel4);
+		DefineRegister (kRegSDIOut5VPIDA,		"",	mVPIDOutRegDecoder,			READWRITE,	kRegClass_VPID,		kRegClass_Output,	kRegClass_Channel5);
+		DefineRegister (kRegSDIOut5VPIDB,		"",	mVPIDOutRegDecoder,			READWRITE,	kRegClass_VPID,		kRegClass_Output,	kRegClass_Channel5);
+		DefineRegister (kRegSDIIn5VPIDA,		"",	mVPIDInpRegDecoder,			READONLY,	kRegClass_VPID,		kRegClass_Input,	kRegClass_Channel5);
+		DefineRegister (kRegSDIIn5VPIDB,		"",	mVPIDInpRegDecoder,			READONLY,	kRegClass_VPID,		kRegClass_Input,	kRegClass_Channel5);
+		DefineRegister (kRegSDIIn6VPIDA,		"",	mVPIDInpRegDecoder,			READONLY,	kRegClass_VPID,		kRegClass_Input,	kRegClass_Channel6);
+		DefineRegister (kRegSDIIn6VPIDB,		"",	mVPIDInpRegDecoder,			READONLY,	kRegClass_VPID,		kRegClass_Input,	kRegClass_Channel6);
+		DefineRegister (kRegSDIOut6VPIDA,		"",	mVPIDOutRegDecoder,			READWRITE,	kRegClass_VPID,		kRegClass_Output,	kRegClass_Channel6);
+		DefineRegister (kRegSDIOut6VPIDB,		"",	mVPIDOutRegDecoder,			READWRITE,	kRegClass_VPID,		kRegClass_Output,	kRegClass_Channel6);
+		DefineRegister (kRegSDIIn7VPIDA,		"",	mVPIDInpRegDecoder,			READONLY,	kRegClass_VPID,		kRegClass_Input,	kRegClass_Channel7);
+		DefineRegister (kRegSDIIn7VPIDB,		"",	mVPIDInpRegDecoder,			READONLY,	kRegClass_VPID,		kRegClass_Input,	kRegClass_Channel7);
+		DefineRegister (kRegSDIOut7VPIDA,		"",	mVPIDOutRegDecoder,			READWRITE,	kRegClass_VPID,		kRegClass_Output,	kRegClass_Channel7);
+		DefineRegister (kRegSDIOut7VPIDB,		"",	mVPIDOutRegDecoder,			READWRITE,	kRegClass_VPID,		kRegClass_Output,	kRegClass_Channel7);
+		DefineRegister (kRegSDIIn8VPIDA,		"",	mVPIDInpRegDecoder,			READONLY,	kRegClass_VPID,		kRegClass_Input,	kRegClass_Channel8);
+		DefineRegister (kRegSDIIn8VPIDB,		"",	mVPIDInpRegDecoder,			READONLY,	kRegClass_VPID,		kRegClass_Input,	kRegClass_Channel8);
+		DefineRegister (kRegSDIOut8VPIDA,		"",	mVPIDOutRegDecoder,			READWRITE,	kRegClass_VPID,		kRegClass_Output,	kRegClass_Channel8);
+		DefineRegister (kRegSDIOut8VPIDB,		"",	mVPIDOutRegDecoder,			READWRITE,	kRegClass_VPID,		kRegClass_Output,	kRegClass_Channel8);
 
 		SetupAncInsExt();		//	Anc Ins/Ext
 		SetupXptSelect();		//	Xpt Select
@@ -1116,6 +1152,26 @@ private:
 		}
 	}	//	SetupVRegs
 public:
+	static ostream & PrintLabelValuePairs (ostream & oss, const AJALabelValuePairs & inLabelValuePairs)
+	{
+		for (AJALabelValuePairsConstIter it(inLabelValuePairs.begin());  it != inLabelValuePairs.end();  )
+		{
+			const string &	label	(it->first);
+			const string &	value	(it->second);
+			if (label.empty())
+				;
+			else if (label.back() != ' '  &&  label.back() != ':')
+				oss << label << ": " << value;
+			else if (label.back() == ':')
+				oss << label << " " << value;
+			else
+				oss << label << value;
+			if (++it != inLabelValuePairs.end())
+				oss << endl;
+		}
+		return oss;
+	}
+
 	string RegNameToString (const uint32_t inRegNum) const
 	{
 		RegNumToStringMap::const_iterator	iter	(mRegNumToStringMap.find (inRegNum));
@@ -1564,6 +1620,37 @@ private:
 		}
 		virtual	~DecodeSDITransmitCtrl()	{}
 	}	mDecodeSDITransmitCtrl;
+
+	struct DecodeInputVPID: public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+			const uint32_t		regValue (NTV2EndianSwap32(inRegValue));	//	Input VPID register values require endian-swap
+			ostringstream		oss;
+			AJALabelValuePairs	info;
+			const CNTV2VPID		ntv2vpid(regValue);
+			PrintLabelValuePairs(oss, ntv2vpid.GetInfo(info));
+			return oss.str();
+		}
+		virtual	~DecodeInputVPID()	{}
+	}	mVPIDInpRegDecoder;
+
+	struct DecodeOutputVPID: public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+			ostringstream		oss;
+			AJALabelValuePairs	info;
+			const CNTV2VPID		ntv2vpid(inRegValue);
+			PrintLabelValuePairs(oss, ntv2vpid.GetInfo(info));
+			return oss.str();
+		}
+		virtual	~DecodeOutputVPID()	{}
+	}	mVPIDOutRegDecoder;
 
 	struct DecodeBitfileDateTime : public Decoder
 	{

@@ -24,22 +24,23 @@ using namespace std;
 
 
 //	STATIC
-string AJASystemInfo::ToString (const LabelValuePairs & inLabelValuePairs, const size_t inMaxValWidth, const size_t inGutterWidth)
+string AJASystemInfo::ToString (const AJALabelValuePairs & inLabelValuePairs, const size_t inMaxValWidth, const size_t inGutterWidth)
 {
 	typedef std::vector<string>			ValueLines;
 	typedef ValueLines::const_iterator	ValueLinesConstIter;
 	const string	gutterStr	(inGutterWidth, ' ');
 
 	//	Measure longest label length...
+	//	BUGBUGBUG	Multi-byte UTF8 characters should only be counted as one character
     size_t longestLabelLen(0);
-    for (LabelValuePairsConstIter it(inLabelValuePairs.begin());  it != inLabelValuePairs.end();  ++it)
+    for (AJALabelValuePairsConstIter it(inLabelValuePairs.begin());  it != inLabelValuePairs.end();  ++it)
         if (it->first.length() > longestLabelLen)
             longestLabelLen = it->first.length();
     longestLabelLen++;	//	Plus the ':'
 
 	//	Iterate over everything again, this time "printing" the map's contents...
     ostringstream oss;
-    for (LabelValuePairsConstIter it(inLabelValuePairs.begin());  it != inLabelValuePairs.end();  ++it)
+    for (AJALabelValuePairsConstIter it(inLabelValuePairs.begin());  it != inLabelValuePairs.end();  ++it)
     {
 		static const string	lineBreakChars("\r\n");
         string label(it->first), value(it->second);
@@ -169,7 +170,7 @@ AJAStatus AJASystemInfo::GetLabel (const AJASystemInfoTag tag, string & outLabel
 
 string AJASystemInfo::ToString (const size_t inValueWrapLen, const size_t inGutterWidth) const
 {
-	LabelValuePairs	infoTable;
+	AJALabelValuePairs	infoTable;
 	append(infoTable, "HOST INFO");
     for (AJASystemInfoTag tag(AJASystemInfoTag(0));  tag < AJA_SystemInfoTag_LAST;  tag = AJASystemInfoTag(tag+1))
     {
@@ -190,4 +191,29 @@ ostream & operator << (ostream & outStream, const AJASystemInfo & inData)
 {
     outStream << inData.ToString();
     return outStream;
+}
+
+ostream & operator << (ostream & outStream, const AJALabelValuePair & inData)
+{
+	string			label(inData.first);
+	const string &	value(inData.second);
+	if (label.empty())
+		return outStream;
+	aja::strip(label);
+	if (label.back() == ':')
+		label.resize(label.length()-1);
+	aja::replace(label, " ", "_");
+	outStream << label << "=" << value;
+	return outStream;
+}
+
+ostream & operator << (ostream & outStream, const AJALabelValuePairs & inData)
+{
+	for (AJALabelValuePairsConstIter it(inData.begin());  it != inData.end();  )
+	{
+		outStream << *it;
+		if (++it != inData.end())
+			outStream << ", ";
+	}
+	return outStream;
 }

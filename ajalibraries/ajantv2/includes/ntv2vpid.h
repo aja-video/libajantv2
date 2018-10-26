@@ -9,23 +9,58 @@
 
 #include "ajaexport.h"
 #include "ntv2publicinterface.h"
+#include "ajabase/system/info.h"
 
 #if defined(AJALinux)
 #include <stdio.h>
-//#include "ntv2winlinhacks.h"
 #endif
 
+/**
+    @brief	A convenience class that simplifies encoding or decoding the 4-byte VPID payload
+			that can be read or written from/to VPID registers.
+**/
 class AJAExport CNTV2VPID
 {
 public:
-	//	Construction & Destruction
-								CNTV2VPID ();
+	/**
+		@name	Construction, Destruction, Copying, Assigning
+	**/
+	///@{
+								CNTV2VPID (const ULWord inData = 0);
 								CNTV2VPID (const CNTV2VPID & other);
 	virtual CNTV2VPID &			operator = (const CNTV2VPID & inRHS);
-	virtual						~CNTV2VPID ()							{}
+	virtual inline				~CNTV2VPID ()							{}
+	///@}
 
+	/**
+		@name	Inquiry
+	**/
+	///@{
+	virtual inline ULWord			GetVPID (void) const					{return m_uVPID;}	///< @return	My current 4-byte VPID value.
+	virtual VPIDVersion				GetVersion (void) const;
+	virtual NTV2VideoFormat			GetVideoFormat (void) const;
+	virtual bool					IsStandard3Ga (void) const;
+	virtual bool					IsStandardTwoSampleInterleave (void) const;
+	virtual VPIDStandard			GetStandard (void) const;
+	virtual bool					GetProgressiveTransport (void) const;
+	virtual bool					GetProgressivePicture (void) const;
+	virtual VPIDPictureRate			GetPictureRate (void) const;
+	virtual bool					GetImageAspect16x9 (void) const;
+	virtual VPIDSampling			GetSampling (void) const;
+	virtual VPIDChannel				GetChannel (void) const;
+	virtual VPIDChannel				GetDualLinkChannel (void) const;
+	virtual VPIDDynamicRange		GetDynamicRange (void) const;
+	virtual VPIDBitDepth			GetBitDepth (void) const;
+	virtual inline bool				IsValid (void) const			{return GetVersion() == VPIDVersion_1;}	///< @return	True if valid;  otherwise false.
+	virtual AJALabelValuePairs &	GetInfo (AJALabelValuePairs & outInfo) const;
+	virtual std::ostream &			Print (std::ostream & ostrm) const;
+	///@}
+
+	/**
+		@name	Changing
+	**/
+	///@{
 	virtual inline void			SetVPID (const ULWord inData)			{m_uVPID = inData;}
-	virtual inline ULWord		GetVPID (void) const					{return m_uVPID;}
 
 	virtual bool				SetVPID (const NTV2VideoFormat		inVideoFormat,
 										const NTV2FrameBufferFormat	inFrameBufferFormat,
@@ -40,45 +75,26 @@ public:
 										const bool				inIsSMPTE425,
 										const VPIDChannel		inVPIDhannel);
 
-	virtual bool				IsStandard3Ga (void) const;
 
-	virtual bool				IsStandardTwoSampleInterleave (void) const;
-
-	virtual NTV2VideoFormat		GetVideoFormat (void) const;
 	
 	virtual void				SetVersion (const VPIDVersion inVersion);
-	virtual VPIDVersion			GetVersion (void) const;
-
 	virtual void				SetStandard (const VPIDStandard inStandard);
-	virtual VPIDStandard		GetStandard (void) const;
-
 	virtual void				SetProgressiveTransport (const bool inIsProgressiveTransport);
-	virtual bool				GetProgressiveTransport (void) const;
-
 	virtual void				SetProgressivePicture (const bool inIsProgressivePicture);
-	virtual bool				GetProgressivePicture (void) const;
-
 	virtual void				SetPictureRate (const VPIDPictureRate inPictureRate);
-	virtual VPIDPictureRate		GetPictureRate (void) const;
-
 	virtual void				SetImageAspect16x9 (const bool inIs16x9Aspect);
-	virtual bool				GetImageAspect16x9 (void) const;
-
 	virtual void				SetSampling (const VPIDSampling inSampling);
-	virtual VPIDSampling		GetSampling (void) const;
-
 	virtual void				SetChannel (const VPIDChannel inChannel);
-	virtual VPIDChannel			GetChannel (void) const;
-	
 	virtual void				SetDualLinkChannel (const VPIDChannel inChannel);
-	virtual VPIDChannel			GetDualLinkChannel (void) const;
-
 	virtual void				SetDynamicRange (const VPIDDynamicRange inDynamicRange);
-	virtual VPIDDynamicRange	GetDynamicRange (void) const;
-
 	virtual void				SetBitDepth (const VPIDBitDepth inBitDepth);
-	virtual VPIDBitDepth		GetBitDepth (void) const;
+	///@}
 
+
+	/**
+		@name	Class Methods
+	**/
+	///@{
 	static bool					SetVPIDData (ULWord &					outVPID,
 											const NTV2VideoFormat		inOutputFormat,
 											const NTV2FrameBufferFormat	inFrameBufferFormat,
@@ -119,10 +135,13 @@ public:
 
 		virtual inline NTV2_DEPRECATED_f(void	Init (void))				{}		///< @deprecated	Obsolete. Do not use.
 	#endif	//	!defined (NTV2_DEPRECATE)
+	///@}
 
 private:
 	ULWord	m_uVPID;	///< @brief	My 32-bit VPID data value
 
 };	//	CNTV2VPID
+
+AJAExport std::ostream &	operator << (std::ostream & ostrm, const CNTV2VPID & inData);
 
 #endif	//	NTV2VPID_H
