@@ -932,7 +932,7 @@
 
 	Newer AJA hardware firmware implements an adjustable input delay that can be applied while samples are being written into the
 	<b>Audio Input Buffer</b>. Call ::NTV2DeviceCanDoAudioDelay to determine if this feature is available. Call CNTV2Card::GetAudioInputDelay
-	to obtain the current delay value. Call CNTV2Card::SetAudioDelay to change it.
+	to obtain the current delay value. Call CNTV2Card::SetAudioInputDelay to change it.
 
 	Audio input clocking for the running <b>Audio System</b> is ordinarily obtained from the input signal being used (SDI, HDMI, Analog, etc.).
 	AJA’s older devices, however, derived the audio input clock from the Device Reference by default (see ::NTV2ReferenceSource) and had to be
