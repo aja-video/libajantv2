@@ -1160,9 +1160,9 @@ public:
 			const string &	value	(it->second);
 			if (label.empty())
 				;
-			else if (label.back() != ' '  &&  label.back() != ':')
+			else if (label.at(label.length()-1) != ' '  &&  label.at(label.length()-1) != ':')	//	C++11 "label.back()" would be better
 				oss << label << ": " << value;
-			else if (label.back() == ':')
+			else if (label.at(label.length()-1) == ':')	//	C++11 "label.back()" would be better
 				oss << label << " " << value;
 			else
 				oss << label << value;
