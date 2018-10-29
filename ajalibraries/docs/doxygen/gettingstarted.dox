@@ -287,7 +287,9 @@ The \ref ajantv2 source code is provided, and the libraries can be built with de
 		$ xcrun xcodebuild -workspace ntv2.xcworkspace  -scheme 'All - libs and demos'  -configuration Debug  CLANG_CXX_LIBRARY=libstdc++  clean build
 		\endcode
 		If you use the \ref ajacc, AJA supplies a stdc++-compatible version of this library inside the <b>lib/libstdc++</b> folder.
-		Swap them with their counterparts in the <b>lib</b> folder.
+		Swap them with their counterparts in the <b>lib</b> folder.<br><br>
+		<b>Starting in Xcode 10, the GNU-ABI-based ‘libstdc++’ standard libraries and headers are gone.</b><br>
+		To build using the older GNU-ABI-based ‘libstdc++’ libraries and headers, use Xcode 9 or earlier.
 
 
 @subsection		gs-winsdkbuild	Building on Windows
