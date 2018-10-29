@@ -200,7 +200,7 @@ ostream & operator << (ostream & outStream, const AJALabelValuePair & inData)
 	if (label.empty())
 		return outStream;
 	aja::strip(label);
-	if (label.back() == ':')
+	if (label.at(label.length()-1) == ':')
 		label.resize(label.length()-1);
 	aja::replace(label, " ", "_");
 	outStream << label << "=" << value;
