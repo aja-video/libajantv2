@@ -271,7 +271,6 @@ On Linux, the libraries and device drivers are not pre-built, and must be compil
 @note	The \ref ajantv2 in the SDK is built to link with GCC 5.0 and earlier, GCC versions after this introduced an ABI change.
 		If you use the \ref ajacc, AJA supplies a GCC 5.1 and later compatible version of this library inside the <b>lib/gcc_5_1_and_after</b> directory.
 		Swap it with the couterpart in the <b>lib</b> directory. Then follow the build steps above.<br><br>
-
 		On CentOS (and possibly other Linux variants), the DVP demo app “dvplowlatencydemo” won’t run unless the \c libdvp.so
 		shared library is copied into \c /usr/lib64.
 
