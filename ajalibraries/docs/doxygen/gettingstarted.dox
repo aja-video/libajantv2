@@ -300,8 +300,8 @@ The \ref ajantv2 source code is provided, and the libraries can be built with de
 On Windows, the device driver is normally installed from the provided \c .msi, and the libraries are provided pre-built in the \c sdk\\lib folder.
 However, the \ref ajantv2 source code is provided, and the libraries can be built with debugging symbols as a troubleshooting aid.
 -#	Launch <b>Visual Studio</b> and do one of the following:
-	-	open the <b>ntv2_vs12.sln</b> solution file that’s inside \c sdk\\ajalibraries\\ajantv2\\build, or…
-	-	drag one of <b>libajantv2_vs12.vcxproj</b> or <b>libajantv2dll_vs12.vcxproj</b> project files into your solution.
+	-	open the <b>ntv2_vs12.sln</b> solution file that’s inside \c sdk, or…
+	-	drag one of <b>libajantv2_vs12.vcxproj</b> or <b>libajantv2dll_vs12.vcxproj</b> project files from \c sdk\\ajalibraries\\ajantv2\\build into your solution.
 -#	Select the build configuration, whether Debug or Release, and 32 or 64 bit.
 -#	Build the \ref ajantv2.
 Look for the <b>.DLL</b> in \c sdk\\bin, or the <b>.LIB</b> in \c sdk\\lib.
