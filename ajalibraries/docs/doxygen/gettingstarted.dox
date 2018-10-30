@@ -281,13 +281,13 @@ The \ref ajantv2 source code is provided, and the libraries can be built with de
 -#	Choose <b>Build</b> from the <b>Product</b> menu.
 -#	Look for the new \c libajantv2d.a library in the \c lib folder.
 
-@note	The \ref ajantv2, \ref ajabase and \ref ajaanc included in the SDK are built to link with the latest C++11 standard library.
-		If your application must use the older \c stdc++ standard libraries, you must rebuild them to reference the stdc++ standard library:
+@note	The \ref ajantv2 in the SDK is built to link with the latest C++11 standard library.
+		If your application must use the older \c stdc++ standard library, you must rebuild it to reference the stdc++ standard library:
 		\code{.sh}
 		$ xcrun xcodebuild -workspace ntv2.xcworkspace  -scheme 'All - libs and demos'  -configuration Debug  CLANG_CXX_LIBRARY=libstdc++  clean build
 		\endcode
 		If you use the \ref ajacc, AJA supplies a stdc++-compatible version of this library inside the <b>lib/libstdc++</b> folder.
-		Swap them with their counterparts in the <b>lib</b> folder.<br><br>
+		Swap it with the counterpart in the <b>lib</b> folder.<br><br>
 		<b>Starting in Xcode 10, the GNU-ABI-based ‘libstdc++’ standard libraries and headers are gone.</b><br>
 		To build using the older GNU-ABI-based ‘libstdc++’ libraries and headers, use Xcode 9 or earlier.
 
