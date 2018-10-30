@@ -411,12 +411,12 @@ void CNTV2SupportLogger::ToString(std::string& outString) const
 
 static inline std::string HEX0NStr(const uint32_t inNum, const uint16_t inWidth)	{ostringstream	oss;  oss << HEX0N(inNum,inWidth);  return oss.str();}
 static inline std::string xHEX0NStr(const uint32_t inNum, const uint16_t inWidth)	{ostringstream	oss;  oss << xHEX0N(inNum,inWidth);  return oss.str();}
-template <class T> std::string DECStr (const T & inT)					{ostringstream	oss;  oss << DEC(inT);  return oss.str();}
+template <class T> std::string DECStr (const T & inT)								{ostringstream	oss;  oss << DEC(inT);  return oss.str();}
 
 void CNTV2SupportLogger::FetchInfoLog(std::ostringstream& oss) const
 {
     string str;
-	AJASystemInfo::LabelValuePairs	infoTable;
+	AJALabelValuePairs	infoTable;
 	AJASystemInfo::append(infoTable, "SDK/DRIVER INFO",	"");
 	AJASystemInfo::append(infoTable, "NTV2 SDK Version",	::NTV2GetVersionString(true));
 	AJASystemInfo::append(infoTable, "supportlog Built",	std::string(__DATE__ " at " __TIME__));
@@ -431,6 +431,8 @@ void CNTV2SupportLogger::FetchInfoLog(std::ostringstream& oss) const
 		if (mDevice.DriverGetBuildInformation(buildInfo))
 			AJASystemInfo::append(infoTable, "Driver Build Version",	buildInfo.buildStr);
 	}
+#else
+	AJASystemInfo::append(infoTable, "Watcher Nub Protocol Version",	"N/A (nub client support missing)");
 #endif	//	NTV2_NUB_CLIENT_SUPPORT
 
 	AJASystemInfo::append(infoTable, "DEVICE INFO",	"");

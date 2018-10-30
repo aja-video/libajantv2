@@ -276,7 +276,7 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 		//This will handle 4k formats
 		if (NTV2_IS_QUAD_FRAME_FORMAT(value))
 		{
-			Get4kSquaresEnable(&squares, channel);
+			Get4kSquaresEnable(squares, channel);
 			if (squares)
 			{
 				Set4kSquaresEnable(true, channel);
@@ -1812,23 +1812,18 @@ bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat 
 	if (IS_CHANNEL_INVALID (channel))
 		return false;
 
-	const ULWord	regNum	(gChannelToControlRegNum [channel]);
-	NTV2FrameGeometry currentGeometry;
-	NTV2FrameBufferFormat currentFormat; // save for call to IsBufferSizeChangeRequired below
-	bool status = GetFrameInfo(channel,currentGeometry,currentFormat);
-	if ( !status )
+	const ULWord	regNum	(gChannelToControlRegNum[channel]);
+	const ULWord	loValue	(newFormat & 0x0f);
+	const ULWord	hiValue	((newFormat & 0x10) >> 4);
+	NTV2FrameGeometry		currentGeometry	(NTV2_FG_INVALID);
+	NTV2FrameBufferFormat	currentFormat	(NTV2_FBF_INVALID); // save for call to IsBufferSizeChangeRequired below
+	bool status = GetFrameInfo(channel, currentGeometry, currentFormat);
+	if (!status)
 		return status;
 
-	ULWord loValue = newFormat & 0x0f;
-	ULWord hiValue = (newFormat & 0x10)>>4;
-	bool result1 = WriteRegister (regNum,
-						  loValue,
-						  kRegMaskFrameFormat,
-						  kRegShiftFrameFormat);
-	bool result2 = WriteRegister (regNum,
-						  hiValue,
-						  kRegMaskFrameFormatHiBit,
-						  kRegShiftFrameFormatHiBit);
+	//	Set channel control register FBF bits 1,2,3,4,6...
+	status =  WriteRegister (regNum, loValue, kRegMaskFrameFormat,      kRegShiftFrameFormat)
+	      &&  WriteRegister (regNum, hiValue, kRegMaskFrameFormatHiBit, kRegShiftFrameFormatHiBit);
 
 	#if !defined (NTV2_DEPRECATE)
 		//	Mac driver does it's own bit file switching so only do this for MSWindows
@@ -1843,8 +1838,18 @@ bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat 
 		_ulFrameBufferSize = ::NTV2DeviceGetFrameBufferSize(_boardID,currentGeometry,newFormat);
 		_ulNumFrameBuffers = ::NTV2DeviceGetNumberFrameBuffers(_boardID,currentGeometry,newFormat);
 	}
-	
-	return (result1 && result2);
+
+	if (status)
+		{if (newFormat != currentFormat)
+			CVIDINFO("'" << GetDisplayName() << "': Channel " << DEC(UWord(channel)+1) << " FBF changed from "
+					<< ::NTV2FrameBufferFormatToString(currentFormat) << " to "
+					<< ::NTV2FrameBufferFormatToString(newFormat) << " (FBSize=" << xHEX0N(_ulFrameBufferSize,8)
+					<< " numFBs=" << DEC(_ulNumFrameBuffers) << ")");}
+	else
+		CVIDFAIL("'" << GetDisplayName() << "': Failed to change channel " << DEC(UWord(channel)+1) << " FBF from "
+				<< ::NTV2FrameBufferFormatToString(currentFormat) << " to " << ::NTV2FrameBufferFormatToString(newFormat));
+
+	return status;
 }
 
 // Method: GetFrameBufferFormat

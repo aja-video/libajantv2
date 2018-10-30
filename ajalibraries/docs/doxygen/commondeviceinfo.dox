@@ -932,7 +932,7 @@
 
 	Newer AJA hardware firmware implements an adjustable input delay that can be applied while samples are being written into the
 	<b>Audio Input Buffer</b>. Call ::NTV2DeviceCanDoAudioDelay to determine if this feature is available. Call CNTV2Card::GetAudioInputDelay
-	to obtain the current delay value. Call CNTV2Card::SetAudioDelay to change it.
+	to obtain the current delay value. Call CNTV2Card::SetAudioInputDelay to change it.
 
 	Audio input clocking for the running <b>Audio System</b> is ordinarily obtained from the input signal being used (SDI, HDMI, Analog, etc.).
 	AJA’s older devices, however, derived the audio input clock from the Device Reference by default (see ::NTV2ReferenceSource) and had to be
@@ -973,6 +973,10 @@
 	<b>Audio System</b>’s <b>Audio Output Last Address</b> register (i.e., the <b>Play Head</b> or “read head”). Call CNTV2Card::ReadAudioLastOut to get the
 	current <b>Play Head</b> position. Audio data continues to be read from the <b>Output Buffer</b> until the end is reached, whereupon the
 	<b>Play Head</b> wraps back to the start of the buffer, where reading continues.
+
+	Newer AJA hardware firmware implements an adjustable output delay that can be applied while samples are being read from the
+	<b>Audio Output Buffer</b>. Call ::NTV2DeviceCanDoAudioDelay to determine if this feature is available. Call CNTV2Card::GetAudioOutputDelay
+	to obtain the current delay value. Call CNTV2Card::SetAudioOutputDelay to change it.
 
 	The playout engine has an optional <b>Erase Mode</b>, in which it will automatically clear (zero) the <b>Output Buffer</b> memory immediately behind
 	the <b>Play Head</b> as it runs. If the host application fails to transfer new samples into the <b>Audio Output Buffer</b>, the buffer will eventually

@@ -1110,8 +1110,10 @@ const char * NTV2InterruptEnumString (const unsigned inInterruptEnum)
 													"eOutput6",					//	38
 													"eOutput7",					//	39
 													"eOutput8"	};				//	40
-	NTV2_ASSERT(sizeof(sInterruptEnumStrings) / sizeof(void*) == size_t(eNumInterruptTypes));
-	if (inInterruptEnum >= unsigned(eOutput1)  &&  inInterruptEnum < unsigned(eNumInterruptTypes))
+#if !defined(NTV2_BUILDING_DRIVER)
+	NTV2_ASSERT(sizeof(sInterruptEnumStrings) / sizeof(void*) == (unsigned)eNumInterruptTypes);
+#endif
+	if (inInterruptEnum < (unsigned)eNumInterruptTypes)
 		return sInterruptEnumStrings[inInterruptEnum];
 	return sNullString;
 }	//	NTV2InterruptEnumString
