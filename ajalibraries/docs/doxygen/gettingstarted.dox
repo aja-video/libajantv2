@@ -252,18 +252,18 @@ On Linux, the libraries and device drivers are not pre-built, and must be compil
 	-	If your Linux distro’s package manager can’t get it, AJA recommends downloading and building <a href="https://doc.qt.io/" target="_qt">Qt</a> directly from sources.
 	-	For more information about <a href="https://doc.qt.io/" target="_qt">Qt</a>, visit <http://qt.digia.com/>.
 	-	Be sure the path to <a href="https://doc.qt.io/" target="_qt">Qt</a>’s <b>bin</b> directory is in the current path.
--#	Using a terminal, change to the \c ntv2libraries/ajantv2/build directory in the SDK:
-	<tt>$ cd sdk/ntv2libraries/ajantv2/build</tt>
+-#	Using a terminal, change to the sdk directory:
+	<tt>$ cd sdk/</tt>
 -#	<b>Corvid HEVC Only:</b>  Export the environment variable <tt>AJA_HEVC=MB31</tt> to include the HEVC API:
 	<tt>$ export AJA_HEVC=MB31</tt>
 -#	<b>Optional:</b> Export the environment variable <tt>NTV2_DEPRECATE=1</tt> to build everything without the old, deprecated functions and APIs:
-	<tt>$ export AJA_DEPRECATE=1</tt>
+	<tt>$ export NTV2_DEPRECATE=1</tt>
 -#	<b>Optional:</b> Export the environment variable <tt>AJA_DEBUG=1</tt> if a debug build is required:
 	<tt>$ export AJA_DEBUG=1</tt>
 -#	Enter the \c make command. This will build all libraries, tools, utilities, demo applications, and the device driver.
-	The built executables will appear in the “../bin” directory (a peer to <b>ntv2libraries</b>).
+	The built executables will appear in the “bin” directory (a peer to <b>ajalibraries</b>).
 -#	Load the device driver:
-    <tt>$ sudo ../bin/load_ajantv2</tt>
+    <tt>$ sudo bin/load_ajantv2</tt>
 -#	Verify that the driver is installed by ...
 	-	issuing an \c lsmod, and look for \c ajantv2 in the list;
 	-	look inside \c /dev/proc and look for devices with \c ajantv2 in the name.
