@@ -332,7 +332,8 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 
 // Remote card GetDriverVersion.  Tested on Mac only, other platforms use
 // a virtual register for the driver version.
-bool CNTV2DriverInterface::GetDriverVersion (ULWord * driverVersion)
+
+bool CNTV2DriverInterface::GetDriverVersion (ULWord & outDriverVersion)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
@@ -340,9 +341,9 @@ bool CNTV2DriverInterface::GetDriverVersion (ULWord * driverVersion)
 	return !NTV2GetDriverVersionRemote(	_sockfd,
 										_remoteHandle,
 										_nubProtocolVersion,
-										driverVersion);
+										&outDriverVersion);
 #else
-	(void) driverVersion;
+	(void) outDriverVersion;
 	return false;
 #endif
 }

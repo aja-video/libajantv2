@@ -67,7 +67,7 @@ public:
 									   ULWord registerValue,
 									   ULWord registerMask = 0xFFFFFFFF,
 									   ULWord registerShift = 0x0 );
-	UInt32				GetDriverVersion( NumVersion *driverVers = 0 );
+
 	bool				StartDriver( DriverStartPhase phase );
 
 	/**
@@ -167,7 +167,7 @@ public:
 	virtual bool		AutoCirculate( AUTOCIRCULATE_DATA &autoCircData );
 	virtual bool		NTV2Message (NTV2_HEADER * pInMessage);
 	virtual bool		ControlDriverDebugMessages( NTV2_DriverDebugMessageSet /*msgSet*/, bool /*enable*/ ) {return false;}
-	virtual bool		GetDriverVersion( ULWord* driverVersion );
+	virtual bool		GetDriverVersion (ULWord & outDriverVersion);
 	virtual bool		RestoreHardwareProcampRegisters( void );
 
 	virtual	Word		SleepMs( LWord msec ) const;
