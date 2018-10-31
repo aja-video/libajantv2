@@ -1554,6 +1554,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 	bool						bFb1RGB				= IsRGBFormat(mFb1Format);
 	NTV2VideoFormat				inputFormat			= NTV2_FORMAT_UNKNOWN;
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
+	SdiState*					sdiIn				= (mVirtualInputSelect == NTV2_Input2Select) ? mDs.sdiIn[1] : mDs.sdiIn[0];
 	bool						b3GbOut				= mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb;
 	bool						bSdiOutRGB			= mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb;
 	bool						b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
@@ -1561,15 +1562,19 @@ void Class4kServices::SetDeviceXPointCapture ()
 	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b4k6gOut			= (b4K && !b4kHfr && !bSdiOutRGB && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	bool						b4k12gOut			= (b4K && (b4kHfr || bSdiOutRGB) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
-	bool						b2xQuadIn			= b4K && !b4kHfr && (mVirtualInputSelect == NTV2_Input2x4kSelect);
 	bool						b2xQuadOut			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
+	bool 						b2x2piIn  			= mDs.input2si && (mDs.bIn2xSdi || sdiIn->is6G);
+	bool 						b2piIn				= sdiIn->is2si && mDs.bInSdi;
+	bool 						b2pi				= mDs.input2si;
+	bool						b2xQuadIn			= b4K && !b4kHfr && !b2piIn && (mVirtualInputSelect == NTV2_Input2x4kSelect);
 	uint32_t					bFb1Disable			= 0, bFb2Disable = 1, bFb3Disable = 1, bFb4Disable = 1;
 	//bool 						bFbLevelA 			= IsVideoFormatA(mFb1sVideoFormat); 
 	bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_Input4x4kSelect && mQuadSwapIn != 0;
-	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)
-	bool						bHdmiIn             = mVirtualInputSelect == NTV2_Input5Select;
+	bool						bHdmiIn             = mDs.bInHdmi && bDoHdmiIn;
+	bool						bHdmiInRGB			= bHdmiIn == true && mDs.hdmiIn[0]->cs == NTV2_ColorSpaceModeRgb;
 	bool						bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit;
-	SdiState*					sdiIn				= NULL;
+	bool						bInRGB				= bHdmiInRGB || mDs.bInSdiRgb;
+	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;	// TBD
 	
 	bHdmiIn						= bHdmiIn && bDoHdmiIn;
 	bHdmiOutRGB					= bHdmiOutRGB && bDoHdmiOut;
@@ -1577,15 +1582,6 @@ void Class4kServices::SetDeviceXPointCapture ()
 	b4k12gOut					= b4k12gOut && bDo12G;
 	
 	// SMPTE 425 (2pi)
-	bool						bVpid2x2piIn		= false;
-	bool						bVpid4x2piInA		= false;
-	bool						bVpid4x2piInB		= false;
-	bool						bVpid6GIn			= false;
-	bool						bVpid12GIn			= false;
-	bool						b2piIn				= false;
-	bool						b2pi				= false;
-	bool						bInRGB				= false;
-	bool						bHdmiInRGB			= false;
 	NTV2CrosspointID			XPt1, XPt2, XPt3, XPt4;
 	NTV2CrosspointID			inHdYUV1, inHdYUV2;	
 	NTV2CrosspointID			inHdRGB1;	
@@ -1593,14 +1589,13 @@ void Class4kServices::SetDeviceXPointCapture ()
 	NTV2CrosspointID			in4kYUV1, in4kYUV2, in4kYUV3, in4kYUV4;
 	
     // Figure out what our input format is based on what is selected
-    inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
+    inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, NULL);
     
 
 	// input 1 select
 	inHdYUV1 = inHdYUV2 = inHdRGB1 = NTV2_XptBlack;
 	if (mVirtualInputSelect == NTV2_Input1Select)
 	{
-		sdiIn		= mDs.sdiIn[0];
 		inHdYUV1	= NTV2_XptSDIIn1;
 		inHdYUV2	= NTV2_XptSDIIn1DS2;
 		inHdRGB1	= NTV2_XptDuallinkIn1;
@@ -1608,7 +1603,6 @@ void Class4kServices::SetDeviceXPointCapture ()
 	// input 2 select
 	else if (mVirtualInputSelect == NTV2_Input2Select)
 	{
-		sdiIn		= mDs.sdiIn[1];
 		inHdYUV1	= NTV2_XptSDIIn2;
 		inHdYUV2	= NTV2_XptSDIIn2DS2;
 		inHdRGB1	= NTV2_XptDuallinkIn1;
@@ -1638,40 +1632,26 @@ void Class4kServices::SetDeviceXPointCapture ()
 	
 	else // 425 or Quads
 	{
-		#if 1
+		#if 0
 		
 			mVpidParser.SetVPID(mVpid1a);
 			VPIDStandard std = mVpidParser.GetStandard();
-			bVpid2x2piIn  = std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb;
-			bVpid4x2piInA = std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb;
-			bVpid4x2piInB = std == VPIDStandard_2160_QuadDualLink_3Gb;
+			bool b2x2piIn  = std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb;
+			bool bVpid4x2piInA = std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb;
+			bool bVpid4x2piInB = std == VPIDStandard_2160_QuadDualLink_3Gb;
 			mCard->GetSDIInput6GPresent(bVpid6GIn, NTV2_CHANNEL1);
 			mCard->GetSDIInput12GPresent(bVpid12GIn, NTV2_CHANNEL1);
-			bVpid2x2piIn	= bVpid2x2piIn  || bVpid6GIn;
+			b2x2piIn		= b2x2piIn  || bVpid6GIn;
 			bVpid4x2piInA	= bVpid4x2piInA || bVpid12GIn;
-			b2piIn			= bVpid2x2piIn  || bVpid4x2piInA || bVpid4x2piInB;
+			bool b2piIn		= b2x2piIn  || bVpid4x2piInA || bVpid4x2piInB;
 			
 			// quad in
 			if (b2piIn)
-				b2xQuadIn = false;
+				b2xQuadIn 	= false;
+			b2pi 			= b2piIn || (bHdmiIn && b4K);				
 			
-		#else
-
-			VPIDStandard std	= sdiIn->vpidStd;
-			bVpid2x2piIn  		= sdiIn->input2si && sdiIn->bIn2xSdi;
-			b2piIn				= sdiIn->input2si;
-			
-			// quad in
-			if (b2piIn)
-				b2xQuadIn = false;
-		
 		#endif
 	}
-	
-	// other bools
-	b2pi		= b2piIn || (bHdmiIn && b4K);				
-	bInRGB		= (bHdmiIn == false && inputColorSpace == NTV2_ColorSpaceModeRgb) ||
-				  (bHdmiIn == true && bHdmiInRGB == true);
 	
 
 	// 4K input routing
@@ -1697,7 +1677,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 			in4kRGB1 = NTV2_XptDuallinkIn1;	in4kRGB2 = NTV2_XptDuallinkIn2;
 			in4kRGB3 = NTV2_XptDuallinkIn3;	in4kRGB4 = NTV2_XptDuallinkIn4;
 		}
-		else if (bVpid2x2piIn || b2xQuadIn)	// SDI-2Wire-YUV
+		else if (b2x2piIn || b2xQuadIn)	// SDI-2Wire-YUV
 		{
 			in4kYUV1 = NTV2_XptSDIIn1;		in4kYUV2 = NTV2_XptSDIIn1DS2;
 			in4kYUV3 = NTV2_XptSDIIn2;		in4kYUV4 = NTV2_XptSDIIn2DS2;
@@ -2690,7 +2670,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 		}
 		else
 		{
-			if (b4k6gOut || b2xQuadOut || b2xQuadIn || bVpid2x2piIn)
+			if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x2piIn)
 			{
 				mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptBlack);
 				mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
@@ -2725,7 +2705,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 		}
 		else // YUV
 		{
-			if (b4k6gOut || b2xQuadOut || b2xQuadIn || bVpid2x2piIn)
+			if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x2piIn)
 			{
 				mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptBlack);
 				mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
@@ -2761,7 +2741,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 		}
 		else // YUV
 		{
-			if (b4k6gOut || b2xQuadOut || b2xQuadIn || bVpid2x2piIn)
+			if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x2piIn)
 			{
 				if (bInRGB)
 				{
@@ -2837,7 +2817,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 		}
 		else // YUV
 		{
-			if (b4k6gOut || b2xQuadOut || b2xQuadIn || bVpid2x2piIn)
+			if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x2piIn)
 			{
 				if (bInRGB)
 				{
@@ -2918,7 +2898,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 	// YUV Out 4K 2pi 
 	else if (b4K && b2pi)
 	{
-		if (b4k6gOut || b2xQuadOut || b2xQuadIn || bVpid2x2piIn)
+		if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x2piIn)
 		{
 			if (bInRGB)
 			{
