@@ -1658,12 +1658,8 @@ void Class4kServices::SetDeviceXPointCapture ()
 		#else
 
 			VPIDStandard std	= sdiIn->vpidStd;
-			bVpid2x2piIn  = std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb;		// USED
-			bVpid4x2piInA = std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb;	// INT
-			bVpid4x2piInB = std == VPIDStandard_2160_QuadDualLink_3Gb;										// INT
-			bVpid2x2piIn	= bVpid2x2piIn  || sdiIn->is6G;
-			bVpid4x2piInA	= bVpid4x2piInA || sdiIn->is12G;
-			b2piIn			= bVpid2x2piIn  || bVpid4x2piInA || bVpid4x2piInB;								// USED
+			bVpid2x2piIn  		= sdiIn->input2si && sdiIn->bIn2xSdi;
+			b2piIn				= sdiIn->input2si;
 			
 			// quad in
 			if (b2piIn)
