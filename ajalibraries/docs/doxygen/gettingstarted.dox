@@ -407,9 +407,8 @@ Many OEM developers choose to create their own NTV2-based Xcode projects “from
 @subsection	gs-newwinprojects	Windows
 
 Windows builds are structured with projects (.vcproj files) grouped into a solution (.sln file).
-The solution files for building the entire SDK can be found here:
--	\c sdkdir\\ajalibraries\\ajantv2\\build\\ntv2_vs12.sln		(for VS2013+)
--	\c sdkdir\\ajalibraries\\ajantv2\\build\\ntv2_vs9.sln		(for all others)
+The solution file for building the entire SDK can be found here:
+-	\c sdkdir\\ntv2_vs12.sln		(for VS2013+)
 
 Choose “build all” to build all of the SDK libraries and the demo applications that use the libraries.
 
@@ -429,11 +428,11 @@ Many OEM developers choose to create their own solution and project files “fro
 	-	For DLLs, \c sdkdir\\bin
 	-	For LIBs, \c sdkdir\\lib
 -	Add the appropriate SDK <b>.vcproj</b> file(s) to your solution as needed, then make your build target(s) dependent upon them. This will configure the linker properly.
--	It’s important to link with the correct runtime libraries. When using AJA’s static libraries, link with Multi-threaded \c /MT or Multi-threaded debug \c /Mtd
+-	It’s important to link with the correct runtime libraries. When using AJA’s static libraries, link with Multi-threaded \c /MT or Multi-threaded debug \c /MTd
 	runtime libraries. When using AJA’s dynamic libraries, link with Multi-threaded-DLL \c /MD or Multi-threaded DLL debug \c /MDd runtime libraries.
 -	When using the \ref ajacc (found in the \c lib directory), it’s important to link with the one that’s correct for the Visual Studio
-	compiler being used. The library names are decorated with the Visual Studio compiler version (\c _vs10, \c _vs11, etc.), Win32 or x64 (\c _32 or \c _64),
-	and the runtime library they’re compatible with (undecorated is \c /MT, \c d for \c /Mtd, \c MD for \c /MD, and \c MDd for \c /MDd ).
+	compiler being used. The library names are decorated with the Visual Studio compiler version (\c _vs10, \c _vs11, etc.), architecture x64 (\c _64),
+	and the runtime library they’re compatible with (undecorated is \c /MT, \c d for \c /MTd, \c MD for \c /MD, and \c MDd for \c /MDd ).
 -	When using AJA’s pre-built DLLs, AJA recommends configuring your solution to place build products in the same \c bin directory that contains AJA’s pre-built
 	executables. This will speed development, since the requisite DLLs can readily be found by your application at run time.
 
