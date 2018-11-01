@@ -337,6 +337,20 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 	}
 
 	_boardOpened = true;
+
+	ULWord driverVersionMajor;
+	GetDriverVersion(&driverVersionMajor);
+	driverVersionMajor = (driverVersionMajor >> 4) & 0xF;
+#if AJA_NTV2_SDK_VERSION_MAJOR != 0
+	if (driverVersionMajor < (ULWord)AJA_NTV2_SDK_VERSION_MAJOR)
+	{
+		printf("## ERROR:  Cannot open:  Driver version %d older than SDK version %d\n",
+				driverVersionMajor, AJA_NTV2_SDK_VERSION_MAJOR);
+		Close();
+		return false;
+	}
+#endif
+
 	CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID);
 	NTV2FrameGeometry fg;
 	CNTV2DriverInterface::ReadRegister (kRegGlobalControl, fg, kRegMaskGeometry, kRegShiftGeometry);
