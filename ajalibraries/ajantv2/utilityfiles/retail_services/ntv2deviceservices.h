@@ -93,7 +93,6 @@ public:
 	virtual	~DeviceServices();
 	virtual	void SetCard(CNTV2Card* pCard);
 	virtual bool ReadDriverState();
-	virtual void UpdateAutoState();
 
 	// override these
 	virtual void SetDeviceEveryFrameRegs(uint32_t virtualDebug1, uint32_t everyFrameTaskFilter);
@@ -209,7 +208,6 @@ public:
 	CNTV2Card*				mCard;
 	
 	// set by every frame, not user
-	NTV2VideoFormat			mDefaultVideoFormat;
 	uint32_t				mADCStabilizeCount;	
 	uint32_t				mADCLockScanTestFormat;
 	CNTV2VPID 				mVpidParser;
@@ -296,9 +294,7 @@ public:
 	NTV2AnalogType			mVirtualAnalogOutputType;
 	NTV2AnalogBlackLevel	mVirtualAnalogInBlackLevel;
 	NTV2AnalogType			mVirtualAnalogInType;
-	NTV2Standard			mVirtualAnalogInStandard;
 	
-	NTV2HDMIAudioChannels	mHDMIOutAudioChannels;
 	NTV2HDMIRange			mHDMIInRGBRange;
 	
 	uint32_t				mRegFramesPerVertical;		// frames per vertical interrupt (e.g. CION RAW)

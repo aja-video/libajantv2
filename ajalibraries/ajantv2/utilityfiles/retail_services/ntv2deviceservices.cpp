@@ -179,7 +179,6 @@ DeviceServices::DeviceServices()
 	mInputFormatSelect				= -1;
 	mInputFormatLock				= false;
 	mLastInputFormatSelect			= NTV2_FORMAT_UNKNOWN;
-	mDefaultVideoFormat				= NTV2_FORMAT_UNKNOWN;
 }
 
 DeviceServices::~DeviceServices()
@@ -226,9 +225,6 @@ bool DeviceServices::ReadDriverState (void)
 	// retrofit hack for now
 	//if (bChanged)
 	{
-		mFb1VideoFormat = mDs.primaryFormat;
-		mFb1Mode		= mDs.ioMode;
-	
 		// sdi out
 		if (ds.sdiOutSize > 0)
 		{ 
@@ -249,6 +245,8 @@ bool DeviceServices::ReadDriverState (void)
 		{
 			mSDIInput1ColorSpace = ds.sdiIn[0]->cs;
 			mSDIInput1RGBRange = ds.sdiIn[0]->rgbRange;
+			mSDIInput2RGBRange = mSDIInput1RGBRange;		// for now
+			mSDIInput2ColorSpace = mSDIInput1ColorSpace;	// for now
 		}
 		
 		// hdmi out
@@ -258,7 +256,11 @@ bool DeviceServices::ReadDriverState (void)
 		}
 
 		// analog out
-		mVirtualAnalogOutputSelect = ds.analogOutFormatSelect;
+		mVirtualAnalogOutputSelect 	= ds.analogOutFormatSelect;
+		mFb1VideoFormat 			= mDs.primaryFormat;
+		mFb1Mode					= mDs.ioMode;
+		mFollowInputFormat			= mDs.followInputFormat;
+		
 	}
 	
 	
@@ -269,9 +271,7 @@ bool DeviceServices::ReadDriverState (void)
 
 	mCard->GetStreamingApplication(&mStreamingAppType, &mStreamingAppPID);
 	
-	AsDriverInterface(mCard)->ReadRegister(kVRegDefaultVideoFormat, mDefaultVideoFormat);
 	AsDriverInterface(mCard)->ReadRegister(kVRegDefaultVideoOutMode, mDefaultVideoOutMode);
-	mCard->ReadRegister(kVRegFollowInputFormat, mFollowInputFormat);
 	mCard->ReadRegister(kVRegVANCMode, mVANCMode);
 	mCard->ReadRegister(kVRegDefaultInput, mDefaultInput);
 	AsDriverInterface(mCard)->ReadRegister(kVRegDSKMode, mDSKMode);
@@ -292,12 +292,8 @@ bool DeviceServices::ReadDriverState (void)
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogOutputType, mVirtualAnalogOutputType);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogInBlackLevel, mVirtualAnalogInBlackLevel);
 	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogInputType, mVirtualAnalogInType);
-	AsDriverInterface(mCard)->ReadRegister(kVRegAnalogInStandard, mVirtualAnalogInStandard);
-	AsDriverInterface(mCard)->ReadRegister(kVRegHDMIOutAudioChannels, mHDMIOutAudioChannels);
 	mCard->ReadRegister(kVRegFramesPerVertical, mRegFramesPerVertical);
 	
-	mSDIInput2RGBRange = mSDIInput1RGBRange;
-	mSDIInput2ColorSpace = mSDIInput1ColorSpace;	// for now
 	
 	// basic Ch1 HW registers 
 	mDeviceID = mCard->GetDeviceID();
@@ -509,86 +505,6 @@ bool DeviceServices::ReadDriverState (void)
     
     return true;
 }
-
-
-//-------------------------------------------------------------------------------------------------------
-//	UpdateAutoState
-//-------------------------------------------------------------------------------------------------------
-void DeviceServices::UpdateAutoState()
-{
-	mSdiOutTransportType = 
-		RetailSupport::AutoSelect3GTransport(mDeviceID, mSdiOutTransportType, mFb1VideoFormat);
-	
-	// out select sdi
-	mVirtualDigitalOutput1Select = mVirtualDigitalOutput1Select == NTV2_AutoOutputSelect ?
-				NTV2_PrimaryOutputSelect : mVirtualDigitalOutput1Select;
-	
-	// out select hdmi
-	mVirtualHDMIOutputSelect = mVirtualHDMIOutputSelect == NTV2_AutoOutputSelect ?
-				NTV2_PrimaryOutputSelect : mVirtualHDMIOutputSelect;
-	
-	// out select analog
-	mVirtualAnalogOutputSelect = mVirtualAnalogOutputSelect == NTV2_AutoOutputSelect ?
-				NTV2_PrimaryOutputSelect : mVirtualAnalogOutputSelect;
-	
-	// out cs
-	mSDIOutput1ColorSpace = mSDIOutput1ColorSpace == NTV2_ColorSpaceModeAuto ?
-							NTV2_ColorSpaceModeYCbCr : mSDIOutput1ColorSpace;
-	
-	// out range						
-	mSDIOutput1RGBRange = mSDIOutput1RGBRange == NTV2_RGBRangeAuto ?
-							NTV2_RGBRangeFull : mSDIOutput1RGBRange;
-							
-	// in range
-	mSDIInput1RGBRange = mSDIInput1RGBRange == NTV2_RGBRangeAuto ?
-							NTV2_RGBRangeFull : mSDIInput1RGBRange;
-	mSDIInput2RGBRange = mSDIInput1RGBRange;
-	
-	
-	// video input select
-	if (mVirtualInputSelect == NTV2_InputAutoSelect)
-	{
-		mVirtualInputSelect = NTV2_Input1Select;
-	}
-	
-	// audio input select
-	/*
-	if (ds.audioSelect_ == NTV2_AutoAudioSelect)
-	{
-		if (count > 0)
-			ds.audioSelect = NTV2_Input1Embedded1_8Select;
-		else
-			ds.audioSelect = NTV2_HDMISelect;
-		
-		// TBD more here
-	}
-	else
-	{
-		ds.audioSelect = ds.audioSelect_;
-	}
-	*/
-	
-	// in color space - use vpid
-	mSDIInput1ColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
-	mSDIInput2ColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL2, mSDIInput2ColorSpace);
-	
-	// 4k transport
-	NTV24kTransportType tranport4k = NTV2_4kTransport_PixelInterleave;
-	if (::NTV2DeviceCanDo425Mux(mDeviceID) == false)
-		tranport4k = NTV2_4kTransport_Quadrants_4wire;
-		
-	m4kTransportOutSelection = m4kTransportOutSelection == NTV2_4kTransport_Auto ? 
-				tranport4k : m4kTransportOutSelection;
-				
-	// 3G tranport
-	NTV2SDITransportType transport3g = NTV2_SDITransport_DualLink_3Gb;
-	if (::NTV2DeviceCanDo3GOut(mDeviceID, 0) == false)
-		transport3g	= NTV2_SDITransport_DualLink_1_5;
-		
-	mSdiOutTransportType = mSdiOutTransportType == NTV2_SDITransport_Auto ? 
-				transport3g : mSdiOutTransportType;
-}
-
 
 
 //-------------------------------------------------------------------------------------------------------

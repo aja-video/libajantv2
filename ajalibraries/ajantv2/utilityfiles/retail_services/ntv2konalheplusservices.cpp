@@ -817,8 +817,6 @@ void KonaLHePlusServices::SetDeviceMiscRegisters ()
 						(mVirtualAnalogInType != ctrlAnalogInType) ||
 						(virtualAnalogInBlackLevel != ctrlAnalogInBlackLevel) )
 				{
-					//DebugLog("program ADC AnalogInFrameRate = %d, AnalogInStandard = %d\n", inputFrameRate, mVirtualAnalogInStandard);
-
 					// reset stabilization count
 					mADCStabilizeCount = kADCStabilizeCount;
 					

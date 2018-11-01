@@ -1489,7 +1489,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 	DeviceServices::SetDeviceXPointCapture();
 	
 	bool						bFb1RGB				= IsRGBFormat(mFb1Format);
-	NTV2VideoFormat				inputFormat			= NTV2_FORMAT_UNKNOWN;
+	NTV2VideoFormat				inputFormat			= mDs.inputVideoFormatSelect;
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	SdiState*					sdiIn				= (mVirtualInputSelect == NTV2_Input2Select) ? mDs.sdiIn[1] : mDs.sdiIn[0];
 	bool						b3GbOut				= mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb;
@@ -1523,9 +1523,6 @@ void Class4kServices::SetDeviceXPointCapture ()
 	NTV2CrosspointID			inHdRGB1;	
 	NTV2CrosspointID			in4kRGB1, in4kRGB2, in4kRGB3, in4kRGB4;
 	NTV2CrosspointID			in4kYUV1, in4kYUV2, in4kYUV3, in4kYUV4;
-	
-    // Figure out what our input format is based on what is selected
-    inputFormat = mDs.inputVideoFormatSelect;
 
 	// input 1 select
 	inHdYUV1 = inHdYUV2 = inHdRGB1 = NTV2_XptBlack;

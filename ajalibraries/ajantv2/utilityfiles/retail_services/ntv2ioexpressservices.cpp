@@ -429,8 +429,6 @@ void IoExpressServices::SetDeviceMiscRegisters ()
 				(mVirtualAnalogInType != ctrlAnalogInType) ||
 				(virtualAnalogInBlackLevel != ctrlAnalogInBlackLevel) )
 		{
-			//DebugLog("program ADC AnalogInFrameRate = %d, AnalogInStandard = %d\n", inputFrameRate, mVirtualAnalogInStandard);
-
 			// insure we wait at least 10 frames to allow the ADC chip to stabilize
 			mADCStabilizeCount = 10;
 			
