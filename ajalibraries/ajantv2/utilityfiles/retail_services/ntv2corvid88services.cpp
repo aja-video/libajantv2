@@ -44,7 +44,7 @@ void Corvid88Services::SetDeviceXPointPlayback ()
 	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
 								bDSKOn				= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
-	NTV2ColorSpaceMode            inputColorSpace	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
+	NTV2ColorSpaceMode			inputColorSpace	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
     bool						bFb1HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
@@ -69,9 +69,6 @@ void Corvid88Services::SetDeviceXPointPlayback ()
 	
 	// select square division or 2 pixel interleave in frame buffer
     AdjustFor4kQuadOrTpiOut();
-
-	// Figure out what our input format is based on what is selected 
-	GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1137,7 +1134,7 @@ void Corvid88Services::SetDeviceXPointCapture ()
 
 
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
+	inputFormat = mDs.inputVideoFormatSelect;
 
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1185,19 +1182,19 @@ void Corvid88Services::SetDeviceXPointCapture ()
 
 	// SDI In 1
 	bool bConvertBToA; 
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL1)==true && mVirtualInputSelect==NTV2_Input1Select;
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL1, mDs.primaryFormat) == true && mVirtualInputSelect == NTV2_Input1Select;
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
 	
 	// SDI In 2
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL2)==true && mVirtualInputSelect==NTV2_Input2Select;
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL2, mDs.primaryFormat)==true && mVirtualInputSelect==NTV2_Input2Select;
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, bConvertBToA);
 	
 	// SDI In 3
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL3);
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL3, mDs.primaryFormat);
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, bConvertBToA);
 	
 	// SDI In 4
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL4);
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL4, mDs.primaryFormat);
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, bConvertBToA);
 	
 	

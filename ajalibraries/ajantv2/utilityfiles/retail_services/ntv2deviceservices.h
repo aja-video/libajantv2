@@ -104,8 +104,6 @@ public:
 	
 	virtual NTV2VideoFormat GetLockedInputVideoFormat();
 	virtual NTV2ColorSpaceMode GetSDIInputColorSpace(NTV2Channel inChannel, NTV2ColorSpaceMode inMode);
-	virtual NTV2VideoFormat GetSelectedInputVideoFormat(NTV2VideoFormat referenceFormat, NTV2ColorSpaceMode* inputColorSpace=NULL);
-    virtual NTV2VideoFormat GetCorrespondingAFormat(NTV2VideoFormat bVideoFormat);
 	virtual void SetDeviceXPointPlaybackRaw();
 	virtual void SetDeviceXPointCaptureRaw();
 	virtual void SetDeviceMiscRegistersRaw(NTV2Mode mode) {(void)mode;}
@@ -142,8 +140,6 @@ public:
 	// overridden in some classes
 	virtual NTV2LSVideoADCMode GetVideoADCMode();
 	virtual bool SetVideoADCMode(NTV2LSVideoADCMode value);
-	virtual NTV2VideoFormat GetSdiInVideoFormatWithVpid(int32_t index);
-	virtual NTV2VideoFormat GetSdiInVideoFormat(int32_t index, NTV2VideoFormat videoFormat);
 	
 	// support
 	bool SetVPIDData(	ULWord &		outVPID,

@@ -31,69 +31,6 @@ Class4kServices::~Class4kServices()
 
 
 //-------------------------------------------------------------------------------------------------------
-//	GetSelectedInputVideoFormat
-//	Note:	Determine input video format based on input select and fbVideoFormat
-//			which currently is videoformat of ch1-framebuffer
-//-------------------------------------------------------------------------------------------------------
-NTV2VideoFormat Class4kServices::GetSelectedInputVideoFormat(
-											NTV2VideoFormat fbVideoFormat,
-											NTV2ColorSpaceMode* inputColorSpace)
-{
-	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-	if (inputColorSpace)
-		*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-	
-	// Figure out what our input format is based on what is selected
-    switch (mVirtualInputSelect)
-    {
-		case NTV2_Input1Select:
-			inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-			if (InputRequiresBToAConvertsion(NTV2_CHANNEL1))
-				inputFormat = GetCorrespondingAFormat(inputFormat);
-
-			if (inputColorSpace)
-				*inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
-			break;
-
-		case NTV2_Input2xDLHDSelect:
-		case NTV2_Input4x4kSelect:
-		case NTV2_Input2x4kSelect:
-			inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-			if (inputColorSpace)
-				*inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
-			break;
-
-		case NTV2_Input2Select:
-			inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
-			if (InputRequiresBToAConvertsion(NTV2_CHANNEL2))
-				inputFormat = GetCorrespondingAFormat(inputFormat);
-
-			if (inputColorSpace)
-				*inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL2, mSDIInput2ColorSpace);
-			break;
-
-		case NTV2_Input5Select:	// HDMI
-			{
-				// dynamically use input color space for 
-				ULWord colorSpace;
-				mCard->ReadRegister(kRegHDMIInputStatus, colorSpace, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
-
-				inputFormat = mCard->GetHDMIInputVideoFormat();
-				if (inputColorSpace)
-					*inputColorSpace = (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr) ? NTV2_ColorSpaceModeYCbCr : NTV2_ColorSpaceModeRgb;
-			}
-			break;
-
-		default:
-			break;
-	}
-	inputFormat = GetTransportCompatibleFormat(inputFormat, fbVideoFormat);
-	
-	return inputFormat;
-}
-
-
-//-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
 void Class4kServices::SetDeviceXPointPlayback ()
@@ -1574,7 +1511,6 @@ void Class4kServices::SetDeviceXPointCapture ()
 	bool						bHdmiInRGB			= bHdmiIn == true && mDs.hdmiIn[0]->cs == NTV2_ColorSpaceModeRgb;
 	bool						bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit;
 	bool						bInRGB				= bHdmiInRGB || mDs.bInSdiRgb;
-	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;	// TBD
 	
 	bHdmiIn						= bHdmiIn && bDoHdmiIn;
 	bHdmiOutRGB					= bHdmiOutRGB && bDoHdmiOut;
@@ -1589,8 +1525,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 	NTV2CrosspointID			in4kYUV1, in4kYUV2, in4kYUV3, in4kYUV4;
 	
     // Figure out what our input format is based on what is selected
-    inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, NULL);
-    
+    inputFormat = mDs.inputVideoFormatSelect;
 
 	// input 1 select
 	inHdYUV1 = inHdYUV2 = inHdRGB1 = NTV2_XptBlack;
@@ -3113,7 +3048,7 @@ void Class4kServices::SetDeviceMiscRegisters ()
 	mCard->GetFrameGeometry(primaryGeometry);
 	
 	// VPID
-	bool					bHdmiIn				= mVirtualInputSelect == NTV2_Input5Select;
+	bool					bHdmiIn				= mDs.bInHdmi;
 	bool					bFbLevelA			= IsVideoFormatA(mFb1VideoFormat);
 	bool					b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool					b4kHfr				= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);

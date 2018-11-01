@@ -23,68 +23,6 @@ IoIP2110Services::~IoIP2110Services()
 
 
 //-------------------------------------------------------------------------------------------------------
-//	GetSelectedInputVideoFormat
-//	Note:	Determine input video format based on input select and fbVideoFormat
-//			which currently is videoformat of ch1-framebuffer
-//-------------------------------------------------------------------------------------------------------
-NTV2VideoFormat IoIP2110Services::GetSelectedInputVideoFormat(
-                                                              NTV2VideoFormat fbVideoFormat,
-                                                              NTV2ColorSpaceMode* inputColorSpace)
-{
-    NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-    if (inputColorSpace)
-        *inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-    
-    // Figure out what our input format is based on what is selected
-    switch (mVirtualInputSelect)
-    {
-        case NTV2_Input1Select:
-			inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-			if (InputRequiresBToAConvertsion(NTV2_CHANNEL1))
-				inputFormat = GetCorrespondingAFormat(inputFormat);
-            
-            if (inputColorSpace)
-                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
-            break;
-            
-        case NTV2_Input2xDLHDSelect:
-        case NTV2_Input4x4kSelect:
-        case NTV2_Input2x4kSelect:
-            inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-            if (inputColorSpace)
-                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
-            break;
-            
-        case NTV2_Input2Select:
-			inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
-			if (InputRequiresBToAConvertsion(NTV2_CHANNEL2))
-				inputFormat = GetCorrespondingAFormat(inputFormat);
-            
-            if (inputColorSpace)
-                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL2, mSDIInput2ColorSpace);
-            break;
-            
-        case NTV2_Input5Select:	// HDMI
-        {
-            // dynamically use input color space for
-            ULWord colorSpace;
-            mCard->ReadRegister(kRegHDMIInputStatus, colorSpace, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
-            
-            inputFormat = mCard->GetHDMIInputVideoFormat();
-            if (inputColorSpace)
-                *inputColorSpace = (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr) ? NTV2_ColorSpaceModeYCbCr : NTV2_ColorSpaceModeRgb;
-        }
-            break;
-        default:
-            break;
-    }
-    inputFormat = GetTransportCompatibleFormat(inputFormat, fbVideoFormat);
-    
-    return inputFormat;
-}
-
-
-//-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
 void IoIP2110Services::SetDeviceXPointPlayback ()
@@ -148,9 +86,6 @@ void IoIP2110Services::SetDeviceXPointPlayback ()
 	
 	// select square division or 2 pixel interleave in frame buffer
     AdjustFor4kQuadOrTpiOut();
-	
-	// Figure out what our input format is based on what is selected
-	GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1532,16 +1467,16 @@ void IoIP2110Services::SetDeviceXPointCapture ()
     
     bool inHfrB = false;
     // Figure out what our input format is based on what is selected
-    inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
+    inputFormat = mDs.inputVideoFormatSelect;
     
     // Now we need to figure if the signal coming in is level B or A
     if (mVirtualInputSelect == NTV2_Input1Select)
     {
-        inHfrB = IsVideoFormatB(GetSdiInVideoFormat(0, mFb1VideoFormat));
+        inHfrB = IsVideoFormatB(mDs.sdiIn[0]->videoFormat);
     }
     else if (mVirtualInputSelect == NTV2_Input2Select)
     {
-        inHfrB = IsVideoFormatB(GetSdiInVideoFormat(1, mFb1VideoFormat));
+        inHfrB = IsVideoFormatB(mDs.sdiIn[1]->videoFormat);
     }
     else
     {
@@ -1666,19 +1601,19 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 
 	// SDI In 1
 	bool bConvertBToA; 
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL1)==true && mVirtualInputSelect==NTV2_Input1Select;
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL1, mDs.primaryFormat) == true && mVirtualInputSelect == NTV2_Input1Select;
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
-
+	
 	// SDI In 2
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL2)==true && mVirtualInputSelect==NTV2_Input2Select;
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL2, mDs.primaryFormat)==true && mVirtualInputSelect==NTV2_Input2Select;
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, bConvertBToA);
-
+	
 	// SDI In 3
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL3);
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL3, mDs.primaryFormat);
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, bConvertBToA);
-
+	
 	// SDI In 4
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL4);
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL4, mDs.primaryFormat);
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, bConvertBToA);
 	
 	// Mixer/Keyer
@@ -3376,9 +3311,6 @@ void IoIP2110Services::SetDeviceMiscRegisters ()
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
-		
-	// Figure out what our input format is based on what is selected
-	GetSelectedInputVideoFormat(mFb1VideoFormat);
 
 	//
 	// SDI Out
