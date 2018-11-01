@@ -651,7 +651,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	NTV2ColorSpaceMode			inputColorSpace 	= NTV2_ColorSpaceModeYCbCr;	// Input format select (YUV, RGB, etc)
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
+	inputFormat = mDs.inputVideoFormatSelect;
 
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
 	if (b2FbLevelBHfr)
@@ -1167,7 +1167,7 @@ void Kona4UfcServices::SetDeviceMiscRegisters ()
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
+	inputFormat = mDs.inputVideoFormatSelect;
 	
 	
 	//

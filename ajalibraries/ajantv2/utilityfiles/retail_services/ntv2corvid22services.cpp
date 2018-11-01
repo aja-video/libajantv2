@@ -419,11 +419,6 @@ void Corvid22Services::SetDeviceXPointCapture ()
 	
 	NTV2CrosspointID			inputXptYUV1 		= NTV2_XptBlack;		// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2 		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	NTV2ColorSpaceMode			inputColorSpace 	= mSDIInput1ColorSpace;	// Input format select (YUV, RGB, etc)
-	
-	// Figure out what our input format is based on what is selected
-	GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
-	
 	
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
 	if (b2FbLevelBHfr)

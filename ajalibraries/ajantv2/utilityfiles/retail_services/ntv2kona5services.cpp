@@ -23,70 +23,6 @@ Kona5Services::~Kona5Services()
 
 
 //-------------------------------------------------------------------------------------------------------
-//	GetSelectedInputVideoFormat
-//	Note:	Determine input video format based on input select and fbVideoFormat
-//			which currently is videoformat of ch1-framebuffer
-//-------------------------------------------------------------------------------------------------------
-NTV2VideoFormat Kona5Services::GetSelectedInputVideoFormat(
-											NTV2VideoFormat fbVideoFormat,
-                                            NTV2ColorSpaceMode* inputColorSpace)
-{
-    bool inHfrB;
-    bool levelbtoaConvert;
-    NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-    if (inputColorSpace)
-        *inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-
-    // Figure out what our input format is based on what is selected
-    switch (mVirtualInputSelect)
-    {
-        case NTV2_Input1Select:
-            inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-
-            // See if we need to translate this from a level B format to level A
-            inHfrB = IsVideoFormatB(inputFormat);
-            mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, levelbtoaConvert);
-            if (inHfrB && levelbtoaConvert)
-            {
-                inputFormat = GetCorrespondingAFormat(inputFormat);
-            }
-
-            if (inputColorSpace)
-                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
-            break;
-
-        case NTV2_Input2xDLHDSelect:
-        case NTV2_Input4x4kSelect:
-        case NTV2_Input2x4kSelect:
-            inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-            if (inputColorSpace)
-                *inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
-            break;
-            
-        case NTV2_Input2Select:
-            inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
-
-            // See if we need to translate this from a level B format to level A
-            inHfrB = IsVideoFormatB(inputFormat);
-            mCard->GetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, levelbtoaConvert);
-            if (inHfrB && levelbtoaConvert)
-            {
-                inputFormat = GetCorrespondingAFormat(inputFormat);
-            }
-
-            if (inputColorSpace)
-                *inputColorSpace =  GetSDIInputColorSpace(NTV2_CHANNEL2, mSDIInput2ColorSpace);
-            break;
-        default:
-            break;
-    }
-    inputFormat = GetTransportCompatibleFormat(inputFormat, fbVideoFormat);
-
-    return inputFormat;
-}
-
-
-//-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
 void Kona5Services::SetDeviceXPointPlayback ()
@@ -1481,7 +1417,7 @@ void Kona5Services::SetDeviceXPointCapture ()
     bool						b3GbInEnabled;
 
     // Figure out what our input format is based on what is selected
-    inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
+    inputFormat = mDs.inputVideoFormatSelect;
     bool inHfrB = IsVideoFormatB(inputFormat);
 
     // SDI In 1
