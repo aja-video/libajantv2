@@ -20,6 +20,7 @@ AJAExport const char *	NTV2FrameGeometryString		(NTV2FrameGeometry geom);
 AJAExport const char *	NTV2FrameRateString			(NTV2FrameRate rate);
 AJAExport const char *	NTV2VideoFormatString		(NTV2VideoFormat fmt);
 AJAExport const char *	NTV2RegisterNameString		(const ULWord inRegNum);
+AJAExport const char *	NTV2InterruptEnumString		(const unsigned inInterruptEnum);
 #if !defined (NTV2_DEPRECATE)
 	AJAExport const char *	NTV2BoardTypeString		(NTV2BoardType type);
 	AJAExport const char *	NTV2BoardIDString		(NTV2BoardID id);

@@ -17,31 +17,6 @@ CorvidServices::CorvidServices()
 
 
 //-------------------------------------------------------------------------------------------------------
-//	GetSelectedInputVideoFormat
-//	Note:	Determine input video format based on input select and fbVideoFormat
-//			which currently is videoformat of ch1-framebuffer
-//-------------------------------------------------------------------------------------------------------
-NTV2VideoFormat CorvidServices::GetSelectedInputVideoFormat(
-											NTV2VideoFormat fbVideoFormat,
-											NTV2ColorSpaceMode* inputColorSpace)
-{
-	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-	if (inputColorSpace)
-		*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-	
-	if (mVirtualInputSelect == NTV2_Input1Select)
-	{
-		inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-		if (inputColorSpace)
-			*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-	}
-	inputFormat = GetTransportCompatibleFormat(inputFormat, fbVideoFormat);
-	
-	return inputFormat;
-}
-
-
-//-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
 void CorvidServices::SetDeviceXPointPlayback ()

@@ -64,11 +64,7 @@ void Kona3GQuadServices::SetDeviceXPointPlayback ()
 			mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_DISPLAY);
 			mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
 		}
-	}
-	
-	// Figure out what our input format is based on what is selected 
-	GetSelectedInputVideoFormat(mFb1VideoFormat);
-	
+	}	
 	
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -973,7 +969,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
+	inputFormat = mDs.inputVideoFormatSelect;
 	
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)

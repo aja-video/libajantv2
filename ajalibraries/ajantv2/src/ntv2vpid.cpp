@@ -7,8 +7,11 @@
 #include "ntv2vpid.h"
 #include "ntv2vpidfromspec.h"
 #include "ntv2debug.h"
+#include "ntv2utils.h"
+#include "ntv2registerexpert.h"	//	For YesNo macro
 #include <string.h>
-#include <assert.h>
+
+using namespace std;
 
 #ifndef NULL
 #define NULL (0)
@@ -150,23 +153,23 @@ class VPIDTableInitializer
 static VPIDTableInitializer	gVPIDTableInitializer;
 
 
-CNTV2VPID::CNTV2VPID()
+CNTV2VPID::CNTV2VPID(const ULWord inData)
+	:	m_uVPID (inData)
 {
-	assert (stTablesInitialized);
-	m_uVPID = 0;
+	NTV2_ASSERT(stTablesInitialized);
 }
 
 
 CNTV2VPID::CNTV2VPID (const CNTV2VPID & inVPID)
 {
-	assert (stTablesInitialized);
+	NTV2_ASSERT(stTablesInitialized);
 	m_uVPID = inVPID.m_uVPID;
 }
 
 
 CNTV2VPID & CNTV2VPID::operator = (const CNTV2VPID & inRHS)
 {
-	assert (stTablesInitialized);
+	NTV2_ASSERT(stTablesInitialized);
 	if (&inRHS != this)
 		m_uVPID = inRHS.m_uVPID;
 	return *this;
@@ -560,4 +563,130 @@ NTV2VideoFormat CNTV2VPID::GetVideoFormat (void) const
 	}
 
 	return videoFormat;
+}
+
+
+static string VPIDVersionToString (const VPIDVersion inVers)
+{
+	switch (inVers)
+	{
+		case VPIDVersion_0:	return "0";
+		case VPIDVersion_1:	return "1";
+	#if !defined(_DEBUG)
+		default:	break;
+	#endif
+	}
+	return "";
+}
+
+static string VPIDStandardToString (const VPIDStandard inStd)
+{
+	switch (inStd)
+	{
+		case VPIDStandard_Unknown:						return "Unknown";
+		case VPIDStandard_483_576:						return "Standard Definition";
+		case VPIDStandard_483_576_DualLink:				return "SD Dual Link?";
+		case VPIDStandard_483_576_540Mbs:				return "SD 540Mbs?";
+		case VPIDStandard_720:							return "720 Single Link";
+		case VPIDStandard_1080:							return "1080 Single Link";
+		case VPIDStandard_483_576_1485Mbs:				return "SD 1485Mbs?";
+		case VPIDStandard_1080_DualLink:				return "1080 Dual Link";
+		case VPIDStandard_720_3Ga:						return "720 3G Level A";
+		case VPIDStandard_1080_3Ga:						return "1080 3G Level A";
+		case VPIDStandard_1080_DualLink_3Gb:			return "1080 Dual Link 3G Level B";
+		case VPIDStandard_720_3Gb:						return "2x720 3G Level B";
+		case VPIDStandard_1080_3Gb:						return "2x1080 3G Level B";
+		case VPIDStandard_483_576_3Gb:					return "SD 3G Level B?";
+		case VPIDStandard_720_Stereo_3Gb:				return "720_Stereo_3Gb";
+		case VPIDStandard_1080_Stereo_3Gb:				return "1080_Stereo_3Gb";
+		case VPIDStandard_1080_QuadLink:				return "1080 Quad Link";
+		case VPIDStandard_720_Stereo_3Ga:				return "720_Stereo_3Ga";
+		case VPIDStandard_1080_Stereo_3Ga:				return "1080_Stereo_3Ga";
+		case VPIDStandard_1080_Stereo_DualLink_3Gb:		return "1080_Stereo_DualLink_3Gb";
+		case VPIDStandard_1080_Dual_3Ga:				return "1080 Dual Link 3Ga";
+		case VPIDStandard_1080_Dual_3Gb:				return "1080 Dual Link 3Gb";
+		case VPIDStandard_2160_DualLink:				return "2160 Dual Link";
+		case VPIDStandard_2160_QuadLink_3Ga:			return "2160 Quad Link 3Ga";
+		case VPIDStandard_2160_QuadDualLink_3Gb:		return "2160 Quad Dual Link 3Gb";
+		case VPIDStandard_1080_Stereo_Quad_3Ga:			return "1080_Stereo_Quad_3Ga";
+		case VPIDStandard_1080_Stereo_Quad_3Gb:			return "1080_Stereo_Quad_3Gb";
+		case VPIDStandard_2160_Stereo_Quad_3Gb:			return "2160_Stereo_Quad_3Gb";
+		case VPIDStandard_1080_OctLink:					return "1080 Octa Link";
+		case VPIDStandard_UHDTV1_Single_DualLink_10Gb:	return "UHDTV1_Single_DualLink_10Gb";
+		case VPIDStandard_UHDTV2_Quad_OctaLink_10Gb:	return "UHDTV2_Quad_OctaLink_10Gb";
+		case VPIDStandard_UHDTV1_MultiLink_10Gb:		return "UHDTV1_MultiLink_10Gb";
+		case VPIDStandard_UHDTV2_MultiLink_10Gb:		return "UHDTV2_MultiLink_10Gb";
+		case VPIDStandard_VC2:							return "VC2";
+		case VPIDStandard_720_1080_Stereo:				return "720_1080_Stereo";
+		case VPIDStandard_VC2_Level65_270Mbs:			return "VC2_Level65_270Mbs";
+		case VPIDStandard_4K_DCPIF_FSW709_10Gbs:		return "4K_DCPIF_FSW709_10Gbs";
+		case VPIDStandard_FT_2048x1556_Dual:			return "FT_2048x1556_Dual";
+		case VPIDStandard_FT_2048x1556_3Gb:				return "FT_2048x1556_3Gb";
+		case VPIDStandard_2160_Single_6Gb:				return "2160_Single_6Gb";
+		case VPIDStandard_1080_Single_6Gb:				return "1080_Single_6Gb";
+		case VPIDStandard_1080_AFR_Single_6Gb:			return "1080_AFR_Single_6Gb";
+		case VPIDStandard_2160_Single_12Gb:				return "2160_Single_12Gb";
+		case VPIDStandard_1080_10_12_AFR_Single_12Gb:	return "1080_10_12_AFR_Single_12Gb";
+	#if !defined(_DEBUG)
+		default:	break;
+	#endif
+	}
+	return "";
+}
+
+static const string sVPIDPictureRate[]	= {	"None", "Reserved1", "23.98", "24.00", "47.95", "25.00", "29.97", "30.00", "48.00", "50.00", "59.94", "60.00",
+											"ReservedC",    "ReservedD",    "ReservedE",    "ReservedF"	};
+static const string sVPIDSampling[]		= {	"YCbCr 4:2:2",	"YCbCr 4:4:4",	"GBR 4:4:4",	"YCbCr 4:2:0",	"YCbCrA 4:2:2:4",	"YCbCrA 4:4:4:4",
+											"GBRA 4:4:4:4",	"Reserved7",	"YCbCrD 4:2:2:4",	"YCbCrD 4:4:4:4",	"GBRD 4:4:4:4",	"ReservedB",
+											"ReservedC",	"ReservedD",	"ReservedE",	"XYZ 4:4:4"	};
+static const string sVPIDChannel[]		= {	"1", "2", "3", "4", "5", "6", "7", "8"	};
+static const string sVPIDDynamicRange[]	= {	"100", "200", "400", "Reserved3"	};
+static const string sVPIDBitDepth[]		= {	"8", "10", "12", "Reserved3"	};
+static const string sVPIDLink[]			= {	"1", "2", "3", "4", "5", "6", "7", "8"	};
+static const string	sVPIDAudio[]		= {	"Unknown", "Copied", "Additional", "Reserved" };
+
+
+ostream & CNTV2VPID::Print (ostream & ostrm) const
+{
+	ostrm	<< "VPID " << xHEX0N(m_uVPID,8);
+	if (IsValid())
+		ostrm	<< ": v" << ::VPIDVersionToString(GetVersion())
+				<< " " << ::VPIDStandardToString(GetStandard())
+				<< " " << ::NTV2VideoFormatToString(GetVideoFormat())
+				<< " rate=" << sVPIDPictureRate[GetPictureRate()]
+				<< " samp=" << sVPIDSampling[GetSampling()]
+				<< " channel=" << sVPIDChannel[GetChannel()]
+				<< " dynRange=" << sVPIDDynamicRange[GetDynamicRange()]
+				<< " bitDepth=" << sVPIDBitDepth[GetBitDepth()]
+				<< " 3Ga=" << YesNo(IsStandard3Ga())
+				<< " Tsi=" << YesNo(IsStandardTwoSampleInterleave())
+				<< " 16x9=" << YesNo(GetImageAspect16x9());
+	return ostrm;
+}
+
+#define	YesOrNo(__x__)		((__x__) ? "Yes" : "No")
+
+AJALabelValuePairs & CNTV2VPID::GetInfo (AJALabelValuePairs & outInfo) const
+{
+	if (!IsValid())
+		return outInfo;
+	AJASystemInfo::append(outInfo, "Version:",					::VPIDVersionToString(GetVersion()));
+	AJASystemInfo::append(outInfo, "Standard:",					::VPIDStandardToString(GetStandard()));
+	AJASystemInfo::append(outInfo, "Video Format:",				::NTV2VideoFormatToString(GetVideoFormat()));
+	AJASystemInfo::append(outInfo, "Progressive Transport:",	YesOrNo(GetProgressiveTransport()));
+	AJASystemInfo::append(outInfo, "Progressive Picture:",		YesOrNo(GetProgressivePicture()));
+	AJASystemInfo::append(outInfo, "Picture Rate:",				sVPIDPictureRate[GetPictureRate()]);
+	AJASystemInfo::append(outInfo, "Aspect Ratio:",				GetImageAspect16x9() ? "16x9" : "4x3");
+	AJASystemInfo::append(outInfo, "Sampling:",					sVPIDSampling[GetSampling()]);
+	AJASystemInfo::append(outInfo, "Channel:",					sVPIDChannel[GetChannel()]);
+	AJASystemInfo::append(outInfo, "Dynamic Range:",			sVPIDDynamicRange[GetDynamicRange()]);
+	AJASystemInfo::append(outInfo, "Bit Depth:",				sVPIDBitDepth[GetBitDepth()]);
+	AJASystemInfo::append(outInfo, "3Ga:",						YesOrNo(IsStandard3Ga()));
+	AJASystemInfo::append(outInfo, "Two Sample Interleave:",	YesOrNo(IsStandardTwoSampleInterleave()));
+	return outInfo;
+}
+
+ostream & operator << (std::ostream & ostrm, const CNTV2VPID & inData)
+{
+	return inData.Print(ostrm);
 }

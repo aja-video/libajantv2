@@ -65,9 +65,6 @@ void Corvid24Services::SetDeviceXPointPlayback ()
 		}
 	}
 	
-	// Figure out what our input format is based on what is selected
-	GetSelectedInputVideoFormat(mFb1VideoFormat);
-	
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
 	{
@@ -939,7 +936,7 @@ void Corvid24Services::SetDeviceXPointCapture ()
 	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;		// Input format select (YUV, RGB, etc)
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
+	inputFormat = mDs.inputVideoFormatSelect;
 	
 	
 	// input 1 select

@@ -93,7 +93,6 @@ public:
 	virtual	~DeviceServices();
 	virtual	void SetCard(CNTV2Card* pCard);
 	virtual bool ReadDriverState();
-	virtual void UpdateAutoState();
 
 	// override these
 	virtual void SetDeviceEveryFrameRegs(uint32_t virtualDebug1, uint32_t everyFrameTaskFilter);
@@ -104,8 +103,6 @@ public:
 	
 	virtual NTV2VideoFormat GetLockedInputVideoFormat();
 	virtual NTV2ColorSpaceMode GetSDIInputColorSpace(NTV2Channel inChannel, NTV2ColorSpaceMode inMode);
-	virtual NTV2VideoFormat GetSelectedInputVideoFormat(NTV2VideoFormat referenceFormat, NTV2ColorSpaceMode* inputColorSpace=NULL);
-    virtual NTV2VideoFormat GetCorrespondingAFormat(NTV2VideoFormat bVideoFormat);
 	virtual void SetDeviceXPointPlaybackRaw();
 	virtual void SetDeviceXPointCaptureRaw();
 	virtual void SetDeviceMiscRegistersRaw(NTV2Mode mode) {(void)mode;}
@@ -142,8 +139,6 @@ public:
 	// overridden in some classes
 	virtual NTV2LSVideoADCMode GetVideoADCMode();
 	virtual bool SetVideoADCMode(NTV2LSVideoADCMode value);
-	virtual NTV2VideoFormat GetSdiInVideoFormatWithVpid(int32_t index);
-	virtual NTV2VideoFormat GetSdiInVideoFormat(int32_t index, NTV2VideoFormat videoFormat);
 	
 	// support
 	bool SetVPIDData(	ULWord &		outVPID,
@@ -213,7 +208,6 @@ public:
 	CNTV2Card*				mCard;
 	
 	// set by every frame, not user
-	NTV2VideoFormat			mDefaultVideoFormat;
 	uint32_t				mADCStabilizeCount;	
 	uint32_t				mADCLockScanTestFormat;
 	CNTV2VPID 				mVpidParser;
@@ -300,9 +294,7 @@ public:
 	NTV2AnalogType			mVirtualAnalogOutputType;
 	NTV2AnalogBlackLevel	mVirtualAnalogInBlackLevel;
 	NTV2AnalogType			mVirtualAnalogInType;
-	NTV2Standard			mVirtualAnalogInStandard;
 	
-	NTV2HDMIAudioChannels	mHDMIOutAudioChannels;
 	NTV2HDMIRange			mHDMIInRGBRange;
 	
 	uint32_t				mRegFramesPerVertical;		// frames per vertical interrupt (e.g. CION RAW)
