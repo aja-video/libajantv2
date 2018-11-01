@@ -3012,7 +3012,6 @@ void Class4kServices::SetDeviceMiscRegisters ()
 	mCard->GetStandard(primaryStandard);
 	mCard->GetFrameGeometry(primaryGeometry);
 	
-	// VPID
 	bool					bHdmiIn				= mDs.bInHdmi;
 	bool					bFbLevelA			= IsVideoFormatA(mFb1VideoFormat);
 	bool					b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
@@ -3051,9 +3050,6 @@ void Class4kServices::SetDeviceMiscRegisters ()
 					   
 	bool b2pi 		= b4K && (m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave ||
 						  	  m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
-
-	//HACK: We need to disable the sample rate converter for now - 9/27/17. We do not support 44.1 audio until firmware is fixed
-	mCard->SetEncodedAudioMode(NTV2_ENCODED_AUDIO_SRC_DISABLED, NTV2_AUDIOSYSTEM_1);
 	
 	// SDI Transmit
 	for (int i=0; i<4; i++)

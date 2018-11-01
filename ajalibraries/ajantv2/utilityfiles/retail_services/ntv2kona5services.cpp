@@ -2799,9 +2799,6 @@ void Kona5Services::SetDeviceMiscRegisters ()
 						  	  m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	bool b4xSdiOut 	= b4K && ((m4kTransportOutSelection == NTV2_4kTransport_Quadrants_4wire) ||
 						  	  (b2pi && (bSdiOutRGB || b4kHfr)));
-
-	//HACK: We need to disable the sample rate converter for now - 9/27/17. We do not support 44.1 audio until firmware is fixed
-	mCard->SetEncodedAudioMode(NTV2_ENCODED_AUDIO_SRC_DISABLED, NTV2_AUDIOSYSTEM_1);
 	
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)
