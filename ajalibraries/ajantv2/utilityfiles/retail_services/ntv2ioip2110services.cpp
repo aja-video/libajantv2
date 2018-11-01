@@ -1528,8 +1528,7 @@ void IoIP2110Services::SetDeviceXPointCapture ()
 	
 	else // 425
 	{
-		mVpidParser.SetVPID(mVpid1a);
-		VPIDStandard std = mVpidParser.GetStandard();
+		VPIDStandard std = mDs.sdiIn[0]->vpidStd;
 		bVpid2x2piIn  = std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb;
 		bVpid4x2piInA = std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb;
 		bVpid4x2piInB = std == VPIDStandard_2160_QuadDualLink_3Gb;
@@ -3007,10 +3006,9 @@ void IoIP2110Services::SetDeviceMiscRegisters ()
 		else 
 		{
 			bool b4xSdiIn = (mVirtualInputSelect == NTV2_Input4x4kSelect);
-			if (mVpid1Valid)
+			if (mDs.sdiIn[0]->vpid.valid)
 			{
-				mVpidParser.SetVPID(mVpid1a);
-				VPIDStandard std = mVpidParser.GetStandard();
+				VPIDStandard std = mDs.sdiIn[0]->vpidStd;;
 				switch (std)
 				{
 				case VPIDStandard_2160_Single_12Gb:

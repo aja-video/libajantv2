@@ -41,6 +41,7 @@ typedef enum
 
 #define AUDIO_DELAY_WRAPAROUND    8160    // for 4Mb buffer
 
+const ReferenceSelect kCaptureReferenceSelect = kVideoIn;
 
 #define USE_CLASS4K_SERVICE		(true)
 enum
@@ -102,7 +103,6 @@ public:
 	virtual void SetDeviceMiscRegisters();
 	
 	virtual NTV2VideoFormat GetLockedInputVideoFormat();
-	virtual NTV2ColorSpaceMode GetSDIInputColorSpace(NTV2Channel inChannel, NTV2ColorSpaceMode inMode);
 	virtual void SetDeviceXPointPlaybackRaw();
 	virtual void SetDeviceXPointCaptureRaw();
 	virtual void SetDeviceMiscRegistersRaw(NTV2Mode mode) {(void)mode;}
@@ -226,7 +226,6 @@ public:
 	uint32_t				mVANCMode;
 	uint32_t				mVirtualDebug1;
 	uint32_t				mEveryFrameTaskFilter;
-	uint32_t				mDefaultInput;
 	NTV2SDITransportType	mSdiOutTransportType;
 	NTV24kTransportType		m4kTransportOutSelection;
 	NTV2DSKMode				mDSKMode;
@@ -245,7 +244,6 @@ public:
 	uint32_t				mDSKAudioMode;
 	uint32_t				mDSKForegroundMode;
 	uint32_t				mDSKForegroundFade;
-	ReferenceSelect			mCaptureReferenceSelect;
 	ReferenceSelect			mDisplayReferenceSelect;
 	NTV2GammaType			mGammaMode;
 	NTV2RGB10Range			mRGB10Range;
@@ -280,16 +278,9 @@ public:
 	NTV2FrameBufferFormat	mFb1Format;
 	NTV2FrameBufferFormat	mFb2Format;
 	NTV2Mode				mFb1Mode;
-	bool					mVpid1Valid;
-	ULWord					mVpid1a;
-	ULWord					mVpid1b;
-	bool					mVpid2Valid;
-	ULWord					mVpid2a;
-	ULWord					mVpid2b;
 
 	// calculated valule, selected by user
 	NTV2VideoFormat			mSelectedInputVideoFormat;
-	NTV2RGBRangeMode		mFrameBuffer1RGBRange;
 	NTV2AnalogBlackLevel	mVirtualAnalogOutBlackLevel;
 	NTV2AnalogType			mVirtualAnalogOutputType;
 	NTV2AnalogBlackLevel	mVirtualAnalogInBlackLevel;
