@@ -1074,14 +1074,14 @@ void NTV2Player4K::PlayFrames (void)
 			break;
 		}
 		endNum = startNum + numberOfACFramesPerChannel - 1;
-		mDevice.AutoCirculateInitForOutput (mChannel, numberOfACFramesPerChannel, mAudioSystem, AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC,
+        mDevice.AutoCirculateInitForOutput (mChannel, 0, mAudioSystem, AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC,
 											1 /*numChannels*/, startNum,  endNum);
 	}
 	else
 	{
 		const uint8_t	startNum	(mChannel < 4	?								0	:	numberOfACFramesPerChannel);		//	Ch1: frames 0-6
 		const uint8_t	endNum		(mChannel < 4	?	numberOfACFramesPerChannel-1	:	numberOfACFramesPerChannel*2-1);	//	Ch5: frames 7-13
-		mDevice.AutoCirculateInitForOutput (mChannel, numberOfACFramesPerChannel, mAudioSystem, AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC,
+        mDevice.AutoCirculateInitForOutput (mChannel, 0, mAudioSystem, AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC,
 											1 /*numChannels*/, startNum,  endNum);
 	}
 	mDevice.AutoCirculateStart (mChannel);
