@@ -3061,7 +3061,7 @@ void Class4kServices::SetDeviceMiscRegisters ()
 		if (mDs.sdiIn[i]->isOut == false)
 		{
 			bool bConvertBToA = bFbLevelA && mDs.sdiIn[i]->is3Gb;
-			mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
+			mCard->SetSDIInLevelBtoLevelAConversion(i, bConvertBToA);
 		}
 	}
 	
