@@ -549,6 +549,8 @@ NTV2VideoFormat CNTV2VPID::GetVideoFormat (void) const
 	case VPIDStandard_2160_DualLink:
 	case VPIDStandard_2160_QuadLink_3Ga:
 	case VPIDStandard_2160_QuadDualLink_3Gb:
+	case VPIDStandard_2160_Single_6Gb:
+	case VPIDStandard_2160_Single_12Gb:
 		if (vpidHorizontal2048)
 		{
 			videoFormat = stTable4096pSID[vpidFrameRate];

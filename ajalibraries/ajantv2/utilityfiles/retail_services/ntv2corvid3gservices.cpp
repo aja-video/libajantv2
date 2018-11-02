@@ -420,7 +420,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
+	inputFormat = mDs.inputVideoFormatSelect;
 	
 	
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)

@@ -41,6 +41,7 @@ typedef enum
 
 #define AUDIO_DELAY_WRAPAROUND    8160    // for 4Mb buffer
 
+const ReferenceSelect kCaptureReferenceSelect = kVideoIn;
 
 #define USE_CLASS4K_SERVICE		(true)
 enum
@@ -93,7 +94,6 @@ public:
 	virtual	~DeviceServices();
 	virtual	void SetCard(CNTV2Card* pCard);
 	virtual bool ReadDriverState();
-	virtual void UpdateAutoState();
 
 	// override these
 	virtual void SetDeviceEveryFrameRegs(uint32_t virtualDebug1, uint32_t everyFrameTaskFilter);
@@ -103,9 +103,6 @@ public:
 	virtual void SetDeviceMiscRegisters();
 	
 	virtual NTV2VideoFormat GetLockedInputVideoFormat();
-	virtual NTV2ColorSpaceMode GetSDIInputColorSpace(NTV2Channel inChannel, NTV2ColorSpaceMode inMode);
-	virtual NTV2VideoFormat GetSelectedInputVideoFormat(NTV2VideoFormat referenceFormat, NTV2ColorSpaceMode* inputColorSpace=NULL);
-    virtual NTV2VideoFormat GetCorrespondingAFormat(NTV2VideoFormat bVideoFormat);
 	virtual void SetDeviceXPointPlaybackRaw();
 	virtual void SetDeviceXPointCaptureRaw();
 	virtual void SetDeviceMiscRegistersRaw(NTV2Mode mode) {(void)mode;}
@@ -142,8 +139,6 @@ public:
 	// overridden in some classes
 	virtual NTV2LSVideoADCMode GetVideoADCMode();
 	virtual bool SetVideoADCMode(NTV2LSVideoADCMode value);
-	virtual NTV2VideoFormat GetSdiInVideoFormatWithVpid(int32_t index);
-	virtual NTV2VideoFormat GetSdiInVideoFormat(int32_t index, NTV2VideoFormat videoFormat);
 	
 	// support
 	bool SetVPIDData(	ULWord &		outVPID,
@@ -213,7 +208,6 @@ public:
 	CNTV2Card*				mCard;
 	
 	// set by every frame, not user
-	NTV2VideoFormat			mDefaultVideoFormat;
 	uint32_t				mADCStabilizeCount;	
 	uint32_t				mADCLockScanTestFormat;
 	CNTV2VPID 				mVpidParser;
@@ -232,7 +226,6 @@ public:
 	uint32_t				mVANCMode;
 	uint32_t				mVirtualDebug1;
 	uint32_t				mEveryFrameTaskFilter;
-	uint32_t				mDefaultInput;
 	NTV2SDITransportType	mSdiOutTransportType;
 	NTV24kTransportType		m4kTransportOutSelection;
 	NTV2DSKMode				mDSKMode;
@@ -251,7 +244,6 @@ public:
 	uint32_t				mDSKAudioMode;
 	uint32_t				mDSKForegroundMode;
 	uint32_t				mDSKForegroundFade;
-	ReferenceSelect			mCaptureReferenceSelect;
 	ReferenceSelect			mDisplayReferenceSelect;
 	NTV2GammaType			mGammaMode;
 	NTV2RGB10Range			mRGB10Range;
@@ -286,23 +278,14 @@ public:
 	NTV2FrameBufferFormat	mFb1Format;
 	NTV2FrameBufferFormat	mFb2Format;
 	NTV2Mode				mFb1Mode;
-	bool					mVpid1Valid;
-	ULWord					mVpid1a;
-	ULWord					mVpid1b;
-	bool					mVpid2Valid;
-	ULWord					mVpid2a;
-	ULWord					mVpid2b;
 
 	// calculated valule, selected by user
 	NTV2VideoFormat			mSelectedInputVideoFormat;
-	NTV2RGBRangeMode		mFrameBuffer1RGBRange;
 	NTV2AnalogBlackLevel	mVirtualAnalogOutBlackLevel;
 	NTV2AnalogType			mVirtualAnalogOutputType;
 	NTV2AnalogBlackLevel	mVirtualAnalogInBlackLevel;
 	NTV2AnalogType			mVirtualAnalogInType;
-	NTV2Standard			mVirtualAnalogInStandard;
 	
-	NTV2HDMIAudioChannels	mHDMIOutAudioChannels;
 	NTV2HDMIRange			mHDMIInRGBRange;
 	
 	uint32_t				mRegFramesPerVertical;		// frames per vertical interrupt (e.g. CION RAW)

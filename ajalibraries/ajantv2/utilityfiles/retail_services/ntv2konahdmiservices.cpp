@@ -17,46 +17,6 @@ KonaHDMIServices::KonaHDMIServices()
 
 
 //-------------------------------------------------------------------------------------------------------
-//	GetSelectedInputVideoFormat
-//	Note:	Determine input video format based on input select and fbVideoFormat
-//			which currently is videoformat of ch1-framebuffer
-//-------------------------------------------------------------------------------------------------------
-NTV2VideoFormat KonaHDMIServices::GetSelectedInputVideoFormat(
-											NTV2VideoFormat fbVideoFormat,
-											NTV2ColorSpaceMode* inputColorSpace)
-{
-	(void)fbVideoFormat;
-	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-	if (inputColorSpace)
-		*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-	
-	// Figure out what our input format is based on what is selected
-    switch (mVirtualInputSelect)
-    {
-		case NTV2_Input1Select:
-		case NTV2_Input2Select:
-		case NTV2_Input3Select:
-		case NTV2_Input4Select:
-			{
-				inputFormat = mCard->GetHDMIInputVideoFormat((NTV2Channel)mVirtualInputSelect);
-			
-				NTV2LHIHDMIColorSpace hdmiInputColor;
-				mCard->GetHDMIInputColor(hdmiInputColor, (NTV2Channel)mVirtualInputSelect);
-
-				if (inputColorSpace)
-					*inputColorSpace = (hdmiInputColor == NTV2_LHIHDMIColorSpaceYCbCr) ? NTV2_ColorSpaceModeYCbCr : NTV2_ColorSpaceModeRgb;
-			}
-			break;
-
-		default:
-			break;
-	}
-	
-	return inputFormat;
-}
-
-
-//-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
 void KonaHDMIServices::SetDeviceXPointPlayback ()
