@@ -102,7 +102,7 @@ public:
 	virtual void SetDeviceXPointCapture();
 	virtual void SetDeviceMiscRegisters();
 	
-	virtual NTV2VideoFormat GetLockedInputVideoFormat();
+	virtual bool NewLockedInputVideoFormatDetected();
 	virtual void SetDeviceXPointPlaybackRaw();
 	virtual void SetDeviceXPointCaptureRaw();
 	virtual void SetDeviceMiscRegistersRaw(NTV2Mode mode) {(void)mode;}
@@ -287,11 +287,7 @@ public:
 	NTV2AnalogType			mVirtualAnalogInType;
 	
 	NTV2HDMIRange			mHDMIInRGBRange;
-	
-	uint32_t				mRegFramesPerVertical;		// frames per vertical interrupt (e.g. CION RAW)
-	int32_t					mInputFormatSelect;			// set and read by device services only
-	bool					mInputFormatLock;
-	NTV2VideoFormat			mLastInputFormatSelect;
+	uint32_t				mRegFramesPerVertical;	// frames per vertical interrupt (CION RAW)
 	
 	// audio mixer
 	bool					mAudioMixerOverrideState;
