@@ -174,9 +174,6 @@ DeviceServices::DeviceServices()
 	mVirtualAnalogInType			= NTV2_AnlgComposite;		
 	mADCLockScanTestFormat			= 0;
 	mStreamingAppPID				= 0;
-	mInputFormatSelect				= -1;
-	mInputFormatLock				= false;
-	mLastInputFormatSelect			= NTV2_FORMAT_UNKNOWN;
 }
 
 DeviceServices::~DeviceServices()
@@ -537,14 +534,11 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	else
 	{
 		// follow input option
-		if (mFollowInputFormat)
+		if (mFollowInputFormat && NewLockedInputVideoFormatDetected())
 		{
-            NTV2VideoFormat lockedInputFormat = GetLockedInputVideoFormat();
-            if (mFb1VideoFormat != lockedInputFormat)
-            {
-                mCard->WriteRegister(kVRegDefaultVideoFormat, lockedInputFormat);
-                mCard->SetVideoFormat(lockedInputFormat);
-            }
+			NTV2VideoFormat newVideoFormat = mDs.inputVideoFormatSelect;
+			mCard->WriteRegister(kVRegDefaultVideoFormat, newVideoFormat);
+			mCard->SetVideoFormat(newVideoFormat);
 		}
 	
 		if (IsFormatRaw(mFb1Format))
@@ -728,10 +722,6 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 
 void DeviceServices::SetDeviceMiscRegisters ()
 {
-//	if (mBoardInfo.numHDMIVidOutputs)
-//	{
-//		mDs.hdmiOutColorSpace
-//	}
 }
 
 
@@ -792,54 +782,24 @@ bool DeviceServices::SetVPIDData (	ULWord &				outVPID,
 }
 
 
-NTV2VideoFormat DeviceServices::GetLockedInputVideoFormat()
+// return true new locked-input video format detected, false if unchanged
+bool DeviceServices::NewLockedInputVideoFormatDetected()
 {
-	const int32_t kLockAttemps		= 3;
-	const int32_t kLockSleepTimeMs	= 30;	
+	const int32_t kLockTimeMs			= 100;	
+	bool bNewLockedFormatDetected		= false;
+	NTV2VideoFormat curVideoFormat 		= mDs.primaryFormat;
+	NTV2VideoFormat inputVideoFormat 	= mDs.inputVideoFormatSelect;
 	
-	// default output
-	NTV2VideoFormat outVideoFormat = mDs.primaryFormat;
-
-	// following the input video format, make sure it is locked
-	if (mFollowInputFormat)
+	
+	// format changed
+	if (inputVideoFormat != curVideoFormat && inputVideoFormat != NTV2_FORMAT_UNKNOWN)
 	{
-		NTV2VideoFormat inputVideoFormat = mRs->GetSelectedInputVideoFormat(mDs);
-	
-		mInputFormatLock	= mInputFormatLock &&
-							  inputVideoFormat != NTV2_FORMAT_UNKNOWN &&
-							  mLastInputFormatSelect == inputVideoFormat;
-		
-		if (mInputFormatLock)
-		{
-			outVideoFormat = inputVideoFormat;
-		}
-		else
-		{
-			mLastInputFormatSelect	= inputVideoFormat;
-			int attempts			= kLockAttemps;
-			while (attempts > 0)
-			{
-				AJATime::Sleep(kLockSleepTimeMs);
-				inputVideoFormat = mRs->GetSelectedInputVideoFormat(mDs);
-				if (inputVideoFormat != mLastInputFormatSelect)
-					break;
-				if (inputVideoFormat == NTV2_FORMAT_UNKNOWN)
-					break;
-				attempts--;
-			}
-			
-			mInputFormatLock = (attempts == 0 && inputVideoFormat != NTV2_FORMAT_UNKNOWN);
-			mLastInputFormatSelect = inputVideoFormat;
-			
-			if (mInputFormatLock)
-				outVideoFormat = inputVideoFormat;
-		}
+		// now check to see enough time has passed to consider the format "locked"
+		uint64_t deltaMs = AJATime::GetSystemMilliseconds() - mDs.inputVideoFormatChangeTime;
+		bNewLockedFormatDetected 	= deltaMs >= kLockTimeMs;
 	}
-	else
-		mLastInputFormatSelect = NTV2_FORMAT_UNKNOWN;
 	
-	
-	return outVideoFormat;
+	return bNewLockedFormatDetected;
 }
 
 
