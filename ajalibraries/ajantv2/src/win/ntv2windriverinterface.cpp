@@ -749,9 +749,7 @@ bool CNTV2WinDriverInterface::ConfigureSubscription (bool bSubscribe, INTERRUPT_
 	DWORD dwBytesReturned = 0;
 
 	BOOL bRet;
-	ULWord driverVersion;
-	GetDriverVersion(&driverVersion);
-	if ( driverVersion & BIT_13)  // 64 bit driver.
+	if ( true)  // 64 bit driver.
 	{
 		// for support of 64 bit driver only in 5.0...
 		ZeroMemory (&propStruct,sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S));
@@ -773,33 +771,6 @@ bool CNTV2WinDriverInterface::ConfigureSubscription (bool bSubscribe, INTERRUPT_
 								sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
 								&propStruct,
 								sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
-								&dwBytesReturned,
-								NULL);
-	}
-	else
-	{
-		KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S propStruct;
-		DWORD dwBytesReturned = 0;
-
-		ZeroMemory (&propStruct,sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S));
-		propStruct.Property.Set= _GUID_PROPSET;
-		propStruct.Property.Id = KSPROPERTY_AJAPROPS_SUBSCRIPTIONS;
-		if (bSubscribe)
-		{
-			hSubscription = CreateEvent (NULL, FALSE, FALSE, NULL);
-			propStruct.Property.Flags = KSPROPERTY_TYPE_GET;
-		}
-		else
-			propStruct.Property.Flags = KSPROPERTY_TYPE_SET;
-		propStruct.pHandle = &hSubscription;
-		propStruct.eInterrupt = eInterruptType;
-
-		bRet = DeviceIoControl(_hDevice,
-								IOCTL_AJAPROPS_SUBSCRIPTIONS,
-								&propStruct,
-								sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S),
-								&propStruct,
-								sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S),
 								&dwBytesReturned,
 								NULL);
 	}
@@ -834,9 +805,6 @@ bool CNTV2WinDriverInterface::GetInterruptCount(INTERRUPT_ENUMS eInterruptType, 
 {
 	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
-	ULWord driverVersion;
-	GetDriverVersion(&driverVersion);
-	if ( driverVersion & BIT_13 )  // 64 bit driver.
 	{
 		KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S propStruct;
 		DWORD dwBytesReturned = 0;
@@ -855,37 +823,6 @@ bool CNTV2WinDriverInterface::GetInterruptCount(INTERRUPT_ENUMS eInterruptType, 
 										sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
 										&propStruct,
 										sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
-										&dwBytesReturned,
-										NULL);
-		if (!ioctlSuccess)
-		{
-			DisplayNTV2Error("getInterruptCount() failed");
-			return false;
-		}
-
-		*pCount = propStruct.ulIntCount;
-	}
-	else
-	{
-		// This IOCTL gives us the number of actual interrupts that have happened
-		// since the driver started up!
-		KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S propStruct;
-		DWORD dwBytesReturned = 0;
-
-		ZeroMemory (&propStruct,sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S));
-		propStruct.Property.Set	= _GUID_PROPSET;
-		propStruct.Property.Id	= KSPROPERTY_AJAPROPS_SUBSCRIPTIONS;
-		propStruct.Property.Flags = KSPROPERTY_TYPE_GET;
-		propStruct.eInterrupt = eGetIntCount;
-		propStruct.ulIntCount = (ULONG) eInterruptType;
-
-		BOOL ioctlSuccess = FALSE;
-		ioctlSuccess = DeviceIoControl(_hDevice,
-										IOCTL_AJAPROPS_SUBSCRIPTIONS,
-										&propStruct,
-										sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S),
-										&propStruct,
-										sizeof(KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S),
 										&dwBytesReturned,
 										NULL);
 		if (!ioctlSuccess)
@@ -2158,11 +2095,6 @@ bool CNTV2WinDriverInterface::GetAudioRecordPinDelay(ULWord* millisecondDelay)
 	return millisecondDelay ? ReadRegister (kVRegAudioRecordPinDelay, *millisecondDelay) : false;
 }
 
-bool CNTV2WinDriverInterface::GetDriverVersion(ULWord* driverVersion)
-{
-	return driverVersion ? ReadRegister (kVRegDriverVersion, *driverVersion) : false;
-}
-
 bool CNTV2WinDriverInterface::SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode)
 {
 	return WriteRegister(kVRegGlobalAudioPlaybackMode,mode);
@@ -2437,32 +2369,7 @@ LWord64 CNTV2WinDriverInterface::GetLastInputVerticalTimestamp(NTV2Channel chann
 
 bool CNTV2WinDriverInterface::NeedToLimitDMAToOneMegabyte()
 {
-
-	ULWord driverVersion;
-	GetDriverVersion(&driverVersion);
-	bool status = false;
-	if ( driverVersion & BIT_13 )  // 64 bit driver.
-	{
-		UWord majorVersion = (driverVersion>>4) & 0xF;
-		UWord minorVersion = (driverVersion & 0xF);
-		if ( majorVersion >= 6 && minorVersion >= 2)
-		{
-			status = false; // handled in driver
-		}
-		else
-		{
-			// if memory > 2 gigs need to limit
-			PERFORMANCE_INFORMATION pi;
-			GetPerformanceInfo(&pi,sizeof(PERFORMANCE_INFORMATION));
-			ULWord64 memoryInstalled = pi.PhysicalTotal*pi.PageSize;
-			if ( memoryInstalled > ULWord64((ULWord64)2*(ULWord64)1024*(ULWord64)1024*(ULWord64)1024)) // 2 gigs
-				status = true;
-
-		}
-	}
-
-	return status;
-
+	return false;
 }
 
 bool CNTV2WinDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used*/, RP188_STRUCT* pRP188Data )

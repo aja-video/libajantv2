@@ -167,7 +167,6 @@ public:
 	virtual bool		AutoCirculate( AUTOCIRCULATE_DATA &autoCircData );
 	virtual bool		NTV2Message (NTV2_HEADER * pInMessage);
 	virtual bool		ControlDriverDebugMessages( NTV2_DriverDebugMessageSet /*msgSet*/, bool /*enable*/ ) {return false;}
-	virtual bool		GetDriverVersion (ULWord & outDriverVersion);
 	virtual bool		RestoreHardwareProcampRegisters( void );
 
 	virtual	Word		SleepMs( LWord msec ) const;

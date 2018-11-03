@@ -391,22 +391,33 @@ class DeviceMap
 				MDIWARN ("CheckDriverVersion:  bad 'inConnection' parameter " << inConnection);
 				return false;
 			}
-
-			uint64_t		scalarO_64[2];
-			uint32_t		outputCount	(sizeof(scalarO_64) / sizeof(scalarO_64[0]));
-			kern_return_t	kernResult	(OS_IOConnectCallScalarMethod (inConnection, kDriverGetDrvrVersion, 0, 0, scalarO_64, &outputCount));
+			const uint64_t	scalarI_64[2]	=	{kVRegDriverVersion, 0xFFFFFFFF};
+			uint32_t	inputCount	(sizeof(scalarI_64) / sizeof(scalarI_64[0]));
+			uint64_t	scalarO_64[1];
+			uint32_t	outputCount	(sizeof(scalarO_64) / sizeof(scalarO_64[0]));
+			kern_return_t	kernResult (OS_IOConnectCallScalarMethod(inConnection, kDriverReadRegister, scalarI_64, inputCount, scalarO_64, &outputCount));
 			if (kernResult == KERN_SUCCESS)
 			{
 				if (!mDriverVersion)
 					mDriverVersion = uint32_t(scalarO_64[1]);
 				if (!(AJA_NTV2_SDK_VERSION_MAJOR))
-					return true;	//	Allow zero (for internal AJA development)
-				const UWord	versionComponents[4] =	{	UWord(0x000000FF & (mDriverVersion >> 24)),		//	major
-														UWord(0x000000FF & (mDriverVersion >> 16)),		//	minor
-														UWord(0x000000FF & (mDriverVersion >>  8)),		//	point
-														UWord(0x000000FF & (mDriverVersion      ))	};	//	build
+				{
+					MDIWARN ("connection " << inConnection << " allowed in dev mode (SDK vers == zero) -- may be incompatible with driver vers "
+							<< xHEX0N(mDriverVersion,8));
+					return true;	//	Zero (internal AJA development) grants full access -- DANGER!
+				}
+				const UWord	versionComponents[4] =	{	UWord(NTV2DriverVersionDecode_Major(mDriverVersion)),	//	major
+														UWord(NTV2DriverVersionDecode_Minor(mDriverVersion)),	//	minor
+														UWord(NTV2DriverVersionDecode_Point(mDriverVersion)),	//	point
+														UWord(NTV2DriverVersionDecode_Build(mDriverVersion)) };	//	build
 				if (versionComponents[0] == UWord(AJA_NTV2_SDK_VERSION_MAJOR))
+				{
+					MDIDBG ("connection " << inConnection << " -- driver vers " << DEC(versionComponents[0])
+							<< "." << DEC(versionComponents[1]) << "." << DEC(versionComponents[2]) << "." << DEC(versionComponents[3])
+							<< " matches SDK vers " << DEC(UWord(AJA_NTV2_SDK_VERSION_MAJOR)) << "." << DEC(UWord(AJA_NTV2_SDK_VERSION_MINOR))
+							<< "." << DEC(UWord(AJA_NTV2_SDK_VERSION_POINT)) << "." << DEC(UWord(AJA_NTV2_SDK_BUILD_NUMBER)));
 					return true;	//	Major version must match
+				}
 				MDIFAIL ("connection " << inConnection << " -- incompatible driver major version " << DEC(versionComponents[0])
 						<< ", expected major version " << DEC(UWord(AJA_NTV2_SDK_VERSION_MAJOR))
 						<< ", mDriverVersion=" << xHEX0N(mDriverVersion,8));
@@ -881,34 +892,6 @@ bool CNTV2MacDriverInterface::WriteRegister( ULWord registerNumber,
 			return false;
 		}
 	}
-}
-
-
-//--------------------------------------------------------------------------------------------------------------------
-//	GetDriverVersion
-//
-//	Return the driver interface version and release version.
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::GetDriverVersion (ULWord & outVersion)
-{
-	kern_return_t kernResult(KERN_FAILURE);
-	outVersion = 0;
-	if (GetIOConnect())
-	{
-		uint64_t	scalarO_64[2];
-		uint32_t	outputCount(2);
-		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
-											   kDriverGetDrvrVersion,	// selector of the function to be called via the user client.
-											   0,						// array of scalar (64-bit) input values.
-											   0,						// the number of scalar input values.
-											   scalarO_64,				// array of scalar (64-bit) output values.
-											   &outputCount);			// pointer to the number of scalar output values.
-		if (kernResult == KERN_SUCCESS)
-			outVersion = ULWord(scalarO_64[1]);
-		else
-			MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
-	}
-	return kernResult == KERN_SUCCESS;
 }
 
 

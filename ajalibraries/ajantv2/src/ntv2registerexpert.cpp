@@ -758,10 +758,9 @@ private:
 
 	void SetupVRegs(void)
 	{
-		DefineRegName	(kVRegLinuxDriverVersion,				"kVRegLinuxDriverVersion");
+		DefineRegName	(kVRegDriverVersion,					"kVRegDriverVersion");
 		DefineRegName	(kVRegRelativeVideoPlaybackDelay,		"kVRegRelativeVideoPlaybackDelay");
 		DefineRegName	(kVRegAudioRecordPinDelay,				"kVRegAudioRecordPinDelay");
-		DefineRegName	(kVRegDriverVersion,					"kVRegDriverVersion");
 		DefineRegName	(kVRegGlobalAudioPlaybackMode,			"kVRegGlobalAudioPlaybackMode");
 		DefineRegName	(kVRegFlashProgramKey,					"kVRegFlashProgramKey");
 		DefineRegName	(kVRegStrictTiming,						"kVRegStrictTiming");
@@ -993,9 +992,6 @@ private:
 		DefineRegName	(kVRegFrameBufferGangCount,				"kVRegFrameBufferGangCount");
 		DefineRegName	(kVRegChannelCrosspointFirst,			"kVRegChannelCrosspointFirst");
 		DefineRegName	(kVRegChannelCrosspointLast,			"kVRegChannelCrosspointLast");
-		DefineRegName	(kVRegDriverVersionMajor,				"kVRegDriverVersionMajor");
-		DefineRegName	(kVRegDriverVersionMinor,				"kVRegDriverVersionMinor");
-		DefineRegName	(kVRegDriverVersionPoint,				"kVRegDriverVersionPoint");
 		DefineRegName	(kVRegFollowInputFormat,				"kVRegFollowInputFormat");
 		DefineRegName	(kVRegAncField1Offset,					"kVRegAncField1Offset");
 		DefineRegName	(kVRegAncField2Offset,					"kVRegAncField2Offset");

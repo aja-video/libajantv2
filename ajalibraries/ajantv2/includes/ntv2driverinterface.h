@@ -238,9 +238,6 @@ public:
 	virtual bool ControlDriverDebugMessages(NTV2_DriverDebugMessageSet msgSet,
 		  									bool enable ) = 0;
 
-	virtual bool GetDriverVersion(ULWord & outDriverVersion) = 0;
-	virtual inline bool GetDriverVersion(ULWord * pOutDriverVersion)		{return pOutDriverVersion ? GetDriverVersion(*pOutDriverVersion) : false;}
-
 	/**
 		@return		True if the device is ready to be fully operable;  otherwise false.
 		@param[in]	inCheckValid	If true, additionally checks CNTV2Card::IsMBSystemValid. Defaults to false.

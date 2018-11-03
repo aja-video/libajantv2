@@ -148,8 +148,6 @@ public:
   	bool ControlDriverDebugMessages(NTV2_DriverDebugMessageSet msgSet,
 									bool enable );
 
-    bool GetDriverVersion(ULWord* driverVersion);
-
 	virtual Word SleepMs(LWord msec) { Sleep(msec); return (Word)msec;}
 
 public:

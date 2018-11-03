@@ -161,34 +161,16 @@ string CNTV2Card::GetDriverVersionString (void)
 
 bool CNTV2Card::GetDriverVersionComponents (UWord & outMajor, UWord & outMinor, UWord & outPoint, UWord & outBuild)
 {
-	bool	result		(false);
-
 	outMajor = outMinor = outPoint = outBuild = 0;
+	ULWord	driverVersionULWord	(0);
+	if (!ReadRegister (kVRegDriverVersion, driverVersionULWord))
+		return false;
 
-	#if defined (MSWindows)
-		ULWord	versionInfo	(0);
-		result = GetDriverVersion (&versionInfo);
-		outMajor = (versionInfo >>  4) & 0xF;
-		outMinor = (versionInfo >>  0) & 0xF;
-		outPoint = (versionInfo >>  8) & 0xF;
-		outBuild = (versionInfo >> 16) & 0xFFFF;
-	#elif defined (AJALinux)
-		ULWord	versionInfo	(0);
-		result = GetDriverVersion (&versionInfo);
-		outMajor = (versionInfo >>  4) & 0xF;
-		outMinor = (versionInfo >>  0) & 0xF;
-		outPoint = (versionInfo >>  8) & 0x3F;
-		outBuild = (versionInfo >> 16) & 0xFFFF;
-	#elif defined (AJAMac)
-		ULWord	version(0);
-		CNTV2MacDriverInterface::GetDriverVersion(version);
-		outMajor = version>>24 & 0x000000FF;
-		outMinor = version>>16 & 0x000000FF;
-		outPoint = version>>8 & 0x000000FF;
-		outBuild = version & 0x000000FF;
-		result = true;
-	#endif
-	return result;
+	outMajor = UWord(NTV2DriverVersionDecode_Major(driverVersionULWord));
+	outMinor = UWord(NTV2DriverVersionDecode_Minor(driverVersionULWord));
+	outPoint = UWord(NTV2DriverVersionDecode_Point(driverVersionULWord));
+	outBuild = UWord(NTV2DriverVersionDecode_Build(driverVersionULWord));
+	return true;
 }
 
 

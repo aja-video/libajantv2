@@ -24,12 +24,12 @@
 typedef enum
 {
 	// Common to all platforms
-	kVRegLinuxDriverVersion					= VIRTUALREG_START,			/* Packed version of Linux driver, used in watcher */
+	kVRegLinuxDriverVersion					= VIRTUALREG_START,			///< @deprecated	Obsolete in SDK 15.0, use kVRegDriverVersion instead
+	kVRegDriverVersion						= VIRTUALREG_START,			///< @brief			Packed driver version -- use NTV2DriverVersionEncode, NTV2DriverVersionDecode* macros to encode/decode
 
 	// Windows platform custom section
 	kVRegRelativeVideoPlaybackDelay			= VIRTUALREG_START,			// Video Delay relative to audio, for Windows Media playback
 	kVRegAudioRecordPinDelay				= VIRTUALREG_START+1,		// Audio Delay relative to video, for Windows Media capture
-	kVRegDriverVersion						= VIRTUALREG_START+2,
 	kVRegGlobalAudioPlaybackMode			= VIRTUALREG_START+3,		// Shared with Linux, but not Mac
 	kVRegFlashProgramKey					= VIRTUALREG_START+4,
 	kVRegStrictTiming						= VIRTUALREG_START+5,		// Drift Correction requires Strict Frame Timing for Windows Media playback;Required for BackHaul;Correlate Presentation Time Stamp with Graph Clock;Turn off (default) to allow Playback even when Graph Manager gives us a Bogus Clcok!
@@ -315,9 +315,9 @@ typedef enum
                                                                         //	kVRegChannelCrosspointFirst+6
 	kVRegChannelCrosspointLast				= VIRTUALREG_START+387,		//	kVRegChannelCrosspointFirst+7
 
-	kVRegDriverVersionMajor					= VIRTUALREG_START+388,		// supported by all three platforms
-	kVRegDriverVersionMinor					= VIRTUALREG_START+389,		// used to check SDK version against the driver version
-	kVRegDriverVersionPoint					= VIRTUALREG_START+390,		// when calling ::Open
+//	kVRegDriverVersionMajor					= VIRTUALREG_START+388,		///< @deprecated	Obsolete starting in SDK 13.0, replaced by kVRegDriverVersion
+//	kVRegDriverVersionMinor					= VIRTUALREG_START+389,		///< @deprecated	Obsolete starting in SDK 13.0, replaced by kVRegDriverVersion
+//	kVRegDriverVersionPoint					= VIRTUALREG_START+390,		///< @deprecated	Obsolete starting in SDK 13.0, replaced by kVRegDriverVersion
 	kVRegFollowInputFormat					= VIRTUALREG_START+391,
 
 	kVRegAncField1Offset					= VIRTUALREG_START+392,		///< @brief	How many bytes to subtract from the end of a frame buffer for field 1 ANC
