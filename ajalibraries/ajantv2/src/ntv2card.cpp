@@ -151,9 +151,16 @@ string CNTV2Card::GetPCIFPGAVersionString (void)
 string CNTV2Card::GetDriverVersionString (void)
 {
 	stringstream	oss;
+	static const string	sDriverBuildTypes [] = {"", "b", "a", "d"};
 	UWord	versions[4]	= {0, 0, 0, 0};
+	ULWord	versBits(0);
+	ReadRegister (kVRegDriverVersion, versBits);
+	const string & dabr (sDriverBuildTypes[versBits >> 30]);	//	Bits 31:30 == build type
 	GetDriverVersionComponents (versions[0], versions[1], versions[2], versions[3]);
-	oss << DEC(versions[0]) << "." << DEC(versions[1]) << "." << DEC(versions[2]) << "." << DEC(versions[3]);
+	if (dabr.empty())
+		oss << DEC(versions[0]) << "." << DEC(versions[1]) << "." << DEC(versions[2]) << "." << DEC(versions[3]);
+	else
+		oss << DEC(versions[0]) << "." << DEC(versions[1]) << "." << DEC(versions[2]) << dabr << DEC(versions[3]);
 	return oss.str ();
 
 }	//	GetDriverVersionString
