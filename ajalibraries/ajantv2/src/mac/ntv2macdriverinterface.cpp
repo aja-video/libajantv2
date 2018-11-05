@@ -2242,17 +2242,6 @@ Word CNTV2MacDriverInterface::SleepMs( LWord milliseconds ) const
 }
 
 
-//--------------------------------------------------------------------------------------------------------------------
-// Method: SwitchBitfile
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SwitchBitfile( NTV2DeviceID boardID, NTV2BitfileType bitfile )
-{
-	(void) boardID;
-	(void) bitfile;
-	return false;
-}
-
-
 bool CNTV2MacDriverInterface::ConfigureSubscription (bool bSubscribe, INTERRUPT_ENUMS eInterruptType, PULWord & hSubscription)
 {
 	return CNTV2DriverInterface::ConfigureSubscription (bSubscribe, eInterruptType, hSubscription);

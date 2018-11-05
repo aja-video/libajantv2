@@ -2234,57 +2234,6 @@ CNTV2WinDriverInterface::DriverSetBitFileInformation(
 
 
 #include <ntv2devicefeatures.h>
-bool CNTV2WinDriverInterface::SwitchBitfile(NTV2DeviceID boardID, NTV2BitfileType bitfile)
-{
-		// nothing to do...
-	if (bitfile == NTV2_BITFILE_NO_CHANGE)
-		return true;
-
-	ULWord numRegisters = NTV2DeviceGetMaxRegisterNumber(boardID);
-	ULWord *regValues = new ULWord[numRegisters];
-
-	if (regValues == NULL)
-	{
-		DisplayNTV2Error("CNTV2WinDriverInterface::SwitchBitfile() failed to download new bitfile: out of memory.");
-		return false;
-	}
-
-
-	for (ULWord i = 0; i < numRegisters; i ++)
-		ReadRegister(i, regValues[i]);
-
-	// Disable all interrupts.
-	for ( ULWord i=0; i<eNumInterruptTypes; i++)
-	{
-		ConfigureInterrupt(false,INTERRUPT_ENUMS(i));
-	}
-
-	// Tell the driver to switch bitfiles
-	// The driver will check to see if this is a ok bitfile for the current board.
-	bool status = WriteRegister(kVRegBitFileDownload,(ULWord)bitfile);
-
-	for (ULWord i = 0; i < numRegisters; i ++)
-	{
-		if ( i == kRegDMAControl )		// don't inadvertantly set 'go' bit.
-			continue;
-
-		if ( i == kRegFlashProgramReg)  // or muck with the flash.
-			continue;
-
-		if ( i >= kRegReserved51  && i < kRegRP188InOut2DBB )
-			continue;
-
-		if ( i >= kRegRS422Transmit  && i < kRegHDMIInputStatus )
-			continue;
-
-		WriteRegister(i, regValues[i]);
-	}
-
-
-	delete [] regValues;
-
-	return status;
-}
 
 bool CNTV2WinDriverInterface::RestoreHardwareProcampRegisters()
 {

@@ -203,8 +203,6 @@ public:
 	bool				SystemStatus( void* dataPtr, SystemStatusCode systemStatusCode );
 	bool				SystemControl( void* dataPtr, SystemControlCode systemControlCode );
 
-	bool				SwitchBitfile( NTV2DeviceID boardID, NTV2BitfileType bitfile );		//	DEPRECATION_CANDIDATE
-
 	// We don't do these
 	virtual bool		DmaUnlock( void ) {return false;}
 	virtual bool		CompleteMemoryForDMA( ULWord* /*pFrameBuffer*/ ) {return false;}

@@ -190,8 +190,6 @@ public:
 
 	// Functions for cards that support more than one bitfile
 
-	bool SwitchBitfile(NTV2DeviceID boardID, NTV2BitfileType bitfile);
-
 	bool RestoreHardwareProcampRegisters();
 
 	bool NeedToLimitDMAToOneMegabyte();
