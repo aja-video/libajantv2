@@ -148,8 +148,6 @@ public:
   	bool ControlDriverDebugMessages(NTV2_DriverDebugMessageSet msgSet,
 									bool enable );
 
-    bool GetDriverVersion(ULWord* driverVersion);
-
 	virtual Word SleepMs(LWord msec) { Sleep(msec); return (Word)msec;}
 
 public:
@@ -191,8 +189,6 @@ public:
     bool DriverSetBitFileInformation(BITFILE_INFO_STRUCT &bitFileInfo);
 
 	// Functions for cards that support more than one bitfile
-
-	bool SwitchBitfile(NTV2DeviceID boardID, NTV2BitfileType bitfile);
 
 	bool RestoreHardwareProcampRegisters();
 

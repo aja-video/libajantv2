@@ -130,17 +130,6 @@
 
 	#define INVALID_HANDLE_VALUE (0)
 
-	//	MacDriverInterfaceVersion		Description of Changes
-	//			1 .. 7					???
-	//				8					Valid since 10.2. Added reference-counted Acquire/Release calls.
-	//				9					Valid since NTV2 SDK 12.1
-	//
-	//	This important number is used in the driver's Info.plist, as well as the NTV2 Mac public interface.
-	//	CNTV2Card::Open will fail if the client (SDK) driver interface version number does not match the
-	//	driver version number that is reported by the driver.
-	//
-	#define	AJA_MAC_DRIVER_INTERFACE_VERSION	9
-
 	#if !defined (NTV2_DEPRECATE)
 		typedef struct {
 		  int cx;

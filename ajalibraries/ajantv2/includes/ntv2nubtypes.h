@@ -227,14 +227,6 @@ typedef struct
 	ULWord testPatternNumber;
 } NTV2DownloadTestPatternPayload;
 
-// Only tested on Mac.  Windows and Linux use a virtual register for driver version which is not a special case.
-typedef struct
-{
-	LWord  handle;			// A session cookie required for reg gets/sets and close
-	ULWord result;			// Actually a bool
-	ULWord driverVersion;
-} NTV2GetDriverVersionPayload;
-
 #if 0
 #define	NTV2NUB_DISCOVER_QUERY	"Our chief weapons are?"
 #define	NTV2NUB_DISCOVER_RESP	"Fear and surprise!"
