@@ -5453,10 +5453,10 @@ typedef enum
 																		|	(((ULWord)(__min__) & 0x0000003F) << 16)		\
 																		|	(((ULWord)(__pt__ ) & 0x0000003F) << 10)		\
 																		|	(((ULWord)(__bld__) & 0x000003FF) <<  0)
-#define	NTV2DriverVersionDecode_Major(__vers__)		(((ULWord)(__vers__) >> 22) && 0x0000007F)
-#define	NTV2DriverVersionDecode_Minor(__vers__)		(((ULWord)(__vers__) >> 16) && 0x0000003F)
-#define	NTV2DriverVersionDecode_Point(__vers__)		(((ULWord)(__vers__) >> 10) && 0x0000003F)
-#define	NTV2DriverVersionDecode_Build(__vers__)		(((ULWord)(__vers__) >>  0) && 0x000003FF)
+#define	NTV2DriverVersionDecode_Major(__vers__)		(((ULWord)(__vers__) >> 22) & 0x0000007F)
+#define	NTV2DriverVersionDecode_Minor(__vers__)		(((ULWord)(__vers__) >> 16) & 0x0000003F)
+#define	NTV2DriverVersionDecode_Point(__vers__)		(((ULWord)(__vers__) >> 10) & 0x0000003F)
+#define	NTV2DriverVersionDecode_Build(__vers__)		(((ULWord)(__vers__) >>  0) & 0x000003FF)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////	BEGIN NEW AUTOCIRCULATE API
