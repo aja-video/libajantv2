@@ -24,12 +24,11 @@
 typedef enum
 {
 	// Common to all platforms
-	kVRegLinuxDriverVersion					= VIRTUALREG_START,			///< @deprecated	Obsolete in SDK 15.0, use kVRegDriverVersion instead
 	kVRegDriverVersion						= VIRTUALREG_START,			///< @brief			Packed driver version -- use NTV2DriverVersionEncode, NTV2DriverVersionDecode* macros to encode/decode
 
 	// Windows platform custom section
-	kVRegRelativeVideoPlaybackDelay			= VIRTUALREG_START,			// Video Delay relative to audio, for Windows Media playback
 	kVRegAudioRecordPinDelay				= VIRTUALREG_START+1,		// Audio Delay relative to video, for Windows Media capture
+	kVRegRelativeVideoPlaybackDelay			= VIRTUALREG_START+2,		// Video Delay relative to audio, for Windows Media playback
 	kVRegGlobalAudioPlaybackMode			= VIRTUALREG_START+3,		// Shared with Linux, but not Mac
 	kVRegFlashProgramKey					= VIRTUALREG_START+4,
 	kVRegStrictTiming						= VIRTUALREG_START+5,		// Drift Correction requires Strict Frame Timing for Windows Media playback;Required for BackHaul;Correlate Presentation Time Stamp with Graph Clock;Turn off (default) to allow Playback even when Graph Manager gives us a Bogus Clcok!
@@ -486,6 +485,11 @@ typedef enum
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 
 } VirtualRegisterNum;
+
+
+#if !defined(NTV2_DEPRECATE_15_0)
+	#define	kVRegLinuxDriverVersion				VIRTUALREG_START		///< @deprecated	Obsolete in SDK 15.0, use kVRegDriverVersion instead
+#endif
 
 #if !defined (NTV2_DEPRECATE_12_7)
 	//	The old virtual register names will be deprecated sometime after SDK 13.0.0
