@@ -92,7 +92,7 @@ CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & hostNa
 	// Fail if running with an old driver
 	ULWord driverVersionMajor;
 	GetDriverVersion(&driverVersionMajor);
-	driverVersionMajor = (driverVersionMajor >> 4) & 0xF;
+	driverVersionMajor = NTV2DriverVersionDecode_Major(driverVersionMajor);
 #if AJA_NTV2_SDK_VERSION_MAJOR != 0
     if (driverVersionMajor < (ULWord)AJA_NTV2_SDK_VERSION_MAJOR)
 	{
