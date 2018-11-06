@@ -36,6 +36,8 @@
 
 	-	<b>ntv2konaipjsonsetup</b> -- A command-line tool used to configure the \ref konaip from a JSON configuration file.
 
+	-	\ref usinglogreader — A command-line tool for displaying messages from the ::AJADebug facility.
+
 	-	\ref ntv2thermo -- Interrogates and/or controls temperature-related parameters of connected AJA devices.
 
 	<hr size="50px">

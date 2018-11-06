@@ -44,12 +44,11 @@ void Corvid88Services::SetDeviceXPointPlayback ()
 	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
 								bDSKOn				= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
-	NTV2ColorSpaceMode            inputColorSpace	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
+	NTV2ColorSpaceMode			inputColorSpace	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	
-    bool						bFb1HdrRGB			= (mFb1Format == NTV2_FBF_48BIT_RGB) ? true : false;
-    bool						bFb2HdrRGB			= (mFb2Format == NTV2_FBF_48BIT_RGB) ? true : false;
+    bool						bFb1HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
+    bool						bFb2HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
 
 	// make sure formats/modes match for multibuffer modes
 	if (b4K || b2FbLevelBHfr || bStereoOut)
@@ -70,9 +69,6 @@ void Corvid88Services::SetDeviceXPointPlayback ()
 	
 	// select square division or 2 pixel interleave in frame buffer
     AdjustFor4kQuadOrTpiOut();
-
-	// Figure out what our input format is based on what is selected 
-	GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1138,7 +1134,7 @@ void Corvid88Services::SetDeviceXPointCapture ()
 
 
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
+	inputFormat = mDs.inputVideoFormatSelect;
 
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1174,8 +1170,7 @@ void Corvid88Services::SetDeviceXPointCapture ()
 		}
 	}
 
-	mVpidParser.SetVPID(mVpid1a);
-	VPIDStandard std = mVpidParser.GetStandard();
+	VPIDStandard std = mDs.sdiIn[0]->vpidStd;
 	bool b2x2piIn  = (std == VPIDStandard_2160_DualLink);
 	bool b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
 	bool b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
@@ -1186,19 +1181,19 @@ void Corvid88Services::SetDeviceXPointCapture ()
 
 	// SDI In 1
 	bool bConvertBToA; 
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL1)==true && mVirtualInputSelect==NTV2_Input1Select;
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL1, mDs.primaryFormat) == true && mVirtualInputSelect == NTV2_Input1Select;
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
 	
 	// SDI In 2
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL2)==true && mVirtualInputSelect==NTV2_Input2Select;
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL2, mDs.primaryFormat)==true && mVirtualInputSelect==NTV2_Input2Select;
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, bConvertBToA);
 	
 	// SDI In 3
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL3);
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL3, mDs.primaryFormat);
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, bConvertBToA);
 	
 	// SDI In 4
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL4);
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL4, mDs.primaryFormat);
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, bConvertBToA);
 	
 	
@@ -2018,14 +2013,9 @@ void Corvid88Services::SetDeviceMiscRegisters ()
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)
 	{
-		ULWord vpida = 0;
-		ULWord vpidb = 0;
-		mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb);
-
-		if (mCard->ReadSDIInVPID(NTV2_CHANNEL1, vpida, vpidb))
+		if (mDs.sdiIn[0]->vpid.valid)
 		{
-			mVpidParser.SetVPID(vpida);
-			VPIDStandard std = mVpidParser.GetStandard();
+			VPIDStandard std = mDs.sdiIn[0]->vpidStd;
 			switch (std)
 			{
 			case VPIDStandard_2160_DualLink:

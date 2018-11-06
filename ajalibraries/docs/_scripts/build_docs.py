@@ -95,11 +95,11 @@ def main ():
         os.makedirs(build_dir)
         
         # Copy essentials into 'build_dir'...
-        # Copy 'ajastyles.css' and 'config.doxy' from 'ajalibraries/docs'...
-        aja.utils.copy_filelist(os.path.join('ajalibraries','docs'), build_dir, ['ajastyles.css', 'config.doxy'], False, "3")
-        
-        # Copy '_scripts' and 'doxygen' folders from 'ajalibraries/docs'...
-        aja.utils.copy_filelist(os.path.join('ajalibraries','docs'), build_dir, ['_scripts', 'doxygen'], False, "3")
+        # Copy 'ajastyles.css', 'config.doxy', '_scripts' & 'doxygen' from 'ajalibraries/docs'...
+        aja.utils.copy_filelist(os.path.join('ajalibraries/docs'),
+                                build_dir,
+                                ['ajastyles.css', 'config.doxy', '_scripts', 'doxygen'],
+                                False, "3")
         
         # Try copying 'ntv2sdk*.zip' files out of current dir...
         copied_items = aja.utils.copy_filelist(os.path.join('.'), build_dir, ['ntv2sdk*.zip'], False, "3")
@@ -277,11 +277,13 @@ def main ():
         return result_code
 
     destination_rsync_url = "sdkdocs@sdksupport.aja.com:/docs/"
+    rsync_options = '-avc'
     if platform.node () == "mrbillmp.aja.com":
         destination_rsync_url = "/Users/demo/Sites/"
+        rsync_options = '-avnc'
     print "## NOTE:  rsync '%s' to '%s'..." % (html_folder_path, destination_rsync_url)
     cmd_lines = []
-    cmd_lines.append (['rsync', '-avc', '--delete', html_folder_path, destination_rsync_url])
+    cmd_lines.append (['rsync', rsync_options, '--delete', html_folder_path, destination_rsync_url])
     if build_type:
         win_html = make_redirect_html ('Windows', client_browser_url, win_major, win_minor, win_point, win_build_num, win_build_type)
         lin_html = make_redirect_html ('Linux',   client_browser_url, lin_major, lin_minor, lin_point, lin_build_num, lin_build_type)

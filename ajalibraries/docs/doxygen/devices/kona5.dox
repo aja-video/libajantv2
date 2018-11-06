@@ -6,8 +6,10 @@
 	<hr>
 	@subsection		kona5		KONA 5
 
-	This page describes the KONA 5 capture/playout board in its OEM mode of operation.
-	It’s identified by ::DEVICE_ID_KONA5.
+	This page describes the KONA 5 capture/playout board.
+	It has two different firmware personalities:
+	-	::DEVICE_ID_KONA5 — “retail” personality, similar to the \ref io4kplus (4 × 3G FrameStores, one 12G/6G in & out);
+	-	::DEVICE_ID_KONA5_12G — “OEM” personality, with all-new 12G FrameStore architecture.  This page describes this mode of operation.
 
 	@image	html	kona5.png
 	@image	html	kona5end.png
@@ -19,28 +21,46 @@
 	@par	PCI Interface
 
 	-	PCI device ID: <b>0xEB1F</b>
-	-	Four-lane gen 2 PCI Express
+	-	8-lane gen 3 PCI Express
 	-	2 DMA engines
-	-	Legacy and MSI interrupt delivery supported
+	-	MSI interrupt delivery
 
 	@par	Inputs & Outputs
 
-	-	4 × SDI bi-directional (under software control)
-	-	1 × HDMI output (HDMI v2.0a subset with v1.4 connection, to support HDR InfoFrame metadata and UHD/4K@60 4:2:0 YUV)
-	-	1 × analog component video output
-	-	2 × reference/LTC inputs
-	-	2 × LTC outputs
-	-	1 × RS-422 serial port
+	-	4 × SDI connectors, bi-directional (under software control)
+		-	12G SDI, SMPTE 2082, 12/10/8-bit
+		-	6G SDI, SMPTE 2081, 10/8-bit
+		-	3G SDI, SMPTE 259/292/296/424, 12/10/8-bit
+		-	1.5G SDI:
+			-	SMPTE 372M, Dual-Link HD 4:4:4 (2 × BNCs), 12/10/8-bit
+			-	SMPTE 292M, Single-Link 4:2:2 (1 × BNC), 10/8-bit
+	-	1 × HDMI v2.0 output
+		-	30/36-bpp, RGB/YUV, 6-Gbps per color component
+		-	4K/UHD/2K/HD/SD + HFR up to 60p 4:2:2, 10/8-bit
+		-	HDR10 support — HDR InfoFrame metadata, compatible with HDMI 2.0a/CTA-861.3
+		-	HLG support — compatible with HDMI 2.0b/CTA-861-G
+	-	1 × Reference input (via 1 × HD-BNC at PCIe bracket)
+		-	Analog Color Black (1V) or…
+		-	Composite Sync (2V or 4V) or…
+		-	HD Tri-Level Sync (1V)
+		-	Reference input is terminated into 75Ω when Genlock set to ::NTV2_REFERENCE_EXTERNAL
+	-	1 × LTC output (via 1 × HD-BNC on Breakout Cable)
+	-	1 × LTC inputs — use one of:
+		-	1 × HD-BNC on Breakout Cable
+		-	1 × HD-BNC at PCIe bracket
+		-	2-pin header on PCIe card
+	-	1 × RS-422 serial port, Sony 9-pin protocol (via Breakout Cable)
 
 	@par	Frame Buffer
 
-	-	512 MB SDRAM
-	-	64 × 8MB frames
-	-	32 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	4GB SDRAM
+	-	512 × 8MB frames
+	-	256 × 16MB frames
+	-	128 × 32MB frames
 
 	@par	Audio
 
-	-	4 audio systems
+	-	4 audio systems + Mixer audio system
 	-	16 channels (max.) per audio system
 	-	16 channels (max.) of AES audio
 	-	First audio system’s 8MB buffer memory ends at the end of SDRAM
@@ -48,14 +68,25 @@
 
 	@par	Video Formats
 
-	-	Supports all standard video formats, plus 2K, 4K and UHD formats, including 4Kp60.
+	-	<b>4K:</b> 4096 × 2160P 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
+	-	<b>UHD:</b> 3840 × 2160P 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
+	-	<b>2K:</b>
+		-	2048 × 1080p 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
+		-	2048 × 1080PsF 23.98, 24, 25, 29.97, 30
+	-	<b>HD:</b>
+		-	1080p 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
+		-	1080PsF 23.98, 24, 25, 29.97, 30
+		-	1080i 50, 59.94, 60
+		-	720p 50, 59.94, 60
+	-	<b>SD:</b>
+		-	625i 50
+		-	525i 59.94
 
-	@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
 
 	@par	Ancillary Data
 
-	-	Anc inserters and extractors (use AUTOCIRCULATE_TRANSFER)
-	-	\ref vancframegeometries
+	-	Anc inserters and extractors
+	-	\ref vancframegeometries (SD/HD only)
 
 	@par	Video Processing
 
@@ -65,22 +96,29 @@
 
 	@par	External Connectivity
 
-	-	Optional \ref aja103226 provides access to other inputs and outputs
-	-	Optional \ref ajak3gbox provides convenient access to most of the board's inputs and outputs in a 1U rack-mountable chassis
+	-	Optional breakout cable provides access to other inputs and outputs
 
 	@par	Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/137/25>
 
 	@par	Physical
 
-	-	Size (W × D × H):  0.75" × 8.25" × 5.0" (19.05mm × 209.55mm × 127mm)
-	-	Weight: 0.7 lb (0.4 kg)
+	-	Size (W × D × H):  0.75" × 6.9" × 5.0" (19.05mm × 175.26mm × 127mm)
+	-	Weight: 0.6 lb (0.3 kg)
+
+	@par	Power
+
+	-	28W typical, 35W maximum
+
+	@par	Noise
+
+	-	<50dBA (A-weighted at 1m in free air)
 
 	@par	Environment
 
-	-	Safe Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
+	-	Safe Operating Temperature: 0°C to 40°C (32°F to 104°F)
 	-	Operating Relative Humidity: 10-90% non-condensing
 	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
-	-	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
+	-	Safe Storage Temperature (Power OFF): -40°C to +60°C (-40°F to +140°F)
 
 **/

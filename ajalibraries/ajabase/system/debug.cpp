@@ -1017,6 +1017,21 @@ AJADebug::GetGroupString(int32_t group)
 }
 
 
+const std::string &
+AJADebug::GetGroupName(const int32_t group)
+{
+	static const std::string sRangeErr("<bad index>");
+	static const std::string sNoLabelErr("<empty>");
+    if(group < 0 || group >= (int32_t)sGroupLabelVector.size())
+        return sRangeErr;
+
+    if(sGroupLabelVector.at(group).empty())
+        return sNoLabelErr;
+
+    return sGroupLabelVector.at(group);
+}
+
+
 AJAStatus
 AJADebug::SaveState(char* pFileName)
 {
@@ -1186,4 +1201,24 @@ std::string AJAStatusToString (const AJAStatus inStatus)
         case AJA_STATUS_REBOOT:             return "AJA_STATUS_REBOOT";
 	}
 	return "<bad AJAStatus>";
+}
+
+
+void *
+AJADebug::GetPrivateDataLoc()
+{
+	if (!sLock.IsValid())
+		return NULL;
+	AJAAutoLock lock(&sLock);
+	return spShare;
+}
+
+
+size_t
+AJADebug::GetPrivateDataLen()
+{
+	if (!sLock.IsValid())
+		return 0;
+	AJAAutoLock lock(&sLock);
+	return spShare ? sizeof(AJADebugShare) : 0;
 }

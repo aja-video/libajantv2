@@ -490,6 +490,14 @@ public:
      */
     static const char* GetGroupString(int32_t group);
 
+    /**
+     *	Get the string associated with a debug message group.
+     *
+     *	@param[in]	group	Index of the message group string to return.
+     *	@return				Group string
+     */
+    static const std::string & GetGroupName(const int32_t group);
+
 	/**
 	 *	Write group state to a file.
 	 *
@@ -517,6 +525,8 @@ public:
 	 */
 	static int64_t DebugTime();
 
+	static void * GetPrivateDataLoc (void);
+	static size_t GetPrivateDataLen (void);
 private:
 };
 

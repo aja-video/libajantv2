@@ -405,6 +405,7 @@ AJAExport NTV2_SHOULD_BE_DEPRECATED(bool NTV2DeviceCanDoFormat(NTV2DeviceID		inD
 								framerate might be NTV2_FRAMERATE_3000, but since 2 links are coming out, the video rate
 								is effectively NTV2_FRAMERATE_6000. Defaults to false.
 	@return	The number of audio samples.
+	@see	See \ref audiosamplecount
 **/
 AJAExport ULWord				GetAudioSamplesPerFrame (NTV2FrameRate frameRate, NTV2AudioRate audioRate, ULWord cadenceFrame=0,bool smpte372Enabled=false);
 AJAExport LWord64				GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr (NTV2FrameRate frameRate, NTV2AudioRate audioRate, ULWord frameNbrNonInclusive);
@@ -490,10 +491,10 @@ AJAExport INTERRUPT_ENUMS		NTV2ChannelToOutputInterrupt (const NTV2Channel inCha
 AJAExport NTV2TCIndex			NTV2ChannelToTimecodeIndex (const NTV2Channel inChannel, const bool inEmbeddedLTC = false, const bool inIsF2 = false);
 
 /**
-	@return		The NTV2TCIndexes that are associated with the given SDI input.
-	@param[in]	inSDIInput		Specifies the SDI input of interest as an NTV2Channel.
+	@return		The NTV2TCIndexes that are associated with the given SDI connector.
+	@param[in]	inSDIConnector	The SDI connector of interest, specified as an NTV2Channel (a zero-based index number).
 **/
-AJAExport NTV2TCIndexes			GetTCIndexesForSDIInput (const NTV2Channel inSDIInput);
+AJAExport NTV2TCIndexes			GetTCIndexesForSDIConnector (const NTV2Channel inSDIConnector);
 
 /**
 	@brief		Converts the given NTV2TCIndex value into the appropriate NTV2Channel value.
@@ -510,6 +511,7 @@ AJAExport NTV2Channel			NTV2TimecodeIndexToChannel (const NTV2TCIndex inTCIndex)
 AJAExport NTV2InputSource		NTV2TimecodeIndexToInputSource (const NTV2TCIndex inTCIndex);
 
 
+#define	GetTCIndexesForSDIInput			GetTCIndexesForSDIConnector
 #define	NTV2ChannelToCaptureCrosspoint	NTV2ChannelToInputCrosspoint
 #define	NTV2ChannelToIngestCrosspoint	NTV2ChannelToInputCrosspoint
 #define	NTV2ChannelToInputChannelSpec	NTV2ChannelToInputCrosspoint
@@ -616,6 +618,12 @@ AJAExport NTV2Channel NTV2OutputDestinationToChannel (const NTV2OutputDestinatio
 **/
 AJAExport NTV2OutputDestination NTV2ChannelToOutputDestination (const NTV2Channel inChannel);
 
+/**
+	@return		The frame rate family that the given ::NTV2FrameRate belongs to.
+				(This is the ::NTV2FrameRate of the family having the lowest ordinal value.)
+	@param[in]	inFrameRate		Specifies the frame rate of interest.
+**/
+AJAExport NTV2FrameRate GetFrameRateFamily (const NTV2FrameRate inFrameRate);
 
 /**
 	@brief	Compares two frame rates and returns true if they are "compatible" (with respect to a multiformat-capable device).

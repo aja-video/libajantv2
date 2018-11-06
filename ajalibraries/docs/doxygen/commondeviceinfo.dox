@@ -44,16 +44,17 @@
 	-	To determine the number of SDI output jacks the device has, call ::NTV2DeviceGetNumVideoOutputs.
 
 	Some SDI connectors are permanently configured as inputs, others as outputs, but on some devices, they’re software-configurable.
-	This means your application can, by calling a function in the NTV2 SDK, instruct the device to reconfigure one of its SDI jacks from an
-	input to an output (or vice-versa).
+	This means your application can instruct the device to reconfigure one of its SDI jacks from an input to an output (or vice-versa).
 	-	To determine if a device has software-configurable SDI connectors, call ::NTV2DeviceHasBiDirectionalSDI.
 	-	If a device has bi-directional SDI connectors, the ::NTV2DeviceGetNumVideoInputs and ::NTV2DeviceGetNumVideoOutputs will reflect
 		the maximum possible number of inputs and outputs.
 		-	For example, the \ref io4kquad has four bi-directional SDI jacks plus an additional monitor (output-only) jack,
 			so for that device, ::NTV2DeviceGetNumVideoInputs returns 4 and ::NTV2DeviceGetNumVideoOutputs returns 5.
+	-	To determine if an SDI connector is currently configured to transmit, call CNTV2Card::GetSDITransmitEnable.
+	-	To change an SDI connector’s function to receive or transmit, call CNTV2Card::SetSDITransmitEnable.
 
 	All SDI connectors on NTV2 devices can receive or transmit 1.5 Gbps signals, and almost all will handle 3Gbps.
-	-	To determine if its SDI spigots can handle 6Gbps or 12Gbps, call NTV2DeviceCanDo12GSDI.
+	-	To determine if its SDI spigots can handle 6Gbps or 12Gbps, call ::NTV2DeviceCanDo12GSDI.
 
 	@par	Analog Video Connectors
 
@@ -90,7 +91,12 @@
 
 	Most AJA devices have a single RS-422 connector that can be used to control tape deck transports and for other purposes.
 	-	To determine the number of serial ports on a device, call ::NTV2DeviceGetNumSerialPorts.
-	-	To determine if the serial port is programmable (for baud rate, parity, stop bits, etc.), call ::NTV2DeviceCanDoProgrammableRS422.
+	-	To determine if the serial port is programmable (for baud rate, parity, etc.), call ::NTV2DeviceCanDoProgrammableRS422.
+		-	To determine the current baud rate, call CNTV2Card::GetRS422BaudRate. To change the baud rate, call CNTV2Card::SetRS422BaudRate.
+		-	To determine the current parity configuration, call CNTV2Card::GetRS422Parity. To change the baud rate, call CNTV2Card::SetRS422Parity.
+
+	@image	html	rs422pinout400.png
+
 
 	@subsection	commonelectricalchars		Common Electrical Characteristics
 
@@ -321,7 +327,8 @@
 			video formats are multi-format compatible.
 			Call ::IsMultiFormatCompatible(const NTV2FrameRate, const NTV2FrameRate) to see if two frame
 			rates are multi-format compatible.
-			See \ref deviceclockingandsync for more details (below).
+			Call ::GetFrameRateFamily to determine the frame-rate “family” that a given ::NTV2FrameRate
+			belongs to. See \ref deviceclockingandsync for more details (below).
 
 
 	@subsection	vidop-fbaccess		Frame Buffer Access
@@ -925,7 +932,7 @@
 
 	Newer AJA hardware firmware implements an adjustable input delay that can be applied while samples are being written into the
 	<b>Audio Input Buffer</b>. Call ::NTV2DeviceCanDoAudioDelay to determine if this feature is available. Call CNTV2Card::GetAudioInputDelay
-	to obtain the current delay value. Call CNTV2Card::SetAudioDelay to change it.
+	to obtain the current delay value. Call CNTV2Card::SetAudioInputDelay to change it.
 
 	Audio input clocking for the running <b>Audio System</b> is ordinarily obtained from the input signal being used (SDI, HDMI, Analog, etc.).
 	AJA’s older devices, however, derived the audio input clock from the Device Reference by default (see ::NTV2ReferenceSource) and had to be
@@ -967,6 +974,10 @@
 	current <b>Play Head</b> position. Audio data continues to be read from the <b>Output Buffer</b> until the end is reached, whereupon the
 	<b>Play Head</b> wraps back to the start of the buffer, where reading continues.
 
+	Newer AJA hardware firmware implements an adjustable output delay that can be applied while samples are being read from the
+	<b>Audio Output Buffer</b>. Call ::NTV2DeviceCanDoAudioDelay to determine if this feature is available. Call CNTV2Card::GetAudioOutputDelay
+	to obtain the current delay value. Call CNTV2Card::SetAudioOutputDelay to change it.
+
 	The playout engine has an optional <b>Erase Mode</b>, in which it will automatically clear (zero) the <b>Output Buffer</b> memory immediately behind
 	the <b>Play Head</b> as it runs. If the host application fails to transfer new samples into the <b>Audio Output Buffer</b>, the buffer will eventually
 	contain all zeroes, and the output embedder will thereafter only transmit silence. Use the CNTV2Card::SetAudioOutputEraseMode function
@@ -989,6 +1000,36 @@
 	Newer AJA devices can mark individual audio channel pairs as non-PCM (the ::NTV2DeviceCanDoPCMControl function returns true for
 	devices that support this capability). Use one of the overloaded versions of CNTV2Card::SetAudioPCMControl that accepts either a
 	single ::NTV2AudioChannelPair or an ::NTV2AudioChannelPairs set.
+
+
+	<hr size="50px">
+	@subsection	audiosamplecount	Correlating Audio Samples to Video Frames
+
+	Because AJA devices use fixed audio sample rates (i.e. 48000 samples per second), some video frame rates will necessarily result
+	in some frames having more audio samples than others. For example, the NTSC frame rate is exactly 30000/1001 frames per second — so by
+	converting frames to samples, the expected number of audio samples at any given frame time can be calculated. This is what
+	the ::GetAudioSamplesPerFrame utility function is for:
+	@code{.cpp}
+		//	Print the audio sample count cadence for NTSC 2997...
+		for (ULWord frame(0);  frame < 60;  )
+		{
+			std::cout << DEC(::GetAudioSamplesPerFrame(NTV2_FRAMERATE_2997, NTV2_AUDIO_48K, frame));
+			if (++frame < 60)
+				std::cout << ", ";
+			if (!(frame % 5))
+				std::cout << std::endl;
+		}
+	@endcode
+
+	-	<b>Capture</b>
+		-	<b>Without AutoCirculate</b> — the number of audio samples to associate with the current frame is provided by the
+			hardware’s <b>Record Head</b>. Just compare its new position with its old position from the previous frame.
+		-	<b>With AutoCirculate</b> — Use the AUTOCIRCULATE_TRANSFER::GetCapturedAudioByteCount function.
+	-	<b>Playout</b>
+		-	<b>Without AutoCirculate</b> — Use ::GetAudioSamplesPerFrame to calculate the number of audio samples to write for
+			the current frame.
+		-	<b>With AutoCirculate</b> — Use ::GetAudioSamplesPerFrame to calculate the number of audio samples to write for
+			the current frame.
 
 
 	<hr size="50px">

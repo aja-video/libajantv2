@@ -21,7 +21,7 @@ namespace aja
 static const std::string WHITESPACE(" \t\n\r");
 
 /**
- *	Replace a substring within a string with a new string
+ *	Replaces all occurrences of a substring within a string with a new string
  *
  *  @param[in,out]  str  The string to modify
  *  @param[in]      from The substring to look for
@@ -178,22 +178,31 @@ AJA_EXPORT bool wstring_to_string(const std::wstring& wstr, std::string& str);
 AJA_EXPORT bool string_to_cstring(const std::string &str, char *c_str, size_t c_str_size);
 
 /**
- *	Splits a string into substrings at a character delimeter
+ *	Splits a string into substrings at a character delimiter
  *
  *  @param[in]   str   The string to split into parts
- *  @param[in]   delim The character delimeter to split the string at
+ *  @param[in]   delim The character delimiter to split the string at
  *  @param[out]  elems A vector of strings that contains all the substrings
  */
 AJA_EXPORT void split(const std::string& str, const char delim, std::vector<std::string>& elems);
 
 /**
- *	Splits a string into substrings at a character delimeter
+ *	Splits a string into substrings at a character delimiter
  *
  *  @param[in]  str   The string to split into parts
- *  @param[in]  delim The character delimeter to split the string at
+ *  @param[in]  delim The character delimiter to split the string at
  *	@return		A vector of strings that contains all the substrings
  */
 AJA_EXPORT std::vector<std::string> split(const std::string& str, const char delim);
+
+/**
+ *	Splits a string into substrings at a string delimiter
+ *
+ *  @param[in]  inStr   The string to split into parts
+ *  @param[in]  inDelim The delimiter string to split the string at
+ *	@return		A vector of strings that contains all the substrings
+ */
+AJA_EXPORT std::vector<std::string> split (const std::string & inStr, const std::string inDelim);
 
 /**
  *	Converts the passed string to lowercase

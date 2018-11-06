@@ -817,6 +817,18 @@ bool CNTV2Config2022::GetRxChannelEnable(const NTV2Channel channel, bool & enabl
     return true;
 }
 
+static bool MacAddressToRegisters(const MACAddr &macaddr, uint32_t & hi, uint32_t & lo)
+{
+    hi  = macaddr.mac[0]  << 8;
+    hi += macaddr.mac[1];
+
+    lo  = macaddr.mac[2] << 24;
+    lo += macaddr.mac[3] << 16;
+    lo += macaddr.mac[4] << 8;
+    lo += macaddr.mac[5];
+	return true;
+}
+
 bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const tx_2022_channel & txConfig)
 {
     uint32_t    baseAddr;
@@ -1575,15 +1587,7 @@ bool CNTV2Config2022::GetMACAddress(eSFP sfp, NTV2Stream stream, string remoteIP
         }
     }
 
-    hi  = macaddr.mac[0]  << 8;
-    hi += macaddr.mac[1];
-
-    lo  = macaddr.mac[2] << 24;
-    lo += macaddr.mac[3] << 16;
-    lo += macaddr.mac[4] << 8;
-    lo += macaddr.mac[5];
-
-    return true;
+	return MacAddressToRegisters( macaddr, hi, lo );
 }
 
 bool CNTV2Config2022::GetSFPMSAData(eSFP sfp, SFPMSAData & data)

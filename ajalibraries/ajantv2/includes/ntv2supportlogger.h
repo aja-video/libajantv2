@@ -25,8 +25,6 @@ typedef enum
 /**
 	@brief	Generates a standard support log (register log) for any NTV2 device attached to the host.
 			To write the log into a file, open a std::ofstream, then stream this object into it.
-	@bug	This class currently excludes bank-selected registers, so support logs for \ref konaip and
-			\ref ioip will be incomplete. This will be addressed in a future SDK.
 **/
 class AJAExport CNTV2SupportLogger
 {
@@ -51,7 +49,7 @@ public:
 
     virtual ~CNTV2SupportLogger();	///< @brief	My default destructor
 
-    static int Version();	///< @return	The current version of log file this will produce.
+    static int Version(void);	///< @return	The log file version I will produce.
 
 	/**
 		@brief		Prepends arbitrary string data to my support log, ahead of a given section.
@@ -81,25 +79,25 @@ public:
 	**/
     void AddFooter(const std::string& sectionName, const std::string& sectionData);
 
-    std::string ToString();		///< @return	My entire support log as a standard string.
+    std::string ToString(void) const;		///< @return	My entire support log as a standard string.
 
 	/**
 		@brief		Writes my support log into a string object.
 		@param[out]	outString	Receives my entire support log as a standard string, replacing its contents.
 	**/
-    void ToString(std::string& outString);
+    void ToString(std::string& outString) const;
 
 	bool LoadFromLog (const std::string & inLogFilePath, const bool bForceLoad);
 
 
 private:
-    void FetchInfoLog(std::ostringstream& oss);
-    void FetchRegisterLog(std::ostringstream& oss);
-    void FetchAutoCirculateLog(std::ostringstream& oss);
-    void FetchAudioLog(std::ostringstream& oss);
-    void FetchRoutingLog(std::ostringstream& oss);
+    void FetchInfoLog(std::ostringstream& oss) const;
+    void FetchRegisterLog(std::ostringstream& oss) const;
+    void FetchAutoCirculateLog(std::ostringstream& oss) const;
+    void FetchAudioLog(std::ostringstream& oss) const;
+    void FetchRoutingLog(std::ostringstream& oss) const;
 
-    CNTV2Card mDevice;
+    mutable CNTV2Card mDevice;
     NTV2SupportLoggerSections mSections;
     std::string mHeaderStr;
     std::string mFooterStr;

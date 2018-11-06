@@ -416,14 +416,14 @@ void Kona1Services::SetDeviceXPointCapture ()
 	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)
 
 	// get selected input video format
-	NTV2VideoFormat	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
+	NTV2VideoFormat	inputFormat = mDs.inputVideoFormatSelect;
 
 	inputXptYUV1 = NTV2_XptSDIIn1;
 	inputXptYUV2 = NTV2_XptSDIIn1DS2;
 
 	// SDI In 1
 	bool bConvertBToA; 
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL1)==true && mVirtualInputSelect==NTV2_Input1Select;
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL1, mDs.primaryFormat) == true && mVirtualInputSelect == NTV2_Input1Select;
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
 
 	// Dual Link In 1

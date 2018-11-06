@@ -438,65 +438,60 @@ void AJATimeCode::SetSMPTEString(const char *pBufr, const AJATimeBase& timeBase)
     SetHmsf(h,m,s,f,timeBase,bDrop);
 }
 
-bool AJATimeCode::QueryIsRP188DropFrame(uint32_t dbb, uint32_t low, uint32_t high)
+bool AJATimeCode::QueryIsRP188DropFrame (const uint32_t inDBB, const uint32_t inLo, const uint32_t inHi)		//	STATIC
 {
-    AJA_UNUSED(dbb);
-    AJA_UNUSED(high);
-	return (low >> 10) & 0x01;
+    AJA_UNUSED(inDBB);
+    AJA_UNUSED(inHi);
+	return (inLo >> 10) & 0x01;
 }
 
-void AJATimeCode::SetRP188(uint32_t dbb, uint32_t low, uint32_t high, const AJATimeBase& timeBase)
+
+void AJATimeCode::SetRP188 (const uint32_t inDBB, const uint32_t inLo, const uint32_t inHi, const AJATimeBase & inTimeBase)
 {
 	AJATimeBase tb25(25000,1000);
 	AJATimeBase	tb50(50000,1000);
 	AJATimeBase tb60(60000,1000);
 	AJATimeBase tb5994(60000,1001);
-	
-	uint32_t f0;
-	uint32_t f1;
-	
-	// for cases where 
-	if( (m_stdTimecodeForHfr == false) &&
-		(timeBase.IsCloseTo(tb50) || timeBase.IsCloseTo(tb60) || timeBase.IsCloseTo(tb5994)) )
+
+	//	HRS
+	const uint32_t h0 (((inHi >> 16) & 0xF)     );
+	const uint32_t h1 (((inHi >> 24) & 0x3) * 10);
+	//	MINS
+	const uint32_t m0 (((inHi      ) & 0xF)     );
+	const uint32_t m1 (((inHi >>  8) & 0x7) * 10);
+	//	SECS
+	const uint32_t s0 (((inLo >> 16) & 0xF)     );
+	const uint32_t s1 (((inLo >> 24) & 0x7) * 10);
+	//	FRAMES
+	uint32_t f0(0);
+	uint32_t f1(0);
+
+	if (!m_stdTimecodeForHfr  &&  (inTimeBase.IsCloseTo(tb50) || inTimeBase.IsCloseTo(tb60) || inTimeBase.IsCloseTo(tb5994)))
 	{
 		// for frame rates > 39 fps, we need an extra bit for the frame "10s". By convention,
 		// we use the field ID bit to be the LS bit of the three bit number.
 		bool fieldID;
 		
 		// Note: FID is in different words for PAL & NTSC!
-		if(timeBase.IsCloseTo(tb25) || timeBase.IsCloseTo(tb50))
-			fieldID = ((high & (1u<<27)) != 0);
+		if(inTimeBase.IsCloseTo(tb25) || inTimeBase.IsCloseTo(tb50))
+			fieldID = ((inHi & (1u<<27)) != 0);
 		else
-			fieldID = ((low & (1u<<27)) != 0);
-		
-		int numFrames = (((((low>>8)&0x3) * 10) + (low&0xF)) * 2) + (int)fieldID;	// double the regular frame count and add fieldID
+			fieldID = ((inLo & (1u<<27)) != 0);
+
+		//	Double the regular frame count and add fieldID...
+		const uint32_t numFrames = (((((inLo >> 8) & 0x3) * 10)  +  (inLo & 0xF)) * 2)  +  uint32_t(fieldID);
 		f0 = numFrames % 10;
 		f1 = (numFrames / 10) * 10;
 	}
 	else
 	{
-		f0 = (low   )&0xF;
-		f1 = ((low>>8)&0x3) * 10;
+		f0 = ((inLo     ) & 0xF);
+		f1 = ((inLo >> 8) & 0x3) * 10;
 	}
-	
-	uint32_t s0 = (low>>16)&0xF;
-	uint32_t s1 = ((low>>24)&0x7)  * 10;
-	
-	uint32_t m0 = (high    )&0xF;
-	uint32_t m1 = ((high>> 8)&0x7) * 10;
-	
-	uint32_t h0 = (high>>16)&0xF;
-	uint32_t h1 = ((high>>24)&0x3) * 10;
-	
-	uint32_t h = h0+h1;
-	uint32_t m = m0+m1;
-	uint32_t s = s0+s1;
-	uint32_t f = f0+f1;
-	
-	bool bDrop = AJATimeCode::QueryIsRP188DropFrame(dbb,low,high);
-	
-    SetHmsf(h,m,s,f,timeBase,bDrop);
+
+    SetHmsf (h0+h1, m0+m1, s0+s1, f0+f1, inTimeBase, AJATimeCode::QueryIsRP188DropFrame(inDBB, inLo, inHi));
 }
+
 
 void AJATimeCode::QueryRP188(uint32_t *pDbb, uint32_t *pLow, uint32_t *pHigh, const AJATimeBase& timeBase, bool bDrop)
 {

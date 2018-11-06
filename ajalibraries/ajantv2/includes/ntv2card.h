@@ -297,18 +297,6 @@ public:
 	///@{
 
 	/**
-		@brief	Answers with a 4-byte value that uniquely identifies the kind of AJA device I'm talking to.
-		@return	The 4-byte value that identifies the kind of AJA device this is.
-	**/
-	AJA_VIRTUAL NTV2DeviceID		GetDeviceID (void);
-
-	/**
-		@brief	Answers with this device's zero-based index number (relative to other known devices).
-		@return	This device's zero-based index number.
-	**/
-	AJA_VIRTUAL inline UWord		GetIndexNumber (void) const		{return _boardNumber;}
-
-	/**
 		@brief	Answers with this device's display name.
 		@return	A string containing this device's display name.
 	**/
@@ -2199,17 +2187,8 @@ public:
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool	Read3GInputStatus2Register(ULWord *value));
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool	Read3GInput5678StatusRegister(ULWord *value));
 
-	AJA_VIRTUAL bool	ReadSDIInVPID (const NTV2Channel channel, ULWord & outValueA, ULWord & outValueB);
-	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadSDIInVPID(NTV2Channel channel, ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use ReadSDIInVPID(NTV2Channel,ULWord&,ULWord&) instead
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadSDI1InVPID(ULWord* valueA, ULWord* valueB = NULL));						///< @deprecated	Use ReadSDIInVPID(NTV2Channel,ULWord&,ULWord&) instead
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadSDI2InVPID(ULWord* valueA, ULWord* valueB = NULL));						///< @deprecated	Use ReadSDIInVPID(NTV2Channel,ULWord&,ULWord&) instead
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadSDI3InVPID(ULWord* valueA, ULWord* valueB = NULL));						///< @deprecated	Use ReadSDIInVPID(NTV2Channel,ULWord&,ULWord&) instead
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadSDI4InVPID(ULWord* valueA, ULWord* valueB = NULL));						///< @deprecated	Use ReadSDIInVPID(NTV2Channel,ULWord&,ULWord&) instead
-	#endif	//	!defined (NTV2_DEPRECATE)
-
-	AJA_VIRTUAL bool	SupportsP2PTransfer ();
-	AJA_VIRTUAL bool	SupportsP2PTarget ();
+	AJA_VIRTUAL bool	SupportsP2PTransfer (void);	///< @return	True if this device can directly transmit data to another PCIe device via DMA;  otherwise false.
+	AJA_VIRTUAL bool	SupportsP2PTarget (void);	///< @return	True if this device can directly receive data from another PCIe device via DMA;  otherwise false.
 
 
 	/**
@@ -2239,16 +2218,16 @@ public:
 	**/
 	///@{
 	/**
-		@brief		Sets the current RP188 mode -- NTV2_RP188_INPUT or NTV2_RP188_OUTPUT -- for the given channel.
+		@brief		Sets the current RP188 mode -- ::NTV2_RP188_INPUT or ::NTV2_RP188_OUTPUT -- for the given channel.
 		@param[in]	inChannel		Specifies the channel of interest.
 		@param[in]	inMode			Specifies the new RP-188 mode for the given channel.
-									Must be one of NTV2_RP188_INPUT or NTV2_RP188_OUTPUT. All other values are illegal.
+									Must be one of ::NTV2_RP188_INPUT or ::NTV2_RP188_OUTPUT. All other values are illegal.
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool	SetRP188Mode			(const NTV2Channel inChannel,	const NTV2_RP188Mode inMode);
 
 	/**
-		@brief		Returns the current RP188 mode -- NTV2_RP188_INPUT or NTV2_RP188_OUTPUT -- for the given channel.
+		@brief		Returns the current RP188 mode -- ::NTV2_RP188_INPUT or ::NTV2_RP188_OUTPUT -- for the given channel.
 		@param[in]	inChannel		Specifies the channel of interest.
 		@param[out]	outMode			Receives the RP-188 mode for the given channel.
 		@return		True if successful;  otherwise false.
@@ -2257,7 +2236,7 @@ public:
 
 	/**
 		@brief		Writes the raw RP188 data into the DBB/Low/Hi registers for the given channel.
-		@param[in]	inChannel		Specifies the SDI output of interest as an NTV2Channel value.
+		@param[in]	inChannel		Specifies the SDI output of interest as an ::NTV2Channel value.
 		@param[in]	inRP188Data		Specifies the raw RP188 data values to be written.
 		@note		This call won't have any effect if the channel is in "bypass mode".
 					See CNTV2Card::IsRP188BypassEnabled and CNTV2Card::DisableRP188Bypass.
@@ -2266,7 +2245,7 @@ public:
 
 	/**
 		@brief		Reads the raw RP188 data from the DBB/Low/Hi registers for the given channel.
-		@param[in]	inChannel		Specifies the SDI input of interest as an NTV2Channel value.
+		@param[in]	inChannel		Specifies the SDI input of interest as an ::NTV2Channel value.
 		@param[out]	outRP188Data	Receives the raw RP188 data values.
 	**/
 	AJA_VIRTUAL bool	GetRP188Data			(const NTV2Channel inChannel,	NTV2_RP188 & outRP188Data);
@@ -2275,11 +2254,13 @@ public:
 	AJA_VIRTUAL bool	GetRP188Data			(const NTV2Channel inChannel,	const ULWord frame, RP188_STRUCT & outRP188Data);
 
 	/**
-		@brief		Sets the RP188 DBB filter for the given SDI output (channel), assuming the channel's RP188 bypass mode is enabled (i.e., for E-E operation).
+		@brief		Sets the RP188 DBB filter for the given SDI output (channel).
 		@param[in]	inChannel		Specifies the SDI output (channel) of interest.
 		@param[out]	inFilterValue	Specifies the new filter value to use. Only the lower 8 bits are used.
+									Use 0xFF for unfiltered;  0x01 for VITC1;  0x02 for VITC2.
 		@return		True if successful;  otherwise false.
-		@note		AutoCirculate-based applications have no need to use this function, since the driver manages RP188 filtering when AutoCirculateInitForOutput is called.
+		@note		AutoCirculate-based applications have no need to use this function, since the driver manages
+					RP188 filtering when CNTV2Card::AutoCirculateInitForOutput is called.
 	**/
 	AJA_VIRTUAL bool	SetRP188Source			(const NTV2Channel inChannel,	const ULWord inFilterValue);
 
@@ -2289,7 +2270,8 @@ public:
 		@param[in]	inChannel		Specifies the SDI output (channel) of interest.
 		@param[out]	outFilterValue	Receives the given channel's current RP188 SDI input filter, which will be an 8-bit value.
 		@return		True if successful;  otherwise false.
-		@note		AutoCirculate-based applications have no need to use this function, since the driver manages RP188 filtering when AutoCirculateInitForOutput is called.
+		@note		AutoCirculate-based applications have no need to use this function, since the driver manages
+					RP188 filtering when CNTV2Card::AutoCirculateInitForOutput is called.
 	**/
 	AJA_VIRTUAL bool	GetRP188Source			(const NTV2Channel inChannel,	ULWord & outFilterValue);
 
@@ -2298,15 +2280,15 @@ public:
 		@brief		Answers whether or not the channel's RP-188 bypass mode is in effect.
 		@param[in]	inChannel	Specifies the output channel of interest.
 		@param[out]	outIsBypassEnabled	Receives true if the output channel's RP188 timecode is currently sourced from the channel's
-										RP188 registers (i.e., from calls to SetRP188Data). Receives false if its output timecode is
-										currently sourced from the input (specified from a prior call to SetRP188Source).
+										RP188 registers (i.e., from calls to CNTV2Card::SetRP188Data). Receives false if its output timecode is
+										currently sourced from the input (specified from a prior call to CNTV2Card::SetRP188Source).
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool	IsRP188BypassEnabled	(const NTV2Channel inChannel,	bool & outIsBypassEnabled);
 
 	/**
-		@brief		Normally, if the device channel's NTV2_RP188Mode is NTV2_RP188_OUTPUT, an SDI output will embed RP188 timecode as fed into its three
-					DBB/Bits0_31/Bits32_63 registers (via calls to SetRP188Data). These registers can be bypassed to grab RP188 from an SDI input, which
+		@brief		Normally, if the device channel's ::NTV2_RP188Mode is ::NTV2_RP188_OUTPUT, an SDI output will embed RP188 timecode as fed into its three
+					DBB/Bits0_31/Bits32_63 registers (via calls to CNTV2Card::SetRP188Data). These registers can be bypassed to grab RP188 from an SDI input, which
 					is useful in E-E mode.
 		@param[in]	inChannel			Specifies the (SDI output) channel of interest.
 		@return		True if successful; otherwise false.
@@ -3401,6 +3383,76 @@ public:
 	///@}
 
 	/**
+		@name	VPID
+	**/
+	///@{
+	/*
+		@brief		Sets the VPID payload value(s) for each link of the given 3G SDI output.
+		@param[in]	inValueA		Specifies the "Link A" VPID value to be embedded in the "A" link output signal.
+		@param[in]	inValueB		Specifies the "Link B" VPID value to be embedded in the "B" link output signal.
+		@param[in]	inOutputSpigot	Specifies the SDI output connector of interest as a zero-based index value.
+									Defaults to zero, the first SDI output connector.
+		@return		True if successful; otherwise false.
+	*/
+	AJA_VIRTUAL bool		SetSDIOutVPID (const ULWord inValueA, const ULWord inValueB, const UWord inOutputSpigot = NTV2_CHANNEL1);
+
+	/*
+		@brief		Answers with the VPID payload value(s) that are currently being embedded for each link of the given 3G SDI output.
+		@param[out]	outValueA		Receives the VPID payload value currently being embedded in the "A" link output signal.
+		@param[out]	outValueB		Receives the VPID payload value currently being embedded in the "B" link output signal.
+		@param[in]	inOutputSpigot	Specifies the SDI output connector of interest as a zero-based index value.
+									Defaults to zero, the first SDI output connector.
+		@return		True if successful; otherwise false.
+	*/
+	AJA_VIRTUAL bool		GetSDIOutVPID (ULWord & outValueA, ULWord & outValueB, const UWord inOutputSpigot = NTV2_CHANNEL1);
+
+	/*
+		@brief		Reads the latest received VPID payload value(s) for each link of the given SDI input.
+		@param[in]	inSDIInput	Specifies the 3G SDI input connector as an ::NTV2Channel, a zero-based index value.
+		@param[out]	outValueA	Receives the "Link A" VPID payload value -- or zero if VPID was not present.
+		@param[out]	outValueB	Receives the "Link B" VPID payload value -- or zero if VPID was not present.
+		@return		True if successful; otherwise false.
+	*/
+	AJA_VIRTUAL bool		ReadSDIInVPID (const NTV2Channel inSDIInput, ULWord & outValueA, ULWord & outValueB);
+	
+	/**
+		@return		True if the SDI VPID link A input status is valid;  otherwise false.
+		@param[in]	inChannel		Specifies the SDI input connector of interest, specified as an ::NTV2Channel, a zero-based index value.
+	**/
+	AJA_VIRTUAL bool		GetVPIDValidA (const NTV2Channel inChannel);
+
+	/**
+		@return		True if the SDI VPID link B input status is valid;  otherwise false.
+		@param[in]	inChannel		Specifies the SDI input connector of interest, specified as an ::NTV2Channel, a zero-based index value.
+	**/
+	AJA_VIRTUAL bool		GetVPIDValidB (const NTV2Channel inChannel);
+
+	#if !defined (NTV2_DEPRECATE)
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadSDIInVPID(NTV2Channel channel, ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use ReadSDIInVPID(NTV2Channel,ULWord&,ULWord&) instead
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadSDI1InVPID(ULWord* valueA, ULWord* valueB = NULL));						///< @deprecated	Use ReadSDIInVPID(NTV2Channel,ULWord&,ULWord&) instead
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadSDI2InVPID(ULWord* valueA, ULWord* valueB = NULL));						///< @deprecated	Use ReadSDIInVPID(NTV2Channel,ULWord&,ULWord&) instead
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadSDI3InVPID(ULWord* valueA, ULWord* valueB = NULL));						///< @deprecated	Use ReadSDIInVPID(NTV2Channel,ULWord&,ULWord&) instead
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadSDI4InVPID(ULWord* valueA, ULWord* valueB = NULL));						///< @deprecated	Use ReadSDIInVPID(NTV2Channel,ULWord&,ULWord&) instead
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI1OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI1OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI2OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI2OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI3OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI3OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI4OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI4OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI5OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI5OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI6OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI6OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI7OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI7OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI8OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI8OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
+	#endif	//	!defined (NTV2_DEPRECATE)
+	///@}
+
+	/**
 		@brief	Sets the SDI output spigot's video standard.
 		@param[in]	inOutputSpigot	Specifies the SDI output spigot of interest as a zero-based index number, where zero is "SDI Out 1".
 		@param[in]	inValue			Specifies the video standard.
@@ -3437,27 +3489,6 @@ public:
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI8OutStandard (NTV2Standard value));		///< @deprecated	Use SetSDIOutputStandard(NTV2Channel,NTV2Standard) instead.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI8OutStandard (NTV2Standard* value));	///< @deprecated	Use GetSDIOutputStandard(NTV2Channel,NTV2Standard&) instead.
 	#endif	//	!NTV2_DEPRECATE
-
-	AJA_VIRTUAL bool	SetSDIOutVPID (const ULWord inValueA, const ULWord inValueB, const UWord inOutputSpigot = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool	GetSDIOutVPID (ULWord & outValueA, ULWord & outValueB, const UWord inOutputSpigot = NTV2_CHANNEL1);
-	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI1OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI1OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI2OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI2OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI3OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI3OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI4OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI4OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI5OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI5OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI6OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI6OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI7OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI7OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2SDI8OutVPID(ULWord valueA, ULWord valueB = 0));			///< @deprecated	Use SetSDIOutVPID(ULWord,ULWord,NTV2Channel) instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2SDI8OutVPID(ULWord* valueA, ULWord* valueB = NULL));	///< @deprecated	Use GetSDIOutVPID(ULWord&,ULWord&,NTV2Channel) instead.
-	#endif	//	!defined (NTV2_DEPRECATE)
 
 
 	/**
@@ -3694,10 +3725,11 @@ public:
 	AJA_VIRTUAL NTV2VideoFormat GetSDIInputVideoFormat (NTV2Channel inChannel, bool inIsProgressive = false);
 
 	/**
-		@brief		Returns the video format of the signal that is present on the device's HDMI input.
 		@return		A valid ::NTV2VideoFormat if successful; otherwise returns ::NTV2_FORMAT_UNKNOWN.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to ::NTV2_CHANNEL1 (the first HDMI input).
 	**/
-    AJA_VIRTUAL NTV2VideoFormat GetHDMIInputVideoFormat (NTV2Channel inChannel = NTV2_CHANNEL1);
+    AJA_VIRTUAL NTV2VideoFormat GetHDMIInputVideoFormat (NTV2Channel inHDMIInput = NTV2_CHANNEL1);
 
 	/**
 		@brief		Returns the video format of the signal that is present on the device's analog video input.
@@ -4990,20 +5022,6 @@ public:
 		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
 	AJA_VIRTUAL ULWord		GetSDIUnlockCount (const NTV2Channel inChannel);
-	
-	/**
-		@return		True if the SDI VPID link A input status is valid;  otherwise false.
-		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
-		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
-	**/
-	AJA_VIRTUAL bool		GetVPIDValidA (const NTV2Channel inChannel);
-
-	/**
-		@return		True if the SDI VPID link B input status is valid;  otherwise false.
-		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
-		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
-	**/
-	AJA_VIRTUAL bool		GetVPIDValidB (const NTV2Channel inChannel);
 
 	/**
 		@return		The current Link A error count for the given SDI input.
@@ -5055,24 +5073,55 @@ public:
 	**/
 	///@{
 	/**
-		@brief		Sets the parity control on the RS422 port specified by inChannel.
+		@brief		Sets the parity control on the specified RS422 serial port.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the RS422 port to be affected, which must be ::NTV2_CHANNEL1 or ::NTV2_CHANNEL2.
-		@param[in]	inRS422Parity	Specifies if parity should be used, and if so, whether it should be odd or even.
+		@param[in]	inSerialPort	Specifies the RS422 serial port to be affected, expressed as an ::NTV2Channel
+									(a zero-based index number). Call ::NTV2DeviceGetNumSerialPorts to determine
+									the number of available serial ports.
+		@param[in]	inParity		Specifies if parity should be used, and if so, whether it should be odd or even.
+		@note		This function only works with programmable RS422 devices.
+		@see		CNTV2Card::GetRS422Parity, CNTV2Card::SetRS422BaudRate, ::NTV2DeviceGetNumSerialPorts,
+					::NTV2DeviceCanDoProgrammableRS422
 	**/
-	AJA_VIRTUAL bool		SetRS422Parity  (const NTV2Channel inChannel, const NTV2_RS422_PARITY inRS422Parity);
-
-	AJA_VIRTUAL bool		GetRS422Parity (NTV2Channel inChannel, NTV2_RS422_PARITY & outRS422Parity);
+	AJA_VIRTUAL bool		SetRS422Parity  (const NTV2Channel inSerialPort, const NTV2_RS422_PARITY inParity);
 
 	/**
-		@brief		Sets the baud rate the RS422 port specified by inChannel.
+		@brief		Answers with the current parity control for the specified RS422 serial port.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the RS422 port to be affected, which must be ::NTV2_CHANNEL1 or ::NTV2_CHANNEL2.
-		@param[in]	inRS422BaudRate	Specifies the baud rate to be used for RS422 communications.
+		@param[in]	inSerialPort	Specifies the RS422 serial port of interest, expressed as an ::NTV2Channel
+									(a zero-based index number). Call ::NTV2DeviceGetNumSerialPorts to determine
+									the number of available serial ports.
+		@param[in]	outParity		Receives the serial port's current ::NTV2_RS422_PARITY setting.
+		@see		CNTV2Card::SetRS422Parity, CNTV2Card::GetRS422BaudRate, ::NTV2DeviceGetNumSerialPorts,
+					::NTV2DeviceCanDoProgrammableRS422
 	**/
-	AJA_VIRTUAL bool		SetRS422BaudRate  (const NTV2Channel inChannel, const NTV2_RS422_BAUD_RATE inRS422BaudRate);
+	AJA_VIRTUAL bool		GetRS422Parity (const NTV2Channel inSerialPort, NTV2_RS422_PARITY & outParity);
 
-	AJA_VIRTUAL bool		GetRS422BaudRate (NTV2Channel inChannel, NTV2_RS422_BAUD_RATE & outRS422BaudRate);
+	/**
+		@brief		Sets the baud rate of the specified RS422 serial port.
+		@return		True if successful; otherwise false.
+		@param[in]	inSerialPort	Specifies the RS422 serial port to be affected, expressed as an ::NTV2Channel
+									(a zero-based index number). Call ::NTV2DeviceGetNumSerialPorts to determine
+									the number of available serial ports.
+		@param[in]	inBaudRate		Specifies the ::NTV2_RS422_BAUD_RATE to be used. (The default baud rate upon
+									power-up or reset is ::NTV2_RS422_BAUD_RATE_38400.)
+		@note		This function only works with programmable RS422 devices.
+		@see		CNTV2Card::SetRS422Parity, CNTV2Card::GetRS422BaudRate, ::NTV2DeviceGetNumSerialPorts,
+					::NTV2DeviceCanDoProgrammableRS422
+	**/
+	AJA_VIRTUAL bool		SetRS422BaudRate  (const NTV2Channel inSerialPort, const NTV2_RS422_BAUD_RATE inBaudRate);
+
+	/**
+		@brief		Answers with the current baud rate of the specified RS422 serial port.
+		@return		True if successful; otherwise false.
+		@param[in]	inSerialPort	Specifies the RS422 serial port of interest, expressed as an ::NTV2Channel
+									(a zero-based index number). Call ::NTV2DeviceGetNumSerialPorts to determine
+									the number of available serial ports.
+		@param[out]	outBaudRate		Receives the ::NTV2_RS422_BAUD_RATE being used.
+		@see		CNTV2Card::GetRS422Parity, CNTV2Card::SetRS422BaudRate, ::NTV2DeviceGetNumSerialPorts,
+					::NTV2DeviceCanDoProgrammableRS422
+	**/
+	AJA_VIRTUAL bool		GetRS422BaudRate (const NTV2Channel inSerialPort, NTV2_RS422_BAUD_RATE & outBaudRate);
 
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	ReadUartRxFifoSize (ULWord * pOutSizeInBytes));
@@ -5308,6 +5357,7 @@ public:
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool		GetDieTemperature (double & outTemp, const NTV2DieTempScale inTempScale = NTV2DieTempScale_Celsius);
+	AJA_VIRTUAL bool		GetDieVoltage (double & outVoltage);
 	///@}
 public:
 	#if !defined (NTV2_DEPRECATE)
@@ -5344,6 +5394,25 @@ public:
 	**/
 	AJA_VIRTUAL bool			GetInstalledBitfileInfo (ULWord & outNumBytes, std::string & outDateStr, std::string & outTimeStr);
 
+	/**
+		@brief		Answers whether or not the "fail-safe" (aka "safe-boot") bitfile is currently loaded and running in the FPGA.
+		@param[out]	outIsFailSafe	Receives true if the "fail-safe" bitfile is currently loaded and running in the FPGA;
+									otherwise receives false. This return value cannot be trusted if the function result
+									is false.
+		@return		True if successful;  otherwise false.
+		@note		The "outIsFailSafe" answer can only be trusted if the function result is true.
+		@see		::NTV2DeviceCanReportFailSafeLoaded
+	**/
+	AJA_VIRTUAL bool			IsFailSafeBitfileLoaded (bool & outIsFailSafe);
+
+	/**
+		@brief		Answers whether or not the FPGA can be reloaded without powering off.
+		@param[out]	outCanWarmBoot	Receives true if the FPGA can be reloaded without powering off the device.
+									Receives false if it can only be reloaded after power-cycling.
+		@return		True if successful;  otherwise false.
+		@note		The "outCanWarmBoot" answer can only be trusted if the function result is true.
+	**/
+	AJA_VIRTUAL bool			CanWarmBootFPGA (bool & outCanWarmBoot);
 
 				//////////////////////////////////////////////////////////
 	public:		//////////	From CNTV2Status				//////////////
@@ -5938,6 +6007,7 @@ protected:
 	AJA_VIRTUAL bool			IS_CHANNEL_INVALID (const NTV2Channel inChannel) const;
 	AJA_VIRTUAL bool			IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot) const;
 	AJA_VIRTUAL bool			IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot) const;
+	AJA_VIRTUAL bool			S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & inOutXferInfo);
 
 private:
 	// frame buffer sizing helpers

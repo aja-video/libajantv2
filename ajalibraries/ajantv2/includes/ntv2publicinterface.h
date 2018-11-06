@@ -96,7 +96,7 @@ typedef enum
 	kRegXenaxFlashDIN,				// 60	
 	kRegXenaxFlashDOUT,				// 61	
 	kRegReserved62,					// 62	
-	kRegReserved63,					// 63	
+	kRegCPLDVersion,				// 63	
 	kRegRP188InOut2DBB,				// 64
 	kRegRP188InOut2Bits0_31,		// 65
 	kRegRP188InOut2Bits32_63,		// 66
@@ -3723,6 +3723,7 @@ typedef enum
 	kRegXlnxChannelPerfCycleCountHigh			= 0x32,
 	kRegXlnxChannelPerfDataCountLow				= 0x33,
 	kRegXlnxChannelPerfDataCountHigh			= 0x34,
+	kRegXlnxChannelUserMaxReadRequestSize		= 0x44,
 
 	kRegXlnxIrqIdentifier						= 0x00,
 	kRegXlnxIrqUserInterruptEnable				= 0x01,
@@ -3779,7 +3780,10 @@ typedef enum
 	kRegMaskXlnxPerfCycleCountHigh				= 0x000003ff,
 
 	kRegMaskXlnxPerfDataCountMax				= 0x00010000,
-	kRegMaskXlnxPerfDataCountHigh				= 0x000003ff
+	kRegMaskXlnxPerfDataCountHigh				= 0x000003ff,
+
+	kRegMaskXlnxUserMaxReadRequestEff			= 0x00000070,
+	kRegMaskXlnxUserMaxReadRequestPgm			= 0x00000007
 
 } XlnxRegisterMask;
 
@@ -3818,7 +3822,10 @@ typedef enum
 	kRegShiftXlnxPerfCycleCountHigh				= 0,
 
 	kRegShiftXlnxPerfDataCountMax				= 16,
-	kRegShiftXlnxPerfDataCountHigh				= 0
+	kRegShiftXlnxPerfDataCountHigh				= 0,
+
+	kRegShiftXlnxUserMaxReadRequestEff			= 4,
+	kRegShiftXlnxUserMaxReadRequestPgm			= 0
 
 } XlnxRegisterShift;
 
@@ -4684,10 +4691,10 @@ typedef struct
 	ULWord				currentAudioStartAddress;
 
 	//! At Call Field0 or Field1 _currently_ being OUTPUT (at the time of the IOCTL_NTV2_GET_FRAMESTAMP)
-	ULWord				currentFieldCount;         //! At Call Line# _currently_ being OUTPUT (at the time of the IOCTL_NTV2_GET_FRAMESTAMP)
-	ULWord				currentLineCount;          //! Contains validCount (Play - reps remaining, Record - drops on frame)
-	ULWord				currentReps;               //! User cookie at last vblank
-	ULWord				currenthUser;            
+	ULWord				currentFieldCount;         
+	ULWord				currentLineCount;			//! At Call Line# _currently_ being OUTPUT (at the time of the IOCTL_NTV2_GET_FRAMESTAMP)
+	ULWord				currentReps;				//! Contains validCount (Play - reps remaining, Record - drops on frame)
+	ULWord				currenthUser;				//! User cookie at last vblank
 } FRAME_STAMP_STRUCT;
 
 
@@ -5186,7 +5193,7 @@ typedef enum
 	kRP188SourceEmbeddedLTC		= 0x0,		// NOTE these values are same as RP188 DBB channel select
 	kRP188SourceEmbeddedVITC1	= 0x1,
 	kRP188SourceEmbeddedVITC2	= 0x2,
-	kRP188SourceLTCPort			= 0xFE		// used in ioHD
+	kRP188SourceLTCPort			= 0xFE
 } RP188SourceSelect;
 
 // note: this order mimics (somewhat) that of NTV2TestPatternSelect in "ntv2testpatterngen.h"
@@ -5429,6 +5436,29 @@ typedef enum
 } ANCInsMaskShift;
 
 
+//	Driver Version ULWord encode/decode macros
+//	Introduced in SDK 15.0
+//	Common ULWord format on all platforms:
+//
+//		 3         2         1          
+//		10987654321098765432109876543210
+//		TTXMMMMMMMmmmmmmPPPPPPbbbbbbbbbb
+//
+//	MMMMMMM:	[28:22]	major version number
+//	mmmmmm:		[21:16]	minor version number
+//	PPPPPP:		[15:10]	point release number
+//	bbbbbbbbbb:	[9:0]	build number
+//	TT:			[31:30]	build type (0=release, 1=beta, 2=alpha, 3=dev)
+#define	NTV2DriverVersionEncode(__maj__, __min__, __pt__, __bld__)			(((ULWord)(__maj__) & 0x0000007F) << 22)		\
+																		|	(((ULWord)(__min__) & 0x0000003F) << 16)		\
+																		|	(((ULWord)(__pt__ ) & 0x0000003F) << 10)		\
+																		|	(((ULWord)(__bld__) & 0x000003FF) <<  0)
+#define	NTV2DriverVersionDecode_Major(__vers__)		(((ULWord)(__vers__) >> 22) & 0x0000007F)
+#define	NTV2DriverVersionDecode_Minor(__vers__)		(((ULWord)(__vers__) >> 16) & 0x0000003F)
+#define	NTV2DriverVersionDecode_Point(__vers__)		(((ULWord)(__vers__) >> 10) & 0x0000003F)
+#define	NTV2DriverVersionDecode_Build(__vers__)		(((ULWord)(__vers__) >>  0) & 0x000003FF)
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////	BEGIN NEW AUTOCIRCULATE API
 
 		#if AJATargetBigEndian
@@ -5493,6 +5523,7 @@ typedef enum
 		#define	AUTOCIRCULATE_TYPE_GETREGS		NTV2_FOURCC ('r', 'e', 'g', 'R')	///< @brief	Identifies NTV2GetRegisters struct
 		#define	AUTOCIRCULATE_TYPE_SETREGS		NTV2_FOURCC ('r', 'e', 'g', 'W')	///< @brief	Identifies NTV2SetRegisters struct
 		#define	AUTOCIRCULATE_TYPE_SDISTATS		NTV2_FOURCC ('s', 'd', 'i', 'S')	///< @brief	Identifies NTV2SDIStatus struct
+        #define	NTV2_TYPE_AJADEBUGLOGGING		NTV2_FOURCC ('d', 'b', 'l', 'g')	///< @brief	Identifies NTV2DebugLogging struct
 
 		#define	NTV2_IS_VALID_STRUCT_TYPE(_x_)	(	(_x_) == AUTOCIRCULATE_TYPE_STATUS		||	\
 													(_x_) == AUTOCIRCULATE_TYPE_XFER		||	\
@@ -5503,7 +5534,8 @@ typedef enum
 													(_x_) == AUTOCIRCULATE_TYPE_SETREGS		||	\
 													(_x_) == AUTOCIRCULATE_TYPE_SDISTATS	||	\
                                                     (_x_) == NTV2_TYPE_BANKGETSET			||	\
-                                                    (_x_) == NTV2_TYPE_VIRTUAL_DATA_RW      )
+                                                    (_x_) == NTV2_TYPE_VIRTUAL_DATA_RW		||	\
+                                                    (_x_) == NTV2_TYPE_AJADEBUGLOGGING	)
 
 
 		//	NTV2_POINTER FLAGS
@@ -5520,6 +5552,11 @@ typedef enum
 		#define	AUTOCIRCULATE_WITH_VIDPROC			BIT(5)		///< @brief	Use this to AutoCirculate with video processing
 		#define	AUTOCIRCULATE_WITH_ANC				BIT(6)		///< @brief	Use this to AutoCirculate with ancillary data
 		#define	AUTOCIRCULATE_WITH_AUDIO_CONTROL	BIT(7)		///< @brief	Use this to AutoCirculate with no audio but with audio control
+		#define	AUTOCIRCULATE_WITH_FIELDS			BIT(8)		///< @brief	Use this to AutoCirculate with fields as frames for interlaced formats
+
+		#define AUTOCIRCULATE_FRAME_FULL			BIT(20)		///< @brief Frame contains a full image
+		#define AUTOCIRCULATE_FRAME_FIELD0			BIT(21)		///< @brief Frame contains field 0 of an interlaced image (first field in time)
+		#define AUTOCIRCULATE_FRAME_FIELD1			BIT(22)		///< @brief Frame contains field 1 of an interlaced image (second field in time)
 
 		#define AUTOCIRCULATE_P2P_PREPARE			BIT(28)		///< @brief prepare p2p target for synchronous transfer (no message)
 		#define AUTOCIRCULATE_P2P_COMPLETE			BIT(29)		///< @brief complete synchronous p2p transfer
@@ -6143,6 +6180,7 @@ typedef enum
 
 				/**
 					@brief		Answers with my contents as a character string.
+					@param[out]	outString		Receives the character string copied verbatim from my contents.
 					@param[in]	inU8Offset		The starting offset, in bytes, where copying will commence.
 					@param[in]	inMaxSize		Specifies the maximum number of 8-bit values to be returned.
 												Use zero for unlimited.
@@ -6300,6 +6338,11 @@ typedef enum
 					@return		An equivalent RP188_STRUCT.
 				**/
 				inline operator		RP188_STRUCT () const							{RP188_STRUCT result;  result.DBB = fDBB;  result.Low = fLo;  result.High = fHi;  return result;}
+
+				/**
+					@return		True if I'm valid.
+				**/
+				inline operator		bool () const									{return IsValid();}
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_RP188)
 
@@ -6579,6 +6622,7 @@ typedef enum
 					ULWord					acBufferLevel;				///< @brief	Number of buffered frames in driver ready to capture or play
 					ULWord					acOptionFlags;				///< @brief	AutoCirculate options used when CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput called (e.g., AUTOCIRCULATE_WITH_RP188, etc.).
 					NTV2AudioSystem			acAudioSystem;				///< @brief	The audio system being used for this channel (NTV2_AUDIOSYSTEM_INVALID if none)
+					ULWord					acReserved[100];			///< @brief	Reserved for future expansion.
 				NTV2_TRAILER			acTrailer;					///< @brief	The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
@@ -6740,6 +6784,7 @@ typedef enum
 					ULWord			mOutNumRegisters;	///< @brief	The number of registers successfully read.
 					NTV2_POINTER	mOutGoodRegisters;	///< @brief	Array of register numbers that were read successfully. The SDK owns this memory.
 					NTV2_POINTER	mOutValues;			///< @brief	Array of register values that were read successfully. The SDK owns this memory.
+					ULWord			mReserved[100];		///< @brief	Reserved for future expansion.
 				NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
 			NTV2_END_PRIVATE
 
@@ -6817,6 +6862,7 @@ typedef enum
 				NTV2_POINTER	mInRegInfos;		///< @brief	Read-only array of NTV2ReadWriteRegisterSingle structs to be set. The SDK owns this memory.
 				ULWord			mOutNumFailures;	///< @brief	The number of registers unsuccessfully written.
 				NTV2_POINTER	mOutBadRegIndexes;	///< @brief	Array of UWords containing index numbers of the register writes that failed. The SDK owns this memory.
+				ULWord			mReserved[100];		///< @brief	Reserved for future expansion.
 			NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
@@ -6869,6 +6915,7 @@ typedef enum
 				ULWord			mIsWriting;			///< @brief	If non-zero, register(s) will be written;  otherwise, register(s) will be read.
 				NTV2_POINTER	mInBankInfos;		///< @brief	Bank select NTV2RegInfo. The SDK owns this memory.
 				NTV2_POINTER	mInRegInfos;		///< @brief	NTV2RegInfo array of registers be read/written. The SDK owns this memory.
+				ULWord			mReserved[100];		///< @brief	Reserved for future expansion.
 			NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
@@ -6913,6 +6960,7 @@ typedef enum
                 ULWord			mTag;               ///< @brief	Tag for virtual data.  This value is used to recal saved data by tag.
                 ULWord			mIsWriting;			///< @brief	If non-zero, virtual data will be written;  otherwise, virtual data will be read.
                 NTV2_POINTER	mVirtualData;		///< @brief	Pointer object to virtual data. The SDK owns this memory.
+				ULWord			mReserved[100];		///< @brief	Reserved for future expansion.
             NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
 
             #if !defined (NTV2_BUILDING_DRIVER)
@@ -6947,6 +6995,7 @@ typedef enum
 			NTV2_BEGIN_PRIVATE
 				NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
 					NTV2_POINTER	mInStatistics;		///< @brief	Array of NTV2SDIStatus s to be read in one batch. The SDK owns this memory.
+					ULWord			mReserved[100];		///< @brief	Reserved for future expansion.
 				NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
 			NTV2_END_PRIVATE
 
@@ -6992,6 +7041,7 @@ typedef enum
 					LWord64				acFrameTime;					///< @brief	On exit, contains host OS clock at time of capture/play.
 																		///<		On entry, contains ::NTV2Channel of interest, but only for new API ::FRAME_STAMP message.
 					ULWord				acRequestedFrame;				///< @brief	The frame requested (0xFFFFFFFF == "not available"), including for new API (::FRAME_STAMP message).
+					ULWord				acFrameFlags;					///< @brief	Frame data flags
 					ULWord64			acAudioClockTimeStamp;			///< @brief	Number of 10MHz ticks at moment of play or record, based on 48kHz clock (from register 28).
 					ULWord				acAudioExpectedAddress;			///< @brief	The address that was used to transfer
 					ULWord				acAudioInStartAddress;			///< @brief	For record - first position in buffer of audio (includes base offset) -- AudioInAddress at the time this Frame was stamped
@@ -7030,6 +7080,8 @@ typedef enum
 																		///			This can tell clients which frame was on-air at the last VBI.
 					ULWord				acFrame;						///< @brief	Record/capture -- current frame number
 					NTV2_SHOULD_BE_DEPRECATED	(NTV2_RP188	acRP188);	///< @brief	Deprecated -- call FRAME_STAMP::GetInputTimeCode instead.
+					ULWord				acReserved[100];				///< @brief	Reserved for future expansion.
+
 					///@}
 				NTV2_TRAILER		acTrailer;						///< @brief	The common structure trailer -- ALWAYS LAST!
 
@@ -7132,8 +7184,9 @@ typedef enum
 					FRAME_STAMP				acFrameStamp;			///< @brief	Frame stamp for the transferred frame.
 					ULWord					acAudioTransferSize;	///< @brief Number of bytes captured into the audio buffer.
 					ULWord					acAudioStartSample;		///< @brief	Starting audio sample (valid for capture only).
-					ULWord					acAncTransferSize;		///< @brief Total ancillary data bytes for field 1 transferred
-					ULWord					acAncField2TransferSize;///< @brief Total ancillary data bytes for field 2 transferred.
+					ULWord					acAncTransferSize;		///< @brief Total ancillary data bytes for field 1 transferred (capture only).
+					ULWord					acAncField2TransferSize;///< @brief Total ancillary data bytes for field 2 transferred (capture only).
+					ULWord					acReserved[100];		///< @brief	Reserved for future expansion.
 				NTV2_TRAILER			acTrailer;				///< @brief	The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
@@ -7151,6 +7204,39 @@ typedef enum
 					@return		The frame buffer number the frame was transferred to or from (or -1 if the transfer failed).
 				**/
 				inline LWord					GetTransferFrame (void) const							{return acTransferFrame;}
+
+				/**
+					@return		My state after the transfer.
+				**/
+				inline NTV2AutoCirculateState	GetState (void) const									{return acState;}
+
+				/**
+					@return		My buffer level after the transfer.
+				**/
+				inline ULWord					GetBufferLevel (void) const								{return acBufferLevel;}
+
+				/**
+					@return		The total number of frames successfully processed (not dropped) since AutoCirculateStart called.
+				**/
+				inline ULWord					GetProcessedFrameCount (void) const						{return acFramesProcessed;}
+
+				/**
+					@return		The total number of frames dropped since AutoCirculateStart called.
+				**/
+				inline ULWord					GetDroppedFrameCount (void) const						{return acFramesDropped;}
+
+				/**
+					@return		The number of audio bytes deposited/transferred into the host audio buffer after
+								the last successful CNTV2Card::AutoCirculateTransfer.
+				**/
+				inline ULWord					GetCapturedAudioByteCount (void) const					{return acAudioTransferSize;}
+
+				/**
+					@return		The number of ancillary data bytes deposited/transferred into the host anc buffer after
+								the last successful CNTV2Card::AutoCirculateTransfer.
+					@param[in]	inField2	Specify \c true for Field 2;  otherwise \c false (the default) for Field 1 (or progessive).
+				**/
+				inline ULWord					GetCapturedAncByteCount (const bool inField2 = false) const	{return inField2 ? acAncField2TransferSize : acAncTransferSize;}
 
 				NTV2_IS_STRUCT_VALID_IMPL(acHeader,acTrailer)
 
@@ -7250,11 +7336,13 @@ typedef enum
 						@name	Lesser-used and Deprecated Members
 					**/
 					///@{
+					ULWord							acFrameFlags;				//// @brief Frame data flags
 					ULWord							acPeerToPeerFlags;			//// @brief	Used to control P2P transfers.
 					ULWord							acFrameRepeatCount;			///< @brief Intended for playout. The number of times to repeat the frame being transferred.
 					LWord							acDesiredFrame;				///< @brief	Used to specify a different frame in the circulate ring to transfer to/from.
 					NTV2_SHOULD_BE_DEPRECATED(NTV2_RP188		acRP188);		///< @brief	Will be deprecated -- use AUTOCIRCULATE_TRANSFER::SetOutputTimeCode instead.
 					NTV2_SHOULD_BE_DEPRECATED(NTV2Crosspoint	acCrosspoint);	///< @brief	Will be deprecated -- used internally by the SDK. Will be removed when the driver changes to use NTV2Channel/NTV2Mode.
+					ULWord							acReserved[100];			///< @brief	Reserved for future expansion.
 					///@}
 				NTV2_TRAILER					acTrailer;					///< @brief	The common structure trailer -- ALWAYS LAST!
 
@@ -7532,21 +7620,21 @@ typedef enum
 				inline const FRAME_STAMP &				GetFrameInfo (void) const						{return acTransferStatus.acFrameStamp;}
 
 				/**
-					@return		The exact number of audio bytes transferred into my acAudioBuffer after the last successful
-								call made to CNTV2Card::AutoCirculateTransfer.
-					@note		This function is intended for capture/ingest, not playout.
+					@return		The number of audio bytes deposited/transferred into the host audio buffer after
+								the last successful CNTV2Card::AutoCirculateTransfer.
 				**/
-				inline ULWord							GetCapturedAudioByteCount (void) const			{return acTransferStatus.acAudioTransferSize;}
+				inline ULWord							GetCapturedAudioByteCount (void) const			{return acTransferStatus.GetCapturedAudioByteCount();}
 
 				inline NTV2_DEPRECATED_f(ULWord	GetAudioByteCount (void) const)					{return GetCapturedAudioByteCount ();}	///< @deprecated	Use GetCapturedAudioByteCount instead.
 
 				/**
-					@brief	Returns the number of actual ancillary data bytes that were transferred.
-					@param[in]	inField2	Specify true to get the Field 2 ancillary byte count.
+					@return		The number of ancillary data bytes deposited/transferred into the host anc buffer after
+								the last successful CNTV2Card::AutoCirculateTransfer.
+					@param[in]	inField2	Specify true to obtain the Field 2 ancillary byte count.
 											Specify false (the default) to return the Field 1 (or progessive) ancillary byte count.
-					@return	The number of actual ancillary data bytes that were transferred (F1 or F2).
 				**/
-				inline ULWord							GetAncByteCount (const bool inField2 = false) const		{return inField2 ? acTransferStatus.acAncField2TransferSize : acTransferStatus.acAncTransferSize;}
+				inline ULWord							GetCapturedAncByteCount (const bool inField2 = false) const	{return acTransferStatus.GetCapturedAncByteCount(inField2);}
+				inline NTV2_SHOULD_BE_DEPRECATED(ULWord	GetAncByteCount (const bool inField2 = false) const)	{return GetCapturedAncByteCount(inField2);}	///< @deprecated	Use GetCapturedAncByteCount instead.
 
 				/**
 					@return		My current frame buffer format.
@@ -7556,7 +7644,7 @@ typedef enum
 				/**
 					@return		The frame number that was transferred (or -1 if failed).
 				**/
-				inline LWord							GetTransferFrameNumber (void) const						{return acTransferStatus.acTransferFrame;}
+				inline LWord							GetTransferFrameNumber (void) const						{return acTransferStatus.GetTransferFrame();}
 				///@}
 
 				/**
@@ -7593,6 +7681,39 @@ typedef enum
 				NTV2_IS_STRUCT_VALID_IMPL(acHeader,acTrailer)
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (AUTOCIRCULATE_TRANSFER)
+
+
+        /**
+            @brief	This is used to enable or disable AJADebug logging in the driver.
+            @note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
+        **/
+        NTV2_STRUCT_BEGIN (NTV2DebugLogging)
+            NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
+                NTV2_POINTER	mSharedMemory;		///< @brief	Virtual address of AJADebug shared memory in calling process' context,
+													//			and its length. The AJADebug logging facility owns and manages this memory.
+													//			If NULL or zero length, debug logging will be disabled in the driver.
+													//			If non-NULL and zero length, debug logging will be enabled in the driver.
+                ULWord			mReserved[32];		///< @brief	Reserved for future expansion.
+            NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
+
+            #if !defined (NTV2_BUILDING_DRIVER)
+                /**
+                    @brief	Constructs an NTV2DebugLogging struct.
+                    @param[in]	inEnable            False to disable (the default), or True to enable.
+                **/
+                explicit	NTV2DebugLogging (const bool inEnable = false);
+
+                /**
+                    @brief	Prints a human-readable representation of me to the given output stream.
+                    @param	inOutStream		Specifies the output stream to use.
+                    @return	A reference to the output stream.
+                **/
+                std::ostream &	Print (std::ostream & inOutStream) const;
+
+                NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
+
+            #endif	//	!defined (NTV2_BUILDING_DRIVER)
+        NTV2_STRUCT_END (NTV2DebugLogging)
 
 
 		#if !defined (NTV2_BUILDING_DRIVER)
@@ -7925,6 +8046,14 @@ typedef enum
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStrm, const NTV2SegmentedXferInfo & inXferInfo);
+
+			/**
+				@brief	Streams the given NTV2DebugLogging struct to the specified ostream in a human-readable format.
+				@param		inOutStream		Specifies the ostream to use.
+				@param[in]	inObj			Specifies the NTV2DebugLogging to be streamed.
+				@return	The ostream being used.
+			**/
+			AJAExport inline std::ostream &	operator << (std::ostream & inOutStream, const NTV2DebugLogging & inObj)	{return inObj.Print (inOutStream);}
 		#endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 		#if defined (AJAMac)

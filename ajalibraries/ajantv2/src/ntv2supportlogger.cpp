@@ -10,7 +10,7 @@
 #include "ntv2registerexpert.h"
 #include "ntv2registersmb.h"
 #include "ntv2rp188.h"
-
+#include "ajabase/system/info.h"
 #include <algorithm>
 #include <sstream>
 #include <vector>
@@ -259,8 +259,7 @@ static bool getBitfileDate(CNTV2Card& device, std::string &bitFileDateString, NT
 
 AJAExport std::ostream & operator << (std::ostream & outStream, const CNTV2SupportLogger & inData)
 {
-    CNTV2SupportLogger* instance = (CNTV2SupportLogger*)&inData;
-    outStream << instance->ToString();
+    outStream << inData.ToString();
     return outStream;
 }
 
@@ -280,7 +279,7 @@ CNTV2SupportLogger::~CNTV2SupportLogger()
 {
 }
 
-int CNTV2SupportLogger::Version()
+int CNTV2SupportLogger::Version(void)
 {
     // Bump this whenever the formatting of the support log changes drastically
     return 2;
@@ -348,7 +347,7 @@ void CNTV2SupportLogger::AddFooter(const std::string& sectionName, const std::st
             oss << mAppendMap.at(_SectionEnum_); \
     }
 
-std::string CNTV2SupportLogger::ToString()
+std::string CNTV2SupportLogger::ToString(void) const
 {
     ostringstream oss;
 
@@ -405,89 +404,101 @@ std::string CNTV2SupportLogger::ToString()
     return oss.str();
 }
 
-void CNTV2SupportLogger::ToString(std::string& outString)
+void CNTV2SupportLogger::ToString(std::string& outString) const
 {
     outString = ToString();
 }
 
-void CNTV2SupportLogger::FetchInfoLog(std::ostringstream& oss)
+static inline std::string HEX0NStr(const uint32_t inNum, const uint16_t inWidth)	{ostringstream	oss;  oss << HEX0N(inNum,inWidth);  return oss.str();}
+static inline std::string xHEX0NStr(const uint32_t inNum, const uint16_t inWidth)	{ostringstream	oss;  oss << xHEX0N(inNum,inWidth);  return oss.str();}
+template <class T> std::string DECStr (const T & inT)								{ostringstream	oss;  oss << DEC(inT);  return oss.str();}
+
+void CNTV2SupportLogger::FetchInfoLog(std::ostringstream& oss) const
 {
     string str;
-    string bitFileDateString;
-    oss << "NTV2 SDK Version:  " << ::NTV2GetVersionString(true) << "\n"
-        << "Watcher/supportlog built on " << __DATE__ << " at " << __TIME__ << "\n"
-        << "Device: " << mDevice.GetDeviceVersionString() << "\n"
-        << "PCI FPGA Version: " << mDevice.GetPCIFPGAVersionString() << "\n"
-        << "Driver Version: " << mDevice.GetDriverVersionString() << "\n"
-        << "Device ID: " << hex << mDevice.GetDeviceID() << dec << "\n"
-        << "Serial Number: " << (mDevice.GetSerialNumberString(str) ? str : "Not programmed") << "\n"
-        << "Video Bitfile: " << (getBitfileDate(mDevice, bitFileDateString, eFPGAVideoProc) ? bitFileDateString : "Not available") << "\n";
+	AJALabelValuePairs	infoTable;
+	AJASystemInfo::append(infoTable, "SDK/DRIVER INFO",	"");
+	AJASystemInfo::append(infoTable, "NTV2 SDK Version",	::NTV2GetVersionString(true));
+	AJASystemInfo::append(infoTable, "supportlog Built",	std::string(__DATE__ " at " __TIME__));
+	AJASystemInfo::append(infoTable, "Driver Version",		mDevice.GetDriverVersionString());
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
+	const ULWord negotiatedProtocolVersion (mDevice.GetNubProtocolVersion());
+	AJASystemInfo::append(infoTable, "Watcher Nub Protocol Version",	DECStr(maxKnownProtocolVersion));
+	AJASystemInfo::append(infoTable, "Negotiated Nub Protocol Version",	negotiatedProtocolVersion ? DECStr(negotiatedProtocolVersion) : "Not available");
+	if (negotiatedProtocolVersion >= ntv2NubProtocolVersion3)
+	{
+		BUILD_INFO_STRUCT buildInfo;
+		if (mDevice.DriverGetBuildInformation(buildInfo))
+			AJASystemInfo::append(infoTable, "Driver Build Version",	buildInfo.buildStr);
+	}
+#else
+	AJASystemInfo::append(infoTable, "Watcher Nub Protocol Version",	"N/A (nub client support missing)");
+#endif	//	NTV2_NUB_CLIENT_SUPPORT
+
+	AJASystemInfo::append(infoTable, "DEVICE INFO",	"");
+	AJASystemInfo::append(infoTable, "Device",				mDevice.GetDisplayName());
+	str = xHEX0NStr(mDevice.GetDeviceID(),8) + " (" + string(::NTV2DeviceIDString(mDevice.GetDeviceID())) + ")";
+	AJASystemInfo::append(infoTable, "Device ID",			str);
+	AJASystemInfo::append(infoTable, "Serial Number",		(mDevice.GetSerialNumberString(str) ? str : "Not programmed"));
+	AJASystemInfo::append(infoTable, "Video Bitfile",		(getBitfileDate(mDevice, str, eFPGAVideoProc) ? str : "Not available"));
+	AJASystemInfo::append(infoTable, "PCI FPGA Version",	mDevice.GetPCIFPGAVersionString());
+	ULWord	numBytes(0);	string	dateStr, timeStr;
+	if (mDevice.GetInstalledBitfileInfo(numBytes, dateStr, timeStr))
+	{
+		AJASystemInfo::append(infoTable, "Installed Bitfile ByteCount",	DECStr(numBytes));
+		AJASystemInfo::append(infoTable, "Installed Bitfile Build Date",	dateStr + " " + timeStr);
+	}
 
     if (mDevice.IsKonaIPDevice())
     {
-        ULWord cfg(0);
-        mDevice.ReadRegister((kRegSarekFwCfg + SAREK_REGS), cfg);
-
-        PACKAGE_INFO_STRUCT pis;
-        mDevice.GetPackageInformation(pis);
-        oss << "Package: " << pis.packageNumber << "  Build: " << pis.buildNumber << "  " << pis.date << " "  << pis.time << endl;
+        PACKAGE_INFO_STRUCT pkgInfo;
+        if (mDevice.GetPackageInformation(pkgInfo))
+        {
+			AJASystemInfo::append(infoTable, "Package",		DECStr(pkgInfo.packageNumber));
+			AJASystemInfo::append(infoTable, "Build",		DECStr(pkgInfo.buildNumber));
+			AJASystemInfo::append(infoTable, "Build Date",	pkgInfo.date);
+			AJASystemInfo::append(infoTable, "Build Time",	pkgInfo.time);
+		}
 
         CNTV2KonaFlashProgram ntv2Card(mDevice.GetIndexNumber());
-        MacAddr mac1;
-        MacAddr mac2;
+        MacAddr mac1, mac2;
         if (ntv2Card.ReadMACAddresses(mac1, mac2))
         {
-            char buf[132];
-            sprintf(buf,"MAC1=%02x:%02x:%02x:%02x:%02x:%02x MAC2=%02x:%02x:%02x:%02x:%02x:%02x\n",
-                mac1.mac[0], mac1.mac[1], mac1.mac[2], mac1.mac[3], mac1.mac[4], mac1.mac[5],
-                mac2.mac[0], mac2.mac[1], mac2.mac[2], mac2.mac[3], mac2.mac[4], mac2.mac[5]);
-            oss << buf;
-        }
+			AJASystemInfo::append(infoTable, "MAC1",	mac1.AsString());
+			AJASystemInfo::append(infoTable, "MAC2",	mac2.AsString());
+		}
 
+        ULWord cfg(0);
+        mDevice.ReadRegister((kRegSarekFwCfg + SAREK_REGS), cfg);
         if (cfg & SAREK_2022_2)
         {
-            ULWord dnaLo;
-            ntv2Card.ReadRegister(kRegSarekDNALow + SAREK_REGS, dnaLo);
-            ULWord dnaHi;
-            ntv2Card.ReadRegister(kRegSarekDNAHi + SAREK_REGS, dnaHi);
-            oss << "Device DNA: " << HEX0N(dnaHi,8) << "-" << HEX0N(dnaLo,8) << endl;
+			ULWord dnaLo(0), dnaHi(0);
+			if (ntv2Card.ReadRegister(kRegSarekDNALow + SAREK_REGS, dnaLo))
+				if (ntv2Card.ReadRegister(kRegSarekDNAHi + SAREK_REGS, dnaHi))
+					AJASystemInfo::append(infoTable, "Device DNA",	string(HEX0NStr(dnaHi,8)+HEX0NStr(dnaLo,8)));
         }
 
         string licenseInfo;
         ntv2Card.ReadLicenseInfo(licenseInfo);
-        oss << "License: " << licenseInfo << endl;
+		AJASystemInfo::append(infoTable, "License",	licenseInfo);
 
         if (cfg & SAREK_2022_2)
         {
-            ULWord licenseStatus;
-            ntv2Card.ReadRegister(kRegSarekLicenseStatus + SAREK_REGS, licenseStatus);
-            oss  << ((licenseStatus & SAREK_LICENSE_PRESENT) ? "" : "License not found ")
-                 << ((licenseStatus & SAREK_LICENSE_VALID) ? "License is valid" : "License NOT valid")
-                 << " (Enable Mask: 0x" << hex << (licenseStatus & 0xff) << ")"
-                 << endl;
+			ULWord licenseStatus(0);
+			ntv2Card.ReadRegister(kRegSarekLicenseStatus + SAREK_REGS, licenseStatus);
+			AJASystemInfo::append(infoTable, "License Present",	licenseStatus & SAREK_LICENSE_PRESENT ? "Yes" : "No");
+			AJASystemInfo::append(infoTable, "License Status",	licenseStatus & SAREK_LICENSE_VALID ? "License is valid" : "License NOT valid");
+			AJASystemInfo::append(infoTable, "License Enable Mask",	xHEX0NStr(licenseStatus & 0xff,2));
         }
     }
 
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-    oss << "Watcher Nub Protocol version: " << maxKnownProtocolVersion << endl;
-
-    ULWord negotiatedProtocolVersion = mDevice.GetNubProtocolVersion ();
-    oss << "Negotiated Nub Protocol version: ";
-    if (!negotiatedProtocolVersion)
-        oss << " Not available" << endl;
-    else
-        oss << negotiatedProtocolVersion << endl;
-
-    if (negotiatedProtocolVersion >= ntv2NubProtocolVersion3)
-    {
-        BUILD_INFO_STRUCT buildInfo;
-        if (mDevice.DriverGetBuildInformation (buildInfo))
-            oss << buildInfo.buildStr;
-    }
-#endif	//	NTV2_NUB_CLIENT_SUPPORT
+    //	Host info
+    AJASystemInfo	hostInfo;
+	oss << AJASystemInfo::ToString(infoTable) << endl
+		<< hostInfo.ToString() << endl;
 }
 
-void CNTV2SupportLogger::FetchRegisterLog(std::ostringstream& oss)
+void CNTV2SupportLogger::FetchRegisterLog(std::ostringstream& oss) const
 {
     NTV2RegisterReads	regs;
     const NTV2DeviceID	deviceID	(mDevice.GetDeviceID());
@@ -531,7 +542,7 @@ void CNTV2SupportLogger::FetchRegisterLog(std::ostringstream& oss)
     }
 }
 
-void CNTV2SupportLogger::FetchAutoCirculateLog(std::ostringstream& oss)
+void CNTV2SupportLogger::FetchAutoCirculateLog(std::ostringstream& oss) const
 {
     ULWord					appSignature	(0);
     int32_t					appPID			(0);
@@ -627,7 +638,7 @@ void CNTV2SupportLogger::FetchAutoCirculateLog(std::ostringstream& oss)
     }	//	for each channel
 }
 
-void CNTV2SupportLogger::FetchAudioLog(std::ostringstream& oss)
+void CNTV2SupportLogger::FetchAudioLog(std::ostringstream& oss) const
 {
 
     const UWord		maxNumChannels		(::NTV2DeviceGetMaxAudioChannels(mDevice.GetDeviceID()));
@@ -725,7 +736,7 @@ void CNTV2SupportLogger::FetchAudioLog(std::ostringstream& oss)
     }
 }
 
-void CNTV2SupportLogger::FetchRoutingLog(std::ostringstream& oss)
+void CNTV2SupportLogger::FetchRoutingLog(std::ostringstream& oss) const
 {
     //	Dump routing info...
     CNTV2SignalRouter	router;

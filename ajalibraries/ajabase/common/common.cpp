@@ -298,6 +298,7 @@ bool string_to_cstring(const std::string &str, char *c_str, size_t c_str_size)
 
 void split(const std::string& str, const char delim, std::vector<std::string>& elems)
 {
+	elems.clear();
     std::stringstream ss(str);
     std::string item;
     while(std::getline(ss, item, delim))
@@ -317,6 +318,24 @@ std::vector<std::string> split(const std::string& str, const char delim)
     std::vector<std::string> elems;
     split(str, delim, elems);
     return elems;
+}
+
+std::vector<std::string> split(const std::string& str, const std::string & delim)
+{
+	std::vector<std::string> result;
+    size_t	startPos(0);
+    size_t	delimPos(str.find(delim, startPos));
+    while(delimPos != std::string::npos)
+    {
+        const std::string item (str.substr(startPos, delimPos - startPos));
+        result.push_back(item);
+        startPos = delimPos + delim.length();
+        delimPos = str.find(delim, startPos);
+	}
+    // if last character in string matches the split delim add an empty string
+    if (startPos == str.length())
+        result.push_back(std::string());
+    return result;
 }
 
 std::string& lower(std::string& str)

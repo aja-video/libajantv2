@@ -1,5 +1,5 @@
 /**
-	@file		ajantv2/includes/testpatterngen.h
+	@file		ajantv2/includes/ntv2testpatterngen.h
 	@brief		Declares the NTV2TestPatternGen class.
 	@copyright	(C) 2010-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/

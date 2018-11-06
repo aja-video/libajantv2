@@ -7,13 +7,15 @@
 #include "ajatypes.h"
 #include "ajaexport.h"
 #include "ntv2enums.h"
+#include "ntv2debug.h"
 #include "ntv2driverinterface.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2nubaccess.h"
 #include "ntv2bitfile.h"
 #include "ntv2registers2022.h"
 #include "ntv2spiinterface.h"
-
+#include "ntv2utils.h"
+#include "ajabase/system/debug.h"
 #include <string.h>
 #include <assert.h>
 #include <iostream>
@@ -23,59 +25,12 @@
 
 using namespace std;
 
-typedef map <INTERRUPT_ENUMS, string>	InterruptEnumStringMap;
-static InterruptEnumStringMap			gInterruptNames;
 
-class DriverInterfaceGlobalInitializer
-{
-	public:
-		DriverInterfaceGlobalInitializer ()
-		{
-			gInterruptNames [eOutput1]				= "eOutput1";
-			gInterruptNames [eInterruptMask]		= "eInterruptMask";
-			gInterruptNames [eInput1]				= "eInput1";
-			gInterruptNames [eInput2]				= "eInput2";
-			gInterruptNames [eAudio]				= "eAudio";
-			gInterruptNames [eAudioInWrap]			= "eAudioInWrap";
-			gInterruptNames [eAudioOutWrap]			= "eAudioOutWrap";
-			gInterruptNames [eDMA1]					= "eDMA1";
-			gInterruptNames [eDMA2]					= "eDMA2";
-			gInterruptNames [eDMA3]					= "eDMA3";
-			gInterruptNames [eDMA4]					= "eDMA4";
-			gInterruptNames [eChangeEvent]			= "eChangeEvent";
-			gInterruptNames [eGetIntCount]			= "eGetIntCount";
-			gInterruptNames [eWrapRate]				= "eWrapRate";
-			gInterruptNames [eUart1Tx]				= "eUart1Tx";
-			gInterruptNames [eUart1Rx]				= "eUart1Rx";
-			gInterruptNames [eAuxVerticalInterrupt]	= "eAuxVerticalInterrupt";
-			gInterruptNames [ePushButtonChange]		= "ePushButtonChange";
-			gInterruptNames [eLowPower]				= "eLowPower";
-			gInterruptNames [eDisplayFIFO]			= "eDisplayFIFO";
-			gInterruptNames [eSATAChange]			= "eSATAChange";
-			gInterruptNames [eTemp1High]			= "eTemp1High";
-			gInterruptNames [eTemp2High]			= "eTemp2High";
-			gInterruptNames [ePowerButtonChange]	= "ePowerButtonChange";
-			gInterruptNames [eInput3]				= "eInput3";
-			gInterruptNames [eInput4]				= "eInput4";
-			gInterruptNames [eUart2Tx]				= "eUart2Tx";
-			gInterruptNames [eUart2Rx]				= "eUart2Rx";
-			gInterruptNames [eHDMIRxV2HotplugDetect]= "eHDMIRxV2HotplugDetect";
-			gInterruptNames [eInput5]				= "eInput5";
-			gInterruptNames [eInput6]				= "eInput6";
-			gInterruptNames [eInput7]				= "eInput7";
-			gInterruptNames [eInput8]				= "eInput8";
-			gInterruptNames [eInterruptMask2]		= "eInterruptMask2";
-			gInterruptNames [eOutput2]				= "eOutput2";
-			gInterruptNames [eOutput3]				= "eOutput3";
-			gInterruptNames [eOutput4]				= "eOutput4";
-			gInterruptNames [eOutput5]				= "eOutput5";
-			gInterruptNames [eOutput6]				= "eOutput6";
-			gInterruptNames [eOutput7]				= "eOutput7";
-			gInterruptNames [eOutput8]				= "eOutput8";
-		}
-};
-
-static DriverInterfaceGlobalInitializer	gInitializerSingleton;
+#define	DIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
+#define	DIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
+#define	DINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
+#define	DIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
+#define	DIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
 
 
 CNTV2DriverInterface::CNTV2DriverInterface ()
@@ -125,16 +80,38 @@ CNTV2DriverInterface::~CNTV2DriverInterface ()
 
 bool CNTV2DriverInterface::ConfigureSubscription (bool bSubscribe, INTERRUPT_ENUMS eInterruptType, PULWord & hSubscription)
 {
-	if (bSubscribe)							//	If subscribing,
-		mEventCounts [eInterruptType] = 0;	//		clear this interrupt's event counter
-// 	#if defined (_DEBUG)
-// 	else
-// 		cerr << "## DEBUG:  Unsubscribing '" << gInterruptNames [eInterruptType] << "' (" << eInterruptType << "), " << mEventCounts [eInterruptType] << " event(s) received" << endl;
-// 	#endif
 	(void) hSubscription;
+	if (!NTV2_IS_VALID_INTERRUPT_ENUM(eInterruptType))
+		return false;
+	if (bSubscribe)
+	{										//	If subscribing,
+		mEventCounts [eInterruptType] = 0;	//		clear this interrupt's event counter
+		DIINFO("Subscribing '" << ::NTV2InterruptEnumString(eInterruptType) << "' (" << UWord(eInterruptType)
+				<< "), event counter reset");
+	}
+ 	else
+		DIINFO("Unsubscribing '" << ::NTV2InterruptEnumString(eInterruptType) << "' (" << UWord(eInterruptType) << "), "
+				<< mEventCounts[eInterruptType] << " event(s) received");
 	return true;
 
 }	//	ConfigureSubscription
+
+
+NTV2DeviceID CNTV2DriverInterface::GetDeviceID (void)
+{
+	ULWord	value	(0);
+	if (_boardOpened && ReadRegister (kRegBoardID, value))
+	{
+		const NTV2DeviceID	currentValue (static_cast <NTV2DeviceID> (value));
+		if (currentValue != _boardID)
+			DIWARN(xHEX0N(this,16) << ":  NTV2DeviceID " << xHEX0N(value,8) << " (" << ::NTV2DeviceIDToString(currentValue)
+					<< ") read from register " << kRegBoardID << " doesn't match _boardID " << xHEX0N(_boardID,8) << " ("
+					<< ::NTV2DeviceIDToString(_boardID) << ")");
+		return currentValue;
+	}
+	else
+		return DEVICE_ID_NOTFOUND;
+}
 
 
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
@@ -351,23 +328,6 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 	(void) inByteCount;
 	(void) inSynchronous;
 	return false;
-}
-
-// Remote card GetDriverVersion.  Tested on Mac only, other platforms use
-// a virtual register for the driver version.
-bool CNTV2DriverInterface::GetDriverVersion (ULWord * driverVersion)
-{
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
-
-	return !NTV2GetDriverVersionRemote(	_sockfd,
-										_remoteHandle,
-										_nubProtocolVersion,
-										driverVersion);
-#else
-	(void) driverVersion;
-	return false;
-#endif
 }
 
 
@@ -812,34 +772,6 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 	return false;
 }
 
-bool CNTV2DriverInterface::IsKonaIPDevice()
-{
-	ULWord val = 0;
-	ULWord hexID = 0x0;
-	ReadRegister (kRegBoardID, hexID);
-	switch((NTV2DeviceID)hexID)
-	{
-	case DEVICE_ID_KONA4:
-	case DEVICE_ID_KONA4UFC:
-		ReadRegister((0x100000 + 0x80) / 4, val);
-		if (val != 0x00000000 && val != 0xffffffff)
-			return true;
-		else
-			return false;
-
-	case DEVICE_ID_KONAIP_2022:
-	case DEVICE_ID_KONAIP_4CH_2SFP:
-	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-	case DEVICE_ID_KONAIP_1RX_1TX_2110:
-	case DEVICE_ID_KONAIP_2110:
-    case DEVICE_ID_IOIP_2022:
-    case DEVICE_ID_IOIP_2110:
-		return true;
-	default:
-		return false;
-	}
-}
 
 #if !defined (NTV2_DEPRECATE)
 NTV2BoardType CNTV2DriverInterface::GetCompileFlag ()

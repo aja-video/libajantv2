@@ -16,35 +16,7 @@
 
 #define NTV2_DEVICE_TYPE               0xBB
 
-// Driver version mask definition.
-// 1.1 Beta
-// Bit  15     Debug
-// Bit  14     Beta Version flag (Bits 13-8 interpreted as "beta x"
-// Bits 13-8   sub-minor Version (or beta version #)
-// Bits 7-4    Major Version  - new hardware types to support, etc.
-// Bits 3-0    Minor Version
-
-// Examples:  0xB140  = Debug driver, 4.0 Beta1
-//            0x8140  = Debug driver, 4.0.1
-//            0x4140  = Release driver, 4.0 Beta1
-//            0x0140  = Release driver, 4.0.1
-
-#ifdef OLD_SDK_VERSION_FORMAT
-// Zero high word denotes old format
-#define NTV2_LINUX_DRIVER_VERSION  (  ((SDKVER_MIN & 0x000f) <<  0) + \
-                                      ((SDKVER_MAJ & 0x000f) <<  4) + \
-                                      ((SDKVER_PNT & 0x003f) <<  8) + \
-                                      ((AJA_BETA   & 0x0001) << 14) + \
-                                      ((AJA_DEBUG  & 0x0001) << 15) + \
-                                      ((0          & 0xffff) << 16))
-#else
-#define NTV2_LINUX_DRIVER_VERSION  (  ((SDKVER_MIN & 0x000f) <<  0) + \
-                                      ((SDKVER_MAJ & 0x000f) <<  4) + \
-                                      ((SDKVER_PNT & 0x000f) <<  8) + \
-                                      ((AJA_BETA   & 0x0001) << 14) + \
-                                      ((AJA_DEBUG  & 0x0001) << 15) + \
-                                      ((SDKVER_BLD & 0xffff) << 16))
-#endif
+#define NTV2_LINUX_DRIVER_VERSION  	NTV2DriverVersionEncode(AJA_NTV2_SDK_VERSION_MAJOR, AJA_NTV2_SDK_VERSION_MINOR, AJA_NTV2_SDK_VERSION_POINT, AJA_NTV2_SDK_BUILD_NUMBER)
 
 
 // Read,Write IOCTL's
@@ -87,15 +59,6 @@
 #define IOCTL_NTV2_DMA_P2P \
             _IOW(NTV2_DEVICE_TYPE, 179,NTV2_DMA_P2P_CONTROL_STRUCT)
 
-//  These aren't currently implemented but may be someday.
-#if 0
-#define IOCTL_NTV2_DMA_READ_RECTANGLE \
-            _IOW(NTV2_DEVICE_TYPE, 177)
-
-#define IOCTL_NTV2_DMA_WRITE_RECTANGLE \
-            _IOW(NTV2_DEVICE_TYPE, 178)
-#endif
-
 
 // Interrupt control (enable, disable, get count)
 //
@@ -120,6 +83,7 @@
 // Reload procamp hardware registers from software copy after ADC chip reset
 #define IOCTL_NTV2_RESTORE_HARDWARE_PROCAMP_REGISTERS \
             _IO(NTV2_DEVICE_TYPE, 232)
+
 //
 // Downloaded Xilinx bitfile management IOCTLs
 //

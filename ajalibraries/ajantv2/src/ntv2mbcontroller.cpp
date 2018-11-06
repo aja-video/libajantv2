@@ -185,52 +185,6 @@ bool CNTV2MBController::SetIGMPVersion(uint32_t version)
     return false;
 }
 
-bool CNTV2MBController::FetchGrandMasterInfo(string & grandmasterInfo)
-{
-    if (!(getFeatures() & SAREK_MB_PRESENT))
-        return true;
-
-    sprintf((char*)txBuf,"cmd=%d",(int)MB_CMD_FETCH_GM_INFO);
-    bool rv = sendMsg(500);
-    if (!rv)
-    {
-        mIpErrorCode = NTV2IpErrNoResponseFromMB;
-        return false;
-    }
-
-    string response;
-    getResponse(response);
-    vector<string> msg;
-    splitResponse(response, msg);
-    if (msg.size() >=3)
-    {
-        string status;
-        rv = getString(msg[0],"status",status);
-        if (rv && (status == "OK"))
-        {
-            rv = getString(msg[2],"INFO",grandmasterInfo);
-            if (rv == false)
-            {
-                mIpErrorCode = NTV2IpErrGrandMasterInfo;
-                return false;
-            }
-            return true;
-        }
-        else if (rv && (status == "FAIL"))
-        {
-            if (msg.size() >= 3)
-            {
-                rv = getString(msg[2],"error",mIpInternalErrorString);
-                mIpErrorCode = NTV2IpErrMBStatusFail;
-                return false;
-            }
-        }
-    }
-
-    mIpErrorCode = NTV2IpErrInvalidMBResponse;
-    return false;
-}
-
 bool CNTV2MBController::GetRemoteMAC(std::string remote_IPAddress, eSFP port, NTV2Stream stream, string & MACaddress)
 {
     if ( (getFeatures() & SAREK_MB_PRESENT) == 0)
@@ -440,7 +394,11 @@ void CNTV2MBController::SetIGMPGroup(eSFP port, NTV2Stream stream, uint32_t mcas
 void CNTV2MBController::UnsetIGMPGroup(eSFP port, NTV2Stream stream)
 {
     uint32_t offset = getIGMPCBOffset(port, stream);
-    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, 0);   // block not used
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, IGMPCB_STATE_BUSY);
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_MCAST_ADDR, 0);
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_SRC_ADDR,   0);
+
+    mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, 0);
 }
 
 void CNTV2MBController::EnableIGMPGroup(eSFP port, NTV2Stream stream, bool enable)

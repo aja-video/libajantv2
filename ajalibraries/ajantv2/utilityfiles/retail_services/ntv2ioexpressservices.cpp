@@ -17,36 +17,6 @@ IoExpressServices::IoExpressServices()
 
 
 //-------------------------------------------------------------------------------------------------------
-//	GetSelectedInputVideoFormat
-//	Note:	Determine input video format based on input select and fbVideoFormat
-//			which currently is videoformat of ch1-framebuffer
-//-------------------------------------------------------------------------------------------------------
-NTV2VideoFormat IoExpressServices::GetSelectedInputVideoFormat(
-											NTV2VideoFormat fbVideoFormat,
-											NTV2ColorSpaceMode* inputColorSpace)
-{
-	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-	if (inputColorSpace)
-		*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-	
-	// Figure out what our input format is based on what is selected 
-	switch (mVirtualInputSelect)
-	{
-		case NTV2_Input1Select:
-			inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-			break;
-		case NTV2_Input2Select:
-			inputFormat = mCard->GetHDMIInputVideoFormat();
-			break;
-		default: break;
-	}
-	inputFormat = GetTransportCompatibleFormat(inputFormat, fbVideoFormat);
-	
-	return inputFormat;
-}
-
-
-//-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
 void IoExpressServices::SetDeviceXPointPlayback ()
@@ -201,7 +171,7 @@ void IoExpressServices::SetDeviceXPointCapture()
 	mCard->WriteRegister (kRegFS1ReferenceSelect, enabled, kRegMaskLTCLoopback, kRegShiftLTCLoopback);
 	
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
+	inputFormat = mDs.inputVideoFormatSelect;
 	
 	
 	// This is done all over so do it once here so we have the value
@@ -345,103 +315,80 @@ void IoExpressServices::SetDeviceMiscRegisters ()
 	NTV2FrameRate			secondardFrameRate = GetNTV2FrameRateFromVideoFormat (mVirtualSecondaryFormatSelect);
 	
 	
-	// HDMI output - initialization sequence
-	if (mHDMIStartupCountDown > 0)
+	if (mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)
 	{
-		// start initialization
-		if (mHDMIStartupCountDown == kHDMIStartupPhase0)
-			mCard->WriteRegister (kRegHDMIOutControl, 0x0, 0x0F000000);
-			
-		else if (mHDMIStartupCountDown == kHDMIStartupPhase1)
-			mCard->WriteRegister (kRegHDMIOutControl, 0xC, 0x0F000000);
-		
-		else if (mHDMIStartupCountDown == kHDMIStartupPhase2)
-			mCard->WriteRegister (kRegHDMIOutControl, 0xD, 0x0F000000);
-			
-		else if (mHDMIStartupCountDown == kHDMIStartupPhase3)
-			mCard->WriteRegister (kRegHDMIOutControl, 0xC, 0x0F000000);
-		
-		mHDMIStartupCountDown--;
+		mCard->SetHDMIOutVideoStandard (primaryStandard);
+		mCard->SetHDMIOutVideoFPS (primaryFrameRate);
 	}
-	else
+	else if (mVirtualHDMIOutputSelect == NTV2_SecondaryOutputSelect)
 	{
-		// HDMI out fully initialized - now do setup
-	
-		// Set HDMI Out (reg 125)
-		if (mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)
-		{
-			mCard->SetHDMIOutVideoStandard (primaryStandard);
-			mCard->SetHDMIOutVideoFPS (primaryFrameRate);
-		}
-		else if (mVirtualHDMIOutputSelect == NTV2_SecondaryOutputSelect)
-		{
-			mCard->SetHDMIOutVideoStandard (secondaryStandard);
-			mCard->SetHDMIOutVideoFPS (secondardFrameRate);
-		}
-		
-		// HDMI out colorspace auto-detect status 
-		mHDMIOutColorSpaceModeStatus = mHDMIOutColorSpaceModeCtrl;
-		if (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect)
-		{
-			NTV2HDMIBitDepth bitDepth = NTV2_HDMI10Bit;
-			NTV2LHIHDMIColorSpace colorSpace = NTV2_LHIHDMIColorSpaceYCbCr;
-			
-			mCard->GetHDMIOutDownstreamColorSpace (colorSpace);
-			mCard->GetHDMIOutDownstreamBitDepth (bitDepth);
-			
-			if (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCYCbCr10bit;
-			
-			else if (bitDepth == NTV2_HDMI10Bit)
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB10bit;
-			
-			else
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB8bit;
-		}
-		
-		// set color space bits as specified
-		switch (mHDMIOutColorSpaceModeStatus)
-		{
-			case kHDMIOutCSCYCbCr10bit:
-				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
-				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
-				break;
-				
-			case kHDMIOutCSCRGB10bit:
-				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
-				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
-				break;
-				
-			default:
-			case kHDMIOutCSCRGB8bit:
-				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
-				mCard->SetHDMIOutBitDepth (NTV2_HDMI8Bit);
-				break;
-		}
-		
-		// HDMI Out Protocol mode
-		switch (mHDMIOutProtocolMode)
-		{
-			default:
-			case kHDMIOutProtocolAutoDetect:
-				{
-					ULWord detectedProtocol;
-					mCard->ReadRegister (kRegHDMIInputStatus, detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
-					mCard->WriteRegister (kRegHDMIOutControl, detectedProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);				
-				}
-				break;
-			
-			case kHDMIOutProtocolHDMI:
-				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-				break;
-			
-			case kHDMIOutProtocolDVI:
-				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolDVI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-				break;
-		}
+		mCard->SetHDMIOutVideoStandard (secondaryStandard);
+		mCard->SetHDMIOutVideoFPS (secondardFrameRate);
 	}
 	
-		// special case - VANC 8bit pixel shift support
+	// set color-space bit-depth
+	switch (mDs.hdmiOutColorSpace)
+	{
+		case kHDMIOutCSCYCbCr8bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
+			mCard->SetHDMIOutBitDepth(NTV2_HDMI8Bit);
+			break;
+	
+		case kHDMIOutCSCYCbCr10bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
+			mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
+			break;
+			
+		case kHDMIOutCSCRGB10bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
+			mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
+			break;
+			
+		default:
+		case kHDMIOutCSCRGB8bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
+			mCard->SetHDMIOutBitDepth (NTV2_HDMI8Bit);
+			break;
+	}
+	
+	// HDMI Out Protocol mode
+	switch (mDs.hdmiOutProtocol_)
+	{
+		default:
+		case kHDMIOutProtocolAutoDetect:
+			mCard->WriteRegister(kRegHDMIOutControl, mDs.hdmiOutDsProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+			break;
+			
+		case kHDMIOutProtocolHDMI:
+			mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+			break;
+			
+		case kHDMIOutProtocolDVI:
+			mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolDVI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+			break;
+	}
+	
+	// HDMI Out rgb range
+	switch (mDs.hdmiOutRange)
+	{
+		default:
+		case NTV2_RGBRangeSMPTE:	mCard->SetHDMIOutRange(NTV2_HDMIRangeSMPTE);	break;
+		case NTV2_RGBRangeFull:		mCard->SetHDMIOutRange(NTV2_HDMIRangeFull);		break;
+	}
+	
+	// HDMI Out Stereo 3D
+	mCard->SetHDMIOut3DPresent(false);
+
+	
+	// HDMI In rgb range
+	switch (mDs.hdmiInRange)
+	{
+		default:
+		case NTV2_RGBRangeSMPTE:	mCard->SetHDMIInputRange(NTV2_HDMIRangeSMPTE);	break;
+		case NTV2_RGBRangeFull:		mCard->SetHDMIInputRange(NTV2_HDMIRangeFull);	break;
+	}
+	
+	// special case - VANC 8bit pixel shift support
 	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format) )
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else
@@ -449,7 +396,7 @@ void IoExpressServices::SetDeviceMiscRegisters ()
 	
 
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
+	inputFormat = mDs.inputVideoFormatSelect;
 	
 	//
 	// Analog-In locking state machine
@@ -482,8 +429,6 @@ void IoExpressServices::SetDeviceMiscRegisters ()
 				(mVirtualAnalogInType != ctrlAnalogInType) ||
 				(virtualAnalogInBlackLevel != ctrlAnalogInBlackLevel) )
 		{
-			//DebugLog("program ADC AnalogInFrameRate = %d, AnalogInStandard = %d\n", inputFrameRate, mVirtualAnalogInStandard);
-
 			// insure we wait at least 10 frames to allow the ADC chip to stabilize
 			mADCStabilizeCount = 10;
 			

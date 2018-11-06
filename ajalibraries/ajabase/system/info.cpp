@@ -20,6 +20,82 @@
 #include <iomanip>
 #include <iostream>
 
+using namespace std;
+
+
+//	STATIC
+string AJASystemInfo::ToString (const AJALabelValuePairs & inLabelValuePairs, const size_t inMaxValWidth, const size_t inGutterWidth)
+{
+	typedef std::vector<string>			ValueLines;
+	typedef ValueLines::const_iterator	ValueLinesConstIter;
+	const string	gutterStr	(inGutterWidth, ' ');
+
+	//	Measure longest label length...
+	//	BUGBUGBUG	Multi-byte UTF8 characters should only be counted as one character
+    size_t longestLabelLen(0);
+    for (AJALabelValuePairsConstIter it(inLabelValuePairs.begin());  it != inLabelValuePairs.end();  ++it)
+        if (it->first.length() > longestLabelLen)
+            longestLabelLen = it->first.length();
+    longestLabelLen++;	//	Plus the ':'
+
+	//	Iterate over everything again, this time "printing" the map's contents...
+    ostringstream oss;
+    for (AJALabelValuePairsConstIter it(inLabelValuePairs.begin());  it != inLabelValuePairs.end();  ++it)
+    {
+		static const string	lineBreakChars("\r\n");
+        string label(it->first), value(it->second);
+        const bool	hasLineBreaks (value.find_first_of(lineBreakChars) != string::npos);
+		if (value.empty())	//	Empty value string is a special case...
+			oss << endl;	//	...don't append ':' and prepend an extra blank line
+		else
+			label += ":";
+
+		if (!hasLineBreaks  &&  !inMaxValWidth)
+		{	//	No wrapping or line-breaks -- just output the line...
+			oss << setw(int(longestLabelLen)) << left << label << gutterStr << value << endl;
+			continue;	//	...and move on to the next
+		}
+
+		//	Wrapping/line-breaking:
+		ValueLines	valueLines, finalLines;
+		if (hasLineBreaks)
+		{
+			static const string	lineBreakDelims[]	=	{"\r\n", "\r", "\n"};
+			aja::replace(value, lineBreakDelims[0], lineBreakDelims[2]);	//	CRLF => LF
+			aja::replace(value, lineBreakDelims[1], lineBreakDelims[2]);	//	CR => LF
+			valueLines = aja::split(value, lineBreakDelims[2][0]);	//	Split on LF
+		}
+		else
+			valueLines.push_back(value);
+		if (inMaxValWidth)
+			for (ValueLinesConstIter it(valueLines.begin());  it != valueLines.end();  ++it)
+			{
+				const string &	lineStr(*it);
+				size_t	pos(0);
+				do
+				{
+					finalLines.push_back(lineStr.substr(pos, inMaxValWidth));
+					pos += inMaxValWidth;
+				} while (pos < lineStr.length());
+			}	//	for each valueLine
+		else
+			finalLines = valueLines;
+
+		const string	wrapIndentStr	(longestLabelLen + inGutterWidth,  ' ');
+		for (size_t ndx(0);  ndx < finalLines.size();  ndx++)
+		{
+			const string &	valStr(finalLines.at(ndx));
+			if (ndx)
+				oss << wrapIndentStr << valStr << endl;
+			else
+				oss << setw(int(longestLabelLen)) << left << label << gutterStr << valStr << endl;
+		}
+    }	//	for each label/value pair
+
+    return oss.str();
+}
+
+
 AJASystemInfo::AJASystemInfo(AJASystemInfoMemoryUnit units)
 {
 	// create the implementation class
@@ -37,8 +113,7 @@ AJASystemInfo::~AJASystemInfo()
 	}
 }
 
-AJAStatus
-AJASystemInfo::Rescan()
+AJAStatus AJASystemInfo::Rescan (void)
 {
     AJAStatus ret = AJA_STATUS_FAIL;
     if(mpImpl)
@@ -71,121 +146,74 @@ AJASystemInfo::Rescan()
     return ret;
 }
 
-AJAStatus
-AJASystemInfo::GetValue(AJASystemInfoTag tag, std::string &value)
+AJAStatus AJASystemInfo::GetValue (const AJASystemInfoTag tag, string & outValue) const
 {
-    AJAStatus ret = AJA_STATUS_FAIL;
-    value = "";
-    if (mpImpl && mpImpl->mValueMap.count(int(tag)) != 0)
-    {
-        value = mpImpl->mValueMap[int(tag)];
-        ret = AJA_STATUS_SUCCESS;
-    }
-
-    return ret;
+	outValue = "";
+	if (mpImpl && mpImpl->mValueMap.count(int(tag)) != 0)
+	{
+		outValue = mpImpl->mValueMap[int(tag)];
+		return AJA_STATUS_SUCCESS;
+	}
+	return AJA_STATUS_FAIL;
 }
 
-AJAStatus
-AJASystemInfo::GetLabel(AJASystemInfoTag tag, std::string& label)
+AJAStatus AJASystemInfo::GetLabel (const AJASystemInfoTag tag, string & outLabel) const
 {
-    AJAStatus ret = AJA_STATUS_FAIL;
-    label = "";
-    if (mpImpl && mpImpl->mLabelMap.count(int(tag)) != 0)
-    {
-        label = mpImpl->mLabelMap[int(tag)];
-        ret = AJA_STATUS_SUCCESS;
-    }
-
-    return ret;
+	outLabel = "";
+	if (mpImpl && mpImpl->mLabelMap.count(int(tag)) != 0)
+	{
+		outLabel = mpImpl->mLabelMap[int(tag)];
+		return AJA_STATUS_SUCCESS;
+	}
+	return AJA_STATUS_FAIL;
 }
 
-std::string
-AJASystemInfo::ToString(int maxLength)
+string AJASystemInfo::ToString (const size_t inValueWrapLen, const size_t inGutterWidth) const
 {
-    std::ostringstream oss;
-
-    int longestLabelLen = 0;
-    for (int i=0;i<(int)AJA_SystemInfoTag_LAST;i++)
+	AJALabelValuePairs	infoTable;
+	append(infoTable, "HOST INFO");
+    for (AJASystemInfoTag tag(AJASystemInfoTag(0));  tag < AJA_SystemInfoTag_LAST;  tag = AJASystemInfoTag(tag+1))
     {
-        AJASystemInfoTag tag = (AJASystemInfoTag)i;
-        std::string label, value;
-        AJAStatus retLabel = GetLabel(tag, label);
-        AJAStatus retValue = GetValue(tag, value);
-        if (retLabel == AJA_STATUS_SUCCESS && retValue == AJA_STATUS_SUCCESS)
-        {
-            if ((int)label.length() > longestLabelLen)
-                longestLabelLen = (int)label.length();
-        }
+        string label, value;
+        if (AJA_SUCCESS(GetLabel(tag, label)) && AJA_SUCCESS(GetValue(tag, value)))
+			if (!label.empty())
+				append(infoTable, label, value);
     }
-
-    longestLabelLen += 3;
-
-    for (int i=0;i<(int)AJA_SystemInfoTag_LAST;i++)
-    {
-        AJASystemInfoTag tag = (AJASystemInfoTag)i;
-        std::string label, value;
-        AJAStatus retLabel = GetLabel(tag, label);
-        AJAStatus retValue = GetValue(tag, value);
-
-        if (retLabel == AJA_STATUS_SUCCESS && retValue == AJA_STATUS_SUCCESS)
-        {
-            label += ":";
-            std::ostringstream l;
-            l << std::setw(longestLabelLen) << std::left << label << " " << value;
-
-            int longestLabelPlusColonLen = longestLabelLen+1;
-
-            if (maxLength > 0 &&
-                maxLength > longestLabelPlusColonLen &&
-                (int)l.str().length() > maxLength)
-            {
-                // this will wrap the values at maxLength to use multiple lines
-                // a maxLength of -1 will skip this functionality
-                // i.e:
-                //
-                // some label:   this is a long string of text
-                //
-                // with a maxLength of 36 would become
-                //
-                // some label:   this is a long string
-                //               of text
-                //
-
-                std::string tmp = l.str();
-
-                oss << tmp.substr(0, maxLength) << std::endl;
-                tmp = tmp.substr(maxLength, std::string::npos);
-
-                int maxGrabAmount = maxLength - longestLabelPlusColonLen;
-                while(!tmp.empty())
-                {
-                    int grab = maxGrabAmount;
-                    if (grab > (int)tmp.length())
-                        grab = (int)tmp.length();
-
-                    oss << std::setw(longestLabelLen) << std::left << "" << " " << tmp.substr(0, grab) << std::endl;
-                    tmp = tmp.substr(grab, std::string::npos);
-                }
-            }
-            else
-            {
-                oss << l.str() << std::endl;
-            }
-        }
-    }
-
-    return oss.str();
+	return ToString(infoTable, inValueWrapLen, inGutterWidth);
 }
 
-void
-AJASystemInfo::ToString(std::string& allLabelsAndValues)
+void AJASystemInfo::ToString(string& allLabelsAndValues) const
 {
     allLabelsAndValues = ToString();
 }
 
-std::ostream & operator << (std::ostream & outStream, const AJASystemInfo & inData)
+ostream & operator << (ostream & outStream, const AJASystemInfo & inData)
 {
-    AJASystemInfo* instance = (AJASystemInfo*)&inData;
-    outStream << instance->ToString();
+    outStream << inData.ToString();
     return outStream;
+}
+
+ostream & operator << (ostream & outStream, const AJALabelValuePair & inData)
+{
+	string			label(inData.first);
+	const string &	value(inData.second);
+	if (label.empty())
+		return outStream;
+	aja::strip(label);
+	if (label.at(label.length()-1) == ':')
+		label.resize(label.length()-1);
+	aja::replace(label, " ", "_");
+	outStream << label << "=" << value;
+	return outStream;
+}
+
+ostream & operator << (ostream & outStream, const AJALabelValuePairs & inData)
+{
+	for (AJALabelValuePairsConstIter it(inData.begin());  it != inData.end();  )
+	{
+		outStream << *it;
+		if (++it != inData.end())
+			outStream << ", ";
+	}
+	return outStream;
 }

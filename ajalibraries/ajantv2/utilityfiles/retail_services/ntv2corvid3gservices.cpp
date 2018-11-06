@@ -23,17 +23,15 @@ void Corvid3GServices::SetDeviceXPointPlayback ()
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback();
 
-	bool bFb1RGB = IsRGBFormat(mFb1Format);
-	bool bFb2RGB = IsRGBFormat(mFb2Format);
-	bool bFb1Compressed = IsFormatCompressed(mFb1Format);
-		
-	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
-	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
-		
-	// don't let the DSK be ON if we're in Mac Desktop mode
-	if (!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop)
-		bDSKOn = false;
-		
+	bool bFb1RGB 			= IsRGBFormat(mFb1Format);
+	bool bFb2RGB 			= IsRGBFormat(mFb2Format);
+	bool bFb1Compressed 	= IsFormatCompressed(mFb1Format);
+	bool bDSKGraphicMode 	= mDSKMode == NTV2_DSKModeGraphicOverMatte || 
+							  mDSKMode == NTV2_DSKModeGraphicOverVideoIn || 
+							  mDSKMode == NTV2_DSKModeGraphicOverFB;
+	bool bDSKOn 			= mDSKMode == NTV2_DSKModeFBOverMatte || 
+							  mDSKMode == NTV2_DSKModeFBOverVideoIn || 
+							  (bFb2RGB && bDSKGraphicMode);
 	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool b3GbOut			= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);	
@@ -422,7 +420,7 @@ void Corvid3GServices::SetDeviceXPointCapture ()
 	
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
+	inputFormat = mDs.inputVideoFormatSelect;
 	
 	
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)

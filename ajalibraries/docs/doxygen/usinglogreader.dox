@@ -1,0 +1,272 @@
+/**
+@page	toolsandutilities
+
+@section		usinglogreader		‘logreader’ Command-Line Utility
+
+
+@par	Description
+
+A command-line tool that streams ::AJADebug log messages to standard output (or standard error).
+
+
+@par	Synopsis
+
+\code{.sh}
+	logreader [OPTION...]
+	  -u, --unit=[*|?]{{+|-}{0-84}}[...]                        Debug unit filter
+	  -s, --severity=[*|?]{{+|-}{deb|inf|not|warn|err}}[...]    Severity level filter
+	  --pid=process ID                                          Process ID filter
+	  --tid=thread ID                                           Thread ID filter
+	  -t, --threshold=deb|inf|not|warn|err|assert|alert|emerg   Stderr severity threshold
+	  --setdu                                                   Set debug units
+	  -v  --verbose                                             Show extra information when starting
+	Help options:
+	  -?, --help                                                Show this help message
+	      --usage                                               Show brief usage message
+\endcode
+
+-	The executable is shipped pre-built with the SDK, and appears in the “<b>bin</b>” directory.
+-	Source code is provided in the SDK.
+
+
+
+@par	Filtering by Message Severity
+
+By default, <b>logreader</b> reports all messages regardless of message severity.
+Each severity can be specified by a <b>severity identifier</b> (which correspond to the ::AJADebugSeverity enumeration values):
+-	<b>Emergency</b> (or <b>0</b>)
+-	<b>Alert</b> (or <b>1</b>)
+-	<b>Assert</b> (or <b>2</b>)
+-	<b>Error</b> (or <b>3</b>)
+-	<b>Warning</b> (or <b>4</b>)
+-	<b>Notice</b> (or <b>5</b>)
+-	<b>Info</b> (or <b>6</b>)
+-	<b>Debug</b> (or <b>7</b>)
+
+The <b>--severity</b> or <b>-s</b> option allows you to specify which severities to display.
+
+The parameter value is a sequence of <b>severity identifiers</b> that each are preceded by:
+-	<b>+</b> (to <b>include</b>), or…
+-	<b>-</b> (to <b>exclude</b>).
+
+The parameter value can also start with <b>*</b> (an asterisk) to mean “all” severities.
+
+A <b>?</b> (question mark) placed anywhere in the parameter will display a help message and terminate the tool:
+\code{.sh}
+$ ./bin/logreader  -s"?"
+## Legal severity values:  debug|info|notice|warning|error|assert|alert|emergency
+## Precede with '+' to include, or '-' to exclude;  start with '*' to specify 'everything'
+## EXAMPLE:  --severity="*-debug-info"   Show all except Debug and Info messages
+## EXAMPLE:  --severity=+notice+warn     Show only Notice and Warning messages
+\endcode
+
+Order and case is irrelevant, and identifiers can be repeated.
+They’re parsed left-to-right, so the right-most specification “wins”.
+They can also be abbreviated to the smallest number of letters that uniquely identify it.
+
+To display all messages, regardless of severity, omit the <b>-s</b> parameter, or use this:
+\code{.sh}
+$ ./bin/logreader  -s"*"
+\endcode
+
+To display all messages except those having <b>Debug</b> or <b>Info</b> severities, use the “all except” form:
+\code{.sh}
+$ ./bin/logreader  --severity "*-debug-info"
+\endcode
+
+To display only <b>Notice</b> or <b>Warning</b> severities:
+\code{.sh}
+$ ./bin/logreader  -s+not+warn
+$ ./bin/logreader  -s+5+4
+$ ./bin/logreader  -s+debug+info+notice+warning+error+assert+alert+emergency-alert-emergency-assert-error-info-debug
+\endcode
+
+
+
+@par	Filtering by Message Debug Unit (Groups)
+
+By default, <b>logreader</b> reports all messages whose <b>Debug Unit</b>s are <b>Enabled</b>.
+These are the messages that are allowed to enter the global ring buffer on the host computer.
+
+\ref usingajalogger has a configuration dialog that allows you to choose which <b>Debug Unit</b>’s messages
+to allow into the buffer (see \ref logger-config ).
+
+Each <b>Debug Unit</b> can be specified by a <b>Debug Unit identifier</b> (which correspond to the ::AJADebugUnit enumeration values):
+-	<b>Unknown</b> (or <b>0</b>)
+-	<b>Critical</b> (or <b>1</b>)
+-	<b>DriverGeneric</b> (or <b>2</b>)
+-	<b>ServiceGeneric</b> (or <b>3</b>)
+-	<b>UserGeneric</b> (or <b>4</b>)
+-	<b>VideoGeneric</b> (or <b>5</b>)
+-	<b>AudioGeneric</b> (or <b>6</b>)
+-	<b>TimecodeGeneric</b> (or <b>7</b>)
+-	<b>AncGeneric</b> (or <b>8</b>)
+-	<b>RoutingGeneric</b> (or <b>9</b>)
+-	<b>StatsGeneric</b> (or <b>10</b>)
+-	<b>Enumeration</b> (or <b>11</b>)
+-	<b>Application</b> (or <b>12</b>)
+-	<b>QuickTime</b> (or <b>13</b>)
+-	<b>ControlPanel</b> (or <b>14</b>)
+-	<b>Watcher</b> (or <b>15</b>)
+-	<b>Plugins</b> (or <b>16</b>)
+-	<b>CCLine21Decode</b> (or <b>17</b>)
+-	<b>CCLine21Encode</b> (or <b>18</b>)
+-	<b>CC608DataQueue</b> (or <b>19</b>)
+-	<b>CC608MsgQueue</b> (or <b>20</b>)
+-	<b>CC608Decode</b> (or <b>21</b>)
+-	<b>CC608DecodeChannel</b> (or <b>22</b>)
+-	<b>CC608DecodeScreen</b> (or <b>23</b>)
+-	<b>CC608Encode</b> (or <b>24</b>)
+-	<b>CC708Decode</b> (or <b>25</b>)
+-	<b>CC708Service</b> (or <b>26</b>)
+-	<b>CC708ServiceBlockQueue</b> (or <b>27</b>)
+-	<b>CC708Window</b> (or <b>28</b>)
+-	<b>CC708Encode</b> (or <b>29</b>)
+-	<b>CCFont</b> (or <b>30</b>)
+-	<b>SMPTEAnc</b> (or <b>31</b>)
+-	<b>AJAAncData</b> (or <b>32</b>)
+-	<b>AJAAncList</b> (or <b>33</b>)
+-	<b>BFT</b> (or <b>34</b>)
+-	<b>PnP</b> (or <b>35</b>)
+-	<b>Persistence</b> (or <b>36</b>)
+-	<b>Avid</b> (or <b>37</b>)
+-	<b>DriverInterface</b> (or <b>38</b>)
+-	<b>AutoCirculate</b> (or <b>39</b>)
+-	…plus the “unused” set <b>40</b> thru <b>84</b>
+
+The <b>--unit</b> or <b>-u</b> option allows you to specify which <b>Debug Unit</b>(s) to display.
+
+The parameter value is a sequence of <b>Debug Unit identifiers</b> that each must be preceded by:
+-	<b>+</b> (to <b>include</b>), or…
+-	<b>-</b> (to <b>exclude</b>).
+
+The parameter value can also start with <b>*</b> (an asterisk) to mean “all” <b>Debug Units</b>.
+
+A <b>?</b> (question mark) placed anywhere in the parameter will display a help message and terminate the tool:
+\code{.sh}
+$ ./bin/logreader  -u"?"
+## Legal debug units:  Unknown|Critical|DriverGeneric|ServiceGeneric|UserGeneric|VideoGeneric|AudioGeneric|…
+## Precede with '+' to include, or '-' to exclude;  start with '*' to specify 'everything'
+## EXAMPLE:  -u"*-AncGeneric-CC608Decode"       Show all except AncGeneric & CC608Decode messages
+## EXAMPLE:  -u+DriverInterface+AutoCirculate   Show only DriverInterface & AutoCirculate messages
+\endcode
+
+Order and case is irrelevant, and identifiers can be repeated.
+They’re parsed left-to-right, so the right-most specification “wins”.
+They can also be abbreviated to the smallest number of letters that uniquely identify it.
+
+To display all messages, regardless of <b>Debug Unit</b>, omit the <b>-u</b> parameter, or use this:
+\code{.sh}
+$ ./bin/logreader  -u"*"
+\endcode
+
+To display all messages except those in the <b>AncGeneric</b> and <b>CC608Decode</b> groups, use the “all except” form:
+\code{.sh}
+$ ./bin/logreader  --unit "*-AncGeneric-CC608Decode"
+\endcode
+
+To display only messages from the <b>DriverInterface</b> and <b>AutoCirculate</b> groups:
+\code{.sh}
+$ ./bin/logreader  -s+not+warn
+$ ./bin/logreader  -s+5+4
+$ ./bin/logreader  -s+debug+info+notice+warning+error+assert+alert+emergency-alert-emergency-assert-error-info-debug
+\endcode
+
+Use the <b>--enable</b> option to forcibly <b>Enable</b> the specified <b>Debug Units</b> and permit messages
+of those groups to enter the global ring buffer on the host computer. For example, to <b>Enable</b> (and also monitor)
+only messages from the <b>DriverInterface</b> and <b>AutoCirculate</b> groups:
+\code{.sh}
+$ ./bin/logreader  --enable  --unit +DriverInterface+AutoCirculate   -v
+## NOTE: Filtering: Showing 2 debug unit(s): +DriverInterface+AutoCirculate
+## NOTE: Selected debug unit(s) AJADebug::Enable'd -- all others AJADebug::Disable'd
+\endcode
+
+@note	Using the <b>--enable</b> option will affect what’s displayed in all running instances of \ref usingajalogger
+		and <b>logreader</b>.
+
+
+
+@par	Logging to Files
+
+Use the host operating system’s own output redirection facility to stream <b>logreader</b>’s output to a file.
+\code{.sh}
+$ ./bin/logreader  >/home/bozo/logfile.txt
+\endcode
+
+By default, all <b>logreader</b> output is streamed to the standard output stream.
+
+Use the <b>--threshold</b> or <b>-t</b> option to split the message output into two different streams
+based on the message’s severity.
+
+To route all messages of severity <b>Info</b> and below into file “debuginfo.txt” and all other messages
+into another file “errors.txt”:
+\code{.sh}
+$ ./bin/logreader  --threshold Info  2>debuginfo.txt  >errors.txt
+## NOTE: Messages higher than severity 'info' will be written to stderr; all others to stdout
+\endcode
+
+
+@par	Custom Formatting
+
+By default, <b>logreader</b> writes the following information fields to the output stream, each field delimited by
+a single horizontal tab character (ASCII 0x08), and each message delimited by the default platform-specific
+“newline” character (\c <CR><LF> on Windows, and \c <LF> on Mac and Linux):
+-	<b>Message Index Number</b> (unsigned decimal number)
+-	<b>Process ID</b> (unsigned decimal number)
+-	<b>Thread ID</b> (unsigned decimal number)
+-	<b>Time Stamp</b> (unsigned floating point number)
+-	<b>Debug Unit</b> (string/name)
+-	<b>Severity</b> (string/name)
+-	<b>Source File</b> (full path, string)
+-	<b>Source Line Number</b> (unsigned decimal number)
+-	<b>Message Text</b> (string)
+
+@note	Some messages incorporate multiple lines of text, each line separated by the “newline” character(s)
+		appropriate for the platform that produced the message.
+
+This default output can be customized to some extent using the <b>--format</b> or <b>-f</b> option.
+Its parameter value is a character string that can contain escape sequences that get replaced with message
+field data.
+
+The valid escape sequences are as follows:
+-	<b>%I</b> Message Index Number
+-	<b>%p</b> Process ID
+-	<b>%t</b> Thread ID
+-	<b>%T</b> Time Stamp
+-	<b>%D</b> Debug unit
+-	<b>%S</b> Severity
+-	<b>%P</b> Full source file path
+-	<b>%F</b> Source folder path (part of full source file path)
+-	<b>%N</b> Source file name (part of full source file path, includes extension)
+-	<b>%n</b> Source file base name (part of source file name, excludes extension)
+-	<b>%x</b> Source file name extension (part of file name)
+-	<b>%L</b> Source file line number
+-	<b>%M</b> Message text
+-	<b>%%</b> Percent sign
+-	<b>\n</b> Line Feed (\c 0x0A )
+-	<b>\f</b> Form Feed (\c 0x0C )
+-	<b>\r</b> Carriage Return (\c 0x0D )
+-	<b>\\</b> Backslash (\c 0x5C )
+-	<b>\a</b> Bell (\c 0x07 )
+-	<b>\b</b> Backspace (\c 0x08 )
+-	<b>\t</b> Horizontal Tab (\c 0x09 )
+-	<b>\v</b> Vertical Tab (\c 0x0B )
+
+@note	When using custom formatting, <b>logreader</b> does not emit a line break after each message.
+		If you need a line break after each message (or before each message), be sure to put one into the
+		parameter string (e.g. \c "%T\t%M\n" ).
+
+<b>Example:</b> To emit the default output, omit the <b>--format</b> or <b>-f</b> option, or do this:
+\code{.sh}
+$ ./bin/logreader  --format "%I\t%p\t%t\t%T\t%D\t%S\t%P\t%L\t%M\n"
+\endcode
+
+<b>Example:</b> To emit the default output, but use a <b>Comma</b> instead of a <b>Horizontal Tab</b>
+character as the field delimiter:
+\code{.sh}
+$ ./bin/logreader  --format "%I,%p,%t,%T,%D,%S,%P,%L,%M\n"
+\endcode
+
+<hr size="50px">
+
+**/

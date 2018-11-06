@@ -24,52 +24,28 @@ AJAAncillaryDataFactory::Create(AJAAncillaryDataType ancType, AJAAncillaryData *
 {
 	switch (ancType)
 	{
-		case AJAAncillaryDataType_Unknown:				// if we don't recognize a specific derived type, instantiate the base class
-			return new AJAAncillaryData(pAncData);
-			break;
+		case AJAAncillaryDataType_Unknown:				return new AJAAncillaryData(pAncData);	//	Use base type for 'Unknown'
+		case AJAAncillaryDataType_Timecode_ATC:			return new AJAAncillaryData_Timecode_ATC(pAncData);
+		case AJAAncillaryDataType_Timecode_VITC:		return new AJAAncillaryData_Timecode_VITC(pAncData);
+		case AJAAncillaryDataType_Cea708:				return new AJAAncillaryData_Cea708(pAncData);
+		case AJAAncillaryDataType_Cea608_Vanc:			return new AJAAncillaryData_Cea608_Vanc(pAncData);
+		case AJAAncillaryDataType_Cea608_Line21:		return new AJAAncillaryData_Cea608_Line21(pAncData);
+		case AJAAncillaryDataType_FrameStatusInfo524D:	return new AJAAncillaryData_FrameStatusInfo524D(pAncData);
+		case AJAAncillaryDataType_FrameStatusInfo5251:	return new AJAAncillaryData_FrameStatusInfo5251(pAncData);
 
-// 		case AJAAncillaryDataType_Smpte2016_3:	
-// 			return new AJAAncillaryData_Smpte2016_3(pAncData);
-// 			break;
-// 
-		case AJAAncillaryDataType_Timecode_ATC:	
-			return new AJAAncillaryData_Timecode_ATC(pAncData);
-			break;
-
-		case AJAAncillaryDataType_Timecode_VITC:	
-			return new AJAAncillaryData_Timecode_VITC(pAncData);
-			break;
-
-		case AJAAncillaryDataType_Cea708:
-			return new AJAAncillaryData_Cea708(pAncData);
-			break;
-
-		case AJAAncillaryDataType_Cea608_Vanc:
-			return new AJAAncillaryData_Cea608_Vanc(pAncData);
-			break;
-
-		case AJAAncillaryDataType_Cea608_Line21:
-			return new AJAAncillaryData_Cea608_Line21(pAncData);
-			break;
-
-// 		case AJAAncillaryDataType_Smpte352:
-// 			return new AJAAncillaryData_Smpte352(pAncData);
-// 			break;
-// 
-// 		case AJAAncillaryDataType_Smpte2051:
-// 			return new AJAAncillaryData_Smpte2051(pAncData);
-// 			break;
-// 
-		case AJAAncillaryDataType_FrameStatusInfo524D:
-			return new AJAAncillaryData_FrameStatusInfo524D(pAncData);
-
-		case AJAAncillaryDataType_FrameStatusInfo5251:
-			return new AJAAncillaryData_FrameStatusInfo5251(pAncData);
-
-		default:
-			return NULL;
-			break;
+ 		case AJAAncillaryDataType_Smpte2016_3:			break;	//	return new AJAAncillaryData_Smpte2016_3(pAncData);
+ 		case AJAAncillaryDataType_Smpte352:				break;	//	return new AJAAncillaryData_Smpte352(pAncData);
+ 		case AJAAncillaryDataType_Smpte2051:			break;	//	return new AJAAncillaryData_Smpte2051(pAncData);
+ 		case AJAAncillaryDataType_HDR_SDR:				break;
+ 		case AJAAncillaryDataType_HDR_HDR10:			break;
+ 		case AJAAncillaryDataType_HDR_HLG:				break;
+#if !defined(_DEBUG)
+		default:	break;
+#else
+		case AJAAncillaryDataType_Size:					break;
+#endif
 	}
+	return NULL;
 }
 
 

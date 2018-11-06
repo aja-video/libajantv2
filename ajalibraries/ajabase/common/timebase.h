@@ -270,15 +270,6 @@ public:
 	int64_t SecondsToTicks(double seconds, bool round = false);
 
 	/**
-	 *	Convert time in seconds to microseconds.
-	 *
-	 *	@param[in]	seconds	Time in seconds.
-	 *	@param[in]	round	Round the result.
-	 *	@return				Time in microseconds.
-	 */
-	int64_t SecondsToMicroseconds(double seconds, bool round = false);
-
-	/**
 	 *	Convert microseconds to video frames.
 	 *
 	 *	@param[in]	microseconds	System tick count to convert.
@@ -304,14 +295,6 @@ public:
 	 *	@return						Time in microseconds.
 	 */
 	int64_t MicrosecondsToTicks(int64_t microseconds, bool round = false);
-
-	/**
-	 *	Convert microseconds to time in seconds.
-	 *
-	 *	@param[in]	microseconds	System tick count to convert.
-	 *	@return						Time in seconds.
-	 */
-	double MicrosecondsToSeconds(int64_t microseconds);
 
 	/**
 	 *	Get the current value of the system tick count.
@@ -345,19 +328,36 @@ public:
 	 *
 	 *	@return						True if the timescale/duration ratio has a non-zero fraction, i.e. "drop frame".
 	 */
-	bool IsNonIntegralRatio();
+	bool IsNonIntegralRatio(void) const;
 
 	/**
 	 *	Returns frames per second
 	 *
 	 *	@return		frames per second
 	 */
-	float  GetFramesPerSecond(void);
-	double GetFramesPerSecondDouble(void);
+	float  GetFramesPerSecond(void) const;
+	double GetFramesPerSecondDouble(void) const;
 
 	AJATimeBase&   operator=(const AJATimeBase &t); 
 	bool operator==(const AJATimeBase &val) const;
 	bool operator!=(const AJATimeBase &val) const;
+
+	/**
+	 *	Convert time in seconds to microseconds.
+	 *
+	 *	@param[in]	seconds	Time in seconds.
+	 *	@param[in]	round	Round the result.
+	 *	@return				Time in microseconds.
+	 */
+	static int64_t SecondsToMicroseconds(double seconds, bool round = false);
+
+	/**
+	 *	Convert microseconds to time in seconds.
+	 *
+	 *	@param[in]	microseconds	System tick count to convert.
+	 *	@return						Time in seconds.
+	 */
+	static double MicrosecondsToSeconds(int64_t microseconds);
 
 	static int64_t Convert(int64_t inValue, int64_t inRate, int64_t outRate, bool round, bool large);
 	static int64_t Convert(int64_t inValue, int64_t inScale, int64_t inDuration,

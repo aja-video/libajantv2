@@ -7,6 +7,8 @@
 #ifndef _DeviceServices_
 #define _DeviceServices_
 
+#include "devicestate.h"
+#include "retailsupport.h"
 #include "ntv2utils.h"
 #include "ntv2vpid.h"
 #include "ntv2card.h"
@@ -19,6 +21,7 @@
 #define ISO_CONVERT_FMT(fmt)	(mIsoConvertEnable && (fmt == NTV2_FORMAT_525_5994 || fmt == NTV2_FORMAT_625_5000))
 #endif
 
+#define HDMI_INIT			1
 #define kADCStabilizeCount	10
 #define kHDMIStartupPhase0	16
 #define kHDMIStartupPhase1	11
@@ -37,6 +40,16 @@ typedef enum
 } GeneralFrameFormat;
 
 #define AUDIO_DELAY_WRAPAROUND    8160    // for 4Mb buffer
+
+const ReferenceSelect kCaptureReferenceSelect = kVideoIn;
+
+#define USE_CLASS4K_SERVICE		(true)
+enum
+{
+	kUseClass4kForIo4k			= (true && USE_CLASS4K_SERVICE),
+	kUseClass4kForKona			= (true && USE_CLASS4K_SERVICE),
+	kUseClass4kForCorvid		= (true && USE_CLASS4K_SERVICE)
+};
 
 
 //-------------------------------------------------------------------------------------------------------
@@ -77,13 +90,10 @@ public:
 	static DeviceServices* CreateDeviceServices(NTV2DeviceID deviceID);	// factory
 	
 public:
-	uint32_t				mHDMIStartupCountDown;
-	
-public:
 			DeviceServices();
-	virtual	~DeviceServices() {}
-	virtual void ReadDriverState();
-	virtual void UpdateAutoState();
+	virtual	~DeviceServices();
+	virtual	void SetCard(CNTV2Card* pCard);
+	virtual bool ReadDriverState();
 
 	// override these
 	virtual void SetDeviceEveryFrameRegs(uint32_t virtualDebug1, uint32_t everyFrameTaskFilter);
@@ -92,19 +102,17 @@ public:
 	virtual void SetDeviceXPointCapture();
 	virtual void SetDeviceMiscRegisters();
 	
-	virtual NTV2VideoFormat GetLockedInputVideoFormat();
-	virtual NTV2ColorSpaceMode GetSDIInputColorSpace(NTV2Channel inChannel, NTV2ColorSpaceMode inMode);
-	virtual NTV2VideoFormat GetSelectedInputVideoFormat(NTV2VideoFormat referenceFormat, NTV2ColorSpaceMode* inputColorSpace=NULL);
-    virtual NTV2VideoFormat GetCorrespondingAFormat(NTV2VideoFormat bVideoFormat);
+	virtual bool NewLockedInputVideoFormatDetected();
 	virtual void SetDeviceXPointPlaybackRaw();
 	virtual void SetDeviceXPointCaptureRaw();
 	virtual void SetDeviceMiscRegistersRaw(NTV2Mode mode) {(void)mode;}
-	virtual void DisableStartupSequence() {mStartupDisabled = true;}
+	virtual void DisableStartupSequence() {} // deprecated
 
     // common IP support routines
     virtual void EveryFrameTask2022(CNTV2Config2022* config2022, NTV2Mode* modeLast, NTV2VideoFormat* videoFormatLast);
     virtual void EveryFrameTask2110(CNTV2Config2110* config2110,
                                     NTV2VideoFormat* videoFormatLast,
+									NTV2Mode* modeLast,
                                     NetworkData2110* s2110NetworkLast,
                                     TransmitVideoData2110* s2110TxVideoDataLast,
                                     TransmitAudioData2110* s2110TxAudioDataLast,
@@ -131,8 +139,6 @@ public:
 	// overridden in some classes
 	virtual NTV2LSVideoADCMode GetVideoADCMode();
 	virtual bool SetVideoADCMode(NTV2LSVideoADCMode value);
-	virtual NTV2VideoFormat GetSdiInVideoFormatWithVpid(int32_t index);
-	virtual NTV2VideoFormat GetSdiInVideoFormat(int32_t index, NTV2VideoFormat videoFormat);
 	
 	// support
 	bool SetVPIDData(	ULWord &		outVPID,
@@ -194,22 +200,32 @@ public:
     void AgentIsAlive();
 
 public:
+	
+	DeviceState				mDs;
+	NTV2DeviceInfo			mBoardInfo;
+	VirtualRegisterModel 	mModel;
+	RetailSupport*			mRs;
 	CNTV2Card*				mCard;
 	
 	// set by every frame, not user
-	NTV2VideoFormat			mDefaultVideoFormat;
 	uint32_t				mADCStabilizeCount;	
-	HDMIOutColorSpaceMode	mHDMIOutColorSpaceModeStatus;	
 	uint32_t				mADCLockScanTestFormat;
 	CNTV2VPID 				mVpidParser;
 	
-	// virtual register
-	DefaultVideoOutMode		mDefaultVideoOutMode;
+	// Input
 	uint32_t				mFollowInputFormat;
+	NTV2InputVideoSelect	mVirtualInputSelect;
+	NTV2InputAudioSelect	mInputAudioSelect;
+	NTV2ColorSpaceMode 		mSDIInput1ColorSpace;
+	NTV2ColorSpaceMode 		mSDIInput2ColorSpace;
+	NTV2RGBRangeMode		mSDIInput1RGBRange;
+	NTV2RGBRangeMode		mSDIInput2RGBRange;
+	
+	// Output
+	DefaultVideoOutMode		mDefaultVideoOutMode;
 	uint32_t				mVANCMode;
 	uint32_t				mVirtualDebug1;
 	uint32_t				mEveryFrameTaskFilter;
-	uint32_t				mDefaultInput;
 	NTV2SDITransportType	mSdiOutTransportType;
 	NTV24kTransportType		m4kTransportOutSelection;
 	NTV2DSKMode				mDSKMode;
@@ -221,14 +237,13 @@ public:
 	NTV2OutputVideoSelect	mVirtualAnalogOutputSelect;
 	NTV2LutType				mLUTType;
 	NTV2LutType				mLUT2Type;
-	NTV2InputVideoSelect	mVirtualInputSelect;
-	NTV2InputAudioSelect	mInputAudioSelect;
 	NTV2VideoFormat			mVirtualSecondaryFormatSelect;
 	bool					mIsoConvertEnable;
+	ULWord 					mQuadSwapIn;
+	ULWord 					mQuadSwapOut;
 	uint32_t				mDSKAudioMode;
 	uint32_t				mDSKForegroundMode;
 	uint32_t				mDSKForegroundFade;
-	ReferenceSelect			mCaptureReferenceSelect;
 	ReferenceSelect			mDisplayReferenceSelect;
 	NTV2GammaType			mGammaMode;
 	NTV2RGB10Range			mRGB10Range;
@@ -263,40 +278,16 @@ public:
 	NTV2FrameBufferFormat	mFb1Format;
 	NTV2FrameBufferFormat	mFb2Format;
 	NTV2Mode				mFb1Mode;
-	bool					mVpid1Valid;
-	ULWord					mVpid1a;
-	ULWord					mVpid1b;
-	bool					mVpid2Valid;
-	ULWord					mVpid2a;
-	ULWord					mVpid2b;
 
 	// calculated valule, selected by user
 	NTV2VideoFormat			mSelectedInputVideoFormat;
-	NTV2ColorSpaceMode 		mSDIInput1ColorSpace;
-	NTV2ColorSpaceMode 		mSDIInput2ColorSpace;
-	NTV2RGBRangeMode		mSDIInput1RGBRange;
-	NTV2RGBRangeMode		mSDIInput2RGBRange;
-	NTV2RGBRangeMode		mFrameBuffer1RGBRange;
 	NTV2AnalogBlackLevel	mVirtualAnalogOutBlackLevel;
 	NTV2AnalogType			mVirtualAnalogOutputType;
 	NTV2AnalogBlackLevel	mVirtualAnalogInBlackLevel;
 	NTV2AnalogType			mVirtualAnalogInType;
-	NTV2Standard			mVirtualAnalogInStandard;
 	
-	HDMIOutColorSpaceMode	mHDMIOutColorSpaceModeCtrl;	
-	HDMIOutProtocolMode		mHDMIOutProtocolMode;
-	HDMIOutStereoSelect		mHDMIOutStereoSelect;		// selection driven by user choice in CP
-	HDMIOutStereoSelect		mHDMIOutStereoCodecSelect;	// selection driver by codec settings
-	NTV2HDMIAudioChannels	mHDMIOutAudioChannels;
 	NTV2HDMIRange			mHDMIInRGBRange;
-	
-	uint32_t				mRegFramesPerVertical;		// frames per vertical interrupt (e.g. CION RAW)
-	uint32_t				mRegResetCycleCount;		// reset cycle count (power-cycle, or sleep)
-	uint32_t				mRegResetCycleCountLast;	// prev reset cycle count used to detect changes
-	bool					mStartupDisabled;			// sometime we don't want to do hw reset
-	int32_t					mInputFormatSelect;			// set and read by device services only
-	bool					mInputFormatLock;
-	NTV2VideoFormat			mLastInputFormatSelect;
+	uint32_t				mRegFramesPerVertical;	// frames per vertical interrupt (CION RAW)
 	
 	// audio mixer
 	bool					mAudioMixerOverrideState;
@@ -313,9 +304,6 @@ public:
 	int32_t					mAudioCapMixerSourceMainGain;
 	int32_t					mAudioCapMixerSourceAux1Gain;
 	int32_t					mAudioCapMixerSourceAux2Gain;
-
-	void SetCard (CNTV2Card* card)
-		{ mCard = card; }
 };
 
 #endif

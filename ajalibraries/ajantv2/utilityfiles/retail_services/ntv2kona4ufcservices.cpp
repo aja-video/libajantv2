@@ -24,24 +24,21 @@ void Kona4UfcServices::SetDeviceXPointPlayback ()
 	// call superclass first
 	DeviceServices::SetDeviceXPointPlayback();
 	
-	bool bFb1RGB = IsRGBFormat(mFb1Format);
-	bool bFb2RGB = IsRGBFormat(mFb2Format);
-	bool bFb1Compressed = IsFormatCompressed(mFb1Format);
-		
-	bool bDSKGraphicMode = (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
-	bool bDSKOn = (mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode));
-		
-	// don't let the DSK be ON if we're in Mac Desktop mode
-	if (!mStreamingAppPID && mDefaultVideoOutMode == kDefaultModeDesktop)
-		bDSKOn = false;
-		
+	bool bFb1RGB 			= IsRGBFormat(mFb1Format);
+	bool bFb2RGB 			= IsRGBFormat(mFb2Format);
+	bool bFb1Compressed 	= IsFormatCompressed(mFb1Format);
+	bool bDSKGraphicMode 	= mDSKMode == NTV2_DSKModeGraphicOverMatte || 
+							  mDSKMode == NTV2_DSKModeGraphicOverVideoIn || 
+							  mDSKMode == NTV2_DSKModeGraphicOverFB;
+	bool bDSKOn 			= mDSKMode == NTV2_DSKModeFBOverMatte || 
+							  mDSKMode == NTV2_DSKModeFBOverVideoIn || 
+							  (bFb2RGB && bDSKGraphicMode);
 	bool bStereoOut			= mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect;
 	bool b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
-	bool b3GbOut	= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
+	bool b3GbOut			= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);			// use 2 SDI wires, or just 1 3Gb
 	bool bEanbleConverter	= false;
-
-    bool bFb1HdrRGB        = (mFb1Format == NTV2_FBF_48BIT_RGB) ? true : false;
-    bool bFb2HdrRGB		= (mFb2Format == NTV2_FBF_48BIT_RGB) ? true : false;
+    bool bFb1HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
+    bool bFb2HdrRGB			= mFb2Format == NTV2_FBF_48BIT_RGB;
 	
 	// make sure frame DualLink B mode (SMPTE 372), Stereo
 	if (b2FbLevelBHfr || bStereoOut)
@@ -654,7 +651,7 @@ void Kona4UfcServices::SetDeviceXPointCapture ()
 	NTV2ColorSpaceMode			inputColorSpace 	= NTV2_ColorSpaceModeYCbCr;	// Input format select (YUV, RGB, etc)
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
+	inputFormat = mDs.inputVideoFormatSelect;
 
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
 	if (b2FbLevelBHfr)
@@ -1093,126 +1090,75 @@ void Kona4UfcServices::SetDeviceMiscRegisters ()
 	
 	NTV2VideoFormat			inputFormat = NTV2_FORMAT_UNKNOWN;
 	
-		// HDMI output - initialization sequence
-	if (mHDMIStartupCountDown > 0)
+	
+	// Set HDMI Out Std / FPS
+	mCard->SetHDMIV2Mode(NTV2_HDMI_V2_HDSD_BIDIRECTIONAL);
+	if (mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)
 	{
-		// start initialization
-		if (mHDMIStartupCountDown == kHDMIStartupPhase0)
-			mCard->WriteRegister (kRegHDMIOutControl, 0x0, 0x0F000000);
-			
-		else if (mHDMIStartupCountDown == kHDMIStartupPhase1)
-			mCard->WriteRegister (kRegHDMIOutControl, 0xC, 0x0F000000);
-			
-		else if (mHDMIStartupCountDown == kHDMIStartupPhase2)
-			mCard->WriteRegister (kRegHDMIOutControl, 0xD, 0x0F000000);
-			
-		else if (mHDMIStartupCountDown == kHDMIStartupPhase3)
-			mCard->WriteRegister (kRegHDMIOutControl, 0xC, 0x0F000000);
-			
-		mHDMIStartupCountDown--;
-	}
-	else
-	{
-		// Set HDMI Out Std / FPS
+		NTV2Standard v2Standard = GetHdmiV2StandardFromVideoFormat(mFb1VideoFormat);
 		mCard->SetHDMIV2Mode(NTV2_HDMI_V2_HDSD_BIDIRECTIONAL);
-		if (mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)
-		{
-			NTV2Standard v2Standard = GetHdmiV2StandardFromVideoFormat(mFb1VideoFormat);
-			mCard->SetHDMIV2Mode(NTV2_HDMI_V2_HDSD_BIDIRECTIONAL);
-			mCard->SetHDMIOutVideoStandard(v2Standard);
-			mCard->SetHDMIOutVideoFPS (primaryFrameRate);
-		}
-		else if (mVirtualHDMIOutputSelect == NTV2_SecondaryOutputSelect)
-		{
-			NTV2Standard v2Standard = GetHdmiV2StandardFromVideoFormat(mVirtualSecondaryFormatSelect);
-			mCard->SetHDMIOutVideoStandard(v2Standard);
-			mCard->SetHDMIOutVideoFPS (secondaryFrameRate);
-		}
-		
-		// HDMI out colorspace auto-detect status
-		mHDMIOutColorSpaceModeStatus = mHDMIOutColorSpaceModeCtrl;
-		if (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect)
-		{
-			NTV2HDMIBitDepth bitDepth = NTV2_HDMI10Bit;
-			NTV2LHIHDMIColorSpace colorSpace = NTV2_LHIHDMIColorSpaceYCbCr;
-			
-			mCard->GetHDMIOutDownstreamColorSpace (colorSpace);
-			mCard->GetHDMIOutDownstreamBitDepth (bitDepth);
-			
-			if (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCYCbCr10bit;
-				
-			else if (bitDepth == NTV2_HDMI10Bit)
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB10bit;
-					
-			else
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB8bit;
-		}
-		
-		// set color space bits as specified
-		switch (mHDMIOutColorSpaceModeStatus)
-		{
-			case kHDMIOutCSCYCbCr10bit:
-				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
-				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
-				break;
-				
-			case kHDMIOutCSCRGB10bit:
-				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
-				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
-				break;
-				
-			default:
-			case kHDMIOutCSCRGB8bit:
-				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
-				mCard->SetHDMIOutBitDepth (NTV2_HDMI8Bit);
-				break;
-		}
-		
-		// HDMI Out Protocol mode
-		switch (mHDMIOutProtocolMode)
-		{
-			default:
-			case kHDMIOutProtocolAutoDetect:
-			{
-				ULWord detectedProtocol;
-				mCard->ReadRegister (kRegHDMIInputStatus, detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
-				mCard->WriteRegister (kRegHDMIOutControl, detectedProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-			}
-			break;
-				
-			case kHDMIOutProtocolHDMI:
-				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-				break;
-				
-			case kHDMIOutProtocolDVI:
-				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolDVI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-				break;
-		}
-		
-		// HDMI Out Stereo 3D
-		HDMIOutStereoSelect stereoSelect = mHDMIOutStereoSelect;
-		
-		// in auto mode, follow codec settings
-		if (stereoSelect == kHDMIOutStereoAuto)
-			stereoSelect = mHDMIOutStereoCodecSelect;
-			
-		switch (stereoSelect)
-		{
-			case kHDMIOutStereoSideBySide:
-				mCard->SetHDMIOut3DPresent(true);
-				mCard->SetHDMIOut3DMode(NTV2_HDMI3DSideBySide);
-				break;
-			case kHDMIOutStereoTopBottom:
-				mCard->SetHDMIOut3DPresent(true);
-				mCard->SetHDMIOut3DMode(NTV2_HDMI3DTopBottom);
-				break;
-			case kHDMIOutStereoOff:
-			default:
-				mCard->SetHDMIOut3DPresent(false);
-				break;
-		}
+		mCard->SetHDMIOutVideoStandard(v2Standard);
+		mCard->SetHDMIOutVideoFPS (primaryFrameRate);
 	}
+	else if (mVirtualHDMIOutputSelect == NTV2_SecondaryOutputSelect)
+	{
+		NTV2Standard v2Standard = GetHdmiV2StandardFromVideoFormat(mVirtualSecondaryFormatSelect);
+		mCard->SetHDMIOutVideoStandard(v2Standard);
+		mCard->SetHDMIOutVideoFPS (secondaryFrameRate);
+	}
+	
+	// set color-space bit-depth
+	switch (mDs.hdmiOutColorSpace)
+	{
+		case kHDMIOutCSCYCbCr8bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
+			mCard->SetHDMIOutBitDepth(NTV2_HDMI8Bit);
+			break;
+	
+		case kHDMIOutCSCYCbCr10bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
+			mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
+			break;
+			
+		case kHDMIOutCSCRGB10bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
+			mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
+			break;
+			
+		default:
+		case kHDMIOutCSCRGB8bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
+			mCard->SetHDMIOutBitDepth (NTV2_HDMI8Bit);
+			break;
+	}
+	
+	// HDMI Out Protocol mode
+	switch (mDs.hdmiOutProtocol_)
+	{
+		default:
+		case kHDMIOutProtocolAutoDetect:
+			mCard->WriteRegister(kRegHDMIOutControl, mDs.hdmiOutDsProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+			break;
+			
+		case kHDMIOutProtocolHDMI:
+			mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+			break;
+			
+		case kHDMIOutProtocolDVI:
+			mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolDVI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+			break;
+	}
+	
+	// HDMI Out rgb range
+	switch (mDs.hdmiOutRange)
+	{
+		default:
+		case NTV2_RGBRangeSMPTE:	mCard->SetHDMIOutRange(NTV2_HDMIRangeSMPTE);	break;
+		case NTV2_RGBRangeFull:		mCard->SetHDMIOutRange(NTV2_HDMIRangeFull);		break;
+	}
+	
+	// HDMI Out Stereo 3D
+	mCard->SetHDMIOut3DPresent(false);
 	
 	// special case - VANC 8bit pixel shift support
 	if (mVANCMode && Is8BitFrameBufferFormat(mFb1Format) )
@@ -1221,7 +1167,7 @@ void Kona4UfcServices::SetDeviceMiscRegisters ()
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
+	inputFormat = mDs.inputVideoFormatSelect;
 	
 	
 	//

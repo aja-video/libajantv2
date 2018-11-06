@@ -64,11 +64,7 @@ void Kona3GQuadServices::SetDeviceXPointPlayback ()
 			mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_DISPLAY);
 			mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
 		}
-	}
-	
-	// Figure out what our input format is based on what is selected 
-	GetSelectedInputVideoFormat(mFb1VideoFormat);
-	
+	}	
 	
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -973,7 +969,7 @@ void Kona3GQuadServices::SetDeviceXPointCapture ()
 	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
+	inputFormat = mDs.inputVideoFormatSelect;
 	
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1732,116 +1728,61 @@ void Kona3GQuadServices::SetDeviceMiscRegisters ()
 	}
 
 	
-	// HDMI output - initialization sequence
-	if (mHDMIStartupCountDown > 0)
-	{
-		// start initialization
-		if (mHDMIStartupCountDown == kHDMIStartupPhase0)
-			mCard->WriteRegister (kRegHDMIOutControl, 0x0, 0x0F000000);
-			
-		else if (mHDMIStartupCountDown == kHDMIStartupPhase1)
-			mCard->WriteRegister (kRegHDMIOutControl, 0xC, 0x0F000000);
-		
-		else if (mHDMIStartupCountDown == kHDMIStartupPhase2)
-			mCard->WriteRegister (kRegHDMIOutControl, 0xD, 0x0F000000);
-			
-		else if (mHDMIStartupCountDown == kHDMIStartupPhase3)
-			mCard->WriteRegister (kRegHDMIOutControl, 0xC, 0x0F000000);
-		
-		mHDMIStartupCountDown--;
-	}
-	else
-	{
-		// HDMI out fully initialized - now do setup
+	mCard->SetHDMIOutVideoStandard (primaryStandard);
+	mCard->SetHDMIOutVideoFPS (primaryFrameRate);
 	
-		// Set HDMI Out (reg 125)
-		mCard->SetHDMIOutVideoStandard (primaryStandard);
-		mCard->SetHDMIOutVideoFPS (primaryFrameRate);
-		
-		// HDMI out colorspace auto-detect status 
-		mHDMIOutColorSpaceModeStatus = mHDMIOutColorSpaceModeCtrl;
-		if (mHDMIOutColorSpaceModeCtrl == kHDMIOutCSCAutoDetect)
-		{
-			NTV2HDMIBitDepth bitDepth = NTV2_HDMI10Bit;
-			NTV2LHIHDMIColorSpace colorSpace = NTV2_LHIHDMIColorSpaceYCbCr;
+	// set color-space bit-depth
+	switch (mDs.hdmiOutColorSpace)
+	{
+		case kHDMIOutCSCYCbCr8bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
+			mCard->SetHDMIOutBitDepth(NTV2_HDMI8Bit);
+			break;
+	
+		case kHDMIOutCSCYCbCr10bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
+			mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
+			break;
 			
-			mCard->GetHDMIOutDownstreamColorSpace (colorSpace);
-			mCard->GetHDMIOutDownstreamBitDepth (bitDepth);
+		case kHDMIOutCSCRGB10bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
+			mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
+			break;
 			
-			if (colorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCYCbCr10bit;
-			
-			else if (bitDepth == NTV2_HDMI10Bit)
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB10bit;
-			
-			else
-				mHDMIOutColorSpaceModeStatus = kHDMIOutCSCRGB8bit;
-		}
-		
-		// set color space bits as specified
-		switch (mHDMIOutColorSpaceModeStatus)
-		{
-			case kHDMIOutCSCYCbCr10bit:
-				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
-				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
-				break;
-				
-			case kHDMIOutCSCRGB10bit:
-				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
-				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
-				break;
-				
-			default:
-			case kHDMIOutCSCRGB8bit:
-				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
-				mCard->SetHDMIOutBitDepth (NTV2_HDMI8Bit);
-				break;
-		}
-		
-		// HDMI Out Protocol mode
-		switch (mHDMIOutProtocolMode)
-		{
-			default:
-			case kHDMIOutProtocolAutoDetect:
-				{
-					ULWord detectedProtocol;
-					mCard->ReadRegister (kRegHDMIInputStatus, detectedProtocol, kLHIRegMaskHDMIOutputEDIDDVI);
-					mCard->WriteRegister (kRegHDMIOutControl, detectedProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-				}
-				break;
-			
-			case kHDMIOutProtocolHDMI:
-				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-				break;
-			
-			case kHDMIOutProtocolDVI:
-				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolDVI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-				break;
-		}
-		
-		// HDMI Out Stereo 3D
-		HDMIOutStereoSelect stereoSelect = mHDMIOutStereoSelect;
-		
-		// in auto mode, follow codec settings
-		if (stereoSelect == kHDMIOutStereoAuto)
-			stereoSelect = mHDMIOutStereoCodecSelect;
-		
-		switch (stereoSelect)
-		{
-			case kHDMIOutStereoSideBySide:
-				mCard->SetHDMIOut3DPresent(true);
-				mCard->SetHDMIOut3DMode(NTV2_HDMI3DSideBySide);
-				break;
-			case kHDMIOutStereoTopBottom:
-				mCard->SetHDMIOut3DPresent(true);
-				mCard->SetHDMIOut3DMode(NTV2_HDMI3DTopBottom);
-				break;
-			case kHDMIOutStereoOff:
-			default:
-				mCard->SetHDMIOut3DPresent(false);
-				break;
-		}
+		default:
+		case kHDMIOutCSCRGB8bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
+			mCard->SetHDMIOutBitDepth (NTV2_HDMI8Bit);
+			break;
 	}
+	
+	// HDMI Out Protocol mode
+	switch (mDs.hdmiOutProtocol_)
+	{
+		default:
+		case kHDMIOutProtocolAutoDetect:
+			mCard->WriteRegister(kRegHDMIOutControl, mDs.hdmiOutDsProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+			break;
+			
+		case kHDMIOutProtocolHDMI:
+			mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+			break;
+			
+		case kHDMIOutProtocolDVI:
+			mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolDVI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+			break;
+	}
+	
+	// HDMI Out rgb range
+	switch (mDs.hdmiOutRange)
+	{
+		default:
+		case NTV2_RGBRangeSMPTE:	mCard->SetHDMIOutRange(NTV2_HDMIRangeSMPTE);	break;
+		case NTV2_RGBRangeFull:		mCard->SetHDMIOutRange(NTV2_HDMIRangeFull);		break;
+	}
+	
+	// HDMI Out Stereo 3D
+	mCard->SetHDMIOut3DPresent(false);
 	
 	
 	// special case - VANC 8bit pixel shift support

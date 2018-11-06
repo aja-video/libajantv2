@@ -10,6 +10,8 @@
 #include "ajabase/system/lock.h"
 #include "ajabase/system/debug.h"
 #include "ajaanc/includes/ancillarylist.h"
+#include "ajaanc/includes/ancillarydata_timecode_atc.h"
+#include "ajabase/common/timecode.h"
 #include <iomanip>
 #include <assert.h>
 
@@ -984,10 +986,16 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			inOutXferInfo.SetAllOutputTimeCodes (pArray [NTV2_TCINDEX_DEFAULT]);
 	}
 
-	//	Use the new NTV2Message driver call...
-	bool	result	(false);
-	inOutXferInfo.acCrosspoint = crosspoint;
-	result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&inOutXferInfo));
+	if (NTV2DeviceCanDo2110(_boardID))
+		if (NTV2_IS_OUTPUT_CROSSPOINT(crosspoint)  &&  inOutXferInfo.acOutputTimeCodes  &&  (inOutXferInfo.GetAncBuffer(true) || inOutXferInfo.GetAncBuffer(false)))
+			S2110AddTimecodesToAncBuffers(inChannel, inOutXferInfo);
+
+	/////////////////////////////////////////////////////////////////////////////
+		//	Call the driver...
+		bool	result	(false);
+		inOutXferInfo.acCrosspoint = crosspoint;
+		result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&inOutXferInfo));
+	/////////////////////////////////////////////////////////////////////////////
 
 	if (result  &&  taskMode == NTV2_STANDARD_TASKS  &&  NTV2_IS_INPUT_CROSSPOINT (crosspoint))
 	{
@@ -999,6 +1007,7 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 		//	First, determine the ControlPanel's current Input source (SDIIn1/HDMIIn1 or SDIIn2/HDMIIn2)...
 		ULWord	inputSelect	(NTV2_Input1Select);
 		ReadRegister (kVRegInputSelect, inputSelect);
+		const bool	bIsInput2	(inputSelect == NTV2_Input2Select);
 
 		//	Next, determine the ControlPanel's current TimeCode source (LTC? VITC1? VITC2)...
 		RP188SourceSelect TimecodeSource(kRP188SourceEmbeddedLTC);
@@ -1009,10 +1018,10 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 		switch (TimecodeSource)
 		{
 			default:
-			case kRP188SourceEmbeddedLTC:		TimecodeIndex = inputSelect == NTV2_Input2Select	? NTV2_TCINDEX_SDI2_LTC	: NTV2_TCINDEX_SDI1_LTC;	break;
-			case kRP188SourceEmbeddedVITC1:		TimecodeIndex = inputSelect == NTV2_Input2Select	? NTV2_TCINDEX_SDI2		: NTV2_TCINDEX_SDI1;		break;
-			case kRP188SourceEmbeddedVITC2:		TimecodeIndex = inputSelect == NTV2_Input2Select	? NTV2_TCINDEX_SDI2_2	: NTV2_TCINDEX_SDI1_2;		break;
-			case kRP188SourceLTCPort:			TimecodeIndex = NTV2_TCINDEX_LTC1;																		break;
+			case kRP188SourceEmbeddedLTC:		TimecodeIndex = bIsInput2 ? NTV2_TCINDEX_SDI2_LTC : NTV2_TCINDEX_SDI1_LTC;	break;
+			case kRP188SourceEmbeddedVITC1:		TimecodeIndex = bIsInput2 ? NTV2_TCINDEX_SDI2     : NTV2_TCINDEX_SDI1;		break;
+			case kRP188SourceEmbeddedVITC2:		TimecodeIndex = bIsInput2 ? NTV2_TCINDEX_SDI2_2   : NTV2_TCINDEX_SDI1_2;	break;
+			case kRP188SourceLTCPort:			TimecodeIndex = NTV2_TCINDEX_LTC1;											break;
 		}
 
 		//	Fetch the TimeCode value that's in that NTV2TCIndex slot...
@@ -1075,8 +1084,8 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			{	//	Zero out everything past the last captured Anc byte in the client's host buffer(s)... 
 				NTV2_POINTER &	clientAncBufferF1	(inOutXferInfo.acANCBuffer);
 				NTV2_POINTER &	clientAncBufferF2	(inOutXferInfo.acANCField2Buffer);
-				const ULWord	ancF1ByteCount		(inOutXferInfo.GetAncByteCount(false));
-				const ULWord	ancF2ByteCount		(inOutXferInfo.GetAncByteCount(true));
+				const ULWord	ancF1ByteCount		(inOutXferInfo.GetCapturedAncByteCount(false));
+				const ULWord	ancF2ByteCount		(inOutXferInfo.GetCapturedAncByteCount(true));
 				void *			pF1TailEnd			(clientAncBufferF1.GetHostAddress(ancF1ByteCount));
 				void *			pF2TailEnd			(clientAncBufferF2.GetHostAddress(ancF2ByteCount));
 				if (pF1TailEnd  &&  clientAncBufferF1.GetByteCount() > ancF1ByteCount)
@@ -1093,3 +1102,92 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 	return result;
 
 }	//	AutoCirculateTransfer
+
+
+static const AJA_FrameRate	sAJARate2NTV2Rate[] = {	AJA_FrameRate_Unknown,	//	NTV2_FRAMERATE_UNKNOWN	= 0,
+													AJA_FrameRate_6000,		//	NTV2_FRAMERATE_6000		= 1,
+													AJA_FrameRate_5994,		//	NTV2_FRAMERATE_5994		= 2,
+													AJA_FrameRate_3000,		//	NTV2_FRAMERATE_3000		= 3,
+													AJA_FrameRate_2997,		//	NTV2_FRAMERATE_2997		= 4,
+													AJA_FrameRate_2500,		//	NTV2_FRAMERATE_2500		= 5,
+													AJA_FrameRate_2400,		//	NTV2_FRAMERATE_2400		= 6,
+													AJA_FrameRate_2398,		//	NTV2_FRAMERATE_2398		= 7,
+													AJA_FrameRate_5000,		//	NTV2_FRAMERATE_5000		= 8,
+													AJA_FrameRate_4800,		//	NTV2_FRAMERATE_4800		= 9,
+													AJA_FrameRate_4795,		//	NTV2_FRAMERATE_4795		= 10,
+													AJA_FrameRate_12000,	//	NTV2_FRAMERATE_12000	= 11,
+													AJA_FrameRate_11988,	//	NTV2_FRAMERATE_11988	= 12,
+													AJA_FrameRate_1500,		//	NTV2_FRAMERATE_1500		= 13,
+													AJA_FrameRate_1498,		//	NTV2_FRAMERATE_1498		= 14,
+													AJA_FrameRate_1900,		//	NTV2_FRAMERATE_1900		= 15,	// Formerly 09 in older SDKs
+													AJA_FrameRate_1898,		//	NTV2_FRAMERATE_1898		= 16, 	// Formerly 10 in older SDKs
+													AJA_FrameRate_1800,		//	NTV2_FRAMERATE_1800		= 17,	// Formerly 11 in older SDKs
+													AJA_FrameRate_1798};	//	NTV2_FRAMERATE_1798		= 18,	// Formerly 12 in older SDKs
+
+bool CNTV2Card::S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & inOutXferInfo)
+{
+	//	IP 2110 Playout only:	Add relevant transmit timecodes to outgoing Anc
+	NTV2FrameRate		ntv2Rate		(NTV2_FRAMERATE_UNKNOWN);
+	bool				result			(GetFrameRate(ntv2Rate, inChannel));
+	bool				isProgressive	(false);
+	NTV2Standard		standard		(NTV2_STANDARD_INVALID);
+	NTV2_POINTER &		ancF1			(inOutXferInfo.acANCBuffer);
+	NTV2_POINTER &		ancF2			(inOutXferInfo.acANCField2Buffer);
+	AJAAncillaryList	pkts;
+
+	if (!result)
+		return false;	//	Can't get frame rate
+	if (!NTV2_IS_VALID_NTV2FrameRate(ntv2Rate))
+		return false;	//	Bad frame rate
+	if (!IsProgressiveStandard(isProgressive, inChannel))
+		return false;	//	Can't get isProgressive
+	if (!GetStandard(standard, inChannel))
+		return false;	//	Can't get standard
+	if (AJA_FAILURE(AJAAncillaryList::SetFromIPAncData(ancF1, ancF2, pkts)))
+		return false;	//	Packet import failed
+
+	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(standard));
+	const uint32_t				F2StartLine			(smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD1));
+	const AJA_FrameRate			ajaRate				(sAJARate2NTV2Rate[ntv2Rate]);
+	const AJATimeBase			ajaTB				(ajaRate);
+	const NTV2TCIndexes			tcIndexes			(::GetTCIndexesForSDIConnector(inChannel));
+	const size_t				maxNumTCs			(inOutXferInfo.acOutputTimeCodes.GetByteCount() / sizeof(NTV2_RP188));
+	NTV2_RP188 *				pTimecodes			(reinterpret_cast<NTV2_RP188*>(inOutXferInfo.acOutputTimeCodes.GetHostPointer()));
+
+	//	For each timecode index for this channel...
+	for (NTV2TCIndexesConstIter it(tcIndexes.begin());  it != tcIndexes.end();  ++it)
+	{
+		const NTV2TCIndex	tcNdx(*it);
+		if (size_t(tcNdx) >= maxNumTCs)
+			continue;	//	Skip -- not in the array
+		if (!NTV2_IS_SDI_TIMECODE_INDEX(tcNdx))
+			continue;	//	Skip -- analog or invalid
+
+		const NTV2_RP188	regTC	(pTimecodes[tcNdx]);
+		if (!regTC)
+			continue;	//	Skip -- invalid timecode (all FFs)
+
+		const bool	isDF (ajaTB.IsNonIntegralRatio());
+		AJATimeCode						tc;		tc.SetRP188(regTC.fDBB, regTC.fLo, regTC.fHi, ajaTB);
+		AJAAncillaryData_Timecode_ATC	atc;	atc.SetTimecode (tc, ajaTB, isDF);
+		atc.AJAAncillaryData_Timecode_ATC::SetDBB (uint8_t(regTC.fDBB & 0x000000FF), uint8_t(regTC.fDBB & 0x0000FF00 >> 8));
+		if (NTV2_IS_ATC_VITC2_TIMECODE_INDEX(tcNdx))	//	VITC2?
+			atc.SetDBB1PayloadType(AJAAncillaryData_Timecode_ATC_DBB1PayloadType_VITC2);
+		else
+		{	//	F1
+			if (NTV2_IS_ATC_VITC1_TIMECODE_INDEX(tcNdx))	//	VITC1?
+				atc.SetDBB1PayloadType(AJAAncillaryData_Timecode_ATC_DBB1PayloadType_VITC1);
+			else if (NTV2_IS_ATC_LTC_TIMECODE_INDEX(tcNdx))	//	LTC?
+				atc.SetDBB1PayloadType(AJAAncillaryData_Timecode_ATC_DBB1PayloadType_LTC);
+			else
+				continue;
+		}
+		atc.GeneratePayloadData();
+		pkts.AddAncillaryData(atc);
+	}	//	for each timecode index value
+
+	pkts.SortListByLocation();
+	ancF1.Fill(ULWord(0));	ancF2.Fill(ULWord(0));
+	return AJA_SUCCESS(pkts.GetIPTransmitData (ancF1, ancF2, isProgressive, F2StartLine));
+
+}	//	S2110AddTimecodesToAncBuffers

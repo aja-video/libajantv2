@@ -1,5 +1,5 @@
 /**
-    @file		ntv2_2022_registers.h
+    @file		ntv2registersmb.h
     @brief		Defines the Sarek board's registers.
     @copyright	(C) 2014-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
@@ -59,6 +59,9 @@
 #define SAREK_10G_EMAC_1            (0x1a0000/4)
 #define SAREK_CSREGS                (0x080000/4)
 #define SAREK_ENET_FILTER           (0x109000/4)
+#define SAREK_AXIS_FILTER_0         (0x109000/4)
+#define SAREK_AXIS_FILTER_1         (0x10a000/4)
+
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -221,6 +224,13 @@
 #define SAREK_LICENSE_VALID         BIT(30)
 #define SAREK_LICENSE_J2K           BIT(1)
 
+#define PLL_PCR                     BIT(0)
+#define PLL_PTP                     BIT(1)
+#define PLL_UNICAST_DELREQ          BIT(5)
+#define PLL_PCR_RESET               BIT(16)
+#define PLL_PTP_RESET               BIT(20)
+#define PLL_Si5345_DCO_MODE         BIT(28)
+
 #define SFP_1_NOT_PRESENT           BIT(0)
 #define SFP_1_TX_FAULT              BIT(1)
 #define SFP_1_RX_LOS                BIT(2)
@@ -234,7 +244,7 @@
 
 /////////////////////////////////////////////////////////////////////
 //
-// 10G Regsiters
+// 10G Registers
 //
 /////////////////////////////////////////////////////////////////////
 
@@ -342,7 +352,7 @@
 
 /////////////////////////////////////////////////////////////////////
 //
-// Genlock SPI Regsiters
+// Genlock SPI Registers
 //
 /////////////////////////////////////////////////////////////////////
 
@@ -360,7 +370,7 @@
 
 /////////////////////////////////////////////////////////////////////
 //
-// PLL Regsiters
+// PLL Registers
 //
 /////////////////////////////////////////////////////////////////////
 
@@ -416,9 +426,26 @@
 #define kRegPll_ptp_delay_resp_cnt              0x30
 #define kRegPll_ptp_announce_cnt                0x31
 
+// additional registers used for SWPTP
+#define kRegPll_swptp_SetSecsHi					0x32		// R/W
+#define kRegPll_swptp_SetSecsLo					0x33		// R/W
+#define kRegPll_swptp_SetNanoSecs				0x34		// R/W
+#define kRegPll_swptp_JamNow					0x35		// R/W
+
+// redefinition of registers used for SWPTP
+#define kRegPll_swptp_Domain					0x04		// R/W
+#define kRegPll_swptp_PreferredGmIdHi			0x05		// R/W
+#define kRegPll_swptp_PreferredGmIdLo			0x06		// R/W
+#define kRegPll_swptp_GrandMasterIdHi			0x07		// R
+#define kRegPll_swptp_GrandMasterIdLo			0x08		// R
+#define kRegPll_swptp_MasterIdHi				0x09		// R
+#define kRegPll_swptp_MasterIdLo				0x0A		// R
+#define kRegPll_swptp_LockedState				0x0B		// R
+#define kRegPll_swptp_MasterOffset				0x0C		// R
+
 /////////////////////////////////////////////////////////////////////
 //
-// AXI Lite Control Regsiters
+// AXI Lite Control Registers
 //
 /////////////////////////////////////////////////////////////////////
 
@@ -432,5 +459,33 @@
 #define kRegAXI_Lite_Cntrl_Match                7
 #define kRegAXI_Lite_Cntrl_Pll_Reset            8
 #define kRegAXI_Lite_Cntrl_Pll_Status           32
+
+/////////////////////////////////////////////////////////////////////
+//
+// Cochrane CS Registers
+//
+/////////////////////////////////////////////////////////////////////
+
+#define kRegCS_ps_gen_ctl           0
+#define kRegCS_hdmi_fmt             1
+#define kRegCS_hdmi_ctl             2
+#define kRegCS_top_gen_ctl          3
+#define kRegCS_sdi_fmt              4
+#define kRegCS_sdi_ctl              5
+#define kRegCS_sdi_vpid_a           6
+#define kRegCS_sdi_vpid_b           7
+#define kRegCS_audio_ctl            8
+#define kRegCS_firmware_id          32
+#define kRegCS_revisions            33
+#define kRegCS_compile_date         34
+#define kRegCS_compile_time         35
+#define kRegCS_audio_auto_delay     36
+#define kRegCS_audio_status             0x25
+#define kRegCS_audio_offset_ptp         0x26
+#define kRegCS_video_offset_ptp         0x27
+#define kRegCS_video_post_ptp           0x28
+#define kRegCS_av_diff_48khz            0x29
+#define kRegCS_vfifo_av_diff_48khz      0x2a
+#define kRegCS_vfifo_level              0x2b
 
 #endif // REGISTERS_MB_H
