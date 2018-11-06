@@ -134,18 +134,26 @@ CFArrayRef get_items_array_from_dict(const CFDictionaryRef inDictionary)
 std::string
 aja_getgputype()
 {
+	std::ostringstream oss;
+
     // get the display information from system_profiler, in xml form
     std::vector<char> streamBuffer(512*512);
     FILE *sys_profile = popen("system_profiler SPDisplaysDataType -xml", "r");
     size_t bytesRead = fread(&streamBuffer[0], sizeof(char), streamBuffer.size(), sys_profile);
     pclose(sys_profile);
+    
+    // sometimes occurs when many I2C requests happen at the same time
+    if (bytesRead == 0)
+    {
+    	oss << "CPU Type not found";
+    	return oss.str();
+    }
 
     // read in the raw xml string and convert to an xml data structure
     CFDataRef xmlData = CFDataCreate(kCFAllocatorDefault, (const UInt8*)&streamBuffer[0], bytesRead);
     CFStringRef errorString;
     CFArrayRef propertyArray = CFArrayRef(CFPropertyListCreateFromXMLData(kCFAllocatorDefault, xmlData, kCFPropertyListImmutable, &errorString));
 
-    std::ostringstream oss;
 
     CFDictionaryRef hwInfoDict = find_dict_for_data_type(propertyArray, CFSTR("SPDisplaysDataType"));
     if (hwInfoDict != NULL)
@@ -176,6 +184,7 @@ aja_getgputype()
         }
         CFRelease(hwInfoDict);
     }
+    
     return oss.str();
 }
 

@@ -248,6 +248,7 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 	GetFrameRate(frameRate, channel);
     inFrameRate = GetNTV2FrameRateFromVideoFormat(value);
     NTV2FrameGeometry inFrameGeometry = GetNTV2FrameGeometryFromVideoFormat(value);
+	bool squares;
 	
 #if !defined (NTV2_DEPRECATE)
 	// If switching from high def to standard def or vice versa
@@ -275,7 +276,15 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 		//This will handle 4k formats
 		if (NTV2_IS_QUAD_FRAME_FORMAT(value))
 		{
-            SetQuadFrameEnable(true, channel);
+			Get4kSquaresEnable(squares, channel);
+			if (squares)
+			{
+				Set4kSquaresEnable(true, channel);
+			}
+			else
+			{
+				SetQuadFrameEnable(true, channel);
+			}
 		}
 		else
 		{
@@ -1152,21 +1161,18 @@ bool CNTV2Card::Set4kSquaresEnable (const bool inEnable, NTV2Channel inChannel)
 	}
 	else
 	{
-		if (!IsMultiFormatActive())
-		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
-			CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
-		}
+        if (!IsMultiFormatActive())
+        {
+            status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
+                WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
+        }
 		else if (inChannel < NTV2_CHANNEL5)
 		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode) &&
-				CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL4);
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode, kRegShiftQuadMode);
 		}
 		else
 		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2) &&
-				CopyVideoFormat(inChannel, NTV2_CHANNEL5, NTV2_CHANNEL8);
+			status = WriteRegister(kRegGlobalControl2, 0, kRegMaskQuadMode2, kRegShiftQuadMode2);
 		}
 	}
 
@@ -1273,42 +1279,36 @@ bool CNTV2Card::SetTsiFrameEnable (const bool enable, const NTV2Channel inChanne
 				status = WriteRegister(kRegGlobalControl, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
 					WriteRegister(kRegGlobalControlCh2, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
 					WriteRegister(kRegGlobalControlCh3, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
-					WriteRegister(kRegGlobalControlCh4, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable) &&
-					CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
+					WriteRegister(kRegGlobalControlCh4, 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
 			}
 			else
 			{
 				status = WriteRegister(gChannelToGlobalControlRegNum[inChannel], 0, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
 			}
 		}
-		// enable 425 mode, disable squares
+        // disable 425 mode, enable squares
 		else if (!IsMultiFormatActive())
 		{
 			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
 				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
 				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
-				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78) &&
-				CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL8);
+				WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
 		}
 		else if (inChannel < NTV2_CHANNEL3)
 		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12) &&
-				CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL2);
+            status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB12, kRegShift425FB12);
 		}
 		else if (inChannel < NTV2_CHANNEL5)
 		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34) &&
-				CopyVideoFormat(inChannel, NTV2_CHANNEL3, NTV2_CHANNEL4);
+            status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB34, kRegShift425FB34);
 		}
 		else if (inChannel < NTV2_CHANNEL7)
 		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56) &&
-				CopyVideoFormat(inChannel, NTV2_CHANNEL5, NTV2_CHANNEL6);
+            status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB56, kRegShift425FB56);
 		}
 		else
 		{
-			status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78) &&
-				CopyVideoFormat(inChannel, NTV2_CHANNEL7, NTV2_CHANNEL8);
+            status = WriteRegister(kRegGlobalControl2, 0, kRegMask425FB78, kRegShift425FB78);
 		}
 	}
 
@@ -1812,23 +1812,18 @@ bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat 
 	if (IS_CHANNEL_INVALID (channel))
 		return false;
 
-	const ULWord	regNum	(gChannelToControlRegNum [channel]);
-	NTV2FrameGeometry currentGeometry;
-	NTV2FrameBufferFormat currentFormat; // save for call to IsBufferSizeChangeRequired below
-	bool status = GetFrameInfo(channel,currentGeometry,currentFormat);
-	if ( !status )
+	const ULWord	regNum	(gChannelToControlRegNum[channel]);
+	const ULWord	loValue	(newFormat & 0x0f);
+	const ULWord	hiValue	((newFormat & 0x10) >> 4);
+	NTV2FrameGeometry		currentGeometry	(NTV2_FG_INVALID);
+	NTV2FrameBufferFormat	currentFormat	(NTV2_FBF_INVALID); // save for call to IsBufferSizeChangeRequired below
+	bool status = GetFrameInfo(channel, currentGeometry, currentFormat);
+	if (!status)
 		return status;
 
-	ULWord loValue = newFormat & 0x0f;
-	ULWord hiValue = (newFormat & 0x10)>>4;
-	bool result1 = WriteRegister (regNum,
-						  loValue,
-						  kRegMaskFrameFormat,
-						  kRegShiftFrameFormat);
-	bool result2 = WriteRegister (regNum,
-						  hiValue,
-						  kRegMaskFrameFormatHiBit,
-						  kRegShiftFrameFormatHiBit);
+	//	Set channel control register FBF bits 1,2,3,4,6...
+	status =  WriteRegister (regNum, loValue, kRegMaskFrameFormat,      kRegShiftFrameFormat)
+	      &&  WriteRegister (regNum, hiValue, kRegMaskFrameFormatHiBit, kRegShiftFrameFormatHiBit);
 
 	#if !defined (NTV2_DEPRECATE)
 		//	Mac driver does it's own bit file switching so only do this for MSWindows
@@ -1843,8 +1838,18 @@ bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat 
 		_ulFrameBufferSize = ::NTV2DeviceGetFrameBufferSize(_boardID,currentGeometry,newFormat);
 		_ulNumFrameBuffers = ::NTV2DeviceGetNumberFrameBuffers(_boardID,currentGeometry,newFormat);
 	}
-	
-	return (result1 && result2);
+
+	if (status)
+		{if (newFormat != currentFormat)
+			CVIDINFO("'" << GetDisplayName() << "': Channel " << DEC(UWord(channel)+1) << " FBF changed from "
+					<< ::NTV2FrameBufferFormatToString(currentFormat) << " to "
+					<< ::NTV2FrameBufferFormatToString(newFormat) << " (FBSize=" << xHEX0N(_ulFrameBufferSize,8)
+					<< " numFBs=" << DEC(_ulNumFrameBuffers) << ")");}
+	else
+		CVIDFAIL("'" << GetDisplayName() << "': Failed to change channel " << DEC(UWord(channel)+1) << " FBF from "
+				<< ::NTV2FrameBufferFormatToString(currentFormat) << " to " << ::NTV2FrameBufferFormatToString(newFormat));
+
+	return status;
 }
 
 // Method: GetFrameBufferFormat
@@ -5423,37 +5428,14 @@ bool CNTV2Card::GetSDIInput12GPresent (bool & outValue, const NTV2Channel channe
 	{
 		bool bResult = false;
 		
-			// If switching from high def to standard def or vice versa some 
-			// boards may need to have a different bitfile loaded.
-		NTV2DeviceID boardID = GetDeviceID();
-		NTV2BitfileType bitfile = BitfileSwitchNeeded(boardID, newValue);
-		if (bitfile != NTV2_BITFILE_NO_CHANGE)
-		{
-			//printf (" switching bitfiles ----------------------------\n");
-			SwitchBitfile(boardID, bitfile);
-			bResult = true;
-		}
-		
+		// If switching from high def to standard def or vice versa some 
+		// boards used to require a different bitfile loaded.
 		return bResult;
 	}
 
 
 	NTV2BitfileType CNTV2Card::BitfileSwitchNeeded (NTV2DeviceID boardID, NTV2VideoFormat newValue, bool ajaRetail)
 	{
-	#ifdef  MSWindows
-		NTV2EveryFrameTaskMode mode;
-		GetEveryFrameServices(&mode);
-		if(mode == NTV2_STANDARD_TASKS)
-			ajaRetail = true;
-	#endif
-		// if bit 30 of the debug register is set, we're not going to change bitfiles no matter what
-		ULWord debugRegValue;
-		ReadRegister(kVRegDebug1,&debugRegValue);
-		if (debugRegValue & BIT_30)
-		{
-			return NTV2_BITFILE_NO_CHANGE;
-		}
-
 		#if !defined (NTV2_DEPRECATE)
 		#else	//	!defined(NTV2_DEPRECATE)
 			(void) boardID;
@@ -7621,6 +7603,21 @@ bool CNTV2Card::GetDieTemperature (double & outTemp, const NTV2DieTempScale inTe
 		case NTV2DieTempScale_Rankine:		outTemp = (celsius + 273.15) * 9.0 / 5.0;	break;
 		default:							return false;
 	}
+	return true;
+}
+
+bool CNTV2Card::GetDieVoltage (double & outVoltage)
+{
+	outVoltage = 0.0;
+
+	//	Read the temperature...
+	ULWord			rawRegValue	(0);
+	if (!ReadRegister (kRegSysmonVccIntDieTemp, rawRegValue))
+		return false;
+
+	const UWord		coreVoltageRaw	((rawRegValue>>22) & 0x00003FF);
+	const double	coreVoltageFloat ((float)(((float)coreVoltageRaw)/ 1024.0 * 3.0));
+	outVoltage = coreVoltageFloat;
 	return true;
 }
 

@@ -105,9 +105,6 @@ void KonaIP22Services::SetDeviceXPointPlayback ()
 	
 	// select square division or 2 pixel interleave in frame buffer
     AdjustFor4kQuadOrTpiOut();
-
-	// Figure out what our input format is based on what is selected 
-	GetSelectedInputVideoFormat(mFb1VideoFormat);
 	
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1426,7 +1423,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
     mCard->WriteRegister(kVRegRxcEnable2, true);
 
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
+	inputFormat = mDs.inputVideoFormatSelect;
 
 	// input 1 select
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -1462,8 +1459,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 		}
 	}
 
-	mVpidParser.SetVPID(mVpid1a);
-	VPIDStandard std = mVpidParser.GetStandard();
+	VPIDStandard std = mDs.sdiIn[0]->vpidStd;
 	bool b2x2piIn  = (std == VPIDStandard_2160_DualLink);
 	bool b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
 	bool b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
@@ -1476,19 +1472,19 @@ void KonaIP22Services::SetDeviceXPointCapture()
 
 	// SDI In 1
 	bool bConvertBToA; 
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL1)==true && mVirtualInputSelect==NTV2_Input1Select;
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL1, mDs.primaryFormat) == true && mVirtualInputSelect == NTV2_Input1Select;
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
 	
 	// SDI In 2
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL2)==true && mVirtualInputSelect==NTV2_Input2Select;
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL2, mDs.primaryFormat)==true && mVirtualInputSelect==NTV2_Input2Select;
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL2, bConvertBToA);
 	
 	// SDI In 3
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL3);
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL3, mDs.primaryFormat);
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL3, bConvertBToA);
 	
 	// SDI In 4
-	bConvertBToA = InputRequiresBToAConvertsion(NTV2_CHANNEL4);
+	bConvertBToA = mRs->InputRequiresBToAConvertsion(NTV2_CHANNEL4, mDs.primaryFormat);
 	mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL4, bConvertBToA);
 	
 	
@@ -2477,10 +2473,9 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)
 	{
-		if (mVpid1Valid)
+		if (mDs.sdiIn[0]->vpid.valid)
 		{
-			mVpidParser.SetVPID(mVpid1a);
-			VPIDStandard std = mVpidParser.GetStandard();
+			VPIDStandard std = mDs.sdiIn[0]->vpidStd;
 			switch (std)
 			{
 			case VPIDStandard_2160_DualLink:
@@ -2728,9 +2723,6 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 		mCard->WriteRegister(kRegCh1Control, 1, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	else
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
-
-	// Figure out what our input format is based on what is selected
-	GetSelectedInputVideoFormat(mFb1VideoFormat);
 
 	//
 	// Analog-Out

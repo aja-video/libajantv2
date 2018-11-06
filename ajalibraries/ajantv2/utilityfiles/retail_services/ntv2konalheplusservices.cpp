@@ -17,36 +17,6 @@ KonaLHePlusServices::KonaLHePlusServices()
 
 
 //-------------------------------------------------------------------------------------------------------
-//	GetSelectedInputVideoFormat
-//	Note:	Determine input video format based on input select and fbVideoFormat
-//			which currently is videoformat of ch1-framebuffer
-//-------------------------------------------------------------------------------------------------------
-NTV2VideoFormat KonaLHePlusServices::GetSelectedInputVideoFormat(
-											NTV2VideoFormat fbVideoFormat,
-											NTV2ColorSpaceMode* inputColorSpace)
-{
-	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-	if (inputColorSpace)
-		*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-	
-	// Figure out what our input format is based on what is selected 
-	switch (mVirtualInputSelect)
-	{
-		case NTV2_Input1Select:
-			inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-			break;
-		case NTV2_Input2Select:
-			inputFormat = mCard->GetAnalogInputVideoFormat();
-			break;
-		default: break;
-	}
-	inputFormat = GetTransportCompatibleFormat(inputFormat, fbVideoFormat);
-	
-	return inputFormat;
-}
-
-
-//-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
 void KonaLHePlusServices::SetDeviceXPointPlayback ()
@@ -518,7 +488,7 @@ void KonaLHePlusServices::SetDeviceXPointCapture ()
 	NTV2CrosspointID	inputXptYUV1;
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
+	inputFormat = mDs.inputVideoFormatSelect;
 	
 	
 	// This is done all over so do it once here so we have the value
@@ -732,7 +702,7 @@ void KonaLHePlusServices::SetDeviceMiscRegisters ()
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
+	inputFormat = mDs.inputVideoFormatSelect;
 
 	
 	//
@@ -847,8 +817,6 @@ void KonaLHePlusServices::SetDeviceMiscRegisters ()
 						(mVirtualAnalogInType != ctrlAnalogInType) ||
 						(virtualAnalogInBlackLevel != ctrlAnalogInBlackLevel) )
 				{
-					//DebugLog("program ADC AnalogInFrameRate = %d, AnalogInStandard = %d\n", inputFrameRate, mVirtualAnalogInStandard);
-
 					// reset stabilization count
 					mADCStabilizeCount = kADCStabilizeCount;
 					

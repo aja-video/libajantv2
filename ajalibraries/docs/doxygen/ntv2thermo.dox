@@ -3,9 +3,12 @@
 
 @section		ntv2thermo		‘ntv2thermo’ Command-Line Utility
 
+
 @par	Description
 
 A command-line tool that interrogates and/or controls temperature-related parameters of connected AJA devices.
+
+
 
 @par	Synopsis
 
@@ -28,15 +31,17 @@ A command-line tool that interrogates and/or controls temperature-related parame
 	the device name, and the device index number … plus the requested fan state or temperature (and temperature units).
 -	Use the <tt>--scale</tt> option to specify the temperature unit scale to use:  <tt>celsius</tt> (or <tt>c</tt>, the default),
 	<tt>fahrenheit</tt> (or <tt>f</tt>), <tt>kelvin</tt> (or <tt>k</tt>) or <tt>rankine</tt> (or <tt>r</tt>).
--	Use the <tt>--fan</tt> option to inquire/control the fan. Follow it with <tt>read</tt> to report the current fan state,
+-	Use the <tt>--fan</tt> option to inquire about or control the fan. Follow it with <tt>read</tt> to report the current fan state,
 	<tt>on</tt> to turn it on, or <tt>off</tt> to turn it off. Use <tt>auto</tt> to enable automatic fan control (assuming the
 	device and/or driver supports it).
 
 @note	On devices for which automatic fan control is supported, using <b>on</b>, <b>off</b>, <b>lo</b>, <b>med</b>, or <b>hi</b> will
 		override and disable the automatic fan control.
 
-@note	<b>CAUTION!</b>	Turning the fan "off" or disabling a device's automatic fan control can cause the device to overheat,
+@note	<b>CAUTION!</b>	Turning the fan “off” or disabling a device’s automatic fan control can cause the device to overheat,
 		and result in permanent damage to the device!
+
+
 
 @par	Temperature Measurement
 
@@ -65,9 +70,11 @@ $ ./bin/ntv2thermo --device io4k --scale kelvin
 'Io4K - 1' die temperature is 344.514 degrees Kelvin
 \endcode
 
+
+
 @par	Logging
 
-By specifying the <tt>--log</tt> command line switch, the tool enters "logging" mode, which periodically writes temperature and fan
+By specifying the <tt>--log</tt> command line switch, the tool enters “logging” mode, which periodically writes temperature and fan
 state until interrupted (using Ctrl-C). The argument to the <tt>--log</tt> switch is an unsigned decimal integer that specifies the
 number of seconds between each line in the report:
 \code{.sh}
@@ -81,9 +88,13 @@ $ ./bin/ntv2thermo --device io4k --log 5 --scale=f -f=json
 ^C
 \endcode
 
-@par	"Fan" Mode
 
-By specifying the <tt>--fan</tt> command line switch, the tool enters "fan" mode, which overrides its temperature measurement functionality.
+
+@par	“Fan” Mode
+
+By specifying the <tt>--fan</tt> command line switch, the tool enters “fan” mode, which overrides its temperature measurement functionality.
+
+@note	Fan mode is only supported on devices that have adjustable fans — see \ref ::NTV2DeviceCanThermostat.
 
 To show the fan status:
 \code{.sh}
@@ -115,15 +126,19 @@ $ ./bin/ntv2thermo --device io4k --fan off -f b
 0
 \endcode
 
-It's not an error to turn on the fan when it's already on, nor is it an error to turn off the fan when it's already off.
+It’s not an error to turn on the fan when it’s already on, nor is it an error to turn off the fan when it’s already off.
 
 JSON output is not supported when turning the fan on or off.
 
+
+
 @par	Exit Codes
--	0	Success. No errors encountered. The tool did what it was asked to do.
--	1	An illegal command line parameter was specified.
--	2	No such device (e.g., specifying <tt>-b io4k</tt> when there's no Io4K attached).
--	3	The tool failed to successfully communicate with the device driver, or an API call failed.
+-	<b>0</b> — Success. No errors encountered. The tool did what it was asked to do.
+-	<b>1</b> — An illegal command line parameter was specified.
+-	<b>2</b> — No such device (e.g., specifying <tt>-b io4k</tt> when there’s no Io4K attached).
+-	<b>3</b> — The tool failed to successfully communicate with the device driver, or an API call failed.
+
+
 
 @par	Output File Streams
 

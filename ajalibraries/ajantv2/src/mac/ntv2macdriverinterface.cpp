@@ -34,12 +34,12 @@ static const char * GetKernErrStr (const kern_return_t inError);
 
 //	MacDriverInterface-specific Logging Macros
 
-#define	HEX2(__x__)			"0x" << hex << setw(2)  << setfill('0') << (0xFF       & uint8_t (__x__)) << dec
-#define	HEX4(__x__)			"0x" << hex << setw(4)  << setfill('0') << (0xFFFF     & uint16_t(__x__)) << dec
-#define	HEX8(__x__)			"0x" << hex << setw(8)  << setfill('0') << (0xFFFFFFFF & uint32_t(__x__)) << dec
-#define	HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') <<               uint64_t(__x__)  << dec
+#define	HEX2(__x__)			xHEX0N(0xFF       & uint8_t (__x__),2)
+#define	HEX4(__x__)			xHEX0N(0xFFFF     & uint16_t(__x__),4)
+#define	HEX8(__x__)			xHEX0N(0xFFFFFFFF & uint32_t(__x__),8)
+#define	HEX16(__x__)		xHEX0N(uint64_t(__x__),16)
 #define KR(_kr_)			"kernResult=" << HEX8(_kr_) << "(" << GetKernErrStr(_kr_) << ")"
-#define INSTP(_p_)			" instance=" << HEX16(uint64_t(_p_))
+#define INSTP(_p_)			" instance=" << HEX16(_p_)
 
 #define	MDIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, __func__ << ": " << __x__)
 #define	MDIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, __func__ << ": " << __x__)
@@ -156,7 +156,7 @@ class DeviceMap
 			AJAAutoLock autoLock (&mMutex);
 			Reset ();
 			MDINOTE ("DeviceMap singleton destroyed");
-			gnBoardMaps--;
+			AJAAtomic::Decrement(&gnBoardMaps);
 		}
 
 
@@ -171,7 +171,7 @@ class DeviceMap
 				{
 					OS_IOServiceClose (connection);
 					mIOConnections [ndx] = 0;
-					MDINOTE ("Device " << ndx << " connection " << HEX8 (connection) << " closed");
+					MDINOTE ("Device " << ndx << " connection " << HEX8(connection) << " closed");
 				}
 			}	//	for each connection in the map
 			if (inResetMasterPort)
@@ -180,7 +180,7 @@ class DeviceMap
 				if (error != kIOReturnSuccess)
 					MDIFAIL (KR(error) << "Unable to reset master port");
 				else
-					MDINOTE ("reset mMasterPort=" << HEX8 (mMasterPort));
+					MDINOTE ("reset mMasterPort=" << HEX8(mMasterPort));
 			}
 		}
 
@@ -200,10 +200,10 @@ class DeviceMap
 				uint64_t &	recheckTally	(mRecheckTally [inDeviceIndex]);
 				if (++recheckTally % RECHECK_INTERVAL == 0)
 				{
-					MDIDBG ("Device " << inDeviceIndex << " connection " << HEX8 (connection) << " expired, checking connection");
+					MDIDBG ("Device " << inDeviceIndex << " connection " << HEX8(connection) << " expired, checking connection");
 					if (!ConnectionIsStillOkay (inDeviceIndex))
 					{
-						MDIFAIL ("Device " << inDeviceIndex << " connection " << HEX8 (connection) << " invalid, resetting DeviceMap");
+						MDIFAIL ("Device " << inDeviceIndex << " connection " << HEX8(connection) << " invalid, resetting DeviceMap");
 						Reset ();
 						return 0;
 					}
@@ -278,7 +278,7 @@ class DeviceMap
 			//	All good -- cache the connection handle...
 			mIOConnections [inDeviceIndex] = ioConnect;
 			mRecheckTally [inDeviceIndex] = 0;
-			MDINOTE ("Device " << inDeviceIndex << " connection " << HEX8 (ioConnect) << " opened");
+			MDINOTE ("Device " << inDeviceIndex << " connection " << HEX8(ioConnect) << " opened");
 			return ioConnect;
 
 		}	//	GetConnection
@@ -288,7 +288,7 @@ class DeviceMap
 		{
 			AJAAutoLock autoLock (&mMutex);
 			for (UWord ndx (0);  ndx < inMaxNumDevices;  ++ndx)
-				MDIDBG ("    [" << ndx << "]:  con=" << HEX8 (mIOConnections [ndx]));
+				MDIDBG ("    [" << ndx << "]:  con=" << HEX8(mIOConnections [ndx]));
 		}
 
 
@@ -391,19 +391,36 @@ class DeviceMap
 				MDIWARN ("CheckDriverVersion:  bad 'inConnection' parameter " << inConnection);
 				return false;
 			}
-
-			uint64_t		scalarO_64 [2];
-			uint32_t		outputCount	(sizeof (scalarO_64) / sizeof (scalarO_64[0]));
-			kern_return_t	kernResult	(OS_IOConnectCallScalarMethod (inConnection, kDriverGetDrvrVersion, 0, 0, scalarO_64, &outputCount));
+			const uint64_t	scalarI_64[2]	=	{kVRegDriverVersion, 0xFFFFFFFF};
+			uint32_t	inputCount	(sizeof(scalarI_64) / sizeof(scalarI_64[0]));
+			uint64_t	scalarO_64[1];
+			uint32_t	outputCount	(sizeof(scalarO_64) / sizeof(scalarO_64[0]));
+			kern_return_t	kernResult (OS_IOConnectCallScalarMethod(inConnection, kDriverReadRegister, scalarI_64, inputCount, scalarO_64, &outputCount));
 			if (kernResult == KERN_SUCCESS)
 			{
-				const UInt32	interfaceVers	= UInt32(scalarO_64[0]);
 				if (!mDriverVersion)
 					mDriverVersion = uint32_t(scalarO_64[1]);
-				if (interfaceVers == AJA_MAC_DRIVER_INTERFACE_VERSION)
-					return true;
-				MDIFAIL ("connection " << inConnection << " -- incompatible driver interface " << interfaceVers << ", expected " << AJA_MAC_DRIVER_INTERFACE_VERSION
-						<< ", version " << HEX8(mDriverVersion));
+				if (!(AJA_NTV2_SDK_VERSION_MAJOR))
+				{
+					MDIWARN ("connection " << inConnection << " allowed in dev mode (SDK vers == zero) -- may be incompatible with driver vers "
+							<< xHEX0N(mDriverVersion,8));
+					return true;	//	Zero (internal AJA development) grants full access -- DANGER!
+				}
+				const UWord	versionComponents[4] =	{	UWord(NTV2DriverVersionDecode_Major(mDriverVersion)),	//	major
+														UWord(NTV2DriverVersionDecode_Minor(mDriverVersion)),	//	minor
+														UWord(NTV2DriverVersionDecode_Point(mDriverVersion)),	//	point
+														UWord(NTV2DriverVersionDecode_Build(mDriverVersion)) };	//	build
+				if (versionComponents[0] == UWord(AJA_NTV2_SDK_VERSION_MAJOR))
+				{
+					MDIDBG ("connection " << inConnection << " -- driver vers " << DEC(versionComponents[0])
+							<< "." << DEC(versionComponents[1]) << "." << DEC(versionComponents[2]) << "." << DEC(versionComponents[3])
+							<< " matches SDK vers " << DEC(UWord(AJA_NTV2_SDK_VERSION_MAJOR)) << "." << DEC(UWord(AJA_NTV2_SDK_VERSION_MINOR))
+							<< "." << DEC(UWord(AJA_NTV2_SDK_VERSION_POINT)) << "." << DEC(UWord(AJA_NTV2_SDK_BUILD_NUMBER)));
+					return true;	//	Major version must match
+				}
+				MDIFAIL ("connection " << inConnection << " -- incompatible driver major version " << DEC(versionComponents[0])
+						<< ", expected major version " << DEC(UWord(AJA_NTV2_SDK_VERSION_MAJOR))
+						<< ", mDriverVersion=" << xHEX0N(mDriverVersion,8));
 			}
 			else
 				MDIFAIL ("IOConnectCallScalerMethod returned " << KR(kernResult) << " for 'kDriverGetDrvrVersion' using connection " << HEX8(inConnection));
@@ -527,10 +544,10 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 		const NTV2DeviceIDSet	legalDeviceIDs	(::NTV2GetSupportedDevices ());
 		if (!CNTV2DriverInterface::ReadRegister (kRegBoardID, _boardID))
 		{
-			MDIFAIL ("ReadRegister failed for 'kRegBoardID' -- " << INSTP(this) << ", ndx=" << inDeviceIndexNumber << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndexNumber, false)) << ", id=" << HEX4(_boardID));
+			MDIFAIL ("ReadRegister failed for 'kRegBoardID' -- " << INSTP(this) << ", ndx=" << inDeviceIndexNumber << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndexNumber, false)) << ", id=" << HEX8(_boardID));
 			if (!CNTV2DriverInterface::ReadRegister (kRegBoardID, _boardID))
 			{
-				MDIFAIL ("ReadRegister retry failed for 'kRegBoardID' -- " << INSTP(this) << ", ndx=" << inDeviceIndexNumber << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndexNumber, false)) << ", id=" << HEX4(_boardID));
+				MDIFAIL ("ReadRegister retry failed for 'kRegBoardID' -- " << INSTP(this) << ", ndx=" << inDeviceIndexNumber << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndexNumber, false)) << ", id=" << HEX8(_boardID));
 				_boardNumber = 0;
 				_boardOpened = false;
 				return false;
@@ -541,7 +558,7 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 		{
 			_boardNumber = 0;
 			_boardOpened = false;
-			MDIFAIL ("Unsupported _boardID " << HEX4(_boardID) << INSTP(this) << ", ndx=" << inDeviceIndexNumber << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndexNumber, false)));
+			MDIFAIL ("Unsupported _boardID " << HEX8(_boardID) << INSTP(this) << ", ndx=" << inDeviceIndexNumber << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndexNumber, false)));
 			return false;
 		}
 
@@ -875,45 +892,6 @@ bool CNTV2MacDriverInterface::WriteRegister( ULWord registerNumber,
 			return false;
 		}
 	}
-}
-
-
-//--------------------------------------------------------------------------------------------------------------------
-//	GetDriverVersion
-//
-//	Return the driver interface version and release version.
-//--------------------------------------------------------------------------------------------------------------------
-UInt32 CNTV2MacDriverInterface::GetDriverVersion( NumVersion *version )
-{
-	UInt32 interfaceVers = 0;
-	UInt32 driverVers = 0;
-
-	if (GetIOConnect())
-	{
-		kern_return_t kernResult = KERN_FAILURE;
-
-		uint64_t	scalarO_64[2];
-		uint32_t	outputCount = 2;
-
-		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
-											   kDriverGetDrvrVersion,	// selector of the function to be called via the user client.
-											   0,						// array of scalar (64-bit) input values.
-											   0,						// the number of scalar input values.
-											   scalarO_64,				// array of scalar (64-bit) output values.
-											   &outputCount);				// pointer to the number of scalar output values.
-		if (kernResult == KERN_SUCCESS)
-		{
-			interfaceVers = (UInt32) scalarO_64[0];
-			driverVers = (UInt32) scalarO_64[1];
-		}
-		else
-			MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
-	}
-
-	if (version)
-		*version = *((NumVersion *) &driverVers);
-
-	return interfaceVers;
 }
 
 
@@ -1991,23 +1969,6 @@ bool CNTV2MacDriverInterface::NTV2Message (NTV2_HEADER * pInOutMessage)
 
 
 //--------------------------------------------------------------------------------------------------------------------
-//	GetDriverVersion
-//
-//	Return the driver interface version and release version.
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::GetDriverVersion (ULWord * pOutDriverVersion)
-{
-	if (!pOutDriverVersion)
-		return false;
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
-		{MDIFAIL (INSTP(this) << ": GetDriverVersion:  Cannot retrieve driver version for this remote device type");	return false;}
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-	*pOutDriverVersion = gDeviceMap.GetDriverVersion ();
-	return true;
-}
-
-//--------------------------------------------------------------------------------------------------------------------
 //	Get/Set Debug Levels
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::SetUserModeDebugLevel( ULWord level )
@@ -2278,17 +2239,6 @@ Word CNTV2MacDriverInterface::SleepMs( LWord milliseconds ) const
    req.tv_sec = milliseconds / 1000;
    req.tv_nsec = 1000000UL *(milliseconds - (1000 * req.tv_sec));
    return ::nanosleep(&req, NULL); // NULL: don't care about remaining time if interrupted for now
-}
-
-
-//--------------------------------------------------------------------------------------------------------------------
-// Method: SwitchBitfile
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SwitchBitfile( NTV2DeviceID boardID, NTV2BitfileType bitfile )
-{
-	(void) boardID;
-	(void) bitfile;
-	return false;
 }
 
 

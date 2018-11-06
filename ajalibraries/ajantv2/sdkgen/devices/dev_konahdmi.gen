@@ -140,6 +140,7 @@ NTV2DeviceCanDoProgrammableCSC
 NTV2DeviceCanDoRGBPlusAlphaOut
 NTV2DeviceCanDoSDVideo
 NTV2DeviceCanDoStackedAudio
+NTV2DeviceCanMeasureTemperature
 NTV2DeviceCanReportFrameSize
 NTV2DeviceHasRetailSupport
 NTV2DeviceHasSPIFlash

@@ -473,10 +473,10 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
 		return (designName == GetPrimaryDesignName(DEVICE_ID_KONA4));
 	case DEVICE_ID_KONA5:
         return (designName == GetPrimaryDesignName(DEVICE_ID_KONA5) ||
-                designName == "kona5_12g");
+                designName == GetPrimaryDesignName(DEVICE_ID_KONA5_12G));
     case DEVICE_ID_KONA5_12G:
         return (designName == GetPrimaryDesignName(DEVICE_ID_KONA5_12G) ||
-                designName == "kona5");
+                designName == GetPrimaryDesignName(DEVICE_ID_KONA5));
 	case DEVICE_ID_IO4K:
 		return (designName == GetPrimaryDesignName(DEVICE_ID_IO4KUFC));
 	case DEVICE_ID_IO4KUFC:

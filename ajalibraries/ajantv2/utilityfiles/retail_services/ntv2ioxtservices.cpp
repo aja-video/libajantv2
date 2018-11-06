@@ -17,44 +17,6 @@ IoXTServices::IoXTServices()
 
 
 //-------------------------------------------------------------------------------------------------------
-//	GetSelectedInputVideoFormat
-//	Note:	Determine input video format based on input select and fbVideoFormat
-//			which currently is videoformat of ch1-framebuffer
-//-------------------------------------------------------------------------------------------------------
-NTV2VideoFormat IoXTServices::GetSelectedInputVideoFormat(
-											NTV2VideoFormat fbVideoFormat,
-											NTV2ColorSpaceMode* inputColorSpace)
-{
-	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
-	if (inputColorSpace)
-		*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-	
-	// Figure out what our input format is based on what is selected 
-	if ((mVirtualInputSelect == NTV2_Input1Select) || (mVirtualInputSelect == NTV2_Input2xDLHDSelect))
-	{
-		inputFormat = GetSdiInVideoFormat(0, fbVideoFormat);
-		if (inputColorSpace)
-			*inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL1, mSDIInput1ColorSpace);
-	}
-	else if (mVirtualInputSelect == NTV2_Input2Select)
-	{
-		inputFormat = GetSdiInVideoFormat(1, fbVideoFormat);
-		if (inputColorSpace)
-			*inputColorSpace = GetSDIInputColorSpace(NTV2_CHANNEL2, mSDIInput2ColorSpace);
-	}
-	else if (mVirtualInputSelect == NTV2_Input3Select)
-	{
-		inputFormat = mCard->GetHDMIInputVideoFormat();
-		if (inputColorSpace)
-			*inputColorSpace = NTV2_ColorSpaceModeYCbCr;
-	}
-	inputFormat = GetTransportCompatibleFormat(inputFormat, fbVideoFormat);
-	
-	return inputFormat;
-}
-
-
-//-------------------------------------------------------------------------------------------------------
 //	SetDeviceXPointPlayback
 //-------------------------------------------------------------------------------------------------------
 void IoXTServices::SetDeviceXPointPlayback ()
@@ -651,7 +613,7 @@ void IoXTServices::SetDeviceXPointCapture ()
 	
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
+	inputFormat = mDs.inputVideoFormatSelect;
 	
 	
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
@@ -1173,7 +1135,7 @@ void IoXTServices::SetDeviceMiscRegisters ()
 		mCard->WriteRegister(kRegCh1Control, 0, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 	
 	// Figure out what our input format is based on what is selected
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat);
+	inputFormat = mDs.inputVideoFormatSelect;
 	
 	
 	//

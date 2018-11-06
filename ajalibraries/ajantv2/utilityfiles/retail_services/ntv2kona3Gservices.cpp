@@ -608,7 +608,7 @@ void Kona3GServices::SetDeviceXPointCapture ()
 	
 	
 	// Figure out what our input format is based on what is selected 
-	inputFormat = GetSelectedInputVideoFormat(mFb1VideoFormat, &inputColorSpace);
+	inputFormat = mDs.inputVideoFormatSelect;
 	
 	
 	// make sure frame buffer formats match for DualLink B mode (SMPTE 372)
@@ -1041,7 +1041,7 @@ void Kona3GServices::SetDeviceMiscRegisters ()
 	NTV2FrameRate			primaryFrameRate = GetNTV2FrameRateFromVideoFormat (frameBufferFormat);
 	NTV2FrameRate			secondardFrameRate = GetNTV2FrameRateFromVideoFormat (mVirtualSecondaryFormatSelect);
 	
-	NTV2VideoFormat			inputFormat = GetSelectedInputVideoFormat(frameBufferFormat);;
+	NTV2VideoFormat			inputFormat = mDs.inputVideoFormatSelect;
 	
 
 	if (mVirtualHDMIOutputSelect == NTV2_PrimaryOutputSelect)
