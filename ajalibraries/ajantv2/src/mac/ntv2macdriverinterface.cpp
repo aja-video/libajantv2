@@ -399,7 +399,7 @@ class DeviceMap
 			if (kernResult == KERN_SUCCESS)
 			{
 				if (!mDriverVersion)
-					mDriverVersion = uint32_t(scalarO_64[1]);
+					mDriverVersion = uint32_t(scalarO_64[0]);
 				if (!(AJA_NTV2_SDK_VERSION_MAJOR))
 				{
 					MDIWARN ("connection " << inConnection << " allowed in dev mode (SDK vers == zero) -- may be incompatible with driver vers "
