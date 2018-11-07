@@ -329,13 +329,13 @@ To get started, look for the <b>build</b> folder in the SDK:
 		-	<b>local_config.pri</b> — An optional file that is used to override <b>qmake</b> settings in <b>config.pri</b>. It’s provided as an example to show how to produce <b>Debug</b> builds by default.
 		-	<b>ntv2demos</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the demonstration applications.
 
-@par	Building with qmake/make:
+@par	Building with qmake/nmake:
 
 Assuming at least one version of <a href="https://doc.qt.io/" target="_qt">Qt</a> is already installed:
 
 -#	Change the current directory to \c build inside the unzipped SDK folder.
 -#	Enter  \c path/to/qmake  \c _ntv2demos.pro
--#	Enter  \c make
+-#	Enter  \c nmake
 
 @par	Building with <a href="https://doc.qt.io/qtcreator/" target="_qtcreator">Qt Creator</a>:</b>
 
