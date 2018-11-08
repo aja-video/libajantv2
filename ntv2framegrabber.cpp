@@ -560,7 +560,6 @@ bool NTV2FrameGrabber::SetupInput (void)
 		{
             mNumChannels = 0;
             mTsi = false;
-			mNTV2Card.SetTsiFrameEnable(false, NTV2_CHANNEL1);
 
             for (unsigned offset (0);  offset < 4;  offset++)
 			{
@@ -572,13 +571,14 @@ bool NTV2FrameGrabber::SetupInput (void)
 				mNTV2Card.SetSDIInLevelBtoLevelAConversion (mChannel + offset, IsInput3Gb (mInputSource) ? true : false);
 				if (!NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat))
 					break;
+				mNTV2Card.Set4kSquaresEnable(true, NTV2_CHANNEL1);
 			}
 		}
 		else if (mInputSource == NTV2_INPUTSOURCE_ANALOG1)
 		{
             mNumChannels = 0;
             mTsi = false;
-			mNTV2Card.SetTsiFrameEnable(false, NTV2_CHANNEL1);
+			//mNTV2Card.SetTsiFrameEnable(false, NTV2_CHANNEL1);
 
 			mNTV2Card.Connect (::GetCSCInputXptFromChannel (NTV2_CHANNEL1), NTV2_XptAnalogIn);
 			mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (NTV2_CHANNEL1), ::GetCSCOutputXptFromChannel (NTV2_CHANNEL1, false/*isKey*/, true/*isRGB*/));
