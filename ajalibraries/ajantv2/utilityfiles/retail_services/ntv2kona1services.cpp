@@ -410,6 +410,7 @@ void Kona1Services::SetDeviceXPointCapture ()
 
 	NTV2RGBRangeMode			frambBufferRange	= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
 	bool 						bFb1RGB 			= IsRGBFormat(mFb1Format);
+	bool						b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool						b3GbOut				= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;				// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
@@ -533,9 +534,18 @@ void Kona1Services::SetDeviceXPointCapture ()
 	{
 		mCard->Connect (NTV2_XptFrameBuffer1Input, inputXptYUV1);
 	}
-
-	// Frame Buffer Disabling
-	mCard->WriteRegister(kRegCh2Control, true, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	
+	// Frame Buffer 2
+	if (b2FbLevelBHfr)
+	{
+		mCard->Connect (NTV2_XptFrameBuffer2Input, inputXptYUV2);
+		mCard->WriteRegister(kRegCh2Control, false, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	}
+	else
+	{
+		mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptBlack);
+		mCard->WriteRegister(kRegCh2Control, true, kRegMaskChannelDisable, kRegShiftChannelDisable);
+	}
 
 	// SDI Out 1
 	if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)				// Same as RGB in this case
@@ -551,7 +561,12 @@ void Kona1Services::SetDeviceXPointCapture ()
 			mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 		}
 	}
-	else // NTV2_PrimaryOutputSelect													// Primary
+	else if (b2FbLevelBHfr)
+	{
+		mCard->Connect (NTV2_XptSDIOut1Input, inputXptYUV1);										// HFR LevelB
+		mCard->Connect (NTV2_XptSDIOut1InputDS2, inputXptYUV2);
+	}
+	else // NTV2_PrimaryOutputSelect																// Primary
 	{
 		mCard->Connect (NTV2_XptSDIOut1Input, inputXptYUV1);
 		mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
