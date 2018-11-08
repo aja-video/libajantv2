@@ -324,9 +324,13 @@ To get started, look for the <b>build</b> folder in the SDK:
 		-	<b>_ntv2demos.pro</b> — This is the “solution file” or “project file” that builds everything — the libraries and the demonstration applications.
 		-	<b>ajacc</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to link with the \ref ajacc.
 		-	<b>ajantv2</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the \ref ajantv2.
-		-	<b>config.pri</b> — This is the starting point for all the <b>qmake</b> magic used in all the <b>.pro</b> files. It defines common locations like the <b>bin</b> and <b>lib</b> directories.
+		-	<b>config.pri</b> — This is the starting point for all the <b>qmake</b> magic used in all the <b>.pro</b> files.
+			It defines common locations like the <b>bin</b> and <b>lib</b> directories.
 		-	<b>libs.pri</b> — A helper <b>.pri</b> used by most of the <b>.pro</b>’s to simplify adding libraries and library dependencies.
-		-	<b>local_config.pri</b> — An optional file that is used to override <b>qmake</b> settings in <b>config.pri</b>. It’s provided as an example to show how to produce <b>Debug</b> builds by default.
+		-	<b>local_config.pri</b> — An optional file that’s used to override <b>qmake</b> settings in <b>config.pri</b>.
+			It’s frequently used to set the build type to <b>Debug</b> or <b>Release</b>.
+			-	Add the line <tt>A_CONFIG = Debug</tt> to build for <b>Debug</b>.
+			-	Omit the <tt>A_CONFIG = Debug</tt> line to build for <b>Release</b>.
 		-	<b>ntv2demos</b> — Contains the <b>.pri</b> and <b>.pro</b> files necessary to build the demonstration applications.
 
 @par	Building with qmake/nmake:
