@@ -2413,6 +2413,12 @@ bool CNTV2Card::ReadSDIInVPID (const NTV2Channel inChannel, ULWord & outValue_A,
 		if (!ReadRegister (gChannelToSDIInVPIDARegNum [inChannel], valA))
 			return false;
 	}
+	else
+	{
+		outValue_A = 0;
+		outValue_B = 0;
+		return false;
+	}
 
 	if (!ReadRegister (gChannelToSDIInput3GStatusRegNum	[inChannel], status))
 		return false;
