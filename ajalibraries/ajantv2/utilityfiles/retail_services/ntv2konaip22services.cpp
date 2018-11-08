@@ -1459,8 +1459,7 @@ void KonaIP22Services::SetDeviceXPointCapture()
 		}
 	}
 
-	mVpidParser.SetVPID(mVpid1a);
-	VPIDStandard std = mVpidParser.GetStandard();
+	VPIDStandard std = mDs.sdiIn[0]->vpidStd;
 	bool b2x2piIn  = (std == VPIDStandard_2160_DualLink);
 	bool b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
 	bool b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
@@ -2474,10 +2473,9 @@ void KonaIP22Services::SetDeviceMiscRegisters()
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)
 	{
-		if (mVpid1Valid)
+		if (mDs.sdiIn[0]->vpid.valid)
 		{
-			mVpidParser.SetVPID(mVpid1a);
-			VPIDStandard std = mVpidParser.GetStandard();
+			VPIDStandard std = mDs.sdiIn[0]->vpidStd;
 			switch (std)
 			{
 			case VPIDStandard_2160_DualLink:

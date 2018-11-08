@@ -68,7 +68,7 @@ void KonaIPJ2kServices::SetDeviceXPointPlayback ()
 	bool						bFb2RGB				= IsRGBFormat(mFb2Format);
 	bool						bDSKGraphicMode		= (mDSKMode == NTV2_DSKModeGraphicOverMatte || mDSKMode == NTV2_DSKModeGraphicOverVideoIn || mDSKMode == NTV2_DSKModeGraphicOverFB);
 	bool						bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || mDSKMode == NTV2_DSKModeFBOverVideoIn || (bFb2RGB && bDSKGraphicMode);
-	NTV2ColorSpaceMode            inputColorSpace	= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
+	NTV2ColorSpaceMode			inputColorSpace		= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
 	NTV2CrosspointID			inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	
@@ -656,8 +656,7 @@ void KonaIPJ2kServices::SetDeviceXPointCapture()
 		mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
 	}
 
-	mVpidParser.SetVPID(mVpid1a);
-	VPIDStandard std = mVpidParser.GetStandard();
+	VPIDStandard std = mDs.sdiIn[0]->vpidStd;
 	bool b2x2piIn  = (std == VPIDStandard_2160_DualLink);
 	bool b4x2piInA = (std == VPIDStandard_2160_QuadLink_3Ga);
 	bool b4x2piInB = (std == VPIDStandard_2160_QuadDualLink_3Gb);
@@ -1435,10 +1434,9 @@ void KonaIPJ2kServices::SetDeviceMiscRegisters()
 	// enable/disable transmission (in/out polarity) for each SDI channel
 	if (mFb1Mode == NTV2_MODE_CAPTURE)
 	{
-		if (mVpid1Valid)
+		if (mDs.sdiIn[0]->vpid.valid)
 		{
-			mVpidParser.SetVPID(mVpid1a);
-			VPIDStandard std = mVpidParser.GetStandard();
+			VPIDStandard std = mDs.sdiIn[0]->vpidStd;
 			switch (std)
 			{
 			case VPIDStandard_2160_DualLink:

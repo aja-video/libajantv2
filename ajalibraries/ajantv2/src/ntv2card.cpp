@@ -151,74 +151,16 @@ string CNTV2Card::GetPCIFPGAVersionString (void)
 string CNTV2Card::GetDriverVersionString (void)
 {
 	stringstream	oss;
-
-	#if defined (MSWindows)
-		// Bits 3-0		minor version
-		// Bits 7-4		major version
-		// Bits 11-8	point version
-		// Bit	12		reserved
-		// Bit	13		64 bit flag
-		// Bit  14		beta flag
-		// Bit  15		debug flag
-		// Bits	31-16	build version
-		ULWord			versionInfo	(0);
-		GetDriverVersion (&versionInfo);
-
-		const ULWord	ulMajor	((versionInfo >>  4) & 0xf);
-		const ULWord	ulMinor	((versionInfo >>  0) & 0xf);
-		const ULWord	ulPoint	((versionInfo >>  8) & 0xf);
-		const ULWord	ulBuild	((versionInfo >> 16) & 0xffff);
-
-		if ((ulMajor < 6) ||
-			((ulMajor == 6) && (ulMinor < 5)) ||
-			((ulMajor == 6) && (ulMinor == 5) && (ulBuild == 0)))
-		{
-			oss	<< dec << ulMajor
-				<< "." << dec << ulMinor
-				<< ((versionInfo & (BIT_14)) ? " beta " : ".") << dec << ulPoint
-				<< ((versionInfo & (BIT_13)) ? " 64bit" : "")
-				<< ((versionInfo & (BIT_15)) ? " debug" : "");
-		}
-		else
-			oss << dec << ulMajor
-				<< "." << dec << ulMinor
-				<< "." << dec << ulPoint
-				<< ((versionInfo & (BIT_14)) ? " beta " : " build ") << dec << ulBuild
-				<< ((versionInfo & (BIT_13)) ? " 64bit" : "")
-				<< ((versionInfo & (BIT_15)) ? " debug" : "");
-
-	#elif defined (AJALinux)
-
-		// Bit  15     Debug
-		// Bit  14     Beta Version flag (Bits 13-8 interpreted as "beta x"
-		// Bits 13-8   sub-minor Version (or beta version #)
-		// Bits 7-4    Major Version  - new hardware types to support, etc.
-		// Bits 3-0    Minor Version  
-		ULWord			versionInfo	(0);
-		GetDriverVersion (&versionInfo);
-
-		oss	<< dec << ((versionInfo >> 4) & 0xF) << "." << dec << (versionInfo & 0xF)	//	Major and Minor version
-			<< "." << dec << ((versionInfo >> 8) & 0x3F);								//	Point version
-
-		if (versionInfo & 0xFFFF000)
-			oss << "." << dec << ((versionInfo >> 16) & 0xFFFF);						//	Build Version, if present
-
-		if (versionInfo & (BIT_14))
-			oss << " Beta";																//	Beta Version
-
-		if (versionInfo & BIT_15)
-			oss << " Debug";															//	Debug Version
-
-	#elif defined (AJAMac)
-
-		NumVersion	version	=	{0, 0, 0, 0};
-		CNTV2MacDriverInterface::GetDriverVersion (&version);
-		oss	<< uint32_t (version.majorRev) << "." << uint32_t (version.minorAndBugRev) << "." << uint32_t (version.stage)
-			<< ", Interface " << uint32_t (AJA_MAC_DRIVER_INTERFACE_VERSION);
-
-	#else
-	#endif
-
+	static const string	sDriverBuildTypes [] = {"", "b", "a", "d"};
+	UWord	versions[4]	= {0, 0, 0, 0};
+	ULWord	versBits(0);
+	ReadRegister (kVRegDriverVersion, versBits);
+	const string & dabr (sDriverBuildTypes[versBits >> 30]);	//	Bits 31:30 == build type
+	GetDriverVersionComponents (versions[0], versions[1], versions[2], versions[3]);
+	if (dabr.empty())
+		oss << DEC(versions[0]) << "." << DEC(versions[1]) << "." << DEC(versions[2]) << "." << DEC(versions[3]);
+	else
+		oss << DEC(versions[0]) << "." << DEC(versions[1]) << "." << DEC(versions[2]) << dabr << DEC(versions[3]);
 	return oss.str ();
 
 }	//	GetDriverVersionString
@@ -226,33 +168,16 @@ string CNTV2Card::GetDriverVersionString (void)
 
 bool CNTV2Card::GetDriverVersionComponents (UWord & outMajor, UWord & outMinor, UWord & outPoint, UWord & outBuild)
 {
-	bool	result		(false);
-
 	outMajor = outMinor = outPoint = outBuild = 0;
+	ULWord	driverVersionULWord	(0);
+	if (!ReadRegister (kVRegDriverVersion, driverVersionULWord))
+		return false;
 
-	#if defined (MSWindows)
-		ULWord	versionInfo	(0);
-		result = GetDriverVersion (&versionInfo);
-		outMajor = (versionInfo >>  4) & 0xF;
-		outMinor = (versionInfo >>  0) & 0xF;
-		outPoint = (versionInfo >>  8) & 0xF;
-		outBuild = (versionInfo >> 16) & 0xFFFF;
-	#elif defined (AJALinux)
-		ULWord	versionInfo	(0);
-		result = GetDriverVersion (&versionInfo);
-		outMajor = (versionInfo >>  4) & 0xF;
-		outMinor = (versionInfo >>  0) & 0xF;
-		outPoint = (versionInfo >>  8) & 0x3F;
-		outBuild = (versionInfo >> 16) & 0xFFFF;
-	#elif defined (AJAMac)
-		NumVersion	version	= {0, 0, 0, 0};
-		CNTV2MacDriverInterface::GetDriverVersion (&version);
-		outMajor = version.majorRev;
-		outMinor = version.minorAndBugRev;
-		outPoint = version.stage;
-		result = true;
-	#endif
-	return result;
+	outMajor = UWord(NTV2DriverVersionDecode_Major(driverVersionULWord));
+	outMinor = UWord(NTV2DriverVersionDecode_Minor(driverVersionULWord));
+	outPoint = UWord(NTV2DriverVersionDecode_Point(driverVersionULWord));
+	outBuild = UWord(NTV2DriverVersionDecode_Build(driverVersionULWord));
+	return true;
 }
 
 
@@ -384,6 +309,27 @@ bool CNTV2Card::GetInstalledBitfileInfo (ULWord & outNumBytes, std::string & out
 	outDateStr = reinterpret_cast <char *> (&bitFileInfo.dateStr [0]);
 	outTimeStr = reinterpret_cast <char *> (&bitFileInfo.timeStr [0]);
 	outNumBytes = bitFileInfo.numBytes;
+	return true;
+}
+
+
+bool CNTV2Card::IsFailSafeBitfileLoaded (bool & outIsSafeBoot)
+{
+	outIsSafeBoot = false;
+	if (!::NTV2DeviceCanReportFailSafeLoaded(_boardID))
+		return false;
+	return CNTV2DriverInterface::ReadRegister(kRegCPLDVersion, outIsSafeBoot, BIT(4), 4);
+}
+
+
+bool CNTV2Card::CanWarmBootFPGA (bool & outCanWarmBoot)
+{
+	outCanWarmBoot = false;	//	Definitely can't
+	ULWord	version(0);
+	if (!ReadRegister(kRegCPLDVersion, version, BIT(0)|BIT(1)))
+		return false;	//	Fail
+	if (version == 3)
+		outCanWarmBoot = true;	//	Definitely can
 	return true;
 }
 

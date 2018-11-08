@@ -239,10 +239,12 @@ void IoXTServices::SetDeviceXPointPlayback ()
 				 && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		mCard->Connect (NTV2_XptSDIOut1Input, frameSync1YUV);
+		mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 	}
 	else if (mVirtualDigitalOutput1Select == NTV2_SecondaryOutputSelect)			// Secondary
 	{
 		mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptConversionModule);
+		mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
 		bEanbleConverter = true;
 	}
 	else if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)			// RGB Out
@@ -290,10 +292,12 @@ void IoXTServices::SetDeviceXPointPlayback ()
 				  && (!ISO_CONVERT_FMT(mVirtualSecondaryFormatSelect)) ) )
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, frameSync1YUV);
+		mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 	}
 	else if (mVirtualDigitalOutput2Select == NTV2_SecondaryOutputSelect)			// Secondary
 	{
 		mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptConversionModule);
+		mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
 		bEanbleConverter = true;
 	}
 	else if (mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb)			// RGB Out
@@ -609,7 +613,7 @@ void IoXTServices::SetDeviceXPointCapture ()
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;		// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	NTV2VideoFormat				inputFormat			= mFb1VideoFormat;		// Input source selected format
-	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;		// Input format select (YUV, RGB, etc)
+	NTV2ColorSpaceMode			inputColorSpace		= mSDIInput1ColorSpace;	// Input format select (YUV, RGB, etc)
 	
 	
 	// Figure out what our input format is based on what is selected 

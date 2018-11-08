@@ -535,7 +535,7 @@ const char * ntv2RegStrings[] =
 	"kRegXenaxFlashDIN",							//  60
 	"kRegXenaxFlashDOUT",							//  61
 	"kRegReserved62",								//  62
-	"kRegReserved63",								//  63
+	"kRegCPLDVersion",								//  63
 	"kRegRP188InOut2DBB",							//  64
 	"kRegRP188InOut2Bits0_31",						//  65
 	"kRegRP188InOut2Bits32_63",						//  66

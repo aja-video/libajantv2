@@ -116,13 +116,6 @@ isNubReadRegisterMultiRespPacket(NTV2NubPkt *pPkt)
 	return isNTV2NubPacketType(pPkt, eNubReadRegisterMultiRespPkt);
 }
 
-static bool 
-isNubGetDriverVersionRespPacket(NTV2NubPkt *pPkt)
-{
-	return isNTV2NubPacketType(pPkt, eNubGetDriverVersionRespPkt);
-}
-
-
 static NTV2NubPkt *
 BuildReadRegisterQueryPacket(	LWord  handle,
 								NTV2NubProtocolVersion nubProtocolVersion,
@@ -383,26 +376,6 @@ BuildReadRegisterMultiQueryPacket(	LWord  handle,
 		pRWMRP->aRegs[i].registerMask = htonl(aRegs[i].registerMask);
 		pRWMRP->aRegs[i].registerShift = htonl(aRegs[i].registerShift);
 	}
-
-	return pPkt;
-}
-
-static NTV2NubPkt *
-BuildGetDriverVersionQueryPacket(	LWord  handle,
-									NTV2NubProtocolVersion nubProtocolVersion)
-{
-	NTV2NubPkt *pPkt;
-	char *p;
-	
-	pPkt = BuildNubBasePacket(	nubProtocolVersion,
-								eNubGetDriverVersionQueryPkt,
-								sizeof(NTV2GetDriverVersionPayload),
-								&p);
-	if (pPkt == 0)
-		return 0;
-	
-	NTV2GetDriverVersionPayload *pGDVP = (NTV2GetDriverVersionPayload *)p;
-	pGDVP->handle = htonl(handle);
 
 	return pPkt;
 }
@@ -1433,101 +1406,6 @@ NTV2ReadRegisterMultiRemote(AJASocket sockfd,
 								static unsigned long ignoredNTV2pkts;
 								++ignoredNTV2pkts;
 								retcode = NTV2_REMOTE_ACCESS_NOT_READ_REG_MULTI;
-							}
-						}
-						else // Non ntv2 packet on our port.
-						{
-							// NOTE: Defragmentation of jumbo packets would probably go here.
-							retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
-						}
-			}
-		}
-	}
-	delete pPkt;
-	return retcode;
-}
-
-int 
-NTV2GetDriverVersionRemote(AJASocket sockfd,
-							LWord remoteHandle,
-							NTV2NubProtocolVersion nubProtocolVersion,
-							ULWord *driverVersion)
-{
-	// Connected?
-	if (sockfd == -1)
-		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
-
-	// Construct open query
-	NTV2NubPkt *pPkt = BuildGetDriverVersionQueryPacket(remoteHandle, nubProtocolVersion);
-
-	if (pPkt == NULL)
-	{
-		return NTV2_REMOTE_ACCESS_OUT_OF_MEMORY;
-	}
-
-	int retcode = NTV2_REMOTE_ACCESS_SUCCESS;
-
-	int len =  pPkt == 0 ? 0 : sizeof(NTV2NubPktHeader) + pPkt->hdr.dataLength;
-	// Send it
-	if(NBOifyNTV2NubPkt(pPkt)) 
-	{
-		if (-1 == sendall(sockfd, (char *)pPkt, &len))
-		{
-			retcode = NTV2_REMOTE_ACCESS_SEND_ERR;
-		}
-		else
-		{
-			// Wait for response
-			int numbytes = recvtimeout_sec(sockfd, (char *)pPkt, sizeof(NTV2NubPkt), 2); // 2 second timeout
-
-			switch (numbytes)
-			{
-				case  0: // Remote side closed connection
-						retcode = NTV2_REMOTE_ACCESS_CONNECTION_CLOSED;
-						break;
-
-				case -1: // error occurred
-						perror("recvtimeout_sec");
-						retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
-						break;
-			
-				case -2: // timeout occurred
-						retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-						break;
-			
-				default: // got some data.  Open response packet?
-						if (deNBOifyNTV2NubPkt((NTV2NubPkt *)pPkt, numbytes)) 
-						{
-							if (isNubGetDriverVersionRespPacket((NTV2NubPkt *)pPkt)) 
-							{
-								// printf("Got a get driver version response packet\n");
-								NTV2GetDriverVersionPayload * pGDVP;
-								pGDVP = (NTV2GetDriverVersionPayload *)getNubPktPayload(pPkt);
-								// Did card go away?
-								LWord handle = ntohl(pGDVP->handle);
-								// printf("Handle = %d\n", handle);
-								if (handle == (LWord)INVALID_NUB_HANDLE)
-								{
-									printf("Got invalid nub handle back from get driver version.\n");
-									retcode = NTV2_REMOTE_ACCESS_NO_CARD;
-								}
-								ULWord result = ntohl (pGDVP->result);
-								if (result)
-								{
-									*driverVersion = ntohl(pGDVP->driverVersion);
-									// printf("Get driver version succeeded, got %x\n", *driverVersion);
-								}
-								else // Get failed on remote side
-								{
-									printf("Get driver version failed on remote side.\n");
-									retcode = NTV2_REMOTE_ACCESS_GET_DRIVER_VERSION_FAILED;
-								}
-							}
-							else // Not a write register response packet, count it and discard it.
-							{
-								static unsigned long ignoredNTV2pkts;
-								++ignoredNTV2pkts;
-								retcode = NTV2_REMOTE_ACCESS_NOT_GET_DRIVER_VERSION_RESP;
 							}
 						}
 						else // Non ntv2 packet on our port.

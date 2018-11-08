@@ -5394,6 +5394,25 @@ public:
 	**/
 	AJA_VIRTUAL bool			GetInstalledBitfileInfo (ULWord & outNumBytes, std::string & outDateStr, std::string & outTimeStr);
 
+	/**
+		@brief		Answers whether or not the "fail-safe" (aka "safe-boot") bitfile is currently loaded and running in the FPGA.
+		@param[out]	outIsFailSafe	Receives true if the "fail-safe" bitfile is currently loaded and running in the FPGA;
+									otherwise receives false. This return value cannot be trusted if the function result
+									is false.
+		@return		True if successful;  otherwise false.
+		@note		The "outIsFailSafe" answer can only be trusted if the function result is true.
+		@see		::NTV2DeviceCanReportFailSafeLoaded
+	**/
+	AJA_VIRTUAL bool			IsFailSafeBitfileLoaded (bool & outIsFailSafe);
+
+	/**
+		@brief		Answers whether or not the FPGA can be reloaded without powering off.
+		@param[out]	outCanWarmBoot	Receives true if the FPGA can be reloaded without powering off the device.
+									Receives false if it can only be reloaded after power-cycling.
+		@return		True if successful;  otherwise false.
+		@note		The "outCanWarmBoot" answer can only be trusted if the function result is true.
+	**/
+	AJA_VIRTUAL bool			CanWarmBootFPGA (bool & outCanWarmBoot);
 
 				//////////////////////////////////////////////////////////
 	public:		//////////	From CNTV2Status				//////////////

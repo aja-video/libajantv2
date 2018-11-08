@@ -252,18 +252,6 @@ public:
 
 	Word SleepMs(LWord msec);
 
-	// Management of downloaded Xilinx bitfile
-	bool DriverGetBitFileInformation(	BITFILE_INFO_STRUCT &bitFileInfo,
-										NTV2BitFileType bitFileType=NTV2_VideoProcBitFile);
-
-	bool DriverSetBitFileInformation(	BITFILE_INFO_STRUCT &bitFileInfo);
-
-	// Functions for cards that support more than one bitfile
-	bool SetBitFileDirectory(const std::string &bitfileDirectory) { _bitfileDirectory = bitfileDirectory; return true; }
-	const std::string GetBitFileDirectory() { return _bitfileDirectory; }
-	bool SwitchBitfile(NTV2DeviceID boardID, NTV2BitfileType bitfile);
-
-
 	// These are only implemented in Mac code but need to be here to satisfy Win/Linux build
 	bool		SuspendAudio () { return true; }
 	bool		ResumeAudio (ULWord frameBufferSize) { (void) frameBufferSize; return true; }

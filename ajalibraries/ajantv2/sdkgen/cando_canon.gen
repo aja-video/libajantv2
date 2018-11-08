@@ -102,4 +102,5 @@ NTV2DeviceHasAudioMonitorRCAJacks			True if the device having the given ID has a
 NTV2DeviceHasBiDirectionalAnalogAudio		True if the device having the given ID has a bi-directional analog audio connector.
 NTV2DeviceCanDoIP							True if the device having the given ID ingests and/or plays video via TCP/IP (instead of SDI/HDMI/etc).
 NTV2DeviceHasGenlockv3
-NTV2DeviceCanDo12gRouting					True if the board supports the new 12g routing xpt
+NTV2DeviceCanDo12gRouting					True if the device having the given ID supports 12g routing crosspoints.
+NTV2DeviceCanReportFailSafeLoaded			True if the device having the given ID can report if its "fail-safe" firmware is loaded and running.

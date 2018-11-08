@@ -1553,38 +1553,6 @@ void Class4kServices::SetDeviceXPointCapture ()
 		inHdYUV2 = NTV2_XptSDIIn2;
 		inHdRGB1 = NTV2_XptDuallinkIn1;
 	}
-	
-	// HMDI In
-	if (bHdmiIn)
-	{
-		uint32_t valRgb = 0;
-		mCard->ReadRegister(kRegHDMIInputStatus, valRgb, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
-		bHdmiInRGB = valRgb != 0;
-	}
-	
-	else // 425 or Quads
-	{
-		#if 0
-		
-			mVpidParser.SetVPID(mVpid1a);
-			VPIDStandard std = mVpidParser.GetStandard();
-			bool b2x2piIn  = std == VPIDStandard_2160_DualLink || std == VPIDStandard_2160_Single_6Gb;
-			bool bVpid4x2piInA = std == VPIDStandard_2160_QuadLink_3Ga || std == VPIDStandard_2160_Single_12Gb;
-			bool bVpid4x2piInB = std == VPIDStandard_2160_QuadDualLink_3Gb;
-			mCard->GetSDIInput6GPresent(bVpid6GIn, NTV2_CHANNEL1);
-			mCard->GetSDIInput12GPresent(bVpid12GIn, NTV2_CHANNEL1);
-			b2x2piIn		= b2x2piIn  || bVpid6GIn;
-			bVpid4x2piInA	= bVpid4x2piInA || bVpid12GIn;
-			bool b2piIn		= b2x2piIn  || bVpid4x2piInA || bVpid4x2piInB;
-			
-			// quad in
-			if (b2piIn)
-				b2xQuadIn 	= false;
-			b2pi 			= b2piIn || (bHdmiIn && b4K);				
-			
-		#endif
-	}
-	
 
 	// 4K input routing
 	in4kRGB1 = in4kRGB2 = in4kRGB3 = in4kRGB4 = NTV2_XptBlack;
@@ -3044,7 +3012,6 @@ void Class4kServices::SetDeviceMiscRegisters ()
 	mCard->GetStandard(primaryStandard);
 	mCard->GetFrameGeometry(primaryGeometry);
 	
-	// VPID
 	bool					bHdmiIn				= mDs.bInHdmi;
 	bool					bFbLevelA			= IsVideoFormatA(mFb1VideoFormat);
 	bool					b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
@@ -3083,9 +3050,6 @@ void Class4kServices::SetDeviceMiscRegisters ()
 					   
 	bool b2pi 		= b4K && (m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave ||
 						  	  m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
-
-	//HACK: We need to disable the sample rate converter for now - 9/27/17. We do not support 44.1 audio until firmware is fixed
-	mCard->SetEncodedAudioMode(NTV2_ENCODED_AUDIO_SRC_DISABLED, NTV2_AUDIOSYSTEM_1);
 	
 	// SDI Transmit
 	for (int i=0; i<4; i++)
@@ -3097,7 +3061,7 @@ void Class4kServices::SetDeviceMiscRegisters ()
 		if (mDs.sdiIn[i]->isOut == false)
 		{
 			bool bConvertBToA = bFbLevelA && mDs.sdiIn[i]->is3Gb;
-			mCard->SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, bConvertBToA);
+			mCard->SetSDIInLevelBtoLevelAConversion(i, bConvertBToA);
 		}
 	}
 	

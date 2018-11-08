@@ -96,7 +96,7 @@ typedef enum
 	kRegXenaxFlashDIN,				// 60	
 	kRegXenaxFlashDOUT,				// 61	
 	kRegReserved62,					// 62	
-	kRegReserved63,					// 63	
+	kRegCPLDVersion,				// 63	
 	kRegRP188InOut2DBB,				// 64
 	kRegRP188InOut2Bits0_31,		// 65
 	kRegRP188InOut2Bits32_63,		// 66
@@ -5434,6 +5434,29 @@ typedef enum
 	shiftInsFieldIDLow = 16
 
 } ANCInsMaskShift;
+
+
+//	Driver Version ULWord encode/decode macros
+//	Introduced in SDK 15.0
+//	Common ULWord format on all platforms:
+//
+//		 3         2         1          
+//		10987654321098765432109876543210
+//		TTXMMMMMMMmmmmmmPPPPPPbbbbbbbbbb
+//
+//	MMMMMMM:	[28:22]	major version number
+//	mmmmmm:		[21:16]	minor version number
+//	PPPPPP:		[15:10]	point release number
+//	bbbbbbbbbb:	[9:0]	build number
+//	TT:			[31:30]	build type (0=release, 1=beta, 2=alpha, 3=dev)
+#define	NTV2DriverVersionEncode(__maj__, __min__, __pt__, __bld__)			(((ULWord)(__maj__) & 0x0000007F) << 22)		\
+																		|	(((ULWord)(__min__) & 0x0000003F) << 16)		\
+																		|	(((ULWord)(__pt__ ) & 0x0000003F) << 10)		\
+																		|	(((ULWord)(__bld__) & 0x000003FF) <<  0)
+#define	NTV2DriverVersionDecode_Major(__vers__)		(((ULWord)(__vers__) >> 22) & 0x0000007F)
+#define	NTV2DriverVersionDecode_Minor(__vers__)		(((ULWord)(__vers__) >> 16) & 0x0000003F)
+#define	NTV2DriverVersionDecode_Point(__vers__)		(((ULWord)(__vers__) >> 10) & 0x0000003F)
+#define	NTV2DriverVersionDecode_Build(__vers__)		(((ULWord)(__vers__) >>  0) & 0x000003FF)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////	BEGIN NEW AUTOCIRCULATE API

@@ -92,7 +92,7 @@ CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & hostNa
 	// Fail if running with an old driver
 	ULWord driverVersionMajor;
 	GetDriverVersion(&driverVersionMajor);
-	driverVersionMajor = (driverVersionMajor >> 4) & 0xF;
+	driverVersionMajor = NTV2DriverVersionDecode_Major(driverVersionMajor);
 #if AJA_NTV2_SDK_VERSION_MAJOR != 0
     if (driverVersionMajor < (ULWord)AJA_NTV2_SDK_VERSION_MAJOR)
 	{
@@ -1879,90 +1879,6 @@ CNTV2LinuxDriverInterface::DmaReadWithOffsets(
 	return true;
 
 #undef ERRMSG
-}
-
-//
-// Management of downloaded Xilinx bitfile
-//
-//
-bool
-CNTV2LinuxDriverInterface::DriverGetBitFileInformation(
-		BITFILE_INFO_STRUCT &bitFileInfo,
-		NTV2BitFileType bitFileType)
-{
-	if (_remoteHandle != INVALID_NUB_HANDLE)
-	{
-		if (!CNTV2DriverInterface::DriverGetBitFileInformation(
-				bitFileInfo,
-				bitFileType))
-		{
-			DisplayNTV2Error("NTV2DriverGetBitFileInformationRemote failed");
-			return false;
-		}
-	}
-	else
-	{
-		if(NTV2DeviceHasSPIFlash(_boardID))
-		{
-			if (!CNTV2DriverInterface::DriverGetBitFileInformation(
-					bitFileInfo,
-					bitFileType))
-			{
-				DisplayNTV2Error("DriverGetBitFileInformation failed");
-				return false;
-			}
-			return true;
-		}
-		else
-		{
-			int request;
-
-			assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
-			assert( bitFileType == NTV2_VideoProcBitFile); // Other types not implemented yet
-
-			request = (int)IOCTL_NTV2_GET_BITFILE_INFO;
-
-			if (ioctl( _hDevice, request, &bitFileInfo))
-			{
-				return false;
-			}
-		}
-	}
-	return true;
-}
-
-bool
-CNTV2LinuxDriverInterface::DriverSetBitFileInformation(
-		BITFILE_INFO_STRUCT &bitFileInfo)
-{
-	int request;
-	const char *errMsg = NULL;
-
-#define ERRMSG(s) #s " failed"
-
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
-
-	request = (int)IOCTL_NTV2_SET_BITFILE_INFO;
-	errMsg = ERRMSG(IOCTL_NTV2_SET_BITFILE_INFO);
-
-	if (ioctl( _hDevice, request, &bitFileInfo))
-	{
-		DisplayNTV2Error(errMsg);
-		return false;
-	}
-
-	return true;
-#undef ERRMSG
-}
-
-bool
-CNTV2LinuxDriverInterface::SwitchBitfile(NTV2DeviceID boardID, NTV2BitfileType bitfile)
-{
-    (void)boardID;
-    (void)bitfile;
-
-	// Bitfiles are no longer dynamically loaded
-	return true;
 }
 
 //

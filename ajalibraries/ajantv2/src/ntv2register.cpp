@@ -2413,6 +2413,12 @@ bool CNTV2Card::ReadSDIInVPID (const NTV2Channel inChannel, ULWord & outValue_A,
 		if (!ReadRegister (gChannelToSDIInVPIDARegNum [inChannel], valA))
 			return false;
 	}
+	else
+	{
+		outValue_A = 0;
+		outValue_B = 0;
+		return false;
+	}
 
 	if (!ReadRegister (gChannelToSDIInput3GStatusRegNum	[inChannel], status))
 		return false;
@@ -5428,37 +5434,14 @@ bool CNTV2Card::GetSDIInput12GPresent (bool & outValue, const NTV2Channel channe
 	{
 		bool bResult = false;
 		
-			// If switching from high def to standard def or vice versa some 
-			// boards may need to have a different bitfile loaded.
-		NTV2DeviceID boardID = GetDeviceID();
-		NTV2BitfileType bitfile = BitfileSwitchNeeded(boardID, newValue);
-		if (bitfile != NTV2_BITFILE_NO_CHANGE)
-		{
-			//printf (" switching bitfiles ----------------------------\n");
-			SwitchBitfile(boardID, bitfile);
-			bResult = true;
-		}
-		
+		// If switching from high def to standard def or vice versa some 
+		// boards used to require a different bitfile loaded.
 		return bResult;
 	}
 
 
 	NTV2BitfileType CNTV2Card::BitfileSwitchNeeded (NTV2DeviceID boardID, NTV2VideoFormat newValue, bool ajaRetail)
 	{
-	#ifdef  MSWindows
-		NTV2EveryFrameTaskMode mode;
-		GetEveryFrameServices(&mode);
-		if(mode == NTV2_STANDARD_TASKS)
-			ajaRetail = true;
-	#endif
-		// if bit 30 of the debug register is set, we're not going to change bitfiles no matter what
-		ULWord debugRegValue;
-		ReadRegister(kVRegDebug1,&debugRegValue);
-		if (debugRegValue & BIT_30)
-		{
-			return NTV2_BITFILE_NO_CHANGE;
-		}
-
 		#if !defined (NTV2_DEPRECATE)
 		#else	//	!defined(NTV2_DEPRECATE)
 			(void) boardID;

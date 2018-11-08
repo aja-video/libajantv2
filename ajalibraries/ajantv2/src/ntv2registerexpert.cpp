@@ -148,6 +148,7 @@ public:
 
 		DefineRegister (kRegBitfileDate,		"",	mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegBitfileTime,		"",	mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegCPLDVersion,		"",	mDecodeCPLDVersion,			READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 
 		DefineRegister (kRegStatus,				"",	mDecodeStatusReg,			READWRITE,	kRegClass_DMA,		kRegClass_Channel1,	kRegClass_Channel2);
 			DefineRegClass (kRegStatus, kRegClass_Timecode);
@@ -758,10 +759,9 @@ private:
 
 	void SetupVRegs(void)
 	{
-		DefineRegName	(kVRegLinuxDriverVersion,				"kVRegLinuxDriverVersion");
+		DefineRegName	(kVRegDriverVersion,					"kVRegDriverVersion");
 		DefineRegName	(kVRegRelativeVideoPlaybackDelay,		"kVRegRelativeVideoPlaybackDelay");
 		DefineRegName	(kVRegAudioRecordPinDelay,				"kVRegAudioRecordPinDelay");
-		DefineRegName	(kVRegDriverVersion,					"kVRegDriverVersion");
 		DefineRegName	(kVRegGlobalAudioPlaybackMode,			"kVRegGlobalAudioPlaybackMode");
 		DefineRegName	(kVRegFlashProgramKey,					"kVRegFlashProgramKey");
 		DefineRegName	(kVRegStrictTiming,						"kVRegStrictTiming");
@@ -993,9 +993,6 @@ private:
 		DefineRegName	(kVRegFrameBufferGangCount,				"kVRegFrameBufferGangCount");
 		DefineRegName	(kVRegChannelCrosspointFirst,			"kVRegChannelCrosspointFirst");
 		DefineRegName	(kVRegChannelCrosspointLast,			"kVRegChannelCrosspointLast");
-		DefineRegName	(kVRegDriverVersionMajor,				"kVRegDriverVersionMajor");
-		DefineRegName	(kVRegDriverVersionMinor,				"kVRegDriverVersionMinor");
-		DefineRegName	(kVRegDriverVersionPoint,				"kVRegDriverVersionPoint");
 		DefineRegName	(kVRegFollowInputFormat,				"kVRegFollowInputFormat");
 		DefineRegName	(kVRegAncField1Offset,					"kVRegAncField1Offset");
 		DefineRegName	(kVRegAncField2Offset,					"kVRegAncField2Offset");
@@ -1745,6 +1742,21 @@ private:
 		}
 		virtual	~DecodeStatusReg()	{}
 	}	mDecodeStatusReg;
+
+	struct DecodeCPLDVersion : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+			ostringstream	oss;
+			oss	<< "CPLD Version: "					<< DEC(inRegValue & (BIT(0)|BIT(1)))	<< endl
+				<< "Failsafe Bitfile Loaded: "		<< (inRegValue & BIT(4) ? "Yes" : "No")	<< endl
+				<< "Force Reload: "					<< YesNo(inRegValue & BIT(8));
+			return oss.str();
+		}
+		virtual	~DecodeCPLDVersion()	{}
+	}	mDecodeCPLDVersion;
 
 	struct DecodeStatus2Reg : public Decoder
 	{

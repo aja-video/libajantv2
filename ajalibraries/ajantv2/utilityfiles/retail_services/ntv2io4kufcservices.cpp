@@ -667,7 +667,7 @@ void Io4KUfcServices::SetDeviceXPointCapture ()
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;		// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;		// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
 	NTV2VideoFormat				inputFormat			= mFb1VideoFormat;		// Input source selected format
-	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;		// Input format select (YUV, RGB, etc)
+	NTV2ColorSpaceMode			inputColorSpace		= mSDIInput1ColorSpace;	// Input format select (YUV, RGB, etc)
 	
 	// Figure out what our input format is based on what is selected
 	inputFormat = mDs.inputVideoFormatSelect;
