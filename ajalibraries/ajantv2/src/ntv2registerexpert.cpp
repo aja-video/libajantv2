@@ -210,6 +210,7 @@ public:
 		SetupSDIErrorRegs();	//	SDIError
 		SetupCSCRegs();			//	CSCs
 		SetupVRegs();			//	Virtuals
+		SetupClassicRegGroups();	//	Classic groups
 		
 		//Print (cout);	//	For debugging
 	}	//	constructor
@@ -757,9 +758,22 @@ private:
 		DefineRegister	(kRegMixer4Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel4,	kRegClass_NULL);
 	}
 
+	void SetupClassicRegGroups(void)
+	{
+		//	Define "classic" register groups to emulate the old "classic" register pages in FLTK Watcher and earlier NTV2Watcher versions.
+		const string	sRegGroups[]		=	{"NTV2 Regs 1",			"NTV2 Regs 2",			"NTV2 Regs 3",			"NTV2 Regs 4"};
+		const ULWord	sRegGroupsStart[]	=	{kRegGlobalControl,		kRegHDMIOut3DStatus1,	kRegAud2SourceSelect,	kRegGlobalControlCh2};
+		const ULWord	sRegGroupsEnd[]		=	{kRegFlashProgramReg2,	kRegAud2Control,		kRegLUTV2Control,		kRegReserved511};
+		for (unsigned groupNdx(0);  groupNdx < 4;  groupNdx++)
+			for (ULWord regNum(sRegGroupsStart[groupNdx]); regNum < sRegGroupsEnd[groupNdx]; regNum++)
+				DefineRegClass (regNum, sRegGroups[groupNdx]);
+	}
+
 	void SetupVRegs(void)
 	{
 		DefineRegName	(kVRegDriverVersion,					"kVRegDriverVersion");
+			DefineRegDecoder(kVRegDriverVersion, mDriverVersionDecoder);
+			//	Let's permit editing driver version -- might be useful		DefineRegReadWrite(kVRegDriverVersion, READONLY);
 		DefineRegName	(kVRegRelativeVideoPlaybackDelay,		"kVRegRelativeVideoPlaybackDelay");
 		DefineRegName	(kVRegAudioRecordPinDelay,				"kVRegAudioRecordPinDelay");
 		DefineRegName	(kVRegGlobalAudioPlaybackMode,			"kVRegGlobalAudioPlaybackMode");
@@ -1205,9 +1219,9 @@ public:
 	NTV2StringSet	GetAllRegisterClasses (void) const
 	{
 		if (mAllRegClasses.empty())
-			for (RegClassToRegNumConstIter	it	(mRegClassToRegNumMap.begin ());  it != mRegClassToRegNumMap.end();  ++it)
-				if (mAllRegClasses.find (it->first) == mAllRegClasses.end())
-					mAllRegClasses.insert (it->first);
+			for (RegClassToRegNumConstIter	it(mRegClassToRegNumMap.begin());  it != mRegClassToRegNumMap.end();  ++it)
+				if (mAllRegClasses.find(it->first) == mAllRegClasses.end())
+					mAllRegClasses.insert(it->first);
 		return mAllRegClasses;
 	}
 	
@@ -2934,7 +2948,23 @@ private:
 		}
 		virtual	~DecodeSDIErrorCount()	{}
 	}	mSDIErrorCountRegDecoder;
-	
+
+	struct DecodeDriverVersion : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+			ostringstream	oss;
+			oss	<< "Major Version: "	<< DEC(NTV2DriverVersionDecode_Major(inRegValue))	<< endl
+				<< "Minor Version: "	<< DEC(NTV2DriverVersionDecode_Minor(inRegValue))	<< endl
+				<< "Point Version: "	<< DEC(NTV2DriverVersionDecode_Point(inRegValue)) << endl
+				<< "Build Number: "		<< DEC(NTV2DriverVersionDecode_Build(inRegValue));
+			return oss.str();
+		}
+		virtual	~DecodeDriverVersion()	{}
+	}	mDriverVersionDecoder;
+
 	static const int	NOREADWRITE	=	0;
 	static const int	READONLY	=	1;
 	static const int	WRITEONLY	=	2;
