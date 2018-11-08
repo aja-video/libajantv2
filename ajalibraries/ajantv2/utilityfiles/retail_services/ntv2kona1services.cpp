@@ -414,7 +414,8 @@ void Kona1Services::SetDeviceXPointCapture ()
 	bool						b3GbOut				= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb);
 	NTV2CrosspointID			inputXptYUV1		= NTV2_XptBlack;				// Input source selected single stream
 	NTV2CrosspointID			inputXptYUV2		= NTV2_XptBlack;				// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
-	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)
+	NTV2ColorSpaceMode			inputColorSpace		= mSDIInput1ColorSpace;			// Input format select (YUV, RGB, etc)
+	//bool						bInRGB				= mDs.bInSdiRgb;
 
 	// get selected input video format
 	NTV2VideoFormat	inputFormat = mDs.inputVideoFormatSelect;
