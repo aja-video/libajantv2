@@ -70,7 +70,7 @@ public:
 	bool			ReadInfoString();
 	void			SetBitFile (const char *bitFileName, FlashBlockID blockNumber = AUTO_FLASHBLOCK);
 	bool			SetMCSFile (const char *sMCSFileName);
-    void			Program (bool verify = true);
+    void			Program (bool fullVerify = false);
     bool            ProgramFromMCS(bool verify);
     bool            ProgramSOC(bool verify = true);
 	void			ProgramCustom ( const char *sCustomFileName, const uint32_t addr);
@@ -79,7 +79,7 @@ public:
 	bool			CreateSRecord (bool bChangeEndian);
 	bool			CreateEDIDIntelRecord ();
     void			SetQuietMode ();
-	bool			VerifyFlash (FlashBlockID flashBlockNumber);
+	bool			VerifyFlash (FlashBlockID flashBlockNumber, bool fullVerify = false);
 	bool			SetBankSelect (BankSelect bankNumber);
 	bool			SetFlashBlockIDBank(FlashBlockID blockID);
     bool            ROMHasBankSelect();
