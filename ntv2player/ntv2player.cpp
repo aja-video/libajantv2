@@ -123,7 +123,7 @@ NTV2Player::~NTV2Player (void)
 		}
 	}	//	for each buffer in the ring
 
-	if (!mDoMultiChannel)
+	if (!mDoMultiChannel && mDevice.IsOpen())
 	{
 		mDevice.SetEveryFrameServices (mSavedTaskMode);			//	Restore the previously saved service level
 		mDevice.ReleaseStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ()));	//	Release the device
