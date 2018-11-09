@@ -25,17 +25,19 @@
 #endif
 #include <deque>
 
-#define	CVIDFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
-#define	CVIDWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
-#define	CVIDNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
-#define	CVIDINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
-#define	CVIDDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
+#define	HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') <<               uint64_t(__x__)  << dec
+#define INSTP(_p_)			HEX16(uint64_t(_p_))
+#define	CVIDFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_VideoGeneric, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	CVIDWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_VideoGeneric, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	CVIDNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_VideoGeneric, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	CVIDINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_VideoGeneric, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	CVIDDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_VideoGeneric, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 
-#define	ROUTEFAIL(__x__)	AJA_sERROR  (AJA_DebugUnit_RoutingGeneric, AJAFUNC << ": " << __x__)
-#define	ROUTEWARN(__x__)	AJA_sWARNING(AJA_DebugUnit_RoutingGeneric, AJAFUNC << ": " << __x__)
-#define	ROUTENOTE(__x__)	AJA_sNOTICE (AJA_DebugUnit_RoutingGeneric, AJAFUNC << ": " << __x__)
-#define	ROUTEINFO(__x__)	AJA_sINFO   (AJA_DebugUnit_RoutingGeneric, AJAFUNC << ": " << __x__)
-#define	ROUTEDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_RoutingGeneric, AJAFUNC << ": " << __x__)
+#define	ROUTEFAIL(__x__)	AJA_sERROR  (AJA_DebugUnit_RoutingGeneric, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	ROUTEWARN(__x__)	AJA_sWARNING(AJA_DebugUnit_RoutingGeneric, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	ROUTENOTE(__x__)	AJA_sNOTICE (AJA_DebugUnit_RoutingGeneric, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	ROUTEINFO(__x__)	AJA_sINFO   (AJA_DebugUnit_RoutingGeneric, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	ROUTEDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_RoutingGeneric, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 
 using namespace std;
 
