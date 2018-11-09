@@ -23,13 +23,28 @@
 #include <iostream>
 
 #include "ntv2linuxdriverinterface.h"
-#include <ntv2linuxpublicinterface.h>
+#include "ntv2linuxpublicinterface.h"
+#include "ntv2devicefeatures.h" 			// For multiple bitfile support for XenaHS
+#include "ntv2nubtypes.h"
+#include "ntv2utils.h"
+#include "ajabase/system/debug.h"
 
-#include <ntv2devicefeatures.h> 			// For multiple bitfile support for XenaHS
-#include <ntv2nubtypes.h>
-#include <ntv2utils.h>
 
 using namespace std;
+
+
+//	LinuxDriverInterface Logging Macros
+#define	HEX2(__x__)			"0x" << hex << setw(2)  << setfill('0') << (0xFF       & uint8_t (__x__)) << dec
+#define	HEX4(__x__)			"0x" << hex << setw(4)  << setfill('0') << (0xFFFF     & uint16_t(__x__)) << dec
+#define	HEX8(__x__)			"0x" << hex << setw(8)  << setfill('0') << (0xFFFFFFFF & uint32_t(__x__)) << dec
+#define	HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') <<               uint64_t(__x__)  << dec
+#define INSTP(_p_)			HEX16(uint64_t(_p_))
+
+#define	LDIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << __FUNCTION__ << ": " << __x__)
+#define	LDIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << __FUNCTION__ << ": " << __x__)
+#define	LDINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << __FUNCTION__ << ": " << __x__)
+#define	LDIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << __FUNCTION__ << ": " << __x__)
+#define	LDIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << __FUNCTION__ << ": " << __x__)
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Board Open / Close methods
@@ -64,7 +79,8 @@ CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & hostNa
 		boardStr = oss.str();
 		if (!OpenRemote(inDeviceIndexNumber, false, 256, hostName.c_str()))
 		{
-			DisplayNTV2Error("Failed to open board on remote host.");
+			LDIFAIL("Failed to open '" << boardStr << "' on remote host");
+			return false;
 		}
 	}
 	else
@@ -80,9 +96,7 @@ CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & hostNa
 
 	if (_hDevice == INVALID_HANDLE_VALUE && _remoteHandle == INVALID_NUB_HANDLE)
 	{
-		ostringstream	oss;
-		oss << "Couldn't open " << boardStr << "\n";
-		DisplayNTV2Error(oss.str().c_str());
+		LDIFAIL("Failed to open '" << boardStr << "'");
 		return false;
 	}
 
@@ -90,18 +104,26 @@ CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & hostNa
 	_boardOpened = true;
 
 	// Fail if running with an old driver
-	ULWord driverVersionMajor;
-	GetDriverVersion(&driverVersionMajor);
-	driverVersionMajor = NTV2DriverVersionDecode_Major(driverVersionMajor);
-#if AJA_NTV2_SDK_VERSION_MAJOR != 0
-    if (driverVersionMajor < (ULWord)AJA_NTV2_SDK_VERSION_MAJOR)
+
+	if (AJA_NTV2_SDK_VERSION_MAJOR)
 	{
-		printf("## ERROR:  Cannot open:  Driver version %d older than SDK version %d\n",
-				driverVersionMajor, AJA_NTV2_SDK_VERSION_MAJOR);
-		Close();
-		return false;
+		ULWord driverVersionRaw(0);
+		if (!ReadRegister (kVRegDriverVersion, driverVersionRaw))
+		{
+			LDIFAIL("Unable to read driver version, ReadRegister(kVRegDriverVersion) failed");
+			Close();
+			return false;
+		}
+		const ULWord	driverVersionMajor(NTV2DriverVersionDecode_Major(driverVersionRaw));
+		if (driverVersionMajor != (ULWord)AJA_NTV2_SDK_VERSION_MAJOR)
+		{
+			LDIFAIL("Driver version " << DEC(driverVersionMajor) << " doesn't match SDK version " << DEC(AJA_NTV2_SDK_VERSION_MAJOR));
+			Close();
+			return false;
+		}
 	}
-#endif
+	else
+		LDIWARN ("Driver version not checked (AJA_NTV2_SDK_VERSION_MAJOR == 0)");
 
 	CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID);
 	//Kludge Warning.....
@@ -130,6 +152,7 @@ CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & hostNa
 			fg = NTV2_FG_1920x1080;	// we usually load the bitfiles for HD, so assume 1080
 		}
 	}
+	LDIINFO ("Opened '" << boardStr << "', deviceID=" << HEX8(_boardID) << ", device index " << DEC(_boardNumber));
 
 	InitMemberVariablesOnOpen(fg, format);
 	return true;
@@ -182,7 +205,7 @@ CNTV2LinuxDriverInterface::Close()
 	if( !_boardOpened )
 		return true;
 
-	assert( _hDevice );
+	NTV2_ASSERT( _hDevice );
 
 	// oem additions
 	UnmapFrameBuffers ();
@@ -226,7 +249,7 @@ CNTV2LinuxDriverInterface::ReadRegister(
 	}
 	else
 	{
-		assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0));
+		NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0));
 		NTV2_ASSERT (registerShift < 32);
 
 		REGISTER_ACCESS ra;
@@ -270,7 +293,7 @@ CNTV2LinuxDriverInterface::WriteRegister (
 	}
 	else
 	{
-		assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+		NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 		NTV2_ASSERT (registerShift < 32);
 		REGISTER_ACCESS ra;
 
@@ -294,7 +317,7 @@ CNTV2LinuxDriverInterface::RestoreHardwareProcampRegisters()
 {
 	bool result = false;
 
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	if (ioctl( _hDevice, IOCTL_NTV2_RESTORE_HARDWARE_PROCAMP_REGISTERS))
 	{
@@ -321,7 +344,7 @@ CNTV2LinuxDriverInterface::ConfigureInterrupt (
 	bool			bEnable,
 	INTERRUPT_ENUMS	eInterruptType)
 {
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	NTV2_INTERRUPT_CONTROL_STRUCT intrControlStruct;
 	memset(&intrControlStruct, 0, sizeof(NTV2_INTERRUPT_CONTROL_STRUCT));	// Suppress valgrind error
@@ -345,7 +368,7 @@ CNTV2LinuxDriverInterface::GetInterruptCount(
 	INTERRUPT_ENUMS	eInterruptType,
 	ULWord			*pCount)
 {
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 	if (     eInterruptType != eVerticalInterrupt
 		  && eInterruptType != eInput1
 		  && eInterruptType != eInput2
@@ -386,7 +409,7 @@ CNTV2LinuxDriverInterface::WaitForInterrupt (
 		return CNTV2DriverInterface::WaitForInterrupt(eInterrupt, timeOutMs);
 	}
 
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	NTV2_WAITFOR_INTERRUPT_STRUCT waitIntrStruct;
 	waitIntrStruct.eInterruptType = eInterrupt;
@@ -410,7 +433,7 @@ CNTV2LinuxDriverInterface::ControlDriverDebugMessages(
 	NTV2_DriverDebugMessageSet msgSet,
 	bool enable )
 {
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	NTV2_CONTROL_DRIVER_DEBUG_MESSAGES_STRUCT cddmStruct;
 	cddmStruct.msgSet = msgSet;
@@ -433,7 +456,7 @@ CNTV2LinuxDriverInterface::ControlDriverDebugMessages(
 bool
 CNTV2LinuxDriverInterface::SetupBoard()
 {
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	if (ioctl(	_hDevice,
 			 	IOCTL_NTV2_SETUP_BOARD,
@@ -458,7 +481,7 @@ CNTV2LinuxDriverInterface::SetupBoard()
 bool
 CNTV2LinuxDriverInterface::MapFrameBuffers (void)
 {
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	if ( _pFrameBaseAddress == NULL )
 	{
@@ -512,7 +535,7 @@ CNTV2LinuxDriverInterface::UnmapFrameBuffers (void)
 	if (_pFrameBaseAddress == 0)
 		return true;
 
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	// Get memory window size from driver
 	ULWord BA1MemorySize;
@@ -536,7 +559,7 @@ CNTV2LinuxDriverInterface::UnmapFrameBuffers (void)
 bool
 CNTV2LinuxDriverInterface::MapRegisters (void)
 {
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0));
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0));
 
 	if ( _pRegisterBaseAddress == NULL )
 	{
@@ -578,7 +601,7 @@ CNTV2LinuxDriverInterface::MapRegisters (void)
 bool
 CNTV2LinuxDriverInterface::UnmapRegisters (void)
 {
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	if (_pRegisterBaseAddress == 0)
 		return true;
@@ -598,7 +621,7 @@ CNTV2LinuxDriverInterface::UnmapRegisters (void)
 bool
 CNTV2LinuxDriverInterface::MapXena2Flash (void)
 {
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	ULWord BA4MemorySize;
 	if ( _pXena2FlashBaseAddress == NULL )
@@ -640,7 +663,7 @@ CNTV2LinuxDriverInterface::UnmapXena2Flash (void)
 	if ( _pXena2FlashBaseAddress == 0 )
 		return true;
 
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	if ( _pXena2FlashBaseAddress != NULL )
 	{
@@ -660,7 +683,7 @@ bool
 CNTV2LinuxDriverInterface::MapDNXRegisters (void)
 {
 	ULWord BA2MemorySize;
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	if ( _pDNXRegisterBaseAddress == NULL )
 	{
@@ -702,7 +725,7 @@ CNTV2LinuxDriverInterface::UnmapDNXRegisters (void)
 	if (_pDNXRegisterBaseAddress == 0 )
 		return true;
 
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	if ( _pDNXRegisterBaseAddress != NULL )
 	{
@@ -744,7 +767,7 @@ CNTV2LinuxDriverInterface::DmaTransfer (
 		return true;
 	}
 
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 //	fprintf(stderr, "%s: FRM(%d) ENG(%d) NB(%d) DIR(%s)\n", __FUNCTION__, frameNumber, DMAEngine, bytes, (bRead==true?"R":"W"));
 	// NOTE: Linux driver assumes driver buffers to be used if
@@ -845,7 +868,7 @@ CNTV2LinuxDriverInterface::DmaTransfer (
 	ULWord        videoSegmentCardPitch,
 	bool		  bSync = true)
 {
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 //	fprintf(stderr, "%s: FRM(%d) ENG(%d) NB(%d) DIR(%s)\n", __FUNCTION__, frameNumber, DMAEngine, bytes, (bRead==true?"R":"W"));
 
@@ -945,7 +968,7 @@ CNTV2LinuxDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine,
 										ULWord videoSegmentCardPitch,
 										PCHANNEL_P2P_STRUCT pP2PData)
 {
-	assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	if( pP2PData == NULL )
 	{
@@ -1020,7 +1043,7 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 	else
 	{
 		int result;
-		assert( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+		NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 		switch (autoCircData.eCommand)
 		{
@@ -1377,11 +1400,6 @@ bool CNTV2LinuxDriverInterface::GetAudioRecordPinDelay(ULWord* millisecondDelay)
 	return false;
 }
 
-bool CNTV2LinuxDriverInterface::GetDriverVersion(ULWord* driverVersion)
-{
-	return driverVersion ? ReadRegister (kVRegLinuxDriverVersion, *driverVersion) : false;
-}
-
 bool CNTV2LinuxDriverInterface::GetBA0MemorySize(ULWord* memSize)
 {
 	return memSize ? ReadRegister (kVRegBA0MemorySize, *memSize) : false;
@@ -1410,43 +1428,6 @@ bool CNTV2LinuxDriverInterface::GetDMADriverBufferPhysicalAddress(ULWord* physAd
 bool CNTV2LinuxDriverInterface::GetDMANumDriverBuffers(ULWord* pNumDmaDriverBuffers)
 {
 	return pNumDmaDriverBuffers ? ReadRegister (kVRegNumDmaDriverBuffers, *pNumDmaDriverBuffers) : false;
-}
-
-
-void CNTV2LinuxDriverInterface::GetDriverVersionString( std::string& driverVersionString)
-{
-	ULWord versionInfo=0;
-	GetDriverVersion(&versionInfo);
-// Bit  15  Debug
-// Bit  14-8  Beta Flag
-// Bits 7-4 Major Version
-// Bits 3-0 Minor Version
-#define VERSTRMAX 32
-
-	char versionString[VERSTRMAX];
-	int soFar;
-
-	soFar = snprintf(	versionString, VERSTRMAX - 1, "%d.%d",
-						((versionInfo>>4)&0xF) , (versionInfo&0xF));
-	if ( versionInfo & (BIT_14+ BIT_13+ BIT_12+ BIT_11+ BIT_10+ BIT_9+ BIT_8 ))
-	{
-		// Beta Version
-		soFar += snprintf(	versionString + soFar, VERSTRMAX - soFar - 1, " Beta %d",
-							((versionInfo>>8)&0x3F));
-	}
-	if ( versionInfo & 0xFFFF0000 )
-	{
-		// Build Version
-		soFar += snprintf(	versionString + soFar, VERSTRMAX - soFar - 1, " Beta %d",
-							((versionInfo>>16)&0xFFFF));
-	}
-	if ( versionInfo & BIT_15 )
-	{
-		// Debug Version
-		soFar += snprintf(	versionString + soFar, VERSTRMAX - soFar - 1, " Debug");
-	}
-
-	driverVersionString = versionString;
 }
 
 bool CNTV2LinuxDriverInterface::SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode)
