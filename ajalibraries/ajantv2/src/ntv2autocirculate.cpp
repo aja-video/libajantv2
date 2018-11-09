@@ -661,6 +661,8 @@ bool CNTV2Card::AutoCirculateInitForInput (	const NTV2Channel		inChannel,
 	autoCircData.lVal2 = endFrameNumber;
 	autoCircData.lVal3 = inAudioSystem;
 	autoCircData.lVal4 = inNumChannels;
+	if ((inOptionFlags & AUTOCIRCULATE_WITH_FIELDS) != 0)
+		autoCircData.lVal6 |= AUTOCIRCULATE_WITH_FIELDS;
 	if ((inOptionFlags & AUTOCIRCULATE_WITH_AUDIO_CONTROL) != 0)
 		autoCircData.bVal1 = false;
 	else
@@ -749,6 +751,8 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 	autoCircData.lVal2 = endFrameNumber;
 	autoCircData.lVal3 = inAudioSystem;
 	autoCircData.lVal4 = inNumChannels;
+	if ((inOptionFlags & AUTOCIRCULATE_WITH_FIELDS) != 0)
+		autoCircData.lVal6 |= AUTOCIRCULATE_WITH_FIELDS;
 	if ((inOptionFlags & AUTOCIRCULATE_WITH_AUDIO_CONTROL) != 0)
 		autoCircData.bVal1 = false;
 	else
