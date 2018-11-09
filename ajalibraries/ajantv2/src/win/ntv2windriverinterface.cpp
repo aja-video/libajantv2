@@ -338,11 +338,16 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 
 	_boardOpened = true;
 
-	ULWord driverVersionMajor;
-	GetDriverVersion(&driverVersionMajor);
-	driverVersionMajor = (driverVersionMajor >> 4) & 0xF;
 #if AJA_NTV2_SDK_VERSION_MAJOR != 0
-	if (driverVersionMajor < (ULWord)AJA_NTV2_SDK_VERSION_MAJOR)
+	ULWord driverVersionMajor;
+	if (!ReadRegister (kVRegLinuxDriverVersion, &driverVersionMajor))
+	{
+		WDIFAIL("Cannot read driver version");
+		Close();
+		return false;
+	}
+	driverVersionMajor = NTV2DriverVersionDecode_Major(driverVersionMajor);
+	if (driverVersionMajor != (ULWord)AJA_NTV2_SDK_VERSION_MAJOR)
 	{
 		printf("## ERROR:  Cannot open:  Driver version %d older than SDK version %d\n",
 				driverVersionMajor, AJA_NTV2_SDK_VERSION_MAJOR);
@@ -1444,9 +1449,7 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 		switch (autoCircData.eCommand)
 		{
 		case eInitAutoCirc:
-			if((autoCircData.lVal4 <= 1) && 
-			   (autoCircData.lVal5 == 0) &&
-			   (autoCircData.lVal6 == 0))
+			if(autoCircData.lVal4 <= 1)
 			{
 				KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S autoCircControl;
 				memset(&autoCircControl, 0, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S));
@@ -1517,8 +1520,6 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 				autoCircControl.lVal2 = autoCircData.lVal2;
 				autoCircControl.lVal3 = autoCircData.lVal3;
 				autoCircControl.lVal4 = autoCircData.lVal4;
-				autoCircControl.lVal5 = autoCircData.lVal5;
-				autoCircControl.lVal6 = autoCircData.lVal6;
 				autoCircControl.bVal1 = autoCircData.bVal1;
 				autoCircControl.bVal2 = autoCircData.bVal2;
 				autoCircControl.bVal3 = autoCircData.bVal3;
