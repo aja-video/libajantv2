@@ -1449,7 +1449,9 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 		switch (autoCircData.eCommand)
 		{
 		case eInitAutoCirc:
-			if(autoCircData.lVal4 <= 1)
+			if((autoCircData.lVal4 <= 1) && 
+			   (autoCircData.lVal5 == 0) &&
+			   (autoCircData.lVal6 == 0))
 			{
 				KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S autoCircControl;
 				memset(&autoCircControl, 0, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S));
@@ -1520,6 +1522,8 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 				autoCircControl.lVal2 = autoCircData.lVal2;
 				autoCircControl.lVal3 = autoCircData.lVal3;
 				autoCircControl.lVal4 = autoCircData.lVal4;
+				autoCircControl.lVal5 = autoCircData.lVal5;
+				autoCircControl.lVal6 = autoCircData.lVal6;
 				autoCircControl.bVal1 = autoCircData.bVal1;
 				autoCircControl.bVal2 = autoCircData.bVal2;
 				autoCircControl.bVal3 = autoCircData.bVal3;
