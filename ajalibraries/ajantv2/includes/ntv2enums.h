@@ -684,7 +684,7 @@ typedef enum _NTV2VideoFormat
     (	((__f__) >= NTV2_FORMAT_FIRST_4K_DEF_FORMAT &&				\
         (__f__) < NTV2_FORMAT_END_4K_DEF_FORMATS	)   ||          \
         ((__f__) >= NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT &&         \
-        (__f__) < NTV2_FORMAT_END_4K_TSI_DEF_FORMATS)               \
+        (__f__) < NTV2_FORMAT_END_4K_DEF_FORMATS2)					\
     )
 
 #define NTV2_IS_4K_HFR_VIDEO_FORMAT(__f__)							\
@@ -700,7 +700,7 @@ typedef enum _NTV2VideoFormat
     (	((__f__) >= NTV2_FORMAT_FIRST_4K_DEF_FORMAT &&				\
         (__f__) < NTV2_FORMAT_END_4K_DEF_FORMATS	)   ||          \
         ((__f__) >= NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT    &&      \
-        (__f__) < NTV2_FORMAT_END_4K_TSI_DEF_FORMATS    )           \
+        (__f__) < NTV2_FORMAT_END_4K_DEF_FORMATS2    )           \
     )
 
 #define NTV2_IS_4K_4096_VIDEO_FORMAT(__f__)							\
@@ -721,6 +721,11 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_4x2048x1080p_6000	||				\
         (__f__) == NTV2_FORMAT_4x2048x1080p_11988	||				\
         (__f__) == NTV2_FORMAT_4x2048x1080p_12000	||              \
+		(__f__) == NTV2_FORMAT_4x2048x1080p_4795_B	||				\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_4800_B	||				\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_5000_B	||				\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_5994_B	||				\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_6000_B	||				\
         ((__f__) >= NTV2_FORMAT_FIRST_4K_TSI_DEF_FORMAT &&          \
         (__f__) < NTV2_FORMAT_END_4K_TSI_DEF_FORMATS    )           \
     )
@@ -739,6 +744,9 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_4x1920x1080p_5000	||				\
         (__f__) == NTV2_FORMAT_4x1920x1080p_5994	||				\
         (__f__) == NTV2_FORMAT_4x1920x1080p_6000	||              \
+		(__f__) == NTV2_FORMAT_4x1920x1080p_5000_B	||				\
+		(__f__) == NTV2_FORMAT_4x1920x1080p_5994_B	||				\
+		(__f__) == NTV2_FORMAT_4x1920x1080p_6000_B	||              \
         ((__f__) >= NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT    &&      \
         (__f__) < NTV2_FORMAT_FIRST_4K_TSI_DEF_FORMAT   )           \
     )
@@ -811,9 +819,9 @@ typedef enum _NTV2VideoFormat
 
 #define NTV2_IS_12G_FORMAT(__f__)									\
     (	((__f__) >= NTV2_FORMAT_3840x2160p_5000 &&                  \
-        (__f__) <= NTV2_FORMAT_3840x2160p_6000)     ||              \
+        (__f__) <= NTV2_FORMAT_3840x2160p_6000_B)     ||              \
         ((__f__) >= NTV2_FORMAT_4096x2160p_5000 &&                  \
-        (__f__) <= NTV2_FORMAT_4096x2160p_12000 )                   \
+        (__f__) <= NTV2_FORMAT_4096x2160p_6000_B )                   \
     )
 
 #define NTV2_IS_3Gb_FORMAT(__f__)									\
@@ -824,7 +832,23 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_1080p_2K_5994_B	||					\
         (__f__) == NTV2_FORMAT_1080p_2K_5000_B	||					\
         (__f__) == NTV2_FORMAT_1080p_2K_4800_B	||					\
-        (__f__) == NTV2_FORMAT_1080p_2K_4795_B	)
+        (__f__) == NTV2_FORMAT_1080p_2K_4795_B	||					\
+		(__f__) == NTV2_FORMAT_3840x2160p_5000_B	||					\
+		(__f__) == NTV2_FORMAT_3840x2160p_5994_B	||					\
+		(__f__) == NTV2_FORMAT_3840x2160p_6000_B	||					\
+		(__f__) == NTV2_FORMAT_4096x2160p_4795_B	||					\
+		(__f__) == NTV2_FORMAT_4096x2160p_4800_B	||					\
+		(__f__) == NTV2_FORMAT_4096x2160p_5000_B	||					\
+		(__f__) == NTV2_FORMAT_4096x2160p_5994_B	||					\
+		(__f__) == NTV2_FORMAT_4096x2160p_6000_B	||					\
+		(__f__) == NTV2_FORMAT_4x1920x1080p_5000_B	||					\
+		(__f__) == NTV2_FORMAT_4x1920x1080p_5994_B	||					\
+		(__f__) == NTV2_FORMAT_4x1920x1080p_6000_B	||					\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_5000_B	||					\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_5994_B	||					\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_6000_B	||					\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_4795_B	||					\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_4800_B	)
 
 #define NTV2_IS_WIRE_FORMAT(__f__)									\
     (	(__f__) != NTV2_FORMAT_525_2398 &&							\
@@ -907,7 +931,24 @@ typedef enum _NTV2VideoFormat
         (__f__) == NTV2_FORMAT_1080p_2K_4800_B ||					\
         (__f__) == NTV2_FORMAT_1080p_2K_5000_B ||					\
         (__f__) == NTV2_FORMAT_1080p_2K_5994_B ||					\
-        (__f__) == NTV2_FORMAT_1080p_2K_6000_B )
+        (__f__) == NTV2_FORMAT_1080p_2K_6000_B ||					\
+		(__f__) == NTV2_FORMAT_3840x2160p_5000_B	||					\
+		(__f__) == NTV2_FORMAT_3840x2160p_5994_B	||					\
+		(__f__) == NTV2_FORMAT_3840x2160p_6000_B	||					\
+		(__f__) == NTV2_FORMAT_4096x2160p_4795_B	||					\
+		(__f__) == NTV2_FORMAT_4096x2160p_4800_B	||					\
+		(__f__) == NTV2_FORMAT_4096x2160p_5000_B	||					\
+		(__f__) == NTV2_FORMAT_4096x2160p_5994_B	||					\
+		(__f__) == NTV2_FORMAT_4096x2160p_6000_B	||					\
+		(__f__) == NTV2_FORMAT_4x1920x1080p_5000_B	||					\
+		(__f__) == NTV2_FORMAT_4x1920x1080p_5994_B	||					\
+		(__f__) == NTV2_FORMAT_4x1920x1080p_6000_B	||					\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_5000_B	||					\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_5994_B	||					\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_6000_B	||					\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_4795_B	||					\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_4800_B
+	)
 
 #define NTV2_VIDEO_FORMAT_IS_J2K_SUPPORTED(__f__)					\
     (	(__f__) == NTV2_FORMAT_525_5994 ||                          \
@@ -944,7 +985,27 @@ typedef enum _NTV2VideoFormat
 
 #define NTV2_IS_SQUARE_DIVISION_FORMAT(__f__)									\
     (	((__f__) >= NTV2_FORMAT_FIRST_4K_DEF_FORMAT    &&      \
-        (__f__) < NTV2_FORMAT_END_4K_DEF_FORMATS   ) 	)
+        (__f__) < NTV2_FORMAT_END_4K_DEF_FORMATS   )	||		\
+		((__f__) >= NTV2_FORMAT_FIRST_4K_DEF_FORMAT2    &&      \
+		(__f__) < NTV2_FORMAT_END_4K_DEF_FORMATS2   )	)
+	
+#define NTV2_VIDEO_FORMAT_NEEDS_CONVERSION(__f__)									\
+    (	(__f__) == NTV2_FORMAT_3840x2160p_5000_B	||					\
+		(__f__) == NTV2_FORMAT_3840x2160p_5994_B	||					\
+		(__f__) == NTV2_FORMAT_3840x2160p_6000_B	||					\
+		(__f__) == NTV2_FORMAT_4096x2160p_4795_B	||					\
+		(__f__) == NTV2_FORMAT_4096x2160p_4800_B	||					\
+		(__f__) == NTV2_FORMAT_4096x2160p_5000_B	||					\
+		(__f__) == NTV2_FORMAT_4096x2160p_5994_B	||					\
+		(__f__) == NTV2_FORMAT_4096x2160p_6000_B	||					\
+		(__f__) == NTV2_FORMAT_4x1920x1080p_5000_B	||					\
+		(__f__) == NTV2_FORMAT_4x1920x1080p_5994_B	||					\
+		(__f__) == NTV2_FORMAT_4x1920x1080p_6000_B	||					\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_5000_B	||					\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_5994_B	||					\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_6000_B	||					\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_4795_B	||					\
+		(__f__) == NTV2_FORMAT_4x2048x1080p_4800_B	)
 
 /**
 	@brief		Identifies the mode of a frame store, either Capture (Input) or Display (Output).
