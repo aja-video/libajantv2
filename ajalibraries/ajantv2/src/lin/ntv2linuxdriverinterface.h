@@ -235,7 +235,6 @@ public:
     bool GetAudioPlaybackPinDelay (ULWord* millisecondDelay);	// Not supported
     bool SetAudioRecordPinDelay (ULWord millisecondDelay);		// Not supported
     bool GetAudioRecordPinDelay (ULWord* millisecondDelay);		// Not supported
-    bool GetDriverVersion(ULWord* driverVersion);				// Supported!
 	bool GetBA0MemorySize(ULWord* memSize);						// Supported!
 	bool GetBA1MemorySize(ULWord* memSize);						// Supported!
 	bool GetBA2MemorySize(ULWord* memSize);						// Supported!
@@ -245,8 +244,6 @@ public:
 	bool GetDMANumDriverBuffers(ULWord* pNumDmaDriverBuffers);	// Supported!
 	bool SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode);	// Supported!
 	bool GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode);// Supported!
-
-	void GetDriverVersionString( std::string& driverVersionString);	// Get driver version as ASCII text
 
 	bool DisplayNTV2Error (const char *str);
 

@@ -43,14 +43,6 @@ typedef enum
 
 const ReferenceSelect kCaptureReferenceSelect = kVideoIn;
 
-#define USE_CLASS4K_SERVICE		(true)
-enum
-{
-	kUseClass4kForIo4k			= (true && USE_CLASS4K_SERVICE),
-	kUseClass4kForKona			= (true && USE_CLASS4K_SERVICE),
-	kUseClass4kForCorvid		= (true && USE_CLASS4K_SERVICE)
-};
-
 
 //-------------------------------------------------------------------------------------------------------
 //	class HLState

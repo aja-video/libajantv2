@@ -7,7 +7,6 @@
 #include "retailsupport.h"
 #include "ntv2class4kservices.h"
 #include "ntv2ioxtservices.h"
-#include "ntv2io4kservices.h"
 #include "ntv2io4kufcservices.h"
 #include "ntv2kona3Gquadservices.h"
 #include "ntv2kona3Gservices.h"
@@ -21,20 +20,15 @@
 #include "ntv2ttapservices.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2corvid24services.h"
-#include "ntv2corvid44services.h"
-#include "ntv2kona4quadservices.h"
 #include "ntv2kona4ufcservices.h"
 #include "ntv2konaip22services.h"
 #include "ntv2konaip2110services.h"
 #include "ntv2konaipj2kservices.h"
 #include "ntv2ioip2022services.h"
 #include "ntv2ioip2110services.h"
-#include "ntv2io4kplusservices.h"
 #include "ntv2konahdmiservices.h"
 #include "ntv2vpidfromspec.h"
-#include "ntv2corvid88services.h"
 #include "ntv2kona1services.h"
-#include "ntv2kona5services.h"
 #include "appsignatures.h"
 #include "ajabase/system/systemtime.h"
 
@@ -59,28 +53,26 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 	// create board servicess
 	switch (deviceID)
 	{
+        case DEVICE_ID_KONAIP_2022:
         case DEVICE_ID_IOIP_2022:
             pDeviceServices = new IoIP2022Services();
             break;
         case DEVICE_ID_IOIP_2110:
-            pDeviceServices = new IoIP2110Services();
-            break;
         case DEVICE_ID_KONAIP_2110:
-			pDeviceServices = new KonaIP2110Services();
-			break;
-        case DEVICE_ID_KONAIP_2022:
-            pDeviceServices = new KonaIP22Services();
-            break;
+            pDeviceServices = new KonaIP2110Services();
+        	break;
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:
 			pDeviceServices = new KonaIPJ2kServices();
 			break;
         case DEVICE_ID_KONA4:
-			if (kUseClass4kForKona)
-				pDeviceServices = new Class4kServices(deviceID);
-			else
-            	pDeviceServices = new Kona4QuadServices();
+		case DEVICE_ID_KONA5:
+		case DEVICE_ID_CORVID44:
+		case DEVICE_ID_CORVID88:
+		case DEVICE_ID_IO4K:
+		case DEVICE_ID_IO4KPLUS:
+			pDeviceServices = new Class4kServices(deviceID);
 			break;
 		case DEVICE_ID_KONA4UFC:
 			pDeviceServices = new Kona4UfcServices();
@@ -103,12 +95,6 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 		case DEVICE_ID_IOXT:
 			pDeviceServices = new IoXTServices();
 			break;
-		case DEVICE_ID_IO4K:
-			if (kUseClass4kForIo4k)
-				pDeviceServices = new Class4kServices(deviceID);
-			else
-				pDeviceServices = new Io4KServices();
-			break;
 		case DEVICE_ID_IO4KUFC:
 			pDeviceServices = new Io4KUfcServices();
 			break;
@@ -121,35 +107,11 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 		case DEVICE_ID_CORVID3G:
 			pDeviceServices = new Corvid3GServices();
 			break;
-		case DEVICE_ID_CORVID44:
-			if (kUseClass4kForCorvid)
-				pDeviceServices = new Class4kServices(deviceID);
-			else
-				pDeviceServices = new Corvid44Services();
-			break;
-		case DEVICE_ID_CORVID88:
-			if (kUseClass4kForCorvid)
-				pDeviceServices = new Class4kServices(deviceID);
-			else
-				pDeviceServices = new Corvid88Services();
-			break;
-		case DEVICE_ID_IO4KPLUS:
-			if (kUseClass4kForIo4k)
-				pDeviceServices = new Class4kServices(deviceID);
-			else
-				pDeviceServices = new Io4KPlusServices();
-			break;
 		case DEVICE_ID_KONA1:
 			pDeviceServices = new Kona1Services();
 			break;
 		case DEVICE_ID_KONAHDMI:
 			pDeviceServices = new KonaHDMIServices();
-			break;
-		case DEVICE_ID_KONA5:
-			if (kUseClass4kForKona)
-				pDeviceServices = new Class4kServices(deviceID);
-			else
-				pDeviceServices = new Kona5Services();
 			break;
 		default:
 		case DEVICE_ID_CORVID1:
