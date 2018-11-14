@@ -2267,7 +2267,7 @@ bool CNTV2Card::ProgramMainFlash(const char *fileName, bool bForceUpdate)
         thisDevice.SetBitFile(fileName, MAIN_FLASHBLOCK);
         if(bForceUpdate)
             thisDevice.SetMBReset();
-        thisDevice.Program(true);
+        thisDevice.Program(false);
     }
     catch (const char* Message)
     {
