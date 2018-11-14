@@ -778,6 +778,8 @@ bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID, bool fullVerify)
         SetBankSelect(NTV2DeviceHasSPIv5(_boardID) ? BANK_2 : BANK_1);
 		break;
 	}
+	WriteRegister(kVRegFlashState, kProgramStateVerifyFlash);
+	WriteRegister(kVRegFlashSize, dwordSizeCount);
 	for (uint32_t count = 0; count < dwordSizeCount; /*count += 64, baseAddress += 256, bitFilePtr += 64*/)//count++, baseAddress += 4 )
 	{
 		if (NTV2DeviceHasSPIv5(_boardID) && baseAddress == _bankSize)
@@ -808,6 +810,7 @@ bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID, bool fullVerify)
                 break;
 		}
 		percentComplete = (count*100)/dwordSizeCount;
+		WriteRegister(kVRegFlashStatus, count);
 		if(!_bQuiet)
 		{
 			printf("Program verify: %i%%\r", percentComplete);
