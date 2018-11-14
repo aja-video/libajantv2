@@ -978,7 +978,7 @@ void Class4kServices::SetDeviceXPointPlayback ()
 			}
 		}
 	}
-	else if (b2FbLevelBHfr)													// Stereo or LevelB
+	else if (b2FbLevelBHfr)													// LevelB
 	{
 		if (b3GbOut)
 		{
@@ -1041,7 +1041,7 @@ void Class4kServices::SetDeviceXPointPlayback ()
 		mCard->Connect (NTV2_XptSDIOut5Input, NTV2_Xpt4KDownConverterOut);
 		mCard->Connect (NTV2_XptSDIOut5InputDS2, NTV2_XptBlack);
 	}
-	// Stereo or LevelB
+	// LevelB
 	else if (b2FbLevelBHfr)											
 	{
 		mCard->Connect (NTV2_XptSDIOut5Input, frameSync1YUV);
@@ -1163,7 +1163,7 @@ void Class4kServices::SetDeviceXPointPlayback ()
 		}
 		else if (b2FbLevelBHfr)
 		{
-			// Stereo or LevelB
+			// LevelB
 			XPt1 = NTV2_XptLUT1RGB;
 			XPt2 = NTV2_XptLUT2RGB;
 		}
@@ -3032,7 +3032,6 @@ void Class4kServices::SetDeviceMiscRegisters ()
 	bool b1x3GbOut =		(b4K == false) &&
 							((bSdiOutRGB == true) ||
 							 (mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect) ||
-							 (mVirtualDigitalOutput1Select == NTV2_StereoOutputSelect) ||
 							 (bFbLevelA == true && mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb) ||
 							 (IsVideoFormatB(mFb1VideoFormat) == true)  );
 
