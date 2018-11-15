@@ -2099,7 +2099,7 @@ bool CNTV2MacDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 		if(NTV2DeviceGetNumVideoInputs(boardID) > 1)
 		{
 			CNTV2DriverInterface::ReadRegister (kVRegInputSelect, inputSelect);
-			channel = (inputSelect != NTV2_Input2Select) ? NTV2_CHANNEL1 : NTV2_CHANNEL2;
+			channel = (inputSelect == NTV2_Input2Select) ? NTV2_CHANNEL2 : NTV2_CHANNEL1;
 		}
 		else
 		{

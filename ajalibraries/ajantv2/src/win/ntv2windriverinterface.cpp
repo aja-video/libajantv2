@@ -2380,7 +2380,7 @@ bool CNTV2WinDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 		{
 
 			CNTV2DriverInterface::ReadRegister (kVRegInputSelect, inputSelect);
-			channel = (inputSelect == NTV2_Input1Select) ? NTV2_CHANNEL1 : NTV2_CHANNEL2;
+			channel = (inputSelect == NTV2_Input2Select) ? NTV2_CHANNEL2 : NTV2_CHANNEL1;
 		}
 		else
 		{

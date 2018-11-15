@@ -1898,22 +1898,15 @@ bool CNTV2LinuxDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-us
 		NTV2Channel channel = NTV2_CHANNEL1;
 		NTV2InputVideoSelect inputSelect = NTV2_Input1Select;
 
-		switch (boardID)
+		if(NTV2DeviceGetNumVideoInputs(boardID) > 1)
 		{
-		case DEVICE_ID_KONALHI:
-		case DEVICE_ID_IOXT:
-		case DEVICE_ID_CORVID22:
-		case DEVICE_ID_KONA3G:
-		case DEVICE_ID_KONA3GQUAD:
-			//			case BOARD_ID_CORVID24:			//	** MrBill **	What about CORVID24?!
+
 			CNTV2DriverInterface::ReadRegister (kVRegInputSelect, inputSelect);
-			channel = (inputSelect == NTV2_Input1Select) ? NTV2_CHANNEL1 : NTV2_CHANNEL2;
-			break;
-		case DEVICE_ID_IOEXPRESS:
-		case DEVICE_ID_CORVID1:
-		default:
+			channel = (inputSelect == NTV2_Input2Select) ? NTV2_CHANNEL2 : NTV2_CHANNEL1;
+		}
+		else
+		{
 			channel = NTV2_CHANNEL1;
-			break;
 		}
 
 		// rp188 registers
