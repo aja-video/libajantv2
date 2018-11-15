@@ -4,9 +4,9 @@
 	@section	ntv2devops-intro	Introduction
 
 	In simplest terms, NTV2 devices are essentially…
-	-	a big chunk of SDRAM memory for buffering video frames and audio samples, which is tied to...
-	-	an FPGA that determines what gets written or read to/from that memory (and where), plus...
-	-	one or more video and/or audio signal inputs and/or outputs, and...
+	-	a big chunk of SDRAM memory for buffering video frames and audio samples, which is tied to…
+	-	an FPGA that determines what gets written or read to/from that memory (and where), plus…
+	-	one or more video and/or audio signal inputs and/or outputs, and…
 	-	a high-speed PCIe interface to a host computer, for rapidly reading or writing 32-bit registers,
 		and transferring bulk data via DMA to/from the host.
 
@@ -840,7 +840,7 @@
 		-	Unless its embedder is disabled, it will continually embed 20/24-bit AES audio samples into SMPTE 272M/292M HANC packets
 			into its SDI output stream.
 		-	When its playout side is running, it will read from its output audio buffer in device SDRAM the audio samples to be embedded.
-		-	When its playout side is not running...
+		-	When its playout side is not running…
 			-	If configured for “loopback” play-through, it obtains audio samples from an <b>Audio System</b>’s input audio de-embedder.
 			-	It will otherwise embed silence (audio packets that contain all-zero sample values).
 
@@ -1033,6 +1033,31 @@
 
 
 	<hr size="50px">
+	@subsection	audiohidden		Other “Hidden“ Audio Systems
+
+	Modern AJA devices intended for “retail” markets, particularly newer “KONA” and “Io” series devices, may have firmware that
+	implements additional “hidden” audio systems that aren’t reported in the ordinary ::NTV2DeviceGetNumAudioSystems call:
+	-	A <b>Host Audio System</b> for audio input/output to/from the host operating system (see ::NTV2DeviceGetHostAudioSystem);
+	-	A “phantom” <b>Mixer Audio System</b> that uses only FIFOs (no audio buffer memory) in order to implement an \ref audiomixer
+		(see CNTV2Card::DeviceCanDoAudioMixer and ::NTV2DeviceGetAudioMixerSystem).
+
+	These additional audio systems help support AJA’s “retail” software (i.e. Adobe, Avid, Apple, Telestream, etc. plug-ins, AJA ControlRoom, etc).
+
+	The <b>Host Audio System</b> is used to continuously deliver…
+	-	SDI/HDMI/AES audio from the AJA KONA/Io device as input to the host computer’s primary audio system.
+		For example, this would enable an audio capture program running on the host (e.g. Audacity) to capture audio from an SDI input signal on the KONA/Io device.
+	-	Host audio output from the host OS’s primary system audio to the KONA/Io device’s SDI/HDMI/AES output.
+		For example, this would enable audio from a web browser running on the host computer to playout through a KONA/Io device’s SDI output.
+
+	The <b>Host Audio System</b> is started and operated by the AJA kernel driver in conjunction with the host computer system’s audio control panel.
+	It allows host audio to operate independently of other audio systems on the device that may be used by AutoCirculate or other
+	SDK client software.
+
+	Since the <b>host audio system</b> uses audio buffer memory in device SDRAM, it’s susceptible to \ref audioclobber if an excessively
+	large video buffer number is used by an active Frame Store.
+
+
+	<hr size="50px">
 	@subsection	audioclobber	Audio Buffer Corruption
 
 	It’s possible (and quite easy) to configure a FrameStore to write video into audio buffer memory.
@@ -1074,13 +1099,17 @@
 		}
 	@endcode
 
-	In the above example...
+	In the above example…
 	-	On “stacked audio” devices, this will write video into the last audio system’s buffer memory.
 	-	On older “non-stacked audio” devices, this will write video into the first audio system’s buffer memory.
 	-	To notice the corruption, the affected audio system will need to be running (playout and/or capture).
 	-	It’s more likely to be noticed in audio playout, since the output audio buffer starts at the top of the frame.
 	-	Small frame geometries and pixel formats (e.g., 8-bit YUV 525i) are less likely to touch the audio capture
 		buffer that starts 4MB into the frame.
+
+	It’s also possible (and quite easy) to configure a FrameStore to playout SDI/HDMI video that’s been corrupted by
+	audio-in-the-video. This would happen if the FrameStore is set for playout and it’s using a frame buffer that’s
+	also being used by a running audio system.
 
 
 	<hr size="50px">
@@ -1089,6 +1118,7 @@
 	Some newer NTV2 devices have firmware that implements a three-multichannel-input <b>Audio Mixer</b>.
 	To determine if a device can support this feature, call ::NTV2DeviceCanDoAudioMixer.
 	To determine if the device actually has this feature in its running firmware, call CNTV2Card::DeviceCanDoAudioMixer.
+	To determine the ::NTV2AudioSystem of the mixer, call ::NTV2DeviceGetAudioMixerSystem.
 
 	The mixer supports three multichannel input sources:
 	-	<b>Main</b> (primary) input (all audio channels);
