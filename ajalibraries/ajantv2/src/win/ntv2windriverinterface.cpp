@@ -203,7 +203,7 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 		ostringstream	oss;
 		oss << hostName << ":ntv2" << inDeviceIndexNumber;
 	#if defined(NTV2_NUB_CLIENT_SUPPORT)
-		if (!OpenRemote(inDeviceIndexNumber, _displayErrorMessage, 256, oss.str().c_str()))
+		if (!OpenRemote(inDeviceIndexNumber, _displayErrorMessage, 256, hostName.c_str()))
 	#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
 		{
 			WDIFAIL("Failed to open remote device '" << oss.str() << "'");
