@@ -7190,7 +7190,7 @@ string NTV2VideoFormatToString (const NTV2VideoFormat inFormat, const bool inUse
 		case NTV2_FORMAT_1080psf_2997_2:	return "1080sf29.97";
 		case NTV2_FORMAT_1080psf_3000_2:	return "1080sf30";
 		case NTV2_FORMAT_525_5994:		return inUseFrameRate ? "525i29.97" : "525i59.94";
-		case NTV2_FORMAT_625_5000:		return inUseFrameRate ? "625i25" 	: "525i50";
+		case NTV2_FORMAT_625_5000:		return inUseFrameRate ? "625i25" 	: "625i50";
 		case NTV2_FORMAT_525_2398:		return "525i23.98";
 		case NTV2_FORMAT_525_2400:		return "525i24";
 		case NTV2_FORMAT_525psf_2997:	return "525sf29.97";
