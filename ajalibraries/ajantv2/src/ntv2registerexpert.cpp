@@ -12,6 +12,7 @@
 #include "ajabase/common/common.h"
 #include <algorithm>
 #include <sstream>
+#include <iterator>
 #include <iomanip>
 #include <map>
 
