@@ -86,9 +86,8 @@ bool CNTV2EnhancedCSC::SetChromaEdgeControl (const NTV2EnhancedCSCChromaEdgeCont
 {
 	switch (inChromaEdgeControl)
 	{
-	case NTV2_Enhanced_CSC_Chroma_Filter_Select_Full:
-	case NTV2_Enhanced_CSC_Chroma_Filter_Select_Simple:
-	case NTV2_Enhanced_CSC_Chroma_Filter_Select_None:
+	case NTV2_Enhanced_CSC_Chroma_Edge_Control_Black:
+	case NTV2_Enhanced_CSC_Chroma_Edge_Control_Extended:
 		mChromaEdgeControl = inChromaEdgeControl;
 		break;
 	default:
