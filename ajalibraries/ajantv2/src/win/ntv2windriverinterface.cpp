@@ -339,21 +339,24 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 	_boardOpened = true;
 
 #if AJA_NTV2_SDK_VERSION_MAJOR != 0
-	ULWord driverVersionMajor;
-	if (!ReadRegister (kVRegLinuxDriverVersion, &driverVersionMajor))
-	{
-		WDIFAIL("Cannot read driver version");
-		Close();
-		return false;
-	}
-	driverVersionMajor = NTV2DriverVersionDecode_Major(driverVersionMajor);
-	if (driverVersionMajor != (ULWord)AJA_NTV2_SDK_VERSION_MAJOR)
-	{
-		printf("## ERROR:  Cannot open:  Driver version %d older than SDK version %d\n",
-				driverVersionMajor, AJA_NTV2_SDK_VERSION_MAJOR);
-		Close();
-		return false;
-	}
+	if (!hostName.empty())	// Non-empty: card on remote host
+    {
+        ULWord driverVersionMajor;
+        if (!ReadRegister (kVRegLinuxDriverVersion, &driverVersionMajor))
+        {
+            WDIFAIL("Cannot read driver version");
+            Close();
+            return false;
+        }
+        driverVersionMajor = NTV2DriverVersionDecode_Major(driverVersionMajor);
+        if (driverVersionMajor != (ULWord)AJA_NTV2_SDK_VERSION_MAJOR)
+        {
+            printf("## ERROR:  Cannot open:  Driver version %d older than SDK version %d\n",
+                    driverVersionMajor, AJA_NTV2_SDK_VERSION_MAJOR);
+            Close();
+            return false;
+        }
+    }
 #endif
 
 	CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID);
