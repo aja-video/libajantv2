@@ -50,6 +50,19 @@ enum AJASystemInfoTag
     AJA_SystemInfoTag_LAST
 };
 
+enum AJASystemInfoSections
+{
+    AJA_SystemInfoSection_CPU    = 0x00000001 << 0,
+    AJA_SystemInfoSection_GPU    = 0x00000001 << 1,
+    AJA_SystemInfoSection_Mem    = 0x00000001 << 2,
+    AJA_SystemInfoSection_OS     = 0x00000001 << 3,
+    AJA_SystemInfoSection_Path   = 0x00000001 << 4,
+    AJA_SystemInfoSection_System = 0x00000001 << 5,
+
+    AJA_SystemInfoSection_None   = 0x00000000,
+    AJA_SystemInfoSection_All    = 0xFFFFFFFF,
+};
+
 typedef std::pair<std::string, std::string>		AJALabelValuePair;				///< @brief	A pair of strings comprising a label and a value
 typedef std::vector<AJALabelValuePair>			AJALabelValuePairs;				///< @brief	An ordered sequence of label/value pairs
 typedef AJALabelValuePairs::const_iterator		AJALabelValuePairsConstIter;
@@ -68,14 +81,24 @@ public:	//	Instance Methods
      *               then calls Rescan.
      *  @param[in]   inUnits     Optionally specifies the AJASystemInfoMemoryUnit to use.
      *                           Defaults to "megabytes".
+     *  @param[in]   sections    The sections of the info structure to rescan, bitwise OR the desired sections
+     *                           or use AJA_SystemInfoSection_All (the default) for all sections or
+     *                           AJA_SystemInfoSection_None for no sections. In the case of AJA_SystemInfoSection_None
+     *                           only the labels are set, no scanning is done at initialization.
      */
-    AJASystemInfo (const AJASystemInfoMemoryUnit inUnits = AJA_SystemInfoMemoryUnit_Megabytes);
+    AJASystemInfo (const AJASystemInfoMemoryUnit inUnits = AJA_SystemInfoMemoryUnit_Megabytes,
+                   AJASystemInfoSections sections = AJA_SystemInfoSection_All);
+
     virtual ~AJASystemInfo();
 
     /**
      *	Rescans the host system.
+     *  @param[in]   sections    The sections of the info structure to rescan, bitwise OR the desired sections
+     *                           or use AJA_SystemInfoSection_All (the default) for all sections or
+     *                           AJA_SystemInfoSection_None for no sections. In the case of AJA_SystemInfoSection_None
+     *                           only the labels are set, no scanning is done.
      */
-    virtual AJAStatus Rescan (void);
+    virtual AJAStatus Rescan (AJASystemInfoSections sections = AJA_SystemInfoSection_All);
 	
     /**
      *  @brief       Answers with the host system info value string for the given AJASystemInfoTag.

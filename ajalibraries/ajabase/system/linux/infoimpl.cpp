@@ -250,105 +250,135 @@ AJASystemInfoImpl::~AJASystemInfoImpl()
 }
 
 AJAStatus
-AJASystemInfoImpl::Rescan()
+AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
 {
     AJAStatus ret = AJA_STATUS_FAIL;
 
     static char tmp_buf[4096];
 
-    mValueMap[int(AJA_SystemInfoTag_System_Model)] = aja_cmd("uname -m | tr -d '\n'");
-    gethostname(tmp_buf, sizeof(tmp_buf));
-    mValueMap[int(AJA_SystemInfoTag_System_Name)] = tmp_buf;
-    mValueMap[int(AJA_SystemInfoTag_System_BootTime)] = aja_uptime();
-    mValueMap[int(AJA_SystemInfoTag_OS_ProductName)] = aja_productname();
-    mValueMap[int(AJA_SystemInfoTag_OS_Version)] = aja_osversion();
-    mValueMap[int(AJA_SystemInfoTag_OS_VersionBuild)] = aja_cmd("uname -v | tr -d '\n'");
-    mValueMap[int(AJA_SystemInfoTag_OS_KernelVersion)] = aja_cmd("uname -r | tr -d '\n'");
-    mValueMap[int(AJA_SystemInfoTag_CPU_Type)] = aja_procfs("cpuinfo", "model name");
-    long int numProcs = sysconf(_SC_NPROCESSORS_ONLN);
-    std::ostringstream num_cores;
-    num_cores << numProcs;
-    mValueMap[int(AJA_SystemInfoTag_CPU_NumCores)] = num_cores.str();
+    if (sections & AJA_SystemInfoSection_System)
+    {
+        mValueMap[int(AJA_SystemInfoTag_System_Model)] = aja_cmd("uname -m | tr -d '\n'");
+        gethostname(tmp_buf, sizeof(tmp_buf));
+        mValueMap[int(AJA_SystemInfoTag_System_Name)] = tmp_buf;
+        mValueMap[int(AJA_SystemInfoTag_System_BootTime)] = aja_uptime();
 
-    ////
-    std::string memTotalStr = aja_procfs("meminfo", "MemTotal");
-    int64_t memtotalbytes=0;
-    if (memTotalStr.find(" kB") != std::string::npos)
-    {
-        // convert from kilobytes to bytes
-        aja::replace(memTotalStr, " kB", "");
-        std::istringstream(memTotalStr) >> memtotalbytes;
-        memtotalbytes *= 1024;
-    }
-    else
-    {
-        // assume it is in bytes?
-        std::istringstream(memTotalStr) >> memtotalbytes;
+        ret = AJA_STATUS_SUCCESS;
     }
 
-    std::string memFreeStr = aja_procfs("meminfo", "MemFree");
-    int64_t memfreebytes=0;
-    if (memFreeStr.find(" kB") != std::string::npos)
+    if (sections & AJA_SystemInfoSection_OS)
     {
-        // convert from kilobytes to bytes
-        aja::replace(memFreeStr, " kB", "");
-        std::istringstream(memFreeStr) >> memfreebytes;
-        memfreebytes *= 1024;
-    }
-    else
-    {
-        // assume it is in bytes?
-        std::istringstream(memFreeStr) >> memfreebytes;
+        mValueMap[int(AJA_SystemInfoTag_OS_ProductName)] = aja_productname();
+        mValueMap[int(AJA_SystemInfoTag_OS_Version)] = aja_osversion();
+        mValueMap[int(AJA_SystemInfoTag_OS_VersionBuild)] = aja_cmd("uname -v | tr -d '\n'");
+        mValueMap[int(AJA_SystemInfoTag_OS_KernelVersion)] = aja_cmd("uname -r | tr -d '\n'");
+
+        ret = AJA_STATUS_SUCCESS;
     }
 
-    mValueMap[int(AJA_SystemInfoTag_GPU_Type)] = aja_getgputype();
-
-    std::string unitsLabel;
-    double divisor = 1.0;
-    switch(mMemoryUnits)
+    if (sections & AJA_SystemInfoSection_CPU)
     {
-        default:
-        case AJA_SystemInfoMemoryUnit_Bytes:
-            unitsLabel = "B";
-            break;
-        case AJA_SystemInfoMemoryUnit_Kilobytes:
-            unitsLabel = "KB";
-            divisor = 1024.0;
-            break;
-        case AJA_SystemInfoMemoryUnit_Megabytes:
-            unitsLabel = "MB";
-            divisor = 1048576.0;
-            break;
-        case AJA_SystemInfoMemoryUnit_Gigabytes:
-            unitsLabel = "GB";
-            divisor = 1073741824.0;
-            break;
+        mValueMap[int(AJA_SystemInfoTag_CPU_Type)] = aja_procfs("cpuinfo", "model name");
+        long int numProcs = sysconf(_SC_NPROCESSORS_ONLN);
+        std::ostringstream num_cores;
+        num_cores << numProcs;
+        mValueMap[int(AJA_SystemInfoTag_CPU_NumCores)] = num_cores.str();
+
+        ret = AJA_STATUS_SUCCESS;
     }
 
-    int64_t memusedbytes = memtotalbytes - memfreebytes;
-
-    std::ostringstream t,u,f;
-    t << int64_t(memtotalbytes / divisor) << " " << unitsLabel;
-    u << int64_t(memusedbytes / divisor) << " " << unitsLabel;
-    f << int64_t(memfreebytes / divisor) << " " << unitsLabel;
-
-    mValueMap[int(AJA_SystemInfoTag_Mem_Total)] = t.str();
-    mValueMap[int(AJA_SystemInfoTag_Mem_Used)] = u.str();
-    mValueMap[int(AJA_SystemInfoTag_Mem_Free)] = f.str();
-
-    // Paths
-    const char* homePath = getenv("HOME");
-    if (homePath != NULL)
+    if (sections & AJA_SystemInfoSection_Mem)
     {
-        mValueMap[int(AJA_SystemInfoTag_Path_UserHome)] = homePath;
-        mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = homePath;
-        mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)].append("/.aja/config/");
+        std::string memTotalStr = aja_procfs("meminfo", "MemTotal");
+        int64_t memtotalbytes=0;
+        if (memTotalStr.find(" kB") != std::string::npos)
+        {
+            // convert from kilobytes to bytes
+            aja::replace(memTotalStr, " kB", "");
+            std::istringstream(memTotalStr) >> memtotalbytes;
+            memtotalbytes *= 1024;
+        }
+        else
+        {
+            // assume it is in bytes?
+            std::istringstream(memTotalStr) >> memtotalbytes;
+        }
+
+        std::string memFreeStr = aja_procfs("meminfo", "MemFree");
+        int64_t memfreebytes=0;
+        if (memFreeStr.find(" kB") != std::string::npos)
+        {
+            // convert from kilobytes to bytes
+            aja::replace(memFreeStr, " kB", "");
+            std::istringstream(memFreeStr) >> memfreebytes;
+            memfreebytes *= 1024;
+        }
+        else
+        {
+            // assume it is in bytes?
+            std::istringstream(memFreeStr) >> memfreebytes;
+        }
+
+        std::string unitsLabel;
+        double divisor = 1.0;
+        switch(mMemoryUnits)
+        {
+            default:
+            case AJA_SystemInfoMemoryUnit_Bytes:
+                unitsLabel = "B";
+                break;
+            case AJA_SystemInfoMemoryUnit_Kilobytes:
+                unitsLabel = "KB";
+                divisor = 1024.0;
+                break;
+            case AJA_SystemInfoMemoryUnit_Megabytes:
+                unitsLabel = "MB";
+                divisor = 1048576.0;
+                break;
+            case AJA_SystemInfoMemoryUnit_Gigabytes:
+                unitsLabel = "GB";
+                divisor = 1073741824.0;
+                break;
+        }
+
+        int64_t memusedbytes = memtotalbytes - memfreebytes;
+
+        std::ostringstream t,u,f;
+        t << int64_t(memtotalbytes / divisor) << " " << unitsLabel;
+        u << int64_t(memusedbytes / divisor) << " " << unitsLabel;
+        f << int64_t(memfreebytes / divisor) << " " << unitsLabel;
+
+        mValueMap[int(AJA_SystemInfoTag_Mem_Total)] = t.str();
+        mValueMap[int(AJA_SystemInfoTag_Mem_Used)] = u.str();
+        mValueMap[int(AJA_SystemInfoTag_Mem_Free)] = f.str();
+
+        ret = AJA_STATUS_SUCCESS;
+    } // end if (sections & AJA_SystemInfoSection_Mem)
+
+    if (sections & AJA_SystemInfoSection_GPU)
+    {
+        mValueMap[int(AJA_SystemInfoTag_GPU_Type)] = aja_getgputype();
+
+        ret = AJA_STATUS_SUCCESS;
     }
 
-    mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = "/opt/aja/config/";
+    if (sections & AJA_SystemInfoSection_Path)
+    {
+        const char* homePath = getenv("HOME");
+        if (homePath != NULL)
+        {
+            mValueMap[int(AJA_SystemInfoTag_Path_UserHome)] = homePath;
+            mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = homePath;
+            mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)].append("/.aja/config/");
+        }
 
-    mValueMap[int(AJA_SystemInfoTag_Path_Applications)] = "/opt/aja/bin/";
-    mValueMap[int(AJA_SystemInfoTag_Path_Utilities)] = "/opt/aja/bin/";
+        mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = "/opt/aja/config/";
+
+        mValueMap[int(AJA_SystemInfoTag_Path_Applications)] = "/opt/aja/bin/";
+        mValueMap[int(AJA_SystemInfoTag_Path_Utilities)] = "/opt/aja/bin/";
+
+        ret = AJA_STATUS_SUCCESS;
+    }
 
     return ret;
 }

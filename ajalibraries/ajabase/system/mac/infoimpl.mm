@@ -199,83 +199,105 @@ AJASystemInfoImpl::~AJASystemInfoImpl()
 }
 
 AJAStatus
-AJASystemInfoImpl::Rescan()
+AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
 {
     AJAStatus ret = AJA_STATUS_FAIL;
 
-    ret = aja_sysctl("hw.model",        mValueMap[int(AJA_SystemInfoTag_System_Model)]);
-    ret = aja_sysctl("kern.hostname",   mValueMap[int(AJA_SystemInfoTag_System_Name)]);
-    ret = aja_sysctl("kern.boottime",   mValueMap[int(AJA_SystemInfoTag_System_BootTime)]);
-    ret = aja_sysctl("hw.targettype",   mValueMap[int(AJA_SystemInfoTag_OS_ProductName)]);
-    ret = aja_sysctl("aja.osversion",   mValueMap[int(AJA_SystemInfoTag_OS_Version)]);
-    ret = aja_sysctl("kern.osversion",  mValueMap[int(AJA_SystemInfoTag_OS_VersionBuild)]);
-    ret = aja_sysctl("kern.version",    mValueMap[int(AJA_SystemInfoTag_OS_KernelVersion)]);
-    ret = aja_sysctl("machdep.cpu.brand_string", mValueMap[int(AJA_SystemInfoTag_CPU_Type)]);
-    ret = aja_sysctl("hw.logicalcpu",   mValueMap[int(AJA_SystemInfoTag_CPU_NumCores)]);
-
-    // memory is a little special
-    mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
-    vm_statistics64_data_t vmstat;
-    if(KERN_SUCCESS == host_statistics64(mach_host_self(), HOST_VM_INFO64, (host_info64_t)&vmstat, &count))
+    if (sections & AJA_SystemInfoSection_System)
     {
-        int64_t memtotalbytes;
-        size_t size = sizeof(memtotalbytes);
-        if (sysctlbyname("hw.memsize", (void *)&memtotalbytes, &size, NULL, 0) == 0)
+        ret = aja_sysctl("hw.model",        mValueMap[int(AJA_SystemInfoTag_System_Model)]);
+        ret = aja_sysctl("kern.hostname",   mValueMap[int(AJA_SystemInfoTag_System_Name)]);
+        ret = aja_sysctl("kern.boottime",   mValueMap[int(AJA_SystemInfoTag_System_BootTime)]);
+    }
+
+    if (sections & AJA_SystemInfoSection_OS)
+    {
+        ret = aja_sysctl("hw.targettype",   mValueMap[int(AJA_SystemInfoTag_OS_ProductName)]);
+        ret = aja_sysctl("aja.osversion",   mValueMap[int(AJA_SystemInfoTag_OS_Version)]);
+        ret = aja_sysctl("kern.osversion",  mValueMap[int(AJA_SystemInfoTag_OS_VersionBuild)]);
+        ret = aja_sysctl("kern.version",    mValueMap[int(AJA_SystemInfoTag_OS_KernelVersion)]);
+    }
+
+    if (sections & AJA_SystemInfoSection_CPU)
+    {
+        ret = aja_sysctl("machdep.cpu.brand_string", mValueMap[int(AJA_SystemInfoTag_CPU_Type)]);
+        ret = aja_sysctl("hw.logicalcpu",   mValueMap[int(AJA_SystemInfoTag_CPU_NumCores)]);
+    }
+
+    if (sections & AJA_SystemInfoSection_Mem)
+    {
+        // memory is a little special
+        mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
+        vm_statistics64_data_t vmstat;
+        if(KERN_SUCCESS == host_statistics64(mach_host_self(), HOST_VM_INFO64, (host_info64_t)&vmstat, &count))
         {
-            double totalPages = vmstat.wire_count + vmstat.active_count + vmstat.inactive_count + vmstat.free_count;
-            double freePercent = (vmstat.free_count) / totalPages;
-            double usedPercent = (vmstat.inactive_count + vmstat.wire_count + vmstat.active_count) / totalPages;
-
-            std::string unitsLabel;
-            double divisor = 1.0;
-            switch(mMemoryUnits)
+            int64_t memtotalbytes;
+            size_t size = sizeof(memtotalbytes);
+            if (sysctlbyname("hw.memsize", (void *)&memtotalbytes, &size, NULL, 0) == 0)
             {
-                default:
-                case AJA_SystemInfoMemoryUnit_Bytes:
-                    unitsLabel = "B";
-                    break;
-                case AJA_SystemInfoMemoryUnit_Kilobytes:
-                    unitsLabel = "KB";
-                    divisor = 1024.0;
-                    break;
-                case AJA_SystemInfoMemoryUnit_Megabytes:
-                    unitsLabel = "MB";
-                    divisor = 1048576.0;
-                    break;
-                case AJA_SystemInfoMemoryUnit_Gigabytes:
-                    unitsLabel = "GB";
-                    divisor = 1073741824.0;
-                    break;
+                double totalPages = vmstat.wire_count + vmstat.active_count + vmstat.inactive_count + vmstat.free_count;
+                double freePercent = (vmstat.free_count) / totalPages;
+                double usedPercent = (vmstat.inactive_count + vmstat.wire_count + vmstat.active_count) / totalPages;
+
+                std::string unitsLabel;
+                double divisor = 1.0;
+                switch(mMemoryUnits)
+                {
+                    default:
+                    case AJA_SystemInfoMemoryUnit_Bytes:
+                        unitsLabel = "B";
+                        break;
+                    case AJA_SystemInfoMemoryUnit_Kilobytes:
+                        unitsLabel = "KB";
+                        divisor = 1024.0;
+                        break;
+                    case AJA_SystemInfoMemoryUnit_Megabytes:
+                        unitsLabel = "MB";
+                        divisor = 1048576.0;
+                        break;
+                    case AJA_SystemInfoMemoryUnit_Gigabytes:
+                        unitsLabel = "GB";
+                        divisor = 1073741824.0;
+                        break;
+                }
+
+                std::ostringstream t,u,f;
+                t << int64_t(memtotalbytes / divisor) << " " << unitsLabel;
+                u << int64_t(memtotalbytes * usedPercent / divisor) << " " << unitsLabel;
+                f << int64_t(memtotalbytes * freePercent / divisor) << " " << unitsLabel;
+
+                mValueMap[int(AJA_SystemInfoTag_Mem_Total)] = t.str();
+                mValueMap[int(AJA_SystemInfoTag_Mem_Used)] = u.str();
+                mValueMap[int(AJA_SystemInfoTag_Mem_Free)] = f.str();
+
+                ret = AJA_STATUS_SUCCESS;
             }
-
-            std::ostringstream t,u,f;
-            t << int64_t(memtotalbytes / divisor) << " " << unitsLabel;
-            u << int64_t(memtotalbytes * usedPercent / divisor) << " " << unitsLabel;
-            f << int64_t(memtotalbytes * freePercent / divisor) << " " << unitsLabel;
-
-            mValueMap[int(AJA_SystemInfoTag_Mem_Total)] = t.str();
-            mValueMap[int(AJA_SystemInfoTag_Mem_Used)] = u.str();
-            mValueMap[int(AJA_SystemInfoTag_Mem_Free)] = f.str();
-
-            ret = AJA_STATUS_SUCCESS;
         }
-    }
+    } // end if (sections & AJA_SystemInfoSection_Mem)
 
-    mValueMap[int(AJA_SystemInfoTag_GPU_Type)] = aja_getgputype();
-
-    // Paths
-    const char* homePath = getenv("HOME");
-    if (homePath != NULL)
+    if (sections & AJA_SystemInfoSection_GPU)
     {
-        mValueMap[int(AJA_SystemInfoTag_Path_UserHome)] = homePath;
-        mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = homePath;
-        mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)].append("/Library/Preferences/");
+        mValueMap[int(AJA_SystemInfoTag_GPU_Type)] = aja_getgputype();
+        ret = AJA_STATUS_SUCCESS;
     }
 
-    mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = "/Users/Shared/AJA/";
+    if (sections & AJA_SystemInfoSection_Path)
+    {
+        const char* homePath = getenv("HOME");
+        if (homePath != NULL)
+        {
+            mValueMap[int(AJA_SystemInfoTag_Path_UserHome)] = homePath;
+            mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = homePath;
+            mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)].append("/Library/Preferences/");
+        }
 
-    mValueMap[int(AJA_SystemInfoTag_Path_Applications)] = "/Applications/";
-    mValueMap[int(AJA_SystemInfoTag_Path_Utilities)] = "/Applications/AJA Utilities/";
+        mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = "/Users/Shared/AJA/";
+
+        mValueMap[int(AJA_SystemInfoTag_Path_Applications)] = "/Applications/";
+        mValueMap[int(AJA_SystemInfoTag_Path_Utilities)] = "/Applications/AJA Utilities/";
+
+        ret = AJA_STATUS_SUCCESS;
+    }
 
     return ret;
 }

@@ -705,6 +705,7 @@ private:
 // Start of Public Class AJAPersistence
 
 AJAPersistence::AJAPersistence()
+    : mSysInfo(AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path)
 {
     initTypeLabels();
     SetParams("null_device");

@@ -341,92 +341,123 @@ AJASystemInfoImpl::~AJASystemInfoImpl()
 }
 
 AJAStatus
-AJASystemInfoImpl::Rescan()
+AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
 {
     AJAStatus ret = AJA_STATUS_FAIL;
 
-    mValueMap[int(AJA_SystemInfoTag_System_Model)] = aja_getsystemmodel();
-    mValueMap[int(AJA_SystemInfoTag_System_Bios)] = aja_getsystembios();
-    mValueMap[int(AJA_SystemInfoTag_System_Name)] = aja_getsystemname();
-    mValueMap[int(AJA_SystemInfoTag_System_BootTime)] = aja_getboottime();
-    mValueMap[int(AJA_SystemInfoTag_OS_ProductName)] = aja_getosname();
-    mValueMap[int(AJA_SystemInfoTag_OS_Version)] = aja_getosversion();
-    mValueMap[int(AJA_SystemInfoTag_OS_VersionBuild)] = aja_getosversionbuild();
-    //mValueMap[int(AJA_SystemInfoTag_OS_KernelVersion)] // don't really have anything for this on Windows
-    mValueMap[int(AJA_SystemInfoTag_CPU_Type)] = aja_getcputype();
-    mValueMap[int(AJA_SystemInfoTag_CPU_NumCores)] = aja_getcpucores();
-    aja_getmemory(AJASystemInfoMemoryUnit(mMemoryUnits),
-                  mValueMap[int(AJA_SystemInfoTag_Mem_Total)],
-                  mValueMap[int(AJA_SystemInfoTag_Mem_Used)],
-                  mValueMap[int(AJA_SystemInfoTag_Mem_Free)]);
-    mValueMap[int(AJA_SystemInfoTag_GPU_Type)] = aja_getgputype();
-
-
-    // Paths
-    std::string path;
-
-    // Need to get the user from the registry since when this is run as a service all the normal
-    // calls to get the user name return SYSTEM
-
-    // Method 1 of getting username from registry
-    std::string tmpStr = aja::read_registry_string(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Authentication\\LogonUI",
-                                                  "LastLoggedOnUser");
-
-    path.erase();
-    path.append(getenv("SystemDrive"));
-    path.append("\\Users\\");
-    if(tmpStr.find('\\') != std::string::npos )
+    if (sections & AJA_SystemInfoSection_System)
     {
-        //strip off anything before a "\\"
-        path.append(tmpStr.substr(tmpStr.find('\\')+1));
-    }
-    else
-    {
-        path.append(tmpStr);
+        mValueMap[int(AJA_SystemInfoTag_System_Model)] = aja_getsystemmodel();
+        mValueMap[int(AJA_SystemInfoTag_System_Bios)] = aja_getsystembios();
+        mValueMap[int(AJA_SystemInfoTag_System_Name)] = aja_getsystemname();
+        mValueMap[int(AJA_SystemInfoTag_System_BootTime)] = aja_getboottime();
+
+        ret = AJA_STATUS_SUCCESS;
     }
 
-    //check it directory exists, if not try Method 2
-    if(PathFileExistsA(path.c_str())==false)
+    if (sections & AJA_SystemInfoSection_OS)
     {
-        // Method 2 of getting username from registry (will not work if logged in with a Microsoft ID)
-        // http://forums.codeguru.com/showthread.php?317367-To-get-current-Logged-in-user-name-from-within-a-service
+        mValueMap[int(AJA_SystemInfoTag_OS_ProductName)] = aja_getosname();
+        mValueMap[int(AJA_SystemInfoTag_OS_Version)] = aja_getosversion();
+        mValueMap[int(AJA_SystemInfoTag_OS_VersionBuild)] = aja_getosversionbuild();
+        //mValueMap[int(AJA_SystemInfoTag_OS_KernelVersion)] // don't really have anything for this on Windows
+
+        ret = AJA_STATUS_SUCCESS;
+    }
+
+    if (sections & AJA_SystemInfoSection_CPU)
+    {
+        mValueMap[int(AJA_SystemInfoTag_CPU_Type)] = aja_getcputype();
+        mValueMap[int(AJA_SystemInfoTag_CPU_NumCores)] = aja_getcpucores();
+
+        ret = AJA_STATUS_SUCCESS;
+    }
+
+    if (sections & AJA_SystemInfoSection_Mem)
+    {
+        aja_getmemory(AJASystemInfoMemoryUnit(mMemoryUnits),
+                      mValueMap[int(AJA_SystemInfoTag_Mem_Total)],
+                      mValueMap[int(AJA_SystemInfoTag_Mem_Used)],
+                      mValueMap[int(AJA_SystemInfoTag_Mem_Free)]);
+
+        ret = AJA_STATUS_SUCCESS;
+    }
+
+    if (sections & AJA_SystemInfoSection_GPU)
+    {
+        mValueMap[int(AJA_SystemInfoTag_GPU_Type)] = aja_getgputype();
+
+        ret = AJA_STATUS_SUCCESS;
+    }
+
+    if (sections & AJA_SystemInfoSection_Path)
+    {
+        std::string path;
+
+        // Need to get the user from the registry since when this is run as a service all the normal
+        // calls to get the user name return SYSTEM
+
+        // Method 1 of getting username from registry
+        std::string tmpStr = aja::read_registry_string(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Authentication\\LogonUI",
+                                                      "LastLoggedOnUser");
+
         path.erase();
         path.append(getenv("SystemDrive"));
         path.append("\\Users\\");
-        path.append(aja::read_registry_string(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon",
-                                             "LastUsedUsername"));
-    }
+        if(tmpStr.find('\\') != std::string::npos )
+        {
+            //strip off anything before a "\\"
+            path.append(tmpStr.substr(tmpStr.find('\\')+1));
+        }
+        else
+        {
+            path.append(tmpStr);
+        }
 
-    mValueMap[int(AJA_SystemInfoTag_Path_UserHome)] = path;
+        //check it directory exists, if not try Method 2
+        if(PathFileExistsA(path.c_str())==false)
+        {
+            // Method 2 of getting username from registry (will not work if logged in with a Microsoft ID)
+            // http://forums.codeguru.com/showthread.php?317367-To-get-current-Logged-in-user-name-from-within-a-service
+            path.erase();
+            path.append(getenv("SystemDrive"));
+            path.append("\\Users\\");
+            path.append(aja::read_registry_string(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon",
+                                                 "LastUsedUsername"));
+        }
 
-    path.append("\\AppData\\Local\\Aja\\");
-    mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = path;
+        mValueMap[int(AJA_SystemInfoTag_Path_UserHome)] = path;
 
-    TCHAR szPath[MAX_PATH];
-    HRESULT r;
-    r = SHGetFolderPath(NULL,CSIDL_COMMON_APPDATA,NULL,0,szPath);
-    if(r != S_OK)
-    {
-        //error
-    }
-    else
-    {
-        path.erase();
-#ifdef UNICODE
-        PathAppend(szPath, L"Aja\\");
-        char tmpPath[MAX_PATH];
-        ::wcstombs(tmpPath,szPath,MAX_PATH);
-        path.append(tmpPath);
-#else
-        PathAppend(szPath, "Aja\\");
-        path.append(szPath);
-#endif
-        mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = path;
-    }
+        path.append("\\AppData\\Local\\Aja\\");
+        mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = path;
 
-    mValueMap[int(AJA_SystemInfoTag_Path_Applications)] = "C:\\Program Files\\AJA\\windows\\Applications\\";
-    mValueMap[int(AJA_SystemInfoTag_Path_Utilities)] = "C:\\Program Files\\AJA\\windows\\Applications\\";
+        TCHAR szPath[MAX_PATH];
+        HRESULT r;
+        r = SHGetFolderPath(NULL,CSIDL_COMMON_APPDATA,NULL,0,szPath);
+        if(r != S_OK)
+        {
+            //error
+        }
+        else
+        {
+            path.erase();
+    #ifdef UNICODE
+            PathAppend(szPath, L"Aja\\");
+            char tmpPath[MAX_PATH];
+            ::wcstombs(tmpPath,szPath,MAX_PATH);
+            path.append(tmpPath);
+    #else
+            PathAppend(szPath, "Aja\\");
+            path.append(szPath);
+    #endif
+            mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = path;
+        }
 
-    ret = AJA_STATUS_SUCCESS;
+        mValueMap[int(AJA_SystemInfoTag_Path_Applications)] = "C:\\Program Files\\AJA\\windows\\Applications\\";
+        mValueMap[int(AJA_SystemInfoTag_Path_Utilities)] = "C:\\Program Files\\AJA\\windows\\Applications\\";
+
+        ret = AJA_STATUS_SUCCESS;
+    } //end if (sections & AJA_SystemInfoSection_Path)
+
     return ret;
 }

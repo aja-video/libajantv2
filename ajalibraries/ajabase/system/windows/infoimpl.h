@@ -8,6 +8,7 @@
 #define AJA_INFO_IMPL_H
 
 #include "ajabase/common/common.h"
+#include "ajabase/system/info.h"
 
 class AJA_EXPORT AJASystemInfoImpl
 {
@@ -16,7 +17,7 @@ public:
     AJASystemInfoImpl(int units);
     virtual ~AJASystemInfoImpl();
 
-    virtual AJAStatus Rescan();
+    virtual AJAStatus Rescan(AJASystemInfoSections sections);
 
     std::map<int, std::string> mLabelMap;
     std::map<int, std::string> mValueMap;
