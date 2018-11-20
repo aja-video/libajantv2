@@ -2030,12 +2030,12 @@ bool CNTV2MacDriverInterface::GetLatencyTimerValue( ULWord* value )
 //--------------------------------------------------------------------------------------------------------------------
 //	Get/Set Output Timecode settings
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SetOutputTimecodeOffset( ULWord frames )
+bool CNTV2MacDriverInterface::SetOutputTimecodeOffset( ULWord frames )		// deprecated
 {
 	return WriteRegister(kVRegOutputTimecodeOffset, frames);
 }
 
-bool CNTV2MacDriverInterface::GetOutputTimecodeOffset( ULWord* pFrames )
+bool CNTV2MacDriverInterface::GetOutputTimecodeOffset( ULWord* pFrames )	// deprecated
 {
 	return ReadRegister(kVRegOutputTimecodeOffset, *pFrames);
 }
