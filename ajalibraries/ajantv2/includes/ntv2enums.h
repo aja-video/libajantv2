@@ -3248,7 +3248,7 @@ typedef enum
 {
     NTV2_PauseOnFrame,
     NTV2_PauseOnField
-} NTV2PauseModeType;
+} NTV2PauseModeType;	// deprecated
 
 
 // note: 24 fps <-> 30 fps Pulldown is a "software" feature - not performed in hardware
@@ -3257,7 +3257,7 @@ typedef enum
     NTV2_Pulldown2323,
     NTV2_Pulldown2332,
     NTV2_Pulldown2224
-} NTV2PulldownPatternType;
+} NTV2PulldownPatternType;	// deprecated
 
 
 // This is a user-pref control (currently only used on the Mac) that allows the user
