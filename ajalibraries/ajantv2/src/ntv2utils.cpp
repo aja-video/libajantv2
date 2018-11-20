@@ -2136,6 +2136,23 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 		case NTV2_FORMAT_END_2K_DEF_FORMATS:
 		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
         case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
+        case NTV2_FORMAT_FIRST_4K_DEF_FORMAT2:
+        case NTV2_FORMAT_END_4K_DEF_FORMATS2:
+        case NTV2_FORMAT_3840x2160p_5000_B:
+        case NTV2_FORMAT_3840x2160p_5994_B:
+        case NTV2_FORMAT_3840x2160p_6000_B:
+        case NTV2_FORMAT_4096x2160p_4795_B:
+        case NTV2_FORMAT_4096x2160p_4800_B:
+        case NTV2_FORMAT_4096x2160p_5000_B:
+        case NTV2_FORMAT_4096x2160p_5994_B:
+        case NTV2_FORMAT_4096x2160p_6000_B:
+        case NTV2_FORMAT_4x1920x1080p_5994_B:
+        case NTV2_FORMAT_4x1920x1080p_6000_B:
+        case NTV2_FORMAT_4x2048x1080p_4795_B:
+		case NTV2_FORMAT_4x2048x1080p_4800_B:
+		case NTV2_FORMAT_4x2048x1080p_5000_B:
+		case NTV2_FORMAT_4x2048x1080p_5994_B:
+		case NTV2_FORMAT_4x2048x1080p_6000_B:
 			break;	// Unsupported
 #else
         default:
@@ -2316,6 +2333,7 @@ NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(const NTV2VideoFormat inVi
 		case NTV2_FORMAT_END_2K_DEF_FORMATS:
 		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
 		case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
+		case NTV2_FORMAT_END_4K_DEF_FORMATS2:
 			break;	// Unsupported
 #else
 		default:
@@ -3254,6 +3272,11 @@ NTV2FrameRate GetNTV2FrameRateFromVideoFormat(NTV2VideoFormat videoFormat)
 	case NTV2_FORMAT_END_2K_DEF_FORMATS:
 	case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
 	case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
+	case NTV2_FORMAT_END_4K_DEF_FORMATS2:
+	case NTV2_FORMAT_4096x2160p_4795_B:
+	case NTV2_FORMAT_4096x2160p_4800_B:
+	case NTV2_FORMAT_4x2048x1080p_4795_B:
+	case NTV2_FORMAT_4x2048x1080p_4800_B:
 		break;
 #else
 	default:
@@ -3637,6 +3660,7 @@ ULWord GetDisplayWidth (const NTV2VideoFormat videoFormat)
 		case NTV2_FORMAT_END_2K_DEF_FORMATS:
 		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
 		case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
+		case NTV2_FORMAT_END_4K_DEF_FORMATS2:
 #else
 		default:
 #endif
@@ -3803,6 +3827,7 @@ ULWord GetDisplayHeight (const NTV2VideoFormat videoFormat)
 		case NTV2_FORMAT_END_2K_DEF_FORMATS:
 		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
 		case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
+		case NTV2_FORMAT_END_4K_DEF_FORMATS2:
 #else
 		default:
 #endif
