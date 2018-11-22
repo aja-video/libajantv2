@@ -6819,7 +6819,7 @@ typedef enum
 			@brief	This is used to atomically perform bank-selected register reads or writes.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
-		NTV2_STRUCT_BEGIN (NTV2BankSelGetSetRegs)
+		NTV2_STRUCT_BEGIN (NTV2BankSelGetSetRegs)		//	NTV2_TYPE_BANKGETSET
 			NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
 				ULWord			mIsWriting;			///< @brief	If non-zero, register(s) will be written;  otherwise, register(s) will be read.
 				NTV2_POINTER	mInBankInfos;		///< @brief	Bank select NTV2RegInfo. The SDK owns this memory.
@@ -6864,7 +6864,7 @@ typedef enum
             @brief	This is used to perform virtual data reads or writes.
             @note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
         **/
-        NTV2_STRUCT_BEGIN (NTV2VirtualData)
+        NTV2_STRUCT_BEGIN (NTV2VirtualData)	//	NTV2_TYPE_VIRTUAL_DATA_RW
             NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
                 ULWord			mTag;               ///< @brief	Tag for virtual data.  This value is used to recal saved data by tag.
                 ULWord			mIsWriting;			///< @brief	If non-zero, virtual data will be written;  otherwise, virtual data will be read.
@@ -6945,7 +6945,7 @@ typedef enum
 					pass the NTV2Channel in the least significant byte of FRAME_STAMP::acFrameTime, and the requested frame in FRAME_STAMP::acRequestedFrame.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
-		NTV2_STRUCT_BEGIN (FRAME_STAMP)
+		NTV2_STRUCT_BEGIN (FRAME_STAMP)	//	AUTOCIRCULATE_TYPE_FRAMESTAMP
 				NTV2_HEADER			acHeader;						///< @brief	The common structure header -- ALWAYS FIRST!
 					LWord64				acFrameTime;					///< @brief	On exit, contains host OS clock at time of capture/play.
 																		///<		On entry, contains ::NTV2Channel of interest, but only for new API ::FRAME_STAMP message.
@@ -7083,7 +7083,7 @@ typedef enum
 					and contains status information about the transfer and the state of AutoCirculate.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
-		NTV2_STRUCT_BEGIN (AUTOCIRCULATE_TRANSFER_STATUS)
+		NTV2_STRUCT_BEGIN (AUTOCIRCULATE_TRANSFER_STATUS)	//	AUTOCIRCULATE_TYPE_XFERSTATUS
 				NTV2_HEADER				acHeader;				///< @brief	The common structure header -- ALWAYS FIRST!
 					NTV2AutoCirculateState  acState;				///< @brief	Current AutoCirculate state after the transfer
 					LWord					acTransferFrame;		///< @brief	Frame buffer number the frame was transferred to/from. (-1 if failed)
