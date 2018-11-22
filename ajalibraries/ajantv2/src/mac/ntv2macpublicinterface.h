@@ -28,6 +28,7 @@ const IOReturn	kNTV2HeaderVersionErr	= 0x0443001B;	//	Bad or unsupported header 
 const IOReturn	kNTV2DriverBadTrailerTag= 0x0443001C;	//	Bad trailer tag
 const IOReturn	kNTV2DriverMapperErr	= 0x0443001D;	//	Failure while mapping NTV2_POINTERs
 const IOReturn	kNTV2DriverUnmapperErr	= 0x0443001E;	//	Failure while unmapping NTV2_POINTERs
+const IOReturn	kNTV2DriverMsgConvErr	= 0x0443001F;	//	NTV2Message conversion failure
 
 
 // Driver command function codes
