@@ -132,7 +132,7 @@ NTV2_HEADER::NTV2_HEADER (const ULWord inStructureType, const ULWord inStructSiz
 	:	fHeaderTag		(NTV2_HEADER_TAG),
 		fType			(inStructureType),
 		fHeaderVersion	(NTV2_CURRENT_HEADER_VERSION),
-		fVersion		(AUTOCIRCULATE_STRUCT_VERSION),
+		fVersion		(NTV2SDKVersionEncode(AJA_NTV2_SDK_VERSION_MAJOR, AJA_NTV2_SDK_VERSION_MINOR, AJA_NTV2_SDK_VERSION_POINT, AJA_NTV2_SDK_BUILD_NUMBER)),
 		fSizeInBytes	(inStructSizeInBytes),
 		fPointerSize	(sizeof (int *)),
 		fOperation		(0),
@@ -158,7 +158,10 @@ ostream & NTV2_HEADER::Print (ostream & inOutStream) const
 		inOutStream << NTV2_4CC_AS_STRING (fType);
 	else
 		inOutStream << "|BAD-" << HEX0N(fType,8);
-	inOutStream << " v" << fHeaderVersion << " vers=" << fVersion << " sz=" << fSizeInBytes;
+	inOutStream << " v" << fHeaderVersion << " sdkv=" << DEC(NTV2SDKVersionDecode_Major(fVersion))
+				<< "." << DEC(NTV2SDKVersionDecode_Minor(fVersion))
+				<< "." << DEC(NTV2SDKVersionDecode_Point(fVersion))
+				<< "." << DEC(NTV2SDKVersionDecode_Build(fVersion)) << " sz=" << DEC(fSizeInBytes);
 	return inOutStream << "]";
 }
 
