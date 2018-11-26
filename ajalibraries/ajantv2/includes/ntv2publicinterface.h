@@ -7342,9 +7342,9 @@ typedef enum
 				/**
 					@brief	Sets my video buffer for use in a subsequent call to CNTV2Card::AutoCirculateTransfer.
 					@param	pInVideoBuffer		Specifies a pointer to the host video buffer. On capture, this buffer will be written during the DMA operation.
-												On playout, this buffer will be read during the DMA operation. If NULL, no video will be transferred.
+												On playout, this buffer will be read during the DMA operation. If NULL, no video data will be transferred.
 					@param	inVideoByteCount	Specifies the maximum capacity of the host video buffer, in bytes, or the maximum number of video data bytes to transfer.
-												If zero, no video will be transferred.
+												If zero, no video data will be transferred.
 					@return	True if successful;  otherwise false.
 					@note	Having the \c pInAudioBuffer address start on at least an 8-byte boundary or even better, on a page boundary,
 							and the \c inAudioByteCount be a multiple of 8-bytes (or optimally a multiple of a page) increases PCIe DMA
@@ -7355,9 +7355,9 @@ typedef enum
 				/**
 					@brief	Sets my audio buffer for use in a subsequent call to CNTV2Card::AutoCirculateTransfer.
 					@param	pInAudioBuffer		Specifies a pointer to the host audio buffer. On capture, audio data will be DMA'd into this buffer.
-												On playout, audio data will be DMA'd from this buffer. If NULL, no audio will be transferred.
+												On playout, audio data will be DMA'd from this buffer. If NULL, no audio data will be transferred.
 					@param	inAudioByteCount	Specifies the maximum capacity of the host audio buffer, in bytes, or the maximum number of audio bytes to transfer.
-												If zero, no audio will be transferred.
+												If zero, no audio data will be transferred.
 					@return	True if successful;  otherwise false.
 					@note	Having the \c pInAudioBuffer address start on at least an 8-byte boundary or even better, on a page boundary,
 							and the \c inAudioByteCount be a multiple of 8-bytes (or optimally a multiple of a page) increases PCIe DMA
@@ -7378,11 +7378,11 @@ typedef enum
 												On playout, ancillary data for Field 2 (interlaced video formats only) will be read from this buffer.
 												If NULL, no Field 2 ancillary data will be transferred. Defaults to NULL.
 					@param	inANCF2ByteCount	Optionally specifies the maximum capacity of the Field 2 host ancillary data buffer, in bytes, or the maximum
-												number of Field 2 ancillary data bytes to transfer. If zero, no ancillary data (interlaced F2) will be transferred.
+												number of Field 2 ancillary data bytes to transfer. If zero, no F2 ancillary data will be transferred.
 												Defaults to zero.
 					@note	If using a non-NULL pointer address for either \c pInANCBuffer or \c pInANCF2Buffer, be sure they're aligned to the nearest 8-byte boundary.
 					@note	If using a non-zero byte count, AJA recommends using a 2048-byte buffer (per field). There's no need to fill the entire buffer,
-							but the data it contains should be compatible with what's documented in Chapter 10 (Ancillary Data) of the SDK Guide.
+							but the data it contains should be compatible with what's documented in \ref anccapture or \ref ancplayout (as appropriate).
 					@return	True if successful;  otherwise false.
 				**/
 				bool									SetAncBuffers (ULWord * pInANCBuffer, const ULWord inANCByteCount,

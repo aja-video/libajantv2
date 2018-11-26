@@ -231,9 +231,9 @@ automatically insert a VPID packet in the outgoing SDI data stream.
 
 
 
-@section	anccapture	Capturing All Anc Packets
+@section	anccapture	Custom Anc Packet Capture
 
-There are two ways to capture all Ancillary data packets:
+There are two ways to capture any/all Ancillary data packets:
 -	Use a VANC frame geometry (see CNTV2Card::SetVANCMode) — but there are caveats:
 	-	Only ::NTV2_FBF_10BIT_YCBCR and ::NTV2_FBF_8BIT_YCBCR buffer formats are officially supported. Others may work,
 		but are untested.
