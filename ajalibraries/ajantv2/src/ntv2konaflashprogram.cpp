@@ -635,6 +635,8 @@ void CNTV2KonaFlashProgram::Program(bool fullVerify)
 	}
 	else
 		throw "Board Can't be opened";
+	
+	SetWarmBootFirmwareReload(true);
 }
 
 bool CNTV2KonaFlashProgram::ProgramFlashValue(uint32_t address, uint32_t value)

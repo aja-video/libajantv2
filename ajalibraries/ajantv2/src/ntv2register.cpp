@@ -7629,6 +7629,15 @@ bool CNTV2Card::GetDieVoltage (double & outVoltage)
 	return true;
 }
 
+bool CNTV2Card::SetWarmBootFirmwareReload(bool enable)
+{
+	bool canReboot = false;
+	CanWarmBootFPGA(canReboot);
+	if(!canReboot)
+		return false;
+	return WriteRegister(kRegCPLDVersion, enable ? 1:0, BIT(8), 8);
+}
+
 bool CNTV2Card::ReadRegisters (const NTV2RegNumSet & inRegisters,  NTV2RegisterValueMap & outValues)
 {
 	outValues.clear ();
