@@ -46,11 +46,31 @@ using namespace std;
 #define	LDIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << __FUNCTION__ << ": " << __x__)
 #define	LDIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << __FUNCTION__ << ": " << __x__)
 
+
+CNTV2LinuxDriverInterface::CNTV2LinuxDriverInterface()
+	:	_bitfileDirectory			("../xilinx"),
+		_hDevice					(INVALID_HANDLE_VALUE),
+		_bOpenShared				(true),
+		_pDMADriverBufferAddress	(NULL),
+		_BA0MemorySize				(0),
+		_pDNXRegisterBaseAddress	(NULL),
+		_BA2MemorySize				(0),
+		_pXena2FlashBaseAddress		(NULL),
+		_BA4MemorySize				(0)
+{
+}
+
+CNTV2LinuxDriverInterface::~CNTV2LinuxDriverInterface()
+{
+	if (IsOpen())
+		Close();
+}
+
+
 /////////////////////////////////////////////////////////////////////////////////////
 // Board Open / Close methods
 /////////////////////////////////////////////////////////////////////////////////////
-bool
-CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & hostName)
+bool CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & hostName)
 {
 	static const string	kAJANTV2("ajantv2");
 
@@ -71,22 +91,20 @@ CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & hostNa
 
 	string	boardStr;
 
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (!hostName.empty())	// Non-empty: card on remote host
 	{
 		ostringstream	oss;
 		oss << hostName << ":" << kAJANTV2 << inDeviceIndexNumber;
 		boardStr = oss.str();
+	#if defined(NTV2_NUB_CLIENT_SUPPORT)
 		if (!OpenRemote(inDeviceIndexNumber, false, 256, hostName.c_str()))
+	#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
 		{
 			LDIFAIL("Failed to open '" << boardStr << "' on remote host");
 			return false;
 		}
 	}
 	else
-#else
-	(void) hostName;
-#endif
 	{
 		ostringstream	oss;
 		oss << "/dev/" << kAJANTV2 << inDeviceIndexNumber;
@@ -102,10 +120,10 @@ CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & hostNa
 
 	_boardNumber = inDeviceIndexNumber;
 	_boardOpened = true;
+	CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID);
 
-	// Fail if running with an old driver
-
-	if (AJA_NTV2_SDK_VERSION_MAJOR)
+	// Fail if running with an old driver...
+	if (AJA_NTV2_SDK_VERSION_MAJOR  &&  _remoteHandle == INVALID_NUB_HANDLE)
 	{
 		ULWord driverVersionRaw(0);
 		if (!ReadRegister (kVRegDriverVersion, driverVersionRaw))
@@ -125,7 +143,6 @@ CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & hostNa
 	else
 		LDIWARN ("Driver version not checked (AJA_NTV2_SDK_VERSION_MAJOR == 0)");
 
-	CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID);
 	//Kludge Warning.....
 	//InitMemberVariablesOnOpen needs frame geometry to determine frame buffer
 	// size and number....
@@ -152,7 +169,7 @@ CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & hostNa
 			fg = NTV2_FG_1920x1080;	// we usually load the bitfiles for HD, so assume 1080
 		}
 	}
-	LDIINFO ("Opened '" << boardStr << "', deviceID=" << HEX8(_boardID) << ", device index " << DEC(_boardNumber));
+	LDIINFO ("Opened '" << boardStr << "' deviceID=" << HEX8(_boardID) << " deviceIndex=" << DEC(_boardNumber));
 
 	InitMemberVariablesOnOpen(fg, format);
 	return true;
@@ -198,22 +215,20 @@ bool
 CNTV2LinuxDriverInterface::Close()
 {
 	if (_remoteHandle != INVALID_NUB_HANDLE)
-	{
 		return CloseRemote();
-	}
-
 	if( !_boardOpened )
 		return true;
 
-	NTV2_ASSERT( _hDevice );
+	NTV2_ASSERT (_hDevice);
 
 	// oem additions
-	UnmapFrameBuffers ();
-	DmaUnlock ();
+	UnmapFrameBuffers();
+	DmaUnlock();
 	UnmapXena2Flash();
 	UnmapRegisters();
 	UnmapDMADriverBuffer();
 
+	LDIINFO ("Closed deviceID=" << HEX8(_boardID) << " deviceIndex=" << DEC(_boardNumber));
 	close(_hDevice);
 	_hDevice = INVALID_HANDLE_VALUE;
 	_boardOpened = false;

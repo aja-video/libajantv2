@@ -27,24 +27,8 @@ typedef vector<ULWord *> DMA_LOCKED_VEC;
 class CNTV2LinuxDriverInterface : public CNTV2DriverInterface
 {
 public:
-	CNTV2LinuxDriverInterface()
-	{
-		_bOpenShared = true;
-		_hDevice = INVALID_HANDLE_VALUE;
-		_pDMADriverBufferAddress = NULL;
-		_BA0MemorySize = 0;
-		_pXena2FlashBaseAddress = NULL;
-		_BA4MemorySize = 0;
-		_bitfileDirectory = "../xilinx";
-	}
-
-	virtual ~CNTV2LinuxDriverInterface()
-	{
-		if (IsOpen())
-		{
-			Close();
-		}
-	}
+	CNTV2LinuxDriverInterface();
+	virtual ~CNTV2LinuxDriverInterface();
 
 public:
 	// Interfaces
@@ -333,8 +317,7 @@ public:
 
 	bool HevcSendMessage(HevcMessageHeader* pMessage);
 
-protected:
-
+protected:	//	INSTANCE DATA
  	std::string		_bitfileDirectory;
 
 	HANDLE			_hDevice;
@@ -349,7 +332,6 @@ protected:
 
 	ULWord*			_pXena2FlashBaseAddress; /* PCI Flash base */
 	ULWord			_BA4MemorySize;	         /* XENA2 only */
-
 };
 
-#endif
+#endif	//	NTV2LINUXDRIVERINTERFACE_H
