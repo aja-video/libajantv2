@@ -6536,7 +6536,6 @@ typedef enum
 					ULWord					acBufferLevel;				///< @brief	Number of buffered frames in driver ready to capture or play
 					ULWord					acOptionFlags;				///< @brief	AutoCirculate options used when CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput called (e.g., AUTOCIRCULATE_WITH_RP188, etc.).
 					NTV2AudioSystem			acAudioSystem;				///< @brief	The audio system being used for this channel (NTV2_AUDIOSYSTEM_INVALID if none)
-					ULWord					acReserved[100];			///< @brief	Reserved for future expansion.
 				NTV2_TRAILER			acTrailer;					///< @brief	The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
@@ -6698,7 +6697,6 @@ typedef enum
 					ULWord			mOutNumRegisters;	///< @brief	The number of registers successfully read.
 					NTV2_POINTER	mOutGoodRegisters;	///< @brief	Array of register numbers that were read successfully. The SDK owns this memory.
 					NTV2_POINTER	mOutValues;			///< @brief	Array of register values that were read successfully. The SDK owns this memory.
-					ULWord			mReserved[100];		///< @brief	Reserved for future expansion.
 				NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
 			NTV2_END_PRIVATE
 
@@ -6776,7 +6774,6 @@ typedef enum
 				NTV2_POINTER	mInRegInfos;		///< @brief	Read-only array of NTV2ReadWriteRegisterSingle structs to be set. The SDK owns this memory.
 				ULWord			mOutNumFailures;	///< @brief	The number of registers unsuccessfully written.
 				NTV2_POINTER	mOutBadRegIndexes;	///< @brief	Array of UWords containing index numbers of the register writes that failed. The SDK owns this memory.
-				ULWord			mReserved[100];		///< @brief	Reserved for future expansion.
 			NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
@@ -6829,7 +6826,6 @@ typedef enum
 				ULWord			mIsWriting;			///< @brief	If non-zero, register(s) will be written;  otherwise, register(s) will be read.
 				NTV2_POINTER	mInBankInfos;		///< @brief	Bank select NTV2RegInfo. The SDK owns this memory.
 				NTV2_POINTER	mInRegInfos;		///< @brief	NTV2RegInfo array of registers be read/written. The SDK owns this memory.
-				ULWord			mReserved[100];		///< @brief	Reserved for future expansion.
 			NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
@@ -6874,7 +6870,6 @@ typedef enum
                 ULWord			mTag;               ///< @brief	Tag for virtual data.  This value is used to recal saved data by tag.
                 ULWord			mIsWriting;			///< @brief	If non-zero, virtual data will be written;  otherwise, virtual data will be read.
                 NTV2_POINTER	mVirtualData;		///< @brief	Pointer object to virtual data. The SDK owns this memory.
-				ULWord			mReserved[100];		///< @brief	Reserved for future expansion.
             NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
 
             #if !defined (NTV2_BUILDING_DRIVER)
@@ -6909,7 +6904,6 @@ typedef enum
 			NTV2_BEGIN_PRIVATE
 				NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
 					NTV2_POINTER	mInStatistics;		///< @brief	Array of NTV2SDIStatus s to be read in one batch. The SDK owns this memory.
-					ULWord			mReserved[100];		///< @brief	Reserved for future expansion.
 				NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
 			NTV2_END_PRIVATE
 
@@ -6955,7 +6949,6 @@ typedef enum
 					LWord64				acFrameTime;					///< @brief	On exit, contains host OS clock at time of capture/play.
 																		///<		On entry, contains ::NTV2Channel of interest, but only for new API ::FRAME_STAMP message.
 					ULWord				acRequestedFrame;				///< @brief	The frame requested (0xFFFFFFFF == "not available"), including for new API (::FRAME_STAMP message).
-					ULWord				acFrameFlags;					///< @brief	Frame data flags
 					ULWord64			acAudioClockTimeStamp;			///< @brief	Number of 10MHz ticks at moment of play or record, based on 48kHz clock (from register 28).
 					ULWord				acAudioExpectedAddress;			///< @brief	The address that was used to transfer
 					ULWord				acAudioInStartAddress;			///< @brief	For record - first position in buffer of audio (includes base offset) -- AudioInAddress at the time this Frame was stamped
@@ -6994,7 +6987,6 @@ typedef enum
 																		///			This can tell clients which frame was on-air at the last VBI.
 					ULWord				acFrame;						///< @brief	Record/capture -- current frame number
 					NTV2_SHOULD_BE_DEPRECATED	(NTV2_RP188	acRP188);	///< @brief	Deprecated -- call FRAME_STAMP::GetInputTimeCode instead.
-					ULWord				acReserved[100];				///< @brief	Reserved for future expansion.
 
 					///@}
 				NTV2_TRAILER		acTrailer;						///< @brief	The common structure trailer -- ALWAYS LAST!
@@ -7100,7 +7092,6 @@ typedef enum
 					ULWord					acAudioStartSample;		///< @brief	Starting audio sample (valid for capture only).
 					ULWord					acAncTransferSize;		///< @brief Total ancillary data bytes for field 1 transferred (capture only).
 					ULWord					acAncField2TransferSize;///< @brief Total ancillary data bytes for field 2 transferred (capture only).
-					ULWord					acReserved[100];		///< @brief	Reserved for future expansion.
 				NTV2_TRAILER			acTrailer;				///< @brief	The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
@@ -7250,13 +7241,11 @@ typedef enum
 						@name	Lesser-used and Deprecated Members
 					**/
 					///@{
-					ULWord							acFrameFlags;				//// @brief Frame data flags
 					ULWord							acPeerToPeerFlags;			//// @brief	Used to control P2P transfers.
 					ULWord							acFrameRepeatCount;			///< @brief Intended for playout. The number of times to repeat the frame being transferred.
 					LWord							acDesiredFrame;				///< @brief	Used to specify a different frame in the circulate ring to transfer to/from.
 					NTV2_SHOULD_BE_DEPRECATED(NTV2_RP188		acRP188);		///< @brief	Will be deprecated -- use AUTOCIRCULATE_TRANSFER::SetOutputTimeCode instead.
 					NTV2_SHOULD_BE_DEPRECATED(NTV2Crosspoint	acCrosspoint);	///< @brief	Will be deprecated -- used internally by the SDK. Will be removed when the driver changes to use NTV2Channel/NTV2Mode.
-					ULWord							acReserved[100];			///< @brief	Reserved for future expansion.
 					///@}
 				NTV2_TRAILER					acTrailer;					///< @brief	The common structure trailer -- ALWAYS LAST!
 
