@@ -1014,6 +1014,8 @@ AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,  
 				{
 					if (isSD)
 					{	//	For SD, just pack the u16 components into the buffer...
+						while (u16PktComponents.size() < 12)	//	YUVComponentsTo10BitYUVPackedBuffer fails if packing fewer than 12 words
+							u16PktComponents.push_back(0x040);	//	SMPTE black
 						muxedOK = ::YUVComponentsTo10BitYUVPackedBuffer (u16PktComponents, inFrameBuffer, inFormatDesc, fbLineOffset);
 					}
 					else
@@ -1033,7 +1035,11 @@ AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,  
 
 						//	Repack the patched YUV16 line back into the FB...
 						if (muxedOK)
+						{
+							while (YUV16Line.size() < 12)	//	YUVComponentsTo10BitYUVPackedBuffer fails if packing fewer than 12 words
+								YUV16Line.push_back(0x040);	//	SMPTE black
 							muxedOK = ::YUVComponentsTo10BitYUVPackedBuffer (YUV16Line, inFrameBuffer, inFormatDesc, fbLineOffset);
+						}
 					}	//	else HD
 				}	//	else v210
 			}	//	if GenerateTransmitData OK
