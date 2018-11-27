@@ -80,6 +80,7 @@ typedef struct CCPlayerConfig
 		bool					fDoMultiFormat;			///<	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
 		bool					fForceVanc;				///<	If true, force the use of Vanc, even if the device supports Anc insertion
 		bool					fSuppressLine21;		///<	SD output only:  if true, do not encode Line 21 waveform;  otherwise encode Line 21 waveform
+		bool					fSuppress608;			///<	If true, don't transmit CEA608 packets;  otherwise include 608 packets
 		bool					fSuppressAudio;			///<	If true, suppress audio;  otherwise generate audio tones
 		bool					fSuppressTimecode;		///<	If true, suppress timecode;  otherwise embed VITC/LTC
 		NTV2VideoFormat			fVideoFormat;			///<	The video format to use
@@ -96,6 +97,7 @@ typedef struct CCPlayerConfig
 				fDoMultiFormat		(false),
 				fForceVanc			(false),
 				fSuppressLine21		(false),
+				fSuppress608		(false),
 				fSuppressAudio		(false),
 				fSuppressTimecode	(false),
 				fVideoFormat		(NTV2_FORMAT_525_5994),

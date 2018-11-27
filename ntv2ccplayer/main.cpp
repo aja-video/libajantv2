@@ -116,6 +116,7 @@ int main (int argc, const char ** argv)
 	int					bBreakNewLines	(0);				//	Newlines break rows instead of treated as whitespace?
 	int					bForceVanc		(0);				//	Force use of Vanc?
 	int					bSuppressLine21	(0);				//	Suppress line 21 waveform (SD only)?
+	int					bSuppress608	(0);				//	Don't transmit CEA608 packets?
 	NTV2StringList		pathList;							//	List of text files (paths) to "play"
 	poptContext			optionsContext; 					//	Context for parsing command line arguments
 	AJADebug::Open();
@@ -137,6 +138,7 @@ int main (int argc, const char ** argv)
 		{"stats",		's',	POPT_ARG_NONE,		&bEmitStats,		0,	"show queue stats?",			NULL},
 		{"vanc",		'v',	POPT_ARG_NONE,		&bForceVanc,		0,	"force use of vanc",			NULL},
 		{"noline21",	'n',	POPT_ARG_NONE,		&bSuppressLine21,	0,	"disable line 21 wvfrm?",		NULL},
+		{"no608",		0,		POPT_ARG_NONE,		&bSuppress608,		0,	"don't xmit 608 packets?",		NULL},
 
 		//	Per-caption-channel options -- specify more than one by separating with comma (e.g., --end loop,idle,idle,loop  --608chan cc1,cc2,tx3,tx4)
 		{"end",			'e',	POPT_ARG_STRING,	&pEndAction,		0,	"end action",					"exit|loop|idle,..."},
@@ -208,13 +210,14 @@ int main (int argc, const char ** argv)
 	playerConfig.fDoMultiFormat		= doMultiChannel	? true : false;
 	playerConfig.fForceVanc			= bForceVanc		? true : false;
 	playerConfig.fSuppressLine21	= bSuppressLine21	? true : false;
+	playerConfig.fSuppress608		= bSuppress608		? true : false;
 	playerConfig.fSuppressAudio		= noAudio			? true : false;
 	playerConfig.fSuppressTimecode	= noTimecode		? true : false;
 
 	cerr	<< "CCPlayer config:  '" << ::NTV2VideoFormatToString (videoFormat) << "', " << ::NTV2FrameBufferFormatToString (pixelFormat)
 			<< ", NTV2_CHANNEL" << (channel+1) << ", stats=" << (bEmitStats?"Y":"N") << ", multiChan=" << (doMultiChannel?"Y":"N")
-			<< ", forceVANC=" << (bForceVanc?"Y":"N") << ", noLine21=" << (bSuppressLine21?"Y":"N") << ", noAudio=" << (noAudio?"Y":"N")
-			<< ", noTC=" << (noTimecode?"Y":"N") << endl;
+			<< ", forceVANC=" << (bForceVanc?"Y":"N") << ", noLine21=" << (bSuppressLine21?"Y":"N") << ", no608=" << (bSuppress608?"Y":"N")
+			<< ", noAudio=" << (noAudio?"Y":"N") << ", noTC=" << (noTimecode?"Y":"N") << endl;
 
 	//	NOTE:	From one command line invocation, you can inject different captions into separate caption channels:
 	//	./bin/ntv2ccplayer	--device kona4  --channel 3  --stats  --608chan cc1,cc2,cc3,cc4,tx1,tx2,tx3,tx4
