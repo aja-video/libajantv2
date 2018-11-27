@@ -137,6 +137,7 @@ class DeviceMap
 			AJAAtomic::Increment(&gnBoardMaps);
 			::memset (&mIOConnections, 0, sizeof (mIOConnections));
 			::memset (&mRecheckTally, 0, sizeof (mRecheckTally));
+			mDrvrVersComps[0] = mDrvrVersComps[1] = mDrvrVersComps[2] = mDrvrVersComps[3] = 0;
 
 			//	Get the master mach port for talking to IOKit...
 			IOReturn	error	(OS_IOMasterPort (MACH_PORT_NULL, &mMasterPort));
@@ -391,40 +392,62 @@ class DeviceMap
 				MDIWARN ("CheckDriverVersion:  bad 'inConnection' parameter " << inConnection);
 				return false;
 			}
-			const uint64_t	scalarI_64[2]	=	{kVRegDriverVersion, 0xFFFFFFFF};
-			uint32_t	inputCount	(sizeof(scalarI_64) / sizeof(scalarI_64[0]));
-			uint64_t	scalarO_64[1];
-			uint32_t	outputCount	(sizeof(scalarO_64) / sizeof(scalarO_64[0]));
-			kern_return_t	kernResult (OS_IOConnectCallScalarMethod(inConnection, kDriverReadRegister, scalarI_64, inputCount, scalarO_64, &outputCount));
-			if (kernResult == KERN_SUCCESS)
-			{
-				if (!mDriverVersion)
-					mDriverVersion = uint32_t(scalarO_64[0]);
-				if (!(AJA_NTV2_SDK_VERSION_MAJOR))
-				{
-					MDIWARN ("connection " << inConnection << " allowed in dev mode (SDK vers == zero) -- may be incompatible with driver vers "
-							<< xHEX0N(mDriverVersion,8));
-					return true;	//	Zero (internal AJA development) grants full access -- DANGER!
+			const uint64_t	scalarI_64[2]	=	{kVRegDriverVersion, 0xFFFFFFFF};	//	ReadRegister accepts two 64-bit values:  [0]=regNum [1]=bitMask
+			uint64_t		scalarO_64[1]	=	{0};								//	ReadRegister returns one 64-bit value (requested register value)
+			uint32_t		inputCount	(sizeof(scalarI_64) / sizeof(scalarI_64[0]));
+			uint32_t		outputCount	(sizeof(scalarO_64) / sizeof(scalarO_64[0]));
+			kern_return_t	kernResult	(OS_IOConnectCallScalarMethod(inConnection, kDriverReadRegister, scalarI_64, inputCount, scalarO_64, &outputCount));
+			if (kernResult != KERN_SUCCESS)
+			{	//	ReadRegister MUST succeed -- if it doesn't, we're dead meat...
+				MDIFAIL ("IOConnectCallScalarMethod returned " << KR(kernResult) << " for 'kDriverReadRegister' using connection " << HEX8(inConnection));
+				return false;	//	Just fail
+			}
+			if (!scalarO_64[0])		//	kVRegDriverVersion zero?
+			{	//	kVRegDriverVersion is zero -- might be 14.3 or earlier driver -- try calling old kDriverGetDrvrVersion function...
+				uint64_t	dvscalarO_64 [2];	//	Returns two 64-bit values:  [0]=9, [1]=0xMMmmPPBB  (MM=major mm=minor PP=point BB=build)
+				uint32_t	dvoutputCount(sizeof(dvscalarO_64)/sizeof(dvscalarO_64[0]));
+				kernResult = OS_IOConnectCallScalarMethod (inConnection, kDriverGetDrvrVersion, 0, 0, dvscalarO_64, &dvoutputCount);
+				if (kernResult != KERN_SUCCESS)
+				{	//	Failed -- we're out of options...
+					MDIFAIL ("IOConnectCallScalerMethod returned " << KR(kernResult) << " for 'kDriverGetDrvrVersion' using connection " << HEX8(inConnection));
+					return false;	//	Fail
 				}
-				const UWord	versionComponents[4] =	{	UWord(NTV2DriverVersionDecode_Major(mDriverVersion)),	//	major
-														UWord(NTV2DriverVersionDecode_Minor(mDriverVersion)),	//	minor
-														UWord(NTV2DriverVersionDecode_Point(mDriverVersion)),	//	point
-														UWord(NTV2DriverVersionDecode_Build(mDriverVersion)) };	//	build
-				if (versionComponents[0] == UWord(AJA_NTV2_SDK_VERSION_MAJOR))
-				{
-					MDIDBG ("connection " << inConnection << " -- driver vers " << DEC(versionComponents[0])
-							<< "." << DEC(versionComponents[1]) << "." << DEC(versionComponents[2]) << "." << DEC(versionComponents[3])
-							<< " matches SDK vers " << DEC(UWord(AJA_NTV2_SDK_VERSION_MAJOR)) << "." << DEC(UWord(AJA_NTV2_SDK_VERSION_MINOR))
-							<< "." << DEC(UWord(AJA_NTV2_SDK_VERSION_POINT)) << "." << DEC(UWord(AJA_NTV2_SDK_BUILD_NUMBER)));
-					return true;	//	Major version must match
+				const uint32_t	interfaceVers(static_cast<uint32_t>(dvscalarO_64[0]));
+				if (interfaceVers != 9)
+				{	//	Mac driver interface level before 9 is 'way too old...
+					MDIFAIL ("'kDriverGetDrvrVersion' using connection " << HEX8(inConnection) << " returned interface level " << DEC(interfaceVers) << " -- require 9");
+					return false;
 				}
-				MDIFAIL ("connection " << inConnection << " -- incompatible driver major version " << DEC(versionComponents[0])
-						<< ", expected major version " << DEC(UWord(AJA_NTV2_SDK_VERSION_MAJOR))
-						<< ", mDriverVersion=" << xHEX0N(mDriverVersion,8));
+				mDriverVersion = uint32_t(dvscalarO_64[1]);	//	Decode the packed driver version...
+				mDrvrVersComps[0] =	uint16_t(mDriverVersion >> 24) & 0x00FF;	//	major
+				mDrvrVersComps[1] = uint16_t(mDriverVersion >> 16) & 0x00FF;	//	minor
+				mDrvrVersComps[2] = uint16_t(mDriverVersion >>  8) & 0x00FF;	//	point
+				mDrvrVersComps[3] = uint16_t(mDriverVersion      ) & 0x00FF;	//	build
 			}
 			else
-				MDIFAIL ("IOConnectCallScalerMethod returned " << KR(kernResult) << " for 'kDriverGetDrvrVersion' using connection " << HEX8(inConnection));
-			return false;
+			{
+				mDriverVersion = uint32_t(scalarO_64[0]);	//	Decode the packed driver version...
+				mDrvrVersComps[0] =	uint16_t(NTV2DriverVersionDecode_Major(mDriverVersion));	//	major
+				mDrvrVersComps[1] = uint16_t(NTV2DriverVersionDecode_Minor(mDriverVersion));	//	minor
+				mDrvrVersComps[2] = uint16_t(NTV2DriverVersionDecode_Point(mDriverVersion));	//	point
+				mDrvrVersComps[3] = uint16_t(NTV2DriverVersionDecode_Build(mDriverVersion));	//	build
+			}
+			if (!(AJA_NTV2_SDK_VERSION_MAJOR))
+				MDIWARN ("connection " << inConnection << " allowed in dev mode (SDK v0.0.0.0) -- may be incompatible with driver v"
+						<< DEC(mDrvrVersComps[0]) << "." << DEC(mDrvrVersComps[1]) << "." << DEC(mDrvrVersComps[2]) << "."
+						<< DEC(mDrvrVersComps[3]) << ", mDriverVersion=" << xHEX0N(mDriverVersion,8));
+			else if (mDrvrVersComps[0] == uint16_t(AJA_NTV2_SDK_VERSION_MAJOR))
+				MDIDBG ("connection " << inConnection << " -- driver v" << DEC(mDrvrVersComps[0]) << "." << DEC(mDrvrVersComps[1])
+						<< "." << DEC(mDrvrVersComps[2]) << "." << DEC(mDrvrVersComps[3]) << " == client SDK v"
+						<< DEC(uint16_t(AJA_NTV2_SDK_VERSION_MAJOR)) << "." << DEC(uint16_t(AJA_NTV2_SDK_VERSION_MINOR))
+						<< "." << DEC(uint16_t(AJA_NTV2_SDK_VERSION_POINT)) << "." << DEC(uint16_t(AJA_NTV2_SDK_BUILD_NUMBER)));
+			else
+				MDIWARN ("connection " << inConnection << " -- driver v" << DEC(mDrvrVersComps[0]) << "." << DEC(mDrvrVersComps[1])
+						<< "." << DEC(mDrvrVersComps[2]) << "." << DEC(mDrvrVersComps[3]) << " != client SDK v"
+						<< DEC(uint16_t(AJA_NTV2_SDK_VERSION_MAJOR)) << "." << DEC(uint16_t(AJA_NTV2_SDK_VERSION_MINOR)) << "."
+						<< DEC(uint16_t(AJA_NTV2_SDK_VERSION_POINT)) << "." << DEC(uint16_t(AJA_NTV2_SDK_BUILD_NUMBER))
+						<< ", mDriverVersion=" << xHEX0N(mDriverVersion,8));
+			return true;	//	OK
 		}
 
 	private:
@@ -433,7 +456,8 @@ class DeviceMap
 		mutable AJALock	mMutex;								//	My guard mutex
 		mach_port_t		mMasterPort;						//	Handy master port
 		bool			mStopping;							//	Don't open new connections if I'm stopping
-		uint32_t		mDriverVersion;						//	Handy driver version
+		uint32_t		mDriverVersion;						//	Handy (packed) driver version
+		uint16_t		mDrvrVersComps[4];					//	Handy (unpacked) driver version components
 
 };	//	DeviceMap
 
