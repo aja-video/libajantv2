@@ -96,13 +96,13 @@ bool CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & h
 		ostringstream	oss;
 		oss << hostName << ":" << kAJANTV2 << inDeviceIndexNumber;
 		boardStr = oss.str();
-	#if defined(NTV2_NUB_CLIENT_SUPPORT)
-		if (!OpenRemote(inDeviceIndexNumber, false, 256, hostName.c_str()))
-	#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
-		{
-			LDIFAIL("Failed to open '" << boardStr << "' on remote host");
+		#if defined(NTV2_NUB_CLIENT_SUPPORT)
+			if (!OpenRemote(inDeviceIndexNumber, false, 256, hostName.c_str()))
+				{LDIFAIL("Failed to open '" << boardStr << "' on remote host");  return false;}
+		#else
+			LDIFAIL("Failed to open '" << boardStr << "' on remote host -- NTV2_NUB_CLIENT_SUPPORT missing");
 			return false;
-		}
+		#endif
 	}
 	else
 	{
@@ -112,40 +112,43 @@ bool CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & h
 		_hDevice = open(boardStr.c_str(),O_RDWR);
 	}
 
-	if (_hDevice == INVALID_HANDLE_VALUE && _remoteHandle == INVALID_NUB_HANDLE)
-	{
-		LDIFAIL("Failed to open '" << boardStr << "'");
-		return false;
-	}
+	if (_hDevice == INVALID_HANDLE_VALUE  &&  _remoteHandle == INVALID_NUB_HANDLE)
+		{LDIFAIL("Failed to open '" << boardStr << "'");  return false;}
 
 	_boardNumber = inDeviceIndexNumber;
 	_boardOpened = true;
 	CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID);
 
-	// Fail if running with an old driver...
-	if (AJA_NTV2_SDK_VERSION_MAJOR  &&  _remoteHandle == INVALID_NUB_HANDLE)
-	{
-		ULWord driverVersionRaw(0);
-		if (!ReadRegister (kVRegDriverVersion, driverVersionRaw))
-		{
-			LDIFAIL("Unable to read driver version, ReadRegister(kVRegDriverVersion) failed");
-			Close();
-			return false;
-		}
-		const ULWord	driverVersionMajor(NTV2DriverVersionDecode_Major(driverVersionRaw));
-		if (driverVersionMajor != (ULWord)AJA_NTV2_SDK_VERSION_MAJOR)
-		{
-			LDIFAIL("Driver version " << DEC(driverVersionMajor) << " doesn't match SDK version " << DEC(AJA_NTV2_SDK_VERSION_MAJOR));
-			Close();
-			return false;
-		}
-	}
+	// Read driver version (local devices only)...
+	uint16_t	drvrVersComps[4]	=	{0, 0, 0, 0};
+	ULWord		driverVersionRaw	(0);
+	if (_remoteHandle == INVALID_NUB_HANDLE  &&  !ReadRegister (kVRegDriverVersion, driverVersionRaw))
+		{LDIFAIL("ReadRegister(kVRegDriverVersion) failed");  Close();  return false;}
+	drvrVersComps[0] = uint16_t(NTV2DriverVersionDecode_Major(driverVersionRaw));	//	major
+	drvrVersComps[1] = uint16_t(NTV2DriverVersionDecode_Minor(driverVersionRaw));	//	minor
+	drvrVersComps[2] = uint16_t(NTV2DriverVersionDecode_Point(driverVersionRaw));	//	point
+	drvrVersComps[3] = uint16_t(NTV2DriverVersionDecode_Build(driverVersionRaw));	//	build
+
+	//	Check driver version (local devices only)
+	if (_remoteHandle != INVALID_NUB_HANDLE)
+		;	//	Skip driver version comparison on remote devices
+	else if (!(AJA_NTV2_SDK_VERSION_MAJOR))
+		LDIWARN ("Driver version v" << DEC(drvrVersComps[0]) << "." << DEC(drvrVersComps[1]) << "." << DEC(drvrVersComps[2]) << "."
+				<< DEC(drvrVersComps[3]) << " ignored for client SDK v0.0.0.0 (dev mode), driverVersionRaw=" << xHEX0N(driverVersionRaw,8));
+	else if (drvrVersComps[0] == uint16_t(AJA_NTV2_SDK_VERSION_MAJOR))
+		LDIDBG ("Driver v" << DEC(drvrVersComps[0]) << "." << DEC(drvrVersComps[1])
+				<< "." << DEC(drvrVersComps[2]) << "." << DEC(drvrVersComps[3]) << " == client SDK v"
+				<< DEC(uint16_t(AJA_NTV2_SDK_VERSION_MAJOR)) << "." << DEC(uint16_t(AJA_NTV2_SDK_VERSION_MINOR))
+				<< "." << DEC(uint16_t(AJA_NTV2_SDK_VERSION_POINT)) << "." << DEC(uint16_t(AJA_NTV2_SDK_BUILD_NUMBER)));
 	else
-		LDIWARN ("Driver version not checked (AJA_NTV2_SDK_VERSION_MAJOR == 0)");
+		LDIWARN ("Driver v" << DEC(drvrVersComps[0]) << "." << DEC(drvrVersComps[1])
+				<< "." << DEC(drvrVersComps[2]) << "." << DEC(drvrVersComps[3]) << " != client SDK v"
+				<< DEC(uint16_t(AJA_NTV2_SDK_VERSION_MAJOR)) << "." << DEC(uint16_t(AJA_NTV2_SDK_VERSION_MINOR)) << "."
+				<< DEC(uint16_t(AJA_NTV2_SDK_VERSION_POINT)) << "." << DEC(uint16_t(AJA_NTV2_SDK_BUILD_NUMBER))
+				<< ", driverVersionRaw=" << xHEX0N(driverVersionRaw,8));
 
 	//Kludge Warning.....
-	//InitMemberVariablesOnOpen needs frame geometry to determine frame buffer
-	// size and number....
+	//InitMemberVariablesOnOpen needs frame geometry to determine FB size & number....
 	// We cannot read the registers unless the xilinx is programmed, so check first
 	NTV2FrameGeometry fg =  NTV2_FG_720x486;
 	NTV2FrameBufferFormat format = NTV2_FBF_10BIT_YCBCR;
