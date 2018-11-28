@@ -8311,3 +8311,12 @@ NTV2RegNumSet ToRegNumSet (const NTV2RegisterReads & inRegReads)
 		result.insert (it->registerNumber);
 	return result;
 }
+
+bool GetRegNumChanges (const NTV2RegNumSet & inBefore, const NTV2RegNumSet & inAfter, NTV2RegNumSet & outGone, NTV2RegNumSet & outSame, NTV2RegNumSet & outNew)
+{
+	outGone.clear();  outSame.clear();  outNew.clear();
+	set_difference (inBefore.begin(), inBefore.end(), inAfter.begin(), inAfter.end(),  std::inserter(outGone, outGone.begin()));
+	set_difference (inAfter.begin(), inAfter.end(), inBefore.begin(), inBefore.end(),  std::inserter(outNew, outNew.begin()));
+	set_intersection (inBefore.begin(), inBefore.end(),  inAfter.begin(), inAfter.end(),  std::inserter(outSame, outSame.begin()));
+	return true;
+}

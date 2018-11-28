@@ -8,7 +8,6 @@
 #define NTV2DRIVERINTERFACE_H
 
 #include "ajaexport.h"
-
 #include "ajatypes.h"
 #include "ntv2enums.h"
 #include "ntv2videodefines.h"
@@ -16,6 +15,9 @@
 #include "ntv2nubtypes.h"
 #include "ntv2publicinterface.h"
 #include "ntv2devicefeatures.h"
+#if defined(_DEBUG)	//	Register Write Profiling
+	#include "ajabase/system/lock.h"
+#endif	//	_DEBUG		Register Write Profiling
 #include <string>
 
 #if defined(AJALinux ) || defined(AJAMac)
@@ -298,6 +300,13 @@ public:
 
     virtual inline bool						HevcSendMessage (HevcMessageHeader * /*pMessage*/)		{ return false; }
 
+#if defined(_DEBUG)	//	Register Write Profiling
+	virtual bool				GetRecordedRegisterWrites (NTV2RegisterWrites & outRegWrites) const;
+	virtual bool				StartRecordRegisterWrites (const bool inSkipActualWrites = false);
+	virtual bool				IsRecordingRegisterWrites (void) const;
+	virtual bool				StopRecordRegisterWrites (void);
+#endif	//	_DEBUG	//	Register Write Profiling
+
 protected:
 #if !defined(NTV2_DEPRECATE_12_7)
 	virtual inline NTV2_DEPRECATED_f(bool	DisplayNTV2Error (const char * str))	{ (void) str; return  false;}	///< @deprecated	This function is obsolete.
@@ -368,6 +377,13 @@ protected:
 
 	ULWord					_ulNumFrameBuffers;
 	ULWord					_ulFrameBufferSize;
+
+#if defined(_DEBUG)	//	Register Write Profiling
+	NTV2RegisterWrites		mRegWrites;
+	mutable AJALock			mRegWritesLock;
+	bool					mRecordRegWrites;
+	bool					mSkipRegWrites;
+#endif	//	_DEBUG	//	Register Write Profiling
 
 };	//	CNTV2DriverInterface
 
