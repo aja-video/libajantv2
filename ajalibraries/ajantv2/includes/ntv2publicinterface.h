@@ -5512,6 +5512,8 @@ typedef enum
 		#define	NTV2_CURRENT_HEADER_VERSION		0					///< @brief	Current version of NTV2_HEADER struct, originally 0
 		#define	NTV2_CURRENT_TRAILER_VERSION	0					///< @brief	Current version of NTV2_TRAILER struct, originally 0
 
+		#define	AUTOCIRCULATE_STRUCT_VERSION	0									///< @brief	Version number of AutoCirculate structures, originally 0
+
 		#define	NTV2_HEADER_TAG					NTV2_FOURCC ('N', 'T', 'V', '2')	///< @brief	Identifies the struct header
 		#define	NTV2_TRAILER_TAG				NTV2_FOURCC ('n', 't', 'v', '2')	///< @brief	Identifies the struct trailer
 
@@ -6332,7 +6334,7 @@ typedef enum
 				ULWord		fHeaderTag;			///< @brief	A special FourCC to identify a structure header & detect endianness, set when created
 				ULWord		fType;				///< @brief	A special FourCC to identify a structure type ('stat', 'xfer', 'task', etc.), set when created
 				ULWord		fHeaderVersion;		///< @brief	The version of this header structure, set when created, originally zero
-				ULWord		fVersion;			///< @brief	The calling SDK version
+				ULWord		fVersion;			///< @brief	The version of the structure that follows this header, set when created, originally zero
 				ULWord		fSizeInBytes;		///< @brief	The total size of the struct, in bytes, including header, body and trailer, set when created
 				ULWord		fPointerSize;		///< @brief	The size, in bytes, of a pointer on the host, set when created
 				ULWord		fOperation;			///< @brief	An operation to perform -- currently unused -- reserved for future use -- set when created
@@ -6373,7 +6375,7 @@ typedef enum
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2_TRAILER)
-				ULWord		fTrailerVersion;	///< @brief	Spare longwords reserved for future use
+				ULWord		fTrailerVersion;	///< @brief	Trailer version, set when created. Before SDK 15.1: always zero;  15.1 or later: set to calling SDK version (packed).
 				ULWord		fTrailerTag;		///< @brief	A special FourCC to identify the tail end of an NTV2 structure
 
 				#if !defined (NTV2_BUILDING_DRIVER)
