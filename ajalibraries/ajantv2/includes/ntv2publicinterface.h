@@ -6459,7 +6459,7 @@ typedef enum
 				/**
 					@return	True if I'm currently active (i.e., I have more than one segment;  otherwise false.
 				**/
-				inline bool		IsSegmented (void) const					{return GetSegmentCount () ? true : false;}
+				inline bool		IsSegmented (void) const					{return GetSegmentCount() > 1;}
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2SegmentedDMAInfo)
 
