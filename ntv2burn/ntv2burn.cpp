@@ -354,7 +354,14 @@ AJAStatus NTV2Burn::SetupAudio (void)
 
 	//	Set up the output audio embedders...
 	if (::NTV2DeviceGetNumAudioSystems (mDeviceID) > 1)
-		mDevice.SetSDIOutputAudioSystem (mOutputChannel, mAudioSystem);
+	{
+		//	Some devices, like the Kona1, have 2 FrameStores but only 1 SDI output,
+		//	which makes mOutputChannel == NTV2_CHANNEL2, but need SDIoutput to be NTV2_CHANNEL1...
+		UWord	SDIoutput(mOutputChannel);
+		if (SDIoutput >= ::NTV2DeviceGetNumVideoOutputs(mDeviceID))
+			SDIoutput = ::NTV2DeviceGetNumVideoOutputs(mDeviceID) - 1;
+		mDevice.SetSDIOutputAudioSystem (NTV2Channel(SDIoutput), mAudioSystem);
+	}
 
 	//
 	//	Loopback mode plays whatever audio appears in the input signal when it's
