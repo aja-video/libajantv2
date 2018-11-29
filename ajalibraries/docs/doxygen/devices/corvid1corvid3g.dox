@@ -68,6 +68,10 @@
 
 	@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats (Corvid 3G only).
 
+	@par		SDK Support
+
+	-	Feature-complete in <a href="https://sdksupport.aja.com/docs/NTV2SDK_docs_15_0">SDK v15.0</a>.
+
 	@par		Firmware
 
 	<b>Corvid 1:</b>  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/128/25>

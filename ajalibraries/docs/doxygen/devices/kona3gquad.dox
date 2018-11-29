@@ -70,6 +70,10 @@
 	-	Optional \ref aja103226 provides access to other inputs and outputs
 	-	Optional \ref ajak3gbox provides convenient access to most of the board's inputs and outputs in a 1U rack-mountable chassis
 
+	@par		SDK Support
+
+	-	Feature-complete in <a href="https://sdksupport.aja.com/docs/NTV2SDK_docs_15_0">SDK v15.0</a>.
+
 	@par		Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/140/25>
 **/

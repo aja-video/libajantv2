@@ -76,6 +76,10 @@
 		so it won't respond to configuration changes for a minute or two. To detect when the MicroBlaze is running,
 		and thus when the SFPs can be configured, poll CNTV2DriverInterface::IsDeviceReady until it returns \c true.
 
+	@par	SDK Support
+
+	-	Introduced in <a href="https://sdksupport.aja.com/docs/NTV2SDK_docs_13_0">SDK v13.0</a>.
+
 	@par	Firmware
 
 	-	SMPTE 2110: <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/195/25>

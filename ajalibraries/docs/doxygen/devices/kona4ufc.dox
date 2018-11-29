@@ -69,6 +69,13 @@
 	-	Optional \ref aja103226 provides access to other inputs and outputs
 	-	Optional \ref ajak3gbox provides convenient access to most of the board's inputs and outputs in a 1U rack-mountable chassis
 
+	@par	SDK Support
+
+	-	Introduced in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/122">SDK v11.3</a>.
+
+	@par	Firmware
+	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/185/25>
+
 	@par	Physical
 
 	-	Size (W × D × H):  0.75" × 8.25" × 5.0" (19.05mm × 209.55mm × 127mm)
