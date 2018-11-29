@@ -7,8 +7,11 @@
 	@subsection		kona3gquad		KONA 3G (Quad Mode)
 
 	This page describes the KONA 3G capture/playout board in its 4-channel mode of operation.
-	It can be "flashed" with different firmware to become a 2-channel device (see \ref kona3gufc).
+	It can be “flashed” with different firmware to become a 2-channel device (see \ref kona3gufc).
 	It’s identified by ::DEVICE_ID_KONA3GQUAD.
+
+	@note	This board has been superseded by \ref kona4quad  (announced 28Nov2018).
+			See the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/217">Kona 3G EOL Announcement</a> for details.
 
 	@image	html	kona3g.png
 
