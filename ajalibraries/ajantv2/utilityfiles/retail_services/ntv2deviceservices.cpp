@@ -136,6 +136,8 @@ DeviceServices::DeviceServices()
 	mVirtualAnalogInType			= NTV2_AnlgComposite;		
 	mADCLockScanTestFormat			= 0;
 	mStreamingAppPID				= 0;
+	mInputChangeCount				= 0;
+	mInputChangeCountLast			= 0;
 }
 
 DeviceServices::~DeviceServices()
@@ -173,6 +175,9 @@ void DeviceServices::SetCard(CNTV2Card* pCard)
 bool DeviceServices::ReadDriverState (void)
 {	
 	DeviceState& ds = mDs;
+	
+	// current State
+	NTV2InputVideoSelect inputSelect = ds.inputSelect;
 
 	bool bChanged = mRs->GetDeviceState(ds);
 	(void) bChanged;
@@ -231,12 +236,15 @@ bool DeviceServices::ReadDriverState (void)
 		mFb2Format					= ds.frameBufferFormat2;
 	}
 	
+	// check for format change
+	if (inputSelect != ds.inputSelect)
+		mInputChangeCount++;
 	
 	//
 	// GOAL - deprecate use of all mXXX class variables, use ds.XXX instead
 	//
 
-	// no ds
+	// not in ds
 	mCard->GetStreamingApplication(&mStreamingAppType, &mStreamingAppPID);
 	mCard->ReadRegister(kVRegDSKAudioMode, mDSKAudioMode);
 	mCard->ReadRegister(kVRegDSKForegroundMode, mDSKForegroundMode);
@@ -501,6 +509,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			NTV2VideoFormat newVideoFormat = mDs.inputVideoFormatSelect;
 			mCard->WriteRegister(kVRegDefaultVideoFormat, newVideoFormat);
 			mCard->SetVideoFormat(newVideoFormat);
+			mInputChangeCount++;
 		}
 	
 		if (IsFormatRaw(mFb1Format))
@@ -678,6 +687,13 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	
 	// mark completion on cycle - used in media composer
 	mCard->WriteRegister(kVRegServicesModeFinal, mFb1Mode);
+	
+	// mark change count for those on continuous capture (Control Room)
+	if (mInputChangeCount != mInputChangeCountLast)
+	{
+		mInputChangeCountLast = mInputChangeCount;
+		mCard->WriteRegister(kVRegInputChangedCount, mInputChangeCount);
+	}
 }
 
 

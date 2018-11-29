@@ -277,6 +277,8 @@ public:
 	NTV2AnalogType			mVirtualAnalogOutputType;
 	NTV2AnalogBlackLevel	mVirtualAnalogInBlackLevel;
 	NTV2AnalogType			mVirtualAnalogInType;
+	uint32_t				mInputChangeCount;
+	uint32_t				mInputChangeCountLast;
 	
 	NTV2HDMIRange			mHDMIInRGBRange;
 	uint32_t				mRegFramesPerVertical;	// frames per vertical interrupt (CION RAW)
