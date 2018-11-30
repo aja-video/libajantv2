@@ -1033,7 +1033,7 @@
 
 
 	<hr size="50px">
-	@subsection	audiohidden		Other “Hidden“ Audio Systems
+	@subsection	audiohidden		Other “Hidden” Audio Systems
 
 	Modern AJA devices intended for “retail” markets, particularly newer “KONA” and “Io” series devices, may have firmware that
 	implements additional “hidden” audio systems that aren’t reported in the ordinary ::NTV2DeviceGetNumAudioSystems call:
