@@ -322,20 +322,8 @@ There are two ways to play out custom Ancillary data packets:
 @section	ancgumpformat	SDI Anc Buffer Data Format
 
 The data bytes in the buffer consist of one or more packets having the following format:
-<table>
-	<tr><td>Byte[0]		<td>\c 0xFF (start-of-packet marker). Since \c 0xFF can exist in packet data, use the packet data count (<b>DC</b>) to find subsequent packets in the buffer.
-	<tr><td>Byte[1]		<td><b>LE</b>[7:7] (MSB) -- Position information valid flag -- 0 means <b>LN</b>, <b>HV</b>, <b>A/D</b> and <b>Y/C</b> bits are invalid; 1 means they’re valid.
-	<tr><td>Byte[1]		<td><b>A/D</b>[6:6] -- Packet nature is analog or digital -- 0 means digital; 1 means analog. If analog, ignore <b>DID</b>, <b>SID</b> and <b>CS</b> (invalid).
-	<tr><td>Byte[1]		<td><b>Y/C</b>[5:5] -- Channel origin/destination -- 0 means C (chroma); 1 means Y (luma).
-	<tr><td>Byte[1]		<td><b>HV</b>[4:4] -- Blanking space origin/destination -- 0 means VANC; 1 means HANC.
-	<tr><td>Byte[1]		<td><b>LN</b>[3:0] -- Most significant 4 bits [10:7] of line number.
-	<tr><td>Byte[2]		<td><b>LN</b>[6:0] -- Least significant 7 bits [6:0] of line number. (MSB [7:7] is reserved for future use.)
-	<tr><td>Byte[3]		<td><b>DID</b>[7:0] -- Packet DID.
-	<tr><td>Byte[4]		<td><b>SID</b>[7:0] -- Packet SID.
-	<tr><td>Byte[5]		<td><b>DC</b>[7:0] -- Packet data count -- the total number of bytes in the <b>UDW</b>.
-	<tr><td>Byte[6]		<td><b>UDW</b> -- First packet data byte.
-	<tr><td>Byte[DC+6]	<td><b>CS</b>[7:0] -- Packet checksum.
-</table>
+
+@image	html	sdi_anc_pkt_fmt.png
 
 @note	While the first byte of each packet is set to \c 0xFF, this is not a protected value, and can legally occur within
 		packet data. Software parsers must use the packet Data Count (<b>DC</b>) value to determine the length of each packet.
