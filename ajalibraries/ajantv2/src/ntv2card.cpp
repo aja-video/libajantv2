@@ -328,7 +328,7 @@ bool CNTV2Card::CanWarmBootFPGA (bool & outCanWarmBoot)
 	ULWord	version(0);
 	if (!ReadRegister(kRegCPLDVersion, version, BIT(0)|BIT(1)))
 		return false;	//	Fail
-	if (version == 3)
+	if (version != 3)
 		outCanWarmBoot = true;	//	Definitely can
 	return true;
 }

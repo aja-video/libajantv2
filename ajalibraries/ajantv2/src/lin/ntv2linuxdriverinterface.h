@@ -27,24 +27,8 @@ typedef vector<ULWord *> DMA_LOCKED_VEC;
 class CNTV2LinuxDriverInterface : public CNTV2DriverInterface
 {
 public:
-	CNTV2LinuxDriverInterface()
-	{
-		_bOpenShared = true;
-		_hDevice = INVALID_HANDLE_VALUE;
-		_pDMADriverBufferAddress = NULL;
-		_BA0MemorySize = 0;
-		_pXena2FlashBaseAddress = NULL;
-		_BA4MemorySize = 0;
-		_bitfileDirectory = "../xilinx";
-	}
-
-	virtual ~CNTV2LinuxDriverInterface()
-	{
-		if (IsOpen())
-		{
-			Close();
-		}
-	}
+	CNTV2LinuxDriverInterface();
+	virtual ~CNTV2LinuxDriverInterface();
 
 public:
 	// Interfaces
@@ -235,7 +219,6 @@ public:
     bool GetAudioPlaybackPinDelay (ULWord* millisecondDelay);	// Not supported
     bool SetAudioRecordPinDelay (ULWord millisecondDelay);		// Not supported
     bool GetAudioRecordPinDelay (ULWord* millisecondDelay);		// Not supported
-    bool GetDriverVersion(ULWord* driverVersion);				// Supported!
 	bool GetBA0MemorySize(ULWord* memSize);						// Supported!
 	bool GetBA1MemorySize(ULWord* memSize);						// Supported!
 	bool GetBA2MemorySize(ULWord* memSize);						// Supported!
@@ -245,8 +228,6 @@ public:
 	bool GetDMANumDriverBuffers(ULWord* pNumDmaDriverBuffers);	// Supported!
 	bool SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode);	// Supported!
 	bool GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode);// Supported!
-
-	void GetDriverVersionString( std::string& driverVersionString);	// Get driver version as ASCII text
 
 	bool DisplayNTV2Error (const char *str);
 
@@ -336,8 +317,7 @@ public:
 
 	bool HevcSendMessage(HevcMessageHeader* pMessage);
 
-protected:
-
+protected:	//	INSTANCE DATA
  	std::string		_bitfileDirectory;
 
 	HANDLE			_hDevice;
@@ -352,7 +332,6 @@ protected:
 
 	ULWord*			_pXena2FlashBaseAddress; /* PCI Flash base */
 	ULWord			_BA4MemorySize;	         /* XENA2 only */
-
 };
 
-#endif
+#endif	//	NTV2LINUXDRIVERINTERFACE_H

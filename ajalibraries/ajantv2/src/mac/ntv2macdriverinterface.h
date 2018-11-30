@@ -193,9 +193,9 @@ public:
 
 	bool				ReadRP188Registers( NTV2Channel channel, RP188_STRUCT* pRP188Data );
 
-	bool				SetOutputTimecodeOffset( ULWord frames );
-	bool				GetOutputTimecodeOffset( ULWord* pFrames );
-	bool				SetOutputTimecodeType( ULWord type );
+	bool				SetOutputTimecodeOffset( ULWord frames );			// deprecated
+	bool				GetOutputTimecodeOffset( ULWord* pFrames );			// deprecated
+	bool				SetOutputTimecodeType( ULWord type );				
 	bool				GetOutputTimecodeType( ULWord* pType );
 	bool				SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode);
 	bool				GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode);

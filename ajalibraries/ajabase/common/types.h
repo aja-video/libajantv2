@@ -36,13 +36,7 @@
     #define AJA_LITTLE_ENDIAN
 
     // This adds the ability to format 64-bit entities
-    #if defined(AJA_OS_64)
-    # define __PRI64_PREFIX   "l"
-    # define __PRIPTR_PREFIX  "l"
-    #else
     # define __PRI64_PREFIX   "ll"
-    # define __PRIPTR_PREFIX
-    #endif
 
     // Macros for printing format specifiers.
     #ifndef PRId64

@@ -28,6 +28,7 @@ const IOReturn	kNTV2HeaderVersionErr	= 0x0443001B;	//	Bad or unsupported header 
 const IOReturn	kNTV2DriverBadTrailerTag= 0x0443001C;	//	Bad trailer tag
 const IOReturn	kNTV2DriverMapperErr	= 0x0443001D;	//	Failure while mapping NTV2_POINTERs
 const IOReturn	kNTV2DriverUnmapperErr	= 0x0443001E;	//	Failure while unmapping NTV2_POINTERs
+const IOReturn	kNTV2DriverMsgConvErr	= 0x0443001F;	//	NTV2Message conversion failure
 
 
 // Driver command function codes
@@ -35,36 +36,39 @@ typedef enum
 {
 	kDriverReadRegister									= 0,
 	kDriverWriteRegister								= 1,
-	kDriverStartDriver									= 2,
-	kDriverAcquireStreamForApplication					= 3,
-	kDriverReleaseStreamForApplication					= 4,
-	kDriverSetStreamForApplication						= 5,
-	kDriverGetStreamForApplication						= 6,
-	kDriverLockFormat									= 7,
-	kDriverSetAVSyncPattern								= 8,
-	kDriverTriggerAVSync								= 9,
-	kDriverWaitForInterrupt								= 10,
-	kDriverGetInterruptCount							= 11,
-	kDriverWaitForChangeEvent							= 12,
-	kDriverGetTime										= 13,
-	kDriverDMATransfer									= 14,
-	kDriverRestoreProcAmpRegisters						= 15,
- 	kDriverSetDebugFilterStrings						= 16,
-	kDriverGetDebugFilterStrings						= 17,
-    kDriverAutoCirculateControl							= 18,
-	kDriverAutoCirculateStatus							= 19,
-    kDriverAutoCirculateTransfer						= 20,
-    kDriverAutoCirculateFramestamp						= 21,
-    kDriverSetDefaultDeviceForPID						= 22,
-    kDriverIsDefaultDeviceForPID						= 23,
-	kDriverSystemControl								= 24,
-	kDriverSystemStatus									= 25,
-	kDriverDMATransferEx								= 26,
-	kDriverAcquireStreamForApplicationWithReference		= 27,
-	kDriverReleaseStreamForApplicationWithReference		= 28,
-	kDriverKernelLog									= 29,
-	kDriverReadAudioBuffer								= 30,
-	kDriverNTV2Message									= 31,	//	Added in 12.0 -- all new driver functionality goes thru this NTV2Message call
+	kDriverGetDrvrVersion								= 2,	//	Unsupported starting in 15.0
+	kDriverStartDriver									= 3,
+	kDriverAcquireStreamForApplication					= 4,
+	kDriverReleaseStreamForApplication					= 5,
+	kDriverSetStreamForApplication						= 6,
+	kDriverGetStreamForApplication						= 7,
+	kDriverLockFormat									= 8,
+	kDriverSetAVSyncPattern								= 9,
+	kDriverTriggerAVSync								= 10,
+	kDriverWaitForInterrupt								= 11,
+	kDriverGetInterruptCount							= 12,
+	kDriverWaitForChangeEvent							= 13,
+	kDriverGetTime										= 14,
+	kDriverDMATransfer									= 15,
+	kDriverRestoreProcAmpRegisters						= 16,
+	kDriverSetBitFileInformation						= 17,	//	Unsupported starting in 12.4
+	kDriverGetBitFileInformation						= 18,	//	Unsupported starting in 12.4
+ 	kDriverSetDebugFilterStrings						= 19,
+	kDriverGetDebugFilterStrings						= 20,
+    kDriverAutoCirculateControl							= 21,
+	kDriverAutoCirculateStatus							= 22,
+    kDriverAutoCirculateTransfer						= 23,
+    kDriverAutoCirculateFramestamp						= 24,
+    kDriverSetDefaultDeviceForPID						= 25,
+    kDriverIsDefaultDeviceForPID						= 26,
+	kDriverSystemControl								= 27,
+	kDriverSystemStatus									= 28,
+	kDriverDMATransferEx								= 29,
+	kDriverAcquireStreamForApplicationWithReference		= 30,
+	kDriverReleaseStreamForApplicationWithReference		= 31,
+	kDriverKernelLog									= 32,
+	kDriverReadAudioBuffer								= 33,
+	kDriverNTV2Message									= 34,	//	Added in 12.0 -- all new driver functionality goes thru this NTV2Message call
 	kNumberUserClientCommands	// number of driver commands
 } UserClientCommandCodes;
 

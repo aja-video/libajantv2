@@ -58,6 +58,9 @@ CNTV2DriverInterface::CNTV2DriverInterface ()
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	::memset (mInterruptEventHandles, 0, sizeof (mInterruptEventHandles));
 	::memset (mEventCounts, 0, sizeof (mEventCounts));
+#if defined(_DEBUG)	//	Register Write Profiling
+	mRecordRegWrites = mSkipRegWrites = false;
+#endif	//	_DEBUG
 
 }	//	constructor
 
@@ -335,6 +338,15 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 // that does platform-specific write of register on local card.
 bool CNTV2DriverInterface::WriteRegister (ULWord registerNumber, ULWord registerValue, ULWord registerMask, ULWord registerShift)
 {
+#if defined(_DEBUG)
+	if (mRecordRegWrites)
+	{
+		AJAAutoLock	autoLock(&mRegWritesLock);
+		mRegWrites.push_back(NTV2RegInfo(registerNumber, registerValue, registerMask, registerShift));
+		if (mSkipRegWrites)
+			return true;
+	}
+#endif
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
 
@@ -771,6 +783,38 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 	}
 	return false;
 }
+
+#if defined(_DEBUG)	//	Register Write Profiling
+	bool CNTV2DriverInterface::GetRecordedRegisterWrites (NTV2RegisterWrites & outRegWrites) const
+	{
+		AJAAutoLock	autoLock(&mRegWritesLock);
+		outRegWrites = mRegWrites;
+		return true;
+	}
+	bool CNTV2DriverInterface::StartRecordRegisterWrites (const bool inSkipActualWrites)
+	{
+		AJAAutoLock	autoLock(&mRegWritesLock);
+		if (mRecordRegWrites)
+			return false;	//	Already recording
+		mRegWrites.clear();
+		mRecordRegWrites = true;
+		mSkipRegWrites = inSkipActualWrites;
+		return true;
+	}
+	bool CNTV2DriverInterface::IsRecordingRegisterWrites (void) const
+	{
+		AJAAutoLock	autoLock(&mRegWritesLock);
+		return mRecordRegWrites;
+	}
+	bool CNTV2DriverInterface::StopRecordRegisterWrites (void)
+	{
+		AJAAutoLock	autoLock(&mRegWritesLock);
+		if (!mRecordRegWrites)
+			return false;	//	Already stopped
+		mRecordRegWrites = mSkipRegWrites = false;
+		return true;
+	}
+#endif	//	_DEBUG
 
 
 #if !defined (NTV2_DEPRECATE)

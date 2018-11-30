@@ -7,8 +7,11 @@
 	@subsection		kona3gufc		KONA 3G (UFC Mode)
 
 	This page describes the KONA 3G capture/playout board in its 2-channel mode of operation.
-	It can be "flashed" with different firmware to become a 4-channel device (see \ref kona3gquad).
+	It can be “flashed” with different firmware to become a 4-channel device (see \ref kona3gquad).
 	It’s identified by ::DEVICE_ID_KONA3G.
+
+	@note	This board has been superseded by \ref kona4ufc  (announced 28Nov2018).
+			See the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/217">Kona 3G EOL Announcement</a> for details.
 
 	@image	html	kona3g.png
 
@@ -67,6 +70,10 @@
 
 	-	Optional \ref aja103226 provides access to other inputs and outputs
 	-	Optional \ref ajak3gbox provides convenient access to most of the board's inputs and outputs in a 1U rack-mountable chassis
+
+	@par		SDK Support
+
+	-	Feature-complete in <a href="https://sdksupport.aja.com/docs/NTV2SDK_docs_15_0">SDK v15.0</a>.
 
 	@par		Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/138/25>

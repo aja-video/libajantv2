@@ -6008,6 +6008,7 @@ protected:
 	AJA_VIRTUAL bool			IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot) const;
 	AJA_VIRTUAL bool			IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot) const;
 	AJA_VIRTUAL bool			S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & inOutXferInfo);
+	AJA_VIRTUAL bool			SetWarmBootFirmwareReload(bool enable);
 
 private:
 	// frame buffer sizing helpers

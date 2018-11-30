@@ -986,6 +986,7 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2Stri
 
 AJAExport NTV2RegisterReads	FromRegNumSet	(const NTV2RegNumSet &		inRegNumSet);
 AJAExport NTV2RegNumSet		ToRegNumSet		(const NTV2RegisterReads &	inRegReads);
+AJAExport bool				GetRegNumChanges (const NTV2RegNumSet & inBefore, const NTV2RegNumSet & inAfter, NTV2RegNumSet & outGone, NTV2RegNumSet & outSame, NTV2RegNumSet & outAdded);
 
 
 //	FUTURE	** THESE WILL BE DISAPPEARING **		Deprecate in favor of the new "NTV2xxxxxxToString" functions...

@@ -43,14 +43,6 @@ typedef enum
 
 const ReferenceSelect kCaptureReferenceSelect = kVideoIn;
 
-#define USE_CLASS4K_SERVICE		(true)
-enum
-{
-	kUseClass4kForIo4k			= (true && USE_CLASS4K_SERVICE),
-	kUseClass4kForKona			= (true && USE_CLASS4K_SERVICE),
-	kUseClass4kForCorvid		= (true && USE_CLASS4K_SERVICE)
-};
-
 
 //-------------------------------------------------------------------------------------------------------
 //	class HLState
@@ -285,6 +277,8 @@ public:
 	NTV2AnalogType			mVirtualAnalogOutputType;
 	NTV2AnalogBlackLevel	mVirtualAnalogInBlackLevel;
 	NTV2AnalogType			mVirtualAnalogInType;
+	uint32_t				mInputChangeCount;
+	uint32_t				mInputChangeCountLast;
 	
 	NTV2HDMIRange			mHDMIInRGBRange;
 	uint32_t				mRegFramesPerVertical;	// frames per vertical interrupt (CION RAW)

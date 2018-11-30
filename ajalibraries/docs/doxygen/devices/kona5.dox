@@ -98,6 +98,10 @@
 
 	-	Optional breakout cable provides access to other inputs and outputs
 
+	@par	SDK Support
+
+	-	Introduced in <a href="https://sdksupport.aja.com/docs/NTV2SDK_docs_15_0">SDK v15.0</a>.
+
 	@par	Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/137/25>
 

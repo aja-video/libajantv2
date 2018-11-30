@@ -129,15 +129,13 @@ def get_canonical_video_formats (args, ntv2enums):
                     #print("## DEBUG:  skipped '%s'" % (key))
                     continue
                 if key.startswith("NTV2_FORMAT_END_"):
-                    if key.startswith("NTV2_FORMAT_END_4K_DEF_FORMATS"):
+                    if key == "NTV2_FORMAT_END_4K_DEF_FORMATS":
                         #print("## DEBUG:  skipped '%s'" % (key))
-                        # This one's a special case:
-                        # Ordinal value 110 is used for NTV2_FORMAT_END_4K_DEF_FORMATS (don't care),
-                        # NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT2 (don't care), NTV2_FORMAT_1080p_2K_6000 (this one counts!),
-                        # and NTV2_FORMAT_1080p_2K_6000_A (don't care). So even though NTV2_FORMAT_END_4K_DEF_FORMATS
-                        # starts with "NTV2_FORMAT_END_", we can't put it in our canonical list or else it will appear
-                        # in the unreferenced cases of switch(inVideoFormat) statements and cause a "duplicate case"
-                        # error in _DEBUG builds.
+                        # Special case:
+                        # NTV2_FORMAT_END_4K_DEF_FORMATS happens to match ordinal value 110, which matches
+                        # NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT2 and NTV2_FORMAT_1080p_2K_6000 (this one matters).
+                        # All other "NTV2_FORMAT_END_" ones can be skipped, but NTV2_FORMAT_END_4K_DEF_FORMATS can't,
+                        # because it will cause a "duplicate case" error in _DEBUG builds.
                         continue
                     #print("## DEBUG:  retaining '%s'" % (key))
                 if key.startswith("NTV2_FORMAT_DEPRECATED_"):
@@ -151,7 +149,7 @@ def get_canonical_video_formats (args, ntv2enums):
                 break
     if args.verbose:
         print("## NOTE:  %d canonical NTV2VideoFormats parsed from %d lines in 'ntv2enums.h'" % (len(videoformats), line_num))
-    #print "## DEBUG: CANONICAL LIST OF NTV2VideoFormats:", video_formats
+    #print "## DEBUG: CANONICAL LIST OF NTV2VideoFormats:", videoformats
     return {'err': 0,	'videoformats': videoformats}
 
 

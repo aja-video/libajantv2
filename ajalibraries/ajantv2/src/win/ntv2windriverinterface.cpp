@@ -203,7 +203,7 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 		ostringstream	oss;
 		oss << hostName << ":ntv2" << inDeviceIndexNumber;
 	#if defined(NTV2_NUB_CLIENT_SUPPORT)
-		if (!OpenRemote(inDeviceIndexNumber, _displayErrorMessage, 256, oss.str().c_str()))
+		if (!OpenRemote(inDeviceIndexNumber, _displayErrorMessage, 256, hostName.c_str()))
 	#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
 		{
 			WDIFAIL("Failed to open remote device '" << oss.str() << "'");
@@ -337,6 +337,28 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 	}
 
 	_boardOpened = true;
+
+#if AJA_NTV2_SDK_VERSION_MAJOR != 0
+	if (!hostName.empty())	// Non-empty: card on remote host
+    {
+        ULWord driverVersionMajor;
+        if (!ReadRegister (kVRegLinuxDriverVersion, &driverVersionMajor))
+        {
+            WDIFAIL("Cannot read driver version");
+            Close();
+            return false;
+        }
+        driverVersionMajor = NTV2DriverVersionDecode_Major(driverVersionMajor);
+        if (driverVersionMajor != (ULWord)AJA_NTV2_SDK_VERSION_MAJOR)
+        {
+            printf("## ERROR:  Cannot open:  Driver version %d older than SDK version %d\n",
+                    driverVersionMajor, AJA_NTV2_SDK_VERSION_MAJOR);
+            Close();
+            return false;
+        }
+    }
+#endif
+
 	CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID);
 	NTV2FrameGeometry fg;
 	CNTV2DriverInterface::ReadRegister (kRegGlobalControl, fg, kRegMaskGeometry, kRegShiftGeometry);
@@ -1430,7 +1452,9 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 		switch (autoCircData.eCommand)
 		{
 		case eInitAutoCirc:
-			if(autoCircData.lVal4 <= 1)
+			if((autoCircData.lVal4 <= 1) && 
+			   (autoCircData.lVal5 == 0) &&
+			   (autoCircData.lVal6 == 0))
 			{
 				KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S autoCircControl;
 				memset(&autoCircControl, 0, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S));
@@ -1501,6 +1525,8 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 				autoCircControl.lVal2 = autoCircData.lVal2;
 				autoCircControl.lVal3 = autoCircData.lVal3;
 				autoCircControl.lVal4 = autoCircData.lVal4;
+				autoCircControl.lVal5 = autoCircData.lVal5;
+				autoCircControl.lVal6 = autoCircData.lVal6;
 				autoCircControl.bVal1 = autoCircData.bVal1;
 				autoCircControl.bVal2 = autoCircData.bVal2;
 				autoCircControl.bVal3 = autoCircData.bVal3;
@@ -2357,7 +2383,7 @@ bool CNTV2WinDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 		{
 
 			CNTV2DriverInterface::ReadRegister (kVRegInputSelect, inputSelect);
-			channel = (inputSelect == NTV2_Input1Select) ? NTV2_CHANNEL1 : NTV2_CHANNEL2;
+			channel = (inputSelect == NTV2_Input2Select) ? NTV2_CHANNEL2 : NTV2_CHANNEL1;
 		}
 		else
 		{

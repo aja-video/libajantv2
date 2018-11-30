@@ -557,9 +557,8 @@ bool CNTV2KonaFlashProgram::ReadInfoString()
     }
 }
 
-void CNTV2KonaFlashProgram::Program(bool verify)
+void CNTV2KonaFlashProgram::Program(bool fullVerify)
 {
-	(void) verify;
 	if ( _bitFileBuffer == NULL )
 		throw "Bit File not Open";
 
@@ -621,14 +620,11 @@ void CNTV2KonaFlashProgram::Program(bool verify)
 		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
 		WaitForFlashNOTBusy();
 
-		if (verify)
+		SetBankSelect(BANK_0);
+		if ( !VerifyFlash(_flashID, fullVerify) )
 		{
 			SetBankSelect(BANK_0);
-			if ( !VerifyFlash(_flashID) )
-			{
-				SetBankSelect(BANK_0);
-				throw "Program Didn't Verify";
-			}
+			throw "Program Didn't Verify";
 		}
 		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
 		WaitForFlashNOTBusy();
@@ -639,6 +635,8 @@ void CNTV2KonaFlashProgram::Program(bool verify)
 	}
 	else
 		throw "Board Can't be opened";
+	
+	SetWarmBootFirmwareReload(true);
 }
 
 bool CNTV2KonaFlashProgram::ProgramFlashValue(uint32_t address, uint32_t value)
@@ -763,7 +761,7 @@ bool CNTV2KonaFlashProgram::EraseChip(UWord chip)
 	return status;
 }
 
-bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID)
+bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID, bool fullVerify)
 {
 	uint32_t errorCount = 0;
 	uint32_t baseAddress = GetBaseAddressForProgramming(flashID);
@@ -782,7 +780,9 @@ bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID)
         SetBankSelect(NTV2DeviceHasSPIv5(_boardID) ? BANK_2 : BANK_1);
 		break;
 	}
-	for (uint32_t count = 0; count < dwordSizeCount; count += 64, baseAddress += 256, bitFilePtr += 64)//count++, baseAddress += 4 )
+	WriteRegister(kVRegFlashState, kProgramStateVerifyFlash);
+	WriteRegister(kVRegFlashSize, dwordSizeCount);
+	for (uint32_t count = 0; count < dwordSizeCount; /*count += 64, baseAddress += 256, bitFilePtr += 64*/)//count++, baseAddress += 4 )
 	{
 		if (NTV2DeviceHasSPIv5(_boardID) && baseAddress == _bankSize)
 		{
@@ -812,11 +812,15 @@ bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID)
                 break;
 		}
 		percentComplete = (count*100)/dwordSizeCount;
+		WriteRegister(kVRegFlashStatus, count);
 		if(!_bQuiet)
 		{
 			printf("Program verify: %i%%\r", percentComplete);
 			fflush(stdout);
 		}
+		count += fullVerify ? 1 : 64;
+		baseAddress += fullVerify ? 4 : 256;
+		bitFilePtr +=  fullVerify ? 1 : 64;
 	}
 
 	SetBankSelect(BANK_0);

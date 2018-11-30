@@ -7,7 +7,6 @@
 #include "retailsupport.h"
 #include "ntv2class4kservices.h"
 #include "ntv2ioxtservices.h"
-#include "ntv2io4kservices.h"
 #include "ntv2io4kufcservices.h"
 #include "ntv2kona3Gquadservices.h"
 #include "ntv2kona3Gservices.h"
@@ -21,20 +20,15 @@
 #include "ntv2ttapservices.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2corvid24services.h"
-#include "ntv2corvid44services.h"
-#include "ntv2kona4quadservices.h"
 #include "ntv2kona4ufcservices.h"
 #include "ntv2konaip22services.h"
 #include "ntv2konaip2110services.h"
 #include "ntv2konaipj2kservices.h"
 #include "ntv2ioip2022services.h"
 #include "ntv2ioip2110services.h"
-#include "ntv2io4kplusservices.h"
 #include "ntv2konahdmiservices.h"
 #include "ntv2vpidfromspec.h"
-#include "ntv2corvid88services.h"
 #include "ntv2kona1services.h"
-#include "ntv2kona5services.h"
 #include "appsignatures.h"
 #include "ajabase/system/systemtime.h"
 
@@ -59,28 +53,26 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 	// create board servicess
 	switch (deviceID)
 	{
+        case DEVICE_ID_KONAIP_2022:
         case DEVICE_ID_IOIP_2022:
             pDeviceServices = new IoIP2022Services();
             break;
         case DEVICE_ID_IOIP_2110:
-            pDeviceServices = new IoIP2110Services();
-            break;
         case DEVICE_ID_KONAIP_2110:
-			pDeviceServices = new KonaIP2110Services();
-			break;
-        case DEVICE_ID_KONAIP_2022:
-            pDeviceServices = new KonaIP22Services();
-            break;
+            pDeviceServices = new KonaIP2110Services();
+        	break;
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:
 			pDeviceServices = new KonaIPJ2kServices();
 			break;
         case DEVICE_ID_KONA4:
-			if (kUseClass4kForKona)
-				pDeviceServices = new Class4kServices(deviceID);
-			else
-            	pDeviceServices = new Kona4QuadServices();
+		case DEVICE_ID_KONA5:
+		case DEVICE_ID_CORVID44:
+		case DEVICE_ID_CORVID88:
+		case DEVICE_ID_IO4K:
+		case DEVICE_ID_IO4KPLUS:
+			pDeviceServices = new Class4kServices(deviceID);
 			break;
 		case DEVICE_ID_KONA4UFC:
 			pDeviceServices = new Kona4UfcServices();
@@ -103,12 +95,6 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 		case DEVICE_ID_IOXT:
 			pDeviceServices = new IoXTServices();
 			break;
-		case DEVICE_ID_IO4K:
-			if (kUseClass4kForIo4k)
-				pDeviceServices = new Class4kServices(deviceID);
-			else
-				pDeviceServices = new Io4KServices();
-			break;
 		case DEVICE_ID_IO4KUFC:
 			pDeviceServices = new Io4KUfcServices();
 			break;
@@ -121,35 +107,11 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 		case DEVICE_ID_CORVID3G:
 			pDeviceServices = new Corvid3GServices();
 			break;
-		case DEVICE_ID_CORVID44:
-			if (kUseClass4kForCorvid)
-				pDeviceServices = new Class4kServices(deviceID);
-			else
-				pDeviceServices = new Corvid44Services();
-			break;
-		case DEVICE_ID_CORVID88:
-			if (kUseClass4kForCorvid)
-				pDeviceServices = new Class4kServices(deviceID);
-			else
-				pDeviceServices = new Corvid88Services();
-			break;
-		case DEVICE_ID_IO4KPLUS:
-			if (kUseClass4kForIo4k)
-				pDeviceServices = new Class4kServices(deviceID);
-			else
-				pDeviceServices = new Io4KPlusServices();
-			break;
 		case DEVICE_ID_KONA1:
 			pDeviceServices = new Kona1Services();
 			break;
 		case DEVICE_ID_KONAHDMI:
 			pDeviceServices = new KonaHDMIServices();
-			break;
-		case DEVICE_ID_KONA5:
-			if (kUseClass4kForKona)
-				pDeviceServices = new Class4kServices(deviceID);
-			else
-				pDeviceServices = new Kona5Services();
 			break;
 		default:
 		case DEVICE_ID_CORVID1:
@@ -174,6 +136,8 @@ DeviceServices::DeviceServices()
 	mVirtualAnalogInType			= NTV2_AnlgComposite;		
 	mADCLockScanTestFormat			= 0;
 	mStreamingAppPID				= 0;
+	mInputChangeCount				= 0;
+	mInputChangeCountLast			= 0;
 }
 
 DeviceServices::~DeviceServices()
@@ -211,6 +175,9 @@ void DeviceServices::SetCard(CNTV2Card* pCard)
 bool DeviceServices::ReadDriverState (void)
 {	
 	DeviceState& ds = mDs;
+	
+	// current State
+	NTV2InputVideoSelect inputSelect = ds.inputSelect;
 
 	bool bChanged = mRs->GetDeviceState(ds);
 	(void) bChanged;
@@ -269,12 +236,15 @@ bool DeviceServices::ReadDriverState (void)
 		mFb2Format					= ds.frameBufferFormat2;
 	}
 	
+	// check for format change
+	if (inputSelect != ds.inputSelect)
+		mInputChangeCount++;
 	
 	//
 	// GOAL - deprecate use of all mXXX class variables, use ds.XXX instead
 	//
 
-	// no ds
+	// not in ds
 	mCard->GetStreamingApplication(&mStreamingAppType, &mStreamingAppPID);
 	mCard->ReadRegister(kVRegDSKAudioMode, mDSKAudioMode);
 	mCard->ReadRegister(kVRegDSKForegroundMode, mDSKForegroundMode);
@@ -539,6 +509,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			NTV2VideoFormat newVideoFormat = mDs.inputVideoFormatSelect;
 			mCard->WriteRegister(kVRegDefaultVideoFormat, newVideoFormat);
 			mCard->SetVideoFormat(newVideoFormat);
+			mInputChangeCount++;
 		}
 	
 		if (IsFormatRaw(mFb1Format))
@@ -548,9 +519,8 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	}
 	
 	//Setup the analog LTC stuff
-	RP188SourceSelect TimecodeSource;
-	AsDriverInterface(mCard)->ReadRegister(kVRegRP188SourceSelect, TimecodeSource);
-	if (NTV2DeviceGetNumLTCInputs(mDeviceID) && TimecodeSource == kRP188SourceLTCPort)
+	RP188SourceSelect timecodeSource = mDs.sdiRp188Source;
+	if (NTV2DeviceGetNumLTCInputs(mDeviceID) && timecodeSource == kRP188SourceLTCPort)
 	{
 		mCard->SetLTCInputEnable(true);
 		mCard->WriteRegister(kRegFS1ReferenceSelect, 0x1, BIT(10), 10);
@@ -717,6 +687,13 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	
 	// mark completion on cycle - used in media composer
 	mCard->WriteRegister(kVRegServicesModeFinal, mFb1Mode);
+	
+	// mark change count for those on continuous capture (Control Room)
+	if (mInputChangeCount != mInputChangeCountLast)
+	{
+		mInputChangeCountLast = mInputChangeCount;
+		mCard->WriteRegister(kVRegInputChangedCount, mInputChangeCount);
+	}
 }
 
 
@@ -3251,6 +3228,16 @@ void DeviceServices::EnableRP188EtoE(NTV2WidgetID fromInputWgt, NTV2WidgetID toO
 	// enable RP188 bypass (E-E mode)
 	// disabled DBB filtering
 	// select source
+	
+	ULWord regMask = 0xFF;
+	ULWord inputFilter = 0x00;
+	if (NTV2DeviceCanDoVITC2(mDeviceID))
+		{ inputFilter = 0x02; }
+	else if (mDeviceID == DEVICE_ID_KONALHI)
+		{ inputFilter = 0x00; regMask = 0x00; }
+	else
+		{ inputFilter = 0x01; }
+	
 	if(fromInputWgt == NTV2_WgtSDIIn1 || fromInputWgt == NTV2_Wgt3GSDIIn1)
 	{
 		passthroughInput = 0x0;
@@ -3260,62 +3247,62 @@ void DeviceServices::EnableRP188EtoE(NTV2WidgetID fromInputWgt, NTV2WidgetID toO
 		case NTV2_Wgt3GSDIOut1:
 			mCard->WriteRegister (kRegGlobalControl, 0x1, kRegMaskRP188ModeCh1, kRegShiftRP188ModeCh1);
 			mCard->WriteRegister (kRegRP188InOut1DBB, 0x1, BIT(23), 23);
-			mCard->WriteRegister (kRegRP188InOut1DBB, 0xFF, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
-			mCard->WriteRegister (kRegRP188InOut1DBB, passthroughInput, BIT(21)+BIT(22), 21);
-			mCard->WriteRegister(kRegRP188InOut1DBB, 0xFF, kRegMaskRP188DBB, kRegShiftRP188DBB);
+			mCard->WriteRegister (kRegRP188InOut1DBB, inputFilter, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
+			mCard->WriteRegister (kRegRP188InOut1DBB, passthroughInput, BIT(23), 23);
+			mCard->WriteRegister(kRegRP188InOut1DBB, regMask, kRegMaskRP188DBB, kRegShiftRP188DBB);
 			break;
 		case NTV2_WgtSDIOut2:
 		case NTV2_Wgt3GSDIOut2:
-			mCard->WriteRegister (kRegGlobalControl, 0x1, kRegMaskRP188ModeCh2, kRegShiftRP188ModeCh2);
+			mCard->WriteRegister (kRegGlobalControl,  0x1, kRegMaskRP188ModeCh2, kRegShiftRP188ModeCh2);
 			mCard->WriteRegister (kRegRP188InOut2DBB, 0x1, BIT(23), 23);
-			mCard->WriteRegister (kRegRP188InOut2DBB, 0xFF, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
+			mCard->WriteRegister (kRegRP188InOut2DBB, inputFilter, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
 			mCard->WriteRegister (kRegRP188InOut2DBB, passthroughInput, BIT(21)+BIT(22), 21);
-			mCard->WriteRegister(kRegRP188InOut2DBB, 0xFF, kRegMaskRP188DBB, kRegShiftRP188DBB);
+			mCard->WriteRegister(kRegRP188InOut2DBB,  regMask, kRegMaskRP188DBB, kRegShiftRP188DBB);
 			break;
 		case NTV2_WgtSDIOut3:
 		case NTV2_Wgt3GSDIOut3:
 			mCard->WriteRegister (kRegGlobalControl2, 0x1, kRegMaskRP188ModeCh3, kRegShiftRP188ModeCh3);
 			mCard->WriteRegister (kRegRP188InOut3DBB, 0x1, BIT(23), 23);
-			mCard->WriteRegister (kRegRP188InOut3DBB, 0xFF, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
+			mCard->WriteRegister (kRegRP188InOut3DBB, inputFilter, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
 			mCard->WriteRegister (kRegRP188InOut3DBB, passthroughInput, BIT(21)+BIT(22), 21);
-			mCard->WriteRegister(kRegRP188InOut3DBB, 0xFF, kRegMaskRP188DBB, kRegShiftRP188DBB);
+			mCard->WriteRegister(kRegRP188InOut3DBB,  regMask, kRegMaskRP188DBB, kRegShiftRP188DBB);
 			break;
 		case NTV2_WgtSDIOut4:
 		case NTV2_Wgt3GSDIOut4:
 			mCard->WriteRegister (kRegGlobalControl2, 0x1, kRegMaskRP188ModeCh4, kRegShiftRP188ModeCh4);
 			mCard->WriteRegister (kRegRP188InOut4DBB, 0x1, BIT(23), 23);
-			mCard->WriteRegister (kRegRP188InOut4DBB, 0xFF, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
+			mCard->WriteRegister (kRegRP188InOut4DBB, inputFilter, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
 			mCard->WriteRegister (kRegRP188InOut4DBB, passthroughInput, BIT(21)+BIT(22), 21);
-			mCard->WriteRegister(kRegRP188InOut4DBB, 0xFF, kRegMaskRP188DBB, kRegShiftRP188DBB);
+			mCard->WriteRegister (kRegRP188InOut4DBB, regMask, kRegMaskRP188DBB, kRegShiftRP188DBB);
 			break;
 		case NTV2_Wgt3GSDIOut5:
 		case NTV2_WgtSDIMonOut1:
 			mCard->WriteRegister (kRegGlobalControl2, 0x1, kRegMaskRP188ModeCh5, kRegShiftRP188ModeCh5);
 			mCard->WriteRegister (kRegRP188InOut5DBB, 0x1, BIT(23), 23);
-			mCard->WriteRegister (kRegRP188InOut5DBB, 0xFF, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
+			mCard->WriteRegister (kRegRP188InOut5DBB, inputFilter, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
 			mCard->WriteRegister (kRegRP188InOut5DBB, passthroughInput, BIT(21)+BIT(22), 21);
-			mCard->WriteRegister(kRegRP188InOut5DBB, 0xFF, kRegMaskRP188DBB, kRegShiftRP188DBB);
+			mCard->WriteRegister (kRegRP188InOut5DBB, regMask, kRegMaskRP188DBB, kRegShiftRP188DBB);
 			break;
 		case NTV2_Wgt3GSDIOut6:
 			mCard->WriteRegister (kRegGlobalControl2, 0x1, kRegMaskRP188ModeCh6, kRegShiftRP188ModeCh6);
 			mCard->WriteRegister (kRegRP188InOut6DBB, 0x1, BIT(23), 23);
-			mCard->WriteRegister (kRegRP188InOut6DBB, 0xFF, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
+			mCard->WriteRegister (kRegRP188InOut6DBB, inputFilter, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
 			mCard->WriteRegister (kRegRP188InOut6DBB, passthroughInput, BIT(21)+BIT(22), 21);
-			mCard->WriteRegister(kRegRP188InOut6DBB, 0xFF, kRegMaskRP188DBB, kRegShiftRP188DBB);
+			mCard->WriteRegister (kRegRP188InOut6DBB, regMask, kRegMaskRP188DBB, kRegShiftRP188DBB);
 			break;
 		case NTV2_Wgt3GSDIOut7:
 			mCard->WriteRegister (kRegGlobalControl2, 0x1, kRegMaskRP188ModeCh7, kRegShiftRP188ModeCh7);
 			mCard->WriteRegister (kRegRP188InOut7DBB, 0x1, BIT(23), 23);
-			mCard->WriteRegister (kRegRP188InOut7DBB, 0xFF, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
+			mCard->WriteRegister (kRegRP188InOut7DBB, inputFilter, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
 			mCard->WriteRegister (kRegRP188InOut7DBB, passthroughInput, BIT(21)+BIT(22), 21);
-			mCard->WriteRegister(kRegRP188InOut7DBB, 0xFF, kRegMaskRP188DBB, kRegShiftRP188DBB);
+			mCard->WriteRegister (kRegRP188InOut7DBB, regMask, kRegMaskRP188DBB, kRegShiftRP188DBB);
 			break;
 		case NTV2_Wgt3GSDIOut8:
 			mCard->WriteRegister (kRegGlobalControl2, 0x1, kRegMaskRP188ModeCh8, kRegShiftRP188ModeCh8);
 			mCard->WriteRegister (kRegRP188InOut8DBB, 0x1, BIT(23), 23);
-			mCard->WriteRegister (kRegRP188InOut8DBB, 0xFF, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
+			mCard->WriteRegister (kRegRP188InOut8DBB, inputFilter, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
 			mCard->WriteRegister (kRegRP188InOut8DBB, passthroughInput, BIT(21)+BIT(22), 21);
-			mCard->WriteRegister(kRegRP188InOut8DBB, 0xFF, kRegMaskRP188DBB, kRegShiftRP188DBB);
+			mCard->WriteRegister (kRegRP188InOut8DBB, regMask, kRegMaskRP188DBB, kRegShiftRP188DBB);
 			break;
 		default:
 			break;
@@ -3702,7 +3689,7 @@ void DeviceServices::SetDeviceXPointCapture()
 		//Fall through so every output is setup
 		//1 and 2 get set if they are not bi-directional
 		//otherwise 1 and 2 are direction input
-		switch(NTV2DeviceGetNumVideoInputs(mDeviceID))
+		switch(NTV2DeviceGetNumVideoOutputs(mDeviceID))
 		{
 		case 8:
 			EnableRP188EtoE(inputSelectID, NTV2_Wgt3GSDIOut8);

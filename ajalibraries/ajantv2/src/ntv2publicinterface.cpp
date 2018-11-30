@@ -166,11 +166,15 @@ ostream & NTV2_HEADER::Print (ostream & inOutStream) const
 ostream & operator << (ostream & inOutStream, const NTV2_TRAILER & inObj)
 {
 	inOutStream << "[";
-	if (NTV2_IS_VALID_TRAILER_TAG (inObj.fTrailerTag))
-		inOutStream << NTV2_4CC_AS_STRING (inObj.fTrailerTag);
+	if (NTV2_IS_VALID_TRAILER_TAG(inObj.fTrailerTag))
+		inOutStream << NTV2_4CC_AS_STRING(inObj.fTrailerTag);
 	else
-		inOutStream << "BAD-" << hex << inObj.fTrailerTag << dec;
-	return inOutStream << " v" << inObj.fTrailerVersion << "]";
+		inOutStream << "BAD-" << HEX0N(inObj.fTrailerTag,8);
+	return inOutStream << " rawVers=" << xHEX0N(inObj.fTrailerVersion,8) << " clientSDK="
+				<< DEC(NTV2SDKVersionDecode_Major(inObj.fTrailerVersion))
+				<< "." << DEC(NTV2SDKVersionDecode_Minor(inObj.fTrailerVersion))
+				<< "." << DEC(NTV2SDKVersionDecode_Point(inObj.fTrailerVersion))
+				<< "." << DEC(NTV2SDKVersionDecode_Build(inObj.fTrailerVersion)) << "]";
 }
 
 
@@ -932,7 +936,7 @@ string NTV2AutoCirculateStateToString (const NTV2AutoCirculateState inState)
 
 
 NTV2_TRAILER::NTV2_TRAILER ()
-	:	fTrailerVersion		(NTV2_CURRENT_TRAILER_VERSION),
+	:	fTrailerVersion		(NTV2SDKVersionEncode(AJA_NTV2_SDK_VERSION_MAJOR, AJA_NTV2_SDK_VERSION_MINOR, AJA_NTV2_SDK_VERSION_POINT, AJA_NTV2_SDK_BUILD_NUMBER)),
 		fTrailerTag			(NTV2_TRAILER_TAG)
 {
 }
@@ -1868,9 +1872,10 @@ string AUTOCIRCULATE_STATUS::operator [] (const unsigned inIndexNum) const
 			case 17:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_COLORCORRECT	? "Yes" : "No");	break;
 			case 18:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_VIDPROC		? "Yes" : "No");	break;
 			case 19:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_ANC			? "Yes" : "No");	break;
+			case 20:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_FIELDS		? "Yes" : "No");	break;
 			default:																						break;
 		}
-	else if (inIndexNum < 20)
+	else if (inIndexNum < 21)
 		oss << "---";
 	return oss.str();
 }

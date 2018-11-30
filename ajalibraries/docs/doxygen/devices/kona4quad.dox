@@ -68,6 +68,10 @@
 	-	Optional \ref aja103226 provides access to other inputs and outputs
 	-	Optional \ref ajak3gbox provides convenient access to most of the board's inputs and outputs in a 1U rack-mountable chassis
 
+	@par	SDK Support
+
+	-	Introduced in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/122">SDK v11.3</a>.
+
 	@par	Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/137/25>
 
