@@ -68,9 +68,9 @@ string AJASystemInfo::ToString (const AJALabelValuePairs & inLabelValuePairs, co
 		else
 			valueLines.push_back(value);
 		if (inMaxValWidth)
-			for (ValueLinesConstIter it(valueLines.begin());  it != valueLines.end();  ++it)
+			for (ValueLinesConstIter iter(valueLines.begin());  iter != valueLines.end();  ++iter)
 			{
-				const string &	lineStr(*it);
+				const string &	lineStr(*iter);
 				size_t	pos(0);
 				do
 				{
