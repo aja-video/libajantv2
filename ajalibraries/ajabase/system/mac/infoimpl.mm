@@ -151,38 +151,42 @@ aja_getgputype()
 
     // read in the raw xml string and convert to an xml data structure
     CFDataRef xmlData = CFDataCreate(kCFAllocatorDefault, (const UInt8*)&streamBuffer[0], bytesRead);
-    CFStringRef errorString;
-    CFArrayRef propertyArray = CFArrayRef(CFPropertyListCreateFromXMLData(kCFAllocatorDefault, xmlData, kCFPropertyListImmutable, &errorString));
-
-
-    CFDictionaryRef hwInfoDict = find_dict_for_data_type(propertyArray, CFSTR("SPDisplaysDataType"));
-    if (hwInfoDict != NULL)
+    if (xmlData)
     {
-        CFArrayRef itemsArray = get_items_array_from_dict(hwInfoDict);
-        if (itemsArray != NULL)
+        CFArrayRef propertyArray = CFArrayRef(CFPropertyListCreateWithData(kCFAllocatorDefault, xmlData, kCFPropertyListImmutable, NULL, NULL));
+        if (propertyArray)
         {
-            // each item in array is a dictionary
-            for (CFIndex i=0; i < CFArrayGetCount(itemsArray); i++)
+            CFDictionaryRef hwInfoDict = find_dict_for_data_type(propertyArray, CFSTR("SPDisplaysDataType"));
+            if (hwInfoDict)
             {
-                // find the string for key "sppci_model" which is the human readable name of the graphics card
-                CFDictionaryRef dict = CFDictionaryRef(CFArrayGetValueAtIndex(itemsArray, i));
-                CFStringRef key = CFSTR("sppci_model");
-                CFStringRef outputString = CFStringRef(CFDictionaryGetValue(dict, key));
-
-                std::vector<char> tmp(CFStringGetLength(outputString)+1);
-                if (CFStringGetCString(outputString, &tmp[0], tmp.size(), kCFStringEncodingUTF8))
+                CFArrayRef itemsArray = get_items_array_from_dict(hwInfoDict);
+                if (itemsArray)
                 {
-                    if (i != 0)
+                    // each item in array is a dictionary
+                    for (CFIndex i=0; i < CFArrayGetCount(itemsArray); i++)
                     {
-                        oss << ", ";
+                        // find the string for key "sppci_model" which is the human readable name of the graphics card
+                        CFDictionaryRef dict = CFDictionaryRef(CFArrayGetValueAtIndex(itemsArray, i));
+                        CFStringRef key = CFSTR("sppci_model");
+                        CFStringRef outputString = CFStringRef(CFDictionaryGetValue(dict, key));
+
+                        std::vector<char> tmp(CFStringGetLength(outputString)+1);
+                        if (CFStringGetCString(outputString, &tmp[0], tmp.size(), kCFStringEncodingUTF8))
+                        {
+                            if (i != 0)
+                            {
+                                oss << ", ";
+                            }
+                            oss << &tmp[0];
+                        }
+                        CFRelease(outputString);
                     }
-                    oss << &tmp[0];
+                    CFRelease(itemsArray);
                 }
-                CFRelease(outputString);
+                CFRelease(hwInfoDict);
             }
-            CFRelease(itemsArray);
         }
-        CFRelease(hwInfoDict);
+        CFRelease(xmlData);
     }
     
     return oss.str();
