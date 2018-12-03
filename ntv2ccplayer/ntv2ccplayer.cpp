@@ -1378,6 +1378,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 				}
 			}	//	else HD video
 
+			packetList.SortListByLocation();	//	Must be in order
 			CCPLDBG("Xmit pkts: " << packetList);
 			if (mConfig.fForceVanc)
 				packetList.GetVANCTransmitData (mVideoBuffer,  formatDesc);
