@@ -504,7 +504,7 @@ void NTV2FieldBurn::PlayFrames (void)
 			outputXferField.SetVideoBuffer (playData->fVideoBuffer, playData->fVideoBufferSize);
 			if (NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem))
 				outputXferField.SetAudioBuffer (playData->fAudioBuffer, playData->fAudioBufferSize);
-//			outputXferField.acFrameFlags = playData->fFrameFlags;
+			outputXferField.acPeerToPeerFlags = playData->fFrameFlags;
 
 			//	Tell AutoCirculate to embed this frame's timecode into the SDI output.
 			//	To embed this same timecode into other SDI outputs, set the appropriate members of the acOutputTimeCodes array...
@@ -596,7 +596,7 @@ void NTV2FieldBurn::CaptureFrames (void)
 
 			//	Remember the audio byte count, which can vary frame-by-frame...
 			captureData->fAudioBufferSize	= NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem)  ?  inputXferField.GetCapturedAudioByteCount ()  :  0;
-//			captureData->fFrameFlags = inputXferField.GetFrameInfo().acFrameFlags;
+			captureData->fFrameFlags = inputXferField.acPeerToPeerFlags;
 
 			NTV2_RP188	defaultTC;
 			if (NTV2_IS_VALID_TIMECODE_INDEX (timeCodeIndex) && InputSignalHasTimecode ())
