@@ -3740,15 +3740,10 @@ void DeviceServices::SetDeviceXPointCapture()
 	// set custom anc input select
 	if (NTV2DeviceCanDoCustomAnc(mDeviceID) == true)
 	{
-		uint32_t numSdiInputs = NTV2DeviceGetNumVideoInputs(mDeviceID);
-		uint32_t selectedAncInput = mVirtualInputSelect;
-
-		if (selectedAncInput >= numSdiInputs)
-			selectedAncInput = 0;
-
-		mCard->WriteRegister(kVRegCustomAncInputSelect, selectedAncInput);
+		NTV2InputSource inpuSource = 
+			RetailSupport::GetInputVideoSourceForIndex(mDeviceID, mVirtualInputSelect);
+		mCard->WriteRegister(kVRegCustomAncInputSelect, inpuSource);
 	}
-
 }
 
 void DeviceServices::SetDeviceXPointPlayback()
