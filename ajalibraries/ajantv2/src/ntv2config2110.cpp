@@ -1063,11 +1063,11 @@ bool CNTV2Config2110::SetTxStreamEnable(const NTV2Stream stream, bool enableSfp1
     // Generate and push the SDP
     if (enableSfp1)
     {
-        GenSDP(SFP_1, stream);
+		GenSDP(SFP_1, stream);
     }
     if (enableSfp2)
     {
-        GenSDP(SFP_2, stream);
+		GenSDP(SFP_2, stream);
     }
 
     if (enableSfp1 || enableSfp2)
@@ -1640,7 +1640,7 @@ bool CNTV2Config2110::GetMACAddress(const eSFP port, const NTV2Stream stream, st
     return true;
 }
 
-string CNTV2Config2110::GetTxSDPUrl(const eSFP sfp, const NTV2Stream stream)
+string CNTV2Config2110::GetSDPUrl(const eSFP sfp, const NTV2Stream stream)
 {
     string localIPAddress, subnetMask, gateway;
     string preAmble = "http://";
@@ -1659,15 +1659,21 @@ string CNTV2Config2110::GetTxSDPUrl(const eSFP sfp, const NTV2Stream stream)
         case NTV2_AUDIO2_STREAM:    namePost = "2a.sdp";   break;
         case NTV2_AUDIO3_STREAM:    namePost = "3a.sdp";   break;
         case NTV2_AUDIO4_STREAM:    namePost = "4a.sdp";   break;
+		case NTV2_ANC1_STREAM:		namePost = "1m.sdp";   break;
+		case NTV2_ANC2_STREAM:		namePost = "2m.sdp";   break;
+		case NTV2_ANC3_STREAM:		namePost = "3m.sdp";   break;
+		case NTV2_ANC4_STREAM:		namePost = "4m.sdp";   break;
+		case NTV2_VIDEO4K_STREAM:	namePost = "4Kv.sdp";  break;
+
         default:                    namePost = "";         break;
     }
 
     return preAmble + localIPAddress + "/" + namePre + namePost;
 }
 
-string CNTV2Config2110::GetTxSDP(const eSFP sfp, const NTV2Stream stream)
+string CNTV2Config2110::GetGeneratedSDP(const eSFP sfp, const NTV2Stream stream)
 {
-    GenSDP(sfp, stream, false);
+	GenSDP(sfp, stream, false);
     return txsdp.str();
 }
 
@@ -1739,11 +1745,11 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
 
     if (StreamType(stream) == VIDEO_STREAM)
     {
-        GenSDPVideoStream(sdp, sfp, stream, std::string(&gmInfo[0], 32));
+		GenVideoStreamSDPInfo(sdp, sfp, stream, std::string(&gmInfo[0], 32));
     }
     else
     {
-        GenSDPAudioStream(sdp, sfp, stream, std::string(&gmInfo[0], 32));
+		GenAudioStreamSDPInfo(sdp, sfp, stream, std::string(&gmInfo[0], 32));
     }
     
     //cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
@@ -1756,7 +1762,7 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
     return rv;
 }
 
-bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, const eSFP sfp, const NTV2Stream stream, string gmInfo)
+bool CNTV2Config2110::GenVideoStreamSDPInfo(stringstream & sdp, const eSFP sfp, const NTV2Stream stream, string gmInfo)
 {
     // Insure appropriate stream is enabled
     bool enabledA;
@@ -1850,7 +1856,7 @@ bool CNTV2Config2110::GenSDPVideoStream(stringstream & sdp, const eSFP sfp, cons
 }
 
 
-bool CNTV2Config2110::GenSDPAudioStream(stringstream & sdp, const eSFP sfp, const  NTV2Stream stream, string gmInfo)
+bool CNTV2Config2110::GenAudioStreamSDPInfo(stringstream & sdp, const eSFP sfp, const  NTV2Stream stream, string gmInfo)
 {
     // Insure appropriate stream is enabled
     bool enabledA;
@@ -1955,6 +1961,9 @@ NTV2StreamType CNTV2Config2110::StreamType(const NTV2Stream stream)
             type = ANC_STREAM;
             break;
 
+		case NTV2_VIDEO4K_STREAM:
+			type = VIDEO_4K_STREAM;
+
         default:
             type = INVALID_STREAM;
             break;
@@ -1977,7 +1986,7 @@ NTV2Channel CNTV2Config2110::VideoStreamToChannel(const NTV2Stream stream)
 }
 
 
-bool  CNTV2Config2110::GetRxSDP(std::string url, std::string & sdp)
+bool  CNTV2Config2110::GetActualSDP(std::string url, std::string & sdp)
 {
     return GetSDP(url, sdp);
 }

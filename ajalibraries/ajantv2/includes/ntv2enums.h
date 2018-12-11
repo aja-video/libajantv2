@@ -1250,7 +1250,8 @@ typedef enum
     NTV2_ANC2_STREAM        = 9,
     NTV2_ANC3_STREAM        = 10,
     NTV2_ANC4_STREAM        = 11,
-    NTV2_MAX_NUM_STREAMS    = 12,
+	NTV2_VIDEO4K_STREAM		= 12,
+	NTV2_MAX_NUM_STREAMS    = 13,
     NTV2_STREAM_INVALID = NTV2_MAX_NUM_STREAMS
 } NTV2Stream;
 
@@ -1265,6 +1266,7 @@ typedef enum
     VIDEO_STREAM,		///< @brief	Video data
     AUDIO_STREAM,		///< @brief	Audio data
     ANC_STREAM,         ///< @brief	Anc data
+	VIDEO_4K_STREAM,	///< @brief	4K Video stream using 4 streams
     INVALID_STREAM
 } NTV2StreamType;
 
