@@ -1823,6 +1823,8 @@ bool CNTV2KonaFlashProgram::ProgramFromMCS(bool verify)
             WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
             WaitForFlashNOTBusy();
             SetBankSelect(BANK_0);
+
+			SetWarmBootFirmwareReload(true);
         }
         else
         {
