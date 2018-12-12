@@ -18,6 +18,7 @@
 
 #define MaxVal(X,Y) ((X) < (Y) ? (Y) : (X))
 #define MinVal(X,Y) ((X) < (Y) ? (X) : (Y))
+#define AbsVal(X)   ((X) < 0 ?  (-X) : (X))
 
 #define  BUILD_DEMO 1
 

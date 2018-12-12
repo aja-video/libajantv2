@@ -382,6 +382,10 @@ bool CKonaIpJsonParse2110::JsonToStructNetwork(const QJsonObject& topObj, Networ
     if (m_verbose) std::cout << " setup4k " << str.c_str() << std::endl;
     n2110.setup4k = GetEnable(str);
 
+	str = topObj["multiSDP"].toString().toStdString();
+	if (m_verbose) std::cout << " multiSDP " << str.c_str() << std::endl;
+	n2110.multiSDP = GetEnable(str);
+
     // sfp
     QJsonArray sfpArray = topObj["sfps"].toArray();
     n2110.numSFPs = MinVal(sfpArray.count(), 2);
@@ -425,6 +429,8 @@ bool CKonaIpJsonParse2110::StructToJsonNetwork(const NetworkData2110& n2110, QJs
 
     topObj.insert("setup4k", QJsonValue(QString(GetEnable(n2110.setup4k))));
 
+	topObj.insert("multiSDP", QJsonValue(QString(GetEnable(n2110.multiSDP))));
+
     QJsonArray sfpArray;
 
     for (uint32_t i=0; i<n2110.numSFPs; i++)
@@ -441,7 +447,9 @@ bool CKonaIpJsonParse2110::StructToJsonNetwork(const NetworkData2110& n2110, QJs
         obj.insert("enable", QJsonValue(QString(GetEnable(n2110.sfp[i].enable))));
         sfpArray += QJsonValue(obj);
     }
-    topObj.insert("sfps", QJsonValue(sfpArray));
+    
+    if (n2110.numSFPs > 0)
+    	topObj.insert("sfps", QJsonValue(sfpArray));
 
     return true;
 }
