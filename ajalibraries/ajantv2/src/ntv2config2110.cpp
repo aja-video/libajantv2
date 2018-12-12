@@ -1686,21 +1686,6 @@ string CNTV2Config2110::To_String(int val)
 
 bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushit)
 {
-    string filename = "txstream";
-
-    switch (stream)
-    {
-        case NTV2_VIDEO1_STREAM:    filename += "1v.sdp";   break;
-        case NTV2_VIDEO2_STREAM:    filename += "2v.sdp";   break;
-        case NTV2_VIDEO3_STREAM:    filename += "3v.sdp";   break;
-        case NTV2_VIDEO4_STREAM:    filename += "4v.sdp";   break;
-        case NTV2_AUDIO1_STREAM:    filename += "1a.sdp";   break;
-        case NTV2_AUDIO2_STREAM:    filename += "2a.sdp";   break;
-        case NTV2_AUDIO3_STREAM:    filename += "3a.sdp";   break;
-        case NTV2_AUDIO4_STREAM:    filename += "4a.sdp";   break;
-        default:                    filename += "";         break;
-    }
-
     stringstream & sdp = txsdp;
 
     sdp.str("");
@@ -1736,7 +1721,7 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
 
     // PTP
     PTPStatus ptpStatus;
-    bool rv = GetPTPStatus(ptpStatus);
+	GetPTPStatus(ptpStatus);
 
     char gmInfo[32];
     sprintf(gmInfo, "%02X-%02X-%02X-%02X-%02X-%02X-%02X-%02X",
@@ -1754,10 +1739,31 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
     
     //cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
 
+	bool rv = true;
+
     if (pushit)
+	{
+		string filename = "txstream";
+
+		switch (stream)
+		{
+			case NTV2_VIDEO1_STREAM:    filename += "1v.sdp";   break;
+			case NTV2_VIDEO2_STREAM:    filename += "2v.sdp";   break;
+			case NTV2_VIDEO3_STREAM:    filename += "3v.sdp";   break;
+			case NTV2_VIDEO4_STREAM:    filename += "4v.sdp";   break;
+			case NTV2_AUDIO1_STREAM:    filename += "1a.sdp";   break;
+			case NTV2_AUDIO2_STREAM:    filename += "2a.sdp";   break;
+			case NTV2_AUDIO3_STREAM:    filename += "3a.sdp";   break;
+			case NTV2_AUDIO4_STREAM:    filename += "4a.sdp";   break;
+			case NTV2_ANC1_STREAM:		filename += "1m.sdp";   break;
+			case NTV2_ANC2_STREAM:		filename += "2m.sdp";   break;
+			case NTV2_ANC3_STREAM:		filename += "3m.sdp";   break;
+			case NTV2_ANC4_STREAM:		filename += "4m.sdp";   break;
+			case NTV2_VIDEO4K_STREAM:	filename += "4Kv.sdp";  break;
+			default:                    filename += "";         break;
+		}
         rv = PushSDP(filename,sdp);
-    else
-        rv = true;
+	}
 
     return rv;
 }
