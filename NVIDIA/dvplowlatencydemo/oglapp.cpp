@@ -893,7 +893,7 @@ void	CaptureThreadFunc(AJAThread * pThread, void * pContext)
 			break;
 		}
 
-		__int64 start, end;
+        int64_t start, end;
 		start = AJATime::GetSystemMicroseconds();
 
 		// Do frame capture
@@ -938,7 +938,7 @@ void	PlayoutThreadFunc(AJAThread * pThread, void * pContext)
 			break;
 		}
 
-		__int64 start, end;
+        int64_t start, end;
 		start = AJATime::GetSystemMicroseconds();
 
 		// Do frame playout
@@ -1153,7 +1153,7 @@ int main(int argc, char *argv[])
 
 		// This gives the time to upload to the GPU for some past frame
 		durationCaptureGPU = gpuTransfer->GetCardToGpuTime(inTexture);
-		__int64 start, end;
+        int64_t start, end;
 		start = AJATime::GetSystemMicroseconds();
 
 		// Get output buffer
