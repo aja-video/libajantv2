@@ -475,6 +475,7 @@
 #define kRegCS_sdi_vpid_a           6
 #define kRegCS_sdi_vpid_b           7
 #define kRegCS_audio_ctl            8
+#define kRegCS_fec_ctl				9
 #define kRegCS_firmware_id          32
 #define kRegCS_revisions            33
 #define kRegCS_compile_date         34

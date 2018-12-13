@@ -251,7 +251,7 @@ public:
 	virtual bool		IsMBSystemValid (void);
 	virtual bool		IsMBSystemReady (void);
 #if !defined(NTV2_DEPRECATE_15_0)
-	virtual inline bool	IsKonaIPDevice (void)			{return ::NTV2DeviceCanDoIP(GetDeviceID());}	///< @deprecated	Call CNTV2Card::IsIPDevice instead.
+	virtual inline bool	IsKonaIPDevice (void)			{return IsIPDevice();}	///< @deprecated	Call CNTV2Card::IsIPDevice instead.
 #endif //	!defined(NTV2_DEPRECATE_12_7)
 	virtual inline bool	IsIPDevice (void)				{return ::NTV2DeviceCanDoIP(GetDeviceID());}	///< @return	True if I am an IP device (instead of SDI or HDMI).
 

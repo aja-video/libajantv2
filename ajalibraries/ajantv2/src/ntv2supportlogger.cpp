@@ -449,7 +449,7 @@ void CNTV2SupportLogger::FetchInfoLog(std::ostringstream& oss) const
 		AJASystemInfo::append(infoTable, "Installed Bitfile Build Date",	dateStr + " " + timeStr);
 	}
 
-    if (mDevice.IsKonaIPDevice())
+    if (mDevice.IsIPDevice())
     {
         PACKAGE_INFO_STRUCT pkgInfo;
         if (mDevice.GetPackageInformation(pkgInfo))

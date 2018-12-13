@@ -493,7 +493,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 
 bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageInfo)
 {
-    if(!IsDeviceReady(false) || !IsKonaIPDevice())
+    if(!IsDeviceReady(false) || !IsIPDevice())
     {
         // cannot read flash
         return false;
@@ -737,7 +737,7 @@ void CNTV2DriverInterface::BumpEventCount (const INTERRUPT_ENUMS eInterruptType)
 
 bool CNTV2DriverInterface::IsDeviceReady(bool checkValid)
 {
-	if (IsKonaIPDevice())
+	if (IsIPDevice())
 	{
 		if(!IsMBSystemReady())
 			return false;
@@ -750,7 +750,7 @@ bool CNTV2DriverInterface::IsDeviceReady(bool checkValid)
 
 bool CNTV2DriverInterface::IsMBSystemValid()
 {
-	if (IsKonaIPDevice())
+	if (IsIPDevice())
 	{
         uint32_t val;
         ReadRegister(SAREK_REGS + kRegSarekIfVersion, val);
@@ -764,7 +764,7 @@ bool CNTV2DriverInterface::IsMBSystemValid()
 
 bool CNTV2DriverInterface::IsMBSystemReady()
 {
-	if (IsKonaIPDevice())
+	if (IsIPDevice())
 	{
 		uint32_t val;
 		ReadRegister(SAREK_REGS + kRegSarekMBState, val);
