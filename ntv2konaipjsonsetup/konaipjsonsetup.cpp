@@ -306,8 +306,8 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
         cerr << "## ERROR:  No devices found " << deviceSpec.c_str() << endl;
         return false;
     }
-    //if (!mDevice.IsKonaIPDevice ())
-    //    {cerr << "## ERROR:  Not a KONA IP device" << endl;  return false;}
+    //if (!mDevice.IsIPDevice())
+    //    {cerr << "## ERROR:  Not an IP device" << endl;  return false;}
 
     //	Wait for device ready
     while (!mDevice.IsMBSystemReady())
@@ -510,8 +510,8 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, device);
     if (!device.IsOpen())
     {cerr << "## ERROR:  No devices found " << deviceSpec.c_str() << endl;  return false;}
-    //if (!mDevice.IsKonaIPDevice ())
-    //    {cerr << "## ERROR:  Not a KONA IP device" << endl;  return false;}
+    //if (!mDevice.IsIPDevice())
+    //    {cerr << "## ERROR:  Not an IP device" << endl;  return false;}
 
     //	Read MicroBlaze Uptime in Seconds, to see if it's running...
     while (!device.IsMBSystemReady())

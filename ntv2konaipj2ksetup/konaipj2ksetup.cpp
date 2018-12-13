@@ -159,8 +159,8 @@ bool CKonaIpEncoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetu
         return false;
     }
 
-    //if (!mDevice.IsKonaIPDevice ())
-    //{std::cerr << "## ERROR:  Not a KONA IP device" << std::endl;  return false;}
+    //if (!mDevice.IsIPDevice())
+    //{std::cerr << "## ERROR:  Not an IP device" << std::endl;  return false;}
 
     // Wait for ready
     while (!mDevice.IsMBSystemReady())
@@ -238,8 +238,8 @@ bool CKonaIpDecoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetu
     CNTV2DeviceScanner::GetFirstDeviceFromArgument (pDeviceSpec, mDevice);
     if (!mDevice.IsOpen())
     {std::cerr << "## ERROR:  No devices found" << std::endl;  return false;}
-    //if (!mDevice.IsKonaIPDevice ())
-    //{std::cerr << "## ERROR:  Not a KONA IP device" << std::endl;  return false;}
+    //if (!mDevice.IsIPDevice())
+    //{std::cerr << "## ERROR:  Not an IP device" << std::endl;  return false;}
 
     // Wait for device ready
     while (!mDevice.IsMBSystemReady())
