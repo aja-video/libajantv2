@@ -242,6 +242,11 @@ public:
     eNTV2PacketInterval audioPktInterval;
 };
 
+typedef struct
+{
+	rx_2110Config		rx2110Config[4];
+} multiRx_2110Config;
+
 
 /**
     @brief	The CNTV2Config2110 class is the interface to Kona-IP network I/O using SMPTE 2110
@@ -289,7 +294,9 @@ public:
 	std::string GetSDPUrl(const eSFP sfp, const NTV2Stream stream);
 	std::string GetGeneratedSDP(const eSFP sfp, const NTV2Stream stream);
 	bool        GetActualSDP(std::string url, std::string & sdp);
-    bool        ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream, rx_2110Config & rxConfig);
+	bool		ExtractRxVideoConfigFromSDP(std::string sdp, rx_2110Config & rxConfig);
+	bool		ExtractRxVideoConfigFromSDP(std::string sdp, multiRx_2110Config & rxConfig);
+	bool		ExtractRxAudioConfigFromSDP(std::string sdp, rx_2110Config & rxConfig);
 
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
