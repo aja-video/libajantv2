@@ -151,14 +151,35 @@ static std::string GetKernErrStr (const DWORD inError)
 #define	HEX8(__x__)			"0x" << hex << setw(8)  << setfill('0') << (0xFFFFFFFF & uint32_t(__x__)) << dec
 #define	HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') <<               uint64_t(__x__)  << dec
 #define KR(_kr_)			"kernResult=" << HEX8(_kr_) << "(" << GetKernErrStr(_kr_) << ")"
-#define INSTP(_p_)			" instance=" << HEX16(uint64_t(_p_))
+#define INSTP(_p_)			HEX16(uint64_t(_p_))
 
-#define	WDIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, __FUNCTION__ << ": " << __x__)
-#define	WDIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, __FUNCTION__ << ": " << __x__)
-#define	WDINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, __FUNCTION__ << ": " << __x__)
-#define	WDIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface, __FUNCTION__ << ": " << __x__)
-#define	WDIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface, __FUNCTION__ << ": " << __x__)
+#define	WDIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface,  INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	WDIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface,  INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	WDINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface,  INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	WDIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface,  INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	WDIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface,  INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 
+
+CNTV2WinDriverInterface::CNTV2WinDriverInterface()
+	:	_bOpenShared			(true),
+		_bOpenOverlapped		(false),
+		_hDevInfoSet			(INVALID_HANDLE_VALUE),
+		_pspDevIFaceDetailData	(NULL),
+		_hDevice				(INVALID_HANDLE_VALUE),
+		_previousAudioState		(0),
+		_previousAudioSelection	(0)
+		//_vecDmaLocked
+		//vecIter
+{
+	::memset(&_spDevInfoData, 0, sizeof(_spDevInfoData));
+	::memset(&_GUID_PROPSET, 0, sizeof(_GUID_PROPSET));
+}
+
+CNTV2WinDriverInterface::~CNTV2WinDriverInterface()
+{
+	if (IsOpen())
+		Close();
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -178,30 +199,32 @@ static std::string GetKernErrStr (const DWORD inError)
 bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & hostName)
 {
 	// Check if already opened
-	if (IsOpen())
+	if (IsOpen()  &&  inDeviceIndexNumber == _boardNumber)
 	{
-		// Don't do anything if the requested board is the same as last opened, and
-		// the requested or last opened board aren't remote boards
-		if ( (_boardNumber == inDeviceIndexNumber) && hostName.empty())
-			#if defined(NTV2_NUB_CLIENT_SUPPORT)
-				if (_remoteHandle == INVALID_NUB_HANDLE)
-			#endif	//	NTV2_NUB_CLIENT_SUPPORT
-				return true;
-
-		Close();   // Close current board and open desired board
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
+		if (hostName.empty()  &&  _remoteHandle == INVALID_NUB_HANDLE)
+			return true;	//	Same local device requested, already open
+		if (_hostname == hostName  &&  _remoteHandle != INVALID_NUB_HANDLE)
+			return true;	//	Same remote device requested, already open
+#else
+		return true;		//	Same local device requested, already open
+#endif
 	}
 
-#if defined(NTV2_NUB_CLIENT_SUPPORT)
-	_remoteHandle = (LWord)INVALID_NUB_HANDLE;
-#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
-	_hDevice = INVALID_HANDLE_VALUE;
-	ULWord deviceID = 0x0;
+	if (IsOpen())
+		Close();	//	Close if different device requested
 
-#define BOARDSTRMAX	32
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	NTV2_ASSERT(_remoteHandle == (LWord)INVALID_NUB_HANDLE);
+#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
+	NTV2_ASSERT(_hDevice == INVALID_HANDLE_VALUE);
+	string boardStr;
+
 	if (!hostName.empty())	// Non-empty: card on remote host
 	{
 		ostringstream	oss;
 		oss << hostName << ":ntv2" << inDeviceIndexNumber;
+		boardStr = oss.str();
 	#if defined(NTV2_NUB_CLIENT_SUPPORT)
 		if (!OpenRemote(inDeviceIndexNumber, _displayErrorMessage, 256, hostName.c_str()))
 	#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
@@ -281,15 +304,16 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 			return false; // out of memory
 		}
 
+		ULWord deviceID = 0x0;
 		ULONG deviceInstanceSize = 0;
 		CM_Get_Device_ID_Size(&deviceInstanceSize, _spDevInfoData.DevInst, 0);
 		char* deviceInstance = (char*)new BYTE[deviceInstanceSize*2];
 		CM_Get_Device_IDA(_spDevInfoData.DevInst, deviceInstance, deviceInstanceSize*2, 0);
-		string sDeviceInstance(deviceInstance);
+		boardStr = deviceInstance;
 		delete deviceInstance;
-		if(sDeviceInstance.find("DB") != string::npos)
+/*		if(boardStr.find("DB") != string::npos)
 		{
-			string sDeviceID = sDeviceInstance.substr(sDeviceInstance.find("DB"),4);
+			string sDeviceID = boardStr.substr(sDeviceInstance.find("DB"),4);
 			if(sDeviceID.compare("DB01") == 0)
 				deviceID = 0xDB01;
 			else if(sDeviceID.compare("DB02") == 0)
@@ -316,7 +340,7 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 				deviceID = 0x0;
 		}
 		else
-			deviceID = 0x0;
+			deviceID = 0x0;	*/
 
 		_hDevice = CreateFile(_pspDevIFaceDetailData->DevicePath,
 			GENERIC_READ | GENERIC_WRITE,
@@ -328,6 +352,7 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 
 		if(_hDevice == INVALID_HANDLE_VALUE)
 		{
+			WDIFAIL("CreateFile failed for '" << boardStr << "'");
 			delete _pspDevIFaceDetailData;
 			_pspDevIFaceDetailData=NULL;
 			SetupDiDestroyDeviceInfoList(_hDevInfoSet);
@@ -337,29 +362,36 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 	}
 
 	_boardOpened = true;
-
-#if AJA_NTV2_SDK_VERSION_MAJOR != 0
-	if (!hostName.empty())	// Non-empty: card on remote host
-    {
-        ULWord driverVersionMajor;
-        if (!ReadRegister (kVRegLinuxDriverVersion, &driverVersionMajor))
-        {
-            WDIFAIL("Cannot read driver version");
-            Close();
-            return false;
-        }
-        driverVersionMajor = NTV2DriverVersionDecode_Major(driverVersionMajor);
-        if (driverVersionMajor != (ULWord)AJA_NTV2_SDK_VERSION_MAJOR)
-        {
-            printf("## ERROR:  Cannot open:  Driver version %d older than SDK version %d\n",
-                    driverVersionMajor, AJA_NTV2_SDK_VERSION_MAJOR);
-            Close();
-            return false;
-        }
-    }
-#endif
-
 	CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID);
+
+	// Read driver version (local devices only)...
+	uint16_t	drvrVersComps[4]	=	{0, 0, 0, 0};
+	ULWord		driverVersionRaw	(0);
+	if (_remoteHandle == INVALID_NUB_HANDLE  &&  !ReadRegister (kVRegDriverVersion, driverVersionRaw))
+		{WDIFAIL("ReadRegister(kVRegDriverVersion) failed");  Close();  return false;}
+	drvrVersComps[0] = uint16_t(NTV2DriverVersionDecode_Major(driverVersionRaw));	//	major
+	drvrVersComps[1] = uint16_t(NTV2DriverVersionDecode_Minor(driverVersionRaw));	//	minor
+	drvrVersComps[2] = uint16_t(NTV2DriverVersionDecode_Point(driverVersionRaw));	//	point
+	drvrVersComps[3] = uint16_t(NTV2DriverVersionDecode_Build(driverVersionRaw));	//	build
+
+	//	Check driver version (local devices only)
+	if (_remoteHandle != INVALID_NUB_HANDLE)
+		;	//	Skip driver version comparison on remote devices
+	else if (!(AJA_NTV2_SDK_VERSION_MAJOR))
+		WDIWARN ("Driver version v" << DEC(drvrVersComps[0]) << "." << DEC(drvrVersComps[1]) << "." << DEC(drvrVersComps[2]) << "."
+				<< DEC(drvrVersComps[3]) << " ignored for client SDK v0.0.0.0 (dev mode), driverVersionRaw=" << xHEX0N(driverVersionRaw,8));
+	else if (drvrVersComps[0] == uint16_t(AJA_NTV2_SDK_VERSION_MAJOR))
+		WDIDBG ("Driver v" << DEC(drvrVersComps[0]) << "." << DEC(drvrVersComps[1])
+				<< "." << DEC(drvrVersComps[2]) << "." << DEC(drvrVersComps[3]) << " == client SDK v"
+				<< DEC(uint16_t(AJA_NTV2_SDK_VERSION_MAJOR)) << "." << DEC(uint16_t(AJA_NTV2_SDK_VERSION_MINOR))
+				<< "." << DEC(uint16_t(AJA_NTV2_SDK_VERSION_POINT)) << "." << DEC(uint16_t(AJA_NTV2_SDK_BUILD_NUMBER)));
+	else
+		WDIWARN ("Driver v" << DEC(drvrVersComps[0]) << "." << DEC(drvrVersComps[1])
+				<< "." << DEC(drvrVersComps[2]) << "." << DEC(drvrVersComps[3]) << " != client SDK v"
+				<< DEC(uint16_t(AJA_NTV2_SDK_VERSION_MAJOR)) << "." << DEC(uint16_t(AJA_NTV2_SDK_VERSION_MINOR)) << "."
+				<< DEC(uint16_t(AJA_NTV2_SDK_VERSION_POINT)) << "." << DEC(uint16_t(AJA_NTV2_SDK_BUILD_NUMBER))
+				<< ", driverVersionRaw=" << xHEX0N(driverVersionRaw,8));
+
 	NTV2FrameGeometry fg;
 	CNTV2DriverInterface::ReadRegister (kRegGlobalControl, fg, kRegMaskGeometry, kRegShiftGeometry);
 
@@ -370,11 +402,11 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 
 	// Write the device ID
 	//WriteRegister(kVRegPCIDeviceID, deviceID);
+	WDIINFO ("Opened '" << boardStr << "' deviceID=" << HEX8(_boardID) << " deviceIndex=" << DEC(_boardNumber));
 
 	InitMemberVariablesOnOpen(fg,format);    // in the base class
-
 	return true;
-}
+}	//	Open
 
 #if !defined(NTV2_DEPRECATE_14_3)
 	bool CNTV2WinDriverInterface::Open (	UWord			boardNumber,
@@ -420,61 +452,58 @@ bool CNTV2WinDriverInterface::Close()
     if (!_boardOpened)
         return true;
 
+	NTV2_ASSERT(_hDevice != INVALID_HANDLE_VALUE);
+	if (_pspDevIFaceDetailData)
 	{
-		assert( _hDevice );
-		if(_pspDevIFaceDetailData)
-		{
-			delete _pspDevIFaceDetailData;
-			_pspDevIFaceDetailData=NULL;
-		}
-		if(_hDevInfoSet)
-		{
-#ifndef _AJA_COMPILE_WIN2K_SOFT_LINK
-			SetupDiDestroyDeviceInfoList(_hDevInfoSet);
-#else
-			if(pSetupDiDestroyDeviceInfoList != NULL) {
-				pSetupDiDestroyDeviceInfoList(_hDevInfoSet);
-			}
-#endif
-			_hDevInfoSet=NULL;
-		}
-
-		// oem additions
-		UnmapFrameBuffers ();
-		ConfigureSubscription (false, eOutput1, mInterruptEventHandles [eOutput1]);
-		ConfigureSubscription (false, eOutput2, mInterruptEventHandles [eOutput2]);
-		ConfigureSubscription (false, eOutput3, mInterruptEventHandles [eOutput3]);
-		ConfigureSubscription (false, eOutput4, mInterruptEventHandles [eOutput4]);
-		ConfigureSubscription (false, eOutput5, mInterruptEventHandles [eOutput5]);
-		ConfigureSubscription (false, eOutput6, mInterruptEventHandles [eOutput6]);
-		ConfigureSubscription (false, eOutput7, mInterruptEventHandles [eOutput7]);
-		ConfigureSubscription (false, eOutput8, mInterruptEventHandles [eOutput8]);
-		ConfigureSubscription (false, eInput1, mInterruptEventHandles [eInput1]);
-		ConfigureSubscription (false, eInput2, mInterruptEventHandles [eInput2]);
-		ConfigureSubscription (false, eInput3, mInterruptEventHandles [eInput3]);
-		ConfigureSubscription (false, eInput4, mInterruptEventHandles [eInput4]);
-		ConfigureSubscription (false, eInput5, mInterruptEventHandles [eInput5]);
-		ConfigureSubscription (false, eInput6, mInterruptEventHandles [eInput6]);
-		ConfigureSubscription (false, eInput7, mInterruptEventHandles [eInput7]);
-		ConfigureSubscription (false, eInput8, mInterruptEventHandles [eInput8]);
-		ConfigureSubscription (false, eChangeEvent, mInterruptEventHandles [eChangeEvent]);
-		ConfigureSubscription (false, eAudio, mInterruptEventHandles [eAudio]);
-		ConfigureSubscription (false, eAudioInWrap, mInterruptEventHandles [eAudioInWrap]);
-		ConfigureSubscription (false, eAudioOutWrap, mInterruptEventHandles [eAudioOutWrap]);
-		ConfigureSubscription (false, eUartTx, mInterruptEventHandles [eUartTx]);
-		ConfigureSubscription (false, eUartRx, mInterruptEventHandles [eUartRx]);
-		ConfigureSubscription (false, eHDMIRxV2HotplugDetect, mInterruptEventHandles [eHDMIRxV2HotplugDetect]);
-		ConfigureSubscription (false, eDMA1, mInterruptEventHandles [eDMA1]);
-		ConfigureSubscription (false, eDMA2, mInterruptEventHandles [eDMA2]);
-		ConfigureSubscription (false, eDMA3, mInterruptEventHandles [eDMA3]);
-		ConfigureSubscription (false, eDMA4, mInterruptEventHandles [eDMA4]);
-		DmaUnlock ();
-		UnmapRegisters();
-
-		if ( _hDevice != INVALID_HANDLE_VALUE )
-			CloseHandle(_hDevice);
-
+		delete _pspDevIFaceDetailData;
+		_pspDevIFaceDetailData=NULL;
 	}
+	if (_hDevInfoSet)
+	{
+#ifndef _AJA_COMPILE_WIN2K_SOFT_LINK
+		SetupDiDestroyDeviceInfoList(_hDevInfoSet);
+#else
+		if (pSetupDiDestroyDeviceInfoList)
+			pSetupDiDestroyDeviceInfoList(_hDevInfoSet);
+#endif
+		_hDevInfoSet=NULL;
+	}
+
+	// oem additions
+	UnmapFrameBuffers ();
+	ConfigureSubscription (false, eOutput1, mInterruptEventHandles [eOutput1]);
+	ConfigureSubscription (false, eOutput2, mInterruptEventHandles [eOutput2]);
+	ConfigureSubscription (false, eOutput3, mInterruptEventHandles [eOutput3]);
+	ConfigureSubscription (false, eOutput4, mInterruptEventHandles [eOutput4]);
+	ConfigureSubscription (false, eOutput5, mInterruptEventHandles [eOutput5]);
+	ConfigureSubscription (false, eOutput6, mInterruptEventHandles [eOutput6]);
+	ConfigureSubscription (false, eOutput7, mInterruptEventHandles [eOutput7]);
+	ConfigureSubscription (false, eOutput8, mInterruptEventHandles [eOutput8]);
+	ConfigureSubscription (false, eInput1, mInterruptEventHandles [eInput1]);
+	ConfigureSubscription (false, eInput2, mInterruptEventHandles [eInput2]);
+	ConfigureSubscription (false, eInput3, mInterruptEventHandles [eInput3]);
+	ConfigureSubscription (false, eInput4, mInterruptEventHandles [eInput4]);
+	ConfigureSubscription (false, eInput5, mInterruptEventHandles [eInput5]);
+	ConfigureSubscription (false, eInput6, mInterruptEventHandles [eInput6]);
+	ConfigureSubscription (false, eInput7, mInterruptEventHandles [eInput7]);
+	ConfigureSubscription (false, eInput8, mInterruptEventHandles [eInput8]);
+	ConfigureSubscription (false, eChangeEvent, mInterruptEventHandles [eChangeEvent]);
+	ConfigureSubscription (false, eAudio, mInterruptEventHandles [eAudio]);
+	ConfigureSubscription (false, eAudioInWrap, mInterruptEventHandles [eAudioInWrap]);
+	ConfigureSubscription (false, eAudioOutWrap, mInterruptEventHandles [eAudioOutWrap]);
+	ConfigureSubscription (false, eUartTx, mInterruptEventHandles [eUartTx]);
+	ConfigureSubscription (false, eUartRx, mInterruptEventHandles [eUartRx]);
+	ConfigureSubscription (false, eHDMIRxV2HotplugDetect, mInterruptEventHandles [eHDMIRxV2HotplugDetect]);
+	ConfigureSubscription (false, eDMA1, mInterruptEventHandles [eDMA1]);
+	ConfigureSubscription (false, eDMA2, mInterruptEventHandles [eDMA2]);
+	ConfigureSubscription (false, eDMA3, mInterruptEventHandles [eDMA3]);
+	ConfigureSubscription (false, eDMA4, mInterruptEventHandles [eDMA4]);
+	DmaUnlock ();
+	UnmapRegisters();
+
+	if (_hDevice != INVALID_HANDLE_VALUE)
+		CloseHandle(_hDevice);
+	WDIINFO ("Closed deviceID=" << HEX8(_boardID) << " deviceIndex=" << DEC(_boardNumber));
 
 	_hDevice = INVALID_HANDLE_VALUE;
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
@@ -2628,7 +2657,7 @@ bool CNTV2WinDriverInterface::AcquireStreamForApplicationWithReference( ULWord a
 	ReadRegister(kVRegApplicationCode, currentCode);
 	ReadRegister(kVRegApplicationPID, currentPID);
 
-	HANDLE pH = OpenProcess(READ_CONTROL, false, (DWORD)currentPID);
+	HANDLE pH = OpenProcess(READ_CONTROL, false, DWORD(currentPID));
 	if(INVALID_HANDLE_VALUE != pH && NULL != pH)
 	{
 		CloseHandle(pH);
@@ -2655,10 +2684,10 @@ bool CNTV2WinDriverInterface::AcquireStreamForApplicationWithReference( ULWord a
 				//Just in case this is not zero?
 				WriteRegister(kVRegAcquireReferenceCount, 0);
 				WriteRegister(kVRegAcquireReferenceCount, 1);
-				return WriteRegister(kVRegApplicationPID, (ULWord)pid);
+				return WriteRegister(kVRegApplicationPID, ULWord(pid));
 			}
 		}
-		else if(currentCode == appCode && currentPID == (ULWord)pid)
+		else if(currentCode == appCode && currentPID == ULWord(pid))
 		{
 			//This process has already acquired so bump the count
 			return WriteRegister(kVRegAcquireReferenceCount, 1);
@@ -2680,7 +2709,7 @@ bool CNTV2WinDriverInterface::ReleaseStreamForApplicationWithReference( ULWord a
 	ReadRegister(kVRegApplicationPID, currentPID);
 	ReadRegister(kVRegAcquireReferenceCount, currentCount);
 
-	if(currentCode == appCode && currentPID == (ULWord)pid)
+	if(currentCode == appCode && currentPID == ULWord(pid))
 	{
 		if(currentCount > 1)
 		{
@@ -2706,7 +2735,7 @@ bool CNTV2WinDriverInterface::AcquireStreamForApplication( ULWord appCode, int32
 		if (!WriteRegister(kVRegApplicationCode, appCode))
 			::Sleep(50);
 		else
-			return WriteRegister(kVRegApplicationPID, (ULWord)pid);
+			return WriteRegister(kVRegApplicationPID, ULWord(pid));
 	}
 
 	ULWord currentAppCode, currentPID;
@@ -2731,7 +2760,7 @@ bool CNTV2WinDriverInterface::AcquireStreamForApplication( ULWord appCode, int32
 			if (!WriteRegister(kVRegApplicationCode, appCode))
 				::Sleep(50);
 			else
-				return WriteRegister(kVRegApplicationPID, (ULWord)pid);
+				return WriteRegister(kVRegApplicationPID, ULWord(pid));
 		}
 	}
 	else
@@ -2742,7 +2771,7 @@ bool CNTV2WinDriverInterface::AcquireStreamForApplication( ULWord appCode, int32
 			if (!WriteRegister(kVRegApplicationCode, appCode))
 				::Sleep(50);
 			else
-				return WriteRegister(kVRegApplicationPID, (ULWord)pid);
+				return WriteRegister(kVRegApplicationPID, ULWord(pid));
 		}
 	}
 
@@ -2751,7 +2780,7 @@ bool CNTV2WinDriverInterface::AcquireStreamForApplication( ULWord appCode, int32
 
 bool CNTV2WinDriverInterface::ReleaseStreamForApplication( ULWord appCode, int32_t pid )
 {
-	if(WriteRegister(kVRegReleaseApplication, (ULWord)pid))
+	if(WriteRegister(kVRegReleaseApplication, ULWord(pid)))
 	{
 		WriteRegister(kVRegAcquireReferenceCount, 0);
 		return true;//We don't really care if the count fails
@@ -2765,7 +2794,7 @@ bool CNTV2WinDriverInterface::SetStreamingApplication( ULWord appCode, int32_t p
 	if(!WriteRegister(kVRegForceApplicationCode, appCode))
 		return false;
 	else
-		return WriteRegister(kVRegForceApplicationPID, (ULWord)pid);
+		return WriteRegister(kVRegForceApplicationPID, ULWord(pid));
 }
 
 bool CNTV2WinDriverInterface::GetStreamingApplication( ULWord *appCode, int32_t  *pid )
