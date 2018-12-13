@@ -17,33 +17,92 @@ The NTV2CCPlayer class demonstrates...
 
 <h2>Command Line Syntax</h2>
 
-ntv2ccplayer \[<i>options</i>\] \[<i>filePath</i> \[...\]\]
+<tt>ntv2ccplayer \[OPTION \[...\]\] \[FILEPATH \[...\]\] </tt>
 
 Plays video containing closed-caption data sourced from...
 -	the contents of one or more files specified as path arguments on the command line,
 -	standard input (if "-" used as a file argument),
--	an internal text source (if no file arguments provided).
+-	an internal plaintext source (if no file arguments provided).
 
 ...where...
-<table>
-	<tr><td><i>filePath</i> or "-"<td>Specifies a valid path to a file whose text contents are to be sent into the caption stream. A hyphen ("-") can be specified in lieu of a file path to use the contents of the standard input stream (although this can only be specified once in a single command invocation).
-	<tr><td colspan="2">...and where <i>options</i> can be any combination of the following:
-	<tr><td><tt>--device=</tt><i>indexNumber</i>	<td>A zero-based index number that specifies the AJA device to use.
-	<tr><td><tt>--channel=</tt><i>channelNum</i>	<td>A zero-based unsigned integer value that specifies the device frame store and output SDI spigot that will be used.
+@code
+	OPTION                                   DESCRIPTION
 
-	<tr><td><tt>--format=</tt><i>videoFormat</i>	<td>Specifies the video format to generate. Specify "list" to display all possible formats. Defaults to 1080i5994 (HD).
-	<tr><td><tt>--end=</tt><i>endAction</i>			<td>Specifies what happens when the last specified text file's contents have been queued for playout. If endAction is exit, the default action, the program will terminate after all text files have played. If <i>endAction</i> is "loop", all specified caption text files are to be replayed forever. If <i>endAction</i> is "idle", the program will play frames indefinitely, but without captions.
-	<tr><td><tt>--rate=</tt><i>charsPerMin</i>		<td>Specifies the rate at which caption text is produced, in characters per minute. Defaults to 500 characters per minute.
-	<tr><td><tt>--608mode=</tt><i>captionMode</i>	<td>Caption mode to use: "roll" or "roll4" (4-line roll-up, the default), "roll3" (3-line roll-up), "roll2" (2-line roll-up), "paint" (paint-on captions), or "pop" (pop-on captions).
-	<tr><td><tt>--608chan=</tt><i>captionChan</i>	<td>Caption channel to use: CC1...CC4, TX1...TX4. Defaults to CC1.
-	<tr><td><tt>--stats</tt>						<td>Emits statistics to stdout instead of caption text.
-	<tr><td><tt>--newline</tt>						<td>Newline characters (CR, LF, CR/LF) will start new caption rows.
-	<tr><td><tt>--vanc</tt>							<td>Forces the use of VANC frame geometries on devices that have custom ancillary data insertion capability.
-	<tr><td><tt>--noaudio</tt>						<td>Don't generate/embed audio tone.
-	<tr><td><tt>--notimecode</tt>					<td>Don't generate/embed timecode.
-	<tr><td><tt>--multiChannel</tt>					<td>Share the device with other programs, and if the device is capable of it, will be configured to allow the use of different video formats on other device channels.
-	<tr><td><tt>--noline21</tt>						<td>Don't encode/embed "analog" caption waveform into line 21 (SD only).
-</table>
+	-d index#, serial#, or model             Specifies the device to use.
+	--device=index#, serial#, or model       Defaults to first device found.
+
+	-c 1..8                                  Specifies the channel/frameStore to use.
+	--channel=1..8                           Defaults to channel 1.
+
+	-f formatSpec                            Specifies the video format to produce.
+	--format=formatSpec                      Defaults to 1080i5994.
+	                                         Specify 'list' or '?' to display the valid video formats for the device.
+
+	-p formatSpec                            FrameStore pixel format to use.
+	--pixelFormat=formatSpec                 Defaults to v210 (10-bit YCbCr).
+	                                         Specify 'list' or '?' to display the valid pixel formats for the device.
+
+	--noaudio                                Don't generate/embed audio tone.
+
+	--notimecode                             Don't generate/embed timecode.
+
+	-m                                       Shares the device with other programs, performs minimal routing changes, and if the
+	--multiChannel                           device is capable of it, configures it to allow the use of different video formats
+	                                         on other device channels.
+
+	-s, --stats                              Emits statistics to stdout.
+	                                         By default, ntv2ccplayer emits caption text to stdout.
+
+	-v, --vanc                               Uses a (tall) VANC frame geometry for the frame buffer.
+	                                         By default, ntv2ccplayer uses normal frame geometry.
+
+	-n, --noline21                           Don't encode/embed "analog" caption data into line 21 (SD only).
+	                                         By default, for SD output, ntv2ccplayer will encode "analog" CC data into line 21.
+
+	--no608                                  Don't transmit CEA608 anc data packet(s).
+	                                         By default, ntv2ccplayer will transmit CEA608 anc data packets.
+
+	--no708                                  Don't transmit CEA608 anc data packet(s).
+	                                         By default, ntv2ccplayer will not transmit CEA708 anc packets for SD video,
+	                                         but will transmit CEA708 packets for HD video.
+
+	--608chan=chanSpec[,...]                 Specifies the CEA608 caption channel to use.
+	                                         Legal values:   CC1 | cc1      Caption channel 1 (default).
+	                                                         CC2 | cc2      Caption channel 2.
+	                                                         CC3 | cc3      Caption channel 3.
+	                                                         CC4 | cc4      Caption channel 4.
+	                                                         TX1 | tx1      Text channel 1.
+	                                                         TX2 | tx2      Text channel 2.
+	                                                         TX3 | tx3      Text channel 3.
+	                                                         TX4 | tx4      Text channel 4.
+
+	-e exit|loop|idle[,...]                  Specifies what happens when the last specified text file's contents have been queued for playout.
+	--end=exit|loop|idle[,...]               Legal values:   exit     Terminates ntv2ccplayer after all text files have played. (Default)
+	                                                         loop     Replay the caption text file(s) forever.
+	                                                         idle     Continue to play frames indefinitely, but without captions.
+
+	-r number[,...]                          Specifies the rate at which caption text is produced, in characters per minute.
+	--rate=number[,...]                      Defaults to 500 characters per minute.
+
+	--608mode=modeSpec[,...]                 Specifies the CEA608 caption mode to use.
+	                                         Legal values:   roll|roll4     4-line roll-up, the default
+	                                                         roll3          3-line roll-up
+	                                                         roll2          2-line roll-up
+	                                                         paint          paint-on captions
+	                                                         pop            pop-on captions
+
+	--newline                                Specifies that newline characters (CR, LF, CR/LF) in the text files will start new caption rows.
+	                                         By default, CR, LF, CR/LF is treated as ordinary whitespace.
+@endcode
+
+@note	Multiple CEA608 caption channels can be streamed simultaneously by specifying more than one channel
+		in the <tt>--608mode</tt> parameter. Use a comma between each one (no spaces), and don’t specify the
+		same channel more than once. For example, to stream “fileA” into caption channel CC1 and “fileB” into
+		CC3, with different rates and modes, use <tt>ntv2ccplayer  --stats  --608chan=cc1,cc3  --608mode=roll3,pop  --rate=800,1200  fileA  fileB </tt>.
+
+@note	File data is assumed to be plaintext, unless the file name has a “.scc” or “.SCC” extension and
+		contains SCC caption data. SCC playout ignores the <tt>--rate</tt> and <tt>--608mode</tt> settings.
+		The default or specified <tt>--608chan</tt> may or may not be correct for the SCC file’s data.
 
 The NTV2CCPlayer class used in the demo app is capable of simultaneously generating and injecting captions
 into more than one NTV2Line21Channel at independent rates and NTV2Line21Modes. For example, in "main.cpp"...
