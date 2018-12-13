@@ -10,8 +10,6 @@ ifeq (,$(filter _%,$(notdir $(CURDIR))))
 else
 include $(DIR)/../../../../build/configure.mk
 
-CPPFLAGS += -DAJA_LINUX
-
 AJA_APP = $(A_UBER_BIN)/ntv2capture4k
 
 VPATH	 = $(A_DEMOAPPS_PATH)
