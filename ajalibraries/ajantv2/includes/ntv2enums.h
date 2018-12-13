@@ -2082,14 +2082,15 @@ typedef enum
 } NTV2DeviceInitialized;
 
 
-typedef enum
-{
-    NTV2_YUVSelect,
-    NTV2_RGBSelect,
-    NTV2_Stereo3DSelect,
-    NTV2_NUM_SDIInputFormats
-} NTV2SDIInputFormatSelect;				// Deprecated
-
+#if !defined(NTV2_DEPRECATE_15_1)
+	typedef enum
+	{
+		NTV2_YUVSelect,
+		NTV2_RGBSelect,
+		NTV2_Stereo3DSelect,
+		NTV2_NUM_SDIInputFormats
+	} NTV2SDIInputFormatSelect;
+#endif	//	!defined(NTV2_DEPRECATE_15_1)
 
 typedef enum
 {
@@ -3245,21 +3246,22 @@ typedef enum
 } NTV2DSKAudioMode;
 
 
-// note: Pause Mode is a "software" feature - not performed in hardware
-typedef enum
-{
-    NTV2_PauseOnFrame,
-    NTV2_PauseOnField
-} NTV2PauseModeType;	// deprecated
+#if !defined(NTV2_DEPRECATE_15_1)
+	// note: Pause Mode is a "software" feature - not performed in hardware
+	typedef enum
+	{
+		NTV2_PauseOnFrame,
+		NTV2_PauseOnField
+	} NTV2PauseModeType;
 
-
-// note: 24 fps <-> 30 fps Pulldown is a "software" feature - not performed in hardware
-typedef enum
-{
-    NTV2_Pulldown2323,
-    NTV2_Pulldown2332,
-    NTV2_Pulldown2224
-} NTV2PulldownPatternType;	// deprecated
+	// note: 24 fps <-> 30 fps Pulldown is a "software" feature - not performed in hardware
+	typedef enum
+	{
+		NTV2_Pulldown2323,
+		NTV2_Pulldown2332,
+		NTV2_Pulldown2224
+	} NTV2PulldownPatternType;
+#endif	//	!defined(NTV2_DEPRECATE_15_1)
 
 
 // This is a user-pref control (currently only used on the Mac) that allows the user
