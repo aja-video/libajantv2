@@ -190,6 +190,9 @@ public:
 
 	void SetAudioInputSelect(NTV2InputAudioSelect input);
     void AgentIsAlive();
+    
+    void ConsolidateRegisterWrites(NTV2RegisterWrites& inRegs, 
+								   NTV2RegisterWrites& outRegs);
 
 public:
 	
@@ -279,6 +282,8 @@ public:
 	NTV2AnalogType			mVirtualAnalogInType;
 	uint32_t				mInputChangeCount;
 	uint32_t				mInputChangeCountLast;
+	uint32_t				mAgentAliveCount;
+	NTV2RegisterWrites		mRegisterWrites;
 	
 	NTV2HDMIRange			mHDMIInRGBRange;
 	uint32_t				mRegFramesPerVertical;	// frames per vertical interrupt (CION RAW)

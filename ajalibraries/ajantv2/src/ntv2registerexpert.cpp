@@ -149,7 +149,7 @@ public:
 
 		DefineRegister (kRegBitfileDate,		"",	mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegBitfileTime,		"",	mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
-		DefineRegister (kRegCPLDVersion,		"",	mDecodeCPLDVersion,			READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegCPLDVersion,		"",	mDecodeCPLDVersion,			READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 
 		DefineRegister (kRegStatus,				"",	mDecodeStatusReg,			READWRITE,	kRegClass_DMA,		kRegClass_Channel1,	kRegClass_Channel2);
 			DefineRegClass (kRegStatus, kRegClass_Timecode);

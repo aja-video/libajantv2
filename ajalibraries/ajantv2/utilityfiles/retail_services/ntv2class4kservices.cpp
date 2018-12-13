@@ -3294,6 +3294,35 @@ void Class4kServices::SetDeviceMiscRegisters ()
 		}
 	}
 	
+	
+	//
+	// Analog-Out
+	//
+	
+	// Control video DAC mode
+	// Note: the hardware takes a video "hit" every time we write a value to this register - whether or not
+	// the new value is different. So we're going to filter it ourselves and ONLY write a value if it
+	// has actually changed. 
+	if (bDoAnalogOut)
+	{
+		NTV2LHIVideoDACMode curr2Mode, new2Mode;
+		NTV2Standard curr2Standard, new2Standard;
+		
+		// get current value
+		mCard->GetLHIVideoDACMode (curr2Mode);	
+		mCard->GetLHIVideoDACStandard (curr2Standard);
+		
+		// Select DAC mode from framebufferformat
+		new2Mode = GetLHIVideoDACMode (mFb1VideoFormat, mVirtualAnalogOutputType, mVirtualAnalogOutBlackLevel);
+		new2Standard = primaryStandard;
+		
+		// write it only if the new value is different
+		if (curr2Mode != new2Mode)
+			mCard->SetLHIVideoDACMode (new2Mode);
+		if (curr2Standard != new2Standard)
+			mCard->SetLHIVideoDACStandard (new2Standard);
+	}
+	
 	// 4K Down Converter
 	bool bPsf = IsPSF(mFb1VideoFormat);
 	mCard->Enable4KDCPSFInMode(bPsf);

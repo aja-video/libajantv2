@@ -39,6 +39,8 @@
 #include <arpa/inet.h>
 #endif
 
+#include <algorithm>
+
 using namespace std;
 
 //-------------------------------------------------------------------------------------------------------
@@ -442,6 +444,9 @@ bool DeviceServices::ReadDriverState (void)
 //	SetDeviceEveryFrameRegs
 //-------------------------------------------------------------------------------------------------------
 
+//#define USE_GROUPED_WRITES
+//#define USE_CONSOLIDATION
+
 // Do everyframe task using filter variables set in virtual register  
 void DeviceServices::SetDeviceEveryFrameRegs ()
 {
@@ -464,6 +469,10 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 
     //	CP checks the kVRegAgentCheck virtual register to see if I'm still running...
     AgentIsAlive();
+
+#if defined(USE_GROUPED_WRITES)
+    mCard->StartRecordRegisterWrites(true);
+#endif
 
 	// If the daemon is not responsible for tasks just return
 	if (mVirtualDebug1 & NTV2_DRIVER_TASKS)
@@ -694,13 +703,25 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		mInputChangeCountLast = mInputChangeCount;
 		mCard->WriteRegister(kVRegInputChangedCount, mInputChangeCount);
 	}
+	
+#if defined(USE_GROUPED_WRITES)
+	NTV2RegisterWrites regWrites;
+	mCard->StopRecordRegisterWrites();
+	mCard->GetRecordedRegisterWrites(regWrites);
+	#if defined(USE_CONSOLIDATION)
+		NTV2RegisterWrites regWrites2;
+		ConsolidateRegisterWrites(regWrites, regWrites2);
+		mCard->WriteRegisters(regWrites2);
+	#else
+		mCard->WriteRegisters(regWrites);
+	#endif
+#endif
 }
 
 
 void DeviceServices::SetDeviceMiscRegisters ()
 {
 }
-
 
 // MARK: support -
 
@@ -3719,15 +3740,10 @@ void DeviceServices::SetDeviceXPointCapture()
 	// set custom anc input select
 	if (NTV2DeviceCanDoCustomAnc(mDeviceID) == true)
 	{
-		uint32_t numSdiInputs = NTV2DeviceGetNumVideoInputs(mDeviceID);
-		uint32_t selectedAncInput = mVirtualInputSelect;
-
-		if (selectedAncInput >= numSdiInputs)
-			selectedAncInput = 0;
-
-		mCard->WriteRegister(kVRegCustomAncInputSelect, selectedAncInput);
+		NTV2InputSource inpuSource = 
+			RetailSupport::GetInputVideoSourceForIndex(mDeviceID, mVirtualInputSelect);
+		mCard->WriteRegister(kVRegCustomAncInputSelect, inpuSource);
 	}
-
 }
 
 void DeviceServices::SetDeviceXPointPlayback()
@@ -4468,8 +4484,52 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 //-------------------------------------------------------------------------------------------------------
 void DeviceServices::AgentIsAlive()
 {
-    uint32_t count(0);
-    mCard->ReadRegister(kVRegAgentCheck, count);
-    count++;
-    mCard->WriteRegister(kVRegAgentCheck, count);
+    mAgentAliveCount++;
+    mCard->WriteRegister(kVRegAgentCheck, mAgentAliveCount);
 }
+
+
+bool SortFunction(const NTV2RegInfo& i, const NTV2RegInfo& j) 
+	{ return i.registerNumber < j.registerNumber; }
+
+void DeviceServices::ConsolidateRegisterWrites( NTV2RegisterWrites& inRegs, 
+								   				NTV2RegisterWrites& outRegs)
+{
+	//cerr << inRegs << endl;
+	std::stable_sort(inRegs.begin(), inRegs.end(), SortFunction);
+	
+	uint32_t count = inRegs.size();
+	for (int i=1; i<count; i++)
+	{
+		NTV2RegInfo& i0 = inRegs[i-1];
+		NTV2RegInfo& i1 = inRegs[i];
+	
+		if (i0.registerNumber != i1.registerNumber)
+		{
+			outRegs.push_back(i0);
+		}
+		else
+		{
+			uint32_t v0 = i0.registerValue, v1 = i1.registerValue;
+			uint32_t m0 = i0.registerMask, 	m1 = i1.registerMask;
+			uint32_t s0 = i0.registerShift, s1 = i1.registerShift;
+		
+			v0 = (v0 << s0) & m0;
+			v1 = (v1 << s1) & m1;
+			v1 = (v0 & (~m1)) | v1;
+			m1 = m0 | m1;
+			s1 = s0 < s1 ? s0 : s1;
+			
+			i1.registerShift = s1;
+			i1.registerValue = v1 >> s1;
+			i1.registerMask = m1;
+		}
+	}
+	
+	if (count > 0)
+		outRegs.push_back(inRegs[count-1]);
+		
+	
+	//cerr << endl << endl << outRegs << endl;
+}
+

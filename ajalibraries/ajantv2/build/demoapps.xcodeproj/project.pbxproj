@@ -103,6 +103,7 @@
 		B4CADAD1180F0382004C9057 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD7B167915A7001D4AA8 /* IOKit.framework */; };
 		B4CE1EB916E6BC010092B564 /* ntv2capture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4E76F3B16AA180300473DBD /* ntv2capture.cpp */; };
 		B4CE1ECD16E6BE390092B564 /* ntv2enumerateboards.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4A7F8DC16781B57001D4AA8 /* ntv2enumerateboards.cpp */; };
+		B4D9504421C2E6C600D2CE65 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AE8038D208A60D700FCC91B /* Foundation.framework */; };
 		B4E1C5851F02CDE7004968BE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4AEFE2E1EFDEA00002F08BD /* main.cpp */; };
 		B4E76F5516AA1AEE00473DBD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4E76F4B16AA186B00473DBD /* main.cpp */; };
 		B4E76F5716AA1B1B00473DBD /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */; };
@@ -389,6 +390,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B4D9504421C2E6C600D2CE65 /* Foundation.framework in Frameworks */,
 				B4A704CC1682A069001D4AA8 /* CoreFoundation.framework in Frameworks */,
 				B4A704CD1682A069001D4AA8 /* CoreServices.framework in Frameworks */,
 				B4A704CE1682A069001D4AA8 /* IOKit.framework in Frameworks */,

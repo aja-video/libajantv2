@@ -33,23 +33,63 @@ The demo's operation can be controlled by pressing certain keys on the keyboard 
 @note	This demo behaves differently from the others in that it cannot be stopped using Ctrl-C.
 		Press 'q' or 'Q' to quit.
 
-<b>Command line usage:</b>
+<h2>Command Line Syntax</h2>
+
+<tt>ntv2ccgrabber \[OPTION \[...\]\] </tt>
+
+Displays captured CEA608 captions from incoming video.
+
+...where...
 @code
-	ntv2ccgrabber  [options...]
-	
-	-d|-b|--device|--board	{spec}		Specifies the device to use by index number, serial number or generic model name.
-										Defaults to first device (index 0).
-										If model name specified, uses lowest-numbered matching device.
-	-i|--input	{number}				Specifies the SDI input connector to use. Must be an unsigned integer value, 1 thru 8.
-										Defaults to SDI input 1.
-	--608chan	{channelSpec}			Specifies the CEA-608 caption channel to decode. Use 'CC1' thru 'CC4', or 'Tx1' thru 'Tx4'.
-										Defaults to 'CC1'.
-	-v|--vanc							Force use of VANC frame geometry instead of Anc extractor firmware.
-	--burn								Enables decoded captions to be superimposed on top of captured video.
-										By default, video output is routed directly end-to-end from the input video.
-	--audio								Enables audio capture.
-	-m|--multiChannel					Enables multichannel/multiformat mode, and shares the device with other processes.
-										By default, it assumes full control over the device.
-	-?|--help|--usage					Shows how to use this command.
+	OPTION                                               DESCRIPTION
+
+	-d index#, serial#, or model                         Specifies the device to use.
+	--device=index#, serial#, or model                   Defaults to first device found.
+
+	-c 1..8                                              Specifies the channel/frameStore to use.
+	--channel=1..8                                       Defaults to channel 1.
+
+	-i inputSpec                                         Specifies the device SDI input connector to use, where inputSpec
+	--input=inputSpec                                    ...where inputSpec is '1|sdi1|2|sdi2|…'.  Defaults to 'sdi1'.
+	                                                     Specify 'list' or '?' to display the valid inputs for the device.
+
+	-t tcSpec                                            Specifies the timecode to use while capturing.
+	--tcsource=tcSpec                                    By default, ntv2ccgrabber doesn't capture timecode.
+	                                                     Specify 'list' or '?' to display the valid timecode inputs for the device.
+
+	-p formatSpec                                        Specifies the FrameStore pixel format to use.
+	--pixelFormat=formatSpec                             Defaults to v210 (10-bit YCbCr).
+	                                                     Specify 'list' or '?' to display the valid pixel formats for the device.
+
+	--608chan=cc1|cc2|cc3|cc4|tx1|tx2|tx3|tx4,...        Specifies the CEA608 caption channel of interest.
+	                                                     Legal values:   CC1 | cc1      Caption channel 1. This is the default.
+	                                                                     CC2 | cc2      Caption channel 2.
+	                                                                     CC3 | cc3      Caption channel 3.
+	                                                                     CC4 | cc4      Caption channel 4.
+	                                                                     TX1 | tx1      Text channel 1.
+	                                                                     TX2 | tx2      Text channel 2.
+	                                                                     TX3 | tx3      Text channel 3.
+	                                                                     TX4 | tx4      Text channel 4.
+
+	--608src=source                                      Specifies the CEA608 CC data source, where 'source' must be one of:
+	                                                          default -  Best available (default).
+	                                                          line21  -  Use CC data decoded from line 21.
+	                                                          608vanc -  Use CC data from CEA608 packet(s) found in FB VANC lines.
+	                                                          708vanc -  Use CC data found inside CEA708 packet found in FB VANC lines.
+	                                                          608anc  -  Use CC data from CEA608 packet(s) found using anc extractor.
+	                                                          708anc  -  Use CC data found inside CEA708 packet found using anc extractor.
+
+	-b                                                   Enables playout of captured video with decoded captions "burned-in" to the video.
+	--burn                                               By default, ntv2ccgrabber doesn't burn-in captions into captured video.
+
+	--audio                                              Enables capturing embedded audio.
+	                                                     By default, ntv2ccgrabber doesn't capture embedded audio.
+
+	-m, --multiChannel                                   Shares the device with other programs, performs minimal routing changes, and if the
+	                                                     device is capable of it, configures it to allow the use of different video formats
+	                                                     on other device channels.
+
+	-v, --vanc                                           Uses (tall) VANC frame geometry to also capture VANC data in the frame buffer.
+	                                                     By default, ntv2ccgrabber uses normal frame geometry.
 @endcode
 **/
