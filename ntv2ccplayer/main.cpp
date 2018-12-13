@@ -117,6 +117,7 @@ int main (int argc, const char ** argv)
 	int					bForceVanc		(0);				//	Force use of Vanc?
 	int					bSuppressLine21	(0);				//	Suppress line 21 waveform (SD only)?
 	int					bSuppress608	(0);				//	Don't transmit CEA608 packets?
+	int					bSuppress708	(0);				//	Don't transmit CEA708 packets (HD only)?
 	NTV2StringList		pathList;							//	List of text files (paths) to "play"
 	poptContext			optionsContext; 					//	Context for parsing command line arguments
 	AJADebug::Open();
@@ -125,7 +126,6 @@ int main (int argc, const char ** argv)
 	const struct poptOption userOptionsTable [] =
 	{
 		//	Device config options...
-		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",			"index#, serial#, or model"	},
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",			"index#, serial#, or model"	},
 		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,		0,	"device channel to use",		"1..8"},
 		{"format",		'f',	POPT_ARG_STRING,	&pVideoFormat,		0,	"video format to produce",		"'?' or 'list' to list"},
@@ -139,6 +139,7 @@ int main (int argc, const char ** argv)
 		{"vanc",		'v',	POPT_ARG_NONE,		&bForceVanc,		0,	"force use of vanc",			NULL},
 		{"noline21",	'n',	POPT_ARG_NONE,		&bSuppressLine21,	0,	"disable line 21 wvfrm?",		NULL},
 		{"no608",		0,		POPT_ARG_NONE,		&bSuppress608,		0,	"don't xmit 608 packets?",		NULL},
+		{"no708",		0,		POPT_ARG_NONE,		&bSuppress708,		0,	"don't xmit 708 packets?",		NULL},
 
 		//	Per-caption-channel options -- specify more than one by separating with comma (e.g., --end loop,idle,idle,loop  --608chan cc1,cc2,tx3,tx4)
 		{"end",			'e',	POPT_ARG_STRING,	&pEndAction,		0,	"end action",					"exit|loop|idle,..."},
@@ -151,22 +152,22 @@ int main (int argc, const char ** argv)
 	};
 
 	//	Read command line arguments...
-	optionsContext = ::poptGetContext (NULL, argc, argv, userOptionsTable, 0);
-	::poptGetNextOpt (optionsContext);
+	optionsContext = ::poptGetContext(NULL, argc, argv, userOptionsTable, 0);
+	::poptGetNextOpt(optionsContext);
 
-	const char * pStr	(::poptGetArg (optionsContext));
+	const char * pStr	(::poptGetArg(optionsContext));
 	while (pStr)
 	{
-		pathList.push_back (string (pStr));
-		pStr = ::poptGetArg (optionsContext);
+		pathList.push_back(string(pStr));
+		pStr = ::poptGetArg(optionsContext);
 	}	//	for each file path argument
 	optionsContext = ::poptFreeContext (optionsContext);
 
 	//	Board/Device
-	const string			deviceSpec		(pDeviceSpec ? pDeviceSpec : "0");
+	const string	deviceSpec(pDeviceSpec ? pDeviceSpec : "0");
 
 	//	Channel
-	NTV2Channel				channel			(NTV2_CHANNEL1);			//	Default to channel 1
+	NTV2Channel	channel(NTV2_CHANNEL1);	//	Default to channel 1
 	if (channelNumber > 0 && channelNumber < 9)
 		channel = NTV2Channel (channelNumber - 1);
 	else
@@ -177,32 +178,42 @@ int main (int argc, const char ** argv)
 	NTV2FrameBufferFormat	pixelFormat		(NTV2_FBF_10BIT_YCBCR);		//	Default to 10bitYUV
 	const string			videoFormatStr	(pVideoFormat  ?  pVideoFormat  :  "");
 	if (videoFormatStr == "?" || videoFormatStr == "list")
-		{cout << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_ALL, deviceSpec) << endl;  return 0;}
-	if (!videoFormatStr.empty ())
-		videoFormat = CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr, VIDEO_FORMATS_ALL);
-	else if (!videoFormatStr.empty ()  &&  !NTV2_IS_VALID_VIDEO_FORMAT (videoFormat))
+		{cout << CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_ALL, deviceSpec) << endl;  return 0;}
+	if (!videoFormatStr.empty())
+		videoFormat = CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr, VIDEO_FORMATS_ALL);
+	else if (!videoFormatStr.empty()  &&  !NTV2_IS_VALID_VIDEO_FORMAT(videoFormat))
 	{
 		cerr	<< "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl
 				<< CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_ALL, deviceSpec) << endl;
 		return 2;
 	}
-	if (bSuppressLine21 && !NTV2_IS_SD_VIDEO_FORMAT (videoFormat))
-		cerr	<< "## WARNING:  '--noline21' (-n) option specified with non-SD video format '" << ::NTV2VideoFormatToString (videoFormat) << "'" << endl;
+	if (bSuppressLine21 && !NTV2_IS_SD_VIDEO_FORMAT(videoFormat))
+		cerr	<< "## WARNING:  '--noline21' (-n) option specified with non-SD video format '" << ::NTV2VideoFormatToString(videoFormat) << "'" << endl;
+	if (bSuppress708 && NTV2_IS_SD_VIDEO_FORMAT(videoFormat))
+		cerr	<< "## WARNING:  '--no708' (-n) option specified with SD video format '" << ::NTV2VideoFormatToString(videoFormat) << "'" << endl;
+	if (bSuppressLine21 && bSuppress608 && NTV2_IS_SD_VIDEO_FORMAT(videoFormat))
+		cerr	<< "## WARNING:  '--noline21' and '--no608' options will result in no captions in SD" << endl;
+	if (bSuppress608 && bSuppress708 && !NTV2_IS_SD_VIDEO_FORMAT(videoFormat))
+		cerr	<< "## WARNING:  '--no608' and '--no708' options will result in no captions in HD" << endl;
+	if (NTV2_IS_SD_VIDEO_FORMAT(videoFormat))
+		bSuppress708 = true;
+	else
+		bSuppressLine21 = true;
 
 	//	Pixel Format
 	const string	pixelFormatStr	(pPixelFormat  ?  pPixelFormat  :  "");
-	pixelFormat  =  pixelFormatStr.empty ()  ?  NTV2_FBF_10BIT_YCBCR  :  CNTV2DemoCommon::GetPixelFormatFromString (pixelFormatStr);
+	pixelFormat  =  pixelFormatStr.empty()  ?  NTV2_FBF_10BIT_YCBCR  :  CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);
 	if (pixelFormatStr == "?" || pixelFormatStr == "list")
-		{cout << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
-	else if (!pixelFormatStr.empty () && !NTV2_IS_VALID_FRAME_BUFFER_FORMAT (pixelFormat))
+		{cout << CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
+	else if (!pixelFormatStr.empty() && !NTV2_IS_VALID_FRAME_BUFFER_FORMAT(pixelFormat))
 	{
 		cerr	<< "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl
-				<< CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;
+				<< CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec) << endl;
 		return 2;
 	}
 
 	//	Configure the player...
-	CCPlayerConfig		playerConfig	(pDeviceSpec ? string (pDeviceSpec) : "0");
+	CCPlayerConfig	playerConfig(pDeviceSpec ? string(pDeviceSpec) : "0");
 	playerConfig.fVideoFormat		= videoFormat;
 	playerConfig.fPixelFormat		= pixelFormat;
 	playerConfig.fOutputChannel		= channel;
@@ -211,15 +222,17 @@ int main (int argc, const char ** argv)
 	playerConfig.fForceVanc			= bForceVanc		? true : false;
 	playerConfig.fSuppressLine21	= bSuppressLine21	? true : false;
 	playerConfig.fSuppress608		= bSuppress608		? true : false;
+	playerConfig.fSuppress708		= bSuppress708		? true : false;
 	playerConfig.fSuppressAudio		= noAudio			? true : false;
 	playerConfig.fSuppressTimecode	= noTimecode		? true : false;
 
-	cerr	<< "CCPlayer config:  '" << ::NTV2VideoFormatToString (videoFormat) << "', " << ::NTV2FrameBufferFormatToString (pixelFormat)
-			<< ", NTV2_CHANNEL" << (channel+1) << ", stats=" << (bEmitStats?"Y":"N") << ", multiChan=" << (doMultiChannel?"Y":"N")
-			<< ", forceVANC=" << (bForceVanc?"Y":"N") << ", noLine21=" << (bSuppressLine21?"Y":"N") << ", no608=" << (bSuppress608?"Y":"N")
-			<< ", noAudio=" << (noAudio?"Y":"N") << ", noTC=" << (noTimecode?"Y":"N") << endl;
+	cerr	<< "CCPlayer config:  '" << ::NTV2VideoFormatToString(videoFormat) << "', " << ::NTV2FrameBufferFormatToString(pixelFormat)
+			<< ", NTV2_CHANNEL" << (channel+1) << (bEmitStats?", Stats":"") << (doMultiChannel?", multiChan":"")
+			<< (bForceVanc?", VANC":"") << (bSuppressLine21?", NoLine21":"") << (bSuppress608?", No608":"")
+			<< (bSuppress708?", No708":"") << (noAudio?", NoAudio":"") << (noTimecode?", NoTC":"") << endl;
 
-	//	NOTE:	From one command line invocation, you can inject different captions into separate caption channels:
+	//	NOTE:	From one command line invocation, you can inject different captions into separate caption channels.
+	//			For example:
 	//	./bin/ntv2ccplayer	--device kona4  --channel 3  --stats  --608chan cc1,cc2,cc3,cc4,tx1,tx2,tx3,tx4
 	//						--608mode pop,paint,roll3,roll4  --rate 1000,700,500,300,200
 	//						--end idle,loop,idle,loop,idle,loop,idle,loop

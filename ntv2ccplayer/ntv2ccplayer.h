@@ -39,13 +39,13 @@ void SignalHandler (int inSignal);
 typedef struct CCGeneratorConfig
 {
 	public:
-		NTV2StringList			fFilesToPlay;			///<	A list of zero or more strings containing paths to text files to be "played"
-		AtEndAction				fEndAction;				///<	The action to take after the file list has finished playing
-		NTV2Line21Mode			fCaptionMode;			///<	The CEA-608 caption mode to use
-		NTV2Line21Channel		fCaptionChannel;		///<	The caption channel to use
-		bool					fNewLinesAreNewRows;	///<	If true, newlines break caption rows; otherwise are treated as whitespace
-		double					fCharsPerMinute;		///<	The rate at which caption characters get enqueued, in characters per minute
-		NTV2Line21Attributes	fAttributes;			///<	The character attributes to use
+		NTV2StringList			fFilesToPlay;			///< @brief	A list of zero or more strings containing paths to text files to be "played"
+		AtEndAction				fEndAction;				///< @brief	The action to take after the file list has finished playing
+		NTV2Line21Mode			fCaptionMode;			///< @brief	The CEA-608 caption mode to use
+		NTV2Line21Channel		fCaptionChannel;		///< @brief	The caption channel to use
+		bool					fNewLinesAreNewRows;	///< @brief	If true, newlines break caption rows; otherwise are treated as whitespace
+		double					fCharsPerMinute;		///< @brief	The rate at which caption characters get enqueued, in characters per minute
+		NTV2Line21Attributes	fAttributes;			///< @brief	The character attributes to use
 
 		/**
 			@brief	Constructs a default generator configuration.
@@ -74,18 +74,19 @@ typedef CaptionChanGenMap::iterator							CaptionChanGenMapIter;
 typedef struct CCPlayerConfig
 {
 	public:
-		std::string				fDeviceSpecifier;		///<	The AJA device to use
-		NTV2Channel				fOutputChannel;			///<	The device channel to use
-		bool					fEmitStats;				///<	If true, show stats while playing; otherwise echo caption text being played
-		bool					fDoMultiFormat;			///<	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
-		bool					fForceVanc;				///<	If true, force the use of Vanc, even if the device supports Anc insertion
-		bool					fSuppressLine21;		///<	SD output only:  if true, do not encode Line 21 waveform;  otherwise encode Line 21 waveform
-		bool					fSuppress608;			///<	If true, don't transmit CEA608 packets;  otherwise include 608 packets
-		bool					fSuppressAudio;			///<	If true, suppress audio;  otherwise generate audio tones
-		bool					fSuppressTimecode;		///<	If true, suppress timecode;  otherwise embed VITC/LTC
-		NTV2VideoFormat			fVideoFormat;			///<	The video format to use
-		NTV2FrameBufferFormat	fPixelFormat;			///<	The pixel format to use
-		CaptionChanGenMap		fChannelGenerators;		///<	Caption channel generators
+		std::string				fDeviceSpecifier;		///< @brief	The AJA device to use
+		NTV2Channel				fOutputChannel;			///< @brief	The device channel to use
+		bool					fEmitStats;				///< @brief	If true, show stats while playing; otherwise echo caption text being played
+		bool					fDoMultiFormat;			///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
+		bool					fForceVanc;				///< @brief	If true, force the use of Vanc, even if the device supports Anc insertion
+		bool					fSuppressLine21;		///< @brief	SD output only:  if true, do not encode Line 21 waveform;  otherwise encode Line 21 waveform
+		bool					fSuppress608;			///< @brief	If true, don't transmit CEA608 packets;  otherwise include 608 packets
+		bool					fSuppress708;			///< @brief	If true, don't transmit CEA708 packets;  otherwise include 708 packets
+		bool					fSuppressAudio;			///< @brief	If true, suppress audio;  otherwise generate audio tones
+		bool					fSuppressTimecode;		///< @brief	If true, suppress timecode;  otherwise embed VITC/LTC
+		NTV2VideoFormat			fVideoFormat;			///< @brief	The video format to use
+		NTV2FrameBufferFormat	fPixelFormat;			///< @brief	The pixel format to use
+		CaptionChanGenMap		fChannelGenerators;		///< @brief	Caption channel generators
 
 		/**
 			@brief	Constructs a default CCPlayer configuration.
@@ -98,6 +99,7 @@ typedef struct CCPlayerConfig
 				fForceVanc			(false),
 				fSuppressLine21		(false),
 				fSuppress608		(false),
+				fSuppress708		(false),
 				fSuppressAudio		(false),
 				fSuppressTimecode	(false),
 				fVideoFormat		(NTV2_FORMAT_525_5994),
@@ -219,30 +221,15 @@ class NTV2CCPlayer
 		CCPlayerConfig				mConfig;							///< @brief	My configuration
 		AJAThread *					mPlayThread;						///< @brief	My playout (consumer) thread object
 		AJAThread *					mGeneratorThreads [NTV2_CC608_XDS];	///< @brief	My caption generator threads -- one per caption channel
-
-		uint32_t					mCurrentFrame;						///< @brief	My current frame number (used for timing)
-		uint32_t					mDroppedFrameTally;					///< @brief	My current dropped frame tally
-
+		AUTOCIRCULATE_STATUS		mACStatus;							///< @brief	My AutoCirculate status
 		CNTV2Card					mDevice;							///< @brief	My CNTV2Card instance
 		NTV2DeviceID				mDeviceID;							///< @brief	My device (model) identifier
-
-		const std::string			mDeviceSpecifier;					///< @brief	Which device I should use
-		NTV2Channel					mOutputChannel;						///< @brief	The output channel I'm using
-		const bool					mEmitStats;							///< @brief	Emit stats to stdout while running?
-		NTV2Standard				mVideoStandard;						///< @brief	Desired video standard
-
-		NTV2VideoFormat				mVideoFormat;						///< @brief	My video format
-		NTV2FrameBufferFormat		mPixelFormat;						///< @brief	My pixel format
-		NTV2FrameRate				mFrameRate;							///< @brief	My video frame rate
 		NTV2EveryFrameTaskMode		mSavedTaskMode;						///< @brief	Used to restore the previous state
 		NTV2VANCMode				mVancMode;							///< @brief	VANC mode
-
 		bool						mPlayerQuit;						///< @brief	Set "true" to terminate player
 		bool						mCaptionGeneratorQuit;				///< @brief	Set "true" to terminate caption generator(s)
-
 		CNTV2CaptionEncoder608Ptr	m608Encoder;						///< @brief	My CEA-608 caption encoder
 		CNTV2CaptionEncoder708Ptr	m708Encoder;						///< @brief	My 708 caption encoder
-
 		NTV2_POINTER				mVideoBuffer;						///< @brief	My video buffer
 
 };	//	NTV2CCPlayer
