@@ -156,7 +156,7 @@ static const ULWord	gChannelTo2MFrame []				= {	kRegCh1Control2MFrame, kRegCh2Co
 static const ULWord	gChannelToRP188ModeGCRegisterNum []		= {	kRegGlobalControl,			kRegGlobalControl,			kRegGlobalControl2,			kRegGlobalControl2,
 																kRegGlobalControl2,			kRegGlobalControl2,			kRegGlobalControl2,			kRegGlobalControl2,			0};
 static const ULWord	gChannelToRP188ModeMasks []				= {	kRegMaskRP188ModeCh1,		kRegMaskRP188ModeCh2,		kRegMaskRP188ModeCh3,		kRegMaskRP188ModeCh4,
-																kRegMaskRP188ModeCh5,		(ULWord)kRegMaskRP188ModeCh6,		kRegMaskRP188ModeCh7,		kRegMaskRP188ModeCh8,		0};
+																kRegMaskRP188ModeCh5,		ULWord(kRegMaskRP188ModeCh6),	kRegMaskRP188ModeCh7,		kRegMaskRP188ModeCh8,		0};
 static const ULWord	gChannelToRP188ModeShifts []			= {	kRegShiftRP188ModeCh1,		kRegShiftRP188ModeCh2,		kRegShiftRP188ModeCh3,		kRegShiftRP188ModeCh4,
 																kRegShiftRP188ModeCh5,		kRegShiftRP188ModeCh6,		kRegShiftRP188ModeCh7,		kRegShiftRP188ModeCh8,		0};
 static const ULWord	gChannelToRP188DBBRegisterNum []		= {	kRegRP188InOut1DBB,			kRegRP188InOut2DBB,			kRegRP188InOut3DBB,			kRegRP188InOut4DBB,
@@ -188,7 +188,7 @@ static const ULWord	gChannelToSDIIn6GModeShift []	= {	kRegShiftSDIIn16GbpsMode,	
 														kRegShiftSDIIn56GbpsMode,	kRegShiftSDIIn66GbpsMode,	kRegShiftSDIIn76GbpsMode,	kRegShiftSDIIn86GbpsMode,	0};
 
 static const ULWord	gChannelToSDIIn12GModeMask []	= {	kRegMaskSDIIn112GbpsMode,		kRegMaskSDIIn212GbpsMode,	kRegMaskSDIIn312GbpsMode,	kRegMaskSDIIn412GbpsMode,
-														kRegMaskSDIIn512GbpsMode,	kRegMaskSDIIn612GbpsMode,	kRegMaskSDIIn712GbpsMode,	(ULWord)kRegMaskSDIIn812GbpsMode,	0};
+														kRegMaskSDIIn512GbpsMode,	kRegMaskSDIIn612GbpsMode,	kRegMaskSDIIn712GbpsMode,	ULWord(kRegMaskSDIIn812GbpsMode),	0};
 
 static const ULWord	gChannelToSDIIn12GModeShift []	= {	kRegShiftSDIIn112GbpsMode,	kRegShiftSDIIn212GbpsMode,	kRegShiftSDIIn312GbpsMode,	kRegShiftSDIIn412GbpsMode,
 														kRegShiftSDIIn512GbpsMode,	kRegShiftSDIIn612GbpsMode,	kRegShiftSDIIn712GbpsMode,	kRegShiftSDIIn812GbpsMode,	0};
@@ -1452,12 +1452,12 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 		break;
 	}
 
-	if(IsKonaIPDevice())
+	if(IsIPDevice())
 	{
 		WriteRegister(kRegGlobalControl2, ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 	}
 
-	if (::NTV2DeviceGetNumVideoChannels(_boardID) > 4 || IsKonaIPDevice())
+	if (::NTV2DeviceGetNumVideoChannels(_boardID) > 4 || IsIPDevice())
 	{
 		WriteRegister (kRegGlobalControl2, refControl2,	kRegMaskRefSource2, kRegShiftRefSource2);
 	}
@@ -1475,7 +1475,7 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 
 	outValue = NTV2ReferenceSource(refControl1);
 
-	if (::NTV2DeviceGetNumVideoChannels(_boardID) > 4 || IsKonaIPDevice())
+	if (::NTV2DeviceGetNumVideoChannels(_boardID) > 4 || IsIPDevice())
 	{
 		ReadRegister (kRegGlobalControl2,  refControl2,  kRegMaskRefSource2,  kRegShiftRefSource2);
 		if (refControl2)
@@ -1494,14 +1494,14 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 				outValue = NTV2_REFERENCE_INPUT8;
 				break;
 			case 4:
-				if(IsKonaIPDevice())
+				if(IsIPDevice())
 				{
 					ReadRegister(kRegGlobalControl2, ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 				}
 				outValue = ptpControl == 0 ? NTV2_REFERENCE_SFP1_PCR : NTV2_REFERENCE_SFP1_PTP;
 				break;
 			case 5:
-				if(IsKonaIPDevice())
+				if(IsIPDevice())
 				{
 					ReadRegister(kRegGlobalControl2, ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 				}
@@ -2284,7 +2284,7 @@ bool CNTV2Card::GetRunningFirmwarePackageRevision (ULWord & outRevision)
     if (!IsOpen())
         return false;
 
-    if (!IsKonaIPDevice())
+    if (!IsIPDevice())
         return false;
 
     return ReadRegister(kRegSarekPackageVersion + SAREK_REGS, outRevision);

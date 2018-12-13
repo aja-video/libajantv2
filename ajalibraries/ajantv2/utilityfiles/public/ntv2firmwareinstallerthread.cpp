@@ -486,7 +486,7 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
 				designName == "CORVID88");		//	older design name
 	case DEVICE_ID_KONA4:
 	{
-		if (m_device.IsKonaIPDevice())
+		if (m_device.IsIPDevice())
 			return (designName == GetPrimaryDesignName(DEVICE_ID_KONA4UFC) ||
 					designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2022) ||
 					designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_2SFP) ||
