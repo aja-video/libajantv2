@@ -5449,14 +5449,25 @@ typedef enum
 //	PPPPPP:		[15:10]	point release number
 //	bbbbbbbbbb:	[9:0]	build number
 //	TT:			[31:30]	build type (0=release, 1=beta, 2=alpha, 3=dev)
-#define	NTV2DriverVersionEncode(__maj__, __min__, __pt__, __bld__)			(((ULWord)(__maj__) & 0x0000007F) << 22)		\
-																		|	(((ULWord)(__min__) & 0x0000003F) << 16)		\
-																		|	(((ULWord)(__pt__ ) & 0x0000003F) << 10)		\
-																		|	(((ULWord)(__bld__) & 0x000003FF) <<  0)
-#define	NTV2DriverVersionDecode_Major(__vers__)		(((ULWord)(__vers__) >> 22) & 0x0000007F)
-#define	NTV2DriverVersionDecode_Minor(__vers__)		(((ULWord)(__vers__) >> 16) & 0x0000003F)
-#define	NTV2DriverVersionDecode_Point(__vers__)		(((ULWord)(__vers__) >> 10) & 0x0000003F)
-#define	NTV2DriverVersionDecode_Build(__vers__)		(((ULWord)(__vers__) >>  0) & 0x000003FF)
+#if defined(__CPLUSPLUS__) || defined(__cplusplus)
+	#define	NTV2DriverVersionEncode(__maj__, __min__, __pt__, __bld__)			((ULWord(__maj__) & 0x0000007F) << 22)		\
+																			|	((ULWord(__min__) & 0x0000003F) << 16)		\
+																			|	((ULWord(__pt__ ) & 0x0000003F) << 10)		\
+																			|	((ULWord(__bld__) & 0x000003FF) <<  0)
+	#define	NTV2DriverVersionDecode_Major(__vers__)		((ULWord(__vers__) >> 22) & 0x0000007F)
+	#define	NTV2DriverVersionDecode_Minor(__vers__)		((ULWord(__vers__) >> 16) & 0x0000003F)
+	#define	NTV2DriverVersionDecode_Point(__vers__)		((ULWord(__vers__) >> 10) & 0x0000003F)
+	#define	NTV2DriverVersionDecode_Build(__vers__)		((ULWord(__vers__) >>  0) & 0x000003FF)
+#else
+	#define	NTV2DriverVersionEncode(__maj__, __min__, __pt__, __bld__)			(((ULWord)(__maj__) & 0x0000007F) << 22)		\
+																			|	(((ULWord)(__min__) & 0x0000003F) << 16)		\
+																			|	(((ULWord)(__pt__ ) & 0x0000003F) << 10)		\
+																			|	(((ULWord)(__bld__) & 0x000003FF) <<  0)
+	#define	NTV2DriverVersionDecode_Major(__vers__)		(((ULWord)(__vers__) >> 22) & 0x0000007F)
+	#define	NTV2DriverVersionDecode_Minor(__vers__)		(((ULWord)(__vers__) >> 16) & 0x0000003F)
+	#define	NTV2DriverVersionDecode_Point(__vers__)		(((ULWord)(__vers__) >> 10) & 0x0000003F)
+	#define	NTV2DriverVersionDecode_Build(__vers__)		(((ULWord)(__vers__) >>  0) & 0x000003FF)
+#endif
 
 //	Pack/Unpack SDK version in & out of ULWord:
 #define	NTV2SDKVersionEncode		NTV2DriverVersionEncode

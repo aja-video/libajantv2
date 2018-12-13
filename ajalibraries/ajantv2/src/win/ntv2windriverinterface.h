@@ -28,17 +28,8 @@
 class AJAExport CNTV2WinDriverInterface : public CNTV2DriverInterface
 {
 public:
-	CNTV2WinDriverInterface()
-	{
-		_bOpenShared = true;
-		_bOpenOverlapped = false;
-		_hDevInfoSet = INVALID_HANDLE_VALUE;
-		_pspDevIFaceDetailData = NULL;
-	}
-
-	virtual ~CNTV2WinDriverInterface()
-	{
-	}
+	CNTV2WinDriverInterface();
+	virtual ~CNTV2WinDriverInterface();
 
 public:
 	// Interfaces
