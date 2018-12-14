@@ -52,17 +52,18 @@ void Class4kServices::SetDeviceXPointPlayback ()
 	bool				b1wireQ4k			= (b4K && m4kTransportOutSelection == NTV2_4kTransport_Quarter_1wire);
 	bool				b3GbOut				= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb) || b3GaOutRGB;
 	bool				b2pi                = (b4K && m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
-	bool				b2xQuadOut			= (b4K && !b4kHfr && m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
-	bool				b4k6gOut			= (b4K && !b4kHfr && !bSdiOutRGB && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
-	bool				b4k12gOut			= (b4K && (b4kHfr || bSdiOutRGB) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
+	bool				b2x2piOut			= b4K && !b4kHfr && !bSdiOutRGB && (m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
+	bool				b2xQuadOut			= b4K && !b4kHfr && !bSdiOutRGB && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
+	bool				b4k6gOut			= b4K && !b4kHfr && !bSdiOutRGB && (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
+	bool				b4k12gOut			= b4K && (b4kHfr || bSdiOutRGB) && (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	uint32_t			bFb1Disable			= 0, bFb2Disable = 1, bFb3Disable = 1, bFb4Disable = 1;
 	bool				bQuadSwap			= b4K && !b4k12gOut && !b4k6gOut && (mQuadSwapOut != 0);	
 	bool				bDSKGraphicMode		= mDSKMode == NTV2_DSKModeGraphicOverMatte || 
-													  mDSKMode == NTV2_DSKModeGraphicOverVideoIn || 
-													  mDSKMode == NTV2_DSKModeGraphicOverFB;
+											  mDSKMode == NTV2_DSKModeGraphicOverVideoIn ||
+											  mDSKMode == NTV2_DSKModeGraphicOverFB;
 	bool				bDSKOn				= mDSKMode == NTV2_DSKModeFBOverMatte || 
-													  mDSKMode == NTV2_DSKModeFBOverVideoIn || 
-													  (bFb2RGB && bDSKGraphicMode);
+											  mDSKMode == NTV2_DSKModeFBOverVideoIn || 
+											  (bFb2RGB && bDSKGraphicMode);
 	bDSKOn									= bDSKOn && !b4K;			// DSK not supported with 4K formats, yet
 	NTV2ColorSpaceMode	inputColorSpace		= mSDIInput1ColorSpace;		// Input format select (YUV, RGB, etc)
 	NTV2CrosspointID	inputXptYuv1		= NTV2_XptBlack;			// Input source selected single stream
@@ -699,7 +700,7 @@ void Class4kServices::SetDeviceXPointPlayback ()
 		else
 		{
 			// is SMPTE 425 YUV
-			if (b4kHfr)
+			if (!b2x2piOut)
 			{
 				if (bFb1RGB)
 				{
@@ -762,7 +763,7 @@ void Class4kServices::SetDeviceXPointPlayback ()
 		}
 		else
 		{
-			if (b4kHfr)
+			if (!b2x2piOut)
 			{ 
 				if (bFb1RGB)
 				{
@@ -842,7 +843,7 @@ void Class4kServices::SetDeviceXPointPlayback ()
 		else
 		{
 			// smpte 425
-			if (b4kHfr)
+			if (!b2x2piOut)
 			{ 
 				if (bFb1RGB)
 				{
@@ -958,7 +959,7 @@ void Class4kServices::SetDeviceXPointPlayback ()
 		else
 		{
 			// is 2 pixel interleaved - YUV output
-			if (b4kHfr)
+			if (!b2x2piOut)
 			{
 				if (bFb1RGB)
 				{
@@ -1498,17 +1499,18 @@ void Class4kServices::SetDeviceXPointCapture ()
 	
 	bool				bFb1RGB			= IsRGBFormat(mFb1Format);
 	NTV2VideoFormat		inputFormat		= mDs.inputVideoFormatSelect;
-	NTV2RGBRangeMode	frambBufferRange= (mRGB10Range == NTV2_RGB10RangeSMPTE) ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
-	SdiState*			sdiIn			= (mVirtualInputSelect == NTV2_Input2Select) ? mDs.sdiIn[1] : mDs.sdiIn[0];
+	NTV2RGBRangeMode	frambBufferRange= mRGB10Range == NTV2_RGB10RangeSMPTE ? NTV2_RGBRangeSMPTE : NTV2_RGBRangeFull;
+	SdiState*			sdiIn			= mVirtualInputSelect == NTV2_Input2Select ? mDs.sdiIn[1] : mDs.sdiIn[0];
 	bool				b3GbOut			= mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb;
 	bool				bSdiOutRGB		= mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb;
 	bool				b4K				= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool				b4kHfr			= NTV2_IS_4K_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool				b2FbLevelBHfr	= IsVideoFormatB(mFb1VideoFormat);
-	bool				b4k6gOut		= (b4K && !b4kHfr && !bSdiOutRGB && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
-	bool				b4k12gOut		= (b4K && (b4kHfr || bSdiOutRGB) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
+	//bool				b4k6gOut		= b4K && !b4kHfr && !bSdiOutRGB && (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
+	//bool				b4k12gOut		= b4K && (b4kHfr || bSdiOutRGB) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire;
+	bool				b2x2piOut		= b4K && !b4kHfr && !bSdiOutRGB && (m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
 	bool				b2xQuadOut		= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quadrants_2wire);
-	bool 				b2x2piIn  		= mDs.input2si && (mDs.bIn2xSdi || sdiIn->is6G);
+	bool 				b2x2piIn  		= mDs.input2si && mDs.bIn2xSdi && !sdiIn->is6G;
 	bool 				b2piIn			= sdiIn->is2si && mDs.bInSdi;
 	bool 				b2pi			= mDs.input2si;
 	bool				b2xQuadIn		= b4K && !b4kHfr && !b2piIn && (mVirtualInputSelect == NTV2_Input2x4kSelect);
@@ -1522,8 +1524,8 @@ void Class4kServices::SetDeviceXPointCapture ()
 	
 	bHdmiIn								= bHdmiIn && bDoHdmiIn;
 	bHdmiOutRGB							= bHdmiOutRGB && bDoHdmiOut;
-	b4k6gOut							= b4k6gOut && bDo12G;
-	b4k12gOut							= b4k12gOut && bDo12G;
+	//b4k6gOut							= b4k6gOut && bDo12G;
+	//b4k12gOut							= b4k12gOut && bDo12G;
 	
 	// SMPTE 425 (2pi)
 	NTV2CrosspointID	XPt1, XPt2, XPt3, XPt4;
@@ -2578,7 +2580,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 		}
 		else
 		{
-			if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x2piIn)
+			if (b2x2piOut || b2xQuadOut || b2xQuadIn || b2x2piIn)
 			{
 				mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptBlack);
 				mCard->Connect (NTV2_XptSDIOut1InputDS2, NTV2_XptBlack);
@@ -2613,7 +2615,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 		}
 		else // YUV
 		{
-			if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x2piIn)
+			if (b2x2piOut || b2xQuadOut || b2xQuadIn || b2x2piIn)
 			{
 				mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptBlack);
 				mCard->Connect (NTV2_XptSDIOut2InputDS2, NTV2_XptBlack);
@@ -2649,7 +2651,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 		}
 		else // YUV
 		{
-			if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x2piIn)
+			if (b2x2piOut || b2xQuadOut || b2xQuadIn || b2x2piIn)
 			{
 				if (bInRGB)
 				{
@@ -2725,7 +2727,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 		}
 		else // YUV
 		{
-			if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x2piIn)
+			if (b2x2piOut || b2xQuadOut || b2xQuadIn || b2x2piIn)
 			{
 				if (bInRGB)
 				{
@@ -2806,7 +2808,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 	// YUV Out 4K 2pi 
 	else if (b4K && b2pi)
 	{
-		if (b4k6gOut || b2xQuadOut || b2xQuadIn || b2x2piIn)
+		if (b2x2piOut || b2xQuadOut || b2xQuadIn || b2x2piIn)
 		{
 			if (bInRGB)
 			{
@@ -3026,8 +3028,8 @@ void Class4kServices::SetDeviceMiscRegisters ()
 	bool				bHfr				= NTV2_IS_3G_FORMAT(mFb1VideoFormat);
 	bool				bSdiOutRGB			= mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb;
 	bool				b3GaOutRGB			= (mSdiOutTransportType == NTV2_SDITransport_3Ga) && bSdiOutRGB;
-	bool				b4k6gOut			= (b4K && !b4kHfr && !bSdiOutRGB && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
-	bool				b4k12gOut			= (b4K && (b4kHfr || bSdiOutRGB) && m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
+	bool				b4k6gOut			= b4K && !b4kHfr && !bSdiOutRGB && (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
+	bool				b4k12gOut			= b4K && (b4kHfr || bSdiOutRGB) && (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	NTV2FrameRate		primaryFrameRate	= GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 	
 	bHdmiIn									= bHdmiIn && bDoHdmiIn;
