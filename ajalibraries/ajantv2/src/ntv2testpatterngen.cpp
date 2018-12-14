@@ -37,8 +37,6 @@ typedef struct
 } SegmentTestPatternData;
 
 
-uint32_t MakeSineWaveVideoEx(double radians, bool bChroma,double Gain);
-
 
 
 static const uint32_t ColorBars100_1080_0[] =
@@ -1533,63 +1531,63 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 		{
 			{	// NTV2_STANDARD_1080
 			 {0,1079, ColorBars100_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{	// NTV2_STANDARD_720
 			 {0,719, ColorBars100_720_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{	// NTV2_STANDARD_525
 			 {0,485, ColorBars100_486_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{	// NTV2_STANDARD_625
 			 {0,575, ColorBars100_576_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{	// NTV2_STANDARD_1080p
 			 {0,1079, ColorBars100_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{ // NTV2_STANDARD_2K
 			 {0,1555, ColorBars100_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			}
 
 
@@ -1600,63 +1598,63 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 		{
 			{
 			 {0,1079, ColorBars75_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,719, ColorBars75_720_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,485, ColorBars75_486_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,575, ColorBars75_576_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,1079, ColorBars75_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,1555, ColorBars75_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} 
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} 
 			}
 
 
@@ -1667,63 +1665,63 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 		{
 			{
 			 {0,1079, Ramp_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,719, Ramp_720_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,485, Ramp_486_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,575, Ramp_576_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,1079, Ramp_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,1555, Ramp_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} 
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} 
 			}
 
 		}
@@ -1733,63 +1731,63 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 		{
 			{
 			 {0,1079, Multiburst_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,719, Multiburst_720_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,485, Multiburst_486_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,575, Multiburst_576_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,1079, Multiburst_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,1555, Multiburst_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} 
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} 
 			}
 		}
 	},
@@ -1800,61 +1798,61 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {0,181, LineSweep_1080_0} ,
 			 {182,901, LineSweep_1080_1} ,
 			 {902,1079, LineSweep_1080_2} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,120, LineSweep_720_0} ,
 			 {121,600, LineSweep_720_1} ,
 			 {601,719, LineSweep_720_2} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,340, LineSweep_486_0} ,
 			 {341,485, LineSweep_486_1} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,403, LineSweep_576_0} ,
 			 {404,575, LineSweep_576_1} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,181, LineSweep_1080_0} ,
 			 {182,901, LineSweep_1080_1} ,
 			 {902,1079, LineSweep_1080_2} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,261, LineSweep_1080_0} ,
 			 {262,1298, LineSweep_1080_1} ,
 			 {1299,1555, LineSweep_1080_2} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} 
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} 
 			}
 		}
 	},
@@ -1867,39 +1865,39 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {2,2, Pathological_1080_2} ,
 			 {3,542, Pathological_1080_3} ,
 			 {543,1079, Pathological_1080_4} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} 
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} 
 			},
 			{
 			 {0,1, Pathological_720_0} ,
 			 {2,360, Pathological_720_1} ,
 			 {361,719, Pathological_720_2} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,242, Pathological_486_0} ,
 			 {243,485, Pathological_486_1} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,287, Pathological_576_0} ,
 			 {288,575, Pathological_576_1} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,0, Pathological_1080_0} ,
@@ -1907,9 +1905,9 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {2,2, Pathological_1080_2} ,
 			 {3,542, Pathological_1080_3} ,
 			 {543,1079, Pathological_1080_4} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} 
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} 
 			},
 			{
 			 {0,0, Pathological_1080_0} ,
@@ -1917,9 +1915,9 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {2,2, Pathological_1080_2} ,
 			 {3,781, Pathological_1080_3} ,
 			 {782,1555, Pathological_1080_4} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} 
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} 
 			}
 		}
 	},
@@ -1928,63 +1926,63 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 		{
 			{
 			 {0,1079, FlatField_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} 
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} 
 			},
 			{
 			 {0,719, FlatField_720_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,485, FlatField_486_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,575, FlatField_576_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,1079, FlatField_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} 
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} 
 			},
 			{
 			 {0,1555, FlatField_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} 
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} 
 			}
 		}
 	},
@@ -1997,9 +1995,9 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {432,647, Ramp_1080_0} ,
 			 {648,863,  Multiburst_1080_0} ,
 			 {864,1079, FlatField_Pluge_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} 
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} 
 			},
 			{
 			 {0,143, ColorBars100_720_0} ,
@@ -2007,9 +2005,9 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {288,431, Ramp_720_0} ,
 			 {432,575, Multiburst_720_0} ,
 			 {576,719, FlatField_Pluge_720_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,97, ColorBars100_486_0} ,
@@ -2017,9 +2015,9 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {196,293, Ramp_486_0} ,
 			 {294,389,  Multiburst_486_0} ,
 			 {390,485, FlatField_Pluge_486_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} 
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} 
 			},
 			{
 			 {0,115, ColorBars100_576_0} ,
@@ -2027,9 +2025,9 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {232,347, Ramp_576_0} ,
 			 {348,463, Multiburst_576_0} ,
 			 {464,575, FlatField_Pluge_576_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL}
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL}
 			},
 			{
 			 {0,215, ColorBars100_1080_0} ,
@@ -2037,9 +2035,9 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {432,647, Ramp_1080_0} ,
 			 {648,863,  Multiburst_1080_0} ,
 			 {864,1079, FlatField_Pluge_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} 
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} 
 			},
 			{
 			 {0,310, ColorBars100_1080_0} ,
@@ -2047,9 +2045,9 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {622,932, Ramp_1080_0} ,
 			 {933,1243,  Multiburst_1080_0} ,
 			 {1244,1555, FlatField_Pluge_1080_0} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} ,
-			 {0,0, NULL} 
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} ,
+			 {0,0, AJA_NULL} 
 			}
 		}
 	},
@@ -2192,6 +2190,8 @@ bool NTV2TestPatternGen::DrawTestPattern (NTV2TestPatternSelect pattNum, uint32_
 	return bResult;
 }
 
+#define	AsWordPtr(__p__)	reinterpret_cast<int16_t*>(__p__)
+
 
 bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 {
@@ -2211,7 +2211,7 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 	{
 		const SegmentDescriptor &	segmentDescriptor (testPatternSegmentData.segmentDescriptor[standard][segmentCount]);
 		const uint32_t *	data = segmentDescriptor.data;
-		if ( data != NULL )
+		if (data)
 		{
 
 			// copy the test pattern line to the local "_pPackedLineBuffer"
@@ -2220,7 +2220,7 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 			if (_frameWidth == HD_NUMCOMPONENTPIXELS_2K || _frameWidth == HD_NUMCOMPONENTPIXELS_2K*2)
 			{
 				UnPack10BitYCbCrBuffer(_pPackedLineBuffer, _pUnPackedLineBuffer, HD_NUMCOMPONENTPIXELS_1080);
-				ReSampleYCbCrSampleLine((int16_t*)_pUnPackedLineBuffer, (int16_t*)_pUnPackedLineBuffer, 1920, 2048);
+				ReSampleYCbCrSampleLine(AsWordPtr(_pUnPackedLineBuffer), AsWordPtr(_pUnPackedLineBuffer), 1920, 2048);
 			}
 			else
 			{
@@ -2261,14 +2261,14 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 			if (_patternNumber == NTV2_TestPatt_MultiBurst || _patternNumber == NTV2_TestPatt_LineSweep )// || _patternNumber == NTV2_TestPatt_Ramp)
 			{
 				_signalMask = NTV2_SIGNALMASK_Y;		// just assume that Multiburst and LineSweep are "Y Only"
-				MaskUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer, (uint16_t)_signalMask , _frameWidth);
+				MaskUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer, uint16_t(_signalMask), _frameWidth);
 			}
 
 				// now RE-pack, according to the desired pixel format
 			ConvertUnpacked10BitYCbCrToPixelFormat(_pUnPackedLineBuffer, _pPackedLineBuffer, _frameWidth, _pixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
 
 				// calculate address of first line of segment in destination frame buffer
-			uint8_t *pBuffer = _pTestPatternBuffer + (startLine * _linePitch);
+			uint8_t *pBuffer = _pTestPatternBuffer + (uint32_t(startLine) * _linePitch);
 
 				// copy and repeat for as many lines as called for in segment
 			for (int line = 0; line < numLines; line++)
@@ -2382,9 +2382,46 @@ bool NTV2TestPatternGen::DrawBorderFrame()
 	return true;
 }
 
-const double kPi = 3.1415926535898;
+
+
+static uint16_t MakeSineWaveVideoEx(double radians, bool bChroma, double Gain)
+{
+	// 10-bit YUV values
+	static const int kYUVBlack10	(64);
+	static const int kYUVWhite10	(940);
+	//unused		static const int kYUVMidGray10	((kYUVWhite10 + kYUVBlack10) / 2);
+
+	static const int kYUVMinChroma10	(64);
+	static const int kYUVMaxChroma10	(960);
+	//unused		static const int kYUVZeroChroma10(512);
+
+	uint16_t result(0);
+	double Scale(0.0);
+	double Offset(0.0);
+
+	if (!bChroma)
+	{
+		Scale  = (double(kYUVWhite10) - double(kYUVBlack10)) / 2.0;
+		Offset = (double(kYUVWhite10) + double(kYUVBlack10)) / 2.0;
+
+		// calculate -cosine value to start Y at minimum value
+		result = uint16_t((sin(radians) * Scale * Gain) + Offset + 0.5);	// convert to 10-bit luma video levels
+	}
+	else
+	{
+		Scale  = (double(kYUVMaxChroma10) - double(kYUVMinChroma10)) / 2.0;
+		Offset = (double(kYUVMaxChroma10) + double(kYUVMinChroma10)) / 2.0;
+
+		// calculate sine value to start C at "zero" value
+		result = uint16_t((sin(radians) * Scale * Gain) + Offset + 0.5);	// convert to 10-bit chroma video levels
+	}
+
+	return result;
+}
+
 bool NTV2TestPatternGen::DrawZonePlateFrame()
 {
+	static const double kPi(3.1415926535898);
 	double pattScale = (kPi*.5 ) / (_frameWidth + 1);
 
 	for ( uint32_t line = 0; line < _frameHeight; line++ )
@@ -2392,12 +2429,12 @@ bool NTV2TestPatternGen::DrawZonePlateFrame()
 
 		for ( uint16_t pixel = 0; pixel < _frameWidth; pixel++ )
 		{
-			double xDist = (double)pixel - ((double)_frameWidth  / 2.0);
-			double yDist = (double)line - ((double)_frameHeight / 2.0);
+			double xDist = double(pixel) - (double(_frameWidth)  / 2.0);
+			double yDist = double(line) - (double(_frameHeight) / 2.0);
 			double r = ((xDist * xDist) + (yDist * yDist)) * pattScale;
 
-			_pUnPackedLineBuffer[pixel*2+1] = MakeSineWaveVideoEx(r, false,_sliderValue);
-			_pUnPackedLineBuffer[pixel*2] = MakeSineWaveVideoEx(r, true,_sliderValue);
+			_pUnPackedLineBuffer[pixel*2+1] = MakeSineWaveVideoEx(r, false, _sliderValue);
+			_pUnPackedLineBuffer[pixel*2  ] = MakeSineWaveVideoEx(r,  true, _sliderValue);
 
 		}
 		ConvertUnpacked10BitYCbCrToPixelFormat(_pUnPackedLineBuffer, _pPackedLineBuffer,_frameWidth,_pixelFormat,_bRGBSmpteRange, _bAlphaFromLuma);
@@ -2708,47 +2745,6 @@ bool NTV2TestPatternGen::IsSDStandard()
 
 	return false;
 }
-
-
-
-
-// 10-bit YUV values
-const int kYUVBlack10	   =  64;
-const int kYUVWhite10	   = 940;
-//unused		const int kYUVMidGray10	   = (kYUVWhite10 + kYUVBlack10) / 2;
-
-const int kYUVMinChroma10  =  64;
-const int kYUVMaxChroma10  = 960;
-//unused		const int kYUVZeroChroma10 = 512;
-
-uint32_t MakeSineWaveVideoEx(double radians, bool bChroma, double Gain)
-{
-	int result;
-
-	double Scale;
-	double Offset;
-
-	if (!bChroma)
-	{
-		Scale  = ((float)kYUVWhite10 - (float)kYUVBlack10) / 2.0;
-		Offset = ((float)kYUVWhite10 + (float)kYUVBlack10) / 2.0;
-
-		// calculate -cosine value to start Y at minimum value
-		result = (int)((sin(radians) * Scale * Gain) + Offset + 0.5);	// convert to 10-bit luma video levels
-	}
-	else
-	{
-		Scale  = ((float)kYUVMaxChroma10 - (float)kYUVMinChroma10) / 2.0;
-		Offset = ((float)kYUVMaxChroma10 + (float)kYUVMinChroma10) / 2.0;
-
-		// calculate sine value to start C at "zero" value
-		result = (int)((sin(radians) * Scale * Gain) + Offset + 0.5);	// convert to 10-bit chroma video levels
-	}
-
-	return result;
-}
-
-//***********************************************************************************************************
 
 
 
