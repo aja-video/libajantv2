@@ -49,7 +49,7 @@ void Class4kServices::SetDeviceXPointPlayback ()
 	bool				b2FbLevelBHfr		= IsVideoFormatB(mFb1VideoFormat);
 	bool				bSdiOutRGB			= mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb;
 	bool				b3GaOutRGB			= (mSdiOutTransportType == NTV2_SDITransport_3Ga) && bSdiOutRGB;
-	bool				b1wireQ4k			= (b4K && m4kTransportOutSelection == NTV2_4kTransport_Quarter_1wire);
+	bool				b1wireQ4k			= b4K && (m4kTransportOutSelection == NTV2_4kTransport_Quarter_1wire);
 	bool				b3GbOut				= (mSdiOutTransportType == NTV2_SDITransport_DualLink_3Gb) || b3GaOutRGB;
 	bool				b2pi                = (b4K && m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
 	bool				b2x2piOut			= b4K && !b4kHfr && !bSdiOutRGB && (m4kTransportOutSelection == NTV2_4kTransport_PixelInterleave);
