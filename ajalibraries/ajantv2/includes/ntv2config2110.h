@@ -320,6 +320,8 @@ public:
     bool        GetSFPMSAData(eSFP port, SFPMSAData & data);
     bool        GetLinkStatus(eSFP port, SFPStatus & sfpStatus);
 
+	bool        GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushit=true);
+
     static uint32_t  Get2110TxStreamIndex(NTV2Stream str );
     static uint32_t  GetDecapsulatorAddress(eSFP sfp, NTV2Stream stream);
 
@@ -361,10 +363,9 @@ protected:
 
     bool		ConfigurePTP(const eSFP sfp, const std::string localIPAddress);
 
-	bool        GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushit=true);
-
-	bool        GenVideoStreamSDPInfo(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, std::string gmInfo);
-	bool        GenAudioStreamSDPInfo(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, std::string gmInfo);
+	bool        GenVideoStreamSDPInfo(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo);
+	bool		GenVideoStreamMultiSDPInfo(std::stringstream & sdp, char* gmInfo);
+	bool        GenAudioStreamSDPInfo(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo);
 
     NTV2StreamType  StreamType(const NTV2Stream stream);
     NTV2Channel VideoStreamToChannel(const NTV2Stream stream);

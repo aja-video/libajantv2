@@ -18,7 +18,7 @@ typedef std::vector <uint8_t>		NTV2TestPatternBuffer;	///< @brief	A byte vector 
 #if !defined(NTV2_DEPRECATE_15_0)
 	typedef std::vector <const char *>	NTV2TestPatternList;	///< @deprecated	Use NTV2TestPatternNames instead.
 #endif//!defined(NTV2_DEPRECATE_15_0)
-typedef std::vector <std::string>	NTV2TestPatternNames;	///< @brief	A list (std::vector) of pattern names.
+typedef NTV2StringList					NTV2TestPatternNames;	///< @brief	A list (std::vector) of pattern names.
 
 /**
 	@brief	Identifies a predefined NTV2 test pattern.
@@ -85,7 +85,6 @@ protected:
 	virtual bool	DrawColorQuandrantFrame ();
 	virtual bool	DrawColorQuandrantFrameTsi ();
 
-	void Init();
 	bool IsSDStandard();
 	bool GetStandard(int &standard, bool &b4K);
 

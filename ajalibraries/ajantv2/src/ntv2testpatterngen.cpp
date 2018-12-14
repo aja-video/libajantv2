@@ -13,6 +13,7 @@
 #include "ntv2testpatterngen.h"
 #include "ntv2transcode.h"
 #include "ntv2resample.h"
+#include "ajabase/system/lock.h"
 #include "math.h"
 
 
@@ -2055,12 +2056,27 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 
 };
 
-const uint32_t numSegmentTestPatterns = sizeof(NTV2TestPatternSegments)/sizeof(SegmentTestPatternData);
-
-static NTV2TestPatternNames sTestPatternNames;
 
 const NTV2TestPatternNames & NTV2TestPatternGen::getTestPatternNames (void)
 {
+	static NTV2TestPatternNames sTestPatternNames;
+	static AJALock				sTPNamesGuard;
+	if (sTestPatternNames.empty())
+	{
+		static const uint32_t sNumPatterns(sizeof(NTV2TestPatternSegments)/sizeof(SegmentTestPatternData));
+		AJAAutoLock locker(&sTPNamesGuard);
+		for (uint32_t tpCount(0);  tpCount < sNumPatterns;  tpCount++)
+			sTestPatternNames.push_back(string(NTV2TestPatternSegments[tpCount].name));
+		sTestPatternNames.push_back(string("Black"));
+		sTestPatternNames.push_back(string("White"));
+		sTestPatternNames.push_back(string("Border"));
+		sTestPatternNames.push_back(string("Linear Ramp"));
+		sTestPatternNames.push_back(string("Slant Ramp"));
+		sTestPatternNames.push_back(string("Zone Plate"));
+		sTestPatternNames.push_back(string("Color Quadrant"));
+		sTestPatternNames.push_back(string("Color Quadrant Border"));
+		sTestPatternNames.push_back(string("Color Quadrant Tsi"));
+	}
 	return sTestPatternNames;
 }
 
@@ -2068,9 +2084,14 @@ const NTV2TestPatternNames & NTV2TestPatternGen::getTestPatternNames (void)
 	NTV2TestPatternList & NTV2TestPatternGen::getTestPatternList (void)
 	{
 		static NTV2TestPatternList	result;
+		static AJALock				resultGuard;
 		if (result.empty())
-			for (size_t ndx(0);  ndx < sTestPatternNames.size();  ndx++)
-				result.push_back(sTestPatternNames[ndx].c_str());
+		{
+			AJAAutoLock locker(&resultGuard);
+			const NTV2TestPatternNames & names(getTestPatternNames());
+			for (size_t ndx(0);  ndx < names.size();  ndx++)
+				result.push_back(names[ndx].c_str());
+		}
 		return result;
 	}
 #endif // NTV2_DEPRECATE_15_0
@@ -2083,7 +2104,6 @@ NTV2TestPatternGen::NTV2TestPatternGen() :
 	_sliderValue(DEFAULT_PATT_GAIN),
 	_signalMask(NTV2_SIGNALMASK_ALL)
 {
-	Init();
 }
 
 
@@ -2091,25 +2111,6 @@ NTV2TestPatternGen::~NTV2TestPatternGen()
 {
 
 }
-
-void NTV2TestPatternGen::Init()
-{
-	if (sTestPatternNames.empty())
-	{
-		for (uint32_t tpCount(0);  tpCount < numSegmentTestPatterns;  tpCount++)
-			sTestPatternNames.push_back(string(NTV2TestPatternSegments[tpCount].name));
-		sTestPatternNames.push_back(string("Black"));
-		sTestPatternNames.push_back(string("White"));
-		sTestPatternNames.push_back(string("Border"));
-		sTestPatternNames.push_back(string("Linear Ramp"));
-		sTestPatternNames.push_back(string("Slant Ramp"));
-		sTestPatternNames.push_back(string("Zone Plate"));
-		sTestPatternNames.push_back(string("Color Quadrant"));
-		sTestPatternNames.push_back(string("Color Quadrant Border"));
-		sTestPatternNames.push_back(string("Color Quadrant Tsi"));
-	}
-}
-
 
 // DrawTestPattern()
 //	Note: "dSlider" is expected to range between 0.0 and 1.0
