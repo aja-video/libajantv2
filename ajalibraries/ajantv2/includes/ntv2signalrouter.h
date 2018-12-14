@@ -212,13 +212,7 @@ class AJAExport CNTV2SignalRouter
 		NTV2ActualConnections						mConnections;		///< @brief	My collection of NTV2SignalConnections
 
 
-	//	Class Methods
-        public:
-		#if !defined (NTV2_DEPRECATE_12_5)
-			static NTV2_DEPRECATED_f(const NTV2RoutingEntry &		GetInputSelectEntry (const NTV2InputCrosspointID inInputXpt));	///< @deprecated	NTV2RoutingEntry is deprecated.
-			static NTV2_DEPRECATED_f(NTV2InputCrosspointID		NTV2RoutingEntryToInputCrosspointID (const NTV2RoutingEntry & inEntry));	///< @deprecated	NTV2RoutingEntry is deprecated.
-		#endif	//	!defined (NTV2_DEPRECATE_12_5)
-
+	public:	//	CLASS METHODS
 		/**
 			@brief		Returns a string containing the most compact human-readable form for a given input crosspoint.
 			@param[in]	inInputXpt		Specifies the NTV2InputCrosspointID of interest.
@@ -341,18 +335,29 @@ class AJAExport CNTV2SignalRouter
 		**/
 		static bool					CreateFromString (const std::string & inString, CNTV2SignalRouter & outRouter);
 
-		static bool					Initialize (void);		///< @brief	Initializes my tables.
-		static bool					Deinitialize (void);	///< @brief	Deinitializes (frees) my tables.
-		static bool					IsInitialized (void);	///< @brief	Returns true if my tables are initialized.
 
-        static String2InputXpt		gString2InputXpt;
-        static InputXpt2String		gInputXpt2String;
-        static InputXpt2WidgetIDs	gInputXpt2WidgetIDs;
-        static String2OutputXpt		gString2OutputXpt;
-        static OutputXpt2String		gOutputXpt2String;
-        static OutputXpt2WidgetIDs	gOutputXpt2WidgetIDs;
-        static Widget2OutputXpts	gWidget2OutputXpts;
-        static Widget2InputXpts		gWidget2InputXpts;
+		#if !defined (NTV2_DEPRECATE_12_5)
+			static NTV2_DEPRECATED_f(const NTV2RoutingEntry &		GetInputSelectEntry (const NTV2InputCrosspointID inInputXpt));	///< @deprecated	NTV2RoutingEntry is deprecated.
+			static NTV2_DEPRECATED_f(NTV2InputCrosspointID		NTV2RoutingEntryToInputCrosspointID (const NTV2RoutingEntry & inEntry));	///< @deprecated	NTV2RoutingEntry is deprecated.
+		#endif	//	!defined (NTV2_DEPRECATE_12_5)
+
+    	static bool					IsInitialized(void);	///< @return	True if the Signal Router singleton has been allocated/created; otherwise false.
+
+        /**
+            @brief		Explicitly allocates and initializes the Signal Router singleton.
+            @return		True if successful;  otherwise false.
+            @note		Normally, there is no need to call this function, as the Signal Router singleton is
+            			automatically allocated and initialized.
+        **/
+    	static bool					Initialize(void);
+
+        /**
+            @brief		Explicitly deinitializes and deallocates the Signal Router singleton.
+            @return		True if successful;  otherwise false.
+            @note		Normally, there is no need to call this function, as the Signal Router singleton is
+            			automatically deinitialized and deallocated.
+        **/
+    	static bool					Deinitialize(void);
 
 };	//	CNTV2SignalRouter
 
