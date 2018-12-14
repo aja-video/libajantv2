@@ -34,10 +34,16 @@
 		//		... when building for CLANG_CXX_LIBRARY=libc++		...then 'nullptr' is defined.
 		//		... when building for CLANG_CXX_LIBRARY=libstdc++	...then 'nullptr' is NOT defined.
 		//		TBD FIX FIX FIX     How to tell when building for libc++ versus libstdc++ ?!?!?!?!
-		#include <stddef.h>
 		#define AJA_NULL	NULL
-	#else
+	#elif defined(AJALinux)
+		//	On Linux...
+		//		... when building libajacc, using 'nullptr' fails.
+		//		TBD FIX FIX FIX
+		#define AJA_NULL	NULL
+	#elif defined(MSWindows)
 		#define AJA_NULL	nullptr
+	#else
+		#define AJA_NULL	NULL
 	#endif
 #else
 	#define AJA_NULL		NULL
