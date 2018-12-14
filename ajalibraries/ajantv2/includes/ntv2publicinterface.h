@@ -5480,37 +5480,61 @@ typedef enum
 //////////////////////////////////////////////////////////////////////////////////////////////	BEGIN NEW AUTOCIRCULATE API
 
 		#if AJATargetBigEndian
-			#define	NTV2_4CC(_str_)					(	((uint32_t)(((UByte *)(_str_))[0]) <<  0)  |	\
-														((uint32_t)(((UByte *)(_str_))[1]) <<  8)  |	\
-														((uint32_t)(((UByte *)(_str_))[2]) << 16)  |	\
-														((uint32_t)(((UByte *)(_str_))[3]) << 24))
+			#if defined(__CPLUSPLUS__) || defined(__cplusplus)
+				#define	NTV2_4CC(_str_)					(	(uint32_t((UByte*(_str_))[0]) <<  0)  |	\
+															(uint32_t((UByte*(_str_))[1]) <<  8)  |	\
+															(uint32_t((UByte*(_str_))[2]) << 16)  |	\
+															(uint32_t((UByte*(_str_))[3]) << 24))
 
-			#define NTV2_FOURCC(_a_,_b_,_c_,_d_)	(	(((uint32_t)(_a_)) <<  0)	|		\
-														(((uint32_t)(_b_)) <<  8)	|		\
-														(((uint32_t)(_c_)) << 16)	|		\
-														(((uint32_t)(_d_)) << 24))
-			#if !defined (NTV2_BUILDING_DRIVER)
-				#define	NTV2_4CC_AS_STRING(_x_)			std::string (1, ((_x_) & 0x000000FF) >>  0)	+	\
-														std::string (1, ((_x_) & 0x0000FF00) >>  8)	+	\
-														std::string (1, ((_x_) & 0x00FF0000) >> 16)	+	\
-														std::string (1, ((_x_) & 0xFF000000) >> 24)
-			#endif	//	!defined (NTV2_BUILDING_DRIVER)
+				#define NTV2_FOURCC(_a_,_b_,_c_,_d_)	(	((uint32_t(_a_)) <<  0)	|		\
+															((uint32_t(_b_)) <<  8)	|		\
+															((uint32_t(_c_)) << 16)	|		\
+															((uint32_t(_d_)) << 24))
+				#if !defined (NTV2_BUILDING_DRIVER)
+					#define	NTV2_4CC_AS_STRING(_x_)			std::string (1, ((_x_) & 0x000000FF) >>  0)	+	\
+															std::string (1, ((_x_) & 0x0000FF00) >>  8)	+	\
+															std::string (1, ((_x_) & 0x00FF0000) >> 16)	+	\
+															std::string (1, ((_x_) & 0xFF000000) >> 24)
+				#endif	//	!defined (NTV2_BUILDING_DRIVER)
+			#else
+				#define	NTV2_4CC(_str_)					(	((uint32_t)(((UByte *)(_str_))[0]) <<  0)  |	\
+															((uint32_t)(((UByte *)(_str_))[1]) <<  8)  |	\
+															((uint32_t)(((UByte *)(_str_))[2]) << 16)  |	\
+															((uint32_t)(((UByte *)(_str_))[3]) << 24))
+
+				#define NTV2_FOURCC(_a_,_b_,_c_,_d_)	(	(((uint32_t)(_a_)) <<  0)	|		\
+															(((uint32_t)(_b_)) <<  8)	|		\
+															(((uint32_t)(_c_)) << 16)	|		\
+															(((uint32_t)(_d_)) << 24))
+			#endif	//	C
 		#else
-			#define	NTV2_4CC(_str_)					(	((uint32_t)(((UByte *)(_str_))[3]) <<  0)  |	\
-														((uint32_t)(((UByte *)(_str_))[2]) <<  8)  |	\
-														((uint32_t)(((UByte *)(_str_))[1]) << 16)  |	\
-														((uint32_t)(((UByte *)(_str_))[0]) << 24))
-
-			#define	NTV2_FOURCC(_a_,_b_,_c_,_d_)	(	(((uint32_t)(_a_)) << 24)	|		\
-														(((uint32_t)(_b_)) << 16)	|		\
-														(((uint32_t)(_c_)) <<  8)	|		\
-														(((uint32_t)(_d_)) <<  0) )
-			#if !defined (NTV2_BUILDING_DRIVER)
-				#define	NTV2_4CC_AS_STRING(_x_)			std::string (1, ((_x_) & 0xFF000000) >> 24) +	\
-														std::string (1, ((_x_) & 0x00FF0000) >> 16) +	\
-														std::string (1, ((_x_) & 0x0000FF00) >>  8) +	\
-														std::string (1, ((_x_) & 0x000000FF) >>  0)
-			#endif	//	!defined (NTV2_BUILDING_DRIVER)
+			#if defined(__CPLUSPLUS__) || defined(__cplusplus)
+				#define	NTV2_4CC(_str_)					(	(uint32_t((UByte*(_str_))[3]) <<  0)  |	\
+															(uint32_t((UByte*(_str_))[2]) <<  8)  |	\
+															(uint32_t((UByte*(_str_))[1]) << 16)  |	\
+															(uint32_t((UByte*(_str_))[0]) << 24))
+	
+				#define	NTV2_FOURCC(_a_,_b_,_c_,_d_)	(	((uint32_t(_a_)) << 24)	|		\
+															((uint32_t(_b_)) << 16)	|		\
+															((uint32_t(_c_)) <<  8)	|		\
+															((uint32_t(_d_)) <<  0) )
+				#if !defined (NTV2_BUILDING_DRIVER)
+					#define	NTV2_4CC_AS_STRING(_x_)			std::string (1, ((_x_) & 0xFF000000) >> 24) +	\
+															std::string (1, ((_x_) & 0x00FF0000) >> 16) +	\
+															std::string (1, ((_x_) & 0x0000FF00) >>  8) +	\
+															std::string (1, ((_x_) & 0x000000FF) >>  0)
+				#endif	//	!defined (NTV2_BUILDING_DRIVER)
+			#else
+				#define	NTV2_4CC(_str_)					(	((uint32_t)(((UByte *)(_str_))[3]) <<  0)  |	\
+															((uint32_t)(((UByte *)(_str_))[2]) <<  8)  |	\
+															((uint32_t)(((UByte *)(_str_))[1]) << 16)  |	\
+															((uint32_t)(((UByte *)(_str_))[0]) << 24))
+	
+				#define	NTV2_FOURCC(_a_,_b_,_c_,_d_)	(	(((uint32_t)(_a_)) << 24)	|		\
+															(((uint32_t)(_b_)) << 16)	|		\
+															(((uint32_t)(_c_)) <<  8)	|		\
+															(((uint32_t)(_d_)) <<  0) )
+			#endif	//	C
 		#endif
 
 
@@ -5776,18 +5800,18 @@ typedef enum
 					@return		True if my host storage was allocated by my Allocate function;  otherwise false if my host storage
 								address and size was provided by the client application.
 				**/
-				inline bool		IsAllocatedBySDK (void) const			{return fFlags & NTV2_POINTER_ALLOCATED ? true : false;};
+				inline bool		IsAllocatedBySDK (void) const			{return fFlags & NTV2_POINTER_ALLOCATED ? true : false;}
 
 				/**
 					@return		True if my host storage was provided by the client application;  otherwise false if it was allocated
 								by my Allocate function.
 				**/
-				inline bool		IsProvidedByClient (void) const			{return fFlags & NTV2_POINTER_ALLOCATED ? false : true;};
+				inline bool		IsProvidedByClient (void) const			{return fFlags & NTV2_POINTER_ALLOCATED ? false : true;}
 
 				/**
 					@return		True if my user-space pointer is NULL, or my size is zero.
 				**/
-				inline bool		IsNULL (void) const						{return GetHostPointer() == NULL || GetByteCount() == 0;}
+				inline bool		IsNULL (void) const						{return GetHostPointer() == AJA_NULL || GetByteCount() == 0;}
 
 				/**
 					@return		True if my host pointer is non-NULL and my byte count is non-zero;  otherwise false.
@@ -7293,9 +7317,9 @@ typedef enum
 					@param	inANCF2ByteCount	Optionally specifies the maximum capacity of the Field 2 host ancillary data buffer, in bytes.
 												If zero, no ancillary data (interlaced F2) will be transferred.  Defaults to zero.
 				**/
-				explicit							AUTOCIRCULATE_TRANSFER (ULWord * pInVideoBuffer, const ULWord inVideoByteCount, ULWord * pInAudioBuffer = 0,
-																			const ULWord inAudioByteCount = 0, ULWord * pInANCBuffer = 0, const ULWord inANCByteCount = 0,
-																			ULWord * pInANCF2Buffer = 0, const ULWord inANCF2ByteCount = 0);
+				explicit							AUTOCIRCULATE_TRANSFER (ULWord * pInVideoBuffer, const ULWord inVideoByteCount, ULWord * pInAudioBuffer = AJA_NULL,
+																			const ULWord inAudioByteCount = 0, ULWord * pInANCBuffer = AJA_NULL, const ULWord inANCByteCount = 0,
+																			ULWord * pInANCF2Buffer = AJA_NULL, const ULWord inANCF2ByteCount = 0);
 				/**
 					@brief		Resets the struct to its initialized state, with timecode capture disabled, freeing all buffers that were allocated by the SDK.
 								(Buffers set by the client application are zeroed but not freed.)
@@ -7344,7 +7368,7 @@ typedef enum
 				bool									SetBuffers (ULWord * pInVideoBuffer, const ULWord inVideoByteCount,
 																	ULWord * pInAudioBuffer, const ULWord inAudioByteCount,
 																	ULWord * pInANCBuffer, const ULWord inANCByteCount,
-																	ULWord * pInANCF2Buffer = 0, const ULWord inANCF2ByteCount = 0);
+																	ULWord * pInANCF2Buffer = AJA_NULL, const ULWord inANCF2ByteCount = 0);
 
 				/**
 					@brief	Sets my video buffer for use in a subsequent call to CNTV2Card::AutoCirculateTransfer.
@@ -7393,7 +7417,7 @@ typedef enum
 					@return	True if successful;  otherwise false.
 				**/
 				bool									SetAncBuffers (ULWord * pInANCBuffer, const ULWord inANCByteCount,
-																		ULWord * pInANCF2Buffer = 0, const ULWord inANCF2ByteCount = 0 );
+																		ULWord * pInANCF2Buffer = AJA_NULL, const ULWord inANCF2ByteCount = 0);
 				/**
 					@return		My video buffer.
 				**/

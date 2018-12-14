@@ -103,7 +103,7 @@ aja_sysctl(const char *name, std::string &result)
     return ret;
 }
 
-CFDictionaryRef find_dict_for_data_type(const CFArrayRef inArray, CFStringRef inDataType)
+static CFDictionaryRef find_dict_for_data_type(const CFArrayRef inArray, CFStringRef inDataType)
 {
     for (CFIndex i = 0; i<CFArrayGetCount(inArray); i++)
     {
@@ -120,7 +120,7 @@ CFDictionaryRef find_dict_for_data_type(const CFArrayRef inArray, CFStringRef in
     return NULL;
 }
 
-CFArrayRef get_items_array_from_dict(const CFDictionaryRef inDictionary)
+static CFArrayRef get_items_array_from_dict(const CFDictionaryRef inDictionary)
 {
     CFArrayRef itemsArray = CFArrayRef(CFDictionaryGetValue(inDictionary, CFSTR("_items")));
     if (itemsArray != NULL)
@@ -131,8 +131,7 @@ CFArrayRef get_items_array_from_dict(const CFDictionaryRef inDictionary)
     return itemsArray;
 }
 
-std::string
-aja_getgputype()
+static std::string aja_getgputype(void)
 {
 	std::ostringstream oss;
 

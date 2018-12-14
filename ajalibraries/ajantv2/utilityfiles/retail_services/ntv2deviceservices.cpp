@@ -4498,8 +4498,8 @@ void DeviceServices::ConsolidateRegisterWrites( NTV2RegisterWrites& inRegs,
 	//cerr << inRegs << endl;
 	std::stable_sort(inRegs.begin(), inRegs.end(), SortFunction);
 	
-	uint32_t count = inRegs.size();
-	for (int i=1; i<count; i++)
+	size_t count = inRegs.size();
+	for (size_t i=1; i<count; i++)
 	{
 		NTV2RegInfo& i0 = inRegs[i-1];
 		NTV2RegInfo& i1 = inRegs[i];
