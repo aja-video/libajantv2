@@ -29,9 +29,18 @@
 #define	AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
 
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
-	#define AJA_NULL		(nullptr)
+	#if defined(AJAMac)
+		//	On MacOS...
+		//		... when building for CLANG_CXX_LIBRARY=libc++		...then 'nullptr' is defined.
+		//		... when building for CLANG_CXX_LIBRARY=libstdc++	...then 'nullptr' is NOT defined.
+		//		TBD FIX FIX FIX     How to tell when building for libc++ versus libstdc++ ?!?!?!?!
+		#include <stddef.h>
+		#define AJA_NULL	NULL
+	#else
+		#define AJA_NULL	nullptr
+	#endif
 #else
-	#define AJA_NULL		(NULL)
+	#define AJA_NULL		NULL
 #endif
 
 #if defined(__clang__)
