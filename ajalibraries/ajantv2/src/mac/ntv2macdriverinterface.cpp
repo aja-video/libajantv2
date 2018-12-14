@@ -2060,18 +2060,21 @@ bool CNTV2MacDriverInterface::GetLatencyTimerValue( ULWord* value )
 	return ReadRegister(kVRegLatencyTimerValue, *value);
 }
 
-//--------------------------------------------------------------------------------------------------------------------
-//	Get/Set Output Timecode settings
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SetOutputTimecodeOffset( ULWord frames )		// deprecated
-{
-	return WriteRegister(kVRegOutputTimecodeOffset, frames);
-}
 
-bool CNTV2MacDriverInterface::GetOutputTimecodeOffset( ULWord* pFrames )	// deprecated
-{
-	return ReadRegister(kVRegOutputTimecodeOffset, *pFrames);
-}
+#if !defined(NTV2_DEPRECATE_15_1)
+	//--------------------------------------------------------------------------------------------------------------------
+	//	Get/Set Output Timecode settings
+	//--------------------------------------------------------------------------------------------------------------------
+	bool CNTV2MacDriverInterface::SetOutputTimecodeOffset( ULWord frames )
+	{
+		return WriteRegister(kVRegOutputTimecodeOffset, frames);
+	}
+
+	bool CNTV2MacDriverInterface::GetOutputTimecodeOffset( ULWord* pFrames )
+	{
+		return ReadRegister(kVRegOutputTimecodeOffset, *pFrames);
+	}
+#endif	//	!defined(NTV2_DEPRECATE_15_1)
 
 bool CNTV2MacDriverInterface::SetOutputTimecodeType( ULWord type )
 {

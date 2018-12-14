@@ -1566,7 +1566,9 @@ uint32_t CNTV2Config2110::Get2110TxStreamIndex(NTV2Stream str)
             index = (uint32_t)(str-NTV2_ANC1_STREAM);
             break;
 
-		case NTV2_MAX_NUM_STREAMS:		break;
+		case NTV2_VIDEO4K_STREAM:
+		default:
+			break;
     }
     return index;
 }
