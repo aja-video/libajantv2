@@ -1728,16 +1728,21 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
             ptpStatus.PTP_gmId[0], ptpStatus.PTP_gmId[1], ptpStatus.PTP_gmId[2], ptpStatus.PTP_gmId[3],
             ptpStatus.PTP_gmId[4], ptpStatus.PTP_gmId[5], ptpStatus.PTP_gmId[6], ptpStatus.PTP_gmId[7]);
 
+
     if (StreamType(stream) == VIDEO_STREAM)
     {
-		GenVideoStreamSDPInfo(sdp, sfp, stream, std::string(&gmInfo[0], 32));
+		GenVideoStreamSDPInfo(sdp, sfp, stream, &gmInfo[0]);
     }
+	else if (StreamType(stream) == VIDEO_4K_STREAM)
+	{
+		GenVideoStreamMultiSDPInfo(sdp, &gmInfo[0]);
+	}
     else
     {
-		GenAudioStreamSDPInfo(sdp, sfp, stream, std::string(&gmInfo[0], 32));
+		GenAudioStreamSDPInfo(sdp, sfp, stream, &gmInfo[0]);
     }
     
-    //cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
+	cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
 
 	bool rv = true;
 
@@ -1768,7 +1773,7 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
     return rv;
 }
 
-bool CNTV2Config2110::GenVideoStreamSDPInfo(stringstream & sdp, const eSFP sfp, const NTV2Stream stream, string gmInfo)
+bool CNTV2Config2110::GenVideoStreamSDPInfo(stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo)
 {
     // Insure appropriate stream is enabled
     bool enabledA;
@@ -1862,7 +1867,103 @@ bool CNTV2Config2110::GenVideoStreamSDPInfo(stringstream & sdp, const eSFP sfp, 
 }
 
 
-bool CNTV2Config2110::GenAudioStreamSDPInfo(stringstream & sdp, const eSFP sfp, const  NTV2Stream stream, string gmInfo)
+bool CNTV2Config2110::GenVideoStreamMultiSDPInfo(stringstream & sdp, char* gmInfo)
+{
+	sdp << "a=group:MULTI-2SI 1 2 3 4 " << endl;
+
+	// generate SDP's for all 4 video streams
+	for (int i=0; i<4; i++)
+	{
+		NTV2Stream stream = (NTV2Stream)i;
+		bool enabledA;
+		bool enabledB;
+		GetTxStreamEnable(stream, enabledA, enabledB);
+
+		// Make sure the stream is enabled
+		if (enabledA || enabledB)
+		{
+			tx_2110Config config;
+			GetTxStreamConfiguration(stream, config);
+
+			uint32_t baseAddrPacketizer;
+			SetTxPacketizerChannel(stream, baseAddrPacketizer);
+
+			uint32_t width;
+			mDevice.ReadRegister(kReg4175_pkt_width + baseAddrPacketizer, width);
+
+			uint32_t height;
+			mDevice.ReadRegister(kReg4175_pkt_height + baseAddrPacketizer, height);
+
+			uint32_t  ilace;
+			mDevice.ReadRegister(kReg4175_pkt_interlace_ctrl + baseAddrPacketizer, ilace);
+
+			if (ilace == 1)
+			{
+				height *= 2;
+			}
+
+			NTV2VideoFormat vfmt;
+			GetTxFormat(VideoStreamToChannel(stream), vfmt);
+			NTV2FrameRate frate = GetNTV2FrameRateFromVideoFormat(vfmt);
+			string rateString   = rateToString(frate);
+
+			// media name
+			sdp << "m=video ";
+			if (enabledA)
+				sdp << To_String(config.remotePort[0]);
+			else
+				sdp << To_String(config.remotePort[1]);
+
+			sdp << " RTP/AVP ";
+			sdp << To_String(config.payloadType) << endl;
+
+			// connection information
+			sdp << "c=IN IP4 ";
+			if (enabledA)
+				sdp << config.remoteIP[0];
+			else
+				sdp << config.remoteIP[1];
+			sdp << "/" << To_String(config.ttl) << endl;
+
+			// rtpmap
+			sdp << "a=rtpmap:";
+			sdp << To_String(config.payloadType);
+			sdp << " raw/90000" << endl;
+
+			//fmtp
+			sdp << "a=fmtp:";
+			sdp << To_String(config.payloadType);
+			sdp << " sampling=YCbCr-4:2:2; width=";
+			sdp << To_String(width);
+			sdp << "; height=";
+			sdp << To_String(height);
+			sdp << "; exactframerate=";
+			sdp << rateString;
+			sdp << "; depth=10; TCS=SDR; colorimetry=";
+			sdp << ((NTV2_IS_SD_VIDEO_FORMAT(vfmt)) ? "BT601" : "BT709");
+			sdp << "; PM=2110GPM; SSN=ST2110-20:2017; TP=2110TPN; ";
+			if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vfmt))
+			{
+				sdp << "interlace=1; ";
+			}
+			else if (NTV2_IS_PSF_VIDEO_FORMAT(vfmt))
+			{
+				sdp << "interlace segmented";
+			}
+			sdp << endl;
+
+			// PTP
+			sdp << "a=ts-refclk:ptp=IEEE1588-2008:" << gmInfo << endl;
+			sdp << "a=mediaclk:direct=0" << endl;
+			sdp << "a=mid:" << stream+1 << endl <<  endl;
+		}
+	}
+
+	return true;
+}
+
+
+bool CNTV2Config2110::GenAudioStreamSDPInfo(stringstream & sdp, const eSFP sfp, const  NTV2Stream stream, char* gmInfo)
 {
     // Insure appropriate stream is enabled
     bool enabledA;
@@ -1969,6 +2070,7 @@ NTV2StreamType CNTV2Config2110::StreamType(const NTV2Stream stream)
 
 		case NTV2_VIDEO4K_STREAM:
 			type = VIDEO_4K_STREAM;
+			break;
 
         default:
             type = INVALID_STREAM;
