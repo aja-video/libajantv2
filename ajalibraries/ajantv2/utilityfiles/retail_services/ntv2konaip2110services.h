@@ -17,16 +17,35 @@ class KonaIP2110Services : public DeviceServices
 {
 	
 public:
-	KonaIP2110Services();
+	KonaIP2110Services(NTV2DeviceID devID);
     ~KonaIP2110Services();
 
     virtual void Init();
-	virtual void SetDeviceXPointPlayback ();
-	virtual void SetDeviceXPointCapture ();
-	virtual void SetDeviceMiscRegisters ();
+	virtual void SetDeviceXPointPlayback();
+	virtual void SetDeviceXPointCapture();
+	virtual void SetDeviceMiscRegisters();
+	virtual bool ReadDriverState();
+	
+	void EveryFrameTask2110(CNTV2Config2110* config2110,
+							NTV2VideoFormat* videoFormatLast,
+							NTV2Mode* modeLast,
+							NetworkData2110* s2110NetworkLast,
+							TransmitVideoData2110* s2110TxVideoDataLast,
+							TransmitAudioData2110* s2110TxAudioDataLast,
+							ReceiveVideoData2110* s2110RxVideoDataLast,
+							ReceiveAudioData2110* s2110RxAudioDataLast);
+	NTV2VideoFormat Convert21104KFormat(NTV2VideoFormat videoFormat);
+	void Print2110Network(const NetworkData2110 m2110Network);
 
 protected:
     CNTV2Config2110 *       config2110;
+    
+    NetworkData2110			m2110Network;
+    TransmitVideoData2110   m2110TxVideoData;
+    TransmitAudioData2110   m2110TxAudioData;
+    ReceiveVideoData2110    m2110RxVideoData;
+    ReceiveAudioData2110    m2110RxAudioData;
+    IpStatus2110            m2110IpStatusData;
 
     NetworkData2110			m2110NetworkLast;
     TransmitVideoData2110   m2110TxVideoDataLast;
@@ -36,6 +55,10 @@ protected:
 
 	NTV2Mode				mFb1ModeLast;
     NTV2VideoFormat         mFb1VideoFormatLast;
+    bool 					mHasSdiOut5;					
+    bool 					mHasCSC5;					
+    bool 					mHasLUT5;					
+    bool 					mHas4kQuarter;					
 };
 
 

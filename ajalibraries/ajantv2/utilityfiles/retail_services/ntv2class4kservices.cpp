@@ -13,13 +13,13 @@
 
 Class4kServices::Class4kServices(NTV2DeviceID devID) : DeviceServices()
 {
-	bDoHdmiIn 			= NTV2DeviceGetNumHDMIVideoInputs(devID) > 0;
-	bDoHdmiOut 			= NTV2DeviceGetNumHDMIVideoOutputs(devID) > 0;
-	bDoSdiOut5 			= NTV2DeviceGetNumVideoOutputs(devID) == 5;
-	bDoAnalogOut		= NTV2DeviceGetNumAnalogVideoOutputs(devID) > 0;
-	bDo12G 				= NTV2DeviceCanDo12GSDI(devID);
-	bDoCSC5	= bDoLUT5	= bDoHdmiOut || bDoSdiOut5 || bDoAnalogOut;
-	bDo4kQuarter		= bDoSdiOut5 == false;
+	mHasHdmiIn 		= NTV2DeviceGetNumHDMIVideoInputs(devID) > 0;
+	mHasHdmiOut 	= NTV2DeviceGetNumHDMIVideoOutputs(devID) > 0;
+	mHasSdiOut5 	= NTV2DeviceGetNumVideoOutputs(devID) == 5;
+	mHasAnalogOut	= NTV2DeviceGetNumAnalogVideoOutputs(devID) > 0;
+	mHas12G 		= NTV2DeviceCanDo12GSDI(devID);
+	mHasCSC5		= mHasLUT5	= mHasHdmiOut || mHasSdiOut5 || mHasAnalogOut;
+	mHas4kQuarter	= mHasSdiOut5 == false;
 }
 
 
@@ -73,9 +73,9 @@ void Class4kServices::SetDeviceXPointPlayback ()
 	bool				bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit;
 	bool				bInRGB				= inputColorSpace == NTV2_ColorSpaceModeRgb;
 													    
-	b4k6gOut								= b4k6gOut && bDo12G;
-	b4k12gOut								= b4k12gOut && bDo12G;
-	b1wireQ4k								= b1wireQ4k && bDo4kQuarter;
+	b4k6gOut								= b4k6gOut && mHas12G;
+	b4k12gOut								= b4k12gOut && mHas12G;
+	b1wireQ4k								= b1wireQ4k && mHas4kQuarter;
 	
 	// XPoint Init 
 	NTV2CrosspointID	XPt1, XPt2, XPt3, XPt4;
@@ -308,7 +308,7 @@ void Class4kServices::SetDeviceXPointPlayback ()
 	
 	
 	// CSC 5
-	if (bDoCSC5)
+	if (mHasCSC5)
 	{
 		if (b4K && !b2pi)
 		{
@@ -481,7 +481,7 @@ void Class4kServices::SetDeviceXPointPlayback ()
 	
 	
 	// LUT 5
-	if (bDoLUT5)
+	if (mHasLUT5)
 	{
 		if (b4K && !b2pi)
 		{
@@ -1075,7 +1075,7 @@ void Class4kServices::SetDeviceXPointPlayback ()
 
 	
 	// HDMI Out
-	if (bDoHdmiOut)
+	if (mHasHdmiOut)
 	{
 		XPt1 = XPt2 = XPt3 = XPt4 = NTV2_XptBlack;
 		if (b4K)
@@ -1208,7 +1208,7 @@ void Class4kServices::SetDeviceXPointPlayback ()
 	
 	
 	// Analog Out
-	if (bDoAnalogOut)
+	if (mHasAnalogOut)
 	{
 		if (b4K)
 		{
@@ -1517,15 +1517,15 @@ void Class4kServices::SetDeviceXPointCapture ()
 	uint32_t			bFb1Disable		= 0, bFb2Disable = 1, bFb3Disable = 1, bFb4Disable = 1;
 	//bool 				bFbLevelA 		= IsVideoFormatA(mFb1sVideoFormat); 
 	bool				bQuadSwap		= b4K == true && mVirtualInputSelect == NTV2_Input4x4kSelect && mQuadSwapIn != 0;
-	bool				bHdmiIn			= mDs.bInHdmi && bDoHdmiIn;
+	bool				bHdmiIn			= mDs.bInHdmi && mHasHdmiIn;
 	bool				bHdmiInRGB		= bHdmiIn == true && mDs.hdmiIn[0]->cs == NTV2_ColorSpaceModeRgb;
 	bool				bHdmiOutRGB		= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit;
 	bool				bInRGB			= bHdmiInRGB || mDs.bInSdiRgb;
 	
-	bHdmiIn								= bHdmiIn && bDoHdmiIn;
-	bHdmiOutRGB							= bHdmiOutRGB && bDoHdmiOut;
-	//b4k6gOut							= b4k6gOut && bDo12G;
-	//b4k12gOut							= b4k12gOut && bDo12G;
+	bHdmiIn								= bHdmiIn && mHasHdmiIn;
+	bHdmiOutRGB							= bHdmiOutRGB && mHasHdmiOut;
+	//b4k6gOut							= b4k6gOut && mHas12G;
+	//b4k12gOut							= b4k12gOut && mHas12G;
 	
 	// SMPTE 425 (2pi)
 	NTV2CrosspointID	XPt1, XPt2, XPt3, XPt4;
@@ -1822,7 +1822,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 
 
 	// CSC 5
-	if (bDoCSC5)
+	if (mHasCSC5)
 	{
 		if (b4K && !b2pi)
 		{
@@ -1954,7 +1954,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 
 
 	// LUT 5
-	if (bDoLUT5)
+	if (mHasLUT5)
 	{
 		if (b4K && !b2pi)
 		{
@@ -2857,7 +2857,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 
 
 	// HDMI Out
-	if (bDoHdmiOut)
+	if (mHasHdmiOut)
 	{
 		XPt1 = XPt2 = XPt3 = XPt4 = NTV2_XptBlack;
 		if (b4K)
@@ -2985,7 +2985,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 	
 	
 	// Analog Out
-	if (bDoAnalogOut)
+	if (mHasAnalogOut)
 	{
 		if (b4K)
 		{
@@ -3032,9 +3032,9 @@ void Class4kServices::SetDeviceMiscRegisters ()
 	bool				b4k12gOut			= b4K && (b4kHfr || bSdiOutRGB) && (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	NTV2FrameRate		primaryFrameRate	= GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 	
-	bHdmiIn									= bHdmiIn && bDoHdmiIn;
-	b4k6gOut								= b4k6gOut && bDo12G;
-	b4k12gOut								= b4k12gOut && bDo12G;
+	bHdmiIn									= bHdmiIn && mHasHdmiIn;
+	b4k6gOut								= b4k6gOut && mHas12G;
+	b4k12gOut								= b4k12gOut && mHas12G;
 	
 	// single wire 3Gb out
 	// 1x3Gb = !4k && (rgb | v+k | 3d | (hfra & 3gb) | hfrb)
@@ -3088,7 +3088,7 @@ void Class4kServices::SetDeviceMiscRegisters ()
 	}
 	
 	// HDMI Out 
-	if (bDoHdmiOut)
+	if (mHasHdmiOut)
 	{
 		// set standard / mode
 		NTV2Standard v2Standard = GetHdmiV2StandardFromVideoFormat(mFb1VideoFormat);
@@ -3284,7 +3284,7 @@ void Class4kServices::SetDeviceMiscRegisters ()
 	}
 	
 	// HDMI In 
-	if (bDoHdmiIn)
+	if (mHasHdmiIn)
 	{
 		// HDMI In rgb range
 		switch (mDs.hdmiInRange)
@@ -3304,7 +3304,7 @@ void Class4kServices::SetDeviceMiscRegisters ()
 	// Note: the hardware takes a video "hit" every time we write a value to this register - whether or not
 	// the new value is different. So we're going to filter it ourselves and ONLY write a value if it
 	// has actually changed. 
-	if (bDoAnalogOut)
+	if (mHasAnalogOut)
 	{
 		NTV2LHIVideoDACMode curr2Mode, new2Mode;
 		NTV2Standard curr2Standard, new2Standard;
