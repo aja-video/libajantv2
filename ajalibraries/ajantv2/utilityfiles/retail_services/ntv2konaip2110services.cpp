@@ -3573,12 +3573,16 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
         else
         {
             // See if any transmit video channels need configuring/enabling
+            bool changed = false;
             for (uint32_t i=0; i<m2110TxVideoData.numTxVideoChannels; i++)
             {
                 if (memcmp(&m2110TxVideoData.txVideoCh[i], &s2110TxVideoDataLast->txVideoCh[i], sizeof(TxVideoChData2110)) != 0 ||
                     *videoFormatLast != mFb1VideoFormat ||
                     ipServiceForceConfig)
                 {
+                	// Something got congigured
+					changed = true;
+                
                     // Process the configuration
                     txConfig.init();
                     txConfig.remoteIP[0] = m2110TxVideoData.txVideoCh[i].remoteIP[0];
@@ -3627,7 +3631,14 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                     AgentIsAlive();
                 }
             }
-
+			// if any of the channels got reconfigured and we are in a 4K format and doing multi SDP stuff then
+			// we need to generate a new multi SDP
+			if (changed && m2110Network.multiSDP && Is4KFormat(mFb1VideoFormat))
+			{
+				printf("SetTxStreamConfiguration generating MULTI SDP\n");
+				config2110->GenSDP(SFP_1, NTV2_VIDEO4K_STREAM);
+			}
+			
             // See if any transmit audio channels need configuring/enabling
             for (uint32_t i=0; i<m2110TxAudioData.numTxAudioChannels; i++)
             {
