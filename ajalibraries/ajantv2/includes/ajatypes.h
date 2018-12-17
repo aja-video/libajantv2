@@ -28,6 +28,33 @@
 #define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
 #define	AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
 
+#if defined(__CPLUSPLUS__) || defined(__cplusplus)
+	#if defined(AJAMac)
+		//	On MacOS...
+		//		... when building for CLANG_CXX_LIBRARY=libc++		...then 'nullptr' is defined.
+		//		... when building for CLANG_CXX_LIBRARY=libstdc++	...then 'nullptr' is NOT defined.
+		//		TBD FIX FIX FIX     How to tell when building for libc++ versus libstdc++ ?!?!?!?!
+		#define AJA_NULL	NULL
+	#elif defined(AJALinux)
+		//	On Linux...
+		//		... when building libajacc, using 'nullptr' fails.
+		//		TBD FIX FIX FIX
+		#define AJA_NULL	NULL
+	#elif defined(MSWindows)
+		#define AJA_NULL	nullptr
+	#else
+		#define AJA_NULL	NULL
+	#endif
+#else
+	#define AJA_NULL		NULL
+#endif
+
+#if defined(__clang__)
+	#define AJA_FALL_THRU	 [[clang::fallthrough]]
+#else
+	#define AJA_FALL_THRU
+#endif
+
 
 #if defined (NTV2_USE_STDINT)
 	#if defined (MSWindows)
@@ -75,7 +102,6 @@
 	typedef unsigned char			UByte;
 	typedef char					SByte;
 #endif
-#define AJA_NULL (reinterpret_cast<void*>(0))
 
 // Platform dependent
 									//////////////////////////////////////////////////////////////////
@@ -88,7 +114,7 @@
 		#define WIN32_LEAN_AND_MEAN
 		#endif
 
-		#include <windows.h>
+		#include <Windows.h>
 	#endif
 	#include <Basetsd.h>
 	typedef unsigned char Boolean;
@@ -124,7 +150,7 @@
 	typedef int						Fixed_;
 	typedef int						AJASocket;
 
-	#define AJATargetBigEndian  TARGET_RT_BIG_ENDIAN
+	#define AJATargetBigEndian  0
 	#define	AJAFUNC		__func__
 
 	#define MAX_PATH 4096

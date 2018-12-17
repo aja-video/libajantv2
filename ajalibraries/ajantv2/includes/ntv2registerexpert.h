@@ -168,10 +168,27 @@ class AJAExport CNTV2RegisterExpert
         **/
         static bool						GetCrosspointSelectGroupRegisterInfo (const NTV2InputCrosspointID inInputXpt, uint32_t & outXptRegNum, uint32_t & outMaskIndex);
 
-        static const int	CONTAINS	=	0;
-        static const int	STARTSWITH	=	1;
-        static const int	ENDSWITH	=	2;
-        static const int	EXACTMATCH	=	3;
+        static const int	CONTAINS	=	0;	///< @brief	The name must contain the search string (see CNTV2RegisterExpert::GetRegistersWithName)
+        static const int	STARTSWITH	=	1;	///< @brief	The name must start with the search string (see CNTV2RegisterExpert::GetRegistersWithName)
+        static const int	ENDSWITH	=	2;	///< @brief	The name must end with the search string (see CNTV2RegisterExpert::GetRegistersWithName)
+        static const int	EXACTMATCH	=	3;	///< @brief	The name must exactly match the search string (see CNTV2RegisterExpert::GetRegistersWithName)
+    	static bool			IsAllocated(void);	///< @return	True if the Register Expert singleton has been allocated/created;  otherwise false.
+
+        /**
+            @brief		Explicitly allocates the Register Expert singleton.
+            @return		True if successful;  otherwise false.
+            @note		Normally, there is no need to call this function, as the RegisterExpert singleton is
+            			automatically allocated.
+        **/
+    	static bool Allocate(void);
+
+        /**
+            @brief		Explicitly deallocates the Register Expert singleton.
+            @return		True if successful;  otherwise false.
+            @note		Normally, there is no need to call this function, as the RegisterExpert singleton is
+            			automatically deallocated.
+        **/
+    	static bool Deallocate(void);
 
 };	//	CNTV2RegisterExpert
 

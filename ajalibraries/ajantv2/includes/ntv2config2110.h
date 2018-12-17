@@ -26,7 +26,7 @@
 
 typedef enum
 {
-    kNetworkData2110        = NTV2_FOURCC('n','t','1','3'), // 4CC of network config data
+	kNetworkData2110        = NTV2_FOURCC('n','t','1','3'), // 4CC of network config data
     kTransmitVideoData2110  = NTV2_FOURCC('t','v','1','3'), // 4CC of video transmit config data
     kTransmitAudioData2110  = NTV2_FOURCC('t','a','1','3'), // 4CC of audio transmit config data
     kReceiveVideoData2110   = NTV2_FOURCC('r','v','1','3'), // 4CC of video receive config data
@@ -57,7 +57,7 @@ typedef struct
     uint32_t                payloadType;
     NTV2VideoFormat         videoFormat;
     uint32_t                enable;
-    uint32_t                unused[4];
+	uint8_t					unused[16];
 } TxVideoChData2110;
 
 typedef struct
@@ -75,7 +75,7 @@ typedef struct
     uint32_t                firstAudioChannel;
     eNTV2PacketInterval     audioPktInterval;
     uint32_t                enable;
-    uint32_t                unused[4];
+	uint8_t					unused[16];
 } TxAudioChData2110;
 
 typedef struct
@@ -91,7 +91,7 @@ typedef struct
     uint32_t                payloadType;
     NTV2VideoFormat         videoFormat;
     uint32_t                enable;
-    uint32_t                unused[4];
+	uint8_t					unused[16];
 } RxVideoChData2110;
 
 typedef struct
@@ -109,7 +109,7 @@ typedef struct
     uint32_t                numAudioChannels;
     eNTV2PacketInterval     audioPktInterval;
     uint32_t                enable;
-    uint32_t                unused[4];
+	uint8_t					unused[16];
 } RxAudioChData2110;
 
 typedef struct
@@ -119,14 +119,14 @@ typedef struct
     char                    subnetMask[IP_STRSIZE];
     char                    gateWay[IP_STRSIZE];
     uint32_t                enable;
-    uint32_t                unused[4];
+	uint8_t					unused[16];
 } SFPData2110;
 
 typedef struct
 {
     uint32_t				txChStatus[4];
     uint32_t				rxChStatus[4];
-    uint32_t                unused[4];
+	uint8_t					unused[16];
 } IpStatus2110;
 
 typedef struct
@@ -136,7 +136,8 @@ typedef struct
     uint8_t                 ptpPreferredGMID[8];
     uint32_t                numSFPs;
     SFPData2110             sfp[2];
-    uint32_t                unused[4];
+	bool					multiSDP;
+	uint8_t					unused[15];
 } NetworkData2110;
 
 typedef struct
@@ -241,6 +242,11 @@ public:
     eNTV2PacketInterval audioPktInterval;
 };
 
+typedef struct
+{
+	rx_2110Config		rx2110Config[4];
+} multiRx_2110Config;
+
 
 /**
     @brief	The CNTV2Config2110 class is the interface to Kona-IP network I/O using SMPTE 2110
@@ -285,10 +291,12 @@ public:
     bool        SetIPServicesControl(const bool enable, const bool forceReconfig);
     bool        GetIPServicesControl(bool & enable, bool & forceReconfig);
 
-    std::string GetTxSDPUrl(const eSFP sfp, const NTV2Stream stream);
-    std::string GetTxSDP(const eSFP sfp, const NTV2Stream stream);
-    bool        GetRxSDP(std::string url, std::string & sdp);
-    bool        ExtractRxConfigFromSDP(std::string sdp, NTV2Stream stream, rx_2110Config & rxConfig);
+	std::string GetSDPUrl(const eSFP sfp, const NTV2Stream stream);
+	std::string GetGeneratedSDP(const eSFP sfp, const NTV2Stream stream);
+	bool        GetActualSDP(std::string url, std::string & sdp);
+	bool		ExtractRxVideoConfigFromSDP(std::string sdp, rx_2110Config & rxConfig);
+	bool		ExtractRxVideoConfigFromSDP(std::string sdp, multiRx_2110Config & rxConfig);
+	bool		ExtractRxAudioConfigFromSDP(std::string sdp, rx_2110Config & rxConfig);
 
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
@@ -311,6 +319,8 @@ public:
 
     bool        GetSFPMSAData(eSFP port, SFPMSAData & data);
     bool        GetLinkStatus(eSFP port, SFPStatus & sfpStatus);
+
+	bool        GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushit=true);
 
     static uint32_t  Get2110TxStreamIndex(NTV2Stream str );
     static uint32_t  GetDecapsulatorAddress(eSFP sfp, NTV2Stream stream);
@@ -353,9 +363,9 @@ protected:
 
     bool		ConfigurePTP(const eSFP sfp, const std::string localIPAddress);
 
-    bool        GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushit=true);
-    bool        GenSDPVideoStream(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, std::string gmInfo);
-    bool        GenSDPAudioStream(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, std::string gmInfo);
+	bool        GenVideoStreamSDPInfo(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo);
+	bool		GenVideoStreamMultiSDPInfo(std::stringstream & sdp, char* gmInfo);
+	bool        GenAudioStreamSDPInfo(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo);
 
     NTV2StreamType  StreamType(const NTV2Stream stream);
     NTV2Channel VideoStreamToChannel(const NTV2Stream stream);

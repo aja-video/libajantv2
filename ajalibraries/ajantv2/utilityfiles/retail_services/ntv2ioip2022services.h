@@ -17,7 +17,7 @@ class IoIP2022Services : public DeviceServices
 {
 	
 public:
-	IoIP2022Services();
+	IoIP2022Services(NTV2DeviceID deviceID);
 	~IoIP2022Services();
 	
 	virtual void SetDeviceXPointPlayback ();

@@ -110,7 +110,7 @@ void CNTV2KonaFlashProgram::SetQuietMode()
 
 void CNTV2KonaFlashProgram::SetMBReset()
 {
-    if (IsKonaIPDevice())
+    if (IsIPDevice())
     {
         //Hold MB in reset
         if(GetDeviceID() == DEVICE_ID_IOIP_2022 || GetDeviceID() == DEVICE_ID_IOIP_2110)
@@ -532,7 +532,7 @@ bool CNTV2KonaFlashProgram::ReadInfoString()
     }
     else
     {
-        if (_deviceID != 0x010220 || !IsKonaIPDevice())
+        if (_deviceID != 0x010220 || !IsIPDevice())
             return false;
 		uint32_t baseAddress = _mcsInfoOffset;
         SetFlashBlockIDBank(MCS_INFO_BLOCK);
@@ -1171,7 +1171,7 @@ bool CNTV2KonaFlashProgram::CreateEDIDIntelRecord()
 
 bool CNTV2KonaFlashProgram::ProgramMACAddresses(MacAddr * mac1, MacAddr * mac2)
 {
-	if(!IsKonaIPDevice())
+	if(!IsIPDevice())
 		return false;
 
     if (mac1 == NULL || mac2 == NULL)
@@ -1270,7 +1270,7 @@ bool CNTV2KonaFlashProgram::ReadMACAddresses(MacAddr & mac1, MacAddr & mac2)
 	uint32_t lo2;
 	uint32_t hi2;
 
-	if(!IsKonaIPDevice())
+	if(!IsIPDevice())
 		return false;
 
     if (_spiFlash)
@@ -1360,7 +1360,7 @@ bool CNTV2KonaFlashProgram::ReadMACAddresses(MacAddr & mac1, MacAddr & mac2)
 bool
 CNTV2KonaFlashProgram::ProgramLicenseInfo(std::string licenseString)
 {
-	if(!IsKonaIPDevice())
+	if(!IsIPDevice())
 		return false;
 
     if (_spiFlash)
@@ -1437,7 +1437,7 @@ bool CNTV2KonaFlashProgram::ReadLicenseInfo(std::string& serialString)
 {
     const uint32_t maxSize = 100;
 
-    if(!IsKonaIPDevice())
+    if(!IsIPDevice())
         return false;
 
     if (_spiFlash)
@@ -1823,6 +1823,8 @@ bool CNTV2KonaFlashProgram::ProgramFromMCS(bool verify)
             WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
             WaitForFlashNOTBusy();
             SetBankSelect(BANK_0);
+
+			SetWarmBootFirmwareReload(true);
         }
         else
         {

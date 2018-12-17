@@ -7673,7 +7673,7 @@ string NTV2InputSourceToString (const NTV2InputSource inValue,	const bool inForR
 		case NTV2_INPUTSOURCE_SDI6:				return inForRetailDisplay ? "SDI6"		: "NTV2_INPUTSOURCE_SDI6";
 		case NTV2_INPUTSOURCE_SDI7:				return inForRetailDisplay ? "SDI7"		: "NTV2_INPUTSOURCE_SDI7";
 		case NTV2_INPUTSOURCE_SDI8:				return inForRetailDisplay ? "SDI8"		: "NTV2_INPUTSOURCE_SDI8";
-		case NTV2_NUM_INPUTSOURCES:				break;
+		case NTV2_INPUTSOURCE_INVALID:			return inForRetailDisplay ? ""			: "NTV2_INPUTSOURCE_INVALID";
 	}
 	return string ();
 }

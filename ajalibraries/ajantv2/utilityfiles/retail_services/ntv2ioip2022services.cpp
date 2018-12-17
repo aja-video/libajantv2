@@ -21,8 +21,9 @@ using namespace std;
 //	class IoIP2022Services
 //-------------------------------------------------------------------------------------------------------
 
-IoIP2022Services::IoIP2022Services()
+IoIP2022Services::IoIP2022Services(NTV2DeviceID deviceID)
 {
+	(void) deviceID;
     config = NULL;
     mFb1ModeLast = NTV2_MODE_INVALID;
     mFb1VideoFormatLast = NTV2_FORMAT_UNKNOWN;

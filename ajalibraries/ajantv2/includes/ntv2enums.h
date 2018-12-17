@@ -1250,7 +1250,8 @@ typedef enum
     NTV2_ANC2_STREAM        = 9,
     NTV2_ANC3_STREAM        = 10,
     NTV2_ANC4_STREAM        = 11,
-    NTV2_MAX_NUM_STREAMS    = 12,
+	NTV2_VIDEO4K_STREAM		= 12,
+	NTV2_MAX_NUM_STREAMS    = 13,
     NTV2_STREAM_INVALID = NTV2_MAX_NUM_STREAMS
 } NTV2Stream;
 
@@ -1265,6 +1266,7 @@ typedef enum
     VIDEO_STREAM,		///< @brief	Video data
     AUDIO_STREAM,		///< @brief	Audio data
     ANC_STREAM,         ///< @brief	Anc data
+	VIDEO_4K_STREAM,	///< @brief	4K Video stream using 4 streams
     INVALID_STREAM
 } NTV2StreamType;
 
@@ -2080,14 +2082,15 @@ typedef enum
 } NTV2DeviceInitialized;
 
 
-typedef enum
-{
-    NTV2_YUVSelect,
-    NTV2_RGBSelect,
-    NTV2_Stereo3DSelect,
-    NTV2_NUM_SDIInputFormats
-} NTV2SDIInputFormatSelect;				// Deprecated
-
+#if !defined(NTV2_DEPRECATE_15_1)
+	typedef enum
+	{
+		NTV2_YUVSelect,
+		NTV2_RGBSelect,
+		NTV2_Stereo3DSelect,
+		NTV2_NUM_SDIInputFormats
+	} NTV2SDIInputFormatSelect;
+#endif	//	!defined(NTV2_DEPRECATE_15_1)
 
 typedef enum
 {
@@ -3243,21 +3246,22 @@ typedef enum
 } NTV2DSKAudioMode;
 
 
-// note: Pause Mode is a "software" feature - not performed in hardware
-typedef enum
-{
-    NTV2_PauseOnFrame,
-    NTV2_PauseOnField
-} NTV2PauseModeType;	// deprecated
+#if !defined(NTV2_DEPRECATE_15_1)
+	// note: Pause Mode is a "software" feature - not performed in hardware
+	typedef enum
+	{
+		NTV2_PauseOnFrame,
+		NTV2_PauseOnField
+	} NTV2PauseModeType;
 
-
-// note: 24 fps <-> 30 fps Pulldown is a "software" feature - not performed in hardware
-typedef enum
-{
-    NTV2_Pulldown2323,
-    NTV2_Pulldown2332,
-    NTV2_Pulldown2224
-} NTV2PulldownPatternType;	// deprecated
+	// note: 24 fps <-> 30 fps Pulldown is a "software" feature - not performed in hardware
+	typedef enum
+	{
+		NTV2_Pulldown2323,
+		NTV2_Pulldown2332,
+		NTV2_Pulldown2224
+	} NTV2PulldownPatternType;
+#endif	//	!defined(NTV2_DEPRECATE_15_1)
 
 
 // This is a user-pref control (currently only used on the Mac) that allows the user

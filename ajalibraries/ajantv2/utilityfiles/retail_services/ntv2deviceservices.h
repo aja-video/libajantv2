@@ -43,39 +43,9 @@ typedef enum
 
 const ReferenceSelect kCaptureReferenceSelect = kVideoIn;
 
-
-//-------------------------------------------------------------------------------------------------------
-//	class HLState
-//-------------------------------------------------------------------------------------------------------
- class HLState
- {
-public:
-	explicit HLState() { init(); }
-	HLState(const HLState& s)  { copy(s); }
-	virtual ~HLState() {}
-	
-	void init();
-	void copy(const HLState& s);
-	virtual HLState& operator=(const HLState& s);
-	virtual bool operator==(const HLState& s);
-
-public:
-	// misc regs
-	bool					bHdmiIn;
-	bool					bFbLevelA;
-	bool					b4K;
-	bool					b4kHfr;
-	bool					bHfr;
-	bool					bSdiOutRGB;
-	bool					b4k6gOut;
-	bool					b4k12gOut;
-	NTV2FrameRate			primaryFrameRate;
-};
-
-
-//-------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 //	class DeviceServices
-//-------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 class DeviceServices
 {
 public:
@@ -102,16 +72,6 @@ public:
 
     // common IP support routines
     virtual void EveryFrameTask2022(CNTV2Config2022* config2022, NTV2Mode* modeLast, NTV2VideoFormat* videoFormatLast);
-    virtual void EveryFrameTask2110(CNTV2Config2110* config2110,
-                                    NTV2VideoFormat* videoFormatLast,
-									NTV2Mode* modeLast,
-                                    NetworkData2110* s2110NetworkLast,
-                                    TransmitVideoData2110* s2110TxVideoDataLast,
-                                    TransmitAudioData2110* s2110TxAudioDataLast,
-                                    ReceiveVideoData2110* s2110RxVideoDataLast,
-                                    ReceiveAudioData2110* s2110RxAudioDataLast);
-
-    virtual NTV2VideoFormat Convert21104KFormat(NTV2VideoFormat video4KFormat);
     virtual void SetNetConfig(CNTV2Config2022* config, eSFP  port);
     virtual void SetRxConfig(CNTV2Config2022* config, NTV2Channel channel, bool is2022_7);
     virtual void SetTxConfig(CNTV2Config2022* config, NTV2Channel channel, bool is2022_7);
@@ -125,7 +85,6 @@ public:
     virtual void PrintTxConfig(const tx_2022_channel chan);
     virtual void PrintEncoderConfig(const j2kEncoderConfig modelConfig, j2kEncoderConfig encoderConfig);
     virtual void PrintDecoderConfig(const j2kDecoderConfig modelConfig, j2kDecoderConfig encoderConfig);
-    virtual void Print2110Network(const NetworkData2110 m2110Network);
     virtual void PrintChArray(std::string title, const char* chstr);
 
 	// overridden in some classes
@@ -190,6 +149,9 @@ public:
 
 	void SetAudioInputSelect(NTV2InputAudioSelect input);
     void AgentIsAlive();
+    
+    void ConsolidateRegisterWrites(NTV2RegisterWrites& inRegs, 
+								   NTV2RegisterWrites& outRegs);
 
 public:
 	
@@ -257,13 +219,6 @@ public:
     bool                    m2022_7Mode;
     uint32_t				mNetworkPathDiff;
 
-    NetworkData2110			m2110Network;
-    TransmitVideoData2110   m2110TxVideoData;
-    TransmitAudioData2110   m2110TxAudioData;
-    ReceiveVideoData2110    m2110RxVideoData;
-    ReceiveAudioData2110    m2110RxAudioData;
-    IpStatus2110            m2110IpStatusData;
-
 	// real register state - common
 	NTV2DeviceID			mDeviceID;
     NTV2VideoFormat			mFb1VideoFormat;
@@ -279,6 +234,8 @@ public:
 	NTV2AnalogType			mVirtualAnalogInType;
 	uint32_t				mInputChangeCount;
 	uint32_t				mInputChangeCountLast;
+	uint32_t				mAgentAliveCount;
+	NTV2RegisterWrites		mRegisterWrites;
 	
 	NTV2HDMIRange			mHDMIInRGBRange;
 	uint32_t				mRegFramesPerVertical;	// frames per vertical interrupt (CION RAW)

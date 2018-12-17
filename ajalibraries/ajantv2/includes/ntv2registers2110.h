@@ -36,6 +36,7 @@
 #define SAREK_2110_DECAPSULATOR_0               (0x211000/4)
 #define SAREK_2110_DECAPSULATOR_1               (0x216000/4)
 #define SAREK_2110_VOIPFEC              		(0x217000/4)
+#define SAREK_2110_FEC_CTL              		(0x218000/4)
 #define SAREK_2110_AUDIO_STREAMSELECT           (0x230000/4)
 
 #define SAREK_2110_TEST_GENERATOR               (0x308000/4)

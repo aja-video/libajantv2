@@ -5221,6 +5221,8 @@ public:
 									Defaults to using the ::NTV2Standard of the ::NTV2Channel being used.
 		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
 					use \ref aboutautocirculate.
+		@see		CNTV2Card::AncExtractSetEnable, CNTV2Card::AncExtractSetWriteParams,
+					CNTV2Card::AncExtractSetFilterDIDs, \ref anccapture
 	**/
 	AJA_VIRTUAL bool	AncExtractInit (const UWord inSDIInput, const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
 										const NTV2Standard inStandard = NTV2_STANDARD_INVALID);
@@ -5233,6 +5235,7 @@ public:
 		@param[in]	inIsEnabled		Specify true to enable the Anc extractor;  otherwise false to disable it.
 		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
 					use \ref aboutautocirculate.
+		@see		CNTV2Card::AncExtractIsEnabled, \ref anccapture
 	**/
     AJA_VIRTUAL bool	AncExtractSetEnable (const UWord inSDIInput, const bool inIsEnabled);
 
@@ -5242,6 +5245,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIInput		Specifies the SDI input of interest as a zero-based index value (e.g., 0 == SDIIn1).
 		@param[out]	outIsEnabled	Receives 'true' if the Anc extractor is enabled (running);  otherwise false.
+		@see		CNTV2Card::AncExtractSetEnable, \ref anccapture
 	**/
 	AJA_VIRTUAL bool	AncExtractIsEnabled (const UWord inSDIInput, bool & outIsEnabled);
 
@@ -5259,6 +5263,7 @@ public:
 									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
 		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
 					use \ref aboutautocirculate.
+		@see		CNTV2Card::AncExtractSetField2WriteParams, \ref anccapture
 	**/
     AJA_VIRTUAL bool	AncExtractSetWriteParams (const UWord inSDIInput, const ULWord inFrameNumber,
 													const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
@@ -5278,6 +5283,7 @@ public:
 									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
 		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
 					use \ref aboutautocirculate.
+		@see		CNTV2Card::AncExtractSetWriteParams, \ref anccapture
 	**/
     AJA_VIRTUAL bool	AncExtractSetField2WriteParams (const UWord inSDIInput, const ULWord inFrameNumber,
 														const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
@@ -5289,6 +5295,7 @@ public:
 		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
 		@param[out]	outDIDs			Receives the ::NTV2DIDSet that contain the DIDs that are currently being
 									filtered (excluded).
+		@see		CNTV2Card::AncExtractSetFilterDIDs, \ref anccapture
 	**/
 	AJA_VIRTUAL bool	AncExtractGetFilterDIDs (const UWord inSDIInput, NTV2DIDSet & outDIDs);
 
@@ -5300,6 +5307,7 @@ public:
 		@param[in]	inDIDs			Specifies the DIDs to be filtered (excluded). Specify an empty set to
 									disable all packet filtering.
 		@note		DIDs having the value 0 (zero) are ignored.
+		@see		CNTV2Card::AncExtractGetFilterDIDs, \ref anccapture
 	**/
 	AJA_VIRTUAL bool	AncExtractSetFilterDIDs (const UWord inSDIInput, const NTV2DIDSet & inDIDs);
 
@@ -5317,11 +5325,13 @@ public:
 
 	/**
 		@return		The maximum number of distinct DIDs that the device Anc extractor filter can accommodate.
+		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetDefaultDIDs, \ref anccapture
 	**/
 	static UWord		AncExtractGetMaxNumFilterDIDs (void);
 
 	/**
 		@return		The default DIDs that the device Anc extractor filter is started with.
+		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetMaxNumFilterDIDs, \ref anccapture
 	**/
 	static NTV2DIDSet	AncExtractGetDefaultDIDs (void);
 

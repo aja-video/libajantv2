@@ -25,12 +25,13 @@
 
 using namespace std;
 
-
-#define	DIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
-#define	DIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
-#define	DINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
-#define	DIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
-#define	DIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
+#define	HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') << uint64_t(__x__)  << dec
+#define INSTP(_p_)			HEX16(uint64_t(_p_))
+#define	DIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	DIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	DINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	DIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	DIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 
 
 CNTV2DriverInterface::CNTV2DriverInterface ()
@@ -89,11 +90,11 @@ bool CNTV2DriverInterface::ConfigureSubscription (bool bSubscribe, INTERRUPT_ENU
 	if (bSubscribe)
 	{										//	If subscribing,
 		mEventCounts [eInterruptType] = 0;	//		clear this interrupt's event counter
-		DIINFO("Subscribing '" << ::NTV2InterruptEnumString(eInterruptType) << "' (" << UWord(eInterruptType)
+		DIDBG("Subscribing '" << ::NTV2InterruptEnumString(eInterruptType) << "' (" << UWord(eInterruptType)
 				<< "), event counter reset");
 	}
  	else
-		DIINFO("Unsubscribing '" << ::NTV2InterruptEnumString(eInterruptType) << "' (" << UWord(eInterruptType) << "), "
+		DIDBG("Unsubscribing '" << ::NTV2InterruptEnumString(eInterruptType) << "' (" << UWord(eInterruptType) << "), "
 				<< mEventCounts[eInterruptType] << " event(s) received");
 	return true;
 
@@ -237,6 +238,7 @@ bool CNTV2DriverInterface::CloseRemote()
 		#else
 			close(_sockfd);
 		#endif
+		DIINFO("Remote closed, socket=" << HEX16(uint64_t(_sockfd)) << " remoteHandle=" << DEC(_remoteHandle));
 		_remoteHandle = (LWord) INVALID_NUB_HANDLE;
 		_sockfd = -1;
 		_boardOpened = false;
@@ -491,7 +493,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 
 bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageInfo)
 {
-    if(!IsDeviceReady(false) || !IsKonaIPDevice())
+    if(!IsDeviceReady(false) || !IsIPDevice())
     {
         // cannot read flash
         return false;
@@ -735,7 +737,7 @@ void CNTV2DriverInterface::BumpEventCount (const INTERRUPT_ENUMS eInterruptType)
 
 bool CNTV2DriverInterface::IsDeviceReady(bool checkValid)
 {
-	if (IsKonaIPDevice())
+	if (IsIPDevice())
 	{
 		if(!IsMBSystemReady())
 			return false;
@@ -748,7 +750,7 @@ bool CNTV2DriverInterface::IsDeviceReady(bool checkValid)
 
 bool CNTV2DriverInterface::IsMBSystemValid()
 {
-	if (IsKonaIPDevice())
+	if (IsIPDevice())
 	{
         uint32_t val;
         ReadRegister(SAREK_REGS + kRegSarekIfVersion, val);
@@ -762,7 +764,7 @@ bool CNTV2DriverInterface::IsMBSystemValid()
 
 bool CNTV2DriverInterface::IsMBSystemReady()
 {
-	if (IsKonaIPDevice())
+	if (IsIPDevice())
 	{
 		uint32_t val;
 		ReadRegister(SAREK_REGS + kRegSarekMBState, val);
