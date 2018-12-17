@@ -1696,24 +1696,27 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
     // protocol version
     sdp << "v=0" << endl;
 
-    // username session-id  version network-type address-type address
-    sdp << "o=- ";
+	if (StreamType(stream) != VIDEO_4K_STREAM)
+	{
+		// username session-id  version network-type address-type address
+		sdp << "o=- ";
 
-    uint64_t t = GetNTPTimestamp();
-	sdp <<  To_String((int)t);
+		uint64_t t = GetNTPTimestamp();
+		sdp <<  To_String((int)t);
 
-    sdp << " 0 IN IP4 ";
+		sdp << " 0 IN IP4 ";
 
-    uint32_t val;
-    if (sfp == SFP_2)
-        mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1, val);
-    else
-        mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0, val);
+		uint32_t val;
+		if (sfp == SFP_2)
+			mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1, val);
+		else
+			mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0, val);
 
-    struct in_addr addr;
-    addr.s_addr = val;
-    string localIPAddress = inet_ntoa(addr);
-    sdp << localIPAddress << endl;
+		struct in_addr addr;
+		addr.s_addr = val;
+		string localIPAddress = inet_ntoa(addr);
+		sdp << localIPAddress << endl;
+	}
 
     // session name
     sdp << "s=AJA KonaIP 2110" << endl;
@@ -1871,7 +1874,7 @@ bool CNTV2Config2110::GenVideoStreamSDPInfo(stringstream & sdp, const eSFP sfp, 
 
 bool CNTV2Config2110::GenVideoStreamMultiSDPInfo(stringstream & sdp, char* gmInfo)
 {
-	sdp << "a=group:MULTI-2SI 1 2 3 4 " << endl;
+	sdp << "a=group:MULTI-2SI 1 2 3 4 " << endl << endl;
 
 	// generate SDP's for all 4 video streams
 	for (int i=0; i<4; i++)
@@ -2157,7 +2160,146 @@ bool CNTV2Config2110::ExtractRxVideoConfigFromSDP(std::string sdp, multiRx_2110C
 		mIpErrorCode = NTV2IpErrSDPEmpty;
 		return false;
 	}
-	return false;
+
+	// break into a vector of lines and then into tokenw
+	sdpLines.clear();
+	stringstream ss(sdp);
+	string to;
+
+	while(getline(ss,to,'\n'))
+	{
+		sdpLines.push_back(to);
+	}
+
+	// rudimentary check it is an sdp file
+	int index;
+	string value;
+
+	// is this really an SDP
+	index = getDescriptionValue(0,"v=",value);
+	if (index == -1)
+	{
+		mIpErrorCode = NTV2IpErrSDPInvalid;
+		return false;
+	}
+
+	// make sure this is a multi-2si sdp
+	index = getDescriptionValue(index,"a=group",value);
+	if (index == -1)
+	{
+		mIpErrorCode = NTV2IpErrSDPInvalid;
+		return false;
+	}
+
+	tokens = split(value.c_str(), ' ');
+	if (!((tokens.size() != 5) && (tokens[0] == "MULTI-2SI")))
+	{
+		mIpErrorCode = NTV2IpErrSDPInvalid;
+		return false;
+	}
+
+	// fill in RX struct for each stream
+	for (int i=0; i<4; i++)
+	{
+		uint32_t rxMatch = 0;
+		int rv;
+
+		rxConfig.rx2110Config[i].sourceIP = "0.0.0.0";
+
+		index = getDescriptionValue(index,"m=video",value);
+		if (index == -1)
+		{
+			// does not contain video
+			mIpErrorCode = NTV2IpErrSDPNoVideo;
+			return false;
+		}
+		tokens = split(value.c_str(), ' ');
+		if ((tokens.size() >= 1) && !tokens[0].empty())
+		{
+			rxConfig.rx2110Config[i].destPort    = atoi(tokens[0].c_str());
+			rxMatch |= RX_MATCH_2110_DEST_PORT;
+		}
+		if ((tokens.size() >= 3) && !tokens[2].empty())
+		{
+			rxConfig.rx2110Config[i].payloadType = atoi(tokens[2].c_str());
+			rxMatch |= RX_MATCH_2110_PAYLOAD;
+		}
+
+		rv = getDescriptionValue(index,"c=IN",value);
+		if (rv >= index)
+		{
+			tokens = split(value.c_str(), ' ');
+			if (tokens.size() >= 2)
+			{
+				tokens = split(tokens[1].c_str(), '/');
+				if ((tokens.size() >= 1) && !tokens[0].empty())
+				{
+					rxConfig.rx2110Config[i].destIP = tokens[0];
+					rxMatch |= RX_MATCH_2110_DEST_IP;
+				}
+			}
+		}
+
+		rv = getDescriptionValue(index,"a=rtpmap",value);
+		if (rv > index)
+		{
+			tokens = split(value.c_str(), ' ');
+			if ((tokens.size() >= 1) && !tokens[0].empty())
+			{
+				rxConfig.rx2110Config[i].payloadType = atoi(tokens[0].c_str());
+				rxMatch |= RX_MATCH_2110_PAYLOAD;
+			}
+		}
+
+		rv = getDescriptionValue(index,"a=fmtp",value);
+		if (rv > index)
+		{
+			tokens = split(value.c_str(), ' ');
+			string sampling = getVideoDescriptionValue("sampling=");
+			if (sampling ==  "YCbCr-4:2:2")
+			{
+				rxConfig.rx2110Config[i].videoSamples = VPIDSampling_YUV_422;
+			}
+			string width    = getVideoDescriptionValue("width=");
+			string height   = getVideoDescriptionValue("height=");
+			string rate     = getVideoDescriptionValue("exactframerate=");
+			bool interlace = false;
+			vector<string>::iterator it;
+			for (it = tokens.begin(); it != tokens.end(); it++)
+			{
+				// For interlace, we can get one of the following tokens:
+				// interlace
+				// interlace;
+				// interlace=1
+				// Note: interlace=0 means
+				if (it->substr( 0, 9 ) != "interlace")
+					continue;
+
+				if (*it == "interlace") {
+					interlace=true;
+					break;
+				}
+
+				if (it->substr(0,10) == "interlace;") {
+					interlace=true;
+					break;
+				}
+				if (it->substr(0,11) == "interlace=1") {
+					interlace=true;
+					break;
+				}
+			}
+			int w = atoi(width.c_str());
+			int h = atoi(height.c_str());
+			NTV2FrameRate r = stringToRate(rate);
+			NTV2VideoFormat vf = ::GetFirstMatchingVideoFormat(r,h,w,interlace,false /* no level B */);
+			rxConfig.rx2110Config[i].videoFormat = vf;
+		}
+		rxConfig.rx2110Config[i].rxMatch = rxMatch;
+		index++;
+	}
+
+	return true;
 }
 
 
@@ -2169,10 +2311,7 @@ bool CNTV2Config2110::ExtractRxVideoConfigFromSDP(std::string sdp, rx_2110Config
         return false;
     }
 
-    uint32_t rxMatch = 0;
-
     // break into a vector of lines and then into tokenw
-
     sdpLines.clear();
     stringstream ss(sdp);
     string to;
@@ -2201,6 +2340,8 @@ bool CNTV2Config2110::ExtractRxVideoConfigFromSDP(std::string sdp, rx_2110Config
         mIpErrorCode = NTV2IpErrSDPInvalid;
         return false;
     }
+
+	uint32_t rxMatch = 0;
 
     tokens = split(value.c_str(), ' ');
     if ((tokens.size() >= 6) && (tokens[3] == "IN") && (tokens[4] == "IP4"))

@@ -258,6 +258,12 @@ There are two ways to capture any/all Ancillary data packets:
 		-	SDK 15.0 or later required.
 		-	See \ref ntv2llburn for example of how to use CNTV2Card::AncExtractInit, CNTV2Card::AncExtractSetEnable,
 			CNTV2Card::AncExtractSetWriteParams, etc.
+	-	Each Anc Extractor is capable of filtering certain types of ancillary data packets:
+		-	Upon driver startup, all Anc Extractors are configured to exclude SMPTE 299 HANC Audio and Audio Control packets.
+			These packets will not appear in the ancillary data buffer(s).
+		-	Call CNTV2Card::AncExtractGetFilterDIDs to discover which packet DIDs are currently being excluded.
+		-	Call CNTV2Card::AncExtractSetFilterDIDs to change which packet DIDs will be excluded.
+		-	Use the NTV2DIDSet returned from CNTV2Card::AncExtractGetDefaultDIDs to restore the default packet exclusion list.
 	-	Default per-field ancillary data buffer capacity is 8K by default, or 16K per-frame, including overhead.
 		This can be changed on a per-device basis by setting a pair of virtual registers (using CNTV2Card::WriteRegister):
 		-	::kVRegAncField1Offset — This specifies the offset from the bottom of the 8MB/16MB frame where F1 ancillary

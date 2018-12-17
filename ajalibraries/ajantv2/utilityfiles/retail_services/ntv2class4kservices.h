@@ -24,14 +24,14 @@ public:
 	virtual void SetDeviceMiscRegisters ();
 
 protected:
-	bool bDoHdmiIn;
-	bool bDoHdmiOut;
-	bool bDoSdiOut5;
-	bool bDoAnalogOut;
-	bool bDoCSC5;
-	bool bDoLUT5;
-	bool bDo12G;
-	bool bDo4kQuarter;
+	bool mHasHdmiIn;
+	bool mHasHdmiOut;
+	bool mHasSdiOut5;
+	bool mHasAnalogOut;
+	bool mHasCSC5;
+	bool mHasLUT5;
+	bool mHas12G;
+	bool mHas4kQuarter;
 };
 
 

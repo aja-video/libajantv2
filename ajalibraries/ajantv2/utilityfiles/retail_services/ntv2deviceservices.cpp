@@ -41,13 +41,16 @@
 
 #include <algorithm>
 
+#define	AsDriverInterface(_x_)		static_cast<CNTV2DriverInterface*>(_x_)
+
+
 using namespace std;
 
-//-------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 //	static accessors
-//-------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 
-// factory method
+// factory method - static
 DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 {
 	DeviceServices* pDeviceServices = NULL;
@@ -57,11 +60,11 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 	{
         case DEVICE_ID_KONAIP_2022:
         case DEVICE_ID_IOIP_2022:
-            pDeviceServices = new IoIP2022Services();
+            pDeviceServices = new IoIP2022Services(deviceID);
             break;
         case DEVICE_ID_IOIP_2110:
         case DEVICE_ID_KONAIP_2110:
-            pDeviceServices = new KonaIP2110Services();
+            pDeviceServices = new KonaIP2110Services(deviceID);
         	break;
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
@@ -125,10 +128,10 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 	return pDeviceServices;
 }
 
-
-//-------------------------------------------------------------------------------------------------------
+// MARK: class DeviceServices -
+//--------------------------------------------------------------------------------------------------
 //	class DeviceServices
-//-------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 
 DeviceServices::DeviceServices()
 {
@@ -168,11 +171,6 @@ void DeviceServices::SetCard(CNTV2Card* pCard)
 	mRs->InitDeviceState(mDs);
 }
 
-#define	AsDriverInterface(_x_)		static_cast<CNTV2DriverInterface*>(_x_)
-
-//-------------------------------------------------------------------------------------------------------
-//	ReadDriverState
-//-------------------------------------------------------------------------------------------------------
 
 bool DeviceServices::ReadDriverState (void)
 {	
@@ -389,66 +387,17 @@ bool DeviceServices::ReadDriverState (void)
         mCard->ReadRegister(kVRegTxc_2EncodePcrPid2,		mTx2022J2kConfig2.pcrPid);
         mCard->ReadRegister(kVRegTxc_2EncodeAudio1Pid2,		mTx2022J2kConfig2.audio1Pid);
     }
-
-    if ((mDeviceID == DEVICE_ID_KONAIP_2110) ||
-        (mDeviceID == DEVICE_ID_IOIP_2110))
-    {
-        bool        bOk;
-        bOk = mCard->ReadVirtualData(kNetworkData2110, &m2110Network, sizeof(NetworkData2110));
-        if (bOk == false)
-        {
-            memset(&m2110Network, 0, sizeof(NetworkData2110));
-            //printf("Failed to get 2110 Network params\n");
-        }
-
-        bOk = mCard->ReadVirtualData(kTransmitVideoData2110, &m2110TxVideoData, sizeof(TransmitVideoData2110));
-        if (bOk == false)
-        {
-            memset(&m2110TxVideoData, 0, sizeof(TransmitVideoData2110));
-            //printf("Failed to get 2110 Transmit Video params\n");
-        }
-
-        bOk = mCard->ReadVirtualData(kTransmitAudioData2110, &m2110TxAudioData, sizeof(TransmitAudioData2110));
-        if (bOk == false)
-        {
-            memset(&m2110TxAudioData, 0, sizeof(TransmitAudioData2110));
-            //printf("Failed to get 2110 Transmit Audio params\n");
-        }
-
-        bOk = mCard->ReadVirtualData(kReceiveVideoData2110, &m2110RxVideoData, sizeof(ReceiveVideoData2110));
-        if (bOk == false)
-        {
-            memset(&m2110RxVideoData, 0, sizeof(ReceiveVideoData2110));
-            //printf("Failed to get 2110 Receive Video params\n");
-        }
-
-        bOk = mCard->ReadVirtualData(kReceiveAudioData2110, &m2110RxAudioData, sizeof(ReceiveAudioData2110));
-        if (bOk == false)
-        {
-            memset(&m2110RxAudioData, 0, sizeof(ReceiveAudioData2110));
-            //printf("Failed to get 2110 Receive Audio params\n");
-        }
-
-        bOk = mCard->ReadVirtualData(kChStatusData2110, &m2110IpStatusData, sizeof(IpStatus2110));
-        if (bOk == false)
-        {
-            memset(&m2110IpStatusData, 0, sizeof(IpStatus2110));
-            //printf("Failed to get 2110 Ip status params\n");
-        }
-    }
     
+    //return bChanged;
     return true;
 }
 
-//-------------------------------------------------------------------------------------------------------
-//	SetDeviceEveryFrameRegs
-//-------------------------------------------------------------------------------------------------------
 
 //#define USE_GROUPED_WRITES
 //#define USE_CONSOLIDATION
 
 // Do everyframe task using filter variables set in virtual register  
-void DeviceServices::SetDeviceEveryFrameRegs ()
+void DeviceServices::SetDeviceEveryFrameRegs()
 {
 	uint32_t virtualDebug1			= 0;
 	uint32_t everyFrameTaskFilter	= 0;
@@ -503,6 +452,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		mCard->SetMultiFormatMode(false);
 	}
 
+	// Playback
 	if (mFb1Mode == NTV2_MODE_DISPLAY)
 	{
 		if (IsFormatRaw(mFb1Format))
@@ -510,6 +460,8 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		else
 			SetDeviceXPointPlayback();
 	}
+	
+	// Capture
 	else
 	{
 		// follow input option
@@ -527,170 +479,6 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			SetDeviceXPointCapture();
 	}
 	
-	//Setup the analog LTC stuff
-	RP188SourceSelect timecodeSource = mDs.sdiRp188Source;
-	if (NTV2DeviceGetNumLTCInputs(mDeviceID) && timecodeSource == kRP188SourceLTCPort)
-	{
-		mCard->SetLTCInputEnable(true);
-		mCard->WriteRegister(kRegFS1ReferenceSelect, 0x1, BIT(10), 10);
-		mCard->WriteRegister(kRegLTCStatusControl, 0x0, kRegMaskLTC1InBypass, kRegShiftLTC1Bypass);
-		if(NTV2DeviceCanDoLTCInOnRefPort(mDeviceID))
-			mCard->SetLTCOnReference(true);
-	}
-	else
-	{
-		mCard->SetLTCInputEnable(false);
-		mCard->WriteRegister(kRegFS1ReferenceSelect, 0x0, BIT(10), 10);
-		mCard->WriteRegister(kRegLTCStatusControl, 0x0, kRegMaskLTC1InBypass, kRegShiftLTC1Bypass);
-		if (NTV2DeviceCanDoLTCInOnRefPort(mDeviceID))
-			mCard->SetLTCOnReference(false);
-	}
-	
-	
-	//
-	// Audio output
-	//
-	
-	// host audio
-	bool suspended = false;
-	mCard->GetSuspendHostAudio(suspended);
-	NTV2AudioSystem audioSystem = NTV2_AUDIOSYSTEM_1;
-	NTV2AudioSystem hostAudioSystem = GetHostAudioSystem();
-	
-	// if host-audio not suspended - use host-audio system
-	// note - historically host-audio was NTV2_AUDIOSYSTEM_1 only. Newer devices, host-audio use other systems.
-	if (suspended == false)
-		audioSystem = (NTV2AudioSystem) hostAudioSystem;
-	
-	// mixer - support
-	if (mCard->DeviceCanDoAudioMixer() == true )
-	{
-		ULWord appType=0; int32_t pid=0;
-		mCard->GetStreamingApplication(&appType, &pid);
-		bool bHostAudioApp = AppUsesHostAudio(appType);
-	
-		if (mAudioMixerOverrideState == false)
-		{
-			mCard->SetAudioMixerMainInputChannelSelect(NTV2_AudioChannel1_2);
-			mCard->WriteRegister(kRegAudioMixerChannelSelect, 0x06, 0xff00, 8);		// 64 audio samples (2^6) avg'd on meters
-		}
-		
-		// shared source
-		mCard->SetAudioMixerAux1x2chInputAudioSystem(NTV2_AUDIOSYSTEM_2);
-		mCard->SetAudioMixerAux2x2chInputAudioSystem(hostAudioSystem);
-	
-		if (mFb1Mode == NTV2_MODE_DISPLAY)
-		{
-			mCard->SetAudioMixerMainInputAudioSystem(bHostAudioApp ? hostAudioSystem : NTV2_AUDIOSYSTEM_1);
-		
-			if (mAudioMixerOverrideState == false)
-			{
-				mCard->WriteRegister(kRegAudioMixerMutes, mAudioMixerSourceMainEnable ? 0x0000 : 0xfffc, 0xffff, 0);
-				mCard->SetAudioMixerMainInputEnable(mAudioMixerSourceMainEnable);
-				mCard->SetAudioMixerAux1InputEnable(mAudioMixerSourceAux1Enable);
-				mCard->SetAudioMixerMainInputGain(mAudioMixerSourceMainGain);
-				mCard->SetAudioMixerAux1InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux1Gain);
-			}
-			
-			mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
-			mCard->SetAudioMixerAux2InputEnable(bHostAudioApp ? false : mAudioMixerSourceAux2Enable);
-		}
-		else
-		{
-			mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
-		
-			if (mAudioMixerOverrideState == false)
-			{
-				mCard->WriteRegister(kRegAudioMixerMutes, mAudioCapMixerSourceMainEnable ? 0x0000 : 0xfffc, 0xffff, 0);
-				mCard->SetAudioMixerMainInputEnable(mAudioCapMixerSourceMainEnable);
-				mCard->SetAudioMixerAux1InputEnable(false);
-				mCard->SetAudioMixerMainInputGain(mAudioCapMixerSourceMainGain);
-				//mCard->SetAudioMixerAux1InputGain(NTV2_AudioMixerChannel1, mAudioCapMixerSourceAux1Gain);
-			}
-			
-			mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
-			mCard->SetAudioMixerAux2InputEnable(mAudioCapMixerSourceAux2Enable);
-		}
-		
-		mCard->WriteRegister(kRegHDMIInputControl, 1, BIT(1), 1);
-		
-		audioSystem = NTV2DeviceGetAudioMixerSystem(mDeviceID);
-	}
-
-	// Setup the SDI Outputs audio source
-	switch(NTV2DeviceGetNumVideoOutputs(mDeviceID))
-	{
-	case 8:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL8, audioSystem);
-	case 7:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL7, audioSystem);
-	case 6:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL6, audioSystem);
-	case 5:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, audioSystem);
-	case 4:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL4, audioSystem);
-	case 3:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL3, audioSystem);
-	case 2:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL2, audioSystem);
-	default:
-	case 1:
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL1, audioSystem);
-		break;
-	}
-	if(NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtSDIMonOut1))
-	{
-		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, audioSystem );
-	}
-
-	switch(NTV2DeviceGetNumVideoChannels(mDeviceID))
-	{
-	case 8:
-		mCard->SetFrameBufferOrientation(NTV2_CHANNEL8, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
-	case 7:
-		mCard->SetFrameBufferOrientation(NTV2_CHANNEL7, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
-	case 6:
-		mCard->SetFrameBufferOrientation(NTV2_CHANNEL6, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
-	case 5:
-		mCard->SetFrameBufferOrientation(NTV2_CHANNEL5, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
-	case 4:
-		mCard->SetFrameBufferOrientation(NTV2_CHANNEL4, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
-	case 3:
-		mCard->SetFrameBufferOrientation(NTV2_CHANNEL3, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
-	case 2:
-		mCard->SetFrameBufferOrientation(NTV2_CHANNEL2, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
-	default:
-	case 1:
-		mCard->SetFrameBufferOrientation(NTV2_CHANNEL1, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
-		break;
-	}
-	
-	// audio monitor
-	ULWord chSelect = NTV2_AudioMonitor1_2;
-	mCard->ReadRegister(kVRegAudioMonitorChannelSelect, chSelect);
-	if (mDeviceID == DEVICE_ID_IO4KPLUS || mDeviceID == DEVICE_ID_IO4K || 
-		mDeviceID == DEVICE_ID_KONA4 || mCard->DeviceCanDoAudioMixer() == true)
-	{
-		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect, NTV2_CHANNEL4);
-		mCard->SetAESOutputSource(NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_4, chSelect <= NTV2_AudioMonitor7_8 ? NTV2_AudioChannel1_4 : NTV2_AudioChannel9_12);
-		mCard->SetAESOutputSource(NTV2_AudioChannel5_8, NTV2_AUDIOSYSTEM_4,  chSelect <= NTV2_AudioMonitor7_8 ? NTV2_AudioChannel5_8 : NTV2_AudioChannel13_16);
-	}
-	else if (	mDeviceID == DEVICE_ID_KONA3G	|| mDeviceID == DEVICE_ID_KONA3GQUAD ||
-				mDeviceID == DEVICE_ID_IO4KUFC	|| mDeviceID == DEVICE_ID_KONA4UFC	||
-				mDeviceID == DEVICE_ID_IOXT )
-	{
-		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect,  NTV2_CHANNEL1);
-	}
-	else
-	{
-		mCard->WriteRegister(kRegAud1Control, chSelect, kK2RegMaskKBoxAnalogMonitor, kK2RegShiftKBoxAnalogMonitor);
-	}
-
-	//Setup LUTs
-	UpdateK2ColorSpaceMatrixSelect();
-	UpdateK2LUTSelect();
-
 	// Set misc registers
 	SetDeviceMiscRegisters();
 	
@@ -718,13 +506,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 #endif
 }
 
-
-void DeviceServices::SetDeviceMiscRegisters ()
-{
-}
-
 // MARK: support -
-
 
 bool DeviceServices::SetVPIDData (	ULWord &				outVPID,
 									const NTV2VideoFormat	inOutputFormat,
@@ -1824,388 +1606,8 @@ NTV2FrameRate DeviceServices::HalfFrameRate(NTV2FrameRate rate)
 	return halfRate;
 }
 
-
-// MARK: -
-
 // IP common support routines
-
-//-------------------------------------------------------------------------------------------------------
-//	Support Routines
-//-------------------------------------------------------------------------------------------------------
-void DeviceServices::EveryFrameTask2110(CNTV2Config2110* config2110,
-                                        NTV2VideoFormat* videoFormatLast,
-										NTV2Mode* modeLast,
-                                        NetworkData2110* s2110NetworkLast,
-                                        TransmitVideoData2110* s2110TxVideoDataLast,
-                                        TransmitAudioData2110* s2110TxAudioDataLast,
-                                        ReceiveVideoData2110* s2110RxVideoDataLast,
-                                        ReceiveAudioData2110* s2110RxAudioDataLast)
-{
-    bool ipServiceEnable, ipServiceForceConfig;
-
-    config2110->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
-    if (ipServiceEnable)
-    {
-        tx_2110Config txConfig;
-		uint32_t vRegConfigStreamRefreshValue;
-		uint32_t vRegConfigStreamRefreshMask;
-
-		mCard->ReadRegister(kVRegIpConfigStreamRefresh, vRegConfigStreamRefreshValue);
-		vRegConfigStreamRefreshMask = vRegConfigStreamRefreshValue;
-		mCard->WriteRegister(kVRegIpConfigStreamRefresh, 0, vRegConfigStreamRefreshMask);
-
-        // Handle reset case
-
-        if ((m2110TxVideoData.numTxVideoChannels == 0) &&
-            (m2110TxAudioData.numTxAudioChannels == 0) &&
-            (m2110RxVideoData.numRxVideoChannels == 0) &&
-            (m2110RxAudioData.numRxAudioChannels == 0))
-        {
-            for (uint32_t i=0; i<4; i++)
-            {
-                if (memcmp(&m2110TxVideoData.txVideoCh[i], &s2110TxVideoDataLast->txVideoCh[i], sizeof(TxVideoChData2110)) != 0)
-                {
-                    printf("TX Video Reset disable %d\n", s2110TxVideoDataLast->txVideoCh[i].stream);
-                    config2110->SetTxStreamEnable(s2110TxVideoDataLast->txVideoCh[i].stream, false, false);
-                    s2110TxVideoDataLast->txVideoCh[i] = m2110TxVideoData.txVideoCh[i];
-                }
-                if (memcmp(&m2110TxAudioData.txAudioCh[i], &s2110TxAudioDataLast->txAudioCh[i], sizeof(TxAudioChData2110)) != 0)
-                {
-                    printf("TX Audio Reset disable %d\n", s2110TxAudioDataLast->txAudioCh[i].stream);
-                    config2110->SetTxStreamEnable(s2110TxAudioDataLast->txAudioCh[i].stream, false, false);
-                    s2110TxAudioDataLast->txAudioCh[i] = m2110TxAudioData.txAudioCh[i];
-                }
-                if (memcmp(&m2110RxVideoData.rxVideoCh[i], &s2110RxVideoDataLast->rxVideoCh[i], sizeof(RxVideoChData2110)) != 0)
-                {
-                    printf("RX Video Reset disable %d\n", s2110RxVideoDataLast->rxVideoCh[i].stream);
-                    config2110->SetRxStreamEnable(SFP_1, s2110RxVideoDataLast->rxVideoCh[i].stream, false);
-                    config2110->SetRxStreamEnable(SFP_2, s2110RxVideoDataLast->rxVideoCh[i].stream, false);
-                    s2110RxVideoDataLast->rxVideoCh[i] = m2110RxVideoData.rxVideoCh[i];
-                }
-                if (memcmp(&m2110RxAudioData.rxAudioCh[i], &s2110RxAudioDataLast->rxAudioCh[i], sizeof(RxAudioChData2110)) != 0)
-                {
-                    printf("RX Audio Reset disable %d\n", s2110RxAudioDataLast->rxAudioCh[i].stream);
-                    config2110->SetRxStreamEnable(SFP_1, s2110RxAudioDataLast->rxAudioCh[i].stream, false);
-                    config2110->SetRxStreamEnable(SFP_2, s2110RxAudioDataLast->rxAudioCh[i].stream, false);
-                    s2110RxAudioDataLast->rxAudioCh[i] = m2110RxAudioData.rxAudioCh[i];
-                }
-                m2110IpStatusData.txChStatus[i] = kIpStatusStopped;
-                m2110IpStatusData.rxChStatus[i] = kIpStatusStopped;
-            }
-        }
-        else
-        {
-            // See if any transmit video channels need configuring/enabling
-            for (uint32_t i=0; i<m2110TxVideoData.numTxVideoChannels; i++)
-            {
-                if (memcmp(&m2110TxVideoData.txVideoCh[i], &s2110TxVideoDataLast->txVideoCh[i], sizeof(TxVideoChData2110)) != 0 ||
-                    *videoFormatLast != mFb1VideoFormat ||
-                    ipServiceForceConfig)
-                {
-                    // Process the configuration
-                    txConfig.init();
-                    txConfig.remoteIP[0] = m2110TxVideoData.txVideoCh[i].remoteIP[0];
-                    txConfig.remoteIP[1] = m2110TxVideoData.txVideoCh[i].remoteIP[1];
-                    txConfig.remotePort[0] = m2110TxVideoData.txVideoCh[i].remotePort[0];
-                    txConfig.remotePort[1] = m2110TxVideoData.txVideoCh[i].remotePort[1];
-                    txConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
-                    txConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
-                    txConfig.localPort[0] = m2110TxVideoData.txVideoCh[i].localPort[0];
-                    txConfig.localPort[1] = m2110TxVideoData.txVideoCh[i].localPort[1];
-                    txConfig.payloadType = m2110TxVideoData.txVideoCh[i].payloadType;
-                    txConfig.ttl = 0x40;
-                    txConfig.tos = 0x64;
-
-                    // Video specific
-                    txConfig.videoFormat = Convert21104KFormat(mFb1VideoFormat);
-                    txConfig.videoSamples = VPIDSampling_YUV_422;
-
-                    // Start by turning off the video stream
-                    printf("SetTxVideoStream off %d\n", m2110TxVideoData.txVideoCh[i].stream);
-                    config2110->SetTxStreamEnable(m2110TxVideoData.txVideoCh[i].stream, false, false);
-                    m2110IpStatusData.txChStatus[i] = kIpStatusStopped;
-
-                    if (config2110->SetTxStreamConfiguration(m2110TxVideoData.txVideoCh[i].stream, txConfig) == true)
-                    {
-                        printf("SetTxStreamConfiguration Video OK\n");
-                        s2110TxVideoDataLast->txVideoCh[i] = m2110TxVideoData.txVideoCh[i];
-                        SetIPError((NTV2Channel)m2110TxVideoData.txVideoCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
-
-                        // Process the enable
-                        if (m2110TxVideoData.txVideoCh[i].enable)
-                        {
-                            printf("SetTxVideoStream on %d\n", m2110TxVideoData.txVideoCh[i].stream);
-                            config2110->SetTxStreamEnable(m2110TxVideoData.txVideoCh[i].stream,
-                                                          (bool)m2110TxVideoData.txVideoCh[i].sfpEnable[0],
-                                                          (bool)m2110TxVideoData.txVideoCh[i].sfpEnable[1]);
-                            m2110IpStatusData.txChStatus[i] = kIpStatusRunning;
-                        }
-                    }
-                    else
-                    {
-                        printf("SetTxStreamConfiguration Video ERROR %s\n", config2110->getLastError().c_str());
-                        SetIPError((NTV2Channel)m2110TxVideoData.txVideoCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
-                        m2110IpStatusData.txChStatus[i] = kIpStatusFail;
-                    }
-                    AgentIsAlive();
-                }
-            }
-
-            // See if any transmit audio channels need configuring/enabling
-            for (uint32_t i=0; i<m2110TxAudioData.numTxAudioChannels; i++)
-            {
-                if (memcmp(&m2110TxAudioData.txAudioCh[i], &s2110TxAudioDataLast->txAudioCh[i], sizeof(TxAudioChData2110)) != 0 ||
-                    *videoFormatLast != mFb1VideoFormat ||
-                    ipServiceForceConfig)
-                {
-                    // Process the configuration
-                    txConfig.init();
-                    txConfig.remoteIP[0] = m2110TxAudioData.txAudioCh[i].remoteIP[0];
-                    txConfig.remoteIP[1] = m2110TxAudioData.txAudioCh[i].remoteIP[1];
-                    txConfig.remotePort[0] = m2110TxAudioData.txAudioCh[i].remotePort[0];
-                    txConfig.remotePort[1] = m2110TxAudioData.txAudioCh[i].remotePort[1];
-                    txConfig.localPort[0] = m2110TxAudioData.txAudioCh[i].localPort[0];
-                    txConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
-                    txConfig.localPort[0] = m2110TxAudioData.txAudioCh[i].localPort[0];
-                    txConfig.localPort[1] = m2110TxAudioData.txAudioCh[i].localPort[1];
-                    txConfig.payloadType = m2110TxAudioData.txAudioCh[i].payloadType;
-                    txConfig.ttl = 0x40;
-                    txConfig.tos = 0x64;
-
-                    // Audio specific
-                    txConfig.channel = m2110TxAudioData.txAudioCh[i].channel;
-                    txConfig.numAudioChannels = m2110TxAudioData.txAudioCh[i].numAudioChannels;
-                    txConfig.firstAudioChannel = m2110TxAudioData.txAudioCh[i].firstAudioChannel;
-                    txConfig.audioPktInterval = m2110TxAudioData.txAudioCh[i].audioPktInterval;
-
-                    // Start by turning off the audio stream
-                    printf("SetTxAudioStream off %d\n", m2110TxAudioData.txAudioCh[i].stream);
-                    config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].stream, false, false);
-
-                    if (config2110->SetTxStreamConfiguration(m2110TxAudioData.txAudioCh[i].stream, txConfig) == true)
-                    {
-                        printf("SetTxStreamConfiguration Audio OK\n");
-                        s2110TxAudioDataLast->txAudioCh[i] = m2110TxAudioData.txAudioCh[i];
-                        SetIPError((NTV2Channel)m2110TxVideoData.txVideoCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
-
-                        // Process the enable
-                        if (m2110TxAudioData.txAudioCh[i].enable)
-                        {
-                            printf("SetTxAudioStream on %d\n", m2110TxAudioData.txAudioCh[i].stream);
-                            config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].stream,
-                                                          (bool)m2110TxAudioData.txAudioCh[i].sfpEnable[0],
-                                                          (bool)m2110TxAudioData.txAudioCh[i].sfpEnable[1]);
-                        }
-                    }
-                    else
-                    {
-                        printf("SetTxStreamConfiguration Audio ERROR %s\n", config2110->getLastError().c_str());
-                        SetIPError((NTV2Channel)m2110TxAudioData.txAudioCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
-                    }
-                    AgentIsAlive();
-                }
-            }
-
-            rx_2110Config rxConfig;
-            eSFP sfp = SFP_1;
-
-            // See if any receive video channels need configuring/enabling
-            for (uint32_t i=0; i<m2110RxVideoData.numRxVideoChannels; i++)
-            {
-                if (memcmp(&m2110RxVideoData.rxVideoCh[i], &s2110RxVideoDataLast->rxVideoCh[i], sizeof(RxVideoChData2110)) != 0 ||
-                    *videoFormatLast != mFb1VideoFormat ||
-					vRegConfigStreamRefreshValue & (1 << (i+ NTV2_VIDEO1_STREAM)) ||
-                    ipServiceForceConfig)
-                {
-                    rxConfig.init();
-                    if (m2110RxVideoData.rxVideoCh[i].sfpEnable[1])
-                    {
-                        // Use SFP 2 params
-                        sfp = SFP_2;
-                        rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
-                        rxConfig.sourceIP = m2110RxVideoData.rxVideoCh[i].sourceIP[1];
-                        rxConfig.destIP = m2110RxVideoData.rxVideoCh[i].destIP[1];
-                        rxConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[1];
-                        rxConfig.destPort = m2110RxVideoData.rxVideoCh[i].destPort[1];
-                        sfp = SFP_2;
-                    }
-                    else if (m2110RxVideoData.rxVideoCh[i].sfpEnable[0])
-                    {
-                        // Use SFP 1 params
-                        sfp = SFP_1;
-                        rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
-                        rxConfig.sourceIP = m2110RxVideoData.rxVideoCh[i].sourceIP[0];
-                        rxConfig.destIP = m2110RxVideoData.rxVideoCh[i].destIP[0];
-                        rxConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[0];
-                        rxConfig.destPort = m2110RxVideoData.rxVideoCh[i].destPort[0];
-                    }
-                    rxConfig.payloadType = m2110RxVideoData.rxVideoCh[i].payloadType;
-
-                    // Video specific
-                    if (mFollowInputFormat && (m2110RxVideoData.rxVideoCh[i].videoFormat != NTV2_FORMAT_UNKNOWN))
-                    {
-                        rxConfig.videoFormat = Convert21104KFormat(m2110RxVideoData.rxVideoCh[i].videoFormat);
-
-                        // if format was not converted assume it was not a 4k format and disable 4k mode, otherwise enable it
-                        if (rxConfig.videoFormat == m2110RxVideoData.rxVideoCh[i].videoFormat)
-                            config2110->Set4KModeEnable(false);
-                        else
-                            config2110->Set4KModeEnable(true);
-                    }
-                    else
-                    {
-                        rxConfig.videoFormat = Convert21104KFormat(mFb1VideoFormat);
-
-                        // if format was not converted assume it was not a 4k format and disable 4k mode, otherwise enable it
-                        if (rxConfig.videoFormat == mFb1VideoFormat)
-                            config2110->Set4KModeEnable(false);
-                        else
-                            config2110->Set4KModeEnable(true);
-                    }
-                    rxConfig.videoSamples = VPIDSampling_YUV_422;
-                    printf("Format (%d, %d, %d)\n", i, mFollowInputFormat, rxConfig.videoFormat);
-
-                    // Start by turning off the video receiver
-                    printf("SetRxVideoStream off %d\n", m2110RxVideoData.rxVideoCh[i].stream);
-                    config2110->SetRxStreamEnable(sfp, m2110RxVideoData.rxVideoCh[i].stream, false);
-                    m2110IpStatusData.rxChStatus[i] = kIpStatusStopped;
-
-                    if (config2110->SetRxStreamConfiguration(sfp, m2110RxVideoData.rxVideoCh[i].stream, rxConfig) == true)
-                    {
-                        printf("SetRxStreamConfiguration Video OK\n");
-                        s2110RxVideoDataLast->rxVideoCh[i] = m2110RxVideoData.rxVideoCh[i];
-                        SetIPError((NTV2Channel)m2110RxVideoData.rxVideoCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
-
-                        // Process the enable
-                        if (m2110RxVideoData.rxVideoCh[i].enable)
-                        {
-                            printf("SetRxVideoStream on %d\n", m2110RxVideoData.rxVideoCh[i].stream);
-                            config2110->SetRxStreamEnable(sfp, m2110RxVideoData.rxVideoCh[i].stream, true);
-                            m2110IpStatusData.rxChStatus[i] = kIpStatusRunning;
-                        }
-                    }
-                    else
-                    {
-                        printf("SetRxStreamConfiguration Video ERROR %s\n", config2110->getLastError().c_str());
-                        SetIPError((NTV2Channel)m2110RxVideoData.rxVideoCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
-                        m2110IpStatusData.rxChStatus[i] = kIpStatusFail;
-                    }
-                    AgentIsAlive();
-                }
-            }
-            *videoFormatLast = mFb1VideoFormat;
-
-            // See if any receive audio channels need configuring/enabling
-            for (uint32_t i=0; i<m2110RxAudioData.numRxAudioChannels; i++)
-            {
-                if (memcmp(&m2110RxAudioData.rxAudioCh[i], &s2110RxAudioDataLast->rxAudioCh[i], sizeof(RxAudioChData2110)) != 0 ||
-					vRegConfigStreamRefreshValue & (1 << (i+ NTV2_AUDIO1_STREAM)) ||
-					ipServiceForceConfig)
-                {
-                    rxConfig.init();
-                    if (m2110RxAudioData.rxAudioCh[i].sfpEnable[1])
-                    {
-                        // Use SFP 2 params
-                        sfp = SFP_2;
-                        rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
-                        rxConfig.sourceIP = m2110RxAudioData.rxAudioCh[i].sourceIP[1];
-                        rxConfig.destIP = m2110RxAudioData.rxAudioCh[i].destIP[1];
-                        rxConfig.sourcePort = m2110RxAudioData.rxAudioCh[i].sourcePort[1];
-                        rxConfig.destPort = m2110RxAudioData.rxAudioCh[i].destPort[1];
-                        sfp = SFP_2;
-                    }
-                    else if (m2110RxAudioData.rxAudioCh[i].sfpEnable[0])
-                    {
-                        // Use SFP 1 params
-                        sfp = SFP_1;
-                        rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
-                        rxConfig.sourceIP = m2110RxAudioData.rxAudioCh[i].sourceIP[0];
-                        rxConfig.destIP = m2110RxAudioData.rxAudioCh[i].destIP[0];
-                        rxConfig.sourcePort = m2110RxAudioData.rxAudioCh[i].sourcePort[0];
-                        rxConfig.destPort = m2110RxAudioData.rxAudioCh[i].destPort[0];
-                    }
-                    rxConfig.payloadType = m2110RxAudioData.rxAudioCh[i].payloadType;
-
-                    // Audio specific
-                    rxConfig.numAudioChannels = m2110RxAudioData.rxAudioCh[i].numAudioChannels;
-                    rxConfig.audioPktInterval = m2110RxAudioData.rxAudioCh[i].audioPktInterval;
-
-                    // Start by turning off the audio receiver
-                    printf("SetRxAudioStream off %d\n", m2110RxAudioData.rxAudioCh[i].stream);
-                    config2110->SetRxStreamEnable(sfp, m2110RxAudioData.rxAudioCh[i].stream, false);
-
-                    if (config2110->SetRxStreamConfiguration(sfp, m2110RxAudioData.rxAudioCh[i].stream, rxConfig) == true)
-                    {
-                        printf("SetRxStreamConfiguration Audio OK\n");
-                        s2110RxAudioDataLast->rxAudioCh[i] = m2110RxAudioData.rxAudioCh[i];
-                        SetIPError(m2110RxAudioData.rxAudioCh[i].channel, kErrNetworkConfig, NTV2IpErrNone);
-
-                        // Process the enable
-                        if (m2110RxAudioData.rxAudioCh[i].enable)
-                        {
-                            printf("SetRxAudioStream on %d\n", m2110RxAudioData.rxAudioCh[i].stream);
-                            config2110->SetRxStreamEnable(sfp, m2110RxAudioData.rxAudioCh[i].stream, true);
-                        }
-                    }
-                    else
-                    {
-                        printf("SetRxStreamConfiguration Audio ERROR %s\n", config2110->getLastError().c_str());
-                        SetIPError(m2110RxAudioData.rxAudioCh[i].channel, kErrNetworkConfig, config2110->getLastErrorCode());
-                    }
-                    AgentIsAlive();
-                }
-            }
-        }
-        
-        // See if network needs configuring
-        if (memcmp(&m2110Network, s2110NetworkLast, sizeof(NetworkData2110)) != 0 || ipServiceForceConfig)
-        {
-            *s2110NetworkLast = m2110Network;
-
-            mCard->SetReference(NTV2_REFERENCE_SFP1_PTP);
-            config2110->SetPTPDomain(m2110Network.ptpDomain);
-            config2110->SetPTPPreferredGrandMasterId(m2110Network.ptpPreferredGMID);
-
-            for (uint32_t i = 0; i < SFP_MAX_NUM_SFPS; i++)
-            {
-                eSFP sfp = SFP_1;
-                if (i > 0)
-                    sfp = SFP_2;
-
-                bool rv;
-                if (m2110Network.sfp[i].enable)
-                {
-                    rv =  config2110->SetNetworkConfiguration(sfp,
-                                                              m2110Network.sfp[i].ipAddress,
-                                                              m2110Network.sfp[i].subnetMask,
-                                                              m2110Network.sfp[i].gateWay);
-                    if (rv)
-                    {
-                        printf("SetNetworkConfiguration OK\n");
-                        SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
-                    }
-                    else
-                    {
-                        printf("SetNetworkConfiguration ERROR %s\n", config2110->getLastError().c_str());
-                        SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, config2110->getLastErrorCode());
-                    }
-                }
-                else
-                {
-                    printf("DisableNetworkInterface\n");
-                    config2110->DisableNetworkInterface(sfp);
-                }
-                AgentIsAlive();
-            }
-        }
-
-        // Write status
-        mCard->WriteVirtualData(kChStatusData2110, &m2110IpStatusData, sizeof(IpStatus2110));
-        
-        // Turn off force config
-        config2110->SetIPServicesControl(ipServiceEnable, false);
-    }
-}
+// MARK: -
 
 void DeviceServices::EveryFrameTask2022(CNTV2Config2022* config2022, NTV2Mode* modeLast, NTV2VideoFormat* videoFormatLast)
 {
@@ -2482,85 +1884,6 @@ void DeviceServices::EveryFrameTask2022(CNTV2Config2022* config2022, NTV2Mode* m
     }
 }
 
-NTV2VideoFormat DeviceServices::Convert21104KFormat(NTV2VideoFormat videoFormat)
-{
-    NTV2VideoFormat format;
-
-    switch (videoFormat)
-    {
-        case NTV2_FORMAT_4x2048x1080p_2398:
-        case NTV2_FORMAT_4x2048x1080psf_2398:
-            format = NTV2_FORMAT_1080p_2K_2398;
-            break;
-        case NTV2_FORMAT_4x2048x1080p_2400:
-        case NTV2_FORMAT_4x2048x1080psf_2400:
-            format = NTV2_FORMAT_1080p_2K_2400;
-            break;
-        case NTV2_FORMAT_4x2048x1080p_2500:
-        case NTV2_FORMAT_4x2048x1080psf_2500:
-            format = NTV2_FORMAT_1080p_2K_2500;
-            break;
-        case NTV2_FORMAT_4x2048x1080p_2997:
-        case NTV2_FORMAT_4x2048x1080psf_2997:
-            format = NTV2_FORMAT_1080p_2K_2997;
-            break;
-        case NTV2_FORMAT_4x2048x1080p_3000:
-        case NTV2_FORMAT_4x2048x1080psf_3000:
-            format = NTV2_FORMAT_1080p_2K_3000;
-            break;
-        case NTV2_FORMAT_4x2048x1080p_4795:
-            format = NTV2_FORMAT_1080p_2K_4795_A;
-            break;
-        case NTV2_FORMAT_4x2048x1080p_4800:
-            format = NTV2_FORMAT_1080p_2K_4800_A;
-            break;
-        case NTV2_FORMAT_4x2048x1080p_5000:
-            format = NTV2_FORMAT_1080p_2K_5000_A;
-            break;
-        case NTV2_FORMAT_4x2048x1080p_5994:
-            format = NTV2_FORMAT_1080p_2K_5994_A;
-            break;
-        case NTV2_FORMAT_4x2048x1080p_6000:
-            format = NTV2_FORMAT_1080p_2K_6000_A;
-            break;
-
-        case NTV2_FORMAT_4x1920x1080p_2398:
-        case NTV2_FORMAT_4x1920x1080psf_2398:
-            format = NTV2_FORMAT_1080p_2398;
-            break;
-        case NTV2_FORMAT_4x1920x1080p_2400:
-        case NTV2_FORMAT_4x1920x1080psf_2400:
-            format = NTV2_FORMAT_1080p_2400;
-            break;
-        case NTV2_FORMAT_4x1920x1080p_2500:
-        case NTV2_FORMAT_4x1920x1080psf_2500:
-            format = NTV2_FORMAT_1080p_2500;
-            break;
-        case NTV2_FORMAT_4x1920x1080p_2997:
-        case NTV2_FORMAT_4x1920x1080psf_2997:
-            format = NTV2_FORMAT_1080p_2997;
-            break;
-        case NTV2_FORMAT_4x1920x1080p_3000:
-        case NTV2_FORMAT_4x1920x1080psf_3000:
-            format = NTV2_FORMAT_1080p_3000;
-            break;
-        case NTV2_FORMAT_4x1920x1080p_5000:
-            format = NTV2_FORMAT_1080p_5000_A;
-            break;
-        case NTV2_FORMAT_4x1920x1080p_5994:
-            format = NTV2_FORMAT_1080p_5994_A;
-            break;
-        case NTV2_FORMAT_4x1920x1080p_6000:
-            format = NTV2_FORMAT_1080p_6000_A;
-            break;
-
-        default:
-            format = videoFormat;
-            break;
-    }
-    
-    return format;
-}
 
 void  DeviceServices::SetNetConfig(CNTV2Config2022* config, eSFP  port)
 {
@@ -2965,19 +2288,6 @@ void DeviceServices::PrintDecoderConfig(const j2kDecoderConfig modelConfig, j2kD
     printf("audioNumber    %6d%6d\n\n", modelConfig.audioNumber, encoderConfig.audioNumber);
 }
 
-
-void DeviceServices::Print2110Network(const NetworkData2110 m2110Network)
-{
-    PrintChArray("ptpMaster", &m2110Network.sfp[0].ipAddress[0]);
-    //PrintChArray("ptpMaster", &m2110Network.sfp[0].subnetMask[0]);
-    //PrintChArray("ptpMaster", &m2110Network.sfp[0].gateWay[0]);
-    PrintChArray("ptpMaster", &m2110Network.sfp[1].ipAddress[0]);
-    //PrintChArray("ptpMaster", &m2110Network.sfp[1].subnetMask[0]);
-    //PrintChArray("ptpMaster", &m2110Network.sfp[1].gateWay[0]);
-    printf("\n");
-
-}
-
 void DeviceServices::PrintChArray(const std::string title, const char* chstr)
 {
     printf("%4s          ", title.c_str());
@@ -2989,8 +2299,6 @@ void DeviceServices::PrintChArray(const std::string title, const char* chstr)
 
 
 }
-
-
 
 // MARK: -
 
@@ -3746,6 +3054,7 @@ void DeviceServices::SetDeviceXPointCapture()
 	}
 }
 
+
 void DeviceServices::SetDeviceXPointPlayback()
 {
 	bool bDSKNeedsInputRef 	= false;
@@ -3909,8 +3218,6 @@ void DeviceServices::SetDeviceXPointPlayback()
 
 void DeviceServices::SetDeviceXPointPlaybackRaw()
 {
-
-
 	// CSC 1
 	mCard->Connect (NTV2_XptCSC1VidInput, NTV2_XptBlack);
 	// CSC 2
@@ -4413,9 +3720,178 @@ void DeviceServices::SetDeviceXPointCaptureRaw()
 	}
 }
 
-//-------------------------------------------------------------------------------------------------------
-//	SetAudioInputSelect
-//-------------------------------------------------------------------------------------------------------
+
+void DeviceServices::SetDeviceMiscRegisters()
+{
+	//
+	// Setup the analog LTC stuff
+	//
+	
+	RP188SourceSelect timecodeSource = mDs.sdiRp188Source;
+	if (NTV2DeviceGetNumLTCInputs(mDeviceID) && timecodeSource == kRP188SourceLTCPort)
+	{
+		mCard->SetLTCInputEnable(true);
+		mCard->WriteRegister(kRegFS1ReferenceSelect, 0x1, BIT(10), 10);
+		mCard->WriteRegister(kRegLTCStatusControl, 0x0, kRegMaskLTC1InBypass, kRegShiftLTC1Bypass);
+		if(NTV2DeviceCanDoLTCInOnRefPort(mDeviceID))
+			mCard->SetLTCOnReference(true);
+	}
+	else
+	{
+		mCard->SetLTCInputEnable(false);
+		mCard->WriteRegister(kRegFS1ReferenceSelect, 0x0, BIT(10), 10);
+		mCard->WriteRegister(kRegLTCStatusControl, 0x0, kRegMaskLTC1InBypass, kRegShiftLTC1Bypass);
+		if (NTV2DeviceCanDoLTCInOnRefPort(mDeviceID))
+			mCard->SetLTCOnReference(false);
+	}
+
+
+	//
+	// Audio output
+	//
+	
+	// host audio
+	bool suspended = false;
+	mCard->GetSuspendHostAudio(suspended);
+	NTV2AudioSystem audioSystem = NTV2_AUDIOSYSTEM_1;
+	NTV2AudioSystem hostAudioSystem = GetHostAudioSystem();
+	
+	// if host-audio not suspended - use host-audio system
+	// note - historically host-audio was NTV2_AUDIOSYSTEM_1 only. Newer devices, host-audio use other systems.
+	if (suspended == false)
+		audioSystem = (NTV2AudioSystem) hostAudioSystem;
+	
+	// mixer - support
+	if (mCard->DeviceCanDoAudioMixer() == true )
+	{
+		ULWord appType=0; int32_t pid=0;
+		mCard->GetStreamingApplication(&appType, &pid);
+		bool bHostAudioApp = AppUsesHostAudio(appType);
+	
+		if (mAudioMixerOverrideState == false)
+		{
+			mCard->SetAudioMixerMainInputChannelSelect(NTV2_AudioChannel1_2);
+			mCard->WriteRegister(kRegAudioMixerChannelSelect, 0x06, 0xff00, 8);		// 64 audio samples (2^6) avg'd on meters
+		}
+		
+		// shared source
+		mCard->SetAudioMixerAux1x2chInputAudioSystem(NTV2_AUDIOSYSTEM_2);
+		mCard->SetAudioMixerAux2x2chInputAudioSystem(hostAudioSystem);
+	
+		if (mFb1Mode == NTV2_MODE_DISPLAY)
+		{
+			mCard->SetAudioMixerMainInputAudioSystem(bHostAudioApp ? hostAudioSystem : NTV2_AUDIOSYSTEM_1);
+		
+			if (mAudioMixerOverrideState == false)
+			{
+				mCard->WriteRegister(kRegAudioMixerMutes, mAudioMixerSourceMainEnable ? 0x0000 : 0xfffc, 0xffff, 0);
+				mCard->SetAudioMixerMainInputEnable(mAudioMixerSourceMainEnable);
+				mCard->SetAudioMixerAux1InputEnable(mAudioMixerSourceAux1Enable);
+				mCard->SetAudioMixerMainInputGain(mAudioMixerSourceMainGain);
+				mCard->SetAudioMixerAux1InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux1Gain);
+			}
+			
+			mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
+			mCard->SetAudioMixerAux2InputEnable(bHostAudioApp ? false : mAudioMixerSourceAux2Enable);
+		}
+		else
+		{
+			mCard->SetAudioMixerMainInputAudioSystem(NTV2_AUDIOSYSTEM_1);
+		
+			if (mAudioMixerOverrideState == false)
+			{
+				mCard->WriteRegister(kRegAudioMixerMutes, mAudioCapMixerSourceMainEnable ? 0x0000 : 0xfffc, 0xffff, 0);
+				mCard->SetAudioMixerMainInputEnable(mAudioCapMixerSourceMainEnable);
+				mCard->SetAudioMixerAux1InputEnable(false);
+				mCard->SetAudioMixerMainInputGain(mAudioCapMixerSourceMainGain);
+				//mCard->SetAudioMixerAux1InputGain(NTV2_AudioMixerChannel1, mAudioCapMixerSourceAux1Gain);
+			}
+			
+			mCard->SetAudioMixerAux2InputGain(NTV2_AudioMixerChannel1, mAudioMixerSourceAux2Gain);
+			mCard->SetAudioMixerAux2InputEnable(mAudioCapMixerSourceAux2Enable);
+		}
+		
+		mCard->WriteRegister(kRegHDMIInputControl, 1, BIT(1), 1);
+		
+		audioSystem = NTV2DeviceGetAudioMixerSystem(mDeviceID);
+	}
+
+	// Setup the SDI Outputs audio source
+	switch(NTV2DeviceGetNumVideoOutputs(mDeviceID))
+	{
+	case 8:
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL8, audioSystem);
+	case 7:
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL7, audioSystem);
+	case 6:
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL6, audioSystem);
+	case 5:
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, audioSystem);
+	case 4:
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL4, audioSystem);
+	case 3:
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL3, audioSystem);
+	case 2:
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL2, audioSystem);
+	default:
+	case 1:
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL1, audioSystem);
+		break;
+	}
+	if(NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtSDIMonOut1))
+	{
+		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, audioSystem );
+	}
+
+	switch(NTV2DeviceGetNumVideoChannels(mDeviceID))
+	{
+	case 8:
+		mCard->SetFrameBufferOrientation(NTV2_CHANNEL8, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+	case 7:
+		mCard->SetFrameBufferOrientation(NTV2_CHANNEL7, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+	case 6:
+		mCard->SetFrameBufferOrientation(NTV2_CHANNEL6, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+	case 5:
+		mCard->SetFrameBufferOrientation(NTV2_CHANNEL5, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+	case 4:
+		mCard->SetFrameBufferOrientation(NTV2_CHANNEL4, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+	case 3:
+		mCard->SetFrameBufferOrientation(NTV2_CHANNEL3, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+	case 2:
+		mCard->SetFrameBufferOrientation(NTV2_CHANNEL2, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+	default:
+	case 1:
+		mCard->SetFrameBufferOrientation(NTV2_CHANNEL1, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+		break;
+	}
+	
+	// audio monitor
+	ULWord chSelect = NTV2_AudioMonitor1_2;
+	mCard->ReadRegister(kVRegAudioMonitorChannelSelect, chSelect);
+	if (mDeviceID == DEVICE_ID_IO4KPLUS || mDeviceID == DEVICE_ID_IO4K || 
+		mDeviceID == DEVICE_ID_KONA4 || mCard->DeviceCanDoAudioMixer() == true)
+	{
+		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect, NTV2_CHANNEL4);
+		mCard->SetAESOutputSource(NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_4, chSelect <= NTV2_AudioMonitor7_8 ? NTV2_AudioChannel1_4 : NTV2_AudioChannel9_12);
+		mCard->SetAESOutputSource(NTV2_AudioChannel5_8, NTV2_AUDIOSYSTEM_4,  chSelect <= NTV2_AudioMonitor7_8 ? NTV2_AudioChannel5_8 : NTV2_AudioChannel13_16);
+	}
+	else if (	mDeviceID == DEVICE_ID_KONA3G	|| mDeviceID == DEVICE_ID_KONA3GQUAD ||
+				mDeviceID == DEVICE_ID_IO4KUFC	|| mDeviceID == DEVICE_ID_KONA4UFC	||
+				mDeviceID == DEVICE_ID_IOXT )
+	{
+		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect,  NTV2_CHANNEL1);
+	}
+	else
+	{
+		mCard->WriteRegister(kRegAud1Control, chSelect, kK2RegMaskKBoxAnalogMonitor, kK2RegShiftKBoxAnalogMonitor);
+	}
+
+	// Setup LUTs
+	UpdateK2ColorSpaceMatrixSelect();
+	UpdateK2LUTSelect();
+}
+
+
 void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 {
 	ULWord regValue = 0;
@@ -4479,9 +3955,7 @@ void DeviceServices::SetAudioInputSelect(NTV2InputAudioSelect input)
 }
 
 
-//-------------------------------------------------------------------------------------------------------
 //	AgentIsAlive - CP checks the kVRegAgentCheck virtual register to see if I'm still running...
-//-------------------------------------------------------------------------------------------------------
 void DeviceServices::AgentIsAlive()
 {
     mAgentAliveCount++;
@@ -4491,6 +3965,7 @@ void DeviceServices::AgentIsAlive()
 
 bool SortFunction(const NTV2RegInfo& i, const NTV2RegInfo& j) 
 	{ return i.registerNumber < j.registerNumber; }
+
 
 void DeviceServices::ConsolidateRegisterWrites( NTV2RegisterWrites& inRegs, 
 								   				NTV2RegisterWrites& outRegs)
