@@ -258,7 +258,7 @@ CNTV2CSCMatrix::InitMatrix (const NTV2ColorSpaceMatrixType inPreset)
 			break;
 
 		// YCbCr Rec 709 (HD) -> YCbCr Rec 601 (SD)
-		case NTV4_YCbCrRec709_to_YCbCrRec601_Matrix:
+        case NTV2_YCbCrRec709_to_YCbCrRec601_Matrix:
 			mA0 =  1.00000000;	// Y  -> Y
 			mA1 =  0.09931166;	// Cb -> Y
 			mA2 =  0.19169955;	// Cr -> Y

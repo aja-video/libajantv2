@@ -3063,7 +3063,7 @@ typedef enum
 typedef NTV2Audio8ChannelSelect	NTV2AudioChannelOctet;
 
 #define	NTV2_IS_VALID_AUDIO_CHANNEL_OCTET(__p__)			((__p__) >= NTV2_AudioChannel1_8	&& (__p__) < NTV2_MAX_NUM_Audio8ChannelSelect)
-#define	NTV2_IS_NORMAL_AUDIO_CHANNEL_OCTET(__p__)			((__p__) >= NTV2_AudioChannel1_8	&& (__p__) < NTV2_AudioChannel117_24)
+#define	NTV2_IS_NORMAL_AUDIO_CHANNEL_OCTET(__p__)			((__p__) >= NTV2_AudioChannel1_8	&& (__p__) < NTV2_AudioChannel17_24)
 #define	NTV2_IS_EXTENDED_AUDIO_CHANNEL_OCTET(__p__)			((__p__) >= NTV2_AudioChannel17_24	&& (__p__) < NTV2_MAX_NUM_Audio8ChannelSelect)
 
 
@@ -3206,7 +3206,7 @@ typedef enum
     NTV2_YCbCr_to_GBRSMPTE_Rec601_Matrix,	// YCbCr -> RGB SMPTE range Rec 601 (SD)
 
     NTV2_YCbCrRec601_to_YCbCrRec709_Matrix,	// YCbCr Rec 601 (SD) -> YCbCr Rec 709 (HD)
-    NTV4_YCbCrRec709_to_YCbCrRec601_Matrix,	// YCbCr Rec 709 (HD) -> YCbCr Rec 601 (SD)
+    NTV2_YCbCrRec709_to_YCbCrRec601_Matrix,	// YCbCr Rec 709 (HD) -> YCbCr Rec 601 (SD)
 
     NTV2_GBRFull_to_GBRSMPTE_Matrix,		// RGB full  range -> RGB SMPTE range
     NTV2_GBRSMPTE_to_GBRFull_Matrix,		// RGB SMPTE range -> RGB full  range

@@ -298,6 +298,7 @@ AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
 
         mValueMap[int(AJA_SystemInfoTag_Path_Applications)] = "/Applications/";
         mValueMap[int(AJA_SystemInfoTag_Path_Utilities)] = "/Applications/AJA Utilities/";
+        mValueMap[int(AJA_SystemInfoTag_Path_Firmware)] = "/Library/Application Support/AJA/Firmware/";
 
         ret = AJA_STATUS_SUCCESS;
     }

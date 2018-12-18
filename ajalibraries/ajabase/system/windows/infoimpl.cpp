@@ -455,6 +455,7 @@ AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
 
         mValueMap[int(AJA_SystemInfoTag_Path_Applications)] = "C:\\Program Files\\AJA\\windows\\Applications\\";
         mValueMap[int(AJA_SystemInfoTag_Path_Utilities)] = "C:\\Program Files\\AJA\\windows\\Applications\\";
+        mValueMap[int(AJA_SystemInfoTag_Path_Firmware)] = "C:\\Program Files\\AJA\\windows\\Firmware\\";
 
         ret = AJA_STATUS_SUCCESS;
     } //end if (sections & AJA_SystemInfoSection_Path)
