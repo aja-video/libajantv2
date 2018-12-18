@@ -298,7 +298,7 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 		//now we are setup to get the info we want!
 		if(!SetupDiGetDeviceInterfaceDetail(_hDevInfoSet ,&spDevIFaceData,_pspDevIFaceDetailData, dwReqSize,NULL,&_spDevInfoData))
 		{
-			delete _pspDevIFaceDetailData;
+			delete [] _pspDevIFaceDetailData;
 			_pspDevIFaceDetailData=NULL;
 			SetupDiDestroyDeviceInfoList(_hDevInfoSet);
 			return false; // out of memory
@@ -310,7 +310,7 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 		char* deviceInstance = (char*)new BYTE[deviceInstanceSize*2];
 		CM_Get_Device_IDA(_spDevInfoData.DevInst, deviceInstance, deviceInstanceSize*2, 0);
 		boardStr = deviceInstance;
-		delete deviceInstance;
+		delete [] deviceInstance;
 /*		if(boardStr.find("DB") != string::npos)
 		{
 			string sDeviceID = boardStr.substr(sDeviceInstance.find("DB"),4);
@@ -353,7 +353,7 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 		if(_hDevice == INVALID_HANDLE_VALUE)
 		{
 			WDIFAIL("CreateFile failed for '" << boardStr << "'");
-			delete _pspDevIFaceDetailData;
+			delete [] _pspDevIFaceDetailData;
 			_pspDevIFaceDetailData=NULL;
 			SetupDiDestroyDeviceInfoList(_hDevInfoSet);
 			_hDevInfoSet=NULL;
@@ -455,7 +455,7 @@ bool CNTV2WinDriverInterface::Close()
 	NTV2_ASSERT(_hDevice != INVALID_HANDLE_VALUE);
 	if (_pspDevIFaceDetailData)
 	{
-		delete _pspDevIFaceDetailData;
+		delete [] _pspDevIFaceDetailData;
 		_pspDevIFaceDetailData=NULL;
 	}
 	if (_hDevInfoSet)
