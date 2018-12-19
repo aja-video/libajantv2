@@ -1747,7 +1747,7 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
 		GenAudioStreamSDPInfo(sdp, sfp, stream, &gmInfo[0]);
     }
     
-	cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
+	//cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
 
 	bool rv = true;
 
@@ -1922,13 +1922,33 @@ bool CNTV2Config2110::GenVideoStreamMultiSDPInfo(stringstream & sdp, char* gmInf
 			sdp << " RTP/AVP ";
 			sdp << To_String(config.payloadType) << endl;
 
-			// connection information
+			// dest information
 			sdp << "c=IN IP4 ";
 			if (enabledA)
 				sdp << config.remoteIP[0];
 			else
 				sdp << config.remoteIP[1];
 			sdp << "/" << To_String(config.ttl) << endl;
+
+			// source information
+			sdp << "a=source-filter:incl IN IP4 ";
+			uint32_t val;
+
+			if (enabledA)
+			{
+				sdp << config.remoteIP[0];
+				mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0, val);
+			}
+			else
+			{
+				sdp << config.remoteIP[1];
+				mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1, val);
+			}
+
+			struct in_addr addr;
+			addr.s_addr = val;
+			string localIPAddress = inet_ntoa(addr);
+			sdp << ' ' << localIPAddress << endl;
 
 			// rtpmap
 			sdp << "a=rtpmap:";
