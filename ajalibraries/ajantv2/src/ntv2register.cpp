@@ -430,8 +430,26 @@ NTV2VideoFormat CNTV2Card::GetNTV2VideoFormat (NTV2FrameRate frameRate, NTV2Stan
 					else
 						 videoFormat = progressivePicture ? NTV2_FORMAT_1080psf_2500_2 : NTV2_FORMAT_1080i_5000;
 					break;
-				case NTV2_FRAMERATE_2400:	videoFormat = inputGeometry == 8 ? NTV2_FORMAT_1080psf_2K_2400 : NTV2_FORMAT_1080psf_2400;			break;
-				case NTV2_FRAMERATE_2398:	videoFormat = inputGeometry == 8 ? NTV2_FORMAT_1080psf_2K_2398 : NTV2_FORMAT_1080psf_2398;			break;
+				case NTV2_FRAMERATE_2400:
+					if (isThreeG)
+					{
+						videoFormat = inputGeometry == 8 ? NTV2_FORMAT_1080p_2K_4800_B : NTV2_FORMAT_UNKNOWN;
+					}
+					else
+					{
+						videoFormat = inputGeometry == 8 ? NTV2_FORMAT_1080psf_2K_2400 : NTV2_FORMAT_1080psf_2400;
+					}
+					break;
+				case NTV2_FRAMERATE_2398:
+					if (isThreeG)
+					{
+						videoFormat = inputGeometry == 8 ? NTV2_FORMAT_1080p_2K_4795_B : NTV2_FORMAT_UNKNOWN;
+					}
+					else
+					{
+						videoFormat = inputGeometry == 8 ? NTV2_FORMAT_1080psf_2K_2398 : NTV2_FORMAT_1080psf_2398;
+					}
+					break;
 				default:	break;	// Unsupported
 			}
 			break;
