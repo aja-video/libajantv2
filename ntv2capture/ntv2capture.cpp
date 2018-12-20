@@ -6,10 +6,12 @@
 
 #include "ntv2capture.h"
 #include "ntv2utils.h"
+#include "ntv2debug.h"
 #include "ntv2devicefeatures.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
 #include <iterator>	//	for inserter
+#include <fstream>
 
 using namespace std;
 
@@ -19,6 +21,36 @@ using namespace std;
 
 static const ULWord	kAppSignature	AJA_FOURCC ('D','E','M','O');
 
+//	These AJA_RAW_AUDIO_RECORD* macros can, if enabled, record raw audio samples into a binary data file in the current directory.
+//	To open the resulting file in Audacity, an open-source audio editing tool (see http://audacity.sourceforge.net/)...
+//		1)	Choose File => Import => Raw Data...
+//		2)	Select "Signed 32 bit PCM", Little/No/Default Endian, "16 Channels" (or 8 if applicable), "48000" sample rate.
+//		3)	Click "Import"
+#if 0
+	#define		AJA_RAW_AUDIO_RECORD_BEGIN		ostringstream	filename;														\
+												filename	<< ::NTV2DeviceString(mDeviceID) << "-" << mDevice.GetIndexNumber()	\
+															<< "." << ::NTV2ChannelToString(mInputChannel,true)					\
+															<< "." << ::NTV2InputSourceToString(mInputSource, true)				\
+															<< "." << ::NTV2VideoFormatToString(mVideoFormat)					\
+															<< "." << ::NTV2AudioSystemToString(mAudioSystem, true)				\
+															<< "." << AJAProcess::GetPid()										\
+															<< ".raw";															\
+												ofstream ostrm(filename.str(), ios::binary);
+
+	#define		AJA_RAW_AUDIO_RECORD			if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem))									\
+													if (pFrameData->fAudioBuffer  &&  pFrameData->fAudioBufferSize)				\
+														ostrm.write(reinterpret_cast<char*>(pFrameData->fAudioBuffer),			\
+																	streamsize(pFrameData->fAudioBufferSize));
+
+	#define		AJA_RAW_AUDIO_RECORD_END		
+#else
+	#define		AJA_RAW_AUDIO_RECORD_BEGIN		
+	#define		AJA_RAW_AUDIO_RECORD			
+	#define		AJA_RAW_AUDIO_RECORD_END		
+#endif
+
+
+//////////////////////////////////////////////////////////////////////////////////////	NTV2Capture IMPLEMENTATION
 
 NTV2Capture::NTV2Capture (const string					inDeviceSpecifier,
 						  const bool					inWithAudio,
@@ -230,7 +262,7 @@ AJAStatus NTV2Capture::SetupAudio (void)
 	mDevice.SetAudioRate (NTV2_AUDIO_48K, mAudioSystem);
 
 	//	The on-device audio buffer should be 4MB to work best across all devices & platforms...
-	mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, mAudioSystem);
+	mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_SIZE_4MB, mAudioSystem);
 
 	return AJA_STATUS_SUCCESS;
 
@@ -347,6 +379,7 @@ void NTV2Capture::ConsumerThreadStatic (AJAThread * pThread, void * pContext)		/
 
 void NTV2Capture::ConsumeFrames (void)
 {
+	AJA_RAW_AUDIO_RECORD_BEGIN	//	(see above)
 	while (!mGlobalQuit)
 	{
 		//	Wait for the next frame to become ready to "consume"...
@@ -357,11 +390,13 @@ void NTV2Capture::ConsumeFrames (void)
 			//	. . .		. . .		. . .		. . .
 			//		. . .		. . .		. . .		. . .
 			//			. . .		. . .		. . .		. . .
+			AJA_RAW_AUDIO_RECORD	//	(see above)
 
 			//	Now release and recycle the buffer...
 			mAVCircularBuffer.EndConsumeNextBuffer ();
 		}	//	if pFrameData
 	}	//	loop til quit signaled
+	AJA_RAW_AUDIO_RECORD_END	//	(see above)
 
 }	//	ConsumeFrames
 
@@ -422,14 +457,15 @@ void NTV2Capture::CaptureFrames (void)
 			AVDataBuffer *	captureData	(mAVCircularBuffer.StartProduceNextBuffer ());
 
 			inputXfer.SetVideoBuffer (captureData->fVideoBuffer, captureData->fVideoBufferSize);
-			if (NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem))
-				inputXfer.SetAudioBuffer (captureData->fAudioBuffer, captureData->fAudioBufferSize);
+			if (acStatus.WithAudio())
+				inputXfer.SetAudioBuffer (captureData->fAudioBuffer, NTV2_AUDIOSIZE_MAX);
 			if (mWithAnc)
 				inputXfer.SetAncBuffers (captureData->fAncBuffer, captureData->fAncBufferSize, captureData->fAncF2Buffer, captureData->fAncF2BufferSize);
 
 			//	Do the transfer from the device into our host AVDataBuffer...
 			mDevice.AutoCirculateTransfer (mInputChannel, inputXfer);
-			// inputXfer.GetCapturedAudioByteCount();  // this is the amount of audio captured
+			if (acStatus.WithAudio())
+				captureData->fAudioBufferSize = inputXfer.GetCapturedAudioByteCount();  //	Store the actual amount of audio captured
 
 			NTV2SDIInStatistics	sdiStats;
 			mDevice.ReadSDIStatistics (sdiStats);
@@ -439,7 +475,7 @@ void NTV2Capture::CaptureFrames (void)
 			inputXfer.GetInputTimeCode (timecode);
 			captureData->fRP188Data = timecode;
 
-			if (NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem))
+			if (acStatus.WithAudio())
 				//	Look for PCM/NonPCM changes in the audio stream...
 				if (mDevice.GetInputAudioChannelPairsWithoutPCM (mInputChannel, nonPcmPairs))
 				{
