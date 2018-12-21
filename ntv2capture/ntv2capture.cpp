@@ -4,14 +4,14 @@
 	@copyright	Copyright (C) 2012-2018 AJA Video Systems, Inc.  All rights reserved.
 **/
 
+//#define AJA_RAW_AUDIO_RECORD	//	Uncomment to record raw audio file
+//#define AJA_WAV_AUDIO_RECORD	//	Uncomment to record WAV audio file
 #include "ntv2capture.h"
 #include "ntv2utils.h"
-#include "ntv2debug.h"
 #include "ntv2devicefeatures.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
 #include <iterator>	//	for inserter
-#include <fstream>
 
 using namespace std;
 
@@ -20,34 +20,6 @@ using namespace std;
 
 
 static const ULWord	kAppSignature	AJA_FOURCC ('D','E','M','O');
-
-//	These AJA_RAW_AUDIO_RECORD* macros can, if enabled, record raw audio samples into a binary data file in the current directory.
-//	To open the resulting file in Audacity, an open-source audio editing tool (see http://audacity.sourceforge.net/)...
-//		1)	Choose File => Import => Raw Data...
-//		2)	Select "Signed 32 bit PCM", Little/No/Default Endian, "16 Channels" (or 8 if applicable), "48000" sample rate.
-//		3)	Click "Import"
-#if 0
-	#define		AJA_RAW_AUDIO_RECORD_BEGIN		ostringstream	filename;														\
-												filename	<< ::NTV2DeviceString(mDeviceID) << "-" << mDevice.GetIndexNumber()	\
-															<< "." << ::NTV2ChannelToString(mInputChannel,true)					\
-															<< "." << ::NTV2InputSourceToString(mInputSource, true)				\
-															<< "." << ::NTV2VideoFormatToString(mVideoFormat)					\
-															<< "." << ::NTV2AudioSystemToString(mAudioSystem, true)				\
-															<< "." << AJAProcess::GetPid()										\
-															<< ".raw";															\
-												ofstream ostrm(filename.str(), ios::binary);
-
-	#define		AJA_RAW_AUDIO_RECORD			if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem))									\
-													if (pFrameData->fAudioBuffer  &&  pFrameData->fAudioBufferSize)				\
-														ostrm.write(reinterpret_cast<char*>(pFrameData->fAudioBuffer),			\
-																	streamsize(pFrameData->fAudioBufferSize));
-
-	#define		AJA_RAW_AUDIO_RECORD_END		
-#else
-	#define		AJA_RAW_AUDIO_RECORD_BEGIN		
-	#define		AJA_RAW_AUDIO_RECORD			
-	#define		AJA_RAW_AUDIO_RECORD_END		
-#endif
 
 
 //////////////////////////////////////////////////////////////////////////////////////	NTV2Capture IMPLEMENTATION
@@ -379,7 +351,7 @@ void NTV2Capture::ConsumerThreadStatic (AJAThread * pThread, void * pContext)		/
 
 void NTV2Capture::ConsumeFrames (void)
 {
-	AJA_RAW_AUDIO_RECORD_BEGIN	//	(see above)
+	AJA_NTV2_AUDIO_RECORD_BEGIN	//	Active when AJA_RAW_AUDIO_RECORD or AJA_WAV_AUDIO_RECORD defined
 	while (!mGlobalQuit)
 	{
 		//	Wait for the next frame to become ready to "consume"...
@@ -390,13 +362,13 @@ void NTV2Capture::ConsumeFrames (void)
 			//	. . .		. . .		. . .		. . .
 			//		. . .		. . .		. . .		. . .
 			//			. . .		. . .		. . .		. . .
-			AJA_RAW_AUDIO_RECORD	//	(see above)
+			AJA_NTV2_AUDIO_RECORD_DO	//	Active when AJA_RAW_AUDIO_RECORD or AJA_WAV_AUDIO_RECORD defined
 
 			//	Now release and recycle the buffer...
 			mAVCircularBuffer.EndConsumeNextBuffer ();
 		}	//	if pFrameData
 	}	//	loop til quit signaled
-	AJA_RAW_AUDIO_RECORD_END	//	(see above)
+	AJA_NTV2_AUDIO_RECORD_END	//	Active when AJA_RAW_AUDIO_RECORD or AJA_WAV_AUDIO_RECORD defined
 
 }	//	ConsumeFrames
 

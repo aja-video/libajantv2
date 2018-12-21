@@ -385,4 +385,60 @@ class CNTV2DemoCommon
 };	//	CNTV2DemoCommon
 
 
+//	These AJA_NTV2_AUDIO_RECORD* macros can, if enabled, record audio samples into a file in the current directory.
+//	Optionally used in the CNTV2Capture demo.
+#if defined(AJA_RAW_AUDIO_RECORD)
+	#include "ntv2debug.h"					//	For NTV2DeviceString
+	#include <fstream>						//	For ofstream
+	//	To open the raw audio file in Audacity -- see http://audacity.sourceforge.net/ ...
+	//		1)	Choose File => Import => Raw Data...
+	//		2)	Select "Signed 32 bit PCM", Little/No/Default Endian, "16 Channels" (or 8 if applicable), "48000" sample rate.
+	//		3)	Click "Import"
+	#define		AJA_NTV2_AUDIO_RECORD_BEGIN		ostringstream	_filename;														\
+												_filename	<< ::NTV2DeviceString(mDeviceID) << "-" << mDevice.GetIndexNumber()	\
+															<< "." << ::NTV2ChannelToString(mInputChannel,true)					\
+															<< "." << ::NTV2InputSourceToString(mInputSource, true)				\
+															<< "." << ::NTV2VideoFormatToString(mVideoFormat)					\
+															<< "." << ::NTV2AudioSystemToString(mAudioSystem, true)				\
+															<< "." << AJAProcess::GetPid()										\
+															<< ".raw";															\
+												ofstream _ostrm(_filename.str(), ios::binary);
+
+	#define		AJA_NTV2_AUDIO_RECORD_DO		if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem))									\
+													if (pFrameData->fAudioBuffer  &&  pFrameData->fAudioBufferSize)				\
+														_ostrm.write(reinterpret_cast<char*>(pFrameData->fAudioBuffer),			\
+																	streamsize(pFrameData->fAudioBufferSize));
+
+	#define		AJA_NTV2_AUDIO_RECORD_END		
+#elif defined(AJA_WAV_AUDIO_RECORD)
+	#include "ntv2debug.h"					//	For NTV2DeviceString
+	#include "ajabase/common/wavewriter.h"	//	For AJAWavWriter
+	#define		AJA_NTV2_AUDIO_RECORD_BEGIN		ostringstream	_wavfilename;														\
+												_wavfilename	<< ::NTV2DeviceString(mDeviceID) << "-" << mDevice.GetIndexNumber()	\
+																<< "." << ::NTV2ChannelToString(mInputChannel,true)					\
+																<< "." << ::NTV2InputSourceToString(mInputSource, true)				\
+																<< "." << ::NTV2VideoFormatToString(mVideoFormat)					\
+																<< "." << ::NTV2AudioSystemToString(mAudioSystem, true)				\
+																<< "." << AJAProcess::GetPid()										\
+																<< ".wav";															\
+												const int		_wavMaxNumAudChls(::NTV2DeviceGetMaxAudioChannels(mDeviceID));		\
+												AJAWavWriter	_wavWriter (_wavfilename.str(),										\
+																			AJAWavWriterAudioFormat(_wavMaxNumAudChls, 48000, 32));	\
+												_wavWriter.open();
+
+	#define		AJA_NTV2_AUDIO_RECORD_DO		if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem))										\
+													if (pFrameData->fAudioBuffer  &&  pFrameData->fAudioBufferSize)					\
+														if (_wavWriter.IsOpen())													\
+															_wavWriter.write(reinterpret_cast<char*>(pFrameData->fAudioBuffer),		\
+																pFrameData->fAudioBufferSize);
+
+	#define		AJA_NTV2_AUDIO_RECORD_END		if (_wavWriter.IsOpen())															\
+													_wavWriter.close();
+#else
+	#define		AJA_NTV2_AUDIO_RECORD_BEGIN		
+	#define		AJA_NTV2_AUDIO_RECORD_DO			
+	#define		AJA_NTV2_AUDIO_RECORD_END		
+#endif
+
+
 #endif	//	_NTV2DEMOCOMMON_H
