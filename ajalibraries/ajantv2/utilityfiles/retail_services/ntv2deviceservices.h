@@ -7,6 +7,7 @@
 #ifndef _DeviceServices_
 #define _DeviceServices_
 
+#include "ajabase/common/timer.h"
 #include "devicestate.h"
 #include "retailsupport.h"
 #include "ntv2utils.h"
@@ -27,6 +28,9 @@
 #define kHDMIStartupPhase1	11
 #define kHDMIStartupPhase2	6
 #define kHDMIStartupPhase3	1
+
+// interval in ms between next full write of all regs
+#define kRewriteIntervalMs	(500)
 
 typedef enum 
 { 
@@ -150,9 +154,12 @@ public:
 	void SetAudioInputSelect(NTV2InputAudioSelect input);
     void AgentIsAlive();
     
-    void ConsolidateRegisterWrites(NTV2RegisterWrites& inRegs, 
-								   NTV2RegisterWrites& outRegs);
-
+    void CombineWrites(const NTV2RegInfo& i0, NTV2RegInfo& i1);
+    void ConsolidateRegisterWrites(	NTV2RegisterWrites& inRegs, 
+								   	NTV2RegisterWrites& outRegs);
+	void WriteDifferences(NTV2RegisterWrites& newRegs);
+    void TestWrites();
+    
 public:
 	
 	DeviceState				mDs;
@@ -235,7 +242,8 @@ public:
 	uint32_t				mInputChangeCount;
 	uint32_t				mInputChangeCountLast;
 	uint32_t				mAgentAliveCount;
-	NTV2RegisterWrites		mRegisterWrites;
+	NTV2RegisterWrites		mRegisterWritesLast;
+	AJATimer				mTimer;
 	
 	NTV2HDMIRange			mHDMIInRGBRange;
 	uint32_t				mRegFramesPerVertical;	// frames per vertical interrupt (CION RAW)

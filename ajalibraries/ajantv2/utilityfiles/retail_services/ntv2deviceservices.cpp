@@ -4,6 +4,8 @@
 //  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
+#include <algorithm>
+
 #include "retailsupport.h"
 #include "ntv2class4kservices.h"
 #include "ntv2ioxtservices.h"
@@ -39,10 +41,10 @@
 #include <arpa/inet.h>
 #endif
 
-#include <algorithm>
-
 #define	AsDriverInterface(_x_)		static_cast<CNTV2DriverInterface*>(_x_)
 
+//#define USE_GROUPED_WRITES
+//#define USE_OPTIMIZED_WRITES
 
 using namespace std;
 
@@ -169,6 +171,8 @@ void DeviceServices::SetCard(CNTV2Card* pCard)
 	
 	// device state
 	mRs->InitDeviceState(mDs);
+	
+	mTimer.Start();
 }
 
 
@@ -393,9 +397,6 @@ bool DeviceServices::ReadDriverState (void)
 }
 
 
-//#define USE_GROUPED_WRITES
-//#define USE_CONSOLIDATION
-
 // Do everyframe task using filter variables set in virtual register  
 void DeviceServices::SetDeviceEveryFrameRegs()
 {
@@ -420,6 +421,13 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
     AgentIsAlive();
 
 #if defined(USE_GROUPED_WRITES)
+	// force full write of all regs even if not change on this interval
+	if (mTimer.ElapsedTime() >= kRewriteIntervalMs)
+	{
+		mTimer.Start();
+		mRegisterWritesLast.clear();
+	}
+
     mCard->StartRecordRegisterWrites(true);
 #endif
 
@@ -440,6 +448,8 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	{
 		return;		
 	}
+	
+	// ever
 	
 	// read in virtual registers
 	bool bChanged = ReadDriverState();
@@ -496,10 +506,10 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	NTV2RegisterWrites regWrites;
 	mCard->StopRecordRegisterWrites();
 	mCard->GetRecordedRegisterWrites(regWrites);
-	#if defined(USE_CONSOLIDATION)
+	#if defined(USE_OPTIMIZED_WRITES)
 		NTV2RegisterWrites regWrites2;
 		ConsolidateRegisterWrites(regWrites, regWrites2);
-		mCard->WriteRegisters(regWrites2);
+		WriteDifferences(regWrites2);
 	#else
 		mCard->WriteRegisters(regWrites);
 	#endif
@@ -4007,4 +4017,107 @@ void DeviceServices::ConsolidateRegisterWrites( NTV2RegisterWrites& inRegs,
 	
 	//cerr << endl << endl << outRegs << endl;
 }
+
+// write any changes where newRegs differs from mRegisterWritesLast
+// add changes to mRegisterWritesLast
+void DeviceServices::WriteDifferences(NTV2RegisterWrites& newRegs)
+{
+	NTV2RegisterWrites diffWrites;
+	size_t count0 	= mRegisterWritesLast.size();
+	size_t count1 	= newRegs.size();
+	size_t i0 		= 0;
+	size_t i1;
+	
+	for (i1 = 0; i1 < count1; i1++)
+	{
+		NTV2RegInfo& r1 = newRegs[i1];
+		
+		while (i0 < count0)
+		{ 
+			NTV2RegInfo& r0 = mRegisterWritesLast[i0];
+			if (r0.registerNumber < r1.registerNumber)
+				i0++;
+			else
+				break;
+		}
+		
+		if (i0 < count0)
+		{
+			NTV2RegInfo& r0 = mRegisterWritesLast[i0];
+			
+			if (r0.registerNumber == r1.registerNumber)
+			{
+				if (r0.registerValue != r1.registerValue || 
+					r0.registerMask != r1.registerMask || 
+					r0.registerShift != r1.registerShift)
+				{
+					mRegisterWritesLast[i0] = r1;	// replace as last
+					diffWrites.push_back(r1);
+				}
+				else
+				{
+					// else - they are equal, do nothing
+					// this 
+				}
+			}
+			else // r0.registerNumber > r1.registerNumber
+			{
+				mRegisterWritesLast.push_back(r1);
+				diffWrites.push_back(r1);
+			}
+		}
+		else
+		{
+			mRegisterWritesLast.push_back(r1);
+			diffWrites.push_back(r1);
+		}
+	}
+	
+	// sort
+	std::stable_sort(mRegisterWritesLast.begin(), mRegisterWritesLast.end(), SortFunction);
+	mCard->WriteRegisters(diffWrites);
+	
+	//if (diffWrites.size() > 0)
+	//	cerr << "size=" << diffWrites.size() << endl;
+	//if (diffWrites.size() > 1000)
+	//	cerr << diffWrites;
+}
+
+// simple test script
+void DeviceServices::TestWrites()
+{
+	NTV2RegisterWrites newReg0;
+	newReg0.push_back(NTV2RegInfo(2,2,2,2));
+	newReg0.push_back(NTV2RegInfo(4,4,4,4));
+	
+	NTV2RegisterWrites newReg1;
+	newReg1.push_back(NTV2RegInfo(1,1,1,1));
+	newReg1.push_back(NTV2RegInfo(3,3,3,3));
+	newReg1.push_back(NTV2RegInfo(6,6,6,6));
+	
+	NTV2RegisterWrites newReg2;
+	newReg2.push_back(NTV2RegInfo(4,5,5,5));
+	
+	cerr << "----------" << endl;	// start from zero
+	cerr << newReg0 << endl;
+	WriteDifferences(newReg0);
+	cerr << mRegisterWritesLast << endl;
+	
+	cerr << "----------" << endl;	// front-back addition
+	cerr << newReg1 << endl;
+	WriteDifferences(newReg1);
+	cerr << mRegisterWritesLast << endl;
+	
+	cerr << "----------" << endl;	// value change
+	cerr << newReg2 << endl;
+	WriteDifferences(newReg2);
+	cerr << mRegisterWritesLast << endl;
+	
+	cerr << "----------" << endl;	// no change
+	cerr << newReg1 << endl;
+	WriteDifferences(newReg1);
+	cerr << mRegisterWritesLast << endl;
+}
+
+
 
