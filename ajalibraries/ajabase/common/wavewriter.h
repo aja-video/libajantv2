@@ -14,7 +14,12 @@
 class AJA_EXPORT AJAWavWriterAudioFormat
 {
 public:
-    AJAWavWriterAudioFormat() { channelCount = 2; sampleRate = 48000; sampleSize = 16; }
+    AJAWavWriterAudioFormat(const int inChannelCount = 2, const int inSampleRate = 48000, const int inSampleSizeBits = 16)
+		:	channelCount (inChannelCount),
+			sampleRate   (inSampleRate),
+			sampleSize   (inSampleSizeBits)
+		{
+		}
     int channelCount;
     int sampleRate;
     int sampleSize;
