@@ -3580,9 +3580,6 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                     *videoFormatLast != mFb1VideoFormat ||
                     ipServiceForceConfig)
                 {
-                	// Something got congigured
-					changed = true;
-                
                     // Process the configuration
                     txConfig.init();
                     txConfig.remoteIP[0] = m2110TxVideoData.txVideoCh[i].remoteIP[0];
@@ -3620,6 +3617,8 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                                                           (bool)m2110TxVideoData.txVideoCh[i].sfpEnable[0],
                                                           (bool)m2110TxVideoData.txVideoCh[i].sfpEnable[1]);
                             m2110IpStatusData.txChStatus[i] = kIpStatusRunning;
+							// Something got congigured and enabled
+							changed = true;
                         }
                     }
                     else
