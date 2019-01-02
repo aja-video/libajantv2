@@ -488,5 +488,6 @@
 #define kRegCS_av_diff_48khz            0x29
 #define kRegCS_vfifo_av_diff_48khz      0x2a
 #define kRegCS_vfifo_level              0x2b
+#define kRegCS_sfp_status				0x2c
 
 #endif // REGISTERS_MB_H

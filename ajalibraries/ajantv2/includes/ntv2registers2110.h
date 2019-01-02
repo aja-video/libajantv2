@@ -36,7 +36,7 @@
 #define SAREK_2110_DECAPSULATOR_0               (0x211000/4)
 #define SAREK_2110_DECAPSULATOR_1               (0x216000/4)
 #define SAREK_2110_VOIPFEC              		(0x217000/4)
-#define SAREK_2110_FEC_CTL              		(0x218000/4)
+#define SAREK_2110_VOIPFEC_CTL          		(0x218000/4)
 #define SAREK_2110_AUDIO_STREAMSELECT           (0x230000/4)
 
 #define SAREK_2110_TEST_GENERATOR               (0x308000/4)
@@ -195,6 +195,14 @@
 #define kRegVfec_oor_pkt_cnt            (0xb0/4)
 #define kRegVfec_oor_ts_offset          (0xb4/4)
 #define kRegVfec_link_ts_diff           (0xb8/4)
+
+#define kRegVfec_delay_control			(0x00/4)
+#define kRegVfec_delay_ch0_playout		(0x04/4)
+#define	kRegVfec_delay_ch1_playout		(0x08/4)
+#define	kRegVfec_delay_ch2_playout		(0x0c/4)
+#define	kRegVfec_delay_ch3_playout		(0x10/4)
+#define	kRegVfec_delay_status			(0x20/4)
+#define	kRegVfec_delay_version			(0x3c/4)
 
 /////////////////////////////////////////////////////////////////////
 //

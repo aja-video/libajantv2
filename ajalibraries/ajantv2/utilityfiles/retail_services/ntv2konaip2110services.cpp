@@ -3580,9 +3580,6 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                     *videoFormatLast != mFb1VideoFormat ||
                     ipServiceForceConfig)
                 {
-                	// Something got congigured
-					changed = true;
-                
                     // Process the configuration
                     txConfig.init();
                     txConfig.remoteIP[0] = m2110TxVideoData.txVideoCh[i].remoteIP[0];
@@ -3598,7 +3595,7 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                     txConfig.tos = 0x64;
 
                     // Video specific
-                    txConfig.videoFormat = Convert21104KFormat(mFb1VideoFormat);
+                    txConfig.videoFormat = ConvertVideoToStreamFormat(mFb1VideoFormat);
                     txConfig.videoSamples = VPIDSampling_YUV_422;
 
                     // Start by turning off the video stream
@@ -3620,6 +3617,8 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                                                           (bool)m2110TxVideoData.txVideoCh[i].sfpEnable[0],
                                                           (bool)m2110TxVideoData.txVideoCh[i].sfpEnable[1]);
                             m2110IpStatusData.txChStatus[i] = kIpStatusRunning;
+							// Something got congigured and enabled
+							changed = true;
                         }
                     }
                     else
@@ -3732,7 +3731,7 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                     // Video specific
                     if (mFollowInputFormat && (m2110RxVideoData.rxVideoCh[i].videoFormat != NTV2_FORMAT_UNKNOWN))
                     {
-                        rxConfig.videoFormat = Convert21104KFormat(m2110RxVideoData.rxVideoCh[i].videoFormat);
+                        rxConfig.videoFormat = ConvertVideoToStreamFormat(m2110RxVideoData.rxVideoCh[i].videoFormat);
 
                         // if format was not converted assume it was not a 4k format and disable 4k mode, otherwise enable it
                         if (rxConfig.videoFormat == m2110RxVideoData.rxVideoCh[i].videoFormat)
@@ -3742,7 +3741,7 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                     }
                     else
                     {
-                        rxConfig.videoFormat = Convert21104KFormat(mFb1VideoFormat);
+                        rxConfig.videoFormat = ConvertVideoToStreamFormat(mFb1VideoFormat);
 
                         // if format was not converted assume it was not a 4k format and disable 4k mode, otherwise enable it
                         if (rxConfig.videoFormat == mFb1VideoFormat)
@@ -3751,7 +3750,7 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                             config2110->Set4KModeEnable(true);
                     }
                     rxConfig.videoSamples = VPIDSampling_YUV_422;
-                    printf("Format (%d, %d, %d)\n", i, mFollowInputFormat, rxConfig.videoFormat);
+                    printf("Format (%d, %d, %d, %d)\n", i, mFollowInputFormat, m2110Network.multiSDP, rxConfig.videoFormat);
 
                     // Start by turning off the video receiver
                     printf("SetRxVideoStream off %d\n", m2110RxVideoData.rxVideoCh[i].stream);
@@ -3896,7 +3895,7 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 }
 
 
-NTV2VideoFormat KonaIP2110Services::Convert21104KFormat(NTV2VideoFormat videoFormat)
+NTV2VideoFormat KonaIP2110Services::ConvertVideoToStreamFormat(NTV2VideoFormat videoFormat)
 {
     NTV2VideoFormat format;
 
@@ -3974,6 +3973,77 @@ NTV2VideoFormat KonaIP2110Services::Convert21104KFormat(NTV2VideoFormat videoFor
     }
     
     return format;
+}
+
+
+NTV2VideoFormat KonaIP2110Services::ConvertStreamToVideoFormat(NTV2VideoFormat videoFormat)
+{
+	NTV2VideoFormat format;
+
+	switch (videoFormat)
+	{
+		case NTV2_FORMAT_1080p_2K_2398:
+			format = NTV2_FORMAT_4x2048x1080p_2398;
+			break;
+		case NTV2_FORMAT_1080p_2K_2400:
+			format = NTV2_FORMAT_4x2048x1080p_2400;
+			break;
+		case NTV2_FORMAT_1080p_2K_2500:
+			format = NTV2_FORMAT_4x2048x1080p_2500;
+			break;
+		case NTV2_FORMAT_1080p_2K_2997:
+			format = NTV2_FORMAT_4x2048x1080p_2997;
+			break;
+		case NTV2_FORMAT_1080p_2K_3000:
+			format = NTV2_FORMAT_4x2048x1080p_3000;
+			break;
+		case NTV2_FORMAT_1080p_2K_4795_A:
+			format = NTV2_FORMAT_4x2048x1080p_4795;
+			break;
+		case NTV2_FORMAT_1080p_2K_4800_A:
+			format = NTV2_FORMAT_4x2048x1080p_4800;
+			break;
+		case NTV2_FORMAT_1080p_2K_5000_A:
+			format = NTV2_FORMAT_4x2048x1080p_5000;
+			break;
+		case NTV2_FORMAT_1080p_2K_5994_A:
+			format = NTV2_FORMAT_4x2048x1080p_5994;
+			break;
+		case NTV2_FORMAT_1080p_2K_6000_A:
+			format = NTV2_FORMAT_4x2048x1080p_6000;
+			break;
+
+		case NTV2_FORMAT_1080p_2398:
+			format = NTV2_FORMAT_4x1920x1080p_2398;
+			break;
+		case NTV2_FORMAT_1080p_2400:
+			format = NTV2_FORMAT_4x1920x1080p_2400;
+			break;
+		case NTV2_FORMAT_1080p_2500:
+			format = NTV2_FORMAT_4x1920x1080p_2500;
+			break;
+		case NTV2_FORMAT_1080p_2997:
+			format = NTV2_FORMAT_4x1920x1080p_2997;
+			break;
+		case NTV2_FORMAT_1080p_3000:
+			format = NTV2_FORMAT_4x1920x1080p_3000;
+			break;
+		case NTV2_FORMAT_1080p_5000_A:
+			format = NTV2_FORMAT_4x1920x1080p_5000;
+			break;
+		case NTV2_FORMAT_1080p_5994_A:
+			format = NTV2_FORMAT_4x1920x1080p_5994;
+			break;
+		case NTV2_FORMAT_1080p_6000_A:
+			format = NTV2_FORMAT_4x1920x1080p_6000;
+			break;
+
+		default:
+			format = videoFormat;
+			break;
+	}
+
+	return format;
 }
 
 

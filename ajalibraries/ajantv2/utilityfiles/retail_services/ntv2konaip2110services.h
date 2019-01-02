@@ -34,7 +34,8 @@ public:
 							TransmitAudioData2110* s2110TxAudioDataLast,
 							ReceiveVideoData2110* s2110RxVideoDataLast,
 							ReceiveAudioData2110* s2110RxAudioDataLast);
-	NTV2VideoFormat Convert21104KFormat(NTV2VideoFormat videoFormat);
+	NTV2VideoFormat ConvertVideoToStreamFormat(NTV2VideoFormat videoFormat);
+	NTV2VideoFormat ConvertStreamToVideoFormat(NTV2VideoFormat videoFormat);
 	void Print2110Network(const NetworkData2110 m2110Network);
 
 protected:
