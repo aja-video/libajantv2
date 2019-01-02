@@ -399,6 +399,7 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
         case DEVICE_ID_KONAHDMI:		return "kona_hdmi_4rx";
         case DEVICE_ID_KONA5:           return "kona5";
         case DEVICE_ID_KONA5_12G:       return "kona5_12g";
+		case DEVICE_ID_CORVID4_12G:     return "corvid4_12g";
         default:
 			break;
 	}
@@ -441,6 +442,7 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
                                             || _designName == "kona5_12g";;
         case DEVICE_ID_KONA5_12G:		return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_12G) == _designName
                                             || _designName == "Kona5";
+		case DEVICE_ID_CORVID4_12G:	return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_CORVID4_12G) == _designName;
 		default:					break;
 	}
 	return false;
