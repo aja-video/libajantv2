@@ -1026,10 +1026,7 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 		return AJA_STATUS_BAD_PARAM;
 	}
 	if (NTV2_IS_625_FORMAT(mConfig.fVideoFormat))
-	{
-		cerr << "## ERROR:  Sorry, 'ntv2ccplayer' does not support 625 format" << endl;
-		return AJA_STATUS_UNSUPPORTED;
-	}
+		cerr << "## WARNING:  SD 625/PAL not supported -- but will insert CEA608 caption packets anyway" << endl;
 	if (NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat)  &&  mConfig.fForceVanc)
 	{
 		cerr << "## ERROR:  Cannot use VANC with quad-frame format" << endl;

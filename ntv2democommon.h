@@ -19,12 +19,9 @@
 
 
 /**
-	@brief	This structure encapsulates the video and audio buffers used by AutoCirculate. The demo programs
-			that employ producer/consumer threads use a fixed number (CIRCULAR_BUFFER_SIZE) of these buffers.
-			The AJACircularBuffer template class greatly simplifies implementing this approach to efficiently
-			process frames.
-	@note	The unused fields in this structure are in preparation for adding features to these demo apps,
-			e.g., embedding additional timecode (e.g., VITC) to the output video that's sourced from the input video.
+	@brief	This structure encapsulates the video, audio and anc buffers used in the AutoCirculate demos.
+			These demos use a fixed number (CIRCULAR_BUFFER_SIZE) of these buffers in an AJACircularBuffer,
+			which greatly simplifies processing frames between producer and consumer threads.
 **/
 typedef struct
 {
@@ -37,11 +34,11 @@ typedef struct
 	uint32_t		fAncBufferSize;			///< @brief	Size of ANC buffer, in bytes
 	uint32_t *		fAncF2Buffer;			///< @brief	Pointer to "Field 2" ANC buffer
 	uint32_t		fAncF2BufferSize;		///< @brief	Size of "Field 2" ANC buffer, in bytes
-	uint32_t		fAudioRecordSize;		///< @brief	For future use -- (see note)
-	uint32_t		fAncRecordSize;			///< @brief	For future use -- (see note)
-	RP188_STRUCT	fRP188Data;				///< @brief	For future use -- (see note)
-	RP188_STRUCT	fRP188Data2;			///< @brief	For future use -- (see note)
-	uint8_t *		fVideoBufferUnaligned;	///< @brief	For future use -- (see note)
+	uint32_t		fAudioRecordSize;		///< @brief	For future use
+	uint32_t		fAncRecordSize;			///< @brief	For future use
+	RP188_STRUCT	fRP188Data;				///< @brief	For future use
+	RP188_STRUCT	fRP188Data2;			///< @brief	For future use
+	uint8_t *		fVideoBufferUnaligned;	///< @brief	For future use
 	uint32_t		fFrameFlags;			///< @brief Frame data flags
 } AVDataBuffer;
 

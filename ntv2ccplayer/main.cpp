@@ -165,6 +165,11 @@ int main (int argc, const char ** argv)
 
 	//	Board/Device
 	const string	deviceSpec(pDeviceSpec ? pDeviceSpec : "0");
+	const string	legalDevices(CNTV2DemoCommon::GetDeviceStrings());
+	if (deviceSpec == "?" || deviceSpec == "list")
+		{cout << legalDevices << endl;  return 0;}
+	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
+		{cout << "## ERROR:  No such device '" << deviceSpec << "'" << endl << legalDevices;  return 1;}
 
 	//	Channel
 	NTV2Channel	channel(NTV2_CHANNEL1);	//	Default to channel 1
