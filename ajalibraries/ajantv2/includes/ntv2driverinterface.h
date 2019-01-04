@@ -15,9 +15,9 @@
 #include "ntv2nubtypes.h"
 #include "ntv2publicinterface.h"
 #include "ntv2devicefeatures.h"
-#if defined(_DEBUG)	//	Register Write Profiling
+#if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 	#include "ajabase/system/lock.h"
-#endif	//	_DEBUG		Register Write Profiling
+#endif	//	NTV2_WRITEREG_PROFILING		Register Write Profiling
 #include <string>
 
 #if defined(AJALinux ) || defined(AJAMac)
@@ -378,12 +378,12 @@ protected:
 	ULWord					_ulNumFrameBuffers;
 	ULWord					_ulFrameBufferSize;
 
-#if defined(_DEBUG)	//	Register Write Profiling
+#if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 	NTV2RegisterWrites		mRegWrites;
 	mutable AJALock			mRegWritesLock;
 	bool					mRecordRegWrites;
 	bool					mSkipRegWrites;
-#endif	//	_DEBUG	//	Register Write Profiling
+#endif	//	NTV2_WRITEREG_PROFILING		//	Register Write Profiling
 
 };	//	CNTV2DriverInterface
 
