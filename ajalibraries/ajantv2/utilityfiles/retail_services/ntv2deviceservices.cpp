@@ -43,8 +43,9 @@
 
 #define	AsDriverInterface(_x_)		static_cast<CNTV2DriverInterface*>(_x_)
 
-//#define USE_GROUPED_WRITES
-//#define USE_OPTIMIZED_WRITES
+// service optimization
+#define USE_GROUPED_WRITES
+#define USE_OPTIMIZED_WRITES
 
 using namespace std;
 
@@ -427,7 +428,6 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		mTimer.Start();
 		mRegisterWritesLast.clear();
 	}
-
     mCard->StartRecordRegisterWrites(true);
 #endif
 
