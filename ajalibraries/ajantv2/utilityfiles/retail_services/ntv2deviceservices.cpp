@@ -44,8 +44,10 @@
 #define	AsDriverInterface(_x_)		static_cast<CNTV2DriverInterface*>(_x_)
 
 // service optimization
-//#define USE_GROUPED_WRITES
-//#define USE_OPTIMIZED_WRITES
+#ifdef NTV2_WRITEREG_PROFILING
+#define USE_GROUPED_WRITES
+#define USE_OPTIMIZED_WRITES
+#endif
 
 using namespace std;
 
