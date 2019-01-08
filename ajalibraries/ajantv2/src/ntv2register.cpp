@@ -2456,8 +2456,17 @@ bool CNTV2Card::ReadSDIInVPID (const NTV2Channel inChannel, ULWord & outValue_A,
 	}
 
 	// reverse byte order
-	outValue_A = NTV2EndianSwap32(valA);
-	outValue_B = NTV2EndianSwap32(valB);
+	if (GetDeviceID() == DEVICE_ID_KONALHI)
+	{
+		outValue_A = valA;
+		outValue_B = valB;
+	}
+	else
+	{
+		outValue_A = NTV2EndianSwap32(valA);
+		outValue_B = NTV2EndianSwap32(valB);
+	}
+	
 	return true;
 
 }	//	ReadSDIInVPID
