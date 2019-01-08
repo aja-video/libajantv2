@@ -552,6 +552,8 @@ void NTV2CCGrabber::CaptureFrames (void)
 
 		//	Start AutoCirculate running...
 		mDevice.AutoCirculateStart(mConfig.fInputChannel);
+		if (currentVideoFormat == NTV2_FORMAT_625_5000)	//	Hack to override incorrect 625i50 values used in 15.0-and-earlier drivers:
+			mDevice.AncExtractInit (UWord(::GetIndexForNTV2InputSource(mConfig.fInputSource)), mConfig.fInputChannel, NTV2_STANDARD_625);
 
 		while (!mGlobalQuit)
 		{
@@ -749,28 +751,28 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 	//	Any 608 packets (anc extractor)?
 	if (ancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea608_Vanc, 0))	//	F1
 	{
-		const AJAAncillaryData_Cea608_Vanc	pkt608F1	(ancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea608_Vanc, 0));
-		if (pkt608F1.GetPayloadData() && pkt608F1.GetPayloadByteCount())
+		AJAAncillaryData_Cea608_Vanc	pkt608F1	(ancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea608_Vanc, 0));
+		if (pkt608F1.GetPayloadData() && pkt608F1.GetPayloadByteCount()  &&  AJA_SUCCESS(pkt608F1.ParsePayloadData()))
 			pkt608F1.GetCEA608Bytes (captionData608Anc.f1_char1, captionData608Anc.f1_char2, captionData608Anc.bGotField1Data);
 	}
 	if (ancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea608_Vanc, 1))	//	F2
 	{
-		const AJAAncillaryData_Cea608_Vanc	pkt608F2	(ancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea608_Vanc, 1));
-		if (pkt608F2.GetPayloadData() && pkt608F2.GetPayloadByteCount())
+		AJAAncillaryData_Cea608_Vanc	pkt608F2	(ancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea608_Vanc, 1));
+		if (pkt608F2.GetPayloadData() && pkt608F2.GetPayloadByteCount()  &&  AJA_SUCCESS(pkt608F2.ParsePayloadData()))
 			pkt608F2.GetCEA608Bytes(captionData608Anc.f2_char1, captionData608Anc.f2_char2, captionData608Anc.bGotField2Data);
 	}
 
 	//	Any 608 packets (Vanc)?
 	if (vancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea608_Vanc, 0))
 	{
-		const AJAAncillaryData_Cea608_Vanc	pkt608F1	(vancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea608_Vanc, 0));
-		if (pkt608F1.GetPayloadData() && pkt608F1.GetPayloadByteCount())
+		AJAAncillaryData_Cea608_Vanc	pkt608F1	(vancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea608_Vanc, 0));
+		if (pkt608F1.GetPayloadData() && pkt608F1.GetPayloadByteCount()  &&  AJA_SUCCESS(pkt608F1.ParsePayloadData()))
 			pkt608F1.GetCEA608Bytes (captionData608Vanc.f1_char1, captionData608Vanc.f1_char2, captionData608Vanc.bGotField1Data);
 	}
 	if (vancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea608_Vanc, 1))
 	{
-		const AJAAncillaryData_Cea608_Vanc	pkt608F2	(vancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea608_Vanc, 1));
-		if (pkt608F2.GetPayloadData() && pkt608F2.GetPayloadByteCount())
+		AJAAncillaryData_Cea608_Vanc	pkt608F2	(vancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea608_Vanc, 1));
+		if (pkt608F2.GetPayloadData() && pkt608F2.GetPayloadByteCount()  &&  AJA_SUCCESS(pkt608F2.ParsePayloadData()))
 			pkt608F2.GetCEA608Bytes(captionData608Vanc.f2_char1, captionData608Vanc.f2_char2, captionData608Vanc.bGotField2Data);
 	}
 
@@ -779,7 +781,7 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 	{
 		AJAAncillaryData	vancCEA708DataIn	(vancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea708));
 		bool				hasParityErrors (false);
-		if (vancCEA708DataIn.GetPayloadData() && vancCEA708DataIn.GetPayloadByteCount())
+		if (vancCEA708DataIn.GetPayloadData() && vancCEA708DataIn.GetPayloadByteCount()  &&  AJA_SUCCESS(vancCEA708DataIn.ParsePayloadData()))
 			if (m708DecoderVanc->SetSMPTE334AncData (vancCEA708DataIn.GetPayloadData(), vancCEA708DataIn.GetPayloadByteCount()))
 				if (m708DecoderVanc->ParseSMPTE334AncPacket(hasParityErrors))
 				{
@@ -798,7 +800,7 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 	{
 		AJAAncillaryData	ancCEA708DataIn	(ancPackets.GetAncillaryDataWithType(AJAAncillaryDataType_Cea708));
 		bool				hasParityErrors (false);
-		if (ancCEA708DataIn.GetPayloadData() && ancCEA708DataIn.GetPayloadByteCount())
+		if (ancCEA708DataIn.GetPayloadData() && ancCEA708DataIn.GetPayloadByteCount()  &&  AJA_SUCCESS(ancCEA708DataIn.ParsePayloadData()))
 			if (m708DecoderAnc->SetSMPTE334AncData (ancCEA708DataIn.GetPayloadData(), ancCEA708DataIn.GetPayloadByteCount()))
 				if (m708DecoderAnc->ParseSMPTE334AncPacket(hasParityErrors))
 				{
