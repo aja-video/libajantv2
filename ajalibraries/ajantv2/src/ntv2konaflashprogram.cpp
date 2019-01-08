@@ -769,6 +769,7 @@ bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID, bool fullVerify)
 	uint32_t* bitFilePtr = (uint32_t*)_bitFileBuffer;
 	uint32_t dwordSizeCount = (_bitFileSize+4)/4;
 	int32_t percentComplete = 0;
+	int32_t lastPercentComplete = -1;
 
 	switch(_flashID)
 	{
@@ -815,8 +816,12 @@ bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID, bool fullVerify)
 		WriteRegister(kVRegFlashStatus, count);
 		if(!_bQuiet)
 		{
-			printf("Program verify: %i%%\r", percentComplete);
-			fflush(stdout);
+			if (percentComplete != lastPercentComplete)
+			{
+				printf("Program verify: %i%%\r", percentComplete);
+				fflush(stdout);
+				lastPercentComplete = percentComplete;
+			}
 		}
 		count += fullVerify ? 1 : 64;
 		baseAddress += fullVerify ? 4 : 256;
