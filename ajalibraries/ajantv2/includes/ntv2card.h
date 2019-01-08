@@ -2116,6 +2116,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@note		This may differ from the revision number of the installed firmware if, after
 					erasing or reflashing, the device was not power-cycled to force its FPGA to reload.
+		@see		CNTV2Card::GetRunningFirmwareDate, CNTV2Card::GetRunningFirmwareTime, \ref devicefirmware.
 	**/
 	AJA_VIRTUAL bool	GetRunningFirmwareRevision (UWord & outRevision);
 
@@ -2130,6 +2131,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@note		This date may differ from the build date of the installed firmware if, after erasing
 					or reflashing, the device was never power-cycled to force its FPGA to reload.
+		@see		CNTV2Card::GetRunningFirmwareTime, CNTV2Card::GetRunningFirmwareRevision, \ref devicefirmware.
 	**/
 	AJA_VIRTUAL bool	GetRunningFirmwareDate (UWord & outYear, UWord & outMonth, UWord & outDay);
 
@@ -2144,6 +2146,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@note		This date may differ from the build date of the installed firmware if, after erasing
 					or reflashing, the device was never power-cycled to force its FPGA to reload.
+		@see		CNTV2Card::GetRunningFirmwareDate, CNTV2Card::GetRunningFirmwareRevision, \ref devicefirmware.
 	**/
 	AJA_VIRTUAL bool	GetRunningFirmwareTime (UWord & outHours, UWord & outMinutes, UWord & outSeconds);
 
@@ -2159,6 +2162,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@note		This date/time may differ from the build date/time of the installed firmware if, after erasing
 					or reflashing, the device was never power-cycled to force its FPGA to reload.
+		@see		CNTV2Card::GetRunningFirmwareTime, CNTV2Card::GetRunningFirmwareRevision, \ref devicefirmware.
 	**/
 	AJA_VIRTUAL bool	GetRunningFirmwareDate (std::string & outDate, std::string & outTime);
 #if !defined(NTV2_DEPRECATE_14_2)
