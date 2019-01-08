@@ -141,6 +141,7 @@ NTV2DeviceCanDoAudioMixer
 NTV2DeviceHasColorSpaceConverterOnChannel2
 NTV2DeviceSoftwareCanChangeFrameBufferSize
 NTV2DeviceCanDoFrameStore1Display
+NTV2DeviceCanReportRunningFirmwareDate
 
 // NTV2ConversionModes
 

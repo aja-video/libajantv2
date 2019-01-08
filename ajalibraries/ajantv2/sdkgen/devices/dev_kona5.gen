@@ -220,6 +220,7 @@ NTV2DeviceHasAudioMonitorRCAJacks
 NTV2DeviceHasBiDirectionalAnalogAudio
 NTV2DeviceHasGenlockv3
 NTV2DeviceCanReportFailSafeLoaded
+NTV2DeviceCanReportRunningFirmwareDate
 
 
 // NTV2ConversionModes

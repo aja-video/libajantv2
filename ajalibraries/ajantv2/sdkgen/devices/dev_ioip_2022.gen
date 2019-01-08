@@ -191,6 +191,7 @@ NTV2DeviceIsExternalToHost
 NTV2DeviceIsSupported
 NTV2DeviceNeedsRoutingSetup
 NTV2DeviceSoftwareCanChangeFrameBufferSize
+NTV2DeviceCanReportRunningFirmwareDate
 
 
 // NTV2ConversionModes
