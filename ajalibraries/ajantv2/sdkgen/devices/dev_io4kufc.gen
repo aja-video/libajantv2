@@ -184,6 +184,7 @@ NTV2DeviceCanDoVITC2
 NTV2DeviceHasLEDAudioMeters
 NTV2DeviceHasHeadphoneJack
 NTV2DeviceHasAudioMonitorRCAJacks
+NTV2DeviceCanReportRunningFirmwareDate
 
 
 // NTV2ConversionModes

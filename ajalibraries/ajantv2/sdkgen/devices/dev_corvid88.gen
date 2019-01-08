@@ -236,6 +236,7 @@ NTV2DeviceIsSupported
 NTV2DeviceNeedsRoutingSetup
 NTV2DeviceSoftwareCanChangeFrameBufferSize
 NTV2DeviceCanDoVITC2
+NTV2DeviceCanReportRunningFirmwareDate
 
 
 // NTV2ConversionModes
