@@ -387,6 +387,12 @@ AJAExport bool NTV2DeviceCanReportFailSafeLoaded (const NTV2DeviceID inDeviceID)
 AJAExport bool NTV2DeviceCanReportFrameSize (const NTV2DeviceID inDeviceID);
 
 /**
+	@return		True if the device having the given ID can report its running (and not necessarily installed) firmware date.
+	@param[in]	inDeviceID		Specifies the NTV2DeviceID of interest.
+**/
+AJAExport bool NTV2DeviceCanReportRunningFirmwareDate (const NTV2DeviceID inDeviceID);
+
+/**
 	@return		True if the fan on the device having the given ID can be thermostatically controlled.
 	@param[in]	inDeviceID		Specifies the NTV2DeviceID of interest.
 **/

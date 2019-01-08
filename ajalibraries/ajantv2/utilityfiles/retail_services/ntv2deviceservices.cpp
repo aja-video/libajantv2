@@ -43,8 +43,11 @@
 
 #define	AsDriverInterface(_x_)		static_cast<CNTV2DriverInterface*>(_x_)
 
-//#define USE_GROUPED_WRITES
-//#define USE_OPTIMIZED_WRITES
+// service optimization
+#ifdef NTV2_WRITEREG_PROFILING
+#define USE_GROUPED_WRITES
+#define USE_OPTIMIZED_WRITES
+#endif
 
 using namespace std;
 
@@ -427,7 +430,6 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		mTimer.Start();
 		mRegisterWritesLast.clear();
 	}
-
     mCard->StartRecordRegisterWrites(true);
 #endif
 
@@ -449,28 +451,29 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		return;		
 	}
 	
-	// ever
-	
-	// read in virtual registers
-	bool bChanged = ReadDriverState();
-	if (bChanged == false)
-		return;
-		
 	// Get the general format
 	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
 	{
 		mCard->SetMultiFormatMode(false);
 	}
 
+	// read state
+	bool bChanged = ReadDriverState();
+	if (bChanged == false)
+		return;
+
+	//
+	// Routing
+	//
+
 	// Playback
 	if (mFb1Mode == NTV2_MODE_DISPLAY)
 	{
-		if (IsFormatRaw(mFb1Format))
-			SetDeviceXPointPlaybackRaw();
-		else
-			SetDeviceXPointPlayback();
-	}
+		if (mRs->UpdateFormatForTransport(mDs))
+			ReadDriverState();
 	
+		SetDeviceXPointPlayback();
+	}
 	// Capture
 	else
 	{
@@ -481,15 +484,15 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			mCard->WriteRegister(kVRegDefaultVideoFormat, newVideoFormat);
 			mCard->SetVideoFormat(newVideoFormat);
 			mInputChangeCount++;
+			
+			// reload device state due to format change
+			ReadDriverState();	
 		}
 	
-		if (IsFormatRaw(mFb1Format))
-			SetDeviceXPointCaptureRaw();
-		else
-			SetDeviceXPointCapture();
+		SetDeviceXPointCapture();
 	}
 	
-	// Set misc registers
+	// other registers
 	SetDeviceMiscRegisters();
 	
 	// mark completion on cycle - used in media composer
@@ -570,6 +573,8 @@ bool DeviceServices::SetVPIDData (	ULWord &				outVPID,
 
 	return ::SetVPIDFromSpec (&outVPID, &vpidSpec);
 }
+
+
 
 
 // return true new locked-input video format detected, false if unchanged

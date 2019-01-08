@@ -222,6 +222,7 @@ NTV2DeviceCanDoAudioMixer
 NTV2DeviceHasLEDAudioMeters
 NTV2DeviceHasHeadphoneJack
 NTV2DeviceHasAudioMonitorRCAJacks
+NTV2DeviceCanReportRunningFirmwareDate
 
 
 // NTV2ConversionModes

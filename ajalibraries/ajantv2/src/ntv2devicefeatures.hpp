@@ -3386,6 +3386,62 @@ bool NTV2DeviceCanReportFrameSize (const NTV2DeviceID inDeviceID)
 
 
 /**
+	NTV2DeviceCanReportRunningFirmwareDate
+	True if the device having the given ID can report its running (and not necessarily installed) firmware date.
+**/
+bool NTV2DeviceCanReportRunningFirmwareDate (const NTV2DeviceID inDeviceID)
+{
+	switch (inDeviceID)
+	{
+		case DEVICE_ID_CORVID44:
+		case DEVICE_ID_CORVID88:
+		case DEVICE_ID_IO4K:
+		case DEVICE_ID_IO4KPLUS:
+		case DEVICE_ID_IO4KUFC:
+		case DEVICE_ID_IOIP_2022:
+		case DEVICE_ID_IOIP_2110:
+		case DEVICE_ID_KONA1:
+		case DEVICE_ID_KONA4:
+		case DEVICE_ID_KONA4UFC:
+		case DEVICE_ID_KONA5:
+		case DEVICE_ID_KONA5_12G:
+		case DEVICE_ID_KONAHDMI:
+		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_1RX_1TX_2110:
+		case DEVICE_ID_KONAIP_2022:
+		case DEVICE_ID_KONAIP_2110:
+		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_4CH_2SFP:
+			return true;
+	#if defined(_DEBUG)
+		case DEVICE_ID_CORVID1:
+		case DEVICE_ID_CORVID22:
+		case DEVICE_ID_CORVID24:
+		case DEVICE_ID_CORVID3G:
+		case DEVICE_ID_CORVIDHBR:
+		case DEVICE_ID_CORVIDHEVC:
+		case DEVICE_ID_IOEXPRESS:
+		case DEVICE_ID_IOXT:
+		case DEVICE_ID_KONA3G:
+		case DEVICE_ID_KONA3GQUAD:
+		case DEVICE_ID_KONALHEPLUS:
+		case DEVICE_ID_KONALHI:
+		case DEVICE_ID_KONALHIDVI:
+		case DEVICE_ID_NOTFOUND:
+		case DEVICE_ID_TTAP:
+	#else
+		default:
+	#endif
+			break;
+	}	//	switch on inDeviceID
+
+	return false;
+
+}	//  NTV2DeviceCanReportRunningFirmwareDate (auto-generated)
+
+
+/**
 	NTV2DeviceCanThermostat
 	True if the fan on the device having the given ID can be thermostatically controlled.
 **/

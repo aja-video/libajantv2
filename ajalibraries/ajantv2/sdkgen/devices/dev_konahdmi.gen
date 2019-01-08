@@ -152,6 +152,7 @@ NTV2DeviceNeedsRoutingSetup
 NTV2DeviceSoftwareCanChangeFrameBufferSize
 NTV2DeviceHasXilinxDMA
 NTV2DeviceHasSPIv3
+NTV2DeviceCanReportRunningFirmwareDate
 
 
 // NTV2ConversionModes

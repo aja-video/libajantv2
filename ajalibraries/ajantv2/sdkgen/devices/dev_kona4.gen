@@ -225,6 +225,7 @@ NTV2DeviceSoftwareCanChangeFrameBufferSize
 NTV2DeviceCanDoVITC2
 NTV2DeviceCanDoHDMIHDROut
 NTV2DeviceCanDoAudioMixer
+NTV2DeviceCanReportRunningFirmwareDate
 
 
 // NTV2ConversionModes

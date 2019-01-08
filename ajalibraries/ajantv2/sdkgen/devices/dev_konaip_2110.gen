@@ -179,6 +179,7 @@ NTV2DeviceCanDoVITC2
 NTV2DeviceCanDoHDMIHDROut
 NTV2DeviceCanDo2110
 NTV2DeviceCanDoIP
+NTV2DeviceCanReportRunningFirmwareDate
 
 
 // NTV2ConversionModes

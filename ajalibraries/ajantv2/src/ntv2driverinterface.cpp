@@ -340,7 +340,7 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 // that does platform-specific write of register on local card.
 bool CNTV2DriverInterface::WriteRegister (ULWord registerNumber, ULWord registerValue, ULWord registerMask, ULWord registerShift)
 {
-#if defined(_DEBUG)
+#if defined(NTV2_WRITEREG_PROFILING)
 	if (mRecordRegWrites)
 	{
 		AJAAutoLock	autoLock(&mRegWritesLock);
@@ -348,7 +348,7 @@ bool CNTV2DriverInterface::WriteRegister (ULWord registerNumber, ULWord register
 		if (mSkipRegWrites)
 			return true;
 	}
-#endif
+#endif	//	NTV2_WRITEREG_PROFILING
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
 
@@ -787,7 +787,7 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 	return false;
 }
 
-#if defined(_DEBUG)	//	Register Write Profiling
+#if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 	bool CNTV2DriverInterface::GetRecordedRegisterWrites (NTV2RegisterWrites & outRegWrites) const
 	{
 		AJAAutoLock	autoLock(&mRegWritesLock);
@@ -817,7 +817,7 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 		mRecordRegWrites = mSkipRegWrites = false;
 		return true;
 	}
-#endif	//	_DEBUG
+#endif	//	NTV2_WRITEREG_PROFILING
 
 
 #if !defined (NTV2_DEPRECATE)
