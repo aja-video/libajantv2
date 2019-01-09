@@ -14,6 +14,7 @@
 #include "ajabase/system/debug.h"
 #include "ajabase/system/file_io.h"
 #include "ajabase/system/systemtime.h"
+#include "ajabase/system/lock.h"
 
 // Mac defines
 #if !defined(AJA_MAC) && defined(AJAMac)
@@ -56,10 +57,13 @@
 #endif
 
 static std::vector<std::string> sTypeLabelsVector;
+static AJALock					sTypeLabelsVectorLock;
+
 #define addTypeLabelToVector(x) sTypeLabelsVector.push_back(#x)
 
 inline void initTypeLabels()
 {
+	AJAAutoLock autoLock(&sTypeLabelsVectorLock);
     sTypeLabelsVector.clear();
     addTypeLabelToVector(AJAPersistenceTypeInt);
     addTypeLabelToVector(AJAPersistenceTypeBool);
@@ -71,6 +75,7 @@ inline void initTypeLabels()
 
 inline std::string labelForPersistenceType(AJAPersistenceType type)
 {
+	AJAAutoLock autoLock(&sTypeLabelsVectorLock);
     if (type >= 0  &&  type < AJAPersistenceTypeEnd  &&  size_t(type) < sTypeLabelsVector.size())
         return sTypeLabelsVector.at(type);
     else
