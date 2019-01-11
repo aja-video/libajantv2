@@ -133,7 +133,8 @@ typedef struct
 {
     bool                    setup4k;
 	bool					multiSDP;
-	char                    nmosRegServer[IP_STRSIZE];
+	char                    nmosRegServerIP[IP_STRSIZE];
+	uint32_t				nmosRegServerPort;
     uint32_t                ptpDomain;
     uint8_t                 ptpPreferredGMID[8];
     uint32_t                numSFPs;
