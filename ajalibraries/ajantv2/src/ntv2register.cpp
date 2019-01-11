@@ -2325,6 +2325,9 @@ bool CNTV2Card::GetRunningFirmwareRevision (UWord & outRevision)
 bool CNTV2Card::GetRunningFirmwareDate (UWord & outYear, UWord & outMonth, UWord & outDay)
 {
 	outYear = outMonth = outDay = 0;
+	if (!::NTV2DeviceCanReportRunningFirmwareDate(GetDeviceID()))
+		return false;
+
 	uint32_t	regValue	(0);
 	if (!ReadRegister(kRegBitfileDate, regValue))
 		return false;
@@ -2351,6 +2354,9 @@ bool CNTV2Card::GetRunningFirmwareDate (UWord & outYear, UWord & outMonth, UWord
 bool CNTV2Card::GetRunningFirmwareTime (UWord & outHours, UWord & outMinutes, UWord & outSeconds)
 {
 	outHours = outMinutes = outSeconds = 0;
+	if (!::NTV2DeviceCanReportRunningFirmwareDate(GetDeviceID()))
+		return false;
+
 	uint32_t	regValue	(0);
 	if (!ReadRegister(kRegBitfileTime, regValue))
 		return false;
@@ -2450,8 +2456,17 @@ bool CNTV2Card::ReadSDIInVPID (const NTV2Channel inChannel, ULWord & outValue_A,
 	}
 
 	// reverse byte order
-	outValue_A = NTV2EndianSwap32(valA);
-	outValue_B = NTV2EndianSwap32(valB);
+	if (GetDeviceID() == DEVICE_ID_KONALHI)
+	{
+		outValue_A = valA;
+		outValue_B = valB;
+	}
+	else
+	{
+		outValue_A = NTV2EndianSwap32(valA);
+		outValue_B = NTV2EndianSwap32(valB);
+	}
+	
 	return true;
 
 }	//	ReadSDIInVPID

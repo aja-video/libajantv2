@@ -1139,4 +1139,73 @@
 	-	CNTV2Card::SetAudioMixerMainInputGain
 	-	CNTV2Card::SetAudioMixerAux1InputGain
 	-	CNTV2Card::SetAudioMixerAux2InputGain
+
+
+
+	<hr size="50px">
+	@section	devicefirmware		Firmware
+
+	NTV2 devices have an EEPROM that stores its FPGA programming.
+	This flash memory was commonly divided into a minimum of two logical partitions:
+	-	the “main” partition — for the normal FPGA bitfile image;
+	-	the “failsafe” boot — for a fallback FPGA bitfile image.
+
+	Traditionally, the FPGA could only be loaded from flash memory upon the first PCIe reset that occurs after power-up.
+	The “failsafe” bitfile only loads if the board is powered-up with its “failsafe” button pressed.
+
+	@note	Our newest boards — starting with the \ref kona5 — can be instructed to reload their FPGA upon PCIe reset
+			without an intervening power-down.
+
+	Some of our boards — like the \ref konaip — have, in addition to the normal FPGA hardware, a microprocessor, which requires
+	an additional, separate firmware bitfile that bootstraps and operates it. This extra firmware is bundled into a “package” that is
+	also stored in the EEPROM.
+
+	AJA provides two ways to “flash” — i.e. update — new firmware into the device’s EEPROM storage:
+	-#	Using the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/129">ntv2firmwareinstaller</a>
+		command-line utility, described in \ref toolsandutilities.
+	-#	Using the <b>AJA ControlPanel</b>, which is part of the “retail” software that can be downloaded from https://www.aja.com/.
+
+	Once the new firmware has been written into the device EEPROM storage, it won’t “run” until the device FPGA gets reloaded.
+
+
+	<hr size="50px">
+	@subsection	dev-firmware-vers	Determining Firmware Version
+
+	@note	The <b>currently-running firmware</b> could be different from the <b>currently-installed firmware</b> that’s stored
+			in the EEPROM’s main partition. This can happen if the device wasn’t power-cycled after a firmware update installation,
+			or if the device was booted using its “failsafe” firmware.
+
+	There are three ways to determine what firmware is installed, and/or which firmware is running on an AJA device:
+	-	the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/129">ntv2firmwareinstaller</a> command line
+		utility, using its <b>--info</b> option;
+	-	the “Info” or “Firmware” panels of the <b>AJA ControlPanel</b> application (in AJA’s “retail” software);
+	-	programmatically using certain SDK API calls (see below).
+
+	Newer AJA devices (starting with the \ref ntv2corvid88) report their <b>currently-running firmware date</b> in register 88,
+	which is made available as numeric date components or a standard string by calling CNTV2Card::GetRunningFirmwareDate.
+
+	Older AJA devices prior to the introduction of the \ref ntv2corvid88 have no way of reporting their <b>currently-running firmware date</b>
+	— they can only report the running firmware’s <i>revision number</i> (which was stored in a portion of register 48 and made
+	available by the CNTV2Card::GetRunningFirmwareRevision function. To correlate the revision number to a date, it must be looked
+	up on the device’s firmware page on the
+	<a href="https://sdksupport.aja.com/index.php?/Knowledgebase/List/Index/25/ntv2-firmware">AJA SDK support site’s KnowledgeBase</a>
+	(not very convenient).
+
+	To determine if a device is capable of reporting its <b>currently-running firmware date</b>, call ::NTV2DeviceCanReportRunningFirmwareDate.
+
+	To determine the <b>currently-installed firmware</b> date, the firmware header must be read out of flash memory and parsed.
+	The CNTV2KonaFlashProgram class does this, and after parsing, the CNTV2KonaFlashProgram::GetDate method will provide the date.
+
+
+	<hr size="50px">
+	@subsection	dev-firmware-vers	Determining Firmware Features
+
+	NTV2, being an old and rather crude architecture, has no automatically-enforced linkage between the firmware and the SDK —
+	i.e. the SDK is neither generated from the firmware, nor is the firmware generated from the SDK.
+	Thus, the SDK cannot simply “query the board” to find out how many of a particular widget a device’s running firmware implements,
+	or if a new widget or feature is present (by simply reading registers).
+	Unfortunately, this puts the burden of feature inquiry entirely into software, and onto the authors of NTV2 client applications.
+
+	AJA will do its best to ensure that the “CanDo” functions are correct for the specific set of firmware bitfiles that have been
+	qualified for a given SDK release. The release notes on the SDK download page will point out any firmware features added (or removed).
 **/

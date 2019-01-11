@@ -203,6 +203,7 @@ NTV2DeviceHasLEDAudioMeters
 NTV2DeviceHasHeadphoneJack
 NTV2DeviceHasBiDirectionalAnalogAudio
 NTV2DeviceCanDoIP
+NTV2DeviceCanReportRunningFirmwareDate
 
 
 // NTV2ConversionModes
