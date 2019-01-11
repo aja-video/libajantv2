@@ -3637,7 +3637,7 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 				printf("SetTxStreamConfiguration generating MULTI SDP\n");
 				config2110->GenSDP(SFP_1, NTV2_VIDEO4K_STREAM);
 			}
-			
+
             // See if any transmit audio channels need configuring/enabling
             for (uint32_t i=0; i<m2110TxAudioData.numTxAudioChannels; i++)
             {
@@ -3729,26 +3729,20 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                     rxConfig.payloadType = m2110RxVideoData.rxVideoCh[i].payloadType;
 
                     // Video specific
+					NTV2VideoFormat vFmt;
                     if (mFollowInputFormat && (m2110RxVideoData.rxVideoCh[i].videoFormat != NTV2_FORMAT_UNKNOWN))
-                    {
-                        rxConfig.videoFormat = ConvertVideoToStreamFormat(m2110RxVideoData.rxVideoCh[i].videoFormat);
+						vFmt = m2110RxVideoData.rxVideoCh[i].videoFormat;
+					else
+						vFmt = mFb1VideoFormat;
 
-                        // if format was not converted assume it was not a 4k format and disable 4k mode, otherwise enable it
-                        if (rxConfig.videoFormat == m2110RxVideoData.rxVideoCh[i].videoFormat)
-                            config2110->Set4KModeEnable(false);
-                        else
-                            config2110->Set4KModeEnable(true);
-                    }
-                    else
-                    {
-                        rxConfig.videoFormat = ConvertVideoToStreamFormat(mFb1VideoFormat);
+					rxConfig.videoFormat = ConvertVideoToStreamFormat(vFmt);
 
-                        // if format was not converted assume it was not a 4k format and disable 4k mode, otherwise enable it
-                        if (rxConfig.videoFormat == mFb1VideoFormat)
-                            config2110->Set4KModeEnable(false);
-                        else
-                            config2110->Set4KModeEnable(true);
-                    }
+					// if format was not converted assume it was not a 4k format and disable 4k mode, otherwise enable it
+					if (rxConfig.videoFormat == m2110RxVideoData.rxVideoCh[i].videoFormat)
+						config2110->Set4KModeEnable(false);
+					else
+						config2110->Set4KModeEnable(true);
+
                     rxConfig.videoSamples = VPIDSampling_YUV_422;
                     printf("Format (%d, %d, %d, %d)\n", i, mFollowInputFormat, m2110Network.multiSDP, rxConfig.videoFormat);
 
@@ -3780,6 +3774,7 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                     AgentIsAlive();
                 }
             }
+
             *videoFormatLast = mFb1VideoFormat;
 
             // See if any receive audio channels need configuring/enabling
