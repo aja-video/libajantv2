@@ -84,7 +84,7 @@ int main (int argc, const char ** argv)
 
 			#if defined (AJA_NTV2_SDK_VERSION_AT_LEAST)
 				#if AJA_NTV2_SDK_VERSION_AT_LEAST (12, 0)
-					if (deviceInfo.multiFormat)
+					if (::NTV2DeviceCanDoMultiFormat(deviceID))
 						cout	<< "This device can handle different signal formats on each input/output" << endl;
 				#endif
 				#if AJA_NTV2_SDK_VERSION_AT_LEAST (11, 4)
