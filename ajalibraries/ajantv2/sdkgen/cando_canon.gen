@@ -105,3 +105,4 @@ NTV2DeviceHasGenlockv3
 NTV2DeviceCanDo12gRouting					True if the device having the given ID supports 12g routing crosspoints.
 NTV2DeviceCanReportFailSafeLoaded			True if the device having the given ID can report if its "fail-safe" firmware is loaded and running.
 NTV2DeviceCanReportRunningFirmwareDate		True if the device having the given ID can report its running (and not necessarily installed) firmware date.
+NTV2DeviceCanDo8KVideo						True if the device having the given ID can handle 8K/UHD2 video.

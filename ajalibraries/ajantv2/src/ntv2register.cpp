@@ -244,12 +244,8 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 	if (NTV2_IS_TSI_FORMAT(value) && !NTV2DeviceCanDoVideoFormat(GetDeviceID(), value))
 		return false;
 
-    NTV2Standard standard, inStandard;
-	GetStandard(standard, channel);
-    inStandard = GetNTV2StandardFromVideoFormat(value);
-    NTV2FrameRate frameRate, inFrameRate;
-	GetFrameRate(frameRate, channel);
-    inFrameRate = GetNTV2FrameRateFromVideoFormat(value);
+    NTV2Standard inStandard = GetNTV2StandardFromVideoFormat(value);;
+    NTV2FrameRate inFrameRate = GetNTV2FrameRateFromVideoFormat(value);
     NTV2FrameGeometry inFrameGeometry = GetNTV2FrameGeometryFromVideoFormat(value);
 	bool squares;
 	
@@ -259,45 +255,46 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 	CheckBitfile(value);
 #endif	//	!defined (NTV2_DEPRECATE)
 
-    if(!(standard == inStandard && frameRate == inFrameRate && keepVancSettings))
+	// Set the standard for this video format
+	SetStandard(inStandard, channel);
+
+	// Set the framegeometry for this video format
+	SetFrameGeometry(inFrameGeometry, ajaRetail, channel);
+
+	// Set the framerate for this video format
+	SetFrameRate(inFrameRate, channel);
+
+	// Set SMPTE 372 1080p60 Dual Link option
+	SetSmpte372(NTV2_IS_3Gb_FORMAT(value), channel);
+
+	// set virtual video format
+	WriteRegister (kVRegVideoFormatCh1 + channel, value);
+
+	//This will handle 4k formats
+	if (NTV2_IS_QUAD_FRAME_FORMAT(value))
 	{
-		// Set the standard for this video format
-        SetStandard(inStandard, channel);
-
-		// Set the framegeometry for this video format
-        SetFrameGeometry(inFrameGeometry, ajaRetail, channel);
-
-		// Set the framerate for this video format
-        SetFrameRate(inFrameRate, channel);
-
-		// Set SMPTE 372 1080p60 Dual Link option
-        SetSmpte372(NTV2_IS_3Gb_FORMAT(value), channel);
-
-		// set virtual video format
-		WriteRegister (kVRegVideoFormatCh1 + channel, value);
-
-		//This will handle 4k formats
-		if (NTV2_IS_QUAD_FRAME_FORMAT(value))
+		Get4kSquaresEnable(squares, channel);
+		if (squares)
 		{
-			Get4kSquaresEnable(squares, channel);
-			if (squares)
-			{
-				Set4kSquaresEnable(true, channel);
-			}
-			else
-			{
-				SetQuadFrameEnable(true, channel);
-			}
+			Set4kSquaresEnable(true, channel);
 		}
 		else
 		{
-			//	Non-quad format
-			SetQuadFrameEnable(false, channel);
-
-			if (!IsMultiFormatActive())
-			{
-				CopyVideoFormat(channel, NTV2_CHANNEL1, NTV2_CHANNEL8);
-			}
+			SetQuadFrameEnable(true, channel);
+		}
+		if (NTV2_IS_QUAD_QUAD_FORMAT(value))
+		{
+			SetQuadQuadFrameEnable(true, channel);
+		}
+	}
+	else
+	{
+		//	Non-quad format
+		SetQuadFrameEnable(false, channel);
+		SetQuadQuadFrameEnable(false, channel);
+		if (!IsMultiFormatActive())
+		{
+			CopyVideoFormat(channel, NTV2_CHANNEL1, NTV2_CHANNEL8);
 		}
 	}
 	
@@ -808,6 +805,10 @@ bool CNTV2Card::SetStandard (NTV2Standard value, NTV2Channel channel)
 	if (!IsMultiFormatActive ())
 		channel = NTV2_CHANNEL1;
 	NTV2Standard newStandard = value;
+	if (NTV2_IS_QUAD_QUAD_STANDARD(newStandard))
+	{
+		newStandard = GetQuarterSizedStandard(newStandard);
+	}
 	if (NTV2_IS_QUAD_STANDARD(newStandard))
 	{
 		newStandard = GetQuarterSizedStandard(newStandard);
@@ -831,12 +832,19 @@ bool CNTV2Card::GetStandard (NTV2Standard & outValue, NTV2Channel inChannel)
 	if (!IsMultiFormatActive ())
 		inChannel = NTV2_CHANNEL1;
 	bool status = CNTV2DriverInterface::ReadRegister (gChannelToGlobalControlRegNum[inChannel], outValue, kRegMaskStandard, kRegShiftStandard);
-	if (status && (::NTV2DeviceCanDo4KVideo(_boardID) || NTV2DeviceCanDo425Mux(_boardID)))
+	if (status && ::NTV2DeviceCanDo4KVideo(_boardID))// || NTV2DeviceCanDo425Mux(_boardID)))
 	{
 		ULWord	quadFrameEnabled(0);
 		status = GetQuadFrameEnable(quadFrameEnabled, inChannel);
 		if (status  &&  quadFrameEnabled)
 			outValue = Get4xSizedStandard(outValue);
+		if( status && NTV2DeviceCanDo8KVideo(_boardID))
+		{
+			ULWord quadQuadFrameEnabled(0);
+			status = GetQuadQuadFrameEnable(quadQuadFrameEnabled);
+			if(status && quadQuadFrameEnabled)
+				outValue = Get4xSizedStandard(outValue);
+		}
 	}
 	return status;
 }
@@ -953,9 +961,14 @@ bool CNTV2Card::SetFrameGeometry (NTV2FrameGeometry value, bool ajaRetail, NTV2C
 	// If quad frame geometry, each of 4 frame buffers geometry is one quarter of full size
 	if (::NTV2DeviceCanDo4KVideo(_boardID))
 	{
-		if (NTV2_IS_QUAD_FRAME_GEOMETRY(newGeometry))
+		newFrameStoreGeometry = newGeometry;
+		if (NTV2_IS_QUAD_QUAD_FRAME_GEOMETRY(newFrameStoreGeometry))
 		{
-			newFrameStoreGeometry = GetQuarterSizedGeometry(newGeometry);
+			newFrameStoreGeometry = GetQuarterSizedGeometry(newFrameStoreGeometry);
+		}
+		if (NTV2_IS_QUAD_FRAME_GEOMETRY(newFrameStoreGeometry))
+		{
+			newFrameStoreGeometry = GetQuarterSizedGeometry(newFrameStoreGeometry);
 		}
 	}
 
@@ -1000,6 +1013,13 @@ bool CNTV2Card::GetFrameGeometry (NTV2FrameGeometry & outValue, NTV2Channel inCh
 		status = GetQuadFrameEnable(quadFrameEnabled, inChannel);
 		if (status  &&  quadFrameEnabled)
 			outValue = Get4xSizedGeometry(outValue);
+		if( status && NTV2DeviceCanDo8KVideo(_boardID))
+		{
+			ULWord quadQuadFrameEnabled(0);
+			status = GetQuadQuadFrameEnable(quadQuadFrameEnabled);
+			if(status && quadQuadFrameEnabled)
+				outValue = Get4xSizedGeometry(outValue);
+		}
 	}
 	return status;
 }
@@ -1121,6 +1141,18 @@ bool CNTV2Card::SetQuadFrameEnable (const ULWord inValue, const NTV2Channel inCh
 	return (status);
 }
 
+bool CNTV2Card::SetQuadQuadFrameEnable(const ULWord inValue, const NTV2Channel inChannel)
+{
+	(void)inChannel;
+	bool status = true;
+	
+	if (!::NTV2DeviceCanDo8KVideo(_boardID))
+		return false;
+	
+	status = WriteRegister(kRegGlobalControl3, inValue, kRegMaskQuadQuadMode, kRegShiftQuadQuadMode);
+	return status;
+}
+
 // Method: GetQuadFrameEnable
 // Input:  NONE
 // Output: bool
@@ -1137,6 +1169,15 @@ bool CNTV2Card::GetQuadFrameEnable (ULWord & outValue, const NTV2Channel inChann
 
 	outValue = (status1 & status2) ? ((quadEnabled | s425Enabled) ? 1 : 0) : 0;
 	return status1;
+}
+
+bool CNTV2Card::GetQuadQuadFrameEnable(ULWord & outValue, const NTV2Channel inChannel)
+{
+	(void)inChannel;
+	outValue = 0;
+	if(::NTV2DeviceCanDo8KVideo(_boardID))
+		return ReadRegister(kRegGlobalControl3, outValue, kRegMaskQuadQuadMode, kRegShiftQuadQuadMode );
+	return true;
 }
 
 bool CNTV2Card::Set4kSquaresEnable (const bool inEnable, NTV2Channel inChannel)

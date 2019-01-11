@@ -185,6 +185,7 @@ NTV2DeviceHasGenlockv3
 NTV2DeviceCanDo12gRouting
 NTV2DeviceCanReportFailSafeLoaded
 NTV2DeviceCanReportRunningFirmwareDate
+NTV2DeviceCanDo8KVideo
 
 
 // NTV2ConversionModes

@@ -1316,6 +1316,8 @@ typedef enum
 
 	// Global Control 3
 	kRegMaskAnalogIOControl			= BIT(1) + BIT(0),
+	kRegMaskQuadQuadMode		= BIT(2),
+	kRegMaskQuadQuadMode2		= BIT(3),
 
 
 	// Channel Control - kRegCh1Control, kRegCh2Control, kRegCh3Control, kRegCh4Control
@@ -2458,6 +2460,8 @@ typedef enum
 
 	// Global Control 3
 	kRegShiftAnalogIOControl			= 0,
+	kRegShiftQuadQuadMode				= 2,
+	kRegShiftQuadQuadMode2				= 3,
 
 	// Channel Control - kRegCh1Control, kRegCh2Control, kRegCh3Control, kRegCh4Control
 	kRegShiftMode						= 0,

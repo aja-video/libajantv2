@@ -865,6 +865,18 @@ public:
 		@note		Most clients need not call this function, as SetVideoFormat to one of the 4K/UHD formats will automatically call this function.
 	**/
 	AJA_VIRTUAL bool		SetQuadFrameEnable (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	
+	/**
+		@brief	Enables or disables quad-quad-frame mode on the device, 8K.
+		@return		True if successful; otherwise false.
+		@param[in]	inValue		Specify a non-zero value (true) to put the device into quad quad frame mode.
+								Specify zero (false) to put the device into normal (non-quad quad) frame mode.
+		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1. Ignored if the device
+								is incapable of multi-format mode, or is not currently in multi-format mode.
+		@todo		Should use bool parameter.
+		@note		Most clients need not call this function, as SetVideoFormat to one of the 8K/UHD2 formats will automatically call this function.
+	**/
+	AJA_VIRTUAL bool		SetQuadQuadFrameEnable (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
 		@brief	Returns the device's current quad-frame mode, whether it's enabled or not.
@@ -875,6 +887,16 @@ public:
 		@todo		Should use bool & parameter.
 	**/
 	AJA_VIRTUAL bool		GetQuadFrameEnable (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	
+	/**
+		@brief	Returns the device's current quad-quad-frame mode, whether it's enabled or not.
+		@return		True if successful; otherwise false.
+		@param[in]	outValue	Receives 1 if the device is currently in quad quad frame mode; otherwise receives 0.
+		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1. Ignored if the device
+								is incapable of multi-format mode, or is not currently in multi-format mode.
+		@todo		Should use bool & parameter.
+	**/
+	AJA_VIRTUAL bool		GetQuadQuadFrameEnable (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
 		@brief	Enables or disables SMPTE 425 "2K quadrants" mode for the given frame store on the device.
