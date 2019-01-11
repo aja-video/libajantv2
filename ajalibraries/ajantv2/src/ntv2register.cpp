@@ -7124,187 +7124,157 @@ bool CNTV2Card::GetSDIOut12GEnable(const NTV2Channel inChannel, bool & outIsEnab
 
 
 // SDI bypass relay control
-static bool AccessWatchdogControlBit( CNTV2Card* card, ULWord* value, ULWord mask, ULWord shift, bool read )
+static inline bool ReadWatchdogControlBit (CNTV2Card & card, ULWord & outValue, const ULWord inMask, const ULWord inShift)
 {
-	if (!value)
-		return false;
-	if( read )
-		return card->ReadRegister (kRegSDIWatchdogControlStatus, *value, mask, shift);
-	if (!card->KickSDIWatchdog ())
-		return false;
-	return card->WriteRegister (kRegSDIWatchdogControlStatus, *value, mask, shift);
+	return card.ReadRegister (kRegSDIWatchdogControlStatus, outValue, inMask, inShift);
 }
+
+static bool WriteWatchdogControlBit (CNTV2Card & card, const ULWord inValue, const ULWord inMask, const ULWord inShift)
+{
+	if (!card.KickSDIWatchdog())
+		return false;
+	return card.WriteRegister (kRegSDIWatchdogControlStatus, inValue, inMask, inShift);
+}
+
 
 bool CNTV2Card::KickSDIWatchdog()
-{
-	bool status = true;
-
-	status &= WriteRegister( kRegSDIWatchdogKick2, 0x01234567 );
-	status &= WriteRegister( kRegSDIWatchdogKick1, 0xA5A55A5A );
-
-	return status;
+{	//	Write 0x01234567 into Kick2 register to begin watchdog reset, then in < 30 msec,
+	//	write 0xA5A55A5A into Kick1 register to complete the reset...
+	const bool status (WriteRegister(kRegSDIWatchdogKick2, 0x01234567));
+	return status && WriteRegister(kRegSDIWatchdogKick1, 0xA5A55A5A);
 }
 
-bool CNTV2Card::GetSDIWatchdogStatus(NTV2RelayState & value)
+bool CNTV2Card::GetSDIWatchdogStatus (NTV2RelayState & outValue)
 {
-	ULWord statusBit;
-
-	if( !AccessWatchdogControlBit( this, &statusBit, kRegMaskSDIWatchdogStatus, kRegShiftSDIWatchdogStatus, true ) )
+	ULWord statusBit(0);
+	if (!ReadWatchdogControlBit (*this, statusBit, kRegMaskSDIWatchdogStatus, kRegShiftSDIWatchdogStatus))
 		return false;
 
-	value = statusBit ? NTV2_THROUGH_DEVICE : NTV2_DEVICE_BYPASSED;
-
+	outValue = statusBit ? NTV2_THROUGH_DEVICE : NTV2_DEVICE_BYPASSED;
 	return true;
 }
 
-bool CNTV2Card::GetSDIRelayPosition12(NTV2RelayState &  value)
+bool CNTV2Card::GetSDIRelayPosition12 (NTV2RelayState & outValue)
 {
-	ULWord statusBit;
-
-	if( !AccessWatchdogControlBit( this, &statusBit, kRegMaskSDIRelayPosition12, kRegShiftSDIRelayPosition12, true ) )
+	ULWord statusBit(0);
+	if (!ReadWatchdogControlBit (*this, statusBit, kRegMaskSDIRelayPosition12, kRegShiftSDIRelayPosition12))
 		return false;
 
-	value = statusBit ? NTV2_THROUGH_DEVICE : NTV2_DEVICE_BYPASSED;
-
+	outValue = statusBit ? NTV2_THROUGH_DEVICE : NTV2_DEVICE_BYPASSED;
 	return true;
 }
 
-bool CNTV2Card::GetSDIRelayPosition34(NTV2RelayState &  value)
+bool CNTV2Card::GetSDIRelayPosition34 (NTV2RelayState & outValue)
 {
-	ULWord statusBit;
-
-	if( !AccessWatchdogControlBit( this, &statusBit, kRegMaskSDIRelayPosition34, kRegShiftSDIRelayPosition34, true ) )
+	ULWord statusBit(0);
+	if (!ReadWatchdogControlBit (*this, statusBit, kRegMaskSDIRelayPosition34, kRegShiftSDIRelayPosition34))
 		return false;
 
-	value = statusBit ? NTV2_THROUGH_DEVICE : NTV2_DEVICE_BYPASSED;
-
+	outValue = statusBit ? NTV2_THROUGH_DEVICE : NTV2_DEVICE_BYPASSED;
 	return true;
 }
 
-bool CNTV2Card::GetSDIRelayManualControl12(NTV2RelayState & value)
+bool CNTV2Card::GetSDIRelayManualControl12 (NTV2RelayState & outValue)
 {
-	ULWord statusBit;
-
-	if( !AccessWatchdogControlBit( this, &statusBit, kRegMaskSDIRelayControl12, kRegShiftSDIRelayControl12, true ) )
+	ULWord statusBit(0);
+	if (!ReadWatchdogControlBit (*this, statusBit, kRegMaskSDIRelayControl12, kRegShiftSDIRelayControl12))
 		return false;
 
-	value = statusBit ? NTV2_THROUGH_DEVICE : NTV2_DEVICE_BYPASSED;
-
+	outValue = statusBit ? NTV2_THROUGH_DEVICE : NTV2_DEVICE_BYPASSED;
 	return true;
 }
 
-bool CNTV2Card::SetSDIRelayManualControl12(NTV2RelayState value)
+bool CNTV2Card::SetSDIRelayManualControl12 (const NTV2RelayState inValue)
 {
-	ULWord statusBit = (value == NTV2_THROUGH_DEVICE) ? 1 : 0;
-
-	return AccessWatchdogControlBit( this, &statusBit, kRegMaskSDIRelayControl12, kRegShiftSDIRelayControl12, false );
+	const ULWord statusBit ((inValue == NTV2_THROUGH_DEVICE) ? 1 : 0);
+	return WriteWatchdogControlBit (*this, statusBit, kRegMaskSDIRelayControl12, kRegShiftSDIRelayControl12);
 }
 
-bool CNTV2Card::GetSDIRelayManualControl34(NTV2RelayState & value)
+bool CNTV2Card::GetSDIRelayManualControl34 (NTV2RelayState & outValue)
 {
-	ULWord statusBit;
-
-	if( !AccessWatchdogControlBit( this, &statusBit, kRegMaskSDIRelayControl34, kRegShiftSDIRelayControl34, true ) )
+	ULWord statusBit(0);
+	if (!ReadWatchdogControlBit (*this, statusBit, kRegMaskSDIRelayControl34, kRegShiftSDIRelayControl34))
 		return false;
 
-	value = statusBit ? NTV2_THROUGH_DEVICE : NTV2_DEVICE_BYPASSED;
-
+	outValue = statusBit ? NTV2_THROUGH_DEVICE : NTV2_DEVICE_BYPASSED;
 	return true;
 }
 
-bool CNTV2Card::SetSDIRelayManualControl34(NTV2RelayState value)
+bool CNTV2Card::SetSDIRelayManualControl34 (const NTV2RelayState inValue)
 {
-	ULWord statusBit = (value == NTV2_THROUGH_DEVICE) ? 1 : 0;
-
-	return AccessWatchdogControlBit( this, &statusBit, kRegMaskSDIRelayControl34, kRegShiftSDIRelayControl34, false );
+	const ULWord statusBit ((inValue == NTV2_THROUGH_DEVICE) ? 1 : 0);
+	return WriteWatchdogControlBit (*this, statusBit, kRegMaskSDIRelayControl34, kRegShiftSDIRelayControl34);
 }
 
-bool CNTV2Card::GetSDIWatchdogEnable12(bool & value)
+bool CNTV2Card::GetSDIWatchdogEnable12 (bool & outValue)
 {
-	ULWord statusBit;
-
-	if( !AccessWatchdogControlBit( this, &statusBit, kRegMaskSDIWatchdogEnable12, kRegShiftSDIWatchdogEnable12, true ) )
+	ULWord statusBit(0);
+	if (!ReadWatchdogControlBit (*this, statusBit, kRegMaskSDIWatchdogEnable12, kRegShiftSDIWatchdogEnable12))
 		return false;
 
-	value = statusBit ? true : false;
-
+	outValue = statusBit ? true : false;
 	return true;
 }
 
-bool CNTV2Card::SetSDIWatchdogEnable12(bool value)
+bool CNTV2Card::SetSDIWatchdogEnable12 (const bool inValue)
 {
-	ULWord statusBit = (value == NTV2_THROUGH_DEVICE) ? 1 : 0;
-
-	return AccessWatchdogControlBit( this, &statusBit, kRegMaskSDIWatchdogEnable12, kRegShiftSDIWatchdogEnable12, false );
+	const ULWord statusBit ((inValue == NTV2_THROUGH_DEVICE) ? 1 : 0);
+	return WriteWatchdogControlBit (*this, statusBit, kRegMaskSDIWatchdogEnable12, kRegShiftSDIWatchdogEnable12);
 }
 
-bool CNTV2Card::GetSDIWatchdogEnable34(bool & value)
+bool CNTV2Card::GetSDIWatchdogEnable34 (bool & outValue)
 {
-	ULWord statusBit;
-
-	if( !AccessWatchdogControlBit( this, &statusBit, kRegMaskSDIWatchdogEnable34, kRegShiftSDIWatchdogEnable34, true ) )
+	ULWord statusBit(0);
+	if (!ReadWatchdogControlBit (*this, statusBit, kRegMaskSDIWatchdogEnable34, kRegShiftSDIWatchdogEnable34))
 		return false;
 
-	value = statusBit ? true : false;
-
+	outValue = statusBit ? true : false;
 	return true;
 }
 
-bool CNTV2Card::SetSDIWatchdogEnable34(bool value)
+bool CNTV2Card::SetSDIWatchdogEnable34 (const bool inValue)
 {
-	ULWord statusBit = (value == NTV2_THROUGH_DEVICE) ? 1 : 0;
-
-	return AccessWatchdogControlBit( this, &statusBit, kRegMaskSDIWatchdogEnable34, kRegShiftSDIWatchdogEnable34, false );
+	const ULWord statusBit ((inValue == NTV2_THROUGH_DEVICE) ? 1 : 0);
+	return WriteWatchdogControlBit (*this, statusBit, kRegMaskSDIWatchdogEnable34, kRegShiftSDIWatchdogEnable34);
 }
 
-bool CNTV2Card::GetSDIWatchdogTimeout(ULWord & value)
+bool CNTV2Card::GetSDIWatchdogTimeout (ULWord & outValue)
 {
-	return ReadRegister( kRegSDIWatchdogTimeout, value );
+	return ReadRegister (kRegSDIWatchdogTimeout, outValue);
 }
 
-bool CNTV2Card::SetSDIWatchdogTimeout(ULWord value)
+bool CNTV2Card::SetSDIWatchdogTimeout (const ULWord inValue)
 {
-	if( !KickSDIWatchdog() )
-		return false;
-
-	return WriteRegister( kRegSDIWatchdogTimeout, value );
+	return KickSDIWatchdog()  &&  WriteRegister (kRegSDIWatchdogTimeout, inValue);
 }
 
-bool CNTV2Card::GetSDIWatchdogState(NTV2SDIWatchdogState & state)
+bool CNTV2Card::GetSDIWatchdogState (NTV2SDIWatchdogState & outState)
 {
 	NTV2SDIWatchdogState tempState;
-	bool status = true;
-
-	status &= GetSDIRelayManualControl12( tempState.manualControl12  );
-	status &= GetSDIRelayManualControl34( tempState.manualControl34  );
-	status &= GetSDIRelayPosition12(      tempState.relayPosition12  );
-	status &= GetSDIRelayPosition34(      tempState.relayPosition34  );
-	status &= GetSDIWatchdogStatus(       tempState.watchdogStatus   );
-	status &= GetSDIWatchdogEnable12(     tempState.watchdogEnable12 );
-	status &= GetSDIWatchdogEnable34(     tempState.watchdogEnable34 );
-	status &= GetSDIWatchdogTimeout(      tempState.watchdogTimeout  );
-
-	if( status )
+	if (   GetSDIRelayManualControl12 (tempState.manualControl12  )
+		&& GetSDIRelayManualControl34 (tempState.manualControl34  )
+		&& GetSDIRelayPosition12      (tempState.relayPosition12  )
+		&& GetSDIRelayPosition34      (tempState.relayPosition34  )
+		&& GetSDIWatchdogStatus       (tempState.watchdogStatus   )
+		&& GetSDIWatchdogEnable12     (tempState.watchdogEnable12 )
+		&& GetSDIWatchdogEnable34     (tempState.watchdogEnable34 )
+		&& GetSDIWatchdogTimeout      (tempState.watchdogTimeout  ))
 	{
-		state = tempState;
+		outState = tempState;
 		return true;
 	}
-
 	return false;
 }
 
-bool CNTV2Card::SetSDIWatchdogState(const NTV2SDIWatchdogState & state)
+bool CNTV2Card::SetSDIWatchdogState (const NTV2SDIWatchdogState & inState)
 {
-	bool status = true;
-
-	status &= SetSDIRelayManualControl12( state.manualControl12  );
-	status &= SetSDIRelayManualControl34( state.manualControl34  );
-	status &= SetSDIWatchdogTimeout(      state.watchdogTimeout  );
-	status &= SetSDIWatchdogEnable12(     state.watchdogEnable12 );
-	status &= SetSDIWatchdogEnable34(     state.watchdogEnable34 );
-
-	return true;
+	return SetSDIRelayManualControl12 (inState.manualControl12)
+		&& SetSDIRelayManualControl34 (inState.manualControl34)
+		&& SetSDIWatchdogTimeout      (inState.watchdogTimeout)
+		&& SetSDIWatchdogEnable12     (inState.watchdogEnable12)
+		&& SetSDIWatchdogEnable34     (inState.watchdogEnable34);
 }
+
 
 bool CNTV2Card::Enable4KDCRGBMode(bool enable)
 {
