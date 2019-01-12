@@ -21,14 +21,15 @@
 
 
 //	Streaming Helpers
-#define	YesNo(__x__)			((__x__) ? "Y"			: "N")
-#define	OnOff(__x__)			((__x__) ? "On"			: "Off")
-#define	SetNotset(__x__)		((__x__) ? "Set"		: "Not Set")
-#define	EnabDisab(__x__)		((__x__) ? "Enabled"	: "Disabled")
-#define	DisabEnab(__x__)		((__x__) ? "Disabled"	: "Enabled")
-#define	ActInact(__x__)			((__x__) ? "Active"		: "Inactive")
-#define	SuppNotsupp(__x__)		((__x__) ? "Supported"	: "Unsupported")
-#define	PresNotPres(__x__)		((__x__) ? "Present"	: "Not Present")
+#define	YesNo(__x__)					((__x__) ? "Y"				: "N")
+#define	OnOff(__x__)					((__x__) ? "On"				: "Off")
+#define	SetNotset(__x__)				((__x__) ? "Set"			: "Not Set")
+#define	EnabDisab(__x__)				((__x__) ? "Enabled"		: "Disabled")
+#define	DisabEnab(__x__)				((__x__) ? "Disabled"		: "Enabled")
+#define	ActInact(__x__)					((__x__) ? "Active"			: "Inactive")
+#define	SuppNotsupp(__x__)				((__x__) ? "Supported"		: "Unsupported")
+#define	PresNotPres(__x__)				((__x__) ? "Present"		: "Not Present")
+#define	ThruDeviceOrBypassed(__x__)		((__x__) ? "Thru Device"	: "Device Bypassed")
 
 
 //	Register classifier keys

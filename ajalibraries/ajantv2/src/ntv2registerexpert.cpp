@@ -258,6 +258,11 @@ private:
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel5);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel6);
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel7);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel8);
 		DefineRegister (kRegCh1InputFrame,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel1,	kRegClass_NULL);
+
+		DefineRegister (kRegSDIWatchdogControlStatus,"", mDecodeRelayCtrlStat,	READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegSDIWatchdogTimeout,	"",	mDecodeWatchdogTimeout,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegSDIWatchdogKick1,	"",	mDecodeWatchdogKick,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegSDIWatchdogKick2,	"",	mDecodeWatchdogKick,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 	}
 	void SetupVPIDRegs(void)
 	{
@@ -1545,7 +1550,7 @@ private:
 			(void) inDeviceID;
 			static const ULWord	playCaptModes[]	= {	kRegMaskAud1PlayCapMode,kRegMaskAud2PlayCapMode,kRegMaskAud3PlayCapMode,kRegMaskAud4PlayCapMode,
 													kRegMaskAud5PlayCapMode,kRegMaskAud6PlayCapMode,kRegMaskAud7PlayCapMode,kRegMaskAud8PlayCapMode};
-			static const ULWord	rp188Modes[]	= {	0, 0, kRegMaskRP188ModeCh3,kRegMaskRP188ModeCh4,kRegMaskRP188ModeCh5,(ULWord)kRegMaskRP188ModeCh6,kRegMaskRP188ModeCh7,kRegMaskRP188ModeCh8};
+			static const ULWord	rp188Modes[]	= {	0, 0, kRegMaskRP188ModeCh3,kRegMaskRP188ModeCh4,kRegMaskRP188ModeCh5,ULWord(kRegMaskRP188ModeCh6),kRegMaskRP188ModeCh7,kRegMaskRP188ModeCh8};
 			static const ULWord	k425Masks[]		= {	kRegMask425FB12, kRegMask425FB34, kRegMask425FB56, kRegMask425FB78};
 			static const ULWord	BLinkModes[]	= {	kRegMaskSmpte372Enable4, kRegMaskSmpte372Enable6, kRegMaskSmpte372Enable8};
 			ostringstream	oss;
@@ -1697,6 +1702,75 @@ private:
 		}
 		virtual	~DecodeSDITransmitCtrl()	{}
 	}	mDecodeSDITransmitCtrl;
+	
+	struct DecodeRelayCtrlStat : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			ostringstream	oss;
+			if (::NTV2DeviceHasSDIRelays(inDeviceID))
+			{
+				oss	<< "SDI1-SDI2 Relay Control: "	<< ThruDeviceOrBypassed(inRegValue & kRegMaskSDIRelayControl12)		<< endl
+					<< "SDI3-SDI4 Relay Control: "	<< ThruDeviceOrBypassed(inRegValue & kRegMaskSDIRelayControl34)		<< endl
+					<< "SDI1-SDI2 Relay Watchdog: "	<< EnabDisab(inRegValue & kRegMaskSDIWatchdogEnable12)				<< endl
+					<< "SDI3-SDI4 Relay Watchdog: "	<< EnabDisab(inRegValue & kRegMaskSDIWatchdogEnable34)				<< endl
+					<< "SDI1-SDI2 Relay Position: "	<< ThruDeviceOrBypassed(inRegValue & kRegMaskSDIRelayPosition12)	<< endl
+					<< "SDI3-SDI4 Relay Position: "	<< ThruDeviceOrBypassed(inRegValue & kRegMaskSDIRelayPosition34)	<< endl
+					<< "Watchdog Timer Status: "	<< ThruDeviceOrBypassed(inRegValue & kRegMaskSDIWatchdogStatus);
+			}
+			else
+				oss	<< "(SDI bypass relays not supported)";
+			return oss.str();
+		}
+		virtual	~DecodeRelayCtrlStat()	{}
+	}	mDecodeRelayCtrlStat;
+	
+	struct DecodeWatchdogTimeout : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			ostringstream	oss;
+			if (::NTV2DeviceHasSDIRelays(inDeviceID))
+			{
+				const uint32_t	ticks8nanos	(inRegValue);	//	number of 8-nanosecond ticks
+				const double	microsecs	(double(ticks8nanos) * 8.0 / 1000.0);
+				const double	millisecs	(microsecs / 1000.0);
+				oss << "Watchdog Timeout [8-ns ticks]: " << xHEX0N(ticks8nanos,8) << " (" << DEC(ticks8nanos) << ")" << endl
+					<< "Watchdog Timeout [usec]: " << microsecs << endl
+					<< "Watchdog Timeout [msec]: " << millisecs;
+			}
+			else
+				oss	<< "(SDI bypass relays not supported)";
+			return oss.str();
+		}
+		virtual	~DecodeWatchdogTimeout()	{}
+	}	mDecodeWatchdogTimeout;
+	
+	struct DecodeWatchdogKick : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			ostringstream	oss;
+			if (::NTV2DeviceHasSDIRelays(inDeviceID))
+			{
+				const uint32_t	whichReg(inRegNum - kRegSDIWatchdogKick1);
+				NTV2_ASSERT(whichReg < 2);
+				const uint32_t expectedValue(whichReg ? 0x01234567 : 0xA5A55A5A);
+				oss << xHEX0N(inRegValue,8);
+				if (inRegValue == expectedValue)
+					oss << " (Normal)";
+				else
+					oss << " (Not expected, should be " << xHEX0N(expectedValue,8) << ")";
+			}
+			else
+				oss	<< "(SDI bypass relays not supported)";
+			return oss.str();
+		}
+		virtual	~DecodeWatchdogKick()	{}
+	}	mDecodeWatchdogKick;
 
 	struct DecodeInputVPID: public Decoder
 	{
@@ -1767,8 +1841,8 @@ private:
 		{
 			(void) inRegNum;
 			(void) inDeviceID;
-			const bool		is16x9	((inRegValue & (1 << 31)) != 0);
-			const bool		isMono	((inRegValue & (1 << 30)) != 0);
+			const bool		is16x9	((inRegValue & BIT(31)) != 0);
+			const bool		isMono	((inRegValue & BIT(30)) != 0);
 			ostringstream	oss;
 			oss << "Aspect Ratio: " << (is16x9 ? "16x9" : "4x3") << endl
 				<< "Depth: " << (isMono ? "Monochrome" : "Color");
@@ -2341,13 +2415,13 @@ private:
 			const bool		overrun		((inRegValue & BIT(28)) ? true : false);
 			switch (which)
 			{
-				case 6:		oss	<<	"Total bytes: ";		break;
+				case 6:		oss	<< "Total bytes: ";			break;
 				case 7:		oss	<< "Total F1 bytes: ";		break;
 				case 8:		oss	<< "Total F2 bytes: ";		break;
-				default:	return "Invalid register type";	break;
+				default:	oss << "Invalid register type";	break;
 			}
-			oss	<< byteTotal	<< endl
-			<< "Overrun: "	<< YesNo(overrun);
+			oss	<< DEC(byteTotal)	<< endl
+				<< "Overrun: "	<< YesNo(overrun);
 			return oss.str();
 		}
 		virtual	~DecodeAncExtStatusReg()	{}
