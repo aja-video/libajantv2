@@ -1181,10 +1181,10 @@
 	-	the “Info” or “Firmware” panels of the <b>AJA ControlPanel</b> application (in AJA’s “retail” software);
 	-	programmatically using certain SDK API calls (see below).
 
-	Newer AJA devices (starting with the \ref ntv2corvid88) report their <b>currently-running firmware date</b> in register 88,
+	Newer AJA devices (starting with the \ref corvid88) report their <b>currently-running firmware date</b> in register 88,
 	which is made available as numeric date components or a standard string by calling CNTV2Card::GetRunningFirmwareDate.
 
-	Older AJA devices prior to the introduction of the \ref ntv2corvid88 have no way of reporting their <b>currently-running firmware date</b>
+	Older AJA devices prior to the introduction of the \ref corvid88 have no way of reporting their <b>currently-running firmware date</b>
 	— they can only report the running firmware’s <i>revision number</i> (which was stored in a portion of register 48 and made
 	available by the CNTV2Card::GetRunningFirmwareRevision function. To correlate the revision number to a date, it must be looked
 	up on the device’s firmware page on the

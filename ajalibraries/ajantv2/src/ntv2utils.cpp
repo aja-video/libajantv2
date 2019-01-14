@@ -2001,9 +2001,6 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 		case NTV2_FORMAT_1080psf_2500_2:
 		case NTV2_FORMAT_1080psf_2997_2:
 		case NTV2_FORMAT_1080psf_3000_2:
-		case NTV2_FORMAT_1080psf_2K_2398:
-		case NTV2_FORMAT_1080psf_2K_2400:
-		case NTV2_FORMAT_1080psf_2K_2500:
 		case NTV2_FORMAT_1080p_5000_B:
 		case NTV2_FORMAT_1080p_5994_B:
 		case NTV2_FORMAT_1080p_6000_B:
@@ -2036,6 +2033,12 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 		case NTV2_FORMAT_1080p_2K_6000_A:
 			standard = NTV2_STANDARD_2Kx1080p;
 			break;
+        case NTV2_FORMAT_1080psf_2K_2398:
+        case NTV2_FORMAT_1080psf_2K_2400:
+        case NTV2_FORMAT_1080psf_2K_2500:
+            standard = NTV2_STANDARD_2Kx1080i;
+            break;
+
 		case NTV2_FORMAT_720p_2398:
 		case NTV2_FORMAT_720p_5000:
 		case NTV2_FORMAT_720p_5994:
@@ -2100,8 +2103,6 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 		case NTV2_FORMAT_4x2048x1080p_2500:
 		case NTV2_FORMAT_4x2048x1080p_2997:
 		case NTV2_FORMAT_4x2048x1080p_3000:
-		case NTV2_FORMAT_4x2048x1080p_4795:
-		case NTV2_FORMAT_4x2048x1080p_4800:
         case NTV2_FORMAT_4096x2160psf_2398:
         case NTV2_FORMAT_4096x2160psf_2400:
         case NTV2_FORMAT_4096x2160psf_2500:
@@ -2112,15 +2113,17 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
         case NTV2_FORMAT_4096x2160p_3000:
         case NTV2_FORMAT_4096x2160psf_2997:
         case NTV2_FORMAT_4096x2160psf_3000:
-        case NTV2_FORMAT_4096x2160p_4795:
-        case NTV2_FORMAT_4096x2160p_4800:
 			standard = NTV2_STANDARD_4096x2160p;
 			break;
+        case NTV2_FORMAT_4x2048x1080p_4795:
+        case NTV2_FORMAT_4x2048x1080p_4800:
 		case NTV2_FORMAT_4x2048x1080p_5000:
 		case NTV2_FORMAT_4x2048x1080p_5994:
 		case NTV2_FORMAT_4x2048x1080p_6000:
 		case NTV2_FORMAT_4x2048x1080p_11988:
 		case NTV2_FORMAT_4x2048x1080p_12000:
+        case NTV2_FORMAT_4096x2160p_4795:
+        case NTV2_FORMAT_4096x2160p_4800:
         case NTV2_FORMAT_4096x2160p_5000:
         case NTV2_FORMAT_4096x2160p_5994:
         case NTV2_FORMAT_4096x2160p_6000:
