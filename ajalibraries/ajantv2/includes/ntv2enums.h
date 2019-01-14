@@ -3943,7 +3943,10 @@ typedef enum
 	VPIDStandard_1080_Single_6Gb				= 0xC1,	// 1080 single link 6Gb
 	VPIDStandard_1080_AFR_Single_6Gb			= 0xC2,	// 1080 additional frame rates single link 6Gb
 	VPIDStandard_2160_Single_12Gb				= 0xCE,	// 2160 single link 12Gb
-	VPIDStandard_1080_10_12_AFR_Single_12Gb		= 0xCF	// 1080 10 bit or 12 bit additional frame rates single link 12Gb
+	VPIDStandard_1080_10_12_AFR_Single_12Gb		= 0xCF,	// 1080 10 bit or 12 bit additional frame rates single link 12Gb
+	VPIDStandard_4320_DualLink_12Gb				= 0xD0, // 4320 dual link 12Gb ST2802-11 Mode 1
+	VPIDStandard_2160_DualLink_12Gb				= 0xD1, // 2160 RGB dual link 12Gb ST2082-11 Mode 2
+	VPIDStandard_4320_QuadLink_12Gb				= 0xD2 // 4320 quad link 12Gb ST2082-12 Mode 1
 } VPIDStandard;
 
 typedef enum
