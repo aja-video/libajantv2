@@ -1130,13 +1130,14 @@ static const AJA_FrameRate	sAJARate2NTV2Rate[] = {	AJA_FrameRate_Unknown,	//	NTV
 
 bool CNTV2Card::S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & inOutXferInfo)
 {
-	//	IP 2110 Playout only:	Add relevant transmit timecodes to outgoing Anc
+	//	IP 2110 Playout only:	Add relevant transmit timecodes and VPID to outgoing Anc
 	NTV2FrameRate		ntv2Rate		(NTV2_FRAMERATE_UNKNOWN);
 	bool				result			(GetFrameRate(ntv2Rate, inChannel));
 	bool				isProgressive	(false);
 	NTV2Standard		standard		(NTV2_STANDARD_INVALID);
 	NTV2_POINTER &		ancF1			(inOutXferInfo.acANCBuffer);
 	NTV2_POINTER &		ancF2			(inOutXferInfo.acANCField2Buffer);
+	ULWord				vpidA(0), vpidB(0);
 	AJAAncillaryList	pkts;
 
 	if (!result)
@@ -1150,6 +1151,35 @@ bool CNTV2Card::S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTO
 	if (AJA_FAILURE(AJAAncillaryList::SetFromIPAncData(ancF1, ancF2, pkts)))
 		return false;	//	Packet import failed
 
+	if (GetSDIOutVPID (vpidA, vpidB, UWord(inChannel)))
+	{	//	VPID Packet Insertion						1080	720		525		625		1080p	2K		2K1080p		2K1080i		UHD		4K		UHDHFR		4KHFR
+		static const uint16_t	vpidF1LineNums[] = {	10,		10,		13,		9,		10,		10,		10,			10,			10,		10,		10,			10	};
+		static const uint16_t	vpidF2LineNums[] = {	572,	0,		276,	322,	0,		0,		0,			572,		0,		0,		0,			0	};
+		if (vpidA)
+		{
+			AJAAncillaryData	pktA;
+			pktA.SetDID(0x41);
+			pktA.SetSID(0x01);
+			pktA.SetLocationVideoLink(AJAAncillaryDataLink_A);
+			pktA.SetLocationDataStream(AJAAncillaryDataStream_1);
+			pktA.SetLocationDataChannel(AJAAncillaryDataChannel_Y);
+			pktA.SetLocationVideoSpace(AJAAncillaryDataSpace_HANC);
+			pktA.SetLocationLineNumber(vpidF1LineNums[standard]);
+			pkts.AddAncillaryData(pktA);
+		}
+		if (!isProgressive && vpidB)
+		{
+			AJAAncillaryData	pktB;
+			pktB.SetDID(0x41);
+			pktB.SetSID(0x01);
+			pktB.SetLocationVideoLink(AJAAncillaryDataLink_A);
+			pktB.SetLocationDataStream(AJAAncillaryDataStream_1);
+			pktB.SetLocationDataChannel(AJAAncillaryDataChannel_Y);
+			pktB.SetLocationVideoSpace(AJAAncillaryDataSpace_HANC);
+			pktB.SetLocationLineNumber(vpidF2LineNums[standard]);
+			pkts.AddAncillaryData(pktB);
+		}
+	}
 	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(standard));
 	const uint32_t				F2StartLine			(smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD1));
 	const AJA_FrameRate			ajaRate				(sAJARate2NTV2Rate[ntv2Rate]);
