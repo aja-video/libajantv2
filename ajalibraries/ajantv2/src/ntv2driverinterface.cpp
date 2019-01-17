@@ -830,6 +830,12 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 		mRecordRegWrites = false;
 		return true;
 	}
+
+	ULWord CNTV2DriverInterface::GetNumRecordedRegisterWrites (void) const
+	{
+		AJAAutoLock	autoLock(&mRegWritesLock);
+		return ULWord(mRegWrites.size());
+	}
 #endif	//	NTV2_WRITEREG_PROFILING
 
 

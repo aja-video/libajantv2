@@ -301,18 +301,24 @@ public:
     virtual inline bool						HevcSendMessage (HevcMessageHeader * /*pMessage*/)		{ return false; }
 
 #if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
+	/**
+		@name	WriteRegister Profiling
+	**/
+	///@{
 public:
-	virtual bool				GetRecordedRegisterWrites (NTV2RegisterWrites & outRegWrites) const;
-	virtual bool				StartRecordRegisterWrites (const bool inSkipActualWrites = false);
-	virtual bool				IsRecordingRegisterWrites (void) const;	//	Note: returns false if Paused
-	virtual bool				StopRecordRegisterWrites (void);
-	virtual bool				PauseRecordRegisterWrites (void);
-	virtual bool				ResumeRecordRegisterWrites (void);
+	virtual bool				GetRecordedRegisterWrites (NTV2RegisterWrites & outRegWrites) const;	///< @brief	Answers with the recorded register writes.
+	virtual bool				StartRecordRegisterWrites (const bool inSkipActualWrites = false);	///< @brief	Starts recording all WriteRegister calls.
+	virtual bool				IsRecordingRegisterWrites (void) const;		///< @return	True if WriteRegister calls are currently being recorded (and not paused);  otherwise false.
+	virtual bool				StopRecordRegisterWrites (void);			///< @brief		Stops recording all WriteRegister calls.
+	virtual bool				PauseRecordRegisterWrites (void);			///< @brief		Pauses recording WriteRegister calls.
+	virtual bool				ResumeRecordRegisterWrites (void);			///< @brief		Resumes recording WriteRegister calls (after a prior call to PauseRecordRegisterWrites).
+	virtual ULWord				GetNumRecordedRegisterWrites (void) const;	///< @return	The number of recorded WriteRegister calls.
 protected:
-	NTV2RegisterWrites			mRegWrites;
-	mutable AJALock				mRegWritesLock;
-	bool						mRecordRegWrites;
-	bool						mSkipRegWrites;
+	NTV2RegisterWrites			mRegWrites;			///< @brief	Stores WriteRegister data
+	mutable AJALock				mRegWritesLock;		///< @brief	Guard mutex for mRegWrites
+	bool						mRecordRegWrites;	///< @brief	True if recording; otherwise false when not recording
+	bool						mSkipRegWrites;		///< @brief	True if actual register writes are skipped while recording
+	///@}
 #endif	//	NTV2_WRITEREG_PROFILING		//	Register Write Profiling
 
 protected:
