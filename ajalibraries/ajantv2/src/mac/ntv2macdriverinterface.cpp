@@ -877,7 +877,7 @@ bool CNTV2MacDriverInterface::WriteRegister( ULWord registerNumber,
 											 ULWord registerMask,
 											 ULWord registerShift)
 {
-#if defined(_DEBUG)
+#if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 	if (mRecordRegWrites)
 	{
 		AJAAutoLock	autoLock(&mRegWritesLock);
@@ -885,7 +885,7 @@ bool CNTV2MacDriverInterface::WriteRegister( ULWord registerNumber,
 		if (mSkipRegWrites)
 			return true;
 	}
-#endif
+#endif	//	defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 	{
