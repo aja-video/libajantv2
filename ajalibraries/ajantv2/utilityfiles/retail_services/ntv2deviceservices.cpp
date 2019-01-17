@@ -419,18 +419,22 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	// override virtual register filter variables
 	mVirtualDebug1			= virtualDebug1;
 	mEveryFrameTaskFilter	= everyFrameTaskFilter;
+	mDeviceID				= mCard->GetDeviceID();
 
     //	CP checks the kVRegAgentCheck virtual register to see if I'm still running...
     AgentIsAlive();
 
 #if defined(USE_GROUPED_WRITES)
-	// force full write of all regs even if not change on this interval
-	if (mTimer.ElapsedTime() >= kRewriteIntervalMs)
+	if (CanDoOptimizedWrites(mDeviceID))
 	{
-		mTimer.Start();
-		mRegisterWritesLast.clear();
+		// force full write of all regs even if not change on this interval
+		if (mTimer.ElapsedTime() >= kRewriteIntervalMs)
+		{
+			mTimer.Start();
+			mRegisterWritesLast.clear();
+		}
+		mCard->StartRecordRegisterWrites(true);
 	}
-    mCard->StartRecordRegisterWrites(true);
 #endif
 
 	// If the daemon is not responsible for tasks just return
@@ -506,16 +510,19 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 	}
 	
 #if defined(USE_GROUPED_WRITES)
-	NTV2RegisterWrites regWrites;
-	mCard->StopRecordRegisterWrites();
-	mCard->GetRecordedRegisterWrites(regWrites);
-	#if defined(USE_OPTIMIZED_WRITES)
-		NTV2RegisterWrites regWrites2;
-		ConsolidateRegisterWrites(regWrites, regWrites2);
-		WriteDifferences(regWrites2);
-	#else
-		mCard->WriteRegisters(regWrites);
-	#endif
+	if (CanDoOptimizedWrites(mDeviceID))
+	{
+		NTV2RegisterWrites regWrites;
+		mCard->StopRecordRegisterWrites();
+		mCard->GetRecordedRegisterWrites(regWrites);
+		#if defined(USE_OPTIMIZED_WRITES)
+			NTV2RegisterWrites regWrites2;
+			ConsolidateRegisterWrites(regWrites, regWrites2);
+			WriteDifferences(regWrites2);
+		#else
+			mCard->WriteRegisters(regWrites);
+		#endif
+	}
 #endif
 }
 
@@ -1579,6 +1586,25 @@ bool DeviceServices::CanConvertFormat(NTV2VideoFormat inFormat, NTV2VideoFormat 
 	return bResult;
 }
 
+
+bool DeviceServices::CanDoOptimizedWrites(NTV2DeviceID deviceId)
+{
+	switch(deviceId)
+	{
+		case DEVICE_ID_IOIP_2022:
+		case DEVICE_ID_IOIP_2110:
+		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_1RX_1TX_2110:
+		case DEVICE_ID_KONAIP_2022:
+		case DEVICE_ID_KONAIP_2110:
+		case DEVICE_ID_KONAIP_2RX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_4CH_2SFP:
+			return false;
+		default:
+			return true;
+	}
+}
 
 
 // Return convertible format if UFC is available, otherwise return same fmt
