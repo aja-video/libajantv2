@@ -59,9 +59,9 @@ CNTV2DriverInterface::CNTV2DriverInterface ()
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	::memset (mInterruptEventHandles, 0, sizeof (mInterruptEventHandles));
 	::memset (mEventCounts, 0, sizeof (mEventCounts));
-#if defined(_DEBUG)	//	Register Write Profiling
+#if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 	mRecordRegWrites = mSkipRegWrites = false;
-#endif	//	_DEBUG
+#endif	//	NTV2_WRITEREG_PROFILING
 
 }	//	constructor
 
