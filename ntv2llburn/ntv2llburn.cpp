@@ -690,7 +690,7 @@ void NTV2LLBurn::ProcessFrames (void)
 					pkt.SetPayloadData((const uint8_t*) &pktData, 4);
 					pkts.AddAncillaryData(pkt);
 				}
-				pkts.SortListByLocation();	//pkts.Print(cerr, true); cerr << endl;
+				//pkts.Print(cerr, true); cerr << endl;
 				if (NTV2_DEVICE_SUPPORTS_SMPTE2110(mDeviceID))
 					pkts.GetIPTransmitData (mpHostF1AncBuffer, mpHostF2AncBuffer, !isInterlace, isInterlace ? smpteLineNumInfo.GetLastLine(NTV2_FIELD0)+1 : 0);
 				else
