@@ -1198,7 +1198,7 @@
 
 
 	<hr size="50px">
-	@subsection	dev-firmware-vers	Determining Firmware Features
+	@subsection	dev-firmware-features	Determining Firmware Features
 
 	NTV2, being an old and rather crude architecture, has no automatically-enforced linkage between the firmware and the SDK —
 	i.e. the SDK is neither generated from the firmware, nor is the firmware generated from the SDK.
