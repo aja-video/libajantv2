@@ -893,6 +893,9 @@ AJAStatus AJAAncillaryList::GetSDITransmitData (NTV2_POINTER & F1Buffer, NTV2_PO
 	uint8_t *	pF1AncData	(reinterpret_cast<uint8_t*>(F1Buffer.GetHostPointer()));
 	uint8_t *	pF2AncData	(reinterpret_cast<uint8_t*>(F2Buffer.GetHostPointer()));
 
+	//	I need to be in ascending line order...
+	SortListByLocation();
+
 	//	Generate transmit data for each of my packets...
 	for (AJAAncDataListConstIter it(m_ancList.begin());  it != m_ancList.end();  ++it)
 	{
@@ -954,6 +957,9 @@ AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,  
 		LOGMYWARN("List is empty");
 		return AJA_STATUS_SUCCESS;
 	}
+
+	//	I need to be in ascending line order...
+	SortListByLocation();
 
 	//	BRUTE-FORCE METHOD -- NOT VERY EFFICIENT
 	const bool	isSD	(inFormatDesc.IsSDFormat());
@@ -1121,6 +1127,9 @@ AJAStatus AJAAncillaryList::GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POI
 	U32F1s.reserve(maxPktLengthWords);
 	if (!inIsProgressive)
 		U32F2s.reserve(maxPktLengthWords);
+
+	//	I need to be in ascending line order...
+	SortListByLocation();
 
 	//	Generate transmit data for each of my packets...
 	for (uint32_t pktNdx(0);  pktNdx < CountAncillaryData();  pktNdx++)
