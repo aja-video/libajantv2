@@ -68,6 +68,12 @@ public:
 	virtual void SetDeviceXPointCapture();
 	virtual void SetDeviceMiscRegisters();
 	
+	// optimization
+	virtual void StartOptimizedWrites();
+	virtual void StopOptimizedWrites();
+	virtual void PauseOptimizedWrites();
+	virtual void ResumeOptimizedWrites();
+	
 	virtual bool NewLockedInputVideoFormatDetected();
 	virtual void SetDeviceXPointPlaybackRaw();
 	virtual void SetDeviceXPointCaptureRaw();

@@ -45,8 +45,8 @@
 
 // service optimization
 #ifdef NTV2_WRITEREG_PROFILING
-//#define USE_GROUPED_WRITES
-#define USE_OPTIMIZED_WRITES
+//#define USE_OPTIMIZED_WRITES
+#define USE_FILTERED_WRITES
 #endif
 
 using namespace std;
@@ -423,19 +423,9 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 
     //	CP checks the kVRegAgentCheck virtual register to see if I'm still running...
     AgentIsAlive();
-
-#if defined(USE_GROUPED_WRITES)
-	if (CanDoOptimizedWrites(mDeviceID))
-	{
-		// force full write of all regs even if not change on this interval
-		if (mTimer.ElapsedTime() >= kRewriteIntervalMs)
-		{
-			mTimer.Start();
-			mRegisterWritesLast.clear();
-		}
-		mCard->StartRecordRegisterWrites(true);
-	}
-#endif
+    
+    // optimized writes start
+    StartOptimizedWrites();
 
 	// If the daemon is not responsible for tasks just return
 	if (mVirtualDebug1 & NTV2_DRIVER_TASKS)
@@ -484,6 +474,8 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		// follow input option
 		if (mFollowInputFormat && NewLockedInputVideoFormatDetected())
 		{
+			PauseOptimizedWrites();
+			
 			NTV2VideoFormat newVideoFormat = mDs.inputVideoFormatSelect;
 			mCard->WriteRegister(kVRegDefaultVideoFormat, newVideoFormat);
 			mCard->SetVideoFormat(newVideoFormat);
@@ -491,6 +483,9 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			
 			// reload device state due to format change
 			ReadDriverState();	
+			
+			mRegisterWritesLast.clear();
+			ResumeOptimizedWrites();
 		}
 	
 		SetDeviceXPointCapture();
@@ -509,22 +504,69 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 		mCard->WriteRegister(kVRegInputChangedCount, mInputChangeCount);
 	}
 	
-#if defined(USE_GROUPED_WRITES)
+	// optimized writes end
+	StopOptimizedWrites();
+}
+
+// MARK: optimization -
+
+void DeviceServices::StartOptimizedWrites()
+{
+	#if defined(USE_OPTIMIZED_WRITES)
+		if (CanDoOptimizedWrites(mDeviceID))
+		{
+			// force full write of all regs even if not change on this interval
+			if (mTimer.ElapsedTime() >= kRewriteIntervalMs)
+			{
+				mTimer.Start();
+				mRegisterWritesLast.clear();
+			}
+			mCard->StartRecordRegisterWrites(true);
+		}
+	#endif
+}
+
+void DeviceServices::StopOptimizedWrites()
+{
+	#if defined(USE_OPTIMIZED_WRITES)
+		if (CanDoOptimizedWrites(mDeviceID))
+		{
+			NTV2RegisterWrites regWrites;
+			mCard->StopRecordRegisterWrites();
+			mCard->GetRecordedRegisterWrites(regWrites);
+			#if defined(USE_OPTIMIZED_WRITES)
+				NTV2RegisterWrites regWrites2;
+				ConsolidateRegisterWrites(regWrites, regWrites2);
+				WriteDifferences(regWrites2);
+			#else
+				mCard->WriteRegisters(regWrites);
+			#endif
+		}
+	#endif
+}
+
+
+void DeviceServices::PauseOptimizedWrites()
+{
+	#if defined(USE_OPTIMIZED_WRITES)
 	if (CanDoOptimizedWrites(mDeviceID))
 	{
-		NTV2RegisterWrites regWrites;
-		mCard->StopRecordRegisterWrites();
-		mCard->GetRecordedRegisterWrites(regWrites);
-		#if defined(USE_OPTIMIZED_WRITES)
-			NTV2RegisterWrites regWrites2;
-			ConsolidateRegisterWrites(regWrites, regWrites2);
-			WriteDifferences(regWrites2);
-		#else
-			mCard->WriteRegisters(regWrites);
-		#endif
+		mCard->PauseRecordRegisterWrites();
 	}
-#endif
+	#endif
 }
+
+
+void DeviceServices::ResumeOptimizedWrites()
+{
+	#if defined(USE_OPTIMIZED_WRITES)
+	if (CanDoOptimizedWrites(mDeviceID))
+	{
+		mCard->ResumeRecordRegisterWrites();
+	}
+	#endif
+}
+
 
 // MARK: support -
 
