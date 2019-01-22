@@ -45,7 +45,7 @@
 
 // service optimization
 #ifdef NTV2_WRITEREG_PROFILING
-#define USE_GROUPED_WRITES
+//#define USE_GROUPED_WRITES
 #define USE_OPTIMIZED_WRITES
 #endif
 
