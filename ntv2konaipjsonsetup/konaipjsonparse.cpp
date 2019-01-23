@@ -791,9 +791,6 @@ bool CKonaIpJsonParse2110::JsonToStructReceiveAnc(const QJsonArray& aArray, Rece
 		str = vObj["enable"].toString().toStdString();
 		if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
 		rAnc2110.rxAncCh[i].enable = GetEnable(str);
-		str = vObj["designator"].toString().toStdString();
-		if (m_verbose) std::cout << " designator " << str.c_str() << std::endl << std::endl;
-		rAnc2110.rxAncCh[i].channel = GetChannel(str);
 		str = vObj["stream"].toString().toStdString();
 		if (m_verbose) std::cout << " stream " << str.c_str() << std::endl;
 		rAnc2110.rxAncCh[i].stream = GetAncStream(str);
@@ -824,7 +821,6 @@ bool CKonaIpJsonParse2110::StructToJsonReceiveAnc(const ReceiveAncData2110& rAnc
 		obj.insert("payloadType",           QJsonValue((int)rAnc2110.rxAncCh[i].payloadType));
 
 		obj.insert("enable",                QJsonValue(QString(GetEnable(rAnc2110.rxAncCh[i].enable))));
-		obj.insert("designator",            QJsonValue(QString(GetChannel(rAnc2110.rxAncCh[i].channel))));
 		obj.insert("stream",                QJsonValue(QString(GetAudioStream(rAnc2110.rxAncCh[i].stream))));
 
 		aArray += QJsonValue(obj);
@@ -1073,9 +1069,6 @@ bool CKonaIpJsonParse2110::JsonToStructTransmitAnc(const QJsonArray& aArray, Tra
 		str = vObj["stream"].toString().toStdString();
 		if (m_verbose) std::cout << " stream " << str.c_str() << std::endl;
 		tAnc2110.txAncCh[i].stream = GetAncStream(str);
-		str = vObj["designator"].toString().toStdString();
-		if (m_verbose) std::cout << " designator " << str.c_str() << std::endl << std::endl;
-		tAnc2110.txAncCh[i].channel = GetChannel(str);
 	}
 
 	return true;
@@ -1102,7 +1095,6 @@ bool CKonaIpJsonParse2110::StructToJsonTransmitAnc(const TransmitAncData2110& tA
 
 		obj.insert("enable",                QJsonValue(QString(GetEnable(tAnc2110.txAncCh[i].enable))));
 		obj.insert("stream",                QJsonValue(QString(GetAudioStream(tAnc2110.txAncCh[i].stream))));
-		obj.insert("designator",            QJsonValue(QString(GetChannel(tAnc2110.txAncCh[i].channel))));
 		aArray += QJsonValue(obj);
 	}
 

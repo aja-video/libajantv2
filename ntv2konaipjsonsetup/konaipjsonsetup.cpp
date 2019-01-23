@@ -587,7 +587,6 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     {
 		cerr << "## receiveVideo " << i+1 << endl;
 
-        bool rv;
         rxChannelConfig.init();
 
         // If sfp2 is on use it otherwise assume we are always dealing with sfp1
@@ -643,7 +642,8 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             rxChannelConfig.rxMatch |= RX_MATCH_2110_SSRC;
 
 
-        rv = config2110.SetRxStreamConfiguration (sfp,
+		bool rv;
+		rv = config2110.SetRxStreamConfiguration (sfp,
                                                   receiveVideo2110.rxVideoCh[i].stream,
                                                   rxChannelConfig);
         if (!rv)
@@ -668,7 +668,6 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     {
 		cerr << "## receiveAudio " << i+1 << endl;
 
-        bool rv;
         rxChannelConfig.init();
 
         // If sfp2 is on use it otherwise assume we are always dealing with sfp1
@@ -723,7 +722,8 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             rxChannelConfig.rxMatch |= RX_MATCH_2110_SSRC;
 
 
-        rv = config2110.SetRxStreamConfiguration (sfp,
+		bool rv;
+		rv = config2110.SetRxStreamConfiguration (sfp,
                                                   receiveAudio2110.rxAudioCh[i].stream,
                                                   rxChannelConfig);
         if (!rv)
@@ -748,7 +748,6 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 	{
 		cerr << "## receiveAnc " << i+1 << endl;
 
-		bool rv;
 		rxChannelConfig.init();
 
 		// If sfp2 is on use it otherwise assume we are always dealing with sfp1
@@ -802,6 +801,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
 
 #if 0
+		bool rv;
 		rv = config2110.SetRxStreamConfiguration (sfp,
 												  receiveAnc2110.rxAncCh[i].stream,
 												  rxChannelConfig);
@@ -933,8 +933,6 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 		txChannelConfig.payloadType     = transmitAnc2110.txAncCh[i].payloadType;
 		txChannelConfig.ssrc            = transmitAnc2110.txAncCh[i].ssrc;
 		txChannelConfig.ttl             = transmitAnc2110.txAncCh[i].ttl;
-
-		txChannelConfig.channel         = transmitAnc2110.txAncCh[i].channel;
 
 		rv = config2110.SetTxStreamConfiguration(transmitAnc2110.txAncCh[i].stream,
 												 txChannelConfig);
