@@ -409,7 +409,7 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
     QListIterator<ReceiveStruct2022> receiveIter(mKonaIP2022Params.mReceive2022Channels);
     while (receiveIter.hasNext())
     {
-        cerr << "## receiveIter did" << endl;
+		cerr << "## receiveIter " << endl;
 
         ReceiveStruct2022 receive = receiveIter.next();
         rx_2022_channel rxChannelConfig;
@@ -459,7 +459,7 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
     QListIterator<TransmitStruct2022> transmitIter(mKonaIP2022Params.mTransmit2022Channels);
     while (transmitIter.hasNext())
     {
-        cerr << "## transmitIter did" << endl;
+		cerr << "## transmitIter " << endl;
 
         TransmitStruct2022 transmit = transmitIter.next();
         tx_2022_channel txChannelConfig;
@@ -554,7 +554,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
     for (uint32_t i = 0; i < net2110.numSFPs; i++)
     {
-        cerr << "## network did" << endl;
+		cerr << "## network " << i+1 << endl;
 
         eSFP sfp = SFP_1;
         if (i > 0)
@@ -585,7 +585,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     ReceiveVideoData2110 receiveVideo2110 = parse2110.m_receiveVideo2110;
     for (uint32_t i = 0; i < receiveVideo2110.numRxVideoChannels; i++)
     {
-        cerr << "## receiveVideo did" << endl;
+		cerr << "## receiveVideo " << i+1 << endl;
 
         bool rv;
         rxChannelConfig.init();
@@ -666,7 +666,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     ReceiveAudioData2110 receiveAudio2110 = parse2110.m_receiveAudio2110;
     for (uint32_t i = 0; i < receiveAudio2110.numRxAudioChannels; i++)
     {
-        cerr << "## receiveAudio did" << endl;
+		cerr << "## receiveAudio " << i+1 << endl;
 
         bool rv;
         rxChannelConfig.init();
@@ -742,13 +742,93 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         }
     }
 
+	// fetch parsed receive anc struct
+	ReceiveAncData2110 receiveAnc2110 = parse2110.m_receiveAnc2110;
+	for (uint32_t i = 0; i < receiveAnc2110.numRxAncChannels; i++)
+	{
+		cerr << "## receiveAnc " << i+1 << endl;
+
+		bool rv;
+		rxChannelConfig.init();
+
+		// If sfp2 is on use it otherwise assume we are always dealing with sfp1
+		// (RX does not support both at the moment)
+		eSFP sfp = SFP_INVALID;
+		if (receiveAnc2110.rxAncCh[i].sfpEnable[0])
+			sfp = SFP_1;
+		else if (receiveAnc2110.rxAncCh[i].sfpEnable[1])
+			sfp = SFP_2;
+
+		// Until we support -7, only use one link
+		if (sfp == SFP_1)
+		{
+			rxChannelConfig.sourceIP    = receiveAnc2110.rxAncCh[i].sourceIP[0];
+			rxChannelConfig.destIP      = receiveAnc2110.rxAncCh[i].destIP[0];
+			rxChannelConfig.sourcePort  = receiveAnc2110.rxAncCh[i].sourcePort[0];
+			rxChannelConfig.destPort    = receiveAnc2110.rxAncCh[i].destPort[0];
+		}
+		else
+		{
+			rxChannelConfig.sourceIP    = receiveAnc2110.rxAncCh[i].sourceIP[1];
+			rxChannelConfig.destIP      = receiveAnc2110.rxAncCh[i].destIP[1];
+			rxChannelConfig.sourcePort  = receiveAnc2110.rxAncCh[i].sourcePort[1];
+			rxChannelConfig.destPort    = receiveAnc2110.rxAncCh[i].destPort[1];
+		}
+		rxChannelConfig.ssrc            = receiveAnc2110.rxAncCh[i].vlan;
+		rxChannelConfig.vlan            = receiveAnc2110.rxAncCh[i].ssrc;
+		rxChannelConfig.payloadType     = receiveAnc2110.rxAncCh[i].payloadType;
+
+		// Set RX match based on non zero passed in params
+		rxChannelConfig.rxMatch = 0;
+		uint32_t ip = 0;
+		ip = inet_addr(rxChannelConfig.sourceIP.c_str());
+		ip = NTV2EndianSwap32(ip);
+		if (ip)
+			rxChannelConfig.rxMatch |= RX_MATCH_2110_SOURCE_IP;
+		ip = inet_addr(rxChannelConfig.destIP.c_str());
+		ip = NTV2EndianSwap32(ip);
+		if (ip)
+			rxChannelConfig.rxMatch |= RX_MATCH_2110_DEST_IP;
+		if (rxChannelConfig.sourcePort)
+			rxChannelConfig.rxMatch |= RX_MATCH_2110_SOURCE_PORT;
+		if (rxChannelConfig.destPort)
+			rxChannelConfig.rxMatch |= RX_MATCH_2110_DEST_PORT;
+		if (rxChannelConfig.vlan)
+			rxChannelConfig.rxMatch |= RX_MATCH_2110_VLAN;
+		if (rxChannelConfig.payloadType)
+			rxChannelConfig.rxMatch |= RX_MATCH_2110_PAYLOAD;
+		if (rxChannelConfig.ssrc)
+			rxChannelConfig.rxMatch |= RX_MATCH_2110_SSRC;
+
+
+#if 0
+		rv = config2110.SetRxStreamConfiguration (sfp,
+												  receiveAnc2110.rxAncCh[i].stream,
+												  rxChannelConfig);
+		if (!rv)
+		{
+			cerr << "SetRxStreamConfiguration: FAILED: " << config2110.getLastError() << endl;
+			return false;
+		}
+
+		rv = config2110.SetRxStreamEnable(sfp,
+										  receiveAnc2110.rxAncCh[i].stream,
+										  receiveAnc2110.rxAncCh[i].enable);
+		if (!rv)
+		{
+			cerr << "SetRxStreamEnable: FAILED: " << config2110.getLastError() << endl;
+			return false;
+		}
+#endif
+	}
+
     tx_2110Config txChannelConfig;
 
     // fetch parsed transmit video struct
     TransmitVideoData2110 transmitVideo2110 = parse2110.m_transmitVideo2110;
     for (uint32_t i = 0; i < transmitVideo2110.numTxVideoChannels; i++)
     {
-        cerr << "## transmitVideo did" << endl;
+		cerr << "## transmitVideo " << i+1 << endl;
 
         bool rv;
         txChannelConfig.init();
@@ -789,10 +869,9 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 
     // fetch parsed transmit audio struct
     TransmitAudioData2110 transmitAudio2110 = parse2110.m_transmitAudio2110;
-
     for (uint32_t i = 0; i < transmitAudio2110.numTxAudioChannels; i++)
     {
-        cerr << "## transmitAudio did" << endl;
+		cerr << "## transmitAudio " << i+1 << endl;
 
         bool rv;
         txChannelConfig.init();
@@ -834,6 +913,50 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
             }
         }
     }
+
+	// fetch parsed transmit anc struct
+	TransmitAncData2110 transmitAnc2110 = parse2110.m_transmitAnc2110;
+	for (uint32_t i = 0; i < transmitAnc2110.numTxAncChannels; i++)
+	{
+		cerr << "## transmitAnc " << i+1 << endl;
+
+		bool rv;
+		txChannelConfig.init();
+
+		txChannelConfig.localPort[0]    = transmitAnc2110.txAncCh[i].localPort[0];
+		txChannelConfig.remoteIP[0]     = transmitAnc2110.txAncCh[i].remoteIP[0];
+		txChannelConfig.remotePort[0]   = transmitAnc2110.txAncCh[i].remotePort[0];
+		txChannelConfig.localPort[1]    = transmitAnc2110.txAncCh[i].localPort[1];
+		txChannelConfig.remoteIP[1]     = transmitAnc2110.txAncCh[i].remoteIP[1];
+		txChannelConfig.remotePort[1]   = transmitAnc2110.txAncCh[i].remotePort[1];
+
+		txChannelConfig.payloadType     = transmitAnc2110.txAncCh[i].payloadType;
+		txChannelConfig.ssrc            = transmitAnc2110.txAncCh[i].ssrc;
+		txChannelConfig.ttl             = transmitAnc2110.txAncCh[i].ttl;
+
+		txChannelConfig.channel         = transmitAnc2110.txAncCh[i].channel;
+
+		rv = config2110.SetTxStreamConfiguration(transmitAnc2110.txAncCh[i].stream,
+												 txChannelConfig);
+		if (!rv)
+		{
+			cerr << "SetTxStreamConfiguration Anc: FAILED: " << config2110.getLastError() << endl;
+			return false;
+		}
+
+		if (transmitAnc2110.txAncCh[i].enable)
+		{
+			rv = config2110.SetTxStreamEnable(transmitAnc2110.txAncCh[i].stream,
+											  transmitAnc2110.txAncCh[i].sfpEnable[0],
+											  transmitAnc2110.txAncCh[i].sfpEnable[1]);
+			if (!rv)
+			{
+				cerr << "SetTxStreamEnable Anc: FAILED: " << config2110.getLastError() << endl;
+				return false;
+			}
+		}
+	}
+
 
     return true;
 }

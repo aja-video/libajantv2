@@ -37,9 +37,11 @@ bool CKonaIpJsonParse2110::SetJson(const QJsonObject& topObj, bool verbose)
 
     memset(&m_net2110, 0, sizeof(NetworkData2110));
     memset(&m_receiveVideo2110, 0, sizeof(ReceiveVideoData2110));
-    memset(&m_receiveAudio2110, 0, sizeof(ReceiveAudioData2110));
-    memset(&m_transmitVideo2110, 0, sizeof(TransmitVideoData2110));
-    memset(&m_transmitAudio2110, 0, sizeof(TransmitAudioData2110));
+	memset(&m_receiveAudio2110, 0, sizeof(ReceiveAudioData2110));
+	memset(&m_receiveAnc2110, 0, sizeof(ReceiveAncData2110));
+	memset(&m_transmitVideo2110, 0, sizeof(TransmitVideoData2110));
+	memset(&m_transmitAudio2110, 0, sizeof(TransmitAudioData2110));
+	memset(&m_transmitAnc2110, 0, sizeof(TransmitAncData2110));
 
     //
     // Network
@@ -62,6 +64,12 @@ bool CKonaIpJsonParse2110::SetJson(const QJsonObject& topObj, bool verbose)
         success = SetJsonReceiveAudio(receiveAudioArray) && success;
     }
 
+	if (topObj.contains("receiveAnc2110"))
+	{
+		QJsonArray receiveAncArray = topObj["receiveAnc2110"].toArray();
+		success = SetJsonReceiveAnc(receiveAncArray) && success;
+	}
+
     if (topObj.contains("transmitVideo2110"))
     {
         QJsonArray transmitVideoArray = topObj["transmitVideo2110"].toArray();
@@ -74,13 +82,21 @@ bool CKonaIpJsonParse2110::SetJson(const QJsonObject& topObj, bool verbose)
         success = SetJsonTransmitAudio(transmitAudioArray) && success;
     }
 
+	if (topObj.contains("transmitAnc2110"))
+	{
+		QJsonArray transmitAncArray = topObj["transmitAnc2110"].toArray();
+		success = SetJsonTransmitAnc(transmitAncArray) && success;
+	}
+
     QJsonObject newTopObj;
     newTopObj.insert("network2110", m_netJson);
     newTopObj.insert("receiveVideo2110", m_receiveVideoJson);
-    newTopObj.insert("receiveAudio2110", m_receiveAudioJson);
-    newTopObj.insert("transmitVideo2110", m_transmitVideoJson);
-    newTopObj.insert("transmitAudio2110", m_transmitAudioJson);
-    m_topJson = newTopObj;
+	newTopObj.insert("receiveAudio2110", m_receiveAudioJson);
+	newTopObj.insert("receiveAnc2110", m_receiveAncJson);
+	newTopObj.insert("transmitVideo2110", m_transmitVideoJson);
+	newTopObj.insert("transmitAudio2110", m_transmitAudioJson);
+	newTopObj.insert("transmitAnc2110", m_transmitAncJson);
+	m_topJson = newTopObj;
 
     return success;
 }
@@ -127,6 +143,20 @@ bool CKonaIpJsonParse2110::SetJsonReceiveAudio(const QJsonArray& jsonArray)
     return success;
 }
 
+bool CKonaIpJsonParse2110::SetJsonReceiveAnc(const QJsonArray& jsonArray)
+{
+	ReceiveAncData2110 rAnc2110;
+	bool success = JsonToStructReceiveAnc(jsonArray, rAnc2110);
+
+	if (success)
+	{
+		memcpy(&m_receiveAnc2110, &rAnc2110, sizeof(ReceiveAncData2110));
+		m_receiveAncJson = jsonArray;
+	}
+
+	return success;
+}
+
 bool CKonaIpJsonParse2110::SetJsonTransmitVideo(const QJsonArray& jsonArray)
 {
     TransmitVideoData2110 tVideo2110;
@@ -153,6 +183,20 @@ bool CKonaIpJsonParse2110::SetJsonTransmitAudio(const QJsonArray& jsonArray)
     }
 
     return success;
+}
+
+bool CKonaIpJsonParse2110::SetJsonTransmitAnc(const QJsonArray& jsonArray)
+{
+	TransmitAncData2110 tAnc2110;
+	bool success = JsonToStructTransmitAnc(jsonArray, tAnc2110);
+
+	if (success)
+	{
+		memcpy(&m_transmitAnc2110, &tAnc2110, sizeof(TransmitAncData2110));
+		m_transmitAncJson = jsonArray;
+	}
+
+	return success;
 }
 
 bool CKonaIpJsonParse2110::GetEnable(const std::string enableBoolString)
@@ -302,6 +346,42 @@ QString CKonaIpJsonParse2110::GetAudioStream(const NTV2Stream stream)
         str = "invalid";
 
     return str;
+}
+
+NTV2Stream CKonaIpJsonParse2110::GetAncStream(const std::string streamString)
+{
+	NTV2Stream stream;
+
+	if (streamString == "anc1")
+		stream = NTV2_ANC1_STREAM;
+	else if (streamString == "anc2")
+		stream = NTV2_ANC2_STREAM;
+	else if (streamString == "anc3")
+		stream = NTV2_ANC3_STREAM;
+	else if (streamString == "anc4")
+		stream = NTV2_ANC4_STREAM;
+	else
+		stream = NTV2_STREAM_INVALID;
+
+	return stream;
+}
+
+QString CKonaIpJsonParse2110::GetAncStream(const NTV2Stream stream)
+{
+	QString str;
+
+	if (stream == NTV2_ANC1_STREAM)
+		str = "anc1";
+	else if (stream == NTV2_ANC2_STREAM)
+		str = "anc2";
+	else if (stream == NTV2_ANC3_STREAM)
+		str = "anc3";
+	else if (stream == NTV2_ANC4_STREAM)
+		str = "anc4";
+	else
+		str = "invalid";
+
+	return str;
 }
 
 eNTV2PacketInterval CKonaIpJsonParse2110::GetAudioPktInterval(const std::string pktIntervalString)
@@ -656,6 +736,103 @@ bool CKonaIpJsonParse2110::StructToJsonReceiveAudio(const ReceiveAudioData2110& 
     return true;
 }
 
+bool CKonaIpJsonParse2110::JsonToStructReceiveAnc(const QJsonArray& aArray, ReceiveAncData2110& rAnc2110)
+{
+	memset(&rAnc2110, 0, sizeof(ReceiveAncData2110));
+
+	std::cout << "ReceiveAnc2110" << std::endl;
+
+	// up to 4 channels
+	rAnc2110.numRxAncChannels = MinVal(aArray.count(), 4);
+	if (rAnc2110.numRxAncChannels == 0)
+		return false;
+
+	std::string str;
+
+	for (uint32_t i=0; i<rAnc2110.numRxAncChannels; i++)
+	{
+		QJsonObject vObj = aArray[i].toObject();
+
+		rAnc2110.rxAncCh[i].sourcePort[0]		= vObj["sfp1srcPort"].toInt();
+		if (m_verbose) std::cout << " sfp1srcPort " << rAnc2110.rxAncCh[i].sourcePort[0] << std::endl;
+		rAnc2110.rxAncCh[i].destPort[0]			= vObj["sfp1DestPort"].toInt();
+		if (m_verbose) std::cout << " sfp1DestPort " << rAnc2110.rxAncCh[i].destPort[0] << std::endl;
+		str = vObj["sfp1srcIPAddress"].toString().toStdString();
+		if (m_verbose) std::cout << " sfp1srcIPAddress " << str.c_str() << std::endl;
+		strncpy(rAnc2110.rxAncCh[i].sourceIP[0], str.c_str(), kStrMax);
+		str = vObj["sfp1DestIPAddress"].toString().toStdString();
+		if (m_verbose) std::cout << " sfp1DestIPAddress " << str.c_str() << std::endl;
+		strncpy(rAnc2110.rxAncCh[i].destIP[0], str.c_str(), kStrMax);
+		str = vObj["sfp1Enable"].toString().toStdString();
+		if (m_verbose) std::cout << " sfp1Enable " << str.c_str() << std::endl;
+		rAnc2110.rxAncCh[i].sfpEnable[0] = GetEnable(str);
+
+		rAnc2110.rxAncCh[i].sourcePort[1]		= vObj["sfp2srcPort"].toInt();
+		if (m_verbose) std::cout << " sfp2srcPort " << rAnc2110.rxAncCh[i].sourcePort[1] << std::endl;
+		rAnc2110.rxAncCh[i].destPort[1]			= vObj["sfp2DestPort"].toInt();
+		if (m_verbose) std::cout << " sfp2DestPort " << rAnc2110.rxAncCh[i].destPort[1] << std::endl;
+		str = vObj["sfp2srcIPAddress"].toString().toStdString();
+		if (m_verbose) std::cout << " sfp2srcIPAddress " << str.c_str() << std::endl;
+		strncpy(rAnc2110.rxAncCh[i].sourceIP[1], str.c_str(), kStrMax);
+		str = vObj["sfp2DestIPAddress"].toString().toStdString();
+		if (m_verbose) std::cout << " sfp2DestIPAddress " << str.c_str() << std::endl;
+		strncpy(rAnc2110.rxAncCh[i].destIP[1], str.c_str(), kStrMax);
+		str = vObj["sfp2Enable"].toString().toStdString();
+		if (m_verbose) std::cout << " sfp2Enable " << str.c_str() << std::endl;
+		rAnc2110.rxAncCh[i].sfpEnable[1] = GetEnable(str);
+
+		rAnc2110.rxAncCh[i].vlan					= vObj["vlan"].toInt();
+		if (m_verbose) std::cout << " vlan " << rAnc2110.rxAncCh[i].vlan << std::endl;
+		rAnc2110.rxAncCh[i].ssrc					= vObj["ssrc"].toInt();
+		if (m_verbose) std::cout << " ssrc " << rAnc2110.rxAncCh[i].ssrc << std::endl;
+		rAnc2110.rxAncCh[i].payloadType				= vObj["payloadType"].toInt();
+		if (m_verbose) std::cout << " payloadType " << rAnc2110.rxAncCh[i].payloadType << std::endl;
+
+		str = vObj["enable"].toString().toStdString();
+		if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
+		rAnc2110.rxAncCh[i].enable = GetEnable(str);
+		str = vObj["designator"].toString().toStdString();
+		if (m_verbose) std::cout << " designator " << str.c_str() << std::endl << std::endl;
+		rAnc2110.rxAncCh[i].channel = GetChannel(str);
+		str = vObj["stream"].toString().toStdString();
+		if (m_verbose) std::cout << " stream " << str.c_str() << std::endl;
+		rAnc2110.rxAncCh[i].stream = GetAncStream(str);
+	}
+
+	return true;
+}
+
+bool CKonaIpJsonParse2110::StructToJsonReceiveAnc(const ReceiveAncData2110& rAnc2110, QJsonArray& aArray)
+{
+	for (uint32_t i=0; i<rAnc2110.numRxAncChannels; i++)
+	{
+		QJsonObject obj;
+		obj.insert("sfp1Enable",            QJsonValue(QString(GetEnable(rAnc2110.rxAncCh[i].sfpEnable[0]))));
+		obj.insert("sfp1srcPort",           QJsonValue((int)rAnc2110.rxAncCh[i].sourcePort[0]));
+		obj.insert("sfp1DestPort",          QJsonValue((int)rAnc2110.rxAncCh[i].destPort[0]));
+		obj.insert("sfp1srcIPAddress",      QJsonValue(QString(rAnc2110.rxAncCh[i].sourceIP[0])));
+		obj.insert("sfp1DestIPAddress",     QJsonValue(QString(rAnc2110.rxAncCh[i].destIP[0])));
+
+		obj.insert("sfp2Enable",            QJsonValue(QString(GetEnable(rAnc2110.rxAncCh[i].sfpEnable[1]))));
+		obj.insert("sfp2srcPort",           QJsonValue((int)rAnc2110.rxAncCh[i].sourcePort[1]));
+		obj.insert("sfp2DestPort",          QJsonValue((int)rAnc2110.rxAncCh[i].destPort[1]));
+		obj.insert("sfp2srcIPAddress",      QJsonValue(QString(rAnc2110.rxAncCh[i].sourceIP[1])));
+		obj.insert("sfp2DestIPAddress",     QJsonValue(QString(rAnc2110.rxAncCh[i].destIP[1])));
+
+		obj.insert("vlan",                  QJsonValue((int)rAnc2110.rxAncCh[i].vlan));
+		obj.insert("ssrc",                  QJsonValue((int)rAnc2110.rxAncCh[i].ssrc));
+		obj.insert("payloadType",           QJsonValue((int)rAnc2110.rxAncCh[i].payloadType));
+
+		obj.insert("enable",                QJsonValue(QString(GetEnable(rAnc2110.rxAncCh[i].enable))));
+		obj.insert("designator",            QJsonValue(QString(GetChannel(rAnc2110.rxAncCh[i].channel))));
+		obj.insert("stream",                QJsonValue(QString(GetAudioStream(rAnc2110.rxAncCh[i].stream))));
+
+		aArray += QJsonValue(obj);
+	}
+
+	return true;
+}
+
 bool CKonaIpJsonParse2110::JsonToStructTransmitVideo(const QJsonArray& vArray, TransmitVideoData2110& tVideo2110)
 {
     memset(&tVideo2110, 0, sizeof(TransmitVideoData2110));
@@ -844,11 +1021,101 @@ bool CKonaIpJsonParse2110::StructToJsonTransmitAudio(const TransmitAudioData2110
     return true;
 }
 
+bool CKonaIpJsonParse2110::JsonToStructTransmitAnc(const QJsonArray& aArray, TransmitAncData2110& tAnc2110)
+{
+	memset(&tAnc2110, 0, sizeof(TransmitAncData2110));
+
+	std::cout << "TransmitAnc2110" << std::endl;
+
+	// up to 4 channels
+	tAnc2110.numTxAncChannels = MinVal(aArray.count(), 4);
+	if (tAnc2110.numTxAncChannels == 0)
+		return false;
+
+	std::string str;
+
+	for (uint32_t i=0; i<tAnc2110.numTxAncChannels; i++)
+	{
+		QJsonObject vObj = aArray[i].toObject();
+
+		tAnc2110.txAncCh[i].localPort[0]		= vObj["sfp1LocalPort"].toInt();
+		if (m_verbose) std::cout << " sfp1LocalPort " << tAnc2110.txAncCh[i].localPort[0] << std::endl;
+		tAnc2110.txAncCh[i].remotePort[0]		= vObj["sfp1RemotePort"].toInt();
+		if (m_verbose) std::cout << " sfp1RemotePort " << tAnc2110.txAncCh[i].remotePort[0] << std::endl;
+		str = vObj["sfp1RemoteIPAddress"].toString().toStdString();
+		if (m_verbose) std::cout << " sfp1RemoteIPAddress " << str.c_str() << std::endl;
+		strncpy(tAnc2110.txAncCh[i].remoteIP[0], str.c_str(), kStrMax);
+		str = vObj["sfp1Enable"].toString().toStdString();
+		if (m_verbose) std::cout << " sfp1Enable " << str.c_str() << std::endl;
+		tAnc2110.txAncCh[i].sfpEnable[0] = GetEnable(str);
+
+		tAnc2110.txAncCh[i].localPort[1]		= vObj["sfp2LocalPort"].toInt();
+		if (m_verbose) std::cout << " sfp2LocalPort " << tAnc2110.txAncCh[i].localPort[1] << std::endl;
+		tAnc2110.txAncCh[i].remotePort[1]		= vObj["sfp2RemotePort"].toInt();
+		if (m_verbose) std::cout << " sfp2RemotePort " << tAnc2110.txAncCh[i].remotePort[1] << std::endl;
+		str = vObj["sfp2RemoteIPAddress"].toString().toStdString();
+		if (m_verbose) std::cout << " sfp2RemoteIPAddress " << str.c_str() << std::endl;
+		strncpy(tAnc2110.txAncCh[i].remoteIP[1], str.c_str(), kStrMax);
+		str = vObj["sfp2Enable"].toString().toStdString();
+		if (m_verbose) std::cout << " sfp2Enable " << str.c_str() << std::endl;
+		tAnc2110.txAncCh[i].sfpEnable[1] = GetEnable(str);
+
+		tAnc2110.txAncCh[i].ttl						= vObj["ttl"].toInt();
+		if (m_verbose) std::cout << " ttl " << tAnc2110.txAncCh[i].ttl << std::endl;
+		tAnc2110.txAncCh[i].ssrc					= vObj["ssrc"].toInt();
+		if (m_verbose) std::cout << " ssrc " << tAnc2110.txAncCh[i].ssrc << std::endl;
+		tAnc2110.txAncCh[i].payloadType				= vObj["payloadType"].toInt();
+		if (m_verbose) std::cout << " payloadType " << tAnc2110.txAncCh[i].payloadType << std::endl;
+
+		str = vObj["enable"].toString().toStdString();
+		if (m_verbose) std::cout << " enable " << str.c_str() << std::endl;
+		tAnc2110.txAncCh[i].enable = GetEnable(str);
+		str = vObj["stream"].toString().toStdString();
+		if (m_verbose) std::cout << " stream " << str.c_str() << std::endl;
+		tAnc2110.txAncCh[i].stream = GetAncStream(str);
+		str = vObj["designator"].toString().toStdString();
+		if (m_verbose) std::cout << " designator " << str.c_str() << std::endl << std::endl;
+		tAnc2110.txAncCh[i].channel = GetChannel(str);
+	}
+
+	return true;
+}
+
+bool CKonaIpJsonParse2110::StructToJsonTransmitAnc(const TransmitAncData2110& tAnc2110, QJsonArray& aArray)
+{
+	for (uint32_t i=0; i<tAnc2110.numTxAncChannels; i++)
+	{
+		QJsonObject obj;
+		obj.insert("sfp1LocalPort",         QJsonValue((int)tAnc2110.txAncCh[i].localPort[0]));
+		obj.insert("sfp1RemoteIPAddress",   QJsonValue(QString(tAnc2110.txAncCh[i].remoteIP[0])));
+		obj.insert("sfp1RemotePort",        QJsonValue((int)tAnc2110.txAncCh[i].remotePort[0]));
+		obj.insert("sfp1Enable",            QJsonValue(QString(GetEnable(tAnc2110.txAncCh[i].sfpEnable[0]))));
+
+		obj.insert("sfp2LocalPort",         QJsonValue((int)tAnc2110.txAncCh[i].localPort[1]));
+		obj.insert("sfp2RemoteIPAddress",   QJsonValue(QString(tAnc2110.txAncCh[i].remoteIP[1])));
+		obj.insert("sfp2RemotePort",        QJsonValue((int)tAnc2110.txAncCh[i].remotePort[1]));
+		obj.insert("sfp2Enable",            QJsonValue(QString(GetEnable(tAnc2110.txAncCh[i].sfpEnable[1]))));
+
+		obj.insert("ttl",                   QJsonValue((int)tAnc2110.txAncCh[i].ttl));
+		obj.insert("ssrc",                  QJsonValue((int)tAnc2110.txAncCh[i].ssrc));
+		obj.insert("payloadType",           QJsonValue((int)tAnc2110.txAncCh[i].payloadType));
+
+		obj.insert("enable",                QJsonValue(QString(GetEnable(tAnc2110.txAncCh[i].enable))));
+		obj.insert("stream",                QJsonValue(QString(GetAudioStream(tAnc2110.txAncCh[i].stream))));
+		obj.insert("designator",            QJsonValue(QString(GetChannel(tAnc2110.txAncCh[i].channel))));
+		aArray += QJsonValue(obj);
+	}
+
+	return true;
+}
+
 bool CKonaIpJsonParse2110::StructToJson(const NetworkData2110& net2110,
-										const ReceiveVideoData2110& vRec2110, 
-										const ReceiveAudioData2110& aRec2110, 
-										const TransmitVideoData2110& vTran2110, 
-										const TransmitAudioData2110& aTran2110,
+										const ReceiveVideoData2110& vidRec2110,
+										const ReceiveAudioData2110& audRec2110,
+										const ReceiveAncData2110& ancRec2110,
+										const TransmitVideoData2110& vidTran2110,
+										const TransmitAudioData2110& audTran2110,
+										const TransmitAncData2110& ancTran2110,
 										QJsonObject& topObj)
 {
 	QJsonObject netJson;
@@ -856,31 +1123,39 @@ bool CKonaIpJsonParse2110::StructToJson(const NetworkData2110& net2110,
 	StructToJsonNetwork(m_net2110, netJson);
 	m_netJson = netJson;
 
-	QJsonArray vRecJson;
-	memcpy(&m_receiveVideo2110, &vRec2110, sizeof(ReceiveVideoData2110));
-	StructToJsonReceiveVideo(m_receiveVideo2110, vRecJson);
-	m_receiveVideoJson = vRecJson;
+	QJsonArray vidRecJson;
+	memcpy(&m_receiveVideo2110, &vidRec2110, sizeof(ReceiveVideoData2110));
+	StructToJsonReceiveVideo(m_receiveVideo2110, vidRecJson);
+	m_receiveVideoJson = vidRecJson;
+	QJsonArray audRecJson;
+	memcpy(&m_receiveAudio2110, &audRec2110, sizeof(ReceiveAudioData2110));
+	StructToJsonReceiveAudio(m_receiveAudio2110, audRecJson);
+	m_receiveAudioJson = audRecJson;
+	QJsonArray ancRecJson;
+	memcpy(&m_receiveAnc2110, &ancRec2110, sizeof(ReceiveAncData2110));
+	StructToJsonReceiveAnc(m_receiveAnc2110, ancRecJson);
+	m_receiveAncJson = ancRecJson;
 
-	QJsonArray aRecJson;
-	memcpy(&m_receiveAudio2110, &aRec2110, sizeof(ReceiveAudioData2110));
-	StructToJsonReceiveAudio(m_receiveAudio2110, aRecJson);
-	m_receiveAudioJson = aRecJson;
-
-	QJsonArray vTransJson;
-	memcpy(&m_transmitVideo2110, &vTran2110, sizeof(TransmitVideoData2110));
-	StructToJsonTransmitVideo(m_transmitVideo2110, vTransJson);
-	m_transmitVideoJson = vTransJson;
-
-	QJsonArray aTransJson;
-	memcpy(&m_transmitAudio2110, &aTran2110, sizeof(TransmitAudioData2110));
-	StructToJsonTransmitAudio(m_transmitAudio2110, aTransJson);
-	m_transmitAudioJson = aTransJson;
+	QJsonArray vidTransJson;
+	memcpy(&m_transmitVideo2110, &vidTran2110, sizeof(TransmitVideoData2110));
+	StructToJsonTransmitVideo(m_transmitVideo2110, vidTransJson);
+	m_transmitVideoJson = vidTransJson;
+	QJsonArray audTransJson;
+	memcpy(&m_transmitAudio2110, &audTran2110, sizeof(TransmitAudioData2110));
+	StructToJsonTransmitAudio(m_transmitAudio2110, audTransJson);
+	m_transmitAudioJson = audTransJson;
+	QJsonArray ancTransJson;
+	memcpy(&m_transmitAnc2110, &ancTran2110, sizeof(TransmitAncData2110));
+	StructToJsonTransmitAnc(m_transmitAnc2110, ancTransJson);
+	m_transmitAncJson = ancTransJson;
 
 	topObj.insert("network2110", m_netJson);
 	topObj.insert("receiveVideo2110", m_receiveVideoJson);
 	topObj.insert("receiveAudio2110", m_receiveAudioJson);
+	topObj.insert("receiveAnc2110", m_receiveAncJson);
 	topObj.insert("transmitVideo2110", m_transmitVideoJson);
 	topObj.insert("transmitAudio2110", m_transmitAudioJson);
-	
+	topObj.insert("transmitAnc2110", m_transmitAncJson);
+
 	return true;
 }
