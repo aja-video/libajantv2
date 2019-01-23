@@ -23,6 +23,7 @@
 #define SAREK_4175_RX_DEPACKETIZER_2            (0x209000/4)
 #define SAREK_4175_RX_DEPACKETIZER_3            (0x20a000/4)
 #define SAREK_4175_RX_DEPACKETIZER_4            (0x20b000/4)
+
 #define SAREK_3190_RX_DEPACKETIZER_1            (0x20c000/4)
 #define SAREK_3190_RX_DEPACKETIZER_2            (0x20d000/4)
 #define SAREK_3190_RX_DEPACKETIZER_3            (0x20e000/4)

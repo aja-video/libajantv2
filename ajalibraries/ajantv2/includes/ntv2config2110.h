@@ -82,7 +82,6 @@ typedef struct
 typedef struct
 {
 	NTV2Stream              stream;
-	NTV2Channel             channel;
 	char                    remoteIP[2][IP_STRSIZE];
 	uint32_t                localPort[2];
 	uint32_t                remotePort[2];
@@ -131,7 +130,6 @@ typedef struct
 typedef struct
 {
 	NTV2Stream              stream;
-	NTV2Channel             channel;
 	char                    sourceIP[2][IP_STRSIZE];
 	char                    destIP[2][IP_STRSIZE];
 	uint32_t                sourcePort[2];
