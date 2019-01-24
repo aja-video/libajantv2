@@ -17,6 +17,7 @@
 	#include <iomanip>
 	#include <bitset>
 	#include "ajaexport.h"
+	#include "string.h"
 	#if defined(MSWindows)
 		#pragma warning(disable:4800)	//	int/bool conversion
 		#pragma warning(disable:4127)	//	Stop MSVC from bitching about "do{...}while(false)" macros
@@ -5727,6 +5728,8 @@ typedef enum
 				inline bool		isDestBottomUp (void) const			{return mFlags & BIT(9) ? true : false;}
 				inline bool		isDestTopDown (void) const			{return mFlags & BIT(9) ? false : true;}
 				std::ostream &	Print (std::ostream & inStrm, const bool inDumpSegments = false) const;
+				ULWord			getTotalElements (void) const		{return getSegmentCount() * getSegmentLength();}
+				ULWord			getTotalBytes (void) const			{return getTotalElements() * getElementLength();}
 
 				// Changing
 				inline NTV2SegmentedXferInfo &	setSegmentCount (const ULWord inNumSegments)		{mNumSegments = inNumSegments;  return *this;}
@@ -5962,32 +5965,55 @@ typedef enum
 				bool			Deallocate (void);
 
 				/**
-					@brief		Fills me with the given UByte value.
-					@param[in]	inValue		The UByte value to fill me with.
-					@note		Ignored if I'm not currently allocated.
+					@brief		Fills me with the given scalar value.
+					@param[in]	inValue		The scalar value to fill me with.
+					@return		True if I'm currently allocated;  otherwise false.
 				**/
-				void			Fill (const UByte inValue);
+				template<typename T>	bool Fill (const T & inValue)
+				{
+					T *	pT	(reinterpret_cast<T*>(GetHostPointer()));
+					const size_t loopCount(GetByteCount() / sizeof(T));
+					if (pT)
+						for (size_t n(0);  n < loopCount;  n++)
+							pT[n] = inValue;
+					return pT ? true : false;
+				}
 
 				/**
-					@brief		Fills me with the given UWord value.
-					@param[in]	inValue		The UWord value to fill me with.
-					@note		Ignored if I'm not currently allocated.
+					@brief		Fills a portion of me with the given scalar value.
+					@param[in]	inValue			The scalar value.
+					@param[in]	inXferInfo		Describes the portion of me to be filled.
+					@return		True if successful; otherwise false.
+					@note		Offsets and lengths are checked. The function will return false for any overflow or underflow.
 				**/
-				void			Fill (const UWord inValue);
+				template<typename T> bool	Fill (const T & inValue, const NTV2SegmentedXferInfo & inXferInfo)
+				{
+					if (!inXferInfo.isValid())
+						return false;
+					//	Fill a temporary buffer to hold all the segment data...
+					NTV2_POINTER	segData(inXferInfo.getElementLength() * inXferInfo.getSegmentCount() * inXferInfo.getSegmentLength());
+					if (!segData.Fill(inValue))
+						return false;	//	Fill failed
 
-				/**
-					@brief		Fills me with the given ULWord value.
-					@param[in]	inValue		The ULWord value to fill me with.
-					@note		Ignored if I'm not currently allocated.
-				**/
-				void			Fill (const ULWord inValue);
-
-				/**
-					@brief		Fills me with the given ULWord64 value.
-					@param[in]	inValue		The ULWord64 value to fill me with.
-					@note		Ignored if I'm not currently allocated.
-				**/
-				void			Fill (const ULWord64 inValue);
+					//	Copy the segment data into me...
+					ULWord			srcOffset	(0);
+					ULWord			dstOffset	(inXferInfo.getDestOffset() * inXferInfo.getElementLength());
+					const ULWord	dstPitch	(inXferInfo.getDestPitch() * inXferInfo.getElementLength());
+					const ULWord	bytesPerSeg	(inXferInfo.getSegmentLength() * inXferInfo.getElementLength());
+					for (ULWord segNdx(0);  segNdx < inXferInfo.getSegmentCount();  segNdx++)
+					{
+						const void *	pSrc (segData.GetHostAddress(srcOffset));
+						void *			pDst (GetHostAddress(dstOffset));
+						if (!pSrc)	return false;
+						if (!pDst)	return false;
+						if (dstOffset + bytesPerSeg > GetByteCount())
+							return false;	//	memcpy will write past end
+						::memcpy (pDst,  pSrc,  bytesPerSeg);
+						srcOffset += bytesPerSeg;	//	Bump src offset
+						dstOffset += dstPitch;		//	Bump dst offset
+					}	//	for each segment
+					return true;
+				}
 
 				/**
 					@brief		Sets (or resets) me from a client-supplied address and size.

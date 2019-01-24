@@ -951,15 +951,16 @@ ostream & NTV2SegmentedXferInfo::Print (ostream & inStrm, const bool inDumpSegme
 	}
 	else
 	{
-		inStrm	<< DEC(getSegmentCount()) << " segment(s) of " << DEC(getSegmentLength()) << " elements long";
-		if (getElementLength() != 1)
-			inStrm << ", bytes/Elem=" << DEC(getElementLength());
+		static const string sUnits[] = {"", " U8", " U16", "", " U32", "", "", "", " U64", ""};
+		inStrm	<< DEC(getSegmentCount()) << " x " << DEC(getSegmentLength())
+				<< sUnits[getElementLength()] << " segs";
 		if (getSourceOffset())
-			inStrm	<< ", srcOffset=" << DEC(getSourceOffset());
-		inStrm << ", srcSpan=" << DEC(getSourcePitch()) << (isSourceBottomUp()?" Vflip":"");
+			inStrm	<< " srcOff=" << DEC(getSourceOffset());
+		inStrm << " srcSpan=" << DEC(getSourcePitch()) << (isSourceBottomUp()?" VF":"");
 		if (getDestOffset())
-			inStrm	<< ", dstOffset=" << DEC(getDestOffset());
-		inStrm << ", dstSpan=" << DEC(getDestPitch()) << (isDestBottomUp()?" Vflip":"");
+			inStrm	<< " dstOff=" << DEC(getDestOffset());
+		inStrm << " dstSpan=" << DEC(getDestPitch()) << (isDestBottomUp()?" VF":"")
+				<< " totElm=" << DEC(getTotalElements()) << " totByt=" << DEC(getTotalBytes());
 	}
 	return inStrm;
 }
@@ -1108,44 +1109,6 @@ bool NTV2_POINTER::Deallocate (void)
 }
 
 
-void NTV2_POINTER::Fill (const UByte inValue)
-{
-	UByte *	pBytes	(reinterpret_cast <UByte *> (GetHostPointer ()));
-	if (pBytes)
-		::memset (pBytes, inValue, GetByteCount ());
-}
-
-
-void NTV2_POINTER::Fill (const UWord inValue)
-{
-	UWord *		pUWords		(reinterpret_cast <UWord *> (GetHostPointer ()));
-	size_t		loopCount	(GetByteCount () / sizeof (inValue));
-	if (pUWords)
-		for (size_t n (0);  n < loopCount;  n++)
-			pUWords [n] = inValue;
-}
-
-
-void NTV2_POINTER::Fill (const ULWord inValue)
-{
-	ULWord *	pULWords	(reinterpret_cast <ULWord *> (GetHostPointer ()));
-	size_t		loopCount	(GetByteCount () / sizeof (inValue));
-	if (pULWords)
-		for (size_t n (0);  n < loopCount;  n++)
-			pULWords [n] = inValue;
-}
-
-
-void NTV2_POINTER::Fill (const ULWord64 inValue)
-{
-	ULWord64 *	pULWord64s	(reinterpret_cast <ULWord64 *> (GetHostPointer ()));
-	size_t		loopCount	(GetByteCount () / sizeof (inValue));
-	if (pULWord64s)
-		for (size_t n (0);  n < loopCount;  n++)
-			pULWord64s [n] = inValue;
-}
-
-
 void * NTV2_POINTER::GetHostAddress (const ULWord inByteOffset, const bool inFromEnd) const
 {
 	if (IsNULL())
@@ -1214,46 +1177,28 @@ bool NTV2_POINTER::CopyFrom (const NTV2_POINTER & inBuffer,
 
 bool NTV2_POINTER::CopyFrom (const NTV2_POINTER & inSrcBuffer, const NTV2SegmentedXferInfo & inXferInfo)
 {
-	if (!inXferInfo.isValid())
+	if (!inXferInfo.isValid()  ||  inSrcBuffer.IsNULL()  ||  IsNULL())
 		return false;
 
-	const ULWord	elementSize	(inXferInfo.getElementLength());
-	if (elementSize != 1  &&  elementSize != 2  &&  elementSize != 4  &&  elementSize != 8)
-		return false;	//	Illegal element size
-
-	const bool	bClearExcess	(false);
-	ULWord		bytesPerSegment	(elementSize * inXferInfo.getSegmentLength());
-	ULWord		totalSegments	(inXferInfo.getSegmentCount());
-	ULWord		totalElements	(totalSegments * inXferInfo.getSegmentLength());
-	ULWord		totalSrcBytes	(inXferInfo.getSourceOffset());
-	ULWord		totalDstBytes	(inXferInfo.getDestOffset());
-	if (inXferInfo.getSourcePitch())
-		totalSrcBytes += inXferInfo.getSourcePitch() * elementSize;
-	else
-		totalSrcBytes += totalElements * elementSize;
-	if (inXferInfo.getDestPitch())
-		totalDstBytes += inXferInfo.getDestPitch() * elementSize;
-	else
-		totalDstBytes += totalElements * elementSize;
-
-	if (inSrcBuffer.GetByteCount() < totalSrcBytes)
-		return false;	//	Too small
-	if (GetByteCount() < totalDstBytes)
-		return false;	//	Too small
-	if (bClearExcess  &&  GetByteCount() > totalDstBytes)
-		::memset(GetHostAddress(totalDstBytes), 0, GetByteCount() - totalDstBytes);
-
 	//	Copy every segment...
-	ULWord	dstByteOffset(0), srcByteOffset(0);
-	for (ULWord ndx(0);  ndx < totalSegments;  ndx++)
+	ULWord			srcOffset	(inXferInfo.getSourceOffset() * inXferInfo.getElementLength());
+	ULWord			dstOffset	(inXferInfo.getDestOffset() * inXferInfo.getElementLength());
+	const ULWord	srcPitch	(inXferInfo.getSourcePitch() * inXferInfo.getElementLength());
+	const ULWord	dstPitch	(inXferInfo.getDestPitch() * inXferInfo.getElementLength());
+	const ULWord	bytesPerSeg	(inXferInfo.getSegmentLength() * inXferInfo.getElementLength());
+	for (ULWord segNdx(0);  segNdx < inXferInfo.getSegmentCount();  segNdx++)
 	{
-		void *	pSrc (inSrcBuffer.GetHostAddress(srcByteOffset, inXferInfo.isSourceBottomUp()));
-		NTV2_ASSERT(pSrc);	//	Should never happen if 'totalBytes' is correct
-		void *	pDst (GetHostAddress(dstByteOffset, inXferInfo.isDestBottomUp()));
-		NTV2_ASSERT(pDst);	//	Should never happen if 'totalBytes' is correct
-		::memcpy (pDst,  pSrc,  bytesPerSegment);
-		srcByteOffset += bytesPerSegment  +  inXferInfo.getSourcePitch() * elementSize;	//	Bump src offset
-		dstByteOffset += bytesPerSegment  +  inXferInfo.getDestPitch() * elementSize;	//	Bump dst offset
+		const void *	pSrc (inSrcBuffer.GetHostAddress(srcOffset));
+		void *			pDst (GetHostAddress(dstOffset));
+		if (!pSrc)	return false;
+		if (!pDst)	return false;
+		if (srcOffset + bytesPerSeg > inSrcBuffer.GetByteCount())
+			return false;	//	memcpy will read past end of srcBuffer
+		if (dstOffset + bytesPerSeg > GetByteCount())
+			return false;	//	memcpy will write past end of me
+		::memcpy (pDst,  pSrc,  bytesPerSeg);
+		srcOffset += srcPitch;	//	Bump src offset
+		dstOffset += dstPitch;	//	Bump dst offset
 	}	//	for each segment
 	return true;
 }
