@@ -3451,6 +3451,7 @@ typedef enum
 {
     NTV2_HDMI8Bit,				//	8 bit
     NTV2_HDMI10Bit,				//	10 bit
+    NTV2_HDMI12Bit,				//	12 bit
     NTV2_MAX_NUM_HDMIBitDepths,
     NTV2_INVALID_HDMIBitDepth = NTV2_MAX_NUM_HDMIBitDepths
 } NTV2HDMIBitDepth;

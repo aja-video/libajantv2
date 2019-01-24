@@ -4279,6 +4279,12 @@ public:
 	AJA_VIRTUAL bool		SetHDMIOutProtocol (const NTV2HDMIProtocol inNewValue);
 	AJA_VIRTUAL bool		GetHDMIOutProtocol (NTV2HDMIProtocol & outValue);
 
+	AJA_VIRTUAL bool		SetHDMIOutForceConfig (const bool inNewValue);
+	AJA_VIRTUAL bool		GetHDMIOutForceConfig (bool & outValue);
+
+	AJA_VIRTUAL bool		SetHDMIOutPrefer420 (const bool inNewValue);
+	AJA_VIRTUAL bool		GetHDMIOutPrefer420 (bool & outValue);
+
 	AJA_VIRTUAL bool		GetHDMIOutDownstreamBitDepth (NTV2HDMIBitDepth & outValue);
 
 	AJA_VIRTUAL bool		GetHDMIOutDownstreamColorSpace (NTV2LHIHDMIColorSpace & outValue);

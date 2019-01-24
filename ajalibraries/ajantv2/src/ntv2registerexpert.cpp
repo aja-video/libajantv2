@@ -2648,11 +2648,12 @@ private:
 			const UWord	txCh12Sel	((inRegValue & (BIT(29)|BIT(30))) >> 29);
 			static const NTV2AudioChannelPair pairs[] = {NTV2_AudioChannel1_2, NTV2_AudioChannel3_4, NTV2_AudioChannel5_6, NTV2_AudioChannel7_8};
 			oss	<< "HDMI In EDID Write-Enable: " << EnabDisab(inRegValue & BIT(0))							<< endl
-				<< "Force User Output Params: " << SetNotset(inRegValue & BIT(1))							<< endl
+				<< "HDMI Force Output Params: " << SetNotset(inRegValue & BIT(1))							<< endl
 				<< "HDMI In Audio Chan Select: " << ::NTV2AudioChannelPairToString(pairs[chanPair], true)	<< endl
 				<< "hdmi_rx_8ch_src_off: " << YesNo(inRegValue & BIT(4))									<< endl
 				<< "Swap HDMI In Audio Ch. 3/4: " << YesNo(inRegValue & BIT(5))								<< endl
 				<< "Swap HDMI Out Audio Ch. 3/4: " << YesNo(inRegValue & BIT(6))							<< endl
+				<< "HDMI Prefer 420: " << SetNotset(inRegValue & BIT(7))									<< endl
 				<< "hdmi_rx_spdif_err: " << SetNotset(inRegValue & BIT(8))									<< endl
 				<< "hdmi_rx_afifo_under: " << SetNotset(inRegValue & BIT(9))								<< endl
 				<< "hdmi_rx_afifo_empty: " << SetNotset(inRegValue & BIT(10))								<< endl
