@@ -17,6 +17,7 @@
 	#include <iomanip>
 	#include <bitset>
 	#include "ajaexport.h"
+	#include "string.h"
 	#if defined(MSWindows)
 		#pragma warning(disable:4800)	//	int/bool conversion
 		#pragma warning(disable:4127)	//	Stop MSVC from bitching about "do{...}while(false)" macros
@@ -5682,6 +5683,90 @@ typedef enum
 			#pragma pack (push, 4)
 		#endif	//	defined (AJAMac)
 
+
+		#if !defined (NTV2_BUILDING_DRIVER)
+		/**
+			@brief		Describes a segmented data transfer (copy or move).
+			@details	A segmented transfer has the following pieces of information:
+						-	A starting source and destination offset, in elements;
+						-	A source and destination pitch (span between segments, in elements);
+						-	A segment length, in elements;
+						-	A segment count.
+						It also has some optional attributes:
+						-	Element size, in bytes. Defaults to 1 byte per element. Must be power-of-2. Maximum is 8.
+						-	Optional “source vertical flip” flag to indicate that the source offset is interpreted as an offset, in elements,
+							from the bottom of the source buffer, and during the transfer, the source pitch is subtracted instead of added.
+							Defaults to normal “from top” source offset reference.
+						-	Optional “destination vertical flip” flag to indicate that the destination offset is interpreted as an offset, in
+							elements, from the bottom of the destination buffer, and during the transfer, the destination pitch is subtracted
+							instead of added. Defaults to normal “from top” destination offset reference.
+		**/
+		AJAExport class NTV2SegmentedXferInfo
+		{
+			public:
+								NTV2SegmentedXferInfo()
+									:	mFlags				(0),
+										mNumSegments		(0),
+										mElementsPerSegment	(0),
+										mInitialSrcOffset	(0),
+										mInitialDstOffset	(0),
+										mSrcElementsPerRow	(0),
+										mDstElementsPerRow	(0)		{setElementLength(1);}
+
+				// Inquiry -- Essentials
+				inline bool		isValid (void) const				{return getSegmentCount() && getSegmentLength() ? true : false;}
+				inline ULWord	getSegmentCount (void) const		{return mNumSegments;}
+				inline ULWord	getSegmentLength (void) const		{return mElementsPerSegment;}
+				inline ULWord	getSourceOffset (void) const		{return mInitialSrcOffset;}
+				inline ULWord	getDestOffset (void) const			{return mInitialDstOffset;}
+				inline ULWord	getSourcePitch (void) const			{return mSrcElementsPerRow;}
+				inline ULWord	getDestPitch (void) const			{return mDstElementsPerRow;}
+				// Inquiry -- Non-Essentials
+				inline ULWord	getElementLength (void) const		{return ULWord(1 << (mFlags & 3));}
+				inline bool		isSourceBottomUp (void) const		{return mFlags & BIT(8) ? true : false;}
+				inline bool		isSourceTopDown (void) const		{return mFlags & BIT(8) ? false : true;}
+				inline bool		isDestBottomUp (void) const			{return mFlags & BIT(9) ? true : false;}
+				inline bool		isDestTopDown (void) const			{return mFlags & BIT(9) ? false : true;}
+				std::ostream &	Print (std::ostream & inStrm, const bool inDumpSegments = false) const;
+				ULWord			getTotalElements (void) const		{return getSegmentCount() * getSegmentLength();}
+				ULWord			getTotalBytes (void) const			{return getTotalElements() * getElementLength();}
+
+				// Changing
+				inline NTV2SegmentedXferInfo &	setSegmentCount (const ULWord inNumSegments)		{mNumSegments = inNumSegments;  return *this;}
+				inline NTV2SegmentedXferInfo &	setSegmentLength (const ULWord inNumElements)	{mElementsPerSegment = inNumElements;  return *this;}
+				inline NTV2SegmentedXferInfo &	setSourceInfo (const ULWord inOffset, const ULWord inPitch)
+											{return setSourceOffset(inOffset).setSourcePitch(inPitch);}
+				inline NTV2SegmentedXferInfo &	setSourceOffset (const ULWord inOffset)			{mInitialSrcOffset = inOffset;  return *this;}
+				inline NTV2SegmentedXferInfo &	setSourcePitch (const ULWord inPitch)			{mSrcElementsPerRow = inPitch;  return *this;}
+				inline NTV2SegmentedXferInfo &	setSourceDirection (const bool inTopDown)		{mFlags = (0xFFFFFFFF - BIT(8)); if (!inTopDown) mFlags |= BIT(8);  return *this;}
+				inline NTV2SegmentedXferInfo &	setDestInfo (const ULWord inOffset, const ULWord inPitch)
+											{return setDestOffset(inOffset).setDestPitch(inPitch);}
+				inline NTV2SegmentedXferInfo &	setDestOffset (const ULWord inOffset)			{mInitialDstOffset = inOffset;  return *this;}
+				inline NTV2SegmentedXferInfo &	setDestPitch (const ULWord inPitch)				{mDstElementsPerRow = inPitch;  return *this;}
+				inline NTV2SegmentedXferInfo &	setDestDirection (const bool inTopDown)			{mFlags = (0xFFFFFFFF - BIT(9)); if (!inTopDown) mFlags |= BIT(9);  return *this;}
+				inline NTV2SegmentedXferInfo &	setElementLength (const ULWord inBytesPerElement)	
+											{
+												if (inBytesPerElement  &&  inBytesPerElement < 9)
+													if (!(inBytesPerElement & (inBytesPerElement - 1)))  // Power of 2?
+													{
+														ULWord	num(inBytesPerElement),  lengthBits(0);
+														while (num >>= 1)
+															lengthBits++;
+														mFlags = (mFlags & ~3) | (lengthBits & 3);
+													}
+												return *this;
+											}
+			private:
+				ULWord	mFlags;					///< @brief	Lowest 2 bits determines element size, kRegMaskFrameOrientation is bit 10
+				ULWord	mNumSegments;			///< @brief	Number of segments to transfer (i.e. row count).
+				ULWord	mElementsPerSegment;	///< @brief	Size of each segment, in elements.
+				ULWord	mInitialSrcOffset;		///< @brief	Initial source offset, in elements.
+				ULWord	mInitialDstOffset;		///< @brief	Initial destination offset, in elements.
+				ULWord	mSrcElementsPerRow;		///< @brief	Source pitch (i.e. the span, in elements, between the starting elements of adjacent segments on the source).
+				ULWord	mDstElementsPerRow;		///< @brief	Destination pitch (i.e. the span, in elements, between the starting elements of adjacent segments on the destination).
+		};
+		#endif	//	!defined (NTV2_BUILDING_DRIVER)
+
 		/**
 			@brief	Principally used for sharing an arbitrary-sized chunk of host memory with the NTV2 kernel driver,
 					but is flexible and handy enough for use as a generic user-space buffer object.
@@ -5880,32 +5965,55 @@ typedef enum
 				bool			Deallocate (void);
 
 				/**
-					@brief		Fills me with the given UByte value.
-					@param[in]	inValue		The UByte value to fill me with.
-					@note		Ignored if I'm not currently allocated.
+					@brief		Fills me with the given scalar value.
+					@param[in]	inValue		The scalar value to fill me with.
+					@return		True if I'm currently allocated;  otherwise false.
 				**/
-				void			Fill (const UByte inValue);
+				template<typename T>	bool Fill (const T & inValue)
+				{
+					T *	pT	(reinterpret_cast<T*>(GetHostPointer()));
+					const size_t loopCount(GetByteCount() / sizeof(T));
+					if (pT)
+						for (size_t n(0);  n < loopCount;  n++)
+							pT[n] = inValue;
+					return pT ? true : false;
+				}
 
 				/**
-					@brief		Fills me with the given UWord value.
-					@param[in]	inValue		The UWord value to fill me with.
-					@note		Ignored if I'm not currently allocated.
+					@brief		Fills a portion of me with the given scalar value.
+					@param[in]	inValue			The scalar value.
+					@param[in]	inXferInfo		Describes the portion of me to be filled.
+					@return		True if successful; otherwise false.
+					@note		Offsets and lengths are checked. The function will return false for any overflow or underflow.
 				**/
-				void			Fill (const UWord inValue);
+				template<typename T> bool	Fill (const T & inValue, const NTV2SegmentedXferInfo & inXferInfo)
+				{
+					if (!inXferInfo.isValid())
+						return false;
+					//	Fill a temporary buffer to hold all the segment data...
+					NTV2_POINTER	segData(inXferInfo.getElementLength() * inXferInfo.getSegmentCount() * inXferInfo.getSegmentLength());
+					if (!segData.Fill(inValue))
+						return false;	//	Fill failed
 
-				/**
-					@brief		Fills me with the given ULWord value.
-					@param[in]	inValue		The ULWord value to fill me with.
-					@note		Ignored if I'm not currently allocated.
-				**/
-				void			Fill (const ULWord inValue);
-
-				/**
-					@brief		Fills me with the given ULWord64 value.
-					@param[in]	inValue		The ULWord64 value to fill me with.
-					@note		Ignored if I'm not currently allocated.
-				**/
-				void			Fill (const ULWord64 inValue);
+					//	Copy the segment data into me...
+					ULWord			srcOffset	(0);
+					ULWord			dstOffset	(inXferInfo.getDestOffset() * inXferInfo.getElementLength());
+					const ULWord	dstPitch	(inXferInfo.getDestPitch() * inXferInfo.getElementLength());
+					const ULWord	bytesPerSeg	(inXferInfo.getSegmentLength() * inXferInfo.getElementLength());
+					for (ULWord segNdx(0);  segNdx < inXferInfo.getSegmentCount();  segNdx++)
+					{
+						const void *	pSrc (segData.GetHostAddress(srcOffset));
+						void *			pDst (GetHostAddress(dstOffset));
+						if (!pSrc)	return false;
+						if (!pDst)	return false;
+						if (dstOffset + bytesPerSeg > GetByteCount())
+							return false;	//	memcpy will write past end
+						::memcpy (pDst,  pSrc,  bytesPerSeg);
+						srcOffset += bytesPerSeg;	//	Bump src offset
+						dstOffset += dstPitch;		//	Bump dst offset
+					}	//	for each segment
+					return true;
+				}
 
 				/**
 					@brief		Sets (or resets) me from a client-supplied address and size.
@@ -5952,6 +6060,15 @@ typedef enum
 								The function will return false for any overflow.
 				**/
 				bool			CopyFrom (const NTV2_POINTER & inSrcBuffer, const ULWord inSrcByteOffset, const ULWord inDstByteOffset, const ULWord inByteCount);
+
+				/**
+					@brief		Copies data segments from a given buffer into me.
+					@param[in]	inSrcBuffer			Specifies the source memory buffer to be copied into me.
+					@param[in]	inXferInfo			The segmented transfer info.
+					@return		True if successful; otherwise false.
+					@note		Offsets and lengths are checked. The function will return false for any overflow or underflow.
+				**/
+				bool			CopyFrom (const NTV2_POINTER & inSrcBuffer, const NTV2SegmentedXferInfo & inXferInfo);
 
 				/**
 					@brief		Swaps my underlying buffer with another's.
@@ -7682,46 +7799,46 @@ typedef enum
 			typedef	ULWord64Sequence::iterator					ULWord64SequenceIter;				///< @brief	A handy non-const iterator for iterating over a ULWord64Sequence.
 
 			/**
-				@brief		Prints the given UWordSequence's contents into the given output stream.
-				@param		inOutStream		The stream into which the given UWordSequence will be printed.
-				@param[in]	inData			Specifies the UWordSequence to be streamed.
+				@brief		Prints the given ::UWordSequence contents into the given output stream.
+				@param		inOutStream		The stream into which the given ::UWordSequence will be printed.
+				@param[in]	inData			Specifies the ::UWordSequence to be streamed.
 				@return		The "inOStream" that was specified.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const UWordSequence & inData);
 
 			/**
-				@brief		Prints the given ULWordSequence's contents into the given output stream.
-				@param		inOutStream		The stream into which the given ULWordSequence will be printed.
-				@param[in]	inData			Specifies the ULWordSequence to be streamed.
+				@brief		Prints the given ::ULWordSequence contents into the given output stream.
+				@param		inOutStream		The stream into which the given ::ULWordSequence will be printed.
+				@param[in]	inData			Specifies the ::ULWordSequence to be streamed.
 				@return		The "inOStream" that was specified.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const ULWordSequence & inData);
 
 			/**
-				@brief		Prints the given ULWord64Sequence's contents into the given output stream.
-				@param		inOutStream		The stream into which the given ULWord64Sequence will be printed.
-				@param[in]	inData			Specifies the ULWord64Sequence to be streamed.
+				@brief		Prints the given ::ULWord64Sequence contents into the given output stream.
+				@param		inOutStream		The stream into which the given ::ULWord64Sequence will be printed.
+				@param[in]	inData			Specifies the ::ULWord64Sequence to be streamed.
 				@return		The "inOStream" that was specified.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const ULWord64Sequence & inData);
 
 			/**
-				@return		A string that contains the human-readable representation of the given NTV2AutoCirculateState value.
-				@param[in]	inState		Specifies the NTV2AutoCirculateState of interest.
+				@return		A string that contains the human-readable representation of the given ::NTV2AutoCirculateState value.
+				@param[in]	inState		Specifies the ::NTV2AutoCirculateState of interest.
 			**/
 			AJAExport std::string NTV2AutoCirculateStateToString (const NTV2AutoCirculateState inState);
 
 			/**
-				@brief	Returns a set of distinct NTV2VideoFormat values supported on the given device.
-				@param[in]	inDeviceID	Specifies the NTV2DeviceID of the device of interest.
-				@param[out]	outFormats	Receives the set of distinct NTV2VideoFormat values supported by the device.
+				@brief	Returns a set of distinct ::NTV2VideoFormat values supported on the given device.
+				@param[in]	inDeviceID	Specifies the ::NTV2DeviceID of the device of interest.
+				@param[out]	outFormats	Receives the set of distinct ::NTV2VideoFormat values supported by the device.
 				@return		True if successful;  otherwise false.
 				@todo	This needs to be moved to a C++ compatible "device features" module.
 			**/
 			AJAExport bool NTV2DeviceGetSupportedVideoFormats (const NTV2DeviceID inDeviceID, NTV2VideoFormatSet & outFormats);
 
 			/**
-				@brief		Prints the given NTV2VideoFormatSet's contents into the given output stream.
+				@brief		Prints the given ::NTV2VideoFormatSet contents into the given output stream.
 				@param		inOStream	The stream into which the human-readable list will be written.
 				@param[in]	inFormats	Specifies the set of video formats to be streamed.
 				@return		The "inOStream" that was specified.
@@ -7729,16 +7846,16 @@ typedef enum
 			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2VideoFormatSet & inFormats);
 
 			/**
-				@brief	Returns a set of distinct NTV2FrameBufferFormat values supported on the given device.
-				@param[in]	inDeviceID	Specifies the NTV2DeviceID of the device of interest.
-				@param[out]	outFormats	Receives the set of distinct NTV2FrameBufferFormat values supported by the device.
+				@brief	Returns a set of distinct ::NTV2FrameBufferFormat values supported on the given device.
+				@param[in]	inDeviceID	Specifies the ::NTV2DeviceID of the device of interest.
+				@param[out]	outFormats	Receives the set of distinct ::NTV2FrameBufferFormat values supported by the device.
 				@return		True if successful;  otherwise false.
 				@todo	This needs to be moved to a C++ compatible "device features" module.
 			**/
 			AJAExport bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2FrameBufferFormatSet & outFormats);
 
 			/**
-				@brief		Prints the given NTV2FrameBufferFormatSet's contents into the given output stream.
+				@brief		Prints the given ::NTV2FrameBufferFormatSet contents into the given output stream.
 				@param		inOStream	The stream into which the human-readable list will be written.
 				@param[in]	inFormats	Specifies the set of pixel formats to be streamed.
 				@return		The "inOStream" that was specified.
@@ -7746,7 +7863,7 @@ typedef enum
 			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2FrameBufferFormatSet & inFormats);
 
 			/**
-				@brief		Appends the given NTV2FrameBufferFormatSet's contents into the given set.
+				@brief		Appends the given ::NTV2FrameBufferFormatSet contents into the given set.
 				@param		inOutSet	The set to which the other set will be appended.
 				@param[in]	inSet		Specifies the set whose contents will be appended.
 				@return		A reference to the modified set.
@@ -7754,24 +7871,24 @@ typedef enum
 			AJAExport NTV2FrameBufferFormatSet & operator += (NTV2FrameBufferFormatSet & inOutSet, const NTV2FrameBufferFormatSet inSet);
 
 			/**
-				@brief	Returns a set of distinct NTV2Standard values supported on the given device.
-				@param[in]	inDeviceID		Specifies the NTV2DeviceID of the device of interest.
-				@param[out]	outStandards	Receives the set of distinct NTV2Standard values supported by the device.
+				@brief	Returns a set of distinct ::NTV2Standard values supported on the given device.
+				@param[in]	inDeviceID		Specifies the ::NTV2DeviceID of the device of interest.
+				@param[out]	outStandards	Receives the set of distinct ::NTV2Standard values supported by the device.
 				@return		True if successful;  otherwise false.
 				@todo	This needs to be moved to a C++ compatible "device features" module.
 			**/
 			AJAExport bool NTV2DeviceGetSupportedStandards (const NTV2DeviceID inDeviceID, NTV2StandardSet & outStandards);
 
 			/**
-				@brief		Prints the given NTV2StandardSet's contents into the given output stream.
+				@brief		Prints the given ::NTV2StandardSet contents into the given output stream.
 				@param		inOStream		The stream into which the human-readable list will be written.
-				@param[in]	inStandards		Specifies the set of NTV2Standard values to be streamed.
+				@param[in]	inStandards		Specifies the set of ::NTV2Standard values to be streamed.
 				@return		The "inOStream" that was specified.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2StandardSet & inStandards);
 
 			/**
-				@brief		Appends the given NTV2StandardSet's contents into the given set.
+				@brief		Appends the given ::NTV2StandardSet contents into the given set.
 				@param		inOutSet	The set to which the other set will be appended.
 				@param[in]	inSet		Specifies the set whose contents will be appended.
 				@return		A reference to the modified set.
@@ -7779,7 +7896,7 @@ typedef enum
 			AJAExport NTV2StandardSet & operator += (NTV2StandardSet & inOutSet, const NTV2StandardSet inSet);
 
 			/**
-				@brief		Prints the given NTV2InputSourceSet's contents into the given output stream.
+				@brief		Prints the given ::NTV2InputSourceSet contents into the given output stream.
 				@param		inOStream	The stream into which the human-readable list will be written.
 				@param[in]	inSet		Specifies the set to be streamed.
 				@return		The "inOStream" that was specified.
@@ -7787,7 +7904,7 @@ typedef enum
 			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2InputSourceSet & inSet);
 
 			/**
-				@brief		Appends the given NTV2InputSourceSet's contents into the given set.
+				@brief		Appends the given ::NTV2InputSourceSet's contents into the given set.
 				@param		inOutSet	The set to which the other set will be appended.
 				@param[in]	inSet		Specifies the set whose contents will be appended.
 				@return		A reference to the modified set.
@@ -7796,63 +7913,63 @@ typedef enum
 
 
 			/**
-				@brief	Streams the given NTV2_HEADER to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2_HEADER to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the NTV2_HEADER to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2_HEADER to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2_HEADER & inObj);
 
 			/**
-				@brief	Streams the given NTV2_TRAILER to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2_TRAILER to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the NTV2_TRAILER to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2_TRAILER to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2_TRAILER & inObj);
 
 			/**
-				@brief	Streams the given NTV2_POINTER to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2_POINTER to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the NTV2_POINTER to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2_POINTER to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2_POINTER & inObj);
 
 			/**
-				@brief	Streams the given NTV2_RP188 struct to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2_RP188 struct to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the NTV2_RP188 struct to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2_RP188 struct to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2_RP188 & inObj);
 
 			/**
-				@brief	Streams the given NTV2TimeCodeList to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2TimeCodeList to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the NTV2TimeCodeList to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2TimeCodeList to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2TimeCodeList & inObj);
 
 			/**
-				@brief	Streams the given NTV2TimeCodes map to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2TimeCodes map to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the NTV2TimeCodes map to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2TimeCodes map to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2TimeCodes & inObj);
 
 			/**
-				@brief	Streams the given NTV2TCIndexes set to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2TCIndexes to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the NTV2TCIndexes set to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2TCIndexes set to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2TCIndexes & inObj);
 
 			/**
-				@brief		Appends the given NTV2TCIndexes' contents into the given set.
+				@brief		Appends the given ::NTV2TCIndexes contents into the given set.
 				@param		inOutSet	The set to which the other set will be appended.
 				@param[in]	inSet		Specifies the set whose contents will be appended.
 				@return		A reference to the modified set.
@@ -7860,124 +7977,132 @@ typedef enum
 			AJAExport NTV2TCIndexes & operator += (NTV2TCIndexes & inOutSet, const NTV2TCIndexes & inSet);
 
 			/**
-				@brief	Streams the given FRAME_STAMP to the specified ostream in a human-readable format.
+				@brief	Streams the given ::FRAME_STAMP to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the FRAME_STAMP to be streamed.
+				@param[in]	inObj			Specifies the ::FRAME_STAMP to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const FRAME_STAMP & inObj);
 
 			/**
-				@brief	Streams the given AUTOCIRCULATE_STATUS to the specified ostream in a human-readable format.
+				@brief	Streams the given ::AUTOCIRCULATE_STATUS to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the AUTOCIRCULATE_STATUS to be streamed.
+				@param[in]	inObj			Specifies the ::AUTOCIRCULATE_STATUS to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const AUTOCIRCULATE_STATUS & inObj);
 
 			/**
-				@brief	Streams the given NTV2SegmentedDMAInfo to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2SegmentedDMAInfo to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the NTV2SegmentedDMAInfo to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2SegmentedDMAInfo to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2SegmentedDMAInfo & inObj);
 
 			/**
-				@brief	Streams the given AUTOCIRCULATE_TRANSFER to the specified ostream in a human-readable format.
+				@brief	Streams the given ::AUTOCIRCULATE_TRANSFER to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the AUTOCIRCULATE_TRANSFER to be streamed.
+				@param[in]	inObj			Specifies the ::AUTOCIRCULATE_TRANSFER to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const AUTOCIRCULATE_TRANSFER & inObj);
 
 			/**
-				@brief	Streams the given FRAME_STAMP to the specified ostream in a human-readable format.
+				@brief	Streams the given ::FRAME_STAMP to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the FRAME_STAMP to be streamed.
+				@param[in]	inObj			Specifies the ::FRAME_STAMP to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const FRAME_STAMP & inObj);
 
 			/**
-				@brief	Streams the given AUTOCIRCULATE_TRANSFER_STATUS to the specified ostream in a human-readable format.
+				@brief	Streams the given ::AUTOCIRCULATE_TRANSFER_STATUS to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the AUTOCIRCULATE_TRANSFER_STATUS to be streamed.
+				@param[in]	inObj			Specifies the ::AUTOCIRCULATE_TRANSFER_STATUS to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const AUTOCIRCULATE_TRANSFER_STATUS & inObj);
 
 			/**
-				@brief	Streams the given NTV2RegisterNumberSet to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2RegisterNumberSet to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the NTV2RegisterNumberSet to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2RegisterNumberSet to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2RegisterNumberSet & inObj);
 
 			/**
-				@brief	Streams the given NTV2RegisterValueMap to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2RegisterValueMap to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the NTV2RegisterValueMap to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2RegisterValueMap to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2RegisterValueMap & inObj);
 
 			/**
-				@brief	Streams the given AutoCircVidProcInfo to the specified ostream in a human-readable format.
+				@brief	Streams the given ::AutoCircVidProcInfo to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the AutoCircVidProcInfo to be streamed.
+				@param[in]	inObj			Specifies the ::AutoCircVidProcInfo to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const AutoCircVidProcInfo & inObj);
 
 			/**
-				@brief	Streams the given NTV2ColorCorrectionData to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2ColorCorrectionData to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the NTV2ColorCorrectionData to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2ColorCorrectionData to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2ColorCorrectionData & inObj);
 
 			/**
-				@brief	Streams the given NTV2GetRegisters to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2GetRegisters to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the NTV2GetRegisters to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2GetRegisters to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport inline std::ostream & operator << (std::ostream & inOutStream, const NTV2GetRegisters & inObj)	{return inObj.Print (inOutStream);}
 
 			/**
-				@brief	Streams the given NTV2SetRegisters to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2SetRegisters to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the NTV2SetRegisters to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2SetRegisters to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport inline std::ostream & operator << (std::ostream & inOutStream, const NTV2SetRegisters & inObj)		{return inObj.Print (inOutStream);}
 
 			/**
-				@brief	Streams the given NTV2BankSelGetSetRegs to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2BankSelGetSetRegs to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the NTV2BankSelGetSetRegs to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2BankSelGetSetRegs to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport inline std::ostream & operator << (std::ostream & inOutStream, const NTV2BankSelGetSetRegs & inObj)	{return inObj.Print (inOutStream);}
 
 			/**
-				@brief	Streams the given NTV2SDIInStatistics to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2SDIInStatistics to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the NTV2SDIInStatistics to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2SDIInStatistics to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport inline std::ostream & operator << (std::ostream & inOutStream, const NTV2SDIInStatistics & inObj)	{return inObj.Print (inOutStream);}
 
 			/**
-				@brief	Streams the given NTV2SDIInputStatus to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2SDIInputStatus to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the NTV2SDIInputStatus to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2SDIInputStatus to be streamed.
 				@return	The ostream being used.
 			**/
 			AJAExport inline std::ostream &	operator << (std::ostream & inOutStream, const NTV2SDIInputStatus & inObj)	{return inObj.Print (inOutStream);}
+
+			/**
+				@brief	Streams the given ::NTV2SegmentedXferInfo to the specified ostream in a human-readable format.
+				@param		inOutStrm		Specifies the ostream to use.
+				@param[in]	inXferInfo		Specifies the ::NTV2SegmentedXferInfo to be streamed.
+				@return	The ostream being used.
+			**/
+			AJAExport std::ostream & operator << (std::ostream & inOutStrm, const NTV2SegmentedXferInfo & inXferInfo);
 
 			/**
 				@brief	Streams the given NTV2DebugLogging struct to the specified ostream in a human-readable format.
