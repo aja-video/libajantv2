@@ -1,6 +1,32 @@
 /**
 	@page	ntv2devops		NTV2 Device Hardware Operation
 
+	On this page:
+	-	\ref ntv2devops-intro
+	-	\ref devicesignalinputsoutputs
+		-	\ref commonelectricalchars
+		-	\ref hardwarecharacteristics
+	-	\ref videooperation
+		-	\ref vidop-fs
+		-	\ref independentmode
+		-	\ref vidop-fbaccess
+		-	\ref deviceclockingandsync
+		-	\ref fieldframeinterrupts
+		-	\ref vidop-fbconflict
+	-	\ref widgetsandrouting
+		-	\ref widget_inputs
+		-	\ref widget_outputs
+		-	\ref widget_processing
+		-	\ref recipes_capture
+		-	\ref recipes_playout
+		-	\ref recipes_endtoend
+	-	\ref audiooperation
+	-	\ref devicefirmware
+		-	\ref dev-firmware-vers
+
+
+
+	<hr size="50px">
 	@section	ntv2devops-intro	Introduction
 
 	In simplest terms, NTV2 devices are essentially…
@@ -27,6 +53,8 @@
 	Most devices can capture and play video, but some may only capture, while others may only playout.
 	-	To determine if a device can capture video, call ::NTV2DeviceCanDoCapture.
 	-	To determine if a device can play video, call ::NTV2DeviceCanDoPlayback.
+
+
 
 	<hr size="50px">
 	@section	devicesignalinputsoutputs		Signal Inputs & Outputs
@@ -213,6 +241,7 @@
 	@note	A very <i>very</i> long time ago, AJA had devices that stored all of F1’s lines in
 			the top half of the buffer, and all of F2’s lines in the bottom half. These devices
 			and buffer formats are no longer supported.
+
 
 
 	<hr size="50px">
@@ -547,16 +576,16 @@
 	@section	widgetsandrouting		Widgets and Signal Routing
 
 	NTV2 device FPGA firmware implements several types of “widgets“ for receiving, processing and transmitting video data.
-	These can be grouped as follows:
-	-	<b>Input Widgets</b>
+	These can be classified as follows:
+	-	\ref widget_inputs
 		-	\ref widget_sdiin
 		-	\ref widget_hdmiin
 		-	\ref widget_anlgin
-	-	<b>Output Widgets</b>
+	-	\ref widget_outputs
 		-	\ref widget_sdiout
 		-	\ref widget_hdmiout
 		-	\ref widget_anlgout
-	-	<b>Processing Widgets</b>
+	-	\ref widget_processing
 		-	\ref widget_framestore
 		-	\ref widget_csc
 		-	Color Look-Up-Tables (LUTs)
@@ -566,6 +595,9 @@
 		-	4K Down-converters
 		-	DVC Pro converters
 		-	Universal Frequency Converters (UFCs)
+	-	\ref recipes_capture
+	-	\ref recipes_playout
+	-	\ref recipes_endtoend
 
 	Most widgets typically have associated registers for reporting status and/or controlling their operation.
 	Rather than calling CNTV2Card::ReadRegister or CNTV2Card::WriteRegister, client applications should use the
@@ -607,16 +639,24 @@
 	Starting in SDK 14.0, AJA finally implemented a program that inspects the FPGA source code to compile a static “implemented routes”
 	table that’s queried by the CNTV2Card::CanConnect function. These tables are correct and complete for firmware versions used
 	at the time of the SDK release. However, subsequent firmware updates may add or remove interconnect routes that would not be
-	reflected in the tables used by the SDK. We intend to improve this process going forward.
+	reflected in the tables used by the SDK. We hope to improve this process going forward.
 
 	The NTV2 SDK provides two tools that graphically show the available device widgets and the signal routing between them.
-	-	\ref usingcables — An ancient, but still functional utility that allows you to inspect and interactively change widget
-		configuration and signal routing paths between widgets.
-	-	The \ref inspectorroute in \ref usingntv2watcher — Currently an incomplete port of \ref usingcables that eventually
-		will incorporate all of its functionality.
+	-	\ref usingcables — An ancient, but still functional graphical utility that allows you to inspect and interactively change
+		widget configuration and signal routing paths between widgets.
+	-	The \ref inspectorroute in \ref usingntv2watcher — This will eventually incorporate the functionality of \ref usingcables .
 
 
-	@subsection	widget_sdiin	SDI Input
+
+	<hr size="50px">
+	@subsection	widget_inputs	Input Widgets
+
+	These widgets only have output crosspoints that provide signal sources for signal-processing or output widgets.
+
+	@note	An input widget’s output can be used to source multiple output and signal-processing widgets’ inputs.
+
+
+	@subsubsection	widget_sdiin	SDI Input
 
 	An SDI Input widget represents a physical SDI input connector.
 	-	There is one of these widgets for each input SDI connector (e.g. ::NTV2_WgtSDIIn1, ::NTV2_WgtSDIIn2, …).
@@ -638,7 +678,7 @@
 				For Data Stream 2’s crosspoint, specify \c true for \c inIsSDI_DS2.
 
 
-	@subsection	widget_hdmiin	HDMI Input
+	@subsubsection	widget_hdmiin	HDMI Input
 
 	An HDMI Input widget represents a physical HDMI input connector.
 	-	There is one of these widgets for each input HDMI connector.
@@ -655,7 +695,7 @@
 				for the \c inIsHDMI_RGB parameter.
 
 
-	@subsection	widget_anlgin	Analog Video Input
+	@subsubsection	widget_anlgin	Analog Video Input
 
 	An Analog Video Input widget represents a physical analog video input connector (typically RCA connectors labeled Y/G/CVBS,
 	Pb/B/Y and Pr/R/C RCA connectors).
@@ -665,7 +705,16 @@
 		-	Or call ::GetInputSourceOutputXpt with ::NTV2_INPUTSOURCE_ANALOG1.
 
 
-	@subsection	widget_sdiout	SDI Output
+
+	<hr size="50px">
+	@subsection	widget_outputs	Output Widgets
+
+	These widgets only have input crosspoints that accept signals from signal-processing or input widgets.
+
+	@note	An output widget’s input can only be sourced from a single input or signal-processing widget’s output.
+
+
+	@subsubsection	widget_sdiout	SDI Output
 
 	An SDI Output widget represents one of the device’s physical SDI output connectors.
 	-	There is one of these widgets for each output SDI connector (e.g. ::NTV2_WgtSDIOut1, ::NTV2_WgtSDIOut2, …).
@@ -684,7 +733,7 @@
 			-	For dual-link applications, pass \c true for \c inIsSDI_DS2 for the 2nd dual-link stream.
 
 
-	@subsection	widget_hdmiout	HDMI Output
+	@subsubsection	widget_hdmiout	HDMI Output
 
 	An HDMI Output widget represents a physical HDMI output connector.
 	-	There is one of these widgets for the output HDMI connector — ::NTV2_WgtHDMIOut1.
@@ -697,7 +746,7 @@
 			For 4K/UHD quadrants, you can specify a quadrant number (0, 1, 2 or 3).
 
 
-	@subsection	widget_anlgout	Analog Video Output
+	@subsubsection	widget_anlgout	Analog Video Output
 
 	An Analog Video Output widget represents a physical analog video output connector (typically RCA connectors labeled Y/G/CVBS,
 	Pb/B/Y and Pr/R/C RCA connectors).
@@ -707,7 +756,17 @@
 		-	Call ::GetOutputDestInputXpt with ::NTV2_OUTPUTDESTINATION_ANALOG.
 
 
-	@subsection	widget_framestore	Frame Store
+	<hr size="50px">
+	@subsection	widget_processing	Signal-Processing Widgets
+
+	These widgets have both input and output crosspoints. They accept and consume a signal from another source, and perform some
+	kind of processing on it, and send it on to another widget for consumption downstream.
+
+	@note	A signal-processing widget’s output can source multiple widgets’ inputs,
+			while each of its inputs can only be sourced by one other widget’s output.
+
+
+	@subsubsection	widget_framestore	Frame Store
 
 	A <b>Frame Store</b> widget represents the firmware entity responsible for writing or reading video frames to or from device SDRAM.
 	-	::NTV2DeviceGetNumFrameStores will report the number of Frame Store widgets that are available on a given device.
@@ -724,8 +783,8 @@
 			-	Use the normal <b>YUV</b> output crosspoint when the FrameStore is using a YCbCr ::NTV2FrameBufferFormat.
 			-	Use the <b>RGB</b> output crosspoint when the FrameStore is using an RGB ::NTV2FrameBufferFormat.
 		-	If the Frame Store is configured for 4K/UHD Tsi (SMPTE 425 two-sample-interleave) mode:
-			-	Use the “425” YUV output crosspoint when the FrameStore is using a YCbCr ::NTV2FrameBufferFormat.
-			-	Use the “425” RGB output crosspoint when the FrameStore is using an RGB ::NTV2FrameBufferFormat.
+			-	Use the “425” YUV output crosspoint when the FrameStore is using a YCbCr ::NTV2FrameBufferFormat (see ::NTV2_FBF_IS_YCBCR macro).
+			-	Use the “425” RGB output crosspoint when the FrameStore is using an RGB ::NTV2FrameBufferFormat (see ::NTV2_IS_FBF_RGB macro).
 		-	Call ::GetFrameBufferOutputXptFromChannel to obtain a Frame Store’s ::NTV2OutputCrosspointID …
 			-	Specify the Frame Store of interest by ::NTV2Channel (i.e., ::NTV2_CHANNEL1, ::NTV2_CHANNEL2, …etc.).
 			-	By default, the function returns the YUV output crosspoint. If the Frame Store’s ::NTV2FrameBufferFormat
@@ -737,7 +796,7 @@
 	See the \ref vidop-fs section for information about how to programmatically interrogate and configure Frame Stores.
 
 
-	@subsection	widget_csc	ColorSpace Converter (CSC)
+	@subsubsection	widget_csc	ColorSpace Converter (CSC)
 
 	A <b>ColorSpace Converter</b> widget represents the firmware entity that can convert YCbCr video into RGBA or vice-versa.
 	-	::NTV2DeviceGetNumCSCs reports the number of CSC widgets that are available on a given device.
@@ -763,7 +822,7 @@
 				To obtain the <b>RGB</b> crosspoint, pass \c true for \c inIsRGB.
 
 
-	@subsection	widget_mixkey	Mixer/Keyer
+	@subsubsection	widget_mixkey	Mixer/Keyer
 
 	@image	html	cables-mixerkeyerwidget.png
 
@@ -820,6 +879,122 @@
 	@note	The Mixer’s foreground and background inputs must be closely synchronized or the Mixer won’t be able to
 			mix them, and if unlocked, its output will be garbled/invalid. Call CNTV2Card::GetMixerSyncStatus to
 			determine if the Mixer is locked to both of its inputs and therefore if its output is locked/valid.
+
+
+	<hr size="50px">
+	@subsection	recipes_capture		Routing for Capture
+
+	This section shows how to programmatically set up a device to receive video for several commmon scenarios.
+
+	@par	SD/HD YCbCr
+
+	TBD
+
+	@par	SD/HD RGB
+
+	TBD
+
+	@par	SD/HD RGB Over-the-Wire Dual-Link
+
+	TBD
+
+
+	<hr size="50px">
+	@subsection	recipes_playout		Routing for Playout
+
+	This section shows how to programmatically set up a device for transmitting video for several commmon scenarios.
+
+	@par	SD/HD YCbCr Playout From YCbCr Frame Buffer
+
+	TBD
+
+	@par	SD/HD YCbCr Playout From RGB Frame Buffer
+
+	TBD
+
+	@par	HD RGB Playout Over 2 × 1.5G Dual-Link SDI From YCbCr Frame Buffer
+
+	TBD
+
+	@par	HD RGB Playout Over 1 × 3G Dual-Link SDI From YCbCr Frame Buffer
+
+	TBD
+
+	@par	HD RGB Playout Over 2 × 1.5G Dual-Link SDI From RGB Frame Buffer
+
+	TBD
+
+	@par	HD RGB Playout Over 1 × 3G Dual-Link SDI From RGB Frame Buffer
+
+	TBD
+
+	@par	HD HFR YCbCr Playout Over 2 × 3G SDI From YCbCr Frame Buffer
+
+	TBD
+
+	@par	HD HFR YCbCr Playout Over 2 × 3G SDI From RGB Frame Buffer
+
+	TBD
+
+	@par	2K×1080 YCbCr Playout Over 2 × 3G SDI From YCbCr Frame Buffer
+
+	TBD
+
+	@par	HD HFR YCbCr Playout Over 2 × 3G SDI From RGB Frame Buffer
+
+	TBD
+
+	@par	UHD/4K 4:2:2 YCbCr Playout Over 4 × 3G SDI (“Squares”)
+
+	TBD
+
+	@par	UHD/4K 4:2:2 YCbCr Playout Over 4 × 3G SDI (“Two-Sample Interleave”)
+
+	TBD
+
+	@par	UHD/4K 4:2:2 YCbCr Playout Over 2 × 6G SDI (“Two-Sample Interleave”)
+
+	TBD
+
+	@par	UHD/4K 4:2:2 YCbCr Playout Over 1 × 12G SDI
+
+	TBD
+
+
+	<hr size="50px">
+	@subsection	recipes_endtoend	Routing for Simultaneous Capture & Playout
+
+	This section shows how to programmatically set up a device for transmitting input video with a variety of latencies.
+
+	@par	SD/HD YCbCr E-E (Sub-Frame Latency)
+
+	TBD
+
+	@par	SD/HD YCbCr Frame Synchronizer (One-Frame Latency)
+
+	TBD
+
+	@par	HD E-E Mix RGBA Graphic Over Live Video
+
+	with sub-frame latency
+	TBD
+
+	@par	HD HFR YCbCr E-E Over 2 × 1.5G Dual-Link SDI
+
+	TBD
+
+	@par	HD HFR YCbCr E-E Over 1 × 3G Dual-Link SDI
+
+	TBD
+
+	@par	E-E Over 2 × 3G SDI
+
+	TBD
+
+	@par	E-E Over 1 × 6G SDI
+
+	TBD
+
 
 
 
