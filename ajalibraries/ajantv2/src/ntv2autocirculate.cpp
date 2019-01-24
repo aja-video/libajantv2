@@ -1130,13 +1130,15 @@ static const AJA_FrameRate	sAJARate2NTV2Rate[] = {	AJA_FrameRate_Unknown,	//	NTV
 
 bool CNTV2Card::S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & inOutXferInfo)
 {
-	//	IP 2110 Playout only:	Add relevant transmit timecodes to outgoing Anc
+	//	IP 2110 Playout only:	Add relevant transmit timecodes and VPID to outgoing Anc
 	NTV2FrameRate		ntv2Rate		(NTV2_FRAMERATE_UNKNOWN);
 	bool				result			(GetFrameRate(ntv2Rate, inChannel));
 	bool				isProgressive	(false);
+	bool				changed			(false);
 	NTV2Standard		standard		(NTV2_STANDARD_INVALID);
 	NTV2_POINTER &		ancF1			(inOutXferInfo.acANCBuffer);
 	NTV2_POINTER &		ancF2			(inOutXferInfo.acANCField2Buffer);
+	ULWord				vpidA(0), vpidB(0);
 	AJAAncillaryList	pkts;
 
 	if (!result)
@@ -1152,46 +1154,81 @@ bool CNTV2Card::S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTO
 
 	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(standard));
 	const uint32_t				F2StartLine			(smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD1));
-	const AJA_FrameRate			ajaRate				(sAJARate2NTV2Rate[ntv2Rate]);
-	const AJATimeBase			ajaTB				(ajaRate);
-	const NTV2TCIndexes			tcIndexes			(::GetTCIndexesForSDIConnector(inChannel));
-	const size_t				maxNumTCs			(inOutXferInfo.acOutputTimeCodes.GetByteCount() / sizeof(NTV2_RP188));
-	NTV2_RP188 *				pTimecodes			(reinterpret_cast<NTV2_RP188*>(inOutXferInfo.acOutputTimeCodes.GetHostPointer()));
 
-	//	For each timecode index for this channel...
-	for (NTV2TCIndexesConstIter it(tcIndexes.begin());  it != tcIndexes.end();  ++it)
-	{
-		const NTV2TCIndex	tcNdx(*it);
-		if (size_t(tcNdx) >= maxNumTCs)
-			continue;	//	Skip -- not in the array
-		if (!NTV2_IS_SDI_TIMECODE_INDEX(tcNdx))
-			continue;	//	Skip -- analog or invalid
+	if (!pkts.CountAncillaryDataWithID(0x41,0x01))			//	If no VPID packets in buffer...
+		if (GetSDIOutVPID(vpidA, vpidB, UWord(inChannel)))	//	...then we'll add them...
+		{	//	VPID Packet Insertion						1080	720		525		625		1080p	2K		2K1080p		2K1080i		UHD		4K		UHDHFR		4KHFR
+			static const uint16_t	vpidF1LineNums[] = {	10,		10,		13,		9,		10,		10,		10,			10,			10,		10,		10,			10	};
+			static const uint16_t	vpidF2LineNums[] = {	572,	0,		276,	322,	0,		0,		0,			572,		0,		0,		0,			0	};
+			AJAAncillaryData	vpidPkt;
+			vpidPkt.SetDID(0x41);
+			vpidPkt.SetSID(0x01);
+			vpidPkt.SetLocationVideoLink(AJAAncillaryDataLink_A);
+			vpidPkt.SetLocationDataStream(AJAAncillaryDataStream_1);
+			vpidPkt.SetLocationDataChannel(AJAAncillaryDataChannel_Y);
+			vpidPkt.SetLocationVideoSpace(AJAAncillaryDataSpace_HANC);
+			if (vpidA)
+			{
+				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(vpidA), 4);
+				vpidPkt.SetLocationLineNumber(vpidF1LineNums[standard]);
+				pkts.AddAncillaryData(vpidPkt);			changed = true;
+			}
+			if (!isProgressive && vpidB)
+			{
+				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(vpidB), 4);
+				vpidPkt.SetLocationLineNumber(vpidF2LineNums[standard]);
+				pkts.AddAncillaryData(vpidPkt);			changed = true;
+			}
+		}	//	if user not inserting his own VPID
 
-		const NTV2_RP188	regTC	(pTimecodes[tcNdx]);
-		if (!regTC)
-			continue;	//	Skip -- invalid timecode (all FFs)
+	if (!pkts.CountAncillaryDataWithType(AJAAncillaryDataType_Timecode_ATC))
+		if (!pkts.CountAncillaryDataWithType(AJAAncillaryDataType_Timecode_VITC))
+		{
+			const AJA_FrameRate			ajaRate				(sAJARate2NTV2Rate[ntv2Rate]);
+			const AJATimeBase			ajaTB				(ajaRate);
+			const NTV2TCIndexes			tcIndexes			(::GetTCIndexesForSDIConnector(inChannel));
+			const size_t				maxNumTCs			(inOutXferInfo.acOutputTimeCodes.GetByteCount() / sizeof(NTV2_RP188));
+			NTV2_RP188 *				pTimecodes			(reinterpret_cast<NTV2_RP188*>(inOutXferInfo.acOutputTimeCodes.GetHostPointer()));
 
-		const bool	isDF (ajaTB.IsNonIntegralRatio());
-		AJATimeCode						tc;		tc.SetRP188(regTC.fDBB, regTC.fLo, regTC.fHi, ajaTB);
-		AJAAncillaryData_Timecode_ATC	atc;	atc.SetTimecode (tc, ajaTB, isDF);
-		atc.AJAAncillaryData_Timecode_ATC::SetDBB (uint8_t(regTC.fDBB & 0x000000FF), uint8_t(regTC.fDBB & 0x0000FF00 >> 8));
-		if (NTV2_IS_ATC_VITC2_TIMECODE_INDEX(tcNdx))	//	VITC2?
-			atc.SetDBB1PayloadType(AJAAncillaryData_Timecode_ATC_DBB1PayloadType_VITC2);
-		else
-		{	//	F1
-			if (NTV2_IS_ATC_VITC1_TIMECODE_INDEX(tcNdx))	//	VITC1?
-				atc.SetDBB1PayloadType(AJAAncillaryData_Timecode_ATC_DBB1PayloadType_VITC1);
-			else if (NTV2_IS_ATC_LTC_TIMECODE_INDEX(tcNdx))	//	LTC?
-				atc.SetDBB1PayloadType(AJAAncillaryData_Timecode_ATC_DBB1PayloadType_LTC);
-			else
-				continue;
-		}
-		atc.GeneratePayloadData();
-		pkts.AddAncillaryData(atc);
-	}	//	for each timecode index value
+			//	For each timecode index for this channel...
+			for (NTV2TCIndexesConstIter it(tcIndexes.begin());  it != tcIndexes.end();  ++it)
+			{
+				const NTV2TCIndex	tcNdx(*it);
+				if (size_t(tcNdx) >= maxNumTCs)
+					continue;	//	Skip -- not in the array
+				if (!NTV2_IS_SDI_TIMECODE_INDEX(tcNdx))
+					continue;	//	Skip -- analog or invalid
 
-	pkts.SortListByLocation();
-	ancF1.Fill(ULWord(0));	ancF2.Fill(ULWord(0));
-	return AJA_SUCCESS(pkts.GetIPTransmitData (ancF1, ancF2, isProgressive, F2StartLine));
+				const NTV2_RP188	regTC	(pTimecodes[tcNdx]);
+				if (!regTC)
+					continue;	//	Skip -- invalid timecode (all FFs)
+
+				const bool	isDF (ajaTB.IsNonIntegralRatio());
+				AJATimeCode						tc;		tc.SetRP188(regTC.fDBB, regTC.fLo, regTC.fHi, ajaTB);
+				AJAAncillaryData_Timecode_ATC	atc;	atc.SetTimecode (tc, ajaTB, isDF);
+				atc.AJAAncillaryData_Timecode_ATC::SetDBB (uint8_t(regTC.fDBB & 0x000000FF), uint8_t(regTC.fDBB & 0x0000FF00 >> 8));
+				if (NTV2_IS_ATC_VITC2_TIMECODE_INDEX(tcNdx))	//	VITC2?
+					atc.SetDBB1PayloadType(AJAAncillaryData_Timecode_ATC_DBB1PayloadType_VITC2);
+				else
+				{	//	F1
+					if (NTV2_IS_ATC_VITC1_TIMECODE_INDEX(tcNdx))	//	VITC1?
+						atc.SetDBB1PayloadType(AJAAncillaryData_Timecode_ATC_DBB1PayloadType_VITC1);
+					else if (NTV2_IS_ATC_LTC_TIMECODE_INDEX(tcNdx))	//	LTC?
+						atc.SetDBB1PayloadType(AJAAncillaryData_Timecode_ATC_DBB1PayloadType_LTC);
+					else
+						continue;
+				}
+				atc.GeneratePayloadData();
+				pkts.AddAncillaryData(atc);				changed = true;
+			}	//	for each timecode index value
+		}	//	if user not inserting his own ATC/VITC
+
+	if (changed)
+	{	//	Only need to re-encode pkts to RTP buffers if anything new was added...
+		pkts.SortListByLocation();
+		ancF1.Fill(ULWord(0));	ancF2.Fill(ULWord(0));
+		return AJA_SUCCESS(pkts.GetIPTransmitData (ancF1, ancF2, isProgressive, F2StartLine));
+	}
+	return true;
 
 }	//	S2110AddTimecodesToAncBuffers

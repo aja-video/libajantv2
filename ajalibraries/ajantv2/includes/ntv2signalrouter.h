@@ -39,6 +39,8 @@ typedef NTV2ActualConnections::const_iterator						NTV2ActualConnectionsConstIte
 typedef std::multimap <NTV2InputCrosspointID, NTV2OutputXptID>		NTV2PossibleConnections;	///< @brief	A map of zero or more one-to-many possible NTV2InputCrosspointID to NTV2OutputCrosspointID connections.
 typedef NTV2PossibleConnections::const_iterator						NTV2PossibleConnectionsConstIter;
 
+AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2ActualConnections & inObj);
+
 typedef	std::map <std::string, NTV2InputXptID>			String2InputXpt;
 typedef String2InputXpt::const_iterator					String2InputXptConstIter;
 
@@ -132,7 +134,13 @@ class AJAExport CNTV2SignalRouter
 		virtual bool								HasInput (const NTV2InputCrosspointID inSignalInput) const;
 
 		/**
-			@brief	Resets me, erasing any/all existing connections.
+			@return		The output crosspoint that the given input is connected to, or NTV2_XptBlack if not connected.
+			@param[in]	inSignalInput		Specifies the widget signal input (sink) of interest.
+		**/
+		virtual NTV2OutputCrosspointID				GetConnectedOutput (const NTV2InputCrosspointID inSignalInput) const;
+
+		/**
+			@brief		Resets me, erasing any/all existing connections.
 		**/
 		virtual inline void							Reset (void)										{mConnections.clear ();}
 
@@ -145,10 +153,19 @@ class AJAExport CNTV2SignalRouter
 		virtual bool								ResetFromRegisters (const NTV2InputCrosspointIDSet & inInputXpts, const NTV2RegisterReads & inRegReads);
 
 		/**
-			@brief	Answers with the current number of connections (signal routes).
-			@return	The current number of connections.
+			@return	The current number of connections (signal routes).
 		**/
 		virtual inline ULWord						GetNumberOfConnections (void) const					{return ULWord (mConnections.size ());}
+
+		/**
+			@return	True if I have no connections (signal routes); otherwise false.
+		**/
+		virtual inline bool							IsEmpty (void) const								{return mConnections.empty();}
+
+		/**
+			@return	A copy of my connections.
+		**/
+		virtual inline NTV2ActualConnections		GetConnections (void) const							{return mConnections;}
 
 		/**
 			@brief		Returns a sequence of NTV2RegInfo values that can be written to an NTV2 device using its WriteRegisters function.
@@ -156,6 +173,34 @@ class AJAExport CNTV2SignalRouter
 			@return		True if successful;  otherwise false.
 		**/
 		virtual bool								GetRegisterWrites (NTV2RegisterWrites & outRegWrites) const;
+
+		/**
+			@brief		Compares me with another routing, and returns three connection mappings as a result of the comparison:
+						those that are new, changed, and missing.
+			@param[in]	inRHS		The CNTV2SignalRouter that I'm being compared with.
+			@param[out]	outNew		Receives the new connections (those that I have, but RHS doesn't).
+			@param[out]	outChanged	Receives the changed connections, where only the output crosspoint changed.
+									The output crosspoint of these changed connections will be those from "inRHS"
+									-- not the new ones.
+			@param[out]	outMissing	Receives the deleted connections (those that RHS has, but I don't).
+			@return		True if identical (i.e. the returned output connection maps are all empty);  otherwise false.
+		**/
+		virtual bool								Compare (const CNTV2SignalRouter & inRHS,
+															NTV2ActualConnections & outNew,
+															NTV2ActualConnections & outChanged,
+															NTV2ActualConnections & outMissing) const;
+
+		/**
+			@return		True if my connections are identical to those of the given right-hand-side signal router; otherwise false.
+			@param[in]	inRHS		The CNTV2SignalRouter that I'll be compared with.
+		**/
+		virtual inline bool			operator == (const CNTV2SignalRouter & inRHS) const		{NTV2ActualConnections tmp; return Compare(inRHS, tmp,tmp,tmp);}
+
+		/**
+			@return		True if my connections differ from those of the given right-hand-side signal router;  otherwise false.
+			@param[in]	inRHS		The CNTV2SignalRouter that I'll be compared with.
+		**/
+		virtual inline bool			operator != (const CNTV2SignalRouter & inRHS) const		{return !(inRHS == *this);}
 
 		/**
 			@brief	Prints me in a human-readable format to the given output stream.
@@ -183,6 +228,10 @@ class AJAExport CNTV2SignalRouter
 			std::string	mDeviceVarName;		///< @brief	Name to use for CNTV2Card variable
 			std::string	mRouterVarName;		///< @brief	Name to use for CNTV2DeviceRouter variable
 			std::string	mLineBreakText;		///< @brief	Text to use for line breaks
+			std::string	mFieldBreakText;	///< @brief	Text to use for field breaks
+			NTV2ActualConnections mNew;		///< @brief	Optional, to show new connections
+			NTV2ActualConnections mChanged;	///< @brief	Optional, to show changed connections
+			NTV2ActualConnections mMissing;	///< @brief	Optional, to show deleted connections
 			/**
 				@brief	Default constructor sets the following default settings:
 						-	include "//"-style comments and variable declarations;

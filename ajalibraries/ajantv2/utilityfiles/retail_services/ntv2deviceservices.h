@@ -68,6 +68,12 @@ public:
 	virtual void SetDeviceXPointCapture();
 	virtual void SetDeviceMiscRegisters();
 	
+	// optimization
+	virtual void StartOptimizedWrites();
+	virtual void StopOptimizedWrites();
+	virtual void PauseOptimizedWrites();
+	virtual void ResumeOptimizedWrites();
+	
 	virtual bool NewLockedInputVideoFormatDetected();
 	virtual void SetDeviceXPointPlaybackRaw();
 	virtual void SetDeviceXPointCaptureRaw();
@@ -141,6 +147,7 @@ public:
 	
 	NTV2VideoFormat GetPairedInterlaceTransportFormat(NTV2VideoFormat format);
 	bool CanConvertFormat(NTV2VideoFormat inFormat, NTV2VideoFormat outFormat);
+	bool CanDoOptimizedWrites(NTV2DeviceID deviceId);
 	NTV2VideoFormat GetConversionCompatibleFormat(NTV2VideoFormat sourceFmt, NTV2VideoFormat secondaryFmt);
 	NTV2FrameRate HalfFrameRate(NTV2FrameRate rate);
 	bool InputRequiresBToAConvertsion(NTV2Channel ch);

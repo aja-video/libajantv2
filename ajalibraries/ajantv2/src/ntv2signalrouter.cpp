@@ -985,6 +985,13 @@ bool CNTV2SignalRouter::HasInput (const NTV2InputCrosspointID inSignalInput) con
 }
 
 
+NTV2OutputCrosspointID CNTV2SignalRouter::GetConnectedOutput (const NTV2InputCrosspointID inSignalInput) const
+{
+	NTV2ActualConnectionsConstIter it(mConnections.find(inSignalInput));
+	return it != mConnections.end()  ?  it->second  :  NTV2_XptBlack;
+}
+
+
 bool CNTV2SignalRouter::HasConnection (const NTV2InputCrosspointID inSignalInput, const NTV2OutputCrosspointID inSignalOutput) const
 {
     NTV2ActualConnectionsConstIter	iter (mConnections.find (inSignalInput));
@@ -1068,6 +1075,42 @@ bool CNTV2SignalRouter::GetRegisterWrites (NTV2RegisterWrites & outRegWrites) co
 }
 
 
+bool CNTV2SignalRouter::Compare (const CNTV2SignalRouter & inRHS, NTV2ActualConnections & outNew,
+								NTV2ActualConnections & outChanged, NTV2ActualConnections & outMissing) const
+{
+	outNew.clear();  outChanged.clear();  outMissing.clear();
+	//	Check that my connections are also in RHS:
+	for (NTV2ActualConnectionsConstIter it(mConnections.begin());  it != mConnections.end();  ++it)
+	{
+		const NTV2SignalConnection &	connection (*it);
+		const NTV2InputXptID			inputXpt(connection.first);
+		const NTV2OutputXptID			outputXpt(connection.second);
+		if (inRHS.HasConnection(inputXpt, outputXpt))
+			;
+		else if (inRHS.HasInput(inputXpt))
+			outChanged.insert(NTV2Connection(inputXpt, inRHS.GetConnectedOutput(inputXpt)));	//	Connection changed from this
+		else
+			outNew.insert(connection);		//	Connection is new in me, not in RHS
+	}
+
+	//	Check that RHS' connections are also in me...
+	const NTV2ActualConnections	connectionsRHS(inRHS.GetConnections());
+	for (NTV2ActualConnectionsConstIter it(connectionsRHS.begin());  it != connectionsRHS.end();  ++it)
+	{
+		const NTV2SignalConnection &	connectionRHS (*it);
+		const NTV2InputXptID			inputXpt(connectionRHS.first);
+		const NTV2OutputXptID			outputXpt(connectionRHS.second);
+		NTV2ActualConnectionsConstIter	pFind (mConnections.find(inputXpt));
+		if (pFind == mConnections.end())		//	If not found in me...
+			outMissing.insert(connectionRHS);	//	...in RHS, but missing in me
+		else if (pFind->second != outputXpt)	//	If output xpt differs...
+			outChanged.insert(connectionRHS);	//	...then 'connection' is changed (in RHS, not in me)
+	}
+
+	return outNew.empty() && outChanged.empty() && outMissing.empty();	//	Return true if identical
+}
+
+
 ostream & CNTV2SignalRouter::Print (ostream & inOutStream, const bool inForRetailDisplay) const
 {
     if (inForRetailDisplay)
@@ -1089,45 +1132,63 @@ ostream & CNTV2SignalRouter::Print (ostream & inOutStream, const bool inForRetai
 
 bool CNTV2SignalRouter::PrintCode (string & outCode, const PrintCodeConfig & inConfig) const
 {
-    ostringstream	oss;
+	ostringstream	oss;
 
-    outCode.clear ();
+	outCode.clear ();
 
-    if (inConfig.mShowComments)
-    {
-        oss << "//  " << mConnections.size() << " routing ";
-        oss << ((mConnections.size () == 1) ? "entry:" : "entries:");
-        oss << inConfig.mLineBreakText;
-    }
+	if (inConfig.mShowComments)
+	{
+		oss << inConfig.mPreCommentText << DEC(mConnections.size()) << " routing ";
+		oss << ((mConnections.size () == 1) ? "entry:" : "entries:");
+		oss << inConfig.mPostCommentText << inConfig.mLineBreakText;
+	}
 
-    if (inConfig.mShowDeclarations)
-    {
-        if (inConfig.mUseRouter)
-            oss << "CNTV2SignalRouter" << "\t" << inConfig.mRouterVarName;
-        else
-            oss << "CNTV2Card" << "\t" << inConfig.mDeviceVarName;
-        oss << ";" << inConfig.mLineBreakText;
-    }
+	if (inConfig.mShowDeclarations)
+	{
+		if (inConfig.mUseRouter)
+			oss << inConfig.mPreClassText << "CNTV2SignalRouter" << inConfig.mPostClassText
+				<< "\t"<< inConfig.mPreVariableText << inConfig.mRouterVarName<< inConfig.mPostVariableText;
+		else
+			oss << inConfig.mPreClassText << "CNTV2Card" << inConfig.mPostClassText
+				<< "\t" << inConfig.mPreVariableText << inConfig.mDeviceVarName<< inConfig.mPostVariableText;
+		oss << ";" << inConfig.mLineBreakText;
+	}
 
-    for (NTV2ActualConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
-    {
-        const string	inXptStr	(::NTV2InputCrosspointIDToString (iter->first, false));
-        const string	outXptStr	(::NTV2OutputCrosspointIDToString (iter->second, false));
+	const string	varName				(inConfig.mUseRouter ? inConfig.mRouterVarName : inConfig.mDeviceVarName);
+	const string	variableNameText	(inConfig.mPreVariableText + varName + inConfig.mPostVariableText);
+	const string	funcName			(inConfig.mUseRouter ? "AddConnection" : "Connect");
+	const string	functionCallText	(inConfig.mPreFunctionText + funcName + inConfig.mPostFunctionText);
+	for (NTV2ActualConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
+	{
+		const string	inXptStr	(inConfig.mPreXptText + ::NTV2InputCrosspointIDToString(iter->first, false) + inConfig.mPostXptText);
+		const string	outXptStr	(inConfig.mPreXptText + ::NTV2OutputCrosspointIDToString(iter->second, false) + inConfig.mPostXptText);
 
-        if (inConfig.mUseRouter)
-            oss << inConfig.mPreVariableText << inConfig.mRouterVarName << inConfig.mPostVariableText
-                << "." << inConfig.mPreFunctionText << "AddConnection" << inConfig.mPostFunctionText
-                << " (" << inConfig.mPreXptText << inXptStr << inConfig.mPostXptText
-                << ", " << inConfig.mPreXptText << outXptStr << inConfig.mPostXptText << ");" << inConfig.mLineBreakText;
-        else
-            oss << inConfig.mPreVariableText << inConfig.mDeviceVarName << inConfig.mPostVariableText
-                << "." << inConfig.mPreFunctionText << "Connect" << inConfig.mPostFunctionText
-                << " (" << inConfig.mPreXptText << inXptStr << inConfig.mPostXptText
-                << ", " << inConfig.mPreXptText << outXptStr << inConfig.mPostXptText << ");" << inConfig.mLineBreakText;
-    }	//	for each connection
+		oss << variableNameText << "." << functionCallText << " (" << inXptStr << ", " << outXptStr << ");";
 
-    outCode = oss.str();
-    return true;
+		if (inConfig.mShowComments)
+		{
+			NTV2ActualConnectionsConstIter pNew(inConfig.mNew.find(iter->first));
+			NTV2ActualConnectionsConstIter pChanged(inConfig.mChanged.find(iter->first));
+			if (pNew != inConfig.mNew.end()  &&  pNew->second == iter->second)
+				oss << inConfig.mFieldBreakText << inConfig.mPreCommentText << "New" << inConfig.mPostCommentText;
+			else if (pChanged != inConfig.mChanged.end()  &&  pChanged->second != iter->second)
+				oss << inConfig.mFieldBreakText << inConfig.mPreCommentText << "Changed from "
+					<< ::NTV2OutputCrosspointIDToString(pChanged->second, false) << inConfig.mPostCommentText;
+		}
+		oss << inConfig.mLineBreakText;
+	}	//	for each connection
+
+	if (inConfig.mShowComments)
+		for (NTV2ActualConnectionsConstIter pGone(inConfig.mMissing.begin());  pGone != inConfig.mMissing.end();  ++pGone)
+			if (mConnections.find(pGone->first) == mConnections.end())
+				oss << inConfig.mPreCommentText << varName << "." << funcName << " ("
+					<< ::NTV2InputCrosspointIDToString(pGone->first, false) << ", "
+					<< ::NTV2OutputCrosspointIDToString(pGone->second, false) << ");" << inConfig.mPostCommentText
+					<< inConfig.mFieldBreakText << inConfig.mPreCommentText << "Deleted" << inConfig.mPostCommentText
+					<< inConfig.mLineBreakText;
+
+	outCode = oss.str();
+	return true;
 
 }	//	PrintCode
 
@@ -1136,7 +1197,7 @@ CNTV2SignalRouter::PrintCodeConfig::PrintCodeConfig ()
     :	mShowComments		(true),
         mShowDeclarations	(true),
         mUseRouter			(false),
-        mPreCommentText		("//\t"),
+        mPreCommentText		("// "),
         mPostCommentText	(),
         mPreClassText		(),
         mPostClassText		(),
@@ -1148,7 +1209,11 @@ CNTV2SignalRouter::PrintCodeConfig::PrintCodeConfig ()
         mPostFunctionText	(),
         mDeviceVarName		("device"),
         mRouterVarName		("router"),
-        mLineBreakText		("\n")
+        mLineBreakText		("\n"),
+        mFieldBreakText		("\t"),
+        mNew				(),
+        mChanged			(),
+        mMissing			()
 {
 }
 
@@ -2325,6 +2390,17 @@ ostream & operator << (ostream & inOutStream, const NTV2WidgetIDSet & inObj)
 		inOutStream << ::NTV2WidgetIDToString (*iter, true);
 		if (++iter != inObj.end ())
 			inOutStream << ",";
+	}
+	return inOutStream;
+}
+
+ostream & operator << (ostream & inOutStream, const NTV2ActualConnections & inObj)
+{
+	for (NTV2ActualConnectionsConstIter it(inObj.begin());  it != inObj.end();  )
+	{
+		inOutStream << ::NTV2InputCrosspointIDToString(it->first) << "-" << ::NTV2OutputCrosspointIDToString(it->second);
+		if (++it != inObj.end())
+			inOutStream << ", ";
 	}
 	return inOutStream;
 }

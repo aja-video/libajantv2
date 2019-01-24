@@ -29,9 +29,10 @@ typedef enum
 	kNetworkData2110        = NTV2_FOURCC('n','t','1','3'), // 4CC of network config data
     kTransmitVideoData2110  = NTV2_FOURCC('t','v','1','3'), // 4CC of video transmit config data
     kTransmitAudioData2110  = NTV2_FOURCC('t','a','1','3'), // 4CC of audio transmit config data
+	kTransmitAncData2110	= NTV2_FOURCC('t','n','1','3'), // 4CC of anc transmit config data
     kReceiveVideoData2110   = NTV2_FOURCC('r','v','1','3'), // 4CC of video receive config data
     kReceiveAudioData2110   = NTV2_FOURCC('r','a','1','3'), // 4CC of audio receive config data
-    kAncVData2110           = NTV2_FOURCC('a','n','1','3'), // 4CC of anc config data
+	kReceiveAncData2110		= NTV2_FOURCC('r','n','1','3'), // 4CC of anc receive config data
     kChStatusData2110       = NTV2_FOURCC('s','t','1','3')  // 4CC of channel status config data
 } VirtualDataTag2110 ;
 
@@ -80,6 +81,20 @@ typedef struct
 
 typedef struct
 {
+	NTV2Stream              stream;
+	char                    remoteIP[2][IP_STRSIZE];
+	uint32_t                localPort[2];
+	uint32_t                remotePort[2];
+	uint32_t                sfpEnable[2];
+	uint32_t                ttl;
+	uint32_t                ssrc;
+	uint32_t                payloadType;
+	uint32_t                enable;
+	uint8_t					unused[16];
+} TxAncChData2110;
+
+typedef struct
+{
     NTV2Stream              stream;
     char                    sourceIP[2][IP_STRSIZE];
     char                    destIP[2][IP_STRSIZE];
@@ -111,6 +126,21 @@ typedef struct
     uint32_t                enable;
 	uint8_t					unused[16];
 } RxAudioChData2110;
+
+typedef struct
+{
+	NTV2Stream              stream;
+	char                    sourceIP[2][IP_STRSIZE];
+	char                    destIP[2][IP_STRSIZE];
+	uint32_t                sourcePort[2];
+	uint32_t                destPort[2];
+	uint32_t                sfpEnable[2];
+	uint32_t                vlan;
+	uint32_t                ssrc;
+	uint32_t                payloadType;
+	uint32_t                enable;
+	uint8_t					unused[16];
+} RxAncChData2110;
 
 typedef struct
 {
@@ -154,6 +184,12 @@ typedef struct
 
 typedef struct
 {
+	uint32_t                numTxAncChannels;
+	TxAncChData2110			txAncCh[4];
+} TransmitAncData2110;
+
+typedef struct
+{
     uint32_t                numRxVideoChannels;
     RxVideoChData2110       rxVideoCh[4];
 } ReceiveVideoData2110;
@@ -166,8 +202,9 @@ typedef struct
 
 typedef struct
 {
-    uint32_t                placeHolder;
-} AncVData2110;
+	uint32_t                numRxAncChannels;
+	RxAncChData2110			rxAncCh[4];
+} ReceiveAncData2110;
 
 #pragma pack(pop)
 

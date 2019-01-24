@@ -3738,7 +3738,7 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 					rxConfig.videoFormat = ConvertVideoToStreamFormat(vFmt);
 
 					// if format was not converted assume it was not a 4k format and disable 4k mode, otherwise enable it
-					if (rxConfig.videoFormat == m2110RxVideoData.rxVideoCh[i].videoFormat)
+					if (rxConfig.videoFormat == vFmt)
 						config2110->Set4KModeEnable(false);
 					else
 						config2110->Set4KModeEnable(true);

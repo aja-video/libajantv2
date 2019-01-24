@@ -2618,9 +2618,9 @@ private:
 			(void) inRegNum;
 			ostringstream	oss;
 			const ULWord	hdmiVers(::NTV2DeviceGetHDMIVersion (inDeviceID));
-			const uint32_t	vidStd	(hdmiVers == 2 ? (inRegValue & kRegMaskHDMIInV2VideoStd) >> kRegShiftHDMIInputStatusV2Std : (inRegValue & kRegMaskHDMIInStandard) >> kRegShiftInputStatusStd);
+			const uint32_t	vidStd	(hdmiVers >= 2 ? (inRegValue & kRegMaskHDMIInV2VideoStd) >> kRegShiftHDMIInputStatusV2Std : (inRegValue & kRegMaskHDMIInStandard) >> kRegShiftInputStatusStd);
 			const uint32_t	rate	((inRegValue & kRegMaskHDMIInFPS) >> kRegShiftInputStatusFPS);
-			static const string	sStds[32] = {"1080i", "720p", "480i", "576i", "1080p", "SXGA", "6", "7", "3840p", "4096p"};
+			static const string	sStds[32] = {"1080i", "720p", "480i", "576i", "1080p", "SXGA", "2K1080p", "2K1080i", "3840p", "4096p"};
 			static const string	sRates[32] = {"invalid", "60.00", "59.94", "30.00", "29.97", "25.00", "24.00", "23.98"};
 			oss	<< "HDMI Input: " << (inRegValue & BIT(0) ? "Locked" : "Unlocked")			<< endl
 				<< "HDMI Input: " << (inRegValue & BIT(1) ? "Stable" : "Unstable")			<< endl
@@ -2628,10 +2628,9 @@ private:
 				<< "Bitdepth: " << (inRegValue & BIT(3) ? "10-bit" : "8-bit")				<< endl
 				<< "Audio Channels: " << (inRegValue & BIT(12) ? 8 : 2)						<< endl
 				<< "Scan Mode: " << (inRegValue & BIT(13) ? "Progressive" : "Interlaced")	<< endl
-				<< "Standard: " << (inRegValue & BIT(14) ? "SD" : "HD")						<< endl;
-			if (hdmiVers == 1 || hdmiVers == 2)
-				oss << "Video Standard: " << sStds[vidStd]									<< endl;
-			oss	<< "Protocol: " << (inRegValue & BIT(27) ? "DVI" : "HDMI")					<< endl
+				<< "Standard: " << (inRegValue & BIT(14) ? "SD" : "HD")						<< endl
+				<< "Video Standard: " << sStds[vidStd]										<< endl
+				<< "Protocol: " << (inRegValue & BIT(27) ? "DVI" : "HDMI")					<< endl
 				<< "Video Rate : " << (rate < 8 ? sRates[rate] : string("invalid"));
 			return oss.str();
 		}
@@ -2663,6 +2662,7 @@ private:
 				<< "DE polarity: " << (inRegValue & BIT(19) ? "Inverted" : "Normal")						<< endl
 				<< "Tx Src Sel: " << DEC(txSrcSel) << " (" << xHEX0N(txSrcSel,4) << ")"						<< endl
 				<< "Tx Center Cut: " << SetNotset(inRegValue & BIT(24))										<< endl
+				<< "Tx 12 bit: " << SetNotset(inRegValue & BIT(26))											<< endl
 				<< "RGB Input Gamut: " << (inRegValue & BIT(28) ? "Full Range" : "Narrow Range (SMPTE)")	<< endl
 				<< "Tx_ch12_sel: " << DEC(txCh12Sel) << " (" << xHEX0N(txCh12Sel,4) << ")"					<< endl
 				<< "Input AVI Gamut: " << (inRegValue & BIT(31) ? "Full Range" : "Narrow Range (SMPTE)")	<< endl

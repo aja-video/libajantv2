@@ -297,6 +297,15 @@ CNTV2LinuxDriverInterface::WriteRegister (
 	ULWord registerMask,
 	ULWord registerShift)
 {
+#if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
+	if (mRecordRegWrites)
+	{
+		AJAAutoLock	autoLock(&mRegWritesLock);
+		mRegWrites.push_back(NTV2RegInfo(registerNumber, registerValue, registerMask, registerShift));
+		if (mSkipRegWrites)
+			return true;
+	}
+#endif	//	defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 	{
 		if (!CNTV2DriverInterface::WriteRegister(
@@ -327,7 +336,6 @@ CNTV2LinuxDriverInterface::WriteRegister (
 		}
 	}
 	return true;
-
 }
 
 bool

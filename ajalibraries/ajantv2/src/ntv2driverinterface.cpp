@@ -59,9 +59,9 @@ CNTV2DriverInterface::CNTV2DriverInterface ()
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	::memset (mInterruptEventHandles, 0, sizeof (mInterruptEventHandles));
 	::memset (mEventCounts, 0, sizeof (mEventCounts));
-#if defined(_DEBUG)	//	Register Write Profiling
+#if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 	mRecordRegWrites = mSkipRegWrites = false;
-#endif	//	_DEBUG
+#endif	//	NTV2_WRITEREG_PROFILING
 
 }	//	constructor
 
@@ -341,13 +341,7 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 bool CNTV2DriverInterface::WriteRegister (ULWord registerNumber, ULWord registerValue, ULWord registerMask, ULWord registerShift)
 {
 #if defined(NTV2_WRITEREG_PROFILING)
-	if (mRecordRegWrites)
-	{
-		AJAAutoLock	autoLock(&mRegWritesLock);
-		mRegWrites.push_back(NTV2RegInfo(registerNumber, registerValue, registerMask, registerShift));
-		if (mSkipRegWrites)
-			return true;
-	}
+	//	Recording is done in platform-specific WriteRegister
 #endif	//	NTV2_WRITEREG_PROFILING
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
@@ -794,6 +788,7 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 		outRegWrites = mRegWrites;
 		return true;
 	}
+
 	bool CNTV2DriverInterface::StartRecordRegisterWrites (const bool inSkipActualWrites)
 	{
 		AJAAutoLock	autoLock(&mRegWritesLock);
@@ -804,18 +799,42 @@ bool CNTV2DriverInterface::IsMBSystemReady()
 		mSkipRegWrites = inSkipActualWrites;
 		return true;
 	}
+
+	bool CNTV2DriverInterface::ResumeRecordRegisterWrites (void)
+	{	//	Identical to Start, but don't clear mRegWrites nor change mSkipRegWrites
+		AJAAutoLock	autoLock(&mRegWritesLock);
+		if (mRecordRegWrites)
+			return false;	//	Already recording
+		mRecordRegWrites = true;
+		return true;
+	}
+
 	bool CNTV2DriverInterface::IsRecordingRegisterWrites (void) const
-	{
+	{	//	NB: This will return false if paused
 		AJAAutoLock	autoLock(&mRegWritesLock);
 		return mRecordRegWrites;
 	}
+
 	bool CNTV2DriverInterface::StopRecordRegisterWrites (void)
 	{
 		AJAAutoLock	autoLock(&mRegWritesLock);
-		if (!mRecordRegWrites)
-			return false;	//	Already stopped
 		mRecordRegWrites = mSkipRegWrites = false;
 		return true;
+	}
+
+	bool CNTV2DriverInterface::PauseRecordRegisterWrites (void)
+	{	//	Identical to Stop, but don't change mSkipRegWrites
+		AJAAutoLock	autoLock(&mRegWritesLock);
+		if (!mRecordRegWrites)
+			return false;	//	Already stopped/paused
+		mRecordRegWrites = false;
+		return true;
+	}
+
+	ULWord CNTV2DriverInterface::GetNumRecordedRegisterWrites (void) const
+	{
+		AJAAutoLock	autoLock(&mRegWritesLock);
+		return ULWord(mRegWrites.size());
 	}
 #endif	//	NTV2_WRITEREG_PROFILING
 

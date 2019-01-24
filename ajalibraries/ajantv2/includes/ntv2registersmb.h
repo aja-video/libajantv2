@@ -431,6 +431,10 @@
 #define kRegPll_swptp_SetSecsLo					0x33		// R/W
 #define kRegPll_swptp_SetNanoSecs				0x34		// R/W
 #define kRegPll_swptp_JamNow					0x35		// R/W
+#define kRegPll_swptp_Jam90KHzRTP_TS			0x36		// R/W
+#define kRegPll_swptp_Jam48KHzRTP_TS			0x37		// R/W
+#define	kRegPll_swptp_ClockDate					0x3e		// R
+#define	kRegPll_swptp_ClockVersion				0x3f		// R
 
 // redefinition of registers used for SWPTP
 #define kRegPll_swptp_Domain					0x04		// R/W
