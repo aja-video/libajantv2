@@ -22,12 +22,10 @@
 #define RESET_MILLISECONDS 5
 
 // Meta data not yet defined
-uint32_t CNTV2Config2110::packetizers[12] =     {SAREK_4175_TX_PACKETIZER_1, SAREK_4175_TX_PACKETIZER_2, SAREK_4175_TX_PACKETIZER_3, SAREK_4175_TX_PACKETIZER_4,
-                                                 SAREK_3190_TX_PACKETIZER_0, SAREK_3190_TX_PACKETIZER_1, SAREK_3190_TX_PACKETIZER_2, SAREK_3190_TX_PACKETIZER_3,
-                                                 0, 0, 0, 0};
-uint32_t CNTV2Config2110::depacketizers[12] =   {SAREK_4175_RX_DEPACKETIZER_1, SAREK_4175_RX_DEPACKETIZER_2, SAREK_4175_RX_DEPACKETIZER_3, SAREK_4175_RX_DEPACKETIZER_4,
-                                                 SAREK_3190_RX_DEPACKETIZER_1, SAREK_3190_RX_DEPACKETIZER_2, SAREK_3190_RX_DEPACKETIZER_3, SAREK_3190_RX_DEPACKETIZER_4,
-                                                 0, 0, 0, 0};
+uint32_t CNTV2Config2110::packetizers[8] =     {SAREK_4175_TX_PACKETIZER_1, SAREK_4175_TX_PACKETIZER_2, SAREK_4175_TX_PACKETIZER_3, SAREK_4175_TX_PACKETIZER_4,
+												SAREK_3190_TX_PACKETIZER_0, SAREK_3190_TX_PACKETIZER_1, SAREK_3190_TX_PACKETIZER_2, SAREK_3190_TX_PACKETIZER_3};
+uint32_t CNTV2Config2110::depacketizers[8] =   {SAREK_4175_RX_DEPACKETIZER_1, SAREK_4175_RX_DEPACKETIZER_2, SAREK_4175_RX_DEPACKETIZER_3, SAREK_4175_RX_DEPACKETIZER_4,
+												SAREK_3190_RX_DEPACKETIZER_1, SAREK_3190_RX_DEPACKETIZER_2, SAREK_3190_RX_DEPACKETIZER_3, SAREK_3190_RX_DEPACKETIZER_4};
 
 using namespace std;
 
@@ -211,14 +209,14 @@ bool CNTV2Config2110::SetNetworkConfiguration(const eSFP sfp, const std::string 
     core = SAREK_2110_VIDEO_FRAMER_0;
     mDevice.WriteRegister(kRegFramer_src_mac_lo + core,boardLo);
     mDevice.WriteRegister(kRegFramer_src_mac_hi + core,boardHi);
-    core = SAREK_2110_AUDIO_FRAMER_0;
+	core = SAREK_2110_AUDIO_ANC_FRAMER_0;
     mDevice.WriteRegister(kRegFramer_src_mac_lo + core,boardLo);
     mDevice.WriteRegister(kRegFramer_src_mac_hi + core,boardHi);
 
     core = SAREK_2110_VIDEO_FRAMER_1;
     mDevice.WriteRegister(kRegFramer_src_mac_lo + core,boardLo2);
     mDevice.WriteRegister(kRegFramer_src_mac_hi + core,boardHi2);
-    core = SAREK_2110_AUDIO_FRAMER_1;
+	core = SAREK_2110_AUDIO_ANC_FRAMER_1;
     mDevice.WriteRegister(kRegFramer_src_mac_lo + core,boardLo2);
     mDevice.WriteRegister(kRegFramer_src_mac_hi + core,boardHi2);
 
@@ -461,7 +459,7 @@ void  CNTV2Config2110::SetupDepacketizerStream(const NTV2Stream stream, const rx
     {
         SetVideoFormatForRxTx(stream, (NTV2VideoFormat) rxConfig.videoFormat, true);
     }
-    else
+	else if (StreamType(stream) == AUDIO_STREAM)
     {
         // setup 3190 depacketizer
         uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(stream);
@@ -479,179 +477,196 @@ void  CNTV2Config2110::SetupDepacketizerStream(const NTV2Stream stream, const rx
 
 void CNTV2Config2110::SetVideoFormatForRxTx(const NTV2Stream stream, const NTV2VideoFormat format, const bool rx)
 {
-    NTV2FormatDescriptor fd(format, NTV2_FBF_10BIT_YCBCR);
+	if (StreamType(stream) == VIDEO_STREAM)
+	{
+		NTV2FormatDescriptor fd(format, NTV2_FBF_10BIT_YCBCR);
 
-    NTV2FrameRate       fr  = GetNTV2FrameRateFromVideoFormat(format);
-    NTV2FrameGeometry   fg  = GetNTV2FrameGeometryFromVideoFormat(format);
-    NTV2Standard        std = fd.GetVideoStandard();
-    bool               is2K = fd.Is2KFormat();
+		NTV2FrameRate       fr  = GetNTV2FrameRateFromVideoFormat(format);
+		NTV2FrameGeometry   fg  = GetNTV2FrameGeometryFromVideoFormat(format);
+		NTV2Standard        std = fd.GetVideoStandard();
+		bool               is2K = fd.Is2KFormat();
 
-    uint32_t val = ( (((uint32_t) fr) << 8) |
-                     (((uint32_t) fg) << 4) |
-                      ((uint32_t) std ) );
+		uint32_t val = ( (((uint32_t) fr) << 8) |
+						 (((uint32_t) fg) << 4) |
+						  ((uint32_t) std ) );
 
-    if (is2K)
-        val += BIT(13);
+		if (is2K)
+			val += BIT(13);
 
-    if (NTV2_IS_PSF_VIDEO_FORMAT (format))
-        val += BIT(15);
+		if (NTV2_IS_PSF_VIDEO_FORMAT (format))
+			val += BIT(15);
 
-    uint32_t reg, reg2;
-    if (rx)
-    {
-        reg = stream - NTV2_CHANNEL1 + kRegRxVideoDecode1;
-        reg2 = stream - NTV2_CHANNEL1 + kRegRxNtv2VideoDecode1;
-    }
-    else
-    {
-        reg = stream - NTV2_CHANNEL1 + kRegTxVideoDecode1;
-        reg2 = stream - NTV2_CHANNEL1 + kRegTxNtv2VideoDecode1;
-    }
+		uint32_t reg, reg2;
+		if (rx)
+		{
+			reg = stream - NTV2_CHANNEL1 + kRegRxVideoDecode1;
+			reg2 = stream - NTV2_CHANNEL1 + kRegRxNtv2VideoDecode1;
+		}
+		else
+		{
+			reg = stream - NTV2_CHANNEL1 + kRegTxVideoDecode1;
+			reg2 = stream - NTV2_CHANNEL1 + kRegTxNtv2VideoDecode1;
+		}
 
-    // Write the format for the firmware and also tuck it away in NTV2 flavor so we can retrieve it easily
-    mDevice.WriteRegister(reg + SAREK_2110_TX_ARBITRATOR, val);
-    mDevice.WriteRegister(reg2 + SAREK_REGS2, format);
-
+		// Write the format for the firmware and also tuck it away in NTV2 flavor so we can retrieve it easily
+		mDevice.WriteRegister(reg + SAREK_2110_TX_ARBITRATOR, val);
+		mDevice.WriteRegister(reg2 + SAREK_REGS2, format);
+	}
 }
 
 void CNTV2Config2110::GetVideoFormatForRxTx(const NTV2Stream stream, NTV2VideoFormat & format, uint32_t & hwFormat, const bool rx)
 {
-    uint32_t reg, reg2, value;
-    if (rx)
-    {
-        reg = stream - NTV2_CHANNEL1 + kRegRxVideoDecode1;
-        reg2 = stream - NTV2_CHANNEL1 + kRegRxNtv2VideoDecode1;
-    }
-    else
-    {
-        reg = stream - NTV2_CHANNEL1 + kRegTxVideoDecode1;
-        reg2 = stream - NTV2_CHANNEL1 + kRegTxNtv2VideoDecode1;
-    }
+	if (StreamType(stream) == VIDEO_STREAM)
+	{
+		uint32_t reg, reg2, value;
+		if (rx)
+		{
+			reg = stream - NTV2_CHANNEL1 + kRegRxVideoDecode1;
+			reg2 = stream - NTV2_CHANNEL1 + kRegRxNtv2VideoDecode1;
+		}
+		else
+		{
+			reg = stream - NTV2_CHANNEL1 + kRegTxVideoDecode1;
+			reg2 = stream - NTV2_CHANNEL1 + kRegTxNtv2VideoDecode1;
+		}
 
-    // Write the format for the firmware and also tuck it away in NTV2 flavor so we can retrieve it easily
-    mDevice.ReadRegister(reg + SAREK_2110_TX_ARBITRATOR, value);
-    hwFormat = value;
-    mDevice.ReadRegister(reg2 + SAREK_REGS2, value);
-    format = (NTV2VideoFormat)value;
+		// Write the format for the firmware and also tuck it away in NTV2 flavor so we can retrieve it easily
+		mDevice.ReadRegister(reg + SAREK_2110_TX_ARBITRATOR, value);
+		hwFormat = value;
+		mDevice.ReadRegister(reg2 + SAREK_REGS2, value);
+		format = (NTV2VideoFormat)value;
+	}
 }
 
 bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP sfp, const NTV2Stream stream, rx_2110Config & rxConfig)
 {
-    uint32_t    val;
+	if ((StreamType(stream) == VIDEO_STREAM) || (StreamType(stream) == AUDIO_STREAM))
+	{
+		uint32_t    val;
 
-    // get address,strean
-    uint32_t  decapBaseAddr = GetDecapsulatorAddress(sfp, stream);
+		// get address,strean
+		uint32_t  decapBaseAddr = GetDecapsulatorAddress(sfp, stream);
 
-    // source ip address
-    mDevice.ReadRegister(kRegDecap_match_src_ip + decapBaseAddr, val);
-    struct in_addr in;
-    in.s_addr = NTV2EndianSwap32(val);
-    char * ip = inet_ntoa(in);
-    rxConfig.sourceIP = ip;
+		// source ip address
+		mDevice.ReadRegister(kRegDecap_match_src_ip + decapBaseAddr, val);
+		struct in_addr in;
+		in.s_addr = NTV2EndianSwap32(val);
+		char * ip = inet_ntoa(in);
+		rxConfig.sourceIP = ip;
 
-    // dest ip address
-    mDevice.ReadRegister(kRegDecap_match_dst_ip + decapBaseAddr, val);
-    in.s_addr = NTV2EndianSwap32(val);
-    ip = inet_ntoa(in);
-    rxConfig.destIP = ip;
+		// dest ip address
+		mDevice.ReadRegister(kRegDecap_match_dst_ip + decapBaseAddr, val);
+		in.s_addr = NTV2EndianSwap32(val);
+		ip = inet_ntoa(in);
+		rxConfig.destIP = ip;
 
-    // source port
-    mDevice.ReadRegister(kRegDecap_match_udp_src_port + decapBaseAddr, rxConfig.sourcePort);
+		// source port
+		mDevice.ReadRegister(kRegDecap_match_udp_src_port + decapBaseAddr, rxConfig.sourcePort);
 
-    // dest port
-    mDevice.ReadRegister(kRegDecap_match_udp_dst_port + decapBaseAddr, rxConfig.destPort);
+		// dest port
+		mDevice.ReadRegister(kRegDecap_match_udp_dst_port + decapBaseAddr, rxConfig.destPort);
 
-    // ssrc
-    mDevice.ReadRegister(kRegDecap_match_ssrc + decapBaseAddr, rxConfig.ssrc);
+		// ssrc
+		mDevice.ReadRegister(kRegDecap_match_ssrc + decapBaseAddr, rxConfig.ssrc);
 
-    // vlan
-    //mDevice.ReadRegister(kRegDecap_match_vlan + decapBaseAddr, val);
-    //rxConfig.VLAN = val & 0xffff;
+		// vlan
+		//mDevice.ReadRegister(kRegDecap_match_vlan + decapBaseAddr, val);
+		//rxConfig.VLAN = val & 0xffff;
 
-    // payloadType
-    mDevice.ReadRegister(kRegDecap_match_payload + decapBaseAddr, val);
-    rxConfig.payloadType = val & 0x7f;
+		// payloadType
+		mDevice.ReadRegister(kRegDecap_match_payload + decapBaseAddr, val);
+		rxConfig.payloadType = val & 0x7f;
 
-    // matching
-    mDevice.ReadRegister(kRegDecap_match_sel + decapBaseAddr, rxConfig.rxMatch);
+		// matching
+		mDevice.ReadRegister(kRegDecap_match_sel + decapBaseAddr, rxConfig.rxMatch);
 
-    uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(stream);
+		uint32_t  depacketizerBaseAddr = GetDepacketizerAddress(stream);
 
-    if (StreamType(stream) == VIDEO_STREAM)
-    {
-        NTV2VideoFormat     format;
-        uint32_t            hwFormat;
+		if (StreamType(stream) == VIDEO_STREAM)
+		{
+			NTV2VideoFormat     format;
+			uint32_t            hwFormat;
 
-        GetVideoFormatForRxTx(stream, format, hwFormat, true);
-        rxConfig.videoFormat = format;
-    }
-    else if (StreamType(stream) == AUDIO_STREAM)
-    {
-        uint32_t samples;
-        mDevice.ReadRegister(kReg3190_depkt_config + depacketizerBaseAddr, samples);
-        rxConfig.audioPktInterval = (((samples >> 8) & 0xff) == 6) ? PACKET_INTERVAL_125uS : PACKET_INTERVAL_1mS;
-        rxConfig.numAudioChannels = samples & 0xff;
-    }
+			GetVideoFormatForRxTx(stream, format, hwFormat, true);
+			rxConfig.videoFormat = format;
+		}
+		else if (StreamType(stream) == AUDIO_STREAM)
+		{
+			uint32_t samples;
+			mDevice.ReadRegister(kReg3190_depkt_config + depacketizerBaseAddr, samples);
+			rxConfig.audioPktInterval = (((samples >> 8) & 0xff) == 6) ? PACKET_INTERVAL_125uS : PACKET_INTERVAL_1mS;
+			rxConfig.numAudioChannels = samples & 0xff;
+		}
+	}
 
     return true;
 }
 
 bool CNTV2Config2110::SetRxStreamEnable(const eSFP sfp, const NTV2Stream stream, bool enable)
 {
-    if (GetSFPActive(sfp) == false)
-    {
-        mIpErrorCode = NTV2IpErrSFP1NotConfigured;
-        return false;
-    }
+	if ((StreamType(stream) == VIDEO_STREAM) || (StreamType(stream) == AUDIO_STREAM))
+	{
+		if (GetSFPActive(sfp) == false)
+		{
+			mIpErrorCode = NTV2IpErrSFP1NotConfigured;
+			return false;
+		}
 
-    if (enable)
-    {
-        uint32_t  decapBaseAddr = GetDecapsulatorAddress(sfp, stream);
+		if (enable)
+		{
+			uint32_t  decapBaseAddr = GetDecapsulatorAddress(sfp, stream);
 
-        // get source and dest ip address
-        uint32_t srcIp, destIp;
-        mDevice.ReadRegister(kRegDecap_match_src_ip + decapBaseAddr, srcIp);
-        mDevice.ReadRegister(kRegDecap_match_dst_ip + decapBaseAddr, destIp);
+			// get source and dest ip address
+			uint32_t srcIp, destIp;
+			mDevice.ReadRegister(kRegDecap_match_src_ip + decapBaseAddr, srcIp);
+			mDevice.ReadRegister(kRegDecap_match_dst_ip + decapBaseAddr, destIp);
 
-        // setup IGMP subscription
-        uint8_t ip0 = (destIp & 0xff000000)>> 24;
-        if (ip0 >= 224 && ip0 <= 239)
-        {
-            // is multicast
-            SetIGMPGroup(sfp, stream, destIp, srcIp, true);
-        }
-        else
-        {
-            UnsetIGMPGroup(sfp, stream);
-        }
+			// setup IGMP subscription
+			uint8_t ip0 = (destIp & 0xff000000)>> 24;
+			if (ip0 >= 224 && ip0 <= 239)
+			{
+				// is multicast
+				SetIGMPGroup(sfp, stream, destIp, srcIp, true);
+			}
+			else
+			{
+				UnsetIGMPGroup(sfp, stream);
+			}
 
-        EnableDepacketizerStream(stream);
-        EnableDecapsulatorStream(sfp, stream);
-    }
-    else
-    {
-        // disable IGMP subscription
-        bool disableIGMP;
-        GetIGMPDisable(sfp, disableIGMP);
-        if (!disableIGMP)
-        {
-            EnableIGMPGroup(sfp, stream, false);
-        }
+			EnableDepacketizerStream(stream);
+			EnableDecapsulatorStream(sfp, stream);
+		}
+		else
+		{
+			// disable IGMP subscription
+			bool disableIGMP;
+			GetIGMPDisable(sfp, disableIGMP);
+			if (!disableIGMP)
+			{
+				EnableIGMPGroup(sfp, stream, false);
+			}
 
-        DisableDecapsulatorStream(sfp, stream);
-        DisableDepacketizerStream(stream);
-    }
+			DisableDecapsulatorStream(sfp, stream);
+			DisableDepacketizerStream(stream);
+		}
+	}
+
     return true;
 }
 
 bool CNTV2Config2110::GetRxStreamEnable(const eSFP sfp, const NTV2Stream stream, bool & enabled)
 {
-    // get address
-    uint32_t  decapBaseAddr = GetDecapsulatorAddress(sfp, stream);
+	enabled = false;
 
-    uint32_t val;
-    mDevice.ReadRegister(kRegDecap_chan_enable + decapBaseAddr, val);
-    enabled = (val & 0x01);
+	if ((StreamType(stream) == VIDEO_STREAM) || (StreamType(stream) == AUDIO_STREAM))
+	{
+		// get address
+		uint32_t  decapBaseAddr = GetDecapsulatorAddress(sfp, stream);
+
+		uint32_t val;
+		mDevice.ReadRegister(kRegDecap_chan_enable + decapBaseAddr, val);
+		enabled = (val & 0x01);
+	}
 
     return true;
 }
@@ -772,8 +787,6 @@ int CNTV2Config2110::LeastCommonMultiple(int a,int b)
 
 bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx_2110Config & txConfig)
 {
-    bool        rv = true;
-
     if (GetSFPActive(SFP_1) == false)
     {
         mIpErrorCode = NTV2IpErrSFP1NotConfigured;
@@ -785,12 +798,12 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
     SetFramerStream(SFP_1, stream, txConfig);
     SetFramerStream(SFP_2, stream, txConfig);
 
-    // packetizer
-    uint32_t baseAddrPacketizer;
-    SetTxPacketizerChannel(stream, baseAddrPacketizer);
-
     if (StreamType(stream) == VIDEO_STREAM)
     {
+		// video setup 3190 packetizer
+		uint32_t baseAddrPacketizer;
+		SetTxPacketizerChannel(stream, baseAddrPacketizer);
+
         NTV2VideoFormat fmt = txConfig.videoFormat;
 
         // Write the video format into the arbitrator
@@ -885,7 +898,9 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
     }
     else if (StreamType(stream) == AUDIO_STREAM)
     {
-        // audio setup 3190 packetizer
+		// audio setup 3190 packetizer
+		uint32_t baseAddrPacketizer;
+		SetTxPacketizerChannel(stream, baseAddrPacketizer);
 
         uint32_t audioChans = txConfig.numAudioChannels;
         uint32_t samples    = (txConfig.audioPktInterval == PACKET_INTERVAL_125uS) ? 6 : 48;
@@ -910,12 +925,23 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
         mDevice.WriteRegister(kReg3190_pkt_payload_type + baseAddrPacketizer, txConfig.payloadType);
 
         // ssrc
-        mDevice.WriteRegister(kReg3190_pkt_ssrc + baseAddrPacketizer,txConfig.ssrc);
-
+		mDevice.WriteRegister(kReg3190_pkt_ssrc + baseAddrPacketizer, txConfig.ssrc);
     }
+	else if (StreamType(stream) == ANC_STREAM)
+	{
+		// for anc streams we tuck away these values so anc inserter can get to them
+		uint32_t regOffset = (uint32_t)(stream-NTV2_ANC1_STREAM);
 
-    return rv;
+		// payloadType
+		mDevice.WriteRegister(kRegTxAncPayload1 + regOffset + SAREK_2110_TX_ARBITRATOR, txConfig.payloadType);
+
+		// ssrc
+		mDevice.WriteRegister(kRegTxAncSSRC1 + regOffset + SAREK_2110_TX_ARBITRATOR, txConfig.ssrc);
+	}
+
+	return true;
 }
+
 
 bool CNTV2Config2110::SetFramerStream(const eSFP sfp, const NTV2Stream stream, const tx_2110Config & txConfig)
 {
@@ -965,13 +991,13 @@ bool CNTV2Config2110::GetTxStreamConfiguration(const NTV2Stream stream, tx_2110C
     GetFramerStream(SFP_1, stream, txConfig);
     GetFramerStream(SFP_2, stream, txConfig);
 
-    // select packetizer
-    uint32_t baseAddrPacketizer;
-    SetTxPacketizerChannel(stream, baseAddrPacketizer);
-
     uint32_t val;
     if (StreamType(stream) == VIDEO_STREAM)
     {
+		// select packetizer
+		uint32_t baseAddrPacketizer;
+		SetTxPacketizerChannel(stream, baseAddrPacketizer);
+
         // payloadType
         mDevice.ReadRegister(kReg4175_pkt_payload_type + baseAddrPacketizer, val);
         txConfig.payloadType = (uint16_t)val;
@@ -982,8 +1008,12 @@ bool CNTV2Config2110::GetTxStreamConfiguration(const NTV2Stream stream, tx_2110C
         // Video format
         GetTxFormat(VideoStreamToChannel(stream), txConfig.videoFormat);
     }
-    else
-    {
+	else if (StreamType(stream) == AUDIO_STREAM)
+	{
+		// select packetizer
+		uint32_t baseAddrPacketizer;
+		SetTxPacketizerChannel(stream, baseAddrPacketizer);
+
         // audio - payloadType
         mDevice.ReadRegister(kReg3190_pkt_payload_type + baseAddrPacketizer, val);
         txConfig.payloadType = (uint16_t)val;
@@ -1004,6 +1034,17 @@ bool CNTV2Config2110::GetTxStreamConfiguration(const NTV2Stream stream, tx_2110C
         mDevice.ReadRegister(kReg3190_pkt_num_samples + baseAddrPacketizer, samples);
         txConfig.audioPktInterval = (samples == 6) ? PACKET_INTERVAL_125uS : PACKET_INTERVAL_1mS;
     }
+	else if (StreamType(stream) == ANC_STREAM)
+	{
+		uint32_t regOffset = (uint32_t)(stream-NTV2_ANC1_STREAM);
+
+		// payloadType
+		mDevice.ReadRegister(kRegTxAncPayload1 + regOffset + SAREK_2110_TX_ARBITRATOR, val);
+		txConfig.payloadType = (uint16_t)val;
+
+		// ssrc
+		mDevice.ReadRegister(kRegTxAncSSRC1 + regOffset + SAREK_2110_TX_ARBITRATOR, txConfig.ssrc);
+	}
 
     return true;
 }
@@ -1387,7 +1428,11 @@ uint32_t CNTV2Config2110::GetDecapsulatorAddress(eSFP sfp, NTV2Stream stream)
 
 uint32_t CNTV2Config2110::GetDepacketizerAddress(NTV2Stream stream)
 {
-    return depacketizers[stream];
+	// only video and audio streams have depacketizers
+	if ((StreamType(stream) == VIDEO_STREAM) || (StreamType(stream) == AUDIO_STREAM))
+		return depacketizers[stream];
+	else
+		return 0;
 }
 
 uint32_t CNTV2Config2110::GetFramerAddress(const eSFP sfp, const NTV2Stream stream)
@@ -1397,14 +1442,14 @@ uint32_t CNTV2Config2110::GetFramerAddress(const eSFP sfp, const NTV2Stream stre
         if (StreamType(stream) == VIDEO_STREAM)
             return SAREK_2110_VIDEO_FRAMER_1;
         else
-            return SAREK_2110_AUDIO_FRAMER_1;
+			return SAREK_2110_AUDIO_ANC_FRAMER_1;
     }
     else
     {
         if (StreamType(stream) == VIDEO_STREAM)
             return SAREK_2110_VIDEO_FRAMER_0;
         else
-            return SAREK_2110_AUDIO_FRAMER_0;
+			return SAREK_2110_AUDIO_ANC_FRAMER_0;
     }
 }
 
@@ -1417,19 +1462,24 @@ void CNTV2Config2110::SelectTxFramerChannel(const NTV2Stream stream, const uint3
 
 bool CNTV2Config2110::SetTxPacketizerChannel(NTV2Stream stream, uint32_t & baseAddrPacketizer)
 {
-    baseAddrPacketizer = packetizers[stream];
-    uint32_t index = Get2110TxStreamIndex(stream);
+	baseAddrPacketizer = 0;
 
     if (StreamType(stream) == VIDEO_STREAM)
     {
+		baseAddrPacketizer = packetizers[stream];
+		uint32_t index = Get2110TxStreamIndex(stream);
         mDevice.WriteRegister(kReg4175_pkt_chan_num + baseAddrPacketizer, index);
+		return true;
     }
     else if (StreamType(stream) == AUDIO_STREAM)
     {
+		baseAddrPacketizer = packetizers[stream];
+		uint32_t index = Get2110TxStreamIndex(stream);
         mDevice.WriteRegister(kReg3190_pkt_chan_num + baseAddrPacketizer, index);
+		return true;
     }
-
-    return true;
+	else
+		return false;
 }
 
 bool  CNTV2Config2110::ConfigurePTP (const eSFP sfp, const std::string localIPAddress)
@@ -1539,31 +1589,28 @@ void CNTV2Config2110::ReleaseFramerControlAccess(const uint32_t baseAddr)
     WriteChannelRegister(kRegFramer_control + baseAddr, 0x02);
 }
 
-uint32_t CNTV2Config2110::Get2110TxStreamIndex(NTV2Stream str)
+uint32_t CNTV2Config2110::Get2110TxStreamIndex(NTV2Stream stream)
 {
     // this stream number is a core 'channel' number
     uint32_t index = 0;
-    switch (str)
+	switch (stream)
     {
         case NTV2_VIDEO1_STREAM:
         case NTV2_VIDEO2_STREAM:
         case NTV2_VIDEO3_STREAM:
         case NTV2_VIDEO4_STREAM:
-            index = (uint32_t)(str-NTV2_VIDEO1_STREAM);
+			index = (uint32_t)(stream-NTV2_VIDEO1_STREAM);
             break;
 
         case NTV2_AUDIO1_STREAM:
         case NTV2_AUDIO2_STREAM:
         case NTV2_AUDIO3_STREAM:
         case NTV2_AUDIO4_STREAM:
-            index = (uint32_t)(str-NTV2_AUDIO1_STREAM);
-            break;
-
-        case NTV2_ANC1_STREAM:
-        case NTV2_ANC2_STREAM:
-        case NTV2_ANC3_STREAM:
-        case NTV2_ANC4_STREAM:
-            index = (uint32_t)(str-NTV2_ANC1_STREAM);
+		case NTV2_ANC1_STREAM:
+		case NTV2_ANC2_STREAM:
+		case NTV2_ANC3_STREAM:
+		case NTV2_ANC4_STREAM:
+			index = (uint32_t)(stream-NTV2_AUDIO1_STREAM);
             break;
 
 		case NTV2_VIDEO4K_STREAM:

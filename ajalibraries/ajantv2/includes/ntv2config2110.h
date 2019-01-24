@@ -359,15 +359,15 @@ public:
 
 	bool        GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushit=true);
 
-    static uint32_t  Get2110TxStreamIndex(NTV2Stream str );
+	static uint32_t  Get2110TxStreamIndex(NTV2Stream stream );
     static uint32_t  GetDecapsulatorAddress(eSFP sfp, NTV2Stream stream);
 
     // If method returns false call this to get details
     std::string getLastError();
     NTV2IpError getLastErrorCode();
 
-    static uint32_t packetizers[12];
-    static uint32_t depacketizers[12];
+	static uint32_t packetizers[8];
+	static uint32_t depacketizers[8];
 
 protected:
     uint32_t    GetFramerAddress(const eSFP sfp, const NTV2Stream stream);
