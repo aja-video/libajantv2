@@ -76,6 +76,16 @@ uint32_t CalcRowBytesForFormat (const NTV2FrameBufferFormat inPixelFormat, const
 	case NTV2_FBF_48BIT_RGB:
 		rowBytes = inPixelWidth * 6;
 		break;
+
+	case NTV2_FBF_10BIT_YCBCR_420PL2:
+	case NTV2_FBF_10BIT_YCBCR_422PL2:
+		rowBytes = inPixelWidth * 20 / 16;
+		break;
+
+	case NTV2_FBF_8BIT_YCBCR_420PL2:
+	case NTV2_FBF_8BIT_YCBCR_422PL2:
+		rowBytes = inPixelWidth;
+		break;
 		
 	case NTV2_FBF_8BIT_YCBCR_420PL3:
 	case NTV2_FBF_8BIT_HDV:
@@ -91,11 +101,6 @@ uint32_t CalcRowBytesForFormat (const NTV2FrameBufferFormat inPixelFormat, const
 	case NTV2_FBF_NUMFRAMEBUFFERFORMATS:
 	case NTV2_FBF_10BIT_YCBCR_420PL3_LE:
 	case NTV2_FBF_10BIT_YCBCR_422PL3_LE:
-	case NTV2_FBF_10BIT_YCBCR_420PL2:
-	case NTV2_FBF_10BIT_YCBCR_422PL2:
-	case NTV2_FBF_8BIT_YCBCR_420PL2:
-	case NTV2_FBF_8BIT_YCBCR_422PL2:
-
 		//	TO DO.....add more
 		break;
 	}
