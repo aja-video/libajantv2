@@ -7662,18 +7662,16 @@ bool CNTV2Card::ReadRegisters (const NTV2RegNumSet & inRegisters,  NTV2RegisterV
 	NTV2GetRegisters	getRegsParams (inRegisters);
 	if (NTV2Message (reinterpret_cast <NTV2_HEADER *> (&getRegsParams)))
 		return getRegsParams.GetRegisterValues (outValues);
-	else
-	{
-		//	Non-atomic user-space workaround until GETREGS implemented in driver...
-		for (NTV2RegNumSetConstIter iter (inRegisters.begin ());  iter != inRegisters.end ();  ++iter)
+	else	//	Non-atomic user-space workaround until GETREGS implemented in driver...
+		for (NTV2RegNumSetConstIter iter(inRegisters.begin());  iter != inRegisters.end();  ++iter)
 		{
 			ULWord	tempVal	(0);
-			if (ReadRegister (*iter, tempVal))
-				outValues [*iter] = tempVal;
+			if (*iter != kRegXenaxFlashDOUT)	//	Prevent firmware erase/program/verify failures
+				if (ReadRegister (*iter, tempVal))
+					outValues[*iter] = tempVal;
 		}
-	}
 
-	return outValues.size () == inRegisters.size ();
+	return outValues.size() == inRegisters.size();
 }
 
 bool CNTV2Card::ReadRegisters (NTV2RegisterReads & inOutValues)
@@ -7684,18 +7682,16 @@ bool CNTV2Card::ReadRegisters (NTV2RegisterReads & inOutValues)
 		return true;		//	Nothing to do!
 
 	NTV2GetRegisters	getRegsParams (inOutValues);
-	if (NTV2Message (reinterpret_cast <NTV2_HEADER *> (&getRegsParams)))
+	if (NTV2Message (reinterpret_cast<NTV2_HEADER*>(&getRegsParams)))
 	{
 		if (!getRegsParams.GetRegisterValues (inOutValues))
 			return false;
 	}
-	else
-	{
-		//	Non-atomic user-space workaround until GETREGS implemented in driver...
-		for (NTV2RegisterReadsIter iter (inOutValues.begin ());  iter != inOutValues.end ();  ++iter)
-			if (!ReadRegister (iter->registerNumber, iter->registerValue))
-				return false;
-	}
+	else	//	Non-atomic user-space workaround until GETREGS implemented in driver...
+		for (NTV2RegisterReadsIter iter(inOutValues.begin());  iter != inOutValues.end();  ++iter)
+			if (iter->registerNumber != kRegXenaxFlashDOUT)	//	Prevent firmware erase/program/verify failures
+				if (!ReadRegister (iter->registerNumber, iter->registerValue))
+					return false;
 	return true;
 }
 
