@@ -3015,7 +3015,7 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
         if ((hwNetConfig1.ipc_ip == 0) && (hwNetConfig1.ipc_subnet == 0) && (hwNetConfig1.ipc_gateway == 0) &&
             (hwNetConfig2.ipc_ip == 0) && (hwNetConfig2.ipc_subnet == 0) && (hwNetConfig2.ipc_gateway == 0))
         {
-            printf("Power on state or not configured\n");
+            //printf("Power on state or not configured\n");
             Init();
         }
 
