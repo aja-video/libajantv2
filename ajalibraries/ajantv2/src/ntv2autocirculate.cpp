@@ -764,6 +764,13 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 	autoCircData.bVal6 = ((inOptionFlags & AUTOCIRCULATE_WITH_VIDPROC) != 0) ? true : false;
 	autoCircData.bVal7 = ((inOptionFlags & AUTOCIRCULATE_WITH_ANC) != 0) ? true : false;
 	autoCircData.bVal8 = ((inOptionFlags & AUTOCIRCULATE_WITH_LTC) != 0) ? true : false;
+	if (NTV2DeviceCanDo2110(_boardID))						//	If S2110 IP device...
+		if (inOptionFlags & AUTOCIRCULATE_WITH_RP188)		//	and caller wants RP188
+			if (!(inOptionFlags & AUTOCIRCULATE_WITH_ANC))	//	but caller failed to enable Anc playout
+			{
+				autoCircData.bVal7 = true;					//	Enable Anc insertion anyway
+				ACDBG("Channel " << DEC(inChannel+1) << ": caller requested RP188 but not Anc -- enabled Anc inserter anyway");
+			}
 
 	const bool result (AutoCirculate(autoCircData));	//	Call the OS-specific method
 	if (result)
@@ -990,9 +997,18 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			inOutXferInfo.SetAllOutputTimeCodes (pArray [NTV2_TCINDEX_DEFAULT]);
 	}
 
+	//	S2110 Playout -- transfer RP188 Anc even if caller didn't provide Anc buffers...
+	bool	tmpLocalRP188F1AncBuffer(false), tmpLocalRP188F2AncBuffer(false);
 	if (NTV2DeviceCanDo2110(_boardID))
-		if (NTV2_IS_OUTPUT_CROSSPOINT(crosspoint)  &&  inOutXferInfo.acOutputTimeCodes  &&  (inOutXferInfo.GetAncBuffer(true) || inOutXferInfo.GetAncBuffer(false)))
-			S2110AddTimecodesToAncBuffers(inChannel, inOutXferInfo);
+		if (NTV2_IS_OUTPUT_CROSSPOINT(crosspoint))
+			if (inOutXferInfo.acOutputTimeCodes)
+			{
+				if (inOutXferInfo.acANCBuffer.IsNULL())
+					tmpLocalRP188F1AncBuffer = inOutXferInfo.acANCBuffer.Allocate(2048);
+				if (inOutXferInfo.acANCField2Buffer.IsNULL())
+					tmpLocalRP188F2AncBuffer = inOutXferInfo.acANCField2Buffer.Allocate(2048);
+				S2110AddTimecodesToAncBuffers(inChannel, inOutXferInfo);
+			}
 
 	/////////////////////////////////////////////////////////////////////////////
 		//	Call the driver...
@@ -1099,6 +1115,12 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			}
 		}
 	#endif	//	AJA_NTV2_CLEAR_HOST_ANC_BUFFER_TAIL_AFTER_CAPTURE_XFER
+
+	if (tmpLocalRP188F1AncBuffer)
+		inOutXferInfo.acANCBuffer.Deallocate();
+	if (tmpLocalRP188F2AncBuffer)
+		inOutXferInfo.acANCField2Buffer.Deallocate();
+
 	if (result)
 		ACDBG("Transfer successful for channel " << DEC(inChannel+1));
 	else
@@ -1149,8 +1171,9 @@ bool CNTV2Card::S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTO
 		return false;	//	Can't get isProgressive
 	if (!GetStandard(standard, inChannel))
 		return false;	//	Can't get standard
-	if (AJA_FAILURE(AJAAncillaryList::SetFromIPAncData(ancF1, ancF2, pkts)))
-		return false;	//	Packet import failed
+	if (!ancF1.IsNULL() || !ancF2.IsNULL())
+		if (AJA_FAILURE(AJAAncillaryList::SetFromIPAncData(ancF1, ancF2, pkts)))
+			return false;	//	Packet import failed
 
 	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(standard));
 	const uint32_t				F2StartLine			(smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD1));
