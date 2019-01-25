@@ -6,7 +6,7 @@
 
 #ifndef AJA_TESTPATTERN_GEN
 #define AJA_TESTPATTERN_GEN
-
+#if 0	//	CAN_WE_REMOVE_AJABASE_TPGEN?
 #if !defined(NTV2_DEPRECATE_15_0)
 #include "types.h"
 #include "videotypes.h"
@@ -91,5 +91,6 @@ protected:
 };	//	AJATestPatternGen
 
 #endif	//	!defined(NTV2_DEPRECATE_15_0)
+#endif	//	CAN_WE_REMOVE_AJABASE_TPGEN?
 
 #endif	//	AJA_TESTPATTERN_GEN

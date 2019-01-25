@@ -3,7 +3,7 @@
 	@copyright	Copyright (C) 2010-2015 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Implements the AJATestPatternGen class.
 **/
-
+#if 0	//	CAN_WE_REMOVE_AJABASE_TPGEN?
 #if !defined(NTV2_DEPRECATE_15_0)
 #include "types.h"
 #include "videoutilities.h"
@@ -2720,3 +2720,4 @@ uint32_t MakeSineWaveVideo(double radians, bool bChroma, double Gain)
 }
  
 #endif	//	!defined(NTV2_DEPRECATE_15_0)
+#endif	//	CAN_WE_REMOVE_AJABASE_TPGEN?
