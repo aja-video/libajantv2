@@ -476,6 +476,11 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 		byte4 |= pInVPIDSpec->audioCarriage	<< 2;		//	0x0C
 	}
 
+	if (NTV2_IS_QUAD_FRAME_FORMAT(outputFormat))
+	{
+		byte4 |= VPIDAudio_Copied << 2;
+	}
+
 	//	Bit depth
 	if(NTV2_IS_VALID_FBF(pixelFormat))
 	{
