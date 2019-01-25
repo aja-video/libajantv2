@@ -1521,6 +1521,117 @@ static const uint32_t FlatField_Pluge_576_0[] =
 	0x2001f200, 0x07c8007c, 0x2001f200, 0x07c8007c, 0x2001f200, 0x07c8007c, 0x2001f200, 0x07c8007c, 0x2001f200, 0x07c8007c, 0x2001f200, 0x07c8007c, 0x2001f200, 0x07c8007c, 0x2001f200, 0x07c8007c, 
 };
 
+typedef struct {
+    uint16_t Blue;
+    uint16_t Green;
+    uint16_t Red;
+} AJA_RGB16BitPixel;
+void ConvertRGBLineTo10BitYCbCr422(AJA_RGB16BitPixel* lineBuffer,uint16_t lineLength);
+
+// Narrow
+AJA_RGB16BitPixel NarrowWhite100 = { 940*4,940*4,940*4 };
+AJA_RGB16BitPixel NarrowYellow100 = { 64*4,940*4, 940*4};
+AJA_RGB16BitPixel NarrowCyan100 = { 940*4,940*4,64*4 };
+AJA_RGB16BitPixel NarrowGreen100 = { 64<<2,940<<2,64*4 };
+AJA_RGB16BitPixel NarrowMagenta100 = { 940*4,64*4,940*4 };
+AJA_RGB16BitPixel NarrowRed100 = { 64*4,64*4,940*4 };
+AJA_RGB16BitPixel NarrowBlue100 = { 940*4,64*4,64*4 };
+
+AJA_RGB16BitPixel NarrowWhite75 = { 721*4,721*4,721*4 };
+AJA_RGB16BitPixel NarrowYellow75 = { 64*4,721*4,721*4 };
+AJA_RGB16BitPixel NarrowCyan75 = { 721*4,721*4,64*4 };
+AJA_RGB16BitPixel NarrowGreen75 = { 64*4,721*4,64*4 };
+AJA_RGB16BitPixel NarrowMagenta75 = { 721*4,64*4,721*4 };
+AJA_RGB16BitPixel NarrowRed75 = { 64*4,64*4,721*4 };
+AJA_RGB16BitPixel NarrowBlue75 = { 721*4,64*4,64*4 };
+
+AJA_RGB16BitPixel NarrowWhite58 = { 572*4,572*4,572*4 };
+AJA_RGB16BitPixel NarrowYellow58 = { 64*4,572*4,572*4 };
+AJA_RGB16BitPixel NarrowCyan58 = { 572*4,572*4,64*4 };
+AJA_RGB16BitPixel NarrowGreen58 = { 64*4,572*4,64*4 };
+AJA_RGB16BitPixel NarrowMagenta58 = { 572*4,64*4,572*4 };
+AJA_RGB16BitPixel NarrowRed58 = { 64*4,64*4,572*4 };
+AJA_RGB16BitPixel NarrowBlue58 = { 572*4,64*4,64*4 };
+
+AJA_RGB16BitPixel NarrowGrey40 = { 414*4,414*4,414*4 };
+
+AJA_RGB16BitPixel NarrowStepMinus7 = { 4*4,4*4,4*4 };
+AJA_RGB16BitPixel NarrowStep0 = { 64*4,64*4,64*4 };
+AJA_RGB16BitPixel NarrowStep10 = { 152*4,152*4,152*4 };
+AJA_RGB16BitPixel NarrowStep20 = { 239*4,239*4,239*4 };
+AJA_RGB16BitPixel NarrowStep30 = { 327*4,327*4,327*4 };
+AJA_RGB16BitPixel NarrowStep40 = { 414*4,414*4,414*4 };
+AJA_RGB16BitPixel NarrowStep50 = { 502*4,502*4,502*4 };
+AJA_RGB16BitPixel NarrowStep60 = { 590*4,590*4,590*4 };
+AJA_RGB16BitPixel NarrowStep70 = { 677*4,677*4,677*4 };
+AJA_RGB16BitPixel NarrowStep80 = { 765*4,765*4,765*4 };
+AJA_RGB16BitPixel NarrowStep90 = { 852*4,852*4,852*4 };
+AJA_RGB16BitPixel NarrowStep100 = { 940*4,940*4,940*4 };
+AJA_RGB16BitPixel NarrowStep109 = { 1019*4,1019*4,1019*4 };
+
+AJA_RGB16BitPixel NarrowYellow75_709 = { 316*4,719*4,713*4 };
+AJA_RGB16BitPixel NarrowCyan75_709 = { 718*4,709*4,538*4 };
+AJA_RGB16BitPixel NarrowGreen75_709 = { 296*4,706*4,512*4 };
+AJA_RGB16BitPixel NarrowMagenta75_709 = { 705*4,286*4,651*4 };
+AJA_RGB16BitPixel NarrowRed75_709 = { 164*4,269*4,639*4 };
+AJA_RGB16BitPixel NarrowBlue75_709 = { 702*4,147*4,227*4 };
+
+AJA_RGB16BitPixel NarrowYellow58_709 = { 381*4,571*4,568*4 };
+AJA_RGB16BitPixel NarrowCyan58_709 = { 571*4,566*4,484*4 };
+AJA_RGB16BitPixel NarrowGreen58_709 = { 368*4,564*4,474*4 };
+AJA_RGB16BitPixel NarrowMagenta58_709 = { 564*4,361*4,536*4 };
+AJA_RGB16BitPixel NarrowRed58_709 = { 256*4,350*4,530*4 };
+AJA_RGB16BitPixel NarrowBlue58_709 = { 562*4,236*4,317*4 };
+
+AJA_RGB16BitPixel NarrowBlack = { 64*4,64*4,64*4 };
+AJA_RGB16BitPixel NarrowMinus2PercentBlack = { 48*4,48*4,48*4 };
+AJA_RGB16BitPixel Narrow2PercentBlack = { 80*4,80*4, 80*4 };
+AJA_RGB16BitPixel Narrow4PercentBlack = { 99*4,99*4,99*4 };
+
+
+// Wide
+AJA_RGB16BitPixel WideWhite100 = { 4095,4095,4095 };
+AJA_RGB16BitPixel WideYellow100 = { 0,4095,4095};
+AJA_RGB16BitPixel WideCyan100 = { 4095,4095,0 };
+AJA_RGB16BitPixel WideGreen100 = { 0,4095,0 };
+AJA_RGB16BitPixel WideMagenta100 = { 4095,0,4095 };
+AJA_RGB16BitPixel WideRed100 = { 0,0,4095 };
+AJA_RGB16BitPixel WideBlue100 = { 4095,0,0 };
+
+AJA_RGB16BitPixel WideWhite58 = {2375,2375,2375 };
+AJA_RGB16BitPixel WideYellow58 = {0,2375,2375 };
+AJA_RGB16BitPixel WideCyan58 = { 2375,2375,0 };
+AJA_RGB16BitPixel WideGreen58 = { 0,2375,0 };
+AJA_RGB16BitPixel WideMagenta58 = { 2375,0,2375 };
+AJA_RGB16BitPixel WideRed58 = { 0,0,2375 };
+AJA_RGB16BitPixel WideBlue58 = { 2375,0,0 };
+
+
+AJA_RGB16BitPixel WideGrey40 = { 1638,1638,1638 };
+
+AJA_RGB16BitPixel WideStep0 = { 0,0,0 };
+AJA_RGB16BitPixel WideStep10 = { 410,410,410 };
+AJA_RGB16BitPixel WideStep20 = { 819,819,819 };
+AJA_RGB16BitPixel WideStep30 = { 1229,1229,1229 };
+AJA_RGB16BitPixel WideStep40 = { 1638,1638,1638 };
+AJA_RGB16BitPixel WideStep50 = { 2048,2048,2048 };
+AJA_RGB16BitPixel WideStep60 = { 2457,2457,2457 };
+AJA_RGB16BitPixel WideStep70 = { 2867,2867,2867 };
+AJA_RGB16BitPixel WideStep80 = { 3276,3276,3276};
+AJA_RGB16BitPixel WideStep90 = { 3686,3686,3686 };
+AJA_RGB16BitPixel WideStep100 = { 4095,4095,4095 };
+
+AJA_RGB16BitPixel WideYellow58_709 = { 1480,2370,2356 };
+AJA_RGB16BitPixel WideCyan58_709 = { 2368,2345,1964 };
+AJA_RGB16BitPixel WideGreen58_709 = { 1420,2339,1915};
+AJA_RGB16BitPixel WideMagenta58_709 = { 2336,1389,2206};
+AJA_RGB16BitPixel WideRed58_709 = { 900,1337,2178};
+AJA_RGB16BitPixel WideBlue58_709 = { 2328,805,1184};
+
+AJA_RGB16BitPixel WideBlack = { 0,0,0 };
+AJA_RGB16BitPixel Wide2PercentBlack = { 82,82, 82 };
+AJA_RGB16BitPixel Wide4PercentBlack = { 164,164,164 };
+
 #ifndef HD_NUMACTIVELINES_2K
 	#define HD_NUMACTIVELINES_2K      1556  
 #endif
@@ -2102,6 +2213,7 @@ NTV2TestPatternGen::NTV2TestPatternGen() :
 	_sliderValue(DEFAULT_PATT_GAIN),
 	_signalMask(NTV2_SIGNALMASK_ALL)
 {
+	    mRGBBuffer.resize(4096*2160*3+1);
 }
 
 
@@ -2746,5 +2858,484 @@ bool NTV2TestPatternGen::IsSDStandard()
 	return false;
 }
 
+AJA_RGB16BitPixel*  addToBuffer(AJA_RGB16BitPixel* buffer, AJA_RGB16BitPixel& value,uint32_t length)
+{
+    AJA_RGB16BitPixel pixel = value;
 
 
+    for ( int i=0; i<length; i++)
+    {
+        *buffer++ = pixel;
+
+    }
+    return buffer;
+}
+
+AJA_RGB16BitPixel*  addRampToBuffer(AJA_RGB16BitPixel* buffer, AJA_RGB16BitPixel& value,uint32_t length,uint32_t incrementValue)
+{
+    AJA_RGB16BitPixel pixel = value;
+
+
+    for ( int i=0; i<length; i++)
+    {
+        *buffer++ = pixel;
+        pixel.Red += incrementValue;
+        pixel.Green += incrementValue;
+        pixel.Blue += incrementValue;
+
+    }
+    return buffer;
+}
+
+static int a;
+static int b;
+static int c;
+static int d;
+static int e;
+static int f;
+static int g;
+static int h;
+static int i;
+static int j;
+static int k;
+static int rampA;
+static int rampB;
+static int rampC;
+static int rampD;
+static int rampE;
+static int rampF;
+static int incrementValue;
+
+void NTV2TestPatternGen::setupHDRTestPatternGeometries()
+{
+    // Only these 2 geometries supported(8k also but ignoring).
+    if ( mNumPixels == 3840 )
+    {
+        mNumLines = 2160;
+        a=3840;
+        b=2160;
+        c=480;
+        d=412;
+        e=408;
+        f=272;
+        g=140;
+        h=136;
+        i=476;
+        j=876;
+        k=564;
+        rampA=3360;
+        rampB=1118;
+        rampC=2030;
+        rampD=212;
+        rampE=120;
+        rampF=1872;
+        incrementValue = 2;
+
+    }
+    else
+    {
+        mNumPixels == 1920;
+        mNumLines = 1080;
+        a=1920;
+        b=1080;
+        c=240;
+        d=206;
+        e=204;
+        f=136;
+        g=70;
+        h=68;
+        i=238;
+        j=438;
+        k=282;
+        rampA=1680;
+        rampB=559;
+        rampC=1015;
+        rampD=106;
+        rampE=60;
+        rampF=936;
+        incrementValue = 4;
+    }
+}
+
+void NTV2TestPatternGen::writeTestPatternNarrowHLG()
+{
+    mBitsPerComponent = 16;
+    setupHDRTestPatternGeometries();
+
+    AJA_RGB16BitPixel* rgbBuffer = ( AJA_RGB16BitPixel*)mRGBBuffer.data();
+
+    AJA_RGB16BitPixel* tempBuffer = new AJA_RGB16BitPixel[a*2];
+    AJA_RGB16BitPixel* lineBuffer = tempBuffer;
+
+    // build  line of 1st segment
+    lineBuffer = addToBuffer(lineBuffer,NarrowGrey40,c);
+    lineBuffer = addToBuffer(lineBuffer,NarrowWhite100,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowYellow100,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowCyan100,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowGreen100,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowMagenta100,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowRed100,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlue100,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowGrey40,c);
+
+    int line = 0;
+    for ( line = 0; line < b/12; line++ )
+    {
+        memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
+        rgbBuffer += a;
+
+    }
+    // build  line of 2nd segment
+    lineBuffer = tempBuffer;
+    lineBuffer = addToBuffer(lineBuffer,NarrowGrey40,c);
+    lineBuffer = addToBuffer(lineBuffer,NarrowWhite75,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowYellow75,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowCyan75,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowGreen75,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowMagenta75,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowRed75,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlue75,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowGrey40,c);
+
+    for ( ; line < (b/12+b/2); line++)
+    {
+        memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
+        rgbBuffer += a;
+
+    }
+
+    // build  line of 3rd segment
+    lineBuffer = tempBuffer;
+    lineBuffer = addToBuffer(lineBuffer,NarrowWhite75,c);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStepMinus7,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep0,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep10,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep20,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep30,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep40,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep50,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep60,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep70,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep80,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep90,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep100,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep109,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowWhite75,c);
+
+    for ( ; line < (b/12+b/2+b/12); line++)
+    {
+        memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
+        rgbBuffer += a;
+    }
+
+    // build  line of 4th segment
+    lineBuffer = tempBuffer;
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlack,c);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStepMinus7,rampB);
+    lineBuffer = addRampToBuffer(lineBuffer,NarrowStepMinus7,rampC,incrementValue);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep109,rampD);
+
+    for ( ; line < (b/12+b/2+b/12+b/12); line++)
+    {
+        memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
+        rgbBuffer += a;
+    }
+
+    // build  line of 5th segment
+    lineBuffer = tempBuffer;
+    lineBuffer = addToBuffer(lineBuffer,NarrowYellow75_709,c/3);
+    lineBuffer = addToBuffer(lineBuffer,NarrowCyan75_709,c/3);
+    lineBuffer = addToBuffer(lineBuffer,NarrowGreen75_709,c/3);
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlack,f);
+    lineBuffer = addToBuffer(lineBuffer,NarrowMinus2PercentBlack,g);
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlack,h);
+    lineBuffer = addToBuffer(lineBuffer,Narrow2PercentBlack,g);
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlack,h);
+    lineBuffer = addToBuffer(lineBuffer,Narrow4PercentBlack,g);
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlack,i);
+    lineBuffer = addToBuffer(lineBuffer,NarrowWhite75,j);
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlack,k);
+    lineBuffer = addToBuffer(lineBuffer,NarrowMagenta75_709,c/3);
+    lineBuffer = addToBuffer(lineBuffer,NarrowRed75_709,c/3);
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlue75_709,c/3);
+
+    for ( ; line < (b/12+b/2+b/12+b/12+b/4); line++)
+    {
+        memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
+        rgbBuffer += a;
+    }
+
+//    mFileType = WorkerThread::FILETYPE_TIFF;
+//    preview();
+
+//    if (mOutputToSDI)
+//        sendToSDI();
+
+    delete [] tempBuffer;
+}
+
+void NTV2TestPatternGen::writeTestPatternNarrowPQ()
+{
+    mBitsPerComponent = 16;
+    setupHDRTestPatternGeometries();
+
+    AJA_RGB16BitPixel* rgbBuffer = ( AJA_RGB16BitPixel*)mRGBBuffer.data();
+
+    AJA_RGB16BitPixel* tempBuffer = new AJA_RGB16BitPixel[a*2];
+    AJA_RGB16BitPixel* lineBuffer = tempBuffer;
+
+    lineBuffer = addToBuffer(lineBuffer,NarrowGrey40,c);
+    lineBuffer = addToBuffer(lineBuffer,NarrowWhite100,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowYellow100,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowCyan100,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowGreen100,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowMagenta100,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowRed100,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlue100,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowGrey40,c);
+    ConvertRGBLineTo10BitYCbCr422(tempBuffer,mNumPixels);
+    //qDebug() << "between the lines";
+
+    // build  line of 1st segment
+    int line ;
+    for ( line = 0; line < b/12; line++ )
+    {
+        memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
+        rgbBuffer += a;
+
+    }
+    // build  line of 2nd segment
+    lineBuffer = tempBuffer;
+    lineBuffer = addToBuffer(lineBuffer,NarrowGrey40,c);
+    lineBuffer = addToBuffer(lineBuffer,NarrowWhite58,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowYellow58,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowCyan58,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowGreen58,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowMagenta58,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowRed58,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlue58,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowGrey40,c);
+    for ( ; line < (b/12+b/2); line++)
+    {
+        memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
+        rgbBuffer += a;
+
+    }
+
+    // build  line of 3rd segment
+    lineBuffer = tempBuffer;
+    lineBuffer = addToBuffer(lineBuffer,NarrowWhite58,c);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStepMinus7,d);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep0,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep10,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep20,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep30,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep40,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep50,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep60,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep70,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep80,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep90,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep100,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep109,d/2);
+    lineBuffer = addToBuffer(lineBuffer,NarrowWhite58,c);
+    for ( ; line < (b/12+b/2+b/12); line++)
+    {
+        memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
+        rgbBuffer += a;
+    }
+
+    // build  line of 4th segment
+    lineBuffer = tempBuffer;
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlack,c);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStepMinus7,rampB);
+    lineBuffer = addRampToBuffer(lineBuffer,NarrowStepMinus7,rampC,incrementValue);
+    lineBuffer = addToBuffer(lineBuffer,NarrowStep109,rampD);
+    for ( ; line < (b/12+b/2+b/12+b/12); line++)
+    {
+        memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
+        rgbBuffer += a;
+    }
+
+    // build  line of 5th segment
+    lineBuffer = tempBuffer;
+    lineBuffer = addToBuffer(lineBuffer,NarrowYellow58_709,c/3);
+    lineBuffer = addToBuffer(lineBuffer,NarrowCyan58_709,c/3);
+    lineBuffer = addToBuffer(lineBuffer,NarrowGreen58_709,c/3);
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlack,f);
+    lineBuffer = addToBuffer(lineBuffer,NarrowMinus2PercentBlack,g);
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlack,h);
+    lineBuffer = addToBuffer(lineBuffer,Narrow2PercentBlack,g);
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlack,h);
+    lineBuffer = addToBuffer(lineBuffer,Narrow4PercentBlack,g);
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlack,i);
+    lineBuffer = addToBuffer(lineBuffer,NarrowWhite75,j);
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlack,k);
+    lineBuffer = addToBuffer(lineBuffer,NarrowMagenta58_709,c/3);
+    lineBuffer = addToBuffer(lineBuffer,NarrowRed58_709,c/3);
+    lineBuffer = addToBuffer(lineBuffer,NarrowBlue58_709,c/3);
+    for ( ; line < (b/12+b/2+b/12+b/12+b/4); line++)
+    {
+        memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
+        rgbBuffer += a;
+    }
+
+//    mFileType = WorkerThread::FILETYPE_TIFF;
+//    preview();
+
+//    if (mOutputToSDI)
+//        sendToSDI();
+
+    delete [] tempBuffer;
+}
+
+
+void NTV2TestPatternGen::writeTestPatternWidePQ()
+{
+    mBitsPerComponent = 16;
+    setupHDRTestPatternGeometries();
+
+    AJA_RGB16BitPixel* rgbBuffer = ( AJA_RGB16BitPixel*)mRGBBuffer.data();
+
+    AJA_RGB16BitPixel* tempBuffer = new AJA_RGB16BitPixel[a*2];
+    AJA_RGB16BitPixel* lineBuffer = tempBuffer;
+
+    lineBuffer = addToBuffer(lineBuffer,WideGrey40,c);
+    lineBuffer = addToBuffer(lineBuffer,WideWhite100,d);
+    lineBuffer = addToBuffer(lineBuffer,WideYellow100,d);
+    lineBuffer = addToBuffer(lineBuffer,WideCyan100,d);
+    lineBuffer = addToBuffer(lineBuffer,WideGreen100,d);
+    lineBuffer = addToBuffer(lineBuffer,WideMagenta100,d);
+    lineBuffer = addToBuffer(lineBuffer,WideRed100,d);
+    lineBuffer = addToBuffer(lineBuffer,WideBlue100,d);
+    lineBuffer = addToBuffer(lineBuffer,WideGrey40,c);
+    ConvertRGBLineTo10BitYCbCr422(tempBuffer,mNumPixels);
+    //qDebug() << "between the lines 0";
+    // build  line of 1st segment
+    int line ;
+    for ( line = 0; line < b/12; line++ )
+    {
+        memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
+        rgbBuffer += a;
+
+    }
+    // build  line of 2nd segment
+    lineBuffer = tempBuffer;
+    lineBuffer = addToBuffer(lineBuffer,WideGrey40,c);
+    lineBuffer = addToBuffer(lineBuffer,WideWhite58,d);
+    lineBuffer = addToBuffer(lineBuffer,WideYellow58,d);
+    lineBuffer = addToBuffer(lineBuffer,WideCyan58,d);
+    lineBuffer = addToBuffer(lineBuffer,WideGreen58,d);
+    lineBuffer = addToBuffer(lineBuffer,WideMagenta58,d);
+    lineBuffer = addToBuffer(lineBuffer,WideRed58,d);
+    lineBuffer = addToBuffer(lineBuffer,WideBlue58,d);
+    lineBuffer = addToBuffer(lineBuffer,WideGrey40,c);
+    ConvertRGBLineTo10BitYCbCr422(tempBuffer,mNumPixels);
+    //qDebug() << "between the lines 1";
+    for ( ; line < (b/12+b/2); line++)
+    {
+        memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
+        rgbBuffer += a;
+
+    }
+
+    // build  line of 3rd segment
+    lineBuffer = tempBuffer;
+    lineBuffer = addToBuffer(lineBuffer,WideWhite58,c);
+    lineBuffer = addToBuffer(lineBuffer,WideStep0,d);
+    lineBuffer = addToBuffer(lineBuffer,WideStep0,d/2);
+    lineBuffer = addToBuffer(lineBuffer,WideStep10,d/2);
+    lineBuffer = addToBuffer(lineBuffer,WideStep20,d/2);
+    lineBuffer = addToBuffer(lineBuffer,WideStep30,d/2);
+    lineBuffer = addToBuffer(lineBuffer,WideStep40,d/2);
+    lineBuffer = addToBuffer(lineBuffer,WideStep50,d/2);
+    lineBuffer = addToBuffer(lineBuffer,WideStep60,d/2);
+    lineBuffer = addToBuffer(lineBuffer,WideStep70,d/2);
+    lineBuffer = addToBuffer(lineBuffer,WideStep80,d/2);
+    lineBuffer = addToBuffer(lineBuffer,WideStep90,d/2);
+    lineBuffer = addToBuffer(lineBuffer,WideStep100,d/2);
+    lineBuffer = addToBuffer(lineBuffer,WideStep100,d/2);
+    lineBuffer = addToBuffer(lineBuffer,WideWhite58,c);
+    ConvertRGBLineTo10BitYCbCr422(tempBuffer,mNumPixels);
+    //qDebug() << "between the lines 2";
+    for ( ; line < (b/12+b/2+b/12); line++)
+    {
+        memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
+        rgbBuffer += a;
+    }
+
+    // build  line of 4th segment
+    lineBuffer = tempBuffer;
+    lineBuffer = addToBuffer(lineBuffer,WideBlack,c);
+    lineBuffer = addToBuffer(lineBuffer,WideBlack,rampB);
+    lineBuffer = addRampToBuffer(lineBuffer,WideBlack,rampC,incrementValue);
+    lineBuffer = addToBuffer(lineBuffer,WideStep100,rampD);
+    ConvertRGBLineTo10BitYCbCr422(tempBuffer,mNumPixels);
+    //qDebug() << "between the lines 3";
+    for ( ; line < (b/12+b/2+b/12+b/12); line++)
+    {
+        memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
+        rgbBuffer += a;
+    }
+
+    // build  line of 5th segment
+    lineBuffer = tempBuffer;
+    lineBuffer = addToBuffer(lineBuffer,WideYellow58_709,c/3);
+    lineBuffer = addToBuffer(lineBuffer,WideCyan58_709,c/3);
+    lineBuffer = addToBuffer(lineBuffer,WideGreen58_709,c/3);
+    lineBuffer = addToBuffer(lineBuffer,WideBlack,f);
+    lineBuffer = addToBuffer(lineBuffer,WideBlack,g);
+    lineBuffer = addToBuffer(lineBuffer,WideBlack,h);
+    lineBuffer = addToBuffer(lineBuffer,Wide2PercentBlack,g);
+    lineBuffer = addToBuffer(lineBuffer,WideBlack,h);
+    lineBuffer = addToBuffer(lineBuffer,Wide4PercentBlack,g);
+    lineBuffer = addToBuffer(lineBuffer,WideBlack,i);
+    lineBuffer = addToBuffer(lineBuffer,WideWhite58,j);
+    lineBuffer = addToBuffer(lineBuffer,WideBlack,k);
+    lineBuffer = addToBuffer(lineBuffer,WideMagenta58_709,c/3);
+    lineBuffer = addToBuffer(lineBuffer,WideRed58_709,c/3);
+    lineBuffer = addToBuffer(lineBuffer,WideBlue58_709,c/3);
+    ConvertRGBLineTo10BitYCbCr422(tempBuffer,mNumPixels);
+    //qDebug() << "between the lines 4";
+    for ( ; line < (b/12+b/2+b/12+b/12+b/4); line++)
+    {
+        memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
+        rgbBuffer += a;
+    }
+
+//    mFileType = WorkerThread::FILETYPE_TIFF;
+//    preview();
+
+//    if (mOutputToSDI)
+//        sendToSDI();
+
+    delete [] tempBuffer;
+}
+
+void NTV2TestPatternGen::write12BitRamp()
+{
+    mBitsPerComponent = 16;
+    uint16_t* rgbBuffer = ( uint16_t*)mRGBBuffer.data();
+
+     for ( uint32_t lineCount=0; lineCount<mNumLines; lineCount++)
+     {
+         for ( int32_t pixelCount = 0; pixelCount < mNumPixels; pixelCount++)
+         {
+
+             double dvalue = (double)pixelCount*(4095.0/(double)(mNumPixels-1));
+             uint32_t ivalue = (uint32_t)dvalue;
+             *rgbBuffer++ = ivalue;
+             *rgbBuffer++ = ivalue;
+             *rgbBuffer++ = ivalue;
+
+         }
+
+     }
+     // close enough
+//     mFileType = WorkerThread::FILETYPE_TIFF;
+//     preview();
+
+//     if (mOutputToSDI)
+//         sendToSDI();
+
+}

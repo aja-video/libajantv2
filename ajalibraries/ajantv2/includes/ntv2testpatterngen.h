@@ -87,6 +87,12 @@ protected:
 
 	bool IsSDStandard();
 	bool GetStandard(int &standard, bool &b4K);
+	
+	void setupHDRTestPatternGeometries();
+	void writeTestPatternNarrowHLG();
+	void writeTestPatternNarrowPQ();
+	void writeTestPatternWidePQ();
+	void write12BitRamp();
 
 protected:
 	NTV2TestPatternSelect	_patternNumber;
@@ -104,6 +110,17 @@ protected:
 	double					_sliderValue;
 	NTV2SignalMask			_signalMask;
 	NTV2FrameBufferFormat	_pixelFormat;
+	
+	uint32_t mNumPixels;
+    uint32_t mNumLines;
+    uint32_t mBitsPerComponent;
+    uint32_t mSamplesPerPixel;
+	uint16_t mCompressionType;
+    uint32_t mDataOffset;
+    uint32_t mDataSize;
+    std::vector<char> mData;
+    std::vector<uint16_t> mUnPackedRAWBuffer;
+    std::vector<uint16_t> mRGBBuffer;
 
 };	//	NTV2TestPatternGen
 
