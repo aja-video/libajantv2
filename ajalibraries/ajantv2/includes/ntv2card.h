@@ -4301,6 +4301,12 @@ public:
 	AJA_VIRTUAL bool		SetHDMIOutProtocol (const NTV2HDMIProtocol inNewValue);
 	AJA_VIRTUAL bool		GetHDMIOutProtocol (NTV2HDMIProtocol & outValue);
 
+	AJA_VIRTUAL bool		SetHDMIOutForceConfig (const bool inNewValue);
+	AJA_VIRTUAL bool		GetHDMIOutForceConfig (bool & outValue);
+
+	AJA_VIRTUAL bool		SetHDMIOutPrefer420 (const bool inNewValue);
+	AJA_VIRTUAL bool		GetHDMIOutPrefer420 (bool & outValue);
+
 	AJA_VIRTUAL bool		GetHDMIOutDownstreamBitDepth (NTV2HDMIBitDepth & outValue);
 
 	AJA_VIRTUAL bool		GetHDMIOutDownstreamColorSpace (NTV2LHIHDMIColorSpace & outValue);
@@ -5692,6 +5698,9 @@ public:
     /**
         @brief		Enables or disables HDMI HDR Dolby Vision.
         @param[in]	inEnable		If true, sets the device to output HDMI HDR Dolby Vision; otherwise sets the device to not output HDMI HDR Dolby Vision.
+        @note		This function only affects Dolby HDR signaling. The client application is responsible for transferring Dolby-encoded pixel data from the
+					host to the device frame buffer(s) for HDMI transmission.
+		@see		CNTV2Card::GetHDMIHDRDolbyVisionEnabled
         @return		True if successful; otherwise false.
     **/
     AJA_VIRTUAL bool EnableHDMIHDRDolbyVision (const bool inEnable);

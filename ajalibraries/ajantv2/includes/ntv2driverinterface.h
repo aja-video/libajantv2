@@ -301,10 +301,24 @@ public:
     virtual inline bool						HevcSendMessage (HevcMessageHeader * /*pMessage*/)		{ return false; }
 
 #if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
-	virtual bool				GetRecordedRegisterWrites (NTV2RegisterWrites & outRegWrites) const;
-	virtual bool				StartRecordRegisterWrites (const bool inSkipActualWrites = false);
-	virtual bool				IsRecordingRegisterWrites (void) const;
-	virtual bool				StopRecordRegisterWrites (void);
+	/**
+		@name	WriteRegister Profiling
+	**/
+	///@{
+public:
+	virtual bool				GetRecordedRegisterWrites (NTV2RegisterWrites & outRegWrites) const;	///< @brief	Answers with the recorded register writes.
+	virtual bool				StartRecordRegisterWrites (const bool inSkipActualWrites = false);	///< @brief	Starts recording all WriteRegister calls.
+	virtual bool				IsRecordingRegisterWrites (void) const;		///< @return	True if WriteRegister calls are currently being recorded (and not paused);  otherwise false.
+	virtual bool				StopRecordRegisterWrites (void);			///< @brief		Stops recording all WriteRegister calls.
+	virtual bool				PauseRecordRegisterWrites (void);			///< @brief		Pauses recording WriteRegister calls.
+	virtual bool				ResumeRecordRegisterWrites (void);			///< @brief		Resumes recording WriteRegister calls (after a prior call to PauseRecordRegisterWrites).
+	virtual ULWord				GetNumRecordedRegisterWrites (void) const;	///< @return	The number of recorded WriteRegister calls.
+protected:
+	NTV2RegisterWrites			mRegWrites;			///< @brief	Stores WriteRegister data
+	mutable AJALock				mRegWritesLock;		///< @brief	Guard mutex for mRegWrites
+	bool						mRecordRegWrites;	///< @brief	True if recording; otherwise false when not recording
+	bool						mSkipRegWrites;		///< @brief	True if actual register writes are skipped while recording
+	///@}
 #endif	//	NTV2_WRITEREG_PROFILING		//	Register Write Profiling
 
 protected:
@@ -377,13 +391,6 @@ protected:
 
 	ULWord					_ulNumFrameBuffers;
 	ULWord					_ulFrameBufferSize;
-
-#if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
-	NTV2RegisterWrites		mRegWrites;
-	mutable AJALock			mRegWritesLock;
-	bool					mRecordRegWrites;
-	bool					mSkipRegWrites;
-#endif	//	NTV2_WRITEREG_PROFILING		//	Register Write Profiling
 
 };	//	CNTV2DriverInterface
 

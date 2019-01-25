@@ -1105,6 +1105,23 @@ ostream & NTV2FormatDescriptor::PrintSMPTELineNumber (ostream & inOutStream, con
 }
 
 
+NTV2SegmentedXferInfo & NTV2FormatDescriptor::GetSegmentedXferInfo (NTV2SegmentedXferInfo & inSegmentInfo, const bool inIsSource) const
+{
+	if (IsValid())
+	{	//	Full visible raster
+		inSegmentInfo.setElementLength(1).setSegmentCount(GetRasterHeight(true)).setSegmentLength(GetBytesPerRow());
+		if (inIsSource)
+			return inSegmentInfo.setSourceOffset(GetBytesPerRow() * GetFirstActiveLine())
+								.setSourcePitch(GetBytesPerRow());
+		else
+			return inSegmentInfo.setDestOffset(GetBytesPerRow() * GetFirstActiveLine())
+								.setDestPitch(GetBytesPerRow());
+	}
+	inSegmentInfo = NTV2SegmentedXferInfo();
+	return inSegmentInfo;	
+}
+
+
 //	Q:	WHY IS NTV2SmpteLineNumber's CONSTRUCTOR & GetLastLine IMPLEMENTATION HERE?
 //	A:	TO USE THE SAME LineNumbersF1/LineNumbersF2 TABLES (above)
 
