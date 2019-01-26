@@ -906,11 +906,37 @@
 
 	@par	SD/HD YCbCr Playout From YCbCr Frame Buffer
 
-	TBD
+	@code{.cpp}
+		//	Example:  Set up FrameStore3 for RGB playout, route to SDI 3...
+		theDevice.SetFrameBufferFormat (NTV2_CHANNEL3, NTV2_FBF_10BIT_YCBCR);
+		theDevice.SetMode (NTV2_CHANNEL3, NTV2_MODE_OUTPUT);
+		theDevice.Connect (NTV2_XptSDIOut3Input, NTV2_XptFrameBuffer3YUV);  // SDIOut3 <== FB3
+
+		//	Or, more generically...
+		NTV2Channel	chan = NTV2_CHANNEL3;
+		NTV2FrameBufferFormat fbf = NTV2_FBF_10BIT_YCBCR;
+		theDevice.SetFrameBufferFormat (chan, fbf);
+		theDevice.SetMode (chan, NTV2_MODE_OUTPUT);
+		theDevice.Connect (::GetSDIOutputInputXpt(chan), ::GetFrameBufferOutputXptFromChannel(chan, NTV2_IS_FBF_RGB(fbf))); // SDIOut3 <== FB3
+	@endcode
 
 	@par	SD/HD YCbCr Playout From RGB Frame Buffer
 
-	TBD
+	@code{.cpp}
+		//	Example:  Set up FrameStore3 for RGB playout, route to SDI 3...
+		theDevice.SetFrameBufferFormat (NTV2_CHANNEL3, NTV2_FBF_ARGB);
+		theDevice.SetMode (NTV2_CHANNEL3, NTV2_MODE_OUTPUT);
+		theDevice.Connect (NTV2_XptCSC3VidInput, NTV2_XptFrameBuffer3RGB);  // CSC3 <== FB3RGB
+		theDevice.Connect (NTV2_XptSDIOut3Input, NTV2_XptCSC3VidRGB);       // SDIOut3 <== CSC3RGB
+
+		//	Or, more generically...
+		NTV2Channel	chan = NTV2_CHANNEL3;
+		NTV2FrameBufferFormat fbf = NTV2_FBF_ARGB;
+		theDevice.SetFrameBufferFormat (chan, fbf);
+		theDevice.SetMode (chan, NTV2_MODE_OUTPUT);
+		theDevice.Connect (::GetCSCInputXptFromChannel(chan), ::GetFrameBufferOutputXptFromChannel(chan, NTV2_IS_FBF_RGB(fbf))); // CSC3 <== FB3RGB
+		theDevice.Connect (::GetSDIOutputInputXpt(chan), ::GetCSCOutputXptFromChannel(chan)); // SDIOut3 <== CSC3RGB
+	@endcode
 
 	@par	HD RGB Playout Over 2 × 1.5G Dual-Link SDI From YCbCr Frame Buffer
 
