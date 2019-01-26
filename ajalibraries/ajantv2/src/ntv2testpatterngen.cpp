@@ -2252,6 +2252,8 @@ bool NTV2TestPatternGen::DrawTestPattern (NTV2TestPatternSelect pattNum, uint32_
 	_pPackedLineBuffer = new uint32_t[_frameWidth*2];
 	_pUnPackedLineBuffer = new uint16_t[_frameWidth*4];
 	MakeUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer,CCIR601_10BIT_BLACK,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET,_frameWidth);
+	if(NTV2_IS_12B_PATTERN(pattNum))
+		
 	switch (pattNum)
 	{
 		case NTV2_TestPatt_ColorBars100:
@@ -2291,6 +2293,21 @@ bool NTV2TestPatternGen::DrawTestPattern (NTV2TestPatternSelect pattNum, uint32_
 			break;
 		case NTV2_TestPatt_ColorQuadrantTsi:
 			bResult = DrawColorQuandrantFrameTsi();
+			break;
+		case NTV2_TestPatt_ZonePlate_12b_RGB:
+			bResult = Draw12BitZonePlate();
+			break;
+		case NTV2_TestPatt_LinearRamp_12b_RGB:
+			bResult = Draw12BitRamp();
+			break;
+		case NTV2_TestPatt_HLG_Narrow_12b_RGB:
+			bResult = DrawTestPatternNarrowHLG();
+			break;
+		case NTV2_TestPatt_PQ_Narrow_12b_RGB:
+			bResult = DrawTestPatternNarrowPQ();
+			break;
+		case NTV2_TestPatt_PQ_Wide_12b_RGB:
+			bResult = DrawTestPatternWidePQ();
 			break;
 		default:	// unknown test pattern ID?
 			break;
@@ -2494,8 +2511,6 @@ bool NTV2TestPatternGen::DrawBorderFrame()
 	return true;
 }
 
-
-
 static uint16_t MakeSineWaveVideoEx(double radians, bool bChroma, double Gain)
 {
 	// 10-bit YUV values
@@ -2557,8 +2572,6 @@ bool NTV2TestPatternGen::DrawZonePlateFrame()
 	return true;
 
 }
-
-
 
 bool NTV2TestPatternGen::DrawColorQuandrantFrame()
 {
@@ -2909,7 +2922,29 @@ static int incrementValue;
 void NTV2TestPatternGen::setupHDRTestPatternGeometries()
 {
     // Only these 2 geometries supported(8k also but ignoring).
-    if ( mNumPixels == 3840 )
+	if ( mNumPixels == 7680 )
+	{
+		mNumLines = 4320;
+        a=7680;
+        b=4320;
+        c=960;
+        d=824;
+        e=816;
+        f=544;
+        g=280;
+        h=272;
+        i=952;
+        j=1752;
+        k=1128;
+        rampA=6720;
+        rampB=2236;
+        rampC=4060;
+        rampD=424;
+        rampE=240;
+        rampF=3744;
+        incrementValue = 1;
+	}
+    else if ( mNumPixels == 3840 )
     {
         mNumLines = 2160;
         a=3840;
@@ -2930,7 +2965,6 @@ void NTV2TestPatternGen::setupHDRTestPatternGeometries()
         rampE=120;
         rampF=1872;
         incrementValue = 2;
-
     }
     else
     {
@@ -2957,7 +2991,7 @@ void NTV2TestPatternGen::setupHDRTestPatternGeometries()
     }
 }
 
-void NTV2TestPatternGen::writeTestPatternNarrowHLG()
+bool NTV2TestPatternGen::DrawTestPatternNarrowHLG()
 {
     mBitsPerComponent = 16;
     setupHDRTestPatternGeometries();
@@ -3064,17 +3098,12 @@ void NTV2TestPatternGen::writeTestPatternNarrowHLG()
         memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
         rgbBuffer += a;
     }
-
-//    mFileType = WorkerThread::FILETYPE_TIFF;
-//    preview();
-
-//    if (mOutputToSDI)
-//        sendToSDI();
-
+	::memcpy(_pTestPatternBuffer, mRGBBuffer.data(), _bufferSize);
     delete [] tempBuffer;
+	return true;
 }
 
-void NTV2TestPatternGen::writeTestPatternNarrowPQ()
+bool NTV2TestPatternGen::DrawTestPatternNarrowPQ()
 {
     mBitsPerComponent = 16;
     setupHDRTestPatternGeometries();
@@ -3179,18 +3208,13 @@ void NTV2TestPatternGen::writeTestPatternNarrowPQ()
         memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
         rgbBuffer += a;
     }
-
-//    mFileType = WorkerThread::FILETYPE_TIFF;
-//    preview();
-
-//    if (mOutputToSDI)
-//        sendToSDI();
-
+	::memcpy(_pTestPatternBuffer, mRGBBuffer.data(), _bufferSize);
     delete [] tempBuffer;
+	return true;
 }
 
 
-void NTV2TestPatternGen::writeTestPatternWidePQ()
+bool NTV2TestPatternGen::DrawTestPatternWidePQ()
 {
     mBitsPerComponent = 16;
     setupHDRTestPatternGeometries();
@@ -3302,40 +3326,70 @@ void NTV2TestPatternGen::writeTestPatternWidePQ()
         memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
         rgbBuffer += a;
     }
-
-//    mFileType = WorkerThread::FILETYPE_TIFF;
-//    preview();
-
-//    if (mOutputToSDI)
-//        sendToSDI();
-
+	::memcpy(_pTestPatternBuffer, mRGBBuffer.data(), _bufferSize);
     delete [] tempBuffer;
+	return true;
 }
 
-void NTV2TestPatternGen::write12BitRamp()
+bool NTV2TestPatternGen::Draw12BitRamp()
 {
     mBitsPerComponent = 16;
     uint16_t* rgbBuffer = ( uint16_t*)mRGBBuffer.data();
 
-     for ( uint32_t lineCount=0; lineCount<mNumLines; lineCount++)
-     {
-         for ( int32_t pixelCount = 0; pixelCount < mNumPixels; pixelCount++)
-         {
+	for ( uint32_t lineCount=0; lineCount<mNumLines; lineCount++)
+	{
+		for ( int32_t pixelCount = 0; pixelCount < mNumPixels; pixelCount++)
+		{
+			double dvalue = (double)pixelCount*(4095.0/(double)(mNumPixels-1));
+			uint32_t ivalue = (uint32_t)dvalue;
+			*rgbBuffer++ = ivalue;
+			*rgbBuffer++ = ivalue;
+			*rgbBuffer++ = ivalue;
+		}
+	}
+	::memcpy(_pTestPatternBuffer, mRGBBuffer.data(), _bufferSize);
+	return true;
+}
 
-             double dvalue = (double)pixelCount*(4095.0/(double)(mNumPixels-1));
-             uint32_t ivalue = (uint32_t)dvalue;
-             *rgbBuffer++ = ivalue;
-             *rgbBuffer++ = ivalue;
-             *rgbBuffer++ = ivalue;
+const int kRGBMinChroma12  =  0x10;
+const int kRGBMaxChroma12  = 0xFEF;
+//const int kYUVZeroChroma10 = 512;
 
-         }
+uint32_t MakeSineWaveVideo(double radians, double Gain)
+{
+    int result;
+    double Scale;
+    double Offset;
+	
+	Scale  = ((float)kRGBMaxChroma12 - (float)kRGBMinChroma12) / 2.0;
+	Offset = ((float)kRGBMaxChroma12 + (float)kRGBMinChroma12) / 2.0;
 
-     }
-     // close enough
-//     mFileType = WorkerThread::FILETYPE_TIFF;
-//     preview();
+	// calculate sine value to start C at "zero" value
+	result = (int)((sin(radians) * Scale * Gain) + Offset + 0.5);	// convert to 12-bit chroma video levels
+    return result;
+}
 
-//     if (mOutputToSDI)
-//         sendToSDI();
-
+const double kPi = 3.1415926535898;
+bool NTV2TestPatternGen::Draw12BitZonePlate()
+{
+    mBitsPerComponent = 16;
+    double pattScale = (kPi*.5 ) / (mNumPixels + 1);
+    uint16_t* rgbBuffer = ( uint16_t*)mRGBBuffer.data();
+	
+    for ( uint32_t lineCount=0; lineCount<mNumLines; lineCount++)
+	{
+		for ( uint32_t pixelCount = 0; pixelCount < mNumPixels; pixelCount++)
+		{
+			double xDist = (double)pixelCount - ((double)mNumPixels / 2.0);
+			double yDist = (double)lineCount - ((double)mNumLines / 2.0);
+			double r = ((xDist * xDist) + (yDist * yDist)) * pattScale;
+			uint16_t value = MakeSineWaveVideo(r, 0.9);
+			
+			*rgbBuffer++ = value;
+			*rgbBuffer++ = value;
+			*rgbBuffer++ = value;
+		}
+	}
+	::memcpy(_pTestPatternBuffer, mRGBBuffer.data(), _bufferSize);
+	return true;
 }

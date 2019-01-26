@@ -42,8 +42,15 @@ enum NTV2TestPatternSelect
 	NTV2_TestPatt_ColorQuadrant,
 	NTV2_TestPatt_ColorQuadrantBorder,
 	NTV2_TestPatt_ColorQuadrantTsi,
+	NTV2_TestPatt_ZonePlate_12b_RGB,
+	NTV2_TestPatt_LinearRamp_12b_RGB,
+	NTV2_TestPatt_HLG_Narrow_12b_RGB,
+	NTV2_TestPatt_PQ_Narrow_12b_RGB,
+	NTV2_TestPatt_PQ_Wide_12b_RGB,
 	NTV2_TestPatt_All
 };
+
+#define NTV2_IS_12B_PATTERN(__S__) ((__S__) >= NTV2_TestPatt_ZonePlate_12b_RGB && (__S__) < NTV2_TestPatt_All)
 
 
 /**
@@ -84,15 +91,17 @@ protected:
 	virtual bool	DrawQuandrantBorderFrame ();
 	virtual bool	DrawColorQuandrantFrame ();
 	virtual bool	DrawColorQuandrantFrameTsi ();
+	
+	//12b patterns
+	virtual void	setupHDRTestPatternGeometries();
+	virtual bool	DrawTestPatternNarrowHLG();
+	virtual bool	DrawTestPatternNarrowPQ();
+	virtual bool	DrawTestPatternWidePQ();
+	virtual bool	Draw12BitRamp();
+	virtual bool	Draw12BitZonePlate();
 
 	bool IsSDStandard();
 	bool GetStandard(int &standard, bool &b4K);
-	
-	void setupHDRTestPatternGeometries();
-	void writeTestPatternNarrowHLG();
-	void writeTestPatternNarrowPQ();
-	void writeTestPatternWidePQ();
-	void write12BitRamp();
 
 protected:
 	NTV2TestPatternSelect	_patternNumber;
