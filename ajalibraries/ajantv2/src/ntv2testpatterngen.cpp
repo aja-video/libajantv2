@@ -2185,6 +2185,11 @@ const NTV2TestPatternNames & NTV2TestPatternGen::getTestPatternNames (void)
 		sTestPatternNames.push_back(string("Color Quadrant"));
 		sTestPatternNames.push_back(string("Color Quadrant Border"));
 		sTestPatternNames.push_back(string("Color Quadrant Tsi"));
+		sTestPatternNames.push_back(string("ZonePlate 12b RGB"));
+		sTestPatternNames.push_back(string("LinearRamp 12b RGB"));
+		sTestPatternNames.push_back(string("HLG_Narrow 12b RGB"));
+		sTestPatternNames.push_back(string("PQ_Narrow 12b RGB"));
+		sTestPatternNames.push_back(string("PQ_Wide 12b RGB"));
 	}
 	return sTestPatternNames;
 }
@@ -2211,7 +2216,8 @@ const NTV2TestPatternNames & NTV2TestPatternGen::getTestPatternNames (void)
 
 NTV2TestPatternGen::NTV2TestPatternGen() :
 	_sliderValue(DEFAULT_PATT_GAIN),
-	_signalMask(NTV2_SIGNALMASK_ALL)
+	_signalMask(NTV2_SIGNALMASK_ALL),
+	mNumPixels(1920)
 {
 	    mRGBBuffer.resize(4096*2160*3+1);
 }
@@ -2252,7 +2258,8 @@ bool NTV2TestPatternGen::DrawTestPattern (NTV2TestPatternSelect pattNum, uint32_
 	_pPackedLineBuffer = new uint32_t[_frameWidth*2];
 	_pUnPackedLineBuffer = new uint16_t[_frameWidth*4];
 	MakeUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer,CCIR601_10BIT_BLACK,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET,_frameWidth);
-	if(NTV2_IS_12B_PATTERN(pattNum))
+	if (NTV2_IS_12B_PATTERN(pattNum))
+		setupHDRTestPatternGeometries();
 		
 	switch (pattNum)
 	{
@@ -3392,4 +3399,59 @@ bool NTV2TestPatternGen::Draw12BitZonePlate()
 	}
 	::memcpy(_pTestPatternBuffer, mRGBBuffer.data(), _bufferSize);
 	return true;
+}
+void ConvertRGBLineTo10BitYCbCr422(AJA_RGB16BitPixel* lineBuffer,uint16_t lineLength)
+{
+    int16_t r,g,b;
+    int16_t y,cb,cr;
+    //QString debugString;
+    r =0;
+    g = 512;
+    b = 1023;
+
+    y = (r-64.0)*(.26270) + (g-64.0)*(.67800) + (b-64)*(.05930) + 64.0;
+    cb = (r-64.0)*(-0.14282) + (g-64.0)*(-0.368594) + (b-64.0)*(0.511414) + 512.0;
+    cr = (r-64.0)*(0.511414) + (g-64.0)*(-0.470284) + (b-64.0)*(-0.04113) + 512.0;
+//qDebug() << y << cb << cr;
+
+    for ( uint32_t pixel = 0; pixel<lineLength; pixel++)
+    {
+        AJA_RGB16BitPixel pixelValue = lineBuffer[pixel];
+        //Make 10 bit Value
+        r = pixelValue.Red>>2;
+        g = pixelValue.Green>>2;
+        b = pixelValue.Blue>>2;
+        y = (r-64.0)*(.26270) + (g-64.0)*(.67800) + (b-64)*(.05930) + 64.0;
+        cb = (r-64.0)*(-0.14282) + (g-64.0)*(-0.368594) + (b-64.0)*(0.511414) + 512.0;
+        cr = (r-64.0)*(0.511414) + (g-64.0)*(-0.470284) + (b-64.0)*(-0.04113) + 512.0;
+        if ( y  > 1020) y = 1020;
+        if ( y < 4 ) y = 4;
+        if ( cb  > 1020) cb = 1020;
+        if ( cb < 4 ) cb = 4;
+        if ( cr  > 1020) cr = 1020;
+        if ( cr < 4 ) cr = 4;
+#if 0
+        if ( pixel & 0x1)
+        {
+            debugString += QString::number(y);
+            debugString += ',';
+        }
+        else
+        {
+             debugString += QString::number(cb);
+            debugString += ',';
+            debugString += QString::number(y);
+            debugString += ',';
+            debugString += QString::number(cr);
+            debugString += ',';
+        }
+        if ( (pixel != 0 ) && ((pixel%16) == 0) )
+        {
+            debugString +=  "\r";
+        }
+
+#endif
+    }
+    //qDebug().noquote() << debugString;
+
 }
