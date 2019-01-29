@@ -315,6 +315,11 @@ typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief	An alias for NTV2Fram
                                             ||	(__fbf__) == NTV2_FBF_10BIT_RAW_YCBCR			\
                                         )
 
+#define NTV2_FBF_IS_YCBCR(__fbf__)		(		!NTV2_IS_FBF_RGB(__fbf__)						\
+											&&  !NTV2_FBF_IS_RAW(__fbf__)						\
+											&&  !NTV2_IS_FBF_PRORES(__fbf__)					\
+										)
+
 
 /**
     @brief	Identifies a particular video frame geometry.
@@ -3498,6 +3503,7 @@ typedef enum
 {
     NTV2_HDMI8Bit,				//	8 bit
     NTV2_HDMI10Bit,				//	10 bit
+    NTV2_HDMI12Bit,				//	12 bit
     NTV2_MAX_NUM_HDMIBitDepths,
     NTV2_INVALID_HDMIBitDepth = NTV2_MAX_NUM_HDMIBitDepths
 } NTV2HDMIBitDepth;

@@ -4007,6 +4007,7 @@ public:
 		@param[out]	outOutputXpt	Receives the output (signal source) the given input is connected to (if connected),
 									or NTV2_XptBlack if not connected.
 		@return		True if successful;  otherwise false.
+		@see		ntv2signalrouting, CNTV2Card::GetConnectedInput, CNTV2Card::IsConnected
 	**/
 	AJA_VIRTUAL bool	GetConnectedOutput (const NTV2InputCrosspointID inInputXpt, NTV2OutputCrosspointID & outOutputXpt);
 
@@ -4016,6 +4017,7 @@ public:
 		@param[out]	outInputXpt		Receives the input (signal sink) the given output is connected to (if connected),
 									or NTV2_XptBlack if not connected.
 		@return		True if successful;  otherwise false.
+		@see		ntv2signalrouting, CNTV2Card::GetConnectedOutput, CNTV2Card::IsConnected
 	**/
 	AJA_VIRTUAL bool	GetConnectedInput (const NTV2OutputCrosspointID inOutputXpt, NTV2InputCrosspointID & outInputXpt);
 
@@ -4028,6 +4030,7 @@ public:
 									before writing the crosspoint register;  otherwise writes the crosspoint register
 									regardless. Defaults to false.
 		@return		True if successful;  otherwise false.
+		@see		ntv2signalrouting, CNTV2Card::Disconnect, CNTV2Card::IsConnected
 	**/
 	AJA_VIRTUAL bool	Connect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, const bool inValidate = false);
 
@@ -4035,6 +4038,7 @@ public:
 		@brief		Disconnects the given widget signal input (sink) from whatever output (source) it may be connected.
 		@param[in]	inInputXpt		Specifies the input (signal sink) to be disconnected.
 		@return		True if successful;  otherwise false.
+		@see		ntv2signalrouting, CNTV2Card::Connect
 	**/
 	AJA_VIRTUAL bool	Disconnect (const NTV2InputCrosspointID inInputXpt);
 
@@ -4044,6 +4048,7 @@ public:
 		@param[out]	outIsConnected	Receives true if the input is connected to any other output (other than NTV2_XptBlack).
 		@return		True if successful;  otherwise false.
 		@note		If the input is connected to NTV2_XptBlack, "outIsConnected" will be "false".
+		@see		ntv2signalrouting, CNTV2Card::IsConnectedTo
 	**/
 	AJA_VIRTUAL bool	IsConnected (const NTV2InputCrosspointID inInputXpt, bool & outIsConnected);
 
@@ -4053,6 +4058,7 @@ public:
 		@param[in]	inOutputXpt		Specifies the output (signal source) of interest. It's okay to specify NTV2_XptBlack.
 		@param[out]	outIsConnected	Receives true if the input is connected to the specified output.
 		@return		True if successful;  otherwise false.
+		@see		ntv2signalrouting, CNTV2Card::IsConnected
 	**/
 	AJA_VIRTUAL bool	IsConnectedTo (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, bool & outIsConnected);
 
@@ -4065,6 +4071,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@bug		This function is not currently implemented.
 		@todo		This needs to be implemented.
+		@see		ntv2signalrouting, CNTV2Card::Connect
 	**/
 	AJA_VIRTUAL bool	CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, bool & outCanConnect);
 
@@ -4085,6 +4092,7 @@ public:
 					are built and then applied to the device in this function call.
 					This function iterates over each connection that's specified in the given routing table and updates
 					the appropriate register in the device.
+		@see		ntv2signalrouting, CNTV2SignalRouter
 	**/
 	AJA_VIRTUAL bool	ApplySignalRoute (const CNTV2SignalRouter & inRouter, const bool inReplace = false);
 
@@ -4093,6 +4101,7 @@ public:
 		@return		True if successful; otherwise false.
 		@details	This function writes zeroes into all crosspoint selection registers, effectively
 					clearing any existing routing configuration on the device.
+		@see		ntv2signalrouting
 	**/
 	AJA_VIRTUAL bool	ClearRouting (void);
 
@@ -4100,6 +4109,7 @@ public:
 		@brief		Answers with the current signal routing between any and all widgets on the AJA device.
 		@param[out]	outRouting	Receives the current signal routing.
 		@return		True if successful; otherwise false.
+		@see		ntv2signalrouting, CNTV2SignalRouter, CNTV2Card::GetRoutingForChannel, CNTV2Card::ApplySignalRoute
 	**/
 	AJA_VIRTUAL bool	GetRouting (CNTV2SignalRouter & outRouting);
 
@@ -4108,6 +4118,7 @@ public:
 		@param[in]	inChannel	Specifies the NTV2Channel of interest.
 		@param[out]	outRouting	Receives the current signal routing for the given channel.
 		@return		True if successful; otherwise false.
+		@see		ntv2signalrouting, CNTV2SignalRouter, CNTV2Card::GetRouting, CNTV2Card::ApplySignalRoute
 	**/
 	AJA_VIRTUAL bool	GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRouter & outRouting);
 
@@ -4300,6 +4311,12 @@ public:
 
 	AJA_VIRTUAL bool		SetHDMIOutProtocol (const NTV2HDMIProtocol inNewValue);
 	AJA_VIRTUAL bool		GetHDMIOutProtocol (NTV2HDMIProtocol & outValue);
+
+	AJA_VIRTUAL bool		SetHDMIOutForceConfig (const bool inNewValue);
+	AJA_VIRTUAL bool		GetHDMIOutForceConfig (bool & outValue);
+
+	AJA_VIRTUAL bool		SetHDMIOutPrefer420 (const bool inNewValue);
+	AJA_VIRTUAL bool		GetHDMIOutPrefer420 (bool & outValue);
 
 	AJA_VIRTUAL bool		GetHDMIOutDownstreamBitDepth (NTV2HDMIBitDepth & outValue);
 
@@ -5692,6 +5709,9 @@ public:
     /**
         @brief		Enables or disables HDMI HDR Dolby Vision.
         @param[in]	inEnable		If true, sets the device to output HDMI HDR Dolby Vision; otherwise sets the device to not output HDMI HDR Dolby Vision.
+        @note		This function only affects Dolby HDR signaling. The client application is responsible for transferring Dolby-encoded pixel data from the
+					host to the device frame buffer(s) for HDMI transmission.
+		@see		CNTV2Card::GetHDMIHDRDolbyVisionEnabled
         @return		True if successful; otherwise false.
     **/
     AJA_VIRTUAL bool EnableHDMIHDRDolbyVision (const bool inEnable);

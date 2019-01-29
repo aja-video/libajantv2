@@ -141,20 +141,41 @@ Except in its Image view, the raster content display always highlights changed c
 			-	Note that the <b>Image</b> view always uses 0-based decimal pixel offsets relative to the left edge of the frame buffer.
 	-	<b>Selecting</b> -- Rectangular portions of the raster (or raw memory) can be selected/highlighted, and is shown as a yellow box in the view.
 		-	The current selection, if any, is described in the status bar, to the left of the refresh timing indicator.
-		-	To cancel the current selection, press the <b>Esc</b> key.
-		-	Switching views will attempt to retain the current selection. If this is not possible (e.g., switching from <b>Raw</b> to <b>Image</b> when a
-			byte range outside the raster was selected), the selection will be reset.
+		-	To cancel the current selection, press <b>Esc</b>ape.
+		-	Switching views will attempt to retain the current selection. If this is not possible
+			(e.g., switching from <b>Raw</b> to <b>Image</b> when a byte range outside the raster was selected),
+			the selection will be reset/cancelled.
 		-	Left-click in the display (and optionally drag up/down/left/right) to select a rectangular raster or memory portion.
-			-	Vertically, <b>Component</b>, <b>Image</b>, and <b>Line</b> views will select line-by-line, whereas <b>Raw</b> views will select by a number of powers-of-two byte offsets.
-			-	Horizontally, <b>Image</b> and <b>Component</b> views will select pixel-by-pixel, whereas <b>Line</b> and <b>Raw</b> views will select by 1/2/4/8-byte groups
-			(depending on the current <b>Grouping</b> setting).
-		-	Use the arrow keys to change the existing selection with great precision:
-			-	By default, the selection will change to a single-element selection above/left of the top/left corner, or below/right of the bottom/right corner.
+			@image	html	watcher-fb09kMouseDragMode_DrawSelection.png
+			-	Vertically, <b>Component</b>, <b>Image</b>, and <b>Line</b> views will select line-by-line,
+				whereas <b>Raw</b> views will select by a number of powers-of-two byte offsets.
+			-	Horizontally, <b>Image</b> and <b>Component</b> views will select pixel-by-pixel,
+				whereas <b>Line</b> and <b>Raw</b> views will select by 1/2/4/8-byte groups
+				(depending on the current <b>Grouping</b> setting).
+		-	Use the arrow keys to precisely and incrementally change the existing selection:
+			-	By default, the selection will change to a single-element selection above/left of the top/left corner,
+				or below/right of the bottom/right corner.
 			-	Hold the <b>Shift</b> key down to expand the selection from the top/left or bottom/right corner.
-			-	Hold the <b>Control</b> key (or <b>Command</b> key on MacOS) down to shrink the selection from the top/left or bottom/right corner.
-		-	Choose <b>Select All</b> from the <b>Edit</b> menu to select the entire raster (<b>Image</b>, <b>Component</b> or <b>Line</b> view) or frame buffer (<b>Raw</b> view).
+			-	Hold the <b>Ctrl</b> (<b>Command</b> on MacOS) key down to shrink the selection
+				from the top/left or bottom/right corner.
+		-	Choose <b>Select All</b> from the <b>Edit</b> menu to select the entire raster
+			(<b>Image</b>, <b>Component</b> or <b>Line</b> view) or frame buffer (<b>Raw</b> view).
 		-	Moving the mouse cursor into the selection will cause a ToolTip to appear that describes the selection.
-		-	Left-click inside the selection and drag from there to move the selection without changing its dimensions.
+		-	Dragging the edge of the yellow selection box will resize the selection without moving it.
+			@image	html	watcher-fb01kMouseDragMode_AdjustTopLeft.png
+			@image	html	watcher-fb02kMouseDragMode_AdjustTop.png
+			@image	html	watcher-fb03kMouseDragMode_AdjustTopRight.png
+			@image	html	watcher-fb04kMouseDragMode_AdjustRight.png
+			@image	html	watcher-fb05kMouseDragMode_AdjustBotRight.png
+			@image	html	watcher-fb06kMouseDragMode_AdjustBottom.png
+			@image	html	watcher-fb07kMouseDragMode_AdjustBotLeft.png
+			@image	html	watcher-fb08kMouseDragMode_AdjustLeft.png
+		-	Dragging from inside the selection box will change the selection’s position without changing its dimensions.
+			@image	html	watcher-fb10kMouseDragMode_MoveSelection.png
+		-	Dragging from inside the selection box with both the <b>Ctrl</b> and <b>Shift</b> keys held down will
+			copy the underlying raster data in the frame buffer to the position where the selection frame was moved
+			(<b>Line</b> or <b>Raw</b> views only).
+			@image	html	watcher-fb11kMouseDragMode_MoveContents.png
 	-	<b>Right-Click Operations</b>
 		-	<b>View</b> -- Changes the view to <b>Lines</b>, <b>Raw</b>, <b>Components</b> or <b>Image</b>.
 		-	<b>Grouping</b> -- (<b>Lines</b> and <b>Raw</b> views only) -- Changes the data grouping to 8-bit (1-byte), 16-bit (2-byte), 32-bit (4-byte) or 64-bit (8-byte).
@@ -188,8 +209,10 @@ Except in its Image view, the raster content display always highlights changed c
 	-	<b>Drag and Drop</b>
 		-	The <b>Auto</b> checkbox must be un-checked.
 		-	Choose the <b>FrameStore</b> and <b>Frame</b> of interest.
-		-	Drag operations cannot be started from the Frame Buffer inspector view.
-		-	Supported Drop Operations:
+		-	Drag operations started from inside the Frame Buffer inspector view cannot end outside the view (not yet supported).
+		-	Ctrl+Shift+Drag operations started from inside an existing selection in the Frame Buffer inspector
+			(<b>Line</b> or <b>Raw</b> views only) will copy the underlying raster data to where it’s dropped in the frame buffer.
+		-	Supported Drop Operations from outside the NTV2Watcher window:
 			-	For file drops, drop only one file at a time. Multiple files are not supported.
 			-	<b>Image Files</b> -- The frame’s visible raster is replaced with the image.
 				-	If the image dimensions differ from the frame geometry, the image is scaled to fit.

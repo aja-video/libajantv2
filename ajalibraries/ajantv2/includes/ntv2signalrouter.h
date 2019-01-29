@@ -39,6 +39,8 @@ typedef NTV2ActualConnections::const_iterator						NTV2ActualConnectionsConstIte
 typedef std::multimap <NTV2InputCrosspointID, NTV2OutputXptID>		NTV2PossibleConnections;	///< @brief	A map of zero or more one-to-many possible NTV2InputCrosspointID to NTV2OutputCrosspointID connections.
 typedef NTV2PossibleConnections::const_iterator						NTV2PossibleConnectionsConstIter;
 
+AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2ActualConnections & inObj);
+
 typedef	std::map <std::string, NTV2InputXptID>			String2InputXpt;
 typedef String2InputXpt::const_iterator					String2InputXptConstIter;
 
@@ -70,10 +72,11 @@ typedef Widget2InputXpts::const_iterator				Widget2InputXptsConstIter;
 /**
 	@brief	This class is a collection of widget input-to-output connections that can be applied all-at-once to an NTV2 device.
 			Call AddConnection to connect a widget input (specified by NTV2InputCrosspointID) to a widget's output (specified by NTV2OutputCrosspointID).
-			Call the NTV2 device's ApplySignalRoute function to apply this route to the device.
+			Call the CNTV2Card::ApplySignalRoute function to apply this route to the device.
 	@note	Use of this class is optional, as widget signal routing can always be performed using direct calls to NTV2Card::Connect.
 	@note	This class is not thread-safe.
-	@note	Public access to the NTV2RoutingEntry structs will be deprecated. Please use NTV2InputCrosspointIDs instead.
+	@note	Public access to the NTV2RoutingEntry structs are deprecated. Please use NTV2InputCrosspointIDs instead.
+	@see	ntv2signalrouting
 **/
 class AJAExport CNTV2SignalRouter
 {
@@ -105,6 +108,7 @@ class AJAExport CNTV2SignalRouter
 			@param[in]	inSignalInput		Specifies the widget signal input (sink) as an NTV2InputCrosspointID.
 			@param[in]	inSignalOutput		Specifies the widget signal output (source) as an NTV2OutputCrosspointID. If not specified, uses NTV2_XptBlack.
 			@return		True if successfully added;  otherwise false.
+			@see		CNTV2Card::Connect, CNTV2SignalRouter::RemoveConnection
 		**/
 		virtual bool								AddConnection (const NTV2InputCrosspointID inSignalInput, const NTV2OutputCrosspointID inSignalOutput = NTV2_XptBlack);
 
@@ -113,6 +117,7 @@ class AJAExport CNTV2SignalRouter
 			@param[in]	inSignalInput		Specifies the widget signal input (sink) as an NTV2InputCrosspointID.
 			@param[in]	inSignalOutput		Specifies the widget signal output (source) as an NTV2OutputCrosspointID.
 			@return		True if successfully removed;  otherwise false.
+			@see		CNTV2Card::Disconnect, CNTV2SignalRouter::AddConnection
 		**/
 		virtual bool								RemoveConnection (const NTV2InputCrosspointID inSignalInput, const NTV2OutputCrosspointID inSignalOutput);
 
@@ -121,6 +126,7 @@ class AJAExport CNTV2SignalRouter
 			@param[in]	inSignalInput		Specifies the widget signal input (sink) as an NTV2InputCrosspointID.
 			@param[in]	inSignalOutput		Specifies the widget signal output (source) as an NTV2OutputCrosspointID.
 			@return		True if I have such a connection;  otherwise false.
+			@see		CNTV2Card::IsConnected, CNTV2Card::IsConnectedTo
 		**/
 		virtual bool								HasConnection (const NTV2InputCrosspointID inSignalInput, const NTV2OutputCrosspointID inSignalOutput) const;
 
@@ -128,11 +134,20 @@ class AJAExport CNTV2SignalRouter
 			@brief		Answers true if I contain a connection that involves the given input (signal sink).
 			@param[in]	inSignalInput		Specifies the widget signal input (sink) of interest as an NTV2InputCrosspointID.
 			@return		True if I have a connection involving the given input;  otherwise false.
+			@see		CNTV2Card::IsConnected, CNTV2Card::GetConnectedInput, CNTV2SignalRouter::HasConnection
 		**/
 		virtual bool								HasInput (const NTV2InputCrosspointID inSignalInput) const;
 
 		/**
-			@brief	Resets me, erasing any/all existing connections.
+			@return		The output crosspoint that the given input is connected to, or NTV2_XptBlack if not connected.
+			@param[in]	inSignalInput		Specifies the widget signal input (sink) of interest.
+			@see		CNTV2Card::GetConnectedOutput
+		**/
+		virtual NTV2OutputCrosspointID				GetConnectedOutput (const NTV2InputCrosspointID inSignalInput) const;
+
+		/**
+			@brief		Resets me, erasing any/all existing connections.
+			@see		CNTV2Card::ClearRouting, CNTV2SignalRouter::ResetFromRegisters
 		**/
 		virtual inline void							Reset (void)										{mConnections.clear ();}
 
@@ -141,14 +156,26 @@ class AJAExport CNTV2SignalRouter
 			@param[in]	inInputXpts		Specifies the input crosspoints of interest (perhaps obtained from CNTV2SignalRouter::GetAllWidgetInputs).
 			@param[in]	inRegReads		Specifies the routing registers/values (perhaps obtained from CNTV2Card::ReadRegisters).
 			@return		True if successful;  otherwise false.
+			@see		CNTV2SignalRouter::Reset, CNTV2SignalRouter::GetRegisterWrites
 		**/
 		virtual bool								ResetFromRegisters (const NTV2InputCrosspointIDSet & inInputXpts, const NTV2RegisterReads & inRegReads);
 
 		/**
-			@brief	Answers with the current number of connections (signal routes).
-			@return	The current number of connections.
+			@return	The current number of connections (signal routes).
+			@see		CNTV2SignalRouter::IsEmpty
 		**/
 		virtual inline ULWord						GetNumberOfConnections (void) const					{return ULWord (mConnections.size ());}
+
+		/**
+			@return	True if I have no connections (signal routes); otherwise false.
+			@see		CNTV2SignalRouter::GetNumberOfConnections
+		**/
+		virtual inline bool							IsEmpty (void) const								{return mConnections.empty();}
+
+		/**
+			@return	A copy of my connections.
+		**/
+		virtual inline NTV2ActualConnections		GetConnections (void) const							{return mConnections;}
 
 		/**
 			@brief		Returns a sequence of NTV2RegInfo values that can be written to an NTV2 device using its WriteRegisters function.
@@ -158,10 +185,42 @@ class AJAExport CNTV2SignalRouter
 		virtual bool								GetRegisterWrites (NTV2RegisterWrites & outRegWrites) const;
 
 		/**
-			@brief	Prints me in a human-readable format to the given output stream.
-			@param	inOutStream		Specifies the output stream that is to receive the human-readable data.
+			@brief		Compares me with another routing, and returns three connection mappings as a result of the comparison:
+						those that are new, changed, and missing.
+			@param[in]	inRHS		The CNTV2SignalRouter that I'm being compared with.
+			@param[out]	outNew		Receives the new connections (those that I have, but RHS doesn't).
+			@param[out]	outChanged	Receives the changed connections, where only the output crosspoint changed.
+									The output crosspoint of these changed connections will be those from "inRHS"
+									-- not the new ones.
+			@param[out]	outMissing	Receives the deleted connections (those that RHS has, but I don't).
+			@return		True if identical (i.e. the returned output connection maps are all empty);  otherwise false.
+			@see		CNTV2SignalRouter::operator ==, CNTV2SignalRouter::operator !=
+		**/
+		virtual bool								Compare (const CNTV2SignalRouter & inRHS,
+															NTV2ActualConnections & outNew,
+															NTV2ActualConnections & outChanged,
+															NTV2ActualConnections & outMissing) const;
+
+		/**
+			@return		True if my connections are identical to those of the given right-hand-side signal router; otherwise false.
+			@param[in]	inRHS		The CNTV2SignalRouter that I'll be compared with.
+			@see		CNTV2SignalRouter::Compare, CNTV2SignalRouter::operator !=
+		**/
+		virtual inline bool			operator == (const CNTV2SignalRouter & inRHS) const		{NTV2ActualConnections tmp; return Compare(inRHS, tmp,tmp,tmp);}
+
+		/**
+			@return		True if my connections differ from those of the given right-hand-side signal router;  otherwise false.
+			@param[in]	inRHS		The CNTV2SignalRouter that I'll be compared with.
+			@see		CNTV2SignalRouter::Compare, CNTV2SignalRouter::operator ==
+		**/
+		virtual inline bool			operator != (const CNTV2SignalRouter & inRHS) const		{return !(inRHS == *this);}
+
+		/**
+			@brief		Prints me in a human-readable format to the given output stream.
+			@param		inOutStream			Specifies the output stream that is to receive the human-readable data.
 			@param[in]	inForRetailDisplay	Specify true to use human-readable names in the display;  otherwise false to use names found in the SDK.
-			@return	A reference to the specified output stream.
+			@return		A reference to the specified output stream.
+			@see		CNTV2SignalRouter::PrintCode
 		**/
 		virtual std::ostream &						Print (std::ostream & inOutStream, const bool inForRetailDisplay = false) const;
 
@@ -183,6 +242,10 @@ class AJAExport CNTV2SignalRouter
 			std::string	mDeviceVarName;		///< @brief	Name to use for CNTV2Card variable
 			std::string	mRouterVarName;		///< @brief	Name to use for CNTV2DeviceRouter variable
 			std::string	mLineBreakText;		///< @brief	Text to use for line breaks
+			std::string	mFieldBreakText;	///< @brief	Text to use for field breaks
+			NTV2ActualConnections mNew;		///< @brief	Optional, to show new connections
+			NTV2ActualConnections mChanged;	///< @brief	Optional, to show changed connections
+			NTV2ActualConnections mMissing;	///< @brief	Optional, to show deleted connections
 			/**
 				@brief	Default constructor sets the following default settings:
 						-	include "//"-style comments and variable declarations;
@@ -193,11 +256,12 @@ class AJAExport CNTV2SignalRouter
 		};
 
 		/**
-			@brief	Prints me as source code to the given output stream.
+			@brief		Prints me as source code to the given output stream.
 			@param[out]	outCode		Receives the generated source code.
 			@param[in]	inConfig	Specifies how the source code will be generated.
 									If unspecified, uses the PrintCodeConfig's default settings.
-			@return	True if successful;  otherwise false.
+			@return		True if successful;  otherwise false.
+			@see		CNTV2SignalRouter::Print
 		**/
 		virtual bool								PrintCode (std::string & outCode, const PrintCodeConfig & inConfig = PrintCodeConfig()) const;
 
@@ -217,6 +281,7 @@ class AJAExport CNTV2SignalRouter
 			@brief		Returns a string containing the most compact human-readable form for a given input crosspoint.
 			@param[in]	inInputXpt		Specifies the NTV2InputCrosspointID of interest.
 			@return		A string containing the most compact human-readable representation of the input crosspoint.
+			@see		CNTV2SignalRouter::NTV2OutputCrosspointIDToString, CNTV2SignalRouter::StringToNTV2InputCrosspointID
 		**/
 		static std::string			NTV2InputCrosspointIDToString (const NTV2InputCrosspointID inInputXpt);
 
@@ -224,6 +289,7 @@ class AJAExport CNTV2SignalRouter
 			@brief		Returns a string containing the most compact human-readable form for a given output crosspoint.
 			@param[in]	inOutputXpt		Specifies the NTV2OutputCrosspointID of interest.
 			@return		A string containing the most compact human-readable representation of the output crosspoint.
+			@see		CNTV2SignalRouter::NTV2InputCrosspointIDToString, CNTV2SignalRouter::StringToNTV2OutputCrosspointID
 		**/
 		static std::string			NTV2OutputCrosspointIDToString (const NTV2OutputCrosspointID inOutputXpt);
 
@@ -231,6 +297,7 @@ class AJAExport CNTV2SignalRouter
 			@brief		Returns a string containing the most compact human-readable form for a given input crosspoint.
 			@param[in]	inStr		Specifies the string to convert into an NTV2InputXptID.
 			@return		The corresponding input crosspoint.
+			@see		CNTV2SignalRouter::StringToNTV2OutputCrosspointID, CNTV2SignalRouter::NTV2InputCrosspointIDToString
 		**/
 		static NTV2InputXptID		StringToNTV2InputCrosspointID (const std::string & inStr);
 
@@ -238,6 +305,7 @@ class AJAExport CNTV2SignalRouter
 			@brief		Returns the output crosspoint that corresponds to the given string.
 			@param[in]	inStr		Specifies the string to convert into an NTV2OutputXptID.
 			@return		The corresponding output crosspoint.
+			@see		CNTV2SignalRouter::StringToNTV2InputCrosspointID, CNTV2SignalRouter::NTV2OutputCrosspointIDToString
 		**/
 		static NTV2OutputXptID		StringToNTV2OutputCrosspointID (const std::string & inStr);
 
@@ -332,6 +400,7 @@ class AJAExport CNTV2SignalRouter
 			@param[out]	outRouter		The CNTV2SignalRouter to be cleared and set from what is parsed from the string.
 										It will be empty if this function fails.
 			@return		True if successful;  otherwise false.
+			@see		CNTV2SignalRouter::PrintCode, CNTV2SignalRouter::ResetFromRegisters
 		**/
 		static bool					CreateFromString (const std::string & inString, CNTV2SignalRouter & outRouter);
 
@@ -344,18 +413,20 @@ class AJAExport CNTV2SignalRouter
     	static bool					IsInitialized(void);	///< @return	True if the Signal Router singleton has been allocated/created; otherwise false.
 
         /**
-            @brief		Explicitly allocates and initializes the Signal Router singleton.
+            @brief		Explicitly allocates and initializes the Routing Expert singleton.
             @return		True if successful;  otherwise false.
-            @note		Normally, there is no need to call this function, as the Signal Router singleton is
+            @note		Normally, there is no need to call this function, as the Routing Expert singleton is
             			automatically allocated and initialized.
+            @see		CNTV2SignalRouter::Deinitialize
         **/
     	static bool					Initialize(void);
 
         /**
-            @brief		Explicitly deinitializes and deallocates the Signal Router singleton.
+            @brief		Explicitly deinitializes and deallocates the Routing Expert singleton.
             @return		True if successful;  otherwise false.
-            @note		Normally, there is no need to call this function, as the Signal Router singleton is
+            @note		Normally, there is no need to call this function, as the Routing Expert singleton is
             			automatically deinitialized and deallocated.
+            @see		CNTV2SignalRouter::Initialize
         **/
     	static bool					Deinitialize(void);
 
