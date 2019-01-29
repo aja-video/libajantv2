@@ -218,6 +218,10 @@ inline NTV2Stream ChToAudioStream(int ch)
 inline int AudioStreamToCh(NTV2Stream s)
 	{ return (int)(s >= NTV2_AUDIO1_STREAM ? s-NTV2_AUDIO1_STREAM : 0); }
 
+inline NTV2Stream ChToAncStream(int ch)
+	{ return (NTV2Stream)(NTV2_ANC1_STREAM+ch); }
+inline int AncStreamToCh(NTV2Stream s)
+	{ return (int)(s >= NTV2_ANC1_STREAM ? s-NTV2_ANC1_STREAM : 0); }
 
 /**
     @brief	Configures a SMPTE 2110 Transmit Channel.

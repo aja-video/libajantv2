@@ -1007,7 +1007,7 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 					tmpLocalRP188F1AncBuffer = inOutXferInfo.acANCBuffer.Allocate(2048);
 				if (inOutXferInfo.acANCField2Buffer.IsNULL())
 					tmpLocalRP188F2AncBuffer = inOutXferInfo.acANCField2Buffer.Allocate(2048);
-				S2110AddTimecodesToAncBuffers(inChannel, inOutXferInfo);
+				//S2110AddTimecodesToAncBuffers(inChannel, inOutXferInfo);
 			}
 
 	/////////////////////////////////////////////////////////////////////////////
