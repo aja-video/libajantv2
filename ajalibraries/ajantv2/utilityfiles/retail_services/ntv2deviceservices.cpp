@@ -210,8 +210,8 @@ bool DeviceServices::ReadDriverState (void)
 		
         if (ds.sdiInSize > 0)
 		{
-			mSDIInput1ColorSpace = ds.sdiIn[0]->cs;
-			mSDIInput1RGBRange = ds.sdiIn[0]->rgbRange;
+			mSDIInput1ColorSpace = ds.sdiIn1ColorSpace;
+			mSDIInput1RGBRange = ds.sdiIn1RGBRange;
 			mSDIInput2RGBRange = mSDIInput1RGBRange;		// for now
 			mSDIInput2ColorSpace = mSDIInput1ColorSpace;	// for now
 		}
