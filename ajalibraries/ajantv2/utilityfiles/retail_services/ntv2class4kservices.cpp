@@ -1084,17 +1084,17 @@ void Class4kServices::SetDeviceXPointPlayback ()
 			if (b2pi)
 			{
 				// RGB-mode set
-				if (bHdmiOutRGB)
+				if (bHdmiOutRGB || (bFb1HdrRGB || bFb2HdrRGB))
 				{
 					switch (mVirtualHDMIOutputSelect)
 					{
 					default:
 					case NTV2_PrimaryOutputSelect:
 					case NTV2_4kHalfFrameRate:		// unsupported for now
-						XPt1 = NTV2_XptLUT1RGB;
-						XPt2 = NTV2_XptLUT2RGB;
-						XPt3 = NTV2_XptLUT3Out;
-						XPt4 = NTV2_XptLUT4Out;
+						XPt1 = bFb1HdrRGB ? NTV2_Xpt425Mux1ARGB : NTV2_XptLUT1RGB;
+						XPt2 = bFb1HdrRGB ? NTV2_Xpt425Mux1BRGB : NTV2_XptLUT2RGB;
+						XPt3 = bFb2HdrRGB ? NTV2_Xpt425Mux2ARGB : NTV2_XptLUT3Out;
+						XPt4 = bFb2HdrRGB ? NTV2_Xpt425Mux2BRGB : NTV2_XptLUT4Out;
 						break;
 					case NTV2_Quarter4k:       XPt1 = NTV2_XptLUT1RGB; break;
 					case NTV2_Quadrant1Select: XPt1 = NTV2_XptLUT1RGB; break;
