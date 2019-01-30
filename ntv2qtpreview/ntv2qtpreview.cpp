@@ -1,7 +1,7 @@
 /**
 	@file		ntv2qtpreview.cpp
 	@brief		Implementation of the NTV2QtPreview class.
-	@copyright	(C) 2013-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2013-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 

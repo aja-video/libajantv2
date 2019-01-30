@@ -2,7 +2,7 @@
 	@file		ntv2qtpreview.h
 	@brief		Header file for NTV2QtPreview demo application.
 				Demonstrates how to capture audio/video from NTV2-based AJA devices.
-	@copyright	(C) 2013-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2013-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2QTPREVIEW_H

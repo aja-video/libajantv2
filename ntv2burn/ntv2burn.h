@@ -1,7 +1,7 @@
 /**
 	@file	ntv2burn.h
 	@brief	Header file for the NTV2Burn demonstration class.
-	@copyright	Copyright (C) 2012-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2012-2019 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef _NTV2BURN_H

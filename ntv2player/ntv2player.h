@@ -1,7 +1,7 @@
 /**
 	@file		ntv2player.cpp
 	@brief		Header file for NTV2Player demonstration class
-	@copyright	Copyright (C) 2013-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2013-2019 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 

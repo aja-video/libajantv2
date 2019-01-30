@@ -1,7 +1,7 @@
 /**
 	@file		ntv2encodehevc.cpp
 	@brief		Implementation of NTV2EncodeHEVC class.
-	@copyright	Copyright (C) 2015-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2015-2019 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include <stdio.h>

@@ -1,7 +1,7 @@
 /**
 @file		AMDSDIInput/main.cpp
 @brief		Demonstration application to capture frames from SDI to GPU using GMA.
-@copyright	Copyright (C) 2012-2018 AJA Video Systems, Inc.  All rights reserved.
+@copyright	Copyright (C) 2012-2019 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include <string>

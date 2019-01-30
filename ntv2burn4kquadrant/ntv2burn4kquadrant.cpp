@@ -1,7 +1,7 @@
 /**
 	@file		ntv2burn4kquadrant.cpp
 	@brief		Implementation of NTV2Burn4KQuadrant demonstration class.
-	@copyright	Copyright (C) 2013-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2013-2019 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ntv2burn4kquadrant.h"
