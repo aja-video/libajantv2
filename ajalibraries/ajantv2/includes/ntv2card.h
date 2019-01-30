@@ -3563,14 +3563,16 @@ public:
 		@return		True if the call was successful; otherwise false. 
 		@note		When selecting NTV2_CSC_Method_Enhanced_4K as the method, the channel must be NTV2_CHANNEL1 or NTV2_CHANNEL5.
 					This will group four CSCs together to process the 4K image. To leave 4K, take CSC 1 (or CSC 5) out of 4K mode. 
+		@see		CNTV2Card::GetColorSpaceMethod, \ref vidop-csc and \ref widget_csc
 	**/
 	AJA_VIRTUAL bool		SetColorSpaceMethod (const NTV2ColorSpaceMethod inCSCMethod, const NTV2Channel inChannel);
 
 	/**
 		@brief		Answers with the current operating mode of the given color space converter.
-		@param[out]	outMethod		Receives the CSC's current operating mode.
+		@param[out]	outMethod		Receives the CSC's current operating method.
 		@param[in]	inChannel		Specifies the CSC of interest.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetColorSpaceMethod, \ref vidop-csc and \ref widget_csc
 	**/
 	AJA_VIRTUAL bool	GetColorSpaceMethod (NTV2ColorSpaceMethod & outMethod, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -3617,6 +3619,7 @@ public:
 								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
 								Defaults to CSC 0 (NTV2_CHANNEL1).
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetColorSpaceRGBBlackRange, \ref vidop-csc and \ref widget_csc
 	**/
 	AJA_VIRTUAL bool	SetColorSpaceRGBBlackRange (const NTV2_CSC_RGB_Range inRange,  const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -3627,6 +3630,7 @@ public:
 								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
 								Defaults to CSC 0 (NTV2_CHANNEL1).
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetColorSpaceRGBBlackRange, \ref vidop-csc and \ref widget_csc
 	**/
 	AJA_VIRTUAL bool	GetColorSpaceRGBBlackRange (NTV2_CSC_RGB_Range & outRange,  const NTV2Channel inChannel = NTV2_CHANNEL1);
 

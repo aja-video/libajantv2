@@ -564,6 +564,84 @@
 	@endcode
 
 
+	@subsection	vidop-csc		Color Space Converter Operation
+
+	A <b>Color Space Converter</b> (a.k.a. <b>CSC</b>) is a device widget implemented in FPGA firmware that converts Y/Cb/Cr values
+	into R/G/B/A values, or vice-versa. It uses several registers for configuring its properties and conversion coefficients.
+
+	-	In the SDK, CSCs are identified by an ::NTV2Channel enumeration.
+	-	Generally, there is one CSC for every Frame Store. ::NTV2DeviceGetNumFrameStores can be used to determine
+		the number of Frame Stores on a given device.
+	-	CSC widgets are identified by ::NTV2_WgtCSC1, ::NTV2_WgtCSC2, etc.
+	-	Each CSC has two inputs:
+		-	<b>Video Input</b>:  When this is sourced from another widget’s output crosspoint, and it’s receiving…
+			-	YCbCr/YUV video, then the CSC will produce valid RGB[A] data at its RGBA output.
+			-	RGB[A] video, then the CSC will produce valid YCbCr video at its <b>YUV Video</b> output,
+				and alpha channel video at its <b>Key YUV</b> output.
+		-	<b>Key Input</b>:  This supplies alpha channel data for the CSC’s <b>RGB Video</b> output.
+	-	Each CSC has 3 outputs:
+		-	<b>YUV Video</b>:  This produces valid YCbCr video data only when the CSC’s <b>Video Input</b> is receiving RGB[A] video data.
+		-	<b>RGB Video</b>:	This produces valid RGB[A] video data only when the CSC’s <b>Video Input</b> is receiving YCbCr video data.
+		-	<b>Key YUV</b>:  This produces valid YCbCr key data only when the CSC’s <b>Video Input</b> is receiving RGB[A] video data.
+	-	Routing instructions are in the \ref widget_csc section in the \ref ntv2signalrouting section.
+
+	@par	YCbCr to RGB Conversion
+
+	When the CSC’s <b>Video Input</b> is connected to a YUV video source, it will convert and provide RGB data on
+	its “RGB” output crosspoint. If <b>Key Input</b> is not provided, the alpha channel in the output will be <i>opaque</i>.
+
+	The conversion formulæ:
+	@code{.cpp}
+		// Full-range 10-bit “Rec 601” (SD) conversion:
+		R = 1.167808 * y  +  0.000000 * cb  +  1.600721 * cr;
+		G = 1.167808 * y  -  0.392915 * cb  -  0.815359 * cr;
+		B = 1.167808 * y  +  2.023165 * cb  +  0.000000 * cr;
+
+		// SMPTE-range 10-bit “Rec 601” (SD) conversion:
+		R = 1.0000008 * y  +  0.000000 * cb  +  1.370705 * cr;
+		G = 1.0000008 * y  -  0.336455 * cb  -  0.698196 * cr;
+		B = 1.0000008 * y  +  1.732446 * cb  +  0.000000 * cr;
+
+		// Full-range 10-bit “Rec 709” (HD) conversion:
+		R = 1.167808 * y  +  0.000000 * cb  +  1.798014 * cr;
+		G = 1.167808 * y  -  0.213876 * cb  -  0.534477 * cr;
+		B = 1.167808 * y  +  2.118615 * cb  +  0.000000 * cr;
+
+		// SMPTE-range 10-bit “Rec 709” (HD) conversion:
+		R = 1.000000 * y  +  0.000000 * cb  +  1.539648 * cr;
+		G = 1.000000 * y  -  0.183143 * cb  -  0.457675 * cr;
+		B = 1.000000 * y  +  1.814180 * cb  +  0.000000 * cr;
+	@endcode
+
+	@par	RGB to YCbCr Conversion
+
+	When the CSC’s <b>Video Input</b> is fed RGB[A] video, it will convert and provide YUV data on its “Video” and “Key”
+	output crosspoints.
+
+	The conversion formulæ:
+	@code{.cpp}
+		// Full-range 10-bit “Rec 601” (SD) conversion:
+		Y  =  0.25604 * r  +  0.50265 * g  +  0.09762 * b;
+		Cb = -0.14779 * r  -  0.29014 * g  +  0.43793 * b;
+		Cr =  0.43793 * r  -  0.36671 * g  -  0.07122 * b;
+
+		// SMPTE-range 10-bit “Rec 601” (SD) conversion:
+		Y  =  0.29900 * r  +  0.58700 * g  +  0.11400 * b;
+		Cb = -0.17259 * r  -  0.33883 * g  +  0.51142 * b;
+		Cr =  0.51142 * r  -  0.42825 * g  -  0.08317 * b;
+
+		// Full-range 10-bit “Rec 709” (HD) conversion:
+		Y  =  0.18205 * r  +  0.61243 * g  +  0.06183 * b;
+		Cb = -0.10035 * r  -  0.33758 * g  +  0.43793 * b;
+		Cr =  0.43793 * r  -  0.39777 * g  -  0.04016 * b;
+
+		// SMPTE-range 10-bit “Rec 709” (HD) conversion:
+		Y  =  0.21260 * r  +  0.71520 * g  +  0.07220 * b;
+		Cb = -0.11719 * r  -  0.39423 * g  +  0.51142 * b;
+		Cr =  0.51142 * r  -  0.46452 * g  -  0.04689 * b;
+	@endcode
+
+
 
 	<hr size="50px">
 	@section	audiooperation		Audio System Operation
