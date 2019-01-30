@@ -246,12 +246,16 @@ private:
 			DefineRegClass (kRegStatus, kRegClass_Timecode);
 		DefineRegister (kRegStatus2,			"",	mDecodeStatus2Reg,			READWRITE,	kRegClass_DMA,		kRegClass_Channel3,	kRegClass_Channel4);
 		DefineRegClass (kRegStatus2, kRegClass_Channel5);	DefineRegClass (kRegStatus2, kRegClass_Channel6);	DefineRegClass (kRegStatus2, kRegClass_Channel7);	DefineRegClass (kRegStatus2, kRegClass_Channel8);
-		DefineRegister (kRegInputStatus,		"",	mDecodeInputStatusReg,		READWRITE,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);	DefineRegClass (kRegInputStatus, kRegClass_Audio);
+		DefineRegister (kRegInputStatus,		"",	mDecodeInputStatusReg,		READONLY,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);	DefineRegClass (kRegInputStatus, kRegClass_Audio);
 		DefineRegister (kRegSDIInput3GStatus,	"",	mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);
 		DefineRegister (kRegSDIInput3GStatus2,	"",	mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel3,	kRegClass_Channel4);
 		DefineRegister (kRegSDI5678Input3GStatus,"",mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel5,	kRegClass_Channel6);
 			DefineRegClass (kRegSDI5678Input3GStatus, kRegClass_Channel7);
 			DefineRegClass (kRegSDI5678Input3GStatus, kRegClass_Channel8);
+		DefineRegister (kRegInputStatus2,		"",	mDecodeSDIInputStatus2Reg,	READONLY,	kRegClass_Input,	kRegClass_Channel3,	kRegClass_Channel4);	//	288
+		DefineRegister (kRegInput56Status,		"",	mDecodeSDIInputStatus2Reg,	READONLY,	kRegClass_Input,	kRegClass_Channel5,	kRegClass_Channel6);	//	458
+		DefineRegister (kRegInput78Status,		"",	mDecodeSDIInputStatus2Reg,	READONLY,	kRegClass_Input,	kRegClass_Channel7,	kRegClass_Channel8);	//	459
+
 		DefineRegister (kRegFS1ReferenceSelect,	"", mDecodeFS1RefSelectReg,		READWRITE,	kRegClass_Input,	kRegClass_Timecode, kRegClass_NULL);
 		DefineRegister (kRegSysmonVccIntDieTemp,"",	mDecodeSysmonVccIntDieTemp,	READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegSDITransmitControl,	"",	mDecodeSDITransmitCtrl,		READWRITE,	kRegClass_Channel1,	kRegClass_Channel2,	kRegClass_Channel3);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel4);
@@ -1975,7 +1979,7 @@ private:
 				<< "Input 1 Scan Mode: "	<< ((BIT(7) & inRegValue) ? "Progressive" : "Interlaced") << endl
 				<< "Input 2 Frame Rate: " << ::NTV2FrameRateToString(fRate2, true) << endl
 				<< "Input 2 Geometry: ";
-			if (BIT(30) & inRegValue)
+			if (BIT(31) & inRegValue)
 				switch (((BIT(12)|BIT(13)|BIT(14)) & inRegValue) >> 12)
 			{
 				case 0:		oss << "2K x 1080";		break;
@@ -2066,6 +2070,62 @@ private:
 		}
 		virtual	~DecodeSDIInputStatusReg()	{}
 	}	mDecodeSDIInputStatusReg;
+
+	struct DecodeSDIInputStatus2Reg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;
+			const string sOdd	(inRegNum == kRegInputStatus2 ? "Input 3" : (inRegNum == kRegInput56Status ? "Input 5" : "Input 7"));
+			const string sEven	(inRegNum == kRegInputStatus2 ? "Input 4" : (inRegNum == kRegInput56Status ? "Input 6" : "Input 8"));
+			const NTV2FrameRate	fRate1	(NTV2FrameRate( (inRegValue & (BIT( 0)|BIT( 1)|BIT( 2) ))        | ((inRegValue & BIT(28)) >> (28-3)) ));
+			const NTV2FrameRate	fRate2	(NTV2FrameRate(((inRegValue & (BIT( 8)|BIT( 9)|BIT(10) )) >>  8) | ((inRegValue & BIT(29)) >> (29-3)) ));
+			ostringstream	oss;
+			oss	<< sOdd << " Scan Mode: "	<< ((BIT(7) & inRegValue) ? "Progressive" : "Interlaced") << endl
+				<< sOdd << " Frame Rate: " << ::NTV2FrameRateToString(fRate1, true) << endl
+				<< sOdd << " Geometry: ";
+			if (BIT(30) & inRegValue) switch (((BIT(4)|BIT(5)|BIT(6)) & inRegValue) >> 4)
+			{
+				case 0:				oss << "2K x 1080";		break;
+				case 1:				oss << "2K x 1556";		break;
+				default:			oss << "Invalid HI";	break;
+			}
+			else switch (((BIT(4)|BIT(5)|BIT(6)) & inRegValue) >> 4)
+			{
+				case 0:				oss << "Unknown";		break;
+				case 1:				oss << "525";			break;
+				case 2:				oss << "625";			break;
+				case 3:				oss << "750";			break;
+				case 4:				oss << "1125";			break;
+				case 5:				oss << "1250";			break;
+				case 6:	case 7:		oss << "Reserved";		break;
+				default:			oss << "Invalid LO";	break;
+			}
+			oss	<< endl
+				<< sEven << " Scan Mode: "	<< ((BIT(15) & inRegValue) ? "Progressive" : "Interlaced") << endl
+				<< sEven << " Frame Rate: " << ::NTV2FrameRateToString(fRate2, true) << endl
+				<< sEven << " Geometry: ";
+			if (BIT(31) & inRegValue) switch (((BIT(12)|BIT(13)|BIT(14)) & inRegValue) >> 12)
+			{
+				case 0:				oss << "2K x 1080";		break;
+				case 1:				oss << "2K x 1556";		break;
+				default:			oss << "Invalid HI";	break;
+			}
+			else switch (((BIT(12)|BIT(13)|BIT(14)) & inRegValue) >> 12)
+			{
+				case 0:				oss << "Unknown";		break;
+				case 1:				oss << "525";			break;
+				case 2:				oss << "625";			break;
+				case 3:				oss << "750";			break;
+				case 4:				oss << "1125";			break;
+				case 5:				oss << "1250";			break;
+				case 6:	case 7:		oss << "Reserved";		break;
+				default:			oss << "Invalid LO";	break;
+			}
+			return oss.str();
+		}
+		virtual	~DecodeSDIInputStatus2Reg()	{}
+	}	mDecodeSDIInputStatus2Reg;
 
 	struct DecodeFS1RefSelectReg : public Decoder
 	{
