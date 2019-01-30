@@ -41,6 +41,7 @@
 #define SAREK_2110_AUDIO_STREAMSELECT           (0x230000/4)
 
 #define SAREK_2110_TEST_GENERATOR               (0x308000/4)
+#define SAREK_AXIS_PCAP							(0x309000/4)
 
 
 /////////////////////////////////////////////////////////////////////
