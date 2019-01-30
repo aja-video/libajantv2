@@ -1,6 +1,6 @@
 /**
     @file		ntv2enums.h
-    @copyright	Copyright (C) 2013-2018 AJA Video Systems, Inc.  All rights reserved.
+    @copyright	Copyright (C) 2013-2019 AJA Video Systems, Inc.  All rights reserved.
     @brief		Enumerations for controlling NTV2 devices.
 **/
 

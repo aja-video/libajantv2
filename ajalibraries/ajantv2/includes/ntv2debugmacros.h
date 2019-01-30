@@ -1,6 +1,6 @@
 /**
 	@file		ntv2debugMacros.h
-	@copyright	Copyright (C) 2004-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2004-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares several macros useful for debugging.
 **/
 

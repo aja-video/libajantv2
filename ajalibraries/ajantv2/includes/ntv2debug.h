@@ -1,7 +1,7 @@
 /**
 	@file		ntv2debug.cpp
 	@brief		Declares the NTV2 debug output functions, including 'odprintf'.
-	@copyright	Copyright 2004-2018 AJA Video Systems, Inc. All rights reserved.
+	@copyright	Copyright 2004-2019 AJA Video Systems, Inc. All rights reserved.
 	@note		This module should remain straight ANSI 'C' -- no C++ or STL.
 **/
 

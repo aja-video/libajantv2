@@ -2,7 +2,7 @@
 	@file		ntv2verticalfilter.h
 	@brief		Declares the VerticalFilterLine and FieldInterpolateLine functions for
 				vertically filtering interlaced video with a 1/4,1/2,1/4 filter.
-	@copyright	(C) 2004-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef VERTICALFILTER_H

@@ -1,7 +1,7 @@
 /**
 	@file		ancillarydata_hdr_hdr10.cpp
 	@brief		Implements the AJAAncillaryData_HDR_HDR10 class.
-	@copyright	(C) 2012-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2012-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ancillarydata_hdr_hdr10.h"

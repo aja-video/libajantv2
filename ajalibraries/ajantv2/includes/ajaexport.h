@@ -1,6 +1,6 @@
 /**
 	@file		ajaexport.h
-	@copyright	Copyright (C) 2008-2018 AJA Video Systems, Inc.  Proprietary and Confidential information.
+	@copyright	Copyright (C) 2008-2019 AJA Video Systems, Inc.  Proprietary and Confidential information.
 	@brief		Defines the import/export macros for producing DLLs or LIBs.
 **/
 

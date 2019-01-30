@@ -1,7 +1,7 @@
 /**
 	@file		ntv2task.cpp
 	@brief		Implements the CNTV2Task class. Its functionality is deprecated.
-	@copyright	(C) 2008-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2008-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2task.h"

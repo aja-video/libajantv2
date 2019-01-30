@@ -1,7 +1,7 @@
 /**
 	@file		ntv2discover.h
 	@brief		Declares the NTV nub discovery functions.
-	@copyright	Copyright 2006-2018 AJA Video Systems, Inc. All rights reserved.
+	@copyright	Copyright 2006-2019 AJA Video Systems, Inc. All rights reserved.
 **/
 
 #ifndef NTV2DISCOVER_H

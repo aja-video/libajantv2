@@ -1,6 +1,6 @@
 /**
 	@file		ntv2endian.h
-	@copyright	Copyright (C) 2008-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2008-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Defines a number of handy byte-swapping macros.
 **/
 

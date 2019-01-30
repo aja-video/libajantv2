@@ -1,6 +1,6 @@
 /**
 	@file		pixelformat.cpp
-	@copyright	Copyright (C) 2010-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2010-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Contains the implementation of the AJAPixelFormat class.
 **/
 

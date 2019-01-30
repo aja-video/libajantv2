@@ -1,7 +1,7 @@
 /**
 	@file		ntv2signalrouter.h
 	@brief		Declares CNTV2SignalRouter class.
-	@copyright	(C) 2014-2018 AJA Video Systems, Inc.	Proprietary and confidential.
+	@copyright	(C) 2014-2019 AJA Video Systems, Inc.	Proprietary and confidential.
 **/
 
 #ifndef NTV2SIGNALROUTER_H

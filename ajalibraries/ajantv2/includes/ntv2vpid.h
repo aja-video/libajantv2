@@ -1,7 +1,7 @@
 /**
 	@file		ntv2vpid.h
 	@brief		Declares the CNTV2VPID class. See SMPTE 352 standard for details.
-	@copyright	(C) 2012-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2012-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2VPID_H

@@ -1,6 +1,6 @@
 /**
 	@file		performance.h
-	@copyright	Copyright (C) 2011-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2011-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declaration of the AJAPerformance class.
 **/
 

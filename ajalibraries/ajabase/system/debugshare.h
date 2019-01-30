@@ -1,6 +1,6 @@
 /**
 	@file		debugshare.h
-	@copyright	Copyright (C) 2009-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2009-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares the constants used for sharing debug messages. These structures are used
 				to gather debug messages and share them with the applications that report and log.
 	@note		This file is shared with drivers written in c.
