@@ -1693,26 +1693,26 @@ string CNTV2Config2110::GetSDPUrl(const eSFP sfp, const NTV2Stream stream)
 {
     string localIPAddress, subnetMask, gateway;
     string preAmble = "http://";
-    string namePre = "txstream";
+	string namePre = "tx";
     string namePost;
 
     GetNetworkConfiguration(sfp, localIPAddress, subnetMask, gateway);
 
     switch (stream)
     {
-        case NTV2_VIDEO1_STREAM:    namePost = "1v.sdp";   break;
-        case NTV2_VIDEO2_STREAM:    namePost = "2v.sdp";   break;
-        case NTV2_VIDEO3_STREAM:    namePost = "3v.sdp";   break;
-        case NTV2_VIDEO4_STREAM:    namePost = "4v.sdp";   break;
-        case NTV2_AUDIO1_STREAM:    namePost = "1a.sdp";   break;
-        case NTV2_AUDIO2_STREAM:    namePost = "2a.sdp";   break;
-        case NTV2_AUDIO3_STREAM:    namePost = "3a.sdp";   break;
-        case NTV2_AUDIO4_STREAM:    namePost = "4a.sdp";   break;
-		case NTV2_ANC1_STREAM:		namePost = "1m.sdp";   break;
-		case NTV2_ANC2_STREAM:		namePost = "2m.sdp";   break;
-		case NTV2_ANC3_STREAM:		namePost = "3m.sdp";   break;
-		case NTV2_ANC4_STREAM:		namePost = "4m.sdp";   break;
-		case NTV2_VIDEO4K_STREAM:	namePost = "4Kv.sdp";  break;
+		case NTV2_VIDEO1_STREAM:    namePost = "Video1.sdp";	break;
+		case NTV2_VIDEO2_STREAM:    namePost = "Video2.sdp";	break;
+		case NTV2_VIDEO3_STREAM:    namePost = "Video3.sdp";	break;
+		case NTV2_VIDEO4_STREAM:    namePost = "Video4.sdp";	break;
+		case NTV2_AUDIO1_STREAM:    namePost = "Audio1.sdp";	break;
+		case NTV2_AUDIO2_STREAM:    namePost = "Audio2.sdp";	break;
+		case NTV2_AUDIO3_STREAM:    namePost = "Audio3.sdp";	break;
+		case NTV2_AUDIO4_STREAM:    namePost = "Audio4.sdp";	break;
+		case NTV2_ANC1_STREAM:		namePost = "Anc1.sdp";		break;
+		case NTV2_ANC2_STREAM:		namePost = "Anc2.sdp";		break;
+		case NTV2_ANC3_STREAM:		namePost = "Anc3.sdp";		break;
+		case NTV2_ANC4_STREAM:		namePost = "Anc4.sdp";		break;
+		case NTV2_VIDEO4K_STREAM:	namePost = "Video4K.sdp";	break;
 
         default:                    namePost = "";         break;
     }
@@ -1800,24 +1800,24 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
 
     if (pushit)
 	{
-		string filename = "txstream";
+		string filename = "tx";
 
 		switch (stream)
 		{
-			case NTV2_VIDEO1_STREAM:    filename += "1v.sdp";   break;
-			case NTV2_VIDEO2_STREAM:    filename += "2v.sdp";   break;
-			case NTV2_VIDEO3_STREAM:    filename += "3v.sdp";   break;
-			case NTV2_VIDEO4_STREAM:    filename += "4v.sdp";   break;
-			case NTV2_AUDIO1_STREAM:    filename += "1a.sdp";   break;
-			case NTV2_AUDIO2_STREAM:    filename += "2a.sdp";   break;
-			case NTV2_AUDIO3_STREAM:    filename += "3a.sdp";   break;
-			case NTV2_AUDIO4_STREAM:    filename += "4a.sdp";   break;
-			case NTV2_ANC1_STREAM:		filename += "1m.sdp";   break;
-			case NTV2_ANC2_STREAM:		filename += "2m.sdp";   break;
-			case NTV2_ANC3_STREAM:		filename += "3m.sdp";   break;
-			case NTV2_ANC4_STREAM:		filename += "4m.sdp";   break;
-			case NTV2_VIDEO4K_STREAM:	filename += "4Kv.sdp";  break;
-			default:                    filename += "";         break;
+			case NTV2_VIDEO1_STREAM:    filename += "Video1.sdp";   break;
+			case NTV2_VIDEO2_STREAM:    filename += "Video2.sdp";   break;
+			case NTV2_VIDEO3_STREAM:    filename += "Video3.sdp";   break;
+			case NTV2_VIDEO4_STREAM:    filename += "Video4.sdp";   break;
+			case NTV2_AUDIO1_STREAM:    filename += "Audio1.sdp";   break;
+			case NTV2_AUDIO2_STREAM:    filename += "Audio2.sdp";   break;
+			case NTV2_AUDIO3_STREAM:    filename += "Audio3.sdp";   break;
+			case NTV2_AUDIO4_STREAM:    filename += "Audio4.sdp";   break;
+			case NTV2_ANC1_STREAM:		filename += "Anc1.sdp";		break;
+			case NTV2_ANC2_STREAM:		filename += "Anc2.sdp";		break;
+			case NTV2_ANC3_STREAM:		filename += "Anc3.sdp";		break;
+			case NTV2_ANC4_STREAM:		filename += "Anc4.sdp";		break;
+			case NTV2_VIDEO4K_STREAM:	filename += "Video4K.sdp";  break;
+			default:                    filename += "";				break;
 		}
         rv = PushSDP(filename,sdp);
 	}
