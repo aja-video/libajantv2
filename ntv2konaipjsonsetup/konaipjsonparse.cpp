@@ -1094,7 +1094,7 @@ bool CKonaIpJsonParse2110::StructToJsonTransmitAnc(const TransmitAncData2110& tA
 		obj.insert("payloadType",           QJsonValue((int)tAnc2110.txAncCh[i].payloadType));
 
 		obj.insert("enable",                QJsonValue(QString(GetEnable(tAnc2110.txAncCh[i].enable))));
-		obj.insert("stream",                QJsonValue(QString(GetAudioStream(tAnc2110.txAncCh[i].stream))));
+		obj.insert("stream",                QJsonValue(QString(GetAncStream(tAnc2110.txAncCh[i].stream))));
 		aArray += QJsonValue(obj);
 	}
 
