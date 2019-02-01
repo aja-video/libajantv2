@@ -3559,9 +3559,9 @@ public:
 	/**
 		@brief		Selects the color space converter operation method.
 		@param[in]	inCSCMethod		Specifies the method by which the color space converter will transform its input into its output.
-		@param[in]	inChannel		Specifies the CSC of interest.
+		@param[in]	inChannel		Specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
 		@return		True if the call was successful; otherwise false. 
-		@note		When selecting NTV2_CSC_Method_Enhanced_4K as the method, the channel must be NTV2_CHANNEL1 or NTV2_CHANNEL5.
+		@note		When selecting ::NTV2_CSC_Method_Enhanced_4K as the method, the channel must be ::NTV2_CHANNEL1 or ::NTV2_CHANNEL5.
 					This will group four CSCs together to process the 4K image. To leave 4K, take CSC 1 (or CSC 5) out of 4K mode. 
 		@see		CNTV2Card::GetColorSpaceMethod, \ref vidop-csc and \ref widget_csc
 	**/
@@ -3569,14 +3569,32 @@ public:
 
 	/**
 		@brief		Answers with the current operating mode of the given color space converter.
-		@param[out]	outMethod		Receives the CSC's current operating method.
-		@param[in]	inChannel		Specifies the CSC of interest.
+		@param[out]	outMethod	Receives the CSC's current operating method.
+		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
+								Defaults to ::NTV2_CHANNEL1 (CSC1).
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::SetColorSpaceMethod, \ref vidop-csc and \ref widget_csc
 	**/
 	AJA_VIRTUAL bool	GetColorSpaceMethod (NTV2ColorSpaceMethod & outMethod, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
+	/**
+		@brief		Sets the matrix type to be used for the given CSC, typically ::NTV2_Rec601Matrix or ::NTV2_Rec709Matrix.
+		@param[in]	inType		Specifies the matrix type to be used.
+		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
+								Defaults to ::NTV2_CHANNEL1 (CSC1).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetColorSpaceMatrixSelect, \ref vidop-csc and \ref widget_csc
+	**/
 	AJA_VIRTUAL bool	SetColorSpaceMatrixSelect (const NTV2ColorSpaceMatrixType inType, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief		Answers with the current matrix type being used for the given CSC.
+		@param[out]	outType		Receives the matrix type being used, typically ::NTV2_Rec601Matrix or ::NTV2_Rec709Matrix.
+		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
+								Defaults to ::NTV2_CHANNEL1 (CSC1).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetColorSpaceMatrixSelect, \ref vidop-csc and \ref widget_csc
+	**/
 	AJA_VIRTUAL bool	GetColorSpaceMatrixSelect (NTV2ColorSpaceMatrixType & outType, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	AJA_VIRTUAL bool	DownloadLUTToHW (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT, const NTV2Channel inChannel, const int inBank);
@@ -3614,10 +3632,10 @@ public:
 
 	/**
 		@brief		Sets the RGB range for the given CSC.
-		@param[in]	inRange		Specifies the new RGB range (NTV2_CSC_RGB_RANGE_FULL or NTV2_CSC_RGB_RANGE_SMPTE).
+		@param[in]	inRange		Specifies the new RGB range (::NTV2_CSC_RGB_RANGE_FULL or ::NTV2_CSC_RGB_RANGE_SMPTE).
 		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
 								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
-								Defaults to CSC 0 (NTV2_CHANNEL1).
+								Defaults to ::NTV2_CHANNEL1 (CSC1).
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::GetColorSpaceRGBBlackRange, \ref vidop-csc and \ref widget_csc
 	**/
@@ -3628,7 +3646,7 @@ public:
 		@param[out]	outRange	Receives the RGB range (NTV2_CSC_RGB_RANGE_FULL, NTV2_CSC_RGB_RANGE_SMPTE, or NTV2_CSC_RGB_RANGE_INVALID upon failure).
 		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
 								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
-								Defaults to CSC 0 (NTV2_CHANNEL1).
+								Defaults to ::NTV2_CHANNEL1 (CSC1).
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::SetColorSpaceRGBBlackRange, \ref vidop-csc and \ref widget_csc
 	**/
@@ -3637,16 +3655,52 @@ public:
 	AJA_VIRTUAL bool	SetColorSpaceUseCustomCoefficient (const ULWord inUseCustomCoefficient, const NTV2Channel inChannel = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool	GetColorSpaceUseCustomCoefficient (ULWord & outUseCustomCoefficient, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool	SetColorSpaceMakeAlphaFromKey (const ULWord inMakeAlphaFromKey, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	/**
+		@brief		Specifies whether or not the given CSC will produce alpha channel data from its key input.
+		@param[in]	inMakeAlphaFromKey		Specify true to have the CSC generate alpha channel data from a YCbCr video signal
+											applied to its Key Input;  otherwise specify false to have it generate an "opaque" value.
+		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
+								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
+								Defaults to ::NTV2_CHANNEL1 (CSC1).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetColorSpaceMakeAlphaFromKey, \ref vidop-csc and \ref widget_csc
+	**/
+	AJA_VIRTUAL bool	SetColorSpaceMakeAlphaFromKey (const bool inMakeAlphaFromKey, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief		Answers whether or not the given CSC is set to produce alpha channel data from its key input.
+		@param[out]	outMakeAlphaFromKey		Receives true if the CSC is generating alpha channel data from the YCbCr video signal
+											being applied to its Key Input;  otherwise receives false.
+		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
+								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
+								Defaults to ::NTV2_CHANNEL1 (CSC1).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetColorSpaceMakeAlphaFromKey, \ref vidop-csc and \ref widget_csc
+	**/
 	AJA_VIRTUAL bool	GetColorSpaceMakeAlphaFromKey (ULWord & outMakeAlphaFromKey, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
+	/**
+		@brief		Answers whether or not the video signal present at the CSC’s Key Input is in sync with the video signal present
+					at its Video Input.
+		@param[out]	outVideoKeySyncFail		Receives true if the video signal present at the CSC’s Key Input is NOT sync'd to the
+											video signal present at its Video Input;  otherwise receives false.
+		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
+								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
+								Defaults to ::NTV2_CHANNEL1 (CSC1).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetColorSpaceMakeAlphaFromKey, CNTV2Card::SetColorSpaceMakeAlphaFromKey, \ref vidop-csc and \ref widget_csc
+		@note		The "outVideoKeySyncFail" result is valid and trustworthy when all of the following are true:
+					-	the Video Input is connected to a YCbCr signal source crosspoint;
+					-	the CSC's "Make Alpha From Key" setting is enabled;
+					-	the Key Input is connected to a YCbCr signal source crosspoint.
+	**/
 	AJA_VIRTUAL bool	GetColorSpaceVideoKeySyncFail (bool & outVideoKeySyncFail, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool	SetColorSpaceCustomCoefficients (const ColorSpaceConverterCustomCoefficients & inCustomCoefficients, const NTV2Channel inChannel = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool	GetColorSpaceCustomCoefficients (ColorSpaceConverterCustomCoefficients & outCustomCoefficients, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool	SetColorSpaceCustomCoefficients (const NTV2CSCCustomCoeffs & inCustomCoefficients, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool	GetColorSpaceCustomCoefficients (NTV2CSCCustomCoeffs & outCustomCoefficients, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool	SetColorSpaceCustomCoefficients12Bit (const ColorSpaceConverterCustomCoefficients & inCustomCoefficients, const NTV2Channel inChannel = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool	GetColorSpaceCustomCoefficients12Bit (ColorSpaceConverterCustomCoefficients & outCustomCoefficients, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool	SetColorSpaceCustomCoefficients12Bit (const NTV2CSCCustomCoeffs & inCustomCoefficients, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool	GetColorSpaceCustomCoefficients12Bit (NTV2CSCCustomCoeffs & outCustomCoefficients, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	AJA_VIRTUAL bool	SetLUTControlSelect (const NTV2LUTControlSelect inLUTSelect);
 	AJA_VIRTUAL bool	GetLUTControlSelect (NTV2LUTControlSelect & outLUTSelect);

@@ -21,6 +21,7 @@
 		-	\ref audioformats
 		-	@subpage	ancillarydata
 	-	<b>Other Helpful Information</b>
+		-	@subpage	ntv2signalrouting
 		-	@subpage	recordplaytechniques
 		-	@subpage	duallinkoverview
 		-	@subpage	devicesharing
