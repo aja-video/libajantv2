@@ -822,8 +822,11 @@ private:
 		for (unsigned chan(0);  chan < 8;  chan++)
 		{
 			const string & chanClass (sChan[chan]);
-			for (unsigned num(0);  num < 5;  num++)
-				DefineRegister (sECSCRegs[chan][num],		"",		mDefaultRegDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (sECSCRegs[chan][0],	"",	mCSCoeff1234Decoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (sECSCRegs[chan][1],	"",	mCSCoeff1234Decoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (sECSCRegs[chan][2],	"",	mCSCoeff567890Decoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (sECSCRegs[chan][3],	"",	mCSCoeff567890Decoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (sECSCRegs[chan][4],	"",	mCSCoeff567890Decoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
 		}
 	}	//	SetupCSCRegs
 
@@ -3116,6 +3119,79 @@ private:
 		}
 		virtual	~DecodeEnhancedCSCCoefficient()	{}
 	}	mEnhCSCCoeffDecoder;
+
+	struct DecodeCSCoeff1234 : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;
+			const uint32_t	coeff1 (((inRegValue >> 11) & 0x00000003) | uint32_t(inRegValue & 0x000007FF));
+			const uint32_t	coeff2 ((inRegValue >> 14) & 0x00001FFF);
+			uint16_t		nCoeff1(1), nCoeff2(2);
+			switch(inRegNum)
+			{
+				case kRegCSCoefficients3_4:		case kRegCS2Coefficients3_4:	case kRegCS3Coefficients3_4:	case kRegCS4Coefficients3_4:
+				case kRegCS5Coefficients3_4:	case kRegCS6Coefficients3_4:	case kRegCS7Coefficients3_4:	case kRegCS8Coefficients3_4:
+					nCoeff1 = 3;	nCoeff2 = 4;	break;
+			}
+			//			kRegCS?Coefficients1_2					kRegCS?Coefficients3_4
+			//	CSC		1	2	3	4	5	6	7	8			1	2	3	4	5	6	7	8
+			//	RegNum	142	147	291	296	347	460	465	470			143	148	292	297	348	461	466	471
+			//	kRegCS?Coefficients1_2:	kK2RegMaskVidKeySyncStatus			= BIT(28)	0=OK		1=SyncFail		GetColorSpaceVideoKeySyncFail
+			//	kRegCS?Coefficients1_2:	kK2RegMaskMakeAlphaFromKeySelect	= BIT(29)	0=No		1=Yes			GetColorSpaceMakeAlphaFromKey
+			//	kRegCS?Coefficients1_2:	kK2RegMaskColorSpaceMatrixSelect	= BIT(30)	0=Rec709	1=Rec601		GetColorSpaceMatrixSelect
+			//	kRegCS?Coefficients1_2:	kK2RegMaskUseCustomCoefSelect		= BIT(31)	0=No		1=Yes			GetColorSpaceUseCustomCoefficient
+			//	kRegCS?Coefficients3_4:	kK2RegMaskXena2RGBRange				= BIT(31)	0=Full		1=SMPTE			GetColorSpaceRGBBlackRange
+			//	kK2RegMaskCustomCoefficientLow		= BITS(0-10)	CSCCustomCoeffs.Coefficient1	GetColorSpaceCustomCoefficients
+			//	kK2RegMaskCustomCoefficientHigh		= BITS(16-26)	CSCCustomCoeffs.Coefficient2	GetColorSpaceCustomCoefficients
+			//	kK2RegMaskCustomCoefficient12BitLow	= BITS(0-12)	CSCCustomCoeffs.Coefficient1	GetColorSpaceCustomCoefficients12Bit
+			//	kK2RegMaskCustomCoefficient12BitHigh= BITS(14-26)	CSCCustomCoeffs.Coefficient2	GetColorSpaceCustomCoefficients12Bit
+			ostringstream	oss;
+			if (nCoeff1 == 1)
+				oss	<< "Video Key Sync Status: "		<< (inRegValue & BIT(28) ? "SyncFail" : "OK")	<< endl
+					<< "Make Alpha From Key Input: "	<< EnabDisab(inRegValue & BIT(29))				<< endl
+					<< "Matrix Select: "				<< (inRegValue & BIT(30) ? "Rec601" : "Rec709")	<< endl
+					<< "Use Custom Coeffs: "			<< YesNo(inRegValue & BIT(31))					<< endl;
+			else
+				oss	<< "RGB Range: "					<< (inRegValue & BIT(31) ? "SMPTE (0x040-0x3C0)" : "Full (0x000-0x3FF)")	<< endl;
+			oss	<< "Coefficient" << DEC(nCoeff1) << ": "	<< xHEX0N(coeff1, 4)	<< endl
+				<< "Coefficient" << DEC(nCoeff2) << ": "	<< xHEX0N(coeff2, 4);
+			return oss.str();
+		}
+		virtual	~DecodeCSCoeff1234()	{}
+	}	mCSCoeff1234Decoder;
+
+	struct DecodeCSCoeff567890 : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;
+			const uint32_t	coeff5 (((inRegValue >> 11) & 0x00000003) | uint32_t(inRegValue & 0x000007FF));
+			const uint32_t	coeff6 ((inRegValue >> 14) & 0x00001FFF);
+			uint16_t	nCoeff5(5), nCoeff6(6);
+			switch(inRegNum)
+			{
+				case kRegCSCoefficients7_8:		case kRegCS2Coefficients7_8:	case kRegCS3Coefficients7_8:	case kRegCS4Coefficients7_8:
+				case kRegCS5Coefficients7_8:	case kRegCS6Coefficients7_8:	case kRegCS7Coefficients7_8:	case kRegCS8Coefficients7_8:
+					nCoeff5 = 7;	nCoeff6 = 8;	break;
+				case kRegCSCoefficients9_10:	case kRegCS2Coefficients9_10:	case kRegCS3Coefficients9_10:	case kRegCS4Coefficients9_10:
+				case kRegCS5Coefficients9_10:	case kRegCS6Coefficients9_10:	case kRegCS7Coefficients9_10:	case kRegCS8Coefficients9_10:
+					nCoeff5 = 9;	nCoeff6 = 10;	break;
+			}
+			//			kRegCS?Coefficients5_6				kRegCS?Coefficients7_8				kRegCS?Coefficients9_10
+			//	CSC		1	2	3	4	5	6	7	8		1	2	3	4	5	6	7	8		1	2	3	4	5	6	7	8
+			//	RegNum	143	148	292	297	348	461	466	471		144	149	293	298	349	462	467	472		145	150	294	299	350	463	468	473
+			//	kK2RegMaskCustomCoefficientLow	= BITS(0-10) CSCCustomCoeffs.Coefficient5	GetColorSpaceCustomCoefficients
+			//	kK2RegMaskCustomCoefficientHigh	= BITS(16-26) CSCCustomCoeffs.Coefficient6	GetColorSpaceCustomCoefficients
+			//	kK2RegMaskCustomCoefficient12BitLow	= BITS(0-12) CSCCustomCoeffs.Coefficient5	GetColorSpaceCustomCoefficients12Bit
+			//	kK2RegMaskCustomCoefficient12BitHigh= BITS(14-26) CSCCustomCoeffs.Coefficient6	GetColorSpaceCustomCoefficients12Bit
+			ostringstream	oss;
+			oss	<< "Coefficient" << DEC(nCoeff5) << ": "	<< xHEX0N(coeff5, 4)	<< endl
+				<< "Coefficient" << DEC(nCoeff6) << ": "	<< xHEX0N(coeff6, 4);
+			return oss.str();
+		}
+		virtual	~DecodeCSCoeff567890()	{}
+	}	mCSCoeff567890Decoder;
 
 	struct DecodeSDIErrorStatus : public Decoder
 	{
