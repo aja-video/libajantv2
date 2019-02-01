@@ -61,7 +61,7 @@ enum AJASystemInfoSections
     AJA_SystemInfoSection_System = 0x00000001 << 5,
 
     AJA_SystemInfoSection_None   = 0x00000000,
-    AJA_SystemInfoSection_All    = 0xFFFFFFFF,
+    AJA_SystemInfoSection_All    = 0xFFFFFFFF
 };
 
 typedef std::pair<std::string, std::string>		AJALabelValuePair;				///< @brief	A pair of strings comprising a label and a value
