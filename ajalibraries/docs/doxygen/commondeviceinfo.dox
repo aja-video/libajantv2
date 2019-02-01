@@ -564,34 +564,74 @@
 	@endcode
 
 
+	<hr size="50px">
 	@subsection	vidop-csc		Color Space Converter Operation
 
 	A <b>Color Space Converter</b> (a.k.a. <b>CSC</b>) is a device widget implemented in FPGA firmware that converts Y/Cb/Cr values
-	into R/G/B/A values, or vice-versa. It uses several registers for configuring its properties and conversion coefficients.
+	into R/G/B/A values, or vice-versa. It uses a pair of registers for configuring its conversion properties.
 
 	-	In the SDK, CSCs are identified by an ::NTV2Channel enumeration.
-	-	Generally, there is one CSC for every Frame Store. ::NTV2DeviceGetNumFrameStores can be used to determine
-		the number of Frame Stores on a given device.
-	-	CSC widgets are identified by ::NTV2_WgtCSC1, ::NTV2_WgtCSC2, etc.
+	-	Generally, there is one CSC for every SDI connector. ::NTV2DeviceGetNumCSCs can be used to determine the number
+		of CSCs on a given device, which should match ::NTV2DeviceGetNumVideoInputs or ::NTV2DeviceGetNumVideoOutputs (whichever is larger).
+	-	CSC widgets are identified by ::NTV2_WgtCSC1, ::NTV2_WgtCSC2, etc.,
+		but are normally identified in SDK calls by an ::NTV2Channel value that represents a zero-based index number.
 	-	Each CSC has two inputs:
-		-	<b>Video Input</b>:  When this is sourced from another widget’s output crosspoint, and it’s receiving…
-			-	YCbCr/YUV video, then the CSC will produce valid RGB[A] data at its RGBA output.
-			-	RGB[A] video, then the CSC will produce valid YCbCr video at its <b>YUV Video</b> output,
+		-	<b>Video</b>:  When this is sourced from another widget’s output crosspoint, and it’s receiving…
+			-	Y/Cb/Cr video — then the CSC will produce valid RGB[A] data at its RGBA output.
+			-	RGB[A] video — then the CSC will produce valid YCbCr video at its <b>YUV Video</b> output,
 				and alpha channel video at its <b>Key YUV</b> output.
-		-	<b>Key Input</b>:  This supplies alpha channel data for the CSC’s <b>RGB Video</b> output.
+		-	<b>Key</b>:  This supplies alpha channel data for the CSC’s <b>RGB Video</b> output. When used,
+			it should always be sourced with Y/Cb/Cr video (never RGB).
 	-	Each CSC has 3 outputs:
 		-	<b>YUV Video</b>:  This produces valid YCbCr video data only when the CSC’s <b>Video Input</b> is receiving RGB[A] video data.
-		-	<b>RGB Video</b>:	This produces valid RGB[A] video data only when the CSC’s <b>Video Input</b> is receiving YCbCr video data.
+		-	<b>RGB Video</b>: This produces valid RGB[A] video data only when the CSC’s <b>Video Input</b> is receiving YCbCr video data.
 		-	<b>Key YUV</b>:  This produces valid YCbCr key data only when the CSC’s <b>Video Input</b> is receiving RGB[A] video data.
 	-	Routing instructions are in the \ref widget_csc section in the \ref ntv2signalrouting section.
+	-	The CSC’s conversion coefficients are adjusted based on “SMPTE” versus “Full” range.
+		-	The conversion range is represented in the SDK as the ::NTV2RGBBlackRange or ::NTV2_CSC_RGB_Range data types.
+		-	Full range is represented by the ::NTV2_CSC_RGB_RANGE_FULL or ::NTV2_RGBBLACKRANGE_0_0x3FF enumerations.
+			-	8-bit Full Range has 255 possible values (0 thru 255)
+			-	10-bit Full Range has 1023 possible values (0 thru 1023).
+		-	SMPTE range is represented by the ::NTV2_CSC_RGB_RANGE_SMPTE or ::NTV2_RGBBLACKRANGE_0x40_0x3C0 enumerations.
+			-	8-bit SMPTE-range has 219 possible values (16 thru 235).
+			-	10-bit SMPTE-range has 876 possible values (64 thru 940).
+		-	Call CNTV2Card::GetColorSpaceRGBBlackRange to determine the current range setting for a CSC.
+		-	Call CNTV2Card::SetColorSpaceRGBBlackRange to change a CSC’s range setting.
+	-	The CSC’s conversion matrix can be set to “Rec. 601” (SD) or “Rec. 709” (HD).
+		-	The conversion matrix type is represented in the SDK by the ::NTV2ColorSpaceMatrixType data type.
+		-	Rec. 601 is represented by the ::NTV2_Rec601Matrix enumeration constant.
+		-	Rec. 709 is represented by the ::NTV2_Rec709Matrix enumeration constant.
+		-	Call CNTV2Card::GetColorSpaceMatrixSelect to determine the current matrix selection for a CSC.
+		-	Call CNTV2Card::SetColorSpaceMatrixSelect to change a CSC’s matrix selection.
 
 	@par	YCbCr to RGB Conversion
 
-	When the CSC’s <b>Video Input</b> is connected to a YUV video source, it will convert and provide RGB data on
-	its “RGB” output crosspoint. If <b>Key Input</b> is not provided, the alpha channel in the output will be <i>opaque</i>.
+	-	When the CSC’s <b>Video Input</b> is connected to a YUV video source, it will convert and provide RGB data on
+		its “RGB” output crosspoint.
+	-	In addition to the YCbCr-to-RGB value conversion, the CSC also performs the necessary 4:2:2 up-sampling to fill the
+		“missing” pixels in the outgoing RGB raster.
+	-	The CSC will produce an <i>opaque</i> alpha channel by default.
+	-	It can produce alpha channel data from YCbCr video supplied to its <b>Key Input</b> (using just the luma channel) —
+		provided it’s configured to do so:
+		-	Call CNTV2Card::GetColorSpaceMakeAlphaFromKey to determine if the CSC will use its <b>Key Input</b> to generate
+			alpha channel data.
+		-	Call CNTV2Card::SetColorSpaceMakeAlphaFromKey to enable or disable the setting.
+		-	When “Make Alpha From Key” is enabled, call CNTV2Card::GetColorSpaceVideoKeySyncFail to query if the CSC’s
+			<b>Key Input</b> is synchronized with its <b>Video Input</b>. Sync failure will occur if the Key and Video
+			signals have unrelated frame rates, or are significantly out of phase with each other.
 
 	The conversion formulæ:
 	@code{.cpp}
+		// Full-range 8-bit “Rec 601” (SD) conversion:
+		R = 1.164384 * y  +  0.000000 * cb  +  1.596027 * cr;
+		G = 1.164384 * y  -  0.391762 * cb  -  0.812968 * cr;
+		B = 1.164384 * y  +  2.017232 * cb  +  0.000000 * cr;
+
+		// SMPTE-range 8-bit “Rec 601” (SD) conversion:
+		R = 1.000000 * y  +  0.000000 * cb  +  1.370705 * cr;
+		R = 1.000000 * y  -  0.336455 * cb  -  0.698196 * cr;
+		R = 1.000000 * y  +  1.732446 * cb  +  0.000000 * cr;
+
 		// Full-range 10-bit “Rec 601” (SD) conversion:
 		R = 1.167808 * y  +  0.000000 * cb  +  1.600721 * cr;
 		G = 1.167808 * y  -  0.392915 * cb  -  0.815359 * cr;
@@ -613,10 +653,17 @@
 		B = 1.000000 * y  +  1.814180 * cb  +  0.000000 * cr;
 	@endcode
 
+	@note	The 8-bit and 10-bit coefficients are NOT the same, since the RGB 10-bit white point (1023)
+			is not simply 4 × the 8-bit RGB white point (255).
+
 	@par	RGB to YCbCr Conversion
 
-	When the CSC’s <b>Video Input</b> is fed RGB[A] video, it will convert and provide YUV data on its “Video” and “Key”
-	output crosspoints.
+	-	When the CSC’s <b>Video Input</b> is fed RGB[A] video, it will convert and provide YUV data on
+		its “Video” and “Key” output crosspoints.
+	-	In addition to the RGB-to-YCbCr value conversion, it also performs the necessary 4:2:2 down-sampling
+		(implemented as a low-pass filter) for the fewer samples in the outgoing YUV raster.
+	-	The <b>Key Output</b> luma channel data is scaled appropriately from the incoming alpha channel data.
+		Its outgoing Cb and Cr component values are fixed at <tt>0x200</tt>.
 
 	The conversion formulæ:
 	@code{.cpp}
@@ -640,6 +687,11 @@
 		Cb = -0.11719 * r  -  0.39423 * g  +  0.51142 * b;
 		Cr =  0.51142 * r  -  0.46452 * g  -  0.04689 * b;
 	@endcode
+
+	@par	Enhanced CSCs
+
+	Some AJA devices support “enhanced” CSC firmware that is used to override the default Rec 601 and Rec 709 conversion
+	offsets and coefficients.  Call ::NTV2DeviceCanDoEnhancedCSC to determine if the device has the enhanced CSC firmware.
 
 
 

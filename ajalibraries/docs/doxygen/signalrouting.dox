@@ -247,6 +247,8 @@
 			-	By default, the function returns the <b>YUV</b> output crosspoint.
 				To obtain the <b>RGB</b> crosspoint, pass \c true for \c inIsRGB.
 
+	The \ref vidop-csc section has more information on CSC configuration.
+
 
 	@subsection	widget_mixkey	Mixer/Keyer
 
