@@ -52,7 +52,15 @@
 #endif
 
 #if defined(__clang__)
-	#define AJA_FALL_THRU	 [[clang::fallthrough]]
+	#ifndef __has_cpp_attribute
+		#define __has_cpp_attribute(__x__)	0
+	#endif
+
+	#if __has_cpp_attribute(clang::fallthrough)
+		#define AJA_FALL_THRU	[[clang::fallthrough]]
+	#else
+		#define AJA_FALL_THRU
+	#endif
 #else
 	#define AJA_FALL_THRU
 #endif
