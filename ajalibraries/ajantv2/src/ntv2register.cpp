@@ -3049,8 +3049,73 @@ bool CNTV2Card::GetMixerSyncStatus (const UWord inWhichMixer, bool & outIsSyncOK
 	ULWord	value	(0);
 	bool	result	(ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], value));
 	if (result)
-		outIsSyncOK = (value & BIT(27)) ? false : true;
+		outIsSyncOK = (value & kRegMaskVidProcSyncFail) ? false : true;
 	return result;
+}
+
+bool CNTV2Card::GetMixerFGMatteEnabled (const UWord inWhichMixer, bool & outIsEnabled)
+{
+	outIsEnabled = false;
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
+		return false;
+	return !CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outIsEnabled, kRegMaskVidProcFGMatteEnable, kRegShiftVidProcFGMatteEnable);
+}
+
+bool CNTV2Card::SetMixerFGMatteEnabled (const UWord inWhichMixer, const bool & inIsEnabled)
+{
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
+		return false;
+	return !WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inIsEnabled?1:0, kRegMaskVidProcFGMatteEnable, kRegShiftVidProcFGMatteEnable);
+}
+
+bool CNTV2Card::GetMixerBGMatteEnabled (const UWord inWhichMixer, bool & outIsEnabled)
+{
+	outIsEnabled = false;
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
+		return false;
+	return !CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outIsEnabled, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
+}
+
+bool CNTV2Card::SetMixerBGMatteEnabled (const UWord inWhichMixer, const bool & inIsEnabled)
+{
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
+		return false;
+	return !WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inIsEnabled?1:0, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
+}
+
+static const ULWord	gMatteColorRegs[]	= {	kRegFlatMatteValue /*13*/,	kRegFlatMatte2Value	/*249*/,	kRegFlatMatte3Value /*487*/,	kRegFlatMatte4Value /*490*/, 0, 0, 0, 0};
+
+bool CNTV2Card::GetMixerMatteColor (const UWord inWhichMixer, YCbCr10BitPixel & outYCbCrValue)
+{
+	ULWord	packedValue	(0);
+	outYCbCrValue.cb = outYCbCrValue.y = outYCbCrValue.cr = 0;
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
+		return false;
+	if (!WriteRegister(gMatteColorRegs[inWhichMixer], packedValue))
+		return false;
+
+	outYCbCrValue.cb	=   packedValue        & 0x03FF;
+	outYCbCrValue.y		= ((packedValue >> 10) & 0x03FF) + 0x0040;
+	outYCbCrValue.cr	=  (packedValue >> 20) & 0x03FF;
+	return true;
+}
+
+bool CNTV2Card::SetMixerMatteColor (const UWord inWhichMixer, const YCbCr10BitPixel & inYCbCrValue)
+{
+	YCbCr10BitPixel	ycbcrPixel	(inYCbCrValue);
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
+		return false;
+
+	if (ycbcrPixel.y < 0x40) 
+		ycbcrPixel.y = 0x0;	// clip y
+	else
+		ycbcrPixel.y -= 0x40;
+
+	//	Pack it into three 10-bit YCbCr value...
+	const ULWord packedValue (ycbcrPixel.cb  |  (ycbcrPixel.y << 10)  |  (ycbcrPixel.cr << 20));
+
+	//	Write it...
+	return WriteRegister(gMatteColorRegs[inWhichMixer], packedValue);
 }
 
 

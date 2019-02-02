@@ -1093,6 +1093,7 @@ public:
 		@param[in]	inWhichMixer			Specifies the mixer/keyer to be affected as a zero-based index number.
 		@param[in]	inFromForegroundSource	If true, sets the mixer/keyer's VANC source to its foreground video input;
 											otherwise, sets it to its background video input.
+		@see		CNTV2Card::GetMixerVancOutputFromForeground, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	SetMixerVancOutputFromForeground (const UWord inWhichMixer, const bool inFromForegroundSource = true);
 
@@ -1103,6 +1104,7 @@ public:
 		@param[in]	inWhichMixer				Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	outIsFromForegroundSource	Receives True if the mixer/keyer's VANC source is its foreground video input;
 												otherwise False if it's its background video input.
+		@see		CNTV2Card::SetMixerVancOutputFromForeground, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerVancOutputFromForeground (const UWord inWhichMixer, bool & outIsFromForegroundSource);
 
@@ -1112,6 +1114,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	inInputControl		Specifies the mixer/keyer's foreground input control value.
+		@see		CNTV2Card::GetMixerFGInputControl, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	SetMixerFGInputControl (const UWord inWhichMixer, const NTV2MixerKeyerInputControl inInputControl);
 
@@ -1120,6 +1123,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	outInputControl		Receives the mixer/keyer's foreground input control value; otherwise NTV2MIXERINPUTCONTROL_INVALID upon failure.
+		@see		CNTV2Card::SetMixerFGInputControl, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerFGInputControl (const UWord inWhichMixer, NTV2MixerKeyerInputControl & outInputControl);
 
@@ -1128,6 +1132,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	inInputControl		Specifies the mixer/keyer's background input control value.
+		@see		CNTV2Card::GetMixerBGInputControl, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	SetMixerBGInputControl (const UWord inWhichMixer, const NTV2MixerKeyerInputControl inInputControl);
 
@@ -1136,6 +1141,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	outInputControl		Receives the mixer/keyer's background input control value; otherwise NTV2MIXERINPUTCONTROL_INVALID upon failure.
+		@see		CNTV2Card::SetMixerBGInputControl, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerBGInputControl (const UWord inWhichMixer, NTV2MixerKeyerInputControl & outInputControl);
 
@@ -1144,6 +1150,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	inMode				Specifies the mode value.
+		@see		CNTV2Card::GetMixerMode, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	SetMixerMode (const UWord inWhichMixer, const NTV2MixerKeyerMode inMode);
 
@@ -1152,6 +1159,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	outMode				Receives the mode value.
+		@see		CNTV2Card::SetMixerMode, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerMode (const UWord inWhichMixer, NTV2MixerKeyerMode & outMode);
 
@@ -1160,6 +1168,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	inMixCoefficient	Specifies the new mix coefficient value, where \c 0x10000 is the maximum.
+		@see		CNTV2Card::GetMixerCoefficient, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	SetMixerCoefficient (const UWord inWhichMixer, const ULWord inMixCoefficient);
 
@@ -1168,6 +1177,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	outMixCoefficient	Receives the current mix coefficient value, where \c 0x10000 is the maximum.
+		@see		CNTV2Card::SetMixerCoefficient, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerCoefficient (const UWord inWhichMixer, ULWord & outMixCoefficient);
 
@@ -1177,8 +1187,63 @@ public:
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	outIsSyncOK			Receives the mixer's current sync state. If true, the mixer is synchronized to its inputs.
 										If false, the mixer is not synchronized to its inputs.
+		@see		See \ref vidop-mixerkeyer for more information
 	**/
 	AJA_VIRTUAL bool	GetMixerSyncStatus (const UWord inWhichMixer, bool & outIsSyncOK);
+
+	/**
+		@brief		Answers if the given mixer/keyer's foreground matte is enabled or not.
+		@return		True if successful; otherwise false.
+		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
+		@param[in]	outIsEnabled		Receives true if the mixer's foreground matte is currently enabled;  otherwise false.
+		@see		CNTV2Card::SetMixerFGMatteEnabled, CNTV2Card::GetMixerBGMatteEnabled, \ref vidop-mixerkeyer, \ref widget_mixkey
+	**/
+	AJA_VIRTUAL bool	GetMixerFGMatteEnabled (const UWord inWhichMixer, bool & outIsEnabled);
+
+	/**
+		@brief		Answers if the given mixer/keyer's foreground matte is enabled or not.
+		@return		True if successful; otherwise false.
+		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
+		@param[in]	inIsEnabled			Specify true to enable the mixer's foreground matte;  otherwise false to disable it.
+		@see		CNTV2Card::GetMixerFGMatteEnabled, CNTV2Card::SetMixerBGMatteEnabled, \ref vidop-mixerkeyer, \ref widget_mixkey
+	**/
+	AJA_VIRTUAL bool	SetMixerFGMatteEnabled (const UWord inWhichMixer, const bool & inIsEnabled);
+
+	/**
+		@brief		Answers if the given mixer/keyer's background matte is enabled or not.
+		@return		True if successful; otherwise false.
+		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
+		@param[in]	outIsEnabled		Receives true if the mixer's background matte is currently enabled;  otherwise false.
+		@see		CNTV2Card::SetMixerBGMatteEnabled, CNTV2Card::GetMixerFGMatteEnabled, \ref vidop-mixerkeyer, \ref widget_mixkey
+	**/
+	AJA_VIRTUAL bool	GetMixerBGMatteEnabled (const UWord inWhichMixer, bool & outIsEnabled);
+
+	/**
+		@brief		Answers if the given mixer/keyer's background matte is enabled or not.
+		@return		True if successful; otherwise false.
+		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
+		@param[in]	inIsEnabled			Specify true to enable the mixer's background matte;  otherwise false to disable it.
+		@see		CNTV2Card::GetMixerBGMatteEnabled, CNTV2Card::SetMixerFGMatteEnabled, \ref vidop-mixerkeyer, \ref widget_mixkey
+	**/
+	AJA_VIRTUAL bool	SetMixerBGMatteEnabled (const UWord inWhichMixer, const bool & inIsEnabled);
+
+	/**
+		@brief		Answers with the given mixer/keyer's current matte color value being used.
+		@return		True if successful; otherwise false.
+		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
+		@param[in]	outYCbCrValue		Receives the mixer's current matte color value.
+		@see		CNTV2Card::SetMixerMatteColor, \ref vidop-mixerkeyer, \ref widget_mixkey
+	**/
+	AJA_VIRTUAL bool	GetMixerMatteColor (const UWord inWhichMixer, YCbCr10BitPixel & outYCbCrValue);
+
+	/**
+		@brief		Sets the matte color to use for the given mixer/keyer.
+		@return		True if successful; otherwise false.
+		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
+		@param[in]	inYCbCrValue		Specifies the new matte color value to use.
+		@see		CNTV2Card::GetMixerMatteColor, CNTV2Card::GetMixerFGMatteEnabled, CNTV2Card::SetMixerFGMatteEnabled, CNTV2Card::GetMixerBGMatteEnabled, CNTV2Card::SetMixerBGMatteEnabled, \ref vidop-mixerkeyer, \ref widget_mixkey
+	**/
+	AJA_VIRTUAL bool	SetMixerMatteColor (const UWord inWhichMixer, const YCbCr10BitPixel & inYCbCrValue);
 
 	AJA_VIRTUAL bool	ReadLineCount (ULWord & outValue);
 	///@}
