@@ -222,7 +222,7 @@
 	See the \ref vidop-fs section for information about how to programmatically interrogate and configure Frame Stores.
 
 
-	@subsection	widget_csc	ColorSpace Converter (CSC)
+	@subsection	widget_csc	ColorSpace Converter (CSC) Routing
 
 	A <b>ColorSpace Converter</b> widget represents the firmware entity that can convert YCbCr video into RGBA or vice-versa.
 	-	::NTV2DeviceGetNumCSCs reports the number of CSC widgets that are available on a given device.
@@ -250,14 +250,12 @@
 	The \ref vidop-csc section has more information on CSC configuration.
 
 
-	@subsection	widget_mixkey	Mixer/Keyer
+	@subsection	widget_mixkey	Mixer/Keyer Routing
 
 	@image	html	cables-mixerkeyerwidget.png
 
 	A <b>Mixer/Keyer</b> widget represents the firmware entity that can mix two YCbCr video sources into a single YCbCr
 	raster (and key).
-	-	::NTV2DeviceGetNumMixers reports the number of Mixer/Keyer widgets that are available on a given device.
-	-	Mixer/Keyer widgets are identified by ::NTV2_WgtMixer1, ::NTV2_WgtMixer2, etc.
 	-	Each Mixer/Keyer widget has four input crosspoints:
 		-	<b>Foreground Inputs</b>:
 			-	<b>Video</b>:  This determines the video that will appear in the foreground of the mix,
@@ -284,29 +282,6 @@
 			-	Specify the ::NTV2Channel used. (The actual zero-based Mixer index that’s used will be half the
 				ordinal value of ::NTV2Channel.)
 			-	Pass \c false for \c inIsKey for the Mixer’s Video output;  pass \c true for the Mixer’s Key output.
-	-	The Mixer is controlled using ::CNTV2Card API calls:
-		-	<b>Mode</b>:
-			-	Call CNTV2Card::GetMixerMode to determine the Mixer’s current mode.
-			-	Call CNTV2Card::SetMixerMode to change the Mixer’s mode.
-			-	Use ::NTV2MIXERMODE_FOREGROUND_ON to exclusively pass the foreground video and key to the Mixer output.
-			-	Use ::NTV2MIXERMODE_FOREGROUND_OFF to exclusively pass the background video and key to the Mixer output.
-			-	Use ::NTV2MIXERMODE_MIX to overlay the foreground video on top of the background video.
-		-	<b>Input Controls</b>:
-			-	Call CNTV2Card::GetMixerFGInputControl to determine the Mixer’s current foreground control value;
-				call CNTV2Card::SetMixerFGInputControl to change it.
-			-	Call CNTV2Card::GetMixerBGInputControl to determine the Mixer’s current background control value;
-				call CNTV2Card::SetMixerBGInputControl to change it.
-			-	Use ::NTV2MIXERINPUTCONTROL_FULLRASTER to …explain….
-			-	Use ::NTV2MIXERINPUTCONTROL_SHAPED  to …explain….
-			-	Use ::NTV2MIXERINPUTCONTROL_UNSHAPED  to …explain….
-		-	<b>Mix Coefficient</b>:
-			-	This is an unsigned 16-bit integer that determines the transparency of the foreground mask/key.
-			-	Call CNTV2Card::GetMixerCoefficient to determine the Mixer’s current mix coefficient;
-				call CNTV2Card::SetMixerCoefficient to change it.
-
-	@note	The Mixer’s foreground and background inputs must be closely synchronized or the Mixer won’t be able to
-			mix them, and if unlocked, its output will be garbled/invalid. Call CNTV2Card::GetMixerSyncStatus to
-			determine if the Mixer is locked to both of its inputs and therefore if its output is locked/valid.
 
 
 	<hr size="50px">

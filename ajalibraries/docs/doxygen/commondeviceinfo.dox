@@ -567,34 +567,33 @@
 	<hr size="50px">
 	@subsection	vidop-csc		Color Space Converter Operation
 
-	A <b>Color Space Converter</b> (a.k.a. <b>CSC</b>) is a device widget implemented in FPGA firmware that converts Y/Cb/Cr values
-	into R/G/B/A values, or vice-versa. It uses a pair of registers for configuring its conversion properties.
+	A <b>Color Space Converter</b> (a.k.a. <b>CSC</b>) is a device widget implemented in FPGA firmware that converts YCbCr values
+	into RGB[A] values, or vice-versa. It uses several registers to configure its conversion properties.
 
-	-	In the SDK, CSCs are identified by an ::NTV2Channel enumeration.
 	-	Generally, there is one CSC for every SDI connector. ::NTV2DeviceGetNumCSCs can be used to determine the number
 		of CSCs on a given device, which should match ::NTV2DeviceGetNumVideoInputs or ::NTV2DeviceGetNumVideoOutputs (whichever is larger).
 	-	CSC widgets are identified by ::NTV2_WgtCSC1, ::NTV2_WgtCSC2, etc.,
 		but are normally identified in SDK calls by an ::NTV2Channel value that represents a zero-based index number.
 	-	Each CSC has two inputs:
-		-	<b>Video</b>:  When this is sourced from another widget’s output crosspoint, and it’s receiving…
-			-	Y/Cb/Cr video — then the CSC will produce valid RGB[A] data at its RGBA output.
-			-	RGB[A] video — then the CSC will produce valid YCbCr video at its <b>YUV Video</b> output,
+		-	<b>Video Input</b>:  This input should be routed to another widget’s output that produces…
+			-	YCbCr video — in which case the CSC will produce valid RGB[A] data at its <b>RGB Video</b> output.
+			-	RGB[A] video — in which case the CSC will produce valid YCbCr video at its <b>YUV Video</b> output,
 				and alpha channel video at its <b>Key YUV</b> output.
-		-	<b>Key</b>:  This supplies alpha channel data for the CSC’s <b>RGB Video</b> output. When used,
-			it should always be sourced with Y/Cb/Cr video (never RGB).
+		-	<b>Key Input</b>:  This supplies alpha channel data for the CSC’s <b>RGB Video</b> output. When used,
+			it should always be sourced with YCbCr video (never RGB).
 	-	Each CSC has 3 outputs:
-		-	<b>YUV Video</b>:  This produces valid YCbCr video data only when the CSC’s <b>Video Input</b> is receiving RGB[A] video data.
-		-	<b>RGB Video</b>: This produces valid RGB[A] video data only when the CSC’s <b>Video Input</b> is receiving YCbCr video data.
-		-	<b>Key YUV</b>:  This produces valid YCbCr key data only when the CSC’s <b>Video Input</b> is receiving RGB[A] video data.
+		-	<b>YUV Video</b>:  This produces valid YCbCr video data only when the CSC’s <b>Video Input</b> is receiving RGB[A] video.
+		-	<b>RGB Video</b>: This produces valid RGB[A] video data only when the CSC’s <b>Video Input</b> is receiving YCbCr video.
+		-	<b>Key YUV</b>:  This produces valid YCbCr key data only when the CSC’s <b>Video Input</b> is receiving RGB[A] video.
 	-	Routing instructions are in the \ref widget_csc section in the \ref ntv2signalrouting section.
 	-	The CSC’s conversion coefficients are adjusted based on “SMPTE” versus “Full” range.
 		-	The conversion range is represented in the SDK as the ::NTV2RGBBlackRange or ::NTV2_CSC_RGB_Range data types.
 		-	Full range is represented by the ::NTV2_CSC_RGB_RANGE_FULL or ::NTV2_RGBBLACKRANGE_0_0x3FF enumerations.
-			-	8-bit Full Range has 255 possible values (0 thru 255)
-			-	10-bit Full Range has 1023 possible values (0 thru 1023).
+			-	8-bit Full Range has 256 possible values (0 thru 255)
+			-	10-bit Full Range has 1024 possible values (0 thru 1023).
 		-	SMPTE range is represented by the ::NTV2_CSC_RGB_RANGE_SMPTE or ::NTV2_RGBBLACKRANGE_0x40_0x3C0 enumerations.
-			-	8-bit SMPTE-range has 219 possible values (16 thru 235).
-			-	10-bit SMPTE-range has 876 possible values (64 thru 940).
+			-	8-bit SMPTE-range has 220 possible values (16 thru 235).
+			-	10-bit SMPTE-range has 877 possible values (64 thru 940).
 		-	Call CNTV2Card::GetColorSpaceRGBBlackRange to determine the current range setting for a CSC.
 		-	Call CNTV2Card::SetColorSpaceRGBBlackRange to change a CSC’s range setting.
 	-	The CSC’s conversion matrix can be set to “Rec. 601” (SD) or “Rec. 709” (HD).
@@ -692,6 +691,63 @@
 
 	Some AJA devices support “enhanced” CSC firmware that is used to override the default Rec 601 and Rec 709 conversion
 	offsets and coefficients.  Call ::NTV2DeviceCanDoEnhancedCSC to determine if the device has the enhanced CSC firmware.
+
+
+	<hr size="50px">
+	@subsection	vidop-mixerkeyer		Mixer/Keyer Operation
+
+	A <b>Mixer/Keyer</b> is a device widget implemented in FPGA firmware that mixes or “keys” YCbCr video.
+	It uses a pair of registers for configuring its mixing/keying properties.
+
+	@note	Mixer/Keyer widgets can only process YCbCr video — not RGB[A].
+
+	-	Generally, there is one mixer/keyer for every 2 Frame Stores and/or SDI Inputs (or SDI Outputs).
+		Call ::NTV2DeviceGetNumMixers to obtain the number of Mixer/Keyer widgets that are available.
+	-	Mixer/Keyer widgets are identified by ::NTV2_WgtMixer1, ::NTV2_WgtMixer2, …,
+		but are normally identified in SDK calls by a zero-based, unsigned 16-bit index number.
+	-	Each Mixer/Keyer has two outputs — <b>Video</b> and <b>Key</b> — that contain the mixed/keyed output video.
+	-	Each Mixer/Keyer has four inputs:
+		-	two <b>Foreground</b> inputs — <b>Video</b> and <b>Key</b> — and…
+		-	two <b>Background</b> inputs — <b>Video</b> and <b>Key</b>.
+		-	<b>Key Input</b>s only utilize Y-channel data — the Cb and Cr components are ignored.
+		-	<b>IMPORTANT:</b> The Mixer’s foreground and background inputs must be closely synchronized
+			or the Mixer won’t be able to mix them. If the Mixer is unlocked, its outputs will send unclocked
+			(garbage) video.
+			-	Call CNTV2Card::GetMixerSyncStatus to determine if the Mixer is locked to both of its inputs,
+				and therefore if its output is valid.
+	-	Each Mixer/Keyer has the following configuration parameters:
+		-	::NTV2MixerKeyerMode — Primary operating mode:
+			-	Use ::NTV2MIXERMODE_FOREGROUND_ON to exclusively pass the <b>foreground</b> video and key to the Mixer output.
+			-	Use ::NTV2MIXERMODE_FOREGROUND_OFF to exclusively pass the <b>background</b> video and key to the Mixer output.
+			-	Use ::NTV2MIXERMODE_MIX to overlay the foreground video on top of the background video.
+			-	Call CNTV2Card::GetMixerMode to determine the Mixer’s current mode.
+			-	Call CNTV2Card::SetMixerMode to change its mode.
+		-	::NTV2MixerKeyerInputControl — input control mode, one for foreground input, one for background input:
+			-	::NTV2MIXERINPUTCONTROL_FULLRASTER ignores the input key.
+			-	::NTV2MIXERINPUTCONTROL_SHAPED uses the input key as a mask.
+			-	Call CNTV2Card::GetMixerFGInputControl to discover the foreground input’s current control value.
+			-	Call CNTV2Card::SetMixerFGInputControl to change the foreground input’s control value.
+			-	Call CNTV2Card::GetMixerBGInputControl to discover the background input’s current control value.
+			-	Call CNTV2Card::SetMixerBGInputControl to change the background input’s control value.
+		-	<b>Mix Coefficient</b> — an unsigned, 16-bit integer that determines the transparency of the foreground mask/key.
+			-	Call CNTV2Card::GetMixerCoefficient to determine the current mix coefficient value.
+			-	Call CNTV2Card::SetMixerCoefficient to change its value.
+		-	<b>Output VANC Source</b> — The Mixer’s output video VANC can be sourced from the foreground
+			or background input video.
+			-	Call CNTV2Card::GetMixerVancOutputFromForeground to determine if the output VANC is currently
+				being sourced from the foreground video input.
+			-	Call CNTV2Card::SetMixerVancOutputFromForeground to change the output VANC source.
+		-	The Mixer’s foreground and/or background raster can be set to a flat matte of any 10-bit YCbCr color.
+			This matte will override any respective video input to the Mixer.
+				-	Call CNTV2Card::GetMixerFGMatteEnabled to determine if the foreground matte is enabled or not.
+				-	Call CNTV2Card::SetMixerFGMatteEnabled to enable or disable using the foreground matte.
+				-	Call CNTV2Card::GetMixerBGMatteEnabled to determine if the background matte is enabled or not.
+				-	Call CNTV2Card::SetMixerBGMatteEnabled to enable or disable using the background matte.
+				-	Call CNTV2Card::GetMixerMatteColor to determine the current matte color.
+				-	Call CNTV2Card::SetMixerMatteColor to change the matte color.
+				-	Note that to enable its video output, the Mixer still requires a foreground video source
+					if background matte is enabled, or a background video source if foreground matte is enabled.
+	-	For information on how to route signals to and from the Mixer, see \ref widget_mixkey.
 
 
 
