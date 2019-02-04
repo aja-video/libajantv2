@@ -1921,12 +1921,30 @@ bool CNTV2Config2110::GenVideoStreamSDPInfo(stringstream & sdp, const eSFP sfp, 
 
 bool CNTV2Config2110::GenVideoStreamMultiSDPInfo(stringstream & sdp, char* gmInfo)
 {
+	uint32_t 	quadSwapOut;
+	NTV2Stream 	stream;
+
+	// Read virtual to see if we are to quad swap the outputs
+	mDevice.ReadRegister(kVRegSwizzle4kOutput, quadSwapOut);
+
 	sdp << "a=group:MULTI-2SI 1 2 3 4 " << endl << endl;
 
 	// generate SDP's for all 4 video streams
 	for (int i=0; i<4; i++)
 	{
-		NTV2Stream stream = (NTV2Stream)i;
+		if (quadSwapOut != 0)
+		{
+			switch (i)
+			{
+				case 0: stream = NTV2_VIDEO3_STREAM; break;
+				case 1: stream = NTV2_VIDEO4_STREAM; break;
+				case 2: stream = NTV2_VIDEO1_STREAM; break;
+				case 3: stream = NTV2_VIDEO2_STREAM; break;
+			}
+		}
+		else
+			stream = (NTV2Stream)i;
+
 		bool enabledA;
 		bool enabledB;
 		GetTxStreamEnable(stream, enabledA, enabledB);

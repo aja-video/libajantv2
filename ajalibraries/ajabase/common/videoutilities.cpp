@@ -253,7 +253,6 @@ void AJA_UnPack10BitYCbCrBuffer( uint32_t* packedBuffer, uint16_t* ycbcrBuffer, 
 		ycbcrBuffer[sampleCount]   =  packedBuffer[dataCount]&0x3FF;  
 		ycbcrBuffer[sampleCount+1] = (packedBuffer[dataCount]>>10)&0x3FF;  
 		ycbcrBuffer[sampleCount+2] = (packedBuffer[dataCount]>>20)&0x3FF;  
-
 	}
 }
 
@@ -286,7 +285,6 @@ void AJA_PackTo10BitYCbCrDPXBuffer( uint16_t *ycbcrBuffer, uint32_t *packedBuffe
 			packedBuffer[outputCount+1] = AJA_ENDIAN_SWAP32(((ycbcrBuffer[inputCount+3]<<20) + (ycbcrBuffer[inputCount+4]<<10) + (ycbcrBuffer[inputCount+5]))<<2);
 			packedBuffer[outputCount+2] = AJA_ENDIAN_SWAP32(((ycbcrBuffer[inputCount+6]<<20) + (ycbcrBuffer[inputCount+7]<<10) + (ycbcrBuffer[inputCount+8]))<<2);
 			packedBuffer[outputCount+3] = AJA_ENDIAN_SWAP32(((ycbcrBuffer[inputCount+9]<<20) + (ycbcrBuffer[inputCount+10]<<10) + (ycbcrBuffer[inputCount+11]))<<2);
-
 		}
 		else
 		{
@@ -294,11 +292,10 @@ void AJA_PackTo10BitYCbCrDPXBuffer( uint16_t *ycbcrBuffer, uint32_t *packedBuffe
 			packedBuffer[outputCount+1] = (((ycbcrBuffer[inputCount+3]<<20) + (ycbcrBuffer[inputCount+4]<<10) + (ycbcrBuffer[inputCount+5]))<<2);
 			packedBuffer[outputCount+2] = (((ycbcrBuffer[inputCount+6]<<20) + (ycbcrBuffer[inputCount+7]<<10) + (ycbcrBuffer[inputCount+8]))<<2);
 			packedBuffer[outputCount+3] = (((ycbcrBuffer[inputCount+9]<<20) + (ycbcrBuffer[inputCount+10]<<10) + (ycbcrBuffer[inputCount+11]))<<2);
-
-
 		}
 	}
 }
+
 // Pack 10 Bit RGBA to 10 Bit RGB Format for our board
 void AJA_PackRGB10BitFor10BitRGB(AJA_RGBAlpha10BitPixel* rgba10BitBuffer,uint32_t numPixels)
 {
@@ -325,7 +322,6 @@ void AJA_PackRGB10BitFor10BitRGBPacked(AJA_RGBAlpha10BitPixel* rgba10BitBuffer,u
 		value |= ((Red&0x3)<<28) + ((Green&0x3)<<26) + ((Blue&0x3)<<24);
 
 		outputBuffer[pixel] = value;
-
 	}
 }
 
