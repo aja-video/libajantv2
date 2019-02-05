@@ -1,7 +1,7 @@
 /**
 	@file		ancillarydatafactory.cpp
 	@brief		Implementation of the AJAAncillaryDataFactory class.
-	@copyright	(C) 2010-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2010-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ancillarydatafactory.h"

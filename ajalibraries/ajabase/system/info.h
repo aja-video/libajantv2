@@ -1,6 +1,6 @@
 /**
     @file		info.h
-	@copyright	Copyright (C) 2009-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2009-2019 AJA Video Systems, Inc.  All rights reserved.
     @brief		Declares the AJASystemInfo class.
 **/
 
@@ -61,7 +61,7 @@ enum AJASystemInfoSections
     AJA_SystemInfoSection_System = 0x00000001 << 5,
 
     AJA_SystemInfoSection_None   = 0x00000000,
-    AJA_SystemInfoSection_All    = 0xFFFFFFFF,
+    AJA_SystemInfoSection_All    = 0xFFFFFFFF
 };
 
 typedef std::pair<std::string, std::string>		AJALabelValuePair;				///< @brief	A pair of strings comprising a label and a value

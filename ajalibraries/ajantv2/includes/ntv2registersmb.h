@@ -1,7 +1,7 @@
 /**
     @file		ntv2registersmb.h
     @brief		Defines the Sarek board's registers.
-    @copyright	(C) 2014-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @copyright	(C) 2014-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef REGISTERS_MB_H

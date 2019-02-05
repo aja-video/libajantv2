@@ -1,7 +1,7 @@
 /**
 	@file		ntv2hdmi.cpp
 	@brief		Implements most of CNTV2Card's HDMI-related functions.
-	@copyright	(C) 2004-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2card.h"
@@ -370,17 +370,17 @@ bool CNTV2Card::SetHDMIOutBitDepth (const NTV2HDMIBitDepth value)
 	if (value == NTV2_HDMI12Bit)
 	{
 		ret &= WriteRegister (kRegHDMIOutControl, 1, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
-		ret &= WriteRegister (kRegHDMIOutControl, 1, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
+		ret &= WriteRegister (kRegHDMIInputControl, 1, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
 	}
 	else if (value == NTV2_HDMI10Bit)
 	{
 		ret &= WriteRegister (kRegHDMIOutControl, 1, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
-		ret &= WriteRegister (kRegHDMIOutControl, 0, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
+		ret &= WriteRegister (kRegHDMIInputControl, 0, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
 	}
 	else
 	{
 		ret &= WriteRegister (kRegHDMIOutControl, 0, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
-		ret &= WriteRegister (kRegHDMIOutControl, 0, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
+		ret &= WriteRegister (kRegHDMIInputControl, 0, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
 	}
 
 	return ret;
@@ -396,7 +396,7 @@ bool CNTV2Card::GetHDMIOutBitDepth (NTV2HDMIBitDepth & outValue)
 		return false;
 
 	ret &= CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, d10, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
-	ret &= CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, d12,  kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
+	ret &= CNTV2DriverInterface::ReadRegister (kRegHDMIInputControl, d12,  kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
 
 	if (!ret)
 		return false;

@@ -1,6 +1,6 @@
 /**
 	@file		mac/file_io.cpp
-	@copyright	Copyright (C) 2011-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2011-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Implements the AJAFileIO class on the Mac platform.
 **/
 

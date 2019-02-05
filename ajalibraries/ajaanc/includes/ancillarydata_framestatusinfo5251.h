@@ -1,7 +1,7 @@
 /**
 	@file		ancillarydata_framestatusinfo5251.h
 	@brief		Declares the AJAAncillaryData_FrameStatusInfo5251 class.
-	@copyright	(C) 2012-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2012-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef AJA_ANCILLARYDATA_FRAMESTATUSINFO5251_H

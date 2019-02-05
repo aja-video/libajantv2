@@ -1,7 +1,7 @@
 /**
 	@file		ntv2macdriverinterface.h
 	@brief		Implements the MacOS-specific flavor of CNTV2DriverInterface.
-	@copyright	(C) 2007-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2007-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2macdriverinterface.h"

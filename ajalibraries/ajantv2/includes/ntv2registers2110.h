@@ -1,7 +1,7 @@
 /**
 	@file		ntv2registers2110.h
 	@brief		Defines the Sarek board's registers.
-	@copyright	(C) 2014-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2014-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef REGISTERS_2110_H
@@ -41,6 +41,7 @@
 #define SAREK_2110_AUDIO_STREAMSELECT           (0x230000/4)
 
 #define SAREK_2110_TEST_GENERATOR               (0x308000/4)
+#define SAREK_AXIS_PCAP							(0x309000/4)
 
 
 /////////////////////////////////////////////////////////////////////

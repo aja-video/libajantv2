@@ -1,6 +1,6 @@
 /**
 	@file		pnp/linux/pnpimpl.cpp
-	@copyright	Copyright (C) 2011-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2011-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Implements the AJAPnpImpl class on the Linux platform.
 **/
 

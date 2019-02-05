@@ -1,7 +1,7 @@
 /**
     @file		ntv2config2022.h
     @brief		Declares the CNTV2Config2022 class.
-    @copyright	(C) 2014-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @copyright	(C) 2014-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2_2022CONFIG_H

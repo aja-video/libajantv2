@@ -13,13 +13,6 @@
 		-	\ref deviceclockingandsync
 		-	\ref fieldframeinterrupts
 		-	\ref vidop-fbconflict
-	-	\ref widgetsandrouting
-		-	\ref widget_inputs
-		-	\ref widget_outputs
-		-	\ref widget_processing
-		-	\ref recipes_capture
-		-	\ref recipes_playout
-		-	\ref recipes_endtoend
 	-	\ref audiooperation
 	-	\ref devicefirmware
 		-	\ref dev-firmware-vers
@@ -571,446 +564,190 @@
 	@endcode
 
 
-
 	<hr size="50px">
-	@section	widgetsandrouting		Widgets and Signal Routing
-
-	NTV2 device FPGA firmware implements several types of “widgets“ for receiving, processing and transmitting video data.
-	These can be classified as follows:
-	-	\ref widget_inputs
-		-	\ref widget_sdiin
-		-	\ref widget_hdmiin
-		-	\ref widget_anlgin
-	-	\ref widget_outputs
-		-	\ref widget_sdiout
-		-	\ref widget_hdmiout
-		-	\ref widget_anlgout
-	-	\ref widget_processing
-		-	\ref widget_framestore
-		-	\ref widget_csc
-		-	Color Look-Up-Tables (LUTs)
-		-	\ref widget_mixkey
-		-	Dual-Link (DL) converters (input & output)
-		-	Two-sample-interleave (Tsi) muxers/demuxers
-		-	4K Down-converters
-		-	DVC Pro converters
-		-	Universal Frequency Converters (UFCs)
-	-	\ref recipes_capture
-	-	\ref recipes_playout
-	-	\ref recipes_endtoend
-
-	Most widgets typically have associated registers for reporting status and/or controlling their operation.
-	Rather than calling CNTV2Card::ReadRegister or CNTV2Card::WriteRegister, client applications should use the
-	appropriate widget-related API calls in the ::CNTV2Card class to inquire about and/or control the widget of interest.
-
-	All widgets have a unique identifier in software expressed by the ::NTV2WidgetID enumeration.
-	To determine if a device implements a particular widget, call ::NTV2DeviceCanDoWidget.
-
-	Video data paths between widgets are implemented using <b>crosspoints</b> in firmware.
-	-	Widget <b>inputs</b> are identified by ::NTV2InputCrosspointID.
-	-	Widget <b>outputs</b> are identified by ::NTV2OutputCrosspointID.
-	-	<b>Input Widgets</b> only have <b>output</b> crosspoint connections.
-	-	<b>Output Widgets</b> only have <b>input</b> crosspoint connections.
-	-	<b>Processing Widgets</b> have both <b>input</b> and <b>output</b> crosspoint connections.
-
-	The ::CNTV2SignalRouter class has static methods that are useful for inquiring about device widgets and their input and output crosspoints:
-	-	CNTV2SignalRouter::GetWidgetIDs answers with an ::NTV2WidgetIDSet of all widgets supported by a given device.
-	-	CNTV2SignalRouter::GetWidgetForInput reports the widget (::NTV2WidgetID) that’s associated with a given ::NTV2InputCrosspointID.
-	-	CNTV2SignalRouter::GetWidgetForOutput reports the widget (::NTV2WidgetID) associated with a given ::NTV2OutputCrosspointID.
-	-	CNTV2SignalRouter::GetWidgetInputs reports all input crosspoints for a given widget.
-	-	CNTV2SignalRouter::GetWidgetOutputs reports all output crosspoints for a given widget.
-
-	A set of “crosspoint select” registers (e.g., ::kRegXptSelectGroup1, ::kRegXptSelectGroup2, etc.) determine which widget output
-	will feed (source) each widget’s input.
-
-	@note	A widget’s output can source multiple widgets’ inputs,
-			while a widget’s input can only be sourced by one other widget’s output.
-			In other words, widget outputs are one-to-many, while widget inputs are one-to-one.
-
-	@note	Due to FPGA size limitations, only a small fraction of the possible widget interconnection routes are implemented.
-
-	@note	Widget inputs that are left open — i.e., disconnected — i.e. aren’t connected to any other widget’s output — default
-			to the ::NTV2_XptBlack output crosspoint.
-
-	The CNTV2Card::Connect call is used to make and/or break these output-to-input crosspoint connections.
-	The CNTV2Card::ClearRouting function breaks <i>all</i> crosspoint connections.
-
-	Historically, there was no programmatic way in NTV2 to determine at runtime if a device implemented a specific connection path.
-	Starting in SDK 14.0, AJA finally implemented a program that inspects the FPGA source code to compile a static “implemented routes”
-	table that’s queried by the CNTV2Card::CanConnect function. These tables are correct and complete for firmware versions used
-	at the time of the SDK release. However, subsequent firmware updates may add or remove interconnect routes that would not be
-	reflected in the tables used by the SDK. We hope to improve this process going forward.
-
-	The NTV2 SDK provides two tools that graphically show the available device widgets and the signal routing between them.
-	-	\ref usingcables — An ancient, but still functional graphical utility that allows you to inspect and interactively change
-		widget configuration and signal routing paths between widgets.
-	-	The \ref inspectorroute in \ref usingntv2watcher — This will eventually incorporate the functionality of \ref usingcables .
-
-
-
-	<hr size="50px">
-	@subsection	widget_inputs	Input Widgets
-
-	These widgets only have output crosspoints that provide signal sources for signal-processing or output widgets.
-
-	@note	An input widget’s output can be used to source multiple output and signal-processing widgets’ inputs.
-
-
-	@subsubsection	widget_sdiin	SDI Input
-
-	An SDI Input widget represents a physical SDI input connector.
-	-	There is one of these widgets for each input SDI connector (e.g. ::NTV2_WgtSDIIn1, ::NTV2_WgtSDIIn2, …).
-	-	For devices that have bi-directional SDI connectors (see ::NTV2DeviceHasBiDirectionalSDI),
-		there will be one of these widgets for each <i>potential</i> SDI input connector.
-	-	Older devices that only support 1.5Gbps SDI use “non-3G” SDI input widgets — ::NTV2_WgtSDIIn1, ::NTV2_WgtSDIIn2, etc.
-	-	Devices that support 3Gbps SDI have “3G” SDI input widgets — ::NTV2_Wgt3GSDIIn1, ::NTV2_Wgt3GSDIIn2, etc.
-	-	Devices that support 6Gbps or higher SDI have “12G” SDI input widgets — ::NTV2_Wgt12GSDIIn1, ::NTV2_Wgt12GSDIIn2, etc.
-	-	3Gbps SDI inputs have two output crosspoints — one for DS1, another for DS2, the latter used in dual-link applications.
-		Note that the \ref konalhi, AJA’s first 3Gbps SDI board, used ::NTV2_WgtSDIIn2 for DS1 and ::NTV2_WgtSDIIn2 for DS2.
-	-	There are two ways to obtain an SDI input’s ::NTV2OutputCrosspointID …
-		-	Call ::GetSDIInputOutputXptFromChannel …
-			-	Specify the SDI input connector by ::NTV2Channel (e.g., use ::NTV2_CHANNEL3 for SDI In 3).
-			-	By default, it returns data stream 1’s crosspoint.
-				To obtain Data Stream 2’s crosspoint, specify \c true for \c inIsDS2.
-		-	Or call ::GetInputSourceOutputXpt …
-			-	Specify the SDI input by passing it ::NTV2_INPUTSOURCE_SDI1, ::NTV2_INPUTSOURCE_SDI2, …etc.
-			-	By default, it returns Data Stream 1’s crosspoint.
-				For Data Stream 2’s crosspoint, specify \c true for \c inIsSDI_DS2.
-
-
-	@subsubsection	widget_hdmiin	HDMI Input
-
-	An HDMI Input widget represents a physical HDMI input connector.
-	-	There is one of these widgets for each input HDMI connector.
-	-	Older devices with our 1st-generation HDMI chip use ::NTV2_WgtHDMIIn1.
-	-	Devices that support our 2nd-generation HDMI chip use ::NTV2_WgtHDMIIn1v2.
-	-	Devices that support our 3rd-generation HDMI chip use ::NTV2_WgtHDMIIn1v3.
-	-	Devices that support our 4th-generation HDMI chip use ::NTV2_WgtHDMIIn1v4, etc. Each of these have separate YCbCr and RGB output crosspoints.
-	-	To obtain its ::NTV2OutputCrosspointID …
-		-	Call ::GetInputSourceOutputXpt …
-			-	Specify which HDMI input by passing it ::NTV2_INPUTSOURCE_HDMI1, ::NTV2_INPUTSOURCE_HDMI2, …etc.
-			-	For 4K/UHD applications, specify the appropriate quadrant number 0, 1, 2 or 3 in the \c inHDMI_Quadrant
-				parameter.
-			-	For the RGB output crosspoint instead of the default YUV one (4th-generation HDMI only), pass \c true
-				for the \c inIsHDMI_RGB parameter.
-
-
-	@subsubsection	widget_anlgin	Analog Video Input
-
-	An Analog Video Input widget represents a physical analog video input connector (typically RCA connectors labeled Y/G/CVBS,
-	Pb/B/Y and Pr/R/C RCA connectors).
-	-	There is one of these widgets for devices that support analog video input — ::NTV2_WgtAnalogIn1.
-	-	To obtain its ::NTV2OutputCrosspointID …
-		-	Either use ::NTV2_XptAnalogIn directly;
-		-	Or call ::GetInputSourceOutputXpt with ::NTV2_INPUTSOURCE_ANALOG1.
-
-
-
-	<hr size="50px">
-	@subsection	widget_outputs	Output Widgets
-
-	These widgets only have input crosspoints that accept signals from signal-processing or input widgets.
-
-	@note	An output widget’s input can only be sourced from a single input or signal-processing widget’s output.
-
-
-	@subsubsection	widget_sdiout	SDI Output
-
-	An SDI Output widget represents one of the device’s physical SDI output connectors.
-	-	There is one of these widgets for each output SDI connector (e.g. ::NTV2_WgtSDIOut1, ::NTV2_WgtSDIOut2, …).
-	-	For devices that have bi-directional SDI connectors (see ::NTV2DeviceHasBiDirectionalSDI),
-		there will be one of these widgets for each <i>potential</i> SDI output connector.
-	-	Older devices that only support 1.5Gbps SDI use “non-3G” SDI output widgets — ::NTV2_WgtSDIOut1, ::NTV2_WgtSDIOut2, etc.
-	-	Devices that support 3Gbps SDI have “3G” SDI output widgets — ::NTV2_Wgt3GSDIOut1, ::NTV2_Wgt3GSDIOut2, etc.
-	-	Devices that support 6Gbps or higher SDI have “12G” SDI output widgets — ::NTV2_Wgt12GSDIOut1, ::NTV2_Wgt12GSDIOut2, etc.
-	-	3Gbps SDI outputs have two input crosspoints — one for DS1, another for DS2, the latter used in dual-link applications.
-	-	There are two ways to obtain an SDI output’s ::NTV2InputCrosspointID …
-		-	Call ::GetSDIOutputInputXpt …
-			-	Specify the SDI output connector by ::NTV2Channel (e.g. use ::NTV2_CHANNEL3 for SDI Out 3);
-			-	For dual-link applications, pass \c true for \c inIsDS2 for the 2nd dual-link stream.
-		-	Or call ::GetOutputDestInputXpt …
-			-	Specify the SDI output connector using ::NTV2_OUTPUTDESTINATION_SDI1, ::NTV2_OUTPUTDESTINATION_SDI2, … etc.
-			-	For dual-link applications, pass \c true for \c inIsSDI_DS2 for the 2nd dual-link stream.
-
-
-	@subsubsection	widget_hdmiout	HDMI Output
-
-	An HDMI Output widget represents a physical HDMI output connector.
-	-	There is one of these widgets for the output HDMI connector — ::NTV2_WgtHDMIOut1.
-	-	Older devices use ::NTV2_WgtHDMIOut1.
-	-	Devices that support our 2nd-generation HDMI chip use ::NTV2_WgtHDMIOut1v2.
-	-	Devices that support our 3rd-generation HDMI chip use ::NTV2_WgtHDMIOut1v3.
-	-	Devices that support our 4th-generation HDMI chip use ::NTV2_WgtHDMIOut1v4.
-	-	To obtain its output crosspoint(s)…
-		-	Call ::GetOutputDestInputXpt, passing it ::NTV2_OUTPUTDESTINATION_HDMI.
-			For 4K/UHD quadrants, you can specify a quadrant number (0, 1, 2 or 3).
-
-
-	@subsubsection	widget_anlgout	Analog Video Output
-
-	An Analog Video Output widget represents a physical analog video output connector (typically RCA connectors labeled Y/G/CVBS,
-	Pb/B/Y and Pr/R/C RCA connectors).
-	-	There is one of these widgets for devices that support analog video output — ::NTV2_WgtAnalogOut1.
-	-	To obtain its ::NTV2InputCrosspointID …
-		-	Use ::NTV2_XptAnalogOutInput
-		-	Call ::GetOutputDestInputXpt with ::NTV2_OUTPUTDESTINATION_ANALOG.
-
-
-	<hr size="50px">
-	@subsection	widget_processing	Signal-Processing Widgets
-
-	These widgets have both input and output crosspoints. They accept and consume a signal from another source, and perform some
-	kind of processing on it, and send it on to another widget for consumption downstream.
-
-	@note	A signal-processing widget’s output can source multiple widgets’ inputs,
-			while each of its inputs can only be sourced by one other widget’s output.
-
-
-	@subsubsection	widget_framestore	Frame Store
-
-	A <b>Frame Store</b> widget represents the firmware entity responsible for writing or reading video frames to or from device SDRAM.
-	-	::NTV2DeviceGetNumFrameStores will report the number of Frame Store widgets that are available on a given device.
-	-	Frame Store widgets are identified by ::NTV2_WgtFrameBuffer1, ::NTV2_WgtFrameBuffer2, etc.
-	-	In <b>Capture Mode</b>…
-		-	The normal (“Level A”) input crosspoint is available and should be used for most applications.
-		-	There is a “Level B” input crosspoint that is available for dual-link applications.
-		-	Call ::GetFrameBufferInputXptFromChannel to obtain a Frame Store’s ::NTV2InputCrosspointID …
-			-	Specify the Frame Store of interest by ::NTV2Channel (i.e., ::NTV2_CHANNEL1, ::NTV2_CHANNEL2, …etc.).
-			-	By default, the function returns the normal “Level A” input crosspoint.
-				Specify \c true for \c inIsBInput for the “Level B” crosspoint.
-	-	In <b>Playout Mode</b>…
-		-	If the Frame Store is configured for SD, HD, or 4K/UHD Quads/Squares (i.e. non-Tsi) mode:
-			-	Use the normal <b>YUV</b> output crosspoint when the FrameStore is using a YCbCr ::NTV2FrameBufferFormat.
-			-	Use the <b>RGB</b> output crosspoint when the FrameStore is using an RGB ::NTV2FrameBufferFormat.
-		-	If the Frame Store is configured for 4K/UHD Tsi (SMPTE 425 two-sample-interleave) mode:
-			-	Use the “425” YUV output crosspoint when the FrameStore is using a YCbCr ::NTV2FrameBufferFormat (see ::NTV2_FBF_IS_YCBCR macro).
-			-	Use the “425” RGB output crosspoint when the FrameStore is using an RGB ::NTV2FrameBufferFormat (see ::NTV2_IS_FBF_RGB macro).
-		-	Call ::GetFrameBufferOutputXptFromChannel to obtain a Frame Store’s ::NTV2OutputCrosspointID …
-			-	Specify the Frame Store of interest by ::NTV2Channel (i.e., ::NTV2_CHANNEL1, ::NTV2_CHANNEL2, …etc.).
-			-	By default, the function returns the YUV output crosspoint. If the Frame Store’s ::NTV2FrameBufferFormat
-				is an RGB format, pass \c true for \c inIsRGB to obtain the RGB crosspoint.
-			-	By default, the function will return a normal, non-SMPTE-425 (non-Tsi) output crosspoint.
-				If the Frame Store is configured for 4K/UHD and for two-sample-interleave, pass \c true for \c inIs425,
-				to obtain the “425” crosspoint.
-
-	See the \ref vidop-fs section for information about how to programmatically interrogate and configure Frame Stores.
-
-
-	@subsubsection	widget_csc	ColorSpace Converter (CSC)
-
-	A <b>ColorSpace Converter</b> widget represents the firmware entity that can convert YCbCr video into RGBA or vice-versa.
-	-	::NTV2DeviceGetNumCSCs reports the number of CSC widgets that are available on a given device.
-	-	CSC widgets are identified by ::NTV2_WgtCSC1, ::NTV2_WgtCSC2, etc.
-	-	Each CSC has two input crosspoints:
-		-	<b>Video Input</b>:  When this is sourced from another widget’s output crosspoint, and it’s receiving…
-			-	YCbCr/YUV video, then the CSC will produce valid RGB[A] data on its RGBA output crosspoint.
-			-	RGB[A] video, then the CSC will produce valid YCbCr data on its YUV output crosspoint.
-		-	<b>Key Input</b>:  This supplies the alpha channel data for the CSC’s RGBA output.
-		-	Call ::GetCSCInputXptFromChannel to obtain the ::NTV2InputCrosspointID for a CSC:
-			-	Specify the CSC by ::NTV2Channel (e.g., use ::NTV2_CHANNEL3 for CSC 3).
-			-	By default, the function returns the video input crosspoint. To obtain the alpha/key input
-				crosspoint, pass \c true for \c inIsKeyInput.
-	-	Each CSC has 3 output crosspoints:
-		-	<b>YUV Video</b>:  This will produce valid YCbCr video data only when the CSC’s Video Input is receiving RGB[A] video data.
-		-	<b>RGB Video</b>:	This will produce valid RGB[A] video data only when the CSC’s Video Input is receiving YCbCr video data.
-		-	<b>Key YUV</b>:  This will produce valid YCbCr key data only when the CSC’s Video Input is receiving RGB[A] video data.
-		-	Call ::GetCSCOutputXptFromChannel to obtain one of the CSC’s ::NTV2OutputCrosspointID values:
-			-	Specify the CSC by ::NTV2Channel (e.g., use ::NTV2_CHANNEL3 for CSC 3).
-			-	By default, the function returns the video output crosspoint.
-				To obtain the <b>Key</b> crosspoint, pass \c true for \c inIsKey.
-			-	By default, the function returns the <b>YUV</b> output crosspoint.
-				To obtain the <b>RGB</b> crosspoint, pass \c true for \c inIsRGB.
-
-
-	@subsubsection	widget_mixkey	Mixer/Keyer
-
-	@image	html	cables-mixerkeyerwidget.png
-
-	A <b>Mixer/Keyer</b> widget represents the firmware entity that can mix two YCbCr video sources into a single YCbCr
-	raster (and key).
-	-	::NTV2DeviceGetNumMixers reports the number of Mixer/Keyer widgets that are available on a given device.
-	-	Mixer/Keyer widgets are identified by ::NTV2_WgtMixer1, ::NTV2_WgtMixer2, etc.
-	-	Each Mixer/Keyer widget has four input crosspoints:
-		-	<b>Foreground Inputs</b>:
-			-	<b>Video</b>:  This determines the video that will appear in the foreground of the mix,
-				and should be routed to a widget that produces YCbCr video.
-			-	<b>Key</b>:  This determines the foreground key, and should be routed to another widget’s YCbCr output.
-				Only the Y component is used — the Cb and Cr components are ignored.
-			-	Call ::GetMixerFGInputXpt to obtain a foreground ::NTV2InputCrosspointID:
-				-	Specify the ::NTV2Channel used. (The actual zero-based Mixer index that’s used will be half the
-					ordinal value of ::NTV2Channel.)
-				-	Pass \c false for \c inIsKey for the Video input;  pass \c true for the Key input.
-		-	<b>Background Inputs</b>:
-			-	<b>Video</b>:  This determines the video that will appear in the background,
-				and should be routed to a widget that produces YCbCr video.
-			-	<b>Key</b>:  This determines the background key, and should be routed to another widget’s YCbCr output.
-				Note that only the Y component is used — the Cb and Cr components are ignored.
-			-	Call ::GetMixerBGInputXpt to obtain a background ::NTV2InputCrosspointID:
-				-	Specify the ::NTV2Channel used. (The actual zero-based Mixer index that’s used will be half the
-					ordinal value of ::NTV2Channel.)
-				-	Pass \c false for \c inIsKey for the Video input;  pass \c true for the Key input.
-	-	Each Mixer/Keyer widget has two output crosspoints:
-		-	<b>Video Output</b>:  This produces the mixed/keyed YCbCr video raster.
-		-	<b>Key Output</b>:  This produces a YCbCr signal with the resulting mixed key data in the Y channel.
-		-	Call ::GetMixerOutputXptFromChannel to obtain a Mixer’s ::NTV2OutputCrosspointID:
-			-	Specify the ::NTV2Channel used. (The actual zero-based Mixer index that’s used will be half the
-				ordinal value of ::NTV2Channel.)
-			-	Pass \c false for \c inIsKey for the Mixer’s Video output;  pass \c true for the Mixer’s Key output.
-	-	The Mixer is controlled using ::CNTV2Card API calls:
-		-	<b>Mode</b>:
-			-	Call CNTV2Card::GetMixerMode to determine the Mixer’s current mode.
-			-	Call CNTV2Card::SetMixerMode to change the Mixer’s mode.
-			-	Use ::NTV2MIXERMODE_FOREGROUND_ON to exclusively pass the foreground video and key to the Mixer output.
-			-	Use ::NTV2MIXERMODE_FOREGROUND_OFF to exclusively pass the background video and key to the Mixer output.
-			-	Use ::NTV2MIXERMODE_MIX to overlay the foreground video on top of the background video.
-		-	<b>Input Controls</b>:
-			-	Call CNTV2Card::GetMixerFGInputControl to determine the Mixer’s current foreground control value;
-				call CNTV2Card::SetMixerFGInputControl to change it.
-			-	Call CNTV2Card::GetMixerBGInputControl to determine the Mixer’s current background control value;
-				call CNTV2Card::SetMixerBGInputControl to change it.
-			-	Use ::NTV2MIXERINPUTCONTROL_FULLRASTER to …explain….
-			-	Use ::NTV2MIXERINPUTCONTROL_SHAPED  to …explain….
-			-	Use ::NTV2MIXERINPUTCONTROL_UNSHAPED  to …explain….
-		-	<b>Mix Coefficient</b>:
-			-	This is an unsigned 16-bit integer that determines the transparency of the foreground mask/key.
-			-	Call CNTV2Card::GetMixerCoefficient to determine the Mixer’s current mix coefficient;
-				call CNTV2Card::SetMixerCoefficient to change it.
-
-	@note	The Mixer’s foreground and background inputs must be closely synchronized or the Mixer won’t be able to
-			mix them, and if unlocked, its output will be garbled/invalid. Call CNTV2Card::GetMixerSyncStatus to
-			determine if the Mixer is locked to both of its inputs and therefore if its output is locked/valid.
-
-
-	<hr size="50px">
-	@subsection	recipes_capture		Routing for Capture
-
-	This section shows how to programmatically set up a device to receive video for several commmon scenarios.
-
-	@par	SD/HD YCbCr
-
-	TBD
-
-	@par	SD/HD RGB
-
-	TBD
-
-	@par	SD/HD RGB Over-the-Wire Dual-Link
-
-	TBD
-
-
-	<hr size="50px">
-	@subsection	recipes_playout		Routing for Playout
-
-	This section shows how to programmatically set up a device for transmitting video for several commmon scenarios.
-
-	@par	SD/HD YCbCr Playout From YCbCr Frame Buffer
-
-	TBD
-
-	@par	SD/HD YCbCr Playout From RGB Frame Buffer
-
-	TBD
-
-	@par	HD RGB Playout Over 2 × 1.5G Dual-Link SDI From YCbCr Frame Buffer
-
-	TBD
-
-	@par	HD RGB Playout Over 1 × 3G Dual-Link SDI From YCbCr Frame Buffer
-
-	TBD
-
-	@par	HD RGB Playout Over 2 × 1.5G Dual-Link SDI From RGB Frame Buffer
-
-	TBD
-
-	@par	HD RGB Playout Over 1 × 3G Dual-Link SDI From RGB Frame Buffer
-
+	@subsection	vidop-csc		Color Space Converter Operation
+
+	A <b>Color Space Converter</b> (a.k.a. <b>CSC</b>) is a device widget implemented in FPGA firmware that converts YCbCr values
+	into RGB[A] values, or vice-versa. It uses several registers to configure its conversion properties.
+
+	-	Generally, there is one CSC for every SDI connector. ::NTV2DeviceGetNumCSCs can be used to determine the number
+		of CSCs on a given device, which should match ::NTV2DeviceGetNumVideoInputs or ::NTV2DeviceGetNumVideoOutputs (whichever is larger).
+	-	CSC widgets are identified by ::NTV2_WgtCSC1, ::NTV2_WgtCSC2, etc.,
+		but are normally identified in SDK calls by an ::NTV2Channel value that represents a zero-based index number.
+	-	Each CSC has two inputs:
+		-	<b>Video Input</b>:  This input should be routed to another widget’s output that produces…
+			-	YCbCr video — in which case the CSC will produce valid RGB[A] data at its <b>RGB Video</b> output.
+			-	RGB[A] video — in which case the CSC will produce valid YCbCr video at its <b>YUV Video</b> output,
+				and alpha channel video at its <b>Key YUV</b> output.
+		-	<b>Key Input</b>:  This supplies alpha channel data for the CSC’s <b>RGB Video</b> output. When used,
+			it should always be sourced with YCbCr video (never RGB).
+	-	Each CSC has 3 outputs:
+		-	<b>YUV Video</b>:  This produces valid YCbCr video data only when the CSC’s <b>Video Input</b> is receiving RGB[A] video.
+		-	<b>RGB Video</b>: This produces valid RGB[A] video data only when the CSC’s <b>Video Input</b> is receiving YCbCr video.
+		-	<b>Key YUV</b>:  This produces valid YCbCr key data only when the CSC’s <b>Video Input</b> is receiving RGB[A] video.
+	-	Routing instructions are in the \ref widget_csc section in the \ref ntv2signalrouting section.
+	-	The CSC’s conversion coefficients are adjusted based on “SMPTE” versus “Full” range.
+		-	The conversion range is represented in the SDK as the ::NTV2RGBBlackRange or ::NTV2_CSC_RGB_Range data types.
+		-	Full range is represented by the ::NTV2_CSC_RGB_RANGE_FULL or ::NTV2_RGBBLACKRANGE_0_0x3FF enumerations.
+			-	8-bit Full Range has 256 possible values (0 thru 255)
+			-	10-bit Full Range has 1024 possible values (0 thru 1023).
+		-	SMPTE range is represented by the ::NTV2_CSC_RGB_RANGE_SMPTE or ::NTV2_RGBBLACKRANGE_0x40_0x3C0 enumerations.
+			-	8-bit SMPTE-range has 220 possible values (16 thru 235).
+			-	10-bit SMPTE-range has 877 possible values (64 thru 940).
+		-	Call CNTV2Card::GetColorSpaceRGBBlackRange to determine the current range setting for a CSC.
+		-	Call CNTV2Card::SetColorSpaceRGBBlackRange to change a CSC’s range setting.
+	-	The CSC’s conversion matrix can be set to “Rec. 601” (SD) or “Rec. 709” (HD).
+		-	The conversion matrix type is represented in the SDK by the ::NTV2ColorSpaceMatrixType data type.
+		-	Rec. 601 is represented by the ::NTV2_Rec601Matrix enumeration constant.
+		-	Rec. 709 is represented by the ::NTV2_Rec709Matrix enumeration constant.
+		-	Call CNTV2Card::GetColorSpaceMatrixSelect to determine the current matrix selection for a CSC.
+		-	Call CNTV2Card::SetColorSpaceMatrixSelect to change a CSC’s matrix selection.
+
+	@par	YCbCr to RGB Conversion
+
+	-	When the CSC’s <b>Video Input</b> is connected to a YUV video source, it will convert and provide RGB data on
+		its “RGB” output crosspoint.
+	-	In addition to the YCbCr-to-RGB value conversion, the CSC also performs the necessary 4:2:2 up-sampling to fill the
+		“missing” pixels in the outgoing RGB raster.
+	-	The CSC will produce an <i>opaque</i> alpha channel by default.
+	-	It can produce alpha channel data from YCbCr video supplied to its <b>Key Input</b> (using just the luma channel) —
+		provided it’s configured to do so:
+		-	Call CNTV2Card::GetColorSpaceMakeAlphaFromKey to determine if the CSC will use its <b>Key Input</b> to generate
+			alpha channel data.
+		-	Call CNTV2Card::SetColorSpaceMakeAlphaFromKey to enable or disable the setting.
+		-	When “Make Alpha From Key” is enabled, call CNTV2Card::GetColorSpaceVideoKeySyncFail to query if the CSC’s
+			<b>Key Input</b> is synchronized with its <b>Video Input</b>. Sync failure will occur if the Key and Video
+			signals have unrelated frame rates, or are significantly out of phase with each other.
+
+	The conversion formulæ:
 	@code{.cpp}
-		//	Example:  Set up FrameStore3 for RGB playout, route to SDI 3...
-		theDevice.SetFrameBufferFormat (NTV2_CHANNEL3, NTV2_FBF_ARGB);
-		theDevice.SetMode (NTV2_CHANNEL3, NTV2_MODE_OUTPUT);
-		theDevice.Connect (NTV2_XptDualLinkOut3Input, NTV2_XptFrameBuffer3RGB); // DLOut3 <== FB3RGB
-		theDevice.Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);         // SDIOut3 <== DLOut3
-		theDevice.Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptDuallinkOut3DS2);   // SDIOut3DS <== DLOut3DS
+		// Full-range 8-bit “Rec 601” (SD) conversion:
+		R = 1.164384 * y  +  0.000000 * cb  +  1.596027 * cr;
+		G = 1.164384 * y  -  0.391762 * cb  -  0.812968 * cr;
+		B = 1.164384 * y  +  2.017232 * cb  +  0.000000 * cr;
 
-		//	Or, more generically...
-		NTV2Channel	chan = NTV2_CHANNEL3;
-		NTV2FrameBufferFormat fbf = NTV2_FBF_ARGB;
-		theDevice.SetFrameBufferFormat (chan, fbf);
-		theDevice.SetMode (chan, NTV2_MODE_OUTPUT);
-		theDevice.Connect (::GetDLOutInputXptFromChannel(chan), ::GetFrameBufferOutputXptFromChannel(chan, NTV2_IS_FBF_RGB(fbf))); // DLOut3 <== FB3RGB
-		theDevice.Connect (::GetSDIOutputInputXpt(chan, false), ::GetDLOutOutputXptFromChannel(chan, false)); // SDIOut3 <== DLOut3
-		theDevice.Connect (::GetSDIOutputInputXpt(chan, true),  ::GetDLOutOutputXptFromChannel(chan, true));  // SDIOut3DS <== DLOut3DS
+		// SMPTE-range 8-bit “Rec 601” (SD) conversion:
+		R = 1.000000 * y  +  0.000000 * cb  +  1.370705 * cr;
+		R = 1.000000 * y  -  0.336455 * cb  -  0.698196 * cr;
+		R = 1.000000 * y  +  1.732446 * cb  +  0.000000 * cr;
+
+		// Full-range 10-bit “Rec 601” (SD) conversion:
+		R = 1.167808 * y  +  0.000000 * cb  +  1.600721 * cr;
+		G = 1.167808 * y  -  0.392915 * cb  -  0.815359 * cr;
+		B = 1.167808 * y  +  2.023165 * cb  +  0.000000 * cr;
+
+		// SMPTE-range 10-bit “Rec 601” (SD) conversion:
+		R = 1.0000008 * y  +  0.000000 * cb  +  1.370705 * cr;
+		G = 1.0000008 * y  -  0.336455 * cb  -  0.698196 * cr;
+		B = 1.0000008 * y  +  1.732446 * cb  +  0.000000 * cr;
+
+		// Full-range 10-bit “Rec 709” (HD) conversion:
+		R = 1.167808 * y  +  0.000000 * cb  +  1.798014 * cr;
+		G = 1.167808 * y  -  0.213876 * cb  -  0.534477 * cr;
+		B = 1.167808 * y  +  2.118615 * cb  +  0.000000 * cr;
+
+		// SMPTE-range 10-bit “Rec 709” (HD) conversion:
+		R = 1.000000 * y  +  0.000000 * cb  +  1.539648 * cr;
+		G = 1.000000 * y  -  0.183143 * cb  -  0.457675 * cr;
+		B = 1.000000 * y  +  1.814180 * cb  +  0.000000 * cr;
 	@endcode
 
-	@par	HD HFR YCbCr Playout Over 2 × 3G SDI From YCbCr Frame Buffer
+	@note	The 8-bit and 10-bit coefficients are NOT the same, since the RGB 10-bit white point (1023)
+			is not simply 4 × the 8-bit RGB white point (255).
 
-	TBD
+	@par	RGB to YCbCr Conversion
 
-	@par	HD HFR YCbCr Playout Over 2 × 3G SDI From RGB Frame Buffer
+	-	When the CSC’s <b>Video Input</b> is fed RGB[A] video, it will convert and provide YUV data on
+		its “Video” and “Key” output crosspoints.
+	-	In addition to the RGB-to-YCbCr value conversion, it also performs the necessary 4:2:2 down-sampling
+		(implemented as a low-pass filter) for the fewer samples in the outgoing YUV raster.
+	-	The <b>Key Output</b> luma channel data is scaled appropriately from the incoming alpha channel data.
+		Its outgoing Cb and Cr component values are fixed at <tt>0x200</tt>.
 
-	TBD
+	The conversion formulæ:
+	@code{.cpp}
+		// Full-range 10-bit “Rec 601” (SD) conversion:
+		Y  =  0.25604 * r  +  0.50265 * g  +  0.09762 * b;
+		Cb = -0.14779 * r  -  0.29014 * g  +  0.43793 * b;
+		Cr =  0.43793 * r  -  0.36671 * g  -  0.07122 * b;
 
-	@par	2K×1080 YCbCr Playout Over 2 × 3G SDI From YCbCr Frame Buffer
+		// SMPTE-range 10-bit “Rec 601” (SD) conversion:
+		Y  =  0.29900 * r  +  0.58700 * g  +  0.11400 * b;
+		Cb = -0.17259 * r  -  0.33883 * g  +  0.51142 * b;
+		Cr =  0.51142 * r  -  0.42825 * g  -  0.08317 * b;
 
-	TBD
+		// Full-range 10-bit “Rec 709” (HD) conversion:
+		Y  =  0.18205 * r  +  0.61243 * g  +  0.06183 * b;
+		Cb = -0.10035 * r  -  0.33758 * g  +  0.43793 * b;
+		Cr =  0.43793 * r  -  0.39777 * g  -  0.04016 * b;
 
-	@par	HD HFR YCbCr Playout Over 2 × 3G SDI From RGB Frame Buffer
+		// SMPTE-range 10-bit “Rec 709” (HD) conversion:
+		Y  =  0.21260 * r  +  0.71520 * g  +  0.07220 * b;
+		Cb = -0.11719 * r  -  0.39423 * g  +  0.51142 * b;
+		Cr =  0.51142 * r  -  0.46452 * g  -  0.04689 * b;
+	@endcode
 
-	TBD
+	@par	Enhanced CSCs
 
-	@par	UHD/4K 4:2:2 YCbCr Playout Over 4 × 3G SDI (“Squares”)
-
-	TBD
-
-	@par	UHD/4K 4:2:2 YCbCr Playout Over 4 × 3G SDI (“Two-Sample Interleave”)
-
-	TBD
-
-	@par	UHD/4K 4:2:2 YCbCr Playout Over 2 × 6G SDI (“Two-Sample Interleave”)
-
-	TBD
-
-	@par	UHD/4K 4:2:2 YCbCr Playout Over 1 × 12G SDI
-
-	TBD
+	Some AJA devices support “enhanced” CSC firmware that is used to override the default Rec 601 and Rec 709 conversion
+	offsets and coefficients.  Call ::NTV2DeviceCanDoEnhancedCSC to determine if the device has the enhanced CSC firmware.
 
 
 	<hr size="50px">
-	@subsection	recipes_endtoend	Routing for Simultaneous Capture & Playout
+	@subsection	vidop-mixerkeyer		Mixer/Keyer Operation
 
-	This section shows how to programmatically set up a device for transmitting input video with a variety of latencies.
+	A <b>Mixer/Keyer</b> is a device widget implemented in FPGA firmware that mixes or “keys” YCbCr video.
+	It uses a pair of registers for configuring its mixing/keying properties.
 
-	@par	SD/HD YCbCr E-E (Sub-Frame Latency)
+	@note	Mixer/Keyer widgets can only process YCbCr video — not RGB[A].
 
-	TBD
-
-	@par	SD/HD YCbCr Frame Synchronizer (One-Frame Latency)
-
-	TBD
-
-	@par	HD E-E Mix RGBA Graphic Over Live Video
-
-	with sub-frame latency
-	TBD
-
-	@par	HD HFR YCbCr E-E Over 2 × 1.5G Dual-Link SDI
-
-	TBD
-
-	@par	HD HFR YCbCr E-E Over 1 × 3G Dual-Link SDI
-
-	TBD
-
-	@par	E-E Over 2 × 3G SDI
-
-	TBD
-
-	@par	E-E Over 1 × 6G SDI
-
-	TBD
-
+	-	Generally, there is one mixer/keyer for every 2 Frame Stores and/or SDI Inputs (or SDI Outputs).
+		Call ::NTV2DeviceGetNumMixers to obtain the number of Mixer/Keyer widgets that are available.
+	-	Mixer/Keyer widgets are identified by ::NTV2_WgtMixer1, ::NTV2_WgtMixer2, …,
+		but are normally identified in SDK calls by a zero-based, unsigned 16-bit index number.
+	-	Each Mixer/Keyer has two outputs — <b>Video</b> and <b>Key</b> — that contain the mixed/keyed output video.
+	-	Each Mixer/Keyer has four inputs:
+		-	two <b>Foreground</b> inputs — <b>Video</b> and <b>Key</b> — and…
+		-	two <b>Background</b> inputs — <b>Video</b> and <b>Key</b>.
+		-	<b>Key Input</b>s only utilize Y-channel data — the Cb and Cr components are ignored.
+		-	<b>IMPORTANT:</b> The Mixer’s foreground and background inputs must be closely synchronized
+			or the Mixer won’t be able to mix them. If the Mixer is unlocked, its outputs will send unclocked
+			(garbage) video.
+			-	Call CNTV2Card::GetMixerSyncStatus to determine if the Mixer is locked to both of its inputs,
+				and therefore if its output is valid.
+	-	Each Mixer/Keyer has the following configuration parameters:
+		-	::NTV2MixerKeyerMode — Primary operating mode:
+			-	Use ::NTV2MIXERMODE_FOREGROUND_ON to exclusively pass the <b>foreground</b> video and key to the Mixer output.
+			-	Use ::NTV2MIXERMODE_FOREGROUND_OFF to exclusively pass the <b>background</b> video and key to the Mixer output.
+			-	Use ::NTV2MIXERMODE_MIX to overlay the foreground video on top of the background video.
+			-	Call CNTV2Card::GetMixerMode to determine the Mixer’s current mode.
+			-	Call CNTV2Card::SetMixerMode to change its mode.
+		-	::NTV2MixerKeyerInputControl — input control mode, one for foreground input, one for background input:
+			-	::NTV2MIXERINPUTCONTROL_FULLRASTER ignores the input key.
+			-	::NTV2MIXERINPUTCONTROL_SHAPED uses the input key as a mask.
+			-	Call CNTV2Card::GetMixerFGInputControl to discover the foreground input’s current control value.
+			-	Call CNTV2Card::SetMixerFGInputControl to change the foreground input’s control value.
+			-	Call CNTV2Card::GetMixerBGInputControl to discover the background input’s current control value.
+			-	Call CNTV2Card::SetMixerBGInputControl to change the background input’s control value.
+		-	<b>Mix Coefficient</b> — an unsigned, 16-bit integer that determines the transparency of the foreground mask/key.
+			-	Call CNTV2Card::GetMixerCoefficient to determine the current mix coefficient value.
+			-	Call CNTV2Card::SetMixerCoefficient to change its value.
+		-	<b>Output VANC Source</b> — The Mixer’s output video VANC can be sourced from the foreground
+			or background input video.
+			-	Call CNTV2Card::GetMixerVancOutputFromForeground to determine if the output VANC is currently
+				being sourced from the foreground video input.
+			-	Call CNTV2Card::SetMixerVancOutputFromForeground to change the output VANC source.
+		-	The Mixer’s foreground and/or background raster can be set to a flat matte of any 10-bit YCbCr color.
+			This matte will override any respective video input to the Mixer.
+				-	Call CNTV2Card::GetMixerFGMatteEnabled to determine if the foreground matte is enabled or not.
+				-	Call CNTV2Card::SetMixerFGMatteEnabled to enable or disable using the foreground matte.
+				-	Call CNTV2Card::GetMixerBGMatteEnabled to determine if the background matte is enabled or not.
+				-	Call CNTV2Card::SetMixerBGMatteEnabled to enable or disable using the background matte.
+				-	Call CNTV2Card::GetMixerMatteColor to determine the current matte color.
+				-	Call CNTV2Card::SetMixerMatteColor to change the matte color.
+				-	Note that to enable its video output, the Mixer still requires a foreground video source
+					if background matte is enabled, or a background video source if foreground matte is enabled.
+	-	For information on how to route signals to and from the Mixer, see \ref widget_mixkey.
 
 
 

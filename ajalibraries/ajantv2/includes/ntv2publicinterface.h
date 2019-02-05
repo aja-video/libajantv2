@@ -1,6 +1,6 @@
 /**
 	@file		ntv2publicinterface.h
-	@copyright	Copyright (C) 2012-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2012-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares enums and structs used by all platform drivers and the SDK.
 **/
 
@@ -1907,10 +1907,10 @@ typedef enum
 	kK2RegMaskColorSpaceMatrixSelect = BIT(30),
 	kK2RegMaskUseCustomCoefSelect    = BIT(31),
 
-	//kK2RegCSCoefficients3_4,
-	//kK2RegCS2Coefficients3_4,
-	//kK2RegCS3Coefficients3_4,
-	//kK2RegCS4Coefficients3_4,
+	//kRegCSCoefficients3_4,
+	//kRegCS2Coefficients3_4,
+	//kRegCS3Coefficients3_4,
+	//kRegCS4Coefficients3_4,
 	//kRegCS5Coefficients3_4,
 	//kRegCS6Coefficients3_4,
 	//kRegCS7Coefficients3_4,
@@ -4279,10 +4279,7 @@ typedef struct
 #endif	//	if !defined (NTV2_DEPRECATE)
 
 
-//
-//
 // Color Space Convert Custom Coefficients
-//  ...See Xena2kRegisters.pdf for more info
 typedef struct
 {
 	ULWord Coefficient1;
@@ -4295,7 +4292,7 @@ typedef struct
 	ULWord Coefficient8;
 	ULWord Coefficient9;
 	ULWord Coefficient10;
-} ColorSpaceConverterCustomCoefficients;
+} ColorSpaceConverterCustomCoefficients, NTV2CSCCustomCoeffs;
 
 /////////////////////////////////////////////////////////////////////////////////////
 // RP188 data structure used in AutoCirculate

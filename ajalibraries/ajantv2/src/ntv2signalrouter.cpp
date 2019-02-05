@@ -1,6 +1,6 @@
 /**
     @brief		CNTV2SignalRouter implementation.
-    @copyright	(C) 2014-2018 AJA Video Systems, Inc.	Proprietary and confidential.
+    @copyright	(C) 2014-2019 AJA Video Systems, Inc.	Proprietary and confidential.
 **/
 #include "ntv2signalrouter.h"
 #include "ntv2debug.h"
@@ -757,6 +757,7 @@ void RoutingExpert::InitInputXpt2WidgetIDs(void)
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut4InputDS2,			NTV2_Wgt12GSDIOut4));
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut5Input,			NTV2_Wgt3GSDIOut5));
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut5Input,			NTV2_WgtSDIMonOut1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut5InputDS2,			NTV2_WgtSDIMonOut1));
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut5InputDS2,			NTV2_Wgt3GSDIOut5));
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut6Input,			NTV2_Wgt3GSDIOut6));
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptSDIOut6InputDS2,			NTV2_Wgt3GSDIOut6));
@@ -775,6 +776,11 @@ void RoutingExpert::InitInputXpt2WidgetIDs(void)
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutQ2Input,			NTV2_WgtHDMIOut1v3));
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutQ3Input,			NTV2_WgtHDMIOut1v3));
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutQ4Input,			NTV2_WgtHDMIOut1v3));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutInput,			NTV2_WgtHDMIOut1v4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutQ1Input,			NTV2_WgtHDMIOut1v4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutQ2Input,			NTV2_WgtHDMIOut1v4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutQ3Input,			NTV2_WgtHDMIOut1v4));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutQ4Input,			NTV2_WgtHDMIOut1v4));
 
 	//	gWidget2InputXpts
 	for (InputXpt2WidgetIDsConstIter iter (gInputXpt2WidgetIDs.begin ());  iter != gInputXpt2WidgetIDs.end ();  ++iter)

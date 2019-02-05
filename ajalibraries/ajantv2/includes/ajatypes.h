@@ -1,6 +1,6 @@
 /**
 	@file		ajatypes.h
-	@copyright	Copyright (C) 2004-2018 AJA Video Systems, Inc.  Proprietary and Confidential information.
+	@copyright	Copyright (C) 2004-2019 AJA Video Systems, Inc.  Proprietary and Confidential information.
 	@brief		Declares the most fundamental data types used by NTV2. Since Windows NT was the first principal
 				development platform, many typedefs are Windows-centric.
 **/
@@ -24,6 +24,7 @@
 //#define NTV2_DEPRECATE_14_3		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.3
 //#define NTV2_DEPRECATE_15_0		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.0
 //#define NTV2_DEPRECATE_15_1		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.1
+//#define NTV2_DEPRECATE_15_2		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.2
 
 #define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
 #define	AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
@@ -51,7 +52,15 @@
 #endif
 
 #if defined(__clang__)
-	#define AJA_FALL_THRU	 [[clang::fallthrough]]
+	#ifndef __has_cpp_attribute
+		#define __has_cpp_attribute(__x__)	0
+	#endif
+
+	#if __has_cpp_attribute(clang::fallthrough)
+		#define AJA_FALL_THRU	[[clang::fallthrough]]
+	#else
+		#define AJA_FALL_THRU
+	#endif
 #else
 	#define AJA_FALL_THRU
 #endif
