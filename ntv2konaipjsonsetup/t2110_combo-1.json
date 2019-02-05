@@ -6,6 +6,7 @@
 		"ptpDomain":0,
 		"setup4k":"false",
 		"multiSDP":"false",
+		"audioCombine":"false",
 		"sfps":
 		[
 			{
