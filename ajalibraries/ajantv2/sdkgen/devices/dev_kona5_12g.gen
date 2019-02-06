@@ -78,7 +78,16 @@ NTV2_FORMAT_4096x2160p_12000
 // NTV2FrameBufferFormats
 NTV2_FBF_10BIT_YCBCR
 NTV2_FBF_8BIT_YCBCR
+NTV2_FBF_ARGB
+NTV2_FBF_RGBA
+NTV2_FBF_10BIT_RGB
 NTV2_FBF_8BIT_YCBCR_YUY2
+NTV2_FBF_ABGR
+NTV2_FBF_10BIT_DPX
+NTV2_FBF_24BIT_RGB
+NTV2_FBF_24BIT_BGR
+NTV2_FBF_10BIT_DPX_LE
+NTV2_FBF_48BIT_RGB
 
 
 // NTV2WidgetIDs
@@ -86,6 +95,9 @@ NTV2_WgtFrameBuffer1
 NTV2_WgtFrameBuffer2
 NTV2_WgtFrameBuffer3
 NTV2_WgtFrameBuffer4
+NTV2_WgtCSC1
+NTV2_WgtCSC2
+NTV2_WgtMixer1
 NTV2_WgtGenLock
 NTV2_Wgt12GSDIIn1
 NTV2_Wgt12GSDIIn2
@@ -120,14 +132,14 @@ NTV2DeviceGetNum4kQuarterSizeConverters			1
 NTV2DeviceGetNumAnalogAudioInputChannels		8
 NTV2DeviceGetNumAnalogAudioOutputChannels		8
 NTV2DeviceGetNumAudioSystems					4
-NTV2DeviceGetNumCSCs							0
+NTV2DeviceGetNumCSCs							2
 NTV2DeviceGetNumEmbeddedAudioInputChannels		16
 NTV2DeviceGetNumEmbeddedAudioOutputChannels		16
 NTV2DeviceGetNumFrameStores						4
 NTV2DeviceGetNumHDMIAudioOutputChannels			8
 NTV2DeviceGetNumHDMIVideoOutputs				1
 NTV2DeviceGetNumLUTs							0
-NTV2DeviceGetNumMixers							0
+NTV2DeviceGetNumMixers							1
 NTV2DeviceGetNumReferenceVideoInputs			1
 NTV2DeviceGetNumSerialPorts						1
 NTV2DeviceGetNumVideoInputs						4
