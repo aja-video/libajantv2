@@ -7163,6 +7163,46 @@ string NTV2VANCModeToString (const NTV2VANCMode inValue, const bool inCompactDis
 }
 
 
+string NTV2MixerKeyerModeToString (const NTV2MixerKeyerMode inValue, const bool inCompactDisplay)
+{
+	switch(inValue)
+	{
+		case NTV2MIXERMODE_FOREGROUND_ON:		return inCompactDisplay ? "FGOn"  : "NTV2MIXERMODE_FOREGROUND_ON";
+		case NTV2MIXERMODE_MIX:					return inCompactDisplay ? "Mix"   : "NTV2MIXERMODE_MIX";
+		case NTV2MIXERMODE_SPLIT:				return inCompactDisplay ? "Split" : "NTV2MIXERMODE_SPLIT";
+		case NTV2MIXERMODE_FOREGROUND_OFF:		return inCompactDisplay ? "FGOff" : "NTV2MIXERMODE_FOREGROUND_OFF";
+		default:								break;
+	}
+	return inCompactDisplay ? "" : "NTV2MIXERMODE_INVALID";
+}
+
+
+string NTV2MixerInputControlToString (const NTV2MixerKeyerInputControl inValue, const bool inCompactDisplay)
+{
+	switch(inValue)
+	{
+		case NTV2MIXERINPUTCONTROL_FULLRASTER:	return inCompactDisplay ? "FullRaster"  : "NTV2MIXERINPUTCONTROL_FULLRASTER";
+		case NTV2MIXERINPUTCONTROL_SHAPED:		return inCompactDisplay ? "Shaped"      : "NTV2MIXERINPUTCONTROL_SHAPED";
+		case NTV2MIXERINPUTCONTROL_UNSHAPED:	return inCompactDisplay ? "Unshaped"    : "NTV2MIXERINPUTCONTROL_UNSHAPED";
+		default:								break;
+	}
+	return inCompactDisplay ? "" : "NTV2MIXERINPUTCONTROL_INVALID";
+}
+
+
+string NTV2VideoLimitingToString (const NTV2VideoLimiting inValue, const bool inCompactDisplay)
+{
+	switch(inValue)
+	{
+		case NTV2_VIDEOLIMITING_LEGALSDI:		return inCompactDisplay ? "LegalSDI"		: "NTV2_VIDEOLIMITING_LEGALSDI";
+		case NTV2_VIDEOLIMITING_OFF:			return inCompactDisplay	? "Off"				: "NTV2_VIDEOLIMITING_OFF";
+		case NTV2_VIDEOLIMITING_LEGALBROADCAST:	return inCompactDisplay	? "LegalBroadcast"	: "NTV2_VIDEOLIMITING_LEGALBROADCAST";
+		default:								break;
+	}
+	return inCompactDisplay ? "" : "NTV2MIXERINPUTCONTROL_INVALID";
+}
+
+
 string NTV2EmbeddedAudioInputToString (const NTV2EmbeddedAudioInput inValue,  const bool inCompactDisplay)
 {
 	ostringstream	oss;

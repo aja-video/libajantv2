@@ -1358,6 +1358,7 @@ typedef enum
 	kRegMaskVidProcMux4				= BIT(6) + BIT(7),
 	kRegMaskVidProcMux5				= BIT(8) + BIT(9) + BIT(10),
 	kRegMaskVidProcLimiting			= BIT(11) + BIT(12),
+	kRegMaskVidProcVancSource		= BIT(13),
 	
 	// Xena 2 only
 	kRegMaskVidProcFGMatteEnable	= BIT(18),
@@ -2504,6 +2505,7 @@ typedef enum
 	kRegShiftVidProcMux5				= 8,
 
 	kRegShiftVidProcLimiting			= 11,
+	kRegShiftVidProcVancSource			= 13,
 	kRegShiftVidProcFGMatteEnable		= 18,
 	kRegShiftVidProcBGMatteEnable		= 19,
 	kRegShiftVidProcFGControl			= 20,
