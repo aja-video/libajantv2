@@ -5706,7 +5706,7 @@ typedef enum
 							elements, from the bottom of the destination buffer, and during the transfer, the destination pitch is subtracted
 							instead of added. Defaults to normal “from top” destination offset reference.
 		**/
-		AJAExport class NTV2SegmentedXferInfo
+		class AJAExport NTV2SegmentedXferInfo
 		{
 			public:
 								NTV2SegmentedXferInfo()
@@ -5737,7 +5737,7 @@ typedef enum
 				ULWord			getTotalBytes (void) const			{return getTotalElements() * getElementLength();}
 
 				// Changing
-				inline NTV2SegmentedXferInfo &	setSegmentCount (const ULWord inNumSegments)		{mNumSegments = inNumSegments;  return *this;}
+				inline NTV2SegmentedXferInfo &	setSegmentCount (const ULWord inNumSegments)	{mNumSegments = inNumSegments;  return *this;}
 				inline NTV2SegmentedXferInfo &	setSegmentLength (const ULWord inNumElements)	{mElementsPerSegment = inNumElements;  return *this;}
 				inline NTV2SegmentedXferInfo &	setSourceInfo (const ULWord inOffset, const ULWord inPitch)
 											{return setSourceOffset(inOffset).setSourcePitch(inPitch);}
