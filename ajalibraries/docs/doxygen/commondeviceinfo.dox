@@ -201,7 +201,8 @@
 	-	To determine the SDRAM that the device has for storing video and audio data,
 		call ::NTV2DeviceGetActiveMemorySize.
 	-	To determine the current ::NTV2Framesize for the device,
-		call CNTV2Card::GetFrameBufferSize;
+		call CNTV2Card::GetFrameBufferSize. The returned ::NTV2Framesize can be converted
+		into a byte count using ::NTV2FramesizeToByteCount.
 	-	To change (override) the current ::NTV2Framesize for the device,
 		call CNTV2Card::SetFrameBufferSize.
 
@@ -356,8 +357,6 @@
 	@subsection	vidop-fbaccess		Frame Buffer Access
 
 	Data can be transferred to or from the device at any time using the DMA API in the CNTV2Card class.
-	Call CNTV2Card::DMAReadFrame to transfer a single frame from device SDRAM to a local host buffer.
-	Call CNTV2Card::DMAWriteFrame to transfer a single frame from a local host buffer to device SDRAM.
 
 	Remember that <b>the host computer always has access to frame memory</b>. Therefore
 	it’s important to synchronize or gate transfers to/from the host using the vertical blanking
@@ -365,8 +364,32 @@
 	CNTV2Card::WaitForInputVerticalInterrupt, CNTV2Card::WaitForInputFieldID, etc.).
 
 	The device’s current line counter could also be used (i.e., by monitoring the ::kRegLineCount register
-	via CNTV2Card::ReadRegister), but that value reflects the read/write line position of Frame Store 1.
-	There are no other Line Count registers provided for other Frame Stores.
+	via CNTV2Card::ReadLineCount), but that value reflects the read/write line position of Frame Store 1.
+	Other Frame Stores do not have Line Counters.
+
+	There are several DMA API functions for transferring data between host memory and device SDRAM.
+	They are <b>frame-centric</b> in that they all require a zero-based frame number to calculate
+	where to start reading or writing in device SDRAM. The actual byte offset into device SDRAM
+	depends on the device’s current <b>Frame Size</b> — whether 8MB, 16MB, or larger.
+
+	-	Call CNTV2Card::DMAReadFrame or CNTV2Card::DMAWriteFrame to transfer frame data from or to
+		device SDRAM (respectively).
+	-	<b>Frame Number</b> — If non-zero, it will index into device SDRAM by ::NTV2Framesize frames.
+		See the <b>Frame Buffer Layout</b> discussion in the \ref hardwarecharacteristics
+		section for more information.
+	-	<b>Byte Count:</b>
+		-	Should be even, or evenly divisible by 4, or ideally a power of two.
+		-	Small transfers can sometimes be problematic for certain DMA engine firmware in combination
+			with certain host hardware and OS platforms.  To avoid this, AJA recommends transferring at
+			least 4096 bytes of data. Try smaller values if necessary, but test thoroughly with the
+			devices and hardware you intend to support.
+		-	It can be larger than a frame. For example, if the device frame size is 8MB, and the
+			requested byte count is 16MB, two frames will be transferred.
+	-	CNTV2Card::DMARead and CNTV2Card::DMAWrite are similar, but also accept a <b>Byte Offset</b>,
+		which…
+		-	Should be even, or evenly divisible by 4, or ideally a power of two.
+		-	<b>Hint:</b> All device SDRAM can be accessed by using a zero <b>Frame Number</b> and
+			using any offset value needed (up to 4GB minus the <b>Byte Count</b>).
 
 	@warning	Calling CNTV2Card::DMAWriteFrame at a fraction of frame time <i>after</i>
 				the VBI to write the same frame on the device that’s being read for the currently-playing
@@ -378,7 +401,7 @@
 				old pixel data.
 
 	@note	DMA transfer speeds may be affected by the amount of video data being accessed by
-			the device to transmit video. If a channel is in display mode, it is always outputting
+			the device to transmit video. If a channel is in display mode, it is always playing
 			video, and therefore reading from SDRAM, consuming SDRAM bandwidth… the amount consumed
 			determined by the amount of data being read from frame memory… which depends on Frame
 			Buffer Format and Frame Geometry. <b>In some cases, DMA speeds can be increased by
@@ -387,6 +410,10 @@
 			SDRAM bandwidth to read frame data for playout. In addition to the fact that more data is
 			moved in, say, 48-bit RGB (than YUV8), the transfer of that data may also proceed at a
 			slightly slower rate.
+
+	@warning	Accessing memory addresses that are beyond the end of device SDRAM is not recommended,
+				and will result in unexpected behavior — e.g. wrapping around and continuing from the
+				start of device SDRAM.
 
 
 	@subsection	deviceclockingandsync		Device Clocking and Synchronization

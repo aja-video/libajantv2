@@ -2142,18 +2142,18 @@ bool CNTV2Card::SetPCIAccessFrame (NTV2Channel channel, ULWord value, bool waitF
 // Method: FlopFlopPage
 // Input:  NTV2Channel
 // Output: NONE
-bool CNTV2Card::FlipFlopPage(NTV2Channel channel )
+bool CNTV2Card::FlipFlopPage (const NTV2Channel inChannel)
 {
-	ULWord pciAccessFrame;
-	ULWord outputFrame;
-
-	if (IS_CHANNEL_INVALID (channel))
+	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 
-	if (GetPCIAccessFrame (channel, pciAccessFrame))
-		if (GetOutputFrame (channel, outputFrame))
-			if (SetOutputFrame (channel, pciAccessFrame))
-				if (SetPCIAccessFrame (channel, outputFrame))
+	ULWord pciAccessFrame(0);
+	ULWord outputFrame(0);
+
+	if (GetPCIAccessFrame (inChannel, pciAccessFrame))
+		if (GetOutputFrame (inChannel, outputFrame))
+			if (SetOutputFrame (inChannel, pciAccessFrame))
+				if (SetPCIAccessFrame (inChannel, outputFrame))
 					return true;
 	return false;
 }
