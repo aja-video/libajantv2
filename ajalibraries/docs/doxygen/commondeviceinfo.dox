@@ -746,7 +746,8 @@
 		-	::NTV2MixerKeyerMode — Primary operating mode:
 			-	Use ::NTV2MIXERMODE_FOREGROUND_ON to exclusively pass the <b>foreground</b> video and key to the Mixer output.
 			-	Use ::NTV2MIXERMODE_FOREGROUND_OFF to exclusively pass the <b>background</b> video and key to the Mixer output.
-			-	Use ::NTV2MIXERMODE_MIX to overlay the foreground video on top of the background video.
+			-	Use ::NTV2MIXERMODE_MIX to overlay the foreground video on top of the background video. Foreground or background
+				<b>Flat Matte</b> (see below), if enabled, will be mixed instead of its respective input raster.
 			-	Call CNTV2Card::GetMixerMode to determine the Mixer’s current mode.
 			-	Call CNTV2Card::SetMixerMode to change its mode.
 		-	::NTV2MixerKeyerInputControl — input control mode, one for foreground input, one for background input:
@@ -764,16 +765,18 @@
 			-	Call CNTV2Card::GetMixerVancOutputFromForeground to determine if the output VANC is currently
 				being sourced from the foreground video input.
 			-	Call CNTV2Card::SetMixerVancOutputFromForeground to change the output VANC source.
-		-	The Mixer’s foreground and/or background raster can be set to a flat matte of any 10-bit YCbCr color.
-			This matte will override any respective video input to the Mixer.
+		-	<b>Flat Matte</b> — The Mixer’s foreground and/or background raster can be set to a flat matte of any
+			10-bit YCbCr color. This matte will override any respective video input to the Mixer.
 				-	Call CNTV2Card::GetMixerFGMatteEnabled to determine if the foreground matte is enabled or not.
 				-	Call CNTV2Card::SetMixerFGMatteEnabled to enable or disable using the foreground matte.
 				-	Call CNTV2Card::GetMixerBGMatteEnabled to determine if the background matte is enabled or not.
 				-	Call CNTV2Card::SetMixerBGMatteEnabled to enable or disable using the background matte.
+				-	Do not enable <b>Flat Matte</b> on both foreground and background — use one or the other, or neither.
 				-	Call CNTV2Card::GetMixerMatteColor to determine the current matte color.
 				-	Call CNTV2Card::SetMixerMatteColor to change the matte color.
-				-	Note that to enable its video output, the Mixer still requires a foreground video source
-					if background matte is enabled, or a background video source if foreground matte is enabled.
+				-	Note that to retain sync and enable its video output, the Mixer still requires a foreground
+					video source if background matte is enabled, or a background video source if foreground
+					matte is enabled.
 	-	For information on how to route signals to and from the Mixer, see \ref widget_mixkey.
 
 
