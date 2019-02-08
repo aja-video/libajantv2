@@ -1345,10 +1345,6 @@ public:
 			result.insert(regNum);
 
 		AJAAutoLock	lock(&mGuardMutex);
-			//	TBD: Remove unneeded mixer regs
-			UWord	nMixers(::NTV2DeviceGetNumMixers(inDeviceID));
-			//if (nMixers < 8)
-			//const NTV2RegNumSet	mixerRegs	(GetRegistersForClass(kRegClass_Mixer));
 
 		if (::NTV2DeviceCanDoCustomAnc(inDeviceID))
 		{
