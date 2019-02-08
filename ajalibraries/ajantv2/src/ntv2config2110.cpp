@@ -2061,7 +2061,7 @@ bool CNTV2Config2110::GenVideoStreamMultiSDPInfo(stringstream & sdp, char* gmInf
 			// PTP
 			sdp << "a=ts-refclk:ptp=IEEE1588-2008:" << gmInfo << endl;
 			sdp << "a=mediaclk:direct=0" << endl;
-			sdp << "a=mid:" << stream+1 << endl <<  endl;
+			sdp << "a=mid:" << i+1 << endl <<  endl;
 		}
 	}
 
