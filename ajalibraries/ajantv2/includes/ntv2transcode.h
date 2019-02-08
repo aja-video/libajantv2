@@ -251,7 +251,7 @@ inline void HDConvertRGBAlphatoYCbCr(RGBAlphaPixel * pSource, YCbCrPixel * pTarg
 }
 
  
-inline void SDConvertRGBAlphatoYCbCr(RGBAlphaPixel * pSource, YCbCr10BitPixel * pTarget)
+inline void SDConvertRGBAlphatoYCbCr(const RGBAlphaPixel * pSource, YCbCr10BitPixel * pTarget)
 {
   LWord Y,Cb,Cr;
 
@@ -273,7 +273,7 @@ inline void SDConvertRGBAlphatoYCbCr(RGBAlphaPixel * pSource, YCbCr10BitPixel * 
   pTarget->cr = UWord(Cr&0x3FF);
 }
 
-inline void HDConvertRGBAlphatoYCbCr(RGBAlphaPixel * pSource, YCbCr10BitPixel * pTarget)
+inline void HDConvertRGBAlphatoYCbCr(const RGBAlphaPixel * pSource, YCbCr10BitPixel * pTarget)
 {
   LWord Y,Cb,Cr;
 
@@ -322,7 +322,7 @@ inline 	void SDConvertYCbCrtoRGB(YCbCrAlphaPixel *pSource,
   pTarget->Alpha = pSource->Alpha;
 }
 
-inline 	void SDConvert10BitYCbCrtoRGB(YCbCr10BitAlphaPixel *pSource,
+inline 	void SDConvert10BitYCbCrtoRGB(const YCbCr10BitAlphaPixel *pSource,
 										        RGBAlphaPixel *pTarget)
 {
   LWord Red,Green,Blue;
@@ -376,7 +376,7 @@ inline 	void HDConvertYCbCrtoRGB(YCbCrAlphaPixel *pSource,
   pTarget->Alpha = pSource->Alpha;
 }
 
-inline 	void HDConvert10BitYCbCrtoRGB(YCbCr10BitAlphaPixel *pSource,
+inline 	void HDConvert10BitYCbCrtoRGB(const YCbCr10BitAlphaPixel *pSource,
 										        RGBAlphaPixel *pTarget)
 {
   LWord Red,Green,Blue;

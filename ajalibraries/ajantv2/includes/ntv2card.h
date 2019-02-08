@@ -1024,7 +1024,7 @@ public:
 	AJA_VIRTUAL bool		SetDualLinkInputEnable (bool enable);
 	AJA_VIRTUAL bool		GetDualLinkInputEnable (bool & outIsEnabled);
 
-	AJA_VIRTUAL bool		SetVideoLimiting (NTV2VideoLimiting inValue);
+	AJA_VIRTUAL bool		SetVideoLimiting (const NTV2VideoLimiting inValue);
 	AJA_VIRTUAL bool		GetVideoLimiting (NTV2VideoLimiting & outValue);
 
 	AJA_VIRTUAL bool		SetEnableVANCData (const bool inVANCenabled, const bool inTallerVANC, const NTV2Standard inStandard, const NTV2FrameGeometry inGeometry, const NTV2Channel inChannel = NTV2_CHANNEL1);

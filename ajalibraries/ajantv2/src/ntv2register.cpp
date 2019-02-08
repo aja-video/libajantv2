@@ -2685,9 +2685,12 @@ bool CNTV2Card::EnableRP188Bypass (const NTV2Channel inChannel)
 }
 
 
-bool CNTV2Card::SetVideoLimiting (NTV2VideoLimiting value)
+bool CNTV2Card::SetVideoLimiting (const NTV2VideoLimiting inValue)
 {
-	return WriteRegister (kRegVidProc1Control, value, kRegMaskVidProcLimiting, kRegShiftVidProcLimiting);
+	if (!NTV2_IS_VALID_VIDEOLIMITING(inValue))
+		return false;
+	CVIDINFO("'" << GetDisplayName() << "' set to " << ::NTV2VideoLimitingToString(inValue));
+	return WriteRegister (kRegVidProc1Control, inValue, kRegMaskVidProcLimiting, kRegShiftVidProcLimiting);
 }
 
 bool CNTV2Card::GetVideoLimiting (NTV2VideoLimiting & outValue)
@@ -2779,9 +2782,10 @@ bool CNTV2Card::SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard i
 	#endif	//	_DEBUG
 	}
 	SetFrameGeometry (frameGeometry, false/*ajaRetail*/, inChannel);
+	CVIDINFO("'" << GetDisplayName() << "' Ch" << DEC(channel+1) << ": set to " << ::NTV2VANCModeToString(inVancMode) << " for " << ::NTV2StandardToString(inStandard) << " and " << ::NTV2FrameGeometryToString(frameGeometry));
 
 	//	Only muck with limiting if not the xena2k board. Xena2k only turns off limiting in VANC area. Active video uses vidproccontrol setting...
-	if (!::NTV2DeviceNeedsRoutingSetup (GetDeviceID ()))
+	if (!::NTV2DeviceNeedsRoutingSetup(GetDeviceID()))
 		SetVideoLimiting (NTV2_IS_VANCMODE_ON (inVancMode) ? NTV2_VIDEOLIMITING_OFF : NTV2_VIDEOLIMITING_LEGALSDI);
 
 	return true;
@@ -2898,6 +2902,7 @@ bool CNTV2Card::SetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode i
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
+	CVIDINFO("'" << GetDisplayName() << "' Ch" << DEC(inChannel+1) << ": Vanc data shift " << (inValue ? "enabled" : "disabled"));
 	return WriteRegister (gChannelToControlRegNum [inChannel], inValue, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 }
 
@@ -2934,19 +2939,20 @@ bool CNTV2Card::GetPulldownMode (NTV2Channel inChannel, bool & outValue)
 
 bool CNTV2Card::SetMixerVancOutputFromForeground (const UWord inWhichMixer, const bool inFromForegroundSource)
 {
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
-	return WriteRegister (gIndexToVidProcControlRegNum [inWhichMixer], inFromForegroundSource ? 1 : 0, BIT(13), 13);
+	CVIDINFO("'" << GetDisplayName() << "' Mixer" << DEC(inWhichMixer+1) << ": Vanc from " << (inFromForegroundSource ? "FG" : "BG"));
+	return WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inFromForegroundSource ? 1 : 0, kRegMaskVidProcVancSource, kRegShiftVidProcVancSource);
 }
 
 
 bool CNTV2Card::GetMixerVancOutputFromForeground (const UWord inWhichMixer, bool & outIsFromForegroundSource)
 {
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
 
 	ULWord	value	(0);
-	bool	result	(ReadRegister (gIndexToVidProcControlRegNum [inWhichMixer], value, BIT(13), 13));
+	bool	result	(ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], value, kRegMaskVidProcVancSource, kRegShiftVidProcVancSource));
 	if (result)
 		outIsFromForegroundSource = value ? true : false;
 	return result;
@@ -2959,16 +2965,17 @@ bool CNTV2Card::GetMixerVancOutputFromForeground (const UWord inWhichMixer, bool
 
 bool CNTV2Card::SetMixerFGInputControl (const UWord inWhichMixer, const NTV2MixerKeyerInputControl inInputControl)
 {
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
-	return WriteRegister (gIndexToVidProcControlRegNum [inWhichMixer], inInputControl, kK2RegMaskXena2FgVidProcInputControl, kK2RegShiftXena2FgVidProcInputControl);
+	CVIDINFO("'" << GetDisplayName() << "' Mixer" << DEC(inWhichMixer+1) << ": FG input ctrl=" << ::NTV2MixerInputControlToString(inInputControl));
+	return WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inInputControl, kK2RegMaskXena2FgVidProcInputControl, kK2RegShiftXena2FgVidProcInputControl);
 }
 
 
 bool CNTV2Card::GetMixerFGInputControl (const UWord inWhichMixer, NTV2MixerKeyerInputControl & outInputControl)
 {
 	outInputControl = NTV2MIXERINPUTCONTROL_INVALID;
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
 
 	ULWord	value	(0);
@@ -2981,8 +2988,9 @@ bool CNTV2Card::GetMixerFGInputControl (const UWord inWhichMixer, NTV2MixerKeyer
 
 bool CNTV2Card::SetMixerBGInputControl (const UWord inWhichMixer, const NTV2MixerKeyerInputControl inInputControl)
 {
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
+	CVIDINFO("'" << GetDisplayName() << "' Mixer" << DEC(inWhichMixer+1) << ": BG input ctrl=" << ::NTV2MixerInputControlToString(inInputControl));
 	return WriteRegister (gIndexToVidProcControlRegNum [inWhichMixer], inInputControl, kK2RegMaskXena2BgVidProcInputControl, kK2RegShiftXena2BgVidProcInputControl);
 }
 
@@ -2990,11 +2998,11 @@ bool CNTV2Card::SetMixerBGInputControl (const UWord inWhichMixer, const NTV2Mixe
 bool CNTV2Card::GetMixerBGInputControl (const UWord inWhichMixer, NTV2MixerKeyerInputControl & outInputControl)
 {
 	outInputControl = NTV2MIXERINPUTCONTROL_INVALID;
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
 
 	ULWord	value	(0);
-	bool	result	(ReadRegister (gIndexToVidProcControlRegNum [inWhichMixer], value, kK2RegMaskXena2BgVidProcInputControl, kK2RegShiftXena2BgVidProcInputControl));
+	bool	result	(ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], value, kK2RegMaskXena2BgVidProcInputControl, kK2RegShiftXena2BgVidProcInputControl));
 	if (result)
 		outInputControl = static_cast <NTV2MixerKeyerInputControl> (value);
 	return result;
@@ -3003,9 +3011,10 @@ bool CNTV2Card::GetMixerBGInputControl (const UWord inWhichMixer, NTV2MixerKeyer
 
 bool CNTV2Card::SetMixerMode (const UWord inWhichMixer, const NTV2MixerKeyerMode inMode)
 {
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
-	return WriteRegister (gIndexToVidProcControlRegNum [inWhichMixer], inMode, kK2RegMaskXena2VidProcMode, kK2RegShiftXena2VidProcMode);
+	CVIDINFO("'" << GetDisplayName() << "' Mixer" << DEC(inWhichMixer+1) << ": mode=" << ::NTV2MixerKeyerModeToString(inMode));
+	return WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inMode, kK2RegMaskXena2VidProcMode, kK2RegShiftXena2VidProcMode);
 }
 
 
@@ -3013,11 +3022,11 @@ bool CNTV2Card::GetMixerMode (const UWord inWhichMixer, NTV2MixerKeyerMode & out
 {
 	outMode = NTV2MIXERMODE_INVALID;
 
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
 
 	ULWord	value	(0);
-	bool	result	(ReadRegister (gIndexToVidProcControlRegNum [inWhichMixer], value, kK2RegMaskXena2VidProcMode, kK2RegShiftXena2VidProcMode));
+	bool	result	(ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], value, kK2RegMaskXena2VidProcMode, kK2RegShiftXena2VidProcMode));
 	if (result)
 		outMode = static_cast <NTV2MixerKeyerMode> (value);
 	return result;
@@ -3026,16 +3035,17 @@ bool CNTV2Card::GetMixerMode (const UWord inWhichMixer, NTV2MixerKeyerMode & out
 
 bool CNTV2Card::SetMixerCoefficient (const UWord inWhichMixer, const ULWord inMixCoefficient)
 {
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
-	return WriteRegister (gIndexToVidProcMixCoeffRegNum [inWhichMixer], inMixCoefficient);
+	CVIDINFO("'" << GetDisplayName() << "' Mixer" << DEC(inWhichMixer+1) << ": mixCoeff=" << xHEX0N(inMixCoefficient,8));
+	return WriteRegister (gIndexToVidProcMixCoeffRegNum[inWhichMixer], inMixCoefficient);
 }
 
 
 bool CNTV2Card::GetMixerCoefficient (const UWord inWhichMixer, ULWord & outMixCoefficient)
 {
 	outMixCoefficient = 0;
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
 	return ReadRegister (gIndexToVidProcMixCoeffRegNum[inWhichMixer], outMixCoefficient);
 }
@@ -3043,14 +3053,14 @@ bool CNTV2Card::GetMixerCoefficient (const UWord inWhichMixer, ULWord & outMixCo
 
 bool CNTV2Card::GetMixerSyncStatus (const UWord inWhichMixer, bool & outIsSyncOK)
 {
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
 
-	ULWord	value	(0);
-	bool	result	(ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], value));
-	if (result)
-		outIsSyncOK = (value & kRegMaskVidProcSyncFail) ? false : true;
-	return result;
+	bool syncFail (false);
+	if (!CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], syncFail, kRegMaskVidProcSyncFail, kRegShiftVidProcSyncFail))
+		return false;
+	outIsSyncOK = syncFail ? false : true;
+	return true;
 }
 
 bool CNTV2Card::GetMixerFGMatteEnabled (const UWord inWhichMixer, bool & outIsEnabled)
@@ -3091,7 +3101,7 @@ bool CNTV2Card::GetMixerMatteColor (const UWord inWhichMixer, YCbCr10BitPixel & 
 	outYCbCrValue.cb = outYCbCrValue.y = outYCbCrValue.cr = 0;
 	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
-	if (!WriteRegister(gMatteColorRegs[inWhichMixer], packedValue))
+	if (!ReadRegister(gMatteColorRegs[inWhichMixer], packedValue))
 		return false;
 
 	outYCbCrValue.cb	=   packedValue        & 0x03FF;
@@ -3110,9 +3120,16 @@ bool CNTV2Card::SetMixerMatteColor (const UWord inWhichMixer, const YCbCr10BitPi
 		ycbcrPixel.y = 0x0;	// clip y
 	else
 		ycbcrPixel.y -= 0x40;
+	ycbcrPixel.y &= 0x3FF;
+	ycbcrPixel.cb &= 0x3FF;
+	ycbcrPixel.cr &= 0x3FF;
 
-	//	Pack it into three 10-bit YCbCr value...
+	//	Pack three 10-bit values into ULWord...
 	const ULWord packedValue (ycbcrPixel.cb  |  (ycbcrPixel.y << 10)  |  (ycbcrPixel.cr << 20));
+	CVIDINFO("'" << GetDisplayName() << "' Mixer" << DEC(inWhichMixer+1) << ": set to YCbCr=" << DEC(ycbcrPixel.y)
+			<< "|" << DEC(ycbcrPixel.cb) << "|" << DEC(ycbcrPixel.cr) << ":" << HEXN(ycbcrPixel.y,3) << "|"
+			<< HEXN(ycbcrPixel.cb,3) << "|" << HEXN(ycbcrPixel.cr,3) << ", write " << xHEX0N(packedValue,8)
+			<< " into reg " << DEC(gMatteColorRegs[inWhichMixer]));
 
 	//	Write it...
 	return WriteRegister(gMatteColorRegs[inWhichMixer], packedValue);

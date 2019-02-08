@@ -36,24 +36,25 @@
     #define AJA_LITTLE_ENDIAN
 
     // This adds the ability to format 64-bit entities
+	#include <inttypes.h>	//	Prevents duplicate macro definition warnings
     # define __PRI64_PREFIX   "ll"
 
-    // Macros for printing format specifiers.
-    #ifndef PRId64
-        #define PRId64 __PRI64_PREFIX "d"
-    #endif
-    #ifndef PRIi64
-        #define PRIi64 __PRI64_PREFIX "i"
-    #endif
-    #ifndef PRIu64
-        #define PRIu64 __PRI64_PREFIX "u"
-    #endif
-    #ifndef PRIo64
-        #define PRIo64 __PRI64_PREFIX "o"
-    #endif
-    #ifndef PRIx64
-        #define PRIx64 __PRI64_PREFIX "x"
-    #endif
+	// Macros for printing format specifiers.
+	#ifndef PRId64
+		#define PRId64 __PRI64_PREFIX "d"
+	#endif
+	#ifndef PRIi64
+		#define PRIi64 __PRI64_PREFIX "i"
+	#endif
+	#ifndef PRIu64
+		#define PRIu64 __PRI64_PREFIX "u"
+	#endif
+	#ifndef PRIo64
+		#define PRIo64 __PRI64_PREFIX "o"
+	#endif
+	#ifndef PRIx64
+		#define PRIx64 __PRI64_PREFIX "x"
+	#endif
 
     // Synonyms for library functions with different names on different platforms
     #define ajasnprintf(_str_, _maxbytes_, _format_, ...) _snprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
