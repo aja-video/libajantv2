@@ -1256,38 +1256,54 @@ bool CNTV2Config2110::Set4KModeEnable(const bool enable)
         return false;
     }
 
-    bool old_enable = false;
-    Get4KModeEnable(old_enable);
-    bool enableChange = (old_enable != enable);
+	uint32_t val;
+	mDevice.ReadRegister(kRegArb_4KMode + SAREK_2110_TX_ARBITRATOR, val);
+	if (enable)
+		val |= BIT(0);
+	else
+		val &= ~BIT(0);
 
-    if (enableChange)
-    {
-        uint32_t reg;
-        reg = kRegArb_4KMode + SAREK_2110_TX_ARBITRATOR;
-
-        uint32_t val;
-        mDevice.ReadRegister(reg, val);
-        if (enable)
-            val |= BIT(0);
-        else
-            val &= ~BIT(0);
-
-        mDevice.WriteRegister(reg,val);
-    }
+	mDevice.WriteRegister(kRegArb_4KMode + SAREK_2110_TX_ARBITRATOR,val);
 
     return true;
 }
 
 bool  CNTV2Config2110::Get4KModeEnable(bool & enable)
 {
-    uint32_t reg;
-    reg = kRegArb_4KMode + SAREK_2110_TX_ARBITRATOR;
-
     uint32_t val;
-    mDevice.ReadRegister(reg, val);
+	mDevice.ReadRegister(kRegArb_4KMode + SAREK_2110_TX_ARBITRATOR, val);
 
     enable = val & 0x01;
     return true;
+}
+
+bool CNTV2Config2110::SetAudioCombineEnable(const bool enable)
+{
+	if (!mDevice.IsMBSystemReady())
+	{
+		mIpErrorCode = NTV2IpErrNotReady;
+		return false;
+	}
+
+	uint32_t val;
+	mDevice.ReadRegister(kRegArb_4KMode + SAREK_2110_TX_ARBITRATOR, val);
+	if (enable)
+		val |= BIT(4);
+	else
+		val &= ~BIT(4);
+
+	mDevice.WriteRegister(kRegArb_4KMode + SAREK_2110_TX_ARBITRATOR,val);
+
+	return true;
+}
+
+bool  CNTV2Config2110::GetAudioCombineEnable(bool & enable)
+{
+	uint32_t val;
+	mDevice.ReadRegister(kRegArb_4KMode + SAREK_2110_TX_ARBITRATOR, val);
+
+	enable = val & 0x10;
+	return true;
 }
 
 bool CNTV2Config2110::SetIPServicesControl(const bool enable, const bool forceReconfig)
@@ -2045,7 +2061,7 @@ bool CNTV2Config2110::GenVideoStreamMultiSDPInfo(stringstream & sdp, char* gmInf
 			// PTP
 			sdp << "a=ts-refclk:ptp=IEEE1588-2008:" << gmInfo << endl;
 			sdp << "a=mediaclk:direct=0" << endl;
-			sdp << "a=mid:" << stream+1 << endl <<  endl;
+			sdp << "a=mid:" << i+1 << endl <<  endl;
 		}
 	}
 

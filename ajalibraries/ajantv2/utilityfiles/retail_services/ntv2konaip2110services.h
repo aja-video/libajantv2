@@ -32,8 +32,10 @@ public:
 							NetworkData2110* s2110NetworkLast,
 							TransmitVideoData2110* s2110TxVideoDataLast,
 							TransmitAudioData2110* s2110TxAudioDataLast,
+							TransmitAncData2110* s2110TxAncDataLast,
 							ReceiveVideoData2110* s2110RxVideoDataLast,
-							ReceiveAudioData2110* s2110RxAudioDataLast);
+							ReceiveAudioData2110* s2110RxAudioDataLast,
+							ReceiveAncData2110* s2110RxAncDataLast);
 	NTV2VideoFormat ConvertVideoToStreamFormat(NTV2VideoFormat videoFormat);
 	NTV2VideoFormat ConvertStreamToVideoFormat(NTV2VideoFormat videoFormat);
 	void Print2110Network(const NetworkData2110 m2110Network);
@@ -43,16 +45,20 @@ protected:
     
     NetworkData2110			m2110Network;
     TransmitVideoData2110   m2110TxVideoData;
-    TransmitAudioData2110   m2110TxAudioData;
+	TransmitAudioData2110   m2110TxAudioData;
+	TransmitAncData2110   	m2110TxAncData;
     ReceiveVideoData2110    m2110RxVideoData;
-    ReceiveAudioData2110    m2110RxAudioData;
+	ReceiveAudioData2110    m2110RxAudioData;
+	ReceiveAncData2110    	m2110RxAncData;
     IpStatus2110            m2110IpStatusData;
 
     NetworkData2110			m2110NetworkLast;
     TransmitVideoData2110   m2110TxVideoDataLast;
-    TransmitAudioData2110   m2110TxAudioDataLast;
+	TransmitAudioData2110   m2110TxAudioDataLast;
+	TransmitAncData2110   	m2110TxAncDataLast;
     ReceiveVideoData2110    m2110RxVideoDataLast;
-    ReceiveAudioData2110    m2110RxAudioDataLast;
+	ReceiveAudioData2110    m2110RxAudioDataLast;
+	ReceiveAncData2110    	m2110RxAncDataLast;
 
 	NTV2Mode				mFb1ModeLast;
     NTV2VideoFormat         mFb1VideoFormatLast;

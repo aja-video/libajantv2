@@ -130,6 +130,7 @@ public:
 	bool ReadLicenseInfo(std::string& licenseString);
 	void DisplayData(uint32_t address, uint32_t len);
 	bool ProgramInfoFromString(std::string infoString);
+	void FullProgram(std::vector<uint8_t> & dataBuffer);
 
     int32_t  NextMcsStep() {return ++_mcsStep;}
 
