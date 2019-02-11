@@ -201,7 +201,8 @@
 	-	To determine the SDRAM that the device has for storing video and audio data,
 		call ::NTV2DeviceGetActiveMemorySize.
 	-	To determine the current ::NTV2Framesize for the device,
-		call CNTV2Card::GetFrameBufferSize;
+		call CNTV2Card::GetFrameBufferSize. The returned ::NTV2Framesize can be converted
+		into a byte count using ::NTV2FramesizeToByteCount.
 	-	To change (override) the current ::NTV2Framesize for the device,
 		call CNTV2Card::SetFrameBufferSize.
 
@@ -356,8 +357,6 @@
 	@subsection	vidop-fbaccess		Frame Buffer Access
 
 	Data can be transferred to or from the device at any time using the DMA API in the CNTV2Card class.
-	Call CNTV2Card::DMAReadFrame to transfer a single frame from device SDRAM to a local host buffer.
-	Call CNTV2Card::DMAWriteFrame to transfer a single frame from a local host buffer to device SDRAM.
 
 	Remember that <b>the host computer always has access to frame memory</b>. Therefore
 	it’s important to synchronize or gate transfers to/from the host using the vertical blanking
@@ -365,8 +364,32 @@
 	CNTV2Card::WaitForInputVerticalInterrupt, CNTV2Card::WaitForInputFieldID, etc.).
 
 	The device’s current line counter could also be used (i.e., by monitoring the ::kRegLineCount register
-	via CNTV2Card::ReadRegister), but that value reflects the read/write line position of Frame Store 1.
-	There are no other Line Count registers provided for other Frame Stores.
+	via CNTV2Card::ReadLineCount), but that value reflects the read/write line position of Frame Store 1.
+	Other Frame Stores do not have Line Counters.
+
+	There are several DMA API functions for transferring data between host memory and device SDRAM.
+	They are <b>frame-centric</b> in that they all require a zero-based frame number to calculate
+	where to start reading or writing in device SDRAM. The actual byte offset into device SDRAM
+	depends on the device’s current <b>Frame Size</b> — whether 8MB, 16MB, or larger.
+
+	-	Call CNTV2Card::DMAReadFrame or CNTV2Card::DMAWriteFrame to transfer frame data from or to
+		device SDRAM (respectively).
+	-	<b>Frame Number</b> — If non-zero, it will index into device SDRAM by ::NTV2Framesize frames.
+		See the <b>Frame Buffer Layout</b> discussion in the \ref hardwarecharacteristics
+		section for more information.
+	-	<b>Byte Count:</b>
+		-	Should be even, or evenly divisible by 4, or ideally a power of two.
+		-	Small transfers can sometimes be problematic for certain DMA engine firmware in combination
+			with certain host hardware and OS platforms.  To avoid this, AJA recommends transferring at
+			least 4096 bytes of data. Try smaller values if necessary, but test thoroughly with the
+			devices and hardware you intend to support.
+		-	It can be larger than a frame. For example, if the device frame size is 8MB, and the
+			requested byte count is 16MB, two frames will be transferred.
+	-	CNTV2Card::DMARead and CNTV2Card::DMAWrite are similar, but also accept a <b>Byte Offset</b>,
+		which…
+		-	Should be even, or evenly divisible by 4, or ideally a power of two.
+		-	<b>Hint:</b> All device SDRAM can be accessed by using a zero <b>Frame Number</b> and
+			using any offset value needed (up to 4GB minus the <b>Byte Count</b>).
 
 	@warning	Calling CNTV2Card::DMAWriteFrame at a fraction of frame time <i>after</i>
 				the VBI to write the same frame on the device that’s being read for the currently-playing
@@ -378,7 +401,7 @@
 				old pixel data.
 
 	@note	DMA transfer speeds may be affected by the amount of video data being accessed by
-			the device to transmit video. If a channel is in display mode, it is always outputting
+			the device to transmit video. If a channel is in display mode, it is always playing
 			video, and therefore reading from SDRAM, consuming SDRAM bandwidth… the amount consumed
 			determined by the amount of data being read from frame memory… which depends on Frame
 			Buffer Format and Frame Geometry. <b>In some cases, DMA speeds can be increased by
@@ -387,6 +410,10 @@
 			SDRAM bandwidth to read frame data for playout. In addition to the fact that more data is
 			moved in, say, 48-bit RGB (than YUV8), the transfer of that data may also proceed at a
 			slightly slower rate.
+
+	@warning	Accessing memory addresses that are beyond the end of device SDRAM is not recommended,
+				and will result in unexpected behavior — e.g. wrapping around and continuing from the
+				start of device SDRAM.
 
 
 	@subsection	deviceclockingandsync		Device Clocking and Synchronization
@@ -719,7 +746,8 @@
 		-	::NTV2MixerKeyerMode — Primary operating mode:
 			-	Use ::NTV2MIXERMODE_FOREGROUND_ON to exclusively pass the <b>foreground</b> video and key to the Mixer output.
 			-	Use ::NTV2MIXERMODE_FOREGROUND_OFF to exclusively pass the <b>background</b> video and key to the Mixer output.
-			-	Use ::NTV2MIXERMODE_MIX to overlay the foreground video on top of the background video.
+			-	Use ::NTV2MIXERMODE_MIX to overlay the foreground video on top of the background video. Foreground or background
+				<b>Flat Matte</b> (see below), if enabled, will be mixed instead of its respective input raster.
 			-	Call CNTV2Card::GetMixerMode to determine the Mixer’s current mode.
 			-	Call CNTV2Card::SetMixerMode to change its mode.
 		-	::NTV2MixerKeyerInputControl — input control mode, one for foreground input, one for background input:
@@ -737,16 +765,18 @@
 			-	Call CNTV2Card::GetMixerVancOutputFromForeground to determine if the output VANC is currently
 				being sourced from the foreground video input.
 			-	Call CNTV2Card::SetMixerVancOutputFromForeground to change the output VANC source.
-		-	The Mixer’s foreground and/or background raster can be set to a flat matte of any 10-bit YCbCr color.
-			This matte will override any respective video input to the Mixer.
+		-	<b>Flat Matte</b> — The Mixer’s foreground and/or background raster can be set to a flat matte of any
+			10-bit YCbCr color. This matte will override any respective video input to the Mixer.
 				-	Call CNTV2Card::GetMixerFGMatteEnabled to determine if the foreground matte is enabled or not.
 				-	Call CNTV2Card::SetMixerFGMatteEnabled to enable or disable using the foreground matte.
 				-	Call CNTV2Card::GetMixerBGMatteEnabled to determine if the background matte is enabled or not.
 				-	Call CNTV2Card::SetMixerBGMatteEnabled to enable or disable using the background matte.
+				-	Do not enable <b>Flat Matte</b> on both foreground and background — use one or the other, or neither.
 				-	Call CNTV2Card::GetMixerMatteColor to determine the current matte color.
 				-	Call CNTV2Card::SetMixerMatteColor to change the matte color.
-				-	Note that to enable its video output, the Mixer still requires a foreground video source
-					if background matte is enabled, or a background video source if foreground matte is enabled.
+				-	Note that to retain sync and enable its video output, the Mixer still requires a foreground
+					video source if background matte is enabled, or a background video source if foreground
+					matte is enabled.
 	-	For information on how to route signals to and from the Mixer, see \ref widget_mixkey.
 
 
@@ -1073,20 +1103,67 @@
 	<hr size="50px">
 	@section	devicefirmware		Firmware
 
-	NTV2 devices have an EEPROM that stores its FPGA programming.
-	This flash memory was commonly divided into a minimum of two logical partitions:
+	NTV2 devices have an EEPROM (non-volatile memory) that stores its FPGA programming.
+	This flash memory is commonly divided into a minimum of two logical partitions:
 	-	the “main” partition — for the normal FPGA bitfile image;
 	-	the “failsafe” boot — for a fallback FPGA bitfile image.
 
-	Traditionally, the FPGA could only be loaded from flash memory upon the first PCIe reset that occurs after power-up.
-	The “failsafe” bitfile only loads if the board is powered-up with its “failsafe” button pressed.
+	Traditionally, the FPGA is only loaded from flash memory upon power-up.
+	The “failsafe” bitfile only loads if the board’s “failsafe” button is held down while power is applied to the board.
 
 	@note	Our newest boards — starting with the \ref kona5 — can be instructed to reload their FPGA upon PCIe reset
 			without an intervening power-down.
 
 	Some of our boards — like the \ref konaip — have, in addition to the normal FPGA hardware, a microprocessor, which requires
 	an additional, separate firmware bitfile that bootstraps and operates it. This extra firmware is bundled into a “package” that is
-	also stored in the EEPROM.
+	also stored in (and loaded from) a separate partition in the EEPROM.
+
+
+	<hr size="50px">
+	@subsection	dev-firmware-loading	Loading Firmware
+
+	Loading the FPGA from EEPROM after power-up takes a finite amount of time.
+	If this exceeds the amount of time allotted by the BIOS for PCIe devices to become ready, the AJA device
+	won’t be detected by the BIOS, and thus won’t be probed by — or matched to — any device drivers.
+	On Windows PCs, this is shown as an “<i>Unknown device</i>” in the Windows <b>Device Manager</b>.
+	On Linux PCs, the ‘<b>lspci</b>’ command can help diagnose these issues.
+	For example, here’s what ‘<b>lspci</b>’ should normally show when looking for devices with AJA’s PCIe vendor
+	ID of \c 0xF1D0 (e.g. for a Corvid88):
+	@code{.sh}
+		$ lspci -d f1d0:
+		03:00.0 Multimedia video controller: AJA Video Device eb0d
+		$ lspci -n  -d f1d0:
+		03:00.0 0400: f1d0:eb0d
+		$ lspci -nn  -d f1d0:
+		03:00.0 Multimedia video controller [0400]: AJA Video Device [f1d0:eb0d]
+	@endcode
+
+	@note	<b>Disable Fast-Boot Option:</b> On PCs running Windows or Linux, be sure to disable all fast-boot options in the BIOS.
+
+	@note	<b>Disable Power-Saving Modes:</b> AJA’s NTV2 devices do not support PCIe power management.
+			-	Be sure to disable any and all Energy-Saving features in the OS,
+				particularly PCIe “Link State Power Management” (LSPM).
+			-	<b>Windows</b> — This is in “Advanced Power Settings” ==≻ “Power Options” ==≻
+				“PCI Express” ==≻ “Link State Power Management” ==≻ <b>Off</b>.
+			-	<b>Linux</b> — Use the \c lspci command:
+				@code{.sh}
+					$ sudo lspci -vvv  -d f1d0:
+				@endcode
+				… and confirm that “LnkCtl: ASPM Disabled” is shown for each AJA device.
+			-	On some motherboards, power management is controlled by the BIOS, in which case,
+				try <b>disabling ASPM</b> under the BIOS’ <b>power options</b>.
+
+	If, even after disabling “fast-boot”, the AJA device fails to show up, …
+	-	Try “warm-booting” the PC. If the device is recognized after a warm-boot, then it’s likely a firmware load-time issue.
+	-	Try installing the AJA board into a different PCIe slot on the motherboard. Some manufacturers employ chips that perform
+		intermediate buffering on certain specific PCIe slots that can sometimes cause detection issues. Also beware that some
+		manufacturers use a custom BIOS that has options for configuring PCIe slots, so be sure to check those BIOS settings
+		and adjust them if needed.
+	-	If the device still fails to show up, please <a href="https://sdksupport.aja.com/index.php?/Tickets/Submit">submit a Ticket</a>.
+
+
+	<hr size="50px">
+	@subsection	dev-firmware-flash		“Flashing” Firmware
 
 	AJA provides two ways to “flash” — i.e. update — new firmware into the device’s EEPROM storage:
 	-#	Using the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/129">ntv2firmwareinstaller</a>
@@ -1097,7 +1174,7 @@
 
 
 	<hr size="50px">
-	@subsection	dev-firmware-vers	Determining Firmware Version
+	@subsection	dev-firmware-vers		Determining Firmware Version
 
 	@note	The <b>currently-running firmware</b> could be different from the <b>currently-installed firmware</b> that’s stored
 			in the EEPROM’s main partition. This can happen if the device wasn’t power-cycled after a firmware update installation,

@@ -161,13 +161,14 @@ typedef struct
 
 typedef struct
 {
-    bool                    setup4k;
-    uint32_t                ptpDomain;
-    uint8_t                 ptpPreferredGMID[8];
-    uint32_t                numSFPs;
-    SFPData2110             sfp[2];
+	bool                    setup4k;
+	uint32_t                ptpDomain;
+	uint8_t                 ptpPreferredGMID[8];
+	uint32_t                numSFPs;
+	SFPData2110             sfp[2];
 	bool					multiSDP;
-	uint8_t					unused[15];
+	bool					audioCombine;
+	uint8_t					unused[14];
 } NetworkData2110;
 
 typedef struct
@@ -328,6 +329,8 @@ public:
 
     bool        Set4KModeEnable(const bool enable);
     bool        Get4KModeEnable(bool & enable);
+	bool        SetAudioCombineEnable(const bool enable);
+	bool        GetAudioCombineEnable(bool & enable);
 
     bool        SetIPServicesControl(const bool enable, const bool forceReconfig);
     bool        GetIPServicesControl(bool & enable, bool & forceReconfig);

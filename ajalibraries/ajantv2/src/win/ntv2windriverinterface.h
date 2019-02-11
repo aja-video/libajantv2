@@ -7,8 +7,7 @@
 #define NTV2WINDRIVERINTERFACE_H
 
 #include "ajaexport.h"
-
-#include <ajatypes.h>
+#include "ajatypes.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>

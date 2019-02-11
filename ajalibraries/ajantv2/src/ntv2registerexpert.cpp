@@ -839,14 +839,18 @@ private:
 		DefineRegister	(kRegVidProc3Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel5,	kRegClass_Channel6);
 		DefineRegister	(kRegVidProc4Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel7,	kRegClass_Channel8);
 		DefineRegister	(kRegSplitControl,		"",	mSplitControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
-		DefineRegister	(kRegFlatMatteValue,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Color);
-		DefineRegister	(kRegFlatMatte2Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Color);
-		DefineRegister	(kRegFlatMatte3Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Color);
-		DefineRegister	(kRegFlatMatte4Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Color);
-		DefineRegister	(kRegMixer1Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
-		DefineRegister	(kRegMixer2Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel2,	kRegClass_NULL);
-		DefineRegister	(kRegMixer3Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel3,	kRegClass_NULL);
-		DefineRegister	(kRegMixer4Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel4,	kRegClass_NULL);
+		DefineRegister	(kRegFlatMatteValue,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Channel2);
+		DefineRegister	(kRegFlatMatte2Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel3,	kRegClass_Channel4);
+		DefineRegister	(kRegFlatMatte3Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel5,	kRegClass_Channel6);
+		DefineRegister	(kRegFlatMatte4Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel7,	kRegClass_Channel8);
+			DefineRegClass (kRegFlatMatteValue, kRegClass_Color);
+			DefineRegClass (kRegFlatMatte2Value, kRegClass_Color);
+			DefineRegClass (kRegFlatMatte3Value, kRegClass_Color);
+			DefineRegClass (kRegFlatMatte4Value, kRegClass_Color);
+		DefineRegister	(kRegMixer1Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Channel2);
+		DefineRegister	(kRegMixer2Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel3,	kRegClass_Channel4);
+		DefineRegister	(kRegMixer3Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel5,	kRegClass_Channel6);
+		DefineRegister	(kRegMixer4Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel7,	kRegClass_Channel8);
 	}
 
 	void SetupVRegs(void)
@@ -1341,6 +1345,7 @@ public:
 			result.insert(regNum);
 
 		AJAAutoLock	lock(&mGuardMutex);
+
 		if (::NTV2DeviceCanDoCustomAnc(inDeviceID))
 		{
 			const NTV2RegNumSet	ancRegs			(GetRegistersForClass(kRegClass_Anc));
@@ -2924,15 +2929,15 @@ private:
 			(void) inDeviceID;
 			ostringstream	oss;
 			static const string	sSplitStds [8]	=	{"1080i", "720p", "480i", "576i", "1080p", "1556i", "?6?", "?7?"};
-			oss	<< "Limiting: "			<< ((inRegValue & BIT(11)) ? "Pass illegal data values" : "Limit to legal SDI")									<< endl
-				<< "Limiting: "			<< ((inRegValue & BIT(12)) ? "Limit" : "Don't limit") << " to legal broadcast data values"						<< endl
+			oss	<< "Mode: "				<< (inRegValue & kRegMaskVidProcMode ? ((inRegValue & BIT(24)) ? "Shaped" : "Unshaped") : "Full Raster")		<< endl
+				<< "FG Control: "		<< (inRegValue & kRegMaskVidProcFGControl ? ((inRegValue & BIT(20)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
+				<< "BG Control: "		<< (inRegValue & kRegMaskVidProcBGControl ? ((inRegValue & BIT(22)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
 				<< "VANC Pass-Thru: "	<< ((inRegValue & BIT(13)) ? "Background" : "Foreground")														<< endl
 				<< "FG Matte: "			<< EnabDisab(inRegValue & kRegMaskVidProcFGMatteEnable)															<< endl
 				<< "BG Matte: "			<< EnabDisab(inRegValue & kRegMaskVidProcBGMatteEnable)															<< endl
-				<< "FG Control: "		<< (inRegValue & kRegMaskVidProcFGControl ? ((inRegValue & BIT(20)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
-				<< "BG Control: "		<< (inRegValue & kRegMaskVidProcBGControl ? ((inRegValue & BIT(22)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
-				<< "Input Sync: "		<< "Inputs " << (inRegValue & kRegMaskVidProcSyncFail ? "not in sync" : "in sync")								<< endl
-				<< "Split Video Standard: "	<< sSplitStds[inRegValue & kRegMaskVidProcSplitStd];
+				<< "Input Sync: "		<< (inRegValue & kRegMaskVidProcSyncFail ? "not in sync" : "in sync")								<< endl
+				<< "Limiting: "			<< ((inRegValue & BIT(11)) ? "Off" : ((inRegValue & BIT(12)) ? "Legal Broadcast" : "Legal SDI"))				<< endl
+				<< "Split Video Std: "	<< sSplitStds[inRegValue & kRegMaskVidProcSplitStd];
 			return oss.str();
 		}
 		virtual	~DecodeVidProcControl()	{}

@@ -469,6 +469,7 @@ public:
 		@return		True if successful; otherwise false.
 		@note		The host buffer should be at least inByteCount + inOffsetBytes in size, or host memory will be corrupted.
 		@note		This function will block and not return until the transfer has finished or failed.
+		@see		CNTV2Card::DMAWrite, CNTV2Card::DMAReadFrame, CNTV2Card::DMAReadSegments, \ref vidop-fbaccess
 	**/
 	AJA_VIRTUAL bool	DMARead (const ULWord inFrameNumber, ULWord * pFrameBuffer, const ULWord inOffsetBytes, const ULWord inByteCount);
 
@@ -482,6 +483,7 @@ public:
 		@return		True if successful; otherwise false.
 		@note		The host buffer should be at least inByteCount + inOffsetBytes in size, or a host memory access violation may occur.
 		@note		This function will block and not return until the transfer has finished or failed.
+		@see		CNTV2Card::DMARead, CNTV2Card::DMAWriteFrame, CNTV2Card::DMAWriteSegments, \ref vidop-fbaccess
 	**/
 	AJA_VIRTUAL bool	DMAWrite (const ULWord inFrameNumber, const ULWord * pFrameBuffer, const ULWord inOffsetBytes, const ULWord inByteCount);
 
@@ -495,6 +497,7 @@ public:
 		@return		True if successful; otherwise false.
 		@note		The host buffer must be at least inByteCount in size, or a host memory access violation may occur.
 		@note		This function will block and not return until the transfer has finished or failed.
+		@see		CNTV2Card::DMAWriteFrame, CNTV2Card::DMARead, CNTV2Card::DMAReadSegments, \ref vidop-fbaccess
 	**/
 	AJA_VIRTUAL bool	DMAReadFrame (const ULWord inFrameNumber, ULWord * pOutFrameBuffer, const ULWord inByteCount);
 
@@ -507,6 +510,7 @@ public:
 		@return		True if successful; otherwise false.
 		@note		The host buffer must be at least inByteCount in size, or a host memory access violation may occur.
 		@note		This function will block and not return until the transfer has finished or failed.
+		@see		CNTV2Card::DMAReadFrame, CNTV2Card::DMAWrite, CNTV2Card::DMAWriteSegments, \ref vidop-fbaccess
 	**/
 	AJA_VIRTUAL bool	DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pInFrameBuffer, const ULWord inByteCount);
 
@@ -523,6 +527,7 @@ public:
 		@return		True if successful; otherwise false.
 		@note		The host buffer should be at least inByteCount + inOffsetBytes in size, or a host memory access violation may occur.
 		@note		This function will block and not return until the transfer has finished or failed.
+		@see		CNTV2Card::DMAWriteSegments, CNTV2Card::DMARead, CNTV2Card::DMAReadFrame, \ref vidop-fbaccess
 	**/
 	AJA_VIRTUAL bool	DMAReadSegments (	const ULWord		inFrameNumber,
 											ULWord *			pFrameBuffer,
@@ -545,6 +550,7 @@ public:
 		@return		True if successful; otherwise false.
 		@note		The host buffer should be at least inByteCount + inOffsetBytes in size, or a host memory access violation may occur.
 		@note		This function will block and not return until the transfer has finished or failed.
+		@see		CNTV2Card::DMAReadSegments, CNTV2Card::DMAWrite, CNTV2Card::DMAWriteFrame, \ref vidop-fbaccess
 	**/
 	AJA_VIRTUAL bool	DMAWriteSegments (	const ULWord		inFrameNumber,
 											const ULWord *		pFrameBuffer,
@@ -1046,7 +1052,7 @@ public:
 	AJA_VIRTUAL bool		SetDualLinkInputEnable (bool enable);
 	AJA_VIRTUAL bool		GetDualLinkInputEnable (bool & outIsEnabled);
 
-	AJA_VIRTUAL bool		SetVideoLimiting (NTV2VideoLimiting inValue);
+	AJA_VIRTUAL bool		SetVideoLimiting (const NTV2VideoLimiting inValue);
 	AJA_VIRTUAL bool		GetVideoLimiting (NTV2VideoLimiting & outValue);
 
 	AJA_VIRTUAL bool		SetEnableVANCData (const bool inVANCenabled, const bool inTallerVANC, const NTV2Standard inStandard, const NTV2FrameGeometry inGeometry, const NTV2Channel inChannel = NTV2_CHANNEL1);
@@ -1096,11 +1102,19 @@ public:
 	AJA_VIRTUAL bool		GetPulldownMode (NTV2Channel inChannel, bool & outValue);
 
 	/**
-		@brief	Swaps the values stored in the PCI access frame and output frame registers for the given frame store (channel).
+		@brief		Swaps the values stored in the PCI access frame and output frame registers for the given frame store (channel).
 		@param[in]	inChannel	Specifies the channel (frame store) of interest.
-		@return	True if successful;  otherwise false.
+		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool		FlipFlopPage (NTV2Channel inChannel);
+	AJA_VIRTUAL bool		FlipFlopPage (const NTV2Channel inChannel);
+
+	/**
+		@brief		Answers with the line offset into the frame currently being read (playout) or written
+					(capture) for FrameStore 1.
+		@param[in]	outValue	Receives the line number being read or written for ::NTV2_CHANNEL1.
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		ReadLineCount (ULWord & outValue);
 
 
 	/**
@@ -1266,8 +1280,6 @@ public:
 		@see		CNTV2Card::GetMixerMatteColor, CNTV2Card::GetMixerFGMatteEnabled, CNTV2Card::SetMixerFGMatteEnabled, CNTV2Card::GetMixerBGMatteEnabled, CNTV2Card::SetMixerBGMatteEnabled, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	SetMixerMatteColor (const UWord inWhichMixer, const YCbCr10BitPixel & inYCbCrValue);
-
-	AJA_VIRTUAL bool	ReadLineCount (ULWord & outValue);
 	///@}
 
 
