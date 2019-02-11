@@ -80,7 +80,7 @@ int main (int argc, const char ** argv)
 							  pixelFormat,
 							  false,
 							  doMultiFormat ? true : false,
-							  false,
+							  true,
 							  doTsiRouting ? true : false);
 
 	::signal (SIGINT, SignalHandler);
