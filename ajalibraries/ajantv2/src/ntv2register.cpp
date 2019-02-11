@@ -282,10 +282,10 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 		{
 			SetQuadFrameEnable(true, channel);
 		}
-		if (NTV2_IS_QUAD_QUAD_FORMAT(value))
-		{
-			SetQuadQuadFrameEnable(true, channel);
-		}
+	}
+	else if (NTV2_IS_QUAD_QUAD_FORMAT(value))
+	{
+		SetQuadQuadFrameEnable(true, channel);
 	}
 	else
 	{
@@ -1177,6 +1177,8 @@ bool CNTV2Card::SetQuadQuadFrameEnable(const ULWord inValue, const NTV2Channel i
 	
 	if (!::NTV2DeviceCanDo8KVideo(_boardID))
 		return false;
+	
+	SetQuadFrameEnable(1, inChannel);
 	
 	status = WriteRegister(kRegGlobalControl3, inValue, kRegMaskQuadQuadMode, kRegShiftQuadQuadMode);
 	return status;
