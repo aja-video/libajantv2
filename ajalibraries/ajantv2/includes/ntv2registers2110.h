@@ -205,6 +205,7 @@
 #define	kRegVfec_delay_ch1_playout		(0x08/4)
 #define	kRegVfec_delay_ch2_playout		(0x0c/4)
 #define	kRegVfec_delay_ch3_playout		(0x10/4)
+#define	kRegVfec_audio_pkt_read_intrvl	(0x14/4)
 #define	kRegVfec_delay_status			(0x20/4)
 #define	kRegVfec_delay_version			(0x3c/4)
 
