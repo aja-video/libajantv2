@@ -658,7 +658,14 @@ void Class4kServices::SetDeviceXPointPlayback ()
 	}
 	else
 	{
-		mCard->Connect (NTV2_XptDualLinkOut5Input, bSdiOutRGB ? NTV2_XptLUT1RGB : NTV2_XptBlack);
+		if (bSdiOutRGB)
+		{
+			mCard->Connect (NTV2_XptDualLinkOut5Input, bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptLUT1RGB);
+		}
+		else
+		{
+			mCard->Connect (NTV2_XptDualLinkOut5Input, NTV2_XptBlack);
+		}
 	}
 	
 	
@@ -1521,6 +1528,8 @@ void Class4kServices::SetDeviceXPointCapture ()
 	bool				bHdmiInRGB		= bHdmiIn == true && mDs.hdmiIn[0]->cs == NTV2_ColorSpaceModeRgb;
 	bool				bHdmiOutRGB		= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit;
 	bool				bInRGB			= bHdmiInRGB || mDs.bInSdiRgb;
+	bool				bFb1HdrRGB		= mFb1Format == NTV2_FBF_48BIT_RGB;
+    //bool				bFb2HdrRGB		= mFb2Format == NTV2_FBF_48BIT_RGB;
 	
 	bHdmiIn								= bHdmiIn && mHasHdmiIn;
 	bHdmiOutRGB							= bHdmiOutRGB && mHasHdmiOut;
@@ -1997,7 +2006,11 @@ void Class4kServices::SetDeviceXPointCapture ()
 	{
 		if (bInRGB)
 		{
-			if (bFb1RGB)
+			if (bFb1HdrRGB)
+			{
+				mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptDuallinkIn1);
+			}
+			else if (bFb1RGB)
 			{
 				mCard->Connect (NTV2_XptDualLinkOut1Input, NTV2_XptLUT1RGB);
 			}
@@ -2026,7 +2039,11 @@ void Class4kServices::SetDeviceXPointCapture ()
 	{
 		if (bInRGB)
 		{
-			if (bFb1RGB)
+			if (bFb1HdrRGB)
+			{
+				mCard->Connect (NTV2_XptDualLinkOut2Input, b4K ? NTV2_XptDuallinkIn2 : NTV2_XptDuallinkIn1);
+			}
+			else if (bFb1RGB)
 			{
 				mCard->Connect (NTV2_XptDualLinkOut2Input, NTV2_XptLUT2RGB);
 			}
@@ -2055,7 +2072,11 @@ void Class4kServices::SetDeviceXPointCapture ()
 	{
 		if (bInRGB)
 		{
-			if (bFb1RGB)
+			if (bFb1HdrRGB)
+			{
+				mCard->Connect (NTV2_XptDualLinkOut3Input, b4K ? NTV2_XptDuallinkIn3 : NTV2_XptDuallinkIn1);
+			}
+			else if (bFb1RGB)
 			{
 				mCard->Connect (NTV2_XptDualLinkOut3Input, b4K ? NTV2_XptLUT3Out : NTV2_XptLUT1RGB);
 			}
@@ -2081,7 +2102,11 @@ void Class4kServices::SetDeviceXPointCapture ()
 	{
 		if (bInRGB)
 		{
-			if (bFb1RGB)
+			if (bFb1HdrRGB)
+			{
+				mCard->Connect (NTV2_XptDualLinkOut4Input, b4K ? NTV2_XptDuallinkIn4 : NTV2_XptDuallinkIn1);
+			}
+			else if (bFb1RGB)
 			{
 				mCard->Connect (NTV2_XptDualLinkOut4Input, b4K ? NTV2_XptLUT4Out : NTV2_XptLUT1RGB);
 			}
@@ -2270,7 +2295,11 @@ void Class4kServices::SetDeviceXPointCapture ()
 	{
 		if (bInRGB)
 		{
-			if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
+			if (bFb1HdrRGB)
+			{
+				mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptDuallinkIn1);
+			}
+			else if (mSDIInput1RGBRange == frambBufferRange && mLUTType != NTV2_LUTCustom)
 			{
 				mCard->Connect (NTV2_XptFrameBuffer1Input, bHdmiIn ? NTV2_XptHDMIIn1 : NTV2_XptDuallinkIn1);
 			}
@@ -2676,8 +2705,8 @@ void Class4kServices::SetDeviceXPointCapture ()
 			}
 		}
 	}
-	else if (IsVideoFormatB(mFb1VideoFormat) ||											// Dual Stream - p60b
-			 mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)					// Video + Key
+	else if (IsVideoFormatB(mFb1VideoFormat) ||											// p60b
+			 mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)
 	{
 		if (b3GbOut)
 		{
@@ -2694,12 +2723,12 @@ void Class4kServices::SetDeviceXPointCapture ()
 	{
 		if (b3GbOut)
 		{
-			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);							// 1 3Gb wire
+			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);				// 1 3Gb wire
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptDuallinkOut3DS2);
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);							// 2 wires
+			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptDuallinkOut3);				// 2 wires
 			mCard->Connect (NTV2_XptSDIOut3InputDS2, NTV2_XptBlack);
 		}
 	}
@@ -2752,7 +2781,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 			}
 		}
 	}
-	else if (IsVideoFormatB(mFb1VideoFormat) ||									// Dual Stream - p60b
+	else if (IsVideoFormatB(mFb1VideoFormat) ||									// p60b
 			 mVirtualDigitalOutput1Select == NTV2_VideoPlusKeySelect)			// Video + Key
 	{
 		if (b3GbOut)
@@ -2956,7 +2985,11 @@ void Class4kServices::SetDeviceXPointCapture ()
 		}
 		else
 		{
-			if (bHdmiOutRGB)
+			if (bFb1HdrRGB)
+			{
+				XPt1 = NTV2_XptDuallinkIn1;
+			}
+			else if (bHdmiOutRGB)
 			{
 				XPt1 = bInRGB ? inHdRGB1 : NTV2_XptLUT1RGB;
 			}
