@@ -745,6 +745,15 @@ typedef enum _NTV2VideoFormat
         (__f__) <= NTV2_FORMAT_4096x2160p_12000)                    \
     )
 
+#define NTV2_IS_QUAD_HFR_VIDEO_FORMAT(__f__)						\
+    (	((__f__) >= NTV2_FORMAT_4x1920x1080p_5000	&&				\
+        (__f__) <= NTV2_FORMAT_4x2048x1080p_12000	)   ||          \
+        ((__f__) >= NTV2_FORMAT_3840x2160p_5000     &&              \
+        (__f__) <= NTV2_FORMAT_3840x2160p_6000      )   ||          \
+        ((__f__) >= NTV2_FORMAT_4096x2160p_5000     &&              \
+        (__f__) <= NTV2_FORMAT_4096x2160p_12000)                    \
+    )
+
 #define NTV2_IS_QUAD_FRAME_FORMAT(__f__)							\
     (	((__f__) >= NTV2_FORMAT_FIRST_4K_DEF_FORMAT &&				\
         (__f__) < NTV2_FORMAT_END_4K_DEF_FORMATS	)   ||          \
@@ -755,6 +764,13 @@ typedef enum _NTV2VideoFormat
 #define NTV2_IS_QUAD_QUAD_FORMAT(__f__)								\
 	(	(__f__) >= NTV2_FORMAT_FIRST_UHD2_DEF_FORMAT &&			\
 		(__f__) < NTV2_FORMAT_END_UHD2_DEF_FORMATS	)
+
+#define NTV2_IS_QUAD_QUAD_HFR_VIDEO_FORMAT(__f__)					\
+    (	((__f__) >= NTV2_FORMAT_4x3840x2160p_5000	&&				\
+        (__f__) <= NTV2_FORMAT_4x3840x2160p_6000_B	)   ||          \
+        ((__f__) >= NTV2_FORMAT_4x4096x2160p_4795     &&			\
+        (__f__) <= NTV2_FORMAT_4x4096x2160p_6000_B      )			\
+    )
 
 #define NTV2_IS_4K_4096_VIDEO_FORMAT(__f__)							\
     (	(__f__) == NTV2_FORMAT_4x2048x1080p_2398	||				\
