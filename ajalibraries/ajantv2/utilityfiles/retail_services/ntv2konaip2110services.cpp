@@ -3294,6 +3294,11 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 			mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
 			break;
 			
+		case kHDMIOutCSCRGB12bit:
+			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
+			mCard->SetHDMIOutBitDepth (NTV2_HDMI12Bit);
+			break;
+			
 		case kHDMIOutCSCRGB10bit:
 			mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
 			mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
@@ -3307,13 +3312,9 @@ void KonaIP2110Services::SetDeviceMiscRegisters()
 	}
 
 	// HDMI Out Protocol mode
-	switch (mDs.hdmiOutProtocol_)
+	switch (mDs.hdmiOutProtocol)
 	{
 		default:
-		case kHDMIOutProtocolAutoDetect:
-			mCard->WriteRegister(kRegHDMIOutControl, mDs.hdmiOutDsProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-			break;
-			
 		case kHDMIOutProtocolHDMI:
 			mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 			break;
