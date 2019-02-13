@@ -43,7 +43,11 @@
 		//		TBD FIX FIX FIX
 		#define AJA_NULL	NULL
 	#elif defined(MSWindows)
-		#define AJA_NULL	nullptr
+		#if defined(_MSC_VER) && _MSC_VER >= 1700		//	VS2012 or later:
+			#define AJA_NULL	nullptr
+		#else
+			#define AJA_NULL	NULL
+		#endif
 	#else
 		#define AJA_NULL	NULL
 	#endif

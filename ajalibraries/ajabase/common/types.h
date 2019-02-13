@@ -36,7 +36,9 @@
     #define AJA_LITTLE_ENDIAN
 
     // This adds the ability to format 64-bit entities
-	#include <inttypes.h>	//	Prevents duplicate macro definition warnings
+	#if defined(_MSC_VER) && _MSC_VER >= 1900		//	VS2015 or later:
+		#include <inttypes.h>	//	Prevent duplicate macro definition warnings
+	#endif
     # define __PRI64_PREFIX   "ll"
 
 	// Macros for printing format specifiers.

@@ -1103,20 +1103,67 @@
 	<hr size="50px">
 	@section	devicefirmware		Firmware
 
-	NTV2 devices have an EEPROM that stores its FPGA programming.
-	This flash memory was commonly divided into a minimum of two logical partitions:
+	NTV2 devices have an EEPROM (non-volatile memory) that stores its FPGA programming.
+	This flash memory is commonly divided into a minimum of two logical partitions:
 	-	the “main” partition — for the normal FPGA bitfile image;
 	-	the “failsafe” boot — for a fallback FPGA bitfile image.
 
-	Traditionally, the FPGA could only be loaded from flash memory upon the first PCIe reset that occurs after power-up.
-	The “failsafe” bitfile only loads if the board is powered-up with its “failsafe” button pressed.
+	Traditionally, the FPGA is only loaded from flash memory upon power-up.
+	The “failsafe” bitfile only loads if the board’s “failsafe” button is held down while power is applied to the board.
 
 	@note	Our newest boards — starting with the \ref kona5 — can be instructed to reload their FPGA upon PCIe reset
 			without an intervening power-down.
 
 	Some of our boards — like the \ref konaip — have, in addition to the normal FPGA hardware, a microprocessor, which requires
 	an additional, separate firmware bitfile that bootstraps and operates it. This extra firmware is bundled into a “package” that is
-	also stored in the EEPROM.
+	also stored in (and loaded from) a separate partition in the EEPROM.
+
+
+	<hr size="50px">
+	@subsection	dev-firmware-loading	Loading Firmware
+
+	Loading the FPGA from EEPROM after power-up takes a finite amount of time.
+	If this exceeds the amount of time allotted by the BIOS for PCIe devices to become ready, the AJA device
+	won’t be detected by the BIOS, and thus won’t be probed by — or matched to — any device drivers.
+	On Windows PCs, this is shown as an “<i>Unknown device</i>” in the Windows <b>Device Manager</b>.
+	On Linux PCs, the ‘<b>lspci</b>’ command can help diagnose these issues.
+	For example, here’s what ‘<b>lspci</b>’ should normally show when looking for devices with AJA’s PCIe vendor
+	ID of \c 0xF1D0 (e.g. for a Corvid88):
+	@code{.sh}
+		$ lspci -d f1d0:
+		03:00.0 Multimedia video controller: AJA Video Device eb0d
+		$ lspci -n  -d f1d0:
+		03:00.0 0400: f1d0:eb0d
+		$ lspci -nn  -d f1d0:
+		03:00.0 Multimedia video controller [0400]: AJA Video Device [f1d0:eb0d]
+	@endcode
+
+	@note	<b>Disable Fast-Boot Option:</b> On PCs running Windows or Linux, be sure to disable all fast-boot options in the BIOS.
+
+	@note	<b>Disable Power-Saving Modes:</b> AJA’s NTV2 devices do not support PCIe power management.
+			-	Be sure to disable any and all Energy-Saving features in the OS,
+				particularly PCIe “Link State Power Management” (LSPM).
+			-	<b>Windows</b> — This is in “Advanced Power Settings” ==≻ “Power Options” ==≻
+				“PCI Express” ==≻ “Link State Power Management” ==≻ <b>Off</b>.
+			-	<b>Linux</b> — Use the \c lspci command:
+				@code{.sh}
+					$ sudo lspci -vvv  -d f1d0:
+				@endcode
+				… and confirm that “LnkCtl: ASPM Disabled” is shown for each AJA device.
+			-	On some motherboards, power management is controlled by the BIOS, in which case,
+				try <b>disabling ASPM</b> under the BIOS’ <b>power options</b>.
+
+	If, even after disabling “fast-boot”, the AJA device fails to show up, …
+	-	Try “warm-booting” the PC. If the device is recognized after a warm-boot, then it’s likely a firmware load-time issue.
+	-	Try installing the AJA board into a different PCIe slot on the motherboard. Some manufacturers employ chips that perform
+		intermediate buffering on certain specific PCIe slots that can sometimes cause detection issues. Also beware that some
+		manufacturers use a custom BIOS that has options for configuring PCIe slots, so be sure to check those BIOS settings
+		and adjust them if needed.
+	-	If the device still fails to show up, please <a href="https://sdksupport.aja.com/index.php?/Tickets/Submit">submit a Ticket</a>.
+
+
+	<hr size="50px">
+	@subsection	dev-firmware-flash		“Flashing” Firmware
 
 	AJA provides two ways to “flash” — i.e. update — new firmware into the device’s EEPROM storage:
 	-#	Using the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/129">ntv2firmwareinstaller</a>
@@ -1127,7 +1174,7 @@
 
 
 	<hr size="50px">
-	@subsection	dev-firmware-vers	Determining Firmware Version
+	@subsection	dev-firmware-vers		Determining Firmware Version
 
 	@note	The <b>currently-running firmware</b> could be different from the <b>currently-installed firmware</b> that’s stored
 			in the EEPROM’s main partition. This can happen if the device wasn’t power-cycled after a firmware update installation,

@@ -8,9 +8,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-
 #include <sys/types.h>
-
 #include "ajatypes.h"
 #ifdef MSWindows
 	#include <WinSock2.h>
@@ -18,6 +16,7 @@
 #include "ntv2discover.h"
 #include "ntv2nubpktcom.h"
 #include "ntv2nubaccess.h"
+#include "ntv2endian.h"
 
 // max number of bytes we can get at once 
 #define MAXDATASIZE (sizeof(NTV2NubPktHeader) + NTV2_NUBPKT_MAX_DATASIZE)
@@ -429,10 +428,17 @@ deNBOifyAndCopyGetAutoCirculateData(AUTOCIRCULATE_STATUS_STRUCT *pACStatus, NTV2
 	pACStatus->activeFrame =  ntohl(pGACP->activeFrame);
 
 	// Note: the following four items are 64-bit quantities!
+#if defined(AJAMac)	//	'ntohll' was introduced in MacOS 10.9 (Xcode9)
+	pACStatus->rdtscStartTime = NTV2EndianSwap64BtoH(pGACP->rdtscStartTime);
+	pACStatus->audioClockStartTime = NTV2EndianSwap64BtoH(pGACP->audioClockStartTime);
+	pACStatus->rdtscCurrentTime = NTV2EndianSwap64BtoH(pGACP->rdtscCurrentTime);
+	pACStatus->audioClockCurrentTime = NTV2EndianSwap64BtoH(pGACP->audioClockCurrentTime);
+#else
 	pACStatus->rdtscStartTime = ntohll(pGACP->rdtscStartTime);
 	pACStatus->audioClockStartTime = ntohll(pGACP->audioClockStartTime);
 	pACStatus->rdtscCurrentTime = ntohll(pGACP->rdtscCurrentTime);
 	pACStatus->audioClockCurrentTime = ntohll(pGACP->audioClockCurrentTime);
+#endif
 
 	// Back to 32 bit quantities.
 	pACStatus->framesProcessed = ntohl(pGACP->framesProcessed);

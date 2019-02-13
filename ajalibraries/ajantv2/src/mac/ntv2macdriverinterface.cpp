@@ -2074,17 +2074,18 @@ bool CNTV2MacDriverInterface::GetLatencyTimerValue( ULWord* value )
 	{
 		return ReadRegister(kVRegOutputTimecodeOffset, *pFrames);
 	}
+	
+	bool CNTV2MacDriverInterface::SetOutputTimecodeType( ULWord type )
+	{
+		return WriteRegister( kVRegOutputTimecodeType, type );
+	}
+
+	bool CNTV2MacDriverInterface::GetOutputTimecodeType( ULWord* pType )
+	{
+		return ReadRegister(kVRegOutputTimecodeType, *pType);
+	}
 #endif	//	!defined(NTV2_DEPRECATE_15_1)
 
-bool CNTV2MacDriverInterface::SetOutputTimecodeType( ULWord type )
-{
-	return WriteRegister( kVRegOutputTimecodeType, type );
-}
-
-bool CNTV2MacDriverInterface::GetOutputTimecodeType( ULWord* pType )
-{
-	return ReadRegister(kVRegOutputTimecodeType, *pType);
-}
 
 
 //--------------------------------------------------------------------------------------------------------------------

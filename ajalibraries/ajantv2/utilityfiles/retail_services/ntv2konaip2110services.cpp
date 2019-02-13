@@ -3592,7 +3592,6 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                     config2110->SetRxStreamEnable(SFP_2, s2110RxAudioDataLast->rxAudioCh[i].stream, false);
                     s2110RxAudioDataLast->rxAudioCh[i] = m2110RxAudioData.rxAudioCh[i];
                 }
-#if 0
 				if (memcmp(&m2110RxAncData.rxAncCh[i], &s2110RxAncDataLast->rxAncCh[i], sizeof(RxAncChData2110)) != 0)
 				{
 					printf("RX Anc Reset disable %d\n", s2110RxAncDataLast->rxAncCh[i].stream);
@@ -3600,8 +3599,6 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 					config2110->SetRxStreamEnable(SFP_2, s2110RxAncDataLast->rxAncCh[i].stream, false);
 					s2110RxAncDataLast->rxAncCh[i] = m2110RxAncData.rxAncCh[i];
 				}
-#endif
-
                 m2110IpStatusData.txChStatus[i] = kIpStatusStopped;
                 m2110IpStatusData.rxChStatus[i] = kIpStatusStopped;
             }
