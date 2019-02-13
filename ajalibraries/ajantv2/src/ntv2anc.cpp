@@ -210,6 +210,21 @@ static bool SetAncInsFidLow (CNTV2Card & inDevice, const UWord inSDIOutput, uint
     return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsFieldIDLines), lineNumber, maskInsFieldIDLow, shiftInsFieldIDLow);
 }
 
+static bool SetAncInsRtpPayloadID (CNTV2Card & inDevice, const UWord inSDIOutput, uint32_t payloadID)
+{
+	return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsRtpPayloadID), payloadID);
+}
+
+static bool SetAncInsRtpSSRC (CNTV2Card & inDevice, const UWord inSDIOutput, uint32_t ssrc)
+{
+	return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsRtpSSRC), ssrc);
+}
+
+static bool SetAncInsIPChannel (CNTV2Card & inDevice, const UWord inSDIOutput, uint32_t channel)
+{
+	return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsIpChannel), channel);
+}
+
 static bool GetAncOffsets (CNTV2Card & inDevice, ULWord & outF1Offset, ULWord & outF2Offset)
 {
 	outF1Offset = outF2Offset = 0;
@@ -378,9 +393,21 @@ bool CNTV2Card::AncInsertSetField2ReadParams (const UWord inSDIOutput, const ULW
 	const ULWord	ANCStartMemory (frameLocation - F2Offset);
 	if (ok)	ok = SetAncInsField2StartAddr (*this, inChannel, ANCStartMemory);
 	if (ok)	ok = SetAncInsField2Bytes (*this, inChannel, inF2Size);
-    return true;
+	return ok;
 }
 
+bool CNTV2Card::AncInsertSetIPParams (const UWord inSDIOutput, const UWord ancChannel, const ULWord payloadID, const ULWord ssrc)
+{
+	bool ok(false);
+
+	if (::NTV2DeviceCanDoIP(_boardID))
+	{
+		ok = SetAncInsIPChannel (*this, inSDIOutput, ancChannel);
+		if (ok)	ok = SetAncInsRtpPayloadID (*this, inSDIOutput, payloadID);
+		if (ok)	ok = SetAncInsRtpSSRC (*this, inSDIOutput, ssrc);
+	}
+	return ok;
+}
 
 
 /////////////////////////////////////////////

@@ -5174,8 +5174,8 @@ typedef enum
 
 typedef enum
 {
-	kHDMIOutCSCAuto,
 	kHDMIOutCSCAutoDetect,
+	kHDMIOutCSCAutoSet,
 	kHDMIOutCSCRGB8bit,
 	kHDMIOutCSCRGB10bit,
 	kHDMIOutCSCRGB12bit,
@@ -5185,8 +5185,8 @@ typedef enum
 
 typedef enum
 {
-	kHDMIOutProtocolAuto,
 	kHDMIOutProtocolAutoDetect,
+	kHDMIOutProtocolAutoSet,
 	kHDMIOutProtocolHDMI,
 	kHDMIOutProtocolDVI
 } HDMIOutProtocolMode;
@@ -5404,6 +5404,11 @@ typedef enum
 	regAncInsBlankCStartLine,
 	regAncInsBlankField1CLines,
 	regAncInsBlankField2CLines,
+	regAncInsReserved14,
+	regAncInsReserved15,
+	regAncInsRtpPayloadID,
+	regAncInsRtpSSRC,
+	regAncInsIpChannel,
 	regAncIns_LAST
 } ANCInsRegisters;
 
