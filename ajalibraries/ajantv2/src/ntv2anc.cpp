@@ -393,9 +393,21 @@ bool CNTV2Card::AncInsertSetField2ReadParams (const UWord inSDIOutput, const ULW
 	const ULWord	ANCStartMemory (frameLocation - F2Offset);
 	if (ok)	ok = SetAncInsField2StartAddr (*this, inChannel, ANCStartMemory);
 	if (ok)	ok = SetAncInsField2Bytes (*this, inChannel, inF2Size);
-    return true;
+	return ok;
 }
 
+bool CNTV2Card::AncInsertSetIPParams (const UWord inSDIOutput, const UWord ancChannel, const ULWord payloadID, const ULWord ssrc)
+{
+	bool ok(false);
+
+	if (::NTV2DeviceCanDoIP(_boardID))
+	{
+		ok = SetAncInsIPChannel (*this, inSDIOutput, ancChannel);
+		if (ok)	ok = SetAncInsRtpPayloadID (*this, inSDIOutput, payloadID);
+		if (ok)	ok = SetAncInsRtpSSRC (*this, inSDIOutput, ssrc);
+	}
+	return ok;
+}
 
 
 /////////////////////////////////////////////

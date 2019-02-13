@@ -930,13 +930,15 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
 	else if (StreamType(stream) == ANC_STREAM)
 	{
 		// for anc streams we tuck away these values so anc inserter can get to them
-		uint32_t regOffset = (uint32_t)(stream-NTV2_ANC1_STREAM);
+		uint32_t channel = (uint32_t)(stream-NTV2_ANC1_STREAM);
+
+		mDevice.AncInsertSetIPParams(channel, channel+4, txConfig.payloadType, txConfig.ssrc);
 
 		// payloadType
-		mDevice.WriteRegister(kRegTxAncPayload1 + regOffset + SAREK_2110_TX_ARBITRATOR, txConfig.payloadType);
+		mDevice.WriteRegister(kRegTxAncPayload1+channel + SAREK_2110_TX_ARBITRATOR, txConfig.payloadType);
 
 		// ssrc
-		mDevice.WriteRegister(kRegTxAncSSRC1 + regOffset + SAREK_2110_TX_ARBITRATOR, txConfig.ssrc);
+		mDevice.WriteRegister(kRegTxAncSSRC1+channel + SAREK_2110_TX_ARBITRATOR, txConfig.ssrc);
 	}
 
 	return true;
