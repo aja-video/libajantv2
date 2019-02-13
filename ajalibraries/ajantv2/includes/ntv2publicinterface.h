@@ -5170,8 +5170,8 @@ typedef enum
 
 typedef enum
 {
-	kHDMIOutCSCAuto,
 	kHDMIOutCSCAutoDetect,
+	kHDMIOutCSCAutoSet,
 	kHDMIOutCSCRGB8bit,
 	kHDMIOutCSCRGB10bit,
 	kHDMIOutCSCRGB12bit,
@@ -5181,8 +5181,8 @@ typedef enum
 
 typedef enum
 {
-	kHDMIOutProtocolAuto,
 	kHDMIOutProtocolAutoDetect,
+	kHDMIOutProtocolAutoSet,
 	kHDMIOutProtocolHDMI,
 	kHDMIOutProtocolDVI
 } HDMIOutProtocolMode;
