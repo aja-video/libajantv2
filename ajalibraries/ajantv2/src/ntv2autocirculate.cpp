@@ -753,6 +753,8 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 	autoCircData.lVal4 = inNumChannels;
 	if ((inOptionFlags & AUTOCIRCULATE_WITH_FIELDS) != 0)
 		autoCircData.lVal6 |= AUTOCIRCULATE_WITH_FIELDS;
+	if ((inOptionFlags & AUTOCIRCULATE_WITH_HDRDATA) != 0)
+		autoCircData.lVal6 |= AUTOCIRCULATE_WITH_HDRDATA;
 	if ((inOptionFlags & AUTOCIRCULATE_WITH_AUDIO_CONTROL) != 0)
 		autoCircData.bVal1 = false;
 	else

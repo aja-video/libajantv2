@@ -906,6 +906,7 @@ typedef enum
 
 typedef enum _NTV2HDMIRegisters
 {
+	kRegHDMIOutHDRMetaData		= 0x0a00,
 	kRegHDMIOutputConfig1       = 0x1d14,
 	kRegHDMIInputStatus1        = 0x1d15,
 	kRegHDMIControl1            = 0x1d16,
@@ -919,6 +920,8 @@ typedef enum _NTV2HDMIRegisters
 	kRegHDMIInputStatus4        = 0x3013,
 	kRegHDMIControl4            = 0x3014
 } NTV2HDMIRegisters;
+
+#define HDMIOutHDRMetaDataSize	32
 
 #if !defined (NTV2_DEPRECATE)
 	#define	KRegDMA1HostAddr			kRegDMA1HostAddr			///< @deprecated		Use kRegDMA1HostAddr instead.
@@ -5622,6 +5625,7 @@ typedef enum
 		#define	AUTOCIRCULATE_WITH_ANC				BIT(6)		///< @brief	Use this to AutoCirculate with ancillary data
 		#define	AUTOCIRCULATE_WITH_AUDIO_CONTROL	BIT(7)		///< @brief	Use this to AutoCirculate with no audio but with audio control
 		#define	AUTOCIRCULATE_WITH_FIELDS			BIT(8)		///< @brief	Use this to AutoCirculate with fields as frames for interlaced formats
+		#define	AUTOCIRCULATE_WITH_HDRDATA			BIT(9)		///< @brief	Use this to AutoCirculate with HDMI HDR10+ output data
 
 		#define AUTOCIRCULATE_FRAME_FULL			BIT(20)		///< @brief Frame contains a full image
 		#define AUTOCIRCULATE_FRAME_FIELD0			BIT(21)		///< @brief Frame contains field 0 of an interlaced image (first field in time)
