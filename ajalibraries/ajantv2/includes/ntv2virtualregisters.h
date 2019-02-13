@@ -169,8 +169,8 @@ typedef enum
 	kVRegFrameBufferInstalled				= VIRTUALREG_START+179,
 
 	kVRegAnalogInStandard					= VIRTUALREG_START+180,
-	kVRegOutputTimecodeOffset				= VIRTUALREG_START+181,
-	kVRegOutputTimecodeType					= VIRTUALREG_START+182,
+	kVRegOutputTimecodeOffset				= VIRTUALREG_START+181,		// deprecated
+	kVRegOutputTimecodeType					= VIRTUALREG_START+182,		// deprecated
 	kVRegQuicktimeUsingBoard				= VIRTUALREG_START+183,		// Not used in Mac
 	kVRegApplicationPID						= VIRTUALREG_START+184,		// The rest of this section handled by IOCTL in Mac
 	kVRegApplicationCode					= VIRTUALREG_START+185,
