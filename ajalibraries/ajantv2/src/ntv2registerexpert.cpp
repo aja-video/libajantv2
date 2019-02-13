@@ -536,10 +536,12 @@ private:
 														"",						"",						"",
 														"Analog Act Line Len",	""};
 		static const string	AncInsRegNames []	=	{	"Field Bytes",			"Control",				"F1 Start Address",
-														"F2 Start Address",		"Pixel Delays",			"First Active Lines",
+														"F2 Start Address",		"Pixel Delay",			"Active Start",
 														"Pixels Per Line",		"Lines Per Frame",		"Field ID Lines",
 														"Payload ID Control",	"Payload ID",			"Chroma Blank Lines",
-														"F1 C Blanking Mask",	"F2 C Blanking Mask"	};
+														"F1 C Blanking Mask",	"F2 C Blanking Mask",	"Reserved 14",
+														"Reserved 15",			"RTP Payload ID",		"RTP SSRC",
+														"IP Channel"};
 		static const uint32_t	AncExtPerChlRegBase []	=	{	0x1000,	0x1040,	0x1080,	0x10C0,	0x1100,	0x1140,	0x1180,	0x11C0	};
 		static const uint32_t	AncInsPerChlRegBase []	=	{	0x1200,	0x1240,	0x1280,	0x12C0,	0x1300,	0x1340,	0x1380,	0x13C0	};
 		
@@ -597,9 +599,14 @@ private:
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsLinePixels,					"",	mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsFrameLines,					"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsFieldIDLines,					"",	mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsPayloadIDControl,				"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsPayloadID,						"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlankCStartLine,				"",	mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlankField1CLines,				"",	mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlankField2CLines,				"",	mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsRtpPayloadID,					"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsRtpSSRC,						"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsIpChannel,						"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 		}
 	}	//	SetupAncInsExt
 

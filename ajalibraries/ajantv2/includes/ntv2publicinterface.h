@@ -5400,6 +5400,11 @@ typedef enum
 	regAncInsBlankCStartLine,
 	regAncInsBlankField1CLines,
 	regAncInsBlankField2CLines,
+	regAncInsReserved14,
+	regAncInsReserved15,
+	regAncInsRtpPayloadID,
+	regAncInsRtpSSRC,
+	regAncInsIpChannel,
 	regAncIns_LAST
 } ANCInsRegisters;
 

@@ -210,6 +210,21 @@ static bool SetAncInsFidLow (CNTV2Card & inDevice, const UWord inSDIOutput, uint
     return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsFieldIDLines), lineNumber, maskInsFieldIDLow, shiftInsFieldIDLow);
 }
 
+static bool SetAncInsRtpPayloadID (CNTV2Card & inDevice, const UWord inSDIOutput, uint32_t payloadID)
+{
+	return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsRtpPayloadID), payloadID);
+}
+
+static bool SetAncInsRtpSSRC (CNTV2Card & inDevice, const UWord inSDIOutput, uint32_t ssrc)
+{
+	return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsRtpSSRC), ssrc);
+}
+
+static bool SetAncInsIPChannel (CNTV2Card & inDevice, const UWord inSDIOutput, uint32_t channel)
+{
+	return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsIpChannel), channel);
+}
+
 static bool GetAncOffsets (CNTV2Card & inDevice, ULWord & outF1Offset, ULWord & outF2Offset)
 {
 	outF1Offset = outF2Offset = 0;
