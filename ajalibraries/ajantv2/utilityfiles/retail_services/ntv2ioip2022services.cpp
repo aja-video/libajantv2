@@ -81,8 +81,9 @@ void IoIP2022Services::SetDeviceXPointPlayback ()
 	NTV2CrosspointID			inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
     bool						bFb1HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
     bool						bFb2HdrRGB			= mFb2Format == NTV2_FBF_48BIT_RGB;
-	bool						bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit;
 	bool						bInRGB				= inputColorSpace == NTV2_ColorSpaceModeRgb;
+	bool						bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit ||
+													  mDs.hdmiOutColorSpace == kHDMIOutCSCRGB12bit;
 	
 	// XPoint Init 
 	NTV2CrosspointID			XPt1, XPt2, XPt3, XPt4;
@@ -1475,7 +1476,8 @@ void IoIP2022Services::SetDeviceXPointCapture ()
 	bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_Input4x4kSelect && mQuadSwapIn != 0;
 	NTV2ColorSpaceMode			inputColorSpace		= NTV2_ColorSpaceModeYCbCr;				// Input format select (YUV, RGB, etc)
 	bool						bHdmiIn             = mVirtualInputSelect == NTV2_Input5Select;
-	bool						bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit;
+	bool						bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit ||
+													  mDs.hdmiOutColorSpace == kHDMIOutCSCRGB12bit;
 	
 	// SMPTE 425 (2pi)
 	bool						bVpid2x2piIn		= false;
@@ -3287,6 +3289,11 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
 				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
 				break;
 				
+			case kHDMIOutCSCRGB12bit:
+				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
+				mCard->SetHDMIOutBitDepth (NTV2_HDMI12Bit);
+				break;
+				
 			case kHDMIOutCSCRGB10bit:
 				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
 				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
@@ -3300,13 +3307,9 @@ void IoIP2022Services::SetDeviceMiscRegisters ()
 		}
 		
 		// HDMI Out Protocol mode
-		switch (mDs.hdmiOutProtocol_)
+		switch (mDs.hdmiOutProtocol)
 		{
 			default:
-			case kHDMIOutProtocolAutoDetect:
-				mCard->WriteRegister(kRegHDMIOutControl, mDs.hdmiOutDsProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-				break;
-				
 			case kHDMIOutProtocolHDMI:
 				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 				break;

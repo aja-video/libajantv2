@@ -70,7 +70,8 @@ void Class4kServices::SetDeviceXPointPlayback ()
 	NTV2CrosspointID	inputXptYuv2		= NTV2_XptBlack;			// Input source selected for 2nd stream (dual-stream, e.g. DualLink / 3Gb)
     bool				bFb1HdrRGB			= mFb1Format == NTV2_FBF_48BIT_RGB;
     bool				bFb2HdrRGB			= mFb2Format == NTV2_FBF_48BIT_RGB;
-	bool				bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit;
+	bool				bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit ||
+											  mDs.hdmiOutColorSpace == kHDMIOutCSCRGB12bit;
 	bool				bInRGB				= inputColorSpace == NTV2_ColorSpaceModeRgb;
 													    
 	b4k6gOut								= b4k6gOut && mHas12G;
@@ -1525,7 +1526,8 @@ void Class4kServices::SetDeviceXPointCapture ()
 	bool				bQuadSwap		= b4K == true && mVirtualInputSelect == NTV2_Input4x4kSelect && mQuadSwapIn != 0;
 	bool				bHdmiIn			= mDs.bInHdmi && mHasHdmiIn;
 	bool				bHdmiInRGB		= bHdmiIn == true && mDs.hdmiIn[0]->cs == NTV2_ColorSpaceModeRgb;
-	bool				bHdmiOutRGB		= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit;
+	bool				bHdmiOutRGB		= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit ||
+										  mDs.hdmiOutColorSpace == kHDMIOutCSCRGB12bit;
 	bool				bInRGB			= bHdmiInRGB || mDs.bInSdiRgb;
 	bool				bFb1HdrRGB		= mFb1Format == NTV2_FBF_48BIT_RGB;
     //bool				bFb2HdrRGB		= mFb2Format == NTV2_FBF_48BIT_RGB;
@@ -3147,14 +3149,18 @@ void Class4kServices::SetDeviceMiscRegisters ()
 		// set color-space bit-depth 
 		switch (mDs.hdmiOutColorSpace)
 		{
+			case kHDMIOutCSCYCbCr10bit:
+				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
+				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
+				break;
+		
 			case kHDMIOutCSCYCbCr8bit:
 				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
 				mCard->SetHDMIOutBitDepth(NTV2_HDMI8Bit);
 				break;
-		
-			case kHDMIOutCSCYCbCr10bit:
-				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
-				mCard->SetHDMIOutBitDepth (NTV2_HDMI10Bit);
+			case kHDMIOutCSCRGB12bit:
+				mCard->SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceRGB);
+				mCard->SetHDMIOutBitDepth (NTV2_HDMI12Bit);
 				break;
 				
 			case kHDMIOutCSCRGB10bit:
@@ -3170,13 +3176,9 @@ void Class4kServices::SetDeviceMiscRegisters ()
 		}
 		
 		// HDMI Out Protocol mode
-		switch (mDs.hdmiOutProtocol_)
+		switch (mDs.hdmiOutProtocol)
 		{
 			default:
-			case kHDMIOutProtocolAutoDetect:
-				mCard->WriteRegister(kRegHDMIOutControl, mDs.hdmiOutDsProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-				break;
-				
 			case kHDMIOutProtocolHDMI:
 				mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 				break;
