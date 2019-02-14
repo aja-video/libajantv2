@@ -3676,7 +3676,6 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
             for (uint32_t i=0; i<m2110TxAudioData.numTxAudioChannels; i++)
             {
                 if (memcmp(&m2110TxAudioData.txAudioCh[i], &s2110TxAudioDataLast->txAudioCh[i], sizeof(TxAudioChData2110)) != 0 ||
-                    *videoFormatLast != mFb1VideoFormat ||
                     ipServiceForceConfig)
                 {
                     // Process the configuration
@@ -3731,7 +3730,6 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 			for (uint32_t i=0; i<m2110TxAncData.numTxAncChannels; i++)
 			{
 				if (memcmp(&m2110TxAncData.txAncCh[i], &s2110TxAncDataLast->txAncCh[i], sizeof(TxAncChData2110)) != 0 ||
-					*videoFormatLast != mFb1VideoFormat ||
 					ipServiceForceConfig)
 				{
 					// Process the configuration
@@ -3748,7 +3746,7 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 					txConfig.ttl = 0x40;
 					txConfig.tos = 0x64;
 
-					// Start by turning off the audio stream
+					// Start by turning off the anc stream
 					printf("SetTxAncStream off %d\n", m2110TxAncData.txAncCh[i].stream);
 					config2110->SetTxStreamEnable(m2110TxAncData.txAncCh[i].stream, false, false);
 
@@ -3775,7 +3773,6 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 					AgentIsAlive();
 				}
 			}
-
 
             rx_2110Config rxConfig;
             eSFP sfp = SFP_1;
