@@ -41,6 +41,7 @@ static const string				gGlobalMutexName	("com.aja.ntv2.mutex.demo");
 static NTV2VideoFormatSet		gAllFormats;
 static NTV2VideoFormatSet		gNon4KFormats;
 static NTV2VideoFormatSet		g4KFormats;
+static NTV2VideoFormatSet		g8kFormats;
 static NTV2FrameBufferFormatSet	gPixelFormats;
 static NTV2FrameBufferFormatSet	gFBFsRGB;
 static NTV2FrameBufferFormatSet	gFBFsPlanar;
@@ -83,7 +84,9 @@ class DemoCommonInitializer
 				if (!NTV2_IS_VALID_VIDEO_FORMAT (legalFormat))
 					continue;
 
-				if (NTV2_IS_4K_VIDEO_FORMAT (legalFormat))
+				if (NTV2_IS_QUAD_QUAD_FORMAT(legalFormat))
+					g8kFormats.insert (legalFormat);
+				else if (NTV2_IS_4K_VIDEO_FORMAT (legalFormat))
 					g4KFormats.insert (legalFormat);
 				else
 					gNon4KFormats.insert (legalFormat);
@@ -145,6 +148,24 @@ class DemoCommonInitializer
 			gString2VideoFormatMap.insert (String2VideoFormatPair ("4k11988",		NTV2_FORMAT_4x2048x1080p_11988));
 			gString2VideoFormatMap.insert (String2VideoFormatPair ("4k120",			NTV2_FORMAT_4x2048x1080p_12000));
 
+			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd2",			NTV2_FORMAT_4x3840x2160p_2398));
+			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd22398",		NTV2_FORMAT_4x3840x2160p_2398));
+			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd224",		NTV2_FORMAT_4x3840x2160p_2400));
+			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd225",		NTV2_FORMAT_4x3840x2160p_2500));
+			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd250",		NTV2_FORMAT_4x3840x2160p_5000));
+			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd25994",		NTV2_FORMAT_4x3840x2160p_5994));
+			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd260",		NTV2_FORMAT_4x3840x2160p_6000));
+
+			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k",			NTV2_FORMAT_4x4096x2160p_6000));
+			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k2398",		NTV2_FORMAT_4x4096x2160p_2398));
+			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k24",			NTV2_FORMAT_4x4096x2160p_2400));
+			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k25",			NTV2_FORMAT_4x4096x2160p_2500));
+			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k4795",		NTV2_FORMAT_4x4096x2160p_4795));
+			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k48",			NTV2_FORMAT_4x4096x2160p_4800));
+			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k50",			NTV2_FORMAT_4x4096x2160p_5000));
+			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k5994",		NTV2_FORMAT_4x4096x2160p_5994));
+			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k60",			NTV2_FORMAT_4x4096x2160p_6000));
+			
 			NTV2_ASSERT (gPixelFormats.empty ());
 			for (NTV2FrameBufferFormat legalFormat (NTV2_FBF_10BIT_YCBCR);  legalFormat < NTV2_FBF_NUMFRAMEBUFFERFORMATS;  legalFormat = NTV2FrameBufferFormat (legalFormat + 1))
 			{
