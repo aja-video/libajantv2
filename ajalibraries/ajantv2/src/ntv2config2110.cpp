@@ -930,13 +930,15 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
 	else if (StreamType(stream) == ANC_STREAM)
 	{
 		// for anc streams we tuck away these values so anc inserter can get to them
-		uint32_t regOffset = (uint32_t)(stream-NTV2_ANC1_STREAM);
+		uint32_t channel = (uint32_t)(stream-NTV2_ANC1_STREAM);
+
+		mDevice.AncInsertSetIPParams(channel, channel+4, txConfig.payloadType, txConfig.ssrc);
 
 		// payloadType
-		mDevice.WriteRegister(kRegTxAncPayload1 + regOffset + SAREK_2110_TX_ARBITRATOR, txConfig.payloadType);
+		mDevice.WriteRegister(kRegTxAncPayload1+channel + SAREK_2110_TX_ARBITRATOR, txConfig.payloadType);
 
 		// ssrc
-		mDevice.WriteRegister(kRegTxAncSSRC1 + regOffset + SAREK_2110_TX_ARBITRATOR, txConfig.ssrc);
+		mDevice.WriteRegister(kRegTxAncSSRC1+channel + SAREK_2110_TX_ARBITRATOR, txConfig.ssrc);
 	}
 
 	return true;
@@ -1494,6 +1496,13 @@ bool CNTV2Config2110::SetTxPacketizerChannel(NTV2Stream stream, uint32_t & baseA
         mDevice.WriteRegister(kReg3190_pkt_chan_num + baseAddrPacketizer, index);
 		return true;
     }
+	else if (StreamType(stream) == ANC_STREAM)
+	{
+		baseAddrPacketizer = packetizers[stream-NTV2_AUDIO1_STREAM];
+		uint32_t index = Get2110TxStreamIndex(stream);
+		mDevice.WriteRegister(kReg3190_pkt_chan_num + baseAddrPacketizer, index);
+		return true;
+	}
 	else
 		return false;
 }
@@ -1805,10 +1814,14 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
 	{
 		GenVideoStreamMultiSDPInfo(sdp, &gmInfo[0]);
 	}
-    else
+    else if (StreamType(stream) == AUDIO_STREAM)
     {
 		GenAudioStreamSDPInfo(sdp, sfp, stream, &gmInfo[0]);
     }
+	else if (StreamType(stream) == ANC_STREAM)
+	{
+		GenAncStreamSDPInfo(sdp, sfp, stream, &gmInfo[0]);
+	}
     
 	//cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
 
@@ -2148,6 +2161,56 @@ bool CNTV2Config2110::GenAudioStreamSDPInfo(stringstream & sdp, const eSFP sfp, 
 
     return true;
 }
+
+bool CNTV2Config2110::GenAncStreamSDPInfo(stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo)
+{
+	// Insure appropriate stream is enabled
+	bool enabledA;
+	bool enabledB;
+	GetTxStreamEnable(stream, enabledA, enabledB);
+	if ((sfp == SFP_1) && !enabledA)
+	{
+		return true;
+	}
+	if ((sfp == SFP_2) && !enabledB)
+	{
+		return true;
+	}
+
+	tx_2110Config config;
+	GetTxStreamConfiguration(stream, config);
+
+	// media name
+	sdp << "m=video ";
+	if (sfp == SFP_2)
+		sdp << To_String(config.remotePort[1]);
+	else
+		sdp << To_String(config.remotePort[0]);
+
+	sdp << " RTP/AVP ";
+	sdp << To_String(config.payloadType) << endl;
+
+	// connection information
+	sdp << "c=IN IP4 ";
+	if (sfp == SFP_2)
+		sdp << config.remoteIP[1];
+	else
+		sdp << config.remoteIP[0];
+	sdp << "/" << To_String(config.ttl) << endl;
+
+	// rtpmap
+	sdp << "a=rtpmap:";
+	sdp << To_String(config.payloadType);
+	sdp << " raw/90000" << endl;
+
+	// PTP
+	sdp << "a=ts-refclk:ptp=IEEE1588-2008:" << gmInfo << endl;
+	sdp << "a=mediaclk:direct=0" << endl;
+	sdp << "a=mid:VID" << endl;
+
+	return true;
+}
+
 
 NTV2StreamType CNTV2Config2110::StreamType(const NTV2Stream stream)
 {

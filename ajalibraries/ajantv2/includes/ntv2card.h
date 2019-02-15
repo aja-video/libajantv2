@@ -5364,6 +5364,16 @@ public:
 														const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
 														const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);
 
+	/**
+		@brief		Configures the Anc inserter IP specific params.
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[in]	ancChannel		Tells the IP packetizer which Anc inserter to use (4-7).
+		@param[in]	payloadID		Tells the IP packetizer what the RTP Payload Id is.
+		@param[in]	ssrc			Tells the IP packetizer what the RTP SSRC is.
+	**/
+	AJA_VIRTUAL bool	AncInsertSetIPParams (const UWord inSDIOutput, const UWord ancChannel, const ULWord payloadID, const ULWord ssrc);
+
 
 	/**
 		@brief		Initializes the given SDI input's Anc extractor for custom Anc packet detection and de-embedding.

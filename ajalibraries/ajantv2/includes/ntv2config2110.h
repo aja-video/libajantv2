@@ -410,6 +410,7 @@ protected:
 	bool        GenVideoStreamSDPInfo(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo);
 	bool		GenVideoStreamMultiSDPInfo(std::stringstream & sdp, char* gmInfo);
 	bool        GenAudioStreamSDPInfo(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo);
+	bool        GenAncStreamSDPInfo(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo);
 
     NTV2StreamType  StreamType(const NTV2Stream stream);
     NTV2Channel VideoStreamToChannel(const NTV2Stream stream);
