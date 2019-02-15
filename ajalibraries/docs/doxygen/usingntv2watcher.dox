@@ -59,6 +59,7 @@ If you click back to return to an inspector that was previously in use, its stat
 
 
 
+<hr size="50px">
 @subsection	inspectorframebuffer	Frame Buffer Inspector
 
 @image	html	watcher-inspector-framebuffer.png
@@ -186,10 +187,13 @@ Except in its Image view, the raster content display always highlights changed c
 		-	<b>Paste</b> — (Available only if an entire frame was previously Copied) — Replaces the current 8MB or 16MB frame with the 8MB or 16MB frame that was Copied earlier.
 		-	<b>Set Color…</b> — (<b>Auto</b> mode OFF only) — Displays a color picker.
 			Choosing a color will set the active lines of the current frame buffer to the chosen color.
-		-	<b>Fill…</b> — (<b>Auto</b> mode OFF only) — Displays the <b>Fill Frame Buffer</b> dialog.
+		-	<b>Fill…</b> — (<b>Auto</b> mode OFF only) — Reveals the <b>Fill Frame Buffer</b> modeless dialog.
 			-	<b>Numeric Values</b> — Fills one or more buffers with any 8, 16, 32 or 64-bit numeric value.
-			-	<b>Component Values</b> — Fills one or more buffers with any desired component values.
-			-	<b>Video Pattern</b> — Fills one or more buffers with any of several predefined test patterns.
+				@image	html	watcher-fillfb-numeric.png
+			-	<b>Test Pattern</b> — Fills one or more buffers with any of several predefined test patterns.
+				@image	html	watcher-fillfb-pattern.png
+			-	<b>Text</b> — Fills one or more buffers with glyphs rendered using the ::CNTV2CaptionRenderer.
+				@image	html	watcher-fillfb-text.png
 		-	<b>Compare to Frame…</b> — (<b>Auto</b> mode OFF only) — Enables “Frame Differencing” mode, comparing the current frame with another, highlighting the differences.
 			To cancel this mode, toggle the “Auto” setting, or change the current frame being viewed.
 		-	<b>Bytes/Line</b> — (<b>Raw</b> view only) — Changes the number of bytes to display in each line of the Raw data view. Choose from 64 bytes up to 32K bytes by powers of 2.
@@ -206,6 +210,13 @@ Except in its Image view, the raster content display always highlights changed c
 			-	<b>Lines</b>, <b>Components</b>, and <b>Image</b> — Writes a human-readable formatted dump of the raster selection, or, if there’s no selection, the full raster.
 			-	<b>Raw</b> — Writes a raw, binary data file containing the contents of the entire frame buffer (8MB or 16MB).
 				If given a name extension of “.raw”, it can be dropped into the Frame Buffer inspector view to set the contents of a frame buffer at any time thereafter.
+	-	<b>Buffer Editing</b> — (<b>Lines</b> or <b>Raw</b> view only)
+		-	This will fill a portion of the currently displayed frame buffer with a specific value that you enter from the keyboard.
+		-#	Highlight a selection area of any size.
+		-#	Press <b>Enter</b> (or <b>Return</b>).
+		-#	Type the new value in the edit box that appears.
+		-#	Press <b>Enter</b> (or <b>Return</b>) to fill the selection with the new value.
+			Press <b>Esc</b> (or click outside the selection) to cancel.
 	-	<b>Drag and Drop</b>
 		-	The <b>Auto</b> checkbox must be un-checked.
 		-	Choose the <b>FrameStore</b> and <b>Frame</b> of interest.
@@ -229,6 +240,7 @@ Except in its Image view, the raster content display always highlights changed c
 
 
 
+<hr size="50px">
 @subsection	inspectoraudio		Audio Inspector
 
 @image	html	watcher-inspector-audio.png
@@ -324,6 +336,7 @@ The display highlights changed content with a brighter color.
 		-	<b>Fill</b> — (<b>Output</b> mode only) Fills the output audio buffer with 440Hz constant-amplitude identical-phase sinusoidal tone.
 
 
+<hr size="50px">
 @subsection	inspectoranc		Ancillary Data Inspector
 
 @image	html	watcher-inspector-anc.png
@@ -372,6 +385,7 @@ The display highlights changed content with a brighter color.
 
 
 
+<hr size="50px">
 @subsection	inspectorac		AutoCirculate Inspector
 
 @image	html	watcher-inspector-ac.png
@@ -390,6 +404,7 @@ Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable frame-accu
 
 
 
+<hr size="50px">
 @subsection	inspectormixerkeyer		Mixer/Keyer Inspector
 
 @image	html	watcher-inspector-mixer.png
@@ -430,6 +445,7 @@ Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable frame-accu
 
 
 
+<hr size="50px">
 @subsection	inspectorregs		Registers Inspector
 
 @image	html	watcher-inspector-regs.png
@@ -472,6 +488,7 @@ To change a register’s value:
 
 
 
+<hr size="50px">
 @subsection	inspectorroute		Routing Inspector
 
 The <b>Routing</b> inspector monitors widget signal crosspoint routing.
