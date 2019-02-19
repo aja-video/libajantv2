@@ -240,6 +240,20 @@ bool CNTV2VPID::IsStandard3Ga (void) const
 	return false;
 }
 
+bool CNTV2VPID::IsStandardMultiLink4320 (void) const
+{
+	switch(GetStandard())
+	{
+	case VPIDStandard_4320_DualLink_12Gb:
+	case VPIDStandard_4320_QuadLink_12Gb:
+		return true;
+	default:
+		break;
+	}
+
+	return false;
+}
+
 
 bool CNTV2VPID::IsStandardTwoSampleInterleave (void) const
 {

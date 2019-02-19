@@ -3910,6 +3910,10 @@ public:
 		@note		The returned video format, if valid, will be an SD format for black burst and HD for tri-level.
 	**/
 	AJA_VIRTUAL NTV2VideoFormat GetReferenceVideoFormat (void);
+	
+	AJA_VIRTUAL NTV2FrameGeometry GetSDIInputRate (const NTV2Channel channel);
+	AJA_VIRTUAL NTV2FrameGeometry GetSDIInputGeometry (const NTV2Channel channel);
+	AJA_VIRTUAL bool GetSDIInputIsProgressive (const NTV2Channel channel);
 
 	AJA_VIRTUAL bool	GetSDIInput3GPresent (bool & outValue, const NTV2Channel channel);
 	#if !defined (NTV2_DEPRECATE)
