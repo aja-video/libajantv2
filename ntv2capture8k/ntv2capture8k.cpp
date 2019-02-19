@@ -175,10 +175,10 @@ AJAStatus NTV2Capture8K::SetupVideo (void)
 	//	Disable SDI output from the SDI input being used,
 	//	but only if the device supports bi-directional SDI,
 	//	and only if the input being used is an SDI input...
-	mDevice.SetSDITransmitEnable(NTV2_CHANNEL4, false);
-	mDevice.SetSDITransmitEnable(NTV2_CHANNEL3, false);
-	mDevice.SetSDITransmitEnable(NTV2_CHANNEL2, false);
 	mDevice.SetSDITransmitEnable(NTV2_CHANNEL1, false);
+	mDevice.SetSDITransmitEnable(NTV2_CHANNEL2, false);
+	mDevice.SetSDITransmitEnable(NTV2_CHANNEL3, false);
+	mDevice.SetSDITransmitEnable(NTV2_CHANNEL4, false);
 
 	//	Wait for four verticals to let the reciever lock...
 	mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1, 10);
