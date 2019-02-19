@@ -65,6 +65,15 @@ AJAExport bool	ConvertLine_8bitABGR_to_10bitABGR (const UByte * pInSrcLine_8bitA
 **/
 AJAExport bool	ConvertLine_8bitABGR_to_10bitRGBDPX (const UByte * pInSrcLine_8bitABGR,  ULWord * pOutDstLine_10BitDPX, const ULWord inNumPixels);
 
+/**
+	@brief		Converts a single 8-bit ABGR raster line to 48-bit RGB.
+	@param[in]	pInSrcLine_8bitABGR		Specifies a valid, non-NULL address of the first byte of the 8-bit ABGR raster line to be converted.
+	@param[out]	pOutDstLine_48BitRGB	Specifies a valid, non-NULL address of the first byte of the 48-bit RGB DPX raster line to receive the converted data.
+	@param[in]	inNumPixels				The number of pixels to be converted.
+	@return		True if successful;  otherwise false.
+**/
+AJAExport bool	ConvertLine_8bitABGR_to_48bitRGB (const UByte * pInSrcLine_8bitABGR,  ULWord * pOutDstLine_48BitRGB, const ULWord inNumPixels);
+
 
 // ConvertLineToYCbCr422
 // 8 Bit

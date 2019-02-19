@@ -80,15 +80,13 @@ bool ConvertLine_8bitABGR_to_10bitABGR (const UByte * pInSrcLine_8bitABGR,  ULWo
 }
 
 
-
-
 bool ConvertLine_8bitABGR_to_10bitRGBDPX (const UByte * pInSrcLine_8bitABGR,  ULWord * pOutDstLine_10BitDPX, const ULWord inNumPixels)
 {
 	if (!pInSrcLine_8bitABGR || !pOutDstLine_10BitDPX || !inNumPixels)
 		return false;
 
-	ULWord* pSrc = (ULWord*) pInSrcLine_8bitABGR;
-	ULWord* pDst = (ULWord*) pOutDstLine_10BitDPX;
+	const ULWord* pSrc = reinterpret_cast<const ULWord*>(pInSrcLine_8bitABGR);
+	ULWord* pDst = reinterpret_cast<ULWord*>(pOutDstLine_10BitDPX);
 	
 	for (ULWord pixCount = 0;   pixCount < inNumPixels;   pixCount++)
 	{
@@ -98,6 +96,26 @@ bool ConvertLine_8bitABGR_to_10bitRGBDPX (const UByte * pInSrcLine_8bitABGR,  UL
 		pDst++; pSrc++;
 	}
 	
+	return true;
+}
+
+
+bool ConvertLine_8bitABGR_to_48bitRGB (const UByte * pInSrcLine_8bitABGR,  ULWord * pOutDstLine_48BitRGB, const ULWord inNumPixels)
+{
+	if (!pInSrcLine_8bitABGR || !pOutDstLine_48BitRGB || !inNumPixels)
+		return false;
+
+	const UByte* pSrc = reinterpret_cast<const UByte*>(pInSrcLine_8bitABGR);
+	UByte* pDst = reinterpret_cast<UByte*>(pOutDstLine_48BitRGB);
+	
+	for (ULWord pixCount = 0;   pixCount < inNumPixels;   pixCount++)
+	{
+		UByte	r(*pSrc++),  g(*pSrc++),  b(*pSrc++);	//	UByte	a(*pSrc++);
+		++pDst;  *pDst++ = r;
+		++pDst;  *pDst++ = g;
+		++pDst;  *pDst++ = b;
+		pSrc++;
+	}
 	return true;
 }
 

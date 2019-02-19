@@ -400,7 +400,7 @@ protected:
     void        SetupDepacketizerStream(const NTV2Stream stream, const rx_2110Config & rxConfig);
     void        ResetDepacketizerStream(const NTV2Stream stream);
     uint32_t    GetDepacketizerAddress(const NTV2Stream stream);
-    bool        SetTxPacketizerChannel(const NTV2Stream stream, uint32_t  & baseAddr);
+	uint32_t	GetPacketizerAddress(const NTV2Stream stream);
 
     void        SetVideoFormatForRxTx(const NTV2Stream stream, const NTV2VideoFormat format, const bool rx);
     void        GetVideoFormatForRxTx(const NTV2Stream stream, NTV2VideoFormat & format, uint32_t & hwFormat, const bool rx);
