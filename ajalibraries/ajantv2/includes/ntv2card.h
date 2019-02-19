@@ -3911,7 +3911,7 @@ public:
 	**/
 	AJA_VIRTUAL NTV2VideoFormat GetReferenceVideoFormat (void);
 	
-	AJA_VIRTUAL NTV2FrameGeometry GetSDIInputRate (const NTV2Channel channel);
+	AJA_VIRTUAL NTV2FrameRate GetSDIInputRate (const NTV2Channel channel);
 	AJA_VIRTUAL NTV2FrameGeometry GetSDIInputGeometry (const NTV2Channel channel);
 	AJA_VIRTUAL bool GetSDIInputIsProgressive (const NTV2Channel channel);
 
