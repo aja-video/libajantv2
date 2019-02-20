@@ -797,7 +797,7 @@ bool NTV2DeviceGetVideoFormatFromState_Ex2(	NTV2VideoFormat *		pOutValue,
 	case NTV2_STANDARD_7680:
 	case NTV2_STANDARD_8192:
 	{
-		bool isUHD2 = inStandard == NTV2_STANDARD_7680;
+		bool isUHD2 = inFrameGeometry == NTV2_FG_4x3840x2160;
 		switch(inFrameRate)
 		{
 		case NTV2_FRAMERATE_2398:

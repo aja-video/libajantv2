@@ -601,6 +601,17 @@ NTV2VideoFormat CNTV2VPID::GetVideoFormat (void) const
 			videoFormat = stTable3840pSID[vpidFrameRate];
 		}
 		break;
+	case VPIDStandard_4320_DualLink_12Gb:
+	case VPIDStandard_4320_QuadLink_12Gb:
+		if (vpidHorizontal2048)
+		{
+			videoFormat = stTable8192p[vpidFrameRate];
+		}
+		else
+		{
+			videoFormat = stTable7680p[vpidFrameRate];
+		}
+		break;
 	default:
 		break;
 	}
@@ -670,6 +681,9 @@ static string VPIDStandardToString (const VPIDStandard inStd)
 		case VPIDStandard_1080_AFR_Single_6Gb:			return "1080_AFR_Single_6Gb";
 		case VPIDStandard_2160_Single_12Gb:				return "2160_Single_12Gb";
 		case VPIDStandard_1080_10_12_AFR_Single_12Gb:	return "1080_10_12_AFR_Single_12Gb";
+		case VPIDStandard_4320_DualLink_12Gb:			return "4320_DualLink_12Gb";
+		case VPIDStandard_2160_DualLink_12Gb:			return "2160_DualLink_12Gb";
+		case VPIDStandard_4320_QuadLink_12Gb:			return "4320_QuadLink_12Gb";
 	#if !defined(_DEBUG)
 		default:	break;
 	#endif

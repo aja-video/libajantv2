@@ -7590,6 +7590,32 @@ string NTV2VideoFormatToString (const NTV2VideoFormat inFormat, const bool inUse
 	case NTV2_FORMAT_4096x2160p_5000_B:	return "4Kp50b";
 	case NTV2_FORMAT_4096x2160p_5994_B:	return "4Kp59.94b";
 	case NTV2_FORMAT_4096x2160p_6000_B:	return "4Kp60b";
+	case NTV2_FORMAT_4x3840x2160p_2398: return "UHD2p23.98";
+	case NTV2_FORMAT_4x3840x2160p_2400: return "UHD2p24";
+	case NTV2_FORMAT_4x3840x2160p_2500: return "UHD2p25";
+	case NTV2_FORMAT_4x3840x2160p_2997: return "UHD2p29.97";
+	case NTV2_FORMAT_4x3840x2160p_3000: return "UHD2p30";
+	case NTV2_FORMAT_4x3840x2160p_5000: return "UHD2p50";
+	case NTV2_FORMAT_4x3840x2160p_5994: return "UHD2p59.94";
+	case NTV2_FORMAT_4x3840x2160p_6000: return "UHD2p60";
+	case NTV2_FORMAT_4x3840x2160p_5000_B: return "UHD2p50b";
+	case NTV2_FORMAT_4x3840x2160p_5994_B: return "UHD2p59.94b";
+	case NTV2_FORMAT_4x3840x2160p_6000_B: return "UHD2p60b";
+	case NTV2_FORMAT_4x4096x2160p_2398: return "8Kp23.98";
+	case NTV2_FORMAT_4x4096x2160p_2400: return "8Kp24";
+	case NTV2_FORMAT_4x4096x2160p_2500: return "8Kp25";
+	case NTV2_FORMAT_4x4096x2160p_2997: return "8Kp29.97";
+	case NTV2_FORMAT_4x4096x2160p_3000: return "8Kp30";
+	case NTV2_FORMAT_4x4096x2160p_4795: return "8Kp47.95";
+	case NTV2_FORMAT_4x4096x2160p_4800: return "8Kp48";
+	case NTV2_FORMAT_4x4096x2160p_5000: return "8Kp50";
+	case NTV2_FORMAT_4x4096x2160p_5994: return "8Kp59.94";
+	case NTV2_FORMAT_4x4096x2160p_6000: return "8Kp60";
+	case NTV2_FORMAT_4x4096x2160p_4795_B: return "8Kp47.95b";
+	case NTV2_FORMAT_4x4096x2160p_4800_B: return "8Kp48b";
+	case NTV2_FORMAT_4x4096x2160p_5000_B: return "8Kp50b";
+	case NTV2_FORMAT_4x4096x2160p_5994_B: return "8Kp59.94b";
+	case NTV2_FORMAT_4x4096x2160p_6000_B: return "8Kp60b";
 	default: return "Unknown";
 	}
 }	//	NTV2VideoFormatToString

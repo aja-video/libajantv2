@@ -299,6 +299,7 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 	//This will handle 4k formats
 	if (NTV2_IS_QUAD_FRAME_FORMAT(value))
 	{
+		SetQuadQuadFrameEnable(false, channel);
 		Get4kSquaresEnable(squares, channel);
 		if (squares)
 		{
@@ -1204,7 +1205,8 @@ bool CNTV2Card::SetQuadQuadFrameEnable(const ULWord inValue, const NTV2Channel i
 	if (!::NTV2DeviceCanDo8KVideo(_boardID))
 		return false;
 	
-	SetQuadFrameEnable(1, inChannel);
+	if (inValue)
+		SetQuadFrameEnable(1, inChannel);
 	
 	status = WriteRegister(kRegGlobalControl3, inValue, kRegMaskQuadQuadMode, kRegShiftQuadQuadMode);
 	return status;
@@ -5357,7 +5359,7 @@ NTV2FrameGeometry CNTV2Card::GetSDIInputGeometry (const NTV2Channel channel)
 bool CNTV2Card::GetSDIInputIsProgressive (const NTV2Channel channel)
 {
 	if (IS_CHANNEL_INVALID (channel))
-		return NTV2_FG_INVALID;
+		return false;
 
 	ULWord isProgressive = 0;
 	ReadRegister(gChannelToSDIInputStatusRegNum[channel], isProgressive, gChannelToSDIInputProgressiveMask[channel], gChannelToSDIInputProgressiveShift[channel]);
