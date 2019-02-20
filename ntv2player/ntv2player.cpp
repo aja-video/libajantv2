@@ -455,10 +455,11 @@ void NTV2Player::PlayFrames (void)
 	AUTOCIRCULATE_TRANSFER	xferInfo;
 
 	if (mAncType != AJAAncillaryDataType_Unknown)
+	{
 		ancBuffer.Allocate(NTV2_ANCSIZE_MAX, true);	//	true == page-aligned
-	if (::NTV2DeviceCanDoCustomAnc(mDeviceID))
-		acOpts |= AUTOCIRCULATE_WITH_ANC;
-
+		if (::NTV2DeviceCanDoCustomAnc(mDeviceID))
+			acOpts |= AUTOCIRCULATE_WITH_ANC;
+	}
 	mDevice.AutoCirculateStop (mOutputChannel);
 	mDevice.AutoCirculateInitForOutput (mOutputChannel, 7,	//	7 frame cushion sufficient for all devices & FBFs
 										mWithAudio ? mAudioSystem : NTV2_AUDIOSYSTEM_INVALID,	//	Which audio system?
