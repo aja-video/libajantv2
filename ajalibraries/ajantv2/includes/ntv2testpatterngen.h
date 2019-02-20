@@ -99,6 +99,7 @@ protected:
 	virtual bool	DrawTestPatternWidePQ();
 	virtual bool	Draw12BitRamp();
 	virtual bool	Draw12BitZonePlate();
+	virtual void	PrepareForOutput();
 
 	bool IsSDStandard();
 	bool GetStandard(int &standard, bool &b4K);

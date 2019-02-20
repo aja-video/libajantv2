@@ -2998,6 +2998,23 @@ void NTV2TestPatternGen::setupHDRTestPatternGeometries()
     }
 }
 
+void NTV2TestPatternGen::PrepareForOutput()
+{
+	uint16_t* rgb16BitBuffer = new uint16_t[mNumPixels*mNumLines * 3];
+	uint16_t* rgb12Buffer = mRGBBuffer.data();
+	ULWord* buffer = (ULWord*)rgb16BitBuffer;
+	for (uint32_t i = 0; i<mNumPixels*mNumLines; i++)
+	{
+		uint16_t r = (*rgb12Buffer++) << 4;
+		uint16_t g = (*rgb12Buffer++) << 4;
+		uint16_t b = (*rgb12Buffer++) << 4;
+		*rgb16BitBuffer++ = b;  // b
+		*rgb16BitBuffer++ = g; //g
+		*rgb16BitBuffer++ = r;
+	}
+	::memcpy(_pTestPatternBuffer, (uint8_t*)buffer, _bufferSize);
+}
+
 bool NTV2TestPatternGen::DrawTestPatternNarrowHLG()
 {
     mBitsPerComponent = 16;
@@ -3105,7 +3122,7 @@ bool NTV2TestPatternGen::DrawTestPatternNarrowHLG()
         memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
         rgbBuffer += a;
     }
-	::memcpy(_pTestPatternBuffer, mRGBBuffer.data(), _bufferSize);
+	PrepareForOutput();
     delete [] tempBuffer;
 	return true;
 }
@@ -3215,7 +3232,7 @@ bool NTV2TestPatternGen::DrawTestPatternNarrowPQ()
         memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
         rgbBuffer += a;
     }
-	::memcpy(_pTestPatternBuffer, mRGBBuffer.data(), _bufferSize);
+	PrepareForOutput();
     delete [] tempBuffer;
 	return true;
 }
@@ -3333,7 +3350,7 @@ bool NTV2TestPatternGen::DrawTestPatternWidePQ()
         memcpy(rgbBuffer,tempBuffer,a*sizeof(AJA_RGB16BitPixel));
         rgbBuffer += a;
     }
-	::memcpy(_pTestPatternBuffer, mRGBBuffer.data(), _bufferSize);
+	PrepareForOutput();
     delete [] tempBuffer;
 	return true;
 }
@@ -3354,7 +3371,7 @@ bool NTV2TestPatternGen::Draw12BitRamp()
 			*rgbBuffer++ = ivalue;
 		}
 	}
-	::memcpy(_pTestPatternBuffer, mRGBBuffer.data(), _bufferSize);
+	PrepareForOutput();
 	return true;
 }
 
@@ -3397,7 +3414,7 @@ bool NTV2TestPatternGen::Draw12BitZonePlate()
 			*rgbBuffer++ = value;
 		}
 	}
-	::memcpy(_pTestPatternBuffer, mRGBBuffer.data(), _bufferSize);
+	PrepareForOutput();
 	return true;
 }
 void ConvertRGBLineTo10BitYCbCr422(AJA_RGB16BitPixel* lineBuffer,uint16_t lineLength)
