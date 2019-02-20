@@ -192,27 +192,32 @@ static const ULWord	gChannelToSDIIn12GModeMask []	= {	kRegMaskSDIIn112GbpsMode,	
 
 static const ULWord	gChannelToSDIIn12GModeShift []	= {	kRegShiftSDIIn112GbpsMode,	kRegShiftSDIIn212GbpsMode,	kRegShiftSDIIn312GbpsMode,	kRegShiftSDIIn412GbpsMode,
 														kRegShiftSDIIn512GbpsMode,	kRegShiftSDIIn612GbpsMode,	kRegShiftSDIIn712GbpsMode,	kRegShiftSDIIn812GbpsMode,	0};
+
 static const ULWord	gChannelToSDIInputStatusRegNum []		= {	kRegInputStatus,		kRegInputStatus,		kRegInputStatus2,		kRegInputStatus2,
 																kRegInput56Status,		kRegInput56Status,		kRegInput78Status,		kRegInput78Status,	0};
-
-static const ULWord	gChannelToSDIInputRateShift []			= {	kRegShiftInput1FrameRate,			kRegShiftInput2FrameRate,			kRegShiftInput1FrameRate,			kRegShiftInput2FrameRate,
-																kRegShiftInput1FrameRate,			kRegShiftInput2FrameRate,			kRegShiftInput1FrameRate,			kRegShiftInput2FrameRate,			0};
-static const ULWord	gChannelToSDIInputRateHighShift []		= {	kRegShiftInput1FrameRateHigh,		kRegShiftInput2FrameRateHigh,		kRegShiftInput1FrameRateHigh,		kRegShiftInput2FrameRateHigh,
-																kRegShiftInput1FrameRateHigh,		kRegShiftInput2FrameRateHigh,		kRegShiftInput1FrameRateHigh,		kRegShiftInput2FrameRateHigh,		0};
 
 static const ULWord	gChannelToSDIInputRateMask []			= {	kRegMaskInput1FrameRate,			kRegMaskInput2FrameRate,			kRegMaskInput1FrameRate,			kRegMaskInput2FrameRate,
 																kRegMaskInput1FrameRate,			kRegMaskInput2FrameRate,			kRegMaskInput1FrameRate,			kRegMaskInput2FrameRate,			0};
 static const ULWord	gChannelToSDIInputRateHighMask []		= {	kRegMaskInput1FrameRateHigh,		kRegMaskInput2FrameRateHigh,		kRegMaskInput1FrameRateHigh,		kRegMaskInput2FrameRateHigh,
 																kRegMaskInput1FrameRateHigh,		kRegMaskInput2FrameRateHigh,		kRegMaskInput1FrameRateHigh,		kRegMaskInput2FrameRateHigh,		0};
+static const ULWord	gChannelToSDIInputRateShift []			= {	kRegShiftInput1FrameRate,			kRegShiftInput2FrameRate,			kRegShiftInput1FrameRate,			kRegShiftInput2FrameRate,
+																kRegShiftInput1FrameRate,			kRegShiftInput2FrameRate,			kRegShiftInput1FrameRate,			kRegShiftInput2FrameRate,			0};
+static const ULWord	gChannelToSDIInputRateHighShift []		= {	kRegShiftInput1FrameRateHigh,		kRegShiftInput2FrameRateHigh,		kRegShiftInput1FrameRateHigh,		kRegShiftInput2FrameRateHigh,
+																kRegShiftInput1FrameRateHigh,		kRegShiftInput2FrameRateHigh,		kRegShiftInput1FrameRateHigh,		kRegShiftInput2FrameRateHigh,		0};
+
+static const ULWord	gChannelToSDIInputGeometryMask []		= {	kRegMaskInput1Geometry,				kRegMaskInput2Geometry,				kRegMaskInput1Geometry,				kRegMaskInput2Geometry,
+																kRegMaskInput1Geometry,				kRegMaskInput2Geometry,				kRegMaskInput1Geometry,				kRegMaskInput2Geometry,				0};
+static const ULWord	gChannelToSDIInputGeometryHighMask []	= {	kRegMaskInput1GeometryHigh,			kRegMaskInput2GeometryHigh,			kRegMaskInput1GeometryHigh,			kRegMaskInput2GeometryHigh,
+																kRegMaskInput1GeometryHigh,			kRegMaskInput2GeometryHigh,			kRegMaskInput1GeometryHigh,			kRegMaskInput2GeometryHigh,			0};
 static const ULWord	gChannelToSDIInputGeometryShift []		= {	kRegShiftInput1Geometry,			kRegShiftInput2Geometry,			kRegShiftInput1Geometry,			kRegShiftInput2Geometry,
 																kRegShiftInput1Geometry,			kRegShiftInput2Geometry,			kRegShiftInput1Geometry,			kRegShiftInput2Geometry,			0};
 static const ULWord	gChannelToSDIInputGeometryHighShift []	= {	kRegShiftInput1GeometryHigh,		kRegShiftInput2GeometryHigh,		kRegShiftInput1GeometryHigh,		kRegShiftInput2GeometryHigh,
 																kRegShiftInput1GeometryHigh,		kRegShiftInput2GeometryHigh,		kRegShiftInput1GeometryHigh,		kRegShiftInput2GeometryHigh,		0};
 
-static const ULWord	gChannelToSDIInputGeometryMask []		= {	kRegMaskInput1GeometryHigh,			kRegMaskInput2GeometryHigh,			kRegMaskInput1GeometryHigh,			kRegMaskInput2GeometryHigh,
-																kRegMaskInput1GeometryHigh,			kRegMaskInput2GeometryHigh,			kRegMaskInput1GeometryHigh,			kRegMaskInput2GeometryHigh,			0};
-static const ULWord	gChannelToSDIInputGeometryHighMask []	= {	kRegMaskInput1GeometryHigh,			kRegMaskInput2GeometryHigh,			kRegMaskInput1GeometryHigh,			kRegMaskInput2GeometryHigh,
-																kRegMaskInput1GeometryHigh,			kRegMaskInput2GeometryHigh,			kRegMaskInput1GeometryHigh,			kRegMaskInput2GeometryHigh,			0};
+static const ULWord	gChannelToSDIInputProgressiveMask []	= {	kRegMaskInput1Progressive,			kRegMaskInput2Progressive,			kRegMaskInput1Progressive,			kRegMaskInput2Progressive,
+																kRegMaskInput1Progressive,			kRegMaskInput2Progressive,			kRegMaskInput1Progressive,			kRegMaskInput2Progressive,			0};
+static const ULWord	gChannelToSDIInputProgressiveShift []	= {	kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,
+																kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			0};
 
 
 // Method: SetEveryFrameServices
@@ -5348,6 +5353,16 @@ NTV2FrameGeometry CNTV2Card::GetSDIInputGeometry (const NTV2Channel channel)
 		return currentGeometry;
 	return NTV2_FG_INVALID;
 }	//	GetSDIInputGeometry
+
+bool CNTV2Card::GetSDIInputIsProgressive (const NTV2Channel channel)
+{
+	if (IS_CHANNEL_INVALID (channel))
+		return NTV2_FG_INVALID;
+
+	ULWord isProgressive = 0;
+	ReadRegister(gChannelToSDIInputStatusRegNum[channel], isProgressive, gChannelToSDIInputProgressiveMask[channel], gChannelToSDIInputProgressiveShift[channel]);
+	return isProgressive ? true : false;
+}	//	GetSDIInputIsProgressive
 
 bool CNTV2Card::GetSDIInput3GPresent (bool & outValue, const NTV2Channel channel)
 {
