@@ -1494,9 +1494,8 @@ uint32_t CNTV2Config2110::GetPacketizerAddress(NTV2Stream stream)
 		uint32_t index = Get2110TxStreamIndex(stream);
         mDevice.WriteRegister(kReg3190_pkt_chan_num + baseAddrPacketizer, index);
     }
-	// ANC streams do not have packetizers
-	else
-		return baseAddrPacketizer;
+	
+	return baseAddrPacketizer;
 }
 
 bool  CNTV2Config2110::ConfigurePTP (const eSFP sfp, const std::string localIPAddress)
