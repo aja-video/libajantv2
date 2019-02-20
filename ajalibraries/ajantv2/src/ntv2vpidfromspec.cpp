@@ -298,7 +298,8 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	case NTV2_FORMAT_4x4096x2160p_2500:
 	case NTV2_FORMAT_4x4096x2160p_2997:
 	case NTV2_FORMAT_4x4096x2160p_3000:
-		
+		byte1 = VPIDStandard_4320_DualLink_12Gb;
+		break;
 		
 	case NTV2_FORMAT_4x3840x2160p_5000:
 	case NTV2_FORMAT_4x3840x2160p_5994:
@@ -316,7 +317,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	case NTV2_FORMAT_4x4096x2160p_5000_B:
 	case NTV2_FORMAT_4x4096x2160p_5994_B:
 	case NTV2_FORMAT_4x4096x2160p_6000_B:
-
+		byte1 = VPIDStandard_4320_QuadLink_12Gb;
 	default:
 		*pOutVPID = 0;
 		return true;

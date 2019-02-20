@@ -40,6 +40,7 @@ public:
 	virtual VPIDVersion				GetVersion (void) const;
 	virtual NTV2VideoFormat			GetVideoFormat (void) const;
 	virtual bool					IsStandard3Ga (void) const;
+	virtual bool					IsStandardMultiLink4320 (void) const;
 	virtual bool					IsStandardTwoSampleInterleave (void) const;
 	virtual VPIDStandard			GetStandard (void) const;
 	virtual bool					GetProgressiveTransport (void) const;

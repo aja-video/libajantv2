@@ -193,6 +193,32 @@ static const ULWord	gChannelToSDIIn12GModeMask []	= {	kRegMaskSDIIn112GbpsMode,	
 static const ULWord	gChannelToSDIIn12GModeShift []	= {	kRegShiftSDIIn112GbpsMode,	kRegShiftSDIIn212GbpsMode,	kRegShiftSDIIn312GbpsMode,	kRegShiftSDIIn412GbpsMode,
 														kRegShiftSDIIn512GbpsMode,	kRegShiftSDIIn612GbpsMode,	kRegShiftSDIIn712GbpsMode,	kRegShiftSDIIn812GbpsMode,	0};
 
+static const ULWord	gChannelToSDIInputStatusRegNum []		= {	kRegInputStatus,		kRegInputStatus,		kRegInputStatus2,		kRegInputStatus2,
+																kRegInput56Status,		kRegInput56Status,		kRegInput78Status,		kRegInput78Status,	0};
+
+static const ULWord	gChannelToSDIInputRateMask []			= {	kRegMaskInput1FrameRate,			kRegMaskInput2FrameRate,			kRegMaskInput1FrameRate,			kRegMaskInput2FrameRate,
+																kRegMaskInput1FrameRate,			kRegMaskInput2FrameRate,			kRegMaskInput1FrameRate,			kRegMaskInput2FrameRate,			0};
+static const ULWord	gChannelToSDIInputRateHighMask []		= {	kRegMaskInput1FrameRateHigh,		kRegMaskInput2FrameRateHigh,		kRegMaskInput1FrameRateHigh,		kRegMaskInput2FrameRateHigh,
+																kRegMaskInput1FrameRateHigh,		kRegMaskInput2FrameRateHigh,		kRegMaskInput1FrameRateHigh,		kRegMaskInput2FrameRateHigh,		0};
+static const ULWord	gChannelToSDIInputRateShift []			= {	kRegShiftInput1FrameRate,			kRegShiftInput2FrameRate,			kRegShiftInput1FrameRate,			kRegShiftInput2FrameRate,
+																kRegShiftInput1FrameRate,			kRegShiftInput2FrameRate,			kRegShiftInput1FrameRate,			kRegShiftInput2FrameRate,			0};
+static const ULWord	gChannelToSDIInputRateHighShift []		= {	kRegShiftInput1FrameRateHigh,		kRegShiftInput2FrameRateHigh,		kRegShiftInput1FrameRateHigh,		kRegShiftInput2FrameRateHigh,
+																kRegShiftInput1FrameRateHigh,		kRegShiftInput2FrameRateHigh,		kRegShiftInput1FrameRateHigh,		kRegShiftInput2FrameRateHigh,		0};
+
+static const ULWord	gChannelToSDIInputGeometryMask []		= {	kRegMaskInput1Geometry,				kRegMaskInput2Geometry,				kRegMaskInput1Geometry,				kRegMaskInput2Geometry,
+																kRegMaskInput1Geometry,				kRegMaskInput2Geometry,				kRegMaskInput1Geometry,				kRegMaskInput2Geometry,				0};
+static const ULWord	gChannelToSDIInputGeometryHighMask []	= {	kRegMaskInput1GeometryHigh,			kRegMaskInput2GeometryHigh,			kRegMaskInput1GeometryHigh,			kRegMaskInput2GeometryHigh,
+																kRegMaskInput1GeometryHigh,			kRegMaskInput2GeometryHigh,			kRegMaskInput1GeometryHigh,			kRegMaskInput2GeometryHigh,			0};
+static const ULWord	gChannelToSDIInputGeometryShift []		= {	kRegShiftInput1Geometry,			kRegShiftInput2Geometry,			kRegShiftInput1Geometry,			kRegShiftInput2Geometry,
+																kRegShiftInput1Geometry,			kRegShiftInput2Geometry,			kRegShiftInput1Geometry,			kRegShiftInput2Geometry,			0};
+static const ULWord	gChannelToSDIInputGeometryHighShift []	= {	kRegShiftInput1GeometryHigh,		kRegShiftInput2GeometryHigh,		kRegShiftInput1GeometryHigh,		kRegShiftInput2GeometryHigh,
+																kRegShiftInput1GeometryHigh,		kRegShiftInput2GeometryHigh,		kRegShiftInput1GeometryHigh,		kRegShiftInput2GeometryHigh,		0};
+
+static const ULWord	gChannelToSDIInputProgressiveMask []	= {	kRegMaskInput1Progressive,			kRegMaskInput2Progressive,			kRegMaskInput1Progressive,			kRegMaskInput2Progressive,
+																kRegMaskInput1Progressive,			kRegMaskInput2Progressive,			kRegMaskInput1Progressive,			kRegMaskInput2Progressive,			0};
+static const ULWord	gChannelToSDIInputProgressiveShift []	= {	kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,
+																kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			0};
+
 
 // Method: SetEveryFrameServices
 // Input:  NTV2EveryFrameTaskMode
@@ -273,6 +299,7 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 	//This will handle 4k formats
 	if (NTV2_IS_QUAD_FRAME_FORMAT(value))
 	{
+		SetQuadQuadFrameEnable(false, channel);
 		Get4kSquaresEnable(squares, channel);
 		if (squares)
 		{
@@ -282,10 +309,10 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 		{
 			SetQuadFrameEnable(true, channel);
 		}
-		if (NTV2_IS_QUAD_QUAD_FORMAT(value))
-		{
-			SetQuadQuadFrameEnable(true, channel);
-		}
+	}
+	else if (NTV2_IS_QUAD_QUAD_FORMAT(value))
+	{
+		SetQuadQuadFrameEnable(true, channel);
 	}
 	else
 	{
@@ -1177,6 +1204,9 @@ bool CNTV2Card::SetQuadQuadFrameEnable(const ULWord inValue, const NTV2Channel i
 	
 	if (!::NTV2DeviceCanDo8KVideo(_boardID))
 		return false;
+	
+	if (inValue)
+		SetQuadFrameEnable(1, inChannel);
 	
 	status = WriteRegister(kRegGlobalControl3, inValue, kRegMaskQuadQuadMode, kRegShiftQuadQuadMode);
 	return status;
@@ -4805,11 +4835,11 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (NTV2InputSource inSource, const 
 		case NTV2_INPUTSOURCE_SDI6:		return GetSDIInputVideoFormat (NTV2_CHANNEL6, inIsProgressivePicture);
 		case NTV2_INPUTSOURCE_SDI7:		return GetSDIInputVideoFormat (NTV2_CHANNEL7, inIsProgressivePicture);
 		case NTV2_INPUTSOURCE_SDI8:		return GetSDIInputVideoFormat (NTV2_CHANNEL8, inIsProgressivePicture);
-        case NTV2_INPUTSOURCE_HDMI1:	return GetHDMIInputVideoFormat (NTV2_CHANNEL1);
-        case NTV2_INPUTSOURCE_HDMI2:	return GetHDMIInputVideoFormat (NTV2_CHANNEL2);
-        case NTV2_INPUTSOURCE_HDMI3:	return GetHDMIInputVideoFormat (NTV2_CHANNEL3);
-        case NTV2_INPUTSOURCE_HDMI4:	return GetHDMIInputVideoFormat (NTV2_CHANNEL4);
-        case NTV2_INPUTSOURCE_ANALOG1:	return GetAnalogInputVideoFormat ();
+		case NTV2_INPUTSOURCE_HDMI1:	return GetHDMIInputVideoFormat (NTV2_CHANNEL1);
+		case NTV2_INPUTSOURCE_HDMI2:	return GetHDMIInputVideoFormat (NTV2_CHANNEL2);
+		case NTV2_INPUTSOURCE_HDMI3:	return GetHDMIInputVideoFormat (NTV2_CHANNEL3);
+		case NTV2_INPUTSOURCE_HDMI4:	return GetHDMIInputVideoFormat (NTV2_CHANNEL4);
+		case NTV2_INPUTSOURCE_ANALOG1:	return GetAnalogInputVideoFormat ();
 		default:						return NTV2_FORMAT_UNKNOWN;
 	}
 }
@@ -4817,253 +4847,58 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (NTV2InputSource inSource, const 
 NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool inIsProgressivePicture)
 {
 	ULWord status (0), threeGStatus (0);
-    ULWord vpidDS1 = 0, vpidDS2 = 0;
-    CNTV2VPID inputVPID;
-    if (IS_CHANNEL_INVALID (inChannel))
-        return NTV2_FORMAT_UNKNOWN;
+	ULWord vpidDS1 = 0, vpidDS2 = 0;
+	CNTV2VPID inputVPID;
+	if (IS_CHANNEL_INVALID (inChannel))
+		return NTV2_FORMAT_UNKNOWN;
 
-    if(GetVPIDValidA(inChannel))
-    {
-        ReadSDIInVPID(inChannel, vpidDS1, vpidDS2);
-        inputVPID.SetVPID(vpidDS1);
-    }
-	switch (inChannel)
+	bool isValidVPID = GetVPIDValidA(inChannel);
+	if(isValidVPID)
 	{
-	case NTV2_CHANNEL1:
-		if (ReadRegister(kRegInputStatus, status))
-        {
-            ReadRegister(kRegSDIInput3GStatus, threeGStatus);
-            if (::NTV2DeviceCanDo12GIn(_boardID, 0))
-			{
-				NTV2VideoFormat format =  GetNTV2VideoFormat(NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
-									((status >> 27) & BIT_3) | ((status >> 4) & 0x7),				//input geometry
-									((status & BIT_7) >> 7),										//progressive transport
-									(threeGStatus & BIT_0),											//3G
-									inIsProgressivePicture);
-				bool is6G = false, is12G = false;
-				GetSDIInput6GPresent(is6G, inChannel);
-				GetSDIInput12GPresent(is12G, inChannel);
-				if(is6G || is12G)
-                    return GetQuadSizedVideoFormat(format, !NTV2DeviceCanDo12gRouting(GetDeviceID()) ? true : false);
-				else
-					return format;
-
-			}
-            else if (::NTV2DeviceCanDo3GIn(_boardID, 0))
-			{
-				return GetNTV2VideoFormat(NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
-					((status >> 27) & BIT_3) | ((status >> 4) & 0x7),				//input geometry
-					((status & BIT_7) >> 7),										//progressive transport
-					(threeGStatus & BIT_0),											//3G
-					inIsProgressivePicture);											//progressive picture
-			}
-			else
-			{
-				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
-					((status >> 27) & BIT_3) | ((status >> 4) & 0x7),			//input geometry
-					((status & BIT_7) >> 7),									//progressive transport
-					false,														//3G
-					inIsProgressivePicture);										//progressive picture
-			}
-		}
-		else
-			return NTV2_FORMAT_UNKNOWN;
-
-	case NTV2_CHANNEL2:
-		if (ReadRegister(kRegInputStatus, status))
-		{
-            ReadRegister(kRegSDIInput3GStatus, threeGStatus);
-            if (::NTV2DeviceCanDo12GIn(_boardID, 1))
-			{
-				NTV2VideoFormat format =  GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
-															  ((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
-															  (status & BIT_15) >> 15,											//progressive transport
-															  (threeGStatus & BIT_8) >> 8,										//3G
-															  inIsProgressivePicture);												//progressive picture
-				bool is6G = false, is12G = false;
-				GetSDIInput6GPresent(is6G, inChannel);
-				GetSDIInput12GPresent(is12G, inChannel);
-				if(is6G || is12G)
-                    return GetQuadSizedVideoFormat(format, false);
-				else
-					return format;
-
-			}
-            else if (::NTV2DeviceCanDo3GIn(_boardID, 1))
-			{
-				//This is a hack, LHI does not have a second input
-				if ((_boardID == DEVICE_ID_KONALHI || _boardID == DEVICE_ID_KONALHIDVI) && ((threeGStatus & kRegMaskSDIIn3GbpsSMPTELevelBMode) >> 1) && (threeGStatus & kRegMaskSDIIn3GbpsMode))
-				{
-					return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
-						((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
-						(status & BIT_15) >> 15,											//progressive transport
-						(threeGStatus & kRegMaskSDIIn3GbpsMode),							//3G
-						inIsProgressivePicture);												//progressive picture
-				}
-				else if (_boardID != DEVICE_ID_KONALHI || _boardID != DEVICE_ID_KONALHIDVI)
-					return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
-					((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
-					(status & BIT_15) >> 15,											//progressive transport
-					(threeGStatus & BIT_8) >> 8,										//3G
-					inIsProgressivePicture);												//progressive picture
-				else
-					return NTV2_FORMAT_UNKNOWN;
-			}
-			else
-			{
-				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
-					((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
-					(status & BIT_15) >> 15,											//progressive transport
-					false,																//3G
-					inIsProgressivePicture);												//progressive picture
-			}
-		}
-		else
-			return NTV2_FORMAT_UNKNOWN;
-
-	case NTV2_CHANNEL3:
-		if (ReadRegister(kRegInputStatus2, status))
-		{
-            ReadRegister(kRegSDIInput3GStatus2, threeGStatus);
-            if (::NTV2DeviceCanDo12GIn(_boardID, 2))
-			{
-				NTV2VideoFormat format =  GetNTV2VideoFormat (NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
-															  ((status >> 27) & BIT_3) | ((status >> 4) & 0x7),				//input geometry
-															  ((status & BIT_7) >> 7),										//progressive transport
-															  (threeGStatus & BIT_0),										//3G
-															  inIsProgressivePicture);										//progressive picture
-				bool is6G = false, is12G = false;
-				GetSDIInput6GPresent(is6G, inChannel);
-				GetSDIInput12GPresent(is12G, inChannel);
-				if(is6G || is12G)
-                    return GetQuadSizedVideoFormat(format, false);
-				else
-					return format;
-
-			}
-            else if (::NTV2DeviceCanDo3GIn(_boardID, 2))
-			{
-				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
-					((status >> 27) & BIT_3) | ((status >> 4) & 0x7),			//input geometry
-					((status & BIT_7) >> 7),									//progressive transport
-					(threeGStatus & BIT_0),										//3G
-					inIsProgressivePicture);										//progressive picture
-			}
-			else
-			{
-				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
-					((status >> 27) & BIT_3) | ((status >> 4) & 0x7),			//input geometry
-					((status & BIT_7) >> 7),									//progressive transport
-					false,														//3G
-					inIsProgressivePicture);										//progressive picture
-			}
-		}
-		else
-			return NTV2_FORMAT_UNKNOWN;
-
-	case NTV2_CHANNEL4:
-		if (ReadRegister(kRegInputStatus2, status))
-		{
-            ReadRegister(kRegSDIInput3GStatus2, threeGStatus);
-            if (::NTV2DeviceCanDo12GIn(_boardID, 3))
-			{
-				NTV2VideoFormat format = GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
-															 ((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
-															 (status & BIT_15) >> 15,											//progressive transport
-															 (threeGStatus & BIT_8) >> 8,										//3G
-															 inIsProgressivePicture);											//progressive picture
-				bool is6G = false, is12G = false;
-				GetSDIInput6GPresent(is6G, inChannel);
-				GetSDIInput12GPresent(is12G, inChannel);
-				if(is6G || is12G)
-                    return GetQuadSizedVideoFormat(format, false);
-				else
-					return format;
-
-			}
-            else if (::NTV2DeviceCanDo3GIn(_boardID, 3))
-            {
-                return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
-                    ((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
-                    (status & BIT_15) >> 15,											//progressive transport
-                    (threeGStatus & BIT_8) >> 8,										//3G
-                    inIsProgressivePicture);												//progressive picture
-            }
-            else
-            {
-                return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
-                    ((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
-                    (status & BIT_15) >> 15,											//progressive transport
-                    false,																//3G
-                    inIsProgressivePicture);												//progressive picture
-            }
-		}
-		else
-			return NTV2_FORMAT_UNKNOWN;
-
-	case NTV2_CHANNEL5:
-		if (ReadRegister(kRegInput56Status, status))
-		{
-            ReadRegister(kRegSDI5678Input3GStatus, threeGStatus);
-            if (::NTV2DeviceCanDo3GIn(_boardID, 4))
-			{
-				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
-					((status >> 27) & BIT_3) | ((status >> 4) & 0x7),			//input geometry
-					((status & BIT_7) >> 7),									//progressive transport
-					(threeGStatus & BIT_0),										//3G
-					inIsProgressivePicture);										//progressive picture
-			}
-		}
-		return NTV2_FORMAT_UNKNOWN;
-
-	case NTV2_CHANNEL6:
-		if (ReadRegister(kRegInput56Status, status))
-		{
-            ReadRegister(kRegSDI5678Input3GStatus, threeGStatus);
-            if (::NTV2DeviceCanDo3GIn(_boardID, 6))
-			{
-				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
-					((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
-					(status & BIT_15) >> 15,											//progressive transport
-					(threeGStatus & BIT_8) >> 8,										//3G
-					inIsProgressivePicture);												//progressive picture
-			}
-		}
-		return NTV2_FORMAT_UNKNOWN;
-
-	case NTV2_CHANNEL7:
-		if (ReadRegister(kRegInput78Status, status))
-		{
-            ReadRegister(kRegSDI5678Input3GStatus, threeGStatus);
-            if (::NTV2DeviceCanDo3GIn(_boardID, 7))
-			{
-				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 25) & BIT_3) | (status & 0x7)),	//framerate
-					((status >> 27) & BIT_3) | ((status >> 4) & 0x7),			//input geometry
-					((status & BIT_7) >> 7),									//progressive transport
-					((threeGStatus & BIT_16) >> 16),							//3G
-					inIsProgressivePicture);										//progressive picture
-			}
-		}
-		return NTV2_FORMAT_UNKNOWN;
-
-	case NTV2_CHANNEL8:
-		if (ReadRegister(kRegInput78Status, status))
-		{
-            ReadRegister(kRegSDI5678Input3GStatus, threeGStatus);
-            if (::NTV2DeviceCanDo3GIn(_boardID, 7))
-			{
-				return GetNTV2VideoFormat (NTV2FrameRate (((status >> 26) & BIT_3) | ((status >> 8) & 0x7)),	//framerate
-					((status >> 28) & BIT_3) | ((status >> 12) & 0x7),					//input geometry
-					(status & BIT_15) >> 15,											//progressive transport
-					(threeGStatus & BIT_24) >> 24,										//3G
-					inIsProgressivePicture);												//progressive picture
-			}
-		}
-		return NTV2_FORMAT_UNKNOWN;
-	default:
-		break;
+		ReadSDIInVPID(inChannel, vpidDS1, vpidDS2);
+		inputVPID.SetVPID(vpidDS1);
 	}
-	return NTV2_FORMAT_UNKNOWN;
+	
+	if(::NTV2DeviceCanDo3GIn(_boardID, inChannel) || ::NTV2DeviceCanDo12GIn(_boardID, inChannel))
+	{
+		NTV2FrameRate inputRate = GetSDIInputRate(inChannel);
+		NTV2FrameGeometry inputGeometry = GetSDIInputGeometry(inChannel);
+		bool isProgressiveTrans = isValidVPID ? inputVPID.GetProgressiveTransport() : GetSDIInputIsProgressive(inChannel);
+		bool isProgressivePic = isValidVPID ? inputVPID.GetProgressivePicture() : inIsProgressivePicture;
+		bool isInput3G = false;
+		GetSDIInput3GPresent(isInput3G, inChannel);
+		NTV2VideoFormat format = GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
+		if (::NTV2DeviceCanDo12GIn(_boardID, inChannel))
+		{
+			bool is6G = false, is12G = false;
+			GetSDIInput6GPresent(is6G, inChannel);
+			GetSDIInput12GPresent(is12G, inChannel);
+			if(is6G || is12G)
+			{
+				format = GetQuadSizedVideoFormat(format, !NTV2DeviceCanDo12gRouting(GetDeviceID()) ? true : false);
+			}
+			if(inputVPID.IsStandardMultiLink4320())
+			{
+				format = GetQuadSizedVideoFormat(format, true);
+			}
+		}
+		return format;
+	}
+	else if(::NTV2DeviceCanDo292In(_boardID, inChannel))
+	{
+		NTV2FrameRate inputRate = GetSDIInputRate(inChannel);
+		NTV2FrameGeometry inputGeometry = GetSDIInputGeometry(inChannel);
+		bool isProgressiveTrans = isValidVPID ? inputVPID.GetProgressiveTransport() : GetSDIInputIsProgressive(inChannel);
+		bool isProgressivePic = isValidVPID ? inputVPID.GetProgressivePicture() : inIsProgressivePicture;
+		bool isInput3G = false;
+		if(_boardID == DEVICE_ID_KONALHI || _boardID == DEVICE_ID_KONALHIDVI)
+		{
+			GetSDIInput3GPresent(isInput3G, NTV2_CHANNEL1);
+		}
+		return GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
+	}
+	else
+		return NTV2_FORMAT_UNKNOWN;
 }
 
 
@@ -5071,7 +4906,7 @@ NTV2VideoFormat CNTV2Card::GetHDMIInputVideoFormat(NTV2Channel inChannel)
 {
 	NTV2VideoFormat format = NTV2_FORMAT_UNKNOWN;
 	ULWord status;
-    if (GetHDMIInputStatus(status, inChannel))
+	if (GetHDMIInputStatus(status, inChannel))
 	{
 		if ( (status & kRegMaskInputStatusLock) != 0 )
 		{
@@ -5491,6 +5326,45 @@ NTV2VideoFormat CNTV2Card::GetReferenceVideoFormat()
 
 }
 
+NTV2FrameRate CNTV2Card::GetSDIInputRate (const NTV2Channel channel)
+{
+	if (IS_CHANNEL_INVALID (channel))
+		return NTV2_FRAMERATE_INVALID;
+
+	ULWord rateLow (0), rateHigh (0);
+	NTV2FrameRate currentRate (NTV2_FRAMERATE_INVALID);
+	bool result = ReadRegister(gChannelToSDIInputStatusRegNum[channel], rateLow, gChannelToSDIInputRateMask[channel], gChannelToSDIInputRateShift[channel]);
+	result = ReadRegister(gChannelToSDIInputStatusRegNum[channel], rateHigh, gChannelToSDIInputRateHighMask[channel], gChannelToSDIInputRateHighShift[channel]);
+	currentRate = NTV2FrameRate(((rateHigh << 4) & BIT_3) | rateLow);
+	if(NTV2_IS_VALID_NTV2FrameRate(currentRate))
+		return currentRate;
+	return NTV2_FRAMERATE_INVALID;
+}	//	GetSDIInputRate
+
+NTV2FrameGeometry CNTV2Card::GetSDIInputGeometry (const NTV2Channel channel)
+{
+	if (IS_CHANNEL_INVALID (channel))
+		return NTV2_FG_INVALID;
+
+	ULWord geometryLow (0), geometryHigh (0);
+	NTV2FrameGeometry currentGeometry (NTV2_FG_INVALID);
+	bool result = ReadRegister(gChannelToSDIInputStatusRegNum[channel], geometryLow, gChannelToSDIInputGeometryMask[channel], gChannelToSDIInputGeometryShift[channel]);
+	result = ReadRegister(gChannelToSDIInputStatusRegNum[channel], geometryHigh, gChannelToSDIInputGeometryHighMask[channel], gChannelToSDIInputGeometryHighShift[channel]);
+	currentGeometry = NTV2FrameGeometry(((geometryHigh << 4) & BIT_3) | geometryLow);
+	if(NTV2_IS_VALID_NTV2FrameGeometry(currentGeometry))
+		return currentGeometry;
+	return NTV2_FG_INVALID;
+}	//	GetSDIInputGeometry
+
+bool CNTV2Card::GetSDIInputIsProgressive (const NTV2Channel channel)
+{
+	if (IS_CHANNEL_INVALID (channel))
+		return false;
+
+	ULWord isProgressive = 0;
+	ReadRegister(gChannelToSDIInputStatusRegNum[channel], isProgressive, gChannelToSDIInputProgressiveMask[channel], gChannelToSDIInputProgressiveShift[channel]);
+	return isProgressive ? true : false;
+}	//	GetSDIInputIsProgressive
 
 bool CNTV2Card::GetSDIInput3GPresent (bool & outValue, const NTV2Channel channel)
 {
