@@ -1162,6 +1162,8 @@ bool CNTV2Card::S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTO
 	NTV2_POINTER &		ancF2			(inOutXferInfo.acANCField2Buffer);
 	ULWord				vpidA(0), vpidB(0);
 	AJAAncillaryList	pkts;
+	static const uint16_t	vpidF1LineNums[] = {	10,		10,		13,		9,		10,		10,		10,			10,			10,		10,		10,			10	};
+	static const uint16_t	vpidF2LineNums[] = {	572,	0,		276,	322,	0,		0,		0,			572,		0,		0,		0,			0	};
 
 	if (!result)
 		return false;	//	Can't get frame rate
@@ -1172,6 +1174,7 @@ bool CNTV2Card::S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTO
 	if (!GetStandard(standard, inChannel))
 		return false;	//	Can't get standard
 	if (!ancF1.IsNULL() || !ancF2.IsNULL())
+		//	We could skip this call to SetFromIPAncData if we knew the client wasn't AutoCirculating WITH_CUSTOM_ANC
 		if (AJA_FAILURE(AJAAncillaryList::SetFromIPAncData(ancF1, ancF2, pkts)))
 			return false;	//	Packet import failed
 
@@ -1181,8 +1184,6 @@ bool CNTV2Card::S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTO
 	if (!pkts.CountAncillaryDataWithID(0x41,0x01))			//	If no VPID packets in buffer...
 		if (GetSDIOutVPID(vpidA, vpidB, UWord(inChannel)))	//	...then we'll add them...
 		{	//	VPID Packet Insertion						1080	720		525		625		1080p	2K		2K1080p		2K1080i		UHD		4K		UHDHFR		4KHFR
-			static const uint16_t	vpidF1LineNums[] = {	10,		10,		13,		9,		10,		10,		10,			10,			10,		10,		10,			10	};
-			static const uint16_t	vpidF2LineNums[] = {	572,	0,		276,	322,	0,		0,		0,			572,		0,		0,		0,			0	};
 			AJAAncillaryData	vpidPkt;
 			vpidPkt.SetDID(0x41);
 			vpidPkt.SetSID(0x01);
@@ -1231,7 +1232,10 @@ bool CNTV2Card::S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTO
 				AJAAncillaryData_Timecode_ATC	atc;	atc.SetTimecode (tc, ajaTB, isDF);
 				atc.AJAAncillaryData_Timecode_ATC::SetDBB (uint8_t(regTC.fDBB & 0x000000FF), uint8_t(regTC.fDBB & 0x0000FF00 >> 8));
 				if (NTV2_IS_ATC_VITC2_TIMECODE_INDEX(tcNdx))	//	VITC2?
+				{
 					atc.SetDBB1PayloadType(AJAAncillaryData_Timecode_ATC_DBB1PayloadType_VITC2);
+					atc.SetLocationLineNumber(vpidF2LineNums[standard] - 1);	//	Line 9 in F2
+				}
 				else
 				{	//	F1
 					if (NTV2_IS_ATC_VITC1_TIMECODE_INDEX(tcNdx))	//	VITC1?
@@ -1250,6 +1254,7 @@ bool CNTV2Card::S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTO
 	{	//	Only need to re-encode pkts to RTP buffers if anything new was added...
 		pkts.SortListByLocation();
 		ancF1.Fill(ULWord(0));	ancF2.Fill(ULWord(0));
+		//ACDBG(pkts);
 		return AJA_SUCCESS(pkts.GetIPTransmitData (ancF1, ancF2, isProgressive, F2StartLine));
 	}
 	return true;
