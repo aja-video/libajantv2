@@ -1,7 +1,7 @@
 /**
 	@file		ntv2card.h
 	@brief		Declares the CNTV2Card class and the NTV2VideoFormatSet.
-	@copyright	(C) 2004-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2CARD_H
@@ -469,6 +469,7 @@ public:
 		@return		True if successful; otherwise false.
 		@note		The host buffer should be at least inByteCount + inOffsetBytes in size, or host memory will be corrupted.
 		@note		This function will block and not return until the transfer has finished or failed.
+		@see		CNTV2Card::DMAWrite, CNTV2Card::DMAReadFrame, CNTV2Card::DMAReadSegments, \ref vidop-fbaccess
 	**/
 	AJA_VIRTUAL bool	DMARead (const ULWord inFrameNumber, ULWord * pFrameBuffer, const ULWord inOffsetBytes, const ULWord inByteCount);
 
@@ -482,6 +483,7 @@ public:
 		@return		True if successful; otherwise false.
 		@note		The host buffer should be at least inByteCount + inOffsetBytes in size, or a host memory access violation may occur.
 		@note		This function will block and not return until the transfer has finished or failed.
+		@see		CNTV2Card::DMARead, CNTV2Card::DMAWriteFrame, CNTV2Card::DMAWriteSegments, \ref vidop-fbaccess
 	**/
 	AJA_VIRTUAL bool	DMAWrite (const ULWord inFrameNumber, const ULWord * pFrameBuffer, const ULWord inOffsetBytes, const ULWord inByteCount);
 
@@ -495,6 +497,7 @@ public:
 		@return		True if successful; otherwise false.
 		@note		The host buffer must be at least inByteCount in size, or a host memory access violation may occur.
 		@note		This function will block and not return until the transfer has finished or failed.
+		@see		CNTV2Card::DMAWriteFrame, CNTV2Card::DMARead, CNTV2Card::DMAReadSegments, \ref vidop-fbaccess
 	**/
 	AJA_VIRTUAL bool	DMAReadFrame (const ULWord inFrameNumber, ULWord * pOutFrameBuffer, const ULWord inByteCount);
 
@@ -507,6 +510,7 @@ public:
 		@return		True if successful; otherwise false.
 		@note		The host buffer must be at least inByteCount in size, or a host memory access violation may occur.
 		@note		This function will block and not return until the transfer has finished or failed.
+		@see		CNTV2Card::DMAReadFrame, CNTV2Card::DMAWrite, CNTV2Card::DMAWriteSegments, \ref vidop-fbaccess
 	**/
 	AJA_VIRTUAL bool	DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pInFrameBuffer, const ULWord inByteCount);
 
@@ -523,6 +527,7 @@ public:
 		@return		True if successful; otherwise false.
 		@note		The host buffer should be at least inByteCount + inOffsetBytes in size, or a host memory access violation may occur.
 		@note		This function will block and not return until the transfer has finished or failed.
+		@see		CNTV2Card::DMAWriteSegments, CNTV2Card::DMARead, CNTV2Card::DMAReadFrame, \ref vidop-fbaccess
 	**/
 	AJA_VIRTUAL bool	DMAReadSegments (	const ULWord		inFrameNumber,
 											ULWord *			pFrameBuffer,
@@ -545,6 +550,7 @@ public:
 		@return		True if successful; otherwise false.
 		@note		The host buffer should be at least inByteCount + inOffsetBytes in size, or a host memory access violation may occur.
 		@note		This function will block and not return until the transfer has finished or failed.
+		@see		CNTV2Card::DMAReadSegments, CNTV2Card::DMAWrite, CNTV2Card::DMAWriteFrame, \ref vidop-fbaccess
 	**/
 	AJA_VIRTUAL bool	DMAWriteSegments (	const ULWord		inFrameNumber,
 											const ULWord *		pFrameBuffer,
@@ -1046,7 +1052,7 @@ public:
 	AJA_VIRTUAL bool		SetDualLinkInputEnable (bool enable);
 	AJA_VIRTUAL bool		GetDualLinkInputEnable (bool & outIsEnabled);
 
-	AJA_VIRTUAL bool		SetVideoLimiting (NTV2VideoLimiting inValue);
+	AJA_VIRTUAL bool		SetVideoLimiting (const NTV2VideoLimiting inValue);
 	AJA_VIRTUAL bool		GetVideoLimiting (NTV2VideoLimiting & outValue);
 
 	AJA_VIRTUAL bool		SetEnableVANCData (const bool inVANCenabled, const bool inTallerVANC, const NTV2Standard inStandard, const NTV2FrameGeometry inGeometry, const NTV2Channel inChannel = NTV2_CHANNEL1);
@@ -1096,11 +1102,19 @@ public:
 	AJA_VIRTUAL bool		GetPulldownMode (NTV2Channel inChannel, bool & outValue);
 
 	/**
-		@brief	Swaps the values stored in the PCI access frame and output frame registers for the given frame store (channel).
+		@brief		Swaps the values stored in the PCI access frame and output frame registers for the given frame store (channel).
 		@param[in]	inChannel	Specifies the channel (frame store) of interest.
-		@return	True if successful;  otherwise false.
+		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool		FlipFlopPage (NTV2Channel inChannel);
+	AJA_VIRTUAL bool		FlipFlopPage (const NTV2Channel inChannel);
+
+	/**
+		@brief		Answers with the line offset into the frame currently being read (playout) or written
+					(capture) for FrameStore 1.
+		@param[in]	outValue	Receives the line number being read or written for ::NTV2_CHANNEL1.
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		ReadLineCount (ULWord & outValue);
 
 
 	/**
@@ -1115,6 +1129,7 @@ public:
 		@param[in]	inWhichMixer			Specifies the mixer/keyer to be affected as a zero-based index number.
 		@param[in]	inFromForegroundSource	If true, sets the mixer/keyer's VANC source to its foreground video input;
 											otherwise, sets it to its background video input.
+		@see		CNTV2Card::GetMixerVancOutputFromForeground, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	SetMixerVancOutputFromForeground (const UWord inWhichMixer, const bool inFromForegroundSource = true);
 
@@ -1125,6 +1140,7 @@ public:
 		@param[in]	inWhichMixer				Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	outIsFromForegroundSource	Receives True if the mixer/keyer's VANC source is its foreground video input;
 												otherwise False if it's its background video input.
+		@see		CNTV2Card::SetMixerVancOutputFromForeground, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerVancOutputFromForeground (const UWord inWhichMixer, bool & outIsFromForegroundSource);
 
@@ -1134,6 +1150,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	inInputControl		Specifies the mixer/keyer's foreground input control value.
+		@see		CNTV2Card::GetMixerFGInputControl, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	SetMixerFGInputControl (const UWord inWhichMixer, const NTV2MixerKeyerInputControl inInputControl);
 
@@ -1142,6 +1159,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	outInputControl		Receives the mixer/keyer's foreground input control value; otherwise NTV2MIXERINPUTCONTROL_INVALID upon failure.
+		@see		CNTV2Card::SetMixerFGInputControl, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerFGInputControl (const UWord inWhichMixer, NTV2MixerKeyerInputControl & outInputControl);
 
@@ -1150,6 +1168,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	inInputControl		Specifies the mixer/keyer's background input control value.
+		@see		CNTV2Card::GetMixerBGInputControl, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	SetMixerBGInputControl (const UWord inWhichMixer, const NTV2MixerKeyerInputControl inInputControl);
 
@@ -1158,6 +1177,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	outInputControl		Receives the mixer/keyer's background input control value; otherwise NTV2MIXERINPUTCONTROL_INVALID upon failure.
+		@see		CNTV2Card::SetMixerBGInputControl, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerBGInputControl (const UWord inWhichMixer, NTV2MixerKeyerInputControl & outInputControl);
 
@@ -1166,6 +1186,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	inMode				Specifies the mode value.
+		@see		CNTV2Card::GetMixerMode, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	SetMixerMode (const UWord inWhichMixer, const NTV2MixerKeyerMode inMode);
 
@@ -1174,6 +1195,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	outMode				Receives the mode value.
+		@see		CNTV2Card::SetMixerMode, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerMode (const UWord inWhichMixer, NTV2MixerKeyerMode & outMode);
 
@@ -1182,6 +1204,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	inMixCoefficient	Specifies the new mix coefficient value, where \c 0x10000 is the maximum.
+		@see		CNTV2Card::GetMixerCoefficient, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	SetMixerCoefficient (const UWord inWhichMixer, const ULWord inMixCoefficient);
 
@@ -1190,6 +1213,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	outMixCoefficient	Receives the current mix coefficient value, where \c 0x10000 is the maximum.
+		@see		CNTV2Card::SetMixerCoefficient, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerCoefficient (const UWord inWhichMixer, ULWord & outMixCoefficient);
 
@@ -1199,10 +1223,63 @@ public:
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	outIsSyncOK			Receives the mixer's current sync state. If true, the mixer is synchronized to its inputs.
 										If false, the mixer is not synchronized to its inputs.
+		@see		See \ref vidop-mixerkeyer for more information
 	**/
 	AJA_VIRTUAL bool	GetMixerSyncStatus (const UWord inWhichMixer, bool & outIsSyncOK);
 
-	AJA_VIRTUAL bool	ReadLineCount (ULWord & outValue);
+	/**
+		@brief		Answers if the given mixer/keyer's foreground matte is enabled or not.
+		@return		True if successful; otherwise false.
+		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
+		@param[in]	outIsEnabled		Receives true if the mixer's foreground matte is currently enabled;  otherwise false.
+		@see		CNTV2Card::SetMixerFGMatteEnabled, CNTV2Card::GetMixerBGMatteEnabled, \ref vidop-mixerkeyer, \ref widget_mixkey
+	**/
+	AJA_VIRTUAL bool	GetMixerFGMatteEnabled (const UWord inWhichMixer, bool & outIsEnabled);
+
+	/**
+		@brief		Answers if the given mixer/keyer's foreground matte is enabled or not.
+		@return		True if successful; otherwise false.
+		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
+		@param[in]	inIsEnabled			Specify true to enable the mixer's foreground matte;  otherwise false to disable it.
+		@see		CNTV2Card::GetMixerFGMatteEnabled, CNTV2Card::SetMixerBGMatteEnabled, \ref vidop-mixerkeyer, \ref widget_mixkey
+	**/
+	AJA_VIRTUAL bool	SetMixerFGMatteEnabled (const UWord inWhichMixer, const bool & inIsEnabled);
+
+	/**
+		@brief		Answers if the given mixer/keyer's background matte is enabled or not.
+		@return		True if successful; otherwise false.
+		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
+		@param[in]	outIsEnabled		Receives true if the mixer's background matte is currently enabled;  otherwise false.
+		@see		CNTV2Card::SetMixerBGMatteEnabled, CNTV2Card::GetMixerFGMatteEnabled, \ref vidop-mixerkeyer, \ref widget_mixkey
+	**/
+	AJA_VIRTUAL bool	GetMixerBGMatteEnabled (const UWord inWhichMixer, bool & outIsEnabled);
+
+	/**
+		@brief		Answers if the given mixer/keyer's background matte is enabled or not.
+		@return		True if successful; otherwise false.
+		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
+		@param[in]	inIsEnabled			Specify true to enable the mixer's background matte;  otherwise false to disable it.
+		@see		CNTV2Card::GetMixerBGMatteEnabled, CNTV2Card::SetMixerFGMatteEnabled, \ref vidop-mixerkeyer, \ref widget_mixkey
+	**/
+	AJA_VIRTUAL bool	SetMixerBGMatteEnabled (const UWord inWhichMixer, const bool & inIsEnabled);
+
+	/**
+		@brief		Answers with the given mixer/keyer's current matte color value being used.
+		@return		True if successful; otherwise false.
+		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
+		@param[in]	outYCbCrValue		Receives the mixer's current matte color value.
+		@see		CNTV2Card::SetMixerMatteColor, \ref vidop-mixerkeyer, \ref widget_mixkey
+	**/
+	AJA_VIRTUAL bool	GetMixerMatteColor (const UWord inWhichMixer, YCbCr10BitPixel & outYCbCrValue);
+
+	/**
+		@brief		Sets the matte color to use for the given mixer/keyer.
+		@return		True if successful; otherwise false.
+		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
+		@param[in]	inYCbCrValue		Specifies the new matte color value to use.
+		@see		CNTV2Card::GetMixerMatteColor, CNTV2Card::GetMixerFGMatteEnabled, CNTV2Card::SetMixerFGMatteEnabled, CNTV2Card::GetMixerBGMatteEnabled, CNTV2Card::SetMixerBGMatteEnabled, \ref vidop-mixerkeyer, \ref widget_mixkey
+	**/
+	AJA_VIRTUAL bool	SetMixerMatteColor (const UWord inWhichMixer, const YCbCr10BitPixel & inYCbCrValue);
 	///@}
 
 
@@ -3581,22 +3658,42 @@ public:
 	/**
 		@brief		Selects the color space converter operation method.
 		@param[in]	inCSCMethod		Specifies the method by which the color space converter will transform its input into its output.
-		@param[in]	inChannel		Specifies the CSC of interest.
+		@param[in]	inChannel		Specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
 		@return		True if the call was successful; otherwise false. 
-		@note		When selecting NTV2_CSC_Method_Enhanced_4K as the method, the channel must be NTV2_CHANNEL1 or NTV2_CHANNEL5.
+		@note		When selecting ::NTV2_CSC_Method_Enhanced_4K as the method, the channel must be ::NTV2_CHANNEL1 or ::NTV2_CHANNEL5.
 					This will group four CSCs together to process the 4K image. To leave 4K, take CSC 1 (or CSC 5) out of 4K mode. 
+		@see		CNTV2Card::GetColorSpaceMethod, \ref vidop-csc and \ref widget_csc
 	**/
 	AJA_VIRTUAL bool		SetColorSpaceMethod (const NTV2ColorSpaceMethod inCSCMethod, const NTV2Channel inChannel);
 
 	/**
 		@brief		Answers with the current operating mode of the given color space converter.
-		@param[out]	outMethod		Receives the CSC's current operating mode.
-		@param[in]	inChannel		Specifies the CSC of interest.
+		@param[out]	outMethod	Receives the CSC's current operating method.
+		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
+								Defaults to ::NTV2_CHANNEL1 (CSC1).
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetColorSpaceMethod, \ref vidop-csc and \ref widget_csc
 	**/
 	AJA_VIRTUAL bool	GetColorSpaceMethod (NTV2ColorSpaceMethod & outMethod, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
+	/**
+		@brief		Sets the matrix type to be used for the given CSC, typically ::NTV2_Rec601Matrix or ::NTV2_Rec709Matrix.
+		@param[in]	inType		Specifies the matrix type to be used.
+		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
+								Defaults to ::NTV2_CHANNEL1 (CSC1).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetColorSpaceMatrixSelect, \ref vidop-csc and \ref widget_csc
+	**/
 	AJA_VIRTUAL bool	SetColorSpaceMatrixSelect (const NTV2ColorSpaceMatrixType inType, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief		Answers with the current matrix type being used for the given CSC.
+		@param[out]	outType		Receives the matrix type being used, typically ::NTV2_Rec601Matrix or ::NTV2_Rec709Matrix.
+		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
+								Defaults to ::NTV2_CHANNEL1 (CSC1).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetColorSpaceMatrixSelect, \ref vidop-csc and \ref widget_csc
+	**/
 	AJA_VIRTUAL bool	GetColorSpaceMatrixSelect (NTV2ColorSpaceMatrixType & outType, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	AJA_VIRTUAL bool	DownloadLUTToHW (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT, const NTV2Channel inChannel, const int inBank);
@@ -3634,11 +3731,12 @@ public:
 
 	/**
 		@brief		Sets the RGB range for the given CSC.
-		@param[in]	inRange		Specifies the new RGB range (NTV2_CSC_RGB_RANGE_FULL or NTV2_CSC_RGB_RANGE_SMPTE).
+		@param[in]	inRange		Specifies the new RGB range (::NTV2_CSC_RGB_RANGE_FULL or ::NTV2_CSC_RGB_RANGE_SMPTE).
 		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
 								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
-								Defaults to CSC 0 (NTV2_CHANNEL1).
+								Defaults to ::NTV2_CHANNEL1 (CSC1).
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetColorSpaceRGBBlackRange, \ref vidop-csc and \ref widget_csc
 	**/
 	AJA_VIRTUAL bool	SetColorSpaceRGBBlackRange (const NTV2_CSC_RGB_Range inRange,  const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -3647,24 +3745,61 @@ public:
 		@param[out]	outRange	Receives the RGB range (NTV2_CSC_RGB_RANGE_FULL, NTV2_CSC_RGB_RANGE_SMPTE, or NTV2_CSC_RGB_RANGE_INVALID upon failure).
 		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
 								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
-								Defaults to CSC 0 (NTV2_CHANNEL1).
+								Defaults to ::NTV2_CHANNEL1 (CSC1).
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetColorSpaceRGBBlackRange, \ref vidop-csc and \ref widget_csc
 	**/
 	AJA_VIRTUAL bool	GetColorSpaceRGBBlackRange (NTV2_CSC_RGB_Range & outRange,  const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	AJA_VIRTUAL bool	SetColorSpaceUseCustomCoefficient (const ULWord inUseCustomCoefficient, const NTV2Channel inChannel = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool	GetColorSpaceUseCustomCoefficient (ULWord & outUseCustomCoefficient, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool	SetColorSpaceMakeAlphaFromKey (const ULWord inMakeAlphaFromKey, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	/**
+		@brief		Specifies whether or not the given CSC will produce alpha channel data from its key input.
+		@param[in]	inMakeAlphaFromKey		Specify true to have the CSC generate alpha channel data from a YCbCr video signal
+											applied to its Key Input;  otherwise specify false to have it generate an "opaque" value.
+		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
+								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
+								Defaults to ::NTV2_CHANNEL1 (CSC1).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetColorSpaceMakeAlphaFromKey, \ref vidop-csc and \ref widget_csc
+	**/
+	AJA_VIRTUAL bool	SetColorSpaceMakeAlphaFromKey (const bool inMakeAlphaFromKey, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief		Answers whether or not the given CSC is set to produce alpha channel data from its key input.
+		@param[out]	outMakeAlphaFromKey		Receives true if the CSC is generating alpha channel data from the YCbCr video signal
+											being applied to its Key Input;  otherwise receives false.
+		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
+								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
+								Defaults to ::NTV2_CHANNEL1 (CSC1).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetColorSpaceMakeAlphaFromKey, \ref vidop-csc and \ref widget_csc
+	**/
 	AJA_VIRTUAL bool	GetColorSpaceMakeAlphaFromKey (ULWord & outMakeAlphaFromKey, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
+	/**
+		@brief		Answers whether or not the video signal present at the CSC’s Key Input is in sync with the video signal present
+					at its Video Input.
+		@param[out]	outVideoKeySyncFail		Receives true if the video signal present at the CSC’s Key Input is NOT sync'd to the
+											video signal present at its Video Input;  otherwise receives false.
+		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
+								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
+								Defaults to ::NTV2_CHANNEL1 (CSC1).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetColorSpaceMakeAlphaFromKey, CNTV2Card::SetColorSpaceMakeAlphaFromKey, \ref vidop-csc and \ref widget_csc
+		@note		The "outVideoKeySyncFail" result is valid and trustworthy when all of the following are true:
+					-	the Video Input is connected to a YCbCr signal source crosspoint;
+					-	the CSC's "Make Alpha From Key" setting is enabled;
+					-	the Key Input is connected to a YCbCr signal source crosspoint.
+	**/
 	AJA_VIRTUAL bool	GetColorSpaceVideoKeySyncFail (bool & outVideoKeySyncFail, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool	SetColorSpaceCustomCoefficients (const ColorSpaceConverterCustomCoefficients & inCustomCoefficients, const NTV2Channel inChannel = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool	GetColorSpaceCustomCoefficients (ColorSpaceConverterCustomCoefficients & outCustomCoefficients, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool	SetColorSpaceCustomCoefficients (const NTV2CSCCustomCoeffs & inCustomCoefficients, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool	GetColorSpaceCustomCoefficients (NTV2CSCCustomCoeffs & outCustomCoefficients, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool	SetColorSpaceCustomCoefficients12Bit (const ColorSpaceConverterCustomCoefficients & inCustomCoefficients, const NTV2Channel inChannel = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool	GetColorSpaceCustomCoefficients12Bit (ColorSpaceConverterCustomCoefficients & outCustomCoefficients, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool	SetColorSpaceCustomCoefficients12Bit (const NTV2CSCCustomCoeffs & inCustomCoefficients, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool	GetColorSpaceCustomCoefficients12Bit (NTV2CSCCustomCoeffs & outCustomCoefficients, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	AJA_VIRTUAL bool	SetLUTControlSelect (const NTV2LUTControlSelect inLUTSelect);
 	AJA_VIRTUAL bool	GetLUTControlSelect (NTV2LUTControlSelect & outLUTSelect);
@@ -5250,6 +5385,16 @@ public:
     AJA_VIRTUAL bool	AncInsertSetField2ReadParams (const UWord inSDIOutput, const ULWord inFrameNumber, const ULWord inF2Size,
 														const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
 														const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);
+
+	/**
+		@brief		Configures the Anc inserter IP specific params.
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[in]	ancChannel		Tells the IP packetizer which Anc inserter to use (4-7).
+		@param[in]	payloadID		Tells the IP packetizer what the RTP Payload Id is.
+		@param[in]	ssrc			Tells the IP packetizer what the RTP SSRC is.
+	**/
+	AJA_VIRTUAL bool	AncInsertSetIPParams (const UWord inSDIOutput, const UWord ancChannel, const ULWord payloadID, const ULWord ssrc);
 
 
 	/**

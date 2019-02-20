@@ -1133,13 +1133,9 @@ void Kona4UfcServices::SetDeviceMiscRegisters ()
 	}
 	
 	// HDMI Out Protocol mode
-	switch (mDs.hdmiOutProtocol_)
+	switch (mDs.hdmiOutProtocol)
 	{
 		default:
-		case kHDMIOutProtocolAutoDetect:
-			mCard->WriteRegister(kRegHDMIOutControl, mDs.hdmiOutDsProtocol, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
-			break;
-			
 		case kHDMIOutProtocolHDMI:
 			mCard->WriteRegister (kRegHDMIOutControl, NTV2_HDMIProtocolHDMI, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 			break;

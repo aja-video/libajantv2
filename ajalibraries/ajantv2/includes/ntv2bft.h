@@ -1,7 +1,7 @@
 /**
 	@file		ntv2bft.h
 	@brief		Handy macros for Basic Functionality Tests.
-	@copyright	Copyright (c) 2014-2018 AJA Video Systems, Inc. All rights reserved.
+	@copyright	Copyright (c) 2014-2019 AJA Video Systems, Inc. All rights reserved.
 **/
 
 #ifndef _NTV2BFT_H_

@@ -1,7 +1,7 @@
 /**
 	@file		ntv2card.cpp
 	@brief		Partially implements the CNTV2Card class. Other implementation files are 'ntv2audio.cpp', 'ntv2dma.cpp', and 'ntv2register.cpp'.
-	@copyright	(C) 2004-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2devicefeatures.h"

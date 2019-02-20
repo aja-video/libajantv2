@@ -1,6 +1,6 @@
 /**
 	@file		debugshare.h
-	@copyright	Copyright (C) 2009-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2009-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares the constants used for sharing debug messages. These structures are used
 				to gather debug messages and share them with the applications that report and log.
 	@note		This file is shared with drivers written in c.
@@ -78,6 +78,7 @@ typedef enum _AJADebugUnit
     AJA_DebugUnit_Avid                      = 37,
     AJA_DebugUnit_DriverInterface           = 38,
     AJA_DebugUnit_AutoCirculate             = 39,
+    AJA_DebugUnit_NMOS                      = 40,
 
     // to add a new unit:
     //
@@ -96,9 +97,8 @@ typedef enum _AJADebugUnit
     // if no more unused units
     //   * set AJA_DebugUnit_FirstUnused to the same value as AJA_DebugUnit_Size
     //
-    AJA_DebugUnit_FirstUnused               = 40,
-    AJA_DebugUnit_Unused_40                 = AJA_DebugUnit_FirstUnused,
-    AJA_DebugUnit_Unused_41                 = 41,
+    AJA_DebugUnit_FirstUnused               = 41,
+    AJA_DebugUnit_Unused_41                 = AJA_DebugUnit_FirstUnused,
     AJA_DebugUnit_Unused_42                 = 42,
     AJA_DebugUnit_Unused_43                 = 43,
     AJA_DebugUnit_Unused_44                 = 44,

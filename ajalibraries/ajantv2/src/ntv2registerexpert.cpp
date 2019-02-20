@@ -1,7 +1,7 @@
 /**
 	@file		ntv2registerexpert.cpp
 	@brief		Implements the CNTV2RegisterExpert class.
-	@copyright	(C) 2016-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2016-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
  **/
 #include "ntv2registerexpert.h"
 #include "ntv2devicefeatures.h"
@@ -246,12 +246,16 @@ private:
 			DefineRegClass (kRegStatus, kRegClass_Timecode);
 		DefineRegister (kRegStatus2,			"",	mDecodeStatus2Reg,			READWRITE,	kRegClass_DMA,		kRegClass_Channel3,	kRegClass_Channel4);
 		DefineRegClass (kRegStatus2, kRegClass_Channel5);	DefineRegClass (kRegStatus2, kRegClass_Channel6);	DefineRegClass (kRegStatus2, kRegClass_Channel7);	DefineRegClass (kRegStatus2, kRegClass_Channel8);
-		DefineRegister (kRegInputStatus,		"",	mDecodeInputStatusReg,		READWRITE,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);	DefineRegClass (kRegInputStatus, kRegClass_Audio);
+		DefineRegister (kRegInputStatus,		"",	mDecodeInputStatusReg,		READONLY,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);	DefineRegClass (kRegInputStatus, kRegClass_Audio);
 		DefineRegister (kRegSDIInput3GStatus,	"",	mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);
 		DefineRegister (kRegSDIInput3GStatus2,	"",	mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel3,	kRegClass_Channel4);
 		DefineRegister (kRegSDI5678Input3GStatus,"",mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel5,	kRegClass_Channel6);
 			DefineRegClass (kRegSDI5678Input3GStatus, kRegClass_Channel7);
 			DefineRegClass (kRegSDI5678Input3GStatus, kRegClass_Channel8);
+		DefineRegister (kRegInputStatus2,		"",	mDecodeSDIInputStatus2Reg,	READONLY,	kRegClass_Input,	kRegClass_Channel3,	kRegClass_Channel4);	//	288
+		DefineRegister (kRegInput56Status,		"",	mDecodeSDIInputStatus2Reg,	READONLY,	kRegClass_Input,	kRegClass_Channel5,	kRegClass_Channel6);	//	458
+		DefineRegister (kRegInput78Status,		"",	mDecodeSDIInputStatus2Reg,	READONLY,	kRegClass_Input,	kRegClass_Channel7,	kRegClass_Channel8);	//	459
+
 		DefineRegister (kRegFS1ReferenceSelect,	"", mDecodeFS1RefSelectReg,		READWRITE,	kRegClass_Input,	kRegClass_Timecode, kRegClass_NULL);
 		DefineRegister (kRegSysmonVccIntDieTemp,"",	mDecodeSysmonVccIntDieTemp,	READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegSDITransmitControl,	"",	mDecodeSDITransmitCtrl,		READWRITE,	kRegClass_Channel1,	kRegClass_Channel2,	kRegClass_Channel3);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel4);
@@ -532,10 +536,12 @@ private:
 														"",						"",						"",
 														"Analog Act Line Len",	""};
 		static const string	AncInsRegNames []	=	{	"Field Bytes",			"Control",				"F1 Start Address",
-														"F2 Start Address",		"Pixel Delays",			"First Active Lines",
+														"F2 Start Address",		"Pixel Delay",			"Active Start",
 														"Pixels Per Line",		"Lines Per Frame",		"Field ID Lines",
 														"Payload ID Control",	"Payload ID",			"Chroma Blank Lines",
-														"F1 C Blanking Mask",	"F2 C Blanking Mask"	};
+														"F1 C Blanking Mask",	"F2 C Blanking Mask",	"Reserved 14",
+														"Reserved 15",			"RTP Payload ID",		"RTP SSRC",
+														"IP Channel"};
 		static const uint32_t	AncExtPerChlRegBase []	=	{	0x1000,	0x1040,	0x1080,	0x10C0,	0x1100,	0x1140,	0x1180,	0x11C0	};
 		static const uint32_t	AncInsPerChlRegBase []	=	{	0x1200,	0x1240,	0x1280,	0x12C0,	0x1300,	0x1340,	0x1380,	0x13C0	};
 		
@@ -593,9 +599,14 @@ private:
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsLinePixels,					"",	mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsFrameLines,					"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsFieldIDLines,					"",	mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsPayloadIDControl,				"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsPayloadID,						"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlankCStartLine,				"",	mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlankField1CLines,				"",	mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlankField2CLines,				"",	mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsRtpPayloadID,					"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsRtpSSRC,						"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsIpChannel,						"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 		}
 	}	//	SetupAncInsExt
 
@@ -818,8 +829,11 @@ private:
 		for (unsigned chan(0);  chan < 8;  chan++)
 		{
 			const string & chanClass (sChan[chan]);
-			for (unsigned num(0);  num < 5;  num++)
-				DefineRegister (sECSCRegs[chan][num],		"",		mDefaultRegDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (sECSCRegs[chan][0],	"",	mCSCoeff1234Decoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (sECSCRegs[chan][1],	"",	mCSCoeff1234Decoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (sECSCRegs[chan][2],	"",	mCSCoeff567890Decoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (sECSCRegs[chan][3],	"",	mCSCoeff567890Decoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (sECSCRegs[chan][4],	"",	mCSCoeff567890Decoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
 		}
 	}	//	SetupCSCRegs
 
@@ -832,14 +846,18 @@ private:
 		DefineRegister	(kRegVidProc3Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel5,	kRegClass_Channel6);
 		DefineRegister	(kRegVidProc4Control,	"",	mVidProcControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel7,	kRegClass_Channel8);
 		DefineRegister	(kRegSplitControl,		"",	mSplitControlRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
-		DefineRegister	(kRegFlatMatteValue,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Color);
-		DefineRegister	(kRegFlatMatte2Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Color);
-		DefineRegister	(kRegFlatMatte3Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Color);
-		DefineRegister	(kRegFlatMatte4Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Color);
-		DefineRegister	(kRegMixer1Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_NULL);
-		DefineRegister	(kRegMixer2Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel2,	kRegClass_NULL);
-		DefineRegister	(kRegMixer3Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel3,	kRegClass_NULL);
-		DefineRegister	(kRegMixer4Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel4,	kRegClass_NULL);
+		DefineRegister	(kRegFlatMatteValue,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Channel2);
+		DefineRegister	(kRegFlatMatte2Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel3,	kRegClass_Channel4);
+		DefineRegister	(kRegFlatMatte3Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel5,	kRegClass_Channel6);
+		DefineRegister	(kRegFlatMatte4Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel7,	kRegClass_Channel8);
+			DefineRegClass (kRegFlatMatteValue, kRegClass_Color);
+			DefineRegClass (kRegFlatMatte2Value, kRegClass_Color);
+			DefineRegClass (kRegFlatMatte3Value, kRegClass_Color);
+			DefineRegClass (kRegFlatMatte4Value, kRegClass_Color);
+		DefineRegister	(kRegMixer1Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Channel2);
+		DefineRegister	(kRegMixer2Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel3,	kRegClass_Channel4);
+		DefineRegister	(kRegMixer3Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel5,	kRegClass_Channel6);
+		DefineRegister	(kRegMixer4Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel7,	kRegClass_Channel8);
 	}
 
 	void SetupVRegs(void)
@@ -1334,6 +1352,7 @@ public:
 			result.insert(regNum);
 
 		AJAAutoLock	lock(&mGuardMutex);
+
 		if (::NTV2DeviceCanDoCustomAnc(inDeviceID))
 		{
 			const NTV2RegNumSet	ancRegs			(GetRegistersForClass(kRegClass_Anc));
@@ -1975,7 +1994,7 @@ private:
 				<< "Input 1 Scan Mode: "	<< ((BIT(7) & inRegValue) ? "Progressive" : "Interlaced") << endl
 				<< "Input 2 Frame Rate: " << ::NTV2FrameRateToString(fRate2, true) << endl
 				<< "Input 2 Geometry: ";
-			if (BIT(30) & inRegValue)
+			if (BIT(31) & inRegValue)
 				switch (((BIT(12)|BIT(13)|BIT(14)) & inRegValue) >> 12)
 			{
 				case 0:		oss << "2K x 1080";		break;
@@ -2066,6 +2085,62 @@ private:
 		}
 		virtual	~DecodeSDIInputStatusReg()	{}
 	}	mDecodeSDIInputStatusReg;
+
+	struct DecodeSDIInputStatus2Reg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;
+			const string sOdd	(inRegNum == kRegInputStatus2 ? "Input 3" : (inRegNum == kRegInput56Status ? "Input 5" : "Input 7"));
+			const string sEven	(inRegNum == kRegInputStatus2 ? "Input 4" : (inRegNum == kRegInput56Status ? "Input 6" : "Input 8"));
+			const NTV2FrameRate	fRate1	(NTV2FrameRate( (inRegValue & (BIT( 0)|BIT( 1)|BIT( 2) ))        | ((inRegValue & BIT(28)) >> (28-3)) ));
+			const NTV2FrameRate	fRate2	(NTV2FrameRate(((inRegValue & (BIT( 8)|BIT( 9)|BIT(10) )) >>  8) | ((inRegValue & BIT(29)) >> (29-3)) ));
+			ostringstream	oss;
+			oss	<< sOdd << " Scan Mode: "	<< ((BIT(7) & inRegValue) ? "Progressive" : "Interlaced") << endl
+				<< sOdd << " Frame Rate: " << ::NTV2FrameRateToString(fRate1, true) << endl
+				<< sOdd << " Geometry: ";
+			if (BIT(30) & inRegValue) switch (((BIT(4)|BIT(5)|BIT(6)) & inRegValue) >> 4)
+			{
+				case 0:				oss << "2K x 1080";		break;
+				case 1:				oss << "2K x 1556";		break;
+				default:			oss << "Invalid HI";	break;
+			}
+			else switch (((BIT(4)|BIT(5)|BIT(6)) & inRegValue) >> 4)
+			{
+				case 0:				oss << "Unknown";		break;
+				case 1:				oss << "525";			break;
+				case 2:				oss << "625";			break;
+				case 3:				oss << "750";			break;
+				case 4:				oss << "1125";			break;
+				case 5:				oss << "1250";			break;
+				case 6:	case 7:		oss << "Reserved";		break;
+				default:			oss << "Invalid LO";	break;
+			}
+			oss	<< endl
+				<< sEven << " Scan Mode: "	<< ((BIT(15) & inRegValue) ? "Progressive" : "Interlaced") << endl
+				<< sEven << " Frame Rate: " << ::NTV2FrameRateToString(fRate2, true) << endl
+				<< sEven << " Geometry: ";
+			if (BIT(31) & inRegValue) switch (((BIT(12)|BIT(13)|BIT(14)) & inRegValue) >> 12)
+			{
+				case 0:				oss << "2K x 1080";		break;
+				case 1:				oss << "2K x 1556";		break;
+				default:			oss << "Invalid HI";	break;
+			}
+			else switch (((BIT(12)|BIT(13)|BIT(14)) & inRegValue) >> 12)
+			{
+				case 0:				oss << "Unknown";		break;
+				case 1:				oss << "525";			break;
+				case 2:				oss << "625";			break;
+				case 3:				oss << "750";			break;
+				case 4:				oss << "1125";			break;
+				case 5:				oss << "1250";			break;
+				case 6:	case 7:		oss << "Reserved";		break;
+				default:			oss << "Invalid LO";	break;
+			}
+			return oss.str();
+		}
+		virtual	~DecodeSDIInputStatus2Reg()	{}
+	}	mDecodeSDIInputStatus2Reg;
 
 	struct DecodeFS1RefSelectReg : public Decoder
 	{
@@ -2861,15 +2936,15 @@ private:
 			(void) inDeviceID;
 			ostringstream	oss;
 			static const string	sSplitStds [8]	=	{"1080i", "720p", "480i", "576i", "1080p", "1556i", "?6?", "?7?"};
-			oss	<< "Limiting: "			<< ((inRegValue & BIT(11)) ? "Pass illegal data values" : "Limit to legal SDI")									<< endl
-				<< "Limiting: "			<< ((inRegValue & BIT(12)) ? "Limit" : "Don't limit") << " to legal broadcast data values"						<< endl
+			oss	<< "Mode: "				<< (inRegValue & kRegMaskVidProcMode ? ((inRegValue & BIT(24)) ? "Shaped" : "Unshaped") : "Full Raster")		<< endl
+				<< "FG Control: "		<< (inRegValue & kRegMaskVidProcFGControl ? ((inRegValue & BIT(20)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
+				<< "BG Control: "		<< (inRegValue & kRegMaskVidProcBGControl ? ((inRegValue & BIT(22)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
 				<< "VANC Pass-Thru: "	<< ((inRegValue & BIT(13)) ? "Background" : "Foreground")														<< endl
 				<< "FG Matte: "			<< EnabDisab(inRegValue & kRegMaskVidProcFGMatteEnable)															<< endl
 				<< "BG Matte: "			<< EnabDisab(inRegValue & kRegMaskVidProcBGMatteEnable)															<< endl
-				<< "FG Control: "		<< (inRegValue & kRegMaskVidProcFGControl ? ((inRegValue & BIT(20)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
-				<< "BG Control: "		<< (inRegValue & kRegMaskVidProcBGControl ? ((inRegValue & BIT(22)) ? "Shaped" : "Unshaped") : "Full Raster")	<< endl
-				<< "Input Sync: "		<< "Inputs " << (inRegValue & kRegMaskVidProcSyncFail ? "not in sync" : "in sync")								<< endl
-				<< "Split Video Standard: "	<< sSplitStds[inRegValue & kRegMaskVidProcSplitStd];
+				<< "Input Sync: "		<< (inRegValue & kRegMaskVidProcSyncFail ? "not in sync" : "in sync")								<< endl
+				<< "Limiting: "			<< ((inRegValue & BIT(11)) ? "Off" : ((inRegValue & BIT(12)) ? "Legal Broadcast" : "Legal SDI"))				<< endl
+				<< "Split Video Std: "	<< sSplitStds[inRegValue & kRegMaskVidProcSplitStd];
 			return oss.str();
 		}
 		virtual	~DecodeVidProcControl()	{}
@@ -3056,6 +3131,79 @@ private:
 		}
 		virtual	~DecodeEnhancedCSCCoefficient()	{}
 	}	mEnhCSCCoeffDecoder;
+
+	struct DecodeCSCoeff1234 : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;
+			const uint32_t	coeff1 (((inRegValue >> 11) & 0x00000003) | uint32_t(inRegValue & 0x000007FF));
+			const uint32_t	coeff2 ((inRegValue >> 14) & 0x00001FFF);
+			uint16_t		nCoeff1(1), nCoeff2(2);
+			switch(inRegNum)
+			{
+				case kRegCSCoefficients3_4:		case kRegCS2Coefficients3_4:	case kRegCS3Coefficients3_4:	case kRegCS4Coefficients3_4:
+				case kRegCS5Coefficients3_4:	case kRegCS6Coefficients3_4:	case kRegCS7Coefficients3_4:	case kRegCS8Coefficients3_4:
+					nCoeff1 = 3;	nCoeff2 = 4;	break;
+			}
+			//			kRegCS?Coefficients1_2					kRegCS?Coefficients3_4
+			//	CSC		1	2	3	4	5	6	7	8			1	2	3	4	5	6	7	8
+			//	RegNum	142	147	291	296	347	460	465	470			143	148	292	297	348	461	466	471
+			//	kRegCS?Coefficients1_2:	kK2RegMaskVidKeySyncStatus			= BIT(28)	0=OK		1=SyncFail		GetColorSpaceVideoKeySyncFail
+			//	kRegCS?Coefficients1_2:	kK2RegMaskMakeAlphaFromKeySelect	= BIT(29)	0=No		1=Yes			GetColorSpaceMakeAlphaFromKey
+			//	kRegCS?Coefficients1_2:	kK2RegMaskColorSpaceMatrixSelect	= BIT(30)	0=Rec709	1=Rec601		GetColorSpaceMatrixSelect
+			//	kRegCS?Coefficients1_2:	kK2RegMaskUseCustomCoefSelect		= BIT(31)	0=No		1=Yes			GetColorSpaceUseCustomCoefficient
+			//	kRegCS?Coefficients3_4:	kK2RegMaskXena2RGBRange				= BIT(31)	0=Full		1=SMPTE			GetColorSpaceRGBBlackRange
+			//	kK2RegMaskCustomCoefficientLow		= BITS(0-10)	CSCCustomCoeffs.Coefficient1	GetColorSpaceCustomCoefficients
+			//	kK2RegMaskCustomCoefficientHigh		= BITS(16-26)	CSCCustomCoeffs.Coefficient2	GetColorSpaceCustomCoefficients
+			//	kK2RegMaskCustomCoefficient12BitLow	= BITS(0-12)	CSCCustomCoeffs.Coefficient1	GetColorSpaceCustomCoefficients12Bit
+			//	kK2RegMaskCustomCoefficient12BitHigh= BITS(14-26)	CSCCustomCoeffs.Coefficient2	GetColorSpaceCustomCoefficients12Bit
+			ostringstream	oss;
+			if (nCoeff1 == 1)
+				oss	<< "Video Key Sync Status: "		<< (inRegValue & BIT(28) ? "SyncFail" : "OK")	<< endl
+					<< "Make Alpha From Key Input: "	<< EnabDisab(inRegValue & BIT(29))				<< endl
+					<< "Matrix Select: "				<< (inRegValue & BIT(30) ? "Rec601" : "Rec709")	<< endl
+					<< "Use Custom Coeffs: "			<< YesNo(inRegValue & BIT(31))					<< endl;
+			else
+				oss	<< "RGB Range: "					<< (inRegValue & BIT(31) ? "SMPTE (0x040-0x3C0)" : "Full (0x000-0x3FF)")	<< endl;
+			oss	<< "Coefficient" << DEC(nCoeff1) << ": "	<< xHEX0N(coeff1, 4)	<< endl
+				<< "Coefficient" << DEC(nCoeff2) << ": "	<< xHEX0N(coeff2, 4);
+			return oss.str();
+		}
+		virtual	~DecodeCSCoeff1234()	{}
+	}	mCSCoeff1234Decoder;
+
+	struct DecodeCSCoeff567890 : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;
+			const uint32_t	coeff5 (((inRegValue >> 11) & 0x00000003) | uint32_t(inRegValue & 0x000007FF));
+			const uint32_t	coeff6 ((inRegValue >> 14) & 0x00001FFF);
+			uint16_t	nCoeff5(5), nCoeff6(6);
+			switch(inRegNum)
+			{
+				case kRegCSCoefficients7_8:		case kRegCS2Coefficients7_8:	case kRegCS3Coefficients7_8:	case kRegCS4Coefficients7_8:
+				case kRegCS5Coefficients7_8:	case kRegCS6Coefficients7_8:	case kRegCS7Coefficients7_8:	case kRegCS8Coefficients7_8:
+					nCoeff5 = 7;	nCoeff6 = 8;	break;
+				case kRegCSCoefficients9_10:	case kRegCS2Coefficients9_10:	case kRegCS3Coefficients9_10:	case kRegCS4Coefficients9_10:
+				case kRegCS5Coefficients9_10:	case kRegCS6Coefficients9_10:	case kRegCS7Coefficients9_10:	case kRegCS8Coefficients9_10:
+					nCoeff5 = 9;	nCoeff6 = 10;	break;
+			}
+			//			kRegCS?Coefficients5_6				kRegCS?Coefficients7_8				kRegCS?Coefficients9_10
+			//	CSC		1	2	3	4	5	6	7	8		1	2	3	4	5	6	7	8		1	2	3	4	5	6	7	8
+			//	RegNum	143	148	292	297	348	461	466	471		144	149	293	298	349	462	467	472		145	150	294	299	350	463	468	473
+			//	kK2RegMaskCustomCoefficientLow	= BITS(0-10) CSCCustomCoeffs.Coefficient5	GetColorSpaceCustomCoefficients
+			//	kK2RegMaskCustomCoefficientHigh	= BITS(16-26) CSCCustomCoeffs.Coefficient6	GetColorSpaceCustomCoefficients
+			//	kK2RegMaskCustomCoefficient12BitLow	= BITS(0-12) CSCCustomCoeffs.Coefficient5	GetColorSpaceCustomCoefficients12Bit
+			//	kK2RegMaskCustomCoefficient12BitHigh= BITS(14-26) CSCCustomCoeffs.Coefficient6	GetColorSpaceCustomCoefficients12Bit
+			ostringstream	oss;
+			oss	<< "Coefficient" << DEC(nCoeff5) << ": "	<< xHEX0N(coeff5, 4)	<< endl
+				<< "Coefficient" << DEC(nCoeff6) << ": "	<< xHEX0N(coeff6, 4);
+			return oss.str();
+		}
+		virtual	~DecodeCSCoeff567890()	{}
+	}	mCSCoeff567890Decoder;
 
 	struct DecodeSDIErrorStatus : public Decoder
 	{

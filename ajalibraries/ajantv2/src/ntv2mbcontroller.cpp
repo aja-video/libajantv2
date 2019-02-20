@@ -1,7 +1,7 @@
 /**
     @file		ntv2mbcontroller.cpp
     @brief		Implementation of CNTV2MBController class.
-    @copyright	(C) 2015-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @copyright	(C) 2015-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2mbcontroller.h"

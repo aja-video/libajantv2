@@ -1,7 +1,7 @@
 /**
 	@file		ntv2autocirculate.cpp
 	@brief		Implements the CNTV2Card AutoCirculate API functions.
-	@copyright	(C) 2004-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2card.h"
@@ -1192,13 +1192,13 @@ bool CNTV2Card::S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTO
 			vpidPkt.SetLocationVideoSpace(AJAAncillaryDataSpace_HANC);
 			if (vpidA)
 			{
-				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(vpidA), 4);
+				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidA), 4);
 				vpidPkt.SetLocationLineNumber(vpidF1LineNums[standard]);
 				pkts.AddAncillaryData(vpidPkt);			changed = true;
 			}
 			if (!isProgressive && vpidB)
 			{
-				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(vpidB), 4);
+				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidB), 4);
 				vpidPkt.SetLocationLineNumber(vpidF2LineNums[standard]);
 				pkts.AddAncillaryData(vpidPkt);			changed = true;
 			}

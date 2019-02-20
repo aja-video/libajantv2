@@ -1,7 +1,7 @@
 /**
     @file		ntv2config2110.h
     @brief		Declares the CNTV2Config2110 class.
-    @copyright	(C) 2014-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @copyright	(C) 2014-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2_2110CONFIG_H
@@ -161,13 +161,14 @@ typedef struct
 
 typedef struct
 {
-    bool                    setup4k;
-    uint32_t                ptpDomain;
-    uint8_t                 ptpPreferredGMID[8];
-    uint32_t                numSFPs;
-    SFPData2110             sfp[2];
+	bool                    setup4k;
+	uint32_t                ptpDomain;
+	uint8_t                 ptpPreferredGMID[8];
+	uint32_t                numSFPs;
+	SFPData2110             sfp[2];
 	bool					multiSDP;
-	uint8_t					unused[15];
+	bool					audioCombine;
+	uint8_t					unused[14];
 } NetworkData2110;
 
 typedef struct
@@ -218,6 +219,10 @@ inline NTV2Stream ChToAudioStream(int ch)
 inline int AudioStreamToCh(NTV2Stream s)
 	{ return (int)(s >= NTV2_AUDIO1_STREAM ? s-NTV2_AUDIO1_STREAM : 0); }
 
+inline NTV2Stream ChToAncStream(int ch)
+	{ return (NTV2Stream)(NTV2_ANC1_STREAM+ch); }
+inline int AncStreamToCh(NTV2Stream s)
+	{ return (int)(s >= NTV2_ANC1_STREAM ? s-NTV2_ANC1_STREAM : 0); }
 
 /**
     @brief	Configures a SMPTE 2110 Transmit Channel.
@@ -324,6 +329,8 @@ public:
 
     bool        Set4KModeEnable(const bool enable);
     bool        Get4KModeEnable(bool & enable);
+	bool        SetAudioCombineEnable(const bool enable);
+	bool        GetAudioCombineEnable(bool & enable);
 
     bool        SetIPServicesControl(const bool enable, const bool forceReconfig);
     bool        GetIPServicesControl(bool & enable, bool & forceReconfig);
@@ -393,7 +400,7 @@ protected:
     void        SetupDepacketizerStream(const NTV2Stream stream, const rx_2110Config & rxConfig);
     void        ResetDepacketizerStream(const NTV2Stream stream);
     uint32_t    GetDepacketizerAddress(const NTV2Stream stream);
-    bool        SetTxPacketizerChannel(const NTV2Stream stream, uint32_t  & baseAddr);
+	uint32_t	GetPacketizerAddress(const NTV2Stream stream);
 
     void        SetVideoFormatForRxTx(const NTV2Stream stream, const NTV2VideoFormat format, const bool rx);
     void        GetVideoFormatForRxTx(const NTV2Stream stream, NTV2VideoFormat & format, uint32_t & hwFormat, const bool rx);
@@ -403,6 +410,7 @@ protected:
 	bool        GenVideoStreamSDPInfo(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo);
 	bool		GenVideoStreamMultiSDPInfo(std::stringstream & sdp, char* gmInfo);
 	bool        GenAudioStreamSDPInfo(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo);
+	bool        GenAncStreamSDPInfo(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo);
 
     NTV2StreamType  StreamType(const NTV2Stream stream);
     NTV2Channel VideoStreamToChannel(const NTV2Stream stream);

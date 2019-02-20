@@ -201,7 +201,8 @@
 	-	To determine the SDRAM that the device has for storing video and audio data,
 		call ::NTV2DeviceGetActiveMemorySize.
 	-	To determine the current ::NTV2Framesize for the device,
-		call CNTV2Card::GetFrameBufferSize;
+		call CNTV2Card::GetFrameBufferSize. The returned ::NTV2Framesize can be converted
+		into a byte count using ::NTV2FramesizeToByteCount.
 	-	To change (override) the current ::NTV2Framesize for the device,
 		call CNTV2Card::SetFrameBufferSize.
 
@@ -356,8 +357,6 @@
 	@subsection	vidop-fbaccess		Frame Buffer Access
 
 	Data can be transferred to or from the device at any time using the DMA API in the CNTV2Card class.
-	Call CNTV2Card::DMAReadFrame to transfer a single frame from device SDRAM to a local host buffer.
-	Call CNTV2Card::DMAWriteFrame to transfer a single frame from a local host buffer to device SDRAM.
 
 	Remember that <b>the host computer always has access to frame memory</b>. Therefore
 	it’s important to synchronize or gate transfers to/from the host using the vertical blanking
@@ -365,8 +364,32 @@
 	CNTV2Card::WaitForInputVerticalInterrupt, CNTV2Card::WaitForInputFieldID, etc.).
 
 	The device’s current line counter could also be used (i.e., by monitoring the ::kRegLineCount register
-	via CNTV2Card::ReadRegister), but that value reflects the read/write line position of Frame Store 1.
-	There are no other Line Count registers provided for other Frame Stores.
+	via CNTV2Card::ReadLineCount), but that value reflects the read/write line position of Frame Store 1.
+	Other Frame Stores do not have Line Counters.
+
+	There are several DMA API functions for transferring data between host memory and device SDRAM.
+	They are <b>frame-centric</b> in that they all require a zero-based frame number to calculate
+	where to start reading or writing in device SDRAM. The actual byte offset into device SDRAM
+	depends on the device’s current <b>Frame Size</b> — whether 8MB, 16MB, or larger.
+
+	-	Call CNTV2Card::DMAReadFrame or CNTV2Card::DMAWriteFrame to transfer frame data from or to
+		device SDRAM (respectively).
+	-	<b>Frame Number</b> — If non-zero, it will index into device SDRAM by ::NTV2Framesize frames.
+		See the <b>Frame Buffer Layout</b> discussion in the \ref hardwarecharacteristics
+		section for more information.
+	-	<b>Byte Count:</b>
+		-	Should be even, or evenly divisible by 4, or ideally a power of two.
+		-	Small transfers can sometimes be problematic for certain DMA engine firmware in combination
+			with certain host hardware and OS platforms.  To avoid this, AJA recommends transferring at
+			least 4096 bytes of data. Try smaller values if necessary, but test thoroughly with the
+			devices and hardware you intend to support.
+		-	It can be larger than a frame. For example, if the device frame size is 8MB, and the
+			requested byte count is 16MB, two frames will be transferred.
+	-	CNTV2Card::DMARead and CNTV2Card::DMAWrite are similar, but also accept a <b>Byte Offset</b>,
+		which…
+		-	Should be even, or evenly divisible by 4, or ideally a power of two.
+		-	<b>Hint:</b> All device SDRAM can be accessed by using a zero <b>Frame Number</b> and
+			using any offset value needed (up to 4GB minus the <b>Byte Count</b>).
 
 	@warning	Calling CNTV2Card::DMAWriteFrame at a fraction of frame time <i>after</i>
 				the VBI to write the same frame on the device that’s being read for the currently-playing
@@ -378,7 +401,7 @@
 				old pixel data.
 
 	@note	DMA transfer speeds may be affected by the amount of video data being accessed by
-			the device to transmit video. If a channel is in display mode, it is always outputting
+			the device to transmit video. If a channel is in display mode, it is always playing
 			video, and therefore reading from SDRAM, consuming SDRAM bandwidth… the amount consumed
 			determined by the amount of data being read from frame memory… which depends on Frame
 			Buffer Format and Frame Geometry. <b>In some cases, DMA speeds can be increased by
@@ -387,6 +410,10 @@
 			SDRAM bandwidth to read frame data for playout. In addition to the fact that more data is
 			moved in, say, 48-bit RGB (than YUV8), the transfer of that data may also proceed at a
 			slightly slower rate.
+
+	@warning	Accessing memory addresses that are beyond the end of device SDRAM is not recommended,
+				and will result in unexpected behavior — e.g. wrapping around and continuing from the
+				start of device SDRAM.
 
 
 	@subsection	deviceclockingandsync		Device Clocking and Synchronization
@@ -562,6 +589,195 @@
 			device.SetInputFrame(NTV2_CHANNEL2, 3);	//	Write FrameStore 2 video into frame buffer 3
 		}
 	@endcode
+
+
+	<hr size="50px">
+	@subsection	vidop-csc		Color Space Converter Operation
+
+	A <b>Color Space Converter</b> (a.k.a. <b>CSC</b>) is a device widget implemented in FPGA firmware that converts YCbCr values
+	into RGB[A] values, or vice-versa. It uses several registers to configure its conversion properties.
+
+	-	Generally, there is one CSC for every SDI connector. ::NTV2DeviceGetNumCSCs can be used to determine the number
+		of CSCs on a given device, which should match ::NTV2DeviceGetNumVideoInputs or ::NTV2DeviceGetNumVideoOutputs (whichever is larger).
+	-	CSC widgets are identified by ::NTV2_WgtCSC1, ::NTV2_WgtCSC2, etc.,
+		but are normally identified in SDK calls by an ::NTV2Channel value that represents a zero-based index number.
+	-	Each CSC has two inputs:
+		-	<b>Video Input</b>:  This input should be routed to another widget’s output that produces…
+			-	YCbCr video — in which case the CSC will produce valid RGB[A] data at its <b>RGB Video</b> output.
+			-	RGB[A] video — in which case the CSC will produce valid YCbCr video at its <b>YUV Video</b> output,
+				and alpha channel video at its <b>Key YUV</b> output.
+		-	<b>Key Input</b>:  This supplies alpha channel data for the CSC’s <b>RGB Video</b> output. When used,
+			it should always be sourced with YCbCr video (never RGB).
+	-	Each CSC has 3 outputs:
+		-	<b>YUV Video</b>:  This produces valid YCbCr video data only when the CSC’s <b>Video Input</b> is receiving RGB[A] video.
+		-	<b>RGB Video</b>: This produces valid RGB[A] video data only when the CSC’s <b>Video Input</b> is receiving YCbCr video.
+		-	<b>Key YUV</b>:  This produces valid YCbCr key data only when the CSC’s <b>Video Input</b> is receiving RGB[A] video.
+	-	Routing instructions are in the \ref widget_csc section in the \ref ntv2signalrouting section.
+	-	The CSC’s conversion coefficients are adjusted based on “SMPTE” versus “Full” range.
+		-	The conversion range is represented in the SDK as the ::NTV2RGBBlackRange or ::NTV2_CSC_RGB_Range data types.
+		-	Full range is represented by the ::NTV2_CSC_RGB_RANGE_FULL or ::NTV2_RGBBLACKRANGE_0_0x3FF enumerations.
+			-	8-bit Full Range has 256 possible values (0 thru 255)
+			-	10-bit Full Range has 1024 possible values (0 thru 1023).
+		-	SMPTE range is represented by the ::NTV2_CSC_RGB_RANGE_SMPTE or ::NTV2_RGBBLACKRANGE_0x40_0x3C0 enumerations.
+			-	8-bit SMPTE-range has 220 possible values (16 thru 235).
+			-	10-bit SMPTE-range has 877 possible values (64 thru 940).
+		-	Call CNTV2Card::GetColorSpaceRGBBlackRange to determine the current range setting for a CSC.
+		-	Call CNTV2Card::SetColorSpaceRGBBlackRange to change a CSC’s range setting.
+	-	The CSC’s conversion matrix can be set to “Rec. 601” (SD) or “Rec. 709” (HD).
+		-	The conversion matrix type is represented in the SDK by the ::NTV2ColorSpaceMatrixType data type.
+		-	Rec. 601 is represented by the ::NTV2_Rec601Matrix enumeration constant.
+		-	Rec. 709 is represented by the ::NTV2_Rec709Matrix enumeration constant.
+		-	Call CNTV2Card::GetColorSpaceMatrixSelect to determine the current matrix selection for a CSC.
+		-	Call CNTV2Card::SetColorSpaceMatrixSelect to change a CSC’s matrix selection.
+
+	@par	YCbCr to RGB Conversion
+
+	-	When the CSC’s <b>Video Input</b> is connected to a YUV video source, it will convert and provide RGB data on
+		its “RGB” output crosspoint.
+	-	In addition to the YCbCr-to-RGB value conversion, the CSC also performs the necessary 4:2:2 up-sampling to fill the
+		“missing” pixels in the outgoing RGB raster.
+	-	The CSC will produce an <i>opaque</i> alpha channel by default.
+	-	It can produce alpha channel data from YCbCr video supplied to its <b>Key Input</b> (using just the luma channel) —
+		provided it’s configured to do so:
+		-	Call CNTV2Card::GetColorSpaceMakeAlphaFromKey to determine if the CSC will use its <b>Key Input</b> to generate
+			alpha channel data.
+		-	Call CNTV2Card::SetColorSpaceMakeAlphaFromKey to enable or disable the setting.
+		-	When “Make Alpha From Key” is enabled, call CNTV2Card::GetColorSpaceVideoKeySyncFail to query if the CSC’s
+			<b>Key Input</b> is synchronized with its <b>Video Input</b>. Sync failure will occur if the Key and Video
+			signals have unrelated frame rates, or are significantly out of phase with each other.
+
+	The conversion formulæ:
+	@code{.cpp}
+		// Full-range 8-bit “Rec 601” (SD) conversion:
+		R = 1.164384 * y  +  0.000000 * cb  +  1.596027 * cr;
+		G = 1.164384 * y  -  0.391762 * cb  -  0.812968 * cr;
+		B = 1.164384 * y  +  2.017232 * cb  +  0.000000 * cr;
+
+		// SMPTE-range 8-bit “Rec 601” (SD) conversion:
+		R = 1.000000 * y  +  0.000000 * cb  +  1.370705 * cr;
+		R = 1.000000 * y  -  0.336455 * cb  -  0.698196 * cr;
+		R = 1.000000 * y  +  1.732446 * cb  +  0.000000 * cr;
+
+		// Full-range 10-bit “Rec 601” (SD) conversion:
+		R = 1.167808 * y  +  0.000000 * cb  +  1.600721 * cr;
+		G = 1.167808 * y  -  0.392915 * cb  -  0.815359 * cr;
+		B = 1.167808 * y  +  2.023165 * cb  +  0.000000 * cr;
+
+		// SMPTE-range 10-bit “Rec 601” (SD) conversion:
+		R = 1.0000008 * y  +  0.000000 * cb  +  1.370705 * cr;
+		G = 1.0000008 * y  -  0.336455 * cb  -  0.698196 * cr;
+		B = 1.0000008 * y  +  1.732446 * cb  +  0.000000 * cr;
+
+		// Full-range 10-bit “Rec 709” (HD) conversion:
+		R = 1.167808 * y  +  0.000000 * cb  +  1.798014 * cr;
+		G = 1.167808 * y  -  0.213876 * cb  -  0.534477 * cr;
+		B = 1.167808 * y  +  2.118615 * cb  +  0.000000 * cr;
+
+		// SMPTE-range 10-bit “Rec 709” (HD) conversion:
+		R = 1.000000 * y  +  0.000000 * cb  +  1.539648 * cr;
+		G = 1.000000 * y  -  0.183143 * cb  -  0.457675 * cr;
+		B = 1.000000 * y  +  1.814180 * cb  +  0.000000 * cr;
+	@endcode
+
+	@note	The 8-bit and 10-bit coefficients are NOT the same, since the RGB 10-bit white point (1023)
+			is not simply 4 × the 8-bit RGB white point (255).
+
+	@par	RGB to YCbCr Conversion
+
+	-	When the CSC’s <b>Video Input</b> is fed RGB[A] video, it will convert and provide YUV data on
+		its “Video” and “Key” output crosspoints.
+	-	In addition to the RGB-to-YCbCr value conversion, it also performs the necessary 4:2:2 down-sampling
+		(implemented as a low-pass filter) for the fewer samples in the outgoing YUV raster.
+	-	The <b>Key Output</b> luma channel data is scaled appropriately from the incoming alpha channel data.
+		Its outgoing Cb and Cr component values are fixed at <tt>0x200</tt>.
+
+	The conversion formulæ:
+	@code{.cpp}
+		// Full-range 10-bit “Rec 601” (SD) conversion:
+		Y  =  0.25604 * r  +  0.50265 * g  +  0.09762 * b;
+		Cb = -0.14779 * r  -  0.29014 * g  +  0.43793 * b;
+		Cr =  0.43793 * r  -  0.36671 * g  -  0.07122 * b;
+
+		// SMPTE-range 10-bit “Rec 601” (SD) conversion:
+		Y  =  0.29900 * r  +  0.58700 * g  +  0.11400 * b;
+		Cb = -0.17259 * r  -  0.33883 * g  +  0.51142 * b;
+		Cr =  0.51142 * r  -  0.42825 * g  -  0.08317 * b;
+
+		// Full-range 10-bit “Rec 709” (HD) conversion:
+		Y  =  0.18205 * r  +  0.61243 * g  +  0.06183 * b;
+		Cb = -0.10035 * r  -  0.33758 * g  +  0.43793 * b;
+		Cr =  0.43793 * r  -  0.39777 * g  -  0.04016 * b;
+
+		// SMPTE-range 10-bit “Rec 709” (HD) conversion:
+		Y  =  0.21260 * r  +  0.71520 * g  +  0.07220 * b;
+		Cb = -0.11719 * r  -  0.39423 * g  +  0.51142 * b;
+		Cr =  0.51142 * r  -  0.46452 * g  -  0.04689 * b;
+	@endcode
+
+	@par	Enhanced CSCs
+
+	Some AJA devices support “enhanced” CSC firmware that is used to override the default Rec 601 and Rec 709 conversion
+	offsets and coefficients.  Call ::NTV2DeviceCanDoEnhancedCSC to determine if the device has the enhanced CSC firmware.
+
+
+	<hr size="50px">
+	@subsection	vidop-mixerkeyer		Mixer/Keyer Operation
+
+	A <b>Mixer/Keyer</b> is a device widget implemented in FPGA firmware that mixes or “keys” YCbCr video.
+	It uses a pair of registers for configuring its mixing/keying properties.
+
+	@note	Mixer/Keyer widgets can only process YCbCr video — not RGB[A].
+
+	-	Generally, there is one mixer/keyer for every 2 Frame Stores and/or SDI Inputs (or SDI Outputs).
+		Call ::NTV2DeviceGetNumMixers to obtain the number of Mixer/Keyer widgets that are available.
+	-	Mixer/Keyer widgets are identified by ::NTV2_WgtMixer1, ::NTV2_WgtMixer2, …,
+		but are normally identified in SDK calls by a zero-based, unsigned 16-bit index number.
+	-	Each Mixer/Keyer has two outputs — <b>Video</b> and <b>Key</b> — that contain the mixed/keyed output video.
+	-	Each Mixer/Keyer has four inputs:
+		-	two <b>Foreground</b> inputs — <b>Video</b> and <b>Key</b> — and…
+		-	two <b>Background</b> inputs — <b>Video</b> and <b>Key</b>.
+		-	<b>Key Input</b>s only utilize Y-channel data — the Cb and Cr components are ignored.
+		-	<b>IMPORTANT:</b> The Mixer’s foreground and background inputs must be closely synchronized
+			or the Mixer won’t be able to mix them. If the Mixer is unlocked, its outputs will send unclocked
+			(garbage) video.
+			-	Call CNTV2Card::GetMixerSyncStatus to determine if the Mixer is locked to both of its inputs,
+				and therefore if its output is valid.
+	-	Each Mixer/Keyer has the following configuration parameters:
+		-	::NTV2MixerKeyerMode — Primary operating mode:
+			-	Use ::NTV2MIXERMODE_FOREGROUND_ON to exclusively pass the <b>foreground</b> video and key to the Mixer output.
+			-	Use ::NTV2MIXERMODE_FOREGROUND_OFF to exclusively pass the <b>background</b> video and key to the Mixer output.
+			-	Use ::NTV2MIXERMODE_MIX to overlay the foreground video on top of the background video. Foreground or background
+				<b>Flat Matte</b> (see below), if enabled, will be mixed instead of its respective input raster.
+			-	Call CNTV2Card::GetMixerMode to determine the Mixer’s current mode.
+			-	Call CNTV2Card::SetMixerMode to change its mode.
+		-	::NTV2MixerKeyerInputControl — input control mode, one for foreground input, one for background input:
+			-	::NTV2MIXERINPUTCONTROL_FULLRASTER ignores the input key.
+			-	::NTV2MIXERINPUTCONTROL_SHAPED uses the input key as a mask.
+			-	Call CNTV2Card::GetMixerFGInputControl to discover the foreground input’s current control value.
+			-	Call CNTV2Card::SetMixerFGInputControl to change the foreground input’s control value.
+			-	Call CNTV2Card::GetMixerBGInputControl to discover the background input’s current control value.
+			-	Call CNTV2Card::SetMixerBGInputControl to change the background input’s control value.
+		-	<b>Mix Coefficient</b> — an unsigned, 16-bit integer that determines the transparency of the foreground mask/key.
+			-	Call CNTV2Card::GetMixerCoefficient to determine the current mix coefficient value.
+			-	Call CNTV2Card::SetMixerCoefficient to change its value.
+		-	<b>Output VANC Source</b> — The Mixer’s output video VANC can be sourced from the foreground
+			or background input video.
+			-	Call CNTV2Card::GetMixerVancOutputFromForeground to determine if the output VANC is currently
+				being sourced from the foreground video input.
+			-	Call CNTV2Card::SetMixerVancOutputFromForeground to change the output VANC source.
+		-	<b>Flat Matte</b> — The Mixer’s foreground and/or background raster can be set to a flat matte of any
+			10-bit YCbCr color. This matte will override any respective video input to the Mixer.
+				-	Call CNTV2Card::GetMixerFGMatteEnabled to determine if the foreground matte is enabled or not.
+				-	Call CNTV2Card::SetMixerFGMatteEnabled to enable or disable using the foreground matte.
+				-	Call CNTV2Card::GetMixerBGMatteEnabled to determine if the background matte is enabled or not.
+				-	Call CNTV2Card::SetMixerBGMatteEnabled to enable or disable using the background matte.
+				-	Do not enable <b>Flat Matte</b> on both foreground and background — use one or the other, or neither.
+				-	Call CNTV2Card::GetMixerMatteColor to determine the current matte color.
+				-	Call CNTV2Card::SetMixerMatteColor to change the matte color.
+				-	Note that to retain sync and enable its video output, the Mixer still requires a foreground
+					video source if background matte is enabled, or a background video source if foreground
+					matte is enabled.
+	-	For information on how to route signals to and from the Mixer, see \ref widget_mixkey.
 
 
 
@@ -887,20 +1103,67 @@
 	<hr size="50px">
 	@section	devicefirmware		Firmware
 
-	NTV2 devices have an EEPROM that stores its FPGA programming.
-	This flash memory was commonly divided into a minimum of two logical partitions:
+	NTV2 devices have an EEPROM (non-volatile memory) that stores its FPGA programming.
+	This flash memory is commonly divided into a minimum of two logical partitions:
 	-	the “main” partition — for the normal FPGA bitfile image;
 	-	the “failsafe” boot — for a fallback FPGA bitfile image.
 
-	Traditionally, the FPGA could only be loaded from flash memory upon the first PCIe reset that occurs after power-up.
-	The “failsafe” bitfile only loads if the board is powered-up with its “failsafe” button pressed.
+	Traditionally, the FPGA is only loaded from flash memory upon power-up.
+	The “failsafe” bitfile only loads if the board’s “failsafe” button is held down while power is applied to the board.
 
 	@note	Our newest boards — starting with the \ref kona5 — can be instructed to reload their FPGA upon PCIe reset
 			without an intervening power-down.
 
 	Some of our boards — like the \ref konaip — have, in addition to the normal FPGA hardware, a microprocessor, which requires
 	an additional, separate firmware bitfile that bootstraps and operates it. This extra firmware is bundled into a “package” that is
-	also stored in the EEPROM.
+	also stored in (and loaded from) a separate partition in the EEPROM.
+
+
+	<hr size="50px">
+	@subsection	dev-firmware-loading	Loading Firmware
+
+	Loading the FPGA from EEPROM after power-up takes a finite amount of time.
+	If this exceeds the amount of time allotted by the BIOS for PCIe devices to become ready, the AJA device
+	won’t be detected by the BIOS, and thus won’t be probed by — or matched to — any device drivers.
+	On Windows PCs, this is shown as an “<i>Unknown device</i>” in the Windows <b>Device Manager</b>.
+	On Linux PCs, the ‘<b>lspci</b>’ command can help diagnose these issues.
+	For example, here’s what ‘<b>lspci</b>’ should normally show when looking for devices with AJA’s PCIe vendor
+	ID of \c 0xF1D0 (e.g. for a Corvid88):
+	@code{.sh}
+		$ lspci -d f1d0:
+		03:00.0 Multimedia video controller: AJA Video Device eb0d
+		$ lspci -n  -d f1d0:
+		03:00.0 0400: f1d0:eb0d
+		$ lspci -nn  -d f1d0:
+		03:00.0 Multimedia video controller [0400]: AJA Video Device [f1d0:eb0d]
+	@endcode
+
+	@note	<b>Disable Fast-Boot Option:</b> On PCs running Windows or Linux, be sure to disable all fast-boot options in the BIOS.
+
+	@note	<b>Disable Power-Saving Modes:</b> AJA’s NTV2 devices do not support PCIe power management.
+			-	Be sure to disable any and all Energy-Saving features in the OS,
+				particularly PCIe “Link State Power Management” (LSPM).
+			-	<b>Windows</b> — This is in “Advanced Power Settings” ==≻ “Power Options” ==≻
+				“PCI Express” ==≻ “Link State Power Management” ==≻ <b>Off</b>.
+			-	<b>Linux</b> — Use the \c lspci command:
+				@code{.sh}
+					$ sudo lspci -vvv  -d f1d0:
+				@endcode
+				… and confirm that “LnkCtl: ASPM Disabled” is shown for each AJA device.
+			-	On some motherboards, power management is controlled by the BIOS, in which case,
+				try <b>disabling ASPM</b> under the BIOS’ <b>power options</b>.
+
+	If, even after disabling “fast-boot”, the AJA device fails to show up, …
+	-	Try “warm-booting” the PC. If the device is recognized after a warm-boot, then it’s likely a firmware load-time issue.
+	-	Try installing the AJA board into a different PCIe slot on the motherboard. Some manufacturers employ chips that perform
+		intermediate buffering on certain specific PCIe slots that can sometimes cause detection issues. Also beware that some
+		manufacturers use a custom BIOS that has options for configuring PCIe slots, so be sure to check those BIOS settings
+		and adjust them if needed.
+	-	If the device still fails to show up, please <a href="https://sdksupport.aja.com/index.php?/Tickets/Submit">submit a Ticket</a>.
+
+
+	<hr size="50px">
+	@subsection	dev-firmware-flash		“Flashing” Firmware
 
 	AJA provides two ways to “flash” — i.e. update — new firmware into the device’s EEPROM storage:
 	-#	Using the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/129">ntv2firmwareinstaller</a>
@@ -911,7 +1174,7 @@
 
 
 	<hr size="50px">
-	@subsection	dev-firmware-vers	Determining Firmware Version
+	@subsection	dev-firmware-vers		Determining Firmware Version
 
 	@note	The <b>currently-running firmware</b> could be different from the <b>currently-installed firmware</b> that’s stored
 			in the EEPROM’s main partition. This can happen if the device wasn’t power-cycled after a firmware update installation,

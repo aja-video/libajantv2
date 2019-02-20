@@ -1,7 +1,7 @@
 /**
 	@file	ntv2audio.cpp
 	@brief	Implementations of audio-centric NTV2Card methods.
-	@copyright	(C) 2004-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2card.h"

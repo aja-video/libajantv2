@@ -1,6 +1,6 @@
 /**
 	@file		ntv2audiodefines.h
-	@copyright	Copyright (C) 2004-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2004-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares common audio macros and structs used in the SDK.
 **/
 

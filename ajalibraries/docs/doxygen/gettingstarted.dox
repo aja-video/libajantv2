@@ -265,8 +265,11 @@ On Linux, the libraries and device drivers are not pre-built, and must be compil
 -#	Load the device driver:
     <tt>$ sudo bin/load_ajantv2</tt>
 -#	Verify that the driver is installed by ...
-	-	issuing an \c lsmod, and look for \c ajantv2 in the list;
-	-	look inside \c /dev/proc and look for devices with \c ajantv2 in the name.
+	-	issuing an \c lsmod, and look for <b>ajantv2</b> in the list;
+	-	look inside \c /dev and look for devices with names that start with <b>ajantv2</b>.
+
+@note	If the device doesn’t show up in \c /dev or \c lsmod doesn’t report it, see the \ref dev-firmware-loading section
+		for more information on how to diagnose the problem.
 
 @note	The \ref ajantv2 in the SDK is built to link with GCC 5.0 and earlier, GCC versions after this introduced an ABI change.
 		If you use the \ref ajacc, AJA supplies a GCC 5.1 and later compatible version of this library inside the <b>lib/gcc_5_1_and_after</b> directory.
@@ -305,6 +308,9 @@ However, the \ref ajantv2 source code is provided, and the libraries can be buil
 -#	Select the build configuration, whether Debug or Release, and 32 or 64 bit.
 -#	Build the \ref ajantv2.
 Look for the <b>.DLL</b> in \c sdk\\bin, or the <b>.LIB</b> in \c sdk\\lib.
+
+@note	If the device doesn’t show up in the Windows <b>Device Manager</b>, see the \ref dev-firmware-loading section
+		for more information on how to diagnose the problem.
 
 
 @subsection		gs-qtbuild	Building With Qt

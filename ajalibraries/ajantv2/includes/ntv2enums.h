@@ -1,6 +1,6 @@
 /**
     @file		ntv2enums.h
-    @copyright	Copyright (C) 2013-2018 AJA Video Systems, Inc.  All rights reserved.
+    @copyright	Copyright (C) 2013-2019 AJA Video Systems, Inc.  All rights reserved.
     @brief		Enumerations for controlling NTV2 devices.
 **/
 
@@ -96,7 +96,7 @@ typedef enum
     DEVICE_ID_TTAP						= 0x10416000,	///< @brief	See \ref ttap
     DEVICE_ID_KONA5						= 0x10798400,	///< @brief	See \ref kona5
     DEVICE_ID_KONA5_12G					= 0x10798401,	///< @brief	See \ref kona5
-	DEVICE_ID_CORVID44_12G				= 0x00000001,	///< @brief	See \ref corvid412g
+	DEVICE_ID_CORVID44_12G				= 0x10832400,	///< @brief	See \ref corvid412g
 #if !defined (NTV2_DEPRECATE_12_6)
     DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
 #endif	//	NTV2_DEPRECATE_12_6
@@ -1661,6 +1661,8 @@ typedef enum
     NTV2MIXERINPUTCONTROL_UNSHAPED,
     NTV2MIXERINPUTCONTROL_INVALID
 } NTV2MixerKeyerInputControl;
+
+#define	NTV2_IS_VALID_MIXERINPUTCONTROL(__x__)		((__x__) >= NTV2MIXERINPUTCONTROL_FULLRASTER  &&  (__x__) < NTV2MIXERINPUTCONTROL_INVALID)
 
 #if !defined (NTV2_DEPRECATE)
     typedef NTV2MixerKeyerInputControl	Xena2VidProcInputControl;
@@ -3626,8 +3628,14 @@ typedef enum
     NTV2_VIDEOLIMITING_LEGALSDI,
     NTV2_VIDEOLIMITING_OFF,
     NTV2_VIDEOLIMITING_LEGALBROADCAST,
-    NTV2_MAX_NUM_VideoLimitingEnums
+    NTV2_MAX_NUM_VideoLimitingEnums,
+    NTV2_VIDEOLIMITING_INVALID	=	NTV2_MAX_NUM_VideoLimitingEnums
 } NTV2VideoLimiting;
+
+#define	NTV2_IS_VALID_VIDEOLIMITING(__v__)			((__v__) >= NTV2_VIDEOLIMITING_LEGALSDI && (__v__) < NTV2_VIDEOLIMITING_INVALID)
+#define	NTV2_IS_LIMITING_LEGALSDI(__v__)			((__v__) == NTV2_VIDEOLIMITING_LEGALSDI)
+#define	NTV2_IS_LIMITING_OFF(__v__)					((__v__) == NTV2_VIDEOLIMITING_OFF)
+#define	NTV2_IS_LIMITING_LEGALBROADCAST(__v__)		((__v__) == NTV2_VIDEOLIMITING_LEGALBROADCAST)
 
 
 /**

@@ -1,7 +1,7 @@
 /**
 	@file		ntv2utils.h
 	@brief		Declares numerous NTV2 utility functions.
-	@copyright	(C) 2004-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2UTILS_H
@@ -966,6 +966,9 @@ AJAExport std::string NTV2AudioChannelOctetToString		(const NTV2Audio8ChannelSel
 AJAExport std::string NTV2FramesizeToString				(const NTV2Framesize			inValue,	const bool inCompactDisplay = false);
 AJAExport std::string NTV2ModeToString					(const NTV2Mode					inValue,	const bool inCompactDisplay = false);
 AJAExport std::string NTV2VANCModeToString				(const NTV2VANCMode				inValue,	const bool inCompactDisplay = false);
+AJAExport std::string NTV2MixerKeyerModeToString		(const NTV2MixerKeyerMode		inValue,	const bool inCompactDisplay = false);
+AJAExport std::string NTV2MixerInputControlToString		(const NTV2MixerKeyerInputControl inValue,	const bool inCompactDisplay = false);
+AJAExport std::string NTV2VideoLimitingToString			(const NTV2VideoLimiting		inValue,	const bool inCompactDisplay = false);
 AJAExport bool	convertHDRFloatToRegisterValues			(const HDRFloatValues & inFloatValues,		HDRRegValues & outRegisterValues);
 AJAExport bool	convertHDRRegisterToFloatValues			(const HDRRegValues & inRegisterValues,		HDRFloatValues & outFloatValues);
 AJAExport void  setHDRDefaultsForBT2020                 (HDRRegValues & outRegisterValues);

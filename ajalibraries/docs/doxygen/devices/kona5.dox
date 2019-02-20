@@ -17,6 +17,10 @@
 	The KONA 5 has a breakout connector on the top, followed by the HDMI output, then four
 	12G SDI connectors and a reference input connector. The SDI connectors are bidirectional,
 	and can be configured as inputs or outputs under software control.
+	-	<b>KONA-5-R0</b> — ATX Power, cables included (for retail)
+	-	<b>KONA-5-R0-S00</b> — ATX Power, no cables included (OEM)
+	-	<b>KONA-5-R0-S01</b> — PCIe Power, cables included (OEM)
+	-	<b>KONA-5-R0-S02</b> — PCIe Power, no cables included (OEM)
 
 	@par	PCI Interface
 

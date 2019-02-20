@@ -1,7 +1,7 @@
 /**
 	@file		ntv2konaflashprogram.cpp
 	@brief		Implementation of CNTV2KonaFlashProgram class.
-	@copyright	(C) 2010-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2010-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2konaflashprogram.h"
@@ -2453,6 +2453,81 @@ void CNTV2KonaFlashProgram::DisplayData(uint32_t address, uint32_t count)
 		printf("%s\n", line);
 	}
 }
+
+void CNTV2KonaFlashProgram::FullProgram(std::vector<uint8_t> & dataBuffer)
+{
+	if (IsOpen ())
+	{
+		uint32_t baseAddress = 0;
+
+		printf("\nErasing ROM\n");
+		EraseChip();
+		BankSelect currentBank = BANK_0;
+		SetBankSelect(currentBank);
+
+		uint32_t* bitFilePtr = (uint32_t*)dataBuffer.data();
+		uint32_t twoFixtysixBlockSizeCount = (dataBuffer.size()+256)/256;
+		int32_t percentComplete = 0;
+        WriteRegister(kVRegFlashState, kProgramStateProgramFlash);
+        WriteRegister(kVRegFlashSize, twoFixtysixBlockSizeCount);
+		for ( uint32_t count = 0; count < twoFixtysixBlockSizeCount; count++, baseAddress += 256, bitFilePtr += 64 )
+		{
+			if (baseAddress == _bankSize)
+			{
+				baseAddress = 0;
+				switch(currentBank)
+				{
+				default:
+				case BANK_0:
+					currentBank = BANK_1;
+					break;
+				case BANK_1:
+					currentBank = BANK_2;
+					break;
+				case BANK_2:
+					currentBank = BANK_3;
+					break;
+				case BANK_3:
+					currentBank = BANK_0;
+					break;
+				}
+				SetBankSelect(currentBank);
+			}
+			FastProgramFlash256(baseAddress, bitFilePtr);
+			percentComplete = (count*100)/twoFixtysixBlockSizeCount;
+
+            WriteRegister(kVRegFlashStatus, count);
+			if(!_bQuiet)
+			{
+				printf("Program status: %i%%\r", percentComplete);
+				fflush(stdout);
+			}
+		}
+		if(!_bQuiet)
+			printf("Program status: 100%%                  \n");
+
+		// Protect Device
+		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+		WaitForFlashNOTBusy();
+		WriteRegister(kRegXenaxFlashDIN, 0x1C);
+		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+		WaitForFlashNOTBusy();
+
+		SetBankSelect(BANK_0);
+
+		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+		WaitForFlashNOTBusy();
+		WriteRegister(kRegXenaxFlashDIN, 0x9C);
+		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+		WaitForFlashNOTBusy();
+		SetBankSelect(BANK_0);
+	}
+	else
+		throw "Board Can't be opened";
+	
+	SetWarmBootFirmwareReload(true);
+}
+
 
 
 #ifdef MSWindows

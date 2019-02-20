@@ -1,7 +1,7 @@
 /**
 	@file		ntv2transcode.h
 	@brief		Declares a number of pixel format transcoder functions.
-	@copyright	(C) 2004-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2TRANSCODE_H
@@ -64,6 +64,15 @@ AJAExport bool	ConvertLine_8bitABGR_to_10bitABGR (const UByte * pInSrcLine_8bitA
 	@return		True if successful;  otherwise false.
 **/
 AJAExport bool	ConvertLine_8bitABGR_to_10bitRGBDPX (const UByte * pInSrcLine_8bitABGR,  ULWord * pOutDstLine_10BitDPX, const ULWord inNumPixels);
+
+/**
+	@brief		Converts a single 8-bit ABGR raster line to 48-bit RGB.
+	@param[in]	pInSrcLine_8bitABGR		Specifies a valid, non-NULL address of the first byte of the 8-bit ABGR raster line to be converted.
+	@param[out]	pOutDstLine_48BitRGB	Specifies a valid, non-NULL address of the first byte of the 48-bit RGB DPX raster line to receive the converted data.
+	@param[in]	inNumPixels				The number of pixels to be converted.
+	@return		True if successful;  otherwise false.
+**/
+AJAExport bool	ConvertLine_8bitABGR_to_48bitRGB (const UByte * pInSrcLine_8bitABGR,  ULWord * pOutDstLine_48BitRGB, const ULWord inNumPixels);
 
 
 // ConvertLineToYCbCr422
@@ -251,7 +260,7 @@ inline void HDConvertRGBAlphatoYCbCr(RGBAlphaPixel * pSource, YCbCrPixel * pTarg
 }
 
  
-inline void SDConvertRGBAlphatoYCbCr(RGBAlphaPixel * pSource, YCbCr10BitPixel * pTarget)
+inline void SDConvertRGBAlphatoYCbCr(const RGBAlphaPixel * pSource, YCbCr10BitPixel * pTarget)
 {
   LWord Y,Cb,Cr;
 
@@ -273,7 +282,7 @@ inline void SDConvertRGBAlphatoYCbCr(RGBAlphaPixel * pSource, YCbCr10BitPixel * 
   pTarget->cr = UWord(Cr&0x3FF);
 }
 
-inline void HDConvertRGBAlphatoYCbCr(RGBAlphaPixel * pSource, YCbCr10BitPixel * pTarget)
+inline void HDConvertRGBAlphatoYCbCr(const RGBAlphaPixel * pSource, YCbCr10BitPixel * pTarget)
 {
   LWord Y,Cb,Cr;
 
@@ -322,7 +331,7 @@ inline 	void SDConvertYCbCrtoRGB(YCbCrAlphaPixel *pSource,
   pTarget->Alpha = pSource->Alpha;
 }
 
-inline 	void SDConvert10BitYCbCrtoRGB(YCbCr10BitAlphaPixel *pSource,
+inline 	void SDConvert10BitYCbCrtoRGB(const YCbCr10BitAlphaPixel *pSource,
 										        RGBAlphaPixel *pTarget)
 {
   LWord Red,Green,Blue;
@@ -376,7 +385,7 @@ inline 	void HDConvertYCbCrtoRGB(YCbCrAlphaPixel *pSource,
   pTarget->Alpha = pSource->Alpha;
 }
 
-inline 	void HDConvert10BitYCbCrtoRGB(YCbCr10BitAlphaPixel *pSource,
+inline 	void HDConvert10BitYCbCrtoRGB(const YCbCr10BitAlphaPixel *pSource,
 										        RGBAlphaPixel *pTarget)
 {
   LWord Red,Green,Blue;

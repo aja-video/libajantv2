@@ -1,6 +1,6 @@
 /**
 	@file		debug.cpp
-	@copyright	Copyright (C) 2009-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2009-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Implements the AJADebug class.
 **/
 
@@ -149,6 +149,7 @@ AJADebug::Open(bool incrementRefCount)
             addDebugGroupToLabelVector(AJA_DebugUnit_Avid);
             addDebugGroupToLabelVector(AJA_DebugUnit_DriverInterface);
             addDebugGroupToLabelVector(AJA_DebugUnit_AutoCirculate);
+            addDebugGroupToLabelVector(AJA_DebugUnit_NMOS);
 
             for(int i=AJA_DebugUnit_FirstUnused;i<AJA_DebugUnit_Size;i++)
             {

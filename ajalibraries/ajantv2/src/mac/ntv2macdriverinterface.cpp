@@ -1,7 +1,7 @@
 /**
 	@file		ntv2macdriverinterface.h
 	@brief		Implements the MacOS-specific flavor of CNTV2DriverInterface.
-	@copyright	(C) 2007-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2007-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2macdriverinterface.h"
@@ -2074,17 +2074,18 @@ bool CNTV2MacDriverInterface::GetLatencyTimerValue( ULWord* value )
 	{
 		return ReadRegister(kVRegOutputTimecodeOffset, *pFrames);
 	}
+	
+	bool CNTV2MacDriverInterface::SetOutputTimecodeType( ULWord type )
+	{
+		return WriteRegister( kVRegOutputTimecodeType, type );
+	}
+
+	bool CNTV2MacDriverInterface::GetOutputTimecodeType( ULWord* pType )
+	{
+		return ReadRegister(kVRegOutputTimecodeType, *pType);
+	}
 #endif	//	!defined(NTV2_DEPRECATE_15_1)
 
-bool CNTV2MacDriverInterface::SetOutputTimecodeType( ULWord type )
-{
-	return WriteRegister( kVRegOutputTimecodeType, type );
-}
-
-bool CNTV2MacDriverInterface::GetOutputTimecodeType( ULWord* pType )
-{
-	return ReadRegister(kVRegOutputTimecodeType, *pType);
-}
 
 
 //--------------------------------------------------------------------------------------------------------------------

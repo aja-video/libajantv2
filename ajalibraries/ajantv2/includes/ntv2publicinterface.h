@@ -1,6 +1,6 @@
 /**
 	@file		ntv2publicinterface.h
-	@copyright	Copyright (C) 2012-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2012-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares enums and structs used by all platform drivers and the SDK.
 **/
 
@@ -1360,6 +1360,7 @@ typedef enum
 	kRegMaskVidProcMux4				= BIT(6) + BIT(7),
 	kRegMaskVidProcMux5				= BIT(8) + BIT(9) + BIT(10),
 	kRegMaskVidProcLimiting			= BIT(11) + BIT(12),
+	kRegMaskVidProcVancSource		= BIT(13),
 	
 	// Xena 2 only
 	kRegMaskVidProcFGMatteEnable	= BIT(18),
@@ -1907,10 +1908,10 @@ typedef enum
 	kK2RegMaskColorSpaceMatrixSelect = BIT(30),
 	kK2RegMaskUseCustomCoefSelect    = BIT(31),
 
-	//kK2RegCSCoefficients3_4,
-	//kK2RegCS2Coefficients3_4,
-	//kK2RegCS3Coefficients3_4,
-	//kK2RegCS4Coefficients3_4,
+	//kRegCSCoefficients3_4,
+	//kRegCS2Coefficients3_4,
+	//kRegCS3Coefficients3_4,
+	//kRegCS4Coefficients3_4,
 	//kRegCS5Coefficients3_4,
 	//kRegCS6Coefficients3_4,
 	//kRegCS7Coefficients3_4,
@@ -2508,6 +2509,7 @@ typedef enum
 	kRegShiftVidProcMux5				= 8,
 
 	kRegShiftVidProcLimiting			= 11,
+	kRegShiftVidProcVancSource			= 13,
 	kRegShiftVidProcFGMatteEnable		= 18,
 	kRegShiftVidProcBGMatteEnable		= 19,
 	kRegShiftVidProcFGControl			= 20,
@@ -4279,10 +4281,7 @@ typedef struct
 #endif	//	if !defined (NTV2_DEPRECATE)
 
 
-//
-//
 // Color Space Convert Custom Coefficients
-//  ...See Xena2kRegisters.pdf for more info
 typedef struct
 {
 	ULWord Coefficient1;
@@ -4295,7 +4294,7 @@ typedef struct
 	ULWord Coefficient8;
 	ULWord Coefficient9;
 	ULWord Coefficient10;
-} ColorSpaceConverterCustomCoefficients;
+} ColorSpaceConverterCustomCoefficients, NTV2CSCCustomCoeffs;
 
 /////////////////////////////////////////////////////////////////////////////////////
 // RP188 data structure used in AutoCirculate
@@ -5176,8 +5175,10 @@ typedef enum
 typedef enum
 {
 	kHDMIOutCSCAutoDetect,
+	kHDMIOutCSCAutoSet,
 	kHDMIOutCSCRGB8bit,
 	kHDMIOutCSCRGB10bit,
+	kHDMIOutCSCRGB12bit,
 	kHDMIOutCSCYCbCr8bit,
 	kHDMIOutCSCYCbCr10bit
 } HDMIOutColorSpaceMode;
@@ -5185,6 +5186,7 @@ typedef enum
 typedef enum
 {
 	kHDMIOutProtocolAutoDetect,
+	kHDMIOutProtocolAutoSet,
 	kHDMIOutProtocolHDMI,
 	kHDMIOutProtocolDVI
 } HDMIOutProtocolMode;
@@ -5402,6 +5404,11 @@ typedef enum
 	regAncInsBlankCStartLine,
 	regAncInsBlankField1CLines,
 	regAncInsBlankField2CLines,
+	regAncInsReserved14,
+	regAncInsReserved15,
+	regAncInsRtpPayloadID,
+	regAncInsRtpSSRC,
+	regAncInsIpChannel,
 	regAncIns_LAST
 } ANCInsRegisters;
 
@@ -5711,7 +5718,7 @@ typedef enum
 							elements, from the bottom of the destination buffer, and during the transfer, the destination pitch is subtracted
 							instead of added. Defaults to normal “from top” destination offset reference.
 		**/
-		AJAExport class NTV2SegmentedXferInfo
+		class AJAExport NTV2SegmentedXferInfo
 		{
 			public:
 								NTV2SegmentedXferInfo()
@@ -5742,7 +5749,7 @@ typedef enum
 				ULWord			getTotalBytes (void) const			{return getTotalElements() * getElementLength();}
 
 				// Changing
-				inline NTV2SegmentedXferInfo &	setSegmentCount (const ULWord inNumSegments)		{mNumSegments = inNumSegments;  return *this;}
+				inline NTV2SegmentedXferInfo &	setSegmentCount (const ULWord inNumSegments)	{mNumSegments = inNumSegments;  return *this;}
 				inline NTV2SegmentedXferInfo &	setSegmentLength (const ULWord inNumElements)	{mElementsPerSegment = inNumElements;  return *this;}
 				inline NTV2SegmentedXferInfo &	setSourceInfo (const ULWord inOffset, const ULWord inPitch)
 											{return setSourceOffset(inOffset).setSourcePitch(inPitch);}

@@ -1,6 +1,6 @@
 /**
 	@file		audioutilities.h
-	@copyright	Copyright (C) 2012-2018 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	Copyright (C) 2012-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declaration of AJA_GenerateAudioTone function.
 **/
 

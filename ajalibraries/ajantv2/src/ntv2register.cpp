@@ -1,7 +1,7 @@
 /**
 	@file		ntv2register.cpp
 	@brief		Implements most of CNTV2Card's register-based functions.
-	@copyright	(C) 2004-2018 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2card.h"
@@ -122,7 +122,7 @@ static const ULWord	gChannelToCSCoeff12RegNum []		= {	kRegCSCoefficients1_2,	kRe
 
 static const ULWord	gChannelToCSCoeff34RegNum []		= {	kRegCSCoefficients3_4,	kRegCS2Coefficients3_4,	kRegCS3Coefficients3_4,	kRegCS4Coefficients3_4,
 															kRegCS5Coefficients3_4,	kRegCS6Coefficients3_4,	kRegCS7Coefficients3_4,	kRegCS8Coefficients3_4,	0};
-/*
+
 static const ULWord	gChannelToCSCoeff56RegNum []		= {	kRegCSCoefficients5_6,	kRegCS2Coefficients5_6,	kRegCS3Coefficients5_6,	kRegCS4Coefficients5_6,
 															kRegCS5Coefficients5_6,	kRegCS6Coefficients5_6,	kRegCS7Coefficients5_6,	kRegCS8Coefficients5_6,	0};
 
@@ -131,7 +131,7 @@ static const ULWord	gChannelToCSCoeff78RegNum []		= {	kRegCSCoefficients7_8,	kRe
 
 static const ULWord	gChannelToCSCoeff910RegNum []		= {	kRegCSCoefficients9_10,	kRegCS2Coefficients9_10,	kRegCS3Coefficients9_10,	kRegCS4Coefficients9_10,
 															kRegCS5Coefficients9_10,	kRegCS6Coefficients9_10,	kRegCS7Coefficients9_10,	kRegCS8Coefficients9_10,	0};
-*/
+
 static const ULWord	gChannelToSDIInVPIDLinkAValidMask[]	= {	kRegMaskSDIInVPIDLinkAValid,	kRegMaskSDIIn2VPIDLinkAValid,	kRegMaskSDIIn3VPIDLinkAValid,	kRegMaskSDIIn4VPIDLinkAValid,
 															kRegMaskSDIIn5VPIDLinkAValid,	kRegMaskSDIIn6VPIDLinkAValid,	kRegMaskSDIIn7VPIDLinkAValid,	kRegMaskSDIIn8VPIDLinkAValid,	0};
 
@@ -1595,7 +1595,6 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 				}
 				outValue = ptpControl == 0 ? NTV2_REFERENCE_SFP2_PCR : NTV2_REFERENCE_SFP2_PTP;
 				break;
-				break;
 			default:
 				break;
 			}
@@ -2213,18 +2212,18 @@ bool CNTV2Card::SetPCIAccessFrame (NTV2Channel channel, ULWord value, bool waitF
 // Method: FlopFlopPage
 // Input:  NTV2Channel
 // Output: NONE
-bool CNTV2Card::FlipFlopPage(NTV2Channel channel )
+bool CNTV2Card::FlipFlopPage (const NTV2Channel inChannel)
 {
-	ULWord pciAccessFrame;
-	ULWord outputFrame;
-
-	if (IS_CHANNEL_INVALID (channel))
+	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 
-	if (GetPCIAccessFrame (channel, pciAccessFrame))
-		if (GetOutputFrame (channel, outputFrame))
-			if (SetOutputFrame (channel, pciAccessFrame))
-				if (SetPCIAccessFrame (channel, outputFrame))
+	ULWord pciAccessFrame(0);
+	ULWord outputFrame(0);
+
+	if (GetPCIAccessFrame (inChannel, pciAccessFrame))
+		if (GetOutputFrame (inChannel, outputFrame))
+			if (SetOutputFrame (inChannel, pciAccessFrame))
+				if (SetPCIAccessFrame (inChannel, outputFrame))
 					return true;
 	return false;
 }
@@ -2583,11 +2582,9 @@ bool CNTV2Card::SupportsP2PTransfer (void)
 			case 0xEB0E:  // Corvid 44
 			case 0xEB0D:  // Corvid 88
 				return true;
-				break;
 
 			default:
 				return false;
-				break;
 		}
 	return false;
 }
@@ -2606,11 +2603,9 @@ bool CNTV2Card::SupportsP2PTarget (void)
 			case 0xEB0E:  // Corvid 44
 			case 0xEB0D:  // Corvid 88
 				return true;
-				break;
 
 			default:
 				return false;
-				break;
 		}
 	return false;
 }
@@ -2760,9 +2755,12 @@ bool CNTV2Card::EnableRP188Bypass (const NTV2Channel inChannel)
 }
 
 
-bool CNTV2Card::SetVideoLimiting (NTV2VideoLimiting value)
+bool CNTV2Card::SetVideoLimiting (const NTV2VideoLimiting inValue)
 {
-	return WriteRegister (kRegVidProc1Control, value, kRegMaskVidProcLimiting, kRegShiftVidProcLimiting);
+	if (!NTV2_IS_VALID_VIDEOLIMITING(inValue))
+		return false;
+	CVIDINFO("'" << GetDisplayName() << "' set to " << ::NTV2VideoLimitingToString(inValue));
+	return WriteRegister (kRegVidProc1Control, inValue, kRegMaskVidProcLimiting, kRegShiftVidProcLimiting);
 }
 
 bool CNTV2Card::GetVideoLimiting (NTV2VideoLimiting & outValue)
@@ -2854,9 +2852,10 @@ bool CNTV2Card::SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard i
 	#endif	//	_DEBUG
 	}
 	SetFrameGeometry (frameGeometry, false/*ajaRetail*/, inChannel);
+	CVIDINFO("'" << GetDisplayName() << "' Ch" << DEC(channel+1) << ": set to " << ::NTV2VANCModeToString(inVancMode) << " for " << ::NTV2StandardToString(inStandard) << " and " << ::NTV2FrameGeometryToString(frameGeometry));
 
 	//	Only muck with limiting if not the xena2k board. Xena2k only turns off limiting in VANC area. Active video uses vidproccontrol setting...
-	if (!::NTV2DeviceNeedsRoutingSetup (GetDeviceID ()))
+	if (!::NTV2DeviceNeedsRoutingSetup(GetDeviceID()))
 		SetVideoLimiting (NTV2_IS_VANCMODE_ON (inVancMode) ? NTV2_VIDEOLIMITING_OFF : NTV2_VIDEOLIMITING_LEGALSDI);
 
 	return true;
@@ -2973,6 +2972,7 @@ bool CNTV2Card::SetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode i
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
+	CVIDINFO("'" << GetDisplayName() << "' Ch" << DEC(inChannel+1) << ": Vanc data shift " << (inValue ? "enabled" : "disabled"));
 	return WriteRegister (gChannelToControlRegNum [inChannel], inValue, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
 }
 
@@ -3009,19 +3009,20 @@ bool CNTV2Card::GetPulldownMode (NTV2Channel inChannel, bool & outValue)
 
 bool CNTV2Card::SetMixerVancOutputFromForeground (const UWord inWhichMixer, const bool inFromForegroundSource)
 {
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
-	return WriteRegister (gIndexToVidProcControlRegNum [inWhichMixer], inFromForegroundSource ? 1 : 0, BIT(13), 13);
+	CVIDINFO("'" << GetDisplayName() << "' Mixer" << DEC(inWhichMixer+1) << ": Vanc from " << (inFromForegroundSource ? "FG" : "BG"));
+	return WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inFromForegroundSource ? 1 : 0, kRegMaskVidProcVancSource, kRegShiftVidProcVancSource);
 }
 
 
 bool CNTV2Card::GetMixerVancOutputFromForeground (const UWord inWhichMixer, bool & outIsFromForegroundSource)
 {
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
 
 	ULWord	value	(0);
-	bool	result	(ReadRegister (gIndexToVidProcControlRegNum [inWhichMixer], value, BIT(13), 13));
+	bool	result	(ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], value, kRegMaskVidProcVancSource, kRegShiftVidProcVancSource));
 	if (result)
 		outIsFromForegroundSource = value ? true : false;
 	return result;
@@ -3034,16 +3035,17 @@ bool CNTV2Card::GetMixerVancOutputFromForeground (const UWord inWhichMixer, bool
 
 bool CNTV2Card::SetMixerFGInputControl (const UWord inWhichMixer, const NTV2MixerKeyerInputControl inInputControl)
 {
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
-	return WriteRegister (gIndexToVidProcControlRegNum [inWhichMixer], inInputControl, kK2RegMaskXena2FgVidProcInputControl, kK2RegShiftXena2FgVidProcInputControl);
+	CVIDINFO("'" << GetDisplayName() << "' Mixer" << DEC(inWhichMixer+1) << ": FG input ctrl=" << ::NTV2MixerInputControlToString(inInputControl));
+	return WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inInputControl, kK2RegMaskXena2FgVidProcInputControl, kK2RegShiftXena2FgVidProcInputControl);
 }
 
 
 bool CNTV2Card::GetMixerFGInputControl (const UWord inWhichMixer, NTV2MixerKeyerInputControl & outInputControl)
 {
 	outInputControl = NTV2MIXERINPUTCONTROL_INVALID;
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
 
 	ULWord	value	(0);
@@ -3056,8 +3058,9 @@ bool CNTV2Card::GetMixerFGInputControl (const UWord inWhichMixer, NTV2MixerKeyer
 
 bool CNTV2Card::SetMixerBGInputControl (const UWord inWhichMixer, const NTV2MixerKeyerInputControl inInputControl)
 {
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
+	CVIDINFO("'" << GetDisplayName() << "' Mixer" << DEC(inWhichMixer+1) << ": BG input ctrl=" << ::NTV2MixerInputControlToString(inInputControl));
 	return WriteRegister (gIndexToVidProcControlRegNum [inWhichMixer], inInputControl, kK2RegMaskXena2BgVidProcInputControl, kK2RegShiftXena2BgVidProcInputControl);
 }
 
@@ -3065,11 +3068,11 @@ bool CNTV2Card::SetMixerBGInputControl (const UWord inWhichMixer, const NTV2Mixe
 bool CNTV2Card::GetMixerBGInputControl (const UWord inWhichMixer, NTV2MixerKeyerInputControl & outInputControl)
 {
 	outInputControl = NTV2MIXERINPUTCONTROL_INVALID;
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
 
 	ULWord	value	(0);
-	bool	result	(ReadRegister (gIndexToVidProcControlRegNum [inWhichMixer], value, kK2RegMaskXena2BgVidProcInputControl, kK2RegShiftXena2BgVidProcInputControl));
+	bool	result	(ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], value, kK2RegMaskXena2BgVidProcInputControl, kK2RegShiftXena2BgVidProcInputControl));
 	if (result)
 		outInputControl = static_cast <NTV2MixerKeyerInputControl> (value);
 	return result;
@@ -3078,9 +3081,10 @@ bool CNTV2Card::GetMixerBGInputControl (const UWord inWhichMixer, NTV2MixerKeyer
 
 bool CNTV2Card::SetMixerMode (const UWord inWhichMixer, const NTV2MixerKeyerMode inMode)
 {
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
-	return WriteRegister (gIndexToVidProcControlRegNum [inWhichMixer], inMode, kK2RegMaskXena2VidProcMode, kK2RegShiftXena2VidProcMode);
+	CVIDINFO("'" << GetDisplayName() << "' Mixer" << DEC(inWhichMixer+1) << ": mode=" << ::NTV2MixerKeyerModeToString(inMode));
+	return WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inMode, kK2RegMaskXena2VidProcMode, kK2RegShiftXena2VidProcMode);
 }
 
 
@@ -3088,11 +3092,11 @@ bool CNTV2Card::GetMixerMode (const UWord inWhichMixer, NTV2MixerKeyerMode & out
 {
 	outMode = NTV2MIXERMODE_INVALID;
 
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
 
 	ULWord	value	(0);
-	bool	result	(ReadRegister (gIndexToVidProcControlRegNum [inWhichMixer], value, kK2RegMaskXena2VidProcMode, kK2RegShiftXena2VidProcMode));
+	bool	result	(ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], value, kK2RegMaskXena2VidProcMode, kK2RegShiftXena2VidProcMode));
 	if (result)
 		outMode = static_cast <NTV2MixerKeyerMode> (value);
 	return result;
@@ -3101,16 +3105,17 @@ bool CNTV2Card::GetMixerMode (const UWord inWhichMixer, NTV2MixerKeyerMode & out
 
 bool CNTV2Card::SetMixerCoefficient (const UWord inWhichMixer, const ULWord inMixCoefficient)
 {
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
-	return WriteRegister (gIndexToVidProcMixCoeffRegNum [inWhichMixer], inMixCoefficient);
+	CVIDINFO("'" << GetDisplayName() << "' Mixer" << DEC(inWhichMixer+1) << ": mixCoeff=" << xHEX0N(inMixCoefficient,8));
+	return WriteRegister (gIndexToVidProcMixCoeffRegNum[inWhichMixer], inMixCoefficient);
 }
 
 
 bool CNTV2Card::GetMixerCoefficient (const UWord inWhichMixer, ULWord & outMixCoefficient)
 {
 	outMixCoefficient = 0;
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
 	return ReadRegister (gIndexToVidProcMixCoeffRegNum[inWhichMixer], outMixCoefficient);
 }
@@ -3118,14 +3123,86 @@ bool CNTV2Card::GetMixerCoefficient (const UWord inWhichMixer, ULWord & outMixCo
 
 bool CNTV2Card::GetMixerSyncStatus (const UWord inWhichMixer, bool & outIsSyncOK)
 {
-	if (inWhichMixer >= ::NTV2DeviceGetNumMixers (GetDeviceID ()))
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
 
-	ULWord	value	(0);
-	bool	result	(ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], value));
-	if (result)
-		outIsSyncOK = (value & BIT(27)) ? false : true;
-	return result;
+	bool syncFail (false);
+	if (!CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], syncFail, kRegMaskVidProcSyncFail, kRegShiftVidProcSyncFail))
+		return false;
+	outIsSyncOK = syncFail ? false : true;
+	return true;
+}
+
+bool CNTV2Card::GetMixerFGMatteEnabled (const UWord inWhichMixer, bool & outIsEnabled)
+{
+	outIsEnabled = false;
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
+		return false;
+	return !CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outIsEnabled, kRegMaskVidProcFGMatteEnable, kRegShiftVidProcFGMatteEnable);
+}
+
+bool CNTV2Card::SetMixerFGMatteEnabled (const UWord inWhichMixer, const bool & inIsEnabled)
+{
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
+		return false;
+	return !WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inIsEnabled?1:0, kRegMaskVidProcFGMatteEnable, kRegShiftVidProcFGMatteEnable);
+}
+
+bool CNTV2Card::GetMixerBGMatteEnabled (const UWord inWhichMixer, bool & outIsEnabled)
+{
+	outIsEnabled = false;
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
+		return false;
+	return !CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outIsEnabled, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
+}
+
+bool CNTV2Card::SetMixerBGMatteEnabled (const UWord inWhichMixer, const bool & inIsEnabled)
+{
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
+		return false;
+	return !WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inIsEnabled?1:0, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
+}
+
+static const ULWord	gMatteColorRegs[]	= {	kRegFlatMatteValue /*13*/,	kRegFlatMatte2Value	/*249*/,	kRegFlatMatte3Value /*487*/,	kRegFlatMatte4Value /*490*/, 0, 0, 0, 0};
+
+bool CNTV2Card::GetMixerMatteColor (const UWord inWhichMixer, YCbCr10BitPixel & outYCbCrValue)
+{
+	ULWord	packedValue	(0);
+	outYCbCrValue.cb = outYCbCrValue.y = outYCbCrValue.cr = 0;
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
+		return false;
+	if (!ReadRegister(gMatteColorRegs[inWhichMixer], packedValue))
+		return false;
+
+	outYCbCrValue.cb	=   packedValue        & 0x03FF;
+	outYCbCrValue.y		= ((packedValue >> 10) & 0x03FF) + 0x0040;
+	outYCbCrValue.cr	=  (packedValue >> 20) & 0x03FF;
+	return true;
+}
+
+bool CNTV2Card::SetMixerMatteColor (const UWord inWhichMixer, const YCbCr10BitPixel & inYCbCrValue)
+{
+	YCbCr10BitPixel	ycbcrPixel	(inYCbCrValue);
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
+		return false;
+
+	if (ycbcrPixel.y < 0x40) 
+		ycbcrPixel.y = 0x0;	// clip y
+	else
+		ycbcrPixel.y -= 0x40;
+	ycbcrPixel.y &= 0x3FF;
+	ycbcrPixel.cb &= 0x3FF;
+	ycbcrPixel.cr &= 0x3FF;
+
+	//	Pack three 10-bit values into ULWord...
+	const ULWord packedValue (ycbcrPixel.cb  |  (ycbcrPixel.y << 10)  |  (ycbcrPixel.cr << 20));
+	CVIDINFO("'" << GetDisplayName() << "' Mixer" << DEC(inWhichMixer+1) << ": set to YCbCr=" << DEC(ycbcrPixel.y)
+			<< "|" << DEC(ycbcrPixel.cb) << "|" << DEC(ycbcrPixel.cr) << ":" << HEXN(ycbcrPixel.y,3) << "|"
+			<< HEXN(ycbcrPixel.cb,3) << "|" << HEXN(ycbcrPixel.cr,3) << ", write " << xHEX0N(packedValue,8)
+			<< " into reg " << DEC(gMatteColorRegs[inWhichMixer]));
+
+	//	Write it...
+	return WriteRegister(gMatteColorRegs[inWhichMixer], packedValue);
 }
 
 
@@ -3406,7 +3483,6 @@ bool CNTV2Card::GetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessB
 		case NTV2_CHANNEL1:
 		case NTV2_CHANNEL2:
 			return CNTV2DriverInterface::ReadRegister (kRegGlobalControl, outValue, kRegMaskCCHostBankSelect, kRegShiftCCHostAccessBankSelect);
-			break;
 
 		case NTV2_CHANNEL3:
 		case NTV2_CHANNEL4:
@@ -3661,14 +3737,14 @@ bool CNTV2Card::WriteOutputTimingControl (const ULWord inValue, const UWord inOu
 				WriteRegister (gChannelToOutputTimingCtrlRegNum[NTV2_CHANNEL7], inValue);
 				WriteRegister (gChannelToOutputTimingCtrlRegNum[NTV2_CHANNEL6], inValue);
 				WriteRegister (gChannelToOutputTimingCtrlRegNum[NTV2_CHANNEL5], inValue);
-				/* FALLTHRU */
+				AJA_FALL_THRU;
 			case 4:
 				WriteRegister (gChannelToOutputTimingCtrlRegNum[NTV2_CHANNEL4], inValue);
 				WriteRegister (gChannelToOutputTimingCtrlRegNum[NTV2_CHANNEL3], inValue);
-				/* FALLTHRU */
+				AJA_FALL_THRU;
 			case 2:
 				WriteRegister (gChannelToOutputTimingCtrlRegNum[NTV2_CHANNEL2], inValue);
-				/* FALLTHRU */
+				AJA_FALL_THRU;
 			default:
 				return WriteRegister (gChannelToOutputTimingCtrlRegNum [NTV2_CHANNEL1], inValue);
 		}
@@ -4721,20 +4797,20 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (NTV2InputSource inSource, const 
 {
 	switch (inSource)
 	{
-		case NTV2_INPUTSOURCE_SDI1:		return GetSDIInputVideoFormat (NTV2_CHANNEL1, inIsProgressivePicture);	break;
-		case NTV2_INPUTSOURCE_SDI2:		return GetSDIInputVideoFormat (NTV2_CHANNEL2, inIsProgressivePicture);	break;
-		case NTV2_INPUTSOURCE_SDI3:		return GetSDIInputVideoFormat (NTV2_CHANNEL3, inIsProgressivePicture);	break;
-		case NTV2_INPUTSOURCE_SDI4:		return GetSDIInputVideoFormat (NTV2_CHANNEL4, inIsProgressivePicture);	break;
-		case NTV2_INPUTSOURCE_SDI5:		return GetSDIInputVideoFormat (NTV2_CHANNEL5, inIsProgressivePicture);	break;
-		case NTV2_INPUTSOURCE_SDI6:		return GetSDIInputVideoFormat (NTV2_CHANNEL6, inIsProgressivePicture);	break;
-		case NTV2_INPUTSOURCE_SDI7:		return GetSDIInputVideoFormat (NTV2_CHANNEL7, inIsProgressivePicture);	break;
-		case NTV2_INPUTSOURCE_SDI8:		return GetSDIInputVideoFormat (NTV2_CHANNEL8, inIsProgressivePicture);	break;
-        case NTV2_INPUTSOURCE_HDMI1:	return GetHDMIInputVideoFormat (NTV2_CHANNEL1);							break;
-        case NTV2_INPUTSOURCE_HDMI2:	return GetHDMIInputVideoFormat (NTV2_CHANNEL2);							break;
-        case NTV2_INPUTSOURCE_HDMI3:	return GetHDMIInputVideoFormat (NTV2_CHANNEL3);							break;
-        case NTV2_INPUTSOURCE_HDMI4:	return GetHDMIInputVideoFormat (NTV2_CHANNEL4);							break;
-        case NTV2_INPUTSOURCE_ANALOG1:	return GetAnalogInputVideoFormat ();									break;
-		default:						return NTV2_FORMAT_UNKNOWN;												break;
+		case NTV2_INPUTSOURCE_SDI1:		return GetSDIInputVideoFormat (NTV2_CHANNEL1, inIsProgressivePicture);
+		case NTV2_INPUTSOURCE_SDI2:		return GetSDIInputVideoFormat (NTV2_CHANNEL2, inIsProgressivePicture);
+		case NTV2_INPUTSOURCE_SDI3:		return GetSDIInputVideoFormat (NTV2_CHANNEL3, inIsProgressivePicture);
+		case NTV2_INPUTSOURCE_SDI4:		return GetSDIInputVideoFormat (NTV2_CHANNEL4, inIsProgressivePicture);
+		case NTV2_INPUTSOURCE_SDI5:		return GetSDIInputVideoFormat (NTV2_CHANNEL5, inIsProgressivePicture);
+		case NTV2_INPUTSOURCE_SDI6:		return GetSDIInputVideoFormat (NTV2_CHANNEL6, inIsProgressivePicture);
+		case NTV2_INPUTSOURCE_SDI7:		return GetSDIInputVideoFormat (NTV2_CHANNEL7, inIsProgressivePicture);
+		case NTV2_INPUTSOURCE_SDI8:		return GetSDIInputVideoFormat (NTV2_CHANNEL8, inIsProgressivePicture);
+        case NTV2_INPUTSOURCE_HDMI1:	return GetHDMIInputVideoFormat (NTV2_CHANNEL1);
+        case NTV2_INPUTSOURCE_HDMI2:	return GetHDMIInputVideoFormat (NTV2_CHANNEL2);
+        case NTV2_INPUTSOURCE_HDMI3:	return GetHDMIInputVideoFormat (NTV2_CHANNEL3);
+        case NTV2_INPUTSOURCE_HDMI4:	return GetHDMIInputVideoFormat (NTV2_CHANNEL4);
+        case NTV2_INPUTSOURCE_ANALOG1:	return GetAnalogInputVideoFormat ();
+		default:						return NTV2_FORMAT_UNKNOWN;
 	}
 }
 
@@ -6358,10 +6434,10 @@ bool CNTV2Card::GetColorSpaceUseCustomCoefficient (ULWord & outUseCustomCoeffici
 			&&  ReadRegister (gChannelToCSCoeff12RegNum[inChannel], outUseCustomCoefficient,  kK2RegMaskUseCustomCoefSelect,  kK2RegShiftUseCustomCoefSelect);
 }
 
-bool CNTV2Card::SetColorSpaceMakeAlphaFromKey (const ULWord inMakeAlphaFromKey, const NTV2Channel inChannel)
+bool CNTV2Card::SetColorSpaceMakeAlphaFromKey (const bool inMakeAlphaFromKey, const NTV2Channel inChannel)
 {
 	return !IS_CHANNEL_INVALID(inChannel)
-			&&  WriteRegister (gChannelToCSCoeff12RegNum[inChannel], inMakeAlphaFromKey, kK2RegMaskMakeAlphaFromKeySelect, kK2RegShiftMakeAlphaFromKeySelect);
+			&&  WriteRegister (gChannelToCSCoeff12RegNum[inChannel], inMakeAlphaFromKey?1:0, kK2RegMaskMakeAlphaFromKeySelect, kK2RegShiftMakeAlphaFromKeySelect);
 }
 
 bool CNTV2Card::GetColorSpaceMakeAlphaFromKey (ULWord & outMakeAlphaFromKey, const NTV2Channel inChannel)
@@ -6370,50 +6446,38 @@ bool CNTV2Card::GetColorSpaceMakeAlphaFromKey (ULWord & outMakeAlphaFromKey, con
 			&&  ReadRegister (gChannelToCSCoeff12RegNum[inChannel], outMakeAlphaFromKey, kK2RegMaskMakeAlphaFromKeySelect, kK2RegShiftMakeAlphaFromKeySelect);
 }
 
-
-static const ULWord sRegsCoeffs12[]	=	{	kRegCSCoefficients1_2,		kRegCS2Coefficients1_2,		kRegCS3Coefficients1_2,		kRegCS4Coefficients1_2,
-											kRegCS5Coefficients1_2,		kRegCS6Coefficients1_2,		kRegCS7Coefficients1_2,		kRegCS8Coefficients1_2	};
-static const ULWord sRegsCoeffs34[]	=	{	kRegCSCoefficients3_4,		kRegCS2Coefficients3_4,		kRegCS3Coefficients3_4,		kRegCS4Coefficients3_4,
-											kRegCS5Coefficients3_4,		kRegCS6Coefficients3_4,		kRegCS7Coefficients3_4,		kRegCS8Coefficients3_4	};
-static const ULWord sRegsCoeffs56[]	=	{	kRegCSCoefficients5_6,		kRegCS2Coefficients5_6,		kRegCS3Coefficients5_6,		kRegCS4Coefficients5_6,
-											kRegCS5Coefficients5_6,		kRegCS6Coefficients5_6,		kRegCS7Coefficients5_6,		kRegCS8Coefficients5_6	};
-static const ULWord sRegsCoeffs78[]	=	{	kRegCSCoefficients7_8,		kRegCS2Coefficients7_8,		kRegCS3Coefficients7_8,		kRegCS4Coefficients7_8,
-											kRegCS5Coefficients7_8,		kRegCS6Coefficients7_8,		kRegCS7Coefficients7_8,		kRegCS8Coefficients7_8	};
-static const ULWord sRegsCoeffs910[]=	{	kRegCSCoefficients9_10,		kRegCS2Coefficients9_10,	kRegCS3Coefficients9_10,	kRegCS4Coefficients9_10,
-											kRegCS5Coefficients9_10,	kRegCS6Coefficients9_10,	kRegCS7Coefficients9_10,	kRegCS8Coefficients9_10	};
-
-bool CNTV2Card::SetColorSpaceCustomCoefficients (const ColorSpaceConverterCustomCoefficients & inCoefficients, const NTV2Channel inChannel)
+bool CNTV2Card::SetColorSpaceCustomCoefficients (const NTV2CSCCustomCoeffs & inCoefficients, const NTV2Channel inChannel)
 {
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 
-	return		WriteRegister (sRegsCoeffs12[inChannel],	inCoefficients.Coefficient1,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
-			&&	WriteRegister (sRegsCoeffs12[inChannel],	inCoefficients.Coefficient2,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh)
-			&&	WriteRegister (sRegsCoeffs34[inChannel],	inCoefficients.Coefficient3,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
-			&&	WriteRegister (sRegsCoeffs34[inChannel],	inCoefficients.Coefficient4,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh)
-			&&	WriteRegister (sRegsCoeffs56[inChannel],	inCoefficients.Coefficient5,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
-			&&	WriteRegister (sRegsCoeffs56[inChannel],	inCoefficients.Coefficient6,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh)
-			&&	WriteRegister (sRegsCoeffs78[inChannel],	inCoefficients.Coefficient7,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
-			&&	WriteRegister (sRegsCoeffs78[inChannel],	inCoefficients.Coefficient8,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh)
-			&&	WriteRegister (sRegsCoeffs910[inChannel],	inCoefficients.Coefficient9,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
-			&&	WriteRegister (sRegsCoeffs910[inChannel],	inCoefficients.Coefficient10,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh);
+	return		WriteRegister (gChannelToCSCoeff12RegNum[inChannel],	inCoefficients.Coefficient1,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
+			&&	WriteRegister (gChannelToCSCoeff12RegNum[inChannel],	inCoefficients.Coefficient2,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh)
+			&&	WriteRegister (gChannelToCSCoeff34RegNum[inChannel],	inCoefficients.Coefficient3,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
+			&&	WriteRegister (gChannelToCSCoeff34RegNum[inChannel],	inCoefficients.Coefficient4,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh)
+			&&	WriteRegister (gChannelToCSCoeff56RegNum[inChannel],	inCoefficients.Coefficient5,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
+			&&	WriteRegister (gChannelToCSCoeff56RegNum[inChannel],	inCoefficients.Coefficient6,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh)
+			&&	WriteRegister (gChannelToCSCoeff78RegNum[inChannel],	inCoefficients.Coefficient7,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
+			&&	WriteRegister (gChannelToCSCoeff78RegNum[inChannel],	inCoefficients.Coefficient8,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh)
+			&&	WriteRegister (gChannelToCSCoeff910RegNum[inChannel],	inCoefficients.Coefficient9,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
+			&&	WriteRegister (gChannelToCSCoeff910RegNum[inChannel],	inCoefficients.Coefficient10,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh);
 }
 
-bool CNTV2Card::GetColorSpaceCustomCoefficients(ColorSpaceConverterCustomCoefficients & outCoefficients, NTV2Channel inChannel)
+bool CNTV2Card::GetColorSpaceCustomCoefficients(NTV2CSCCustomCoeffs & outCoefficients, NTV2Channel inChannel)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 
-	return		ReadRegister (sRegsCoeffs12[inChannel],		outCoefficients.Coefficient1,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
-			&&	ReadRegister (sRegsCoeffs12[inChannel],		outCoefficients.Coefficient2,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh)
-			&&	ReadRegister (sRegsCoeffs34[inChannel],		outCoefficients.Coefficient3,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
-			&&	ReadRegister (sRegsCoeffs34[inChannel],		outCoefficients.Coefficient4,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh)
-			&&	ReadRegister (sRegsCoeffs56[inChannel],		outCoefficients.Coefficient5,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
-			&&	ReadRegister (sRegsCoeffs56[inChannel],		outCoefficients.Coefficient6,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh)
-			&&	ReadRegister (sRegsCoeffs78[inChannel],		outCoefficients.Coefficient7,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
-			&&	ReadRegister (sRegsCoeffs78[inChannel],		outCoefficients.Coefficient8,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh)
-			&&	ReadRegister (sRegsCoeffs910[inChannel],	outCoefficients.Coefficient9,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
-			&&	ReadRegister (sRegsCoeffs910[inChannel],	outCoefficients.Coefficient10,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh);
+	return		ReadRegister (gChannelToCSCoeff12RegNum[inChannel],		outCoefficients.Coefficient1,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
+			&&	ReadRegister (gChannelToCSCoeff12RegNum[inChannel],		outCoefficients.Coefficient2,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh)
+			&&	ReadRegister (gChannelToCSCoeff34RegNum[inChannel],		outCoefficients.Coefficient3,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
+			&&	ReadRegister (gChannelToCSCoeff34RegNum[inChannel],		outCoefficients.Coefficient4,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh)
+			&&	ReadRegister (gChannelToCSCoeff56RegNum[inChannel],		outCoefficients.Coefficient5,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
+			&&	ReadRegister (gChannelToCSCoeff56RegNum[inChannel],		outCoefficients.Coefficient6,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh)
+			&&	ReadRegister (gChannelToCSCoeff78RegNum[inChannel],		outCoefficients.Coefficient7,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
+			&&	ReadRegister (gChannelToCSCoeff78RegNum[inChannel],		outCoefficients.Coefficient8,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh)
+			&&	ReadRegister (gChannelToCSCoeff910RegNum[inChannel],	outCoefficients.Coefficient9,	kK2RegMaskCustomCoefficientLow,		kK2RegShiftCustomCoefficientLow)
+			&&	ReadRegister (gChannelToCSCoeff910RegNum[inChannel],	outCoefficients.Coefficient10,	kK2RegMaskCustomCoefficientHigh,	kK2RegShiftCustomCoefficientHigh);
 }
 
 // 12/7/2006	To increase accuracy and decrease generational degredation, the width of the coefficients
@@ -6423,39 +6487,39 @@ bool CNTV2Card::GetColorSpaceCustomCoefficients(ColorSpaceConverterCustomCoeffic
 //				the low coefficient ended on the 0 bit ... the hi coefficient was simply widened to 13 bits
 //				total.  The 2 LSBs of the low coefficient are written *in front* of the 11 MSBs, hence the
 //				shifting and masking below. - jac
-bool CNTV2Card::SetColorSpaceCustomCoefficients12Bit (const ColorSpaceConverterCustomCoefficients & inCoefficients, const NTV2Channel inChannel)
+bool CNTV2Card::SetColorSpaceCustomCoefficients12Bit (const NTV2CSCCustomCoeffs & inCoefficients, const NTV2Channel inChannel)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 
 	ULWord MSBs(inCoefficients.Coefficient1 >> 2);
 	ULWord LSBs(inCoefficients.Coefficient1 & 0x00000003);
-	if (!WriteRegister (sRegsCoeffs12[inChannel],	MSBs | (LSBs << 11),			kK2RegMaskCustomCoefficient12BitLow,	kK2RegShiftCustomCoefficient12BitLow)
-		||  !WriteRegister (sRegsCoeffs12[inChannel],	inCoefficients.Coefficient2,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh))
+	if (!WriteRegister (gChannelToCSCoeff12RegNum[inChannel],	MSBs | (LSBs << 11),			kK2RegMaskCustomCoefficient12BitLow,	kK2RegShiftCustomCoefficient12BitLow)
+		||  !WriteRegister (gChannelToCSCoeff12RegNum[inChannel],	inCoefficients.Coefficient2,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh))
 			return false;
 
 	MSBs = inCoefficients.Coefficient3 >> 2;
 	LSBs = inCoefficients.Coefficient3 & 0x00000003;
-	if (!WriteRegister (sRegsCoeffs34[inChannel],	MSBs | (LSBs << 11),			kK2RegMaskCustomCoefficient12BitLow,	kK2RegShiftCustomCoefficient12BitLow)
-		||  !WriteRegister (sRegsCoeffs34[inChannel],	inCoefficients.Coefficient4,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh))
+	if (!WriteRegister (gChannelToCSCoeff34RegNum[inChannel],	MSBs | (LSBs << 11),			kK2RegMaskCustomCoefficient12BitLow,	kK2RegShiftCustomCoefficient12BitLow)
+		||  !WriteRegister (gChannelToCSCoeff34RegNum[inChannel],	inCoefficients.Coefficient4,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh))
 			return false;
 
 	MSBs = inCoefficients.Coefficient5 >> 2;
 	LSBs = inCoefficients.Coefficient5 & 0x00000003;
-	if (!WriteRegister (sRegsCoeffs56[inChannel],	MSBs | (LSBs << 11),			kK2RegMaskCustomCoefficient12BitLow,	kK2RegShiftCustomCoefficient12BitLow)
-		||  !WriteRegister (sRegsCoeffs56[inChannel],	inCoefficients.Coefficient6,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh))
+	if (!WriteRegister (gChannelToCSCoeff56RegNum[inChannel],	MSBs | (LSBs << 11),			kK2RegMaskCustomCoefficient12BitLow,	kK2RegShiftCustomCoefficient12BitLow)
+		||  !WriteRegister (gChannelToCSCoeff56RegNum[inChannel],	inCoefficients.Coefficient6,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh))
 			return false;
 
 	MSBs = inCoefficients.Coefficient7 >> 2;
 	LSBs = inCoefficients.Coefficient7 & 0x00000003;
-	if (!WriteRegister (sRegsCoeffs78[inChannel],	MSBs | (LSBs << 11),			kK2RegMaskCustomCoefficient12BitLow,	kK2RegShiftCustomCoefficient12BitLow)
-		||  !WriteRegister (sRegsCoeffs78[inChannel],	inCoefficients.Coefficient8,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh))
+	if (!WriteRegister (gChannelToCSCoeff78RegNum[inChannel],	MSBs | (LSBs << 11),			kK2RegMaskCustomCoefficient12BitLow,	kK2RegShiftCustomCoefficient12BitLow)
+		||  !WriteRegister (gChannelToCSCoeff78RegNum[inChannel],	inCoefficients.Coefficient8,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh))
 			return false;
 
 	MSBs = inCoefficients.Coefficient9 >> 2;
 	LSBs = inCoefficients.Coefficient9 & 0x00000003;
-	return WriteRegister (sRegsCoeffs910[inChannel],	MSBs | (LSBs << 11),			kK2RegMaskCustomCoefficient12BitLow,	kK2RegShiftCustomCoefficient12BitLow)
-		&&  WriteRegister (sRegsCoeffs910[inChannel],	inCoefficients.Coefficient10,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh);
+	return WriteRegister (gChannelToCSCoeff910RegNum[inChannel],	MSBs | (LSBs << 11),			kK2RegMaskCustomCoefficient12BitLow,	kK2RegShiftCustomCoefficient12BitLow)
+		&&  WriteRegister (gChannelToCSCoeff910RegNum[inChannel],	inCoefficients.Coefficient10,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh);
 }
 
 // 12/7/2006	To increase accuracy and decrease generational degredation, the width of the coefficients
@@ -6465,47 +6529,47 @@ bool CNTV2Card::SetColorSpaceCustomCoefficients12Bit (const ColorSpaceConverterC
 //				the low coefficient ended on the 0 bit ... the hi coefficient was simply widened to 13 bits
 //				total.  The 2 LSBs of the low coefficient are written *in front* of the 11 MSBs, hence the
 //				shifting and masking below. - jac
-bool CNTV2Card::GetColorSpaceCustomCoefficients12Bit (ColorSpaceConverterCustomCoefficients & outCoefficients, const NTV2Channel inChannel)
+bool CNTV2Card::GetColorSpaceCustomCoefficients12Bit (NTV2CSCCustomCoeffs & outCoefficients, const NTV2Channel inChannel)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 
 	ULWord regVal(0),  MSBs(0),  LSBs(0);
 
-	if (!ReadRegister (sRegsCoeffs12[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
+	if (!ReadRegister (gChannelToCSCoeff12RegNum[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
 		return false;
 	LSBs = (regVal >> 11) & 0x00000003;
 	MSBs = regVal & 0x000007FF;
 	outCoefficients.Coefficient1 = MSBs | LSBs;
 
-	if (!ReadRegister (sRegsCoeffs12[inChannel], outCoefficients.Coefficient2,  kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh)
-		||  !ReadRegister (sRegsCoeffs34[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
+	if (!ReadRegister (gChannelToCSCoeff12RegNum[inChannel], outCoefficients.Coefficient2,  kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh)
+		||  !ReadRegister (gChannelToCSCoeff34RegNum[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
 			return false;
 	LSBs = (regVal >> 11) & 0x00000003;
 	MSBs = regVal & 0x000007FF;
 	outCoefficients.Coefficient3 = MSBs | LSBs;
 
-	if (!ReadRegister (sRegsCoeffs34[inChannel], outCoefficients.Coefficient4,  kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh)
-		||  !ReadRegister (sRegsCoeffs56[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
+	if (!ReadRegister (gChannelToCSCoeff34RegNum[inChannel], outCoefficients.Coefficient4,  kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh)
+		||  !ReadRegister (gChannelToCSCoeff56RegNum[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
 			return false;
 	LSBs = (regVal >> 11) & 0x00000003;
 	MSBs = regVal & 0x000007FF;
 	outCoefficients.Coefficient5 = MSBs | LSBs;
 
-	if (!ReadRegister (sRegsCoeffs56[inChannel], outCoefficients.Coefficient6,  kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh)
-		||  !ReadRegister (sRegsCoeffs78[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
+	if (!ReadRegister (gChannelToCSCoeff56RegNum[inChannel], outCoefficients.Coefficient6,  kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh)
+		||  !ReadRegister (gChannelToCSCoeff78RegNum[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
 			return false;
 	LSBs = (regVal >> 11) & 0x00000003;
 	MSBs = regVal & 0x000007FF;
 	outCoefficients.Coefficient7 = MSBs | LSBs;
 
-	if (!ReadRegister (sRegsCoeffs78[inChannel], outCoefficients.Coefficient8,  kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh)
-		||  !ReadRegister (sRegsCoeffs910[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
+	if (!ReadRegister (gChannelToCSCoeff78RegNum[inChannel], outCoefficients.Coefficient8,  kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh)
+		||  !ReadRegister (gChannelToCSCoeff910RegNum[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
 			return false;
 	LSBs = (regVal >> 11) & 0x00000003;
 	MSBs = regVal & 0x000007FF;
 	outCoefficients.Coefficient9 = MSBs | LSBs;
-	return ReadRegister (sRegsCoeffs910[inChannel], outCoefficients.Coefficient10,  kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh);
+	return ReadRegister (gChannelToCSCoeff910RegNum[inChannel], outCoefficients.Coefficient10,  kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh);
 }
 
 
