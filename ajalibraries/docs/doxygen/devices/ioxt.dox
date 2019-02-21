@@ -68,6 +68,24 @@
 	@par		Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/136/25>
 
+	If, after a firmware update, the IoXT fails to be recognized by the host:
+	-	Be sure power is applied and the power switch is lighted.
+	-	Be sure a good Thunderbolt cable is being used.
+	-	Be sure the AJA driver software is installed and able to be loaded.
+
+	If the IoXT still fails to be recognized, it may be that its main firmware image is corrupt.
+	To force the IoXT to load its fail-safe firmware:
+	-#	With the IoXT’s power cord connected, and a known-good Thunderbolt cable connected from IoXT to host,
+		and with the host powered-on and awake…
+	-#	Press the fail-safe button in the IoXT by inserting an unbent paperclip lead into the hole next to
+		the power button (see photo below).
+	-#	While the fail-safe button is pressed, press the IoXT’s power button. When it lights up, release
+		both the power button and fail-safe button.
+	@image	html	ioxtsafemode.jpg
+
+	If the IoXT is recognized by the host OS and AJA software, you may try re-flashing the firmware.
+	If it’s still not recognized, you should contact <a href="https://www.aja.com/support/contact">AJA Tech Support</a>.
+
 	@par	Environment
 
 	-	Safe Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
