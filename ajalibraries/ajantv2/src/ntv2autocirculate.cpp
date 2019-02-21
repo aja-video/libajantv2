@@ -1184,7 +1184,7 @@ bool CNTV2Card::S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTO
 			return false;	//	Packet import failed
 
 	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(standard));
-	const uint32_t				F2StartLine			(smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD1));
+	const uint32_t				F2StartLine			(smpteLineNumInfo.GetLastLine());	//	F2 VANC starts past last line of F1
 
 	//	We allow callers to override our register-based VPID values...
 	if (!pkts.CountAncillaryDataWithID(0x41,0x01))			//	If no VPID packets in buffer...
