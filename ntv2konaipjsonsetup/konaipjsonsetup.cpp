@@ -53,26 +53,28 @@ bool CKonaIpJsonSetup::openJson(QString fileName)
         return false;
     }
 
+	// default is 2110 unless specified by protocol
+	mIs2110 = true;
+
     const QJsonObject & json = loadDoc.object();
     QJsonValue qjv = json.value("protocol");
     if (qjv != QJsonValue::Undefined)
     {
         QString protocol = qjv.toString();
-        if (protocol == "2110")
+		if (protocol == "2022")
         {
-            mIs2110 = true;
-            cout << "Protocol2110 " << endl;
+			mIs2110 = false;
         }
-        else
-            cout << "Protocol2022 " << endl;
-    }
+	}
 
     if (mIs2110)
     {
+		cout << "-----Protocol2110-----" << endl;
         result = parse2110.SetJson(json, true);
     }
     else
     {
+		cout << "-----Protocol2022-----" << endl;
         qjv = json.value("enable2022_7");
         if (qjv != QJsonValue::Undefined)
         {
