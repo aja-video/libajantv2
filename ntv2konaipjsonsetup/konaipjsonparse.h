@@ -32,7 +32,8 @@ public:
     ~CKonaIpJsonParse2110();
 
     bool SetJson(const QJsonObject& topObj, bool verbose);
-    bool SetJsonNetwork(const QJsonObject& obj);
+	bool SetJsonProtocol(const QJsonObject& obj);
+	bool SetJsonNetwork(const QJsonObject& obj);
 
     bool SetJsonReceiveVideo(const QJsonArray& jsonArray);
     bool SetJsonReceiveAudio(const QJsonArray& jsonArray);
@@ -89,7 +90,8 @@ public:
     bool                    m_verbose;
 
     QJsonObject             m_topJson;
-    QJsonObject             m_netJson;
+	QJsonObject             m_protocolJson;
+	QJsonObject             m_netJson;
     QJsonArray              m_receiveVideoJson;
     QJsonArray              m_receiveAudioJson;
 	QJsonArray              m_receiveAncJson;
