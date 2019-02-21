@@ -341,6 +341,7 @@ public:
 	bool		ExtractRxVideoConfigFromSDP(std::string sdp, rx_2110Config & rxConfig);
 	bool		ExtractRxVideoConfigFromSDP(std::string sdp, multiRx_2110Config & rxConfig);
 	bool		ExtractRxAudioConfigFromSDP(std::string sdp, rx_2110Config & rxConfig);
+	bool		ExtractRxAncConfigFromSDP(std::string sdp, rx_2110Config & rxConfig);
 
     /**
         @brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels

@@ -1716,19 +1716,19 @@ string CNTV2Config2110::GetSDPUrl(const eSFP sfp, const NTV2Stream stream)
 
     switch (stream)
     {
-		case NTV2_VIDEO1_STREAM:    namePost = "Video1.sdp";	break;
-		case NTV2_VIDEO2_STREAM:    namePost = "Video2.sdp";	break;
-		case NTV2_VIDEO3_STREAM:    namePost = "Video3.sdp";	break;
-		case NTV2_VIDEO4_STREAM:    namePost = "Video4.sdp";	break;
-		case NTV2_AUDIO1_STREAM:    namePost = "Audio1.sdp";	break;
-		case NTV2_AUDIO2_STREAM:    namePost = "Audio2.sdp";	break;
-		case NTV2_AUDIO3_STREAM:    namePost = "Audio3.sdp";	break;
-		case NTV2_AUDIO4_STREAM:    namePost = "Audio4.sdp";	break;
-		case NTV2_ANC1_STREAM:		namePost = "Anc1.sdp";		break;
-		case NTV2_ANC2_STREAM:		namePost = "Anc2.sdp";		break;
-		case NTV2_ANC3_STREAM:		namePost = "Anc3.sdp";		break;
-		case NTV2_ANC4_STREAM:		namePost = "Anc4.sdp";		break;
-		case NTV2_VIDEO4K_STREAM:	namePost = "Video4K.sdp";	break;
+		case NTV2_VIDEO1_STREAM:    namePost = "video1.sdp";	break;
+		case NTV2_VIDEO2_STREAM:    namePost = "video2.sdp";	break;
+		case NTV2_VIDEO3_STREAM:    namePost = "video3.sdp";	break;
+		case NTV2_VIDEO4_STREAM:    namePost = "video4.sdp";	break;
+		case NTV2_AUDIO1_STREAM:    namePost = "audio1.sdp";	break;
+		case NTV2_AUDIO2_STREAM:    namePost = "audio2.sdp";	break;
+		case NTV2_AUDIO3_STREAM:    namePost = "audio3.sdp";	break;
+		case NTV2_AUDIO4_STREAM:    namePost = "audio4.sdp";	break;
+		case NTV2_ANC1_STREAM:		namePost = "anc1.sdp";		break;
+		case NTV2_ANC2_STREAM:		namePost = "anc2.sdp";		break;
+		case NTV2_ANC3_STREAM:		namePost = "anc3.sdp";		break;
+		case NTV2_ANC4_STREAM:		namePost = "anc4.sdp";		break;
+		case NTV2_VIDEO4K_STREAM:	namePost = "video4K.sdp";	break;
 
         default:                    namePost = "";         break;
     }
@@ -1824,19 +1824,19 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
 
 		switch (stream)
 		{
-			case NTV2_VIDEO1_STREAM:    filename += "Video1.sdp";   break;
-			case NTV2_VIDEO2_STREAM:    filename += "Video2.sdp";   break;
-			case NTV2_VIDEO3_STREAM:    filename += "Video3.sdp";   break;
-			case NTV2_VIDEO4_STREAM:    filename += "Video4.sdp";   break;
-			case NTV2_AUDIO1_STREAM:    filename += "Audio1.sdp";   break;
-			case NTV2_AUDIO2_STREAM:    filename += "Audio2.sdp";   break;
-			case NTV2_AUDIO3_STREAM:    filename += "Audio3.sdp";   break;
-			case NTV2_AUDIO4_STREAM:    filename += "Audio4.sdp";   break;
-			case NTV2_ANC1_STREAM:		filename += "Anc1.sdp";		break;
-			case NTV2_ANC2_STREAM:		filename += "Anc2.sdp";		break;
-			case NTV2_ANC3_STREAM:		filename += "Anc3.sdp";		break;
-			case NTV2_ANC4_STREAM:		filename += "Anc4.sdp";		break;
-			case NTV2_VIDEO4K_STREAM:	filename += "Video4K.sdp";  break;
+			case NTV2_VIDEO1_STREAM:    filename += "video1.sdp";   break;
+			case NTV2_VIDEO2_STREAM:    filename += "video2.sdp";   break;
+			case NTV2_VIDEO3_STREAM:    filename += "video3.sdp";   break;
+			case NTV2_VIDEO4_STREAM:    filename += "video4.sdp";   break;
+			case NTV2_AUDIO1_STREAM:    filename += "audio1.sdp";   break;
+			case NTV2_AUDIO2_STREAM:    filename += "audio2.sdp";   break;
+			case NTV2_AUDIO3_STREAM:    filename += "audio3.sdp";   break;
+			case NTV2_AUDIO4_STREAM:    filename += "audio4.sdp";   break;
+			case NTV2_ANC1_STREAM:		filename += "anc1.sdp";		break;
+			case NTV2_ANC2_STREAM:		filename += "anc2.sdp";		break;
+			case NTV2_ANC3_STREAM:		filename += "anc3.sdp";		break;
+			case NTV2_ANC4_STREAM:		filename += "anc4.sdp";		break;
+			case NTV2_VIDEO4K_STREAM:	filename += "video4K.sdp";  break;
 			default:                    filename += "";				break;
 		}
         rv = PushSDP(filename,sdp);
@@ -2753,6 +2753,122 @@ bool CNTV2Config2110::ExtractRxAudioConfigFromSDP(std::string sdp, rx_2110Config
 				else if ((atoi(tokens[0].c_str()) == 0) && (atoi(tokens[1].c_str()) == 125))
 					rxConfig.audioPktInterval = PACKET_INTERVAL_125uS;
 			}
+		}
+	}
+
+	rxConfig.rxMatch = rxMatch;
+	return true;
+}
+
+
+bool CNTV2Config2110::ExtractRxAncConfigFromSDP(std::string sdp, rx_2110Config & rxConfig)
+{
+	if (sdp.empty())
+	{
+		mIpErrorCode = NTV2IpErrSDPEmpty;
+		return false;
+	}
+
+	// break into a vector of lines and then into tokenw
+	sdpLines.clear();
+	stringstream ss(sdp);
+	string to;
+
+	while(getline(ss,to,'\n'))
+	{
+		sdpLines.push_back(to);
+	}
+
+	// rudimentary check it is an sdp file
+	int index;
+	string value;
+
+	// is this really an SDP
+	index = getDescriptionValue(0,"v=",value);
+	if (index == -1)
+	{
+		mIpErrorCode = NTV2IpErrSDPInvalid;
+		return false;
+	}
+
+	// originator
+	index = getDescriptionValue(index,"o=",value);
+	if (index == -1)
+	{
+		mIpErrorCode = NTV2IpErrSDPInvalid;
+		return false;
+	}
+
+	uint32_t rxMatch = 0;
+
+	tokens = split(value.c_str(), ' ');
+	if ((tokens.size() >= 6) && (tokens[3] == "IN") && (tokens[4] == "IP4"))
+	{
+		if (!tokens[5].empty())
+		{
+			rxConfig.sourceIP = tokens[5];
+			rxMatch |= RX_MATCH_2110_SOURCE_IP;
+		}
+	}
+
+	int rv = getDescriptionValue(0,"c=IN",value);
+	if (rv >= index)
+	{
+		tokens = split(value.c_str(), ' ');
+		if (tokens.size() >= 2)
+		{
+			tokens = split(tokens[1].c_str(), '/');
+			if ((tokens.size() >= 1) && !tokens[0].empty())
+			{
+				rxConfig.destIP = tokens[0];
+				rxMatch |= RX_MATCH_2110_DEST_IP;
+			}
+		}
+	}
+
+	index = getDescriptionValue(index,"m=video",value);
+	if (index == -1)
+	{
+		// does not contain video
+		mIpErrorCode = NTV2IpErrSDPNoVideo;
+		return false;
+	}
+	tokens = split(value.c_str(), ' ');
+	if ((tokens.size() >= 1) && !tokens[0].empty())
+	{
+		rxConfig.destPort    = atoi(tokens[0].c_str());
+		rxMatch |= RX_MATCH_2110_DEST_PORT;
+	}
+	if ((tokens.size() >= 3) && !tokens[2].empty())
+	{
+		rxConfig.payloadType = atoi(tokens[2].c_str());
+		rxMatch |= RX_MATCH_2110_PAYLOAD;
+	}
+
+	rv = getDescriptionValue(index,"c=IN",value);
+	if (rv >= index)
+	{
+		// this overwrites if found before
+		tokens = split(value.c_str(), ' ');
+		if (tokens.size() >= 2)
+		{
+			tokens = split(tokens[1].c_str(), '/');
+			if ((tokens.size() >= 1) && !tokens[0].empty())
+			{
+				rxConfig.destIP = tokens[0];
+				rxMatch |= RX_MATCH_2110_DEST_IP;
+			}
+		}
+	}
+
+	rv = getDescriptionValue(index,"a=rtpmap",value);
+	if (rv > index)
+	{
+		tokens = split(value.c_str(), ' ');
+		if ((tokens.size() >= 1) && !tokens[0].empty())
+		{
+			rxConfig.payloadType = atoi(tokens[0].c_str());
+			rxMatch |= RX_MATCH_2110_PAYLOAD;
 		}
 	}
 

@@ -188,8 +188,9 @@ AJAStatus AJAAncillaryData_Timecode_ATC::ParsePayloadData (void)
 
 AJAStatus AJAAncillaryData_Timecode_ATC::GeneratePayloadData (void)
 {
-	m_DID = AJAAncillaryData_SMPTE12M_DID;
-	m_SID = AJAAncillaryData_SMPTE12M_SID;
+	SetDID(AJAAncillaryData_SMPTE12M_DID);
+	SetSID(AJAAncillaryData_SMPTE12M_SID);
+	SetLocationVideoSpace(AJAAncillaryDataSpace_HANC);
 
 	AJAStatus status = AllocDataMemory(AJAAncillaryData_SMPTE12M_PayloadSize);
 	if (AJA_FAILURE(status))
@@ -237,9 +238,11 @@ AJAStatus AJAAncillaryData_Timecode_ATC::GeneratePayloadData (void)
 
 
 
-AJAStatus AJAAncillaryData_Timecode_ATC::SetDBB1PayloadType (AJAAncillaryData_Timecode_ATC_DBB1PayloadType type)
+AJAStatus AJAAncillaryData_Timecode_ATC::SetDBB1PayloadType (const AJAAncillaryData_Timecode_ATC_DBB1PayloadType inType)
 {
-	return SetDBB1 (uint8_t (type));
+	if (inType != AJAAncillaryData_Timecode_ATC_DBB1PayloadType_VITC2)
+		SetLocationLineNumber(9);	//	All but Field2 should go on line 9
+	return SetDBB1(uint8_t(inType));
 }
 
 

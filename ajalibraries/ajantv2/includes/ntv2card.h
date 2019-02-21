@@ -3283,6 +3283,22 @@ public:
 					via the AUTOCIRCULATE_TRANSFER::SetBuffers function(s). Bad addresses and/or sizes can cause crashes.
 		@note		Do not call this method with an ::NTV2Channel that's in the ::NTV2_AUTOCIRCULATE_DISABLED state.
 		@note		The calling thread will block until the transfer completes (or fails).
+		@note		For <b>capture</b>, there should be an available frame buffer on the device waiting to be transferred to the host.
+					Call CNTV2Card::AutoCirculateGetStatus, and check AUTOCIRCULATE_STATUS::HasAvailableInputFrame.
+		@note		For <b>playout</b>, there should be a free frame buffer on the device to accommodate the new frame being transferred.
+					Call CNTV2Card::AutoCirculateGetStatus, and check AUTOCIRCULATE_STATUS::CanAcceptMoreOutputFrames.
+		@note		For IP devices running S2110 firmware, this method will automatically insert <b>VPID</b> and <b>RP188</b>
+					timecode packets into the outgoing RTP Anc streams, even if CNTV2Card::AutoCirculateInitForOutput was called
+					without ::AUTOCIRCULATE_WITH_ANC, or if Anc buffers weren't specified in the ::AUTOCIRCULATE_TRANSFER object.
+					This default behavior can be overridden or disabled:
+					-	To disable the default insertion of VPID, call CNTV2Card::SetSDIOutVPID, passing zeroes for the VPID values.
+					-	To override the default <b>VPID</b> packets, call CNTV2Card::AutoCirculateInitForOutput with ::AUTOCIRCULATE_WITH_ANC,
+						and insert your own <b>VPID</b> packet(s) into the ::AUTOCIRCULATE_TRANSFER object's Anc buffers.
+					-	To disable the default insertion of <b>RP188</b>, nullify (clear) the AUTOCIRCULATE_TRANSFER::acOutputTimeCodes
+						array storage.
+					-	To override the default <b>RP188</b> packet(s), be sure CNTV2Card::AutoCirculateInitForOutput was called with
+						::AUTOCIRCULATE_WITH_ANC, and insert your own <b>RP188</b> packets into the ::AUTOCIRCULATE_TRANSFER object's
+						Anc buffers.
 		@see		CNTV2Card::DMAReadFrame, CNTV2Card::DMAWriteFrame, \ref aboutautocirculate
 	**/
 	AJA_VIRTUAL bool	AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & transferInfo);
