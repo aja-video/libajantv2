@@ -46,6 +46,12 @@ bool CKonaIpJsonParse2110::SetJson(const QJsonObject& topObj, bool verbose)
     //
     // Network
     //
+	if (topObj.contains("protocol"))
+	{
+		QJsonObject obj2110 = topObj["protocol"].toObject();
+		success = SetJsonProtocol(obj2110) && success;
+	}
+
     if (topObj.contains("network2110"))
     {
         QJsonObject obj2110 = topObj["network2110"].toObject();
@@ -89,8 +95,9 @@ bool CKonaIpJsonParse2110::SetJson(const QJsonObject& topObj, bool verbose)
 	}
 
     QJsonObject newTopObj;
-    newTopObj.insert("network2110", m_netJson);
-    newTopObj.insert("receiveVideo2110", m_receiveVideoJson);
+	newTopObj.insert("protocol", m_protocolJson);
+	newTopObj.insert("network2110", m_netJson);
+	newTopObj.insert("receiveVideo2110", m_receiveVideoJson);
 	newTopObj.insert("receiveAudio2110", m_receiveAudioJson);
 	newTopObj.insert("receiveAnc2110", m_receiveAncJson);
 	newTopObj.insert("transmitVideo2110", m_transmitVideoJson);
@@ -99,6 +106,12 @@ bool CKonaIpJsonParse2110::SetJson(const QJsonObject& topObj, bool verbose)
 	m_topJson = newTopObj;
 
     return success;
+}
+
+bool CKonaIpJsonParse2110::SetJsonProtocol(const QJsonObject& topObj)
+{
+	m_protocolJson = topObj;
+	return true;
 }
 
 bool CKonaIpJsonParse2110::SetJsonNetwork(const QJsonObject& topObj)
@@ -615,20 +628,20 @@ bool CKonaIpJsonParse2110::StructToJsonReceiveVideo(const ReceiveVideoData2110& 
     {
         QJsonObject obj;
         obj.insert("sfp1Enable",        QJsonValue(QString(GetEnable(rVideo2110.rxVideoCh[i].sfpEnable[0]))));
-        obj.insert("sfp1srcPort",       QJsonValue((int)rVideo2110.rxVideoCh[i].sourcePort[0]));
-        obj.insert("sfp1DestPort",      QJsonValue((int)rVideo2110.rxVideoCh[i].destPort[0]));
+		obj.insert("sfp1srcPort",       QJsonValue(static_cast<int>(rVideo2110.rxVideoCh[i].sourcePort[0])));
+		obj.insert("sfp1DestPort",      QJsonValue(static_cast<int>(rVideo2110.rxVideoCh[i].destPort[0])));
         obj.insert("sfp1srcIPAddress",  QJsonValue(QString(rVideo2110.rxVideoCh[i].sourceIP[0])));
         obj.insert("sfp1DestIPAddress", QJsonValue(QString(rVideo2110.rxVideoCh[i].destIP[0])));
 
         obj.insert("sfp2Enable",        QJsonValue(QString(GetEnable(rVideo2110.rxVideoCh[i].sfpEnable[1]))));
-        obj.insert("sfp2srcPort",       QJsonValue((int)rVideo2110.rxVideoCh[i].sourcePort[1]));
-        obj.insert("sfp2DestPort",      QJsonValue((int)rVideo2110.rxVideoCh[i].destPort[1]));
+		obj.insert("sfp2srcPort",       QJsonValue(static_cast<int>(rVideo2110.rxVideoCh[i].sourcePort[1])));
+		obj.insert("sfp2DestPort",      QJsonValue(static_cast<int>(rVideo2110.rxVideoCh[i].destPort[1])));
         obj.insert("sfp2srcIPAddress",  QJsonValue(QString(rVideo2110.rxVideoCh[i].sourceIP[1])));
         obj.insert("sfp2DestIPAddress", QJsonValue(QString(rVideo2110.rxVideoCh[i].destIP[1])));
 
-        obj.insert("vlan",              QJsonValue((int)rVideo2110.rxVideoCh[i].vlan));
-        obj.insert("ssrc",              QJsonValue((int)rVideo2110.rxVideoCh[i].ssrc));
-        obj.insert("payloadType",       QJsonValue((int)rVideo2110.rxVideoCh[i].payloadType));
+		obj.insert("vlan",              QJsonValue(static_cast<int>(rVideo2110.rxVideoCh[i].vlan)));
+		obj.insert("ssrc",              QJsonValue(static_cast<int>(rVideo2110.rxVideoCh[i].ssrc)));
+		obj.insert("payloadType",       QJsonValue(static_cast<int>(rVideo2110.rxVideoCh[i].payloadType)));
         obj.insert("enable",            QJsonValue(QString(GetEnable(rVideo2110.rxVideoCh[i].enable))));
         obj.insert("stream",            QJsonValue(QString(GetVideoStream(rVideo2110.rxVideoCh[i].stream))));
 
@@ -715,21 +728,21 @@ bool CKonaIpJsonParse2110::StructToJsonReceiveAudio(const ReceiveAudioData2110& 
     {
         QJsonObject obj;
         obj.insert("sfp1Enable",            QJsonValue(QString(GetEnable(rAudio2110.rxAudioCh[i].sfpEnable[0]))));
-        obj.insert("sfp1srcPort",           QJsonValue((int)rAudio2110.rxAudioCh[i].sourcePort[0]));
-        obj.insert("sfp1DestPort",          QJsonValue((int)rAudio2110.rxAudioCh[i].destPort[0]));
+		obj.insert("sfp1srcPort",           QJsonValue(static_cast<int>(rAudio2110.rxAudioCh[i].sourcePort[0])));
+		obj.insert("sfp1DestPort",          QJsonValue(static_cast<int>(rAudio2110.rxAudioCh[i].destPort[0])));
         obj.insert("sfp1srcIPAddress",      QJsonValue(QString(rAudio2110.rxAudioCh[i].sourceIP[0])));
         obj.insert("sfp1DestIPAddress",     QJsonValue(QString(rAudio2110.rxAudioCh[i].destIP[0])));
 
         obj.insert("sfp2Enable",            QJsonValue(QString(GetEnable(rAudio2110.rxAudioCh[i].sfpEnable[1]))));
-        obj.insert("sfp2srcPort",           QJsonValue((int)rAudio2110.rxAudioCh[i].sourcePort[1]));
-        obj.insert("sfp2DestPort",          QJsonValue((int)rAudio2110.rxAudioCh[i].destPort[1]));
+		obj.insert("sfp2srcPort",           QJsonValue(static_cast<int>(rAudio2110.rxAudioCh[i].sourcePort[1])));
+		obj.insert("sfp2DestPort",          QJsonValue(static_cast<int>(rAudio2110.rxAudioCh[i].destPort[1])));
         obj.insert("sfp2srcIPAddress",      QJsonValue(QString(rAudio2110.rxAudioCh[i].sourceIP[1])));
         obj.insert("sfp2DestIPAddress",     QJsonValue(QString(rAudio2110.rxAudioCh[i].destIP[1])));
 
-        obj.insert("vlan",                  QJsonValue((int)rAudio2110.rxAudioCh[i].vlan));
-        obj.insert("ssrc",                  QJsonValue((int)rAudio2110.rxAudioCh[i].ssrc));
-        obj.insert("payloadType",           QJsonValue((int)rAudio2110.rxAudioCh[i].payloadType));
-        obj.insert("numAudioChannels",      QJsonValue((int)rAudio2110.rxAudioCh[i].numAudioChannels));
+		obj.insert("vlan",                  QJsonValue(static_cast<int>(rAudio2110.rxAudioCh[i].vlan)));
+		obj.insert("ssrc",                  QJsonValue(static_cast<int>(rAudio2110.rxAudioCh[i].ssrc)));
+		obj.insert("payloadType",           QJsonValue(static_cast<int>(rAudio2110.rxAudioCh[i].payloadType)));
+		obj.insert("numAudioChannels",      QJsonValue(static_cast<int>(rAudio2110.rxAudioCh[i].numAudioChannels)));
 
         obj.insert("audioPktInterval",      QJsonValue(QString(GetAudioPktInterval(rAudio2110.rxAudioCh[i].audioPktInterval))));
         obj.insert("enable",                QJsonValue(QString(GetEnable(rAudio2110.rxAudioCh[i].enable))));
@@ -811,20 +824,20 @@ bool CKonaIpJsonParse2110::StructToJsonReceiveAnc(const ReceiveAncData2110& rAnc
 	{
 		QJsonObject obj;
 		obj.insert("sfp1Enable",            QJsonValue(QString(GetEnable(rAnc2110.rxAncCh[i].sfpEnable[0]))));
-		obj.insert("sfp1srcPort",           QJsonValue((int)rAnc2110.rxAncCh[i].sourcePort[0]));
-		obj.insert("sfp1DestPort",          QJsonValue((int)rAnc2110.rxAncCh[i].destPort[0]));
+		obj.insert("sfp1srcPort",           QJsonValue(static_cast<int>(rAnc2110.rxAncCh[i].sourcePort[0])));
+		obj.insert("sfp1DestPort",          QJsonValue(static_cast<int>(rAnc2110.rxAncCh[i].destPort[0])));
 		obj.insert("sfp1srcIPAddress",      QJsonValue(QString(rAnc2110.rxAncCh[i].sourceIP[0])));
 		obj.insert("sfp1DestIPAddress",     QJsonValue(QString(rAnc2110.rxAncCh[i].destIP[0])));
 
 		obj.insert("sfp2Enable",            QJsonValue(QString(GetEnable(rAnc2110.rxAncCh[i].sfpEnable[1]))));
-		obj.insert("sfp2srcPort",           QJsonValue((int)rAnc2110.rxAncCh[i].sourcePort[1]));
-		obj.insert("sfp2DestPort",          QJsonValue((int)rAnc2110.rxAncCh[i].destPort[1]));
+		obj.insert("sfp2srcPort",           QJsonValue(static_cast<int>(rAnc2110.rxAncCh[i].sourcePort[1])));
+		obj.insert("sfp2DestPort",          QJsonValue(static_cast<int>(rAnc2110.rxAncCh[i].destPort[1])));
 		obj.insert("sfp2srcIPAddress",      QJsonValue(QString(rAnc2110.rxAncCh[i].sourceIP[1])));
 		obj.insert("sfp2DestIPAddress",     QJsonValue(QString(rAnc2110.rxAncCh[i].destIP[1])));
 
-		obj.insert("vlan",                  QJsonValue((int)rAnc2110.rxAncCh[i].vlan));
-		obj.insert("ssrc",                  QJsonValue((int)rAnc2110.rxAncCh[i].ssrc));
-		obj.insert("payloadType",           QJsonValue((int)rAnc2110.rxAncCh[i].payloadType));
+		obj.insert("vlan",                  QJsonValue(static_cast<int>(rAnc2110.rxAncCh[i].vlan)));
+		obj.insert("ssrc",                  QJsonValue(static_cast<int>(rAnc2110.rxAncCh[i].ssrc)));
+		obj.insert("payloadType",           QJsonValue(static_cast<int>(rAnc2110.rxAncCh[i].payloadType)));
 
 		obj.insert("enable",                QJsonValue(QString(GetEnable(rAnc2110.rxAncCh[i].enable))));
 		obj.insert("stream",                QJsonValue(QString(GetAudioStream(rAnc2110.rxAncCh[i].stream))));
@@ -903,19 +916,19 @@ bool CKonaIpJsonParse2110::StructToJsonTransmitVideo(const TransmitVideoData2110
     for (uint32_t i=0; i<tVideo2110.numTxVideoChannels; i++)
     {
         QJsonObject obj;
-        obj.insert("sfp1LocalPort",         QJsonValue((int)tVideo2110.txVideoCh[i].localPort[0]));
+		obj.insert("sfp1LocalPort",         QJsonValue(static_cast<int>(tVideo2110.txVideoCh[i].localPort[0])));
         obj.insert("sfp1RemoteIPAddress",   QJsonValue(QString(tVideo2110.txVideoCh[i].remoteIP[0])));
-        obj.insert("sfp1RemotePort",        QJsonValue((int)tVideo2110.txVideoCh[i].remotePort[0]));
+		obj.insert("sfp1RemotePort",        QJsonValue(static_cast<int>(tVideo2110.txVideoCh[i].remotePort[0])));
         obj.insert("sfp1Enable",            QJsonValue(QString(GetEnable(tVideo2110.txVideoCh[i].sfpEnable[0]))));
 
-        obj.insert("sfp2LocalPort",         QJsonValue((int)tVideo2110.txVideoCh[i].localPort[1]));
+		obj.insert("sfp2LocalPort",         QJsonValue(static_cast<int>(tVideo2110.txVideoCh[i].localPort[1])));
         obj.insert("sfp2RemoteIPAddress",   QJsonValue(QString(tVideo2110.txVideoCh[i].remoteIP[1])));
-        obj.insert("sfp2RemotePort",        QJsonValue((int)tVideo2110.txVideoCh[i].remotePort[1]));
+		obj.insert("sfp2RemotePort",        QJsonValue(static_cast<int>(tVideo2110.txVideoCh[i].remotePort[1])));
         obj.insert("sfp2Enable",            QJsonValue(QString(GetEnable(tVideo2110.txVideoCh[i].sfpEnable[1]))));
 
-        obj.insert("ttl",                   QJsonValue((int)tVideo2110.txVideoCh[i].ttl));
-        obj.insert("ssrc",                  QJsonValue((int)tVideo2110.txVideoCh[i].ssrc));
-        obj.insert("payloadType",           QJsonValue((int)tVideo2110.txVideoCh[i].payloadType));
+		obj.insert("ttl",                   QJsonValue(static_cast<int>(tVideo2110.txVideoCh[i].ttl)));
+		obj.insert("ssrc",                  QJsonValue(static_cast<int>(tVideo2110.txVideoCh[i].ssrc)));
+		obj.insert("payloadType",           QJsonValue(static_cast<int>(tVideo2110.txVideoCh[i].payloadType)));
 
         obj.insert("enable",                QJsonValue(QString(GetEnable(tVideo2110.txVideoCh[i].enable))));
         obj.insert("stream",                QJsonValue(QString(GetVideoStream(tVideo2110.txVideoCh[i].stream))));
@@ -997,21 +1010,21 @@ bool CKonaIpJsonParse2110::StructToJsonTransmitAudio(const TransmitAudioData2110
     for (uint32_t i=0; i<tAudio2110.numTxAudioChannels; i++)
     {
         QJsonObject obj;
-        obj.insert("sfp1LocalPort",         QJsonValue((int)tAudio2110.txAudioCh[i].localPort[0]));
+		obj.insert("sfp1LocalPort",         QJsonValue(static_cast<int>(tAudio2110.txAudioCh[i].localPort[0])));
         obj.insert("sfp1RemoteIPAddress",   QJsonValue(QString(tAudio2110.txAudioCh[i].remoteIP[0])));
-        obj.insert("sfp1RemotePort",        QJsonValue((int)tAudio2110.txAudioCh[i].remotePort[0]));
+		obj.insert("sfp1RemotePort",        QJsonValue(static_cast<int>(tAudio2110.txAudioCh[i].remotePort[0])));
         obj.insert("sfp1Enable",            QJsonValue(QString(GetEnable(tAudio2110.txAudioCh[i].sfpEnable[0]))));
 
-        obj.insert("sfp2LocalPort",         QJsonValue((int)tAudio2110.txAudioCh[i].localPort[1]));
+		obj.insert("sfp2LocalPort",         QJsonValue(static_cast<int>(tAudio2110.txAudioCh[i].localPort[1])));
         obj.insert("sfp2RemoteIPAddress",   QJsonValue(QString(tAudio2110.txAudioCh[i].remoteIP[1])));
-        obj.insert("sfp2RemotePort",        QJsonValue((int)tAudio2110.txAudioCh[i].remotePort[1]));
+		obj.insert("sfp2RemotePort",        QJsonValue(static_cast<int>(tAudio2110.txAudioCh[i].remotePort[1])));
         obj.insert("sfp2Enable",            QJsonValue(QString(GetEnable(tAudio2110.txAudioCh[i].sfpEnable[1]))));
 
-        obj.insert("ttl",                   QJsonValue((int)tAudio2110.txAudioCh[i].ttl));
-        obj.insert("ssrc",                  QJsonValue((int)tAudio2110.txAudioCh[i].ssrc));
-        obj.insert("payloadType",           QJsonValue((int)tAudio2110.txAudioCh[i].payloadType));
-        obj.insert("numAudioChannels",      QJsonValue((int)tAudio2110.txAudioCh[i].numAudioChannels));
-        obj.insert("firstAudioChannel",     QJsonValue((int)tAudio2110.txAudioCh[i].firstAudioChannel));
+		obj.insert("ttl",                   QJsonValue(static_cast<int>(tAudio2110.txAudioCh[i].ttl)));
+		obj.insert("ssrc",                  QJsonValue(static_cast<int>(tAudio2110.txAudioCh[i].ssrc)));
+		obj.insert("payloadType",           QJsonValue(static_cast<int>(tAudio2110.txAudioCh[i].payloadType)));
+		obj.insert("numAudioChannels",      QJsonValue(static_cast<int>(tAudio2110.txAudioCh[i].numAudioChannels)));
+		obj.insert("firstAudioChannel",     QJsonValue(static_cast<int>(tAudio2110.txAudioCh[i].firstAudioChannel)));
 
         obj.insert("audioPktInterval",      QJsonValue(QString(GetAudioPktInterval(tAudio2110.txAudioCh[i].audioPktInterval))));
         obj.insert("enable",                QJsonValue(QString(GetEnable(tAudio2110.txAudioCh[i].enable))));
@@ -1085,19 +1098,19 @@ bool CKonaIpJsonParse2110::StructToJsonTransmitAnc(const TransmitAncData2110& tA
 	for (uint32_t i=0; i<tAnc2110.numTxAncChannels; i++)
 	{
 		QJsonObject obj;
-		obj.insert("sfp1LocalPort",         QJsonValue((int)tAnc2110.txAncCh[i].localPort[0]));
+		obj.insert("sfp1LocalPort",         QJsonValue(static_cast<int>(tAnc2110.txAncCh[i].localPort[0])));
 		obj.insert("sfp1RemoteIPAddress",   QJsonValue(QString(tAnc2110.txAncCh[i].remoteIP[0])));
-		obj.insert("sfp1RemotePort",        QJsonValue((int)tAnc2110.txAncCh[i].remotePort[0]));
+		obj.insert("sfp1RemotePort",        QJsonValue(static_cast<int>(tAnc2110.txAncCh[i].remotePort[0])));
 		obj.insert("sfp1Enable",            QJsonValue(QString(GetEnable(tAnc2110.txAncCh[i].sfpEnable[0]))));
 
-		obj.insert("sfp2LocalPort",         QJsonValue((int)tAnc2110.txAncCh[i].localPort[1]));
+		obj.insert("sfp2LocalPort",         QJsonValue(static_cast<int>(tAnc2110.txAncCh[i].localPort[1])));
 		obj.insert("sfp2RemoteIPAddress",   QJsonValue(QString(tAnc2110.txAncCh[i].remoteIP[1])));
-		obj.insert("sfp2RemotePort",        QJsonValue((int)tAnc2110.txAncCh[i].remotePort[1]));
+		obj.insert("sfp2RemotePort",        QJsonValue(static_cast<int>(tAnc2110.txAncCh[i].remotePort[1])));
 		obj.insert("sfp2Enable",            QJsonValue(QString(GetEnable(tAnc2110.txAncCh[i].sfpEnable[1]))));
 
-		obj.insert("ttl",                   QJsonValue((int)tAnc2110.txAncCh[i].ttl));
-		obj.insert("ssrc",                  QJsonValue((int)tAnc2110.txAncCh[i].ssrc));
-		obj.insert("payloadType",           QJsonValue((int)tAnc2110.txAncCh[i].payloadType));
+		obj.insert("ttl",                   QJsonValue(static_cast<int>(tAnc2110.txAncCh[i].ttl)));
+		obj.insert("ssrc",                  QJsonValue(static_cast<int>(tAnc2110.txAncCh[i].ssrc)));
+		obj.insert("payloadType",           QJsonValue(static_cast<int>(tAnc2110.txAncCh[i].payloadType)));
 
 		obj.insert("enable",                QJsonValue(QString(GetEnable(tAnc2110.txAncCh[i].enable))));
 		obj.insert("stream",                QJsonValue(QString(GetAncStream(tAnc2110.txAncCh[i].stream))));
@@ -1147,6 +1160,7 @@ bool CKonaIpJsonParse2110::StructToJson(const NetworkData2110& net2110,
 	StructToJsonTransmitAnc(m_transmitAnc2110, ancTransJson);
 	m_transmitAncJson = ancTransJson;
 
+	topObj.insert("protocol", QJsonValue(QString("2110")));
 	topObj.insert("network2110", m_netJson);
 	topObj.insert("receiveVideo2110", m_receiveVideoJson);
 	topObj.insert("receiveAudio2110", m_receiveAudioJson);
