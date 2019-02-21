@@ -2761,6 +2761,122 @@ bool CNTV2Config2110::ExtractRxAudioConfigFromSDP(std::string sdp, rx_2110Config
 }
 
 
+bool CNTV2Config2110::ExtractRxAncConfigFromSDP(std::string sdp, rx_2110Config & rxConfig)
+{
+	if (sdp.empty())
+	{
+		mIpErrorCode = NTV2IpErrSDPEmpty;
+		return false;
+	}
+
+	// break into a vector of lines and then into tokenw
+	sdpLines.clear();
+	stringstream ss(sdp);
+	string to;
+
+	while(getline(ss,to,'\n'))
+	{
+		sdpLines.push_back(to);
+	}
+
+	// rudimentary check it is an sdp file
+	int index;
+	string value;
+
+	// is this really an SDP
+	index = getDescriptionValue(0,"v=",value);
+	if (index == -1)
+	{
+		mIpErrorCode = NTV2IpErrSDPInvalid;
+		return false;
+	}
+
+	// originator
+	index = getDescriptionValue(index,"o=",value);
+	if (index == -1)
+	{
+		mIpErrorCode = NTV2IpErrSDPInvalid;
+		return false;
+	}
+
+	uint32_t rxMatch = 0;
+
+	tokens = split(value.c_str(), ' ');
+	if ((tokens.size() >= 6) && (tokens[3] == "IN") && (tokens[4] == "IP4"))
+	{
+		if (!tokens[5].empty())
+		{
+			rxConfig.sourceIP = tokens[5];
+			rxMatch |= RX_MATCH_2110_SOURCE_IP;
+		}
+	}
+
+	int rv = getDescriptionValue(0,"c=IN",value);
+	if (rv >= index)
+	{
+		tokens = split(value.c_str(), ' ');
+		if (tokens.size() >= 2)
+		{
+			tokens = split(tokens[1].c_str(), '/');
+			if ((tokens.size() >= 1) && !tokens[0].empty())
+			{
+				rxConfig.destIP = tokens[0];
+				rxMatch |= RX_MATCH_2110_DEST_IP;
+			}
+		}
+	}
+
+	index = getDescriptionValue(index,"m=video",value);
+	if (index == -1)
+	{
+		// does not contain video
+		mIpErrorCode = NTV2IpErrSDPNoVideo;
+		return false;
+	}
+	tokens = split(value.c_str(), ' ');
+	if ((tokens.size() >= 1) && !tokens[0].empty())
+	{
+		rxConfig.destPort    = atoi(tokens[0].c_str());
+		rxMatch |= RX_MATCH_2110_DEST_PORT;
+	}
+	if ((tokens.size() >= 3) && !tokens[2].empty())
+	{
+		rxConfig.payloadType = atoi(tokens[2].c_str());
+		rxMatch |= RX_MATCH_2110_PAYLOAD;
+	}
+
+	rv = getDescriptionValue(index,"c=IN",value);
+	if (rv >= index)
+	{
+		// this overwrites if found before
+		tokens = split(value.c_str(), ' ');
+		if (tokens.size() >= 2)
+		{
+			tokens = split(tokens[1].c_str(), '/');
+			if ((tokens.size() >= 1) && !tokens[0].empty())
+			{
+				rxConfig.destIP = tokens[0];
+				rxMatch |= RX_MATCH_2110_DEST_IP;
+			}
+		}
+	}
+
+	rv = getDescriptionValue(index,"a=rtpmap",value);
+	if (rv > index)
+	{
+		tokens = split(value.c_str(), ' ');
+		if ((tokens.size() >= 1) && !tokens[0].empty())
+		{
+			rxConfig.payloadType = atoi(tokens[0].c_str());
+			rxMatch |= RX_MATCH_2110_PAYLOAD;
+		}
+	}
+
+	rxConfig.rxMatch = rxMatch;
+	return true;
+}
+
+
 std::string CNTV2Config2110::rateToString(NTV2FrameRate rate)
 {
     string rateString;
