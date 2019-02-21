@@ -3,31 +3,32 @@
 
 @section	ntv2ccgrabber		NTV2CCGrabber Demo
 
-This command-line program "grabs" CEA-608 or CEA-708 closed-caption data that may be present on a video signal,
-streams it to standard output, and optionally "burns" it into the video.
+This command-line program “grabs” CEA-608 (and “608-over-708”) closed-caption data that may be present on a
+video signal, streams it to standard output, and optionally “burns” it into the video.
 
 @image	html	ntv2ccgrabber.png
 
 This shows a screenshot of video from a device while <b>ntv2ccgrabber</b> runs with the <b>--burn</b> option.
-The status display turns red if caption data is missing or can't be decoded, green when present and being decoded
+The status display turns red if caption data is missing or can’t be decoded, green when present and being decoded
 properly, and shows other useful status information.
 
 The NTV2CCGrabber class demonstrates...
--	how to use the CNTV2CaptionDecoder608 and CNTV2CaptionDecoder708 classes provided in the "libajacc" library
+-	the CNTV2CaptionDecoder608 and CNTV2CaptionDecoder708 classes provided in the “libajacc” library
 	to decode CEA-608 or CEA-708 closed-caption data that may be present on a video stream;
--	how to use the new custom ancillary data insertion feature of newer AJA devices (if available);
--	how to use an NTV2 device's mixer/keyer widget to superimpose graphics with alpha (transparency) over live video;
--	how to use AutoCirculate to efficiently stream video, and react to input signal changes, including loss of video,
-	or change of video format;
--	how to use an AJACircularBuffer and the producer/consumer model with AutoCirculate;
--	how to "burn" decoded captions into a frame buffer at the correct on-screen location with the proper attributes
+-	the custom ancillary data extraction feature of AJA devices (if available);
+-	using the AJAAncillaryList and AJAAncillaryData classes;
+-	using a mixer/keyer widget to superimpose graphics with alpha (transparency) over live video;
+-	how to react to input video format changes, including loss of signal, and keep running;
+-	using an AJACircularBuffer and the producer/consumer model with AutoCirculate;
+-	how to “burn” captions into a frame buffer at the correct on-screen location with the proper attributes
 	(color, transparency, etc.).
 
-The demo's operation can be controlled by pressing certain keys on the keyboard while it's running.
+The demo’s operation can be controlled by pressing certain keys on the keyboard while it’s running.
 -	Press '1' thru '4' to change displayed caption channel to CC1 thru CC4.
 -	Press '5' thru '8' to change displayed caption channel to TX1 thru TX4.
 -	Press 'H' or 'h' to toggle the heads-up-display on or off
--	Press 'V' or 'v' to toggle VANC on or off (experimental)
+-	Press 'S' or 's' to change the “608 source” on-the-fly.
+-	Press 'O' or 'o' to change the output on-the-fly.
 -	Press 'Q' or 'q' to exit the demo
 
 @note	This demo behaves differently from the others in that it cannot be stopped using Ctrl-C.
@@ -54,7 +55,7 @@ Displays captured CEA608 captions from incoming video.
 	                                                     Specify 'list' or '?' to display the valid inputs for the device.
 
 	-t tcSpec                                            Specifies the timecode to use while capturing.
-	--tcsource=tcSpec                                    By default, ntv2ccgrabber doesn't capture timecode.
+	--tcsource=tcSpec                                    By default, ntv2ccgrabber doesn’t capture timecode.
 	                                                     Specify 'list' or '?' to display the valid timecode inputs for the device.
 
 	-p formatSpec                                        Specifies the FrameStore pixel format to use.
@@ -79,11 +80,17 @@ Displays captured CEA608 captions from incoming video.
 	                                                          608anc  -  Use CC data from CEA608 packet(s) found using anc extractor.
 	                                                          708anc  -  Use CC data found inside CEA708 packet found using anc extractor.
 
-	-b                                                   Enables playout of captured video with decoded captions "burned-in" to the video.
-	--burn                                               By default, ntv2ccgrabber doesn't burn-in captions into captured video.
+	-output=stream|screen|scc|stats                      Specifies what gets written into the standard output stream:
+	                                                          stream  -  A continuous stream of caption characters, as decoded.
+	                                                          screen  -  Periodically shows the on-screen captions.
+	                                                          scc     -  Emits Scenarist Closed Caption formatted data.
+	                                                          stats   -  Periodically emits statistics from the CEA-608 decoder.
+
+	-b                                                   Enables playout of captured video with decoded captions “burned-in” to the video.
+	--burn                                               By default, ntv2ccgrabber doesn’t burn-in captions into captured video.
 
 	--audio                                              Enables capturing embedded audio.
-	                                                     By default, ntv2ccgrabber doesn't capture embedded audio.
+	                                                     By default, ntv2ccgrabber doesn’t capture embedded audio.
 
 	-m, --multiChannel                                   Shares the device with other programs, performs minimal routing changes, and if the
 	                                                     device is capable of it, configures it to allow the use of different video formats
