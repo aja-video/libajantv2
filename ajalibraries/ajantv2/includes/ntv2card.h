@@ -1420,6 +1420,7 @@ public:
 		@param[in]	inValue		Specifies the new byte offset into the device's output audio buffer.
 		@param[in]	inChannel	Specifies the NTV2Channel (output audio embedder) of interest.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::ReadAudioLastOut, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool	WriteAudioLastOut (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -1431,6 +1432,7 @@ public:
 								embedder in its output audio buffer.
 		@param[in]	inChannel	Specifies the NTV2Channel (output audio embedder) of interest.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::WriteAudioLastOut, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool	ReadAudioLastOut (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -1489,6 +1491,7 @@ public:
 										Specify 'false' to stop producing audio samples ("stopped").
 		@note		This function doesn't alter the Audio Output Buffer Pointer ("play head") position.
 					To reset the "play head" back to the beginning of the buffer, use CNTV2Card::SetAudioOutputReset instead.
+		@see		CNTV2Card::GetAudioOutputPause, CNTV2Card::StartAudioOutput, CNTV2Card::StopAudioOutput, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		SetAudioOutputPause (const NTV2AudioSystem inAudioSystem, const bool inEnablePlayout);
 
@@ -1500,6 +1503,7 @@ public:
 		@param[in]	inAudioSystem		Specifies the Audio System of interest.
 		@param[in]	outIsPaused			Receives 'true' if audio output is paused, or 'false' if audio
 										playout is running normally.
+		@see		CNTV2Card::SetAudioOutputPause, CNTV2Card::IsAudioOutputRunning, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		GetAudioOutputPause (const NTV2AudioSystem inAudioSystem, bool & outIsPaused);
 
@@ -1546,6 +1550,7 @@ public:
 									If false, the Audio System will not capture samples.
 		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
 					configures the Audio System automatically.
+		@see		CNTV2Card::GetAudioCaptureEnable, \ref audiocapture
 	**/
 	AJA_VIRTUAL bool		SetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, const bool inEnable);
 
@@ -1556,6 +1561,7 @@ public:
 		@param[in]	outEnable			Receives 'true' if the Audio System will capture samples to memory when
 										not in reset mode;  otherwise 'false' if the Audio System is inhibited from
 										capturing samples.
+		@see		CNTV2Card::SetAudioCaptureEnable, \ref audiocapture
 	**/
 	AJA_VIRTUAL bool		GetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, bool & outEnable);
 
@@ -1590,6 +1596,7 @@ public:
 									Values from 0 thru 8159 are valid, which gives a maximum delay of about
 									1.36 seconds.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetAudioInputDelay, \ref audiocapture
 	**/
 	AJA_VIRTUAL bool		SetAudioInputDelay (const NTV2AudioSystem inAudioSystem, const ULWord inDelay);
 
@@ -1601,6 +1608,7 @@ public:
 									audio buffer on the device. This can be translated into microseconds by multiplying
 									the received value by 166.7.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetAudioInputDelay, \ref audiocapture
 	**/
 	AJA_VIRTUAL bool		GetAudioInputDelay (const NTV2AudioSystem inAudioSystem, ULWord & outDelay);
 
@@ -1613,6 +1621,7 @@ public:
 									about 166.7 microseconds (when configured for 16 audio channels). Values from 0 to 8159
 									are valid, which gives a maximum delay of about 1.36 seconds.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetAudioOutputDelay, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		SetAudioOutputDelay (const NTV2AudioSystem inAudioSystem, const ULWord inDelay);
 
@@ -1624,6 +1633,7 @@ public:
 									audio buffer on the device. This can be translated into microseconds by multiplying
 									the received value by 166.7.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetAudioOutputDelay, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		GetAudioOutputDelay (const NTV2AudioSystem inAudioSystem, ULWord & outDelay);
 
@@ -1637,6 +1647,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@note		This setting, if non-PCM, overrides per-audio-channel-pair PCM control on those devices that support it
 					(see ::NTV2DeviceCanDoPCMControl).
+		@see		CNTV2Card::GetAudioPCMControl, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		SetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const bool inIsNonPCM);
 
@@ -1648,6 +1659,7 @@ public:
 		@param[out]	outIsNonPCM		Receives true if all outgoing audio channel pairs are currently flagged as non-PCM;
 									otherwise receives false if the non-PCM indicator is set "Off".
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::SetAudioPCMControl, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		GetAudioPCMControl (const NTV2AudioSystem inAudioSystem, bool & outIsNonPCM);
 
@@ -1663,6 +1675,7 @@ public:
 		@note		Call ::NTV2DeviceCanDoPCMControl to determine if per-audio-channel-pair PCM control capability is available on this device.
 		@note		This function has no effect if the Audio-System-wide non-PCM control setting is set to non-PCM.
 					(See the two-parameter overloaded version of this function.)
+		@see		CNTV2Card::GetAudioPCMControl, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		SetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPair inChannelPair, const bool inIsNonPCM);
 
@@ -1673,6 +1686,7 @@ public:
 		@param[in]	inNonPCMChannelPairs	Specifies the audio channel pairs whose non-PCM indicators will be set "On".
 		@return		True if successful; otherwise false.
 		@note		Call ::NTV2DeviceCanDoPCMControl to determine if this device supports per-audio-channel-pair PCM control.
+		@see		CNTV2Card::GetAudioPCMControl, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		SetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPairs & inNonPCMChannelPairs);
 
@@ -1688,6 +1702,7 @@ public:
 		@note		Call ::NTV2DeviceCanDoPCMControl to determine if this device supports per-audio-channel-pair PCM control.
 		@note		This function's answer is irrelevant if the Audio-System-wide non-PCM control setting is set to non-PCM.
 					(See the two-parameter overloaded version of this function.)
+		@see		CNTV2Card::SetAudioPCMControl, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		GetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPair inChannelPair, bool & outIsNonPCM);
 
@@ -1699,6 +1714,7 @@ public:
 		@param[out]	outNonPCMChannelPairs	Receives the ::NTV2AudioChannelPairs that are currently being flagged as non-PCM.
 		@return		True if successful; otherwise false.
 		@note		Call ::NTV2DeviceCanDoPCMControl to determine if this device supports per-audio-channel-pair PCM control.
+		@see		CNTV2Card::SetAudioPCMControl, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		GetAudioPCMControl (const NTV2AudioSystem inAudioSystem, NTV2AudioChannelPairs & outNonPCMChannelPairs);
 
@@ -1709,6 +1725,7 @@ public:
 		@param[in]	inChannelPair	Specifies the ::NTV2AudioChannelPair of interest.
 		@param[out]	outIsPresent	Receives true if the ::NTV2AudioChannelPair is present;  otherwise false if it's not present.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::GetDetectedAudioChannelPairs, \ref audiocapture
 	**/
 	AJA_VIRTUAL bool		IsAudioChannelPairPresent (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPair inChannelPair, bool & outIsPresent);
 
@@ -1721,6 +1738,7 @@ public:
 		@note		NTV2 device firmware performs this detection using a simple method of detecting the presence of the Audio Group's data packet.
 					It does not perform detailed inspection of the packet -- i.e., checking bits b1/b2 of the AES sub-frame per SMPTE 272, nor
 					checking the V/U/C/P bits per SMPTE 299.
+		@see		CNTV2Card::IsAudioChannelPairPresent, \ref audiocapture
 	**/
 	AJA_VIRTUAL bool		GetDetectedAudioChannelPairs (const NTV2AudioSystem inAudioSystem, NTV2AudioChannelPairs & outDetectedChannelPairs);
 
@@ -1729,6 +1747,7 @@ public:
 		@brief		Answers which AES/EBU audio channel pairs are present on the device.
 		@param[out]	outDetectedChannelPairs		Receives the set of unique audio channel pairs that are present in any of the device's AES/EBU inputs.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::IsAudioChannelPairPresent, \ref audiocapture
 	**/
 	AJA_VIRTUAL bool		GetDetectedAESChannelPairs (NTV2AudioChannelPairs & outDetectedChannelPairs);
 
@@ -1882,6 +1901,7 @@ public:
 		@param[out]	outSrcAudioSystem		Receives the NTV2AudioSystem that is currently driving the given AES audio output channel quad.
 		@param[out]	outSrcAudioChannels		Receives the audio channel quad from the Audio System that's sourcing the given AES audio output channel quad.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::SetAESOutputSource, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		GetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, NTV2AudioSystem & outSrcAudioSystem, NTV2Audio4ChannelSelect & outSrcAudioChannels);
 
@@ -1893,6 +1913,7 @@ public:
 		@param[in]	inSrcAudioSystem		Specifies the NTV2AudioSystem that should drive the given AES audio output channel quad.
 		@param[in]	inSrcAudioChannels		Specifies the audio channel quad from the given Audio System that should drive the given AES audio output channel quad.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::GetAESOutputSource, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		SetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, const NTV2AudioSystem inSrcAudioSystem, const NTV2Audio4ChannelSelect inSrcAudioChannels);
 
@@ -1904,6 +1925,7 @@ public:
 		@bug		The \c inChannelPair parameter really should be an ::NTV2AudioChannelPair.
 					The \c inAudioSystem parameter really should be an ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::GetAudioOutputMonitorSource, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inChannelPair, const NTV2Channel inAudioSystem = NTV2_CHANNEL1);
 
@@ -1915,6 +1937,7 @@ public:
 		@bug		The \c outChannelPair parameter really should be an ::NTV2AudioChannelPair.
 					The \c outAudioSystem parameter really should be an ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::SetAudioOutputMonitorSource, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		GetAudioOutputMonitorSource (NTV2AudioMonitorSelect & outChannelPair, NTV2Channel & outAudioSystem);
 
@@ -1924,6 +1947,7 @@ public:
 		@param[in]	inSDIOutputConnector	Specifies the SDI output of interest.
 		@param[out]	outIsEnabled			Receives 'true' if the audio output embedder is enabled;  otherwise 'false' if disabled.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetAudioOutputEmbedderState, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		GetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, bool & outIsEnabled);
 
@@ -1934,26 +1958,47 @@ public:
 		@param[out]	inEnable				Specify 'true' to enable the audio output embedder (normal operation).
 											Specify 'false' to disable the embedder.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetAudioOutputEmbedderState, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		SetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, const bool & inEnable);
 
 	/**
 		@brief		Answers with the current state of the audio output erase mode for the given Audio System.
 					If enabled, the Audio System automatically writes zeroes into the audio output buffer behind the output read head during playout.
-		@param[in]	inAudioSystem			Specifies the SDI output of interest.
+		@param[in]	inAudioSystem			Specifies the audio system of interest.
 		@param[out]	outEraseModeEnabled		Receives 'true' if enabled;  otherwise 'false' if disabled (normal operation).
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetAudioOutputEraseMode, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		GetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, bool & outEraseModeEnabled);
 
 	/**
 		@brief		Enables or disables output erase mode for the given Audio System, which, when enabled, automatically writes zeroes into the audio output buffer
 					behind the output read head.
-		@param[in]	inAudioSystem			Specifies the SDI output of interest.
+		@param[in]	inAudioSystem			Specifies the audio system of interest.
 		@param[in]	inEraseModeEnabled		Specify 'true' to enable output erase mode;  otherwise 'false' for normal operation.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetAudioOutputEraseMode, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, const bool & inEraseModeEnabled);
+
+	/**
+		@brief		Answers with the current state of the AES Sync Mode bit for the given Audio System's output.
+		@param[in]	inAudioSystem			Specifies the audio system of interest.
+		@param[out]	outAESSyncModeBitSet	Receives 'true' if the bit is set;  otherwise 'false' (normal operation).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetAudioOutputAESSyncModeBit, \ref audioplayout
+	**/
+	AJA_VIRTUAL bool		GetAudioOutputAESSyncModeBit (const NTV2AudioSystem inAudioSystem, bool & outAESSyncModeBitSet);
+
+	/**
+		@brief		Sets or clears the AES Sync Mode bit for the given Audio System's output.
+		@param[in]	inAudioSystem			Specifies the audio system of interest.
+		@param[in]	inAESSyncModeBitSet		Specify 'true' to set the AES Sync Mode bit;  otherwise 'false' for normal operation.
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetAudioOutputAESSyncModeBit, \ref audioplayout
+	**/
+	AJA_VIRTUAL bool		SetAudioOutputAESSyncModeBit (const NTV2AudioSystem inAudioSystem, const bool & inAESSyncModeBitSet);
 
 	AJA_VIRTUAL bool NTV2_SHOULD_BE_DEPRECATED(WriteAudioSource (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1));
 	AJA_VIRTUAL bool NTV2_SHOULD_BE_DEPRECATED(ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1));
