@@ -3556,7 +3556,7 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 			(m2110TxAudioData.numTxAudioChannels == 0) &&
 			(m2110TxAncData.numTxAncChannels == 0) &&
             (m2110RxVideoData.numRxVideoChannels == 0) &&
-			//(m2110RxAncData.numRxAncChannels == 0) &&
+			(m2110RxAncData.numRxAncChannels == 0) &&
 			(m2110RxAudioData.numRxAudioChannels == 0))
         {
             for (uint32_t i=0; i<4; i++)
@@ -3918,6 +3918,63 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                     AgentIsAlive();
                 }
             }
+
+			// See if any receive anc channels need configuring/enabling
+			for (uint32_t i=0; i<m2110RxAncData.numRxAncChannels; i++)
+			{
+				if (memcmp(&m2110RxAncData.rxAncCh[i], &s2110RxAncDataLast->rxAncCh[i], sizeof(RxAncChData2110)) != 0 ||
+					vRegConfigStreamRefreshValue & (1 << (i+ NTV2_ANC1_STREAM)) ||
+					ipServiceForceConfig)
+				{
+					rxConfig.init();
+					if (m2110RxAncData.rxAncCh[i].sfpEnable[1])
+					{
+						// Use SFP 2 params
+						sfp = SFP_2;
+						rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
+						rxConfig.sourceIP = m2110RxAncData.rxAncCh[i].sourceIP[1];
+						rxConfig.destIP = m2110RxAncData.rxAncCh[i].destIP[1];
+						rxConfig.sourcePort = m2110RxAncData.rxAncCh[i].sourcePort[1];
+						rxConfig.destPort = m2110RxAncData.rxAncCh[i].destPort[1];
+						sfp = SFP_2;
+					}
+					else if (m2110RxAncData.rxAncCh[i].sfpEnable[0])
+					{
+						// Use SFP 1 params
+						sfp = SFP_1;
+						rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
+						rxConfig.sourceIP = m2110RxAncData.rxAncCh[i].sourceIP[0];
+						rxConfig.destIP = m2110RxAncData.rxAncCh[i].destIP[0];
+						rxConfig.sourcePort = m2110RxAncData.rxAncCh[i].sourcePort[0];
+						rxConfig.destPort = m2110RxAncData.rxAncCh[i].destPort[0];
+					}
+					rxConfig.payloadType = m2110RxAncData.rxAncCh[i].payloadType;
+
+					// Start by turning off the anc receiver
+					printf("SetRxAncStream off %d\n", m2110RxAncData.rxAncCh[i].stream);
+					config2110->SetRxStreamEnable(sfp, m2110RxAncData.rxAncCh[i].stream, false);
+
+					if (config2110->SetRxStreamConfiguration(sfp, m2110RxAncData.rxAncCh[i].stream, rxConfig) == true)
+					{
+						printf("SetRxStreamConfiguration Anc OK\n");
+						s2110RxAncDataLast->rxAncCh[i] = m2110RxAncData.rxAncCh[i];
+						SetIPError((NTV2Channel)m2110RxAncData.rxAncCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
+
+						// Process the enable
+						if (m2110RxAncData.rxAncCh[i].enable)
+						{
+							printf("SetRxAncStream on %d\n", m2110RxAncData.rxAncCh[i].stream);
+							config2110->SetRxStreamEnable(sfp, m2110RxAncData.rxAncCh[i].stream, true);
+						}
+					}
+					else
+					{
+						printf("SetRxStreamConfiguration Anc ERROR %s\n", config2110->getLastError().c_str());
+						SetIPError((NTV2Channel)m2110RxAncData.rxAncCh[i].stream, kErrNetworkConfig, config2110->getLastErrorCode());
+					}
+					AgentIsAlive();
+				}
+			}
         }
         
         // See if network needs configuring

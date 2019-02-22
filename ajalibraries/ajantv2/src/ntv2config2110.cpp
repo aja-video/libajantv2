@@ -275,19 +275,28 @@ bool  CNTV2Config2110::DisableNetworkInterface(const eSFP sfp)
 
 bool CNTV2Config2110::SetRxStreamConfiguration(const eSFP sfp, const NTV2Stream stream, const rx_2110Config & rxConfig)
 {
-    if (GetSFPActive(sfp) == false)
-    {
-        mIpErrorCode = NTV2IpErrSFP1NotConfigured;
-        return false;
-    }
+	if ((StreamType(stream) == VIDEO_STREAM) ||
+		(StreamType(stream) == AUDIO_STREAM) ||
+		(StreamType(stream) == ANC_STREAM))
+	{
+    	if (GetSFPActive(sfp) == false)
+    	{
+        	mIpErrorCode = NTV2IpErrSFP1NotConfigured;
+        	return false;
+    	}
 
-    SetRxStreamEnable(sfp, stream, false);
+    	SetRxStreamEnable(sfp, stream, false);
 
-    ResetDepacketizerStream(stream);
-    SetupDepacketizerStream(stream,rxConfig);
-    SetupDecapsulatorStream(sfp, stream, rxConfig);
-
-    return true;
+    	ResetDepacketizerStream(stream);
+    	SetupDepacketizerStream(stream,rxConfig);
+    	SetupDecapsulatorStream(sfp, stream, rxConfig);
+		return true;
+	}
+	else
+	{
+		mIpErrorCode = NTV2IpErrInvalidChannel;
+		return false;
+	}
 }
 
 void  CNTV2Config2110::SetupDecapsulatorStream(const eSFP sfp, const NTV2Stream stream, const rx_2110Config & rxConfig)
@@ -540,7 +549,9 @@ void CNTV2Config2110::GetVideoFormatForRxTx(const NTV2Stream stream, NTV2VideoFo
 
 bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP sfp, const NTV2Stream stream, rx_2110Config & rxConfig)
 {
-	if ((StreamType(stream) == VIDEO_STREAM) || (StreamType(stream) == AUDIO_STREAM))
+	if ((StreamType(stream) == VIDEO_STREAM) ||
+		(StreamType(stream) == AUDIO_STREAM) ||
+		(StreamType(stream) == ANC_STREAM))
 	{
 		uint32_t    val;
 		uint32_t	depacketizerBaseAddr;
@@ -599,14 +610,20 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP sfp, const NTV2Stream
 			rxConfig.audioPktInterval = (((samples >> 8) & 0xff) == 6) ? PACKET_INTERVAL_125uS : PACKET_INTERVAL_1mS;
 			rxConfig.numAudioChannels = samples & 0xff;
 		}
+		return true;
 	}
-
-    return true;
+	else
+	{
+		mIpErrorCode = NTV2IpErrInvalidChannel;
+		return false;
+	}
 }
 
 bool CNTV2Config2110::SetRxStreamEnable(const eSFP sfp, const NTV2Stream stream, bool enable)
 {
-	if ((StreamType(stream) == VIDEO_STREAM) || (StreamType(stream) == AUDIO_STREAM))
+	if ((StreamType(stream) == VIDEO_STREAM) ||
+		(StreamType(stream) == AUDIO_STREAM) ||
+		(StreamType(stream) == ANC_STREAM))
 	{
 		if (GetSFPActive(sfp) == false)
 		{
@@ -651,16 +668,22 @@ bool CNTV2Config2110::SetRxStreamEnable(const eSFP sfp, const NTV2Stream stream,
 			DisableDecapsulatorStream(sfp, stream);
 			DisableDepacketizerStream(stream);
 		}
+		return true;
 	}
-
-    return true;
+	else
+	{
+		mIpErrorCode = NTV2IpErrInvalidChannel;
+		return false;
+	}
 }
 
 bool CNTV2Config2110::GetRxStreamEnable(const eSFP sfp, const NTV2Stream stream, bool & enabled)
 {
 	enabled = false;
 
-	if ((StreamType(stream) == VIDEO_STREAM) || (StreamType(stream) == AUDIO_STREAM))
+	if ((StreamType(stream) == VIDEO_STREAM) ||
+		(StreamType(stream) == AUDIO_STREAM) ||
+		(StreamType(stream) == ANC_STREAM))
 	{
 		// get address
 		uint32_t  decapBaseAddr = GetDecapsulatorAddress(sfp, stream);
@@ -668,9 +691,13 @@ bool CNTV2Config2110::GetRxStreamEnable(const eSFP sfp, const NTV2Stream stream,
 		uint32_t val;
 		mDevice.ReadRegister(kRegDecap_chan_enable + decapBaseAddr, val);
 		enabled = (val & 0x01);
+		return true;
 	}
-
-    return true;
+	else
+	{
+		mIpErrorCode = NTV2IpErrInvalidChannel;
+		return false;
+	}
 }
 
 bool CNTV2Config2110::GetRxPacketCount(const NTV2Stream stream, uint32_t & packets)
@@ -1433,6 +1460,18 @@ uint32_t CNTV2Config2110::GetDecapsulatorAddress(eSFP sfp, NTV2Stream stream)
         case NTV2_AUDIO4_STREAM:
             offset = 0x70;
             break;
+		case NTV2_ANC1_STREAM:
+			offset = 0x80;
+			break;
+		case NTV2_ANC2_STREAM:
+			offset = 0x90;
+			break;
+		case NTV2_ANC3_STREAM:
+			offset = 0xA0;
+			break;
+		case NTV2_ANC4_STREAM:
+			offset = 0xB0;
+			break;
 
         default:
             break;
