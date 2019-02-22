@@ -64,6 +64,8 @@ in this Software without prior written authorization from the X Consortium.
 
 #if defined(AJA_WINDOWS)
 
+#pragma warning (disable:4302)
+#pragma warning (disable:4311)
 #pragma warning (disable:4996)
 
 #include <BaseTsd.h>
