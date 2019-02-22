@@ -2266,6 +2266,7 @@ private:
 			ostringstream	oss;
 			oss	<< "Audio Source: "	<< SrcStrs [SrcStrMap [(BIT(0) | BIT(1) | BIT(2) | BIT(3)) & inRegValue]]	<< endl
 				<< "Embedded Source Select: Video Input " << (1 + vidInput)										<< endl
+				<< "AES Sync Mode bit (fib): "	<< EnabDisab(inRegValue & BIT(18))								<< endl
 				<< "PCM disabled: "				<< YesNo(inRegValue & BIT(17))									<< endl
 				<< "Erase head enable: "		<< YesNo(inRegValue & BIT(19))									<< endl
 				<< "Embedded Clock Select: "	<< (inRegValue & BIT(22) ? "Video Input" : "Board Reference")	<< endl

@@ -76,16 +76,20 @@ Frame buffer memory contents can be displayed in four ways:
 	-	<b>Raw</b> — The entire 8MB or 16MB buffer in fixed-length “lines”, grouped by 1, 2, 4 or 8 byte chunks. The line length is adjustable.
 		By default, unless disabled, boundaries between raster lines are indicated with a blue marker.
 		Regions and planes are indicated by color:  green for audio, yellow for Ancillary data, etc.
-	-	<b>Component</b> — The full raster (including VANC lines, if any), line-by-line, in component format, dictated by the frame store’s frame buffer format, in hex or decimal.
+	-	<b>Component</b> — The full raster (including VANC lines, if any), line-by-line, in component format,
+		dictated by the frame store’s frame buffer format, in hex or decimal.
+		@image	html	watcher-inspector-fb-comp.png
+	-	<b>Waveform</b> — The full raster (including VANC lines, if any), one-line-at-a-time, as a waveform,
+		with the component waveforms overlaid on top of each other.
+		@image	html	watcher-inspector-fb-wfm.png
 	-	<b>Image</b> — The visible raster, as an image.
 
 This inspector repeatedly monitors the indicated frame buffer for the selected channel or frame store.
 It reads the entire buffer into host memory and compares it to what was read the last time.
-(In “Frame Differencing” mode, it highlights the differences between the current frame and another frame on the device.)
-Except in Raw view, the status bar indicates the number of lines in the raster that changed from the last frame.
-Except in its Image view, the raster content display always highlights changed content with a brighter color.
+(In <b>Frame Differencing mode</b>, it highlights the differences between the current frame and another frame on the device.)
+Except in <b>Raw</b> view, the status bar indicates the number of lines in the raster that changed from the last frame.
+Except in its <b>Image</b> view, the raster content display always highlights changed content with a brighter color.
 
-@image	html	watcher-fbinspector-componentselection.png
 
 @par	Frame/Buffer Controls
 	-	<b>FrameStore/Channel</b> — Selects the FrameStore/Channel of interest.
@@ -122,7 +126,7 @@ Except in its Image view, the raster content display always highlights changed c
 		-	Use the Page-Up or Page-Down keys to scroll the display up or down by a larger amount.
 		-	Press <b>Home</b> to scroll the upper-left corner of the current selection into view (or frame, if nothing selected).
 		-	Press <b>End</b> to scroll the bottom-right corner of the current selection into view (or frame, if nothing selected).
-	-	<b>Vertical Ruler</b> — This ruler identifies each line in the display.
+	-	<b>Vertical Ruler</b> — This ruler labels lines (rows) in the display.
 		-	Left-click (and optionally drag up or down) to select entire lines.
 		-	Right-click to pop up a menu to choose the <b>Units</b> to use:
 			-	<b>Line Numbers</b> — 1-based decimal line numbers relative to the start of the frame buffer.
@@ -132,7 +136,7 @@ Except in its Image view, the raster content display always highlights changed c
 			-	<b>Bytes From Bottom</b> — The negative hexadecimal offset, in bytes, from the bottom of the frame buffer.
 			-	<b>Device Memory Address</b> — The hexadecimal byte offset into the device SDRAM.
 			-	Note that the <b>Image</b> view always uses 1-based decimal line numbers relative to the start of the visible portion of the frame buffer (i.e., excludes any VANC lines).
-	-	<b>Horizontal Ruler</b> — This ruler identifies each column in the display.
+	-	<b>Horizontal Ruler</b> — This ruler labels columns in the display.
 		-	Left-click (and optionally drag left or right) to select entire pixel columns.
 		-	Right-click to pop up a menu to choose the <b>Units</b> to use:
 			-	<b>Elements From Left Edge</b> — 0-based decimal element numbers relative to the start of each line, where an element is the natural “chunk” of pixels for a given frame buffer format.
@@ -140,7 +144,8 @@ Except in its Image view, the raster content display always highlights changed c
 			-	<b>Bytes From Left Edge (Hex)</b> — The hexadecimal offset, in bytes, from the start of each line.
 			-	<b>Pixels From Left Edge</b> — 0-based decimal pixel numbers, as measured from the start of each line.
 			-	Note that the <b>Image</b> view always uses 0-based decimal pixel offsets relative to the left edge of the frame buffer.
-	-	<b>Selecting</b> — Rectangular portions of the raster (or raw memory) can be selected/highlighted, and is shown as a yellow box in the view.
+	-	<b>Selecting</b> — A rectangular <b>region-of-interest</b> of the raster (or raw memory) can be selected/highlighted,
+		and is shown as a yellow box in the view.
 		-	The current selection, if any, is described in the status bar, to the left of the refresh timing indicator.
 		-	To cancel the current selection, press <b>Esc</b>ape.
 		-	Switching views will attempt to retain the current selection. If this is not possible

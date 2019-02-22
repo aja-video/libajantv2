@@ -959,6 +959,15 @@
 	devices that support this capability). Use one of the overloaded versions of CNTV2Card::SetAudioPCMControl that accepts either a
 	single ::NTV2AudioChannelPair or an ::NTV2AudioChannelPairs set.
 
+	Downstream equipment can also be told that the outgoing audio is <b>synchronous</b> — i.e. a fixed number of samples per frame.
+	AJA NTV2 <b>Audio Systems</b> always operate in <b>asynchronous</b> mode — i.e. we won’t <i>guarantee</i> a fixed number of samples
+	per frame — but overall, downstream equipment <i>will</i> receive the correct number of samples for a number of frames.
+	The net effect is a <i>de facto</i> Sync Mode, even though the Sync Mode bit is not set in the AES header. Some downstream equipment
+	may complain about the AES Sync Mode bit being clear. The <b>Audio System</b> can be told to set the Sync Mode bit in order to
+	“fib” to downstream equipment (to stop them from complaining).
+	-	Call CNTV2Card::GetAudioOutputAESSyncModeBit to see if the device is setting the Sync Mode bit.
+	-	Call CNTV2Card::SetAudioOutputAESSyncModeBit to change the setting.
+
 
 	<hr size="50px">
 	@subsection	audiosamplecount	Correlating Audio Samples to Video Frames

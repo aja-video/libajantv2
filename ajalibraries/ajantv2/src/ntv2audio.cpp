@@ -1634,6 +1634,28 @@ bool CNTV2Card::GetAnalogAudioIOConfiguration(NTV2AnalogAudioIO & inAudioIOConfi
 	return status;
 }
 
+bool CNTV2Card::GetAudioOutputAESSyncModeBit (const NTV2AudioSystem inAudioSystem, bool & outAESSyncModeBitSet)
+{
+	if (!NTV2_IS_VALID_AUDIO_SYSTEM (inAudioSystem))
+		return false;
+	if (inAudioSystem >= (::NTV2DeviceGetNumAudioSystems (_boardID) + (DeviceCanDoAudioMixer() ? 1 : 0)))
+		return false;
+	ULWord	regValue(0);
+	if (!ReadRegister (gAudioSystemToSrcSelectRegNum[inAudioSystem], regValue, BIT(18), 18))
+		return false;
+	outAESSyncModeBitSet = regValue ? true : false;
+	return true;
+}
+
+bool CNTV2Card::SetAudioOutputAESSyncModeBit (const NTV2AudioSystem inAudioSystem, const bool & inAESSyncModeBitSet)
+{
+	if (!NTV2_IS_VALID_AUDIO_SYSTEM (inAudioSystem))
+		return false;
+	if (inAudioSystem >= (::NTV2DeviceGetNumAudioSystems (_boardID) + (DeviceCanDoAudioMixer() ? 1 : 0)))
+		return false;
+	return WriteRegister(gAudioSystemToSrcSelectRegNum[inAudioSystem], inAESSyncModeBitSet?1:0, BIT(18), 18);
+}
+
 
 #if !defined (NTV2_DEPRECATE)
 	bool CNTV2Card::GetAudioPlayCaptureModeEnable (const NTV2AudioSystem inAudioSystem, bool * pOutEnable)
