@@ -2466,7 +2466,7 @@ void CNTV2KonaFlashProgram::FullProgram(std::vector<uint8_t> & dataBuffer)
 		SetBankSelect(currentBank);
 
 		uint32_t* bitFilePtr = (uint32_t*)dataBuffer.data();
-		uint32_t twoFixtysixBlockSizeCount = (dataBuffer.size()+256)/256;
+		uint32_t twoFixtysixBlockSizeCount = (uint32_t)((dataBuffer.size()+256)/256);
 		int32_t percentComplete = 0;
         WriteRegister(kVRegFlashState, kProgramStateProgramFlash);
         WriteRegister(kVRegFlashSize, twoFixtysixBlockSizeCount);
