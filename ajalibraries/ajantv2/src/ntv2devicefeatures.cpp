@@ -341,56 +341,58 @@ ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID boardID)
 ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
 #endif
 {
-	switch (boardID)
-	{
-	case DEVICE_ID_IOEXPRESS:
-	case DEVICE_ID_KONALHEPLUS:
-	case DEVICE_ID_TTAP:
-		return 16;
-	case DEVICE_ID_KONALHIDVI:
-	case DEVICE_ID_KONALHI:
-	case DEVICE_ID_CORVID1:
-	case DEVICE_ID_CORVID3G:
-		return 32;
-	case DEVICE_ID_IOXT:
-		return 24;
-	case DEVICE_ID_CORVID22:
-	case DEVICE_ID_KONA3GQUAD: //Took this from below quad has no ufc but it still reserves 8 buffers for 3D feature.
-	case DEVICE_ID_CORVID24:
-		return 64;
-	case DEVICE_ID_IO4K:
-	case DEVICE_ID_IO4KUFC:
-	case DEVICE_ID_KONA4:
-	case DEVICE_ID_KONA4UFC:
-	case DEVICE_ID_CORVID88:
-	case DEVICE_ID_CORVID44:
-    case DEVICE_ID_CORVIDHEVC:
-	case DEVICE_ID_KONAIP_2022:
-	case DEVICE_ID_KONAIP_4CH_2SFP:
-	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-	case DEVICE_ID_KONAIP_1RX_1TX_2110:
-	case DEVICE_ID_IO4KPLUS:
-    case DEVICE_ID_IOIP_2022:
-    case DEVICE_ID_IOIP_2110:
-    case DEVICE_ID_KONAIP_2110:
-	case DEVICE_ID_KONA1:
-    case DEVICE_ID_KONAHDMI:
-	case DEVICE_ID_KONA5:
-        return 111;
-	case DEVICE_ID_KONA3G:
-		return 56; // ufc uses 8 
-	case DEVICE_ID_CORVIDHBR:
-		return 56;
-	case DEVICE_ID_KONA5_12G:
-	case DEVICE_ID_CORVID44_12G:
+	if(NTV2DeviceCanDoStackedAudio(boardID))
 	{
 		ULWord totalFrames = ::NTV2DeviceGetActiveMemorySize(boardID)/0x800000;
-		totalFrames -= ::NTV2DeviceGetNumAudioSystems(boardID);
+		totalFrames -= ::NTV2DeviceGetNumAudioSystems(boardID)*(::NTV2DeviceCanDo12gRouting(boardID) ? 4 : 1);
 		return totalFrames;
 	}
-	default:
-		return 0;
+	else
+	{
+		switch (boardID)
+		{
+		case DEVICE_ID_IOEXPRESS:
+		case DEVICE_ID_KONALHEPLUS:
+		case DEVICE_ID_TTAP:
+			return 16;
+		case DEVICE_ID_KONALHIDVI:
+		case DEVICE_ID_KONALHI:
+		case DEVICE_ID_CORVID1:
+		case DEVICE_ID_CORVID3G:
+			return 32;
+		case DEVICE_ID_IOXT:
+			return 24;
+		case DEVICE_ID_CORVID22:
+		case DEVICE_ID_KONA3GQUAD: //Took this from below quad has no ufc but it still reserves 8 buffers for 3D feature.
+		case DEVICE_ID_CORVID24:
+			return 64;
+		case DEVICE_ID_IO4K:
+		case DEVICE_ID_IO4KUFC:
+		case DEVICE_ID_KONA4:
+		case DEVICE_ID_KONA4UFC:
+		case DEVICE_ID_CORVID88:
+		case DEVICE_ID_CORVID44:
+		case DEVICE_ID_CORVIDHEVC:
+		case DEVICE_ID_KONAIP_2022:
+		case DEVICE_ID_KONAIP_4CH_2SFP:
+		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_1RX_1TX_2110:
+		case DEVICE_ID_IO4KPLUS:
+		case DEVICE_ID_IOIP_2022:
+		case DEVICE_ID_IOIP_2110:
+		case DEVICE_ID_KONAIP_2110:
+		case DEVICE_ID_KONA1:
+		case DEVICE_ID_KONAHDMI:
+		case DEVICE_ID_KONA5:
+			return 111;
+		case DEVICE_ID_KONA3G:
+			return 56; // ufc uses 8 
+		case DEVICE_ID_CORVIDHBR:
+			return 56;
+		default:
+			return 0;
+		}
 	}
 }
 

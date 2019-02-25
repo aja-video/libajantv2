@@ -2852,7 +2852,9 @@ bool NTV2TestPatternGen::GetStandard(int &standard, bool &b4K)
 		standard = 5;			// aka "NTV2_STANDARD2_K"
 
 	else if ((_frameWidth == 3840 && _frameHeight == 2160) || 
-			(_frameWidth == 4096 && _frameHeight == 2160))
+			(_frameWidth == 4096 && _frameHeight == 2160) ||
+			(_frameWidth == 7680 && _frameHeight == 4320) ||
+			(_frameWidth == 8192 && _frameHeight == 4320))
 	{
 		// kludge for now. 
 		standard = 0;			// aka "NTV2_STANDARD_1080"
