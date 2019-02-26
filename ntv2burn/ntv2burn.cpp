@@ -476,7 +476,7 @@ void NTV2Burn::RouteOutputSignal (void)
 
 		for (NTV2Channel chan (startNum);  chan < endNum;  chan = NTV2Channel (chan + 1))
 		{
-			mDevice.SetRP188Source (chan, 0);	//	Set all SDI spigots to capture embedded LTC (VITC could be an option)
+			mDevice.SetRP188SourceFilter (chan, 0);	//	Set all SDI spigots to capture embedded LTC (VITC could be an option)
 
 			if (chan == mInputChannel || chan == mOutputChannel)
 				continue;	//	Skip the input & output channel, already routed
