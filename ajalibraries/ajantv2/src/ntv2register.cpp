@@ -153,17 +153,17 @@ static const ULWord	gChannelTo2MFrame []				= {	kRegCh1Control2MFrame, kRegCh2Co
 															kRegCh7Control2MFrame, kRegCh8Control2MFrame, 0};
 #endif	//	defined (NTV2_ALLOW_2MB_FRAMES)
 
-static const ULWord	gChannelToRP188ModeGCRegisterNum []		= {	kRegGlobalControl,			kRegGlobalControl,			kRegGlobalControl2,			kRegGlobalControl2,
+static const ULWord	gChannelToRP188ModeGCRegisterNum[]		= {	kRegGlobalControl,			kRegGlobalControl,			kRegGlobalControl2,			kRegGlobalControl2,
 																kRegGlobalControl2,			kRegGlobalControl2,			kRegGlobalControl2,			kRegGlobalControl2,			0};
-static const ULWord	gChannelToRP188ModeMasks []				= {	kRegMaskRP188ModeCh1,		kRegMaskRP188ModeCh2,		kRegMaskRP188ModeCh3,		kRegMaskRP188ModeCh4,
+static const ULWord	gChannelToRP188ModeMasks[]				= {	kRegMaskRP188ModeCh1,		kRegMaskRP188ModeCh2,		kRegMaskRP188ModeCh3,		kRegMaskRP188ModeCh4,
 																kRegMaskRP188ModeCh5,		ULWord(kRegMaskRP188ModeCh6),	kRegMaskRP188ModeCh7,		kRegMaskRP188ModeCh8,		0};
-static const ULWord	gChannelToRP188ModeShifts []			= {	kRegShiftRP188ModeCh1,		kRegShiftRP188ModeCh2,		kRegShiftRP188ModeCh3,		kRegShiftRP188ModeCh4,
+static const ULWord	gChannelToRP188ModeShifts[]			= {	kRegShiftRP188ModeCh1,		kRegShiftRP188ModeCh2,		kRegShiftRP188ModeCh3,		kRegShiftRP188ModeCh4,
 																kRegShiftRP188ModeCh5,		kRegShiftRP188ModeCh6,		kRegShiftRP188ModeCh7,		kRegShiftRP188ModeCh8,		0};
-static const ULWord	gChannelToRP188DBBRegisterNum []		= {	kRegRP188InOut1DBB,			kRegRP188InOut2DBB,			kRegRP188InOut3DBB,			kRegRP188InOut4DBB,
+static const ULWord	gChlToRP188DBBRegNum[]				= {	kRegRP188InOut1DBB,			kRegRP188InOut2DBB,			kRegRP188InOut3DBB,			kRegRP188InOut4DBB,
 																kRegRP188InOut5DBB,			kRegRP188InOut6DBB,			kRegRP188InOut7DBB,			kRegRP188InOut8DBB,			0};
-static const ULWord	gChannelToRP188Bits031RegisterNum []	= {	kRegRP188InOut1Bits0_31,	kRegRP188InOut2Bits0_31,	kRegRP188InOut3Bits0_31,	kRegRP188InOut4Bits0_31,
+static const ULWord	gChlToRP188Bits031RegNum[]			= {	kRegRP188InOut1Bits0_31,	kRegRP188InOut2Bits0_31,	kRegRP188InOut3Bits0_31,	kRegRP188InOut4Bits0_31,
 																kRegRP188InOut5Bits0_31,	kRegRP188InOut6Bits0_31,	kRegRP188InOut7Bits0_31,	kRegRP188InOut8Bits0_31,	0};
-static const ULWord	gChannelToRP188Bits3263RegisterNum []	= {	kRegRP188InOut1Bits32_63,	kRegRP188InOut2Bits32_63,	kRegRP188InOut3Bits32_63,	kRegRP188InOut4Bits32_63,
+static const ULWord	gChlToRP188Bits3263RegNum[]			= {	kRegRP188InOut1Bits32_63,	kRegRP188InOut2Bits32_63,	kRegRP188InOut3Bits32_63,	kRegRP188InOut4Bits32_63,
 																kRegRP188InOut5Bits32_63,	kRegRP188InOut6Bits32_63,	kRegRP188InOut7Bits32_63,	kRegRP188InOut8Bits32_63,	0};
 
 static const ULWord	gChannelToRXSDIStatusRegs []			= {	kRegRXSDI1Status,				kRegRXSDI2Status,				kRegRXSDI3Status,				kRegRXSDI4Status,				kRegRXSDI5Status,				kRegRXSDI6Status,				kRegRXSDI7Status,				kRegRXSDI8Status,				0};
@@ -2593,37 +2593,37 @@ bool CNTV2Card::GetRP188Mode (const NTV2Channel inChannel, NTV2_RP188Mode & outM
 }
 
 
-bool CNTV2Card::GetRP188Data (const NTV2Channel inChannel, ULWord inFrame, RP188_STRUCT & outRP188Data)
-{
-	(void)	inFrame;
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
-	return		ReadRegister (gChannelToRP188DBBRegisterNum[inChannel],		outRP188Data.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
-			&&	ReadRegister (gChannelToRP188Bits031RegisterNum[inChannel],	outRP188Data.Low)
-			&&	ReadRegister (gChannelToRP188Bits3263RegisterNum[inChannel],	outRP188Data.High);
-}
-
-
 bool CNTV2Card::GetRP188Data (const NTV2Channel inChannel, NTV2_RP188 & outRP188Data)
 {
 	outRP188Data = NTV2_RP188();
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
-	return		ReadRegister (gChannelToRP188DBBRegisterNum[inChannel],		outRP188Data.fDBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
-			&&	ReadRegister (gChannelToRP188Bits031RegisterNum[inChannel],	outRP188Data.fLo)
-			&&	ReadRegister (gChannelToRP188Bits3263RegisterNum[inChannel],	outRP188Data.fHi);
+	return		ReadRegister (gChlToRP188DBBRegNum[inChannel],		outRP188Data.fDBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
+			&&	ReadRegister (gChlToRP188Bits031RegNum[inChannel],	outRP188Data.fLo)
+			&&	ReadRegister (gChlToRP188Bits3263RegNum[inChannel],	outRP188Data.fHi);
 }
 
+#if !defined(NTV2_DEPRECATE_15_2)
+	bool CNTV2Card::GetRP188Data (const NTV2Channel inChannel, ULWord inFrame, RP188_STRUCT & outRP188Data)
+	{
+		(void)	inFrame;
+		if (IS_CHANNEL_INVALID (inChannel))
+			return false;
+		return		ReadRegister (gChlToRP188DBBRegNum[inChannel],		outRP188Data.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
+				&&	ReadRegister (gChlToRP188Bits031RegNum[inChannel],	outRP188Data.Low)
+				&&	ReadRegister (gChlToRP188Bits3263RegNum[inChannel],	outRP188Data.High);
+	}
 
-bool CNTV2Card::SetRP188Data (const NTV2Channel inChannel, const ULWord inFrame, const RP188_STRUCT & inRP188Data)
-{
-	(void) inFrame;
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
-	return		WriteRegister (gChannelToRP188DBBRegisterNum[inChannel],		inRP188Data.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
-			&&	WriteRegister (gChannelToRP188Bits031RegisterNum[inChannel],	inRP188Data.Low)
-			&&	WriteRegister (gChannelToRP188Bits3263RegisterNum[inChannel],	inRP188Data.High);
-}
+	bool CNTV2Card::SetRP188Data (const NTV2Channel inChannel, const ULWord inFrame, const RP188_STRUCT & inRP188Data)
+	{
+		(void) inFrame;
+		if (IS_CHANNEL_INVALID (inChannel))
+			return false;
+		return		WriteRegister (gChlToRP188DBBRegNum[inChannel],		inRP188Data.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
+				&&	WriteRegister (gChlToRP188Bits031RegNum[inChannel],	inRP188Data.Low)
+				&&	WriteRegister (gChlToRP188Bits3263RegNum[inChannel],	inRP188Data.High);
+	}
+#endif	//	!defined(NTV2_DEPRECATE_15_2)
 
 
 bool CNTV2Card::SetRP188Data (const NTV2Channel inChannel, const NTV2_RP188 & inRP188Data)
@@ -2632,25 +2632,25 @@ bool CNTV2Card::SetRP188Data (const NTV2Channel inChannel, const NTV2_RP188 & in
 		return false;
 	if (!inRP188Data.IsValid())
 		return false;
-	return		WriteRegister (gChannelToRP188DBBRegisterNum[inChannel],		inRP188Data.fDBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
-			&&	WriteRegister (gChannelToRP188Bits031RegisterNum[inChannel],	inRP188Data.fLo)
-			&&	WriteRegister (gChannelToRP188Bits3263RegisterNum[inChannel],	inRP188Data.fHi);
+	return		WriteRegister (gChlToRP188DBBRegNum[inChannel],		inRP188Data.fDBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
+			&&	WriteRegister (gChlToRP188Bits031RegNum[inChannel],	inRP188Data.fLo)
+			&&	WriteRegister (gChlToRP188Bits3263RegNum[inChannel],	inRP188Data.fHi);
 }
 
 
-bool CNTV2Card::SetRP188Source (const NTV2Channel inChannel, ULWord inValue)
+bool CNTV2Card::SetRP188SourceFilter (const NTV2Channel inChannel, UWord inValue)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
-	return WriteRegister (gChannelToRP188DBBRegisterNum [inChannel], inValue, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
+	return WriteRegister (gChlToRP188DBBRegNum[inChannel], ULWord(inValue), kRegMaskRP188SourceSelect, kRegShiftRP188Source);
 }
 
 
-bool CNTV2Card::GetRP188Source (const NTV2Channel inChannel, ULWord & outValue)
+bool CNTV2Card::GetRP188SourceFilter (const NTV2Channel inChannel, UWord & outValue)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
-	return ReadRegister (gChannelToRP188DBBRegisterNum [inChannel], outValue, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
+	return CNTV2DriverInterface::ReadRegister (gChlToRP188DBBRegNum[inChannel], outValue, kRegMaskRP188SourceSelect, kRegShiftRP188Source);
 }
 
 
@@ -2660,7 +2660,7 @@ bool CNTV2Card::IsRP188BypassEnabled (const NTV2Channel inChannel, bool & outIsB
 		return false;
 	//	Bit 23 of the RP188 DBB register will be set if output timecode will be grabbed directly from an input (bypass source)...
 	ULWord	regValue	(0);
-	bool	result		(NTV2_IS_VALID_CHANNEL(inChannel) && ReadRegister(gChannelToRP188DBBRegisterNum[inChannel], regValue));
+	bool	result		(NTV2_IS_VALID_CHANNEL(inChannel) && ReadRegister(gChlToRP188DBBRegNum[inChannel], regValue));
 	if (result)
 		outIsBypassEnabled = regValue & BIT(23);
 	return result;
@@ -2672,7 +2672,7 @@ bool CNTV2Card::DisableRP188Bypass (const NTV2Channel inChannel)
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 	//	Clear bit 23 of my output destination's RP188 DBB register...
-	return NTV2_IS_VALID_CHANNEL (inChannel) && WriteRegister (gChannelToRP188DBBRegisterNum [inChannel], 0, BIT(23), 23);
+	return NTV2_IS_VALID_CHANNEL (inChannel) && WriteRegister (gChlToRP188DBBRegNum[inChannel], 0, BIT(23), 23);
 }
 
 
@@ -2681,7 +2681,36 @@ bool CNTV2Card::EnableRP188Bypass (const NTV2Channel inChannel)
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 	//	Set bit 23 of my output destination's RP188 DBB register...
-	return NTV2_IS_VALID_CHANNEL (inChannel) && WriteRegister (gChannelToRP188DBBRegisterNum [inChannel], 1, BIT(23), 23);
+	return NTV2_IS_VALID_CHANNEL (inChannel) && WriteRegister (gChlToRP188DBBRegNum [inChannel], 1, BIT(23), 23);
+}
+
+static const ULWord gSDIOutToRP188Input[] = { 0, 2, 1, 3, 0, 2, 1, 3, 0 };
+
+bool CNTV2Card::SetRP188BypassSource (const NTV2Channel inSDIOutput, const UWord inSDIInput)
+{
+	if (IS_CHANNEL_INVALID(inSDIOutput))
+		return false;
+	if (IS_CHANNEL_INVALID(NTV2Channel(inSDIInput)))
+		return false;
+	return WriteRegister(gChlToRP188DBBRegNum[inSDIOutput], gSDIOutToRP188Input[inSDIInput], BIT(21)|BIT(22), 21);
+}
+
+bool CNTV2Card::GetRP188BypassSource (const NTV2Channel inSDIOutput, UWord & outSDIInput)
+{
+	if (IS_CHANNEL_INVALID(inSDIOutput))
+		return false;
+	ULWord	val(0);
+	if (!ReadRegister(gChlToRP188DBBRegNum[inSDIOutput], val, BIT(21)|BIT(22), 21))
+		return false;
+	switch(val)
+	{
+		case 0:		outSDIInput =  inSDIOutput < NTV2_CHANNEL5  ?  0  :  4;		break;
+		case 2:		outSDIInput =  inSDIOutput < NTV2_CHANNEL5  ?  1  :  5;		break;
+		case 1:		outSDIInput =  inSDIOutput < NTV2_CHANNEL5  ?  2  :  6;		break;
+		case 3:		outSDIInput =  inSDIOutput < NTV2_CHANNEL5  ?  3  :  7;		break;
+		default:	return false;
+	}
+	return true;
 }
 
 

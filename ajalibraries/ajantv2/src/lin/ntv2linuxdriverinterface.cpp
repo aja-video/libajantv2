@@ -1897,7 +1897,7 @@ bool CNTV2LinuxDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-us
 	bool bSuccess = false;
 	RP188_STRUCT rp188;
 	NTV2DeviceID boardID = DEVICE_ID_NOTFOUND;
-	RP188SourceSelect source = kRP188SourceEmbeddedLTC;
+	RP188SourceFilterSelect source = kRP188SourceEmbeddedLTC;
 	ULWord dbbReg, msReg, lsReg;
 
 	CNTV2DriverInterface::ReadRegister(kRegBoardID, boardID);

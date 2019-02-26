@@ -2106,7 +2106,7 @@ bool CNTV2MacDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 	bool bSuccess = false;
 	RP188_STRUCT rp188;
 	NTV2DeviceID boardID = DEVICE_ID_NOTFOUND;
-	RP188SourceSelect source = kRP188SourceEmbeddedLTC;
+	RP188SourceFilterSelect source = kRP188SourceEmbeddedLTC;
 	ULWord dbbReg(0), msReg(0), lsReg(0);
 
 	CNTV2DriverInterface::ReadRegister(kRegBoardID, boardID);

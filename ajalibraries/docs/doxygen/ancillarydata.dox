@@ -38,8 +38,8 @@ one reason why the same registers were used for RP-188 capture and playout. (New
 away from this old model, so eventually, we hope to deliver a simpler timecode API.)
 
 @note	Two 32-bit registers are required to store a timecode value (one for the low-order 32 bits, another for the high-order
-		32 bits), plus an extra register to hold the extra “Distributed Binary Bits” (DBB) information associated with SMPTE
-		12M and RP-188. In the SDK, these three register values are represented by the ::NTV2_RP188 data type, and the older
+		32 bits), plus an extra register to hold the extra “Distributed Binary Bits” (DBB) information per SMPTE 12M and RP-188.
+		In the SDK, these three register values are represented by the ::NTV2_RP188 data type, and the older
 		::RP188_STRUCT data type.
 
 In this ancient model, one general-purpose register triplet is used to store an SDI input’s timecode <i>and also</i> provide
@@ -53,11 +53,18 @@ timecode, while writing those registers sets the output (playout) timecode.
 		value that was written for playout. So beware that when CNTV2Card::SetRP188Data is called, it’s not possible to find
 		out what was “set”, since CNTV2Card::GetRP188Data is always reading the SDI input’s timecode.
 
+For End-to-End (E-E) mode, i.e. when an SDI input is connected directly to an SDI output, to pass through timecode obtained
+from an SDI input…
+-	Call CNTV2Card::EnableRP188Bypass to have the SDI output’s timecode embedder <i>not</i> use the RP188 registers, but
+	instead use timecode obtained from an SDI input.
+-	Call CNTV2Card::SetRP188BypassSource to specify which SDI input to use.
+-	Call CNTV2Card::SetRP188SourceFilter to specify which input timecode to use — e.g. 0 for LTC, 1 for VITC1, etc.
+
 
 @subsection		anctimecodeinput		Embedded SDI Timecode Input
 
 Any RP-188 data in the SDI input video with DBB-1 data matching the input’s current RP-188 source select filter (see
-CNTV2Card::SetRP188Source) will be placed into the input’s RP-188 registers.
+CNTV2Card::SetRP188SourceFilter) will be placed into the input’s RP-188 registers.
 
 There are two ways to receive input timecode:
 -	When using \ref autocirculatecapture, do the following:
@@ -67,7 +74,7 @@ There are two ways to receive input timecode:
 		-	in the ::NTV2TimeCodes map, or…
 		-	in the ::NTV2TimeCodeList vector.
 -	Without \ref aboutautocirculate, use either of these two methods:
-	-	Call CNTV2Card::GetRP188Data for the SDI Input of interest, using the DBB filter (see CNTV2Card::SetRP188Source)
+	-	Call CNTV2Card::GetRP188Data for the SDI Input of interest, using the DBB filter (see CNTV2Card::SetRP188SourceFilter)
 		to choose the timecode of interest (LTC, VITC1, VITC2), or…
 	-	Use the <b>Anc Extractor</b> firmware described in \ref anccapture (below) to capture the “raw” HANC timecode
 		packet data … then decode it per the SMPTE specifications.
