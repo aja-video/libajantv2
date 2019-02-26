@@ -3539,6 +3539,8 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 {
     bool ipServiceEnable, ipServiceForceConfig;
 
+	mCard->ReadRegister(kRegAud1Counter, startAudioCounter);
+
     config2110->GetIPServicesControl(ipServiceEnable, ipServiceForceConfig);
     if (ipServiceEnable)
     {
@@ -3633,20 +3635,20 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                     txConfig.videoSamples = VPIDSampling_YUV_422;
 
                     // Start by turning off the video stream
-                    printf("SetTxVideoStream off %d\n", m2110TxVideoData.txVideoCh[i].stream);
+                    //printf("SetTxVideoStream off %d\n", m2110TxVideoData.txVideoCh[i].stream);
                     config2110->SetTxStreamEnable(m2110TxVideoData.txVideoCh[i].stream, false, false);
                     m2110IpStatusData.txChStatus[i] = kIpStatusStopped;
 
                     if (config2110->SetTxStreamConfiguration(m2110TxVideoData.txVideoCh[i].stream, txConfig) == true)
                     {
-                        printf("SetTxStreamConfiguration Video OK\n");
+                        //printf("SetTxStreamConfiguration Video OK\n");
                         s2110TxVideoDataLast->txVideoCh[i] = m2110TxVideoData.txVideoCh[i];
                         SetIPError((NTV2Channel)m2110TxVideoData.txVideoCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
 
                         // Process the enable
                         if (m2110TxVideoData.txVideoCh[i].enable)
                         {
-                            printf("SetTxVideoStream on %d\n", m2110TxVideoData.txVideoCh[i].stream);
+                            //printf("SetTxVideoStream on %d\n", m2110TxVideoData.txVideoCh[i].stream);
                             config2110->SetTxStreamEnable(m2110TxVideoData.txVideoCh[i].stream,
                                                           (bool)m2110TxVideoData.txVideoCh[i].sfpEnable[0],
                                                           (bool)m2110TxVideoData.txVideoCh[i].sfpEnable[1]);
@@ -3699,19 +3701,19 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                     txConfig.audioPktInterval = m2110TxAudioData.txAudioCh[i].audioPktInterval;
 
                     // Start by turning off the audio stream
-                    printf("SetTxAudioStream off %d\n", m2110TxAudioData.txAudioCh[i].stream);
+                    //printf("SetTxAudioStream off %d\n", m2110TxAudioData.txAudioCh[i].stream);
                     config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].stream, false, false);
 
                     if (config2110->SetTxStreamConfiguration(m2110TxAudioData.txAudioCh[i].stream, txConfig) == true)
                     {
-                        printf("SetTxStreamConfiguration Audio OK\n");
+                        //printf("SetTxStreamConfiguration Audio OK\n");
                         s2110TxAudioDataLast->txAudioCh[i] = m2110TxAudioData.txAudioCh[i];
                         SetIPError((NTV2Channel)m2110TxAudioData.txAudioCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
 
                         // Process the enable
                         if (m2110TxAudioData.txAudioCh[i].enable)
                         {
-                            printf("SetTxAudioStream on %d\n", m2110TxAudioData.txAudioCh[i].stream);
+                            //printf("SetTxAudioStream on %d\n", m2110TxAudioData.txAudioCh[i].stream);
                             config2110->SetTxStreamEnable(m2110TxAudioData.txAudioCh[i].stream,
                                                           (bool)m2110TxAudioData.txAudioCh[i].sfpEnable[0],
                                                           (bool)m2110TxAudioData.txAudioCh[i].sfpEnable[1]);
@@ -3747,19 +3749,19 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 					txConfig.tos = 0x64;
 
 					// Start by turning off the anc stream
-					printf("SetTxAncStream off %d\n", m2110TxAncData.txAncCh[i].stream);
+					//printf("SetTxAncStream off %d\n", m2110TxAncData.txAncCh[i].stream);
 					config2110->SetTxStreamEnable(m2110TxAncData.txAncCh[i].stream, false, false);
 
 					if (config2110->SetTxStreamConfiguration(m2110TxAncData.txAncCh[i].stream, txConfig) == true)
 					{
-						printf("SetTxStreamConfiguration Anc OK\n");
+						//printf("SetTxStreamConfiguration Anc OK\n");
 						s2110TxAncDataLast->txAncCh[i] = m2110TxAncData.txAncCh[i];
 						SetIPError((NTV2Channel)m2110TxAncData.txAncCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
 
 						// Process the enable
 						if (m2110TxAncData.txAncCh[i].enable)
 						{
-							printf("SetTxAncStream on %d\n", m2110TxAncData.txAncCh[i].stream);
+							//printf("SetTxAncStream on %d\n", m2110TxAncData.txAncCh[i].stream);
 							config2110->SetTxStreamEnable(m2110TxAncData.txAncCh[i].stream,
 														  (bool)m2110TxAncData.txAncCh[i].sfpEnable[0],
 														  (bool)m2110TxAncData.txAncCh[i].sfpEnable[1]);
@@ -3825,23 +3827,23 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 						config2110->Set4KModeEnable(true);
 
                     rxConfig.videoSamples = VPIDSampling_YUV_422;
-                    printf("Format (%d, %d, %d, %d)\n", i, mFollowInputFormat, m2110Network.multiSDP, rxConfig.videoFormat);
+                    //printf("Format (%d, %d, %d, %d)\n", i, mFollowInputFormat, m2110Network.multiSDP, rxConfig.videoFormat);
 
                     // Start by turning off the video receiver
-                    printf("SetRxVideoStream off %d\n", m2110RxVideoData.rxVideoCh[i].stream);
+                    //printf("SetRxVideoStream off %d\n", m2110RxVideoData.rxVideoCh[i].stream);
                     config2110->SetRxStreamEnable(sfp, m2110RxVideoData.rxVideoCh[i].stream, false);
                     m2110IpStatusData.rxChStatus[i] = kIpStatusStopped;
 
                     if (config2110->SetRxStreamConfiguration(sfp, m2110RxVideoData.rxVideoCh[i].stream, rxConfig) == true)
                     {
-                        printf("SetRxStreamConfiguration Video OK\n");
+                        //printf("SetRxStreamConfiguration Video OK\n");
                         s2110RxVideoDataLast->rxVideoCh[i] = m2110RxVideoData.rxVideoCh[i];
                         SetIPError((NTV2Channel)m2110RxVideoData.rxVideoCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
 
                         // Process the enable
                         if (m2110RxVideoData.rxVideoCh[i].enable)
                         {
-                            printf("SetRxVideoStream on %d\n", m2110RxVideoData.rxVideoCh[i].stream);
+                            //printf("SetRxVideoStream on %d\n", m2110RxVideoData.rxVideoCh[i].stream);
                             config2110->SetRxStreamEnable(sfp, m2110RxVideoData.rxVideoCh[i].stream, true);
                             m2110IpStatusData.rxChStatus[i] = kIpStatusRunning;
                         }
@@ -3856,7 +3858,7 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                 }
             }
 
-            *videoFormatLast = mFb1VideoFormat;
+            //*videoFormatLast = mFb1VideoFormat;
 
             // See if any receive audio channels need configuring/enabling
             for (uint32_t i=0; i<m2110RxAudioData.numRxAudioChannels; i++)
@@ -3894,19 +3896,19 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                     rxConfig.audioPktInterval = m2110RxAudioData.rxAudioCh[i].audioPktInterval;
 
                     // Start by turning off the audio receiver
-                    printf("SetRxAudioStream off %d\n", m2110RxAudioData.rxAudioCh[i].stream);
+                    //printf("SetRxAudioStream off %d\n", m2110RxAudioData.rxAudioCh[i].stream);
                     config2110->SetRxStreamEnable(sfp, m2110RxAudioData.rxAudioCh[i].stream, false);
 
                     if (config2110->SetRxStreamConfiguration(sfp, m2110RxAudioData.rxAudioCh[i].stream, rxConfig) == true)
                     {
-                        printf("SetRxStreamConfiguration Audio OK\n");
+                        //printf("SetRxStreamConfiguration Audio OK\n");
                         s2110RxAudioDataLast->rxAudioCh[i] = m2110RxAudioData.rxAudioCh[i];
                         SetIPError(m2110RxAudioData.rxAudioCh[i].channel, kErrNetworkConfig, NTV2IpErrNone);
 
                         // Process the enable
                         if (m2110RxAudioData.rxAudioCh[i].enable)
                         {
-                            printf("SetRxAudioStream on %d\n", m2110RxAudioData.rxAudioCh[i].stream);
+                            //printf("SetRxAudioStream on %d\n", m2110RxAudioData.rxAudioCh[i].stream);
                             config2110->SetRxStreamEnable(sfp, m2110RxAudioData.rxAudioCh[i].stream, true);
                         }
                     }
@@ -3951,19 +3953,19 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 					rxConfig.payloadType = m2110RxAncData.rxAncCh[i].payloadType;
 
 					// Start by turning off the anc receiver
-					printf("SetRxAncStream off %d\n", m2110RxAncData.rxAncCh[i].stream);
+					//printf("SetRxAncStream off %d\n", m2110RxAncData.rxAncCh[i].stream);
 					config2110->SetRxStreamEnable(sfp, m2110RxAncData.rxAncCh[i].stream, false);
 
 					if (config2110->SetRxStreamConfiguration(sfp, m2110RxAncData.rxAncCh[i].stream, rxConfig) == true)
 					{
-						printf("SetRxStreamConfiguration Anc OK\n");
+						//printf("SetRxStreamConfiguration Anc OK\n");
 						s2110RxAncDataLast->rxAncCh[i] = m2110RxAncData.rxAncCh[i];
 						SetIPError((NTV2Channel)m2110RxAncData.rxAncCh[i].stream, kErrNetworkConfig, NTV2IpErrNone);
 
 						// Process the enable
 						if (m2110RxAncData.rxAncCh[i].enable)
 						{
-							printf("SetRxAncStream on %d\n", m2110RxAncData.rxAncCh[i].stream);
+							//printf("SetRxAncStream on %d\n", m2110RxAncData.rxAncCh[i].stream);
 							config2110->SetRxStreamEnable(sfp, m2110RxAncData.rxAncCh[i].stream, true);
 						}
 					}
@@ -4002,7 +4004,7 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                                                               m2110Network.sfp[i].gateWay);
                     if (rv)
                     {
-                        printf("SetNetworkConfiguration OK\n");
+                        //printf("SetNetworkConfiguration OK\n");
                         SetIPError(NTV2_CHANNEL1, kErrNetworkConfig, NTV2IpErrNone);
                     }
                     else
@@ -4013,12 +4015,20 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
                 }
                 else
                 {
-                    printf("DisableNetworkInterface\n");
+                    //printf("DisableNetworkInterface\n");
                     config2110->DisableNetworkInterface(sfp);
                 }
                 AgentIsAlive();
             }
         }
+
+		if (*videoFormatLast != mFb1VideoFormat)
+		{
+			*videoFormatLast = mFb1VideoFormat;
+			mCard->ReadRegister(kRegAud1Counter, endAudioCounter);
+			printf("Format change time = %d ms\n", (endAudioCounter-startAudioCounter)/48);
+		}
+
 
         // Write status
         mCard->WriteVirtualData(kChStatusData2110, &m2110IpStatusData, sizeof(IpStatus2110));
