@@ -683,11 +683,11 @@ void NTV2Burn4KQuadrant::CaptureFrames (void)
 	//	Enable analog LTC input (some LTC inputs are shared with reference input)
 	mInputDevice.SetLTCInputEnable (true);
 
-	//	Set all sources to capture embedded LTC (VITC could be an option)
-	mInputDevice.SetRP188Source (NTV2_CHANNEL1, 0);
-	mInputDevice.SetRP188Source (NTV2_CHANNEL2, 0);
-	mInputDevice.SetRP188Source (NTV2_CHANNEL3, 0);
-	mInputDevice.SetRP188Source (NTV2_CHANNEL4, 0);
+	//	Set all sources to capture embedded LTC (Use 1 for VITC1)
+	mInputDevice.SetRP188SourceFilter (NTV2_CHANNEL1, 0);
+	mInputDevice.SetRP188SourceFilter (NTV2_CHANNEL2, 0);
+	mInputDevice.SetRP188SourceFilter (NTV2_CHANNEL3, 0);
+	mInputDevice.SetRP188SourceFilter (NTV2_CHANNEL4, 0);
 
 	//	Start AutoCirculate running...
 	mInputDevice.AutoCirculateStart (mInputChannel);

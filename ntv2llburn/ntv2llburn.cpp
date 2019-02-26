@@ -296,7 +296,7 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 	if (isBypassEnabled)
 		mDevice.DisableRP188Bypass (mInputChannel);
 	mDevice.SetRP188Mode (mInputChannel, NTV2_RP188_INPUT);
-	mDevice.SetRP188Source (mInputChannel, 0);
+	mDevice.SetRP188SourceFilter (mInputChannel, 0);	//	0=LTC 1=VITC1 2=VITC2
 
 	//	Make sure the RP188 mode for all SDI outputs is NTV2_RP188_OUTPUT, and that their RP188
 	//	registers are not bypassed (i.e. timecode isn't sourced from an SDI input, as for E-E mode)...
@@ -434,7 +434,7 @@ void NTV2LLBurn::RouteOutputSignal (void)
 
 		for (NTV2Channel chan(startNum);  chan < endNum;  chan = NTV2Channel(chan+1))
 		{
-			mDevice.SetRP188Source (chan, 0);	//	Set all SDI spigots to capture embedded LTC (VITC could be an option)
+			mDevice.SetRP188SourceFilter (chan, 0);	//	Set all SDI spigots to capture embedded LTC (0==LTC 1==VITC1 2==VITC2)
 			if (chan == mInputChannel  ||  chan == mOutputChannel)
 				continue;	//	Skip the input & output channel, already routed
 			mRP188Outputs.insert(chan);	//	Add this SDI spigot to those we'll push timecode into

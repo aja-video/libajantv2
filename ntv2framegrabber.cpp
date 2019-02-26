@@ -395,7 +395,7 @@ void NTV2FrameGrabber::run (void)
 
 					//	Start AutoCirculate...
 					mNTV2Card.SetLTCInputEnable (true);
-					mNTV2Card.SetRP188Source (mChannel, 0);
+					mNTV2Card.SetRP188SourceFilter (mChannel, 0);	//	0=LTC 1=VITC1 2=VITC2
 					mNTV2Card.AutoCirculateStart (mChannel);
 
 					for (int i = 0; i < NTV2_NUM_IMAGES; i++)
