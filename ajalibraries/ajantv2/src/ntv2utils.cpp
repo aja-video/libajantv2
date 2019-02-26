@@ -3471,6 +3471,8 @@ NTV2FrameGeometry GetNormalizedFrameGeometry (const NTV2FrameGeometry inFrameGeo
 	case NTV2_FG_2048x1556:		//	2k1556psf
 	case NTV2_FG_4x1920x1080:	//	UHD
 	case NTV2_FG_4x2048x1080:	//	4K
+	case NTV2_FG_4x3840x2160:
+	case NTV2_FG_4x4096x2160:
 		return inFrameGeometry;	//	No change, already normalized
 
 														//	525i
@@ -3546,6 +3548,8 @@ NTV2FrameGeometry GetVANCFrameGeometry (const NTV2FrameGeometry inFrameGeometry,
 
 	case NTV2_FG_4x1920x1080:	//	3840x2160 ::NTV2_VANCMODE_OFF
 	case NTV2_FG_4x2048x1080:	//	4096x2160 ::NTV2_VANCMODE_OFF
+	case NTV2_FG_4x3840x2160:
+	case NTV2_FG_4x4096x2160:
 		return inFrameGeometry;	//	no tall or taller geometries!
 #if defined (_DEBUG)
 	case NTV2_FG_INVALID:	break;
@@ -3578,6 +3582,10 @@ NTV2FrameGeometry GetGeometryFromStandard (const NTV2Standard inStandard)
 
 	case NTV2_STANDARD_4096x2160p:								//	4K
 	case NTV2_STANDARD_4096HFR:		return NTV2_FG_4x2048x1080;	//	HFR 4K
+		
+	case NTV2_STANDARD_7680:		return NTV2_FG_4x3840x2160;
+		
+	case NTV2_STANDARD_8192:		return NTV2_FG_4x4096x2160;
 #if defined (_DEBUG)
 	case NTV2_STANDARD_INVALID:	break;
 #else
@@ -3637,6 +3645,8 @@ ULWord GetNTV2FrameGeometryHeight(NTV2FrameGeometry geometry)
 	case NTV2_FG_720x612:		return 612;
 	case NTV2_FG_4x1920x1080:	return 2160;
 	case NTV2_FG_4x2048x1080:	return 2160;
+	case NTV2_FG_4x3840x2160:	return 4320;
+	case NTV2_FG_4x4096x2160:	return 4320;
 	default:					return 0;
 	}
 }
@@ -3669,6 +3679,10 @@ ULWord GetNTV2FrameGeometryWidth(NTV2FrameGeometry geometry)
 		return 3840;
 	case NTV2_FG_4x2048x1080:
 		return 4096;
+	case NTV2_FG_4x3840x2160:
+		return 7680;
+	case NTV2_FG_4x4096x2160:
+		return 8192;
 	default:
 		return 0;
 	}
