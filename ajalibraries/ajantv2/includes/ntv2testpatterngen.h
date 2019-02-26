@@ -102,7 +102,7 @@ protected:
 	virtual void	PrepareForOutput();
 
 	bool IsSDStandard();
-	bool GetStandard(int &standard, bool &b4K);
+	bool GetStandard(int &standard, bool &b4K, bool &b8K);
 
 protected:
 	NTV2TestPatternSelect	_patternNumber;

@@ -2333,10 +2333,11 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 {
 	bool bResult = true;
 	bool b4K = false;
+	bool b8K = false;
 	int standard;
 
 	// which video standard are we?
-	if (!GetStandard(standard, b4K))
+	if (!GetStandard(standard, b4K, b8K))
 		return false;
 
 	// find the appropriate test pattern descriptor
@@ -2369,8 +2370,8 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 			if ( b4K)
 			{
 				// total kludge....just stretch out 1080 pattern.
-				startLine *= (_frameWidth == 7680 || _frameWidth == 8192) ? 4 : 2;
-				numLines *= (_frameWidth == 7680 || _frameWidth == 8192) ? 4 : 2;
+				startLine *= 2;
+				numLines *= 2;
 
 				// stretch line by copying pixels.
 				uint16_t* pLineSrc  = &_pUnPackedLineBuffer[_frameWidth-1];
@@ -2390,6 +2391,41 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 					*pLineDest-- = y1;
 					*pLineDest-- = cb1;
 						
+				}
+			}
+
+			if (b8K)
+			{
+				// total kludge....just stretch out 1080 pattern.
+				startLine *= 4;
+				numLines *= 4;
+
+				// stretch line by copying pixels.
+				uint16_t* pLineSrc = &_pUnPackedLineBuffer[_frameWidth - 1];
+				uint16_t* pLineDest = &_pUnPackedLineBuffer[_frameWidth * 4 - 1];
+				for (uint32_t count = 0; count < _frameWidth / 4; count++)
+				{
+					uint16_t y2 = *pLineSrc--;
+					uint16_t cr1 = *pLineSrc--;
+					uint16_t y1 = *pLineSrc--;
+					uint16_t cb1 = *pLineSrc--;
+					*pLineDest-- = y2;
+					*pLineDest-- = cr1;
+					*pLineDest-- = y1;
+					*pLineDest-- = cb1;
+					*pLineDest-- = y2;
+					*pLineDest-- = cr1;
+					*pLineDest-- = y1;
+					*pLineDest-- = cb1;
+					*pLineDest-- = y2;
+					*pLineDest-- = cr1;
+					*pLineDest-- = y1;
+					*pLineDest-- = cb1;
+					*pLineDest-- = y2;
+					*pLineDest-- = cr1;
+					*pLineDest-- = y1;
+					*pLineDest-- = cb1;
+
 				}
 			}
 
@@ -2828,7 +2864,7 @@ bool NTV2TestPatternGen::DrawColorQuandrantFrameTsi()
 
 }
 
-bool NTV2TestPatternGen::GetStandard(int &standard, bool &b4K)
+bool NTV2TestPatternGen::GetStandard(int &standard, bool &b4K, bool &b8K)
 {
 	bool bResult = true;
 	b4K = false;
@@ -2852,13 +2888,16 @@ bool NTV2TestPatternGen::GetStandard(int &standard, bool &b4K)
 		standard = 5;			// aka "NTV2_STANDARD2_K"
 
 	else if ((_frameWidth == 3840 && _frameHeight == 2160) || 
-			(_frameWidth == 4096 && _frameHeight == 2160) ||
-			(_frameWidth == 7680 && _frameHeight == 4320) ||
-			(_frameWidth == 8192 && _frameHeight == 4320))
+			(_frameWidth == 4096 && _frameHeight == 2160))
 	{
-		// kludge for now. 
 		standard = 0;			// aka "NTV2_STANDARD_1080"
 		b4K = true;
+	}
+	else if ((_frameWidth == 7680 && _frameHeight == 4320) ||
+			(_frameWidth == 8192 && _frameHeight == 4320))
+	{
+		standard = 0;			// aka "NTV2_STANDARD_1080"
+		b8K = true;
 	}
 	
 	else
@@ -2873,8 +2912,8 @@ bool NTV2TestPatternGen::GetStandard(int &standard, bool &b4K)
 bool NTV2TestPatternGen::IsSDStandard()
 {
 	int standard;
-	bool b4K;
-	if (GetStandard(standard, b4K))
+	bool b4K, b8K;
+	if (GetStandard(standard, b4K, b8K))
 		return (standard == 2 || standard == 3);
 
 	return false;
