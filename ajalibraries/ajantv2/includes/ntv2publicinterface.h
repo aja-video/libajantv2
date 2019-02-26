@@ -5210,7 +5210,12 @@ typedef enum
 	kRP188SourceEmbeddedVITC1	= 0x1,
 	kRP188SourceEmbeddedVITC2	= 0x2,
 	kRP188SourceLTCPort			= 0xFE
-} RP188SourceSelect;
+} RP188SourceFilterSelect;
+
+#if !defined(NTV2_DEPRECATE_15_2)
+	typedef RP188SourceFilterSelect		RP188SourceSelect;
+#endif	//	!defined(NTV2_DEPRECATE_15_2)
+
 
 // note: this order mimics (somewhat) that of NTV2TestPatternSelect in "ntv2testpatterngen.h"
 typedef enum

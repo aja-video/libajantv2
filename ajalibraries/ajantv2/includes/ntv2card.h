@@ -2371,6 +2371,7 @@ public:
 		@param[in]	inMode			Specifies the new RP-188 mode for the given channel.
 									Must be one of ::NTV2_RP188_INPUT or ::NTV2_RP188_OUTPUT. All other values are illegal.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetRP188Mode, \ref anctimecode
 	**/
 	AJA_VIRTUAL bool	SetRP188Mode			(const NTV2Channel inChannel,	const NTV2_RP188Mode inMode);
 
@@ -2379,78 +2380,107 @@ public:
 		@param[in]	inChannel		Specifies the channel of interest.
 		@param[out]	outMode			Receives the RP-188 mode for the given channel.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetRP188Mode, \ref anctimecode
 	**/
 	AJA_VIRTUAL bool	GetRP188Mode			(const NTV2Channel inChannel,	NTV2_RP188Mode & outMode);
 
 	/**
-		@brief		Writes the raw RP188 data into the DBB/Low/Hi registers for the given channel.
-		@param[in]	inChannel		Specifies the SDI output of interest as an ::NTV2Channel value.
+		@brief		Writes the raw RP188 data into the DBB/Low/Hi registers for the given SDI output.
+					These values are latched and sent at the next VBI.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest as an NTV2Channel value.
 		@param[in]	inRP188Data		Specifies the raw RP188 data values to be written.
-		@note		This call won't have any effect if the channel is in "bypass mode".
-					See CNTV2Card::IsRP188BypassEnabled and CNTV2Card::DisableRP188Bypass.
+		@note		This call will have no effect if the SDI output is in "bypass mode".
+		@see		CNTV2Card::GetRP188Data, CNTV2Card::IsRP188BypassEnabled, CNTV2Card::DisableRP188Bypass, \ref anctimecode
 	**/
-	AJA_VIRTUAL bool	SetRP188Data			(const NTV2Channel inChannel,	const NTV2_RP188 & inRP188Data);
+	AJA_VIRTUAL bool	SetRP188Data			(const NTV2Channel inSDIOutput,	const NTV2_RP188 & inRP188Data);
 
 	/**
-		@brief		Reads the raw RP188 data from the DBB/Low/Hi registers for the given channel.
-		@param[in]	inChannel		Specifies the SDI input of interest as an ::NTV2Channel value.
+		@brief		Reads the raw RP188 data from the DBB/Low/Hi registers for the given SDI input.
+		@param[in]	inSDIInput		Specifies the SDI input of interest, expressed as an NTV2Channel.
 		@param[out]	outRP188Data	Receives the raw RP188 data values.
+		@note		The returned timecode is subject to the SDI input's RP188 source filter -- see CNTV2Card::GetRP188SourceFilter.
+		@see		CNTV2Card::SetRP188Data, CNTV2Card::GetRP188SourceFilter, \ref anctimecode
 	**/
-	AJA_VIRTUAL bool	GetRP188Data			(const NTV2Channel inChannel,	NTV2_RP188 & outRP188Data);
-
-	AJA_VIRTUAL bool	SetRP188Data			(const NTV2Channel inChannel,	const ULWord frame, const RP188_STRUCT & inRP188Data);
-	AJA_VIRTUAL bool	GetRP188Data			(const NTV2Channel inChannel,	const ULWord frame, RP188_STRUCT & outRP188Data);
+	AJA_VIRTUAL bool	GetRP188Data			(const NTV2Channel inSDIInput,	NTV2_RP188 & outRP188Data);
 
 	/**
-		@brief		Sets the RP188 DBB filter for the given SDI output (channel).
-		@param[in]	inChannel		Specifies the SDI output (channel) of interest.
+		@brief		Sets the RP188 DBB filter for the given SDI input.
+		@param[in]	inSDIInput		Specifies the SDI input of interest, expressed as an NTV2Channel.
 		@param[out]	inFilterValue	Specifies the new filter value to use. Only the lower 8 bits are used.
-									Use 0xFF for unfiltered;  0x01 for VITC1;  0x02 for VITC2.
+									Use 0x00 for LTC;  0x01 for VITC1;  0x02 for VITC2; 0xFF for unfiltered.
 		@return		True if successful;  otherwise false.
-		@note		AutoCirculate-based applications have no need to use this function, since the driver manages
-					RP188 filtering when CNTV2Card::AutoCirculateInitForOutput is called.
+		@see		CNTV2Card::GetRP188SourceFilter, CNTV2Card::SetRP188BypassSource, \ref anctimecode
 	**/
-	AJA_VIRTUAL bool	SetRP188Source			(const NTV2Channel inChannel,	const ULWord inFilterValue);
-
+	AJA_VIRTUAL bool	SetRP188SourceFilter	(const NTV2Channel inSDIInput,	const UWord inFilterValue);
 
 	/**
-		@brief		Returns the current RP188 filter setting for the given (output) channel, assuming the channel's RP188 bypass mode is enabled (i.e., for E-E operation).
-		@param[in]	inChannel		Specifies the SDI output (channel) of interest.
-		@param[out]	outFilterValue	Receives the given channel's current RP188 SDI input filter, which will be an 8-bit value.
+		@brief		Returns the current RP188 filter setting for the given SDI input.
+		@param[in]	inSDIInput		Specifies the SDI input of interest, expressed as an NTV2Channel.
+		@param[out]	outFilterValue	Receives the given SDI input's current RP188 SDI input filter, an 8-bit value.
+									0x00 is LTC;  0x01 is VITC1;  0x02 is VITC2;  0xFF is unfiltered, which results
+									in the timecode registers containing the last received timecode packet for the
+									input frame.
 		@return		True if successful;  otherwise false.
-		@note		AutoCirculate-based applications have no need to use this function, since the driver manages
-					RP188 filtering when CNTV2Card::AutoCirculateInitForOutput is called.
+		@see		CNTV2Card::SetRP188SourceFilter, CNTV2Card::IsRP188BypassEnabled, CNTV2Card::GetRP188BypassSource, \ref anctimecode
 	**/
-	AJA_VIRTUAL bool	GetRP188Source			(const NTV2Channel inChannel,	ULWord & outFilterValue);
+	AJA_VIRTUAL bool	GetRP188SourceFilter	(const NTV2Channel inSDIInput,	UWord & outFilterValue);
 
+	#if !defined(NTV2_DEPRECATE_15_2)
+		AJA_VIRTUAL bool		SetRP188Data	(const NTV2Channel inChannel, const ULWord frame, const RP188_STRUCT & inRP188Data);
+		AJA_VIRTUAL bool		GetRP188Data	(const NTV2Channel inChannel, const ULWord frame, RP188_STRUCT & outRP188Data);
+		AJA_VIRTUAL inline bool	SetRP188Source	(const NTV2Channel inChannel, const ULWord inFilterValue)	{return SetRP188SourceFilter(inChannel, UWord(inFilterValue));}	///< @deprecated	Use SetRP188SourceFilter instead.
+		AJA_VIRTUAL inline bool	GetRP188Source	(const NTV2Channel inChannel, ULWord & outFilterValue)		{UWord val(0); bool result(GetRP188SourceFilter(inChannel, val)); outFilterValue = ULWord(val); return result;}	///< @deprecated	Use GetRP188SourceFilter instead.
+	#endif	//	!defined(NTV2_DEPRECATE_15_2)
 
 	/**
-		@brief		Answers whether or not the channel's RP-188 bypass mode is in effect.
-		@param[in]	inChannel	Specifies the output channel of interest.
-		@param[out]	outIsBypassEnabled	Receives true if the output channel's RP188 timecode is currently sourced from the channel's
-										RP188 registers (i.e., from calls to CNTV2Card::SetRP188Data). Receives false if its output timecode is
-										currently sourced from the input (specified from a prior call to CNTV2Card::SetRP188Source).
+		@brief		Answers if the SDI output's RP-188 bypass mode is enabled or not.
+		@param[in]	inSDIOutput			Specifies the SDI output of interest, expressed as an NTV2Channel.
+		@param[out]	outIsBypassEnabled	Receives true if the SDI output's RP188 timecode is currently sourced from its
+										RP188 registers (see CNTV2Card::SetRP188Data).
+										Receives false if its output timecode is currently sourced from an SDI input
+										(see CNTV2Card::GetRP188BypassSource and CNTV2Card::GetRP188SourceFilter).
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::EnableRP188Bypass, CNTV2Card::DisableRP188Bypass, CNTV2Card::GetRP188BypassSource, CNTV2Card::GetRP188SourceFilter
 	**/
-	AJA_VIRTUAL bool	IsRP188BypassEnabled	(const NTV2Channel inChannel,	bool & outIsBypassEnabled);
+	AJA_VIRTUAL bool	IsRP188BypassEnabled	(const NTV2Channel inSDIOutput,	bool & outIsBypassEnabled);
 
 	/**
-		@brief		Normally, if the device channel's ::NTV2_RP188Mode is ::NTV2_RP188_OUTPUT, an SDI output will embed RP188 timecode as fed into its three
-					DBB/Bits0_31/Bits32_63 registers (via calls to CNTV2Card::SetRP188Data). These registers can be bypassed to grab RP188 from an SDI input, which
-					is useful in E-E mode.
-		@param[in]	inChannel			Specifies the (SDI output) channel of interest.
+		@brief		Configures the SDI output's embedder to embed SMPTE 12M timecode specified in calls to CNTV2Card::SetRP188Data.
+		@param[in]	inSDIOutput			Specifies the SDI output of interest, expressed as an NTV2Channel.
+		@return		True if successful; otherwise false.
+		@note		The SDI output's ::NTV2_RP188Mode must be set to ::NTV2_RP188_OUTPUT.
+		@see		CNTV2Card::EnableRP188Bypass, CNTV2Card::SetRP188Data, CNTV2Card::SetRP188Mode, \ref anctimecode
+	**/
+	AJA_VIRTUAL bool	DisableRP188Bypass		(const NTV2Channel inSDIOutput);
+
+	/**
+		@brief		Configures the SDI output's embedder to embed SMPTE 12M timecode obtained from an SDI input,
+					which is often useful in E-E mode.
+		@param[in]	inSDIOutput			Specifies the SDI output of interest, expressed as an NTV2Channel.
+		@return		True if successful; otherwise false.
+		@see		CNTV2Card::DisableRP188Bypass, CNTV2Card::SetRP188SourceFilter, CNTV2Card::SetRP188BypassSource, \ref anctimecode
+	**/
+	AJA_VIRTUAL bool	EnableRP188Bypass		(const NTV2Channel inSDIOutput);
+
+	/**
+		@brief		For the given SDI output that's in RP188 bypass mode (E-E), specifies the SDI input
+					to be used as a timecode source.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest, expressed as an NTV2Channel.
+		@param[in]	inSDIInput		Specifies the SDI input to be used as a timecode source,
+									expressed as a zero-based index number.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	DisableRP188Bypass		(const NTV2Channel inChannel);
+	AJA_VIRTUAL bool	SetRP188BypassSource (const NTV2Channel inSDIOutput, const UWord inSDIInput);
 
 	/**
-		@brief		Normally, if the device channel's NTV2_RP188Mode is NTV2_RP188_OUTPUT, an SDI output will embed RP188 timecode as fed into its three
-					DBB/Bits0_31/Bits32_63 registers (via calls to SetRP188Data). These registers can be bypassed to grab RP188 from an SDI input, which
-					is useful in E-E mode.
-		@param[in]	inChannel			Specifies the (SDI output) channel of interest.
+		@brief		For the given SDI output that's in RP188 bypass mode (E-E), answers with the SDI input
+					that's currently being used as a timecode source.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest, expressed as an NTV2Channel.
+		@param[in]	outSDIInput		Receives the SDI input being used as a timecode source, expressed
+									as a zero-based index number.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	EnableRP188Bypass		(const NTV2Channel inChannel);
+	AJA_VIRTUAL bool	GetRP188BypassSource (const NTV2Channel inSDIOutput, UWord & outSDIInput);
 
 	#if !defined(NTV2_DEPRECATE_14_0)
 		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	DisableRP188Bypass	(const NTV2Channel inChannel, const bool inBypassDisabled))

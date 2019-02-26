@@ -65,7 +65,10 @@ protected:
     bool 					mHasSdiOut5;					
     bool 					mHasCSC5;					
     bool 					mHasLUT5;					
-    bool 					mHas4kQuarter;					
+    bool 					mHas4kQuarter;
+
+	uint32_t				startAudioCounter;
+	uint32_t				endAudioCounter;
 };
 
 

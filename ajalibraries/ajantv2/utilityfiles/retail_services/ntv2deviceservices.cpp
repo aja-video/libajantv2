@@ -3810,7 +3810,7 @@ void DeviceServices::SetDeviceMiscRegisters()
 	// Setup the analog LTC stuff
 	//
 	
-	RP188SourceSelect timecodeSource = mDs.sdiRp188Source;
+	RP188SourceFilterSelect timecodeSource = mDs.sdiRp188Source;
 	if (NTV2DeviceGetNumLTCInputs(mDeviceID) && timecodeSource == kRP188SourceLTCPort)
 	{
 		mCard->SetLTCInputEnable(true);
