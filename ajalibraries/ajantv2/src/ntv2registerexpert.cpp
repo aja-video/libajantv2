@@ -188,6 +188,7 @@ private:
 		AJAAutoLock	lock(&mGuardMutex);
 		DefineRegister (kRegGlobalControl,		"",	mDecodeGlobalControlReg,	READWRITE,	kRegClass_NULL,		kRegClass_Channel1,	kRegClass_NULL);
 		DefineRegister (kRegGlobalControl2,		"",	mDecodeGlobalControl2,		READWRITE,	kRegClass_NULL,		kRegClass_Channel1,	kRegClass_NULL);
+		DefineRegister (kRegGlobalControl3,		"",	mDecodeGlobalControl3,		READWRITE,	kRegClass_NULL,		kRegClass_Channel1,	kRegClass_NULL);
 		DefineRegister (kRegGlobalControlCh2,	"",	mDecodeGlobalControlChanRegs,READWRITE,	kRegClass_NULL,		kRegClass_Channel2,	kRegClass_NULL);
 		DefineRegister (kRegGlobalControlCh3,	"",	mDecodeGlobalControlChanRegs,READWRITE,	kRegClass_NULL,		kRegClass_Channel3,	kRegClass_NULL);
 		DefineRegister (kRegGlobalControlCh4,	"",	mDecodeGlobalControlChanRegs,READWRITE,	kRegClass_NULL,		kRegClass_Channel4,	kRegClass_NULL);
@@ -1594,7 +1595,23 @@ private:
 		}
 		virtual	~DecodeGlobalControl2()	{}
 	}	mDecodeGlobalControl2;
-
+	
+	//	reg 108 aka kRegGlobalControl3
+	struct DecodeGlobalControl3 : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+			ostringstream	oss;
+		    oss	<< "Bidirectional analog 1-4 input: "	<< SetNotset(inRegValue & kRegMaskAnalogIOControl_14 )			<< endl
+				<< "Quad Quad Mode Channel 1-4: "		<< SetNotset(inRegValue & kRegMaskQuadQuadMode)					<< endl
+				<< "Quad Quad Squares Mode 1-4: "		<< SetNotset(inRegValue & kRegMaskQuadQuadSquaresMode)			<< endl;
+			return oss.str();
+		}
+		virtual	~DecodeGlobalControl3()	{}
+	}	mDecodeGlobalControl3;
+	
 	// Regs 377,378,379,380,381,382,383 aka kRegGlobalControlCh2,kRegGlobalControlCh3,kRegGlobalControlCh4,kRegGlobalControlCh5,kRegGlobalControlCh6,kRegGlobalControlCh7,kRegGlobalControlCh8
 	struct DecodeGlobalControlChanReg : public Decoder
 	{

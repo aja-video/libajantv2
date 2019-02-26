@@ -630,7 +630,7 @@ const char * ntv2RegStrings[] =
 	"kRegDMA4HostAddrHigh",							// 106
 	"kRegDMA4NextDescHigh",							// 107
 
-	"kRegReserved108",								// 108
+	"kRegGlobalControl3",							// 108
 	"kRegReserved109",								// 109
 	"kRegLTCEmbeddedBits0_31",						// 110
 	"kRegLTCEmbeddedBits32_63",						// 111
