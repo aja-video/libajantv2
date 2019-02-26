@@ -181,6 +181,8 @@ UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBuffer
 	}
 	if (inFG == NTV2_FG_4x1920x1080 || inFG == NTV2_FG_4x2048x1080)
 		factor *= 4;
+	if (inFG == NTV2_FG_4x3840x2160 || inFG == NTV2_FG_4x4096x2160)
+		factor *= 16;
 	return factor;
 }
 
