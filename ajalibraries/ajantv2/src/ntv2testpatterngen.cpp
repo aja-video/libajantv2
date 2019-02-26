@@ -2366,11 +2366,11 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 			int startLine = segmentDescriptor.startLine;
 			int numLines  = (segmentDescriptor.endLine - startLine) + 1;
 
-			if ( b4K )
+			if ( b4K)
 			{
 				// total kludge....just stretch out 1080 pattern.
-				startLine *= 2;
-				numLines *= 2;
+				startLine *= (_frameWidth == 7680 || _frameWidth == 8192) ? 4 : 2;
+				numLines *= (_frameWidth == 7680 || _frameWidth == 8192) ? 4 : 2;
 
 				// stretch line by copying pixels.
 				uint16_t* pLineSrc  = &_pUnPackedLineBuffer[_frameWidth-1];
