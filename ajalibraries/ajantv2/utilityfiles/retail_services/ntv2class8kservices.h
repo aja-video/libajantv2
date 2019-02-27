@@ -8,12 +8,12 @@
 #define _Class8kServices_
 
 
-#include "ntv2deviceservices.h"
+#include "ntv2class4kservices.h"
 
 //-------------------------------------------------------------------------------------------------------
 //	class Class8kServices
 //-------------------------------------------------------------------------------------------------------
-class Class8kServices : public DeviceServices
+class Class8kServices : public Class4kServices
 {
 public:
 	Class8kServices(NTV2DeviceID devID);
