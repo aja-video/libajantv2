@@ -41,7 +41,7 @@ static const string				gGlobalMutexName	("com.aja.ntv2.mutex.demo");
 static NTV2VideoFormatSet		gAllFormats;
 static NTV2VideoFormatSet		gNon4KFormats;
 static NTV2VideoFormatSet		g4KFormats;
-static NTV2VideoFormatSet		g8kFormats;
+static NTV2VideoFormatSet		g8KFormats;
 static NTV2FrameBufferFormatSet	gPixelFormats;
 static NTV2FrameBufferFormatSet	gFBFsRGB;
 static NTV2FrameBufferFormatSet	gFBFsPlanar;
@@ -85,7 +85,7 @@ class DemoCommonInitializer
 					continue;
 
 				if (NTV2_IS_QUAD_QUAD_FORMAT(legalFormat))
-					g8kFormats.insert (legalFormat);
+					g8KFormats.insert (legalFormat);
 				else if (NTV2_IS_4K_VIDEO_FORMAT (legalFormat))
 					g4KFormats.insert (legalFormat);
 				else
@@ -421,7 +421,17 @@ string CNTV2DemoCommon::GetDeviceStrings (const NTV2DeviceKinds inKinds)
 
 const NTV2VideoFormatSet &	CNTV2DemoCommon::GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds)
 {
-	return inKinds == VIDEO_FORMATS_ALL  ?  gAllFormats  :  (inKinds == VIDEO_FORMATS_4KUHD ? g4KFormats : gNon4KFormats);
+	switch(inKinds)
+	{
+	case VIDEO_FORMATS_ALL:
+		return gAllFormats;
+	case VIDEO_FORMATS_4KUHD:
+		return g4KFormats;
+	case VIDEO_FORMATS_UHD2:
+		return g8KFormats;
+	default:
+		return gNon4KFormats;
+	}
 }
 
 
@@ -523,6 +533,8 @@ NTV2VideoFormat CNTV2DemoCommon::GetVideoFormatFromString (const string & inStr,
 	if (inKinds == VIDEO_FORMATS_ALL)
 		return format;
 	if (inKinds == VIDEO_FORMATS_4KUHD && NTV2_IS_4K_VIDEO_FORMAT(format))
+		return format;
+	if (inKinds == VIDEO_FORMATS_UHD2 && NTV2_IS_QUAD_QUAD_FORMAT(format))
 		return format;
 	if (inKinds == VIDEO_FORMATS_NON_4KUHD && !NTV2_IS_4K_VIDEO_FORMAT(format))
 		return format;

@@ -69,11 +69,11 @@ int main (int argc, const char ** argv)
 
 	const string			deviceSpec		(pDeviceSpec ? pDeviceSpec : "0");
 	const string			videoFormatStr	(pVideoFormat  ?  pVideoFormat  :  "");
-	const NTV2VideoFormat	videoFormat		(videoFormatStr.empty () ? NTV2_FORMAT_4x1920x1080p_2398 : CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr, VIDEO_FORMATS_4KUHD));
+	const NTV2VideoFormat	videoFormat		(videoFormatStr.empty () ? NTV2_FORMAT_4x1920x1080p_2398 : CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr, VIDEO_FORMATS_UHD2));
 	if (videoFormatStr == "?" || videoFormatStr == "list")
-		{cerr << "## NOTE:  List of valid '--videoFormat' parameter values:\n" << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_4KUHD, deviceSpec) << endl;  return 0;}
-	else if (!videoFormatStr.empty () && !NTV2_IS_4K_VIDEO_FORMAT (videoFormat))
-		{cerr << "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_4KUHD, deviceSpec) << endl;  return 2;}
+		{cerr << "## NOTE:  List of valid '--videoFormat' parameter values:\n" << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_UHD2, deviceSpec) << endl;  return 0;}
+	else if (!videoFormatStr.empty () && !NTV2_IS_QUAD_QUAD_FORMAT (videoFormat))
+		{cerr << "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_UHD2, deviceSpec) << endl;  return 2;}
 
 	const string				pixelFormatStr	(pPixelFormat  ?  pPixelFormat  :  "");
 	const NTV2FrameBufferFormat	pixelFormat		(pixelFormatStr.empty () ? NTV2_FBF_8BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString (pixelFormatStr));
