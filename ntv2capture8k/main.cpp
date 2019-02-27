@@ -1,5 +1,5 @@
 /**
-	@file		ntv2capture4k/main.cpp
+	@file		ntv2capture8k/main.cpp
 	@brief		Demonstration application to capture frames from SDI input.
 	@copyright	Copyright (C) 2012-2019 AJA Video Systems, Inc.  All rights reserved.
 **/
