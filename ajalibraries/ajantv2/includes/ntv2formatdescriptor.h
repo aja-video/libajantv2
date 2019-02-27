@@ -154,6 +154,15 @@ public:
 	const void *					GetRowAddress (const void * pInStartAddress,  const ULWord inRowIndex0,  const UWord inPlaneIndex0 = 0) const;
 
 	/**
+		@return		A non-const pointer to the start of the given row in the given buffer, or NULL if row index is bad
+					(using my description of the buffer contents).
+		@param[in]	pInStartAddress		A non-const pointer to the raster buffer.
+		@param[in]	inRowIndex0			Specifies the row of interest in the buffer, where zero is the topmost row.
+		@param[in]	inPlaneIndex0		Specifies the plane of interest. Defaults to zero.
+	**/
+	void *							GetWriteableRowAddress (void * pInStartAddress,  const ULWord inRowIndex0,  const UWord inPlaneIndex0 = 0) const;
+
+	/**
 		@return		The absolute byte offset from the start of the frame buffer to the start of the given raster line
 					in the given plane (or 0xFFFFFFFF if the row and/or plane indexes are bad).
 		@note		This function assumes that the planes contiguously abut each other in memory, in ascending address order.
