@@ -8,6 +8,7 @@
 
 #include "retailsupport.h"
 #include "ntv2class4kservices.h"
+#include "ntv2class8kservices.h"
 #include "ntv2ioxtservices.h"
 #include "ntv2io4kufcservices.h"
 #include "ntv2kona3Gquadservices.h"
@@ -83,6 +84,9 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 		case DEVICE_ID_IO4K:
 		case DEVICE_ID_IO4KPLUS:
 			pDeviceServices = new Class4kServices(deviceID);
+			break;
+		case DEVICE_ID_KONA5_12G:
+			pDeviceServices = new Class8kServices(deviceID);
 			break;
 		case DEVICE_ID_KONA4UFC:
 			pDeviceServices = new Kona4UfcServices();
