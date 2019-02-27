@@ -100,6 +100,8 @@ typedef enum
 	kVRegTimeCodeIn8Delay					= VIRTUALREG_START+98,
 
 	kVRegDebug1								= VIRTUALREG_START+100,		// general debug register
+	kVRegDebugLastFormat					= VIRTUALREG_START+101,		// IP debug registers
+	kVRegDebugIPConfigTimeMS				= VIRTUALREG_START+102,
 
 	// Control Panel virtual registers
 	kVRegDisplayReferenceSelect				= VIRTUALREG_START+120,

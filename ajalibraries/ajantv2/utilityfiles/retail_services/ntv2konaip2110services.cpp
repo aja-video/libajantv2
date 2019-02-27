@@ -4026,6 +4026,9 @@ void KonaIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 		{
 			*videoFormatLast = mFb1VideoFormat;
 			mCard->ReadRegister(kRegAud1Counter, endAudioCounter);
+
+			mCard->WriteRegister(kVRegDebugLastFormat, mFb1VideoFormat);
+			mCard->WriteRegister(kVRegDebugIPConfigTimeMS, (endAudioCounter-startAudioCounter)/48);
 			printf("Format change time = %d ms\n", (endAudioCounter-startAudioCounter)/48);
 		}
 
