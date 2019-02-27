@@ -928,6 +928,8 @@ private:
 		DefineRegName	(kVRegTimeCodeCh8Delay,					"kVRegTimeCodeCh8Delay");
 		DefineRegName	(kVRegTimeCodeIn8Delay,					"kVRegTimeCodeIn8Delay");
 		DefineRegName	(kVRegDebug1,							"kVRegDebug1");
+		DefineRegName	(kVRegDebugLastFormat,					"kVRegDebugLastFormat");
+		DefineRegName	(kVRegDebugIPConfigTimeMS,				"kVRegDebugIPConfigTimeMS");
 		DefineRegName	(kVRegDisplayReferenceSelect,			"kVRegDisplayReferenceSelect");
 		DefineRegName	(kVRegVANCMode,							"kVRegVANCMode");
 		DefineRegName	(kVRegDualStreamTransportType,			"kVRegDualStreamTransportType");
