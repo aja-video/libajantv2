@@ -137,6 +137,8 @@ const char *NTV2StandardString (NTV2Standard std)
 		case NTV2_STANDARD_4096x2160p:	result = "NTV2_STANDARD_4096x2160p";	break;
 		case NTV2_STANDARD_3840HFR:		result = "NTV2_STANDARD_3840HFR";		break;
 		case NTV2_STANDARD_4096HFR:		result = "NTV2_STANDARD_4096HFR";		break;
+		case NTV2_STANDARD_7680:		result = "NTV2_STANDARD_7680";			break;
+		case NTV2_STANDARD_8192:		result = "NTV2_STANDARD_8192";			break;
 		case NTV2_STANDARD_INVALID:		result = "NTV2_STANDARD_INVALID";		break;
 #if !defined (_DEBUG)
 		default:						result = "";							break;

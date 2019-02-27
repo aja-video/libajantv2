@@ -167,7 +167,7 @@ UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBuffer
 		case NTV2_FG_2048x1114:
 			factor = (inFBF == NTV2_FBF_16BIT_ARGB)  ?  4  :  2;
 			break;
-
+#if defined(_DEBUG)
 		case NTV2_FG_1280x720:
 		case NTV2_FG_720x486:
 		case NTV2_FG_720x576:
@@ -176,8 +176,13 @@ UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBuffer
 		case NTV2_FG_1280x740:
 		case NTV2_FG_720x514:
 		case NTV2_FG_720x612:
+		case NTV2_FG_4x3840x2160:
+		case NTV2_FG_4x4096x2160:
 		case NTV2_FG_INVALID:
 			break;
+#else
+		default:	break;
+#endif
 	}
 	if (inFG == NTV2_FG_4x1920x1080 || inFG == NTV2_FG_4x2048x1080)
 		factor *= 4;

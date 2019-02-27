@@ -346,15 +346,15 @@ AJAExport ULWord GetVideoWriteSize (const NTV2VideoFormat inVideoFormat,
 									const NTV2FrameBufferFormat inFBFormat,
 									const NTV2VANCMode inVancMode = NTV2_VANCMODE_OFF);
 
-AJAExport NTV2VideoFormat GetQuarterSizedVideoFormat(NTV2VideoFormat videoFormat);
-AJAExport NTV2VideoFormat GetQuadSizedVideoFormat(NTV2VideoFormat videoFormat, bool isSquareDivision = true);
-AJAExport NTV2FrameGeometry GetQuarterSizedGeometry(NTV2FrameGeometry geometry);
-AJAExport NTV2FrameGeometry Get4xSizedGeometry(NTV2FrameGeometry geometry);
-AJAExport NTV2Standard GetQuarterSizedStandard(NTV2Standard geometry);
-AJAExport NTV2Standard Get4xSizedStandard(NTV2Standard geometry, bool bIs4k = false);
+AJAExport NTV2VideoFormat GetQuarterSizedVideoFormat (const NTV2VideoFormat inVideoFormat);
+AJAExport NTV2VideoFormat GetQuadSizedVideoFormat (const NTV2VideoFormat inVideoFormat, const bool isSquareDivision = true);
+AJAExport NTV2FrameGeometry GetQuarterSizedGeometry (const NTV2FrameGeometry inGeometry);
+AJAExport NTV2FrameGeometry Get4xSizedGeometry (const NTV2FrameGeometry inGeometry);
+AJAExport NTV2Standard GetQuarterSizedStandard (const NTV2Standard inGeometry);
+AJAExport NTV2Standard Get4xSizedStandard (const NTV2Standard inGeometry, const bool bIs4k = false);
 
-AJAExport double GetFramesPerSecond(NTV2FrameRate frameRate);
-AJAExport double GetFrameTime(NTV2FrameRate frameRate);
+AJAExport double GetFramesPerSecond (const NTV2FrameRate inFrameRate);
+AJAExport double GetFrameTime (const NTV2FrameRate inFrameRate);
 /**
 	@return		The first NTV2VideoFormat that matches the given frame rate and raster dimensions (and whether it's interlaced or not).
 	@param[in]	inFrameRate		Specifies the frame rate of interest.

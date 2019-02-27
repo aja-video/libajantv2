@@ -782,13 +782,31 @@ bool CNTV2Card::GetNumberActiveLines (ULWord & outNumActiveLines)
 
 	switch (standard)
 	{
-		case NTV2_STANDARD_2K:		outNumActiveLines = HD_NUMACTIVELINES_2K;		break;
-		case NTV2_STANDARD_1080:	outNumActiveLines = HD_NUMACTIVELINES_1080;		break;
-		case NTV2_STANDARD_1080p:	outNumActiveLines = HD_NUMACTIVELINES_1080;		break;
-		case NTV2_STANDARD_720:		outNumActiveLines = HD_NUMACTIVELINES_720;		break;
-		case NTV2_STANDARD_525:		outNumActiveLines = NUMACTIVELINES_525;			break;
-		case NTV2_STANDARD_625:		outNumActiveLines = NUMACTIVELINES_625;			break;
-		default:					outNumActiveLines = 0;							break;
+		case NTV2_STANDARD_525:			outNumActiveLines = NUMACTIVELINES_525;			break;
+
+		case NTV2_STANDARD_625:			outNumActiveLines = NUMACTIVELINES_625;			break;
+
+		case NTV2_STANDARD_720:			outNumActiveLines = HD_NUMACTIVELINES_720;		break;
+
+		case NTV2_STANDARD_2K:			outNumActiveLines = HD_NUMACTIVELINES_2K;		break;
+
+		case NTV2_STANDARD_1080:
+		case NTV2_STANDARD_1080p:
+		case NTV2_STANDARD_2Kx1080p:
+		case NTV2_STANDARD_2Kx1080i:	outNumActiveLines = HD_NUMACTIVELINES_1080;		break;
+
+		case NTV2_STANDARD_3840x2160p:
+		case NTV2_STANDARD_4096x2160p:
+		case NTV2_STANDARD_3840HFR:
+		case NTV2_STANDARD_4096HFR:		outNumActiveLines = HD_NUMLINES_4K;				break;
+
+		case NTV2_STANDARD_7680:
+		case NTV2_STANDARD_8192:		outNumActiveLines = FD_NUMLINES_8K;				break;
+	#if defined(_DEBUG)
+		case NTV2_NUM_STANDARDS:		outNumActiveLines = 0;							break;
+	#else
+		default:						outNumActiveLines = 0;							break;
+	#endif
 	}
 	return outNumActiveLines != 0;
 }
@@ -815,23 +833,27 @@ NTV2FrameDimensions CNTV2Card::GetActiveFrameDimensions (const NTV2Channel inCha
 					case NTV2_STANDARD_1080p:
 						result.SetWidth(geometry == NTV2_FG_2048x1080 || geometry == NTV2_FG_4x2048x1080  ?  HD_NUMCOMPONENTPIXELS_1080_2K  :  HD_NUMCOMPONENTPIXELS_1080);
 						result.SetHeight(HD_NUMACTIVELINES_1080);
-						if (geometry == NTV2_FG_4x1920x1080  ||  geometry == NTV2_FG_4x2048x1080)
-							result.Set(result.Width()*2,  result.Height()*2);
+						if (NTV2_IS_QUAD_FRAME_GEOMETRY(geometry))
+							result.Set(result.Width()*2,  HD_NUMLINES_4K);
+						else if (NTV2_IS_QUAD_QUAD_FRAME_GEOMETRY(geometry))
+							result.Set(result.Width()*4,  FD_NUMLINES_8K);
 						break;
-					case NTV2_STANDARD_720:			result.SetWidth(HD_NUMCOMPONENTPIXELS_720).SetHeight(HD_NUMACTIVELINES_720);	break;
-					case NTV2_STANDARD_525:			result.Set(NUMCOMPONENTPIXELS, NUMACTIVELINES_525);								break;
-					case NTV2_STANDARD_625:			result.Set(NUMCOMPONENTPIXELS, NUMACTIVELINES_625);								break;
-					case NTV2_STANDARD_2K:			result.Set(HD_NUMCOMPONENTPIXELS_2K, HD_NUMLINES_2K);							break;
-					case NTV2_STANDARD_2Kx1080p:	result.Set(HD_NUMCOMPONENTPIXELS_1080_2K, HD_NUMACTIVELINES_1080);				break;
-					case NTV2_STANDARD_2Kx1080i:	result.Set(HD_NUMCOMPONENTPIXELS_1080_2K, HD_NUMACTIVELINES_1080);				break;
-					case NTV2_STANDARD_3840x2160p:	result.Set(HD_NUMCOMPONENTPIXELS_1080*2, HD_NUMACTIVELINES_1080*2);				break;
-					case NTV2_STANDARD_4096x2160p:	result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*2, HD_NUMACTIVELINES_1080*2);			break;
-					case NTV2_STANDARD_3840HFR:		result.Set(HD_NUMCOMPONENTPIXELS_1080*2, HD_NUMACTIVELINES_1080*2);				break;
-					case NTV2_STANDARD_4096HFR:		result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*2, HD_NUMACTIVELINES_1080*2);			break;
+					case NTV2_STANDARD_720:			result.Set(HD_NUMCOMPONENTPIXELS_720,		HD_NUMACTIVELINES_720);		break;
+					case NTV2_STANDARD_525:			result.Set(NUMCOMPONENTPIXELS,				NUMACTIVELINES_525);		break;
+					case NTV2_STANDARD_625:			result.Set(NUMCOMPONENTPIXELS,				NUMACTIVELINES_625);		break;
+					case NTV2_STANDARD_2K:			result.Set(HD_NUMCOMPONENTPIXELS_2K,		HD_NUMLINES_2K);			break;
+					case NTV2_STANDARD_2Kx1080p:	result.Set(HD_NUMCOMPONENTPIXELS_1080_2K,	HD_NUMACTIVELINES_1080);	break;
+					case NTV2_STANDARD_2Kx1080i:	result.Set(HD_NUMCOMPONENTPIXELS_1080_2K,	HD_NUMACTIVELINES_1080);	break;
+					case NTV2_STANDARD_3840x2160p:	result.Set(HD_NUMCOMPONENTPIXELS_1080*2,	HD_NUMLINES_4K);			break;
+					case NTV2_STANDARD_4096x2160p:	result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*2,	HD_NUMLINES_4K);			break;
+					case NTV2_STANDARD_3840HFR:		result.Set(HD_NUMCOMPONENTPIXELS_1080*2,	HD_NUMLINES_4K);			break;
+					case NTV2_STANDARD_4096HFR:		result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*2,	HD_NUMLINES_4K);			break;
+					case NTV2_STANDARD_7680:		result.Set(HD_NUMCOMPONENTPIXELS_1080*4,	FD_NUMLINES_8K);			break;
+					case NTV2_STANDARD_8192:		result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*4,	FD_NUMLINES_8K);			break;
 				#if defined(_DEBUG)
-					case NTV2_NUM_STANDARDS:																						break;
+					case NTV2_NUM_STANDARDS:																				break;
 				#else
-					default:																										break;
+					default:																								break;
 				#endif
 				}
 
@@ -2900,10 +2922,11 @@ bool CNTV2Card::SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard i
 		case NTV2_STANDARD_4096x2160p:
 		case NTV2_STANDARD_3840HFR:
 		case NTV2_STANDARD_4096HFR:
+		case NTV2_STANDARD_7680:
+		case NTV2_STANDARD_8192:
 			if (NTV2_IS_VANCMODE_ON(inVancMode))
-				CVIDWARN("'tall' or 'taller' mode requested for quad standard '" << ::NTV2StandardToString(inStandard) << "' -- using non-VANC geometry instead");
+				CVIDWARN("'tall' or 'taller' mode requested for '" << ::NTV2StandardToString(inStandard) << "' -- using non-VANC geometry instead");
 			break;
-
 	#if defined(_DEBUG)
 		case NTV2_STANDARD_INVALID:		return false;
 	#else
@@ -2983,6 +3006,8 @@ bool CNTV2Card::GetVANCMode (NTV2VANCMode & outVancMode, const NTV2Channel inCha
 		case NTV2_STANDARD_4096x2160p:
 		case NTV2_STANDARD_3840HFR:
 		case NTV2_STANDARD_4096HFR:
+		case NTV2_STANDARD_7680:
+		case NTV2_STANDARD_8192:
 			break;
 	#if defined (_DEBUG)
 		case NTV2_NUM_STANDARDS:	return false;
