@@ -3632,6 +3632,7 @@ NTV2FrameRate GetNTV2FrameRateFromVideoFormat(NTV2VideoFormat videoFormat)
 	case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
 	case NTV2_FORMAT_END_4K_DEF_FORMATS2:
 	case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
+	case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
 		break;
 #else
 	default:
@@ -4065,6 +4066,7 @@ ULWord GetDisplayWidth (const NTV2VideoFormat videoFormat)
 	case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
 	case NTV2_FORMAT_END_4K_DEF_FORMATS2:
 	case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
+	case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
 #else
 	default:
 #endif
@@ -4263,6 +4265,7 @@ ULWord GetDisplayHeight (const NTV2VideoFormat videoFormat)
 	case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
 	case NTV2_FORMAT_END_4K_DEF_FORMATS2:
 	case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
+	case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
 #else
 	default:
 #endif

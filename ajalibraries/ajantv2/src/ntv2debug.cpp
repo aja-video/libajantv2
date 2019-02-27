@@ -433,7 +433,8 @@ const char *NTV2VideoFormatString (NTV2VideoFormat fmt)
 		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:		result = "";								break;
 		case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:	result = "";								break;
 		case NTV2_FORMAT_END_4K_DEF_FORMATS2:		result = "";								break;
-		case NTV2_FORMAT_END_UHD2_DEF_FORMATS:			result = "";								break;
+		case NTV2_FORMAT_END_UHD2_DEF_FORMATS:		result = "";								break;
+		case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:	result = "";								break;
 		case NTV2_FORMAT_UNKNOWN:					result = "";								break;
 #if !defined (_DEBUG)
 		default:									result = "";								break;
