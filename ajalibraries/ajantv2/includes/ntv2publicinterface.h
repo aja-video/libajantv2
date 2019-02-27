@@ -906,7 +906,7 @@ typedef enum
 
 typedef enum _NTV2HDMIRegisters
 {
-	kRegHDMIOutHDRMetaData		= 0x0a00,
+	kRegHDMIOutputAuxData		= 0x0a00,
 	kRegHDMIOutputConfig1       = 0x1d14,
 	kRegHDMIInputStatus1        = 0x1d15,
 	kRegHDMIControl1            = 0x1d16,
@@ -921,7 +921,8 @@ typedef enum _NTV2HDMIRegisters
 	kRegHDMIControl4            = 0x3014
 } NTV2HDMIRegisters;
 
-#define HDMIOutHDRMetaDataSize	32
+#define NTV2_HDMIAuxMaxFrames	8
+#define NTV2_HDMIAuxDataSize	32
 
 #if !defined (NTV2_DEPRECATE)
 	#define	KRegDMA1HostAddr			kRegDMA1HostAddr			///< @deprecated		Use kRegDMA1HostAddr instead.
@@ -5625,7 +5626,7 @@ typedef enum
 		#define	AUTOCIRCULATE_WITH_ANC				BIT(6)		///< @brief	Use this to AutoCirculate with ancillary data
 		#define	AUTOCIRCULATE_WITH_AUDIO_CONTROL	BIT(7)		///< @brief	Use this to AutoCirculate with no audio but with audio control
 		#define	AUTOCIRCULATE_WITH_FIELDS			BIT(8)		///< @brief	Use this to AutoCirculate with fields as frames for interlaced formats
-		#define	AUTOCIRCULATE_WITH_HDRDATA			BIT(9)		///< @brief	Use this to AutoCirculate with HDMI HDR10+ output data
+		#define	AUTOCIRCULATE_WITH_HDMIAUX			BIT(9)		///< @brief	Use this to AutoCirculate with HDMI auxiliary data
 
 		#define AUTOCIRCULATE_FRAME_FULL			BIT(20)		///< @brief Frame contains a full image
 		#define AUTOCIRCULATE_FRAME_FIELD0			BIT(21)		///< @brief Frame contains field 0 of an interlaced image (first field in time)
@@ -7419,7 +7420,7 @@ typedef enum
 					AutoCircVidProcInfo				acVidProcInfo;				///< @brief	Specifies the mixer/keyer transition to make.  Ignored if AUTOCIRCULATE_WITH_VIDPROC option is not set.
 					NTV2QuarterSizeExpandMode		acVideoQuarterSizeExpand;	///< @brief	Turns on the "quarter-size expand" (2x H + 2x V) hardware. Defaults to off (1:1).
 
-					NTV2_POINTER					acHDR10PlusDynamicMetaData;
+					NTV2_POINTER					acHDMIAuxData;
 
 					/**
 						@name	Lesser-used and Deprecated Members
@@ -7476,7 +7477,7 @@ typedef enum
 				NTV2_BEGIN_PRIVATE
 					inline explicit					AUTOCIRCULATE_TRANSFER (const AUTOCIRCULATE_TRANSFER & inObj)
 																									:	acHeader(0xFEFEFEFE, 0), acVideoBuffer(0), acAudioBuffer(0),
-																										acANCBuffer(0), acANCField2Buffer(0), acOutputTimeCodes(0), acHDR10PlusDynamicMetaData(0)
+                                                                                                        acANCBuffer(0), acANCField2Buffer(0), acOutputTimeCodes(0), acHDMIAuxData(0)
 																										{(void) inObj;}		///< @brief	You cannot construct an AUTOCIRCULATE_TRANSFER from another.
 					inline AUTOCIRCULATE_TRANSFER &	operator = (const AUTOCIRCULATE_TRANSFER & inRHS)	{(void) inRHS; return *this;}	///< @brief	You cannot assign AUTOCIRCULATE_TRANSFERs.
 				NTV2_END_PRIVATE
