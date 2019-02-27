@@ -885,6 +885,16 @@ public:
 	AJA_VIRTUAL bool		SetQuadQuadFrameEnable (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
+	@brief	Enables or disables quad-quad-frame squares mode on the device, 8K.
+	@return		True if successful; otherwise false.
+	@param[in]	inValue		Specify a non-zero value (true) to put the device into quad quad frame mode.
+	Specify zero (false) to put the device into normal (non-quad quad) frame mode.
+	@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1. Ignored if the device
+	is incapable of multi-format mode, or is not currently in multi-format mode.
+	**/
+	AJA_VIRTUAL bool		SetQuadQuadSquaresEnable(const bool inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
 		@brief	Returns the device's current quad-frame mode, whether it's enabled or not.
 		@return		True if successful; otherwise false.
 		@param[in]	outValue	Receives 1 if the device is currently in quad frame mode; otherwise receives 0.
