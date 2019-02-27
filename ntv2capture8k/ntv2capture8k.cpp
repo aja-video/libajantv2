@@ -1,5 +1,5 @@
 /**
-	@file		ntv2capture4k.cpp
+	@file		ntv2capture8k.cpp
 	@brief		Implementation of NTV2Capture class.
 	@copyright	Copyright (C) 2012-2019 AJA Video Systems, Inc.  All rights reserved.
 **/
