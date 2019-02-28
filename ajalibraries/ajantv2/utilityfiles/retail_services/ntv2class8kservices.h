@@ -7,8 +7,6 @@
 #ifndef _Class8kServices_
 #define _Class8kServices_
 
-#define NTV2_IS_8K_VIDEO_FORMAT_TEMP(xx) (false)
-
 
 #include "ntv2class4kservices.h"
 

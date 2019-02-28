@@ -27,7 +27,7 @@ Class8kServices::~Class8kServices()
 //--------------------------------------------------------------------------------------------------
 void Class8kServices::SetDeviceXPointPlayback ()
 {
-	bool b8K = NTV2_IS_8K_VIDEO_FORMAT_TEMP(mFb1VideoFormat);
+	bool b8K = NTV2_IS_QUAD_QUAD_FORMAT(mFb1VideoFormat);
 	if (!b8K)
 		return Class4kServices::SetDeviceXPointPlayback();
 }
@@ -38,7 +38,7 @@ void Class8kServices::SetDeviceXPointPlayback ()
 //--------------------------------------------------------------------------------------------------
 void Class8kServices::SetDeviceXPointCapture ()
 {
-	bool b8K = NTV2_IS_8K_VIDEO_FORMAT_TEMP(mFb1VideoFormat);
+	bool b8K = NTV2_IS_QUAD_QUAD_FORMAT(mFb1VideoFormat);
 	if (!b8K)
 		return Class4kServices::SetDeviceXPointCapture();
 }
@@ -49,7 +49,7 @@ void Class8kServices::SetDeviceXPointCapture ()
 //--------------------------------------------------------------------------------------------------
 void Class8kServices::SetDeviceMiscRegisters ()
 {
-	bool b8K = NTV2_IS_8K_VIDEO_FORMAT_TEMP(mFb1VideoFormat);
+	bool b8K = NTV2_IS_QUAD_QUAD_FORMAT(mFb1VideoFormat);
 	if (!b8K)
 		Class4kServices::SetDeviceMiscRegisters();
 }
