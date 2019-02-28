@@ -350,8 +350,8 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
 {
 	if(NTV2DeviceCanDoStackedAudio(boardID))
 	{
-		ULWord totalFrames = ::NTV2DeviceGetActiveMemorySize(boardID)/0x800000;
-		totalFrames -= ::NTV2DeviceGetNumAudioSystems(boardID)*(::NTV2DeviceCanDo12gRouting(boardID) ? 4 : 1);
+		ULWord totalFrames = NTV2DeviceGetActiveMemorySize(boardID)/0x800000;
+		totalFrames -= NTV2DeviceGetNumAudioSystems(boardID)*(NTV2DeviceCanDo12gRouting(boardID) ? 4 : 1);
 		return totalFrames;
 	}
 	else
