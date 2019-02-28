@@ -1052,33 +1052,33 @@ void NTV2Player4K::PlayFrames (void)
 	}
 
 	//	Initialize & start AutoCirculate...
-	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
-	{
-		uint32_t startNum = 0;
-		uint32_t endNum = 0;
+    if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+    {
+        uint32_t startNum = 0;
+        uint32_t endNum = 0;
 
-		switch (mChannel)
-		{
-		case NTV2_CHANNEL1:
-		default:
-			startNum = 0;
-			break;
-		case NTV2_CHANNEL2:
-			startNum = numberOfACFramesPerChannel;
-			break;
-		case NTV2_CHANNEL3:
-			startNum = 64;
-			break;
-		case NTV2_CHANNEL4:
-			startNum = 64 + numberOfACFramesPerChannel;
-			break;
-		}
-		endNum = startNum + numberOfACFramesPerChannel - 1;
+        switch (mChannel)
+        {
+        case NTV2_CHANNEL1:
+        default:
+            startNum = 0;
+            break;
+        case NTV2_CHANNEL2:
+            startNum = numberOfACFramesPerChannel;
+            break;
+        case NTV2_CHANNEL3:
+            startNum = numberOfACFramesPerChannel*2;
+            break;
+        case NTV2_CHANNEL4:
+            startNum = numberOfACFramesPerChannel*3;
+            break;
+        }
+        endNum = startNum + numberOfACFramesPerChannel - 1;
         mDevice.AutoCirculateInitForOutput (mChannel, 0, mAudioSystem, AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC,
-											1 /*numChannels*/, startNum,  endNum);
-	}
-	else
-	{
+                                            1 /*numChannels*/, startNum,  endNum);
+    }
+    else
+    {
 		const uint8_t	startNum	(mChannel < 4	?								0	:	numberOfACFramesPerChannel);		//	Ch1: frames 0-6
 		const uint8_t	endNum		(mChannel < 4	?	numberOfACFramesPerChannel-1	:	numberOfACFramesPerChannel*2-1);	//	Ch5: frames 7-13
         mDevice.AutoCirculateInitForOutput (mChannel, 0, mAudioSystem, AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC,
