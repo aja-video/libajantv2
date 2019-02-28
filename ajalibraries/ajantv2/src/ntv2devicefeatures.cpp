@@ -586,44 +586,29 @@ bool NTV2DeviceGetVideoFormatFromState_Ex2(	NTV2VideoFormat *		pOutValue,
 	case NTV2_STANDARD_525:
 		switch (inFrameRate)
 		{
-		case NTV2_FRAMERATE_2398:
-			*pOutValue = NTV2_FORMAT_525_2398;
-			break;
-		case NTV2_FRAMERATE_2400:
-			*pOutValue = NTV2_FORMAT_525_2400;
-			break;
-		case NTV2_FRAMERATE_2997:
-			*pOutValue = inIsProgressivePicture ? NTV2_FORMAT_525psf_2997 : NTV2_FORMAT_525_5994;
-			break;
-		default:
-			return false;
+		case NTV2_FRAMERATE_2398:	*pOutValue = NTV2_FORMAT_525_2398;		break;
+		case NTV2_FRAMERATE_2400:	*pOutValue = NTV2_FORMAT_525_2400;		break;
+		case NTV2_FRAMERATE_2997:	*pOutValue = inIsProgressivePicture ? NTV2_FORMAT_525psf_2997 : NTV2_FORMAT_525_5994;	break;
+		default:					return false;
 		}
 		break;
+
 	case NTV2_STANDARD_625:
 		*pOutValue = inIsProgressivePicture ? NTV2_FORMAT_625psf_2500 : NTV2_FORMAT_625_5000;
 		break;
+
 	case NTV2_STANDARD_720:
 		switch (inFrameRate)
 		{
-		case NTV2_FRAMERATE_2398:
-			*pOutValue = NTV2_FORMAT_720p_2398;
-			break;
-		case NTV2_FRAMERATE_2500:
-			*pOutValue = NTV2_FORMAT_720p_2500;
-			break;
-		case NTV2_FRAMERATE_5000:
-			*pOutValue = NTV2_FORMAT_720p_5000;
-			break;
-		case NTV2_FRAMERATE_5994:
-			*pOutValue = NTV2_FORMAT_720p_5994;
-			break;
-		case NTV2_FRAMERATE_6000:
-			*pOutValue = NTV2_FORMAT_720p_6000;
-			break;
-		default:
-			return false;
+		case NTV2_FRAMERATE_2398:	*pOutValue = NTV2_FORMAT_720p_2398;		break;
+		case NTV2_FRAMERATE_2500:	*pOutValue = NTV2_FORMAT_720p_2500;		break;
+		case NTV2_FRAMERATE_5000:	*pOutValue = NTV2_FORMAT_720p_5000;		break;
+		case NTV2_FRAMERATE_5994:	*pOutValue = NTV2_FORMAT_720p_5994;		break;
+		case NTV2_FRAMERATE_6000:	*pOutValue = NTV2_FORMAT_720p_6000;		break;
+		default:					return false;
 		}
 		break;
+
 	case NTV2_STANDARD_1080:
 		switch (inFrameRate)
 		{
@@ -702,27 +687,19 @@ bool NTV2DeviceGetVideoFormatFromState_Ex2(	NTV2VideoFormat *		pOutValue,
 			return false;
 		}
 		break;
+
 	case NTV2_STANDARD_2K:
 		switch (inFrameRate)
 		{
-		case NTV2_FRAMERATE_1498:
-			*pOutValue = NTV2_FORMAT_2K_1498;
-			break;
-		case NTV2_FRAMERATE_1500:
-			*pOutValue = NTV2_FORMAT_2K_1500;
-			break;
-		case NTV2_FRAMERATE_2398:
-			*pOutValue = NTV2_FORMAT_2K_2398;
-			break;
-		case NTV2_FRAMERATE_2400:
-			*pOutValue = NTV2_FORMAT_2K_2400;
-			break;
-		case NTV2_FRAMERATE_2500:
-			*pOutValue = NTV2_FORMAT_2K_2500;
-			break;
-		default:
-			return false;
+		case NTV2_FRAMERATE_1498:	*pOutValue = NTV2_FORMAT_2K_1498;	break;
+		case NTV2_FRAMERATE_1500:	*pOutValue = NTV2_FORMAT_2K_1500;	break;
+		case NTV2_FRAMERATE_2398:	*pOutValue = NTV2_FORMAT_2K_2398;	break;
+		case NTV2_FRAMERATE_2400:	*pOutValue = NTV2_FORMAT_2K_2400;	break;
+		case NTV2_FRAMERATE_2500:	*pOutValue = NTV2_FORMAT_2K_2500;	break;
+		default:					return false;
 		}
+		break;
+
 	case NTV2_STANDARD_1080p:
 	case NTV2_STANDARD_3840x2160p:
 	case NTV2_STANDARD_4096x2160p:
@@ -834,6 +811,7 @@ bool NTV2DeviceGetVideoFormatFromState_Ex2(	NTV2VideoFormat *		pOutValue,
 			return false;
 		}
 		break;
+
 	case NTV2_STANDARD_7680:
 	case NTV2_STANDARD_8192:
 	{
@@ -875,8 +853,15 @@ bool NTV2DeviceGetVideoFormatFromState_Ex2(	NTV2VideoFormat *		pOutValue,
 		}
 		break;
 	}
-	default: 
-		return false;
+
+	case NTV2_STANDARD_2Kx1080p:
+	case NTV2_STANDARD_2Kx1080i:	NTV2_ASSERT(false && "What about these?");	break;
+
+#if defined(_DEBUG)
+	case NTV2_NUM_STANDARDS:	return false;
+#else
+	default:					return false;
+#endif
 	}
 
 	return true;
