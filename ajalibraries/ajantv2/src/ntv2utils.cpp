@@ -1997,6 +1997,7 @@ NTV2VideoFormat GetQuarterSizedVideoFormat(NTV2VideoFormat videoFormat)
 	case NTV2_FORMAT_4096x2160psf_3000:
 	case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
 	case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
+	case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
 		quarterSizedFormat = videoFormat;
 		break;
 #else
@@ -2182,6 +2183,7 @@ NTV2VideoFormat GetQuadSizedVideoFormat (const NTV2VideoFormat inVideoFormat, co
 	case NTV2_FORMAT_4x4096x2160p_5994_B:
 	case NTV2_FORMAT_4x4096x2160p_6000_B:
 	case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
+	case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
 #else
 	default:
 #endif
@@ -2427,6 +2429,7 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 	case NTV2_FORMAT_FIRST_4K_DEF_FORMAT2:
 	case NTV2_FORMAT_END_4K_DEF_FORMATS2:
 	case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
+	case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
 	case NTV2_FORMAT_3840x2160p_5000_B:
 	case NTV2_FORMAT_3840x2160p_5994_B:
 	case NTV2_FORMAT_3840x2160p_6000_B:
@@ -2664,6 +2667,7 @@ NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(const NTV2VideoFormat inVi
 	case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
 	case NTV2_FORMAT_END_4K_DEF_FORMATS2:
 	case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
+	case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
 		break;	// Unsupported
 #else
 	default:
