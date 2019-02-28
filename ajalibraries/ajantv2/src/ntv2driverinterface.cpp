@@ -103,8 +103,6 @@ bool CNTV2DriverInterface::ConfigureSubscription (bool bSubscribe, INTERRUPT_ENU
 
 NTV2DeviceID CNTV2DriverInterface::GetDeviceID (void)
 {
-	return DEVICE_ID_KONA5_12G;
-
 	ULWord	value	(0);
 	if (_boardOpened && ReadRegister (kRegBoardID, value))
 	{
