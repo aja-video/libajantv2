@@ -189,6 +189,7 @@
 	 * -JAC 3/6/2007 */
 	#ifdef __KERNEL__
 		#include "linux/version.h"
+		#include "linux/kernel.h"
 		#if defined (RHEL5) || (LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19))
 			#include "linux/types.h"
 		#else/* LINUX_VERSION_CODE */
@@ -375,8 +376,8 @@
 				#define	NTV2_ASSERT(_expr_)		assert (_expr_)
 			#elif defined (AJALinux)
 				#define NTV2_ASSERT(_expr_)		do {if (#_expr_) break;														\
-													printk (KERN_EMERG "### NTV2_ASSERT '%s': %s: line %d: %s\n",			\
-															__FILE__, __func__, __LINE__, #_expr_); dump_stack(); BUG();	\
+													printk (KERN_EMERG "### NTV2_ASSERT '%s': %s: line %d: %s\n", \
+															__FILE__, __func__, __LINE__, #_expr_); dump_stack(); \
 												} while (0)
 			#else
 				#define	NTV2_ASSERT(_expr_)
