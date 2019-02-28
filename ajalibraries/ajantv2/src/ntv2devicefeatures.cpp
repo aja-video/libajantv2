@@ -855,7 +855,9 @@ bool NTV2DeviceGetVideoFormatFromState_Ex2(	NTV2VideoFormat *		pOutValue,
 	}
 
 	case NTV2_STANDARD_2Kx1080p:
-	case NTV2_STANDARD_2Kx1080i:	NTV2_ASSERT(false && "What about these?");	break;
+	case NTV2_STANDARD_2Kx1080i:	
+		//NTV2_ASSERT(false && "What about these?");	// causes build fail on mac	
+		break;
 
 #if defined(_DEBUG)
 	case NTV2_NUM_STANDARDS:	return false;
