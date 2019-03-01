@@ -1194,7 +1194,7 @@ void Class4kServices::SetDeviceXPointPlayback ()
 			{
 				if (bFb1RGB)
 				{
-					XPt1 = NTV2_XptCSC1VidYUV;
+					XPt1 = bFb1HdrRGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptCSC1VidYUV;
 				}
 				
 				// FB-YUV 
