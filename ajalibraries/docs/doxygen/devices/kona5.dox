@@ -117,6 +117,20 @@
 	@par	Power
 
 	-	28W typical, 35W maximum
+	-	The socket that contains the fuse determines the board’s power source (see illustration below).
+		-	Use the <b>top</b> socket for external ATX power.
+		-	Use the <b>bottom</b> socket for PCIe bus power.
+		-	<b>NOTE:</b> The fuse sockets aren’t designed for frequent insertion or removal.
+			Change the fuse position only when necessary.
+
+	@image	html	kona5-fuses.png
+
+	<b>To remove or insert the fuse:</b>
+	-	Use a pair of needlenose pliers to grip the fuse.
+	-	<b>CAUTION:</b> Squeezing the fuse too tightly can break the fuse, making it inoperable.
+	-	<b>To remove:</b> Gently (but firmly) wriggle the fuse out of its socket.
+	-	<b>To insert:</b> Grip the fuse with pliers and “cradle” it on its socket, then push firmly
+		until it snaps into place.
 
 	@par	Noise
 
