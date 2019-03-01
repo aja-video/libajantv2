@@ -91,6 +91,28 @@ enum AJA_VideoFormat
 	AJA_VideoFormat_4K_1080p_5000,
 	AJA_VideoFormat_4K_1080p_5994,
 	AJA_VideoFormat_4K_1080p_6000,
+	
+	// UHD2 (8K)
+	AJA_VideoFormat_4x3840x2160p_2398,
+	AJA_VideoFormat_4x3840x2160p_2400,
+	AJA_VideoFormat_4x3840x2160p_2500,
+	AJA_VideoFormat_4x3840x2160p_2997,
+	AJA_VideoFormat_4x3840x2160p_3000,
+	AJA_VideoFormat_4x3840x2160p_5000,
+	AJA_VideoFormat_4x3840x2160p_5994,
+	AJA_VideoFormat_4x3840x2160p_6000,
+	
+	// UHD2 (8K)
+	AJA_VideoFormat_4x4096x2160p_2398,
+	AJA_VideoFormat_4x4096x2160p_2400,
+	AJA_VideoFormat_4x4096x2160p_2500,
+	AJA_VideoFormat_4x4096x2160p_2997,
+	AJA_VideoFormat_4x4096x2160p_3000,
+	AJA_VideoFormat_4x4096x2160p_4795,
+	AJA_VideoFormat_4x4096x2160p_4800,
+	AJA_VideoFormat_4x4096x2160p_5000,
+	AJA_VideoFormat_4x4096x2160p_5994,
+	AJA_VideoFormat_4x4096x2160p_6000,
 
 	AJA_VideoFormat_Size
 };
