@@ -422,21 +422,65 @@ AJAExport NTV2FrameRate			GetNTV2FrameRateFromVideoFormat (NTV2VideoFormat video
 AJAExport NTV2FrameGeometry		GetNormalizedFrameGeometry (const NTV2FrameGeometry inFrameGeometry);
 
 /**
-	@return	The equivalent VANC ::NTV2FrameGeometry value for a given ::NTV2VANCMode.
+	@return		The equivalent VANC ::NTV2FrameGeometry value for a given ::NTV2VANCMode.
 	@param[in]	inFrameGeometry	Specifies the ::NTV2FrameGeometry to be converted into its VANC equivalent.
 	@param[in]	inVancMode		Specifies the desired ::NTV2VANCMode.
 	@see		::GetNormalizedFrameGeometry
 **/
 AJAExport NTV2FrameGeometry		GetVANCFrameGeometry (const NTV2FrameGeometry inFrameGeometry, const NTV2VANCMode inVancMode);
 
-AJAExport ULWord				GetNTV2FrameGeometryWidth (NTV2FrameGeometry geometry);
-AJAExport ULWord				GetNTV2FrameGeometryHeight (NTV2FrameGeometry geometry);
+/**
+	@return		True if the given ::NTV2FrameGeometry has tall or taller geometries associated with it;
+				otherwise false.
+	@param[in]	inFrameGeometry	Specifies the ::NTV2FrameGeometry.
+	@see		::GetVANCFrameGeometry
+**/
+AJAExport bool					HasVANCGeometries (const NTV2FrameGeometry inFrameGeometry);
 
 /**
-	@return	The equivalent normalized (non-VANC) ::NTV2FrameGeometry value for a given ::NTV2Standard.
+	@return		An ::NTV2GeometrySet containing normal, tall and (possibly) taller frame geometries
+				that are associated with the given ::NTV2FrameGeometry;  or an empty set if passed
+				an invalid geometry.
+	@param[in]	inFrameGeometry		Specifies the ::NTV2FrameGeometry. (Need not be normalized.)
+	@note		The resulting set will, at the least, contain the given geometry (if valid).
+	@see		::GetVANCFrameGeometry
+**/
+AJAExport NTV2GeometrySet		GetRelatedGeometries (const NTV2FrameGeometry inFrameGeometry);
+
+/**
+	@return		The equivalent NTV2VANCMode for a given ::NTV2FrameGeometry.
+	@param[in]	inFrameGeometry	Specifies the ::NTV2FrameGeometry.
+	@see		::GetVANCFrameGeometry
+**/
+AJAExport NTV2VANCMode			GetVANCModeForGeometry (const NTV2FrameGeometry inFrameGeometry);
+
+/**
+	@return		The pixel width of the given ::NTV2FrameGeometry.
+	@param[in]	inFrameGeometry	Specifies the ::NTV2FrameGeometry of interest.
+	@see		::GetVANCFrameGeometry
+**/
+AJAExport ULWord				GetNTV2FrameGeometryWidth (const NTV2FrameGeometry inFrameGeometry);
+
+/**
+	@return		The height, in lines, of the given ::NTV2FrameGeometry.
+	@param[in]	inFrameGeometry	Specifies the ::NTV2FrameGeometry of interest.
+	@see		::GetVANCFrameGeometry
+**/
+AJAExport ULWord				GetNTV2FrameGeometryHeight (const NTV2FrameGeometry inFrameGeometry);
+
+/**
+	@return		The equivalent normalized (non-VANC) ::NTV2FrameGeometry value for a given ::NTV2Standard.
 	@param[in]	inStandard		Specifies the ::NTV2Standard to be converted into a normalized ::NTV2FrameGeometry.
 **/
 AJAExport NTV2FrameGeometry		GetGeometryFromStandard (const NTV2Standard inStandard);
+
+/**
+	@return		The equivalent ::NTV2Standard for the given ::NTV2FrameGeometry.
+	@param[in]	inGeometry		Specifies the ::NTV2FrameGeometry to be converted into a ::NTV2Standard.
+	@param[in]	inIsProgressive	Specifies if the resulting Standard should have a progressive transport or not.
+								Defaults to true.
+**/
+AJAExport NTV2Standard			GetStandardFromGeometry (const NTV2FrameGeometry inGeometry, const bool inIsProgressive = true);
 
 AJAExport ULWord				GetDisplayWidth (NTV2VideoFormat videoFormat);
 AJAExport ULWord				GetDisplayHeight (NTV2VideoFormat videoFormat);

@@ -157,10 +157,13 @@ UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBuffer
 				factor = 2;
 			break;
 
-		case NTV2_FG_4x2048x1080:
-		case NTV2_FG_2048x1080:
 		case NTV2_FG_2048x1556:
 		case NTV2_FG_2048x1588:
+			factor = (inFBF == NTV2_FBF_10BIT_ARGB  ||  inFBF == NTV2_FBF_16BIT_ARGB  ||  inFBF == NTV2_FBF_48BIT_RGB)  ?  4  :  2;
+			break;
+
+		case NTV2_FG_4x2048x1080:
+		case NTV2_FG_2048x1080:
 		case NTV2_FG_1920x1112:
 		case NTV2_FG_1920x1114:
 		case NTV2_FG_2048x1112:

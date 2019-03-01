@@ -890,6 +890,29 @@ NTV2StandardSet & operator += (NTV2StandardSet & inOutSet, const NTV2StandardSet
 }
 
 
+//	Implementation of NTV2GeometrySet's ostream writer...
+ostream & operator << (ostream & inOStream, const NTV2GeometrySet & inGeometries)
+{
+	NTV2GeometrySetConstIter	iter	(inGeometries.begin ());
+	inOStream	<< inGeometries.size ()
+				<< (inGeometries.size () == 1 ? " geometry:  " : " geometries:  ");
+	while (iter != inGeometries.end ())
+	{
+		inOStream << ::NTV2FrameGeometryToString(*iter);
+		inOStream << (++iter == inGeometries.end ()  ?  ""  :  ", ");
+	}
+	return inOStream;
+}
+
+
+NTV2GeometrySet & operator += (NTV2GeometrySet & inOutSet, const NTV2GeometrySet inSet)
+{
+	for (NTV2GeometrySetConstIter iter(inSet.begin ());  iter != inSet.end();  ++iter)
+		inOutSet.insert(*iter);
+	return inOutSet;
+}
+
+
 //	Implementation of NTV2FrameBufferFormatSet's ostream writer...
 ostream & operator << (ostream & inOStream, const NTV2InputSourceSet & inSet)
 {

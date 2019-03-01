@@ -7806,6 +7806,9 @@ typedef enum
 			typedef std::set <NTV2FrameBufferFormat>			NTV2FrameBufferFormatSet;			///< @brief	A set of distinct NTV2FrameBufferFormat values.
 			typedef NTV2FrameBufferFormatSet::const_iterator	NTV2FrameBufferFormatSetConstIter;	///< @brief	A handy const iterator for iterating over an NTV2FrameBufferFormatSet.
 
+			typedef std::set <NTV2FrameGeometry>				NTV2GeometrySet;					///< @brief	A set of distinct NTV2FrameGeometry values.
+			typedef NTV2GeometrySet::const_iterator				NTV2GeometrySetConstIter;			///< @brief	A handy const iterator for iterating over an NTV2GeometrySet.
+
 			typedef std::set <NTV2Standard>						NTV2StandardSet;					///< @brief	A set of distinct NTV2Standard values.
 			typedef NTV2StandardSet::const_iterator				NTV2StandardSetConstIter;			///< @brief	A handy const iterator for iterating over an NTV2StandardSet.
 
@@ -7920,6 +7923,31 @@ typedef enum
 				@return		A reference to the modified set.
 			**/
 			AJAExport NTV2StandardSet & operator += (NTV2StandardSet & inOutSet, const NTV2StandardSet inSet);
+
+			/**
+				@brief		Returns a set of distinct ::NTV2Geometry values supported on the given device.
+				@param[in]	inDeviceID		Specifies the ::NTV2DeviceID of the device of interest.
+				@param[out]	outGeometries	Receives the set of distinct ::NTV2Geometry values supported by the device.
+				@return		True if successful;  otherwise false.
+				@todo		Needs to be moved to a C++ compatible "device features" module.
+			**/
+			AJAExport bool NTV2DeviceGetSupportedGeometries (const NTV2DeviceID inDeviceID, NTV2GeometrySet & outGeometries);
+
+			/**
+				@brief		Prints the given ::NTV2GeometrySet contents into the given output stream.
+				@param		inOStream		The stream into which the human-readable list will be written.
+				@param[in]	inGeometries	Specifies the set of ::NTV2FrameGeometry values to be streamed.
+				@return		The "inOStream" that was specified.
+			**/
+			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2GeometrySet & inGeometries);
+
+			/**
+				@brief		Appends the given ::NTV2GeometrySet contents into the given set.
+				@param		inOutSet	The set to which the other set will be appended.
+				@param[in]	inSet		Specifies the set whose contents will be appended.
+				@return		A reference to the modified set.
+			**/
+			AJAExport NTV2GeometrySet & operator += (NTV2GeometrySet & inOutSet, const NTV2GeometrySet inSet);
 
 			/**
 				@brief		Prints the given ::NTV2InputSourceSet contents into the given output stream.

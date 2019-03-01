@@ -3750,6 +3750,103 @@ NTV2FrameGeometry GetVANCFrameGeometry (const NTV2FrameGeometry inFrameGeometry,
 	return NTV2_FG_INVALID;	//	fail
 }
 
+bool HasVANCGeometries (const NTV2FrameGeometry inFG)
+{
+	switch (inFG)
+	{
+		case NTV2_FG_1920x1080:	//	1920x1080 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_1920x1112:	//	1920x1080 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_1920x1114:	//	1920x1080 ::NTV2_VANCMODE_TALLER
+		case NTV2_FG_1280x720:	//	1280x720, ::NTV2_VANCMODE_OFF
+		case NTV2_FG_1280x740:	//	1280x720 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_720x486:	//	720x486 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_720x508:	//	720x486 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_720x514: 	//	720x486 ::NTV2_VANCMODE_TALLER
+		case NTV2_FG_720x576:	//	720x576 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_720x598:	//	720x576 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_720x612: 	//	720x576 ::NTV2_VANCMODE_TALLER
+		case NTV2_FG_2048x1080:	//	2048x1080 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_2048x1112: //	2048x1080 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_2048x1114:	//	2048x1080 ::NTV2_VANCMODE_TALLER
+		case NTV2_FG_2048x1556:	//	2048x1556 film ::NTV2_VANCMODE_OFF
+		case NTV2_FG_2048x1588: //	2048x1556 film ::NTV2_VANCMODE_TALL
+			return true;
+
+		case NTV2_FG_4x1920x1080:	//	3840x2160
+		case NTV2_FG_4x2048x1080:	//	4096x2160
+			break;					//	no tall or taller geometries!
+#if defined (_DEBUG)
+		case NTV2_FG_INVALID:	break;
+#else
+		default:				break;
+#endif
+	}
+	return false;
+}
+
+NTV2GeometrySet GetRelatedGeometries (const NTV2FrameGeometry inFG)
+{
+	NTV2GeometrySet	result;
+	switch (inFG)
+	{
+		case NTV2_FG_1920x1080:	//	1920x1080 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_1920x1112:	//	1920x1080 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_1920x1114:	//	1920x1080 ::NTV2_VANCMODE_TALLER
+			result.insert(NTV2_FG_1920x1080);	result.insert(NTV2_FG_1920x1112);	result.insert(NTV2_FG_1920x1114);
+			break;
+
+		case NTV2_FG_1280x720:	//	1280x720, ::NTV2_VANCMODE_OFF
+		case NTV2_FG_1280x740:	//	1280x720 ::NTV2_VANCMODE_TALL
+			result.insert(NTV2_FG_1280x720);	result.insert(NTV2_FG_1280x740);
+			break;
+
+		case NTV2_FG_720x486:	//	720x486 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_720x508:	//	720x486 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_720x514: 	//	720x486 ::NTV2_VANCMODE_TALLER
+			result.insert(NTV2_FG_720x486);	result.insert(NTV2_FG_720x508);	result.insert(NTV2_FG_720x514);
+			break;
+
+		case NTV2_FG_720x576:	//	720x576 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_720x598:	//	720x576 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_720x612: 	//	720x576 ::NTV2_VANCMODE_TALLER
+			result.insert(NTV2_FG_720x576);	result.insert(NTV2_FG_720x598);	result.insert(NTV2_FG_720x612);
+			break;
+
+		case NTV2_FG_2048x1080:	//	2048x1080 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_2048x1112: //	2048x1080 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_2048x1114:	//	2048x1080 ::NTV2_VANCMODE_TALLER
+			result.insert(NTV2_FG_2048x1080);	result.insert(NTV2_FG_2048x1112);	result.insert(NTV2_FG_2048x1114);
+			break;
+
+		case NTV2_FG_2048x1556:	//	2048x1556 film ::NTV2_VANCMODE_OFF
+		case NTV2_FG_2048x1588: //	2048x1556 film ::NTV2_VANCMODE_TALL
+			result.insert(NTV2_FG_2048x1556);	result.insert(NTV2_FG_2048x1588);
+			break;
+
+		case NTV2_FG_4x1920x1080:	//	3840x2160
+		case NTV2_FG_4x2048x1080:	//	4096x2160
+			result.insert(inFG);
+			break;					//	no tall or taller geometries!
+#if defined (_DEBUG)
+		case NTV2_FG_INVALID:	break;
+#else
+		default:				break;
+#endif
+	}
+	return result;
+}
+
+NTV2VANCMode GetVANCModeForGeometry (const NTV2FrameGeometry inFG)
+{
+	if (NTV2_IS_TALL_VANC_GEOMETRY(inFG))
+		return NTV2_VANCMODE_TALL;
+	else if (NTV2_IS_TALLER_VANC_GEOMETRY(inFG))
+		return NTV2_VANCMODE_TALLER;
+	else if (NTV2_IS_VALID_NTV2FrameGeometry(inFG))
+		return NTV2_VANCMODE_OFF;
+	return NTV2_VANCMODE_INVALID;
+}
+
 
 NTV2FrameGeometry GetGeometryFromStandard (const NTV2Standard inStandard)
 {
@@ -3785,6 +3882,52 @@ NTV2FrameGeometry GetGeometryFromStandard (const NTV2Standard inStandard)
 	return NTV2_FG_INVALID;
 }
 
+NTV2Standard GetStandardFromGeometry (const NTV2FrameGeometry inGeometry, const bool inIsProgressive)
+{
+	switch (inGeometry)
+	{
+		case NTV2_FG_1920x1080:	//	1920x1080 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_1920x1112:	//	1920x1080 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_1920x1114:	//	1920x1080 ::NTV2_VANCMODE_TALLER
+			return inIsProgressive ? NTV2_STANDARD_1080p : NTV2_STANDARD_1080;
+
+		case NTV2_FG_1280x720:	//	1280x720, ::NTV2_VANCMODE_OFF
+		case NTV2_FG_1280x740:	//	1280x720 ::NTV2_VANCMODE_TALL
+			return NTV2_STANDARD_720;
+
+		case NTV2_FG_720x486:	//	720x486 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_720x508:	//	720x486 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_720x514: 	//	720x486 ::NTV2_VANCMODE_TALLER
+			return NTV2_STANDARD_525;
+
+		case NTV2_FG_720x576:	//	720x576 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_720x598:	//	720x576 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_720x612: 	//	720x576 ::NTV2_VANCMODE_TALLER
+			return NTV2_STANDARD_625;
+
+		case NTV2_FG_2048x1080:	//	2048x1080 ::NTV2_VANCMODE_OFF
+		case NTV2_FG_2048x1112: //	2048x1080 ::NTV2_VANCMODE_TALL
+		case NTV2_FG_2048x1114:	//	2048x1080 ::NTV2_VANCMODE_TALLER
+			return inIsProgressive ? NTV2_STANDARD_2Kx1080p : NTV2_STANDARD_2Kx1080i;
+
+		case NTV2_FG_2048x1556:	//	2048x1556 film ::NTV2_VANCMODE_OFF
+		case NTV2_FG_2048x1588: //	2048x1556 film ::NTV2_VANCMODE_TALL
+			return NTV2_STANDARD_2K;
+
+		case NTV2_FG_4x1920x1080:	//	3840x2160
+			return NTV2_STANDARD_3840x2160p; // NTV2_STANDARD_3840HFR
+
+		case NTV2_FG_4x2048x1080:	//	4096x2160
+			return NTV2_STANDARD_4096x2160p;	//	NTV2_STANDARD_4096HFR
+#if defined (_DEBUG)
+		case NTV2_FG_INVALID:	break;
+#else
+		default:				break;
+#endif
+	}
+	return NTV2_STANDARD_INVALID;
+}
+
 
 bool NTV2DeviceCanDoFormat(NTV2DeviceID		inDeviceID,
 						  NTV2FrameRate		inFrameRate,
@@ -3813,7 +3956,7 @@ bool NTV2DeviceCanDoFormat(NTV2DeviceID		inDeviceID,
 	return false;
 }
 
-ULWord GetNTV2FrameGeometryHeight(NTV2FrameGeometry geometry)
+ULWord GetNTV2FrameGeometryHeight(const NTV2FrameGeometry geometry)
 {
 	switch (geometry)
 	{
@@ -3841,7 +3984,7 @@ ULWord GetNTV2FrameGeometryHeight(NTV2FrameGeometry geometry)
 	}
 }
 
-ULWord GetNTV2FrameGeometryWidth(NTV2FrameGeometry geometry)
+ULWord GetNTV2FrameGeometryWidth(const NTV2FrameGeometry geometry)
 {
 	switch ( geometry )
 	{
