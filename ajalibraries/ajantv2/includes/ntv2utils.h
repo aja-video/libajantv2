@@ -692,6 +692,7 @@ AJAExport bool IsYCbCrFormat(NTV2FrameBufferFormat format);
 AJAExport bool IsAlphaChannelFormat(NTV2FrameBufferFormat format);
 AJAExport bool Is2KFormat(NTV2VideoFormat format);
 AJAExport bool Is4KFormat(NTV2VideoFormat format);
+AJAExport bool Is8KFormat(NTV2VideoFormat format);
 AJAExport bool IsRaw(NTV2FrameBufferFormat format);
 AJAExport bool Is8BitFrameBufferFormat(NTV2FrameBufferFormat fbFormat);
 AJAExport bool IsVideoFormatA(NTV2VideoFormat format);

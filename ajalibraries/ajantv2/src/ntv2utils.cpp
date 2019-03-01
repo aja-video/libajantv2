@@ -5949,6 +5949,12 @@ AJAExport bool Is4KFormat(NTV2VideoFormat format)
 }
 
 
+AJAExport bool Is8KFormat(NTV2VideoFormat format)
+{
+	return NTV2_IS_QUAD_QUAD_FORMAT (format);
+}
+
+
 AJAExport bool IsRaw(NTV2FrameBufferFormat frameBufferFormat)
 {
 	return NTV2_FBF_IS_RAW (frameBufferFormat);
