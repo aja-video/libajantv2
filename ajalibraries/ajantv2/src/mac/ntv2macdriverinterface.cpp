@@ -2298,8 +2298,8 @@ void CNTV2MacDriverInterface::CopyTo_AUTOCIRCULATE_DATA_64 (AUTOCIRCULATE_DATA *
 	p64->lVal2			= p->lVal2;
 	p64->lVal3			= p->lVal3;
 	p64->lVal4			= p->lVal4;
-	p64->lVal5			= p->lVal4;
-	p64->lVal6			= p->lVal5;
+	p64->lVal5			= p->lVal5;
+	p64->lVal6			= p->lVal6;
 
 	p64->bVal1			= p->bVal1;
 	p64->bVal2			= p->bVal2;
@@ -2330,8 +2330,8 @@ void CNTV2MacDriverInterface::CopyTo_AUTOCIRCULATE_DATA (AUTOCIRCULATE_DATA_64 *
 	p->lVal2			= p64->lVal2;
 	p->lVal3			= p64->lVal3;
 	p->lVal4			= p64->lVal4;
-	p->lVal5			= p64->lVal4;
-	p->lVal6			= p64->lVal5;
+	p->lVal5			= p64->lVal5;
+	p->lVal6			= p64->lVal6;
 
 	p->bVal1			= p64->bVal1;
 	p->bVal2			= p64->bVal2;
