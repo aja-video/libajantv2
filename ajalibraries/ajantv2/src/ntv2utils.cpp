@@ -8601,7 +8601,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 	case DEVICE_ID_KONAHDMI:					return "kona_hdmi_4rx.bit";
 	case DEVICE_ID_KONA1:						return "kona1.bit";
 	case DEVICE_ID_KONA5:                       return "kona5.bit";
-	case DEVICE_ID_KONA5_12G:                       return "kona5_12g.bit";
+	case DEVICE_ID_KONA5_12G:                   return "kona5_12g.bit";
 	default:									return "";
 	}
 #endif	//	else not MSWindows
