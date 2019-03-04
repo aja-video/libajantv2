@@ -1840,10 +1840,11 @@ string AUTOCIRCULATE_STATUS::operator [] (const unsigned inIndexNum) const
 			case 17:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_COLORCORRECT	? "Yes" : "No");	break;
 			case 18:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_VIDPROC		? "Yes" : "No");	break;
 			case 19:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_ANC			? "Yes" : "No");	break;
-			case 20:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_FIELDS		? "Yes" : "No");	break;
+			case 20:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_HDMIAUX		? "Yes" : "No");	break;
+			case 21:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_FIELDS		? "Yes" : "No");	break;
 			default:																						break;
 		}
-	else if (inIndexNum < 21)
+	else if (inIndexNum < 22)
 		oss << "---";
 	return oss.str();
 }
