@@ -5626,7 +5626,7 @@ typedef enum
 		#define	AUTOCIRCULATE_WITH_ANC				BIT(6)		///< @brief	Use this to AutoCirculate with ancillary data
 		#define	AUTOCIRCULATE_WITH_AUDIO_CONTROL	BIT(7)		///< @brief	Use this to AutoCirculate with no audio but with audio control
 		#define	AUTOCIRCULATE_WITH_FIELDS			BIT(8)		///< @brief	Use this to AutoCirculate with fields as frames for interlaced formats
-		#define	AUTOCIRCULATE_WITH_HDMIAUX			BIT(9)		///< @brief	Use this to AutoCirculate with HDMI auxiliary data
+		#define AUTOCIRCULATE_WITH_HDMIAUX			BIT(9)		///< @brief	Use this to AutoCirculate with HDMI auxiliary data
 
 		#define AUTOCIRCULATE_FRAME_FULL			BIT(20)		///< @brief Frame contains a full image
 		#define AUTOCIRCULATE_FRAME_FIELD0			BIT(21)		///< @brief Frame contains field 0 of an interlaced image (first field in time)
@@ -7477,7 +7477,7 @@ typedef enum
 				NTV2_BEGIN_PRIVATE
 					inline explicit					AUTOCIRCULATE_TRANSFER (const AUTOCIRCULATE_TRANSFER & inObj)
 																									:	acHeader(0xFEFEFEFE, 0), acVideoBuffer(0), acAudioBuffer(0),
-                                                                                                        acANCBuffer(0), acANCField2Buffer(0), acOutputTimeCodes(0), acHDMIAuxData(0)
+																										acANCBuffer(0), acANCField2Buffer(0), acOutputTimeCodes(0), acHDMIAuxData(0)
 																										{(void) inObj;}		///< @brief	You cannot construct an AUTOCIRCULATE_TRANSFER from another.
 					inline AUTOCIRCULATE_TRANSFER &	operator = (const AUTOCIRCULATE_TRANSFER & inRHS)	{(void) inRHS; return *this;}	///< @brief	You cannot assign AUTOCIRCULATE_TRANSFERs.
 				NTV2_END_PRIVATE

@@ -510,8 +510,8 @@ bool CNTV2Card::FindUnallocatedFrames (const UByte inFrameCount, LWord & outStar
 	typedef	std::set <uint16_t>		U16Set;
 	typedef U16Set::const_iterator	U16SetConstIter;
 	U16Set							allocatedFrameNumbers;
-	ULWord							isQuadMode1	(0);
-	ULWord							isQuadMode5	(0);
+	bool							isQuadMode1	(0);
+	bool							isQuadMode5	(0);
 
 	//	Look for a contiguous group of available frame buffers...
 	outStartFrame = outEndFrame = 0;

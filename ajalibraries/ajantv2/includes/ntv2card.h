@@ -863,56 +863,64 @@ public:
 	/**
 		@brief	Enables or disables quad-frame mode on the device.
 		@return		True if successful; otherwise false.
-		@param[in]	inValue		Specify a non-zero value (true) to put the device into quad frame mode.
-								Specify zero (false) to put the device into normal (non-quad) frame mode.
+		@param[in]	inValue		Specify 'true' to put the device into quad frame mode.
+								Specify 'false' to put the device into normal (non-quad) frame mode.
 		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1. Ignored if the device
 								is incapable of multi-format mode, or is not currently in multi-format mode.
-		@todo		Should use bool parameter.
-		@note		Most clients need not call this function, as SetVideoFormat to one of the 4K/UHD formats will automatically call this function.
+		@note		Most clients need not call this function, as calling CNTV2Card::SetVideoFormat to one of
+					the 4K/UHD formats will automatically call this function.
 	**/
-	AJA_VIRTUAL bool		SetQuadFrameEnable (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		SetQuadFrameEnable (const bool inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief		Returns the device's current quad-frame mode, whether it's enabled or not.
+		@return		True if successful; otherwise false.
+		@param[in]	outValue	Receives 'true' if the device is currently in quad frame mode; otherwise receives 'false'.
+		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1. Ignored if the device
+								is incapable of multi-format mode, or is not currently in multi-format mode.
+	**/
+	AJA_VIRTUAL bool		GetQuadFrameEnable (bool & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 	
 	/**
-		@brief	Enables or disables quad-quad-frame mode on the device, 8K.
+		@brief		Enables or disables "quad-quad" 8K frame mode on the device.
+		@return		True if successful; otherwise false.
+		@param[in]	inValue		Specify 'true' to put the device into "quad quad" frame mode.
+								Specify 'false' to put the device into normal (non-quad-quad) frame mode.
+		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1. Ignored if the device
+								is incapable of multi-format mode, or is not currently in multi-format mode.
+		@note		Most clients won't need to call this function, as CNTV2Card::SetVideoFormat using one of
+					the 8K/UHD2 formats will automatically call this function.
+	**/
+	AJA_VIRTUAL bool		SetQuadQuadFrameEnable (const bool inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief		Returns the device's current "quad-quad" frame mode, whether it's enabled or not.
+		@return		True if successful; otherwise false.
+		@param[in]	outValue	Receives 'true' if the device is currently in quad quad frame mode; otherwise receives 'false'.
+		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1. Ignored if the device
+								is incapable of multi-format mode, or is not currently in multi-format mode.
+	**/
+	AJA_VIRTUAL bool		GetQuadQuadFrameEnable (bool & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief		Enables or disables quad-quad-frame (8K) squares mode on the device.
 		@return		True if successful; otherwise false.
 		@param[in]	inValue		Specify a non-zero value (true) to put the device into quad quad frame mode.
-								Specify zero (false) to put the device into normal (non-quad quad) frame mode.
+								Specify zero (false) to put the device into normal (non-quad-quad) frame mode.
 		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1. Ignored if the device
 								is incapable of multi-format mode, or is not currently in multi-format mode.
-		@todo		Should use bool parameter.
-		@note		Most clients need not call this function, as SetVideoFormat to one of the 8K/UHD2 formats will automatically call this function.
 	**/
-	AJA_VIRTUAL bool		SetQuadQuadFrameEnable (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		SetQuadQuadSquaresEnable (const bool inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
-	@brief	Enables or disables quad-quad-frame squares mode on the device, 8K.
-	@return		True if successful; otherwise false.
-	@param[in]	inValue		Specify a non-zero value (true) to put the device into quad quad frame mode.
-	Specify zero (false) to put the device into normal (non-quad quad) frame mode.
-	@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1. Ignored if the device
-	is incapable of multi-format mode, or is not currently in multi-format mode.
-	**/
-	AJA_VIRTUAL bool		SetQuadQuadSquaresEnable(const bool inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
-
-	/**
-		@brief	Returns the device's current quad-frame mode, whether it's enabled or not.
+		@brief		Returns the device's current "quad-quad-squares" frame mode, whether it's enabled or not.
 		@return		True if successful; otherwise false.
-		@param[in]	outValue	Receives 1 if the device is currently in quad frame mode; otherwise receives 0.
+		@param[in]	outValue	Receives 'true' if the device is currently in "quad quad squares" frame mode;
+								otherwise receives 'false'.
 		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1. Ignored if the device
 								is incapable of multi-format mode, or is not currently in multi-format mode.
-		@todo		Should use bool & parameter.
 	**/
-	AJA_VIRTUAL bool		GetQuadFrameEnable (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
-	
-	/**
-		@brief	Returns the device's current quad-quad-frame mode, whether it's enabled or not.
-		@return		True if successful; otherwise false.
-		@param[in]	outValue	Receives 1 if the device is currently in quad quad frame mode; otherwise receives 0.
-		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1. Ignored if the device
-								is incapable of multi-format mode, or is not currently in multi-format mode.
-		@todo		Should use bool & parameter.
-	**/
-	AJA_VIRTUAL bool		GetQuadQuadFrameEnable (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetQuadQuadSquaresEnable (bool & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
 		@brief	Enables or disables SMPTE 425 "2K quadrants" mode for the given frame store on the device.
@@ -948,7 +956,6 @@ public:
 		@note	There is no need to call this function if Set4kSquaresEnable(false) was called.
 	**/
 	AJA_VIRTUAL bool		SetTsiFrameEnable (const bool inIsEnabled, const NTV2Channel inChannel);
-#define Set425FrameEnable	SetTsiFrameEnable
 
 	/**
 		@brief	Returns the current SMPTE 425 two-sample-interleave frame mode on the device, whether it's enabled or not.
@@ -959,7 +966,6 @@ public:
 									report on Frame Stores 5/6/7/8.
 	**/
 	AJA_VIRTUAL bool		GetTsiFrameEnable (bool & outIsEnabled, const NTV2Channel inChannel);
-#define Get425FrameEnable	GetTsiFrameEnable
 
 	AJA_VIRTUAL bool		SetFrameBufferQuarterSizeMode (NTV2Channel inChannel, NTV2QuarterSizeExpandMode inValue);
 	AJA_VIRTUAL bool		GetFrameBufferQuarterSizeMode (NTV2Channel inChannel, NTV2QuarterSizeExpandMode & outValue);
@@ -1125,6 +1131,14 @@ public:
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool		ReadLineCount (ULWord & outValue);
+
+
+#if !defined(NTV2_DEPRECATE_15_2)
+	AJA_VIRTUAL inline bool NTV2_SHOULD_BE_DEPRECATED(GetQuadFrameEnable (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1))	{ bool enb(false); if(!GetQuadFrameEnable(enb, inChannel)) return false; outValue = enb?1:0; return true; }
+	AJA_VIRTUAL inline bool NTV2_SHOULD_BE_DEPRECATED(GetQuadQuadFrameEnable (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1))	{ bool enb(false); if(!GetQuadQuadFrameEnable(enb, inChannel)) return false; outValue = enb?1:0; return true; }
+#endif	//	NTV2_DEPRECATE_15_2
+#define Set425FrameEnable	SetTsiFrameEnable
+#define Get425FrameEnable	GetTsiFrameEnable
 
 
 	/**
@@ -6283,7 +6297,7 @@ public:
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetStandard								(NTV2Standard * pOutValue,								const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetStandard(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetFrameRate							(NTV2FrameRate * pOutValue,								const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetFrameRate(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetSmpte372								(ULWord * pOutValue,									const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetSmpte372(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetQuadFrameEnable						(ULWord * pOutValue,									const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetQuadFrameEnable(*pOutValue, inChannel) : false;}		///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetQuadFrameEnable						(ULWord * pOutValue,									const NTV2Channel inChannel = NTV2_CHANNEL1)	) {bool enb(false); if (pOutValue && GetQuadFrameEnable(enb, inChannel)) {*pOutValue = enb?1:0; return true;}	return false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	IsProgressiveStandard					(bool * pOutIsProgressive,								const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutIsProgressive ? IsProgressiveStandard(*pOutIsProgressive, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	IsSDStandard							(bool * pOutIsStandardDef,								const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutIsStandardDef ? IsSDStandard(*pOutIsStandardDef, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	Get4kSquaresEnable						(bool * pOutIsEnabled,									const NTV2Channel inChannel)					) {return pOutIsEnabled ? Get4kSquaresEnable(*pOutIsEnabled, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.

@@ -665,7 +665,7 @@ bool CNTV2Card::AncExtractSetWriteParams (const UWord inSDIInput, const ULWord i
 	bool			ok					(true);
 	const ULWord	frameNumber			(inFrameNumber + 1);	//	This is so the next calculation will point to the beginning of the next frame - subtract offset for memory start
 	ULWord			endOfFrameLocation	(::NTV2FramesizeToByteCount(theFrameSize) * frameNumber);
-	ULWord			isQuadFormatEnabled	(0);
+	bool			isQuadFormatEnabled	(false);
 	if (ok)	ok = GetQuadFrameEnable (isQuadFormatEnabled, theChannel);
 	if (isQuadFormatEnabled)
 		endOfFrameLocation *= 4;
@@ -708,7 +708,7 @@ bool CNTV2Card::AncExtractSetField2WriteParams (const UWord inSDIInput, const UL
 	bool			ok					(true);
 	const ULWord	frameNumber			(inFrameNumber + 1);	//	This is so the next calculation will point to the beginning of the next frame - subtract offset for memory start
 	ULWord			endOfFrameLocation	(::NTV2FramesizeToByteCount(theFrameSize) * frameNumber);
-	ULWord			isQuadFormatEnabled	(0);
+	bool			isQuadFormatEnabled	(false);
 	if (ok)	ok = GetQuadFrameEnable (isQuadFormatEnabled, theChannel);
 	if (isQuadFormatEnabled)
 		endOfFrameLocation *= 4;

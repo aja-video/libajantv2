@@ -221,6 +221,8 @@ const char *NTV2FrameGeometryString (NTV2FrameGeometry geom)
 		case NTV2_FG_720x612:		result = "NTV2_FG_720x612";			break;
 		case NTV2_FG_4x1920x1080:	result = "NTV2_FG_4x1920x1080";		break;
 		case NTV2_FG_4x2048x1080:	result = "NTV2_FG_4x2048x1080";		break;
+		case NTV2_FG_4x3840x2160:	result = "NTV2_FG_4x3840x2160";		break;
+		case NTV2_FG_4x4096x2160:	result = "NTV2_FG_4x4096x2160";		break;
 		case NTV2_FG_INVALID:		result = "NTV2_FG_INVALID";			break;
 #if !defined (_DEBUG)
 		default:					result = "";			break;

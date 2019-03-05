@@ -3774,6 +3774,8 @@ bool HasVANCGeometries (const NTV2FrameGeometry inFG)
 
 		case NTV2_FG_4x1920x1080:	//	3840x2160
 		case NTV2_FG_4x2048x1080:	//	4096x2160
+		case NTV2_FG_4x3840x2160:
+		case NTV2_FG_4x4096x2160:
 			break;					//	no tall or taller geometries!
 #if defined (_DEBUG)
 		case NTV2_FG_INVALID:	break;
@@ -3825,6 +3827,8 @@ NTV2GeometrySet GetRelatedGeometries (const NTV2FrameGeometry inFG)
 
 		case NTV2_FG_4x1920x1080:	//	3840x2160
 		case NTV2_FG_4x2048x1080:	//	4096x2160
+		case NTV2_FG_4x3840x2160:
+		case NTV2_FG_4x4096x2160:
 			result.insert(inFG);
 			break;					//	no tall or taller geometries!
 #if defined (_DEBUG)
@@ -3919,6 +3923,13 @@ NTV2Standard GetStandardFromGeometry (const NTV2FrameGeometry inGeometry, const 
 
 		case NTV2_FG_4x2048x1080:	//	4096x2160
 			return NTV2_STANDARD_4096x2160p;	//	NTV2_STANDARD_4096HFR
+
+		case NTV2_FG_4x3840x2160:	//	4320x7680	uhd 8K
+			return NTV2_STANDARD_7680;
+
+		case NTV2_FG_4x4096x2160:	//	4320x8192	8K
+			return NTV2_STANDARD_8192;
+
 #if defined (_DEBUG)
 		case NTV2_FG_INVALID:	break;
 #else
@@ -8601,7 +8612,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 	case DEVICE_ID_KONAHDMI:					return "kona_hdmi_4rx.bit";
 	case DEVICE_ID_KONA1:						return "kona1.bit";
 	case DEVICE_ID_KONA5:                       return "kona5.bit";
-	case DEVICE_ID_KONA5_12G:                   return "kona5_12g.bit";
+	case DEVICE_ID_KONA5_12G:					return "kona5_12g.bit";
 	default:									return "";
 	}
 #endif	//	else not MSWindows
