@@ -4935,7 +4935,6 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (NTV2InputSource inSource, const 
 
 NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool inIsProgressivePicture)
 {
-	ULWord status (0), threeGStatus (0);
 	ULWord vpidDS1 = 0, vpidDS2 = 0;
 	CNTV2VPID inputVPID;
 	if (IS_CHANNEL_INVALID (inChannel))
