@@ -330,6 +330,26 @@ aja_getosversionbuild()
     return oss.str();
 }
 
+std::string
+aja_mkpath_to_user_dir(const std::string& username)
+{
+    std::string path;
+
+    path.append(getenv("SystemDrive"));
+    path.append("\\Users\\");
+    if (username.find('\\') != std::string::npos)
+    {
+        //strip off anything before a "\\"
+        path.append(username.substr(username.find('\\') + 1));
+    }
+    else
+    {
+        path.append(username);
+    }
+
+    return path;
+}
+
 AJASystemInfoImpl::AJASystemInfoImpl(int units)
 {
     mMemoryUnits = units;
@@ -394,41 +414,74 @@ AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
     {
         std::string path;
 
-        // Need to get the user from the registry since when this is run as a service all the normal
-        // calls to get the user name return SYSTEM
+        // We try 3 different ways to get the path to the user's home directory, we read directly
+        // from the registry rather than using a system call so we can use this within a service.
+        // 1) Read a value from HKEY_CURRENT_USER\Volatile Environment
+        //    ISSUES
+        //    - Does not work so well if used from a service, in this case it will return user 'SYSTEM'
+        // 2) Read a value from HKEY_LOCAL_MACHINE...\Authentication
+        //    ISSUES
+        //    - Does not work so well if multiple users logged in and the user using the desktop was
+        //      not the last one logged into the machine.
+        // 3) As a last attempt use an older method that does not work with microsoft id logins
+        //    http://forums.codeguru.com/showthread.php?317367-To-get-current-Logged-in-user-name-from-within-a-service
+        //    ISSUES
+        //    - Same as #2 above
 
-        // Method 1 of getting username from registry
-        std::string tmpStr = aja::read_registry_string(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Authentication\\LogonUI",
-                                                      "LastLoggedOnUser");
+        bool usernameFound = false;
 
-        path.erase();
-        path.append(getenv("SystemDrive"));
-        path.append("\\Users\\");
-        if(tmpStr.find('\\') != std::string::npos )
+        // try method 1
         {
-            //strip off anything before a "\\"
-            path.append(tmpStr.substr(tmpStr.find('\\')+1));
-        }
-        else
-        {
-            path.append(tmpStr);
-        }
-
-        //check it directory exists, if not try Method 2
-        if(PathFileExistsA(path.c_str())==false)
-        {
-            // Method 2 of getting username from registry (will not work if logged in with a Microsoft ID)
-            // http://forums.codeguru.com/showthread.php?317367-To-get-current-Logged-in-user-name-from-within-a-service
-            path.erase();
-            path.append(getenv("SystemDrive"));
-            path.append("\\Users\\");
-            path.append(aja::read_registry_string(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon",
-                                                 "LastUsedUsername"));
+            std::string regVal = aja::read_registry_string(HKEY_CURRENT_USER,
+                                                           "Volatile Environment",
+                                                           "USERNAME");
+            if (!regVal.empty() && regVal != "SYSTEM")
+            {
+                path = aja_mkpath_to_user_dir(regVal);
+                if (!path.empty() && PathFileExistsA(path.c_str()))
+                    usernameFound = true;
+            }
         }
 
+        // try method 2
+        if (!usernameFound)
+        {
+            std::string regVal = aja::read_registry_string(HKEY_LOCAL_MACHINE,
+                                                           "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Authentication\\LogonUI",
+                                                           "LastLoggedOnUser");
+            if (!regVal.empty())
+            {
+                path = aja_mkpath_to_user_dir(regVal);
+                if (!path.empty() && PathFileExistsA(path.c_str()))
+                    usernameFound = true;
+            }
+        }
+
+        // try method 3
+        if (!usernameFound)
+        {
+            std::string regVal = aja::read_registry_string(HKEY_LOCAL_MACHINE,
+                                                           "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon",
+                                                           "LastUsedUsername");
+            if (!regVal.empty())
+            {
+                path = aja_mkpath_to_user_dir(regVal);
+                if (!path.empty() && PathFileExistsA(path.c_str()))
+                    usernameFound = true;
+            }
+        }
+
+        if (!usernameFound)
+        {
+            // as a last resort set to nothing, if nothing else makes the error more obvious
+            path = "";
+        }
         mValueMap[int(AJA_SystemInfoTag_Path_UserHome)] = path;
 
-        path.append("\\AppData\\Local\\Aja\\");
+        if (usernameFound)
+        {
+            path.append("\\AppData\\Local\\Aja\\");
+        }
         mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = path;
 
         TCHAR szPath[MAX_PATH];
