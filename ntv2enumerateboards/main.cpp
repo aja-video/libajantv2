@@ -33,10 +33,10 @@ int main (int argc, const char ** argv)
 	const size_t			deviceCount	(deviceEnumerator.GetDeviceCount ());
 
 	#if defined (AJA_NTV2_SDK_VERSION_MAJOR)
-		cout	<< "AJA NTV2 SDK version " << AJA_NTV2_SDK_VERSION_MAJOR << "." << AJA_NTV2_SDK_VERSION_MINOR << "." << AJA_NTV2_SDK_VERSION_POINT
-				<< " (0x" << hex << setw (8) << setfill ('0') << AJA_NTV2_SDK_VERSION << dec << ")" << " build " << AJA_NTV2_SDK_BUILD_NUMBER
-				<< " built on " << AJA_NTV2_SDK_BUILD_DATETIME << endl;
-		cout << "Devices supported:  " << ::NTV2GetSupportedDevices () << endl;
+		cout	<< "AJA NTV2 SDK version " << DEC(AJA_NTV2_SDK_VERSION_MAJOR) << "." << DEC(AJA_NTV2_SDK_VERSION_MINOR)
+				<< "." << DEC(AJA_NTV2_SDK_VERSION_POINT) << " (" << xHEX0N(AJA_NTV2_SDK_VERSION,8)
+				<< ") build " << DEC(AJA_NTV2_SDK_BUILD_NUMBER) << " built on " << AJA_NTV2_SDK_BUILD_DATETIME << endl;
+		cout << "Devices supported:  " << ::NTV2GetSupportedDevices() << endl;
 	#else
 		cout	<< "Unknown AJA NTV2 SDK version" << endl;
 	#endif
