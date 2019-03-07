@@ -233,7 +233,7 @@ typedef enum
 	kVRegMacUserModePingLevel				= VIRTUALREG_START+302,
 	kVRegMacKernelModePingLevel				= VIRTUALREG_START+303,
 	kVRegLatencyTimerValue					= VIRTUALREG_START+304,
-	kVRegAudioAVSyncEnable					= VIRTUALREG_START+305,
+
 	kVRegAudioInputSelect					= VIRTUALREG_START+306,
 	kVRegSerialSuspended					= VIRTUALREG_START+307,
 	kVRegXilinxProgramming					= VIRTUALREG_START+308,
@@ -674,7 +674,6 @@ typedef enum
 	#define	kRegMacUserModePingLevel			kVRegMacUserModePingLevel
 	#define	kRegMacKernelModePingLevel			kVRegMacKernelModePingLevel
 	#define	kRegLatencyTimerValue				kVRegLatencyTimerValue
-	#define	kRegAudioAVSyncEnable				kVRegAudioAVSyncEnable
 	#define	kRegAudioInputSelect				kVRegAudioInputSelect
 	#define	kSerialSuspended					kVRegSerialSuspended
 	#define	kXilinxProgramming					kVRegXilinxProgramming

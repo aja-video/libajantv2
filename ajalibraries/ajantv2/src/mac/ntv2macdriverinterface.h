@@ -128,8 +128,6 @@ public:
 	bool				SetDefaultDeviceForPID( int32_t pid );
 	bool				IsDefaultDeviceForPID( int32_t pid );
 	bool				LockFormat( void );
-	bool				SetAVSyncPattern( void* dataPtr, UInt32 dataSize );
-	bool				TriggerAVSync( NTV2Crosspoint channelSpec, UInt32 count );
 	virtual bool		WaitForInterrupt( INTERRUPT_ENUMS type,  ULWord timeout = 50 );
 	virtual bool		GetInterruptCount( INTERRUPT_ENUMS eInterrupt, ULWord *pCount );
 	bool				WaitForChangeEvent( UInt32 timeout = 0 );
@@ -187,9 +185,6 @@ public:
 
 	bool				SetDebugFilterStrings( const char* includeString,const char* excludeString );
 	bool				GetDebugFilterStrings( char* includeString,char* excludeString );
-
-	bool				SetAudioAVSyncEnable( bool enable );
-	bool				GetAudioAVSyncEnable( bool* enable );
 
 	bool				ReadRP188Registers( NTV2Channel channel, RP188_STRUCT* pRP188Data );
 

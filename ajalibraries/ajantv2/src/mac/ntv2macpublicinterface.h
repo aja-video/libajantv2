@@ -43,8 +43,8 @@ typedef enum
 	kDriverSetStreamForApplication						= 6,
 	kDriverGetStreamForApplication						= 7,
 	kDriverLockFormat									= 8,
-	kDriverSetAVSyncPattern								= 9,
-	kDriverTriggerAVSync								= 10,
+	kDriverSetAVSyncPattern								= 9,	//	Unsupported starting in 15.2
+	kDriverTriggerAVSync								= 10,	//	Unsupported starting in 15.2
 	kDriverWaitForInterrupt								= 11,
 	kDriverGetInterruptCount							= 12,
 	kDriverWaitForChangeEvent							= 13,
@@ -67,7 +67,7 @@ typedef enum
 	kDriverAcquireStreamForApplicationWithReference		= 30,
 	kDriverReleaseStreamForApplicationWithReference		= 31,
 	kDriverKernelLog									= 32,
-	kDriverReadAudioBuffer								= 33,
+	kDriverReadAudioBuffer								= 33,	//	Unsupported starting in 15.2
 	kDriverNTV2Message									= 34,	//	Added in 12.0 -- all new driver functionality goes thru this NTV2Message call
 	kNumberUserClientCommands	// number of driver commands
 } UserClientCommandCodes;
