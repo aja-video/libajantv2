@@ -629,7 +629,7 @@ void NTV2LLBurn::ProcessFrames (void)
 		{	//	Transfer received Anc data into my F1 & F2 buffers...
 			AJAAncillaryList	capturedPackets;
 			mDevice.DMAReadAnc (currentInFrame, mpHostF1AncBuffer, mpHostF2AncBuffer);
-			AJAAncillaryList::SetFromSDIAncData (mpHostF1AncBuffer, mpHostF2AncBuffer, capturedPackets);
+			AJAAncillaryList::SetFromDeviceAncBuffers (mpHostF1AncBuffer, mpHostF2AncBuffer, capturedPackets);
 			//	if (capturedPackets.CountAncillaryData())	capturedPackets.Print(cerr, false);		//	Dump packets
 			if (CLEAR_DEVICE_ANC_BUFFER_AFTER_READ)
 				mDevice.DMAWriteAnc (currentInFrame, zeroesBuffer, zeroesBuffer);
@@ -691,10 +691,7 @@ void NTV2LLBurn::ProcessFrames (void)
 					pkts.AddAncillaryData(pkt);
 				}
 				//pkts.Print(cerr, true); cerr << endl;
-				if (NTV2_DEVICE_SUPPORTS_SMPTE2110(mDeviceID))
-					pkts.GetIPTransmitData (mpHostF1AncBuffer, mpHostF2AncBuffer, !isInterlace, isInterlace ? smpteLineNumInfo.GetLastLine(NTV2_FIELD0)+1 : 0);
-				else
-					pkts.GetSDITransmitData (mpHostF1AncBuffer, mpHostF2AncBuffer, !isInterlace, isInterlace ? smpteLineNumInfo.GetLastLine(NTV2_FIELD0)+1 : 0);
+				pkts.GetTransmitData (mpHostF1AncBuffer, mpHostF2AncBuffer, !isInterlace, isInterlace ? smpteLineNumInfo.GetLastLine(NTV2_FIELD0)+1 : 0);
 			}
 			mDevice.DMAWriteAnc (currentOutFrame, mpHostF1AncBuffer, mpHostF2AncBuffer);
 		}

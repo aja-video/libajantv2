@@ -1547,16 +1547,11 @@ void NTV2CCPlayer::PlayoutFrames (void)
 				}
 			}	//	else HD video
 
-//CCPLDBG("Xmit pkts: " << packetList);
-			if (mConfig.fForceVanc)
+			//CCPLDBG("Xmit pkts: " << packetList);
+			if (mConfig.fForceVanc)	//	Write FB VANC lines...
 				packetList.GetVANCTransmitData (mVideoBuffer,  formatDesc);
-			else
-			{	//	Use the Anc inserter firmware:
-				if (NTV2_DEVICE_SUPPORTS_SMPTE2110(mDeviceID))
-					packetList.GetIPTransmitData (xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, IsProgressivePicture(mConfig.fVideoFormat), F2StartLine);
-				else
-					packetList.GetSDITransmitData (xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, IsProgressivePicture(mConfig.fVideoFormat), F2StartLine);
-			}
+			else					//	Else use the Anc inserter firmware:
+				packetList.GetTransmitData (xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, IsProgressivePicture(mConfig.fVideoFormat), F2StartLine);
 
 			if (!mConfig.fSuppressTimecode)
 			{

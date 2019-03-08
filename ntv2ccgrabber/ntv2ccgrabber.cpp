@@ -709,14 +709,12 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 	//	Get all anc extractor packets...
 	if (DeviceAncExtractorIsAvailable())
 	{
-		if (NTV2_DEVICE_SUPPORTS_SMPTE2110(mDeviceID))
-			AJAAncillaryList::SetFromIPAncData (mInputXferInfo.acANCBuffer, mInputXferInfo.acANCField2Buffer, ancPackets);
-		else
+		if (!NTV2_DEVICE_SUPPORTS_SMPTE2110(mDeviceID))
 		{	//	Include "analog" packets:
 			ancPackets.SetAnalogAncillaryDataTypeForLine (21, AJAAncillaryDataType_Cea608_Line21);
 			ancPackets.SetAnalogAncillaryDataTypeForLine (284, AJAAncillaryDataType_Cea608_Line21);
-			AJAAncillaryList::SetFromSDIAncData (mInputXferInfo.acANCBuffer, mInputXferInfo.acANCField2Buffer, ancPackets);
 		}
+		AJAAncillaryList::SetFromDeviceAncBuffers (mInputXferInfo.acANCBuffer, mInputXferInfo.acANCField2Buffer, ancPackets);
 		ancPackets.ParseAllAncillaryData();
 		if (NTV2_IS_VANCMODE_ON(vancMode))
 		{	//	Compare with what we got from VANC lines:
