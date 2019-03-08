@@ -421,7 +421,7 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 
 		//	Reset the AncData object, then load itself from the next GUMP packet...
 		newAncData.Clear();
-		status = newAncData.InitWithReceivedData (pInputData, remainingSize, defaultLoc, packetSize);
+		status = newAncData.InitWithReceivedData (pInputData, uint32_t(remainingSize), defaultLoc, packetSize);
 		if (AJA_FAILURE(status))
 		{
 			//	TODO:	Someday, let's try to recover and process subsequent packets.
@@ -453,7 +453,7 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 
 			if (!m_ancList.empty ())
 			{
-				AJAAncillaryData *	pPrevData		(m_ancList.back ());
+				AJAAncillaryData *	pPrevData		(m_ancList.back());
 				bool				bAnlgContinue	(TestForAnalogContinuation (pPrevData, &newAncData));
 
 				if (bAnlgContinue)
@@ -481,7 +481,10 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 			//	Create an AJAAncillaryData object of the appropriate type, and init it with our raw data...
 			AJAAncillaryData *	pData	(factory.Create (newAncType, &newAncData));
 			if (pData)
+			{
+				pData->SetBufferFormat(AJAAncillaryBufferFormat_SDI);
 				m_ancList.push_back(pData);		//	Add it to my list
+			}
 		}
 
 		remainingSize -= packetSize;		//	Decrease the remaining data size by the amount we just "consumed"
@@ -534,6 +537,7 @@ LOGMYDEBUG(RTPheader);
 		status = pkt.InitWithReceivedData(inReceivedData, u32Ndx);
 		if (AJA_FAILURE(status))
 			continue;
+		pkt.SetFrameID(RTPheader.GetTimeStamp());
 		status = AddAncillaryData(pkt);
 	}	//	for each anc packet
 	if (AJA_FAILURE(status))
@@ -602,14 +606,15 @@ AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords,
 	if (AJA_FAILURE(status))
 		return status;
 
-	AJAAncillaryData	newAncData;
-	status = newAncData.InitWithReceivedData (gumpPacketData, inLocation);
+	AJAAncillaryData	pkt;
+	status = pkt.InitWithReceivedData (gumpPacketData, inLocation);
 	if (AJA_FAILURE(status))
 		return status;
+	pkt.SetBufferFormat(AJAAncillaryBufferFormat_FBVANC);
 
 	AJAAncillaryDataFactory	factory;
-	AJAAncillaryDataType	newAncType	(factory.GuessAncillaryDataType(&newAncData));
-	AJAAncillaryData *		pData		(factory.Create (newAncType, &newAncData));
+	AJAAncillaryDataType	newAncType	(factory.GuessAncillaryDataType(&pkt));
+	AJAAncillaryData *		pData		(factory.Create (newAncType, &pkt));
 	if (!pData)
 		return AJA_STATUS_FAIL;
 
@@ -723,69 +728,76 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffe
 	return AJA_STATUS_SUCCESS;
 }
 
-
-AJAStatus AJAAncillaryList::SetFromSDIAncData (const NTV2_POINTER & inF1AncBuffer,
-											const NTV2_POINTER & inF2AncBuffer,
-											AJAAncillaryList & outPackets)
+AJAStatus AJAAncillaryList::SetFromDeviceAncBuffers (const NTV2_POINTER & inF1AncBuffer,
+													const NTV2_POINTER & inF2AncBuffer,
+													AJAAncillaryList & outPackets)
 {
 	AJAStatus	result	(AJA_STATUS_SUCCESS);
 	outPackets.Clear();
-	if (inF1AncBuffer.IsNULL())
-		LOGMYWARN("Empty/null F1 RTP anc buffer");
-	if (!inF1AncBuffer.IsNULL()  &&  AJA_SUCCESS(result))
-		result = outPackets.AddReceivedAncillaryData (reinterpret_cast <const uint8_t *> (inF1AncBuffer.GetHostPointer()), inF1AncBuffer.GetByteCount());
-	if (!inF2AncBuffer.IsNULL()  &&  AJA_SUCCESS(result))
-		result = outPackets.AddReceivedAncillaryData (reinterpret_cast <const uint8_t *> (inF2AncBuffer.GetHostPointer()), inF1AncBuffer.GetByteCount());
+
+	//	Try F1 first...
+	if (AJA_SUCCESS(result)  &&  !inF1AncBuffer.IsNULL())
+	{
+		if (AJARTPAncPayloadHeader::BufferStartsWithRTPHeader(inF1AncBuffer))
+		{	//	RTP		RTP		RTP		RTP
+			vector<uint32_t>		F1U32s;
+			AJARTPAncPayloadHeader	F1PayloadHdr;
+	
+			//	Peek into the F1 packet header and discover its true length...
+			if (!F1PayloadHdr.ReadBuffer(inF1AncBuffer))
+				{result = AJA_STATUS_MEMORY;  LOGMYERROR("F1AncBuffer " << inF1AncBuffer.AsString() << ": failed reading IP payload hdr, AJA_STATUS_MEMORY");}	//	Fail
+	
+			const size_t	F1ULWordCnt	((F1PayloadHdr.GetHeaderByteCount() + F1PayloadHdr.GetPacketLength()) / sizeof(uint32_t));
+	
+			//	Read F1ULWordCnt x 32-bit words from the F1 buffer...
+			if (AJA_SUCCESS(result)  &&  !inF1AncBuffer.GetU32s(F1U32s, 0, F1ULWordCnt))
+				{result = AJA_STATUS_MEMORY;  LOGMYERROR("F1AncBuffer " << inF1AncBuffer.AsString() << ": failed reading " << DEC(F1ULWordCnt) << " 32-bit words, AJA_STATUS_MEMORY");}	//	Fail
+			if (AJA_SUCCESS(result))
+				result = outPackets.AddReceivedAncillaryData(F1U32s);
+		}
+		else if (BufferHasGUMPData(inF1AncBuffer))
+		{	//	GUMP		GUMP		GUMP		GUMP
+			result = outPackets.AddReceivedAncillaryData (reinterpret_cast<const uint8_t*>(inF1AncBuffer.GetHostPointer()), inF1AncBuffer.GetByteCount());
+		}
+	}
+
+	//	Try F2...
+	if (AJA_SUCCESS(result)  &&  !inF2AncBuffer.IsNULL())
+	{
+		if (AJARTPAncPayloadHeader::BufferStartsWithRTPHeader(inF2AncBuffer))
+		{	//	RTP		RTP		RTP		RTP
+			vector<uint32_t>		F2U32s;
+			AJARTPAncPayloadHeader	F2PayloadHdr;
+	
+			//	Peek into the F2 packet header and discover its true length...
+			if (!F2PayloadHdr.ReadBuffer(inF2AncBuffer))
+				{result = AJA_STATUS_MEMORY;  LOGMYERROR("F2AncBuffer " << inF2AncBuffer.AsString() << ": failed reading IP payload hdr, AJA_STATUS_MEMORY");}	//	Fail
+	
+			const size_t	F2ULWordCnt	((F2PayloadHdr.GetHeaderByteCount() + F2PayloadHdr.GetPacketLength()) / sizeof(uint32_t));
+	
+			//	Read F2ULWordCnt x 32-bit words from the F2 buffer...
+			if (AJA_SUCCESS(result)  &&  !inF2AncBuffer.GetU32s(F2U32s, 0, F2ULWordCnt))
+				{result = AJA_STATUS_MEMORY;  LOGMYERROR("F2AncBuffer " << inF2AncBuffer.AsString() << ": failed reading " << DEC(F2ULWordCnt) << " 32-bit words, AJA_STATUS_MEMORY");}	//	Fail
+			if (AJA_SUCCESS(result)  &&  !F2U32s.empty())
+				result = outPackets.AddReceivedAncillaryData(F2U32s);
+		}
+		else if (BufferHasGUMPData(inF1AncBuffer))
+		{	//	GUMP		GUMP		GUMP		GUMP
+			result = outPackets.AddReceivedAncillaryData (reinterpret_cast <const uint8_t *> (inF2AncBuffer.GetHostPointer()), inF1AncBuffer.GetByteCount());
+		}
+	}
 	return result;
 }
 
 
-AJAStatus AJAAncillaryList::SetFromIPAncData (const NTV2_POINTER & inF1AncBuffer,
-											const NTV2_POINTER & inF2AncBuffer,
-											AJAAncillaryList & outPackets)
+bool AJAAncillaryList::BufferHasGUMPData (const NTV2_POINTER & inBuffer)
 {
-	AJAStatus	result	(AJA_STATUS_SUCCESS);
-	outPackets.Clear();
-	{
-		vector<uint32_t>	F1U32s;
-
-		if (inF1AncBuffer.IsNULL())
-			LOGMYWARN("Empty/null F1 RTP anc buffer");
-		else
-		{
-			//	Peek into the F1 packet header and discover its true length...
-			AJARTPAncPayloadHeader	F1PayloadHdr;
-			if (!F1PayloadHdr.ReadBuffer(inF1AncBuffer))
-				{result = AJA_STATUS_MEMORY;  LOGMYERROR("F1AncBuffer " << inF1AncBuffer.AsString() << ": failed reading IP payload hdr, AJA_STATUS_MEMORY");}	//	Fail
-
-			const size_t	F1ULWordCnt	((F1PayloadHdr.GetHeaderByteCount() + F1PayloadHdr.GetPacketLength()) / sizeof(uint32_t));
-
-			//	Read F1ULWordCnt x 32-bit words from the F1 buffer...
-			if (AJA_SUCCESS(result)  &&  !inF1AncBuffer.GetU32s(F1U32s, 0, F1ULWordCnt))
-				{result = AJA_STATUS_MEMORY;  LOGMYERROR("F1AncBuffer " << inF1AncBuffer.AsString() << ": failed reading " << DEC(F1ULWordCnt) << " 32-bit words, AJA_STATUS_MEMORY");}	//	Fail
-		}
-		if (AJA_SUCCESS(result))
-			result = outPackets.AddReceivedAncillaryData(F1U32s);
-	}
-
-	if (AJA_SUCCESS(result)  &&  !inF2AncBuffer.IsNULL())
-	{
-		vector<uint32_t>		F2U32s;
-		AJARTPAncPayloadHeader	F2PayloadHdr;
-
-		//	Peek into the F2 packet header and discover its true length...
-		if (!F2PayloadHdr.ReadBuffer(inF2AncBuffer))
-			{result = AJA_STATUS_MEMORY;  LOGMYERROR("F2AncBuffer " << inF2AncBuffer.AsString() << ": failed reading IP payload hdr, AJA_STATUS_MEMORY");}	//	Fail
-
-		const size_t	F2ULWordCnt	((F2PayloadHdr.GetHeaderByteCount() + F2PayloadHdr.GetPacketLength()) / sizeof(uint32_t));
-
-		//	Read F2ULWordCnt x 32-bit words from the F2 buffer...
-		if (AJA_SUCCESS(result)  &&  !inF2AncBuffer.GetU32s(F2U32s, 0, F2ULWordCnt))
-			{result = AJA_STATUS_MEMORY;  LOGMYERROR("F2AncBuffer " << inF2AncBuffer.AsString() << ": failed reading " << DEC(F2ULWordCnt) << " 32-bit words, AJA_STATUS_MEMORY");}	//	Fail
-		if (AJA_SUCCESS(result)  &&  !F2U32s.empty())
-			result = outPackets.AddReceivedAncillaryData(F2U32s);
-	}
-	return result;
+	if (inBuffer.IsNULL())
+		return false;
+	const uint8_t *	pBytes (reinterpret_cast <const uint8_t*>(inBuffer.GetHostPointer()));
+	if (pBytes == NULL)
+		return false;
+	return pBytes[0] == 0xFF;
 }
 
 
@@ -884,7 +896,7 @@ AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (const bool bProgressiv
 }
 
 
-AJAStatus AJAAncillaryList::GetSDITransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
+AJAStatus AJAAncillaryList::GetTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
 												const bool inIsProgressive, const uint32_t inF2StartLine)
 {
 	AJAStatus	status		(AJA_STATUS_SUCCESS);

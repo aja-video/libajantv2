@@ -33,25 +33,29 @@ them per SMPTE/AES specifications.  See \ref anccapture (below) for information 
 @section	anctimecode		Timecode (RP-188, SMPTE-12M)
 
 The timecode aspects of NTV2’s SDK and firmware has its origins in the early 2000s — when NTV2 devices were SD-only, and the
-12M spec was still evolving. FPGA space was very tight in those days, including the number of registers available … which is
-one reason why the same registers were used for RP-188 capture and playout. (Newer NTV2 devices are finally starting to move
-away from this old model, so eventually, we hope to deliver a simpler timecode API.)
+SMPTE 12M spec was still evolving. FPGA space was very tight in those days, including the number of registers available … which
+is one reason why the same registers were used for RP-188 capture and playout.
 
 @note	Two 32-bit registers are required to store a timecode value (one for the low-order 32 bits, another for the high-order
 		32 bits), plus an extra register to hold the extra “Distributed Binary Bits” (DBB) information per SMPTE 12M and RP-188.
 		In the SDK, these three register values are represented by the ::NTV2_RP188 data type, and the older
 		::RP188_STRUCT data type.
 
-In this ancient model, one general-purpose register triplet is used to store an SDI input’s timecode <i>and also</i> provide
-a place to specify a timecode for SDI output. In other words, one register triplet is used for reading a timecode from, say,
-SDI In 1 <i>and</i> for writing a timecode to, say, SDI Out 1. The Hi/Lo-order general-purpose timecode registers are
-“write-only” for SDI output;  and “read-only” for SDI input. In other words, reading those registers yields the received input
-timecode, while writing those registers sets the output (playout) timecode.
+On older devices (i.e. those that <i>don’t</i> support “stacked audio” — see ::NTV2DeviceCanDoStackedAudio) and those <i>without</i>
+bidirectional SDI connectors (see ::NTV2DeviceHasBiDirectionalSDI), one general-purpose register triplet is used to store an SDI
+input’s timecode <b><i>and also</i></b> provide a place to specify a timecode for SDI output. In other words, one register triplet
+is used for reading a timecode from, say, SDI In 1 <i>and</i> for writing a timecode to, say, SDI Out 1. The Hi/Lo-order
+general-purpose timecode registers are “write-only” for SDI output;  and “read-only” for SDI input. In other words, reading those
+registers yields the received input timecode, while writing those registers sets the output (playout) timecode.
 
 @note	This inability to read back what’s been written into the register is very different behavior from nearly all other NTV2
-		registers. Thus, for devices that follow this old model, it’s impossible to fetch from the device the output timecode
-		value that was written for playout. So beware that when CNTV2Card::SetRP188Data is called, it’s not possible to find
-		out what was “set”, since CNTV2Card::GetRP188Data is always reading the SDI input’s timecode.
+		registers. For devices that follow this old model, it’s impossible to fetch from the device the output timecode value
+		that was written for playout. So beware that when CNTV2Card::SetRP188Data is called on these older devices, it’s
+		not possible to find out what was “set”, since CNTV2Card::GetRP188Data is always reading the SDI input’s timecode.
+
+On newer devices that have bi-directional SDI connectors (i.e. both ::NTV2DeviceCanDoStackedAudio and ::NTV2DeviceHasBiDirectionalSDI
+return <tt>true</tt>), CNTV2Card::GetRP188Data will return the corresponding SDI output’s timecode if the SDI spigot is configured
+for output (see CNTV2Card::SetSDITransmitEnable).
 
 For End-to-End (E-E) mode, i.e. when an SDI input is connected directly to an SDI output, to pass through timecode obtained
 from an SDI input…
@@ -254,13 +258,11 @@ There are two ways to capture any/all Ancillary data packets:
 		-	SDK & driver version 12.3 or later required.
 		-	Call CNTV2Card::AutoCirculateInitForInput with the ::AUTOCIRCULATE_WITH_ANC option.
 		-	Call AUTOCIRCULATE_TRANSFER::SetAncBuffers to specify the destination host Anc buffer(s).
-		-	After CNTV2Card::AutoCirculateTransfer returns, parse the contents of the host Anc buffer(s)…
-			-	For SDI devices:
-				-	Manually parse the data — see \ref ancgumpformat (below).
-				-	Or use the \ref ajaanc — call AJAAncillaryList::SetFromSDIAncData.
-			-	For IP devices (see \c NTV2_DEVICE_SUPPORTS_SMPTE2110 macro):
-				-	Manually parse the data — see \ref ancrtpformat (below).
-				-	Or use the \ref ajaanc — call AJAAncillaryList::SetFromIPAncData.
+		-	After CNTV2Card::AutoCirculateTransfer returns, parse the contents of the host Anc buffer(s).
+			For SDI or IP devices:
+			-	Manually parse the data — see \ref ancgumpformat (below) for SDI devices,
+				or \ref ancrtpformat (below) for IP devices (see \c NTV2_DEVICE_SUPPORTS_SMPTE2110 macro).
+			-	Or use the \ref ajaanc — call AJAAncillaryList::SetFromDeviceAncBuffers.
 	-	Without \ref aboutautocirculate :
 		-	SDK 15.0 or later required.
 		-	See \ref ntv2llburn for example of how to use CNTV2Card::AncExtractInit, CNTV2Card::AncExtractSetEnable,
@@ -271,14 +273,14 @@ There are two ways to capture any/all Ancillary data packets:
 		-	Call CNTV2Card::AncExtractGetFilterDIDs to discover which packet DIDs are currently being excluded.
 		-	Call CNTV2Card::AncExtractSetFilterDIDs to change which packet DIDs will be excluded.
 		-	Use the NTV2DIDSet returned from CNTV2Card::AncExtractGetDefaultDIDs to restore the default packet exclusion list.
-	-	Default per-field ancillary data buffer capacity is 8K by default, or 16K per-frame, including overhead.
+	-	The default maximum per-field ancillary data buffer capacity is 8K by default, or 16K per-frame, including overhead.
 		This can be changed on a per-device basis by setting a pair of virtual registers (using CNTV2Card::WriteRegister):
 		-	::kVRegAncField1Offset — This specifies the offset from the bottom of the 8MB/16MB frame where F1 ancillary
 			data will be written. Defaults to 16K (\c 0x00004000 ).
 		-	::kVRegAncField2Offset — This specifies the offset from the bottom of the 8MB/16MB frame where F2 ancillary
 			data will be written. Defaults to 8K (\c 0x00002000 ).
-		-	Recklessly setting these values can cause ancillary data to be written into the active video, thus corrupting
-			captured video frames.
+		-	<b>Caution:</b> Recklessly setting these values can cause ancillary data to be written into the active video,
+			thus corrupting captured video frames.
 		-	Changing either of these values also affects Anc playout.
 
 
@@ -332,6 +334,7 @@ There are two ways to play out custom Ancillary data packets:
 <hr size="50px">
 
 
+
 @section	ancgumpformat	SDI Anc Buffer Data Format
 
 The data bytes in the buffer consist of one or more packets having the following format:
@@ -341,24 +344,42 @@ The data bytes in the buffer consist of one or more packets having the following
 @note	While the first byte of each packet is set to \c 0xFF, this is not a protected value, and can legally occur within
 		packet data. Software parsers must use the packet Data Count (<b>DC</b>) value to determine the length of each packet.
 
+For <b>Capture</b>:
+-	Clients can parse the data themselves, using the above specification.
+-	AJAAncillaryList::SetFromDeviceAncBuffers can be called to transform the buffer contents into an ::AJAAncillaryList
+	containing one ::AJAAncillaryData instance per packet.
+
+For <b>Playout</b>:
+-	Clients can write the data themselves per the above specification.
+-	AJAAncillaryList::GetTransmitData can be called to fill your Anc playout buffers from an ::AJAAncillaryList.
+	-	If using \ref aboutautocirculate , these buffers can be transferred to the AJA device by first calling
+		AUTOCIRCULATE_TRANSFER::SetAncBuffers , then calling CNTV2Card::AutoCirculateTransfer.
+	-	If not using AutoCirculate, the buffers can be transferred to the AJA device using CNTV2Card::DMAWriteAnc.
+
 <hr size="50px">
 
 
-@section	ancrtpformat	IP/RTP Anc Buffer Data Format
+
+@section	ancrtpformat	RTP Anc Buffer Data Format
 
 The data in the ancillary data buffer matches the RTP specification:
 
 @image	html	fbf-rtp.png
 
-For <b>Capture</b>, clients can parse the data themselves, or AJAAncillaryList::SetFromIPAncData can be called to transform
-the buffer contents into an ::AJAAncillaryList containing one ::AJAAncillaryData instance per packet.
+For <b>Capture</b>:
+-	Clients can parse the data themselves.
+-	AJAAncillaryList::SetFromDeviceAncBuffers can be called to transform the buffer contents into an ::AJAAncillaryList
+	containing one ::AJAAncillaryData instance per packet.
 
-For <b>Playout</b>, AJAAncillaryList::GetIPTransmitData can be called to fill the Anc data buffer from an ::AJAAncillaryList.
-Clients that generate the Anc data buffer contents themselves must set the <b>Sequence Number</b> field in the first longword
-of the RTP packet header to the total RTP packet bytecount, since AJA IP devices running 2110 firmware (\ref konaip and \ref ioip)
-expect it there.
+For <b>Playout</b>:
+-	Clients can write the data themselves per the RTP specification.
+	-	Clients that generate the Anc data buffer contents themselves must set the <b>Sequence Number</b> field in the first
+		longword of the RTP packet header to the total RTP packet bytecount, since AJA IP devices running 2110 firmware
+		(\ref konaip and \ref ioip) expect it there.
+-	AJAAncillaryList::GetIPTransmitData can be called to fill the Anc data buffer from an ::AJAAncillaryList.
 
 <hr size="50px">
+
 
 
 @section	vancframegeometries		VANC Frame Geometries
@@ -378,18 +399,27 @@ The easiest format to use is ::NTV2_FBF_8BIT_YCBCR, but to prevent truncating th
 told to not do this by calling CNTV2Card::SetVANCShiftMode. When a frame is captured using the ::NTV2_VANCDATA_8BITSHIFT_ENABLE
 mode, VANC lines can be easily parsed into Ancillary packets. With ::NTV2_FBF_10BIT_YCBCR frame buffers, ancillary data packets can be
 found in the VANC lines, but the scanning process is more difficult, due to the packing of 10-bit words in the frame buffer.
-The ::CNTV2SMPTEAncData class in the \ref ajacc has some functions (e.g., CNTV2SMPTEAncData::FindAnc, CNTV2SMPTEAncData::InsertAnc,
-etc.) to help with this. Starting in SDK 14.1, the AJAAncillaryList::SetFromVANCData class method answers with an ::AJAAncillaryList
-with ::AJAAncillaryData instances for each VANC packet found in a given frame buffer.
 
-@bug	VANC Shift Mode is not implemented for SD video formats. You must use ::NTV2_FBF_10BIT_YCBCR for SD 525i/625i video.
+@bug	VANC Shift Mode is not implemented for SD video formats — ::NTV2_FBF_10BIT_YCBCR must be used for SD 525i/625i video.
 
 RGB video to/from YCbCr frame buffers generally doesn't work because the VANC data is corrupted by the color-space converters.
-However, dual-link RGB video to/from RGB frame buffers will work.
+However, dual-link RGB video to/from RGB frame buffers (directly from/to the SDI spigots) will work.
 
 @note	Mixer/Keyer widgets on newer devices (generally, those that support ::NTV2DeviceCanDoCustomAnc) will pass VANC.
 		Call CNTV2Card::GetMixerVancOutputFromForeground to determine if the Mixer is configured to pass foreground or background VANC.
 		Call CNTV2Card::SetMixerVancOutputFromForeground to change the setting.
+
+For <b>Capture</b>:
+-	Clients can parse the frame buffer lines themselves. The ::CNTV2SMPTEAncData class in the \ref ajacc has some functions
+	(e.g., CNTV2SMPTEAncData::FindAnc) to help with the parsing.
+-	Starting in SDK 14.1, AJAAncillaryList::SetFromVANCData can be called to transform the VANC region into an ::AJAAncillaryList
+	containing one ::AJAAncillaryData instance per packet.
+
+For <b>Playout</b>:
+-	Clients can write the frame buffer lines themselves. The ::CNTV2SMPTEAncData class in the \ref ajacc has some functions
+	(e.g., CNTV2SMPTEAncData::InsertAnc) to help with this.
+-	Starting in SDK 14.1, given an ::AJAAncillaryList of packets, calling its AJAAncillaryList::GetVANCTransmitData method will
+	write the packets into the frame buffer’s VANC lines.
 
 The spreadsheets that follow show, in detail for each video format, which lines contain VANC, and which ones contain video data.
 

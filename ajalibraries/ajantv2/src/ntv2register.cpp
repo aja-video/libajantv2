@@ -2628,6 +2628,26 @@ bool CNTV2Card::ReadSDIInVPID (const NTV2Channel inChannel, ULWord & outValue_A,
 }	//	ReadSDIInVPID
 
 
+bool CNTV2Card::WriteSDIInVPID (const NTV2Channel inChannel, const ULWord inValA, const ULWord inValB)
+{
+	ULWord	valA(inValA), valB(inValB);
+
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+
+	// reverse byte order
+	if (GetDeviceID() != DEVICE_ID_KONALHI)
+	{
+		valA = NTV2EndianSwap32(valA);
+		valB = NTV2EndianSwap32(valB);
+	}
+
+	return WriteRegister (gChannelToSDIInVPIDARegNum[inChannel], valA)
+			&&  WriteRegister (gChannelToSDIInVPIDBRegNum[inChannel], valB);
+
+}	//	WriteSDIInVPID
+
+
 
 #if !defined (NTV2_DEPRECATE)
 	bool CNTV2Card::ReadSDIInVPID (NTV2Channel channel, ULWord* valueA, ULWord* valueB)

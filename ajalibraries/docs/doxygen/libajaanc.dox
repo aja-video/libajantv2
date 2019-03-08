@@ -12,12 +12,12 @@
 	@par	Transmit/Playout:
 	To encode my ancillary data packets into other buffer destinations:
 	-	Call AJAAncillaryList::AddAncillaryData for each packet to be added to me.
-	-	It’s best to call AJAAncillaryList::SortListByLocation before transmitting.
+	-	The list will automatically be sorted by ascending location It’s best to call AJAAncillaryList::SortListByLocation before transmitting.
 	-	For encoding into a “tall” or “taller” VANC frame buffer, call AJAAncillaryList::GetVANCTransmitData.
-	-	For devices with Anc extractors (see ::NTV2DeviceCanDoCustomAnc), to fill the buffer used in
-		the AUTOCIRCULATE_TRANSFER::SetAncBuffers function,
-		-	call AJAAncillaryList::GetSDITransmitData for SDI (see \ref ancgumpformat).
-		-	call AJAAncillaryList::GetIPTransmitData for IP/RTP (see \ref ancrtpformat).
+	-	For devices with Anc extractors (see ::NTV2DeviceCanDoCustomAnc), to fill the buffers used in
+		the AUTOCIRCULATE_TRANSFER::SetAncBuffers or CNTV2Card::DMAWriteAnc functions, call AJAAncillaryList::GetTransmitData
+		(see \ref ancgumpformat). For IP S2110 devices, the anc buffer will automatically be transformed into RTP (see \ref ancrtpformat)
+		in CNTV2Card::AutoCirculateTransfer (or CNTV2Card::DMAWriteAnc) before tranferring to the device.
 
 	@par	Receive/Capture:
 	To decode other buffer sources into a list of ancillary data packets:
@@ -25,10 +25,8 @@
 		AJAAncillaryList::SetFromVANCData class method, passing it an ::NTV2_POINTER that
 		references the frame buffer (or just the VANC portion of one), and an ::NTV2FormatDescriptor
 		that describes the raster.
-	-	For devices with Anc extractors (see ::NTV2DeviceCanDoCustomAnc), using the buffer(s) used
-		in the AUTOCIRCULATE_TRANSFER::SetAncBuffers call...
-		-	call AJAAncillaryList::SetFromSDIAncData for SDI (see \ref ancgumpformat);
-		-	call AJAAncillaryList::SetFromIPAncData for IP/RTP (see \ref ancrtpformat).
+	-	For devices with Anc extractors (see ::NTV2DeviceCanDoCustomAnc), using the buffer(s) passed to
+		AUTOCIRCULATE_TRANSFER::SetAncBuffers or CNTV2Card::DMAReadAnc, call AJAAncillaryList::SetFromDeviceAncBuffers.
 
 	@par	Principal Classes:
 	- AJAAncillaryData:  Container that holds a single Anc packet (or raster line containing “analog” waveform data).

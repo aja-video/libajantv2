@@ -396,6 +396,30 @@ AJAExport const std::string &	AJAAncillaryDataCodingToString (const AJAAncillary
 
 
 /**
+	@brief	Identifies the type of anc buffer the packet originated from:  GUMP, RTP, VANC, or unknown.
+**/
+enum AJAAncillaryBufferFormat
+{
+	AJAAncillaryBufferFormat_Unknown,		///< @brief	Unknown or "don't care".
+	AJAAncillaryBufferFormat_FBVANC,		///< @brief	Frame buffer VANC line.
+	AJAAncillaryBufferFormat_SDI,			///< @brief	SDI ("GUMP").
+	AJAAncillaryBufferFormat_RTP,			///< @brief	RTP/IP.
+	AJAAncillaryBufferFormat_Invalid,		///< @brief	Invalid.
+	AJAAncillaryBufferFormat_Size = AJAAncillaryBufferFormat_Invalid
+};
+
+#define	IS_VALID_AJAAncillaryBufferFormat(_x_)		((_x_) >= AJAAncillaryBufferFormat_Unknown  &&  (_x_) < AJAAncillaryBufferFormat_Size)
+#define	IS_KNOWN_AJAAncillaryBufferFormat(_x_)		((_x_) > AJAAncillaryBufferFormat_Unknown  &&  (_x_) < AJAAncillaryBufferFormat_Size)
+
+/**
+	@return		A string containing a human-readable representation of the given AJAAncillaryBufferFormat value (or empty if invalid).
+	@param[in]	inValue		Specifies the AJAAncillaryBufferFormat to be converted.
+	@param[in]	inCompact	If true (the default), returns the compact representation;  otherwise use the longer symbolic format.
+**/
+AJAExport const std::string &	AJAAncillaryBufferFormatToString (const AJAAncillaryBufferFormat inValue, const bool inCompact = true);
+
+
+/**
 	@brief		I am the principal class that stores a single SMPTE-291 SDI ancillary data packet OR the
 				digitized contents of one "analog" raster line (e.g. line 21 captions or VITC). Since I'm
 				payload-agnostic, I serve as the generic base class for more specific objects that know
@@ -466,9 +490,11 @@ public:
 	virtual inline uint32_t					GetDC (void) const							{return uint32_t(m_payload.size());}	///< @return	My payload data count, in bytes.
 	virtual inline size_t					GetPayloadByteCount (void) const			{return size_t(GetDC());}	///< @return	My current payload byte count.
 	virtual AJAAncillaryDataType			GetAncillaryDataType (void) const			{return m_ancType;}			///< @return	My anc data type (if known).
+	virtual inline uint32_t					GetFrameID (void) const						{return m_frameID;}			///< @return	My anc data type (if known).
 
 	virtual inline const AJAAncillaryDataLocation &		GetDataLocation (void) const	{return m_location;}		///< @brief	My ancillary data "location" within the video stream.
 	virtual inline AJAAncillaryDataCoding	GetDataCoding (void) const					{return m_coding;}			///< @return	The ancillary data coding type (e.g., digital or analog/raw waveform).
+	virtual inline AJAAncillaryBufferFormat	GetBufferFormat (void) const				{return m_bufferFmt;}		///< @return	The ancillary buffer format (e.g., SDI/GUMP, RTP or Unknown).
 	virtual uint8_t							GetChecksum (void) const					{return m_checksum;}		///< @return	My 8-bit checksum.
 
 	virtual inline AJAAncillaryDataLink		GetLocationVideoLink (void) const			{return GetDataLocation().GetDataLink();}		///< @return	My current anc data video link value (A or B).
@@ -648,6 +674,20 @@ public:
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						SetDataCoding (const AJAAncillaryDataCoding inCodingType);
+
+	/**
+		@brief		Sets my originating frame identifier.
+		@param[in]	inFrameID	Specifies my new frame identifier.
+		@return		A non-constant reference to myself.
+	**/
+	virtual inline AJAAncillaryData &		SetFrameID (const uint32_t inFrameID)					{m_frameID = inFrameID;  return *this;}
+
+	/**
+		@brief		Sets my originating buffer format.
+		@param[in]	inFmt	Specifies my new buffer format.
+		@return		A non-constant reference to myself.
+	**/
+	virtual inline AJAAncillaryData &		SetBufferFormat (const AJAAncillaryBufferFormat inFmt)	{m_bufferFmt = inFmt;  return *this;}
 
 #if !defined(NTV2_DEPRECATE_14_2)
 		/**
@@ -923,7 +963,7 @@ public:
 	static bool								GetAncPacketsFromVANCLine (const std::vector<uint16_t> &	inYUV16Line,
 																		const AncChannelSearchSelect	inChanSelect,
 																		U16Packets &					outRawPackets,
-																		std::vector<uint16_t> &			outWordOffsets);
+																		U16Packet &						outWordOffsets);
 	/**
 		@brief		Converts a single line of ::NTV2_FBF_8BIT_YCBCR data from the given source buffer into an ordered sequence of uint16_t
 					values that contain the resulting 10-bit even-parity data.
@@ -937,7 +977,7 @@ public:
 					firmware does during playout of ::NTV2_FBF_8BIT_YCBCR frame buffers with ::NTV2_VANCDATA_8BITSHIFT_ENABLE.)
 	**/
 	static bool								Unpack8BitYCbCrToU16sVANCLine (const void * pInYUV8Line,
-																			std::vector<uint16_t> & outU16YUVLine,
+																			U16Packet & outU16YUVLine,
 																			const uint32_t inNumPixels);
 
 	protected:
@@ -964,6 +1004,8 @@ public:
 		ByteVector					m_payload;		///< @brief	My payload data (DC = size)
 		bool						m_rcvDataValid;	///< @brief	This is set true (or not) by ParsePayloadData()
 		AJAAncillaryDataType		m_ancType;		///< @brief	One of a known set of ancillary data types (or "Custom" if not identified)
+		AJAAncillaryBufferFormat	m_bufferFmt;	///< @brief	My originating buffer format, if known
+		uint32_t					m_frameID;		///< @brief	ID of my originating frame, if known
 
 };	//	AJAAncillaryData
 
@@ -978,10 +1020,14 @@ static inline std::ostream & operator << (std::ostream & inOutStream, const AJAA
 
 
 /**
-	@brief		I represent the header of an RTP packet.
+	@brief		I represent the header of an RTP network packet.
 **/
 class AJAExport AJARTPAncPayloadHeader
 {
+	//	Class Methods
+	public:
+		static bool				BufferStartsWithRTPHeader(const NTV2_POINTER & inBuffer);
+
 	//	Instance Methods
 	public:
 								AJARTPAncPayloadHeader();

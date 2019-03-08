@@ -1506,6 +1506,23 @@ bool FRAME_STAMP::GetSDIInputStatus(NTV2SDIInputStatus & outStatus, const UWord 
 	return true;
 }
 
+bool FRAME_STAMP::SetInputTimecode (const NTV2TCIndex inTCNdx, const NTV2_RP188 & inTimecode)
+{
+	ULWord			numRP188s	(acTimeCodes.GetByteCount() / sizeof(NTV2_RP188));
+	NTV2_RP188 *	pArray		(reinterpret_cast<NTV2_RP188*>(acTimeCodes.GetHostPointer()));
+	if (!pArray  ||  !numRP188s)
+		return false;		//	No 'acTimeCodes' array!
+
+	if (numRP188s > NTV2_MAX_NUM_TIMECODE_INDEXES)
+		numRP188s = NTV2_MAX_NUM_TIMECODE_INDEXES;	//	clamp to this max number
+	if (ULWord(inTCNdx) >= numRP188s)
+		return false;	//	Past end
+
+	pArray[inTCNdx] = inTimecode;	//	Write the new value
+	return true;	//	Success!
+}
+
+
 FRAME_STAMP & FRAME_STAMP::operator = (const FRAME_STAMP & inRHS)
 {
 	if (this != &inRHS)
