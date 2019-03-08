@@ -1041,7 +1041,6 @@ private:
 		DefineRegName	(kVRegMacUserModePingLevel,				"kVRegMacUserModePingLevel");
 		DefineRegName	(kVRegMacKernelModePingLevel,			"kVRegMacKernelModePingLevel");
 		DefineRegName	(kVRegLatencyTimerValue,				"kVRegLatencyTimerValue");
-		DefineRegName	(kVRegAudioAVSyncEnable,				"kVRegAudioAVSyncEnable");
 		DefineRegName	(kVRegAudioInputSelect,					"kVRegAudioInputSelect");
 		DefineRegName	(kVRegSerialSuspended,					"kVRegSerialSuspended");
 		DefineRegName	(kVRegXilinxProgramming,				"kVRegXilinxProgramming");

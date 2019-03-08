@@ -67,6 +67,7 @@ typedef struct NTV2DeviceInfo
 	bool							procAmpSupport;
 	bool							has2KSupport;						///< @brief	Supports 2K formats?
 	bool							has4KSupport;						///< @brief	Supports 4K formats?
+	bool							has8KSupport;						///< @brief	Supports 8K formats?
     bool                            has3GLevelConversion;               ///< @brief	Supports 3G Level Conversion?
 	bool							proResSupport;						///< @brief	Supports ProRes?
 	bool							sdi3GSupport;						///< @brief	Supports 3G?

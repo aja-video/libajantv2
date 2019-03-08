@@ -477,6 +477,7 @@ ostream &	operator << (ostream & inOutStr, const NTV2DeviceInfo & inInfo)
 					<< "                        ProcAmp: " << (inInfo.procAmpSupport ? "Y" : "N") << endl
 					<< "                             2K: " << (inInfo.has2KSupport ? "Y" : "N") << endl
 					<< "                             4K: " << (inInfo.has4KSupport ? "Y" : "N") << endl
+					<< "                             8K: " << (inInfo.has8KSupport ? "Y" : "N") << endl
                     << "            3G Level Conversion: " << (inInfo.has3GLevelConversion ? "Y" : "N") << endl
 					<< "                         ProRes: " << (inInfo.proResSupport ? "Y" : "N") << endl
 					<< "                         SDI 3G: " << (inInfo.sdi3GSupport ? "Y" : "N") << endl
@@ -583,6 +584,7 @@ void CNTV2DeviceScanner::SetVideoAttributes (NTV2DeviceInfo & info)
 	info.pingLED				= NTV2DeviceGetPingLED				(info.deviceID);
 	info.has2KSupport			= NTV2DeviceCanDo2KVideo			(info.deviceID);
 	info.has4KSupport			= NTV2DeviceCanDo4KVideo			(info.deviceID);
+	info.has8KSupport			= NTV2DeviceCanDo8KVideo			(info.deviceID);
     info.has3GLevelConversion   = NTV2DeviceCanDo3GLevelConversion  (info.deviceID);
 	info.isoConvertSupport		= NTV2DeviceCanDoIsoConvert			(info.deviceID);
 	info.rateConvertSupport		= NTV2DeviceCanDoRateConvert		(info.deviceID);

@@ -5443,7 +5443,7 @@ NTV2FrameRate CNTV2Card::GetSDIInputRate (const NTV2Channel channel)
 	NTV2FrameRate currentRate (NTV2_FRAMERATE_INVALID);
 	bool result = ReadRegister(gChannelToSDIInputStatusRegNum[channel], rateLow, gChannelToSDIInputRateMask[channel], gChannelToSDIInputRateShift[channel]);
 	result = ReadRegister(gChannelToSDIInputStatusRegNum[channel], rateHigh, gChannelToSDIInputRateHighMask[channel], gChannelToSDIInputRateHighShift[channel]);
-	currentRate = NTV2FrameRate(((rateHigh << 4) & BIT_3) | rateLow);
+	currentRate = NTV2FrameRate(((rateHigh << 3) & BIT_3) | rateLow);
 	if(NTV2_IS_VALID_NTV2FrameRate(currentRate))
 		return currentRate;
 	return NTV2_FRAMERATE_INVALID;
@@ -5458,7 +5458,7 @@ NTV2FrameGeometry CNTV2Card::GetSDIInputGeometry (const NTV2Channel channel)
 	NTV2FrameGeometry currentGeometry (NTV2_FG_INVALID);
 	bool result = ReadRegister(gChannelToSDIInputStatusRegNum[channel], geometryLow, gChannelToSDIInputGeometryMask[channel], gChannelToSDIInputGeometryShift[channel]);
 	result = ReadRegister(gChannelToSDIInputStatusRegNum[channel], geometryHigh, gChannelToSDIInputGeometryHighMask[channel], gChannelToSDIInputGeometryHighShift[channel]);
-	currentGeometry = NTV2FrameGeometry(((geometryHigh << 4) & BIT_3) | geometryLow);
+	currentGeometry = NTV2FrameGeometry(((geometryHigh << 3) & BIT_3) | geometryLow);
 	if(NTV2_IS_VALID_NTV2FrameGeometry(currentGeometry))
 		return currentGeometry;
 	return NTV2_FG_INVALID;

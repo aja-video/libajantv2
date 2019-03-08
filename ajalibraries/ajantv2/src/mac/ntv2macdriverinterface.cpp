@@ -1288,66 +1288,6 @@ bool CNTV2MacDriverInterface::LockFormat( void )
 
 
 //--------------------------------------------------------------------------------------------------------------------
-//	SetAVSyncPattern
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SetAVSyncPattern( void* dataPtr, UInt32 dataSize )
-{
-	kern_return_t kernResult = KERN_FAILURE;
-
-	uint64_t	scalarI_64[2];
-	uint32_t	outputCount = 0;
-
-	scalarI_64[0] = (uint64_t) dataPtr;
-	scalarI_64[1] = dataSize;
-
-	if (GetIOConnect())
-		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
-											   kDriverSetAVSyncPattern,	// selector of the function to be called via the user client.
-											   scalarI_64,				// array of scalar (64-bit) input values.
-											   2,						// the number of scalar input values.
-											   0,						// array of scalar (64-bit) output values.
-											   &outputCount);			// pointer to the number of scalar output values.
-	if (kernResult == KERN_SUCCESS)
-        return true;
-	else
-	{
-		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
-		return false;
-	}
-}
-
-
-//--------------------------------------------------------------------------------------------------------------------
-//	TriggerAVSync
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::TriggerAVSync( NTV2Crosspoint channelSpec, UInt32 count )
-{
-	kern_return_t kernResult = KERN_FAILURE;
-
-	uint64_t	scalarI_64[2];
-	uint32_t	outputCount = 0;
-
-	scalarI_64[0] = channelSpec;
-	scalarI_64[1] = count;
-
-	if (GetIOConnect())
-		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
-											   kDriverTriggerAVSync,	// selector of the function to be called via the user client.
-											   scalarI_64,				// array of scalar (64-bit) input values.
-											   2,						// the number of scalar input values.
-											   0,						// array of scalar (64-bit) output values.
-											   &outputCount);			// pointer to the number of scalar output values.
-	if (kernResult == KERN_SUCCESS)
-        return true;
-	else
-	{
-		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
-		return false;
-	}
-}
-
-
-//--------------------------------------------------------------------------------------------------------------------
 //	WaitForInterrupt
 //
 //	Block the current thread until the specified interrupt occurs.
@@ -2224,25 +2164,6 @@ bool CNTV2MacDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used
 	} while (bSuccess == false);
 
 	return true;
-}
-
-
-//--------------------------------------------------------------------------------------------------------------------
-//	Get/Set Audio AV Sync Enable
-//
-//	Note: Our core audio driver looks at this virtual register during playback and if it is
-//   set it will wait for a markFirstFrame call from the muxer so that audio and video will
-//   be in sync.  Otherwise it will start right away, the assumption is no muxer is present
-//   and we are in stand alone audio mode.
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SetAudioAVSyncEnable( bool enable )
-{
-	return WriteRegister(kVRegAudioAVSyncEnable, enable);
-}
-
-bool CNTV2MacDriverInterface::GetAudioAVSyncEnable( bool* enable )
-{
-	return enable ? CNTV2DriverInterface::ReadRegister(kVRegAudioAVSyncEnable, *enable) : false;
 }
 
 
