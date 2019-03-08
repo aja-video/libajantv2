@@ -321,6 +321,7 @@ void Class8kServices::SetDeviceXPointCapture ()
 void Class8kServices::SetDeviceMiscRegisters ()
 {
 	bool 				b8K 				= NTV2_IS_QUAD_QUAD_FORMAT(mFb1VideoFormat);
+	bool				b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool				b8kHfr				= NTV2_IS_QUAD_QUAD_HFR_VIDEO_FORMAT(mFb1VideoFormat);
 	bool				bSdiOutRGB			= mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb;
 	//bool				b3GaOutRGB			= (mSdiOutTransportType == NTV2_SDITransport_3Ga) && bSdiOutRGB;
@@ -329,9 +330,8 @@ void Class8kServices::SetDeviceMiscRegisters ()
 	bool				bFbLevelA			= true; //IsVideoFormatA(mFb1VideoFormat);
 	NTV2FrameRate		primaryFrameRate	= GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 
-	if (!b8K)
+	if (!b8K && !b4K)
 		return Class4kServices::SetDeviceMiscRegisters();
-	
 	
 	//
 	// SDI Out
@@ -354,29 +354,14 @@ void Class8kServices::SetDeviceMiscRegisters ()
 		mCard->SetSDITransmitEnable((NTV2Channel)i, bTransmit);
 	}
 	
-	// SDI Out - 6G/12G
-	if (b4k12gOut)
-	{
-		mCard->SetSDIOut12GEnable(NTV2_CHANNEL1, true);
-		mCard->SetSDIOut12GEnable(NTV2_CHANNEL2, true);
-		mCard->SetSDIOut12GEnable(NTV2_CHANNEL3, true);
-		mCard->SetSDIOut12GEnable(NTV2_CHANNEL4, true);
-	}
-	else if (b4k6gOut)
-	{
-		mCard->SetSDIOut6GEnable(NTV2_CHANNEL1, true);
-		mCard->SetSDIOut6GEnable(NTV2_CHANNEL2, true);
-		mCard->SetSDIOut6GEnable(NTV2_CHANNEL3, true);
-		mCard->SetSDIOut6GEnable(NTV2_CHANNEL4, true);
-	}
-	
+	// SDI Out - 6G/12G - SetSDIOut12GEnable - handled in driver
 	
 	//
 	// HDMI Out
 	// 
 	
 	// local hacks for now
-	bool b4K = true;
+	b4K = true;
 	bool b2pi = true;
 	bool bHdmiIn = false;
 	bool b4kHfr	= NTV2_IS_QUAD_QUAD_HFR_VIDEO_FORMAT(mFb1VideoFormat);
