@@ -892,7 +892,7 @@ AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (const bool bProgressiv
 		NTV2_ASSERT(F1Buffer.IsProvidedByClient());
 	if (!F2Buffer.IsNULL())
 		NTV2_ASSERT(F2Buffer.IsProvidedByClient());
-	return GetSDITransmitData(F1Buffer, F2Buffer, bProgressive, f2StartLine);
+	return GetTransmitData(F1Buffer, F2Buffer, bProgressive, f2StartLine);
 }
 
 
@@ -904,6 +904,8 @@ AJAStatus AJAAncillaryList::GetTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINT
 	uint32_t	maxF2Data	(F2Buffer.GetByteCount());
 	uint8_t *	pF1AncData	(reinterpret_cast<uint8_t*>(F1Buffer.GetHostPointer()));
 	uint8_t *	pF2AncData	(reinterpret_cast<uint8_t*>(F2Buffer.GetHostPointer()));
+
+	F1Buffer.Fill(uint64_t(0));	 F2Buffer.Fill(uint64_t(0));
 
 	//	I need to be in ascending line order...
 	SortListByLocation();
@@ -1134,6 +1136,8 @@ AJAStatus AJAAncillaryList::GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POI
 	size_t				overflowWords			(0);
 	AJAStatus			result					(AJA_STATUS_SUCCESS);
 	vector<uint32_t>	U32F1s, U32F2s;		//	32-bit network-byte-order data
+
+	F1Buffer.Fill(uint64_t(0));	 F2Buffer.Fill(uint64_t(0));
 
 	//	Reserve space in ULWord vectors...
 	U32F1s.reserve(maxPktLengthWords);

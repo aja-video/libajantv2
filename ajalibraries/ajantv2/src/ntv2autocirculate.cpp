@@ -1215,11 +1215,9 @@ bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTO
 	if (!ancF1.IsNULL() || !ancF2.IsNULL())
 		if (AJA_FAILURE(AJAAncillaryList::SetFromDeviceAncBuffers(ancF1, ancF2, pkts)))
 			return false;	//	Packet import failed
-	if (!pkts.CountAncillaryData())
-		return true;	//	Success, but nothing to do
 
 	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(standard));
-	const uint32_t				F2StartLine			(smpteLineNumInfo.GetLastLine());	//	F2 VANC starts past last line of F1
+	const uint32_t				F2StartLine			(isProgressive ? 0 : smpteLineNumInfo.GetLastLine());	//	F2 VANC starts past last line of F1
 
 	//	Look for ATC and VITC...
 	for (uint32_t ndx(0);  ndx < pkts.CountAncillaryData();  ndx++)
@@ -1291,6 +1289,8 @@ bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTO
 	if (vpidA || vpidB)
 		WriteSDIInVPID(inChannel, vpidA, vpidB);
 
+	//	Normalize to SDI/GUMP...
+	result = AJA_SUCCESS(pkts.GetTransmitData(ancF1, ancF2, isProgressive, F2StartLine));
 	return result;
 }	//	S2110DeviceAncFromXferBuffers
 
