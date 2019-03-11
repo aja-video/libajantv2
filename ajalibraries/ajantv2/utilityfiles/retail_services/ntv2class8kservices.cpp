@@ -322,11 +322,11 @@ void Class8kServices::SetDeviceMiscRegisters ()
 {
 	bool 				b8K 				= NTV2_IS_QUAD_QUAD_FORMAT(mFb1VideoFormat);
 	bool				b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
-	bool				b8kHfr				= NTV2_IS_QUAD_QUAD_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	bool				bSdiOutRGB			= mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb;
+	//bool				b8kHfr				= NTV2_IS_QUAD_QUAD_HFR_VIDEO_FORMAT(mFb1VideoFormat);
+	//bool				bSdiOutRGB			= mSDIOutput1ColorSpace == NTV2_ColorSpaceModeRgb;
 	//bool				b3GaOutRGB			= (mSdiOutTransportType == NTV2_SDITransport_3Ga) && bSdiOutRGB;
-	bool				b4k6gOut			= b8K && !b8kHfr && !bSdiOutRGB; //&& (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
-	bool				b4k12gOut			= b8K && (b8kHfr || bSdiOutRGB); //&& (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
+	//bool				b4k6gOut			= b8K && !b8kHfr && !bSdiOutRGB; //&& (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
+	//bool				b4k12gOut			= b8K && (b8kHfr || bSdiOutRGB); //&& (m4kTransportOutSelection == NTV2_4kTransport_12g_6g_1wire);
 	bool				bFbLevelA			= true; //IsVideoFormatA(mFb1VideoFormat);
 	NTV2FrameRate		primaryFrameRate	= GetNTV2FrameRateFromVideoFormat(mFb1VideoFormat);
 
