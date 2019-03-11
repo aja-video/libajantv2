@@ -173,9 +173,6 @@ void Class8kServices::SetDeviceXPointPlayback ()
 	// Mixer/Keyer
 	mCard->Connect (NTV2_XptMixer1FGVidInput, NTV2_XptBlack);
 	mCard->Connect (NTV2_XptMixer1FGKeyInput, NTV2_XptBlack);
-	
-	
-	mCard->DisableChannel(NTV2_CHANNEL1);
 }
 
 	
