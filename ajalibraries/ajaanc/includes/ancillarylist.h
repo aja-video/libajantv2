@@ -39,7 +39,7 @@ class AJAExport AJAAncillaryList
 public:	//	CLASS METHODS
 	/**
 		@brief		Returns all packets found in the VANC lines of the given NTV2 frame buffer.
-		@param[in]	inFrameBuffer		Specifies the NTV2 frame buffer (or the portion containing the VANC lines).
+		@param[in]	inFrameBuffer		Specifies the NTV2 frame buffer (or at least the portion containing the VANC lines).
 		@param[in]	inFormatDesc		Describes the frame buffer (pixel format, video standard, etc.).
 		@param[out]	outPackets			Receives the packets found.
 		@return		AJA_STATUS_SUCCESS if successful.
@@ -58,20 +58,14 @@ public:	//	CLASS METHODS
 		@param[out]	outPackets			Receives the packet list.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	static AJAStatus						SetFromSDIAncData (const NTV2_POINTER & inF1AncBuffer,
-															const NTV2_POINTER & inF2AncBuffer,
-															AJAAncillaryList & outPackets);
+	static AJAStatus						SetFromDeviceAncBuffers (const NTV2_POINTER & inF1AncBuffer,
+																	const NTV2_POINTER & inF2AncBuffer,
+																	AJAAncillaryList & outPackets);
 
-	/**
-		@brief		Returns all ancillary data packets found in the given F1 and F2 RTP packet buffers.
-		@param[in]	inF1AncBuffer		Specifies the F1 RTP packet buffer.
-		@param[in]	inF2AncBuffer		Specifies the F2 RTP packet buffer.
-		@param[out]	outPackets			Receives the packet list.
-		@return		AJA_STATUS_SUCCESS if successful.
-	**/
-	static AJAStatus						SetFromIPAncData (const NTV2_POINTER & inF1AncBuffer,
-															const NTV2_POINTER & inF2AncBuffer,
-															AJAAncillaryList & outPackets);
+#if !defined(NTV2_DEPRECATE_15_2)
+	static inline AJAStatus	SetFromSDIAncData (const NTV2_POINTER & inF1, const NTV2_POINTER & inF2, AJAAncillaryList & outPkts)	{return SetFromDeviceAncBuffers(inF1, inF2, outPkts);}	///< @deprecated	Use SetFromDeviceAncBuffers instead.
+	static inline AJAStatus	SetFromIPAncData (const NTV2_POINTER & inF1, const NTV2_POINTER & inF2, AJAAncillaryList & outPkts)		{return SetFromDeviceAncBuffers(inF1, inF2, outPkts);}	///< @deprecated	Use SetFromDeviceAncBuffers instead.
+#endif	//	!defined(NTV2_DEPRECATE_15_2)
 
 public:	//	INSTANCE METHODS
 	/**
@@ -225,7 +219,7 @@ public:	//	INSTANCE METHODS
 
 
 	/**
-		@name	Transmit to AJA Hardware
+		@name	Transmit to AJA Hardware (Playout)
 	**/
 	///@{
 	/**
@@ -259,40 +253,44 @@ public:	//	INSTANCE METHODS
 																			uint8_t * pOutF2AncData, const uint32_t inF2ByteCountMax);
 
 	/**
-		@brief		Writes my AJAAncillaryData objects into the given buffers for insertion into an SDI data stream
-					in \ref ancgumpformat.
+		@brief		Encodes my AJAAncillaryData packets into the given buffers in the default \ref ancgumpformat .
+					The buffer contents are replaced;  the unused remainder, if any, will be zeroed.
 		@param		F1Buffer			Specifies the buffer memory into which Field 1's anc data will be written.
 		@param		F2Buffer			Specifies the buffer memory into which Field 2's anc data will be written.
 		@param		inIsProgressive		Specify true to designate the output ancillary data stream as progressive; 
 										otherwise, specify false. Defaults to true (is progressive).
 		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
 										Defaults to zero (progressive). For interlaced video, see NTV2SmpteLineNumber::GetLastLine .
-		@note		It's assumed that my packets are already sorted by location.
+		@note		This function has a side-effect of automatically sorting my packets by ascending location before encoding.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						GetSDITransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
-																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0);
+	virtual AJAStatus						GetTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
+															const bool inIsProgressive = true, const uint32_t inF2StartLine = 0);
+
+	virtual inline AJAStatus				GetSDITransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
+																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0)
+																			{return GetTransmitData(F1Buffer, F2Buffer, inIsProgressive, inF2StartLine);}	///< @deprecated	An alias for GetTransmitData
 
 	/**
 		@brief		Writes my AJAAncillaryData objects into the given tall/taller frame buffer having the given raster/format.
 		@param		inFrameBuffer		Specifies the frame buffer memory on the host to modify.
 		@param[in]	inFormatDesc		Describes the frame buffer's raster and pixel format.
-		@note		It's a good idea to call AJAAncillaryList::SortListByLocation before calling this function.
+		@note		Before writing, I automatically sort my packets by location.
 		@return		AJA_STATUS_SUCCESS if successful.
 		@bug		Currently ignores each packet's horizontal offset (assumes AJAAncDataHorizOffset_Anywhere).
 	**/
 	virtual AJAStatus						GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,  const NTV2FormatDescriptor & inFormatDesc);
 
 	/**
-		@brief		Writes my AJAAncillaryData objects into the given buffers as an IP/RTP data structure suitable for
-					insertion into an IP ancillary data stream in \ref ancrtpformat.
+		@brief		Explicitly encodes my AJAAncillaryData packets into the given buffers in \ref ancrtpformat .
+					The buffer contents are replaced;  the unused remainder, if any, will be zeroed.
 		@param		F1Buffer			Specifies the buffer memory into which Field 1's IP/RTP data will be written.
 		@param		F2Buffer			Specifies the buffer memory into which Field 2's IP/RTP data will be written.
 		@param		inIsProgressive		Specify true to designate the output ancillary data stream as progressive; 
 										otherwise, specify false. Defaults to true (is progressive).
 		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
 										Defaults to zero (progressive).
-		@note		It's assumed that my packets are already sorted by location.
+		@note		This function has a side-effect of automatically sorting my packets by ascending location before encoding.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
@@ -301,7 +299,7 @@ public:	//	INSTANCE METHODS
 
 
 	/**
-		@name	Receive from AJA Hardware
+		@name	Receive from AJA Hardware (Ingest)
 	**/
 	///@{
 
@@ -429,6 +427,8 @@ public:	//	INSTANCE METHODS
 
 protected:
 	virtual AJAAncillaryDataType			GetAnalogAncillaryDataType (AJAAncillaryData * pInAncData);
+
+	static bool								BufferHasGUMPData (const NTV2_POINTER & inBuffer);
 
 
 protected:

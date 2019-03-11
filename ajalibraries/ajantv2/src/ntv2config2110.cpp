@@ -1798,27 +1798,25 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
     // protocol version
     sdp << "v=0" << endl;
 
-	if (StreamType(stream) != VIDEO_4K_STREAM)
-	{
-		// username session-id  version network-type address-type address
-		sdp << "o=- ";
+	// username session-id  version network-type address-type address
+	sdp << "o=- ";
 
-		uint64_t t = GetNTPTimestamp();
-		sdp <<  To_String((int)t);
+	uint64_t t = GetNTPTimestamp();
+	sdp <<  To_String((int)t);
 
-		sdp << " 0 IN IP4 ";
+	sdp << " 0 IN IP4 ";
 
-		uint32_t val;
-		if (sfp == SFP_2)
-			mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1, val);
-		else
-			mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0, val);
+	uint32_t val;
+	// o is required but for multi SDP's we will just assume the originator is SFP_1
+	if ((sfp == SFP_2) && (StreamType(stream) != VIDEO_4K_STREAM))
+		mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1, val);
+	else
+		mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0, val);
 
-		struct in_addr addr;
-		addr.s_addr = val;
-		string localIPAddress = inet_ntoa(addr);
-		sdp << localIPAddress << endl;
-	}
+	struct in_addr addr;
+	addr.s_addr = val;
+	string localIPAddress = inet_ntoa(addr);
+	sdp << localIPAddress << endl;
 
     // session name
     sdp << "s=AJA KonaIP 2110" << endl;

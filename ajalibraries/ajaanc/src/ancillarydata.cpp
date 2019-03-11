@@ -80,12 +80,14 @@ void AJAAncillaryData::Init()
 {
 	FreeDataMemory();	// reset all internal data to defaults
 
-	m_DID = 0x00;
-	m_SID = 0x00;
-
-	m_checksum = 0;
-
-	m_coding = AJAAncillaryDataCoding_Digital;
+	m_DID			= 0x00;
+	m_SID			= 0x00;
+	m_checksum		= 0;
+	m_frameID		= 0;
+	m_coding		= AJAAncillaryDataCoding_Digital;
+	m_ancType		= AJAAncillaryDataType_Unknown;
+	m_bufferFmt		= AJAAncillaryBufferFormat_Unknown;
+	m_rcvDataValid	= false;
 
 	m_location.SetDataLink(AJAAncillaryDataLink_A);
 	m_location.SetDataStream(AJAAncillaryDataStream_1);
@@ -93,9 +95,6 @@ void AJAAncillaryData::Init()
 	m_location.SetDataSpace(AJAAncillaryDataSpace_VANC);
 	m_location.SetLineNumber(0);
 	m_location.SetHorizontalOffset(AJAAncillaryDataLocation::AJAAncDataHorizOffset_Default);
-
-	m_ancType	   = AJAAncillaryDataType_Unknown;
-	m_rcvDataValid = false;
 }
 
 
@@ -582,7 +581,8 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
 		m_location.SetDataStream(AJAAncillaryDataStream_1);	//	???	GUMP doesn't tell us the data stream it came from
 		m_location.SetDataChannel(((pInData[1] & 0x20) == 0) ? AJAAncillaryDataChannel_C : AJAAncillaryDataChannel_Y);		// byte 1, bit 5
 		m_location.SetDataSpace(((pInData[1] & 0x10) == 0) ? AJAAncillaryDataSpace_VANC : AJAAncillaryDataSpace_HANC);		// byte 1, bit 4
-		m_location.SetLineNumber(((pInData[1] & 0x0F) << 7) + (pInData[2] & 0x7F));											// byte 1, bits 3:0 + byte 2, bits 6:0
+		m_location.SetLineNumber(uint16_t((pInData[1] & 0x0F) << 7) + uint16_t(pInData[2] & 0x7F));							// byte 1, bits 3:0 + byte 2, bits 6:0
+		SetBufferFormat(AJAAncillaryBufferFormat_SDI);
 		//m_location.SetHorizontalOffset(hOffset);	//	??? GUMP doesn't report the horiz offset of where the packet started in the raster line
 	}
 
@@ -1040,6 +1040,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 	result = SetChecksum(uint8_t(u16s.at(u16s.size()-1)), true /*validate*/);
 	if (AJA_FAILURE(result))
 		{LOGMYERROR("SetChecksum=" << xHEX0N(u16s.at(u16s.size()-1),3) << " failed, calculated=" << xHEX0N(Calculate9BitChecksum(),3));	return result;}
+	SetBufferFormat(AJAAncillaryBufferFormat_RTP);
 	LOGMYDEBUG(AsString(64));
 
 	/*	The Pattern:  (unrolling the above loop):
@@ -1171,6 +1172,16 @@ const string & AJAAncillaryDataCodingToString (const AJAAncillaryDataCoding inVa
 }
 
 
+const string &	AJAAncillaryBufferFormatToString (const AJAAncillaryBufferFormat inValue, const bool inCompact)
+{
+	static const string		gAncBufFmtToStr []	= {"???", "FBVANC", "SDI", "RTP", ""};
+	static const string		gDAncBufFmtToStr []	= {"AJAAncillaryBufferFormat_Unknown", "AJAAncillaryBufferFormat_FBVANC",
+													"AJAAncillaryBufferFormat_SDI", "AJAAncillaryBufferFormat_RTP", ""};
+
+	return IS_VALID_AJAAncillaryBufferFormat (inValue) ? (inCompact ? gAncBufFmtToStr[inValue] : gDAncBufFmtToStr[inValue]) : gEmptyString;
+}
+
+
 const string & AJAAncillaryDataTypeToString (const AJAAncillaryDataType inValue, const bool inCompact)
 {
 	static const string		gAncDataTypeToStr []			= {	"Unknown", "SMPTE 2016-3 AFD", "SMPTE 12-M RP188", "SMPTE 12-M VITC",
@@ -1187,13 +1198,15 @@ const string & AJAAncillaryDataTypeToString (const AJAAncillaryDataType inValue,
 
 ostream & AJAAncillaryData::Print (ostream & inOutStream, const bool inDumpPayload) const
 {
-	inOutStream << "Type:\t\t"	<< AJAAncillaryData::DIDSIDToString(m_DID, m_SID)	<< endl	//	::AJAAncillaryDataTypeToString (GetAncillaryDataType ()) << endl
-				<< "DID:\t\t"	<< xHEX0N(uint32_t(m_DID),2)						<< endl
-				<< "SID:\t\t"	<< xHEX0N(uint32_t(m_SID),2)						<< endl
-				<< "DC:\t\t"	<< DEC(GetDC())										<< endl
-				<< "CS:\t\t"	<< xHEX0N(uint32_t(m_checksum),2)					<< endl
-				<< "Loc:\t\t"	<< m_location										<< endl
-				<< "Coding:\t\t"<< ::AJAAncillaryDataCodingToString(m_coding)		<< endl
+	inOutStream << "Type:\t\t"	<< AJAAncillaryData::DIDSIDToString(m_DID, m_SID)			<< endl
+				<< "DID:\t\t"	<< xHEX0N(uint32_t(m_DID),2)								<< endl
+				<< "SID:\t\t"	<< xHEX0N(uint32_t(m_SID),2)								<< endl
+				<< "DC:\t\t"	<< DEC(GetDC())												<< endl
+				<< "CS:\t\t"	<< xHEX0N(uint32_t(m_checksum),2)							<< endl
+				<< "Loc:\t\t"	<< m_location												<< endl
+				<< "Coding:\t\t"<< ::AJAAncillaryDataCodingToString(m_coding)				<< endl
+				<< "Frame:\t\t"	<< DEC(GetFrameID())										<< endl
+				<< "Format:\t\t"<< ::AJAAncillaryBufferFormatToString(GetBufferFormat())	<< endl
 				<< "Valid:\t\t"	<< (m_rcvDataValid ? "Yes" : "No");
 	if (inDumpPayload)
 		{inOutStream << endl;  DumpPayload (inOutStream);}
@@ -1205,7 +1218,12 @@ string AJAAncillaryData::AsString (const uint16_t inMaxBytes) const
 {
 	ostringstream	oss;
 	oss	<< "[" << ::AJAAncillaryDataCodingToString(GetDataCoding())
-		<< "|" << ::AJAAncillaryDataLocationToString(GetDataLocation()) << "|" << GetDIDSIDPair() << "|CS=" << xHEX0N(uint16_t(GetChecksum()),2) << "|DC=" << DEC(GetDC());
+		<< "|" << ::AJAAncillaryDataLocationToString(GetDataLocation())
+		<< "|" << GetDIDSIDPair() << "|CS=" << xHEX0N(uint16_t(GetChecksum()),2) << "|DC=" << DEC(GetDC());
+	if (m_frameID)
+		oss	<< "|Frm=" << DEC(GetFrameID());
+	if (IS_KNOWN_AJAAncillaryBufferFormat(m_bufferFmt))
+		oss	<< "|Fmt=" << ::AJAAncillaryBufferFormatToString(GetBufferFormat());
 	const string	typeStr	(AJAAncillaryData::DIDSIDToString(m_DID, m_SID));
 	if (!typeStr.empty())
 		oss << "|" << typeStr;
@@ -1656,8 +1674,7 @@ string AJAAncillaryData::DIDSIDToString (const uint8_t inDID, const uint8_t inSI
 					else if (inSID == 0xDD)	return "ARIB STD-B37 Analog Captions";
 					else if (inSID == 0xDC)	return "ARIB STD-B37 Mobile Captions";
 					else if ((inSID & 0xF0) == 0xD0)	return "ARIB STD-B37 ??? Captions";
-					else					return "ARIB STD-B37 ???";
-					break;
+					return "ARIB STD-B37 ???";
 		case 0x60:	if (inSID == 0x60)		return "SMPTE-12M ATC Timecode";
 					break;
 		case 0x61:	if (inSID == 0x01)		return "SMPTE-334 HD CEA-708 CC";
@@ -1713,6 +1730,18 @@ string AJAAncillaryData::DIDSIDToString (const uint8_t inDID, const uint8_t inSI
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //	AJARTPAncPayloadHeader
+
+
+bool AJARTPAncPayloadHeader::BufferStartsWithRTPHeader (const NTV2_POINTER & inBuffer)
+{
+	if (inBuffer.IsNULL())
+		return false;
+	//	Peek in buffer and see if it starts with an RTP header...
+	AJARTPAncPayloadHeader	hdr;
+	if (!hdr.ReadBuffer(inBuffer))
+		return false;
+	return hdr.IsValid();
+}
 
 AJARTPAncPayloadHeader::AJARTPAncPayloadHeader()
 	:	mVBits			(2),		//	Playout: don't care -- hardware sets this

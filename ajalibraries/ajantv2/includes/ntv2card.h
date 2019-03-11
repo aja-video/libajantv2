@@ -613,35 +613,59 @@ public:
 
 	/**
 		@brief		Transfers the contents of the ancillary data buffer(s) from a given frame on the AJA device to the host.
-		@param[in]	inFrameNumber		Specifies the zero-based frame number of the frame to be read from the device.
+		@param[in]	inFrameNumber		Specifies the zero-based frame number of the frame buffer to be read on the device.
+										The actual starting device memory address is predicated on the device's current
+										frame size, which doesn't take into account "quad" or "quad-quad 8K" frames.
+										Callers must carefully calculate this number, taking into account other FrameStores
+										or Channels that may be active, and if they're using "Quad" or "QuadQuad" geometries.
 		@param[out]	outAncF1Buffer		Specifies the host buffer that is to receive the device F1 ancillary data buffer contents.
 		@param[out]	outAncF2Buffer		Optionally specifies the host buffer that is to receive the device F2 ancillary data
 										buffer contents.
+		@param[in]	inChannel			The FrameStore/Channel being used for ingest. Defaults to NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 		@note		This function will block and not return until the transfer has finished or failed.
 		@note		This function uses the values stored in the ::kVRegAncField1Offset and ::kVRegAncField2Offset virtual registers
 					to determine the Anc data boundary locations within each frame buffer in device memory.
+		@note		For <b>capture</b> from IP devices running S2110 firmware, this method will automatically extract <b>VPID</b> and
+					<b>RP188</b> timecode packets from the incoming RTP Anc streams, even if not ::AUTOCIRCULATE_WITH_ANC, or without
+					Anc buffers in the "transferInfo".
 	**/
 	AJA_VIRTUAL bool	DMAReadAnc (	const ULWord	inFrameNumber,
 										NTV2_POINTER &	outAncF1Buffer,
-										NTV2_POINTER &	outAncF2Buffer	= NULL_POINTER);
+										NTV2_POINTER &	outAncF2Buffer	= NULL_POINTER,
+										const NTV2Channel	inChannel	= NTV2_CHANNEL1);
 
 	/**
 		@brief		Transfers the contents of the ancillary data buffer(s) from the host to a given frame on the AJA device.
 		@param[in]	inFrameNumber		Specifies the zero-based frame number of the frame to be read from the device.
+										The actual starting device memory address is predicated on the device's current
+										frame size, which doesn't take into account "quad" or "quad-quad 8K" frames.
+										Callers must carefully calculate this number, taking into account other FrameStores
+										or Channels that may be active, and if they're using "Quad" or "QuadQuad" geometries.
 		@param[in]	inAncF1Buffer		Specifies the host buffer that is to supply the F1 ancillary data buffer content.
 		@param[in]	inAncF2Buffer		Optionally specifies the host buffer that is to supply the F2 ancillary data
 										buffer content.
+		@param[in]	inChannel			The FrameStore/Channel being used for playout. Defaults to NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 		@note		This function will block and not return until the transfer has finished or failed.
 		@note		This function uses the values stored in the ::kVRegAncField1Offset and ::kVRegAncField2Offset virtual registers
 					to determine the Anc data boundary locations within each frame buffer in device memory.
+		@note		For <b>playout</b> to IP devices running S2110 firmware, this method will automatically add <b>VPID</b> and
+					<b>RP188</b> timecode packets into the outgoing RTP Anc streams, even if such packets weren't placed into the
+					given buffers. This default behavior can be overridden or disabled:
+					-	To disable the default <b>VPID</b> insertion, call CNTV2Card::SetSDIOutVPID, passing zeroes for
+						the VPID values.
+					-	To override the default <b>VPID</b> values, insert your own <b>VPID</b> packet(s) into the F1
+						and/or F2 Anc buffers.
+					-	To override the default <b>RP188</b> value(s), insert your own <b>RP188</b> packets into the
+						F1 and/or F2 Anc buffers.
 	**/
-	AJA_VIRTUAL bool	DMAWriteAnc (	const ULWord			inFrameNumber,
-										const NTV2_POINTER &	inAncF1Buffer,
-										const NTV2_POINTER &	inAncF2Buffer	= NULL_POINTER);
+	AJA_VIRTUAL bool	DMAWriteAnc (	const ULWord		inFrameNumber,
+										NTV2_POINTER &		inAncF1Buffer,
+										NTV2_POINTER &		inAncF2Buffer	= NULL_POINTER,
+										const NTV2Channel	inChannel		= NTV2_CHANNEL1);
 
-
+#if !defined(NTV2_DEPRECATE_15_2)
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool	DMAReadAnc (	const ULWord		inFrameNumber,
 																UByte *				pOutAncBuffer,
 																const NTV2FieldID	inFieldID		= NTV2_FIELD0,
@@ -650,6 +674,7 @@ public:
 																const UByte *		pInAncBuffer,
 																const NTV2FieldID	inFieldID		= NTV2_FIELD0,
 																const ULWord		inByteCount		= 2048));	///< @deprecated	Call CNTV2Card::DMAWriteAnc(const ULWord, const NTV2_POINTER &, const NTV2_POINTER &) instead.
+#endif	//	!defined(NTV2_DEPRECATE_15_2)
 	///@}
 
 //
@@ -2411,7 +2436,7 @@ public:
 	/**
 		@brief		Writes the raw RP188 data into the DBB/Low/Hi registers for the given SDI output.
 					These values are latched and sent at the next VBI.
-		@param[in]	inSDIOutput		Specifies the SDI output of interest as an NTV2Channel value.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest as an ::NTV2Channel value.
 		@param[in]	inRP188Data		Specifies the raw RP188 data values to be written.
 		@note		This call will have no effect if the SDI output is in "bypass mode".
 		@see		CNTV2Card::GetRP188Data, CNTV2Card::IsRP188BypassEnabled, CNTV2Card::DisableRP188Bypass, \ref anctimecode
@@ -2420,9 +2445,16 @@ public:
 
 	/**
 		@brief		Reads the raw RP188 data from the DBB/Low/Hi registers for the given SDI input.
-		@param[in]	inSDIInput		Specifies the SDI input of interest, expressed as an NTV2Channel.
+					On newer devices with bi-directional SDI connectors -- see \ref anctimecode for details --
+					if the device is configured for...
+					-	<b>input</b>: answers with the last timecode received at the SDI input (subject to
+						the SDI input's RP188 source filter -- see CNTV2Card::GetRP188SourceFilter);
+					-	<b>output</b>: answers with the timecode that's to be embedded into the SDI output
+						(usually the last timecode written via CNTV2Card::SetRP188Data).
+		@param[in]	inSDIInput		Specifies the SDI input of interest, expressed as an ::NTV2Channel.
+									For bi-directional SDI devices, specifies the SDI connector of interest,
+									which can specify an SDI output.
 		@param[out]	outRP188Data	Receives the raw RP188 data values.
-		@note		The returned timecode is subject to the SDI input's RP188 source filter -- see CNTV2Card::GetRP188SourceFilter.
 		@see		CNTV2Card::SetRP188Data, CNTV2Card::GetRP188SourceFilter, \ref anctimecode
 	**/
 	AJA_VIRTUAL bool	GetRP188Data			(const NTV2Channel inSDIInput,	NTV2_RP188 & outRP188Data);
@@ -3386,7 +3418,7 @@ public:
 					Call CNTV2Card::AutoCirculateGetStatus, and check AUTOCIRCULATE_STATUS::HasAvailableInputFrame.
 		@note		For <b>playout</b>, there should be a free frame buffer on the device to accommodate the new frame being transferred.
 					Call CNTV2Card::AutoCirculateGetStatus, and check AUTOCIRCULATE_STATUS::CanAcceptMoreOutputFrames.
-		@note		For IP devices running S2110 firmware, this method will automatically insert <b>VPID</b> and <b>RP188</b>
+		@note		For <b>playout</b> to IP devices running S2110 firmware, this method will automatically insert <b>VPID</b> and <b>RP188</b>
 					timecode packets into the outgoing RTP Anc streams, even if CNTV2Card::AutoCirculateInitForOutput was called
 					without ::AUTOCIRCULATE_WITH_ANC, or if Anc buffers weren't specified in the ::AUTOCIRCULATE_TRANSFER object.
 					This default behavior can be overridden or disabled:
@@ -3398,6 +3430,9 @@ public:
 					-	To override the default <b>RP188</b> packet(s), be sure CNTV2Card::AutoCirculateInitForOutput was called with
 						::AUTOCIRCULATE_WITH_ANC, and insert your own <b>RP188</b> packets into the ::AUTOCIRCULATE_TRANSFER object's
 						Anc buffers.
+		@note		For <b>capture</b> from IP devices running S2110 firmware, this method will automatically extract <b>VPID</b> and
+					<b>RP188</b> timecode packets from the incoming RTP Anc streams, even if not ::AUTOCIRCULATE_WITH_ANC, or without
+					Anc buffers in the "transferInfo".
 		@see		CNTV2Card::DMAReadFrame, CNTV2Card::DMAWriteFrame, \ref aboutautocirculate
 	**/
 	AJA_VIRTUAL bool	AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & transferInfo);
@@ -3632,7 +3667,7 @@ public:
 		@return		True if successful; otherwise false.
 	*/
 	AJA_VIRTUAL bool		ReadSDIInVPID (const NTV2Channel inSDIInput, ULWord & outValueA, ULWord & outValueB);
-	
+
 	/**
 		@return		True if the SDI VPID link A input status is valid;  otherwise false.
 		@param[in]	inChannel		Specifies the SDI input connector of interest, specified as an ::NTV2Channel, a zero-based index value.
@@ -6327,8 +6362,18 @@ protected:
 	AJA_VIRTUAL bool			IS_CHANNEL_INVALID (const NTV2Channel inChannel) const;
 	AJA_VIRTUAL bool			IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot) const;
 	AJA_VIRTUAL bool			IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot) const;
-	AJA_VIRTUAL bool			S2110AddTimecodesToAncBuffers (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & inOutXferInfo);
 	AJA_VIRTUAL bool			SetWarmBootFirmwareReload(bool enable);
+
+	//	Seamless Anc Playout & Capture
+	//		For AutoCirculate Playout
+	AJA_VIRTUAL bool			S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & inOutXferInfo);
+	//		For Non-AutoCirculate Playout
+	AJA_VIRTUAL bool			S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2_POINTER & ancF1, NTV2_POINTER & ancF2);
+	//		For AutoCirculate Capture
+	AJA_VIRTUAL bool			S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & inOutXferInfo);
+	//		For Non-AutoCirculate Capture
+	AJA_VIRTUAL bool			S2110DeviceAncFromBuffers (const NTV2Channel inChannel, NTV2_POINTER & ancF1, NTV2_POINTER & ancF2);
+	AJA_VIRTUAL bool			WriteSDIInVPID (const NTV2Channel inChannel, const ULWord inValA, const ULWord inValB);
 
 private:
 	// frame buffer sizing helpers

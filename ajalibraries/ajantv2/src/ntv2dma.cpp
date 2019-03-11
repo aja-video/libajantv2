@@ -161,25 +161,28 @@ bool CNTV2Card::DMAWriteAudio (	const NTV2AudioSystem	inAudioSystem,
 }
 
 
+#if !defined(NTV2_DEPRECATE_15_2)
+	bool CNTV2Card::DMAReadAnc (const ULWord		inFrameNumber,
+								UByte *				pOutAncBuffer,
+								const NTV2FieldID	inFieldID,
+								const ULWord		inByteCount)
+	{
+		if (!::NTV2DeviceCanDoCustomAnc (GetDeviceID ()))
+			return false;
+		if (!NTV2_IS_VALID_FIELD(inFieldID))
+			return false;
+	
+		NTV2_POINTER	ancF1Buffer	(inFieldID ? NULL : pOutAncBuffer, inFieldID ? 0 : inByteCount);
+		NTV2_POINTER	ancF2Buffer	(inFieldID ? pOutAncBuffer : NULL, inFieldID ? inByteCount : 0);
+		return DMAReadAnc (inFrameNumber, ancF1Buffer, ancF2Buffer);
+	}
+#endif	//	!defined(NTV2_DEPRECATE_15_2)
+
+
 bool CNTV2Card::DMAReadAnc (const ULWord		inFrameNumber,
-							UByte *				pOutAncBuffer,
-							const NTV2FieldID	inFieldID,
-							const ULWord		inByteCount)
-{
-	if (!::NTV2DeviceCanDoCustomAnc (GetDeviceID ()))
-		return false;
-	if (!NTV2_IS_VALID_FIELD(inFieldID))
-		return false;
-
-	NTV2_POINTER	ancF1Buffer	(inFieldID ? NULL : pOutAncBuffer, inFieldID ? 0 : inByteCount);
-	NTV2_POINTER	ancF2Buffer	(inFieldID ? pOutAncBuffer : NULL, inFieldID ? inByteCount : 0);
-	return DMAReadAnc (inFrameNumber, ancF1Buffer, ancF2Buffer);
-}
-
-
-bool CNTV2Card::DMAReadAnc (const ULWord	inFrameNumber,
-							NTV2_POINTER & 	outAncF1Buffer,
-							NTV2_POINTER & 	outAncF2Buffer)
+							NTV2_POINTER &	 	outAncF1Buffer,
+							NTV2_POINTER &	 	outAncF2Buffer,
+							const NTV2Channel	inChannel)
 {
 	ULWord			F1Offset(0),  F2Offset(0), inByteCount(0), bytesToTransfer(0), byteOffsetToAncData(0);
 	NTV2Framesize	frameSize(NTV2_FRAMESIZE_INVALID);
@@ -216,29 +219,37 @@ bool CNTV2Card::DMAReadAnc (const ULWord	inFrameNumber,
 								reinterpret_cast <ULWord *> (outAncF2Buffer.GetHostPointer()),
 								byteOffsetToAncData, bytesToTransfer, true);
 	}
+	if (result  &&  ::NTV2DeviceCanDo2110(_boardID))
+		//	S2110 Capture:	So that most OEM ingest apps "just work" with S2110 RTP Anc streams, our
+		//					classic SDI Anc data that device firmware normally de-embeds into registers
+		//					e.g. VPID & RP188 -- the SDK here will automatically try to do the same.
+		S2110DeviceAncFromBuffers (inChannel, outAncF1Buffer, outAncF2Buffer);
 	return result;
 }
 
 
+#if !defined(NTV2_DEPRECATE_15_2)
+	bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
+								const UByte *		pInAncBuffer,
+								const NTV2FieldID	inFieldID,
+								const ULWord		inByteCount)
+	{
+		if (!::NTV2DeviceCanDoCustomAnc (GetDeviceID ()))
+			return false;
+		if (!NTV2_IS_VALID_FIELD(inFieldID))
+			return false;
+	
+		NTV2_POINTER	ancF1Buffer	(inFieldID ? NULL : pInAncBuffer, inFieldID ? 0 : inByteCount);
+		NTV2_POINTER	ancF2Buffer	(inFieldID ? pInAncBuffer : NULL, inFieldID ? inByteCount : 0);
+		return DMAWriteAnc (inFrameNumber, ancF1Buffer, ancF2Buffer);
+	}
+#endif	//	!defined(NTV2_DEPRECATE_15_2)
+
+
 bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
-							const UByte *		pInAncBuffer,
-							const NTV2FieldID	inFieldID,
-							const ULWord		inByteCount)
-{
-	if (!::NTV2DeviceCanDoCustomAnc (GetDeviceID ()))
-		return false;
-	if (!NTV2_IS_VALID_FIELD(inFieldID))
-		return false;
-
-	const NTV2_POINTER	ancF1Buffer	(inFieldID ? NULL : pInAncBuffer, inFieldID ? 0 : inByteCount);
-	const NTV2_POINTER	ancF2Buffer	(inFieldID ? pInAncBuffer : NULL, inFieldID ? inByteCount : 0);
-	return DMAWriteAnc (inFrameNumber, ancF1Buffer, ancF2Buffer);
-}
-
-
-bool CNTV2Card::DMAWriteAnc (const ULWord			inFrameNumber,
-							const NTV2_POINTER &	inAncF1Buffer,
-							const NTV2_POINTER &	inAncF2Buffer)
+							NTV2_POINTER &		inAncF1Buffer,
+							NTV2_POINTER &		inAncF2Buffer,
+							const NTV2Channel	inChannel)
 {
 	ULWord			F1Offset(0),  F2Offset(0), inByteCount(0), bytesToTransfer(0), byteOffsetToAncData(0);
 	NTV2Framesize	frameSize(NTV2_FRAMESIZE_INVALID);
@@ -255,6 +266,22 @@ bool CNTV2Card::DMAWriteAnc (const ULWord			inFrameNumber,
 		return false;
 
 	const ULWord	frameSizeInBytes(::NTV2FramesizeToByteCount(frameSize));
+
+	//	Seamless Anc playout...
+	bool	tmpLocalRP188F1AncBuffer(false), tmpLocalRP188F2AncBuffer(false);
+	if (::NTV2DeviceCanDo2110(_boardID))
+		//	S2110 Playout:	So that most Retail & OEM playout apps "just work" with S2110 RTP Anc streams,
+		//					our classic SDI Anc data that device firmware normally embeds into SDI output
+		//					as derived from registers -- e.g. VPID & RP188 -- the SDK here will automatically
+		//					insert these packets into the outgoing RTP streams, even if the client didn't
+		//					provide Anc buffers. (But they MUST call DMAWriteAnc for this to work!)
+		{
+			if (inAncF1Buffer.IsNULL())
+				tmpLocalRP188F1AncBuffer = inAncF1Buffer.Allocate(2048);
+			if (inAncF2Buffer.IsNULL())
+				tmpLocalRP188F2AncBuffer = inAncF2Buffer.Allocate(2048);
+			S2110DeviceAncToBuffers (inChannel, inAncF1Buffer, inAncF2Buffer);
+		}
 
 	//	IMPORTANT ASSUMPTION:	F1 data is first (at lower address) in the frame buffer...!
 	inByteCount      =  inAncF1Buffer.IsNULL()  ?  0  :  inAncF1Buffer.GetByteCount();
@@ -275,6 +302,9 @@ bool CNTV2Card::DMAWriteAnc (const ULWord			inFrameNumber,
 								reinterpret_cast <ULWord *> (inAncF2Buffer.GetHostPointer()),
 								byteOffsetToAncData, bytesToTransfer, true);
 	}
+
+	if (tmpLocalRP188F1AncBuffer)	inAncF1Buffer.Deallocate();
+	if (tmpLocalRP188F2AncBuffer)	inAncF2Buffer.Deallocate();
 	return result;
 }
 

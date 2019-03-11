@@ -7235,12 +7235,21 @@ typedef enum
 				bool		GetInputTimeCode (NTV2_RP188 & outTimeCode, const NTV2TCIndex inTCIndex = NTV2_TCINDEX_SDI1) const;
 
 				/**
-				@brief		Answers with the NTV2SDIInputStatus for the given SDI input spigot.
-				@param[out]	outStatus			Receives the NTV2SDIInputStatus for the given SDI input.
-				@param[in]	inSDIInputIndex0	Specifies the zero-based index of the SDI input of interest.
-				@return		True if successful;  otherwise false.
+					@brief		Answers with the NTV2SDIInputStatus for the given SDI input spigot.
+					@param[out]	outStatus			Receives the NTV2SDIInputStatus for the given SDI input.
+					@param[in]	inSDIInputIndex0	Specifies the zero-based index of the SDI input of interest.
+					@return		True if successful;  otherwise false.
 				**/
 				bool		GetSDIInputStatus (NTV2SDIInputStatus & outStatus, const UWord inSDIInputIndex0 = 0) const;
+
+				/**
+					@brief		Sets one of my input timecodes.
+					@param[in]	inTCNdx		Specifies which timecode (slot) to set.
+					@param[in]	inTimecode	Specifies the timecode data to write.
+					@return		True if successful;  otherwise false.
+					@note		This function is provided for internal SDK use only.
+				**/
+				bool		SetInputTimecode (const NTV2TCIndex inTCNdx, const NTV2_RP188 & inTimecode);
 
 				/**
 					@param[in]	inRHS		The FRAME_STAMP to be assigned (copied) into me.
