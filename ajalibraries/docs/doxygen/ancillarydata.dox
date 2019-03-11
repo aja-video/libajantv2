@@ -367,7 +367,7 @@ The data in the ancillary data buffer matches the RTP specification:
 @image	html	fbf-rtp.png
 
 For <b>Capture</b>:
--	Clients can parse the data themselves.
+-	Clients can parse the data themselves, using the above specification.
 -	AJAAncillaryList::SetFromDeviceAncBuffers can be called to transform the buffer contents into an ::AJAAncillaryList
 	containing one ::AJAAncillaryData instance per packet.
 
@@ -376,7 +376,12 @@ For <b>Playout</b>:
 	-	Clients that generate the Anc data buffer contents themselves must set the <b>Sequence Number</b> field in the first
 		longword of the RTP packet header to the total RTP packet bytecount, since AJA IP devices running 2110 firmware
 		(\ref konaip and \ref ioip) expect it there.
--	AJAAncillaryList::GetIPTransmitData can be called to fill the Anc data buffer from an ::AJAAncillaryList.
+-	AJAAncillaryList::GetTransmitData can be called to fill the host Anc data buffers from an ::AJAAncillaryList.
+	-	If using \ref aboutautocirculate , these buffers can be transferred to the AJA device by first calling
+		AUTOCIRCULATE_TRANSFER::SetAncBuffers , then calling CNTV2Card::AutoCirculateTransfer.
+	-	If not using AutoCirculate, the buffers can be transferred to the AJA device using CNTV2Card::DMAWriteAnc.
+	-	Either way, the \ref ancgumpformat will be automatically converted to \ref ancrtpformat expected by the device
+		before the DMA transfer.
 
 <hr size="50px">
 
@@ -410,15 +415,15 @@ However, dual-link RGB video to/from RGB frame buffers (directly from/to the SDI
 		Call CNTV2Card::SetMixerVancOutputFromForeground to change the setting.
 
 For <b>Capture</b>:
--	Clients can parse the frame buffer lines themselves. The ::CNTV2SMPTEAncData class in the \ref ajacc has some functions
+-	Clients can parse the frame buffer video lines themselves. The ::CNTV2SMPTEAncData class in the \ref ajacc has some functions
 	(e.g., CNTV2SMPTEAncData::FindAnc) to help with the parsing.
--	Starting in SDK 14.1, AJAAncillaryList::SetFromVANCData can be called to transform the VANC region into an ::AJAAncillaryList
+-	AJAAncillaryList::SetFromVANCData (SDKs 14.1 and later) can be called to transform the VANC region into an ::AJAAncillaryList
 	containing one ::AJAAncillaryData instance per packet.
 
 For <b>Playout</b>:
 -	Clients can write the frame buffer lines themselves. The ::CNTV2SMPTEAncData class in the \ref ajacc has some functions
 	(e.g., CNTV2SMPTEAncData::InsertAnc) to help with this.
--	Starting in SDK 14.1, given an ::AJAAncillaryList of packets, calling its AJAAncillaryList::GetVANCTransmitData method will
+-	Given an ::AJAAncillaryList of packets, calling its AJAAncillaryList::GetVANCTransmitData method (SDKs 14.1 and later) will
 	write the packets into the frame buffer’s VANC lines.
 
 The spreadsheets that follow show, in detail for each video format, which lines contain VANC, and which ones contain video data.

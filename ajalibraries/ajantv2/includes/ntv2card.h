@@ -2436,7 +2436,7 @@ public:
 	/**
 		@brief		Writes the raw RP188 data into the DBB/Low/Hi registers for the given SDI output.
 					These values are latched and sent at the next VBI.
-		@param[in]	inSDIOutput		Specifies the SDI output of interest as an NTV2Channel value.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest as an ::NTV2Channel value.
 		@param[in]	inRP188Data		Specifies the raw RP188 data values to be written.
 		@note		This call will have no effect if the SDI output is in "bypass mode".
 		@see		CNTV2Card::GetRP188Data, CNTV2Card::IsRP188BypassEnabled, CNTV2Card::DisableRP188Bypass, \ref anctimecode
@@ -2451,8 +2451,8 @@ public:
 						the SDI input's RP188 source filter -- see CNTV2Card::GetRP188SourceFilter);
 					-	<b>output</b>: answers with the timecode that's to be embedded into the SDI output
 						(usually the last timecode written via CNTV2Card::SetRP188Data).
-		@param[in]	inSDIInput		Specifies the SDI input of interest, expressed as an NTV2Channel.
-									For bi-direction SDI devices, specifies the SDI connector of interest,
+		@param[in]	inSDIInput		Specifies the SDI input of interest, expressed as an ::NTV2Channel.
+									For bi-directional SDI devices, specifies the SDI connector of interest,
 									which can specify an SDI output.
 		@param[out]	outRP188Data	Receives the raw RP188 data values.
 		@see		CNTV2Card::SetRP188Data, CNTV2Card::GetRP188SourceFilter, \ref anctimecode
