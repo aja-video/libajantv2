@@ -24,7 +24,7 @@
  *	Assert if _expression_ is false.  
  *	@hideinitializer
  *
- *	In Windows, this macro will specify the file name and line number of the assert.
+ *	This macro will provide the file name and line number of the assert.
  *
  *  @param[in]	_expression_	Boolean expression that should be true.
  */
@@ -33,11 +33,92 @@
  *	Report debug messages to active destinations.  
  *	@hideinitializer
  *
- *	In Windows, this macro will specify the file name and line number of the report.
+ *	This macro will provide the file name and line number of the reporting module.
  *  
  *  @param[in]	_index_		Send message to this destination index.
- *  @param[in]	_severity_	Severity (::AJA_DEBUG_SEVERITY) of the message to report.
+ *  @param[in]	_severity_	Severity (::AJADebugSeverity) of the message to report.
  *  @param[in]	_format_	Format parameters passed to vsprintf. The first is the format itself.
+ */
+
+/** @def AJA_sREPORT(_index_, _severity_, _xpr_)
+ *	Report a message to active destinations using the given std::ostream expression.
+ *	@hideinitializer
+ *
+ *	This macro will provide the file name and line number of the reporting module.
+ *
+ *  @param[in]	_index_		Send message to this destination index.
+ *  @param[in]	_severity_	Severity (::AJADebugSeverity) of the message to report.
+ *  @param[in]	_xpr_		A std::ostream expression (e.g. <tt>"Foo" << std::hex << 3500<//tt>.
+ */
+
+/** @def AJA_sEMERGENCY(_index_, _xpr_)
+ *	Reports a ::AJA_DebugSeverity_Emergency message to active destinations using the given std::ostream expression.
+ *	@hideinitializer
+ *
+ *	This macro will provide the file name and line number of the reporting module.
+ *
+ *  @param[in]	_index_		Send ::AJA_DebugSeverity_Emergency message to this destination index.
+ *  @param[in]	_xpr_		A std::ostream expression.
+ */
+
+/** @def AJA_sALERT(_index_, _xpr_)
+ *	Reports a ::AJA_DebugSeverity_Alert message to active destinations using the given std::ostream expression.
+ *	@hideinitializer
+ *
+ *	This macro will provide the file name and line number of the reporting module.
+ *
+ *  @param[in]	_index_		Send ::AJA_DebugSeverity_Alert message to this destination index.
+ *  @param[in]	_xpr_		A std::ostream expression.
+ */
+
+/** @def AJA_sERROR(_index_, _xpr_)
+ *	Reports a ::AJA_DebugSeverity_Error message to active destinations using the given std::ostream expression.
+ *	@hideinitializer
+ *
+ *	This macro will provide the file name and line number of the reporting module.
+ *
+ *  @param[in]	_index_		Send ::AJA_DebugSeverity_Error message to this destination index.
+ *  @param[in]	_xpr_		A std::ostream expression.
+ */
+
+/** @def AJA_sWARNING(_index_, _xpr_)
+ *	Reports a ::AJA_DebugSeverity_Warning message to active destinations using the given std::ostream expression.
+ *	@hideinitializer
+ *
+ *	This macro will provide the file name and line number of the reporting module.
+ *
+ *  @param[in]	_index_		Send ::AJA_DebugSeverity_Warning message to this destination index.
+ *  @param[in]	_xpr_		A std::ostream expression.
+ */
+
+/** @def AJA_sNOTICE(_index_, _xpr_)
+ *	Reports a ::AJA_DebugSeverity_Notice message to active destinations using the given std::ostream expression.
+ *	@hideinitializer
+ *
+ *	This macro will provide the file name and line number of the reporting module.
+ *
+ *  @param[in]	_index_		Send ::AJA_DebugSeverity_Notice message to this destination index.
+ *  @param[in]	_xpr_		A std::ostream expression.
+ */
+
+/** @def AJA_sINFO(_index_, _xpr_)
+ *	Reports a ::AJA_DebugSeverity_Info message to active destinations using the given std::ostream expression.
+ *	@hideinitializer
+ *
+ *	This macro will provide the file name and line number of the reporting module.
+ *
+ *  @param[in]	_index_		Send ::AJA_DebugSeverity_Info message to this destination index.
+ *  @param[in]	_xpr_		A std::ostream expression.
+ */
+
+/** @def AJA_sDEBUG(_index_, _xpr_)
+ *	Reports a ::AJA_DebugSeverity_Debug message to active destinations using the given std::ostream expression.
+ *	@hideinitializer
+ *
+ *	This macro will provide the file name and line number of the reporting module.
+ *
+ *  @param[in]	_index_		Send ::AJA_DebugSeverity_Debug message to this destination index.
+ *  @param[in]	_xpr_		A std::ostream expression.
  */
 
 /**	@} */
