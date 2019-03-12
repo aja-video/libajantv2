@@ -221,7 +221,7 @@ NTV2DeviceHasBiDirectionalAnalogAudio
 NTV2DeviceHasGenlockv3
 NTV2DeviceCanReportFailSafeLoaded
 NTV2DeviceCanReportRunningFirmwareDate
-
+NTV2DeviceCanDoWarmBootFPGA
 
 // NTV2ConversionModes
 

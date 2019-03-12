@@ -325,6 +325,9 @@ bool CNTV2Card::IsFailSafeBitfileLoaded (bool & outIsSafeBoot)
 bool CNTV2Card::CanWarmBootFPGA (bool & outCanWarmBoot)
 {
 	outCanWarmBoot = false;	//	Definitely can't
+	if (!::NTV2DeviceCanDoWarmBootFPGA(_boardID))
+		return false;
+
 	ULWord	version(0);
 	if (!ReadRegister(kRegCPLDVersion, version, BIT(0)|BIT(1)))
 		return false;	//	Fail

@@ -177,7 +177,7 @@ NTV2DeviceCanChangeEmbeddedAudioClock
 NTV2DeviceHasGenlockv3
 NTV2DeviceCanDo12gRouting
 NTV2DeviceCanReportFailSafeLoaded
-
+NTV2DeviceCanDoWarmBootFPGA
 
 // NTV2ConversionModes
 
