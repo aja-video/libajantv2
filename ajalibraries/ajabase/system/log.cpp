@@ -82,22 +82,24 @@ AJALog::~AJALog()
 
 AJATimeLog::AJATimeLog()
 {
-    _tag[0] = 0;
-    _unit = 1;
+    _tag = "";
+    _unit = AJA_DebugUnit_Critical;
     Reset();
 }
 
-// create with name tag
+
 AJATimeLog::AJATimeLog(const char* tag, int unit)
 {	
 	_unit = unit;
-#if defined(AJA_MAC)
-    strncpy(_tag, tag, TAG_SIZE);
-#else
-    AJA_UNUSED(tag);
-    _tag[0] = 0;
-#endif
-    
+	_tag = tag;
+    Reset();
+}
+
+
+AJATimeLog::AJATimeLog(const std::string& tag, int unit)
+{	
+	_unit = unit;
+	_tag = tag;
     Reset();
 }
 
@@ -117,7 +119,14 @@ void AJATimeLog::Reset()
 // reset time
 void AJATimeLog::PrintReset()
 {
-	AJA_LOG("%s - Reset\n", _tag);
+    #if defined(AJA_DEBUG) && (AJA_LOGTYPE!=2)
+		AJA_LOG("%s - Reset\n", _tag.c_str());
+	#else
+		if (AJADebug::IsActive(_unit))
+			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
+				"%s - Reset\n", _tag.c_str());
+	#endif
+	
 	Reset();
 }
 
@@ -130,13 +139,10 @@ void AJATimeLog::PrintDelta(bool bReset)
 		AJA_LOG("%s = %lld\n", _tag, currTime-_time));
 	#else
 		if (AJADebug::IsActive(_unit))
-		{
 			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
-				"%s = %lld\n", _tag, currTime-_time);
-		}
+				"%s = %lld\n", _tag.c_str(), currTime-_time);
 	#endif
-    
-    
+        
     if (bReset)
         _time = currTime;
 }
@@ -157,18 +163,14 @@ int32_t AJATimeLog::GetDelta(bool bReset)
 // print dela time in micro seconds, use additional tag
 void AJATimeLog::PrintDelta(const char* addTag, bool bReset)
 {
-    AJA_UNUSED(addTag);
-
     uint64_t currTime = AJATime::GetSystemMicroseconds();
     
     #if defined(AJA_DEBUG) && (AJA_LOGTYPE!=2)
 		AJA_LOG("%s-%s = %lld\n", _tag, addTag, currTime-_time);
 	#else
 		if (AJADebug::IsActive(_unit))
-		{
 			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
-				"%s-%s = %lld\n", _tag, addTag, currTime-_time);
-		}
+				"%s-%s = %lld\n", _tag.c_str(), addTag, currTime-_time);
 	#endif
 
     if (bReset)

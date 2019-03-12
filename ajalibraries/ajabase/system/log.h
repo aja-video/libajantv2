@@ -122,6 +122,7 @@ class AJA_EXPORT AJATimeLog
 public:
 	AJATimeLog();
 	AJATimeLog(const char* tag, int unit=AJA_DebugUnit_Critical);
+	AJATimeLog(const std::string& tag, int unit=AJA_DebugUnit_Critical);
 	virtual ~AJATimeLog();
     
     /**
@@ -180,12 +181,20 @@ public:
 			if (bEnable)
 				PrintDelta(addedTag, bReset);
 		}
+		
+	inline int GetUnit() {return _unit; }
+	inline void SetUnit(int unit)
+		{ _unit = unit; }
+		
+	inline std::string GetTag() {return _tag;}
+	inline void SetTag(const char* tag)
+		{ _tag = tag; }
 
 	
 protected:
-    char        _tag[TAG_SIZE];
-    int         _unit;
-    uint64_t    _time;
+    std::string 	_tag;
+    int         	_unit;
+    uint64_t    	_time;
 };
 
 
