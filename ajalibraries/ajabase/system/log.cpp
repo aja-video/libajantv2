@@ -52,9 +52,6 @@ AJALog::AJALog()
             #if (AJA_LOGTYPE==2)
                 AJADebug::Open();
 
-            #elif (AJA_LOGTYPE==9999)
-                CreateFireLogUserClient();
-
             #endif
         
         #elif defined(AJA_LINUX)
@@ -86,11 +83,12 @@ AJALog::~AJALog()
 AJATimeLog::AJATimeLog()
 {
     mTag[0] = 0;
+    unit = 1;
     Reset();
 }
 
 // create with name tag
-AJATimeLog::AJATimeLog(const char* tag)
+AJATimeLog::AJATimeLog(const char* tag, int unit)
 {
 #if defined(AJA_MAC)
     strncpy(mTag, tag, TAG_SIZE);
@@ -151,7 +149,13 @@ void AJATimeLog::PrintDelta(const char* addTag, bool bReset)
     AJA_UNUSED(addTag);
 
     uint64_t currTime = AJATime::GetSystemMicroseconds();
-    AJA_LOG("%s-%s = %lld\n", mTag, addTag, currTime-mTime);
+    
+    #if defined(AJA_DEBUG)
+    	AJA_LOG("%s-%s = %lld\n", mTag, addTag, currTime-mTime);
+	#else
+		if (AJADebug::IsActive(unit)
+	#endif
+	
     
     if (bReset)
         mTime = currTime;

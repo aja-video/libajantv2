@@ -68,11 +68,6 @@ extern void __cdecl log_odprintf(const char *format, ...);
         #elif (AJA_LOGTYPE==2)
             #define AJA_LOG(_format_...) AJA_REPORT(AJA_DebugUnit_Critical, AJA_DebugSeverity_Info, _format_)
 
-        #elif (AJA_LOGTYPE==9999)	//	'9999' is an attempt to make it obvious when FireLog is being used, to prevent downstream build failures on MacOS
-			//	If this #include fails at compile time, then FireLog isn't installed:
-			#include "/System/Library/Frameworks/FireLog.framework/Headers/FireLog.h"
-			//	FireLog should not be used in production (committed) code!!
-			#define AJA_LOG(_format_...)	FireLog (_format_)
 		#endif
 			
 	#else
@@ -126,7 +121,7 @@ class AJA_EXPORT AJATimeLog
 {
 public:
 	AJATimeLog();
-	AJATimeLog(const char* tag);
+	AJATimeLog(const char* tag, int unit=AJA_DebugUnit_Critical);
 	virtual ~AJATimeLog();
     
     /**
@@ -189,6 +184,7 @@ public:
 	
 protected:
     char        mTag[TAG_SIZE];
+    int         unit;
     uint64_t    mTime;
 };
 
