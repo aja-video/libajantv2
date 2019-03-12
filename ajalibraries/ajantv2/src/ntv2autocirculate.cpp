@@ -1299,8 +1299,102 @@ bool CNTV2Card::S2110DeviceAncFromBuffers (const NTV2Channel inChannel, NTV2_POI
 {
 	//	IP 2110 Capture:	Extract timecode(s) and put into RP188 registers
 	//						Extract VPID and put into SDIIn VPID registers
-	//////////  TBD  ///////////
-	return false;
+	NTV2FrameRate		ntv2Rate		(NTV2_FRAMERATE_UNKNOWN);
+	bool				result			(GetFrameRate(ntv2Rate, inChannel));
+	bool				isProgressive	(false);
+	NTV2Standard		standard		(NTV2_STANDARD_INVALID);
+	AJAAncillaryData *	pPkt			(NULL);
+	uint32_t			vpidA(0), vpidB(0);
+	AJAAncillaryList	pkts;
+
+	if (!result)
+		return false;	//	Can't get frame rate
+	if (!NTV2_IS_VALID_NTV2FrameRate(ntv2Rate))
+		return false;	//	Bad frame rate
+	if (!IsProgressiveStandard(isProgressive, inChannel))
+		return false;	//	Can't get isProgressive
+	if (!GetStandard(standard, inChannel))
+		return false;	//	Can't get standard
+	if (!ancF1.IsNULL() || !ancF2.IsNULL())
+		if (AJA_FAILURE(AJAAncillaryList::SetFromDeviceAncBuffers(ancF1, ancF2, pkts)))
+			return false;	//	Packet import failed
+
+	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(standard));
+	const uint32_t				F2StartLine			(isProgressive ? 0 : smpteLineNumInfo.GetLastLine());	//	F2 VANC starts past last line of F1
+
+	//	Look for ATC and VITC...
+	for (uint32_t ndx(0);  ndx < pkts.CountAncillaryData();  ndx++)
+	{
+		pPkt = pkts.GetAncillaryDataAtIndex(ndx);
+		if (pPkt->GetDID() == 0x41  &&  pPkt->GetSID() == 0x01)	//	VPID?
+		{	//	VPID!
+			if (pPkt->GetDC() != 4)
+				continue;	//	Skip . . . expected DC to be 4
+			const uint32_t* pULWord (reinterpret_cast<const uint32_t*>(pPkt->GetPayloadData()));
+			NTV2_ASSERT(pULWord);
+			if (!pPkt->GetDataLocation().IsHanc())
+				continue;	//	Skip . . . expected IsHANC
+			if (pPkt->GetDataLocation().GetLineNumber() > uint16_t(F2StartLine))
+				vpidB = *pULWord;
+			else
+				vpidA = *pULWord;
+			continue;	//	Done . . . on to next packet
+		}
+
+		const AJAAncillaryDataType	ancType  (pPkt->GetAncillaryDataType());
+		if (ancType != AJAAncillaryDataType_Timecode_ATC)
+			continue;	//	Not timecode . . . skip
+		//	** MrBill **	What about AJAAncillaryDataType_Timecode_VITC??
+
+		//	Got ATC packet!
+		AJAAncillaryData_Timecode_ATC *	pATCPkt(reinterpret_cast<AJAAncillaryData_Timecode_ATC*>(pPkt));
+		if (!pATCPkt)
+			continue;
+
+		AJAAncillaryData_Timecode_ATC_DBB1PayloadType	payloadType (AJAAncillaryData_Timecode_ATC_DBB1PayloadType_Unknown);
+		pATCPkt->GetDBB1PayloadType(payloadType);
+		NTV2TCIndex tcNdx (NTV2_TCINDEX_INVALID);
+		switch(payloadType)
+		{
+			case AJAAncillaryData_Timecode_ATC_DBB1PayloadType_LTC:
+				tcNdx = ::NTV2ChannelToTimecodeIndex (inChannel, /*inEmbeddedLTC*/true, /*inIsF2*/false);
+				break;
+			case AJAAncillaryData_Timecode_ATC_DBB1PayloadType_VITC1:
+				tcNdx = ::NTV2ChannelToTimecodeIndex (inChannel, /*inEmbeddedLTC*/false, /*inIsF2*/false);
+				break;
+			case AJAAncillaryData_Timecode_ATC_DBB1PayloadType_VITC2:
+				tcNdx = ::NTV2ChannelToTimecodeIndex (inChannel, /*inEmbeddedLTC*/false, /*inIsF2*/true);
+				break;
+			default:
+				break;
+		}
+		if (!NTV2_IS_VALID_TIMECODE_INDEX(tcNdx))
+			continue;
+
+		NTV2_RP188	ntv2rp188;	//	<==	This is what we want to get from pATCPkt
+		AJATimeCode	ajaTC;		//	We can get an AJATimeCode from it via GetTimecode
+		const AJA_FrameRate	ajaRate	(sNTV2Rate2AJARate[ntv2Rate]);
+		AJATimeBase			ajaTB	(ajaRate);
+		const bool			isDF	(ajaTB.IsNonIntegralRatio());
+		pATCPkt->GetTimecode(ajaTC, ajaTB);
+								//	There is an AJATimeCode function to get an NTV2_RP188:
+								//	ajaTC.QueryRP188(ntv2rp188.fDBB, ntv2rp188.fLo, ntv2rp188.fHi, ajaTB, isDF);
+								//	But it's not implemented!  D'OH!!
+								//	Let the hacking begin...
+		string	tcStr;
+		ajaTC.QueryString(tcStr, ajaTB, isDF);
+		CRP188 rp188(tcStr, sNTV2Rate2TCFormat[ntv2Rate]);
+		rp188.SetDropFrame(isDF);
+		rp188.GetRP188Reg(ntv2rp188);
+		//	Finally, poke the RP188 timecode into the SDIIn timecode registers...
+		SetRP188Data(inChannel, ntv2rp188);
+	}	//	for each anc packet
+	if (vpidA || vpidB)
+		WriteSDIInVPID(inChannel, vpidA, vpidB);
+
+	//	Normalize to SDI/GUMP...
+	result = AJA_SUCCESS(pkts.GetTransmitData(ancF1, ancF2, isProgressive, F2StartLine));
+	return result;
 }	//	S2110DeviceAncFromBuffers
 
 
