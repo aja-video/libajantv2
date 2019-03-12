@@ -82,19 +82,20 @@ AJALog::~AJALog()
 
 AJATimeLog::AJATimeLog()
 {
-    mTag[0] = 0;
-    unit = 1;
+    _tag[0] = 0;
+    _unit = 1;
     Reset();
 }
 
 // create with name tag
 AJATimeLog::AJATimeLog(const char* tag, int unit)
-{	AJA_UNUSED(unit);
+{	
+	_unit = unit;
 #if defined(AJA_MAC)
-    strncpy(mTag, tag, TAG_SIZE);
+    strncpy(_tag, tag, TAG_SIZE);
 #else
     AJA_UNUSED(tag);
-    mTag[0] = 0;
+    _tag[0] = 0;
 #endif
     
     Reset();
@@ -109,14 +110,14 @@ AJATimeLog::~AJATimeLog()
 // reset time
 void AJATimeLog::Reset()
 {
-    mTime = AJATime::GetSystemMicroseconds();
+    _time = AJATime::GetSystemMicroseconds();
 }
 
 
 // reset time
 void AJATimeLog::PrintReset()
 {
-	AJA_LOG("%s - Reset\n", mTag);
+	AJA_LOG("%s - Reset\n", _tag);
 	Reset();
 }
 
@@ -124,10 +125,20 @@ void AJATimeLog::PrintReset()
 void AJATimeLog::PrintDelta(bool bReset)
 {
     uint64_t currTime = AJATime::GetSystemMicroseconds();
-    AJA_LOG("%s = %lld\n", mTag, currTime-mTime);
+    
+    #if defined(AJA_DEBUG) && (AJA_LOGTYPE!=2)
+		AJA_LOG("%s = %lld\n", _tag, currTime-_time));
+	#else
+		if (AJADebug::IsActive(_unit))
+		{
+			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
+				"%s = %lld\n", _tag, currTime-_time);
+		}
+	#endif
+    
     
     if (bReset)
-        mTime = currTime;
+        _time = currTime;
 }
 
 
@@ -135,9 +146,9 @@ void AJATimeLog::PrintDelta(bool bReset)
 int32_t AJATimeLog::GetDelta(bool bReset)
 {
     uint64_t currTime = AJATime::GetSystemMicroseconds();
-	int32_t delta = (uint32_t)(currTime - mTime);
+	int32_t delta = (uint32_t)(currTime - _time);
     if (bReset)
-        mTime = currTime;
+        _time = currTime;
 		
 	return delta;
 }
@@ -150,12 +161,16 @@ void AJATimeLog::PrintDelta(const char* addTag, bool bReset)
 
     uint64_t currTime = AJATime::GetSystemMicroseconds();
     
-    #if defined(AJA_DEBUG)
-    	AJA_LOG("%s-%s = %lld\n", mTag, addTag, currTime-mTime);
+    #if defined(AJA_DEBUG) && (AJA_LOGTYPE!=2)
+		AJA_LOG("%s-%s = %lld\n", _tag, addTag, currTime-_time);
 	#else
-		if (AJADebug::IsActive(unit))
+		if (AJADebug::IsActive(_unit))
+		{
+			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
+				"%s-%s = %lld\n", _tag, addTag, currTime-_time);
+		}
 	#endif
 
     if (bReset)
-        mTime = currTime;
+        _time = currTime;
 }

@@ -19,7 +19,7 @@ extern void __cdecl log_odprintf(const char *format, ...);
 
 // use this the select alternate platform specific loggers, 0 is used for no-log
 #ifndef AJA_LOGTYPE
-#define AJA_LOGTYPE    1
+#define AJA_LOGTYPE    2
 #endif
 
 // define AJA_LOG here
@@ -183,9 +183,9 @@ public:
 
 	
 protected:
-    char        mTag[TAG_SIZE];
-    int         unit;
-    uint64_t    mTime;
+    char        _tag[TAG_SIZE];
+    int         _unit;
+    uint64_t    _time;
 };
 
 
