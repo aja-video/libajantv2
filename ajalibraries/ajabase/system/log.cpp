@@ -89,7 +89,7 @@ AJATimeLog::AJATimeLog()
 
 // create with name tag
 AJATimeLog::AJATimeLog(const char* tag, int unit)
-{
+{	AJA_UNUSED(unit);
 #if defined(AJA_MAC)
     strncpy(mTag, tag, TAG_SIZE);
 #else
@@ -153,10 +153,9 @@ void AJATimeLog::PrintDelta(const char* addTag, bool bReset)
     #if defined(AJA_DEBUG)
     	AJA_LOG("%s-%s = %lld\n", mTag, addTag, currTime-mTime);
 	#else
-		if (AJADebug::IsActive(unit)
+		if (AJADebug::IsActive(unit))
 	#endif
-	
-    
+
     if (bReset)
         mTime = currTime;
 }
