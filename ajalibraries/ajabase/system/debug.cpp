@@ -150,6 +150,14 @@ AJADebug::Open(bool incrementRefCount)
             addDebugGroupToLabelVector(AJA_DebugUnit_DriverInterface);
             addDebugGroupToLabelVector(AJA_DebugUnit_AutoCirculate);
             addDebugGroupToLabelVector(AJA_DebugUnit_NMOS);
+            addDebugGroupToLabelVector(AJA_DebugUnit_App_DiskRead);
+            addDebugGroupToLabelVector(AJA_DebugUnit_App_DiskWrite);
+            addDebugGroupToLabelVector(AJA_DebugUnit_App_Decode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_App_Encode);
+            addDebugGroupToLabelVector(AJA_DebugUnit_App_DMA);
+            addDebugGroupToLabelVector(AJA_DebugUnit_App_Screen);
+            addDebugGroupToLabelVector(AJA_DebugUnit_App_User1);
+            addDebugGroupToLabelVector(AJA_DebugUnit_App_User2);
 
             for(int i=AJA_DebugUnit_FirstUnused;i<AJA_DebugUnit_Size;i++)
             {

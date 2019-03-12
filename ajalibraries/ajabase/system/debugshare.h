@@ -79,6 +79,14 @@ typedef enum _AJADebugUnit
     AJA_DebugUnit_DriverInterface           = 38,
     AJA_DebugUnit_AutoCirculate             = 39,
     AJA_DebugUnit_NMOS                      = 40,
+    AJA_DebugUnit_App_DiskRead              = 41,
+    AJA_DebugUnit_App_DiskWrite             = 42,
+    AJA_DebugUnit_App_Decode                = 43,
+    AJA_DebugUnit_App_Encode                = 44,
+    AJA_DebugUnit_App_DMA                   = 45,
+    AJA_DebugUnit_App_Screen                = 46,
+    AJA_DebugUnit_App_User1                	= 47,
+    AJA_DebugUnit_App_User2               	= 48,
 
     // to add a new unit:
     //
@@ -97,16 +105,8 @@ typedef enum _AJADebugUnit
     // if no more unused units
     //   * set AJA_DebugUnit_FirstUnused to the same value as AJA_DebugUnit_Size
     //
-    AJA_DebugUnit_FirstUnused               = 41,
-    AJA_DebugUnit_Unused_41                 = AJA_DebugUnit_FirstUnused,
-    AJA_DebugUnit_Unused_42                 = 42,
-    AJA_DebugUnit_Unused_43                 = 43,
-    AJA_DebugUnit_Unused_44                 = 44,
-    AJA_DebugUnit_Unused_45                 = 45,
-    AJA_DebugUnit_Unused_46                 = 46,
-    AJA_DebugUnit_Unused_47                 = 47,
-    AJA_DebugUnit_Unused_48                 = 48,
-    AJA_DebugUnit_Unused_49                 = 49,
+    AJA_DebugUnit_FirstUnused               = 49,
+    AJA_DebugUnit_Unused_49                 = AJA_DebugUnit_FirstUnused,
     AJA_DebugUnit_Unused_50                 = 50,
     AJA_DebugUnit_Unused_51                 = 51,
     AJA_DebugUnit_Unused_52                 = 52,
