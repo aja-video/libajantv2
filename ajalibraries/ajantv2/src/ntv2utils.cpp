@@ -8578,7 +8578,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_KONA1:						return useWindowsName ? "kona1_pcie.bit"            : "kona1.bit";
 	case DEVICE_ID_KONA5:						return useWindowsName ? "kona5_pcie.bit"            : "kona5.bit";
 	case DEVICE_ID_KONA5_12G:					return useWindowsName ? "kona5_12G_pcie.bit"        : "kona5_12g.bit";
-	case DEVICE_ID_CORVID44_12G:					return useWindowsName ? "corvid44_12G_pcie.bit"     : "corvid44_12g.bit";
+	case DEVICE_ID_CORVID44_12G:					return useWindowsName ? "corvid44_12G_pcie.bit"     : "c44_12g.bit";
 	default:							return "";
 	}
 	return "";
