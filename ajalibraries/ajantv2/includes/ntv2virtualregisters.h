@@ -483,9 +483,9 @@ typedef enum
     kVRegServicesForceInit                  = VIRTUALREG_START+528,		// set true when power state changes
     kVRegServicesModeFinal               	= VIRTUALREG_START+529,
 	
-	kVregNTV2VPIDTransferCharacteristics	= VIRTUALREG_START+530,
-	kVregNTV2VPIDColorimetry				= VIRTUALREG_START+531,
-	kVregNTV2VPIDLuminance					= VIRTUALREG_START+532,
+	kVRegNTV2VPIDTransferCharacteristics	= VIRTUALREG_START+530,
+	kVRegNTV2VPIDColorimetry				= VIRTUALREG_START+531,
+	kVRegNTV2VPIDLuminance					= VIRTUALREG_START+532,
 
     kVRegLastAJA							= VIRTUALREG_START+533,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
