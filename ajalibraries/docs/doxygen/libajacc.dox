@@ -24,48 +24,40 @@
 	-	\ref CNTV2Line21Captioner — Encodes or decodes line-21 waveforms for U.S. captioning, per EIA-608.
 	-	\ref CNTV2CaptionRenderer — Renders (draws) CEA-608-compatible captions into frame buffers.
 
+	@dot
+		digraph LIBAJACCHierarchy
+		{
+			  size="14,7"
+			  node [shape=record, fontname=Helvetica, fontsize=11];
+			  edge[dir=back]
+			  ccline21captioner [ label="{CNTV2Line21Captioner|- mEncodeBuffer\n- mEncodeBufferInitialized\n- mEncodePixelOffset\n- mEncodeFirstDataBitOffset}" URL="\ref CNTV2Line21Captioner"];
+			  cclogconfig [ label="{CNTV2CaptionLogConfig|- mLogMask\n- mLogLabel\n- mpLabelLock}" URL="\ref CNTV2CaptionLogConfig"];
+			  ccrenderer [ label="{CNTV2CaptionRenderer|- mCCFont\n- mPixelFormat\n- mpRasters\n- mHRasterPixelsPerGlyphDot\n- mVRasterLinesPerGlyphDot\n- mVCaptionRasterOrigin\n- mHCaptionRasterOrigin\n- mGlyphWidthInPixels\n- mGlyphWidthInBytes\n- mGlyphHeightInLines\n- mBytesPerAttribute\n- mTotalBytes\n- mFrameDimensions}" URL="\ref CNTV2CaptionRenderer"];
+			  cc608decoder [ label="{CNTV2CaptionDecoder608|- mChannelDecoders\n- mXDSDecoder}" URL="\ref CNTV2CaptionDecoder608"];
+			  cc608channeldecoder [ label="{CNTV2CaptionDecodeChannel608|- mScreen\n- mAttributes\n- mCurrScreen\n- mRow\n- mCol\n- mRollBaseRow\n- mTextRows\n- mTextModeStyle\n- mCaptionMode\n- mChannel\n- mCharacterSet}" URL="\ref CNTV2CaptionDecodeChannel608"];
+			  cc608xdsdecoder [ label="{CNTV2XDSDecodeChannel608|- mCurrClass\n- mCurrType\n- …many more…\n- mNWSMessageStr}" URL="\ref CNTV2XDSDecodeChannel608"];
+			  cc608encoder [ label="{CNTV2CaptionEncoder608|- mLine21Encoder\n- mXmitMsgQueueF1\n- mXmitMsgQueueF2\n- mpXmitCurrentF1Msg\n- mpXmitCurrentF2Msg}" URL="\ref CNTV2CaptionEncoder608"];
+			  ccsmpteancdata [ label="CNTV2SMPTEAncData" URL="\ref CNTV2SMPTEAncData"];
+			  ccfont [ label="{NTV2CCFont|- mGlyphCount\n- mUnderlineGlyphIndex\n- mNoUnderlineSpaceGlyphIndex\n- mDotMapWidth\n- mLeftMarginDotCount\n- mRightMarginDotCount\n- mDotMapHeight\n- mTopMarginDotCount\n- mBottomMarginDotCount\n- mFontName}" URL="\ref NTV2CCFont"];
+			  cclogconfig -> ccline21captioner;
+			  cclogconfig -> cc608decoder;
+			  cclogconfig -> cc608channeldecoder;
+			  cclogconfig -> cc608xdsdecoder;
+			  cclogconfig -> cc608encoder;
+			  cc608channeldecoder -> cc608decoder [constraint=false, arrowtail=diamond];
+			  cc608xdsdecoder -> cc608decoder [constraint=false, arrowtail=diamond];
+			  ccfont -> ccrenderer [constraint=false, arrowtail=diamond];
+			  ccline21captioner -> cc608encoder [constraint=false, arrowtail=diamond];
+		}
+	@enddot
+
 	@par	Object Lifespan
 
-	Caption library class instances are provided using type-safe “smart” pointers, which helps to simplify memory management,
-	and eliminate leaks and double-free’s. Client programs need not micromanage the lifespans of these objects.
+	Caption library class instances are provided using type-safe “smart” pointers (see ::AJARefPtr), which helps to simplify
+	memory management, and eliminate leaks and double-free’s. Client programs need not micromanage the lifespans of these objects.
 
 	Client programs instantiate library objects using a <b>Create</b> class method, which always return a valid smart pointer if the
-	function result is true, an invalid one if the result is false, and never throw \c std::bad_alloc.
-
-	@code
-		class MyClass
-		{
-			private:
-				CNTV2CaptionDecoder608Ptr	m608Decoder;
-
-			public:
-				MyClass()
-				{
-					CNTV2CaptionDecoder608::Create(m608Decoder);
-					//	You may consider throwing an exception here if Create returned false
-				}
-
-				virtual ~MyClass()
-				{
-					//	The decoder instance is automatically freed
-				}
-
-				bool DoWork()
-				{
-					if (!m608Decoder)
-						return false;	//	Fail, no decoder instance
-
-					do
-					{
-						//	. . . processing loop . . .
-						m608Decoder->DoSomething();
-						. . .
-					} while (workStillToBeDone);
-
-					return true;
-				}
-		};
-	@endcode
+	function result is true, an invalid one if the result is false (i.e. \c std::bad_alloc should never be thrown).
 
 	@section	ajacc-decoding608	Decoding CEA-608 Captions
 
