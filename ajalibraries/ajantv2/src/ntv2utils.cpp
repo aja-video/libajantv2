@@ -8540,9 +8540,9 @@ ostream & operator << (ostream & inOutStream, const RP188_STRUCT & inObj)
 
 string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOnWindows)
 {
-    bool useWindowsName = !useOemNameOnWindows;
+	bool useWindowsName = !useOemNameOnWindows;
 #if defined (AJAMac) || defined (AJALinux)
-    useWindowsName = false;
+	useWindowsName = false;
 #endif
 	switch (inBoardID)
 	{
@@ -8563,10 +8563,10 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_KONA4:						return useWindowsName ? "kona4_pcie.bit"            : "kona_4_quad.bit";
 	case DEVICE_ID_KONA4UFC:					return useWindowsName ? "kona4_ufc_pcie.bit"        : "kona_4_ufc.bit";
 	case DEVICE_ID_KONAIP_2022:					return useWindowsName ? "kip_s2022.mcs"             : "kip_s2022.mcs";
-	case DEVICE_ID_KONAIP_4CH_2SFP:					return useWindowsName ? "s2022_56_2p2ch_rxtx.mcs"   : "s2022_56_2p2ch_rxtx.mcs";
-	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:				return useWindowsName ? "kip_j2k_1i1o.mcs"          : "kip_j2k_1i1o.mcs";
-	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:				return useWindowsName ? "kip_j2k_2o.mcs"            : "kip_j2k_2o.mcs";
-	case DEVICE_ID_KONAIP_1RX_1TX_2110:				return useWindowsName ? "s2110_1rx_1tx.mcs"         : "s2110_1rx_1tx.mcs";
+	case DEVICE_ID_KONAIP_4CH_2SFP:				return useWindowsName ? "s2022_56_2p2ch_rxtx.mcs"   : "s2022_56_2p2ch_rxtx.mcs";
+	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return useWindowsName ? "kip_j2k_1i1o.mcs"          : "kip_j2k_1i1o.mcs";
+	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return useWindowsName ? "kip_j2k_2o.mcs"            : "kip_j2k_2o.mcs";
+	case DEVICE_ID_KONAIP_1RX_1TX_2110:			return useWindowsName ? "s2110_1rx_1tx.mcs"         : "s2110_1rx_1tx.mcs";
 	case DEVICE_ID_KONALHEPLUS:					return useWindowsName ? "lheplus_pcie.bit"          : "lhe_12_pcie.bit";
 	case DEVICE_ID_KONALHI:						return useWindowsName ? "lhi_pcie.bit"              : "top_pike.bit";
 	case DEVICE_ID_TTAP:						return useWindowsName ? "ttap_pcie.bit"             : "t_tap_top.bit";
@@ -8578,8 +8578,8 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_KONA1:						return useWindowsName ? "kona1_pcie.bit"            : "kona1.bit";
 	case DEVICE_ID_KONA5:						return useWindowsName ? "kona5_pcie.bit"            : "kona5.bit";
 	case DEVICE_ID_KONA5_12G:					return useWindowsName ? "kona5_12G_pcie.bit"        : "kona5_12g.bit";
-	case DEVICE_ID_CORVID44_12G:					return useWindowsName ? "corvid44_12G_pcie.bit"     : "c44_12g.bit";
-	default:							return "";
+	case DEVICE_ID_CORVID44_12G:				return useWindowsName ? "corvid44_12G_pcie.bit"     : "c44_12g.bit";
+	default:									return "";
 	}
 	return "";
 }	//	NTV2GetBitfileName
