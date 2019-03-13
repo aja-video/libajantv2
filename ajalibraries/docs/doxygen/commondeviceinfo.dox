@@ -932,7 +932,7 @@
 	current <b>Play Head</b> position. Audio data continues to be read from the <b>Output Buffer</b> until the end is reached, whereupon the
 	<b>Play Head</b> wraps back to the start of the buffer, where reading continues.
 
-	Newer AJA hardware firmware implements an adjustable output delay that can be applied while samples are being read from the
+	Newer AJA hardware firmware implements an adjustable <b>Output Delay</b> that can be applied while samples are being read from the
 	<b>Audio Output Buffer</b>. Call ::NTV2DeviceCanDoAudioDelay to determine if this feature is available. Call CNTV2Card::GetAudioOutputDelay
 	to obtain the current delay value. Call CNTV2Card::SetAudioOutputDelay to change it.
 

@@ -250,8 +250,11 @@ There are two ways to capture any/all Ancillary data packets:
 		but are untested.
 	-	4K/UHD or larger rasters (i.e. ::NTV2FrameGeometry ≥ ::NTV2_FG_4x1920x1080) aren’t supported.
 	-	Signal paths involving CSCs/LUTs between the SDI input and the Frame Store may corrupt the VANC data.
-	-	HANC is unsupported and cannot be captured.
+	-	HANC is (obviously) not available in the frame buffer.
 	-	See \ref vancframegeometries (below) for details on the locations of the SMPTE VANC lines in the frame buffer.
+	-	After the frame has been transferred to the host, to obtain the ancillary data:
+		-	Parse the VANC lines manually.
+		-	Use AJAAncillaryList::SetFromVANCData to obtain a list of ::AJAAncillaryData packets found in the frame buffer.
 -	Use <b>Anc Extractor</b> firmware:
 	-	Limited to devices that support ::NTV2DeviceCanDoCustomAnc.
 	-	With \ref aboutautocirculate :
@@ -259,14 +262,15 @@ There are two ways to capture any/all Ancillary data packets:
 		-	Call CNTV2Card::AutoCirculateInitForInput with the ::AUTOCIRCULATE_WITH_ANC option.
 		-	Call AUTOCIRCULATE_TRANSFER::SetAncBuffers to specify the destination host Anc buffer(s).
 		-	After CNTV2Card::AutoCirculateTransfer returns, parse the contents of the host Anc buffer(s).
-			For SDI or IP devices:
-			-	Manually parse the data — see \ref ancgumpformat (below) for SDI devices,
-				or \ref ancrtpformat (below) for IP devices (see \c NTV2_DEVICE_SUPPORTS_SMPTE2110 macro).
-			-	Or use the \ref ajaanc — call AJAAncillaryList::SetFromDeviceAncBuffers.
+			-	Manually parse the data — see \ref ancgumpformat (below).
+			-	Or use the \ref ajaanc — call AJAAncillaryList::SetFromDeviceAncBuffers to retrieve the ::AJAAncillaryData packets.
 	-	Without \ref aboutautocirculate :
 		-	SDK 15.0 or later required.
 		-	See \ref ntv2llburn for example of how to use CNTV2Card::AncExtractInit, CNTV2Card::AncExtractSetEnable,
 			CNTV2Card::AncExtractSetWriteParams, etc.
+		-	After CNTV2Card::DMAReadAnc returns, parse the contents of the host Anc buffer(s).
+			-	Manually — see \ref ancgumpformat (below).
+			-	Or use the \ref ajaanc — call AJAAncillaryList::SetFromDeviceAncBuffers to retrieve the ::AJAAncillaryData packets.
 	-	Each Anc Extractor is capable of filtering certain types of ancillary data packets:
 		-	Upon driver startup, all Anc Extractors are configured to exclude SMPTE 299 HANC Audio and Audio Control packets.
 			These packets will not appear in the ancillary data buffer(s).
@@ -304,19 +308,27 @@ There are two ways to play out custom Ancillary data packets:
 		-	Call CNTV2Card::AutoCirculateInitForOutput with the ::AUTOCIRCULATE_WITH_ANC option.
 		-	Call AUTOCIRCULATE_TRANSFER::SetAncBuffers to specify the source host Anc buffer(s).
 		-	Before calling CNTV2Card::AutoCirculateTransfer, set the contents of the host Anc buffer(s)…
-			-	For SDI devices:
-				-	Manually write the data — see \ref ancgumpformat (below).
-				-	Or use the \ref ajaanc — call AJAAncillaryList::GetSDITransmitData.
-				-	The parity bits for outgoing 10-bit UDWs are recalculated by the Anc inserter, after
-					reading the 8-bit UDWs out of the Anc Buffer, while embedding the packet data into
-					the outgoing SDI data stream.
-			-	For IP devices (see \c NTV2_DEVICE_SUPPORTS_SMPTE2110 macro):
-				-	Manually write the data — see \ref ancrtpformat (below).
-				-	Or use the \ref ajaanc — call AJAAncillaryList::GetIPTransmitData.
+			-	Manually write the data — see \ref ancgumpformat (below).
+			-	Or use the \ref ajaanc — call AJAAncillaryList::GetTransmitData.
+			-	On SDI devices, the parity bits for outgoing 10-bit UDWs are recalculated by the Anc inserter,
+				after reading the 8-bit UDWs out of the Anc Buffer, while embedding the packet data into the
+				outgoing SDI data stream.
+			-	For SMPTE-2110 IP devices, CNTV2Card::AutoCirculateTransfer will automatically convert the data from
+				\ref ancgumpformat into \ref ancrtpformat (SDK version 15.2 or later required).
 	-	Without \ref aboutautocirculate :
 		-	SDK 15.0 or later required.
 		-	See \ref ntv2llburn for example of how to use CNTV2Card::AncInsertInit, CNTV2Card::AncInsertSetEnable,
 			CNTV2Card::AncInsertSetReadParams, etc.
+		-	Before calling CNTV2Card::DMAWriteAnc, set the contents of the host Anc buffer(s)…
+			-	Manually write the data — see \ref ancgumpformat (below).
+			-	Or use the \ref ajaanc to put together an ::AJAAncillaryList of packets to send — then call
+				AJAAncillaryList::GetTransmitData.
+			-	For SMPTE-2110 IP devices, CNTV2Card::DMAWriteAnc will automatically convert the data from
+				\ref ancgumpformat into \ref ancrtpformat (SDK version 15.2 or later required) immediately prior
+				to the actual transfer.
+	-	On SDI devices and SMPTE 2022 firmware on IP devices, the parity bits for outgoing 10-bit UDWs are recalculated
+		by the Anc inserter, after reading the 8-bit UDWs out of the Anc Buffer, while embedding the packet data into the
+		outgoing SDI data stream.
 	-	Default per-field ancillary data buffer capacity is 8K by default, or 16K per-frame, including overhead.
 		This can be changed on a per-device basis by setting a pair of virtual registers (using CNTV2Card::WriteRegister):
 		-	::kVRegAncField1Offset — This specifies the offset from the bottom of the 8MB/16MB frame where F1 ancillary
@@ -337,7 +349,7 @@ There are two ways to play out custom Ancillary data packets:
 
 @section	ancgumpformat	SDI Anc Buffer Data Format
 
-The data bytes in the buffer consist of one or more packets having the following format:
+This is the default format in the host ancillary data buffers. The data bytes in the ancillary data buffer consist of one or more packets having the following format:
 
 @image	html	sdi_anc_pkt_fmt.png
 

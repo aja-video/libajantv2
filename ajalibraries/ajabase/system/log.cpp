@@ -134,15 +134,13 @@ void AJATimeLog::PrintReset()
 void AJATimeLog::PrintDelta(bool bReset)
 {
     uint64_t currTime = AJATime::GetSystemMicroseconds();
-    
-    #if defined(AJA_DEBUG) && (AJA_LOGTYPE!=2)
+    #if defined(AJA_DEBUG) && (AJA_LOGTYPE != 2)
 		AJA_LOG("%s = %lld\n", _tag, currTime-_time));
 	#else
 		if (AJADebug::IsActive(_unit))
 			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
 				"%s = %lld\n", _tag.c_str(), currTime-_time);
 	#endif
-        
     if (bReset)
         _time = currTime;
 }
@@ -152,7 +150,7 @@ void AJATimeLog::PrintDelta(bool bReset)
 int32_t AJATimeLog::GetDelta(bool bReset)
 {
     uint64_t currTime = AJATime::GetSystemMicroseconds();
-	int32_t delta = (uint32_t)(currTime - _time);
+	int32_t delta = int32_t(currTime - _time);
     if (bReset)
         _time = currTime;
 		
