@@ -325,10 +325,11 @@ typedef enum
 	AJA_STATUS_BADBUFFERSIZE	=-105,	/**< Buffer size out of bounds */
 	AJA_STATUS_STREAMCONFLICT	=-106,	/**< Another stream is using resources */
 	AJA_STATUS_NOTINITIALIZED	=-107,	/**< Streams not initialized */
-    AJA_STATUS_STREAMRUNNING	=-108,	/**< Streams is running, should be stopped */
+	AJA_STATUS_STREAMRUNNING	=-108,	/**< Streams is running, should be stopped */
 
 // Other
-    AJA_STATUS_REBOOT           = 1000   /**< Device requires reboot */
+	AJA_STATUS_REBOOT		= 1000,	/**< Device requires reboot */
+	AJA_STATUS_POWER_CYCLE		= 1001	/**< Device requires a machine power-cycle */
 
 } AJAStatus;
 ///@}

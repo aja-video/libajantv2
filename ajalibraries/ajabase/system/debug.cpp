@@ -1208,6 +1208,7 @@ std::string AJAStatusToString (const AJAStatus inStatus)
 		case AJA_STATUS_NOTINITIALIZED:		return "AJA_STATUS_NOTINITIALIZED";
 		case AJA_STATUS_STREAMRUNNING:		return "AJA_STATUS_STREAMRUNNING";
         case AJA_STATUS_REBOOT:             return "AJA_STATUS_REBOOT";
+        case AJA_STATUS_POWER_CYCLE:        return "AJA_STATUS_POWER_CYCLE";
 	}
 	return "<bad AJAStatus>";
 }
