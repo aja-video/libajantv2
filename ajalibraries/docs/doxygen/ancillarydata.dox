@@ -36,10 +36,11 @@ The timecode aspects of NTV2’s SDK and firmware has its origins in the early 2
 SMPTE 12M spec was still evolving. FPGA space was very tight in those days, including the number of registers available … which
 is one reason why the same registers were used for RP-188 capture and playout.
 
-@note	Two 32-bit registers are required to store a timecode value (one for the low-order 32 bits, another for the high-order
-		32 bits), plus an extra register to hold the extra “Distributed Binary Bits” (DBB) information per SMPTE 12M and RP-188.
-		In the SDK, these three register values are represented by the ::NTV2_RP188 data type, and the older
-		::RP188_STRUCT data type.
+-	Two 32-bit registers are required to store a timecode value:
+	-	one for the low-order 32 bits;
+	-	another for the high-order 32 bits
+-	An extra register is used to hold the extra “Distributed Binary Bits” (DBB) information per SMPTE 12M and RP-188.
+-	In the SDK, these three register values are represented by the ::NTV2_RP188 data type, and the older ::RP188_STRUCT data type.
 
 On older devices (i.e. those that <i>don’t</i> support “stacked audio” — see ::NTV2DeviceCanDoStackedAudio) and those <i>without</i>
 bidirectional SDI connectors (see ::NTV2DeviceHasBiDirectionalSDI), one general-purpose register triplet is used to store an SDI
@@ -49,9 +50,9 @@ general-purpose timecode registers are “write-only” for SDI output;  and “
 registers yields the received input timecode, while writing those registers sets the output (playout) timecode.
 
 @note	This inability to read back what’s been written into the register is very different behavior from nearly all other NTV2
-		registers. For devices that follow this old model, it’s impossible to fetch from the device the output timecode value
-		that was written for playout. So beware that when CNTV2Card::SetRP188Data is called on these older devices, it’s
-		not possible to find out what was “set”, since CNTV2Card::GetRP188Data is always reading the SDI input’s timecode.
+		registers. For devices that follow this old model, it’s impossible to fetch the output timecode value that was written
+		for playout. So beware that when CNTV2Card::SetRP188Data is called on these older devices, it’s not possible to find out
+		what was “set”, since CNTV2Card::GetRP188Data is always reading the SDI input’s timecode.
 
 On newer devices that have bi-directional SDI connectors (i.e. both ::NTV2DeviceCanDoStackedAudio and ::NTV2DeviceHasBiDirectionalSDI
 return <tt>true</tt>), CNTV2Card::GetRP188Data will return the corresponding SDI output’s timecode if the SDI spigot is configured
@@ -78,10 +79,149 @@ There are two ways to receive input timecode:
 		-	in the ::NTV2TimeCodes map, or…
 		-	in the ::NTV2TimeCodeList vector.
 -	Without \ref aboutautocirculate, use either of these two methods:
-	-	Call CNTV2Card::GetRP188Data for the SDI Input of interest, using the DBB filter (see CNTV2Card::SetRP188SourceFilter)
-		to choose the timecode of interest (LTC, VITC1, VITC2), or…
-	-	Use the <b>Anc Extractor</b> firmware described in \ref anccapture (below) to capture the “raw” HANC timecode
+	-	Call CNTV2Card::GetRP188Data (shortly after the input VBI) for the SDI Input of interest, using the DBB filter
+		to choose the timecode of interest (LTC, VITC1, VITC2 … see CNTV2Card::SetRP188SourceFilter ).
+		-	There are extra bits in NTV2_RP188::fDBB that indicate what was received:
+			-	<tt>BIT(16)</tt>: If set, indicates RP-188 is being received.
+			-	<tt>BIT(17)</tt>: Valid when RP-188 filtering is in-play (see CNTV2Card::SetRP188SourceFilter):
+				If set, indicates the requested (filtered) RP-188 has been received.
+			-	<tt>BIT(18)</tt>: If set, indicates ATC/LTC was received.
+			-	<tt>BIT(19)</tt>: If set, indicates VITC was received.
+	-	Or use the <b>Anc Extractor</b> firmware described in \ref anccapture (below) to capture the “raw” HANC timecode
 		packet data … then decode it per the SMPTE specifications.
+
+@note	<b>Regarding High Frame Rates (>30fps):</b> When reading timecode for any input faster than 30fps,
+		you’ll see a duplicate frame count in two successive frames. but in the latter frame, the field bit will be set,
+		and the DBB will indicate a value of 0x02 (VITC2). This is the SMPTE ST-12M-preferred way of sending >30fps timecode.
+		The 12M specification says there are systems that won’t conform to this transmission convention, so receivers
+		that want to support them will need to be flexible.
+
+
+@par	Example: Capturing Embedded SDI Timecode Without AutoCirculate
+
+<b>SetUpRP188</b>
+
+@code{.cpp}
+static const ULWord  gChToRP188DBBRegNum[] = {  kRegRP188InOut1DBB,  kRegRP188InOut2DBB,  kRegRP188InOut3DBB,  kRegRP188InOut4DBB,
+                                                kRegRP188InOut5DBB,  kRegRP188InOut6DBB,  kRegRP188InOut7DBB,  kRegRP188InOut8DBB,  0};
+
+bool SetUpRP188 (CNTV2Card & inCard)
+{
+    const NTV2DeviceID  deviceID        (inCard.GetDeviceID());
+    const bool          isKonaLHi       (deviceID == DEVICE_ID_KONALHI);
+    ULWord              userDefinedDBB  (0);
+
+    for (NTV2Channel ch(NTV2_CHANNEL1);  ch < NTV2Channel(::NTV2DeviceGetNumVideoOutputs(deviceID));  ch = NTV2Channel(ch + 1))
+    {
+        inCard.SetRP188Mode (ch, NTV2_RP188_OUTPUT);
+        inCard.ReadRegister (kVRegUserDefinedDBB, userDefinedDBB);
+        if (!userDefinedDBB == 0)
+        {
+            ULWord inputFilter (0x00);
+            if (::NTV2DeviceCanDoVITC2(deviceID))
+                inputFilter = 0x02;
+            else if (!isKonaLHi)
+                inputFilter = 0x01;
+            inCard.WriteRegister (gChToRP188DBBRegNum[i],  inputFilter,  ULWord(kRegMaskRP188SourceSelect),  kRegShiftRP188Source);
+            inCard.WriteRegister (gChToRP188DBBRegNum[i],  isKonaLHi ? 0x00 : 0xFF,  kRegMaskRP188DBB,  kRegShiftRP188DBB);
+        }
+    }  //  for each SDI connector
+
+    if (::NTV2DeviceCanDoWidget(m_DeviceID, NTV2_WgtSDIMonOut1))
+    {
+        inCard.SetRP188Mode (NTV2_CHANNEL5, NTV2_RP188_OUTPUT);
+        inCard.ReadRegister (kVRegUserDefinedDBB, userDefinedDBB);
+        if (!userDefinedDBB)
+            inCard.WriteRegister (gChToRP188DBBRegNum[NTV2_CHANNEL5], 0xFF, kRegMaskRP188DBB, kRegShiftRP188DBB);
+    }
+}  //  SetUpRP188
+@endcode
+
+<b>GetReceivedTCForChannel</b>
+
+@code{.cpp}
+bool GetReceivedTCForChannel (CNTV2Card & inCard, const NTV2Channel inChannel, NTV2_RP188 & outReceivedLTC, RP188_STRUCT & outReceivedVITC1, RP188_STRUCT & outReceivedVITC2)
+{
+    ULWord  receivedAnyRP188  (0);
+    ULWord  receivedLTC       (0);
+    ULWord  receivedVITC1     (0);
+    ULWord  receivedVITC2     (0);
+    ULWord  inputFilter       (0x02);
+    NTV2VideoFormat    channelFormat (NTV2_FORMAT_UNKNOWN);
+    inCard.GetVideoFormat (channelFormat, inChannel);
+    outReceivedLTC.Set();  outReceivedVITC1.Set();  outReceivedVITC2.Set();  // Make invalid
+
+    //  Any TC available?
+    inCard.ReadRegister (gChToRP188DBBRegNum[inChannel], receivedAnyRP188, BIT(16), 16);
+    if (!receivedAnyRP188)
+        return false;
+
+    //  Read the input filter, can be overridden by software any time (AutoCirculate initializes once)
+    inCard.ReadRegister (gChToRP188DBBRegNum[inChannel], inputFilter, (ULWord)kRegMaskRP188SourceSelect, kRegShiftRP188Source);
+
+    //  If the filter is not FF, only fill in the selected (if received)...
+    switch (inputFilter)
+    {
+        case 0x0000:    //  User requested LTC only
+            inCard.ReadRegister(gChToRP188DBBRegNum[inChannel], &receivedLTC, BIT(17), 17);
+            if (receivedLTC)
+                inCard.GetRP188Data (inChannel, outReceivedLTC);
+            break;
+
+        case 0x0001:    //  User requested VITC only
+            inCard.ReadRegister (gChToRP188DBBRegNum[inChannel], receivedLTC, BIT(18), 18);
+            if (!receivedLTC  &&  inChannel == NTV2_CHANNEL1)
+                inCard.ReadRegister (kRegFS1ReferenceSelect, receivedLTC, BIT(9), 9);  // Reg 95
+            if (receivedLTC)
+            {
+                inCard.GetRP188Data (inChannel, outReceivedLTC);
+                outReceivedLTC.DBB |= BIT(18);    //  Set "LTC received" bit
+            }
+            inCard.ReadRegister (gChToRP188DBBRegNum[inChannel], receivedVITC1, BIT(17), 17);
+            if (receivedVITC1)
+            {
+                outReceivedVITC1.DBB = inCard.ReadRegister (gChToRP188DBBRegNum[inChannel]);
+                outReceivedVITC1.Low = inCard.ReadRegister (gChannelToRP188Bits031RegisterNum[inChannel]);
+                outReceivedVITC1.High = inCard.ReadRegister (gChannelToRP188Bits3263RegisterNum[inChannel]);
+            }
+            break;
+
+        default:    //  User requested whatever's there
+            //  Check for LTC...
+            inCard.ReadRegister (gChToRP188DBBRegNum[inChannel], receivedLTC, BIT(18), 18);
+            if (!receivedLTC  &&  inChannel == NTV2_CHANNEL1)
+                inCard.ReadRegister (kRegFS1ReferenceSelect, receivedLTC, BIT(9), 9);  // Reg 95
+            if (receivedLTC)
+            {
+                inCard.GetRP188Data (inChannel, outReceivedLTC);
+                outReceivedLTC.DBB |= BIT(18);    //  Set "LTC received" bit
+            }
+
+            //  Check for VITC1/VITC2...
+            inCard.ReadRegister (gChToRP188DBBRegNum[inChannel], receivedVITC1, BIT(19), 19);
+            inCard.ReadRegister (gChToRP188DBBRegNum[inChannel], receivedVITC2, BIT(17), 17);
+            if (receivedVITC1  &&  receivedVITC2)
+            {
+                inCard.GetRP188Data (inChannel, outReceivedVITC1);
+                inCard.GetRP188Data (inChannel, outReceivedVITC2);
+            }
+            else
+            {
+                if (receivedVITC1)
+                    inCard.GetRP188Data (inChannel, outReceivedVITC1);
+                if (receivedVITC2)
+                {
+                    if (NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(channelFormat))
+                        inCard.GetRP188Data (inChannel, outReceivedVITC1);
+                    else
+                        inCard.GetRP188Data (inChannel, outReceivedVITC2);
+                }
+            }
+    }  //  switch on inputFilter
+    return true;
+}  //  GetReceivedTCForChannel
+@endcode
+
 
 
 @subsection		anctimecodeoutput		Embedded SDI Timecode Output
@@ -245,7 +385,7 @@ automatically insert a VPID packet in the outgoing SDI data stream.
 @section	anccapture	Custom Anc Packet Capture
 
 There are two ways to capture any/all Ancillary data packets:
--	Use a VANC frame geometry (see CNTV2Card::SetVANCMode) — but there are caveats:
+-	<b>Use a VANC frame geometry</b> (see CNTV2Card::SetVANCMode) — but there are caveats:
 	-	Only ::NTV2_FBF_10BIT_YCBCR and ::NTV2_FBF_8BIT_YCBCR buffer formats are officially supported. Others may work,
 		but are untested.
 	-	4K/UHD or larger rasters (i.e. ::NTV2FrameGeometry ≥ ::NTV2_FG_4x1920x1080) aren’t supported.
@@ -253,9 +393,9 @@ There are two ways to capture any/all Ancillary data packets:
 	-	HANC is (obviously) not available in the frame buffer.
 	-	See \ref vancframegeometries (below) for details on the locations of the SMPTE VANC lines in the frame buffer.
 	-	After the frame has been transferred to the host, to obtain the ancillary data:
-		-	Parse the VANC lines manually.
+		-	Parse the VANC lines in the host frame buffer manually, or…
 		-	Use AJAAncillaryList::SetFromVANCData to obtain a list of ::AJAAncillaryData packets found in the frame buffer.
--	Use <b>Anc Extractor</b> firmware:
+-	<b>Use Anc Extractor firmware:</b>
 	-	Limited to devices that support ::NTV2DeviceCanDoCustomAnc.
 	-	With \ref aboutautocirculate :
 		-	SDK & driver version 12.3 or later required.
@@ -264,6 +404,8 @@ There are two ways to capture any/all Ancillary data packets:
 		-	After CNTV2Card::AutoCirculateTransfer returns, parse the contents of the host Anc buffer(s).
 			-	Manually parse the data — see \ref ancgumpformat (below).
 			-	Or use the \ref ajaanc — call AJAAncillaryList::SetFromDeviceAncBuffers to retrieve the ::AJAAncillaryData packets.
+			-	<b>NOTE:</b> For SMPTE-2110 IP devices, CNTV2Card::AutoCirculateTransfer will have automatically converted the
+				received host ancillary data from  \ref ancrtpformat into \ref ancgumpformat (SDK version 15.2 or later required).
 	-	Without \ref aboutautocirculate :
 		-	SDK 15.0 or later required.
 		-	See \ref ntv2llburn for example of how to use CNTV2Card::AncExtractInit, CNTV2Card::AncExtractSetEnable,
@@ -271,6 +413,8 @@ There are two ways to capture any/all Ancillary data packets:
 		-	After CNTV2Card::DMAReadAnc returns, parse the contents of the host Anc buffer(s).
 			-	Manually — see \ref ancgumpformat (below).
 			-	Or use the \ref ajaanc — call AJAAncillaryList::SetFromDeviceAncBuffers to retrieve the ::AJAAncillaryData packets.
+			-	<b>NOTE:</b> For SMPTE-2110 IP devices, CNTV2Card::DMAReadAnc will have automatically converted the received
+				host ancillary data from  \ref ancrtpformat into \ref ancgumpformat (SDK version 15.2 or later required).
 	-	Each Anc Extractor is capable of filtering certain types of ancillary data packets:
 		-	Upon driver startup, all Anc Extractors are configured to exclude SMPTE 299 HANC Audio and Audio Control packets.
 			These packets will not appear in the ancillary data buffer(s).
@@ -310,9 +454,6 @@ There are two ways to play out custom Ancillary data packets:
 		-	Before calling CNTV2Card::AutoCirculateTransfer, set the contents of the host Anc buffer(s)…
 			-	Manually write the data — see \ref ancgumpformat (below).
 			-	Or use the \ref ajaanc — call AJAAncillaryList::GetTransmitData.
-			-	On SDI devices, the parity bits for outgoing 10-bit UDWs are recalculated by the Anc inserter,
-				after reading the 8-bit UDWs out of the Anc Buffer, while embedding the packet data into the
-				outgoing SDI data stream.
 			-	For SMPTE-2110 IP devices, CNTV2Card::AutoCirculateTransfer will automatically convert the data from
 				\ref ancgumpformat into \ref ancrtpformat (SDK version 15.2 or later required).
 	-	Without \ref aboutautocirculate :
