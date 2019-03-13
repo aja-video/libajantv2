@@ -247,7 +247,7 @@ bool CNTV2Card::GetDefaultVideoOutMode(ULWord & outMode)
 // Input:  NTV2VideoFormat
 // Output: NONE
 bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keepVancSettings, NTV2Channel channel)
-{
+{	AJA_UNUSED(keepVancSettings);
 #ifdef  MSWindows
 	NTV2EveryFrameTaskMode mode;
 	GetEveryFrameServices(mode);
@@ -654,7 +654,7 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 				// Add 3 to the timing value. Note that nominalH is already advanced by one so
 				// we just need to add 2.
 				timingValue &= 0xFFFF0000;
-				timingValue |= nominalH + 2;
+				timingValue |= ULWord(nominalH + 2);
 				WriteOutputTimingControl(timingValue);
 				
 				// Wait a scanline
@@ -673,7 +673,7 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 				// Subract 3 to the timing value. Note that nominalH is already decremented by one so
 				// we just need to subtract 2.
 				timingValue &= 0xFFFF0000;
-				timingValue |= nominalH - 2;
+				timingValue |= ULWord(nominalH - 2);
 				WriteOutputTimingControl(timingValue);
 				
 				// Wait a scanline
@@ -692,7 +692,7 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 				// Setting arbitrary value so we don't need to do the +3-2 or -3+2 trick and
 				// we can just set the new value
 				timingValue &= 0xFFFF0000;
-				timingValue |= nominalH;
+				timingValue |= ULWord(nominalH);
 				WriteOutputTimingControl(timingValue);
 			}
 		}
@@ -746,7 +746,7 @@ bool CNTV2Card::SetVideoVOffset (int vOffset)
 	ULWord	timingValue(0);
 	ReadOutputTimingControl(timingValue);
 	timingValue &= 0x0000FFFF;
-	timingValue |= (nominalV << 16);
+	timingValue |= ULWord(nominalV << 16);
 	WriteOutputTimingControl(timingValue);
 	return true; 
 }
@@ -765,9 +765,9 @@ bool CNTV2Card::GetVideoVOffset (int & outVOffset)
 
 	// Get offset from nominal value (K2 you increment the timing by adding the timing value)
 	if (::NTV2DeviceNeedsRoutingSetup(GetDeviceID()))
-		outVOffset = timingValue - nominalV;
+		outVOffset = int(timingValue) - nominalV;
 	else
-		outVOffset = nominalV - timingValue;
+		outVOffset = nominalV - int(timingValue);
 	return true; 
 }
 
@@ -1574,7 +1574,7 @@ bool CNTV2Card::SetReference (NTV2ReferenceSource value)
 
 	//this looks slightly unusual but really
 	//it is a 4 bit counter in 2 different registers
-	ULWord refControl1 = (ULWord)value, refControl2 = 0, ptpControl = 0;
+	ULWord refControl1 = ULWord(value), refControl2 = 0, ptpControl = 0;
 	switch(value)
 	{
 	case NTV2_REFERENCE_INPUT5:
@@ -1920,7 +1920,7 @@ bool CNTV2Card::SetFrameBufferSize (NTV2Framesize size)
 
 	reg1Contents |= kRegMaskFrameSizeSetBySW;
 	reg1Contents &= ~kK2RegMaskFrameSize;
-	reg1Contents |= size << kK2RegShiftFrameSize;
+	reg1Contents |= ULWord(size) << kK2RegShiftFrameSize;
 
 	if( !WriteRegister(kRegCh1Control, reg1Contents) )
 		return false;
