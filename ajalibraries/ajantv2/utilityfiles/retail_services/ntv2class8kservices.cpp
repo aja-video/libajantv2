@@ -330,6 +330,9 @@ void Class8kServices::SetDeviceMiscRegisters ()
 	if (!b8K && !b4K)
 		return Class4kServices::SetDeviceMiscRegisters();
 	
+	// skip a class4k - for now
+	DeviceServices::SetDeviceMiscRegisters();
+	
 	//
 	// SDI Out
 	//

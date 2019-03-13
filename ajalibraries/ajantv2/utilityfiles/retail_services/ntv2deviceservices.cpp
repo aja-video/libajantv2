@@ -2485,14 +2485,11 @@ bool DeviceServices::UpdateK2LUTSelect()
 				wantedLUT = (cscRange == NTV2_RGB10RangeFull) ? NTV2_LUTGamma18_Rec709 : NTV2_LUTGamma18_Rec709_SMPTE;
 			break;
 		
-		case NTV2_GammaAuto:	
-			wantedLUT = NTV2_LUTLinear;
-			break;
-		
 		// when in doubt use linear
 		default:
 		case NTV2_GammaRec601:	
-		case NTV2_GammaRec709:		
+		case NTV2_GammaRec709:	
+		case NTV2_GammaAuto:	
 			wantedLUT = NTV2_LUTLinear;	
 			break;
 	}
@@ -2538,6 +2535,8 @@ bool DeviceServices::UpdateK2LUTSelect()
 		((wantedLUT != mLUTType) || (wantedLUT != lut2Type && bE2ERangeConversion == false) ||
 		 (wantedLUT != lut3Type) || (wantedLUT != lut4Type) || (wantedLUT != lut4Type)))
 	{
+		PauseOptimizedWrites();
+	
 		// generate and download new LUTs
 		//printf (" Changing from LUT %d to LUT %d  \n", mLUTType, wantedLUT);
 		double table[1024];
@@ -2569,6 +2568,8 @@ bool DeviceServices::UpdateK2LUTSelect()
 			mCard->DownloadLUTToHW(table, NTV2_CHANNEL4, kLUTBank_YUV2RGB);
 		if (bLut5 == true && wantedLUT != lut5Type)
 			mCard->DownloadLUTToHW(table, NTV2_CHANNEL5, kLUTBank_YUV2RGB);
+			
+		ResumeOptimizedWrites();
 	}
 	
 	// special use of LUT2 for E-to-E rgb range conversion
