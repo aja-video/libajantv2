@@ -1233,6 +1233,15 @@ private:
 		DefineRegName	(kVRegSwizzle4kInput,					"kVRegSwizzle4kInput");
 		DefineRegName	(kVRegSwizzle4kOutput,					"kVRegSwizzle4kOutput");
 		DefineRegName	(kVRegAnalogAudioIOConfiguration,		"kVRegAnalogAudioIOConfiguration");
+		DefineRegName	(kVRegHdmiHdrOutChanged,				"kVRegHdmiHdrOutChanged");
+		DefineRegName	(kVRegDisableAutoVPID,					"kVRegDisableAutoVPID");
+		DefineRegName	(kVRegEnableBT2020,						"kVRegEnableBT2020");
+		DefineRegName	(kVRegHdmiHdrOutMode,					"kVRegHdmiHdrOutMode");
+		DefineRegName	(kVRegServicesForceInit,				"kVRegServicesForceInit");
+		DefineRegName	(kVRegServicesModeFinal,				"kVRegServicesModeFinal");
+		DefineRegName	(kVregNTV2VPIDTransferCharacteristics,	"kVregNTV2VPIDTransferCharacteristics");
+		DefineRegName	(kVregNTV2VPIDColorimetry,				"kVregNTV2VPIDColorimetry");
+		DefineRegName	(kVregNTV2VPIDLuminance,				"kVregNTV2VPIDLuminance");
 		DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
 		DefineRegName	(kVRegFirstOEM,							"kVRegFirstOEM");
 

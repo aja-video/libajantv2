@@ -71,6 +71,9 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	is12G					= pInVPIDSpec->isOutput12G;
 	vpidChannel				= pInVPIDSpec->vpidChannel;
 	enableBT2020			= pInVPIDSpec->enableBT2020;
+	transferCharacteristics = pInVPIDSpec->transferCharacteristics;
+	colorimetry				= pInVPIDSpec->colorimetry;
+	luminance				= pInVPIDSpec->luminance;
 
 
 	if (! NTV2_IS_WIRE_FORMAT (outputFormat))
