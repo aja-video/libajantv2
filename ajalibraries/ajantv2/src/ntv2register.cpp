@@ -7940,7 +7940,20 @@ bool CNTV2Card::ReadSDIStatistics (NTV2SDIInStatistics & outStats)
 	return NTV2Message (reinterpret_cast <NTV2_HEADER *> (&outStats));
 }
 
+bool CNTV2Card::SetVPIDTransferCharacteristics (NTV2VPIDTransferCharacteristics inValue)
+{
+	return WriteRegister(kVregNTV2VPIDTransferCharacteristics, inValue);
+}
 
+bool CNTV2Card::SetVPIDColorimetry (NTV2VPIDColorimetry inValue)
+{
+	return WriteRegister(kVregNTV2VPIDColorimetry, inValue);
+}
+
+bool CNTV2Card::SetVPIDVPIDLuminance (NTV2VPIDLuminance inValue)
+{
+	return WriteRegister(kVregNTV2VPIDLuminance, inValue);
+}
 
 #if !defined (NTV2_DEPRECATE)
 // deprecated - does not support progressivePicture, 3G, 2K

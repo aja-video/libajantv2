@@ -6193,6 +6193,10 @@ public:
     AJA_VIRTUAL bool GetHDRData (HDRRegValues & outRegisterValues);
 	AJA_VIRTUAL bool SetHDMIHDRBT2020 (void);
 	AJA_VIRTUAL bool SetHDMIHDRDCIP3 (void);
+	
+	AJA_VIRTUAL bool SetVPIDTransferCharacteristics (NTV2VPIDTransferCharacteristics inValue);
+	AJA_VIRTUAL bool SetVPIDColorimetry (NTV2VPIDColorimetry inValue);
+	AJA_VIRTUAL bool SetVPIDVPIDLuminance (NTV2VPIDLuminance inValue);
 
 	///@}
 

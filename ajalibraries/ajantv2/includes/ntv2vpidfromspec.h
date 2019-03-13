@@ -32,6 +32,9 @@ typedef struct
 	bool					isOutput6G;				///< @brief	If true, the transport on the wire is 6G.
 	bool					isOutput12G;			///< @brief	If true, the transport on the wire is 12G.
 	bool					enableBT2020;			///< @brief	If true, the VPID will insert BT.2020 data.
+	NTV2VPIDTransferCharacteristics	transferCharacteristics;	///< @brief Describes the transfer characteristics
+	NTV2VPIDColorimetry		colorimetry;			///< @brief Describes the Colorimetry
+	NTV2VPIDLuminance		luminance;				///< @bried Describes the luminance and color difference
 } VPIDSpec;
 
 /**

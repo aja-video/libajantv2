@@ -32,6 +32,9 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	NTV2VideoFormat			outputFormat	= NTV2_FORMAT_UNKNOWN;
 	NTV2FrameBufferFormat	pixelFormat		= NTV2_FBF_INVALID;
 	NTV2FrameRate			frameRate		= NTV2_FRAMERATE_UNKNOWN;
+	NTV2VPIDTransferCharacteristics transferCharacteristics = NTV2_VPID_TC_SDR_TV;
+	NTV2VPIDColorimetry		colorimetry		= NTV2_VPID_Color_Rec709;
+	NTV2VPIDLuminance		luminance		= NTV2_VPID_Luminance_YCbCr;
 
 	bool	isProgressivePicture	= false;
 	bool	isProgressiveTransport	= false;
@@ -365,6 +368,8 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 		return true;
 	}
 
+	byte2 |= (transferCharacteristics << 4);
+
 	//	Progressive picture
 	byte2 |= isProgressivePicture ? (1UL << 6) : 0;	//	0x40
 
@@ -406,17 +411,11 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	}
 
 	//Colorimetry
-	if ((NTV2_IS_4K_VIDEO_FORMAT(outputFormat) ||
-		NTV2_IS_HD_VIDEO_FORMAT(outputFormat)) &&
-		enableBT2020)
+	if (NTV2_IS_QUAD_QUAD_FORMAT(outputFormat) ||
+		NTV2_IS_4K_VIDEO_FORMAT(outputFormat) ||
+		NTV2_IS_HD_VIDEO_FORMAT(outputFormat))
 	{
-		if ((!NTV2_IS_FBF_RGB(pixelFormat) &&
-			NTV2_IS_HIGH_NTV2FrameRate(frameRate)) ||
-			(NTV2_IS_FBF_RGB(pixelFormat) &&
-			!NTV2_IS_HIGH_NTV2FrameRate(frameRate)))
-		{
-			byte3 |= (VPIDDynamicRange_400 << 4);
-		}
+		byte3 |= (colorimetry << 4);
 	}
 
 	//	Sampling structure
@@ -504,6 +503,14 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	{
 		byte4 |= pInVPIDSpec->isRightEye	<< 6;		//	0x40
 		byte4 |= pInVPIDSpec->audioCarriage	<< 2;		//	0x0C
+	}
+
+	//Luminance and color difference signal
+	if (NTV2_IS_QUAD_QUAD_FORMAT(outputFormat) ||
+		NTV2_IS_4K_VIDEO_FORMAT(outputFormat) ||
+		NTV2_IS_HD_VIDEO_FORMAT(outputFormat))
+	{
+		byte4 |= (luminance << 4);
 	}
 
 	if (NTV2_IS_QUAD_FRAME_FORMAT(outputFormat))
