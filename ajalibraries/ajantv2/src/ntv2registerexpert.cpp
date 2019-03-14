@@ -1239,9 +1239,9 @@ private:
 		DefineRegName	(kVRegHdmiHdrOutMode,					"kVRegHdmiHdrOutMode");
 		DefineRegName	(kVRegServicesForceInit,				"kVRegServicesForceInit");
 		DefineRegName	(kVRegServicesModeFinal,				"kVRegServicesModeFinal");
-		DefineRegName	(kVregNTV2VPIDTransferCharacteristics,	"kVregNTV2VPIDTransferCharacteristics");
-		DefineRegName	(kVregNTV2VPIDColorimetry,				"kVregNTV2VPIDColorimetry");
-		DefineRegName	(kVregNTV2VPIDLuminance,				"kVregNTV2VPIDLuminance");
+		DefineRegName	(kVRegNTV2VPIDTransferCharacteristics,	"kVregNTV2VPIDTransferCharacteristics");
+		DefineRegName	(kVRegNTV2VPIDColorimetry,				"kVregNTV2VPIDColorimetry");
+		DefineRegName	(kVRegNTV2VPIDLuminance,				"kVregNTV2VPIDLuminance");
 		DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
 		DefineRegName	(kVRegFirstOEM,							"kVRegFirstOEM");
 
