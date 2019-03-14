@@ -2228,7 +2228,6 @@ typedef enum
 
 typedef enum
 {
-	/*
     NTV2_SDITransport_Off,					// transport disabled, disconnected
     NTV2_SDITransport_1_5,					// Single Link, 1 wire 1.5G
     NTV2_SDITransport_3Ga,					// Single Link, 1 wire 3Ga
@@ -2243,9 +2242,6 @@ typedef enum
     NTV2_MAX_NUM_SDITransportTypes,			// last
 	NTV2_SDITransport_Auto					// auto mode
 		=NTV2_MAX_NUM_SDITransportTypes	
-			*/
-			
-
 } NTV2SDITransportType;
 
 
