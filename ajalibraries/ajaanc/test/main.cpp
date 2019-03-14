@@ -21,11 +21,11 @@
 
 using namespace std;
 
-#define	LOGMYERROR(__x__)	AJA_sREPORT(AJA_DebugUnit_AncGeneric, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
-#define	LOGMYWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_AncGeneric, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
-#define	LOGMYNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_AncGeneric, AJA_DebugSeverity_Notice,		__FUNCTION__ << ":  " << __x__)
-#define	LOGMYINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_AncGeneric, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
-#define	LOGMYDEBUG(__x__)	AJA_sREPORT(AJA_DebugUnit_AncGeneric, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
+#define	LOGMYERROR(__x__)	AJA_sREPORT(AJA_DebugUnit_BFT, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
+#define	LOGMYWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_BFT, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
+#define	LOGMYNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_BFT, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":  " << __x__)
+#define	LOGMYINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_BFT, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
+#define	LOGMYDEBUG(__x__)	AJA_sREPORT(AJA_DebugUnit_BFT, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
 
 static int	gIsVerbose(0);	//	Verbose output?
 static NTV2_POINTER	gGumpBuffers[NTV2_MAX_NUM_VIDEO_FORMATS];
