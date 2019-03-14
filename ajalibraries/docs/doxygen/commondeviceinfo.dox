@@ -88,6 +88,13 @@
 	Many AJA devices have HDMI connectors, some for capture, most for playout.
 	-	To determine the number of HDMI inputs the device has, call ::NTV2DeviceGetNumHDMIVideoInputs.
 	-	To determine the number of HDMI outputs the device has, call ::NTV2DeviceGetNumHDMIVideoOutputs.
+	-	HDMI capabilities depend on the physical HDMI hardware used on the device and the supporting firmware.
+		To determine which HDMI hardware is present on the device, call ::NTV2DeviceGetHDMIVersion.
+		(Note that this doesn’t return an HDMI protocol version — it’s strictly an unsigned integer that indicates
+		which “generation” of HDMI hardware was used on the device.
+	-	HDMI hardware capabilities chart:
+
+	@image	html	hdmichart.png
 
 	@par	Audio Connectors
 

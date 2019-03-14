@@ -4501,6 +4501,7 @@ typedef enum
 } NTV2EveryFrameTaskMode;
 
 #define	NTV2_IS_VALID_TASK_MODE(__m__)		((__m__) == NTV2_DISABLE_TASKS  ||  (__m__) == NTV2_STANDARD_TASKS  ||  (__m__) == NTV2_OEM_TASKS)
+#define	NTV2_IS_STANDARD_TASKS(__m__)		((__m__) == NTV2_STANDARD_TASKS)
 
 
 typedef enum
@@ -6151,6 +6152,37 @@ typedef enum
 					@return	A non-constant reference to the output stream that received the dump.
 				**/
 				std::ostream &	Dump (	std::ostream &	inOutputStream		= std::cout,
+										const size_t	inStartByteOffset	= 0,
+										const size_t	inByteCount			= 0,
+										const size_t	inRadix				= 16,
+										const size_t	inBytesPerGroup		= 4,
+										const size_t	inGroupsPerLine		= 8,
+										const size_t	inAddressRadix		= 0,
+										const bool		inShowAscii			= false,
+										const size_t	inAddrOffset		= 0) const;
+
+				/**
+					@brief	Dumps me in hex/octal/decimal, with/without Ascii, into the given string.
+					@param	inOutputString		String that will receive the dump. Appends the dump to the end of
+												whatever is already in the string.
+					@param	inStartByteOffset	The starting offset, in bytes, where the dump will start.
+					@param	inByteCount			The number of bytes to be dumped. If zero, all bytes will be dumped.
+					@param	inRadix				Specifies the radix of the dumped memory values.
+												16=hex, 10=decimal, 8=octal, 2=binary -- all others disallowed.
+					@param	inBytesPerGroup		Number of bytes to dump per contiguous group of numbers. Defaults to 4.
+					@param	inGroupsPerLine		Number of contiguous groups of numbers to dump per output line.
+												If zero, no grouping is done, and address & ASCII display is suppressed.
+												Defaults to 8.
+					@param	inAddressRadix		Specifies the radix of the address column.
+												0=omit, 2=binary, 8=octal, 10=decimal, 16=hex -- all others disallowed.
+												Defaults to 0.
+					@param	inShowAscii			If True, show ASCII characters; otherwise no ASCII characters.
+												Overridden to false if inGroupsPerLine is zero. Defaults to false.
+					@param	inAddrOffset		Specifies a value to be added to the addresses that appear in the dump.
+												Ignored if inGroupsPerLine is zero.
+					@return	A reference to the output string that received the dump.
+				**/
+				std::string &	Dump (	std::string &	inOutputString,
 										const size_t	inStartByteOffset	= 0,
 										const size_t	inByteCount			= 0,
 										const size_t	inRadix				= 16,

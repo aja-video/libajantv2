@@ -18,7 +18,7 @@
 NTV2DeviceGetActiveMemorySize				ULWord	Returns the size, in bytes, of the device's active RAM available for video and audio.
 NTV2DeviceGetDACVersion						UWord	Returns the version number of the DAC on the device having the given ID.
 NTV2DeviceGetDownConverterDelay				UWord	Returns the down-converter delay on the device having the given ID.
-NTV2DeviceGetHDMIVersion					ULWord	Returns the version number of the HDMI input(s) and/or output(s) on the device having the given ID.
+NTV2DeviceGetHDMIVersion					ULWord	Returns the version number of the HDMI input or output hardware on the device having the given ID.
 NTV2DeviceGetLUTVersion						ULWord	Returns the version number of the LUT(s) on the device having the given ID.
 NTV2DeviceGetMaxAudioChannels				UWord	Returns the maximum number of audio channels that a single audio system can support on the device having the given ID.
 NTV2DeviceGetMaxRegisterNumber				ULWord	Returns the highest register number for the device having the given ID.
