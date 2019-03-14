@@ -2150,6 +2150,7 @@ typedef enum					// used in Virtual Register: kVRegInputSelect
     NTV2_Input2xDLHDSelect,
     NTV2_Input2x4kSelect,
     NTV2_Input4x4kSelect,
+    NTV2_Input4x8kSelect,
     NTV2_InputAutoSelect,
     NTV2_MAX_NUM_InputVideoSelectEnums
 } NTV2InputVideoSelect;
@@ -2227,6 +2228,7 @@ typedef enum
 
 typedef enum
 {
+	/*
     NTV2_SDITransport_Off,					// transport disabled, disconnected
     NTV2_SDITransport_1_5,					// Single Link, 1 wire 1.5G
     NTV2_SDITransport_3Ga,					// Single Link, 1 wire 3Ga
@@ -2240,7 +2242,9 @@ typedef enum
     NTV2_SDITransport_12G,					// 12G see Oct Link
     NTV2_MAX_NUM_SDITransportTypes,			// last
 	NTV2_SDITransport_Auto					// auto mode
-		=NTV2_MAX_NUM_SDITransportTypes				
+		=NTV2_MAX_NUM_SDITransportTypes	
+			*/
+			
 
 } NTV2SDITransportType;
 
@@ -4461,7 +4465,7 @@ typedef enum
     #define		NTV2K2_Input3Select					NTV2_Input3Select					///< @deprecated	Use NTV2_Input3Select instead.
     #define		NTV2K2_Input4Select					NTV2_Input4Select					///< @deprecated	Use NTV2_Input4Select instead.
     #define		NTV2K2_Input5Select					NTV2_Input5Select					///< @deprecated	Use NTV2_Input5Select instead.
-    #define		NTV2K2_DualLinkInputSelect			NTV2_Input2xDLHDSelect			///< @deprecated	Use NTV2_Input2xDLHDSelect instead.
+    #define		NTV2K2_DualLinkInputSelect			NTV2_Input2xDLHDSelect				///< @deprecated	Use NTV2_Input2xDLHDSelect instead.
     #define		NTV2K2_DualLink2xSdi4k				NTV2_Input2x4kSelect				///< @deprecated	Use NTV2_Input2x4kSelect instead.
     #define		NTV2K2_DualLink4xSdi4k				NTV2_Input4x4kSelect				///< @deprecated	Use NTV2_Input4x4kSelect instead.
     #define		NTV2K2_InputSelectMax				NTV2_MAX_NUM_InputVideoSelectEnums	///< @deprecated	Use NTV2_MAX_NUM_InputVideoSelectEnums instead.

@@ -1523,7 +1523,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 	bool				b2xQuadIn		= b4K && !b4kHfr && !b2pi && (mVirtualInputSelect == NTV2_Input2x4kSelect);
 	uint32_t			bFb1Disable		= 0, bFb2Disable = 1, bFb3Disable = 1, bFb4Disable = 1;
 	//bool 				bFbLevelA 		= IsVideoFormatA(mFb1sVideoFormat); 
-	bool				bQuadSwap		= b4K == true && mVirtualInputSelect == NTV2_Input4x4kSelect && mQuadSwapIn != 0;
+	bool				bQuadSwap		= b4K == true && mDs.bIn4xSdi == true && mQuadSwapIn != 0;
 	bool				bHdmiIn			= mDs.bInHdmi && mHasHdmiIn;
 	bool				bHdmiInRGB		= bHdmiIn == true && mDs.hdmiIn[0]->cs == NTV2_ColorSpaceModeRgb;
 	bool				bHdmiOutRGB		= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit ||

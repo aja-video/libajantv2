@@ -1439,7 +1439,7 @@ void KonaIP2110Services::SetDeviceXPointCapture()
 	// swap quad mode
 	ULWord						selectSwapQuad		= 0;
 	mCard->ReadRegister(kVRegSwizzle4kInput, selectSwapQuad);
-	bool						bQuadSwap			= b4K == true && mVirtualInputSelect == NTV2_Input4x4kSelect && selectSwapQuad != 0;
+	bool						bQuadSwap			= b4K == true && mDs.bIn4xSdi == true && selectSwapQuad != 0;
 
 	// SMPTE 425 (2pi)
 	bool						bVpid2x2piIn		= false;
