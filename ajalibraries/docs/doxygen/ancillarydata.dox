@@ -91,7 +91,7 @@ There are two ways to receive input timecode:
 		packet data … then decode it per the SMPTE specifications.
 
 @note	<b>Regarding High Frame Rates (>30fps):</b> When reading timecode for any input faster than 30fps,
-		you’ll see a duplicate frame count in two successive frames. but in the latter frame, the field bit will be set,
+		you’ll see a duplicate frame count in two successive frames — but in the latter frame, the field bit will be set,
 		and the DBB will indicate a value of 0x02 (VITC2). This is the SMPTE ST-12M-preferred way of sending >30fps timecode.
 		The 12M specification says there are systems that won’t conform to this transmission convention, so receivers
 		that want to support them will need to be flexible.
