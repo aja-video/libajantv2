@@ -194,7 +194,7 @@ AJAStatus NTV2Capture8K::SetupVideo (void)
 	}
 
 	// Convert the signal wire format to a 4k format
-	CNTV2DemoCommon::Get4KInputFormat(mVideoFormat);
+	CNTV2DemoCommon::Get8KInputFormat(mVideoFormat);
 	mDevice.SetVideoFormat(mVideoFormat, false, false, mInputChannel);
 
 	//	Set the device video format to whatever we detected at the input...

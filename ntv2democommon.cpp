@@ -918,6 +918,58 @@ bool CNTV2DemoCommon::Get4KInputFormat (NTV2VideoFormat & inOutVideoFormat)
 
 }	//	get4KInputFormat
 
+bool CNTV2DemoCommon::Get8KInputFormat (NTV2VideoFormat & inOutVideoFormat)
+{
+	bool	status	(false);
+	struct	VideoFormatPair
+	{
+		NTV2VideoFormat	vIn;
+		NTV2VideoFormat	vOut;
+		
+	} VideoFormatPairs [] =	{	//			vIn								vOut
+
+								{NTV2_FORMAT_3840x2160p_2398,		NTV2_FORMAT_4x3840x2160p_2398},
+								{NTV2_FORMAT_3840x2160p_2400,		NTV2_FORMAT_4x3840x2160p_2400},
+								{NTV2_FORMAT_3840x2160p_2500,		NTV2_FORMAT_4x3840x2160p_2500},
+								{NTV2_FORMAT_3840x2160p_2997,		NTV2_FORMAT_4x3840x2160p_2997},
+								{NTV2_FORMAT_3840x2160p_3000,		NTV2_FORMAT_4x3840x2160p_3000},
+								{NTV2_FORMAT_3840x2160p_5000,		NTV2_FORMAT_4x3840x2160p_5000},
+								{NTV2_FORMAT_3840x2160p_5994,		NTV2_FORMAT_4x3840x2160p_5994},
+								{NTV2_FORMAT_3840x2160p_6000,		NTV2_FORMAT_4x3840x2160p_6000},
+								{NTV2_FORMAT_3840x2160p_5000_B,		NTV2_FORMAT_4x3840x2160p_5000_B},
+								{NTV2_FORMAT_3840x2160p_5994_B,		NTV2_FORMAT_4x3840x2160p_5994_B},
+								{NTV2_FORMAT_3840x2160p_6000_B,		NTV2_FORMAT_4x3840x2160p_6000_B},
+								{NTV2_FORMAT_4096x2160p_2398,		NTV2_FORMAT_4x4096x2160p_2398},
+								{NTV2_FORMAT_4096x2160p_2400,		NTV2_FORMAT_4x4096x2160p_2400},
+								{NTV2_FORMAT_4096x2160p_2500,		NTV2_FORMAT_4x4096x2160p_2500},
+								{NTV2_FORMAT_4096x2160p_2997,		NTV2_FORMAT_4x4096x2160p_2997},
+								{NTV2_FORMAT_4096x2160p_3000,		NTV2_FORMAT_4x4096x2160p_3000},
+								{NTV2_FORMAT_4096x2160p_4795,		NTV2_FORMAT_4x4096x2160p_4795},
+								{NTV2_FORMAT_4096x2160p_4800,		NTV2_FORMAT_4x4096x2160p_4800},
+								{NTV2_FORMAT_4096x2160p_5000,		NTV2_FORMAT_4x4096x2160p_5000},
+								{NTV2_FORMAT_4096x2160p_5994,		NTV2_FORMAT_4x4096x2160p_5994},
+								{NTV2_FORMAT_4096x2160p_6000,		NTV2_FORMAT_4x4096x2160p_6000},
+								{NTV2_FORMAT_4096x2160p_4795_B,		NTV2_FORMAT_4x4096x2160p_4795_B},
+								{NTV2_FORMAT_4096x2160p_4800_B,		NTV2_FORMAT_4x4096x2160p_4800_B},
+								{NTV2_FORMAT_4096x2160p_5000_B,		NTV2_FORMAT_4x4096x2160p_5000_B},
+								{NTV2_FORMAT_4096x2160p_5994_B,		NTV2_FORMAT_4x4096x2160p_5994_B},
+								{NTV2_FORMAT_4096x2160p_6000_B,		NTV2_FORMAT_4x4096x2160p_6000_B}
+
+	};
+
+	for (size_t formatNdx = 0;  formatNdx < sizeof (VideoFormatPairs) / sizeof (VideoFormatPair);  formatNdx++)
+	{
+		if (VideoFormatPairs [formatNdx].vIn == inOutVideoFormat)
+		{
+			inOutVideoFormat = VideoFormatPairs [formatNdx].vOut;
+			status = true;
+		}
+	}
+
+	return status;
+
+}	//	get8KInputFormat
+
 
 const char * CNTV2DemoCommon::GetGlobalMutexName (void)
 {

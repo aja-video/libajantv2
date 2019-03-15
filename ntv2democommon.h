@@ -209,6 +209,13 @@ class CNTV2DemoCommon
 			@return		True if successful;  otherwise false.
 		**/
 		static bool							Get4KInputFormat (NTV2VideoFormat & inOutVideoFormat);
+		
+		/**
+			@brief		Given a video format, if all 4 inputs are the same and promotable to 8K, this function does the promotion.
+			@param		inOutVideoFormat	On entry, specifies the wire format;  on exit, receives the 4K video format.
+			@return		True if successful;  otherwise false.
+		**/
+		static bool							Get8KInputFormat (NTV2VideoFormat & inOutVideoFormat);
 	///@}
 
 	/**
