@@ -9,8 +9,17 @@
 #include "ntv2devicefeatures.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
+#include "ajabase/system/memory.h"
 
 using namespace std;
+
+/**
+	@brief	The alignment of the video and audio buffers has a big impact on the efficiency of
+			DMA transfers. When aligned to the page size of the architecture, only one DMA
+			descriptor is needed per page. Misalignment will double the number of descriptors
+			that need to be fetched and processed, thus reducing bandwidth.
+**/
+static const uint32_t	BUFFER_ALIGNMENT	(4096);		// The correct size for many systems
 
 
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
@@ -257,13 +266,21 @@ void NTV2Capture8K::SetupHostBuffers (void)
 	//	Allocate and add each in-host AVDataBuffer to my circular buffer member variable...
 	for (unsigned bufferNdx = 0; bufferNdx < CIRCULAR_BUFFER_SIZE; bufferNdx++ )
 	{
-		mAVHostBuffer [bufferNdx].fVideoBuffer		= reinterpret_cast <uint32_t *> (new uint8_t [mVideoBufferSize]);
+		mAVHostBuffer [bufferNdx].fVideoBuffer		= reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (mVideoBufferSize, BUFFER_ALIGNMENT));
 		mAVHostBuffer [bufferNdx].fVideoBufferSize	= mVideoBufferSize;
-		mAVHostBuffer [bufferNdx].fAudioBuffer		= mWithAudio ? reinterpret_cast <uint32_t *> (new uint8_t [mAudioBufferSize]) : 0;
+		mAVHostBuffer [bufferNdx].fAudioBuffer		= mWithAudio ? reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (mAudioBufferSize, BUFFER_ALIGNMENT)) : 0;
 		mAVHostBuffer [bufferNdx].fAudioBufferSize	= mWithAudio ? mAudioBufferSize : 0;
-		mAVHostBuffer [bufferNdx].fAncBuffer		= mWithAnc ? reinterpret_cast <uint32_t *> (new uint8_t [mAncBufferSize]) : 0;
+		mAVHostBuffer [bufferNdx].fAncBuffer		= mWithAnc ? reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (mAncBufferSize, BUFFER_ALIGNMENT)) : 0;
 		mAVHostBuffer [bufferNdx].fAncBufferSize	= mAncBufferSize;
 		mAVCircularBuffer.Add (& mAVHostBuffer [bufferNdx]);
+
+		// Page lock the memory
+		if (mAVHostBuffer [bufferNdx].fVideoBuffer != NULL)
+			mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fVideoBuffer, mVideoBufferSize);
+		if (mAVHostBuffer [bufferNdx].fAudioBuffer)
+			mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fAudioBuffer, mVideoBufferSize);
+		if (mAVHostBuffer [bufferNdx].fAncBuffer)
+			mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fAncBuffer, mVideoBufferSize);
 	}	//	for each AVDataBuffer
 
 }	//	SetupHostBuffers
