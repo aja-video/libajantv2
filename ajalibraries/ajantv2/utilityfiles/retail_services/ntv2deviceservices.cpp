@@ -266,7 +266,8 @@ bool DeviceServices::ReadDriverState (void)
 	mDeviceID = mCard->GetDeviceID();
 	
 	// quad swap
-	if (mBoardInfo.has4KSupport == true && NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat) == true)
+	if ((mBoardInfo.has4KSupport == true && ds.b4k == true) || 
+		(mBoardInfo.has8KSupport == true && ds.b8k == true)    )
 	{
 		if (mFb1Mode == NTV2_MODE_CAPTURE)
 			mCard->ReadRegister(kVRegSwizzle4kInput, mQuadSwapIn);

@@ -30,6 +30,7 @@ void Class8kServices::SetDeviceXPointPlayback ()
 	bool 				b8K 				= NTV2_IS_QUAD_QUAD_FORMAT(mFb1VideoFormat);
 	bool				b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool				bFb1RGB				= IsRGBFormat(mFb1Format);
+	bool				bQuadSwap			= b8K == true && mDs.bOut4xSdi == true && mQuadSwapOut != 0;	
 	bool				bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit ||
 											  mDs.hdmiOutColorSpace == kHDMIOutCSCRGB12bit;
 	
@@ -61,11 +62,11 @@ void Class8kServices::SetDeviceXPointPlayback ()
 	{
 		if (bFb1RGB)
 		{
-			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptFrameBuffer1RGB);
+			mCard->Connect (NTV2_XptSDIOut1Input, bQuadSwap ? NTV2_XptFrameBuffer3RGB : NTV2_XptFrameBuffer1RGB);
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptSDIOut1Input, NTV2_XptFrameBuffer1YUV);
+			mCard->Connect (NTV2_XptSDIOut1Input, bQuadSwap ? NTV2_XptFrameBuffer3YUV : NTV2_XptFrameBuffer1YUV);
 		}
 	}
 	else if (b4K)
@@ -80,11 +81,11 @@ void Class8kServices::SetDeviceXPointPlayback ()
 	{
 		if (bFb1RGB)
 		{
-			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptFrameBuffer2RGB);
+			mCard->Connect (NTV2_XptSDIOut2Input, bQuadSwap ? NTV2_XptFrameBuffer4RGB : NTV2_XptFrameBuffer2RGB);
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptSDIOut2Input, NTV2_XptFrameBuffer2YUV);
+			mCard->Connect (NTV2_XptSDIOut2Input, bQuadSwap ? NTV2_XptFrameBuffer4YUV : NTV2_XptFrameBuffer2YUV);
 		}
 	}
 	else if (b4K)
@@ -99,11 +100,11 @@ void Class8kServices::SetDeviceXPointPlayback ()
 	{
 		if (bFb1RGB)
 		{
-			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptFrameBuffer3RGB);
+			mCard->Connect (NTV2_XptSDIOut3Input, bQuadSwap ? NTV2_XptFrameBuffer1RGB : NTV2_XptFrameBuffer3RGB);
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptSDIOut3Input, NTV2_XptFrameBuffer3YUV);
+			mCard->Connect (NTV2_XptSDIOut3Input, bQuadSwap ? NTV2_XptFrameBuffer1YUV : NTV2_XptFrameBuffer3YUV);
 		}
 	}
 	else if (b4K)
@@ -125,12 +126,12 @@ void Class8kServices::SetDeviceXPointPlayback ()
 	{
 		if (bFb1RGB)
 		{
-			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptFrameBuffer4RGB);
+			mCard->Connect (NTV2_XptSDIOut4Input, bQuadSwap ? NTV2_XptFrameBuffer2RGB : NTV2_XptFrameBuffer4RGB);
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 		}
 		else
 		{
-			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptFrameBuffer4YUV);
+			mCard->Connect (NTV2_XptSDIOut4Input, bQuadSwap ? NTV2_XptFrameBuffer2YUV : NTV2_XptFrameBuffer4YUV);
 			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
 		}
 	}
@@ -183,6 +184,8 @@ void Class8kServices::SetDeviceXPointCapture ()
 {
 	bool 				b8K 			= NTV2_IS_QUAD_QUAD_FORMAT(mFb1VideoFormat);
 	bool				b4K				= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
+	bool				bQuadSwap		= b8K == true && mDs.bIn4xSdi == true && mQuadSwapIn != 0;
+
 	//bool				bHdmiIn			= mDs.bInHdmi && mHasHdmiIn;
 	//bool				bHdmiInRGB		= bHdmiIn == true && mDs.hdmiIn[0]->cs == NTV2_ColorSpaceModeRgb;
 	//bool				bInRGB			= bHdmiInRGB || mDs.bInSdiRgb;
@@ -204,7 +207,7 @@ void Class8kServices::SetDeviceXPointCapture ()
 	// Frame Buffer 1
 	if (b8K)
 	{
-		mCard->Connect (NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);
+		mCard->Connect (NTV2_XptFrameBuffer1Input, bQuadSwap ? NTV2_XptSDIIn3 : NTV2_XptSDIIn1);
 	}
 	else if (b4K)
 	{
@@ -214,7 +217,7 @@ void Class8kServices::SetDeviceXPointCapture ()
 	// Frame Buffer 2
 	if (b8K)
 	{
-		mCard->Connect (NTV2_XptFrameBuffer2Input, NTV2_XptSDIIn2);
+		mCard->Connect (NTV2_XptFrameBuffer2Input, bQuadSwap ? NTV2_XptSDIIn4 : NTV2_XptSDIIn2);
 	}
 	else
 	{
@@ -224,7 +227,7 @@ void Class8kServices::SetDeviceXPointCapture ()
 	// Frame Buffer 3
 	if (b8K)
 	{
-		mCard->Connect (NTV2_XptFrameBuffer3Input, NTV2_XptSDIIn3);
+		mCard->Connect (NTV2_XptFrameBuffer3Input, bQuadSwap ? NTV2_XptSDIIn1 : NTV2_XptSDIIn3);
 	}
 	else
 	{
@@ -234,7 +237,7 @@ void Class8kServices::SetDeviceXPointCapture ()
 	// Frame Buffer 4
 	if (b8K)
 	{
-		mCard->Connect (NTV2_XptFrameBuffer4Input, NTV2_XptSDIIn4);
+		mCard->Connect (NTV2_XptFrameBuffer4Input, bQuadSwap ? NTV2_XptSDIIn2 : NTV2_XptSDIIn4);
 	}
 	else
 	{
