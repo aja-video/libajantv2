@@ -351,9 +351,10 @@ void Class8kServices::SetDeviceMiscRegisters ()
 	}
 	
 	// SDI Out - Transmit
-	bool bTransmit = mDs.ioMode == NTV2_MODE_OUTPUT;
+	bool bTransmit;
 	for (int i=0; i<4; i++)
 	{
+		bTransmit = mDs.sdiOut[i]->isOut;
 		mCard->SetSDITransmitEnable((NTV2Channel)i, bTransmit);
 	}
 	
