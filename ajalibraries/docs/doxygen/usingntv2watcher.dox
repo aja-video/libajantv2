@@ -445,7 +445,7 @@ There is a group of controls for each Mixer/Keyer widget on the device:
 		-	<b>Background Video</b> — Passes the background video’s VANC lines to the Mixer output.
 		-	<b>Foreground Video</b> — Passes the foreground video’s VANC lines to the Mixer output.
 
-Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable frame-accurate snapshot of the AutoCirculate state of the device to the Clipboard.
+Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the state of all Mixers to the Clipboard.
 
 
 

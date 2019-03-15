@@ -772,7 +772,7 @@
 			-	Call CNTV2Card::GetMixerVancOutputFromForeground to determine if the output VANC is currently
 				being sourced from the foreground video input.
 			-	Call CNTV2Card::SetMixerVancOutputFromForeground to change the output VANC source.
-		-	<b>Flat Matte</b> — The Mixer’s foreground and/or background raster can be set to a flat matte of any
+		-	<b>Flat Matte</b> — The Mixer’s foreground or background raster can be set to a flat matte of any
 			10-bit YCbCr color. This matte will override any respective video input to the Mixer.
 				-	Call CNTV2Card::GetMixerFGMatteEnabled to determine if the foreground matte is enabled or not.
 				-	Call CNTV2Card::SetMixerFGMatteEnabled to enable or disable using the foreground matte.
@@ -785,6 +785,8 @@
 					video source if background matte is enabled, or a background video source if foreground
 					matte is enabled.
 	-	For information on how to route signals to and from the Mixer, see \ref widget_mixkey.
+	-	The \ref usingntv2watcher tool’s \ref inspectormixerkeyer allows you to interactively view each Mixer/Keyer
+		widget’s current configuration, as well as make changes to it.
 
 
 
