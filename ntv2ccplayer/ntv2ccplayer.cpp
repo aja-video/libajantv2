@@ -1418,6 +1418,8 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	static const AJAAncillaryDataLocation	kCEA708LocF1(AJAAncillaryDataLink_A,  AJAAncillaryDataVideoStream_Y,  AJAAncillaryDataSpace_VANC,  kF1PktLineNumCEA708);
 	const NTV2FormatDescriptor	formatDesc			(mConfig.fVideoFormat, mConfig.fPixelFormat, mVancMode);
 	const ULWord				bytesPerRow			(formatDesc.GetBytesPerRow());
+	const bool					isProgressive		(::IsProgressivePicture(mConfig.fVideoFormat));
+	const bool					isInterlaced		(!isProgressive);
 	CNTV2Line21Captioner		F1Line21Encoder;	//	Used to encode Field 1 analog (line 21) waveform
 	CNTV2Line21Captioner		F2Line21Encoder;	//	Used to encode Field 2 analog (line 21) waveform
 	CaptionData					captionData;		//	Current frame's 608 caption bytes (Fields 1 and 2)
@@ -1432,7 +1434,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	if (!mConfig.fForceVanc)
 	{
 		xferInfo.acANCBuffer.Allocate(2048);
-		if (!IsProgressivePicture(mConfig.fVideoFormat))
+		if (isInterlaced)
 			xferInfo.acANCField2Buffer.Allocate(2048);
 	}
 
@@ -1543,7 +1545,27 @@ void NTV2CCPlayer::PlayoutFrames (void)
 				{
 					AJAAncillaryData_Cea708	pkt708;
 					pkt708.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data(), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708LocF1);
+#if 1	/////// ** MrBill **	DEBUG	//////////////		DEBUG		///////////////////		DEBUG		//////////////////		DEBUG		//////////////////
+					if (::NTV2DeviceCanDo2110(mDeviceID))	//	KONA IP 2110 ONLY
+						if (mConfig.fVideoFormat == NTV2_FORMAT_1080p_2398)	//	1080p2398 ONLY
+						{
+							pkt708.SetLocationLineNumber(18);		//	Put CEA708 packet on line 18
+							packetList.AddAncillaryData(pkt708);
+
+							//	Put a second packet after it on line 18...
+							AJAAncillaryData extraPkt;  const string testData ("This is a test packet");
+							extraPkt.SetDID(0xAB);	extraPkt.SetSID(0xCD);
+							extraPkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
+							extraPkt.SetLocationVideoLink(AJAAncillaryDataLink_A);
+							extraPkt.SetLocationVideoSpace(AJAAncillaryDataSpace_VANC);
+							extraPkt.SetLocationDataChannel(AJAAncillaryDataChannel_Y);
+							extraPkt.SetLocationLineNumber(18);
+							extraPkt.SetPayloadData((uint8_t*)testData.c_str(), testData.size());
+							packetList.AddAncillaryData(extraPkt);
+						}
+#else	/////// ** MrBill **	DEBUG	//////////////		DEBUG		///////////////////		DEBUG		//////////////////		DEBUG		//////////////////
 					packetList.AddAncillaryData(pkt708);
+#endif	/////// ** MrBill **	DEBUG	//////////////		DEBUG		///////////////////		DEBUG		//////////////////		DEBUG		//////////////////
 				}
 			}	//	else HD video
 
@@ -1551,7 +1573,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 			if (mConfig.fForceVanc)	//	Write FB VANC lines...
 				packetList.GetVANCTransmitData (mVideoBuffer,  formatDesc);
 			else					//	Else use the Anc inserter firmware:
-				packetList.GetTransmitData (xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, IsProgressivePicture(mConfig.fVideoFormat), F2StartLine);
+				packetList.GetTransmitData (xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, isProgressive, F2StartLine);
 
 			if (!mConfig.fSuppressTimecode)
 			{
@@ -1562,15 +1584,21 @@ void NTV2CCPlayer::PlayoutFrames (void)
 				NTV2_RP188		tc;
 				rp188.GetRP188Reg  (tc);
 				if (!NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat) && !mConfig.fDoMultiFormat)
-					tcOK = xferInfo.SetAllOutputTimeCodes(tc);
+					//	UniFormat and not Quad Frame:   i.e. using ALL output spigots:
+					//	AutoCirculateTransfer will automatically set ALL output timecodes to
+					//	the DEFAULT timecode if the DEFAULT timecode is valid...
+					tcOK = xferInfo.SetOutputTimeCode(tc, NTV2_TCINDEX_DEFAULT);
 				else
-				{
+				{	//	MULTI-FORMAT OR QUAD-FRAME:
 					//	Be more selective as to which output spigots get the generated timecode...
 					NTV2TimeCodes	timecodes;
 					for (int num (0);  num < 4;  num++)
 					{
-						timecodes[::NTV2ChannelToTimecodeIndex(NTV2Channel(mConfig.fOutputChannel + num), false)] = tc;
-						timecodes[::NTV2ChannelToTimecodeIndex(NTV2Channel(mConfig.fOutputChannel + num), true)] = tc;
+						const NTV2Channel	chan (NTV2Channel(mConfig.fOutputChannel + num));
+						timecodes[::NTV2ChannelToTimecodeIndex(chan, /*inEmbeddedLTC*/false)] = tc;
+						timecodes[::NTV2ChannelToTimecodeIndex(chan, /*inEmbeddedLTC*/true)] = tc;
+						if (isInterlaced)
+							timecodes[::NTV2ChannelToTimecodeIndex(chan, /*inEmbeddedLTC*/false, /*inIsF2*/true)] = tc;
 						if (acOptionFlags & AUTOCIRCULATE_WITH_LTC)
 						{
 							timecodes[NTV2_TCINDEX_LTC1] = tc;
@@ -1578,8 +1606,8 @@ void NTV2CCPlayer::PlayoutFrames (void)
 								timecodes[NTV2_TCINDEX_LTC2] = tc;
 						}
 						if (!NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
-							break;
-					}
+							break;	//	Not Quad Frame:  just do the one output
+					}	//	for each quad
 					tcOK = xferInfo.SetOutputTimeCodes(timecodes);
 				}
 				::memcpy (tcString + colShift, rp188.GetRP188CString(), 11);
