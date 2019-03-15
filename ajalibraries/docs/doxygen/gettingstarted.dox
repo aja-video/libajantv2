@@ -268,14 +268,25 @@ On Linux, the libraries and device drivers are not pre-built, and must be compil
 	-	issuing an \c lsmod, and look for <b>ajantv2</b> in the list;
 	-	look inside \c /dev and look for devices with names that start with <b>ajantv2</b>.
 
-@note	If the device doesn’t show up in \c /dev or \c lsmod doesn’t report it, see the \ref dev-firmware-loading section
-		for more information on how to diagnose the problem.
+@note	<b>If the device doesn’t show up:</b> If \c lsmod doesn’t report the device, or it doesn’t appear in \c /dev ,
+		see the \ref dev-firmware-loading section for more information on how to diagnose the problem.
 
-@note	The \ref ajantv2 in the SDK is built to link with GCC 5.0 and earlier, GCC versions after this introduced an ABI change.
-		If you use the \ref ajacc, AJA supplies a GCC 5.1 and later compatible version of this library inside the <b>lib/gcc_5_1_and_after</b> directory.
-		Swap it with the couterpart in the <b>lib</b> directory. Then follow the build steps above.<br><br>
-		On CentOS (and possibly other Linux variants), the DVP demo app “dvplowlatencydemo” won’t run unless the \c libdvp.so
+@note	<b>GCC Versions:</b>  The \ref ajantv2 in the SDK is built to link with GCC 5.0 and earlier — GCC versions after this
+		introduced an ABI change. If you use the \ref ajacc, AJA supplies a GCC 5.1+-compatible version of this library inside
+		the <b>lib/gcc_5_1_and_after</b> directory. Swap it with the counterpart in the <b>lib</b> directory, then follow the
+		build steps above.
+
+@note	On CentOS (and possibly other Linux variants), the DVP demo app “dvplowlatencydemo” won’t run unless the \c libdvp.so
 		shared library is copied into \c /usr/lib64.
+
+@note	<b>Automatic Driver Loading at Boot Time:</b> To install the AJA NTV2 driver at boot time, you could add the load to the
+		boot process.  See, for example, the AJA Linux Retail Installer’s DKMS package, which installs the driver source that will
+		get rebuilt when the system kernel is updated.
+
+@note	<b>Hosts With Secure Boot Enabled:</b> On hosts with <b>Secure Boot</b> enabled, you’ll need to sign the <b>ajantv2.ko</b>
+		kernel module after it’s been built. Check with your Linux distro’s documentation for <b>Secure Boot</b> information (e.g.,
+		“<a href="https://blog.ubuntu.com/2017/08/11/how-to-sign-things-for-secure-boot">Secure Boot Signing on Ubuntu</a>”).
+
 
 
 @subsection		gs-macsdkbuild	Building on MacOS
