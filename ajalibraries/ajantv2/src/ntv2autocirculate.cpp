@@ -27,7 +27,7 @@ using namespace std;
 #endif	//	_DEBUG
 
 //	Logging Macros
-#define ACINSTP(_p_)		" inst=" << HEX0N(uint64_t(_p_),8)
+#define ACINSTP(_p_)		" " << HEX0N(uint64_t(_p_),8)
 #define ACTHIS				ACINSTP(this)
 
 #define	ACFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_AutoCirculate,	ACTHIS << "::" << AJAFUNC << ": " << __x__)
@@ -1372,6 +1372,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 		if (AJA_FAILURE(AJAAncillaryList::SetFromDeviceAncBuffers(ancF1, ancF2, pkts)))
 			return false;	//	Packet import failed
 
+	//ANCDBG(pkts);	//	Original packet list from caller
 	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(standard));
 	const uint32_t				F2StartLine			(smpteLineNumInfo.GetLastLine());	//	F2 VANC starts past last line of F1
 
@@ -1458,15 +1459,16 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 	if (changed)
 	{	//	We must re-encode packets into the RTP buffers only if anything new was added...
 		ancF1.Fill(ULWord(0));	ancF2.Fill(ULWord(0));	//	Clear/reset anc RTP buffers
-		//ANCDBG(pkts);
+		//ANCDBG(pkts);	//	Modified, but unsorted packet list
 		result = AJA_SUCCESS(pkts.GetIPTransmitData (ancF1, ancF2, isProgressive, F2StartLine));
 #if defined(_DEBUG)
 		if (result)
 		{
 			AJAAncillaryList	comparePkts;
+			ANCDBG(pkts);	//	Sorted packet list
 			NTV2_ASSERT(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(ancF1, ancF2, comparePkts)));
-			//ANCDBG(comparePkts);
-			string compareResult (comparePkts.CompareWithInfo(pkts,false,false));
+			ANCDBG(comparePkts);
+			string compareResult (comparePkts.CompareWithInfo(pkts, /*ignoreLocation*/false, /*ignoreChecksum*/false));
 			if (!compareResult.empty())
 				ANCWARN("MISCOMPARE: " << compareResult);
 		}

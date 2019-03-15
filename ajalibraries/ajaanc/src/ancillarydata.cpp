@@ -1174,7 +1174,7 @@ const string & AJAAncillaryDataCodingToString (const AJAAncillaryDataCoding inVa
 
 const string &	AJAAncillaryBufferFormatToString (const AJAAncillaryBufferFormat inValue, const bool inCompact)
 {
-	static const string		gAncBufFmtToStr []	= {"???", "FBVANC", "SDI", "RTP", ""};
+	static const string		gAncBufFmtToStr []	= {"UNK", "FBVANC", "SDI", "RTP", ""};
 	static const string		gDAncBufFmtToStr []	= {"AJAAncillaryBufferFormat_Unknown", "AJAAncillaryBufferFormat_FBVANC",
 													"AJAAncillaryBufferFormat_SDI", "AJAAncillaryBufferFormat_RTP", ""};
 
@@ -1205,7 +1205,7 @@ ostream & AJAAncillaryData::Print (ostream & inOutStream, const bool inDumpPaylo
 				<< "CS:\t\t"	<< xHEX0N(uint32_t(m_checksum),2)							<< endl
 				<< "Loc:\t\t"	<< m_location												<< endl
 				<< "Coding:\t\t"<< ::AJAAncillaryDataCodingToString(m_coding)				<< endl
-				<< "Frame:\t\t"	<< DEC(GetFrameID())										<< endl
+				<< "Frame:\t\t"	<< xHEX0N(GetFrameID(),8)									<< endl
 				<< "Format:\t\t"<< ::AJAAncillaryBufferFormatToString(GetBufferFormat())	<< endl
 				<< "Valid:\t\t"	<< (m_rcvDataValid ? "Yes" : "No");
 	if (inDumpPayload)
@@ -1219,11 +1219,11 @@ string AJAAncillaryData::AsString (const uint16_t inMaxBytes) const
 	ostringstream	oss;
 	oss	<< "[" << ::AJAAncillaryDataCodingToString(GetDataCoding())
 		<< "|" << ::AJAAncillaryDataLocationToString(GetDataLocation())
-		<< "|" << GetDIDSIDPair() << "|CS=" << xHEX0N(uint16_t(GetChecksum()),2) << "|DC=" << DEC(GetDC());
+		<< "|" << GetDIDSIDPair() << "|CS" << HEX0N(uint16_t(GetChecksum()),2) << "|DC=" << DEC(GetDC());
 	if (m_frameID)
-		oss	<< "|Frm=" << DEC(GetFrameID());
+		oss	<< "|FRx" << HEX0N(GetFrameID(),8);
 	if (IS_KNOWN_AJAAncillaryBufferFormat(m_bufferFmt))
-		oss	<< "|Fmt=" << ::AJAAncillaryBufferFormatToString(GetBufferFormat());
+		oss	<< "|" << ::AJAAncillaryBufferFormatToString(GetBufferFormat());
 	const string	typeStr	(AJAAncillaryData::DIDSIDToString(m_DID, m_SID));
 	if (!typeStr.empty())
 		oss << "|" << typeStr;
@@ -1245,7 +1245,7 @@ string AJAAncillaryData::AsString (const uint16_t inMaxBytes) const
 
 ostream & operator << (ostream & inOutStream, const AJAAncillaryDIDSIDPair & inData)
 {
-	inOutStream << "ID=" << xHEX0N(uint16_t(inData.first), 2) << "/" << xHEX0N(uint16_t(inData.second), 2);
+	inOutStream << "x" << HEX0N(uint16_t(inData.first), 2) << "x" << HEX0N(uint16_t(inData.second), 2);
 	return inOutStream;
 }
 

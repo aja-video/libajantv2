@@ -73,7 +73,7 @@ public:	//	INSTANCE METHODS
 	**/
 	///@{
 											AJAAncillaryList ();			///< @brief	Instantiate and initialize with a default set of values.
-
+	inline									AJAAncillaryList (const AJAAncillaryList & inRHS)	{*this = inRHS;}	///< @brief	My copy constructor.
 	virtual									~AJAAncillaryList ();			///< @brief	My destructor.
 
 	/**
@@ -429,7 +429,6 @@ protected:
 	virtual AJAAncillaryDataType			GetAnalogAncillaryDataType (AJAAncillaryData * pInAncData);
 
 	static bool								BufferHasGUMPData (const NTV2_POINTER & inBuffer);
-
 
 protected:
 	typedef std::list <AJAAncillaryData *>			AJAAncillaryDataList;

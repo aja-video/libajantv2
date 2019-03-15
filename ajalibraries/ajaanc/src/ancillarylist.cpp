@@ -44,7 +44,7 @@ static bool	gIncludeZeroLengthPackets	(false);
 
 AJAAncillaryList::AJAAncillaryList ()
 {
-	Clear ();
+	Clear();
 	SetAnalogAncillaryDataTypeForLine (20, AJAAncillaryDataType_Cea608_Line21);
 	SetAnalogAncillaryDataTypeForLine (21, AJAAncillaryDataType_Cea608_Line21);
 	SetAnalogAncillaryDataTypeForLine (22, AJAAncillaryDataType_Cea608_Line21);
@@ -57,7 +57,7 @@ AJAAncillaryList::AJAAncillaryList ()
 
 AJAAncillaryList::~AJAAncillaryList ()
 {
-	Clear ();
+	Clear();
 }
 
 
@@ -65,10 +65,10 @@ AJAAncillaryList & AJAAncillaryList::operator = (const AJAAncillaryList & inRHS)
 {
 	if (this != &inRHS)
 	{
-		Clear ();
-		for (AJAAncDataListConstIter it (inRHS.m_ancList.begin ());  it != inRHS.m_ancList.end ();  ++it)
+		Clear();
+		for (AJAAncDataListConstIter it(inRHS.m_ancList.begin());  it != inRHS.m_ancList.end();  ++it)
 			if (*it)
-				AddAncillaryData ((*it)->Clone ());
+				AddAncillaryData((*it)->Clone());
 	}
 	return *this;
 }
@@ -350,7 +350,7 @@ string AJAAncillaryList::CompareWithInfo (const AJAAncillaryList & inCompareList
 	for (uint32_t ndx (0);  ndx < CountAncillaryData();  ndx++)
 	{
 		AJAAncillaryData *	pPktA	(inCompareList.GetAncillaryDataAtIndex(ndx));
-		AJAAncillaryData *	pPktB	(inCompareList.GetAncillaryDataAtIndex(ndx));
+		AJAAncillaryData *	pPktB	(GetAncillaryDataAtIndex(ndx));
 		const string		info	(pPktA->CompareWithInfo(*pPktB, inIgnoreLocation, inIgnoreChecksum));
 		if (!info.empty())
 			return info;
@@ -1324,7 +1324,7 @@ ostream & AJAAncillaryList::Print (ostream & inOutStream, const bool inDumpPaylo
 	{
 		AJAAncillaryData *	ancData	(*it);
 
-		inOutStream << "## Pkt" << DEC0N(++num,3) << ":  " << ancData->AsString(inDumpPayload ? 64 : 0);
+		inOutStream << "## Pkt" << DEC0N(++num,3) << ":  " << ancData->AsString(inDumpPayload ? 16 : 0);
 //		ancData->Print (inOutStream, inDumpPayload);
 		++it;
 		if (it != m_ancList.end())
