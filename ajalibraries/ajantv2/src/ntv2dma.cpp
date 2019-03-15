@@ -309,6 +309,30 @@ bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
 }
 
 
+bool
+CNTV2Card::DMABufferLock (const ULWord * pBuffer, const ULWord inByteCount)
+{
+	if (!_boardOpened)
+		return false;		//	Device not open!
+
+	NTV2BufferLock lock(pBuffer, inByteCount, DMABUFFERLOCK_LOCK);
+
+	return NTV2Message (reinterpret_cast <NTV2_HEADER *> (&lock));
+}
+
+
+bool
+CNTV2Card::DMABufferUnlockAll ()
+{
+	if (!_boardOpened)
+		return false;		//	Device not open!
+
+	NTV2BufferLock lock(NULL, 0, DMABUFFERLOCK_UNLOCK_ALL);
+
+	return NTV2Message (reinterpret_cast <NTV2_HEADER *> (&lock));
+}
+
+
 #if !defined (NTV2_DEPRECATE)
 	bool CNTV2Card::DmaRead (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
 							 const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous)
