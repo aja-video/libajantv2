@@ -773,7 +773,7 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 	autoCircData.bVal6 = ((inOptionFlags & AUTOCIRCULATE_WITH_VIDPROC) != 0) ? true : false;
 	autoCircData.bVal7 = ((inOptionFlags & AUTOCIRCULATE_WITH_ANC) != 0) ? true : false;
 	autoCircData.bVal8 = ((inOptionFlags & AUTOCIRCULATE_WITH_LTC) != 0) ? true : false;
-	if (NTV2DeviceCanDo2110(_boardID))						//	If S2110 IP device...
+	if (::NTV2DeviceCanDo2110(_boardID))					//	If S2110 IP device...
 		if (inOptionFlags & AUTOCIRCULATE_WITH_RP188)		//	and caller wants RP188
 			if (!(inOptionFlags & AUTOCIRCULATE_WITH_ANC))	//	but caller failed to enable Anc playout
 			{
@@ -990,24 +990,26 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 	NTV2EveryFrameTaskMode	taskMode	(NTV2_OEM_TASKS);
 	if (!GetCurrentACChannelCrosspoint (*this, inChannel, crosspoint))
 		return false;
-	if (!NTV2_IS_VALID_NTV2CROSSPOINT (crosspoint))
+	if (!NTV2_IS_VALID_NTV2CROSSPOINT(crosspoint))
 		return false;
-	GetEveryFrameServices (taskMode);
+	GetEveryFrameServices(taskMode);
 
-	if (NTV2_IS_INPUT_CROSSPOINT (crosspoint))
-		inOutXferInfo.acTransferStatus.acFrameStamp.acTimeCodes.Fill (UByte (0xFF));	//	Invalidate old timecodes
-	else if (NTV2_IS_OUTPUT_CROSSPOINT (crosspoint))
+	if (NTV2_IS_INPUT_CROSSPOINT(crosspoint))
+		inOutXferInfo.acTransferStatus.acFrameStamp.acTimeCodes.Fill(ULWord(0xFFFFFFFF));	//	Invalidate old timecodes
+	else if (NTV2_IS_OUTPUT_CROSSPOINT(crosspoint))
 	{
-		if (inOutXferInfo.acRP188.IsValid ())
-			inOutXferInfo.SetAllOutputTimeCodes (inOutXferInfo.acRP188);
+		bool isProgressive (false);
+		IsProgressiveStandard(isProgressive, inChannel);
+		if (inOutXferInfo.acRP188.IsValid())
+			inOutXferInfo.SetAllOutputTimeCodes(inOutXferInfo.acRP188, /*alsoSetF2*/!isProgressive);
 
-		const NTV2_RP188 *	pArray	(reinterpret_cast <const NTV2_RP188 *> (inOutXferInfo.acOutputTimeCodes.GetHostPointer ()));
-		if (pArray  &&  pArray [NTV2_TCINDEX_DEFAULT].IsValid ())
-			inOutXferInfo.SetAllOutputTimeCodes (pArray [NTV2_TCINDEX_DEFAULT]);
+		const NTV2_RP188 *	pArray	(reinterpret_cast <const NTV2_RP188*>(inOutXferInfo.acOutputTimeCodes.GetHostPointer()));
+		if (pArray  &&  pArray[NTV2_TCINDEX_DEFAULT].IsValid())
+			inOutXferInfo.SetAllOutputTimeCodes(pArray[NTV2_TCINDEX_DEFAULT], /*alsoSetF2*/!isProgressive);
 	}
 
 	bool	tmpLocalRP188F1AncBuffer(false), tmpLocalRP188F2AncBuffer(false);
-	if (NTV2DeviceCanDo2110(_boardID)  &&  NTV2_IS_OUTPUT_CROSSPOINT(crosspoint))
+	if (::NTV2DeviceCanDo2110(_boardID)  &&  NTV2_IS_OUTPUT_CROSSPOINT(crosspoint))
 		//	S2110 Playout:	So that most Retail & OEM playout apps "just work" with S2110 RTP Anc streams, our classic SDI
 		//					Anc data that device firmware normally embeds into SDI output as derived from registers -- e.g.
 		//					VPID, RP188, etc. -- the SDK here will automatically insert these packets into the outgoing RTP
@@ -1073,7 +1075,7 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 				pArray [NTV2_TCINDEX_DEFAULT] = tcValue;
 		}	//	if retail mode
 
-		if (NTV2DeviceCanDo2110(_boardID))
+		if (::NTV2DeviceCanDo2110(_boardID))
 		{	//	S2110:  decode VPID and timecode anc packets from RTP, and put into A/C Xfer and device regs
 			if (inOutXferInfo.acANCBuffer.IsNULL())
 				tmpLocalRP188F1AncBuffer = inOutXferInfo.acANCBuffer.Allocate(2048);

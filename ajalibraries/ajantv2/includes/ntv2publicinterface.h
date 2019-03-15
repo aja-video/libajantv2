@@ -7653,12 +7653,13 @@ typedef enum
 
 				/**
 					@brief		Intended for playout, replaces all elements of my acOutputTimeCodes member with the given timecode value.
-					@param[in]	inTimecode	Specifies the timecode value to use for all possible embedded (VITC, ATC-LTC) and analog timecode outputs for the device.
+					@param[in]	inTimecode		Specifies the timecode value to use for all possible embedded (VITC, ATC-LTC) and analog timecode outputs for the device.
+					@param[in]	inIncludeF2		Specify true to include Field2 timecode values (VITC2), or false to exclude them. Defaults to true.
 					@note		Note that specifying an SDI output destination that's not connected to the framestore associated with the
 								AutoCirculate channel can result in the wrong timecode being transmitted from another channel's SDI output(s).
 					@return		True if successful;  otherwise false.
 				**/
-				bool									SetAllOutputTimeCodes (const NTV2_RP188 & inTimecode);
+				bool									SetAllOutputTimeCodes (const NTV2_RP188 & inTimecode, const bool inIncludeF2 = true);
 
 				/**
 					@brief		Intended for capture, answers with the timecodes captured in my acTransferStatus member's acFrameStamp member.

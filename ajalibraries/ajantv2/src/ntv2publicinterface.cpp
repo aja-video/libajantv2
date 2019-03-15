@@ -2140,11 +2140,12 @@ bool AUTOCIRCULATE_TRANSFER::SetAncBuffers (ULWord * pInANCBuffer, const ULWord 
 	return true;
 }
 
+static const NTV2_RP188		INVALID_TIMECODE_VALUE;
+
 
 bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes (const NTV2TimeCodes & inValues)
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	NTV2_RP188		invalidValue;
 	ULWord			maxNumValues	(acOutputTimeCodes.GetByteCount () / sizeof (NTV2_RP188));
 	NTV2_RP188 *	pArray	(reinterpret_cast <NTV2_RP188 *> (acOutputTimeCodes.GetHostPointer ()));
 	if (!pArray)
@@ -2152,11 +2153,11 @@ bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes (const NTV2TimeCodes & inValues)
 	if (maxNumValues > NTV2_MAX_NUM_TIMECODE_INDEXES)
 		maxNumValues = NTV2_MAX_NUM_TIMECODE_INDEXES;
 
-	for (UWord ndx (0);  ndx < maxNumValues;  ndx++)
+	for (UWord ndx (0);  ndx < UWord(maxNumValues);  ndx++)
 	{
 		const NTV2TCIndex		tcIndex	(static_cast <const NTV2TCIndex> (ndx));
 		NTV2TimeCodesConstIter	iter	(inValues.find (tcIndex));
-		pArray [ndx] = (iter != inValues.end ())  ?  iter->second  :  invalidValue;
+		pArray [ndx] = (iter != inValues.end ())  ?  iter->second  :  INVALID_TIMECODE_VALUE;
 	}	//	for each possible NTV2TCSource value
 	return true;
 }
@@ -2178,18 +2179,21 @@ bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCode (const NTV2_RP188 & inTimeCode, c
 	return true;
 }
 
-bool AUTOCIRCULATE_TRANSFER::SetAllOutputTimeCodes (const NTV2_RP188 & inTimeCode)
+bool AUTOCIRCULATE_TRANSFER::SetAllOutputTimeCodes (const NTV2_RP188 & inTimeCode, const bool inIncludeF2)
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	ULWord			maxNumValues	(acOutputTimeCodes.GetByteCount () / sizeof (NTV2_RP188));
-	NTV2_RP188 *	pArray			(reinterpret_cast <NTV2_RP188 *> (acOutputTimeCodes.GetHostPointer ()));
+	ULWord			maxNumValues	(acOutputTimeCodes.GetByteCount() / sizeof(NTV2_RP188));
+	NTV2_RP188 *	pArray			(reinterpret_cast<NTV2_RP188*>(acOutputTimeCodes.GetHostPointer()));
 	if (!pArray)
 		return false;
 	if (maxNumValues > NTV2_MAX_NUM_TIMECODE_INDEXES)
 		maxNumValues = NTV2_MAX_NUM_TIMECODE_INDEXES;
 
-	for (ULWord tcIndex (0);  tcIndex < maxNumValues;  tcIndex++)
-		pArray[tcIndex] = inTimeCode;
+	for (ULWord tcIndex(0);  tcIndex < maxNumValues;  tcIndex++)
+		if (NTV2_IS_ATC_VITC2_TIMECODE_INDEX(tcIndex))
+			pArray[tcIndex] = inIncludeF2 ? inTimeCode : INVALID_TIMECODE_VALUE;
+		else
+			pArray[tcIndex] = inTimeCode;
 	return true;
 }
 
