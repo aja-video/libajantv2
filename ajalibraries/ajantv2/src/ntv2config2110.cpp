@@ -2238,6 +2238,11 @@ bool CNTV2Config2110::GenAncStreamSDPInfo(stringstream & sdp, const eSFP sfp, co
 		mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0, val);
 	}
 
+	struct in_addr addr;
+	addr.s_addr = val;
+	string localIPAddress = inet_ntoa(addr);
+	sdp << ' ' << localIPAddress << endl;
+
 	// rtpmap
 	sdp << "a=rtpmap:";
 	sdp << To_String(config.payloadType);
