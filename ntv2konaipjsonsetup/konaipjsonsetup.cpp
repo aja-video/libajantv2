@@ -803,7 +803,6 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 			rxChannelConfig.rxMatch |= RX_MATCH_2110_SSRC;
 
 
-#if 0
 		bool rv;
 		rv = config2110.SetRxStreamConfiguration (sfp,
 												  receiveAnc2110.rxAncCh[i].stream,
@@ -822,7 +821,6 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 			cerr << "SetRxStreamEnable: FAILED: " << config2110.getLastError() << endl;
 			return false;
 		}
-#endif
 	}
 
     tx_2110Config txChannelConfig;
