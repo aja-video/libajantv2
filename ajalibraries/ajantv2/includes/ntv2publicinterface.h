@@ -5805,8 +5805,9 @@ typedef enum
 		#endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 		/**
-			@brief	Principally used for sharing an arbitrary-sized chunk of host memory with the NTV2 kernel driver,
-					but is flexible and handy enough for use as a generic user-space buffer object.
+			@brief	A generic user-space buffer object that has an address and a length.
+					Used most often to share an arbitrary-sized chunk of host memory with the NTV2 kernel driver
+					through a CNTV2DriverInterface::NTV2Message call.
 
 					-	For a static or global buffer, simply construct from the variable:
 						@code
@@ -5838,7 +5839,8 @@ typedef enum
 								. . .
 							}	//  The memory is freed automatically when foo goes out of scope
 						@endcode
-			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
+			@note	This struct uses a constructor to properly initialize itself.
+					Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2_POINTER)
 			NTV2_BEGIN_PRIVATE
@@ -7162,7 +7164,7 @@ typedef enum
 
 		/**
 			@brief	This is returned by the CNTV2Card::AutoCirculateGetFrameStamp function, and is also embedded in the AUTOCIRCULATE_TRANSFER struct
-					returned from CNTV2Card::AutoCirculateTransfer. If used as its own NTV2Message (the new API version of the old CNTV2Card::GetFrameStamp call),
+					returned from CNTV2Card::AutoCirculateTransfer. If used as its own CNTV2DriverInterface::NTV2Message (the new API version of the old CNTV2Card::GetFrameStamp call),
 					pass the NTV2Channel in the least significant byte of FRAME_STAMP::acFrameTime, and the requested frame in FRAME_STAMP::acRequestedFrame.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/

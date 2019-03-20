@@ -235,6 +235,13 @@ public:
 
 	virtual bool	AutoCirculate (AUTOCIRCULATE_DATA &autoCircData);
 
+	/**
+		@brief	Sends a message to the NTV2 driver.
+				(This is the new, improved, preferred way of talking to the NTV2 driver.)
+		@param	pInMessage	Points to the message to pass to the driver.
+							Valid messages start with an NTV2_HEADER and end with an NTV2_TRAILER.
+		@return	True if successful;  otherwise false.
+	**/
 	virtual inline bool		NTV2Message (NTV2_HEADER * pInMessage)					{ (void) pInMessage;  return false; }
 
 	virtual bool ControlDriverDebugMessages(NTV2_DriverDebugMessageSet msgSet,

@@ -1917,9 +1917,9 @@ bool CNTV2MacDriverInterface::NTV2Message (NTV2_HEADER * pInOutMessage)
 
 	uint64_t	scalarI_64 [2];
 	uint32_t	numScalarOutputs (0);
-
-	scalarI_64[0] = (uint64_t) pInOutMessage;			//	The NTV2 Message/struct
-	scalarI_64[1] = pInOutMessage->GetSizeInBytes ();	//	The size of the message/struct
+	//	The NTV2Message call passes two things to the driver:
+	scalarI_64[0] = (uint64_t) pInOutMessage;			//	Pointer to the NTV2 Message/struct
+	scalarI_64[1] = pInOutMessage->GetSizeInBytes ();	//	The size, in bytes, of the entire message/struct
 
 	if (connection)
 		kernResult = IOConnectCallScalarMethod (connection,			//	an io_connect_t returned from IOServiceOpen
