@@ -36,6 +36,14 @@ void Class8kServices::SetDeviceXPointPlayback ()
 	
 	if (!b8K && !b4K)
 		return Class4kServices::SetDeviceXPointPlayback();
+	
+	// sync 8k quad buffers
+	mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
+	mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
+	mCard->SetMode(NTV2_CHANNEL3, NTV2_MODE_CAPTURE);
+	mCard->SetFrameBufferFormat(NTV2_CHANNEL3, mFb1Format);
+	mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_CAPTURE);
+	mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
 		
 	// Frame Buffer 1-4
 	mCard->Connect(NTV2_XptFrameBuffer1Input, NTV2_XptBlack);
@@ -193,7 +201,7 @@ void Class8kServices::SetDeviceXPointCapture ()
 	
 	if (!b8K && !b4K)
 		return Class4kServices::SetDeviceXPointCapture();
-	
+		
 	NTV2CrosspointID in4k = NTV2_XptSDIIn1;
 	if (mVirtualInputSelect == NTV2_Input1Select)
 	{
@@ -203,6 +211,14 @@ void Class8kServices::SetDeviceXPointCapture ()
 	{
 		in4k = NTV2_XptSDIIn2;
 	}
+	
+	// sync 8k quad buffers
+	mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
+	mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
+	mCard->SetMode(NTV2_CHANNEL3, NTV2_MODE_CAPTURE);
+	mCard->SetFrameBufferFormat(NTV2_CHANNEL3, mFb1Format);
+	mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_CAPTURE);
+	mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
 		
 	// Frame Buffer 1
 	if (b8K)
