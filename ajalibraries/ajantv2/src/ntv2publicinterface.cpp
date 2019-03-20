@@ -2278,6 +2278,56 @@ ostream & NTV2DebugLogging::Print (ostream & inOutStream) const
 }
 
 
+NTV2BufferLock::NTV2BufferLock()
+	:	mHeader	(NTV2_TYPE_AJABUFFERLOCK, sizeof (NTV2BufferLock))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+}
+
+
+NTV2BufferLock::NTV2BufferLock(const ULWord * pInBuffer, const ULWord inByteCount, const ULWord inFlags)
+	:	mHeader	(NTV2_TYPE_AJABUFFERLOCK, sizeof (NTV2BufferLock))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	SetBuffer (pInBuffer, inByteCount);
+	SetFlags (inFlags);
+}
+
+
+NTV2BufferLock::~NTV2BufferLock ()
+{
+}
+
+
+bool NTV2BufferLock::SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	return mBuffer.Set (pInBuffer, inByteCount);
+}
+
+
+void NTV2BufferLock::SetFlags (const ULWord inFlags)
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	mFlags = inFlags;
+}
+
+
+void NTV2BufferLock::Clear (void)
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	SetBuffer (NULL, 0);
+}
+
+
+ostream & NTV2BufferLock::Print (ostream & inOutStream) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	inOutStream	<< mHeader << mBuffer << ", sharedMem=" << xHEX0N(mFlags, 8) << ", " << mTrailer;
+	return inOutStream;
+}
+
+
 NTV2GetRegisters::NTV2GetRegisters (const NTV2RegNumSet & inRegisterNumbers)
 	:	mHeader				(AUTOCIRCULATE_TYPE_GETREGS, sizeof (NTV2GetRegisters)),
 		mInNumRegisters		(ULWord (inRegisterNumbers.size ())),

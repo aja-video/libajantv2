@@ -665,6 +665,23 @@ public:
 										NTV2_POINTER &		inAncF2Buffer	= NULL_POINTER,
 										const NTV2Channel	inChannel		= NTV2_CHANNEL1);
 
+	/**
+		@brief		Page locks the data buffer to reduce transfer time and CPU usage of DMA transfers.
+		@param[in]	pBuffer			Specifies the non-NULL address of the host buffer to lock.
+									Specify a NULL buffer and 0 bytes to unlock all buffers.
+		@param[in]	inByteCount		Specifies the total number of bytes to lock.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	DMABufferLock (const ULWord * pBuffer, const ULWord inByteCount);
+
+
+	/**
+		@brief		Unlocks all buffers used for DMA transfers.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	DMABufferUnlockAll ();
+
+
 #if !defined(NTV2_DEPRECATE_15_2)
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool	DMAReadAnc (	const ULWord		inFrameNumber,
 																UByte *				pOutAncBuffer,

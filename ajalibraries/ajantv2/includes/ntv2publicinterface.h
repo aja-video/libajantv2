@@ -5598,6 +5598,7 @@ typedef enum
 		#define	AUTOCIRCULATE_TYPE_SETREGS		NTV2_FOURCC ('r', 'e', 'g', 'W')	///< @brief	Identifies NTV2SetRegisters struct
 		#define	AUTOCIRCULATE_TYPE_SDISTATS		NTV2_FOURCC ('s', 'd', 'i', 'S')	///< @brief	Identifies NTV2SDIStatus struct
         #define	NTV2_TYPE_AJADEBUGLOGGING		NTV2_FOURCC ('d', 'b', 'l', 'g')	///< @brief	Identifies NTV2DebugLogging struct
+		#define	NTV2_TYPE_AJABUFFERLOCK			NTV2_FOURCC ('b', 'f', 'l', 'k')	///< @brief	Identifies NTV2BufferLock struct
 
 		#define	NTV2_IS_VALID_STRUCT_TYPE(_x_)	(	(_x_) == AUTOCIRCULATE_TYPE_STATUS		||	\
 													(_x_) == AUTOCIRCULATE_TYPE_XFER		||	\
@@ -5609,7 +5610,8 @@ typedef enum
 													(_x_) == AUTOCIRCULATE_TYPE_SDISTATS	||	\
                                                     (_x_) == NTV2_TYPE_BANKGETSET			||	\
                                                     (_x_) == NTV2_TYPE_VIRTUAL_DATA_RW		||	\
-                                                    (_x_) == NTV2_TYPE_AJADEBUGLOGGING	)
+													(_x_) == NTV2_TYPE_AJADEBUGLOGGING		||	\
+													(_x_) == NTV2_TYPE_AJABUFFERLOCK	)
 
 
 		//	NTV2_POINTER FLAGS
@@ -5637,6 +5639,9 @@ typedef enum
 		#define AUTOCIRCULATE_P2P_COMPLETE			BIT(29)		///< @brief complete synchronous p2p transfer
 		#define AUTOCIRCULATE_P2P_TARGET			BIT(30)		///< @brief prepare p2p target for asynchronous transfer (with message)
 		#define AUTOCIRCULATE_P2P_TRANSFER			BIT(31)		///< @brief transfer to p2p sync or async target
+
+		#define DMABUFFERLOCK_LOCK					BIT(0)		///< @brief page lock the buffer
+		#define DMABUFFERLOCK_UNLOCK_ALL			BIT(1)		///< @brief unlock all locked buffers
 
 		#if !defined (NTV2_BUILDING_DRIVER)
 			/**
@@ -7840,10 +7845,73 @@ typedef enum
                 **/
                 std::ostream &	Print (std::ostream & inOutStream) const;
 
-                NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
+				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
 
             #endif	//	!defined (NTV2_BUILDING_DRIVER)
         NTV2_STRUCT_END (NTV2DebugLogging)
+
+
+		/**
+			@brief	This is used to prelock video / audio / anc buffers used as the source or target of DMA transfers.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
+		**/
+		NTV2_STRUCT_BEGIN (NTV2BufferLock)
+			NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
+				NTV2_POINTER	mBuffer;			///< @brief	Virtual address of a buffer to prelock, and its length.
+													//			The driver will page lock the buffer immediately so this will not have to
+													//			be done for each DMA transfer.  This will reduce transfer time and CPU overhead
+													//			at the cost of locking physical memory.
+													//			A NULL buffer or zero length releases all locked buffers.
+				ULWord			mFlags;				///< @brief Action flags (lock, unlock, etc)
+				ULWord			mReserved[32];		///< @brief	Reserved for future expansion.
+			NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
+
+			#if !defined (NTV2_BUILDING_DRIVER)
+				/**
+					@name	Construction & Destruction
+				**/
+				///@{
+				explicit	NTV2BufferLock ();		///< @brief		Constructs a default NTV2BufferLock struct.
+							~NTV2BufferLock ();		///< @brief		My default destructor, which frees all allocatable fields that I own.
+
+				/**
+					@brief	Constructs an NTV2BufferLock object to use in a CNTV2Card::DMABufferLock call.
+					@param	pInBuffer			Specifies a pointer to the host buffer. This buffer will be locked for DMA operations.
+					@param	inByteCount			Specifies a the length of the buffer to lock in bytes.
+				**/
+				explicit	NTV2BufferLock (const ULWord * pInBuffer, const ULWord inByteCount, const ULWord inFlags);
+
+				/**
+					@brief	Sets the buffer to lock for use in a subsequent call to CNTV2Card::DMABufferLock.
+					@param	pInBuffer			Specifies a pointer to the host buffer. This buffer will be locked for DMA operations.
+					@param	inByteCount			Specifies a the length of the buffer to lock in bytes.
+					@return	True if successful;  otherwise false.
+				**/
+				bool		SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount);
+
+				/**
+					@brief	Sets the action flags for use in a subsequent call to CNTV2Card::DMABufferLock.
+					@param	inFlags			Specifies action flags (lock, unlock, etc)
+				**/
+				void		SetFlags (const ULWord inFlags);
+
+				/**
+					@brief	Resets the struct to its initialized state, this does not release locked buffers.
+				**/
+				void		Clear (void);
+				///@}
+
+				/**
+					@brief	Prints a human-readable representation of me to the given output stream.
+					@param	inOutStream		Specifies the output stream to use.
+					@return	A reference to the output stream.
+				**/
+				std::ostream &	Print (std::ostream & inOutStream) const;
+
+				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
+
+			#endif	//	!defined (NTV2_BUILDING_DRIVER)
+		NTV2_STRUCT_END (NTV2BufferLock)
 
 
 		#if !defined (NTV2_BUILDING_DRIVER)
