@@ -7813,6 +7813,11 @@ bool CNTV2Card::ReadRegisters (NTV2RegisterReads & inOutValues)
 
 bool CNTV2Card::WriteRegisters (const NTV2RegisterWrites & inRegWrites)
 {
+	if (!_boardOpened)
+		return false;		//	Device not open!
+	if (inRegWrites.empty())
+		return true;		//	Nothing to do!
+
 	bool				result(false);
 	NTV2SetRegisters	setRegsParams(inRegWrites);
 	//cerr << "## DEBUG:  CNTV2Card::WriteRegisters:  setRegsParams:  " << setRegsParams << endl;
