@@ -46,7 +46,7 @@
 
 // service optimization
 #ifdef NTV2_WRITEREG_PROFILING
-#define USE_OPTIMIZED_WRITES
+#define USE_GROUPED_WRITES
 #define USE_FILTERED_WRITES
 #endif
 
@@ -517,8 +517,8 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 
 void DeviceServices::StartOptimizedWrites()
 {
-	#if defined(USE_OPTIMIZED_WRITES)
-		if (CanDoOptimizedWrites(mDeviceID))
+	#if defined(USE_GROUPED_WRITES)
+		if (CanDoGroupedWrites(mDeviceID))
 		{
 			// force full write of all regs even if not change on this interval
 			if (mTimer.ElapsedTime() >= kRewriteIntervalMs)
@@ -533,13 +533,13 @@ void DeviceServices::StartOptimizedWrites()
 
 void DeviceServices::StopOptimizedWrites()
 {
-	#if defined(USE_OPTIMIZED_WRITES)
-		if (CanDoOptimizedWrites(mDeviceID))
+	#if defined(USE_GROUPED_WRITES)
+		if (CanDoGroupedWrites(mDeviceID))
 		{
 			NTV2RegisterWrites regWrites;
 			mCard->StopRecordRegisterWrites();
 			mCard->GetRecordedRegisterWrites(regWrites);
-			#if defined(USE_OPTIMIZED_WRITES)
+			#if defined(USE_FILTERED_WRITES)
 				NTV2RegisterWrites regWrites2;
 				ConsolidateRegisterWrites(regWrites, regWrites2);
 				WriteDifferences(regWrites2);
@@ -553,8 +553,8 @@ void DeviceServices::StopOptimizedWrites()
 
 void DeviceServices::PauseOptimizedWrites()
 {
-	#if defined(USE_OPTIMIZED_WRITES)
-	if (CanDoOptimizedWrites(mDeviceID))
+	#if defined(USE_GROUPED_WRITES)
+	if (CanDoGroupedWrites(mDeviceID))
 	{
 		mCard->PauseRecordRegisterWrites();
 	}
@@ -564,8 +564,8 @@ void DeviceServices::PauseOptimizedWrites()
 
 void DeviceServices::ResumeOptimizedWrites()
 {
-	#if defined(USE_OPTIMIZED_WRITES)
-	if (CanDoOptimizedWrites(mDeviceID))
+	#if defined(USE_GROUPED_WRITES)
+	if (CanDoGroupedWrites(mDeviceID))
 	{
 		mCard->ResumeRecordRegisterWrites();
 	}
@@ -1634,7 +1634,7 @@ bool DeviceServices::CanConvertFormat(NTV2VideoFormat inFormat, NTV2VideoFormat 
 }
 
 
-bool DeviceServices::CanDoOptimizedWrites(NTV2DeviceID deviceId)
+bool DeviceServices::CanDoGroupedWrites(NTV2DeviceID deviceId)
 {
 	switch(deviceId)
 	{
@@ -4107,10 +4107,13 @@ void DeviceServices::WriteDifferences(NTV2RegisterWrites& newRegs)
 	size_t i0 		= 0;
 	size_t i1;
 	
+	// for each reg in newRegs
 	for (i1 = 0; i1 < count1; i1++)
 	{
 		NTV2RegInfo& r1 = newRegs[i1];
 		
+		// find first reg in old regs that is equal-to or greater
+		// then the reg in 
 		while (i0 < count0)
 		{ 
 			NTV2RegInfo& r0 = mRegisterWritesLast[i0];
