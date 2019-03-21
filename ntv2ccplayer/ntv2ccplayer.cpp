@@ -1086,7 +1086,10 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 	if (!CNTV2CaptionEncoder708::Create (m708Encoder))
 		return AJA_STATUS_MEMORY;
 
-	mDevice.SetReference (NTV2_REFERENCE_FREERUN);	//	Use free-run for playout
+	if(NTV2DeviceCanDo2110(mDeviceID))
+		mDevice.SetReference(NTV2_REFERENCE_SFP1_PTP);
+	else
+		mDevice.SetReference (NTV2_REFERENCE_FREERUN);	//	Use free-run for playout
 
 	//	Subscribe to the output interrupt...
 	mDevice.SubscribeOutputVerticalEvent(mConfig.fOutputChannel);
