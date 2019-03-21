@@ -45,11 +45,11 @@ void Class8kServices::SetDeviceXPointPlayback ()
 	NTV2CrosspointID XPt1, XPt2, XPt3, XPt4;
 	
 	// sync 8k quad buffers
-	mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_CAPTURE);
+	mCard->SetMode(NTV2_CHANNEL2, NTV2_MODE_DISPLAY);
 	mCard->SetFrameBufferFormat(NTV2_CHANNEL2, mFb1Format);
-	mCard->SetMode(NTV2_CHANNEL3, NTV2_MODE_CAPTURE);
+	mCard->SetMode(NTV2_CHANNEL3, NTV2_MODE_DISPLAY);
 	mCard->SetFrameBufferFormat(NTV2_CHANNEL3, mFb1Format);
-	mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_CAPTURE);
+	mCard->SetMode(NTV2_CHANNEL4, NTV2_MODE_DISPLAY);
 	mCard->SetFrameBufferFormat(NTV2_CHANNEL4, mFb1Format);
 		
 	// Frame Buffer 1-4
@@ -219,7 +219,6 @@ void Class8kServices::SetDeviceXPointCapture ()
 	bool 				b8K 			= NTV2_IS_QUAD_QUAD_FORMAT(mFb1VideoFormat);
 	bool				b4K				= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
 	bool				bQuadSwap		= b8K == true && mDs.bIn4xSdi == true && mQuadSwapIn != 0;
-
 	//bool				bHdmiIn			= mDs.bInHdmi && mHasHdmiIn;
 	//bool				bHdmiInRGB		= bHdmiIn == true && mDs.hdmiIn[0]->cs == NTV2_ColorSpaceModeRgb;
 	//bool				bInRGB			= bHdmiInRGB || mDs.bInSdiRgb;
