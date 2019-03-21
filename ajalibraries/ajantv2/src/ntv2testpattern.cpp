@@ -3442,7 +3442,7 @@ void CNTV2Card::DownloadTestPatternBuffer(ULWord *buffer, ULWord size)
     GetFrameGeometry(fg, _channel);
     
     SetDualLinkOutputEnable(_dualLinkOutputEnable );
-    if (NTV2_IS_QUAD_FRAME_GEOMETRY(fg))
+    if (NTV2_IS_QUAD_FRAME_GEOMETRY(fg) || NTV2_IS_QUAD_QUAD_FRAME_GEOMETRY(fg))
     {
         SetFrameBufferFormat(NTV2_CHANNEL1,_fbFormat);
         SetFrameBufferFormat(NTV2_CHANNEL2,_fbFormat);
