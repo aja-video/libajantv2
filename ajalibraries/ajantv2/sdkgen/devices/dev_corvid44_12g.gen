@@ -115,8 +115,6 @@ NTV2DeviceGetNumVideoChannels					4
 NTV2DeviceGetPingLED							BIT(16)
 NTV2DeviceGetUFCVersion							1
 NTV2DeviceGetNum4kQuarterSizeConverters			1
-NTV2DeviceGetNumAnalogAudioInputChannels		8
-NTV2DeviceGetNumAnalogAudioOutputChannels		8
 NTV2DeviceGetNumAudioSystems					4
 NTV2DeviceGetNumCSCs							0
 NTV2DeviceGetNumEmbeddedAudioInputChannels		16
@@ -136,8 +134,6 @@ NTV2DeviceGetNumLTCOutputs						2
 NTV2DeviceCanChangeFrameBufferSize
 NTV2DeviceCanDo3GLevelConversion
 NTV2DeviceCanDo4KVideo
-NTV2DeviceCanDoAESAudioIn
-NTV2DeviceCanDoAnalogAudio
 NTV2DeviceCanDoAudio8Channels
 NTV2DeviceCanDoAudioDelay
 NTV2DeviceCanDoBreakoutBox
