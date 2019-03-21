@@ -1965,7 +1965,7 @@ bool CNTV2Config2110::GenVideoStreamSDPInfo(stringstream & sdp, const eSFP sfp, 
     sdp << "; PM=2110GPM; SSN=ST2110-20:2017; TP=2110TPN; ";
     if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vfmt))
     {
-        sdp << "interlace=1; ";
+		sdp << "interlace; ";
     }
     else if (NTV2_IS_PSF_VIDEO_FORMAT(vfmt))
     {
@@ -2095,7 +2095,7 @@ bool CNTV2Config2110::GenVideoStreamMultiSDPInfo(stringstream & sdp, char* gmInf
 		sdp << "; PM=2110GPM; SSN=ST2110-20:2017; TP=2110TPN; ";
 		if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vfmt))
 		{
-			sdp << "interlace=1; ";
+			sdp << "interlace; ";
 		}
 		else if (NTV2_IS_PSF_VIDEO_FORMAT(vfmt))
 		{
@@ -2193,7 +2193,7 @@ bool CNTV2Config2110::GenAudioStreamSDPInfo(stringstream & sdp, const eSFP sfp, 
     else
         sdp << "a=ptime:1.000" << endl;
 
-    sdp << "a=tsrefclk:ptp=IEEE1588-2008:" << gmInfo << endl;
+	sdp << "a=ts-refclk:ptp=IEEE1588-2008:" << gmInfo << endl;
     sdp << "a=mediaclk:direct=0" << endl;
     sdp << "a=mid:AUD" << endl;
 
@@ -2247,6 +2247,11 @@ bool CNTV2Config2110::GenAncStreamSDPInfo(stringstream & sdp, const eSFP sfp, co
 	sdp << "a=rtpmap:";
 	sdp << To_String(config.payloadType);
 	sdp << " smpte291/90000" << endl;
+
+	//fmtp
+	sdp << "a=fmtp:";
+	sdp << To_String(config.payloadType);
+	sdp << endl;
 
 	// PTP
 	sdp << "a=ts-refclk:ptp=IEEE1588-2008:" << gmInfo << endl;
