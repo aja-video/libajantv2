@@ -33,7 +33,7 @@ void Class8kServices::SetDeviceXPointPlayback ()
 	bool				bQuadSwap			= b8K == true && mDs.bOut4xSdi == true && mQuadSwapOut != 0;	
 	bool				bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit ||
 											  mDs.hdmiOutColorSpace == kHDMIOutCSCRGB12bit;
-	bool				bSdiOutRGB			= false; // for now
+	//bool				bSdiOutRGB			= false; // for now
 	
 	if (!b8K && !b4K)
 		return Class4kServices::SetDeviceXPointPlayback();
@@ -177,18 +177,15 @@ void Class8kServices::SetDeviceXPointPlayback ()
 			XPt1 = NTV2_XptFrameBuffer1YUV;
 		}
 	}
-	
-	
-	// 8K-Quad mode
 	else if (b8K)
 	{
 		switch (mVirtualHDMIOutputSelect)
 		{
-		default:
-		case NTV2_Quadrant1Select: XPt1 = bFb1RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptFrameBuffer1YUV; break;
-		case NTV2_Quadrant2Select: XPt1 = bFb1RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptFrameBuffer2YUV; break;
-		case NTV2_Quadrant3Select: XPt1 = bFb1RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptFrameBuffer3YUV; break;
-		case NTV2_Quadrant4Select: XPt1 = bFb1RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptFrameBuffer4YUV; break;
+			default:
+			case NTV2_Quadrant1Select: XPt1 = bFb1RGB ? NTV2_XptFrameBuffer1RGB : NTV2_XptFrameBuffer1YUV; break;
+			case NTV2_Quadrant2Select: XPt1 = bFb1RGB ? NTV2_XptFrameBuffer2RGB : NTV2_XptFrameBuffer2YUV; break;
+			case NTV2_Quadrant3Select: XPt1 = bFb1RGB ? NTV2_XptFrameBuffer3RGB : NTV2_XptFrameBuffer3YUV; break;
+			case NTV2_Quadrant4Select: XPt1 = bFb1RGB ? NTV2_XptFrameBuffer4RGB : NTV2_XptFrameBuffer4YUV; break;
 		}
 	}
 	mCard->Connect (NTV2_XptHDMIOutQ1Input, XPt1);
@@ -226,6 +223,12 @@ void Class8kServices::SetDeviceXPointCapture ()
 	
 	if (!b8K && !b4K)
 		return Class4kServices::SetDeviceXPointCapture();
+		
+	// 
+	// 4K-8K support
+	//
+	
+	NTV2CrosspointID XPt1, XPt2, XPt3, XPt4;
 		
 	NTV2CrosspointID in4k = NTV2_XptSDIIn1;
 	if (mVirtualInputSelect == NTV2_Input1Select)
@@ -336,10 +339,30 @@ void Class8kServices::SetDeviceXPointCapture ()
 	
 	
 	// HDMI Out
-	mCard->Connect (NTV2_XptHDMIOutInput, 		in4k);
-	mCard->Connect (NTV2_XptHDMIOutQ2Input, 	NTV2_XptBlack);
-	mCard->Connect (NTV2_XptHDMIOutQ3Input, 	NTV2_XptBlack);
-	mCard->Connect (NTV2_XptHDMIOutQ4Input, 	NTV2_XptBlack);
+	XPt1 = XPt2 = XPt3 = XPt4 = NTV2_XptBlack;
+	if (b4K)
+	{
+		XPt1 = in4k;
+	}
+	else if (b8K)
+	{
+		switch (mVirtualHDMIOutputSelect)
+		{
+			default:
+			case NTV2_Quadrant1Select: XPt1 = NTV2_XptSDIIn1; break;
+			case NTV2_Quadrant2Select: XPt1 = NTV2_XptSDIIn2; break;
+			case NTV2_Quadrant3Select: XPt1 = NTV2_XptSDIIn3; break;
+			case NTV2_Quadrant4Select: XPt1 = NTV2_XptSDIIn4; break;
+		}
+	}
+	mCard->Connect (NTV2_XptHDMIOutQ1Input, XPt1);
+	mCard->Connect (NTV2_XptHDMIOutQ2Input, XPt2);
+	mCard->Connect (NTV2_XptHDMIOutQ3Input, XPt3);
+	mCard->Connect (NTV2_XptHDMIOutQ4Input, XPt4);
+	
+	
+	
+	// HDMI Out
 
 	
 	// CSC 1
