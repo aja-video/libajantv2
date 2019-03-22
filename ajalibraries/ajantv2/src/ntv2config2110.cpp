@@ -829,14 +829,23 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
 		// video setup 3190 packetizer
 		uint32_t baseAddrPacketizer = GetPacketizerAddress(stream);
 
-        NTV2VideoFormat fmt = txConfig.videoFormat;
+		NTV2VideoFormat vfmt = txConfig.videoFormat;
 
         // Write the video format into the arbitrator
-        SetVideoFormatForRxTx(stream, fmt, false);
+		SetVideoFormatForRxTx(stream, vfmt, false);
 
         // setup 4175 packetizer
-        bool interlaced = !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(fmt);
-        NTV2FormatDescriptor fd(fmt,NTV2_FBF_10BIT_YCBCR);
+		bool interlaced = false;
+		if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vfmt))
+		{
+			interlaced = true;
+		}
+		else if (NTV2_IS_PSF_VIDEO_FORMAT(vfmt))
+		{
+			interlaced = true;
+		}
+
+		NTV2FormatDescriptor fd(vfmt,NTV2_FBF_10BIT_YCBCR);
 
         // width
         uint32_t width = fd.GetRasterWidth();
