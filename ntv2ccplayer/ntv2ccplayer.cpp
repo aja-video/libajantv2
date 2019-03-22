@@ -42,7 +42,7 @@ using namespace std;
 
 
 //#define	MEASURE_ACCURACY	1		//	Enables a feedback mechanism to precisely generate captions at the desired rate
-static const uint32_t		kAppSignature		(AJA_FOURCC ('C','C','P','L'));
+static const uint32_t		kAppSignature		(NTV2_FOURCC ('C','C','P','L'));
 
 
 /**
@@ -272,7 +272,7 @@ class CaptionSource
 			if (mDeleteInputStream && mpInputStream)
 			{
 				delete mpInputStream;
-				mpInputStream = NULL;
+				mpInputStream = AJA_NULL;
 			}
 			#if defined (MEASURE_ACCURACY)
 				CCPLDBG(::NTV2Line21ChannelToStr(mCaptionChannel) << ": " << mCharSpeed.GetSampleCountTally() << " final chars: " << mCharSpeed);
@@ -286,72 +286,72 @@ class CaptionSource
 		**/
 		virtual string GetNextCaptionCharacter (void)
 		{
-			static double	milliSecsPerChar	(mMilliSecsPerChar);
+			static double	milliSecsPerChar(mMilliSecsPerChar);
 			string			resultChar;
-			unsigned char	rawBytes [5]	= {0, 0, 0, 0, 0};
+			unsigned char	rawBytes[5]	= {0, 0, 0, 0, 0};
 
-			AJATime::Sleep (static_cast <int32_t> (milliSecsPerChar));
+			AJATime::Sleep (static_cast<int32_t>(milliSecsPerChar));
 
-			*mpInputStream >> rawBytes [0];
-			if (mpInputStream->eof ())
-				SetFinished ();
+			*mpInputStream >> rawBytes[0];
+			if (mpInputStream->eof())
+				SetFinished();
 
-			if (rawBytes [0] < 0x80)		//	1-byte code
+			if (rawBytes[0] < 0x80)		//	1-byte code
 			{
-				if (rawBytes [0])
-					resultChar = string (1, rawBytes [0]);
+				if (rawBytes[0])
+					resultChar = string (1, rawBytes[0]);
 			}
-			else if (rawBytes [0] < 0xC0)	//	invalid
+			else if (rawBytes[0] < 0xC0)	//	invalid
 				CCPLWARN(::NTV2Line21ChannelToStr(mCaptionChannel) << ": Invalid UTF8 value read from input stream:  " << xHEX0N(uint16_t(rawBytes[0]),2));
-			else if (rawBytes [0] < 0xE0)	//	2-byte code
+			else if (rawBytes[0] < 0xE0)	//	2-byte code
 			{
-				if (IsFinished ())
+				if (IsFinished())
 					CCPLWARN(::NTV2Line21ChannelToStr(mCaptionChannel) << ": EOF on input stream before reading byte 2 of 2-byte UTF8 character");
 				else
 				{
-					resultChar = string (1, rawBytes [0]);
-					*mpInputStream >> rawBytes [1];
-					if (mpInputStream->eof ())
+					resultChar = string(1, rawBytes[0]);
+					*mpInputStream >> rawBytes[1];
+					if (mpInputStream->eof())
 						SetFinished ();
-					resultChar += string (1, rawBytes [1]);
-					NTV2_ASSERT (resultChar.length () == 2);
+					resultChar += string(1, rawBytes[1]);
+					NTV2_ASSERT(resultChar.length() == 2);
 				}
 			}
-			else if (rawBytes [0] < 0xF0)	//	3-byte code
+			else if (rawBytes[0] < 0xF0)	//	3-byte code
 			{
-				resultChar = string (1, rawBytes [0]);
-				for (unsigned ndx (1);  ndx <= 2;  ndx++)
+				resultChar = string(1, rawBytes[0]);
+				for (unsigned ndx(1);  ndx <= 2;  ndx++)
 				{
-					if (IsFinished ())
+					if (IsFinished())
 					{
 						CCPLWARN(::NTV2Line21ChannelToStr(mCaptionChannel) << ": EOF on input stream before reading byte " << DEC(ndx + 1) << " of 3-byte UTF8 character");
 						resultChar = "";
 						break;
 					}
-					*mpInputStream >> rawBytes [ndx];
-					if (mpInputStream->eof ())
-						SetFinished ();
-					resultChar += string (1, rawBytes [ndx]);
+					*mpInputStream >> rawBytes[ndx];
+					if (mpInputStream->eof())
+						SetFinished();
+					resultChar += string(1, rawBytes [ndx]);
 				}
-				if (!IsFinished ())	NTV2_ASSERT (resultChar.length () == 3);
+				if (!IsFinished())	NTV2_ASSERT(resultChar.length() == 3);
 			}
-			else if (rawBytes [0] < 0xF8)	//	4-byte code
+			else if (rawBytes[0] < 0xF8)	//	4-byte code
 			{
-				resultChar = string (1, rawBytes [0]);
-				for (unsigned ndx (1);  ndx <= 3;  ndx++)
+				resultChar = string(1, rawBytes[0]);
+				for (unsigned ndx(1);  ndx <= 3;  ndx++)
 				{
-					if (IsFinished ())
+					if (IsFinished())
 					{
 						CCPLWARN(::NTV2Line21ChannelToStr(mCaptionChannel) << "; EOF on input stream before reading byte " << DEC(ndx + 1) << " of 4-byte UTF8 character");
 						resultChar = "";
 						break;
 					}
-					*mpInputStream >> rawBytes [ndx];
-					if (mpInputStream->eof ())
-						SetFinished ();
-					resultChar += string (1, rawBytes [ndx]);
+					*mpInputStream >> rawBytes[ndx];
+					if (mpInputStream->eof())
+						SetFinished();
+					resultChar += string(1, rawBytes[ndx]);
 				}
-				if (!IsFinished ())	NTV2_ASSERT (resultChar.length () == 4);
+				if (!IsFinished())	NTV2_ASSERT(resultChar.length() == 4);
 			}
 			else
 				CCPLWARN(::NTV2Line21ChannelToStr(mCaptionChannel) << ": UTF8 byte value not handled:  " << xHEX0N(uint16_t(rawBytes[0]),2));
@@ -563,7 +563,7 @@ class CaptionSource
 			//	tab, newline, vertical tab, form feed, carriage return, and space
 			if (inUTF8Char.length () != 1)
 				return false;
-			const unsigned char	c	(inUTF8Char [0]);
+			const unsigned char	c =	UByte(inUTF8Char[0]);
 			if (c == 0x09 || c == 0x0A || c == 0x0B || c == 0x0C || c == 0x0D || c == 0x20)
 				return true;
 			return false;
@@ -574,7 +574,7 @@ class CaptionSource
 			//	ASCII characters octal codes 000 through 037, and 177 (DEL)
 			if (inUTF8Char.length () != 1)
 				return false;
-			const unsigned char	c	(inUTF8Char [0]);
+			unsigned char	c = UByte(inUTF8Char[0]);
 			if ((c > 0x00 && c < ' ') || c == 0x7F)
 				return true;
 			return false;
@@ -671,7 +671,7 @@ SCCSource::SCCSource (const double inCharsPerMinute, istream * pInInputStream, c
 			aja::strip(ccDataWord);
 			if (ccDataWord.find("0x") == string::npos && ccDataWord.find("0X") == string::npos)
 				ccDataWord = "0x" + ccDataWord;
-			const uint16_t	ccWord(ULWord(aja::stoul(ccDataWord, NULL, 16)));
+			const uint16_t	ccWord(UWord(aja::stoul(ccDataWord, AJA_NULL, 16)));
 			ccWords.push_back(ccWord);
 		}
 
@@ -844,7 +844,7 @@ NTV2CCPlayer::~NTV2CCPlayer (void)
 	if (!mConfig.fDoMultiFormat)
 	{
 		mDevice.SetEveryFrameServices(mSavedTaskMode);															//	Restore prior service level
-		mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<uint32_t>(AJAProcess::GetPid()));	//	Release the device
+		mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));	//	Release the device
 	}
 
 }	//	destructor
@@ -923,7 +923,7 @@ AJAStatus NTV2CCPlayer::Init (void)
 
 	if (!mConfig.fDoMultiFormat)
 	{
-		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<uint32_t>(AJAProcess::GetPid())))
+		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 		{
 			cerr << "## ERROR:  Unable to acquire device because another app owns it" << endl;
 			return AJA_STATUS_BUSY;		//	Some other app owns the device
@@ -983,25 +983,25 @@ AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 
 	//	Set the VANC area, if any, to legal black...
 	if (formatDesc.IsVANC())
-		if (!::SetRasterLinesBlack(mConfig.fPixelFormat, (UByte*)mVideoBuffer.GetHostPointer(), formatDesc.GetBytesPerRow (), formatDesc.firstActiveLine))
+		if (!::SetRasterLinesBlack(mConfig.fPixelFormat, reinterpret_cast<UByte*>(mVideoBuffer.GetHostPointer()), UWord(formatDesc.GetBytesPerRow()), UWord(formatDesc.firstActiveLine)))
 		{
 			cerr << "## ERROR:  Cannot set video buffer's VANC area to legal black" << endl;
 			return AJA_STATUS_FAIL;
 		}
 
 	//	Stuff the gray pattern into my video buffer...
-	::memcpy (formatDesc.GetTopVisibleRowAddress((UByte*)mVideoBuffer.GetHostPointer()), &testPatternBuffer[0], testPatternBuffer.size ());
+	::memcpy (formatDesc.GetTopVisibleRowAddress(reinterpret_cast<UByte*>(mVideoBuffer.GetHostPointer())), &testPatternBuffer[0], testPatternBuffer.size ());
 
 	//	Add info to the display...
 	const string	strVideoFormat	(CNTV2DemoCommon::StripFormatString (::NTV2VideoFormatToString(mConfig.fVideoFormat)));
 	{ostringstream	oss;	oss << setw (32) << left << string ("CCPlayer ") + strVideoFormat + string (formatDesc.IsVANC() ? " VANC" : "");
 	CNTV2CaptionRenderer::BurnString (oss.str (), NTV2Line21Attributes (NTV2_CC608_White, NTV2_CC608_Cyan),
-										formatDesc.GetTopVisibleRowAddress((UByte*)mVideoBuffer.GetHostPointer()),
-										formatDesc.GetVisibleRasterDimensions(), mConfig.fPixelFormat, formatDesc.GetBytesPerRow(),  1, 1);	}	//	row 1, col 1
+										formatDesc.GetTopVisibleRowAddress(reinterpret_cast<UByte*>(mVideoBuffer.GetHostPointer())),
+										formatDesc.GetVisibleRasterDimensions(), mConfig.fPixelFormat, UWord(formatDesc.GetBytesPerRow()),  1, 1);	}	//	row 1, col 1
 	{ostringstream	oss;	oss << formatDesc.GetRasterWidth() << "Wx" << formatDesc.GetFullRasterHeight() << "H  " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, true) << string (20, ' ');
 	CNTV2CaptionRenderer::BurnString (oss.str (), NTV2Line21Attributes (NTV2_CC608_White, NTV2_CC608_Cyan),
-										formatDesc.GetTopVisibleRowAddress((UByte*)mVideoBuffer.GetHostPointer()),
-										formatDesc.GetVisibleRasterDimensions(), mConfig.fPixelFormat, formatDesc.GetBytesPerRow(),  2, 1);	}	//	row 2, col 1
+										formatDesc.GetTopVisibleRowAddress(reinterpret_cast<UByte*>(mVideoBuffer.GetHostPointer())),
+										formatDesc.GetVisibleRasterDimensions(), mConfig.fPixelFormat, UWord(formatDesc.GetBytesPerRow()),  2, 1);	}	//	row 2, col 1
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetUpBackgroundPatternBuffer
@@ -1040,7 +1040,7 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 	if (UWord(mConfig.fOutputChannel) >= ::NTV2DeviceGetNumFrameStores(mDeviceID))
 	{
 		cerr	<< "## ERROR:  Cannot use channel '" << mConfig.fOutputChannel+1 << "' -- device only supports channel 1"
-				<< (::NTV2DeviceGetNumFrameStores(mDeviceID) > 1  ?  string(" thru ") + string(1, uint8_t(::NTV2DeviceGetNumFrameStores(mDeviceID)+'0'))  :  "") << endl;
+				<< (::NTV2DeviceGetNumFrameStores(mDeviceID) > 1  ?  string(" thru ") + string(1, char(::NTV2DeviceGetNumFrameStores(mDeviceID)+'0'))  :  "") << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
 
@@ -1229,7 +1229,7 @@ void NTV2CCPlayer::StartCaptionGeneratorThreads ()
 		if (pThread)
 		{
 			mGeneratorThreads [ccChannel] = pThread;
-			pThread->Attach (CaptionGeneratorThreadStatic, (void *) ccChannel);	//	The generator thread needs to know its caption channel
+			pThread->Attach (CaptionGeneratorThreadStatic, reinterpret_cast<void*>(ccChannel));	//	The generator thread needs to know its caption channel
 			pThread->Start ();
 		}
 	}
@@ -1240,7 +1240,7 @@ void NTV2CCPlayer::StartCaptionGeneratorThreads ()
 void NTV2CCPlayer::CaptionGeneratorThreadStatic (AJAThread * pThread, void * pContext)
 {
 	(void) pThread;
-	const size_t	ccChannel	((size_t) pContext);
+	const size_t	ccChannel	(reinterpret_cast<size_t>(pContext));
 
 	//	Grab the NTV2CCPlayer instance pointer from the gApp global, call its GenerateCaptions method,
 	//	and pass it the given caption channel (passed in via the pContext parameter)...
@@ -1261,7 +1261,7 @@ void NTV2CCPlayer::GenerateCaptions (const NTV2Line21Channel inCCChannel)
 	const bool					newlinesMakeNewRows	(ccGeneratorConfig.fNewLinesAreNewRows);//	Newline characters cause row breaks?
 	const AtEndAction			endAction			(ccGeneratorConfig.fEndAction);			//	What to do after last file is done playing
 	NTV2StringList				filesToPlay			(ccGeneratorConfig.fFilesToPlay);		//	List of text files to play
-	unsigned					linesWanted			(3);									//	Desired number of lines to Enqueue in one shot (min 1, max 4)
+	UWord						linesWanted			(3);									//	Desired number of lines to Enqueue in one shot (min 1, max 4)
 	bool						quitThisGenerator	(false);								//	Set true to exit this function/thread
 	const UWord					paintPopTopRow		(9);									//	PaintOn/PopOn only:	top display row
 	const UWord					paintPopMaxNumRows	(15 - paintPopTopRow + 1);				//	PaintOn/PopOn only:	number of rows to fill to bottom
@@ -1472,7 +1472,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	//	Set up the transfer buffers...
 	xferInfo.SetVideoBuffer(reinterpret_cast<ULWord *>(mVideoBuffer.GetHostPointer()), mVideoBuffer.GetByteCount());
 	if (mConfig.fSuppressTimecode)
-		xferInfo.acOutputTimeCodes.Set (NULL, 0);
+		xferInfo.acOutputTimeCodes.Set (AJA_NULL, 0);
 	CCPLNOTE("Playout thread started: 608F1PktLine=" << DEC(kF1PktLineNumCEA608) << " 608F2PktLine=" << DEC(kF2PktLineNumCEA608)
 			<< " 708F1PktLine=" << DEC(kF1PktLineNumCEA708) << " F2StartLine=" << DEC(F2StartLine));
 
@@ -1493,152 +1493,163 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  7,  audioSystem,  acOptionFlags);
 	mDevice.AutoCirculateStart (mConfig.fOutputChannel);
 
+	//	Repeat until time to quit...
 	while (!mPlayerQuit)
-	{
+	{	//	Check AutoCirculate status...
 		mDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, mACStatus);
-		if (mACStatus.CanAcceptMoreOutputFrames())			//	Room for another frame on the device?
+		if (!mACStatus.CanAcceptMoreOutputFrames())
+		{	//	Out of room on the device for new frame...
+			mDevice.WaitForOutputVerticalInterrupt (mConfig.fOutputChannel);	//	Wait for next VBI
+			continue;	//	Try again
+		}
+		if (!mConfig.fForceVanc)
+			{xferInfo.acANCBuffer.Fill(ULWord(0));	xferInfo.acANCField2Buffer.Fill(ULWord(0));}	//	Clear Anc buffers before filling
+
+		AJAAncillaryList	packetList;	//	List of packets to be transmitted
+		m608Encoder->GetNextCaptionData(captionData);	//	Pop queued captions from 608 encoder waiting to be transmitted
+		if (!mConfig.fSuppress608)
 		{
-			if (!mConfig.fForceVanc)
-				{xferInfo.acANCBuffer.Fill(ULWord(0));	xferInfo.acANCField2Buffer.Fill(ULWord(0));}	//	Clear Anc buffers before filling
+			AJAAncillaryData_Cea608_Vanc	pkt608F1;
 
-			AJAAncillaryList	packetList;	//	List of packets to be transmitted
-			m608Encoder->GetNextCaptionData(captionData);	//	Pop queued captions from 608 encoder waiting to be transmitted
-			if (!mConfig.fSuppress608)
-			{
-				AJAAncillaryData_Cea608_Vanc	pkt608F1;
-
-				pkt608F1.SetLocationLineNumber (kF1PktLineNumCEA608);
-				pkt608F1.SetCEA608Bytes (captionData.f1_char1, captionData.f1_char2);
-				packetList.AddAncillaryData(pkt608F1);
-				if (!NTV2_IS_PROGRESSIVE_STANDARD(standard))
-				{	NTV2_ASSERT(kF2PktLineNumCEA608);
-					AJAAncillaryData_Cea608_Vanc	pkt608F2;
-					pkt608F2.SetLocationLineNumber(kF2PktLineNumCEA608);
-					pkt608F2.SetCEA608Bytes (captionData.f2_char1, captionData.f2_char2);
-					packetList.AddAncillaryData(pkt608F2);
-				}
+			pkt608F1.SetLocationLineNumber (kF1PktLineNumCEA608);
+			pkt608F1.SetCEA608Bytes (captionData.f1_char1, captionData.f1_char2);
+			pkt608F1.GeneratePayloadData();
+			packetList.AddAncillaryData(pkt608F1);
+			if (!NTV2_IS_PROGRESSIVE_STANDARD(standard))
+			{	NTV2_ASSERT(kF2PktLineNumCEA608);
+				AJAAncillaryData_Cea608_Vanc	pkt608F2;
+				pkt608F2.SetLocationLineNumber(kF2PktLineNumCEA608);
+				pkt608F2.SetCEA608Bytes (captionData.f2_char1, captionData.f2_char2);
+				pkt608F2.GeneratePayloadData();
+				packetList.AddAncillaryData(pkt608F2);
 			}
+		}
 
-			if (NTV2_IS_SD_VIDEO_FORMAT(mConfig.fVideoFormat))
-			{	//	SD Video
-				if (!mConfig.fSuppressLine21)
-				{	//	Overwrite Line21 with encoded CEA608 waveform
-					const ULWord	kLine21F1RowNum		(NTV2_IS_VANCMODE_TALLER(mVancMode)  ?  29  :  (NTV2_IS_VANCMODE_TALL(mVancMode)  ?  23  :  1));
-					const ULWord	kLine21F2RowNum		(kLine21F1RowNum + 1);
-					UByte *			pF1EncodedYUV8Line	(F1Line21Encoder.EncodeLine (captionData.f1_char1, captionData.f1_char2));
-					UByte *			pF2EncodedYUV8Line	(F2Line21Encoder.EncodeLine (captionData.f2_char1, captionData.f2_char2));
-					UByte *			pF1Line21InBuffer	((UByte*)mVideoBuffer.GetHostPointer() + (kLine21F1RowNum * bytesPerRow));
-					UByte *			pF2Line21InBuffer	((UByte*)mVideoBuffer.GetHostPointer() + (kLine21F2RowNum * bytesPerRow));
-	
-					if (mConfig.fPixelFormat == NTV2_FBF_8BIT_YCBCR)
-						::memcpy (pF1Line21InBuffer, pF1EncodedYUV8Line, bytesPerRow);		//	Replace F1 line 21 with resulting F1 line from EncodeLine
-					else if (mConfig.fPixelFormat == NTV2_FBF_10BIT_YCBCR)
-						::ConvertLine_2vuy_to_v210 (pF1EncodedYUV8Line, reinterpret_cast <ULWord *> (pF1Line21InBuffer), 720);	//	Convert to 10-bit YUV in-place
-	
-					if (mConfig.fPixelFormat == NTV2_FBF_8BIT_YCBCR)
-						::memcpy (pF2Line21InBuffer, pF2EncodedYUV8Line, bytesPerRow);		//	Replace F2 line 21 with resulting F2 line from EncodeLine
-					else if (mConfig.fPixelFormat == NTV2_FBF_10BIT_YCBCR)
-						::ConvertLine_2vuy_to_v210 (pF2EncodedYUV8Line, reinterpret_cast <ULWord *> (pF2Line21InBuffer), 720);	//	Convert to 10-bit YUV in-place
-				}
-			}	//	if SD video
-			else if (!mConfig.fSuppress708)
-			{	//	HD video -- use the 708 encoder to put 608 captions into a single 708 packet:
-				m708Encoder->Set608CaptionData (captionData);	//	Set the 708 encoder's 608 caption data (for both F1 and F2)
-				if (m708Encoder->MakeSMPTE334AncPacket (frameRate, NTV2_CC608_Field1))		//	Generate SMPTE-334 Anc data packet
-				{
-					AJAAncillaryData_Cea708	pkt708;
-					pkt708.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data(), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708LocF1);
-#if 1	/////// ** MrBill **	DEBUG	//////////////		DEBUG		///////////////////		DEBUG		//////////////////		DEBUG		//////////////////
-					if (::NTV2DeviceCanDo2110(mDeviceID))	//	KONA IP 2110 ONLY
-						if (mConfig.fVideoFormat == NTV2_FORMAT_1080p_2398)	//	1080p2398 ONLY
-						{
-							pkt708.SetLocationLineNumber(18);		//	Put CEA708 packet on line 18
-							packetList.AddAncillaryData(pkt708);
+		if (NTV2_IS_SD_VIDEO_FORMAT(mConfig.fVideoFormat))
+		{	//	SD Video
+			if (!mConfig.fSuppressLine21)
+			{	//	Overwrite Line21 with encoded CEA608 waveform
+				const ULWord	kLine21F1RowNum		(NTV2_IS_VANCMODE_TALLER(mVancMode)  ?  29  :  (NTV2_IS_VANCMODE_TALL(mVancMode)  ?  23  :  1));
+				const ULWord	kLine21F2RowNum		(kLine21F1RowNum + 1);
+				UByte *			pF1EncodedYUV8Line	(F1Line21Encoder.EncodeLine (captionData.f1_char1, captionData.f1_char2));
+				UByte *			pF2EncodedYUV8Line	(F2Line21Encoder.EncodeLine (captionData.f2_char1, captionData.f2_char2));
+				UByte *			pF1Line21InBuffer	(reinterpret_cast<UByte*>(mVideoBuffer.GetHostPointer()) + (kLine21F1RowNum * bytesPerRow));
+				UByte *			pF2Line21InBuffer	(reinterpret_cast<UByte*>(mVideoBuffer.GetHostPointer()) + (kLine21F2RowNum * bytesPerRow));
 
-							//	Put a second packet after it on line 18...
-							AJAAncillaryData extraPkt;  const string testData ("This is a test packet");
-							extraPkt.SetDID(0xAB);	extraPkt.SetSID(0xCD);
-							extraPkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
-							extraPkt.SetLocationVideoLink(AJAAncillaryDataLink_A);
-							extraPkt.SetLocationVideoSpace(AJAAncillaryDataSpace_VANC);
-							extraPkt.SetLocationDataChannel(AJAAncillaryDataChannel_Y);
-							extraPkt.SetLocationLineNumber(18);
-							extraPkt.SetPayloadData((uint8_t*)testData.c_str(), testData.size());
-							packetList.AddAncillaryData(extraPkt);
-						}
-#else	/////// ** MrBill **	DEBUG	//////////////		DEBUG		///////////////////		DEBUG		//////////////////		DEBUG		//////////////////
-					packetList.AddAncillaryData(pkt708);
-#endif	/////// ** MrBill **	DEBUG	//////////////		DEBUG		///////////////////		DEBUG		//////////////////		DEBUG		//////////////////
-				}
-			}	//	else HD video
+				if (mConfig.fPixelFormat == NTV2_FBF_8BIT_YCBCR)
+					::memcpy (pF1Line21InBuffer, pF1EncodedYUV8Line, bytesPerRow);		//	Replace F1 line 21 with resulting F1 line from EncodeLine
+				else if (mConfig.fPixelFormat == NTV2_FBF_10BIT_YCBCR)
+					::ConvertLine_2vuy_to_v210 (pF1EncodedYUV8Line, reinterpret_cast <ULWord *> (pF1Line21InBuffer), 720);	//	Convert to 10-bit YUV in-place
 
-			//CCPLDBG("Xmit pkts: " << packetList);
-			if (mConfig.fForceVanc)	//	Write FB VANC lines...
-				packetList.GetVANCTransmitData (mVideoBuffer,  formatDesc);
-			else					//	Else use the Anc inserter firmware:
-				packetList.GetTransmitData (xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, isProgressive, F2StartLine);
-
-			if (!mConfig.fSuppressTimecode)
+				if (mConfig.fPixelFormat == NTV2_FBF_8BIT_YCBCR)
+					::memcpy (pF2Line21InBuffer, pF2EncodedYUV8Line, bytesPerRow);		//	Replace F2 line 21 with resulting F2 line from EncodeLine
+				else if (mConfig.fPixelFormat == NTV2_FBF_10BIT_YCBCR)
+					::ConvertLine_2vuy_to_v210 (pF2EncodedYUV8Line, reinterpret_cast <ULWord *> (pF2Line21InBuffer), 720);	//	Convert to 10-bit YUV in-place
+			}
+		}	//	if SD video
+		else if (!mConfig.fSuppress708)
+		{	//	HD video -- use the 708 encoder to put 608 captions into a single 708 packet:
+			m708Encoder->Set608CaptionData (captionData);	//	Set the 708 encoder's 608 caption data (for both F1 and F2)
+			if (m708Encoder->MakeSMPTE334AncPacket (frameRate, NTV2_CC608_Field1))		//	Generate SMPTE-334 Anc data packet
 			{
-				const CRP188	rp188		(mACStatus.GetProcessedFrameCount(), tcFormat);
-				char			tcString[]	= {"                                "};
-				const UWord		colShift	(mACStatus.GetProcessedFrameCount() % 10 == 0  ?  colBouncer.Next()  :  colBouncer.Value());
-				bool			tcOK		(false);
-				NTV2_RP188		tc;
-				rp188.GetRP188Reg  (tc);
-				if (!NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat) && !mConfig.fDoMultiFormat)
-					//	UniFormat and not Quad Frame:   i.e. using ALL output spigots:
-					//	AutoCirculateTransfer will automatically set ALL output timecodes to
-					//	the DEFAULT timecode if the DEFAULT timecode is valid...
-					tcOK = xferInfo.SetOutputTimeCode(tc, NTV2_TCINDEX_DEFAULT);
-				else
-				{	//	MULTI-FORMAT OR QUAD-FRAME:
-					//	Be more selective as to which output spigots get the generated timecode...
-					NTV2TimeCodes	timecodes;
-					for (int num (0);  num < 4;  num++)
+				AJAAncillaryData_Cea708	pkt708;
+				pkt708.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data(), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708LocF1);
+#if defined(_DEBUG)	/////// ** MrBill **	DEBUG	//////////////		DEBUG		///////////////////		DEBUG		//////////////////		DEBUG		//////////////////
+				if (::NTV2DeviceCanDo2110(mDeviceID)	//	KONA IP 2110 ONLY
+					&& mConfig.fVideoFormat == NTV2_FORMAT_1080p_2398)	//	1080p2398 ONLY
 					{
-						const NTV2Channel	chan (NTV2Channel(mConfig.fOutputChannel + num));
-						timecodes[::NTV2ChannelToTimecodeIndex(chan, /*inEmbeddedLTC*/false)] = tc;
-						timecodes[::NTV2ChannelToTimecodeIndex(chan, /*inEmbeddedLTC*/true)] = tc;
-						if (isInterlaced)
-							timecodes[::NTV2ChannelToTimecodeIndex(chan, /*inEmbeddedLTC*/false, /*inIsF2*/true)] = tc;
-						if (acOptionFlags & AUTOCIRCULATE_WITH_LTC)
-						{
-							timecodes[NTV2_TCINDEX_LTC1] = tc;
-							if (::NTV2DeviceGetNumLTCOutputs(mDeviceID) > 1)
-								timecodes[NTV2_TCINDEX_LTC2] = tc;
-						}
-						if (!NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
-							break;	//	Not Quad Frame:  just do the one output
-					}	//	for each quad
-					tcOK = xferInfo.SetOutputTimeCodes(timecodes);
-				}
-				::memcpy (tcString + colShift, rp188.GetRP188CString(), 11);
-				CNTV2CaptionRenderer::BurnString (tcString, tcOK ? kBlueOnWhite : kRedOnYellow,
-												formatDesc.GetTopVisibleRowAddress((UByte*)mVideoBuffer.GetHostPointer()),
-												formatDesc.GetVisibleRasterDimensions(), mConfig.fPixelFormat, bytesPerRow, 3, 1);
-			}	//	if not suppressing timecode injection
+						pkt708.SetLocationLineNumber(18);		//	Put CEA708 packet on line 18
+						packetList.AddAncillaryData(pkt708);
 
-			if (!pAudioBuffer.IsNULL())
-				xferInfo.SetAudioBuffer(reinterpret_cast<ULWord*>(pAudioBuffer.GetHostPointer()),
-										::AddAudioTone(reinterpret_cast<ULWord *>(pAudioBuffer.GetHostPointer()),	//	audio buffer to fill
-														currentSample,												//	sample for continuing the waveform
-														::GetAudioSamplesPerFrame(frameRate, NTV2_AUDIO_48K, mACStatus.GetProcessedFrameCount()),	//	# samples to generate
-														48000.0,			//	sample rate [Hz]
-														gAmplitudes,		//	per-channel amplitudes
-														gFrequencies,		//	per-channel tone frequencies [Hz]
-														31,					//	bits per sample
-														false,				//	don't byte swap
-														numAudioChannels));	//	number of audio channels
-			//	Finally ... transfer the frame data...
-			mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, xferInfo);
-		}	//	if room for another output frame on device
-		else
-			mDevice.WaitForOutputVerticalInterrupt (mConfig.fOutputChannel);
+						//	Put a second packet after it on line 18...
+						AJAAncillaryData extraPkt;  const string testData ("This is a test packet");	AJAAncDataLoc loc;
+						extraPkt.SetDID(0xAB);	extraPkt.SetSID(0xCD);  extraPkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
+						extraPkt.SetDataLocation(loc.SetDataLink(AJAAncillaryDataLink_A).SetDataChannel(AJAAncillaryDataChannel_Y).SetLineNumber(18).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc));
+						extraPkt.SetPayloadData(reinterpret_cast<const uint8_t*>(testData.c_str()), uint32_t(testData.size()));
+						packetList.AddAncillaryData(extraPkt);
+					}
+				else
+#endif	//	_DEBUG	/////// ** MrBill **	DEBUG	//////////////		DEBUG		///////////////////		DEBUG		//////////////////		DEBUG		//////////////////
+				packetList.AddAncillaryData(pkt708);
+			}
+		}	//	else HD video
+
+		CCPLDBG("Xmit pkts: " << packetList);	//	DEBUG: Packet list to be transmitted
+		if (mConfig.fForceVanc)	//	Write FB VANC lines...
+			packetList.GetVANCTransmitData (mVideoBuffer,  formatDesc);
+		else					//	Else use the Anc inserter firmware:
+			packetList.GetTransmitData (xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, isProgressive, F2StartLine);
+		mDevice.DMAWriteAnc(29, xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, NTV2_CHANNEL_INVALID);	//	DEBUG: DMA Xmit GUMP to frame 29
+
+		if (!mConfig.fSuppressTimecode)
+		{
+			const CRP188	rp188		(mACStatus.GetProcessedFrameCount(), tcFormat);
+			char			tcString[]	= {"                                "};
+			const UWord		colShift	(mACStatus.GetProcessedFrameCount() % 10 == 0  ?  colBouncer.Next()  :  colBouncer.Value());
+			bool			tcOK		(false);
+			NTV2_RP188		tc;
+			rp188.GetRP188Reg  (tc);
+			if (!NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat) && !mConfig.fDoMultiFormat)
+				//	UniFormat and not Quad Frame:   i.e. using ALL output spigots:
+				//	AutoCirculateTransfer will automatically set ALL output timecodes to
+				//	the DEFAULT timecode if the DEFAULT timecode is valid...
+				tcOK = xferInfo.SetOutputTimeCode(tc, NTV2_TCINDEX_DEFAULT);
+			else
+			{	//	MULTI-FORMAT OR QUAD-FRAME:
+				//	Be more selective as to which output spigots get the generated timecode...
+				NTV2TimeCodes	timecodes;
+				for (int num (0);  num < 4;  num++)
+				{
+					const NTV2Channel	chan (NTV2Channel(mConfig.fOutputChannel + num));
+					timecodes[::NTV2ChannelToTimecodeIndex(chan, /*inEmbeddedLTC*/false)] = tc;
+					timecodes[::NTV2ChannelToTimecodeIndex(chan, /*inEmbeddedLTC*/true)] = tc;
+					if (isInterlaced)
+						timecodes[::NTV2ChannelToTimecodeIndex(chan, /*inEmbeddedLTC*/false, /*inIsF2*/true)] = tc;
+					if (acOptionFlags & AUTOCIRCULATE_WITH_LTC)
+					{
+						timecodes[NTV2_TCINDEX_LTC1] = tc;
+						if (::NTV2DeviceGetNumLTCOutputs(mDeviceID) > 1)
+							timecodes[NTV2_TCINDEX_LTC2] = tc;
+					}
+					if (!NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
+						break;	//	Not Quad Frame:  just do the one output
+				}	//	for each quad
+				tcOK = xferInfo.SetOutputTimeCodes(timecodes);
+			}
+			::memcpy (tcString + colShift, rp188.GetRP188CString(), 11);
+			CNTV2CaptionRenderer::BurnString (tcString, tcOK ? kBlueOnWhite : kRedOnYellow,
+											formatDesc.GetTopVisibleRowAddress(reinterpret_cast<UByte*>(mVideoBuffer.GetHostPointer())),
+											formatDesc.GetVisibleRasterDimensions(), mConfig.fPixelFormat, UWord(bytesPerRow), 3, 1);
+		}	//	if not suppressing timecode injection
+
+		if (!pAudioBuffer.IsNULL())
+			xferInfo.SetAudioBuffer(reinterpret_cast<ULWord*>(pAudioBuffer.GetHostPointer()),
+									::AddAudioTone(reinterpret_cast<ULWord *>(pAudioBuffer.GetHostPointer()),	//	audio buffer to fill
+													currentSample,												//	sample for continuing the waveform
+													::GetAudioSamplesPerFrame(frameRate, NTV2_AUDIO_48K, mACStatus.GetProcessedFrameCount()),	//	# samples to generate
+													48000.0,			//	sample rate [Hz]
+													gAmplitudes,		//	per-channel amplitudes
+													gFrequencies,		//	per-channel tone frequencies [Hz]
+													31,					//	bits per sample
+													false,				//	don't byte swap
+													numAudioChannels));	//	number of audio channels
+		//	Finally ... transfer the frame data to the device...
+NTV2_POINTER	f1b(2048), f2b(2048);
+packetList.GetIPTransmitData (f1b, f2b, isProgressive, F2StartLine);
+mDevice.DMAWriteAnc(30, f1b, f2b, NTV2_CHANNEL_INVALID);	//	DEBUG: DMA Xmit RTP to frame 29
+AJAAncillaryList	pkts;
+AJAAncillaryList::SetFromDeviceAncBuffers(f1b, f2b, pkts);
+if (AJA_FAILURE(packetList.GetAncillaryDataWithID(0x61, 0x02)->Compare(*(pkts.GetAncillaryDataWithID(0x61, 0x02)), false, false)))
+	CCPLDBG(packetList.GetAncillaryDataWithID(0x61, 0x02)->AsString(8) << "  |  " << pkts.GetAncillaryDataWithID(0x61, 0x02)->AsString(8));
+string result(pkts.CompareWithInfo(packetList));
+if (!result.empty())	CCPLDBG(result);
+		mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, xferInfo);
+mDevice.DMAWriteAnc(32, xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, NTV2_CHANNEL_INVALID);	//	DEBUG: DMA XferStruct anc buffers to frame 32
 	}	//	loop til quit signaled
 
 	//	Stop AutoCirculate...
 	mDevice.AutoCirculateStop (mConfig.fOutputChannel);
+
 	//	Flush encoder queues (prevent Quit from hanging)...
 	while(m608Encoder->GetQueuedByteCount(NTV2_CC608_Field1) || m608Encoder->GetQueuedByteCount(NTV2_CC608_Field2))
 		{m608Encoder->Flush(NTV2_CC608_Field1);  m608Encoder->Flush(NTV2_CC608_Field2);}
