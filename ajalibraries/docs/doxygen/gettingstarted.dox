@@ -153,16 +153,53 @@ Deprecation history:
 	-	::CNTV2Card’s RP188 functions that use ::RP188_STRUCT’s.
 	-	Retired several mis-named NTV2DeviceID’s.
 -	<b>SDK 14.1:</b> ::NTV2_DEPRECATE_14_1 macro defined in <b>ajatypes.h</b>.
--	<b>SDK 14.2:</b> ::NTV2_DEPRECATE_14_2 and ::NTV2_DEPRECATE_14_2 macros defined in <b>ajatypes.h</b>. Deprecated APIs:
+-	<b>SDK 14.2:</b> ::NTV2_DEPRECATE_14_2 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
 	-	AJAAncillaryData::SetLocationVideoStream
 	-	The 3-parameter variant of AJAAncillaryList::AddVANCData.
 	-	AJA CC library’s caption logging control flags.
+-	<b>SDK 14.3:</b> ::NTV2_DEPRECATE_14_3 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
+	-	The 4-parameter ::CNTV2Card constructor.
+	-	The CNTV2Card::GetFrameBufferSize function that returns ::NTV2FrameSize via a pointer.
+	-	Several ::CNTV2Card GetHDMI…/SetHDMI… member functions were replaced by GetHDMIOut…/SetHDMIOut… functions.
+	-	Several ::CNTV2Card GetAnc…/SetAnc… member functions were replaced by AncInsert…/AncExtract… functions.
+	-	Most ::CNTV2Card functions that returned data via a pointer-based parameter.
+	-	The ::NTV2DeviceType data type.
+	-	The ::NTV2DeviceTypeString debug function.
+	-	The ::NTV2DeviceCanDoFreezeOutput device features function.
+	-	The 4-parameter variants of CNTV2DriverInterface::Open, CNTV2LinuxDriverInterface::Open, CNTV2MacDriverInterface::Open and CNTV2WinDriverInterface::Open.
+	-	The pointer-based variants of CNTV2DriverInterface::ReadRegister, CNTV2LinuxDriverInterface::ReadRegister
+	-	The “un-numbered” ::NTV2_XptHDMIIn … output crosspoint IDs that were replaced by “numbered” ones (e.g. ::NTV2_XptHDMIIn1).
+	-	The AJATestPattern… data types that were replaced by the NTV2TestPattern… ones.
+	-	The AJA_TestPattEx_… enumerations that were replaced by the NTV2_TestPatt_… ones.
+-	<b>SDK 15.0:</b> ::NTV2_DEPRECATE_15_0 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
+	-	The entire AJATestPatternGen class that was replaced with ::NTV2TestPatternGen.
+	-	CNTV2Card::IsKonaIPDevice was replaced with CNTV2Card::IsIPDevice.
+	-	::NTV2TestPatternList was replaced with ::NTV2TestPatternNames.
+	-	NTV2TestPatternGen::getTestPatternList was replaced with NTV2TestPatternGen::getTestPatternNames.
+	-	kVRegLinuxDriverVersion was replaced by kVRegDriverVersion.
+-	<b>SDK 15.1:</b> ::NTV2_DEPRECATE_15_1 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
+	-	NTV2SDIInputFormatSelect, NTV2PauseModeType and NTV2PulldownPatternType data types were removed.
+	-	CNTV2MacDriverInterface::SetOutputTimecodeOffset, CNTV2MacDriverInterface::GetOutputTimecodeOffset,
+		CNTV2MacDriverInterface::SetOutputTimecodeType and CNTV2MacDriverInterface::GetOutputTimecodeType functions were removed.
+-	<b>SDK 15.2:</b> ::NTV2_DEPRECATE_15_2 macro defined in <b>ajatypes.h</b>. Deprecated APIs:
+	-	AJAAncillaryDataLocation::Set was removed.
+	-	AJAAncillaryDataLocation instance data members were made private.
+	-	AJAAncillaryData::GetDataLocation members having parameters were removed.
+	-	AJAAncillaryData::GetLocationVideoStream was replaced by AJAAncillaryData::GetLocationDataChannel.
+	-	The multi-parameter variant of AJAAncillaryData::SetDataLocation was removed.
+	-	AJAAncillaryData::SetLocationVideoSpace
+	-	AJAAncillaryList::SetFromSDIAncData and AJAAncillaryList::SetFromIPAncData were deprecated in favor of the generic
+		AJAAncillaryList::SetFromDeviceAncBuffers.
+	-	The “UByte*” versions of CNTV2Card::DMAReadAnc and CNTV2Card::DMAWriteAnc.
+	-	CNTV2Card::GetQuadFrameEnable and CNTV2Card::GetQuadQuadFrameEnable.
+	-	The RP188_STRUCT based variants of CNTV2Card’s Get/SetRP188Data and Get/SetRP188Source.
+	-	The RP188SourceSelect type definition was deprecated in favor of the more meaningful ::RP188SourceFilterSelect.
 
 To build with an SDK’s deprecated API, comment out or remove its corresponding \c #define ::NTV2_DEPRECATE…
 line in <b>ajatypes.h</b>, then rebuild the <b>ajantv2</b> library.
 
 
-@note	It’s best to undefine macros from oldest-to-newest SDKs in contiguous blocks or unexpected results will occur.
+@note	It’s best to undefine macros from oldest-to-newest SDKs in contiguous blocks or unexpected results may occur.
 		For example, do this:
 		@code
 		#define NTV2_DEPRECATE
@@ -180,7 +217,7 @@ line in <b>ajatypes.h</b>, then rebuild the <b>ajantv2</b> library.
 		. . .
 		@endcode
 
-@note	AJA is planning to remove all deprecated symbols and APIs up through SDK 13.1 in SDK 15.0.
+@note	AJA may jettison all deprecated symbols and APIs in a future SDK.
 		Please prepare for this by porting your code to the latest SDK.
 		The <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/186" target="_kb">NTV2 SDK Porting Guide</a> can help you.
 
