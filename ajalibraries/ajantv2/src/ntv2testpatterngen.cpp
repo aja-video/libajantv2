@@ -1521,120 +1521,122 @@ static const uint32_t FlatField_Pluge_576_0[] =
 	0x2001f200, 0x07c8007c, 0x2001f200, 0x07c8007c, 0x2001f200, 0x07c8007c, 0x2001f200, 0x07c8007c, 0x2001f200, 0x07c8007c, 0x2001f200, 0x07c8007c, 0x2001f200, 0x07c8007c, 0x2001f200, 0x07c8007c, 
 };
 
-typedef struct {
-    uint16_t Blue;
-    uint16_t Green;
-    uint16_t Red;
+typedef struct
+{
+    uint16_t	Blue;
+    uint16_t	Green;
+    uint16_t	Red;
 } AJA_RGB16BitPixel;
-void ConvertRGBLineTo10BitYCbCr422(AJA_RGB16BitPixel* lineBuffer,uint16_t lineLength);
+
 
 // Narrow
-AJA_RGB16BitPixel NarrowWhite100 = { 940*4,940*4,940*4 };
-AJA_RGB16BitPixel NarrowYellow100 = { 64*4,940*4, 940*4};
-AJA_RGB16BitPixel NarrowCyan100 = { 940*4,940*4,64*4 };
-AJA_RGB16BitPixel NarrowGreen100 = { 64<<2,940<<2,64*4 };
-AJA_RGB16BitPixel NarrowMagenta100 = { 940*4,64*4,940*4 };
-AJA_RGB16BitPixel NarrowRed100 = { 64*4,64*4,940*4 };
-AJA_RGB16BitPixel NarrowBlue100 = { 940*4,64*4,64*4 };
+static const AJA_RGB16BitPixel NarrowWhite100			= { 940*4,940*4,940*4 };
+static const AJA_RGB16BitPixel NarrowYellow100			= { 64*4,940*4, 940*4};
+static const AJA_RGB16BitPixel NarrowCyan100			= { 940*4,940*4,64*4 };
+static const AJA_RGB16BitPixel NarrowGreen100			= { 64<<2,940<<2,64*4 };
+static const AJA_RGB16BitPixel NarrowMagenta100			= { 940*4,64*4,940*4 };
+static const AJA_RGB16BitPixel NarrowRed100				= { 64*4,64*4,940*4 };
+static const AJA_RGB16BitPixel NarrowBlue100			= { 940*4,64*4,64*4 };
 
-AJA_RGB16BitPixel NarrowWhite75 = { 721*4,721*4,721*4 };
-AJA_RGB16BitPixel NarrowYellow75 = { 64*4,721*4,721*4 };
-AJA_RGB16BitPixel NarrowCyan75 = { 721*4,721*4,64*4 };
-AJA_RGB16BitPixel NarrowGreen75 = { 64*4,721*4,64*4 };
-AJA_RGB16BitPixel NarrowMagenta75 = { 721*4,64*4,721*4 };
-AJA_RGB16BitPixel NarrowRed75 = { 64*4,64*4,721*4 };
-AJA_RGB16BitPixel NarrowBlue75 = { 721*4,64*4,64*4 };
+static const AJA_RGB16BitPixel NarrowWhite75			= { 721*4,721*4,721*4 };
+static const AJA_RGB16BitPixel NarrowYellow75			= { 64*4,721*4,721*4 };
+static const AJA_RGB16BitPixel NarrowCyan75				= { 721*4,721*4,64*4 };
+static const AJA_RGB16BitPixel NarrowGreen75			= { 64*4,721*4,64*4 };
+static const AJA_RGB16BitPixel NarrowMagenta75			= { 721*4,64*4,721*4 };
+static const AJA_RGB16BitPixel NarrowRed75				= { 64*4,64*4,721*4 };
+static const AJA_RGB16BitPixel NarrowBlue75				= { 721*4,64*4,64*4 };
 
-AJA_RGB16BitPixel NarrowWhite58 = { 572*4,572*4,572*4 };
-AJA_RGB16BitPixel NarrowYellow58 = { 64*4,572*4,572*4 };
-AJA_RGB16BitPixel NarrowCyan58 = { 572*4,572*4,64*4 };
-AJA_RGB16BitPixel NarrowGreen58 = { 64*4,572*4,64*4 };
-AJA_RGB16BitPixel NarrowMagenta58 = { 572*4,64*4,572*4 };
-AJA_RGB16BitPixel NarrowRed58 = { 64*4,64*4,572*4 };
-AJA_RGB16BitPixel NarrowBlue58 = { 572*4,64*4,64*4 };
+static const AJA_RGB16BitPixel NarrowWhite58			= { 572*4,572*4,572*4 };
+static const AJA_RGB16BitPixel NarrowYellow58			= { 64*4,572*4,572*4 };
+static const AJA_RGB16BitPixel NarrowCyan58				= { 572*4,572*4,64*4 };
+static const AJA_RGB16BitPixel NarrowGreen58			= { 64*4,572*4,64*4 };
+static const AJA_RGB16BitPixel NarrowMagenta58			= { 572*4,64*4,572*4 };
+static const AJA_RGB16BitPixel NarrowRed58				= { 64*4,64*4,572*4 };
+static const AJA_RGB16BitPixel NarrowBlue58				= { 572*4,64*4,64*4 };
 
-AJA_RGB16BitPixel NarrowGrey40 = { 414*4,414*4,414*4 };
+static const AJA_RGB16BitPixel NarrowGrey40				= { 414*4,414*4,414*4 };
 
-AJA_RGB16BitPixel NarrowStepMinus7 = { 4*4,4*4,4*4 };
-AJA_RGB16BitPixel NarrowStep0 = { 64*4,64*4,64*4 };
-AJA_RGB16BitPixel NarrowStep10 = { 152*4,152*4,152*4 };
-AJA_RGB16BitPixel NarrowStep20 = { 239*4,239*4,239*4 };
-AJA_RGB16BitPixel NarrowStep30 = { 327*4,327*4,327*4 };
-AJA_RGB16BitPixel NarrowStep40 = { 414*4,414*4,414*4 };
-AJA_RGB16BitPixel NarrowStep50 = { 502*4,502*4,502*4 };
-AJA_RGB16BitPixel NarrowStep60 = { 590*4,590*4,590*4 };
-AJA_RGB16BitPixel NarrowStep70 = { 677*4,677*4,677*4 };
-AJA_RGB16BitPixel NarrowStep80 = { 765*4,765*4,765*4 };
-AJA_RGB16BitPixel NarrowStep90 = { 852*4,852*4,852*4 };
-AJA_RGB16BitPixel NarrowStep100 = { 940*4,940*4,940*4 };
-AJA_RGB16BitPixel NarrowStep109 = { 1019*4,1019*4,1019*4 };
+static const AJA_RGB16BitPixel NarrowStepMinus7			= { 4*4,4*4,4*4 };
+static const AJA_RGB16BitPixel NarrowStep0				= { 64*4,64*4,64*4 };
+static const AJA_RGB16BitPixel NarrowStep10				= { 152*4,152*4,152*4 };
+static const AJA_RGB16BitPixel NarrowStep20				= { 239*4,239*4,239*4 };
+static const AJA_RGB16BitPixel NarrowStep30				= { 327*4,327*4,327*4 };
+static const AJA_RGB16BitPixel NarrowStep40				= { 414*4,414*4,414*4 };
+static const AJA_RGB16BitPixel NarrowStep50				= { 502*4,502*4,502*4 };
+static const AJA_RGB16BitPixel NarrowStep60				= { 590*4,590*4,590*4 };
+static const AJA_RGB16BitPixel NarrowStep70				= { 677*4,677*4,677*4 };
+static const AJA_RGB16BitPixel NarrowStep80				= { 765*4,765*4,765*4 };
+static const AJA_RGB16BitPixel NarrowStep90				= { 852*4,852*4,852*4 };
+static const AJA_RGB16BitPixel NarrowStep100			= { 940*4,940*4,940*4 };
+static const AJA_RGB16BitPixel NarrowStep109			= { 1019*4,1019*4,1019*4 };
 
-AJA_RGB16BitPixel NarrowYellow75_709 = { 316*4,719*4,713*4 };
-AJA_RGB16BitPixel NarrowCyan75_709 = { 718*4,709*4,538*4 };
-AJA_RGB16BitPixel NarrowGreen75_709 = { 296*4,706*4,512*4 };
-AJA_RGB16BitPixel NarrowMagenta75_709 = { 705*4,286*4,651*4 };
-AJA_RGB16BitPixel NarrowRed75_709 = { 164*4,269*4,639*4 };
-AJA_RGB16BitPixel NarrowBlue75_709 = { 702*4,147*4,227*4 };
+static const AJA_RGB16BitPixel NarrowYellow75_709		= { 316*4,719*4,713*4 };
+static const AJA_RGB16BitPixel NarrowCyan75_709			= { 718*4,709*4,538*4 };
+static const AJA_RGB16BitPixel NarrowGreen75_709		= { 296*4,706*4,512*4 };
+static const AJA_RGB16BitPixel NarrowMagenta75_709		= { 705*4,286*4,651*4 };
+static const AJA_RGB16BitPixel NarrowRed75_709			= { 164*4,269*4,639*4 };
+static const AJA_RGB16BitPixel NarrowBlue75_709			= { 702*4,147*4,227*4 };
 
-AJA_RGB16BitPixel NarrowYellow58_709 = { 381*4,571*4,568*4 };
-AJA_RGB16BitPixel NarrowCyan58_709 = { 571*4,566*4,484*4 };
-AJA_RGB16BitPixel NarrowGreen58_709 = { 368*4,564*4,474*4 };
-AJA_RGB16BitPixel NarrowMagenta58_709 = { 564*4,361*4,536*4 };
-AJA_RGB16BitPixel NarrowRed58_709 = { 256*4,350*4,530*4 };
-AJA_RGB16BitPixel NarrowBlue58_709 = { 562*4,236*4,317*4 };
+static const AJA_RGB16BitPixel NarrowYellow58_709		= { 381*4,571*4,568*4 };
+static const AJA_RGB16BitPixel NarrowCyan58_709			= { 571*4,566*4,484*4 };
+static const AJA_RGB16BitPixel NarrowGreen58_709		= { 368*4,564*4,474*4 };
+static const AJA_RGB16BitPixel NarrowMagenta58_709		= { 564*4,361*4,536*4 };
+static const AJA_RGB16BitPixel NarrowRed58_709			= { 256*4,350*4,530*4 };
+static const AJA_RGB16BitPixel NarrowBlue58_709			= { 562*4,236*4,317*4 };
 
-AJA_RGB16BitPixel NarrowBlack = { 64*4,64*4,64*4 };
-AJA_RGB16BitPixel NarrowMinus2PercentBlack = { 48*4,48*4,48*4 };
-AJA_RGB16BitPixel Narrow2PercentBlack = { 80*4,80*4, 80*4 };
-AJA_RGB16BitPixel Narrow4PercentBlack = { 99*4,99*4,99*4 };
+static const AJA_RGB16BitPixel NarrowBlack				= { 64*4,64*4,64*4 };
+static const AJA_RGB16BitPixel NarrowMinus2PercentBlack	= { 48*4,48*4,48*4 };
+static const AJA_RGB16BitPixel Narrow2PercentBlack		= { 80*4,80*4, 80*4 };
+static const AJA_RGB16BitPixel Narrow4PercentBlack		= { 99*4,99*4,99*4 };
 
 
 // Wide
-AJA_RGB16BitPixel WideWhite100 = { 4095,4095,4095 };
-AJA_RGB16BitPixel WideYellow100 = { 0,4095,4095};
-AJA_RGB16BitPixel WideCyan100 = { 4095,4095,0 };
-AJA_RGB16BitPixel WideGreen100 = { 0,4095,0 };
-AJA_RGB16BitPixel WideMagenta100 = { 4095,0,4095 };
-AJA_RGB16BitPixel WideRed100 = { 0,0,4095 };
-AJA_RGB16BitPixel WideBlue100 = { 4095,0,0 };
+static const AJA_RGB16BitPixel WideWhite100				= { 4095,4095,4095 };
+static const AJA_RGB16BitPixel WideYellow100			= { 0,4095,4095};
+static const AJA_RGB16BitPixel WideCyan100				= { 4095,4095,0 };
+static const AJA_RGB16BitPixel WideGreen100				= { 0,4095,0 };
+static const AJA_RGB16BitPixel WideMagenta100			= { 4095,0,4095 };
+static const AJA_RGB16BitPixel WideRed100				= { 0,0,4095 };
+static const AJA_RGB16BitPixel WideBlue100				= { 4095,0,0 };
 
-AJA_RGB16BitPixel WideWhite58 = {2375,2375,2375 };
-AJA_RGB16BitPixel WideYellow58 = {0,2375,2375 };
-AJA_RGB16BitPixel WideCyan58 = { 2375,2375,0 };
-AJA_RGB16BitPixel WideGreen58 = { 0,2375,0 };
-AJA_RGB16BitPixel WideMagenta58 = { 2375,0,2375 };
-AJA_RGB16BitPixel WideRed58 = { 0,0,2375 };
-AJA_RGB16BitPixel WideBlue58 = { 2375,0,0 };
+static const AJA_RGB16BitPixel WideWhite58				= {2375,2375,2375 };
+static const AJA_RGB16BitPixel WideYellow58				= {0,2375,2375 };
+static const AJA_RGB16BitPixel WideCyan58				= { 2375,2375,0 };
+static const AJA_RGB16BitPixel WideGreen58				= { 0,2375,0 };
+static const AJA_RGB16BitPixel WideMagenta58			= { 2375,0,2375 };
+static const AJA_RGB16BitPixel WideRed58				= { 0,0,2375 };
+static const AJA_RGB16BitPixel WideBlue58				= { 2375,0,0 };
 
 
-AJA_RGB16BitPixel WideGrey40 = { 1638,1638,1638 };
+static const AJA_RGB16BitPixel WideGrey40				= { 1638,1638,1638 };
 
-AJA_RGB16BitPixel WideStep0 = { 0,0,0 };
-AJA_RGB16BitPixel WideStep10 = { 410,410,410 };
-AJA_RGB16BitPixel WideStep20 = { 819,819,819 };
-AJA_RGB16BitPixel WideStep30 = { 1229,1229,1229 };
-AJA_RGB16BitPixel WideStep40 = { 1638,1638,1638 };
-AJA_RGB16BitPixel WideStep50 = { 2048,2048,2048 };
-AJA_RGB16BitPixel WideStep60 = { 2457,2457,2457 };
-AJA_RGB16BitPixel WideStep70 = { 2867,2867,2867 };
-AJA_RGB16BitPixel WideStep80 = { 3276,3276,3276};
-AJA_RGB16BitPixel WideStep90 = { 3686,3686,3686 };
-AJA_RGB16BitPixel WideStep100 = { 4095,4095,4095 };
+static const AJA_RGB16BitPixel WideStep0				= { 0,0,0 };
+static const AJA_RGB16BitPixel WideStep10				= { 410,410,410 };
+static const AJA_RGB16BitPixel WideStep20				= { 819,819,819 };
+static const AJA_RGB16BitPixel WideStep30				= { 1229,1229,1229 };
+static const AJA_RGB16BitPixel WideStep40				= { 1638,1638,1638 };
+static const AJA_RGB16BitPixel WideStep50				= { 2048,2048,2048 };
+static const AJA_RGB16BitPixel WideStep60				= { 2457,2457,2457 };
+static const AJA_RGB16BitPixel WideStep70				= { 2867,2867,2867 };
+static const AJA_RGB16BitPixel WideStep80				= { 3276,3276,3276};
+static const AJA_RGB16BitPixel WideStep90				= { 3686,3686,3686 };
+static const AJA_RGB16BitPixel WideStep100				= { 4095,4095,4095 };
 
-AJA_RGB16BitPixel WideYellow58_709 = { 1480,2370,2356 };
-AJA_RGB16BitPixel WideCyan58_709 = { 2368,2345,1964 };
-AJA_RGB16BitPixel WideGreen58_709 = { 1420,2339,1915};
-AJA_RGB16BitPixel WideMagenta58_709 = { 2336,1389,2206};
-AJA_RGB16BitPixel WideRed58_709 = { 900,1337,2178};
-AJA_RGB16BitPixel WideBlue58_709 = { 2328,805,1184};
+static const AJA_RGB16BitPixel WideYellow58_709			= { 1480,2370,2356 };
+static const AJA_RGB16BitPixel WideCyan58_709			= { 2368,2345,1964 };
+static const AJA_RGB16BitPixel WideGreen58_709			= { 1420,2339,1915};
+static const AJA_RGB16BitPixel WideMagenta58_709		= { 2336,1389,2206};
+static const AJA_RGB16BitPixel WideRed58_709			= { 900,1337,2178};
+static const AJA_RGB16BitPixel WideBlue58_709			= { 2328,805,1184};
 
-AJA_RGB16BitPixel WideBlack = { 0,0,0 };
-AJA_RGB16BitPixel Wide2PercentBlack = { 82,82, 82 };
-AJA_RGB16BitPixel Wide4PercentBlack = { 164,164,164 };
+static const AJA_RGB16BitPixel WideBlack				= { 0,0,0 };
+static const AJA_RGB16BitPixel Wide2PercentBlack		= { 82,82, 82 };
+static const AJA_RGB16BitPixel Wide4PercentBlack		= { 164,164,164 };
 
 #ifndef HD_NUMACTIVELINES_2K
 	#define HD_NUMACTIVELINES_2K      1556  
 #endif
+
 static const SegmentTestPatternData NTV2TestPatternSegments[] = 
 {
 	{
@@ -2919,25 +2921,18 @@ bool NTV2TestPatternGen::IsSDStandard()
 	return false;
 }
 
-AJA_RGB16BitPixel*  addToBuffer(AJA_RGB16BitPixel* buffer, AJA_RGB16BitPixel& value,uint32_t length)
+static AJA_RGB16BitPixel*  addToBuffer (AJA_RGB16BitPixel* buffer, const AJA_RGB16BitPixel& value, const uint32_t length)
 {
-    AJA_RGB16BitPixel pixel = value;
-
-
-    for ( int i=0; i<length; i++)
-    {
-        *buffer++ = pixel;
-
-    }
+    for (uint32_t i=0;  i<length;  i++)
+        *buffer++ = value;
     return buffer;
 }
 
-AJA_RGB16BitPixel*  addRampToBuffer(AJA_RGB16BitPixel* buffer, AJA_RGB16BitPixel& value,uint32_t length,uint32_t incrementValue)
+static AJA_RGB16BitPixel*  addRampToBuffer (AJA_RGB16BitPixel* buffer, const AJA_RGB16BitPixel& value, const uint32_t length, const uint32_t incrementValue)
 {
-    AJA_RGB16BitPixel pixel = value;
+    AJA_RGB16BitPixel pixel(value);
 
-
-    for ( int i=0; i<length; i++)
+    for (uint32_t i=0;  i<length;  i++)
     {
         *buffer++ = pixel;
         pixel.Red += incrementValue;
@@ -2946,6 +2941,60 @@ AJA_RGB16BitPixel*  addRampToBuffer(AJA_RGB16BitPixel* buffer, AJA_RGB16BitPixel
 
     }
     return buffer;
+}
+
+static void ConvertRGBLineTo10BitYCbCr422 (AJA_RGB16BitPixel* lineBuffer, const uint16_t lineLength)
+{
+    int16_t r,g,b;
+    int16_t y,cb,cr;
+    //QString debugString;
+    r =0;
+    g = 512;
+    b = 1023;
+
+    y = (r-64.0)*(.26270) + (g-64.0)*(.67800) + (b-64)*(.05930) + 64.0;
+    cb = (r-64.0)*(-0.14282) + (g-64.0)*(-0.368594) + (b-64.0)*(0.511414) + 512.0;
+    cr = (r-64.0)*(0.511414) + (g-64.0)*(-0.470284) + (b-64.0)*(-0.04113) + 512.0;
+//qDebug() << y << cb << cr;
+
+    for (uint32_t pixel = 0;  pixel<lineLength;  pixel++)
+    {
+        AJA_RGB16BitPixel pixelValue = lineBuffer[pixel];
+        //Make 10 bit Value
+        r = pixelValue.Red>>2;
+        g = pixelValue.Green>>2;
+        b = pixelValue.Blue>>2;
+        y = (r-64.0)*(.26270) + (g-64.0)*(.67800) + (b-64)*(.05930) + 64.0;
+        cb = (r-64.0)*(-0.14282) + (g-64.0)*(-0.368594) + (b-64.0)*(0.511414) + 512.0;
+        cr = (r-64.0)*(0.511414) + (g-64.0)*(-0.470284) + (b-64.0)*(-0.04113) + 512.0;
+        if ( y  > 1020) y = 1020;
+        if ( y < 4 ) y = 4;
+        if ( cb  > 1020) cb = 1020;
+        if ( cb < 4 ) cb = 4;
+        if ( cr  > 1020) cr = 1020;
+        if ( cr < 4 ) cr = 4;
+#if 0
+        if ( pixel & 0x1)
+        {
+            debugString += QString::number(y);
+            debugString += ',';
+        }
+        else
+        {
+             debugString += QString::number(cb);
+            debugString += ',';
+            debugString += QString::number(y);
+            debugString += ',';
+            debugString += QString::number(cr);
+            debugString += ',';
+        }
+        if ( (pixel != 0 ) && ((pixel%16) == 0) )
+        {
+            debugString +=  "\r";
+        }
+#endif
+    }
+    //qDebug().noquote() << debugString;
 }
 
 static int a;
@@ -3403,9 +3452,9 @@ bool NTV2TestPatternGen::Draw12BitRamp()
 
 	for ( uint32_t lineCount=0; lineCount<mNumLines; lineCount++)
 	{
-		for ( int32_t pixelCount = 0; pixelCount < mNumPixels; pixelCount++)
+		for (uint32_t pixelCount = 0; pixelCount < mNumPixels; pixelCount++)
 		{
-			double dvalue = (double)pixelCount*(4095.0/(double)(mNumPixels-1));
+			double dvalue = double(pixelCount)*(4095.0/double(mNumPixels-1));
 			uint32_t ivalue = (uint32_t)dvalue;
 			*rgbBuffer++ = ivalue;
 			*rgbBuffer++ = ivalue;
@@ -3457,59 +3506,4 @@ bool NTV2TestPatternGen::Draw12BitZonePlate()
 	}
 	PrepareForOutput();
 	return true;
-}
-void ConvertRGBLineTo10BitYCbCr422(AJA_RGB16BitPixel* lineBuffer,uint16_t lineLength)
-{
-    int16_t r,g,b;
-    int16_t y,cb,cr;
-    //QString debugString;
-    r =0;
-    g = 512;
-    b = 1023;
-
-    y = (r-64.0)*(.26270) + (g-64.0)*(.67800) + (b-64)*(.05930) + 64.0;
-    cb = (r-64.0)*(-0.14282) + (g-64.0)*(-0.368594) + (b-64.0)*(0.511414) + 512.0;
-    cr = (r-64.0)*(0.511414) + (g-64.0)*(-0.470284) + (b-64.0)*(-0.04113) + 512.0;
-//qDebug() << y << cb << cr;
-
-    for ( uint32_t pixel = 0; pixel<lineLength; pixel++)
-    {
-        AJA_RGB16BitPixel pixelValue = lineBuffer[pixel];
-        //Make 10 bit Value
-        r = pixelValue.Red>>2;
-        g = pixelValue.Green>>2;
-        b = pixelValue.Blue>>2;
-        y = (r-64.0)*(.26270) + (g-64.0)*(.67800) + (b-64)*(.05930) + 64.0;
-        cb = (r-64.0)*(-0.14282) + (g-64.0)*(-0.368594) + (b-64.0)*(0.511414) + 512.0;
-        cr = (r-64.0)*(0.511414) + (g-64.0)*(-0.470284) + (b-64.0)*(-0.04113) + 512.0;
-        if ( y  > 1020) y = 1020;
-        if ( y < 4 ) y = 4;
-        if ( cb  > 1020) cb = 1020;
-        if ( cb < 4 ) cb = 4;
-        if ( cr  > 1020) cr = 1020;
-        if ( cr < 4 ) cr = 4;
-#if 0
-        if ( pixel & 0x1)
-        {
-            debugString += QString::number(y);
-            debugString += ',';
-        }
-        else
-        {
-             debugString += QString::number(cb);
-            debugString += ',';
-            debugString += QString::number(y);
-            debugString += ',';
-            debugString += QString::number(cr);
-            debugString += ',';
-        }
-        if ( (pixel != 0 ) && ((pixel%16) == 0) )
-        {
-            debugString +=  "\r";
-        }
-
-#endif
-    }
-    //qDebug().noquote() << debugString;
-
 }
