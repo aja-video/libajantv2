@@ -31,7 +31,7 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 {
 public:
 						CNTV2MacDriverInterface( void );
-	virtual 			~CNTV2MacDriverInterface( void );
+	AJA_VIRTUAL			~CNTV2MacDriverInterface( void );
 
 #if !defined(NTV2_DEPRECATE_14_3)
 	virtual bool		Open (UWord inDeviceIndex,
@@ -39,21 +39,21 @@ public:
 							  NTV2DeviceType eDeviceType,
 							  const char * hostName);
 #endif	//	!defined(NTV2_DEPRECATE_14_3)
-	virtual bool		Open (const UWord inDeviceIndex = 0,
+	AJA_VIRTUAL bool	Open (const UWord inDeviceIndex = 0,
 							  const std::string & inHostName = std::string());
-	bool				TestOpen();
-	virtual bool		Close (void);
-	virtual ULWord		GetPCISlotNumber (void) const;
-	virtual bool		MapFrameBuffers( void );
-	virtual bool		UnmapFrameBuffers( void );
-	virtual bool		MapRegisters( void );
-	virtual bool		UnmapRegisters( void );
-	virtual bool		MapXena2Flash( void );
-	virtual bool		UnmapXena2Flash( void );
-	bool				MapMemory( MemoryType memType, void **memPtr );
+	AJA_VIRTUAL bool	TestOpen();
+	AJA_VIRTUAL bool	Close (void);
+	AJA_VIRTUAL ULWord	GetPCISlotNumber (void) const;
+	AJA_VIRTUAL bool	MapFrameBuffers( void );
+	AJA_VIRTUAL bool	UnmapFrameBuffers( void );
+	AJA_VIRTUAL bool	MapRegisters( void );
+	AJA_VIRTUAL bool	UnmapRegisters( void );
+	AJA_VIRTUAL bool	MapXena2Flash( void );
+	AJA_VIRTUAL bool	UnmapXena2Flash( void );
+	AJA_VIRTUAL bool	MapMemory( MemoryType memType, void **memPtr );
 
 	// Driver calls
-	virtual bool		ReadRegister (const ULWord inRegisterNumber,
+	AJA_VIRTUAL bool	ReadRegister (const ULWord inRegisterNumber,
 									  ULWord & outValue,
 									  const ULWord inRegisterMask = 0xFFFFFFFF,
 									  const ULWord inRegisterShift = 0x0);
@@ -63,12 +63,12 @@ public:
 		return pOutValue ? ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift) : false;
 	}
 #endif	//	!defined(NTV2_DEPRECATE_14_3)
-	virtual bool		WriteRegister( ULWord registerNumber,
+	AJA_VIRTUAL bool	WriteRegister( ULWord registerNumber,
 									   ULWord registerValue,
 									   ULWord registerMask = 0xFFFFFFFF,
 									   ULWord registerShift = 0x0 );
 
-	bool				StartDriver( DriverStartPhase phase );
+	AJA_VIRTUAL bool	StartDriver( DriverStartPhase phase );
 
 	/**
 		@brief		Reserves exclusive use of the AJA device for a given process, preventing other processes on the host
@@ -87,7 +87,7 @@ public:
 		@note		AJA recommends saving the device's NTV2EveryFrameTaskMode at the time AcquireStreamForApplication
 					is called, and restoring it after releasing the device.
 	**/
-	bool				AcquireStreamForApplication (ULWord inApplicationType, int32_t inProcessID);
+	AJA_VIRTUAL bool	AcquireStreamForApplication (ULWord inApplicationType, int32_t inProcessID);
 
 	/**
 		@brief		Releases exclusive use of the AJA device for a given process, permitting other processes to acquire it.
@@ -106,14 +106,14 @@ public:
 		@note		AJA recommends saving the device's NTV2EveryFrameTaskMode at the time AcquireStreamForApplication
 					is called, and restoring it after releasing the device.
 	**/
-	bool				ReleaseStreamForApplication (ULWord inApplicationType, int32_t inProcessID);
+	AJA_VIRTUAL bool	ReleaseStreamForApplication (ULWord inApplicationType, int32_t inProcessID);
 
-	bool				AcquireStreamForApplicationWithReference (ULWord inApplicationType, int32_t inProcessID);
-	bool				ReleaseStreamForApplicationWithReference (ULWord inApplicationType, int32_t inProcessID);
+	AJA_VIRTUAL bool	AcquireStreamForApplicationWithReference (ULWord inApplicationType, int32_t inProcessID);
+	AJA_VIRTUAL bool	ReleaseStreamForApplicationWithReference (ULWord inApplicationType, int32_t inProcessID);
 	
-	bool				KernelLog( void* dataPtr, UInt32 dataSize );
+	AJA_VIRTUAL bool	KernelLog( void* dataPtr, UInt32 dataSize );
 
-	bool				SetStreamingApplication( ULWord appType, int32_t pid );
+	AJA_VIRTUAL bool	SetStreamingApplication( ULWord appType, int32_t pid );
 
 	/**
 		@brief		Answers whether or not an application is currently using the AJA device, and if so, reports the host process ID.
@@ -123,16 +123,16 @@ public:
 									identifier of the application that's currently using the AJA device.
 		@result		True if successful; otherwise false.
 	**/
-	bool				GetStreamingApplication (ULWord * pOutAppFourCC, int32_t * pOutAppPID);
+	AJA_VIRTUAL bool	GetStreamingApplication (ULWord * pOutAppFourCC, int32_t * pOutAppPID);
 
-	bool				SetDefaultDeviceForPID( int32_t pid );
-	bool				IsDefaultDeviceForPID( int32_t pid );
-	bool				LockFormat( void );
-	virtual bool		WaitForInterrupt( INTERRUPT_ENUMS type,  ULWord timeout = 50 );
-	virtual bool		GetInterruptCount( INTERRUPT_ENUMS eInterrupt, ULWord *pCount );
-	bool				WaitForChangeEvent( UInt32 timeout = 0 );
-	bool                GetTime( UInt32 *time, UInt32 *scale );
-	virtual bool		DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
+	AJA_VIRTUAL bool	SetDefaultDeviceForPID( int32_t pid );
+	AJA_VIRTUAL bool	IsDefaultDeviceForPID( int32_t pid );
+	AJA_VIRTUAL bool	LockFormat( void );
+	AJA_VIRTUAL bool	WaitForInterrupt( INTERRUPT_ENUMS type,  ULWord timeout = 50 );
+	AJA_VIRTUAL bool	GetInterruptCount( INTERRUPT_ENUMS eInterrupt, ULWord *pCount );
+	AJA_VIRTUAL bool	WaitForChangeEvent( UInt32 timeout = 0 );
+	AJA_VIRTUAL bool    GetQuickTimeTime( UInt32 *time, UInt32 *scale );	//	Formerly called "GetTime" which shadowed CNTV2KonaFlashProgram::GetTime
+	AJA_VIRTUAL bool	DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
 										const bool			inIsRead,
 										const ULWord		inFrameNumber,
 										ULWord *			pFrameBuffer,
@@ -140,7 +140,7 @@ public:
 										const ULWord		inByteCount,
 										const bool			inSynchronous = true);
 
-	bool				DmaTransfer ( NTV2DMAEngine DMAEngine,
+	AJA_VIRTUAL bool	DmaTransfer ( NTV2DMAEngine DMAEngine,
 									  bool bRead,
 									  ULWord frameNumber,
 									  ULWord * pFrameBuffer,
@@ -151,7 +151,7 @@ public:
 									  ULWord videoSegmentCardPitch,
 									  bool bSync );
 
-	bool				DmaTransfer (NTV2DMAEngine DMAEngine,
+	AJA_VIRTUAL bool	DmaTransfer (NTV2DMAEngine DMAEngine,
 									NTV2Channel DMAChannel,
 									bool bTarget,
 									ULWord frameNumber,
@@ -162,52 +162,52 @@ public:
 									ULWord videoSegmentCardPitch,
 									PCHANNEL_P2P_STRUCT pP2PData);
 
-	virtual bool		AutoCirculate( AUTOCIRCULATE_DATA &autoCircData );
-	virtual bool		NTV2Message (NTV2_HEADER * pInMessage);
-	virtual bool		ControlDriverDebugMessages( NTV2_DriverDebugMessageSet /*msgSet*/, bool /*enable*/ ) {return false;}
-	virtual bool		RestoreHardwareProcampRegisters( void );
+	AJA_VIRTUAL bool	AutoCirculate( AUTOCIRCULATE_DATA &autoCircData );
+	AJA_VIRTUAL bool	NTV2Message (NTV2_HEADER * pInMessage);
+	AJA_VIRTUAL bool	ControlDriverDebugMessages( NTV2_DriverDebugMessageSet /*msgSet*/, bool /*enable*/ ) {return false;}
+	AJA_VIRTUAL bool	RestoreHardwareProcampRegisters( void );
 
-	virtual	Word		SleepMs( LWord msec ) const;
-	void				Sleep( int /*milliseconds*/ ) {}
+	AJA_VIRTUAL	Word	SleepMs( LWord msec ) const;
+	AJA_VIRTUAL void	Sleep( int /*milliseconds*/ ) {}
 
-	bool				SetUserModeDebugLevel( ULWord  level );
-	bool				GetUserModeDebugLevel( ULWord* level );
-	bool				SetKernelModeDebugLevel( ULWord  level );
-	bool				GetKernelModeDebugLevel( ULWord* level );
+	AJA_VIRTUAL bool	SetUserModeDebugLevel( ULWord  level );
+	AJA_VIRTUAL bool	GetUserModeDebugLevel( ULWord* level );
+	AJA_VIRTUAL bool	SetKernelModeDebugLevel( ULWord  level );
+	AJA_VIRTUAL bool	GetKernelModeDebugLevel( ULWord* level );
 
-	bool				SetUserModePingLevel( ULWord  level );
-	bool				GetUserModePingLevel( ULWord* level );
-	bool				SetKernelModePingLevel( ULWord  level );
-	bool				GetKernelModePingLevel( ULWord* level );
+	AJA_VIRTUAL bool	SetUserModePingLevel( ULWord  level );
+	AJA_VIRTUAL bool	GetUserModePingLevel( ULWord* level );
+	AJA_VIRTUAL bool	SetKernelModePingLevel( ULWord  level );
+	AJA_VIRTUAL bool	GetKernelModePingLevel( ULWord* level );
 
-	bool				SetLatencyTimerValue( ULWord value );
-	bool				GetLatencyTimerValue( ULWord* value );
+	AJA_VIRTUAL bool	SetLatencyTimerValue( ULWord value );
+	AJA_VIRTUAL bool	GetLatencyTimerValue( ULWord* value );
 
-	bool				SetDebugFilterStrings( const char* includeString,const char* excludeString );
-	bool				GetDebugFilterStrings( char* includeString,char* excludeString );
+	AJA_VIRTUAL bool	SetDebugFilterStrings( const char* includeString,const char* excludeString );
+	AJA_VIRTUAL bool	GetDebugFilterStrings( char* includeString,char* excludeString );
 
-	bool				ReadRP188Registers( NTV2Channel channel, RP188_STRUCT* pRP188Data );
+	AJA_VIRTUAL bool	ReadRP188Registers( NTV2Channel channel, RP188_STRUCT* pRP188Data );
 
 #if	!defined(NTV2_DEPRECATE_15_1)
-	bool				SetOutputTimecodeOffset( ULWord frames );
-	bool				GetOutputTimecodeOffset( ULWord* pFrames );
+	AJA_VIRTUAL bool	SetOutputTimecodeOffset( ULWord frames );
+	AJA_VIRTUAL bool	GetOutputTimecodeOffset( ULWord* pFrames );
 #endif	//	!defined(NTV2_DEPRECATE_15_1)
-	bool				SetOutputTimecodeType( ULWord type );
-	bool				GetOutputTimecodeType( ULWord* pType );
-	bool				SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode);
-	bool				GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode);
+	AJA_VIRTUAL bool	SetOutputTimecodeType( ULWord type );
+	AJA_VIRTUAL bool	GetOutputTimecodeType( ULWord* pType );
+	AJA_VIRTUAL bool	SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode);
+	AJA_VIRTUAL bool	GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode);
 
-	bool				SystemStatus( void* dataPtr, SystemStatusCode systemStatusCode );
-	bool				SystemControl( void* dataPtr, SystemControlCode systemControlCode );
+	AJA_VIRTUAL bool	SystemStatus( void* dataPtr, SystemStatusCode systemStatusCode );
+	AJA_VIRTUAL bool	SystemControl( void* dataPtr, SystemControlCode systemControlCode );
 
-	// We don't do these
-	virtual bool		DmaUnlock( void ) {return false;}
-	virtual bool		CompleteMemoryForDMA( ULWord* /*pFrameBuffer*/ ) {return false;}
-	virtual bool		PrepareMemoryForDMA( ULWord* /*pFrameBuffer*/, ULWord /*ulNumBytes*/ ) {return false;}
-	virtual bool		ConfigureInterrupt( bool /*bEnable*/, INTERRUPT_ENUMS /*eInterruptType*/ ) {return true;}
-	virtual bool		ConfigureSubscription (bool bSubscribe, INTERRUPT_ENUMS eInterruptType, PULWord & hSubscription);
-	virtual bool		SetShareMode( bool /*bShared*/ ) {return false;}
-	virtual bool		SetOverlappedMode( bool /*bOverlapped*/ ) {return false;}
+	// Mac doesn't do these:
+	AJA_VIRTUAL bool	DmaUnlock( void ) {return false;}
+	AJA_VIRTUAL bool	CompleteMemoryForDMA( ULWord* /*pFrameBuffer*/ ) {return false;}
+	AJA_VIRTUAL bool	PrepareMemoryForDMA( ULWord* /*pFrameBuffer*/, ULWord /*ulNumBytes*/ ) {return false;}
+	AJA_VIRTUAL bool	ConfigureInterrupt( bool /*bEnable*/, INTERRUPT_ENUMS /*eInterruptType*/ ) {return true;}
+	AJA_VIRTUAL bool	ConfigureSubscription (bool bSubscribe, INTERRUPT_ENUMS eInterruptType, PULWord & hSubscription);
+	AJA_VIRTUAL bool	SetShareMode( bool /*bShared*/ ) {return false;}
+	AJA_VIRTUAL bool	SetOverlappedMode( bool /*bOverlapped*/ ) {return false;}
 
 public:
 	static const char *	GetIOServiceName (void);	//	For internal use only
@@ -220,14 +220,14 @@ public:
 	static void			GetClientStats (MDIStats & outStats);
 
 private:
-	virtual io_connect_t		GetIOConnect (const bool inDoNotAllocate = false) const;	//	For internal use only
+	AJA_VIRTUAL io_connect_t	GetIOConnect (const bool inDoNotAllocate = false) const;	//	For internal use only
 
 		// 64 bit thunking - only for structures that contain pointers
-	void CopyTo_AUTOCIRCULATE_DATA_64 (AUTOCIRCULATE_DATA *p, AUTOCIRCULATE_DATA_64 *p64);
-	void CopyTo_AUTOCIRCULATE_DATA (AUTOCIRCULATE_DATA_64 *p64, AUTOCIRCULATE_DATA *p);
-	void CopyTo_AUTOCIRCULATE_TRANSFER_STRUCT_64 (AUTOCIRCULATE_TRANSFER_STRUCT *p, AUTOCIRCULATE_TRANSFER_STRUCT_64 *p64);
-	void CopyTo_AUTOCIRCULATE_TASK_STRUCT_64 (AUTOCIRCULATE_TASK_STRUCT *p, AUTOCIRCULATE_TASK_STRUCT_64 *p64);
-	void CopyTo_AUTOCIRCULATE_TRANSFER_STRUCT (AUTOCIRCULATE_TRANSFER_STRUCT_64 *p64, AUTOCIRCULATE_TRANSFER_STRUCT *p);
+	AJA_VIRTUAL void CopyTo_AUTOCIRCULATE_DATA_64 (AUTOCIRCULATE_DATA *p, AUTOCIRCULATE_DATA_64 *p64);
+	AJA_VIRTUAL void CopyTo_AUTOCIRCULATE_DATA (AUTOCIRCULATE_DATA_64 *p64, AUTOCIRCULATE_DATA *p);
+	AJA_VIRTUAL void CopyTo_AUTOCIRCULATE_TRANSFER_STRUCT_64 (AUTOCIRCULATE_TRANSFER_STRUCT *p, AUTOCIRCULATE_TRANSFER_STRUCT_64 *p64);
+	AJA_VIRTUAL void CopyTo_AUTOCIRCULATE_TASK_STRUCT_64 (AUTOCIRCULATE_TASK_STRUCT *p, AUTOCIRCULATE_TASK_STRUCT_64 *p64);
+	AJA_VIRTUAL void CopyTo_AUTOCIRCULATE_TRANSFER_STRUCT (AUTOCIRCULATE_TRANSFER_STRUCT_64 *p64, AUTOCIRCULATE_TRANSFER_STRUCT *p);
 
 };	//	CNTV2MacDriverInterface
 

@@ -1405,11 +1405,12 @@ bool CNTV2MacDriverInterface::WaitForChangeEvent( UInt32 timeout )
 
 
 //--------------------------------------------------------------------------------------------------------------------
-//	GetTime
-//
-//	Return the time.
+//	GetQuickTimeTime
+// This is the number of QuickTime "ticks" per video frame, and is used to determine the
+// QuickTime "scale" that the Clock Component uses. Note that this number has to agree with
+// the Muxer -- see Muxer::GetTime()
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::GetTime( UInt32 *time, UInt32 *scale )
+bool CNTV2MacDriverInterface::GetQuickTimeTime( UInt32 *time, UInt32 *scale )
 {
 	kern_return_t 	kernResult = KERN_FAILURE;
 

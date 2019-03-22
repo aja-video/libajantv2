@@ -154,28 +154,14 @@ public:
 	{
 		switch ( flashBlockNumber )
 		{
-		default:
-		case MAIN_FLASHBLOCK:
-			return _mainOffset;
-			break;
-		case FAILSAFE_FLASHBLOCK:
-			return _failSafeOffset;
-			break;
-		case SOC1_FLASHBLOCK:
-			return _soc1Offset;
-			break;
-		case SOC2_FLASHBLOCK:
-			return _soc2Offset;
-			break;
-		case MAC_FLASHBLOCK:
-			return _macOffset;
-			break;
-		case MCS_INFO_BLOCK:
-			return _mcsInfoOffset;
-			break;
-		case LICENSE_BLOCK:
-			return _licenseOffset;
-			break;
+			default:
+			case MAIN_FLASHBLOCK:		return _mainOffset;
+			case FAILSAFE_FLASHBLOCK:	return _failSafeOffset;
+			case SOC1_FLASHBLOCK:		return _soc1Offset;
+			case SOC2_FLASHBLOCK:		return _soc2Offset;
+			case MAC_FLASHBLOCK:		return _macOffset;
+			case MCS_INFO_BLOCK:		return _mcsInfoOffset;
+			case LICENSE_BLOCK:			return _licenseOffset;
 		}
 
 	}
@@ -184,31 +170,17 @@ public:
 	{
 		switch ( flashBlockNumber )
 		{
-		default:
-		case MAIN_FLASHBLOCK:
-			return _numSectorsMain;
-			break;
-		case FAILSAFE_FLASHBLOCK:
-			return _numSectorsFailSafe;
-			break;
-		case SOC1_FLASHBLOCK:
-			return _numSectorsSOC1;
-			break;
-		case SOC2_FLASHBLOCK:
-			return _numSectorsSOC2;
-			break;
-		case MAC_FLASHBLOCK:
-			return 1;
-			break;
-		case MCS_INFO_BLOCK:
-			return 1;
-			break;
-		case LICENSE_BLOCK:
-			return 1;
-			break;
+			default:
+			case MAIN_FLASHBLOCK:		return _numSectorsMain;
+			case FAILSAFE_FLASHBLOCK:	return _numSectorsFailSafe;
+			case SOC1_FLASHBLOCK:		return _numSectorsSOC1;
+			case SOC2_FLASHBLOCK:		return _numSectorsSOC2;
+			case MAC_FLASHBLOCK:		return 1;
+			case MCS_INFO_BLOCK:		return 1;
+			case LICENSE_BLOCK:			return 1;
 		}
-
 	}
+
 	bool VerifySOCPartition(FlashBlockID flashID, uint32_t FlashBlockOffset);
 
 	uint8_t*	  _bitFileBuffer;

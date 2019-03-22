@@ -360,6 +360,9 @@
 	#if !defined(NTV2_DEPRECATE_15_1)
 		#define NTV2_DEPRECATE_15_1		//	(future ready)
 	#endif
+	#if !defined(NTV2_DEPRECATE_15_2)
+		#define NTV2_DEPRECATE_15_2		//	(future ready)
+	#endif
 #endif
 
 
