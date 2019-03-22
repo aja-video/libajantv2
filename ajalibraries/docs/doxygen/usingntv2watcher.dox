@@ -371,21 +371,26 @@ A menu/combobox is provided for each of the Anc buffer display areas, to control
 		geometry, but the F1 and F2 Anc buffer displays can be changed from 8, 16, 32, … up to 4096 bytes per line. You can also change the
 		scale reference and/or radix by right-clicking in the column and/or row headings.
 	-	<b>Packets</b> — Displays a list of Anc data packets parsed from the byte stream found in the buffer. For each packet found, it shows:
-		-	<b>A/D</b> — Analog or digital.
-		-	<b>Line#</b> — On capture, the SMPTE line number where the data was extracted;  on playout, the SMPTE line number where the data is to be inserted.
-		-	<b>HV</b> — HANC (H) or VANC (V) area.
-		-	<b>Y/C</b> — Luma (Y) or chroma (C) data stream.
+		-	<b>Cod</b> — Coding – <b>Ana</b>log or <b>Dig</b>ital.
+		-	<b>Fmt</b> — Originating Buffer Format: <b>SDI</b>, <b>RTP</b> or <b>VANC</b>.
+		-	<b>Timestamp</b> — Capture from RTP source: the timestamp from the RTP header.
 		-	<b>Lnk</b> — The data link (A or B).
+		-	<b>DS</b> — The data stream (DS1 … DS4).
+		-	<b>Line</b> — On capture, the SMPTE line number where the data was found;  on playout, the SMPTE line number where the data is to be inserted.
+		-	<b>HOff</b> — Horizontal Offset: or HANC or VANC.
+		-	<b>Chn</b> — Channel: Luma (Y) or chroma (C).
 		-	<b>DID</b> — The DID of the packet.
 		-	<b>SDID</b> — The SDID of the packet.
-		-	<b>Name</b> — A description of the packet.
+		-	<b>Description</b> — Packet description.
 		-	<b>DC</b> — Data Count of the payload data, in bytes.
 		-	<b>CS</b> — The checksum of the payload data. Note that on playout, this value is irrelevant, since the inserter/embedder performs the checksum computation.
-		-	<b>Data</b> — The payload data bytes (64 bytes maximum).
+		-	<b>Data</b> — The payload data bytes.
 
 When device polling is enabled, this inspector repeatedly monitors the device frame buffer.
 It reads the entire buffer into host memory and compares it to what was read the last time.
 The display highlights changed content with a brighter color.
+ 
+Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the displayed information to the Clipboard.
 
 
 
@@ -490,6 +495,8 @@ To change a register’s value:
 	-	Press <b>Enter</b> or <b>Return</b> to confirm your changes, and write the new register value to the device. The edit box will disappear.
 	-	Press <b>Escape</b> to abandon your changes. The edit box will disappear.
 
+Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the displayed registers to the Clipboard.
+
 
 
 
@@ -510,6 +517,8 @@ The inspector has the following individual panels:
 		-	<b>C++ (CNTV2SignalRouter calls)</b> — C++ code that will produce the current routing configuration using CNTV2SignalRouter::AddConnection calls.
 	-	<b>Routing Registers</b> — A panel containing a list of the device’s routing registers. The register values can be changed.
  
+Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the displayed routing information to the Clipboard.
+
 
 <hr size="50px">
 **/

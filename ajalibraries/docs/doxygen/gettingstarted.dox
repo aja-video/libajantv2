@@ -250,7 +250,7 @@ On Linux, the libraries and device drivers are not pre-built, and must be compil
 -#	To build the <a href="https://doc.qt.io/" target="_qt">Qt</a>-based demo applications, you’ll need to install <a href="https://doc.qt.io/" target="_qt">Qt</a>
 	(the <tt>qt5-dev-tools</tt> package).
 	-	If your Linux distro’s package manager can’t get it, AJA recommends downloading and building <a href="https://doc.qt.io/" target="_qt">Qt</a> directly from sources.
-	-	For more information about <a href="https://doc.qt.io/" target="_qt">Qt</a>, visit <http://qt.digia.com/>.
+	-	For more information about <a href="https://doc.qt.io/" target="_qt">Qt</a>, visit <http://www.qt.io/>.
 	-	Be sure the path to <a href="https://doc.qt.io/" target="_qt">Qt</a>’s <b>bin</b> directory is in the current path.
 -#	Using a terminal, change to the sdk directory:
 	<tt>$ cd sdk/</tt>
