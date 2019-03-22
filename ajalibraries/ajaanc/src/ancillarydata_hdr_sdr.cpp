@@ -56,7 +56,7 @@ void AJAAncillaryData_HDR_SDR::Init (void)
 	m_coding       = AJAAncillaryDataCoding_Digital;
 	m_DID          = AJAAncillaryData_HDR_SDR_DID;
 	m_SID          = AJAAncillaryData_HDR_SDR_SID;
-	m_location.Set(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 16);
+	m_location.SetDataLink(AJAAncillaryDataLink_A).SetDataChannel(AJAAncillaryDataChannel_Y).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc).SetLineNumber(16);
 	uint8_t payload[29] = {0x06,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 	SetPayloadData(payload, 29);
 }

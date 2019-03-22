@@ -1291,8 +1291,14 @@ public:
 		RegNumToStringMap::const_iterator	iter	(mRegNumToStringMap.find (inRegNum));
 		if (iter != mRegNumToStringMap.end())
 			return iter->second;
-		ostringstream oss;
-		oss << dec << "Register " << inRegNum << " (0x" << hex << inRegNum << ")";
+
+		ostringstream	oss;	oss << "Reg ";
+		if (inRegNum <= kRegNumRegisters)
+			oss << DEC(inRegNum);
+		else if (inRegNum <= 0x0000FFFF)
+			oss << xHEX0N(inRegNum,4);
+		else
+			oss << xHEX0N(inRegNum,8);
 		return oss.str();
 	}
 	
@@ -3348,7 +3354,17 @@ string CNTV2RegisterExpert::GetDisplayName (const uint32_t inRegNum)
 {
 	AJAAutoLock	locker(&gRegExpertGuardMutex);
 	RegisterExpertPtr pRegExpert(RegisterExpert::GetInstance());
-	return pRegExpert ? pRegExpert->RegNameToString(inRegNum) : string();
+	if (pRegExpert)
+		return pRegExpert->RegNameToString(inRegNum);
+
+	ostringstream	oss;	oss << "Reg ";
+	if (inRegNum <= kRegNumRegisters)
+		oss << DEC(inRegNum);
+	else if (inRegNum <= 0x0000FFFF)
+		oss << xHEX0N(inRegNum,4);
+	else
+		oss << xHEX0N(inRegNum,8);
+	return oss.str();
 }
 
 string CNTV2RegisterExpert::GetDisplayValue (const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID)

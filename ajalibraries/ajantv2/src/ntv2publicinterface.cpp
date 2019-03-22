@@ -2620,10 +2620,11 @@ NTV2RegisterReadsConstIter FindFirstMatchingRegisterNumber (const uint32_t inReg
 
 ostream & operator << (std::ostream & inOutStream, const NTV2RegInfo & inObj)
 {
-	const string	regName	(::NTV2RegisterNumberToString (NTV2RegisterNumber (inObj.registerNumber)));
-	inOutStream << "[" << regName << "(" << inObj.registerNumber << ") val=0x" << hex << inObj.registerValue << dec << "|" << inObj.registerValue
-				<< " mask=0x" << hex << inObj.registerMask << dec << " shift=" << inObj.registerShift << "]";
-	return inOutStream;
+	const string	regName(::NTV2RegisterNumberToString(NTV2RegisterNumber(inObj.registerNumber)));
+	inOutStream << "[" << regName << "|" << DEC(inObj.registerNumber) << ": val=" << xHEX0N(inObj.registerValue,8);
+	if (inObj.registerMask != 0xFFFFFFFF)	inOutStream << " msk=" << xHEX0N(inObj.registerMask,8);
+	if (inObj.registerShift != 0)			inOutStream << " shf=" << DEC(inObj.registerShift);
+	return inOutStream << "]";
 }
 
 

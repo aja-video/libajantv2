@@ -4498,7 +4498,7 @@ typedef enum
 	NTV2_STANDARD_TASKS,			//	1	Standard/Retail	--	Board config set by AJA ControlPanel + service + driver
 	NTV2_OEM_TASKS,					//	2	OEM				--	Board config set by controlling app, minimal driver involvement
 	NTV2_TASK_MODE_INVALID	= 0xFF
-} NTV2EveryFrameTaskMode;
+} NTV2EveryFrameTaskMode, NTV2TaskMode;
 
 #define	NTV2_IS_VALID_TASK_MODE(__m__)		((__m__) == NTV2_DISABLE_TASKS  ||  (__m__) == NTV2_STANDARD_TASKS  ||  (__m__) == NTV2_OEM_TASKS)
 #define	NTV2_IS_STANDARD_TASKS(__m__)		((__m__) == NTV2_STANDARD_TASKS)

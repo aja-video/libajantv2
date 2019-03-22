@@ -653,6 +653,7 @@ public:
 		@note		For <b>playout</b> to IP devices running S2110 firmware, this method will automatically add <b>VPID</b> and
 					<b>RP188</b> timecode packets into the outgoing RTP Anc streams, even if such packets weren't placed into the
 					given buffers. This default behavior can be overridden or disabled:
+					-	To disable this behavior completely, use an invalid ::NTV2Channel value (e.g. ::NTV2_CHANNEL_INVALID).
 					-	To disable the default <b>VPID</b> insertion, call CNTV2Card::SetSDIOutVPID, passing zeroes for
 						the VPID values.
 					-	To override the default <b>VPID</b> values, insert your own <b>VPID</b> packet(s) into the F1

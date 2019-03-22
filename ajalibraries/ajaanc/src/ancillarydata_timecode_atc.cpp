@@ -190,7 +190,7 @@ AJAStatus AJAAncillaryData_Timecode_ATC::GeneratePayloadData (void)
 {
 	SetDID(AJAAncillaryData_SMPTE12M_DID);
 	SetSID(AJAAncillaryData_SMPTE12M_SID);
-	SetLocationVideoSpace(AJAAncillaryDataSpace_HANC);
+	SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc);
 
 	AJAStatus status = AllocDataMemory(AJAAncillaryData_SMPTE12M_PayloadSize);
 	if (AJA_FAILURE(status))

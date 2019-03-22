@@ -18,11 +18,15 @@
 //#include "ancillarydata_smpte2051.h"
 
 
-
-AJAAncillaryData *
-AJAAncillaryDataFactory::Create(AJAAncillaryDataType ancType, AJAAncillaryData *pAncData)
+AJAAncillaryData * AJAAncillaryDataFactory::Create (const AJAAncillaryDataType inAncType, const AJAAncillaryData & inAncData)
 {
-	switch (ancType)
+	return Create (inAncType, &inAncData);
+}
+
+
+AJAAncillaryData * AJAAncillaryDataFactory::Create (const AJAAncillaryDataType inAncType, const AJAAncillaryData *pAncData)
+{
+	switch (inAncType)
 	{
 		case AJAAncillaryDataType_Unknown:				return new AJAAncillaryData(pAncData);	//	Use base type for 'Unknown'
 		case AJAAncillaryDataType_Timecode_ATC:			return new AJAAncillaryData_Timecode_ATC(pAncData);
@@ -49,6 +53,12 @@ AJAAncillaryDataFactory::Create(AJAAncillaryDataType ancType, AJAAncillaryData *
 }
 
 
+
+AJAAncillaryDataType AJAAncillaryDataFactory::GuessAncillaryDataType (const AJAAncillaryData & inAncData)
+{
+	return GuessAncillaryDataType (&inAncData);
+}
+
 //---------------------------------
 // Given a "raw" (unparsed) AJAAncillaryData object, see if we can identify it based on its contents (e.g. DID, SID, location, etc.)
 // (Architectural note: while this isn't a "factory" method, per se, it's convenient to be here because the factory is the one thing
@@ -56,8 +66,7 @@ AJAAncillaryDataFactory::Create(AJAAncillaryDataType ancType, AJAAncillaryData *
 // the factory.)
 //
 
-AJAAncillaryDataType
-AJAAncillaryDataFactory::GuessAncillaryDataType(AJAAncillaryData *pAncData)
+AJAAncillaryDataType AJAAncillaryDataFactory::GuessAncillaryDataType (const AJAAncillaryData * pAncData)
 {
 	AJAAncillaryDataType result = AJAAncillaryDataType_Unknown;
 

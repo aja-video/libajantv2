@@ -269,7 +269,7 @@ bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
 
 	//	Seamless Anc playout...
 	bool	tmpLocalRP188F1AncBuffer(false), tmpLocalRP188F2AncBuffer(false);
-	if (::NTV2DeviceCanDo2110(_boardID))
+	if (::NTV2DeviceCanDo2110(_boardID)  &&  NTV2_IS_VALID_CHANNEL(inChannel))
 		//	S2110 Playout:	So that most Retail & OEM playout apps "just work" with S2110 RTP Anc streams,
 		//					our classic SDI Anc data that device firmware normally embeds into SDI output
 		//					as derived from registers -- e.g. VPID & RP188 -- the SDK here will automatically

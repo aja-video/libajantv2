@@ -5,42 +5,54 @@
 **/
 
 #ifndef AJA_ANCILLARYDATAFACTORY_H
-#define AJA_ANCILLARYDATAFACTORY_H
+	#define AJA_ANCILLARYDATAFACTORY_H
 
-#include "ancillarydata.h"
-
-
-/**
-	@brief	Use my GuessAncillaryDataType method to determine what kind of ancillary data is being held by
-			a (generic) AJAAncillaryData object. Use my Create method to instantiate a new AJAAncillaryData
-			object specific to a given type.
-**/
-class AJAExport AJAAncillaryDataFactory
-{
-public:
-
-	AJAAncillaryDataFactory()	{}
-
-	virtual ~AJAAncillaryDataFactory()	{}
-
-	/**
-		@brief	Creates a new AJAAncillaryData object having a particular subtype.
-		@param[in]	ancType		Type of AJAAncillaryData object (subclass) to instantiate.
-		@param[in]	pAncData	Optionally supplies an existing AJAAncillaryData object to clone from.
-		@return		A pointer to the new instance.
-	**/
-	static AJAAncillaryData *Create(AJAAncillaryDataType ancType, AJAAncillaryData *pAncData = NULL);
+	#include "ancillarydata.h"
 
 
 	/**
-		@brief		From the raw ancillary data in a base class AJAAncillaryData object, try to guess
-					what kind of derived class it should be.
-		@param[in]	pAncData	A valid, non-NULL pointer to an AJAAncillaryData object that contains
-								"raw" packet data.
-		@return		The guessed AJAAncillaryDataType (or AJAAncillaryDataType_Unknown if no idea...).
+		@brief	Use my AJAAncillaryDataFactory::GuessAncillaryDataType method to determine what kind of
+				ancillary data is being held by a (generic) ::AJAAncillaryData object.
+				Use my AJAAncillaryDataFactory::Create method to instantiate a new ::AJAAncillaryData
+				object specific to a given type.
 	**/
-	static AJAAncillaryDataType GuessAncillaryDataType(AJAAncillaryData *pAncData);
+	class AJAExport AJAAncillaryDataFactory
+	{
+		public:
+			/**
+				@brief		Creates a new particular subtype of ::AJAAncillaryData object.
+				@param[in]	inAncType	Specifies the subtype of ::AJAAncillaryData object (subclass) to instantiate.
+				@param[in]	inAncData	Supplies an existing ::AJAAncillaryData object to clone from.
+				@return		A pointer to the new instance;  or NULL upon failure.
+			**/
+			static AJAAncillaryData *		Create (const AJAAncillaryDataType inAncType, const AJAAncillaryData & inAncData);
 
-};
+			/**
+				@brief		Creates a new ::AJAAncillaryData object having a particular subtype.
+				@param[in]	inAncType	Type of ::AJAAncillaryData object (subclass) to instantiate.
+				@param[in]	pInAncData	Optionally supplies an existing ::AJAAncillaryData object to clone from.
+				@return		A pointer to the new instance;  or NULL upon failure.
+			**/
+			static AJAAncillaryData *		Create (const AJAAncillaryDataType inAncType, const AJAAncillaryData * pInAncData = NULL);
+
+
+			/**
+				@brief		Given a generic ::AJAAncillaryData object, attempts to guess what kind of specific
+							::AJAAncillaryData object it might be from its raw packet data.
+				@param[in]	pInAncData	An ::AJAAncillaryData object that contains "raw" packet data.
+				@return		The guessed ::AJAAncillaryDataType (or ::AJAAncillaryDataType_Unknown if no idea...).
+			**/
+			static AJAAncillaryDataType		GuessAncillaryDataType (const AJAAncillaryData & inAncData);
+
+			/**
+				@brief		Given a generic ::AJAAncillaryData object, attempts to guess what kind of specific
+							::AJAAncillaryData object from its raw packet data.
+				@param[in]	pInAncData	A valid, non-NULL pointer to an ::AJAAncillaryData object that contains
+										"raw" packet data.
+				@return		The guessed ::AJAAncillaryDataType (or ::AJAAncillaryDataType_Unknown if no idea...).
+			**/
+			static AJAAncillaryDataType		GuessAncillaryDataType (const AJAAncillaryData * pInAncData);
+
+	};	//	AJAAncillaryDataFactory
 
 #endif	// AJA_ANCILLARYDATAFACTORY_H

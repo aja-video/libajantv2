@@ -3,7 +3,7 @@
 	@brief		Basic Functionality Tests for the AJA Anc Library.
 	@copyright	Copyright (c) 2013-2015 AJA Video Systems, Inc. All rights reserved.
 **/
-//#define	DEBUG_BREAK_AFTER_FAILURE	(true)
+#define	DEBUG_BREAK_AFTER_FAILURE	(true)
 #include "ntv2bft.h"
 #include "ajabase/common/options_popt.h"
 #include "ajabase/common/performance.h"
@@ -11,15 +11,18 @@
 #include "ancillarydata_cea608_vanc.h"
 #include "ancillarydata_cea708.h"
 #include "ancillarydata_hdr_hlg.h"
+#include "ancillarydata_timecode_atc.h"
 #include "ancillarylist.h"
 #include "ajacc/includes/ntv2smpteancdata.h"
 #include "ajacc/includes/ntv2captionlogging.h"
 #include <iomanip>
+#include <utility>	//	std::rel_ops
 #if defined(AJA_LINUX)
 	#include <string.h>
 #endif
 
 using namespace std;
+using namespace std::rel_ops;
 
 #define	LOGMYERROR(__x__)	AJA_sREPORT(AJA_DebugUnit_BFT, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
 #define	LOGMYWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_BFT, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
@@ -73,6 +76,26 @@ static NTV2_POINTER gVanc10Buffers[NTV2_MAX_NUM_VIDEO_FORMATS];
 												STDOUT	<< "## NOTE:  '" << #_x_ << "' in '" << __FUNCTION__ << "' returned '" << ::AJAStatusToString (__err__)		\
 														<< "'" << ENDL;																								\
 										} while (false)
+
+static const AJA_FrameRate	sNTV2Rate2AJARate[] = {	AJA_FrameRate_Unknown,	//	NTV2_FRAMERATE_UNKNOWN	= 0,
+													AJA_FrameRate_6000,		//	NTV2_FRAMERATE_6000		= 1,
+													AJA_FrameRate_5994,		//	NTV2_FRAMERATE_5994		= 2,
+													AJA_FrameRate_3000,		//	NTV2_FRAMERATE_3000		= 3,
+													AJA_FrameRate_2997,		//	NTV2_FRAMERATE_2997		= 4,
+													AJA_FrameRate_2500,		//	NTV2_FRAMERATE_2500		= 5,
+													AJA_FrameRate_2400,		//	NTV2_FRAMERATE_2400		= 6,
+													AJA_FrameRate_2398,		//	NTV2_FRAMERATE_2398		= 7,
+													AJA_FrameRate_5000,		//	NTV2_FRAMERATE_5000		= 8,
+													AJA_FrameRate_4800,		//	NTV2_FRAMERATE_4800		= 9,
+													AJA_FrameRate_4795,		//	NTV2_FRAMERATE_4795		= 10,
+													AJA_FrameRate_12000,	//	NTV2_FRAMERATE_12000	= 11,
+													AJA_FrameRate_11988,	//	NTV2_FRAMERATE_11988	= 12,
+													AJA_FrameRate_1500,		//	NTV2_FRAMERATE_1500		= 13,
+													AJA_FrameRate_1498,		//	NTV2_FRAMERATE_1498		= 14,
+													AJA_FrameRate_1900,		//	NTV2_FRAMERATE_1900		= 15,	// Formerly 09 in older SDKs
+													AJA_FrameRate_1898,		//	NTV2_FRAMERATE_1898		= 16, 	// Formerly 10 in older SDKs
+													AJA_FrameRate_1800,		//	NTV2_FRAMERATE_1800		= 17,	// Formerly 11 in older SDKs
+													AJA_FrameRate_1798};	//	NTV2_FRAMERATE_1798		= 18,	// Formerly 12 in older SDKs
 
 
 class CNTV2AncDataTester
@@ -140,63 +163,101 @@ class CNTV2AncDataTester
 			//typedef	AncLocationSet::const_iterator		AncLocationSetConstIter;
 			AncLocationSet	ancLocations;
 			static const uint16_t					lines[]		=	{9,		16,		220,	285,	1910,	2320};
-			static const uint16_t					hOffsets[]	=	{AJAAncillaryDataLocation::AJAAncDataHorizOffset_Default,	AJAAncillaryDataLocation::AJAAncDataHorizOffset_Anywhere,	AJAAncillaryDataLocation::AJAAncDataHorizOffset_AnyHanc,	127,	898,	1321};
-			static const AJAAncillaryDataSpace		spaces[]	=	{AJAAncillaryDataSpace_VANC,	AJAAncillaryDataSpace_HANC};
+			static const uint16_t					hOffsets[]	=	{0,	AJAAncDataHorizOffset_Anywhere,	AJAAncDataHorizOffset_AnyVanc, AJAAncDataHorizOffset_AnyHanc,	127,	898,	1321};
 			static const AJAAncillaryDataChannel	channels[]	=	{AJAAncillaryDataChannel_C,		AJAAncillaryDataChannel_Y};
 			static const AJAAncillaryDataStream		streams[]	=	{AJAAncillaryDataStream_1,		AJAAncillaryDataStream_2,	AJAAncillaryDataStream_3,	AJAAncillaryDataStream_4};
 			static const AJAAncillaryDataLink		links[]		=	{AJAAncillaryDataLink_A,		AJAAncillaryDataLink_B};
 			AJAAncillaryDataLocation	nullLoc;
-			AJAAncillaryDataLocation	a, toSetAllAtOnce, toBeSet;
+			AJAAncillaryDataLocation	aFromSets, toSetAllAtOnce, toBeSet;
 
 			SHOULD_BE_FALSE(nullLoc.IsValid());	//	Invalid, because default constructor makes everything "unknown"
-			SHOULD_BE_TRUE(nullLoc == a);
+			SHOULD_BE_TRUE(nullLoc == aFromSets);
 
 			for (unsigned lineNdx(0);  lineNdx < sizeof(lines)/sizeof(lines[0]);  lineNdx++)
 			{
 				const uint16_t lineNum(lines[lineNdx]);
 				toBeSet.SetLineNumber(lineNum);
-				for (unsigned spaceNdx(0);  spaceNdx < sizeof(spaces)/sizeof(spaces[0]);  spaceNdx++)
+				for (unsigned chanNdx(0);  chanNdx < sizeof(channels)/sizeof(channels[0]);  chanNdx++)
 				{
-					toBeSet.SetDataSpace(spaces[spaceNdx]);
-					for (unsigned chanNdx(0);  chanNdx < sizeof(channels)/sizeof(channels[0]);  chanNdx++)
+					toBeSet.SetDataChannel(channels[chanNdx]);
+					for (unsigned streamNdx(0);  streamNdx < sizeof(streams)/sizeof(streams[0]);  streamNdx++)
 					{
-						toBeSet.SetDataChannel(channels[chanNdx]);
-						for (unsigned streamNdx(0);  streamNdx < sizeof(streams)/sizeof(streams[0]);  streamNdx++)
+						toBeSet.SetDataStream(streams[streamNdx]);
+						for (unsigned hOffNdx(0);  hOffNdx < sizeof(hOffsets)/sizeof(hOffsets[0]);  hOffNdx++)
 						{
-							toBeSet.SetDataStream(streams[streamNdx]);
-							for (unsigned hOffNdx(0);  hOffNdx < sizeof(hOffsets)/sizeof(hOffsets[0]);  hOffNdx++)
+							const uint16_t hOffset(hOffsets[hOffNdx]);
+							toBeSet.SetHorizontalOffset(hOffset);
+							for (unsigned linkNdx(0);  linkNdx < sizeof(links)/sizeof(links[0]);  linkNdx++)
 							{
-								const uint16_t hOffset(hOffsets[hOffNdx]);
-								toBeSet.SetHorizontalOffset(hOffset);
-								for (unsigned linkNdx(0);  linkNdx < sizeof(links)/sizeof(links[0]);  linkNdx++)
-								{
-									const AJAAncillaryDataLocation	b(links[linkNdx], channels[chanNdx], spaces[spaceNdx], lineNum, hOffset, streams[streamNdx]);
-									toBeSet.SetDataLink(links[linkNdx]);
-									toSetAllAtOnce.Set(links[linkNdx], channels[chanNdx], spaces[spaceNdx], lineNum, hOffset, streams[streamNdx]);
-									a.SetLineNumber(lineNum).SetHorizontalOffset(hOffset).SetDataSpace(spaces[spaceNdx]).SetDataChannel(channels[chanNdx]).SetDataStream(streams[streamNdx]).SetDataLink(links[linkNdx]);
-									SHOULD_BE_TRUE(b == toBeSet);
-									SHOULD_BE_TRUE(a == b);
-									SHOULD_BE_TRUE(a == toSetAllAtOnce);
-									SHOULD_BE_TRUE(a.IsValid());
-									SHOULD_BE_EQUAL(a.GetDataLink(), links[linkNdx]);
-									SHOULD_BE_EQUAL(b.GetDataStream(), streams[streamNdx]);
-									SHOULD_BE_EQUAL(toBeSet.GetDataChannel(), channels[chanNdx]);
-									SHOULD_BE_EQUAL(toSetAllAtOnce.GetDataSpace(), spaces[spaceNdx]);
-									SHOULD_BE_EQUAL(a.GetLineNumber(), lineNum);
-									SHOULD_BE_EQUAL(a.GetHorizontalOffset(), hOffset);
-									a.Reset();
-									SHOULD_BE_FALSE(a == b);
-									SHOULD_BE_FALSE(a.IsValid());
-									ancLocations.insert(b);
-								}	//	for each AJAAncillaryDataLink
-							}	//	for each horizOffset
-						}	//	for each AJAAncillaryDataStream
-					}	//	for each AJAAncillaryDataChannel
-				}	//	for each AJAAncillaryDataSpace
+								const AJAAncillaryDataLocation	bFromConstructor(links[linkNdx], channels[chanNdx], AJAAncillaryDataSpace_Unknown, lineNum, hOffset, streams[streamNdx]);
+								toBeSet.SetDataLink(links[linkNdx]);
+								toSetAllAtOnce.SetDataLink(links[linkNdx]).SetDataChannel(channels[chanNdx]).SetLineNumber(lineNum).SetHorizontalOffset(hOffset).SetDataStream(streams[streamNdx]);
+								aFromSets.SetLineNumber(lineNum).SetHorizontalOffset(hOffsets[hOffNdx]).SetDataChannel(channels[chanNdx]).SetDataStream(streams[streamNdx]).SetDataLink(links[linkNdx]);
+								SHOULD_BE_TRUE(bFromConstructor == toBeSet);
+								SHOULD_BE_TRUE(aFromSets == bFromConstructor);
+								SHOULD_BE_TRUE(aFromSets == toSetAllAtOnce);
+								SHOULD_BE_TRUE(aFromSets.IsValid());
+								SHOULD_BE_EQUAL(aFromSets.GetDataLink(), links[linkNdx]);
+								SHOULD_BE_EQUAL(bFromConstructor.GetDataStream(), streams[streamNdx]);
+								SHOULD_BE_EQUAL(toBeSet.GetDataChannel(), channels[chanNdx]);
+								SHOULD_BE_EQUAL(aFromSets.GetLineNumber(), lineNum);
+								SHOULD_BE_EQUAL(aFromSets.GetHorizontalOffset(), hOffset);
+								aFromSets.Reset();
+								SHOULD_BE_FALSE(aFromSets == bFromConstructor);
+								SHOULD_BE_FALSE(aFromSets.IsValid());
+								ancLocations.insert(bFromConstructor);
+							}	//	for each AJAAncillaryDataLink
+						}	//	for each horizOffset
+					}	//	for each AJAAncillaryDataStream
+				}	//	for each AJAAncillaryDataChannel
 			}	//	for each line number
 			//cerr << endl << endl;		for (AncLocationSetConstIter it(ancLocations.begin());  it != ancLocations.end();  ++it)	cerr << *it << endl;	cerr << endl << endl;
 
-			//	Ordering Tests
+			{	//	Ordering Tests
+				AJAAncDataLoc	a, b;
+				SHOULD_BE_EQUAL(a, b);	//	AJAAncDataLoc doesn't have != -- requires rel_ops
+				//	Check Individual Component Magnitude Comparison
+				//	Line Number (highest)
+				a.Reset();  a.SetLineNumber(100);  b = a;  b.SetLineNumber(99);		//	B precedes A
+				SHOULD_BE_TRUE(b < a);
+				SHOULD_BE_FALSE(b == a);
+				//	Horizontal Offset
+				a.Reset();  a.SetHorizontalOffset(1023);  b = a;  b.SetHorizontalOffset(1022);	//	B precedes A
+				SHOULD_BE_TRUE(b < a);
+				SHOULD_BE_FALSE(b == a);
+				//	Horizontal Offset -- HANC anywhere versus VANC anywhere:
+				a.Reset();  a.SetHorizontalOffset(AJAAncDataHorizOffset_AnyHanc);  b = a;  b.SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);	//	B precedes A
+				SHOULD_BE_TRUE(b < a);
+				SHOULD_BE_FALSE(b == a);
+				//	Data Channel
+				a.Reset();  a.SetDataChannel(AJAAncillaryDataChannel_Y);  b = a;  b.SetDataChannel(AJAAncillaryDataChannel_C);	//	B precedes A
+				SHOULD_BE_TRUE(b < a);
+				SHOULD_BE_FALSE(b == a);
+				//	Data Stream
+				a.Reset();  a.SetDataStream(AJAAncillaryDataStream_3);  b = a;  b.SetDataStream(AJAAncillaryDataStream_2);	//	B precedes A
+				SHOULD_BE_TRUE(b < a);
+				SHOULD_BE_FALSE(b == a);
+				//	Data Link
+				a.Reset();  a.SetDataLink(AJAAncillaryDataLink_B);  b = a;  b.SetDataLink(AJAAncillaryDataLink_A);	//	B precedes A
+				SHOULD_BE_TRUE(b < a);
+				SHOULD_BE_FALSE(b == a);
+
+				//	Combo
+				a.Reset();
+				a.SetDataLink(AJAAncillaryDataLink_B).SetDataStream(AJAAncillaryDataStream_3).SetDataChannel(AJAAncillaryDataChannel_Y);
+				a.SetHorizontalOffset(1000).SetLineNumber(12);
+				b = a;  b.SetDataLink(AJAAncillaryDataLink_A);
+				SHOULD_BE_TRUE(b < a);
+				b = a;  b.SetDataStream(AJAAncillaryDataStream_2);
+				SHOULD_BE_TRUE(b < a);
+				b = a;  b.SetDataChannel(AJAAncillaryDataChannel_C);
+				SHOULD_BE_TRUE(b < a);
+				b = a;  b.SetHorizontalOffset(a.GetHorizontalOffset()-1);
+				SHOULD_BE_TRUE(b < a);
+				b = a;  b.SetLineNumber(a.GetLineNumber()-1);
+				SHOULD_BE_TRUE(b < a);
+			}
+			LOGMYNOTE("Passed");	cerr << "BFT_DataLocation passed" << endl;
 			return true;
 		}
 
@@ -219,7 +280,7 @@ class CNTV2AncDataTester
 			SHOULD_BE_EQUAL (defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
 			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
 			SHOULD_BE_EQUAL (defaultPkt.GetLocationLineNumber(), 9);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationHorizOffset(), 0);
+			SHOULD_BE_EQUAL (defaultPkt.GetLocationHorizOffset(), AJAAncDataHorizOffset_AnyVanc);
 			SHOULD_BE_EQUAL (defaultPkt.GetDataCoding(), AJAAncillaryDataCoding_Digital);
 			SHOULD_BE_FALSE (defaultPkt.GotValidReceiveData());		//	False, because wasn't vetted by specific subclass
 			SHOULD_BE_EQUAL (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Unknown);
@@ -796,7 +857,7 @@ cerr << __FUNCTION__ << ":  " << fd << endl;
 								SHOULD_SUCCEED(pkt.SetDID(TEST_DID));	SHOULD_SUCCEED(pkt.SetSID(TEST_SID));
 								SHOULD_SUCCEED(pkt.SetDataCoding(AJAAncillaryDataCoding_Digital));
 								SHOULD_SUCCEED(pkt.SetLocationVideoLink(AJAAncillaryDataLink_A));
-								SHOULD_SUCCEED(pkt.SetLocationVideoSpace(AJAAncillaryDataSpace_VANC));
+								SHOULD_SUCCEED(pkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyVanc));
 								SHOULD_SUCCEED(pkt.SetLocationDataChannel(chan));
 								SHOULD_SUCCEED(pkt.SetLocationLineNumber(smpteLine));
 								const uint8_t		pTestData[]	=	{0xAA, 0xBB, uint8_t(vf), uint8_t(fbf), uint8_t(pkt.GetLocationVideoLink()), uint8_t(pkt.GetLocationDataChannel()), uint8_t(pkt.GetLocationVideoSpace()), uint8_t(smpteLine), uint8_t(pkt.GetDataCoding()), 0xBB, 0xAA};
@@ -1054,7 +1115,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				const AJAAncillaryDataLocation savedLoc(defaultPkt.GetDataLocation());
 					SHOULD_SUCCEED(defaultPkt.SetLocationVideoLink(AJAAncillaryDataLink_B));
 					SHOULD_SUCCEED(defaultPkt.SetLocationDataStream(AJAAncillaryDataStream_4));
-					SHOULD_SUCCEED(defaultPkt.SetLocationVideoSpace(AJAAncillaryDataSpace_HANC));
+					SHOULD_SUCCEED(defaultPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc));
 					SHOULD_SUCCEED(defaultPkt.SetLocationDataChannel(AJAAncillaryDataChannel_C));
 					SHOULD_SUCCEED(defaultPkt.SetLocationLineNumber(225));
 					SHOULD_BE_EQUAL(defaultPkt.GetLocationLineNumber(), 225);
@@ -1143,7 +1204,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				SHOULD_SUCCEED(pClone->SetLocationLineNumber(100));
 				SHOULD_BE_EQUAL(pClone->GetLocationLineNumber(), 100);
 				SHOULD_BE_EQUAL(pClone->GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
-				SHOULD_SUCCEED(pClone->SetLocationVideoSpace(AJAAncillaryDataSpace_HANC));
+				SHOULD_SUCCEED(pClone->SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc));
 				SHOULD_BE_EQUAL(pClone->GetLocationVideoSpace(), AJAAncillaryDataSpace_HANC);
 				SHOULD_BE_EQUAL(pClone->GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
 				SHOULD_SUCCEED(pClone->SetLocationDataChannel(AJAAncillaryDataChannel_C));
@@ -1200,7 +1261,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 
 			SHOULD_SUCCEED(defaultPkt.SetDataCoding(AJAAncillaryDataCoding_Digital));
 			SHOULD_SUCCEED(defaultPkt.SetLocationLineNumber(9));
-			SHOULD_SUCCEED(defaultPkt.SetLocationVideoSpace(AJAAncillaryDataSpace_VANC));
+			SHOULD_SUCCEED(defaultPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyVanc));
 			SHOULD_SUCCEED(defaultPkt.SetLocationDataChannel(AJAAncillaryDataChannel_Y));
 			SHOULD_SUCCEED(defaultPkt.SetLocationDataStream(AJAAncillaryDataStream_1));
 			SHOULD_SUCCEED(defaultPkt.SetLocationVideoLink(AJAAncillaryDataLink_A));
@@ -1301,23 +1362,25 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
 
 				//	Make the transmit packets...
+				AJAAncillaryDataLocation	loc;
+				loc.SetDataLink(AJAAncillaryDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
 				AJAAncillaryData_Cea608_Vanc	pkt608F1;
 				SHOULD_SUCCEED(pkt608F1.SetLine(false/*isF1*/, 9));
 				SHOULD_SUCCEED(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B')));
-				SHOULD_SUCCEED(pkt608F1.SetDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, pkt608F1.IsField2() ? smpteLineF2+9 : 9 /*inLineNum*/));
+				SHOULD_SUCCEED(pkt608F1.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+9 : 9)));
 				SHOULD_SUCCEED(pkt608F1.GeneratePayloadData());
 	
 				AJAAncillaryData_Cea608_Vanc	pkt608F2;
 				SHOULD_SUCCEED(pkt608F2.SetLine(true/*isF2*/, 9));
 				SHOULD_SUCCEED(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b')));
-				SHOULD_SUCCEED(pkt608F2.SetDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, pkt608F2.IsField2() ? smpteLineF2+9 : 9 /*inLineNum*/));
+				SHOULD_SUCCEED(pkt608F2.SetDataLocation(loc.SetLineNumber(pkt608F2.IsField2() ? smpteLineF2+9 : 9)));
 				SHOULD_SUCCEED(pkt608F2.GeneratePayloadData());
 	
 				AJAAncillaryData_HDR_HLG		pktHDR;
 				SHOULD_SUCCEED(pktHDR.GeneratePayloadData());
 	
 				AJAAncillaryData				pktCustomY;
-				SHOULD_SUCCEED(pktCustomY.SetDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 10 /*inLineNum*/));
+				SHOULD_SUCCEED(pktCustomY.SetDataLocation(loc.SetLineNumber(10)));
 				SHOULD_SUCCEED(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital));
 				SHOULD_SUCCEED(pktCustomY.SetDID(0x7A));
 				SHOULD_SUCCEED(pktCustomY.SetSID(0x01));
@@ -1325,7 +1388,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				SHOULD_SUCCEED(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY)));
 	
 				AJAAncillaryData				pktCustomC;
-				SHOULD_SUCCEED(pktCustomC.SetDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, 11 /*inLineNum*/));
+				SHOULD_SUCCEED(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_C).SetLineNumber(11)));
 				SHOULD_SUCCEED(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital));
 				SHOULD_SUCCEED(pktCustomC.SetDID(0x8A));
 				SHOULD_SUCCEED(pktCustomC.SetSID(0x02));
@@ -1362,6 +1425,72 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 			return true;
 		}
 
+		static bool BFT_AncListToSortToAncList (void)
+		{
+			LOGMYNOTE("Starting");
+			{
+				const NTV2VideoFormat		vFormat	(NTV2_FORMAT_1080i_5994);
+				const NTV2FormatDescriptor	fd		(vFormat, NTV2_FBF_10BIT_YCBCR);
+				ULWord						smpteLineF1(0), smpteLineF2(0);
+				bool						isF2	(false);
+				SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
+				if (isF2)
+					smpteLineF2 = smpteLineF1;
+				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
+					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
+
+				//	Make the transmit packets...
+				AJAAncillaryDataLocation loc;	loc.SetDataLink(AJAAncillaryDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
+				AJAAncillaryData_Cea608_Vanc	pkt608F1;
+				SHOULD_SUCCEED(pkt608F1.SetLine(false/*isF1*/, 9));
+				SHOULD_SUCCEED(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B')));
+				SHOULD_SUCCEED(pkt608F1.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+9 : 9)));
+				SHOULD_SUCCEED(pkt608F1.GeneratePayloadData());
+
+				AJAAncillaryData_Cea608_Vanc	pkt608F2;
+				SHOULD_SUCCEED(pkt608F2.SetLine(true/*isF2*/, 9));
+				SHOULD_SUCCEED(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b')));
+				SHOULD_SUCCEED(pkt608F2.SetDataLocation(loc.SetLineNumber(pkt608F2.IsField2() ? smpteLineF2+9 : 9)));
+				SHOULD_SUCCEED(pkt608F2.GeneratePayloadData());
+
+				AJAAncillaryData_HDR_HLG		pktHDR;
+				SHOULD_SUCCEED(pktHDR.GeneratePayloadData());
+
+				AJAAncillaryData				pktCustomY;
+				SHOULD_SUCCEED(pktCustomY.SetDataLocation(loc.SetLineNumber(10)));
+				SHOULD_SUCCEED(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital));
+				SHOULD_SUCCEED(pktCustomY.SetDID(0x7A));
+				SHOULD_SUCCEED(pktCustomY.SetSID(0x01));
+				static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0A	};
+				SHOULD_SUCCEED(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY)));
+
+				AJAAncillaryData				pktCustomC;
+				SHOULD_SUCCEED(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_C).SetLineNumber(11)));
+				SHOULD_SUCCEED(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital));
+				SHOULD_SUCCEED(pktCustomC.SetDID(0x8A));
+				SHOULD_SUCCEED(pktCustomC.SetSID(0x02));
+				static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
+				SHOULD_SUCCEED(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC)));
+
+				//	Make the transmit packet list...
+				AJAAncillaryList	origPkts;
+				SHOULD_SUCCEED(origPkts.AddAncillaryData(pktCustomC));
+				SHOULD_SUCCEED(origPkts.AddAncillaryData(pktCustomY));
+				SHOULD_SUCCEED(origPkts.AddAncillaryData(pktHDR));
+				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
+					SHOULD_SUCCEED(origPkts.AddAncillaryData(pkt608F2));
+				SHOULD_SUCCEED(origPkts.AddAncillaryData(pkt608F1));
+				LOGMYDEBUG("ORIG: " << origPkts);
+				AJAAncillaryList	sortedPkts(origPkts);
+
+				//	Sort...
+				SHOULD_SUCCEED(sortedPkts.SortListByLocation());
+				LOGMYDEBUG("SORTED: " << sortedPkts);
+			}	//	for each video format
+			LOGMYNOTE("Passed");
+			return true;
+		}
+
 		static bool BFT_AncListToIPBufferToAncList (void)
 		{
 			LOGMYNOTE("Starting");	if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToIPBufferToAncList..." << endl;
@@ -1381,23 +1510,39 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
 
 				//	Make the transmit packets...
+				AJAAncDataLoc loc;
+				loc.SetDataLink(AJAAncillaryDataLink_A).SetDataChannel(AJAAncillaryDataChannel_Y).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
 				AJAAncillaryData_Cea608_Vanc	pkt608F1;
 				SHOULD_SUCCEED(pkt608F1.SetLine(false/*isF1*/, 9));
 				SHOULD_SUCCEED(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B')));
-				SHOULD_SUCCEED(pkt608F1.SetDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, pkt608F1.IsField2() ? smpteLineF2+9 : 9 /*inLineNum*/));
+				SHOULD_SUCCEED(pkt608F1.SetDataLocation(loc.SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+9 : 9)));
 				SHOULD_SUCCEED(pkt608F1.GeneratePayloadData());
 	
 				AJAAncillaryData_Cea608_Vanc	pkt608F2;
 				SHOULD_SUCCEED(pkt608F2.SetLine(true/*isF2*/, 9));
 				SHOULD_SUCCEED(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b')));
-				SHOULD_SUCCEED(pkt608F2.SetDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, pkt608F2.IsField2() ? smpteLineF2+9 : 9 /*inLineNum*/));
+				SHOULD_SUCCEED(pkt608F2.SetDataLocation(loc.SetLineNumber(pkt608F2.IsField2() ? smpteLineF2+9 : 9)));
 				SHOULD_SUCCEED(pkt608F2.GeneratePayloadData());
-	
+
 				AJAAncillaryData_HDR_HLG		pktHDR;
 				SHOULD_SUCCEED(pktHDR.GeneratePayloadData());
+
+				AJAAncillaryData_Timecode_ATC	pktATC;
+				{
+					const NTV2_RP188				regTC (0, 0, 0);
+					AJATimeCode						tc;
+					NTV2FrameRate					ntv2Rate	(::GetNTV2FrameRateFromVideoFormat(vFormat));
+					const AJA_FrameRate				ajaRate		(sNTV2Rate2AJARate[ntv2Rate]);
+					const AJATimeBase				ajaTB		(ajaRate);
+					tc.SetRP188 (regTC.fDBB, regTC.fLo, regTC.fHi, ajaTB);
+					pktATC.SetTimecode (tc, ajaTB, ajaTB.IsNonIntegralRatio());
+					pktATC.SetDBB1PayloadType(AJAAncillaryData_Timecode_ATC_DBB1PayloadType_VITC1);
+					//pktATC.SetDBB1PayloadType(AJAAncillaryData_Timecode_ATC_DBB1PayloadType_LTC);
+					pktATC.GeneratePayloadData();
+				}
 	
 				AJAAncillaryData				pktCustomY;
-				SHOULD_SUCCEED(pktCustomY.SetDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 10 /*inLineNum*/));
+				SHOULD_SUCCEED(pktCustomY.SetDataLocation(loc.SetLineNumber(10)));
 				SHOULD_SUCCEED(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital));
 				SHOULD_SUCCEED(pktCustomY.SetDID(0x7A));
 				SHOULD_SUCCEED(pktCustomY.SetSID(0x01));
@@ -1405,7 +1550,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				SHOULD_SUCCEED(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY)));
 	
 				AJAAncillaryData				pktCustomC;
-				SHOULD_SUCCEED(pktCustomC.SetDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, 11 /*inLineNum*/));
+				SHOULD_SUCCEED(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_C).SetLineNumber(11)));
 				SHOULD_SUCCEED(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital));
 				SHOULD_SUCCEED(pktCustomC.SetDID(0x8A));
 				SHOULD_SUCCEED(pktCustomC.SetSID(0x02));
@@ -1418,9 +1563,11 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
 					SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F2));
 				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktHDR));
+				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktATC));
 				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomY));
 				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomC));
-				if (gIsVerbose)	cerr << "Tx: " << txPkts << endl;
+gIsVerbose = true;
+				LOGMYNOTE("Tx: " << txPkts);	if (gIsVerbose)	cerr << "Tx: " << txPkts << endl;
 
 				//	Transmit the packets into the IP buffer...
 				NTV2_POINTER	IPF1(2048), IPF2(2048);
@@ -1440,7 +1587,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 
 				//	Compare the Tx and Rx packet lists...
 				LOGMYNOTE("Compare Tx vs Rx packets");
-				const string	cmpInfo	(txPkts.CompareWithInfo(rxPkts, false/*don't ignoreLocation*/, false/*don't ignoreChecksum*/));
+				const string	cmpInfo	(txPkts.CompareWithInfo(rxPkts, /*ignoreLocation*/false, /*ignoreChecksum*/true));
 				if (!cmpInfo.empty())
 					LOGMYWARN(cmpInfo);
 				SHOULD_BE_TRUE(cmpInfo.empty());
@@ -1474,23 +1621,25 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
 
 				//	Make the transmit packets...
+				AJAAncDataLoc	loc;
+				loc.SetDataLink(AJAAncillaryDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
 				AJAAncillaryData_Cea608_Vanc	pkt608F1;
 				SHOULD_SUCCEED(pkt608F1.SetLine(false/*isF1*/, 10));
 				SHOULD_SUCCEED(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B')));
-				SHOULD_SUCCEED(pkt608F1.SetDataLocation(AJAAncillaryDataLink_A, fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, pkt608F1.IsField2() ? smpteLineF2+10 : 10));
+				SHOULD_SUCCEED(pkt608F1.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+10 : 10)));
 				SHOULD_SUCCEED(pkt608F1.GeneratePayloadData());
 
 				AJAAncillaryData_Cea608_Vanc	pkt608F2;
 				SHOULD_SUCCEED(pkt608F2.SetLine(true/*isF2*/, 11));
 				SHOULD_SUCCEED(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b')));
-				SHOULD_SUCCEED(pkt608F2.SetDataLocation(AJAAncillaryDataLink_A, fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, !NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11 /*inLineNum*/));
+				SHOULD_SUCCEED(pkt608F2.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11)));
 				SHOULD_SUCCEED(pkt608F2.GeneratePayloadData());
 	
 				AJAAncillaryData_HDR_HLG		pktHDR;
 				SHOULD_SUCCEED(pktHDR.GeneratePayloadData());
 	
 				AJAAncillaryData				pktCustomY;
-				SHOULD_SUCCEED(pktCustomY.SetDataLocation(AJAAncillaryDataLink_A, fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 12 /*inLineNum*/));
+				SHOULD_SUCCEED(pktCustomY.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(12)));
 				SHOULD_SUCCEED(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital));
 				SHOULD_SUCCEED(pktCustomY.SetDID(0x7A));
 				SHOULD_SUCCEED(pktCustomY.SetSID(0x01));
@@ -1498,7 +1647,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				SHOULD_SUCCEED(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY)));
 	
 				AJAAncillaryData				pktCustomC;
-				SHOULD_SUCCEED(pktCustomC.SetDataLocation(AJAAncillaryDataLink_A, fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, 13 /*inLineNum*/));
+				SHOULD_SUCCEED(pktCustomC.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C).SetLineNumber(13)));
 				SHOULD_SUCCEED(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital));
 				SHOULD_SUCCEED(pktCustomC.SetDID(0x8A));
 				SHOULD_SUCCEED(pktCustomC.SetSID(0x02));
@@ -1586,8 +1735,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 		static bool BFT_IPBufferToAncListToIPBuffer (void)
 		{
 			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
-			LOGMYNOTE("Starting");
-			if (gIsVerbose)	cerr << endl << "Starting BFT_IPBufferToAncListToIPBuffer..." << endl;
+			LOGMYNOTE("Starting");		if (gIsVerbose)	cerr << endl << "Starting BFT_IPBufferToAncListToIPBuffer..." << endl;
 			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 			{
 				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
@@ -1635,8 +1783,7 @@ if (gIPBuffers[vFormat].IsNULL())
 				}
 				SHOULD_BE_TRUE(F1RTP_a.IsContentEqual(F1RTP_b, 0, 27*4));
 			}	//	for each vFormat
-			LOGMYNOTE("Passed");
-			cerr << "BFT_IPBufferToAncListToIPBuffer passed" << endl;
+			LOGMYNOTE("Passed");	cerr << "BFT_IPBufferToAncListToIPBuffer passed" << endl;
 			return true;
 		}	//	BFT_IPBufferToAncListToIPBuffer
 
@@ -1841,7 +1988,7 @@ if (gIPBuffers[vFormat].IsNULL())
 				loc.SetDataChannel(pktNum & 1 ? AJAAncillaryDataChannel_C : AJAAncillaryDataChannel_Y);
 				loc.SetDataSpace(AJAAncillaryDataSpace_VANC).SetDataStream(AJAAncillaryDataStream(pktNum & 3));
 				loc.SetLineNumber(9+(pktNum&0x0F));
-				loc.SetHorizontalOffset(AJAAncillaryDataLocation::AJAAncDataHorizOffset_Anywhere);
+				loc.SetHorizontalOffset(AJAAncDataHorizOffset_Anywhere);
 				AJAAncillaryData	pkt;
 				pkt.SetDID(pktNum);
 				pkt.SetSID(200-pktNum);
@@ -1856,7 +2003,7 @@ if (gIPBuffers[vFormat].IsNULL())
 				loc.SetDataChannel(pktNum & 1 ? AJAAncillaryDataChannel_C : AJAAncillaryDataChannel_Y);
 				loc.SetDataSpace(AJAAncillaryDataSpace_VANC).SetDataStream(AJAAncillaryDataStream(pktNum & 3));
 				loc.SetLineNumber(567+(pktNum&0x0F));
-				loc.SetHorizontalOffset(AJAAncillaryDataLocation::AJAAncDataHorizOffset_Anywhere);
+				loc.SetHorizontalOffset(AJAAncDataHorizOffset_Anywhere);
 				AJAAncillaryData	pkt;
 				pkt.SetDID(pktNum);
 				pkt.SetSID(200-pktNum);
@@ -1891,6 +2038,12 @@ if (gIPBuffers[vFormat].IsNULL())
 		{
 			AJADebug::Open();
 			LOGMYNOTE("Starting");
+			static const uint32_t jeff_data[] = {AJA_ENDIAN_SWAP32(0x80E493EF),	AJA_ENDIAN_SWAP32(0x5B9B84A4),	AJA_ENDIAN_SWAP32(0x000003E8),	AJA_ENDIAN_SWAP32(0x00040010),	AJA_ENDIAN_SWAP32(0x01800000),	AJA_ENDIAN_SWAP32(0x00AFFE00),	AJA_ENDIAN_SWAP32(0x90501411),	AJA_ENDIAN_SWAP32(0x0140A034),	AJA_ENDIAN_SWAP32(0x11500000), 0};
+			NTV2_POINTER	buff(2048), nullbuff(2048);	buff.Fill(uint64_t(0)); nullbuff.Fill(uint64_t(0));
+			::memcpy(buff.GetHostAddress(0), jeff_data, sizeof(jeff_data));
+			AJAAncillaryList	pkts;
+			AJAAncillaryList::SetFromIPAncData(buff, nullbuff, pkts);
+			LOGMYNOTE("JEFFL: " << pkts);
 			if (false)
 				RTPTimingTest();
 
@@ -1992,6 +2145,8 @@ if (gIPBuffers[vFormat].IsNULL())
 					SHOULD_BE_TRUE(BFT_AncListToBuffer8BitGumpToAncList());
 				if (false)
 					SHOULD_BE_TRUE(BFT_Buffer8BitGumpToAncListToBuffer8BitGump());
+				if (true)
+					SHOULD_BE_TRUE(BFT_AncListToSortToAncList());
 				if (true)
 					SHOULD_BE_TRUE(BFT_AncListToIPBufferToAncList());
 				if (true)

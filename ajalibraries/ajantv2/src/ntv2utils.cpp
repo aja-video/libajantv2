@@ -8758,18 +8758,7 @@ std::string NTV2GetVersionString (const bool inDetailed)
 
 string NTV2RegisterNumberToString (const NTV2RegisterNumber inValue)
 {
-	string	result	(::NTV2RegisterNameString (inValue));
-	if (result.empty ())
-	{
-		result = CNTV2RegisterExpert::GetDisplayName(inValue);
-		if (result.empty())
-		{
-			ostringstream	oss;	//oss << "0x" << hex << inValue << dec;
-		oss << inValue;
-			result = oss.str();
-	}
-	}
-	return result;
+	return CNTV2RegisterExpert::GetDisplayName(inValue);
 }
 
 

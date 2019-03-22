@@ -31,8 +31,8 @@ typedef std::map <uint16_t, AJAAncillaryDataType>	AJAAncillaryAnalogTypeMap;
 				Use my AJAAncillaryList::SortListByDID, AJAAncillaryList::SortListBySID or AJAAncillaryList::SortListByLocation
 				methods to sort my packets by DID, SDID or location.
 
-	@warning	I am not thread-safe! When any of my non-const methods are called by one thread, do not call any of my
-				methods from any other thread.
+	@warning	I am not thread-safe! When any of my non-const instance methods are called by one thread,
+				do not call any of my other instance methods from any other thread.
 **/
 class AJAExport AJAAncillaryList
 {
@@ -53,8 +53,8 @@ public:	//	CLASS METHODS
 
 	/**
 		@brief		Returns all ancillary data packets found in the given F1 and F2 ancillary data buffers.
-		@param[in]	inF1AncBuffer		Specifies the F1 ancillary data ("GUMP") buffer.
-		@param[in]	inF2AncBuffer		Specifies the F2 ancillary data ("GUMP") buffer.
+		@param[in]	inF1AncBuffer		Specifies the F1 ancillary data buffer.
+		@param[in]	inF2AncBuffer		Specifies the F2 ancillary data buffer.
 		@param[out]	outPackets			Receives the packet list.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
@@ -62,6 +62,14 @@ public:	//	CLASS METHODS
 																	const NTV2_POINTER & inF2AncBuffer,
 																	AJAAncillaryList & outPackets);
 
+	/**
+		@brief	Sets whether or not zero-length packets are included or not.
+		@param[in]	inExclude	Specify true to exclude zero-length packets.
+	**/
+	static void								SetIncludeZeroLengthPackets (const bool inExclude);
+	static uint32_t							GetExcludedZeroLengthPacketCount (void);	///< @return	The current number of zero-length packets that have been excluded
+	static void								ResetExcludedZeroLengthPacketCount (void);	///< @brief		Resets my tally of excluded zero-length packets to zero.
+	static bool								IsIncludingZeroLengthPackets (void);		///< @return	True if zero-length packets are included;  otherwise false.
 #if !defined(NTV2_DEPRECATE_15_2)
 	static inline AJAStatus	SetFromSDIAncData (const NTV2_POINTER & inF1, const NTV2_POINTER & inF2, AJAAncillaryList & outPkts)	{return SetFromDeviceAncBuffers(inF1, inF2, outPkts);}	///< @deprecated	Use SetFromDeviceAncBuffers instead.
 	static inline AJAStatus	SetFromIPAncData (const NTV2_POINTER & inF1, const NTV2_POINTER & inF2, AJAAncillaryList & outPkts)		{return SetFromDeviceAncBuffers(inF1, inF2, outPkts);}	///< @deprecated	Use SetFromDeviceAncBuffers instead.
@@ -95,6 +103,11 @@ public:	//	INSTANCE METHODS
 		@return	The number of AJAAncillaryData objects I contain.
 	**/
 	virtual inline uint32_t					CountAncillaryData (void) const				{return uint32_t(m_ancList.size());}
+
+	/**
+		@return	True if I'm empty;  otherwise false.
+	**/
+	virtual inline bool						IsEmpty (void) const						{return !CountAncillaryData();}
 
 	/**
 		@brief		Answers with the AJAAncillaryData object at the given index.
@@ -214,6 +227,16 @@ public:	//	INSTANCE METHODS
 		@note		The sort order of each list, to be considered identical, must be the same.
 	**/
 	virtual AJAStatus						Compare (const AJAAncillaryList & inCompareList, const bool inIgnoreLocation = true,  const bool inIgnoreChecksum = true) const;
+
+	/**
+		@brief		Compares me with another list and returns a std::string that contains a human-readable explanation
+					of the first difference found (if any).
+		@param[in]	inIgnoreLocation	If true, don't compare each packet's AJAAncillaryDataLocation info. Defaults to true.
+		@param[in]	inIgnoreChecksum	If true, don't compare each packet's checksums. Defaults to true.
+		@return		A string that contains a human-readable explanation of the first difference found (if any);
+					or an empty string if the lists are identical.
+		@note		The sort order of each list, to be considered identical, must be the same.
+	**/
 	virtual std::string						CompareWithInfo (const AJAAncillaryList & inCompareList, const bool inIgnoreLocation = true,  const bool inIgnoreChecksum = true) const;
 	///@}
 
@@ -290,7 +313,9 @@ public:	//	INSTANCE METHODS
 										otherwise, specify false. Defaults to true (is progressive).
 		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
 										Defaults to zero (progressive).
-		@note		This function has a side-effect of automatically sorting my packets by ascending location before encoding.
+		@note		This function has the following side-effects:
+					-	Sorts my packets by ascending location before encoding.
+					-	Calls AJAAncillaryData::GenerateTransmitData on each of my packets.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,

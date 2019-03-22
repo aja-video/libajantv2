@@ -20,7 +20,7 @@ const uint32_t  AJAAncillaryData_Cea608_Vanc_PayloadSize = 3;	// constant 3 byte
 
 
 /**
-	@brief	This class handles VANC-based CEA-608 caption data packets.
+	@brief	This class handles VANC-based CEA-608 caption data packets (not "analog" Line 21).
 **/
 class AJAExport AJAAncillaryData_Cea608_Vanc : public AJAAncillaryData_Cea608
 {

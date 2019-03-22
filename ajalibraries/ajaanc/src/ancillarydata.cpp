@@ -69,6 +69,26 @@ AJAAncillaryData::AJAAncillaryData (const AJAAncillaryData * pClone)
 		*this = *pClone;
 }
 
+/** not necessary
+AJAAncillaryData & AJAAncillaryData::operator = (const AJAAncillaryData & inRHS)
+{
+	if (this == &inRHS)
+		return *this;
+
+	m_DID			= inRHS.m_DID;
+	m_SID			= inRHS.m_SID;
+	m_checksum		= inRHS.m_checksum;
+	m_location		= inRHS.m_location;
+	m_coding		= inRHS.m_coding;
+	m_payload		= inRHS.m_payload;
+	m_rcvDataValid	= inRHS.m_rcvDataValid;
+	m_ancType		= inRHS.m_ancType;
+	m_bufferFmt		= inRHS.m_bufferFmt;
+	m_frameID		= inRHS.m_frameID;
+	return *this;
+}
+not necessary **/
+
 
 AJAAncillaryData::~AJAAncillaryData ()
 {
@@ -94,7 +114,6 @@ void AJAAncillaryData::Init()
 	m_location.SetDataChannel(AJAAncillaryDataChannel_Y);
 	m_location.SetDataSpace(AJAAncillaryDataSpace_VANC);
 	m_location.SetLineNumber(0);
-	m_location.SetHorizontalOffset(AJAAncillaryDataLocation::AJAAncDataHorizOffset_Default);
 }
 
 
@@ -215,41 +234,40 @@ AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncillaryDataLocation & lo
 	if (AJA_SUCCESS(status))
 		status = SetLocationDataChannel(loc.GetDataChannel());
 	if (AJA_SUCCESS(status))
-		status = SetLocationVideoSpace(loc.GetDataSpace());
+		status = SetLocationHorizOffset(loc.GetHorizontalOffset());
 	if (AJA_SUCCESS(status))
 		status = SetLocationLineNumber(loc.GetLineNumber());
 	return status;
 }
 
 
-//	DEPRECATED
-AJAStatus AJAAncillaryData::GetDataLocation (AJAAncillaryDataLink &			outLink,
-											AJAAncillaryDataVideoStream &	outStream,
-											AJAAncillaryDataSpace &			outAncSpace,
-											uint16_t &						outLineNum)
-{
-	outLink		= m_location.GetDataLink();
-	outStream	= m_location.GetDataChannel();
-	outAncSpace	= m_location.GetDataSpace();
-	outLineNum	= m_location.GetLineNumber();
-	return AJA_STATUS_SUCCESS;
-}
+#if !defined(NTV2_DEPRECATE_15_2)
+	AJAStatus AJAAncillaryData::GetDataLocation (AJAAncillaryDataLink &			outLink,
+												AJAAncillaryDataVideoStream &	outStream,
+												AJAAncillaryDataSpace &			outAncSpace,
+												uint16_t &						outLineNum)
+	{
+		outLink		= m_location.GetDataLink();
+		outStream	= m_location.GetDataChannel();
+		outAncSpace	= m_location.GetDataSpace();
+		outLineNum	= m_location.GetLineNumber();
+		return AJA_STATUS_SUCCESS;
+	}
 
-//-------------
-//
-AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncillaryDataLink inLink, const AJAAncillaryDataChannel inChannel, const AJAAncillaryDataSpace inAncSpace, const uint16_t inLineNum, const AJAAncillaryDataStream inStream)
-{
-	AJAStatus	status	(SetLocationVideoLink(inLink));
-	if (AJA_SUCCESS(status))
-		status = SetLocationDataStream(inStream);
-	if (AJA_SUCCESS(status))
-		status = SetLocationDataChannel(inChannel);
-	if (AJA_SUCCESS(status))
-		status = SetLocationVideoSpace(inAncSpace);
-	if (AJA_SUCCESS(status))
-		status = SetLocationLineNumber(inLineNum);
-	return status;
-}
+	AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncillaryDataLink inLink, const AJAAncillaryDataChannel inChannel, const AJAAncillaryDataSpace inAncSpace, const uint16_t inLineNum, const AJAAncillaryDataStream inStream)
+	{
+		AJAStatus	status	(SetLocationVideoLink(inLink));
+		if (AJA_SUCCESS(status))
+			status = SetLocationDataStream(inStream);
+		if (AJA_SUCCESS(status))
+			status = SetLocationDataChannel(inChannel);
+		if (AJA_SUCCESS(status))
+			status = SetLocationVideoSpace(inAncSpace);
+		if (AJA_SUCCESS(status))
+			status = SetLocationLineNumber(inLineNum);
+		return status;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_15_2)
 
 
 //-------------
@@ -288,23 +306,23 @@ AJAStatus AJAAncillaryData::SetLocationDataChannel (const AJAAncillaryDataChanne
 }
 
 
-//-------------
-//
-AJAStatus AJAAncillaryData::SetLocationVideoSpace (const AJAAncillaryDataSpace inSpace)
-{
-	if (!IS_VALID_AJAAncillaryDataSpace(inSpace))
-		return AJA_STATUS_RANGE;
-
-	m_location.SetDataSpace(inSpace);
-	return AJA_STATUS_SUCCESS;
-}
+#if !defined(NTV2_DEPRECATE_15_2)
+	AJAStatus AJAAncillaryData::SetLocationVideoSpace (const AJAAncillaryDataSpace inSpace)
+	{
+		if (!IS_VALID_AJAAncillaryDataSpace(inSpace))
+			return AJA_STATUS_RANGE;
+	
+		m_location.SetDataSpace(inSpace);
+		return AJA_STATUS_SUCCESS;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_15_2)
 
 
 //-------------
 //
 AJAStatus AJAAncillaryData::SetLocationLineNumber (const uint16_t inLineNum)
 {
-	//	No range checking here because we don't know how big the frame is
+	//	No range checking here because we don't know how tall the frame is
 	m_location.SetLineNumber(inLineNum);
 	return AJA_STATUS_SUCCESS;
 }
@@ -965,8 +983,9 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 	result = SetLocationDataChannel(dataLoc.GetDataChannel());
 	if (AJA_FAILURE(result))	{LOGMYERROR("SetLocationDataChannel failed, dataLoc: " << dataLoc);	return result;}
 
-	result = SetLocationVideoSpace(dataLoc.GetDataSpace());
-	if (AJA_FAILURE(result))	{LOGMYERROR("SetLocationVideoSpace failed, dataLoc: " << dataLoc);	return result;}
+//	result = SetLocationVideoSpace(dataLoc.GetDataSpace());
+	result = SetLocationHorizOffset(dataLoc.GetHorizontalOffset());
+	if (AJA_FAILURE(result))	{LOGMYERROR("SetLocationHorizOffset failed, dataLoc: " << dataLoc);	return result;}
 
 	result = SetLocationLineNumber(dataLoc.GetLineNumber());
 	if (AJA_FAILURE(result))	{LOGMYERROR("SetLocationLineNumber failed, dataLoc: " << dataLoc);	return result;}
@@ -1134,32 +1153,44 @@ const string & AJAAncillaryDataSpaceToString (const AJAAncillaryDataSpace inValu
 }
 
 
+string AJAAncHorizOffsetToString (const uint16_t inValue)
+{
+	ostringstream	oss;
+	if (inValue == AJAAncDataHorizOffset_AnyHanc)
+		oss	<< "HANC";
+	else if (inValue == AJAAncDataHorizOffset_AnyVanc)
+		oss	<< "VANC";
+	else if (inValue == AJAAncDataHorizOffset_Anywhere)
+		oss	<< "UNSP";
+	else if (inValue == 0)
+		oss	<< "UNS0";
+	else
+		oss << "+" << DEC(inValue);
+	return oss.str();
+}
+
+
+ostream & AJAAncillaryDataLocation::Print (ostream & oss, const bool inCompact) const
+{
+	oss	<< ::AJAAncillaryDataLinkToString(GetDataLink(), inCompact)
+		<< "|" << ::AJAAncillaryDataStreamToString(GetDataStream(), inCompact)
+		<< "|" << ::AJAAncillaryDataChannelToString(GetDataChannel(), inCompact)
+		<< "|L" << DEC(GetLineNumber())
+		<< "|" << ::AJAAncHorizOffsetToString(GetHorizontalOffset());
+	return oss;
+}
+
+
 string AJAAncillaryDataLocationToString (const AJAAncillaryDataLocation & inValue, const bool inCompact)
 {
 	ostringstream	oss;
-	oss	<< ::AJAAncillaryDataLinkToString(inValue.GetDataLink(), inCompact)
-		<< "|" << ::AJAAncillaryDataStreamToString(inValue.GetDataStream(), inCompact)
-		<< "|" << ::AJAAncillaryDataChannelToString(inValue.GetDataChannel(), inCompact)
-		<< "|" << ::AJAAncillaryDataSpaceToString(inValue.GetDataSpace(), inCompact)
-		<< "|L" << DEC(inValue.GetLineNumber());
-	if (inValue.GetHorizontalOffset() != AJAAncillaryDataLocation::AJAAncDataHorizOffset_Default)
-	{
-		oss	<< "|";
-		if (inValue.GetHorizontalOffset() == AJAAncillaryDataLocation::AJAAncDataHorizOffset_AnyHanc)
-			oss	<< "EAV*";
-		else if (inValue.GetHorizontalOffset() == AJAAncillaryDataLocation::AJAAncDataHorizOffset_Anywhere)
-			oss	<< "SAV*";
-		else
-			oss << "SAV+" << DEC(inValue.GetHorizontalOffset());
-	}
-	//else oss << DEC(inValue.GetHorizontalOffset());	//	DON'T SHOW ANYTHING FOR ZERO (DEFAULT)
-	return oss.str ();
+	inValue.Print(oss, inCompact);
+	return oss.str();
 }
 
 ostream & operator << (ostream & inOutStream, const AJAAncillaryDataLocation & inValue)
 {
-	inOutStream	<< ::AJAAncillaryDataLocationToString(inValue, true);
-	return inOutStream;
+	return inValue.Print(inOutStream, true);
 }
 
 
@@ -1957,11 +1988,12 @@ uint32_t AJARTPAncPacketHeader::GetULWord (void) const
 	//	|C|   Line_Number       |   Horizontal_Offset   |S|  StreamNum  |
 	//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	uint32_t	u32(0);
-	u32 |= (uint32_t(GetLineNumber()) & 0x000007FF) << 20;
+	u32 |= (uint32_t(GetLineNumber()) & 0x000007FF) << 20;	//	11-bit line number
 	u32 |= (IsCBitSet() ? 0x80000000 : 0x00000000);
-	u32 |= (uint32_t(GetHorizOffset()) & 0x00000FFF) << 8;
-	u32 |= uint32_t(GetStreamNumber() & 0x7F);
-	u32 |= IsSBitSet() ? 0x00000080 : 0x00000000;
+	u32 |= (uint32_t(GetHorizOffset()) & 0x00000FFF) << 8;	//	12-bit horiz offset
+	u32 |= IsSBitSet() ? 0x00000080 : 0x00000000;			//	Data Stream flag
+	if (IsSBitSet())
+		u32 |= uint32_t(GetStreamNumber() & 0x7F);			//	7-bit StreamNum
 	return AJA_ENDIAN_32HtoN(u32);
 }
 
@@ -2000,20 +2032,18 @@ bool AJARTPAncPacketHeader::ReadFromULWordVector(const vector<uint32_t> & inVect
 
 AJAAncillaryDataLocation AJARTPAncPacketHeader::AsDataLocation(void) const
 {
-	AJAAncillaryDataSpace	dataSpace (AJAAncillaryDataSpace_VANC);
-	switch (GetHorizOffset())
+	AJAAncillaryDataLocation	result;
+	result.SetLineNumber(GetLineNumber()).SetHorizontalOffset(GetHorizOffset())
+			.SetDataChannel(IsCBitSet() ? AJAAncillaryDataChannel_C : AJAAncillaryDataChannel_Y)
+			.SetDataLink(AJAAncillaryDataLink_A).SetDataStream(AJAAncillaryDataStream_1);
+	if (IsSBitSet())
 	{
-		case AJAAncillaryDataLocation::AJAAncDataHorizOffset_Default:	break;
-		case AJAAncillaryDataLocation::AJAAncDataHorizOffset_Anywhere:	break;
-		case AJAAncillaryDataLocation::AJAAncDataHorizOffset_AnyHanc:	dataSpace = AJAAncillaryDataSpace_HANC;	break;
-		default:	break;	//	Depends on video standard / frame geometry
+		//	e.g. SMPTE ST 425-3 DL 3Gbps, data streams are numbered 1-4, so DS1/DS2 on linkA, DS3/DS4 on linkB
+		result.SetDataStream(AJAAncillaryDataStream(GetStreamNumber()));
+		if (IS_LINKB_AJAAncillaryDataStream(result.GetDataStream()))
+			result.SetDataLink(AJAAncillaryDataLink_B);
 	}
-	return AJAAncillaryDataLocation(IsSBitSet() ? AJAAncillaryDataLink_A : AJAAncillaryDataLink_Unknown,
-									IsCBitSet() ? AJAAncillaryDataChannel_C : AJAAncillaryDataChannel_Y,
-									dataSpace,
-									GetLineNumber(),
-									GetHorizOffset(),
-									IsSBitSet() ? AJAAncillaryDataStream(GetStreamNumber()) : AJAAncillaryDataStream_1);
+	return result;
 }
 
 AJARTPAncPacketHeader &	AJARTPAncPacketHeader::SetFrom(const AJAAncillaryDataLocation & inLoc)
@@ -2044,6 +2074,7 @@ AJARTPAncPacketHeader &	AJARTPAncPacketHeader::SetFrom(const AJAAncillaryDataLoc
 
 	mLineNum = inLoc.GetLineNumber();
 	mHOffset = inLoc.GetHorizontalOffset();
+
 	return *this;
 }
 
