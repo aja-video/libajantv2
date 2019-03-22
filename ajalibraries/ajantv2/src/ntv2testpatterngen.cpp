@@ -3016,7 +3016,7 @@ void NTV2TestPatternGen::setupHDRTestPatternGeometries()
     }
     else
     {
-        mNumPixels == 1920;
+        mNumPixels = 1920;
         mNumLines = 1080;
         a=1920;
         b=1080;
