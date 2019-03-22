@@ -1639,7 +1639,7 @@ packetList.GetIPTransmitData (f1b, f2b, isProgressive, F2StartLine);
 mDevice.DMAWriteAnc(30, f1b, f2b, NTV2_CHANNEL_INVALID);	//	DEBUG: DMA Xmit RTP to frame 29
 AJAAncillaryList	pkts;
 AJAAncillaryList::SetFromDeviceAncBuffers(f1b, f2b, pkts);
-if (AJA_FAILURE(packetList.GetAncillaryDataWithID(0x61, 0x02)->Compare(*(pkts.GetAncillaryDataWithID(0x61, 0x02)), false, false)))
+if (!mConfig.fSuppress608  &&  AJA_FAILURE(packetList.GetAncillaryDataWithID(0x61, 0x02)->Compare(*(pkts.GetAncillaryDataWithID(0x61, 0x02)), false, false)))
 	CCPLDBG(packetList.GetAncillaryDataWithID(0x61, 0x02)->AsString(8) << "  |  " << pkts.GetAncillaryDataWithID(0x61, 0x02)->AsString(8));
 string result(pkts.CompareWithInfo(packetList));
 if (!result.empty())	CCPLDBG(result);
