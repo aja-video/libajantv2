@@ -1806,15 +1806,21 @@ NTV2Standard GetNTV2StandardFromScanGeometry(UByte geometry, bool progressiveTra
 }
 
 
-NTV2VideoFormat GetFirstMatchingVideoFormat (const NTV2FrameRate inFrameRate, const UWord inHeightLines, const UWord inWidthPixels, const bool inIsInterlaced, const bool inIsLevelB)
+NTV2VideoFormat GetFirstMatchingVideoFormat (const NTV2FrameRate inFrameRate,
+											 const UWord inHeightLines,
+											 const UWord inWidthPixels,
+											 const bool inIsInterlaced,
+											 const bool inIsLevelB,
+											 const bool inIsPSF)
 {
 	for (NTV2VideoFormat fmt(NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT);  fmt < NTV2_MAX_NUM_VIDEO_FORMATS;  fmt = NTV2VideoFormat(fmt+1))
 		if (inFrameRate == ::GetNTV2FrameRateFromVideoFormat(fmt))
 			if (inHeightLines == ::GetDisplayHeight(fmt))
 				if (inWidthPixels == ::GetDisplayWidth(fmt))
 					if (inIsInterlaced == !::IsProgressiveTransport(fmt))
-						if (NTV2_VIDEO_FORMAT_IS_B(fmt) == inIsLevelB)
-							return fmt;
+						if (inIsPSF == ::IsPSF(fmt))
+							if (NTV2_VIDEO_FORMAT_IS_B(fmt) == inIsLevelB)
+								return fmt;
 	return NTV2_FORMAT_UNKNOWN;
 }
 
