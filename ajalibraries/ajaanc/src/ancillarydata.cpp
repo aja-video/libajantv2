@@ -21,6 +21,24 @@ using namespace std;
 #define	LOGMYINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
 #define	LOGMYDEBUG(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
 
+#define	RCV2110ERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
+#define	RCV2110WARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
+#define	RCV2110NOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Notice,		__FUNCTION__ << ":  " << __x__)
+#define	RCV2110INFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
+#define	RCV2110DBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
+
+#define	XMT2110ERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
+#define	XMT2110WARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
+#define	XMT2110NOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":  " << __x__)
+#define	XMT2110INFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
+#define	XMT2110DBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
+#if defined(_DEBUG)	//	DetailedDebugging
+	#define	RCV2110DDBG(__x__)	RCV2110DBG(__x__)
+	#define	XMT2110DDBG(__x__)	XMT2110DBG(__x__)
+#else
+	#define	RCV2110DDBG(__x__)	
+	#define	XMT2110DDBG(__x__)	
+#endif
 
 #if defined(AJAHostIsBigEndian)
 	//	Host is BigEndian (BE)
@@ -45,7 +63,6 @@ const uint32_t AJAAncillaryDataWrapperSize = 7;		// 3 bytes header + DID + SID +
 
 //const uint8_t  AJAAncillaryDataAnalogDID = 0x00;		// used in header DID field when ancillary data is "analog"
 //const uint8_t  AJAAncillaryDataAnalogSID = 0x00;		// used in header SID field when ancillary data is "analog"
-static bool	DetailedDebugging	(false);
 
 
 
@@ -848,9 +865,9 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData)
 	uint32_t							u32			(0);	//	32-bit value
 
 	if (!IsDigital())
-		{LOGMYWARN("Analog/raw packet skipped/ignored: " << AsString(32));	return AJA_STATUS_SUCCESS;}
+		{XMT2110WARN("Analog/raw packet skipped/ignored: " << AsString(32));	return AJA_STATUS_SUCCESS;}
 	if (GetDC() > 255)
-		{LOGMYERROR("Data count exceeds 255: " << AsString(32));	return AJA_STATUS_RANGE;}
+		{XMT2110ERR("Data count exceeds 255: " << AsString(32));	return AJA_STATUS_RANGE;}
 
 	//////////////////////////////////////////////////
 	//	Prepare an array of 10-bit DID/SID/DC/UDWs/CS values...
@@ -868,17 +885,17 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData)
 		//	Append 8-bit payload data, converting into 10-bit values with even parity added...
 		status = GetPayloadData(UDW16s, true);	//	Append 10-bit even-parity UDWs
 		if (AJA_FAILURE(status))
-			{LOGMYERROR("GetPayloadData failed: " << AsString(32));	return status;}
+			{XMT2110ERR("GetPayloadData failed: " << AsString(32));	return status;}
 		UDW16s.push_back(cs);	//	Checksum is the caboose
 	//	Done -- 10-bit DID/SID/DC/UDWs/CS array is prepared
-	LOGMYDEBUG("From " << UWordSequence(UDW16s) << " " << AsString(32));
+	XMT2110DBG("From " << UWordSequence(UDW16s) << " " << AsString(32));
 	//////////////////////////////////////////////////
 
 	//	Begin writing into "outData" array.
 	//	My first 32-bit longword is the Anc packet header, which contains location info...
 	const AJARTPAncPacketHeader	pktHdr	(GetDataLocation());
 	outData.push_back(pktHdr.GetULWord());
-	if (DetailedDebugging)	LOGMYDEBUG("outU32s[" << DEC(outData.size()-1) << "]=" << xHEX0N(AJA_ENDIAN_32HtoN(pktHdr.GetULWord()),8));
+	XMT2110DDBG("outU32s[" << DEC(outData.size()-1) << "]=" << xHEX0N(AJA_ENDIAN_32HtoN(pktHdr.GetULWord()),8));
 
 	//	All subsequent 32-bit longwords come from the array of 10-bit values I built earlier.
 	const size_t	numUDWs	(UDW16s.size());
@@ -894,12 +911,12 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData)
 			const uint32_t	UDW			(isPastEnd  ?  0  :  uint32_t(UDW16s[ndx]));
 			const unsigned	shift		(gShifts[loopNdx]);
 			const uint32_t	mask		(gMasks[loopNdx]);
-			if (!isPastEnd)	if (DetailedDebugging)	LOGMYDEBUG("u16s[" << DEC(ndx) << "]=" << xHEX0N(UDW,3));
+			if (!isPastEnd)	XMT2110DDBG("u16s[" << DEC(ndx) << "]=" << xHEX0N(UDW,3));
 			if (is4th)
 			{
 				u32 |=  (UDW >> shift) & mask;
 				outData.push_back(AJA_ENDIAN_32HtoN(u32));
-				if (DetailedDebugging)	LOGMYDEBUG("outU32s[" << DEC(outData.size()-1) << "]=" << xHEX0N(u32,8));
+				XMT2110DDBG("outU32s[" << DEC(outData.size()-1) << "]=" << xHEX0N(u32,8));
 				u32 = 0;	//	Reset, start over
 				if (isPastEnd)
 					break;	//	Done, 32-bit longword aligned
@@ -938,17 +955,19 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData)
 	u32 |= (uint32_t(UDW16s.at(15)) >>  0) & 0x000003FF;	//	0b10011|0x13|19: [15] all 10 bits		22+10=32				10-10=0
 	outData.push_back(AJA_ENDIAN_32HtoN(u32));	*/
 
-if (true)	{
+#if defined(_DEBUG)
+{
 	ostringstream	oss;
 	oss << (origSize ? "Appended " : "Generated ") << (outData.size() - origSize)  << " 32-bit words:";
 	for (size_t ndx(origSize);  ndx < outData.size();  ndx++)
 		oss << " " << HEX0N(AJA_ENDIAN_32NtoH(outData[ndx]),8);
 	oss << " from " << AsString(32);
-	LOGMYDEBUG(oss.str());
-} else
-	LOGMYDEBUG((origSize ? "Appended " : "Generated ")
+	XMT2110DBG(oss.str());
+}
+#else
+	XMT2110DBG((origSize ? "Appended " : "Generated ")
 					<< (outData.size() - origSize)  << " 32-bit words from " << AsString(32));
-
+#endif
 	return AJA_STATUS_SUCCESS;
 }	//	GenerateTransmitData
 
@@ -960,35 +979,34 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 	Clear();	//	Reset me -- start over
 
 	if (inOutU32Ndx >= numU32s)
-		{LOGMYERROR("Index error: [" << DEC(inOutU32Ndx) << "] past end of [" << DEC(numU32s) << "] element buffer");  return AJA_STATUS_RANGE;}
+		{RCV2110ERR("Index error: [" << DEC(inOutU32Ndx) << "] past end of [" << DEC(numU32s) << "] element buffer");  return AJA_STATUS_RANGE;}
 
 	AJARTPAncPacketHeader	ancPktHeader;
 	if (!ancPktHeader.ReadFromULWordVector(inU32s, inOutU32Ndx))
-		{LOGMYERROR("AJARTPAncPacketHeader::ReadFromULWordVector failed at [" << DEC(inOutU32Ndx) << "]");	return AJA_STATUS_FAIL;}
+		{RCV2110ERR("AJARTPAncPacketHeader::ReadFromULWordVector failed at [" << DEC(inOutU32Ndx) << "]");	return AJA_STATUS_FAIL;}
 
 	const AJAAncillaryDataLocation	dataLoc	(ancPktHeader.AsDataLocation());
-	if (DetailedDebugging)	LOGMYDEBUG("u32=" << xHEX0N(AJA_ENDIAN_32NtoH(inU32s.at(inOutU32Ndx)),8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "] AncPktHdr: " << ancPktHeader << " -- AncDataLoc: " << dataLoc);
+	RCV2110DDBG("u32=" << xHEX0N(AJA_ENDIAN_32NtoH(inU32s.at(inOutU32Ndx)),8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "] AncPktHdr: " << ancPktHeader << " -- AncDataLoc: " << dataLoc);
 
 	if (++inOutU32Ndx >= numU32s)
-		{LOGMYERROR("Index error: [" << DEC(inOutU32Ndx) << "] past end of [" << DEC(numU32s) << "] element buffer");  return AJA_STATUS_RANGE;}
+		{RCV2110ERR("Index error: [" << DEC(inOutU32Ndx) << "] past end of [" << DEC(numU32s) << "] element buffer");  return AJA_STATUS_RANGE;}
 
 	//	Set location info...
 	AJAStatus result;
 	result = SetLocationVideoLink(dataLoc.GetDataLink());
-	if (AJA_FAILURE(result))	{LOGMYERROR("SetLocationVideoLink failed, dataLoc: " << dataLoc);	return result;}
+	if (AJA_FAILURE(result))	{RCV2110ERR("SetLocationVideoLink failed, dataLoc: " << dataLoc);	return result;}
 
 	result = SetLocationDataStream(dataLoc.GetDataStream());
-	if (AJA_FAILURE(result))	{LOGMYERROR("SetLocationDataStream failed, dataLoc: " << dataLoc);	return result;}
+	if (AJA_FAILURE(result))	{RCV2110ERR("SetLocationDataStream failed, dataLoc: " << dataLoc);	return result;}
 
 	result = SetLocationDataChannel(dataLoc.GetDataChannel());
-	if (AJA_FAILURE(result))	{LOGMYERROR("SetLocationDataChannel failed, dataLoc: " << dataLoc);	return result;}
+	if (AJA_FAILURE(result))	{RCV2110ERR("SetLocationDataChannel failed, dataLoc: " << dataLoc);	return result;}
 
-//	result = SetLocationVideoSpace(dataLoc.GetDataSpace());
 	result = SetLocationHorizOffset(dataLoc.GetHorizontalOffset());
-	if (AJA_FAILURE(result))	{LOGMYERROR("SetLocationHorizOffset failed, dataLoc: " << dataLoc);	return result;}
+	if (AJA_FAILURE(result))	{RCV2110ERR("SetLocationHorizOffset failed, dataLoc: " << dataLoc);	return result;}
 
 	result = SetLocationLineNumber(dataLoc.GetLineNumber());
-	if (AJA_FAILURE(result))	{LOGMYERROR("SetLocationLineNumber failed, dataLoc: " << dataLoc);	return result;}
+	if (AJA_FAILURE(result))	{RCV2110ERR("SetLocationLineNumber failed, dataLoc: " << dataLoc);	return result;}
 
 	//	Unpack this anc packet...
 	vector<uint16_t>	u16s;	//	10-bit even-parity words
@@ -996,7 +1014,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 	size_t				dataCount		(0);
 	uint32_t			u32				(AJA_ENDIAN_32NtoH(inU32s.at(inOutU32Ndx)));
 	const size_t		startU32Ndx		(inOutU32Ndx);
-	if (DetailedDebugging)	LOGMYDEBUG("u32=" << xHEX0N(u32,8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "]");
+	RCV2110DDBG("u32=" << xHEX0N(u32,8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "]");
 	do
 	{
 		uint16_t	u16	(0);
@@ -1013,34 +1031,34 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 				//	Grab next u32 value...
 				if (++inOutU32Ndx >= numU32s)
 				{
-					u16s.push_back(u16);	if (DetailedDebugging)	LOGMYDEBUG("u16s[" << DEC(u16s.size()-1) << "]=" << xHEX0N(u16,3) << " (Past end)");
+					u16s.push_back(u16);	RCV2110DDBG("u16s[" << DEC(u16s.size()-1) << "]=" << xHEX0N(u16,3) << " (Past end)");
 					break;	//	Past end
 				}
 				u32 = AJA_ENDIAN_32NtoH(inU32s.at(inOutU32Ndx));
-				if (DetailedDebugging)	LOGMYDEBUG("u32=" << xHEX0N(u32,8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "], u16=" << xHEX0N(u16,3)
+				RCV2110DDBG("u32=" << xHEX0N(u32,8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "], u16=" << xHEX0N(u16,3)
 										<< " from " << DEC(loopNdx) << "(" << xHEX0N(inU32s.at(inOutU32Ndx-1),8) << " & " << xHEX0N(mask,8) << ") << " << DEC(shift));
 				if (shift)
 					continue;	//	go around
 			}
 			else if (is1st)
 			{
-				if (DetailedDebugging)	LOGMYDEBUG("u16s[" << DEC(u16s.size()) << "]=" << xHEX0N(u16,3) << " | " << xHEX0N(uint16_t((u32 & mask) >> shift),3)
+				RCV2110DDBG("u16s[" << DEC(u16s.size()) << "]=" << xHEX0N(u16,3) << " | " << xHEX0N(uint16_t((u32 & mask) >> shift),3)
 													<< " = " << xHEX0N(u16 | uint16_t((u32 & mask) >> shift),3));
 				u16 |= uint16_t((u32 & mask) >> shift);
 			}
 			else
 			{
 				u16 = uint16_t((u32 & mask) >> shift);
-				if (DetailedDebugging)	LOGMYDEBUG("u16s[" << DEC(u16s.size()) << "]=" << xHEX0N(u16,3));
+				RCV2110DDBG("u16s[" << DEC(u16s.size()) << "]=" << xHEX0N(u16,3));
 			}
-			u16s.push_back(u16);	if (DetailedDebugging)	LOGMYDEBUG("u16s[" << DEC(u16s.size()-1) << "]=" << xHEX0N(u16,3));
+			u16s.push_back(u16);	RCV2110DDBG("u16s[" << DEC(u16s.size()-1) << "]=" << xHEX0N(u16,3));
 			switch(u16s.size())
 			{
 				case 1:		SetDID(uint8_t(u16));				break;	//	Got DID
 				case 2:		SetSID(uint8_t(u16));				break;	//	Got SID
 				case 3:		dataCount = size_t(u16 & 0x0FF);	break;	//	Got DC
 				default:	if (u16s.size() == (dataCount + 4))
-								{gotChecksum = true; if (DetailedDebugging)	LOGMYDEBUG("Got checksum");}	//	Got CS
+								{gotChecksum = true; RCV2110DDBG("Got checksum, DC=" << xHEX0N(dataCount,2) << " CS=" << xHEX0N(u16s.back(),3));}	//	Got CS
 							break;
 			}
 		}	//	loop 20 times (or until gotChecksum)
@@ -1048,7 +1066,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 				break;
 	} while (inOutU32Ndx < numU32s);
 
-	LOGMYDEBUG("Consumed " << DEC(inOutU32Ndx - startU32Ndx + 1) << " ULWord(s), unpacked " << u16s);
+	RCV2110DBG("Consumed " << DEC(inOutU32Ndx - startU32Ndx + 1) << " ULWord(s), unpacked " << u16s);
 	if (inOutU32Ndx < numU32s)
 		inOutU32Ndx++;	//	Bump to next Anc packet, if any
 
@@ -1058,9 +1076,9 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 
 	result = SetChecksum(uint8_t(u16s.at(u16s.size()-1)), true /*validate*/);
 	if (AJA_FAILURE(result))
-		{LOGMYERROR("SetChecksum=" << xHEX0N(u16s.at(u16s.size()-1),3) << " failed, calculated=" << xHEX0N(Calculate9BitChecksum(),3));	return result;}
+		{RCV2110ERR("SetChecksum=" << xHEX0N(u16s.at(u16s.size()-1),3) << " failed, calculated=" << xHEX0N(Calculate9BitChecksum(),3));	return result;}
 	SetBufferFormat(AJAAncillaryBufferFormat_RTP);
-	LOGMYDEBUG(AsString(64));
+	RCV2110DBG(AsString(64));
 
 	/*	The Pattern:  (unrolling the above loop):
 		u32 = AJA_ENDIAN_32NtoH(inU32s.at(0));

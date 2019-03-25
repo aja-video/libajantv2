@@ -87,7 +87,8 @@ typedef enum _AJADebugUnit
     AJA_DebugUnit_App_Screen                = 46,
     AJA_DebugUnit_App_User1                	= 47,
     AJA_DebugUnit_App_User2               	= 48,
-    AJA_DebugUnit_Anc2110					= 49,
+    AJA_DebugUnit_Anc2110Xmit				= 49,
+    AJA_DebugUnit_Anc2110Rcv				= 50,
 
     // to add a new unit:
     //
@@ -106,9 +107,8 @@ typedef enum _AJADebugUnit
     // if no more unused units
     //   * set AJA_DebugUnit_FirstUnused to the same value as AJA_DebugUnit_Size
     //
-    AJA_DebugUnit_FirstUnused               = 50,
-    AJA_DebugUnit_Unused_50                 = AJA_DebugUnit_FirstUnused,
-    AJA_DebugUnit_Unused_51                 = 51,
+    AJA_DebugUnit_FirstUnused               = 51,
+    AJA_DebugUnit_Unused_51                 = AJA_DebugUnit_FirstUnused,
     AJA_DebugUnit_Unused_52                 = 52,
     AJA_DebugUnit_Unused_53                 = 53,
     AJA_DebugUnit_Unused_54                 = 54,

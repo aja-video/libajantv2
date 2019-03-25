@@ -302,6 +302,7 @@ bool NTV2DeviceCanDo2110 (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IOIP_2110:
 		case DEVICE_ID_KONAIP_1RX_1TX_2110:
 		case DEVICE_ID_KONAIP_2110:
+		case DEVICE_ID_IO4KPLUS:	//	** MrBill **	DEBUGGING -- DO NOT COMMIT
 			return true;
 	#if defined(_DEBUG)
 		case DEVICE_ID_CORVID1:
@@ -314,7 +315,6 @@ bool NTV2DeviceCanDo2110 (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_CORVIDHBR:
 		case DEVICE_ID_CORVIDHEVC:
 		case DEVICE_ID_IO4K:
-		case DEVICE_ID_IO4KPLUS:
 		case DEVICE_ID_IO4KUFC:
 		case DEVICE_ID_IOEXPRESS:
 		case DEVICE_ID_IOIP_2022:
