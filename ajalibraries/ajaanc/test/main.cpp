@@ -3,7 +3,9 @@
 	@brief		Basic Functionality Tests for the AJA Anc Library.
 	@copyright	Copyright (c) 2013-2015 AJA Video Systems, Inc. All rights reserved.
 **/
-#define	DEBUG_BREAK_AFTER_FAILURE	(true)
+#if defined(_DEBUG)
+	#define	DEBUG_BREAK_AFTER_FAILURE	(true)
+#endif
 #include "ntv2bft.h"
 #include "ajabase/common/options_popt.h"
 #include "ajabase/common/performance.h"
@@ -1332,22 +1334,22 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 		/*
 			ROUND-TRIP BFTS:
 
-			AncillaryList 'a' to buffer to AncillaryList 'b':
-				AJAAncillaryList 'a'	=>	8-bit GUMP			=>	AJAAncillaryList 'b'		Verify 'a' == 'b'					BFT_AncListToBuffer8BitGumpToAncList
-				AJAAncillaryList 'a'	=>	IP-RTP				=>	AJAAncillaryList 'b'		Verify 'a' == 'b'					BFT_AncListToIPBufferToAncList
-				AJAAncillaryList 'a'	=>	FB-VANC-8bitYC		=>	AJAAncillaryList 'b'		Verify 'a' == 'b'					BFT_AncListToBufferYUV8ToAncList
-				AJAAncillaryList 'a'	=>	FB-VANC-10bitYC		=>	AJAAncillaryList 'b'		Verify 'a' == 'b'					BFT_AncListToBufferYUV10ToAncList
+			AncList 'a' to buffer to AncList 'b':
+				AJAAncillaryList 'a'	=>	GUMP				=>	AJAAncillaryList 'b'		Verify 'a' == 'b'					BFT_AncListToGumpToAncList
+				AJAAncillaryList 'a'	=>	RTP					=>	AJAAncillaryList 'b'		Verify 'a' == 'b'					BFT_AncListToRTPToAncList
+				AJAAncillaryList 'a'	=>	FB-VANC-8bitYC		=>	AJAAncillaryList 'b'		Verify 'a' == 'b'					BFT_AncListToFBYUV8ToAncList	TBD
+				AJAAncillaryList 'a'	=>	FB-VANC-10bitYC		=>	AJAAncillaryList 'b'		Verify 'a' == 'b'					BFT_AncListToFBYUV10ToAncList
 
-			Buffer 'a' to AncillaryList to buffer 'b':
-				8-bit GUMP 'a'			=>	AJAAncillaryList	=>	8-bit GUMP 'b'				Verify buffer contents 'a' == 'b'	BFT_Buffer8BitGumpToAncListToBuffer8BitGump
-				IP-RTP 'a'				=>	AJAAncillaryList	=>	IP-RTP 'b'					Verify buffer contents 'a' == 'b'	BFT_BufferIPGumpToAncListToBufferIPGump
-				FB-VANC-8bitYC 'a'		=>	AJAAncillaryList	=>	FB-VANC-8bitYC 'b'			Verify buffer contents 'a' == 'b'	BFT_BufferYUV8ToAncListToBufferYUV8
-				FB-VANC-10bitYC 'a'		=>	AJAAncillaryList	=>	FB-VANC-10bitYC 'b'			Verify buffer contents 'a' == 'b'	BFT_BufferYUV10ToAncListToBufferYUV10
+			Buffer 'a' to AncList to buffer 'b':
+				GUMP 'a'				=>	AJAAncillaryList	=>	GUMP 'b'					Verify buffer contents 'a' == 'b'	BFT_GumpToAncListToGump
+				RTP 'a'					=>	AJAAncillaryList	=>	RTP 'b'						Verify buffer contents 'a' == 'b'	BFT_RTPToAncListToRTP
+				FB-VANC-8bitYC 'a'		=>	AJAAncillaryList	=>	FB-VANC-8bitYC 'b'			Verify buffer contents 'a' == 'b'	BFT_FBYUV8ToAncListToFBYUV8		TBD
+				FB-VANC-10bitYC 'a'		=>	AJAAncillaryList	=>	FB-VANC-10bitYC 'b'			Verify buffer contents 'a' == 'b'	BFT_FBYUV10ToAncListToFBYUV10
 		*/
-		static bool BFT_AncListToBuffer8BitGumpToAncList (void)
+		static bool BFT_AncListToGumpToAncList (void)
 		{
 			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
-			if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToBuffer8BitGumpToAncList..." << endl;
+			if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToGumpToAncList..." << endl;
 			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 			{
 				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
@@ -1410,7 +1412,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				SHOULD_SUCCEED(txPkts.GetTransmitData (gumpF1, gumpF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
 				if (gIsVerbose)	cerr << "GUMP F1: " << gumpF1.AsString(64) << endl << "GUMP F2: " << gumpF2.AsString(64) << endl;
 
-				//	NOTE:	This test saves the F1 GUMP buffers for use later by BFT_Buffer8BitGumpToAncListToBuffer8BitGump...
+				//	NOTE:	This test saves the F1 GUMP buffers for use later by BFT_GumpToAncListToGump...
 				gGumpBuffers[vFormat] = NTV2_POINTER(gumpF1);
 
 				//	Receive packets from the 8-bit GUMP buffer...
@@ -1421,7 +1423,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				//	Compare the Tx and Rx packet lists...
 				SHOULD_SUCCEED(txPkts.Compare(rxPkts, false/*ignoreLocation*/, false/*ignoreChecksum*/));
 			}	//	for each video format
-			cerr << "BFT_AncListToBuffer8BitGumpToAncList passed" << endl;
+			cerr << "BFT_AncListToGumpToAncList passed" << endl;
 			return true;
 		}
 
@@ -1491,9 +1493,9 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 			return true;
 		}
 
-		static bool BFT_AncListToIPBufferToAncList (void)
+		static bool BFT_AncListToRTPToAncList (void)
 		{
-			LOGMYNOTE("Starting");	if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToIPBufferToAncList..." << endl;
+			LOGMYNOTE("Starting");	if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToRTPToAncList..." << endl;
 			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
 			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 			{
@@ -1574,7 +1576,7 @@ gIsVerbose = true;
 				SHOULD_SUCCEED(txPkts.GetIPTransmitData (IPF1, IPF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
 				if (gIsVerbose)	cerr << "IP F1: " << IPF1.AsString(64) << endl << "IP F2: " << IPF2.AsString(64) << endl;
 
-				//	NOTE:	This test saves the F1 RTP buffers for use later by BFT_IPBufferToAncListToIPBuffer...
+				//	NOTE:	This test saves the F1 RTP buffers for use later by BFT_RTPToAncListToRTP...
 				gIPBuffers[vFormat] = NTV2_POINTER(IPF1);
 //{ostringstream oss; IPF1.Dump(oss,0,0,16,4,16); LOGMYDEBUG("F1 RTP Buffer:" << endl << oss.str());}
 //{ostringstream oss; IPF2.Dump(oss,0,0,16,4,16); LOGMYDEBUG("F2 RTP Buffer:" << endl << oss.str());}
@@ -1593,20 +1595,20 @@ gIsVerbose = true;
 				SHOULD_BE_TRUE(cmpInfo.empty());
 			}	//	for each video format
 
-			LOGMYNOTE("Passed");	cerr << "BFT_AncListToIPBufferToAncList passed" << endl;
+			LOGMYNOTE("Passed");	cerr << "BFT_AncListToRTPToAncList passed" << endl;
 			return true;
-		}	//	BFT_AncListToIPBufferToAncList
+		}	//	BFT_AncListToRTPToAncList
 
-		static bool BFT_AncListToBufferYUV8ToAncList (void)
+		static bool BFT_AncListToFBYUV8ToAncList (void)
 		{
-			cerr << "BFT_AncListToBufferYUV8ToAncList passed" << endl;
+			cerr << "BFT_AncListToFBYUV8ToAncList passed" << endl;
 			return true;
 		}
 
-		static bool BFT_AncListToBufferYUV10ToAncList (void)
+		static bool BFT_AncListToFBYUV10ToAncList (void)
 		{
 			const NTV2VideoFormat	vFormats[]	=	{/*NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000,*/ NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
-			if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToBufferYUV10ToAncList..." << endl;
+			if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToFBYUV10ToAncList..." << endl;
 			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 			{
 				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
@@ -1677,7 +1679,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 		CNTV2CaptionLogConfig::DumpMemory(oneLine.GetHostPointer(), 32*4, cerr, 16, 4, 32,0,false);
 } } */
 
-				//	NOTE:	This test saves the VANC buffer for use later by BFT_BufferYUV10ToAncListToBufferYUV10...
+				//	NOTE:	This test saves the VANC buffer for use later by BFT_FBYUV10ToAncListToFBYUV10...
 				gVanc10Buffers[vFormat] = NTV2_POINTER(vanc10);
 
 				//	Receive packets from the 8-bit GUMP buffer...
@@ -1690,14 +1692,14 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 					cerr << "MISCOMPARE:" << endl << "Tx: " << txPkts << endl	<< "Rx: " << rxPkts << endl;
 				SHOULD_SUCCEED(result);
 			}	//	for each video format
-			cerr << "BFT_AncListToBufferYUV10ToAncList passed" << endl;
+			cerr << "BFT_AncListToFBYUV10ToAncList passed" << endl;
 			return true;
 		}
 
-		static bool BFT_Buffer8BitGumpToAncListToBuffer8BitGump (void)
+		static bool BFT_GumpToAncListToGump (void)
 		{
-			//	NOTE:	This test relies on GUMP buffers generated by BFT_AncListToBuffer8BitGumpToAncList
-			if (gIsVerbose)	cerr << endl << "Starting BFT_Buffer8BitGumpToAncListToBuffer8BitGump..." << endl;
+			//	NOTE:	This test relies on GUMP buffers generated by BFT_AncListToGumpToAncList
+			if (gIsVerbose)	cerr << endl << "Starting BFT_GumpToAncListToGump..." << endl;
 			for (NTV2VideoFormat vFormat(NTV2_FORMAT_UNKNOWN);  vFormat < NTV2_MAX_NUM_VIDEO_FORMATS;  vFormat = NTV2VideoFormat(vFormat+1))
 			{
 				if (gGumpBuffers[vFormat].IsNULL())
@@ -1728,14 +1730,14 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				if (gIsVerbose)	cerr << "        GUMP F1: " << gumpF1.AsString(64) << endl;
 				SHOULD_BE_TRUE(gGumpBuffers[vFormat].IsContentEqual(gumpF1));
 			}	//	for each video format
-			cerr << "BFT_Buffer8BitGumpToAncListToBuffer8BitGump passed" << endl;
+			cerr << "BFT_GumpToAncListToGump passed" << endl;
 			return true;
 		}
 
-		static bool BFT_IPBufferToAncListToIPBuffer (void)
+		static bool BFT_RTPToAncListToRTP (void)
 		{
 			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
-			LOGMYNOTE("Starting");		if (gIsVerbose)	cerr << endl << "Starting BFT_IPBufferToAncListToIPBuffer..." << endl;
+			LOGMYNOTE("Starting");		if (gIsVerbose)	cerr << endl << "Starting BFT_RTPToAncListToRTP..." << endl;
 			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 			{
 				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
@@ -1751,21 +1753,22 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
 					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
 
-				//	NOTE:	Use the F1 RTP buffer we saved in BFT_AncListToIPBufferToAncList...
+				//	NOTE:	Use the F1 RTP buffer we saved in BFT_AncListToRTPToAncList...
 if (gIPBuffers[vFormat].IsNULL())
 	{cerr << "Skipping " << fd << " because " << gIPBuffers[vFormat] << endl;	continue;}
 				const NTV2_POINTER	F1RTP_a	(gIPBuffers[vFormat]);
-				NTV2_POINTER		F1RTP_b	(F1RTP_a.GetByteCount()),	F2RTP_b(F1RTP_a.GetByteCount());
+				NTV2_POINTER		F1RTP_b	(F1RTP_a.GetByteCount());
+				NTV2_POINTER		F2RTP_b	(F1RTP_a.GetByteCount());
 				//	Unpack into an AJAAncillaryList of anc packets...
 				SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers(F1RTP_a, NTV2_POINTER(), rxPkts));
-				//	Re-pack into a n AJAAncillaryList of anc packets...
+				//	Re-pack into RTP...
 				SHOULD_SUCCEED(rxPkts.GetIPTransmitData (F1RTP_b, F2RTP_b, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
-				//	Content of "A" and "B" buffers should be the same...
-				if (!F1RTP_a.IsContentEqual(F1RTP_b, 0, 27*4))
+				//	Content of F1RTP "a" and "b" buffers should match...
+				if (!F1RTP_a.IsContentEqual(F1RTP_b, 0))
 				{
 					cerr << "MIS-COMPARE:" << endl
-						 << "Rx RTP: " << F1RTP_a.GetU32s(32, true) << endl
-						 << "CmpRTP: " << F1RTP_b.GetU32s(32,true) << endl;
+						 << "Rx RTP: " << F1RTP_a.GetU32s(0, 32, true) << endl
+						 << "CmpRTP: " << F1RTP_b.GetU32s(0, 32, true) << endl;
 					AJAAncillaryList	b_pkts;
 					AJAAncillaryList::SetFromDeviceAncBuffers(F1RTP_b, NTV2_POINTER(), b_pkts);
 					const string	info	(rxPkts.CompareWithInfo(b_pkts, false, false));
@@ -1781,22 +1784,22 @@ if (gIPBuffers[vFormat].IsNULL())
 						cerr << rxA->AsString() << " == " << rxB->AsString() << endl;
 					cerr << rxA->CompareWithInfo(*rxB, false, false) << endl;
 				}
-				SHOULD_BE_TRUE(F1RTP_a.IsContentEqual(F1RTP_b, 0, 27*4));
+				SHOULD_BE_TRUE(F1RTP_a.IsContentEqual(F1RTP_b, 0));
 			}	//	for each vFormat
-			LOGMYNOTE("Passed");	cerr << "BFT_IPBufferToAncListToIPBuffer passed" << endl;
+			LOGMYNOTE("Passed");	cerr << "BFT_RTPToAncListToRTP passed" << endl;
 			return true;
-		}	//	BFT_IPBufferToAncListToIPBuffer
+		}	//	BFT_RTPToAncListToRTP
 
-		static bool BFT_BufferYUV8ToAncListToBufferYUV8 (void)
+		static bool BFT_FBYUV8ToAncListToFBYUV8 (void)
 		{
-			cerr << "BFT_BufferYUV8ToAncListToBufferYUV8 passed" << endl;
+			cerr << "BFT_FBYUV8ToAncListToFBYUV8 passed" << endl;
 			return true;
 		}
 
-		static bool BFT_BufferYUV10ToAncListToBufferYUV10 (void)
+		static bool BFT_FBYUV10ToAncListToFBYUV10 (void)
 		{
-			//	NOTE:	This test relies on YUV10 buffers generated by BFT_AncListToBufferYUV10ToAncList
-			if (gIsVerbose)	cerr << endl << "Starting BFT_BufferYUV10ToAncListToBufferYUV10..." << endl;
+			//	NOTE:	This test relies on YUV10 buffers generated by BFT_AncListToFBYUV10ToAncList
+			if (gIsVerbose)	cerr << endl << "Starting BFT_FBYUV10ToAncListToFBYUV10..." << endl;
 			for (NTV2VideoFormat vFormat(NTV2_FORMAT_UNKNOWN);  vFormat < NTV2_MAX_NUM_VIDEO_FORMATS;  vFormat = NTV2VideoFormat(vFormat+1))
 			{
 				if (gVanc10Buffers[vFormat].IsNULL())
@@ -1824,7 +1827,7 @@ if (gIPBuffers[vFormat].IsNULL())
 				SHOULD_SUCCEED(pkts.GetVANCTransmitData(yuv10vanc, fd));
 				SHOULD_BE_TRUE(gVanc10Buffers[vFormat].IsContentEqual(yuv10vanc));
 			}	//	for each video format
-			cerr << "BFT_BufferYUV10ToAncListToBufferYUV10 passed" << endl;
+			cerr << "BFT_FBYUV10ToAncListToFBYUV10 passed" << endl;
 			return true;
 		}
 
@@ -2142,23 +2145,23 @@ if (gIPBuffers[vFormat].IsNULL())
 				if (true)
 					SHOULD_BE_TRUE(RTPHeaderBFT());
 				if (false)
-					SHOULD_BE_TRUE(BFT_AncListToBuffer8BitGumpToAncList());
+					SHOULD_BE_TRUE(BFT_AncListToGumpToAncList());
 				if (false)
-					SHOULD_BE_TRUE(BFT_Buffer8BitGumpToAncListToBuffer8BitGump());
+					SHOULD_BE_TRUE(BFT_GumpToAncListToGump());
 				if (true)
 					SHOULD_BE_TRUE(BFT_AncListToSortToAncList());
 				if (true)
-					SHOULD_BE_TRUE(BFT_AncListToIPBufferToAncList());
+					SHOULD_BE_TRUE(BFT_AncListToRTPToAncList());
 				if (true)
-					SHOULD_BE_TRUE(BFT_IPBufferToAncListToIPBuffer());
+					SHOULD_BE_TRUE(BFT_RTPToAncListToRTP());
 				if (false)
-					SHOULD_BE_TRUE(BFT_AncListToBufferYUV8ToAncList());
+					SHOULD_BE_TRUE(BFT_AncListToFBYUV8ToAncList());
 				if (false)
-					SHOULD_BE_TRUE(BFT_BufferYUV8ToAncListToBufferYUV8());
+					SHOULD_BE_TRUE(BFT_FBYUV8ToAncListToFBYUV8());
 				if (false)
-					SHOULD_BE_TRUE(BFT_AncListToBufferYUV10ToAncList());
+					SHOULD_BE_TRUE(BFT_AncListToFBYUV10ToAncList());
 				if (false)
-					SHOULD_BE_TRUE(BFT_BufferYUV10ToAncListToBufferYUV10());
+					SHOULD_BE_TRUE(BFT_FBYUV10ToAncListToFBYUV10());
 				cerr << "AJAAncillaryList-to-buffer-to-AJAAncillaryList and Buffer-to-AJAAncillaryList-to-buffer round-trip BFTs passed" << endl;
 			}
 

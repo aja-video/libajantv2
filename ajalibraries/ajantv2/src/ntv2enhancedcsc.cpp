@@ -162,6 +162,8 @@ bool CNTV2EnhancedCSC::SetKeyGain (const double inKeyGain)
 
 bool CNTV2EnhancedCSC::SendToHardware (CNTV2Card & inDevice, const NTV2Channel inChannel) const
 {
+	if (!::NTV2DeviceCanDoEnhancedCSC(inDevice.GetDeviceID()))
+		return false;
 	if (!inDevice.IsOpen())
 		return false;
 
@@ -230,6 +232,8 @@ bool CNTV2EnhancedCSC::SendToHardware (CNTV2Card & inDevice, const NTV2Channel i
 
 bool CNTV2EnhancedCSC::GetFromHardware (CNTV2Card & inDevice, const NTV2Channel inChannel)
 {
+	if (!::NTV2DeviceCanDoEnhancedCSC(inDevice.GetDeviceID()))
+		return false;
 	if (!inDevice.IsOpen ())
 		return false;
 
