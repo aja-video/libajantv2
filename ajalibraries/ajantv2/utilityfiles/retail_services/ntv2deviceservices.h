@@ -75,8 +75,6 @@ public:
 	virtual void ResumeOptimizedWrites();
 	
 	virtual bool NewLockedInputVideoFormatDetected();
-	virtual void SetDeviceXPointPlaybackRaw();
-	virtual void SetDeviceXPointCaptureRaw();
 	virtual void SetDeviceMiscRegistersRaw(NTV2Mode mode) {(void)mode;}
 	virtual void DisableStartupSequence() {} // deprecated
 
