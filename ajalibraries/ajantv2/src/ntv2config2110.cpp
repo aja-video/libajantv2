@@ -2257,11 +2257,6 @@ bool CNTV2Config2110::GenAncStreamSDPInfo(stringstream & sdp, const eSFP sfp, co
 	sdp << To_String(config.payloadType);
 	sdp << " smpte291/90000" << endl;
 
-	//fmtp
-	sdp << "a=fmtp:";
-	sdp << To_String(config.payloadType);
-	sdp << endl;
-
 	// PTP
 	sdp << "a=ts-refclk:ptp=IEEE1588-2008:" << gmInfo << endl;
 	sdp << "a=mediaclk:direct=0" << endl;
