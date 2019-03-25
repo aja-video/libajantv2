@@ -182,8 +182,6 @@ void NTV2FrameGrabber::GrabCaptions (void)
 
 			//	See what's in the AUTOCIRCULATE_TRANSFER's F1 & F2 anc buffers...
 			AJAAncillaryList	ancPacketsF1, ancPacketsF2;
-			ancPacketsF1.SetAnalogAncillaryDataTypeForLine (21, AJAAncillaryDataType_Cea608_Line21);
-			ancPacketsF2.SetAnalogAncillaryDataTypeForLine (21, AJAAncillaryDataType_Cea608_Line21);
 			ancPacketsF1.AddReceivedAncillaryData ((uint8_t *) mTransferStruct.acANCBuffer.GetHostPointer (), mTransferStruct.acANCBuffer.GetByteCount ());
 			ancPacketsF2.AddReceivedAncillaryData ((uint8_t *) mTransferStruct.acANCField2Buffer.GetHostPointer (), mTransferStruct.acANCField2Buffer.GetByteCount ());
 			ancPacketsF1.ParseAllAncillaryData ();
