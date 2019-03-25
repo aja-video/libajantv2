@@ -355,20 +355,16 @@ void Class8kServices::SetDeviceXPointCapture ()
 		switch (mVirtualHDMIOutputSelect)
 		{
 			default:
-			case NTV2_Quadrant1Select: XPt1 = NTV2_XptSDIIn1; break;
-			case NTV2_Quadrant2Select: XPt1 = NTV2_XptSDIIn2; break;
-			case NTV2_Quadrant3Select: XPt1 = NTV2_XptSDIIn3; break;
-			case NTV2_Quadrant4Select: XPt1 = NTV2_XptSDIIn4; break;
+			case NTV2_Quadrant1Select: XPt1 = bQuadSwap ? NTV2_XptSDIIn3 : NTV2_XptSDIIn1; break;
+			case NTV2_Quadrant2Select: XPt1 = bQuadSwap ? NTV2_XptSDIIn4 : NTV2_XptSDIIn2; break;
+			case NTV2_Quadrant3Select: XPt1 = bQuadSwap ? NTV2_XptSDIIn1 : NTV2_XptSDIIn3; break;
+			case NTV2_Quadrant4Select: XPt1 = bQuadSwap ? NTV2_XptSDIIn2 : NTV2_XptSDIIn4; break;
 		}
 	}
 	mCard->Connect (NTV2_XptHDMIOutQ1Input, XPt1);
 	mCard->Connect (NTV2_XptHDMIOutQ2Input, XPt2);
 	mCard->Connect (NTV2_XptHDMIOutQ3Input, XPt3);
 	mCard->Connect (NTV2_XptHDMIOutQ4Input, XPt4);
-	
-	
-	
-	// HDMI Out
 
 	
 	// CSC 1
