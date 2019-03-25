@@ -2257,11 +2257,6 @@ bool CNTV2Config2110::GenAncStreamSDPInfo(stringstream & sdp, const eSFP sfp, co
 	sdp << To_String(config.payloadType);
 	sdp << " smpte291/90000" << endl;
 
-	//fmtp
-	sdp << "a=fmtp:";
-	sdp << To_String(config.payloadType);
-	sdp << endl;
-
 	// PTP
 	sdp << "a=ts-refclk:ptp=IEEE1588-2008:" << gmInfo << endl;
 	sdp << "a=mediaclk:direct=0" << endl;
@@ -2487,35 +2482,44 @@ bool CNTV2Config2110::ExtractRxVideoConfigFromSDP(std::string sdp, multiRx_2110C
 			string height   = getVideoDescriptionValue("height=");
 			string rate     = getVideoDescriptionValue("exactframerate=");
 			bool interlace = false;
+			bool segmented = false;
 			vector<string>::iterator it;
+
 			for (it = tokens.begin(); it != tokens.end(); it++)
 			{
 				// For interlace, we can get one of the following tokens:
 				// interlace
 				// interlace;
 				// interlace=1
-				// Note: interlace=0 means
-				if (it->substr( 0, 9 ) != "interlace")
+				// interlace segmented
+
+				if (*it == "interlace")
+				{
+					interlace=true;
 					continue;
-
-				if (*it == "interlace") {
-					interlace=true;
-					break;
 				}
 
-				if (it->substr(0,10) == "interlace;") {
+				if (it->substr(0,10) == "interlace;")
+				{
 					interlace=true;
-					break;
+					continue;
 				}
-				if (it->substr(0,11) == "interlace=1") {
+				if (it->substr(0,11) == "interlace=1")
+				{
 					interlace=true;
+					continue;
+				}
+				if ((it->substr( 0, 9 ) == "segmented") && interlace)
+				{
+					interlace=false;
+					segmented=true;
 					break;
 				}
 			}
 			int w = atoi(width.c_str());
 			int h = atoi(height.c_str());
 			NTV2FrameRate r = stringToRate(rate);
-			NTV2VideoFormat vf = ::GetFirstMatchingVideoFormat(r,h,w,interlace,false /* no level B */);
+			NTV2VideoFormat vf = ::GetFirstMatchingVideoFormat(r, h, w, interlace, segmented, false /* no level B */);
 			rxConfig.rx2110Config[i].videoFormat = vf;
 		}
 		rxConfig.rx2110Config[i].rxMatch = rxMatch;
@@ -2650,6 +2654,7 @@ bool CNTV2Config2110::ExtractRxVideoConfigFromSDP(std::string sdp, rx_2110Config
 		string height   = getVideoDescriptionValue("height=");
 		string rate     = getVideoDescriptionValue("exactframerate=");
 		bool interlace = false;
+		bool segmented = false;
 		vector<string>::iterator it;
 		for (it = tokens.begin(); it != tokens.end(); it++)
 		{
@@ -2657,28 +2662,35 @@ bool CNTV2Config2110::ExtractRxVideoConfigFromSDP(std::string sdp, rx_2110Config
 			// interlace
 			// interlace;
 			// interlace=1
-			// Note: interlace=0 means
-			if (it->substr( 0, 9 ) != "interlace")
+			// interlace segmented
+
+			if (*it == "interlace")
+			{
+				interlace=true;
 				continue;
-
-			if (*it == "interlace") {
-				interlace=true;
-				break;
 			}
 
-			if (it->substr(0,10) == "interlace;") {
+			if (it->substr(0,10) == "interlace;")
+			{
 				interlace=true;
-				break;
+				continue;
 			}
-			if (it->substr(0,11) == "interlace=1") {
+			if (it->substr(0,11) == "interlace=1")
+			{
 				interlace=true;
+				continue;
+			}
+			if ((it->substr( 0, 9 ) == "segmented") && interlace)
+			{
+				interlace=false;
+				segmented=true;
 				break;
 			}
 		}
 		int w = atoi(width.c_str());
 		int h = atoi(height.c_str());
 		NTV2FrameRate r = stringToRate(rate);
-		NTV2VideoFormat vf = ::GetFirstMatchingVideoFormat(r,h,w,interlace,false /* no level B */);
+		NTV2VideoFormat vf = ::GetFirstMatchingVideoFormat(r, h, w, interlace, segmented, false /* no level B */);
 		rxConfig.videoFormat = vf;
 	}
 	rxConfig.rxMatch = rxMatch;
