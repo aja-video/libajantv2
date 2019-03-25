@@ -314,6 +314,7 @@ typedef enum
 	AJA_STATUS_FLUSH			=-18,	/**< Something has been flushed */	
 	AJA_STATUS_NOINPUT			=-19,	/**< No input detected */
 	AJA_STATUS_SURPRISE_REMOVAL	=-20,	/**< Hardware communication failed */
+	AJA_STATUS_NOT_FOUND		=-21,	/**< Something wasn't found */
 
 // Sequence errors
 
@@ -328,7 +329,7 @@ typedef enum
 	AJA_STATUS_STREAMRUNNING	=-108,	/**< Streams is running, should be stopped */
 
 // Other
-	AJA_STATUS_REBOOT		= 1000,	/**< Device requires reboot */
+	AJA_STATUS_REBOOT			= 1000,	/**< Device requires reboot */
 	AJA_STATUS_POWER_CYCLE		= 1001	/**< Device requires a machine power-cycle */
 
 } AJAStatus;

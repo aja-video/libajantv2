@@ -38,6 +38,9 @@ void Class8kServices::SetDeviceXPointPlayback ()
 	if (!b8K && !b4K)
 		return Class4kServices::SetDeviceXPointPlayback();
 	
+	// skip Class4K for now
+	DeviceServices::SetDeviceXPointPlayback();
+	
 	// 
 	// 4K-8K support
 	//
@@ -223,6 +226,9 @@ void Class8kServices::SetDeviceXPointCapture ()
 	
 	if (!b8K && !b4K)
 		return Class4kServices::SetDeviceXPointCapture();
+		
+	// skip Class4K for now
+	DeviceServices::SetDeviceXPointCapture();
 		
 	// 
 	// 4K-8K support

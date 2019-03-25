@@ -471,22 +471,22 @@ bool NTV2_POINTER::GetU32s (vector<uint32_t> & outUint32s, const size_t inU32Off
 	if (IsNULL())
 		return false;
 
-	size_t				maxSize	(size_t(GetByteCount()) / sizeof(uint32_t));
-	if (maxSize < inU32Offset)
+	size_t	maxNumU32s	(size_t(GetByteCount()) / sizeof(uint32_t));
+	if (maxNumU32s < inU32Offset)
 		return false;	//	Past end
-	maxSize -= inU32Offset;	//	Remove starting offset
+	maxNumU32s -= inU32Offset;	//	Remove starting offset
 
-	const uint32_t *	pU32	(reinterpret_cast <const uint32_t *> (GetHostAddress(ULWord(inU32Offset * sizeof(uint32_t)))));
+	const uint32_t * pU32 (reinterpret_cast<const uint32_t*>(GetHostAddress(ULWord(inU32Offset * sizeof(uint32_t)))));
 	if (!pU32)
 		return false;	//	Past end
 
-	if (inMaxSize  &&  inMaxSize < maxSize)
-		maxSize = inMaxSize;
+	if (inMaxSize  &&  inMaxSize < maxNumU32s)
+		maxNumU32s = inMaxSize;
 
 	try
 	{
-		outUint32s.reserve(maxSize);
-		for (size_t ndx(0);  ndx < maxSize;  ndx++)
+		outUint32s.reserve(maxNumU32s);
+		for (size_t ndx(0);  ndx < maxNumU32s;  ndx++)
 		{
 			const uint32_t	u32	(*pU32++);
 			outUint32s.push_back(inByteSwap ? NTV2EndianSwap32(u32) : u32);

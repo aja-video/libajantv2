@@ -8,6 +8,7 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
 #include "ntv2rp188.h"
+#include "ntv2endian.h"
 #include "ajabase/system/lock.h"
 #include "ajabase/system/debug.h"
 #include "ajaanc/includes/ancillarylist.h"
@@ -36,11 +37,17 @@ using namespace std;
 #define	ACINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_AutoCirculate,	ACTHIS << "::" << AJAFUNC << ": " << __x__)
 #define	ACDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_AutoCirculate,	ACTHIS << "::" << AJAFUNC << ": " << __x__)
 
-#define	ANCFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_Anc2110,			ACTHIS << "::" << AJAFUNC << ": " << __x__)
-#define	ANCWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_Anc2110,			ACTHIS << "::" << AJAFUNC << ": " << __x__)
-#define	ANCNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_Anc2110,			ACTHIS << "::" << AJAFUNC << ": " << __x__)
-#define	ANCINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_Anc2110,			ACTHIS << "::" << AJAFUNC << ": " << __x__)
-#define	ANCDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_Anc2110,			ACTHIS << "::" << AJAFUNC << ": " << __x__)
+#define	RCVFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_Anc2110Rcv,		ACTHIS << "::" << AJAFUNC << ": " << __x__)
+#define	RCVWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_Anc2110Rcv,		ACTHIS << "::" << AJAFUNC << ": " << __x__)
+#define	RCVNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_Anc2110Rcv,		ACTHIS << "::" << AJAFUNC << ": " << __x__)
+#define	RCVINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_Anc2110Rcv,		ACTHIS << "::" << AJAFUNC << ": " << __x__)
+#define	RCVDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_Anc2110Rcv,		ACTHIS << "::" << AJAFUNC << ": " << __x__)
+
+#define	XMTFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_Anc2110Xmit,		ACTHIS << "::" << AJAFUNC << ": " << __x__)
+#define	XMTWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_Anc2110Xmit,		ACTHIS << "::" << AJAFUNC << ": " << __x__)
+#define	XMTNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_Anc2110Xmit,		ACTHIS << "::" << AJAFUNC << ": " << __x__)
+#define	XMTINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_Anc2110Xmit,		ACTHIS << "::" << AJAFUNC << ": " << __x__)
+#define	XMTDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_Anc2110Xmit,		ACTHIS << "::" << AJAFUNC << ": " << __x__)
 
 
 static const char	gFBAllocLockName[]	=	"com.aja.ntv2.mutex.FBAlloc";
@@ -1205,7 +1212,7 @@ bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTO
 	NTV2FrameRate		ntv2Rate		(NTV2_FRAMERATE_UNKNOWN);
 	bool				result			(GetFrameRate(ntv2Rate, inChannel));
 	bool				isProgressive	(false);
-	const bool			isMonitoring	(AJADebug::IsActive(AJA_DebugUnit_Anc2110));
+	const bool			isMonitoring	(AJADebug::IsActive(AJA_DebugUnit_Anc2110Rcv));
 	NTV2Standard		standard		(NTV2_STANDARD_INVALID);
 	NTV2_POINTER &		ancF1			(inOutXferInfo.acANCBuffer);
 	NTV2_POINTER &		ancF2			(inOutXferInfo.acANCField2Buffer);
@@ -1251,7 +1258,7 @@ bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTO
 		if (ancType != AJAAncillaryDataType_Timecode_ATC)
 		{
 			if (ancType == AJAAncillaryDataType_Timecode_VITC  &&  isMonitoring)
-				ANCWARN("Skipped VITC packet: " << pPkt->AsString(16));
+				RCVWARN("Skipped VITC packet: " << pPkt->AsString(16));
 			continue;	//	Not timecode . . . skip
 		}
 
@@ -1303,12 +1310,12 @@ bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTO
 	{
 		NTV2TimeCodes	timecodes;
 		inOutXferInfo.acTransferStatus.GetFrameStamp().GetInputTimeCodes(timecodes, inChannel);
-		if (!timecodes.empty())	ANCDBG("Channel" << DEC(inChannel+1) << " timecodes: " << timecodes);
+		if (!timecodes.empty())	RCVDBG("Channel" << DEC(inChannel+1) << " timecodes: " << timecodes);
 	}
 	if (vpidA || vpidB)
 	{
 		if (isMonitoring)
-			ANCDBG("WriteSDIInVPID chan=" << DEC(inChannel+1) << " VPIDa=" << xHEX0N(vpidA,4) << " VPIDb=" << xHEX0N(vpidB,4));
+			RCVDBG("WriteSDIInVPID chan=" << DEC(inChannel+1) << " VPIDa=" << xHEX0N(vpidA,4) << " VPIDb=" << xHEX0N(vpidB,4));
 		WriteSDIInVPID(inChannel, vpidA, vpidB);
 	}
 
@@ -1324,11 +1331,11 @@ bool CNTV2Card::S2110DeviceAncFromBuffers (const NTV2Channel inChannel, NTV2_POI
 	//						Extract VPID and put into SDIIn VPID registers
 	AUTOCIRCULATE_TRANSFER	tmpXfer;	tmpXfer.acANCBuffer = ancF1;	tmpXfer.acANCField2Buffer = ancF2;
 	if (!S2110DeviceAncFromXferBuffers (inChannel, tmpXfer))	//	<== This handles stuffing the VPID regs
-		{ANCFAIL("S2110DeviceAncFromXferBuffers failed");  return false;}
+		{RCVFAIL("S2110DeviceAncFromXferBuffers failed");  return false;}
 
 	NTV2TimeCodes	timecodes;
 	if (!tmpXfer.acTransferStatus.GetFrameStamp().GetInputTimeCodes(timecodes, inChannel))
-		{ANCFAIL("GetInputTimeCodes failed");  return false;}
+		{RCVFAIL("GetInputTimeCodes failed");  return false;}
 
 	for (NTV2TimeCodesConstIter iter(timecodes.begin());  iter != timecodes.end();  ++iter)
 	{
@@ -1350,7 +1357,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 	bool				result			(GetFrameRate(ntv2Rate, inChannel));
 	bool				isProgressive	(false);
 	bool				changed			(false);
-	const bool			isMonitoring	(AJADebug::IsActive(AJA_DebugUnit_Anc2110));
+	const bool			isMonitoring	(AJADebug::IsActive(AJA_DebugUnit_Anc2110Xmit));
 	NTV2Standard		standard		(NTV2_STANDARD_INVALID);
 	NTV2_POINTER &		ancF1			(inOutXferInfo.acANCBuffer);
 	NTV2_POINTER &		ancF2			(inOutXferInfo.acANCField2Buffer);
@@ -1382,7 +1389,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 			changed = true;	//	Caller buffer GUMP -- force conversion to RTP
 	}	//	if either buffer non-empty/NULL
 
-	ANCDBG("ORIG: " << packetList);	//	Original packet list from caller
+	XMTDBG("ORIG: " << packetList);	//	Original packet list from caller
 	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(standard));
 	const uint32_t				F2StartLine			(smpteLineNumInfo.GetLastLine());	//	F2 VANC starts past last line of F1
 
@@ -1400,6 +1407,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 			vpidPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc);
 			if (vpidA)
 			{
+				vpidA = NTV2EndianSwap32BtoH(vpidA);
 				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidA), 4);
 				vpidPkt.SetLocationLineNumber(sVPIDLineNumsF1[standard]);
 				vpidPkt.GeneratePayloadData();
@@ -1407,15 +1415,16 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 			}
 			if (!isProgressive && vpidB)
 			{
+				vpidB = NTV2EndianSwap32BtoH(vpidB);
 				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidB), 4);
 				vpidPkt.SetLocationLineNumber(sVPIDLineNumsF2[standard]);
 				vpidPkt.GeneratePayloadData();
 				packetList.AddAncillaryData(vpidPkt);	changed = true;
 			}
 		}	//	if user not inserting his own VPID
-		else if (isMonitoring)	{ANCWARN("GetSDIOutVPID failed for SDI spigot " << ::NTV2ChannelToString(SDISpigotChannel,true));}
+		else if (isMonitoring)	{XMTWARN("GetSDIOutVPID failed for SDI spigot " << ::NTV2ChannelToString(SDISpigotChannel,true));}
 	}	//	if no VPID pkts in buffer
-	else if (isMonitoring)	{ANCDBG(DEC(packetList.CountAncillaryDataWithID(0x41,0x01)) << " VPID packet(s) already provided, won't insert any here");}
+	else if (isMonitoring)	{XMTDBG(DEC(packetList.CountAncillaryDataWithID(0x41,0x01)) << " VPID packet(s) already provided, won't insert any here");}
 
 	//	Callers can override our register-based RP188 values...
 	if (!packetList.CountAncillaryDataWithType(AJAAncillaryDataType_Timecode_ATC)		//	if no caller-specified ATC timecodes...
@@ -1464,13 +1473,13 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 				packetList.AddAncillaryData(atc);	changed = true;
 			}	//	for each timecode index value
 		}	//	if user not inserting his own ATC/VITC
-		else if (isMonitoring)	{ANCWARN("Cannot insert ATC/VITC -- Xfer struct has no acOutputTimeCodes array!");}
+		else if (isMonitoring)	{XMTWARN("Cannot insert ATC/VITC -- Xfer struct has no acOutputTimeCodes array!");}
 	}	//	if no ATC/VITC packets in buffer
-	else if (isMonitoring)	{ANCDBG("ATC and/or VITC packet(s) already provided, won't insert any here");}
+	else if (isMonitoring)	{XMTDBG("ATC and/or VITC packet(s) already provided, won't insert any here");}
 
 	if (changed)		//	if anything added (or forced conversion from GUMP)
 	{	//	Re-encode packets into the XferStruct buffers as RTP...
-		ANCDBG("CHGD: " << packetList);	//	DEBUG:  Changed packet list (to be converted to RTP)
+		XMTDBG("CHGD: " << packetList);	//	DEBUG:  Changed packet list (to be converted to RTP)
 		result = AJA_SUCCESS(packetList.GetIPTransmitData (ancF1, ancF2, isProgressive, F2StartLine));
 		DMAWriteAnc(31, ancF1, ancF2, NTV2_CHANNEL_INVALID);	//	DEBUG: DMA RTP into frame 31
 #if defined(_DEBUG)
@@ -1479,10 +1488,10 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 			AJAAncillaryList	comparePkts;	//	RTP into comparePkts
 			NTV2_ASSERT(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(ancF1, ancF2, comparePkts)));
 			//if (packetList.GetAncillaryDataWithID(0x61,0x02)->GetChecksum() != comparePkts.GetAncillaryDataWithID(0x61,0x02)->GetChecksum())
-			ANCDBG("COMP608: " << packetList.GetAncillaryDataWithID(0x61,0x02)->AsString(8) << comparePkts.GetAncillaryDataWithID(0x61,0x02)->AsString(8));
+			XMTDBG("COMP608: " << packetList.GetAncillaryDataWithID(0x61,0x02)->AsString(8) << comparePkts.GetAncillaryDataWithID(0x61,0x02)->AsString(8));
 			string compareResult (comparePkts.CompareWithInfo(packetList, /*ignoreLocation*/false, /*ignoreChecksum*/false));
 			if (!compareResult.empty())
-				ANCWARN("MISCOMPARE: " << compareResult);
+				XMTWARN("MISCOMPARE: " << compareResult);
 		}
 #endif	//	_DEBUG
 	}
@@ -1498,7 +1507,7 @@ bool CNTV2Card::S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2_POINT
 	bool				result			(GetFrameRate(ntv2Rate, inChannel));
 	bool				isProgressive	(false);
 	bool				changed			(false);
-	const bool			isMonitoring	(AJADebug::IsActive(AJA_DebugUnit_Anc2110));
+	const bool			isMonitoring	(AJADebug::IsActive(AJA_DebugUnit_Anc2110Xmit));
 	NTV2Standard		standard		(NTV2_STANDARD_INVALID);
 	const NTV2Channel	SDISpigotChannel(inChannel);	//	DMAWriteAnc usually for OEM clients -- just use inChannel
 	ULWord				vpidA(0), vpidB(0);
@@ -1536,19 +1545,21 @@ bool CNTV2Card::S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2_POINT
 			vpidPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc);
 			if (vpidA)
 			{
+				vpidA = NTV2EndianSwap32BtoH(vpidA);
 				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidA), 4);
 				vpidPkt.SetLocationLineNumber(sVPIDLineNumsF1[standard]);
 				pkts.AddAncillaryData(vpidPkt);			changed = true;
 			}
 			if (!isProgressive && vpidB)
 			{
+				vpidB = NTV2EndianSwap32BtoH(vpidB);
 				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidB), 4);
 				vpidPkt.SetLocationLineNumber(sVPIDLineNumsF2[standard]);
 				pkts.AddAncillaryData(vpidPkt);			changed = true;
 			}
 		}	//	if client didn't insert their own VPID
 	}	//	if no VPID pkts in buffer
-	else if (isMonitoring)	{ANCDBG(DEC(pkts.CountAncillaryDataWithID(0x41,0x01)) << " VPID packet(s) already provided, won't insert any here");}
+	else if (isMonitoring)	{XMTDBG(DEC(pkts.CountAncillaryDataWithID(0x41,0x01)) << " VPID packet(s) already provided, won't insert any here");}
 
 	//	Non-autocirculate users can transmit timecode two ways:
 	//	1)	Insert ATC or VITC packets into the Anc buffers themselves, or
@@ -1605,22 +1616,22 @@ bool CNTV2Card::S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2_POINT
 			}	//	if GetRP188Data returned valid timecode
 		}	//	if newer device with bidirectional spigots
 	}	//	if client didn't insert their own ATC/VITC
-	else if (isMonitoring)	{ANCDBG("ATC and/or VITC packet(s) already provided, won't insert any here");}
+	else if (isMonitoring)	{XMTDBG("ATC and/or VITC packet(s) already provided, won't insert any here");}
 
 	if (changed)
 	{	//	We must re-encode packets into the RTP buffers only if anything new was added...
 		ancF1.Fill(ULWord(0));	ancF2.Fill(ULWord(0));	//	Clear/reset anc RTP buffers
-		//ANCDBG(pkts);
+		//XMTDBG(pkts);
 		result = AJA_SUCCESS(pkts.GetIPTransmitData (ancF1, ancF2, isProgressive, F2StartLine));
 #if defined(_DEBUG)
 		if (result)
 		{
 			AJAAncillaryList	comparePkts;
 			NTV2_ASSERT(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(ancF1, ancF2, comparePkts)));
-			//ANCDBG(comparePkts);
+			//XMTDBG(comparePkts);
 			string compareResult (comparePkts.CompareWithInfo(pkts,false,false));
 			if (!compareResult.empty())
-				ANCWARN("MISCOMPARE: " << compareResult);
+				XMTWARN("MISCOMPARE: " << compareResult);
 		}
 #endif	//	_DEBUG
 	}

@@ -158,7 +158,8 @@ AJADebug::Open(bool incrementRefCount)
             addDebugGroupToLabelVector(AJA_DebugUnit_App_Screen);
             addDebugGroupToLabelVector(AJA_DebugUnit_App_User1);
             addDebugGroupToLabelVector(AJA_DebugUnit_App_User2);
-            addDebugGroupToLabelVector(AJA_DebugUnit_Anc2110);
+            addDebugGroupToLabelVector(AJA_DebugUnit_Anc2110Rcv);
+            addDebugGroupToLabelVector(AJA_DebugUnit_Anc2110Xmit);
 
             for(int i=AJA_DebugUnit_FirstUnused;i<AJA_DebugUnit_Size;i++)
             {
@@ -1199,6 +1200,7 @@ std::string AJAStatusToString (const AJAStatus inStatus)
 		case AJA_STATUS_FLUSH:				return "AJA_STATUS_FLUSH";
 		case AJA_STATUS_NOINPUT:			return "AJA_STATUS_NOINPUT";
 		case AJA_STATUS_SURPRISE_REMOVAL:	return "AJA_STATUS_SURPRISE_REMOVAL";
+		case AJA_STATUS_NOT_FOUND:			return "AJA_STATUS_NOT_FOUND";
 		case AJA_STATUS_NOBUFFER:			return "AJA_STATUS_NOBUFFER";
 		case AJA_STATUS_INVALID_TIME:		return "AJA_STATUS_INVALID_TIME";
 		case AJA_STATUS_NOSTREAM:			return "AJA_STATUS_NOSTREAM";
@@ -1210,6 +1212,9 @@ std::string AJAStatusToString (const AJAStatus inStatus)
 		case AJA_STATUS_STREAMRUNNING:		return "AJA_STATUS_STREAMRUNNING";
         case AJA_STATUS_REBOOT:             return "AJA_STATUS_REBOOT";
         case AJA_STATUS_POWER_CYCLE:        return "AJA_STATUS_POWER_CYCLE";
+#if !defined(_DEBUG)
+        default:	break;
+#endif
 	}
 	return "<bad AJAStatus>";
 }

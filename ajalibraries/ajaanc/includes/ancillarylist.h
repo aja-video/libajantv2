@@ -17,7 +17,12 @@
 const uint8_t AJAAncillaryDataWildcard_DID = 0xFF;
 const uint8_t AJAAncillaryDataWildcard_SID = 0xFF;
 
-
+/**
+	@brief	Associates certain frame line numbers with specific types of "raw" or "analog" ancillary data.
+			For example, you may wish to associate line 21 (in 525i) with ::AJAAncillaryDataType_Cea608_Line21.
+	@note	This facility is ONLY used by AJAAncillaryList::AddReceivedAncillaryData to identify captured
+			"raw" data (AJAAncillaryDataCoding_Analog).
+**/
 typedef std::map <uint16_t, AJAAncillaryDataType>	AJAAncillaryAnalogTypeMap;
 
 
@@ -37,6 +42,10 @@ typedef std::map <uint16_t, AJAAncillaryDataType>	AJAAncillaryAnalogTypeMap;
 class AJAExport AJAAncillaryList
 {
 public:	//	CLASS METHODS
+	/**
+		@name	Create from Device Buffers (Capture/Ingest)
+	**/
+	///@{
 	/**
 		@brief		Returns all packets found in the VANC lines of the given NTV2 frame buffer.
 		@param[in]	inFrameBuffer		Specifies the NTV2 frame buffer (or at least the portion containing the VANC lines).
@@ -62,6 +71,59 @@ public:	//	CLASS METHODS
 																	const NTV2_POINTER & inF2AncBuffer,
 																	AJAAncillaryList & outPackets);
 
+	#if !defined(NTV2_DEPRECATE_15_2)
+		static inline AJAStatus	SetFromSDIAncData (const NTV2_POINTER & inF1, const NTV2_POINTER & inF2, AJAAncillaryList & outPkts)	{return SetFromDeviceAncBuffers(inF1, inF2, outPkts);}	///< @deprecated	Use SetFromDeviceAncBuffers instead.
+		static inline AJAStatus	SetFromIPAncData (const NTV2_POINTER & inF1, const NTV2_POINTER & inF2, AJAAncillaryList & outPkts)		{return SetFromDeviceAncBuffers(inF1, inF2, outPkts);}	///< @deprecated	Use SetFromDeviceAncBuffers instead.
+	#endif	//	!defined(NTV2_DEPRECATE_15_2)
+	///@}
+
+
+	/**
+		@name	Global Configuration
+	**/
+	///@{
+	/**
+		@brief		Clears my global Analog Ancillary Data Type map.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	static AJAStatus						ClearAnalogAncillaryDataTypeMap (void);
+	
+
+	/**
+		@brief		Copies the given map to the global Analog Ancillary Data Type map.
+		@param[in]	inMap	The map to copy.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	static AJAStatus						SetAnalogAncillaryDataTypeMap (const AJAAncillaryAnalogTypeMap & inMap);
+	
+
+	/**
+		@brief		Returns a copy of the global Analog Ancillary Data Type map.
+		@param[out]	outMap	Receives a copy of the map.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	static AJAStatus						GetAnalogAncillaryDataTypeMap (AJAAncillaryAnalogTypeMap & outMap);
+
+
+	/**
+		@brief		Sets (or changes) the map entry for the designated line to the designated type.
+		@param[in]	inLineNum	Specifies the frame line number to be added or changed.
+		@param[in]	inType		Specifies the ancillary data type to be associated with this line.
+								Use AJAAncillaryDataType_Unknown to remove any associations with the line.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	static	AJAStatus						SetAnalogAncillaryDataTypeForLine (const uint16_t inLineNum, const AJAAncillaryDataType inType);
+
+
+	/**
+		@brief		Answers with the ancillary data type associated with the designated line.
+		@param[in]	inLineNum		Specifies the frame line number of interest.
+		@return		The ancillary data type associated with the designated line, if any;
+					otherwise AJAAncillaryDataType_Unknown if the line has no association.
+	**/
+	static AJAAncillaryDataType				GetAnalogAncillaryDataTypeForLine (const uint16_t inLineNum);
+
+
 	/**
 		@brief	Sets whether or not zero-length packets are included or not.
 		@param[in]	inExclude	Specify true to exclude zero-length packets.
@@ -70,10 +132,8 @@ public:	//	CLASS METHODS
 	static uint32_t							GetExcludedZeroLengthPacketCount (void);	///< @return	The current number of zero-length packets that have been excluded
 	static void								ResetExcludedZeroLengthPacketCount (void);	///< @brief		Resets my tally of excluded zero-length packets to zero.
 	static bool								IsIncludingZeroLengthPackets (void);		///< @return	True if zero-length packets are included;  otherwise false.
-#if !defined(NTV2_DEPRECATE_15_2)
-	static inline AJAStatus	SetFromSDIAncData (const NTV2_POINTER & inF1, const NTV2_POINTER & inF2, AJAAncillaryList & outPkts)	{return SetFromDeviceAncBuffers(inF1, inF2, outPkts);}	///< @deprecated	Use SetFromDeviceAncBuffers instead.
-	static inline AJAStatus	SetFromIPAncData (const NTV2_POINTER & inF1, const NTV2_POINTER & inF2, AJAAncillaryList & outPkts)		{return SetFromDeviceAncBuffers(inF1, inF2, outPkts);}	///< @deprecated	Use SetFromDeviceAncBuffers instead.
-#endif	//	!defined(NTV2_DEPRECATE_15_2)
+	///@}
+
 
 public:	//	INSTANCE METHODS
 	/**
@@ -221,6 +281,7 @@ public:	//	INSTANCE METHODS
 
 	/**
 		@brief		Compares me with another list.
+		@param[in]	inCompareList		Specifies the other list to be compared with me.
 		@param[in]	inIgnoreLocation	If true, don't compare each packet's AJAAncillaryDataLocation info. Defaults to true.
 		@param[in]	inIgnoreChecksum	If true, don't compare each packet's checksums. Defaults to true.
 		@return		AJA_STATUS_SUCCESS if equal;  otherwise AJA_STATUS_FAIL.
@@ -231,6 +292,7 @@ public:	//	INSTANCE METHODS
 	/**
 		@brief		Compares me with another list and returns a std::string that contains a human-readable explanation
 					of the first difference found (if any).
+		@param[in]	inCompareList		Specifies the other list to be compared with me.
 		@param[in]	inIgnoreLocation	If true, don't compare each packet's AJAAncillaryDataLocation info. Defaults to true.
 		@param[in]	inIgnoreChecksum	If true, don't compare each packet's checksums. Defaults to true.
 		@return		A string that contains a human-readable explanation of the first difference found (if any);
@@ -376,66 +438,6 @@ public:	//	INSTANCE METHODS
 
 
 	/**
-		@name	Analog Anc Type Mapping
-	**/
-	///@{
-
-//--------------------------------------------------------
-	/**
-	 *	The Analog Ancillary Data Type Map is a way for the user to associate certain frame line line numbers
-	 *	with specific types of analog ancillary data. For example, in 525i you may wish to say, "if you find
-	 *	any analog ancillary data on line 21, it is going to be AJAAncillaryDataType_Cea608_Line21. The
-	 *	implementation is a std::map, and the following access methods may be used to set/get the map values.
-	 *
-	 *	Note: this is ONLY used by AddReceivedAncillaryData() to identify captured "analog" (AJAAncillaryDataCoding_Analog)
-	 *	      data. It should be loaded BEFORE calling AddReceivedAncillaryData().
-	 *
-	 */
-
-	/**
-		@brief		Clears my local Analog Ancillary Data Type map.
-		@return		AJA_STATUS_SUCCESS if successful.
-	**/
-	virtual AJAStatus						ClearAnalogAncillaryDataTypeMap (void);
-	
-
-	/**
-		@brief		Copies the contents of <inMap> to the local Analog Ancillary Data Type map.
-		@param[in]	inMap	The map to copy.
-		@return		AJA_STATUS_SUCCESS if successful.
-	**/
-	virtual AJAStatus						SetAnalogAncillaryDataTypeMap (const AJAAncillaryAnalogTypeMap & inMap);
-	
-
-	/**
-		@brief		Copies the contents of the local Analog Ancillary Data Type map to <outMap>.
-		@param[out]	outMap	Receives a copy of my map.
-		@return		AJA_STATUS_SUCCESS if successful.
-	**/
-	virtual AJAStatus						GetAnalogAncillaryDataTypeMap (AJAAncillaryAnalogTypeMap & outMap) const;
-
-
-	/**
-		@brief		Sets (or changes) the map entry for the designated line to the designated type.
-		@note		Setting a particular line to AJAAncillaryDataType_Unknown erases the entry for that line,
-					since a non-entry is treated the same as AJAAncillaryDataType_Unknown.
-		@param[in]	inLineNum	Specifies the frame line number to be inserted/modified.
-		@param[in]	inType		The ancillary data type to be associated with this line.
-		@return		AJA_STATUS_SUCCESS if successful.
-	**/
-	virtual	AJAStatus						SetAnalogAncillaryDataTypeForLine (const uint16_t inLineNum, const AJAAncillaryDataType inType);
-
-
-	/**
-		@brief		Answers with the ancillary data type associated with the designated line.
-		@param[in]	inLineNum		Specifies the frame line number of interest.
-		@return		The ancillary data type associated with the designated line, if known, or AJAAncillaryDataType_Unknown.
-	**/
-	virtual AJAAncillaryDataType			GetAnalogAncillaryDataTypeForLine (const uint16_t inLineNum) const;
-	///@}
-
-
-	/**
 		@name	Printing & Debugging
 	**/
 	///@{
@@ -455,15 +457,23 @@ protected:
 
 	static bool								BufferHasGUMPData (const NTV2_POINTER & inBuffer);
 
+	/**
+		@brief		Appends whatever can be decoded from the given device Anc buffer to the AJAAncillaryList.
+		@param[in]	inAncBuffer		Specifies the Anc buffer to be parsed.
+		@param		packetList		The AJAAncillaryList to be appended to for whatever packets are found in the buffer.
+		@note		Called by SetFromDeviceAncBuffers, once for the F1 buffer, another time for the F2 buffer.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	static AJAStatus						AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBuffer,
+																	AJAAncillaryList & packetList);
+
 protected:
 	typedef std::list <AJAAncillaryData *>			AJAAncillaryDataList;
 	typedef AJAAncillaryDataList::const_iterator	AJAAncDataListConstIter;	///< @brief	Handy const iterator for iterating over members of an AJAAncillaryDataList.
 	typedef AJAAncillaryDataList::iterator			AJAAncDataListIter;			///< @brief	Handy non-const iterator for iterating over members of an AJAAncillaryDataList.
 
-	AJAAncillaryDataList		m_ancList;			///< @brief	My packet list
-	AJAAncillaryAnalogTypeMap	m_analogTypeMap;	///< @brief	My "Analog Type Map" can be set by users to suggest where certain types of "analog"
-													///			ancillary data are likely to be found. For example, in 525i systems, analog ancillary
-													///			data captured on Line 21 are likely to be AJAAncillaryDataType_Cea608_Line21 type.
+	AJAAncillaryDataList	m_ancList;		///< @brief	My packet list
+
 };	//	AJAAncillaryList
 
 
