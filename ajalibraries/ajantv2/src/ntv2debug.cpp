@@ -65,7 +65,7 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
 		case DEVICE_ID_KONA1:						return "DEVICE_ID_KONA1";
 		case DEVICE_ID_KONAHDMI:					return "DEVICE_ID_KONAHDMI";
 		case DEVICE_ID_KONA5:						return "DEVICE_ID_KONA5";
-		case DEVICE_ID_KONA5_12G:					return "DEVICE_ID_KONA5_12G";
+		case DEVICE_ID_KONA5_4x12G:					return "DEVICE_ID_KONA5_12G";
 		case DEVICE_ID_CORVID44_12G:				return "DEVICE_ID_CORVID44_12G";
 		case DEVICE_ID_NOTFOUND:					return "DEVICE_ID_NOTFOUND";
 	}
@@ -110,7 +110,7 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_KONA1:						return "Kona1";
 		case DEVICE_ID_KONAHDMI:					return "KonaHDMI";
 		case DEVICE_ID_KONA5:						return "Kona5";
-		case DEVICE_ID_KONA5_12G:					return "Kona5_12G";
+		case DEVICE_ID_KONA5_4x12G:					return "Kona5_12G";
 		case DEVICE_ID_CORVID44_12G:				return "Corvid44_12G";
 		case DEVICE_ID_NOTFOUND:					return "Unknown";
 	}
