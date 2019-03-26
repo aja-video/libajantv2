@@ -743,7 +743,7 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBu
 	size_t			ULWordOffset	(0);	//	Offset to start of current RTP packet, in 32-bit words
 
 	while (AJARTPAncPayloadHeader::BufferStartsWithRTPHeader(ancBuffer))
-	{	//	RTP		RTP		RTP		RTP
+	{	//	RTP   RTP   RTP   RTP   RTP   RTP   RTP   RTP   RTP   RTP   RTP   RTP   RTP   RTP   RTP   RTP   RTP   RTP
 		vector<uint32_t>		U32s;
 		AJARTPAncPayloadHeader	rtpHeader;
 
@@ -777,7 +777,7 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBu
 		}
 	}	//	loop til no more RTP packets found
 
-	if (!RTPPacketCount  &&  BufferHasGUMPData(inAncBuffer))
+	if (!RTPPacketCount  &&  BufferHasGUMPData(inAncBuffer))	//	GUMP  GUMP  GUMP  GUMP  GUMP  GUMP  GUMP  GUMP  GUMP
 		return outPackets.AddReceivedAncillaryData (reinterpret_cast<const uint8_t*>(inAncBuffer.GetHostPointer()),
 													inAncBuffer.GetByteCount());
 	return AJA_STATUS_SUCCESS;
@@ -982,7 +982,7 @@ AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,  
 			{
 				if (inFormatDesc.GetPixelFormat() == NTV2_FBF_8BIT_YCBCR)	//	2vuy buffers are simple -- just copy the data
 				{
-					uint8_t *	pLine	((uint8_t*)inFormatDesc.GetRowAddress(inFrameBuffer.GetHostPointer(), fbLineOffset));
+					uint8_t *	pLine	(reinterpret_cast<uint8_t*>(inFormatDesc.GetWriteableRowAddress(inFrameBuffer.GetHostPointer(), fbLineOffset)));
 					if (isSD)
 					{	//	SD overwrites both Y & C channels in the frame buffer:
 						for (unsigned ndx(0);  ndx < u16PktComponents.size();  ndx++)
@@ -1115,7 +1115,7 @@ AJAStatus AJAAncillaryList::GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POI
 	//	Generate transmit data for each of my packets...
 	for (uint32_t pktNdx(0);  pktNdx < CountAncillaryData();  pktNdx++)
 	{
-		AJAAncillaryData *	pAncData	(GetAncillaryDataAtIndex(pktNdx));
+		AJAAncillaryData *	pAncData (GetAncillaryDataAtIndex(pktNdx));
 		if (!pAncData)
 			return AJA_STATUS_NULL;	//	Fail
 

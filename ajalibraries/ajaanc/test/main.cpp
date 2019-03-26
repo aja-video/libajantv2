@@ -3,9 +3,6 @@
 	@brief		Basic Functionality Tests for the AJA Anc Library.
 	@copyright	Copyright (c) 2013-2015 AJA Video Systems, Inc. All rights reserved.
 **/
-#if defined(_DEBUG)
-	#define	DEBUG_BREAK_AFTER_FAILURE	(true)
-#endif
 #include "ntv2bft.h"
 #include "ajabase/common/options_popt.h"
 #include "ajabase/common/performance.h"
@@ -34,7 +31,7 @@ using namespace std::rel_ops;
 
 static int	gIsVerbose(0);	//	Verbose output?
 static NTV2_POINTER	gGumpBuffers[NTV2_MAX_NUM_VIDEO_FORMATS];
-static NTV2_POINTER gIPBuffers[NTV2_MAX_NUM_VIDEO_FORMATS];
+static NTV2_POINTER gRTPBuffers[NTV2_MAX_NUM_VIDEO_FORMATS];
 static NTV2_POINTER gVanc10Buffers[NTV2_MAX_NUM_VIDEO_FORMATS];
 
 
@@ -1577,8 +1574,8 @@ gIsVerbose = true;
 				if (gIsVerbose)	cerr << "IP F1: " << IPF1.AsString(64) << endl << "IP F2: " << IPF2.AsString(64) << endl;
 
 				//	NOTE:	This test saves the F1 RTP buffers for use later by BFT_RTPToAncListToRTP...
-				gIPBuffers[vFormat] = NTV2_POINTER(IPF1);
-//{ostringstream oss; IPF1.Dump(oss,0,0,16,4,16); LOGMYDEBUG("F1 RTP Buffer:" << endl << oss.str());}
+				gRTPBuffers[vFormat] = NTV2_POINTER(IPF1);
+//{ostringstream oss; IPF1.Dump(oss,0,0,16,4,16); LOGMYDEBUG("gRTPBuffers[" << ::NTV2VideoFormatToString(vFormat) << "]:" << oss.str());}
 //{ostringstream oss; IPF2.Dump(oss,0,0,16,4,16); LOGMYDEBUG("F2 RTP Buffer:" << endl << oss.str());}
 
 				//	Receive packets from the IP buffer...
@@ -1737,7 +1734,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 		static bool BFT_RTPToAncListToRTP (void)
 		{
 			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
-			LOGMYNOTE("Starting");		if (gIsVerbose)	cerr << endl << "Starting BFT_RTPToAncListToRTP..." << endl;
+			LOGMYNOTE("Starting");
 			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 			{
 				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
@@ -1745,7 +1742,6 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				ULWord						smpteLineF1(0), smpteLineF2(0);
 				bool						isF2	(false);
 				AJAAncillaryList			rxPkts;
-				if (gIsVerbose)	cerr << "Trying " << fd << endl;
 				LOGMYNOTE("Trying " << fd);
 				SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
 				if (isF2)
@@ -1754,11 +1750,10 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
 
 				//	NOTE:	Use the F1 RTP buffer we saved in BFT_AncListToRTPToAncList...
-if (gIPBuffers[vFormat].IsNULL())
-	{cerr << "Skipping " << fd << " because " << gIPBuffers[vFormat] << endl;	continue;}
-				const NTV2_POINTER	F1RTP_a	(gIPBuffers[vFormat]);
-				NTV2_POINTER		F1RTP_b	(F1RTP_a.GetByteCount());
-				NTV2_POINTER		F2RTP_b	(F1RTP_a.GetByteCount());
+				if (gRTPBuffers[vFormat].IsNULL())	{LOGMYINFO("Skipping " << fd << " because " << gRTPBuffers[vFormat]);	continue;}
+				const NTV2_POINTER &	F1RTP_a	(gRTPBuffers[vFormat]);
+				NTV2_POINTER			F1RTP_b	(F1RTP_a.GetByteCount());
+				NTV2_POINTER			F2RTP_b	(F1RTP_a.GetByteCount());
 				//	Unpack into an AJAAncillaryList of anc packets...
 				SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers(F1RTP_a, NTV2_POINTER(), rxPkts));
 				//	Re-pack into RTP...
@@ -1766,27 +1761,26 @@ if (gIPBuffers[vFormat].IsNULL())
 				//	Content of F1RTP "a" and "b" buffers should match...
 				if (!F1RTP_a.IsContentEqual(F1RTP_b, 0))
 				{
-					cerr << "MIS-COMPARE:" << endl
-						 << "Rx RTP: " << F1RTP_a.GetU32s(0, 32, true) << endl
-						 << "CmpRTP: " << F1RTP_b.GetU32s(0, 32, true) << endl;
+					LOGMYERROR("MIS-COMPARE: Rx RTP: " << F1RTP_a.GetU32s(0, 32, true));
+					LOGMYERROR("MIS-COMPARE: CmpRTP: " << F1RTP_b.GetU32s(0, 32, true));
 					AJAAncillaryList	b_pkts;
 					AJAAncillaryList::SetFromDeviceAncBuffers(F1RTP_b, NTV2_POINTER(), b_pkts);
 					const string	info	(rxPkts.CompareWithInfo(b_pkts, false, false));
 					if (!info.empty())
-						cerr << "RxPkts != B-Pkts --- MISCOMPARE" << endl << info << endl;
-					cerr << "RxPkts: " << rxPkts << endl
-						<<  "B Pkts: " << b_pkts << endl;
+						LOGMYERROR("RxPkts != B-Pkts --- MISCOMPARE: " << info);
+					LOGMYDEBUG("RxPkts: " << rxPkts);
+					LOGMYDEBUG("B Pkts: " << b_pkts);
 					const AJAAncillaryData *	rxA(rxPkts.GetAncillaryDataAtIndex(1));
 					const AJAAncillaryData *	rxB(b_pkts.GetAncillaryDataAtIndex(1));
 					if (*rxA != *rxB)
-						cerr << rxA->AsString() << " != " << rxB->AsString() << endl;
+						LOGMYDEBUG(rxA->AsString() << " != " << rxB->AsString());
 					else
-						cerr << rxA->AsString() << " == " << rxB->AsString() << endl;
-					cerr << rxA->CompareWithInfo(*rxB, false, false) << endl;
+						LOGMYDEBUG(rxA->AsString() << " == " << rxB->AsString());
+					LOGMYDEBUG(rxA->CompareWithInfo(*rxB, false, false));
 				}
 				SHOULD_BE_TRUE(F1RTP_a.IsContentEqual(F1RTP_b, 0));
 			}	//	for each vFormat
-			LOGMYNOTE("Passed");	cerr << "BFT_RTPToAncListToRTP passed" << endl;
+			LOGMYNOTE("Passed");
 			return true;
 		}	//	BFT_RTPToAncListToRTP
 

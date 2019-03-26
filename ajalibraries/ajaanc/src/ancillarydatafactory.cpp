@@ -26,20 +26,21 @@ AJAAncillaryData * AJAAncillaryDataFactory::Create (const AJAAncillaryDataType i
 
 AJAAncillaryData * AJAAncillaryDataFactory::Create (const AJAAncillaryDataType inAncType, const AJAAncillaryData *pAncData)
 {
+	AJAAncillaryData * pResult (NULL);
 	switch (inAncType)
 	{
-		case AJAAncillaryDataType_Unknown:				return new AJAAncillaryData(pAncData);	//	Use base type for 'Unknown'
-		case AJAAncillaryDataType_Timecode_ATC:			return new AJAAncillaryData_Timecode_ATC(pAncData);
-		case AJAAncillaryDataType_Timecode_VITC:		return new AJAAncillaryData_Timecode_VITC(pAncData);
-		case AJAAncillaryDataType_Cea708:				return new AJAAncillaryData_Cea708(pAncData);
-		case AJAAncillaryDataType_Cea608_Vanc:			return new AJAAncillaryData_Cea608_Vanc(pAncData);
-		case AJAAncillaryDataType_Cea608_Line21:		return new AJAAncillaryData_Cea608_Line21(pAncData);
-		case AJAAncillaryDataType_FrameStatusInfo524D:	return new AJAAncillaryData_FrameStatusInfo524D(pAncData);
-		case AJAAncillaryDataType_FrameStatusInfo5251:	return new AJAAncillaryData_FrameStatusInfo5251(pAncData);
+		case AJAAncillaryDataType_Unknown:				pResult = new AJAAncillaryData(pAncData);						break;	//	Use base type for 'Unknown'
+		case AJAAncillaryDataType_Timecode_ATC:			pResult = new AJAAncillaryData_Timecode_ATC(pAncData);			break;
+		case AJAAncillaryDataType_Timecode_VITC:		pResult = new AJAAncillaryData_Timecode_VITC(pAncData);			break;
+		case AJAAncillaryDataType_Cea708:				pResult = new AJAAncillaryData_Cea708(pAncData);				break;
+		case AJAAncillaryDataType_Cea608_Vanc:			pResult = new AJAAncillaryData_Cea608_Vanc(pAncData);			break;
+		case AJAAncillaryDataType_Cea608_Line21:		pResult = new AJAAncillaryData_Cea608_Line21(pAncData);			break;
+		case AJAAncillaryDataType_FrameStatusInfo524D:	pResult = new AJAAncillaryData_FrameStatusInfo524D(pAncData);	break;
+		case AJAAncillaryDataType_FrameStatusInfo5251:	pResult = new AJAAncillaryData_FrameStatusInfo5251(pAncData);	break;
 
- 		case AJAAncillaryDataType_Smpte2016_3:			break;	//	return new AJAAncillaryData_Smpte2016_3(pAncData);
- 		case AJAAncillaryDataType_Smpte352:				break;	//	return new AJAAncillaryData_Smpte352(pAncData);
- 		case AJAAncillaryDataType_Smpte2051:			break;	//	return new AJAAncillaryData_Smpte2051(pAncData);
+ 		case AJAAncillaryDataType_Smpte2016_3:			break;	//	pResult = new AJAAncillaryData_Smpte2016_3(pAncData);	break;
+ 		case AJAAncillaryDataType_Smpte352:				break;	//	pResult = new AJAAncillaryData_Smpte352(pAncData);		break;
+ 		case AJAAncillaryDataType_Smpte2051:			break;	//	pResult = new AJAAncillaryData_Smpte2051(pAncData);		break;
  		case AJAAncillaryDataType_HDR_SDR:				break;
  		case AJAAncillaryDataType_HDR_HDR10:			break;
  		case AJAAncillaryDataType_HDR_HLG:				break;
@@ -49,7 +50,10 @@ AJAAncillaryData * AJAAncillaryDataFactory::Create (const AJAAncillaryDataType i
 		case AJAAncillaryDataType_Size:					break;
 #endif
 	}
-	return NULL;
+	if (pResult)
+		//	Populate the specialized AJAAncillaryData object's member variables from the packet data...
+		pResult->ParsePayloadData();
+	return pResult;
 }
 
 
