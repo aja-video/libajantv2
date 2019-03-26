@@ -86,26 +86,6 @@ AJAAncillaryData::AJAAncillaryData (const AJAAncillaryData * pClone)
 		*this = *pClone;
 }
 
-/** not necessary
-AJAAncillaryData & AJAAncillaryData::operator = (const AJAAncillaryData & inRHS)
-{
-	if (this == &inRHS)
-		return *this;
-
-	m_DID			= inRHS.m_DID;
-	m_SID			= inRHS.m_SID;
-	m_checksum		= inRHS.m_checksum;
-	m_location		= inRHS.m_location;
-	m_coding		= inRHS.m_coding;
-	m_payload		= inRHS.m_payload;
-	m_rcvDataValid	= inRHS.m_rcvDataValid;
-	m_ancType		= inRHS.m_ancType;
-	m_bufferFmt		= inRHS.m_bufferFmt;
-	m_frameID		= inRHS.m_frameID;
-	return *this;
-}
-not necessary **/
-
 
 AJAAncillaryData::~AJAAncillaryData ()
 {

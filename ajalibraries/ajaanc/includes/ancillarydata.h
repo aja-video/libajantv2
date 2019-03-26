@@ -574,7 +574,6 @@ public:
 	virtual									~AJAAncillaryData ();	///< @brief		My destructor.
 	virtual void							Clear (void);			///< @brief	Frees my allocated memory, if any, and resets my members to their default values.
 	virtual AJAAncillaryData *				Clone (void) const;	//	@return	A clone of myself.
-	//virtual AJAAncillaryData &			operator = (const AJAAncillaryData & inRHS);
 	///@}
 
 
