@@ -1563,9 +1563,6 @@ void NTV2CCPlayer::PlayoutFrames (void)
 			packetList.GetVANCTransmitData (mVideoBuffer,  formatDesc);
 		else					//	Else use the Anc inserter firmware:
 			packetList.GetTransmitData (xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, isProgressive, F2StartLine);
-		#if defined(_DEBUG)
-			mDevice.DMAWriteAnc(29, xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, NTV2_CHANNEL_INVALID);	//	DEBUG: DMA Xmit GUMP to frame 29
-		#endif	//	_DEBUG
 
 		if (!mConfig.fSuppressTimecode)
 		{
@@ -1620,21 +1617,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 													false,				//	don't byte swap
 													numAudioChannels));	//	number of audio channels
 		//	Finally ... transfer the frame data to the device...
-		#if defined(_DEBUG)
-			NTV2_POINTER	f1b(2048), f2b(2048);
-			packetList.GetIPTransmitData (f1b, f2b, isProgressive, F2StartLine);
-			mDevice.DMAWriteAnc(30, f1b, f2b, NTV2_CHANNEL_INVALID);	//	DEBUG: DMA Xmit RTP to frame 29
-			AJAAncillaryList	pkts;
-			AJAAncillaryList::SetFromDeviceAncBuffers(f1b, f2b, pkts);
-			if (!mConfig.fSuppress608  &&  AJA_FAILURE(packetList.GetAncillaryDataWithID(0x61, 0x02)->Compare(*(pkts.GetAncillaryDataWithID(0x61, 0x02)), false, false)))
-				CCPLDBG(packetList.GetAncillaryDataWithID(0x61, 0x02)->AsString(8) << "  |  " << pkts.GetAncillaryDataWithID(0x61, 0x02)->AsString(8));
-			string result(pkts.CompareWithInfo(packetList));
-			if (!result.empty())	CCPLDBG(result);
-		#endif	//	_DEBUG
 		mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, xferInfo);
-		#if defined(_DEBUG)
-			mDevice.DMAWriteAnc(32, xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, NTV2_CHANNEL_INVALID);	//	DEBUG: DMA XferStruct anc buffers to frame 32
-		#endif	//	_DEBUG
 	}	//	loop til quit signaled
 
 	//	Stop AutoCirculate...
