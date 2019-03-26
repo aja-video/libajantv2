@@ -451,12 +451,11 @@ void NTV2Player::PlayFrames (void)
 	ULWord					acOpts		(AUTOCIRCULATE_WITH_RP188);	//	Add timecode
 	const bool				isInterlace	(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mVideoFormat));
 	const bool				isPAL		(NTV2_IS_PAL_VIDEO_FORMAT(mVideoFormat));
-	NTV2_POINTER			ancBuffer;
 	AUTOCIRCULATE_TRANSFER	xferInfo;
 
 	if (mAncType != AJAAncillaryDataType_Unknown)
 	{
-		ancBuffer.Allocate(NTV2_ANCSIZE_MAX, true);	//	true == page-aligned
+		xferInfo.acANCBuffer.Allocate(NTV2_ANCSIZE_MAX);
 		if (::NTV2DeviceCanDoCustomAnc(mDeviceID))
 			acOpts |= AUTOCIRCULATE_WITH_ANC;
 	}
@@ -470,19 +469,19 @@ void NTV2Player::PlayFrames (void)
 		case AJAAncillaryDataType_HDR_SDR:
 		{
 			AJAAncillaryData_HDR_SDR sdrPacket;
-			sdrPacket.GenerateTransmitData((uint8_t*)ancBuffer.GetHostPointer(), ancBuffer.GetByteCount(), packetSize);
+			sdrPacket.GenerateTransmitData((uint8_t*)xferInfo.acANCBuffer.GetHostPointer(), xferInfo.acANCBuffer.GetByteCount(), packetSize);
 			break;
 		}
 		case AJAAncillaryDataType_HDR_HDR10:
 		{
 			AJAAncillaryData_HDR_HDR10 hdr10Packet;
-			hdr10Packet.GenerateTransmitData((uint8_t*)ancBuffer.GetHostPointer(), ancBuffer.GetByteCount(), packetSize);
+			hdr10Packet.GenerateTransmitData((uint8_t*)xferInfo.acANCBuffer.GetHostPointer(), xferInfo.acANCBuffer.GetByteCount(), packetSize);
 			break;
 		}
 		case AJAAncillaryDataType_HDR_HLG:
 		{
 			AJAAncillaryData_HDR_HLG hlgPacket;
-			hlgPacket.GenerateTransmitData((uint8_t*)ancBuffer.GetHostPointer(), ancBuffer.GetByteCount(), packetSize);
+			hlgPacket.GenerateTransmitData((uint8_t*)xferInfo.acANCBuffer.GetHostPointer(), xferInfo.acANCBuffer.GetByteCount(), packetSize);
 			break;
 		}
 		default:	break;
@@ -519,7 +518,6 @@ void NTV2Player::PlayFrames (void)
 				//	Transfer the timecode-burned frame to the device for playout...
 				xferInfo.SetVideoBuffer (playData->fVideoBuffer, playData->fVideoBufferSize);
 				xferInfo.SetAudioBuffer (mWithAudio ? playData->fAudioBuffer : NULL, mWithAudio ? playData->fAudioBufferSize : 0);
-				xferInfo.SetAncBuffers((ULWord*)ancBuffer.GetHostPointer(), ancBuffer.GetByteCount(), NULL, 0);
 				mDevice.AutoCirculateTransfer (mOutputChannel, xferInfo);
 				mAVCircularBuffer.EndConsumeNextBuffer();	//	Signal that the frame has been "consumed"
 			}
