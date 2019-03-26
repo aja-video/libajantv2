@@ -41,13 +41,40 @@ using namespace std;
 #endif
 
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 static bool		gIncludeZeroLengthPackets	(false);
 static uint32_t	gExcludedZeroLengthPackets	(0);
+static AJALock	gZeroLengthLock;
 
-uint32_t AJAAncillaryList::GetExcludedZeroLengthPacketCount (void)			{return gExcludedZeroLengthPackets;}
-void AJAAncillaryList::ResetExcludedZeroLengthPacketCount (void)			{gExcludedZeroLengthPackets = 0;}
-bool AJAAncillaryList::IsIncludingZeroLengthPackets (void)					{return gIncludeZeroLengthPackets;}
-void AJAAncillaryList::SetIncludeZeroLengthPackets (const bool inInclude)	{gIncludeZeroLengthPackets = inInclude;}
+inline uint32_t AJAAncillaryList::GetExcludedZeroLengthPacketCount (void)
+{	AJAAutoLock	locker(&gZeroLengthLock);
+	return gExcludedZeroLengthPackets;
+}
+
+inline void AJAAncillaryList::ResetExcludedZeroLengthPacketCount (void)
+{	AJAAutoLock	locker(&gZeroLengthLock);
+	gExcludedZeroLengthPackets = 0;
+}
+
+inline bool AJAAncillaryList::IsIncludingZeroLengthPackets (void)
+{	AJAAutoLock	locker(&gZeroLengthLock);
+	return gIncludeZeroLengthPackets;
+}
+
+inline void AJAAncillaryList::SetIncludeZeroLengthPackets (const bool inInclude)
+{	AJAAutoLock	locker(&gZeroLengthLock);
+	gIncludeZeroLengthPackets = inInclude;
+}
+
+static inline void BumpZeroLengthPacketCount (void)
+{
+	AJAAtomic::Increment(&gExcludedZeroLengthPackets);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 AJAAncillaryList::AJAAncillaryList ()
@@ -467,13 +494,12 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 			if (pData)
 			{
 				pData->SetBufferFormat(AJAAncillaryBufferFormat_SDI);
-				if (gIncludeZeroLengthPackets  ||  pData->GetDC())
+				if (IsIncludingZeroLengthPackets()  ||  pData->GetDC())
 				{
 					try	{m_ancList.push_back(pData);}	//	Append to my list
 					catch(...)	{status = AJA_STATUS_FAIL;}
 				}
-				else
-					AJAAtomic::Increment(&gExcludedZeroLengthPackets);
+				else ::BumpZeroLengthPacketCount();
 			}
 			else
 				status = AJA_STATUS_FAIL;
@@ -537,13 +563,12 @@ LOGMYDEBUG(RTPheader);
 
 		pNewPkt->SetBufferFormat(AJAAncillaryBufferFormat_RTP);	//	Originated in RTP packet
 		pNewPkt->SetFrameID(RTPheader.GetTimeStamp());			//	TimeStamp it using RTP timestamp
-		if (gIncludeZeroLengthPackets  ||  pNewPkt->GetDC())
+		if (IsIncludingZeroLengthPackets()  ||  pNewPkt->GetDC())
 		{
 			try	{m_ancList.push_back(pNewPkt);}		//	Append to my list
 			catch(...)	{status = AJA_STATUS_FAIL;}
 		}
-		else
-			AJAAtomic::Increment(&gExcludedZeroLengthPackets);
+		else ::BumpZeroLengthPacketCount();
 	}	//	for each anc packet
 
 	if (AJA_FAILURE(status))
@@ -623,13 +648,12 @@ AJAStatus AJAAncillaryList::AddVANCData (const vector<uint16_t> & inPacketWords,
 	if (!pData)
 		return AJA_STATUS_FAIL;
 
-	if (gIncludeZeroLengthPackets  ||  pData->GetDC())
+	if (IsIncludingZeroLengthPackets()  ||  pData->GetDC())
 	{
 		try	{m_ancList.push_back(pData);}	//	Append to my list
 		catch(...)	{return AJA_STATUS_FAIL;}
 	}
-	else
-		AJAAtomic::Increment(&gExcludedZeroLengthPackets);
+	else ::BumpZeroLengthPacketCount();
 
 	return AJA_STATUS_SUCCESS;
 

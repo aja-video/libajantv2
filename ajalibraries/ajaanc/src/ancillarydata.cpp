@@ -105,12 +105,13 @@ void AJAAncillaryData::Init()
 	m_ancType		= AJAAncillaryDataType_Unknown;
 	m_bufferFmt		= AJAAncillaryBufferFormat_Unknown;
 	m_rcvDataValid	= false;
-
-	m_location.SetDataLink(AJAAncillaryDataLink_A);
-	m_location.SetDataStream(AJAAncillaryDataStream_1);
-	m_location.SetDataChannel(AJAAncillaryDataChannel_Y);
-	m_location.SetDataSpace(AJAAncillaryDataSpace_VANC);
-	m_location.SetLineNumber(0);
+	//	Default location:
+	m_location.SetDataLink(AJAAncillaryDataLink_A)					//	LinkA
+				.SetDataStream(AJAAncillaryDataStream_1)			//	DS1
+				.SetDataChannel(AJAAncillaryDataChannel_Y)			//	Y channel
+				.SetDataSpace(AJAAncillaryDataSpace_VANC)			//	VANC
+				.SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc)	//	VANC
+				.SetLineNumber(AJAAncDataLineNumber_Unknown);		//	Unknown line number
 }
 
 
