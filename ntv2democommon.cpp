@@ -423,14 +423,10 @@ const NTV2VideoFormatSet &	CNTV2DemoCommon::GetSupportedVideoFormats (const NTV2
 {
 	switch(inKinds)
 	{
-	case VIDEO_FORMATS_ALL:
-		return gAllFormats;
-	case VIDEO_FORMATS_4KUHD:
-		return g4KFormats;
-	case VIDEO_FORMATS_UHD2:
-		return g8KFormats;
-	default:
-		return gNon4KFormats;
+		case VIDEO_FORMATS_ALL:			return gAllFormats;
+		case VIDEO_FORMATS_4KUHD:		return g4KFormats;
+		case VIDEO_FORMATS_8KUHD2:		return g8KFormats;
+		default:						return gNon4KFormats;
 	}
 }
 
@@ -534,7 +530,7 @@ NTV2VideoFormat CNTV2DemoCommon::GetVideoFormatFromString (const string & inStr,
 		return format;
 	if (inKinds == VIDEO_FORMATS_4KUHD && NTV2_IS_4K_VIDEO_FORMAT(format))
 		return format;
-	if (inKinds == VIDEO_FORMATS_UHD2 && NTV2_IS_QUAD_QUAD_FORMAT(format))
+	if (inKinds == VIDEO_FORMATS_8KUHD2 && NTV2_IS_QUAD_QUAD_FORMAT(format))
 		return format;
 	if (inKinds == VIDEO_FORMATS_NON_4KUHD && !NTV2_IS_4K_VIDEO_FORMAT(format))
 		return format;
