@@ -1554,22 +1554,6 @@ void NTV2CCPlayer::PlayoutFrames (void)
 			{
 				AJAAncillaryData_Cea708	pkt708;
 				pkt708.SetFromSMPTE334 (m708Encoder->GetSMPTE334Data(), uint32_t(m708Encoder->GetSMPTE334Size()), kCEA708LocF1);
-#if defined(_DEBUG)	/////// ** MrBill **	DEBUG	//////////////		DEBUG		///////////////////		DEBUG		//////////////////		DEBUG		//////////////////
-				if (::NTV2DeviceCanDo2110(mDeviceID)	//	KONA IP 2110 ONLY
-					&& mConfig.fVideoFormat == NTV2_FORMAT_1080p_2398)	//	1080p2398 ONLY
-					{
-						pkt708.SetLocationLineNumber(18);		//	Put CEA708 packet on line 18
-						packetList.AddAncillaryData(pkt708);
-
-						//	Put a second packet after it on line 18...
-						AJAAncillaryData extraPkt;  const string testData ("This is a test packet");	AJAAncDataLoc loc;
-						extraPkt.SetDID(0xAB);	extraPkt.SetSID(0xCD);  extraPkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
-						extraPkt.SetDataLocation(loc.SetDataLink(AJAAncillaryDataLink_A).SetDataChannel(AJAAncillaryDataChannel_Y).SetLineNumber(18).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc));
-						extraPkt.SetPayloadData(reinterpret_cast<const uint8_t*>(testData.c_str()), uint32_t(testData.size()));
-						packetList.AddAncillaryData(extraPkt);
-					}
-				else
-#endif	//	_DEBUG	/////// ** MrBill **	DEBUG	//////////////		DEBUG		///////////////////		DEBUG		//////////////////		DEBUG		//////////////////
 				packetList.AddAncillaryData(pkt708);
 			}
 		}	//	else HD video
