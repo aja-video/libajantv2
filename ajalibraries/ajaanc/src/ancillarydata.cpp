@@ -1171,6 +1171,23 @@ const string & AJAAncillaryDataSpaceToString (const AJAAncillaryDataSpace inValu
 }
 
 
+string AJAAncLineNumberToString (const uint16_t inValue)
+{
+	ostringstream	oss;
+	if (inValue == AJAAncDataLineNumber_AnyVanc)
+		oss	<< "VANC";
+	else if (inValue == AJAAncDataLineNumber_Anywhere)
+		oss	<< "UNSP";	//	Unspecified -- anywhere
+	else if (inValue == AJAAncDataLineNumber_Future)
+		oss	<< "OVFL";	//	Overflow
+	else if (inValue == AJAAncDataLineNumber_Unknown)
+		oss	<< "UNKN";
+	else
+		oss << "L" << DEC(inValue);
+	return oss.str();
+}
+
+
 string AJAAncHorizOffsetToString (const uint16_t inValue)
 {
 	ostringstream	oss;
@@ -1180,8 +1197,10 @@ string AJAAncHorizOffsetToString (const uint16_t inValue)
 		oss	<< "VANC";
 	else if (inValue == AJAAncDataHorizOffset_Anywhere)
 		oss	<< "UNSP";
-	else if (inValue == 0)
-		oss	<< "UNS0";
+	else if (inValue == AJAAncDataHorizOffset_Future)
+		oss	<< "OVFL";
+	else if (inValue == AJAAncDataHorizOffset_Unknown)
+		oss	<< "UNKN";
 	else
 		oss << "+" << DEC(inValue);
 	return oss.str();
@@ -1193,7 +1212,7 @@ ostream & AJAAncillaryDataLocation::Print (ostream & oss, const bool inCompact) 
 	oss	<< ::AJAAncillaryDataLinkToString(GetDataLink(), inCompact)
 		<< "|" << ::AJAAncillaryDataStreamToString(GetDataStream(), inCompact)
 		<< "|" << ::AJAAncillaryDataChannelToString(GetDataChannel(), inCompact)
-		<< "|L" << DEC(GetLineNumber())
+		<< "|" << ::AJAAncLineNumberToString(GetLineNumber())
 		<< "|" << ::AJAAncHorizOffsetToString(GetHorizontalOffset());
 	return oss;
 }

@@ -196,12 +196,15 @@ AJAExport const std::string &	AJAAncillaryDataSpaceToString (const AJAAncillaryD
 
 #define	AJAAncDataLineNumber_Unknown	uint16_t(0x0000)	///< @brief	Packet line number is unknown.
 #define	AJAAncDataLineNumber_DontCare	uint16_t(0x07FF)	///< @brief	Packet placed/found on any legal line number (in field or frame).
+#define	AJAAncDataLineNumber_Anywhere	(AJAAncDataLineNumber_DontCare)
 #define	AJAAncDataLineNumber_AnyVanc	uint16_t(0x07FE)	///< @brief	Packet placed/found on any line past RP168 switch line and before SAV.
 #define	AJAAncDataLineNumber_Future		uint16_t(0x07FD)	///< @brief	Line number exceeds 11 bits (future).
 
 #define	IS_UNKNOWN_AJAAncDataLineNumber(_x_)		((_x_) == AJAAncDataLineNumber_Unknown)
 #define	IS_IRRELEVANT_AJAAncDataLineNumber(_x_)		((_x_) == AJAAncDataLineNumber_DontCare)
 #define	IS_GOOD_AJAAncDataLineNumber(_x_)			((_x_) > 0  &&  (_x_) < AJAAncDataLineNumber_DontCare)
+
+AJAExport std::string AJAAncLineNumberToString (const uint16_t inValue);
 
 //	Special horizOffset values:
 #define	AJAAncDataHorizOffset_Unknown	uint16_t(0x0000)	///< @brief	Unknown.
@@ -214,7 +217,7 @@ AJAExport const std::string &	AJAAncillaryDataSpaceToString (const AJAAncillaryD
 	@return		A string containing a human-readable representation of the given horizontal offset location value.
 	@param[in]	inValue		Specifies the horizontal offset location value to be converted.
 **/
-std::string AJAAncHorizOffsetToString (const uint16_t inValue);
+AJAExport std::string AJAAncHorizOffsetToString (const uint16_t inValue);
 
 
 /**
