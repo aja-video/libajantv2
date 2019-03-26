@@ -1394,7 +1394,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 			changed = true;	//	Caller buffer GUMP -- force conversion to RTP
 	}	//	if either buffer non-empty/NULL
 
-	XMTDBG("ORIG: " << packetList);	//	Original packet list from caller
+	if (isMonitoring)	XMTDBG("ORIG: " << packetList);	//	Original packet list from caller
 	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(standard));
 	const uint32_t				F2StartLine			(smpteLineNumInfo.GetLastLine());	//	F2 VANC starts past last line of F1
 
@@ -1484,10 +1484,10 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 
 	if (changed)		//	if anything added (or forced conversion from GUMP)
 	{	//	Re-encode packets into the XferStruct buffers as RTP...
-		XMTDBG("CHGD: " << packetList);	//	DEBUG:  Changed packet list (to be converted to RTP)
+		//XMTDBG("CHGD: " << packetList);	//	DEBUG:  Changed packet list (to be converted to RTP)
 		result = AJA_SUCCESS(packetList.GetIPTransmitData (ancF1, ancF2, isProgressive, F2StartLine));
+#if 0	//	DEBUG
 		DMAWriteAnc(31, ancF1, ancF2, NTV2_CHANNEL_INVALID);	//	DEBUG: DMA RTP into frame 31
-#if defined(_DEBUG)
 		if (result)
 		{
 			AJAAncillaryList	comparePkts;	//	RTP into comparePkts
