@@ -1204,6 +1204,9 @@ static const TimecodeFormat	sNTV2Rate2TCFormat[] = {kTCFormatUnknown,	//	NTV2_FR
 static const uint16_t	sVPIDLineNumsF1[] = {	10,		10,		13,		9,		10,		10,		10,			10,			10,		10,		10,			10	};
 static const uint16_t	sVPIDLineNumsF2[] = {	572,	0,		276,	322,	0,		0,		0,			572,		0,		0,		0,			0	};
 
+//	SDI RX Status Registers (for setting/clearing "VPID Present" bits)
+static const uint32_t	gSDIInRxStatusRegs[] = {kRegRXSDI1Status, kRegRXSDI2Status, kRegRXSDI3Status, kRegRXSDI4Status, kRegRXSDI5Status, kRegRXSDI6Status, kRegRXSDI7Status, kRegRXSDI8Status, 0};
+
 
 bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & inOutXferInfo)
 {
@@ -1318,6 +1321,8 @@ bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTO
 			RCVDBG("WriteSDIInVPID chan=" << DEC(inChannel+1) << " VPIDa=" << xHEX0N(vpidA,4) << " VPIDb=" << xHEX0N(vpidB,4));
 		WriteSDIInVPID(inChannel, vpidA, vpidB);
 	}
+	WriteRegister(gSDIInRxStatusRegs[inChannel], vpidA ? 1 : 0, BIT(20), 20);	//	Set RX VPID Valid LinkA bit if vpidA non-zero
+	WriteRegister(gSDIInRxStatusRegs[inChannel], vpidB ? 1 : 0, BIT(21), 21);	//	Set RX VPID Valid LinkB bit if vpidB non-zero
 
 	//	Normalize to SDI/GUMP...
 	return AJA_SUCCESS(pkts.GetTransmitData(ancF1, ancF2, isProgressive, F2StartLine));
