@@ -7854,16 +7854,16 @@ typedef enum
 
 
 		/**
-			@brief	This is used to prelock video / audio / anc buffers used as the source or target of DMA transfers.
-			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
+			@brief	This is used to prelock a video/audio/anc buffer used as the source or target of DMA transfers.
+					The driver will page-lock the buffer immediately, so it won't have to be done for each DMA transfer.
+					This will reduce transfer time and CPU overhead at the cost of locking physical memory.
+			@note	This struct uses a constructor to properly initialize itself.
+					Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2BufferLock)
 			NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
 				NTV2_POINTER	mBuffer;			///< @brief	Virtual address of a buffer to prelock, and its length.
-													//			The driver will page lock the buffer immediately so this will not have to
-													//			be done for each DMA transfer.  This will reduce transfer time and CPU overhead
-													//			at the cost of locking physical memory.
-													//			A NULL buffer or zero length releases all locked buffers.
+													//			A NULL buffer (or zero length) releases all locked buffers.
 				ULWord			mFlags;				///< @brief Action flags (lock, unlock, etc)
 				ULWord			mReserved[32];		///< @brief	Reserved for future expansion.
 			NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
@@ -7873,14 +7873,13 @@ typedef enum
 					@name	Construction & Destruction
 				**/
 				///@{
-				explicit	NTV2BufferLock ();		///< @brief		Constructs a default NTV2BufferLock struct.
-							~NTV2BufferLock ();		///< @brief		My default destructor, which frees all allocatable fields that I own.
+				explicit	NTV2BufferLock ();		///< @brief	Constructs a default NTV2BufferLock struct.
+				inline		~NTV2BufferLock ()	{}	///< @brief	My default destructor, which frees all allocatable fields that I own.
 
 				/**
 					@brief	Constructs an NTV2BufferLock object to use in a CNTV2Card::DMABufferLock call.
 					@param	inBuffer		Specifies the memory to be locked for DMA operations.
-					@param	inByteCount		Specifies a the length of the buffer to lock in bytes.
-					@param	inFlags			Specifies action flags (lock, unlock, etc)
+					@param	inFlags			Specifies action flags (e.g. ::DMABUFFERLOCK_LOCK, etc.).
 				**/
 				explicit	NTV2BufferLock (const NTV2_POINTER & inBuffer, const ULWord inFlags);
 
@@ -7910,19 +7909,19 @@ typedef enum
 					@param	inByteCount			Specifies a the length of the buffer to lock in bytes.
 					@return	True if successful;  otherwise false.
 				**/
-				bool		SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount);
+				inline bool	SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)	{return SetBuffer(NTV2_POINTER(pInBuffer, inByteCount));}
 
 				/**
 					@brief	Sets the action flags for use in a subsequent call to CNTV2Card::DMABufferLock.
 					@param	inFlags			Specifies action flags (lock, unlock, etc)
 				**/
-				void		SetFlags (const ULWord inFlags);
+				inline void	SetFlags (const ULWord inFlags)		{NTV2_ASSERT_STRUCT_VALID;  mFlags = inFlags;}
 
 				/**
 					@brief	Resets the struct to its initialized state.
 					@note	This does not release locked buffers.
 				**/
-				void		Clear (void);
+				inline void	Clear (void)		{SetBuffer(NTV2_POINTER());}
 				///@}
 
 				/**
@@ -8304,6 +8303,14 @@ typedef enum
 				@return	The ostream being used.
 			**/
 			AJAExport inline std::ostream &	operator << (std::ostream & inOutStream, const NTV2DebugLogging & inObj)	{return inObj.Print (inOutStream);}
+
+			/**
+				@brief	Streams the given NTV2BufferLock struct to the specified ostream in a human-readable format.
+				@param		inOutStream		Specifies the ostream to use.
+				@param[in]	inObj			Specifies the NTV2BufferLock to be streamed.
+				@return	The ostream being used.
+			**/
+			AJAExport inline std::ostream &	operator << (std::ostream & inOutStream, const NTV2BufferLock & inObj)	{return inObj.Print (inOutStream);}
 		#endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 		#if defined (AJAMac)
