@@ -830,6 +830,11 @@ typedef enum _NTV2VideoFormat
         (__f__) < NTV2_FORMAT_END_UHD2_DEF_FORMAT)				\
     )
 
+#define NTV2_IS_8K_VIDEO_FORMAT(__f__)                                \
+    (   ((__f__) >= NTV2_FORMAT_FIRST_UHD2_FULL_DEF_FORMAT &&        \
+        (__f__) < NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS)                \
+    )
+
 #define NTV2_IS_372_DUALLINK_FORMAT(__f__)							\
     (	(__f__) == NTV2_FORMAT_1080p_5000_B	||						\
         (__f__) == NTV2_FORMAT_1080p_5994_B	||						\
