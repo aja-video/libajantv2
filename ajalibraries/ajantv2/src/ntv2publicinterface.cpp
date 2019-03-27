@@ -2273,23 +2273,32 @@ NTV2DebugLogging::NTV2DebugLogging(const bool inEnable)
 ostream & NTV2DebugLogging::Print (ostream & inOutStream) const
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	inOutStream	<< mHeader << ", sharedMem=" << mSharedMemory << ", " << mTrailer;
+	inOutStream	<< mHeader << " shMem=" << mSharedMemory << " " << mTrailer;
 	return inOutStream;
 }
 
 
 NTV2BufferLock::NTV2BufferLock()
-	:	mHeader	(NTV2_TYPE_AJABUFFERLOCK, sizeof (NTV2BufferLock))
+	:	mHeader	(NTV2_TYPE_AJABUFFERLOCK, sizeof(NTV2BufferLock))
 {
 	NTV2_ASSERT_STRUCT_VALID;
 }
 
 
-NTV2BufferLock::NTV2BufferLock(const ULWord * pInBuffer, const ULWord inByteCount, const ULWord inFlags)
-	:	mHeader	(NTV2_TYPE_AJABUFFERLOCK, sizeof (NTV2BufferLock))
+NTV2BufferLock::NTV2BufferLock (const NTV2_POINTER & inBuffer, const ULWord inFlags)
+	:	mHeader	(NTV2_TYPE_AJABUFFERLOCK, sizeof(NTV2BufferLock))
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	SetBuffer (pInBuffer, inByteCount);
+	SetBuffer(inBuffer);
+	SetFlags(inFlags);
+}
+
+
+NTV2BufferLock::NTV2BufferLock(const ULWord * pInBuffer, const ULWord inByteCount, const ULWord inFlags)
+	:	mHeader	(NTV2_TYPE_AJABUFFERLOCK, sizeof(NTV2BufferLock))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	SetBuffer (NTV2_POINTER(pInBuffer, inByteCount));
 	SetFlags (inFlags);
 }
 
@@ -2298,6 +2307,10 @@ NTV2BufferLock::~NTV2BufferLock ()
 {
 }
 
+bool NTV2BufferLock::SetBuffer (const NTV2_POINTER & inBuffer)
+{	//	Just copy address and length (no deep copy)...
+	return mBuffer.Set (inBuffer.GetHostPointer(), inBuffer.GetByteCount());
+}
 
 bool NTV2BufferLock::SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)
 {
@@ -2316,14 +2329,14 @@ void NTV2BufferLock::SetFlags (const ULWord inFlags)
 void NTV2BufferLock::Clear (void)
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	SetBuffer (NULL, 0);
+	SetBuffer (AJA_NULL, 0);
 }
 
 
 ostream & NTV2BufferLock::Print (ostream & inOutStream) const
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	inOutStream	<< mHeader << mBuffer << ", sharedMem=" << xHEX0N(mFlags, 8) << ", " << mTrailer;
+	inOutStream	<< mHeader << mBuffer << " flags=" << xHEX0N(mFlags,8) << " " << mTrailer;
 	return inOutStream;
 }
 

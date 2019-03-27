@@ -5640,8 +5640,8 @@ typedef enum
 		#define AUTOCIRCULATE_P2P_TARGET			BIT(30)		///< @brief prepare p2p target for asynchronous transfer (with message)
 		#define AUTOCIRCULATE_P2P_TRANSFER			BIT(31)		///< @brief transfer to p2p sync or async target
 
-		#define DMABUFFERLOCK_LOCK					BIT(0)		///< @brief page lock the buffer
-		#define DMABUFFERLOCK_UNLOCK_ALL			BIT(1)		///< @brief unlock all locked buffers
+		#define DMABUFFERLOCK_LOCK					BIT(0)		///< @brief Used in ::NTV2BufferLock to page lock the buffer.
+		#define DMABUFFERLOCK_UNLOCK_ALL			BIT(1)		///< @brief Used in ::NTV2BufferLock to unlock all locked buffers.
 
 		#if !defined (NTV2_BUILDING_DRIVER)
 			/**
@@ -7878,10 +7878,31 @@ typedef enum
 
 				/**
 					@brief	Constructs an NTV2BufferLock object to use in a CNTV2Card::DMABufferLock call.
-					@param	pInBuffer			Specifies a pointer to the host buffer. This buffer will be locked for DMA operations.
-					@param	inByteCount			Specifies a the length of the buffer to lock in bytes.
+					@param	inBuffer		Specifies the memory to be locked for DMA operations.
+					@param	inByteCount		Specifies a the length of the buffer to lock in bytes.
+					@param	inFlags			Specifies action flags (lock, unlock, etc)
+				**/
+				explicit	NTV2BufferLock (const NTV2_POINTER & inBuffer, const ULWord inFlags);
+
+				/**
+					@brief	Constructs an NTV2BufferLock object to use in a CNTV2Card::DMABufferLock call.
+					@param	pInBuffer		Specifies a pointer to the host buffer. This buffer will be locked for DMA operations.
+					@param	inByteCount		Specifies a the length of the buffer to lock in bytes.
+					@param	inFlags			Specifies action flags (lock, unlock, etc)
 				**/
 				explicit	NTV2BufferLock (const ULWord * pInBuffer, const ULWord inByteCount, const ULWord inFlags);
+				///@}
+
+				/**
+					@name	Changing
+				**/
+				///@{
+				/**
+					@brief	Sets the buffer to lock for use in a subsequent call to CNTV2Card::DMABufferLock.
+					@param	inBuffer		Specifies the memory to be locked for DMA operations.
+					@return	True if successful;  otherwise false.
+				**/
+				bool		SetBuffer (const NTV2_POINTER & inBuffer);
 
 				/**
 					@brief	Sets the buffer to lock for use in a subsequent call to CNTV2Card::DMABufferLock.
@@ -7898,7 +7919,8 @@ typedef enum
 				void		SetFlags (const ULWord inFlags);
 
 				/**
-					@brief	Resets the struct to its initialized state, this does not release locked buffers.
+					@brief	Resets the struct to its initialized state.
+					@note	This does not release locked buffers.
 				**/
 				void		Clear (void);
 				///@}

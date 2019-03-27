@@ -309,27 +309,23 @@ bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
 }
 
 
-bool
-CNTV2Card::DMABufferLock (const ULWord * pBuffer, const ULWord inByteCount)
+bool CNTV2Card::DMABufferLock (const ULWord * pBuffer, const ULWord inByteCount)
 {
 	if (!_boardOpened)
 		return false;		//	Device not open!
 
-	NTV2BufferLock lock(pBuffer, inByteCount, DMABUFFERLOCK_LOCK);
-
-	return NTV2Message (reinterpret_cast <NTV2_HEADER *> (&lock));
+	NTV2BufferLock lockMsg (NTV2_POINTER(pBuffer, inByteCount), DMABUFFERLOCK_LOCK);
+	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&lockMsg));
 }
 
 
-bool
-CNTV2Card::DMABufferUnlockAll ()
+bool CNTV2Card::DMABufferUnlockAll (void)
 {
 	if (!_boardOpened)
 		return false;		//	Device not open!
 
-	NTV2BufferLock lock(NULL, 0, DMABUFFERLOCK_UNLOCK_ALL);
-
-	return NTV2Message (reinterpret_cast <NTV2_HEADER *> (&lock));
+	NTV2BufferLock unlockAllMsg (NTV2_POINTER(), DMABUFFERLOCK_UNLOCK_ALL);
+	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&unlockAllMsg));
 }
 
 
