@@ -85,7 +85,7 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 		case DEVICE_ID_IO4KPLUS:
 			pDeviceServices = new Class4kServices(deviceID);
 			break;
-		case DEVICE_ID_KONA5_12G:
+		case DEVICE_ID_KONA5_4X12G:
 			pDeviceServices = new Class8kServices(deviceID);
 			break;
 		case DEVICE_ID_KONA4UFC:
@@ -3458,7 +3458,7 @@ void DeviceServices::SetDeviceMiscRegisters()
 		mCard->SetAESOutputSource(NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_4, chSelect <= NTV2_AudioMonitor7_8 ? NTV2_AudioChannel1_4 : NTV2_AudioChannel9_12);
 		mCard->SetAESOutputSource(NTV2_AudioChannel5_8, NTV2_AUDIOSYSTEM_4,  chSelect <= NTV2_AudioMonitor7_8 ? NTV2_AudioChannel5_8 : NTV2_AudioChannel13_16);
 	}
-	else if (mDeviceID == DEVICE_ID_KONA5_12G)
+	else if (mDeviceID == DEVICE_ID_KONA5_4X12G)
 	{
 		mCard->SetAudioOutputMonitorSource((NTV2AudioMonitorSelect)chSelect,  NTV2_CHANNEL1);
 		mCard->SetAESOutputSource(NTV2_AudioChannel1_4, NTV2_AUDIOSYSTEM_1, chSelect <= NTV2_AudioMonitor7_8 ? NTV2_AudioChannel1_4 : NTV2_AudioChannel9_12);
