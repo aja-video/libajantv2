@@ -4145,7 +4145,7 @@ typedef enum
 	NTV2_AnalogAudioIO_4In_4Out,
 	NTV2_AnalogAudioIO_4Out_4In,
 	NTV2_AnalogAudioIO_8In
-}NTV2AnalogAudioIO;
+} NTV2AnalogAudioIO;
 		
 typedef enum
 {
@@ -4153,7 +4153,7 @@ typedef enum
 	NTV2_VPID_TC_HLG,
 	NTV2_VPID_TC_PQ,
 	NTV2_VPID_TC_Unspecified
-}NTV2VPIDTransferCharacteristics;
+} NTV2VPIDTransferCharacteristics, NTV2VPIDXferChars;
 		
 typedef enum
 {
@@ -4161,13 +4161,13 @@ typedef enum
 	NTV2_VPID_Color_Reserved,
 	NTV2_VPID_Color_UHDTV,
 	NTV2_VPID_Color_Unknown
-}NTV2VPIDColorimetry;
+} NTV2VPIDColorimetry;
 		
 typedef enum
 {
 	NTV2_VPID_Luminance_YCbCr,
 	NTV2_VPID_Luminance_ICtCp
-}NTV2VPIDLuminance;
+} NTV2VPIDLuminance;
 
 
 #if !defined (NTV2_DEPRECATE)

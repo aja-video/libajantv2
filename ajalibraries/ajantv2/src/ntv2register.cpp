@@ -7945,17 +7945,17 @@ bool CNTV2Card::ReadSDIStatistics (NTV2SDIInStatistics & outStats)
 	return NTV2Message (reinterpret_cast <NTV2_HEADER *> (&outStats));
 }
 
-bool CNTV2Card::SetVPIDTransferCharacteristics (NTV2VPIDTransferCharacteristics inValue)
+bool CNTV2Card::SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue)
 {
 	return WriteRegister(kVRegNTV2VPIDTransferCharacteristics, inValue);
 }
 
-bool CNTV2Card::SetVPIDColorimetry (NTV2VPIDColorimetry inValue)
+bool CNTV2Card::SetVPIDColorimetry (const NTV2VPIDColorimetry inValue)
 {
 	return WriteRegister(kVRegNTV2VPIDColorimetry, inValue);
 }
 
-bool CNTV2Card::SetVPIDVPIDLuminance (NTV2VPIDLuminance inValue)
+bool CNTV2Card::SetVPIDVPIDLuminance (const NTV2VPIDLuminance inValue)
 {
 	return WriteRegister(kVRegNTV2VPIDLuminance, inValue);
 }
