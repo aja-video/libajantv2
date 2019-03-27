@@ -17,7 +17,7 @@
 
 
 /**
-	@brief		Converts a single 8-bit YCbCr '2vuy' raster line to 10-bit YCbCr 'v210'.
+	@brief		Converts a single 8-bit YCbCr '2vuy' raster line to 10-bit YCbCr 'v210' (from NTV2_FBF_8BIT_YCBCR to NTV2_FBF_10BIT_YCBCR ).
 	@param[in]	pInSrcLine_2vuy		Specifies a valid, non-NULL address of the first byte of the '2vuy'
 									raster line to be converted.
 	@param[out]	pOutDstLine_v210	Specifies a valid, non-NULL address of the first byte of the 'v210'
@@ -26,6 +26,17 @@
 	@return		True if successful;  otherwise false.
 **/
 AJAExport bool	ConvertLine_2vuy_to_v210 (const UByte * pInSrcLine_2vuy, ULWord * pOutDstLine_v210, const ULWord inNumPixels);
+
+/**
+	@brief		Converts a single 8-bit YCbCr '2vuy' raster line to 10-bit YCbCr 'v210' (from NTV2_FBF_8BIT_YCBCR to NTV2_FBF_8BIT_YCBCR_YUY2 ).
+	@param[in]	pInSrcLine_2vuy		Specifies a valid, non-NULL address of the first byte of the '2vuy'
+									raster line to be converted.
+	@param[out]	pOutDstLine_yuy2	Specifies a valid, non-NULL address of the first byte of the 'YUY2'
+									raster line to receive the converted data.
+	@param[in]	inNumPixels			The number of pixels to be converted.
+	@return		True if successful;  otherwise false.
+**/
+AJAExport bool	ConvertLine_2vuy_to_yuy2 (const UByte * pInSrcLine_2vuy, UWord * pOutDstLine_yuy2, const ULWord inNumPixels);
 
 /**
 	@brief		Converts a single 10-bit YCbCr 'v210' raster line to 8-bit YCbCr '2vuy'.
@@ -48,7 +59,7 @@ AJAExport bool	ConvertLine_v210_to_2vuy (const ULWord * pInSrcLine_v210, UByte *
 AJAExport bool	ConvertLine_v210_to_2vuy (const void * pInSrcLine_v210, std::vector<uint8_t> & outDstLine2vuy, const ULWord inNumPixels);
 
 /**
-	@brief		Converts a single 8-bit ABGR raster line to 10-bit ABGR.
+	@brief		Converts a single 8-bit ABGR raster line to 10-bit ABGR (from NTV2_FBF_ABGR to NTV2_FBF_10BIT_RGB ).
 	@param[in]	pInSrcLine_8bitABGR		Specifies a valid, non-NULL address of the first byte of the 8-bit ABGR raster line to be converted.
 	@param[out]	pOutDstLine_10BitABGR	Specifies a valid, non-NULL address of the first byte of the 10-bit ABGR raster line to receive the converted data.
 	@param[in]	inNumPixels				The number of pixels to be converted.
@@ -57,7 +68,7 @@ AJAExport bool	ConvertLine_v210_to_2vuy (const void * pInSrcLine_v210, std::vect
 AJAExport bool	ConvertLine_8bitABGR_to_10bitABGR (const UByte * pInSrcLine_8bitABGR,  ULWord * pOutDstLine_10BitABGR, const ULWord inNumPixels);
 
 /**
-	@brief		Converts a single 8-bit ABGR raster line to 10-bit RGB DPX.
+	@brief		Converts a single 8-bit ABGR raster line to 10-bit RGB DPX (from NTV2_FBF_ABGR to NTV2_FBF_10BIT_DPX ).
 	@param[in]	pInSrcLine_8bitABGR		Specifies a valid, non-NULL address of the first byte of the 8-bit ABGR raster line to be converted.
 	@param[out]	pOutDstLine_10BitDPX	Specifies a valid, non-NULL address of the first byte of the 10-bit RGB DPX raster line to receive the converted data.
 	@param[in]	inNumPixels				The number of pixels to be converted.
@@ -66,9 +77,36 @@ AJAExport bool	ConvertLine_8bitABGR_to_10bitABGR (const UByte * pInSrcLine_8bitA
 AJAExport bool	ConvertLine_8bitABGR_to_10bitRGBDPX (const UByte * pInSrcLine_8bitABGR,  ULWord * pOutDstLine_10BitDPX, const ULWord inNumPixels);
 
 /**
-	@brief		Converts a single 8-bit ABGR raster line to 48-bit RGB.
+	@brief		Converts a single 8-bit ABGR raster line to 10-bit RGB DPX (from NTV2_FBF_ABGR to NTV2_FBF_10BIT_DPX_LE ).
 	@param[in]	pInSrcLine_8bitABGR		Specifies a valid, non-NULL address of the first byte of the 8-bit ABGR raster line to be converted.
-	@param[out]	pOutDstLine_48BitRGB	Specifies a valid, non-NULL address of the first byte of the 48-bit RGB DPX raster line to receive the converted data.
+	@param[out]	pOutDstLine_10BitDPXLE	Specifies a valid, non-NULL address of the first byte of the 10-bit RGB DPX LE raster line to receive the converted data.
+	@param[in]	inNumPixels				The number of pixels to be converted.
+	@return		True if successful;  otherwise false.
+**/
+AJAExport bool	ConvertLine_8bitABGR_to_10bitRGBDPXLE (const UByte * pInSrcLine_8bitABGR,  ULWord * pOutDstLine_10BitDPXLE, const ULWord inNumPixels);
+
+/**
+	@brief		Converts a single 8-bit ABGR raster line to 24-bit RGB (from NTV2_FBF_ABGR to NTV2_FBF_24BIT_RGB ).
+	@param[in]	pInSrcLine_8bitABGR		Specifies a valid, non-NULL address of the first byte of the 8-bit ABGR raster line to be converted.
+	@param[out]	pOutDstLine_24BitRGB	Specifies a valid, non-NULL address of the first byte of the 24-bit RGB raster line to receive the converted data.
+	@param[in]	inNumPixels				The number of pixels to be converted.
+	@return		True if successful;  otherwise false.
+**/
+AJAExport bool	ConvertLine_8bitABGR_to_24bitRGB (const UByte * pInSrcLine_8bitABGR,  UByte * pOutDstLine_24BitRGB, const ULWord inNumPixels);
+
+/**
+	@brief		Converts a single 8-bit ABGR raster line to 24-bit BGR (from NTV2_FBF_ABGR to NTV2_FBF_24BIT_BGR ).
+	@param[in]	pInSrcLine_8bitABGR		Specifies a valid, non-NULL address of the first byte of the 8-bit ABGR raster line to be converted.
+	@param[out]	pOutDstLine_24BitBGR	Specifies a valid, non-NULL address of the first byte of the 24-bit BGR raster line to receive the converted data.
+	@param[in]	inNumPixels				The number of pixels to be converted.
+	@return		True if successful;  otherwise false.
+**/
+AJAExport bool	ConvertLine_8bitABGR_to_24bitBGR (const UByte * pInSrcLine_8bitABGR,  UByte * pOutDstLine_24BitBGR, const ULWord inNumPixels);
+
+/**
+	@brief		Converts a single 8-bit ABGR raster line to 48-bit RGB (from NTV2_FBF_ABGR to NTV2_FBF_48BIT_RGB ).
+	@param[in]	pInSrcLine_8bitABGR		Specifies a valid, non-NULL address of the first byte of the 8-bit ABGR raster line to be converted.
+	@param[out]	pOutDstLine_48BitRGB	Specifies a valid, non-NULL address of the first byte of the 48-bit RGB raster line to receive the converted data.
 	@param[in]	inNumPixels				The number of pixels to be converted.
 	@return		True if successful;  otherwise false.
 **/

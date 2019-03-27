@@ -156,7 +156,7 @@ Many AJA devices support most of these additional frame buffer formats:
 	<tr><td><b>8-Bit HDV</b>					<td>::NTV2_FBF_8BIT_HDV
 	<tr><td><b>24-Bit RGB</b>					<td>::NTV2_FBF_24BIT_RGB
 	<tr><td><b>24-Bit BGR</b>					<td>::NTV2_FBF_24BIT_BGR
-	<tr><td><b>10-Bit DPX LE</b>				<td>::NTV2_FBF_10BIT_DPX_LITTLEENDIAN
+	<tr><td><b>10-Bit DPX LE</b>				<td>::NTV2_FBF_10BIT_DPX_LE
 	<tr><td><b>48-Bit RGB 16 bpc</b>			<td>::NTV2_FBF_48BIT_RGB
 	<tr><td><b>10-Bit Raw YCbCr</b>				<td>::NTV2_FBF_10BIT_RAW_YCBCR	<i>new in 12.1</i>
 	<tr><td><b>10-Bit Raw RGB</b>				<td>::NTV2_FBF_10BIT_RAW_RGB		<i>new in 12.1</i>
@@ -279,7 +279,7 @@ This format, identified by the ::NTV2_FBF_24BIT_BGR enumeration constant, has th
 
 @subsubsection		fbformats10bitdpxle	10-Bit DPX Little-Endian
 
-This format, identified by the ::NTV2_FBF_10BIT_DPX_LITTLEENDIAN enumeration constant, has this single-pixel layout:
+This format, identified by the ::NTV2_FBF_10BIT_DPX_LE enumeration constant, has this single-pixel layout:
 
 @image	html	fbf-10bitdpxle-75.png
 

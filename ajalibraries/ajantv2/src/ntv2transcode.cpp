@@ -28,6 +28,22 @@ bool ConvertLine_2vuy_to_v210 (const UByte * pSrc2vuyLine,  ULWord * pDstv210Lin
 }	//	ConvertLine_2vuy_to_v210
 
 
+bool ConvertLine_2vuy_to_yuy2 (const UByte * pInSrcLine_2vuy, UWord * pOutDstLine_yuy2, const ULWord inNumPixels)
+{
+	if (!pInSrcLine_2vuy || !pOutDstLine_yuy2 || !inNumPixels)
+		return false;
+
+	const UWord* pSrc = reinterpret_cast<const UWord*>(pInSrcLine_2vuy);
+	UWord*       pDst = pOutDstLine_yuy2;
+
+	for (UWord pixIndex(0);   pixIndex < inNumPixels;   pixIndex++)
+	{
+		*pDst = NTV2EndianSwap16(*pSrc);
+		pDst++;  pSrc++;
+	}
+	return true;
+}
+
 
 bool ConvertLine_v210_to_2vuy (const ULWord * pSrcv210Line, UByte * pDst2vuyLine, const ULWord inNumPixels)
 {
@@ -100,10 +116,68 @@ bool ConvertLine_8bitABGR_to_10bitRGBDPX (const UByte * pInSrcLine_8bitABGR,  UL
 
 	for (ULWord pixCount = 0;   pixCount < inNumPixels;   pixCount++)
 	{
-		*pDst = ((*pSrc & 0x000000FF)     ) +
-				((*pSrc & 0x0000FC00) >> 2) + ((*pSrc & 0x00000300) << 14) +
-				((*pSrc & 0x00F00000) >> 4) + ((*pSrc & 0x000F0000) << 12);
-		pDst++; pSrc++;
+		*pDst = ((*pSrc & 0x000000FF)     ) +									//	Red
+				((*pSrc & 0x0000FC00) >> 2) + ((*pSrc & 0x00000300) << 14) +	//	Green
+				((*pSrc & 0x00F00000) >> 4) + ((*pSrc & 0x000F0000) << 12);		//	Blue
+		pDst++; pSrc++;	//	Next line
+	}
+	return true;
+}
+
+
+bool ConvertLine_8bitABGR_to_10bitRGBDPXLE (const UByte * pInSrcLine_8bitABGR,  ULWord * pOutDstLine_10BitDPXLE, const ULWord inNumPixels)
+{
+	if (!pInSrcLine_8bitABGR || !pOutDstLine_10BitDPXLE || !inNumPixels)
+		return false;
+
+	const ULWord* pSrc	= reinterpret_cast<const ULWord*>(pInSrcLine_8bitABGR);
+	ULWord* pDst		= reinterpret_cast<      ULWord*>(pOutDstLine_10BitDPXLE);
+
+	for (ULWord pixCount = 0;   pixCount < inNumPixels;   pixCount++)
+	{
+		*pDst = ((*pSrc & 0x000000FF) << 24) |		//	Red
+				((*pSrc & 0x0000FF00) <<  6) |		//	Green
+				((*pSrc & 0x00FF0000) >> 12);		//	Blue
+		pDst++; pSrc++;	//	Next line
+	}
+	return true;
+}
+
+
+bool ConvertLine_8bitABGR_to_24bitRGB (const UByte * pInSrcLine_8bitABGR,  UByte * pOutDstLine_24BitRGB, const ULWord inNumPixels)
+{
+	if (!pInSrcLine_8bitABGR || !pOutDstLine_24BitRGB || !inNumPixels)
+		return false;
+
+	const UByte* pSrc = reinterpret_cast<const UByte*>(pInSrcLine_8bitABGR);
+	UByte* pDst = reinterpret_cast<UByte*>(pOutDstLine_24BitRGB);
+	
+	for (ULWord pixCount = 0;   pixCount < inNumPixels;   pixCount++)
+	{
+		*pDst++ = *pSrc++;	//	Red
+		*pDst++ = *pSrc++;	//	Green
+		*pDst++ = *pSrc++;	//	Blue
+		pSrc++;				//	Skip over src Alpha
+	}
+	return true;
+}
+
+
+bool ConvertLine_8bitABGR_to_24bitBGR (const UByte * pInSrcLine_8bitABGR,  UByte * pOutDstLine_24BitBGR, const ULWord inNumPixels)
+{
+	if (!pInSrcLine_8bitABGR || !pOutDstLine_24BitBGR || !inNumPixels)
+		return false;
+
+	const UByte* pSrc = reinterpret_cast<const UByte*>(pInSrcLine_8bitABGR);
+	UByte* pDst = reinterpret_cast<UByte*>(pOutDstLine_24BitBGR);
+	
+	for (ULWord pixCount = 0;   pixCount < inNumPixels;   pixCount++)
+	{
+		UByte	r(*pSrc++),  g(*pSrc++),  b(*pSrc++);
+		*pDst++ = b;	//	Blue
+		*pDst++ = g;	//	Green
+		*pDst++ = r;	//	Red
+		pSrc++;			//	Skip over src Alpha
 	}
 	return true;
 }
