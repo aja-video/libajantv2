@@ -324,6 +324,8 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	case NTV2_FORMAT_4x4096x2160p_5994_B:
 	case NTV2_FORMAT_4x4096x2160p_6000_B:
 		byte1 = VPIDStandard_4320_QuadLink_12Gb;
+        break;
+            
 	default:
 		*pOutVPID = 0;
 		return true;
@@ -391,6 +393,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	{
 		byte3 |= NTV2_IS_2K_1080_VIDEO_FORMAT (outputFormat) ? (1UL << 6) : 0;	//	0x40
 		byte3 |= NTV2_IS_4K_4096_VIDEO_FORMAT (outputFormat) ? (1UL << 6) : 0;	//	0x40
+        byte3 |= NTV2_IS_8K_VIDEO_FORMAT (outputFormat) ? (1UL << 6) : 0;    //    0x40
 	}
 
 	//	Aspect ratio
@@ -407,11 +410,19 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	if ( NTV2_IS_4K_VIDEO_FORMAT (outputFormat) &&
 		 ! NTV2_IS_4K_4096_VIDEO_FORMAT (outputFormat))
 	{
-		if (is3G && !isLevelB && !isDualLink)
+		if (!isLevelB && !isDualLink)
 			byte3 |= (1UL << 7);			//	0x80
 		else
 			byte3 |= (1UL << 5);			//	0x20
 	}
+    
+    if ( NTV2_IS_UHD2_VIDEO_FORMAT (outputFormat))
+    {
+        if (!isLevelB && !isDualLink)
+            byte3 |= (1UL << 7);            //    0x80
+        else
+            byte3 |= (1UL << 5);            //    0x20
+    }
 
 	//Colorimetry
 	if (NTV2_IS_QUAD_QUAD_FORMAT(outputFormat) ||
