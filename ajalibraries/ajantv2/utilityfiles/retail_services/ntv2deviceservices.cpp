@@ -86,6 +86,7 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 			pDeviceServices = new Class4kServices(deviceID);
 			break;
 		case DEVICE_ID_KONA5_4X12G:
+		case DEVICE_ID_CORVID44_12G:
 			pDeviceServices = new Class8kServices(deviceID);
 			break;
 		case DEVICE_ID_KONA4UFC:
