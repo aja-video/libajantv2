@@ -515,7 +515,8 @@ For <b>Playout</b>:
 
 @section	ancrtpformat	RTP Anc Buffer Data Format
 
-The data in the ancillary data buffer matches the RTP specification:
+The data in the ancillary data buffer, except where noted (below), matches the RTP specification documented
+in <a href="https://tools.ietf.org/html/draft-ietf-payload-rtp-ancillary-14" target="_blank">SMPTE ST 291-1</a>:
 
 @image	html	fbf-rtp.png
 
