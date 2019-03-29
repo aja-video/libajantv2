@@ -105,6 +105,7 @@
 #define kReg3190_pkt_num_audio_channels         (0x0018/4)
 #define kReg3190_pkt_payload_len                (0x0020/4)
 #define kReg3190_pkt_chan_num                   (0x0028/4)
+#define kReg3190_pkt_stat_reset                 (0x0028/4)
 #define kReg3190_pkt_payload_type               (0x0030/4)
 #define kReg3190_pkt_ssrc                       (0x0038/4)
 #define kReg3190_pkt_tx_pkt_cnt                 (0x0040/4)
