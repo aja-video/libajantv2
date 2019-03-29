@@ -507,7 +507,7 @@ AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
 
         if (usernameFound)
         {
-            path.append("\\AppData\\Local\\Aja\\");
+            path.append("\\AppData\\Local\\AJA\\");
         }
         mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = path;
 
@@ -522,12 +522,12 @@ AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
         {
             path.erase();
     #ifdef UNICODE
-            PathAppend(szPath, L"Aja\\");
+            PathAppend(szPath, L"AJA\\");
             char tmpPath[MAX_PATH];
             ::wcstombs(tmpPath,szPath,MAX_PATH);
             path.append(tmpPath);
     #else
-            PathAppend(szPath, "Aja\\");
+            PathAppend(szPath, "AJA\\");
             path.append(szPath);
     #endif
             mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = path;
