@@ -12,6 +12,7 @@
 #pragma warning(disable:4996)
 #include <intrin.h>
 #include <io.h>
+#include <Knownfolders.h>
 #include <LM.h>
 #include <ShlObj.h>
 #include <Shlwapi.h>
@@ -414,23 +415,49 @@ AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
     {
         std::string path;
 
-        // We try 3 different ways to get the path to the user's home directory, we read directly
-        // from the registry rather than using a system call so we can use this within a service.
-        // 1) Read a value from HKEY_CURRENT_USER\Volatile Environment
-        //    ISSUES
-        //    - Does not work so well if used from a service, in this case it will return user 'SYSTEM'
-        // 2) Read a value from HKEY_LOCAL_MACHINE...\Authentication
-        //    ISSUES
-        //    - Does not work so well if multiple users logged in and the user using the desktop was
-        //      not the last one logged into the machine.
-        // 3) As a last attempt use an older method that does not work with microsoft id logins
-        //    http://forums.codeguru.com/showthread.php?317367-To-get-current-Logged-in-user-name-from-within-a-service
-        //    ISSUES
-        //    - Same as #2 above
+		// We try 4 different ways to get the path to the user's home directory,
+		// We start by using a system call and the try reading directly from the registry
+		// so we can use this within a service.
+		// 0) Read the path to the user home directory via SHGetFolderPathA()
+		//    ISSUES
+		//	  - Does not work so well if used from a service, in this case it will return:
+		//		C:\WINDOWS\system32\config\systemprofile
+		// 1) Read a value from HKEY_CURRENT_USER\Volatile Environment
+		//    ISSUES
+		//    - Does not work so well if used from a service, in this case it will return user 'SYSTEM'
+		// 2) Read a value from HKEY_LOCAL_MACHINE...\Authentication
+		//    ISSUES
+		//    - Does not work so well if multiple users logged in and the user using the desktop was
+		//      not the last one logged into the machine.
+		// 3) As a last attempt use an older method that does not work with microsoft id logins
+		//    http://forums.codeguru.com/showthread.php?317367-To-get-current-Logged-in-user-name-from-within-a-service
+		//    ISSUES
+		//    - Same as #2 above
 
         bool usernameFound = false;
 
+		// try method 0
+		{
+
+			char szPath[MAX_PATH];
+			HRESULT	hresult = SHGetFolderPathA(NULL, CSIDL_PROFILE, NULL, SHGFP_TYPE_CURRENT, szPath);
+			if (hresult == S_OK)
+			{
+				path.append(szPath);
+
+				std::vector<std::string> parts;
+				aja::split(path, '\\', parts);
+				std::string username;
+				if (parts.size() > 0)
+					username = parts.at(parts.size()-1);
+
+				if (!path.empty() && username != "systemprofile" && PathFileExistsA(path.c_str()))
+					usernameFound = true;
+			}
+		}
+
         // try method 1
+		if (!usernameFound)
         {
             std::string regVal = aja::read_registry_string(HKEY_CURRENT_USER,
                                                            "Volatile Environment",
