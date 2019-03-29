@@ -571,6 +571,7 @@ std::string CNTV2FirmwareInstallerThread::GetPrimaryDesignName(const NTV2DeviceI
         case DEVICE_ID_KONA1:                       return "kona_alpha";
         case DEVICE_ID_KONAHDMI:                    return "kona_hdmi";
 		case DEVICE_ID_KONA5:						return "kona_5";
+		case DEVICE_ID_KONA5_4X12G:					return "kona5_12g";
         default: return "";
 	}
 }
