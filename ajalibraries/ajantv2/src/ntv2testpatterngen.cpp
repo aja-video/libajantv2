@@ -2356,7 +2356,7 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 			// copy the test pattern line to the local "_pPackedLineBuffer"
 			memcpy(_pPackedLineBuffer, data, _dataLinePitch);
 			
-			if (_frameWidth == HD_NUMCOMPONENTPIXELS_2K || _frameWidth == HD_NUMCOMPONENTPIXELS_2K*2)
+			if (_frameWidth == HD_NUMCOMPONENTPIXELS_2K || _frameWidth == HD_NUMCOMPONENTPIXELS_2K * 2 || _frameWidth == HD_NUMCOMPONENTPIXELS_2K * 4)
 			{
 				UnPack10BitYCbCrBuffer(_pPackedLineBuffer, _pUnPackedLineBuffer, HD_NUMCOMPONENTPIXELS_1080);
 				ReSampleYCbCrSampleLine(AsWordPtr(_pUnPackedLineBuffer), AsWordPtr(_pUnPackedLineBuffer), 1920, 2048);
