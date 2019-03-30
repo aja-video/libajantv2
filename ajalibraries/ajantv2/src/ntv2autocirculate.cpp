@@ -1412,6 +1412,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 			vpidPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc);
 			if (vpidA)
 			{
+				vpidA = NTV2EndianSwap32BtoH(vpidA);
 				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidA), 4);
 				vpidPkt.SetLocationLineNumber(sVPIDLineNumsF1[standard]);
 				vpidPkt.GeneratePayloadData();
@@ -1419,6 +1420,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 			}
 			if (!isProgressive && vpidB)
 			{
+				vpidB = NTV2EndianSwap32BtoH(vpidB);
 				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidB), 4);
 				vpidPkt.SetLocationLineNumber(sVPIDLineNumsF2[standard]);
 				vpidPkt.GeneratePayloadData();
@@ -1548,12 +1550,14 @@ bool CNTV2Card::S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2_POINT
 			vpidPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc);
 			if (vpidA)
 			{
+				vpidA = NTV2EndianSwap32BtoH(vpidA);
 				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidA), 4);
 				vpidPkt.SetLocationLineNumber(sVPIDLineNumsF1[standard]);
 				pkts.AddAncillaryData(vpidPkt);			changed = true;
 			}
 			if (!isProgressive && vpidB)
 			{
+				vpidB = NTV2EndianSwap32BtoH(vpidB);
 				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidB), 4);
 				vpidPkt.SetLocationLineNumber(sVPIDLineNumsF2[standard]);
 				pkts.AddAncillaryData(vpidPkt);			changed = true;
