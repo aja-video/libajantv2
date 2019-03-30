@@ -3,6 +3,7 @@
 	@brief		Basic Functionality Tests for the AJA Anc Library.
 	@copyright	Copyright (c) 2013-2015 AJA Video Systems, Inc. All rights reserved.
 **/
+#define	DEBUG_BREAK_AFTER_FAILURE 1
 #include "ntv2bft.h"
 #include "ajabase/common/options_popt.h"
 #include "ajabase/common/performance.h"
@@ -1575,8 +1576,8 @@ gIsVerbose = true;
 
 				//	NOTE:	This test saves the F1 RTP buffers for use later by BFT_RTPToAncListToRTP...
 				gRTPBuffers[vFormat] = NTV2_POINTER(IPF1);
-//{ostringstream oss; IPF1.Dump(oss,0,0,16,4,16); LOGMYDEBUG("gRTPBuffers[" << ::NTV2VideoFormatToString(vFormat) << "]:" << oss.str());}
-//{ostringstream oss; IPF2.Dump(oss,0,0,16,4,16); LOGMYDEBUG("F2 RTP Buffer:" << endl << oss.str());}
+{ostringstream oss; IPF1.Dump(oss,0,0,16,4,16); LOGMYDEBUG("gRTPBuffers[" << ::NTV2VideoFormatToString(vFormat) << "]:" << oss.str());}
+{ostringstream oss; IPF2.Dump(oss,0,0,16,4,16); LOGMYDEBUG("F2 RTP Buffer:" << endl << oss.str());}
 
 				//	Receive packets from the IP buffer...
 				AJAAncillaryList	rxPkts;

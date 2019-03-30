@@ -1148,9 +1148,9 @@ class AJAExport AJARTPAncPayloadHeader
 		virtual bool			IsValid(void) const;
 
 		//	I/O
-		virtual bool			WriteULWordVector(std::vector<uint32_t> & outVector, const bool inReset = true) const;
-		virtual bool			WriteBuffer(NTV2_POINTER & outBuffer) const;
-		virtual bool			ReadULWordVector(const std::vector<uint32_t> & inVector);
+		virtual bool			WriteULWordVector(ULWordSequence & outVector, const bool inReset = true) const;
+		virtual bool			WriteBuffer(NTV2_POINTER & outBuffer, const ULWord inU32Offset = 0) const;
+		virtual bool			ReadULWordVector(const ULWordSequence & inVector);
 		virtual bool			ReadBuffer(const NTV2_POINTER & inBuffer);
 		static inline size_t	GetHeaderByteCount(void)			{return 5 * sizeof(uint32_t);}
 
@@ -1166,6 +1166,7 @@ class AJAExport AJARTPAncPayloadHeader
 		virtual inline AJARTPAncPayloadHeader &	SetSyncSourceID (const uint32_t inSyncSrcID)	{mSyncSourceID = inSyncSrcID;  return *this;}
 		virtual inline AJARTPAncPayloadHeader &	SetSequenceNumber (const uint32_t inSeqNumber)	{mSequenceNumber = inSeqNumber;  return *this;}
 		virtual inline AJARTPAncPayloadHeader &	SetCCBits (const uint8_t inCCBits)				{mCCBits = inCCBits & 0x0F;  return *this;}
+		virtual inline AJARTPAncPayloadHeader &	SetEndOfFieldOrFrame(const bool inIsLast = true){mMarkerBit = inIsLast;  return *this;}
 
 		//	Debugging
 		virtual bool							operator == (const AJARTPAncPayloadHeader & inRHS) const;
@@ -1181,15 +1182,15 @@ class AJAExport AJARTPAncPayloadHeader
 		uint8_t		mVBits;			//	Version:			Hardware gets/sets this -- should be 2
 		bool		mPBit;			//	Padding:			Hardware gets/sets this
 		bool		mXBit;			//	Extended Header:	Hardware gets/sets this
-		bool		mMarkerBit;		//	Marker Bit:			Hardware gets/sets this
+		bool		mMarkerBit;		//	Marker Bit (last RTP pkt):	Playout: WriteRTPPackets sets this
 		uint8_t		mCCBits;		//	CSRC Count:			Hardware gets/sets this
 		uint8_t		mPayloadType;	//	Payload Type:		Hardware gets/sets this
 		uint32_t	mSequenceNumber;//	Sequence Number:	Hardware gets/sets this
 		uint32_t	mTimeStamp;		//	Time Stamp:			Hardware gets/sets this
 		uint32_t	mSyncSourceID;	//	Sync Source ID:		Playout: client sets this
-		uint16_t	mPacketLength;	//	Packet Length:		Playout: WriteIPAncData sets this
-		uint8_t		mAncCount;		//	Anc Packet Count:	Playout: WriteIPAncData sets this
-		uint8_t		mFieldSignal;	//	Field Signal:		Playout: WriteIPAncData sets this
+		uint16_t	mPacketLength;	//	Packet Length:		Playout: WriteRTPPackets sets this
+		uint8_t		mAncCount;		//	Anc Packet Count:	Playout: WriteRTPPackets sets this
+		uint8_t		mFieldSignal;	//	Field Signal:		Playout: WriteRTPPackets sets this
 };	//	AJARTPAncPayloadHeader
 
 static inline std::ostream & operator << (std::ostream & inOutStrm, const AJARTPAncPayloadHeader & inObj)	{return inObj.Print(inOutStrm);}
@@ -1216,8 +1217,8 @@ class AJAExport AJARTPAncPacketHeader
 
 		virtual uint32_t		GetULWord(void) const;
 		virtual bool			SetFromULWord (const uint32_t inULWord);
-		virtual bool			WriteToULWordVector(std::vector<uint32_t> & outVector, const bool inReset = true) const;
-		virtual bool			ReadFromULWordVector(const std::vector<uint32_t> & inVector, const unsigned inIndex0);
+		virtual bool			WriteToULWordVector(ULWordSequence & outVector, const bool inReset = true) const;
+		virtual bool			ReadFromULWordVector(const ULWordSequence & inVector, const unsigned inIndex0);
 
 		//	Setting
 		virtual inline AJARTPAncPacketHeader &	SetCChannel(void)							{mCBit = true;  return *this;}

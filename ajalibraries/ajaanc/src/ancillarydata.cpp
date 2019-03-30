@@ -1880,7 +1880,7 @@ bool AJARTPAncPayloadHeader::SetULWordAtIndex(const unsigned inIndex0, const uin
 	return true;
 }
 
-bool AJARTPAncPayloadHeader::WriteULWordVector(std::vector<uint32_t> & outVector, const bool inReset) const
+bool AJARTPAncPayloadHeader::WriteULWordVector (ULWordSequence & outVector, const bool inReset) const
 {
 	if (inReset)
 		outVector.clear();
@@ -1891,19 +1891,18 @@ bool AJARTPAncPayloadHeader::WriteULWordVector(std::vector<uint32_t> & outVector
 	return true;
 }
 
-bool AJARTPAncPayloadHeader::WriteBuffer(NTV2_POINTER & outBuffer) const
+bool AJARTPAncPayloadHeader::WriteBuffer (NTV2_POINTER & outBuffer, const ULWord inU32Offset) const
 {
-	if (outBuffer.IsNULL())
-		return false;
-	if (outBuffer.GetByteCount() < GetHeaderByteCount())
-		return false;	//	Too small
-	uint32_t *	pU32s	(reinterpret_cast <uint32_t *> (outBuffer.GetHostPointer()));
+	const ULWord	startingByteOffset	(inU32Offset * sizeof(uint32_t));
+	if ((startingByteOffset + ULWord(GetHeaderByteCount())) > outBuffer.GetByteCount())
+		return false;	//	Buffer too small
+	uint32_t *	pU32s	(reinterpret_cast<uint32_t*>(outBuffer.GetHostAddress(startingByteOffset)));
 	for (unsigned ndx(0);  ndx < 5;  ndx++)
 		pU32s[ndx] = GetULWordAtIndex(ndx);
 	return true;
 }
 
-bool AJARTPAncPayloadHeader::ReadULWordVector(const std::vector<uint32_t> & inVector)
+bool AJARTPAncPayloadHeader::ReadULWordVector (const ULWordSequence & inVector)
 {
 	//	Note: uint32_t's are assumed to be in network byte order
 	if (inVector.size() < 5)
@@ -2033,7 +2032,7 @@ bool AJARTPAncPacketHeader::SetFromULWord (const uint32_t inULWord)
 	return true;
 }
 
-bool AJARTPAncPacketHeader::WriteToULWordVector(std::vector<uint32_t> & outVector, const bool inReset) const
+bool AJARTPAncPacketHeader::WriteToULWordVector (ULWordSequence & outVector, const bool inReset) const
 {
 	if (inReset)
 		outVector.clear();
@@ -2041,7 +2040,7 @@ bool AJARTPAncPacketHeader::WriteToULWordVector(std::vector<uint32_t> & outVecto
 	return true;
 }
 
-bool AJARTPAncPacketHeader::ReadFromULWordVector(const vector<uint32_t> & inVector, const unsigned inIndex0)
+bool AJARTPAncPacketHeader::ReadFromULWordVector (const ULWordSequence & inVector, const unsigned inIndex0)
 {
 	if (inIndex0 >= inVector.size())
 		return false;	//	Bad index -- out of range

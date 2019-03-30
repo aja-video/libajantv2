@@ -406,7 +406,7 @@ public:	//	INSTANCE METHODS
 		@param[in]	inReceivedData		The received packet words in network byte order.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						AddReceivedAncillaryData (const std::vector<uint32_t> & inReceivedData);
+	virtual AJAStatus						AddReceivedAncillaryData (const ULWordSequence & inReceivedData);
 
 
 	/**
@@ -453,6 +453,14 @@ public:	//	INSTANCE METHODS
 
 
 protected:
+	typedef std::vector<ULWordSequence>		U32Pkts;			///< @brief	Ordered sequence of U32 RTP packets
+	typedef U32Pkts::const_iterator			U32PktsConstIter;
+	typedef U32Pkts::iterator				U32PktsIter;
+
+	typedef std::list <AJAAncillaryData *>			AJAAncillaryDataList;
+	typedef AJAAncillaryDataList::const_iterator	AJAAncDataListConstIter;	///< @brief	Handy const iterator for iterating over members of an AJAAncillaryDataList.
+	typedef AJAAncillaryDataList::iterator			AJAAncDataListIter;			///< @brief	Handy non-const iterator for iterating over members of an AJAAncillaryDataList.
+
 	virtual AJAAncillaryDataType			GetAnalogAncillaryDataType (AJAAncillaryData * pInAncData);
 
 	static bool								BufferHasGUMPData (const NTV2_POINTER & inBuffer);
@@ -467,11 +475,30 @@ protected:
 	static AJAStatus						AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBuffer,
 																	AJAAncillaryList & packetList);
 
-protected:
-	typedef std::list <AJAAncillaryData *>			AJAAncillaryDataList;
-	typedef AJAAncillaryDataList::const_iterator	AJAAncDataListConstIter;	///< @brief	Handy const iterator for iterating over members of an AJAAncillaryDataList.
-	typedef AJAAncillaryDataList::iterator			AJAAncDataListIter;			///< @brief	Handy non-const iterator for iterating over members of an AJAAncillaryDataList.
+	/**
+		@brief		Answers with my F1 & F2 SMPTE anc packets encoded as RTP ULWordSequences.
+		@param[out]	outF1U32Pkts	Receives my F1 U32Pkts, containing zero or more RTP ULWordSequences.
+		@param[out]	outF2U32Pkts	Receives my F1 U32Pkts, containing zero or more RTP ULWordSequences.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						GetRTPPackets (U32Pkts & outF1U32Pkts,
+															U32Pkts & outF2U32Pkts,
+															const bool inIsProgressive,
+															const uint32_t inF2StartLine);
+	/**
+		@brief		Fills the buffer with the given RTP packets.
+		@param		theBuffer		The buffer to be filled.
+		@param[in]	inRTPPkts		The RTP packets, a vector of zero or more RTP ULWordSequences.
+		@param[in]	inIsF2			Specify false for Field1 (or progressive or Psf);  true for Field2.
+		@param[in]	inIsProgressive	Specify false for interlace;  true for progressive/Psf.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	static AJAStatus						WriteRTPPackets (NTV2_POINTER & theBuffer,
+															const U32Pkts & inRTPPkts,
+															const bool	inIsF2,
+															const bool inIsProgressive);
 
+private:
 	AJAAncillaryDataList	m_ancList;		///< @brief	My packet list
 
 };	//	AJAAncillaryList
