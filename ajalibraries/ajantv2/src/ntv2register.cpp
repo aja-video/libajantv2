@@ -3939,12 +3939,11 @@ bool CNTV2Card::SetSDIOutVPID (const ULWord inValueA, const ULWord inValueB, con
 
 bool CNTV2Card::GetSDIOutVPID (ULWord & outValueA, ULWord & outValueB, const UWord inOutputSpigot)
 {
-	if (IS_OUTPUT_SPIGOT_INVALID (inOutputSpigot))
-		return false;
-	if (!ReadRegister (gChannelToSDIOutVPIDARegNum[inOutputSpigot], outValueA))
+	if (IS_OUTPUT_SPIGOT_INVALID(inOutputSpigot))
 		return false;
 
-	return ReadRegister (gChannelToSDIOutVPIDBRegNum[inOutputSpigot], outValueB);
+	return ReadRegister(gChannelToSDIOutVPIDARegNum[inOutputSpigot], outValueA)
+			&&  ReadRegister(gChannelToSDIOutVPIDBRegNum[inOutputSpigot], outValueB);
 
 }	//	GetSDIOutVPID
 
