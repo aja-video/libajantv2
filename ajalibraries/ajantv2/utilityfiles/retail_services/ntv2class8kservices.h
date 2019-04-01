@@ -22,16 +22,6 @@ public:
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();
 	virtual void SetDeviceMiscRegisters ();
-
-protected:
-	bool mHasHdmiIn;
-	bool mHasHdmiOut;
-	bool mHasSdiOut5;
-	bool mHasAnalogOut;
-	bool mHasCSC5;
-	bool mHasLUT5;
-	bool mHas12G;
-	bool mHas4kQuarter;
 };
 
 
