@@ -1410,6 +1410,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 			vpidPkt.SetLocationDataStream(AJAAncillaryDataStream_1);
 			vpidPkt.SetLocationDataChannel(AJAAncillaryDataChannel_Y);
 			vpidPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc);
+XMTFAIL("WTHIGO Raw|BE:  A=" << xHEX0N(vpidA,8) << "|" << xHEX0N(NTV2EndianSwap32(vpidA),8) << " B=" << xHEX0N(vpidB,8) << "|" << xHEX0N(NTV2EndianSwap32(vpidB),8));	//	** MrBill **	TEMP DEBUG
 			if (vpidA)
 			{
 				vpidA = NTV2EndianSwap32BtoH(vpidA);
