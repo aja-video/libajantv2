@@ -477,6 +477,7 @@ protected:
 
 	/**
 		@brief		Answers with my F1 & F2 SMPTE anc packets encoded as RTP ULWordSequences.
+					The returned ULWords are already network-byte-order, ready to encapsulate into an RTP packet buffer.
 		@param[out]	outF1U32Pkts	Receives my F1 U32Pkts, containing zero or more RTP ULWordSequences.
 		@param[out]	outF2U32Pkts	Receives my F1 U32Pkts, containing zero or more RTP ULWordSequences.
 		@return		AJA_STATUS_SUCCESS if successful.

@@ -1120,80 +1120,242 @@ static inline std::ostream & operator << (std::ostream & inOutStream, const AJAA
 **/
 class AJAExport AJARTPAncPayloadHeader
 {
-	//	Class Methods
-	public:
-		static bool				BufferStartsWithRTPHeader(const NTV2_POINTER & inBuffer);
+	public: // CLASS METHODS
+	/**
+		@name	Construction & Destruction
+	**/
+	///@{
+		/**
+			@return		True if the given buffer starts with an RTP packet header.
+			@param[in]	inBuffer		Specifies the buffer to inspect.
+		**/
+		static bool				BufferStartsWithRTPHeader (const NTV2_POINTER & inBuffer);
 
-	//	Instance Methods
-	public:
-								AJARTPAncPayloadHeader();
-		virtual inline			~AJARTPAncPayloadHeader()			{}
+		static inline size_t	GetHeaderByteCount (void)	{return 5 * sizeof(uint32_t);}	///< @return	The number of bytes in an RTP header.
 
-		//	Inquiry Methods
-		virtual inline bool		IsEndOfFieldOrFrame(void) const		{return mMarkerBit;}
-		virtual inline uint8_t	GetPayloadType(void) const			{return mPayloadType;}
-		virtual inline uint32_t	GetSequenceNumber(void) const		{return mSequenceNumber;}
-		virtual inline uint32_t	GetTimeStamp(void) const			{return mTimeStamp;}
-		virtual inline uint32_t	GetSyncSourceID(void) const			{return mSyncSourceID;}
-		virtual inline uint16_t	GetPacketLength(void) const			{return mPacketLength;}
-		virtual inline uint8_t	GetAncPacketCount(void) const		{return mAncCount;}
-		virtual inline uint8_t	GetFieldSignal(void) const			{return mFieldSignal & 3;}
-		virtual inline bool		IsProgressive(void) const			{return mFieldSignal == 0;}
-		virtual inline bool		NoFieldSpecified(void) const		{return IsProgressive();}
-		virtual inline bool		IsField1(void) const				{return mFieldSignal == 2;}
-		virtual inline bool		IsField2(void) const				{return mFieldSignal == 3;}
-		virtual bool			GetULWordAtIndex(const unsigned inIndex0, uint32_t & outULWord) const;
-		virtual inline uint32_t	GetULWordAtIndex(const unsigned inIndex0) const		{uint32_t result(0); GetULWordAtIndex(inIndex0, result); return result;}
-		virtual bool			IsNULL(void) const;
-		virtual bool			IsValid(void) const;
+		/**
+			@return		A string containing a human-readable description of the given Field Bits value.
+			@param[in]	inFBits		Specifies the Field Bits of interest.
+		**/
+		static const std::string &	FieldSignalToString (const uint8_t inFBits);
+	///@}
 
-		//	I/O
-		virtual bool			WriteULWordVector(ULWordSequence & outVector, const bool inReset = true) const;
-		virtual bool			WriteBuffer(NTV2_POINTER & outBuffer, const ULWord inU32Offset = 0) const;
-		virtual bool			ReadULWordVector(const ULWordSequence & inVector);
-		virtual bool			ReadBuffer(const NTV2_POINTER & inBuffer);
-		static inline size_t	GetHeaderByteCount(void)			{return 5 * sizeof(uint32_t);}
 
-		//	Setting
-		virtual bool							SetULWordAtIndex(const unsigned inIndex0, const uint32_t inULWord);
-		virtual inline AJARTPAncPayloadHeader &	SetField1 (void)								{return SetFieldSignal(2);}
-		virtual inline AJARTPAncPayloadHeader &	SetField2 (void)								{return SetFieldSignal(3);}
-		virtual inline AJARTPAncPayloadHeader &	SetProgressive (void)							{return SetFieldSignal(0);}
-		virtual inline AJARTPAncPayloadHeader &	SetPayloadType (const uint8_t inPayloadType)	{mPayloadType = inPayloadType & 0x7F;  return *this;}
-		virtual inline AJARTPAncPayloadHeader &	SetPacketLength (const uint16_t inPktLength)	{mPacketLength = inPktLength;  return *this;}
-		virtual inline AJARTPAncPayloadHeader &	SetAncPacketCount (const uint8_t inAncCount)	{mAncCount = inAncCount;  return *this;}
-		virtual inline AJARTPAncPayloadHeader &	SetTimeStamp (const uint32_t inTimeStamp)		{mTimeStamp = inTimeStamp;  return *this;}
-		virtual inline AJARTPAncPayloadHeader &	SetSyncSourceID (const uint32_t inSyncSrcID)	{mSyncSourceID = inSyncSrcID;  return *this;}
-		virtual inline AJARTPAncPayloadHeader &	SetSequenceNumber (const uint32_t inSeqNumber)	{mSequenceNumber = inSeqNumber;  return *this;}
-		virtual inline AJARTPAncPayloadHeader &	SetCCBits (const uint8_t inCCBits)				{mCCBits = inCCBits & 0x0F;  return *this;}
-		virtual inline AJARTPAncPayloadHeader &	SetEndOfFieldOrFrame(const bool inIsLast = true){mMarkerBit = inIsLast;  return *this;}
+	public: // INSTANCE METHODS
+								AJARTPAncPayloadHeader ();		///< @brief	My default constructor
+		virtual inline			~AJARTPAncPayloadHeader ()	{}	///< @brief	My destructor
 
-		//	Debugging
-		virtual bool							operator == (const AJARTPAncPayloadHeader & inRHS) const;
-		virtual inline bool						operator != (const AJARTPAncPayloadHeader & inRHS) const	{return !(operator == (inRHS));}
-		virtual std::ostream &					Print (std::ostream & inOutStream) const;
-		static const std::string &				FieldSignalToString (const uint8_t inFBits);
+	/**
+		@name	Inquiry Methods
+	**/
+	///@{
+		virtual bool			IsNULL (void) const;													///< @return	True if all of my fields are currently zero or false.
+		virtual bool			IsValid (void) const;													///< @return	True if I'm considered "valid" in my current state.
+		virtual inline bool		IsEndOfFieldOrFrame (void) const		{return mMarkerBit;}			///< @return	True if my current Marker Bit value is non-zero;  otherwise false.
+		virtual inline uint8_t	GetPayloadType (void) const				{return mPayloadType;}			///< @return	My current Payload Type value.
+		virtual inline uint32_t	GetSequenceNumber (void) const			{return mSequenceNumber;}		///< @return	My current 32-bit Sequence Number value, in native host byte order.
+		virtual inline uint32_t	GetTimeStamp (void) const				{return mTimeStamp;}			///< @return	My current 32-bit RTP Time Stamp value, in native host byte order.
+		virtual inline uint32_t	GetSyncSourceID (void) const			{return mSyncSourceID;}			///< @return	My current Sync Source ID (SSID) value, in native host byte order.
+		virtual inline uint16_t	GetPacketLength (void) const			{return mPacketLength;}			///< @return	My current RTP packet length, in bytes, in native host byte order.
+		virtual inline uint8_t	GetAncPacketCount (void) const			{return mAncCount;}				///< @return	My current Anc packet count.
+		virtual inline uint8_t	GetFieldSignal (void) const				{return mFieldSignal & 3;}		///< @return	My current 3-bit Field Bits value.
+		virtual inline bool		IsProgressive (void) const				{return mFieldSignal == 0;}		///< @return	True if my current Field Bits indicate Progressive video.
+		virtual inline bool		NoFieldSpecified (void) const			{return IsProgressive();}		///< @return	True if my current Field Bits indicate No Field Specified.
+		virtual inline bool		IsField1 (void) const					{return mFieldSignal == 2;}		///< @return	True if my current Field Bits indicate Field1.
+		virtual inline bool		IsField2 (void) const					{return mFieldSignal == 3;}		///< @return	True if my current Field Bits indicate Field2.
+
+		/**
+			@return		True if the RHS payload header state matches my own current state;  otherwise false.
+			@param[in]	inRHS	The RHS operand ::AJARTPAncPayloadHeader to compare with me.
+		**/
+		virtual bool			operator == (const AJARTPAncPayloadHeader & inRHS) const;
+
+		/**
+			@return		True if the RHS payload header state doesn't match my own current state;  otherwise false.
+			@param[in]	inRHS	The RHS operand ::AJARTPAncPayloadHeader to compare with me.
+		**/
+		virtual inline bool		operator != (const AJARTPAncPayloadHeader & inRHS) const	{return !(operator == (inRHS));}
+
+		/**
+			@brief		Writes a human-readable dump of my current state into a given output stream.
+			@param		inOutStream		The output stream to write into.
+			@return		A reference to the specified output stream.
+		**/
+		virtual std::ostream &	Print (std::ostream & inOutStream) const;
+	///@}
+
+	/**
+		@name	I/O Methods
+	**/
+	///@{
+		/**
+			@brief		Writes an RTP packet header based on my current state into the given ::ULWordSequence.
+						Each 32-bit word will be written in network byte order.
+			@param[out]	outVector	Specifies the ::ULWordSequence to receive the RTP header words.
+			@param[in]	inReset		Clears the ::ULWordSequence before appending my header, if true (the default).
+									Specify false to append the 32-bit words to the ::ULWordSequence without first clearing it.
+			@return		True if successful;  otherwise false.
+		**/
+		virtual bool			WriteToULWordVector (ULWordSequence & outVector, const bool inReset = true) const;
+
+		/**
+			@brief		Writes an RTP packet header based on my current state into the given buffer.
+						Each 32-bit word will be written in network byte order.
+			@param[out]	outBuffer	Specifies the buffer to modify.
+			@param[in]	inU32Offset	Specifies where to start writing in the buffer, as a count of 32-bit words.
+									Defaults to zero (the start of the buffer).
+			@return		True if successful;  otherwise false.
+		**/
+		virtual bool			WriteToBuffer (NTV2_POINTER & outBuffer, const ULWord inU32Offset = 0) const;
+
+		/**
+			@brief		Resets my current state from the RTP packet header stored in the given ::ULWordSequence.
+						Each 32-bit word in the vector is expected to be in network byte order.
+			@param[in]	inVector	A vector of 32-bit words. Each word must be in network byte order.
+			@return		True if successful;  otherwise false.
+		**/
+		virtual bool			ReadFromULWordVector (const ULWordSequence & inVector);
+
+		/**
+			@brief		Resets my current state from the RTP packet header stored in the given buffer.
+						Each 32-bit word in the vector is expected to be in network byte order.
+			@param[in]	inBuffer	A buffer containing a number of 32-bit words. Each word must be in network byte order.
+			@return		True if successful;  otherwise false.
+		**/
+		virtual bool			ReadFromBuffer (const NTV2_POINTER & inBuffer);
+	///@}
+
+	/**
+		@name	Setters
+	**/
+	///@{
+		/**
+			@brief		Sets my Field Signal value to "Field 1".
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPayloadHeader &	SetField1 (void)									{return SetFieldSignal(2);}
+
+		/**
+			@brief		Sets my Field Signal value to "Field 2".
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPayloadHeader &	SetField2 (void)									{return SetFieldSignal(3);}
+
+		/**
+			@brief		Sets my Field Signal value to "Progressive".
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPayloadHeader &	SetProgressive (void)								{return SetFieldSignal(0);}
+
+		/**
+			@brief		Sets my Payload Type value.
+			@param[in]	inPayloadType	Specifies my new Payload Type value.
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPayloadHeader &	SetPayloadType (const uint8_t inPayloadType)		{mPayloadType = inPayloadType & 0x7F;  return *this;}
+
+		/**
+			@brief		Sets my RTP Packet Length value.
+			@param[in]	inPktLength		Specifies my new RTP Packet Length value, which must be in native host byte order.
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPayloadHeader &	SetPacketLength (const uint16_t inPktLength)		{mPacketLength		= inPktLength;		return *this;}
+
+		/**
+			@brief		Sets my RTP Packet Count value.
+			@param[in]	inAncCount	Specifies my new Payload Type value.
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPayloadHeader &	SetAncPacketCount (const uint8_t inAncCount)		{mAncCount			= inAncCount;		return *this;}
+
+		/**
+			@brief		Sets my RTP Packet Time Stamp value.
+			@param[in]	inTimeStamp		Specifies my new Packet Time Stamp value, which must be in native host byte order.
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPayloadHeader &	SetTimeStamp (const uint32_t inTimeStamp)			{mTimeStamp			= inTimeStamp;		return *this;}
+
+		/**
+			@brief		Sets my RTP Packet Sync Source ID value.
+			@param[in]	inSyncSrcID		Specifies my new Sync Source ID value, which must be in native host byte order.
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPayloadHeader &	SetSyncSourceID (const uint32_t inSyncSrcID)		{mSyncSourceID		= inSyncSrcID;		return *this;}
+
+		/**
+			@brief		Sets my RTP Packet Sequence Number value.
+			@param[in]	inSeqNumber		Specifies my new Sequence Number value, which must be in native host byte order.
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPayloadHeader &	SetSequenceNumber (const uint32_t inSeqNumber)		{mSequenceNumber	= inSeqNumber;		return *this;}
+
+		/**
+			@brief		Sets my RTP Packet CC Bits value.
+			@param[in]	inCCBits		Specifies my new CC Bits value.
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPayloadHeader &	SetCCBits (const uint8_t inCCBits)					{mCCBits			= inCCBits & 0x0F;	return *this;}
+
+		/**
+			@brief		Sets my RTP Packet End-Of-Field or End-Of-Frame (Marker Bit) value.
+			@param[in]	inIsLast		Specify true to set the Marker Bit (the default);  otherwise specify false to clear it.
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPayloadHeader &	SetEndOfFieldOrFrame (const bool inIsLast = true)	{mMarkerBit			= inIsLast;			return *this;}
+	///@}
 
 	protected:
+		/**
+			@brief		Resets (part of) my state from a given 32-bit word in an existing RTP header.
+			@param[in]	inIndex0	Specifies which 32-bit word of the RTP header as a zero-based index number (must be under 5).
+			@param[in]	inULWord	Specifies the 32-bit word from the RTP header (in network-byte-order).
+			@return		True if successful;  otherwise false.
+		**/
+		virtual bool							SetFromPacketHeaderULWordAtIndex (const unsigned inIndex0, const uint32_t inULWord);
+
+		/**
+			@brief		Sets my Field Signal value from the given 8-bit value.
+			@param[in]	inFieldSignal	Specifies my new Field Signal value. Only the least significant 3 bits are used.
+			@return		A non-constant reference to myself.
+		**/
 		virtual inline AJARTPAncPayloadHeader &	SetFieldSignal (const uint8_t inFieldSignal)	{mFieldSignal = (inFieldSignal & 0x03);  return *this;}
 
-	//	Instance Data
-	private:
-		uint8_t		mVBits;			//	Version:			Hardware gets/sets this -- should be 2
-		bool		mPBit;			//	Padding:			Hardware gets/sets this
-		bool		mXBit;			//	Extended Header:	Hardware gets/sets this
-		bool		mMarkerBit;		//	Marker Bit (last RTP pkt):	Playout: WriteRTPPackets sets this
-		uint8_t		mCCBits;		//	CSRC Count:			Hardware gets/sets this
-		uint8_t		mPayloadType;	//	Payload Type:		Hardware gets/sets this
-		uint32_t	mSequenceNumber;//	Sequence Number:	Hardware gets/sets this
-		uint32_t	mTimeStamp;		//	Time Stamp:			Hardware gets/sets this
-		uint32_t	mSyncSourceID;	//	Sync Source ID:		Playout: client sets this
-		uint16_t	mPacketLength;	//	Packet Length:		Playout: WriteRTPPackets sets this
-		uint8_t		mAncCount;		//	Anc Packet Count:	Playout: WriteRTPPackets sets this
-		uint8_t		mFieldSignal;	//	Field Signal:		Playout: WriteRTPPackets sets this
+		/**
+			@brief		Answers with the 32-bit RTP packet header value for the given position. The returned value will be in network byte order.
+			@param[in]	Specifies which 32-bit word of the RTP packet header to calculate and return. It's a zero-based index number, and must be under 5.
+			@param[out]	Receives the requested 32-bit RTP packet header value. It will be in network byte order.
+			@return		True if successful;  otherwise false.
+		**/
+		virtual bool			GetPacketHeaderULWordForIndex (const unsigned inIndex0, uint32_t & outULWord) const;
+
+		/**
+			@return		The 32-bit RTP packet header value for a given position. It will be in network byte order.
+			@param[in]	Specifies which 32-bit word of the RTP packet header to calculate and return. It's a zero-based index number, and must be under 5.
+		**/
+		virtual inline uint32_t	GetPacketHeaderULWordForIndex (const unsigned inIndex0) const		{uint32_t result(0); GetPacketHeaderULWordForIndex(inIndex0, result); return result;}
+
+	private: // INSTANCE DATA
+		uint8_t		mVBits;			///< @brief	Version -- currently should be 0x02
+		bool		mPBit;			///< @brief	Padding -- hardware gets/sets this
+		bool		mXBit;			///< @brief	Extended Header -- Hardware gets/sets this
+		bool		mMarkerBit;		///< @brief	Marker Bit (last RTP pkt?) --	Playout: WriteRTPPackets sets this
+		uint8_t		mCCBits;		///< @brief	CSRC Count -- Hardware gets/sets this
+		uint8_t		mPayloadType;	///< @brief	Payload Type -- Hardware gets/sets this
+		uint32_t	mSequenceNumber;///< @brief	Sequence Number (native host byte order) -- Hardware gets/sets this
+		uint32_t	mTimeStamp;		///< @brief	Time Stamp (native host byte order) -- Hardware gets/sets this
+		uint32_t	mSyncSourceID;	///< @brief	Sync Source ID (native host byte order) -- Playout: client sets this
+		uint16_t	mPacketLength;	///< @brief	Total RTP Packet Length, in bytes (native host byte order) -- Playout: WriteRTPPackets sets this
+		uint8_t		mAncCount;		///< @brief	Anc Packet Count -- Playout: WriteRTPPackets sets this
+		uint8_t		mFieldSignal;	///< @brief	Field Signal -- Playout: WriteRTPPackets sets this
 };	//	AJARTPAncPayloadHeader
 
-static inline std::ostream & operator << (std::ostream & inOutStrm, const AJARTPAncPayloadHeader & inObj)	{return inObj.Print(inOutStrm);}
+/**
+	@brief		Streams a human-readable representation of the given ::AJARTPAncPayloadHeader to the given output stream.
+	@param[in]	inOutStrm		Specifies the output stream to receive the payload header's state information.
+	@param[in]	inObj			Specifies the ::AJARTPAncPayloadHeader of interest.
+	@return		A non-constant reference to the given output stream.
+**/
+static inline std::ostream & operator << (std::ostream & inOutStrm,  const AJARTPAncPayloadHeader & inObj)	{return inObj.Print(inOutStrm);}
 
 
 /**
@@ -1201,48 +1363,141 @@ static inline std::ostream & operator << (std::ostream & inOutStrm, const AJARTP
 **/
 class AJAExport AJARTPAncPacketHeader
 {
-	//	Instance Methods
-	public:
-								AJARTPAncPacketHeader();
-		explicit				AJARTPAncPacketHeader(const AJAAncillaryDataLocation & inLocation);
-		virtual inline			~AJARTPAncPacketHeader()			{}
+	public:  // INSTANCE METHODS
+	/**
+		@name	Construction & Destruction
+	**/
+	///@{
+								AJARTPAncPacketHeader ();		///< @brief	My default constructor
+		explicit				AJARTPAncPacketHeader (const AJAAncillaryDataLocation & inLocation);	///< @brief	Constructs me from an ::AJAAncillaryDataLocation
+		virtual inline			~AJARTPAncPacketHeader ()		{}		///< @brief	My destructor
+	///@}
 
-		//	Inquiry Methods
-		virtual inline bool		IsCBitSet(void) const				{return mCBit;}
-		virtual inline bool		IsSBitSet(void) const				{return mSBit;}
-		virtual inline uint16_t	GetLineNumber(void) const			{return mLineNum;}
-		virtual inline uint16_t	GetHorizOffset(void) const			{return mHOffset;}
-		virtual inline uint8_t	GetStreamNumber(void) const			{return mStreamNum;}
-		virtual AJAAncillaryDataLocation	AsDataLocation(void) const;
+	/**
+		@name	Inquiry Methods
+	**/
+	///@{
+		virtual uint32_t		GetULWord (void) const;										///< @return	The 4-byte header value (in network byte order) that represents my current state.
+		virtual inline bool		IsCBitSet (void) const				{return mCBit;}			///< @return	True if my "C" bit ("C" channel bit) is set; otherwise false.
+		virtual inline bool		IsSBitSet (void) const				{return mSBit;}			///< @return	True if my "S" bit (Data Stream valid bit) is set; otherwise false.
+		virtual inline uint16_t	GetLineNumber (void) const			{return mLineNum;}		///< @return	My current line number value (in host native byte order).
+		virtual inline uint16_t	GetHorizOffset (void) const			{return mHOffset;}		///< @return	My current horizontal offset value (in host native byte order).
+		virtual inline uint8_t	GetStreamNumber (void) const		{return mStreamNum;}	///< @return	My current data stream number value.
+		virtual AJAAncillaryDataLocation	AsDataLocation(void) const;						///< @return	An ::AJAAncillaryDataLocation that represents my current state.
 
-		virtual uint32_t		GetULWord(void) const;
-		virtual bool			SetFromULWord (const uint32_t inULWord);
-		virtual bool			WriteToULWordVector(ULWordSequence & outVector, const bool inReset = true) const;
-		virtual bool			ReadFromULWordVector(const ULWordSequence & inVector, const unsigned inIndex0);
-
-		//	Setting
-		virtual inline AJARTPAncPacketHeader &	SetCChannel(void)							{mCBit = true;  return *this;}
-		virtual inline AJARTPAncPacketHeader &	SetYChannel(void)							{mCBit = false;  return *this;}
-		virtual inline AJARTPAncPacketHeader &	SetLineNumber(const uint16_t inLineNum)		{mLineNum = inLineNum & 0x7FF;  return *this;}
-		virtual inline AJARTPAncPacketHeader &	SetHorizOffset(const uint16_t inHOffset)	{mHOffset = inHOffset & 0x0FFF;  return *this;}
-		virtual inline AJARTPAncPacketHeader &	SetStreamNumber(const uint8_t inStreamNum)	{mStreamNum = inStreamNum & 0x07F;  return *this;}
-		virtual inline AJARTPAncPacketHeader &	SetDataStreamFlag(const bool inFlag)		{mSBit = inFlag;  return *this;}
-		virtual AJARTPAncPacketHeader &	SetFrom(const AJAAncillaryDataLocation & inLocation);
-		virtual inline AJARTPAncPacketHeader &	operator = (const AJAAncillaryDataLocation & inLocation)	{return SetFrom(inLocation);}
-
-		//	Streaming
+		/**
+			@brief		Streams a human-readable represetation of my current state to the given output stream.
+			@param[in]	inOutStream		Specifies the output stream to receive my state information.
+			@return		A non-constant reference to the given output stream.
+		**/
 		virtual std::ostream &		Print (std::ostream & inOutStream) const;
+	///@}
 
-	//	Instance Data
-	private:
-		bool		mCBit;		//	C-channel bit
-		bool		mSBit;		//	Data Stream Flag bit
-		uint16_t	mLineNum;	//	Line number			(host byte order)
-		uint16_t	mHOffset;	//	Horizontal offset	(host byte order)
-		uint8_t		mStreamNum;	//	Stream number
+	/**
+		@name	Modifiers
+	**/
+	///@{
+		/**
+			@brief		Sets my "C" channel bit setting to 'true'.
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPacketHeader &	SetCChannel (void)							{mCBit = true;  return *this;}
+
+		/**
+			@brief		Sets my "C" channel bit setting to 'false'.
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPacketHeader &	SetYChannel (void)							{mCBit = false;  return *this;}
+
+		/**
+			@brief		Sets my line number value to least-significant 11 bits of the given value.
+			@param[in]	inLineNum		Specifies my new line number value. Only the LS 11 bits are used.
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPacketHeader &	SetLineNumber (const uint16_t inLineNum)		{mLineNum = inLineNum & 0x7FF;  return *this;}
+
+		/**
+			@brief		Sets my horizontal offset value to least-significant 12 bits of the given value.
+			@param[in]	inHOffset		Specifies my new horizontal offset value. Only the LS 12 bits are used.
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPacketHeader &	SetHorizOffset (const uint16_t inHOffset)	{mHOffset = inHOffset & 0x0FFF;  return *this;}
+
+		/**
+			@brief		Sets my stream number value to least-significant 7 bits of the given value.
+			@param[in]	inStreamNum		Specifies my new data stream number value. Only the LS 7 bits are used.
+			@note		It is recommended that SetDataStreamFlag be called with 'true' if the stream number is non-zero.
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPacketHeader &	SetStreamNumber (const uint8_t inStreamNum)	{mStreamNum = inStreamNum & 0x07F;  return *this;}
+
+		/**
+			@brief		Sets my data stream flag.
+			@param[in]	inFlag			Specify true to signify my Data Stream Number is legitimate (and non-zero);
+										otherwise 'false'.
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPacketHeader &	SetDataStreamFlag (const bool inFlag)		{mSBit = inFlag;  return *this;}
+
+		/**
+			@brief		Resets me from a given ::AJAAncillaryDataLocation.
+			@param[in]	inLocation		Specifies the ::AJAAncillaryDataLocation to reset my current state from.
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual AJARTPAncPacketHeader &	SetFrom (const AJAAncillaryDataLocation & inLocation);
+
+		/**
+			@brief		Assigns the given ::AJAAncillaryDataLocation to me, resetting my current state.
+			@param[in]	inRHS			Specifies the ::AJAAncillaryDataLocation to reset my current state from.
+			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
+		**/
+		virtual inline AJARTPAncPacketHeader &	operator = (const AJAAncillaryDataLocation & inRHS)		{return SetFrom(inRHS);}
+	///@}
+
+	/**
+		@name	I/O
+	**/
+	///@{
+		/**
+			@brief		Resets my current state by decoding the given 4-byte header value.
+			@param[in]	inULWord	The 4-byte header value obtained from an RTP packet, in network-byte-order.
+			@return		True if successful;  otherwise false.
+		**/
+		virtual bool			SetFromULWord (const uint32_t inULWord);
+
+		/**
+			@brief		Resets my current state by decoding the 4-byte header value stored in the given ::ULWordSequence
+						at the given zero-based index position.
+			@param[in]	inVector	A ::ULWordSequence of 4-byte words, each in network-byte-order.
+			@param[in]	inIndex0	Specifies the position (offset) of the header word in the ::ULWordSequence.
+			@return		True if successful;  otherwise false.
+		**/
+		virtual bool			ReadFromULWordVector (const ULWordSequence & inVector, const unsigned inIndex0);
+
+		/**
+			@brief		Writes my 4-byte header value into the given ::ULWordSequence. The 4-byte value will be in network byte order.
+			@param[out]	outVector	Specifies the ::ULWordSequence to receive my 4-byte header value.
+			@param[in]	inReset		Optionally clears the ::ULWordSequence before appending, if true (the default).
+									Specify false to append my header value to the ::ULWordSequence without first clearing it.
+			@return		True if successful;  otherwise false.
+		**/
+		virtual bool	WriteToULWordVector (ULWordSequence & outVector,  const bool inReset = true) const;
+	///@}
+
+	private:  // INSTANCE DATA
+		bool		mCBit;		///< @brief	My C-channel bit
+		bool		mSBit;		///< @brief	My Data Stream Flag bit
+		uint16_t	mLineNum;	///< @brief	My line number (in host native byte order)
+		uint16_t	mHOffset;	///< @brief	My horizontal offset (in host native byte order)
+		uint8_t		mStreamNum;	///< @brief	My stream number
 };	//	AJARTPAncPacketHeader
 
-static inline std::ostream & operator << (std::ostream & inOutStrm, const AJARTPAncPacketHeader & inObj)	{return inObj.Print(inOutStrm);}
-AJAExport std::string PrintULWordsBE (const ULWordSequence & inData, const unsigned inMaxNum = 32);
+/**
+	@brief		Streams a human-readable representation of the given ::AJARTPAncPacketHeader to the given output stream.
+	@param[in]	inOutStream		Specifies the output stream to receive my state information.
+	@param[in]	inObj			Specifies the ::AJARTPAncPacketHeader of interest.
+	@return		A non-constant reference to the given output stream.
+**/
+static inline std::ostream & operator << (std::ostream & inOutStrm,  const AJARTPAncPacketHeader & inObj)	{return inObj.Print(inOutStrm);}
 
 #endif	// AJA_ANCILLARYDATA_H

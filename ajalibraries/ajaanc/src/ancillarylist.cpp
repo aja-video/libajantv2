@@ -46,6 +46,28 @@ using namespace std;
 	#define AJA_ENDIAN_64HtoN(__val__)		AJA_ENDIAN_SWAP64(__val__)
 #endif
 
+static inline uint32_t ENDIAN_32NtoH(const uint32_t inValue)	{return AJA_ENDIAN_32NtoH(inValue);}
+//static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return AJA_ENDIAN_32HtoN(inValue);}
+
+static string PrintULWordsBE (const ULWordSequence & inData, const unsigned inMaxNum = 32)
+{
+	ostringstream	oss;
+	unsigned		numPrinted (0);
+	oss << DEC(inData.size()) << " ULWords: ";
+	for (ULWordSequenceConstIter iter(inData.begin());  iter != inData.end();  )
+	{
+		oss << HEX0N(ENDIAN_32NtoH(*iter),8);
+		numPrinted++;
+		if (++iter != inData.end())
+		{
+			if (numPrinted > inMaxNum)
+				{oss << "...";	break;}
+			oss << " ";
+		}
+	}
+	return oss.str();
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -530,11 +552,11 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const ULWordSequence & inR
 	if (inReceivedData.empty())
 		{LOGMYWARN("Empty RTP data vector");  return AJA_STATUS_SUCCESS;}
 
-LOGMYDEBUG(PrintULWordsBE(inReceivedData));
+LOGMYDEBUG(PrintULWordsBE(inReceivedData) << " (BigEndian)");	//	ByteSwap em to make em look right
 
 	//	Crack open the RTP packet header...
 	AJARTPAncPayloadHeader	RTPheader;
-	if (!RTPheader.ReadULWordVector(inReceivedData))
+	if (!RTPheader.ReadFromULWordVector(inReceivedData))
 		{LOGMYERROR("AJARTPAncPayloadHeader::ReadULWordVector failed, " << DEC(4*inReceivedData.size()) << " header bytes");  return AJA_STATUS_FAIL;}
 	if (RTPheader.IsNULL())
 		{LOGMYWARN("No anc packets added: NULL RTP header: " << RTPheader);  return AJA_STATUS_SUCCESS;}	//	Not an error
@@ -547,7 +569,7 @@ LOGMYDEBUG(PrintULWordsBE(inReceivedData));
 
 	if (actualBytes < numBytes)
 		{LOGMYERROR("RTP header says " << DEC(numBytes) << "-byte pkt, but only given " << DEC(actualBytes) << " bytes: " << RTPheader);  return AJA_STATUS_BADBUFFERCOUNT;}
-	//else if (actualBytes != numBytes) LOGMYWARN("RTP header says " << DEC(numBytes) << "-byte pkt, but given " << DEC(actualBytes) << " bytes: " << RTPheader);
+	// NO NEED TO WARN OF EXTRA ULWORDs:	else if (actualBytes != numBytes) LOGMYWARN("RTP header says " << DEC(numBytes) << "-byte pkt, but given " << DEC(actualBytes) << " bytes: " << RTPheader);
 	if (!numPackets)
 		{LOGMYWARN("No Anc packets to append: " << RTPheader);  return AJA_STATUS_SUCCESS;}
 
@@ -780,7 +802,7 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBu
 		++RTPPacketCount;
 
 		//	Peek into the packet header to discover its true length...
-		if (!rtpHeader.ReadBuffer(ancBuffer))
+		if (!rtpHeader.ReadFromBuffer(ancBuffer))
 			{LOGMYERROR("Failed reading IP payload header: " << ancBuffer.AsString(40));  return AJA_STATUS_NOT_FOUND;}
 		ULWordCount = (rtpHeader.GetHeaderByteCount() + rtpHeader.GetPacketLength()) / sizeof(uint32_t);
 
@@ -908,7 +930,7 @@ AJAStatus AJAAncillaryList::GetRTPPackets (U32Pkts & outF1U32Pkts,  U32Pkts & ou
 			if (ONE_RTP_PKT_PER_SMPTE_PKT)
 			{
 				outF1U32Pkts.push_back(F1U32s);	//	Append it
-				XMTDBG("F1 pkt " << DEC(actF1PktCnt) << ": " << F1U32s);
+				XMTDBG("F1 pkt " << DEC(actF1PktCnt) << ": " << PrintULWordsBE(F1U32s) << " (BigEndian)");
 				F1U32s.clear();					//	Start current pkt over
 			}
 		}	/////////////	FIELD 1   //////////////
@@ -936,7 +958,7 @@ AJAStatus AJAAncillaryList::GetRTPPackets (U32Pkts & outF1U32Pkts,  U32Pkts & ou
 			if (ONE_RTP_PKT_PER_SMPTE_PKT)
 			{
 				outF2U32Pkts.push_back(F2U32s);	//	Append it
-				XMTDBG("F2 pkt " << DEC(actF2PktCnt) << ": " << F2U32s);
+				XMTDBG("F2 pkt " << DEC(actF2PktCnt) << ": " << PrintULWordsBE(F2U32s) << " (BigEndian)");
 				F2U32s.clear();					//	Start current pkt over
 			}
 		}	/////////////	FIELD 2   //////////////
@@ -947,7 +969,7 @@ AJAStatus AJAAncillaryList::GetRTPPackets (U32Pkts & outF1U32Pkts,  U32Pkts & ou
 	else if (!ONE_RTP_PKT_PER_SMPTE_PKT)
 	{
 		XMTDBG("Single RTP pkt to contain " << DEC(actF1PktCnt) << " F1 pkts (" << DEC(F1U32s.size()) << " U32s), " << DEC(actF2PktCnt) << " F2 pkts (" << DEC(F2U32s.size()) << "U32s)");
-		XMTDBG(F1U32s); XMTDBG(F2U32s);
+		XMTDBG(PrintULWordsBE(F1U32s)); XMTDBG(PrintULWordsBE(F2U32s));
 		outF1U32Pkts.push_back(F1U32s);	//	Append all F1
 		outF2U32Pkts.push_back(F2U32s);	//	Append all F2
 	}
@@ -1258,7 +1280,7 @@ AJAStatus AJAAncillaryList::WriteRTPPackets (NTV2_POINTER & theBuffer,  const U3
 		RTPHeader.SetPacketLength(uint16_t(totalPktBytes));
 		//	Playout:  Firmware looks for full RTP pkt bytecount in LS 16 bits of SequenceNumber in RTP header:
 		RTPHeader.SetSequenceNumber(uint32_t(totalPktBytes) & 0x0000FFFF);
-		if (!RTPHeader.WriteBuffer(theBuffer, u32offset))
+		if (!RTPHeader.WriteToBuffer(theBuffer, u32offset))
 			{LOGMYERROR("RTP hdr WriteBuffer failed for " << theBuffer << " u32offset=" << DEC(u32offset)
 						<< pktNumInfo.str());  return AJA_STATUS_FAIL;}
 		u32offset += RTPHeader.GetHeaderByteCount() / sizeof(uint32_t);

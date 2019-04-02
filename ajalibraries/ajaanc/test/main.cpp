@@ -1576,8 +1576,8 @@ gIsVerbose = true;
 
 				//	NOTE:	This test saves the F1 RTP buffers for use later by BFT_RTPToAncListToRTP...
 				gRTPBuffers[vFormat] = NTV2_POINTER(IPF1);
-{ostringstream oss; IPF1.Dump(oss,0,0,16,4,16); LOGMYDEBUG("gRTPBuffers[" << ::NTV2VideoFormatToString(vFormat) << "]:" << oss.str());}
-{ostringstream oss; IPF2.Dump(oss,0,0,16,4,16); LOGMYDEBUG("F2 RTP Buffer:" << endl << oss.str());}
+LOGMYDEBUG("gRTPBuffers[" << ::NTV2VideoFormatToString(vFormat) << "]:" << IPF1.GetU32s(/*u32offset*/0, /*u32count*/32, /*byteSwap*/true));
+LOGMYDEBUG("F2 RTP Buffer:" << IPF1.GetU32s(/*u32offset*/0, /*u32count*/32, /*byteSwap*/true));
 
 				//	Receive packets from the IP buffer...
 				AJAAncillaryList	rxPkts;
@@ -1933,22 +1933,22 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			SHOULD_BE_EQUAL(hdrB.GetSyncSourceID(), 0xBaadF00d);
 			SHOULD_BE_EQUAL(hdrB.GetPayloadType(), 0x75);
 			NTV2_POINTER	nullBuffer;
-			SHOULD_BE_FALSE(hdrB.WriteBuffer(nullBuffer));
+			SHOULD_BE_FALSE(hdrB.WriteToBuffer(nullBuffer));
 
 			//	HdrB => buffer => HdrC	. . .	verify HdrB == HdrC
 			AJARTPAncPayloadHeader	hdrC, hdrD, hdrE;
 			NTV2_POINTER	bBuffer(4096);
-			SHOULD_BE_TRUE(hdrB.WriteBuffer(bBuffer));
+			SHOULD_BE_TRUE(hdrB.WriteToBuffer(bBuffer));
 			if (gIsVerbose)
 				cerr << "hdrB: " << hdrB << endl << bBuffer.AsString(20) << endl;
-			SHOULD_BE_TRUE(hdrC.ReadBuffer(bBuffer));
+			SHOULD_BE_TRUE(hdrC.ReadFromBuffer(bBuffer));
 			if (gIsVerbose)
 				cerr << "hdrC: " << hdrC << endl;
 
 			//	bufferB => HdrD => bufferC . . .	verify bufferA == bufferB
 			NTV2_POINTER	cBuffer(bBuffer.GetByteCount());
-			SHOULD_BE_TRUE(hdrD.ReadBuffer(bBuffer));
-			SHOULD_BE_TRUE(hdrD.WriteBuffer(cBuffer));
+			SHOULD_BE_TRUE(hdrD.ReadFromBuffer(bBuffer));
+			SHOULD_BE_TRUE(hdrD.WriteToBuffer(cBuffer));
 			SHOULD_BE_TRUE(cBuffer.IsContentEqual(bBuffer));
 
 			//	HdrB => u32vectorA => HdrE	. . .	verify HdrB == HdrE
@@ -1957,13 +1957,13 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			SHOULD_BE_EQUAL(u32vectorA.size(), 20);	//	Size is 20
 			vector<uint32_t>	u32vectorB (u32vectorA);
 			SHOULD_BE_EQUAL(u32vectorB.size(), 20);	//	Size is 20
-			SHOULD_BE_TRUE(hdrB.WriteULWordVector(u32vectorA, false));
+			SHOULD_BE_TRUE(hdrB.WriteToULWordVector(u32vectorA, false));
 			SHOULD_BE_EQUAL(u32vectorA.size(), 20);	//	Size is unchanged -- still 20
-			SHOULD_BE_TRUE(hdrB.WriteULWordVector(u32vectorB, true));
+			SHOULD_BE_TRUE(hdrB.WriteToULWordVector(u32vectorB, true));
 			SHOULD_BE_EQUAL(u32vectorB.size(), 5);	//	Size is changed to 5 due to "reset" param being 'true'
-			SHOULD_BE_FALSE(hdrE.ReadULWordVector(u32vectorTooSmall));
-			SHOULD_BE_FALSE(hdrE.SetULWordAtIndex(5, 0xFFFFFFFF));
-			SHOULD_BE_TRUE(hdrE.ReadULWordVector(u32vectorA));
+			SHOULD_BE_FALSE(hdrE.ReadFromULWordVector(u32vectorTooSmall));
+			//SHOULD_BE_FALSE(hdrE.SetFromPacketHeaderULWordAtIndex(5, 0xFFFFFFFF));
+			SHOULD_BE_TRUE(hdrE.ReadFromULWordVector(u32vectorA));
 			SHOULD_BE_EQUAL(hdrB, hdrE);
 			return true;
 		}

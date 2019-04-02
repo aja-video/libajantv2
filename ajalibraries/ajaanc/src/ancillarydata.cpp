@@ -59,6 +59,10 @@ using namespace std;
 #endif
 
 
+static inline uint32_t ENDIAN_32NtoH(const uint32_t inValue)	{return AJA_ENDIAN_32NtoH(inValue);}
+static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return AJA_ENDIAN_32HtoN(inValue);}
+
+
 const uint32_t AJAAncillaryDataWrapperSize = 7;		// 3 bytes header + DID + SID + DC + Checksum: i.e. everything EXCEPT the payload
 
 //const uint8_t  AJAAncillaryDataAnalogDID = 0x00;		// used in header DID field when ancillary data is "analog"
@@ -875,8 +879,9 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData)
 	//	Begin writing into "outData" array.
 	//	My first 32-bit longword is the Anc packet header, which contains location info...
 	const AJARTPAncPacketHeader	pktHdr	(GetDataLocation());
-	outData.push_back(pktHdr.GetULWord());
-	XMT2110DDBG("outU32s[" << DEC(outData.size()-1) << "]=" << xHEX0N(AJA_ENDIAN_32HtoN(pktHdr.GetULWord()),8));
+	const uint32_t				pktHdrWord	(pktHdr.GetULWord());
+	outData.push_back(pktHdrWord);
+	XMT2110DDBG("outU32s[" << DEC(outData.size()-1) << "]=" << xHEX0N(ENDIAN_32NtoH(pktHdrWord),8) << " (BigEndian)");	//	Byte-Swap it to make BigEndian look right
 
 	//	All subsequent 32-bit longwords come from the array of 10-bit values I built earlier.
 	const size_t	numUDWs	(UDW16s.size());
@@ -896,8 +901,8 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData)
 			if (is4th)
 			{
 				u32 |=  (UDW >> shift) & mask;
-				outData.push_back(AJA_ENDIAN_32HtoN(u32));
-				XMT2110DDBG("outU32s[" << DEC(outData.size()-1) << "]=" << xHEX0N(u32,8));
+				outData.push_back(ENDIAN_32HtoN(u32));
+				XMT2110DDBG("outU32s[" << DEC(outData.size()-1) << "]=" << xHEX0N(u32,8) << " (BigEndian)");
 				u32 = 0;	//	Reset, start over
 				if (isPastEnd)
 					break;	//	Done, 32-bit longword aligned
@@ -914,35 +919,35 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData)
 	u32 |= (uint32_t(UDW16s.at( 1)) << 12) & 0x003FF000;	//	0b00001|0x01|01: [ 1] all 10 bits		10+10=20	22-10=12
 	u32 |= (uint32_t(UDW16s.at( 2)) <<  2) & 0x00000FFC;	//	0b00010|0x02|02: [ 2] all 10 bits		20+10=30	12-10=2
 	u32 |= (uint32_t(UDW16s.at( 3)) >>  8) & 0x00000003;	//	0b00011|0x03|03: [ 3] first (MS 2 bits)	30+2=32					10-2=8
-	outData.push_back(AJA_ENDIAN_32HtoN(u32));
+	outData.push_back(ENDIAN_32HtoN(u32));
 	u32 =  (uint32_t(UDW16s.at( 3)) << 24) & 0xFF000000;	//	0b00100|0x04|04: [ 3] last (LS 8 bits)	0+8=8		32-8=24
 	u32 |= (uint32_t(UDW16s.at( 4)) << 14) & 0x00FFC000;	//	0b00101|0x05|05: [ 4] all 10 bits		8+10=18		24-10=14
 	u32 |= (uint32_t(UDW16s.at( 5)) <<  4) & 0x00003FF0;	//	0b00110|0x06|06: [ 5] all 10 bits		18+10=28	14-10=4
 	u32 |= (uint32_t(UDW16s.at( 6)) >>  6) & 0x0000000F;	//	0b00111|0x07|07: [ 6] first (MS 4 bits)	28+4=32					10-4=6
-	outData.push_back(AJA_ENDIAN_32HtoN(u32));
+	outData.push_back(ENDIAN_32HtoN(u32));
 	u32 =  (uint32_t(UDW16s.at( 6)) << 26) & 0xFC000000;	//	0b01000|0x08|08: [ 6] last (LS 6 bits)	0+6=6		32-6=26
 	u32 |= (uint32_t(UDW16s.at( 7)) << 16) & 0x03FF0000;	//	0b01001|0x09|09: [ 7] all 10 bits		6+10=16		26-10=16
 	u32 |= (uint32_t(UDW16s.at( 8)) <<  6) & 0x0000FFC0;	//	0b01010|0x0A|10: [ 8] all 10 bits		16+10=26	16-10=6
 	u32 |= (uint32_t(UDW16s.at( 9)) >>  4) & 0x0000003F;	//	0b01011|0x0B|11: [ 9] first (MS 6 bits)	26+6=32					10-6=4
-	outData.push_back(AJA_ENDIAN_32HtoN(u32));
+	outData.push_back(ENDIAN_32HtoN(u32));
 	u32 =  (uint32_t(UDW16s.at( 9)) << 28) & 0xF0000000;	//	0b01100|0x0C|12: [ 9] last (LS 4 bits)	0+4=4		32-4=28
 	u32 |= (uint32_t(UDW16s.at(10)) << 18) & 0x0FFC0000;	//	0b01101|0x0D|13: [10] all 10 bits		4+10=14		28-10=18
 	u32 |= (uint32_t(UDW16s.at(11)) <<  8) & 0x0003FF00;	//	0b01110|0x0E|14: [11] all 10 bits		14+10=24	18-10=8
 	u32 |= (uint32_t(UDW16s.at(12)) >>  2) & 0x000000FF;	//	0b01111|0x0F|15: [12] first (MS 8 bits)	24+8=32					10-8=2
-	outData.push_back(AJA_ENDIAN_32HtoN(u32));
+	outData.push_back(ENDIAN_32HtoN(u32));
 	u32 =  (uint32_t(UDW16s.at(12)) << 30) & 0xC0000000;	//	0b10000|0x10|16: [12] last (LS 2 bits)	0+2=2		32-2=30
 	u32 |= (uint32_t(UDW16s.at(13)) << 20) & 0x3FF00000;	//	0b10001|0x11|17: [13] all 10 bits		2+10=12		30-10=20
 	u32 |= (uint32_t(UDW16s.at(14)) << 10) & 0x000FFC00;	//	0b10010|0x12|18: [14] all 10 bits		12+10=22	20-10=10
 	u32 |= (uint32_t(UDW16s.at(15)) >>  0) & 0x000003FF;	//	0b10011|0x13|19: [15] all 10 bits		22+10=32				10-10=0
-	outData.push_back(AJA_ENDIAN_32HtoN(u32));	*/
+	outData.push_back(ENDIAN_32HtoN(u32));	*/
 
 #if defined(_DEBUG)
 {
 	ostringstream	oss;
 	oss << (origSize ? "Appended " : "Generated ") << (outData.size() - origSize)  << " 32-bit words:";
-	for (size_t ndx(origSize);  ndx < outData.size();  ndx++)
-		oss << " " << HEX0N(AJA_ENDIAN_32NtoH(outData[ndx]),8);
-	oss << " from " << AsString(32);
+	for (size_t ndx(origSize);  ndx < outData.size();  ndx++)	//	outData is in Network Byte Order
+		oss << " " << HEX0N(ENDIAN_32NtoH(outData[ndx]),8);		//	so byte-swap to make it look right in the log
+	oss << " BigEndian from " << AsString(32);
 	XMT2110DBG(oss.str());
 }
 #else
@@ -967,7 +972,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 		{RCV2110ERR("AJARTPAncPacketHeader::ReadFromULWordVector failed at [" << DEC(inOutU32Ndx) << "]");	return AJA_STATUS_FAIL;}
 
 	const AJAAncillaryDataLocation	dataLoc	(ancPktHeader.AsDataLocation());
-	RCV2110DDBG("u32=" << xHEX0N(AJA_ENDIAN_32NtoH(inU32s.at(inOutU32Ndx)),8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "] AncPktHdr: " << ancPktHeader << " -- AncDataLoc: " << dataLoc);
+	RCV2110DDBG("u32=" << xHEX0N(ENDIAN_32NtoH(inU32s.at(inOutU32Ndx)),8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "] AncPktHdr: " << ancPktHeader << " -- AncDataLoc: " << dataLoc);
 
 	if (++inOutU32Ndx >= numU32s)
 		{RCV2110ERR("Index error: [" << DEC(inOutU32Ndx) << "] past end of [" << DEC(numU32s) << "] element buffer");  return AJA_STATUS_RANGE;}
@@ -993,7 +998,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 	vector<uint16_t>	u16s;	//	10-bit even-parity words
 	bool				gotChecksum		(false);
 	size_t				dataCount		(0);
-	uint32_t			u32				(AJA_ENDIAN_32NtoH(inU32s.at(inOutU32Ndx)));
+	uint32_t			u32				(ENDIAN_32NtoH(inU32s.at(inOutU32Ndx)));
 	const size_t		startU32Ndx		(inOutU32Ndx);
 	RCV2110DDBG("u32=" << xHEX0N(u32,8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "]");
 	do
@@ -1015,7 +1020,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 					u16s.push_back(u16);	RCV2110DDBG("u16s[" << DEC(u16s.size()-1) << "]=" << xHEX0N(u16,3) << " (Past end)");
 					break;	//	Past end
 				}
-				u32 = AJA_ENDIAN_32NtoH(inU32s.at(inOutU32Ndx));
+				u32 = ENDIAN_32NtoH(inU32s.at(inOutU32Ndx));
 				RCV2110DDBG("u32=" << xHEX0N(u32,8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "], u16=" << xHEX0N(u16,3)
 										<< " from " << DEC(loopNdx) << "(" << xHEX0N(inU32s.at(inOutU32Ndx-1),8) << " & " << xHEX0N(mask,8) << ") << " << DEC(shift));
 				if (shift)
@@ -1062,7 +1067,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 	RCV2110DBG(AsString(64));
 
 	/*	The Pattern:  (unrolling the above loop):
-		u32 = AJA_ENDIAN_32NtoH(inU32s.at(0));
+		u32 = ENDIAN_32NtoH(inU32s.at(0));
 		u16  = uint16_t((u32 & 0xFFC00000) >> 22);		//	all 10 bits				0
 		u16s.push_back(u16);
 		u16  = uint16_t((u32 & 0x003FF000) >> 12);		//	all 10 bits				1
@@ -1071,7 +1076,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 		u16s.push_back(u16);
 		u16  = uint16_t((u32 & 0x00000003) <<  8);		//	first (MS 2 bits)		3
 
-		u32 = AJA_ENDIAN_32NtoH(inU32s.at(1));
+		u32 = ENDIAN_32NtoH(inU32s.at(1));
 		u16 |= uint16_t((u32 & 0xFF000000) >> 24);		//	last (LS 8 bits)		4
 		u16s.push_back(u16);
 		u16  = uint16_t((u32 & 0x00FFC000) >> 14);		//	all 10 bits				5
@@ -1080,7 +1085,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 		u16s.push_back(u16);
 		u16  = uint16_t((u32 & 0x0000000F) <<  6);		//	first (MS 4 bits)		7
 
-		u32 = AJA_ENDIAN_32NtoH(inU32s.at(2));
+		u32 = ENDIAN_32NtoH(inU32s.at(2));
 		u16 |= uint16_t((u32 & 0xFC000000) >> 26);		//	last (LS 6 bits)		8
 		u16s.push_back(u16);
 		u16  = uint16_t((u32 & 0x03FF0000) >> 16);		//	all 10 bits				9
@@ -1089,7 +1094,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 		u16s.push_back(u16);
 		u16  = uint16_t((u32 & 0x0000003F) <<  4);		//	first (MS 6 bits)		11
 
-		u32 = AJA_ENDIAN_32NtoH(inU32s.at(3));
+		u32 = ENDIAN_32NtoH(inU32s.at(3));
 		u16 |= uint16_t((u32 & 0xF0000000) >> 28);		//	last (LS 4 bits)		12
 		u16s.push_back(u16);
 		u16  = uint16_t((u32 & 0x0FFC0000) >> 18);		//	all 10 bits				13
@@ -1098,7 +1103,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 		u16s.push_back(u16);
 		u16  = uint16_t((u32 & 0x000000FF) <<  2);		//	first (MS 8 bits)		15
 
-		u32 = AJA_ENDIAN_32NtoH(inU32s.at(4));
+		u32 = ENDIAN_32NtoH(inU32s.at(4));
 		u16 |= uint16_t((u32 & 0xC0000000) >> 30);		//	last (LS 2 bits)		16
 		u16s.push_back(u16);
 		u16  = uint16_t((u32 & 0x3FF00000) >> 20);		//	all 10 bits				17
@@ -1787,7 +1792,7 @@ bool AJARTPAncPayloadHeader::BufferStartsWithRTPHeader (const NTV2_POINTER & inB
 		return false;
 	//	Peek in buffer and see if it starts with an RTP header...
 	AJARTPAncPayloadHeader	hdr;
-	if (!hdr.ReadBuffer(inBuffer))
+	if (!hdr.ReadFromBuffer(inBuffer))
 		return false;
 	return hdr.IsValid();
 }
@@ -1808,7 +1813,7 @@ AJARTPAncPayloadHeader::AJARTPAncPayloadHeader()
 {
 }
 
-bool AJARTPAncPayloadHeader::GetULWordAtIndex (const unsigned inIndex0, uint32_t & outULWord) const
+bool AJARTPAncPayloadHeader::GetPacketHeaderULWordForIndex (const unsigned inIndex0, uint32_t & outULWord) const
 {
 	switch (inIndex0)
 	{
@@ -1822,24 +1827,33 @@ bool AJARTPAncPayloadHeader::GetULWordAtIndex (const unsigned inIndex0, uint32_t
 			u32 |= uint32_t(IsEndOfFieldOrFrame() ? 1 : 0) << 23;
 			u32 |= uint32_t(GetPayloadType() & 0x0000007F) << 16;
 			u32 |= uint32_t(GetSequenceNumber() & 0x0000FFFF);
-			outULWord = AJA_ENDIAN_32HtoN(u32);
+			outULWord = ENDIAN_32HtoN(u32);
 			break;
 		}
-		case 1:		outULWord = AJA_ENDIAN_32HtoN(GetTimeStamp());		break;
-		case 2:		outULWord = AJA_ENDIAN_32HtoN(GetSyncSourceID());	break;
+
+		case 1:
+			outULWord = ENDIAN_32HtoN(GetTimeStamp());
+			break;
+
+		case 2:
+			outULWord = ENDIAN_32HtoN(GetSyncSourceID());
+			break;
+
 		case 3:
 		{
 			const uint32_t	u32	((GetSequenceNumber() & 0xFFFF0000) | (GetPacketLength()));
-			outULWord = AJA_ENDIAN_32HtoN(u32);
+			outULWord = ENDIAN_32HtoN(u32);
 			break;
 		}
+
 		case 4:
 		{
 			uint32_t u32(uint32_t(GetAncPacketCount() & 0x000000FF) << 24);
 			u32 |= uint32_t(GetFieldSignal() & 0x00000003) << 22;
-			outULWord = AJA_ENDIAN_32HtoN(u32);
+			outULWord = ENDIAN_32HtoN(u32);
 			break;
 		}
+
 		default:
 			outULWord = 0;
 			return false;
@@ -1847,9 +1861,9 @@ bool AJARTPAncPayloadHeader::GetULWordAtIndex (const unsigned inIndex0, uint32_t
 	return true;
 }
 
-bool AJARTPAncPayloadHeader::SetULWordAtIndex(const unsigned inIndex0, const uint32_t inULWord)
+bool AJARTPAncPayloadHeader::SetFromPacketHeaderULWordAtIndex(const unsigned inIndex0, const uint32_t inULWord)
 {
-	const uint32_t	u32	(AJA_ENDIAN_32NtoH(inULWord));
+	const uint32_t	u32	(ENDIAN_32NtoH(inULWord));
 	switch (inIndex0)
 	{
 		case 0:		mVBits = uint8_t(u32 >> 30);
@@ -1880,46 +1894,46 @@ bool AJARTPAncPayloadHeader::SetULWordAtIndex(const unsigned inIndex0, const uin
 	return true;
 }
 
-bool AJARTPAncPayloadHeader::WriteULWordVector (ULWordSequence & outVector, const bool inReset) const
+bool AJARTPAncPayloadHeader::WriteToULWordVector (ULWordSequence & outVector, const bool inReset) const
 {
 	if (inReset)
 		outVector.clear();
 	while (outVector.size() < 5)
 		outVector.push_back(0);
 	for (unsigned ndx(0);  ndx < 5;  ndx++)
-		outVector[ndx] = GetULWordAtIndex(ndx);
+		outVector[ndx] = GetPacketHeaderULWordForIndex(ndx);
 	return true;
 }
 
-bool AJARTPAncPayloadHeader::WriteBuffer (NTV2_POINTER & outBuffer, const ULWord inU32Offset) const
+bool AJARTPAncPayloadHeader::WriteToBuffer (NTV2_POINTER & outBuffer, const ULWord inU32Offset) const
 {
 	const ULWord	startingByteOffset	(inU32Offset * sizeof(uint32_t));
 	if ((startingByteOffset + ULWord(GetHeaderByteCount())) > outBuffer.GetByteCount())
 		return false;	//	Buffer too small
 	uint32_t *	pU32s	(reinterpret_cast<uint32_t*>(outBuffer.GetHostAddress(startingByteOffset)));
 	for (unsigned ndx(0);  ndx < 5;  ndx++)
-		pU32s[ndx] = GetULWordAtIndex(ndx);
+		pU32s[ndx] = GetPacketHeaderULWordForIndex(ndx);
 	return true;
 }
 
-bool AJARTPAncPayloadHeader::ReadULWordVector (const ULWordSequence & inVector)
+bool AJARTPAncPayloadHeader::ReadFromULWordVector (const ULWordSequence & inVector)
 {
 	//	Note: uint32_t's are assumed to be in network byte order
 	if (inVector.size() < 5)
 		return false;	//	Too small
 	for (unsigned ndx(0);  ndx < 5;  ndx++)
-		if (!SetULWordAtIndex(ndx, inVector[ndx]))
+		if (!SetFromPacketHeaderULWordAtIndex(ndx, inVector[ndx]))
 			return false;
 	return true;
 }
 
-bool AJARTPAncPayloadHeader::ReadBuffer(const NTV2_POINTER & inBuffer)
+bool AJARTPAncPayloadHeader::ReadFromBuffer(const NTV2_POINTER & inBuffer)
 {
 	if (inBuffer.GetByteCount() < GetHeaderByteCount())
 		return false;	//	Too small
 	const uint32_t *	pU32s	(reinterpret_cast <const uint32_t *> (inBuffer.GetHostPointer()));
 	for (unsigned ndx(0);  ndx < 5;  ndx++)
-		if (!SetULWordAtIndex(ndx, pU32s[ndx]))
+		if (!SetFromPacketHeaderULWordAtIndex(ndx, pU32s[ndx]))
 			return false;
 	return true;
 }
@@ -1948,7 +1962,7 @@ bool AJARTPAncPayloadHeader::operator == (const AJARTPAncPayloadHeader & inRHS) 
 
 ostream & AJARTPAncPayloadHeader::Print (ostream & inOutStream) const
 {	//	Translate back to host byte order before printing:
-	const uint32_t	word0	(AJA_ENDIAN_32NtoH(GetULWordAtIndex(0)));
+	const uint32_t	word0	(ENDIAN_32NtoH(GetPacketHeaderULWordForIndex(0)));
 	inOutStream << xHEX0N(word0,8)
 //				<< "|" << bBIN032(word0)
 				<< ": V=" << DEC(uint16_t(mVBits))
@@ -2004,19 +2018,19 @@ uint32_t AJARTPAncPacketHeader::GetULWord (void) const
 	//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	//	|C|   Line_Number       |   Horizontal_Offset   |S|  StreamNum  |
 	//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-	uint32_t	u32(0);
+	uint32_t	u32(0);	//	Build little-endian 32-bit ULWord with this
 	u32 |= (uint32_t(GetLineNumber()) & 0x000007FF) << 20;	//	11-bit line number
 	u32 |= (IsCBitSet() ? 0x80000000 : 0x00000000);
 	u32 |= (uint32_t(GetHorizOffset()) & 0x00000FFF) << 8;	//	12-bit horiz offset
 	u32 |= IsSBitSet() ? 0x00000080 : 0x00000000;			//	Data Stream flag
 	if (IsSBitSet())
 		u32 |= uint32_t(GetStreamNumber() & 0x7F);			//	7-bit StreamNum
-	return AJA_ENDIAN_32HtoN(u32);
+	return ENDIAN_32HtoN(u32);	//	Convert to big-endian
 }
 
 bool AJARTPAncPacketHeader::SetFromULWord (const uint32_t inULWord)
 {
-	const uint32_t	u32	(AJA_ENDIAN_32NtoH(inULWord));
+	const uint32_t	u32	(ENDIAN_32NtoH(inULWord));
 	//	 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
 	//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	//	|C|   Line_Number       |   Horizontal_Offset   |S|  StreamNum  |
@@ -2101,24 +2115,4 @@ ostream & AJARTPAncPacketHeader::Print (ostream & inOutStream) const
 				<< " Line=" << DEC(GetLineNumber()) << " HOff=" << DEC(GetHorizOffset())
 				<< " S=" << (IsSBitSet() ? "1" : "0") << " Strm=" << DEC(uint16_t(GetStreamNumber()));
 	return inOutStream;
-}
-
-
-string PrintULWordsBE (const ULWordSequence & inData, const unsigned inMaxNum)
-{
-	ostringstream	oss;
-	unsigned		numPrinted (0);
-	oss << DEC(inData.size()) << " ULWords: ";
-	for (ULWordSequenceConstIter iter(inData.begin());  iter != inData.end();  )
-	{
-		oss << HEX0N(AJA_ENDIAN_32NtoH(*iter),8);
-		numPrinted++;
-		if (++iter != inData.end())
-		{
-			if (numPrinted > inMaxNum)
-				{oss << "...";	break;}
-			oss << " ";
-		}
-	}
-	return oss.str();
 }
