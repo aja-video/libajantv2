@@ -1355,6 +1355,9 @@ bool CNTV2Card::S2110DeviceAncFromBuffers (const NTV2Channel inChannel, NTV2_POI
 }	//	S2110DeviceAncFromBuffers
 
 
+static inline uint32_t EndianSwap32NtoH (const uint32_t inValue)	{return NTV2EndianSwap32BtoH(inValue);}	//	Guaranteed no in-place byte-swap -- always copies
+
+
 bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & inOutXferInfo)
 {
 	//	IP 2110 Playout:	Add relevant transmit timecodes and VPID to outgoing RTP Anc
@@ -1410,22 +1413,18 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 			vpidPkt.SetLocationDataStream(AJAAncillaryDataStream_1);
 			vpidPkt.SetLocationDataChannel(AJAAncillaryDataChannel_Y);
 			vpidPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc);
-XMTFAIL("WTHIGO Raw|BE:  A=" << xHEX0N(vpidA,8) << "|" << xHEX0N(NTV2EndianSwap32(vpidA),8) << " B=" << xHEX0N(vpidB,8) << "|" << xHEX0N(NTV2EndianSwap32(vpidB),8));	//	** MrBill **	TEMP DEBUG
 			if (vpidA)
 			{
-				vpidA = NTV2EndianSwap32BtoH(vpidA);
+				vpidA = EndianSwap32NtoH(vpidA);
 				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidA), 4);
 				vpidPkt.SetLocationLineNumber(sVPIDLineNumsF1[standard]);
 				vpidPkt.GeneratePayloadData();
 				packetList.AddAncillaryData(vpidPkt);	changed = true;
-			}
-			if (!isProgressive && vpidB)
-			{
-				vpidB = NTV2EndianSwap32BtoH(vpidB);
-				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidB), 4);
-				vpidPkt.SetLocationLineNumber(sVPIDLineNumsF2[standard]);
-				vpidPkt.GeneratePayloadData();
-				packetList.AddAncillaryData(vpidPkt);	changed = true;
+				if (!isProgressive)
+				{	//	Ditto for Field 2...
+					vpidPkt.SetLocationLineNumber(sVPIDLineNumsF2[standard]);
+					packetList.AddAncillaryData(vpidPkt);	changed = true;
+				}
 			}
 		}	//	if user not inserting his own VPID
 		else if (isMonitoring)	{XMTWARN("GetSDIOutVPID failed for SDI spigot " << ::NTV2ChannelToString(SDISpigotChannel,true));}
