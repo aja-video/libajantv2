@@ -1413,21 +1413,18 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 			vpidPkt.SetLocationDataStream(AJAAncillaryDataStream_1);
 			vpidPkt.SetLocationDataChannel(AJAAncillaryDataChannel_Y);
 			vpidPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc);
-XMTFAIL("WTHIGO Raw|BE:  A=" << xHEX0N(vpidA,8) << "|" << xHEX0N(::EndianSwap32NtoH(vpidA),8));	//	** MrBill **	TEMP DEBUG
 			if (vpidA)
 			{
+				vpidA = EndianSwap32NtoH(vpidA);
 				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidA), 4);
 				vpidPkt.SetLocationLineNumber(sVPIDLineNumsF1[standard]);
 				vpidPkt.GeneratePayloadData();
 				packetList.AddAncillaryData(vpidPkt);	changed = true;
-			}
-			if (!isProgressive)
-			{	//	Just put the same packet into Field 2...
-				vpidA = EndianSwap32NtoH(vpidA);
-				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidA), 4);
-				vpidPkt.SetLocationLineNumber(sVPIDLineNumsF2[standard]);
-				vpidPkt.GeneratePayloadData();
-				packetList.AddAncillaryData(vpidPkt);	changed = true;
+				if (!isProgressive)
+				{	//	Ditto for Field 2...
+					vpidPkt.SetLocationLineNumber(sVPIDLineNumsF2[standard]);
+					packetList.AddAncillaryData(vpidPkt);	changed = true;
+				}
 			}
 		}	//	if user not inserting his own VPID
 		else if (isMonitoring)	{XMTWARN("GetSDIOutVPID failed for SDI spigot " << ::NTV2ChannelToString(SDISpigotChannel,true));}
