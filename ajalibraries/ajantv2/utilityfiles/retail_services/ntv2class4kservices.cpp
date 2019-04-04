@@ -926,8 +926,16 @@ void Class4kServices::SetDeviceXPointPlayback ()
 	{
 		if (b1wireQ4k)
 		{
-			mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptBlack);
-			mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
+			if (bSdiOutRGB)
+			{
+				mCard->Connect (NTV2_XptSDIOut4Input, NTV2_XptDuallinkOut4);
+				mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
+			}
+			else
+			{
+				mCard->Connect (NTV2_XptSDIOut4Input, NTV2_Xpt4KDownConverterOut);
+				mCard->Connect (NTV2_XptSDIOut4InputDS2, NTV2_XptBlack);
+			}
 		}
         else if (bSdiOutRGB || bFb1HdrRGB)
 		{

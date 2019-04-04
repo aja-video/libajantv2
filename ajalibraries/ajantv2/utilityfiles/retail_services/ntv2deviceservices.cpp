@@ -200,11 +200,12 @@ bool DeviceServices::ReadDriverState (void)
 		// sdi out
 		if (ds.sdiOutSize > 0)
 		{ 
-			mVirtualDigitalOutput1Select = ds.sdiOut[0]->outSelect;
-			mSDIOutput1ColorSpace = ds.sdiOut[0]->cs;
-			mSDIOutput1RGBRange = ds.sdiOut[0]->rgbRange;
-			m4kTransportOutSelection = ds.sdiOut[0]->transport4k;
-			mSdiOutTransportType = ds.sdiOut[0]->transport3g;
+			int index = ds.b4xSdiBiDir ? 2 : 0;
+			mVirtualDigitalOutput1Select = ds.sdiOut[index]->outSelect;
+			mSDIOutput1ColorSpace = ds.sdiOut[index]->cs;
+			mSDIOutput1RGBRange = ds.sdiOut[index]->rgbRange;
+			m4kTransportOutSelection = ds.sdiOut[index]->transport4k;
+			mSdiOutTransportType = ds.sdiOut[index]->transport3g;
 		}
 		if (ds.sdiOutSize > 1) 
 			mVirtualDigitalOutput2Select = ds.sdiOut[1]->outSelect;

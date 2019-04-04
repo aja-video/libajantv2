@@ -211,6 +211,7 @@ NTV2DeviceHasGenlockv2
 NTV2DeviceHasLEDAudioMeters
 NTV2DeviceHasHeadphoneJack
 NTV2DeviceHasBiDirectionalAnalogAudio
+NTV2DeviceHasBiDirectionalSDI
 NTV2DeviceCanDoIP
 NTV2DeviceCanReportRunningFirmwareDate
 

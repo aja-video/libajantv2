@@ -433,6 +433,9 @@
 #define kRegPll_swptp_JamNow					0x35		// R/W
 #define kRegPll_swptp_Jam90KHzRTP_TS			0x36		// R/W
 #define kRegPll_swptp_Jam48KHzRTP_TS			0x37		// R/W
+#define kRegPll_swptp_VblankRiseSecHi			0x38		// R
+#define kRegPll_swptp_VblankRiseSecLo			0x39		// R
+#define kRegPll_swptp_VblankRiseNanoSec			0x3a		// R
 #define	kRegPll_swptp_ClockDate					0x3e		// R
 #define	kRegPll_swptp_ClockVersion				0x3f		// R
 

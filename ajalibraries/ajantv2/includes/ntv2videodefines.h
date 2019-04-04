@@ -88,7 +88,7 @@
 #define HD_YCBCRLINEPITCH_3840        2560  // ""
 #define HD_YCBCRLINEPITCH_4K          2752  // ""
 #define FD_YCBCRLINEPITCH_UHD2        5120  // ""
-#define FD_YCBCRLINEPITCH_8K          5504  // ""
+#define FD_YCBCRLINEPITCH_8K          5472  // ""
 
 #define HD_YCBCRLINEPITCH_720_DVCPRO  (960*2/4)   // dvcpro always 8 bit
 #define HD_YCBCRLINEPITCH_1080_DVCPRO (1280*2/4)  // dvcpro always 8 bit
