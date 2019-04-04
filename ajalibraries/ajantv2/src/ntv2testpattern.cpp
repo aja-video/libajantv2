@@ -3502,32 +3502,20 @@ void CNTV2Card::DownloadTestPatternBuffer(ULWord *buffer, ULWord size)
 
 ULWord CNTV2Card::GetPatternBufferSize(ULWord *width, ULWord *height, ULWord *rowBytes, ULWord *firstLine)
 {
-	NTV2Standard standard;
-	GetStandard(standard, _channel);
-	NTV2FrameGeometry fg;
-	GetFrameGeometry(fg, _channel);
-	bool twoKby1080 = NTV2_IS_2K_1080_FRAME_GEOMETRY(fg);
-	bool fourKby2160 = false;
-	bool quadKby2160 = false;
-	if ( fg == NTV2_FG_4x1920x1080 )
-		quadKby2160 = true;
-	if ( fg == NTV2_FG_4x2048x1080 )
-		fourKby2160 = true;
-
-	// Ignore VANC and just use the size of the active area
-	NTV2FormatDescriptor formatDescriptor (standard,_fbFormat);
-	ULWord numPixels = formatDescriptor.numPixels;
-	ULWord linePitch = formatDescriptor.linePitch;
-	ULWord numLines = formatDescriptor.numLines;
-	ULWord firstActiveLine = formatDescriptor.firstActiveLine;
-
-	// Kludge for now.....
-	if ( twoKby1080)
-		AdjustFor2048x1080(numPixels,linePitch);
-	if ( quadKby2160 )
-		AdjustFor3840x2160(numPixels, linePitch, numLines);
-	if ( fourKby2160 )
-		AdjustFor4096x2160(numPixels, linePitch, numLines);
+	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
+	GetVideoFormat(&videoFormat, _channel);
+	NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
+	GetFrameBufferFormat(_channel, &pixelFormat);
+	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode, _channel);
+	NTV2FormatDescriptor fd (videoFormat, pixelFormat, vancMode);
+	if(!fd.IsValid())
+		return 0;
+	
+	ULWord numPixels = fd.numPixels;
+	ULWord linePitch = fd.linePitch;
+	ULWord numLines = fd.numLines;
+	ULWord firstActiveLine = fd.firstActiveLine;
 	
 	// buffer size
 	if (width) *width = numPixels;
@@ -3535,7 +3523,7 @@ ULWord CNTV2Card::GetPatternBufferSize(ULWord *width, ULWord *height, ULWord *ro
 	if (rowBytes) *rowBytes = linePitch * 4;
 	if (firstLine) *firstLine = firstActiveLine;
 	
-	return numLines * linePitch * 4; 
+	return numLines * linePitch * 4;
 }
 
 
@@ -3744,146 +3732,6 @@ void CNTV2Card::AdjustFor2048x1080(ULWord& numPixels,ULWord& linePitch)
 			numPixels = 0;
 			linePitch = 0;
 			break;
-	}
-}
-
-void CNTV2Card::AdjustFor3840x2160(ULWord& numPixels,ULWord& linePitch, ULWord& numLines)
-{
-	switch ( _fbFormat )
-	{	
-	case NTV2_FBF_8BIT_YCBCR:
-	case NTV2_FBF_8BIT_YCBCR_YUY2:
-		numPixels = HD_NUMCOMPONENTPIXELS_QUADHD;
-		linePitch = HD_NUMCOMPONENTPIXELS_QUADHD*2/4;
-		numLines = HD_NUMLINES_4K;
-		break;
-
-	case NTV2_FBF_10BIT_YCBCR:
-		numPixels = HD_NUMCOMPONENTPIXELS_QUADHD;
-		linePitch = HD_NUMCOMPONENTPIXELS_QUADHD*16/24;
-		numLines = HD_NUMLINES_4K;
-		break; 
-
-	case NTV2_FBF_ARGB:
-	case NTV2_FBF_RGBA:
-	case NTV2_FBF_ABGR:
-	case NTV2_FBF_10BIT_RGB:
-	case NTV2_FBF_10BIT_RGB_PACKED:
-	case NTV2_FBF_10BIT_DPX:
-    case NTV2_FBF_10BIT_DPX_LE:
-		numPixels = HD_NUMCOMPONENTPIXELS_QUADHD;
-		linePitch = HD_NUMCOMPONENTPIXELS_QUADHD;
-		numLines = HD_NUMLINES_4K;
-		break;
-
-	case NTV2_FBF_24BIT_RGB:
-	case NTV2_FBF_24BIT_BGR:
-		numPixels = HD_NUMCOMPONENTPIXELS_QUADHD;
-		linePitch = RGB24LINEPITCH_3840;
-		numLines = HD_NUMLINES_4K;
-		break;
-
-	case NTV2_FBF_48BIT_RGB:
-		numPixels = HD_NUMCOMPONENTPIXELS_QUADHD;
-		linePitch = RGB48LINEPITCH_3840;
-		numLines = HD_NUMLINES_4K;
-		break;
-
-		// Formats not yet supported, kill warning
-	case NTV2_FBF_10BIT_YCBCR_DPX:		
-	case NTV2_FBF_8BIT_DVCPRO:
-	case NTV2_FBF_8BIT_YCBCR_420PL3:
-	case NTV2_FBF_8BIT_HDV:
-	case NTV2_FBF_10BIT_YCBCRA: 
-	case NTV2_FBF_PRORES:
-	case NTV2_FBF_PRORES_DVCPRO:
-	case NTV2_FBF_PRORES_HDV:
-	case NTV2_FBF_10BIT_ARGB:
-	case NTV2_FBF_16BIT_ARGB:
-	case NTV2_FBF_NUMFRAMEBUFFERFORMATS:	// Error
-	case NTV2_FBF_10BIT_RAW_RGB:			//	TODO
-	case NTV2_FBF_10BIT_RAW_YCBCR:			//	TODO
-	case NTV2_FBF_8BIT_YCBCR_422PL3:
-	case NTV2_FBF_10BIT_YCBCR_420PL3_LE:
-	case NTV2_FBF_10BIT_YCBCR_422PL3_LE:
-    case NTV2_FBF_10BIT_YCBCR_420PL2:
-    case NTV2_FBF_10BIT_YCBCR_422PL2:
-    case NTV2_FBF_8BIT_YCBCR_420PL2:
-    case NTV2_FBF_8BIT_YCBCR_422PL2:
-		numPixels = 0;
-		linePitch = 0;
-		numLines = 0;
-		break;
-	}
-}
-
-void CNTV2Card::AdjustFor4096x2160(ULWord& numPixels,ULWord& linePitch, ULWord& numLines)
-{
-	switch ( _fbFormat )
-	{	
-	case NTV2_FBF_8BIT_YCBCR:
-	case NTV2_FBF_8BIT_YCBCR_YUY2:
-		numPixels = HD_NUMCOMPONENTPIXELS_4K;
-		linePitch = HD_NUMCOMPONENTPIXELS_4K*2/4;
-		numLines = HD_NUMLINES_4K;
-		break;
-
-	case NTV2_FBF_10BIT_YCBCR:
-		numPixels = HD_NUMCOMPONENTPIXELS_4K;
-		linePitch = HD_YCBCRLINEPITCH_2K*2;
-		numLines = HD_NUMLINES_4K;
-		break; 
-
-	case NTV2_FBF_ARGB:
-	case NTV2_FBF_RGBA:
-	case NTV2_FBF_ABGR:
-	case NTV2_FBF_10BIT_RGB:
-	case NTV2_FBF_10BIT_RGB_PACKED:
-	case NTV2_FBF_10BIT_DPX:
-    case NTV2_FBF_10BIT_DPX_LE:
-		numPixels = HD_NUMCOMPONENTPIXELS_4K;
-		linePitch = HD_NUMCOMPONENTPIXELS_4K;
-		numLines = HD_NUMLINES_4K;
-		break;
-
-	case NTV2_FBF_24BIT_RGB:
-	case NTV2_FBF_24BIT_BGR:
-		numPixels = HD_NUMCOMPONENTPIXELS_4K;
-		linePitch = RGB24LINEPITCH_4096;
-		numLines = HD_NUMLINES_4K;
-		break;
-
-	case NTV2_FBF_48BIT_RGB:
-		numPixels = HD_NUMCOMPONENTPIXELS_4K;
-		linePitch = RGB48LINEPITCH_4096;
-		numLines = HD_NUMLINES_4K;
-		break;
-
-		// Formats not yet supported, kill warning
-	case NTV2_FBF_10BIT_YCBCR_DPX:		
-	case NTV2_FBF_8BIT_DVCPRO:
-	case NTV2_FBF_8BIT_YCBCR_420PL3:
-	case NTV2_FBF_8BIT_HDV:
-	case NTV2_FBF_10BIT_YCBCRA: 
-	case NTV2_FBF_PRORES:
-	case NTV2_FBF_PRORES_DVCPRO:
-	case NTV2_FBF_PRORES_HDV:
-	case NTV2_FBF_10BIT_ARGB:
-	case NTV2_FBF_16BIT_ARGB:
-	case NTV2_FBF_NUMFRAMEBUFFERFORMATS:	// Error
-	case NTV2_FBF_10BIT_RAW_RGB:			//	TODO
-	case NTV2_FBF_10BIT_RAW_YCBCR:			//	TODO
-	case NTV2_FBF_8BIT_YCBCR_422PL3:
-	case NTV2_FBF_10BIT_YCBCR_420PL3_LE:
-	case NTV2_FBF_10BIT_YCBCR_422PL3_LE:
-    case NTV2_FBF_10BIT_YCBCR_420PL2:
-    case NTV2_FBF_10BIT_YCBCR_422PL2:
-    case NTV2_FBF_8BIT_YCBCR_420PL2:
-    case NTV2_FBF_8BIT_YCBCR_422PL2:
-		numPixels = 0;
-		linePitch = 0;
-		numLines = 0;
-		break;
 	}
 }
 
