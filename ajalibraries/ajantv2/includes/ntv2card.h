@@ -5859,9 +5859,7 @@ public:
 		void													InitNTV2TestPattern (void);														///< Originally in CNTV2TestPattern.
 		AJA_VIRTUAL void										DownloadSegmentedTestPattern (SegmentTestPatternData * pTestPatternSegmentData);///< Originally in CNTV2TestPattern.
 		AJA_VIRTUAL void										AdjustFor2048x1080 (ULWord & numPixels, ULWord & linePitch);					///< Originally in CNTV2TestPattern.
-		AJA_VIRTUAL void										AdjustFor4096x2160 (ULWord & numPixels, ULWord & linePitch, ULWord & numLines);	///< Originally in CNTV2TestPattern.
-		AJA_VIRTUAL void										AdjustFor3840x2160 (ULWord & numPixels, ULWord & linePitch, ULWord & numLines);	///< Originally in CNTV2TestPattern.
-
+		
 		NTV2Channel				_channel;	//	Also in CNTV2ColorCorrection
 		TestPatternList			_testPatternList;
 		UWord					_signalMask;

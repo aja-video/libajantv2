@@ -2221,7 +2221,6 @@ NTV2TestPatternGen::NTV2TestPatternGen() :
 	_signalMask(NTV2_SIGNALMASK_ALL),
 	mNumPixels(1920)
 {
-	    mRGBBuffer.resize(4096*2160*3+1);
 }
 
 
@@ -2242,6 +2241,7 @@ bool NTV2TestPatternGen::DrawTestPattern (NTV2TestPatternSelect pattNum, uint32_
 	_frameWidth  = frameWidth;
 	_frameHeight = frameHeight;
 	_pixelFormat = pixelFormat;
+	mNumPixels = frameWidth;
 
 	_linePitch     = CalcRowBytesForFormat(_pixelFormat, _frameWidth);					// number of BYTES per line of frame buffer format
 	if(_linePitch == 0)
@@ -2254,6 +2254,8 @@ bool NTV2TestPatternGen::DrawTestPattern (NTV2TestPatternSelect pattNum, uint32_
 
 	if ( testPatternBuffer.size() != _bufferSize )
 		testPatternBuffer.resize(_bufferSize);
+
+	mRGBBuffer.resize(frameWidth * frameHeight * 3 + 1);
 
 	_pTestPatternBuffer = &testPatternBuffer[0];
 
