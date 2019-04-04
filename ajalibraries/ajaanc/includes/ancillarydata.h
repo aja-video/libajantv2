@@ -1131,7 +1131,8 @@ class AJAExport AJARTPAncPayloadHeader
 		**/
 		static bool				BufferStartsWithRTPHeader (const NTV2_POINTER & inBuffer);
 
-		static inline size_t	GetHeaderByteCount (void)	{return 5 * sizeof(uint32_t);}	///< @return	The number of bytes in an RTP header.
+		static inline size_t	GetHeaderWordCount (void)	{return 5;}											///< @return	The number of U32s in an RTP header.
+		static inline size_t	GetHeaderByteCount (void)	{return GetHeaderWordCount() * sizeof(uint32_t);}	///< @return	The number of bytes in an RTP header.
 
 		/**
 			@return		A string containing a human-readable description of the given Field Bits value.

@@ -1571,13 +1571,18 @@ gIsVerbose = true;
 
 				//	Transmit the packets into the IP buffer...
 				NTV2_POINTER	IPF1(2048), IPF2(2048);
+				uint32_t		IPF1bytes(0), IPF2bytes(0);
+				SHOULD_SUCCEED(txPkts.GetIPTransmitDataLength (IPF1bytes, IPF2bytes, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
 				SHOULD_SUCCEED(txPkts.GetIPTransmitData (IPF1, IPF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
-				if (gIsVerbose)	cerr << "IP F1: " << IPF1.AsString(64) << endl << "IP F2: " << IPF2.AsString(64) << endl;
+//				if (gIsVerbose)	cerr << "IP F1: " << IPF1.AsString(64) << endl << "IP F2: " << IPF2.AsString(64) << endl;
+cerr << "IP F1:" << endl;	IPF1.Dump(cerr, 0, IPF1bytes, 16, 4, 16);
+if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
+	{cerr << "IP F2:" << endl;	IPF2.Dump(cerr, 0, IPF2bytes, 16, 4, 16);}
 
 				//	NOTE:	This test saves the F1 RTP buffers for use later by BFT_RTPToAncListToRTP...
 				gRTPBuffers[vFormat] = NTV2_POINTER(IPF1);
 LOGMYDEBUG("gRTPBuffers[" << ::NTV2VideoFormatToString(vFormat) << "]:" << IPF1.GetU32s(/*u32offset*/0, /*u32count*/32, /*byteSwap*/true));
-LOGMYDEBUG("F2 RTP Buffer:" << IPF1.GetU32s(/*u32offset*/0, /*u32count*/32, /*byteSwap*/true));
+LOGMYDEBUG("F2 RTP Buffer:" << IPF2.GetU32s(/*u32offset*/0, /*u32count*/32, /*byteSwap*/true));
 
 				//	Receive packets from the IP buffer...
 				AJAAncillaryList	rxPkts;

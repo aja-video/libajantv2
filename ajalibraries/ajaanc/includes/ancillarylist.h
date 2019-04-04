@@ -25,6 +25,10 @@ const uint8_t AJAAncillaryDataWildcard_SID = 0xFF;
 **/
 typedef std::map <uint16_t, AJAAncillaryDataType>	AJAAncillaryAnalogTypeMap;
 
+typedef std::vector<ULWordSequence>	AJAU32Pkts;			///< @brief	Ordered sequence of U32 RTP packets (U32s in network byte order)
+typedef AJAU32Pkts::const_iterator	AJAU32PktsConstIter;	///< @brief	Handy const iterator over AJAU32Pkts
+typedef AJAU32Pkts::iterator		AJAU32PktsIter;		///< @brief	Handy non-const iterator over AJAU32Pkts
+
 
 /**
 	@brief		I am an ordered collection of AJAAncillaryData instances which represent one or more SMPTE 291
@@ -371,7 +375,7 @@ public:	//	INSTANCE METHODS
 					The buffer contents are replaced;  the unused remainder, if any, will be zeroed.
 		@param		F1Buffer			Specifies the buffer memory into which Field 1's IP/RTP data will be written.
 		@param		F2Buffer			Specifies the buffer memory into which Field 2's IP/RTP data will be written.
-		@param		inIsProgressive		Specify true to designate the output ancillary data stream as progressive; 
+		@param[in]	inIsProgressive		Specify true to designate the output ancillary data stream as progressive; 
 										otherwise, specify false. Defaults to true (is progressive).
 		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
 										Defaults to zero (progressive).
@@ -381,6 +385,20 @@ public:	//	INSTANCE METHODS
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
+																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0);
+
+	/**
+		@brief		Answers with the number of bytes required to store IP/RTP for my AJAAncillaryData packets in \ref ancrtpformat .
+		@param[out]	outF1ByteCount		Receives the requisite byte count for Field 1's IP/RTP packet data.
+		@param[out]	outF2ByteCount		Receives the requisite byte count for Field 1's IP/RTP packet data.
+		@param[in]	inIsProgressive		Specify true to designate the output ancillary data stream as progressive; 
+										otherwise, specify false. Defaults to true (is progressive).
+		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
+										Defaults to zero (progressive).
+		@note		This function has the side-effect of calling AJAAncillaryData::GenerateTransmitData on each of my packets.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						GetIPTransmitDataLength (uint32_t & outF1ByteCount, uint32_t & outF2ByteCount,
 																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0);
 	///@}
 
@@ -453,15 +471,11 @@ public:	//	INSTANCE METHODS
 
 
 protected:
-	typedef std::vector<ULWordSequence>		U32Pkts;			///< @brief	Ordered sequence of U32 RTP packets
-	typedef U32Pkts::const_iterator			U32PktsConstIter;
-	typedef U32Pkts::iterator				U32PktsIter;
-
 	typedef std::list <AJAAncillaryData *>			AJAAncillaryDataList;
 	typedef AJAAncillaryDataList::const_iterator	AJAAncDataListConstIter;	///< @brief	Handy const iterator for iterating over members of an AJAAncillaryDataList.
 	typedef AJAAncillaryDataList::iterator			AJAAncDataListIter;			///< @brief	Handy non-const iterator for iterating over members of an AJAAncillaryDataList.
 
-	virtual AJAAncillaryDataType			GetAnalogAncillaryDataType (AJAAncillaryData * pInAncData);
+	virtual inline AJAAncillaryDataType				GetAnalogAncillaryDataType (const AJAAncillaryData & inAncData)	{return GetAnalogAncillaryDataTypeForLine(inAncData.GetLocationLineNumber());}
 
 	static bool								BufferHasGUMPData (const NTV2_POINTER & inBuffer);
 
@@ -478,12 +492,12 @@ protected:
 	/**
 		@brief		Answers with my F1 & F2 SMPTE anc packets encoded as RTP ULWordSequences.
 					The returned ULWords are already network-byte-order, ready to encapsulate into an RTP packet buffer.
-		@param[out]	outF1U32Pkts	Receives my F1 U32Pkts, containing zero or more RTP ULWordSequences.
-		@param[out]	outF2U32Pkts	Receives my F1 U32Pkts, containing zero or more RTP ULWordSequences.
+		@param[out]	outF1U32Pkts	Receives my F1 AJAU32Pkts, containing zero or more RTP ULWordSequences.
+		@param[out]	outF2U32Pkts	Receives my F1 AJAU32Pkts, containing zero or more RTP ULWordSequences.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						GetRTPPackets (U32Pkts & outF1U32Pkts,
-															U32Pkts & outF2U32Pkts,
+	virtual AJAStatus						GetRTPPackets (AJAU32Pkts & outF1U32Pkts,
+															AJAU32Pkts & outF2U32Pkts,
 															const bool inIsProgressive,
 															const uint32_t inF2StartLine);
 	/**
@@ -495,7 +509,7 @@ protected:
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	static AJAStatus						WriteRTPPackets (NTV2_POINTER & theBuffer,
-															const U32Pkts & inRTPPkts,
+															const AJAU32Pkts & inRTPPkts,
 															const bool	inIsF2,
 															const bool inIsProgressive);
 
@@ -512,5 +526,20 @@ private:
 	@return		A non-constant reference to the specified output stream.
 **/
 inline std::ostream & operator << (std::ostream & inOutStream, const AJAAncillaryList & inList)		{return inList.Print(inOutStream);}
+
+/**
+	@brief		Writes the given AJAU32Pkts object into the given output stream in a human-readable format.
+	@param		inOutStream		Specifies the output stream to be written.
+	@param[in]	inPkts			Specifies the AJAU32Pkts object to be rendered into the output stream.
+	@return		A non-constant reference to the specified output stream.
+**/
+AJAExport std::ostream & operator << (std::ostream & inOutStream, const AJAU32Pkts & inPkts);
+
+/**
+	@param[in]	inU32Pkts			Specifies the AJAU32Pkts object of interest.
+	@param[in]	inIncludeOverhead	If true, add in the overhead of the RTP headers.
+	@return		The total number of U32 words stored in the given AJAU32Pkts object, with or without RTP header overhead.
+**/
+AJAExport size_t	GetTotalU32Count (const AJAU32Pkts & inU32Pkts, const bool inIncludeOverhead);
 
 #endif	// AJA_ANCILLARYLIST_H

@@ -15,23 +15,23 @@
 
 using namespace std;
 
-#define	LOGMYERROR(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
-#define	LOGMYWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
-#define	LOGMYNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Notice,		__FUNCTION__ << ":  " << __x__)
-#define	LOGMYINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
-#define	LOGMYDEBUG(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
+#define	LOGMYERROR(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Error,		__FUNCTION__ << ": " << __x__)
+#define	LOGMYWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Warning,	__FUNCTION__ << ": " << __x__)
+#define	LOGMYNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Notice,		__FUNCTION__ << ": " << __x__)
+#define	LOGMYINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Info,		__FUNCTION__ << ": " << __x__)
+#define	LOGMYDEBUG(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Debug,		__FUNCTION__ << ": " << __x__)
 
-#define	RCV2110ERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
-#define	RCV2110WARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
-#define	RCV2110NOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Notice,		__FUNCTION__ << ":  " << __x__)
-#define	RCV2110INFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
-#define	RCV2110DBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
+#define	RCV2110ERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Error,		__FUNCTION__ << ": " << __x__)
+#define	RCV2110WARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Warning,	__FUNCTION__ << ": " << __x__)
+#define	RCV2110NOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Notice,		__FUNCTION__ << ": " << __x__)
+#define	RCV2110INFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Info,		__FUNCTION__ << ": " << __x__)
+#define	RCV2110DBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Debug,		__FUNCTION__ << ": " << __x__)
 
-#define	XMT2110ERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
-#define	XMT2110WARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
-#define	XMT2110NOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":  " << __x__)
-#define	XMT2110INFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
-#define	XMT2110DBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
+#define	XMT2110ERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Error,		__FUNCTION__ << ": " << __x__)
+#define	XMT2110WARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Warning,	__FUNCTION__ << ": " << __x__)
+#define	XMT2110NOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Notice,	__FUNCTION__ << ": " << __x__)
+#define	XMT2110INFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Info,		__FUNCTION__ << ": " << __x__)
+#define	XMT2110DBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Debug,		__FUNCTION__ << ": " << __x__)
 #if defined(_DEBUG)	//	DetailedDebugging
 	#define	RCV2110DDBG(__x__)	RCV2110DBG(__x__)
 	#define	XMT2110DDBG(__x__)	XMT2110DBG(__x__)
@@ -881,7 +881,7 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData)
 	const AJARTPAncPacketHeader	pktHdr	(GetDataLocation());
 	const uint32_t				pktHdrWord	(pktHdr.GetULWord());
 	outData.push_back(pktHdrWord);
-	XMT2110DDBG("outU32s[" << DEC(outData.size()-1) << "]=" << xHEX0N(ENDIAN_32NtoH(pktHdrWord),8) << " (BigEndian)");	//	Byte-Swap it to make BigEndian look right
+//	XMT2110DDBG("outU32s[" << DEC(outData.size()-1) << "]=" << xHEX0N(ENDIAN_32NtoH(pktHdrWord),8) << " (BigEndian)");	//	Byte-Swap it to make BigEndian look right
 
 	//	All subsequent 32-bit longwords come from the array of 10-bit values I built earlier.
 	const size_t	numUDWs	(UDW16s.size());
@@ -897,12 +897,12 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData)
 			const uint32_t	UDW			(isPastEnd  ?  0  :  uint32_t(UDW16s[ndx]));
 			const unsigned	shift		(gShifts[loopNdx]);
 			const uint32_t	mask		(gMasks[loopNdx]);
-			if (!isPastEnd)	XMT2110DDBG("u16s[" << DEC(ndx) << "]=" << xHEX0N(UDW,3));
+//			if (!isPastEnd)	XMT2110DDBG("u16s[" << DEC(ndx) << "]=" << xHEX0N(UDW,3));
 			if (is4th)
 			{
 				u32 |=  (UDW >> shift) & mask;
 				outData.push_back(ENDIAN_32HtoN(u32));
-				XMT2110DDBG("outU32s[" << DEC(outData.size()-1) << "]=" << xHEX0N(u32,8) << " (BigEndian)");
+//				XMT2110DDBG("outU32s[" << DEC(outData.size()-1) << "]=" << xHEX0N(u32,8) << " (BigEndian)");
 				u32 = 0;	//	Reset, start over
 				if (isPastEnd)
 					break;	//	Done, 32-bit longword aligned
@@ -944,7 +944,7 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData)
 #if defined(_DEBUG)
 {
 	ostringstream	oss;
-	oss << (origSize ? "Appended " : "Generated ") << (outData.size() - origSize)  << " 32-bit words:";
+	oss << (origSize ? "Appended " : "Generated ") << (outData.size() - origSize)  << " U32s:";
 	for (size_t ndx(origSize);  ndx < outData.size();  ndx++)	//	outData is in Network Byte Order
 		oss << " " << HEX0N(ENDIAN_32NtoH(outData[ndx]),8);		//	so byte-swap to make it look right in the log
 	oss << " BigEndian from " << AsString(32);
@@ -1017,7 +1017,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 				//	Grab next u32 value...
 				if (++inOutU32Ndx >= numU32s)
 				{
-					u16s.push_back(u16);	RCV2110DDBG("u16s[" << DEC(u16s.size()-1) << "]=" << xHEX0N(u16,3) << " (Past end)");
+					u16s.push_back(u16);	//	RCV2110DDBG("u16s[" << DEC(u16s.size()-1) << "]=" << xHEX0N(u16,3) << " (Past end)");
 					break;	//	Past end
 				}
 				u32 = ENDIAN_32NtoH(inU32s.at(inOutU32Ndx));
@@ -1028,16 +1028,16 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 			}
 			else if (is1st)
 			{
-				RCV2110DDBG("u16s[" << DEC(u16s.size()) << "]=" << xHEX0N(u16,3) << " | " << xHEX0N(uint16_t((u32 & mask) >> shift),3)
-													<< " = " << xHEX0N(u16 | uint16_t((u32 & mask) >> shift),3));
+//				RCV2110DDBG("u16s[" << DEC(u16s.size()) << "]=" << xHEX0N(u16,3) << " | " << xHEX0N(uint16_t((u32 & mask) >> shift),3)
+//							<< " = " << xHEX0N(u16 | uint16_t((u32 & mask) >> shift),3));
 				u16 |= uint16_t((u32 & mask) >> shift);
 			}
 			else
 			{
 				u16 = uint16_t((u32 & mask) >> shift);
-				RCV2110DDBG("u16s[" << DEC(u16s.size()) << "]=" << xHEX0N(u16,3));
+//				RCV2110DDBG("u16s[" << DEC(u16s.size()) << "]=" << xHEX0N(u16,3));
 			}
-			u16s.push_back(u16);	RCV2110DDBG("u16s[" << DEC(u16s.size()-1) << "]=" << xHEX0N(u16,3));
+			u16s.push_back(u16);	//	RCV2110DDBG("u16s[" << DEC(u16s.size()-1) << "]=" << xHEX0N(u16,3));
 			switch(u16s.size())
 			{
 				case 1:		SetDID(uint8_t(u16));				break;	//	Got DID

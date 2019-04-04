@@ -49,24 +49,43 @@ using namespace std;
 static inline uint32_t ENDIAN_32NtoH(const uint32_t inValue)	{return AJA_ENDIAN_32NtoH(inValue);}
 //static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return AJA_ENDIAN_32HtoN(inValue);}
 
-static string PrintULWordsBE (const ULWordSequence & inData, const unsigned inMaxNum = 32)
+static ostream & PrintULWordsBE (ostream & inOutStream, const ULWordSequence & inData, const unsigned inMaxNum = 32)
 {
-	ostringstream	oss;
 	unsigned		numPrinted (0);
-	oss << DEC(inData.size()) << " ULWords: ";
+	inOutStream << DECN(inData.size(),3) << " U32s: ";
 	for (ULWordSequenceConstIter iter(inData.begin());  iter != inData.end();  )
 	{
-		oss << HEX0N(ENDIAN_32NtoH(*iter),8);
+		inOutStream << HEX0N(ENDIAN_32NtoH(*iter),8);
 		numPrinted++;
 		if (++iter != inData.end())
 		{
 			if (numPrinted > inMaxNum)
-				{oss << "...";	break;}
-			oss << " ";
+				{inOutStream << "...";	break;}
+			inOutStream << " ";
 		}
 	}
+	return inOutStream;
+}
+
+string ULWordSequenceToStringBE (const ULWordSequence & inData, const unsigned inMaxNum = 32)
+{
+	ostringstream oss;
+	PrintULWordsBE (oss, inData, inMaxNum);
 	return oss.str();
 }
+
+ostream & operator << (ostream & inOutStream, const AJAU32Pkts & inPkts)
+{
+	unsigned	rtpPktNum(0);
+	for (AJAU32PktsConstIter pktIter(inPkts.begin());  pktIter != inPkts.end();  ++pktIter)
+	{	++rtpPktNum;
+		inOutStream << "RTP PKT " << DEC0N(rtpPktNum,3) << ":";
+		::PrintULWordsBE(inOutStream, *pktIter);
+		inOutStream << endl;
+	}	//	for each RTP packet
+	return inOutStream;
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -508,7 +527,7 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 			{
 				//	If this is NOT a "continuation" packet, then this is a new analog packet. see if the
 				//	user has specified an expected Anc data type that matches the location of the new data...
-				newAncType = GetAnalogAncillaryDataType (&newAncData);
+				newAncType = GetAnalogAncillaryDataType(newAncData);
 				bInsertNew = true;
 			}
 		}	// analog anc data
@@ -552,7 +571,7 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const ULWordSequence & inR
 	if (inReceivedData.empty())
 		{LOGMYWARN("Empty RTP data vector");  return AJA_STATUS_SUCCESS;}
 
-LOGMYDEBUG(PrintULWordsBE(inReceivedData) << " (BigEndian)");	//	ByteSwap em to make em look right
+LOGMYDEBUG(::ULWordSequenceToStringBE(inReceivedData) << " (BigEndian)");	//	ByteSwap em to make em look right
 
 	//	Crack open the RTP packet header...
 	AJARTPAncPayloadHeader	RTPheader;
@@ -854,6 +873,13 @@ AJAStatus AJAAncillaryList::SetFromDeviceAncBuffers (const NTV2_POINTER & inF1An
 	return result;
 }
 
+size_t GetTotalU32Count (const AJAU32Pkts & inU32Pkts, const bool inIncludeOverhead)
+{
+	size_t	result (inIncludeOverhead  ?  inU32Pkts.size() * AJARTPAncPayloadHeader::GetHeaderWordCount()  :  0);
+	for (AJAU32PktsConstIter it(inU32Pkts.begin());  it != inU32Pkts.end();  ++it)
+		result += it->size();
+	return result;
+}
 
 bool AJAAncillaryList::BufferHasGUMPData (const NTV2_POINTER & inBuffer)
 {
@@ -871,7 +897,7 @@ static const size_t		MAX_RTP_PKT_LENGTH_WORDS	((MAX_RTP_PKT_LENGTH_BYTES+1) / si
 static const uint32_t	MAX_RTP_PKT_COUNT			(0x000000FF);	//	255 max
 
 
-AJAStatus AJAAncillaryList::GetRTPPackets (U32Pkts & outF1U32Pkts,  U32Pkts & outF2U32Pkts,
+AJAStatus AJAAncillaryList::GetRTPPackets (AJAU32Pkts & outF1U32Pkts,  AJAU32Pkts & outF2U32Pkts,
 											const bool inIsProgressive,  const uint32_t inF2StartLine)
 {
 	AJAStatus	result				(AJA_STATUS_SUCCESS);
@@ -882,7 +908,7 @@ AJAStatus AJAAncillaryList::GetRTPPackets (U32Pkts & outF1U32Pkts,  U32Pkts & ou
 	unsigned	countOverflows		(0);
 	size_t		overflowWords		(0);
 
-	//	Reserve space in U32Pkts vectors...
+	//	Reserve space in AJAU32Pkts vectors...
 	outF1U32Pkts.reserve(CountAncillaryData());		outF1U32Pkts.clear();
 	outF2U32Pkts.reserve(CountAncillaryData());		outF2U32Pkts.clear();
 
@@ -930,7 +956,7 @@ AJAStatus AJAAncillaryList::GetRTPPackets (U32Pkts & outF1U32Pkts,  U32Pkts & ou
 			if (ONE_RTP_PKT_PER_SMPTE_PKT)
 			{
 				outF1U32Pkts.push_back(F1U32s);	//	Append it
-				XMTDBG("F1 pkt " << DEC(actF1PktCnt) << ": " << PrintULWordsBE(F1U32s) << " (BigEndian)");
+				XMTDBG("F1 pkt " << DEC(actF1PktCnt) << ": " << ::ULWordSequenceToStringBE(F1U32s) << " (BigEndian)");
 				F1U32s.clear();					//	Start current pkt over
 			}
 		}	/////////////	FIELD 1   //////////////
@@ -958,7 +984,7 @@ AJAStatus AJAAncillaryList::GetRTPPackets (U32Pkts & outF1U32Pkts,  U32Pkts & ou
 			if (ONE_RTP_PKT_PER_SMPTE_PKT)
 			{
 				outF2U32Pkts.push_back(F2U32s);	//	Append it
-				XMTDBG("F2 pkt " << DEC(actF2PktCnt) << ": " << PrintULWordsBE(F2U32s) << " (BigEndian)");
+				XMTDBG("F2 pkt " << DEC(actF2PktCnt) << ": " << ::ULWordSequenceToStringBE(F2U32s) << " (BigEndian)");
 				F2U32s.clear();					//	Start current pkt over
 			}
 		}	/////////////	FIELD 2   //////////////
@@ -968,19 +994,14 @@ AJAStatus AJAAncillaryList::GetRTPPackets (U32Pkts & outF1U32Pkts,  U32Pkts & ou
 		LOGMYERROR(::AJAStatusToString(result) << ": Pkt " << DEC(pktNdx+1) << " of " << DEC(CountAncillaryData()) << " failed in GenerateTransmitData: " << ::AJAStatusToString(result));
 	else if (!ONE_RTP_PKT_PER_SMPTE_PKT)
 	{
-		XMTDBG("Single RTP pkt to contain " << DEC(actF1PktCnt) << " F1 pkts (" << DEC(F1U32s.size()) << " U32s), " << DEC(actF2PktCnt) << " F2 pkts (" << DEC(F2U32s.size()) << "U32s)");
-		XMTDBG(PrintULWordsBE(F1U32s)); XMTDBG(PrintULWordsBE(F2U32s));
 		outF1U32Pkts.push_back(F1U32s);	//	Append all F1
 		outF2U32Pkts.push_back(F2U32s);	//	Append all F2
 	}
+	XMTDBG("F1: " << outF1U32Pkts);
+	XMTDBG("F2: " << outF2U32Pkts);
 	return result;
 }	//	GetRTPPackets
 
-
-AJAAncillaryDataType AJAAncillaryList::GetAnalogAncillaryDataType (AJAAncillaryData * pData)
-{
-	return pData ? GetAnalogAncillaryDataTypeForLine (pData->GetLocationLineNumber ()) : AJAAncillaryDataType_Unknown;
-}
 
 
 ///////////////////////////////////////////////////////////////////
@@ -1252,7 +1273,7 @@ AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,  
 }	//	WriteVANCData
 
 
-AJAStatus AJAAncillaryList::WriteRTPPackets (NTV2_POINTER & theBuffer,  const U32Pkts & inRTPPkts,
+AJAStatus AJAAncillaryList::WriteRTPPackets (NTV2_POINTER & theBuffer,  const AJAU32Pkts & inRTPPkts,
 												const bool inIsF2,  const bool inIsProgressive)
 {
 	const ULWord	totPkts (ULWord(inRTPPkts.size()));
@@ -1260,7 +1281,7 @@ AJAStatus AJAAncillaryList::WriteRTPPackets (NTV2_POINTER & theBuffer,  const U3
 	const string	sPrg	(inIsProgressive ? " Prg" : " Int");
 	ULWord	u32offset(0), pktNum(1);
 
-	for (U32PktsConstIter RTPPktIter(inRTPPkts.begin());  RTPPktIter != inRTPPkts.end();  pktNum++)
+	for (AJAU32PktsConstIter RTPPktIter(inRTPPkts.begin());  RTPPktIter != inRTPPkts.end();  pktNum++)
 	{
 		AJARTPAncPayloadHeader	RTPHeader;
 		ostringstream			pktNumInfo;
@@ -1283,14 +1304,14 @@ AJAStatus AJAAncillaryList::WriteRTPPackets (NTV2_POINTER & theBuffer,  const U3
 		if (!RTPHeader.WriteToBuffer(theBuffer, u32offset))
 			{LOGMYERROR("RTP hdr WriteBuffer failed for " << theBuffer << " u32offset=" << DEC(u32offset)
 						<< pktNumInfo.str());  return AJA_STATUS_FAIL;}
-		u32offset += RTPHeader.GetHeaderByteCount() / sizeof(uint32_t);
+		u32offset += AJARTPAncPayloadHeader::GetHeaderWordCount();
 		if (!theBuffer.PutU32s (RTPPkt, u32offset))
 			{LOGMYERROR("RTP data PutU32s failed for " << theBuffer << " u32offset=" << DEC(u32offset)
 						<< pktNumInfo.str());  return AJA_STATUS_FAIL;}
-		u32offset += RTPPkt.size() * sizeof(uint32_t);
+		u32offset += RTPPkt.size();
 	}	//	for each RTP packet
 
-	LOGMYDEBUG(DEC(totPkts) << " RTP pkt(s), " << DEC(u32offset*sizeof(uint32_t)) << " bytes written for " << sFld << sPrg);
+	LOGMYDEBUG(DEC(totPkts) << " RTP pkt(s), " << DEC(u32offset) << " U32s (" << DEC(u32offset*sizeof(uint32_t)) << " bytes) written for" << sFld << sPrg);
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -1299,7 +1320,7 @@ AJAStatus AJAAncillaryList::GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POI
 												const bool inIsProgressive, const uint32_t inF2StartLine)
 {
 	AJAStatus	result	(AJA_STATUS_SUCCESS);
-	U32Pkts		F1U32Pkts, F2U32Pkts;		//	32-bit network-byte-order data
+	AJAU32Pkts	F1U32Pkts, F2U32Pkts;		//	32-bit network-byte-order data
 
 	//	I need to be in ascending line order...
 	F1Buffer.Fill(uint64_t(0));	 F2Buffer.Fill(uint64_t(0));
@@ -1398,6 +1419,22 @@ AJAStatus AJAAncillaryList::GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POI
 */
 	return AJA_STATUS_SUCCESS;
 }	//	GetIPTransmitData
+
+AJAStatus AJAAncillaryList::GetIPTransmitDataLength (uint32_t & outF1ByteCount, uint32_t & outF2ByteCount,
+													const bool inIsProgressive, const uint32_t inF2StartLine)
+{
+	outF1ByteCount = outF2ByteCount = 0;
+
+	//	Get F1 & F2 xmit RTP U32 words...
+	AJAU32Pkts	F1U32Pkts, F2U32Pkts;	//	U32 network-byte-order data
+	AJAStatus result (GetRTPPackets (F1U32Pkts, F2U32Pkts, inIsProgressive, inF2StartLine));
+	if (AJA_FAILURE(result))
+		return result;
+
+	outF1ByteCount = uint32_t(::GetTotalU32Count(F1U32Pkts, /*includeOverhead*/true));
+	outF2ByteCount = uint32_t(::GetTotalU32Count(F2U32Pkts, /*includeOverhead*/true));
+	return AJA_STATUS_SUCCESS;
+}
 
 
 ostream & AJAAncillaryList::Print (ostream & inOutStream, const bool inDumpPayload) const
