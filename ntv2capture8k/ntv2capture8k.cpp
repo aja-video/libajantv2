@@ -278,9 +278,9 @@ void NTV2Capture8K::SetupHostBuffers (void)
 		if (mAVHostBuffer [bufferNdx].fVideoBuffer != NULL)
 			mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fVideoBuffer, mVideoBufferSize);
 		if (mAVHostBuffer [bufferNdx].fAudioBuffer)
-			mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fAudioBuffer, mVideoBufferSize);
+            mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fAudioBuffer, mAudioBufferSize);
 		if (mAVHostBuffer [bufferNdx].fAncBuffer)
-			mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fAncBuffer, mVideoBufferSize);
+            mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fAncBuffer, mAncBufferSize);
 	}	//	for each AVDataBuffer
 
 }	//	SetupHostBuffers
