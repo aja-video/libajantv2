@@ -5160,7 +5160,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONA1:					return inForRetailDisplay ? "Kona 1"					: "Kona1";
         case DEVICE_ID_KONAHDMI:				return inForRetailDisplay ? "Kona HDMI"					: "KonaHDMI";
 		case DEVICE_ID_KONA5:					return inForRetailDisplay ?	"KONA 5"					: "Kona5";
-        case DEVICE_ID_KONA5_4X12G:             return inForRetailDisplay ?	"KONA 5 12G"				: "Kona5-12G";
+        case DEVICE_ID_KONA5_4X12G:             return inForRetailDisplay ?	"KONA 5 4x12G"				: "Kona5 4x12G";
 		case DEVICE_ID_CORVID44_12G:			return inForRetailDisplay ?	"Corvid 44 12G"				: "Corvid44-12G";
 #if defined(_DEBUG)
 #else
