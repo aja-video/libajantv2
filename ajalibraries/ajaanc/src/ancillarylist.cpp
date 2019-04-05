@@ -91,28 +91,39 @@ ostream & operator << (ostream & inOutStream, const AJAU32Pkts & inPkts)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+static bool		gDefaultXmitOneRTPPkt		(false);
 static bool		gIncludeZeroLengthPackets	(false);
 static uint32_t	gExcludedZeroLengthPackets	(0);
-static AJALock	gZeroLengthLock;
+static AJALock	gGlobalLock;
 
 inline uint32_t AJAAncillaryList::GetExcludedZeroLengthPacketCount (void)
-{	AJAAutoLock	locker(&gZeroLengthLock);
+{	AJAAutoLock	locker(&gGlobalLock);
 	return gExcludedZeroLengthPackets;
 }
 
 inline void AJAAncillaryList::ResetExcludedZeroLengthPacketCount (void)
-{	AJAAutoLock	locker(&gZeroLengthLock);
+{	AJAAutoLock	locker(&gGlobalLock);
 	gExcludedZeroLengthPackets = 0;
 }
 
 inline bool AJAAncillaryList::IsIncludingZeroLengthPackets (void)
-{	AJAAutoLock	locker(&gZeroLengthLock);
+{	AJAAutoLock	locker(&gGlobalLock);
 	return gIncludeZeroLengthPackets;
 }
 
 inline void AJAAncillaryList::SetIncludeZeroLengthPackets (const bool inInclude)
-{	AJAAutoLock	locker(&gZeroLengthLock);
+{	AJAAutoLock	locker(&gGlobalLock);
 	gIncludeZeroLengthPackets = inInclude;
+}
+
+inline bool AJAAncillaryList::GetDefaultTransmitOneRTPPacket (void)
+{	AJAAutoLock	locker(&gGlobalLock);
+	return gDefaultXmitOneRTPPkt;
+}
+
+inline void AJAAncillaryList::SetDefaultTransmitOneRTPPacket (const bool inXmitOneRTPPkt)
+{	AJAAutoLock	locker(&gGlobalLock);
+	gDefaultXmitOneRTPPkt = inXmitOneRTPPkt;
 }
 
 static inline void BumpZeroLengthPacketCount (void)
@@ -133,6 +144,7 @@ AJAAncillaryList::AJAAncillaryList ()
 	SetAnalogAncillaryDataTypeForLine (283, AJAAncillaryDataType_Cea608_Line21);
 	SetAnalogAncillaryDataTypeForLine (284, AJAAncillaryDataType_Cea608_Line21);
 	SetAnalogAncillaryDataTypeForLine (285, AJAAncillaryDataType_Cea608_Line21);
+	m_xmitOneRTPPkt = GetDefaultTransmitOneRTPPacket();
 }
 
 
@@ -564,7 +576,7 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData, 
 
 
 //	Parse a "raw" RTP packet received from hardware (ingest) in network byte order into separate
-//	AJAAncillaryData objects and append them to me.
+//	AJAAncillaryData objects and append them to me. 'inReceivedData' includes the RTP header.
 AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const ULWordSequence & inReceivedData)
 {
 	AJAStatus	status	(AJA_STATUS_SUCCESS);
@@ -582,18 +594,27 @@ LOGMYDEBUG(::ULWordSequenceToStringBE(inReceivedData) << " (BigEndian)");	//	Byt
 	if (!RTPheader.IsValid())
 		{LOGMYWARN("RTP header invalid: " << RTPheader);  return AJA_STATUS_FAIL;}
 
-	const size_t	numBytes		(RTPheader.GetPacketLength());
-	const uint32_t	numPackets		(RTPheader.GetAncPacketCount());
-	const size_t	actualBytes		(inReceivedData.size() * 4 - RTPheader.GetHeaderByteCount());
+	size_t			numWords	(RTPheader.GetPacketLength() / sizeof(uint32_t));	//	NOTE: RTP pkt length includes the RTP header
+	size_t			actualWords	(inReceivedData.size());
+	const uint32_t	numPackets	(RTPheader.GetAncPacketCount());
+	uint32_t		pktsAdded	(0);
 
-	if (actualBytes < numBytes)
-		{LOGMYERROR("RTP header says " << DEC(numBytes) << "-byte pkt, but only given " << DEC(actualBytes) << " bytes: " << RTPheader);  return AJA_STATUS_BADBUFFERCOUNT;}
+	//	Sanity check the RTP header against inReceivedData...
+	if (numWords < AJARTPAncPayloadHeader::GetHeaderWordCount())
+		{LOGMYERROR("Bad RTP packet len " << DEC(numWords) << " U32s -- < 5 " << RTPheader);  return AJA_STATUS_FAIL;}
+	if (actualWords < AJARTPAncPayloadHeader::GetHeaderWordCount())
+		{LOGMYERROR(DEC(actualWords) << " U32s < 5 -- insufficient data" << RTPheader);  return AJA_STATUS_RANGE;}
+	if (actualWords < numWords)
+		{LOGMYERROR("Expected " << DEC(numWords) << ", but only given " << DEC(actualWords) << " U32s: " << RTPheader);  return AJA_STATUS_BADBUFFERCOUNT;}
 	// NO NEED TO WARN OF EXTRA ULWORDs:	else if (actualBytes != numBytes) LOGMYWARN("RTP header says " << DEC(numBytes) << "-byte pkt, but given " << DEC(actualBytes) << " bytes: " << RTPheader);
+	numWords -= AJARTPAncPayloadHeader::GetHeaderWordCount();		//	Remainder (excluding RTP hdr) contains packed Anc packets
+	actualWords -= AJARTPAncPayloadHeader::GetHeaderWordCount();	//	Remainder (excluding RTP hdr) contains packed Anc packets
 	if (!numPackets)
 		{LOGMYWARN("No Anc packets to append: " << RTPheader);  return AJA_STATUS_SUCCESS;}
 
 LOGMYDEBUG(RTPheader);
 
+	//	Parse each anc pkt in the RTP pkt...
 	uint16_t	u32Ndx	(5);	//	First Anc packet starts at ULWord[5]
 	unsigned	pktNum	(0);
 	for (;  pktNum < numPackets  &&  AJA_SUCCESS(status);  pktNum++)
@@ -612,16 +633,16 @@ LOGMYDEBUG(RTPheader);
 		pNewPkt->SetFrameID(RTPheader.GetTimeStamp());			//	TimeStamp it using RTP timestamp
 		if (IsIncludingZeroLengthPackets()  ||  pNewPkt->GetDC())
 		{
-			try	{m_ancList.push_back(pNewPkt);}		//	Append to my list
+			try	{m_ancList.push_back(pNewPkt);  pktsAdded++;}	//	Append to my list
 			catch(...)	{status = AJA_STATUS_FAIL;}
 		}
 		else ::BumpZeroLengthPacketCount();
 	}	//	for each anc packet
 
 	if (AJA_FAILURE(status))
-		LOGMYERROR(::AJAStatusToString(status) << ": Failed at pkt " << DEC(pktNum+1) << " of " << DEC(numPackets));
+		LOGMYERROR(::AJAStatusToString(status) << ": Failed at pkt[" << DEC(pktNum) << "] of " << DEC(numPackets));
 	if (CountAncillaryData() < numPackets)
-		LOGMYWARN(DEC(CountAncillaryData()) << " of " << DEC(numPackets) << " anc packet(s) decoded from RTP packet");
+		LOGMYWARN(DEC(pktsAdded) << " of " << DEC(numPackets) << " anc pkt(s) decoded from RTP pkt");
 	else
 		LOGMYINFO(DEC(numPackets) << " pkts added from RTP pkt: " << *this);
 	return status;
@@ -823,10 +844,10 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBu
 		//	Peek into the packet header to discover its true length...
 		if (!rtpHeader.ReadFromBuffer(ancBuffer))
 			{LOGMYERROR("Failed reading IP payload header: " << ancBuffer.AsString(40));  return AJA_STATUS_NOT_FOUND;}
-		ULWordCount = (rtpHeader.GetHeaderByteCount() + rtpHeader.GetPacketLength()) / sizeof(uint32_t);
+		ULWordCount = rtpHeader.GetPacketLength() / sizeof(uint32_t);
 
 		//	Read ULWordCount x ULWords from the buffer...
-		if (!ancBuffer.GetU32s(U32s, ULWordOffset, ULWordCount))
+		if (!ancBuffer.GetU32s(U32s, 0, ULWordCount))
 		{
 			LOGMYERROR("On RTP pkt " << DEC(RTPPacketCount) << ", GetU32s failed reading " << DEC(ULWordCount)
 						<< " ULWords");
@@ -846,6 +867,7 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBu
 						<< " ULWords, length=" << DEC(ULWordCount) << " ULWords");
 			return AJA_STATUS_BADBUFFERSIZE;
 		}
+		//LOGMYDEBUG("RTP PKT " << DEC(RTPPacketCount+1) << ": U32Off=" << DEC(ULWordOffset) << " U32Cnt=" << DEC(ULWordCount) << " " << ancBuffer);
 	}	//	loop til no more RTP packets found
 
 	if (!RTPPacketCount  &&  BufferHasGUMPData(inAncBuffer))	//	GUMP  GUMP  GUMP  GUMP  GUMP  GUMP  GUMP  GUMP  GUMP
@@ -891,13 +913,13 @@ bool AJAAncillaryList::BufferHasGUMPData (const NTV2_POINTER & inBuffer)
 	return *pBytes == 0xFF;
 }
 
-static const bool		ONE_RTP_PKT_PER_SMPTE_PKT	(true);
 static const size_t		MAX_RTP_PKT_LENGTH_BYTES	(0x0000FFFF);	//	65535 max
 static const size_t		MAX_RTP_PKT_LENGTH_WORDS	((MAX_RTP_PKT_LENGTH_BYTES+1) / sizeof(uint32_t) - 1);	//	16383 max
-static const uint32_t	MAX_RTP_PKT_COUNT			(0x000000FF);	//	255 max
+static const uint32_t	MAX_ANC_PKTS_PER_RTP_PKT	(0x000000FF);	//	255 max
 
 
 AJAStatus AJAAncillaryList::GetRTPPackets (AJAU32Pkts & outF1U32Pkts,  AJAU32Pkts & outF2U32Pkts,
+											AJAAncPktCounts & outF1AncCounts,  AJAAncPktCounts & outF2AncCounts,
 											const bool inIsProgressive,  const uint32_t inF2StartLine)
 {
 	AJAStatus	result				(AJA_STATUS_SUCCESS);
@@ -911,6 +933,7 @@ AJAStatus AJAAncillaryList::GetRTPPackets (AJAU32Pkts & outF1U32Pkts,  AJAU32Pkt
 	//	Reserve space in AJAU32Pkts vectors...
 	outF1U32Pkts.reserve(CountAncillaryData());		outF1U32Pkts.clear();
 	outF2U32Pkts.reserve(CountAncillaryData());		outF2U32Pkts.clear();
+	outF1AncCounts.clear();  outF2AncCounts.clear();
 
 	ULWordSequence	F1U32s, F2U32s;
 	F1U32s.reserve(MAX_RTP_PKT_LENGTH_WORDS);
@@ -934,7 +957,7 @@ AJAStatus AJAAncillaryList::GetRTPPackets (AJAU32Pkts & outF1U32Pkts,  AJAU32Pkt
 
 		if (inIsProgressive  ||  pkt.GetLocationLineNumber() < inF2StartLine)
 		{	/////////////	FIELD 1   //////////////
-			if (actF1PktCnt >= MAX_RTP_PKT_COUNT)
+			if (actF1PktCnt >= MAX_ANC_PKTS_PER_RTP_PKT)
 			{
 				countOverflows++;
 				LOGMYWARN("Skipped pkt " << DEC(pktNdx+1) << " of " << DEC(CountAncillaryData()) << " -- F1 RTP pkt count overflow");
@@ -953,16 +976,17 @@ AJAStatus AJAAncillaryList::GetRTPPackets (AJAU32Pkts & outF1U32Pkts,  AJAU32Pkt
 				continue;
 			}
 			actF1PktCnt++;
-			if (ONE_RTP_PKT_PER_SMPTE_PKT)
+			if (!m_xmitOneRTPPkt)
 			{
 				outF1U32Pkts.push_back(F1U32s);	//	Append it
+				outF1AncCounts.push_back(1);	//	One SMPTE Anc packet per RTP packet
 				XMTDBG("F1 pkt " << DEC(actF1PktCnt) << ": " << ::ULWordSequenceToStringBE(F1U32s) << " (BigEndian)");
 				F1U32s.clear();					//	Start current pkt over
 			}
 		}	/////////////	FIELD 1   //////////////
 		else
 		{	/////////////	FIELD 2   //////////////
-			if (actF2PktCnt >= MAX_RTP_PKT_COUNT)
+			if (actF2PktCnt >= MAX_ANC_PKTS_PER_RTP_PKT)
 			{
 				countOverflows++;
 				LOGMYWARN("Skipped pkt " << DEC(pktNdx+1) << " of " << DEC(CountAncillaryData()) << " -- F2 RTP pkt count overflow");
@@ -981,9 +1005,10 @@ AJAStatus AJAAncillaryList::GetRTPPackets (AJAU32Pkts & outF1U32Pkts,  AJAU32Pkt
 				continue;
 			}
 			actF2PktCnt++;
-			if (ONE_RTP_PKT_PER_SMPTE_PKT)
+			if (!m_xmitOneRTPPkt)
 			{
 				outF2U32Pkts.push_back(F2U32s);	//	Append it
+				outF2AncCounts.push_back(1);	//	One SMPTE Anc packet per RTP packet
 				XMTDBG("F2 pkt " << DEC(actF2PktCnt) << ": " << ::ULWordSequenceToStringBE(F2U32s) << " (BigEndian)");
 				F2U32s.clear();					//	Start current pkt over
 			}
@@ -992,10 +1017,12 @@ AJAStatus AJAAncillaryList::GetRTPPackets (AJAU32Pkts & outF1U32Pkts,  AJAU32Pkt
 
 	if (AJA_FAILURE(result))
 		LOGMYERROR(::AJAStatusToString(result) << ": Pkt " << DEC(pktNdx+1) << " of " << DEC(CountAncillaryData()) << " failed in GenerateTransmitData: " << ::AJAStatusToString(result));
-	else if (!ONE_RTP_PKT_PER_SMPTE_PKT)
+	else if (m_xmitOneRTPPkt)
 	{
-		outF1U32Pkts.push_back(F1U32s);	//	Append all F1
-		outF2U32Pkts.push_back(F2U32s);	//	Append all F2
+		outF1U32Pkts.push_back(F1U32s);					//	Append all F1
+		outF1AncCounts.push_back(uint8_t(actF1PktCnt));	//	Total F1 SMPTE Anc packets in this one F1 RTP packet
+		outF2U32Pkts.push_back(F2U32s);					//	Append all F2
+		outF2AncCounts.push_back(uint8_t(actF2PktCnt));	//	Total F2 SMPTE Anc packets in this one F2 RTP packet
 	}
 	XMTDBG("F1: " << outF1U32Pkts);
 	XMTDBG("F2: " << outF2U32Pkts);
@@ -1273,13 +1300,17 @@ AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,  
 }	//	WriteVANCData
 
 
-AJAStatus AJAAncillaryList::WriteRTPPackets (NTV2_POINTER & theBuffer,  const AJAU32Pkts & inRTPPkts,
-												const bool inIsF2,  const bool inIsProgressive)
+AJAStatus AJAAncillaryList::WriteRTPPackets (NTV2_POINTER & theBuffer,
+											const AJAU32Pkts & inRTPPkts,  const AJAAncPktCounts & inAncCounts,
+											const bool inIsF2,  const bool inIsProgressive)
 {
 	const ULWord	totPkts (ULWord(inRTPPkts.size()));
 	const string	sFld	(inIsF2 ? " F2" : " F1");
 	const string	sPrg	(inIsProgressive ? " Prg" : " Int");
 	ULWord	u32offset(0), pktNum(1);
+
+	if (inRTPPkts.size() != inAncCounts.size())
+		{LOGMYERROR(DEC(inRTPPkts.size()) << " RTP pkt(s) != " << DEC(inAncCounts.size()) << " anc count(s)");  return AJA_STATUS_BAD_PARAM;}
 
 	for (AJAU32PktsConstIter RTPPktIter(inRTPPkts.begin());  RTPPktIter != inRTPPkts.end();  pktNum++)
 	{
@@ -1297,7 +1328,7 @@ AJAStatus AJAAncillaryList::WriteRTPPackets (NTV2_POINTER & theBuffer,  const AJ
 		else
 			RTPHeader.SetField1();
 		RTPHeader.SetEndOfFieldOrFrame(isLastRTPPkt);
-		RTPHeader.SetAncPacketCount(uint8_t(RTPPkt.size()));
+		RTPHeader.SetAncPacketCount(uint8_t(inAncCounts.at(pktNum-1)));	//	Use provided Anc count
 		RTPHeader.SetPacketLength(uint16_t(totalPktBytes));
 		//	Playout:  Firmware looks for full RTP pkt bytecount in LS 16 bits of SequenceNumber in RTP header:
 		RTPHeader.SetSequenceNumber(uint32_t(totalPktBytes) & 0x0000FFFF);
@@ -1319,106 +1350,38 @@ AJAStatus AJAAncillaryList::WriteRTPPackets (NTV2_POINTER & theBuffer,  const AJ
 AJAStatus AJAAncillaryList::GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
 												const bool inIsProgressive, const uint32_t inF2StartLine)
 {
-	AJAStatus	result	(AJA_STATUS_SUCCESS);
-	AJAU32Pkts	F1U32Pkts, F2U32Pkts;		//	32-bit network-byte-order data
+	AJAStatus		result (AJA_STATUS_SUCCESS);
+	AJAU32Pkts		F1U32Pkts, F2U32Pkts;		//	32-bit network-byte-order data
+	AJAAncPktCounts	F1AncCounts, F2AncCounts;	//	Per-RTP packet anc packet counts
 
 	//	I need to be in ascending line order...
 	F1Buffer.Fill(uint64_t(0));	 F2Buffer.Fill(uint64_t(0));
 	SortListByLocation();
 
-	//	Get F1 & F2 xmit RTP U32 words...
-	result = GetRTPPackets (F1U32Pkts, F2U32Pkts, inIsProgressive, inF2StartLine);
+	//	Get F1 & F2 xmit RTP U32 words (and SMPTE anc packet counts for each RTP packet)...
+	result = GetRTPPackets (F1U32Pkts, F2U32Pkts, F1AncCounts, F2AncCounts, inIsProgressive, inF2StartLine);
 	if (AJA_FAILURE(result))
 		return result;
 
+	/*
+	ostringstream oss;  oss << "Anc Counts: F1=";  for (size_t ndx(0);  ndx < F1AncCounts.size();  ndx++)  oss << (ndx?"|":"[") << DEC(uint16_t(F1AncCounts.at(ndx)));
+	oss << "] F2=";  for (size_t ndx(0);  ndx < F2AncCounts.size();  ndx++)  oss << (ndx?"|":"[") << DEC(uint16_t(F2AncCounts.at(ndx)));  oss << "]";
+	XMTDBG(oss.str());
+	*/
+
 	//	Write the F1 buffer...
-	result = WriteRTPPackets (F1Buffer, F1U32Pkts, /*isF2*/false, inIsProgressive);
+	result = WriteRTPPackets (F1Buffer, F1U32Pkts, F1AncCounts, /*isF2*/false, inIsProgressive);
 	if (AJA_FAILURE(result))
 		return result;
 
 	//	Write the F2 buffer...
 	if (!inIsProgressive)
-		result = WriteRTPPackets (F2Buffer, F2U32Pkts, /*isF2*/true, inIsProgressive);
-	if (AJA_FAILURE(result))
-		return result;
-/*
-	size_t			RTP_pkt_length_bytes	(U32F1s.size() * sizeof(uint32_t));
-	const size_t	F1BytesNeeded			(RTP_pkt_length_bytes  +
-											(ONE_RTP_PKT_PER_SMPTE_PKT ? 1 : actF1PktCnt) * AJARTPAncPayloadHeader::GetHeaderByteCount());
-	NTV2_ASSERT(RTP_pkt_length_bytes <= MAX_RTP_PKT_LENGTH_BYTES);
-	NTV2_ASSERT(actF1PktCnt <= MAX_RTP_PKT_COUNT);
+		result = WriteRTPPackets (F2Buffer, F2U32Pkts, F2AncCounts, /*isF2*/true, inIsProgressive);
 
-	//	Check F1 output buffer size...
-	if (F1Buffer.GetByteCount() < F1BytesNeeded)
-	{
-		LOGMYERROR("AJA_STATUS_BADBUFFERSIZE, F1 buffer too small, size=" << DEC(F1Buffer.GetByteCount()) << ", "
-					<< DEC(F1BytesNeeded) << " needed for " << DEC(actF1PktCnt) << " pkt(s)");
-		return AJA_STATUS_BADBUFFERSIZE;
-	}
+	return result;
 
-	if (!RTPHeaderF1.WriteBuffer(F1Buffer))
-		{LOGMYERROR("F1 RTP anc payload header WriteBuffer failed, " << F1Buffer);	return AJA_STATUS_FAIL;}
-	//	Write F1 packed data...
-	if (!U32F1s.empty())
-	{
-		if (!F1Buffer.PutU32s(U32F1s, 5))
-		{
-			LOGMYERROR("F1Buffer.PutU32s failed: F1Buffer=" << F1Buffer << ", U32F1s: " << ULWordSequence(U32F1s));
-			return AJA_STATUS_FAIL;
-		}
-		LOGMYINFO("Put " << DEC(U32F1s.size()) << " ULWord(s) into F1 buffer starting at ULWord 5: " << F1Buffer << ": " << RTPHeaderF1);
-		#if defined(_DEBUG)
-			LOGMYDEBUG("F1 Output Buffer: " << F1Buffer.GetU32s(0, U32F1s.size()+5, true));	// True means Byte-swapped
-		#endif
-	}
-
-	if (!inIsProgressive)
-	{
-		AJARTPAncPayloadHeader	RTPHeaderF2;
-		RTP_pkt_length_bytes = U32F2s.size() * sizeof(uint32_t);
-		const size_t	F2BytesNeeded	(RTP_pkt_length_bytes + AJARTPAncPayloadHeader::GetHeaderByteCount());
-		NTV2_ASSERT(RTP_pkt_length_bytes <= MAX_RTP_PKT_LENGTH_BYTES);
-		NTV2_ASSERT(actF2PktCnt <= MAX_RTP_PKT_COUNT);
-
-		//	Check F2 output buffer size...
-		if (F2Buffer.GetByteCount() < F2BytesNeeded)
-		{
-			LOGMYERROR("AJA_STATUS_BADBUFFERSIZE, F2 buffer too small, size=" << DEC(F2Buffer.GetByteCount()) << ", "
-						<< DEC(F2BytesNeeded) << " needed for " << DEC(actF2PktCnt) << " pkt(s)");
-			return AJA_STATUS_BADBUFFERSIZE;
-		}
-
-		//	Write F2 RTP header...
-		RTPHeaderF2.SetField2();
-		RTPHeaderF2.SetAncPacketCount(uint8_t(actF2PktCnt));
-		RTPHeaderF2.SetPacketLength(uint16_t(RTP_pkt_length_bytes));
-		//	Playout:  Firmware looks for full RTP pkt bytecount in LS 16 bits of SequenceNumber in RTP header:
-		RTPHeaderF2.SetSequenceNumber(uint32_t(F2BytesNeeded) & 0x0000FFFF);
-		if (!RTPHeaderF2.WriteBuffer(F2Buffer))
-			{LOGMYERROR("F2 RTP anc payload header WriteBuffer failed, " << F2Buffer);	return AJA_STATUS_FAIL;}
-
-		//	Write the packed data into the packet buffers...
-		if (!U32F2s.empty())
-		{
-			if (!F2Buffer.PutU32s(U32F2s, 5))
-			{
-				LOGMYERROR("F2Buffer.PutU32s failed: F2Buffer=" << F2Buffer << ", U32F2s: " << ULWordSequence(U32F2s));
-				return AJA_STATUS_FAIL;
-			}
-			LOGMYINFO("Put " << DEC(U32F2s.size()) << " ULWord(s) into F2 buffer starting at ULWord 5: " << F2Buffer << ": " << RTPHeaderF2);
-			#if defined(_DEBUG)
-				LOGMYDEBUG("F2 Output Buffer: " << F2Buffer.GetU32s(0, U32F2s.size()+5, true));	// True means Byte-swapped
-			#endif
-		}
-	}	//	if interlaced video
-
-	if (countOverflows)
-		{LOGMYERROR(DEC(countOverflows) << " pkt(s) skipped due to RTP anc pkt count overflow (255 max capacity)");	return AJA_STATUS_RANGE;}
-	if (overflowWords)
-		{LOGMYERROR(DEC(overflowWords*4) << " bytes skipped due to RTP pkt length overflow (65535 max capacity)");	return AJA_STATUS_RANGE;}
-*/
-	return AJA_STATUS_SUCCESS;
 }	//	GetIPTransmitData
+
 
 AJAStatus AJAAncillaryList::GetIPTransmitDataLength (uint32_t & outF1ByteCount, uint32_t & outF2ByteCount,
 													const bool inIsProgressive, const uint32_t inF2StartLine)
@@ -1427,12 +1390,19 @@ AJAStatus AJAAncillaryList::GetIPTransmitDataLength (uint32_t & outF1ByteCount, 
 
 	//	Get F1 & F2 xmit RTP U32 words...
 	AJAU32Pkts	F1U32Pkts, F2U32Pkts;	//	U32 network-byte-order data
-	AJAStatus result (GetRTPPackets (F1U32Pkts, F2U32Pkts, inIsProgressive, inF2StartLine));
+	AJAAncPktCounts	F1AncCounts, F2AncCounts;	//	Per-RTP packet anc packet counts
+	AJAStatus result (GetRTPPackets (F1U32Pkts, F2U32Pkts, F1AncCounts, F2AncCounts, inIsProgressive, inF2StartLine));
 	if (AJA_FAILURE(result))
 		return result;
 
-	outF1ByteCount = uint32_t(::GetTotalU32Count(F1U32Pkts, /*includeOverhead*/true));
-	outF2ByteCount = uint32_t(::GetTotalU32Count(F2U32Pkts, /*includeOverhead*/true));
+	/*
+	ostringstream oss;  oss << "Anc Counts: F1=";  for (size_t ndx(0);  ndx < F1AncCounts.size();  ndx++)  oss << (ndx?"|":"[") << DEC(uint16_t(F1AncCounts.at(ndx)));
+	oss << "] F2=";  for (size_t ndx(0);  ndx < F2AncCounts.size();  ndx++)  oss << (ndx?"|":"[") << DEC(uint16_t(F2AncCounts.at(ndx)));  oss << "]";
+	XMTDBG(oss.str());
+	*/
+
+	outF1ByteCount = uint32_t(::GetTotalU32Count(F1U32Pkts, /*includeOverhead*/true) * sizeof(uint32_t));
+	outF2ByteCount = uint32_t(::GetTotalU32Count(F2U32Pkts, /*includeOverhead*/true) * sizeof(uint32_t));
 	return AJA_STATUS_SUCCESS;
 }
 

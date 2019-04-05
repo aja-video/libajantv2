@@ -25,9 +25,12 @@ const uint8_t AJAAncillaryDataWildcard_SID = 0xFF;
 **/
 typedef std::map <uint16_t, AJAAncillaryDataType>	AJAAncillaryAnalogTypeMap;
 
-typedef std::vector<ULWordSequence>	AJAU32Pkts;			///< @brief	Ordered sequence of U32 RTP packets (U32s in network byte order)
-typedef AJAU32Pkts::const_iterator	AJAU32PktsConstIter;	///< @brief	Handy const iterator over AJAU32Pkts
-typedef AJAU32Pkts::iterator		AJAU32PktsIter;		///< @brief	Handy non-const iterator over AJAU32Pkts
+typedef std::vector<ULWordSequence>	AJAU32Pkts;						///< @brief	Ordered sequence of U32 RTP packets (U32s in network byte order)
+typedef AJAU32Pkts::const_iterator	AJAU32PktsConstIter;			///< @brief	Handy const iterator over AJAU32Pkts
+typedef AJAU32Pkts::iterator		AJAU32PktsIter;					///< @brief	Handy non-const iterator over AJAU32Pkts
+
+typedef std::vector<uint8_t>		AJAAncPktCounts;				///< @brief	Ordered sequence of SMPTE Anc packet counts
+typedef AJAAncPktCounts::const_iterator	AJAAncPktCountsConstIter;	///< @brief	Handy const iterator over AJAAncPktCounts
 
 
 /**
@@ -129,13 +132,20 @@ public:	//	CLASS METHODS
 
 
 	/**
-		@brief	Sets whether or not zero-length packets are included or not.
+		@brief		Sets whether or not zero-length packets are included or not.
 		@param[in]	inExclude	Specify true to exclude zero-length packets.
 	**/
 	static void								SetIncludeZeroLengthPackets (const bool inExclude);
 	static uint32_t							GetExcludedZeroLengthPacketCount (void);	///< @return	The current number of zero-length packets that have been excluded
 	static void								ResetExcludedZeroLengthPacketCount (void);	///< @brief		Resets my tally of excluded zero-length packets to zero.
 	static bool								IsIncludingZeroLengthPackets (void);		///< @return	True if zero-length packets are included;  otherwise false.
+	static bool								GetDefaultTransmitOneRTPPacket (void);		///< @return	True if the default RTP transmit behavior is to produce one RTP packet
+																						//				that contains all Anc packets; otherwise false.
+	/**
+		@brief		Sets the default RTP transmit behavior, as to whether each field gets one RTP packet or multiple RTP packets.
+		@param[in]	inXmitOneRTPPkt		Specify true to change the default to transmit one RTP packet that contains all Anc packets.
+	**/
+	static void								SetDefaultTransmitOneRTPPacket (const bool inXmitOneRTPPkt);
 	///@}
 
 
@@ -494,27 +504,38 @@ protected:
 					The returned ULWords are already network-byte-order, ready to encapsulate into an RTP packet buffer.
 		@param[out]	outF1U32Pkts	Receives my F1 AJAU32Pkts, containing zero or more RTP ULWordSequences.
 		@param[out]	outF2U32Pkts	Receives my F1 AJAU32Pkts, containing zero or more RTP ULWordSequences.
+		@param[out]	outF1AncCounts	Receives my F1 SMPTE Anc packet counts for each of the returned F1 RTP packets (in outF1U32Pkts).
+		@param[out]	outF2AncCounts	Receives my F2 SMPTE Anc packet counts for each of the returned F2 RTP packets (in outF2U32Pkts).
+		@param[in]	inIsProgressive	Specify false for interlace;  true for progressive/Psf.
+		@param[in]	inF2StartLine	For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
+									Defaults to zero (progressive).
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						GetRTPPackets (AJAU32Pkts & outF1U32Pkts,
 															AJAU32Pkts & outF2U32Pkts,
+															AJAAncPktCounts & outF1AncCounts,
+															AJAAncPktCounts & outF2AncCounts,
 															const bool inIsProgressive,
 															const uint32_t inF2StartLine);
 	/**
 		@brief		Fills the buffer with the given RTP packets.
 		@param		theBuffer		The buffer to be filled.
 		@param[in]	inRTPPkts		The RTP packets, a vector of zero or more RTP ULWordSequences.
+		@param[in]	inAncCounts		The per-RTP-packet anc packet counts.
 		@param[in]	inIsF2			Specify false for Field1 (or progressive or Psf);  true for Field2.
 		@param[in]	inIsProgressive	Specify false for interlace;  true for progressive/Psf.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	static AJAStatus						WriteRTPPackets (NTV2_POINTER & theBuffer,
 															const AJAU32Pkts & inRTPPkts,
+															const AJAAncPktCounts & inAncCounts,
 															const bool	inIsF2,
 															const bool inIsProgressive);
 
 private:
-	AJAAncillaryDataList	m_ancList;		///< @brief	My packet list
+	AJAAncillaryDataList	m_ancList;			///< @brief	My packet list
+	bool					m_xmitOneRTPPkt;	///< @brief	If true, transmit one RTP pkt containing all Anc pkts;
+												//			otherwise transmit one RTP pkt per Anc pkt
 
 };	//	AJAAncillaryList
 
