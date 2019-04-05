@@ -1042,6 +1042,7 @@ typedef NTV2StringSet::const_iterator	NTV2StringSetConstIter;
 AJAExport std::string NTV2EmbeddedAudioInputToString	(const NTV2EmbeddedAudioInput	inValue,	const bool inCompactDisplay = false);
 AJAExport std::string NTV2AudioSourceToString			(const NTV2AudioSource			inValue,	const bool inCompactDisplay = false);
 
+AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringList & inData);
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringSet & inData);
 
 

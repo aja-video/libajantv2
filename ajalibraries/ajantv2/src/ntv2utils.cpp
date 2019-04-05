@@ -8967,6 +8967,17 @@ static ostream & operator << (ostream & inOutStr, const NTV2InputCrosspointIDs &
 }
 */
 
+ostream & operator << (ostream & inOutStream, const NTV2StringList & inData)
+{
+	for (NTV2StringListConstIter it(inData.begin());  it != inData.end();  )
+	{
+		inOutStream	<< *it;
+		if (++it != inData.end())
+			inOutStream << ", ";
+	}
+	return inOutStream;
+}
+
 ostream & operator << (ostream & inOutStream, const NTV2StringSet & inData)
 {
 	for (NTV2StringSetConstIter it(inData.begin());  it != inData.end();  )
