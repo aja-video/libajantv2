@@ -292,6 +292,12 @@ AJAExport bool	CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,
 AJAExport NTV2Standard GetNTV2StandardFromScanGeometry (UByte geometry, bool progressiveTransport);
 
 /**
+	@return		The ::NTV2VideoFormat that is supported by the device (in frame buffer).
+	@param[in]	inVideoFormat	Specifies the input ::NTV2VideoFormat of interest.
+**/
+AJAExport NTV2VideoFormat GetSupportedNTV2VideoFormatFromInputVideoFormat (const NTV2VideoFormat inVideoFormat);
+
+/**
 	@return		The ::NTV2Standard that corresponds to the given ::NTV2VideoFormat.
 	@param[in]	inVideoFormat	Specifies the ::NTV2VideoFormat of interest.
 	@see		::GetNTV2FrameGeometryFromVideoFormat, ::GetGeometryFromStandard
