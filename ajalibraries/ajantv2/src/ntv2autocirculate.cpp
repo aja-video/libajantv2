@@ -1227,10 +1227,11 @@ bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTO
 		return false;	//	Can't get frame rate
 	if (!NTV2_IS_VALID_NTV2FrameRate(ntv2Rate))
 		return false;	//	Bad frame rate
-	if (!IsProgressiveStandard(isProgressive, inChannel))
-		return false;	//	Can't get isProgressive
 	if (!GetStandard(standard, inChannel))
 		return false;	//	Can't get standard
+	if (!NTV2_IS_VALID_STANDARD(standard))
+		return false;	//	Bad standard
+	isProgressive = NTV2_IS_PROGRESSIVE_STANDARD(standard);
 	if (!ancF1.IsNULL() || !ancF2.IsNULL())
 		if (AJA_FAILURE(AJAAncillaryList::SetFromDeviceAncBuffers(ancF1, ancF2, pkts)))
 			return false;	//	Packet import failed
@@ -1378,10 +1379,11 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 		return false;	//	Can't get frame rate
 	if (!NTV2_IS_VALID_NTV2FrameRate(ntv2Rate))
 		return false;	//	Bad frame rate
-	if (!IsProgressiveStandard(isProgressive, inChannel))
-		return false;	//	Can't get isProgressive
 	if (!GetStandard(standard, inChannel))
 		return false;	//	Can't get standard
+	if (!NTV2_IS_VALID_STANDARD(standard))
+		return false;	//	Bad standard
+	isProgressive = NTV2_IS_PROGRESSIVE_STANDARD(standard);
 	if (ancF1 || ancF2)
 	{
 		//	Import anc packet list that AutoCirculateTransfer's caller put into Xfer
@@ -1522,10 +1524,11 @@ bool CNTV2Card::S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2_POINT
 		return false;	//	Can't get frame rate
 	if (!NTV2_IS_VALID_NTV2FrameRate(ntv2Rate))
 		return false;	//	Bad frame rate
-	if (!IsProgressiveStandard(isProgressive, inChannel))
-		return false;	//	Can't get isProgressive
 	if (!GetStandard(standard, inChannel))
 		return false;	//	Can't get standard
+	if (!NTV2_IS_VALID_STANDARD(standard))
+		return false;	//	Bad standard
+	isProgressive = NTV2_IS_PROGRESSIVE_STANDARD(standard);
 	if (!ancF1.IsNULL() || !ancF2.IsNULL())
 		if (AJA_FAILURE(AJAAncillaryList::SetFromDeviceAncBuffers(ancF1, ancF2, pkts)))
 			return false;	//	Packet import failed
