@@ -5848,7 +5848,7 @@ public:
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							ConvertLinePixelFormat (UWord * unPackedBuffer, ULWord * packedBuffer, int numPixels));	///< Originally in CNTV2TestPattern.
 
 #ifdef AJAMac
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							DownloadRGBPicture (char * pSrc, ULWord srcWidthPixels, ULWord srcHeightPixels, ULWord srcRowBytes));	///< Originally in CNTV2TestPattern.
+//	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							DownloadRGBPicture (char * pSrc, ULWord srcWidthPixels, ULWord srcHeightPixels, ULWord srcRowBytes));	///< Originally in CNTV2TestPattern.
 #endif
 
 #if !defined(NTV2_DEPRECATE_13_0)

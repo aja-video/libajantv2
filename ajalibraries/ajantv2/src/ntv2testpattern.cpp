@@ -2141,13 +2141,13 @@ void CNTV2Card::DownloadSegmentedTestPattern(SegmentTestPatternData* pTestPatter
 	::PackLine_16BitYUVto10BitYUV(unPackedBuffer, packedBuffer,HD_NUMCOMPONENTPIXELS_1080_2K);
 
 	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
-	GetVideoFormat(&videoFormat, _channel);
+	GetVideoFormat(videoFormat, _channel);
 	NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
-	GetFrameBufferFormat(_channel, &pixelFormat);
+	GetFrameBufferFormat(_channel, pixelFormat);
 	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
 	GetVANCMode(vancMode, _channel);
 	NTV2Standard standard = NTV2_STANDARD_INVALID;
-	GetStandard(&standard, _channel);
+	GetStandard(standard, _channel);
 	if ( standard == NTV2_STANDARD_1080p)
 		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
 	NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
@@ -2337,13 +2337,13 @@ void CNTV2Card::DownloadBlackTestPattern(  )
 	UWord   unPackedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
 
 	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
-	GetVideoFormat(&videoFormat, _channel);
+	GetVideoFormat(videoFormat, _channel);
 	NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
-	GetFrameBufferFormat(_channel, &pixelFormat);
+	GetFrameBufferFormat(_channel, pixelFormat);
 	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
 	GetVANCMode(vancMode, _channel);
 	NTV2Standard standard = NTV2_STANDARD_INVALID;
-	GetStandard(&standard, _channel);
+	GetStandard(standard, _channel);
 	if ( standard == NTV2_STANDARD_1080p)
 		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
 	NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
@@ -2470,13 +2470,13 @@ void CNTV2Card::DownloadBorderTestPattern(  )
 	UWord   unPackedWhiteBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
 	
 	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
-	GetVideoFormat(&videoFormat, _channel);
+	GetVideoFormat(videoFormat, _channel);
 	NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
-	GetFrameBufferFormat(_channel, &pixelFormat);
+	GetFrameBufferFormat(_channel, pixelFormat);
 	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
 	GetVANCMode(vancMode, _channel);
 	NTV2Standard standard = NTV2_STANDARD_INVALID;
-	GetStandard(&standard, _channel);
+	GetStandard(standard, _channel);
 	if ( standard == NTV2_STANDARD_1080p)
 		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
 	NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
@@ -2626,13 +2626,13 @@ void CNTV2Card::Download48BitRGBSlantRampTestPattern()
 	ULWord   packedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*4];
 
 	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
-	GetVideoFormat(&videoFormat, _channel);
+	GetVideoFormat(videoFormat, _channel);
 	NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
-	GetFrameBufferFormat(_channel, &pixelFormat);
+	GetFrameBufferFormat(_channel, pixelFormat);
 	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
 	GetVANCMode(vancMode, _channel);
 	NTV2Standard standard = NTV2_STANDARD_INVALID;
-	GetStandard(&standard, _channel);
+	GetStandard(standard, _channel);
 	if ( standard == NTV2_STANDARD_1080p)
 		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
 	NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
@@ -2725,13 +2725,13 @@ void CNTV2Card::DownloadYCbCrSlantRampTestPattern(  )
 
 
 	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
-	GetVideoFormat(&videoFormat, _channel);
+	GetVideoFormat(videoFormat, _channel);
 	NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
-	GetFrameBufferFormat(_channel, &pixelFormat);
+	GetFrameBufferFormat(_channel, pixelFormat);
 	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
 	GetVANCMode(vancMode, _channel);
 	NTV2Standard standard = NTV2_STANDARD_INVALID;
-	GetStandard(&standard, _channel);
+	GetStandard(standard, _channel);
 	if ( standard == NTV2_STANDARD_1080p)
 		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
 	NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
@@ -2855,13 +2855,13 @@ void CNTV2Card::DownloadVerticalSweepTestPattern(  )
 	UWord   unPackedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
 
 	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
-	GetVideoFormat(&videoFormat, _channel);
+	GetVideoFormat(videoFormat, _channel);
 	NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
-	GetFrameBufferFormat(_channel, &pixelFormat);
+	GetFrameBufferFormat(_channel, pixelFormat);
 	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
 	GetVANCMode(vancMode, _channel);
 	NTV2Standard standard = NTV2_STANDARD_INVALID;
-	GetStandard(&standard, _channel);
+	GetStandard(standard, _channel);
 	if ( standard == NTV2_STANDARD_1080p)
 		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
 	NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
@@ -3036,13 +3036,13 @@ void CNTV2Card::DownloadZonePlateTestPattern(  )
 	UWord   unPackedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
 
 	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
-	GetVideoFormat(&videoFormat, _channel);
+	GetVideoFormat(videoFormat, _channel);
 	NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
-	GetFrameBufferFormat(_channel, &pixelFormat);
+	GetFrameBufferFormat(_channel, pixelFormat);
 	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
 	GetVANCMode(vancMode, _channel);
 	NTV2Standard standard = NTV2_STANDARD_INVALID;
-	GetStandard(&standard, _channel);
+	GetStandard(standard, _channel);
 	if ( standard == NTV2_STANDARD_1080p)
 		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
 	NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
@@ -3212,9 +3212,9 @@ void CNTV2Card::DownloadTestPatternBuffer(ULWord *buffer, ULWord size)
 
 		// Transfer the test pattern into the active area of the frame buffer
 		NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
-		GetVideoFormat(&videoFormat, _channel);
+		GetVideoFormat(videoFormat, _channel);
 		NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
-		GetFrameBufferFormat(_channel, &pixelFormat);
+		GetFrameBufferFormat(_channel, pixelFormat);
 		NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
 		GetVANCMode(vancMode, _channel);
 		NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
@@ -3241,9 +3241,9 @@ void CNTV2Card::DownloadTestPatternBuffer(ULWord *buffer, ULWord size)
 ULWord CNTV2Card::GetPatternBufferSize(ULWord *width, ULWord *height, ULWord *rowBytes, ULWord *firstLine)
 {
 	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
-	GetVideoFormat(&videoFormat, _channel);
+	GetVideoFormat(videoFormat, _channel);
 	NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
-	GetFrameBufferFormat(_channel, &pixelFormat);
+	GetFrameBufferFormat(_channel, pixelFormat);
 	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
 	GetVANCMode(vancMode, _channel);
 	NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
