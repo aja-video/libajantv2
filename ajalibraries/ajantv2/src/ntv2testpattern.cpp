@@ -2132,128 +2132,6 @@ void CNTV2Card::DownloadTestPattern(char* testPatternName )
 
 }
 
-#if !defined(NTV2_DEPRECATE_13_0)
-void CNTV2Card::LocalLoadBarsTestPattern( UWord testPatternNumber, NTV2Standard standard)
-{
-	SegmentTestPatternData *pTestPatternSegmentData = &NTV2TestPatternSegments[testPatternNumber];
-
-	/*This is mostly excerpted from DownloadSegmentedTestPattern().
-	*In general many ops in CNTV2TestPattern use hw register reads to manage local state. e.g. GetStandard().
-	*This caused problems when InConverter is involved, etc. while also using test pattern.
-	*So here, for this one narrow use case, set up is local context without reads from ntvcard.
-	*/
-
-	ULWord* baseAddress=0;
-	ULWord  packedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*4]; // extra room
-	UWord   unPackedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
-	::Make10BitBlackLine(unPackedBuffer,HD_NUMCOMPONENTPIXELS_1080_2K);
-	::PackLine_16BitYUVto10BitYUV(unPackedBuffer, packedBuffer,HD_NUMCOMPONENTPIXELS_1080_2K);
-
-	const NTV2FrameBufferFormat fbFormat (NTV2_FBF_10BIT_YCBCR);
-	const NTV2FormatDescriptor	formatDescriptor (standard, fbFormat);
-
-	ULWord numPixels = formatDescriptor.numPixels;
-	ULWord linePitch = formatDescriptor.linePitch;
-	//ULWord numLines = formatDescriptor.numLines;
-	ULWord firstActiveLine = formatDescriptor.firstActiveLine;
-	ULWord numOutputPixels = formatDescriptor.numPixels;
-	ULWord dataLinePitch;
-
-	if ( standard == NTV2_STANDARD_1080p)
-		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
-	switch(standard)
-	{
-	case NTV2_STANDARD_1080:
-		dataLinePitch = HD_YCBCRLINEPITCH_1080;
-		break;
-	case NTV2_STANDARD_720:
-		dataLinePitch = HD_YCBCRLINEPITCH_720;
-		break;
-	case NTV2_STANDARD_525:
-		dataLinePitch = YCBCRLINEPITCH_SD;
-		break;
-	case NTV2_STANDARD_625:
-		dataLinePitch = YCBCRLINEPITCH_SD;
-		break;
-	case NTV2_STANDARD_2K:
-		//dataLinePitch = HD_YCBCRLINEPITCH_2K;
-		//break;
-	default:	return;		//	Signal Generator Unsupported video standard format
-	}
-
-	if ( numOutputPixels == 0 || numPixels == 0 || linePitch == 0)
-	{
-		//	Signal Generator Unsupported video standard/framebuffer format
-		return;
-
-	}
-	// determine where we're going to render the frame to
-	//ULWord *hostBuff = NULL;
-	ULWord *currentAddress;
-	//if (_clientDownloadBuffer)
-	//{
-		currentAddress = _clientDownloadBuffer;
-		baseAddress = currentAddress;
-	//}
-
-	// Assume 1080 format
-	// Start with Black.
-	Make10BitBlackLine(unPackedBuffer,HD_NUMCOMPONENTPIXELS_1080_2K);
-	ULWord line = 0;
-	for ( ;line < firstActiveLine; line++)
-	{
-		// convert line to current frame buffer format
-		ConvertLinePixelFormat(unPackedBuffer, packedBuffer, numPixels);
-
-		// copy to formatted line to the frame buffer
-		CopyMemory(currentAddress,packedBuffer,linePitch*4);
-		currentAddress += linePitch;
-
-	}
-
-	for ( UWord segmentCount = 0; segmentCount < NumTestPatternSegments; segmentCount++ )
-	{
-
-		SegmentDescriptor *	segmentDescriptor = &pTestPatternSegmentData->segmentDescriptor[standard][segmentCount];
-		const ULWord *		data = segmentDescriptor->data;
-		if ( data != NULL )
-		{
-			UWord startLine = segmentDescriptor->startLine;
-			UWord numLines = (segmentDescriptor->endLine - startLine) + 1;
-			currentAddress = baseAddress + ((firstActiveLine+startLine)*linePitch);
-			// go through hoops to mask out undesired components
-			memcpy(packedBuffer,data,dataLinePitch*4);
-			// We are using the 1920 standard test patterns for 2k
-			if (numPixels == HD_NUMCOMPONENTPIXELS_2K)
-				::UnpackLine_10BitYUVto16BitYUV(packedBuffer, unPackedBuffer, HD_NUMCOMPONENTPIXELS_1080);
-			else
-				::UnpackLine_10BitYUVto16BitYUV(packedBuffer, unPackedBuffer, numPixels);
-
-			if ( _signalMask != NTV2_SIGNALMASK_ALL)
-				MaskYCbCrLine(unPackedBuffer, _signalMask , numPixels);
-
-            bool  bIsSD;
-            IsSDStandard(bIsSD);
-			switch(_fbFormat)
-			{
-	            case NTV2_FBF_10BIT_YCBCR:
-		            ::PackLine_16BitYUVto10BitYUV(unPackedBuffer, packedBuffer,numPixels);
-                    break;
-				default:	return;	//	ERROR: Signal Generator not set up for this format
-			}
-
-			for ( UWord lineCount = 0; lineCount < numLines; lineCount++ )
-			{
-				CopyMemory(currentAddress,packedBuffer,linePitch*4);
-				currentAddress += linePitch;
-			}
-
-		}
-	}
-
-}
-#endif	//	!defined(NTV2_DEPRECATE_13_0)
-
 void CNTV2Card::DownloadSegmentedTestPattern(SegmentTestPatternData* pTestPatternSegmentData )
 {
 	ULWord* baseAddress=0;
@@ -2262,82 +2140,31 @@ void CNTV2Card::DownloadSegmentedTestPattern(SegmentTestPatternData* pTestPatter
 	::Make10BitBlackLine(unPackedBuffer,HD_NUMCOMPONENTPIXELS_1080_2K);
 	::PackLine_16BitYUVto10BitYUV(unPackedBuffer, packedBuffer,HD_NUMCOMPONENTPIXELS_1080_2K);
 
-
-	NTV2Standard standard;
-	GetStandard(standard);
-	NTV2FrameGeometry fg;
-	GetFrameGeometry(fg);
-
-
+	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
+	GetVideoFormat(&videoFormat, _channel);
+	NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
+	GetFrameBufferFormat(_channel, &pixelFormat);
 	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
-	GetVANCMode(vancMode);
-	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
+	GetVANCMode(vancMode, _channel);
+	NTV2Standard standard = NTV2_STANDARD_INVALID;
+	GetStandard(&standard, _channel);
+	if ( standard == NTV2_STANDARD_1080p)
+		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
+	NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
+	if(!formatDescriptor.IsValid())
+		return;
+	
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
 	ULWord firstActiveLine = formatDescriptor.firstActiveLine;
 	ULWord numOutputPixels = formatDescriptor.numPixels;
-	ULWord dataLinePitch;
+	ULWord dataLinePitch= formatDescriptor.linePitch;
 
 	// Avoid divide by 0 error/floating point exception for unsupported formats.
-	if (standard == NTV2_STANDARD_525  ||  standard == NTV2_STANDARD_625)
-		if (_fbFormat == NTV2_FBF_8BIT_DVCPRO  ||  _fbFormat == NTV2_FBF_8BIT_HDV)
+	if (NTV2_IS_SD_VIDEO_FORMAT(videoFormat))
+		if (pixelFormat == NTV2_FBF_8BIT_DVCPRO  ||  pixelFormat == NTV2_FBF_8BIT_HDV)
 			return;	//	DVCPro, HDV, and QRez framebuffer formats not supported in 525 and 625
-	
-	if ( standard == NTV2_STANDARD_1080p)
-		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
-	switch(standard) {
-	case NTV2_STANDARD_1080:
-		dataLinePitch = HD_YCBCRLINEPITCH_1080;
-		break;
-	case NTV2_STANDARD_720:
-		dataLinePitch = HD_YCBCRLINEPITCH_720;
-		break;
-	case NTV2_STANDARD_525:
-		dataLinePitch = YCBCRLINEPITCH_SD;
-		break;
-	case NTV2_STANDARD_625:
-		dataLinePitch = YCBCRLINEPITCH_SD;
-		break;
-	case NTV2_STANDARD_2K:
-		dataLinePitch = HD_YCBCRLINEPITCH_2K;
-		break;
-	default:
-		return;
-		break;
-	}
-
-	// Special cases for  DVCPRO and HDV
-	if ( _fbFormat == NTV2_FBF_8BIT_DVCPRO  )
-	{
-		if ( standard == NTV2_STANDARD_1080 )
-		{
-			numPixels = HD_NUMCOMPONENTPIXELS_1080;
-		}
-		else
-		if ( standard == NTV2_STANDARD_720 )
-		{
-			numPixels = HD_NUMCOMPONENTPIXELS_720;
-		}
-	}
-	if ( _fbFormat == NTV2_FBF_8BIT_HDV  )
-	{
-		if ( standard == NTV2_STANDARD_1080 )
-		{
-			numPixels = HD_NUMCOMPONENTPIXELS_1080;
-		}
-		else
-		if ( standard == NTV2_STANDARD_720 )
-		{
-			numPixels = HD_NUMCOMPONENTPIXELS_720;
-		}
-	}
-
-	// Kludge for now.....and probably forever
-	if ( fg == NTV2_FG_2048x1080)
-	{
-		AdjustFor2048x1080(numPixels,linePitch);
-	}
 
 	if (numOutputPixels == 0  ||  numPixels == 0  ||  linePitch == 0)
 		return;	//	Unsupported video standard/framebuffer format
@@ -2382,7 +2209,6 @@ void CNTV2Card::DownloadSegmentedTestPattern(SegmentTestPatternData* pTestPatter
 
 	for ( UWord segmentCount = 0; segmentCount < NumTestPatternSegments; segmentCount++ )
 	{
-
 		SegmentDescriptor *	segmentDescriptor = &pTestPatternSegmentData->segmentDescriptor[standard][segmentCount];
 		const ULWord *		data = segmentDescriptor->data;
 		if ( data != NULL )
@@ -2479,7 +2305,7 @@ void CNTV2Card::DownloadSegmentedTestPattern(SegmentTestPatternData* pTestPatter
 		}
 	}
 	
-		// DMA the resulting frame to Kona memory
+	// DMA the resulting frame to Kona memory
 	if (_bDMAtoBoard && hostBuff != NULL)
 	{
 			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
@@ -2487,10 +2313,6 @@ void CNTV2Card::DownloadSegmentedTestPattern(SegmentTestPatternData* pTestPatter
 		GetPCIAccessFrame (_channel, pciAccessFrame);
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
-			
-		// TODO: fix me
-//		if ( _fbFormat == NTV2_FBF_48BIT_RGB )
-//			pciAccessFrame = 0;
 
 		DMAWriteFrame (pciAccessFrame, hostBuff, (numLines * linePitch * 4));
 		
@@ -2503,15 +2325,6 @@ void CNTV2Card::DownloadSegmentedTestPattern(SegmentTestPatternData* pTestPatter
 		SetFrameBufferFormat(_channel,_fbFormat);
 		SetFrameBufferOrientation(_channel,NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
 	}
-
-	#if !defined (AJAMac) && !defined (NTV2_DEPRECATE)
-	if ( (::NTV2DeviceNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
-	{
-		CNTV2SignalRouter router;
-		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,_dualLinkOutputEnable);
-		ApplySignalRoute(router);
-	}
-	#endif	//	!defined (AJAMac) && !defined (NTV2_DEPRECATE)
 	
 	if( _flipFlopPage)
 		FlipFlopPage(_channel);
@@ -2523,25 +2336,24 @@ void CNTV2Card::DownloadBlackTestPattern(  )
 	ULWord  packedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K];
 	UWord   unPackedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
 
-	NTV2Standard standard;
-	GetStandard(standard);
-	NTV2FrameGeometry fg;
-	GetFrameGeometry(fg);
-	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
-	GetVANCMode(vancMode);
-	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
+	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
+	GetVideoFormat(&videoFormat, _channel);
+	NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
+	GetFrameBufferFormat(_channel, &pixelFormat);
+	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode, _channel);
+	NTV2Standard standard = NTV2_STANDARD_INVALID;
+	GetStandard(&standard, _channel);
+	if ( standard == NTV2_STANDARD_1080p)
+		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
+	NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
+	if(!formatDescriptor.IsValid())
+		return;
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
-
-
-// Kludge for now.....
-	if ( fg == NTV2_FG_2048x1080 )
-	{
-		AdjustFor2048x1080(numPixels,linePitch);
-	}
 	
-		// determine where we're going to render the frame to
+	// determine where we're going to render the frame to
 	ULWord *hostBuff = NULL;
 	ULWord *currentAddress;
 	if (_clientDownloadBuffer)
@@ -2563,7 +2375,7 @@ void CNTV2Card::DownloadBlackTestPattern(  )
 
 
 	// or if fbFormat is not 10 Bit YCbCr
-	switch(_fbFormat) 
+	switch(pixelFormat) 
 	{
 	case NTV2_FBF_10BIT_YCBCR:
 	case NTV2_FBF_8BIT_YCBCR:
@@ -2581,25 +2393,25 @@ void CNTV2Card::DownloadBlackTestPattern(  )
 				unPackedBuffer[count+1] = (UWord)CCIR601_10BIT_BLACK;
 			}
 
-			if ( _fbFormat == NTV2_FBF_10BIT_YCBCR)
+			if ( pixelFormat == NTV2_FBF_10BIT_YCBCR)
 			{
 				::PackLine_16BitYUVto10BitYUV(unPackedBuffer, packedBuffer,numPixels);
 			}
 			else
-			if ( _fbFormat == NTV2_FBF_10BIT_YCBCR_DPX)
+			if ( pixelFormat == NTV2_FBF_10BIT_YCBCR_DPX)
 			{
 				::PackLine_16BitYUVto10BitYUV(unPackedBuffer, packedBuffer,numPixels);
 				RePackLineDataForYCbCrDPX(packedBuffer,linePitch);
 			}
 			else
-			if ( _fbFormat == NTV2_FBF_10BIT_YCBCRA)
+			if ( pixelFormat == NTV2_FBF_10BIT_YCBCRA)
 			{
 				ConvertLineto10BitYCbCrA(unPackedBuffer,packedBuffer,numPixels);
 			}
 			else
 			{
 				ConvertLineto8BitYCbCr(unPackedBuffer,(UByte*)packedBuffer,numPixels);
-				if ( _fbFormat == NTV2_FBF_8BIT_YCBCR_YUY2)
+				if ( pixelFormat == NTV2_FBF_8BIT_YCBCR_YUY2)
 					Convert8BitYCbCrToYUY2((UByte*)packedBuffer,numPixels);
 			}
 
@@ -2636,10 +2448,6 @@ void CNTV2Card::DownloadBlackTestPattern(  )
 			GetOutputFrame (_channel, outputFrame);
 		if ( outputFrame > GetNumFrameBuffers())
 			outputFrame = 0;
-			
-		// TODO: fix me
-//		if ( _fbFormat == NTV2_FBF_48BIT_RGB )
-//			outputFrame = 0;
 
 		DMAWriteFrame (outputFrame, (ULWord *)hostBuff, (numLines * linePitch * 4));
 		
@@ -2649,15 +2457,6 @@ void CNTV2Card::DownloadBlackTestPattern(  )
 	SetDualLinkOutputEnable(_dualLinkOutputEnable );
 	SetFrameBufferFormat(_channel,_fbFormat);
 	SetFrameBufferOrientation(_channel,NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
-
-	#if !defined (AJAMac) && !defined (NTV2_DEPRECATE)
-	if ( (::NTV2DeviceNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
-	{
-		CNTV2SignalRouter router;
-		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,_dualLinkOutputEnable);
-		ApplySignalRoute(router);
-	}
-	#endif	//	!defined (AJAMac) && !defined (NTV2_DEPRECATE)
 	
 	if ( _flipFlopPage)
 		FlipFlopPage(_channel);
@@ -2669,23 +2468,25 @@ void CNTV2Card::DownloadBorderTestPattern(  )
 	ULWord  packedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*4];
 	UWord   unPackedEdgeBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
 	UWord   unPackedWhiteBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
-
-	NTV2Standard standard;
-	GetStandard(standard);
-	NTV2FrameGeometry fg;
-	GetFrameGeometry(fg);
-	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
-	GetVANCMode(vancMode);
-
-	ULWord linePitch;
-	ULWord numPixels;
-	UWord   numLines;
-	UWord Y,Cb,Cr;
 	
-	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
-	numPixels = formatDescriptor.numPixels;
-	linePitch = formatDescriptor.linePitch;
-	numLines = formatDescriptor.numLines;
+	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
+	GetVideoFormat(&videoFormat, _channel);
+	NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
+	GetFrameBufferFormat(_channel, &pixelFormat);
+	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode, _channel);
+	NTV2Standard standard = NTV2_STANDARD_INVALID;
+	GetStandard(&standard, _channel);
+	if ( standard == NTV2_STANDARD_1080p)
+		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
+	NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
+	if(!formatDescriptor.IsValid())
+		return;
+
+	ULWord numPixels = formatDescriptor.numPixels;
+	ULWord linePitch = formatDescriptor.linePitch;
+	UWord numLines = formatDescriptor.numLines;
+	UWord Y,Cb,Cr;
 	
 	Y = CCIR601_10BIT_BLACK; Cb = CCIR601_10BIT_CHROMAOFFSET; Cr = CCIR601_10BIT_CHROMAOFFSET;
 	if ( _signalMask & NTV2_SIGNALMASK_Y)
@@ -2695,19 +2496,10 @@ void CNTV2Card::DownloadBorderTestPattern(  )
 	if ( _signalMask & NTV2_SIGNALMASK_Cr)
 		Cr  = 0x3C0;
 
-
-
-// Kludge for now.....
-	if (formatDescriptor.Is2KFormat())
-	{
-		AdjustFor2048x1080(numPixels,linePitch);
-	}
-
-
 	// trap quartersize mode 
 	ULWord quarterSizeMode = 0;
 	ReadRegister(kRegCh2Control, quarterSizeMode, kRegMaskQuarterSizeMode, kRegShiftQuarterSizeMode);
-	if ( _fbFormat == NTV2_FBF_10BIT_YCBCR  && quarterSizeMode )
+	if ( pixelFormat == NTV2_FBF_10BIT_YCBCR  && quarterSizeMode )
 	{
 		numLines /= 2;
 		numPixels /= 2;
@@ -2728,8 +2520,6 @@ void CNTV2Card::DownloadBorderTestPattern(  )
 		default:	return;	//	DownloadBorderTestPattern(): Unsupported framebuffer standard requested
 		}
 	}
-
-	
 	
 	// determine where we're going to render the frame to
 	ULWord *hostBuff = NULL;
@@ -2814,15 +2604,6 @@ void CNTV2Card::DownloadBorderTestPattern(  )
 	SetFrameBufferFormat(_channel,_fbFormat);
 	SetFrameBufferOrientation(_channel,NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
 
-	#if !defined (AJAMac) && !defined (NTV2_DEPRECATE)
-	if ( (::NTV2DeviceNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
-	{
-		CNTV2SignalRouter router;
-		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,_dualLinkOutputEnable);
-		ApplySignalRoute(router);
-	}
-	#endif	//	!defined (AJAMac) && !defined (NTV2_DEPRECATE)
-
 	FlipFlopPage(_channel);
 }	
 
@@ -2844,13 +2625,19 @@ void CNTV2Card::Download48BitRGBSlantRampTestPattern()
 	RGBAlpha16BitPixel rgbPixels[HD_NUMCOMPONENTPIXELS_1080_2K*2];
 	ULWord   packedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*4];
 
-	NTV2Standard standard;
-	GetStandard(standard);
-	NTV2FrameGeometry fg;
-	GetFrameGeometry(fg);
-	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
-	GetVANCMode(vancMode);
-	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
+	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
+	GetVideoFormat(&videoFormat, _channel);
+	NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
+	GetFrameBufferFormat(_channel, &pixelFormat);
+	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode, _channel);
+	NTV2Standard standard = NTV2_STANDARD_INVALID;
+	GetStandard(&standard, _channel);
+	if ( standard == NTV2_STANDARD_1080p)
+		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
+	NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
+	if(!formatDescriptor.IsValid())
+		return;
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
@@ -2926,15 +2713,6 @@ void CNTV2Card::Download48BitRGBSlantRampTestPattern()
 	SetFrameBufferFormat(_channel,_fbFormat);
 	SetFrameBufferOrientation(_channel,NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
 
-	#if !defined (AJAMac) && !defined (NTV2_DEPRECATE)
-	if ( (::NTV2DeviceNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
-	{
-		CNTV2SignalRouter router;
-		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,_dualLinkOutputEnable);
-		ApplySignalRoute(router);
-	}
-	#endif	//	!defined (AJAMac) && !defined (NTV2_DEPRECATE)
-
 	FlipFlopPage(_channel);
 }
 
@@ -2946,23 +2724,23 @@ void CNTV2Card::DownloadYCbCrSlantRampTestPattern(  )
 	UWord   unPackedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
 
 
-	NTV2Standard standard;
-	GetStandard(standard);
-	NTV2FrameGeometry fg;
-	GetFrameGeometry(fg);
-	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
-	GetVANCMode(vancMode);
-	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
+	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
+	GetVideoFormat(&videoFormat, _channel);
+	NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
+	GetFrameBufferFormat(_channel, &pixelFormat);
+	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode, _channel);
+	NTV2Standard standard = NTV2_STANDARD_INVALID;
+	GetStandard(&standard, _channel);
+	if ( standard == NTV2_STANDARD_1080p)
+		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
+	NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
+	if(!formatDescriptor.IsValid())
+		return;
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
 	ULWord firstActiveLine = formatDescriptor.firstActiveLine;
-
-	// Kludge for now.....
-	if (formatDescriptor.Is2KFormat())
-	{
-		AdjustFor2048x1080(numPixels,linePitch);
-	}
 
 	// determine where we're going to render the frame to
 	ULWord *hostBuff = NULL;
@@ -3056,10 +2834,6 @@ void CNTV2Card::DownloadYCbCrSlantRampTestPattern(  )
 		if ( pciAccessFrame > GetNumFrameBuffers())
 			pciAccessFrame = 0;
 
-		// TODO: fix me
-		//		if ( _fbFormat == NTV2_FBF_48BIT_RGB )
-		//			pciAccessFrame = 0;
-
 		DMAWriteFrame (pciAccessFrame, (ULWord *)hostBuff, (numLines * linePitch * 4));
 
 		delete [] hostBuff;
@@ -3068,15 +2842,6 @@ void CNTV2Card::DownloadYCbCrSlantRampTestPattern(  )
 	SetDualLinkOutputEnable(_dualLinkOutputEnable );
 	SetFrameBufferFormat(_channel,_fbFormat);
 	SetFrameBufferOrientation(_channel,NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
-
-	#if !defined (AJAMac) && !defined (NTV2_DEPRECATE)
-	if ( (::NTV2DeviceNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
-	{
-		CNTV2SignalRouter router;
-		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,_dualLinkOutputEnable);
-		ApplySignalRoute(router);
-	}
-	#endif	//	!defined (AJAMac) && !defined (NTV2_DEPRECATE)
 
 	FlipFlopPage(_channel);
 }
@@ -3089,24 +2854,23 @@ void CNTV2Card::DownloadVerticalSweepTestPattern(  )
 	ULWord  packedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*4];
 	UWord   unPackedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
 
-
-	NTV2Standard standard;
-	GetStandard(standard);
-	NTV2FrameGeometry fg;
-	GetFrameGeometry(fg);
-	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
-	GetVANCMode(vancMode);
-	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
+	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
+	GetVideoFormat(&videoFormat, _channel);
+	NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
+	GetFrameBufferFormat(_channel, &pixelFormat);
+	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode, _channel);
+	NTV2Standard standard = NTV2_STANDARD_INVALID;
+	GetStandard(&standard, _channel);
+	if ( standard == NTV2_STANDARD_1080p)
+		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
+	NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
+	if(!formatDescriptor.IsValid())
+		return;
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
 	ULWord firstActiveLine = formatDescriptor.firstActiveLine;
-
-	// Kludge for now.....
-	if (formatDescriptor.Is2KFormat())
-	{
-		AdjustFor2048x1080(numPixels,linePitch);
-	}
 
 	// determine where we're going to render the frame to
 	ULWord *hostBuff = NULL;
@@ -3259,15 +3023,6 @@ void CNTV2Card::DownloadVerticalSweepTestPattern(  )
 	SetDualLinkOutputEnable(_dualLinkOutputEnable );
 	SetFrameBufferFormat(_channel,_fbFormat);
 	SetFrameBufferOrientation(_channel,NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
-
-	#if !defined (AJAMac) && !defined (NTV2_DEPRECATE)
-	if ( (::NTV2DeviceNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
-	{
-		CNTV2SignalRouter router;
-		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,_dualLinkOutputEnable);
-		ApplySignalRoute(router);
-	}
-	#endif	//	!defined (AJAMac) && !defined (NTV2_DEPRECATE)
 	
 	FlipFlopPage(_channel);
 }	
@@ -3280,23 +3035,23 @@ void CNTV2Card::DownloadZonePlateTestPattern(  )
 	ULWord  packedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*4];
 	UWord   unPackedBuffer[HD_NUMCOMPONENTPIXELS_1080_2K*2];
 
-	NTV2Standard standard;
-	GetStandard(standard);
-	NTV2FrameGeometry fg;
-	GetFrameGeometry(fg);
-	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
-	GetVANCMode(vancMode);
-	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat, vancMode);
+	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
+	GetVideoFormat(&videoFormat, _channel);
+	NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
+	GetFrameBufferFormat(_channel, &pixelFormat);
+	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
+	GetVANCMode(vancMode, _channel);
+	NTV2Standard standard = NTV2_STANDARD_INVALID;
+	GetStandard(&standard, _channel);
+	if ( standard == NTV2_STANDARD_1080p)
+		standard = NTV2_STANDARD_1080;    // no diffence for test patterns.
+	NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
+	if(!formatDescriptor.IsValid())
+		return;
 	ULWord numPixels = formatDescriptor.numPixels;
 	ULWord linePitch = formatDescriptor.linePitch;
 	ULWord numLines = formatDescriptor.numLines;
 	ULWord firstActiveLine = formatDescriptor.firstActiveLine;
-
-	// Kludge for now.....
-	if (formatDescriptor.Is2KFormat())
-	{
-		AdjustFor2048x1080(numPixels,linePitch);
-	}
 
 	// determine where we're going to render the frame to
 	ULWord *hostBuff = NULL;
@@ -3391,15 +3146,6 @@ void CNTV2Card::DownloadZonePlateTestPattern(  )
 	SetFrameBufferFormat(_channel,_fbFormat);
 	SetFrameBufferOrientation(_channel,NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
 
-	#if !defined (AJAMac) && !defined (NTV2_DEPRECATE)
-	if ( (::NTV2DeviceNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
-	{
-		CNTV2SignalRouter router;
-		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,_dualLinkOutputEnable);
-		ApplySignalRoute(router);
-	}
-	#endif	//	!defined (AJAMac) && !defined (NTV2_DEPRECATE)
-
 	FlipFlopPage(_channel);
 }	
 
@@ -3465,16 +3211,17 @@ void CNTV2Card::DownloadTestPatternBuffer(ULWord *buffer, ULWord size)
 			pciAccessFrame = 0;
 
 		// Transfer the test pattern into the active area of the frame buffer
-		NTV2Standard standard;
-		GetStandard(standard, _channel);
-		NTV2FormatDescriptor formatDescriptor (standard, _fbFormat);
-
+		NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
+		GetVideoFormat(&videoFormat, _channel);
+		NTV2FrameBufferFormat pixelFormat(NTV2_FBF_INVALID);
+		GetFrameBufferFormat(_channel, &pixelFormat);
+		NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
+		GetVANCMode(vancMode, _channel);
+		NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
+		if(!formatDescriptor.IsValid())
+			return;
+		
 		ULWord totalHeight = formatDescriptor.numLines;
-		if ( fg == NTV2_FG_1920x1112 )
-			totalHeight = 1112;
-		if ( fg == NTV2_FG_1920x1114 )
-			totalHeight = 1114;
-
 		ULWord dmaOffset = 0;
 		dmaOffset = (totalHeight - formatDescriptor.numLines) * formatDescriptor.linePitch * 4;
 		DMAWrite (pciAccessFrame, buffer, dmaOffset, size);
@@ -3486,15 +3233,6 @@ void CNTV2Card::DownloadTestPatternBuffer(ULWord *buffer, ULWord size)
 		assert (baseAddress);
 		CopyMemory(baseAddress, buffer, size);
 	}
-
-	#if !defined (AJAMac) && !defined (NTV2_DEPRECATE)
-	if ( (::NTV2DeviceNeedsRoutingSetup(GetBoardID())) && _autoRouteOnXena2)
-	{
-		CNTV2SignalRouter router;
-		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,_dualLinkOutputEnable);
-		ApplySignalRoute(router);
-	}
-	#endif	//	!defined (AJAMac) && !defined (NTV2_DEPRECATE)	
 
 	FlipFlopPage(_channel);
 }
@@ -3508,14 +3246,14 @@ ULWord CNTV2Card::GetPatternBufferSize(ULWord *width, ULWord *height, ULWord *ro
 	GetFrameBufferFormat(_channel, &pixelFormat);
 	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
 	GetVANCMode(vancMode, _channel);
-	NTV2FormatDescriptor fd (videoFormat, pixelFormat, vancMode);
-	if(!fd.IsValid())
+	NTV2FormatDescriptor formatDescriptor (videoFormat, pixelFormat, vancMode);
+	if(!formatDescriptor.IsValid())
 		return 0;
 	
-	ULWord numPixels = fd.numPixels;
-	ULWord linePitch = fd.linePitch;
-	ULWord numLines = fd.numLines;
-	ULWord firstActiveLine = fd.firstActiveLine;
+	ULWord numPixels = formatDescriptor.numPixels;
+	ULWord linePitch = formatDescriptor.linePitch;
+	ULWord numLines = formatDescriptor.numLines;
+	ULWord firstActiveLine = formatDescriptor.firstActiveLine;
 	
 	// buffer size
 	if (width) *width = numPixels;
@@ -3734,131 +3472,3 @@ void CNTV2Card::AdjustFor2048x1080(ULWord& numPixels,ULWord& linePitch)
 			break;
 	}
 }
-
-#ifdef AJAMac		// 'til proven OK (or useful) for non-Mac users...
-	// download a Mac ARGB picture to the "current PCI" frame
-void CNTV2Card::DownloadRGBPicture(char *pSrc, ULWord srcWidthPixels, ULWord srcHeightPixels, ULWord srcRowBytes)
-{
-	ULWord* baseAddress=0;
-
-		// this only works as an ARGB frame
-	SetTestPatternFrameBufferFormat(NTV2_FBF_RGBA);
-	
-		// get current frame buffer size
-	NTV2Standard standard;
-	GetStandard(standard);
-	NTV2FormatDescriptor formatDescriptor (standard, _fbFormat);
-	ULWord numPixels = formatDescriptor.numPixels;
-	ULWord linePitch = formatDescriptor.linePitch;		// note: linePitch is in ULWords, not bytes!
-	ULWord numLines  = formatDescriptor.numLines;
-
-// Kludge for now..... (2K isn't part of the table yet)
-	NTV2FrameGeometry fg;
-	GetFrameGeometry(fg);
-	if ( fg == NTV2_FG_2048x1080)
-	{
-		AdjustFor2048x1080(numPixels,linePitch);
-	}
-	
-	// determine where we're going to render the frame to
-	ULWord *hostBuff = NULL;
-	ULWord *currentAddress;
-	if (_clientDownloadBuffer)
-	{
-		currentAddress = (ULWord *)_clientDownloadBuffer;
-	}
-	else if (_bDMAtoBoard)
-	{
-		hostBuff = new ULWord[linePitch * numLines];			// render the test pattern to a host buffer, then DMA it
-		assert(hostBuff);
-		currentAddress = hostBuff;
-	}
-	else
-	{
-		GetBaseAddress(_channel, &baseAddress);
-		assert (baseAddress);
-		currentAddress = baseAddress;
-	}
-	
-		// if the source frame is bigger (in either dimension) than the frame buffer, clip it
-	if (srcWidthPixels > numPixels)
-		srcWidthPixels = numPixels;
-		
-	if (srcHeightPixels > numLines)
-		srcHeightPixels = numLines;
-		
-		// if the source frame is smaller than the frame buffer (in either dimension), center it by padding with black
-	ULWord topPad = 0, bottomPad = 0, leftPad = 0, rightPad = 0;
-	
-	if (srcWidthPixels < numPixels)
-	{
-		leftPad = (numPixels - srcWidthPixels) / 2;
-		rightPad = numPixels - srcWidthPixels - leftPad;
-	}
-	
-	if (srcHeightPixels < numLines)
-	{
-		topPad   = (numLines - srcHeightPixels) / 2;
-		bottomPad = numLines - srcHeightPixels - topPad;
-	}
-	
-		// fill "topPad" space with black
-	bzero(currentAddress, (linePitch * topPad * 4) );
-	currentAddress += (linePitch * topPad);
-
-		// copy the picture
-	UByte *pixelPtr;
-	for ( UWord lineCount = 0; lineCount < srcHeightPixels; lineCount++ )
-	{
-		pixelPtr = (UByte *) currentAddress;
-		
-			// fill "leftPad" with black
-		bzero(pixelPtr, (leftPad * 4) );
-		pixelPtr += (leftPad * 4);
-		
-			// copy picture
-		CopyMemory((ULWord *)pixelPtr, (ULWord *)pSrc, srcWidthPixels*4);
-		pixelPtr += srcWidthPixels*4;
-		
-			// fill "rightPad" with black
-		bzero(pixelPtr, (rightPad * 4) );
-		
-			// beginning of next line
-		currentAddress += linePitch;		// dest
-		pSrc += srcRowBytes;				// src
-	}	
-
-		// fill "bottomPad" space with black
-	bzero(currentAddress, (linePitch * bottomPad) );
-	
-	
-		// DMA the resulting frame to Kona memory
-	if (_bDMAtoBoard && hostBuff != NULL)
-	{
-			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
-		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, pciAccessFrame);
-		if ( pciAccessFrame > GetNumFrameBuffers())
-			pciAccessFrame = 0;
-			
-		DMAWriteFrame (pciAccessFrame, (ULWord *)hostBuff, (numLines * linePitch * 4));
-		
-		delete [] hostBuff;
-	}
-
-	SetDualLinkOutputEnable(_dualLinkOutputEnable );
-	SetFrameBufferFormat(_channel,NTV2_FBF_RGBA);
-	SetFrameBufferOrientation(_channel,NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
-#ifndef AJAMac
-	NTV2BoardID boardID = GetBoardID();
-	if ( (::NTV2DeviceNeedsRoutingSetup(boardID)) && _autoRouteOnXena2)
-	{
-		CNTV2SignalRouter router;
-		BuildRoutingTableForOutput(router,_channel,_fbFormat,false,false,false);
-		ApplySignalRoute(router,router.getCurrentIndex());
-	}
-#endif
-
-	FlipFlopPage(_channel);
-}	
-#endif	//	defined (AJAMac)

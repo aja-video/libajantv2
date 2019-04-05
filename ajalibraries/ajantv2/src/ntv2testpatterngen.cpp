@@ -2873,13 +2873,13 @@ bool NTV2TestPatternGen::GetStandard(int &standard, bool &b4K, bool &b8K)
 	bool bResult = true;
 	b4K = false;
 	
-	if		(_frameWidth == 1920 && _frameHeight == 1080)
+	if		(_frameWidth == 1920)
 		standard = 0;			// aka "NTV2_STANDARD_1080"
 
-	else if (_frameWidth == 2048 && _frameHeight == 1080)
+	else if (_frameWidth == 2048)
 		standard = 0;			// aka "NTV2_STANDARD_1080"
 
-	else if (_frameWidth == 1280 && _frameHeight == 720)
+	else if (_frameWidth == 1280)
 		standard = 1;			// aka "NTV2_STANDARD_720"
 
 	else if (_frameWidth == 720 && _frameHeight == 486)
