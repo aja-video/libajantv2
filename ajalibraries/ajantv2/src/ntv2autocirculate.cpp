@@ -1219,7 +1219,7 @@ bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTO
 	NTV2Standard		standard		(NTV2_STANDARD_INVALID);
 	NTV2_POINTER &		ancF1			(inOutXferInfo.acANCBuffer);
 	NTV2_POINTER &		ancF2			(inOutXferInfo.acANCField2Buffer);
-	AJAAncillaryData *	pPkt			(NULL);
+	AJAAncillaryData *	pPkt			(AJA_NULL);
 	uint32_t			vpidA(0), vpidB(0);
 	AJAAncillaryList	pkts;
 
@@ -1246,15 +1246,16 @@ bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTO
 		if (pPkt->GetDID() == 0x41  &&  pPkt->GetSID() == 0x01)	//	VPID?
 		{	//	VPID!
 			if (pPkt->GetDC() != 4)
-				continue;	//	Skip . . . expected DC to be 4
-			const uint32_t* pULWord (reinterpret_cast<const uint32_t*>(pPkt->GetPayloadData()));
-			NTV2_ASSERT(pULWord);
+				continue;	//	Skip . . . expected DC == 4
+			const uint32_t* pULWord		(reinterpret_cast<const uint32_t*>(pPkt->GetPayloadData()));
+			uint32_t		vpidValue	(pULWord ? *pULWord : 0);
 			if (!pPkt->GetDataLocation().IsHanc())
 				continue;	//	Skip . . . expected IsHANC
-			if (pPkt->GetDataLocation().GetLineNumber() > uint16_t(F2StartLine))
-				vpidB = NTV2EndianSwap32BtoH(*pULWord);
+			vpidValue = NTV2EndianSwap32BtoH(vpidValue);
+			if (IS_LINKB_AJAAncillaryDataStream(pPkt->GetDataLocation().GetDataStream()))
+				vpidB = vpidValue;
 			else
-				vpidA = NTV2EndianSwap32BtoH(*pULWord);
+				vpidA = vpidValue;
 			continue;	//	Done . . . on to next packet
 		}
 

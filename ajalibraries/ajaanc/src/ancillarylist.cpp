@@ -22,24 +22,6 @@ using namespace std;
 #define	LOGMYINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncList, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
 #define	LOGMYDEBUG(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncList, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
 
-#if defined(AJAHostIsBigEndian)
-	//	Host is BigEndian (BE)
-	#define AJA_ENDIAN_16NtoH(__val__)		(__val__)
-	#define AJA_ENDIAN_16HtoN(__val__)		(__val__)
-	#define AJA_ENDIAN_32NtoH(__val__)		(__val__)
-	#define AJA_ENDIAN_32HtoN(__val__)		(__val__)
-	#define AJA_ENDIAN_64NtoH(__val__)		(__val__)
-	#define AJA_ENDIAN_64HtoN(__val__)		(__val__)
-#else
-	//	Host is LittleEndian (LE)
-	#define AJA_ENDIAN_16NtoH(__val__)		AJA_ENDIAN_SWAP16(__val__)
-	#define AJA_ENDIAN_16HtoN(__val__)		AJA_ENDIAN_SWAP16(__val__)
-	#define AJA_ENDIAN_32NtoH(__val__)		AJA_ENDIAN_SWAP32(__val__)
-	#define AJA_ENDIAN_32HtoN(__val__)		AJA_ENDIAN_SWAP32(__val__)
-	#define AJA_ENDIAN_64NtoH(__val__)		AJA_ENDIAN_SWAP64(__val__)
-	#define AJA_ENDIAN_64HtoN(__val__)		AJA_ENDIAN_SWAP64(__val__)
-#endif
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
