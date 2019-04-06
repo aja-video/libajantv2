@@ -60,6 +60,7 @@ enum AJAAncillaryDataType
 };
 
 #define	IS_VALID_AJAAncillaryDataType(_x_)		((_x_) >= AJAAncillaryDataType_Unknown  &&  (_x_) < AJAAncillaryDataType_Size)
+#define	IS_KNOWN_AJAAncillaryDataType(_x_)		((_x_) > AJAAncillaryDataType_Unknown  &&  (_x_) < AJAAncillaryDataType_Size)
 
 /**
 	@return		A string containing a human-readable representation of the given AJAAncillaryDataType value (or empty if not possible).

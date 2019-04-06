@@ -32,7 +32,9 @@ using namespace std;
 #define	XMT2110NOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":  " << __x__)
 #define	XMT2110INFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
 #define	XMT2110DBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
-#if defined(_DEBUG)	//	DetailedDebugging
+
+//	RCV2110DDBG & XMT2110DDBG are for EXTREMELY detailed debug logging:
+#if 0	// DetailedDebugging
 	#define	RCV2110DDBG(__x__)	RCV2110DBG(__x__)
 	#define	XMT2110DDBG(__x__)	XMT2110DBG(__x__)
 #else
@@ -1235,11 +1237,14 @@ const string & AJAAncillaryDataTypeToString (const AJAAncillaryDataType inValue,
 {
 	static const string		gAncDataTypeToStr []			= {	"Unknown", "SMPTE 2016-3 AFD", "SMPTE 12-M RP188", "SMPTE 12-M VITC",
 																"SMPTE 334 CEA708", "SMPTE 334 CEA608", "CEA608 Line21", "SMPTE 352 VPID",
-																"SMPTE 2051 2 Frame Marker", "524D Frame Status", "5251 Frame Status", "?"};
+																"SMPTE 2051 2 Frame Marker", "524D Frame Status", "5251 Frame Status",
+																"HDR SDR", "HDR10", "HDR HLG", "?"};
+
 	static const string		gDAncDataTypeToStr []			= {	"AJAAncillaryDataType_Unknown", "AJAAncillaryDataType_Smpte2016_3", "AJAAncillaryDataType_Timecode_ATC",
 																"AJAAncillaryDataType_Timecode_VITC", "AJAAncillaryDataType_Cea708", "AJAAncillaryDataType_Cea608_Vanc",
 																"AJAAncillaryDataType_Cea608_Line21", "AJAAncillaryDataType_Smpte352", "AJAAncillaryDataType_Smpte2051",
-																"AJAAncillaryDataType_FrameStatusInfo524D", "AJAAncillaryDataType_FrameStatusInfo5251", "?"};
+																"AJAAncillaryDataType_FrameStatusInfo524D", "AJAAncillaryDataType_FrameStatusInfo5251",
+																"AJAAncillaryDataType_HDR_SDR", "AJAAncillaryDataType_HDR_HDR10", "AJAAncillaryDataType_HDR_HLG", "?"};
 
 	return inValue < AJAAncillaryDataType_Size ? (inCompact ? gAncDataTypeToStr[inValue] : gDAncDataTypeToStr[inValue]) : gEmptyString;
 }
