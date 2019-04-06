@@ -107,7 +107,7 @@ public:	//	Instance Methods
      *  @param[out]  outValue   Receives the value string
      *  @return      AJA_SUCCESS if successful
      */
-    AJAStatus GetValue(const AJASystemInfoTag inTag, std::string & outValue) const;
+    virtual AJAStatus GetValue(const AJASystemInfoTag inTag, std::string & outValue) const;
 	
     /**
      *  @brief       Answers with the host system info label string for the given AJASystemInfoTag.
@@ -115,13 +115,13 @@ public:	//	Instance Methods
      *  @param[out]  outLabel   Receives the label string
      *  @return      AJA_SUCCESS if successful
      */
-    AJAStatus GetLabel(const AJASystemInfoTag inTag, std::string & outLabel) const;
+    virtual AJAStatus GetLabel(const AJASystemInfoTag inTag, std::string & outLabel) const;
 
     /**
      *  @brief       Answers with a multi-line string that contains the complete host system info table.
      *  @param[out]  outAllLabelsAndValues   Receives the string
      */
-    void ToString (std::string & outAllLabelsAndValues) const;
+    virtual void ToString (std::string & outAllLabelsAndValues) const;
 
     /**
      *  @return      A multi-line string containing the complete host system info table.
@@ -131,7 +131,7 @@ public:	//	Instance Methods
      *  @param[in]   inGutterWidth        Optionally specifies the gap ("gutter") between the "label"
      *                                    and "value" columns, in character spaces. Defaults to 3 spaces.
      */
-    std::string ToString (const size_t inValueWrapLen = 0, const size_t inGutterWidth = 3) const;
+    virtual std::string ToString (const size_t inValueWrapLen = 0, const size_t inGutterWidth = 3) const;
 
 public:	//	Class Methods
     /**
