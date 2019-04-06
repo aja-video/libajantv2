@@ -40,14 +40,13 @@ int main (int argc, const char ** argv)
 	int				doMultiChannel	(0);				//  More than one instance of player 4k
 	int				doRGBOnWire		(0);				//  Route the output to put RGB on the wire
 	int				doTsiRouting	(0);				//  Route the output through the Tsi Muxes
-	int				hdrType			(0);
+	int				hdrType			(0);				//	Insert HDR anc packet? If so, what kind?
 	poptContext		optionsContext; 					//	Context for parsing command line arguments
 	AJADebug::Open();
 
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
-		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",			"index#, serial#, or model"	},
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",			"index#, serial#, or model"	},
 		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,		0,	"which video format to use",	"e.g. 'uhd24' or ? to list"},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,		0,	"which pixel format to use",	"e.g. 'yuv8' or ? to list"},
@@ -57,7 +56,7 @@ int main (int argc, const char ** argv)
 		{"hdmi",		'h',	POPT_ARG_NONE,		&useHDMIOut,		0,	"enable HDMI output?",			NULL},
 		{"rgb",			'r',	POPT_ARG_NONE,		&doRGBOnWire,		0,	"use RGB output?",				NULL},
 		{"tsi",			't',	POPT_ARG_NONE,		&doTsiRouting,		0,	"use Tsi routing?",				NULL},
-		{"hdrType",		'x',	POPT_ARG_INT,		&hdrType,		0,	"which HDR Packet to send",			"1:SDR,2:HDR10,3:HLG"},
+		{"hdrType",		'x',	POPT_ARG_INT,		&hdrType,			1,	"which HDR Packet to send",		"1:SDR,2:HDR10,3:HLG"},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -82,37 +81,28 @@ int main (int argc, const char ** argv)
 	else if (!pixelFormatStr.empty () && !NTV2_IS_VALID_FRAME_BUFFER_FORMAT (pixelFormat))
 		{cerr << "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 2;}
 
-//	if (channelNumber != 1 && channelNumber != 5)
-//		{cerr << "## ERROR:  Invalid channel number '" << channelNumber << "' -- expected 1 or 5" << endl;  return 2;}
+	if (channelNumber < 1 || channelNumber > 8)
+		{cerr << "## ERROR:  Invalid channel number '" << channelNumber << "' -- use 1 thru 8" << endl;  return 2;}
 
 	Player4KConfig	config;
-
 	config.fDeviceSpecifier	= deviceSpec;
-	config.fWithAudio		= noAudio ? false : true;
-	config.fChannel			= NTV2Channel (channelNumber - 1);
+	config.fAudioSystem		= noAudio ? NTV2_AUDIOSYSTEM_INVALID : NTV2_AUDIOSYSTEM_1;
+	config.fOutputChannel	= NTV2Channel(channelNumber ? channelNumber - 1 : 0);
 	config.fPixelFormat		= pixelFormat;
 	config.fVideoFormat		= videoFormat;
-	config.fUseHDMIOut		= useHDMIOut ? true : false;
+	config.fDoHDMIOutput	= useHDMIOut ? true : false;
 	config.fDoMultiChannel	= doMultiChannel ? true : false;
 	config.fDoTsiRouting	= doTsiRouting ? true : false;
 	config.fDoRGBOnWire		= doRGBOnWire ? true : false;
-	switch(hdrType)
+	switch (hdrType)
 	{
-	case 1:
-		config.fSendAncType = AJAAncillaryDataType_HDR_SDR;
-		break;
-	case 2:
-		config.fSendAncType = AJAAncillaryDataType_HDR_HDR10;
-		break;
-	case 3:
-		config.fSendAncType = AJAAncillaryDataType_HDR_HLG;
-		break;
-	default:
-		config.fSendAncType = AJAAncillaryDataType_Unknown;
-		break;
+		case 1:		config.fSendAncType = AJAAncillaryDataType_HDR_SDR;		break;
+		case 2:		config.fSendAncType = AJAAncillaryDataType_HDR_HDR10;	break;
+		case 3:		config.fSendAncType = AJAAncillaryDataType_HDR_HLG;		break;
+		default:	config.fSendAncType = AJAAncillaryDataType_Unknown;		break;
 	}
 
-	NTV2Player4K	player 	(config);
+	NTV2Player4K player (config);
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)
@@ -121,42 +111,34 @@ int main (int argc, const char ** argv)
 	#endif
 
 	//	Initialize the player...
-	status = player.Init ();
+	status = player.Init();
 	if (AJA_FAILURE (status))
 		{cerr << "Player initialization failed with status " << status << endl;  return 1;}
 
-	bool	firstTimeAround	(true);
-
 	//	Run the player...
-	player.Run ();
+	player.Run();
 
 	//	Loop until told to stop...
-	while (!gGlobalQuit)
+	cout	<< "  Playout  Playout   Frames" << endl
+			<< "   Frames   Buffer  Dropped" << endl;
+	do
 	{
 		//	Poll the player's status...
-		AUTOCIRCULATE_STATUS	outputStatus;
-		player.GetACStatus (outputStatus);
+		AUTOCIRCULATE_STATUS outputStatus;
+		player.GetACStatus(outputStatus);
 
-		if (firstTimeAround)
-		{
-			cout	<< "  Playout  Playout   Frames" << endl
-					<< "   Frames   Buffer  Dropped" << endl;
-			firstTimeAround = false;
-		}
-
-		cout	<<	setw (9) << outputStatus.acFramesProcessed
-				<<	setw (9) << outputStatus.acBufferLevel
-				<<  setw (9) << outputStatus.acFramesDropped
+		cout	<<	DECN(outputStatus.acFramesProcessed, 9)
+				<<	DECN(outputStatus.acBufferLevel, 9)
+				<<  DECN(outputStatus.acFramesDropped, 9)
 				<< "\r" << flush;
 
-		AJATime::Sleep (2000);
-
-	}	//	loop til done
+		AJATime::Sleep(2000);
+	} while (!gGlobalQuit);	//	loop til done
 
 	cout << endl;
 
 	//  Ask the player to stop
-	player.Quit ();
+	player.Quit();
 
 	return 0;
 

@@ -28,34 +28,50 @@ class AJAThread;
 typedef struct Player4KConfig
 {
 	public:
-		std::string				fDeviceSpecifier;		///<	Specifies the AJA device to use.
-		bool					fWithAudio;				///<	If true, include audio tone in the output signal;  otherwise, omit it.
-		NTV2Channel				fChannel;				///<	Specifies the channel to use.
-		NTV2FrameBufferFormat	fPixelFormat;			///<	Specifies the pixel format to use for the device's frame buffers.
-		NTV2VideoFormat			fVideoFormat;			///<	Specifies the video format to use.
-		bool					fUseHDMIOut;			///<	If true, enables an HDMI output signal;  otherwise, disables it.
-		bool					fDoMultiChannel;		///<	If true, enables multiple player 4k instances to share a board.
-		bool					fDoTsiRouting;			///<	If true, enables two sample interleave routing, else squares.
-		bool					fDoRGBOnWire;			///<	If true, enables RGB on the wire, else CSCs convert to YCbCr.
-		AJAAncillaryDataType	fSendAncType;
+		std::string				fDeviceSpecifier;	///< @brief	Specifies the AJA device to use.
+		NTV2AudioSystem			fAudioSystem;		///< @brief	Specifies the audio system to use (use NTV2_AUDIOSYSTEM_INVALID for no audio).
+		NTV2Channel				fOutputChannel;		///< @brief	Specifies the channel to use.
+		NTV2FrameBufferFormat	fPixelFormat;		///< @brief	Specifies the pixel format to use for the device's frame buffers.
+		NTV2VideoFormat			fVideoFormat;		///< @brief	Specifies the video format to use.
+		AJAAncillaryDataType	fSendAncType;		///< @brief	Specifies the HDR anc data packet to transmit, if any.
+		bool					fDoHDMIOutput;		///< @brief	If true, enables HDMI output;  otherwise, disables it.
+		bool					fDoMultiChannel;	///< @brief	If true, enables device-sharing;  otherwise takes exclusive control of the device.
+		bool					fDoTsiRouting;		///< @brief	If true, enables two sample interleave routing, else squares.
+		bool					fDoRGBOnWire;		///< @brief	If true, enables RGB on the wire, else CSCs convert to YCbCr.
 
 		/**
 			@brief	Constructs a default generator configuration.
 		**/
 		inline explicit	Player4KConfig ()
 			:	fDeviceSpecifier	("0"),
-				fWithAudio			(true),
-				fChannel			(NTV2_CHANNEL1),
+				fAudioSystem		(NTV2_AUDIOSYSTEM_1),
+				fOutputChannel		(NTV2_CHANNEL1),
 				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
 				fVideoFormat		(NTV2_FORMAT_4x1920x1080p_2997),
-				fUseHDMIOut			(false),
+				fSendAncType		(AJAAncillaryDataType_Unknown),
+				fDoHDMIOutput		(false),
 				fDoMultiChannel		(false),
 				fDoTsiRouting		(false),
-				fDoRGBOnWire		(false),
-				fSendAncType		(AJAAncillaryDataType_Unknown)
+				fDoRGBOnWire		(false)
 		{
 		}
-}	Player4KConfigConfig;
+
+		inline bool	WithAudio(void) const	{return NTV2_IS_VALID_AUDIO_SYSTEM(fAudioSystem);}	///< @return	True if playing audio, false if not.
+
+		/**
+			@brief		Renders a human-readable representation of me into the given output stream.
+			@param		strm	The output stream.
+			@return		A reference to the output stream.
+		**/
+		std::ostream &	Print (std::ostream & strm) const;
+}	Player4KConfig;
+
+/**
+	@brief		Renders a human-readable representation of a Player4KConfig into an output stream.
+	@param		strm	The output stream.
+	@return		A reference to the output stream.
+**/
+inline std::ostream &	operator << (std::ostream & strm, const Player4KConfig & inObj)		{return inObj.Print(strm);}
 
 
 /**
@@ -68,12 +84,6 @@ typedef struct Player4KConfig
 
 class NTV2Player4K
 {
-	public:
-		/**
-			@brief Signature of a function call for requesting frames to be played.
-		**/
-		typedef AJAStatus (NTV2Player4KCallback)(void * pInstance, const AVDataBuffer * const playData);
-
 	//	Public Instance Methods
 	public:
 		/**
@@ -105,16 +115,6 @@ class NTV2Player4K
 			@param[out]	outOutputStatus		Receives status information about my output (playout) process.
 		**/
 		void			GetACStatus (AUTOCIRCULATE_STATUS & outOutputStatus);
-
-		/**
-			@brief	Returns the current callback function for requesting frames to be played.
-		**/
-		virtual void	GetCallback (void ** const pInstance, NTV2Player4KCallback ** const callback);
-
-		/**
-			@brief	Sets a callback function for requesting frames to be played.
-		**/
-		virtual bool	SetCallback (void * const pInstance, NTV2Player4KCallback * const callback);
 
 
 	//	Protected Instance Methods
@@ -207,17 +207,17 @@ class NTV2Player4K
 		/**
 			@brief	Starts my playout thread.
 		**/
-		void			StartPlayThread (void);
+		void			StartConsumerThread (void);
 
 		/**
 			@brief	Repeatedly plays out frames using AutoCirculate (until global quit flag set).
 		**/
-		void			PlayFrames (void);
+		void			ConsumeFrames (void);
 
 		/**
 			@brief	Starts my test pattern producer thread.
 		**/
-		void			StartProduceFrameThread (void);
+		void			StartProducerThread (void);
 
 		/**
 			@brief	Repeatedly produces test pattern frames (until global quit flag set).
@@ -263,46 +263,23 @@ class NTV2Player4K
 
 	//	Private Member Data
 	private:
-		AJAThread *					mPlayThread;				///< @brief	My playout (consumer) thread object
-		AJAThread *					mProduceFrameThread;		///< @brief	My generator (producer) thread object
-
-		uint32_t					mCurrentFrame;				///< @brief	My current frame number (used to generate timecode)
-		ULWord						mCurrentSample;				///< @brief	My current audio sample (maintains audio tone generator state)
-		double						mToneFrequency;				///< @brief	My current audio tone frequency, in Hertz
-
-		CNTV2Card					mDevice;					///< @brief	My CNTV2Card instance
-		NTV2DeviceID				mDeviceID;					///< @brief	My board (model) identifier
-		const std::string			mDeviceSpecifier;			///< @brief	Specifies the device I should use
-		const bool					mWithAudio;					///< @brief	Capture and playout audio?
-		const bool					mUseHDMIOut;				///< @brief	Enable HDMI output?
-		NTV2Channel					mChannel;					///< @brief	The channel I'm using
-		NTV2Crosspoint				mChannelSpec;				///< @brief	The AutoCirculate channel spec I'm using
-		NTV2VideoFormat				mVideoFormat;				///< @brief	My video format
-		NTV2FrameBufferFormat		mPixelFormat;				///< @brief	My pixel format
-		NTV2EveryFrameTaskMode		mPreviousFrameServices;		///< @brief	Used to restore the previous task mode
-		NTV2VANCMode				mVancMode;					///< @brief	VANC mode
-		NTV2AudioSystem				mAudioSystem;				///< @brief	The audio system I'm using
-		bool						mDoMultiChannel;			///< @brief	Allow more than one player 4k to play
-		bool						mDoTsiRouting;				///< @brief	Route the output through the Tsi Muxes
-		bool						mDoRGBOnWire;				///< @brief	Route the output through the Dual Link to put RGB on the wire
-
-		bool						mGlobalQuit;				///< @brief	Set "true" to gracefully stop
-		AJATimeCodeBurn				mTCBurner;					///< @brief	My timecode burner
-		uint32_t					mVideoBufferSize;			///< @brief	My video buffer size, in bytes
-		uint32_t					mAudioBufferSize;			///< @brief	My audio buffer size, in bytes
-
-		uint8_t **					mTestPatternVideoBuffers;	///< @brief	My test pattern buffers
-		int32_t						mNumTestPatterns;			///< @brief	Number of test patterns to cycle through
-
-		AVDataBuffer							mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
-		AJACircularBuffer <AVDataBuffer *>		mAVCircularBuffer;						///< @brief	My ring buffer
-
-		AUTOCIRCULATE_TRANSFER           mOutputTransferStruct;					///< @brief	My A/C output transfer info
-		AUTOCIRCULATE_TRANSFER_STATUS    mOutputTransferStatusStruct;			///< @brief	My A/C output status
-
-		void *						mInstance;					///< @brief	Instance information for the callback function
-		NTV2Player4KCallback *		mPlayerCallback;			///< @brief	Address of callback function
-		AJAAncillaryDataType		mAncType;
+		Player4KConfig			mConfig;				///< @brief	My configuration.
+		AJAThread *				mConsumerThread;		///< @brief	My playout (consumer) thread object
+		AJAThread *				mProducerThread;		///< @brief	My generator (producer) thread object
+		uint32_t				mCurrentFrame;			///< @brief	My current frame number (used to generate timecode)
+		ULWord					mCurrentSample;			///< @brief	My current audio sample (maintains audio tone generator state)
+		double					mToneFrequency;			///< @brief	My current audio tone frequency, in Hertz
+		CNTV2Card				mDevice;				///< @brief	My CNTV2Card instance
+		NTV2DeviceID			mDeviceID;				///< @brief	My device (model) identifier
+		NTV2EveryFrameTaskMode	mSavedTaskMode;			///< @brief	Used to restore the previous task mode
+		bool					mGlobalQuit;			///< @brief	Set "true" to gracefully stop
+		AJATimeCodeBurn			mTCBurner;				///< @brief	My timecode burner
+		uint32_t				mVideoBufferSize;		///< @brief	My video buffer size, in bytes
+		uint32_t				mAudioBufferSize;		///< @brief	My audio buffer size, in bytes
+		uint8_t **				mTestPatternBuffers;	///< @brief	My array of test pattern buffers
+		uint32_t				mNumTestPatterns;		///< @brief	Number of test patterns to cycle through
+		AVDataBuffer			mHostBuffers[CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
+		AJACircularBuffer <AVDataBuffer *>	mAVCircularBuffer;		///< @brief	My ring buffer
 
 };	//	NTV2Player4K
 
