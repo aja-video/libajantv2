@@ -2221,7 +2221,6 @@ NTV2TestPatternGen::NTV2TestPatternGen() :
 	_signalMask(NTV2_SIGNALMASK_ALL),
 	mNumPixels(1920)
 {
-	    mRGBBuffer.resize(4096*2160*3+1);
 }
 
 
@@ -2242,6 +2241,7 @@ bool NTV2TestPatternGen::DrawTestPattern (NTV2TestPatternSelect pattNum, uint32_
 	_frameWidth  = frameWidth;
 	_frameHeight = frameHeight;
 	_pixelFormat = pixelFormat;
+	mNumPixels = frameWidth;
 
 	_linePitch     = CalcRowBytesForFormat(_pixelFormat, _frameWidth);					// number of BYTES per line of frame buffer format
 	if(_linePitch == 0)
@@ -2254,6 +2254,8 @@ bool NTV2TestPatternGen::DrawTestPattern (NTV2TestPatternSelect pattNum, uint32_
 
 	if ( testPatternBuffer.size() != _bufferSize )
 		testPatternBuffer.resize(_bufferSize);
+
+	mRGBBuffer.resize(frameWidth * frameHeight * 3 + 1);
 
 	_pTestPatternBuffer = &testPatternBuffer[0];
 
@@ -2871,13 +2873,13 @@ bool NTV2TestPatternGen::GetStandard(int &standard, bool &b4K, bool &b8K)
 	bool bResult = true;
 	b4K = false;
 	
-	if		(_frameWidth == 1920 && _frameHeight == 1080)
+	if		(_frameWidth == 1920)
 		standard = 0;			// aka "NTV2_STANDARD_1080"
 
-	else if (_frameWidth == 2048 && _frameHeight == 1080)
+	else if (_frameWidth == 2048)
 		standard = 0;			// aka "NTV2_STANDARD_1080"
 
-	else if (_frameWidth == 1280 && _frameHeight == 720)
+	else if (_frameWidth == 1280)
 		standard = 1;			// aka "NTV2_STANDARD_720"
 
 	else if (_frameWidth == 720 && _frameHeight == 486)

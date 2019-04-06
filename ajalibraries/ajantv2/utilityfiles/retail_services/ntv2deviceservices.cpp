@@ -32,6 +32,7 @@
 #include "ntv2konahdmiservices.h"
 #include "ntv2vpidfromspec.h"
 #include "ntv2kona1services.h"
+#include "ntv2utils.h"
 #include "appsignatures.h"
 #include "ajabase/system/systemtime.h"
 
@@ -484,6 +485,7 @@ void DeviceServices::SetDeviceEveryFrameRegs (uint32_t virtualDebug1, uint32_t e
 			PauseOptimizedWrites();
 			
 			NTV2VideoFormat newVideoFormat = mDs.inputVideoFormatSelect;
+			newVideoFormat = GetSupportedNTV2VideoFormatFromInputVideoFormat(newVideoFormat);
 			mCard->WriteRegister(kVRegDefaultVideoFormat, newVideoFormat);
 			mCard->SetVideoFormat(newVideoFormat);
 			mInputChangeCount++;
@@ -641,6 +643,8 @@ bool DeviceServices::NewLockedInputVideoFormatDetected()
 	NTV2VideoFormat curVideoFormat 		= mDs.primaryFormat;
 	NTV2VideoFormat inputVideoFormat 	= mDs.inputVideoFormatSelect;
 	
+	// some formats like UHDp60b are not legal frame buffer video formats - adjust to UHDp60a
+	inputVideoFormat = GetSupportedNTV2VideoFormatFromInputVideoFormat(inputVideoFormat);
 	
 	// format changed
 	if (inputVideoFormat != curVideoFormat && inputVideoFormat != NTV2_FORMAT_UNKNOWN)

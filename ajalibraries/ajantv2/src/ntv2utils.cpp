@@ -2469,6 +2469,53 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 	return standard;
 }
 
+
+//-------------------------------------------------------------------------------------------------------
+//	GetSupportedNTV2VideoFormatFromInputVideoFormat
+//-------------------------------------------------------------------------------------------------------
+NTV2VideoFormat GetSupportedNTV2VideoFormatFromInputVideoFormat(const NTV2VideoFormat inVideoFormat)
+{
+	NTV2VideoFormat result;
+	
+	switch (inVideoFormat)
+	{
+		case NTV2_FORMAT_3840x2160p_5000_B:  result = NTV2_FORMAT_3840x2160p_5000; 		break;
+		case NTV2_FORMAT_3840x2160p_5994_B:  result = NTV2_FORMAT_3840x2160p_5994; 		break;
+		case NTV2_FORMAT_3840x2160p_6000_B:  result = NTV2_FORMAT_3840x2160p_6000; 		break;
+		
+		case NTV2_FORMAT_4096x2160p_4795_B:  result = NTV2_FORMAT_4096x2160p_4795; 		break;
+		case NTV2_FORMAT_4096x2160p_4800_B:  result = NTV2_FORMAT_4096x2160p_4800; 		break;
+		case NTV2_FORMAT_4096x2160p_5000_B:  result = NTV2_FORMAT_4096x2160p_5000; 		break;
+		case NTV2_FORMAT_4096x2160p_5994_B:  result = NTV2_FORMAT_4096x2160p_5994; 		break;
+		case NTV2_FORMAT_4096x2160p_6000_B:  result = NTV2_FORMAT_4096x2160p_6000; 		break;
+		
+		case NTV2_FORMAT_4x1920x1080p_5000_B:  result = NTV2_FORMAT_4x1920x1080p_5000; 	break;
+		case NTV2_FORMAT_4x1920x1080p_5994_B:  result = NTV2_FORMAT_4x1920x1080p_5994; 	break;
+		case NTV2_FORMAT_4x1920x1080p_6000_B:  result = NTV2_FORMAT_4x1920x1080p_6000; 	break;
+		
+		case NTV2_FORMAT_4x2048x1080p_4795_B:  result = NTV2_FORMAT_4x2048x1080p_4795; 	break;
+		case NTV2_FORMAT_4x2048x1080p_4800_B:  result = NTV2_FORMAT_4x2048x1080p_4800; 	break;
+		case NTV2_FORMAT_4x2048x1080p_5000_B:  result = NTV2_FORMAT_4x2048x1080p_5000; 	break;
+		case NTV2_FORMAT_4x2048x1080p_5994_B:  result = NTV2_FORMAT_4x2048x1080p_5994; 	break;
+		case NTV2_FORMAT_4x2048x1080p_6000_B:  result = NTV2_FORMAT_4x2048x1080p_6000; 	break;
+		
+		case NTV2_FORMAT_4x3840x2160p_5000_B:  result = NTV2_FORMAT_4x3840x2160p_5000; 	break;
+		case NTV2_FORMAT_4x3840x2160p_5994_B:  result = NTV2_FORMAT_4x3840x2160p_5994; 	break;
+		case NTV2_FORMAT_4x3840x2160p_6000_B:  result = NTV2_FORMAT_4x3840x2160p_6000; 	break;
+		
+		case NTV2_FORMAT_4x4096x2160p_4795_B:  result = NTV2_FORMAT_4x4096x2160p_4795; 	break;
+		case NTV2_FORMAT_4x4096x2160p_4800_B:  result = NTV2_FORMAT_4x4096x2160p_4800; 	break;
+		case NTV2_FORMAT_4x4096x2160p_5000_B:  result = NTV2_FORMAT_4x4096x2160p_5000; 	break;
+		case NTV2_FORMAT_4x4096x2160p_5994_B:  result = NTV2_FORMAT_4x4096x2160p_5994; 	break;
+		case NTV2_FORMAT_4x4096x2160p_6000_B:  result = NTV2_FORMAT_4x4096x2160p_6000; 	break;
+		
+		default: result = inVideoFormat; break;
+	}
+	
+	return result;
+}
+
+
 //-------------------------------------------------------------------------------------------------------
 //	GetNTV2FrameGeometryFromVideoFormat
 //-------------------------------------------------------------------------------------------------------
@@ -5160,7 +5207,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONA1:					return inForRetailDisplay ? "Kona 1"					: "Kona1";
         case DEVICE_ID_KONAHDMI:				return inForRetailDisplay ? "Kona HDMI"					: "KonaHDMI";
 		case DEVICE_ID_KONA5:					return inForRetailDisplay ?	"KONA 5"					: "Kona5";
-        case DEVICE_ID_KONA5_4X12G:             return inForRetailDisplay ?	"KONA 5 12G"				: "Kona5-12G";
+        case DEVICE_ID_KONA5_4X12G:             return inForRetailDisplay ?	"KONA 5 4x12G"				: "Kona5 4x12G";
 		case DEVICE_ID_CORVID44_12G:			return inForRetailDisplay ?	"Corvid 44 12G"				: "Corvid44-12G";
 #if defined(_DEBUG)
 #else
@@ -8919,6 +8966,17 @@ static ostream & operator << (ostream & inOutStr, const NTV2InputCrosspointIDs &
 	return inOutStr;
 }
 */
+
+ostream & operator << (ostream & inOutStream, const NTV2StringList & inData)
+{
+	for (NTV2StringListConstIter it(inData.begin());  it != inData.end();  )
+	{
+		inOutStream	<< *it;
+		if (++it != inData.end())
+			inOutStream << ", ";
+	}
+	return inOutStream;
+}
 
 ostream & operator << (ostream & inOutStream, const NTV2StringSet & inData)
 {

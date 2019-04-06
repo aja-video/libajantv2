@@ -1016,6 +1016,7 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 	}
 
 	bool	tmpLocalRP188F1AncBuffer(false), tmpLocalRP188F2AncBuffer(false);
+	NTV2_POINTER	savedAncF1, savedAncF2;
 	if (::NTV2DeviceCanDo2110(_boardID)  &&  NTV2_IS_OUTPUT_CROSSPOINT(crosspoint))
 		//	S2110 Playout:	So that most Retail & OEM playout apps "just work" with S2110 RTP Anc streams, our classic SDI
 		//					Anc data that device firmware normally embeds into SDI output as derived from registers -- e.g.
@@ -1024,8 +1025,12 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 		{
 			if (inOutXferInfo.acANCBuffer.IsNULL())
 				tmpLocalRP188F1AncBuffer = inOutXferInfo.acANCBuffer.Allocate(2048);
+			else
+				savedAncF1 = inOutXferInfo.acANCBuffer;	//	copy
 			if (inOutXferInfo.acANCField2Buffer.IsNULL())
 				tmpLocalRP188F2AncBuffer = inOutXferInfo.acANCField2Buffer.Allocate(2048);
+			else
+				savedAncF2 = inOutXferInfo.acANCField2Buffer;	//	copy
 			S2110DeviceAncToXferBuffers(inChannel, inOutXferInfo);
 		}
 
@@ -1091,6 +1096,18 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			S2110DeviceAncFromXferBuffers(inChannel, inOutXferInfo);
 		}
 	}	//	if NTV2Message OK && capturing
+	else if (result  &&  NTV2_IS_OUTPUT_CROSSPOINT(crosspoint))
+	{
+		if (savedAncF1)
+			inOutXferInfo.acANCBuffer = savedAncF1;			//	restore
+		if (savedAncF2)
+			inOutXferInfo.acANCField2Buffer = savedAncF2;	//	restore
+	}	//	else playout
+
+	if (tmpLocalRP188F1AncBuffer)
+		inOutXferInfo.acANCBuffer.Deallocate();
+	if (tmpLocalRP188F2AncBuffer)
+		inOutXferInfo.acANCField2Buffer.Deallocate();
 
 	#if defined (AJA_NTV2_CLEAR_DEVICE_ANC_BUFFER_AFTER_CAPTURE_XFER)
 		if (result  &&  NTV2_IS_INPUT_CROSSPOINT(crosspoint))
@@ -1145,11 +1162,6 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			}
 		}
 	#endif	//	AJA_NTV2_CLEAR_HOST_ANC_BUFFER_TAIL_AFTER_CAPTURE_XFER
-
-	if (tmpLocalRP188F1AncBuffer)
-		inOutXferInfo.acANCBuffer.Deallocate();
-	if (tmpLocalRP188F2AncBuffer)
-		inOutXferInfo.acANCField2Buffer.Deallocate();
 
 	if (result)
 		ACDBG("Transfer successful for channel " << DEC(inChannel+1));
@@ -1219,7 +1231,7 @@ bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTO
 	NTV2Standard		standard		(NTV2_STANDARD_INVALID);
 	NTV2_POINTER &		ancF1			(inOutXferInfo.acANCBuffer);
 	NTV2_POINTER &		ancF2			(inOutXferInfo.acANCField2Buffer);
-	AJAAncillaryData *	pPkt			(NULL);
+	AJAAncillaryData *	pPkt			(AJA_NULL);
 	uint32_t			vpidA(0), vpidB(0);
 	AJAAncillaryList	pkts;
 
@@ -1227,10 +1239,11 @@ bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTO
 		return false;	//	Can't get frame rate
 	if (!NTV2_IS_VALID_NTV2FrameRate(ntv2Rate))
 		return false;	//	Bad frame rate
-	if (!IsProgressiveStandard(isProgressive, inChannel))
-		return false;	//	Can't get isProgressive
 	if (!GetStandard(standard, inChannel))
 		return false;	//	Can't get standard
+	if (!NTV2_IS_VALID_STANDARD(standard))
+		return false;	//	Bad standard
+	isProgressive = NTV2_IS_PROGRESSIVE_STANDARD(standard);
 	if (!ancF1.IsNULL() || !ancF2.IsNULL())
 		if (AJA_FAILURE(AJAAncillaryList::SetFromDeviceAncBuffers(ancF1, ancF2, pkts)))
 			return false;	//	Packet import failed
@@ -1245,15 +1258,16 @@ bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTO
 		if (pPkt->GetDID() == 0x41  &&  pPkt->GetSID() == 0x01)	//	VPID?
 		{	//	VPID!
 			if (pPkt->GetDC() != 4)
-				continue;	//	Skip . . . expected DC to be 4
-			const uint32_t* pULWord (reinterpret_cast<const uint32_t*>(pPkt->GetPayloadData()));
-			NTV2_ASSERT(pULWord);
+				continue;	//	Skip . . . expected DC == 4
+			const uint32_t* pULWord		(reinterpret_cast<const uint32_t*>(pPkt->GetPayloadData()));
+			uint32_t		vpidValue	(pULWord ? *pULWord : 0);
 			if (!pPkt->GetDataLocation().IsHanc())
 				continue;	//	Skip . . . expected IsHANC
-			if (pPkt->GetDataLocation().GetLineNumber() > uint16_t(F2StartLine))
-				vpidB = NTV2EndianSwap32BtoH(*pULWord);
+			vpidValue = NTV2EndianSwap32BtoH(vpidValue);
+			if (IS_LINKB_AJAAncillaryDataStream(pPkt->GetDataLocation().GetDataStream()))
+				vpidB = vpidValue;
 			else
-				vpidA = NTV2EndianSwap32BtoH(*pULWord);
+				vpidA = vpidValue;
 			continue;	//	Done . . . on to next packet
 		}
 
@@ -1378,10 +1392,11 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 		return false;	//	Can't get frame rate
 	if (!NTV2_IS_VALID_NTV2FrameRate(ntv2Rate))
 		return false;	//	Bad frame rate
-	if (!IsProgressiveStandard(isProgressive, inChannel))
-		return false;	//	Can't get isProgressive
 	if (!GetStandard(standard, inChannel))
 		return false;	//	Can't get standard
+	if (!NTV2_IS_VALID_STANDARD(standard))
+		return false;	//	Bad standard
+	isProgressive = NTV2_IS_PROGRESSIVE_STANDARD(standard);
 	if (ancF1 || ancF2)
 	{
 		//	Import anc packet list that AutoCirculateTransfer's caller put into Xfer
@@ -1414,10 +1429,24 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 			vpidPkt.SetLocationDataChannel(AJAAncillaryDataChannel_Y);
 			vpidPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc);
 			if (vpidA)
-			{
-				vpidA = EndianSwap32NtoH(vpidA);
+			{	//	LinkA/DS1:
+				vpidA = ::EndianSwap32NtoH(vpidA);
 				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidA), 4);
 				vpidPkt.SetLocationLineNumber(sVPIDLineNumsF1[standard]);
+				vpidPkt.GeneratePayloadData();
+				packetList.AddAncillaryData(vpidPkt);	changed = true;
+				if (!isProgressive)
+				{	//	Ditto for Field 2...
+					vpidPkt.SetLocationLineNumber(sVPIDLineNumsF2[standard]);
+					packetList.AddAncillaryData(vpidPkt);	changed = true;
+				}
+			}
+			if (vpidB)
+			{	//	LinkB/DS2:
+				vpidB = ::EndianSwap32NtoH(vpidB);
+				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidB), 4);
+				vpidPkt.SetLocationVideoLink(AJAAncillaryDataLink_B);
+				vpidPkt.SetLocationDataStream(AJAAncillaryDataStream_2);
 				vpidPkt.GeneratePayloadData();
 				packetList.AddAncillaryData(vpidPkt);	changed = true;
 				if (!isProgressive)
@@ -1522,10 +1551,11 @@ bool CNTV2Card::S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2_POINT
 		return false;	//	Can't get frame rate
 	if (!NTV2_IS_VALID_NTV2FrameRate(ntv2Rate))
 		return false;	//	Bad frame rate
-	if (!IsProgressiveStandard(isProgressive, inChannel))
-		return false;	//	Can't get isProgressive
 	if (!GetStandard(standard, inChannel))
 		return false;	//	Can't get standard
+	if (!NTV2_IS_VALID_STANDARD(standard))
+		return false;	//	Bad standard
+	isProgressive = NTV2_IS_PROGRESSIVE_STANDARD(standard);
 	if (!ancF1.IsNULL() || !ancF2.IsNULL())
 		if (AJA_FAILURE(AJAAncillaryList::SetFromDeviceAncBuffers(ancF1, ancF2, pkts)))
 			return false;	//	Packet import failed
@@ -1549,18 +1579,30 @@ bool CNTV2Card::S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2_POINT
 			vpidPkt.SetLocationDataChannel(AJAAncillaryDataChannel_Y);
 			vpidPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc);
 			if (vpidA)
-			{
-				vpidA = NTV2EndianSwap32BtoH(vpidA);
+			{	//	LinkA/DS1:
+				vpidA = ::EndianSwap32NtoH(vpidA);
 				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidA), 4);
 				vpidPkt.SetLocationLineNumber(sVPIDLineNumsF1[standard]);
 				pkts.AddAncillaryData(vpidPkt);			changed = true;
+				if (!isProgressive)
+				{	//	Ditto for Field 2...
+					vpidPkt.SetLocationLineNumber(sVPIDLineNumsF2[standard]);
+					pkts.AddAncillaryData(vpidPkt);	changed = true;
+				}
 			}
-			if (!isProgressive && vpidB)
-			{
-				vpidB = NTV2EndianSwap32BtoH(vpidB);
+			if (vpidB)
+			{	//	LinkB/DS2:
+				vpidB = ::EndianSwap32NtoH(vpidB);
 				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidB), 4);
-				vpidPkt.SetLocationLineNumber(sVPIDLineNumsF2[standard]);
-				pkts.AddAncillaryData(vpidPkt);			changed = true;
+				vpidPkt.SetLocationVideoLink(AJAAncillaryDataLink_B);
+				vpidPkt.SetLocationDataStream(AJAAncillaryDataStream_2);
+				vpidPkt.GeneratePayloadData();
+				pkts.AddAncillaryData(vpidPkt);	changed = true;
+				if (!isProgressive)
+				{	//	Ditto for Field 2...
+					vpidPkt.SetLocationLineNumber(sVPIDLineNumsF2[standard]);
+					pkts.AddAncillaryData(vpidPkt);	changed = true;
+				}
 			}
 		}	//	if client didn't insert their own VPID
 	}	//	if no VPID pkts in buffer

@@ -60,6 +60,7 @@ enum AJAAncillaryDataType
 };
 
 #define	IS_VALID_AJAAncillaryDataType(_x_)		((_x_) >= AJAAncillaryDataType_Unknown  &&  (_x_) < AJAAncillaryDataType_Size)
+#define	IS_KNOWN_AJAAncillaryDataType(_x_)		((_x_) > AJAAncillaryDataType_Unknown  &&  (_x_) < AJAAncillaryDataType_Size)
 
 /**
 	@return		A string containing a human-readable representation of the given AJAAncillaryDataType value (or empty if not possible).
@@ -108,8 +109,8 @@ enum AJAAncillaryDataStream
 };
 
 #define	IS_VALID_AJAAncillaryDataStream(_x_)	((_x_) >= AJAAncillaryDataStream_1  &&  (_x_) < AJAAncillaryDataStream_Unknown)
-#define	IS_LINKA_AJAAncillaryDataStream(_x_)	((_x_) >= AJAAncillaryDataStream_1  &&  (_x_) < AJAAncillaryDataStream_3)
-#define	IS_LINKB_AJAAncillaryDataStream(_x_)	((_x_) > AJAAncillaryDataStream_2  &&  (_x_) < AJAAncillaryDataStream_Unknown)
+#define	IS_LINKA_AJAAncillaryDataStream(_x_)	((_x_) == AJAAncillaryDataStream_1)
+#define	IS_LINKB_AJAAncillaryDataStream(_x_)	((_x_) == AJAAncillaryDataStream_2)
 
 /**
 	@return		A string containing a human-readable representation of the given AJAAncillaryDataStream value (or empty if not possible).

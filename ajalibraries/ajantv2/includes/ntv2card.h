@@ -5848,7 +5848,7 @@ public:
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							ConvertLinePixelFormat (UWord * unPackedBuffer, ULWord * packedBuffer, int numPixels));	///< Originally in CNTV2TestPattern.
 
 #ifdef AJAMac
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							DownloadRGBPicture (char * pSrc, ULWord srcWidthPixels, ULWord srcHeightPixels, ULWord srcRowBytes));	///< Originally in CNTV2TestPattern.
+//	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							DownloadRGBPicture (char * pSrc, ULWord srcWidthPixels, ULWord srcHeightPixels, ULWord srcRowBytes));	///< Originally in CNTV2TestPattern.
 #endif
 
 #if !defined(NTV2_DEPRECATE_13_0)
@@ -5859,9 +5859,7 @@ public:
 		void													InitNTV2TestPattern (void);														///< Originally in CNTV2TestPattern.
 		AJA_VIRTUAL void										DownloadSegmentedTestPattern (SegmentTestPatternData * pTestPatternSegmentData);///< Originally in CNTV2TestPattern.
 		AJA_VIRTUAL void										AdjustFor2048x1080 (ULWord & numPixels, ULWord & linePitch);					///< Originally in CNTV2TestPattern.
-		AJA_VIRTUAL void										AdjustFor4096x2160 (ULWord & numPixels, ULWord & linePitch, ULWord & numLines);	///< Originally in CNTV2TestPattern.
-		AJA_VIRTUAL void										AdjustFor3840x2160 (ULWord & numPixels, ULWord & linePitch, ULWord & numLines);	///< Originally in CNTV2TestPattern.
-
+		
 		NTV2Channel				_channel;	//	Also in CNTV2ColorCorrection
 		TestPatternList			_testPatternList;
 		UWord					_signalMask;
