@@ -44,7 +44,7 @@ typedef struct
 
 
 
-const unsigned int	CIRCULAR_BUFFER_SIZE	(10);		///< @brief	Specifies how many AVDataBuffers constitute the circular buffer
+const uint32_t	CIRCULAR_BUFFER_SIZE (10);	///< @brief	Number of AVDataBuffers in our ring
 
 
 /**
