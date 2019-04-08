@@ -1,0 +1,78 @@
+/**
+	@page			ntv2devices
+
+	@section		ntv2hwcorvid
+
+	<hr>
+	@subsection		corvid4412g		Corvid 44 12G
+
+	This page describes the <b>Corvid 44 12G</b> OEM capture/playout board, which features four SDI connectors that can be programmatically
+	configured as inputs or outputs.
+	It’s identified by ::DEVICE_ID_CORVID44_12G.
+
+	@image	html	corvid4412g_oblique800.png
+
+	The <b>Corvid 44 12G</b> has an RS-422 serial port, 4 × bi-directional 12G-SDI connectors, a reference/LTC input BNC,
+	and a secondary LTC-only input connector on the board header.
+
+	<hr size="50px">
+	<b>Low-Profile Version:</b>
+	@image	html	corvid4412glp800.png
+
+
+	@par	PCI Interface
+
+	-	PCI device ID: <b>0xEB25</b>
+	-	Eight-lane gen 3 PCI Express
+	-	2 DMA engines
+
+	@par	Inputs & Outputs
+
+	-	4 × 12G-SDI bi-directional (under software control)
+	-	1 × reference/LTC input
+	-	1 × secondary LTC-only input (2-pin Molex connector on board header)
+	-	1 × RS-422 serial port (full-height board version has DB-9 connector)
+
+	@par	Frame Buffer
+
+	-	4GB SDRAM
+	-	512 × 8MB frames
+	-	256 × 16MB frames for 2K (1080×2048), 1920×1080 VANC, and 16-bit RGB
+
+	@par	Audio
+
+	-	4 audio systems
+	-	16 channels (max.) per audio system
+	-	First audio system’s 8MB buffer memory ends at the end of SDRAM
+
+	@par	Video Formats
+
+	-	Supports all SD, HD, 2K, 4K and UHD2 video formats (8K coming soon).
+	-	Multiple, independent video formats supported (playout requires same clock family).
+	-	SMPTE 425 2si mux supported
+
+	@par		Ancillary Data
+
+	-	Anc inserters and extractors
+	-	\ref vancframegeometries
+	-	See \ref anccapture and/or \ref ancplayout for more information
+
+	@par		Firmware
+
+	(TBD)
+
+	@par	Physical
+
+	-	Size with Standard PCIe Bracket (W × D × H):  0.875" × 7.25" × 4.875" (22.23mm × 184.15mm × 123.83mm)
+	-	Size with Low-Profile PCIe Bracket (W × D × H):  0.875" × 7.25" × 3.2" (22.23mm × 184.15mm × 81.28mm)
+	-	Weight: 0.47 lb (0.21 kg)
+	-	Power: 25w (typ), 32w (max)
+
+	@par	Environment
+
+	-	Safe Operating Temperature: 0°C to 40°C (32°F to 104°F)
+	-	Operating Relative Humidity: 10-90% non-condensing
+	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
+	-	Safe Storage Temperature (Power OFF): -40°C to +70°C (-40° to +158°F)
+
+**/
