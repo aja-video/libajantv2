@@ -5851,10 +5851,6 @@ public:
 //	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							DownloadRGBPicture (char * pSrc, ULWord srcWidthPixels, ULWord srcHeightPixels, ULWord srcRowBytes));	///< Originally in CNTV2TestPattern.
 #endif
 
-#if !defined(NTV2_DEPRECATE_13_0)
-	AJA_VIRTUAL NTV2_DEPRECATED_f(void							LocalLoadBarsTestPattern (UWord testPatternNumber, NTV2Standard standard));	///< @deprecated	This function is obsolete.
-#endif	//	!defined(NTV2_DEPRECATE_13_0)
-
 	protected:	//	CNTV2TestPattern Data
 		void													InitNTV2TestPattern (void);														///< Originally in CNTV2TestPattern.
 		AJA_VIRTUAL void										DownloadSegmentedTestPattern (SegmentTestPatternData * pTestPatternSegmentData);///< Originally in CNTV2TestPattern.

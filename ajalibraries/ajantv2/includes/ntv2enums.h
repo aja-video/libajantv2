@@ -67,6 +67,7 @@ typedef enum
     DEVICE_ID_CORVID24					= 0x10402100,	///< @brief	See \ref corvid24
     DEVICE_ID_CORVID3G					= 0x10294900,	///< @brief	See \ref corvid1corvid3g
     DEVICE_ID_CORVID44					= 0x10565400,	///< @brief	See \ref corvid44
+	DEVICE_ID_CORVID44_12G				= 0x10832400,	///< @brief	See \ref corvid4412g
     DEVICE_ID_CORVID88					= 0x10538200,	///< @brief	See \ref corvid88
     DEVICE_ID_CORVIDHBR					= 0x10668200,	///< @brief	See \ref corvidhbr
     DEVICE_ID_CORVIDHEVC				= 0x10634500,	///< @brief	See \ref corvidhevc
@@ -82,6 +83,8 @@ typedef enum
     DEVICE_ID_KONA3GQUAD				= 0x10322950,	///< @brief	See \ref kona3gquad
     DEVICE_ID_KONA4						= 0x10518400,	///< @brief	See \ref kona4quad
     DEVICE_ID_KONA4UFC					= 0x10518450,	///< @brief	See \ref kona4ufc
+    DEVICE_ID_KONA5						= 0x10798400,	///< @brief	See \ref kona5
+    DEVICE_ID_KONA5_4X12G				= 0x10798401,	///< @brief	See \ref kona5
     DEVICE_ID_KONAHDMI                  = 0x10767400,	///< @brief	See \ref konahdmi
     DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,	///< @brief	See \ref konaip
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief	See \ref konaip
@@ -94,9 +97,6 @@ typedef enum
     DEVICE_ID_KONALHI					= 0x10266400,	///< @brief	See \ref konalhi
     DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief	See \ref konalhi
     DEVICE_ID_TTAP						= 0x10416000,	///< @brief	See \ref ttap
-    DEVICE_ID_KONA5						= 0x10798400,	///< @brief	See \ref kona5
-    DEVICE_ID_KONA5_4X12G				= 0x10798401,	///< @brief	See \ref kona5
-	DEVICE_ID_CORVID44_12G				= 0x10832400,	///< @brief	See \ref corvid412g
 #if !defined (NTV2_DEPRECATE_12_6)
     DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
 #endif	//	NTV2_DEPRECATE_12_6
