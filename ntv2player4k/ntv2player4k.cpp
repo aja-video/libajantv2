@@ -10,12 +10,12 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2debug.h"
 #include "ntv2testpatterngen.h"
-#include "common/timecode.h"
-#include "system/memory.h"
-#include "system/thread.h"
-#include "system/process.h"
-#include "system/systemtime.h"
-#include "system/info.h"
+#include "ajabase/common/timecode.h"
+#include "ajabase/system/memory.h"
+#include "ajabase/system/thread.h"
+#include "ajabase/system/process.h"
+#include "ajabase/system/systemtime.h"
+#include "ajabase/system/info.h"
 
 using namespace std;
 
