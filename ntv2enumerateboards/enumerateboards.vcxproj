@@ -93,7 +93,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\ajalibraries\ajantv2\src\win;..\;..\..\..\..\ajalibraries;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\ajalibraries\ajantv2\src\win;..\;..\..\..\..\ajalibraries;..\..\..\..\ajalibraries\ajabase;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;MSWindows;AJA_WINDOWS;AJA_DEBUG;AJA_NO_AUTOIMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -111,7 +111,7 @@
       <FixedBaseAddress />
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Winmm.lib;netapi32.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command />
@@ -123,7 +123,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\ajalibraries\ajantv2\src\win;..\;..\..\..\..\ajalibraries;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\ajalibraries\ajantv2\src\win;..\;..\..\..\..\ajalibraries;..\..\..\..\ajalibraries\ajabase;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;MSWindows;AJA_WINDOWS;AJA_DEBUG;AJA_NO_AUTOIMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -140,7 +140,7 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalDependencies>Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Winmm.lib;netapi32.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command />
@@ -148,7 +148,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\ajalibraries\ajantv2\src\win;..\;..\..\..\..\ajalibraries;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\ajalibraries\ajantv2\src\win;..\;..\..\..\..\ajalibraries;..\..\..\..\ajalibraries\ajabase;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;MSWindows;AJA_WINDOWS;AJA_NO_AUTOIMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader />
@@ -163,7 +163,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Winmm.lib;netapi32.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command />
@@ -174,7 +174,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\ajalibraries\ajantv2\src\win;..\;..\..\..\..\ajalibraries;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\ajalibraries\ajantv2\includes;..\..\..\..\ajalibraries\ajantv2\src;..\..\..\..\ajalibraries\ajantv2\src\win;..\;..\..\..\..\ajalibraries;..\..\..\..\ajalibraries\ajabase;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;MSWindows;AJA_WINDOWS;AJA_NO_AUTOIMPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader />
@@ -189,7 +189,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalDependencies>Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Winmm.lib;netapi32.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command />
