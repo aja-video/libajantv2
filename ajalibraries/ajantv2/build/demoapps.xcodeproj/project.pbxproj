@@ -96,6 +96,7 @@
 		B4AEFE391EFDEA39002F08BD /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */; };
 		B4AEFE3A1EFDEA39002F08BD /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */; };
 		B4AEFE3B1EFDEA39002F08BD /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD7B167915A7001D4AA8 /* IOKit.framework */; };
+		B4B0CC6B225BAFF7006D526D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AE8038D208A60D700FCC91B /* Foundation.framework */; };
 		B4CADACB180F02E2004C9057 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CADABD180F00F6004C9057 /* main.cpp */; };
 		B4CADACE180F0321004C9057 /* ntv2burn4kquadrant.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CADACC180F0321004C9057 /* ntv2burn4kquadrant.cpp */; };
 		B4CADACF180F037B004C9057 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */; };
@@ -350,6 +351,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B4B0CC6B225BAFF7006D526D /* Foundation.framework in Frameworks */,
 				B45183DD1935348C00F3D8E9 /* CoreFoundation.framework in Frameworks */,
 				B45183DE1935348C00F3D8E9 /* IOKit.framework in Frameworks */,
 				B45183DF1935348C00F3D8E9 /* CoreServices.framework in Frameworks */,
@@ -1322,7 +1324,7 @@
 				SDKROOT = macosx;
 				STRIP_INSTALLED_PRODUCT = NO;
 				SYMROOT = ../../../bin;
-				USER_HEADER_SEARCH_PATHS = "../includes ../src/mac ../../../ajaapps/crossplatform/demoapps ../..";
+				USER_HEADER_SEARCH_PATHS = "../includes ../src/mac ../../../ajaapps/crossplatform/demoapps ../.. ../../ajabase";
 			};
 			name = Debug;
 		};
@@ -1381,7 +1383,7 @@
 				OTHER_LDFLAGS = "-lajantv2";
 				SDKROOT = macosx;
 				SYMROOT = ../../../bin;
-				USER_HEADER_SEARCH_PATHS = "../includes ../src/mac ../../../ajaapps/crossplatform/demoapps ../..";
+				USER_HEADER_SEARCH_PATHS = "../includes ../src/mac ../../../ajaapps/crossplatform/demoapps ../.. ../../ajabase";
 			};
 			name = Release;
 		};
