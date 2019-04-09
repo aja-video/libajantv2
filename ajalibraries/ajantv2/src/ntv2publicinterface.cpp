@@ -615,13 +615,15 @@ bool NTV2_POINTER::PutU64s (const vector<uint64_t> & inU64s, const size_t inU64O
 		return false;	//	No buffer or space
 
 	size_t		maxU64s	(GetByteCount() / sizeof(uint64_t));
-	uint64_t *	pU64	(reinterpret_cast <uint64_t *> (GetHostAddress(ULWord(inU64Offset * sizeof(uint64_t)))));
+	uint64_t *	pU64	(reinterpret_cast<uint64_t*>(GetHostAddress(ULWord(inU64Offset * sizeof(uint64_t)))));
 	if (!pU64)
 		return false;	//	Start offset is past end
 	if (maxU64s > inU64Offset)
 		maxU64s -= inU64Offset;	//	Don't go past end
 	if (maxU64s > inU64s.size())
 		maxU64s = inU64s.size();	//	Truncate incoming vector to not go past my end
+	if (inU64s.size() > maxU64s)
+		return false;	//	Will write past end
 
 	for (unsigned ndx(0);  ndx < maxU64s;  ndx++)
 #if defined(_DEBUG)
@@ -639,13 +641,15 @@ bool NTV2_POINTER::PutU32s (const vector<uint32_t> & inU32s, const size_t inU32O
 		return false;	//	No buffer or space
 
 	size_t		maxU32s	(GetByteCount() / sizeof(uint32_t));
-	uint32_t *	pU32	(reinterpret_cast <uint32_t *> (GetHostAddress(ULWord(inU32Offset * sizeof(uint32_t)))));
+	uint32_t *	pU32	(reinterpret_cast<uint32_t*>(GetHostAddress(ULWord(inU32Offset * sizeof(uint32_t)))));
 	if (!pU32)
 		return false;	//	Start offset is past end
 	if (maxU32s > inU32Offset)
 		maxU32s -= inU32Offset;	//	Don't go past end
 	if (maxU32s > inU32s.size())
 		maxU32s = inU32s.size();	//	Truncate incoming vector to not go past my end
+	if (inU32s.size() > maxU32s)
+		return false;	//	Will write past end
 
 	for (unsigned ndx(0);  ndx < maxU32s;  ndx++)
 #if defined(_DEBUG)
@@ -663,13 +667,15 @@ bool NTV2_POINTER::PutU16s (const vector<uint16_t> & inU16s, const size_t inU16O
 		return false;	//	No buffer or space
 
 	size_t		maxU16s	(GetByteCount() / sizeof(uint16_t));
-	uint16_t *	pU16	(reinterpret_cast <uint16_t *> (GetHostAddress(ULWord(inU16Offset * sizeof(uint16_t)))));
+	uint16_t *	pU16	(reinterpret_cast<uint16_t*>(GetHostAddress(ULWord(inU16Offset * sizeof(uint16_t)))));
 	if (!pU16)
 		return false;	//	Start offset is past end
 	if (maxU16s > inU16Offset)
 		maxU16s -= inU16Offset;	//	Don't go past end
 	if (maxU16s > inU16s.size())
 		maxU16s = inU16s.size();	//	Truncate incoming vector to not go past my end
+	if (inU16s.size() > maxU16s)
+		return false;	//	Will write past end
 
 	for (unsigned ndx(0);  ndx < maxU16s;  ndx++)
 #if defined(_DEBUG)
@@ -687,13 +693,15 @@ bool NTV2_POINTER::PutU8s (const vector<uint8_t> & inU8s, const size_t inU8Offse
 		return false;	//	No buffer or space
 
 	size_t		maxU8s	(GetByteCount());
-	uint8_t *	pU8		(reinterpret_cast <uint8_t *> (GetHostAddress(ULWord(inU8Offset))));
+	uint8_t *	pU8		(reinterpret_cast<uint8_t*>(GetHostAddress(ULWord(inU8Offset))));
 	if (!pU8)
 		return false;	//	Start offset is past end
 	if (maxU8s > inU8Offset)
 		maxU8s -= inU8Offset;	//	Don't go past end
 	if (maxU8s > inU8s.size())
 		maxU8s = inU8s.size();	//	Truncate incoming vector to not go past end
+	if (inU8s.size() > maxU8s)
+		return false;	//	Will write past end
 
 	for (unsigned ndx(0);  ndx < maxU8s;  ndx++)
 #if defined(_DEBUG)
