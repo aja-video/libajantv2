@@ -139,13 +139,6 @@ public:	//	CLASS METHODS
 	static uint32_t							GetExcludedZeroLengthPacketCount (void);	///< @return	The current number of zero-length packets that have been excluded
 	static void								ResetExcludedZeroLengthPacketCount (void);	///< @brief		Resets my tally of excluded zero-length packets to zero.
 	static bool								IsIncludingZeroLengthPackets (void);		///< @return	True if zero-length packets are included;  otherwise false.
-	static bool								GetDefaultTransmitOneRTPPacket (void);		///< @return	True if the default RTP transmit behavior is to produce one RTP packet
-																						//				that contains all Anc packets; otherwise false.
-	/**
-		@brief		Sets the default RTP transmit behavior, as to whether each field gets one RTP packet or multiple RTP packets.
-		@param[in]	inXmitOneRTPPkt		Specify true to change the default to transmit one RTP packet that contains all Anc packets.
-	**/
-	static void								SetDefaultTransmitOneRTPPacket (const bool inXmitOneRTPPkt);
 	///@}
 
 
@@ -389,13 +382,16 @@ public:	//	INSTANCE METHODS
 										otherwise, specify false. Defaults to true (is progressive).
 		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
 										Defaults to zero (progressive).
+		@param[in]	inSingleRTPPkt		If true, build a single RTP packet per field;
+										otherwise, build a separate RTP packet for each SMPTE Anc packet.
 		@note		This function has the following side-effects:
 					-	Sorts my packets by ascending location before encoding.
 					-	Calls AJAAncillaryData::GenerateTransmitData on each of my packets.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
-																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0);
+																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0,
+																const bool inSingleRTPPkt = true);
 
 	/**
 		@brief		Answers with the number of bytes required to store IP/RTP for my AJAAncillaryData packets in \ref ancrtpformat .
@@ -405,11 +401,14 @@ public:	//	INSTANCE METHODS
 										otherwise, specify false. Defaults to true (is progressive).
 		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
 										Defaults to zero (progressive).
+		@param[in]	inSingleRTPPkt		If true, build a single RTP packet per field;
+										otherwise, build a separate RTP packet for each SMPTE Anc packet.
 		@note		This function has the side-effect of calling AJAAncillaryData::GenerateTransmitData on each of my packets.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						GetIPTransmitDataLength (uint32_t & outF1ByteCount, uint32_t & outF2ByteCount,
-																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0);
+																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0,
+																const bool inSingleRTPPkt = true);
 	///@}
 
 
@@ -509,6 +508,8 @@ protected:
 		@param[in]	inIsProgressive	Specify false for interlace;  true for progressive/Psf.
 		@param[in]	inF2StartLine	For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
 									Defaults to zero (progressive).
+		@param[in]	inSingleRTPPkt	If true, build a single RTP packet per field;
+									otherwise, build a separate RTP packet for each SMPTE Anc packet.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						GetRTPPackets (AJAU32Pkts & outF1U32Pkts,
@@ -516,7 +517,8 @@ protected:
 															AJAAncPktCounts & outF1AncCounts,
 															AJAAncPktCounts & outF2AncCounts,
 															const bool inIsProgressive,
-															const uint32_t inF2StartLine);
+															const uint32_t inF2StartLine,
+															const bool inSingleRTPPkt);
 	/**
 		@brief		Fills the buffer with the given RTP packets.
 		@param		theBuffer		The buffer to be filled.
@@ -533,9 +535,7 @@ protected:
 															const bool inIsProgressive);
 
 private:
-	AJAAncillaryDataList	m_ancList;			///< @brief	My packet list
-	bool					m_xmitOneRTPPkt;	///< @brief	If true, transmit one RTP pkt containing all Anc pkts;
-												//			otherwise transmit one RTP pkt per Anc pkt
+	AJAAncillaryDataList	m_ancList;	///< @brief	My packet list
 
 };	//	AJAAncillaryList
 

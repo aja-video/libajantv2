@@ -5,6 +5,7 @@
 **/
 #define	DEBUG_BREAK_AFTER_FAILURE 1
 #include "ntv2bft.h"
+#include "ntv2endian.h"
 #include "ajabase/common/options_popt.h"
 #include "ajabase/common/performance.h"
 #include "ancillarydata_cea608_line21.h"
@@ -1790,6 +1791,135 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			return true;
 		}	//	BFT_RTPToAncListToRTP
 
+		static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianSwap32HtoB(inValue);}
+
+		static bool BFT_RTPXmitTooManyPackets (void)
+		{
+			//	"TOO MANY PACKETS" TEST
+			//	Validates that GetIPTransmitData will correctly encode no more than 255 packets from a list that contains more.
+			for (unsigned oneRTP(0);  oneRTP < 2;  oneRTP++)
+			{
+				const bool	isSingleRTPPacket	(oneRTP ? true : false);
+				LOGMYNOTE("Starting test: " << (isSingleRTPPacket ? "SINGLE RTP PACKET" : "MULTIPLE RTP PACKETS"));
+
+				//	Create a packet list having more than 255 packets...
+				AJAAncillaryList	pkts;
+				ULWord				pktNum(0);
+				AJAAncDataLoc		loc;
+				//	This test requires a 5K anc buffer for single-RTP, 9K for multiple-RTP:
+				NTV2_POINTER		F1Buffer((isSingleRTPPacket?5:9)*1024), F2Buffer;
+				for (UWord lineNum(9);  lineNum < 42;  lineNum++)
+				{
+					for (UWord pktInLine(0);  pktInLine < 8;  pktInLine++)
+					{
+						AJAAncillaryData	pkt;
+						loc.Reset().SetDataLink(AJAAncillaryDataLink_A)
+									.SetDataChannel(AJAAncillaryDataChannel_Y)
+									.SetDataSpace(AJAAncillaryDataSpace_VANC)
+									.SetDataStream(AJAAncillaryDataStream_1)
+									.SetLineNumber(lineNum)
+									.SetHorizontalOffset(AJAAncDataHorizOffset_Anywhere);
+						pkt.SetDataLocation(loc);
+						pkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
+						pkt.SetBufferFormat(AJAAncillaryBufferFormat_RTP);
+						pkt.SetDID(0xCC);
+						pkt.SetSID(0xDD);
+						const ULWord pktNumBE (ENDIAN_32HtoN(pktNum++));
+						pkt.SetPayloadData(reinterpret_cast<const UByte*>(&pktNumBE), sizeof(ULWord));
+						pkts.AddAncillaryData(pkt);
+
+						SHOULD_SUCCEED(pkts.GetIPTransmitData (F1Buffer, F2Buffer,
+																/*isProgressive=*/true, /*F2StartLine=*/0,
+																/*inSingleRTPPkt=*/isSingleRTPPacket));
+					}	//	7 pkts per line
+				}	//	for lineNum from 8 thru 41
+
+				//	At this point, pkts should contain 264 packets, but F1Buffer will only have 255 (max for RTP).
+				//	Convert F1Buffer into a comparison packet list...
+				AJAAncillaryList	cmpPkts;
+				SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers (F1Buffer, F2Buffer, cmpPkts));
+				SHOULD_BE_UNEQUAL(pkts.CountAncillaryData(), cmpPkts.CountAncillaryData());
+
+				//	Truncate the original pkts list until its count matches cmpPkts...
+				while (pkts.CountAncillaryData() > cmpPkts.CountAncillaryData())
+					pkts.DeleteAncillaryData(pkts.GetAncillaryDataAtIndex(pkts.CountAncillaryData()-1));
+
+				//	Now the two lists should match (ignoring checksums, since original list's packets all have zero checksums)...
+				string	cmpResults (pkts.CompareWithInfo(cmpPkts, /*ignoreLocation=*/false));
+				if (!cmpResults.empty())
+					LOGMYNOTE(cmpResults);
+				SHOULD_BE_TRUE(cmpResults.empty());
+				LOGMYNOTE("Passed test: " << (isSingleRTPPacket ? "SINGLE RTP PACKET" : "MULTIPLE RTP PACKETS"));
+			}	//	permute multiRTP & singleRTP
+			return true;
+		}	//	BFT_RTPXmitTooManyPackets
+
+		static bool BFT_RTPXmitTooMuchData (void)
+		{
+			//	"TOO MUCH DATA" TEST
+			//	Validates that GetIPTransmitData will correctly encode no more than 64K of packet data from a list that contains more.
+			LOGMYNOTE("Starting test: SINGLE RTP PACKET");
+
+			//	Create a packet list having more than 255 packets...
+			AJAAncillaryList	pkts;
+			ULWord				pktNum(0);
+			ULWord				totalPayloadBytes(0);
+			AJAAncDataLoc		loc;
+			for (UWord lineNum(9);  lineNum < 42;  lineNum++)
+			{
+				for (UWord pktInLine(0);  pktInLine < 8;  pktInLine++)
+				{
+					AJAAncillaryData	pkt;
+					loc.Reset().SetDataLink(AJAAncillaryDataLink_A)
+								.SetDataChannel(AJAAncillaryDataChannel_Y)
+								.SetDataSpace(AJAAncillaryDataSpace_VANC)
+								.SetDataStream(AJAAncillaryDataStream_1)
+								.SetLineNumber(lineNum)
+								.SetHorizontalOffset(AJAAncDataHorizOffset_Anywhere);
+					pkt.SetDataLocation(loc);
+					pkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
+					pkt.SetBufferFormat(AJAAncillaryBufferFormat_RTP);
+					pkt.SetDID(0xCC);
+					pkt.SetSID(0xDD);
+					totalPayloadBytes += 255;
+					ostringstream	oss, oss2;  oss << "Packet " << DEC(++pktNum) << ", totalBytes=" << DEC(totalPayloadBytes);
+					oss2 << setw(255) << left << oss.str();
+					NTV2_ASSERT(oss2.str().length() == 255);
+					pkt.SetPayloadData(reinterpret_cast<const UByte*>(oss2.str().c_str()), uint32_t(oss2.str().length()));
+					pkts.AddAncillaryData(pkt);
+				}	//	7 pkts per line
+			}	//	for lineNum from 8 thru 41
+
+			//	How big should our F1 anc buffer be?
+			uint32_t	F1TotalBytes(0), F2TotalBytes(0);
+			SHOULD_SUCCEED(pkts.GetIPTransmitDataLength (F1TotalBytes, F2TotalBytes));	//	Progressive, single RTP pkt
+			LOGMYNOTE(DEC(F1TotalBytes) << " F1 Total Bytes Required, totalPayloadBytes=" << DEC(totalPayloadBytes));
+
+			//	Allocate the F1 anc buffer:   (requires almost 100K!)
+			NTV2_POINTER	F1Buffer((F1TotalBytes / 1024 + 2) * 1024), F2Buffer;
+
+			//	Fill it with RTP xmit data:
+			SHOULD_SUCCEED(pkts.GetIPTransmitData (F1Buffer, F2Buffer));	//	Progressive, single RTP pkt
+
+			//	At this point, pkts should contain ~264 packets, but F1Buffer will only have ~199 (max for RTP).
+			//	Produce a comparison packet list from the F1Buffer contents...
+			AJAAncillaryList	cmpPkts;
+			SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers (F1Buffer, F2Buffer, cmpPkts));
+			SHOULD_BE_UNEQUAL(pkts.CountAncillaryData(), cmpPkts.CountAncillaryData());
+
+			//	Truncate the original pkts list until its count matches cmpPkts...
+			while (pkts.CountAncillaryData() > cmpPkts.CountAncillaryData())
+				pkts.DeleteAncillaryData(pkts.GetAncillaryDataAtIndex(pkts.CountAncillaryData()-1));
+
+			//	Now the two lists should match (ignoring checksums, since original list's packets all have zero checksums)...
+			string	cmpResults (pkts.CompareWithInfo(cmpPkts, /*ignoreLocation=*/false));
+			if (!cmpResults.empty())
+				LOGMYNOTE(cmpResults);
+			SHOULD_BE_TRUE(cmpResults.empty());
+			LOGMYNOTE("Passed test: SINGLE RTP PACKET");
+			return true;
+		}	//	BFT_RTPXmitTooMuchData
+
 		static bool BFT_FBYUV8ToAncListToFBYUV8 (void)
 		{
 			cerr << "BFT_FBYUV8ToAncListToFBYUV8 passed" << endl;
@@ -2154,6 +2284,10 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 					SHOULD_BE_TRUE(BFT_AncListToRTPToAncList());
 				if (true)
 					SHOULD_BE_TRUE(BFT_RTPToAncListToRTP());
+				if (true)
+					SHOULD_BE_TRUE(BFT_RTPXmitTooManyPackets());
+				if (true)
+					SHOULD_BE_TRUE(BFT_RTPXmitTooMuchData());
 				if (false)
 					SHOULD_BE_TRUE(BFT_AncListToFBYUV8ToAncList());
 				if (false)
