@@ -904,23 +904,23 @@ public:
 	AJA_VIRTUAL bool		GetProgressivePicture (ULWord & outValue);
 
 	/**
-		@brief	Enables or disables quad-frame mode on the device.
+		@brief		Enables or disables quad-frame mode on the device.
 		@return		True if successful; otherwise false.
 		@param[in]	inValue		Specify 'true' to put the device into quad frame mode.
 								Specify 'false' to put the device into normal (non-quad) frame mode.
 		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1. Ignored if the device
-								is incapable of multi-format mode, or is not currently in multi-format mode.
-		@note		Most clients need not call this function, as calling CNTV2Card::SetVideoFormat to one of
-					the 4K/UHD formats will automatically call this function.
+								is incapable of 4K.
+		@note		Most clients won't need to call this function, as calling CNTV2Card::SetVideoFormat to one of
+					the 4K/UHD formats will automatically do so.
 	**/
 	AJA_VIRTUAL bool		SetQuadFrameEnable (const bool inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
 		@brief		Returns the device's current quad-frame mode, whether it's enabled or not.
 		@return		True if successful; otherwise false.
-		@param[in]	outValue	Receives 'true' if the device is currently in quad frame mode; otherwise receives 'false'.
+		@param[out]	outValue	Receives 'true' if the device is currently in quad frame mode; otherwise 'false'.
 		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1. Ignored if the device
-								is incapable of multi-format mode, or is not currently in multi-format mode.
+								is incapable of 4K.
 	**/
 	AJA_VIRTUAL bool		GetQuadFrameEnable (bool & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 	
@@ -930,18 +930,18 @@ public:
 		@param[in]	inValue		Specify 'true' to put the device into "quad quad" frame mode.
 								Specify 'false' to put the device into normal (non-quad-quad) frame mode.
 		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1. Ignored if the device
-								is incapable of multi-format mode, or is not currently in multi-format mode.
+								is incapable of 8K/UHD2.
 		@note		Most clients won't need to call this function, as CNTV2Card::SetVideoFormat using one of
-					the 8K/UHD2 formats will automatically call this function.
+					the 8K/UHD2 formats will automatically do so.
 	**/
 	AJA_VIRTUAL bool		SetQuadQuadFrameEnable (const bool inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
 		@brief		Returns the device's current "quad-quad" frame mode, whether it's enabled or not.
 		@return		True if successful; otherwise false.
-		@param[in]	outValue	Receives 'true' if the device is currently in quad quad frame mode; otherwise receives 'false'.
+		@param[out]	outValue	Receives 'true' if the device is currently in quad quad frame mode; otherwise 'false'.
 		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1. Ignored if the device
-								is incapable of multi-format mode, or is not currently in multi-format mode.
+								is incapable of 8K/UHD2.
 	**/
 	AJA_VIRTUAL bool		GetQuadQuadFrameEnable (bool & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
@@ -958,30 +958,31 @@ public:
 	/**
 		@brief		Returns the device's current "quad-quad-squares" frame mode, whether it's enabled or not.
 		@return		True if successful; otherwise false.
-		@param[in]	outValue	Receives 'true' if the device is currently in "quad quad squares" frame mode;
-								otherwise receives 'false'.
+		@param[out]	outValue	Receives 'true' if the device is currently in "quad quad squares" frame mode;
+								otherwise 'false'.
 		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1. Ignored if the device
 								is incapable of multi-format mode, or is not currently in multi-format mode.
 	**/
 	AJA_VIRTUAL bool		GetQuadQuadSquaresEnable (bool & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
-		@brief	Enables or disables SMPTE 425 "2K quadrants" mode for the given frame store on the device.
-				Client applications should call this function only when Tsi is needed.
+		@brief		Enables or disables SMPTE 425 "2K quadrants" mode for the given frame store bank on the device.
+					Client applications should call this function when "4K Squares" mode (not two-sample-interleave) is needed.
 		@return		True if successful; otherwise false.
 		@param[in]	inIsEnabled		Specify true to put the device's frame stores into "4K squares" (i.e., "2K quadrants") mode.
 									Specify false to put the device's frame stores into normal mode (if not currently running in quad frame mode), or the non-2K quadrants quad mode.
 		@param[in]	inChannel		Specifies the frame store bank of interest. Using anything ordinally less than ::NTV2_CHANNEL5
 									will affect Frame Stores 1/2/3/4, while anything ordinally greater than ::NTV2_CHANNEL4 will
 									affect Frame Stores 5/6/7/8.
-		@note	Disabling 4K squares will implicitly set two-sample-interleave mode for the frame stores.
+		@note		Disabling 4K squares will implicitly set two-sample-interleave mode for the frame stores.
 	**/
 	AJA_VIRTUAL bool		Set4kSquaresEnable (const bool inIsEnabled, const NTV2Channel inChannel);
 
 	/**
-		@brief	Returns the device frame store's current SMPTE 425 "2K quadrants" mode, whether it's enabled or not.
+		@brief		Answers whether the frame store bank's current SMPTE 425 "4K squares" (i.e., "2K quadrants") mode is enabled or not.
 		@return		True if successful; otherwise false.
-		@param[in]	outIsEnabled	Receives true if the device's frame stores are currently in "2K quadrants" mode; otherwise false.
+		@param[out]	outIsEnabled	Receives true if the device's frame stores are currently in "4K squares"
+									(i.e., "2K quadrants") mode;  otherwise false.
 		@param[in]	inChannel		Specifies the frame store bank of interest. Using anything ordinally less than ::NTV2_CHANNEL5
 									will report on Frame Stores 1/2/3/4, while anything ordinally greater than ::NTV2_CHANNEL4 will
 									report on Frame Stores 5/6/7/8.
@@ -989,21 +990,21 @@ public:
 	AJA_VIRTUAL bool		Get4kSquaresEnable (bool & outIsEnabled, const NTV2Channel inChannel);
 
 	/**
-		@brief	Enables or disables SMPTE 425 two-sample interleave (Tsi) frame mode on the device.
+		@brief		Enables or disables SMPTE 425 two-sample interleave (Tsi) frame mode on the device.
 		@return		True if successful; otherwise false.
 		@param[in]	inIsEnabled		Specify true to put the device's frame stores into two-sample interleave (Tsi) mode.
 									Specify false to put the device's frame stores into non-Tsi mode.
 		@param[in]	inChannel		Specifies the frame store bank of interest. Using anything ordinally less than ::NTV2_CHANNEL5
 									will affect Frame Stores 1/2/3/4, while anything ordinally greater than ::NTV2_CHANNEL4 will
 									affect Frame Stores 5/6/7/8.
-		@note	There is no need to call this function if Set4kSquaresEnable(false) was called.
+		@note		Since Tsi is the default 4K mode, there's no need to call this function if Set4kSquaresEnable(false) was called.
 	**/
 	AJA_VIRTUAL bool		SetTsiFrameEnable (const bool inIsEnabled, const NTV2Channel inChannel);
 
 	/**
-		@brief	Returns the current SMPTE 425 two-sample-interleave frame mode on the device, whether it's enabled or not.
+		@brief		Returns the current SMPTE 425 two-sample-interleave frame mode on the device, whether it's enabled or not.
 		@return		True if successful; otherwise false.
-		@param[in]	outIsEnabled	Receives true if the device's frame stores are currently in two-sample interleave (Tsi) mode; otherwise false.
+		@param[out]	outIsEnabled	Receives true if the device's frame stores are currently in two-sample interleave (Tsi) mode; otherwise false.
 		@param[in]	inChannel		Specifies the frame store bank of interest. Using anything ordinally less than ::NTV2_CHANNEL5
 									will report on Frame Stores 1/2/3/4, while anything ordinally greater than ::NTV2_CHANNEL4 will
 									report on Frame Stores 5/6/7/8.
