@@ -138,7 +138,7 @@ typedef enum
     NTV2_STANDARD_525,			///< @brief	Identifies SMPTE SD 525i
     NTV2_STANDARD_625,			///< @brief	Identifies SMPTE SD 625i
     NTV2_STANDARD_1080p,		///< @brief	Identifies SMPTE HD 1080p
-    NTV2_STANDARD_2K,			///< @brief	Identifies SMPTE HD 2048x1556psf (1.35 full-aperture film)
+    NTV2_STANDARD_2K,			///< @brief	Identifies SMPTE HD 2048x1556psf (1.35 full-aperture film, obsolete in SDK 15.0 and later)
     NTV2_STANDARD_2Kx1080p,		///< @brief	Identifies SMPTE HD 2K1080p
     NTV2_STANDARD_2Kx1080i,		///< @brief	Identifies SMPTE HD 2K1080psf
     NTV2_STANDARD_3840x2160p,	///< @brief	Identifies Ultra-High-Definition (UHD)
