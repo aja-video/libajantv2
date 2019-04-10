@@ -170,6 +170,35 @@ UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBuffer
 		case NTV2_FG_2048x1114:
 			factor = (inFBF == NTV2_FBF_16BIT_ARGB)  ?  4  :  2;
 			break;
+
+		case NTV2_FG_4x3840x2160:
+			switch (inFBF)
+			{
+				case NTV2_FBF_48BIT_RGB:	return 24;
+				case NTV2_FBF_10BIT_ARGB:	return 22;
+				case NTV2_FBF_16BIT_ARGB:	factor = 2;	break;
+				default:					break;
+			}
+			break;
+
+		case NTV2_FG_4x4096x2160:
+			switch (inFBF)
+			{
+				case NTV2_FBF_ARGB:
+				case NTV2_FBF_RGBA:
+				case NTV2_FBF_ABGR:
+				case NTV2_FBF_10BIT_RGB:
+				case NTV2_FBF_10BIT_DPX:
+				case NTV2_FBF_10BIT_YCBCRA:
+				case NTV2_FBF_10BIT_DPX_LE:
+				case NTV2_FBF_10BIT_RGB_PACKED:	return 17;
+				case NTV2_FBF_48BIT_RGB:		return 26;
+				case NTV2_FBF_10BIT_ARGB:		return 23;
+				case NTV2_FBF_16BIT_ARGB:		return 34;
+				default:						break;
+			}
+			break;
+
 #if defined(_DEBUG)
 		case NTV2_FG_1280x720:
 		case NTV2_FG_720x486:
@@ -179,8 +208,6 @@ UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBuffer
 		case NTV2_FG_1280x740:
 		case NTV2_FG_720x514:
 		case NTV2_FG_720x612:
-		case NTV2_FG_4x3840x2160:
-		case NTV2_FG_4x4096x2160:
 		case NTV2_FG_INVALID:
 			break;
 #else
