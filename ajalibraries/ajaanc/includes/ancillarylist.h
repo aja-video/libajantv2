@@ -382,7 +382,7 @@ public:	//	INSTANCE METHODS
 										otherwise, specify false. Defaults to true (is progressive).
 		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
 										Defaults to zero (progressive).
-		@param[in]	inSingleRTPPkt		If true, build a single RTP packet per field;
+		@param[in]	inSingleRTPPkt		If true (the default), build a single RTP packet per field;
 										otherwise, build a separate RTP packet for each SMPTE Anc packet.
 		@note		This function has the following side-effects:
 					-	Sorts my packets by ascending location before encoding.
