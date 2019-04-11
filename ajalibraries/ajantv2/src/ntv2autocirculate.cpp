@@ -1514,7 +1514,8 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 	if (changed)		//	if anything added (or forced conversion from GUMP)
 	{	//	Re-encode packets into the XferStruct buffers as RTP...
 		//XMTDBG("CHGD: " << packetList);	//	DEBUG:  Changed packet list (to be converted to RTP)
-		result = AJA_SUCCESS(packetList.GetIPTransmitData (ancF1, ancF2, isProgressive, F2StartLine));
+		const bool singleRTPPkt = inOutXferInfo.acTransferStatus.acState == NTV2_AUTOCIRCULATE_INVALID ? false : true;
+		result = AJA_SUCCESS(packetList.GetIPTransmitData (ancF1, ancF2, isProgressive, F2StartLine, singleRTPPkt));
 #if 0	//	DEBUG
 		DMAWriteAnc(31, ancF1, ancF2, NTV2_CHANNEL_INVALID);	//	DEBUG: DMA RTP into frame 31
 		if (result)
