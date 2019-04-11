@@ -12,6 +12,7 @@
 #include "ajatypes.h"
 #include "ajabase/common/options_popt.h"
 #include "ajabase/system/systemtime.h"
+#include "ajabase/common/common.h"
 #include "ntv2ccplayer.h"
 #include <signal.h>
 #include <iostream>
@@ -112,6 +113,7 @@ int main (int argc, const char ** argv)
 	int					noTimecode		(0);				//	Disable timecode?
 	int					doMultiChannel	(0);				//	Enable multi-format?
 	uint32_t			channelNumber	(1);				//	Number of the channel to use
+	uint16_t			forceRTP		(0);				//	Force RTP?
 	int					bEmitStats		(0);				//	Emit stats while running?
 	int					bBreakNewLines	(0);				//	Newlines break rows instead of treated as whitespace?
 	int					bForceVanc		(0);				//	Force use of Vanc?
@@ -158,7 +160,15 @@ int main (int argc, const char ** argv)
 	const char * pStr	(::poptGetArg(optionsContext));
 	while (pStr)
 	{
-		pathList.push_back(string(pStr));
+		string	arg(pStr);
+		if (arg.find("rtp=") == 0)
+		{	//	Hack to work around popt bug:
+			aja::replace(arg, "rtp=", "");
+			if (arg.empty()) arg = "1";
+			forceRTP = uint16_t(aja::stoul(arg));
+		}
+		else	//	Assume file path:
+			pathList.push_back(string(pStr));	//	Append to file list
 		pStr = ::poptGetArg(optionsContext);
 	}	//	for each file path argument
 	optionsContext = ::poptFreeContext (optionsContext);
@@ -222,6 +232,7 @@ int main (int argc, const char ** argv)
 	playerConfig.fVideoFormat		= videoFormat;
 	playerConfig.fPixelFormat		= pixelFormat;
 	playerConfig.fOutputChannel		= channel;
+	playerConfig.fForceRTP			= forceRTP;
 	playerConfig.fEmitStats			= bEmitStats		? true : false;
 	playerConfig.fDoMultiFormat		= doMultiChannel	? true : false;
 	playerConfig.fForceVanc			= bForceVanc		? true : false;
@@ -232,7 +243,7 @@ int main (int argc, const char ** argv)
 	playerConfig.fSuppressTimecode	= noTimecode		? true : false;
 
 	cerr	<< "CCPlayer config:  '" << ::NTV2VideoFormatToString(videoFormat) << "', " << ::NTV2FrameBufferFormatToString(pixelFormat)
-			<< ", NTV2_CHANNEL" << (channel+1) << (bEmitStats?", Stats":"") << (doMultiChannel?", multiChan":"")
+			<< ", NTV2_CHANNEL" << (channel+1) << (forceRTP?", ForceRTP":"") << (bEmitStats?", Stats":"") << (doMultiChannel?", multiChan":"")
 			<< (bForceVanc?", VANC":"") << (bSuppressLine21?", NoLine21":"") << (bSuppress608?", No608":"")
 			<< (bSuppress708?", No708":"") << (noAudio?", NoAudio":"") << (noTimecode?", NoTC":"") << endl;
 

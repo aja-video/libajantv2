@@ -84,6 +84,7 @@ typedef struct CCPlayerConfig
 		bool					fSuppress708;			///< @brief	If true, don't transmit CEA708 packets;  otherwise include 708 packets
 		bool					fSuppressAudio;			///< @brief	If true, suppress audio;  otherwise generate audio tones
 		bool					fSuppressTimecode;		///< @brief	If true, suppress timecode;  otherwise embed VITC/LTC
+		uint16_t				fForceRTP;				///< @brief	BIT(0):0=normal,1=forceRTP  BIT(1):0=uniPkt,1=multiPkt  BIT(2):0=normal,1=patchDeviceID
 		NTV2VideoFormat			fVideoFormat;			///< @brief	The video format to use
 		NTV2FrameBufferFormat	fPixelFormat;			///< @brief	The pixel format to use
 		CaptionChanGenMap		fChannelGenerators;		///< @brief	Caption channel generators
@@ -102,6 +103,7 @@ typedef struct CCPlayerConfig
 				fSuppress708		(false),
 				fSuppressAudio		(false),
 				fSuppressTimecode	(false),
+				fForceRTP			(0),
 				fVideoFormat		(NTV2_FORMAT_525_5994),
 				fPixelFormat		(NTV2_FBF_10BIT_YCBCR)
 		{

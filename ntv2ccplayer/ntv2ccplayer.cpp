@@ -933,9 +933,24 @@ AJAStatus NTV2CCPlayer::Init (void)
 
 	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);		//	Use the OEM service level
 
-
 	//	Store the device ID in a member because it will be used frequently...
 	mDeviceID = mDevice.GetDeviceID();
+
+#if defined(_DEBUG)
+	if (mConfig.fForceRTP & BIT(2))
+	{	//	Hack -- force device to pretend it's a KonaIP2110
+		NTV2_POINTER	pDevice (&mDevice, sizeof(CNTV2Card));
+		ULWordSequence	U32s (pDevice.GetU32s(0, pDevice.GetByteCount()/sizeof(uint32_t)));
+		for (unsigned ndx(0);  ndx < U32s.size();  ndx++)
+			if (U32s.at(ndx) == ULWord(mDeviceID))
+			{	//	by patching its _boardID member...
+				mDeviceID = DEVICE_ID_KONAIP_2110;
+				U32s[ndx] = ULWord(mDeviceID);
+				pDevice.PutU32s(U32s);
+				break;
+			}
+	}
+#endif	//	defined(_DEBUG)
 
 	if (::NTV2DeviceCanDoMultiFormat(mDeviceID)  &&  mConfig.fDoMultiFormat)
 		mDevice.SetMultiFormatMode(true);
@@ -1561,8 +1576,13 @@ void NTV2CCPlayer::PlayoutFrames (void)
 		CCPLDBG("Xmit pkts: " << packetList);	//	DEBUG: Packet list to be transmitted
 		if (mConfig.fForceVanc)	//	Write FB VANC lines...
 			packetList.GetVANCTransmitData (mVideoBuffer,  formatDesc);
-		else					//	Else use the Anc inserter firmware:
+		else if (mConfig.fForceRTP)	//	Force RTP? Non-IP2110 devices won't understand what's in the Anc buffer...
+			packetList.GetIPTransmitData(xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, isProgressive, F2StartLine, (mConfig.fForceRTP & BIT(1)) == 0);
+		else	//	Else use the Anc inserter firmware:
 			packetList.GetTransmitData (xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, isProgressive, F2StartLine);
+
+		if (mConfig.fForceRTP  &&  mConfig.fForceRTP & BIT(1)  &&  ::NTV2DeviceCanDo2110(mDeviceID))
+			xferInfo.acTransferStatus.acState = NTV2_AUTOCIRCULATE_INVALID;	//	Signal MultiPkt RTP to AutoCirculateTransfer/S2110DeviceAncToXferBuffers
 
 		if (!mConfig.fSuppressTimecode)
 		{
