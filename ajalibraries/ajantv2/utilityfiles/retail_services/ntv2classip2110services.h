@@ -1,24 +1,24 @@
 //
-//  ntv2konaip2110services.h
+//  ntv2classip2110services.h
 //
 //  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
-#ifndef _KonaIP2110Services_
-#define _KonaIP2110Services_
+#ifndef _ClassIP2110Services_
+#define _ClassIP2110Services_
 
 
 #include "ntv2deviceservices.h"
 
 //-------------------------------------------------------------------------------------------------------
-//	class KonaIP2110Services
+//	class ClassIP2110Services
 //-------------------------------------------------------------------------------------------------------
-class KonaIP2110Services : public DeviceServices
+class ClassIP2110Services : public DeviceServices
 {
 	
 public:
-	KonaIP2110Services(NTV2DeviceID devID);
-    ~KonaIP2110Services();
+	ClassIP2110Services(NTV2DeviceID devID);
+    ~ClassIP2110Services();
 
     virtual void Init();
 	virtual void SetDeviceXPointPlayback();

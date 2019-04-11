@@ -24,11 +24,9 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2corvid24services.h"
 #include "ntv2kona4ufcservices.h"
-#include "ntv2konaip22services.h"
-#include "ntv2konaip2110services.h"
+#include "ntv2classip2110services.h"
+#include "ntv2classip2022services.h"
 #include "ntv2konaipj2kservices.h"
-#include "ntv2ioip2022services.h"
-#include "ntv2ioip2110services.h"
 #include "ntv2konahdmiservices.h"
 #include "ntv2vpidfromspec.h"
 #include "ntv2kona1services.h"
@@ -67,11 +65,11 @@ DeviceServices* DeviceServices::CreateDeviceServices(NTV2DeviceID deviceID)
 	{
         case DEVICE_ID_KONAIP_2022:
         case DEVICE_ID_IOIP_2022:
-            pDeviceServices = new IoIP2022Services(deviceID);
+            pDeviceServices = new ClassIP2022Services(deviceID);
             break;
         case DEVICE_ID_IOIP_2110:
         case DEVICE_ID_KONAIP_2110:
-            pDeviceServices = new KonaIP2110Services(deviceID);
+            pDeviceServices = new ClassIP2110Services(deviceID);
         	break;
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:

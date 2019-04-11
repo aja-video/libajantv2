@@ -1,24 +1,24 @@
 //
-//  ntv2ioip2022services.h
+//  ntv2classip2022services.h
 //
 //  Copyright (c) 2018 AJA Video, Inc. All rights reserved.
 //
 
-#ifndef _IoIP2022Services_
-#define _IoIP2022Services_
+#ifndef _ClassIP2022Services_
+#define _ClassIP2022Services_
 
 
 #include "ntv2deviceservices.h"
 
 //-------------------------------------------------------------------------------------------------------
-//	class IoIP2022Services
+//	class ClassIP2022Services
 //-------------------------------------------------------------------------------------------------------
-class IoIP2022Services : public DeviceServices
+class ClassIP2022Services : public DeviceServices
 {
 	
 public:
-	IoIP2022Services(NTV2DeviceID deviceID);
-	~IoIP2022Services();
+	ClassIP2022Services(NTV2DeviceID deviceID);
+	~ClassIP2022Services();
 	
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();
