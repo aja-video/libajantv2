@@ -7,23 +7,23 @@
 #ifndef _ClassIP2110Services_
 #define _ClassIP2110Services_
 
-
-#include "ntv2deviceservices.h"
+#include "ntv2class4kservices.h"
 
 //-------------------------------------------------------------------------------------------------------
 //	class ClassIP2110Services
 //-------------------------------------------------------------------------------------------------------
-class ClassIP2110Services : public DeviceServices
+class ClassIP2110Services : public Class4kServices
 {
 	
 public:
 	ClassIP2110Services(NTV2DeviceID devID);
     ~ClassIP2110Services();
 
-    virtual void Init();
 	virtual void SetDeviceXPointPlayback();
 	virtual void SetDeviceXPointCapture();
 	virtual void SetDeviceMiscRegisters();
+	
+	virtual void Init();
 	virtual bool ReadDriverState();
 	
 	void EveryFrameTask2110(CNTV2Config2110* config2110,
@@ -38,7 +38,6 @@ public:
 							ReceiveAncData2110* s2110RxAncDataLast);
 	NTV2VideoFormat ConvertVideoToStreamFormat(NTV2VideoFormat videoFormat);
 	NTV2VideoFormat ConvertStreamToVideoFormat(NTV2VideoFormat videoFormat);
-	void Print2110Network(const NetworkData2110 m2110Network);
 
 protected:
     CNTV2Config2110 *       config2110;
@@ -62,11 +61,6 @@ protected:
 
 	NTV2Mode				mFb1ModeLast;
     NTV2VideoFormat         mFb1VideoFormatLast;
-    bool 					mHasSdiOut5;					
-    bool 					mHasCSC5;					
-    bool 					mHasLUT5;					
-    bool 					mHas4kQuarter;
-
 	uint32_t				startAudioCounter;
 	uint32_t				endAudioCounter;
 };
