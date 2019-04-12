@@ -459,7 +459,6 @@ void ClassIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 					{
 						// Use SFP 2 params
 						sfp = SFP_2;
-						rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
 						rxConfig.sourceIP = m2110RxVideoData.rxVideoCh[i].sourceIP[1];
 						rxConfig.destIP = m2110RxVideoData.rxVideoCh[i].destIP[1];
 						rxConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[1];
@@ -470,12 +469,25 @@ void ClassIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 					{
 						// Use SFP 1 params
 						sfp = SFP_1;
-						rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
 						rxConfig.sourceIP = m2110RxVideoData.rxVideoCh[i].sourceIP[0];
 						rxConfig.destIP = m2110RxVideoData.rxVideoCh[i].destIP[0];
 						rxConfig.sourcePort = m2110RxVideoData.rxVideoCh[i].sourcePort[0];
 						rxConfig.destPort = m2110RxVideoData.rxVideoCh[i].destPort[0];
 					}
+					if (rxConfig.sourceIP != "0.0.0.0")
+						rxConfig.rxMatch |= RX_MATCH_2110_SOURCE_IP;
+					if (rxConfig.destIP != "0.0.0.0")
+						rxConfig.rxMatch |= RX_MATCH_2110_DEST_IP;
+					if (rxConfig.sourcePort != 0)
+						rxConfig.rxMatch |= RX_MATCH_2110_SOURCE_PORT;
+					if (rxConfig.destPort != 0)
+						rxConfig.rxMatch |= RX_MATCH_2110_DEST_PORT;
+					//if (rxConfig.vlan)
+					//	rxConfig.rxMatch |= RX_MATCH_2110_VLAN;
+					//if (rxConfig.payloadType)
+					//	rxConfig.rxMatch |= RX_MATCH_2110_PAYLOAD;
+					//if (rxConfig.ssrc)
+					//	rxConfig.rxMatch |= RX_MATCH_2110_SSRC;
 					rxConfig.payloadType = m2110RxVideoData.rxVideoCh[i].payloadType;
 
 					// Video specific
@@ -539,7 +551,6 @@ void ClassIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 					{
 						// Use SFP 2 params
 						sfp = SFP_2;
-						rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
 						rxConfig.sourceIP = m2110RxAudioData.rxAudioCh[i].sourceIP[1];
 						rxConfig.destIP = m2110RxAudioData.rxAudioCh[i].destIP[1];
 						rxConfig.sourcePort = m2110RxAudioData.rxAudioCh[i].sourcePort[1];
@@ -550,12 +561,25 @@ void ClassIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 					{
 						// Use SFP 1 params
 						sfp = SFP_1;
-						rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
 						rxConfig.sourceIP = m2110RxAudioData.rxAudioCh[i].sourceIP[0];
 						rxConfig.destIP = m2110RxAudioData.rxAudioCh[i].destIP[0];
 						rxConfig.sourcePort = m2110RxAudioData.rxAudioCh[i].sourcePort[0];
 						rxConfig.destPort = m2110RxAudioData.rxAudioCh[i].destPort[0];
 					}
+					if (rxConfig.sourceIP != "0.0.0.0")
+						rxConfig.rxMatch |= RX_MATCH_2110_SOURCE_IP;
+					if (rxConfig.destIP != "0.0.0.0")
+						rxConfig.rxMatch |= RX_MATCH_2110_DEST_IP;
+					if (rxConfig.sourcePort != 0)
+						rxConfig.rxMatch |= RX_MATCH_2110_SOURCE_PORT;
+					if (rxConfig.destPort != 0)
+						rxConfig.rxMatch |= RX_MATCH_2110_DEST_PORT;
+					//if (rxConfig.vlan)
+					//	rxConfig.rxMatch |= RX_MATCH_2110_VLAN;
+					//if (rxConfig.payloadType)
+					//	rxConfig.rxMatch |= RX_MATCH_2110_PAYLOAD;
+					//if (rxConfig.ssrc)
+					//	rxConfig.rxMatch |= RX_MATCH_2110_SSRC;
 					rxConfig.payloadType = m2110RxAudioData.rxAudioCh[i].payloadType;
 
 					// Audio specific
@@ -600,7 +624,6 @@ void ClassIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 					{
 						// Use SFP 2 params
 						sfp = SFP_2;
-						rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
 						rxConfig.sourceIP = m2110RxAncData.rxAncCh[i].sourceIP[1];
 						rxConfig.destIP = m2110RxAncData.rxAncCh[i].destIP[1];
 						rxConfig.sourcePort = m2110RxAncData.rxAncCh[i].sourcePort[1];
@@ -611,12 +634,25 @@ void ClassIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 					{
 						// Use SFP 1 params
 						sfp = SFP_1;
-						rxConfig.rxMatch = 0x14;    // PSM hard code temporarily until we get params sent down properly
 						rxConfig.sourceIP = m2110RxAncData.rxAncCh[i].sourceIP[0];
 						rxConfig.destIP = m2110RxAncData.rxAncCh[i].destIP[0];
 						rxConfig.sourcePort = m2110RxAncData.rxAncCh[i].sourcePort[0];
 						rxConfig.destPort = m2110RxAncData.rxAncCh[i].destPort[0];
 					}
+					if (rxConfig.sourceIP != "0.0.0.0")
+						rxConfig.rxMatch |= RX_MATCH_2110_SOURCE_IP;
+					if (rxConfig.destIP != "0.0.0.0")
+						rxConfig.rxMatch |= RX_MATCH_2110_DEST_IP;
+					if (rxConfig.sourcePort != 0)
+						rxConfig.rxMatch |= RX_MATCH_2110_SOURCE_PORT;
+					if (rxConfig.destPort != 0)
+						rxConfig.rxMatch |= RX_MATCH_2110_DEST_PORT;
+					//if (rxConfig.vlan)
+					//	rxConfig.rxMatch |= RX_MATCH_2110_VLAN;
+					//if (rxConfig.payloadType)
+					//	rxConfig.rxMatch |= RX_MATCH_2110_PAYLOAD;
+					//if (rxConfig.ssrc)
+					//	rxConfig.rxMatch |= RX_MATCH_2110_SSRC;
 					rxConfig.payloadType = m2110RxAncData.rxAncCh[i].payloadType;
 
 					// Start by turning off the anc receiver
