@@ -115,6 +115,9 @@ NTV2_WgtGenLock
 
 // NTV2InputSources
 NTV2_INPUTSOURCE_SDI1
+NTV2_INPUTSOURCE_SDI2
+NTV2_INPUTSOURCE_SDI3
+NTV2_INPUTSOURCE_SDI4
 
 
 // GetNums		(see 'getnum_canon.gen' for legal values)
