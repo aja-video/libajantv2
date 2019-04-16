@@ -45,7 +45,7 @@ string AJASystemInfo::ToString (const AJALabelValuePairs & inLabelValuePairs, co
 		static const string	lineBreakChars("\r\n");
         string label(it->first), value(it->second);
         const bool	hasLineBreaks (value.find_first_of(lineBreakChars) != string::npos);
-		if (value.empty())	//	Empty value string is a special case...
+		if (value.empty()  &&  it != inLabelValuePairs.begin())	//	Empty value string is a special case...
 			oss << endl;	//	...don't append ':' and prepend an extra blank line
 		else
 			label += ":";
