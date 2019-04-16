@@ -17,7 +17,7 @@ class ClassIP2110Services : public Class4kServices
 	
 public:
 	ClassIP2110Services(NTV2DeviceID devID);
-    ~ClassIP2110Services();
+	virtual ~ClassIP2110Services();
 
 	virtual void SetDeviceXPointPlayback();
 	virtual void SetDeviceXPointCapture();

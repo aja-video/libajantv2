@@ -18,7 +18,7 @@ class Io4KUfcServices : public DeviceServices
 	
 public:
 	Io4KUfcServices();
-	~Io4KUfcServices() {}
+	virtual ~Io4KUfcServices() {}
 	
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();

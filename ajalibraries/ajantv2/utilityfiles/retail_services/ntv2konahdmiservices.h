@@ -18,7 +18,7 @@ class KonaHDMIServices : public DeviceServices
 	
 public:
 	KonaHDMIServices();
-	~KonaHDMIServices() {}
+	virtual ~KonaHDMIServices() {}
 	
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();

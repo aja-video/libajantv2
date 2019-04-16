@@ -18,7 +18,7 @@ class Kona3GServices : public DeviceServices
 	
 public:
 	Kona3GServices();
-	~Kona3GServices() {}
+	virtual ~Kona3GServices() {}
 	
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();

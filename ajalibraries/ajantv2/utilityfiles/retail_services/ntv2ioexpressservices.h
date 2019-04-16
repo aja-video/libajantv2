@@ -18,7 +18,7 @@ class IoExpressServices : public DeviceServices
 	
 public:
 	IoExpressServices();
-	~IoExpressServices() {}
+	virtual ~IoExpressServices() {}
 	
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();
