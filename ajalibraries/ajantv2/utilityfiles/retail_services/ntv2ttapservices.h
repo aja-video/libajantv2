@@ -18,7 +18,7 @@ class TTapServices : public DeviceServices
 	
 public:
 	TTapServices();
-	~TTapServices() {}
+	virtual ~TTapServices() {}
 	
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();

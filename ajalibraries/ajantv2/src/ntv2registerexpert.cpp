@@ -1466,9 +1466,11 @@ public:
 			{
 				case CONTAINS:		result.insert(it->second);					break;
 				case STARTSWITH:	if (pos == 0)
-										result.insert(it->second);				break;
+										{result.insert(it->second);}
+									break;
 				case ENDSWITH:		if (pos+nameStrLen == it->first.length())
-										result.insert(it->second);				break;
+										{result.insert(it->second);}
+									break;
 				default:			break;
 			}
 		}

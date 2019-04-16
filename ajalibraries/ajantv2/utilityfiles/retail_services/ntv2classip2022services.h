@@ -18,7 +18,7 @@ class ClassIP2022Services : public DeviceServices
 	
 public:
 	ClassIP2022Services(NTV2DeviceID deviceID);
-	~ClassIP2022Services();
+	virtual ~ClassIP2022Services();
 	
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();

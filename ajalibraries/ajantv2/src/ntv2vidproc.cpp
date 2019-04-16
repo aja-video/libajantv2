@@ -242,6 +242,7 @@ void CNTV2Card::SetSplitParameters(Fixed_ position, Fixed_ softness)
             case HD_NUMACTIVELINES_1080:
 			    offset = 19;
 		        max = frameBufferSize.Height()+1;
+				break;
             case HD_NUMACTIVELINES_720:
 			    offset = 7;
 		        max = frameBufferSize.Height()+1;
@@ -345,6 +346,7 @@ void CNTV2Card::SetSlitParameters(Fixed_ start, Fixed_ width)
 			    offset = 19;
 		        max = frameBufferSize.Height()+1;
 			    maxWidth = max/2;
+				break;
             case HD_NUMACTIVELINES_720:
 			    offset = 7;
 		        max = frameBufferSize.Height()+1;

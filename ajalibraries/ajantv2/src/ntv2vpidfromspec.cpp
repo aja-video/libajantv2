@@ -55,6 +55,8 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	uint8_t	byte3 = 0;
 	uint8_t	byte4 = 0;
 
+	(void)enableBT2020;
+
 	if (! pOutVPID || ! pInVPIDSpec)
 		return false;
 

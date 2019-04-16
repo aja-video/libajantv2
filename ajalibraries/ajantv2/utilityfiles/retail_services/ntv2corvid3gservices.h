@@ -17,7 +17,7 @@ class Corvid3GServices : public DeviceServices
 	
 public:
 	Corvid3GServices();
-	~Corvid3GServices() {}
+	virtual ~Corvid3GServices() {}
 	
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();

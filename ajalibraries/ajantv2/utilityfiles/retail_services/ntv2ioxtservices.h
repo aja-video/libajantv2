@@ -18,7 +18,7 @@ class IoXTServices : public DeviceServices
 	
 public:
 	IoXTServices();
-	~IoXTServices() {}
+	virtual ~IoXTServices() {}
 	
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();

@@ -151,8 +151,8 @@ int32_t AJATimeLog::GetDelta(bool bReset)
 {
     uint64_t currTime = AJATime::GetSystemMicroseconds();
 	int32_t delta = int32_t(currTime - _time);
-    if (bReset)
-        _time = currTime;
+	if (bReset)
+		_time = currTime;
 		
 	return delta;
 }

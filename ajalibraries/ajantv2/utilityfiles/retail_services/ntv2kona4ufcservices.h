@@ -17,7 +17,7 @@ class Kona4UfcServices : public DeviceServices
 	
 public:
 	Kona4UfcServices();
-	~Kona4UfcServices() {}
+	virtual ~Kona4UfcServices() {}
 	
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();

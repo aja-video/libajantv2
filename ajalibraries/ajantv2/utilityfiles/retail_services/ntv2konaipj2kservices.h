@@ -19,7 +19,7 @@ class KonaIPJ2kServices : public DeviceServices
 	
 public:
     KonaIPJ2kServices();
-	~KonaIPJ2kServices();
+	virtual ~KonaIPJ2kServices();
 	
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();

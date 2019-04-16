@@ -659,7 +659,7 @@ bool CNTV2ConfigTs2022::J2KGetNextT0Status(const NTV2Channel channel, uint32_t *
 
     // Check SE Status Empty bit
     if(val & BIT(11))
-        return false;
+		return false;
 
 	return mDevice.ReadRegister( addr + kRegJ2kT0StatusFIFO, *pStatus );
 }

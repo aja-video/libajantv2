@@ -17,7 +17,7 @@ class Kona1Services : public DeviceServices
 	
 public:
 	Kona1Services();
-	~Kona1Services() {}
+	virtual ~Kona1Services() {}
 	
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();

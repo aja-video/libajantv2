@@ -18,7 +18,7 @@ class KonaLHePlusServices : public DeviceServices
 	
 public:
 	KonaLHePlusServices();
-	~KonaLHePlusServices() {}
+	virtual ~KonaLHePlusServices() {}
 	
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();

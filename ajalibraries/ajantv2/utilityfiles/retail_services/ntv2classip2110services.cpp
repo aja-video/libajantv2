@@ -22,7 +22,6 @@ Class4kServices(devID)
 
 ClassIP2110Services::~ClassIP2110Services()
 {
-	Class4kServices::~Class4kServices();
     if (config2110 != NULL)
     {
         delete config2110;
@@ -204,6 +203,8 @@ void ClassIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 											 ReceiveAudioData2110* s2110RxAudioDataLast,
 											 ReceiveAncData2110* s2110RxAncDataLast)
 {
+	AJA_UNUSED(modeLast);
+
 	bool ipServiceEnable, ipServiceForceConfig;
 
 	mCard->ReadRegister(kRegAud1Counter, startAudioCounter);

@@ -17,7 +17,7 @@ class Class8kServices : public Class4kServices
 {
 public:
 	Class8kServices(NTV2DeviceID devID);
-	~Class8kServices();
+	virtual ~Class8kServices();
 	
 	virtual void SetDeviceXPointPlayback ();
 	virtual void SetDeviceXPointCapture ();
