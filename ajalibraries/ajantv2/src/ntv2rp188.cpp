@@ -694,7 +694,7 @@ void CRP188::SetRP188 (ULWord ulFrms, ULWord ulSecs, ULWord ulMins, ULWord ulHrs
     }
 
     if (ulHrs >= 24)
-        ulHrs %= 24;
+		ulHrs %= 24;
 
 		// error check: if this is a DropFrame mode, chop off any frames that should have been dropped
 	if (bDropFrame)

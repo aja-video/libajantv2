@@ -54,7 +54,7 @@ bool CNTV2Card::GetHDMIInputColor (NTV2LHIHDMIColorSpace & outValue, const NTV2C
     if (numInputs < 1)
 		return false;
     if (numInputs == 1)
-        return CNTV2DriverInterface::ReadRegister (kRegHDMIInputStatus, outValue, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
+		return CNTV2DriverInterface::ReadRegister (kRegHDMIInputStatus, outValue, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
 	if (inChannel <= NTV2Channel(numInputs))
 		return CNTV2DriverInterface::ReadRegister (gHDMIChannelToInputStatusRegNum[inChannel], outValue, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
 	return false;
@@ -66,7 +66,7 @@ bool CNTV2Card::GetHDMIInVideoRange (NTV2HDMIRange & outValue, const NTV2Channel
     if (numInputs < 1)
 		return false;
     if (numInputs == 1)
-        return CNTV2DriverInterface::ReadRegister (kRegHDMIInputControl, outValue, kRegMaskHDMIInfoRange, kRegShiftHDMIInfoRange);
+		return CNTV2DriverInterface::ReadRegister (kRegHDMIInputControl, outValue, kRegMaskHDMIInfoRange, kRegShiftHDMIInfoRange);
 	if (inChannel <= NTV2Channel(numInputs))
 		return CNTV2DriverInterface::ReadRegister (gHDMIChannelToControlRegNum[inChannel], outValue, kRegMaskHDMIInfoRange, kRegShiftHDMIInfoRange);
 	return false;
