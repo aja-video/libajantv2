@@ -3038,6 +3038,7 @@ void DeviceServices::SetDeviceXPointCapture()
 					break;
 				case DEVICE_ID_KONAHDMI:
 					mCard->SetReference(NTV2_REFERENCE_HDMI_INPUT2);
+					break;
 				default:
 					mCard->SetReference(NTV2_REFERENCE_INPUT2);
 					break;
@@ -3115,19 +3116,26 @@ void DeviceServices::SetDeviceXPointCapture()
 		{
 		case 8:
 			EnableRP188EtoE(inputSelectID, NTV2_Wgt3GSDIOut8);
+			AJA_FALL_THRU;
 		case 7:
 			EnableRP188EtoE(inputSelectID, NTV2_Wgt3GSDIOut7);
+			AJA_FALL_THRU;
 		case 6:
 			EnableRP188EtoE(inputSelectID, NTV2_Wgt3GSDIOut6);
+			AJA_FALL_THRU;
 		case 5:
 			EnableRP188EtoE(inputSelectID, NTV2_Wgt3GSDIOut5);
+			AJA_FALL_THRU;
 		case 4:
 			EnableRP188EtoE(inputSelectID, NTV2_Wgt3GSDIOut4);
+			AJA_FALL_THRU;
 		case 3:
 			EnableRP188EtoE(inputSelectID, NTV2_Wgt3GSDIOut3);
+			AJA_FALL_THRU;
 		case 2:
 			if(!hasBiDirectionalSDI)
 				EnableRP188EtoE(inputSelectID, NTV2_Wgt3GSDIOut2);
+			AJA_FALL_THRU;
 		default:
 		case 1:
 			if(!hasBiDirectionalSDI)
@@ -3279,21 +3287,28 @@ void DeviceServices::SetDeviceXPointPlayback()
 	{
 	case 8:
 		DisableRP188EtoE(NTV2_Wgt3GSDIOut8);
+		AJA_FALL_THRU;
 	case 7:
 		DisableRP188EtoE(NTV2_Wgt3GSDIOut7);
+		AJA_FALL_THRU;
 	case 6:
 		DisableRP188EtoE(NTV2_Wgt3GSDIOut6);
+		AJA_FALL_THRU;
 	case 5:
 		DisableRP188EtoE(NTV2_Wgt3GSDIOut5);
+		AJA_FALL_THRU;
 	case 4:
 		DisableRP188EtoE(NTV2_Wgt3GSDIOut4);
+		AJA_FALL_THRU;
 	case 3:
 		DisableRP188EtoE(NTV2_Wgt3GSDIOut3);
+		AJA_FALL_THRU;
 	case 2:
 		if(!NTV2DeviceHasBiDirectionalSDI(mDeviceID))
 		{
 			DisableRP188EtoE(NTV2_Wgt3GSDIOut2);
 		}
+		AJA_FALL_THRU;
 	default:
 	case 1:
 		if(!NTV2DeviceHasBiDirectionalSDI(mDeviceID))
@@ -3409,18 +3424,25 @@ void DeviceServices::SetDeviceMiscRegisters()
 	{
 	case 8:
 		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL8, audioSystem);
+		AJA_FALL_THRU;
 	case 7:
 		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL7, audioSystem);
+		AJA_FALL_THRU;
 	case 6:
 		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL6, audioSystem);
+		AJA_FALL_THRU;
 	case 5:
 		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL5, audioSystem);
+		AJA_FALL_THRU;
 	case 4:
 		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL4, audioSystem);
+		AJA_FALL_THRU;
 	case 3:
 		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL3, audioSystem);
+		AJA_FALL_THRU;
 	case 2:
 		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL2, audioSystem);
+		AJA_FALL_THRU;
 	default:
 	case 1:
 		mCard->SetSDIOutputAudioSystem(NTV2_CHANNEL1, audioSystem);
@@ -3435,18 +3457,25 @@ void DeviceServices::SetDeviceMiscRegisters()
 	{
 	case 8:
 		mCard->SetFrameBufferOrientation(NTV2_CHANNEL8, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+		AJA_FALL_THRU;
 	case 7:
 		mCard->SetFrameBufferOrientation(NTV2_CHANNEL7, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+		AJA_FALL_THRU;
 	case 6:
 		mCard->SetFrameBufferOrientation(NTV2_CHANNEL6, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+		AJA_FALL_THRU;
 	case 5:
 		mCard->SetFrameBufferOrientation(NTV2_CHANNEL5, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+		AJA_FALL_THRU;
 	case 4:
 		mCard->SetFrameBufferOrientation(NTV2_CHANNEL4, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+		AJA_FALL_THRU;
 	case 3:
 		mCard->SetFrameBufferOrientation(NTV2_CHANNEL3, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+		AJA_FALL_THRU;
 	case 2:
 		mCard->SetFrameBufferOrientation(NTV2_CHANNEL2, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
+		AJA_FALL_THRU;
 	default:
 	case 1:
 		mCard->SetFrameBufferOrientation(NTV2_CHANNEL1, NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN);
