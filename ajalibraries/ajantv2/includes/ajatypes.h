@@ -70,7 +70,7 @@
 	#if __GNUC__ >= 5
 		#define AJA_FALL_THRU	[[gnu::fallthrough]];
 	#else
-		#define AJA_FALL_THRU	__attribute__ ((fallthrough));
+		#define AJA_FALL_THRU
 	#endif
 #else
 	#define AJA_FALL_THRU
