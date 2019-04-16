@@ -50,10 +50,12 @@ public:
 	virtual VPIDSampling			GetSampling (void) const;
 	virtual VPIDChannel				GetChannel (void) const;
 	virtual VPIDChannel				GetDualLinkChannel (void) const;
-	virtual VPIDDynamicRange		GetDynamicRange (void) const;
 	virtual VPIDBitDepth			GetBitDepth (void) const;
 	virtual inline bool				IsValid (void) const			{return GetVersion() == VPIDVersion_1;}	///< @return	True if valid;  otherwise false.
 	virtual AJALabelValuePairs &	GetInfo (AJALabelValuePairs & outInfo) const;
+	virtual NTV2VPIDXferChars		GetTransferCharacteristics (void) const;
+	virtual NTV2VPIDColorimetry		GetColorimetry (void) const;
+	virtual NTV2VPIDLuminance		GetLuminance (void) const;				
 	virtual std::ostream &			Print (std::ostream & ostrm) const;
 	///@}
 
@@ -87,8 +89,11 @@ public:
 	virtual void				SetSampling (const VPIDSampling inSampling);
 	virtual void				SetChannel (const VPIDChannel inChannel);
 	virtual void				SetDualLinkChannel (const VPIDChannel inChannel);
-	virtual void				SetDynamicRange (const VPIDDynamicRange inDynamicRange);
 	virtual void				SetBitDepth (const VPIDBitDepth inBitDepth);
+	virtual void				SetTransferCharacteristics (const NTV2VPIDXferChars inBitDepth);
+	virtual void				SetColorimetry (const NTV2VPIDColorimetry inBitDepth);
+	virtual void				SetLuminance (const NTV2VPIDLuminance inBitDepth);
+								
 	///@}
 
 
@@ -113,8 +118,13 @@ public:
 											const VPIDChannel		inVPIDChannel,
 											const bool				inUseVPIDChannel = true,
 											const bool				inOutputIs6G = false,
-											const bool				inOutputIs12G = false);
+											const bool				inOutputIs12G = false,
+											const NTV2VPIDXferChars	inXferChars = NTV2_VPID_TC_SDR_TV,
+											const NTV2VPIDColorimetry	inColorimetry = NTV2_VPID_Color_Rec709,
+											const NTV2VPIDLuminance	inLuminance = NTV2_VPID_Luminance_YCbCr);
 	#if !defined (NTV2_DEPRECATE)
+		virtual VPIDDynamicRange NTV2_DEPRECATED_f(GetDynamicRange (void) const);
+		virtual void NTV2_DEPRECATED_f(SetDynamicRange (const VPIDDynamicRange inDynamicRange));	
 		static inline NTV2_DEPRECATED_f(bool	SetVPIDData (ULWord *				pOutVPID,
 														const NTV2VideoFormat		inOutputFormat,
 														const NTV2FrameBufferFormat	inFrameBufferFormat,

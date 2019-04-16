@@ -2031,17 +2031,22 @@ typedef enum
 
 	// kRegVPID
 	kRegMaskVPIDBitDepth				= BIT(1)+BIT(0),
-	kRegMaskVPIDDynamicRange			= BIT(4)+BIT(3),
+	kRegmaskVPIDLuminance				= BIT(4),
 	kRegMaskVPIDChannel					= BIT(7)+BIT(6),
 	kRegMaskVPIDDualLinkChannel         = BIT(7)+BIT(6)+BIT(5),
 	kRegMaskVPIDSampling				= BIT(11)+BIT(10)+BIT(9)+BIT(8),
+	kRegMaskVPIDColorimetry				= BIT(12)+BIT(13),
 	kRegMaskVPIDHorizontalSampling		= BIT(14),
 	kRegMaskVPIDImageAspect16x9			= BIT(15),
 	kRegMaskVPIDPictureRate				= BIT(19)+BIT(18)+BIT(17)+BIT(16),
+	kRegMaskVPIDXferChars				= BIT(20)+BIT(21),
 	kRegMaskVPIDProgressivePicture		= BIT(22),
 	kRegMaskVPIDProgressiveTransport	= BIT(23),
 	kRegMaskVPIDStandard				= BIT(24)+BIT(25)+BIT(26)+BIT(27)+BIT(28)+BIT(29)+BIT(30)+BIT(31),
 	kRegMaskVPIDVersionID				= BIT(31),
+#if !defined (NTV2_DEPRECATE)
+	kRegMaskVPIDDynamicRange			= BIT(4)+BIT(3),
+#endif
 	
 	//Borg Test Pattern Generator
 	kRegMaskTPGChromaSample             = BIT(9)+BIT(8)+BIT(7)+BIT(6)+BIT(5)+BIT(4)+BIT(3)+BIT(2)+BIT(1)+BIT(0),
@@ -3153,17 +3158,22 @@ typedef enum
 
 	// kRegVPID
 	kRegShiftVPIDBitDepth				= 0,
-	kRegShiftVPIDDynamicRange			= 3,
+	kRegShiftVPIDLuminance				= 4,
 	kRegShiftVPIDDualLinkChannel        = 5,
 	kRegShiftVPIDChannel				= 6,
 	kRegShiftVPIDSampling				= 8,
+	kRegShiftVPIDColorimetry			= 12,
 	kRegShiftVPIDHorizontalSampling		= 14,
 	kRegShiftVPIDImageAspect16x9		= 15,
 	kRegShiftVPIDPictureRate			= 16,
+	kRegShiftVPIDXferChars				= 20,
 	kRegShiftVPIDProgressivePicture		= 22,
 	kRegShiftVPIDProgressiveTransport	= 23,
 	kRegShiftVPIDStandard				= 24,
 	kRegShiftVPIDVersionID				= 31,
+#if !defined (NTV2_DEPRECATE)
+	kRegShiftVPIDDynamicRange			= 3,
+#endif
 
 	// Borg Test Pattern Generator
 	kRegShiftTPGChromaSample            = 0,

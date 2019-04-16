@@ -386,19 +386,6 @@ VPIDChannel CNTV2VPID::GetDualLinkChannel (void) const
 }
 
 
-void CNTV2VPID::SetDynamicRange (const VPIDDynamicRange inDynamicRange)
-{
-	m_uVPID = (m_uVPID & ~kRegMaskVPIDDynamicRange) |
-		(((ULWord)inDynamicRange << kRegShiftVPIDDynamicRange) & kRegMaskVPIDDynamicRange);
-}
-
-
-VPIDDynamicRange CNTV2VPID::GetDynamicRange (void) const
-{
-	return (VPIDDynamicRange)((m_uVPID & kRegMaskVPIDDynamicRange) >> kRegShiftVPIDDynamicRange); 
-}
-
-
 void CNTV2VPID::SetBitDepth (const VPIDBitDepth inBitDepth)
 {
 	m_uVPID = (m_uVPID & ~kRegMaskVPIDBitDepth) |
@@ -410,6 +397,56 @@ VPIDBitDepth CNTV2VPID::GetBitDepth (void) const
 {
 	return (VPIDBitDepth)((m_uVPID & kRegMaskVPIDBitDepth) >> kRegShiftVPIDBitDepth); 
 }
+
+void CNTV2VPID::SetTransferCharacteristics (const NTV2VPIDXferChars inBitDepth)
+{
+	m_uVPID = (m_uVPID & ~kRegMaskVPIDXferChars) |
+		(((ULWord)inBitDepth << kRegShiftVPIDXferChars) & kRegMaskVPIDXferChars);
+}
+
+
+NTV2VPIDXferChars CNTV2VPID::GetTransferCharacteristics (void) const
+{
+	return (NTV2VPIDXferChars)((m_uVPID & kRegMaskVPIDXferChars) >> kRegShiftVPIDXferChars); 
+}
+
+void CNTV2VPID::SetColorimetry (const NTV2VPIDColorimetry inBitDepth)
+{
+	m_uVPID = (m_uVPID & ~kRegMaskVPIDColorimetry) |
+		(((ULWord)inBitDepth << kRegShiftVPIDColorimetry) & kRegMaskVPIDColorimetry);
+}
+
+
+NTV2VPIDColorimetry CNTV2VPID::GetColorimetry (void) const
+{
+	return (NTV2VPIDColorimetry)((m_uVPID & kRegMaskVPIDColorimetry) >> kRegShiftVPIDColorimetry); 
+}
+
+void CNTV2VPID::SetLuminance (const NTV2VPIDLuminance inBitDepth)
+{
+	m_uVPID = (m_uVPID & ~kRegmaskVPIDLuminance) |
+		(((ULWord)inBitDepth << kRegShiftVPIDLuminance) & kRegmaskVPIDLuminance);
+}
+
+
+NTV2VPIDLuminance CNTV2VPID::GetLuminance (void) const
+{
+	return (NTV2VPIDLuminance)((m_uVPID & kRegmaskVPIDLuminance) >> kRegShiftVPIDLuminance); 
+}
+
+#if !defined (NTV2_DEPRECATE)
+void CNTV2VPID::SetDynamicRange (const VPIDDynamicRange inDynamicRange)
+{
+	m_uVPID = (m_uVPID & ~kRegMaskVPIDDynamicRange) |
+		(((ULWord)inDynamicRange << kRegShiftVPIDDynamicRange) & kRegMaskVPIDDynamicRange);
+}
+
+
+VPIDDynamicRange CNTV2VPID::GetDynamicRange (void) const
+{
+	return (VPIDDynamicRange)((m_uVPID & kRegMaskVPIDDynamicRange) >> kRegShiftVPIDDynamicRange); 
+}
+#endif
 
 
 //	static - this one doesn't support 3Gb
@@ -475,7 +512,10 @@ bool CNTV2VPID::SetVPIDData (ULWord &				outVPID,
 							const VPIDChannel		inChannel,
 							const bool				inUseChannel,
 							const bool				inOutputIs6G,
-							const bool				inOutputIs12G)
+							const bool				inOutputIs12G,
+							const NTV2VPIDXferChars	inXferChars,
+							const NTV2VPIDColorimetry	inColorimetry,
+							const NTV2VPIDLuminance	inLuminance)
 {
 	VPIDSpec vpidSpec;
 
@@ -496,6 +536,9 @@ bool CNTV2VPID::SetVPIDData (ULWord &				outVPID,
 	vpidSpec.audioCarriage			= VPIDAudio_Unknown;
 	vpidSpec.isOutput6G				= inOutputIs6G;
 	vpidSpec.isOutput12G			= inOutputIs12G;
+	vpidSpec.transferCharacteristics = inXferChars;
+	vpidSpec.colorimetry			= inColorimetry;
+	vpidSpec.luminance				= inLuminance;
 
 	return ::SetVPIDFromSpec (&outVPID, &vpidSpec);
 }
@@ -701,6 +744,10 @@ static const string sVPIDDynamicRange[]	= {	"100", "200", "400", "Reserved3"	};
 static const string sVPIDBitDepth[]		= {	"8", "10", "12", "Reserved3"	};
 static const string sVPIDLink[]			= {	"1", "2", "3", "4", "5", "6", "7", "8"	};
 static const string	sVPIDAudio[]		= {	"Unknown", "Copied", "Additional", "Reserved" };
+static const string sVPIDTransfer[]		= { "SDR", "HLG", "PQ", "Unspecified" };
+static const string sVPIDColorimetry[]	= { "Rec709", "Reserved", "UHDTV", "Unknown" };
+static const string sVPIDLuminance[]	= { "YCbCr", "ICtCp" };
+
 
 
 ostream & CNTV2VPID::Print (ostream & ostrm) const
@@ -713,11 +760,14 @@ ostream & CNTV2VPID::Print (ostream & ostrm) const
 				<< " rate=" << sVPIDPictureRate[GetPictureRate()]
 				<< " samp=" << sVPIDSampling[GetSampling()]
 				<< " channel=" << sVPIDChannel[GetChannel()]
-				<< " dynRange=" << sVPIDDynamicRange[GetDynamicRange()]
+				//<< " dynRange=" << sVPIDDynamicRange[GetDynamicRange()]
 				<< " bitDepth=" << sVPIDBitDepth[GetBitDepth()]
 				<< " 3Ga=" << YesNo(IsStandard3Ga())
 				<< " Tsi=" << YesNo(IsStandardTwoSampleInterleave())
-				<< " 16x9=" << YesNo(GetImageAspect16x9());
+				<< " 16x9=" << YesNo(GetImageAspect16x9())
+				<< " xferChars=" << sVPIDTransfer[GetTransferCharacteristics()]
+				<< " colorimetry=" << sVPIDColorimetry[GetColorimetry()]
+				<< " luminance=" << sVPIDLuminance[GetLuminance()];
 	return ostrm;
 }
 
@@ -736,10 +786,12 @@ AJALabelValuePairs & CNTV2VPID::GetInfo (AJALabelValuePairs & outInfo) const
 	AJASystemInfo::append(outInfo, "Aspect Ratio:",				GetImageAspect16x9() ? "16x9" : "4x3");
 	AJASystemInfo::append(outInfo, "Sampling:",					sVPIDSampling[GetSampling()]);
 	AJASystemInfo::append(outInfo, "Channel:",					sVPIDChannel[GetChannel()]);
-	AJASystemInfo::append(outInfo, "Dynamic Range:",			sVPIDDynamicRange[GetDynamicRange()]);
 	AJASystemInfo::append(outInfo, "Bit Depth:",				sVPIDBitDepth[GetBitDepth()]);
 	AJASystemInfo::append(outInfo, "3Ga:",						YesOrNo(IsStandard3Ga()));
 	AJASystemInfo::append(outInfo, "Two Sample Interleave:",	YesOrNo(IsStandardTwoSampleInterleave()));
+	AJASystemInfo::append(outInfo, "Xfer Characteristics:",		sVPIDTransfer[GetTransferCharacteristics()]);
+	AJASystemInfo::append(outInfo, "Colorimetry:",				sVPIDColorimetry[GetColorimetry()]);
+	AJASystemInfo::append(outInfo, "Luminance:",				sVPIDLuminance[GetLuminance()]);
 	return outInfo;
 }
 
