@@ -629,6 +629,7 @@ public:
 		@note		For <b>capture</b> from IP devices running S2110 firmware, this method will automatically extract <b>VPID</b> and
 					<b>RP188</b> timecode packets from the incoming RTP Anc streams, even if not ::AUTOCIRCULATE_WITH_ANC, or without
 					Anc buffers in the "transferInfo".
+					-	To disable this behavior completely, use an invalid ::NTV2Channel value (e.g. ::NTV2_CHANNEL_INVALID).
 	**/
 	AJA_VIRTUAL bool	DMAReadAnc (	const ULWord	inFrameNumber,
 										NTV2_POINTER &	outAncF1Buffer,
