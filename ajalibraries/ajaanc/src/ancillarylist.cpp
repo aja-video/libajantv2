@@ -70,7 +70,7 @@ static ostream & PrintULWordsBE (ostream & inOutStream, const ULWordSequence & i
 string ULWordSequenceToStringBE (const ULWordSequence & inData, const unsigned inMaxNum = 32)
 {
 	ostringstream oss;
-	PrintULWordsBE (oss, inData, inMaxNum);
+	::PrintULWordsBE (oss, inData, inMaxNum);
 	return oss.str();
 }
 
@@ -819,7 +819,7 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBu
 
 	NTV2_POINTER	ancBuffer		(inAncBuffer.GetHostPointer(), inAncBuffer.GetByteCount());	//	Don't copy
 	uint32_t		RTPPacketCount	(0);	//	Number of packets encountered
-	size_t			ULWordCount		(0);	//	Size of current RTP packet, in 32-bit words
+	size_t			ULWordCount		(0);	//	Size of current RTP packet, including RTP header, in 32-bit words
 	size_t			ULWordOffset	(0);	//	Offset to start of current RTP packet, in 32-bit words
 
 	while (AJARTPAncPayloadHeader::BufferStartsWithRTPHeader(ancBuffer))
@@ -832,7 +832,7 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBu
 		//	Peek into the packet header to discover its true length...
 		if (!rtpHeader.ReadFromBuffer(ancBuffer))
 			{LOGMYERROR("Failed reading IP payload header: " << ancBuffer.AsString(40));  return AJA_STATUS_NOT_FOUND;}
-		ULWordCount = rtpHeader.GetPacketLength() / sizeof(uint32_t);
+		ULWordCount = rtpHeader.GetPacketLength() / sizeof(uint32_t)  +  rtpHeader.GetHeaderWordCount();
 
 		//	Read ULWordCount x ULWords from the buffer...
 		if (!ancBuffer.GetU32s(U32s, 0, ULWordCount))
@@ -848,8 +848,8 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBu
 			return result;
 
 		ULWordOffset += ULWordCount;	//	Move ahead to next potential RTP packet in buffer
-		if (!ancBuffer.Set(inAncBuffer.GetHostAddress(ULWord(ULWordOffset * sizeof(uint32_t))),
-							inAncBuffer.GetByteCount() - ULWordCount * sizeof(uint32_t)))
+		if (!ancBuffer.Set (inAncBuffer.GetHostAddress(ULWord(ULWordOffset * sizeof(uint32_t))),	//	Increment startAddress
+							inAncBuffer.GetByteCount() - ULWordCount * sizeof(uint32_t)))			//	Decrement byteCount
 		{
 			LOGMYERROR("After RTP pkt " << DEC(RTPPacketCount) << ", 'Set' failed, offset=" << DEC(ULWordOffset)
 						<< " ULWords, length=" << DEC(ULWordCount) << " ULWords");
