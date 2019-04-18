@@ -3,7 +3,6 @@
 	@brief		Basic Functionality Tests for the AJA Anc Library.
 	@copyright	Copyright (c) 2013-2015 AJA Video Systems, Inc. All rights reserved.
 **/
-#define	DEBUG_BREAK_AFTER_FAILURE 1
 #include "ntv2bft.h"
 #include "ntv2endian.h"
 #include "ajabase/common/options_popt.h"
