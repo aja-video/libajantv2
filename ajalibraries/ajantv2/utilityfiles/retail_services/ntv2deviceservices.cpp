@@ -2994,9 +2994,7 @@ void DeviceServices::SetDeviceXPointCapture()
 
 	if ((mDeviceID != DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) &&
         (mDeviceID != DEVICE_ID_KONAIP_2TX_1SFP_J2K) &&
-        (mDeviceID != DEVICE_ID_KONAIP_2RX_1SFP_J2K) &&
-        (mDeviceID != DEVICE_ID_KONAIP_2110) &&
-		(mDeviceID != DEVICE_ID_IOIP_2110))
+        (mDeviceID != DEVICE_ID_KONAIP_2RX_1SFP_J2K))
 	{
 		SetAudioInputSelect(mInputAudioSelect);
 
@@ -3089,19 +3087,19 @@ void DeviceServices::SetDeviceXPointCapture()
 			}
 		}
 	}
-    // For 2110 need to set PTP as reference
-    else if ((mDeviceID == DEVICE_ID_KONAIP_2110) ||
-             (mDeviceID == DEVICE_ID_IOIP_2110))
-    {
-        SetAudioInputSelect(mInputAudioSelect);
-        mCard->SetReference(NTV2_REFERENCE_SFP1_PTP);
-    }
 	// For J2K devices we don't set the audio input select reg, audio input
 	// has to come from AES and the configuration code will set this properly
 	// we also force the reference on input to NTV2_REFERENCE_SFP1_PCR
 	else
 	{
 		mCard->SetReference(NTV2_REFERENCE_SFP1_PCR);
+	}
+
+	// For 2110 need to set audio input
+	if ((mDeviceID == DEVICE_ID_KONAIP_2110) ||
+			 (mDeviceID == DEVICE_ID_IOIP_2110))
+	{
+		SetAudioInputSelect(mInputAudioSelect);
 	}
 
 	if(mDeviceID != DEVICE_ID_KONAHDMI)
