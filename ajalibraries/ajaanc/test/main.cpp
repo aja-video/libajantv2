@@ -1495,110 +1495,116 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 		static bool BFT_AncListToRTPToAncList (void)
 		{
 			LOGMYNOTE("Starting");	if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToRTPToAncList..." << endl;
-			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
-			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
+			for (unsigned isSingleRTPPkt(0);  isSingleRTPPkt < 2;  isSingleRTPPkt++)
 			{
-				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
-				const NTV2FormatDescriptor	fd		(vFormat, NTV2_FBF_10BIT_YCBCR, NTV2_VANCMODE_OFF);
-				ULWord						smpteLineF1(0), smpteLineF2(0);
-				bool						isF2	(false);
-//if (vFormat != NTV2_FORMAT_1080p_3000)	continue;	//	TEST 1080p ONLY??
-				LOGMYNOTE("Trying " << fd);	if (gIsVerbose)	cerr << "Trying " << fd << endl;
-				SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
-				if (isF2)
-					smpteLineF2 = smpteLineF1;
-				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
-					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
-
-				//	Make the transmit packets...
-				AJAAncDataLoc loc;
-				loc.SetDataLink(AJAAncillaryDataLink_A).SetDataChannel(AJAAncillaryDataChannel_Y).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
-				AJAAncillaryData_Cea608_Vanc	pkt608F1;
-				SHOULD_SUCCEED(pkt608F1.SetLine(false/*isF1*/, 9));
-				SHOULD_SUCCEED(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B')));
-				SHOULD_SUCCEED(pkt608F1.SetDataLocation(loc.SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+9 : 9)));
-				SHOULD_SUCCEED(pkt608F1.GeneratePayloadData());
-	
-				AJAAncillaryData_Cea608_Vanc	pkt608F2;
-				SHOULD_SUCCEED(pkt608F2.SetLine(true/*isF2*/, 9));
-				SHOULD_SUCCEED(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b')));
-				SHOULD_SUCCEED(pkt608F2.SetDataLocation(loc.SetLineNumber(pkt608F2.IsField2() ? smpteLineF2+9 : 9)));
-				SHOULD_SUCCEED(pkt608F2.GeneratePayloadData());
-
-				AJAAncillaryData_HDR_HLG		pktHDR;
-				SHOULD_SUCCEED(pktHDR.GeneratePayloadData());
-
-				AJAAncillaryData_Timecode_ATC	pktATC;
+				LOGMYDEBUG((isSingleRTPPkt ? "TEST SINGLE RTP PKT CONTAINING MULTIPLE ANC PKTS" : "TEST MULTI RTP PKT (ONE RTP PKT PER ANC PKT)"));
+				const NTV2VideoFormat	vFormats[]	=	{/*NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994,*/ NTV2_FORMAT_1080i_5994/*, NTV2_FORMAT_1080p_3000*/};
+				for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 				{
-					const NTV2_RP188				regTC (0, 0, 0);
-					AJATimeCode						tc;
-					NTV2FrameRate					ntv2Rate	(::GetNTV2FrameRateFromVideoFormat(vFormat));
-					const AJA_FrameRate				ajaRate		(sNTV2Rate2AJARate[ntv2Rate]);
-					const AJATimeBase				ajaTB		(ajaRate);
-					tc.SetRP188 (regTC.fDBB, regTC.fLo, regTC.fHi, ajaTB);
-					pktATC.SetTimecode (tc, ajaTB, ajaTB.IsNonIntegralRatio());
-					pktATC.SetDBB1PayloadType(AJAAncillaryData_Timecode_ATC_DBB1PayloadType_VITC1);
-					//pktATC.SetDBB1PayloadType(AJAAncillaryData_Timecode_ATC_DBB1PayloadType_LTC);
-					pktATC.GeneratePayloadData();
-				}
+					const NTV2VideoFormat		vFormat	(vFormats[ndx]);
+					const NTV2FormatDescriptor	fd		(vFormat, NTV2_FBF_10BIT_YCBCR, NTV2_VANCMODE_OFF);
+					ULWord						smpteLineF1(0), smpteLineF2(0);
+					bool						isF2	(false);
+//if (vFormat != NTV2_FORMAT_1080p_3000)	continue;	//	TEST 1080p ONLY??
+					LOGMYDEBUG("Trying " << fd);	if (gIsVerbose)	cerr << "Trying " << fd << endl;
+					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
+					if (isF2)
+						smpteLineF2 = smpteLineF1;
+					if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
+						SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
+
+					//	Make the transmit packets...
+					AJAAncillaryList	txPkts;
+					if (true)
+					{
+						AJAAncDataLoc loc;
+						loc.SetDataLink(AJAAncillaryDataLink_A).SetDataChannel(AJAAncillaryDataChannel_Y).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
+						AJAAncillaryData_Cea608_Vanc	pkt608F1;
+						SHOULD_SUCCEED(pkt608F1.SetLine(false/*isF1*/, 9));
+						SHOULD_SUCCEED(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B')));
+						SHOULD_SUCCEED(pkt608F1.SetDataLocation(loc.SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+9 : 9)));
+						SHOULD_SUCCEED(pkt608F1.GeneratePayloadData());
 	
-				AJAAncillaryData				pktCustomY;
-				SHOULD_SUCCEED(pktCustomY.SetDataLocation(loc.SetLineNumber(10)));
-				SHOULD_SUCCEED(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital));
-				SHOULD_SUCCEED(pktCustomY.SetDID(0x7A));
-				SHOULD_SUCCEED(pktCustomY.SetSID(0x01));
-				static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20	};
-				SHOULD_SUCCEED(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY)));
+						AJAAncillaryData_Cea608_Vanc	pkt608F2;
+						SHOULD_SUCCEED(pkt608F2.SetLine(true/*isF2*/, 9));
+						SHOULD_SUCCEED(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b')));
+						SHOULD_SUCCEED(pkt608F2.SetDataLocation(loc.SetLineNumber(pkt608F2.IsField2() ? smpteLineF2+9 : 9)));
+						SHOULD_SUCCEED(pkt608F2.GeneratePayloadData());
+
+						AJAAncillaryData_HDR_HLG		pktHDR;
+						SHOULD_SUCCEED(pktHDR.GeneratePayloadData());
+
+						AJAAncillaryData_Timecode_ATC	pktATC;
+						{
+							const NTV2_RP188				regTC (0, 0, 0);
+							AJATimeCode						tc;
+							NTV2FrameRate					ntv2Rate	(::GetNTV2FrameRateFromVideoFormat(vFormat));
+							const AJA_FrameRate				ajaRate		(sNTV2Rate2AJARate[ntv2Rate]);
+							const AJATimeBase				ajaTB		(ajaRate);
+							tc.SetRP188 (regTC.fDBB, regTC.fLo, regTC.fHi, ajaTB);
+							pktATC.SetTimecode (tc, ajaTB, ajaTB.IsNonIntegralRatio());
+							pktATC.SetDBB1PayloadType(AJAAncillaryData_Timecode_ATC_DBB1PayloadType_VITC1);
+							//pktATC.SetDBB1PayloadType(AJAAncillaryData_Timecode_ATC_DBB1PayloadType_LTC);
+							pktATC.GeneratePayloadData();
+						}
 	
-				AJAAncillaryData				pktCustomC;
-				SHOULD_SUCCEED(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_C).SetLineNumber(11)));
-				SHOULD_SUCCEED(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital));
-				SHOULD_SUCCEED(pktCustomC.SetDID(0x8A));
-				SHOULD_SUCCEED(pktCustomC.SetSID(0x02));
-				static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
-				SHOULD_SUCCEED(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC)));
+						AJAAncillaryData				pktCustomY;
+						SHOULD_SUCCEED(pktCustomY.SetDataLocation(loc.SetLineNumber(10)));
+						SHOULD_SUCCEED(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital));
+						SHOULD_SUCCEED(pktCustomY.SetDID(0x7A));
+						SHOULD_SUCCEED(pktCustomY.SetSID(0x01));
+						static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20	};
+						SHOULD_SUCCEED(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY)));
 	
-				//	Make the transmit packet list...
-				AJAAncillaryList	txPkts;
-				SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F1));
-				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
-					SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F2));
-				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktHDR));
-				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktATC));
-				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomY));
-				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomC));
-gIsVerbose = true;
-				LOGMYNOTE("Tx: " << txPkts);	if (gIsVerbose)	cerr << "Tx: " << txPkts << endl;
+						AJAAncillaryData				pktCustomC;
+						SHOULD_SUCCEED(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_C).SetLineNumber(11)));
+						SHOULD_SUCCEED(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital));
+						SHOULD_SUCCEED(pktCustomC.SetDID(0x8A));
+						SHOULD_SUCCEED(pktCustomC.SetSID(0x02));
+						static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
+						SHOULD_SUCCEED(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC)));
+	
+						//	Make the transmit packet list...
+						SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F1));
+						if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
+							SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F2));
+						SHOULD_SUCCEED(txPkts.AddAncillaryData(pktHDR));
+						SHOULD_SUCCEED(txPkts.AddAncillaryData(pktATC));
+						SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomY));
+						SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomC));
+					}
+//gIsVerbose = true;
+					LOGMYDEBUG("Tx: " << txPkts);	if (gIsVerbose)	cerr << "Tx: " << txPkts << endl;
 
-				//	Transmit the packets into the IP buffer...
-				NTV2_POINTER	IPF1(2048), IPF2(2048);
-				uint32_t		IPF1bytes(0), IPF2bytes(0);
-				SHOULD_SUCCEED(txPkts.GetIPTransmitDataLength (IPF1bytes, IPF2bytes, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
-				SHOULD_SUCCEED(txPkts.GetIPTransmitData (IPF1, IPF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
-//				if (gIsVerbose)	cerr << "IP F1: " << IPF1.AsString(64) << endl << "IP F2: " << IPF2.AsString(64) << endl;
-cerr << "IP F1:" << endl;	IPF1.Dump(cerr, 0, IPF1bytes, 16, 4, 16);
-if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
-	{cerr << "IP F2:" << endl;	IPF2.Dump(cerr, 0, IPF2bytes, 16, 4, 16);}
+					//	Transmit the packets into the IP buffer...
+					NTV2_POINTER	IPF1(2048), IPF2(2048);
+					uint32_t		IPF1bytes(0), IPF2bytes(0);
+					SHOULD_SUCCEED(txPkts.GetIPTransmitDataLength (IPF1bytes, IPF2bytes, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2, isSingleRTPPkt));
+					SHOULD_SUCCEED(txPkts.GetIPTransmitData (IPF1, IPF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2, isSingleRTPPkt));
+//cerr << "POST-TRANSMIT:" << endl << "IP F1 (" << DEC(IPF1bytes) << " bytes):" << endl;	IPF1.Dump(cerr, 0, IPF1bytes, 16, 4, 16);
+//if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
+//	{cerr << "IP F2 (" << DEC(IPF2bytes) << " bytes):" << endl;	IPF2.Dump(cerr, 0, IPF2bytes, 16, 4, 16);}
 
-				//	NOTE:	This test saves the F1 RTP buffers for use later by BFT_RTPToAncListToRTP...
-				gRTPBuffers[vFormat] = NTV2_POINTER(IPF1);
-LOGMYDEBUG("gRTPBuffers[" << ::NTV2VideoFormatToString(vFormat) << "]:" << IPF1.GetU32s(/*u32offset*/0, /*u32count*/32, /*byteSwap*/true));
-LOGMYDEBUG("F2 RTP Buffer:" << IPF2.GetU32s(/*u32offset*/0, /*u32count*/32, /*byteSwap*/true));
+					//	NOTE:	This test saves the F1 RTP buffers for use later by BFT_RTPToAncListToRTP...
+					gRTPBuffers[vFormat] = NTV2_POINTER(IPF1);	//	Deep copy
+//LOGMYDEBUG("gRTPBuffers[" << ::NTV2VideoFormatToString(vFormat) << "]:" << IPF1.GetU32s(/*u32offset*/0, /*u32count*/68, /*byteSwap*/true));
+//if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
+//	LOGMYDEBUG("F2 RTP Buffer:" << IPF2.GetU32s(/*u32offset*/0, /*u32count*/10, /*byteSwap*/true));
 
-				//	Receive packets from the IP buffer...
-				AJAAncillaryList	rxPkts;
-				LOGMYNOTE("Receive packets from IP buffers");
-				SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers(IPF1, IPF2, rxPkts));
-				LOGMYNOTE("Rx: " << rxPkts);	if (gIsVerbose)	cerr << "Rx: " << rxPkts << endl;
+					//	Receive packets from the IP buffer...
+					AJAAncillaryList	rxPkts;
+					LOGMYDEBUG("Receive packets from IP buffers");
+					SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers(IPF1, IPF2, rxPkts));
+					LOGMYDEBUG("Rx: " << rxPkts);	if (gIsVerbose)	cerr << "Rx: " << rxPkts << endl;
 
-				//	Compare the Tx and Rx packet lists...
-				LOGMYNOTE("Compare Tx vs Rx packets");
-				const string	cmpInfo	(txPkts.CompareWithInfo(rxPkts, /*ignoreLocation*/false, /*ignoreChecksum*/true));
-				if (!cmpInfo.empty())
-					LOGMYWARN(cmpInfo);
-				SHOULD_BE_TRUE(cmpInfo.empty());
-			}	//	for each video format
-
+					//	Compare the Tx and Rx packet lists...
+					LOGMYDEBUG("Compare Tx vs Rx packets");
+					const string	cmpInfo	(txPkts.CompareWithInfo(rxPkts, /*ignoreLocation*/false, /*ignoreChecksum*/true));
+					if (!cmpInfo.empty())
+						LOGMYWARN(cmpInfo);
+					SHOULD_BE_TRUE(cmpInfo.empty());
+				}	//	for each video format
+			}	//	for singleRTP, multiRTP
 			LOGMYNOTE("Passed");	cerr << "BFT_AncListToRTPToAncList passed" << endl;
 			return true;
 		}	//	BFT_AncListToRTPToAncList

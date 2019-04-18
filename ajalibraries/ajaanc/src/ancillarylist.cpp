@@ -67,7 +67,7 @@ static ostream & PrintULWordsBE (ostream & inOutStream, const ULWordSequence & i
 	return inOutStream;
 }
 
-string ULWordSequenceToStringBE (const ULWordSequence & inData, const unsigned inMaxNum = 32)
+string ULWordSequenceToStringBE (const ULWordSequence & inData, const size_t inMaxNum)
 {
 	ostringstream oss;
 	::PrintULWordsBE (oss, inData, inMaxNum);
@@ -832,7 +832,8 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBu
 		//	Peek into the packet header to discover its true length...
 		if (!rtpHeader.ReadFromBuffer(ancBuffer))
 			{LOGMYERROR("Failed reading IP payload header: " << ancBuffer.AsString(40));  return AJA_STATUS_NOT_FOUND;}
-		ULWordCount = rtpHeader.GetPacketLength() / sizeof(uint32_t)  +  rtpHeader.GetHeaderWordCount();
+		//	The RTP header reports the total packet length, including the header...
+		ULWordCount = rtpHeader.GetPacketLength() / sizeof(uint32_t);
 
 		//	Read ULWordCount x ULWords from the buffer...
 		if (!ancBuffer.GetU32s(U32s, 0, ULWordCount))
@@ -1019,8 +1020,8 @@ AJAStatus AJAAncillaryList::GetRTPPackets (AJAU32Pkts & outF1U32Pkts,  AJAU32Pkt
 		LOGMYWARN("Data overflow: " << DEC(overflowWords) << " U32s dropped");
 	else if (countOverflows)
 		LOGMYWARN("Packet overflow: " << DEC(countOverflows) << " pkts skipped");
-	XMTDBG("F1: " << outF1U32Pkts);
-	XMTDBG("F2: " << outF2U32Pkts);
+	XMTDBG("F1 (Content Only): " << outF1U32Pkts);
+	XMTDBG("F2 (Content Only): " << outF2U32Pkts);
 	return result;
 }	//	GetRTPPackets
 
@@ -1307,15 +1308,19 @@ AJAStatus AJAAncillaryList::WriteRTPPackets (NTV2_POINTER & theBuffer,
 	if (inRTPPkts.size() != inAncCounts.size())
 		{LOGMYERROR(DEC(inRTPPkts.size()) << " RTP pkt(s) != " << DEC(inAncCounts.size()) << " anc count(s)");  return AJA_STATUS_BAD_PARAM;}
 
+	//	For each RTP Packet...
 	for (AJAU32PktsConstIter RTPPktIter(inRTPPkts.begin());  RTPPktIter != inRTPPkts.end();  pktNum++)
 	{
-		AJARTPAncPayloadHeader	RTPHeader;
+		AJARTPAncPayloadHeader	RTPHeader;		//	The RTP packet header to be built
+		ULWordSequence			RTPHeaderU32s;	//	The RTP packet header expressed as a sequence of 5 x U32s
+		const ULWordSequence &	origRTPPkt(*RTPPktIter);	//	The original RTP packet data contents, a sequence of U32s
+		const bool				isLastRTPPkt	(++RTPPktIter == inRTPPkts.end());	//	Last RTP packet?
+		const size_t			totalRTPPktBytes(AJARTPAncPayloadHeader::GetHeaderByteCount()	//	RTP packet size,
+												  +  origRTPPkt.size() * sizeof(uint32_t));		//	including header, in bytes
 		ostringstream			pktNumInfo;
-		const ULWordSequence &	RTPPkt(*RTPPktIter);
-		const bool				isLastRTPPkt	(++RTPPktIter == inRTPPkts.end());
-		const size_t			totalPktBytes	(AJARTPAncPayloadHeader::GetHeaderByteCount()
-												  +  RTPPkt.size() * sizeof(uint32_t));
 		pktNumInfo << " for RTP pkt " << DEC(pktNum) << " of " << DEC(totPkts);
+
+		//	Set the RTP Packet Header's info...
 		if (inIsProgressive)
 			RTPHeader.SetProgressive();
 		else if (inIsF2)
@@ -1324,17 +1329,25 @@ AJAStatus AJAAncillaryList::WriteRTPPackets (NTV2_POINTER & theBuffer,
 			RTPHeader.SetField1();
 		RTPHeader.SetEndOfFieldOrFrame(isLastRTPPkt);
 		RTPHeader.SetAncPacketCount(uint8_t(inAncCounts.at(pktNum-1)));	//	Use provided Anc count
-		RTPHeader.SetPacketLength(uint16_t(totalPktBytes));
+		RTPHeader.SetPacketLength(uint16_t(totalRTPPktBytes));
 		//	Playout:  Firmware looks for full RTP pkt bytecount in LS 16 bits of SequenceNumber in RTP header:
-		RTPHeader.SetSequenceNumber(uint32_t(totalPktBytes) & 0x0000FFFF);
-		if (!RTPHeader.WriteToBuffer(theBuffer, u32offset))
+		RTPHeader.SetSequenceNumber(uint32_t(totalRTPPktBytes) & 0x0000FFFF);
+
+		//	Convert RTP header object into 5 x U32s...
+		RTPHeader.WriteToULWordVector(RTPHeaderU32s, true);
+		NTV2_ASSERT(RTPHeaderU32s.size() == AJARTPAncPayloadHeader::GetHeaderWordCount());
+
+		//	Write RTP header into theBuffer...
+		if (!theBuffer.PutU32s(RTPHeaderU32s, u32offset))
 			{LOGMYERROR("RTP hdr WriteBuffer failed for buffer " << theBuffer << " at u32offset=" << DEC(u32offset)
 						<< pktNumInfo.str());  return AJA_STATUS_FAIL;}
-		u32offset += AJARTPAncPayloadHeader::GetHeaderWordCount();
-		if (!theBuffer.PutU32s (RTPPkt, u32offset))
-			{LOGMYERROR("PutU32s failed writing " << DEC(RTPPkt.size()) << " U32s in buffer " << theBuffer << " at u32offset=" << DEC(u32offset)
+		u32offset += ULWord(RTPHeaderU32s.size());	//	Move "write head" to just past end of RTP header
+
+		//	Write RTP packet contents into theBuffer...
+		if (!theBuffer.PutU32s(origRTPPkt, u32offset))
+			{LOGMYERROR("PutU32s failed writing " << DEC(origRTPPkt.size()) << " U32s in buffer " << theBuffer << " at u32offset=" << DEC(u32offset)
 						<< pktNumInfo.str());  return AJA_STATUS_FAIL;}
-		u32offset += RTPPkt.size();
+		u32offset += origRTPPkt.size();	//	Move "write head" to just past where this RTP packet's data ended
 	}	//	for each RTP packet
 
 	LOGMYDEBUG(DEC(totPkts) << " RTP pkt(s), " << DEC(u32offset) << " U32s (" << DEC(u32offset*sizeof(uint32_t)) << " bytes) written for" << sFld << sPrg);
