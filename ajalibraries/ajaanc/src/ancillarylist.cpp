@@ -67,7 +67,7 @@ static ostream & PrintULWordsBE (ostream & inOutStream, const ULWordSequence & i
 	return inOutStream;
 }
 
-string ULWordSequenceToStringBE (const ULWordSequence & inData, const size_t inMaxNum)
+static string ULWordSequenceToStringBE (const ULWordSequence & inData, const size_t inMaxNum = 32)
 {
 	ostringstream oss;
 	::PrintULWordsBE (oss, inData, inMaxNum);
