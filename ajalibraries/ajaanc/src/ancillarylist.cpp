@@ -1448,13 +1448,10 @@ AJAStatus AJAAncillaryList::GetIPTransmitDataLength (uint32_t & outF1ByteCount, 
 
 	NTV2_POINTER	nullBuffer;	//	An empty buffer tells WriteRTPPackets to just calculate byteCount...
 	result = WriteRTPPackets (nullBuffer, outF1ByteCount, F1U32Pkts, F1AncCounts, /*isF2*/false, inIsProgressive);
-	if (AJA_FAILURE(result))
-		return result;
-
-	if (!inIsProgressive)
+	if (AJA_SUCCESS(result)  &&  !inIsProgressive)
 		result = WriteRTPPackets (nullBuffer, outF2ByteCount, F2U32Pkts, F2AncCounts, /*isF2*/true, inIsProgressive);
 
-	return AJA_STATUS_SUCCESS;
+	return result;
 }
 
 
