@@ -1497,7 +1497,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 			for (unsigned isSingleRTPPkt(0);  isSingleRTPPkt < 2;  isSingleRTPPkt++)
 			{
 				LOGMYDEBUG((isSingleRTPPkt ? "TEST SINGLE RTP PKT CONTAINING MULTIPLE ANC PKTS" : "TEST MULTI RTP PKT (ONE RTP PKT PER ANC PKT)"));
-				const NTV2VideoFormat	vFormats[]	=	{/*NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994,*/ NTV2_FORMAT_1080i_5994/*, NTV2_FORMAT_1080p_3000*/};
+				const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
 				for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 				{
 					const NTV2VideoFormat		vFormat	(vFormats[ndx]);
@@ -1578,7 +1578,9 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 					//	Transmit the packets into the IP buffer...
 					NTV2_POINTER	IPF1(2048), IPF2(2048);
 					uint32_t		IPF1bytes(0), IPF2bytes(0);
+LOGMYDEBUG("Call GetIPTransmitDataLength:");
 					SHOULD_SUCCEED(txPkts.GetIPTransmitDataLength (IPF1bytes, IPF2bytes, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2, isSingleRTPPkt));
+LOGMYDEBUG("IPF1bytes=" << DEC(IPF1bytes) << ", IPF2bytes=" << DEC(IPF2bytes) << " -- Call GetIPTransmitData:");
 					SHOULD_SUCCEED(txPkts.GetIPTransmitData (IPF1, IPF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2, isSingleRTPPkt));
 //cerr << "POST-TRANSMIT:" << endl << "IP F1 (" << DEC(IPF1bytes) << " bytes):" << endl;	IPF1.Dump(cerr, 0, IPF1bytes, 16, 4, 16);
 //if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
@@ -1586,7 +1588,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 
 					//	NOTE:	This test saves the F1 RTP buffers for use later by BFT_RTPToAncListToRTP...
 					gRTPBuffers[vFormat] = NTV2_POINTER(IPF1);	//	Deep copy
-//LOGMYDEBUG("gRTPBuffers[" << ::NTV2VideoFormatToString(vFormat) << "]:" << IPF1.GetU32s(/*u32offset*/0, /*u32count*/68, /*byteSwap*/true));
+//cerr << endl << "gRTPBuffers[" << ::NTV2VideoFormatToString(vFormat) << "]:" << endl << IPF1.GetU32s(/*u32offset*/0, /*u32count*/IPF1bytes/4, /*byteSwap*/true) << endl;
 //if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
 //	LOGMYDEBUG("F2 RTP Buffer:" << IPF2.GetU32s(/*u32offset*/0, /*u32count*/10, /*byteSwap*/true));
 
@@ -1800,6 +1802,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 
 		static bool BFT_RTPXmitTooManyPackets (void)
 		{
+			LOGMYNOTE("Started");
 			//	"TOO MANY PACKETS" TEST
 			//	Validates that GetIPTransmitData will correctly encode no more than 255 packets from a list that contains more.
 			for (unsigned oneRTP(0);  oneRTP < 2;  oneRTP++)
@@ -1811,8 +1814,8 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				AJAAncillaryList	pkts;
 				ULWord				pktNum(0);
 				AJAAncDataLoc		loc;
-				//	This test requires a 5K anc buffer for single-RTP, 9K for multiple-RTP:
-				NTV2_POINTER		F1Buffer((isSingleRTPPacket?5:9)*1024), F2Buffer;
+				//	This test requires a 5K anc buffer for single-RTP, 10K for multiple-RTP:
+				NTV2_POINTER		F1Buffer((isSingleRTPPacket?5:10)*1024), F2Buffer;
 				for (UWord lineNum(9);  lineNum < 42;  lineNum++)
 				{
 					for (UWord pktInLine(0);  pktInLine < 8;  pktInLine++)
@@ -1856,6 +1859,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				SHOULD_BE_TRUE(cmpResults.empty());
 				LOGMYNOTE("Passed test: " << (isSingleRTPPacket ? "SINGLE RTP PACKET" : "MULTIPLE RTP PACKETS"));
 			}	//	permute multiRTP & singleRTP
+			LOGMYNOTE("Passed");
 			return true;
 		}	//	BFT_RTPXmitTooManyPackets
 
