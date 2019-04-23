@@ -1043,6 +1043,14 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 
 	if (result  &&  NTV2_IS_INPUT_CROSSPOINT (crosspoint))
 	{
+		if (::NTV2DeviceCanDo2110(_boardID))
+		{	//	S2110:  decode VPID and timecode anc packets from RTP, and put into A/C Xfer and device regs
+			if (inOutXferInfo.acANCBuffer.IsNULL())
+				tmpLocalRP188F1AncBuffer = inOutXferInfo.acANCBuffer.Allocate(2048);
+			if (inOutXferInfo.acANCField2Buffer.IsNULL())
+				tmpLocalRP188F2AncBuffer = inOutXferInfo.acANCField2Buffer.Allocate(2048);
+			S2110DeviceAncFromXferBuffers(inChannel, inOutXferInfo);
+		}
 		if (taskMode == NTV2_STANDARD_TASKS)
 		{
 			//	After 12.? shipped, we discovered problems with timecode capture in our classic retail stuff.
@@ -1086,15 +1094,6 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			if (pArray)
 				pArray [NTV2_TCINDEX_DEFAULT] = tcValue;
 		}	//	if retail mode
-
-		if (::NTV2DeviceCanDo2110(_boardID))
-		{	//	S2110:  decode VPID and timecode anc packets from RTP, and put into A/C Xfer and device regs
-			if (inOutXferInfo.acANCBuffer.IsNULL())
-				tmpLocalRP188F1AncBuffer = inOutXferInfo.acANCBuffer.Allocate(2048);
-			if (inOutXferInfo.acANCField2Buffer.IsNULL())
-				tmpLocalRP188F2AncBuffer = inOutXferInfo.acANCField2Buffer.Allocate(2048);
-			S2110DeviceAncFromXferBuffers(inChannel, inOutXferInfo);
-		}
 	}	//	if NTV2Message OK && capturing
 	else if (result  &&  NTV2_IS_OUTPUT_CROSSPOINT(crosspoint))
 	{
