@@ -247,7 +247,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 					byte1 = (uint8_t) VPIDStandard_2160_QuadLink_3Ga;  //  0x97
 			}
 			else
-				byte1 = (uint8_t) VPIDStandard_1080;  //  0x85 (bogus if not 3G)
+				byte1 = (uint8_t) VPIDStandard_2160_DualLink;  //  0x96 (bogus if not 3G)
 		}
 		else
 		{

@@ -401,14 +401,13 @@ public:	//	INSTANCE METHODS
 										otherwise, specify false. Defaults to true (is progressive).
 		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
 										Defaults to zero (progressive).
-		@param[in]	inSingleRTPPkt		If true, build a single RTP packet per field;
-										otherwise, build a separate RTP packet for each SMPTE Anc packet.
-		@note		This function has the side-effect of calling AJAAncillaryData::GenerateTransmitData on each of my packets.
+		@param[in]	inSingleRTPPkt		If true (the default), assume a single RTP packet per field;
+										otherwise, base the calculation on a separate RTP packet for each SMPTE Anc packet.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						GetIPTransmitDataLength (uint32_t & outF1ByteCount, uint32_t & outF2ByteCount,
-																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0,
-																const bool inSingleRTPPkt = true);
+																	const bool inIsProgressive = true, const uint32_t inF2StartLine = 0,
+																	const bool inSingleRTPPkt = true);
 	///@}
 
 
@@ -490,13 +489,15 @@ protected:
 
 	/**
 		@brief		Appends whatever can be decoded from the given device Anc buffer to the AJAAncillaryList.
-		@param[in]	inAncBuffer		Specifies the Anc buffer to be parsed.
-		@param		packetList		The AJAAncillaryList to be appended to for whatever packets are found in the buffer.
+		@param[in]	inAncBuffer			Specifies the Anc buffer to be parsed.
+		@param		outPacketList		The AJAAncillaryList to be appended to, for whatever packets are found in the buffer.
+		@param[in]	inAllowMultiRTP		If true (the default), look for multiple RTP packets in the buffer; otherwise stop after the first.
 		@note		Called by SetFromDeviceAncBuffers, once for the F1 buffer, another time for the F2 buffer.
-		@return		AJA_STATUS_SUCCESS if successful.
+		@return		AJA_STATUS_SUCCESS if successful, including if no Anc packets are found and added to the list.
 	**/
 	static AJAStatus						AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBuffer,
-																	AJAAncillaryList & packetList);
+																	AJAAncillaryList & outPacketList,
+																	const bool inAllowMultiRTP = true);
 
 	/**
 		@brief		Answers with my F1 & F2 SMPTE anc packets encoded as RTP ULWordSequences.
@@ -521,7 +522,11 @@ protected:
 															const bool inSingleRTPPkt);
 	/**
 		@brief		Fills the buffer with the given RTP packets.
-		@param		theBuffer		The buffer to be filled.
+		@param		theBuffer		The buffer to be filled. An empty/NULL buffer is permitted, and
+									will copy no data, but instead will return the byte count that
+									otherwise would've been written.
+		@param[out]	outByteCount	Receives the total bytes written into the buffer (or that would
+									be written if given a non-NULL buffer).
 		@param[in]	inRTPPkts		The RTP packets, a vector of zero or more RTP ULWordSequences.
 		@param[in]	inAncCounts		The per-RTP-packet anc packet counts.
 		@param[in]	inIsF2			Specify false for Field1 (or progressive or Psf);  true for Field2.
@@ -529,9 +534,10 @@ protected:
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	static AJAStatus						WriteRTPPackets (NTV2_POINTER & theBuffer,
+															uint32_t & outBytesWritten,
 															const AJAU32Pkts & inRTPPkts,
 															const AJAAncPktCounts & inAncCounts,
-															const bool	inIsF2,
+															const bool inIsF2,
 															const bool inIsProgressive);
 
 private:
@@ -555,12 +561,5 @@ inline std::ostream & operator << (std::ostream & inOutStream, const AJAAncillar
 	@return		A non-constant reference to the specified output stream.
 **/
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const AJAU32Pkts & inPkts);
-
-/**
-	@param[in]	inU32Pkts			Specifies the AJAU32Pkts object of interest.
-	@param[in]	inIncludeOverhead	If true, add in the overhead of the RTP headers.
-	@return		The total number of U32 words stored in the given AJAU32Pkts object, with or without RTP header overhead.
-**/
-AJAExport size_t	GetTotalU32Count (const AJAU32Pkts & inU32Pkts, const bool inIncludeOverhead);
 
 #endif	// AJA_ANCILLARYLIST_H

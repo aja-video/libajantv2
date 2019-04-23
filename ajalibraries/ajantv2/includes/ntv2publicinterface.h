@@ -7963,7 +7963,11 @@ typedef enum
 			typedef std::set <NTV2InputSource>					NTV2InputSourceSet;					///< @brief	A set of distinct NTV2InputSource values.
 			typedef NTV2InputSourceSet::const_iterator			NTV2InputSourceSetConstIter;		///< @brief	A handy const iterator for iterating over an NTV2InputSourceSet.
 
-			typedef	std::vector <UWord>							UWordSequence;						///< @brief	An ordered sequence of UWord (uint16_t) values.
+			typedef	std::vector <uint8_t>						UByteSequence;						///< @brief	An ordered sequence of UByte (uint8_t) values.
+			typedef	UByteSequence::const_iterator				UByteSequenceConstIter;				///< @brief	A handy const iterator for iterating over a UByteSequence.
+			typedef	UByteSequence::iterator						UByteSequenceIter;					///< @brief	A handy non-const iterator for iterating over a UByteSequence.
+
+			typedef	std::vector <uint16_t>						UWordSequence;						///< @brief	An ordered sequence of UWord (uint16_t) values.
 			typedef	UWordSequence::const_iterator				UWordSequenceConstIter;				///< @brief	A handy const iterator for iterating over a UWordSequence.
 			typedef	UWordSequence::iterator						UWordSequenceIter;					///< @brief	A handy non-const iterator for iterating over a UWordSequence.
 

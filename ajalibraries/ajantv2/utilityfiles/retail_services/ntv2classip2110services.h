@@ -12,7 +12,7 @@
 //-------------------------------------------------------------------------------------------------------
 //	class ClassIP2110Services
 //-------------------------------------------------------------------------------------------------------
-class ClassIP2110Services : public Class4kServices
+class ClassIP2110Services : public DeviceServices
 {
 	
 public:
@@ -40,27 +40,32 @@ public:
 	NTV2VideoFormat ConvertStreamToVideoFormat(NTV2VideoFormat videoFormat);
 
 protected:
-    CNTV2Config2110 *       config2110;
-    
-    NetworkData2110			m2110Network;
-    TransmitVideoData2110   m2110TxVideoData;
+	CNTV2Config2110 *       config2110;
+
+	NetworkData2110			m2110Network;
+	TransmitVideoData2110   m2110TxVideoData;
 	TransmitAudioData2110   m2110TxAudioData;
 	TransmitAncData2110   	m2110TxAncData;
-    ReceiveVideoData2110    m2110RxVideoData;
+	ReceiveVideoData2110    m2110RxVideoData;
 	ReceiveAudioData2110    m2110RxAudioData;
 	ReceiveAncData2110    	m2110RxAncData;
-    IpStatus2110            m2110IpStatusData;
+	IpStatus2110            m2110IpStatusData;
 
-    NetworkData2110			m2110NetworkLast;
-    TransmitVideoData2110   m2110TxVideoDataLast;
+	NetworkData2110			m2110NetworkLast;
+	TransmitVideoData2110   m2110TxVideoDataLast;
 	TransmitAudioData2110   m2110TxAudioDataLast;
 	TransmitAncData2110   	m2110TxAncDataLast;
-    ReceiveVideoData2110    m2110RxVideoDataLast;
+	ReceiveVideoData2110    m2110RxVideoDataLast;
 	ReceiveAudioData2110    m2110RxAudioDataLast;
 	ReceiveAncData2110    	m2110RxAncDataLast;
 
 	NTV2Mode				mFb1ModeLast;
-    NTV2VideoFormat         mFb1VideoFormatLast;
+	NTV2VideoFormat         mFb1VideoFormatLast;
+	bool 					mHasSdiOut5;
+	bool 					mHasCSC5;
+	bool 					mHasLUT5;
+	bool 					mHas4kQuarter;
+
 	uint32_t				startAudioCounter;
 	uint32_t				endAudioCounter;
 };
