@@ -378,6 +378,8 @@ bool CNTV2MBController::getString(const std::string & resp, const std::string & 
 
 void CNTV2MBController::SetIGMPGroup(eSFP port, NTV2Stream stream, uint32_t mcast_addr, uint32_t src_addr, bool enable)
 {
+	printf("SetIGMPGroup (port=%d stream=%d enable=%d)\n", port, stream, enable);
+
     uint32_t offset = getIGMPCBOffset(port, stream);
     mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, IGMPCB_STATE_BUSY);
     mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_MCAST_ADDR, mcast_addr);
@@ -393,6 +395,8 @@ void CNTV2MBController::SetIGMPGroup(eSFP port, NTV2Stream stream, uint32_t mcas
 
 void CNTV2MBController::UnsetIGMPGroup(eSFP port, NTV2Stream stream)
 {
+	printf("UnsetIGMPGroup (port=%d stream=%d)\n", port, stream);
+
     uint32_t offset = getIGMPCBOffset(port, stream);
     mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, IGMPCB_STATE_BUSY);
     mDevice.WriteRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_MCAST_ADDR, 0);
@@ -403,7 +407,9 @@ void CNTV2MBController::UnsetIGMPGroup(eSFP port, NTV2Stream stream)
 
 void CNTV2MBController::EnableIGMPGroup(eSFP port, NTV2Stream stream, bool enable)
 {
-    uint32_t val = 0;
+	printf("EnableIGMPGroup (port=%d stream=%d enable=%d)\n", port, stream, enable);
+
+	uint32_t val = 0;
     uint32_t offset = getIGMPCBOffset(port, stream);
     mDevice.ReadRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, val);
     if (val != 0)
@@ -428,9 +434,9 @@ uint32_t CNTV2MBController::getIGMPCBOffset(eSFP port, NTV2Stream stream)
         uint32_t source_addr;
     };
 
-    if (NTV2_IS_VALID_SFP(port) && NTV2_IS_VALID_RX_STREAM(stream))
+	if (NTV2_IS_VALID_SFP(port) && NTV2_IS_VALID_RX_SINGLE_STREAM(stream))
     { 
-        uint32_t index = (int)stream + (NTV2_MAX_NUM_STREAMS * (int)port);
+		uint32_t index = (int)stream + (NTV2_MAX_NUM_SINGLE_STREAMS * (int)port);
         uint32_t reg   = (index * sizeof(IGMPCB))/4;
         return reg;
     }

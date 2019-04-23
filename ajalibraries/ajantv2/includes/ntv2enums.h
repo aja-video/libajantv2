@@ -1351,6 +1351,7 @@ typedef enum
     NTV2_ANC3_STREAM        = 10,
     NTV2_ANC4_STREAM        = 11,
 	NTV2_VIDEO4K_STREAM		= 12,
+	NTV2_MAX_NUM_SINGLE_STREAMS = NTV2_VIDEO4K_STREAM,
 	NTV2_MAX_NUM_STREAMS    = 13,
     NTV2_STREAM_INVALID = NTV2_MAX_NUM_STREAMS
 } NTV2Stream;
@@ -1373,6 +1374,8 @@ typedef enum
 
 #define NTV2_IS_VALID_RX_STREAM(__x__)					((__x__) >= NTV2_VIDEO1_STREAM && (__x__) < NTV2_MAX_NUM_STREAMS)
 #define NTV2_IS_VALID_TX_STREAM(__x__)					((__x__) >= NTV2_VIDEO1_STREAM && (__x__) < NTV2_MAX_NUM_STREAMS)
+#define NTV2_IS_VALID_RX_SINGLE_STREAM(__x__)			((__x__) >= NTV2_VIDEO1_STREAM && (__x__) < NTV2_MAX_NUM_SINGLE_STREAMS)
+#define NTV2_IS_VALID_TX_SINGLE_STREAM(__x__)			((__x__) >= NTV2_VIDEO1_STREAM && (__x__) < NTV2_MAX_NUM_SINGLE_STREAMS)
 
 /**
 	@brief		These enum values identify a specific source for the device's (output) reference clock.
