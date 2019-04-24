@@ -405,16 +405,16 @@ void  CNTV2Config2110::ResetPacketizerStream(const NTV2Stream stream)
         val |= bit;
         mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, val);
 
+        // Unset reset bit
+        val &= ~bit;
+        mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, val);
+
         // Wait just a bit
         #if defined(AJAWindows) || defined(MSWindows)
             ::Sleep (RESET_MILLISECONDS);
         #else
             usleep (RESET_MILLISECONDS * 1000);
         #endif
-
-        // Unset reset bit
-        val &= ~bit;
-        mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, val);
     }
 }
 
@@ -449,16 +449,16 @@ void  CNTV2Config2110::ResetDepacketizerStream(const NTV2Stream stream)
         val |= bit;
         mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, val);
 
+        // Unset reset bit
+        val &= ~bit;
+        mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, val);
+
         // Wait just a bit
         #if defined(AJAWindows) || defined(MSWindows)
             ::Sleep (RESET_MILLISECONDS);
         #else
             usleep (RESET_MILLISECONDS * 1000);
         #endif
-
-        // Unset reset bit
-        val &= ~bit;
-        mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, val);
     }
 }
 
