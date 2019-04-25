@@ -3208,12 +3208,12 @@ public:
 	**/
 
 	AJA_VIRTUAL bool	AutoCirculateInitForInput (	const NTV2Channel		inChannel,
-													const UByte				inFrameCount		= 7,
+													const UWord				inFrameCount		= 7,
 													const NTV2AudioSystem	inAudioSystem		= NTV2_AUDIOSYSTEM_INVALID,
 													const ULWord			inOptionFlags		= 0,
 													const UByte				inNumChannels		= 1,
-													const UByte				inStartFrameNumber	= 0,
-													const UByte				inEndFrameNumber	= 0);
+													const UWord				inStartFrameNumber	= 0,
+													const UWord				inEndFrameNumber	= 0);
 
 	/**
 		@brief		Prepares for subsequent AutoCirculate playout, designating a contiguous block of frame buffers on the device for use
@@ -3256,12 +3256,12 @@ public:
 	**/
 
 	AJA_VIRTUAL bool	AutoCirculateInitForOutput (const NTV2Channel		inChannel,
-													const UByte				inFrameCount		= 7,
+													const UWord				inFrameCount		= 7,
 													const NTV2AudioSystem	inAudioSystem		= NTV2_AUDIOSYSTEM_INVALID,
 													const ULWord			inOptionFlags		= 0,
 													const UByte				inNumChannels		= 1,
-													const UByte				inStartFrameNumber	= 0,
-													const UByte				inEndFrameNumber	= 0);
+													const UWord				inStartFrameNumber	= 0,
+													const UWord				inEndFrameNumber	= 0);
 
 	/**
 		@brief		Starts AutoCirculating the specified channel that was previously initialized by CNTV2Card::AutoCirculateInitForInput or
@@ -3466,7 +3466,7 @@ public:
 		@return		True if successful; otherwise false.
 		@see		See \ref aboutautocirculate
 	**/
-	AJA_VIRTUAL bool	FindUnallocatedFrames (const UByte inFrameCount, LWord & outStartFrameNumber, LWord & outEndFrameNumber);
+	AJA_VIRTUAL bool	FindUnallocatedFrames (const UWord inFrameCount, LWord & outStartFrameNumber, LWord & outEndFrameNumber);
 	///@}
 
 	/**

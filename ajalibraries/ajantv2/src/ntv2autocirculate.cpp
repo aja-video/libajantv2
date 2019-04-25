@@ -518,7 +518,7 @@ bool   CNTV2Card::GetAutoCirculate(NTV2Crosspoint channelSpec, AUTOCIRCULATE_STA
 }
 
 
-bool CNTV2Card::FindUnallocatedFrames (const UByte inFrameCount, LWord & outStartFrame, LWord & outEndFrame)
+bool CNTV2Card::FindUnallocatedFrames (const UWord inFrameCount, LWord & outStartFrame, LWord & outEndFrame)
 {
 	AUTOCIRCULATE_STATUS			acStatus;
 	typedef	std::set <uint16_t>		U16Set;
@@ -609,12 +609,12 @@ static bool GetCurrentACChannelCrosspoint (CNTV2Card & inDevice, const NTV2Chann
 
 
 bool CNTV2Card::AutoCirculateInitForInput (	const NTV2Channel		inChannel,
-											const UByte				inFrameCount,
+											const UWord				inFrameCount,
 											const NTV2AudioSystem	inAudioSystem,
 											const ULWord			inOptionFlags,
 											const UByte				inNumChannels,
-											const UByte				inStartFrameNumber,
-											const UByte				inEndFrameNumber)
+											const UWord				inStartFrameNumber,
+											const UWord				inEndFrameNumber)
 {
 	if (!NTV2_IS_VALID_CHANNEL(inChannel))
 		return false;	//	Must be valid channel
@@ -700,12 +700,12 @@ bool CNTV2Card::AutoCirculateInitForInput (	const NTV2Channel		inChannel,
 
 
 bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
-											const UByte				inFrameCount,
+											const UWord				inFrameCount,
 											const NTV2AudioSystem	inAudioSystem,
 											const ULWord			inOptionFlags,
 											const UByte				inNumChannels,
-											const UByte				inStartFrameNumber,
-											const UByte				inEndFrameNumber)
+											const UWord				inStartFrameNumber,
+											const UWord				inEndFrameNumber)
 {
 	if (!NTV2_IS_VALID_CHANNEL(inChannel))
 		return false;	//	Must be valid channel
