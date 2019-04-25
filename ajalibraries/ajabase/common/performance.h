@@ -19,7 +19,7 @@ typedef std::map<std::string, uint64_t> AJAPerformanceExtraMap;
 /////////////////////////////
 // Declarations
 /////////////////////////////
-class AJAPerformance
+class AJAExport AJAPerformance
 {
 	public:
         /**
