@@ -141,8 +141,8 @@ NTV2DeviceGetUFCVersion							1
 NTV2DeviceGetNum4kQuarterSizeConverters			1
 NTV2DeviceGetNumAESAudioInputChannels			8
 NTV2DeviceGetNumAESAudioOutputChannels			8
-NTV2DeviceGetNumAnalogAudioInputChannels		8
-NTV2DeviceGetNumAnalogAudioOutputChannels		8
+//NTV2DeviceGetNumAnalogAudioInputChannels		8
+//NTV2DeviceGetNumAnalogAudioOutputChannels		8
 NTV2DeviceGetNumAudioSystems					4
 NTV2DeviceGetNumCSCs							5
 NTV2DeviceGetNumEmbeddedAudioInputChannels		16
@@ -167,7 +167,7 @@ NTV2DeviceCanDoRGBLevelAConversion
 NTV2DeviceCanDo425Mux
 NTV2DeviceCanDo4KVideo
 NTV2DeviceCanDoAESAudioIn
-NTV2DeviceCanDoAnalogAudio
+//NTV2DeviceCanDoAnalogAudio
 NTV2DeviceCanDoAudio8Channels
 NTV2DeviceCanDoAudioDelay
 NTV2DeviceCanDoBreakoutBox
@@ -217,7 +217,7 @@ NTV2DeviceSoftwareCanChangeFrameBufferSize
 NTV2DeviceCanDoFrameStore1Display
 NTV2DeviceCanChangeEmbeddedAudioClock
 NTV2DeviceHasAudioMonitorRCAJacks
-NTV2DeviceHasBiDirectionalAnalogAudio
+//NTV2DeviceHasBiDirectionalAnalogAudio
 NTV2DeviceHasGenlockv3
 NTV2DeviceCanReportFailSafeLoaded
 NTV2DeviceCanReportRunningFirmwareDate
