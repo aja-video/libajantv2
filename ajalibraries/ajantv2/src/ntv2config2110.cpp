@@ -2999,10 +2999,10 @@ std::string CNTV2Config2110::rateToString(NTV2FrameRate rate)
         rateString = "48000/1001";
         break;
      case   NTV2_FRAMERATE_12000    :
-        rateString = "12";
+		rateString = "120";
         break;
      case   NTV2_FRAMERATE_11988    :
-        rateString = "12000/1001";
+		rateString = "120000/1001";
         break;
      case   NTV2_FRAMERATE_1500     :
         rateString = "15";
@@ -3037,9 +3037,9 @@ NTV2FrameRate CNTV2Config2110::stringToRate(std::string rateString)
         rate = NTV2_FRAMERATE_4800;
     else if (rateString == "48000/1001")
         rate = NTV2_FRAMERATE_4795;
-    else if (rateString == "12")
+	else if (rateString == "120")
         rate = NTV2_FRAMERATE_12000;
-    else if (rateString == "12000/1001")
+	else if (rateString == "120000/1001")
         rate = NTV2_FRAMERATE_11988;
     else if (rateString == "15")
         rate = NTV2_FRAMERATE_1500;
