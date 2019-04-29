@@ -2634,7 +2634,8 @@ public:
 	/**
 		@brief		Causes me to be notified when the given event/interrupt is triggered for the AJA device.
 		@param[in]	inEventCode		Specifies the INTERRUPT_ENUMS of interest.
-		@return		True if successful; otherwise false.
+		@return		True if successful; otherwise false, which can indicate communication with the device has been lost,
+					or on the Windows platform, there are no more event subscription handles available.
 		@see		CNTV2Card::UnsubscribeEvent, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	SubscribeEvent (const INTERRUPT_ENUMS inEventCode);						//	GENERIC!
@@ -2642,9 +2643,8 @@ public:
 	/**
 		@brief		Causes me to be notified when an output vertical blanking interrupt is generated for the given output channel.
 		@param[in]	inChannel	Specifies the output channel of interest.
-		@return		True if successful; otherwise false.
-		@return		True if successful; otherwise false. A <b>false</b> result usually indicates communication has been
-					lost to the device, or on the Windows platform, there are no more event subscription handles available.
+		@return		True if successful; otherwise false, which can indicate communication with the device has been lost,
+					or on the Windows platform, there are no more event subscription handles available.
 		@note		<b>Windows Users:</b> AJA recommends calling this function on the same thread that will call
 					CNTV2Card::WaitForOutputVerticalInterrupt or CNTV2Card::WaitForOutputFieldID.
 		@see		CNTV2Card::UnsubscribeOutputVerticalEvent, CNTV2Card::SubscribeEvent, \ref fieldframeinterrupts
@@ -2655,7 +2655,8 @@ public:
 	/**
 		@brief		Causes me to be notified when an input vertical blanking interrupt occurs on the given input channel.
 		@param[in]	inChannel	Specifies the input channel of interest. Defaults to ::NTV2_CHANNEL1.
-		@return		True if successful; otherwise false.
+		@return		True if successful; otherwise false, which can indicate communication with the device has been lost,
+					or on the Windows platform, there are no more event subscription handles available.
 		@note		<b>Windows Users:</b> AJA recommends calling this function on the same thread that will call
 					CNTV2Card::WaitForInputVerticalInterrupt or CNTV2Card::WaitForInputFieldID.
 		@see		CNTV2Card::UnsubscribeInputVerticalEvent, CNTV2Card::SubscribeEvent, \ref fieldframeinterrupts
