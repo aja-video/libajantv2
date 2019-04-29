@@ -9,27 +9,27 @@
 using namespace std; 
 
 
-static INTERRUPT_ENUMS	gChannelToOutputVerticalInterrupt []	= {eOutput1, eOutput2, eOutput3, eOutput4, eOutput5, eOutput6, eOutput7, eOutput8, eNumInterruptTypes};
-static INTERRUPT_ENUMS	gChannelToInputVerticalInterrupt []		= {eInput1, eInput2, eInput3, eInput4, eInput5, eInput6, eInput7, eInput8, eNumInterruptTypes};
+static INTERRUPT_ENUMS	gChannelToOutputVerticalInterrupt[]	= {eOutput1, eOutput2, eOutput3, eOutput4, eOutput5, eOutput6, eOutput7, eOutput8, eNumInterruptTypes};
+static INTERRUPT_ENUMS	gChannelToInputVerticalInterrupt[]	= {eInput1,  eInput2,  eInput3,  eInput4,  eInput5,  eInput6,  eInput7,  eInput8,  eNumInterruptTypes};
 
 
 //	Subscribe to events
 
 bool CNTV2Card::SubscribeEvent (const INTERRUPT_ENUMS inEventCode)
 {
-	return ConfigureSubscription (true, inEventCode, mInterruptEventHandles [inEventCode]);
+	return NTV2_IS_VALID_INTERRUPT_ENUM(inEventCode)  &&  ConfigureSubscription (true, inEventCode, mInterruptEventHandles[inEventCode]);
 }
 
 
-bool CNTV2Card::SubscribeOutputVerticalEvent (NTV2Channel channel)
+bool CNTV2Card::SubscribeOutputVerticalEvent (const NTV2Channel inChannel)
 {
-	return SubscribeEvent (gChannelToOutputVerticalInterrupt [channel]);
+	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  SubscribeEvent(gChannelToOutputVerticalInterrupt[inChannel]);
 }
 
 
-bool CNTV2Card::SubscribeInputVerticalEvent (NTV2Channel channel)
+bool CNTV2Card::SubscribeInputVerticalEvent (const NTV2Channel inChannel)
 {
-	return SubscribeEvent (gChannelToInputVerticalInterrupt [channel]);
+	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  SubscribeEvent(gChannelToInputVerticalInterrupt[inChannel]);
 }
 
 
@@ -37,49 +37,51 @@ bool CNTV2Card::SubscribeInputVerticalEvent (NTV2Channel channel)
 
 bool CNTV2Card::UnsubscribeEvent (const INTERRUPT_ENUMS inEventCode)
 {
-	return ConfigureSubscription (false, inEventCode, mInterruptEventHandles [inEventCode]);
+	return NTV2_IS_VALID_INTERRUPT_ENUM(inEventCode)  &&  ConfigureSubscription (false, inEventCode, mInterruptEventHandles[inEventCode]);
 }
 
 
-bool CNTV2Card::UnsubscribeOutputVerticalEvent (NTV2Channel channel)
+bool CNTV2Card::UnsubscribeOutputVerticalEvent (const NTV2Channel inChannel)
 {
-	return UnsubscribeEvent (gChannelToOutputVerticalInterrupt [channel]);
+	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  UnsubscribeEvent(gChannelToOutputVerticalInterrupt[inChannel]);
 }
 
 
-bool CNTV2Card::UnsubscribeInputVerticalEvent (NTV2Channel channel)
+bool CNTV2Card::UnsubscribeInputVerticalEvent (const NTV2Channel inChannel)
 {
-	return UnsubscribeEvent (gChannelToInputVerticalInterrupt [channel]);
+	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  UnsubscribeEvent(gChannelToInputVerticalInterrupt[inChannel]);
 }
 
 
 //	Get interrupt count
 
-bool CNTV2Card::GetOutputVerticalInterruptCount (ULWord & outCount, const NTV2Channel channel)
+bool CNTV2Card::GetOutputVerticalInterruptCount (ULWord & outCount, const NTV2Channel inChannel)
 {
-	return GetInterruptCount (gChannelToOutputVerticalInterrupt [channel], &outCount);
+	outCount = 0;
+	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  GetInterruptCount (gChannelToOutputVerticalInterrupt[inChannel], &outCount);
 }
 
 
-bool CNTV2Card::GetInputVerticalInterruptCount (ULWord & outCount, const NTV2Channel channel)
+bool CNTV2Card::GetInputVerticalInterruptCount (ULWord & outCount, const NTV2Channel inChannel)
 {
-	return GetInterruptCount (gChannelToInputVerticalInterrupt [channel], &outCount);
+	outCount = 0;
+	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  GetInterruptCount (gChannelToInputVerticalInterrupt[inChannel], &outCount);
 }
 
 
 //	Get event count
 
-bool CNTV2Card::GetOutputVerticalEventCount (ULWord & outCount, const NTV2Channel channel)
+bool CNTV2Card::GetOutputVerticalEventCount (ULWord & outCount, const NTV2Channel inChannel)
 {
-	outCount = mEventCounts [gChannelToOutputVerticalInterrupt [channel]];
-	return true;
+	outCount = NTV2_IS_VALID_CHANNEL(inChannel)  ?  mEventCounts[gChannelToOutputVerticalInterrupt[inChannel]]  :  0;
+	return NTV2_IS_VALID_CHANNEL(inChannel);
 }
 
 
-bool CNTV2Card::GetInputVerticalEventCount (ULWord & outCount, const NTV2Channel channel)
+bool CNTV2Card::GetInputVerticalEventCount (ULWord & outCount, const NTV2Channel inChannel)
 {
-	outCount = mEventCounts [gChannelToInputVerticalInterrupt [channel]];
-	return true;
+	outCount = NTV2_IS_VALID_CHANNEL(inChannel)  ?  mEventCounts[gChannelToInputVerticalInterrupt[inChannel]]  :  0;
+	return NTV2_IS_VALID_CHANNEL(inChannel);
 }
 
 
@@ -87,24 +89,29 @@ bool CNTV2Card::GetInputVerticalEventCount (ULWord & outCount, const NTV2Channel
 
 bool CNTV2Card::SetInterruptEventCount (const INTERRUPT_ENUMS inInterrupt, const ULWord inCount)
 {
-	mEventCounts [inInterrupt] = inCount;
+	if (!NTV2_IS_VALID_INTERRUPT_ENUM(inInterrupt))
+		return false;
+	mEventCounts[inInterrupt] = inCount;
 	return true;
 }
 
-bool CNTV2Card::SetOutputVerticalEventCount (const ULWord inCount, const NTV2Channel channel)
+bool CNTV2Card::SetOutputVerticalEventCount (const ULWord inCount, const NTV2Channel inChannel)
 {
-	return SetInterruptEventCount (gChannelToOutputVerticalInterrupt [channel], inCount);
+	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  SetInterruptEventCount(gChannelToOutputVerticalInterrupt[inChannel], inCount);
 }
 
-bool CNTV2Card::SetInputVerticalEventCount (const ULWord inCount, const NTV2Channel channel)
+bool CNTV2Card::SetInputVerticalEventCount (const ULWord inCount, const NTV2Channel inChannel)
 {
-	return SetInterruptEventCount (gChannelToInputVerticalInterrupt [channel], inCount);
+	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  SetInterruptEventCount(gChannelToInputVerticalInterrupt[inChannel], inCount);
 }
 
 
 bool CNTV2Card::GetInterruptEventCount (const INTERRUPT_ENUMS inInterrupt, ULWord & outCount)
 {
-	outCount = mEventCounts [inInterrupt];
+	outCount = 0;
+	if (!NTV2_IS_VALID_INTERRUPT_ENUM(inInterrupt))
+		return false;
+	outCount = mEventCounts[inInterrupt];
 	return true;
 }
 
@@ -112,7 +119,7 @@ bool CNTV2Card::GetInterruptEventCount (const INTERRUPT_ENUMS inInterrupt, ULWor
 bool CNTV2Card::WaitForOutputVerticalInterrupt (const NTV2Channel inChannel, UWord inRepeatCount)
 {
 	bool	result	(true);
-	if (!NTV2_IS_VALID_CHANNEL (inChannel))
+	if (!NTV2_IS_VALID_CHANNEL(inChannel))
 		return false;
 	if (!inRepeatCount)
 		return false;
