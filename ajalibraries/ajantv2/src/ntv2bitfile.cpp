@@ -441,7 +441,7 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
         case DEVICE_ID_KONA5:		return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5) == _designName
                                             || _designName == "kona5_12g";;
         case DEVICE_ID_KONA5_4X12G:		return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_4X12G) == _designName
-                                            || _designName == "Kona5";
+                                            || _designName == "kona5";
 		case DEVICE_ID_CORVID44_12G:	return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_12G) == _designName;
 		default:					break;
 	}
