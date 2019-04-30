@@ -14,6 +14,7 @@ SUBDIRS = ntv2burn \
 		  ntv2burn4kquadrant \
 		  ntv2capture \
 		  ntv2capture4k \
+		  ntv2capture8k \
 		  ntv2ccgrabber \
 		  ntv2ccplayer \
 		  ntv2encodehevc \
@@ -26,6 +27,7 @@ SUBDIRS = ntv2burn \
 		  ntv2outputtestpattern \
 		  ntv2player \
 		  ntv2player4k \
+		  ntv2player8k \
 		  NVIDIA/dvplowlatencydemo
 
 ifndef AJA_NO_QT
