@@ -1307,12 +1307,17 @@ bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTO
 		AJATimeCode	ajaTC;		//	We can get an AJATimeCode from it via GetTimecode
 		const AJA_FrameRate	ajaRate	(sNTV2Rate2AJARate[ntv2Rate]);
 		AJATimeBase			ajaTB	(ajaRate);
-		const bool			isDF	(ajaTB.IsNonIntegralRatio());
+
+		bool isDF = false;
+		AJAAncillaryData_Timecode_Format tcFmt = pATCPkt->GetTimecodeFormatFromTimeBase(ajaTB);
+		pATCPkt->GetDropFrameFlag(isDF, tcFmt);
+
 		pATCPkt->GetTimecode(ajaTC, ajaTB);
 								//	There is an AJATimeCode function to get an NTV2_RP188:
 								//	ajaTC.QueryRP188(ntv2rp188.fDBB, ntv2rp188.fLo, ntv2rp188.fHi, ajaTB, isDF);
 								//	But it's not implemented!  D'OH!!
 								//	Let the hacking begin...
+
 		string	tcStr;
 		ajaTC.QueryString(tcStr, ajaTB, isDF);
 		CRP188 rp188(tcStr, sNTV2Rate2TCFormat[ntv2Rate]);
@@ -1484,7 +1489,8 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 				if (!regTC)
 					continue;	//	Skip -- invalid timecode (all FFs)
 
-				const bool	isDF (ajaTB.IsNonIntegralRatio());
+				const bool isDF = AJATimeCode::QueryIsRP188DropFrame(regTC.fDBB, regTC.fLo, regTC.fHi);
+
 				AJATimeCode						tc;		tc.SetRP188(regTC.fDBB, regTC.fLo, regTC.fHi, ajaTB);
 				AJAAncillaryData_Timecode_ATC	atc;	atc.SetTimecode (tc, ajaTB, isDF);
 				atc.SetDBB (uint8_t(regTC.fDBB & 0x000000FF), uint8_t(regTC.fDBB & 0x0000FF00 >> 8));
@@ -1637,7 +1643,8 @@ bool CNTV2Card::S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2_POINT
 					//	i.e. VITC? LTC? VITC2?
 					//	For now, transmit all three...		TBD
 
-					const bool	isDF (ajaTB.IsNonIntegralRatio());
+					const bool isDF = AJATimeCode::QueryIsRP188DropFrame(regTC.fDBB, regTC.fLo, regTC.fHi);
+
 					AJATimeCode						tc;		tc.SetRP188(regTC.fDBB, regTC.fLo, regTC.fHi, ajaTB);
 					AJAAncillaryData_Timecode_ATC	atc;	atc.SetTimecode (tc, ajaTB, isDF);
 					atc.AJAAncillaryData_Timecode_ATC::SetDBB (uint8_t(regTC.fDBB & 0x000000FF), uint8_t(regTC.fDBB & 0x0000FF00 >> 8));

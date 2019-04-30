@@ -253,10 +253,15 @@ public:
 	**/
 	virtual std::string					TimecodeString (void) const;
 
+	/**
+		@brief		Get the timecode format that matches the input timebase.
+		@param[in]	inTimeBase		Specifies the time base (frame rate) associated with the specified timecode.
+		@return		The AJAAncillaryData_Timecode_Format that corresponds to the input timebase, returns AJAAncillaryData_Timecode_Format_Unknown when no match found.
+	**/
+	static AJAAncillaryData_Timecode_Format	GetTimecodeFormatFromTimeBase (const AJATimeBase & inTimeBase);
+
 protected:
 	void Init (void);	// NOT virtual - called by constructors
-
-	static AJAAncillaryData_Timecode_Format	GetTimecodeFormatFromTimeBase (const AJATimeBase & inTimeBase);
 
 	// Which timecode digits go in which elements of timeDigits[]
 	// Note that this is the same order as received/transmitted, i.e. ls digits FIRST!
