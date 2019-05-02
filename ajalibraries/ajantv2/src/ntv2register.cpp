@@ -2501,7 +2501,7 @@ bool CNTV2Card::GetRunningFirmwareDate (UWord & outYear, UWord & outMonth, UWord
 
 	outDay = ((dayBCD & 0x00F0) >> 4) * 10   +   (dayBCD & 0x000F);
 
-	return	outYear > 2010	&&  outYear < 2018
+	return	outYear > 2010
 		&&	outMonth > 0	&&  outMonth < 13
 		&&	outDay > 0		&&  outDay < 32;		//	If the date's valid, then it's supported;  otherwise, it ain't
 }
