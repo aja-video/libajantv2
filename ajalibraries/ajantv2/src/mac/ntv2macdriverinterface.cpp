@@ -513,6 +513,12 @@ io_connect_t CNTV2MacDriverInterface::GetIOConnect (const bool inDoNotAllocate) 
 }
 
 
+ULWord CNTV2MacDriverInterface::GetMacRawDriverVersion (void)
+{
+	return gDeviceMap.GetDriverVersion();
+}
+
+
 //--------------------------------------------------------------------------------------------------------------------
 //	Open
 //--------------------------------------------------------------------------------------------------------------------
