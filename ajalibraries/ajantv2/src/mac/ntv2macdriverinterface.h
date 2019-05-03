@@ -218,6 +218,7 @@ public:
 	static UWord		GetConnectionCount (void);
 	static ULWord		GetConnectionChecksum (void);
 	static void			GetClientStats (MDIStats & outStats);
+	static ULWord		GetMacRawDriverVersion (void);
 
 private:
 	AJA_VIRTUAL io_connect_t	GetIOConnect (const bool inDoNotAllocate = false) const;	//	For internal use only
