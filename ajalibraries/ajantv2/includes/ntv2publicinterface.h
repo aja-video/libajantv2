@@ -3921,7 +3921,7 @@ typedef enum
 #define kTransferFlagP2PTarget			(BIT(11))	// prepare p2p target for asynchronous transfer (with message)
 #define kTransferFlagP2PTransfer		(BIT(12))	// transfer to p2p sync or async target
 
-#define MAX_FRAMEBUFFERS                111			// Max for Corvid88
+#define MAX_FRAMEBUFFERS                512			// Max for Corvid88
 
 #define KONAIP_REGS_START                0x40000
 
