@@ -3921,7 +3921,7 @@ typedef enum
 #define kTransferFlagP2PTarget			(BIT(11))	// prepare p2p target for asynchronous transfer (with message)
 #define kTransferFlagP2PTransfer		(BIT(12))	// transfer to p2p sync or async target
 
-#define MAX_FRAMEBUFFERS                111			// Max for Corvid88
+#define MAX_FRAMEBUFFERS                512			// Max for Corvid88
 
 #define KONAIP_REGS_START                0x40000
 
@@ -4149,6 +4149,23 @@ typedef enum _INTERRUPT_ENUMS_
 
 #define	MAX_NUM_EVENT_CODES						(eNumInterruptTypes)
 #define	NTV2_IS_VALID_INTERRUPT_ENUM(__e__)		((__e__) >= eOutput1 && (__e__) < eNumInterruptTypes)
+#define NTV2_IS_INPUT_INTERRUPT(__e__)		(	(__e__) == eInput1		\
+											||	(__e__) == eInput2		\
+											||	(__e__) == eInput3		\
+											||	(__e__) == eInput4		\
+											||	(__e__) == eInput5		\
+											||	(__e__) == eInput6		\
+											||	(__e__) == eInput7		\
+											||	(__e__) == eInput8	)
+
+#define NTV2_IS_OUTPUT_INTERRUPT(__e__)		(	(__e__) == eOutput1		\
+											||	(__e__) == eOutput2		\
+											||	(__e__) == eOutput3		\
+											||	(__e__) == eOutput4		\
+											||	(__e__) == eOutput5		\
+											||	(__e__) == eOutput6		\
+											||	(__e__) == eOutput7		\
+											||	(__e__) == eOutput8	)
 
 
 // Some Mac only ENUMS that had to be moved over to get Win/Linux code to compile,
