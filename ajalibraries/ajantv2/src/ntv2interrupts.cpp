@@ -21,7 +21,12 @@ bool CNTV2Card::EnableInterrupt			(const INTERRUPT_ENUMS inInterruptCode)	{retur
 bool CNTV2Card::EnableOutputInterrupt	(const NTV2Channel channel)				{return EnableInterrupt (gChannelToOutputInterrupt [channel]);}
 bool CNTV2Card::EnableInputInterrupt	(const NTV2Channel channel)				{return EnableInterrupt (gChannelToInputInterrupt [channel]);}
 
-bool CNTV2Card::DisableInterrupt		(const INTERRUPT_ENUMS inInterruptCode)	{return ConfigureInterrupt (false, inInterruptCode);}
+bool CNTV2Card::DisableInterrupt		(const INTERRUPT_ENUMS inInterruptCode)
+{
+	if(NTV2_IS_INPUT_INTERRUPT(inInterruptCode) || NTV2_IS_OUTPUT_INTERRUPT(inInterruptCode))
+		return true;
+	return ConfigureInterrupt (false, inInterruptCode);
+}
 bool CNTV2Card::DisableOutputInterrupt	(const NTV2Channel channel)				{return DisableInterrupt (gChannelToOutputInterrupt [channel]);}
 bool CNTV2Card::DisableInputInterrupt	(const NTV2Channel channel)				{return DisableInterrupt (gChannelToInputInterrupt [channel]);}
 
