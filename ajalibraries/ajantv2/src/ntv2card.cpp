@@ -141,7 +141,7 @@ Word CNTV2Card::GetPCIFPGAVersion (void)
 
 string CNTV2Card::GetPCIFPGAVersionString (void)
 {
-	const UWord		version	(GetPCIFPGAVersion ());
+	const UWord		version	(static_cast<UWord>(GetPCIFPGAVersion()));
 	ostringstream	oss;
 	oss << hex << version;
 	return oss.str ();
@@ -280,14 +280,14 @@ string CNTV2Card::SerialNum64ToString (const uint64_t inSerialNumber)	//	Class m
 	const ULWord	serialNumLow	(inSerialNumber & 0x00000000FFFFFFFF);
     char			serialNum [9];
 
-	serialNum[0] = ((serialNumLow  & 0x000000FF)      );
-	serialNum[1] = ((serialNumLow  & 0x0000FF00) >>  8);
-	serialNum[2] = ((serialNumLow  & 0x00FF0000) >> 16);
-	serialNum[3] = ((serialNumLow  & 0xFF000000) >> 24);
-	serialNum[4] = ((serialNumHigh & 0x000000FF)      );
-	serialNum[5] = ((serialNumHigh & 0x0000FF00) >>  8);
-	serialNum[6] = ((serialNumHigh & 0x00FF0000) >> 16);
-	serialNum[7] = ((serialNumHigh & 0xFF000000) >> 24);
+	serialNum[0] = char((serialNumLow  & 0x000000FF)      );
+	serialNum[1] = char((serialNumLow  & 0x0000FF00) >>  8);
+	serialNum[2] = char((serialNumLow  & 0x00FF0000) >> 16);
+	serialNum[3] = char((serialNumLow  & 0xFF000000) >> 24);
+	serialNum[4] = char((serialNumHigh & 0x000000FF)      );
+	serialNum[5] = char((serialNumHigh & 0x0000FF00) >>  8);
+	serialNum[6] = char((serialNumHigh & 0x00FF0000) >> 16);
+	serialNum[7] = char((serialNumHigh & 0xFF000000) >> 24);
 	serialNum[8] = '\0';
 
 	for (unsigned ndx (0);  ndx < 8;  ndx++)
