@@ -270,7 +270,7 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 	if (NTV2_IS_TSI_FORMAT(value) && !NTV2DeviceCanDoVideoFormat(GetDeviceID(), value))
 		return false;
 
-    NTV2Standard inStandard = GetNTV2StandardFromVideoFormat(value);;
+    NTV2Standard inStandard = GetNTV2StandardFromVideoFormat(value, true);;
     NTV2FrameRate inFrameRate = GetNTV2FrameRateFromVideoFormat(value);
     NTV2FrameGeometry inFrameGeometry = GetNTV2FrameGeometryFromVideoFormat(value);
 	bool squares;
@@ -527,6 +527,18 @@ NTV2VideoFormat CNTV2Card::GetNTV2VideoFormat (NTV2FrameRate frameRate, NTV2Stan
 				default:					videoFormat = NTV2_FORMAT_UNKNOWN;				break;
 			}
 			break;
+			
+		case NTV2_STANDARD_3840i:
+			switch (frameRate)
+			{
+				case NTV2_FRAMERATE_2398:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x1920x1080psf_2398 : NTV2_FORMAT_3840x2160psf_2398;	break;
+				case NTV2_FRAMERATE_2400:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x1920x1080psf_2400 : NTV2_FORMAT_3840x2160psf_2400;	break;
+				case NTV2_FRAMERATE_2500:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x1920x1080psf_2500 : NTV2_FORMAT_3840x2160psf_2500;	break;
+				case NTV2_FRAMERATE_2997:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x1920x1080psf_2997 : NTV2_FORMAT_3840x2160psf_2997;	break;
+				case NTV2_FRAMERATE_3000:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x1920x1080psf_3000 : NTV2_FORMAT_3840x2160psf_3000;	break;
+				default:					videoFormat = NTV2_FORMAT_UNKNOWN;				break;
+			}
+			break;
 	
 		case NTV2_STANDARD_4096HFR:		videoFormat = NTV2_FORMAT_UNKNOWN;		break;
 	
@@ -541,6 +553,18 @@ NTV2VideoFormat CNTV2Card::GetNTV2VideoFormat (NTV2FrameRate frameRate, NTV2Stan
 				case NTV2_FRAMERATE_5000:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x2048x1080p_5000 : NTV2_FORMAT_4096x2160p_5000;	break;
 				case NTV2_FRAMERATE_5994:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x2048x1080p_5994 : NTV2_FORMAT_4096x2160p_5994;	break;
 				case NTV2_FRAMERATE_6000:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x2048x1080p_6000 : NTV2_FORMAT_4096x2160p_6000;	break;
+				default:					videoFormat = NTV2_FORMAT_UNKNOWN;				break;
+			}
+			break;
+			
+		case NTV2_STANDARD_4096i:
+			switch (frameRate)
+			{
+				case NTV2_FRAMERATE_2398:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x2048x1080psf_2398 : NTV2_FORMAT_4096x2160psf_2398;	break;
+				case NTV2_FRAMERATE_2400:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x2048x1080psf_2400 : NTV2_FORMAT_4096x2160psf_2400;	break;
+				case NTV2_FRAMERATE_2500:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x2048x1080psf_2500 : NTV2_FORMAT_4096x2160psf_2500;	break;
+				case NTV2_FRAMERATE_2997:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x2048x1080psf_2997 : NTV2_FORMAT_4096x2160psf_2997;	break;
+				case NTV2_FRAMERATE_3000:	videoFormat = isSquareDivision ? NTV2_FORMAT_4x2048x1080psf_3000 : NTV2_FORMAT_4096x2160psf_3000;	break;
 				default:					videoFormat = NTV2_FORMAT_UNKNOWN;				break;
 			}
 			break;
@@ -804,7 +828,9 @@ bool CNTV2Card::GetNumberActiveLines (ULWord & outNumActiveLines)
 		case NTV2_STANDARD_3840x2160p:
 		case NTV2_STANDARD_4096x2160p:
 		case NTV2_STANDARD_3840HFR:
-		case NTV2_STANDARD_4096HFR:		outNumActiveLines = HD_NUMLINES_4K;				break;
+		case NTV2_STANDARD_4096HFR:
+		case NTV2_STANDARD_3840i:
+		case NTV2_STANDARD_4096i:		outNumActiveLines = HD_NUMLINES_4K;				break;
 
 		case NTV2_STANDARD_7680:
 		case NTV2_STANDARD_8192:		outNumActiveLines = FD_NUMLINES_8K;				break;
@@ -856,6 +882,8 @@ NTV2FrameDimensions CNTV2Card::GetActiveFrameDimensions (const NTV2Channel inCha
 					case NTV2_STANDARD_4096HFR:		result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*2,	HD_NUMLINES_4K);			break;
 					case NTV2_STANDARD_7680:		result.Set(HD_NUMCOMPONENTPIXELS_1080*4,	FD_NUMLINES_8K);			break;
 					case NTV2_STANDARD_8192:		result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*4,	FD_NUMLINES_8K);			break;
+					case NTV2_STANDARD_3840i:		result.Set(HD_NUMCOMPONENTPIXELS_1080*2,	HD_NUMLINES_4K);			break;
+					case NTV2_STANDARD_4096i:		result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*2,	HD_NUMLINES_4K);			break;
 				#if defined(_DEBUG)
 					case NTV2_NUM_STANDARDS:																				break;
 				#else
@@ -899,7 +927,7 @@ bool CNTV2Card::SetStandard (NTV2Standard value, NTV2Channel channel)
 	}
 	if (NTV2_IS_2K1080_STANDARD(newStandard))
 	{
-		newStandard = NTV2_STANDARD_1080p;
+		newStandard = NTV2_IS_PROGRESSIVE_STANDARD(newStandard) ? NTV2_STANDARD_1080p : NTV2_STANDARD_1080;
 	}
 
 	return WriteRegister (gChannelToGlobalControlRegNum [channel],
@@ -2979,6 +3007,8 @@ bool CNTV2Card::SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard i
 		case NTV2_STANDARD_4096HFR:
 		case NTV2_STANDARD_7680:
 		case NTV2_STANDARD_8192:
+		case NTV2_STANDARD_3840i:
+		case NTV2_STANDARD_4096i:
 			if (NTV2_IS_VANCMODE_ON(inVancMode))
 				CVIDWARN("'tall' or 'taller' mode requested for '" << ::NTV2StandardToString(inStandard) << "' -- using non-VANC geometry instead");
 			break;
@@ -3063,6 +3093,8 @@ bool CNTV2Card::GetVANCMode (NTV2VANCMode & outVancMode, const NTV2Channel inCha
 		case NTV2_STANDARD_4096HFR:
 		case NTV2_STANDARD_7680:
 		case NTV2_STANDARD_8192:
+		case NTV2_STANDARD_3840i:
+		case NTV2_STANDARD_4096i:
 			break;
 	#if defined (_DEBUG)
 		case NTV2_NUM_STANDARDS:	return false;
@@ -3801,6 +3833,7 @@ bool CNTV2Card::SetSDIOutputStandard (const UWord inOutputSpigot, const NTV2Stan
 		case NTV2_STANDARD_2Kx1080i:
 		case NTV2_STANDARD_4096x2160p:
 		case NTV2_STANDARD_4096HFR:
+		case NTV2_STANDARD_4096i:
 			is2kx1080 = true;
 			break;
 		default:
@@ -6916,6 +6949,8 @@ bool CNTV2Card::GetLHIVideoDACMode(NTV2VideoDACMode & outValue)
 			case NTV2_STANDARD_4096x2160p:
 			case NTV2_STANDARD_3840HFR:
 			case NTV2_STANDARD_4096HFR:
+			case NTV2_STANDARD_3840i:
+			case NTV2_STANDARD_4096i:
 			case NTV2_STANDARD_INVALID:
 			default:
 				result = false;

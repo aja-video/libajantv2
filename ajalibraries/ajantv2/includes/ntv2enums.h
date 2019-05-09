@@ -147,6 +147,8 @@ typedef enum
     NTV2_STANDARD_4096HFR,		///< @brief	Identifies high frame-rate 4K
 	NTV2_STANDARD_7680,			///< @brief	Identifies UHD2
 	NTV2_STANDARD_8192,			///< @brief	Identifies 8K
+	NTV2_STANDARD_3840i,		///< @brief	Identifies Ultra-High-Definition (UHD) psf
+    NTV2_STANDARD_4096i,		///< @brief	Identifies 4K psf
     NTV2_NUM_STANDARDS,
     NTV2_STANDARD_UNDEFINED	= NTV2_NUM_STANDARDS,
     NTV2_STANDARD_INVALID	= NTV2_NUM_STANDARDS
@@ -181,8 +183,12 @@ typedef enum
 													||	(__s__) == NTV2_STANDARD_7680			\
 													||	(__s__) == NTV2_STANDARD_8192	)
 #define NTV2_IS_SD_STANDARD(__s__)				((__s__) == NTV2_STANDARD_525 || (__s__) == NTV2_STANDARD_625)
-#define NTV2_IS_UHD_STANDARD(__s__)				((__s__) == NTV2_STANDARD_3840x2160p || (__s__) == NTV2_STANDARD_3840HFR)
-#define NTV2_IS_4K_STANDARD(__s__)				((__s__) == NTV2_STANDARD_4096x2160p || (__s__) == NTV2_STANDARD_4096HFR)
+#define NTV2_IS_UHD_STANDARD(__s__)				((__s__) == NTV2_STANDARD_3840x2160p	\
+													|| (__s__) == NTV2_STANDARD_3840HFR	\
+													|| (__s__) == NTV2_STANDARD_3840i)
+#define NTV2_IS_4K_STANDARD(__s__)				((__s__) == NTV2_STANDARD_4096x2160p	\
+													|| (__s__) == NTV2_STANDARD_4096HFR	\
+													|| (__s__) == NTV2_STANDARD_4096i)
 #define NTV2_IS_QUAD_STANDARD(__s__)			(NTV2_IS_UHD_STANDARD(__s__) || NTV2_IS_4K_STANDARD(__s__))
 #define NTV2_IS_2K1080_STANDARD(__s__)			((__s__) == NTV2_STANDARD_2Kx1080p || (__s__) == NTV2_STANDARD_2Kx1080i)
 #define NTV2_IS_UHD2_STANDARD(__s__)			((__s__) == NTV2_STANDARD_7680)
