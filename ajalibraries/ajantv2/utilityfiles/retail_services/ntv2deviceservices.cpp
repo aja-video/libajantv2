@@ -3414,6 +3414,14 @@ void DeviceServices::SetDeviceMiscRegisters()
 		
 		mCard->WriteRegister(kRegHDMIInputControl, 1, BIT(1), 1);
 		
+		// make sure sdi out embedders are on
+		if (mDs.sdiOutSize > 2)
+			mCard->SetAudioOutputEmbedderState(NTV2_CHANNEL3, true);
+		if (mDs.sdiOutSize > 3)
+			mCard->SetAudioOutputEmbedderState(NTV2_CHANNEL4, true);
+		if (mDs.sdiOutSize > 4)
+			mCard->SetAudioOutputEmbedderState(NTV2_CHANNEL5, true);
+		
 		audioSystem = NTV2DeviceGetAudioMixerSystem(mDeviceID);
 	}
 
