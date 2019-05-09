@@ -189,6 +189,7 @@ bool DeviceServices::ReadDriverState (void)
 	
 	// current State
 	NTV2InputVideoSelect inputSelect = ds.inputSelect;
+	NTV2FrameBufferFormat frameBufferFormat = ds.frameBufferFormat;
 
 	bool bChanged = mRs->GetDeviceState(ds);
 	(void) bChanged;
@@ -249,7 +250,7 @@ bool DeviceServices::ReadDriverState (void)
 	}
 	
 	// check for format change
-	if (inputSelect != ds.inputSelect)
+	if (inputSelect != ds.inputSelect || frameBufferFormat != ds.frameBufferFormat)
 		mInputChangeCount++;
 	
 	//
