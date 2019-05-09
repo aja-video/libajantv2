@@ -2229,10 +2229,10 @@ NTV2Standard GetQuarterSizedStandard(NTV2Standard standard)
 	{
 	case NTV2_STANDARD_3840x2160p:
 	case NTV2_STANDARD_3840HFR:		return NTV2_STANDARD_1080p;
-
+	case NTV2_STANDARD_3840i:		return NTV2_STANDARD_1080;
 	case NTV2_STANDARD_4096x2160p:
 	case NTV2_STANDARD_4096HFR:		return NTV2_STANDARD_2Kx1080p;
-
+	case NTV2_STANDARD_4096i:		return NTV2_STANDARD_2Kx1080i;
 	case NTV2_STANDARD_7680:		return NTV2_STANDARD_3840x2160p;
 	case NTV2_STANDARD_8192:		return NTV2_STANDARD_4096x2160p;
 	default:						return standard;
@@ -2244,6 +2244,7 @@ NTV2Standard Get4xSizedStandard(NTV2Standard standard, bool bIs4k)
 {
 	switch (standard)
 	{
+	case NTV2_STANDARD_1080:		return bIs4k ? NTV2_STANDARD_4096i : NTV2_STANDARD_3840i;
 	case NTV2_STANDARD_1080p:		return bIs4k ? NTV2_STANDARD_4096x2160p : NTV2_STANDARD_3840x2160p;
 
 	case NTV2_STANDARD_3840HFR:
@@ -2257,7 +2258,7 @@ NTV2Standard Get4xSizedStandard(NTV2Standard standard, bool bIs4k)
 }
 
 
-NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat)
+NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat, const bool inForHardware)
 {
 	NTV2Standard standard = NTV2_STANDARD_INVALID;
 	
@@ -2296,15 +2297,17 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 	case NTV2_FORMAT_1080p_2K_2500:
 	case NTV2_FORMAT_1080p_2K_2997:
 	case NTV2_FORMAT_1080p_2K_3000:
-	case NTV2_FORMAT_1080psf_2K_2398:
-	case NTV2_FORMAT_1080psf_2K_2400:
-	case NTV2_FORMAT_1080psf_2K_2500:
 	case NTV2_FORMAT_1080p_2K_4795_A:
 	case NTV2_FORMAT_1080p_2K_4800_A:
 	case NTV2_FORMAT_1080p_2K_5000_A:
 	case NTV2_FORMAT_1080p_2K_5994_A:
 	case NTV2_FORMAT_1080p_2K_6000_A:
 		standard = NTV2_STANDARD_2Kx1080p;
+		break;
+	case NTV2_FORMAT_1080psf_2K_2398:
+	case NTV2_FORMAT_1080psf_2K_2400:
+	case NTV2_FORMAT_1080psf_2K_2500:
+		standard = inForHardware ? NTV2_STANDARD_2Kx1080i : NTV2_STANDARD_2Kx1080p;
 		break;
 	case NTV2_FORMAT_720p_2398:
 	case NTV2_FORMAT_720p_5000:
@@ -2330,28 +2333,30 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 	case NTV2_FORMAT_2K_2500:
 		standard = NTV2_STANDARD_2K ;
 		break;
-	case NTV2_FORMAT_4x1920x1080psf_2398:
-	case NTV2_FORMAT_4x1920x1080psf_2400:
-	case NTV2_FORMAT_4x1920x1080psf_2500:
-	case NTV2_FORMAT_4x1920x1080psf_2997:
-	case NTV2_FORMAT_4x1920x1080psf_3000:
 	case NTV2_FORMAT_4x1920x1080p_2398:
 	case NTV2_FORMAT_4x1920x1080p_2400:
 	case NTV2_FORMAT_4x1920x1080p_2500:
 	case NTV2_FORMAT_4x1920x1080p_2997:
 	case NTV2_FORMAT_4x1920x1080p_3000:
-	case NTV2_FORMAT_3840x2160psf_2398:
-	case NTV2_FORMAT_3840x2160psf_2400:
-	case NTV2_FORMAT_3840x2160psf_2500:
 	case NTV2_FORMAT_3840x2160p_2398:
 	case NTV2_FORMAT_3840x2160p_2400:
 	case NTV2_FORMAT_3840x2160p_2500:
 	case NTV2_FORMAT_3840x2160p_2997:
 	case NTV2_FORMAT_3840x2160p_3000:
-	case NTV2_FORMAT_3840x2160psf_2997:
-	case NTV2_FORMAT_3840x2160psf_3000:
 		standard = NTV2_STANDARD_3840x2160p;
 		break;
+	case NTV2_FORMAT_4x1920x1080psf_2398:
+	case NTV2_FORMAT_4x1920x1080psf_2400:
+	case NTV2_FORMAT_4x1920x1080psf_2500:
+	case NTV2_FORMAT_4x1920x1080psf_2997:
+	case NTV2_FORMAT_4x1920x1080psf_3000:
+	case NTV2_FORMAT_3840x2160psf_2398:
+	case NTV2_FORMAT_3840x2160psf_2400:
+	case NTV2_FORMAT_3840x2160psf_2500:
+	case NTV2_FORMAT_3840x2160psf_2997:
+	case NTV2_FORMAT_3840x2160psf_3000:
+		standard = inForHardware ? NTV2_STANDARD_3840i : NTV2_STANDARD_3840x2160p;
+		break;		
 	case NTV2_FORMAT_4x1920x1080p_5000:
 	case NTV2_FORMAT_4x1920x1080p_5994:
 	case NTV2_FORMAT_4x1920x1080p_6000:
@@ -2360,11 +2365,6 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 	case NTV2_FORMAT_3840x2160p_6000:
 		standard = NTV2_STANDARD_3840HFR;
 		break;
-	case NTV2_FORMAT_4x2048x1080psf_2398:
-	case NTV2_FORMAT_4x2048x1080psf_2400:
-	case NTV2_FORMAT_4x2048x1080psf_2500:
-	case NTV2_FORMAT_4x2048x1080psf_2997:
-	case NTV2_FORMAT_4x2048x1080psf_3000:
 	case NTV2_FORMAT_4x2048x1080p_2398:
 	case NTV2_FORMAT_4x2048x1080p_2400:
 	case NTV2_FORMAT_4x2048x1080p_2500:
@@ -2372,19 +2372,26 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 	case NTV2_FORMAT_4x2048x1080p_3000:
 	case NTV2_FORMAT_4x2048x1080p_4795:
 	case NTV2_FORMAT_4x2048x1080p_4800:
-	case NTV2_FORMAT_4096x2160psf_2398:
-	case NTV2_FORMAT_4096x2160psf_2400:
-	case NTV2_FORMAT_4096x2160psf_2500:
 	case NTV2_FORMAT_4096x2160p_2398:
 	case NTV2_FORMAT_4096x2160p_2400:
 	case NTV2_FORMAT_4096x2160p_2500:
 	case NTV2_FORMAT_4096x2160p_2997:
 	case NTV2_FORMAT_4096x2160p_3000:
-	case NTV2_FORMAT_4096x2160psf_2997:
-	case NTV2_FORMAT_4096x2160psf_3000:
 	case NTV2_FORMAT_4096x2160p_4795:
 	case NTV2_FORMAT_4096x2160p_4800:
 		standard = NTV2_STANDARD_4096x2160p;
+		break;
+	case NTV2_FORMAT_4x2048x1080psf_2398:
+	case NTV2_FORMAT_4x2048x1080psf_2400:
+	case NTV2_FORMAT_4x2048x1080psf_2500:
+	case NTV2_FORMAT_4x2048x1080psf_2997:
+	case NTV2_FORMAT_4x2048x1080psf_3000:
+	case NTV2_FORMAT_4096x2160psf_2398:
+	case NTV2_FORMAT_4096x2160psf_2400:
+	case NTV2_FORMAT_4096x2160psf_2500:
+	case NTV2_FORMAT_4096x2160psf_2997:
+	case NTV2_FORMAT_4096x2160psf_3000:
+		standard = inForHardware ? NTV2_STANDARD_4096i : NTV2_STANDARD_4096x2160p;
 		break;
 	case NTV2_FORMAT_4x2048x1080p_5000:
 	case NTV2_FORMAT_4x2048x1080p_5994:
@@ -3922,10 +3929,12 @@ NTV2FrameGeometry GetGeometryFromStandard (const NTV2Standard inStandard)
 	case NTV2_STANDARD_2Kx1080i:	return NTV2_FG_2048x1080;	//	2K1080p/i/psf
 
 	case NTV2_STANDARD_3840x2160p:								//	UHD
-	case NTV2_STANDARD_3840HFR:		return NTV2_FG_4x1920x1080;	//	HFR UHD
+	case NTV2_STANDARD_3840HFR:									//	HFR UHD
+	case NTV2_STANDARD_3840i:		return NTV2_FG_4x1920x1080;	//	HFR psf
 
 	case NTV2_STANDARD_4096x2160p:								//	4K
-	case NTV2_STANDARD_4096HFR:		return NTV2_FG_4x2048x1080;	//	HFR 4K
+	case NTV2_STANDARD_4096HFR:									//	HFR 4K
+	case NTV2_STANDARD_4096i:		return NTV2_FG_4x2048x1080;	//	HFR 4K psf
 		
 	case NTV2_STANDARD_7680:		return NTV2_FG_4x3840x2160;
 		
@@ -3972,10 +3981,10 @@ NTV2Standard GetStandardFromGeometry (const NTV2FrameGeometry inGeometry, const 
 			return NTV2_STANDARD_2K;
 
 		case NTV2_FG_4x1920x1080:	//	3840x2160
-			return NTV2_STANDARD_3840x2160p; // NTV2_STANDARD_3840HFR
+			return inIsProgressive ? NTV2_STANDARD_3840x2160p : NTV2_STANDARD_3840i; // NTV2_STANDARD_3840HFR
 
 		case NTV2_FG_4x2048x1080:	//	4096x2160
-			return NTV2_STANDARD_4096x2160p;	//	NTV2_STANDARD_4096HFR
+			return inIsProgressive ? NTV2_STANDARD_4096x2160p : NTV2_STANDARD_4096i;	//	NTV2_STANDARD_4096HFR
 
 		case NTV2_FG_4x3840x2160:	//	4320x7680	uhd 8K
 			return NTV2_STANDARD_7680;
@@ -8058,6 +8067,8 @@ string NTV2StandardToString (const NTV2Standard inValue, const bool inForRetailD
 	case NTV2_STANDARD_4096HFR:		return inForRetailDisplay ? "4K HFR"	: "NTV2_STANDARD_4096HFR";
 	case NTV2_STANDARD_7680:		return inForRetailDisplay ? "UHD2"		: "NTV2_STANDARD_7680";
 	case NTV2_STANDARD_8192:		return inForRetailDisplay ? "8K"		: "NTV2_STANDARD_8192";
+	case NTV2_STANDARD_3840i:		return inForRetailDisplay ? "UHDsf"		: "NTV2_STANDARD_3840x2160psf";
+	case NTV2_STANDARD_4096i:		return inForRetailDisplay ? "4Ksf"		: "NTV2_STANDARD_4096x2160psf";
 	case NTV2_STANDARD_INVALID:		return inForRetailDisplay ? ""			: "NTV2_STANDARD_INVALID";
 	}
 	return string ();

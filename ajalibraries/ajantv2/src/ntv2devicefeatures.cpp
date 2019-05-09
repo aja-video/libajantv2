@@ -640,6 +640,8 @@ bool NTV2DeviceGetVideoFormatFromState_Ex2(	NTV2VideoFormat *		pOutValue,
 		break;
 
 	case NTV2_STANDARD_1080:
+	case NTV2_STANDARD_3840i:
+	case NTV2_STANDARD_4096i:
 		switch (inFrameRate)
 		{
 		case NTV2_FRAMERATE_2398:
