@@ -3632,7 +3632,7 @@ void ClassIP2110Services::EveryFrameTask2110(CNTV2Config2110* config2110,
 			if (changed && m2110Network.multiSDP && Is4KFormat(mFb1VideoFormat))
 			{
 				printf("SetTxStreamConfiguration generating MULTI SDP\n");
-				config2110->GenSDP(SFP_1, NTV2_VIDEO4K_STREAM);
+				config2110->GenSDP(true, false, NTV2_VIDEO4K_STREAM);
 			}
 
 			// See if any transmit audio channels need configuring/enabling
