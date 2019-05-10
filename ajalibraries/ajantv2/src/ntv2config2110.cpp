@@ -2261,7 +2261,7 @@ bool CNTV2Config2110::GenAncStreamSDP(stringstream &sdp, const bool enableSfp1,
 		GenAncStreamSDPInfo(sdp, SFP_2, stream, gmInfo);
 		sdp << "a=mid:" << (isDash7?"2":"VID") << endl << endl;
 	}
-	true;
+	return true;
 }
 
 bool CNTV2Config2110::GenAncStreamSDPInfo(stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo)
