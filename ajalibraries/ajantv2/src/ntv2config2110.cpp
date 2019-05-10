@@ -409,12 +409,12 @@ void  CNTV2Config2110::ResetPacketizerStream(const NTV2Stream stream)
         val &= ~bit;
         mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, val);
 
-        // Wait just a bit
-        #if defined(AJAWindows) || defined(MSWindows)
-            ::Sleep (RESET_MILLISECONDS);
-        #else
-            usleep (RESET_MILLISECONDS * 1000);
-        #endif
+		// Wait just a bit
+		#if defined(AJAWindows) || defined(MSWindows)
+			::Sleep (RESET_MILLISECONDS);
+		#else
+			usleep (RESET_MILLISECONDS * 1000);
+		#endif
     }
 }
 
@@ -453,12 +453,12 @@ void  CNTV2Config2110::ResetDepacketizerStream(const NTV2Stream stream)
         val &= ~bit;
         mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, val);
 
-        // Wait just a bit
-        #if defined(AJAWindows) || defined(MSWindows)
-            ::Sleep (RESET_MILLISECONDS);
-        #else
-            usleep (RESET_MILLISECONDS * 1000);
-        #endif
+		// Wait just a bit
+		#if defined(AJAWindows) || defined(MSWindows)
+			::Sleep (RESET_MILLISECONDS);
+		#else
+			usleep (RESET_MILLISECONDS * 1000);
+		#endif
     }
 }
 
@@ -1134,14 +1134,7 @@ bool CNTV2Config2110::SetTxStreamEnable(const NTV2Stream stream, bool enableSfp1
     SetArbiter(SFP_2, stream, enableSfp2);
 
     // Generate and push the SDP
-    if (enableSfp1)
-    {
-		GenSDP(SFP_1, stream);
-    }
-    if (enableSfp2)
-    {
-		GenSDP(SFP_2, stream);
-    }
+	GenSDP(enableSfp1, enableSfp2, stream);
 
 	if ((StreamType(stream) == VIDEO_STREAM) || (StreamType(stream) == AUDIO_STREAM))
 	{
@@ -1784,9 +1777,9 @@ string CNTV2Config2110::GetSDPUrl(const eSFP sfp, const NTV2Stream stream)
     return preAmble + localIPAddress + "/" + namePre + namePost;
 }
 
-string CNTV2Config2110::GetGeneratedSDP(const eSFP sfp, const NTV2Stream stream)
+string CNTV2Config2110::GetGeneratedSDP(bool enabledSfp1, bool enabledSfp2, const NTV2Stream stream)
 {
-	GenSDP(sfp, stream, false);
+	GenSDP(enabledSfp1, enabledSfp2, stream, false);
     return txsdp.str();
 }
 
@@ -1797,7 +1790,8 @@ string CNTV2Config2110::To_String(int val)
     return oss.str();
 }
 
-bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushit)
+bool CNTV2Config2110::GenSDP(const bool enableSfp1, const bool enableSfp2,
+											const NTV2Stream stream, bool pushit)
 {
     stringstream & sdp = txsdp;
 
@@ -1817,7 +1811,7 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
 
 	uint32_t val;
 	// o is required but for multi SDP's we will just assume the originator is SFP_1
-	if ((sfp == SFP_2) && (StreamType(stream) != VIDEO_4K_STREAM))
+	if (!enableSfp1 && (StreamType(stream) != VIDEO_4K_STREAM))
 		mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1, val);
 	else
 		mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0, val);
@@ -1845,7 +1839,7 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
 
     if (StreamType(stream) == VIDEO_STREAM)
     {
-		GenVideoStreamSDPInfo(sdp, sfp, stream, &gmInfo[0]);
+		GenVideoStreamSDP(sdp, enableSfp1, enableSfp2, stream, &gmInfo[0]);
     }
 	else if (StreamType(stream) == VIDEO_4K_STREAM)
 	{
@@ -1853,11 +1847,11 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
 	}
     else if (StreamType(stream) == AUDIO_STREAM)
     {
-		GenAudioStreamSDPInfo(sdp, sfp, stream, &gmInfo[0]);
+		GenAudioStreamSDP(sdp, enableSfp1, enableSfp2, stream, &gmInfo[0]);
     }
 	else if (StreamType(stream) == ANC_STREAM)
 	{
-		GenAncStreamSDPInfo(sdp, sfp, stream, &gmInfo[0]);
+		GenAncStreamSDP(sdp, enableSfp1, enableSfp2, stream, &gmInfo[0]);
 	}
     
 	//cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
@@ -1889,6 +1883,27 @@ bool CNTV2Config2110::GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushi
 	}
 
     return rv;
+}
+
+bool CNTV2Config2110::GenVideoStreamSDP(stringstream &sdp, const bool enableSfp1,
+					const bool enableSfp2, const NTV2Stream stream, char *gmInfo)
+{
+	bool isDash7 = enableSfp1 && enableSfp2;
+	if (isDash7)
+	{
+		sdp << "a=group:DUP 1 2" << endl << endl;
+	}
+	if (enableSfp1)
+	{
+		GenVideoStreamSDPInfo(sdp, SFP_1, stream, gmInfo);
+		sdp << "a=mid:" << (isDash7?"1":"VID") << endl << endl;
+	}
+	if (enableSfp2)
+	{
+		GenVideoStreamSDPInfo(sdp, SFP_2, stream, gmInfo);
+		sdp << "a=mid:" << (isDash7?"2":"VID") << endl << endl;
+	}
+	return true;
 }
 
 bool CNTV2Config2110::GenVideoStreamSDPInfo(stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo)
@@ -1985,7 +2000,6 @@ bool CNTV2Config2110::GenVideoStreamSDPInfo(stringstream & sdp, const eSFP sfp, 
     // PTP
     sdp << "a=ts-refclk:ptp=IEEE1588-2008:" << gmInfo << endl;
     sdp << "a=mediaclk:direct=0" << endl;
-    sdp << "a=mid:VID" << endl;
 
     return true;
 }
@@ -2122,6 +2136,27 @@ bool CNTV2Config2110::GenVideoStreamMultiSDPInfo(stringstream & sdp, char* gmInf
 }
 
 
+bool CNTV2Config2110::GenAudioStreamSDP(stringstream &sdp, const bool enableSfp1,
+					const bool enableSfp2, const NTV2Stream stream, char *gmInfo)
+{
+	bool isDash7 = enableSfp1 && enableSfp2;
+	if (isDash7)
+	{
+		sdp << "a=group:DUP 1 2" << endl << endl;
+	}
+	if (enableSfp1)
+	{
+		GenAudioStreamSDPInfo(sdp, SFP_1, stream, gmInfo);
+		sdp << "a=mid:" << (isDash7?"1":"VID") << endl << endl;
+	}
+	if (enableSfp2)
+	{
+		GenAudioStreamSDPInfo(sdp, SFP_2, stream, gmInfo);
+		sdp << "a=mid:" << (isDash7?"2":"VID") << endl << endl;
+	}
+	return true;
+}
+
 bool CNTV2Config2110::GenAudioStreamSDPInfo(stringstream & sdp, const eSFP sfp, const  NTV2Stream stream, char* gmInfo)
 {
     tx_2110Config config;
@@ -2200,13 +2235,33 @@ bool CNTV2Config2110::GenAudioStreamSDPInfo(stringstream & sdp, const eSFP sfp, 
     if (config. audioPktInterval == PACKET_INTERVAL_125uS)
         sdp << "a=ptime:0.125" << endl;
     else
-		sdp << "a=ptime:1.000" << endl;
+        sdp << "a=ptime:1.000" << endl;
 
 	sdp << "a=ts-refclk:ptp=IEEE1588-2008:" << gmInfo << endl;
     sdp << "a=mediaclk:direct=0" << endl;
-    sdp << "a=mid:AUD" << endl;
 
     return true;
+}
+
+bool CNTV2Config2110::GenAncStreamSDP(stringstream &sdp, const bool enableSfp1,
+					const bool enableSfp2, const NTV2Stream stream, char *gmInfo)
+{
+	bool isDash7 = enableSfp1 && enableSfp2;
+	if (isDash7)
+	{
+		sdp << "a=group:DUP 1 2" << endl << endl;
+	}
+	if (enableSfp1)
+	{
+		GenAncStreamSDPInfo(sdp, SFP_1, stream, gmInfo);
+		sdp << "a=mid:" << (isDash7?"1":"VID") << endl << endl;
+	}
+	if (enableSfp2)
+	{
+		GenAncStreamSDPInfo(sdp, SFP_2, stream, gmInfo);
+		sdp << "a=mid:" << (isDash7?"2":"VID") << endl << endl;
+	}
+	true;
 }
 
 bool CNTV2Config2110::GenAncStreamSDPInfo(stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo)
@@ -2260,7 +2315,6 @@ bool CNTV2Config2110::GenAncStreamSDPInfo(stringstream & sdp, const eSFP sfp, co
 	// PTP
 	sdp << "a=ts-refclk:ptp=IEEE1588-2008:" << gmInfo << endl;
 	sdp << "a=mediaclk:direct=0" << endl;
-	sdp << "a=mid:VID" << endl;
 
 	return true;
 }

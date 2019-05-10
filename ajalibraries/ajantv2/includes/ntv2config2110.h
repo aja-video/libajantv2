@@ -336,7 +336,7 @@ public:
     bool        GetIPServicesControl(bool & enable, bool & forceReconfig);
 
 	std::string GetSDPUrl(const eSFP sfp, const NTV2Stream stream);
-	std::string GetGeneratedSDP(const eSFP sfp, const NTV2Stream stream);
+	std::string GetGeneratedSDP(bool enabledSfp1, bool enabledSfp2, const NTV2Stream stream);
 	bool        GetActualSDP(std::string url, std::string & sdp);
 	bool		ExtractRxVideoConfigFromSDP(std::string sdp, rx_2110Config & rxConfig);
 	bool		ExtractRxVideoConfigFromSDP(std::string sdp, multiRx_2110Config & rxConfig);
@@ -365,7 +365,7 @@ public:
     bool        GetSFPMSAData(eSFP port, SFPMSAData & data);
     bool        GetLinkStatus(eSFP port, SFPStatus & sfpStatus);
 
-	bool        GenSDP(const eSFP sfp, const NTV2Stream stream, bool pushit=true);
+	bool        GenSDP(bool enableSfp1, bool enableSfp2, const NTV2Stream stream, bool pushit=true);
 
 	static uint32_t  Get2110TxStreamIndex(NTV2Stream stream );
     static uint32_t  GetDecapsulatorAddress(eSFP sfp, NTV2Stream stream);
@@ -408,9 +408,15 @@ protected:
 
     bool		ConfigurePTP(const eSFP sfp, const std::string localIPAddress);
 
+	bool		GenVideoStreamSDP(std::stringstream &sdp, const bool enableSfp1,
+					const bool enableSfp2, const NTV2Stream stream, char *gmInfo);
 	bool        GenVideoStreamSDPInfo(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo);
 	bool		GenVideoStreamMultiSDPInfo(std::stringstream & sdp, char* gmInfo);
+	bool		GenAudioStreamSDP(std::stringstream &sdp, const bool enableSfp1,
+					const bool enableSfp2, const NTV2Stream stream, char *gmInfo);
 	bool        GenAudioStreamSDPInfo(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo);
+	bool		GenAncStreamSDP(std::stringstream &sdp, const bool enableSfp1,
+					const bool enableSfp2, const NTV2Stream stream, char *gmInfo);
 	bool        GenAncStreamSDPInfo(std::stringstream & sdp, const eSFP sfp, const NTV2Stream stream, char* gmInfo);
 
     NTV2StreamType  StreamType(const NTV2Stream stream);
