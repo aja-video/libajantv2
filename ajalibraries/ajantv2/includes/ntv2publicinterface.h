@@ -4251,6 +4251,7 @@ typedef struct NTV2RegInfo
 			@note		To synthesize the other comparison operators (!=, <=, >, >=), in client code, add "#include <utility>", and "using namespace std::rel_ops;".
 		**/
 		AJAExport bool			operator < (const NTV2RegInfo & inRHS) const;
+		AJAExport std::ostream & Print (std::ostream & outputStream, const bool inAsCode = false) const;
 	#endif	//	not NTV2_BUILDING_DRIVER
 } NTV2RegInfo;
 

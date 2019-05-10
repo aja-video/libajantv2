@@ -2539,6 +2539,40 @@ bool NTV2RegInfo::operator < (const NTV2RegInfo & inRHS) const
 	return mine < rhs;
 }
 
+ostream & NTV2RegInfo::Print (ostream & oss, const bool inAsCode) const
+{
+	const string regName (::NTV2RegisterNumberToString(NTV2RegisterNumber(registerNumber)));
+	if (inAsCode)
+	{
+		const bool badName (regName.find(' ') != string::npos);
+		oss << "mDevice.WriteRegister (";
+		if (badName)
+			oss << DEC(registerNumber);
+		else
+			oss << regName;
+		oss << ", " << xHEX0N(registerValue,8);
+		if (registerMask != 0xFFFFFFFF)
+			oss << ", " << xHEX0N(registerMask,8);
+		if (registerShift)
+			oss << ", " << DEC(registerShift);
+		oss << ");  // ";
+		if (badName)
+			oss << regName;
+		else
+			oss << "Reg " << DEC(registerNumber);
+	}
+	else
+	{
+		oss << "[" << regName << "|" << DEC(registerNumber) << ": val=" << xHEX0N(registerValue,8);
+		if (registerMask != 0xFFFFFFFF)
+			oss << " msk=" << xHEX0N(registerMask,8);
+		if (registerShift)
+			oss << " shf=" << DEC(registerShift);
+		oss << "]";
+	}
+	return oss;
+}
+
 
 ostream & NTV2PrintRasterLineOffsets(const NTV2RasterLineOffsets & inObj, ostream & inOutStream)
 {
@@ -2616,11 +2650,7 @@ NTV2RegisterReadsConstIter FindFirstMatchingRegisterNumber (const uint32_t inReg
 
 ostream & operator << (std::ostream & inOutStream, const NTV2RegInfo & inObj)
 {
-	const string	regName(::NTV2RegisterNumberToString(NTV2RegisterNumber(inObj.registerNumber)));
-	inOutStream << "[" << regName << "|" << DEC(inObj.registerNumber) << ": val=" << xHEX0N(inObj.registerValue,8);
-	if (inObj.registerMask != 0xFFFFFFFF)	inOutStream << " msk=" << xHEX0N(inObj.registerMask,8);
-	if (inObj.registerShift != 0)			inOutStream << " shf=" << DEC(inObj.registerShift);
-	return inOutStream << "]";
+	return inObj.Print(inOutStream);
 }
 
 

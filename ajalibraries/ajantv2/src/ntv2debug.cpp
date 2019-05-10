@@ -789,10 +789,10 @@ const char * ntv2RegStrings[] =
 	"kRegFlatMatte2Value",							// 249
 	"kRegXptSelectGroup9",							// 250
 	"kRegXptSelectGroup10",							// 251
-	"kRegLTC2OutBits0_31",							// 252
-	"kRegLTC2OutBits32_63",							// 253
-	"kRegLTC2InBits0_31",							// 254
-	"kRegLTC2InBits32_63",							// 255
+	"kRegLTC2EmbeddedBits0_31",						// 252
+	"kRegLTC2EmbeddedBits32_63",					// 253
+	"kRegLTC2AnalogBits0_31",						// 254
+	"kRegLTC2AnalogBits32_63",						// 255
 	"kRegSDITransmitControl",						// 256
 	"kRegCh3Control",								// 257
 	"kRegCh3OutputFrame",							// 258
