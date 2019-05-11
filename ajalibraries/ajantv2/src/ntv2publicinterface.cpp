@@ -2545,7 +2545,7 @@ ostream & NTV2RegInfo::Print (ostream & oss, const bool inAsCode) const
 	if (inAsCode)
 	{
 		const bool badName (regName.find(' ') != string::npos);
-		oss << "mDevice.WriteRegister (";
+		oss << "theDevice.WriteRegister (";
 		if (badName)
 			oss << DEC(registerNumber);
 		else
