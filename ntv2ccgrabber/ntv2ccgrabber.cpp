@@ -1311,10 +1311,10 @@ string	CCGrabberConfig::OutputModeToString (const OutputMode inMode)
 	if (IS_VALID_OutputMode(inMode))
 		return gModeStrs[inMode];
 	string result;
-	for (unsigned ndx(0);  ndx < sizeof(gModeStrs)/sizeof(gModeStrs[0]);  )
+	for (unsigned ndx(0);  ndx < 5;  )
 	{
 		result += gModeStrs[ndx];
-		if (!gModeStrs[++ndx].empty())
+		if (!(gModeStrs[++ndx].empty()))
 			result += "|";
 	}
 	return result;
@@ -1362,7 +1362,7 @@ string	CCGrabberConfig::CaptionDataSrcToString (const CaptionDataSrc inDataSrc)
 	if (IS_VALID_CaptionDataSrc(inDataSrc))
 		return gSrcStrs[inDataSrc];
 	string result;
-	for (unsigned ndx(0);  ndx < sizeof(gSrcStrs)/sizeof(gSrcStrs[0]);  )
+	for (unsigned ndx(0);  ndx < 6;  )
 	{
 		result += gSrcStrs[ndx];
 		if (!gSrcStrs[++ndx].empty())
