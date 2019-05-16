@@ -623,6 +623,8 @@ public:
 										buffer contents.
 		@param[in]	inChannel			The FrameStore/Channel being used for ingest. Defaults to NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
+		@note		This function assumes the device Anc extractor has been properly configured by a prior calls to
+					CNTV2Card::AncExtractInit, CNTV2Card::AncExtractSetWriteParams (and also possibly CNTV2Card::AncExtractSetField2WriteParams).
 		@note		This function will block and not return until the transfer has finished or failed.
 		@note		This function uses the values stored in the ::kVRegAncField1Offset and ::kVRegAncField2Offset virtual registers
 					to determine the Anc data boundary locations within each frame buffer in device memory.
@@ -648,6 +650,8 @@ public:
 										buffer content.
 		@param[in]	inChannel			The FrameStore/Channel being used for playout. Defaults to NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
+		@note		This function assumes the device Anc inserter has been properly configured by prior calls to
+					CNTV2Card::AncInsertInit, CNTV2Card::AncInsertSetReadParams (and also possibly CNTV2Card::AncInsertSetField2ReadParams).
 		@note		This function will block and not return until the transfer has finished or failed.
 		@note		This function uses the values stored in the ::kVRegAncField1Offset and ::kVRegAncField2Offset virtual registers
 					to determine the Anc data boundary locations within each frame buffer in device memory.
