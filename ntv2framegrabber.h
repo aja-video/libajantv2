@@ -147,6 +147,7 @@ class NTV2FrameGrabber : public QThread
 		bool CheckForValidInput (void);
 
 		NTV2VideoFormat GetVideoFormatFromInputSource (void);
+        NTV2LHIHDMIColorSpace GetColorSpaceFromInputSource (void);
 
 		bool IsInput3Gb (const NTV2InputSource inputSource);
 
@@ -165,6 +166,7 @@ class NTV2FrameGrabber : public QThread
         ULWord                      mNumChannels;           ///< @brief Number of capture frame channels
         bool                        mTsi;                   ///< @brief Channels in tsi mode
 		NTV2VideoFormat				mCurrentVideoFormat;	///< @brief	Current video format seen on selected device input
+        NTV2LHIHDMIColorSpace       mCurrentColorSpace;     ///< @brief Current color space seen on selected device input
 		NTV2VideoFormat				mLastVideoFormat;		///< @brief	Used to detect input video format changes
 		ULWord						mDebounceCounter;		///< @brief	Used for detecting stable input video
 		bool						mFormatIsProgressive;	///< @brief	True if input video format is progressive (not interlaced)
