@@ -36,6 +36,7 @@ NTV2FrameGrabber::NTV2FrameGrabber (QObject * parent)
         mNumChannels            (0),
         mTsi                    (false),
 		mCurrentVideoFormat		(NTV2_FORMAT_UNKNOWN),
+        mCurrentColorSpace      (NTV2_LHIHDMIColorSpaceYCbCr),
 		mLastVideoFormat		(NTV2_FORMAT_UNKNOWN),
 		mDebounceCounter		(0),
 		mFormatIsProgressive	(true),
@@ -539,7 +540,8 @@ bool NTV2FrameGrabber::SetupInput (void)
 	}
 
 	mCurrentVideoFormat = GetVideoFormatFromInputSource ();
-	mFrameDimensions.Set (QTPREVIEW_WIDGET_X, QTPREVIEW_WIDGET_Y);
+    mCurrentColorSpace = GetColorSpaceFromInputSource ();
+    mFrameDimensions.Set (QTPREVIEW_WIDGET_X, QTPREVIEW_WIDGET_Y);
 
 	if (NTV2_IS_VALID_VIDEO_FORMAT (mCurrentVideoFormat))
 	{
@@ -591,8 +593,6 @@ bool NTV2FrameGrabber::SetupInput (void)
             mNumChannels = 0;
             mTsi = false;
 
-            NTV2LHIHDMIColorSpace	hdmiColor	(NTV2_LHIHDMIColorSpaceRGB);
-            mNTV2Card.GetHDMIInputColor (hdmiColor, mChannel);
             if (!mbFixedReference)
 				mNTV2Card.SetReference (::NTV2InputSourceToReferenceSource(mInputSource));
 
@@ -610,7 +610,7 @@ bool NTV2FrameGrabber::SetupInput (void)
                     mNTV2Card.SetFrameBufferFormat (channel, mFrameBufferFormat);
                 }
 
-                if (hdmiColor == NTV2_LHIHDMIColorSpaceYCbCr)
+                if (mCurrentColorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
                 {
                     mNTV2Card.Connect (NTV2_XptCSC1VidInput,
                                         ::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, false/*isHDMI_RGB*/, NTV2_CHANNEL1/*hdmiQuadrant*/));
@@ -652,7 +652,7 @@ bool NTV2FrameGrabber::SetupInput (void)
                     mNTV2Card.EnableChannel (channel);
 					mNTV2Card.SetMode (channel, NTV2_MODE_CAPTURE);
                     mNTV2Card.SetFrameBufferFormat (channel, mFrameBufferFormat);
-                    if (hdmiColor == NTV2_LHIHDMIColorSpaceYCbCr)
+                    if (mCurrentColorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
                     {
                         mNTV2Card.Connect (::GetCSCInputXptFromChannel (channel),
                                             ::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, false/*isHDMI_RGB*/, channel/*hdmiQuadrant*/));
@@ -672,7 +672,7 @@ bool NTV2FrameGrabber::SetupInput (void)
 				mNTV2Card.EnableChannel (mChannel);
 				mNTV2Card.SetMode (mChannel, NTV2_MODE_CAPTURE);
 				mNTV2Card.SetFrameBufferFormat (mChannel, mFrameBufferFormat);
-				if (hdmiColor == NTV2_LHIHDMIColorSpaceYCbCr)
+                if (mCurrentColorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
 				{
 					mNTV2Card.Connect (::GetCSCInputXptFromChannel (mChannel),
 										::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, false/*isHDMI_RGB*/, 0/*hdmiQuadrant*/));
@@ -739,12 +739,15 @@ void NTV2FrameGrabber::StopAutoCirculate (void)
 bool NTV2FrameGrabber::CheckForValidInput (void)
 {
 	NTV2VideoFormat	videoFormat	(GetVideoFormatFromInputSource ());
-	if (videoFormat == NTV2_FORMAT_UNKNOWN)
+    NTV2LHIHDMIColorSpace colorSpace (GetColorSpaceFromInputSource ());
+
+    if (videoFormat == NTV2_FORMAT_UNKNOWN)
 	{
 		mCurrentVideoFormat = videoFormat;
 		return false;
 	}	//	if no video or unknown format
-	else if (mCurrentVideoFormat != videoFormat)
+    else if ((mCurrentVideoFormat != videoFormat) ||
+             (mCurrentColorSpace != colorSpace))
 	{
 		if (mDebounceCounter == 0)
 		{
@@ -817,6 +820,19 @@ NTV2VideoFormat NTV2FrameGrabber::GetVideoFormatFromInputSource (void)
 	return videoFormat;
 
 }	//	GetVideoFormatFromInputSource
+
+
+NTV2LHIHDMIColorSpace NTV2FrameGrabber::GetColorSpaceFromInputSource (void)
+{
+    if (NTV2_INPUT_SOURCE_IS_HDMI (mInputSource))
+    {
+        NTV2LHIHDMIColorSpace	hdmiColor	(NTV2_LHIHDMIColorSpaceRGB);
+        mNTV2Card.GetHDMIInputColor (hdmiColor, mChannel);
+        return hdmiColor;
+    }
+
+    return NTV2_LHIHDMIColorSpaceYCbCr;
+}
 
 
 bool NTV2FrameGrabber::IsInput3Gb (const NTV2InputSource inputSource)
