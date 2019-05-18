@@ -112,6 +112,14 @@ NTV2_WgtFrameBuffer3
 NTV2_WgtFrameBuffer4
 NTV2_WgtCSC1
 NTV2_WgtCSC2
+NTV2_WgtDualLinkV2In1
+NTV2_WgtDualLinkV2In2
+NTV2_WgtDualLinkV2In3
+NTV2_WgtDualLinkV2In4
+NTV2_WgtDualLinkV2Out1
+NTV2_WgtDualLinkV2Out2
+NTV2_WgtDualLinkV2Out3
+NTV2_WgtDualLinkV2Out4
 NTV2_WgtMixer1
 NTV2_WgtGenLock
 NTV2_Wgt12GSDIIn1
@@ -176,6 +184,7 @@ NTV2DeviceCanDoAudioDelay
 NTV2DeviceCanDoBreakoutBox
 NTV2DeviceCanDoCapture
 NTV2DeviceCanDoCustomAnc
+NTV2DeviceCanDoDualLink
 NTV2DeviceCanDoHDMIOutStereo
 NTV2DeviceCanDoHDVideo
 NTV2DeviceCanDoLTC
