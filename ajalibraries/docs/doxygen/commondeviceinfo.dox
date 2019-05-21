@@ -977,14 +977,14 @@
 	-	Call CNTV2Card::GetAudioOutputAESSyncModeBit to see if the device is setting the Sync Mode bit.
 	-	Call CNTV2Card::SetAudioOutputAESSyncModeBit to change the setting.
 
-	If the device supports it (see ::NTV2DeviceCanDoBreakoutBox and ::NTV2DeviceGetNumAESAudioOutputChannels functions),
-	<b>AES/EBU audio playout</b> through a breakout box’s (or breakout cable’s) BNC connectors will automatically carry
-	the same per-channel audio samples being played/embedded from <b>Audio Sytem 1</b> (::NTV2_AUDIOSYSTEM_1).
-	This can be changed to use a different set of 4 audio channels, or even a different <b>Audio System</b>.
+	If the device supports <b>AES/EBU audio playout</b> through a breakout box or cable (see ::NTV2DeviceCanDoBreakoutBox and
+	::NTV2DeviceGetNumAESAudioOutputChannels functions), the output BNCs will automatically carry the same per-channel audio
+	samples being played/embedded from <b>Audio Sytem 1</b> (::NTV2_AUDIOSYSTEM_1).  This can be changed to use a different
+	set of 4 audio channels, even from a different <b>Audio System</b> (if available).
 	-	Call CNTV2Card::GetAESOutputSource to determine the current ::NTV2AudioSystem and ::NTV2Audio4ChannelSelect
-		(band of 4 audio channels) being used for a given set of 4 AES audio channels.
-	-	Call CNTV2Card::SetAESOutputSource to set/change the 4 audio channels and/or ::NTV2AudioSystem to be used for
-		a given set of 4 AES audio channels.
+		(a contiguous band of 4 audio channels) being used for a given set of 4 AES audio channels.
+	-	Call CNTV2Card::SetAESOutputSource to set the 4 audio channels and/or ::NTV2AudioSystem to be used for a given set
+		of 4 AES audio channels.
 
 
 	<hr size="50px">
