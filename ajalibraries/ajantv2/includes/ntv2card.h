@@ -688,6 +688,48 @@ public:
 	AJA_VIRTUAL bool	DMABufferUnlockAll ();
 
 
+	/**
+		@brief		Clears the ANC region in AJA device for specified frames.
+		@param[in]	ndx						Specifies the index of the ANC region to clear
+											0		is ANC Field 1
+											1		is ANC Field 2
+											0xff	is all ANC regions
+		@param[in]	inStartFrameNumber		Optionally specifies the starting frame number as a zero-based unsigned decimal integer.
+											Defaults to zero.
+		@param[in]	inEndFrameNumber		Optionally specifies the ending frame number as a zero-based unsigned decimal integer.
+											Defaults to zero.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	DMAClearAncRegion(UWord ndx,
+										  const UWord inStartFrameNumber = 0,
+										  const UWord inEndFrameNumber	 = 0);
+
+	/**
+		@brief		Get the offset and size of ANC region within frame buffer
+		@param[in]	ndx							Specifies the index of the ANC region to query
+												0		is ANC Field 1
+												1		is ANC Field 2
+												0xff	is all ANC regions
+		@param[out]	offsetToAncDataInBytes		Specifies the byte offset where the ANC region starts.
+		@param[out]	sizeOfAncRegionInBytes		Specifies the size of the ANC region.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetAncRegionOffsetAndSizeWithinFrameBuffer(UWord ndx,
+																   ULWord & offsetToAncDataInBytes,
+																   ULWord & sizeOfAncRegionInBytes);
+
+	/**
+		@brief		Get the offset from bottom of Frame Buffer for ANC region
+		@param[in]	ndx						Specifies the index of the ANC region to query
+											0		is ANC Field 1
+											1		is ANC Field 2
+											0xff	is all ANC regions
+		@param[out]	offsetFromBottom		Specifies the byte offset from bottom of Frame Buffer for ANC region at ndx.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetAncRegionOffsetFromFrameBufferBottom(UWord ndx, ULWord & offsetFromBottom);
+
+
 #if !defined(NTV2_DEPRECATE_15_2)
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool	DMAReadAnc (	const ULWord		inFrameNumber,
 																UByte *				pOutAncBuffer,

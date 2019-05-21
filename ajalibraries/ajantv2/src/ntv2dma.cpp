@@ -329,6 +329,112 @@ bool CNTV2Card::DMABufferUnlockAll (void)
 }
 
 
+bool CNTV2Card::DMAClearAncRegion(UWord ndx,
+								  const UWord inStartFrameNumber,
+								  const UWord inEndFrameNumber)
+{
+	bool result = false;
+
+	if (NTV2DeviceCanDoCustomAnc(GetDeviceID()))
+	{
+		ULWord offsetInBytes = 0;
+		ULWord sizeInBytes = 0;
+		result = GetAncRegionOffsetAndSizeWithinFrameBuffer(ndx, offsetInBytes, sizeInBytes);
+		if (result && sizeInBytes > 0)
+		{
+			NTV2_POINTER zeroBuffer(sizeInBytes);
+			zeroBuffer.Fill(ULWord64(0));
+			for (UWord i=inStartFrameNumber;i<inEndFrameNumber+1;i++)
+			{
+				result = DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, /*isRead*/false, i,
+									  reinterpret_cast <ULWord *> (zeroBuffer.GetHostPointer()),
+									  offsetInBytes, zeroBuffer.GetByteCount(), true);
+				if (!result)
+				{
+					break;
+				}
+			}
+		}
+
+	}
+
+	return result;
+}
+
+
+bool CNTV2Card::GetAncRegionOffsetAndSizeWithinFrameBuffer(UWord ndx, ULWord & offsetToAncDataInBytes,
+														   ULWord & sizeOfAncRegionInBytes)
+{
+	bool result = false;
+
+	if (NTV2DeviceCanDoCustomAnc(GetDeviceID()))
+	{
+		NTV2Framesize frameSize(NTV2_FRAMESIZE_INVALID);
+		result = GetFrameBufferSize (NTV2_CHANNEL1, frameSize);
+		if (result)
+		{
+			const ULWord frameSizeInBytes(::NTV2FramesizeToByteCount(frameSize));
+			ULWord offsetFromEnd=0;
+			result = GetAncRegionOffsetFromFrameBufferBottom(ndx, offsetFromEnd);
+			if (result)
+			{
+				if (offsetFromEnd > frameSizeInBytes)
+				{
+					result = false;
+				}
+				else
+				{
+					offsetToAncDataInBytes = frameSizeInBytes - offsetFromEnd;
+					sizeOfAncRegionInBytes = offsetFromEnd;
+				}
+			}
+		}
+	}
+
+	return result;
+}
+
+
+bool CNTV2Card::GetAncRegionOffsetFromFrameBufferBottom(UWord ndx, ULWord & offsetFromBottom)
+{
+	bool result = false;
+	offsetFromBottom = 0;
+
+	if (NTV2DeviceCanDoCustomAnc(GetDeviceID()))
+	{
+		if (ndx >= 0xff)
+		{
+			// read all and get max
+			result = ReadRegister(kVRegAncField1Offset, offsetFromBottom);
+			if (result)
+			{
+				ULWord temp=0;
+				result = ReadRegister(kVRegAncField2Offset, temp);
+				if (result)
+				{
+					if (temp > offsetFromBottom)
+					{
+						offsetFromBottom = temp;
+					}
+				}
+			}
+		}
+		else if (ndx == 0)
+		{
+			// Anc Field 1
+			result = ReadRegister(kVRegAncField1Offset, offsetFromBottom);
+		}
+		else if (ndx == 1)
+		{
+			// Anc Field 2
+			result = ReadRegister(kVRegAncField2Offset, offsetFromBottom);
+		}
+	}
+
+	return result;
+}
+
+
 #if !defined (NTV2_DEPRECATE)
 	bool CNTV2Card::DmaRead (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
 							 const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous)
