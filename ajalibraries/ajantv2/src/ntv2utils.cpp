@@ -7859,6 +7859,25 @@ string NTV2VideoLimitingToString (const NTV2VideoLimiting inValue, const bool in
 }
 
 
+string NTV2BreakoutTypeToString (const NTV2BreakoutType inValue, const bool inCompactDisplay)
+{
+	switch(inValue)
+	{
+		case NTV2_BreakoutNone:		return inCompactDisplay	? "None"		: "NTV2_BreakoutNone";
+		case NTV2_BreakoutCableXLR:	return inCompactDisplay	? "XLR"			: "NTV2_BreakoutCableXLR";
+		case NTV2_BreakoutCableBNC:	return inCompactDisplay	? "BNC"			: "NTV2_BreakoutCableBNC";
+		case NTV2_KBox:				return inCompactDisplay	? "KBox"		: "NTV2_KBox";
+		case NTV2_KLBox:			return inCompactDisplay	? "KLBox"		: "NTV2_KLBox";
+		case NTV2_K3Box:			return inCompactDisplay	? "K3Box"		: "NTV2_K3Box";
+		case NTV2_KLHiBox:			return inCompactDisplay	? "KLHiBox"		: "NTV2_KLHiBox";
+		case NTV2_KLHePlusBox:		return inCompactDisplay	? "KLHePlusBox"	: "NTV2_KLHePlusBox";
+		case NTV2_K3GBox:			return inCompactDisplay	? "K3GBox"		: "NTV2_K3GBox";
+		case NTV2_MAX_NUM_BreakoutTypes:	break;
+	}
+	return "";
+}
+
+
 string NTV2EmbeddedAudioInputToString (const NTV2EmbeddedAudioInput inValue,  const bool inCompactDisplay)
 {
 	ostringstream	oss;

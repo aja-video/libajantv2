@@ -601,11 +601,14 @@ void CNTV2SupportLogger::FetchAutoCirculateLog(std::ostringstream& oss) const
             << setw (7) << status.acBufferLevel
             << setw (10) << ::NTV2AudioSystemToString (status.acAudioSystem, true)
             << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_RP188		? "+RP188"		: "-RP188")
+            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_LTC			? "+LTC"		: "-LTC")
             << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_FBFCHANGE	? "+FBFchg"		: "-FBFchg")
             << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_FBOCHANGE	? "+FBOchg"		: "-FBOchg")
             << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_COLORCORRECT	? "+ColCor"		: "-ColCor")
             << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_VIDPROC		? "+VidProc"	: "-VidProc")
             << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_ANC			? "+AncData"	: "-AncData")
+            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_FIELDS		? "+FldMode"	: "-FldMode")
+            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_HDMIAUX		? "+HDMIAux"	: "-HDMIAux")
             << setw (22) << ::NTV2VideoFormatToString (getVideoFormat(mDevice, chan))
             << endl;
     }	//	for each channel
