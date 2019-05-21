@@ -607,6 +607,8 @@ void CNTV2SupportLogger::FetchAutoCirculateLog(std::ostringstream& oss) const
             << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_COLORCORRECT	? "+ColCor"		: "-ColCor")
             << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_VIDPROC		? "+VidProc"	: "-VidProc")
             << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_ANC			? "+AncData"	: "-AncData")
+            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_FIELDS		? "+FldMode"	: "-FldMode")
+            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_HDMIAUX		? "+HDMIAux"	: "-HDMIAux")
             << setw (22) << ::NTV2VideoFormatToString (getVideoFormat(mDevice, chan))
             << endl;
     }	//	for each channel
