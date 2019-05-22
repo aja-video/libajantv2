@@ -689,45 +689,58 @@ public:
 
 
 	/**
-		@brief		Clears the ANC region in AJA device for specified frames.
-		@param[in]	ndx						Specifies the index of the ANC region to clear
-											0		is ANC Field 1
-											1		is ANC Field 2
-											0xff	is all ANC regions
-		@param[in]	inStartFrameNumber		Optionally specifies the starting frame number as a zero-based unsigned decimal integer.
-											Defaults to zero.
-		@param[in]	inEndFrameNumber		Optionally specifies the ending frame number as a zero-based unsigned decimal integer.
-											Defaults to zero.
-		@return		True if successful; otherwise false.
+		@brief		These enumerations identify the various ancillary data regions located at the bottom
+					of each frame buffer on the NTV2 device.
 	**/
-	AJA_VIRTUAL bool	DMAClearAncRegion(UWord ndx,
-										  const UWord inStartFrameNumber = 0,
-										  const UWord inEndFrameNumber	 = 0);
+	typedef enum
+	{
+		NTV2_AncRgn_Field1,		///< @brief	Identifies the "normal" Field 1 ancillary data region.
+		NTV2_AncRgn_Field2,		///< @brief	Identifies the "normal" Field 2 ancillary data region.
+		NTV2_AncRgn_MonField1,	///< @brief	Identifies the "monitor" or "auxiliary" Field 1 ancillary data region.
+		NTV2_AncRgn_MonField2,	///< @brief	Identifies the "monitor" or "auxiliary" Field 2 ancillary data region.
+		NTV2_MAX_NUM_AncRgns,
+		NTV2_AncRgn_All = 0xFFFF	///< @brief	Identifies "all" ancillary data regions.
+	} NTV2AncillaryDataRegion;
 
 	/**
-		@brief		Get the offset and size of ANC region within frame buffer
-		@param[in]	ndx							Specifies the index of the ANC region to query
-												0		is ANC Field 1
-												1		is ANC Field 2
-												0xff	is all ANC regions
-		@param[out]	offsetToAncDataInBytes		Specifies the byte offset where the ANC region starts.
-		@param[out]	sizeOfAncRegionInBytes		Specifies the size of the ANC region.
+		@brief		Clears the ancillary data region in the device frame buffer for the specified frames.
+		@param[in]	inStartFrameNumber		Specifies the starting device frame number.
+		@param[in]	inEndFrameNumber		Specifies the ending device frame number.
+		@param[in]	inAncRegion				Optionally specifies the ancillary data region to clear (e.g.
+											NTV2_AncRgn_Field1, NTV2_AncRgn_Field2, etc.).  Defaults to all regions.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetAncRegionOffsetAndSizeWithinFrameBuffer(UWord ndx,
-																   ULWord & offsetToAncDataInBytes,
-																   ULWord & sizeOfAncRegionInBytes);
+	AJA_VIRTUAL bool	DMAClearAncRegion (	const UWord inStartFrameNumber,
+											const UWord inEndFrameNumber,
+											const UWord inAncRegion = NTV2_AncRgn_All);
 
 	/**
-		@brief		Get the offset from bottom of Frame Buffer for ANC region
-		@param[in]	ndx						Specifies the index of the ANC region to query
-											0		is ANC Field 1
-											1		is ANC Field 2
-											0xff	is all ANC regions
-		@param[out]	offsetFromBottom		Specifies the byte offset from bottom of Frame Buffer for ANC region at ndx.
+		@brief		Answers with the offset and size of an ancillary data region within a device frame buffer.
+		@param[out]	outByteOffset	Receives the byte offset where the ancillary data region starts in the frame buffer,
+									(measured from the start of the frame buffer).
+									This is guaranteed to be non-zero if the function succeeds, and zero if it fails.
+		@param[out]	outByteCount	Receives the size of the ancillary data region, in bytes.
+									This is guaranteed to be non-zero if the function succeeds, and zero if it fails.
+		@param[in]	inAncRegion		Optionally specifies the ancillary data region of interest (e.g. NTV2_AncRgn_Field1,
+									NTV2_AncRgn_Field2, etc.).  Defaults to all regions, for the maximum offset and size
+									among all of them.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetAncRegionOffsetFromFrameBufferBottom(UWord ndx, ULWord & offsetFromBottom);
+	AJA_VIRTUAL bool	GetAncRegionOffsetAndSize (ULWord & outByteOffset, ULWord & outByteCount,
+													const UWord inAncRegion = NTV2_AncRgn_All);
+
+	/**
+		@brief		Answers with the byte offset to the start of an ancillary data region within a device frame buffer,
+					as measured from the bottom of the frame buffer.
+		@param[out]	outByteOffsetFromBottom		Receives the byte offset to the start of the ancillary data region,
+												as measured from the bottom of the frame buffer.
+		@param[in]	inAncRegion		Optionally specifies the ancillary data region of interest (e.g. NTV2_AncRgn_Field1,
+									NTV2_AncRgn_Field2, etc.).  Defaults to all regions, for the largest offset among
+									them all.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetAncRegionOffsetFromBottom (ULWord & outByteOffsetFromBottom,
+														const UWord inAncRegion = NTV2_AncRgn_All);
 
 
 #if !defined(NTV2_DEPRECATE_15_2)

@@ -329,109 +329,75 @@ bool CNTV2Card::DMABufferUnlockAll (void)
 }
 
 
-bool CNTV2Card::DMAClearAncRegion(UWord ndx,
-								  const UWord inStartFrameNumber,
-								  const UWord inEndFrameNumber)
+bool CNTV2Card::DMAClearAncRegion (const UWord inAncRegion,  const UWord inStartFrameNumber,  const UWord inEndFrameNumber)
 {
-	bool result = false;
+	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
+		return false;	//	no anc inserters/extractors
 
-	if (NTV2DeviceCanDoCustomAnc(GetDeviceID()))
-	{
-		ULWord offsetInBytes = 0;
-		ULWord sizeInBytes = 0;
-		result = GetAncRegionOffsetAndSizeWithinFrameBuffer(ndx, offsetInBytes, sizeInBytes);
-		if (result && sizeInBytes > 0)
-		{
-			NTV2_POINTER zeroBuffer(sizeInBytes);
-			zeroBuffer.Fill(ULWord64(0));
-			for (UWord i=inStartFrameNumber;i<inEndFrameNumber+1;i++)
-			{
-				result = DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, /*isRead*/false, i,
-									  reinterpret_cast <ULWord *> (zeroBuffer.GetHostPointer()),
-									  offsetInBytes, zeroBuffer.GetByteCount(), true);
-				if (!result)
-				{
-					break;
-				}
-			}
-		}
+	ULWord offsetInBytes(0), sizeInBytes(0);
+	if (!GetAncRegionOffsetAndSize(offsetInBytes, sizeInBytes, inAncRegion))
+		return false;	//	no such region
+	if (!sizeInBytes)
+		return false;	//	zero size
 
-	}
-
-	return result;
+	NTV2_POINTER zeroBuffer(sizeInBytes);
+	zeroBuffer.Fill(ULWord64(0));
+	for (UWord ndx(inStartFrameNumber);  ndx < inEndFrameNumber + 1;  ndx++)
+		if (!DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, /*isRead*/false, /*frameNum*/ndx,
+							reinterpret_cast <ULWord *> (zeroBuffer.GetHostPointer()),
+							offsetInBytes, zeroBuffer.GetByteCount(), /*synchronous*/true))
+			return false;	//	DMA write failure
+	return true;
 }
 
 
-bool CNTV2Card::GetAncRegionOffsetAndSizeWithinFrameBuffer(UWord ndx, ULWord & offsetToAncDataInBytes,
-														   ULWord & sizeOfAncRegionInBytes)
+bool CNTV2Card::GetAncRegionOffsetAndSize (ULWord & outByteOffset,  ULWord & outByteCount, const UWord inAncRegion)
 {
-	bool result = false;
+	outByteOffset = outByteCount = 0;
+	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
+		return false;
 
-	if (NTV2DeviceCanDoCustomAnc(GetDeviceID()))
-	{
-		NTV2Framesize frameSize(NTV2_FRAMESIZE_INVALID);
-		result = GetFrameBufferSize (NTV2_CHANNEL1, frameSize);
-		if (result)
-		{
-			const ULWord frameSizeInBytes(::NTV2FramesizeToByteCount(frameSize));
-			ULWord offsetFromEnd=0;
-			result = GetAncRegionOffsetFromFrameBufferBottom(ndx, offsetFromEnd);
-			if (result)
-			{
-				if (offsetFromEnd > frameSizeInBytes)
-				{
-					result = false;
-				}
-				else
-				{
-					offsetToAncDataInBytes = frameSizeInBytes - offsetFromEnd;
-					sizeOfAncRegionInBytes = offsetFromEnd;
-				}
-			}
-		}
-	}
+	NTV2Framesize frameSize(NTV2_FRAMESIZE_INVALID);
+	if (!GetFrameBufferSize (NTV2_CHANNEL1, frameSize))
+		return false;	//	Bail
 
-	return result;
+	const ULWord frameSizeInBytes (::NTV2FramesizeToByteCount(frameSize));
+	ULWord offsetFromEnd(0);
+	if (!GetAncRegionOffsetFromBottom(offsetFromEnd, inAncRegion))
+		return false;	//	Bail
+
+	if (offsetFromEnd > frameSizeInBytes)
+		return false;	//	Bad offset
+
+	//	Convert to offset from top of frame buffer...
+	outByteOffset = frameSizeInBytes - offsetFromEnd;
+	outByteCount = offsetFromEnd;
+	return outByteOffset && outByteCount;
 }
 
 
-bool CNTV2Card::GetAncRegionOffsetFromFrameBufferBottom(UWord ndx, ULWord & offsetFromBottom)
+bool CNTV2Card::GetAncRegionOffsetFromBottom (ULWord & offsetFromBottom, const UWord inAncRegion)
 {
-	bool result = false;
 	offsetFromBottom = 0;
 
-	if (NTV2DeviceCanDoCustomAnc(GetDeviceID()))
-	{
-		if (ndx >= 0xff)
-		{
-			// read all and get max
-			result = ReadRegister(kVRegAncField1Offset, offsetFromBottom);
-			if (result)
-			{
-				ULWord temp=0;
-				result = ReadRegister(kVRegAncField2Offset, temp);
-				if (result)
-				{
-					if (temp > offsetFromBottom)
-					{
-						offsetFromBottom = temp;
-					}
-				}
-			}
-		}
-		else if (ndx == 0)
-		{
-			// Anc Field 1
-			result = ReadRegister(kVRegAncField1Offset, offsetFromBottom);
-		}
-		else if (ndx == 1)
-		{
-			// Anc Field 2
-			result = ReadRegister(kVRegAncField2Offset, offsetFromBottom);
-		}
-	}
+	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
+		return false;	//	No custom anc support
 
-	return result;
+	if (inAncRegion == NTV2_AncRgn_Field1)
+		return ReadRegister(kVRegAncField1Offset, offsetFromBottom);	// Anc Field 1
+	else if (inAncRegion == NTV2_AncRgn_Field2)
+		return ReadRegister(kVRegAncField2Offset, offsetFromBottom);	// Anc Field 2
+	if (inAncRegion < NTV2_AncRgn_All)
+		return false;	//	Bad index
+
+	//	Read all and determine the largest...
+	ULWord temp(0);
+	if (!ReadRegister(kVRegAncField1Offset, offsetFromBottom)
+		||  !ReadRegister(kVRegAncField2Offset, temp))
+			return false;	//	Read VReg failed
+	if (temp > offsetFromBottom)
+		offsetFromBottom = temp;
+	return true;
 }
 
 
