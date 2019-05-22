@@ -4925,12 +4925,12 @@ public:
 		@brief		Answers whether or not a valid analog LTC signal is being applied to the device's analog LTC input connector.
 		@param[out]	outIsPresent	Receives 'true' if a valid analog LTC signal is present at the analog LTC input connector;
 									otherwise 'false'.
+		@param[in]	inLTCInputNdx	Optionally specifies the LTC input connector. Defaults to 0 (LTCIn1).
 		@return		True if successful; otherwise false.
 		@note		Some devices share analog LTC input and reference input on one connector.
 					For these devices, this call should be preceded by a call to NTV2Card::SetLTCInputEnable(true).
 	**/
-	AJA_VIRTUAL bool		GetLTCInputPresent (bool & outIsPresent);
-	AJA_VIRTUAL inline bool	GetLTCInputPresent (bool * pOutValue)										{return pOutValue ? GetLTCInputPresent (*pOutValue) : false;}
+	AJA_VIRTUAL bool		GetLTCInputPresent (bool & outIsPresent, const UWord inLTCInputNdx = 0);
 
 	AJA_VIRTUAL bool		SetLTCOnReference (bool inNewValue);			//	DEPRECATE??
 	AJA_VIRTUAL bool		GetLTCOnReference (bool & outLTCIsOnReference);	//	DEPRECATE??
@@ -6372,6 +6372,7 @@ public:
     AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIInputStatusRegister				(ULWord * pOutValue,									const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetHDMIInputStatus(*pOutValue, inChannel) : false;}	///< @deprecated	Use CNTV2Card::GetHDMIInputStatus instead.
     AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIInputColor						(NTV2LHIHDMIColorSpace * pOutValue,						const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetHDMIInputColor(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	ReadOutputTimingControl					(ULWord * pOutValue,									const UWord inOutputSpigot = 0)					) {return pOutValue ? ReadOutputTimingControl(*pOutValue, inOutputSpigot) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetLTCInputPresent						(bool * pOutValue)																						) {return pOutValue ? GetLTCInputPresent (*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 
 	AJA_VIRTUAL        NTV2_DEPRECATED_f(bool	GetAudioOutputMonitorSource				(NTV2AudioMonitorSelect * pOutValue,					NTV2Channel * pOutChannel = NULL)				);	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 

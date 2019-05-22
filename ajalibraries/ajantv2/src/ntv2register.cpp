@@ -7015,13 +7015,14 @@ bool CNTV2Card::GetLTCOnReference (bool & outLTCIsOnReference)
 	return retVal;
 }
 
-bool CNTV2Card::GetLTCInputPresent (bool & outIsPresent)
+bool CNTV2Card::GetLTCInputPresent (bool & outIsPresent, const UWord inLTCInputNdx)
 {
-	ULWord	tempVal	(0);
-	bool	retVal	(ReadRegister (kRegStatus, tempVal, kRegMaskLTCInPresent, kRegShiftLTCInPresent));
-	if (retVal)
-		outIsPresent = (bool) tempVal;
-	return retVal;
+	if (inLTCInputNdx >= ::NTV2DeviceGetNumLTCInputs(_boardID))
+		return false;	//	No such LTC input
+	if (inLTCInputNdx)	//	LTCIn2
+		return CNTV2DriverInterface::ReadRegister (kRegLTCStatusControl, outIsPresent, kRegMaskLTC2InPresent, kRegShiftLTC2InPresent);
+	else				//	LTCIn1
+		return CNTV2DriverInterface::ReadRegister (kRegStatus, outIsPresent, kRegMaskLTCInPresent, kRegShiftLTCInPresent);
 }
 
 bool CNTV2Card::SetLTCEmbeddedOutEnable(bool value)
