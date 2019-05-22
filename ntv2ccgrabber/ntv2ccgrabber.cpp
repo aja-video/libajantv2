@@ -553,9 +553,9 @@ void NTV2CCGrabber::CaptureFrames (void)
 		//	Start AutoCirculate running...
 		mDevice.AutoCirculateStart(mConfig.fInputChannel);
 		if (currentVideoFormat == NTV2_FORMAT_625_5000)	//	Hack to override incorrect 625i50 values used in 15.0-and-earlier drivers:
-		{	UWord	maj(0), min(0), pt(0), build(0);
-			if (mDevice.GetDriverVersionComponents(maj, min, pt, build))
-				if ((maj == 15 && min == 0) || (maj && (maj < 15)))	//	driver version <= 15.0
+		{	UWord	majV(0), minV(0), pt(0), build(0);
+			if (mDevice.GetDriverVersionComponents(majV, minV, pt, build))
+				if ((majV == 15 && minV == 0) || (majV && (majV < 15)))	//	driver version <= 15.0
 					mDevice.AncExtractInit (UWord(::GetIndexForNTV2InputSource(mConfig.fInputSource)), mConfig.fInputChannel, NTV2_STANDARD_625);
 		}
 
