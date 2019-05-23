@@ -329,7 +329,7 @@ bool CNTV2Card::DMABufferUnlockAll (void)
 }
 
 
-bool CNTV2Card::DMAClearAncRegion (const UWord inAncRegion,  const UWord inStartFrameNumber,  const UWord inEndFrameNumber)
+bool CNTV2Card::DMAClearAncRegion (const UWord inStartFrameNumber,  const UWord inEndFrameNumber, const UWord inAncRegion)
 {
 	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
 		return false;	//	no anc inserters/extractors
