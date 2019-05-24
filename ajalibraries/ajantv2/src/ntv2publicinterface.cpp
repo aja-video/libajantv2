@@ -826,7 +826,9 @@ ostream & operator << (ostream & inOutStream, const AUTOCIRCULATE_STATUS & inObj
 					<< (inObj.acOptionFlags & AUTOCIRCULATE_WITH_FBOCHANGE		? " +FBOCHG" : "")
 					<< (inObj.acOptionFlags & AUTOCIRCULATE_WITH_COLORCORRECT	? " +COLORCORR" : "")
 					<< (inObj.acOptionFlags & AUTOCIRCULATE_WITH_VIDPROC		? " +VIDPROC" : "")
-					<< (inObj.acOptionFlags & AUTOCIRCULATE_WITH_ANC			? " +ANC" : "");
+					<< (inObj.acOptionFlags & AUTOCIRCULATE_WITH_ANC			? " +ANC" : "")
+					<< (inObj.acOptionFlags & AUTOCIRCULATE_WITH_FIELDS			? " +FldMode" : "")
+					<< (inObj.acOptionFlags & AUTOCIRCULATE_WITH_HDMIAUX		? " +HDMIAux" : "");
 					//	<< inObj.acRDTSCStartTime
 					//	<< inObj.acAudioClockStartTime
 					//	<< inObj.acRDTSCCurrentTime

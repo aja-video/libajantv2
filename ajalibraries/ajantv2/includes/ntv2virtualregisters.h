@@ -317,13 +317,14 @@ typedef enum
                                                                         //	kVRegChannelCrosspointFirst+6
 	kVRegChannelCrosspointLast				= VIRTUALREG_START+387,		//	kVRegChannelCrosspointFirst+7
 
-//	kVRegDriverVersionMajor					= VIRTUALREG_START+388,		///< @deprecated	Obsolete starting in SDK 13.0, replaced by kVRegDriverVersion
-//	kVRegDriverVersionMinor					= VIRTUALREG_START+389,		///< @deprecated	Obsolete starting in SDK 13.0, replaced by kVRegDriverVersion
-//	kVRegDriverVersionPoint					= VIRTUALREG_START+390,		///< @deprecated	Obsolete starting in SDK 13.0, replaced by kVRegDriverVersion
+	//	Starting in SDK 13.0, kVRegDriverVersionMajor, kVRegDriverVersionMinor and kVRegDriverVersionPoint
+	//	were all replaced by a single virtual register kVRegDriverVersion.
+	kVRegMonAncField1Offset					= VIRTUALREG_START+389,		///< @brief	Monitor Anc Field1 byte offset from end of frame buffer (IoIP only, GUMP)
+	kVRegMonAncField2Offset					= VIRTUALREG_START+390,		///< @brief	Monitor Anc Field2 byte offset from end of frame buffer (IoIP only, GUMP)
 	kVRegFollowInputFormat					= VIRTUALREG_START+391,
 
-	kVRegAncField1Offset					= VIRTUALREG_START+392,		///< @brief	How many bytes to subtract from the end of a frame buffer for field 1 ANC
-	kVRegAncField2Offset					= VIRTUALREG_START+393,		///< @brief	How many bytes to subtract from the end of a frame buffer for field 2 ANC
+	kVRegAncField1Offset					= VIRTUALREG_START+392,		///< @brief	Anc Field1 byte offset from end of frame buffer (GUMP on all boards except RTP for SMPTE2022/IP)
+	kVRegAncField2Offset					= VIRTUALREG_START+393,		///< @brief	Anc Field2 byte offset from end of frame buffer (GUMP on all boards except RTP for SMPTE2022/IP)
 	kVRegAgentCheck							= VIRTUALREG_START+394,
 	kVRegUnused_2							= VIRTUALREG_START+395,
 	

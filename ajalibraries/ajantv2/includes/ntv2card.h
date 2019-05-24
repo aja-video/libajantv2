@@ -714,6 +714,61 @@ public:
 	AJA_VIRTUAL bool	DMABufferUnlockAll ();
 
 
+	/**
+		@brief		These enumerations identify the various ancillary data regions located at the bottom
+					of each frame buffer on the NTV2 device.
+	**/
+	typedef enum
+	{
+		NTV2_AncRgn_Field1,		///< @brief	Identifies the "normal" Field 1 ancillary data region.
+		NTV2_AncRgn_Field2,		///< @brief	Identifies the "normal" Field 2 ancillary data region.
+		NTV2_AncRgn_MonField1,	///< @brief	Identifies the "monitor" or "auxiliary" Field 1 ancillary data region.
+		NTV2_AncRgn_MonField2,	///< @brief	Identifies the "monitor" or "auxiliary" Field 2 ancillary data region.
+		NTV2_MAX_NUM_AncRgns,
+		NTV2_AncRgn_All = 0xFFFF	///< @brief	Identifies "all" ancillary data regions.
+	} NTV2AncillaryDataRegion;
+
+	/**
+		@brief		Clears the ancillary data region in the device frame buffer for the specified frames.
+		@param[in]	inStartFrameNumber		Specifies the starting device frame number.
+		@param[in]	inEndFrameNumber		Specifies the ending device frame number.
+		@param[in]	inAncRegion				Optionally specifies the ancillary data region to clear (e.g.
+											NTV2_AncRgn_Field1, NTV2_AncRgn_Field2, etc.).  Defaults to all regions.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	DMAClearAncRegion (	const UWord inStartFrameNumber,
+											const UWord inEndFrameNumber,
+											const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All);
+
+	/**
+		@brief		Answers with the offset and size of an ancillary data region within a device frame buffer.
+		@param[out]	outByteOffset	Receives the byte offset where the ancillary data region starts in the frame buffer,
+									(measured from the start of the frame buffer).
+									This is guaranteed to be non-zero if the function succeeds, and zero if it fails.
+		@param[out]	outByteCount	Receives the size of the ancillary data region, in bytes.
+									This is guaranteed to be non-zero if the function succeeds, and zero if it fails.
+		@param[in]	inAncRegion		Optionally specifies the ancillary data region of interest (e.g. NTV2_AncRgn_Field1,
+									NTV2_AncRgn_Field2, etc.).  Defaults to all regions, for the maximum offset and size
+									among all of them.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetAncRegionOffsetAndSize (ULWord & outByteOffset, ULWord & outByteCount,
+													const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All);
+
+	/**
+		@brief		Answers with the byte offset to the start of an ancillary data region within a device frame buffer,
+					as measured from the bottom of the frame buffer.
+		@param[out]	outByteOffsetFromBottom		Receives the byte offset to the start of the ancillary data region,
+												as measured from the bottom of the frame buffer.
+		@param[in]	inAncRegion		Optionally specifies the ancillary data region of interest (e.g. NTV2_AncRgn_Field1,
+									NTV2_AncRgn_Field2, etc.).  Defaults to all regions, for the largest offset among
+									them all.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetAncRegionOffsetFromBottom (ULWord & outByteOffsetFromBottom,
+														const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All);
+
+
 #if !defined(NTV2_DEPRECATE_15_2)
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool	DMAReadAnc (	const ULWord		inFrameNumber,
 																UByte *				pOutAncBuffer,
@@ -4951,12 +5006,12 @@ public:
 		@brief		Answers whether or not a valid analog LTC signal is being applied to the device's analog LTC input connector.
 		@param[out]	outIsPresent	Receives 'true' if a valid analog LTC signal is present at the analog LTC input connector;
 									otherwise 'false'.
+		@param[in]	inLTCInputNdx	Optionally specifies the LTC input connector. Defaults to 0 (LTCIn1).
 		@return		True if successful; otherwise false.
 		@note		Some devices share analog LTC input and reference input on one connector.
 					For these devices, this call should be preceded by a call to NTV2Card::SetLTCInputEnable(true).
 	**/
-	AJA_VIRTUAL bool		GetLTCInputPresent (bool & outIsPresent);
-	AJA_VIRTUAL inline bool	GetLTCInputPresent (bool * pOutValue)										{return pOutValue ? GetLTCInputPresent (*pOutValue) : false;}
+	AJA_VIRTUAL bool		GetLTCInputPresent (bool & outIsPresent, const UWord inLTCInputNdx = 0);
 
 	AJA_VIRTUAL bool		SetLTCOnReference (bool inNewValue);			//	DEPRECATE??
 	AJA_VIRTUAL bool		GetLTCOnReference (bool & outLTCIsOnReference);	//	DEPRECATE??
@@ -6398,6 +6453,7 @@ public:
     AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIInputStatusRegister				(ULWord * pOutValue,									const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetHDMIInputStatus(*pOutValue, inChannel) : false;}	///< @deprecated	Use CNTV2Card::GetHDMIInputStatus instead.
     AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIInputColor						(NTV2LHIHDMIColorSpace * pOutValue,						const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetHDMIInputColor(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	ReadOutputTimingControl					(ULWord * pOutValue,									const UWord inOutputSpigot = 0)					) {return pOutValue ? ReadOutputTimingControl(*pOutValue, inOutputSpigot) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetLTCInputPresent						(bool * pOutValue)																						) {return pOutValue ? GetLTCInputPresent (*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 
 	AJA_VIRTUAL        NTV2_DEPRECATED_f(bool	GetAudioOutputMonitorSource				(NTV2AudioMonitorSelect * pOutValue,					NTV2Channel * pOutChannel = NULL)				);	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 

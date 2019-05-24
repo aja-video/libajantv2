@@ -1099,6 +1099,8 @@ private:
 		DefineRegName	(kVRegFrameBufferGangCount,				"kVRegFrameBufferGangCount");
 		DefineRegName	(kVRegChannelCrosspointFirst,			"kVRegChannelCrosspointFirst");
 		DefineRegName	(kVRegChannelCrosspointLast,			"kVRegChannelCrosspointLast");
+		DefineRegName	(kVRegMonAncField1Offset,				"kVRegMonAncField1Offset");
+		DefineRegName	(kVRegMonAncField2Offset,				"kVRegMonAncField2Offset");
 		DefineRegName	(kVRegFollowInputFormat,				"kVRegFollowInputFormat");
 		DefineRegName	(kVRegAncField1Offset,					"kVRegAncField1Offset");
 		DefineRegName	(kVRegAncField2Offset,					"kVRegAncField2Offset");
@@ -1262,6 +1264,10 @@ private:
 			DefineRegReadWrite (regNum, READWRITE);
 			DefineRegClass (regNum, kRegClass_Virtual);
 		}
+		DefineRegClass (kVRegMonAncField1Offset, kRegClass_Anc);
+		DefineRegClass (kVRegMonAncField2Offset, kRegClass_Anc);
+		DefineRegClass (kVRegAncField1Offset, kRegClass_Anc);
+		DefineRegClass (kVRegAncField2Offset, kRegClass_Anc);
 	}	//	SetupVRegs
 
 public:

@@ -31,7 +31,7 @@ typedef AJAU32Pkts::iterator		AJAU32PktsIter;					///< @brief	Handy non-const it
 
 typedef std::vector<uint8_t>		AJAAncPktCounts;				///< @brief	Ordered sequence of SMPTE Anc packet counts
 typedef AJAAncPktCounts::const_iterator	AJAAncPktCountsConstIter;	///< @brief	Handy const iterator over AJAAncPktCounts
-
+class CNTV2Card;
 
 /**
 	@brief		I am an ordered collection of AJAAncillaryData instances which represent one or more SMPTE 291
@@ -49,6 +49,7 @@ typedef AJAAncPktCounts::const_iterator	AJAAncPktCountsConstIter;	///< @brief	Ha
 class AJAExport AJAAncillaryList
 {
 public:	//	CLASS METHODS
+
 	/**
 		@name	Create from Device Buffers (Capture/Ingest)
 	**/
@@ -230,6 +231,13 @@ public:	//	INSTANCE METHODS
 		@return	AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						Clear (void);
+
+	/**
+		@brief		Adds (appends) a copy (using AJAAncillaryData::Clone) of the given list's packet objects to me.
+		@param[in]	inPackets	Specifies the AJAAncillaryList containing the packets to be copied and added to me.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						AddAncillaryData (const AJAAncillaryList & inPackets);
 
 	/**
 		@brief		Adds (appends) a copy (using AJAAncillaryData::Clone) of the AJAAncillaryData object to me.
@@ -479,6 +487,8 @@ public:	//	INSTANCE METHODS
 
 
 protected:
+	friend class CNTV2Card;	//	CNTV2Card's member functions can call AJAAncillaryList's private & protected member functions
+
 	typedef std::list <AJAAncillaryData *>			AJAAncillaryDataList;
 	typedef AJAAncillaryDataList::const_iterator	AJAAncDataListConstIter;	///< @brief	Handy const iterator for iterating over members of an AJAAncillaryDataList.
 	typedef AJAAncillaryDataList::iterator			AJAAncDataListIter;			///< @brief	Handy non-const iterator for iterating over members of an AJAAncillaryDataList.
