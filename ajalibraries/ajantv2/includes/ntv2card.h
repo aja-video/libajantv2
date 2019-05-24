@@ -712,7 +712,7 @@ public:
 	**/
 	AJA_VIRTUAL bool	DMAClearAncRegion (	const UWord inStartFrameNumber,
 											const UWord inEndFrameNumber,
-											const UWord inAncRegion = NTV2_AncRgn_All);
+											const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All);
 
 	/**
 		@brief		Answers with the offset and size of an ancillary data region within a device frame buffer.
@@ -727,7 +727,7 @@ public:
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetAncRegionOffsetAndSize (ULWord & outByteOffset, ULWord & outByteCount,
-													const UWord inAncRegion = NTV2_AncRgn_All);
+													const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All);
 
 	/**
 		@brief		Answers with the byte offset to the start of an ancillary data region within a device frame buffer,
@@ -740,7 +740,7 @@ public:
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetAncRegionOffsetFromBottom (ULWord & outByteOffsetFromBottom,
-														const UWord inAncRegion = NTV2_AncRgn_All);
+														const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All);
 
 
 #if !defined(NTV2_DEPRECATE_15_2)

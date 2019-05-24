@@ -329,7 +329,7 @@ bool CNTV2Card::DMABufferUnlockAll (void)
 }
 
 
-bool CNTV2Card::DMAClearAncRegion (const UWord inStartFrameNumber,  const UWord inEndFrameNumber, const UWord inAncRegion)
+bool CNTV2Card::DMAClearAncRegion (const UWord inStartFrameNumber,  const UWord inEndFrameNumber, const NTV2AncillaryDataRegion inAncRegion)
 {
 	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
 		return false;	//	no anc inserters/extractors
@@ -337,8 +337,7 @@ bool CNTV2Card::DMAClearAncRegion (const UWord inStartFrameNumber,  const UWord 
 	ULWord offsetInBytes(0), sizeInBytes(0);
 	if (!GetAncRegionOffsetAndSize(offsetInBytes, sizeInBytes, inAncRegion))
 		return false;	//	no such region
-	if (!sizeInBytes)
-		return false;	//	zero size
+	NTV2_ASSERT (sizeInBytes && offsetInBytes);
 
 	NTV2_POINTER zeroBuffer(sizeInBytes);
 	zeroBuffer.Fill(ULWord64(0));
@@ -351,7 +350,7 @@ bool CNTV2Card::DMAClearAncRegion (const UWord inStartFrameNumber,  const UWord 
 }
 
 
-bool CNTV2Card::GetAncRegionOffsetAndSize (ULWord & outByteOffset,  ULWord & outByteCount, const UWord inAncRegion)
+bool CNTV2Card::GetAncRegionOffsetAndSize (ULWord & outByteOffset,  ULWord & outByteCount, const NTV2AncillaryDataRegion inAncRegion)
 {
 	outByteOffset = outByteCount = 0;
 	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
@@ -361,8 +360,8 @@ bool CNTV2Card::GetAncRegionOffsetAndSize (ULWord & outByteOffset,  ULWord & out
 	if (!GetFrameBufferSize (NTV2_CHANNEL1, frameSize))
 		return false;	//	Bail
 
-	const ULWord frameSizeInBytes (::NTV2FramesizeToByteCount(frameSize));
-	ULWord offsetFromEnd(0);
+	const ULWord	frameSizeInBytes(::NTV2FramesizeToByteCount(frameSize));
+	ULWord			offsetFromEnd	(0);
 	if (!GetAncRegionOffsetFromBottom(offsetFromEnd, inAncRegion))
 		return false;	//	Bail
 
@@ -376,28 +375,43 @@ bool CNTV2Card::GetAncRegionOffsetAndSize (ULWord & outByteOffset,  ULWord & out
 }
 
 
-bool CNTV2Card::GetAncRegionOffsetFromBottom (ULWord & offsetFromBottom, const UWord inAncRegion)
+bool CNTV2Card::GetAncRegionOffsetFromBottom (ULWord & bytesFromBottom, const NTV2AncillaryDataRegion inAncRegion)
 {
-	offsetFromBottom = 0;
+	bytesFromBottom = 0;
 
 	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
 		return false;	//	No custom anc support
 
-	if (inAncRegion == NTV2_AncRgn_Field1)
-		return ReadRegister(kVRegAncField1Offset, offsetFromBottom);	// Anc Field 1
-	else if (inAncRegion == NTV2_AncRgn_Field2)
-		return ReadRegister(kVRegAncField2Offset, offsetFromBottom);	// Anc Field 2
-	if (inAncRegion < NTV2_AncRgn_All)
-		return false;	//	Bad index
+	//	Need to know if running driver version is 15.3 or later...
+	UWord	majV(0), minV(0), pt(0), bld(0);
+	GetDriverVersionComponents(majV, minV, pt, bld);
+	const bool is153OrLater ((majV > 15)  ||  (majV == 15  &&  minV >= 3)  ||  (!majV && !minV && !pt && !bld));
+
+	switch (inAncRegion)
+	{
+		case NTV2_AncRgn_Field1:	return ReadRegister(kVRegAncField1Offset, bytesFromBottom);		// F1
+		case NTV2_AncRgn_Field2:	return ReadRegister(kVRegAncField2Offset, bytesFromBottom);		// F2
+		case NTV2_AncRgn_MonField1:	return is153OrLater && ReadRegister(kVRegMonAncField1Offset, bytesFromBottom);	// MonF1
+		case NTV2_AncRgn_MonField2:	return is153OrLater && ReadRegister(kVRegMonAncField2Offset, bytesFromBottom);	// MonF2
+		case NTV2_AncRgn_All:		break;			//	All Anc regions -- calculate below
+		default:					return false;	//	Bad index
+	}
 
 	//	Read all and determine the largest...
 	ULWord temp(0);
-	if (!ReadRegister(kVRegAncField1Offset, offsetFromBottom)
-		||  !ReadRegister(kVRegAncField2Offset, temp))
-			return false;	//	Read VReg failed
-	if (temp > offsetFromBottom)
-		offsetFromBottom = temp;
-	return true;
+	if (!ReadRegister(kVRegAncField1Offset, bytesFromBottom)  ||  !ReadRegister(kVRegAncField2Offset, temp))
+		return false;	//	Read VReg failed
+	if (temp > bytesFromBottom)
+		bytesFromBottom = temp;
+
+	if (is153OrLater  &&  false) // ** MrBill **	WAIT TIL DRIVERS ARE READY:		&&  GetDeviceID() == DEVICE_ID_IOIP_2110)
+	{
+		if (ReadRegister(kVRegMonAncField1Offset, temp)  &&  temp > bytesFromBottom)
+			bytesFromBottom = temp;
+		if (ReadRegister(kVRegMonAncField2Offset, temp)  &&  temp > bytesFromBottom)
+			bytesFromBottom = temp;
+	}
+	return bytesFromBottom > 0;
 }
 
 
