@@ -312,8 +312,15 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 	}
 	else if (NTV2_IS_QUAD_QUAD_FORMAT(value))
 	{
-		SetQuadQuadFrameEnable(true, channel);
-		SetQuadQuadSquaresEnable(true, channel);
+		GetQuadQuadSquaresEnable(squares, channel);
+		if (squares)
+		{
+			SetQuadQuadSquaresEnable(true, channel);
+		}
+		else
+		{
+			SetQuadQuadFrameEnable(true, channel);
+		}
 	}
 	else
 	{
@@ -1267,9 +1274,18 @@ bool CNTV2Card::SetQuadQuadFrameEnable (const bool inEnable, const NTV2Channel i
 		if(ok)	ok = SetQuadQuadSquaresEnable(false, inChannel);
 	}
 
-	if(ok)	ok = WriteRegister(kRegGlobalControl3, ULWord(inEnable ? 1 : 0), kRegMaskQuadQuadMode, kRegShiftQuadQuadMode);
+	if (ok)	ok = WriteRegister(kRegGlobalControl3, ULWord(inEnable ? 1 : 0), (inChannel < NTV2_CHANNEL3) ? kRegMaskQuadQuadMode : kRegMaskQuadQuadMode2, (inChannel < NTV2_CHANNEL3) ? kRegShiftQuadQuadMode : kRegShiftQuadQuadMode2);
 	if (inEnable)
-		if(ok)	ok = CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL4);
+	{
+		if (inChannel < NTV2_CHANNEL3)
+		{
+			if (ok)	ok = CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL2);
+		}
+		else
+		{
+			if (ok)	ok = CopyVideoFormat(inChannel, NTV2_CHANNEL3, NTV2_CHANNEL4);
+		}
+	}
 	return ok;
 }
 
@@ -1279,6 +1295,8 @@ bool CNTV2Card::SetQuadQuadSquaresEnable (const bool inValue, const NTV2Channel 
 	bool ok(::NTV2DeviceCanDo8KVideo(_boardID));
 	if (inValue)
 	{
+		if (ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL1);
+		if (ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL2);
 		if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL3);
 		if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL4);
 	}
@@ -1317,8 +1335,13 @@ bool CNTV2Card::GetQuadQuadFrameEnable (bool & outValue, const NTV2Channel inCha
 {
 	(void)inChannel;
 	outValue = 0;
-	if(::NTV2DeviceCanDo8KVideo(_boardID))
-		return CNTV2DriverInterface::ReadRegister(kRegGlobalControl3, outValue, kRegMaskQuadQuadMode, kRegShiftQuadQuadMode );
+	if (::NTV2DeviceCanDo8KVideo(_boardID))
+	{
+		if (inChannel < NTV2_CHANNEL3)
+			return CNTV2DriverInterface::ReadRegister(kRegGlobalControl3, outValue, kRegMaskQuadQuadMode, kRegShiftQuadQuadMode);
+		else
+			return CNTV2DriverInterface::ReadRegister(kRegGlobalControl3, outValue, kRegMaskQuadQuadMode2, kRegShiftQuadQuadMode2);
+	}
 	return true;
 }
 

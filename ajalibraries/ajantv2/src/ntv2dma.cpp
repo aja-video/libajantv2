@@ -27,10 +27,42 @@ bool CNTV2Card::DMAReadFrame (const ULWord inFrameNumber, ULWord * pFrameBuffer,
 	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, true, inFrameNumber, pFrameBuffer, (ULWord) 0, inByteCount, true);
 }
 
+bool CNTV2Card::DMAReadFrame (const ULWord inFrameNumber, ULWord * pFrameBuffer, const ULWord inByteCount, const NTV2Channel inChannel)
+{
+	NTV2Framesize hwFrameSize;
+	GetFrameBufferSize(inChannel, hwFrameSize);
+	ULWord actualFrameSize = NTV2FramesizeToByteCount(hwFrameSize);
+	bool quadEnabled = false, quadQuadEnabled = false;
+	GetQuadFrameEnable(quadEnabled, inChannel);
+	GetQuadQuadFrameEnable(quadQuadEnabled, inChannel);
+	if(quadEnabled)
+		actualFrameSize *= 4;
+	if(quadQuadEnabled)
+		actualFrameSize *= 4;
+	ULWord offsetFromZero = inFrameNumber * actualFrameSize;
+	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, true, 0, pFrameBuffer, offsetFromZero, inByteCount, true);
+}
+
 
 bool CNTV2Card::DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pFrameBuffer, const ULWord inByteCount)
 {
 	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, inFrameNumber, const_cast <ULWord *> (pFrameBuffer), (ULWord) 0, inByteCount, true);
+}
+
+bool CNTV2Card::DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pFrameBuffer, const ULWord inByteCount, const NTV2Channel inChannel)
+{
+	NTV2Framesize hwFrameSize;
+	GetFrameBufferSize(inChannel, hwFrameSize);
+	ULWord actualFrameSize = NTV2FramesizeToByteCount(hwFrameSize);
+	bool quadEnabled = false, quadQuadEnabled = false;
+	GetQuadFrameEnable(quadEnabled, inChannel);
+	GetQuadQuadFrameEnable(quadQuadEnabled, inChannel);
+	if(quadEnabled)
+		actualFrameSize *= 4;
+	if(quadQuadEnabled)
+		actualFrameSize *= 4;
+	ULWord offsetFromZero = inFrameNumber * actualFrameSize;
+	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, 0, const_cast <ULWord *> (pFrameBuffer), offsetFromZero, inByteCount, true);
 }
 
 

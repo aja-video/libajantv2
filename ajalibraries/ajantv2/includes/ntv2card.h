@@ -502,6 +502,19 @@ public:
 	AJA_VIRTUAL bool	DMAReadFrame (const ULWord inFrameNumber, ULWord * pOutFrameBuffer, const ULWord inByteCount);
 
 	/**
+		@brief		Transfers a single frame from the AJA device to the host. This call is multi-format compatible.
+		@param[in]	inFrameNumber	Specifies the zero-based frame number of the frame to be read from the device.
+		@param[in]	pOutFrameBuffer	Specifies the non-NULL address of the host buffer that is to receive the frame data.
+									The memory it points to must be writeable.
+		@param[in]	inByteCount		Specifies the total number of bytes to transfer.
+		@return		True if successful; otherwise false.
+		@note		The host buffer must be at least inByteCount in size, or a host memory access violation may occur.
+		@note		This function will block and not return until the transfer has finished or failed.
+		@see		CNTV2Card::DMAWriteFrame, CNTV2Card::DMARead, CNTV2Card::DMAReadSegments, \ref vidop-fbaccess
+	**/
+	AJA_VIRTUAL bool	DMAReadFrame (const ULWord inFrameNumber, ULWord * pFrameBuffer, const ULWord inByteCount, const NTV2Channel inChannel);
+
+	/**
 		@brief		Transfers a single frame from the host to the AJA device.
 		@param[in]	inFrameNumber	Specifies the zero-based frame number of the frame to be written to the device.
 		@param[in]	pInFrameBuffer	Specifies the non-NULL address of the host buffer that is to supply the frame data.
@@ -513,6 +526,19 @@ public:
 		@see		CNTV2Card::DMAReadFrame, CNTV2Card::DMAWrite, CNTV2Card::DMAWriteSegments, \ref vidop-fbaccess
 	**/
 	AJA_VIRTUAL bool	DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pInFrameBuffer, const ULWord inByteCount);
+
+	/**
+		@brief		Transfers a single frame from the host to the AJA device. This call is multi-format compatible.
+		@param[in]	inFrameNumber	Specifies the zero-based frame number of the frame to be written to the device.
+		@param[in]	pInFrameBuffer	Specifies the non-NULL address of the host buffer that is to supply the frame data.
+									The memory it points to must be readable.
+		@param[in]	inByteCount		Specifies the total number of bytes to transfer.
+		@return		True if successful; otherwise false.
+		@note		The host buffer must be at least inByteCount in size, or a host memory access violation may occur.
+		@note		This function will block and not return until the transfer has finished or failed.
+		@see		CNTV2Card::DMAReadFrame, CNTV2Card::DMAWrite, CNTV2Card::DMAWriteSegments, \ref vidop-fbaccess
+	**/
+	AJA_VIRTUAL bool	DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pInFrameBuffer, const ULWord inByteCount, const NTV2Channel inChannel);
 
 	/**
 		@brief		Performs a segmented data transfer from the AJA device to the host.
