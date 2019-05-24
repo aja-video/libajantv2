@@ -507,6 +507,7 @@ public:
 		@param[in]	pOutFrameBuffer	Specifies the non-NULL address of the host buffer that is to receive the frame data.
 									The memory it points to must be writeable.
 		@param[in]	inByteCount		Specifies the total number of bytes to transfer.
+		@param[in]	inChannel		Specified for multi-format
 		@return		True if successful; otherwise false.
 		@note		The host buffer must be at least inByteCount in size, or a host memory access violation may occur.
 		@note		This function will block and not return until the transfer has finished or failed.
@@ -533,6 +534,7 @@ public:
 		@param[in]	pInFrameBuffer	Specifies the non-NULL address of the host buffer that is to supply the frame data.
 									The memory it points to must be readable.
 		@param[in]	inByteCount		Specifies the total number of bytes to transfer.
+		@param[in]	inChannel		Specified for multi-format
 		@return		True if successful; otherwise false.
 		@note		The host buffer must be at least inByteCount in size, or a host memory access violation may occur.
 		@note		This function will block and not return until the transfer has finished or failed.
