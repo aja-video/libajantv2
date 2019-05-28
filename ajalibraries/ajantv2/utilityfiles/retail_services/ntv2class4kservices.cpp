@@ -2877,11 +2877,7 @@ void Class4kServices::SetDeviceXPointCapture ()
 		}
 		else
 		{
-			if (bFb1HdrRGB)
-			{
-				XPt1 = NTV2_XptDuallinkIn1;
-			}
-			else if (bHdmiOutRGB)
+			if (bHdmiOutRGB)
 			{
 				XPt1 = bInRGB ? inHdRGB1 : NTV2_XptLUT1RGB;
 			}
