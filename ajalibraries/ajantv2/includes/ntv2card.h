@@ -700,13 +700,21 @@ public:
 										const NTV2Channel	inChannel		= NTV2_CHANNEL1);
 
 	/**
-		@brief		Page locks the data buffer to reduce transfer time and CPU usage of DMA transfers.
-		@param[in]	pBuffer			Specifies the non-NULL address of the host buffer to lock.
-									Specify a NULL buffer and 0 bytes to unlock all buffers.
-		@param[in]	inByteCount		Specifies the total number of bytes to lock.
+		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
+		@param[in]	inBuffer	Specifies the host buffer to lock.
+								If inBuffer.IsNULL(), the driver will unlock all host buffers.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	DMABufferLock (const ULWord * pBuffer, const ULWord inByteCount);
+	AJA_VIRTUAL bool	DMABufferLock (const NTV2_POINTER & inBuffer);
+
+	/**
+		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
+		@param[in]	pInBuffer		Specifies the starting address of the host buffer to lock.
+		@param[in]	inByteCount		Specifies the total length of the host buffer.
+		@note		Specifying NULL for "pInBuffer" and 0 for "inByteCount" will command the driver to unlock all buffers.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL inline bool	DMABufferLock (const ULWord * pInBuffer, const ULWord inByteCount)	{return DMABufferLock(NTV2_POINTER(pInBuffer, inByteCount));}
 
 
 	/**
@@ -715,20 +723,6 @@ public:
 	**/
 	AJA_VIRTUAL bool	DMABufferUnlockAll ();
 
-
-	/**
-		@brief		These enumerations identify the various ancillary data regions located at the bottom
-					of each frame buffer on the NTV2 device.
-	**/
-	typedef enum
-	{
-		NTV2_AncRgn_Field1,		///< @brief	Identifies the "normal" Field 1 ancillary data region.
-		NTV2_AncRgn_Field2,		///< @brief	Identifies the "normal" Field 2 ancillary data region.
-		NTV2_AncRgn_MonField1,	///< @brief	Identifies the "monitor" or "auxiliary" Field 1 ancillary data region.
-		NTV2_AncRgn_MonField2,	///< @brief	Identifies the "monitor" or "auxiliary" Field 2 ancillary data region.
-		NTV2_MAX_NUM_AncRgns,
-		NTV2_AncRgn_All = 0xFFFF	///< @brief	Identifies "all" ancillary data regions.
-	} NTV2AncillaryDataRegion;
 
 	/**
 		@brief		Clears the ancillary data region in the device frame buffer for the specified frames.

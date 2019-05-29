@@ -24,7 +24,7 @@ bool CNTV2Card::DMAWrite (const ULWord inFrameNumber, const ULWord * pFrameBuffe
 
 bool CNTV2Card::DMAReadFrame (const ULWord inFrameNumber, ULWord * pFrameBuffer, const ULWord inByteCount)
 {
-	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, true, inFrameNumber, pFrameBuffer, (ULWord) 0, inByteCount, true);
+	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, true, inFrameNumber, pFrameBuffer, ULWord(0), inByteCount, true);
 }
 
 bool CNTV2Card::DMAReadFrame (const ULWord inFrameNumber, ULWord * pFrameBuffer, const ULWord inByteCount, const NTV2Channel inChannel)
@@ -46,7 +46,7 @@ bool CNTV2Card::DMAReadFrame (const ULWord inFrameNumber, ULWord * pFrameBuffer,
 
 bool CNTV2Card::DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pFrameBuffer, const ULWord inByteCount)
 {
-	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, inFrameNumber, const_cast <ULWord *> (pFrameBuffer), (ULWord) 0, inByteCount, true);
+	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, inFrameNumber, const_cast <ULWord *> (pFrameBuffer), ULWord(0), inByteCount, true);
 }
 
 bool CNTV2Card::DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pFrameBuffer, const ULWord inByteCount, const NTV2Channel inChannel)
@@ -341,12 +341,12 @@ bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
 }
 
 
-bool CNTV2Card::DMABufferLock (const ULWord * pBuffer, const ULWord inByteCount)
+bool CNTV2Card::DMABufferLock (const NTV2_POINTER & inBuffer)
 {
 	if (!_boardOpened)
 		return false;		//	Device not open!
 
-	NTV2BufferLock lockMsg (NTV2_POINTER(pBuffer, inByteCount), DMABUFFERLOCK_LOCK);
+	NTV2BufferLock lockMsg (inBuffer, inBuffer.IsNULL() ? DMABUFFERLOCK_UNLOCK_ALL : DMABUFFERLOCK_LOCK);
 	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&lockMsg));
 }
 

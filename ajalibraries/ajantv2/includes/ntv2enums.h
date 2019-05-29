@@ -4231,7 +4231,32 @@ typedef enum
 	NTV2_AnalogAudioIO_4Out_4In,
 	NTV2_AnalogAudioIO_8In
 } NTV2AnalogAudioIO;
-		
+
+/**
+	@brief	These enumerations identify the various ancillary data regions located at the bottom
+			of each frame buffer on the NTV2 device.
+	@note	These are only applicable to devices that support custom anc insertion/extraction
+			(see ::NTV2DeviceCanDoCustomAnc). Also see \ref anccapture  and \ref ancplayout .
+**/
+typedef enum
+{
+	NTV2_AncRgn_FIRST,
+	NTV2_AncRgn_Field1	= NTV2_AncRgn_FIRST,	///< @brief	Identifies the "normal" Field 1 ancillary data region.
+	NTV2_AncRgn_Field2,		///< @brief	Identifies the "normal" Field 2 ancillary data region.
+	NTV2_AncRgn_MonField1,	///< @brief	Identifies the "monitor" or "auxiliary" Field 1 ancillary data region.
+	NTV2_AncRgn_MonField2,	///< @brief	Identifies the "monitor" or "auxiliary" Field 2 ancillary data region.
+	NTV2_AncRgn_LAST	= NTV2_AncRgn_MonField2,
+	NTV2_MAX_NUM_AncRgns,
+	NTV2_AncRgn_INVALID	= NTV2_MAX_NUM_AncRgns,
+	NTV2_AncRgn_All = 0xFFFF	///< @brief	Identifies "all" ancillary data regions.
+} NTV2AncillaryDataRegion, NTV2AncDataRgn;
+
+#define	NTV2_IS_ALL_ANC_RGNS(_x_)		((_x_) == NTV2_AncRgn_All)
+#define	NTV2_IS_VALID_ANC_RGN(_x_)		(NTV2_IS_ALL_ANC_RGNS(_x_)  ||  ((_x_) >= NTV2_AncRgn_Field1  &&  (_x_) < NTV2_MAX_NUM_AncRgns))
+#define	NTV2_IS_NORMAL_ANC_RGN(_x_)		((_x_) == NTV2_AncRgn_Field1  ||  (_x_) == NTV2_AncRgn_Field2)
+#define	NTV2_IS_MONITOR_ANC_RGN(_x_)	((_x_) == NTV2_AncRgn_MonField1  ||  (_x_) == NTV2_AncRgn_MonField2)
+
+
 typedef enum
 {
 	NTV2_VPID_TC_SDR_TV,
