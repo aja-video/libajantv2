@@ -7,7 +7,22 @@
 #include "ntv2card.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
+#include "ajabase/system/debug.h"
 #include <assert.h>
+#include <map>
+
+
+//#define	HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') <<               uint64_t(__x__)  << dec
+#define INSTP(_p_)			xHEX0N(uint64_t(_p_),16)
+#define	LOGGING_DMA_ANC		(AJADebug::IsActive(AJA_DebugUnit_AncGeneric))
+#define	DMAANCFAIL(__x__)	AJA_sERROR  (AJA_DebugUnit_AncGeneric, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	DMAANCWARN(__x__)	AJA_sWARNING(AJA_DebugUnit_AncGeneric, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	DMAANCNOTE(__x__)	AJA_sNOTICE (AJA_DebugUnit_AncGeneric, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	DMAANCINFO(__x__)	AJA_sINFO   (AJA_DebugUnit_AncGeneric, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	DMAANCDBG(__x__)	AJA_sDEBUG  (AJA_DebugUnit_AncGeneric, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+
+
+using namespace std;
 
 
 bool CNTV2Card::DMARead (const ULWord inFrameNumber, ULWord * pFrameBuffer, const ULWord inOffsetBytes, const ULWord inByteCount)
@@ -361,6 +376,16 @@ bool CNTV2Card::DMABufferUnlockAll (void)
 }
 
 
+typedef map<ULWord,NTV2AncDataRgn>	OffsetAncRgns, SizeAncRgns;
+typedef pair<ULWord,NTV2AncDataRgn>	OffsetAncRgn, SizeAncRgn;
+typedef OffsetAncRgns::const_iterator	OffsetAncRgnsConstIter;
+typedef OffsetAncRgns::const_reverse_iterator	OffsetAncRgnsConstRIter;
+typedef map<NTV2AncDataRgn,ULWord>	AncRgnOffsets, AncRgnSizes;
+typedef AncRgnOffsets::const_iterator	AncRgnOffsetsConstIter;
+typedef AncRgnSizes::const_iterator		AncRgnSizesConstIter;
+typedef pair<NTV2AncDataRgn,ULWord>	AncRgnOffset, AncRgnSize;
+
+
 bool CNTV2Card::DMAClearAncRegion (const UWord inStartFrameNumber,  const UWord inEndFrameNumber, const NTV2AncillaryDataRegion inAncRegion)
 {
 	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
@@ -387,6 +412,8 @@ bool CNTV2Card::GetAncRegionOffsetAndSize (ULWord & outByteOffset,  ULWord & out
 	outByteOffset = outByteCount = 0;
 	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
 		return false;
+	if (!NTV2_IS_VALID_ANC_RGN(inAncRegion))
+		return false;	//	Bad param
 
 	NTV2Framesize frameSize(NTV2_FRAMESIZE_INVALID);
 	if (!GetFrameBufferSize (NTV2_CHANNEL1, frameSize))
@@ -394,15 +421,73 @@ bool CNTV2Card::GetAncRegionOffsetAndSize (ULWord & outByteOffset,  ULWord & out
 
 	const ULWord	frameSizeInBytes(::NTV2FramesizeToByteCount(frameSize));
 	ULWord			offsetFromEnd	(0);
-	if (!GetAncRegionOffsetFromBottom(offsetFromEnd, inAncRegion))
-		return false;	//	Bail
 
+	//	Map all Anc memory regions...
+	AncRgnOffsets	ancRgnOffsets;
+	OffsetAncRgns	offsetAncRgns;
+	for (NTV2AncDataRgn ancRgn(NTV2_AncRgn_Field1);  ancRgn < NTV2_MAX_NUM_AncRgns;  ancRgn = NTV2AncDataRgn(ancRgn+1))
+	{
+		ULWord	bytesFromBottom(0);
+		if (GetAncRegionOffsetFromBottom(bytesFromBottom, ancRgn))
+		{
+			ancRgnOffsets.insert(AncRgnOffset(ancRgn, bytesFromBottom));
+			offsetAncRgns.insert(OffsetAncRgn(bytesFromBottom, ancRgn));
+		}
+	}
+	if (offsetAncRgns.empty())
+		return false;
+
+	AncRgnSizes	ancRgnSizes;
+	for (NTV2AncDataRgn ancRgn(NTV2_AncRgn_Field1);  ancRgn < NTV2_MAX_NUM_AncRgns;  ancRgn = NTV2AncDataRgn(ancRgn+1))
+	{
+		AncRgnOffsetsConstIter	ancRgnOffsetIter (ancRgnOffsets.find(ancRgn));
+		if (ancRgnOffsetIter != ancRgnOffsets.end())
+		{
+			ULWord	rgnSize(ancRgnOffsetIter->second);		//	Start with ancRgn's offset
+			OffsetAncRgnsConstIter	offsetAncRgnIter (offsetAncRgns.find(ancRgnOffsetIter->second)); //	Find ancRgn's offset in offsets table
+			if (offsetAncRgnIter != offsetAncRgns.end())
+			{
+				if (offsetAncRgnIter->second != ancRgn)
+					DMAANCWARN(::NTV2AncDataRgnToStr(ancRgn) << " and " << ::NTV2AncDataRgnToStr(offsetAncRgnIter->second) << " using same offset " << xHEX0N(offsetAncRgnIter->first,8));
+				else
+				{
+					if (--offsetAncRgnIter != offsetAncRgns.end())	//	Has a neighbor?
+						rgnSize -= offsetAncRgnIter->first;			//	Yes -- subtract neighbor's offset
+					ancRgnSizes.insert(AncRgnSize(ancRgn, rgnSize));
+					DMAANCDBG(::NTV2AncDataRgnToStr(ancRgn) << " offset=" << xHEX0N(ancRgnOffsets[ancRgn],8) << " size=" << xHEX0N(rgnSize,8));
+				}
+			}
+			else DMAANCWARN("Offset " << xHEX0N(ancRgnOffsetIter->second,8) << " missing in OffsetAncRgns table");
+		}
+		else DMAANCWARN(::NTV2AncDataRgnToStr(ancRgn) << " missing in AncRgnOffsets table");
+	}
+
+	if (NTV2_IS_ALL_ANC_RGNS(inAncRegion))
+	{
+		//	Use the largest offset-from-end, and the sum of all sizes
+		OffsetAncRgnsConstRIter rIter (offsetAncRgns.rbegin());
+		if (rIter == offsetAncRgns.rend())
+			return false;	//	Empty?
+		offsetFromEnd = rIter->first;
+		outByteOffset = frameSizeInBytes - offsetFromEnd;	//	Convert to offset from top of frame buffer
+		outByteCount = offsetFromEnd;						//	The whole shebang
+		return true;
+	}
+
+	AncRgnOffsetsConstIter offIter(ancRgnOffsets.find(inAncRegion));
+	if (offIter == ancRgnOffsets.end())
+		return false;	//	Not there
+
+	offsetFromEnd = offIter->second;
 	if (offsetFromEnd > frameSizeInBytes)
 		return false;	//	Bad offset
 
-	//	Convert to offset from top of frame buffer...
-	outByteOffset = frameSizeInBytes - offsetFromEnd;
-	outByteCount = offsetFromEnd;
+	AncRgnSizesConstIter sizeIter(ancRgnSizes.find(inAncRegion));
+	if (sizeIter == ancRgnSizes.end())
+		return false;	//	Not there
+
+	outByteOffset = frameSizeInBytes - offsetFromEnd;	//	Convert to offset from top of frame buffer
+	outByteCount = sizeIter->second;
 	return outByteOffset && outByteCount;
 }
 
@@ -414,35 +499,36 @@ bool CNTV2Card::GetAncRegionOffsetFromBottom (ULWord & bytesFromBottom, const NT
 	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
 		return false;	//	No custom anc support
 
-	//	Need to know if running driver version is 15.3 or later...
+	//	IoIP SDIOut5 monitor anc support added in SDK/driver 15.3...
 	UWord	majV(0), minV(0), pt(0), bld(0);
 	GetDriverVersionComponents(majV, minV, pt, bld);
 	const bool is153OrLater ((majV > 15)  ||  (majV == 15  &&  minV >= 3)  ||  (!majV && !minV && !pt && !bld));
 
 	switch (inAncRegion)
 	{
-		case NTV2_AncRgn_Field1:	return ReadRegister(kVRegAncField1Offset, bytesFromBottom);		// F1
-		case NTV2_AncRgn_Field2:	return ReadRegister(kVRegAncField2Offset, bytesFromBottom);		// F2
-		case NTV2_AncRgn_MonField1:	return is153OrLater && ReadRegister(kVRegMonAncField1Offset, bytesFromBottom);	// MonF1
-		case NTV2_AncRgn_MonField2:	return is153OrLater && ReadRegister(kVRegMonAncField2Offset, bytesFromBottom);	// MonF2
-		case NTV2_AncRgn_All:		break;			//	All Anc regions -- calculate below
 		default:					return false;	//	Bad index
+		case NTV2_AncRgn_Field1:	return ReadRegister(kVRegAncField1Offset, bytesFromBottom)  &&  bytesFromBottom;// F1
+		case NTV2_AncRgn_Field2:	return ReadRegister(kVRegAncField2Offset, bytesFromBottom)  &&  bytesFromBottom;// F2
+		case NTV2_AncRgn_MonField1:	return is153OrLater && ReadRegister(kVRegMonAncField1Offset, bytesFromBottom) &&  bytesFromBottom;// MonF1
+		case NTV2_AncRgn_MonField2:	return is153OrLater && ReadRegister(kVRegMonAncField2Offset, bytesFromBottom) &&  bytesFromBottom;// MonF2
+		case NTV2_AncRgn_All:		break;			//	All Anc regions -- calculate below
 	}
 
 	//	Read all and determine the largest...
 	ULWord temp(0);
-	if (!ReadRegister(kVRegAncField1Offset, bytesFromBottom)  ||  !ReadRegister(kVRegAncField2Offset, temp))
-		return false;	//	Read VReg failed
-	if (temp > bytesFromBottom)
+	if (ReadRegister(kVRegAncField1Offset, temp)  &&  temp > bytesFromBottom)
+		bytesFromBottom = temp;
+	if (ReadRegister(kVRegAncField2Offset, temp)  &&  temp > bytesFromBottom)
 		bytesFromBottom = temp;
 
-	if (is153OrLater  &&  false) // ** MrBill **	WAIT TIL DRIVERS ARE READY:		&&  GetDeviceID() == DEVICE_ID_IOIP_2110)
-	{
-		if (ReadRegister(kVRegMonAncField1Offset, temp)  &&  temp > bytesFromBottom)
-			bytesFromBottom = temp;
-		if (ReadRegister(kVRegMonAncField2Offset, temp)  &&  temp > bytesFromBottom)
-			bytesFromBottom = temp;
-	}
+	if (is153OrLater  &&  GetDeviceID() == DEVICE_ID_IOIP_2110)
+		if (true) // ** MrBill **	DRIVERS AREN'T READY YET
+		{
+			if (ReadRegister(kVRegMonAncField1Offset, temp)  &&  temp > bytesFromBottom)
+				bytesFromBottom = temp;
+			if (ReadRegister(kVRegMonAncField2Offset, temp)  &&  temp > bytesFromBottom)
+				bytesFromBottom = temp;
+		}
 	return bytesFromBottom > 0;
 }
 
