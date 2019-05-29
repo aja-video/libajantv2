@@ -4240,13 +4240,13 @@ typedef enum
 **/
 typedef enum
 {
-	NTV2_AncRgn_FIRST,
-	NTV2_AncRgn_Field1	= NTV2_AncRgn_FIRST,	///< @brief	Identifies the "normal" Field 1 ancillary data region.
+	NTV2_AncRgn_Field1,		///< @brief	Identifies the "normal" Field 1 ancillary data region.
 	NTV2_AncRgn_Field2,		///< @brief	Identifies the "normal" Field 2 ancillary data region.
 	NTV2_AncRgn_MonField1,	///< @brief	Identifies the "monitor" or "auxiliary" Field 1 ancillary data region.
 	NTV2_AncRgn_MonField2,	///< @brief	Identifies the "monitor" or "auxiliary" Field 2 ancillary data region.
-	NTV2_AncRgn_LAST	= NTV2_AncRgn_MonField2,
 	NTV2_MAX_NUM_AncRgns,
+	NTV2_AncRgn_FIRST	= NTV2_AncRgn_Field1,
+	NTV2_AncRgn_LAST	= NTV2_AncRgn_MonField2,
 	NTV2_AncRgn_INVALID	= NTV2_MAX_NUM_AncRgns,
 	NTV2_AncRgn_All = 0xFFFF	///< @brief	Identifies "all" ancillary data regions.
 } NTV2AncillaryDataRegion, NTV2AncDataRgn;

@@ -7877,6 +7877,20 @@ string NTV2BreakoutTypeToString (const NTV2BreakoutType inValue, const bool inCo
 	return "";
 }
 
+string NTV2AncDataRgnToStr (const NTV2AncDataRgn inValue, const bool inCompactDisplay)
+{
+	switch(inValue)
+	{
+		case NTV2_AncRgn_Field1:	return inCompactDisplay	? "AncF1"		: "NTV2_AncRgn_Field1";
+		case NTV2_AncRgn_Field2:	return inCompactDisplay	? "AncF2"		: "NTV2_AncRgn_Field2";
+		case NTV2_AncRgn_MonField1:	return inCompactDisplay	? "MonAncF1"	: "NTV2_AncRgn_MonField1";
+		case NTV2_AncRgn_MonField2:	return inCompactDisplay	? "MonAncF2"	: "NTV2_AncRgn_MonField2";
+		case NTV2_AncRgn_All:		return inCompactDisplay	? "AncAll"		: "NTV2_AncRgn_All";
+		case NTV2_MAX_NUM_AncRgns:	break;
+	}
+	return "";
+}
+
 
 string NTV2EmbeddedAudioInputToString (const NTV2EmbeddedAudioInput inValue,  const bool inCompactDisplay)
 {

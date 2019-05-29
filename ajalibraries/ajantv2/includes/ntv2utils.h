@@ -1028,6 +1028,7 @@ AJAExport std::string NTV2MixerKeyerModeToString		(const NTV2MixerKeyerMode		inV
 AJAExport std::string NTV2MixerInputControlToString		(const NTV2MixerKeyerInputControl inValue,	const bool inCompactDisplay = false);
 AJAExport std::string NTV2VideoLimitingToString			(const NTV2VideoLimiting		inValue,	const bool inCompactDisplay = false);
 AJAExport std::string NTV2BreakoutTypeToString			(const NTV2BreakoutType			inValue,	const bool inCompactDisplay = false);
+AJAExport std::string NTV2AncDataRgnToStr				(const NTV2AncDataRgn			inValue,	const bool inCompactDisplay = false);
 AJAExport bool	convertHDRFloatToRegisterValues			(const HDRFloatValues & inFloatValues,		HDRRegValues & outRegisterValues);
 AJAExport bool	convertHDRRegisterToFloatValues			(const HDRRegValues & inRegisterValues,		HDRFloatValues & outFloatValues);
 AJAExport void  setHDRDefaultsForBT2020                 (HDRRegValues & outRegisterValues);
