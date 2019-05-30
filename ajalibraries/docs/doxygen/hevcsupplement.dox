@@ -61,15 +61,8 @@ After the power cycle, use the HEVC monitor application to confirm that the corr
 
 On Linux, you can build just the parts you need for HEVC development.
 
--#	Build and load the Linux Driver.
-	-#	<tt>cd ajadriver/linux</tt>
-	-#	\c make
-	-#	<tt>cd ../../bin</tt>
-    -#	<tt>sudo ./load_ajantv2</tt>
--#	Build the "ajantv2" library.
-	-#	<tt>cd ajalibraries/ajantv2</tt>
-	-#	\c make
-	-#	The result will be in \c ../../lib
+-#	Build and load the Linux Driver — follow the directions in \ref gs-linuxsdkbuild
+-#	Build the "ajantv2" library — follow the directions in \ref gs-linuxsdkbuild
 -#	Build the \c ntv2firmwareinstaller program and update the NTV2 firmware.
 	-#	<tt>cd ajaapps/crossplatform/ntv2firmwareinstaller</tt>
 	-#	\c make
