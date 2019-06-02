@@ -54,6 +54,9 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	uint8_t	byte2 = 0;
 	uint8_t	byte3 = 0;
 	uint8_t	byte4 = 0;
+	
+	uint8_t highBit = 0;
+	uint8_t lowBit = 0;
 
 	(void)enableBT2020;
 
@@ -427,7 +430,6 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
     }
 	
 	//Colorimetry
-	uint8_t highBit = 0, lowBit = 0;
 	highBit = (colorimetry&0x2)>>1;
 	lowBit = colorimetry&0x1;
 	if ( NTV2_IS_HD_VIDEO_FORMAT		(outputFormat) &&
