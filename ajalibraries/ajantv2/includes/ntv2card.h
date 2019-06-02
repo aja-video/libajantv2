@@ -6290,9 +6290,9 @@ public:
 	AJA_VIRTUAL bool SetHDMIHDRBT2020 (void);
 	AJA_VIRTUAL bool SetHDMIHDRDCIP3 (void);
 	
-	AJA_VIRTUAL bool SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue);
-	AJA_VIRTUAL bool SetVPIDColorimetry (const NTV2VPIDColorimetry inValue);
-	AJA_VIRTUAL bool SetVPIDVPIDLuminance (const NTV2VPIDLuminance inValue);
+	AJA_VIRTUAL bool SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel);
+	AJA_VIRTUAL bool SetVPIDColorimetry (const NTV2VPIDColorimetry inValue, const NTV2Channel inChannel);
+	AJA_VIRTUAL bool SetVPIDVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel);
 
 	///@}
 

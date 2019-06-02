@@ -487,8 +487,36 @@ typedef enum
 	kVRegNTV2VPIDTransferCharacteristics	= VIRTUALREG_START+530,
 	kVRegNTV2VPIDColorimetry				= VIRTUALREG_START+531,
 	kVRegNTV2VPIDLuminance					= VIRTUALREG_START+532,
+	
+	kVRegNTV2VPIDTransferCharacteristics2	= VIRTUALREG_START+533,
+	kVRegNTV2VPIDColorimetry2				= VIRTUALREG_START+534,
+	kVRegNTV2VPIDLuminance2					= VIRTUALREG_START+535,
+	
+	kVRegNTV2VPIDTransferCharacteristics3	= VIRTUALREG_START+536,
+	kVRegNTV2VPIDColorimetry3				= VIRTUALREG_START+537,
+	kVRegNTV2VPIDLuminance3					= VIRTUALREG_START+538,
+	
+	kVRegNTV2VPIDTransferCharacteristics4	= VIRTUALREG_START+539,
+	kVRegNTV2VPIDColorimetry4				= VIRTUALREG_START+540,
+	kVRegNTV2VPIDLuminance4					= VIRTUALREG_START+541,
+	
+	kVRegNTV2VPIDTransferCharacteristics5	= VIRTUALREG_START+542,
+	kVRegNTV2VPIDColorimetry5				= VIRTUALREG_START+543,
+	kVRegNTV2VPIDLuminance5					= VIRTUALREG_START+544,
+	
+	kVRegNTV2VPIDTransferCharacteristics6	= VIRTUALREG_START+545,
+	kVRegNTV2VPIDColorimetry6				= VIRTUALREG_START+546,
+	kVRegNTV2VPIDLuminance6					= VIRTUALREG_START+547,
+	
+	kVRegNTV2VPIDTransferCharacteristics7	= VIRTUALREG_START+548,
+	kVRegNTV2VPIDColorimetry7				= VIRTUALREG_START+549,
+	kVRegNTV2VPIDLuminance7					= VIRTUALREG_START+550,
+	
+	kVRegNTV2VPIDTransferCharacteristics8	= VIRTUALREG_START+551,
+	kVRegNTV2VPIDColorimetry8				= VIRTUALREG_START+552,
+	kVRegNTV2VPIDLuminance8					= VIRTUALREG_START+553,
 
-    kVRegLastAJA							= VIRTUALREG_START+533,		///< @brief	The last AJA virtual register slot
+    kVRegLastAJA							= VIRTUALREG_START+554,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 
