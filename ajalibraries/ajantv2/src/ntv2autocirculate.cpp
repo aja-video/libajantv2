@@ -758,6 +758,14 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 								<< " -- will corrupt AutoCirculate channel " << DEC(inChannel+1) << " output frames "
 								<< DEC(startFrameNumber) << "-" << DEC(endFrameNumber));
 	}
+	//	Warn about "with anc" and VANC mode...
+	if (inOptionFlags & AUTOCIRCULATE_WITH_ANC)
+	{
+		NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
+		if (GetVANCMode(vancMode, inChannel)  &&  NTV2_IS_VANCMODE_ON(vancMode))
+			ACWARN("FrameStore " << DEC(inChannel+1) << " has AUTOCIRCULATE_WITH_ANC set, but also has "
+					<< ::NTV2VANCModeToString(vancMode) << " set -- this may cause anc insertion problems");
+	}
 
 	//	Fill in our OS independent data structure...
 	AUTOCIRCULATE_DATA	autoCircData	(eInitAutoCirc);
