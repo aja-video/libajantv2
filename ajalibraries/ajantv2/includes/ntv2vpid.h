@@ -90,9 +90,9 @@ public:
 	virtual void				SetChannel (const VPIDChannel inChannel);
 	virtual void				SetDualLinkChannel (const VPIDChannel inChannel);
 	virtual void				SetBitDepth (const VPIDBitDepth inBitDepth);
-	virtual void				SetTransferCharacteristics (const NTV2VPIDXferChars inBitDepth);
-	virtual void				SetColorimetry (const NTV2VPIDColorimetry inBitDepth);
-	virtual void				SetLuminance (const NTV2VPIDLuminance inBitDepth);
+	virtual void				SetTransferCharacteristics (const NTV2VPIDXferChars inXferChars);
+	virtual void				SetColorimetry (const NTV2VPIDColorimetry inColorimetry);
+	virtual void				SetLuminance (const NTV2VPIDLuminance inLuminance);
 								
 	///@}
 

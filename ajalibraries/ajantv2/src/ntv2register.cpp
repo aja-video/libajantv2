@@ -219,6 +219,15 @@ static const ULWord	gChannelToSDIInputProgressiveMask []	= {	kRegMaskInput1Progr
 static const ULWord	gChannelToSDIInputProgressiveShift []	= {	kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,
 																kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			0};
 
+static const ULWord	gChannelToSDIOutVPIDTransferCharacteristics []		= {	kVRegNTV2VPIDTransferCharacteristics,		kVRegNTV2VPIDTransferCharacteristics2,		kVRegNTV2VPIDTransferCharacteristics3,		kVRegNTV2VPIDTransferCharacteristics4,
+																kVRegNTV2VPIDTransferCharacteristics5,		kVRegNTV2VPIDTransferCharacteristics6,		kVRegNTV2VPIDTransferCharacteristics7,		kVRegNTV2VPIDTransferCharacteristics8,	0};
+
+static const ULWord	gChannelToSDIOutVPIDColorimetry []		= {	kVRegNTV2VPIDColorimetry,		kVRegNTV2VPIDColorimetry2,		kVRegNTV2VPIDColorimetry3,		kVRegNTV2VPIDColorimetry4,
+																kVRegNTV2VPIDColorimetry5,		kVRegNTV2VPIDColorimetry6,		kVRegNTV2VPIDColorimetry7,		kVRegNTV2VPIDColorimetry8,	0};
+
+static const ULWord	gChannelToSDIOutVPIDLuminance []		= {	kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,
+																kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,	0};
+
 
 // Method: SetEveryFrameServices
 // Input:  NTV2EveryFrameTaskMode
@@ -2077,6 +2086,9 @@ bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat 
 		CVIDFAIL("'" << GetDisplayName() << "': Failed to change channel " << DEC(UWord(channel)+1) << " FBF from "
 				<< ::NTV2FrameBufferFormatToString(currentFormat) << " to " << ::NTV2FrameBufferFormatToString(newFormat));
 
+	SetVPIDTransferCharacteristics(NTV2_VPID_TC_SDR_TV, channel);
+	SetVPIDColorimetry(NTV2_VPID_Color_Rec709, channel);
+	SetVPIDVPIDLuminance(NTV2_VPID_Luminance_YCbCr, channel);
 	return status;
 }
 
@@ -8005,19 +8017,19 @@ bool CNTV2Card::ReadSDIStatistics (NTV2SDIInStatistics & outStats)
 	return NTV2Message (reinterpret_cast <NTV2_HEADER *> (&outStats));
 }
 
-bool CNTV2Card::SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue)
+bool CNTV2Card::SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister(kVRegNTV2VPIDTransferCharacteristics, inValue);
+	return WriteRegister(gChannelToSDIOutVPIDTransferCharacteristics[inChannel], inValue);
 }
 
-bool CNTV2Card::SetVPIDColorimetry (const NTV2VPIDColorimetry inValue)
+bool CNTV2Card::SetVPIDColorimetry (const NTV2VPIDColorimetry inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister(kVRegNTV2VPIDColorimetry, inValue);
+	return WriteRegister(gChannelToSDIOutVPIDColorimetry[inChannel], inValue);
 }
 
-bool CNTV2Card::SetVPIDVPIDLuminance (const NTV2VPIDLuminance inValue)
+bool CNTV2Card::SetVPIDVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister(kVRegNTV2VPIDLuminance, inValue);
+	return WriteRegister(gChannelToSDIOutVPIDLuminance[inChannel], inValue);
 }
 
 #if !defined (NTV2_DEPRECATE)

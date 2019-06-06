@@ -398,10 +398,10 @@ VPIDBitDepth CNTV2VPID::GetBitDepth (void) const
 	return (VPIDBitDepth)((m_uVPID & kRegMaskVPIDBitDepth) >> kRegShiftVPIDBitDepth); 
 }
 
-void CNTV2VPID::SetTransferCharacteristics (const NTV2VPIDXferChars inBitDepth)
+void CNTV2VPID::SetTransferCharacteristics (const NTV2VPIDXferChars iXferChars)
 {
 	m_uVPID = (m_uVPID & ~kRegMaskVPIDXferChars) |
-		(((ULWord)inBitDepth << kRegShiftVPIDXferChars) & kRegMaskVPIDXferChars);
+		(((ULWord)iXferChars << kRegShiftVPIDXferChars) & kRegMaskVPIDXferChars);
 }
 
 
@@ -410,22 +410,54 @@ NTV2VPIDXferChars CNTV2VPID::GetTransferCharacteristics (void) const
 	return (NTV2VPIDXferChars)((m_uVPID & kRegMaskVPIDXferChars) >> kRegShiftVPIDXferChars); 
 }
 
-void CNTV2VPID::SetColorimetry (const NTV2VPIDColorimetry inBitDepth)
+void CNTV2VPID::SetColorimetry (const NTV2VPIDColorimetry inColorimetry)
 {
-	m_uVPID = (m_uVPID & ~kRegMaskVPIDColorimetry) |
-		(((ULWord)inBitDepth << kRegShiftVPIDColorimetry) & kRegMaskVPIDColorimetry);
+	VPIDStandard standard = GetStandard();
+	if(standard == VPIDStandard_1080	||
+		standard == VPIDStandard_1080_DualLink ||
+		standard == VPIDStandard_1080_DualLink_3Gb ||
+		standard == VPIDStandard_2160_QuadDualLink_3Gb ||
+		standard == VPIDStandard_2160_DualLink)
+	{
+		ULWord lowBit = 0, highBit = 0;
+		highBit = (inColorimetry&0x2)>>1;
+		lowBit = inColorimetry&0x1;
+		m_uVPID = (m_uVPID & ~BIT(15)) |
+			((highBit << 15) & BIT(15));
+		m_uVPID = (m_uVPID & ~BIT(12)) |
+			((lowBit << 12) & BIT(12));
+	}
+	else
+	{
+		m_uVPID = (m_uVPID & ~kRegMaskVPIDColorimetry) |
+			(((ULWord)inColorimetry << kRegShiftVPIDColorimetry) & kRegMaskVPIDColorimetry);
+	}
 }
 
 
 NTV2VPIDColorimetry CNTV2VPID::GetColorimetry (void) const
 {
+	VPIDStandard standard = GetStandard();
+	if(standard == VPIDStandard_1080	||
+		standard == VPIDStandard_1080_DualLink ||
+		standard == VPIDStandard_1080_DualLink_3Gb ||
+		standard == VPIDStandard_2160_QuadDualLink_3Gb ||
+		standard == VPIDStandard_2160_DualLink)
+	{
+		//The bits are sparse so...
+		uint8_t lowBit = 0, highBit = 0, value = 0;
+		lowBit = (m_uVPID & BIT(12)) >> 12;
+		highBit = (m_uVPID & BIT(15)) >> 15;
+		value = (highBit << 1)|lowBit;
+		return (NTV2VPIDColorimetry)value;
+	}
 	return (NTV2VPIDColorimetry)((m_uVPID & kRegMaskVPIDColorimetry) >> kRegShiftVPIDColorimetry); 
 }
 
-void CNTV2VPID::SetLuminance (const NTV2VPIDLuminance inBitDepth)
+void CNTV2VPID::SetLuminance (const NTV2VPIDLuminance inLuminance)
 {
 	m_uVPID = (m_uVPID & ~kRegmaskVPIDLuminance) |
-		(((ULWord)inBitDepth << kRegShiftVPIDLuminance) & kRegmaskVPIDLuminance);
+		(((ULWord)inLuminance << kRegShiftVPIDLuminance) & kRegmaskVPIDLuminance);
 }
 
 

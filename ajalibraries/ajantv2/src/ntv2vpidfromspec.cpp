@@ -54,6 +54,9 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	uint8_t	byte2 = 0;
 	uint8_t	byte3 = 0;
 	uint8_t	byte4 = 0;
+	
+	uint8_t highBit = 0;
+	uint8_t lowBit = 0;
 
 	(void)enableBT2020;
 
@@ -425,13 +428,34 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
         else
             byte3 |= (1UL << 5);            //    0x20
     }
-
+	
 	//Colorimetry
-	if (NTV2_IS_QUAD_QUAD_FORMAT(outputFormat) ||
-		NTV2_IS_4K_VIDEO_FORMAT(outputFormat) ||
-		NTV2_IS_HD_VIDEO_FORMAT(outputFormat))
+	highBit = (colorimetry&0x2)>>1;
+	lowBit = colorimetry&0x1;
+	if ( NTV2_IS_HD_VIDEO_FORMAT		(outputFormat) &&
+		 ! NTV2_IS_720P_VIDEO_FORMAT	(outputFormat))
 	{
-		byte3 |= (colorimetry << 4);
+		if (is3G && !isLevelB)
+			byte3 |= (highBit << 5);
+		else
+			byte3 |= (highBit << 7);
+		
+		byte3 |= (lowBit << 4);
+	}
+	
+	if ( NTV2_IS_4K_VIDEO_FORMAT (outputFormat) || NTV2_IS_QUAD_QUAD_FORMAT(outputFormat))
+	{
+		if((is6G || is12G) || (is3G && !isLevelB))
+		{
+			byte3 |= (highBit << 5);
+			byte3 |= (lowBit << 4);
+		}
+		
+		if ((!is3G) || (is3G && isLevelB))
+		{
+			byte3 |= (highBit << 7);
+			byte3 |= (lowBit << 4);
+		}
 	}
 
 	//	Sampling structure
