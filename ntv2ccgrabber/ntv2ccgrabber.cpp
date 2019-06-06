@@ -17,8 +17,10 @@
 #include "ajabase/system/memory.h"
 #include <iostream>
 #include <iomanip>
+#include <utility>	//	std::rel_ops
 
 using namespace std;
+using namespace std::rel_ops;
 
 //	Convenience macros for EZ logging:
 #define	CCGFAIL(_expr_)		AJA_sERROR  (AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)

@@ -1438,9 +1438,8 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	const ULWord				bytesPerRow			(formatDesc.GetBytesPerRow());
 	const bool					isProgressive		(::IsProgressivePicture(mConfig.fVideoFormat));
 	const bool					isInterlaced		(!isProgressive);
-	CNTV2Line21Captioner		F1Line21Encoder;	//	Used to encode Field 1 analog (line 21) waveform
-	CNTV2Line21Captioner		F2Line21Encoder;	//	Used to encode Field 2 analog (line 21) waveform
-	CaptionData					captionData;		//	Current frame's 608 caption bytes (Fields 1 and 2)
+	CNTV2Line21Captioner		Line21Encoder;		//	Used to encode "analog" (line 21) waveform
+	CaptionData					captionData;		//	Current frame's 608 caption byte pairs (both fields)
 	ULWord						acOptionFlags		(0);
 	ULWord						currentSample		(0);
 	NTV2AudioSystem				audioSystem			(NTV2_AUDIOSYSTEM_INVALID);
@@ -1541,30 +1540,43 @@ void NTV2CCPlayer::PlayoutFrames (void)
 		}
 
 		if (NTV2_IS_SD_VIDEO_FORMAT(mConfig.fVideoFormat))
-		{	//	SD Video
+		{	//	SD Video encodes "analog" waveform into line 21...
 			if (!mConfig.fSuppressLine21)
 			{	//	Overwrite Line21 with encoded CEA608 waveform
-				const ULWord	kLine21F1RowNum		(NTV2_IS_VANCMODE_TALLER(mVancMode)  ?  29  :  (NTV2_IS_VANCMODE_TALL(mVancMode)  ?  23  :  1));
-				const ULWord	kLine21F2RowNum		(kLine21F1RowNum + 1);
-				UByte *			pF1EncodedYUV8Line	(F1Line21Encoder.EncodeLine (captionData.f1_char1, captionData.f1_char2));
-				UByte *			pF2EncodedYUV8Line	(F2Line21Encoder.EncodeLine (captionData.f2_char1, captionData.f2_char2));
-				UByte *			pF1Line21InBuffer	(reinterpret_cast<UByte*>(mVideoBuffer.GetHostPointer()) + (kLine21F1RowNum * bytesPerRow));
-				UByte *			pF2Line21InBuffer	(reinterpret_cast<UByte*>(mVideoBuffer.GetHostPointer()) + (kLine21F2RowNum * bytesPerRow));
+				ULWord	line21RowOffset		(0);
+				UByte *	pLine21				(NULL);
+				UByte *	pEncodedYUV8Line	(NULL);
+				formatDesc.GetLineOffsetFromSMPTELine (21, line21RowOffset);
+				pLine21 = reinterpret_cast<UByte*>(formatDesc.GetWriteableRowAddress(mVideoBuffer.GetHostPointer(),  line21RowOffset));
+				if (pLine21)
+				{	//	Encode F1 caption bytes into EIA-608-compliant 8-bit YUV waveform...
+					pEncodedYUV8Line = Line21Encoder.EncodeLine (captionData.f1_char1, captionData.f1_char2);
+					//	Replace F1 line 21 in the frame buffer with the EncodeLine result...
+					if (mConfig.fPixelFormat == NTV2_FBF_8BIT_YCBCR)
+						::memcpy (pLine21, pEncodedYUV8Line, bytesPerRow);	//	... just copy the line
+					else if (mConfig.fPixelFormat == NTV2_FBF_10BIT_YCBCR)
+						::ConvertLine_2vuy_to_v210 (pEncodedYUV8Line, reinterpret_cast<ULWord*>(pLine21), 720);	//	...with EncodeLine result converted to 10-bit YUV
+				}
+				else CCPLFAIL("GetWriteableRowAddress return NULL for SMPTE line 21, rowOffset=" << xHEX0N(line21RowOffset,8) << " " << formatDesc);
 
-				if (mConfig.fPixelFormat == NTV2_FBF_8BIT_YCBCR)
-					::memcpy (pF1Line21InBuffer, pF1EncodedYUV8Line, bytesPerRow);		//	Replace F1 line 21 with resulting F1 line from EncodeLine
-				else if (mConfig.fPixelFormat == NTV2_FBF_10BIT_YCBCR)
-					::ConvertLine_2vuy_to_v210 (pF1EncodedYUV8Line, reinterpret_cast <ULWord *> (pF1Line21InBuffer), 720);	//	Convert to 10-bit YUV in-place
-
-				if (mConfig.fPixelFormat == NTV2_FBF_8BIT_YCBCR)
-					::memcpy (pF2Line21InBuffer, pF2EncodedYUV8Line, bytesPerRow);		//	Replace F2 line 21 with resulting F2 line from EncodeLine
-				else if (mConfig.fPixelFormat == NTV2_FBF_10BIT_YCBCR)
-					::ConvertLine_2vuy_to_v210 (pF2EncodedYUV8Line, reinterpret_cast <ULWord *> (pF2Line21InBuffer), 720);	//	Convert to 10-bit YUV in-place
-			}
+				formatDesc.GetLineOffsetFromSMPTELine (284, line21RowOffset);
+				pLine21 = reinterpret_cast<UByte*>(formatDesc.GetWriteableRowAddress(mVideoBuffer.GetHostPointer(),  line21RowOffset));
+				if (pLine21)
+				{	//	Encode F2 caption bytes into EIA-608-compliant 8-bit YUV waveform...
+					pEncodedYUV8Line = Line21Encoder.EncodeLine (captionData.f2_char1, captionData.f2_char2);
+					//	Replace F2 line 21 in the frame buffer with the EncodeLine result...
+					if (mConfig.fPixelFormat == NTV2_FBF_8BIT_YCBCR)
+						::memcpy (pLine21, pEncodedYUV8Line, bytesPerRow);	//	... just copy the line
+					else if (mConfig.fPixelFormat == NTV2_FBF_10BIT_YCBCR)
+						::ConvertLine_2vuy_to_v210 (pEncodedYUV8Line, reinterpret_cast<ULWord*>(pLine21), 720);	//	...with EncodeLine result converted to 10-bit YUV
+				}
+				else CCPLFAIL("GetWriteableRowAddress return NULL for SMPTE line 284, rowOffset=" << xHEX0N(line21RowOffset,8) << " " << formatDesc);
+				//DEBUG		if (captionData.HasData())	mDevice.DMAWriteFrame(33, (ULWord*) mVideoBuffer.GetHostPointer(), mVideoBuffer.GetByteCount());
+			}	//	if not suppressing analog line21
 		}	//	if SD video
 		else if (!mConfig.fSuppress708)
 		{	//	HD video -- use the 708 encoder to put 608 captions into a single 708 packet:
-			m708Encoder->Set608CaptionData (captionData);	//	Set the 708 encoder's 608 caption data (for both F1 and F2)
+			m708Encoder->Set608CaptionData(captionData);	//	Set the 708 encoder's 608 caption data (for both F1 and F2)
 			if (m708Encoder->MakeSMPTE334AncPacket (frameRate, NTV2_CC608_Field1))		//	Generate SMPTE-334 Anc data packet
 			{
 				AJAAncillaryData_Cea708	pkt708;
