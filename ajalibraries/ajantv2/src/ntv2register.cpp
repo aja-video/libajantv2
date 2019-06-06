@@ -2086,6 +2086,9 @@ bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat 
 		CVIDFAIL("'" << GetDisplayName() << "': Failed to change channel " << DEC(UWord(channel)+1) << " FBF from "
 				<< ::NTV2FrameBufferFormatToString(currentFormat) << " to " << ::NTV2FrameBufferFormatToString(newFormat));
 
+	SetVPIDTransferCharacteristics(NTV2_VPID_TC_SDR_TV, channel);
+	SetVPIDColorimetry(NTV2_VPID_Color_Rec709, channel);
+	SetVPIDVPIDLuminance(NTV2_VPID_Luminance_YCbCr, channel);
 	return status;
 }
 
