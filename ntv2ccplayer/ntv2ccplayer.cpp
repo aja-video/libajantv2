@@ -1433,7 +1433,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(standard));
 	const uint16_t				kF2PktLineNumCEA608	(gF2LineNums608[standard]);
 	const uint32_t				F2StartLine			(smpteLineNumInfo.GetLastLine(smpteLineNumInfo.firstFieldTop ? NTV2_FIELD0 : NTV2_FIELD1) + 1);	//	F2 VBI starts here
-	static const AJAAncillaryDataLocation	kCEA708LocF1(AJAAncillaryDataLink_A,  AJAAncillaryDataVideoStream_Y,  AJAAncillaryDataSpace_VANC,  kF1PktLineNumCEA708);
+	static const AJAAncillaryDataLocation	kCEA708LocF1(AJAAncillaryDataLink_A,  AJAAncillaryDataVideoStream_Y,  AJAAncillaryDataSpace_VANC,  kF1PktLineNumCEA708, AJAAncDataHorizOffset_AnyVanc);
 	const NTV2FormatDescriptor	formatDesc			(mConfig.fVideoFormat, mConfig.fPixelFormat, mVancMode);
 	const ULWord				bytesPerRow			(formatDesc.GetBytesPerRow());
 	const bool					isProgressive		(::IsProgressivePicture(mConfig.fVideoFormat));
