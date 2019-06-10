@@ -950,6 +950,8 @@ private:
 		DefineRegName	(kVRegSDIInput2Stereo3DMode,			"kVRegSDIInput2Stereo3DMode");
 		DefineRegName	(kVRegFrameBuffer1RGBRange,				"kVRegFrameBuffer1RGBRange");
 		DefineRegName	(kVRegFrameBuffer1Stereo3DMode,			"kVRegFrameBuffer1Stereo3DMode");
+		DefineRegName	(kVRegHDMIInRgbRange,					"kVRegHDMIInRgbRange");
+		DefineRegName	(kVRegHDMIOutRgbRange,					"kVRegHDMIOutRgbRange");
 		DefineRegName	(kVRegAnalogInBlackLevel,				"kVRegAnalogInBlackLevel");
 		DefineRegName	(kVRegAnalogInputType,					"kVRegAnalogInputType");
 		DefineRegName	(kVRegHDMIOutColorSpaceModeCtrl,		"kVRegHDMIOutColorSpaceModeCtrl");
@@ -999,6 +1001,7 @@ private:
 		DefineRegName	(kVRegForceApplicationCode,				"kVRegForceApplicationCode");
 		DefineRegName	(kVRegIpConfigStreamRefresh,			"kVRegIpConfigStreamRefresh");
 		DefineRegName	(kVRegSDIInput1Raster,					"kVRegSDIInput1Raster");
+		DefineRegName	(kVRegInputChangedCount,				"kVRegInputChangedCount");
 		DefineRegName	(kVRegProcAmpSDRegsInitialized,			"kVRegProcAmpSDRegsInitialized");
 		DefineRegName	(kVRegProcAmpStandardDefBrightness,		"kVRegProcAmpStandardDefBrightness");
 		DefineRegName	(kVRegProcAmpStandardDefContrast,		"kVRegProcAmpStandardDefContrast");
@@ -1212,10 +1215,8 @@ private:
 		DefineRegName	(kVRegKIPNetCfgError,					"kVRegKIPNetCfgError");
 		DefineRegName	(kVRegUseHDMI420Mode,					"kVRegUseHDMI420Mode");
 		DefineRegName	(kVRegUnused501,						"kVRegUnused501");
-        DefineRegName   (kVReg2022_7NetworkPathDiff,            "kVReg2022_7NetworkPathDiff");
 		DefineRegName	(kVRegUserDefinedDBB,					"kVRegUserDefinedDBB");
 		DefineRegName	(kVRegHDMIOutAudioChannels,				"kVRegHDMIOutAudioChannels");
-		DefineRegName	(kVRegHDMIOutRGBRange,					"kVRegHDMIOutRGBRange");
 		DefineRegName	(kVRegZeroHostAncPostCapture,			"kVRegZeroHostAncPostCapture");
 		DefineRegName	(kVRegZeroDeviceAncPostCapture,			"kVRegZeroDeviceAncPostCapture");
 		DefineRegName	(kVRegAudioMonitorChannelSelect,		"kVRegAudioMonitorChannelSelect");

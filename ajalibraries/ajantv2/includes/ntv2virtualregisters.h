@@ -127,7 +127,7 @@ typedef enum
 	kVRegFrameBuffer1Stereo3DMode			= VIRTUALREG_START+139,
 
 	kVRegHDMIInRgbRange						= VIRTUALREG_START+140,
-	kVRegHDMIOutRgbRange					= VIRTUALREG_START+141,
+	kVRegHDMIOutRgbRange					= VIRTUALREG_START+141,	//	See also kVRegHDMIOutRGBRange
 	kVRegAnalogInBlackLevel					= VIRTUALREG_START+142,
 	kVRegAnalogInputType					= VIRTUALREG_START+143,
 	kVRegHDMIOutColorSpaceModeCtrl			= VIRTUALREG_START+144,
@@ -453,7 +453,7 @@ typedef enum
     kVRegUserDefinedDBB						= VIRTUALREG_START+502,
     
     kVRegHDMIOutAudioChannels				= VIRTUALREG_START+503,
-    kVRegHDMIOutRGBRange					= VIRTUALREG_START+504,
+	kVRegUnused504							= VIRTUALREG_START+504,
     kVRegZeroHostAncPostCapture				= VIRTUALREG_START+505,
     kVRegZeroDeviceAncPostCapture			= VIRTUALREG_START+506,
     kVRegAudioMonitorChannelSelect          = VIRTUALREG_START+507,
@@ -526,7 +526,9 @@ typedef enum
 #if !defined(NTV2_DEPRECATE_15_0)
 	#define	kVRegLinuxDriverVersion				VIRTUALREG_START		///< @deprecated	Obsolete in SDK 15.0, use kVRegDriverVersion instead
 #endif
-
+#if !defined(NTV2_DEPRECATE_15_2)
+	#define	kVRegHDMIOutRGBRange				(VIRTUALREG_START+504)	///< @deprecated	Appears to be unused, but easily confused with kVRegHDMIOutRgbRange
+#endif
 #if !defined (NTV2_DEPRECATE_12_7)
 	//	The old virtual register names will be deprecated sometime after SDK 13.0.0
 	#define	kRegLinuxDriverVersion				kVRegLinuxDriverVersion
