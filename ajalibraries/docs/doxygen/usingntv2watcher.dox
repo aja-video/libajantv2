@@ -318,7 +318,8 @@ The display highlights changed content with a brighter color.
 		-	Use the up-arrow or down-arrow keys to scroll the display up or down.
 		-	Use the left-arrow or right-arrow keys to scroll the display left or right.
 		-	Use the page-up or page-down keys to scroll the display up or down by a larger amount.
-	-	<b>Vertical Ruler</b> — This ruler identifies each audio channel in the display. Each channel can be augmented with “Absent”, “PCM” or “Non-PCM” (or “Mute” or “Non-PCM Dolby” with <b>AutoDetect</b> enabled).
+	-	<b>Vertical Ruler</b> — This ruler identifies each audio channel in the display.
+		Each channel can be augmented with “Absent”, “PCM” or “Non-PCM” (or “Mute” or “Non-PCM Dolby” with <b>AutoDetect</b> enabled).
 	-	<b>Horizontal Ruler</b> — This ruler identifies the offset into the audio buffer of each column (or pixel, horizontally) in the audio buffer.
 		-	Right-click in the horizontal ruler to pop up the <b>Units</b> menu:
 			-	<b>Byte Offset</b> — Shows the buffer offset as a byte count, in hexadecimal.
@@ -337,7 +338,8 @@ The display highlights changed content with a brighter color.
 			-	<b>Float</b> — Shows samples as floating point values.
 			-	<b>dB</b> — Shows samples in decibels.
 		-	<b>Copy</b> — Copies the audio buffer contents to the clipboard.
-		-	<b>Paste</b> — (<b>Output</b> mode only) Pastes the clipboard contents into the output audio buffer. Available only if previously copied from an Audio inspector view.
+		-	<b>Paste</b> — (<b>Output</b> mode only) Pastes the clipboard contents into the output audio buffer.
+			Available only if previously copied from an Audio inspector view.
 		-	<b>Fill</b> — (<b>Output</b> mode only) Fills the output audio buffer with 440Hz constant-amplitude identical-phase sinusoidal tone.
 
 
@@ -364,6 +366,7 @@ The Anc inspector has four main sections:
 	-	<b>F2 Anc</b> — This area is visible only for devices that have Anc inserters/extractors, and only when the channel is running interlaced video.
 		When visible, it displays the contents of the 0x12000-byte region that starts -0x12000 bytes from the end of the frame buffer.
 		This is where the extractor places packets captured from Field 2. It’s also where the inserter fetches packets for output into interlaced Field 2.
+	-	<b>EIA/CEA-608 Caption Decoder</b> — Defaults to “Off”. More information below.
 
 A menu/combobox is provided for each of the Anc buffer display areas, to control how each area’s Anc data is displayed:
 	-	<b>Raw</b> — Displays the buffer as raw data. By right-clicking in the content area, you can change the data display’s grouping
@@ -392,6 +395,38 @@ The display highlights changed content with a brighter color.
  
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the displayed information to the Clipboard.
 
+When the <b>EIA/CEA-608 Caption Decoder</b> is enabled, an additional two data views are revealed:
+	-	<b>Caption Byte Stream</b> — Shows the contents of the inspector’s caption byte-pair stream FIFO in hexadecimal words.
+	-	<b>Rendered Captions</b> — Renders the decoded captions, as they would appear on-screen.
+
+To enable the decoder, choose a caption channel to monitor from the menu (CC1, CC2, etc.). To render captions, the decoder’s byte-pair
+FIFO requires a stream of caption byte-pairs from one of the other packet displays in the Anc Inspector:
+	-	<b>“Analog” Captioning</b> — All of the following are true:
+		-	The monitored FrameStore/Channel is receiving or transmitting SD video;
+		-	The monitored FrameStore/Channel has a 'v210' or '2vuy' pixel format;
+		-	The current frame buffer contains a valid “analog” caption byte pair encoded
+			as a waveform per EIA-608 in “line 21” of active video.
+	-	<b>VANC Frame Geometry</b> — All of the following are true:
+		-	“Tall” or “Taller” VANC mode must be enabled;
+		-	The monitored FrameStore/Channel has a 'v210' or '2vuy' pixel format;
+			-	If 8-bit YCbCr, VANC Shift Mode must be enabled;
+		-	The VANC anc display is set to “Packets”;
+		-	The packet display must contain:
+			-	a CEA-708 packet that contains “Service 0“ CEA-608 caption data;
+			-	at least one CEA-608 packet.
+	-	<b>Anc Extractor/Inserter F1 and/or F2</b> — All of the following are true:
+		-	The monitored Anc Inserter/Extractor must be running;
+		-	The Field 1 or Field 2 displays must be set to display “Packets”.
+		-	One of the packet displays must contain:
+			-	a CEA-708 packet that contains “Service 0“ CEA-608 caption data;
+			-	a CEA-608 packet.
+
+The decoder can also be operated manually/interactively:
+	-	Be sure no displays in the <b>Anc Inspector</b> are set to show “Packets”, and that no SD “line 21” data is currently being decoded.
+	-	In the byte-pair stream view, edit the hex values to whatever CEA-608 byte pair values you wish to decode.
+		(Try pasting in byte sequences from a .scc sidecar file.)
+	-	The caption display will decode the entire stream “live” as it changes.
+	-	The <b>Reset Decoder</b> button is provided to manually force a reset of the decoder, if needed.
 
 
 
