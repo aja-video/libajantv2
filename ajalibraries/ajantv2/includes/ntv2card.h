@@ -821,11 +821,19 @@ public:
 									This must be a valid ::NTV2FrameBufferFormat value.
 		@param[in]	inIsAJARetail	Specifies if the AJA retail configuration settings are to be respected or not.
 									Defaults to false on all platforms other than MacOS, which defaults to true.
+		@param[in]	inXferChars		Specifies the HDR tranfer characteristc description.
+		@param[in]	inColorimetry	Specifies the HDR colorimetry description.
+		@param[in]	inLuminance		Specifies the HDR luminance description.
 		@details	This function allows client applications to control the format of frame data stored
 					in the frame stores on an AJA device. This is important, because when frames are transferred
 					between the host and the AJA device, the frame data format is presumed to be identical.
 	**/
-	AJA_VIRTUAL bool	SetFrameBufferFormat (NTV2Channel inChannel, NTV2FrameBufferFormat inNewFormat, bool inIsAJARetail = AJA_RETAIL_DEFAULT);
+	AJA_VIRTUAL bool	SetFrameBufferFormat (NTV2Channel inChannel,
+											  NTV2FrameBufferFormat inNewFormat,
+											  bool inIsAJARetail = AJA_RETAIL_DEFAULT,
+											  NTV2HDRXferChars inXferChars = NTV2_VPID_TC_SDR_TV,
+											  NTV2HDRColorimetry inColorimetry = NTV2_VPID_Color_Rec709,
+											  NTV2HDRLuminance inLuminance = NTV2_VPID_Luminance_YCbCr);
 
 	/**
 		@brief		Sets the device's clock reference source. See \ref deviceclockingandsync for more information.

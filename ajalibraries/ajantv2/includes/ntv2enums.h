@@ -4263,7 +4263,7 @@ typedef enum
 	NTV2_VPID_TC_HLG,
 	NTV2_VPID_TC_PQ,
 	NTV2_VPID_TC_Unspecified
-} NTV2VPIDTransferCharacteristics, NTV2VPIDXferChars;
+} NTV2VPIDTransferCharacteristics, NTV2VPIDXferChars, NTV2HDRXferChars;
 		
 typedef enum
 {
@@ -4271,13 +4271,13 @@ typedef enum
 	NTV2_VPID_Color_Reserved,
 	NTV2_VPID_Color_UHDTV,
 	NTV2_VPID_Color_Unknown
-} NTV2VPIDColorimetry;
+} NTV2VPIDColorimetry, NTV2HDRColorimetry;
 		
 typedef enum
 {
 	NTV2_VPID_Luminance_YCbCr,
 	NTV2_VPID_Luminance_ICtCp
-} NTV2VPIDLuminance;
+} NTV2VPIDLuminance, NTV2HDRLuminance;
 
 
 #if !defined (NTV2_DEPRECATE)
