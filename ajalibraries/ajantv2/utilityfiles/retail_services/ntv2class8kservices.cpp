@@ -440,8 +440,8 @@ void Class8kServices::SetDeviceMiscRegisters ()
 	b4K = true;
 	bool b2pi = true;
 	bool bHdmiIn = false;
-	bool b4kHfr	= NTV2_IS_QUAD_QUAD_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	
+	bool b4kHfr	= NTV2_IS_QUAD_HFR_VIDEO_FORMAT(mFb1VideoFormat);
+					
 	if (mHasHdmiOut)
 	{
 		// set standard / mode
@@ -547,7 +547,7 @@ void Class8kServices::SetDeviceMiscRegisters ()
 			mCard->SetHDMIOutTsiIO(false);
 		}
 		
-		// HFPS
+		// HFR
 		if (mVirtualHDMIOutputSelect == NTV2_4kHalfFrameRate)
 		{
 			bool bDecimate = b4kHfr;

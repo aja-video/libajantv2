@@ -3114,7 +3114,7 @@ void Class4kServices::SetDeviceMiscRegisters ()
 			mCard->SetHDMIOutTsiIO(false);
 		}
 		
-		// HFPS
+		// HFR
 		if (mVirtualHDMIOutputSelect == NTV2_4kHalfFrameRate)
 		{
 			bool bDecimate = b4kHfr;
