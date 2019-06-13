@@ -5835,24 +5835,41 @@ bool IsTransportCompatibleFormat (const NTV2VideoFormat inFormat1, const NTV2Vid
 }
 
 
-NTV2InputSource GetNTV2InputSourceForIndex (const ULWord inIndex0)
+NTV2InputSource GetNTV2InputSourceForIndex (const ULWord inIndex0, const NTV2InputSourceKinds inKinds)
 {
-	static const NTV2InputSource	sInputSources []	= {	NTV2_INPUTSOURCE_SDI1,	NTV2_INPUTSOURCE_SDI2,	NTV2_INPUTSOURCE_SDI3,	NTV2_INPUTSOURCE_SDI4,
+	static const NTV2InputSource	sSDIInputSources[]	= {	NTV2_INPUTSOURCE_SDI1,	NTV2_INPUTSOURCE_SDI2,	NTV2_INPUTSOURCE_SDI3,	NTV2_INPUTSOURCE_SDI4,
 															NTV2_INPUTSOURCE_SDI5,	NTV2_INPUTSOURCE_SDI6,	NTV2_INPUTSOURCE_SDI7,	NTV2_INPUTSOURCE_SDI8};
-	if (inIndex0 < sizeof (sInputSources) / sizeof (NTV2InputSource))
-		return sInputSources [inIndex0];
-	else
-		return NTV2_NUM_INPUTSOURCES;
+	static const NTV2InputSource	sHDMIInputSources[]	= {	NTV2_INPUTSOURCE_HDMI1,	NTV2_INPUTSOURCE_HDMI2,	NTV2_INPUTSOURCE_HDMI3,	NTV2_INPUTSOURCE_HDMI4};
+	static const NTV2InputSource	sANLGInputSources[]	= {	NTV2_INPUTSOURCE_ANALOG1 };
+	switch (inKinds)
+	{
+		case NTV2_INPUTSOURCES_SDI:
+			if (inIndex0 < sizeof(sSDIInputSources) / sizeof(NTV2InputSource))
+				return sSDIInputSources[inIndex0];
+			break;
+		case NTV2_INPUTSOURCES_HDMI:
+			if (inIndex0 < sizeof(sHDMIInputSources) / sizeof(NTV2InputSource))
+				return sHDMIInputSources[inIndex0];
+			break;
+		case NTV2_INPUTSOURCES_ANALOG:
+			if (inIndex0 < sizeof(sANLGInputSources) / sizeof(NTV2InputSource))
+				return sANLGInputSources[inIndex0];
+			break;
+	#if defined(_DEBUG)
+		case NTV2_INPUTSOURCES_NONE:
+		case NTV2_INPUTSOURCES_ALL:
+			break;
+	#else
+		default:	break;
+	#endif
+	}
+	return NTV2_INPUTSOURCE_INVALID;
 }
 
 
-NTV2InputSource GetNTV2HDMIInputSourceForIndex (const ULWord inIndex0)
+NTV2InputSource GetNTV2HDMIInputSourceForIndex (const ULWord inIndex0)	//	NTV2_SHOULD_BE_DEPRECATED
 {
-	static const NTV2InputSource	sInputSources []	= {	NTV2_INPUTSOURCE_HDMI1,	NTV2_INPUTSOURCE_HDMI2,	NTV2_INPUTSOURCE_HDMI3,	NTV2_INPUTSOURCE_HDMI4};
-	if (inIndex0 < sizeof (sInputSources) / sizeof (NTV2InputSource))
-		return sInputSources [inIndex0];
-	else
-		return NTV2_NUM_INPUTSOURCES;
+	return ::GetNTV2InputSourceForIndex(inIndex0, NTV2_INPUTSOURCES_HDMI);
 }
 
 

@@ -516,12 +516,18 @@ AJAExport NTV2_SHOULD_BE_DEPRECATED(std::string		NTV2CrosspointToString (const N
 AJAExport NTV2_SHOULD_BE_DEPRECATED(NTV2Channel		NTV2CrosspointToNTV2Channel (const NTV2Crosspoint inCrosspointChannel));
 AJAExport NTV2_SHOULD_BE_DEPRECATED(NTV2Crosspoint	NTV2ChannelToInputCrosspoint (const NTV2Channel inChannel));
 AJAExport NTV2_SHOULD_BE_DEPRECATED(NTV2Crosspoint	NTV2ChannelToOutputCrosspoint (const NTV2Channel inChannel));
+AJAExport NTV2_SHOULD_BE_DEPRECATED(NTV2InputSource	GetNTV2HDMIInputSourceForIndex (const ULWord inIndex0));
 
 AJAExport NTV2VideoFormat		GetTransportCompatibleFormat (const NTV2VideoFormat inFormat, const NTV2VideoFormat inTargetFormat);
 AJAExport bool					IsTransportCompatibleFormat (const NTV2VideoFormat inFormat1, const NTV2VideoFormat inFormat2);
 
-AJAExport NTV2InputSource		GetNTV2InputSourceForIndex (const ULWord inIndex0);				//	0-based index
-AJAExport NTV2InputSource		GetNTV2HDMIInputSourceForIndex (const ULWord inIndex0);
+/**
+	@return		The input source that corresponds to an index value, or ::NTV2_INPUTSOURCE_INVALID upon failure.
+	@param[in]	inIndex0	Specifies the unsigned, zero-based integer value to be converted into an equivalent ::NTV2InputSource.
+	@param[in]	inKinds		Optionally specifies the input source type (SDI, HDMI, Analog, etc.) of interest.
+							Defaults to ::NTV2_INPUTSOURCES_SDI.
+**/
+AJAExport NTV2InputSource		GetNTV2InputSourceForIndex (const ULWord inIndex0, const NTV2InputSourceKinds inKinds = NTV2_INPUTSOURCES_SDI);
 AJAExport ULWord				GetIndexForNTV2InputSource (const NTV2InputSource inValue);		//	0-based index
 
 /**
