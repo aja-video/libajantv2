@@ -74,14 +74,20 @@
 	-	To determine if an SDI connector is currently configured to transmit, call CNTV2Card::GetSDITransmitEnable.
 	-	To change an SDI connector’s function to receive or transmit, call CNTV2Card::SetSDITransmitEnable.
 
+		@note	When changing an SDI connector from ‘transmit’ to ‘receive’, it can take a while for the device input
+				to lock to the incoming signal (when there is one). It’s best to delay several frames (or more) before
+				calling CNTV2Card::GetInputVideoFormat or CNTV2Card::GetSDIInputVideoFormat to obtain an accurate
+				determination of what signal is present.
+
 	All SDI connectors on NTV2 devices can receive or transmit 1.5 Gbps signals, and almost all will handle 3Gbps.
 	-	To determine if its SDI spigots can handle 6Gbps or 12Gbps, call ::NTV2DeviceCanDo12GSDI.
 
-	@par	Analog Video Connectors
-
-	Some older AJA devices have analog video connectors (remember the old RCA component-level jacks?).
-	-	To determine the number of analog video inputs the device has, call ::NTV2DeviceGetNumAnalogVideoInputs.
-	-	To determine the number of analog video outputs the device has, call ::NTV2DeviceGetNumAnalogVideoOutputs.
+	To determine if there’s a signal present at an SDI input connector, and if so, what format it is…
+	-	Call CNTV2Card::GetInputVideoFormat, specifying an ::NTV2InputSource …
+		-	Use ::NTV2_INPUTSOURCE_SDI1, ::NTV2_INPUTSOURCE_SDI2, etc.
+		-	Or use the result of ::GetNTV2InputSourceForIndex.
+	-	Or call CNTV2Card::GetSDIInputVideoFormat, specifying the SDI input connector as an ::NTV2Channel value.
+	-	Whichever function you use, if you are expecting <b>psf</b> video, pass ‘true’ for the ‘<i>inIsProgressive</i>’ parameter.
 
 	@par	HDMI Connectors
 
@@ -95,6 +101,26 @@
 	-	HDMI hardware capabilities chart:
 
 	@image	html	hdmichart.png
+
+	To determine if there’s a signal present at an HDMI input connector, and if so, what format it is…
+	-	Call CNTV2Card::GetInputVideoFormat, specifying an ::NTV2InputSource …
+		-	Use ::NTV2_INPUTSOURCE_HDMI1, ::NTV2_INPUTSOURCE_HDMI2, etc.
+		-	Or use the result of ::GetNTV2InputSourceForIndex — specify ::NTV2_INPUTSOURCES_HDMI for the ‘<i>inKinds</i>’ parameter.
+		-	If you are expecting <b>psf</b> video, pass ‘true’ for the ‘<i>inIsProgressive</i>’ parameter.
+	-	Or call CNTV2Card::GetHDMIInputVideoFormat, specifying the HDMI input connector as an ::NTV2Channel value.
+
+	@par	Analog Video Connectors
+
+	Some older AJA devices have analog video connectors (remember the old RCA component-level jacks?).
+	-	To determine the number of analog video inputs the device has, call ::NTV2DeviceGetNumAnalogVideoInputs.
+	-	To determine the number of analog video outputs the device has, call ::NTV2DeviceGetNumAnalogVideoOutputs.
+
+	To determine if there’s a signal present at an analog video input connector, and if so, what format it is…
+	-	Call CNTV2Card::GetInputVideoFormat, specifying an ::NTV2InputSource …
+		-	Use ::NTV2_INPUTSOURCE_ANALOG1.
+		-	Or use the result of ::GetNTV2InputSourceForIndex — specify ::NTV2_INPUTSOURCES_ANALOG for the ‘<i>inKinds</i>’ parameter.
+		-	If you are expecting <b>psf</b> video, pass ‘true’ for the ‘<i>inIsProgressive</i>’ parameter.
+	-	Or call CNTV2Card::GetAnalogInputVideoFormat.
 
 	@par	Audio Connectors
 
