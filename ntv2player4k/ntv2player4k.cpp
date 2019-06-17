@@ -942,17 +942,17 @@ void NTV2Player4K::RouteTsiMuxToSDIOut (void)
 {
 	if (mConfig.fOutputChannel == NTV2_CHANNEL1)
 	{
-		mDevice.Connect (NTV2_XptSDIOut1Input,	NTV2_Xpt425Mux1ARGB);
-		mDevice.Connect (NTV2_XptSDIOut2Input,	NTV2_Xpt425Mux1BRGB);
-		mDevice.Connect (NTV2_XptSDIOut3Input,	NTV2_Xpt425Mux2ARGB);
-		mDevice.Connect (NTV2_XptSDIOut4Input,	NTV2_Xpt425Mux2BRGB);
+        mDevice.Connect (NTV2_XptSDIOut1Input,	NTV2_Xpt425Mux1AYUV);
+        mDevice.Connect (NTV2_XptSDIOut2Input,	NTV2_Xpt425Mux1BYUV);
+        mDevice.Connect (NTV2_XptSDIOut3Input,	NTV2_Xpt425Mux2AYUV);
+        mDevice.Connect (NTV2_XptSDIOut4Input,	NTV2_Xpt425Mux2BYUV);
 	}
 	else if (mConfig.fOutputChannel == NTV2_CHANNEL5)
 	{
-		mDevice.Connect (NTV2_XptSDIOut5Input,	NTV2_Xpt425Mux3ARGB);
-		mDevice.Connect (NTV2_XptSDIOut6Input,	NTV2_Xpt425Mux3BRGB);
-		mDevice.Connect (NTV2_XptSDIOut7Input,	NTV2_Xpt425Mux4ARGB);
-		mDevice.Connect (NTV2_XptSDIOut8Input,	NTV2_Xpt425Mux4BRGB);
+        mDevice.Connect (NTV2_XptSDIOut5Input,	NTV2_Xpt425Mux3AYUV);
+        mDevice.Connect (NTV2_XptSDIOut6Input,	NTV2_Xpt425Mux3BYUV);
+        mDevice.Connect (NTV2_XptSDIOut7Input,	NTV2_Xpt425Mux4AYUV);
+        mDevice.Connect (NTV2_XptSDIOut8Input,	NTV2_Xpt425Mux4BYUV);
 	}
 }	//	RouteTsiMuxToSDIOut
 
