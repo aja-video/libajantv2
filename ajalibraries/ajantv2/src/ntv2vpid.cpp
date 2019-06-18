@@ -336,13 +336,35 @@ VPIDPictureRate CNTV2VPID::GetPictureRate (void) const
 
 void CNTV2VPID::SetImageAspect16x9 (const bool inIs16x9Aspect)
 {
-	m_uVPID = (m_uVPID & ~kRegMaskVPIDImageAspect16x9) |
-		(((inIs16x9Aspect ? 1 : 0) << kRegShiftVPIDImageAspect16x9) & kRegMaskVPIDImageAspect16x9);
+	VPIDStandard standard = GetStandard();
+	if(standard == VPIDStandard_1080	||
+		standard == VPIDStandard_1080_DualLink ||
+		standard == VPIDStandard_1080_DualLink_3Gb ||
+		standard == VPIDStandard_2160_QuadDualLink_3Gb ||
+		standard == VPIDStandard_2160_DualLink)
+	{
+		m_uVPID = (m_uVPID & ~kRegMaskVPIDImageAspect16x9Alt) |
+			(((inIs16x9Aspect ? 1 : 0) << kRegShiftVPIDImageAspect16x9Alt) & kRegMaskVPIDImageAspect16x9Alt);
+	}
+	else
+	{
+		m_uVPID = (m_uVPID & ~kRegMaskVPIDImageAspect16x9) |
+			(((inIs16x9Aspect ? 1 : 0) << kRegShiftVPIDImageAspect16x9) & kRegMaskVPIDImageAspect16x9);
+	}
 }
 
 
 bool CNTV2VPID::GetImageAspect16x9 (void) const
 {
+	VPIDStandard standard = GetStandard();
+	if(standard == VPIDStandard_1080	||
+		standard == VPIDStandard_1080_DualLink ||
+		standard == VPIDStandard_1080_DualLink_3Gb ||
+		standard == VPIDStandard_2160_QuadDualLink_3Gb ||
+		standard == VPIDStandard_2160_DualLink)
+	{
+		return (m_uVPID & kRegMaskVPIDImageAspect16x9Alt) != 0;
+	}
 	return (m_uVPID & kRegMaskVPIDImageAspect16x9) != 0; 
 }
 
@@ -422,10 +444,10 @@ void CNTV2VPID::SetColorimetry (const NTV2VPIDColorimetry inColorimetry)
 		ULWord lowBit = 0, highBit = 0;
 		highBit = (inColorimetry&0x2)>>1;
 		lowBit = inColorimetry&0x1;
-		m_uVPID = (m_uVPID & ~BIT(15)) |
-			((highBit << 15) & BIT(15));
-		m_uVPID = (m_uVPID & ~BIT(12)) |
-			((lowBit << 12) & BIT(12));
+		m_uVPID = (m_uVPID & ~kRegMaskVPIDColorimetryAltHigh) |
+			((highBit << kRegShiftVPIDColorimetryAltHigh) & kRegMaskVPIDColorimetryAltHigh);
+		m_uVPID = (m_uVPID & ~kRegMaskVPIDColorimetryAltLow) |
+			((lowBit << kRegShiftVPIDColorimetryAltLow) & kRegMaskVPIDColorimetryAltLow);
 	}
 	else
 	{
@@ -446,8 +468,8 @@ NTV2VPIDColorimetry CNTV2VPID::GetColorimetry (void) const
 	{
 		//The bits are sparse so...
 		uint8_t lowBit = 0, highBit = 0, value = 0;
-		lowBit = (m_uVPID & BIT(12)) >> 12;
-		highBit = (m_uVPID & BIT(15)) >> 15;
+		lowBit = (m_uVPID & kRegMaskVPIDColorimetryAltLow) >> kRegShiftVPIDColorimetryAltLow;
+		highBit = (m_uVPID & kRegMaskVPIDColorimetryAltHigh) >> kRegShiftVPIDColorimetryAltHigh;
 		value = (highBit << 1)|lowBit;
 		return (NTV2VPIDColorimetry)value;
 	}
