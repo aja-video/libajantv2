@@ -29,6 +29,7 @@ void Class8kServices::SetDeviceXPointPlayback ()
 {
 	bool 				b8K 				= NTV2_IS_QUAD_QUAD_FORMAT(mFb1VideoFormat);
 	bool				b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
+	//bool				bHfr				= RetailSupport::IsHfr(mFb1VideoFormat);
 	bool				bFb1RGB				= IsRGBFormat(mFb1Format);
 	bool				bQuadSwap			= b8K == true && mDs.bOut4xSdi == true && mQuadSwapOut != 0;	
 	bool				bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit ||
