@@ -5043,7 +5043,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 		bool isProgressivePic = isValidVPID ? inputVPID.GetProgressivePicture() : inIsProgressivePicture;
 		bool isInput3G = false;
 		GetSDIInput3GPresent(isInput3G, inChannel);
-		NTV2VideoFormat format = GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
+		NTV2VideoFormat format = isValidVPID ? inputVPID.GetVideoFormat() : GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
 		if (::NTV2DeviceCanDo12GIn(_boardID, inChannel))
 		{
 			bool is6G = false, is12G = false;
