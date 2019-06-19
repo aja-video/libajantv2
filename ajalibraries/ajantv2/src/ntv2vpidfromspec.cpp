@@ -406,7 +406,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 		 ! NTV2_IS_720P_VIDEO_FORMAT	(outputFormat) &&
 		 ! NTV2_IS_2K_1080_VIDEO_FORMAT	(outputFormat))
 	{
-		if (is3G && !isLevelB)
+		if (isLevelA)
 			byte3 |= (1UL << 7);			//	0x80
 		else
 			byte3 |= (1UL << 5);			//	0x20
@@ -415,18 +415,22 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	if ( NTV2_IS_4K_VIDEO_FORMAT (outputFormat) &&
 		 ! NTV2_IS_4K_4096_VIDEO_FORMAT (outputFormat))
 	{
-		if (!isLevelB && !isDualLink)
-			byte3 |= (1UL << 7);			//	0x80
-		else
+		if(is6G || is12G || isLevelA)
+		{
+			byte3 |= (1UL << 7);
+		}
+		else// if((!is3G) || isLevelB)
+		{
 			byte3 |= (1UL << 5);			//	0x20
+		}
 	}
     
     if ( NTV2_IS_UHD2_VIDEO_FORMAT (outputFormat))
     {
-        if (!isLevelB && !isDualLink)
-            byte3 |= (1UL << 7);            //    0x80
-        else
+        if (isLevelB && isDualLink)
             byte3 |= (1UL << 5);            //    0x20
+        else
+            byte3 |= (1UL << 7);            //    0x80
     }
 	
 	//Colorimetry
@@ -435,7 +439,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	if ( NTV2_IS_HD_VIDEO_FORMAT		(outputFormat) &&
 		 ! NTV2_IS_720P_VIDEO_FORMAT	(outputFormat))
 	{
-		if (is3G && !isLevelB)
+		if (isLevelA)
 			byte3 |= (highBit << 5);
 		else
 			byte3 |= (highBit << 7);
@@ -445,13 +449,12 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	
 	if ( NTV2_IS_4K_VIDEO_FORMAT (outputFormat) || NTV2_IS_QUAD_QUAD_FORMAT(outputFormat))
 	{
-		if((is6G || is12G) || (is3G && !isLevelB))
+		if(is6G || is12G || isLevelA)
 		{
 			byte3 |= (highBit << 5);
 			byte3 |= (lowBit << 4);
 		}
-		
-		if ((!is3G) || (is3G && isLevelB))
+		else// if ((!is3G) || isLevelB)
 		{
 			byte3 |= (highBit << 7);
 			byte3 |= (lowBit << 4);

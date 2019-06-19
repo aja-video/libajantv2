@@ -451,7 +451,7 @@ bool CNTV2Card::GetAncRegionOffsetAndSize (ULWord & outByteOffset,  ULWord & out
 					DMAANCWARN(::NTV2AncDataRgnToStr(ancRgn) << " and " << ::NTV2AncDataRgnToStr(offsetAncRgnIter->second) << " using same offset " << xHEX0N(offsetAncRgnIter->first,8));
 				else
 				{
-					if (--offsetAncRgnIter != offsetAncRgns.end())	//	Has a neighbor?
+					if (offsetAncRgnIter != offsetAncRgns.begin() && --offsetAncRgnIter != offsetAncRgns.end())	//	Has a neighbor?
 						rgnSize -= offsetAncRgnIter->first;			//	Yes -- subtract neighbor's offset
 					ancRgnSizes.insert(AncRgnSize(ancRgn, rgnSize));
 					//DMAANCDBG(::NTV2AncDataRgnToStr(ancRgn) << " offset=" << xHEX0N(ancRgnOffsets[ancRgn],8) << " size=" << xHEX0N(rgnSize,8));
