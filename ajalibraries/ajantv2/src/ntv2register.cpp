@@ -2497,12 +2497,14 @@ bool CNTV2Card::GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct)
 	return true;
 }
 
-bool CNTV2Card::ProgramMainFlash(const char *fileName, bool bForceUpdate)
+bool CNTV2Card::ProgramMainFlash(const char *fileName, bool bForceUpdate, bool bQuiet)
 {
     CNTV2KonaFlashProgram thisDevice;
     thisDevice.SetBoard(GetIndexNumber());
     try
     {
+		if (bQuiet)
+			thisDevice.SetQuietMode();
         thisDevice.SetBitFile(fileName, MAIN_FLASHBLOCK);
         if(bForceUpdate)
             thisDevice.SetMBReset();

@@ -2398,7 +2398,7 @@ public:
 	///@{
 	AJA_VIRTUAL bool	ReadFlashProgramControl(ULWord & outValue);
 	AJA_VIRTUAL bool	IsXilinxProgrammed();
-    AJA_VIRTUAL bool	ProgramMainFlash(const char *fileName, bool bForceUpdate = false);
+	AJA_VIRTUAL bool	ProgramMainFlash(const char *fileName, bool bForceUpdate = false, bool bQuiet = false);
 	AJA_VIRTUAL bool	GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct);
 
     /**
