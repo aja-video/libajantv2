@@ -85,37 +85,60 @@ Frame buffer memory contents can be displayed in four ways:
 	-	<b>Image</b> — The visible raster, as an image.
 
 This inspector repeatedly monitors the indicated frame buffer for the selected channel or frame store.
-It reads the entire buffer into host memory and compares it to what was read the last time.
-(In <b>Frame Differencing mode</b>, it highlights the differences between the current frame and another frame on the device.)
-Except in <b>Raw</b> view, the status bar indicates the number of lines in the raster that changed from the last frame.
-Except in its <b>Image</b> view, the raster content display always highlights changed content with a brighter color.
+	-	It reads (via DMA) the frame buffer into host memory.
+		-	In <b>Raw</b> mode, or for planar pixel formats, it reads the entire 8MB/16MB/32MB/etc. buffer.
+			All other views read the frame buffer up to and including the last visible raster line.
+	-	The inspector attempts to refresh at the FrameStore’s current frame rate (as soon after the VBI as possible).
+		-	An indicator in the bottom-right corner of the main window’s status bar shows the average time between updates.
+	-	After each refresh, it compares the frame buffer contents to what was read the last time.
+		-	The bottom left of the main window‘s status bar shows the number of raster lines that changed from the last frame
+			(except <b>Raw</b> view).
+		-	The data display highlights changed content with a brighter color (except <b>Image</b> view).
+		-	<b>Frame Differencing mode</b> statically highlights the differences between the current frame and another frame.
 
 
 @par	Frame/Buffer Controls
 	-	<b>FrameStore/Channel</b> — Selects the FrameStore/Channel of interest.
 	-	<b>On/Off</b> — Indicates if the FrameStore/Channel is enabled or not.  It can be changed using this menu
 		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+		-	See also:  CNTV2Card::EnableChannel , CNTV2Card::DisableChannel , CNTV2Card::IsChannelEnabled , \ref vidop-fs
 	-	<b>Auto</b> — If checked, the frame number being monitored will automatically follow the input or output
 		(depending on frame-store mode) “current frame” register, and the frame number spin control will be disabled.
 		If this is unchecked, the frame number spin control will be available, and the frame being watched can be manually controlled.
 		When unchecked, many other aspects of the device can be controlled (e.g., <b>Mode</b>, <b>Geometry</b>, <b>Format</b>, <b>Size</b>, etc.
 	-	<b>Frame Number</b> spin control:  When available, controls which frame to view.
 		When unavailable, indicates the frame being viewed.
-		@note	The frame’s data will be interpreted with the frame buffer format of the currently selected channel or frame store.
+		@note	Even though the current frame’s contents may have been written in the context of another channel/FrameStore (e.g. '2vuy'),
+				the inspector displays the frame’s data in the context of the current channel/FrameStore (e.g. 'v210'), and thus may
+				appear completely wrong.
 
 @par	Device/Channel Configuration
-	-	<b>Mode</b> — Indicates the current mode (Input or Output) of the FrameStore/Channel. It can be changed using this menu
-		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
-	-	<b>Geometry</b> — Indicates the current frame geometry of the FrameStore/Channel (and whether it’s a VANC geometry or not).  It can be changed using this menu
-		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
-	-	<b>Format</b> — Indicates the current pixel format of the FrameStore/Channel. It can be changed using this menu
-		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
-	-	<b>VFlip</b> — Indicates/controls the current vertical frame buffer orientation for the FrameStore/Channel. It can be changed at any time.
-		When checked, raster lines read or written from/to frame buffer memory is performed bottom-to-top.
-		When unchecked, raster lines are read/written normally (top-to-bottom).
-	-	<b>VancShift</b> — Indicates/controls the current vertical frame buffer orientation for the FrameStore/Channel. It can be changed at any time.
-		When checked, raster lines read or written from/to frame buffer memory is performed bottom-to-top.
-		When unchecked, raster lines are read/written normally (top-to-bottom).
+	-	<b>Mode</b> — Indicates/controls the FrameStore’s current mode (Input or Output).
+		It can be changed using this menu (if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+		-	Input — the FrameStore’s ::NTV2Mode is set to ::NTV2_MODE_INPUT or ::NTV2_MODE_CAPTURE
+		-	Output — the FrameStore’s ::NTV2Mode is set to ::NTV2_MODE_OUTPUT or ::NTV2_MODE_DISPLAY
+		-	See also:  CNTV2Card::GetMode , CNTV2Card::SetMode , \ref vidop-fs
+	-	<b>Video Format</b> — Indicates/controls the FrameStore’s current video format.
+		It can be changed using this menu (if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+		-	See also:  CNTV2Card::GetVideoFormat , CNTV2Card::SetVideoFormat , ::NTV2VideoFormat , \ref vidop-fs
+	-	<b>VANC</b> — Indicates/controls the FrameStore’s current VANC mode.
+		It can be changed using this menu (if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+		-	<b>Off</b> — the FrameStore’s ::NTV2VANCMode is set to ::NTV2_VANCMODE_OFF
+		-	<b>Tall</b> — the FrameStore’s ::NTV2VANCMode is set to ::NTV2_VANCMODE_TALL (if available for the video format)
+		-	<b>Taller</b> — the FrameStore’s ::NTV2VANCMode is set to ::NTV2_VANCMODE_TALLER (if available for the video format)
+		-	See also:  CNTV2Card::GetVANCMode , CNTV2Card::SetVANCMode , \ref vancframegeometries
+	-	<b>FB Format</b> — Indicates/controls the FrameStore’s current pixel format.
+		It can be changed using this menu (if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+		-	See also:  CNTV2Card::GetFrameBufferFormat , CNTV2Card::SetFrameBufferFormat , ::NTV2FrameBufferFormat , \ref vidop-fs , \ref devicefbformats
+	-	<b>VFlip</b> — Indicates/controls the FrameStore’s vertical frame buffer orientation. Can be changed at any time.
+		-	When checked — the FrameStore’s ::NTV2VideoFrameBufferOrientation is set to ::NTV2_FRAMEBUFFER_ORIENTATION_BOTTOMUP
+		-	When unchecked — the FrameStore’s ::NTV2VideoFrameBufferOrientation is set to ::NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN (aka ::NTV2_FRAMEBUFFER_ORIENTATION_NORMAL ) 
+		-	See also:  CNTV2Card::GetFrameBufferOrientation , CNTV2Card::SetFrameBufferOrientation , \ref vidop-fs
+	-	<b>VancShift</b> — Indicates/controls the FrameStore’s VANC Data Shift Mode.
+		It can be changed when not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>.
+		-	When checked, the FrameStore’s ::NTV2VANCDataShiftMode is set to ::NTV2_VANCDATA_8BITSHIFT_ENABLE.
+		-	When unchecked, the FrameStore’s ::NTV2VANCDataShiftMode is set to ::NTV2_VANCDATA_NORMAL.
+		-	See also:  CNTV2Card::GetVANCShiftMode , CNTV2Card::SetVANCShiftMode , \ref vidop-fs , \ref vancframegeometries
 
 @par	Navigation and Data Selection
 	-	<b>Scrolling</b> — The display can be scrolled horizontally and/or vertically.
@@ -199,8 +222,9 @@ Except in its <b>Image</b> view, the raster content display always highlights ch
 				@image	html	watcher-fillfb-pattern.png
 			-	<b>Text</b> — Fills one or more buffers with glyphs rendered using the ::CNTV2CaptionRenderer.
 				@image	html	watcher-fillfb-text.png
-		-	<b>Compare to Frame…</b> — (<b>Auto</b> mode OFF only) — Enables “Frame Differencing” mode, comparing the current frame with another, highlighting the differences.
-			To cancel this mode, toggle the “Auto” setting, or change the current frame being viewed.
+		-	<b>Compare to Frame…</b> — (<b>Auto</b> mode OFF only) — Enables <b>Frame Differencing mode</b>,
+			comparing the current frame with another, highlighting the differences.  To cancel this mode,
+			toggle the “Auto” setting, or change the current frame being viewed.
 		-	<b>Bytes/Line</b> — (<b>Raw</b> view only) — Changes the number of bytes to display in each line of the Raw data view. Choose from 64 bytes up to 32K bytes by powers of 2.
 			Note that larger values make for fewer lines and many more columns. Smaller values show many more lines with fewer columns.
 		-	<b>Show/Hide Line Boundaries</b> — (<b>Raw</b> view only) — Shows or hides the line boundary markers.
