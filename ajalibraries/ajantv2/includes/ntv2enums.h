@@ -2265,54 +2265,6 @@ typedef enum
 } NTV2AudioMapSelect;
 
 
-typedef enum
-{
-    NTV2_PrimaryOutputSelect,
-    NTV2_SecondaryOutputSelect,
-    NTV2_RgbOutputSelect,					// Deprecated
-    NTV2_VideoPlusKeySelect,
-    NTV2_StereoOutputSelect,
-    NTV2_Quadrant1Select,
-    NTV2_Quadrant2Select,
-    NTV2_Quadrant3Select,
-    NTV2_Quadrant4Select,
-    NTV2_Quarter4k,
-    NTV2_4kHalfFrameRate,
-	NTV2_AutoOutputSelect,
-    NTV2_MAX_NUM_OutputVideoSelectEnums
-} NTV2OutputVideoSelect;
-
-
-typedef enum
-{
-    NTV2_SDITransport_Off,					// transport disabled, disconnected
-    NTV2_SDITransport_1_5,					// Single Link, 1 wire 1.5G
-    NTV2_SDITransport_3Ga,					// Single Link, 1 wire 3Ga
-    NTV2_SDITransport_DualLink_1_5,			// Dual Link, 2 wire 1.5G
-    NTV2_SDITransport_DualLink_3Gb,			// Dual Link, 1 wire 3Gb
-    NTV2_SDITransport_QuadLink_1_5,			// Quad Link, 4 wire 1.5G (4K YUV)
-    NTV2_SDITransport_QuadLink_3Gb,			// Quad Link, 2 wire 3Gb (4K YUV or Stereo RGB)
-    NTV2_SDITransport_QuadLink_3Ga,			// Quad Link, 4 wire 3Ga (4K HFR)
-    NTV2_SDITransport_OctLink_3Gb,			// Oct Link, 4 wire 3Gb (4K RGB, HFR)
-    NTV2_SDITransport_6G,					// 6G see Quad Link
-    NTV2_SDITransport_12G,					// 12G see Oct Link
-    NTV2_MAX_NUM_SDITransportTypes,			// last
-	NTV2_SDITransport_Auto					// auto mode
-		=NTV2_MAX_NUM_SDITransportTypes	
-} NTV2SDITransportType;
-
-
-typedef enum
-{
-    NTV2_4kTransport_Auto,        			 // auto
-    NTV2_4kTransport_Quadrants_2wire,        // quads 2x wire
-    NTV2_4kTransport_Quadrants_4wire,        // quads 4x wire
-    NTV2_4kTransport_PixelInterleave,		 // SMPTE 425-5 & 425-3
-    NTV2_4kTransport_Quarter_1wire,          // quarter size
-	NTV2_4kTransport_12g_6g_1wire,		     // 12G / 6G 1wire
-    NTV2_MAX_NUM_4kTransportTypes
-} NTV24kTransportType;
-
 #if !defined (NTV2_DEPRECATE)
     // Audio Channel Mapping and Channel Gain/Phase controls used in FS1
     typedef enum                // used in FS1
