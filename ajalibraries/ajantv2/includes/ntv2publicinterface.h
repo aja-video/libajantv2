@@ -5196,6 +5196,8 @@ typedef enum SharedPrefsPermissions
 } SharedPrefsPermissions;
 
 
+#if !defined(R2_DEPRECATED)
+
 typedef enum TimelapseUnits
 {
 	kTimelapseFrames			= 0,		// frames
@@ -5244,19 +5246,16 @@ typedef enum
 	
 } HDMIOutStereoSelect;
 
-typedef enum
+enum TestPatternFormat
 {
-	kRP188SourceEmbeddedLTC		= 0x0,		// NOTE these values are same as RP188 DBB channel select
-	kRP188SourceEmbeddedVITC1	= 0x1,
-	kRP188SourceEmbeddedVITC2	= 0x2,
-	kRP188SourceLTCPort			= 0xFE
-} RP188SourceFilterSelect;
+	kPatternFormatYUV10b,
+	kPatternFormatRGB10b,
+	kPatternFormatYUV8b,
+    kPatternFormatRGB8b,
+    kPatternFormatRGB12b
+};
 
-#if !defined(NTV2_DEPRECATE_15_2)
-	typedef RP188SourceFilterSelect		RP188SourceSelect;
-#endif	//	!defined(NTV2_DEPRECATE_15_2)
-
-
+// deprecated - NTV2TestPatternSelect
 // note: this order mimics (somewhat) that of NTV2TestPatternSelect in "ntv2testpatterngen.h"
 typedef enum
 {
@@ -5274,14 +5273,23 @@ typedef enum
 
 } TestPatternSelect;
 
-enum TestPatternFormat
+
+#endif //R2_DEPRECATED
+
+
+
+typedef enum
 {
-	kPatternFormatYUV10b,
-	kPatternFormatRGB10b,
-	kPatternFormatYUV8b,
-    kPatternFormatRGB8b,
-    kPatternFormatRGB12b
-};
+	kRP188SourceEmbeddedLTC		= 0x0,		// NOTE these values are same as RP188 DBB channel select
+	kRP188SourceEmbeddedVITC1	= 0x1,
+	kRP188SourceEmbeddedVITC2	= 0x2,
+	kRP188SourceLTCPort			= 0xFE
+} RP188SourceFilterSelect;
+
+#if !defined(NTV2_DEPRECATE_15_2)
+	typedef RP188SourceFilterSelect		RP188SourceSelect;
+#endif	//	!defined(NTV2_DEPRECATE_15_2)
+
 
 // Masks
 enum

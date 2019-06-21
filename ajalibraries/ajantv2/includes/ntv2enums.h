@@ -1995,16 +1995,6 @@ typedef enum
 
 #define	NTV2_IS_VALID_AUDIO_LOOPBACK(_x_)		((_x_) >= NTV2_AUDIO_LOOPBACK_OFF  &&  (_x_) < NTV2_AUDIO_LOOPBACK_INVALID)
 
-
-typedef enum
-{
-    NTV2_AUDIOLEVEL_24dBu,
-    NTV2_AUDIOLEVEL_18dBu,
-    NTV2_AUDIOLEVEL_12dBu,
-    NTV2_AUDIOLEVEL_15dBu,
-    NTV2_MAX_NUM_AudioLevels
-} NTV2AudioLevel;
-
 /**
     @brief	Determines the order that raster lines are written into, or read out of, frame buffer memory on the device.
 **/
@@ -2154,27 +2144,67 @@ typedef enum
 } NTV2LHIVideoDACMode;
 
 
+#if !defined(R2_DEPRECATE)
+
+/**
+    @brief	This is a user-pref control (currently only used on the Mac) that allows the user
+            to specify which gamma-correction function to use when converting between RGB and YUV
+**/
 typedef enum
 {
-    NTV2_480iADCComponentBeta,			//	0
-    NTV2_480iADCComponentSMPTE,			//	1
-    NTV2_480iADCSVideoUS,				//	2
-    NTV2_480iADCCompositeUS,			//	3
-    NTV2_480iADCComponentBetaJapan,		//	4
-    NTV2_480iADCComponentSMPTEJapan,	//	5
-    NTV2_480iADCSVideoJapan,			//	6
-    NTV2_480iADCCompositeJapan,			//	7
-    NTV2_576iADCComponentBeta,			//	8
-    NTV2_576iADCComponentSMPTE,			//	9
-    NTV2_576iADCSVideo,					//	10
-    NTV2_576iADCComposite,				//	11
-    NTV2_720p_60,	//	60 + 59.94		//	12
-    NTV2_1080i_30,	//	30 + 29.97		//	13
-    NTV2_720p_50,						//	14
-    NTV2_1080i_25,						//	15
-    NTV2_1080pSF24,	// 24 + 23.98		//	16
-    NTV2_MAX_NUM_LSVideoADCModes		//	17
-} NTV2LSVideoADCMode;
+    NTV2_GammaNone,				// don't change LUTs for gamma (aka "Custom")
+    NTV2_GammaAuto,				// switch between Rec 601 for SD and Rec 709 for HD
+    NTV2_GammaMac,				// 1.8 "Macintosh" Power-function gamma
+    NTV2_GammaRec601,			// 2.2 Rec 601 Power-function gamma
+    NTV2_GammaRec709,			// 2.22.. Rec 709 gamma
+    NTV2_GammaPC,				// 2.5 "PC" Power-function gamma
+    NTV2_MAX_NUM_GammaTypes
+} NTV2GammaType;
+
+
+/**
+    @brief	This is a user-pref control (currently only used on the Mac) that allows the user
+            to specify which Color Space
+**/
+typedef enum
+{
+    NTV2_ColorSpaceModeAuto,		// Auto Select
+    NTV2_ColorSpaceModeYCbCr,		// YCbCr (TBD, add 420, 444 options)
+    NTV2_ColorSpaceModeRgb,			// RGB
+    NTV2_MAX_NUM_ColorSpaceModes
+} NTV2ColorSpaceMode;
+
+
+/**
+    @brief	This is a user-pref control (currently only used on the Mac) that allows the user
+    to specify which RTB range of CSC function to use when converting between RGB and YUV
+**/
+typedef enum
+{
+    NTV2_RGBRangeAuto,				// don't change LUTs for gamma (aka "Custom")
+    NTV2_RGBRangeFull,				// Levels are 0 - 1023 (Full)
+    NTV2_RGBRangeSMPTE,				// Levels are 64 - 940 (SMPTE)
+    NTV2_MAX_NUM_RGBRangeModes
+} NTV2RGBRangeMode;
+
+
+// This specifies the range of levels for 10-bit RGB (aka DualLink)
+typedef enum
+{
+    NTV2_RGB10RangeFull,		//	Levels are 0 - 1023 (Full)
+    NTV2_RGB10RangeSMPTE,		//	Levels are 64 - 940 (SMPTE)
+    NTV2_MAX_NUM_RGB10Ranges
+} NTV2RGB10Range;
+
+
+typedef enum
+{
+    NTV2_AUDIOLEVEL_24dBu,
+    NTV2_AUDIOLEVEL_18dBu,
+    NTV2_AUDIOLEVEL_12dBu,
+    NTV2_AUDIOLEVEL_15dBu,
+    NTV2_MAX_NUM_AudioLevels
+} NTV2AudioLevel;
 
 
 typedef enum
@@ -2197,30 +2227,6 @@ typedef enum
 } NTV2AnalogBlackLevel;
 
 
-typedef enum					// used in Virtual Register: kVRegInputSelect
-{
-    NTV2_Input1Select,
-    NTV2_Input2Select,
-    NTV2_Input3Select,
-    NTV2_Input4Select,
-    NTV2_Input5Select,
-    NTV2_Input2xDLHDSelect,
-    NTV2_Input2x4kSelect,
-    NTV2_Input4x4kSelect,
-    NTV2_Input4x8kSelect,
-    NTV2_InputAutoSelect,
-    NTV2_MAX_NUM_InputVideoSelectEnums
-} NTV2InputVideoSelect;
-
-
-typedef enum
-{
-    NTV2_DeviceUnavailable		= -1,
-    NTV2_DeviceNotInitialized	= 0,
-    NTV2_DeviceInitialized		= 1
-} NTV2DeviceInitialized;
-
-
 #if !defined(NTV2_DEPRECATE_15_1)
 	typedef enum
 	{
@@ -2230,6 +2236,15 @@ typedef enum
 		NTV2_NUM_SDIInputFormats
 	} NTV2SDIInputFormatSelect;
 #endif	//	!defined(NTV2_DEPRECATE_15_1)
+
+
+typedef enum
+{
+    NTV2_DeviceUnavailable		= -1,
+    NTV2_DeviceNotInitialized	= 0,
+    NTV2_DeviceInitialized		= 1
+} NTV2DeviceInitialized;
+
 
 typedef enum
 {
@@ -2263,7 +2278,6 @@ typedef enum
     NTV2_AudioMap1516_12,
     NTV2_MAX_NUM_AudioMapSelectEnums
 } NTV2AudioMapSelect;
-
 
 typedef enum
 {
@@ -2312,6 +2326,181 @@ typedef enum
 	NTV2_4kTransport_12g_6g_1wire,		     // 12G / 6G 1wire
     NTV2_MAX_NUM_4kTransportTypes
 } NTV24kTransportType;
+
+
+// IsSDVideoADCMode - ntv2card.h
+// GetAnalogInputADCMode
+typedef enum
+{
+    NTV2_480iADCComponentBeta,			//	0
+    NTV2_480iADCComponentSMPTE,			//	1
+    NTV2_480iADCSVideoUS,				//	2
+    NTV2_480iADCCompositeUS,			//	3
+    NTV2_480iADCComponentBetaJapan,		//	4
+    NTV2_480iADCComponentSMPTEJapan,	//	5
+    NTV2_480iADCSVideoJapan,			//	6
+    NTV2_480iADCCompositeJapan,			//	7
+    NTV2_576iADCComponentBeta,			//	8
+    NTV2_576iADCComponentSMPTE,			//	9
+    NTV2_576iADCSVideo,					//	10
+    NTV2_576iADCComposite,				//	11
+    NTV2_720p_60,	//	60 + 59.94		//	12
+    NTV2_1080i_30,	//	30 + 29.97		//	13
+    NTV2_720p_50,						//	14
+    NTV2_1080i_25,						//	15
+    NTV2_1080pSF24,	// 24 + 23.98		//	16
+    NTV2_MAX_NUM_LSVideoADCModes		//	17
+} NTV2LSVideoADCMode;
+
+
+// ntv2card.h
+// ntv2register.cpp
+// ntv2macdriverinterface.cpp
+typedef enum					// used in Virtual Register: kVRegInputSelect
+{
+    NTV2_Input1Select,
+    NTV2_Input2Select,
+    NTV2_Input3Select,
+    NTV2_Input4Select,
+    NTV2_Input5Select,
+    NTV2_Input2xDLHDSelect,
+    NTV2_Input2x4kSelect,
+    NTV2_Input4x4kSelect,
+    NTV2_Input4x8kSelect,
+    NTV2_InputAutoSelect,
+    NTV2_MAX_NUM_InputVideoSelectEnums
+} NTV2InputVideoSelect;
+
+// ntv2card.h
+// ntv2register.cpp
+// Up/Down/Cross Converter modes
+typedef enum
+{
+    NTV2_UpConvertAnamorphic,
+    NTV2_UpConvertPillarbox4x3,
+    NTV2_UpConvertZoom14x9,
+    NTV2_UpConvertZoomLetterbox,
+    NTV2_UpConvertZoomWide,
+    NTV2_MAX_NUM_UpConvertModes
+} NTV2UpConvertMode;
+
+// ntv2card.h
+typedef enum
+{
+    NTV2_DownConvertLetterbox,
+    NTV2_DownConvertCrop,
+    NTV2_DownConvertAnamorphic,
+    NTV2_DownConvert14x9,
+    NTV2_MAX_NUM_DownConvertModes
+} NTV2DownConvertMode;
+
+// ntv2card.h
+typedef enum
+{
+    NTV2_IsoLetterBox,
+    NTV2_IsoHCrop,
+    NTV2_IsoPillarBox,
+    NTV2_IsoVCrop,
+    NTV2_Iso14x9,
+    NTV2_IsoPassThrough,
+    NTV2_MAX_NUM_IsoConvertModes
+} NTV2IsoConvertMode;
+
+// not in use
+typedef enum
+{
+    NTV2_PanModeOff,
+    NTV2_PanModeReserved,
+    NTV2_PanMode2Kx1080,
+    NTV2_PanMode1920x1080,
+    NTV2_MAX_NUM_PanModes
+} NTV2PanMode;
+
+
+#if !defined(NTV2_DEPRECATE_15_1)
+	// note: Pause Mode is a "software" feature - not performed in hardware
+	typedef enum
+	{
+		NTV2_PauseOnFrame,
+		NTV2_PauseOnField
+	} NTV2PauseModeType;
+
+	// note: 24 fps <-> 30 fps Pulldown is a "software" feature - not performed in hardware
+	typedef enum
+	{
+		NTV2_Pulldown2323,
+		NTV2_Pulldown2332,
+		NTV2_Pulldown2224
+	} NTV2PulldownPatternType;
+#endif	//	!defined(NTV2_DEPRECATE_15_1)
+
+// ntv2card.h
+typedef enum
+{
+	NTV2_AnalogAudioIO_8Out,
+	NTV2_AnalogAudioIO_4In_4Out,
+	NTV2_AnalogAudioIO_4Out_4In,
+	NTV2_AnalogAudioIO_8In
+} NTV2AnalogAudioIO;
+
+
+//	NOTE:	Timecode Burn-In Mode is a "software" feature - not performed in hardware
+typedef enum
+{
+    NTV2_TimecodeBurnInOff,				//	no burn-in
+    NTV2_TimecodeBurnInTC,				//	display current timecode
+    NTV2_TimecodeBurnInUB,				//	display current user bits
+    NTV2_TimecodeBurnInFrameCount,		//	display current frame count
+    NTV2_TimecodeBurnInQuickTime,		//	(like frame count, but shows Mac QuickTime frame time)
+    NTV2_MAX_NUM_TimecodeBurnInModeTypes
+} NTV2TimecodeBurnInModeType;
+
+
+// not in use?
+//	This specifies the endian 10-bit RGB (aka DualLink)
+typedef enum
+{
+    NTV2_RGB10LittleEndian,		//	Little Endian
+    NTV2_RGB10BigEndian,		//	Big Endian
+    NTV2_MAX_NUM_RGB10EndianEnums
+} NTV2RGB10Endian;
+
+
+// ntv2card.h
+/**
+    @brief	This specifies the HDMI protocol to be used.
+**/
+typedef enum
+{
+    NTV2_HDMIProtocolHDMI,		//	HDMI Protocol
+    NTV2_HDMIProtocolDVI,		//	DVI Protocol
+    NTV2_MAX_NUM_HDMIProtocols,
+    NTV2_INVALID_HDMI_PROTOCOL	= NTV2_MAX_NUM_HDMIProtocols
+} NTV2HDMIProtocol;
+
+#define	NTV2_IS_VALID_HDMI_PROTOCOL(__x__)	((__x__) >= NTV2_HDMIProtocolHDMI  &&  (__x__) < NTV2_MAX_NUM_HDMIProtocols)
+
+
+// ntv2card.h
+/**
+    @brief	This specifies HDMI Color Space I/O
+**/
+typedef enum
+{
+    NTV2_HDMIColorSpaceAuto,	//	Auto Select
+    NTV2_HDMIColorSpaceRGB,		//	RGB
+    NTV2_HDMIColorSpaceYCbCr,	//	YCbCr
+    NTV2_MAX_NUM_HDMIColorSpaces,
+    NTV2_INVALID_HDMI_COLORSPACE	= NTV2_MAX_NUM_HDMIColorSpaces
+} NTV2HDMIColorSpace;
+
+
+#define	NTV2_IS_VALID_HDMI_COLORSPACE(__x__)		((__x__) > NTV2_HDMIColorSpaceAuto  &&  (__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
+
+
+
+#endif // R2_DEPRECATE
+
 
 #if !defined (NTV2_DEPRECATE)
     // Audio Channel Mapping and Channel Gain/Phase controls used in FS1
@@ -2367,40 +2556,6 @@ typedef enum
         NTV2_AUDIOCHANNELMAPPING_EMB2CH16
     } NTV2AudioChannelMapping;
 #endif	//	!defined (NTV2_DEPRECATE)
-
-
-// Up/Down/Cross Converter modes
-typedef enum
-{
-    NTV2_UpConvertAnamorphic,
-    NTV2_UpConvertPillarbox4x3,
-    NTV2_UpConvertZoom14x9,
-    NTV2_UpConvertZoomLetterbox,
-    NTV2_UpConvertZoomWide,
-    NTV2_MAX_NUM_UpConvertModes
-} NTV2UpConvertMode;
-
-
-typedef enum
-{
-    NTV2_DownConvertLetterbox,
-    NTV2_DownConvertCrop,
-    NTV2_DownConvertAnamorphic,
-    NTV2_DownConvert14x9,
-    NTV2_MAX_NUM_DownConvertModes
-} NTV2DownConvertMode;
-
-
-typedef enum
-{
-    NTV2_IsoLetterBox,
-    NTV2_IsoHCrop,
-    NTV2_IsoPillarBox,
-    NTV2_IsoVCrop,
-    NTV2_Iso14x9,
-    NTV2_IsoPassThrough,
-    NTV2_MAX_NUM_IsoConvertModes
-} NTV2IsoConvertMode;
 
 
 #if !defined (NTV2_DEPRECATE)
@@ -2466,16 +2621,6 @@ typedef enum
 } NTV2EncodeAsPSF;
 
 #define	NTV2_IS_VALID_EncodeAsPSF(__x__)		((__x__) == NTV2_NoPSF || (__x__) == NTV2_IsPSF)
-
-
-typedef enum
-{
-    NTV2_PanModeOff,
-    NTV2_PanModeReserved,
-    NTV2_PanMode2Kx1080,
-    NTV2_PanMode1920x1080,
-    NTV2_MAX_NUM_PanModes
-} NTV2PanMode;
 
 
 /**
@@ -3417,24 +3562,6 @@ typedef enum
 } NTV2DSKAudioMode;
 
 
-#if !defined(NTV2_DEPRECATE_15_1)
-	// note: Pause Mode is a "software" feature - not performed in hardware
-	typedef enum
-	{
-		NTV2_PauseOnFrame,
-		NTV2_PauseOnField
-	} NTV2PauseModeType;
-
-	// note: 24 fps <-> 30 fps Pulldown is a "software" feature - not performed in hardware
-	typedef enum
-	{
-		NTV2_Pulldown2323,
-		NTV2_Pulldown2332,
-		NTV2_Pulldown2224
-	} NTV2PulldownPatternType;
-#endif	//	!defined(NTV2_DEPRECATE_15_1)
-
-
 // This is a user-pref control (currently only used on the Mac) that allows the user
 // to specify which color-space matrix to use when converting between RGB and YUV
 typedef enum
@@ -3444,35 +3571,6 @@ typedef enum
     NTV2_ColorSpaceTypeRec709,		// always use Rec 709 matrix
     NTV2_MAX_NUM_ColorSpaceTypes
 } NTV2ColorSpaceType;
-
-
-/**
-    @brief	This is a user-pref control (currently only used on the Mac) that allows the user
-            to specify which gamma-correction function to use when converting between RGB and YUV
-**/
-typedef enum
-{
-    NTV2_GammaNone,				// don't change LUTs for gamma (aka "Custom")
-    NTV2_GammaAuto,				// switch between Rec 601 for SD and Rec 709 for HD
-    NTV2_GammaMac,				// 1.8 "Macintosh" Power-function gamma
-    NTV2_GammaRec601,			// 2.2 Rec 601 Power-function gamma
-    NTV2_GammaRec709,			// 2.22.. Rec 709 gamma
-    NTV2_GammaPC,				// 2.5 "PC" Power-function gamma
-    NTV2_MAX_NUM_GammaTypes
-} NTV2GammaType;
-
-
-/**
-    @brief	This is a user-pref control (currently only used on the Mac) that allows the user
-    to specify which RTB range of CSC function to use when converting between RGB and YUV
-**/
-typedef enum
-{
-    NTV2_RGBRangeAuto,				// don't change LUTs for gamma (aka "Custom")
-    NTV2_RGBRangeFull,				// Levels are 0 - 1023 (Full)
-    NTV2_RGBRangeSMPTE,				// Levels are 64 - 940 (SMPTE)
-    NTV2_MAX_NUM_RGBRangeModes
-} NTV2RGBRangeMode;
 
 
 /**
@@ -3487,19 +3585,6 @@ typedef enum
     NTV2_Stereo3DDualStream,		// Two independant streams
     NTV2_MAX_NUM_Stereo3DModes
 } NTV2Stereo3DMode;
-
-
-/**
-    @brief	This is a user-pref control (currently only used on the Mac) that allows the user
-            to specify which Color Space
-**/
-typedef enum
-{
-    NTV2_ColorSpaceModeAuto,		// Auto Select
-    NTV2_ColorSpaceModeYCbCr,		// YCbCr (TBD, add 420, 444 options)
-    NTV2_ColorSpaceModeRgb,			// RGB
-    NTV2_MAX_NUM_ColorSpaceModes
-} NTV2ColorSpaceMode;
 
 
 // The Mac implementation of color-space conversion uses the two LUT banks for holding
@@ -3568,22 +3653,6 @@ typedef enum
 
 #define	NTV2_IS_VALID_HDMI_AUDIO_CHANNELS(__x__)	((__x__) >= NTV2_HDMIAudio2Channels)  &&  ((__x__) < NTV2_INVALID_HDMI_AUDIO_CHANNELS)
 
-
-/**
-    @brief	This specifies HDMI Color Space I/O
-**/
-typedef enum
-{
-    NTV2_HDMIColorSpaceAuto,	//	Auto Select
-    NTV2_HDMIColorSpaceRGB,		//	RGB
-    NTV2_HDMIColorSpaceYCbCr,	//	YCbCr
-    NTV2_MAX_NUM_HDMIColorSpaces,
-    NTV2_INVALID_HDMI_COLORSPACE	= NTV2_MAX_NUM_HDMIColorSpaces
-} NTV2HDMIColorSpace;
-
-#define	NTV2_IS_VALID_HDMI_COLORSPACE(__x__)		((__x__) > NTV2_HDMIColorSpaceAuto  &&  (__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
-
-
 // LHI version HDMI Color Space I/O
 typedef enum
 {
@@ -3594,20 +3663,6 @@ typedef enum
 } NTV2LHIHDMIColorSpace;
 
 #define	NTV2_IS_VALID_LHI_HDMI_COLORSPACE(__x__)	((__x__) < NTV2_MAX_NUM_LHIHDMIColorSpaces)
-
-
-/**
-    @brief	This specifies the HDMI protocol to be used.
-**/
-typedef enum
-{
-    NTV2_HDMIProtocolHDMI,		//	HDMI Protocol
-    NTV2_HDMIProtocolDVI,		//	DVI Protocol
-    NTV2_MAX_NUM_HDMIProtocols,
-    NTV2_INVALID_HDMI_PROTOCOL	= NTV2_MAX_NUM_HDMIProtocols
-} NTV2HDMIProtocol;
-
-#define	NTV2_IS_VALID_HDMI_PROTOCOL(__x__)	((__x__) >= NTV2_HDMIProtocolHDMI  &&  (__x__) < NTV2_MAX_NUM_HDMIProtocols)
 
 
 // Bit depth on HDMI interface
@@ -3623,24 +3678,6 @@ typedef enum
 #define	NTV2_IS_VALID_HDMI_BITDEPTH(__x__)	((__x__) < NTV2_MAX_NUM_HDMIBitDepths)
 
 
-// This specifies the range of levels for 10-bit RGB (aka DualLink)
-typedef enum
-{
-    NTV2_RGB10RangeFull,		//	Levels are 0 - 1023 (Full)
-    NTV2_RGB10RangeSMPTE,		//	Levels are 64 - 940 (SMPTE)
-    NTV2_MAX_NUM_RGB10Ranges
-} NTV2RGB10Range;
-
-
-//	This specifies the endian 10-bit RGB (aka DualLink)
-typedef enum
-{
-    NTV2_RGB10LittleEndian,		//	Little Endian
-    NTV2_RGB10BigEndian,		//	Big Endian
-    NTV2_MAX_NUM_RGB10EndianEnums
-} NTV2RGB10Endian;
-
-
 // This specifies the output selection for the LH board
 typedef enum
 {
@@ -3649,18 +3686,6 @@ typedef enum
     NTV2LHOutputSelect_VidProc2,
     NTV2_MAX_NUM_LHOutputSelectEnums
 } NTV2LHOutputSelect;
-
-
-//	NOTE:	Timecode Burn-In Mode is a "software" feature - not performed in hardware
-typedef enum
-{
-    NTV2_TimecodeBurnInOff,				//	no burn-in
-    NTV2_TimecodeBurnInTC,				//	display current timecode
-    NTV2_TimecodeBurnInUB,				//	display current user bits
-    NTV2_TimecodeBurnInFrameCount,		//	display current frame count
-    NTV2_TimecodeBurnInQuickTime,		//	(like frame count, but shows Mac QuickTime frame time)
-    NTV2_MAX_NUM_TimecodeBurnInModeTypes
-} NTV2TimecodeBurnInModeType;
 
 
 #if !defined (NTV2_DEPRECATE)
@@ -4223,14 +4248,6 @@ typedef enum
 } NTV2DieTempScale;
 
 #define	NTV2_IS_VALID_DIETEMP_SCALE(_x_)	((_x_) >= NTV2DieTempScale_Celsius  &&  (_x_) < NTV2DieTempScale_INVALID)
-
-typedef enum
-{
-	NTV2_AnalogAudioIO_8Out,
-	NTV2_AnalogAudioIO_4In_4Out,
-	NTV2_AnalogAudioIO_4Out_4In,
-	NTV2_AnalogAudioIO_8In
-} NTV2AnalogAudioIO;
 
 /**
 	@brief	These enumerations identify the various ancillary data regions located at the bottom
