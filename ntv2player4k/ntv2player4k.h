@@ -170,9 +170,14 @@ class NTV2Player4K
 		void			RouteDLOutToSDIOut (void);
 
 		/**
-			@brief	Sets up board routing from the Color Space Converters to the SDI outputs.
+            @brief	Sets up board routing from the Color Space Converters to the 2xSDI outputs.
 		**/
-		void			RouteCscToSDIOut (void);
+        void			RouteCscTo2xSDIOut (void);
+
+        /**
+            @brief	Sets up board routing from the Color Space Converters to the 4xSDI outputs.
+        **/
+        void			RouteCscTo4xSDIOut (void);
 
 		/**
 			@brief	Sets up board routing from the Color Space Converters to the Dual Link outputs.
@@ -190,9 +195,14 @@ class NTV2Player4K
 		void			RouteTsiMuxToCsc (void);
 
 		/**
-			@brief	Sets up board routing from the Two Sample Interleave muxes to the SDI outputs.
+            @brief	Sets up board routing from the Two Sample Interleave muxes to the 2xSDI outputs.
 		**/
-		void			RouteTsiMuxToSDIOut (void);	
+        void			RouteTsiMuxTo2xSDIOut (void);
+
+        /**
+            @brief	Sets up board routing from the Two Sample Interleave muxes to the 4xSDI outputs.
+        **/
+        void			RouteTsiMuxTo4xSDIOut (void);
 
 		/**
 			@brief	Sets up my circular buffers.

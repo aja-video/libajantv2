@@ -174,11 +174,20 @@ AJAStatus NTV2Player4K::Init (void)
 		if (!mDevice.AcquireStreamForApplication (APP_SIGNATURE, APP_PROCESS_ID))
 			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
 		mDevice.GetEveryFrameServices(mSavedTaskMode);	//	Save the current service level
-	}
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);		//	Set OEM service level
 
-	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
-		mDevice.SetMultiFormatMode(true);
+        mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);		//	Set OEM service level
+        mDevice.SetMultiFormatMode(false);
+        for (NTV2Channel chan (NTV2_CHANNEL1); chan < NTV2_CHANNEL8; chan = NTV2Channel (chan + 1))
+        {
+            mDevice.DisableChannel (chan);
+        }
+	}
+    else
+    {
+        mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);		//	Set OEM service level
+        if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
+            mDevice.SetMultiFormatMode(true);
+    }
 
 	//	Set up the video and audio...
 	status = SetUpVideo();
@@ -213,12 +222,6 @@ AJAStatus NTV2Player4K::SetUpVideo (void)
 	if (!::NTV2DeviceCanDoVideoFormat (mDeviceID, mConfig.fVideoFormat))
 		{cerr << "## ERROR:  Device can't do " << ::NTV2VideoFormatToString(mConfig.fVideoFormat) << endl;  return AJA_STATUS_UNSUPPORTED;}
 
-	//	Configure the device to handle the requested video format...
-	mDevice.SetVideoFormat (mConfig.fVideoFormat, false, false, mConfig.fOutputChannel);
-
-	//	VANC data is not processed by this application
-	mDevice.SetEnableVANCData (false, false);
-
 	//	Configure output for HFR Level A and RGB Level B
 	if (!::NTV2DeviceCanDo12gRouting(mDeviceID))
 	{
@@ -227,7 +230,12 @@ AJAStatus NTV2Player4K::SetUpVideo (void)
 
 		for (NTV2Channel chan (startChannel); chan < endChannel; chan = NTV2Channel (chan + 1))
 		{
-			mDevice.SetSDIOutLevelAtoLevelBConversion (chan, false);
+            //	Configure the device to handle the requested video format...
+            mDevice.SetVideoFormat (mConfig.fVideoFormat, false, false, chan);
+            //	VANC data is not processed by this application
+            mDevice.SetEnableVANCData (false, false, chan);
+            //  Disable SDI output conversions
+            mDevice.SetSDIOutLevelAtoLevelBConversion (chan, false);
 			mDevice.SetSDIOutRGBLevelAConversion (chan, false);
 		}
 
@@ -427,7 +435,7 @@ void NTV2Player4K::RouteOutputSignal (void)
 			break;
 		case 2:		//	Low Frame Rate, Square, Pixel RGB, Wire YCbCr
 			RouteFsToCsc();
-			RouteCscToSDIOut();
+            RouteCscTo4xSDIOut();
 			break;
 		case 3:		//	Low Frame Rate, Square, Pixel RGB, Wire RGB
 			RouteFsToDLOut();
@@ -435,7 +443,7 @@ void NTV2Player4K::RouteOutputSignal (void)
 			break;
 		case 4:		//	Low Frame Rate, Tsi, Pixel YCbCr, Wire YCbCr
 			RouteFsToTsiMux();
-			RouteTsiMuxToSDIOut();
+            RouteTsiMuxTo2xSDIOut();
 			break;
 		case 5:		//	Low Frame Rate, Tsi, Pixel YCbCr, Wire RGB
 			RouteFsToTsiMux();
@@ -446,7 +454,7 @@ void NTV2Player4K::RouteOutputSignal (void)
 		case 6:		//	Low Frame Rate, Tsi, Pixel RGB, Wire YCbCr
 			RouteFsToTsiMux();
 			RouteTsiMuxToCsc();
-			RouteCscToSDIOut();
+            RouteCscTo2xSDIOut();
 			break;
 		case 7:		//	Low Frame Rate, Tsi, Pixel RGB, Wire RGB
 			RouteFsToTsiMux();
@@ -461,14 +469,14 @@ void NTV2Player4K::RouteOutputSignal (void)
 			break;
 		case 10:	//	High Frame Rate, Square, Pixel RGB, Wire YCbCr
 			RouteFsToCsc();
-			RouteCscToSDIOut();
+            RouteCscTo4xSDIOut();
 			break;
 		case 11:	//	High Frame Rate, Square, Pixel RGB, Wire RGB
 			//	No valid routing for this case
 			break;
 		case 12:	//	High Frame Rate, Tsi, Pixel YCbCr, Wire YCbCr
 			RouteFsToTsiMux();
-			RouteTsiMuxToSDIOut();
+            RouteTsiMuxTo4xSDIOut();
 			break;
 		case 13:	//	High Frame Rate, Tsi, Pixel YCbCr, Wire RGB
 			//	No valid routing for this case
@@ -476,7 +484,7 @@ void NTV2Player4K::RouteOutputSignal (void)
 		case 14:	//	High Frame Rate, Tsi, Pixel RGB, Wire YCbCr
 			RouteFsToTsiMux();
 			RouteTsiMuxToCsc();
-			RouteCscToSDIOut();
+            RouteCscTo4xSDIOut();
 			break;
 		case 15:	//	High Frame Rate, Tsi, Pixel RGB, Wire RGB
 			//	No valid routing for this case
@@ -842,9 +850,28 @@ void NTV2Player4K::RouteDLOutToSDIOut (void)
 }	//	RouteFsDLOutToSDIOut
 
 
-void NTV2Player4K::RouteCscToSDIOut (void)
+void NTV2Player4K::RouteCscTo2xSDIOut (void)
 {
 	if (mConfig.fOutputChannel == NTV2_CHANNEL1)
+	{
+        mDevice.Connect (NTV2_XptSDIOut1Input,      NTV2_XptCSC1VidYUV);
+        mDevice.Connect (NTV2_XptSDIOut1InputDS2,	NTV2_XptCSC2VidYUV);
+        mDevice.Connect (NTV2_XptSDIOut2Input,      NTV2_XptCSC3VidYUV);
+        mDevice.Connect (NTV2_XptSDIOut2InputDS2,	NTV2_XptCSC4VidYUV);
+	}
+	else if (mConfig.fOutputChannel == NTV2_CHANNEL5)
+	{
+        mDevice.Connect (NTV2_XptSDIOut5Input,      NTV2_XptCSC5VidYUV);
+        mDevice.Connect (NTV2_XptSDIOut5InputDS2,	NTV2_XptCSC6VidYUV);
+        mDevice.Connect (NTV2_XptSDIOut6Input,      NTV2_XptCSC7VidYUV);
+        mDevice.Connect (NTV2_XptSDIOut6InputDS2,	NTV2_XptCSC8VidYUV);
+	}
+}	//	RouteCscToSDIOut
+
+
+void NTV2Player4K::RouteCscTo4xSDIOut (void)
+{
+    if (mConfig.fOutputChannel == NTV2_CHANNEL1)
 	{
 		mDevice.Connect (NTV2_XptSDIOut1Input,	NTV2_XptCSC1VidYUV);
 		mDevice.Connect (NTV2_XptSDIOut2Input,	NTV2_XptCSC2VidYUV);
@@ -938,9 +965,28 @@ void NTV2Player4K::RouteTsiMuxToCsc (void)
 }	//	RouteTsiMuxToCsc
 
 
-void NTV2Player4K::RouteTsiMuxToSDIOut (void)
+void NTV2Player4K::RouteTsiMuxTo2xSDIOut (void)
 {
 	if (mConfig.fOutputChannel == NTV2_CHANNEL1)
+	{
+        mDevice.Connect (NTV2_XptSDIOut1Input,      NTV2_Xpt425Mux1AYUV);
+        mDevice.Connect (NTV2_XptSDIOut1InputDS2,	NTV2_Xpt425Mux1BYUV);
+        mDevice.Connect (NTV2_XptSDIOut2Input,      NTV2_Xpt425Mux2AYUV);
+        mDevice.Connect (NTV2_XptSDIOut2InputDS2,	NTV2_Xpt425Mux2BYUV);
+	}
+	else if (mConfig.fOutputChannel == NTV2_CHANNEL5)
+	{
+        mDevice.Connect (NTV2_XptSDIOut5Input,      NTV2_Xpt425Mux3AYUV);
+        mDevice.Connect (NTV2_XptSDIOut5InputDS2,	NTV2_Xpt425Mux3BYUV);
+        mDevice.Connect (NTV2_XptSDIOut6Input,      NTV2_Xpt425Mux4AYUV);
+        mDevice.Connect (NTV2_XptSDIOut6InputDS2,	NTV2_Xpt425Mux4BYUV);
+	}
+}	//	RouteTsiMuxToSDIOut
+
+
+void NTV2Player4K::RouteTsiMuxTo4xSDIOut (void)
+{
+    if (mConfig.fOutputChannel == NTV2_CHANNEL1)
 	{
         mDevice.Connect (NTV2_XptSDIOut1Input,	NTV2_Xpt425Mux1AYUV);
         mDevice.Connect (NTV2_XptSDIOut2Input,	NTV2_Xpt425Mux1BYUV);
