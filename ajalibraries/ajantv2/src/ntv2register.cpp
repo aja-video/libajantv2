@@ -4985,6 +4985,8 @@ bool CNTV2Card::GetSecondaryVideoFormat(NTV2VideoFormat & outFormat)
 }
 
 
+#if !defined(R2_DEPRECATE)
+
 bool CNTV2Card::SetInputVideoSelect (NTV2InputVideoSelect input)
 {
 	bool bResult = WriteRegister(kVRegInputSelect, input);
@@ -5001,6 +5003,9 @@ bool CNTV2Card::GetInputVideoSelect(NTV2InputVideoSelect & outInputSelect)
 {
 	return CNTV2DriverInterface::ReadRegister(kVRegInputSelect, outInputSelect);
 }
+
+#endif // R2_DEPRECATE
+
 
 NTV2VideoFormat CNTV2Card::GetInputVideoFormat (NTV2InputSource inSource, const bool inIsProgressivePicture)
 {
@@ -6706,8 +6711,10 @@ bool CNTV2Card::GetStereoCompressorRightSource		(NTV2OutputCrosspointID & outVal
 
 /////////////////////////////////////////////////////////////////////
 // Analog
+#if !defined(R2_DEPRECATE)
 bool CNTV2Card::SetAnalogInputADCMode				(const NTV2LSVideoADCMode inValue)			{return WriteRegister (kRegAnalogInputControl,	ULWord(inValue),		kRegMaskAnalogInputADCMode,				kRegShiftAnalogInputADCMode);}
 bool CNTV2Card::GetAnalogInputADCMode				(NTV2LSVideoADCMode & outValue)				{return CNTV2DriverInterface::ReadRegister  (kRegAnalogInputControl,	outValue,	kRegMaskAnalogInputADCMode,				kRegShiftAnalogInputADCMode);}
+#endif
 
 
 #if !defined (NTV2_DEPRECATE)

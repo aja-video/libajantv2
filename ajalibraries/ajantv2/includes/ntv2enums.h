@@ -2144,6 +2144,74 @@ typedef enum
 } NTV2LHIVideoDACMode;
 
 
+// GetAnalogInputADCMode
+typedef enum
+{
+    NTV2_480iADCComponentBeta,			//	0
+    NTV2_480iADCComponentSMPTE,			//	1
+    NTV2_480iADCSVideoUS,				//	2
+    NTV2_480iADCCompositeUS,			//	3
+    NTV2_480iADCComponentBetaJapan,		//	4
+    NTV2_480iADCComponentSMPTEJapan,	//	5
+    NTV2_480iADCSVideoJapan,			//	6
+    NTV2_480iADCCompositeJapan,			//	7
+    NTV2_576iADCComponentBeta,			//	8
+    NTV2_576iADCComponentSMPTE,			//	9
+    NTV2_576iADCSVideo,					//	10
+    NTV2_576iADCComposite,				//	11
+    NTV2_720p_60,	//	60 + 59.94		//	12
+    NTV2_1080i_30,	//	30 + 29.97		//	13
+    NTV2_720p_50,						//	14
+    NTV2_1080i_25,						//	15
+    NTV2_1080pSF24,	// 24 + 23.98		//	16
+    NTV2_MAX_NUM_LSVideoADCModes		//	17
+} NTV2LSVideoADCMode;
+
+
+// Up/Down/Cross Converter modes
+typedef enum
+{
+    NTV2_UpConvertAnamorphic,
+    NTV2_UpConvertPillarbox4x3,
+    NTV2_UpConvertZoom14x9,
+    NTV2_UpConvertZoomLetterbox,
+    NTV2_UpConvertZoomWide,
+    NTV2_MAX_NUM_UpConvertModes
+} NTV2UpConvertMode;
+
+
+typedef enum
+{
+	NTV2_AnalogAudioIO_8Out,
+	NTV2_AnalogAudioIO_4In_4Out,
+	NTV2_AnalogAudioIO_4Out_4In,
+	NTV2_AnalogAudioIO_8In
+} NTV2AnalogAudioIO;
+
+
+typedef enum
+{
+    NTV2_DownConvertLetterbox,
+    NTV2_DownConvertCrop,
+    NTV2_DownConvertAnamorphic,
+    NTV2_DownConvert14x9,
+    NTV2_MAX_NUM_DownConvertModes
+} NTV2DownConvertMode;
+
+
+typedef enum
+{
+    NTV2_IsoLetterBox,
+    NTV2_IsoHCrop,
+    NTV2_IsoPillarBox,
+    NTV2_IsoVCrop,
+    NTV2_Iso14x9,
+    NTV2_IsoPassThrough,
+    NTV2_MAX_NUM_IsoConvertModes
+} NTV2IsoConvertMode;
+
+
+
 #if !defined(R2_DEPRECATE)
 
 /**
@@ -2328,34 +2396,6 @@ typedef enum
 } NTV24kTransportType;
 
 
-// IsSDVideoADCMode - ntv2card.h
-// GetAnalogInputADCMode
-typedef enum
-{
-    NTV2_480iADCComponentBeta,			//	0
-    NTV2_480iADCComponentSMPTE,			//	1
-    NTV2_480iADCSVideoUS,				//	2
-    NTV2_480iADCCompositeUS,			//	3
-    NTV2_480iADCComponentBetaJapan,		//	4
-    NTV2_480iADCComponentSMPTEJapan,	//	5
-    NTV2_480iADCSVideoJapan,			//	6
-    NTV2_480iADCCompositeJapan,			//	7
-    NTV2_576iADCComponentBeta,			//	8
-    NTV2_576iADCComponentSMPTE,			//	9
-    NTV2_576iADCSVideo,					//	10
-    NTV2_576iADCComposite,				//	11
-    NTV2_720p_60,	//	60 + 59.94		//	12
-    NTV2_1080i_30,	//	30 + 29.97		//	13
-    NTV2_720p_50,						//	14
-    NTV2_1080i_25,						//	15
-    NTV2_1080pSF24,	// 24 + 23.98		//	16
-    NTV2_MAX_NUM_LSVideoADCModes		//	17
-} NTV2LSVideoADCMode;
-
-
-// ntv2card.h
-// ntv2register.cpp
-// ntv2macdriverinterface.cpp
 typedef enum					// used in Virtual Register: kVRegInputSelect
 {
     NTV2_Input1Select,
@@ -2371,40 +2411,6 @@ typedef enum					// used in Virtual Register: kVRegInputSelect
     NTV2_MAX_NUM_InputVideoSelectEnums
 } NTV2InputVideoSelect;
 
-// ntv2card.h
-// ntv2register.cpp
-// Up/Down/Cross Converter modes
-typedef enum
-{
-    NTV2_UpConvertAnamorphic,
-    NTV2_UpConvertPillarbox4x3,
-    NTV2_UpConvertZoom14x9,
-    NTV2_UpConvertZoomLetterbox,
-    NTV2_UpConvertZoomWide,
-    NTV2_MAX_NUM_UpConvertModes
-} NTV2UpConvertMode;
-
-// ntv2card.h
-typedef enum
-{
-    NTV2_DownConvertLetterbox,
-    NTV2_DownConvertCrop,
-    NTV2_DownConvertAnamorphic,
-    NTV2_DownConvert14x9,
-    NTV2_MAX_NUM_DownConvertModes
-} NTV2DownConvertMode;
-
-// ntv2card.h
-typedef enum
-{
-    NTV2_IsoLetterBox,
-    NTV2_IsoHCrop,
-    NTV2_IsoPillarBox,
-    NTV2_IsoVCrop,
-    NTV2_Iso14x9,
-    NTV2_IsoPassThrough,
-    NTV2_MAX_NUM_IsoConvertModes
-} NTV2IsoConvertMode;
 
 // not in use
 typedef enum
@@ -2434,15 +2440,6 @@ typedef enum
 	} NTV2PulldownPatternType;
 #endif	//	!defined(NTV2_DEPRECATE_15_1)
 
-// ntv2card.h
-typedef enum
-{
-	NTV2_AnalogAudioIO_8Out,
-	NTV2_AnalogAudioIO_4In_4Out,
-	NTV2_AnalogAudioIO_4Out_4In,
-	NTV2_AnalogAudioIO_8In
-} NTV2AnalogAudioIO;
-
 
 //	NOTE:	Timecode Burn-In Mode is a "software" feature - not performed in hardware
 typedef enum
@@ -2465,41 +2462,8 @@ typedef enum
     NTV2_MAX_NUM_RGB10EndianEnums
 } NTV2RGB10Endian;
 
-
-// ntv2card.h
-/**
-    @brief	This specifies the HDMI protocol to be used.
-**/
-typedef enum
-{
-    NTV2_HDMIProtocolHDMI,		//	HDMI Protocol
-    NTV2_HDMIProtocolDVI,		//	DVI Protocol
-    NTV2_MAX_NUM_HDMIProtocols,
-    NTV2_INVALID_HDMI_PROTOCOL	= NTV2_MAX_NUM_HDMIProtocols
-} NTV2HDMIProtocol;
-
-#define	NTV2_IS_VALID_HDMI_PROTOCOL(__x__)	((__x__) >= NTV2_HDMIProtocolHDMI  &&  (__x__) < NTV2_MAX_NUM_HDMIProtocols)
-
-
-// ntv2card.h
-/**
-    @brief	This specifies HDMI Color Space I/O
-**/
-typedef enum
-{
-    NTV2_HDMIColorSpaceAuto,	//	Auto Select
-    NTV2_HDMIColorSpaceRGB,		//	RGB
-    NTV2_HDMIColorSpaceYCbCr,	//	YCbCr
-    NTV2_MAX_NUM_HDMIColorSpaces,
-    NTV2_INVALID_HDMI_COLORSPACE	= NTV2_MAX_NUM_HDMIColorSpaces
-} NTV2HDMIColorSpace;
-
-
-#define	NTV2_IS_VALID_HDMI_COLORSPACE(__x__)		((__x__) > NTV2_HDMIColorSpaceAuto  &&  (__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
-
-
-
 #endif // R2_DEPRECATE
+
 
 
 #if !defined (NTV2_DEPRECATE)
@@ -3624,6 +3588,35 @@ typedef enum
     NTV2_HDMI3DTopBottom	= 0x6,	//	Top Over Bottom Stereo 3D mode
     NTV2_MAX_NUM_HDMIOut3DModes
 } NTV2HDMIOut3DMode;
+
+
+/**
+    @brief	This specifies HDMI Color Space I/O
+**/
+typedef enum
+{
+    NTV2_HDMIColorSpaceAuto,	//	Auto Select
+    NTV2_HDMIColorSpaceRGB,		//	RGB
+    NTV2_HDMIColorSpaceYCbCr,	//	YCbCr
+    NTV2_MAX_NUM_HDMIColorSpaces,
+    NTV2_INVALID_HDMI_COLORSPACE	= NTV2_MAX_NUM_HDMIColorSpaces
+} NTV2HDMIColorSpace;
+
+#define	NTV2_IS_VALID_HDMI_COLORSPACE(__x__)		((__x__) > NTV2_HDMIColorSpaceAuto  &&  (__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
+
+
+/**
+    @brief	This specifies the HDMI protocol to be used.
+**/
+typedef enum
+{
+    NTV2_HDMIProtocolHDMI,		//	HDMI Protocol
+    NTV2_HDMIProtocolDVI,		//	DVI Protocol
+    NTV2_MAX_NUM_HDMIProtocols,
+    NTV2_INVALID_HDMI_PROTOCOL	= NTV2_MAX_NUM_HDMIProtocols
+} NTV2HDMIProtocol;
+
+#define	NTV2_IS_VALID_HDMI_PROTOCOL(__x__)	((__x__) >= NTV2_HDMIProtocolHDMI  &&  (__x__) < NTV2_MAX_NUM_HDMIProtocols)
 
 
 /**
