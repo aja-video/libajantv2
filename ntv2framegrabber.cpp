@@ -12,7 +12,9 @@
 #if defined (INCLUDE_AJACC)
 	#include "ajaanc/includes/ancillarylist.h"
 	#include "ajaanc/includes/ancillarydata_cea608_line21.h"
+	using namespace std;
 #endif
+
 
 
 #define NTV2_AUDIOSIZE_MAX	(401*1024)
@@ -379,18 +381,19 @@ void NTV2FrameGrabber::run (void)
 				}
 				else if (SetupInput ())
 				{
+					mTransferStruct.acANCBuffer.Allocate (::NTV2DeviceCanDoCustomAnc (mNTV2Card.GetDeviceID ()) ? NTV2_ANCSIZE_MAX : 0);		//	Reserve space for anc data
+					mTransferStruct.acANCField2Buffer.Allocate (::NTV2DeviceCanDoCustomAnc (mNTV2Card.GetDeviceID ()) ? NTV2_ANCSIZE_MAX : 0);	//	Reserve space for anc data
+					const ULWord	acOptions(AUTOCIRCULATE_WITH_RP188  |  (mTransferStruct.acANCBuffer.IsNULL() && mTransferStruct.acANCField2Buffer.IsNULL() ? 0 : AUTOCIRCULATE_WITH_ANC));
 					gMutex.lock ();
 						StopAutoCirculate ();
 						ULWord numFrameBuffersAvailable = (::NTV2DeviceGetNumberFrameBuffers (mDeviceID) - ::NTV2DeviceGetNumAudioSystems (mDeviceID));
 						ULWord startFrameBuffer = (numFrameBuffersAvailable / ::NTV2DeviceGetNumFrameStores (mDeviceID)) * ULWord(mChannel);
 						mNTV2Card.AutoCirculateInitForInput (mChannel, 0, ::NTV2ChannelToAudioSystem (mChannel),
-															AUTOCIRCULATE_WITH_RP188, 1, startFrameBuffer, startFrameBuffer+7);
+															acOptions, 1, startFrameBuffer, startFrameBuffer+7);
 					gMutex.unlock ();
 					SetupAudio ();
 					if (mAudioOutput)
 						mAudioDevice = mAudioOutput->start ();
-					mTransferStruct.acANCBuffer.Allocate (::NTV2DeviceCanDoCustomAnc (mNTV2Card.GetDeviceID ()) ? NTV2_ANCSIZE_MAX : 0);		//	Reserve space for anc data
-					mTransferStruct.acANCField2Buffer.Allocate (::NTV2DeviceCanDoCustomAnc (mNTV2Card.GetDeviceID ()) ? NTV2_ANCSIZE_MAX : 0);	//	Reserve space for anc data
 
 					//	Start AutoCirculate...
 					mNTV2Card.SetLTCInputEnable (true);

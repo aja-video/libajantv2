@@ -170,26 +170,14 @@ AJAStatus NTV2Capture::SetupVideo (void)
 	mDevice.SubscribeInputVerticalEvent (mInputChannel);
 	mDevice.SubscribeOutputVerticalEvent (NTV2_CHANNEL1);
 
-	//	Disable SDI output from the SDI input being used,
-	//	but only if the device supports bi-directional SDI,
-	//	and only if the input being used is an SDI input...
-	if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID))
-		mDevice.SetSDITransmitEnable (mInputChannel, false);
-
-	//	Wait for four verticals to let the receiver lock...
-	mDevice.WaitForOutputVerticalInterrupt (NTV2_CHANNEL1, 4);
-
-	//	Set the video format to match the incomming video format.
-	//	Does the device support the desired input source?
-
 	//	If the device supports bi-directional SDI and the
-	//	requested input is SDI, ensure the SDI direction
-	//	is configured for input...
+	//	requested input is SDI, ensure the SDI connector
+	//	is configured to receive...
 	if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID) && NTV2_INPUT_SOURCE_IS_SDI (mInputSource))
 	{
 		mDevice.SetSDITransmitEnable (mInputChannel, false);
 
-		//	Give the input circuit some time (~10 frames) to lock onto the input signal...
+		//	Give the input circuit some time (~10 VBIs) to lock onto the input signal...
 		mDevice.WaitForInputVerticalInterrupt (mInputChannel, 10);
 	}
 
