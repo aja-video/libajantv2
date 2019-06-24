@@ -502,6 +502,20 @@ public:
 	AJA_VIRTUAL bool	DMAReadFrame (const ULWord inFrameNumber, ULWord * pOutFrameBuffer, const ULWord inByteCount);
 
 	/**
+		@brief		Transfers a single frame from the AJA device to the host. This call is multi-format compatible.
+		@param[in]	inFrameNumber	Specifies the zero-based frame number of the frame to be read from the device.
+		@param[in]	pOutFrameBuffer	Specifies the non-NULL address of the host buffer that is to receive the frame data.
+									The memory it points to must be writeable.
+		@param[in]	inByteCount		Specifies the total number of bytes to transfer.
+		@param[in]	inChannel		Specified for multi-format
+		@return		True if successful; otherwise false.
+		@note		The host buffer must be at least inByteCount in size, or a host memory access violation may occur.
+		@note		This function will block and not return until the transfer has finished or failed.
+		@see		CNTV2Card::DMAWriteFrame, CNTV2Card::DMARead, CNTV2Card::DMAReadSegments, \ref vidop-fbaccess
+	**/
+	AJA_VIRTUAL bool	DMAReadFrame (const ULWord inFrameNumber, ULWord * pFrameBuffer, const ULWord inByteCount, const NTV2Channel inChannel);
+
+	/**
 		@brief		Transfers a single frame from the host to the AJA device.
 		@param[in]	inFrameNumber	Specifies the zero-based frame number of the frame to be written to the device.
 		@param[in]	pInFrameBuffer	Specifies the non-NULL address of the host buffer that is to supply the frame data.
@@ -513,6 +527,20 @@ public:
 		@see		CNTV2Card::DMAReadFrame, CNTV2Card::DMAWrite, CNTV2Card::DMAWriteSegments, \ref vidop-fbaccess
 	**/
 	AJA_VIRTUAL bool	DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pInFrameBuffer, const ULWord inByteCount);
+
+	/**
+		@brief		Transfers a single frame from the host to the AJA device. This call is multi-format compatible.
+		@param[in]	inFrameNumber	Specifies the zero-based frame number of the frame to be written to the device.
+		@param[in]	pInFrameBuffer	Specifies the non-NULL address of the host buffer that is to supply the frame data.
+									The memory it points to must be readable.
+		@param[in]	inByteCount		Specifies the total number of bytes to transfer.
+		@param[in]	inChannel		Specified for multi-format
+		@return		True if successful; otherwise false.
+		@note		The host buffer must be at least inByteCount in size, or a host memory access violation may occur.
+		@note		This function will block and not return until the transfer has finished or failed.
+		@see		CNTV2Card::DMAReadFrame, CNTV2Card::DMAWrite, CNTV2Card::DMAWriteSegments, \ref vidop-fbaccess
+	**/
+	AJA_VIRTUAL bool	DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pInFrameBuffer, const ULWord inByteCount, const NTV2Channel inChannel);
 
 	/**
 		@brief		Performs a segmented data transfer from the AJA device to the host.
@@ -672,13 +700,21 @@ public:
 										const NTV2Channel	inChannel		= NTV2_CHANNEL1);
 
 	/**
-		@brief		Page locks the data buffer to reduce transfer time and CPU usage of DMA transfers.
-		@param[in]	pBuffer			Specifies the non-NULL address of the host buffer to lock.
-									Specify a NULL buffer and 0 bytes to unlock all buffers.
-		@param[in]	inByteCount		Specifies the total number of bytes to lock.
+		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
+		@param[in]	inBuffer	Specifies the host buffer to lock.
+								If inBuffer.IsNULL(), the driver will unlock all host buffers.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	DMABufferLock (const ULWord * pBuffer, const ULWord inByteCount);
+	AJA_VIRTUAL bool	DMABufferLock (const NTV2_POINTER & inBuffer);
+
+	/**
+		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
+		@param[in]	pInBuffer		Specifies the starting address of the host buffer to lock.
+		@param[in]	inByteCount		Specifies the total length of the host buffer.
+		@note		Specifying NULL for "pInBuffer" and 0 for "inByteCount" will command the driver to unlock all buffers.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL inline bool	DMABufferLock (const ULWord * pInBuffer, const ULWord inByteCount)	{return DMABufferLock(NTV2_POINTER(pInBuffer, inByteCount));}
 
 
 	/**
@@ -686,6 +722,47 @@ public:
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	DMABufferUnlockAll ();
+
+
+	/**
+		@brief		Clears the ancillary data region in the device frame buffer for the specified frames.
+		@param[in]	inStartFrameNumber		Specifies the starting device frame number.
+		@param[in]	inEndFrameNumber		Specifies the ending device frame number.
+		@param[in]	inAncRegion				Optionally specifies the ancillary data region to clear (e.g.
+											NTV2_AncRgn_Field1, NTV2_AncRgn_Field2, etc.).  Defaults to all regions.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	DMAClearAncRegion (	const UWord inStartFrameNumber,
+											const UWord inEndFrameNumber,
+											const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All);
+
+	/**
+		@brief		Answers with the offset and size of an ancillary data region within a device frame buffer.
+		@param[out]	outByteOffset	Receives the byte offset where the ancillary data region starts in the frame buffer,
+									(measured from the start of the frame buffer).
+									This is guaranteed to be non-zero if the function succeeds, and zero if it fails.
+		@param[out]	outByteCount	Receives the size of the ancillary data region, in bytes.
+									This is guaranteed to be non-zero if the function succeeds, and zero if it fails.
+		@param[in]	inAncRegion		Optionally specifies the ancillary data region of interest (e.g. NTV2_AncRgn_Field1,
+									NTV2_AncRgn_Field2, etc.).  Defaults to all regions, for the maximum offset and size
+									among all of them.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetAncRegionOffsetAndSize (ULWord & outByteOffset, ULWord & outByteCount,
+													const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All);
+
+	/**
+		@brief		Answers with the byte offset to the start of an ancillary data region within a device frame buffer,
+					as measured from the bottom of the frame buffer.
+		@param[out]	outByteOffsetFromBottom		Receives the byte offset to the start of the ancillary data region,
+												as measured from the bottom of the frame buffer.
+		@param[in]	inAncRegion		Optionally specifies the ancillary data region of interest (e.g. NTV2_AncRgn_Field1,
+									NTV2_AncRgn_Field2, etc.).  Defaults to all regions, for the largest offset among
+									them all.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetAncRegionOffsetFromBottom (ULWord & outByteOffsetFromBottom,
+														const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All);
 
 
 #if !defined(NTV2_DEPRECATE_15_2)
@@ -744,11 +821,19 @@ public:
 									This must be a valid ::NTV2FrameBufferFormat value.
 		@param[in]	inIsAJARetail	Specifies if the AJA retail configuration settings are to be respected or not.
 									Defaults to false on all platforms other than MacOS, which defaults to true.
+		@param[in]	inXferChars		Specifies the HDR tranfer characteristc description.
+		@param[in]	inColorimetry	Specifies the HDR colorimetry description.
+		@param[in]	inLuminance		Specifies the HDR luminance description.
 		@details	This function allows client applications to control the format of frame data stored
 					in the frame stores on an AJA device. This is important, because when frames are transferred
 					between the host and the AJA device, the frame data format is presumed to be identical.
 	**/
-	AJA_VIRTUAL bool	SetFrameBufferFormat (NTV2Channel inChannel, NTV2FrameBufferFormat inNewFormat, bool inIsAJARetail = AJA_RETAIL_DEFAULT);
+	AJA_VIRTUAL bool	SetFrameBufferFormat (NTV2Channel inChannel,
+											  NTV2FrameBufferFormat inNewFormat,
+											  bool inIsAJARetail = AJA_RETAIL_DEFAULT,
+											  NTV2HDRXferChars inXferChars = NTV2_VPID_TC_SDR_TV,
+											  NTV2HDRColorimetry inColorimetry = NTV2_VPID_Color_Rec709,
+											  NTV2HDRLuminance inLuminance = NTV2_VPID_Luminance_YCbCr);
 
 	/**
 		@brief		Sets the device's clock reference source. See \ref deviceclockingandsync for more information.
@@ -2313,7 +2398,7 @@ public:
 	///@{
 	AJA_VIRTUAL bool	ReadFlashProgramControl(ULWord & outValue);
 	AJA_VIRTUAL bool	IsXilinxProgrammed();
-    AJA_VIRTUAL bool	ProgramMainFlash(const char *fileName, bool bForceUpdate = false);
+	AJA_VIRTUAL bool	ProgramMainFlash(const char *fileName, bool bForceUpdate = false, bool bQuiet = false);
 	AJA_VIRTUAL bool	GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct);
 
     /**
@@ -4002,8 +4087,10 @@ public:
 	AJA_VIRTUAL bool	SetSecondaryVideoFormat(NTV2VideoFormat inFormat);			//	RETAIL USE ONLY
 	AJA_VIRTUAL bool	GetSecondaryVideoFormat(NTV2VideoFormat & outFormat);		//	RETAIL USE ONLY
 
+	#if !defined(R2_DEPRECATE)
 	AJA_VIRTUAL bool	SetInputVideoSelect (NTV2InputVideoSelect inInputSelect);	//	RETAIL USE ONLY
 	AJA_VIRTUAL bool	GetInputVideoSelect(NTV2InputVideoSelect & outInputSelect);	//	RETAIL USE ONLY
+	#endif
 
 	//	--------------------------------------------
 	//	GetNTV2VideoFormat functions
@@ -4491,8 +4578,10 @@ public:
 	AJA_VIRTUAL bool		ReadProcAmpC2CRAdjustment (ULWord & outValue);
 	AJA_VIRTUAL bool		ReadProcAmpOffsetYAdjustment (ULWord & outValue);
 
+	#if !defined(R2_DEPRECATE)
 	AJA_VIRTUAL bool		SetAnalogInputADCMode (const NTV2LSVideoADCMode inValue);
 	AJA_VIRTUAL bool		GetAnalogInputADCMode (NTV2LSVideoADCMode & outValue);
+	#endif
 	///@}
 
 
@@ -4925,12 +5014,12 @@ public:
 		@brief		Answers whether or not a valid analog LTC signal is being applied to the device's analog LTC input connector.
 		@param[out]	outIsPresent	Receives 'true' if a valid analog LTC signal is present at the analog LTC input connector;
 									otherwise 'false'.
+		@param[in]	inLTCInputNdx	Optionally specifies the LTC input connector. Defaults to 0 (LTCIn1).
 		@return		True if successful; otherwise false.
 		@note		Some devices share analog LTC input and reference input on one connector.
 					For these devices, this call should be preceded by a call to NTV2Card::SetLTCInputEnable(true).
 	**/
-	AJA_VIRTUAL bool		GetLTCInputPresent (bool & outIsPresent);
-	AJA_VIRTUAL inline bool	GetLTCInputPresent (bool * pOutValue)										{return pOutValue ? GetLTCInputPresent (*pOutValue) : false;}
+	AJA_VIRTUAL bool		GetLTCInputPresent (bool & outIsPresent, const UWord inLTCInputNdx = 0);
 
 	AJA_VIRTUAL bool		SetLTCOnReference (bool inNewValue);			//	DEPRECATE??
 	AJA_VIRTUAL bool		GetLTCOnReference (bool & outLTCIsOnReference);	//	DEPRECATE??
@@ -6213,9 +6302,9 @@ public:
 	AJA_VIRTUAL bool SetHDMIHDRBT2020 (void);
 	AJA_VIRTUAL bool SetHDMIHDRDCIP3 (void);
 	
-	AJA_VIRTUAL bool SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue);
-	AJA_VIRTUAL bool SetVPIDColorimetry (const NTV2VPIDColorimetry inValue);
-	AJA_VIRTUAL bool SetVPIDVPIDLuminance (const NTV2VPIDLuminance inValue);
+	AJA_VIRTUAL bool SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel);
+	AJA_VIRTUAL bool SetVPIDColorimetry (const NTV2VPIDColorimetry inValue, const NTV2Channel inChannel);
+	AJA_VIRTUAL bool SetVPIDVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel);
 
 	///@}
 
@@ -6255,8 +6344,10 @@ public:
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetConversionMode						(NTV2ConversionMode * pOutConversionMode)		) {return pOutConversionMode ? GetConversionMode(*pOutConversionMode) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetLUTControlSelect						(NTV2LUTControlSelect * pOutLUTSelect)			) {return pOutLUTSelect ? GetLUTControlSelect(*pOutLUTSelect) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetSecondaryVideoFormat					(NTV2VideoFormat * pOutFormat)					) {return pOutFormat ? GetSecondaryVideoFormat(*pOutFormat) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+	#if !defined(R2_DEPRECATE)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetInputVideoSelect						(NTV2InputVideoSelect * pOutInputSelect)		) {return pOutInputSelect ? GetInputVideoSelect(*pOutInputSelect) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetAnalogInputADCMode					(NTV2LSVideoADCMode * pOutValue)				) {return pOutValue ? GetAnalogInputADCMode(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+	#endif
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIOut3DPresent						(bool * pOut3DPresent)							) {return pOut3DPresent ? GetHDMIOut3DPresent(*pOut3DPresent) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIOut3DMode						(NTV2HDMIOut3DMode * pOutValue)					) {return pOutValue ? GetHDMIOut3DMode(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIInputRange						(NTV2HDMIRange * pOutValue)						) {return pOutValue ? GetHDMIInputRange(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
@@ -6372,6 +6463,7 @@ public:
     AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIInputStatusRegister				(ULWord * pOutValue,									const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetHDMIInputStatus(*pOutValue, inChannel) : false;}	///< @deprecated	Use CNTV2Card::GetHDMIInputStatus instead.
     AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIInputColor						(NTV2LHIHDMIColorSpace * pOutValue,						const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetHDMIInputColor(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	ReadOutputTimingControl					(ULWord * pOutValue,									const UWord inOutputSpigot = 0)					) {return pOutValue ? ReadOutputTimingControl(*pOutValue, inOutputSpigot) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetLTCInputPresent						(bool * pOutValue)																						) {return pOutValue ? GetLTCInputPresent (*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 
 	AJA_VIRTUAL        NTV2_DEPRECATED_f(bool	GetAudioOutputMonitorSource				(NTV2AudioMonitorSelect * pOutValue,					NTV2Channel * pOutChannel = NULL)				);	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 

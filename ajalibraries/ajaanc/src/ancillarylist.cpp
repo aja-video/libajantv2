@@ -281,6 +281,24 @@ AJAAncillaryData * AJAAncillaryList::GetAncillaryDataWithID (const uint8_t inDID
 }
 
 
+AJAStatus AJAAncillaryList::AddAncillaryData (const AJAAncillaryList & inPackets)
+{
+	if (&inPackets == this)
+		return AJA_STATUS_BAD_PARAM;	//	Cannot append from same list!
+	for (AJAAncDataListConstIter it(inPackets.m_ancList.begin());  it != inPackets.m_ancList.end();  ++it)
+	{
+		const AJAAncillaryData *	pSrcPkt	(*it);
+		if (!pSrcPkt)
+			return AJA_STATUS_FAIL;
+		AJAAncillaryData *	pNewPkt	(pSrcPkt->Clone());
+		if (!pNewPkt)
+			return AJA_STATUS_FAIL;
+		m_ancList.push_back(pNewPkt);
+	}
+	return AJA_STATUS_SUCCESS;
+}
+
+
 AJAStatus AJAAncillaryList::AddAncillaryData (const AJAAncillaryData * pInAncData)
 {
 	if (!pInAncData)

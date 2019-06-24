@@ -950,6 +950,8 @@ private:
 		DefineRegName	(kVRegSDIInput2Stereo3DMode,			"kVRegSDIInput2Stereo3DMode");
 		DefineRegName	(kVRegFrameBuffer1RGBRange,				"kVRegFrameBuffer1RGBRange");
 		DefineRegName	(kVRegFrameBuffer1Stereo3DMode,			"kVRegFrameBuffer1Stereo3DMode");
+		DefineRegName	(kVRegHDMIInRgbRange,					"kVRegHDMIInRgbRange");
+		DefineRegName	(kVRegHDMIOutRgbRange,					"kVRegHDMIOutRgbRange");
 		DefineRegName	(kVRegAnalogInBlackLevel,				"kVRegAnalogInBlackLevel");
 		DefineRegName	(kVRegAnalogInputType,					"kVRegAnalogInputType");
 		DefineRegName	(kVRegHDMIOutColorSpaceModeCtrl,		"kVRegHDMIOutColorSpaceModeCtrl");
@@ -999,6 +1001,7 @@ private:
 		DefineRegName	(kVRegForceApplicationCode,				"kVRegForceApplicationCode");
 		DefineRegName	(kVRegIpConfigStreamRefresh,			"kVRegIpConfigStreamRefresh");
 		DefineRegName	(kVRegSDIInput1Raster,					"kVRegSDIInput1Raster");
+		DefineRegName	(kVRegInputChangedCount,				"kVRegInputChangedCount");
 		DefineRegName	(kVRegProcAmpSDRegsInitialized,			"kVRegProcAmpSDRegsInitialized");
 		DefineRegName	(kVRegProcAmpStandardDefBrightness,		"kVRegProcAmpStandardDefBrightness");
 		DefineRegName	(kVRegProcAmpStandardDefContrast,		"kVRegProcAmpStandardDefContrast");
@@ -1099,6 +1102,8 @@ private:
 		DefineRegName	(kVRegFrameBufferGangCount,				"kVRegFrameBufferGangCount");
 		DefineRegName	(kVRegChannelCrosspointFirst,			"kVRegChannelCrosspointFirst");
 		DefineRegName	(kVRegChannelCrosspointLast,			"kVRegChannelCrosspointLast");
+		DefineRegName	(kVRegMonAncField1Offset,				"kVRegMonAncField1Offset");
+		DefineRegName	(kVRegMonAncField2Offset,				"kVRegMonAncField2Offset");
 		DefineRegName	(kVRegFollowInputFormat,				"kVRegFollowInputFormat");
 		DefineRegName	(kVRegAncField1Offset,					"kVRegAncField1Offset");
 		DefineRegName	(kVRegAncField2Offset,					"kVRegAncField2Offset");
@@ -1210,10 +1215,8 @@ private:
 		DefineRegName	(kVRegKIPNetCfgError,					"kVRegKIPNetCfgError");
 		DefineRegName	(kVRegUseHDMI420Mode,					"kVRegUseHDMI420Mode");
 		DefineRegName	(kVRegUnused501,						"kVRegUnused501");
-        DefineRegName   (kVReg2022_7NetworkPathDiff,            "kVReg2022_7NetworkPathDiff");
 		DefineRegName	(kVRegUserDefinedDBB,					"kVRegUserDefinedDBB");
 		DefineRegName	(kVRegHDMIOutAudioChannels,				"kVRegHDMIOutAudioChannels");
-		DefineRegName	(kVRegHDMIOutRGBRange,					"kVRegHDMIOutRGBRange");
 		DefineRegName	(kVRegZeroHostAncPostCapture,			"kVRegZeroHostAncPostCapture");
 		DefineRegName	(kVRegZeroDeviceAncPostCapture,			"kVRegZeroDeviceAncPostCapture");
 		DefineRegName	(kVRegAudioMonitorChannelSelect,		"kVRegAudioMonitorChannelSelect");
@@ -1242,6 +1245,27 @@ private:
 		DefineRegName	(kVRegNTV2VPIDTransferCharacteristics,	"kVRegNTV2VPIDTransferCharacteristics");
 		DefineRegName	(kVRegNTV2VPIDColorimetry,				"kVRegNTV2VPIDColorimetry");
 		DefineRegName	(kVRegNTV2VPIDLuminance,				"kVRegNTV2VPIDLuminance");
+		DefineRegName	(kVRegNTV2VPIDTransferCharacteristics2,	"kVRegNTV2VPIDTransferCharacteristics2");
+		DefineRegName	(kVRegNTV2VPIDColorimetry2,				"kVRegNTV2VPIDColorimetry2");
+		DefineRegName	(kVRegNTV2VPIDLuminance2,				"kVRegNTV2VPIDLuminance2");
+		DefineRegName	(kVRegNTV2VPIDTransferCharacteristics3,	"kVRegNTV2VPIDTransferCharacteristics3");
+		DefineRegName	(kVRegNTV2VPIDColorimetry3,				"kVRegNTV2VPIDColorimetry3");
+		DefineRegName	(kVRegNTV2VPIDLuminance3,				"kVRegNTV2VPIDLuminance3");
+		DefineRegName	(kVRegNTV2VPIDTransferCharacteristics4,	"kVRegNTV2VPIDTransferCharacteristics4");
+		DefineRegName	(kVRegNTV2VPIDColorimetry4,				"kVRegNTV2VPIDColorimetry4");
+		DefineRegName	(kVRegNTV2VPIDLuminance4,				"kVRegNTV2VPIDLuminance4");
+		DefineRegName	(kVRegNTV2VPIDTransferCharacteristics5,	"kVRegNTV2VPIDTransferCharacteristics5");
+		DefineRegName	(kVRegNTV2VPIDColorimetry5,				"kVRegNTV2VPIDColorimetry5");
+		DefineRegName	(kVRegNTV2VPIDLuminance5,				"kVRegNTV2VPIDLuminance5");
+		DefineRegName	(kVRegNTV2VPIDTransferCharacteristics6,	"kVRegNTV2VPIDTransferCharacteristics6");
+		DefineRegName	(kVRegNTV2VPIDColorimetry6,				"kVRegNTV2VPIDColorimetry6");
+		DefineRegName	(kVRegNTV2VPIDLuminance6,				"kVRegNTV2VPIDLuminance6");
+		DefineRegName	(kVRegNTV2VPIDTransferCharacteristics7,	"kVRegNTV2VPIDTransferCharacteristics7");
+		DefineRegName	(kVRegNTV2VPIDColorimetry7,				"kVRegNTV2VPIDColorimetry7");
+		DefineRegName	(kVRegNTV2VPIDLuminance7,				"kVRegNTV2VPIDLuminance7");
+		DefineRegName	(kVRegNTV2VPIDTransferCharacteristics8,	"kVRegNTV2VPIDTransferCharacteristics8");
+		DefineRegName	(kVRegNTV2VPIDColorimetry8,				"kVRegNTV2VPIDColorimetry8");
+		DefineRegName	(kVRegNTV2VPIDLuminance8,				"kVRegNTV2VPIDLuminance8");
 		DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
 		DefineRegName	(kVRegFirstOEM,							"kVRegFirstOEM");
 
@@ -1262,6 +1286,10 @@ private:
 			DefineRegReadWrite (regNum, READWRITE);
 			DefineRegClass (regNum, kRegClass_Virtual);
 		}
+		DefineRegClass (kVRegMonAncField1Offset, kRegClass_Anc);
+		DefineRegClass (kVRegMonAncField2Offset, kRegClass_Anc);
+		DefineRegClass (kVRegAncField1Offset, kRegClass_Anc);
+		DefineRegClass (kVRegAncField2Offset, kRegClass_Anc);
 	}	//	SetupVRegs
 
 public:

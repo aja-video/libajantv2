@@ -2036,7 +2036,10 @@ typedef enum
 	kRegMaskVPIDDualLinkChannel         = BIT(7)+BIT(6)+BIT(5),
 	kRegMaskVPIDSampling				= BIT(11)+BIT(10)+BIT(9)+BIT(8),
 	kRegMaskVPIDColorimetry				= BIT(12)+BIT(13),
+	kRegMaskVPIDColorimetryAltLow		= BIT(12),
+	kRegMaskVPIDImageAspect16x9Alt		= BIT(13),
 	kRegMaskVPIDHorizontalSampling		= BIT(14),
+	kRegMaskVPIDColorimetryAltHigh		= BIT(15),
 	kRegMaskVPIDImageAspect16x9			= BIT(15),
 	kRegMaskVPIDPictureRate				= BIT(19)+BIT(18)+BIT(17)+BIT(16),
 	kRegMaskVPIDXferChars				= BIT(20)+BIT(21),
@@ -3163,7 +3166,10 @@ typedef enum
 	kRegShiftVPIDChannel				= 6,
 	kRegShiftVPIDSampling				= 8,
 	kRegShiftVPIDColorimetry			= 12,
+	kRegShiftVPIDColorimetryAltLow		= 12,
+	kRegShiftVPIDImageAspect16x9Alt		= 13,
 	kRegShiftVPIDHorizontalSampling		= 14,
+	kRegShiftVPIDColorimetryAltHigh		= 15,
 	kRegShiftVPIDImageAspect16x9		= 15,
 	kRegShiftVPIDPictureRate			= 16,
 	kRegShiftVPIDXferChars				= 20,
@@ -5190,6 +5196,8 @@ typedef enum SharedPrefsPermissions
 } SharedPrefsPermissions;
 
 
+#if !defined(R2_DEPRECATED)
+
 typedef enum TimelapseUnits
 {
 	kTimelapseFrames			= 0,		// frames
@@ -5238,19 +5246,16 @@ typedef enum
 	
 } HDMIOutStereoSelect;
 
-typedef enum
+enum TestPatternFormat
 {
-	kRP188SourceEmbeddedLTC		= 0x0,		// NOTE these values are same as RP188 DBB channel select
-	kRP188SourceEmbeddedVITC1	= 0x1,
-	kRP188SourceEmbeddedVITC2	= 0x2,
-	kRP188SourceLTCPort			= 0xFE
-} RP188SourceFilterSelect;
+	kPatternFormatYUV10b,
+	kPatternFormatRGB10b,
+	kPatternFormatYUV8b,
+    kPatternFormatRGB8b,
+    kPatternFormatRGB12b
+};
 
-#if !defined(NTV2_DEPRECATE_15_2)
-	typedef RP188SourceFilterSelect		RP188SourceSelect;
-#endif	//	!defined(NTV2_DEPRECATE_15_2)
-
-
+// deprecated - NTV2TestPatternSelect
 // note: this order mimics (somewhat) that of NTV2TestPatternSelect in "ntv2testpatterngen.h"
 typedef enum
 {
@@ -5268,14 +5273,23 @@ typedef enum
 
 } TestPatternSelect;
 
-enum TestPatternFormat
+
+#endif //R2_DEPRECATED
+
+
+
+typedef enum
 {
-	kPatternFormatYUV10b,
-	kPatternFormatRGB10b,
-	kPatternFormatYUV8b,
-    kPatternFormatRGB8b,
-    kPatternFormatRGB12b
-};
+	kRP188SourceEmbeddedLTC		= 0x0,		// NOTE these values are same as RP188 DBB channel select
+	kRP188SourceEmbeddedVITC1	= 0x1,
+	kRP188SourceEmbeddedVITC2	= 0x2,
+	kRP188SourceLTCPort			= 0xFE
+} RP188SourceFilterSelect;
+
+#if !defined(NTV2_DEPRECATE_15_2)
+	typedef RP188SourceFilterSelect		RP188SourceSelect;
+#endif	//	!defined(NTV2_DEPRECATE_15_2)
+
 
 // Masks
 enum

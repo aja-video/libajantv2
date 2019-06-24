@@ -219,6 +219,15 @@ static const ULWord	gChannelToSDIInputProgressiveMask []	= {	kRegMaskInput1Progr
 static const ULWord	gChannelToSDIInputProgressiveShift []	= {	kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,
 																kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			0};
 
+static const ULWord	gChannelToSDIOutVPIDTransferCharacteristics []		= {	kVRegNTV2VPIDTransferCharacteristics,		kVRegNTV2VPIDTransferCharacteristics2,		kVRegNTV2VPIDTransferCharacteristics3,		kVRegNTV2VPIDTransferCharacteristics4,
+																kVRegNTV2VPIDTransferCharacteristics5,		kVRegNTV2VPIDTransferCharacteristics6,		kVRegNTV2VPIDTransferCharacteristics7,		kVRegNTV2VPIDTransferCharacteristics8,	0};
+
+static const ULWord	gChannelToSDIOutVPIDColorimetry []		= {	kVRegNTV2VPIDColorimetry,		kVRegNTV2VPIDColorimetry2,		kVRegNTV2VPIDColorimetry3,		kVRegNTV2VPIDColorimetry4,
+																kVRegNTV2VPIDColorimetry5,		kVRegNTV2VPIDColorimetry6,		kVRegNTV2VPIDColorimetry7,		kVRegNTV2VPIDColorimetry8,	0};
+
+static const ULWord	gChannelToSDIOutVPIDLuminance []		= {	kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,
+																kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,	0};
+
 
 // Method: SetEveryFrameServices
 // Input:  NTV2EveryFrameTaskMode
@@ -312,8 +321,15 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 	}
 	else if (NTV2_IS_QUAD_QUAD_FORMAT(value))
 	{
-		SetQuadQuadFrameEnable(true, channel);
-		SetQuadQuadSquaresEnable(true, channel);
+		GetQuadQuadSquaresEnable(squares, channel);
+		if (squares)
+		{
+			SetQuadQuadSquaresEnable(true, channel);
+		}
+		else
+		{
+			SetQuadQuadFrameEnable(true, channel);
+		}
 	}
 	else
 	{
@@ -1267,9 +1283,18 @@ bool CNTV2Card::SetQuadQuadFrameEnable (const bool inEnable, const NTV2Channel i
 		if(ok)	ok = SetQuadQuadSquaresEnable(false, inChannel);
 	}
 
-	if(ok)	ok = WriteRegister(kRegGlobalControl3, ULWord(inEnable ? 1 : 0), kRegMaskQuadQuadMode, kRegShiftQuadQuadMode);
+	if (ok)	ok = WriteRegister(kRegGlobalControl3, ULWord(inEnable ? 1 : 0), (inChannel < NTV2_CHANNEL3) ? kRegMaskQuadQuadMode : kRegMaskQuadQuadMode2, (inChannel < NTV2_CHANNEL3) ? kRegShiftQuadQuadMode : kRegShiftQuadQuadMode2);
 	if (inEnable)
-		if(ok)	ok = CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL4);
+	{
+		if (inChannel < NTV2_CHANNEL3)
+		{
+			if (ok)	ok = CopyVideoFormat(inChannel, NTV2_CHANNEL1, NTV2_CHANNEL2);
+		}
+		else
+		{
+			if (ok)	ok = CopyVideoFormat(inChannel, NTV2_CHANNEL3, NTV2_CHANNEL4);
+		}
+	}
 	return ok;
 }
 
@@ -1279,6 +1304,8 @@ bool CNTV2Card::SetQuadQuadSquaresEnable (const bool inValue, const NTV2Channel 
 	bool ok(::NTV2DeviceCanDo8KVideo(_boardID));
 	if (inValue)
 	{
+		if (ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL1);
+		if (ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL2);
 		if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL3);
 		if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL4);
 	}
@@ -1317,8 +1344,13 @@ bool CNTV2Card::GetQuadQuadFrameEnable (bool & outValue, const NTV2Channel inCha
 {
 	(void)inChannel;
 	outValue = 0;
-	if(::NTV2DeviceCanDo8KVideo(_boardID))
-		return CNTV2DriverInterface::ReadRegister(kRegGlobalControl3, outValue, kRegMaskQuadQuadMode, kRegShiftQuadQuadMode );
+	if (::NTV2DeviceCanDo8KVideo(_boardID))
+	{
+		if (inChannel < NTV2_CHANNEL3)
+			return CNTV2DriverInterface::ReadRegister(kRegGlobalControl3, outValue, kRegMaskQuadQuadMode, kRegShiftQuadQuadMode);
+		else
+			return CNTV2DriverInterface::ReadRegister(kRegGlobalControl3, outValue, kRegMaskQuadQuadMode2, kRegShiftQuadQuadMode2);
+	}
 	return true;
 }
 
@@ -2001,7 +2033,8 @@ bool CNTV2Card::IsMultiFormatActive (void)
 // Method: SetFrameBufferFormat
 // Input:  NTV2Channel, NTV2FrameBufferFormat
 // Output: NONE
-bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat newFormat, bool inIsRetailMode)
+bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat newFormat, bool inIsRetailMode,
+									 NTV2HDRXferChars inXferChars, NTV2HDRColorimetry inColorimetry, NTV2HDRLuminance inLuminance)
 {
 	#if !defined (NTV2_DEPRECATE)
 		#ifdef  MSWindows
@@ -2054,6 +2087,9 @@ bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat 
 		CVIDFAIL("'" << GetDisplayName() << "': Failed to change channel " << DEC(UWord(channel)+1) << " FBF from "
 				<< ::NTV2FrameBufferFormatToString(currentFormat) << " to " << ::NTV2FrameBufferFormatToString(newFormat));
 
+	SetVPIDTransferCharacteristics(inXferChars, channel);
+	SetVPIDColorimetry(inColorimetry, channel);
+	SetVPIDVPIDLuminance(inLuminance, channel);
 	return status;
 }
 
@@ -2461,12 +2497,14 @@ bool CNTV2Card::GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct)
 	return true;
 }
 
-bool CNTV2Card::ProgramMainFlash(const char *fileName, bool bForceUpdate)
+bool CNTV2Card::ProgramMainFlash(const char *fileName, bool bForceUpdate, bool bQuiet)
 {
     CNTV2KonaFlashProgram thisDevice;
     thisDevice.SetBoard(GetIndexNumber());
     try
     {
+		if (bQuiet)
+			thisDevice.SetQuietMode();
         thisDevice.SetBitFile(fileName, MAIN_FLASHBLOCK);
         if(bForceUpdate)
             thisDevice.SetMBReset();
@@ -4947,6 +4985,8 @@ bool CNTV2Card::GetSecondaryVideoFormat(NTV2VideoFormat & outFormat)
 }
 
 
+#if !defined(R2_DEPRECATE)
+
 bool CNTV2Card::SetInputVideoSelect (NTV2InputVideoSelect input)
 {
 	bool bResult = WriteRegister(kVRegInputSelect, input);
@@ -4963,6 +5003,9 @@ bool CNTV2Card::GetInputVideoSelect(NTV2InputVideoSelect & outInputSelect)
 {
 	return CNTV2DriverInterface::ReadRegister(kVRegInputSelect, outInputSelect);
 }
+
+#endif // R2_DEPRECATE
+
 
 NTV2VideoFormat CNTV2Card::GetInputVideoFormat (NTV2InputSource inSource, const bool inIsProgressivePicture)
 {
@@ -5007,7 +5050,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 		bool isProgressivePic = isValidVPID ? inputVPID.GetProgressivePicture() : inIsProgressivePicture;
 		bool isInput3G = false;
 		GetSDIInput3GPresent(isInput3G, inChannel);
-		NTV2VideoFormat format = GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
+		NTV2VideoFormat format = isValidVPID ? inputVPID.GetVideoFormat() : GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
 		if (::NTV2DeviceCanDo12GIn(_boardID, inChannel))
 		{
 			bool is6G = false, is12G = false;
@@ -6668,8 +6711,10 @@ bool CNTV2Card::GetStereoCompressorRightSource		(NTV2OutputCrosspointID & outVal
 
 /////////////////////////////////////////////////////////////////////
 // Analog
+#if !defined(R2_DEPRECATE)
 bool CNTV2Card::SetAnalogInputADCMode				(const NTV2LSVideoADCMode inValue)			{return WriteRegister (kRegAnalogInputControl,	ULWord(inValue),		kRegMaskAnalogInputADCMode,				kRegShiftAnalogInputADCMode);}
 bool CNTV2Card::GetAnalogInputADCMode				(NTV2LSVideoADCMode & outValue)				{return CNTV2DriverInterface::ReadRegister  (kRegAnalogInputControl,	outValue,	kRegMaskAnalogInputADCMode,				kRegShiftAnalogInputADCMode);}
+#endif
 
 
 #if !defined (NTV2_DEPRECATE)
@@ -7015,13 +7060,14 @@ bool CNTV2Card::GetLTCOnReference (bool & outLTCIsOnReference)
 	return retVal;
 }
 
-bool CNTV2Card::GetLTCInputPresent (bool & outIsPresent)
+bool CNTV2Card::GetLTCInputPresent (bool & outIsPresent, const UWord inLTCInputNdx)
 {
-	ULWord	tempVal	(0);
-	bool	retVal	(ReadRegister (kRegStatus, tempVal, kRegMaskLTCInPresent, kRegShiftLTCInPresent));
-	if (retVal)
-		outIsPresent = (bool) tempVal;
-	return retVal;
+	if (inLTCInputNdx >= ::NTV2DeviceGetNumLTCInputs(_boardID))
+		return false;	//	No such LTC input
+	if (inLTCInputNdx)	//	LTCIn2
+		return CNTV2DriverInterface::ReadRegister (kRegLTCStatusControl, outIsPresent, kRegMaskLTC2InPresent, kRegShiftLTC2InPresent);
+	else				//	LTCIn1
+		return CNTV2DriverInterface::ReadRegister (kRegStatus, outIsPresent, kRegMaskLTCInPresent, kRegShiftLTCInPresent);
 }
 
 bool CNTV2Card::SetLTCEmbeddedOutEnable(bool value)
@@ -7981,19 +8027,19 @@ bool CNTV2Card::ReadSDIStatistics (NTV2SDIInStatistics & outStats)
 	return NTV2Message (reinterpret_cast <NTV2_HEADER *> (&outStats));
 }
 
-bool CNTV2Card::SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue)
+bool CNTV2Card::SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister(kVRegNTV2VPIDTransferCharacteristics, inValue);
+	return WriteRegister(gChannelToSDIOutVPIDTransferCharacteristics[inChannel], inValue);
 }
 
-bool CNTV2Card::SetVPIDColorimetry (const NTV2VPIDColorimetry inValue)
+bool CNTV2Card::SetVPIDColorimetry (const NTV2VPIDColorimetry inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister(kVRegNTV2VPIDColorimetry, inValue);
+	return WriteRegister(gChannelToSDIOutVPIDColorimetry[inChannel], inValue);
 }
 
-bool CNTV2Card::SetVPIDVPIDLuminance (const NTV2VPIDLuminance inValue)
+bool CNTV2Card::SetVPIDVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister(kVRegNTV2VPIDLuminance, inValue);
+	return WriteRegister(gChannelToSDIOutVPIDLuminance[inChannel], inValue);
 }
 
 #if !defined (NTV2_DEPRECATE)

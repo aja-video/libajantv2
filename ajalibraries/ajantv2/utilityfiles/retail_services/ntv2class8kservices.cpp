@@ -29,6 +29,7 @@ void Class8kServices::SetDeviceXPointPlayback ()
 {
 	bool 				b8K 				= NTV2_IS_QUAD_QUAD_FORMAT(mFb1VideoFormat);
 	bool				b4K					= NTV2_IS_4K_VIDEO_FORMAT(mFb1VideoFormat);
+	//bool				bHfr				= RetailSupport::IsHfr(mFb1VideoFormat);
 	bool				bFb1RGB				= IsRGBFormat(mFb1Format);
 	bool				bQuadSwap			= b8K == true && mDs.bOut4xSdi == true && mQuadSwapOut != 0;	
 	bool				bHdmiOutRGB			= mDs.hdmiOutColorSpace == kHDMIOutCSCRGB8bit || mDs.hdmiOutColorSpace == kHDMIOutCSCRGB10bit ||
@@ -440,8 +441,8 @@ void Class8kServices::SetDeviceMiscRegisters ()
 	b4K = true;
 	bool b2pi = true;
 	bool bHdmiIn = false;
-	bool b4kHfr	= NTV2_IS_QUAD_QUAD_HFR_VIDEO_FORMAT(mFb1VideoFormat);
-	
+	bool b4kHfr	= NTV2_IS_QUAD_HFR_VIDEO_FORMAT(mFb1VideoFormat);
+					
 	if (mHasHdmiOut)
 	{
 		// set standard / mode
@@ -547,7 +548,7 @@ void Class8kServices::SetDeviceMiscRegisters ()
 			mCard->SetHDMIOutTsiIO(false);
 		}
 		
-		// HFPS
+		// HFR
 		if (mVirtualHDMIOutputSelect == NTV2_4kHalfFrameRate)
 		{
 			bool bDecimate = b4kHfr;

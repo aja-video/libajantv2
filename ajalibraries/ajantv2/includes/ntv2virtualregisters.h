@@ -127,7 +127,7 @@ typedef enum
 	kVRegFrameBuffer1Stereo3DMode			= VIRTUALREG_START+139,
 
 	kVRegHDMIInRgbRange						= VIRTUALREG_START+140,
-	kVRegHDMIOutRgbRange					= VIRTUALREG_START+141,
+	kVRegHDMIOutRgbRange					= VIRTUALREG_START+141,	//	See also kVRegHDMIOutRGBRange
 	kVRegAnalogInBlackLevel					= VIRTUALREG_START+142,
 	kVRegAnalogInputType					= VIRTUALREG_START+143,
 	kVRegHDMIOutColorSpaceModeCtrl			= VIRTUALREG_START+144,
@@ -317,13 +317,14 @@ typedef enum
                                                                         //	kVRegChannelCrosspointFirst+6
 	kVRegChannelCrosspointLast				= VIRTUALREG_START+387,		//	kVRegChannelCrosspointFirst+7
 
-//	kVRegDriverVersionMajor					= VIRTUALREG_START+388,		///< @deprecated	Obsolete starting in SDK 13.0, replaced by kVRegDriverVersion
-//	kVRegDriverVersionMinor					= VIRTUALREG_START+389,		///< @deprecated	Obsolete starting in SDK 13.0, replaced by kVRegDriverVersion
-//	kVRegDriverVersionPoint					= VIRTUALREG_START+390,		///< @deprecated	Obsolete starting in SDK 13.0, replaced by kVRegDriverVersion
+	//	Starting in SDK 13.0, kVRegDriverVersionMajor, kVRegDriverVersionMinor and kVRegDriverVersionPoint
+	//	were all replaced by a single virtual register kVRegDriverVersion.
+	kVRegMonAncField1Offset					= VIRTUALREG_START+389,		///< @brief	Monitor Anc Field1 byte offset from end of frame buffer (IoIP only, GUMP)
+	kVRegMonAncField2Offset					= VIRTUALREG_START+390,		///< @brief	Monitor Anc Field2 byte offset from end of frame buffer (IoIP only, GUMP)
 	kVRegFollowInputFormat					= VIRTUALREG_START+391,
 
-	kVRegAncField1Offset					= VIRTUALREG_START+392,		///< @brief	How many bytes to subtract from the end of a frame buffer for field 1 ANC
-	kVRegAncField2Offset					= VIRTUALREG_START+393,		///< @brief	How many bytes to subtract from the end of a frame buffer for field 2 ANC
+	kVRegAncField1Offset					= VIRTUALREG_START+392,		///< @brief	Anc Field1 byte offset from end of frame buffer (GUMP on all boards except RTP for SMPTE2022/IP)
+	kVRegAncField2Offset					= VIRTUALREG_START+393,		///< @brief	Anc Field2 byte offset from end of frame buffer (GUMP on all boards except RTP for SMPTE2022/IP)
 	kVRegAgentCheck							= VIRTUALREG_START+394,
 	kVRegUnused_2							= VIRTUALREG_START+395,
 	
@@ -452,7 +453,7 @@ typedef enum
     kVRegUserDefinedDBB						= VIRTUALREG_START+502,
     
     kVRegHDMIOutAudioChannels				= VIRTUALREG_START+503,
-    kVRegHDMIOutRGBRange					= VIRTUALREG_START+504,
+	kVRegUnused504							= VIRTUALREG_START+504,
     kVRegZeroHostAncPostCapture				= VIRTUALREG_START+505,
     kVRegZeroDeviceAncPostCapture			= VIRTUALREG_START+506,
     kVRegAudioMonitorChannelSelect          = VIRTUALREG_START+507,
@@ -486,8 +487,36 @@ typedef enum
 	kVRegNTV2VPIDTransferCharacteristics	= VIRTUALREG_START+530,
 	kVRegNTV2VPIDColorimetry				= VIRTUALREG_START+531,
 	kVRegNTV2VPIDLuminance					= VIRTUALREG_START+532,
+	
+	kVRegNTV2VPIDTransferCharacteristics2	= VIRTUALREG_START+533,
+	kVRegNTV2VPIDColorimetry2				= VIRTUALREG_START+534,
+	kVRegNTV2VPIDLuminance2					= VIRTUALREG_START+535,
+	
+	kVRegNTV2VPIDTransferCharacteristics3	= VIRTUALREG_START+536,
+	kVRegNTV2VPIDColorimetry3				= VIRTUALREG_START+537,
+	kVRegNTV2VPIDLuminance3					= VIRTUALREG_START+538,
+	
+	kVRegNTV2VPIDTransferCharacteristics4	= VIRTUALREG_START+539,
+	kVRegNTV2VPIDColorimetry4				= VIRTUALREG_START+540,
+	kVRegNTV2VPIDLuminance4					= VIRTUALREG_START+541,
+	
+	kVRegNTV2VPIDTransferCharacteristics5	= VIRTUALREG_START+542,
+	kVRegNTV2VPIDColorimetry5				= VIRTUALREG_START+543,
+	kVRegNTV2VPIDLuminance5					= VIRTUALREG_START+544,
+	
+	kVRegNTV2VPIDTransferCharacteristics6	= VIRTUALREG_START+545,
+	kVRegNTV2VPIDColorimetry6				= VIRTUALREG_START+546,
+	kVRegNTV2VPIDLuminance6					= VIRTUALREG_START+547,
+	
+	kVRegNTV2VPIDTransferCharacteristics7	= VIRTUALREG_START+548,
+	kVRegNTV2VPIDColorimetry7				= VIRTUALREG_START+549,
+	kVRegNTV2VPIDLuminance7					= VIRTUALREG_START+550,
+	
+	kVRegNTV2VPIDTransferCharacteristics8	= VIRTUALREG_START+551,
+	kVRegNTV2VPIDColorimetry8				= VIRTUALREG_START+552,
+	kVRegNTV2VPIDLuminance8					= VIRTUALREG_START+553,
 
-    kVRegLastAJA							= VIRTUALREG_START+533,		///< @brief	The last AJA virtual register slot
+    kVRegLastAJA							= VIRTUALREG_START+554,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 
@@ -497,7 +526,9 @@ typedef enum
 #if !defined(NTV2_DEPRECATE_15_0)
 	#define	kVRegLinuxDriverVersion				VIRTUALREG_START		///< @deprecated	Obsolete in SDK 15.0, use kVRegDriverVersion instead
 #endif
-
+#if !defined(NTV2_DEPRECATE_15_2)
+	#define	kVRegHDMIOutRGBRange				(VIRTUALREG_START+504)	///< @deprecated	Appears to be unused, but easily confused with kVRegHDMIOutRgbRange
+#endif
 #if !defined (NTV2_DEPRECATE_12_7)
 	//	The old virtual register names will be deprecated sometime after SDK 13.0.0
 	#define	kRegLinuxDriverVersion				kVRegLinuxDriverVersion
