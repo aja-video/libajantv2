@@ -871,7 +871,7 @@
 	channels (see CNTV2Card::GetNumberAudioChannels) of audio are always written/read to/from this memory,
 	regardless of whether all 8 or 16 channels are used.
 
-	See \ref audioformats for a details on the format of the audio data in the buffer.
+	See \ref audioformats for details on the format of the audio data in the buffer.
 
 	@warning	It is easy to write video data into an audio buffer and vice-versa, which leads to noisy,
 				garbled audio and/or bad video frame(s). SDK clients must take precautions to ensure that frame
