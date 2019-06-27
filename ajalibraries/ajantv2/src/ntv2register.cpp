@@ -2497,12 +2497,14 @@ bool CNTV2Card::GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct)
 	return true;
 }
 
-bool CNTV2Card::ProgramMainFlash(const char *fileName, bool bForceUpdate)
+bool CNTV2Card::ProgramMainFlash(const char *fileName, bool bForceUpdate, bool bQuiet)
 {
     CNTV2KonaFlashProgram thisDevice;
     thisDevice.SetBoard(GetIndexNumber());
     try
     {
+		if (bQuiet)
+			thisDevice.SetQuietMode();
         thisDevice.SetBitFile(fileName, MAIN_FLASHBLOCK);
         if(bForceUpdate)
             thisDevice.SetMBReset();
@@ -4978,6 +4980,8 @@ bool CNTV2Card::GetSecondaryVideoFormat(NTV2VideoFormat & outFormat)
 }
 
 
+#if !defined(R2_DEPRECATE)
+
 bool CNTV2Card::SetInputVideoSelect (NTV2InputVideoSelect input)
 {
 	bool bResult = WriteRegister(kVRegInputSelect, input);
@@ -4994,6 +4998,9 @@ bool CNTV2Card::GetInputVideoSelect(NTV2InputVideoSelect & outInputSelect)
 {
 	return CNTV2DriverInterface::ReadRegister(kVRegInputSelect, outInputSelect);
 }
+
+#endif // R2_DEPRECATE
+
 
 NTV2VideoFormat CNTV2Card::GetInputVideoFormat (NTV2InputSource inSource, const bool inIsProgressivePicture)
 {
@@ -5038,7 +5045,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 		bool isProgressivePic = isValidVPID ? inputVPID.GetProgressivePicture() : inIsProgressivePicture;
 		bool isInput3G = false;
 		GetSDIInput3GPresent(isInput3G, inChannel);
-		NTV2VideoFormat format = GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
+		NTV2VideoFormat format = isValidVPID ? inputVPID.GetVideoFormat() : GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
 		if (::NTV2DeviceCanDo12GIn(_boardID, inChannel))
 		{
 			bool is6G = false, is12G = false;
@@ -6699,8 +6706,10 @@ bool CNTV2Card::GetStereoCompressorRightSource		(NTV2OutputCrosspointID & outVal
 
 /////////////////////////////////////////////////////////////////////
 // Analog
+#if !defined(R2_DEPRECATE)
 bool CNTV2Card::SetAnalogInputADCMode				(const NTV2LSVideoADCMode inValue)			{return WriteRegister (kRegAnalogInputControl,	ULWord(inValue),		kRegMaskAnalogInputADCMode,				kRegShiftAnalogInputADCMode);}
 bool CNTV2Card::GetAnalogInputADCMode				(NTV2LSVideoADCMode & outValue)				{return CNTV2DriverInterface::ReadRegister  (kRegAnalogInputControl,	outValue,	kRegMaskAnalogInputADCMode,				kRegShiftAnalogInputADCMode);}
+#endif
 
 
 #if !defined (NTV2_DEPRECATE)
