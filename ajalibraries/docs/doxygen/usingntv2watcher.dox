@@ -390,7 +390,6 @@ The Anc inspector has four main sections:
 	-	<b>F2 Anc</b> — This area is visible only for devices that have Anc inserters/extractors, and only when the channel is running interlaced video.
 		When visible, it displays the contents of the 0x12000-byte region that starts -0x12000 bytes from the end of the frame buffer.
 		This is where the extractor places packets captured from Field 2. It’s also where the inserter fetches packets for output into interlaced Field 2.
-	-	<b>EIA/CEA-608 Caption Decoder</b> — Defaults to “Off”. More information below.
 
 A menu/combobox is provided for each of the Anc buffer display areas, to control how each area’s Anc data is displayed:
 	-	<b>Raw</b> — Displays the buffer as raw data. By right-clicking in the content area, you can change the data display’s grouping
@@ -413,45 +412,83 @@ A menu/combobox is provided for each of the Anc buffer display areas, to control
 		-	<b>CS</b> — The checksum of the payload data. Note that on playout, this value is irrelevant, since the inserter/embedder performs the checksum computation.
 		-	<b>Data</b> — The payload data bytes.
 
+Finally, a checkbox is provided to show or hide the <b>EIA-608/CEA-608 Caption Viewer</b> window.
+By default, the viewer window is hidden. To reveal it, check the box;  to hide it, un-check the box.
+
 When device polling is enabled, this inspector repeatedly monitors the device frame buffer.
-It reads the entire buffer into host memory and compares it to what was read the last time.
-The display highlights changed content with a brighter color.
+It reads the portions of the buffer that contain anc data into host memory and compares it to what was read the last time.
+Changes are highlighted with a brighter color.
  
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the displayed information to the Clipboard.
 
-When the <b>EIA/CEA-608 Caption Decoder</b> is enabled, an additional two data views are revealed:
-	-	<b>Caption Byte Stream</b> — Shows the contents of the inspector’s caption byte-pair stream FIFO in hexadecimal words.
-	-	<b>Rendered Captions</b> — Renders the decoded captions, as they would appear on-screen.
 
-To enable the decoder, choose a caption channel to monitor from the menu (CC1, CC2, etc.). To render captions, the decoder’s byte-pair
-FIFO requires a stream of caption byte-pairs from one of the other packet displays in the Anc Inspector:
+@subsubsection	anc608viewer		CEA-608 Caption Viewer
+
+@image	html	cea608viewer.png
+
+The <b>CEA-608 Caption Viewer</b> window is a handy debugging aid for viewing EIA-608 and/or CEA-608 caption byte-pair streams.
+Since a CEA-608 decoder is a fairly complex state machine, this requires maintaining a stream of caption byte pairs
+to supply sufficient context in order to properly render captions. Thus, two panels are provided:
+	-	<b>Byte-Pair Stream</b> — Displays a hexadecimal representation of the caption byte-pair stream being decoded.
+		-	The text represents a byte-pair FIFO that holds up to 90 byte pairs (maximum):
+			-	New byte pairs enter the FIFO at the bottom-right corner.
+			-	The oldest byte pairs drop out of the FIFO at the top-left corner.
+		-	When no caption data is being streamed, the text content can be edited:
+			-	You can select all or part of the text, and copy it to the host’s clipboard.
+			-	You can add, remove, or change its contents by typing, or by pasting text from the clipboard.
+			-	The text must consist of 2-byte hexadecimal “words” separated by a single space (case is irrelevant).
+				Any other format will fail to decode properly.
+				-	The left-most 2 digits (most-significant byte) is “byte 1”;
+				-	The right-most 2 digits (least-significant byte) is “byte 2”.
+				-	Byte sequences from “.scc” sidecar files should work (but remove the timecodes).
+	-	<b>Decoded Captions</b> — Renders the decoded captions, as they appear on-screen.
+		-	The 608 decoder always re-decodes the entire FIFO whenever it changes, processing the byte pairs top-left to bottom-right.
+			-	The last pair in the FIFO enters the decoder first;
+			-	The first pair in the FIFO enters the decoder last.
+
+A <b>Channel</b> selector menu is provided to change the channel being decoded and displayed:
+	-	CC1 — the normal, primary (English language) closed-caption channel sourced from Field 1.
+	-	CC2 — the secondary (often Spanish language) closed-caption channel, also sourced from Field 1.
+	-	CC3, CC4 — additional closed-caption channels, sourced from Field 2.
+	-	TX1, TX2 — text-only channels sourced from Field 1.
+	-	TX3, TX4 — text-only channels sourced from Field 2.
+	-	XDS is currently not available for decoding or display.
+
+A <b>Reset</b> button is provided to manually reset the decoder, if necessary.
+Add or remove a space to/from it to force the decoder to re-render what’s in the byte stream.
+
+To render captions in real-time, the decoder’s byte-pair FIFO requires a steady stream of caption
+byte-pairs transmitted by the <b>Anc Inspector</b>:
 	-	<b>“Analog” Captioning</b> — All of the following are true:
 		-	The monitored FrameStore/Channel is receiving or transmitting SD video;
 		-	The monitored FrameStore/Channel has a 'v210' or '2vuy' pixel format;
 		-	The current frame buffer contains a valid “analog” caption byte pair encoded
 			as a waveform per EIA-608 in “line 21” of active video.
 	-	<b>VANC Frame Geometry</b> — All of the following are true:
-		-	“Tall” or “Taller” VANC mode must be enabled;
+		-	“Tall” or “Taller” VANC mode is enabled;
 		-	The monitored FrameStore/Channel has a 'v210' or '2vuy' pixel format;
 			-	If 8-bit YCbCr, VANC Shift Mode must be enabled;
 		-	The VANC anc display is set to “Packets”;
 		-	The packet display must contain:
-			-	a CEA-708 packet that contains “Service 0“ CEA-608 caption data;
+			-	a CEA-708 packet that contains “Service 0“ CEA-608 caption data, or…
 			-	at least one CEA-608 packet.
 	-	<b>Anc Extractor/Inserter F1 and/or F2</b> — All of the following are true:
 		-	The monitored Anc Inserter/Extractor must be running;
-		-	The Field 1 or Field 2 displays must be set to display “Packets”.
-		-	One of the packet displays must contain:
-			-	a CEA-708 packet that contains “Service 0“ CEA-608 caption data;
+		-	The Field 1 or Field 2 displays (or both) must be set to display “Packets”.
+		-	One of the packet displays contains:
+			-	a CEA-708 packet that contains “Service 0“ CEA-608 caption data, or…
 			-	a CEA-608 packet.
 
-The decoder can also be operated manually/interactively:
-	-	Be sure no displays in the <b>Anc Inspector</b> are set to show “Packets”, and that no SD “line 21” data is currently being decoded.
-	-	In the byte-pair stream view, edit the hex values to whatever CEA-608 byte pair values you wish to decode.
-		(Try pasting in byte sequences from a .scc sidecar file.)
-	-	The caption display will decode the entire stream “live” as it changes.
-	-	The <b>Reset Decoder</b> button is provided to manually force a reset of the decoder, if needed.
+	@note	Successful caption rendering relies on getting the correct byte pair every frame.
+			If the <b>Anc Inspector</b>’s refresh rate lags the frame rate, byte pairs will be
+			skipped, resulting in garbled and unreadable captions.
 
+To freeze the <b>Byte-Pair Stream</b> (perhaps to permit interacting with it manually),
+leave the <b>Caption Viewer</b> window open, but switch NTV2Watcher to an Inspector other than
+the <b>Anc Inspector</b>. (You can also stop viewing “Packets” — use “Raw” or “Hide” instead.)
+
+To close the <b>Caption Viewer</b> window, click its close box, or un-check the
+<b>EIA/CEA-608 Caption Viewer</b> checkbox in the <b>Anc Inspector</b>.
 
 
 <hr size="50px">
