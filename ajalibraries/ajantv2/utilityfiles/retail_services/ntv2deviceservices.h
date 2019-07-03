@@ -153,8 +153,10 @@ public:
 	uint32_t GetAudioDelayOffset(double frames);
 	NTV2AudioSystem GetHostAudioSystem();
 	void AdjustFor4kQuadOrTpiOut();
+	void AdjustFor8kQuadOrTpiOut();
 	void AdjustFor4kQuadOrTpiIn(NTV2VideoFormat inputFormat, bool b2pi);
 	void Set4kTpiState(bool b2pi);
+	void Set8kTpiState(bool b2pi);
 
 	void SetAudioInputSelect(NTV2InputAudioSelect input);
     void AgentIsAlive();
@@ -194,6 +196,7 @@ public:
 	uint32_t				mEveryFrameTaskFilter;
 	NTV2SDITransportType	mSdiOutTransportType;
 	NTV24kTransportType		m4kTransportOutSelection;
+	NTV24kTransportType		m8kTransportOutSelection;
 	NTV2DSKMode				mDSKMode;
 	int32_t					mStreamingAppPID;
 	uint32_t				mStreamingAppType;
