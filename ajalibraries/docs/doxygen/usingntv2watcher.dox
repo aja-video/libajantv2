@@ -441,6 +441,8 @@ to supply sufficient context in order to properly render captions. Thus, two pan
 				-	The left-most 2 digits (most-significant byte) is “byte 1”;
 				-	The right-most 2 digits (least-significant byte) is “byte 2”.
 				-	Byte sequences from “.scc” sidecar files should work (but remove the timecodes).
+			-	<b>Example:</b> Try the byte-pair sequence “<tt>9425 94ad 9170 c845 cc4c 4f20</tt>”.
+				It should render “Hello” for CC1.
 	-	<b>Decoded Captions</b> — Renders the decoded captions, as they appear on-screen.
 		-	The 608 decoder always re-decodes the entire FIFO whenever it changes, processing the byte pairs top-left to bottom-right.
 			-	The last pair in the FIFO enters the decoder first;
