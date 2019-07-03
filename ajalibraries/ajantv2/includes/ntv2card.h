@@ -5787,9 +5787,12 @@ public:
 
 	/**
 		@return		The default DIDs that the device Anc extractor filter is started with.
+		@param[in]	inHDAudio	Optionally specifies the desired audio packet filtering.
+								Specify true (the default) for the default HD audio packet DIDs;
+								otherwise false for the default SD audio packet DIDs.
 		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetMaxNumFilterDIDs, \ref anccapture
 	**/
-	static NTV2DIDSet	AncExtractGetDefaultDIDs (void);
+	static NTV2DIDSet	AncExtractGetDefaultDIDs (const bool inHDAudio = true);
 
 
 #if !defined(NTV2_DEPRECATE_14_3)
