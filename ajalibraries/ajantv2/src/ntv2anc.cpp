@@ -798,16 +798,21 @@ UWord CNTV2Card::AncExtractGetMaxNumFilterDIDs (void)
 }
 
 
-NTV2DIDSet CNTV2Card::AncExtractGetDefaultDIDs (void)
+NTV2DIDSet CNTV2Card::AncExtractGetDefaultDIDs (const bool inHDAudio)
 {
-	//												SMPTE299 HD Audio Grp 1-4	SMPTE299 HD Audio Ctrl Grp 1-4
-	static const NTV2DID	sDefaultDIDs[]	=	{	0xE7,0xE6,0xE5,0xE4,		0xE3,0xE2,0xE1,0xE0,
-	//												SMPTE299 HD Audio Grp 5-8	SMPTE299 HD Audio Ctrl Grp 5-8
-													0xA7,0xA6,0xA5,0xA4,		0xA3,0xA2,0xA1,0xA0,
-													0x00};
+	//													SMPTE299 HD Aud Grp 1-4		SMPTE299 HD Aud Ctrl Grp 1-4
+	static const NTV2DID	sDefaultHDDIDs[]	=	{	0xE7,0xE6,0xE5,0xE4,		0xE3,0xE2,0xE1,0xE0,
+	//													SMPTE299 HD Aud Grp 5-8		SMPTE299 HD Aud Ctrl Grp 5-8
+														0xA7,0xA6,0xA5,0xA4,		0xA3,0xA2,0xA1,0xA0,	0x00};
+
+	//													SMPTE272 SD Aud Grp 1-4		SMPTE272 SD Aud Ext Grp 1-4
+	static const NTV2DID	sDefaultSDDIDs[]	=	{	0xFF,0xFD,0xFB,0xF9,		0xFE,0xFC,0xFA,0xF8,
+	//													SMPTE272 SD Aud Ctrl Grp 1-4
+														0xEF,0xEE,0xED,0xEC,		0x00};
 	NTV2DIDSet	result;
-	for (unsigned ndx(0);  sDefaultDIDs[ndx];  ndx++)
-		result.insert(sDefaultDIDs[ndx]);
+	const NTV2DID *	pDIDArray (inHDAudio ? sDefaultHDDIDs : sDefaultSDDIDs);
+	for (unsigned ndx(0);  pDIDArray[ndx];  ndx++)
+		result.insert(pDIDArray[ndx]);
 
 	return result;
 }

@@ -205,6 +205,7 @@ bool DeviceServices::ReadDriverState (void)
 			mSDIOutput1ColorSpace = ds.sdiOut[index]->cs;
 			mSDIOutput1RGBRange = ds.sdiOut[index]->rgbRange;
 			m4kTransportOutSelection = ds.sdiOut[index]->transport4k;
+			m8kTransportOutSelection = ds.sdiOut[index]->transport8k;
 			mSdiOutTransportType = ds.sdiOut[index]->transport3g;
 		}
 		if (ds.sdiOutSize > 1) 
@@ -2949,6 +2950,21 @@ void DeviceServices::AdjustFor4kQuadOrTpiOut()
     }
 }
 
+// select square division or 2 pixel interleave in frame buffer
+void DeviceServices::AdjustFor8kQuadOrTpiOut()
+{
+    if (NTV2_IS_8K_VIDEO_FORMAT(mFb1VideoFormat))
+    {
+   		bool bTpi = (m8kTransportOutSelection != NTV2_4kTransport_Quadrants_2wire &&
+					 m8kTransportOutSelection != NTV2_4kTransport_Quadrants_4wire);
+   		Set8kTpiState(bTpi);
+    }
+    else
+    {
+   		Set4kTpiState(true);
+    }
+}
+
 
 // select square division or 2 pixel interleave in frame buffer
 void DeviceServices::AdjustFor4kQuadOrTpiIn(NTV2VideoFormat inputFormat, bool b2pi)
@@ -2959,7 +2975,10 @@ void DeviceServices::AdjustFor4kQuadOrTpiIn(NTV2VideoFormat inputFormat, bool b2
     }
 }
 
-// true to tpi, false for quads
+
+
+
+// true for pi, false for HD-quads
 void DeviceServices::Set4kTpiState(bool bTpi)
 {
 	bool bEnabled = false;
@@ -2968,6 +2987,35 @@ void DeviceServices::Set4kTpiState(bool bTpi)
 		mCard->GetTsiFrameEnable(bEnabled, NTV2_CHANNEL1);
 		if (bEnabled == false)
 			mCard->SetTsiFrameEnable(true, NTV2_CHANNEL1);
+	}
+	else // quad
+	{
+		mCard->Get4kSquaresEnable(bEnabled, NTV2_CHANNEL1);
+		if (bEnabled == false)
+			mCard->Set4kSquaresEnable(true, NTV2_CHANNEL1);
+	}
+	
+	bEnabled = false;
+	mCard->GetQuadQuadSquaresEnable(bEnabled, NTV2_CHANNEL1);
+	if (bEnabled)
+		mCard->SetQuadQuadSquaresEnable(false, NTV2_CHANNEL1);
+}
+
+
+// true for pi, false for 4k-quads
+void DeviceServices::Set8kTpiState(bool bTpi)
+{
+	bool bEnabled = false;
+	mCard->GetTsiFrameEnable(bEnabled, NTV2_CHANNEL1);
+	if (bEnabled == false)
+		mCard->GetTsiFrameEnable(bEnabled, NTV2_CHANNEL1);
+	
+	bEnabled = false;
+	if (bTpi)
+	{
+		mCard->GetQuadQuadSquaresEnable(bEnabled, NTV2_CHANNEL1);
+		if (bEnabled == true)
+			mCard->SetQuadQuadSquaresEnable(false, NTV2_CHANNEL1);
 	}
 	else // quad
 	{

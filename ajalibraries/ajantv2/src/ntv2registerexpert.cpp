@@ -1002,6 +1002,7 @@ private:
 		DefineRegName	(kVRegIpConfigStreamRefresh,			"kVRegIpConfigStreamRefresh");
 		DefineRegName	(kVRegSDIInput1Raster,					"kVRegSDIInput1Raster");
 		DefineRegName	(kVRegInputChangedCount,				"kVRegInputChangedCount");
+		DefineRegName	(kVReg8kOutputTransportSelection,		"kVReg8kOutputTransportSelection");
 		DefineRegName	(kVRegProcAmpSDRegsInitialized,			"kVRegProcAmpSDRegsInitialized");
 		DefineRegName	(kVRegProcAmpStandardDefBrightness,		"kVRegProcAmpStandardDefBrightness");
 		DefineRegName	(kVRegProcAmpStandardDefContrast,		"kVRegProcAmpStandardDefContrast");

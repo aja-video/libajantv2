@@ -431,6 +431,8 @@ There are two ways to capture any/all Ancillary data packets:
 			thus corrupting captured video frames.
 		-	Changing either of these values also affects Anc playout.
 
+<b>TIP:</b> The \ref usingntv2watcher tool’s \ref inspectoranc is useful for diagnosing issues with ancillary data capture.
+
 
 @section	ancplayout	Custom Anc Packet Playout
 
@@ -483,6 +485,8 @@ There are two ways to play out custom Ancillary data packets:
 @note	Because the outgoing line number can be specified when using the <b>Anc Inserter</b>, it's possible to
 		overrun a line. Be certain that the data packets to be inserted on a given line will fit for the output
 		video standard.
+
+<b>TIP:</b> The \ref usingntv2watcher tool’s \ref inspectoranc is useful for diagnosing issues with ancillary data capture.
 
 <hr size="50px">
 
@@ -552,33 +556,41 @@ omitted, but which turned out to contain useful information after all.
 Note that using a VANC-enabled frame geometry will increase the size, in bytes, of the requisite host frame buffer versus the
 equivalent non-VANC geometry. Use CNTV2Card::GetFrameBufferSize function to determine how large the host frame buffer should be.
 
-There are some restrictions on which frame buffer formats can be used for capture or playout with VANC.
-
-The easiest format to use is ::NTV2_FBF_8BIT_YCBCR, but to prevent truncating the LSBs of the VANC data, the AJA device firmware must be
-told to not do this by calling CNTV2Card::SetVANCShiftMode. When a frame is captured using the ::NTV2_VANCDATA_8BITSHIFT_ENABLE
-mode, VANC lines can be easily parsed into Ancillary packets. With ::NTV2_FBF_10BIT_YCBCR frame buffers, ancillary data packets can be
-found in the VANC lines, but the scanning process is more difficult, due to the packing of 10-bit words in the frame buffer.
-
-@bug	VANC Shift Mode is not implemented for SD video formats — ::NTV2_FBF_10BIT_YCBCR must be used for SD 525i/625i video.
-
-RGB video to/from YCbCr frame buffers generally doesn't work because the VANC data is corrupted by the color-space converters.
-However, dual-link RGB video to/from RGB frame buffers (directly from/to the SDI spigots) will work.
+There are some considerations on which frame buffer formats should be used for capture or playout with VANC:
+-	::NTV2_FBF_8BIT_YCBCR — This is the easiest format to use, but there’s a catch.
+	Ordinarily, the least-significant 2 bits of 10-bit YCbCr pixel data are discarded when filling the 8-bit pixel data words
+	in the frame buffer (in capture mode). This is fatal to ancillary data in the VANC lines, because per SMPTE ST-291,
+	the <b><i>most</i></b>-significant 2 bits of the 10-bit data word can be dropped/ignored, <b><i>not</i></b> the
+	least-significant 2 bits. Fortunately, the AJA device firmware can be told to store the LS 8 bits of each 10-bit word
+	in the VANC area during capture (or left-shift by 2 bits during playout) by calling CNTV2Card::SetVANCShiftMode.
+	Thus, when a frame is captured using ::NTV2_VANCDATA_8BITSHIFT_ENABLE mode, VANC lines can be easily parsed into Ancillary packets.
+	@note	::NTV2_VANCDATA_8BITSHIFT_ENABLE mode is not implemented for SD 525i/625i video formats.
+			This is due to historical reasons, since back when HD was introduced, SD typically carried ancillary data
+			in other ways (e.g. line 21 for captions).
+-	::NTV2_FBF_10BIT_YCBCR — With 10-bit YCbCr, ancillary data packets can be read/written from/to the VANC lines,
+	but the scanning process is more difficult, due to the packing of 10-bit words in the frame buffer.
+-	Dual-link RGB video to/from YCbCr frame buffers generally won't work because the VANC data gets corrupted by
+	the color-space converters. However, dual-link RGB video to/from RGB frame buffers (directly from/to the SDI spigots)
+	will work.
 
 @note	Mixer/Keyer widgets on newer devices (generally, those that support ::NTV2DeviceCanDoCustomAnc) will pass VANC.
 		Call CNTV2Card::GetMixerVancOutputFromForeground to determine if the Mixer is configured to pass foreground or background VANC.
 		Call CNTV2Card::SetMixerVancOutputFromForeground to change the setting.
 
-For <b>Capture</b>:
--	Clients can parse the frame buffer video lines themselves. The ::CNTV2SMPTEAncData class in the \ref ajacc has some functions
-	(e.g., CNTV2SMPTEAncData::FindAnc) to help with the parsing.
--	AJAAncillaryList::SetFromVANCData (SDKs 14.1 and later) can be called to transform the VANC region into an ::AJAAncillaryList
+To <b>Capture</b> custom ancillary data packets using VANC lines in the frame buffer:
+-	AJAAncillaryList::SetFromVANCData (SDKs 14.1 and later) can be called to obtain an ::AJAAncillaryList
 	containing one ::AJAAncillaryData instance per packet.
+-	The ::CNTV2SMPTEAncData class in the \ref ajacc has some functions (e.g., CNTV2SMPTEAncData::FindAnc) to help with the parsing,
+	though SD video formats aren’t supported (again, due to historical reasons).
+-	Write your own functions to parse the frame buffer VANC lines.
 
-For <b>Playout</b>:
--	Clients can write the frame buffer lines themselves. The ::CNTV2SMPTEAncData class in the \ref ajacc has some functions
-	(e.g., CNTV2SMPTEAncData::InsertAnc) to help with this.
--	Given an ::AJAAncillaryList of packets, calling its AJAAncillaryList::GetVANCTransmitData method (SDKs 14.1 and later) will
-	write the packets into the frame buffer’s VANC lines.
+To <b>Playout</b> custom ancillary data packets using VANC lines in the frame buffer:
+-	Given an ::AJAAncillaryList of packets, call AJAAncillaryList::GetVANCTransmitData (SDKs 14.1 and later) to write the packets
+	into a frame buffer’s VANC region.
+-	The ::CNTV2SMPTEAncData class in the \ref ajacc has some functions (e.g., CNTV2SMPTEAncData::InsertAnc) to help with this,
+	though SD video formats aren’t supported (again, due to historical reasons).
+-	Write your own functions to write the frame buffer VANC lines.
+
 
 The spreadsheets that follow show, in detail for each video format, which lines contain VANC, and which ones contain video data.
 

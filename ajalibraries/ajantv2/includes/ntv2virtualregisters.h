@@ -182,6 +182,7 @@ typedef enum
 	kVRegIpConfigStreamRefresh				= VIRTUALREG_START+189,
 	kVRegSDIInput1Raster					= VIRTUALREG_START+190,
 	kVRegInputChangedCount					= VIRTUALREG_START+191,
+	kVReg8kOutputTransportSelection			= VIRTUALREG_START+192,
 
 	// COMMON_VIRTUAL_REGS_PROCAMP_CONTROLS
 	kVRegProcAmpSDRegsInitialized			= VIRTUALREG_START+200,

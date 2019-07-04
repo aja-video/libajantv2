@@ -325,10 +325,9 @@
 		Call CNTV2Card::GetVANCMode to determine the current <b>VANC Mode</b> setting.
 		Call CNTV2Card::SetVANCMode to change it.
 	-	<b>VANC Data Shift Mode</b> — The ::NTV2VANCDataShiftMode determines if the firmware will automatically
-		shift incoming or outgoing video data in the VANC lines (that precede the first visible line)
-		by 2 bits, effectively discarding the least-significant two bits of the 10-bit Y/C values.
-		When used with an ::NTV2_FBF_8BIT_YCBCR frame buffer format, this makes it very easy to parse
-		ancillary data packets in the frame buffer.
+		right-shift incoming (or left-shift outgoing) data words by 2 bits in the VANC lines in 8-bit YCbCr
+		frame buffers (e.g. ::NTV2_FBF_8BIT_YCBCR ), making it easy to parse (or write) ancillary data
+		packets in the frame buffer.
 		Call CNTV2Card::GetVANCShiftMode to determine the current <b>VANC Data Shift Mode</b> setting.
 		Call CNTV2Card::SetVANCShiftMode to change it.
 	-	<b>Frame Buffer Orientation</b> — The ::NTV2FBOrientation (a.k.a. ::NTV2FrameBufferOrientation
@@ -872,7 +871,7 @@
 	channels (see CNTV2Card::GetNumberAudioChannels) of audio are always written/read to/from this memory,
 	regardless of whether all 8 or 16 channels are used.
 
-	See \ref audioformats for a details on the format of the audio data in the buffer.
+	See \ref audioformats for details on the format of the audio data in the buffer.
 
 	@warning	It is easy to write video data into an audio buffer and vice-versa, which leads to noisy,
 				garbled audio and/or bad video frame(s). SDK clients must take precautions to ensure that frame
