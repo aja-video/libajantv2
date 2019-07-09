@@ -380,9 +380,38 @@ The <b>Anc</b> inspector monitors the ancillary data areas of a frame buffer, an
 		in which the act of monitoring an AJA device affects it and the application(s) under test.
 
 The Anc inspector has four main sections:
-	-	<b>VANC</b> — The VANC lines area will be shown if the channel (frame buffer) is configured for a VANC geometry.
+	-	<b>Channel/FrameStore and Frame Selection</b> — Selects a FrameStore (Channel) and frame to inspect.
+		-	<b>FrameStore/Channel</b> — Selects the FrameStore/Channel of interest. On devices that have Anc Inserters/Extractors:
+			-	In <b>Capture Mode</b>, this indicates the SDI Input associated with the firmware Anc Extractor being inspected/controlled.
+			-	In <b>Playout Mode</b>, this indicates the SDI Output associated with the firmware Anc Inserter being inspected/controlled.
+		-	<b>Auto</b> — If checked, the frame number being monitored will automatically follow the input or output
+			(depending on frame-store mode) “current frame” register, and the frame number spin control will be disabled.
+			If this is unchecked, the frame number spin control will be available, and the frame being watched can be manually controlled.
+		-	<b>Frame Number</b> spin control:  When available, controls which frame to view.
+			When unavailable, indicates the frame being viewed.
+		-	<b>Video Format Indicator</b> — Indicates the Channel/FrameStore’s current video standard, frame rate and geometry.
+	-	<b>Line 21</b> — This section is visible only when the Channel/FrameStore is configured for 525i SD,
+		and shows the byte pairs decoded from line 21 (if any).
+	-	<b>Line 284</b> — This section is visible only when the Channel/FrameStore is configured for 525i SD,
+		and shows the byte pairs decoded from line 284 (if any).
+	-	<b>VANC</b> — The VANC section shows the Channel/FrameStore’s current VANC configuration (“Off”, “Tall” or “Taller”) and VANC buffer data.
+		-	<b>Mode</b> — This menu/combobox is provided to indicate the current <b>VANC Mode</b>, and change it, if desired.
 	-	<b>Anc Registers</b> — This area is visible only for devices that have Anc inserters/extractors. When visible,
 		it shows the content of the inserter/extractor configuration registers. The register values are editable.
+		-	<b>Anc Exclusions:</b> — This menu/combobox is provided to indicate which Anc packet types (Data IDs)
+			are currently being excluded by the Anc Extractor. It can be used to add or remove Anc packet types from the exclusion set.
+			-	<b>None (Show All Packets)</b> — Checked if the Anc Extractor is not filtering any packets.
+				Choose this item to stop all packet filtering (i.e. to extract all packet types).
+			-	<b>SD Defaults</b> — Checked if the Anc Extractor is not filtering SD audio packets.
+				Choose this item to filter all SD audio packets.
+			-	<b>HD Defaults</b> — Checked if the Anc Extractor is not filtering HD audio packets.
+				Choose this item to filter all HD audio packets.
+			-	<i>all other items</i> — The menu has dozens of pre-defined Anc packet types available for filtering.
+				For each Anc packet type (i.e. Data ID, or DID)…
+				-	If checked, the Anc Extractor is currently filtering that packet type (Data ID).
+					Selecting the item will toggle its state and remove the DID from the Extractor’s filter set.
+				-	If unchecked, the Anc Extractor is <i>not</i> currently filtering that packet type (Data ID).
+					Selecting the item will toggle its state and add the DID to the Extractor’s filter set.
 	-	<b>F1 Anc</b> — This area is visible only for devices that have Anc inserters/extractors. When visible, it displays the contents
 		of the 0x12000-byte region that starts -0x24000 bytes from the end of the frame buffer. This buffer is where the extractor
 		places packet data extracted from Field 1 of interlaced video or from progressive video. It’s also where the inserter fetches packets for
@@ -391,7 +420,10 @@ The Anc inspector has four main sections:
 		When visible, it displays the contents of the 0x12000-byte region that starts -0x12000 bytes from the end of the frame buffer.
 		This is where the extractor places packets captured from Field 2. It’s also where the inserter fetches packets for output into interlaced Field 2.
 
-A menu/combobox is provided for each of the Anc buffer display areas, to control how each area’s Anc data is displayed:
+A menu/combobox is provided for each of the <b>VANC</b>, <b>F1 Anc</b> and <b>F2 Anc</b> display areas, to control how each area’s Anc data is displayed:
+	-	<b>Hide</b> — Hides the buffer display. This has secondary benefits:
+		-	It makes room for other buffer displays you may be interested in.
+		-	It uses less CPU, allowing it to update other inspectors faster (e.g. CEA-608 Caption Viewer).
 	-	<b>Raw</b> — Displays the buffer as raw data. By right-clicking in the content area, you can change the data display’s grouping
 		(1, 2, 4 or 8 bytes) and radix (binary, octal, decimal or hex). The bytes-per-row count of the VANC display is fixed by the channel’s frame
 		geometry, but the F1 and F2 Anc buffer displays can be changed from 8, 16, 32, … up to 4096 bytes per line. You can also change the
@@ -417,7 +449,7 @@ By default, the viewer window is hidden. To reveal it, check the box;  to hide i
 
 When device polling is enabled, this inspector repeatedly monitors the device frame buffer.
 It reads the portions of the buffer that contain anc data into host memory and compares it to what was read the last time.
-Changes are highlighted with a brighter color.
+Changed data are highlighted with a brighter color.
  
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the displayed information to the Clipboard.
 
@@ -481,9 +513,9 @@ byte-pairs transmitted by the <b>Anc Inspector</b>:
 			-	a CEA-708 packet that contains “Service 0“ CEA-608 caption data, or…
 			-	a CEA-608 packet.
 
-	@note	Successful caption rendering relies on getting the correct byte pair every frame.
+	@note	Successful caption rendering relies on getting a continuous byte pair sequence (no dropped frames).
 			If the <b>Anc Inspector</b>’s refresh rate lags the frame rate, byte pairs will be
-			skipped, resulting in garbled and unreadable captions.
+			skipped, resulting in garbled and unreadable captions. You may need to hide some of the 
 
 To freeze the <b>Byte-Pair Stream</b> (perhaps to permit interacting with it manually),
 leave the <b>Caption Viewer</b> window open, but switch NTV2Watcher to an Inspector other than
