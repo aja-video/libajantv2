@@ -85,37 +85,60 @@ Frame buffer memory contents can be displayed in four ways:
 	-	<b>Image</b> — The visible raster, as an image.
 
 This inspector repeatedly monitors the indicated frame buffer for the selected channel or frame store.
-It reads the entire buffer into host memory and compares it to what was read the last time.
-(In <b>Frame Differencing mode</b>, it highlights the differences between the current frame and another frame on the device.)
-Except in <b>Raw</b> view, the status bar indicates the number of lines in the raster that changed from the last frame.
-Except in its <b>Image</b> view, the raster content display always highlights changed content with a brighter color.
+	-	It reads (via DMA) the frame buffer into host memory.
+		-	In <b>Raw</b> mode, or for planar pixel formats, it reads the entire 8MB/16MB/32MB/etc. buffer.
+			All other views read the frame buffer up to and including the last visible raster line.
+	-	The inspector attempts to refresh at the FrameStore’s current frame rate (as soon after the VBI as possible).
+		-	An indicator in the bottom-right corner of the main window’s status bar shows the average time between updates.
+	-	After each refresh, it compares the frame buffer contents to what was read the last time.
+		-	The bottom left of the main window‘s status bar shows the number of raster lines that changed from the last frame
+			(except <b>Raw</b> view).
+		-	The data display highlights changed content with a brighter color (except <b>Image</b> view).
+		-	<b>Frame Differencing mode</b> statically highlights the differences between the current frame and another frame.
 
 
 @par	Frame/Buffer Controls
 	-	<b>FrameStore/Channel</b> — Selects the FrameStore/Channel of interest.
 	-	<b>On/Off</b> — Indicates if the FrameStore/Channel is enabled or not.  It can be changed using this menu
 		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+		-	See also:  CNTV2Card::EnableChannel , CNTV2Card::DisableChannel , CNTV2Card::IsChannelEnabled , \ref vidop-fs
 	-	<b>Auto</b> — If checked, the frame number being monitored will automatically follow the input or output
 		(depending on frame-store mode) “current frame” register, and the frame number spin control will be disabled.
 		If this is unchecked, the frame number spin control will be available, and the frame being watched can be manually controlled.
 		When unchecked, many other aspects of the device can be controlled (e.g., <b>Mode</b>, <b>Geometry</b>, <b>Format</b>, <b>Size</b>, etc.
 	-	<b>Frame Number</b> spin control:  When available, controls which frame to view.
 		When unavailable, indicates the frame being viewed.
-		@note	The frame’s data will be interpreted with the frame buffer format of the currently selected channel or frame store.
+		@note	Even though the current frame’s contents may have been written in the context of another channel/FrameStore (e.g. '2vuy'),
+				the inspector displays the frame’s data in the context of the current channel/FrameStore (e.g. 'v210'), and thus may
+				appear completely wrong.
 
 @par	Device/Channel Configuration
-	-	<b>Mode</b> — Indicates the current mode (Input or Output) of the FrameStore/Channel. It can be changed using this menu
-		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
-	-	<b>Geometry</b> — Indicates the current frame geometry of the FrameStore/Channel (and whether it’s a VANC geometry or not).  It can be changed using this menu
-		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
-	-	<b>Format</b> — Indicates the current pixel format of the FrameStore/Channel. It can be changed using this menu
-		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
-	-	<b>VFlip</b> — Indicates/controls the current vertical frame buffer orientation for the FrameStore/Channel. It can be changed at any time.
-		When checked, raster lines read or written from/to frame buffer memory is performed bottom-to-top.
-		When unchecked, raster lines are read/written normally (top-to-bottom).
-	-	<b>VancShift</b> — Indicates/controls the current vertical frame buffer orientation for the FrameStore/Channel. It can be changed at any time.
-		When checked, raster lines read or written from/to frame buffer memory is performed bottom-to-top.
-		When unchecked, raster lines are read/written normally (top-to-bottom).
+	-	<b>Mode</b> — Indicates/controls the FrameStore’s current mode (Input or Output).
+		It can be changed using this menu (if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+		-	Input — the FrameStore’s ::NTV2Mode is set to ::NTV2_MODE_INPUT or ::NTV2_MODE_CAPTURE
+		-	Output — the FrameStore’s ::NTV2Mode is set to ::NTV2_MODE_OUTPUT or ::NTV2_MODE_DISPLAY
+		-	See also:  CNTV2Card::GetMode , CNTV2Card::SetMode , \ref vidop-fs
+	-	<b>Video Format</b> — Indicates/controls the FrameStore’s current video format.
+		It can be changed using this menu (if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+		-	See also:  CNTV2Card::GetVideoFormat , CNTV2Card::SetVideoFormat , ::NTV2VideoFormat , \ref vidop-fs
+	-	<b>VANC</b> — Indicates/controls the FrameStore’s current VANC mode.
+		It can be changed using this menu (if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+		-	<b>Off</b> — the FrameStore’s ::NTV2VANCMode is set to ::NTV2_VANCMODE_OFF
+		-	<b>Tall</b> — the FrameStore’s ::NTV2VANCMode is set to ::NTV2_VANCMODE_TALL (if available for the video format)
+		-	<b>Taller</b> — the FrameStore’s ::NTV2VANCMode is set to ::NTV2_VANCMODE_TALLER (if available for the video format)
+		-	See also:  CNTV2Card::GetVANCMode , CNTV2Card::SetVANCMode , \ref vancframegeometries
+	-	<b>FB Format</b> — Indicates/controls the FrameStore’s current pixel format.
+		It can be changed using this menu (if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
+		-	See also:  CNTV2Card::GetFrameBufferFormat , CNTV2Card::SetFrameBufferFormat , ::NTV2FrameBufferFormat , \ref vidop-fs , \ref devicefbformats
+	-	<b>VFlip</b> — Indicates/controls the FrameStore’s vertical frame buffer orientation. Can be changed at any time.
+		-	When checked — the FrameStore’s ::NTV2VideoFrameBufferOrientation is set to ::NTV2_FRAMEBUFFER_ORIENTATION_BOTTOMUP
+		-	When unchecked — the FrameStore’s ::NTV2VideoFrameBufferOrientation is set to ::NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN (aka ::NTV2_FRAMEBUFFER_ORIENTATION_NORMAL ) 
+		-	See also:  CNTV2Card::GetFrameBufferOrientation , CNTV2Card::SetFrameBufferOrientation , \ref vidop-fs
+	-	<b>VancShift</b> — Indicates/controls the FrameStore’s VANC Data Shift Mode.
+		It can be changed when not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>.
+		-	When checked, the FrameStore’s ::NTV2VANCDataShiftMode is set to ::NTV2_VANCDATA_8BITSHIFT_ENABLE.
+		-	When unchecked, the FrameStore’s ::NTV2VANCDataShiftMode is set to ::NTV2_VANCDATA_NORMAL.
+		-	See also:  CNTV2Card::GetVANCShiftMode , CNTV2Card::SetVANCShiftMode , \ref vidop-fs , \ref vancframegeometries
 
 @par	Navigation and Data Selection
 	-	<b>Scrolling</b> — The display can be scrolled horizontally and/or vertically.
@@ -199,8 +222,9 @@ Except in its <b>Image</b> view, the raster content display always highlights ch
 				@image	html	watcher-fillfb-pattern.png
 			-	<b>Text</b> — Fills one or more buffers with glyphs rendered using the ::CNTV2CaptionRenderer.
 				@image	html	watcher-fillfb-text.png
-		-	<b>Compare to Frame…</b> — (<b>Auto</b> mode OFF only) — Enables “Frame Differencing” mode, comparing the current frame with another, highlighting the differences.
-			To cancel this mode, toggle the “Auto” setting, or change the current frame being viewed.
+		-	<b>Compare to Frame…</b> — (<b>Auto</b> mode OFF only) — Enables <b>Frame Differencing mode</b>,
+			comparing the current frame with another, highlighting the differences.  To cancel this mode,
+			toggle the “Auto” setting, or change the current frame being viewed.
 		-	<b>Bytes/Line</b> — (<b>Raw</b> view only) — Changes the number of bytes to display in each line of the Raw data view. Choose from 64 bytes up to 32K bytes by powers of 2.
 			Note that larger values make for fewer lines and many more columns. Smaller values show many more lines with fewer columns.
 		-	<b>Show/Hide Line Boundaries</b> — (<b>Raw</b> view only) — Shows or hides the line boundary markers.
@@ -356,9 +380,38 @@ The <b>Anc</b> inspector monitors the ancillary data areas of a frame buffer, an
 		in which the act of monitoring an AJA device affects it and the application(s) under test.
 
 The Anc inspector has four main sections:
-	-	<b>VANC</b> — The VANC lines area will be shown if the channel (frame buffer) is configured for a VANC geometry.
+	-	<b>Channel/FrameStore and Frame Selection</b> — Selects a FrameStore (Channel) and frame to inspect.
+		-	<b>FrameStore/Channel</b> — Selects the FrameStore/Channel of interest. On devices that have Anc Inserters/Extractors:
+			-	In <b>Capture Mode</b>, this indicates the SDI Input associated with the firmware Anc Extractor being inspected/controlled.
+			-	In <b>Playout Mode</b>, this indicates the SDI Output associated with the firmware Anc Inserter being inspected/controlled.
+		-	<b>Auto</b> — If checked, the frame number being monitored will automatically follow the input or output
+			(depending on frame-store mode) “current frame” register, and the frame number spin control will be disabled.
+			If this is unchecked, the frame number spin control will be available, and the frame being watched can be manually controlled.
+		-	<b>Frame Number</b> spin control:  When available, controls which frame to view.
+			When unavailable, indicates the frame being viewed.
+		-	<b>Video Format Indicator</b> — Indicates the Channel/FrameStore’s current video standard, frame rate and geometry.
+	-	<b>Line 21</b> — This section is visible only when the Channel/FrameStore is configured for 525i SD,
+		and shows the byte pairs decoded from line 21 (if any).
+	-	<b>Line 284</b> — This section is visible only when the Channel/FrameStore is configured for 525i SD,
+		and shows the byte pairs decoded from line 284 (if any).
+	-	<b>VANC</b> — The VANC section shows the Channel/FrameStore’s current VANC configuration (“Off”, “Tall” or “Taller”) and VANC buffer data.
+		-	<b>Mode</b> — This menu/combobox is provided to indicate the current <b>VANC Mode</b>, and change it, if desired.
 	-	<b>Anc Registers</b> — This area is visible only for devices that have Anc inserters/extractors. When visible,
 		it shows the content of the inserter/extractor configuration registers. The register values are editable.
+		-	<b>Anc Exclusions:</b> — This menu/combobox is provided to indicate which Anc packet types (Data IDs)
+			are currently being excluded by the Anc Extractor. It can be used to add or remove Anc packet types from the exclusion set.
+			-	<b>None (Show All Packets)</b> — Checked if the Anc Extractor is not filtering any packets.
+				Choose this item to stop all packet filtering (i.e. to extract all packet types).
+			-	<b>SD Defaults</b> — Checked if the Anc Extractor is not filtering SD audio packets.
+				Choose this item to filter all SD audio packets.
+			-	<b>HD Defaults</b> — Checked if the Anc Extractor is not filtering HD audio packets.
+				Choose this item to filter all HD audio packets.
+			-	<i>all other items</i> — The menu has dozens of pre-defined Anc packet types available for filtering.
+				For each Anc packet type (i.e. Data ID, or DID)…
+				-	If checked, the Anc Extractor is currently filtering that packet type (Data ID).
+					Selecting the item will toggle its state and remove the DID from the Extractor’s filter set.
+				-	If unchecked, the Anc Extractor is <i>not</i> currently filtering that packet type (Data ID).
+					Selecting the item will toggle its state and add the DID to the Extractor’s filter set.
 	-	<b>F1 Anc</b> — This area is visible only for devices that have Anc inserters/extractors. When visible, it displays the contents
 		of the 0x12000-byte region that starts -0x24000 bytes from the end of the frame buffer. This buffer is where the extractor
 		places packet data extracted from Field 1 of interlaced video or from progressive video. It’s also where the inserter fetches packets for
@@ -366,9 +419,11 @@ The Anc inspector has four main sections:
 	-	<b>F2 Anc</b> — This area is visible only for devices that have Anc inserters/extractors, and only when the channel is running interlaced video.
 		When visible, it displays the contents of the 0x12000-byte region that starts -0x12000 bytes from the end of the frame buffer.
 		This is where the extractor places packets captured from Field 2. It’s also where the inserter fetches packets for output into interlaced Field 2.
-	-	<b>EIA/CEA-608 Caption Decoder</b> — Defaults to “Off”. More information below.
 
-A menu/combobox is provided for each of the Anc buffer display areas, to control how each area’s Anc data is displayed:
+A menu/combobox is provided for each of the <b>VANC</b>, <b>F1 Anc</b> and <b>F2 Anc</b> display areas, to control how each area’s Anc data is displayed:
+	-	<b>Hide</b> — Hides the buffer display. This has secondary benefits:
+		-	It makes room for other buffer displays you may be interested in.
+		-	It uses less CPU, allowing it to update other inspectors faster (e.g. CEA-608 Caption Viewer).
 	-	<b>Raw</b> — Displays the buffer as raw data. By right-clicking in the content area, you can change the data display’s grouping
 		(1, 2, 4 or 8 bytes) and radix (binary, octal, decimal or hex). The bytes-per-row count of the VANC display is fixed by the channel’s frame
 		geometry, but the F1 and F2 Anc buffer displays can be changed from 8, 16, 32, … up to 4096 bytes per line. You can also change the
@@ -389,45 +444,85 @@ A menu/combobox is provided for each of the Anc buffer display areas, to control
 		-	<b>CS</b> — The checksum of the payload data. Note that on playout, this value is irrelevant, since the inserter/embedder performs the checksum computation.
 		-	<b>Data</b> — The payload data bytes.
 
+Finally, a checkbox is provided to show or hide the <b>EIA-608/CEA-608 Caption Viewer</b> window.
+By default, the viewer window is hidden. To reveal it, check the box;  to hide it, un-check the box.
+
 When device polling is enabled, this inspector repeatedly monitors the device frame buffer.
-It reads the entire buffer into host memory and compares it to what was read the last time.
-The display highlights changed content with a brighter color.
+It reads the portions of the buffer that contain anc data into host memory and compares it to what was read the last time.
+Changed data are highlighted with a brighter color.
  
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the displayed information to the Clipboard.
 
-When the <b>EIA/CEA-608 Caption Decoder</b> is enabled, an additional two data views are revealed:
-	-	<b>Caption Byte Stream</b> — Shows the contents of the inspector’s caption byte-pair stream FIFO in hexadecimal words.
-	-	<b>Rendered Captions</b> — Renders the decoded captions, as they would appear on-screen.
 
-To enable the decoder, choose a caption channel to monitor from the menu (CC1, CC2, etc.). To render captions, the decoder’s byte-pair
-FIFO requires a stream of caption byte-pairs from one of the other packet displays in the Anc Inspector:
+@subsubsection	anc608viewer		CEA-608 Caption Viewer
+
+@image	html	cea608viewer.png
+
+The <b>CEA-608 Caption Viewer</b> window is a handy debugging aid for viewing EIA-608 and/or CEA-608 caption byte-pair streams.
+Since a CEA-608 decoder is a fairly complex state machine, this requires maintaining a stream of caption byte pairs
+to supply sufficient context in order to properly render captions. Thus, two panels are provided:
+	-	<b>Byte-Pair Stream</b> — Displays a hexadecimal representation of the caption byte-pair stream being decoded.
+		-	The text represents a byte-pair FIFO that holds up to 90 byte pairs (maximum):
+			-	New byte pairs enter the FIFO at the bottom-right corner.
+			-	The oldest byte pairs drop out of the FIFO at the top-left corner.
+		-	When no caption data is being streamed, the text content can be edited:
+			-	You can select all or part of the text, and copy it to the host’s clipboard.
+			-	You can add, remove, or change its contents by typing, or by pasting text from the clipboard.
+			-	The text must consist of 2-byte hexadecimal “words” separated by a single space (case is irrelevant).
+				Any other format will fail to decode properly.
+				-	The left-most 2 digits (most-significant byte) is “byte 1”;
+				-	The right-most 2 digits (least-significant byte) is “byte 2”.
+				-	Byte sequences from “.scc” sidecar files should work (but remove the timecodes).
+			-	<b>Example:</b> Try the byte-pair sequence “<tt>9425 94ad 9170 c845 cc4c 4f20</tt>”.
+				It should render “Hello” for CC1.
+	-	<b>Decoded Captions</b> — Renders the decoded captions, as they appear on-screen.
+		-	The 608 decoder always re-decodes the entire FIFO whenever it changes, processing the byte pairs top-left to bottom-right.
+			-	The last pair in the FIFO enters the decoder first;
+			-	The first pair in the FIFO enters the decoder last.
+
+A <b>Channel</b> selector menu is provided to change the channel being decoded and displayed:
+	-	CC1 — the normal, primary (English language) closed-caption channel sourced from Field 1.
+	-	CC2 — the secondary (often Spanish language) closed-caption channel, also sourced from Field 1.
+	-	CC3, CC4 — additional closed-caption channels, sourced from Field 2.
+	-	TX1, TX2 — text-only channels sourced from Field 1.
+	-	TX3, TX4 — text-only channels sourced from Field 2.
+	-	XDS is currently not available for decoding or display.
+
+A <b>Reset</b> button is provided to manually reset the decoder, if necessary.
+Add or remove a space to/from it to force the decoder to re-render what’s in the byte stream.
+
+To render captions in real-time, the decoder’s byte-pair FIFO requires a steady stream of caption
+byte-pairs transmitted by the <b>Anc Inspector</b>:
 	-	<b>“Analog” Captioning</b> — All of the following are true:
 		-	The monitored FrameStore/Channel is receiving or transmitting SD video;
 		-	The monitored FrameStore/Channel has a 'v210' or '2vuy' pixel format;
 		-	The current frame buffer contains a valid “analog” caption byte pair encoded
 			as a waveform per EIA-608 in “line 21” of active video.
 	-	<b>VANC Frame Geometry</b> — All of the following are true:
-		-	“Tall” or “Taller” VANC mode must be enabled;
+		-	“Tall” or “Taller” VANC mode is enabled;
 		-	The monitored FrameStore/Channel has a 'v210' or '2vuy' pixel format;
 			-	If 8-bit YCbCr, VANC Shift Mode must be enabled;
 		-	The VANC anc display is set to “Packets”;
 		-	The packet display must contain:
-			-	a CEA-708 packet that contains “Service 0“ CEA-608 caption data;
+			-	a CEA-708 packet that contains “Service 0“ CEA-608 caption data, or…
 			-	at least one CEA-608 packet.
 	-	<b>Anc Extractor/Inserter F1 and/or F2</b> — All of the following are true:
 		-	The monitored Anc Inserter/Extractor must be running;
-		-	The Field 1 or Field 2 displays must be set to display “Packets”.
-		-	One of the packet displays must contain:
-			-	a CEA-708 packet that contains “Service 0“ CEA-608 caption data;
+		-	The Field 1 or Field 2 displays (or both) must be set to display “Packets”.
+		-	One of the packet displays contains:
+			-	a CEA-708 packet that contains “Service 0“ CEA-608 caption data, or…
 			-	a CEA-608 packet.
 
-The decoder can also be operated manually/interactively:
-	-	Be sure no displays in the <b>Anc Inspector</b> are set to show “Packets”, and that no SD “line 21” data is currently being decoded.
-	-	In the byte-pair stream view, edit the hex values to whatever CEA-608 byte pair values you wish to decode.
-		(Try pasting in byte sequences from a .scc sidecar file.)
-	-	The caption display will decode the entire stream “live” as it changes.
-	-	The <b>Reset Decoder</b> button is provided to manually force a reset of the decoder, if needed.
+	@note	Successful caption rendering relies on getting a continuous byte pair sequence (no dropped frames).
+			If the <b>Anc Inspector</b>’s refresh rate lags the frame rate, byte pairs will be
+			skipped, resulting in garbled and unreadable captions. You may need to hide some of the 
 
+To freeze the <b>Byte-Pair Stream</b> (perhaps to permit interacting with it manually),
+leave the <b>Caption Viewer</b> window open, but switch NTV2Watcher to an Inspector other than
+the <b>Anc Inspector</b>. (You can also stop viewing “Packets” — use “Raw” or “Hide” instead.)
+
+To close the <b>Caption Viewer</b> window, click its close box, or un-check the
+<b>EIA/CEA-608 Caption Viewer</b> checkbox in the <b>Anc Inspector</b>.
 
 
 <hr size="50px">

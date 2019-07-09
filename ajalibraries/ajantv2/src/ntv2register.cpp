@@ -2497,12 +2497,14 @@ bool CNTV2Card::GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct)
 	return true;
 }
 
-bool CNTV2Card::ProgramMainFlash(const char *fileName, bool bForceUpdate)
+bool CNTV2Card::ProgramMainFlash(const char *fileName, bool bForceUpdate, bool bQuiet)
 {
     CNTV2KonaFlashProgram thisDevice;
     thisDevice.SetBoard(GetIndexNumber());
     try
     {
+		if (bQuiet)
+			thisDevice.SetQuietMode();
         thisDevice.SetBitFile(fileName, MAIN_FLASHBLOCK);
         if(bForceUpdate)
             thisDevice.SetMBReset();
@@ -2847,22 +2849,17 @@ bool CNTV2Card::GetRP188Data (const NTV2Channel inChannel, NTV2_RP188 & outRP188
 #if !defined(NTV2_DEPRECATE_15_2)
 	bool CNTV2Card::GetRP188Data (const NTV2Channel inChannel, ULWord inFrame, RP188_STRUCT & outRP188Data)
 	{
-		(void)	inFrame;
-		if (IS_CHANNEL_INVALID (inChannel))
-			return false;
-		return		ReadRegister (gChlToRP188DBBRegNum[inChannel],		outRP188Data.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
-				&&	ReadRegister (gChlToRP188Bits031RegNum[inChannel],	outRP188Data.Low)
-				&&	ReadRegister (gChlToRP188Bits3263RegNum[inChannel],	outRP188Data.High);
+		(void)		inFrame;
+		NTV2_RP188	rp188data;
+		const bool	result (GetRP188Data(inChannel, rp188data));
+		outRP188Data = rp188data;
+		return result;
 	}
 
 	bool CNTV2Card::SetRP188Data (const NTV2Channel inChannel, const ULWord inFrame, const RP188_STRUCT & inRP188Data)
 	{
 		(void) inFrame;
-		if (IS_CHANNEL_INVALID (inChannel))
-			return false;
-		return		WriteRegister (gChlToRP188DBBRegNum[inChannel],		inRP188Data.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB)
-				&&	WriteRegister (gChlToRP188Bits031RegNum[inChannel],	inRP188Data.Low)
-				&&	WriteRegister (gChlToRP188Bits3263RegNum[inChannel],	inRP188Data.High);
+		return SetRP188Data(inChannel, NTV2_RP188(inRP188Data));
 	}
 #endif	//	!defined(NTV2_DEPRECATE_15_2)
 
@@ -4983,6 +4980,8 @@ bool CNTV2Card::GetSecondaryVideoFormat(NTV2VideoFormat & outFormat)
 }
 
 
+#if !defined(R2_DEPRECATE)
+
 bool CNTV2Card::SetInputVideoSelect (NTV2InputVideoSelect input)
 {
 	bool bResult = WriteRegister(kVRegInputSelect, input);
@@ -4999,6 +4998,9 @@ bool CNTV2Card::GetInputVideoSelect(NTV2InputVideoSelect & outInputSelect)
 {
 	return CNTV2DriverInterface::ReadRegister(kVRegInputSelect, outInputSelect);
 }
+
+#endif // R2_DEPRECATE
+
 
 NTV2VideoFormat CNTV2Card::GetInputVideoFormat (NTV2InputSource inSource, const bool inIsProgressivePicture)
 {
@@ -6704,8 +6706,10 @@ bool CNTV2Card::GetStereoCompressorRightSource		(NTV2OutputCrosspointID & outVal
 
 /////////////////////////////////////////////////////////////////////
 // Analog
+#if !defined(R2_DEPRECATE)
 bool CNTV2Card::SetAnalogInputADCMode				(const NTV2LSVideoADCMode inValue)			{return WriteRegister (kRegAnalogInputControl,	ULWord(inValue),		kRegMaskAnalogInputADCMode,				kRegShiftAnalogInputADCMode);}
 bool CNTV2Card::GetAnalogInputADCMode				(NTV2LSVideoADCMode & outValue)				{return CNTV2DriverInterface::ReadRegister  (kRegAnalogInputControl,	outValue,	kRegMaskAnalogInputADCMode,				kRegShiftAnalogInputADCMode);}
+#endif
 
 
 #if !defined (NTV2_DEPRECATE)

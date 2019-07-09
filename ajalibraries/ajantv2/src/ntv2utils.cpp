@@ -8023,8 +8023,8 @@ string NTV2VideoFormatToString (const NTV2VideoFormat inFormat, const bool inUse
 	case NTV2_FORMAT_1080p_2K_5994_B:	return "2Kp59.94b";
 	case NTV2_FORMAT_1080p_2K_6000_B:	return "2Kp60b";
 	case NTV2_FORMAT_3840x2160psf_2398:	return "UHDsf23.98";
-	case NTV2_FORMAT_3840x2160psf_2400:	return "UHDsf23.98";
-	case NTV2_FORMAT_3840x2160psf_2500:	return "UHDsf23.98";
+	case NTV2_FORMAT_3840x2160psf_2400:	return "UHDsf24";
+	case NTV2_FORMAT_3840x2160psf_2500:	return "UHDsf25";
 	case NTV2_FORMAT_3840x2160p_2398:	return "UHDp23.98";
 	case NTV2_FORMAT_3840x2160p_2400:	return "UHDp24";
 	case NTV2_FORMAT_3840x2160p_2500:	return "UHDp25";

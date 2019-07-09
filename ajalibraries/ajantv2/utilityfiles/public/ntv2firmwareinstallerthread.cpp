@@ -276,7 +276,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 	if (REALLY_UPDATE)
 	{
 		//	ProgramMainFlash used to be able to throw (because XilinxBitfile could throw), but with 12.1 SDK, this is no longer the case.
-        m_updateSuccessful = m_device.ProgramMainFlash (m_bitfilePath.c_str (), m_forceUpdate);
+		m_updateSuccessful = m_device.ProgramMainFlash (m_bitfilePath.c_str (), m_forceUpdate, !m_verbose);
 		if (!m_updateSuccessful)
 		{
 			cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  'ProgramMainFlash' failed" << endl

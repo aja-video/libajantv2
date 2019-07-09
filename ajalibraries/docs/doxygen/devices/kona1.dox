@@ -11,7 +11,10 @@
 
 	@image	html	kona1.png
 
-	The KONA 1 has three BNC connectors -- one input SDI, one output SDI and one Reference/LTC input.
+	The KONA 1 has three BNC connectors:
+	-	Reference/LTC input (nearest the RS422 connector);
+	-	Input SDI (middle connector);
+	-	Output SDI.
 
 	@par	PCI Interface
 

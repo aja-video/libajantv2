@@ -2398,7 +2398,7 @@ public:
 	///@{
 	AJA_VIRTUAL bool	ReadFlashProgramControl(ULWord & outValue);
 	AJA_VIRTUAL bool	IsXilinxProgrammed();
-    AJA_VIRTUAL bool	ProgramMainFlash(const char *fileName, bool bForceUpdate = false);
+	AJA_VIRTUAL bool	ProgramMainFlash(const char *fileName, bool bForceUpdate = false, bool bQuiet = false);
 	AJA_VIRTUAL bool	GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct);
 
     /**
@@ -4087,8 +4087,10 @@ public:
 	AJA_VIRTUAL bool	SetSecondaryVideoFormat(NTV2VideoFormat inFormat);			//	RETAIL USE ONLY
 	AJA_VIRTUAL bool	GetSecondaryVideoFormat(NTV2VideoFormat & outFormat);		//	RETAIL USE ONLY
 
+	#if !defined(R2_DEPRECATE)
 	AJA_VIRTUAL bool	SetInputVideoSelect (NTV2InputVideoSelect inInputSelect);	//	RETAIL USE ONLY
 	AJA_VIRTUAL bool	GetInputVideoSelect(NTV2InputVideoSelect & outInputSelect);	//	RETAIL USE ONLY
+	#endif
 
 	//	--------------------------------------------
 	//	GetNTV2VideoFormat functions
@@ -4576,8 +4578,10 @@ public:
 	AJA_VIRTUAL bool		ReadProcAmpC2CRAdjustment (ULWord & outValue);
 	AJA_VIRTUAL bool		ReadProcAmpOffsetYAdjustment (ULWord & outValue);
 
+	#if !defined(R2_DEPRECATE)
 	AJA_VIRTUAL bool		SetAnalogInputADCMode (const NTV2LSVideoADCMode inValue);
 	AJA_VIRTUAL bool		GetAnalogInputADCMode (NTV2LSVideoADCMode & outValue);
+	#endif
 	///@}
 
 
@@ -5783,9 +5787,12 @@ public:
 
 	/**
 		@return		The default DIDs that the device Anc extractor filter is started with.
+		@param[in]	inHDAudio	Optionally specifies the desired audio packet filtering.
+								Specify true (the default) for the default HD audio packet DIDs;
+								otherwise false for the default SD audio packet DIDs.
 		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetMaxNumFilterDIDs, \ref anccapture
 	**/
-	static NTV2DIDSet	AncExtractGetDefaultDIDs (void);
+	static NTV2DIDSet	AncExtractGetDefaultDIDs (const bool inHDAudio = true);
 
 
 #if !defined(NTV2_DEPRECATE_14_3)
@@ -6340,8 +6347,10 @@ public:
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetConversionMode						(NTV2ConversionMode * pOutConversionMode)		) {return pOutConversionMode ? GetConversionMode(*pOutConversionMode) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetLUTControlSelect						(NTV2LUTControlSelect * pOutLUTSelect)			) {return pOutLUTSelect ? GetLUTControlSelect(*pOutLUTSelect) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetSecondaryVideoFormat					(NTV2VideoFormat * pOutFormat)					) {return pOutFormat ? GetSecondaryVideoFormat(*pOutFormat) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+	#if !defined(R2_DEPRECATE)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetInputVideoSelect						(NTV2InputVideoSelect * pOutInputSelect)		) {return pOutInputSelect ? GetInputVideoSelect(*pOutInputSelect) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetAnalogInputADCMode					(NTV2LSVideoADCMode * pOutValue)				) {return pOutValue ? GetAnalogInputADCMode(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+	#endif
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIOut3DPresent						(bool * pOut3DPresent)							) {return pOut3DPresent ? GetHDMIOut3DPresent(*pOut3DPresent) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIOut3DMode						(NTV2HDMIOut3DMode * pOutValue)					) {return pOutValue ? GetHDMIOut3DMode(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetHDMIInputRange						(NTV2HDMIRange * pOutValue)						) {return pOutValue ? GetHDMIInputRange(*pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
