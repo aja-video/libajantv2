@@ -168,12 +168,14 @@ NTV2DeviceGetNumLTCOutputs						2
 // CanDo's		(see 'cando_canon.gen' for legal values)
 NTV2DeviceCanChangeFrameBufferSize
 NTV2DeviceCanDo3GLevelConversion
+NTV2DeviceCanDoRGBLevelAConversion
 NTV2DeviceCanDo4KVideo
 NTV2DeviceCanDoAudio8Channels
 NTV2DeviceCanDoAudioDelay
 NTV2DeviceCanDoBreakoutBox
 NTV2DeviceCanDoCapture
 NTV2DeviceCanDoCustomAnc
+NTV2DeviceCanDoDualLink
 NTV2DeviceCanDoHDVideo
 NTV2DeviceCanDoLTC
 NTV2DeviceCanDoLTCInOnRefPort
@@ -216,4 +218,9 @@ NTV2DeviceCanDoWarmBootFPGA
 
 
 // NTV2DSKModes
-
+NTV2_DSKModeOff
+NTV2_DSKModeFBOverMatte
+NTV2_DSKModeFBOverVideoIn
+NTV2_DSKModeGraphicOverMatte
+NTV2_DSKModeGraphicOverVideoIn
+NTV2_DSKModeGraphicOverFB
