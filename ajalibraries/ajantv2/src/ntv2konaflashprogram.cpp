@@ -2528,6 +2528,21 @@ void CNTV2KonaFlashProgram::FullProgram(std::vector<uint8_t> & dataBuffer)
 	SetWarmBootFirmwareReload(true);
 }
 
+bool CNTV2KonaFlashProgram::CheckAndFixMACs()
+{
+	MacAddr mac1, mac2;
+	ReadMACAddresses(mac1, mac2);
+	if(mac1.mac[1] != 0x0C || mac2.mac[1] != 0x0c)
+	{
+		cout << "Reprogramming the Mac Addresses!" << endl;
+		string serialString;
+		GetSerialNumberString(serialString);
+		MakeMACsFromSerial(serialString.c_str(), &mac1, &mac2);
+		return ProgramMACAddresses(&mac1, &mac2);
+	}
+	return true;
+}
+
 bool CNTV2KonaFlashProgram::MakeMACsFromSerial( const char *sSerialNumber, MacAddr *pMac1, MacAddr *pMac2 ) {
 	// NOTE: We do both auto if either is auto
 	// TODO: Check if this is an IP board, etc etc
