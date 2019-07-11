@@ -182,6 +182,8 @@ public:
 	}
 
 	bool VerifySOCPartition(FlashBlockID flashID, uint32_t FlashBlockOffset);
+	bool CheckAndFixMACs();
+	bool MakeMACsFromSerial( const char *sSerialNumber, MacAddr *pMac1, MacAddr *pMac2 );
 
 	uint8_t*	  _bitFileBuffer;
 	uint8_t*	  _customFileBuffer;

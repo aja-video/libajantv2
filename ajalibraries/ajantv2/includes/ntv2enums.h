@@ -443,7 +443,7 @@ typedef enum
 
 
 // IMPORTANT When adding to the NTV2VideoFormat enum, don't forget to:
-//		Add a corresponding case to GetNTV2FrameGeometryFromVideoFormat in ntv2deviceservices.cpp
+//		Add a corresponding case to GetNTV2FrameGeometryFromVideoFormat in r2deviceservices.cpp
 //		Add a corresponding case to GetNTV2QuarterSizedVideoFormat in ntv2utils.cpp
 //		Add a corresponding case to GetNTV2StandardFromVideoFormat in ntv2utils.cpp
 //		Add a corresponding case to GetActiveVideoSize in ntv2utils.cpp
