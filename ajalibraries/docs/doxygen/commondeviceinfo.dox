@@ -924,6 +924,12 @@
 	information available in a hardware register, and client software can query it by calling CNTV2Card::GetInputAudioChannelPairsWithoutPCM
 	or CNTV2Card::InputAudioChannelPairHasPCM.
 
+	@note	<b>Dolby AC-3</b>, for example, per SMPTE ST-337, is transported as non-PCM data in the SDI AES stream.
+			The AC-3 data is located in the PCM audio sample words of a channel pair — see \ref audioformats .
+			The formatting of the AC-3 data into the channel pairs is quite flexible, but usually a channel pair (e.g. 5&amp;6) is considered a single AC-3 stream.
+			The specification allows AC-3 data to be carried in 16, 20 or 24 bits of the PCM sample.
+			This flexibility requires the application to know how the source has formatted the data into the AES samples.
+
 	Generally, each <b>Audio System</b>’s <b>Input Source</b> is selectable, to receive samples from any of the device’s video (and possibly audio)
 	Input Sources, including embedded SDI, HDMI, external AES and analog inputs (see CNTV2Card::SetAudioSystemInputSource).
 	For devices that support 3Gb Level B inputs, the audio can be taken from data stream 1 or 2.
