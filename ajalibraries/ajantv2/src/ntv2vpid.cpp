@@ -716,12 +716,15 @@ NTV2VideoFormat CNTV2VPID::GetVideoFormat (void) const
 	return videoFormat;
 }
 
+// Macro to simplify returning of string for given enum
+#define VPID_ENUM_CASE_RETURN_STR(enum_name) case(enum_name): return #enum_name;
+
 const string CNTV2VPID::VersionString(VPIDVersion version)
 {
 	switch (version)
 	{
-		case VPIDVersion_0:		return "VPIDVersion_0";
-		case VPIDVersion_1:		return "VPIDVersion_1";
+		VPID_ENUM_CASE_RETURN_STR(VPIDVersion_0);
+		VPID_ENUM_CASE_RETURN_STR(VPIDVersion_1);
 		// intentionally not setting a default: so compiler will warn about missing enums
 	}
 	return "";
@@ -731,53 +734,53 @@ const string CNTV2VPID::StandardString(VPIDStandard std)
 {
 	switch (std)
 	{
-		case VPIDStandard_Unknown:						return "VPIDStandard_Unknown";
-		case VPIDStandard_483_576:						return "VPIDStandard_483_576";
-		case VPIDStandard_483_576_DualLink:				return "VPIDStandard_483_576_DualLink";
-		case VPIDStandard_483_576_540Mbs:				return "VPIDStandard_483_576_540Mbs";
-		case VPIDStandard_720:							return "VPIDStandard_720";
-		case VPIDStandard_1080:							return "VPIDStandard_1080";
-		case VPIDStandard_483_576_1485Mbs:				return "VPIDStandard_483_576_1485Mbs";
-		case VPIDStandard_1080_DualLink:				return "VPIDStandard_1080_DualLink";
-		case VPIDStandard_720_3Ga:						return "VPIDStandard_720_3Ga";
-		case VPIDStandard_1080_3Ga:						return "VPIDStandard_1080_3Ga";
-		case VPIDStandard_1080_DualLink_3Gb:			return "VPIDStandard_1080_DualLink_3Gb";
-		case VPIDStandard_720_3Gb:						return "VPIDStandard_720_3Gb";
-		case VPIDStandard_1080_3Gb:						return "VPIDStandard_1080_3Gb";
-		case VPIDStandard_483_576_3Gb:					return "VPIDStandard_483_576_3Gb";
-		case VPIDStandard_720_Stereo_3Gb:				return "VPIDStandard_720_Stereo_3Gb";
-		case VPIDStandard_1080_Stereo_3Gb:				return "VPIDStandard_1080_Stereo_3Gb";
-		case VPIDStandard_1080_QuadLink:				return "VPIDStandard_1080_QuadLink";
-		case VPIDStandard_720_Stereo_3Ga:				return "VPIDStandard_720_Stereo_3Ga";
-		case VPIDStandard_1080_Stereo_3Ga:				return "VPIDStandard_1080_Stereo_3Ga";
-		case VPIDStandard_1080_Stereo_DualLink_3Gb:		return "VPIDStandard_1080_Stereo_DualLink_3Gb";
-		case VPIDStandard_1080_Dual_3Ga:				return "VPIDStandard_1080_Dual_3Ga";
-		case VPIDStandard_1080_Dual_3Gb:				return "VPIDStandard_1080_Dual_3Gb";
-		case VPIDStandard_2160_DualLink:				return "VPIDStandard_2160_DualLink";
-		case VPIDStandard_2160_QuadLink_3Ga:			return "VPIDStandard_2160_QuadLink_3Ga";
-		case VPIDStandard_2160_QuadDualLink_3Gb:		return "VPIDStandard_2160_QuadDualLink_3Gb";
-		case VPIDStandard_1080_Stereo_Quad_3Ga:			return "VPIDStandard_1080_Stereo_Quad_3Ga";
-		case VPIDStandard_1080_Stereo_Quad_3Gb:			return "VPIDStandard_1080_Stereo_Quad_3Gb";
-		case VPIDStandard_2160_Stereo_Quad_3Gb:			return "VPIDStandard_2160_Stereo_Quad_3Gb";
-		case VPIDStandard_1080_OctLink:					return "VPIDStandard_1080_OctLink";
-		case VPIDStandard_UHDTV1_Single_DualLink_10Gb:	return "VPIDStandard_UHDTV1_Single_DualLink_10Gb";
-		case VPIDStandard_UHDTV2_Quad_OctaLink_10Gb:	return "VPIDStandard_UHDTV2_Quad_OctaLink_10Gb";
-		case VPIDStandard_UHDTV1_MultiLink_10Gb:		return "VPIDStandard_UHDTV1_MultiLink_10Gb";
-		case VPIDStandard_UHDTV2_MultiLink_10Gb:		return "VPIDStandard_UHDTV2_MultiLink_10Gb";
-		case VPIDStandard_VC2:							return "VPIDStandard_VC2";
-		case VPIDStandard_720_1080_Stereo:				return "VPIDStandard_720_1080_Stereo";
-		case VPIDStandard_VC2_Level65_270Mbs:			return "VPIDStandard_VC2_Level65_270Mbs";
-		case VPIDStandard_4K_DCPIF_FSW709_10Gbs:		return "VPIDStandard_4K_DCPIF_FSW709_10Gbs";
-		case VPIDStandard_FT_2048x1556_Dual:			return "VPIDStandard_FT_2048x1556_Dual";
-		case VPIDStandard_FT_2048x1556_3Gb:				return "VPIDStandard_FT_2048x1556_3Gb";
-		case VPIDStandard_2160_Single_6Gb:				return "VPIDStandard_2160_Single_6Gb";
-		case VPIDStandard_1080_Single_6Gb:				return "VPIDStandard_1080_Single_6Gb";
-		case VPIDStandard_1080_AFR_Single_6Gb:			return "VPIDStandard_1080_AFR_Single_6Gb";
-		case VPIDStandard_2160_Single_12Gb:				return "VPIDStandard_2160_Single_12Gb";
-		case VPIDStandard_1080_10_12_AFR_Single_12Gb:	return "VPIDStandard_1080_10_12_AFR_Single_12Gb";
-		case VPIDStandard_4320_DualLink_12Gb:			return "VPIDStandard_4320_DualLink_12Gb";
-		case VPIDStandard_2160_DualLink_12Gb:			return "VPIDStandard_2160_DualLink_12Gb";
-		case VPIDStandard_4320_QuadLink_12Gb:			return "VPIDStandard_4320_QuadLink_12Gb";
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_Unknown);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_483_576);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_483_576_DualLink);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_483_576_540Mbs);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_720);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_483_576_1485Mbs);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080_DualLink);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_720_3Ga);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080_3Ga);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080_DualLink_3Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_720_3Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080_3Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_483_576_3Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_720_Stereo_3Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080_Stereo_3Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080_QuadLink);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_720_Stereo_3Ga);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080_Stereo_3Ga);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080_Stereo_DualLink_3Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080_Dual_3Ga);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080_Dual_3Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_2160_DualLink);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_2160_QuadLink_3Ga);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_2160_QuadDualLink_3Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080_Stereo_Quad_3Ga);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080_Stereo_Quad_3Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_2160_Stereo_Quad_3Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080_OctLink);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_UHDTV1_Single_DualLink_10Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_UHDTV2_Quad_OctaLink_10Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_UHDTV1_MultiLink_10Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_UHDTV2_MultiLink_10Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_VC2);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_720_1080_Stereo);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_VC2_Level65_270Mbs);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_4K_DCPIF_FSW709_10Gbs);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_FT_2048x1556_Dual);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_FT_2048x1556_3Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_2160_Single_6Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080_Single_6Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080_AFR_Single_6Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_2160_Single_12Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_1080_10_12_AFR_Single_12Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_4320_DualLink_12Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_2160_DualLink_12Gb);
+		VPID_ENUM_CASE_RETURN_STR(VPIDStandard_4320_QuadLink_12Gb);
 		// intentionally not setting a default: so compiler will warn about missing enums
 	}
 	return "";
@@ -787,22 +790,22 @@ const string CNTV2VPID::PictureRateString(VPIDPictureRate rate)
 {
 	switch (rate)
 	{
-		case VPIDPictureRate_None:			return "VPIDPictureRate_None";
-		case VPIDPictureRate_Reserved1:		return "VPIDPictureRate_Reserved1";
-		case VPIDPictureRate_2398:			return "VPIDPictureRate_2398";
-		case VPIDPictureRate_2400:			return "VPIDPictureRate_2400";
-		case VPIDPictureRate_4795:			return "VPIDPictureRate_4795";
-		case VPIDPictureRate_2500:			return "VPIDPictureRate_2500";
-		case VPIDPictureRate_2997:			return "VPIDPictureRate_2997";
-		case VPIDPictureRate_3000:			return "VPIDPictureRate_3000";
-		case VPIDPictureRate_4800:			return "VPIDPictureRate_4800";
-		case VPIDPictureRate_5000:			return "VPIDPictureRate_5000";
-		case VPIDPictureRate_5994:			return "VPIDPictureRate_5994";
-		case VPIDPictureRate_6000:			return "VPIDPictureRate_6000";
-		case VPIDPictureRate_ReservedC:		return "VPIDPictureRate_ReservedC";
-		case VPIDPictureRate_ReservedD:		return "VPIDPictureRate_ReservedD";
-		case VPIDPictureRate_ReservedE:		return "VPIDPictureRate_ReservedE";
-		case VPIDPictureRate_ReservedF:		return "VPIDPictureRate_ReservedF";
+		VPID_ENUM_CASE_RETURN_STR(VPIDPictureRate_None);
+		VPID_ENUM_CASE_RETURN_STR(VPIDPictureRate_Reserved1);
+		VPID_ENUM_CASE_RETURN_STR(VPIDPictureRate_2398);
+		VPID_ENUM_CASE_RETURN_STR(VPIDPictureRate_2400);
+		VPID_ENUM_CASE_RETURN_STR(VPIDPictureRate_4795);
+		VPID_ENUM_CASE_RETURN_STR(VPIDPictureRate_2500);
+		VPID_ENUM_CASE_RETURN_STR(VPIDPictureRate_2997);
+		VPID_ENUM_CASE_RETURN_STR(VPIDPictureRate_3000);
+		VPID_ENUM_CASE_RETURN_STR(VPIDPictureRate_4800);
+		VPID_ENUM_CASE_RETURN_STR(VPIDPictureRate_5000);
+		VPID_ENUM_CASE_RETURN_STR(VPIDPictureRate_5994);
+		VPID_ENUM_CASE_RETURN_STR(VPIDPictureRate_6000);
+		VPID_ENUM_CASE_RETURN_STR(VPIDPictureRate_ReservedC);
+		VPID_ENUM_CASE_RETURN_STR(VPIDPictureRate_ReservedD);
+		VPID_ENUM_CASE_RETURN_STR(VPIDPictureRate_ReservedE);
+		VPID_ENUM_CASE_RETURN_STR(VPIDPictureRate_ReservedF);
 		// intentionally not setting a default: so compiler will warn about missing enums
 	}
 	return "";
@@ -812,22 +815,22 @@ const string CNTV2VPID::SamplingString(VPIDSampling sample)
 {
 	switch (sample)
 	{
-		case VPIDSampling_YUV_422:		return "VPIDSampling_YUV_422";
-		case VPIDSampling_YUV_444:		return "VPIDSampling_YUV_444";
-		case VPIDSampling_GBR_444:		return "VPIDSampling_GBR_444";
-		case VPIDSampling_YUV_420:		return "VPIDSampling_YUV_420";
-		case VPIDSampling_YUVA_4224:	return "VPIDSampling_YUVA_4224";
-		case VPIDSampling_YUVA_4444:	return "VPIDSampling_YUVA_4444";
-		case VPIDSampling_GBRA_4444:	return "VPIDSampling_GBRA_4444";
-		case VPIDSampling_Reserved7:	return "VPIDSampling_Reserved7";
-		case VPIDSampling_YUVD_4224:	return "VPIDSampling_YUVD_4224";
-		case VPIDSampling_YUVD_4444:	return "VPIDSampling_YUVD_4444";
-		case VPIDSampling_GBRD_4444:	return "VPIDSampling_GBRD_4444";
-		case VPIDSampling_ReservedB:	return "VPIDSampling_ReservedB";
-		case VPIDSampling_ReservedC:	return "VPIDSampling_ReservedC";
-		case VPIDSampling_ReservedD:	return "VPIDSampling_ReservedD";
-		case VPIDSampling_ReservedE:	return "VPIDSampling_ReservedE";
-		case VPIDSampling_XYZ_444:		return "VPIDSampling_XYZ_444";
+		VPID_ENUM_CASE_RETURN_STR(VPIDSampling_YUV_422);
+		VPID_ENUM_CASE_RETURN_STR(VPIDSampling_YUV_444);
+		VPID_ENUM_CASE_RETURN_STR(VPIDSampling_GBR_444);
+		VPID_ENUM_CASE_RETURN_STR(VPIDSampling_YUV_420);
+		VPID_ENUM_CASE_RETURN_STR(VPIDSampling_YUVA_4224);
+		VPID_ENUM_CASE_RETURN_STR(VPIDSampling_YUVA_4444);
+		VPID_ENUM_CASE_RETURN_STR(VPIDSampling_GBRA_4444);
+		VPID_ENUM_CASE_RETURN_STR(VPIDSampling_Reserved7);
+		VPID_ENUM_CASE_RETURN_STR(VPIDSampling_YUVD_4224);
+		VPID_ENUM_CASE_RETURN_STR(VPIDSampling_YUVD_4444);
+		VPID_ENUM_CASE_RETURN_STR(VPIDSampling_GBRD_4444);
+		VPID_ENUM_CASE_RETURN_STR(VPIDSampling_ReservedB);
+		VPID_ENUM_CASE_RETURN_STR(VPIDSampling_ReservedC);
+		VPID_ENUM_CASE_RETURN_STR(VPIDSampling_ReservedD);
+		VPID_ENUM_CASE_RETURN_STR(VPIDSampling_ReservedE);
+		VPID_ENUM_CASE_RETURN_STR(VPIDSampling_XYZ_444);
 		// intentionally not setting a default: so compiler will warn about missing enums
 	}
 	return "";
@@ -837,14 +840,14 @@ const string CNTV2VPID::ChannelString(VPIDChannel chan)
 {
 	switch (chan)
 	{
-		case VPIDChannel_1:	return "VPIDChannel_1";
-		case VPIDChannel_2:	return "VPIDChannel_2";
-		case VPIDChannel_3:	return "VPIDChannel_3";
-		case VPIDChannel_4:	return "VPIDChannel_4";
-		case VPIDChannel_5:	return "VPIDChannel_5";
-		case VPIDChannel_6:	return "VPIDChannel_6";
-		case VPIDChannel_7:	return "VPIDChannel_7";
-		case VPIDChannel_8:	return "VPIDChannel_8";
+		VPID_ENUM_CASE_RETURN_STR(VPIDChannel_1);
+		VPID_ENUM_CASE_RETURN_STR(VPIDChannel_2);
+		VPID_ENUM_CASE_RETURN_STR(VPIDChannel_3);
+		VPID_ENUM_CASE_RETURN_STR(VPIDChannel_4);
+		VPID_ENUM_CASE_RETURN_STR(VPIDChannel_5);
+		VPID_ENUM_CASE_RETURN_STR(VPIDChannel_6);
+		VPID_ENUM_CASE_RETURN_STR(VPIDChannel_7);
+		VPID_ENUM_CASE_RETURN_STR(VPIDChannel_8);
 		// intentionally not setting a default: so compiler will warn about missing enums
 	}
 	return "";
@@ -854,10 +857,10 @@ const string CNTV2VPID::DynamicRangeString(VPIDDynamicRange range)
 {
 	switch (range)
 	{
-		case VPIDDynamicRange_100:			return "VPIDDynamicRange_100";
-		case VPIDDynamicRange_200:			return "VPIDDynamicRange_200";
-		case VPIDDynamicRange_400:			return "VPIDDynamicRange_400";
-		case VPIDDynamicRange_Reserved3:	return "VPIDDynamicRange_Reserved3";
+		VPID_ENUM_CASE_RETURN_STR(VPIDDynamicRange_100);
+		VPID_ENUM_CASE_RETURN_STR(VPIDDynamicRange_200);
+		VPID_ENUM_CASE_RETURN_STR(VPIDDynamicRange_400);
+		VPID_ENUM_CASE_RETURN_STR(VPIDDynamicRange_Reserved3);
 		// intentionally not setting a default: so compiler will warn about missing enums
 	}
 	return "";
@@ -867,10 +870,10 @@ const string CNTV2VPID::BitDepthString(VPIDBitDepth depth)
 {
 	switch (depth)
 	{
-		case VPIDBitDepth_8:			return "VPIDBitDepth_8";
-		case VPIDBitDepth_10:			return "VPIDBitDepth_10";
-		case VPIDBitDepth_12:			return "VPIDBitDepth_12";
-		case VPIDBitDepth_Reserved3:	return "VPIDBitDepth_Reserved3";
+		VPID_ENUM_CASE_RETURN_STR(VPIDBitDepth_8);
+		VPID_ENUM_CASE_RETURN_STR(VPIDBitDepth_10);
+		VPID_ENUM_CASE_RETURN_STR(VPIDBitDepth_12);
+		VPID_ENUM_CASE_RETURN_STR(VPIDBitDepth_Reserved3);
 		// intentionally not setting a default: so compiler will warn about missing enums
 	}
 	return "";
@@ -880,14 +883,14 @@ const string CNTV2VPID::LinkString(VPIDLink link)
 {
 	switch (link)
 	{
-		case VPIDLink_1:	return "VPIDLink_1";
-		case VPIDLink_2:	return "VPIDLink_2";
-		case VPIDLink_3:	return "VPIDLink_3";
-		case VPIDLink_4:	return "VPIDLink_4";
-		case VPIDLink_5:	return "VPIDLink_5";
-		case VPIDLink_6:	return "VPIDLink_6";
-		case VPIDLink_7:	return "VPIDLink_7";
-		case VPIDLink_8:	return "VPIDLink_8";
+		VPID_ENUM_CASE_RETURN_STR(VPIDLink_1);
+		VPID_ENUM_CASE_RETURN_STR(VPIDLink_2);
+		VPID_ENUM_CASE_RETURN_STR(VPIDLink_3);
+		VPID_ENUM_CASE_RETURN_STR(VPIDLink_4);
+		VPID_ENUM_CASE_RETURN_STR(VPIDLink_5);
+		VPID_ENUM_CASE_RETURN_STR(VPIDLink_6);
+		VPID_ENUM_CASE_RETURN_STR(VPIDLink_7);
+		VPID_ENUM_CASE_RETURN_STR(VPIDLink_8);
 		// intentionally not setting a default: so compiler will warn about missing enums
 	}
 	return "";
@@ -897,10 +900,10 @@ const string CNTV2VPID::AudioString(VPIDAudio audio)
 {
 	switch (audio)
 	{
-		case VPIDAudio_Unknown:		return "VPIDAudio_Unknown";
-		case VPIDAudio_Copied:		return "VPIDAudio_Copied";
-		case VPIDAudio_Additional:	return "VPIDAudio_Additional";
-		case VPIDAudio_Reserved:	return "VPIDAudio_Reserved";
+		VPID_ENUM_CASE_RETURN_STR(VPIDAudio_Unknown);
+		VPID_ENUM_CASE_RETURN_STR(VPIDAudio_Copied);
+		VPID_ENUM_CASE_RETURN_STR(VPIDAudio_Additional);
+		VPID_ENUM_CASE_RETURN_STR(VPIDAudio_Reserved);
 		// intentionally not setting a default: so compiler will warn about missing enums
 	}
 	return "";
