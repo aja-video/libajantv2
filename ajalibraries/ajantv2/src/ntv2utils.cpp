@@ -1,4 +1,4 @@
-/**
+﻿/**
 	@file		ntv2utils.cpp
 	@brief		Implementations for the NTV2 utility functions.
 	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
@@ -8117,8 +8117,8 @@ string NTV2StandardToString (const NTV2Standard inValue, const bool inForRetailD
 	case NTV2_STANDARD_4096HFR:		return inForRetailDisplay ? "4K HFR"	: "NTV2_STANDARD_4096HFR";
 	case NTV2_STANDARD_7680:		return inForRetailDisplay ? "UHD2"		: "NTV2_STANDARD_7680";
 	case NTV2_STANDARD_8192:		return inForRetailDisplay ? "8K"		: "NTV2_STANDARD_8192";
-	case NTV2_STANDARD_3840i:		return inForRetailDisplay ? "UHDsf"		: "NTV2_STANDARD_3840x2160psf";
-	case NTV2_STANDARD_4096i:		return inForRetailDisplay ? "4Ksf"		: "NTV2_STANDARD_4096x2160psf";
+	case NTV2_STANDARD_3840i:		return inForRetailDisplay ? "UHDsf"		: "NTV2_STANDARD_3840i";
+	case NTV2_STANDARD_4096i:		return inForRetailDisplay ? "4Ksf"		: "NTV2_STANDARD_4096i";
 	case NTV2_STANDARD_INVALID:		return inForRetailDisplay ? ""			: "NTV2_STANDARD_INVALID";
 	}
 	return string ();
@@ -8791,6 +8791,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_KONAIP_4CH_2SFP,
 														DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K,
 														DEVICE_ID_KONAIP_2TX_1SFP_J2K,
+														DEVICE_ID_KONAIP_2RX_1SFP_J2K,
 														DEVICE_ID_KONAIP_1RX_1TX_2110,
 														DEVICE_ID_KONAIP_2110,
 														DEVICE_ID_KONALHEPLUS,
