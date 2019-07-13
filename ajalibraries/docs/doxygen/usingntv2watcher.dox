@@ -3,7 +3,7 @@
 
 @section	usingntv2watcher		“NTV2Watcher”
 
-This page describes how to use the <b>NTV2 Watcher</b> tool to interactively monitor an AJA device.
+This page describes how to use the <b>NTV2 Watcher</b> tool to interactively monitor and control an AJA device.
 
 @par	General Operation
 
@@ -56,6 +56,12 @@ Clicking on an inspector item in the list replaces the one that was previously s
 If you click back to return to an inspector that was previously in use, its state is exactly as it was left.
 (Only when the device is changed does a new inspector get started in its default state.)
 
+@bug	NTV2Watcher keeps some persistent settings data in a local config file.
+		If this file gets corrupted, it can cause NTV2Watcher to hang or crash upon startup.
+		To work around this issue:
+		-	<b>Linux</b> — Delete the ‘NTV2Watcher.conf’ file from your local app data folder ‘~/.config/aja’.
+		-	<b>Mac OS</b> — Delete the ‘NTV2Watcher’ folder from your local app data (in ‘/Users/<i>username</i>/Library/Application Support/AJA’).
+		-	<b>Windows</b> — Delete the ‘NTV2Watcher’ folder from your local app data (in ‘/Users/<i>username</i>/AppData/Local/aja’).
 
 
 
