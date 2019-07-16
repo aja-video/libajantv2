@@ -3489,6 +3489,66 @@ NTV2FrameRate GetFrameRateFromScale(long scale, long duration, NTV2FrameRate pla
 	return result;
 }
 
+
+NTV2FrameRate GetNTV2FrameRateFromNumeratorDenominator (ULWord numerator, ULWord denominator)
+{
+	NTV2FrameRate ntv2Rate = NTV2_FRAMERATE_UNKNOWN;
+	if (denominator == 1)
+	{
+		numerator *= 1000;
+		denominator *= 1000;
+	}
+
+	switch (numerator)
+	{
+		case 120000:
+			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_12000;
+			else ntv2Rate = NTV2_FRAMERATE_11988;
+			break;
+
+		case 60000:
+			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_6000;
+			else ntv2Rate = NTV2_FRAMERATE_5994;
+			break;
+
+		case 50000:
+			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_5000;
+			break;
+
+		case 48000:
+			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_4800;
+			else ntv2Rate = NTV2_FRAMERATE_4795;
+			break;
+
+		case 30000:
+			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_3000;
+			else ntv2Rate = NTV2_FRAMERATE_2997;
+			break;
+
+		case 25000:
+			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_2500;
+			break;
+
+		case 24000:
+			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_2400;
+			else ntv2Rate = NTV2_FRAMERATE_2398;
+			break;
+
+		case 15000:
+			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_1500;
+			else ntv2Rate = NTV2_FRAMERATE_1498;
+			break;
+
+		default:
+			break;
+
+
+	}
+
+	return ntv2Rate;
+}
+
+
 NTV2FrameRate GetNTV2FrameRateFromVideoFormat(NTV2VideoFormat videoFormat)
 {
     NTV2FrameRate frameRate = NTV2_FRAMERATE_UNKNOWN;
