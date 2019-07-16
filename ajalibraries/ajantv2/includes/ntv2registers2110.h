@@ -38,6 +38,7 @@
 #define SAREK_2110_DECAPSULATOR_1               (0x216000/4)
 #define SAREK_2110_VOIPFEC              		(0x217000/4)
 #define SAREK_2110_VOIPFEC_CTL          		(0x218000/4)
+#define SAREK_2110_FRAMESYNC          			(0x219000/4)
 #define SAREK_2110_AUDIO_STREAMSELECT           (0x230000/4)
 
 #define SAREK_2110_TEST_GENERATOR               (0x308000/4)
@@ -209,6 +210,60 @@
 #define	kRegVfec_audio_pkt_read_intrvl	(0x14/4)
 #define	kRegVfec_delay_status			(0x20/4)
 #define	kRegVfec_delay_version			(0x3c/4)
+
+/////////////////////////////////////////////////////////////////////
+//
+// Frame Sync
+//
+/////////////////////////////////////////////////////////////////////
+
+#define kRegVFS_mm2s_control           	(0x00/4)
+#define kRegVFS_mm2s_status            	(0x04/4)
+#define kRegVFS_mm2s_index             	(0x14/4)
+#define kRegVFS_park_ptr               	(0x28/4)
+#define kRegVFS_version                	(0x2c/4)
+#define kRegVFS_s2mm_control            (0x30/4)
+#define kRegVFS_s2mm_status             (0x34/4)
+#define kRegVFS_s2mm_irq_mask          	(0x3c/4)
+#define kRegVFS_s2mm_index             	(0x44/4)
+#define kRegVFS_mm2s_vsize             	(0x50/4)
+#define kRegVFS_mm2s_hsize           	(0x54/4)
+#define kRegVFS_mm2s_frmdly_stride    	(0x58/4)
+#define kRegVFS_mm2s_start_addr01      	(0x5c/4)
+#define kRegVFS_mm2s_start_addr02      	(0x60/4)
+#define kRegVFS_mm2s_start_addr03      	(0x64/4)
+#define kRegVFS_mm2s_start_addr04      	(0x68/4)
+#define kRegVFS_mm2s_start_addr05      	(0x6c/4)
+#define kRegVFS_mm2s_start_addr06      	(0x70/4)
+#define kRegVFS_mm2s_start_addr07      	(0x74/4)
+#define kRegVFS_mm2s_start_addr08      	(0x78/4)
+#define kRegVFS_mm2s_start_addr09      	(0x7c/4)
+#define kRegVFS_mm2s_start_addr10      	(0x80/4)
+#define kRegVFS_mm2s_start_addr11      	(0x84/4)
+#define kRegVFS_mm2s_start_addr12      	(0x88/4)
+#define kRegVFS_mm2s_start_addr13      	(0x8c/4)
+#define kRegVFS_mm2s_start_addr14      	(0x90/4)
+#define kRegVFS_mm2s_start_addr15      	(0x94/4)
+#define kRegVFS_mm2s_start_addr16      	(0x98/4)
+#define kRegVFS_s2mm_vsize             	(0xa0/4)
+#define kRegVFS_s2mm_hsize           	(0xa4/4)
+#define kRegVFS_s2mm_frmdly_stride    	(0xa8/4)
+#define kRegVFS_s2mm_start_addr01      	(0xac/4)
+#define kRegVFS_s2mm_start_addr02      	(0xb0/4)
+#define kRegVFS_s2mm_start_addr03      	(0xb4/4)
+#define kRegVFS_s2mm_start_addr04      	(0xb8/4)
+#define kRegVFS_s2mm_start_addr05      	(0xbc/4)
+#define kRegVFS_s2mm_start_addr06      	(0xc0/4)
+#define kRegVFS_s2mm_start_addr07      	(0xc4/4)
+#define kRegVFS_s2mm_start_addr08      	(0xc8/4)
+#define kRegVFS_s2mm_start_addr09      	(0xcc/4)
+#define kRegVFS_s2mm_start_addr10      	(0xd0/4)
+#define kRegVFS_s2mm_start_addr11      	(0xd4/4)
+#define kRegVFS_s2mm_start_addr12      	(0xd8/4)
+#define kRegVFS_s2mm_start_addr13      	(0xdc/4)
+#define kRegVFS_s2mm_start_addr14      	(0xe0/4)
+#define kRegVFS_s2mm_start_addr15      	(0xe4/4)
+#define kRegVFS_s2mm_start_addr16      	(0xe8/4)
 
 /////////////////////////////////////////////////////////////////////
 //

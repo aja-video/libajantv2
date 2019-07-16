@@ -3,7 +3,7 @@
 
 @section	usingntv2watcher		“NTV2Watcher”
 
-This page describes how to use the <b>NTV2 Watcher</b> tool to interactively monitor an AJA device.
+This page describes how to use the <b>NTV2 Watcher</b> tool to interactively monitor and control an AJA device.
 
 @par	General Operation
 
@@ -56,6 +56,12 @@ Clicking on an inspector item in the list replaces the one that was previously s
 If you click back to return to an inspector that was previously in use, its state is exactly as it was left.
 (Only when the device is changed does a new inspector get started in its default state.)
 
+@bug	NTV2Watcher keeps some persistent settings data in a local config file.
+		If this file gets corrupted, it can cause NTV2Watcher to hang or crash upon startup.
+		To work around this issue:
+		-	<b>Linux</b> — Delete the ‘NTV2Watcher.conf’ file from your local app data folder ‘~/.config/aja’.
+		-	<b>Mac OS</b> — Delete the ‘NTV2Watcher’ folder from your local app data (in ‘/Users/<i>username</i>/Library/Application Support/AJA’).
+		-	<b>Windows</b> — Delete the ‘NTV2Watcher’ folder from your local app data (in ‘/Users/<i>username</i>/AppData/Local/aja’).
 
 
 
@@ -87,10 +93,12 @@ Frame buffer memory contents can be displayed in four ways:
 This inspector repeatedly monitors the indicated frame buffer for the selected channel or frame store.
 	-	It reads (via DMA) the frame buffer into host memory.
 		-	In <b>Raw</b> mode, or for planar pixel formats, it reads the entire 8MB/16MB/32MB/etc. buffer.
-			All other views read the frame buffer up to and including the last visible raster line.
+		-	All other views — <b>Line</b>, <b>Component</b>, <b>Waveform</b>, <b>Image</b>  — it reads the frame buffer up to
+			and including the last visible raster line.
 	-	The inspector attempts to refresh at the FrameStore’s current frame rate (as soon after the VBI as possible).
 		-	An indicator in the bottom-right corner of the main window’s status bar shows the average time between updates.
-	-	After each refresh, it compares the frame buffer contents to what was read the last time.
+		-	When the indicator exceeds the reciprocal of the frame rate, then the inspector is not frame-accurate.
+	-	After each refresh, it compares the frame buffer contents to what was read the last time:
 		-	The bottom left of the main window‘s status bar shows the number of raster lines that changed from the last frame
 			(except <b>Raw</b> view).
 		-	The data display highlights changed content with a brighter color (except <b>Image</b> view).
@@ -252,20 +260,25 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 		-	Drag operations started from inside the Frame Buffer inspector view cannot end outside the view (not yet supported).
 		-	Ctrl+Shift+Drag operations started from inside an existing selection in the Frame Buffer inspector
 			(<b>Line</b> or <b>Raw</b> views only) will copy the underlying raster data to where it’s dropped in the frame buffer.
-		-	Supported Drop Operations from outside the NTV2Watcher window:
-			-	For file drops, drop only one file at a time. Multiple files are not supported.
-			-	<b>Image Files</b> — The frame’s visible raster is replaced with the image.
-				-	If the image dimensions differ from the frame geometry, the image is scaled to fit.
-				-	Only <b>PNG</b> or <b>JPG</b> files are currently supported.
-			-	<b>Raw Data Files</b> — The frame’s buffer content is replaced byte-for-byte with the raw data from the file.
-				-	The file name must end with the <b>“.raw”</b> name extension.
+		-	Dropping files and/or folders from outside the NTV2Watcher window are supported.
+			(Prior to SDK 15.3, only one file having a particular name extension could be dropped at one time.)
+			-	One frame buffer is modified per dropped file.
+			-	The first frame buffer to be changed is determined by the <b>frame number</b> spinbox control.
+				Subsequent files are loaded into successive frame buffers.
+			-	The order of the files (and therefore which frame(s) get which file’s data) is host operating-system dependent.
+			-	Dropped folders have their immediate contents enumerated.
+			-	Symbolic links are skipped and not followed.
+			-	Files are first attempted to be loaded as <b>Image Files</b> <i>regardless of name extension</i>.
+				-	Most popular image formats are supported (e.g. <b>PNG</b>, <b>JPG</b>, <b>BMP</b>, etc.).
+				-	If the image is decoded and loaded successfully, the frame’s visible raster content is replaced with the image.
+				-	If the image dimensions differ from the frame geometry, the image is scaled to fit without altering its aspect ratio.
+				-	Hold down the <b>Shift</b> key when dropping the file(s) to have the image’s aspect ratio changed to fill the raster.
+					This will squish or stretch the image vertically or horizontally (or both).
+			-	All other readable files are treated as <b>Raw Binary Data Files</b>:
+				-	The frame’s buffer content is replaced byte-for-byte with the raw data from the file.
 				-	If the raw file is smaller than the frame buffer, only the bytes from the file will overwrite the frame buffer.
 					All subsequent content in the buffer will remain unchanged.
-				-	If the raw file is larger than the frame buffer, only the currently selected frame buffer on the device will be changed.
-					No memory on the device past the currently selected frame buffer will be touched.
-			-	<b>Image Data</b> — The frame’s visible raster is replaced with the dropped image.
-				-	If the image dimensions differ from the frame geometry, the image is scaled to fit.
-				-	Only <b>PNG</b> or <b>JPG</b> image data is currently supported.
+				-	If the raw file is larger than the frame buffer, only the current frame being written will be changed.
 
 
 

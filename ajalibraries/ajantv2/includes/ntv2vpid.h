@@ -122,6 +122,16 @@ public:
 											const NTV2VPIDXferChars	inXferChars = NTV2_VPID_TC_SDR_TV,
 											const NTV2VPIDColorimetry	inColorimetry = NTV2_VPID_Color_Rec709,
 											const NTV2VPIDLuminance	inLuminance = NTV2_VPID_Luminance_YCbCr);
+
+	static const std::string VersionString(VPIDVersion version);
+	static const std::string StandardString (VPIDStandard std);
+	static const std::string PictureRateString (VPIDPictureRate rate);
+	static const std::string SamplingString (VPIDSampling sample);
+	static const std::string ChannelString (VPIDChannel chan);
+	static const std::string DynamicRangeString (VPIDDynamicRange range);
+	static const std::string BitDepthString(VPIDBitDepth depth);
+	static const std::string LinkString(VPIDLink link);
+	static const std::string AudioString(VPIDAudio audio);
 	#if !defined (NTV2_DEPRECATE)
 		virtual VPIDDynamicRange NTV2_DEPRECATED_f(GetDynamicRange (void) const);
 		virtual void NTV2_DEPRECATED_f(SetDynamicRange (const VPIDDynamicRange inDynamicRange));	
