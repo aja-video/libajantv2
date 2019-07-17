@@ -2406,14 +2406,14 @@ typedef enum					// used in Virtual Register: kVRegInputSelect
     NTV2_Input2xDLHDSelect,
     NTV2_Input2x4kSelect,
     NTV2_Input4x4kSelect,
+    NTV2_Input2x8kSelect,
     NTV2_Input4x8kSelect,
     NTV2_InputAutoSelect,
     NTV2_MAX_NUM_InputVideoSelectEnums
 } NTV2InputVideoSelect;
 
 
-// not in use
-typedef enum
+typedef enum					// Deprecated
 {
     NTV2_PanModeOff,
     NTV2_PanModeReserved,
