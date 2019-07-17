@@ -1310,6 +1310,8 @@ bool CNTV2Card::SetQuadQuadSquaresEnable (const bool inValue, const NTV2Channel 
 		if (ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL2);
 		if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL3);
 		if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL4);
+		if(ok)	ok = SetQuadQuadFrameEnable(true, NTV2_CHANNEL1);
+		if(ok)	ok = SetQuadQuadFrameEnable(true, NTV2_CHANNEL3);
 	}
 	if(ok)	ok = WriteRegister(kRegGlobalControl3, ULWord(inValue ? 1 : 0), kRegMaskQuadQuadSquaresMode, kRegShiftQuadQuadSquaresMode);
 	return ok;
