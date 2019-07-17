@@ -2766,7 +2766,7 @@ private:
 				<< "HDMI Input: " << (inRegValue & BIT(1) ? "Stable" : "Unstable")			<< endl
 				<< "Color Mode: " << (inRegValue & BIT(2) ? "RGB" : "YCbCr")				<< endl
 				<< "Bitdepth: " << (inRegValue & BIT(3) ? "10-bit" : "8-bit")				<< endl
-				<< "Audio Channels: " << (inRegValue & BIT(12) ? 8 : 2)						<< endl
+				<< "Audio Channels: " << (inRegValue & BIT(12) ? 2 : 8)						<< endl
 				<< "Scan Mode: " << (inRegValue & BIT(13) ? "Progressive" : "Interlaced")	<< endl
 				<< "Standard: " << (inRegValue & BIT(14) ? "SD" : "HD")						<< endl
 				<< "Video Standard: " << sStds[vidStd]										<< endl
