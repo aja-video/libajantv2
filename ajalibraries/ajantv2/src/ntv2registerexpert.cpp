@@ -2718,7 +2718,7 @@ private:
 			ostringstream	oss;
             static const string	sHDMIStdV1[]	=	{	"1080i",	"720p",	"480i",	"576i",	"1080p",	"SXGA",	""	};
 			static const string	sHDMIStdV2V3[]	=	{	"1080i",	"720p",	"480i",	"576i",	"1080p",	"1556i",	"2Kx1080p",	"2Kx1080i",	"UHD",	"4K",	""	};
-			static const string	sVidRates[]		=	{	"",	"60.00",	"59.94",	"30.00",	"29.97",	"25.00",	"24.00",	"23.98",	"",	"",	""	};
+			static const string	sVidRates[]		=	{	"",	"60.00",	"59.94",	"30.00",	"29.97",	"25.00",	"24.00",	"23.98",	"50.00",	"48.00",	"47.95"	};
 			static const string	sSrcSampling[]	=	{	"YC422",	"RGB",	"YC420",	"Unknown/invalid"	};
 			static const string	sBitDepth[]		=	{	"8",		"10",	"12",		"Unknown/invalid"	};
             const ULWord	hdmiVers		(::NTV2DeviceGetHDMIVersion(inDeviceID));
@@ -2761,17 +2761,17 @@ private:
 			const uint32_t	vidStd	(hdmiVers >= 2 ? (inRegValue & kRegMaskHDMIInV2VideoStd) >> kRegShiftHDMIInputStatusV2Std : (inRegValue & kRegMaskHDMIInStandard) >> kRegShiftInputStatusStd);
 			const uint32_t	rate	((inRegValue & kRegMaskHDMIInFPS) >> kRegShiftInputStatusFPS);
 			static const string	sStds[32] = {"1080i", "720p", "480i", "576i", "1080p", "SXGA", "2K1080p", "2K1080i", "3840p", "4096p"};
-			static const string	sRates[32] = {"invalid", "60.00", "59.94", "30.00", "29.97", "25.00", "24.00", "23.98"};
+			static const string	sRates[32] = {"invalid", "60.00", "59.94", "30.00", "29.97", "25.00", "24.00", "23.98", "50.00", "48.00", "47.95" };
 			oss	<< "HDMI Input: " << (inRegValue & BIT(0) ? "Locked" : "Unlocked")			<< endl
 				<< "HDMI Input: " << (inRegValue & BIT(1) ? "Stable" : "Unstable")			<< endl
 				<< "Color Mode: " << (inRegValue & BIT(2) ? "RGB" : "YCbCr")				<< endl
 				<< "Bitdepth: " << (inRegValue & BIT(3) ? "10-bit" : "8-bit")				<< endl
-				<< "Audio Channels: " << (inRegValue & BIT(12) ? 8 : 2)						<< endl
+				<< "Audio Channels: " << (inRegValue & BIT(12) ? 2 : 8)						<< endl
 				<< "Scan Mode: " << (inRegValue & BIT(13) ? "Progressive" : "Interlaced")	<< endl
 				<< "Standard: " << (inRegValue & BIT(14) ? "SD" : "HD")						<< endl
 				<< "Video Standard: " << sStds[vidStd]										<< endl
 				<< "Protocol: " << (inRegValue & BIT(27) ? "DVI" : "HDMI")					<< endl
-				<< "Video Rate : " << (rate < 8 ? sRates[rate] : string("invalid"));
+				<< "Video Rate : " << (rate < 11 ? sRates[rate] : string("invalid"));
 			return oss.str();
 		}
 		virtual	~DecodeHDMIInputStatus()	{}
