@@ -528,7 +528,8 @@ byte-pairs transmitted by the <b>Anc Inspector</b>:
 
 	@note	Successful caption rendering relies on getting a continuous byte pair sequence (no dropped frames).
 			If the <b>Anc Inspector</b>’s refresh rate lags the frame rate, byte pairs will be
-			skipped, resulting in garbled and unreadable captions. You may need to hide some of the 
+			skipped, resulting in garbled and unreadable captions. Hiding one or more of the
+			Anc Inspector’s viewers (VANC, Anc Registers, F1, F2) can save CPU cycles.
 
 To freeze the <b>Byte-Pair Stream</b> (perhaps to permit interacting with it manually),
 leave the <b>Caption Viewer</b> window open, but switch NTV2Watcher to an Inspector other than

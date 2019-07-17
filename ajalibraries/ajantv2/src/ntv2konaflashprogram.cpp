@@ -2460,7 +2460,7 @@ void CNTV2KonaFlashProgram::FullProgram(std::vector<uint8_t> & dataBuffer)
 	{
 		uint32_t baseAddress = 0;
 
-		printf("\nErasing ROM\n");
+		printf("Erasing ROM\n");
 		EraseChip();
 		BankSelect currentBank = BANK_0;
 		SetBankSelect(currentBank);
@@ -2497,7 +2497,7 @@ void CNTV2KonaFlashProgram::FullProgram(std::vector<uint8_t> & dataBuffer)
 			percentComplete = (count*100)/twoFixtysixBlockSizeCount;
 
             WriteRegister(kVRegFlashStatus, count);
-			if(!_bQuiet)
+			if(!_bQuiet && (count%100 == 0))
 			{
 				printf("Program status: %i%%\r", percentComplete);
 				fflush(stdout);
