@@ -398,7 +398,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	{
 		byte3 |= NTV2_IS_2K_1080_VIDEO_FORMAT (outputFormat) ? (1UL << 6) : 0;	//	0x40
 		byte3 |= NTV2_IS_4K_4096_VIDEO_FORMAT (outputFormat) ? (1UL << 6) : 0;	//	0x40
-        byte3 |= NTV2_IS_8K_VIDEO_FORMAT (outputFormat) ? (1UL << 6) : 0;    //    0x40
+        byte3 |= NTV2_IS_UHD2_FULL_VIDEO_FORMAT (outputFormat) ? (1UL << 6) : 0;    //    0x40
 	}
 
 	//	Aspect ratio
