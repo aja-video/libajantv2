@@ -6915,6 +6915,11 @@ typedef enum
 				inline bool				IsOutput (void) const								{return NTV2_IS_OUTPUT_CROSSPOINT (acCrosspoint);}
 
 				/**
+					@return		The NTV2Mode, whether NTV2_MODE_OUTPUT, NTV2_MODE_INPUT or NTV2_MODE_INVALID (if stopped).
+				**/
+				inline NTV2Mode			GetMode (void) const								{return IsStopped() ? NTV2_MODE_INVALID : (IsInput() ? NTV2_MODE_INPUT : NTV2_MODE_OUTPUT);}
+
+				/**
 					@return		My channel.
 				**/
 				NTV2Channel				GetChannel (void) const;
