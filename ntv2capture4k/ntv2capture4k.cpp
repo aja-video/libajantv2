@@ -92,7 +92,7 @@ NTV2Capture4K::~NTV2Capture4K ()
 
 	if (!mDoMultiFormat)
 	{
-		mDevice.ReleaseStreamForApplication(kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid()));
+		mDevice.ReleaseStreamForApplication(kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
 		mDevice.SetEveryFrameServices(mSavedTaskMode);		//	Restore prior task mode
 	}
 
@@ -128,7 +128,7 @@ AJAStatus NTV2Capture4K::Init (void)
 
 	if (!mDoMultiFormat)
 	{
-		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))
+		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 			return AJA_STATUS_BUSY;							//	Another app is using the device
 		mDevice.GetEveryFrameServices (mSavedTaskMode);		//	Save the current state before we change it
 	}

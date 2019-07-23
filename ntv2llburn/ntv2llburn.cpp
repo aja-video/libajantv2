@@ -65,7 +65,7 @@ NTV2LLBurn::~NTV2LLBurn ()
 	if (!mDoMultiChannel)
 	{
 		mDevice.SetEveryFrameServices (mSavedTaskMode);										//	Restore prior service level
-		mDevice.ReleaseStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ()));	//	Release the device
+		mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));	//	Release the device
 	}
 
 	//	Don't leave the audio system active after we exit
@@ -110,7 +110,7 @@ AJAStatus NTV2LLBurn::Init (void)
 	mDevice.GetStreamingApplication (&appSignature, &appPID);	//	Who currently "owns" the device?
 	if (!mDoMultiChannel)
 	{
-		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))
+		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 		{
 			cerr << "## ERROR:  Unable to acquire device because another app (pid " << appPID << ") owns it" << endl;
 			return AJA_STATUS_BUSY;		//	Some other app is using the device

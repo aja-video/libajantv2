@@ -241,7 +241,7 @@ void NTV2EncodeHEVCVif::Quit (void)
     mDevice.SetMode(mInputChannel, NTV2_MODE_DISPLAY, false);
 
     //  Release board
-	mDevice.ReleaseStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ()));
+	mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
 	mDevice.SetEveryFrameServices (mSavedTaskMode);		//	Restore prior task mode
 
     //  Close output files
@@ -270,7 +270,7 @@ AJAStatus NTV2EncodeHEVCVif::Init (void)
     { cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not found" << endl;  return AJA_STATUS_OPEN; }
     
     //  Grab board in a shared environment
-	if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))
+	if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 		return AJA_STATUS_BUSY;							//	Another app is using the device
 	mDevice.GetEveryFrameServices (mSavedTaskMode);		//	Save the current state before we change it
     mDevice.SetEveryFrameServices (NTV2_OEM_TASKS);		//	Since this is an OEM demo, use the OEM service level

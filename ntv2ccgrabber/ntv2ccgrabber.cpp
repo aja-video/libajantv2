@@ -88,7 +88,7 @@ NTV2CCGrabber::~NTV2CCGrabber ()
 	if (!mConfig.fDoMultiFormat)
 	{
 		mDevice.SetEveryFrameServices(mSavedTaskMode);
-		mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<uint32_t>(AJAProcess::GetPid()));
+		mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
 	}
 
 }	//	destructor
@@ -151,7 +151,7 @@ AJAStatus NTV2CCGrabber::Init (void)
 
 	if (!mConfig.fDoMultiFormat)
 	{
-		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))
+		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 			{cerr << "## ERROR:  Cannot acquire -- device busy" << endl;  return AJA_STATUS_BUSY;}	//	Some other app owns the device
 		mDevice.GetEveryFrameServices(mSavedTaskMode);	//	Save the current task mode
 	}

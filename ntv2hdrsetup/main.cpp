@@ -99,7 +99,7 @@ int main (int argc, const char ** argv)
     device.GetEveryFrameServices (savedTaskMode);             // Save the current device state
     device.GetStreamingApplication (&appSignature, &appPID);  // Who currently "owns" the device?
 
-    if (!device.AcquireStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))
+    if (!device.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
     {
         cerr << "## ERROR:  Unable to acquire device because another app (pid " << appPID << ") owns it" << endl;
         return AJA_STATUS_BUSY;  // Some other app is using the device
@@ -126,7 +126,7 @@ int main (int argc, const char ** argv)
     CNTV2DemoCommon::WaitForEnterKeyPress();
 
     device.SetEveryFrameServices (savedTaskMode);  // Restore prior service level
-    device.ReleaseStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ()));  // Release the device
+    device.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));  // Release the device
 
     return AJA_SUCCESS (status) ? 0 : 2;  // Return zero upon success -- otherwise 2
 

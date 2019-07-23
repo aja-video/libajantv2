@@ -207,14 +207,13 @@ class NTV2Player
 		bool						mGlobalQuit;				///< @brief	Set "true" to gracefully stop
 		bool						mDoLevelConversion;			///< @brief	Demonstrates a level A to level B conversion
 		bool						mDoMultiChannel;			///< @brief	Demonstrates how to configure the board for multi-format
-		bool						mTCUseVITC;					///< @brief	True=VITC, false=LTC
 		AJATimeCodeBurn				mTCBurner;					///< @brief	My timecode burner
 		NTV2TCIndexes				mTCIndexes;					///< @brief	Timecode indexes to use
 		uint32_t					mVideoBufferSize;			///< @brief	My video buffer size, in bytes
 		uint32_t					mAudioBufferSize;			///< @brief	My audio buffer size, in bytes
 
 		uint8_t **					mTestPatternVideoBuffers;	///< @brief	My test pattern buffers
-		int32_t						mNumTestPatterns;			///< @brief	Number of test patterns to cycle through
+		uint32_t					mNumTestPatterns;			///< @brief	Number of test patterns to cycle through
 
 		AVDataBuffer				mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
 		MyCirculateBuffer			mAVCircularBuffer;						///< @brief	My ring buffer

@@ -95,7 +95,7 @@ NTV2BurnBoardToBoard::~NTV2BurnBoardToBoard ()
 	if (!mDoMultiChannel)
 	{
 		mInDevice.SetEveryFrameServices (mSavedTaskMode);										//	Restore prior service level
-		mInDevice.ReleaseStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ()));	//	Release the device
+		mInDevice.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));	//	Release the device
 	}
 
 }	//	destructor
@@ -131,7 +131,7 @@ AJAStatus NTV2BurnBoardToBoard::Init (void)
 	mInDevice.GetEveryFrameServices (mSavedTaskMode);				//	Save the current device state
 	if (!mDoMultiChannel)
 	{
-		if (!mInDevice.AcquireStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))
+		if (!mInDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 		{
 			cerr << "## ERROR:  Unable to acquire device because another app (pid " << appPID << ") owns it" << endl;
 			return AJA_STATUS_BUSY;		//	Some other app is using the device

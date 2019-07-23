@@ -97,7 +97,7 @@ NTV2Player8K::~NTV2Player8K (void)
 	}	//	for each buffer in the ring
 
 	mDevice.SetEveryFrameServices (NTV2_STANDARD_TASKS);										//	Restore the saved service level
-	mDevice.ReleaseStreamForApplication (AJA_FOURCC ('D','E','M','O'), static_cast <uint32_t> (AJAProcess::GetPid ()));	//	Release the device
+	mDevice.ReleaseStreamForApplication (AJA_FOURCC ('D','E','M','O'), static_cast<int32_t>(AJAProcess::GetPid()));	//	Release the device
 
 }	//	destructor
 
@@ -149,7 +149,7 @@ AJAStatus NTV2Player8K::Init (void)
 
 	if (!mDoMultiChannel)
 	{
-		if (!mDevice.AcquireStreamForApplication (AJA_FOURCC ('D','E','M','O'), static_cast <uint32_t> (AJAProcess::GetPid ())))
+		if (!mDevice.AcquireStreamForApplication (AJA_FOURCC ('D','E','M','O'), static_cast<int32_t>(AJAProcess::GetPid())))
 			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
 		mDevice.GetEveryFrameServices (mPreviousFrameServices);	//	Save the current service level
 	}

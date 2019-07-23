@@ -86,7 +86,7 @@ void NTV2PlaybackDPX::closeDevice()
 {
     mDevice.Close();
     //    mDevice.SetEveryFrameServices (mPreviousFrameServices);										//	Restore the saved service level
-    //    mDevice.ReleaseStreamForApplication (AJA_FOURCC ('D','E','M','O'), static_cast <uint32_t> (AJAProcess::GetPid ()));	//	Release the device
+    //    mDevice.ReleaseStreamForApplication (AJA_FOURCC ('D','E','M','O'), static_cast<int32_t>(AJAProcess::GetPid()));	//	Release the device
 }
 // run()
 // entry point for thread starting

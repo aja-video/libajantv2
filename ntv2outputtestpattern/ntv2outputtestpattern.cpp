@@ -42,7 +42,7 @@ NTV2OutputTestPattern::~NTV2OutputTestPattern ()
 {
 	//	Restore the prior service level...
 	mDevice.SetEveryFrameServices (mSavedTaskMode);													//	Restore prior service level
-	mDevice.ReleaseStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ()));	//	Release the device
+	mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));	//	Release the device
 
 }	//	destructor
 
@@ -56,7 +56,7 @@ AJAStatus NTV2OutputTestPattern::Init ()
     if (!mDevice.IsDeviceReady (false))
 		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
-	if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))
+	if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 	{
 		cerr << "## ERROR:  Unable to acquire device because another app owns it" << endl;
 		return AJA_STATUS_BUSY;		//	Some other app is using the device

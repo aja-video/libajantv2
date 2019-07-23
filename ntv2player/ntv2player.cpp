@@ -9,6 +9,7 @@
 #include "ntv2formatdescriptor.h"
 #include "ntv2debug.h"
 #include "ntv2testpatterngen.h"
+#include "ajabase/system/debug.h"
 #include "ajabase/common/timecode.h"
 #include "ajabase/system/memory.h"
 #include "ajabase/system/systemtime.h"
@@ -20,7 +21,20 @@
 
 using namespace std;
 
+//	Convenience macros for EZ logging:
+#define	TCFAIL(_expr_)	AJA_sERROR  (AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
+#define	TCWARN(_expr_)	AJA_sWARNING(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
+#define	TCNOTE(_expr_)	AJA_sNOTICE	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
+#define	TCINFO(_expr_)	AJA_sINFO	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
+#define	TCDBG(_expr_)	AJA_sDEBUG	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
+#define	PLFAIL(_expr_)	AJA_sERROR  (AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	PLWARN(_expr_)	AJA_sWARNING(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	PLNOTE(_expr_)	AJA_sNOTICE	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	PLINFO(_expr_)	AJA_sINFO	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	PLDBG(_expr_)	AJA_sDEBUG	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+
 #define NTV2_ANCSIZE_MAX	(0x2000)
+
 /**
 	@brief	The maximum number of bytes of 48KHz audio that can be transferred for a single frame.
 			Worst case, assuming 16 channels of audio (max), 4 bytes per sample, and 67 msec per frame
@@ -76,7 +90,6 @@ NTV2Player::NTV2Player (const string &				inDeviceSpecifier,
 		mGlobalQuit					(false),
 		mDoLevelConversion			(inLevelConversion),
 		mDoMultiChannel				(inDoMultiChannel),
-		mTCUseVITC					(true),
 		mVideoBufferSize			(0),
 		mAudioBufferSize			(0),
 		mTestPatternVideoBuffers	(NULL),
@@ -126,7 +139,7 @@ NTV2Player::~NTV2Player (void)
 	if (!mDoMultiChannel && mDevice.IsOpen())
 	{
 		mDevice.SetEveryFrameServices (mSavedTaskMode);			//	Restore the previously saved service level
-		mDevice.ReleaseStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ()));	//	Release the device
+		mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));	//	Release the device
 	}
 }	//	destructor
 
@@ -160,7 +173,7 @@ AJAStatus NTV2Player::Init (void)
 
 	if (!mDoMultiChannel)
 	{
-		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))
+		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
 
 		mDevice.GetEveryFrameServices (mSavedTaskMode);		//	Save the current service level
@@ -363,9 +376,10 @@ void NTV2Player::RouteOutputSignal ()
 			mDevice.SetSDITransmitEnable (mOutputChannel, true);
 
 		mDevice.Connect (::GetSDIOutputInputXpt (mOutputChannel, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt);
-		mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (mOutputChannel, !mTCUseVITC));
+		mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (mOutputChannel, /*useVITC=*/true));
+		mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (mOutputChannel, /*useVITC=*/false));
 		if (isInterlaced)	//	Not really necessary -- NTV2 devices send VITC2 if sending VITC1
-			mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (mOutputChannel, !mTCUseVITC, true));
+			mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (mOutputChannel, /*useVITC=*/false, true));
 		mDevice.SetSDIOutputStandard (mOutputChannel, outputStandard);
 	}
 	else
@@ -386,9 +400,10 @@ void NTV2Player::RouteOutputSignal ()
 
 			mDevice.Connect (::GetSDIOutputInputXpt (chan, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt);
 			mDevice.SetSDIOutputStandard (chan, outputStandard);
-			mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (chan, !mTCUseVITC));	//	Add this SDI spigot's timecode index
+			mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (chan, /*useVITC=*/true));
+			mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (chan, /*useVITC=*/false));	//	Add this SDI spigot's timecode index
 			if (isInterlaced)	//	Not really necessary -- NTV2 devices send VITC2 if sending VITC1
-				mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (chan, !mTCUseVITC, true));
+				mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (chan, /*useVITC=*/false, true));
 		}	//	for each SDI output spigot
 
 		//	And connect analog video output, if the device has one...
@@ -402,6 +417,7 @@ void NTV2Player::RouteOutputSignal ()
             || ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v4))
                 mDevice.Connect (::GetOutputDestInputXpt (NTV2_OUTPUTDESTINATION_HDMI),  isRGB ? cscVidOutXpt : fsVidOutXpt);
 	}
+	TCDBG(mTCIndexes);
 
 }	//	RouteOutputSignal
 
@@ -453,6 +469,7 @@ void NTV2Player::PlayFrames (void)
 	const bool				isPAL		(NTV2_IS_PAL_VIDEO_FORMAT(mVideoFormat));
 	AUTOCIRCULATE_TRANSFER	xferInfo;
 
+	PLNOTE("Started");
 	if (mAncType != AJAAncillaryDataType_Unknown)
 	{
 		xferInfo.acANCBuffer.Allocate(NTV2_ANCSIZE_MAX);
@@ -509,6 +526,7 @@ void NTV2Player::PlayFrames (void)
 				{	//	Set bit 27 of Hi word (PAL) or Lo word (NTSC)
 					if (isPAL) tcF2.fHi |=  BIT(27);	else tcF2.fLo |=  BIT(27);
 				}
+				TCDBG("Playing " << tcF1);
 
 				//	Put timecodes into xfer object...
 				for (NTV2TCIndexesConstIter it(mTCIndexes.begin());  it != mTCIndexes.end();  ++it)
@@ -529,6 +547,7 @@ void NTV2Player::PlayFrames (void)
 	//	Stop AutoCirculate...
 	mDevice.AutoCirculateStop(mOutputChannel);
 	//delete [] fAncBuffer;
+	PLNOTE("Ended");
 
 }	//	PlayFrames
 
@@ -645,7 +664,9 @@ void NTV2Player::ProduceFrames (void)
 	ULWord	testPatternIndex	(0);
 
 	AJATimeBase	timeBase (CNTV2DemoCommon::GetAJAFrameRate (::GetNTV2FrameRateFromVideoFormat (mVideoFormat)));
+	NTV2TestPatternNames tpNames(NTV2TestPatternGen::getTestPatternNames());
 
+	PLNOTE("Started");
 	while (!mGlobalQuit)
 	{
 		AVDataBuffer *	frameData	(mAVCircularBuffer.StartProduceNextBuffer ());
@@ -670,24 +691,28 @@ void NTV2Player::ProduceFrames (void)
 
 		//	Burn the current timecode into the test pattern image that's now in my video buffer...
 		mTCBurner.BurnTimeCode (reinterpret_cast <char *> (frameData->fVideoBuffer), timeCodeString.c_str (), 80);
+		TCDBG("F" << DEC0N(mCurrentFrame-1,6) << ": " << NTV2_RP188(frameData->fRP188Data) << ": " << timeCodeString);
 
 		//	Generate audio tone data...
-		frameData->fAudioBufferSize		= mWithAudio ? AddTone (frameData->fAudioBuffer) : 0;
+		frameData->fAudioBufferSize		= mWithAudio ? AddTone(frameData->fAudioBuffer) : 0;
 
 		//	Every few seconds, change the test pattern and tone frequency...
-		const double	currentTime	(timeBase.FramesToSeconds (mCurrentFrame));
+		const double	currentTime	(timeBase.FramesToSeconds(mCurrentFrame));
 		if (currentTime > timeOfLastSwitch + 4.0)
 		{
 			frequencyIndex = (frequencyIndex + 1) % gNumFrequencies;
 			testPatternIndex = (testPatternIndex + 1) % mNumTestPatterns;
-			mToneFrequency = gFrequencies [frequencyIndex];
+			mToneFrequency = gFrequencies[frequencyIndex];
 			timeOfLastSwitch = currentTime;
+			PLINFO("F" << DEC0N(mCurrentFrame,6) << ": " << timeCodeString << ": tone=" << mToneFrequency
+					<< "Hz, pattern='" << tpNames.at(testPatternIndex) << "'");
 		}	//	if time to switch test pattern & tone frequency
 
 		//	Signal that I'm done producing the buffer -- it's now available for playout...
 		mAVCircularBuffer.EndProduceNextBuffer ();
 
 	}	//	loop til mGlobalQuit goes true
+	PLNOTE("Ended");
 
 }	//	ProduceFrames
 
@@ -742,15 +767,15 @@ ULWord NTV2Player::GetRP188RegisterForOutput (const NTV2OutputDestination inOutp
 {
 	switch (inOutputDest)
 	{
-		case NTV2_OUTPUTDESTINATION_SDI1:	return kRegRP188InOut1DBB;	break;	//	reg 29
-		case NTV2_OUTPUTDESTINATION_SDI2:	return kRegRP188InOut2DBB;	break;	//	reg 64
-		case NTV2_OUTPUTDESTINATION_SDI3:	return kRegRP188InOut3DBB;	break;	//	reg 268
-		case NTV2_OUTPUTDESTINATION_SDI4:	return kRegRP188InOut4DBB;	break;	//	reg 273
-		case NTV2_OUTPUTDESTINATION_SDI5:	return kRegRP188InOut5DBB;	break;	//	reg 29
-		case NTV2_OUTPUTDESTINATION_SDI6:	return kRegRP188InOut6DBB;	break;	//	reg 64
-		case NTV2_OUTPUTDESTINATION_SDI7:	return kRegRP188InOut7DBB;	break;	//	reg 268
-		case NTV2_OUTPUTDESTINATION_SDI8:	return kRegRP188InOut8DBB;	break;	//	reg 273
-		default:							return 0;					break;
+		case NTV2_OUTPUTDESTINATION_SDI1:	return kRegRP188InOut1DBB;	//	reg 29
+		case NTV2_OUTPUTDESTINATION_SDI2:	return kRegRP188InOut2DBB;	//	reg 64
+		case NTV2_OUTPUTDESTINATION_SDI3:	return kRegRP188InOut3DBB;	//	reg 268
+		case NTV2_OUTPUTDESTINATION_SDI4:	return kRegRP188InOut4DBB;	//	reg 273
+		case NTV2_OUTPUTDESTINATION_SDI5:	return kRegRP188InOut5DBB;	//	reg 29
+		case NTV2_OUTPUTDESTINATION_SDI6:	return kRegRP188InOut6DBB;	//	reg 64
+		case NTV2_OUTPUTDESTINATION_SDI7:	return kRegRP188InOut7DBB;	//	reg 268
+		case NTV2_OUTPUTDESTINATION_SDI8:	return kRegRP188InOut8DBB;	//	reg 273
+		default:							return 0;
 	}	//	switch on output destination
 
 }	//	GetRP188RegisterForOutput

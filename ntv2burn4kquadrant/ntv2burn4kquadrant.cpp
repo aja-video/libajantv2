@@ -80,12 +80,12 @@ NTV2Burn4KQuadrant::~NTV2Burn4KQuadrant ()
 	}	//	for each buffer in the ring
 
 	mInputDevice.SetEveryFrameServices (mInputSavedTaskMode);										//	Restore prior service level
-	mInputDevice.ReleaseStreamForApplication (gAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ()));	//	Release the device
+	mInputDevice.ReleaseStreamForApplication (gAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));	//	Release the device
 
 	if (!mSingleDevice)
 	{
 		mOutputDevice.SetEveryFrameServices (mOutputSavedTaskMode);										//	Restore prior service level
-		mOutputDevice.ReleaseStreamForApplication (gAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ()));	//	Release the device
+		mOutputDevice.ReleaseStreamForApplication (gAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));	//	Release the device
 	}
 
 }	//	destructor
@@ -143,14 +143,14 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 		mOutputChannel = NTV2_CHANNEL5;
 	}
 
-	if (!mInputDevice.AcquireStreamForApplication (gAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))
+	if (!mInputDevice.AcquireStreamForApplication (gAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 		{cerr << "## ERROR:  Input device '" << mInputDeviceSpecifier << "' is in use by another application" << endl;  return AJA_STATUS_BUSY;}
 	mInputDevice.GetEveryFrameServices (mInputSavedTaskMode);	//	Save the current state before changing it
 	mInputDevice.SetEveryFrameServices (NTV2_OEM_TASKS);		//	Since this is an OEM demo, use the OEM service level
 
 	if (!mSingleDevice)
 	{
-		if (!mOutputDevice.AcquireStreamForApplication (gAppSignature, static_cast <uint32_t> (AJAProcess::GetPid ())))
+		if (!mOutputDevice.AcquireStreamForApplication (gAppSignature, static_cast <int32_t>(AJAProcess::GetPid())))
 			{cerr << "## ERROR:  Output device '" << mOutputDeviceSpecifier << "' is in use by another application" << endl;  return AJA_STATUS_BUSY;}
 
 		mOutputDevice.GetEveryFrameServices (mOutputSavedTaskMode);		//	Save the current state before changing it

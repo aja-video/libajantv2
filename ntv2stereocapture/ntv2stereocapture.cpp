@@ -32,7 +32,7 @@ NTV2StereoCapture::~NTV2StereoCapture ()
     mDevice.UnsubscribeOutputVerticalEvent(NTV2_CHANNEL1);
 
 	mDevice.SetEveryFrameServices(mPreviousFrameServices);
-	mDevice.ReleaseStreamForApplication(AJA_FOURCC('D','E','M','O'), (uint32_t)AJAProcess::GetPid());
+	mDevice.ReleaseStreamForApplication(AJA_FOURCC('D','E','M','O'), static_cast<int32_t>(AJAProcess::GetPid()));
 
 }	//	destructor
 
@@ -64,7 +64,7 @@ AJAStatus NTV2StereoCapture::Init (const CNTV2DeviceScanner & inBoardScanner, co
     if (!mDevice.Open (info.deviceIndex, false))
 		return AJA_STATUS_OPEN;
 
-	if (!mDevice.AcquireStreamForApplication(AJA_FOURCC('D','E','M','O'), (uint32_t)AJAProcess::GetPid()))
+	if (!mDevice.AcquireStreamForApplication(AJA_FOURCC('D','E','M','O'), static_cast<int32_t>(AJAProcess::GetPid())))
 	{
 		mDevice.Close();
 		return AJA_STATUS_BUSY;
