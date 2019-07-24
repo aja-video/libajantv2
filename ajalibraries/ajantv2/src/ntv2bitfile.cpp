@@ -399,7 +399,7 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
         case DEVICE_ID_KONAHDMI:		return "kona_hdmi_4rx";
         case DEVICE_ID_KONA5:           return "kona5";
         case DEVICE_ID_KONA5_4X12G:     return "kona5_12g";
-		case DEVICE_ID_CORVID44_12G:    return "corvid44_12g";
+		case DEVICE_ID_CORVID44_12G:    return "c44_12g";
         default:
 			break;
 	}
