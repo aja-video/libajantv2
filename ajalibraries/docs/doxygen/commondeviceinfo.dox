@@ -382,8 +382,14 @@
 		Mode or not.
 	-	Call CNTV2Card::SetMultiFormatMode to change the mode.
 
+	@note	This “Independent Mode” doesn’t mean that the FrameStores cannot interfere with each other’s
+			frame buffer memory. FrameStores have equal access to any frame buffer in device SDRAM.
+			Therefore, if you use frame buffers 0…5 for Channel 1, you must take care to <i>not</i> use
+			frames 0…5 for any other channel on the device (unless you have good reason to do so).
+			See \ref vidop-fbconflict (below) for more information.
+
 	@note	In <b>Multi-Format Mode</b>, because NTV2 devices only have one hardware clock for driving the
-			outputs, all playout video formats must be in the same clock family.
+			outputs, all <i>output</i> video formats must be in the same clock family.
 			Call ::IsMultiFormatCompatible(const NTV2VideoFormat, const NTV2VideoFormat) to find out if two
 			video formats are multi-format compatible.
 			Call ::IsMultiFormatCompatible(const NTV2FrameRate, const NTV2FrameRate) to see if two frame
