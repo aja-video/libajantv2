@@ -1266,7 +1266,7 @@ bool CNTV2MacDriverInterface::IsDefaultDeviceForPID( int32_t pid )
 
 
 //--------------------------------------------------------------------------------------------------------------------
-//	LockFormat
+//	LockFormat	- deprecated
 //
 //	For Kona this is currently a no-op
 //	For IoHD this will for bitfile swaps / Isoch channel rebuilds based on vidoe mode / video format
