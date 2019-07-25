@@ -118,6 +118,8 @@ public:
 	}
 	std::string & GetMCSInfo()
 	{
+		std::string::size_type f = _mcsInfo.find("\xFF\xFF");
+		_mcsInfo = _mcsInfo.substr(0, f);
 		return _mcsInfo;
 	}
 
