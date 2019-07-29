@@ -884,6 +884,7 @@ private:
 		DefineRegName	(kVRegLUTType,							"kVRegLUTType");
 		DefineRegName	(kVRegRGB10Range,						"kVRegRGB10Range");
 		DefineRegName	(kVRegRGB10Endian,						"kVRegRGB10Endian");
+		DefineRegName	(kVRegFanControl,						"kVRegFanControl");
 		DefineRegName	(kVRegBitFileDownload,					"kVRegBitFileDownload");
 		DefineRegName	(kVRegSaveRegistersToRegistry,			"kVRegSaveRegistersToRegistry");
 		DefineRegName	(kVRegRecallRegistersFromRegistry,		"kVRegRecallRegistersFromRegistry");

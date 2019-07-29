@@ -127,7 +127,7 @@ public:
 
 	AJA_VIRTUAL bool	SetDefaultDeviceForPID( int32_t pid );
 	AJA_VIRTUAL bool	IsDefaultDeviceForPID( int32_t pid );
-	AJA_VIRTUAL bool	LockFormat( void );
+	AJA_VIRTUAL bool	LockFormat( void );		// deprecated
 	AJA_VIRTUAL bool	WaitForInterrupt( INTERRUPT_ENUMS type,  ULWord timeout = 50 );
 	AJA_VIRTUAL bool	GetInterruptCount( INTERRUPT_ENUMS eInterrupt, ULWord *pCount );
 	AJA_VIRTUAL bool	WaitForChangeEvent( UInt32 timeout = 0 );

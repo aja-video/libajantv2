@@ -50,6 +50,7 @@ typedef enum
 	kVRegLUTType							= VIRTUALREG_START+44,		/* the current LUT function loaded into hardware */
 	kVRegRGB10Range							= VIRTUALREG_START+45,		/* the user-selected 10-bit RGB range (SMPTE 64-940 or Full 0-1023) */
 	kVRegRGB10Endian						= VIRTUALREG_START+46,		/* the user selected 10-bit RGB endian */
+	kVRegFanControl							= VIRTUALREG_START+47,		/* the user fan control setting */
 
 	// Windows platform custom section
 	kVRegBitFileDownload					= VIRTUALREG_START+50,		// NTV2BitfileType

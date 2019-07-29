@@ -2242,6 +2242,10 @@ bool NTV2TestPatternGen::DrawTestPattern (NTV2TestPatternSelect pattNum, uint32_
 	_frameHeight = frameHeight;
 	_pixelFormat = pixelFormat;
 	mNumPixels = frameWidth;
+	
+	// test for incompatible 12Bit pattern settings
+	if (NTV2_IS_12B_PATTERN(pattNum) && (_frameWidth < 1920 || _pixelFormat != NTV2_FBF_48BIT_RGB))
+		return bResult;
 
 	_linePitch     = CalcRowBytesForFormat(_pixelFormat, _frameWidth);					// number of BYTES per line of frame buffer format
 	if(_linePitch == 0)
