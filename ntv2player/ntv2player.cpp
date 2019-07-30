@@ -69,10 +69,11 @@ NTV2Player::NTV2Player (const string &				inDeviceSpecifier,
 						const bool					inEnableVanc,
 						const bool					inLevelConversion,
 						const bool					inDoMultiChannel,
+						const bool					inXmitLTC,
 						const AJAAncillaryDataType	inSendHDRType)
 
-	:	mConsumerThread				(NULL),
-		mProducerThread				(NULL),
+	:	mConsumerThread				(AJA_NULL),
+		mProducerThread				(AJA_NULL),
 		mCurrentFrame				(0),
 		mCurrentSample				(0),
 		mToneFrequency				(440.0),
@@ -90,9 +91,10 @@ NTV2Player::NTV2Player (const string &				inDeviceSpecifier,
 		mGlobalQuit					(false),
 		mDoLevelConversion			(inLevelConversion),
 		mDoMultiChannel				(inDoMultiChannel),
+		mXmitLTC					(inXmitLTC),
 		mVideoBufferSize			(0),
 		mAudioBufferSize			(0),
-		mTestPatternVideoBuffers	(NULL),
+		mTestPatternVideoBuffers	(AJA_NULL),
 		mNumTestPatterns			(0),
 		mAncType					(inSendHDRType)
 {
@@ -109,16 +111,16 @@ NTV2Player::~NTV2Player (void)
 
 	//	Free my threads and buffers...
 	delete mConsumerThread;
-	mConsumerThread = NULL;
+	mConsumerThread = AJA_NULL;
 	delete mProducerThread;
-	mProducerThread = NULL;
+	mProducerThread = AJA_NULL;
 
 	if (mTestPatternVideoBuffers)
 	{
-		for (int32_t ndx = 0;  ndx < mNumTestPatterns;  ndx++)
+		for (uint32_t ndx(0);  ndx < mNumTestPatterns;  ndx++)
 			delete [] mTestPatternVideoBuffers [ndx];
 		delete [] mTestPatternVideoBuffers;
-		mTestPatternVideoBuffers = NULL;
+		mTestPatternVideoBuffers = AJA_NULL;
 		mNumTestPatterns = 0;
 	}
 
@@ -127,12 +129,12 @@ NTV2Player::~NTV2Player (void)
 		if (mAVHostBuffer [ndx].fVideoBuffer)
 		{
 			delete [] mAVHostBuffer [ndx].fVideoBuffer;
-			mAVHostBuffer [ndx].fVideoBuffer = NULL;
+			mAVHostBuffer [ndx].fVideoBuffer = AJA_NULL;
 		}
 		if (mAVHostBuffer [ndx].fAudioBuffer)
 		{
 			delete [] mAVHostBuffer [ndx].fAudioBuffer;
-			mAVHostBuffer [ndx].fAudioBuffer = NULL;
+			mAVHostBuffer [ndx].fAudioBuffer = AJA_NULL;
 		}
 	}	//	for each buffer in the ring
 
@@ -194,7 +196,7 @@ AJAStatus NTV2Player::Init (void)
 	if (UWord (mOutputChannel) >= ::NTV2DeviceGetNumFrameStores (mDeviceID))
 	{
 		cerr	<< "## ERROR:  Cannot use channel '" << mOutputChannel+1 << "' -- device only supports channel 1"
-				<< (::NTV2DeviceGetNumFrameStores (mDeviceID) > 1  ?  string (" thru ") + string (1, uint8_t (::NTV2DeviceGetNumFrameStores (mDeviceID)+'0'))  :  "") << endl;
+				<< (::NTV2DeviceGetNumFrameStores(mDeviceID) > 1  ?  string(" thru ") + string(1, char(::NTV2DeviceGetNumFrameStores(mDeviceID)+'0'))  :  "") << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
 
@@ -333,11 +335,11 @@ void NTV2Player::SetUpHostBuffers ()
 	mAudioBufferSize = (audioRate == NTV2_AUDIO_96K) ? AUDIOBYTES_MAX_96K : AUDIOBYTES_MAX_48K;
 
 	//	Allocate my buffers...
-	for (size_t ndx = 0; ndx < CIRCULAR_BUFFER_SIZE; ndx++)
+	for (size_t ndx(0);  ndx < CIRCULAR_BUFFER_SIZE;  ndx++)
 	{
 		mAVHostBuffer [ndx].fVideoBuffer		= reinterpret_cast <uint32_t *> (new uint8_t [mVideoBufferSize]);
 		mAVHostBuffer [ndx].fVideoBufferSize	= mVideoBufferSize;
-		mAVHostBuffer [ndx].fAudioBuffer		= mWithAudio ? reinterpret_cast <uint32_t *> (new uint8_t [mAudioBufferSize]) : NULL;
+		mAVHostBuffer [ndx].fAudioBuffer		= mWithAudio ? reinterpret_cast<uint32_t*>(new uint8_t[mAudioBufferSize]) : AJA_NULL;
 		mAVHostBuffer [ndx].fAudioBufferSize	= mWithAudio ? mAudioBufferSize : 0;
 
 		::memset (mAVHostBuffer [ndx].fVideoBuffer, 0x00, mVideoBufferSize);
@@ -354,7 +356,6 @@ void NTV2Player::RouteOutputSignal ()
 	const NTV2Standard	outputStandard	(::GetNTV2StandardFromVideoFormat (mVideoFormat));
 	const UWord			numSDIOutputs	(::NTV2DeviceGetNumVideoOutputs (mDeviceID));
 	bool				isRGB			(::IsRGBFormat (mPixelFormat));
-	const bool			isInterlaced	(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mVideoFormat));
 
 	//	Since this function figures out which SDI spigots will be set up for output,
 	//	it also sets the "mTCIndexes" member, which determines which timecodes will
@@ -376,10 +377,8 @@ void NTV2Player::RouteOutputSignal ()
 			mDevice.SetSDITransmitEnable (mOutputChannel, true);
 
 		mDevice.Connect (::GetSDIOutputInputXpt (mOutputChannel, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt);
-		mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (mOutputChannel, /*useVITC=*/true));
-		mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (mOutputChannel, /*useVITC=*/false));
-		if (isInterlaced)	//	Not really necessary -- NTV2 devices send VITC2 if sending VITC1
-			mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (mOutputChannel, /*useVITC=*/false, true));
+		mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (mOutputChannel, /*inEmbeddedLTC=*/mXmitLTC));
+		//	NOTE: No need to send VITC2 with VITC1 (for "i" formats) -- firmware does this automatically
 		mDevice.SetSDIOutputStandard (mOutputChannel, outputStandard);
 	}
 	else
@@ -400,10 +399,8 @@ void NTV2Player::RouteOutputSignal ()
 
 			mDevice.Connect (::GetSDIOutputInputXpt (chan, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt);
 			mDevice.SetSDIOutputStandard (chan, outputStandard);
-			mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (chan, /*useVITC=*/true));
-			mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (chan, /*useVITC=*/false));	//	Add this SDI spigot's timecode index
-			if (isInterlaced)	//	Not really necessary -- NTV2 devices send VITC2 if sending VITC1
-				mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (chan, /*useVITC=*/false, true));
+			mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (chan, /*inEmbeddedLTC=*/mXmitLTC));	//	Add SDI spigot's TC index
+			//	NOTE: No need to send VITC2 with VITC1 (for "i" formats) -- firmware does this automatically
 		}	//	for each SDI output spigot
 
 		//	And connect analog video output, if the device has one...
@@ -417,7 +414,7 @@ void NTV2Player::RouteOutputSignal ()
             || ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v4))
                 mDevice.Connect (::GetOutputDestInputXpt (NTV2_OUTPUTDESTINATION_HDMI),  isRGB ? cscVidOutXpt : fsVidOutXpt);
 	}
-	TCDBG(mTCIndexes);
+	TCNOTE(mTCIndexes);
 
 }	//	RouteOutputSignal
 
@@ -535,7 +532,7 @@ void NTV2Player::PlayFrames (void)
 
 				//	Transfer the timecode-burned frame to the device for playout...
 				xferInfo.SetVideoBuffer (playData->fVideoBuffer, playData->fVideoBufferSize);
-				xferInfo.SetAudioBuffer (mWithAudio ? playData->fAudioBuffer : NULL, mWithAudio ? playData->fAudioBufferSize : 0);
+				xferInfo.SetAudioBuffer (mWithAudio ? playData->fAudioBuffer : AJA_NULL, mWithAudio ? playData->fAudioBufferSize : 0);
 				mDevice.AutoCirculateTransfer (mOutputChannel, xferInfo);
 				mAVCircularBuffer.EndConsumeNextBuffer();	//	Signal that the frame has been "consumed"
 			}
@@ -591,20 +588,20 @@ AJAStatus NTV2Player::SetUpTestPatternVideoBuffers (void)
 
 	mNumTestPatterns = sizeof (testPatternTypes) / sizeof (NTV2TestPatternSelect);
 	mTestPatternVideoBuffers = new uint8_t * [mNumTestPatterns];
-	::memset (mTestPatternVideoBuffers, 0, mNumTestPatterns * sizeof (uint8_t *));
+	::memset (mTestPatternVideoBuffers, 0, mNumTestPatterns * sizeof(uint8_t *));
 
 	//	Set up one video buffer for each of the several predefined patterns...
-	for (int testPatternIndex = 0;  testPatternIndex < mNumTestPatterns;  testPatternIndex++)
+	for (uint32_t testPatternIndex(0);  testPatternIndex < mNumTestPatterns;  testPatternIndex++)
 	{
 		//	Allocate the buffer memory...
-		mTestPatternVideoBuffers [testPatternIndex] = new uint8_t [mVideoBufferSize];
+		mTestPatternVideoBuffers [testPatternIndex] = new uint8_t[mVideoBufferSize];
 
 		//	Use the test pattern generator to fill an NTV2TestPatternBuffer...
 		NTV2TestPatternBuffer	testPatternBuffer;
 		NTV2TestPatternGen		testPatternGen;
-		NTV2FormatDescriptor	formatDesc		(mVideoFormat, mPixelFormat, mVancMode);
+		NTV2FormatDescriptor	formatDesc	(mVideoFormat, mPixelFormat, mVancMode);
 
-		if (!testPatternGen.DrawTestPattern (testPatternTypes [testPatternIndex],
+		if (!testPatternGen.DrawTestPattern (testPatternTypes[testPatternIndex],
 											formatDesc.numPixels,
 											formatDesc.numLines - formatDesc.firstActiveLine,
 											mPixelFormat,
@@ -625,11 +622,11 @@ AJAStatus NTV2Player::SetUpTestPatternVideoBuffers (void)
 			{
 				if (mPixelFormat == NTV2_FBF_10BIT_YCBCR)
 				{
-					::Make10BitBlackLine (reinterpret_cast <UWord *> (pVancLine), formatDesc.numPixels);
+					::Make10BitBlackLine (reinterpret_cast<UWord*>(pVancLine), UWord(formatDesc.numPixels));
 					::PackLine_16BitYUVto10BitYUV (reinterpret_cast <const UWord *> (pVancLine), reinterpret_cast <ULWord *> (pVancLine), formatDesc.numPixels);
 				}
 				else if (mPixelFormat == NTV2_FBF_8BIT_YCBCR)
-					::Make8BitBlackLine (pVancLine, formatDesc.numPixels);
+					::Make8BitBlackLine (pVancLine, UWord(formatDesc.numPixels));
 				else
 				{
 					cerr << "## ERROR:  Cannot initialize video buffer's VANC area" << endl;
@@ -640,9 +637,9 @@ AJAStatus NTV2Player::SetUpTestPatternVideoBuffers (void)
 		}	//	if has VANC area
 
 		//	Copy the contents of the test pattern buffer into my video buffer...
-		uint8_t *	pVideoBuffer	(mTestPatternVideoBuffers [testPatternIndex] + formatDesc.firstActiveLine * formatDesc.linePitch * 4);
-		for (size_t ndx = 0; ndx < testPatternSize; ndx++)
-			pVideoBuffer [ndx] = testPatternBuffer [ndx];
+		uint8_t *	pVideoBuffer	(mTestPatternVideoBuffers[testPatternIndex] + formatDesc.firstActiveLine * formatDesc.linePitch * 4);
+		for (size_t ndx(0);  ndx < testPatternSize;  ndx++)
+			pVideoBuffer[ndx] = testPatternBuffer[ndx];
 
 	}	//	for each test pattern
 

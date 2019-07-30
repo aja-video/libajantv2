@@ -42,6 +42,7 @@ class NTV2Player
 			@param[in]	inWithVanc			If true, enable VANC; otherwise disable VANC. Defaults to false.
 			@param[in]	inLevelConversion	If true, demonstrate level A to B conversion; otherwise don't. Defaults to false.
 			@param[in]	inDoMultiFormat		If true, use multi-format mode; otherwise use uniformat mode. Defaults to false (uniformat mode).
+			@param[in]	inXmitLTC			If true, transmit LTC instead of VITC. Defaults to false (xmit VITC).
 			@param[in]	inSendHDRType		Specifies which, if any, HDR ancillary data packet should be transmitted.
 		**/
 								NTV2Player (const std::string &			inDeviceSpecifier	= "0",
@@ -53,6 +54,7 @@ class NTV2Player
 											const bool					inWithVanc			= false,
 											const bool					inLevelConversion	= false,
 											const bool					inDoMultiFormat		= false,
+											const bool					inXmitLTC			= false,
 											const AJAAncillaryDataType	inSendHDRType		= AJAAncillaryDataType_Unknown);
 
 		virtual					~NTV2Player (void);
@@ -174,7 +176,7 @@ class NTV2Player
 		static void				ProducerThreadStatic (AJAThread * pThread, void * pContext);
 
 		/**
-			@brief	Returns the RP188 DBB register number to use for the given NTV2OutputDestination.
+			@brief	Returns the RP188 DBB register number to use for the given ::NTV2OutputDestination.
 			@param[in]	inOutputSource	Specifies the NTV2OutputDestination of interest.
 			@return	The number of the RP188 DBB register to use for the given output destination.
 		**/
@@ -207,6 +209,7 @@ class NTV2Player
 		bool						mGlobalQuit;				///< @brief	Set "true" to gracefully stop
 		bool						mDoLevelConversion;			///< @brief	Demonstrates a level A to level B conversion
 		bool						mDoMultiChannel;			///< @brief	Demonstrates how to configure the board for multi-format
+		bool						mXmitLTC;					///< @brief	Transmit LTC? (instead of VITC)
 		AJATimeCodeBurn				mTCBurner;					///< @brief	My timecode burner
 		NTV2TCIndexes				mTCIndexes;					///< @brief	Timecode indexes to use
 		uint32_t					mVideoBufferSize;			///< @brief	My video buffer size, in bytes
