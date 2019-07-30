@@ -48,7 +48,7 @@ typedef enum
 	kVRegColorSpaceMode						= VIRTUALREG_START+42,		/* which color space matrix (Rec601, Rec709, ...) to use */
 	kVRegGammaMode							= VIRTUALREG_START+43,		/* which gamma LUT (Rec601, Rec709, ...) to use */
 	kVRegLUTType							= VIRTUALREG_START+44,		/* the current LUT function loaded into hardware */
-	kVRegRGB10Range							= VIRTUALREG_START+45,		/* the user-selected 10-bit RGB range (SMPTE 64-940 or Full 0-1023) */
+	kVRegRGB10Range							= VIRTUALREG_START+45,		/* the user-selected 10-bit RGB range (SMPTE 64-940 or Full 0-1023) - deprecated */
 	kVRegRGB10Endian						= VIRTUALREG_START+46,		/* the user selected 10-bit RGB endian */
 	kVRegFanControl							= VIRTUALREG_START+47,		/* the user fan control setting */
 
@@ -116,26 +116,26 @@ typedef enum
 	kVRegDSKForegroundFade					= VIRTUALREG_START+127,
 	kVRegCaptureReferenceSelect				= VIRTUALREG_START+128,
 
-	kVReg2XTransferMode						= VIRTUALREG_START+130,
+	kVReg2XTransferMode						= VIRTUALREG_START+130,		// deprecated
 	kVRegSDIOutput1RGBRange					= VIRTUALREG_START+131,
 	kVRegSDIInput1FormatSelect				= VIRTUALREG_START+132,
 	kVRegSDIInput2FormatSelect				= VIRTUALREG_START+133,
 	kVRegSDIInput1RGBRange					= VIRTUALREG_START+134,
 	kVRegSDIInput2RGBRange					= VIRTUALREG_START+135,
-	kVRegSDIInput1Stereo3DMode				= VIRTUALREG_START+136,
-	kVRegSDIInput2Stereo3DMode				= VIRTUALREG_START+137,
+	kVRegSDIInput1Stereo3DMode				= VIRTUALREG_START+136,		// deprecated
+	kVRegSDIInput2Stereo3DMode				= VIRTUALREG_START+137,		// deprecated
 	kVRegFrameBuffer1RGBRange				= VIRTUALREG_START+138,
-	kVRegFrameBuffer1Stereo3DMode			= VIRTUALREG_START+139,
+	kVRegFrameBuffer1Stereo3DMode			= VIRTUALREG_START+139,		// deprecated
 
 	kVRegHDMIInRgbRange						= VIRTUALREG_START+140,
-	kVRegHDMIOutRgbRange					= VIRTUALREG_START+141,	//	See also kVRegHDMIOutRGBRange
+	kVRegHDMIOutRgbRange					= VIRTUALREG_START+141,		//	See also kVRegHDMIOutRGBRange
 	kVRegAnalogInBlackLevel					= VIRTUALREG_START+142,
 	kVRegAnalogInputType					= VIRTUALREG_START+143,
 	kVRegHDMIOutColorSpaceModeCtrl			= VIRTUALREG_START+144,
 	kVRegHDMIOutProtocolMode				= VIRTUALREG_START+145,
 	kVRegHDMIOutStereoSelect				= VIRTUALREG_START+146,
 	kVRegHDMIOutStereoCodecSelect			= VIRTUALREG_START+147,
-	kVRegReversePulldownOffset				= VIRTUALREG_START+148,
+	kVRegReversePulldownOffset				= VIRTUALREG_START+148,		// deprecated
 	kVRegSDIInput1ColorSpaceMode			= VIRTUALREG_START+149,
 
 	kVRegSDIInput2ColorSpaceMode			= VIRTUALREG_START+150,
@@ -152,7 +152,7 @@ typedef enum
 	kVRegAudioInputDelay					= VIRTUALREG_START+160,
 	kVRegDSKGraphicFileIndex				= VIRTUALREG_START+161,
 	kVRegTimecodeBurnInMode					= VIRTUALREG_START+162,
-	kVRegUseQTTimecode						= VIRTUALREG_START+163,
+	kVRegUseQTTimecode						= VIRTUALREG_START+163,		// deprecated
 	kVRegAvailable164						= VIRTUALREG_START+164,
 	kVRegRP188SourceSelect					= VIRTUALREG_START+165,
 	kVRegQTCodecModeDebug					= VIRTUALREG_START+166,
@@ -160,21 +160,21 @@ typedef enum
 	kVRegDeviceOnline						= VIRTUALREG_START+168,
 	kVRegIsDefaultDevice					= VIRTUALREG_START+169,
 
-	kVRegDesktopFrameBufferStatus			= VIRTUALREG_START+170,
+	kVRegDesktopFrameBufferStatus			= VIRTUALREG_START+170,		// deprecated
 	kVRegSDIOutput1ColorSpaceMode			= VIRTUALREG_START+171,
 	kVRegSDIOutput2ColorSpaceMode			= VIRTUALREG_START+172,
 	kVRegAudioOutputDelay					= VIRTUALREG_START+173,
-	kVRegTimelapseEnable					= VIRTUALREG_START+174,
-	kVRegTimelapseCaptureValue				= VIRTUALREG_START+175,
-	kVRegTimelapseCaptureUnits				= VIRTUALREG_START+176,
-	kVRegTimelapseIntervalValue				= VIRTUALREG_START+177,
-	kVRegTimelapseIntervalUnits				= VIRTUALREG_START+178,
-	kVRegFrameBufferInstalled				= VIRTUALREG_START+179,
+	kVRegTimelapseEnable					= VIRTUALREG_START+174,		// deprecated
+	kVRegTimelapseCaptureValue				= VIRTUALREG_START+175,		// deprecated
+	kVRegTimelapseCaptureUnits				= VIRTUALREG_START+176,		// deprecated
+	kVRegTimelapseIntervalValue				= VIRTUALREG_START+177,		// deprecated
+	kVRegTimelapseIntervalUnits				= VIRTUALREG_START+178,		// deprecated
+	kVRegFrameBufferInstalled				= VIRTUALREG_START+179,		// deprecated
 
-	kVRegAnalogInStandard					= VIRTUALREG_START+180,
+	kVRegAnalogInStandard					= VIRTUALREG_START+180,		// deprecated
 	kVRegOutputTimecodeOffset				= VIRTUALREG_START+181,		// deprecated
 	kVRegOutputTimecodeType					= VIRTUALREG_START+182,		// deprecated
-	kVRegQuicktimeUsingBoard				= VIRTUALREG_START+183,		// Not used in Mac
+	kVRegQuicktimeUsingBoard				= VIRTUALREG_START+183,		// deprecated
 	kVRegApplicationPID						= VIRTUALREG_START+184,		// The rest of this section handled by IOCTL in Mac
 	kVRegApplicationCode					= VIRTUALREG_START+185,
 	kVRegReleaseApplication					= VIRTUALREG_START+186,
@@ -242,7 +242,7 @@ typedef enum
 	kVRegETTDiagLastSerialTimestamp			= VIRTUALREG_START+309,
 	kVRegETTDiagLastSerialTimecode			= VIRTUALREG_START+310,
 	kVRegStartupStatusFlags					= VIRTUALREG_START+311,
-	kVRegRGBRangeMode						= VIRTUALREG_START+312,
+	kVRegRGBRangeMode						= VIRTUALREG_START+312,		//  deprecated
 	kVRegEnableQueuedDMAs					= VIRTUALREG_START+313,		//	If non-zero, enables queued DMAs on multi-engine devices (Mac only)
 
 	// Linux platform custom section
