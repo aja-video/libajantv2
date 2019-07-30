@@ -115,8 +115,11 @@ typedef enum
 	kVRegDSKForegroundMode					= VIRTUALREG_START+126,
 	kVRegDSKForegroundFade					= VIRTUALREG_START+127,
 	kVRegCaptureReferenceSelect				= VIRTUALREG_START+128,
+	kVRegHdrColorimetry						= VIRTUALREG_START+129,
+	kVRegHdrTransfer						= VIRTUALREG_START+129,
+	kVRegHdrLuminance						= VIRTUALREG_START+130,
 
-	kVReg2XTransferMode						= VIRTUALREG_START+130,		// deprecated
+	kVReg2XTransferMode						= kVRegHdrLuminance,		// deprecated
 	kVRegSDIOutput1RGBRange					= VIRTUALREG_START+131,
 	kVRegSDIInput1FormatSelect				= VIRTUALREG_START+132,
 	kVRegSDIInput2FormatSelect				= VIRTUALREG_START+133,
@@ -155,7 +158,7 @@ typedef enum
 	kVRegUseQTTimecode						= VIRTUALREG_START+163,		// deprecated
 	kVRegAvailable164						= VIRTUALREG_START+164,
 	kVRegRP188SourceSelect					= VIRTUALREG_START+165,
-	kVRegQTCodecModeDebug					= VIRTUALREG_START+166,
+	kVRegQTCodecModeDebug					= VIRTUALREG_START+166,		// deprecated
 	kVRegHDMIOutColorSpaceModeStatus		= VIRTUALREG_START+167,		// deprecated
 	kVRegDeviceOnline						= VIRTUALREG_START+168,
 	kVRegIsDefaultDevice					= VIRTUALREG_START+169,
