@@ -2216,6 +2216,14 @@ typedef enum
 } NTV2IsoConvertMode;
 
 
+// This specifies the range of levels for 10-bit RGB (aka DualLink)
+typedef enum
+{
+    NTV2_RGB10RangeFull,		//	Levels are 0 - 1023 (Full)
+    NTV2_RGB10RangeSMPTE,		//	Levels are 64 - 940 (SMPTE)
+    NTV2_MAX_NUM_RGB10Ranges
+} NTV2RGB10Range;
+
 
 #if !defined(R2_DEPRECATE)
 
@@ -2259,15 +2267,6 @@ typedef enum
     NTV2_RGBRangeSMPTE,				// Levels are 64 - 940 (SMPTE)
     NTV2_MAX_NUM_RGBRangeModes
 } NTV2RGBRangeMode;
-
-
-// This specifies the range of levels for 10-bit RGB (aka DualLink)
-typedef enum
-{
-    NTV2_RGB10RangeFull,		//	Levels are 0 - 1023 (Full)
-    NTV2_RGB10RangeSMPTE,		//	Levels are 64 - 940 (SMPTE)
-    NTV2_MAX_NUM_RGB10Ranges
-} NTV2RGB10Range;
 
 
 typedef enum
