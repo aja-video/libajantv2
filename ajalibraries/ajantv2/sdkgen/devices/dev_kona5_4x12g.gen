@@ -110,8 +110,8 @@ NTV2_WgtFrameBuffer1
 NTV2_WgtFrameBuffer2
 NTV2_WgtFrameBuffer3
 NTV2_WgtFrameBuffer4
-NTV2_WgtCSC1
-NTV2_WgtCSC2
+//NTV2_WgtCSC1
+//NTV2_WgtCSC2
 NTV2_WgtDualLinkV2In1
 NTV2_WgtDualLinkV2In2
 NTV2_WgtDualLinkV2In3
@@ -120,7 +120,7 @@ NTV2_WgtDualLinkV2Out1
 NTV2_WgtDualLinkV2Out2
 NTV2_WgtDualLinkV2Out3
 NTV2_WgtDualLinkV2Out4
-NTV2_WgtMixer1
+//NTV2_WgtMixer1
 NTV2_WgtGenLock
 NTV2_Wgt12GSDIIn1
 NTV2_Wgt12GSDIIn2
@@ -132,12 +132,12 @@ NTV2_Wgt12GSDIOut3
 NTV2_Wgt12GSDIOut4
 NTV2_WgtHDMIOut1v4
 //Temporary
-NTV2_WgtCSC3
-NTV2_WgtCSC4
-NTV2_WgtLUT1
-NTV2_WgtLUT2
-NTV2_WgtLUT3
-NTV2_WgtLUT4
+//NTV2_WgtCSC3
+//NTV2_WgtCSC4
+//NTV2_WgtLUT1
+//NTV2_WgtLUT2
+//NTV2_WgtLUT3
+//NTV2_WgtLUT4
 
 
 // NTV2InputSources
@@ -165,15 +165,14 @@ NTV2DeviceGetNumAESAudioOutputChannels			8
 //NTV2DeviceGetNumAnalogAudioOutputChannels		8
 NTV2DeviceGetNumAudioSystems					4
 //NTV2DeviceGetNumCSCs							2
-NTV2DeviceGetNumCSCs							4
+NTV2DeviceGetNumCSCs							0
 NTV2DeviceGetNumEmbeddedAudioInputChannels		16
 NTV2DeviceGetNumEmbeddedAudioOutputChannels		16
 NTV2DeviceGetNumFrameStores						4
 NTV2DeviceGetNumHDMIAudioOutputChannels			8
 NTV2DeviceGetNumHDMIVideoOutputs				1
-//NTV2DeviceGetNumLUTs							0
-NTV2DeviceGetNumLUTs							4
-NTV2DeviceGetNumMixers							1
+NTV2DeviceGetNumLUTs							0
+NTV2DeviceGetNumMixers							0
 NTV2DeviceGetNumReferenceVideoInputs			1
 NTV2DeviceGetNumSerialPorts						1
 NTV2DeviceGetNumVideoInputs						4
@@ -236,11 +235,11 @@ NTV2DeviceCanReportRunningFirmwareDate
 NTV2DeviceCanDo8KVideo
 NTV2DeviceCanDoWarmBootFPGA
 //Temporary additions
-NTV2DeviceCanDoColorCorrection
-NTV2DeviceCanDoEnhancedCSC
-NTV2DeviceCanDoProgrammableCSC
-NTV2DeviceCanDoRGBPlusAlphaOut
-NTV2DeviceHasColorSpaceConverterOnChannel2
+//NTV2DeviceCanDoColorCorrection
+//NTV2DeviceCanDoEnhancedCSC
+//NTV2DeviceCanDoProgrammableCSC
+//NTV2DeviceCanDoRGBPlusAlphaOut
+//NTV2DeviceHasColorSpaceConverterOnChannel2
 
 // NTV2ConversionModes
 
