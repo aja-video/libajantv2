@@ -5248,6 +5248,7 @@ typedef enum
 
 enum TestPatternFormat
 {
+	kPatternFormatAuto,
 	kPatternFormatYUV10b,
 	kPatternFormatRGB10b,
 	kPatternFormatYUV8b,
