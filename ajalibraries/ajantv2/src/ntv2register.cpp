@@ -4444,21 +4444,23 @@ bool CNTV2Card::GetColorSpaceMatrixSelect (NTV2ColorSpaceMatrixType & outType, c
 			}
 			
 			// get csc rgb range
-			ULWord cscRange = NTV2_RGB10RangeFull;
-			ReadRegister(kVRegRGB10Range, &cscRange);
+			ULWord cscRange = NTV2_RGBRangeFull;
+			ReadRegister(kVRegRGBRangeMode, &cscRange);
+			NTV2RGBBlackRange blackRange =  cscRange == NTV2_RGBRangeFull ? 
+											NTV2_CSC_RGB_RANGE_FULL : NTV2_CSC_RGB_RANGE_SMPTE;
 			
 			// set csc rgb range
-			bResult = SetColorSpaceRGBBlackRange((NTV2RGBBlackRange)cscRange, NTV2_CHANNEL1);
+			bResult = SetColorSpaceRGBBlackRange(blackRange, NTV2_CHANNEL1);
 			if (numberCSCs >= 2)
-				bResult = SetColorSpaceRGBBlackRange((NTV2RGBBlackRange)cscRange, NTV2_CHANNEL2);
+				bResult = SetColorSpaceRGBBlackRange(blackRange, NTV2_CHANNEL2);
 			if (numberCSCs >= 4)
 			{
-				bResult = SetColorSpaceRGBBlackRange((NTV2RGBBlackRange)cscRange, NTV2_CHANNEL3);
-				bResult = SetColorSpaceRGBBlackRange((NTV2RGBBlackRange)cscRange, NTV2_CHANNEL4);
+				bResult = SetColorSpaceRGBBlackRange(blackRange, NTV2_CHANNEL3);
+				bResult = SetColorSpaceRGBBlackRange(blackRange, NTV2_CHANNEL4);
 			}
 			if (numberCSCs >= 5)
 			{
-				bResult = SetColorSpaceRGBBlackRange((NTV2RGBBlackRange)cscRange, NTV2_CHANNEL5);
+				bResult = SetColorSpaceRGBBlackRange(blackRange, NTV2_CHANNEL5);
 			}
 		}
 		
@@ -4494,8 +4496,8 @@ bool CNTV2Card::GetColorSpaceMatrixSelect (NTV2ColorSpaceMatrixType & outType, c
 			NTV2GammaType gammaType = NTV2_GammaNone;
 			ReadRegister(kVRegGammaMode, (ULWord *)&gammaType);
 			
-			ULWord cscRange = NTV2_RGB10RangeFull;
-			ReadRegister(kVRegRGB10Range, &cscRange);
+			ULWord cscRange = NTV2_RGBRangeFull;
+			ReadRegister(kVRegRGBRangeMode, &cscRange);
 		
 			// if the current video format wasn't passed in to us, go get it
 			NTV2VideoFormat vidFormat = currFormat;
@@ -4508,20 +4510,20 @@ bool CNTV2Card::GetColorSpaceMatrixSelect (NTV2ColorSpaceMatrixType & outType, c
 			{
 				// force to Rec 601
 				case NTV2_GammaRec601:		
-					wantedLUT = cscRange == NTV2_RGB10RangeFull ? NTV2_LUTGamma18_Rec601 : NTV2_LUTGamma18_Rec601_SMPTE;	
+					wantedLUT = cscRange == NTV2_RGBRangeFull ? NTV2_LUTGamma18_Rec601 : NTV2_LUTGamma18_Rec601_SMPTE;	
 					break;
 			
 				// force to Rec 709
 				case NTV2_GammaRec709:		
-					wantedLUT = cscRange == NTV2_RGB10RangeFull ? NTV2_LUTGamma18_Rec709 : NTV2_LUTGamma18_Rec709_SMPTE;	
+					wantedLUT = cscRange == NTV2_RGBRangeFull ? NTV2_LUTGamma18_Rec709 : NTV2_LUTGamma18_Rec709_SMPTE;	
 					break;
 			
 				// Auto-switch between SD (Rec 601) and HD (Rec 709)
 				case NTV2_GammaAuto:		
 					if (NTV2_IS_SD_VIDEO_FORMAT(vidFormat) )
-						wantedLUT = cscRange == NTV2_RGB10RangeFull ? NTV2_LUTGamma18_Rec601 : NTV2_LUTGamma18_Rec601_SMPTE;
+						wantedLUT = cscRange == NTV2_RGBRangeFull ? NTV2_LUTGamma18_Rec601 : NTV2_LUTGamma18_Rec601_SMPTE;
 					else
-						wantedLUT = cscRange == NTV2_RGB10RangeFull ? NTV2_LUTGamma18_Rec709 : NTV2_LUTGamma18_Rec709_SMPTE;
+						wantedLUT = cscRange == NTV2_RGBRangeFull ? NTV2_LUTGamma18_Rec709 : NTV2_LUTGamma18_Rec709_SMPTE;
 					break;
 						
 				// custom LUT in use - do not change
