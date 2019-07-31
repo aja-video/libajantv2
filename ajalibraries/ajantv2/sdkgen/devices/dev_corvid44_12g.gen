@@ -180,7 +180,6 @@ NTV2DeviceCanDoRGBLevelAConversion
 NTV2DeviceCanDo4KVideo
 NTV2DeviceCanDoAudio8Channels
 NTV2DeviceCanDoAudioDelay
-NTV2DeviceCanDoBreakoutBox
 NTV2DeviceCanDoCapture
 NTV2DeviceCanDoCustomAnc
 NTV2DeviceCanDoDualLink
