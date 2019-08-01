@@ -1022,28 +1022,36 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			inOutXferInfo.SetAllOutputTimeCodes(pArray[NTV2_TCINDEX_DEFAULT], /*alsoSetF2*/!isProgressive);
 	}
 
-	bool	tmpLocalF1AncBuffer(false), tmpLocalF2AncBuffer(false);
-	NTV2_POINTER	savedAncF1, savedAncF2;
+	bool			tmpLocalF1AncBuffer(false),  tmpLocalF2AncBuffer(false);
+	NTV2_POINTER	savedAncF1,  savedAncF2;
 	if (::NTV2DeviceCanDo2110(_boardID)  &&  NTV2_IS_OUTPUT_CROSSPOINT(crosspoint))
 	{
 		//	S2110 Playout:	So that most Retail & OEM playout apps "just work" with S2110 RTP Anc streams, our classic SDI
 		//					Anc data that device firmware normally embeds into SDI output as derived from registers -- e.g.
 		//					VPID, RP188, etc. -- the SDK here will automatically insert these packets into the outgoing RTP
 		//					streams, even if the client didn't provide Anc buffers or specify AUTOCIRCULATE_WITH_ANC.
+		ULWord	F1OffsetFromBottom(0),  F2OffsetFromBottom(0);
 		size_t	F1SizeInBytes(0), F2SizeInBytes(0);
-		ULWord	byteOffset(0), byteCount(0);
-		if (GetAncRegionOffsetAndSize (byteOffset, byteCount, NTV2_AncRgn_Field1))
-			F1SizeInBytes = size_t(byteCount);
-		if (GetAncRegionOffsetAndSize (byteOffset, byteCount, NTV2_AncRgn_Field2))
-			F2SizeInBytes = size_t(byteCount);
+		if (GetAncRegionOffsetFromBottom(F1OffsetFromBottom, NTV2_AncRgn_Field1)
+			&&  GetAncRegionOffsetFromBottom(F2OffsetFromBottom, NTV2_AncRgn_Field2))
+		{
+			if (F2OffsetFromBottom < F1OffsetFromBottom)
+			{
+				F1SizeInBytes = size_t(F1OffsetFromBottom - F2OffsetFromBottom);
+				F2SizeInBytes = size_t(F2OffsetFromBottom);
+			}
+			else
+			{
+				F1SizeInBytes = size_t(F2OffsetFromBottom - F1OffsetFromBottom);
+				F2SizeInBytes = size_t(F2OffsetFromBottom);
+			}
+		}
 		if (_boardID == DEVICE_ID_IOIP_2110)
 		{	//	IoIP 2110 Playout requires room for RTP+GUMP per anc buffer, to also operate SDI5 Mon output
-			ULWord	F1OffsetFromBottom(0),  F2OffsetFromBottom(0),  F1MonOffsetFromBottom(0),  F2MonOffsetFromBottom(0);
-			bool allGood (GetAncRegionOffsetFromBottom(F1OffsetFromBottom,    NTV2_AncRgn_Field1));
-			if (allGood)  GetAncRegionOffsetFromBottom(F2OffsetFromBottom,    NTV2_AncRgn_Field2);
-			if (allGood)  GetAncRegionOffsetFromBottom(F1MonOffsetFromBottom, NTV2_AncRgn_MonField1);
-			if (allGood)  GetAncRegionOffsetFromBottom(F2MonOffsetFromBottom, NTV2_AncRgn_MonField2);
-			if (allGood	//	Driver expects anc regions in this order (from bottom): F2, F1, F2Mon, F1Mon
+			ULWord	F1MonOffsetFromBottom(0),  F2MonOffsetFromBottom(0);
+			const bool good (GetAncRegionOffsetFromBottom(F1MonOffsetFromBottom, NTV2_AncRgn_MonField1)
+							 &&  GetAncRegionOffsetFromBottom(F2MonOffsetFromBottom, NTV2_AncRgn_MonField2));
+			if (good	//	Driver expects anc regions in this order (from bottom): F2, F1, F2Mon, F1Mon
 				&&	F2MonOffsetFromBottom < F1MonOffsetFromBottom
 				&&	F1OffsetFromBottom < F2MonOffsetFromBottom
 				&&	F2OffsetFromBottom < F1OffsetFromBottom)
@@ -1060,8 +1068,18 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			}
 			savedAncF1 = inOutXferInfo.acANCBuffer;			//	copy
 			savedAncF2 = inOutXferInfo.acANCField2Buffer;	//	copy
-			inOutXferInfo.acANCBuffer.Allocate(F1SizeInBytes);
-			inOutXferInfo.acANCField2Buffer.Allocate(F2SizeInBytes);
+			if (inOutXferInfo.acANCBuffer.GetByteCount() < F1SizeInBytes)
+			{	//	Enlarge acANCBuffer, and copy everything from savedAncF1 into it...
+				inOutXferInfo.acANCBuffer.Allocate(F1SizeInBytes);
+				inOutXferInfo.acANCBuffer.Fill(uint64_t(0));
+				inOutXferInfo.acANCBuffer.CopyFrom(savedAncF1, 0, 0, savedAncF1.GetByteCount());
+			}
+			if (inOutXferInfo.acANCField2Buffer.GetByteCount() < F2SizeInBytes)
+			{	//	Enlarge acANCField2Buffer, and copy everything from savedAncF2 into it...
+				inOutXferInfo.acANCField2Buffer.Allocate(F2SizeInBytes);
+				inOutXferInfo.acANCField2Buffer.Fill(uint64_t(0));
+				inOutXferInfo.acANCField2Buffer.CopyFrom(savedAncF2, 0, 0, savedAncF2.GetByteCount());
+			}
 		}	//	if IoIP 2110 playout
 		else
 		{	//	else KonaIP 2110 playout
@@ -1624,7 +1642,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 		NTV2_POINTER rtpF1 (ancF1.GetHostAddress(0),  isIoIP2110  ?  F1OffsetFromBottom - F2OffsetFromBottom  :  ancF1.GetByteCount());
 		NTV2_POINTER rtpF2 (ancF2.GetHostAddress(0),  isIoIP2110  ?  F2OffsetFromBottom  :  ancF2.GetByteCount());
 		result = AJA_SUCCESS(packetList.GetIPTransmitData (rtpF1, rtpF2, isProgressive, F2StartLine, singleRTPPkt));
-#if defined(_DEBUG)	//	DEBUG
+#if 0	//defined(_DEBUG)
 		DMAWriteAnc(31, rtpF1, rtpF2, NTV2_CHANNEL_INVALID);	//	DEBUG: DMA RTP into frame 31
 		if (result)
 		{
