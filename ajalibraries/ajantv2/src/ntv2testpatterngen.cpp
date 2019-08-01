@@ -2243,9 +2243,13 @@ bool NTV2TestPatternGen::DrawTestPattern (NTV2TestPatternSelect pattNum, uint32_
 	_pixelFormat = pixelFormat;
 	mNumPixels = frameWidth;
 	
-	// test for incompatible 12Bit pattern settings
-	if (NTV2_IS_12B_PATTERN(pattNum) && (_frameWidth < 1920 || _pixelFormat != NTV2_FBF_48BIT_RGB))
-		return bResult;
+	// HDR test pattern compatibility check
+	if (NTV2_IS_12B_PATTERN(pattNum))
+	{
+		// requires video width divisible by 1920, RGB-12b pixel format
+		if (((_frameWidth % 1920) != 0) || (_pixelFormat != NTV2_FBF_48BIT_RGB))
+			return bResult;
+	}
 
 	_linePitch     = CalcRowBytesForFormat(_pixelFormat, _frameWidth);					// number of BYTES per line of frame buffer format
 	if(_linePitch == 0)

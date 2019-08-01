@@ -522,13 +522,12 @@ bool CNTV2Card::GetAncRegionOffsetFromBottom (ULWord & bytesFromBottom, const NT
 		bytesFromBottom = temp;
 
 	if (is153OrLater  &&  GetDeviceID() == DEVICE_ID_IOIP_2110)
-		if (true) // ** MrBill **	DRIVERS AREN'T READY YET
-		{
-			if (ReadRegister(kVRegMonAncField1Offset, temp)  &&  temp > bytesFromBottom)
-				bytesFromBottom = temp;
-			if (ReadRegister(kVRegMonAncField2Offset, temp)  &&  temp > bytesFromBottom)
-				bytesFromBottom = temp;
-		}
+	{
+		if (ReadRegister(kVRegMonAncField1Offset, temp)  &&  temp > bytesFromBottom)
+			bytesFromBottom = temp;
+		if (ReadRegister(kVRegMonAncField2Offset, temp)  &&  temp > bytesFromBottom)
+			bytesFromBottom = temp;
+	}
 	return bytesFromBottom > 0;
 }
 
