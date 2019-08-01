@@ -170,7 +170,6 @@ NTV2DeviceGetNumSerialPorts						1
 NTV2DeviceGetNumVideoInputs						4
 NTV2DeviceGetNumVideoOutputs					4
 NTV2DeviceGetNumLTCInputs						2
-NTV2DeviceGetNumLTCOutputs						2
 
 
 // CanDo's		(see 'cando_canon.gen' for legal values)
