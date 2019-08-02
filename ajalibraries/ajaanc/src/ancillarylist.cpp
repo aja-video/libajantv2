@@ -1397,7 +1397,7 @@ AJAStatus AJAAncillaryList::WriteRTPPackets (NTV2_POINTER & theBuffer,  uint32_t
 		}
 
 		//	Move "write head" to just past where this RTP packet's data ended...
-		u32offset += origRTPPkt.size();
+		u32offset += ULWord(origRTPPkt.size());
 
 		//	JeffL:  IP Anc inserters expect subsequent RTP packets to start on a 64-bit/8-byte word boundary.
 		if (u32offset & 1L)	//	If it's not even...
