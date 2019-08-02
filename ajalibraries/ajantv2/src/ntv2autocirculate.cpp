@@ -16,10 +16,14 @@
 #include "ajabase/common/timecode.h"
 #include <iomanip>
 #include <assert.h>
+#include <algorithm>
 
 
 using namespace std;
 
+#if defined(MSWindows)
+	#undef min
+#endif
 
 #if defined(_DEBUG)
 	//	Debug builds can clear Anc buffers during A/C capture
