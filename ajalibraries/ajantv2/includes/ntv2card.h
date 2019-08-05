@@ -1168,8 +1168,8 @@ public:
 	AJA_VIRTUAL bool		GetOutputFrame (const NTV2Channel inChannel, ULWord & outValue);
 
 	/**
-		@brief		Sets the current input frame number for the given channel. This identifies which particular frame
-					in device SDRAM will be written after the next frame interrupt.
+		@brief		Sets the current input frame number for the given Frame Store.
+					This identifies which particular frame in device SDRAM will be written after the next frame interrupt.
 		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
 		@param[out]	inValue		Specifies the frame number in device memory to be written, which is a zero-based index
 								into each 8/16/32MB block of SDRAM on the device.
@@ -1185,8 +1185,8 @@ public:
 	AJA_VIRTUAL bool		SetInputFrame (const NTV2Channel inChannel, const ULWord inValue);
 
 	/**
-		@brief		Answers with the current input frame number for the given channel. This identifies which particular
-					frame in device SDRAM will be written after the next frame interrupt.
+		@brief		Answers with the current input frame number for the given Frame Store.
+					This identifies which particular frame in device SDRAM will be written after the next frame interrupt.
 		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
 								(The Frame Store should be enabled and set for capture mode.)
 		@param[out]	outValue	Receives the input frame number of the frame in device memory to be written, which is a
@@ -1199,7 +1199,7 @@ public:
 	AJA_VIRTUAL bool		SetDualLinkOutputEnable (bool inIsEnabled);
 	AJA_VIRTUAL bool		GetDualLinkOutputEnable (bool & outIsEnabled);
 
-	AJA_VIRTUAL bool		SetDualLinkInputEnable (bool enable);
+	AJA_VIRTUAL bool		SetDualLinkInputEnable (bool inIsEnabled);
 	AJA_VIRTUAL bool		GetDualLinkInputEnable (bool & outIsEnabled);
 
 	AJA_VIRTUAL bool		SetVideoLimiting (const NTV2VideoLimiting inValue);
@@ -1207,10 +1207,22 @@ public:
 
 	AJA_VIRTUAL bool		SetEnableVANCData (const bool inVANCenabled, const bool inTallerVANC, const NTV2Standard inStandard, const NTV2FrameGeometry inGeometry, const NTV2Channel inChannel = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool		SetEnableVANCData (const bool inVANCenabled, const bool inTallerVANC = false, const NTV2Channel inChannel = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool		SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard inStandard, const NTV2FrameGeometry inFrameGeometry, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
-		@brief		Retrieves the current VANC mode for the given channel.
+		@brief		Sets the VANC mode for the given Frame Store.
+		@param[in]	inVancMode		Specifies the new ::NTV2VANCMode setting.
+		@param[in]	inStandard		Specifies the ::NTV2Standard setting.
+		@param[in]	inFrameGeometry	Specifies the ::NTV2FrameGeometry setting.
+		@param[in]	inChannel		Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
+									Defaults to ::NTV2_CHANNEL1.
+		@return		True if successful; otherwise false.
+		@see		CNTV2Card::GetVANCMode, \ref vancframegeometries
+	**/
+	AJA_VIRTUAL bool		SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard inStandard,
+										const NTV2FrameGeometry inFrameGeometry, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief		Retrieves the current VANC mode for the given Frame Store.
 		@param[out]	outVancMode		Receives the current ::NTV2VANCMode setting.
 		@param[in]	inChannel		Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
 									Defaults to ::NTV2_CHANNEL1.
