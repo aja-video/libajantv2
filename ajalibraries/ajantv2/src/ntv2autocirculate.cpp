@@ -1039,35 +1039,30 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 		if (GetAncRegionOffsetFromBottom(F1OffsetFromBottom, NTV2_AncRgn_Field1)
 			&&  GetAncRegionOffsetFromBottom(F2OffsetFromBottom, NTV2_AncRgn_Field2))
 		{
+			F2SizeInBytes = size_t(F2OffsetFromBottom);
 			if (F2OffsetFromBottom < F1OffsetFromBottom)
-			{
 				F1SizeInBytes = size_t(F1OffsetFromBottom - F2OffsetFromBottom);
-				F2SizeInBytes = size_t(F2OffsetFromBottom);
-			}
 			else
-			{
 				F1SizeInBytes = size_t(F2OffsetFromBottom - F1OffsetFromBottom);
-				F2SizeInBytes = size_t(F2OffsetFromBottom);
-			}
 		}
 		if (_boardID == DEVICE_ID_IOIP_2110)
 		{	//	IoIP 2110 Playout requires room for RTP+GUMP per anc buffer, to also operate SDI5 Mon output
 			ULWord	F1MonOffsetFromBottom(0),  F2MonOffsetFromBottom(0);
 			const bool good (GetAncRegionOffsetFromBottom(F1MonOffsetFromBottom, NTV2_AncRgn_MonField1)
 							 &&  GetAncRegionOffsetFromBottom(F2MonOffsetFromBottom, NTV2_AncRgn_MonField2));
-			if (good	//	Driver expects anc regions in this order (from bottom): F2, F1, F2Mon, F1Mon
-				&&	F2MonOffsetFromBottom < F1MonOffsetFromBottom
-				&&	F1OffsetFromBottom < F2MonOffsetFromBottom
-				&&	F2OffsetFromBottom < F1OffsetFromBottom)
+			if (good	//	Driver expects anc regions in this order (from bottom): F2Mon, F2, F1Mon, F1
+				&&	F2MonOffsetFromBottom < F2OffsetFromBottom
+				&&	F2OffsetFromBottom < F1MonOffsetFromBottom
+				&&	F1MonOffsetFromBottom < F1OffsetFromBottom)
 			{
-				F1SizeInBytes = size_t((F1OffsetFromBottom - F2OffsetFromBottom) + (F1MonOffsetFromBottom - F2MonOffsetFromBottom));
-				F2SizeInBytes = size_t(F2OffsetFromBottom + (F2MonOffsetFromBottom - F1OffsetFromBottom));
+				F1SizeInBytes = size_t(F1OffsetFromBottom - F2OffsetFromBottom);
+				F2SizeInBytes = size_t(F2OffsetFromBottom);
 			}
 			else
 			{	//	Anc regions out of order!
-				XMTWARN("IoIP 2110 playout anc rgns disordered (offsets from bottom): F2=" << HEX0N(F2OffsetFromBottom,8)
-						<< " F1=" << HEX0N(F1OffsetFromBottom,8) << " F2Mon=" << HEX0N(F2MonOffsetFromBottom,8)
-						<< " F1Mon=" << HEX0N(F1MonOffsetFromBottom,8));
+				XMTWARN("IoIP 2110 playout anc rgns disordered (offsets from bottom): F2Mon=" << HEX0N(F2MonOffsetFromBottom,8)
+						<< " F2=" << HEX0N(F2OffsetFromBottom,8) << " F1Mon=" << HEX0N(F1MonOffsetFromBottom,8)
+						<< " F1=" << HEX0N(F1OffsetFromBottom,8));
 				F1SizeInBytes = F2SizeInBytes = 0;	//	Out of order, don't do Anc
 			}
 			savedAncF1 = inOutXferInfo.acANCBuffer;			//	copy
@@ -1475,10 +1470,10 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 	GetAncRegionOffsetFromBottom(F1MonOffsetFromBottom, NTV2_AncRgn_MonField1);
 	GetAncRegionOffsetFromBottom(F2MonOffsetFromBottom, NTV2_AncRgn_MonField2);
 	//	Define F1 & F2 GUMP sub-buffers from ancF1 & ancF2 (only used for IoIP 2110)...
-	NTV2_POINTER gumpF1(ancF1.GetHostAddress(F1OffsetFromBottom - F2OffsetFromBottom), // addr
-						F1MonOffsetFromBottom - F2MonOffsetFromBottom);	// byteCount
-	NTV2_POINTER gumpF2(ancF2.GetHostAddress(F2OffsetFromBottom), // addr
-						F2MonOffsetFromBottom - F1OffsetFromBottom); // byteCount
+	NTV2_POINTER gumpF1(ancF1.GetHostAddress(F1OffsetFromBottom - F1MonOffsetFromBottom), // addr
+						F1MonOffsetFromBottom - F2OffsetFromBottom);	// byteCount
+	NTV2_POINTER gumpF2(ancF2.GetHostAddress(F2OffsetFromBottom - F2MonOffsetFromBottom), // addr
+						F2MonOffsetFromBottom); // byteCount
 
 	if (ancF1 || ancF2)
 	{
@@ -1503,8 +1498,8 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 					{	//	Caller F1 buffer contains RTP
 						if (isIoIP2110)
 						{	//	Generate GUMP from packetList...
-							NTV2_POINTER	tmp2(F2MonOffsetFromBottom - F1OffsetFromBottom);
-							packetList.GetSDITransmitData(gumpF1, tmp2, isProgressive, F2StartLine);
+							NTV2_POINTER	skipF2Data;
+							packetList.GetSDITransmitData(gumpF1, skipF2Data, isProgressive, F2StartLine);
 						}
 					}
 					else
@@ -1512,7 +1507,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 						generateRTP = true;	//	Force conversion to RTP
 						if (isIoIP2110)
 						{	//	Copy GUMP to where the driver expects it...
-							const ULWord	gumpLength (std::min(F1OffsetFromBottom - F2OffsetFromBottom, gumpF1.GetByteCount()));
+							const ULWord	gumpLength (std::min(F1MonOffsetFromBottom - F2OffsetFromBottom, gumpF1.GetByteCount()));
 							gumpF1.CopyFrom(/*src=*/ancF1,  /*srcOffset=*/0,  /*dstOffset=*/0,  /*byteCount=*/gumpLength);
 						}	//	if IoIP
 					}	//	if F1 is GUMP
@@ -1523,8 +1518,8 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 					{	//	Caller F2 buffer contains RTP
 						if (isIoIP2110)
 						{	//	Generate GUMP from packetList...
-							NTV2_POINTER	tmp1(F1MonOffsetFromBottom - F2MonOffsetFromBottom);
-							packetList.GetSDITransmitData(tmp1, gumpF2, isProgressive, F2StartLine);
+							NTV2_POINTER	skipF1Data;
+							packetList.GetSDITransmitData(skipF1Data, gumpF2, isProgressive, F2StartLine);
 						}
 					}
 					else
@@ -1532,7 +1527,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 						generateRTP = true;	//	Force conversion to RTP
 						if (isIoIP2110)
 						{	//	Copy GUMP to where the driver expects it...
-							const ULWord	gumpLength (std::min(F2OffsetFromBottom, gumpF2.GetByteCount()));
+							const ULWord	gumpLength (std::min(F2MonOffsetFromBottom, gumpF2.GetByteCount()));
 							gumpF2.CopyFrom(/*src=*/ancF2,  /*srcOffset=*/0,  /*dstOffset=*/0,  /*byteCount=*/gumpLength);
 						}	//	if IoIP
 					}	//	if F2 is GUMP
@@ -1643,17 +1638,18 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 	{	//	Re-encode packets into the XferStruct buffers as RTP...
 		//XMTDBG("CHGD: " << packetList);	//	DEBUG:  Changed packet list (to be converted to RTP)
 		const bool		singleRTPPkt	= inOutXferInfo.acTransferStatus.acState == NTV2_AUTOCIRCULATE_INVALID  ?  false  :  true;
-		NTV2_POINTER rtpF1 (ancF1.GetHostAddress(0),  isIoIP2110  ?  F1OffsetFromBottom - F2OffsetFromBottom  :  ancF1.GetByteCount());
-		NTV2_POINTER rtpF2 (ancF2.GetHostAddress(0),  isIoIP2110  ?  F2OffsetFromBottom  :  ancF2.GetByteCount());
+		NTV2_POINTER rtpF1 (ancF1.GetHostAddress(0),  isIoIP2110  ?  F1OffsetFromBottom - F1MonOffsetFromBottom  :  ancF1.GetByteCount());
+		NTV2_POINTER rtpF2 (ancF2.GetHostAddress(0),  isIoIP2110  ?  F2OffsetFromBottom - F2MonOffsetFromBottom  :  ancF2.GetByteCount());
 		result = AJA_SUCCESS(packetList.GetIPTransmitData (rtpF1, rtpF2, isProgressive, F2StartLine, singleRTPPkt));
-#if 0	//defined(_DEBUG)
+		//if (isIoIP2110)	XMTDBG("F1RTP: " << rtpF1 << " F2RTP: " << rtpF2 << " Xfer: " << inOutXferInfo);
+#if 0//defined(_DEBUG)
 		DMAWriteAnc(31, rtpF1, rtpF2, NTV2_CHANNEL_INVALID);	//	DEBUG: DMA RTP into frame 31
 		if (result)
 		{
 			AJAAncillaryList	compareRTP;	//	RTP into compareRTP
 			NTV2_ASSERT(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(rtpF1, rtpF2, compareRTP)));
 			//if (packetList.GetAncillaryDataWithID(0x61,0x02)->GetChecksum() != compareRTP.GetAncillaryDataWithID(0x61,0x02)->GetChecksum())
-			XMTDBG("COMPRTP608: " << packetList.GetAncillaryDataWithID(0x61,0x02)->AsString(8) << compareRTP.GetAncillaryDataWithID(0x61,0x02)->AsString(8));
+			//XMTDBG("COMPRTP608: " << packetList.GetAncillaryDataWithID(0x61,0x02)->AsString(8) << compareRTP.GetAncillaryDataWithID(0x61,0x02)->AsString(8));
 			string compRTP (compareRTP.CompareWithInfo(packetList, /*ignoreLocation*/false, /*ignoreChecksum*/false));
 			if (!compRTP.empty())
 				XMTWARN("MISCOMPARE: " << compRTP);
@@ -1666,7 +1662,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 				AJAAncillaryList	compareGUMP;	//	GUMP into compareGUMP
 				NTV2_ASSERT(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(gumpF1, gumpF2, compareGUMP)));
 				//if (packetList.GetAncillaryDataWithID(0x61,0x02)->GetChecksum() != compareGUMP.GetAncillaryDataWithID(0x61,0x02)->GetChecksum())
-				XMTDBG("COMPGUMP608: " << packetList.GetAncillaryDataWithID(0x61,0x02)->AsString(8) << compareGUMP.GetAncillaryDataWithID(0x61,0x02)->AsString(8));
+				//XMTDBG("COMPGUMP608: " << packetList.GetAncillaryDataWithID(0x61,0x02)->AsString(8) << compareGUMP.GetAncillaryDataWithID(0x61,0x02)->AsString(8));
 				string compGUMP (compareGUMP.CompareWithInfo(packetList, /*ignoreLocation*/false, /*ignoreChecksum*/false));
 				if (!compGUMP.empty())
 					XMTWARN("MISCOMPARE: " << compGUMP);

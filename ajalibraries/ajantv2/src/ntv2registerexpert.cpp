@@ -1403,9 +1403,9 @@ public:
 		if (::NTV2DeviceCanDoCustomAnc(inDeviceID))
 		{
 			const NTV2RegNumSet	ancRegs			(GetRegistersForClass(kRegClass_Anc));
-			const UWord			numFrameStores	(::NTV2DeviceGetNumFrameStores(inDeviceID));
+			const UWord			numVideoOutputs	(::NTV2DeviceGetNumVideoOutputs(inDeviceID));
 			NTV2RegNumSet		allChanRegs;	//	For just those channels it supports
-			for (UWord num(0);  num < numFrameStores;  num++)
+			for (UWord num(0);  num < numVideoOutputs;  num++)
 			{
 				const NTV2RegNumSet chRegs (GetRegistersForClass(chanClasses[num]));
 				allChanRegs.insert(chRegs.begin(), chRegs.end());
