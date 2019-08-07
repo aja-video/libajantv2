@@ -1134,6 +1134,8 @@ bool CNTV2Card::GetFrameGeometry (NTV2FrameGeometry & outValue, NTV2Channel inCh
 	outValue = NTV2_FG_INVALID;
 	if (!IsMultiFormatActive())
 		inChannel = NTV2_CHANNEL1;
+	else if (IS_CHANNEL_INVALID(inChannel))
+		return false;
 
 	bool status = CNTV2DriverInterface::ReadRegister (gChannelToGlobalControlRegNum[inChannel], outValue, kRegMaskGeometry, kRegShiftGeometry);
 	// special case for quad-frame (4 frame buffer) geometry
@@ -1176,8 +1178,10 @@ bool CNTV2Card::GetFrameRate (NTV2FrameRate & outValue, NTV2Channel inChannel)
 {
 	ULWord	returnVal1 (0), returnVal2 (0);
 	outValue = NTV2_FRAMERATE_UNKNOWN;
-	if (!IsMultiFormatActive ())
+	if (!IsMultiFormatActive())
 		inChannel = NTV2_CHANNEL1;
+	else if (IS_CHANNEL_INVALID(inChannel))
+		return false;
 
 	if (ReadRegister (gChannelToGlobalControlRegNum[inChannel], returnVal1, kRegMaskFrameRate, kRegShiftFrameRate) &&
 		ReadRegister (gChannelToGlobalControlRegNum[inChannel], returnVal2, kRegMaskFrameRateHiBit, kRegShiftFrameRateHiBit))
