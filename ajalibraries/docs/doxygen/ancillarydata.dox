@@ -472,6 +472,9 @@ There are two ways to play out custom Ancillary data packets:
 	-	See \ref vancframegeometries (below) for details on the locations of the SMPTE VANC lines in the frame buffer.
 	-	Before transferring the frame to the device, set the contents of the VANC line(s)…
 		-	If desired, use the \ref ajaanc — call AJAAncillaryList::GetVANCTransmitData.
+		-	<b>CAUTION:</b> The device will transmit whatever Y/Cb/Cr values are in the VANC region of the buffer unfiltered,
+			<i>including illegal values</i>, which can cause sync issues in downstream equipment. Be sure all values stored
+			in the VANC lines are legal SMPTE.
 
 @note	Because the outgoing line number can be specified when using the <b>Anc Inserter</b>, it's possible to
 		overrun a line. Be certain that the data packets to be inserted on a given line will fit for the output
