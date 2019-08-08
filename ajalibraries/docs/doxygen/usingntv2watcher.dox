@@ -238,15 +238,26 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 		-	<b>Show/Hide Line Boundaries</b> — (<b>Raw</b> view only) — Shows or hides the line boundary markers.
 
 @par	Data Operations
-	-	<b>Save As…</b> — Saves the frame buffer contents to a file.
-		-	The <b>Auto</b> checkbox must be un-checked.
-		-	Choose the <b>FrameStore</b> and <b>Frame</b> of interest.
-		-	Click in the <b>File</b> menu, then choose <b>Save As…</b>.
-		-	A standard file-save dialog box appears. Navigate to the folder on your local host where you want the file to be saved, and give it a name.
-		-	<b>IMPORTANT:</b> The format of the data written to the file is View-dependent:
-			-	<b>Lines</b>, <b>Components</b>, and <b>Image</b> — Writes a human-readable formatted dump of the raster selection, or, if there’s no selection, the full raster.
-			-	<b>Raw</b> — Writes a raw, binary data file containing the contents of the entire frame buffer (8MB or 16MB).
-				If given a name extension of “.raw”, it can be dropped into the Frame Buffer inspector view to set the contents of a frame buffer at any time thereafter.
+	-	<b>File</b> menu
+		-	<b>Save As…</b> — Saves the frame buffer contents to a file.
+			-	The <b>Auto</b> checkbox must be un-checked.
+			-	Choose the <b>FrameStore</b> and <b>Frame</b> of interest.
+			-	Click in the <b>File</b> menu, then choose <b>Save As…</b>.
+			-	A standard file-save dialog box appears. Navigate to the folder on your local host where you want the file to be saved, and give it a name.
+			-	<b>IMPORTANT:</b> The format of the data written to the file is View-dependent:
+				-	<b>Image</b> — Writes a PNG image file of the raster selection, or, if there’s no selection, the full raster.
+				-	<b>Lines</b> and <b>Components</b> — Writes a human-readable C-compilable dump of the raster selection, or,
+					if there’s no selection, the full raster.
+				-	<b>Raw</b> — Writes a raw, binary data file containing the contents of the entire frame buffer. This will be
+					8MB or 16MB for normal rasters. For “quad” 4K/UHD, it will be 8MB/16MB × 4. For “quad-quad” 8K, it will be 8MB/16MB × 16.
+	-	<b>Edit</b> menu
+		-	<b>Copy</b> — Copies the current selection to the “clipboard” that can be used in a subsequent “Paste” operation.
+			The data written to the clipboard is View-dependent:
+			-	<b>Image</b> — The selected raster image, or, if there’s no selection, the full raster.
+			-	All Others — Text that’s a human-readable, C-compilable dump of the selected data,
+				or if there’s no selection, the entire buffer.
+		-	<b>Select All</b> — Selects (highlights) the entire image (<b>Image</b> view), the entire raster (<b>Lines</b>
+			and <b>Components</b> view), the entire line (<b>Waveform</b> view), or the entire buffer (<b>Raw</b> view).
 	-	<b>Buffer Editing</b> — (<b>Lines</b> or <b>Raw</b> view only)
 		-	This will fill a portion of the currently displayed frame buffer with a specific value that you enter from the keyboard.
 		-#	Highlight a selection area of any size.
