@@ -385,18 +385,9 @@ automatically insert a VPID packet in the outgoing SDI data stream.
 @section	anccapture	Custom Anc Packet Capture
 
 There are two ways to capture any/all Ancillary data packets:
--	<b>Use a VANC frame geometry</b> (see CNTV2Card::SetVANCMode) — but there are caveats:
-	-	Only ::NTV2_FBF_10BIT_YCBCR and ::NTV2_FBF_8BIT_YCBCR buffer formats are officially supported. Others may work,
-		but are untested.
-	-	4K/UHD or larger rasters (i.e. ::NTV2FrameGeometry ≥ ::NTV2_FG_4x1920x1080) aren’t supported.
-	-	Signal paths involving CSCs/LUTs between the SDI input and the Frame Store may corrupt the VANC data.
-	-	HANC is (obviously) not available in the frame buffer.
-	-	See \ref vancframegeometries (below) for details on the locations of the SMPTE VANC lines in the frame buffer.
-	-	After the frame has been transferred to the host, to obtain the ancillary data:
-		-	Parse the VANC lines in the host frame buffer manually, or…
-		-	Use AJAAncillaryList::SetFromVANCData to obtain a list of ::AJAAncillaryData packets found in the frame buffer.
--	<b>Use Anc Extractor firmware:</b>
-	-	Limited to devices that support ::NTV2DeviceCanDoCustomAnc.
+-	<b>Use Anc Extractor firmware:</b>  <i>(Preferred)</i>
+	-	Available on most devices — check ::NTV2DeviceCanDoCustomAnc.
+	-	Ancillary data is automatically extracted and placed into a separate area of the device frame buffer.
 	-	With \ref aboutautocirculate :
 		-	SDK & driver version 12.3 or later required.
 		-	Call CNTV2Card::AutoCirculateInitForInput with the ::AUTOCIRCULATE_WITH_ANC option.
@@ -420,16 +411,20 @@ There are two ways to capture any/all Ancillary data packets:
 			These packets will not appear in the ancillary data buffer(s).
 		-	Call CNTV2Card::AncExtractGetFilterDIDs to discover which packet DIDs are currently being excluded.
 		-	Call CNTV2Card::AncExtractSetFilterDIDs to change which packet DIDs will be excluded.
-		-	Use the NTV2DIDSet returned from CNTV2Card::AncExtractGetDefaultDIDs to restore the default packet exclusion list.
+		-	Use the ::NTV2DIDSet returned from CNTV2Card::AncExtractGetDefaultDIDs to restore the default packet exclusion list.
 	-	The default maximum per-field ancillary data buffer capacity is 8K by default, or 16K per-frame, including overhead.
-		This can be changed on a per-device basis by setting a pair of virtual registers (using CNTV2Card::WriteRegister):
-		-	::kVRegAncField1Offset — This specifies the offset from the bottom of the 8MB/16MB frame where F1 ancillary
-			data will be written. Defaults to 16K (\c 0x00004000 ).
-		-	::kVRegAncField2Offset — This specifies the offset from the bottom of the 8MB/16MB frame where F2 ancillary
-			data will be written. Defaults to 8K (\c 0x00002000 ).
-		-	<b>Caution:</b> Recklessly setting these values can cause ancillary data to be written into the active video,
-			thus corrupting captured video frames.
-		-	Changing either of these values also affects Anc playout.
+		Please <a href="https://sdksupport.aja.com/index.php?/Tickets/Submit">submit a Ticket</a> if you need to change this.
+-	<b>Use VANC frame geometry</b>  <i>(for older AJA devices)</i>
+	-	4K/UHD or larger rasters (i.e. ::NTV2FrameGeometry ≥ ::NTV2_FG_4x1920x1080) aren’t supported, and likely never will be.
+	-	Only ::NTV2_FBF_10BIT_YCBCR and ::NTV2_FBF_8BIT_YCBCR buffer formats are officially supported. Others may work,
+		but are untested.
+	-	Signal paths involving CSCs/LUTs between the SDI input and the Frame Store may corrupt the VANC data.
+	-	HANC is (obviously) not available in the frame buffer.
+	-	Call CNTV2Card::SetVANCMode to enable the “tall” or “taller” frame geometry.
+	-	See \ref vancframegeometries (below) for details on the locations of the SMPTE VANC lines in the frame buffer.
+	-	After the frame has been transferred to the host, to obtain the ancillary data:
+		-	Parse the VANC lines in the host frame buffer manually, or…
+		-	Use AJAAncillaryList::SetFromVANCData to obtain a list of ::AJAAncillaryData packets found in the frame buffer.
 
 <b>TIP:</b> The \ref usingntv2watcher tool’s \ref inspectoranc is useful for diagnosing issues with ancillary data capture.
 
@@ -437,18 +432,11 @@ There are two ways to capture any/all Ancillary data packets:
 @section	ancplayout	Custom Anc Packet Playout
 
 There are two ways to play out custom Ancillary data packets:
--	Use a VANC frame geometry (see CNTV2Card::SetVANCMode) — but there are caveats:
-	-	Only ::NTV2_FBF_10BIT_YCBCR or ::NTV2_FBF_8BIT_YCBCR buffer formats are officially supported. Others may work,
-		but are untested.
-	-	4K/UHD or larger rasters (i.e. ::NTV2FrameGeometry ≥ ::NTV2_FG_4x1920x1080) aren’t supported.
-	-	Signal paths involving CSCs/LUTs between the Frame Store and the SDI output may corrupt the VANC data.
-	-	HANC is unsupported.
-	-	See \ref vancframegeometries (below) for details on the locations of the SMPTE VANC lines in the frame buffer.
-	-	Before calling CNTV2Card::DMAWriteFrame, set the frame buffer contents…
-		-	If desired, use the \ref ajaanc — call AJAAncillaryList::GetVANCTransmitData.
--	Use device <b>Anc Inserter</b>:
-	-	Limited to devices that support ::NTV2DeviceCanDoCustomAnc.
-	-	Can’t output HANC.
+-	<b>Use Anc Inserter firmware:</b>  <i>(Preferred)</i>
+	-	Available on most devices — check ::NTV2DeviceCanDoCustomAnc.
+	-	Ancillary data packets are automatically inserted into the outgoing video stream when they’ve been properly formatted
+		and placed into a separate area of the device frame buffer.
+	-	Cannot output HANC (sorry).
 	-	With \ref aboutautocirculate :
 		-	SDK & driver version 12.3 or later required.
 		-	Call CNTV2Card::AutoCirculateInitForOutput with the ::AUTOCIRCULATE_WITH_ANC option.
@@ -469,24 +457,30 @@ There are two ways to play out custom Ancillary data packets:
 			-	For SMPTE-2110 IP devices, CNTV2Card::DMAWriteAnc will automatically convert the data from
 				\ref ancgumpformat into \ref ancrtpformat (SDK version 15.2 or later required) immediately prior
 				to the actual transfer.
-	-	On SDI devices and SMPTE 2022 firmware on IP devices, the parity bits for outgoing 10-bit UDWs are recalculated
-		by the Anc inserter, after reading the 8-bit UDWs out of the Anc Buffer, while embedding the packet data into the
-		outgoing SDI data stream.
+	-	On SDI devices and SMPTE 2022 firmware on IP devices, the parity bits for outgoing 10-bit UDWs are automatically
+		recalculated by the Anc inserter, after reading the 8-bit UDWs out of the Anc Buffer, while embedding the packet
+		data into the outgoing SDI data stream.
 	-	Default per-field ancillary data buffer capacity is 8K by default, or 16K per-frame, including overhead.
-		This can be changed on a per-device basis by setting a pair of virtual registers (using CNTV2Card::WriteRegister):
-		-	::kVRegAncField1Offset — This specifies the offset from the bottom of the 8MB/16MB frame where F1 ancillary
-			data will be read by the Anc inserter. Defaults to 16K (\c 0x00004000 ).
-		-	::kVRegAncField2Offset — This specifies the offset from the bottom of the 8MB/16MB frame where F2 ancillary
-			data will be read by the Anc inserter. Defaults to 8K (\c 0x00002000 ).
-		-	Recklessly setting these values can cause ancillary data to be transferred into the active video, thus corrupting
-			outgoing video frames.
-		-	Changing either of these values also affects Anc capture.
+		Please <a href="https://sdksupport.aja.com/index.php?/Tickets/Submit">submit a Ticket</a> if you need to change this.
+-	<b>Use VANC frame geometry</b>  <i>(for older AJA devices)</i>
+	-	4K/UHD or larger rasters (i.e. ::NTV2FrameGeometry ≥ ::NTV2_FG_4x1920x1080) aren’t supported, and likely never will be.
+	-	Only ::NTV2_FBF_10BIT_YCBCR or ::NTV2_FBF_8BIT_YCBCR buffer formats are officially supported. Others may work,
+		but are untested.
+	-	Signal paths involving CSCs/LUTs between the Frame Store and the SDI output may corrupt the VANC data.
+	-	HANC obviously cannot be supported.
+	-	Call CNTV2Card::SetVANCMode to enable the “tall” or “taller” frame geometry.
+	-	See \ref vancframegeometries (below) for details on the locations of the SMPTE VANC lines in the frame buffer.
+	-	Before transferring the frame to the device, set the contents of the VANC line(s)…
+		-	If desired, use the \ref ajaanc — call AJAAncillaryList::GetVANCTransmitData.
+		-	<b>CAUTION:</b> The device will transmit whatever Y/Cb/Cr values are in the VANC region of the buffer unfiltered,
+			<i>including illegal values</i>, which can cause sync issues in downstream equipment. Be sure all values stored
+			in the VANC lines are legal SMPTE.
 
 @note	Because the outgoing line number can be specified when using the <b>Anc Inserter</b>, it's possible to
 		overrun a line. Be certain that the data packets to be inserted on a given line will fit for the output
 		video standard.
 
-<b>TIP:</b> The \ref usingntv2watcher tool’s \ref inspectoranc is useful for diagnosing issues with ancillary data capture.
+<b>TIP:</b> The \ref usingntv2watcher tool’s \ref inspectoranc is useful for diagnosing issues with ancillary data playout.
 
 <hr size="50px">
 
