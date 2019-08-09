@@ -50,7 +50,8 @@ enum NTV2TestPatternSelect
 	NTV2_TestPatt_All
 };
 
-#define NTV2_IS_12B_PATTERN(__S__) ((__S__) >= NTV2_TestPatt_ZonePlate_12b_RGB && (__S__) < NTV2_TestPatt_All)
+#define NTV2_IS_VALID_PATTERN(__S__) ((__S__) >= NTV2_TestPatt_ColorBars100  &&  (__S__) < NTV2_TestPatt_All)
+#define NTV2_IS_12B_PATTERN(__S__)	 ((__S__) >= NTV2_TestPatt_ZonePlate_12b_RGB  &&  (__S__) < NTV2_TestPatt_All)
 
 
 /**
@@ -64,9 +65,16 @@ public:
 							NTV2TestPatternGen ();
 	virtual					~NTV2TestPatternGen ();
 
-	virtual bool			DrawTestPattern (NTV2TestPatternSelect pattNum, uint32_t frameWidth, uint32_t frameHeight,
-											NTV2FrameBufferFormat pixelFormat, NTV2TestPatternBuffer & outBuffer);
-
+	virtual bool			DrawTestPattern (const NTV2TestPatternSelect inPattern, uint32_t inFrameWidth, uint32_t inFrameHeight,
+											const NTV2FrameBufferFormat inPixelFormat, NTV2TestPatternBuffer & outBuffer);
+	virtual inline bool		DrawTestPattern (const NTV2TestPatternSelect inPattern,
+											const NTV2FormatDescriptor & inDesc,
+											NTV2TestPatternBuffer & outBuffer)
+																			{return DrawTestPattern(inPattern,
+																									inDesc.GetRasterWidth(),
+																									inDesc.GetVisibleRasterHeight(),
+																									inDesc.GetPixelFormat(),
+																									outBuffer);}
 	inline void				setSignalMask (NTV2SignalMask signalMask)		{_signalMask = signalMask;}
 	inline void				setUseRGBSmpteRange (bool useRGBSmpteRange)		{_bRGBSmpteRange = useRGBSmpteRange;}
 	inline bool				getUseRGBSmpteRange (void) const				{return _bRGBSmpteRange;}
@@ -76,6 +84,7 @@ public:
 	inline void				setAlphaFromLuma (bool alphaFromLuma)			{_bAlphaFromLuma = alphaFromLuma;}
 	inline bool				getAlphaFromLuma (void) const					{return _bAlphaFromLuma;}
 
+	static bool							canDrawTestPattern (const NTV2TestPatternSelect inPattern, const NTV2FormatDescriptor & inDesc);
 	static const NTV2TestPatternNames &	getTestPatternNames (void);
 #if !defined(NTV2_DEPRECATE_15_0)
 	static NTV2_SHOULD_BE_DEPRECATED (NTV2TestPatternList &		getTestPatternList (void));

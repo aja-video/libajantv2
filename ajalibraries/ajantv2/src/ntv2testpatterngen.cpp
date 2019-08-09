@@ -2168,6 +2168,22 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 };
 
 
+bool NTV2TestPatternGen::canDrawTestPattern (const NTV2TestPatternSelect inPattern, const NTV2FormatDescriptor & inDesc)
+{
+	if (!inDesc.IsValid())
+		return false;	//	Format descriptor must be valid
+	if (NTV2_IS_12B_PATTERN(inPattern))
+	{
+		if (inDesc.GetRasterWidth() % 1920)
+			return false;	//	Pixel width must be evenly divisible by 1920
+		if (inDesc.GetPixelFormat() != NTV2_FBF_48BIT_RGB)
+			return false;	//	Pixel format must be RGB-12b
+		return true;
+	}
+	return NTV2_IS_VALID_PATTERN(inPattern);
+}
+
+
 const NTV2TestPatternNames & NTV2TestPatternGen::getTestPatternNames (void)
 {
 	static NTV2TestPatternNames sTestPatternNames;
@@ -2232,7 +2248,11 @@ NTV2TestPatternGen::~NTV2TestPatternGen()
 // DrawTestPattern()
 //	Note: "dSlider" is expected to range between 0.0 and 1.0
 //
-bool NTV2TestPatternGen::DrawTestPattern (NTV2TestPatternSelect pattNum, uint32_t frameWidth, uint32_t frameHeight, NTV2FrameBufferFormat pixelFormat, NTV2TestPatternBuffer &testPatternBuffer )
+bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect pattNum,
+											const uint32_t frameWidth,
+											const uint32_t frameHeight,
+											const NTV2FrameBufferFormat pixelFormat,
+											NTV2TestPatternBuffer & testPatternBuffer)
 {
 	bool bResult = false;
 
@@ -2245,10 +2265,11 @@ bool NTV2TestPatternGen::DrawTestPattern (NTV2TestPatternSelect pattNum, uint32_
 	
 	// HDR test pattern compatibility check
 	if (NTV2_IS_12B_PATTERN(pattNum))
-	{
-		// requires video width divisible by 1920, RGB-12b pixel format
-		if (((_frameWidth % 1920) != 0) || (_pixelFormat != NTV2_FBF_48BIT_RGB))
-			return bResult;
+	{	//	HDR test pattern requested...
+		if (_frameWidth % 1920)
+			return false;	//	Pixel width must be evenly divisible by 1920
+		if (_pixelFormat != NTV2_FBF_48BIT_RGB)
+			return false;	//	Pixel format must be RGB-12b
 	}
 
 	_linePitch     = CalcRowBytesForFormat(_pixelFormat, _frameWidth);					// number of BYTES per line of frame buffer format
