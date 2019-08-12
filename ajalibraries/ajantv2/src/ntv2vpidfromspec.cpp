@@ -309,7 +309,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	case NTV2_FORMAT_4x4096x2160p_2500:
 	case NTV2_FORMAT_4x4096x2160p_2997:
 	case NTV2_FORMAT_4x4096x2160p_3000:
-		byte1 = VPIDStandard_4320_DualLink_12Gb;
+		byte1 = isRGB ? VPIDStandard_4320_QuadLink_12Gb : VPIDStandard_4320_DualLink_12Gb;
 		break;
 		
 	case NTV2_FORMAT_4x3840x2160p_5000:
