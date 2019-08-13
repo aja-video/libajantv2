@@ -1,7 +1,7 @@
 #
 # Top level Makefile for AJA Video demo applications
 #
-# Copyright (C) 2018 AJA Video Systems, Inc.
+# Copyright (C) 2019 AJA Video Systems, Inc.
 # Proprietary and Confidential information.
 #
 # Control Flags for Make
@@ -27,8 +27,7 @@ SUBDIRS = ntv2burn \
 		  ntv2outputtestpattern \
 		  ntv2player \
 		  ntv2player4k \
-		  ntv2player8k \
-		  NVIDIA/dvplowlatencydemo
+		  ntv2player8k
 
 ifndef AJA_NO_QT
 SUBDIRS := $(SUBDIRS) \
@@ -36,6 +35,11 @@ SUBDIRS := $(SUBDIRS) \
 		  ntv2konaipj2ksetup \
 		  ntv2qtmultiinput \
 		  ntv2qtpreview
+endif
+
+ifndef AJA_NO_GL
+SUBDIRS := $(SUBDIRS) \
+		  NVIDIA/dvplowlatencydemo
 endif
 
 .PHONY: subdirs $(SUBDIRS)
