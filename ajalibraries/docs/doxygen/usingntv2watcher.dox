@@ -5,12 +5,29 @@
 
 This page describes how to use the <b>NTV2 Watcher</b> tool to interactively monitor and control an AJA device.
 
-@par	General Operation
+Contents:
+	-	\ref inspectorgeneralop
+	-	\ref inspectorframebuffer
+		-	\ref fillbufferdlog
+	-	\ref inspectoraudio
+	-	\ref inspectoranc
+		-	\ref anc608viewer
+	-	\ref inspectorac
+	-	\ref inspectormixerkeyer
+	-	\ref inspectorregs
+		-	\ref regautocycler
+	-	\ref inspectorroute
 
-The <b>NTV2 Watcher</b> is a graphical tool that replaces the original <b>Watcher</b> utility to interactively monitor and configure any NTV2 device.
-The user interface consists of one or more windows, the main window having three panels:
+
+
+<hr size="50px">
+@subsection	inspectorgeneralop		General Operation
+
+The <b>NTV2 Watcher</b> is a graphical tool that interactively monitors and configures an NTV2 device.
+The user interface consists of a main window that contains three panels:
 
 @image	html	watcherlayout.png
+
 
 @par	Device Selection
 
@@ -23,12 +40,14 @@ Choosing an item in the menu causes <b>NTV2 Watcher</b> to stop monitoring the p
 and starts it monitoring the newly-selected AJA device. Depending on the device and its capabilities,
 the list of available inspectors may change.
 
-To monitor an NTV2 device that’s running on another machine in your local network, click the <b>+</b> button and enter the machine’s IP address in the dialog that appears … then click OK.
+To monitor an NTV2 device that’s running on another machine in your local network, click the <b>+</b> button
+and enter the machine’s IP address in the dialog that appears … then click OK.
 The devices on that machine will be added to the popup menu.
 
 To remove a remote device, be sure it’s the currently selected one, then click the <b>-</b> button.
 
 @note	The “NTV2 Nub” must be running on any machine to permit its devices to be monitored remotely.
+
 
 @par	Common Settings
 
@@ -43,6 +62,7 @@ There are several settings that are common to the device and apply to all inspec
 -	<b>Reference</b> — Indicates the device’s current clock reference setting, and allows it to be changed by choosing a different setting.
 -	<b>FBSize</b> — Indicates the device’s current frame buffer size, and allows it to be changed by choosing a different setting.
 
+
 @par	Inspectors
 
 @image	html	watcher-inspectorlist.png
@@ -55,6 +75,13 @@ Each inspector has its own particular user interface that’s designed to monito
 Clicking on an inspector item in the list replaces the one that was previously selected with the one that was newly selected.
 If you click back to return to an inspector that was previously in use, its state is exactly as it was left.
 (Only when the device is changed does a new inspector get started in its default state.)
+
+Right-clicking an inspector item in the list pops up a menu with one choice: “Float”.
+Choosing <b>Float</b> — or double-clicking an inspector item in the list — opens the inspector in a separate window.
+This permits multiple inspectors to be open simultaneously.
+
+@note	Having multiple inspectors open in separate windows increases CPU utilization,
+		and can significantly impact the DMA transfer budget of the device and the PCIe bus.
 
 @bug	NTV2Watcher keeps some persistent settings data in a local config file.
 		If this file gets corrupted, it can cause NTV2Watcher to hang or crash upon startup.
@@ -223,13 +250,7 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 		-	<b>Paste</b> — (Available only if an entire frame was previously Copied) — Replaces the current 8MB or 16MB frame with the 8MB or 16MB frame that was Copied earlier.
 		-	<b>Set Color…</b> — (<b>Auto</b> mode OFF only) — Displays a color picker.
 			Choosing a color will set the active lines of the current frame buffer to the chosen color.
-		-	<b>Fill…</b> — (<b>Auto</b> mode OFF only) — Reveals the <b>Fill Frame Buffer</b> modeless dialog.
-			-	<b>Numeric Values</b> — Fills one or more buffers with any 8, 16, 32 or 64-bit numeric value.
-				@image	html	watcher-fillfb-numeric.png
-			-	<b>Test Pattern</b> — Fills one or more buffers with any of several predefined test patterns.
-				@image	html	watcher-fillfb-pattern.png
-			-	<b>Text</b> — Fills one or more buffers with glyphs rendered using the ::CNTV2CaptionRenderer.
-				@image	html	watcher-fillfb-text.png
+		-	<b>Fill…</b> — (<b>Auto</b> mode OFF only) — Reveals the \ref fillbufferdlog for filling device frame memory with specific values or test patterns.
 		-	<b>Compare to Frame…</b> — (<b>Auto</b> mode OFF only) — Enables <b>Frame Differencing mode</b>,
 			comparing the current frame with another, highlighting the differences.  To cancel this mode,
 			toggle the “Auto” setting, or change the current frame being viewed.
@@ -290,6 +311,45 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 				-	If the raw file is smaller than the frame buffer, only the bytes from the file will overwrite the frame buffer.
 					All subsequent content in the buffer will remain unchanged.
 				-	If the raw file is larger than the frame buffer, only the current frame being written will be changed.
+
+
+@subsubsection	fillbufferdlog		Fill Buffer Window
+
+The <b>Fill Buffer Window</b> is a handy debugging aid for filling device buffer memory with various values and/or patterns.
+
+The <b>Start Frame</b> and <b>End Frame</b> spinner controls are used to adjust the range of frames to be filled.
+Check the <b>All Frames</b> checkbox to easily select all frames on the device.
+
+There are currently three ways to fill buffer memory:
+	-	<b>Numeric Value</b> — Fills one or more buffers with any 8, 16, 32 or 64-bit numeric value.
+		@image	html	watcher-fillfb-numeric.png
+		Click <b>Apply</b> to write the numeric value into the frame buffer(s).
+		Checkboxes are provided for skipping certain regions of each frame buffer being filled:
+		-	<b>Field1</b> — Skips “Field 1” lines.
+		-	<b>Field2</b> — Skips “Field 2” lines.
+		-	<b>VANC</b> — Skips VANC lines. (Enabled only when the FrameStore geometry is “tall” or “taller”.)
+		-	<b>Visible Raster</b> — Skips the visible raster lines.
+		-	<b>Anc F1 Region</b> — Skips the F1 Ancillary Data region.
+		-	<b>Anc F2 Region</b> — Skips the F2 Ancillary Data region.
+	-	<b>Test Pattern</b> — Fills one or more buffers with any of several predefined test patterns.
+		@image	html	watcher-fillfb-pattern.png
+		The test pattern image is written to the buffer(s) immediately after choosing the test pattern.
+	-	<b>Text</b> — Fills one or more buffers with glyphs rendered using the ::CNTV2CaptionRenderer class.
+		@image	html	watcher-fillfb-text.png
+		Note that the frame buffer(s) are written immediately after making any changes or selections in the panel.
+		-	<b>Display Text</b> — A text edit box for specifying the text to be rendered.
+		-	<b>Blit Over Test Pattern</b> — Renders the text <i>after</i> [re]writing the test pattern into the frame buffer(s).
+		-	<b>Y</b> and <b>X</b> Position — Starting position where text rendering begins in the frame.
+			The coordinate units depend on the <b>Use Pixel Position</b> checkbox.
+		-	<b>Use Pixel Position</b> — Determines the position coordinate units where the text is rendered.
+			-	Unchecked — use CEA608 row/column coordinates.
+			-	Checked — use pixel offset from the top-left corner (where top-left is 0,0).
+		-	<b>Italic</b> — Check the box to render in italics;  un-check for non-italic (normal).
+		-	<b>Underline</b> — Check the box to render with underline;  un-check for no underline (normal).
+		-	<b>FG</b> — Specifies the foreground color attribute.
+		-	<b>BG</b> — Specifies the background color attribute.
+		-	<b>Opacity</b> — Specifies the opacity attribute: Opaque, Translucent, or Transparent.
+		-	<b>Clear Caches</b> — Clears the ::CNTV2CaptionRenderer caches.	
 
 
 
@@ -651,6 +711,27 @@ To change a register’s value:
 	-	Press <b>Escape</b> to abandon your changes. The edit box will disappear.
 
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the displayed registers to the Clipboard.
+
+
+
+@subsubsection	regautocycler		Register Auto-Cycler Window
+
+The <b>Register Auto-Cycler Window</b> is a handy tool for automatically cycling the value of a register
+from a minimum to a maximum numeric value at a particular step rate.
+
+For example, it can be used to step the <b>OutputFrame</b> register to automatically cycle through several
+pre-loaded frame images.
+
+	-	<b>Reg</b> — This specifies the register to be cycled.
+	-	<b>Min</b> — This specifies the minimum value for the register.
+	-	<b>Max</b> — This specifies the maximum value for the register.
+		When the register reaches this value, when it’s time for the next step,
+		it will start over at the <b>min</b> value.
+	-	<b>Rate</b> — This slider control adjusts the time between steps.
+	-	<b>Start</b> — Click to start the auto-cycler.
+		When running, this button will be disabled and will be titled “Running”.
+	-	<b>Stop</b> — Click to stop the auto-cycler.
+		When stopped, this button will be disabled and will be titled “Stopped”.
 
 
 
