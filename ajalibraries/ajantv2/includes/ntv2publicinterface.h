@@ -5694,6 +5694,7 @@ typedef enum
 
 		#define DMABUFFERLOCK_LOCK					BIT(0)		///< @brief Used in ::NTV2BufferLock to page lock the buffer.
 		#define DMABUFFERLOCK_UNLOCK_ALL			BIT(1)		///< @brief Used in ::NTV2BufferLock to unlock all locked buffers.
+        #define DMABUFFERLOCK_MAP                   BIT(2)		///< @brief Used in ::NTV2BufferLock to IO map buffer.
 
 		#if !defined (NTV2_BUILDING_DRIVER)
 			/**

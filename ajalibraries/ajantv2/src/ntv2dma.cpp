@@ -455,7 +455,10 @@ bool CNTV2Card::DMABufferLock (const NTV2_POINTER & inBuffer)
 	if (!_boardOpened)
 		return false;		//	Device not open!
 
-	NTV2BufferLock lockMsg (inBuffer, inBuffer.IsNULL() ? DMABUFFERLOCK_UNLOCK_ALL : DMABUFFERLOCK_LOCK);
+    if ((inBuffer.GetHostPointer() == NULL) || inBuffer.GetByteCount() == 0)
+        return false;
+
+    NTV2BufferLock lockMsg (inBuffer, (DMABUFFERLOCK_LOCK | DMABUFFERLOCK_MAP));
 	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&lockMsg));
 }
 
