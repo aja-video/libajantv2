@@ -48,14 +48,7 @@ $(SUBDIRS):
 	$(MAKE) -C $@
 
 .PHONY: clean
-clean: cleandeps
+clean:
 	@for dir in $(SUBDIRS); do \
 		$(MAKE) -C $$dir clean; \
 	done
-
-.PHONY: cleandeps
-cleandeps:
-	@for dir in $(SUBDIRS); do \
-		$(MAKE) -C $$dir cleandeps; \
-	done
-

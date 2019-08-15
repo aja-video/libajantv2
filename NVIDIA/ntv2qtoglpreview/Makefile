@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2004-2013 AJA Video Systems, Inc.
+# Copyright (C) 2004-2019 AJA Video Systems, Inc.
 # Proprietary and Confidential information.  
 # All Rights Reserved.
 #
@@ -15,19 +15,13 @@ QMAKE ?= qmake
 
 include $(NTV2_ROOT)/qt.mk
 
-.PHONY: clean
-
 default: $(NTV2_ROOT)/bin/ntv2qtoglpreview
 
 $(NTV2_ROOT)/bin/ntv2qtoglpreview:
 	$(QMAKE) -o $(QMAKE_FILE) $(QT_PRO_FILE)
 	$(MAKE) -f $(QMAKE_FILE)
 
+.PHONY: clean
 clean:
 	rm -f $(NTV2_ROOT)/bin/ntv2qtoglpreview
 	$(MAKE) -f $(QMAKE_FILE) clean
-
-.PHONY: cleandeps
-cleandeps:
-	@echo "cleandeps is a nop here"
-

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2004 - 2017 AJA Video Systems, Inc.
+# Copyright (C) 2004 - 2019 AJA Video Systems, Inc.
 # Proprietary and Confidential information.
 # All righs reserved
 #
@@ -11,22 +11,14 @@ include $(DIR)/../../../../build/qt.mk
 
 APP_FULL_PATH=$(A_UBER_BIN)/ntv2konaipjsonsetup
 QT_PRO_FILE = $(A_BUILD_PATH)/ntv2demos/konaipjsonsetup/konaipjsonsetup.pro
-QMAKE_FILE = qMakefile
-
-.PHONY: clean
 
 default: $(APP_FULL_PATH)
 
 $(APP_FULL_PATH):
-	$(QMAKE) -o $(QMAKE_FILE) $(QT_PRO_FILE)
-	$(MAKE) -f $(QMAKE_FILE)
+	$(call ensure_dir_exists, $(OBJDIR))
+	cd $(OBJDIR) && $(QMAKE) $(QT_PRO_FILE) && $(MAKE)
 
+.PHONY: clean
 clean:
-	rm -f $(APP_FULL_PATH)
-	$(MAKE) -f $(QMAKE_FILE) clean
-	rm -f $(QMAKE_FILE)
-
-.PHONY: cleandeps
-cleandeps:
-	@echo "cleandeps is a nop here"
-
+	@[ -d $(OBJDIR) ] && rm -rf $(OBJDIR) || true
+	@rm -f $(APP_FULL_PATH)
