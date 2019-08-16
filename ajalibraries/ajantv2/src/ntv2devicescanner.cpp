@@ -683,34 +683,21 @@ bool NTV2DeviceGetSupportedVideoFormats (const NTV2DeviceID inDeviceID, NTV2Vide
 {
 	bool	isOkay	(true);
 
-	outFormats.clear ();
+	outFormats.clear();
 
-    for (unsigned formatIndex (1);  formatIndex < NTV2_FORMAT_END_4K_TSI_DEF_FORMATS;  formatIndex++)
+    for (NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);  videoFormat < NTV2_MAX_NUM_VIDEO_FORMATS;  videoFormat = NTV2VideoFormat(videoFormat + 1))
 	{
-		const NTV2VideoFormat	videoFormat	(static_cast <NTV2VideoFormat> (formatIndex));
-
-		if (formatIndex == NTV2_FORMAT_END_HIGH_DEF_FORMATS)
-			formatIndex = NTV2_FORMAT_FIRST_STANDARD_DEF_FORMAT - 1;
-		else if (formatIndex == NTV2_FORMAT_END_STANDARD_DEF_FORMATS)
-			formatIndex = NTV2_FORMAT_FIRST_2K_DEF_FORMAT - 1;
-		else if (formatIndex == NTV2_FORMAT_END_2K_DEF_FORMATS)
-			formatIndex = NTV2_FORMAT_FIRST_4K_DEF_FORMAT - 1;
-		else if (formatIndex == NTV2_FORMAT_END_4K_DEF_FORMATS)
-			formatIndex = NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT2;
-        else if (formatIndex == NTV2_FORMAT_END_HIGH_DEF_FORMATS2)
-            formatIndex = NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT - 1;
-		else if (::NTV2DeviceCanDoVideoFormat (inDeviceID, videoFormat))
+		if (!::NTV2DeviceCanDoVideoFormat (inDeviceID, videoFormat))
+			continue;
+		try
 		{
-			try
-			{
-				outFormats.insert (videoFormat);
-			}
-			catch (std::bad_alloc)
-			{
-				isOkay = false;
-				outFormats.clear ();
-				break;
-			}
+			outFormats.insert(videoFormat);
+		}
+		catch (std::bad_alloc)
+		{
+			isOkay = false;
+			outFormats.clear();
+			break;
 		}
 	}	//	for each video format
 
