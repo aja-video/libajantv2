@@ -27,17 +27,17 @@
 /*
 //template
 void filename_marker() {} //this is used to easily just around in a GUI with a symbols list
-TEST_SUITE("filename -- functions in streams/common/filename.h");
+TEST_SUITE("filename" * doctest::description("functions in streams/common/filename.h")) {
 
     TEST_CASE("constructor")
     {
     }
 
-TEST_SUITE_END(); //filename
+} //filename
 */
 
 void types_marker() {}
-TEST_SUITE("types -- functions in ajabase/common/types.h");
+TEST_SUITE("types" * doctest::description("functions in ajabase/common/types.h")) {
 
     TEST_CASE("AJA_FOURCC and AJA_FCC")
     {
@@ -49,10 +49,10 @@ TEST_SUITE("types -- functions in ajabase/common/types.h");
         CHECK(AJA_FCC("AJA ") != ajaAsFourcc);
     }
 
-TEST_SUITE_END(); //types
+} //types
 
 void common_marker() {}
-TEST_SUITE("common -- functions in ajabase/common/common.h");
+TEST_SUITE("common" * doctest::description("functions in ajabase/common/common.h")) {
 
     TEST_CASE("aja::replace")
     {
@@ -300,11 +300,11 @@ TEST_SUITE("common -- functions in ajabase/common/common.h");
         CHECK(strcmp(target3, source2) == 0);
     }
 
-TEST_SUITE_END(); //common
+} //common
 
 
 void timebase_timecode_marker() {}
-TEST_SUITE("timebase/timecode -- functions in ajabase/common/time[base|code].h");
+TEST_SUITE("timebase/timecode" * doctest::description("functions in ajabase/common/time[base|code].h")) {
 
     TEST_CASE("AJATimeBase")
     {
@@ -418,11 +418,11 @@ TEST_SUITE("timebase/timecode -- functions in ajabase/common/time[base|code].h")
         CHECK(tmp == "01:02:03:04");
     }
 
-TEST_SUITE_END(); //timecode
+} //timecode
 
 
 void guid_marker() {}
-TEST_SUITE("guid -- functions in ajabase/common/guid.h");
+TEST_SUITE("guid" * doctest::description("functions in ajabase/common/guid.h")) {
 
     TEST_CASE("CreateGuid")
     {
@@ -445,11 +445,11 @@ TEST_SUITE("guid -- functions in ajabase/common/guid.h");
         CHECK(guid != guid2);
     }
 
-TEST_SUITE_END(); //guid
+} //guid
 
 
 void persistence_marker() {}
-TEST_SUITE("persistence -- functions in ajabase/persistence/persistence.h");
+TEST_SUITE("persistence" * doctest::description("functions in ajabase/persistence/persistence.h")) {
 
     TEST_CASE("AJAPersistence")
     {
@@ -679,10 +679,10 @@ TEST_SUITE("persistence -- functions in ajabase/persistence/persistence.h");
         CHECK(doubleValues.at(1) == 3.14);
     }
 
-TEST_SUITE_END(); //persistence
+} //persistence
 
 void atomic_marker() {}
-TEST_SUITE("atomic -- functions in ajabase/system/atomic.h");
+TEST_SUITE("atomic" * doctest::description("functions in ajabase/system/atomic.h")) {
 
     TEST_CASE("Increment")
     {
@@ -718,10 +718,10 @@ TEST_SUITE("atomic -- functions in ajabase/system/atomic.h");
         CHECK(aUInt64 == 0);
     }
 
-TEST_SUITE_END(); //atomic
+} //atomic
 
 void time_marker() {}
-TEST_SUITE("time -- functions in ajabase/system/systemtime.h");
+TEST_SUITE("time" * doctest::description("functions in ajabase/system/systemtime.h")) {
 
     TEST_CASE("AJATime")
     {
@@ -747,10 +747,10 @@ TEST_SUITE("time -- functions in ajabase/system/systemtime.h");
         CHECK(deltaNs < 150000000);
     }
 
-TEST_SUITE_END(); //time
+} //time
 
 void performance_marker() {}
-TEST_SUITE("performance -- functions in ajabase/common/performance.h");
+TEST_SUITE("performance" * doctest::description("functions in ajabase/common/performance.h")) {
 
     TEST_CASE("AJAPerformance")
     {
@@ -780,10 +780,10 @@ TEST_SUITE("performance -- functions in ajabase/common/performance.h");
         CHECK(p2.StandardDeviation() == 0.0);
     }
 
-TEST_SUITE_END(); //performance
+} //performance
 
 void info_marker() {}
-TEST_SUITE("info -- functions in ajabase/system/info.h");
+TEST_SUITE("info" * doctest::description("functions in ajabase/system/info.h")) {
 
     TEST_CASE("AJASystemInfo")
     {
@@ -791,4 +791,4 @@ TEST_SUITE("info -- functions in ajabase/system/info.h");
         AJASystemInfo i;
     }
 
-TEST_SUITE_END(); //info
+} //info

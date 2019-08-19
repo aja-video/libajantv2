@@ -22,21 +22,21 @@
 #if 0
 template
 void filename_marker() {} //this is used to easily just around in a GUI with a symbols list
-TEST_SUITE("filename -- functions in streams/common/filename.h");
+TEST_SUITE("filename" * doctest::description("functions in streams/common/filename.h")) {
 
     TEST_CASE("constructor")
     {
     }
 
-TEST_SUITE_END(); //filename
+} //filename
 #endif
 
 void spi_marker() {}
-TEST_SUITE("spi -- new spi flasher");
+TEST_SUITE("spi" * doctest::description("new spi flasher")) {
 
     TEST_CASE("normal")
     {
 
     }
 
-TEST_SUITE_END(); //spi
+} //spi
