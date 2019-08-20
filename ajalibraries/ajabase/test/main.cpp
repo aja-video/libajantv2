@@ -6,6 +6,9 @@
 // for doctest usage see: https://github.com/onqtam/doctest/blob/1.1.4/doc/markdown/tutorial.md
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+// need to define this so will work with compilers that don't support thread_local
+// ie xcode 6, 7
+#define DOCTEST_THREAD_LOCAL
 #include "doctest.h"
 
 #include "limits.h"
