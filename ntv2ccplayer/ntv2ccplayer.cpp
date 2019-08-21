@@ -10,6 +10,7 @@
 #include "ntv2democommon.h"
 #include "ntv2rp188.h"
 #include "ntv2transcode.h"
+#include "ntv2utils.h"
 #include "ajabase/common/types.h"
 #include "ajabase/common/ajarefptr.h"
 #include "ajabase/system/systemtime.h"
@@ -1058,6 +1059,13 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 				<< (::NTV2DeviceGetNumFrameStores(mDeviceID) > 1  ?  string(" thru ") + string(1, char(::NTV2DeviceGetNumFrameStores(mDeviceID)+'0'))  :  "") << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
+	const NTV2FrameRate	frameRate(::GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat));
+	if (!NTV2_IS_SD_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  !mConfig.fSuppress708)
+		if (frameRate == NTV2_FRAMERATE_2500  ||  frameRate == NTV2_FRAMERATE_5000)
+		{
+			cerr << "## ERROR:  CEA708 CDPs cannot accommodate CEA608 captions for " << ::NTV2FrameRateToString(frameRate) << endl;
+			return AJA_STATUS_UNSUPPORTED;
+		}
 
 	//	Enable the required frame store(s)...
 	mDevice.EnableChannel(mConfig.fOutputChannel);
