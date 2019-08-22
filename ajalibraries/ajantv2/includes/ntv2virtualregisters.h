@@ -34,23 +34,23 @@ typedef enum
 	kVRegStrictTiming						= VIRTUALREG_START+5,		// Drift Correction requires Strict Frame Timing for Windows Media playback;Required for BackHaul;Correlate Presentation Time Stamp with Graph Clock;Turn off (default) to allow Playback even when Graph Manager gives us a Bogus Clcok!
 
 	// COMMON_VIRTUAL_REGS_KONA2
-	kVRegInputSelect						= VIRTUALREG_START+20,		/* Input 1, Input 2, DualLink	*/
-	kVRegSecondaryFormatSelect				= VIRTUALREG_START+21,		/* NTV2VideoFormats				*/
-	kVRegDigitalOutput1Select				= VIRTUALREG_START+22,		/* Primary, Secondary			*/
-	kVRegDigitalOutput2Select				= VIRTUALREG_START+23,		/* Primary, Secondary, DualLink */
-	kVRegAnalogOutputSelect					= VIRTUALREG_START+24,		/* Primary, Secondary			*/
-	kVRegAnalogOutputType					= VIRTUALREG_START+25,		/* Analog output type			*/
-	kVRegAnalogOutBlackLevel				= VIRTUALREG_START+26,		/* Analog output black level	*/
+	kVRegInputSelect						= VIRTUALREG_START+20,		// Input 1, Input 2, DualLink
+	kVRegSecondaryFormatSelect				= VIRTUALREG_START+21,		// NTV2VideoFormats	
+	kVRegDigitalOutput1Select				= VIRTUALREG_START+22,		// Primary, Secondary	
+	kVRegDigitalOutput2Select				= VIRTUALREG_START+23,		// Primary, Secondary, DualLink
+	kVRegAnalogOutputSelect					= VIRTUALREG_START+24,		// Primary, Secondary
+	kVRegAnalogOutputType					= VIRTUALREG_START+25,		// Analog output type
+	kVRegAnalogOutBlackLevel				= VIRTUALREG_START+26,		// Analog output black level
 
 	// COMMON_VIRTUAL_REGS_MISC
-	kVRegVideoOutPauseMode					= VIRTUALREG_START+40,		/* whether we pause on a frame or a field */
-	kVRegPulldownPattern					= VIRTUALREG_START+41,		/* which 3:2 pulldown pattern to use */
-	kVRegColorSpaceMode						= VIRTUALREG_START+42,		/* which color space matrix (Rec601, Rec709, ...) to use */
-	kVRegGammaMode							= VIRTUALREG_START+43,		/* which gamma LUT (Rec601, Rec709, ...) to use */
-	kVRegLUTType							= VIRTUALREG_START+44,		/* the current LUT function loaded into hardware */
-	kVRegRGB10Range							= VIRTUALREG_START+45,		/* the user-selected 10-bit RGB range (SMPTE 64-940 or Full 0-1023) - deprecated */
-	kVRegRGB10Endian						= VIRTUALREG_START+46,		/* the user selected 10-bit RGB endian */
-	kVRegFanControl							= VIRTUALREG_START+47,		/* the user fan control setting */
+	kVRegVideoOutPauseMode					= VIRTUALREG_START+40,		// whether we pause on a frame or a field
+	kVRegPulldownPattern					= VIRTUALREG_START+41,		// which 3:2 pulldown pattern to use
+	kVRegColorSpaceMode						= VIRTUALREG_START+42,		// which color space matrix (Rec601, Rec709, ...) to use
+	kVRegGammaMode							= VIRTUALREG_START+43,		// which gamma LUT (Rec601, Rec709, ...) to use
+	kVRegLUTType							= VIRTUALREG_START+44,		// the current LUT function loaded into hardware
+	kVRegRGB10Range							= VIRTUALREG_START+45,		// deprecated
+	kVRegRGB10Endian						= VIRTUALREG_START+46,		// the user selected 10-bit RGB endian
+	kVRegFanControl							= VIRTUALREG_START+47,		// the user fan control setting
 
 	// Windows platform custom section
 	kVRegBitFileDownload					= VIRTUALREG_START+50,		// NTV2BitfileType
