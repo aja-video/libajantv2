@@ -1,15 +1,12 @@
 #
-# Copyright (C) 2004 - 2018 AJA Video Systems, Inc.
+# Copyright (C) 2004 - 2019 AJA Video Systems, Inc.
 # Proprietary and Confidential information.
 # All righs reserved
 #
 
-.PHONY: all clean cleandeps
+.PHONY: all clean
 all:
 	cd build && $(MAKE)
 
-clean: cleandeps
-	cd build && $(MAKE) $@
-
-cleandeps:
+clean:
 	cd build && $(MAKE) $@
