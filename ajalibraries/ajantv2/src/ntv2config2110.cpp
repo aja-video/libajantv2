@@ -2433,6 +2433,9 @@ bool CNTV2Config2110::ExtractRxVideoConfigFromSDP(std::string sdp, multiRx_2110C
 		return false;
 	}
 
+    // remove any carriage returns
+    sdp.erase(remove(sdp.begin(), sdp.end(), '\r'), sdp.end());
+
 	// break into a vector of lines and then into tokenw
 	sdpLines.clear();
 	stringstream ss(sdp);
@@ -2591,6 +2594,9 @@ bool CNTV2Config2110::ExtractRxVideoConfigFromSDP(std::string sdp, rx_2110Config
         mIpErrorCode = NTV2IpErrSDPEmpty;
         return false;
     }
+
+    // remove any carriage returns
+    sdp.erase(remove(sdp.begin(), sdp.end(), '\r'), sdp.end());
 
     // break into a vector of lines and then into tokenw
     sdpLines.clear();
@@ -2762,6 +2768,9 @@ bool CNTV2Config2110::ExtractRxAudioConfigFromSDP(std::string sdp, rx_2110Config
 
 	uint32_t rxMatch = 0;
 
+    // remove any carriage returns
+    sdp.erase(remove(sdp.begin(), sdp.end(), '\r'), sdp.end());
+
 	// break into a vector of lines and then into tokenw
 
 	sdpLines.clear();
@@ -2904,6 +2913,9 @@ bool CNTV2Config2110::ExtractRxAncConfigFromSDP(std::string sdp, rx_2110Config &
 		mIpErrorCode = NTV2IpErrSDPEmpty;
 		return false;
 	}
+
+    // remove any carriage returns
+    sdp.erase(remove(sdp.begin(), sdp.end(), '\r'), sdp.end());
 
 	// break into a vector of lines and then into tokenw
 	sdpLines.clear();
