@@ -71,7 +71,7 @@ struct PCM_CONTROL_INFO{
 	ULWord pcmControlReg;
 	ULWord pcmControlMask;
 	ULWord pcmControlShift;
-	inline PCM_CONTROL_INFO(ULWord regNum, ULWord mask, ULWord shift) : pcmControlReg(regNum), pcmControlMask(mask), pcmControlShift(shift){};
+	inline PCM_CONTROL_INFO(ULWord regNum, ULWord mask, ULWord shift) : pcmControlReg(regNum), pcmControlMask(mask), pcmControlShift(shift){}
 };
 
 static const PCM_CONTROL_INFO gAudioEngineChannelPairToFieldInformation [][8]	=
@@ -605,296 +605,189 @@ bool CNTV2Card::SetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, const N
 
 }	//	SetSDIOutputDS2AudioSystem
 
-bool CNTV2Card::GetAudioMixerMainInputAudioSystem (NTV2AudioSystem & outAudioSystem)
+
+static const ULWord	sAudioMixerInputSelectMasks[] = {kRegMaskAudioMixerMainInputSelect, kRegMaskAudioMixerAux1x2CHInput, kRegMaskAudioMixerAux2x2CHInput, 0};
+static const ULWord	sAudioMixerInputSelectShifts[] = {kRegShiftAudioMixerMainInputSelect, kRegShiftAudioMixerAux1x2CHInput, kRegShiftAudioMixerAux2x2CHInput, 0};
+
+
+bool CNTV2Card::GetAudioMixerInputAudioSystem (const NTV2AudioMixerInput inMixerInput, NTV2AudioSystem & outAudioSystem)
 {
 	outAudioSystem = NTV2_AUDIOSYSTEM_INVALID;
-	if(!DeviceCanDoAudioMixer())
-		return false;
+	if (!DeviceCanDoAudioMixer())
+		return false;	//	No Audio Mixer -- shouldn't be calling this function
+	if (!NTV2_IS_VALID_AUDIO_MIXER_INPUT(inMixerInput))
+		return false;	//	Bad Mixer Input specified
+	return CNTV2DriverInterface::ReadRegister(kRegAudioMixerInputSelects, outAudioSystem,
+											sAudioMixerInputSelectMasks[inMixerInput],
+											sAudioMixerInputSelectShifts[inMixerInput]);
+}
 
-	uint32_t	audioSelect = 0;
-	if (!ReadRegister (kRegAudioMixerInputSelects, audioSelect, kRegMaskAudioMixerMainInputSelect, kRegShiftAudioMixerMainInputSelect))
-		return false;
-	outAudioSystem = (NTV2AudioSystem) audioSelect;
-	return true;
-
-}	//	GetAudioMixerMainInputAudioSystem
-
-
-bool CNTV2Card::SetAudioMixerMainInputAudioSystem (const NTV2AudioSystem inAudioSystem)
-{
-	if(!DeviceCanDoAudioMixer())
-		return false;
-
-	if (UWord (inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems (_boardID) + 1)
-		return false;	//	Invalid audio system
-
-	if (!WriteRegister (kRegAudioMixerInputSelects, (ULWord)inAudioSystem, kRegMaskAudioMixerMainInputSelect, kRegShiftAudioMixerMainInputSelect))
-		return false;
-
-	return true;
-
-}	//	SetAudioMixerMainInputAudioSystem
-
-bool CNTV2Card::GetAudioMixerMainInputChannelSelect(NTV2AudioChannelPair & outChannelPair)
+bool CNTV2Card::SetAudioMixerInputAudioSystem (const NTV2AudioMixerInput inMixerInput, const NTV2AudioSystem inAudioSystem)
 {
 	if (!DeviceCanDoAudioMixer())
-		return false;
-	uint32_t audioChannelSelect = 0;
-	if (!ReadRegister(kRegAudioMixerChannelSelect, audioChannelSelect, kRegMaskAudioMixerChannelSelect, kRegShiftAudioMixerChannelSelect))
-		return false;
-	outChannelPair = (NTV2AudioChannelPair)audioChannelSelect;
+		return false;	//	No Audio Mixer -- shouldn't be calling this function
+	if (!NTV2_IS_VALID_AUDIO_MIXER_INPUT(inMixerInput))
+		return false;	//	Bad Mixer Input specified
+	if (UWord(inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems(_boardID) + 1)
+		return false;	//	No such audio system on this device
+	return WriteRegister (kRegAudioMixerInputSelects, ULWord(inAudioSystem),
+							sAudioMixerInputSelectMasks[inMixerInput],
+							sAudioMixerInputSelectShifts[inMixerInput]);
+}
+
+bool CNTV2Card::GetAudioMixerInputChannelSelect (const NTV2AudioMixerInput inMixerInput, NTV2AudioChannelPair & outChannelPair)
+{
+	outChannelPair = NTV2_AUDIO_CHANNEL_PAIR_INVALID;
+	if (!DeviceCanDoAudioMixer())
+		return false;	//	No Audio Mixer -- shouldn't be calling this function
+	if (!NTV2_IS_VALID_AUDIO_MIXER_INPUT(inMixerInput))
+		return false;	//	Bad Mixer Input specified
+	if (NTV2_IS_AUDIO_MIXER_INPUT_MAIN(inMixerInput))
+		return CNTV2DriverInterface::ReadRegister (kRegAudioMixerChannelSelect, outChannelPair,
+													kRegMaskAudioMixerChannelSelect,
+													kRegShiftAudioMixerChannelSelect);
+	outChannelPair = NTV2_AudioChannel1_2;	//	Aux1/Aux2 always use 1&2
 	return true;
 }
 
-bool CNTV2Card::SetAudioMixerMainInputChannelSelect(NTV2AudioChannelPair inChannelPair)
+bool CNTV2Card::SetAudioMixerInputChannelSelect (const NTV2AudioMixerInput inMixerInput, const NTV2AudioChannelPair inChannelPair)
 {
 	if (!DeviceCanDoAudioMixer())
+		return false;	//	No Audio Mixer -- shouldn't be calling this function
+	if (!NTV2_IS_AUDIO_MIXER_INPUT_MAIN(inMixerInput))
+		return false;	//	Can only change Main channel selection
+	return WriteRegister (kRegAudioMixerChannelSelect, ULWord(inChannelPair),
+							kRegMaskAudioMixerMainInputSelect, kRegShiftAudioMixerMainInputSelect);
+}
+
+static const ULWord	sAudioMixerInputGainCh1Regs[] = {kRegAudioMixerMainGain, kRegAudioMixerAux1GainCh1, kRegAudioMixerAux2GainCh1, 0};
+static const ULWord	sAudioMixerInputGainCh2Regs[] = {kRegAudioMixerMainGain, kRegAudioMixerAux1GainCh2, kRegAudioMixerAux2GainCh2, 0};
+
+bool CNTV2Card::GetAudioMixerInputGain (const NTV2AudioMixerInput inMixerInput, const NTV2AudioMixerChannel inChannel, ULWord & outGainValue)
+{
+	outGainValue = 0;
+	if (!DeviceCanDoAudioMixer())
+		return false;	//	No Audio Mixer -- shouldn't be calling this function
+	if (!NTV2_IS_VALID_AUDIO_MIXER_INPUT(inMixerInput))
+		return false;	//	Bad Mixer Input specified
+	if (!NTV2_IS_AUDIO_MIXER_CHANNELS_1_OR_2(inChannel))
+		return false;	//	Bad audio channel specified -- must be Ch1 or Ch2
+	return ReadRegister (inChannel == NTV2_AudioMixerChannel1
+							? sAudioMixerInputGainCh1Regs[inMixerInput]
+							: sAudioMixerInputGainCh2Regs[inMixerInput], outGainValue);
+}
+
+bool CNTV2Card::SetAudioMixerInputGain (const NTV2AudioMixerInput inMixerInput, const NTV2AudioMixerChannel inChannel, const ULWord inGainValue)
+{
+	if (!DeviceCanDoAudioMixer())
+		return false;	//	No Audio Mixer -- shouldn't be calling this function
+	if (!NTV2_IS_VALID_AUDIO_MIXER_INPUT(inMixerInput))
+		return false;	//	Bad Mixer Input specified
+	if (!NTV2_IS_AUDIO_MIXER_CHANNELS_1_OR_2(inChannel))
+		return false;	//	Bad audio channel specified -- must be Ch1 or Ch2
+	return WriteRegister(inChannel == NTV2_AudioMixerChannel1
+							? sAudioMixerInputGainCh1Regs[inMixerInput]
+							: sAudioMixerInputGainCh2Regs[inMixerInput], inGainValue);
+}
+
+#if !defined(NTV2_DEPRECATE_15_5)
+	bool CNTV2Card::SetAudioMixerAux1InputGain (const NTV2AudioMixerChannel inChannel, const ULWord inGainValue)
+	{
+		if (inChannel == NTV2_AudioMixerChannel1  ||  inChannel == NTV2_AudioMixerChannel2)
+			return SetAudioMixerInputGain(NTV2_AudioMixerInputAux1, NTV2_AudioMixerChannel1, inGainValue)
+				&& SetAudioMixerInputGain(NTV2_AudioMixerInputAux1, NTV2_AudioMixerChannel2, inGainValue);
 		return false;
+	}
 
-	if (UWord(inChannelPair) > NTV2_AudioChannel15_16)
-		return false;	//	Invalid audio system
 
-	if (!WriteRegister(kRegAudioMixerChannelSelect, (ULWord)inChannelPair, kRegMaskAudioMixerMainInputSelect, kRegShiftAudioMixerMainInputSelect))
+	bool CNTV2Card::SetAudioMixerAux2InputGain(const NTV2AudioMixerChannel inChannel, const ULWord inGainValue)
+	{
+		if (inChannel == NTV2_AudioMixerChannel1  ||  inChannel == NTV2_AudioMixerChannel2)
+			return SetAudioMixerInputGain(NTV2_AudioMixerInputAux2, NTV2_AudioMixerChannel1, inGainValue)
+				&& SetAudioMixerInputGain(NTV2_AudioMixerInputAux2, NTV2_AudioMixerChannel2, inGainValue);
 		return false;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_15_5)
 
+static const ULWord	sAudioMixerInputMuteMasks[] = {kRegMaskAudioMixerMainInputEnable, kRegMaskAudioMixerAux1InputEnable, kRegMaskAudioMixerAux2InputEnable, 0};
+static const ULWord	sAudioMixerInputMuteShifts[] = {kRegShiftAudioMixerMainInputEnable, kRegShiftAudioMixerAux1InputEnable, kRegShiftAudioMixerAux2InputEnable, 0};
+
+bool CNTV2Card::GetAudioMixerInputEnable (const NTV2AudioMixerInput inMixerInput, bool & outEnabled)
+{
+	outEnabled = false;
+	if (!DeviceCanDoAudioMixer())
+		return false;	//	No Audio Mixer -- shouldn't be calling this function
+	if (!NTV2_IS_VALID_AUDIO_MIXER_INPUT(inMixerInput))
+		return false;	//	Bad Mixer Input specified
+	bool muted(false);
+	if (!CNTV2DriverInterface::ReadRegister (kRegAudioMixerMutes, muted,
+											sAudioMixerInputMuteMasks[inMixerInput],
+											sAudioMixerInputMuteShifts[inMixerInput]))
+		return false;
+	outEnabled = !muted;
 	return true;
 }
 
-bool CNTV2Card::GetAudioMixerMainInputGain(ULWord & outGainValue)
+bool CNTV2Card::SetAudioMixerInputEnable (const NTV2AudioMixerInput inMixerInput, const bool inEnable)
 {
 	if (!DeviceCanDoAudioMixer())
+		return false;	//	No Audio Mixer -- shouldn't be calling this function
+	if (!NTV2_IS_VALID_AUDIO_MIXER_INPUT(inMixerInput))
+		return false;	//	Bad Mixer Input specified
+	return WriteRegister(kRegAudioMixerMutes, inEnable ? 0 : 3,
+						sAudioMixerInputMuteMasks[inMixerInput],
+						sAudioMixerInputMuteShifts[inMixerInput]);
+}
+
+bool CNTV2Card::GetAudioMixerMuteOutputChannels (NTV2AudioChannelsMuted16 & outMutes)
+{
+	outMutes.reset();
+	if (!DeviceCanDoAudioMixer())
+		return false;	//	No Audio Mixer -- shouldn't be calling this function
+	unsigned long	ulongvalue(0);
+	if (!CNTV2DriverInterface::ReadRegister(kRegAudioMixerMutes, ulongvalue, 0x0000FFFF))
 		return false;
-	if (!ReadRegister(kRegAudioMixerMainGain, outGainValue))
-		return false;
+	outMutes = NTV2AudioChannelsMuted16(ulongvalue);	//	Hardware uses 1=mute 0=enabled
 	return true;
 }
 
-bool CNTV2Card::SetAudioMixerMainInputGain(const ULWord inGainValue)
+bool CNTV2Card::SetAudioMixerMuteOutputChannels (const NTV2AudioChannelsMuted16 inEnables)
 {
 	if (!DeviceCanDoAudioMixer())
-		return false;
+		return false;	//	No Audio Mixer -- shouldn't be calling this function
+	NTV2AudioChannelsMuted16 mutes(inEnables);
+	mutes.flip();	//	The hardware sets muted channel bits (clear == enabled)
+	return WriteRegister(kRegAudioMixerMutes, ULWord(mutes.to_ulong()), 0x0000FFFF);
+}
 
-	if (inGainValue > 0x1ffff)
+bool CNTV2Card::GetAudioMixerOutputChannelMute (const NTV2AudioMixerChannel inChannel, bool & outChannelMuted)
+{
+	outChannelMuted = false;
+	NTV2AudioChannelsMuted16	mutedChannels;
+	if (!NTV2_IS_VALID_AUDIO_MIXER_CHANNEL(inChannel))
 		return false;
-
-	if (!WriteRegister(kRegAudioMixerMainGain, inGainValue))
+	if (!GetAudioMixerMuteOutputChannels(mutedChannels))
 		return false;
-
+	outChannelMuted = mutedChannels.test(inChannel);
 	return true;
 }
 
-bool CNTV2Card::GetAudioMixerAux1x2chInputAudioSystem (NTV2AudioSystem & outAudioSystem)
-{
-	outAudioSystem = NTV2_AUDIOSYSTEM_INVALID;
-	if(!DeviceCanDoAudioMixer())
-		return false;
-
-	ULWord	audioSelect = 0;		//	The three bits that determine which audio system feeds the audio mixer
-	if (!ReadRegister (kRegAudioMixerInputSelects, audioSelect, kRegMaskAudioMixerAux1x2CHInput, kRegShiftAudioMixerAux1x2CHInput))
-		return false;
-	outAudioSystem = (NTV2AudioSystem) audioSelect;
-	return true;
-
-}	//	GetAudioMixerAux1x2chInputAudioSystem
-
-
-bool CNTV2Card::SetAudioMixerAux1x2chInputAudioSystem (const NTV2AudioSystem inAudioSystem)
-{
-	if(!DeviceCanDoAudioMixer())
-		return false;
-
-	if (UWord (inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems (_boardID) + 1)
-		return false;	//	Invalid audio system
-
-	if (!WriteRegister (kRegAudioMixerInputSelects, (ULWord)inAudioSystem, kRegMaskAudioMixerAux1x2CHInput, kRegShiftAudioMixerAux1x2CHInput))
-		return false;
-
-	return true;
-
-}	//	SetAudioMixerAux1x2chInputAudioSystem
-
-bool CNTV2Card::GetAudioMixerAux1InputGain(const NTV2AudioMixerChannel inChannel, ULWord & outGainValue)
+bool CNTV2Card::SetAudioMixerOutputChannelMute (const NTV2AudioMixerChannel inChannel, const bool inMuteChannel)
 {
 	if (!DeviceCanDoAudioMixer())
 		return false;
-	if (inChannel > NTV2_AudioMixerChannel2)
+	if (!NTV2_IS_VALID_AUDIO_MIXER_CHANNEL(inChannel))
 		return false;
-
-	if (!ReadRegister(kRegAudioMixerAux1GainCh1, outGainValue))
-		return false;
-	return true;
+	return WriteRegister (kRegAudioMixerMutes, inMuteChannel ? 1 : 0,
+							gAudioMixerChannelToAudioMixerMainOutputChannelMuteMask[inChannel],
+							gAudioMixerChannelToAudioMixerMainOutputChannelMuteShift[inChannel]);
 }
 
-bool CNTV2Card::SetAudioMixerAux1InputGain(const NTV2AudioMixerChannel inChannel, const ULWord inGainValue)
-{
-	if (!DeviceCanDoAudioMixer())
-		return false;
-
-	if (inChannel > NTV2_AudioMixerChannel2)
-		return false;
-
-	if (inGainValue > 0x1ffff)
-		return false;
-
-	if (!WriteRegister(kRegAudioMixerAux1GainCh1, inGainValue))
-		return false;
-
-	if (!WriteRegister(kRegAudioMixerAux1GainCh2, inGainValue))
-		return false;
-
-	return true;
-}
-
-bool CNTV2Card::GetAudioMixerAux2x2chInputAudioSystem (NTV2AudioSystem & outAudioSystem)
-{
-	outAudioSystem = NTV2_AUDIOSYSTEM_INVALID;
-	if(!DeviceCanDoAudioMixer())
-		return false;
-
-	ULWord	audioSelect = 0;		//	The three bits that determine which audio system feeds the audio mixer
-	if (!ReadRegister (kRegAudioMixerInputSelects, audioSelect, kRegMaskAudioMixerAux2x2CHInput, kRegShiftAudioMixerAux2x2CHInput))
-		return false;
-	outAudioSystem = (NTV2AudioSystem) audioSelect;
-	return true;
-
-}	//	GetAudioMixerAux2x2chInputAudioSystem
 
 
-bool CNTV2Card::SetAudioMixerAux2x2chInputAudioSystem (const NTV2AudioSystem inAudioSystem)
-{
-	if(!DeviceCanDoAudioMixer())
-		return false;
 
-	if (UWord (inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems (_boardID) + 1)
-		return false;	//	Invalid audio system
 
-	if (!WriteRegister (kRegAudioMixerInputSelects, (ULWord)inAudioSystem, kRegMaskAudioMixerAux2x2CHInput, kRegShiftAudioMixerAux2x2CHInput))
-		return false;
 
-	return true;
-
-}	//	SetAudioMixerAux2x2chInputAudioSystem
-
-bool CNTV2Card::GetAudioMixerAux2InputGain(const NTV2AudioMixerChannel inChannel, ULWord & outGainValue)
-{
-	(void) inChannel;	//	Reserved for future use
-	if (!DeviceCanDoAudioMixer())
-		return false;
-	if (!ReadRegister(kRegAudioMixerAux2GainCh1, outGainValue))
-		return false;
-	return true;
-}
-
-bool CNTV2Card::SetAudioMixerAux2InputGain(const NTV2AudioMixerChannel inChannel, const ULWord inGainValue)
-{
-	(void) inChannel;	//	Reserved for future use
-	if (!DeviceCanDoAudioMixer())
-		return false;
-
-	if (inGainValue > 0x1ffff)
-		return false;
-
-	if (!WriteRegister(kRegAudioMixerAux2GainCh1, inGainValue))
-		return false;
-
-	if (!WriteRegister(kRegAudioMixerAux2GainCh2, inGainValue))
-		return false;
-
-	return true;
-}
-
-bool CNTV2Card::GetAudioMixerOutputChannelMute(NTV2AudioMixerChannel inChannel, bool & outChannelMuted)
-{
-	if (!DeviceCanDoAudioMixer())
-		return false;
-
-	if(!NTV2_IS_VALID_AUDIO_MIXER_CHANNEL(inChannel))
-		return false;
-	uint32_t channelEnable = 0;
-	if(!ReadRegister(kRegAudioMixerMutes, channelEnable, gAudioMixerChannelToAudioMixerMainOutputChannelMuteMask[inChannel], gAudioMixerChannelToAudioMixerMainOutputChannelMuteShift[inChannel]))
-		return false;
-	outChannelMuted = channelEnable == 1 ? true : false;
-	return true;
-}
-
-bool CNTV2Card::SetAudioMixerOutputChannelMute(NTV2AudioMixerChannel inChannel, bool inMuteChannel)
-{
-	if (!DeviceCanDoAudioMixer())
-		return false;
-
-	if(!NTV2_IS_VALID_AUDIO_MIXER_CHANNEL(inChannel))
-		return false;
-
-	if(!WriteRegister(kRegAudioMixerMutes, inMuteChannel ? 1 : 0, gAudioMixerChannelToAudioMixerMainOutputChannelMuteMask[inChannel], gAudioMixerChannelToAudioMixerMainOutputChannelMuteShift[inChannel]))
-		return false;
-	return true;
-}
-
-bool CNTV2Card::GetAudioMixerMainInputEnable(bool & outEnabled)
-{
-	if (!DeviceCanDoAudioMixer())
-		return false;
-
-	uint32_t channelEnable = 0;
-	if(!ReadRegister(kRegAudioMixerMutes, channelEnable, kRegMaskAudioMixerMainInputEnable, kRegShiftAudioMixerMainInputEnable))
-		return false;
-	outEnabled = channelEnable > 0 ? false : true;
-	return true;
-}
-
-bool CNTV2Card::SetAudioMixerMainInputEnable(bool inEnabled)
-{
-	if (!DeviceCanDoAudioMixer())
-		return false;
-
-	if(!WriteRegister(kRegAudioMixerMutes, inEnabled ? 0 : 3, kRegMaskAudioMixerMainInputEnable, kRegShiftAudioMixerMainInputEnable))
-		return false;
-	return true;
-}
-
-bool CNTV2Card::GetAudioMixerAux1InputEnable(bool & outEnabled)
-{
-	if (!DeviceCanDoAudioMixer())
-		return false;
-
-	uint32_t channelEnable = 0;
-	if(!ReadRegister(kRegAudioMixerMutes, channelEnable, kRegMaskAudioMixerAux1InputEnable, kRegShiftAudioMixerAux1InputEnable))
-		return false;
-	outEnabled = channelEnable > 0 ? false : true;
-	return true;
-}
-
-bool CNTV2Card::SetAudioMixerAux1InputEnable(bool inEnabled)
-{
-	if (!DeviceCanDoAudioMixer())
-		return false;
-
-	if(!WriteRegister(kRegAudioMixerMutes, inEnabled ? 0 : 3, kRegMaskAudioMixerAux1InputEnable, kRegShiftAudioMixerAux1InputEnable))
-		return false;
-	return true;
-}
-
-bool CNTV2Card::GetAudioMixerAux2InputEnable(bool & outEnabled)
-{
-	if (!DeviceCanDoAudioMixer())
-		return false;
-
-	uint32_t channelEnable = 0;
-	if(!ReadRegister(kRegAudioMixerMutes, channelEnable, kRegMaskAudioMixerAux2InputEnable, kRegShiftAudioMixerAux2InputEnable))
-		return false;
-	outEnabled = channelEnable > 0 ? false : true;
-	return true;
-}
-
-bool CNTV2Card::SetAudioMixerAux2InputEnable(bool inEnabled)
-{
-	if (!DeviceCanDoAudioMixer())
-		return false;
-
-	if(!WriteRegister(kRegAudioMixerMutes, inEnabled ? 0 : 3, kRegMaskAudioMixerAux2InputEnable, kRegShiftAudioMixerAux2InputEnable))
-		return false;
-	return true;
-}
 
 ULWord CNTV2Card::GetAudioMixerMainInputChannelLevel(NTV2AudioMixerChannel inChannel)
 {

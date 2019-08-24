@@ -7763,11 +7763,11 @@ string NTV2TCIndexToString (const NTV2TCIndex inValue, const bool inCompactDispl
 string NTV2AudioChannelPairToString (const NTV2AudioChannelPair inValue, const bool inCompactDisplay)
 {
 	ostringstream	oss;
-	if (NTV2_IS_VALID_AUDIO_CHANNEL_PAIR (inValue))
-		oss << (inCompactDisplay ? "" : "NTV2_AudioChannel")  <<  (inValue * 2 + 1)  <<  (inCompactDisplay ? "-" : "_")  <<  (inValue * 2 + 2);
+	if (NTV2_IS_VALID_AUDIO_CHANNEL_PAIR(inValue))
+		oss << (inCompactDisplay ? "" : "NTV2_AudioChannel")  <<  DEC(inValue * 2 + 1)  <<  (inCompactDisplay ? "-" : "_")  <<  DEC(inValue * 2 + 2);
 	else if (!inCompactDisplay)
 		oss << "NTV2_AUDIO_CHANNEL_PAIR_INVALID";
-	return oss.str ();
+	return oss.str();
 }
 
 
