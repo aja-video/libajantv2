@@ -115,6 +115,7 @@ void NTV2Player8K::Quit (void)
 		while (mPlayThread->Active ())
 			AJATime::Sleep (10);
 
+	mDevice.DMABufferUnlockAll();
 }	//	Quit
 
 
