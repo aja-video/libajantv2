@@ -119,6 +119,7 @@ void NTV2Capture8K::Quit (void)
 		while (mProducerThread->Active ())
 			AJATime::Sleep (10);
 
+	mDevice.DMABufferUnlockAll();
 }	//	Quit
 
 
