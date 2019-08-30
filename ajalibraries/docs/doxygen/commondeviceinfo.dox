@@ -1163,29 +1163,34 @@
 	-	<b>Main</b> — can utilize any audio channel pair from any <b>Audio System</b>:
 	-	<b>Auxiliary 1</b> — the first two audio channels from any <b>Audio System</b>:
 	-	<b>Auxiliary 2</b> — the first two audio channels from any <b>Audio System</b>:
-	-	Call CNTV2Card::GetAudioMixerInputAudioSystem to discover which <b>Audio System</b>’s output is
-		feeding any given mixer input. Call CNTV2Card::SetAudioMixerInputAudioSystem to change it.
-	-	Call CNTV2Card::GetAudioMixerInputChannelSelect to discover which audio channel pair is currently
-		feeding any given mixer input. Call CNTV2Card::SetAudioMixerInputChannelSelect to change it.
+	-	To discover which <b>Audio System</b>’s output is feeding any given mixer input,
+		call CNTV2Card::GetAudioMixerInputAudioSystem. To change it, call CNTV2Card::SetAudioMixerInputAudioSystem.
+	-	To discover which audio channel pair is currently feeding any given mixer input,
+		call CNTV2Card::GetAudioMixerInputChannelSelect. To change it, call CNTV2Card::SetAudioMixerInputChannelSelect.
 
 	The resulting mixed audio is inserted onto the audio channel pair selected for the mix from the Main input,
-	and the rest of that <b>Audio System</b>’s channel pairs are passed through to that same <b>Audio System</b>’s output.
+	and the rest of that <b>Audio System</b>’s channel pairs are passed through to that same <b>Audio System</b>’s output
+	(unless they’ve been muted).
 
 	Any of the <b>Audio Mixer</b>’s inputs can be disabled (muted) or enabled (unmuted).
-	-	Call CNTV2Card::GetAudioMixerInputEnable to determine if an <b>Audio Mixer</b>’s input is enabled or muted.
-	-	Call CNTV2Card::SetAudioMixerInputEnable to change it.
+	-	Call CNTV2Card::GetAudioMixerInputChannelsMute to determine which audio channels of
+		an <b>Audio Mixer</b>’s input are enabled or muted.
+	-	Call CNTV2Card::SetAudioMixerInputChannelsMute to change them.
 
 	Each <b>Audio Mixer</b> input has a gain control.
 	-	Call CNTV2Card::GetAudioMixerInputGain to determine an input’s current gain setting.
 	-	Call CNTV2Card::SetAudioMixerInputGain to change the setting.
 
 	Each audio channel of the <b>Audio Mixer</b>’s output (up to 16 channels) can be individually muted.
-	-	Call CNTV2Card::GetAudioMixerOutputChannelMute to inquire about a particular mixer output audio channel.
-	-	Call CNTV2Card::SetAudioMixerOutputChannelMute to mute or unmute a particular mixer output audio channel.
+	-	Call CNTV2Card::GetAudioMixerOutputChannelsMute to discover which mixer output audio channels are muted/disabled,
+		and which are enabled/unmuted.
+	-	Call CNTV2Card::SetAudioMixerOutputChannelsMute to mute or unmute the output audio channels.
 
-	Finally, the <b>Audio Mixer</b>’s audio levels can be monitored:
-	-	Call CNTV2Card::GetAudioMixerInputChannelLevel to get the current level of any input’s audio channel.
-	-	Call CNTV2Card::GetAudioMixerInputChannelLevels to get the current level of <i>all</i> audio channels of any input.
+	The <b>Audio Mixer</b>’s audio levels can be monitored:
+	-	Call CNTV2Card::GetAudioMixerInputLevels to get the current levels of any specific audio channels of an input.
+	-	The sample count the firmware uses for calculating audio levels is configurable:
+		-	Call CNTV2Card::GetAudioMixerLevelsSampleCount to get the current sample count in use.
+		-	Call CNTV2Card::SetAudioMixerLevelsSampleCount to change the setting.
 
 
 

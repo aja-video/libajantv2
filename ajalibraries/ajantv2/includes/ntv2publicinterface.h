@@ -2220,6 +2220,7 @@ typedef enum
 	kRegMaskAudioMixerAux1x2CHInput = BIT(6) + BIT(5) + BIT(4),
 	kRegMaskAudioMixerAux2x2CHInput = BIT(10) + BIT(9) + BIT(8),
 	kRegMaskAudioMixerChannelSelect = BIT(2) + BIT(1) + BIT(0),
+	kRegMaskAudioMixerOutputChannelsMute =  BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
 	kRegMaskAudioMixerOutputChannel1Mute =  BIT(0),
 	kRegMaskAudioMixerOutputChannel2Mute = BIT(1),
 	kRegMaskAudioMixerOutputChannel3Mute = BIT(2),
@@ -2263,6 +2264,7 @@ typedef enum
 	kRegMaskAudioMixerMainMixedOutputChannel2Level = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
 	kRegMaskAudioMixerInputLeftLevel = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
 	kRegMaskAudioMixerInputRightLevel = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	kRegMaskAudioMixerLevelSampleCount	= BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
 
 	kRegMaskHDMIOutAudioEngineSelect = BIT(20) + BIT(21) + BIT(22) + BIT(23),
 	kRegMaskHDMIOutAudio8Of16SelectMode = BIT(5),
@@ -3348,6 +3350,7 @@ typedef enum
 	kRegShiftAudioMixerAux1x2CHInput = 4,
 	kRegShiftAudioMixerAux2x2CHInput = 8,
 	kRegShiftAudioMixerChannelSelect = 0,
+	kRegShiftAudioMixerOutputChannelsMute =  0,
 	kRegShiftAudioMixerOutputChannel1Mute =  0,
 	kRegShiftAudioMixerOutputChannel2Mute = 1,
 	kRegShiftAudioMixerOutputChannel3Mute = 2,
@@ -3391,6 +3394,7 @@ typedef enum
 	kRegShiftAudioMixerMainMixedOutputChannel2Level = 16,
 	kRegShiftAudioMixerInputLeftLevel = 0,
 	kRegShiftAudioMixerInputRightLevel = 16,
+	kRegShiftAudioMixerLevelSampleCount = 8,
 
 	kRegShiftHDMIOutAudioEngineSelect = 20,
 	kRegShiftHDMIOutAudio8Of16SelectMode = 5,
