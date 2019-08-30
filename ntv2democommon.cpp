@@ -248,9 +248,6 @@ class DemoCommonInitializer
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("bgr24",			NTV2_FBF_24BIT_BGR));
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("ycbcra10",		NTV2_FBF_10BIT_YCBCRA));
             gString2PixelFormatMap.insert (String2PixelFormatPair ("rgb10dpxle",	NTV2_FBF_10BIT_DPX_LE));
-			gString2PixelFormatMap.insert (String2PixelFormatPair ("prores",		NTV2_FBF_PRORES));
-			gString2PixelFormatMap.insert (String2PixelFormatPair ("ycbcr10prores",	NTV2_FBF_PRORES));
-			gString2PixelFormatMap.insert (String2PixelFormatPair ("yuv10prores",	NTV2_FBF_PRORES));
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("proresdvcpro",	NTV2_FBF_PRORES_DVCPRO));
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("proreshdv",		NTV2_FBF_PRORES_HDV));
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("rgb10packed",	NTV2_FBF_10BIT_RGB_PACKED));
@@ -840,7 +837,7 @@ AJA_PixelFormat CNTV2DemoCommon::GetAJAPixelFormat (const NTV2FrameBufferFormat 
 		case NTV2_FBF_10BIT_YCBCRA:				return AJA_PixelFormat_YCbCrA10;
         case NTV2_FBF_10BIT_DPX_LE:             return AJA_PixelFormat_RGB_DPX_LE;
 		case NTV2_FBF_48BIT_RGB:				return AJA_PixelFormat_RGB16;
-		case NTV2_FBF_PRORES:					return AJA_PixelFormat_PRORES;
+		case NTV2_FBF_12BIT_RGB_PACKED:			return AJA_PixelFormat_RGB12P;
 		case NTV2_FBF_PRORES_DVCPRO:			return AJA_PixelFormat_PRORES_DVPRO;
 		case NTV2_FBF_PRORES_HDV:				return AJA_PixelFormat_PRORES_HDV;
 		case NTV2_FBF_10BIT_RGB_PACKED:			return AJA_PixelFormat_RGB10_PACK;
