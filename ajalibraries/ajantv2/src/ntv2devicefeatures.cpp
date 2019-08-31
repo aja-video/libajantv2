@@ -153,13 +153,13 @@ UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBuffer
 	{
 		case NTV2_FG_4x1920x1080:
 		case NTV2_FG_1920x1080:
-			if (inFBF == NTV2_FBF_10BIT_ARGB  ||  inFBF == NTV2_FBF_16BIT_ARGB  ||  inFBF == NTV2_FBF_48BIT_RGB)
+			if (inFBF == NTV2_FBF_10BIT_ARGB  ||  inFBF == NTV2_FBF_16BIT_ARGB  ||  inFBF == NTV2_FBF_48BIT_RGB || inFBF == NTV2_FBF_12BIT_RGB_PACKED )
 				factor = 2;
 			break;
 
 		case NTV2_FG_2048x1556:
 		case NTV2_FG_2048x1588:
-			factor = (inFBF == NTV2_FBF_10BIT_ARGB  ||  inFBF == NTV2_FBF_16BIT_ARGB  ||  inFBF == NTV2_FBF_48BIT_RGB)  ?  4  :  2;
+			factor = (inFBF == NTV2_FBF_10BIT_ARGB  ||  inFBF == NTV2_FBF_16BIT_ARGB  ||  inFBF == NTV2_FBF_48BIT_RGB || inFBF == NTV2_FBF_12BIT_RGB_PACKED)  ?  4  :  2;
 			break;
 
 		case NTV2_FG_4x2048x1080:
@@ -174,6 +174,7 @@ UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBuffer
 		case NTV2_FG_4x3840x2160:
 			switch (inFBF)
 			{
+				case NTV2_FBF_12BIT_RGB_PACKED:
 				case NTV2_FBF_48BIT_RGB:	return 24;
 				case NTV2_FBF_10BIT_ARGB:	return 22;
 				case NTV2_FBF_16BIT_ARGB:	factor = 2;	break;
@@ -192,6 +193,7 @@ UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBuffer
 				case NTV2_FBF_10BIT_YCBCRA:
 				case NTV2_FBF_10BIT_DPX_LE:
 				case NTV2_FBF_10BIT_RGB_PACKED:	return 17;
+				case NTV2_FBF_12BIT_RGB_PACKED:
 				case NTV2_FBF_48BIT_RGB:		return 26;
 				case NTV2_FBF_10BIT_ARGB:		return 23;
 				case NTV2_FBF_16BIT_ARGB:		return 34;
@@ -291,7 +293,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
         switch (inFrameGeometry)
 		{
 		case NTV2_FG_4x3840x2160:
-			if(frameFormat == NTV2_FBF_48BIT_RGB || frameFormat == NTV2_FBF_10BIT_ARGB)
+			if(frameFormat == NTV2_FBF_48BIT_RGB || frameFormat == NTV2_FBF_12BIT_RGB_PACKED || frameFormat == NTV2_FBF_10BIT_ARGB)
 				multiplier = 32;
 			else
 				multiplier = 16;
@@ -300,6 +302,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 			switch(frameFormat)
 			{
 			case NTV2_FBF_48BIT_RGB:
+			case NTV2_FBF_12BIT_RGB_PACKED:
 			case NTV2_FBF_10BIT_ARGB:
 			case NTV2_FBF_ARGB:
 			case NTV2_FBF_RGBA:
@@ -315,7 +318,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 			}
 			break;
 		case NTV2_FG_4x1920x1080:
-			if(frameFormat == NTV2_FBF_48BIT_RGB || frameFormat == NTV2_FBF_10BIT_ARGB)
+			if(frameFormat == NTV2_FBF_48BIT_RGB || frameFormat == NTV2_FBF_12BIT_RGB_PACKED || frameFormat == NTV2_FBF_10BIT_ARGB)
 				multiplier = 8;
 			else
 				multiplier = 4;
@@ -323,13 +326,15 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 		case NTV2_FG_1920x1080:
 			if(	frameFormat == NTV2_FBF_10BIT_ARGB || 
 				frameFormat == NTV2_FBF_16BIT_ARGB ||
-				frameFormat == NTV2_FBF_48BIT_RGB)
+				frameFormat == NTV2_FBF_48BIT_RGB ||
+				frameFormat == NTV2_FBF_12BIT_RGB_PACKED)
 				multiplier = 2;
 			break;
 		case NTV2_FG_4x2048x1080:
 			switch(frameFormat)
 			{
 			case NTV2_FBF_48BIT_RGB:
+			case NTV2_FBF_12BIT_RGB_PACKED:
 			case NTV2_FBF_10BIT_ARGB:
 			case NTV2_FBF_ARGB:
 			case NTV2_FBF_RGBA:
@@ -492,7 +497,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 		case NTV2_FG_4x1920x1080:
 		case NTV2_FG_1920x1080:
 			if(frameFormat == NTV2_FBF_10BIT_ARGB || frameFormat == NTV2_FBF_16BIT_ARGB
-				|| frameFormat == NTV2_FBF_48BIT_RGB)
+				|| frameFormat == NTV2_FBF_48BIT_RGB || frameFormat == NTV2_FBF_12BIT_RGB_PACKED)
 				divisor = 2;
 			break;
 		case NTV2_FG_4x2048x1080:
@@ -520,7 +525,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 		break;
 	}
 
-	if ( frameFormat == NTV2_FBF_48BIT_RGB )
+	if ( frameFormat == NTV2_FBF_48BIT_RGB || frameFormat == NTV2_FBF_12BIT_RGB_PACKED )
 	{
 		divisor *= 2;
 	}

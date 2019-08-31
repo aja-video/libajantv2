@@ -137,7 +137,7 @@ enum AJA_PixelFormat
 	AJA_PixelFormat_YCbCrA10,			/**< Pixel format YCbCrA 10 bit */
 	AJA_PixelFormat_RGB_DPX_LE,			/**< Pixel format RGB DPX little endian */
 	AJA_PixelFormat_RGB12,				/**< Pixel format RGB 12 bit */
-	AJA_PixelFormat_PRORES,				/**< Pixel format PRORES */
+	AJA_PixelFormat_RGB12P,				/**< Pixel format RGB 12 bit packed */
 	AJA_PixelFormat_PRORES_DVPRO,		/**< Pixel format PRORES DVPRO */
 	AJA_PixelFormat_PRORES_HDV,			/**< Pixel format PRORES HDV */
 	AJA_PixelFormat_RGB10_PACK,			/**< Pixel format RGB 10 bit packed */
