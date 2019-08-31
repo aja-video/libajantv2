@@ -839,6 +839,7 @@ bool CNTV2Card::GetAudioMixerInputLevels (const NTV2AudioMixerInput inMixerInput
 
 	//	Build a bulk register read...
 	NTV2RegisterReads	regs;
+	std::set<ULWord>	regsToRead;
 	for (NTV2AudioChannelPairsConstIter it(chanPairs.begin());  it != chanPairs.end();  ++it)
 	{
 		const NTV2AudioChannelPair	chanPair(*it);
@@ -853,15 +854,20 @@ bool CNTV2Card::GetAudioMixerInputLevels (const NTV2AudioMixerInput inMixerInput
 						? kRegAudioMixerAux1InputLevels
 						: kRegAudioMixerAux2InputLevels;
 		}
-		regs.push_back(NTV2RegInfo(regNum, 0, kRegMaskAudioMixerInputLeftLevel, kRegShiftAudioMixerInputLeftLevel));
-		regs.push_back(NTV2RegInfo(regNum, 0, kRegMaskAudioMixerInputRightLevel, kRegShiftAudioMixerInputRightLevel));
+		regsToRead.insert(regNum);
 	}	//	for each audio channel pair
+	for (std::set<ULWord>::const_iterator it(regsToRead.begin());  it != regsToRead.end();  ++it)
+		regs.push_back(NTV2RegInfo(*it));
 
-	//	Read the levels from the hardware...
+	//	Read the level registers...
 	const bool result(ReadRegisters(regs));
 	if (result)
 		for (NTV2RegisterReadsConstIter it(regs.begin());  it != regs.end();  ++it)
-			outLevels.push_back(it->IsValid() ? it->registerValue : 0);
+		{
+			ULWord	rawLevels(it->IsValid() ? it->registerValue : 0);
+			outLevels.push_back(uint32_t((rawLevels & kRegMaskAudioMixerInputLeftLevel) >> kRegShiftAudioMixerInputLeftLevel));
+			outLevels.push_back(uint32_t((rawLevels & kRegMaskAudioMixerInputRightLevel) >> kRegShiftAudioMixerInputRightLevel));
+		}
 	else
 		while (outLevels.size() < chanPairs.size() * 2)
 			outLevels.push_back(0);
