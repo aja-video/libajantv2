@@ -2176,7 +2176,7 @@ bool NTV2TestPatternGen::canDrawTestPattern (const NTV2TestPatternSelect inPatte
 	{
 		if (inDesc.GetRasterWidth() % 1920)
 			return false;	//	Pixel width must be evenly divisible by 1920
-		if (inDesc.GetPixelFormat() != NTV2_FBF_48BIT_RGB)
+		if (inDesc.GetPixelFormat() != NTV2_FBF_48BIT_RGB && inDesc.GetPixelFormat() != NTV2_FBF_12BIT_RGB_PACKED)
 			return false;	//	Pixel format must be RGB-12b
 		return true;
 	}
@@ -2268,7 +2268,7 @@ bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect pattNum,
 	{	//	HDR test pattern requested...
 		if (_frameWidth % 1920)
 			return false;	//	Pixel width must be evenly divisible by 1920
-		if (_pixelFormat != NTV2_FBF_48BIT_RGB)
+		if (_pixelFormat != NTV2_FBF_48BIT_RGB && _pixelFormat != NTV2_FBF_12BIT_RGB_PACKED)
 			return false;	//	Pixel format must be RGB-12b
 	}
 

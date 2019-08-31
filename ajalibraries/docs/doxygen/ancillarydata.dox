@@ -507,6 +507,10 @@ For <b>Playout</b>:
 		AUTOCIRCULATE_TRANSFER::SetAncBuffers , then calling CNTV2Card::AutoCirculateTransfer.
 	-	If not using AutoCirculate, the buffers can be transferred to the AJA device using CNTV2Card::DMAWriteAnc.
 
+@note	During <b>Playout</b>, the packet checksums in the device ancillary data buffer are ignored.
+		The Anc inserter/embedder firmware automatically recalculates each packet’s checksum as it enters
+		the outgoing SDI stream.
+
 <hr size="50px">
 
 

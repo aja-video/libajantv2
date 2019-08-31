@@ -34,23 +34,23 @@ typedef enum
 	kVRegStrictTiming						= VIRTUALREG_START+5,		// Drift Correction requires Strict Frame Timing for Windows Media playback;Required for BackHaul;Correlate Presentation Time Stamp with Graph Clock;Turn off (default) to allow Playback even when Graph Manager gives us a Bogus Clcok!
 
 	// COMMON_VIRTUAL_REGS_KONA2
-	kVRegInputSelect						= VIRTUALREG_START+20,		/* Input 1, Input 2, DualLink	*/
-	kVRegSecondaryFormatSelect				= VIRTUALREG_START+21,		/* NTV2VideoFormats				*/
-	kVRegDigitalOutput1Select				= VIRTUALREG_START+22,		/* Primary, Secondary			*/
-	kVRegDigitalOutput2Select				= VIRTUALREG_START+23,		/* Primary, Secondary, DualLink */
-	kVRegAnalogOutputSelect					= VIRTUALREG_START+24,		/* Primary, Secondary			*/
-	kVRegAnalogOutputType					= VIRTUALREG_START+25,		/* Analog output type			*/
-	kVRegAnalogOutBlackLevel				= VIRTUALREG_START+26,		/* Analog output black level	*/
+	kVRegInputSelect						= VIRTUALREG_START+20,		// Input 1, Input 2, DualLink
+	kVRegSecondaryFormatSelect				= VIRTUALREG_START+21,		// NTV2VideoFormats	
+	kVRegDigitalOutput1Select				= VIRTUALREG_START+22,		// Primary, Secondary	
+	kVRegDigitalOutput2Select				= VIRTUALREG_START+23,		// Primary, Secondary, DualLink
+	kVRegAnalogOutputSelect					= VIRTUALREG_START+24,		// Primary, Secondary
+	kVRegAnalogOutputType					= VIRTUALREG_START+25,		// Analog output type
+	kVRegAnalogOutBlackLevel				= VIRTUALREG_START+26,		// Analog output black level
 
 	// COMMON_VIRTUAL_REGS_MISC
-	kVRegVideoOutPauseMode					= VIRTUALREG_START+40,		/* whether we pause on a frame or a field */
-	kVRegPulldownPattern					= VIRTUALREG_START+41,		/* which 3:2 pulldown pattern to use */
-	kVRegColorSpaceMode						= VIRTUALREG_START+42,		/* which color space matrix (Rec601, Rec709, ...) to use */
-	kVRegGammaMode							= VIRTUALREG_START+43,		/* which gamma LUT (Rec601, Rec709, ...) to use */
-	kVRegLUTType							= VIRTUALREG_START+44,		/* the current LUT function loaded into hardware */
-	kVRegRGB10Range							= VIRTUALREG_START+45,		/* the user-selected 10-bit RGB range (SMPTE 64-940 or Full 0-1023) - deprecated */
-	kVRegRGB10Endian						= VIRTUALREG_START+46,		/* the user selected 10-bit RGB endian */
-	kVRegFanControl							= VIRTUALREG_START+47,		/* the user fan control setting */
+	kVRegVideoOutPauseMode					= VIRTUALREG_START+40,		// whether we pause on a frame or a field
+	kVRegPulldownPattern					= VIRTUALREG_START+41,		// which 3:2 pulldown pattern to use
+	kVRegColorSpaceMode						= VIRTUALREG_START+42,		// which color space matrix (Rec601, Rec709, ...) to use
+	kVRegGammaMode							= VIRTUALREG_START+43,		// which gamma LUT (Rec601, Rec709, ...) to use
+	kVRegLUTType							= VIRTUALREG_START+44,		// the current LUT function loaded into hardware
+	kVRegRGB10Range							= VIRTUALREG_START+45,		// deprecated
+	kVRegRGB10Endian						= VIRTUALREG_START+46,		// the user selected 10-bit RGB endian
+	kVRegFanControl							= VIRTUALREG_START+47,		// the user fan control setting
 
 	// Windows platform custom section
 	kVRegBitFileDownload					= VIRTUALREG_START+50,		// NTV2BitfileType
@@ -115,11 +115,8 @@ typedef enum
 	kVRegDSKForegroundMode					= VIRTUALREG_START+126,
 	kVRegDSKForegroundFade					= VIRTUALREG_START+127,
 	kVRegCaptureReferenceSelect				= VIRTUALREG_START+128,		// deprecated
-	kVRegHdrColorimetry						= kVRegCaptureReferenceSelect,
-	kVRegHdrTransfer						= VIRTUALREG_START+129,
-	kVRegHdrLuminance						= VIRTUALREG_START+130,
 
-	kVReg2XTransferMode						= kVRegHdrLuminance,		// deprecated
+	kVReg2XTransferMode						= VIRTUALREG_START+130, 	// deprecated
 	kVRegSDIOutput1RGBRange					= VIRTUALREG_START+131,
 	kVRegSDIInput1FormatSelect				= VIRTUALREG_START+132,
 	kVRegSDIInput2FormatSelect				= VIRTUALREG_START+133,
@@ -520,8 +517,24 @@ typedef enum
 	kVRegNTV2VPIDTransferCharacteristics8	= VIRTUALREG_START+551,
 	kVRegNTV2VPIDColorimetry8				= VIRTUALREG_START+552,
 	kVRegNTV2VPIDLuminance8					= VIRTUALREG_START+553,
+	
+	kVRegHdrColorimetryCh1					= VIRTUALREG_START+554,
+	kVRegHdrTransferCh1						= VIRTUALREG_START+555,
+	kVRegHdrLuminanceCh1					= VIRTUALREG_START+556,
+	kVRegHdrRedXCh1							= VIRTUALREG_START+557,
+	kVRegHdrRedYCh1							= VIRTUALREG_START+558,
+	kVRegHdrGreenXCh1						= VIRTUALREG_START+559,
+	kVRegHdrGreenYCh1						= VIRTUALREG_START+560,
+	kVRegHdrBlueXCh1						= VIRTUALREG_START+561,
+	kVRegHdrBlueYCh1						= VIRTUALREG_START+562,
+	kVRegHdrWhiteXCh1						= VIRTUALREG_START+563,
+	kVRegHdrWhiteYCh1						= VIRTUALREG_START+564,
+	kVRegHdrMasterLumMinCh1					= VIRTUALREG_START+565,
+	kVRegHdrMasterLumMaxCh1					= VIRTUALREG_START+566,
+	kVRegHdrMaxCLLCh1						= VIRTUALREG_START+567,
+	kVRegHdrMaxFALLCh1						= VIRTUALREG_START+568,
 
-    kVRegLastAJA							= VIRTUALREG_START+554,		///< @brief	The last AJA virtual register slot
+    kVRegLastAJA							= VIRTUALREG_START+569,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 

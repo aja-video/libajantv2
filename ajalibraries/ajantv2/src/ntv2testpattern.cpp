@@ -2293,6 +2293,10 @@ void CNTV2Card::DownloadSegmentedTestPattern(SegmentTestPatternData* pTestPatter
 					ConvertLineto16BitRGB(unPackedBuffer,(RGBAlpha16BitPixel*)packedBuffer,numPixels, bIsSD);
 					Convert16BitARGBTo16BitRGB((RGBAlpha16BitPixel*)packedBuffer ,(UWord *) packedBuffer, numPixels);
 					break;
+				case NTV2_FBF_12BIT_RGB_PACKED:
+					ConvertLineto16BitRGB(unPackedBuffer,(RGBAlpha16BitPixel*)packedBuffer,numPixels, bIsSD);
+					Convert16BitARGBTo12BitRGBPacked((RGBAlpha16BitPixel*)packedBuffer ,(UByte *) packedBuffer, numPixels);
+					break;
 				default:	return;	//	Unsupported framebuffer standard requested
 			}
 			
@@ -2432,6 +2436,7 @@ void CNTV2Card::DownloadBlackTestPattern(  )
 	case NTV2_FBF_24BIT_BGR:
     case NTV2_FBF_10BIT_DPX_LE:
 	case NTV2_FBF_48BIT_RGB:
+	case NTV2_FBF_12BIT_RGB_PACKED:
 		memset(currentAddress,0,linePitch*numLines*4);
 		break;
 	default:	return;	//	Unsupported framebuffer standard requested
@@ -3403,6 +3408,11 @@ void CNTV2Card::ConvertLinePixelFormat(UWord *unPackedBuffer, ULWord *packedBuff
 			ConvertLineto16BitRGB(unPackedBuffer, (RGBAlpha16BitPixel*)packedBuffer, numPixels, bIsSD);
 			Convert16BitARGBTo16BitRGB((RGBAlpha16BitPixel*)packedBuffer, (UWord *) packedBuffer, numPixels);
 			break;
+			
+		case NTV2_FBF_12BIT_RGB_PACKED:
+			ConvertLineto16BitRGB(unPackedBuffer, (RGBAlpha16BitPixel*)packedBuffer, numPixels, bIsSD);
+			Convert16BitARGBTo12BitRGBPacked((RGBAlpha16BitPixel*)packedBuffer, (UByte *) packedBuffer, numPixels);
+			break;
 
 		default:	return;		//	Unsupported framebuffer standard requested
 	}
@@ -3445,14 +3455,17 @@ void CNTV2Card::AdjustFor2048x1080(ULWord& numPixels,ULWord& linePitch)
 			numPixels = HD_NUMCOMPONENTPIXELS_2K;
 			linePitch = RGB48LINEPITCH_2048;
 			break;
+		case NTV2_FBF_12BIT_RGB_PACKED:
+			numPixels = HD_NUMCOMPONENTPIXELS_2K;
+			linePitch = RGB12PLINEPITCH_2048;
+		
 	
 		// Formats not yet supported, kill warning
 		case NTV2_FBF_10BIT_YCBCR_DPX:		
 		case NTV2_FBF_8BIT_DVCPRO:
 		case NTV2_FBF_8BIT_YCBCR_420PL3:
 		case NTV2_FBF_8BIT_HDV:
-		case NTV2_FBF_10BIT_YCBCRA: 
-		case NTV2_FBF_PRORES:
+		case NTV2_FBF_10BIT_YCBCRA:
 		case NTV2_FBF_PRORES_DVCPRO:
 		case NTV2_FBF_PRORES_HDV:
 		case NTV2_FBF_10BIT_ARGB:
