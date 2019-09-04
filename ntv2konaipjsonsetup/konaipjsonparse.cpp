@@ -483,6 +483,9 @@ bool CKonaIpJsonParse2110::JsonToStructNetwork(const QJsonObject& topObj, Networ
 	if (m_verbose) std::cout << " audioCombine " << str.c_str() << std::endl;
 	n2110.audioCombine = GetEnable(str);
 
+	n2110.rxMatchOverride = topObj["rxMatchOverride"].toInt();
+	if (m_verbose) std::cout << " rxMatchOverride " << n2110.rxMatchOverride << std::endl;
+
     // sfp
     QJsonArray sfpArray = topObj["sfps"].toArray();
     n2110.numSFPs = MinVal(sfpArray.count(), 2);
@@ -529,6 +532,8 @@ bool CKonaIpJsonParse2110::StructToJsonNetwork(const NetworkData2110& n2110, QJs
 	topObj.insert("multiSDP", QJsonValue(QString(GetEnable(n2110.multiSDP))));
 
 	topObj.insert("audioCombine", QJsonValue(QString(GetEnable(n2110.audioCombine))));
+
+	topObj.insert("rxMatchOverride", QJsonValue((int)n2110.rxMatchOverride));
 
     QJsonArray sfpArray;
 
