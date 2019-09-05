@@ -537,8 +537,10 @@ typedef enum
 	kVRegHdrMasterLumMinCh1					= VIRTUALREG_START+569,
 	kVRegHdrMaxCLLCh1						= VIRTUALREG_START+570,
 	kVRegHdrMaxFALLCh1						= VIRTUALREG_START+571,
+	
+	kVRegHDROverrideState					= VIRTUALREG_START+572,
 
-    kVRegLastAJA							= VIRTUALREG_START+572,		///< @brief	The last AJA virtual register slot
+    kVRegLastAJA							= VIRTUALREG_START+573,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 
