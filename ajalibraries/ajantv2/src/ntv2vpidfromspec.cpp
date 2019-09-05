@@ -488,6 +488,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 		case NTV2_FBF_24BIT_RGB:
 		case NTV2_FBF_24BIT_BGR:
 		case NTV2_FBF_48BIT_RGB:
+		case NTV2_FBF_12BIT_RGB_PACKED:
 		case NTV2_FBF_10BIT_RGB_PACKED:
 			byte3 |= VPIDSampling_GBR_444;
 			break;
@@ -564,7 +565,8 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	//	Bit depth
 	if(NTV2_IS_VALID_FBF(pixelFormat))
 	{
-		byte4 |= pixelFormat == NTV2_FBF_48BIT_RGB ? VPIDBitDepth_12 : VPIDBitDepth_10;
+		bool is12Bit = (pixelFormat == NTV2_FBF_48BIT_RGB || pixelFormat == NTV2_FBF_12BIT_RGB_PACKED) ? true : false;
+		byte4 |= is12Bit ? VPIDBitDepth_12 : VPIDBitDepth_10;
 	}
 	else
 	{

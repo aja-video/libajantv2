@@ -48,7 +48,7 @@ AJAPixelFormatEntry AJAPixelFormatTable[AJA_PixelFormat_Size] =
 	{AJA_PixelFormat_YCbCrA10,           AJA_FOURCC(' ',' ',' ',' '),     10,	AJAScaleTypeNone,     false,    "10 Bit YCbCrA"},
 	{AJA_PixelFormat_RGB_DPX_LE,         AJA_FOURCC('r','1','0','k'),     10,	AJAScaleTypeNone,     true,     "10 Bit RGB DPX LE"},
 	{AJA_PixelFormat_RGB12,              AJA_FOURCC(' ',' ',' ',' '),     12,	AJAScaleTypeNone,     true,     "RGB12"},			//tmp name, may need to change
-	{AJA_PixelFormat_PRORES,             AJA_FOURCC('a','c','p','n'),     10,	AJAScaleTypeNone,     false,    "ProRes"},			//tmp name, may need to change
+	{AJA_PixelFormat_RGB12P,             AJA_FOURCC(' ',' ',' ',' '),     12,	AJAScaleTypeNone,     true,     "RGB12P"},
 	{AJA_PixelFormat_PRORES_DVPRO,       AJA_FOURCC('a','c','p','n'),     8,	AJAScaleTypeDVCPro,   false,    "ProRes DVC Pro"},
 	{AJA_PixelFormat_PRORES_HDV,         AJA_FOURCC('a','c','p','n'),     8,	AJAScaleTypeHDV,      false,    "ProRes HDV"},
 	{AJA_PixelFormat_RGB10_PACK,         AJA_FOURCC(' ',' ',' ',' '),     10,	AJAScaleTypeNone,     true,     "RGB10Pack"},		//tmp name, may need to change

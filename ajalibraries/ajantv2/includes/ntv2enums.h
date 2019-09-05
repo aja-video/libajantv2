@@ -228,7 +228,7 @@ typedef enum
 	,NTV2_FBF_10BIT_YCBCRA								///< @brief	10-Bit YCbCrA
 	,NTV2_FBF_10BIT_DPX_LE								///< @brief	10-Bit DPX Little-Endian
 	,NTV2_FBF_48BIT_RGB									///< @brief	See \ref fbformats48bitrgb
-	,NTV2_FBF_PRORES									///< @brief	Apple ProRes
+	,NTV2_FBF_12BIT_RGB_PACKED							///< @brief	12-Bit Packed RGB
 	,NTV2_FBF_PRORES_DVCPRO								///< @brief	Apple ProRes DVC Pro
 	,NTV2_FBF_PRORES_HDV								///< @brief	Apple ProRes HDV
 	,NTV2_FBF_10BIT_RGB_PACKED							///< @brief	10-Bit Packed RGB
@@ -247,7 +247,6 @@ typedef enum
 	,NTV2_FBF_NUMFRAMEBUFFERFORMATS	= NTV2_FBF_LAST
 	,NTV2_FBF_INVALID				= NTV2_FBF_NUMFRAMEBUFFERFORMATS
 } NTV2FrameBufferFormat;
-
 
 #if !defined(NTV2_DEPRECATE_14_0)
 	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_8BIT_QREZ,					NTV2_FBF_8BIT_YCBCR_420PL3);		///< @deprecated	Use NTV2_FBF_8BIT_YCBCR_420PL3 instead.
@@ -281,8 +280,7 @@ typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief	An alias for NTV2Fram
 
 #define	NTV2_IS_VALID_PLANAR_FRAME_BUFFER_FORMAT(__s__)		(NTV2_IS_FBF_PLANAR(__s__))
 
-#define NTV2_IS_FBF_PRORES(__fbf__) 	(		(__fbf__) == NTV2_FBF_PRORES					\
-                                            ||	(__fbf__) == NTV2_FBF_PRORES_DVCPRO				\
+#define NTV2_IS_FBF_PRORES(__fbf__) 	(		(__fbf__) == NTV2_FBF_PRORES_DVCPRO				\
                                             ||	(__fbf__) == NTV2_FBF_PRORES_HDV				\
                                         )
 
