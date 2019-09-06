@@ -209,6 +209,7 @@ NTV2DeviceSoftwareCanChangeFrameBufferSize
 NTV2DeviceCanDoVITC2
 NTV2DeviceCanReportRunningFirmwareDate
 NTV2DeviceCanDoWarmBootFPGA
+NTV2DeviceCanDoHFRRGB
 
 // NTV2ConversionModes
 
