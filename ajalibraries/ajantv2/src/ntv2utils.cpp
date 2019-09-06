@@ -82,6 +82,10 @@ uint32_t CalcRowBytesForFormat (const NTV2FrameBufferFormat inPixelFormat, const
 	case NTV2_FBF_48BIT_RGB:
 		rowBytes = inPixelWidth * 6;
 		break;
+		
+	case NTV2_FBF_12BIT_RGB_PACKED:
+		rowBytes = inPixelWidth * 36 / 8;
+		break;
 
 	case NTV2_FBF_10BIT_YCBCR_420PL2:
 	case NTV2_FBF_10BIT_YCBCR_422PL2:
@@ -96,7 +100,6 @@ uint32_t CalcRowBytesForFormat (const NTV2FrameBufferFormat inPixelFormat, const
 	case NTV2_FBF_8BIT_YCBCR_420PL3:
 	case NTV2_FBF_8BIT_HDV:
 	case NTV2_FBF_10BIT_YCBCRA:
-	case NTV2_FBF_PRORES:
 	case NTV2_FBF_PRORES_DVCPRO:
 	case NTV2_FBF_PRORES_HDV:
 	case NTV2_FBF_10BIT_ARGB:
@@ -296,12 +299,16 @@ void ConvertUnpacked10BitYCbCrToPixelFormat(uint16_t *unPackedBuffer, uint32_t *
 			ConvertLineto10BitRGB(unPackedBuffer, (RGBAlpha10BitPixel*)packedBuffer, numPixels, bIsSD, bUseSmpteRange);
 			PackRGB10BitFor10BitRGBPacked((RGBAlpha10BitPixel*)packedBuffer, numPixels);
 			break;
+			
+		case NTV2_FBF_12BIT_RGB_PACKED:
+			ConvertLineto16BitRGB(unPackedBuffer, (RGBAlpha16BitPixel*)packedBuffer, numPixels, bIsSD, bUseSmpteRange);
+			Convert16BitARGBTo12BitRGBPacked((RGBAlpha16BitPixel*)packedBuffer, (UByte*)packedBuffer, numPixels);
+			break;
 	#if defined(_DEBUG)
 		case NTV2_FBF_8BIT_DVCPRO:
 		case NTV2_FBF_8BIT_YCBCR_420PL3:
 		case NTV2_FBF_8BIT_HDV:
 		case NTV2_FBF_10BIT_YCBCRA:
-		case NTV2_FBF_PRORES:
 		case NTV2_FBF_PRORES_DVCPRO:
 		case NTV2_FBF_PRORES_HDV:
 		case NTV2_FBF_10BIT_ARGB:
@@ -1178,7 +1185,7 @@ bool SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 		case NTV2_FBF_10BIT_YCBCRA:
         case NTV2_FBF_10BIT_DPX_LE:
 		case NTV2_FBF_48BIT_RGB:
-		case NTV2_FBF_PRORES:
+		case NTV2_FBF_12BIT_RGB_PACKED:
 		case NTV2_FBF_PRORES_DVCPRO:
 		case NTV2_FBF_PRORES_HDV:
 		case NTV2_FBF_10BIT_RGB_PACKED:
@@ -1407,6 +1414,66 @@ static bool CopyRaster20BytesPer16Pixels (	UByte *			pDstBuffer,				//	Dest buff
 		const UByte *	pSrcLine	(pSrcBuffer  +  inSrcBytesPerLine * (inSrcVertLineOffset + lineNdx)  +  inSrcHorzPixelOffset * 20 / 16);
 		UByte *			pDstLine	(pDstBuffer  +  inDstBytesPerLine * (inDstVertLineOffset + lineNdx)  +  inDstHorzPixelOffset * 20 / 16);
 		::memcpy (pDstLine, pSrcLine, numHorzPixelsToCopy * 20 / 16);	//	copy the line
+	}
+
+	return true;
+
+}	//	CopyRaster20BytesPer16Pixels
+
+//	This function should work on all 36-byte-per-8-pixel formats
+static bool CopyRaster36BytesPer8Pixels (	UByte *			pDstBuffer,				//	Dest buffer to be modified
+											const UWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
+											const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
+											const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
+											const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear
+											const UByte *	pSrcBuffer,				//	Src buffer
+											const UWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
+											const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
+											const UWord		inSrcVertLineOffset,	//	Src image top edge
+											const UWord		inSrcVertLinesToCopy,	//	Src image height
+											const UWord		inSrcHorzPixelOffset,	//	Src image left edge
+											const UWord		inSrcHorzPixelsToCopy)	//	Src image width
+{
+	if (inDstHorzPixelOffset % 8)		//	dst pixel offset must be on 16-pixel boundary
+		return false;
+	if (inSrcHorzPixelOffset % 8)		//	src pixel offset must be on 16-pixel boundary
+		return false;
+	if (inDstBytesPerLine % 36)			//	dst raster width must be evenly divisible by 20
+		return false;
+	if (inSrcBytesPerLine % 36)			//	src raster width must be evenly divisible by 20
+		return false;
+	if (inSrcHorzPixelsToCopy % 8)		//	pixel width of src image portion to copy must be on 16-pixel boundary
+		return false;
+
+	const UWord	dstMaxPixelWidth	(inDstBytesPerLine / 36 * 8);
+	const UWord	srcMaxPixelWidth	(inSrcBytesPerLine / 36 * 8);
+	UWord		numHorzPixelsToCopy	(inSrcHorzPixelsToCopy);
+	UWord		numVertLinesToCopy	(inSrcVertLinesToCopy);
+
+	if (inDstHorzPixelOffset >= dstMaxPixelWidth)	//	dst past right edge
+		return false;
+	if (inSrcHorzPixelOffset >= srcMaxPixelWidth)	//	src past right edge
+		return false;
+	if (inSrcHorzPixelOffset + inSrcHorzPixelsToCopy > srcMaxPixelWidth)
+		numHorzPixelsToCopy -= inSrcHorzPixelOffset + inSrcHorzPixelsToCopy - srcMaxPixelWidth;	//	Clip to src raster's right edge
+	if (inDstHorzPixelOffset + numHorzPixelsToCopy > dstMaxPixelWidth)
+		numHorzPixelsToCopy = inDstHorzPixelOffset + numHorzPixelsToCopy - dstMaxPixelWidth;
+	NTV2_ASSERT (numHorzPixelsToCopy % 8 == 0);
+	if (inSrcVertLineOffset + inSrcVertLinesToCopy > inSrcTotalLines)
+		numVertLinesToCopy -= inSrcVertLineOffset + inSrcVertLinesToCopy - inSrcTotalLines;		//	Clip to src raster's bottom edge
+	if (numVertLinesToCopy + inDstVertLineOffset >= inDstTotalLines)
+	{
+		if (numVertLinesToCopy + inDstVertLineOffset > inDstTotalLines)
+			numVertLinesToCopy -= numVertLinesToCopy + inDstVertLineOffset - inDstTotalLines;
+		else
+			return true;
+	}
+
+	for (UWord lineNdx (0);  lineNdx < numVertLinesToCopy;  lineNdx++)	//	for each raster line to copy
+	{
+		const UByte *	pSrcLine	(pSrcBuffer  +  inSrcBytesPerLine * (inSrcVertLineOffset + lineNdx)  +  inSrcHorzPixelOffset * 36 / 8);
+		UByte *			pDstLine	(pDstBuffer  +  inDstBytesPerLine * (inDstVertLineOffset + lineNdx)  +  inDstHorzPixelOffset * 36 / 8);
+		::memcpy (pDstLine, pSrcLine, numHorzPixelsToCopy * 36 / 8);	//	copy the line
 	}
 
 	return true;
@@ -1644,6 +1711,9 @@ bool CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,			//	Pixel format of
 																			pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
 																			inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
 
+	case NTV2_FBF_12BIT_RGB_PACKED:			return CopyRaster36BytesPer8Pixels (pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
+																				pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
+																				inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
 	case NTV2_FBF_10BIT_RAW_YCBCR:			return CopyRaster20BytesPer16Pixels (pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
 																				pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
 																				inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
@@ -1652,7 +1722,6 @@ bool CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,			//	Pixel format of
 	case NTV2_FBF_8BIT_HDV:		//	Lossy
 	case NTV2_FBF_8BIT_YCBCR_420PL3:
 	case NTV2_FBF_10BIT_YCBCRA:
-	case NTV2_FBF_PRORES:
 	case NTV2_FBF_PRORES_DVCPRO:
 	case NTV2_FBF_PRORES_HDV:
 	case NTV2_FBF_10BIT_RGB_PACKED:
@@ -8221,7 +8290,7 @@ string NTV2FrameBufferFormatToString (const NTV2FrameBufferFormat inValue,	const
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "YUVA-10", NTV2_FBF_10BIT_YCBCRA);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "RGB-L10", NTV2_FBF_10BIT_DPX_LE);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "RGB-12", NTV2_FBF_48BIT_RGB);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "ProRes-422", NTV2_FBF_PRORES);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "RGB-12P", NTV2_FBF_12BIT_RGB_PACKED);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "ProRes-DVC", NTV2_FBF_PRORES_DVCPRO);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "ProRes-HDV", NTV2_FBF_PRORES_HDV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "RGB-P10", NTV2_FBF_10BIT_RGB_PACKED);

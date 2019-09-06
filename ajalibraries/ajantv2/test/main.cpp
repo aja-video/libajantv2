@@ -6,6 +6,9 @@
 // for doctest usage see: https://github.com/onqtam/doctest/blob/1.1.4/doc/markdown/tutorial.md
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+// need to define this so will work with compilers that don't support thread_local
+// ie xcode 6, 7
+#define DOCTEST_THREAD_LOCAL
 #include "doctest.h"
 
 #include <fstream>
@@ -22,21 +25,21 @@
 #if 0
 template
 void filename_marker() {} //this is used to easily just around in a GUI with a symbols list
-TEST_SUITE("filename -- functions in streams/common/filename.h");
+TEST_SUITE("filename" * doctest::description("functions in streams/common/filename.h")) {
 
     TEST_CASE("constructor")
     {
     }
 
-TEST_SUITE_END(); //filename
+} //filename
 #endif
 
 void spi_marker() {}
-TEST_SUITE("spi -- new spi flasher");
+TEST_SUITE("spi" * doctest::description("new spi flasher")) {
 
     TEST_CASE("normal")
     {
 
     }
 
-TEST_SUITE_END(); //spi
+} //spi

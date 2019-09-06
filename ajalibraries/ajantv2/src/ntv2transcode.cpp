@@ -700,6 +700,31 @@ void Convert16BitARGBTo16BitRGB(RGBAlpha16BitPixel *rgbaLineBuffer ,UWord * rgbL
 	}
 }
 
+void Convert16BitARGBTo12BitRGBPacked(RGBAlpha16BitPixel *rgbaLineBuffer ,UByte * rgbLineBuffer,ULWord numPixels)
+{
+	for ( ULWord pixel=0;pixel<numPixels;pixel+=8)
+	{
+		for(ULWord i = 0;i<8;i+=2)
+		{
+			UWord R = rgbaLineBuffer[pixel+i].Red;
+			UWord G = rgbaLineBuffer[pixel+i].Green;
+			UWord B = rgbaLineBuffer[pixel+i].Blue;
+			*rgbLineBuffer++ = (R & 0xFF00)>>8;
+			*rgbLineBuffer++ = (((R & 0x00F0)) | ((G & 0xF000)>>12));
+			*rgbLineBuffer++ = (G & 0x0FF0)>>4;
+			*rgbLineBuffer++ = (B & 0xFF00)>>8;
+			R = rgbaLineBuffer[pixel+i+1].Red;
+			*rgbLineBuffer++ = (((B & 0x00F0)) | ((R & 0xF000)>>12));
+			*rgbLineBuffer++ = (R & 0x0FF0)>>4;
+			G = rgbaLineBuffer[pixel+i+1].Green;
+			B = rgbaLineBuffer[pixel+i+1].Blue;
+			*rgbLineBuffer++ = (G & 0xFF00)>>8;
+			*rgbLineBuffer++ = (((G & 0x00F0)) | ((B & 0xF000)>>12));
+			*rgbLineBuffer++ = (B & 0x0FF0)>>4;
+		}
+	}
+}
+
 // Convert 8 Bit ARGB to 8 bit BGR
 void ConvertARGBToBGR (const UByte * pInRGBALineBuffer, UByte * pOutRGBLineBuffer, const ULWord inNumPixels)
 {

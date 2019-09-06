@@ -168,17 +168,19 @@ static std::string aja_getgputype(void)
                         CFDictionaryRef dict = CFDictionaryRef(CFArrayGetValueAtIndex(itemsArray, i));
                         CFStringRef key = CFSTR("sppci_model");
                         CFStringRef outputString = CFStringRef(CFDictionaryGetValue(dict, key));
-
-                        std::vector<char> tmp(CFStringGetLength(outputString)+1);
-                        if (CFStringGetCString(outputString, &tmp[0], tmp.size(), kCFStringEncodingUTF8))
+                        if (outputString)
                         {
-                            if (i != 0)
+                            std::vector<char> tmp(CFStringGetLength(outputString)+1);
+                            if (CFStringGetCString(outputString, &tmp[0], tmp.size(), kCFStringEncodingUTF8))
                             {
-                                oss << ", ";
+                                if (i != 0)
+                                {
+                                    oss << ", ";
+                                }
+                                oss << &tmp[0];
                             }
-                            oss << &tmp[0];
+                            CFRelease(outputString);
                         }
-                        CFRelease(outputString);
                     }
                     CFRelease(itemsArray);
                 }
