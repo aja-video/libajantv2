@@ -1617,6 +1617,13 @@ bool CNTV2Card::SetAudioOutputAESSyncModeBit (const NTV2AudioSystem inAudioSyste
 	return WriteRegister(gAudioSystemToSrcSelectRegNum[inAudioSystem], inAESSyncModeBitSet?1:0, BIT(18), 18);
 }
 
+bool CNTV2Card::GetRawAudioTimer (ULWord & outValue, const NTV2AudioSystem inAudioSystem)
+{
+	if (!NTV2_IS_VALID_AUDIO_SYSTEM(inAudioSystem))
+		return false;
+	return ReadRegister(kRegAud1Counter, outValue);
+}
+
 
 #if !defined (NTV2_DEPRECATE)
 	bool CNTV2Card::GetAudioPlayCaptureModeEnable (const NTV2AudioSystem inAudioSystem, bool * pOutEnable)

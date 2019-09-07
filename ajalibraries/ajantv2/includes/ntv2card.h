@@ -2200,6 +2200,17 @@ public:
 	AJA_VIRTUAL bool		SetAnalogAudioIOConfiguration (const NTV2AnalogAudioIO inAudioIOConfiguration);
 	AJA_VIRTUAL bool		GetAnalogAudioIOConfiguration (NTV2AnalogAudioIO & inAudioIOConfiguration);
 
+	/**
+		@brief		Answers with the current value of the 48kHz audio clock counter.
+		@return		True if successful; otherwise false.
+		@param[in]	outValue		Receives the number of 48kHz "ticks" that have transpired since the
+									device was powered up.
+		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest. Currently ignored, but
+									may be used if a future NTV2 device has more than one audio clock.
+		@note		This counter will overflow and wrap back to zero in 24:51:00 [hh:mm:ss].
+	**/
+    AJA_VIRTUAL bool		GetRawAudioTimer (ULWord & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+
 	AJA_VIRTUAL bool NTV2_SHOULD_BE_DEPRECATED(WriteAudioSource (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1));
 	AJA_VIRTUAL bool NTV2_SHOULD_BE_DEPRECATED(ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1));
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioOutput(inAudioSystem) : StartAudioOutput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioOutput or CNTV2Card::StopAudioOutput instead.
