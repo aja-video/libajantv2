@@ -229,6 +229,7 @@ NTV2DeviceHasGenlockv3
 NTV2DeviceCanReportFailSafeLoaded
 NTV2DeviceCanReportRunningFirmwareDate
 NTV2DeviceCanDoWarmBootFPGA
+NTV2DeviceCanDoHFRRGB
 
 // NTV2ConversionModes
 
