@@ -159,13 +159,12 @@ NTV2DeviceGetNumVideoChannels					4
 NTV2DeviceGetPingLED							BIT(16)
 NTV2DeviceGetUFCVersion							1
 NTV2DeviceGetNumAudioSystems					4
-//NTV2DeviceGetNumCSCs							2
-NTV2DeviceGetNumCSCs							0
+NTV2DeviceGetNumCSCs							2
 NTV2DeviceGetNumEmbeddedAudioInputChannels		16
 NTV2DeviceGetNumEmbeddedAudioOutputChannels		16
 NTV2DeviceGetNumFrameStores						4
 NTV2DeviceGetNumLUTs							0
-NTV2DeviceGetNumMixers							0
+NTV2DeviceGetNumMixers							1
 NTV2DeviceGetNumReferenceVideoInputs			1
 NTV2DeviceGetNumSerialPorts						1
 NTV2DeviceGetNumVideoInputs						4
@@ -220,12 +219,13 @@ NTV2DeviceCanReportFailSafeLoaded
 NTV2DeviceCanReportRunningFirmwareDate
 NTV2DeviceCanDo8KVideo
 NTV2DeviceCanDoWarmBootFPGA
+NTV2DeviceCanDoHFRRGB
 //Temporary additions
-//NTV2DeviceCanDoColorCorrection
-//NTV2DeviceCanDoEnhancedCSC
-//NTV2DeviceCanDoProgrammableCSC
-//NTV2DeviceCanDoRGBPlusAlphaOut
-//NTV2DeviceHasColorSpaceConverterOnChannel2
+NTV2DeviceCanDoColorCorrection
+NTV2DeviceCanDoEnhancedCSC
+NTV2DeviceCanDoProgrammableCSC
+NTV2DeviceCanDoRGBPlusAlphaOut
+NTV2DeviceHasColorSpaceConverterOnChannel2
 
 // NTV2ConversionModes
 

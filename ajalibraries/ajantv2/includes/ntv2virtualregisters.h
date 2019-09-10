@@ -518,23 +518,29 @@ typedef enum
 	kVRegNTV2VPIDColorimetry8				= VIRTUALREG_START+552,
 	kVRegNTV2VPIDLuminance8					= VIRTUALREG_START+553,
 	
-	kVRegHdrColorimetryCh1					= VIRTUALREG_START+554,
-	kVRegHdrTransferCh1						= VIRTUALREG_START+555,
-	kVRegHdrLuminanceCh1					= VIRTUALREG_START+556,
-	kVRegHdrRedXCh1							= VIRTUALREG_START+557,
-	kVRegHdrRedYCh1							= VIRTUALREG_START+558,
-	kVRegHdrGreenXCh1						= VIRTUALREG_START+559,
-	kVRegHdrGreenYCh1						= VIRTUALREG_START+560,
-	kVRegHdrBlueXCh1						= VIRTUALREG_START+561,
-	kVRegHdrBlueYCh1						= VIRTUALREG_START+562,
-	kVRegHdrWhiteXCh1						= VIRTUALREG_START+563,
-	kVRegHdrWhiteYCh1						= VIRTUALREG_START+564,
-	kVRegHdrMasterLumMinCh1					= VIRTUALREG_START+565,
-	kVRegHdrMasterLumMaxCh1					= VIRTUALREG_START+566,
-	kVRegHdrMaxCLLCh1						= VIRTUALREG_START+567,
-	kVRegHdrMaxFALLCh1						= VIRTUALREG_START+568,
+	kVRegUserColorimetry					= VIRTUALREG_START+554,
+	kVRegUserTransfer						= VIRTUALREG_START+555,
+	kVRegUserLuminance						= VIRTUALREG_START+556,
+	
+	kVRegHdrColorimetryCh1					= VIRTUALREG_START+557,
+	kVRegHdrTransferCh1						= VIRTUALREG_START+558,
+	kVRegHdrLuminanceCh1					= VIRTUALREG_START+559,
+	kVRegHdrGreenXCh1						= VIRTUALREG_START+560,
+	kVRegHdrGreenYCh1						= VIRTUALREG_START+561,
+	kVRegHdrBlueXCh1						= VIRTUALREG_START+562,
+	kVRegHdrBlueYCh1						= VIRTUALREG_START+563,
+	kVRegHdrRedXCh1							= VIRTUALREG_START+564,
+	kVRegHdrRedYCh1							= VIRTUALREG_START+565,
+	kVRegHdrWhiteXCh1						= VIRTUALREG_START+566,
+	kVRegHdrWhiteYCh1						= VIRTUALREG_START+567,
+	kVRegHdrMasterLumMaxCh1					= VIRTUALREG_START+568,
+	kVRegHdrMasterLumMinCh1					= VIRTUALREG_START+569,
+	kVRegHdrMaxCLLCh1						= VIRTUALREG_START+570,
+	kVRegHdrMaxFALLCh1						= VIRTUALREG_START+571,
+	
+	kVRegHDROverrideState					= VIRTUALREG_START+572,
 
-    kVRegLastAJA							= VIRTUALREG_START+569,		///< @brief	The last AJA virtual register slot
+    kVRegLastAJA							= VIRTUALREG_START+573,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 

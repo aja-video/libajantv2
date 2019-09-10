@@ -168,7 +168,8 @@ typedef struct
 	SFPData2110             sfp[2];
 	bool					multiSDP;
 	bool					audioCombine;
-	uint8_t					unused[14];
+	uint32_t                rxMatchOverride;
+	uint8_t					unused[10];
 } NetworkData2110;
 
 typedef struct
