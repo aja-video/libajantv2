@@ -3267,6 +3267,23 @@ typedef enum
 #define	NTV2_IS_AUDIO_MIXER_CHANNELS_1_OR_2(__p__)		((__p__) >= NTV2_AudioMixerChannel1	&& (__p__) <= NTV2_AudioMixerChannel2)
 
 /**
+    @brief	Identifies the Audio Mixer's audio inputs.
+    @see	See \ref audiomixer
+**/
+typedef enum
+{
+	NTV2_AudioMixerInputMain,	///< @brief	This selects the Audio Mixer's Main (primary) input
+	NTV2_AudioMixerInputAux1,	///< @brief	This selects the Audio Mixer's 1st Auxiliary input
+	NTV2_AudioMixerInputAux2,	///< @brief	This selects the Audio Mixer's 2nd Auxiliary input
+	NTV2_MAX_NUM_AudioMixerInput,
+	NTV2_AUDIO_MIXER_INPUT_INVALID	=	NTV2_MAX_NUM_AudioMixerInput
+} NTV2AudioMixerInput;
+
+#define	NTV2_IS_VALID_AUDIO_MIXER_INPUT(__p__)		((__p__) >= NTV2_AudioMixerInputMain	&& (__p__) < NTV2_AUDIO_MIXER_INPUT_INVALID)
+#define	NTV2_IS_AUDIO_MIXER_INPUT_MAIN(__p__)		((__p__) == NTV2_AudioMixerInputMain)
+
+
+/**
     @brief	Identifies a contiguous, adjacent group of four audio channels.
     @see	CNTV2Card::GetAESOutputSource, CNTV2Card::SetAESOutputSource, \ref audiooperation
 **/

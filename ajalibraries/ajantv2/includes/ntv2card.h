@@ -22,6 +22,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <bitset>
 
 /**
 	@brief	Used in calls to CNTV2Card::GetBoolParam to determine device features.
@@ -243,6 +244,10 @@ AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DIDSet 
 	} SegmentTestPatternData;
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
+
+typedef std::bitset<16>		NTV2AudioChannelsMuted16;				///< @brief	Per-audio-channel mute state for up to 16 audio channels.
+const NTV2AudioChannelsMuted16	NTV2AudioChannelsMuteAll(0xFFFF);	///< @brief	All 16 audio channels muted/disabled.
+const NTV2AudioChannelsMuted16	NTV2AudioChannelsEnableAll(0x0000);	///< @brief	All 16 audio channels unmuted/enabled.
 
 
 
@@ -2192,6 +2197,20 @@ public:
 	**/
 	AJA_VIRTUAL bool		SetAudioOutputAESSyncModeBit (const NTV2AudioSystem inAudioSystem, const bool & inAESSyncModeBitSet);
 
+	AJA_VIRTUAL bool		SetAnalogAudioIOConfiguration (const NTV2AnalogAudioIO inAudioIOConfiguration);
+	AJA_VIRTUAL bool		GetAnalogAudioIOConfiguration (NTV2AnalogAudioIO & inAudioIOConfiguration);
+
+	/**
+		@brief		Answers with the current value of the 48kHz audio clock counter.
+		@return		True if successful; otherwise false.
+		@param[in]	outValue		Receives the number of 48kHz "ticks" that have transpired since the
+									device was powered up.
+		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest. Currently ignored, but
+									may be used if a future NTV2 device has more than one audio clock.
+		@note		This counter will overflow and wrap back to zero in 24:51:00 [hh:mm:ss].
+	**/
+    AJA_VIRTUAL bool		GetRawAudioTimer (ULWord & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+
 	AJA_VIRTUAL bool NTV2_SHOULD_BE_DEPRECATED(WriteAudioSource (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1));
 	AJA_VIRTUAL bool NTV2_SHOULD_BE_DEPRECATED(ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1));
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioOutput(inAudioSystem) : StartAudioOutput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioOutput or CNTV2Card::StopAudioOutput instead.
@@ -2204,45 +2223,167 @@ public:
 		@name	Audio Mixer
 	**/
 	///@{
-	AJA_VIRTUAL bool		GetAudioMixerMainInputAudioSystem (NTV2AudioSystem & outAudioSystem);
-	AJA_VIRTUAL bool		SetAudioMixerMainInputAudioSystem (const NTV2AudioSystem inAudioSystem);
 
-	AJA_VIRTUAL bool		GetAudioMixerMainInputChannelSelect(NTV2AudioChannelPair & outChannelPair);
-	AJA_VIRTUAL bool		SetAudioMixerMainInputChannelSelect(const NTV2AudioChannelPair inChannelPair);
+	/**
+		@brief		Answers with the Audio System that's currently driving the given input of the Audio Mixer.
+		@param[in]	inMixerInput	Specifies the Audio Mixer's input of interest.
+		@param[out]	outAudioSystem	Receives the ::NTV2AudioSystem that's currently driving the Audio Mixer's input.
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetAudioMixerInputAudioSystem, \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		GetAudioMixerInputAudioSystem (const NTV2AudioMixerInput inMixerInput, NTV2AudioSystem & outAudioSystem);
 
-	AJA_VIRTUAL bool		GetAudioMixerMainInputGain(ULWord & outGainValue);
-	AJA_VIRTUAL bool		SetAudioMixerMainInputGain(const ULWord inGainValue);
+	/**
+		@brief		Sets the Audio System that will drive the given input of the Audio Mixer.
+		@param[in]	inMixerInput	Specifies the Audio Mixer's input of interest.
+		@param[in]	inAudioSystem	Specifies the new ::NTV2AudioSystem that is to drive the Audio Mixer's input.
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetAudioMixerInputAudioSystem, \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		SetAudioMixerInputAudioSystem (const NTV2AudioMixerInput inMixerInput, const NTV2AudioSystem inAudioSystem);
 
-	AJA_VIRTUAL bool		GetAudioMixerAux1x2chInputAudioSystem (NTV2AudioSystem & outAudioSystem);
-	AJA_VIRTUAL bool		SetAudioMixerAux1x2chInputAudioSystem(const NTV2AudioSystem inAudioSystem);
+	/**
+		@brief		Answers with the Audio Channel Pair that's currently driving the given input of the Audio Mixer.
+		@param[in]	inMixerInput	Specifies the Audio Mixer's input of interest.
+		@param[out]	outChannelPair	Receives the ::NTV2AudioChannelPair that's currently driving the audio mixer's input.
+		@return		True if successful;  otherwise false.
+		@note		Audio mixer inputs ::NTV2_AudioMixerInputAux1 and ::NTV2_AudioMixerInputAux2 currently return ::NTV2_AudioChannel1_2.
+		@see		CNTV2Card::SetAudioMixerInputChannelSelect, \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		GetAudioMixerInputChannelSelect (const NTV2AudioMixerInput inMixerInput, NTV2AudioChannelPair & outChannelPair);
 
-	AJA_VIRTUAL bool		GetAudioMixerAux1InputGain(const NTV2AudioMixerChannel inChannel, ULWord & outGainValue);
-	AJA_VIRTUAL bool		SetAudioMixerAux1InputGain(const NTV2AudioMixerChannel inChannel, const ULWord inGainValue);
+	/**
+		@brief		Specifies the Audio Channel Pair that will drive the given input of the Audio Mixer.
+		@param[in]	inMixerInput	Specifies the Audio Mixer's input of interest.
+		@param[in]	inChannelPair	Specifies the new ::NTV2AudioChannelPair that is to drive the audio mixer's input.
+		@return		True if successful;  otherwise false.
+		@note		Audio mixer inputs ::NTV2_AudioMixerInputAux1 and ::NTV2_AudioMixerInputAux2 are currently fixed to ::NTV2_AudioChannel1_2 and cannot be changed.
+		@see		CNTV2Card::GetAudioMixerInputChannelSelect, \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		SetAudioMixerInputChannelSelect (const NTV2AudioMixerInput inMixerInput, const NTV2AudioChannelPair inChannelPair);
 
-	AJA_VIRTUAL bool		GetAudioMixerAux2x2chInputAudioSystem (NTV2AudioSystem & outAudioSystem);
-	AJA_VIRTUAL bool		SetAudioMixerAux2x2chInputAudioSystem (const NTV2AudioSystem inAudioSystem);
+	/**
+		@brief		Answers with the current gain setting for the Audio Mixer's given input.
+		@param[in]	inMixerInput	Specifies the Audio Mixer's input of interest.
+		@param[in]	inChannel		Specifies the audio channel of interest.
+		@param[out]	outGainValue	Receives the current main input gain level.
+									This is a signed 18-bit value, where unity gain is 0x10000.
+		@return		True if successful;  otherwise false.
+		@note		Currently, the Audio Mixer's Main input gain control affects both audio channels 1 & 2 (L & R),
+					while the Aux 1 & 2 inputs have separate gain settings for audio channels 1 & 2 (L & R).
+		@see		CNTV2Card::SetAudioMixerInputGain, \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		GetAudioMixerInputGain (const NTV2AudioMixerInput inMixerInput, const NTV2AudioMixerChannel inChannel, ULWord & outGainValue);
 
-	AJA_VIRTUAL bool		GetAudioMixerAux2InputGain(const NTV2AudioMixerChannel inChannel, ULWord & outGainValue);
-	AJA_VIRTUAL bool		SetAudioMixerAux2InputGain(const NTV2AudioMixerChannel inChannel, const ULWord inGainValue);
+	/**
+		@brief		Sets the gain for the given input of the Audio Mixer.
+		@param[in]	inMixerInput	Specifies the Audio Mixer's input of interest.
+		@param[in]	inChannel		Specifies the audio channel of interest.
+		@param[in]	inGainValue		Specifies the new input gain level.
+									This is a signed 18-bit value, where unity gain is 0x10000.
+		@return		True if successful;  otherwise false.
+		@note		Currently, the Audio Mixer's Main input gain control affects both audio channels 1 & 2 (L & R),
+					while the Aux 1 & 2 inputs have separate gain settings for audio channels 1 & 2 (L & R).
+		@see		CNTV2Card::GetAudioMixerInputGain, \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		SetAudioMixerInputGain (const NTV2AudioMixerInput inMixerInput, const NTV2AudioMixerChannel inChannel, const ULWord inGainValue);
 
-	AJA_VIRTUAL bool		GetAudioMixerOutputChannelMute(NTV2AudioMixerChannel inChannel, bool & outChannelMuted);
-	AJA_VIRTUAL bool		SetAudioMixerOutputChannelMute(NTV2AudioMixerChannel inChannel, bool inMuteChannel);
+	/**
+		@brief		Answers with a std::bitset that indicates which input audio channels of the given Audio Mixer input are currently muted.
+		@param[in]	inMixerInput	Specifies the Audio Mixer's input of interest.
+		@param[out]	outMutes		Receives the bitset. Call its "test" method, passing it a valid ::NTV2AudioMixerChannel
+									to determine if that channel is muted (true) or not (false).
+									Note that only audio channels ::NTV2_AudioMixerChannel1 and ::NTV2_AudioMixerChannel2 are relevant.
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetAudioMixerInputChannelsMute, \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		GetAudioMixerInputChannelsMute (const NTV2AudioMixerInput inMixerInput, NTV2AudioChannelsMuted16 & outMutes);
 
-	AJA_VIRTUAL bool		GetAudioMixerMainInputEnable(bool & outEnabled);
-	AJA_VIRTUAL bool		SetAudioMixerMainInputEnable(bool inEnabled);
+	/**
+		@brief		Mutes (or enables) the given output audio channel of the Audio Mixer.
+		@param[in]	inMixerInput	Specifies the Audio Mixer's input of interest.
+		@param[in]	inMutes			Specifies the mute state for each audio channel as a std::bitset.
+									The index in the bitset directly correlates with the ::NTV2AudioMixerChannel.
+									Set the bit to mute the channel;  clear/reset the bit to unmute/enable the channel.
+									Note that only audio channels ::NTV2_AudioMixerChannel1 and ::NTV2_AudioMixerChannel2 are relevant.
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetAudioMixerInputChannelsMute, \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		SetAudioMixerInputChannelsMute (const NTV2AudioMixerInput inMixerInput, const NTV2AudioChannelsMuted16 inMutes);
 
-	AJA_VIRTUAL bool		GetAudioMixerAux1InputEnable(bool & outEnabled);
-	AJA_VIRTUAL bool		SetAudioMixerAux1InputEnable(bool inEnabled);
+	/**
+		@brief		Answers with the Audio Mixer's current audio input levels.
+		@param[in]	inMixerInput		Specifies the Audio Mixer's input of interest.
+		@param[in]	inChannelPairs		Specifies the audio channel pair(s) of interest.
+										Use an empty list to retrieve all available audio channels.
+		@param[out]	outLevels			A std::vector of ULWord values, one per audio channel, in ascending audio
+										channel order (per the ::NTV2AudioChannelPairs that were specified).
+		@return		True if successful;  otherwise false.
+		@see		See \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		GetAudioMixerInputLevels (const NTV2AudioMixerInput inMixerInput, const NTV2AudioChannelPairs & inChannelPairs, std::vector<uint32_t> & outLevels);
 
-	AJA_VIRTUAL bool		GetAudioMixerAux2InputEnable(bool & outEnabled);
-	AJA_VIRTUAL bool		SetAudioMixerAux2InputEnable(bool inEnabled);
+	/**
+		@brief		Answers with the Audio Mixer's current sample count used for measuring audio levels.
+		@param[out]	outSampleCount		Receives the current sample count.
+		@return		True if successful;  otherwise false.
+		@see		See \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		GetAudioMixerLevelsSampleCount (ULWord & outSampleCount);
 
-	AJA_VIRTUAL ULWord		GetAudioMixerMainInputChannelLevel(NTV2AudioMixerChannel inChannel);
-	AJA_VIRTUAL ULWord		GetAudioMixerAux1InputChannelLevel(NTV2AudioMixerChannel inChannel);
-	AJA_VIRTUAL ULWord		GetAudioMixerAux2InputChannelLevel(NTV2AudioMixerChannel inChannel);
+	/**
+		@brief		Sets the Audio Mixer's sample count it uses for measuring audio levels.
+		@param[in]	inSampleCount	Specifies the new sample count. Must be a power of two
+									(e.g. 1, 2, 4, 8 ...) up to 0x8000 maximum.
+		@return		True if successful;  otherwise false.
+		@see		See \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		SetAudioMixerLevelsSampleCount (const ULWord inSampleCount);
 
-	AJA_VIRTUAL bool		SetAnalogAudioIOConfiguration(const NTV2AnalogAudioIO inAudioIOConfiguration);
-	AJA_VIRTUAL bool		GetAnalogAudioIOConfiguration(NTV2AnalogAudioIO & inAudioIOConfiguration);
+	/**
+		@brief		Answers with a std::bitset that indicates which output audio channels of the Audio Mixer are currently muted.
+		@param[out]	outMutes	Receives the bitset. Call its "test" method, passing it a valid ::NTV2AudioMixerChannel
+								to determine if that channel is muted (true) or not (false).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetAudioMixerOutputChannelsMute, \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		GetAudioMixerOutputChannelsMute (NTV2AudioChannelsMuted16 & outMutes);
+
+	/**
+		@brief		Mutes or enables the individual output audio channels of the Audio Mixer.
+		@param[in]	inMutes		Specifies the mute state for each audio channel as a std::bitset.
+								The index in the bitset directly correlates with the ::NTV2AudioMixerChannel.
+								Set the bit to mute the channel;  clear/reset the bit to unmute/enable the channel.
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetAudioMixerOutputChannelsMute, \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		SetAudioMixerOutputChannelsMute (const NTV2AudioChannelsMuted16 inMutes);
+
+#if !defined(NTV2_DEPRECATE_15_5)
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerMainInputAudioSystem(NTV2AudioSystem & outAudioSystem))		{return GetAudioMixerInputAudioSystem(NTV2_AudioMixerInputMain, outAudioSystem);}	///< @deprecated	Call CNTV2Card::GetAudioMixerInputAudioSystem instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerMainInputAudioSystem(const NTV2AudioSystem inAudioSystem))	{return SetAudioMixerInputAudioSystem(NTV2_AudioMixerInputMain, inAudioSystem);}	///< @deprecated	Call CNTV2Card::SetAudioMixerInputAudioSystem instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerMainInputChannelSelect(NTV2AudioChannelPair & outChannelPair))	{return GetAudioMixerInputChannelSelect(NTV2_AudioMixerInputMain, outChannelPair);}	///< @deprecated	Call CNTV2Card::GetAudioMixerInputChannelSelect instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerMainInputChannelSelect(const NTV2AudioChannelPair inChannelPair)){return SetAudioMixerInputChannelSelect(NTV2_AudioMixerInputMain, inChannelPair);}	///< @deprecated	Call CNTV2Card::SetAudioMixerInputChannelSelect instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerMainInputGain(ULWord & outGainValue))							{return GetAudioMixerInputGain(NTV2_AudioMixerInputMain, NTV2_AudioMixerChannel1, outGainValue);}	///< @deprecated	Call CNTV2Card::GetAudioMixerInputGain instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerMainInputGain (const ULWord inGainValue))	{return SetAudioMixerInputGain(NTV2_AudioMixerInputMain, NTV2_AudioMixerChannel1, inGainValue);}	///< @deprecated	Call CNTV2Card::SetAudioMixerInputGain instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerAux1x2chInputAudioSystem(NTV2AudioSystem & outAudioSystem))		{return GetAudioMixerInputAudioSystem(NTV2_AudioMixerInputAux1, outAudioSystem);}	///< @deprecated	Call CNTV2Card::GetAudioMixerInputAudioSystem instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerAux1x2chInputAudioSystem(const NTV2AudioSystem inAudioSystem))	{return SetAudioMixerInputAudioSystem(NTV2_AudioMixerInputAux1, inAudioSystem);}	///< @deprecated	Call CNTV2Card::SetAudioMixerInputAudioSystem instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerAux1InputGain(const NTV2AudioMixerChannel inChannel, ULWord & outGainValue))	{return GetAudioMixerInputGain(NTV2_AudioMixerInputAux1, inChannel, outGainValue);}	///< @deprecated	Call CNTV2Card::GetAudioMixerInputGain instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerAux2x2chInputAudioSystem(NTV2AudioSystem & outAudioSystem))		{return GetAudioMixerInputAudioSystem(NTV2_AudioMixerInputAux2, outAudioSystem);}	///< @deprecated	Call CNTV2Card::GetAudioMixerInputAudioSystem instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerAux2x2chInputAudioSystem(const NTV2AudioSystem inAudioSystem))	{return SetAudioMixerInputAudioSystem(NTV2_AudioMixerInputAux2, inAudioSystem);}	///< @deprecated	Call CNTV2Card::SetAudioMixerInputAudioSystem instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerAux2InputGain(const NTV2AudioMixerChannel inChannel, ULWord & outGainValue))	{return GetAudioMixerInputGain(NTV2_AudioMixerInputAux2, inChannel, outGainValue);}	///< @deprecated	Call CNTV2Card::GetAudioMixerInputGain instead.
+	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerAux1InputGain (const NTV2AudioMixerChannel inChannel, const ULWord inGainValue));	///< @deprecated	Call CNTV2Card::SetAudioMixerInputGain instead.
+	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerAux2InputGain (const NTV2AudioMixerChannel inChannel, const ULWord inGainValue));	///< @deprecated	Call CNTV2Card::SetAudioMixerInputGain instead.
+	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerMainInputEnable(bool & outEnabled));	///< @deprecated	Call CNTV2Card::GetAudioMixerInputChannelsMute instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerMainInputEnable(const bool inEnable))	{return SetAudioMixerInputChannelsMute(NTV2_AudioMixerInputMain, inEnable ? NTV2AudioChannelsEnableAll : NTV2AudioChannelsMuteAll);}		///< @deprecated	Call CNTV2Card::SetAudioMixerInputChannelsMute instead.
+	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerAux1InputEnable (bool & outEnabled));	///< @deprecated	Call CNTV2Card::GetAudioMixerInputChannelsMute instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerAux1InputEnable (const bool inEnable))	{return SetAudioMixerInputChannelsMute(NTV2_AudioMixerInputAux1, inEnable ? NTV2AudioChannelsEnableAll : NTV2AudioChannelsMuteAll);}		///< @deprecated	Call CNTV2Card::SetAudioMixerInputChannelsMute instead.
+	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerAux2InputEnable (bool & outEnabled));	///< @deprecated	Call CNTV2Card::GetAudioMixerInputChannelsMute instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerAux2InputEnable (const bool inEnable))	{return SetAudioMixerInputChannelsMute(NTV2_AudioMixerInputAux2, inEnable ? NTV2AudioChannelsEnableAll : NTV2AudioChannelsMuteAll);}		///< @deprecated	Call CNTV2Card::SetAudioMixerInputChannelsMute instead.
+	AJA_VIRTUAL ULWord		GetAudioMixerMainInputChannelLevel (const NTV2AudioMixerChannel inChannel);
+	AJA_VIRTUAL ULWord		GetAudioMixerAux1InputChannelLevel (const NTV2AudioMixerChannel inChannel);
+	AJA_VIRTUAL ULWord		GetAudioMixerAux2InputChannelLevel (const NTV2AudioMixerChannel inChannel);
+#endif	//	!defined(NTV2_DEPRECATE_15_5)
 	///@}
 
 	//
