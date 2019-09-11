@@ -699,7 +699,8 @@ bool CNTV2Card::SetAudioMixerInputGain (const NTV2AudioMixerInput inMixerInput, 
 			return 0;
 
 		const NTV2AudioChannelPair	chPair (NTV2AudioChannelPair(inChannel / 2));
-		const NTV2AudioChannelPairs	chPairs = {chPair};
+		NTV2AudioChannelPairs		chPairs;
+		chPairs.insert(chPair);
 		vector<uint32_t>	levels;
 		if (!GetAudioMixerInputLevels(NTV2_AudioMixerInputMain, chPairs, levels))
 			return 0;
@@ -712,7 +713,8 @@ bool CNTV2Card::SetAudioMixerInputGain (const NTV2AudioMixerInput inMixerInput, 
 			return 0;
 
 		const NTV2AudioChannelPair	chPair (NTV2AudioChannelPair(inChannel / 2));
-		const NTV2AudioChannelPairs	chPairs = {chPair};
+		NTV2AudioChannelPairs		chPairs;
+		chPairs.insert(chPair);
 		vector<uint32_t>	levels;
 		if (!GetAudioMixerInputLevels(NTV2_AudioMixerInputAux1, chPairs, levels))
 			return 0;
@@ -725,7 +727,8 @@ bool CNTV2Card::SetAudioMixerInputGain (const NTV2AudioMixerInput inMixerInput, 
 			return 0;
 
 		const NTV2AudioChannelPair	chPair (NTV2AudioChannelPair(inChannel / 2));
-		const NTV2AudioChannelPairs	chPairs = {chPair};
+		NTV2AudioChannelPairs		chPairs;
+		chPairs.insert(chPair);
 		vector<uint32_t>	levels;
 		if (!GetAudioMixerInputLevels(NTV2_AudioMixerInputAux2, chPairs, levels))
 			return 0;
