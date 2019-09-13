@@ -17,6 +17,7 @@
 #include <iterator>
 #include <iomanip>
 #include <map>
+#include "math.h"
 
 
 using namespace std;
@@ -43,10 +44,13 @@ static const string	gChlClasses[8]	=	{	kRegClass_Channel1,	kRegClass_Channel2,	k
 static const string sSpace(" ");
 static const string sNull;
 
+
 class RegisterExpert;
 typedef AJARefPtr<RegisterExpert>	RegisterExpertPtr;
 static uint32_t						gInstanceTally(0);
 static uint32_t						gLivingInstances(0);
+
+
 
 /**
 	I'm the the root source of register information. I provide answers to the public-facing CNTV2RegisterExpert class.
@@ -2420,72 +2424,137 @@ private:
 	}	mDecodePCMControlReg;
 
 	struct DecodeAudioMixerInputSelectReg : public Decoder
-	{
+	{	//	kRegAudioMixerInputSelects
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{
-			(void) inDeviceID;	(void) inRegNum;
-			const UWord	mainInputSelect	((inRegValue     ) & 0x0000000F);
-			const UWord	input1_2Channel	((inRegValue >> 4) & 0x0000000F);
-			const UWord	input2_2Channel	((inRegValue >> 8) & 0x0000000F);
+		{	(void) inDeviceID;	(void) inRegNum;
+			const UWord	mainInputSrc((inRegValue     ) & 0x0000000F);
+			const UWord	aux1InputSrc((inRegValue >> 4) & 0x0000000F);
+			const UWord	aux2InputSrc((inRegValue >> 8) & 0x0000000F);
 			ostringstream	oss;
-			oss	<< "Main: "		<< "Audio System " << (mainInputSelect+1)				<< endl
-				<< "AuxIn1: "	<< "2 chls from Audio System " << (input1_2Channel+1)	<< endl
-				<< "AuxIn2: "	<< "2 chls from Audio System " << (input2_2Channel+1);
+			oss	<< "Main Input Source: "	<< ::NTV2AudioSystemToString(NTV2AudioSystem(mainInputSrc))	<< " (bits 0-3)" << endl
+				<< "Aux Input 1 Source: "	<< ::NTV2AudioSystemToString(NTV2AudioSystem(aux1InputSrc))	<< " (bits 4-7)" << endl
+				<< "Aux Input 2 Source: "	<< ::NTV2AudioSystemToString(NTV2AudioSystem(aux2InputSrc))	<< " (bits 8-11)";
 			return oss.str();
 		}
 		virtual	~DecodeAudioMixerInputSelectReg()	{}
 	}	mAudMxrInputSelDecoder;
 
 	struct DecodeAudioMixerGainRegs : public Decoder
-	{
-		//DefineRegister (kRegAudioMixerMainGain,
-		//DefineRegister (kRegAudioMixerAux1GainCh1,
-		//DefineRegister (kRegAudioMixerAux2GainCh1,				
+	{	//	kRegAudioMixerMainGain,
+		//	kRegAudioMixerAux1GainCh1, kRegAudioMixerAux1GainCh2,
+		//	kRegAudioMixerAux2GainCh1, kRegAudioMixerAux2GainCh2
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{
-            (void) inRegNum;
-            (void) inRegValue;
-			(void) inDeviceID;
-			ostringstream	oss;
+		{	(void)inRegNum;	(void)inDeviceID;
+			static const double	kUnityGain	(0x00010000);
+			const bool			atUnity		(inRegValue == 0x00010000);
+			ostringstream		oss;
+			if (atUnity)
+				oss	<< "Gain: 0 dB (Unity)";
+			else
+			{
+				const double	dValue		(inRegValue);
+				const bool		aboveUnity	(inRegValue >= 0x00010000);
+				const string	plusMinus	(atUnity ? "" : (aboveUnity ? "+" : "-"));
+				const string	aboveBelow	(atUnity ? "at" : (aboveUnity ? "above" : "below"));
+				const uint32_t	unityDiff	(aboveUnity ? inRegValue - 0x00010000 : 0x00010000 - inRegValue);
+				const double	dB			(double(20.0) * ::log10(dValue/kUnityGain));
+				oss	<< "Gain: "	<< dB << " dB, " << plusMinus << xHEX0N(unityDiff,6)
+								<< " (" << plusMinus << DEC(unityDiff) << ") " << aboveBelow << " unity gain";
+			}
 			return oss.str();
 		}
 		virtual	~DecodeAudioMixerGainRegs()	{}
 	}	mAudMxrGainDecoder;
 
 	struct DecodeAudioMixerChannelSelectReg : public Decoder
-	{
+	{	//	kRegAudioMixerChannelSelect
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{
-            (void) inRegNum;
-            (void) inRegValue;
-			(void) inDeviceID;
+		{	(void) inRegNum;	(void) inDeviceID;
 			ostringstream	oss;
+			const uint32_t	mainChanPair((inRegValue & kRegMaskAudioMixerChannelSelect   ) >> kRegShiftAudioMixerChannelSelect   );
+			const uint32_t	powerOfTwo	((inRegValue & kRegMaskAudioMixerLevelSampleCount) >> kRegShiftAudioMixerLevelSampleCount);
+			oss	<< "Main Input Source Channel Pair: "	<< ::NTV2AudioChannelPairToString(NTV2AudioChannelPair(mainChanPair)) << " (bits 0-2)" << endl
+				<< "Level Measurement Sample Count: "	<< DEC(ULWord(1 << powerOfTwo)) << " (bits 8-15)";
 			return oss.str();
 		}
 		virtual	~DecodeAudioMixerChannelSelectReg()	{}
 	}	mAudMxrChanSelDecoder;
 
+
 	struct DecodeAudioMixerMutesReg : public Decoder
-	{
+	{	//	kRegAudioMixerMutes
+		protected:
+			typedef std::bitset<16>	AudioChannelSet16;
+			typedef std::bitset<2>	AudioChannelSet2;
+			static void SplitAudioChannelSet16(const AudioChannelSet16 & inChSet, NTV2StringList & outSet, NTV2StringList & outClear)
+			{
+				outSet.clear();  outClear.clear();
+				for (size_t ndx(0);  ndx < 16;  ndx++)
+				{	ostringstream oss;  oss << DEC(ndx+1);
+					if (inChSet.test(ndx))
+						outSet.push_back(oss.str());
+					else
+						outClear.push_back(oss.str());
+				}
+				if (outSet.empty())		outSet.push_back("<none>");
+				if (outClear.empty())	outClear.push_back("<none>");
+			}
+			static void SplitAudioChannelSet2(const AudioChannelSet2 & inChSet, NTV2StringList & outSet, NTV2StringList & outClear)
+			{
+				outSet.clear();  outClear.clear();  static const string LR[] = {"L", "R"};
+				for (size_t ndx(0);  ndx < 2;  ndx++)
+					if (inChSet.test(ndx))
+						outSet.push_back(LR[ndx]);
+					else
+						outClear.push_back(LR[ndx]);
+				if (outSet.empty())		outSet.push_back("<none>");
+				if (outClear.empty())	outClear.push_back("<none>");
+			}
+		public:
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{
-            (void) inRegNum;
-            (void) inRegValue;
-			(void) inDeviceID;
+		{	(void) inRegNum;	(void) inDeviceID;
+			uint32_t	mainOutputMuteBits	((inRegValue & kRegMaskAudioMixerOutputChannelsMute) >> kRegShiftAudioMixerOutputChannelsMute);	//	Bits 0-15
+			uint32_t	mainInputMuteBits	((inRegValue & kRegMaskAudioMixerMainInputEnable   ) >> kRegShiftAudioMixerMainInputEnable   );	//	Bits 16-17
+			uint32_t	aux1InputMuteBits	((inRegValue & kRegMaskAudioMixerAux1InputEnable   ) >> kRegShiftAudioMixerAux1InputEnable   );	//	Bits 18-19
+			uint32_t	aux2InputMuteBits	((inRegValue & kRegMaskAudioMixerAux2InputEnable   ) >> kRegShiftAudioMixerAux2InputEnable   );	//	Bits 20-21
 			ostringstream	oss;
+			NTV2StringList mutedMainOut, unmutedMainOut, mutedMain, unmutedMain, mutedAux1, unmutedAux1, mutedAux2, unmutedAux2;
+			SplitAudioChannelSet16(AudioChannelSet16(mainOutputMuteBits), mutedMainOut, unmutedMainOut);
+			SplitAudioChannelSet2(AudioChannelSet2(mainInputMuteBits), mutedMain, unmutedMain);
+			SplitAudioChannelSet2(AudioChannelSet2(aux1InputMuteBits), mutedAux1, unmutedAux1);
+			SplitAudioChannelSet2(AudioChannelSet2(aux2InputMuteBits), mutedAux2, unmutedAux2);
+			oss	<< "Main Output Muted/Disabled Channels: "	<< mutedMainOut << endl	//	bits[0:15]
+				<< "Main Output Unmuted/Enabled Channels: "	<< unmutedMainOut << endl;
+			oss	<< "Main Input Muted/Disabled Channels: "	<< mutedMain	<< endl	//	bits[16:17]
+				<< "Main Input Unmuted/Enabled Channels: "	<< unmutedMain	<< endl;
+			oss	<< "Aux Input 1 Muted/Disabled Channels: "	<< mutedAux1	<< endl	//	bits[18:19]
+				<< "Aux Input 1 Unmuted/Enabled Channels: "	<< unmutedAux1	<< endl;
+			oss	<< "Aux Input 2 Muted/Disabled Channels: "	<< mutedAux2	<< endl	//	bits[20-21]
+				<< "Aux Input 2 Unmuted/Enabled Channels: "	<< unmutedAux2;
 			return oss.str();
 		}
 		virtual	~DecodeAudioMixerMutesReg()	{}
 	}	mAudMxrMutesDecoder;
 
 	struct DecodeAudioMixerLevelsReg : public Decoder
-	{
+	{	//	kRegAudioMixerAux1InputLevels, kRegAudioMixerAux2InputLevels,
+		//	kRegAudioMixerMainInputLevelsPair0 thru kRegAudioMixerMainInputLevelsPair7,
+		//	kRegAudioMixerMixedChannelOutputLevels
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{
-            (void) inRegNum;
-            (void) inRegValue;
-			(void) inDeviceID;
+		{	(void) inDeviceID;
+			static const string sLabels[] = {	"Aux Input 1", "Aux Input 2", "Main Input Audio Channels 1|2", "Main Input Audio Channels 3|4",
+												"Main Input Audio Channels 5|6", "Main Input Audio Channels 7|8", "Main Input Audio Channels 9|10",
+												"Main Input Audio Channels 11|12", "Main Input Audio Channels 13|14", "Main Input Audio Channels 15|16",
+												"Main Output (Mixed) Audio"};
+			NTV2_ASSERT(inRegNum >= kRegAudioMixerAux1InputLevels);
+			const uint32_t	labelOffset(inRegNum - kRegAudioMixerAux1InputLevels);
+			NTV2_ASSERT(labelOffset < 12);
+			const string &	label(sLabels[labelOffset]);
+			const uint16_t	leftLevel	((inRegValue & kRegMaskAudioMixerInputLeftLevel) >> kRegShiftAudioMixerInputLeftLevel);
+			const uint16_t	rightLevel	((inRegValue & kRegMaskAudioMixerInputRightLevel) >> kRegShiftAudioMixerInputRightLevel);
 			ostringstream	oss;
+			oss	<< label << " Left Level:"	<< xHEX0N(leftLevel, 4) << " (" << DEC(leftLevel) << ")" << endl	//	bits[0:15]
+				<< label << " Right Level:"	<< xHEX0N(rightLevel,4) << " (" << DEC(rightLevel) << ")";			//	bits[16:31]
 			return oss.str();
 		}
 		virtual	~DecodeAudioMixerLevelsReg()	{}
@@ -3357,7 +3426,7 @@ bool RegisterExpert::DisposeInstance(void)
 	AJAAutoLock		locker(&gRegExpertGuardMutex);
 	if (!gpRegExpert)
 		return false;
-	gpRegExpert = NULL;
+	gpRegExpert = AJA_NULL;
 	return true;
 }
 

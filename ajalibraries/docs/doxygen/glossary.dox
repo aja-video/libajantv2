@@ -12,10 +12,11 @@
 		<tr><td><b>Driver</b>			<td>Low-level software that operates at the operating system “kernel” level to control a peripheral device.
 		<tr><td><b>E-E</b>				<td>“End-to-End” … a routing from an input jack to an output jack without going through an intermediate Frame Store to buffer frames.
 		<tr><td><b>Field</b>			<td>The odd or even horizontal lines that comprise a single frame of interlaced video.
+		<tr><td><b>FIFO</b>				<td>Acronym for “First-In, First-Out” — in this context represents a hardware data pipeline that outputs data in the same order as pushed into its input. The length of the FIFO determines the latency through it.
 		<tr><td><b>FPS</b>				<td>Acronym for “Frames Per Second”, used to measure frame rate.
 		<tr><td><b>Frame</b>			<td>A complete video image.
 		<tr><td><b>Frame Buffer</b>		<td>A contiguous chunk of RAM used to store a frame of video pixel data, either on the host computer or in an AJA device.
-		<tr><td><b>Frame Store</b>		<td>A device widget having mode, pixel format and video format properties (e.g., Capture, 10-bit YCbCr, and 1080i50), that, when enabled, can write or read video frame data to or from device SDRAM. Often used interchangeably with the word “Channel”.
+		<tr><td><b>Frame Store</b>		<td>A device widget having mode, pixel format and video format properties (e.g., Capture, 10-bit YCbCr, and 1080i50), that, when enabled, can write/read video frame data to/from device SDRAM. Often used interchangeably with the word “Channel”.
 		<tr><td><b>HANC</b>				<td>\e Horizontal \e Ancillary \e Data, is ancillary data that is embedded into the video lines that are between the start and end of active video.
 		<tr><td><b>HD</b>				<td>\e High \e Definition television standards:  ::NTV2_STANDARD_720, ::NTV2_STANDARD_1080, ::NTV2_STANDARD_1080p or more.
 		<tr><td><b>HDMI</b>				<td>\e High-Definition \e Multimedia \e Interface, a compact hardware interface used for transferring video and audio data between compatible devices.
