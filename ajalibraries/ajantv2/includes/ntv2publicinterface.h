@@ -8994,6 +8994,24 @@ typedef struct HDRFloatValues{
     uint8_t		staticMetadataDescriptorID;
 }HDRFloatValues;
 
+typedef struct HDRDriverValues{
+	uint16_t	greenPrimaryX;
+	uint16_t	greenPrimaryY;
+	uint16_t	bluePrimaryX;
+	uint16_t	bluePrimaryY;
+	uint16_t	redPrimaryX;
+	uint16_t	redPrimaryY;
+	uint16_t	whitePointX;
+	uint16_t	whitePointY;
+	uint16_t	maxMasteringLuminance;
+	uint16_t	minMasteringLuminance;
+	uint16_t	maxContentLightLevel;
+	uint16_t	maxFrameAverageLightLevel;
+	uint8_t		electroOpticalTransferFunction;
+	uint8_t		staticMetadataDescriptorID;
+	uint8_t		luminance;
+}HDRDriverValues;
+
 #define NTV2_IS_VALID_HDR_PRIMARY(__val__)				((__val__) <= 0x0000C350)
 #define NTV2_IS_VALID_HDR_MASTERING_LUMINENCE(__val__)	(true)
 #define NTV2_IS_VALID_HDR_LIGHT_LEVEL(__val__)			(true)
