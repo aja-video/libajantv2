@@ -540,7 +540,9 @@ typedef enum
 	
 	kVRegHDROverrideState					= VIRTUALREG_START+572,
 
-    kVRegLastAJA							= VIRTUALREG_START+573,		///< @brief	The last AJA virtual register slot
+	kVRegPCIMaxReadRequestSize				= VIRTUALREG_START+573,
+
+	kVRegLastAJA							= VIRTUALREG_START+574,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 

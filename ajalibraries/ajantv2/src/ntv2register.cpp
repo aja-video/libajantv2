@@ -5858,6 +5858,26 @@ bool CNTV2Card::GetConnectedInput (const NTV2OutputCrosspointID inOutputXpt, NTV
 }
 
 
+bool CNTV2Card::GetConnectedInputs (const NTV2OutputCrosspointID inOutputXpt, NTV2InputCrosspointIDSet & outInputXpts)
+{
+	outInputXpts.clear();
+	if (!NTV2_IS_VALID_OutputCrosspointID(inOutputXpt))
+		return false;
+	if (inOutputXpt == NTV2_XptBlack)
+		return false;
+	for (NTV2InputCrosspointID inputXpt(NTV2_FIRST_INPUT_CROSSPOINT);
+		inputXpt <= NTV2_LAST_INPUT_CROSSPOINT;
+		inputXpt = NTV2InputCrosspointID(inputXpt+1))
+	{
+		NTV2OutputCrosspointID	tmpOutputXpt(NTV2_OUTPUT_CROSSPOINT_INVALID);
+		if (GetConnectedOutput (inputXpt, tmpOutputXpt))
+			if (tmpOutputXpt == inOutputXpt)
+				outInputXpts.insert(inputXpt);
+	}
+	return !outInputXpts.empty();
+}
+
+
 bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, const bool inValidate)
 {
 	if (inOutputXpt == NTV2_XptBlack)

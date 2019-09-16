@@ -4566,14 +4566,25 @@ public:
 	AJA_VIRTUAL bool	GetConnectedOutput (const NTV2InputCrosspointID inInputXpt, NTV2OutputCrosspointID & outOutputXpt);
 
 	/**
-		@brief		Answers with the currently connected NTV2InputCrosspointID for the given NTV2OutputCrosspointID.
+		@brief		Answers with a connected NTV2InputCrosspointID for the given NTV2OutputCrosspointID.
 		@param[in]	inOutputXpt		Specifies the output (signal source) of interest.
-		@param[out]	outInputXpt		Receives the input (signal sink) the given output is connected to (if connected),
+		@param[out]	outInputXpt		Receives one of the input (signal sink) the given output is connected to (if connected),
 									or NTV2_XptBlack if not connected.
 		@return		True if successful;  otherwise false.
 		@see		ntv2signalrouting, CNTV2Card::GetConnectedOutput, CNTV2Card::IsConnected
+		@bug		If the output is connected to more than one widget input, this function only returns the first one found.
 	**/
 	AJA_VIRTUAL bool	GetConnectedInput (const NTV2OutputCrosspointID inOutputXpt, NTV2InputCrosspointID & outInputXpt);
+
+	/**
+		@brief		Answers with all of the NTV2InputCrosspointIDs that are connected to the given NTV2OutputCrosspointID.
+		@param[in]	inOutputXpt		Specifies the output (signal source) of interest.
+		@param[out]	outInputXpts	Receives the ::NTV2InputCrosspointIDSet of the inputs (signal sinks) the given output
+									is connected to (if connected). If none are connected, the set will be empty.
+		@return		True if successful;  otherwise false.
+		@see		ntv2signalrouting, CNTV2Card::GetConnectedOutput, CNTV2Card::IsConnected
+	**/
+	AJA_VIRTUAL bool	GetConnectedInputs (const NTV2OutputCrosspointID inOutputXpt, NTV2InputCrosspointIDSet & outInputXpts);
 
 	/**
 		@brief		Connects the given widget signal input (sink) to the given widget signal output (source).

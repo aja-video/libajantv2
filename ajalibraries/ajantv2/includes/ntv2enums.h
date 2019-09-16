@@ -3941,8 +3941,11 @@ typedef enum
         NTV2_BYPASS				= NTV2_DEVICE_BYPASSED,
         NTV2_STRAIGHT_THROUGH	= NTV2_THROUGH_DEVICE,
     #endif	//	NTV2_DEPRECATE
-    NTV2_MAX_NUM_RelayStates
+    NTV2_MAX_NUM_RelayStates,
+    NTV2_RELAY_STATE_INVALID	= NTV2_MAX_NUM_RelayStates
 } NTV2RelayState;
+
+#define	NTV2_IS_VALID_RELAY_STATE(__x__)			((__x__) >= NTV2_DEVICE_BYPASSED  &&  (__x__) < NTV2_MAX_NUM_RelayStates)
 
 
 /**
