@@ -67,7 +67,8 @@ typedef enum
     DEVICE_ID_CORVID24					= 0x10402100,	///< @brief	See \ref corvid24
     DEVICE_ID_CORVID3G					= 0x10294900,	///< @brief	See \ref corvid1corvid3g
     DEVICE_ID_CORVID44					= 0x10565400,	///< @brief	See \ref corvid44
-	DEVICE_ID_CORVID44_12G				= 0x10832400,	///< @brief	See \ref corvid4412g
+	DEVICE_ID_CORVID44_8KMK				= 0x10832400,	///< @brief	See \ref corvid4412g
+	DEVICE_ID_CORVID44_8K				= 0X10832401,	///< @brief	See \ref corvid4412g
     DEVICE_ID_CORVID88					= 0x10538200,	///< @brief	See \ref corvid88
     DEVICE_ID_CORVIDHBR					= 0x10668200,	///< @brief	See \ref corvidhbr
     DEVICE_ID_CORVIDHEVC				= 0x10634500,	///< @brief	See \ref corvidhevc
@@ -84,7 +85,8 @@ typedef enum
     DEVICE_ID_KONA4						= 0x10518400,	///< @brief	See \ref kona4quad
     DEVICE_ID_KONA4UFC					= 0x10518450,	///< @brief	See \ref kona4ufc
     DEVICE_ID_KONA5						= 0x10798400,	///< @brief	See \ref kona5
-    DEVICE_ID_KONA5_4X12G				= 0x10798401,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5_8KMK				= 0x10798401,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5_8K					= 0x10798402,	///< @brief	See \ref kona5
     DEVICE_ID_KONAHDMI                  = 0x10767400,	///< @brief	See \ref konahdmi
     DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,	///< @brief	See \ref konaip
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief	See \ref konaip
@@ -112,6 +114,9 @@ typedef enum
     DEVICE_ID_NOTFOUND				= -1
 
 } NTV2DeviceID;
+
+#define DEVICE_ID_CORVID44_12G DEVICE_ID_CORVID44_8KMK
+#define DEVICE_ID_KONA5_4X12G DEVICE_ID_KONA5_8K
 
 #if !defined (NTV2_DEPRECATE)
     typedef NTV2DeviceID	NTV2BoardID;	///< @deprecated	Use NTV2DeviceID instead. Identifiers with "board" in them are being phased out.
@@ -3446,8 +3451,10 @@ typedef enum
     NTV2_BITFILE_KONA1				= 54,
     NTV2_BITFILE_KONAHDMI           = 55,
 	NTV2_BITFILE_KONA5_MAIN			= 56,
-    NTV2_BITFILE_KONA5_12G_MAIN     = 57,
-	NTV2_BITFILE_CORVID44_12G_MAIN	= 58,
+    NTV2_BITFILE_KONA5_8KMK_MAIN     = 57,
+	NTV2_BITFILE_CORVID44_8KMK_MAIN	= 58,
+	NTV2_BITFILE_KONA5_8K_MAIN		= 59,
+	NTV2_BITFILE_CORVID44_8K_MAIN	= 60,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 
