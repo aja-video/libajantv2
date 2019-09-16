@@ -1272,6 +1272,25 @@ private:
 		DefineRegName	(kVRegNTV2VPIDTransferCharacteristics8,	"kVRegNTV2VPIDTransferCharacteristics8");
 		DefineRegName	(kVRegNTV2VPIDColorimetry8,				"kVRegNTV2VPIDColorimetry8");
 		DefineRegName	(kVRegNTV2VPIDLuminance8,				"kVRegNTV2VPIDLuminance8");
+		DefineRegName	(kVRegUserColorimetry,					"kVRegUserColorimetry");					
+		DefineRegName	(kVRegUserTransfer,						"kVRegUserTransfer");
+		DefineRegName	(kVRegUserLuminance,					"kVRegUserLuminance");
+		DefineRegName	(kVRegHdrColorimetryCh1,				"kVRegHdrColorimetryCh1");
+		DefineRegName	(kVRegHdrTransferCh1,					"kVRegHdrTransferCh1");
+		DefineRegName	(kVRegHdrLuminanceCh1,					"kVRegHdrLuminanceCh1");
+		DefineRegName	(kVRegHdrGreenXCh1,						"kVRegHdrGreenXCh1");
+		DefineRegName	(kVRegHdrGreenYCh1,						"kVRegHdrGreenYCh1");
+		DefineRegName	(kVRegHdrBlueXCh1,						"kVRegHdrBlueXCh1");
+		DefineRegName	(kVRegHdrBlueYCh1,						"kVRegHdrBlueYCh1");
+		DefineRegName	(kVRegHdrRedXCh1,						"kVRegHdrRedXCh1");
+		DefineRegName	(kVRegHdrRedYCh1,						"kVRegHdrRedYCh1");
+		DefineRegName	(kVRegHdrWhiteXCh1,						"kVRegHdrWhiteXCh1");
+		DefineRegName	(kVRegHdrWhiteYCh1,						"kVRegHdrWhiteYCh1");
+		DefineRegName	(kVRegHdrMasterLumMaxCh1,				"kVRegHdrMasterLumMaxCh1");
+		DefineRegName	(kVRegHdrMasterLumMinCh1,				"kVRegHdrMasterLumMinCh1");
+		DefineRegName	(kVRegHdrMaxCLLCh1,						"kVRegHdrMaxCLLCh1");
+		DefineRegName	(kVRegHdrMaxFALLCh1,					"kVRegHdrMaxFALLCh1");
+		DefineRegName	(kVRegHDROverrideState,					"kVRegHDROverrideState");
 		DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
 		DefineRegName	(kVRegFirstOEM,							"kVRegFirstOEM");
 
