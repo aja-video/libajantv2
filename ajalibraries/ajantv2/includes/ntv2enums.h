@@ -233,7 +233,7 @@ typedef enum
 	,NTV2_FBF_10BIT_YCBCRA								///< @brief	10-Bit YCbCrA
 	,NTV2_FBF_10BIT_DPX_LE								///< @brief	10-Bit DPX Little-Endian
 	,NTV2_FBF_48BIT_RGB									///< @brief	See \ref fbformats48bitrgb
-	,NTV2_FBF_12BIT_RGB_PACKED							///< @brief	12-Bit Packed RGB
+	,NTV2_FBF_12BIT_RGB_PACKED							///< @brief	See \ref fbformats12bitpackedrgb
 	,NTV2_FBF_PRORES_DVCPRO								///< @brief	Apple ProRes DVC Pro
 	,NTV2_FBF_PRORES_HDV								///< @brief	Apple ProRes HDV
 	,NTV2_FBF_10BIT_RGB_PACKED							///< @brief	10-Bit Packed RGB
