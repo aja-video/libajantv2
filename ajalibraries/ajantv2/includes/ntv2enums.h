@@ -449,11 +449,6 @@ typedef enum
 //		Add a corresponding case to GetDisplayWidth in ntv2utils.cpp
 //		Add a corresponding case to GetDisplayHeight in ntv2utils.cpp
 //		Add a corresponding string to NTV2VideoFormatStrings in ntv2utils.cpp
-//		Add a corresponding standard to NTV2VideoFormatStandards in ntv2register.cpp
-//		Add a corresponding framegeometry to NTV2VideoFormatFrameGeometrys in ntv2register.cpp
-//		Add a corresponding framerate to NTV2VideoFormatFrameRates in ntv2register.cpp
-//		Add a corresponding dual link bool to NTV2Smpte372 in ntv2register.cpp
-//		Add a corresponding progressive bool to NTV2ProgressivePicture in ntv2register.cpp
 //		Add a corresponding timing to NTV2KonaHDTiming in ntv2register.cpp
 //		Add a corresponding timing to NTV2KonaLHTiming in ntv2register.cpp
 //		Add a corresponding case to SetVPIDData in ntv2vpid.cpp
