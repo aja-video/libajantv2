@@ -45,6 +45,8 @@
 	-	\ref	ntv2player
 	-	\ref	ntv2capture4k
 	-	\ref	ntv2player4k
+	-	\ref	ntv2capture8k
+	-	\ref	ntv2player8k
 	-	\ref	ntv2burn
 	-	\ref	ntv2burn4kquadrant
 	-	\ref	ntv2fieldburn
@@ -62,6 +64,7 @@
 	-	\ref	ntv2burn4kquadrant
 	-	\ref	ntv2capture
 	-	\ref	ntv2capture4k
+	-	\ref	ntv2capture8k
 	-	\ref	ntv2ccgrabber
 	-	\ref	ntv2ccplayer
 	-	\ref	ntv2encodehevc  <i>(\ref corvidhevc only)</i>
@@ -73,6 +76,7 @@
 	-	\ref	ntv2outputtestpattern
 	-	\ref	ntv2player
 	-	\ref	ntv2player4k
+	-	\ref	ntv2player8k
 	-	\ref	ntv2qtmultiinput
 	-	\ref	ntv2qtpreview
 

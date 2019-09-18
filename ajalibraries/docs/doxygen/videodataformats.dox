@@ -11,82 +11,151 @@ This section details the video formats and device frame buffer (data) formats.
 A video format describes a particular video signal, which implies a frame geometry, video standard, and frame rate.
 Each format is identified by a specific <tt>NTV2VideoFormat</tt> enumeration constant. All AJA devices support the “basic” SD-SDI
 and HD-SDI video formats that can be accommodated in a single 1.5 Gbps SDI link. Progressively newer AJA devices support 3Gbps
-dual-link HD-SDI and 3G-SDI formats, while the latest devices support 4K video at 60 fps.
+dual-link HD-SDI and 3G-SDI formats, 6Gbps, 12Gbps, even up to 8K video.
 
-@note	The low-frame-rate (LFR) 720p and 525i formats (23.98, 24, 25 fps) marked with an asterisk below
-		are not “legal” SDI wire formats, and should not be routed to the SDI outputs. Typically they’re
-		used to support “retail” editing applications. With firmware that supports the Universal Format
-		Converter widget (see ::NTV2DeviceCanDoWidget for ::NTV2_WgtUpDownConverter1), these formats
-		may be convertible into “legal” SDI wire formats (see ::NTV2DeviceCanDoConversionMode).
 
-@subsubsection		vidformatssd	SD Formats
+@subsubsection		vidformatssd		SD Formats
 <table>
-	<tr><td><b>525i 2398</b>	<td>::NTV2_FORMAT_525_2398 *
-	<tr><td><b>525i 24</b>		<td>::NTV2_FORMAT_525_2400 *
 	<tr><td><b>525i 5994</b>	<td>::NTV2_FORMAT_525_5994
 	<tr><td><b>525psf 2997</b>	<td>::NTV2_FORMAT_525psf_2997
 	<tr><td><b>625i 50</b>		<td>::NTV2_FORMAT_625_5000
 	<tr><td><b>625psf 2500</b>	<td>::NTV2_FORMAT_625psf_2500
 </table>
 
-@subsubsection		vidformatshd	HD Formats
+@subsubsection		vidformatshd		HD Formats
 <table>
-	<tr><td><b>720p 2398</b>				<td>::NTV2_FORMAT_720p_2398 *
-	<tr><td><b>720p 25</b>					<td>::NTV2_FORMAT_720p_2500 *
 	<tr><td><b>720p 50</b>					<td>::NTV2_FORMAT_720p_5000
 	<tr><td><b>720p 5994</b>				<td>::NTV2_FORMAT_720p_5994
 	<tr><td><b>720p 60</b>					<td>::NTV2_FORMAT_720p_6000
+	<tr><td><b>1080p 2398</b>				<td>::NTV2_FORMAT_1080p_2398
+	<tr><td><b>1080p 24</b>					<td>::NTV2_FORMAT_1080p_2400
+	<tr><td><b>1080p 25</b>					<td>::NTV2_FORMAT_1080p_2500
+	<tr><td><b>1080p 2997</b>				<td>::NTV2_FORMAT_1080p_2997
+	<tr><td><b>1080p 30</b>					<td>::NTV2_FORMAT_1080p_3000
 	<tr><td><b>1080i 50, 1080psf 25</b>		<td>::NTV2_FORMAT_1080i_5000
 	<tr><td><b>1080i 5994, 1080psf 2997</b>	<td>::NTV2_FORMAT_1080i_5994
 	<tr><td><b>1080i 60, 1080psf 30</b>		<td>::NTV2_FORMAT_1080i_6000
 </table>
 
-@subsubsection		vidformats2k	2K Formats
+@subsubsection		vidformats2k		2K×1080 Formats
+@note	These formats are unrelated to the ancient 2K “Film” formats — e.g. ::NTV2_FORMAT_2K_1498,
+		::NTV2_FORMAT_2K_1500, ::NTV2_FORMAT_2K_2398, ::NTV2_FORMAT_2K_2400, ::NTV2_FORMAT_2K_2500.
+		These older 2K film formats are obsolete and no longer supported by NTV2 devices.
 <table>
-	<tr><td><b>2K 1498</b>	<td>::NTV2_FORMAT_2K_1498
-	<tr><td><b>2K 15</b>	<td>::NTV2_FORMAT_2K_1500
-	<tr><td><b>2K 2398</b>	<td>::NTV2_FORMAT_2K_2398
-	<tr><td><b>2K 24</b>	<td>::NTV2_FORMAT_2K_2400
-	<tr><td><b>2K 25</b>	<td>::NTV2_FORMAT_2K_2500
+	<tr><td><b>2K 2398</b>	<td>::NTV2_FORMAT_1080p_2K_2398
+	<tr><td><b>2K 24</b>	<td>::NTV2_FORMAT_1080p_2K_2400
+	<tr><td><b>2K 25</b>	<td>::NTV2_FORMAT_1080p_2K_2500
 	<tr><td><b>2K 2997</b>	<td>::NTV2_FORMAT_1080p_2K_2997
 	<tr><td><b>2K 30</b>	<td>::NTV2_FORMAT_1080p_2K_3000
-	<tr><td><b>2K 4795</b>	<td>::NTV2_FORMAT_1080p_2K_4795  <i>new in 12.0</i>
-	<tr><td><b>2K 48</b>	<td>::NTV2_FORMAT_1080p_2K_4800  <i>new in 12.0</i>
+	<tr><td><b>2K 4795</b>	<td>::NTV2_FORMAT_1080p_2K_4795
+	<tr><td><b>2K 48</b>	<td>::NTV2_FORMAT_1080p_2K_4800
 	<tr><td><b>2K 50</b>	<td>::NTV2_FORMAT_1080p_2K_5000
 	<tr><td><b>2K 5994</b>	<td>::NTV2_FORMAT_1080p_2K_5994
 	<tr><td><b>2K 60</b>	<td>::NTV2_FORMAT_1080p_2K_6000
 </table>
 
-@subsubsection		vidformats4k	4K Formats
+@subsubsection		vidformatsuhd		UHD “Square” Formats
 <table>
 	<tr><td><b>4×1920×1080psf 2398</b>	<td>::NTV2_FORMAT_4x1920x1080psf_2398
 	<tr><td><b>4×1920×1080p 2398</b>	<td>::NTV2_FORMAT_4x1920x1080p_2398
-	<tr><td><b>4×2048×1080psf 2398</b>	<td>::NTV2_FORMAT_4x2048x1080psf_2398
-	<tr><td><b>4×2048×1080p 2398</b>	<td>::NTV2_FORMAT_4x2048x1080p_2398
 	<tr><td><b>4×1920×1080psf 24</b>	<td>::NTV2_FORMAT_4x1920x1080psf_2400
 	<tr><td><b>4×1920×1080p 24</b>		<td>::NTV2_FORMAT_4x1920x1080p_2400
-	<tr><td><b>4×2048×1080psf 24</b>	<td>::NTV2_FORMAT_4x2048x1080psf_2400
-	<tr><td><b>4×2048×1080p 24</b>		<td>::NTV2_FORMAT_4x2048x1080p_2400
 	<tr><td><b>4×1920×1080psf 25</b>	<td>::NTV2_FORMAT_4x1920x1080psf_2500
 	<tr><td><b>4×1920×1080p 25</b>		<td>::NTV2_FORMAT_4x1920x1080p_2500
+	<tr><td><b>4×1920×1080p 2997</b>	<td>::NTV2_FORMAT_4x1920x1080p_2997
+	<tr><td><b>4×1920×1080p 30</b>		<td>::NTV2_FORMAT_4x1920x1080p_3000
+</table>
+
+@subsubsection		vidformatsuhdhfr	UHD HFR “Square” Formats
+<table>
+	<tr><td><b>4×1920×1080p 50</b>		<td>::NTV2_FORMAT_4x1920x1080p_5000
+	<tr><td><b>4×1920×1080p 5994</b>	<td>::NTV2_FORMAT_4x1920x1080p_5994
+	<tr><td><b>4×1920×1080p 60</b>		<td>::NTV2_FORMAT_4x1920x1080p_6000
+</table>
+
+@subsubsection		vidformatsuhdtsi	UHD TSI Formats
+<table>
+	<tr><td><b>3840×2160p 2398</b>	<td>::NTV2_FORMAT_3840x2160p_2398
+	<tr><td><b>3840×2160p 24</b>	<td>::NTV2_FORMAT_3840x2160p_2400
+	<tr><td><b>3840×2160p 25</b>	<td>::NTV2_FORMAT_3840x2160p_2500
+	<tr><td><b>3840×2160p 2997</b>	<td>::NTV2_FORMAT_3840x2160p_2997
+	<tr><td><b>3840×2160p 30</b>	<td>::NTV2_FORMAT_3840x2160p_3000
+</table>
+
+@subsubsection		vidformatsuhdhfrtsi		UHD HFR TSI Formats
+<table>
+	<tr><td><b>3840×2160p 50</b>	<td>::NTV2_FORMAT_3840x2160p_5000
+	<tr><td><b>3840×2160p 5994</b>	<td>::NTV2_FORMAT_3840x2160p_5994
+	<tr><td><b>3840×2160p 60</b>	<td>::NTV2_FORMAT_3840x2160p_6000
+</table>
+
+@subsubsection		vidformats4k		4K “Square” Formats
+<table>
+	<tr><td><b>4×2048×1080psf 2398</b>	<td>::NTV2_FORMAT_4x2048x1080psf_2398
+	<tr><td><b>4×2048×1080p 2398</b>	<td>::NTV2_FORMAT_4x2048x1080p_2398
+	<tr><td><b>4×2048×1080psf 24</b>	<td>::NTV2_FORMAT_4x2048x1080psf_2400
+	<tr><td><b>4×2048×1080p 24</b>		<td>::NTV2_FORMAT_4x2048x1080p_2400
 	<tr><td><b>4×2048×1080psf 25</b>	<td>::NTV2_FORMAT_4x2048x1080psf_2500
 	<tr><td><b>4×2048×1080p 25</b>		<td>::NTV2_FORMAT_4x2048x1080p_2500
-	<tr><td><b>4×1920×1080p 2997</b>	<td>::NTV2_FORMAT_4x1920x1080p_2997
 	<tr><td><b>4×2048×1080p 2997</b>	<td>::NTV2_FORMAT_4x2048x1080p_2997
-	<tr><td><b>4×1920×1080p 30</b>		<td>::NTV2_FORMAT_4x1920x1080p_3000
 	<tr><td><b>4×2048×1080p 30</b>		<td>::NTV2_FORMAT_4x2048x1080p_3000
 </table>
 
-@subsubsection		vidformats4khfr		4K HFR Formats
+@subsubsection		vidformats4khfr		4K HFR “Square” Formats
 <table>
-	<tr><td><b>4×2048×1080p 4795</b>	<td>::NTV2_FORMAT_4x2048x1080p_4795  <i>new in 12.0</i>
-	<tr><td><b>4×2048×1080p 48</b>		<td>::NTV2_FORMAT_4x2048x1080p_4800  <i>new in 12.0</i>
-	<tr><td><b>4×1920×1080p 50</b>		<td>::NTV2_FORMAT_4x1920x1080p_5000
+	<tr><td><b>4×2048×1080p 4795</b>	<td>::NTV2_FORMAT_4x2048x1080p_4795
+	<tr><td><b>4×2048×1080p 48</b>		<td>::NTV2_FORMAT_4x2048x1080p_4800
 	<tr><td><b>4×2048×1080p 50</b>		<td>::NTV2_FORMAT_4x2048x1080p_5000
-	<tr><td><b>4×1920×1080p 5994</b>	<td>::NTV2_FORMAT_4x1920x1080p_5994
 	<tr><td><b>4×2048×1080p 5994</b>	<td>::NTV2_FORMAT_4x2048x1080p_5994
-	<tr><td><b>4×1920×1080p 60</b>		<td>::NTV2_FORMAT_4x1920x1080p_6000
 	<tr><td><b>4×2048×1080p 60</b>		<td>::NTV2_FORMAT_4x2048x1080p_6000
+	<tr><td><b>4×2048×1080p 11988</b>	<td>::NTV2_FORMAT_4x2048x1080p_11988
+	<tr><td><b>4×2048×1080p 120</b>		<td>::NTV2_FORMAT_4x2048x1080p_12000
+</table>
+
+@subsubsection		vidformats4ktsi		4K TSI Formats
+<table>
+	<tr><td><b>4096×2160p 2398</b>	<td>::NTV2_FORMAT_4096x2160p_2398
+	<tr><td><b>4096×2160p 24</b>	<td>::NTV2_FORMAT_4096x2160p_2400
+	<tr><td><b>4096×2160p 25</b>	<td>::NTV2_FORMAT_4096x2160p_2500
+	<tr><td><b>4096×2160p 2997</b>	<td>::NTV2_FORMAT_4096x2160p_2997
+	<tr><td><b>4096×2160p 30</b>	<td>::NTV2_FORMAT_4096x2160p_3000
+</table>
+
+@subsubsection		vidformats4khfrtsi	4K HFR TSI Formats
+<table>
+	<tr><td><b>4096×2160p 4795</b>	<td>::NTV2_FORMAT_4096x2160p_4795
+	<tr><td><b>4096×2160p 48</b>	<td>::NTV2_FORMAT_4096x2160p_4800
+	<tr><td><b>4096×2160p 50</b>	<td>::NTV2_FORMAT_4096x2160p_5000
+	<tr><td><b>4096×2160p 5994</b>	<td>::NTV2_FORMAT_4096x2160p_5994
+	<tr><td><b>4096×2160p 60</b>	<td>::NTV2_FORMAT_4096x2160p_6000
+	<tr><td><b>4096×2160p 11988</b>	<td>::NTV2_FORMAT_4096x2160p_11988
+	<tr><td><b>4096×2160p 120</b>	<td>::NTV2_FORMAT_4096x2160p_12000
+</table>
+
+@subsubsection		vidformatsuhd2	UHD2 Formats
+<table>
+	<tr><td><b>4×3840×2160p 2398</b>	<td>::NTV2_FORMAT_4x3840x2160p_2398
+	<tr><td><b>4×3840×2160p 24</b>		<td>::NTV2_FORMAT_4x3840x2160p_2400
+	<tr><td><b>4×3840×2160p 25</b>		<td>::NTV2_FORMAT_4x3840x2160p_2500
+	<tr><td><b>4×3840×2160p 2997</b>	<td>::NTV2_FORMAT_4x3840x2160p_2997
+	<tr><td><b>4×3840×2160p 30</b>		<td>::NTV2_FORMAT_4x3840x2160p_3000
+	<tr><td><b>4×3840×2160p 50</b>		<td>::NTV2_FORMAT_4x3840x2160p_5000
+	<tr><td><b>4×3840×2160p 5994</b>	<td>::NTV2_FORMAT_4x3840x2160p_5994
+	<tr><td><b>4×3840×2160p 60</b>		<td>::NTV2_FORMAT_4x3840x2160p_6000
+</table>
+
+@subsubsection		vidformats8k	8K Formats
+<table>
+	<tr><td><b>4×4096×2160p 2398</b>	<td>::NTV2_FORMAT_4x4096x2160p_2398
+	<tr><td><b>4×4096×2160p 24</b>		<td>::NTV2_FORMAT_4x4096x2160p_2400
+	<tr><td><b>4×4096×2160p 25</b>		<td>::NTV2_FORMAT_4x4096x2160p_2500
+	<tr><td><b>4×4096×2160p 2997</b>	<td>::NTV2_FORMAT_4x4096x2160p_2997
+	<tr><td><b>4×4096×2160p 30</b>		<td>::NTV2_FORMAT_4x4096x2160p_3000
+	<tr><td><b>4×4096×2160p 4795</b>	<td>::NTV2_FORMAT_4x4096x2160p_4795
+	<tr><td><b>4×4096×2160p 48</b>		<td>::NTV2_FORMAT_4x4096x2160p_4800
+	<tr><td><b>4×4096×2160p 50</b>		<td>::NTV2_FORMAT_4x4096x2160p_5000
+	<tr><td><b>4×4096×2160p 5994</b>	<td>::NTV2_FORMAT_4x4096x2160p_5994
+	<tr><td><b>4×4096×2160p 60</b>		<td>::NTV2_FORMAT_4x4096x2160p_6000
 </table>
 
 To determine if a given device can handle a particular video format, call ::NTV2DeviceCanDoVideoFormat.
@@ -140,38 +209,25 @@ Many AJA devices support most of these additional frame buffer formats:
 	<tr><td><b>24-Bit BGR</b>					<td>::NTV2_FBF_24BIT_BGR
 	<tr><td><b>10-Bit DPX little-endian</b>		<td>::NTV2_FBF_10BIT_DPX_LE
 	<tr><td><b>48-Bit RGB 16 bpc</b>			<td>::NTV2_FBF_48BIT_RGB
-	<tr><td><b>10-Bit Raw YCbCr</b>				<td>::NTV2_FBF_10BIT_RAW_YCBCR	<i>new in 12.1</i>
-	<tr><td><b>10-Bit Raw RGB</b>				<td>::NTV2_FBF_10BIT_RAW_RGB		<i>new in 12.1</i>
+	<tr><td><b>10-Bit Raw YCbCr</b>				<td>::NTV2_FBF_10BIT_RAW_YCBCR
+	<tr><td><b>10-Bit Raw RGB</b>				<td>::NTV2_FBF_10BIT_RAW_RGB
 </table>
 
+New pixel formats:
 <table>
-	<tr><td><b>32-Bit ARGB (PC) 8 bpc</b>		<td>::NTV2_FBF_ARGB
-	<tr><td><b>32-Bit RGBA (Mac) 8 bpc</b>		<td>::NTV2_FBF_RGBA
-	<tr><td><b>10-Bit RGB</b>					<td>::NTV2_FBF_10BIT_RGB
-	<tr><td><b>Alternate 8-Bit YCbCr [YUY2]</b>	<td>::NTV2_FBF_8BIT_YCBCR_YUY2
-	<tr><td><b>32-Bit ABGR (OpenGL) 8 bpc</b>	<td>::NTV2_FBF_ABGR
-	<tr><td><b>10-Bit RGB - DPX</b>				<td>::NTV2_FBF_10BIT_DPX
-	<tr><td><b>10-Bit YCbCr - DPX</b>			<td>::NTV2_FBF_10BIT_YCBCR_DPX
-	<tr><td><b>8-Bit DVCPro</b>					<td>::NTV2_FBF_8BIT_DVCPRO
-	<tr><td><b>8-Bit HDV</b>					<td>::NTV2_FBF_8BIT_HDV
-	<tr><td><b>24-Bit RGB</b>					<td>::NTV2_FBF_24BIT_RGB
-	<tr><td><b>24-Bit BGR</b>					<td>::NTV2_FBF_24BIT_BGR
-	<tr><td><b>10-Bit DPX LE</b>				<td>::NTV2_FBF_10BIT_DPX_LE
-	<tr><td><b>48-Bit RGB 16 bpc</b>			<td>::NTV2_FBF_48BIT_RGB
-	<tr><td><b>10-Bit Raw YCbCr</b>				<td>::NTV2_FBF_10BIT_RAW_YCBCR	<i>new in 12.1</i>
-	<tr><td><b>10-Bit Raw RGB</b>				<td>::NTV2_FBF_10BIT_RAW_RGB		<i>new in 12.1</i>
+	<tr><td><b>12-Bit Packed RGB</b>			<td>::NTV2_FBF_12BIT_RGB_PACKED
 </table>
 
-Recently, some AJA devices started supporting planar frame buffer formats:
+Some AJA devices support planar frame buffer formats:
 <table>
-	<tr><td><b>8-Bit YCbCr 420 3-Plane [I420]</b>	<td>::NTV2_FBF_8BIT_YCBCR_420PL3	<i>new in 14.0</i>, \ref corvid44
-	<tr><td><b>8-Bit YCbCr 422 3-Plane [Y42B]</b>	<td>::NTV2_FBF_8BIT_YCBCR_422PL3	<i>new in 14.0</i>, \ref corvid44
-	<tr><td><b>10-Bit YCbCr 420 3-Plane LE</b>		<td>::NTV2_FBF_10BIT_YCBCR_420PL3_LE	<i>new in 14.0</i>, \ref corvid44
-	<tr><td><b>10-Bit YCbCr 422 3-Plane LE</b>		<td>::NTV2_FBF_10BIT_YCBCR_422PL3_LE	<i>new in 14.0</i>, \ref corvid44
-	<tr><td><b>10-Bit YCbCr 420 2-Plane</b>			<td>::NTV2_FBF_10BIT_YCBCR_420PL2	<i>new in 12.4.2</i>, \ref corvidhevc
-	<tr><td><b>10-Bit YCbCr 422 2-Plane</b>			<td>::NTV2_FBF_10BIT_YCBCR_422PL2	<i>new in 12.4.2</i>, \ref corvidhevc
-	<tr><td><b>8-Bit YCbCr 420 2-Plane</b>			<td>::NTV2_FBF_8BIT_YCBCR_420PL2	<i>new in 12.4.2</i>, \ref corvidhevc
-	<tr><td><b>8-Bit YCbCr 422 2-Plane</b>			<td>::NTV2_FBF_8BIT_YCBCR_422PL2	<i>new in 12.4.2</i>, \ref corvidhevc
+	<tr><td><b>8-Bit YCbCr 420 3-Plane [I420]</b>	<td>::NTV2_FBF_8BIT_YCBCR_420PL3	\ref corvid44
+	<tr><td><b>8-Bit YCbCr 422 3-Plane [Y42B]</b>	<td>::NTV2_FBF_8BIT_YCBCR_422PL3	\ref corvid44
+	<tr><td><b>10-Bit YCbCr 420 3-Plane LE</b>		<td>::NTV2_FBF_10BIT_YCBCR_420PL3_LE	\ref corvid44
+	<tr><td><b>10-Bit YCbCr 422 3-Plane LE</b>		<td>::NTV2_FBF_10BIT_YCBCR_422PL3_LE	\ref corvid44
+	<tr><td><b>10-Bit YCbCr 420 2-Plane</b>			<td>::NTV2_FBF_10BIT_YCBCR_420PL2	\ref corvidhevc
+	<tr><td><b>10-Bit YCbCr 422 2-Plane</b>			<td>::NTV2_FBF_10BIT_YCBCR_422PL2	\ref corvidhevc
+	<tr><td><b>8-Bit YCbCr 420 2-Plane</b>			<td>::NTV2_FBF_8BIT_YCBCR_420PL2	\ref corvidhevc
+	<tr><td><b>8-Bit YCbCr 422 2-Plane</b>			<td>::NTV2_FBF_8BIT_YCBCR_422PL2	\ref corvidhevc
 </table>
 
 To determine if a given device can handle a particular frame buffer format, call ::NTV2DeviceCanDoFrameBufferFormat.
@@ -196,8 +252,9 @@ This format, identified by the ::NTV2_FBF_8BIT_YCBCR enumeration constant, is us
 
 @subsubsection		fbformat10bitycbcr	10-Bit YCbCr Format
 
-This format, identified by the ::NTV2_FBF_10BIT_YCBCR enumeration constant, has twelve 10-bit unsigned components that are packed into four 32-bit little-endian words.
-(Six pixels are represented in each 16 bytes.) This is the format used by Quicktime to store 10-bit YCbCr video and is referred to (in both QuickTime and Windows)
+This format, identified by the ::NTV2_FBF_10BIT_YCBCR enumeration constant, has twelve 10-bit unsigned components
+that are packed into four 32-bit little-endian words. (Six pixels are represented in each 16 bytes.)
+This is the format used by Quicktime to store 10-bit YCbCr video and is referred to (in both QuickTime and Windows)
 as the 'v210' “FourCC” format.
 
 Here are the four 32-bit words (six pixels) in increasing address order:
@@ -214,8 +271,8 @@ Here are the same six pixels -- the four 32-bit little-endian words -- in decrea
 These formats incorporate 8-bit Red, Green, Blue and Alpha (key) components.
 The device Color Space Converter(s) will perform the proper conversion to/from 10-Bit YCbCr and Key.
 
-8-Bit ARGB, identified by the ::NTV2_FBF_ARGB enumeration constant, is used extensively on the Windows platform (and on most AJA devices can be routed
-to an SDI output for ARGB 4:4:4:4 over-the-wire):
+8-Bit ARGB, identified by the ::NTV2_FBF_ARGB enumeration constant, is used extensively on the Windows platform
+(and on most AJA devices can be routed to an SDI output for ARGB 4:4:4:4 over-the-wire):
 
 @image	html	fbf-8bitargb-75.png
 
@@ -230,9 +287,9 @@ to an SDI output for ARGB 4:4:4:4 over-the-wire):
 
 @subsubsection		fbformats10bitrgb		10-Bit RGB Format
 
-This format is identified by the ::NTV2_FBF_10BIT_RGB enumeration constant. For playout, the AJA device firmware converts the 10-bit RGB video data
-formatted as in the table below to the expected SMPTE-standard 10-Bit YCbCr output signal. Conversely, for capture/ingest, 10-bit YCbCr input video
-is converted into this 10-bit RGB pixel format:
+This format is identified by the ::NTV2_FBF_10BIT_RGB enumeration constant. For playout, the AJA device firmware
+converts the 10-bit RGB video data formatted as in the table below to the expected SMPTE-standard 10-Bit YCbCr
+output signal. Conversely, for capture/ingest, 10-bit YCbCr input video is converted into this 10-bit RGB pixel format:
 
 @image	html	fbf-10bitrgb-75.png
 
@@ -293,6 +350,13 @@ This format, identified by the ::NTV2_FBF_48BIT_RGB enumeration constant, has th
 @note	The least-significant 4 bits of each color component in this format are zero or irrelevant.
 
 
+@subsubsection		fbformats12bitpackedrgb		12-Bit Packed RGB
+
+This AJA HDR format, identified by the ::NTV2_FBF_12BIT_RGB_PACKED enumeration constant, has this layout:
+
+@image	html	fbf-12bitpackedrgb-75.png
+
+
 @subsubsection		fbformatsyuy2		Alternate 8-Bit YCbCr ('YUY2')
 
 This format, identified by the ::NTV2_FBF_8BIT_YCBCR_YUY2 enumeration constant, has this single-pixel layout:
@@ -307,7 +371,8 @@ This format, identified by the ::NTV2_FBF_8BIT_DVCPRO enumeration constant, is a
 
 @subsubsection		fbformats8bithdv		8-Bit HDV
 
-This format, identified by the ::NTV2_FBF_8BIT_HDV enumeration constant, is a lossy H.262/MPEG-2 (video) and MPEG-1 Layer 2 (audio) compression scheme.
+This format, identified by the ::NTV2_FBF_8BIT_HDV enumeration constant, is a lossy H.262/MPEG-2 (video) and
+MPEG-1 Layer 2 (audio) compression scheme.
 
 
 @subsubsection		fbformats10bitcion	10-Bit Raw YCbCr (CION)
@@ -371,8 +436,9 @@ The luminance plane is a sequence of 10-bit (0-1023) luminance values, each stor
 with the most-significant 6 bits set to zero. Thus, the size, in bytes, of the luma plane is WxHx2 bytes, where W is the raster width
 (in pixels), and H is the raster height (in lines). The Luma Plane should terminate on a 64-bit (8-byte) boundary.
 
-The chroma planes immediately follow the luma plane in memory, each being one-fourth the size of the luma plane, the Cb plane preceding the Cr plane.
-Chroma values are 10-bit (0-1023) values, stored identically to the luma values, one chroma value per 2x2 pixel quad (horizontal and vertical subsampling).
+The chroma planes immediately follow the luma plane in memory, each being one-fourth the size of the luma plane, the Cb plane preceding
+the Cr plane. Chroma values are 10-bit (0-1023) values, stored identically to the luma values, one chroma value per 2x2 pixel quad
+(horizontal and vertical subsampling).
 
 
 @subsubsection		fbformats10bitycbcr422pl3	10-Bit YCbCr 4:2:2 Planar ('I422_10LE')
@@ -388,6 +454,7 @@ with the most-significant 6 bits set to zero. Thus, the size, in bytes, of the l
 (in pixels), and H is the raster height (in lines). The luma plane should terminate on a 64-bit (8-byte) boundary.
 
 The chroma planes immediately follow the luma plane in memory, each half the size of the luma plane, the Cb plane preceding the Cr plane.
-Chroma values are 10-bit (0-1023) values, stored identically to the luma values, one chroma value per horizontal pixel pair (horizontal-only subsampling).
+Chroma values are 10-bit (0-1023) values, stored identically to the luma values, one chroma value per horizontal pixel pair
+(horizontal-only subsampling).
 
 **/
