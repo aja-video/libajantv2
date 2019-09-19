@@ -38,9 +38,11 @@ dual-link HD-SDI and 3G-SDI formats, 6Gbps, 12Gbps, even up to 8K video.
 </table>
 
 @subsubsection		vidformats2k		2K×1080 Formats
+
 @note	These formats are unrelated to the ancient 2K “Film” formats — e.g. ::NTV2_FORMAT_2K_1498,
 		::NTV2_FORMAT_2K_1500, ::NTV2_FORMAT_2K_2398, ::NTV2_FORMAT_2K_2400, ::NTV2_FORMAT_2K_2500.
 		These older 2K film formats are obsolete and no longer supported by NTV2 devices.
+
 <table>
 	<tr><td><b>2K 2398</b>	<td>::NTV2_FORMAT_1080p_2K_2398
 	<tr><td><b>2K 24</b>	<td>::NTV2_FORMAT_1080p_2K_2400
