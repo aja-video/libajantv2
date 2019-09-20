@@ -38,6 +38,7 @@ typedef struct Player4KConfig
 		bool					fDoMultiChannel;	///< @brief	If true, enables device-sharing;  otherwise takes exclusive control of the device.
 		bool					fDoTsiRouting;		///< @brief	If true, enables two sample interleave routing, else squares.
 		bool					fDoRGBOnWire;		///< @brief	If true, enables RGB on the wire, else CSCs convert to YCbCr.
+		bool					fDoLinkGrouping;	///< @brief If true, enables 6/12G output mode
 
 		/**
 			@brief	Constructs a default generator configuration.
@@ -52,7 +53,8 @@ typedef struct Player4KConfig
 				fDoHDMIOutput		(false),
 				fDoMultiChannel		(false),
 				fDoTsiRouting		(false),
-				fDoRGBOnWire		(false)
+				fDoRGBOnWire		(false),
+				fDoLinkGrouping		(false)
 		{
 		}
 

@@ -408,6 +408,7 @@ void NTV2Player4K::SetUpHostBuffers (void)
 void NTV2Player4K::RouteOutputSignal (void)
 {
 	const bool	isRGB (::IsRGBFormat(mConfig.fPixelFormat));
+	bool useLinkGrouping = false;
 
 	if (!mConfig.fDoMultiChannel)
 		mDevice.ClearRouting();	//	Replace current signal routing
@@ -422,6 +423,13 @@ void NTV2Player4K::RouteOutputSignal (void)
 		switchValue += 2;
 	if (mConfig.fDoRGBOnWire)
 		switchValue += 1;
+	if (NTV2DeviceCanDo12GSDI(mDeviceID) && !NTV2DeviceCanDo12gRouting(mDeviceID))
+	{
+		mDevice.SetSDIOut6GEnable(NTV2_CHANNEL3, false);
+		mDevice.SetSDIOut12GEnable(NTV2_CHANNEL3, false);
+		if (mConfig.fDoLinkGrouping)
+			useLinkGrouping = true;
+	}
 
 	switch (switchValue)
 	{
@@ -444,22 +452,26 @@ void NTV2Player4K::RouteOutputSignal (void)
 		case 4:		//	Low Frame Rate, Tsi, Pixel YCbCr, Wire YCbCr
 			RouteFsToTsiMux();
             RouteTsiMuxTo2xSDIOut();
+			if(useLinkGrouping) mDevice.SetSDIOut6GEnable(NTV2_CHANNEL3, true);
 			break;
 		case 5:		//	Low Frame Rate, Tsi, Pixel YCbCr, Wire RGB
 			RouteFsToTsiMux();
 			RouteTsiMuxToCsc();
 			RouteCscToDLOut();
 			RouteDLOutToSDIOut();
+			if(useLinkGrouping) mDevice.SetSDIOut12GEnable(NTV2_CHANNEL3, true);
 			break;
 		case 6:		//	Low Frame Rate, Tsi, Pixel RGB, Wire YCbCr
 			RouteFsToTsiMux();
 			RouteTsiMuxToCsc();
             RouteCscTo2xSDIOut();
+			if(useLinkGrouping) mDevice.SetSDIOut6GEnable(NTV2_CHANNEL3, true);
 			break;
 		case 7:		//	Low Frame Rate, Tsi, Pixel RGB, Wire RGB
 			RouteFsToTsiMux();
 			RouteTsiMuxToDLOut();
 			RouteDLOutToSDIOut();
+			if(useLinkGrouping) mDevice.SetSDIOut12GEnable(NTV2_CHANNEL3, true);
 			break;
 		case 8:		//	High Frame Rate, Square, Pixel YCbCr, Wire YCbCr
 			RouteFsToSDIOut();
@@ -477,6 +489,7 @@ void NTV2Player4K::RouteOutputSignal (void)
 		case 12:	//	High Frame Rate, Tsi, Pixel YCbCr, Wire YCbCr
 			RouteFsToTsiMux();
             RouteTsiMuxTo4xSDIOut();
+			if(useLinkGrouping) mDevice.SetSDIOut12GEnable(NTV2_CHANNEL3, true);
 			break;
 		case 13:	//	High Frame Rate, Tsi, Pixel YCbCr, Wire RGB
 			//	No valid routing for this case
@@ -485,6 +498,7 @@ void NTV2Player4K::RouteOutputSignal (void)
 			RouteFsToTsiMux();
 			RouteTsiMuxToCsc();
             RouteCscTo4xSDIOut();
+			if(useLinkGrouping) mDevice.SetSDIOut12GEnable(NTV2_CHANNEL3, true);
 			break;
 		case 15:	//	High Frame Rate, Tsi, Pixel RGB, Wire RGB
 			//	No valid routing for this case
@@ -510,7 +524,7 @@ void NTV2Player4K::RouteOutputSignal (void)
 	{
 		if (::NTV2DeviceCanDo12gRouting(mDeviceID))
 			mDevice.SetSDITransmitEnable (mConfig.fOutputChannel, true);
-		else if (mConfig.fOutputChannel == NTV2_CHANNEL1)
+		else if (mConfig.fOutputChannel == NTV2_CHANNEL1 || mConfig.fOutputChannel == NTV2_CHANNEL3)
 		{
 			mDevice.SetSDITransmitEnable (NTV2_CHANNEL1, true);
 			mDevice.SetSDITransmitEnable (NTV2_CHANNEL2, true);
@@ -803,6 +817,23 @@ void NTV2Player4K::RouteFsToTsiMux (void)
 			mDevice.Connect (NTV2_Xpt425Mux2BInput,	NTV2_XptFrameBuffer2_425YUV);
 		}
 	}
+	else if (mConfig.fOutputChannel == NTV2_CHANNEL3)
+	{
+		if (::IsRGBFormat(mConfig.fPixelFormat))
+		{
+			mDevice.Connect (NTV2_Xpt425Mux3AInput,	NTV2_XptFrameBuffer3RGB);
+			mDevice.Connect (NTV2_Xpt425Mux3BInput,	NTV2_XptFrameBuffer3_425RGB);
+			mDevice.Connect (NTV2_Xpt425Mux4AInput,	NTV2_XptFrameBuffer4RGB);
+			mDevice.Connect (NTV2_Xpt425Mux4BInput,	NTV2_XptFrameBuffer4_425RGB);
+		}
+		else
+		{
+			mDevice.Connect (NTV2_Xpt425Mux3AInput,	NTV2_XptFrameBuffer3YUV);
+			mDevice.Connect (NTV2_Xpt425Mux3BInput,	NTV2_XptFrameBuffer3_425YUV);
+			mDevice.Connect (NTV2_Xpt425Mux4AInput,	NTV2_XptFrameBuffer4YUV);
+			mDevice.Connect (NTV2_Xpt425Mux4BInput,	NTV2_XptFrameBuffer4_425YUV);
+		}
+	}
 	else if (mConfig.fOutputChannel == NTV2_CHANNEL5)
 	{
 		if (::IsRGBFormat(mConfig.fPixelFormat))
@@ -916,6 +947,13 @@ void NTV2Player4K::RouteTsiMuxToDLOut (void)
 		mDevice.Connect (NTV2_XptDualLinkOut3Input,	NTV2_Xpt425Mux2ARGB);
 		mDevice.Connect (NTV2_XptDualLinkOut4Input,	NTV2_Xpt425Mux2BRGB);
 	}
+	else if (mConfig.fOutputChannel == NTV2_CHANNEL3)
+	{
+		mDevice.Connect (NTV2_XptDualLinkOut1Input,	NTV2_Xpt425Mux3ARGB);
+		mDevice.Connect (NTV2_XptDualLinkOut2Input,	NTV2_Xpt425Mux3BRGB);
+		mDevice.Connect (NTV2_XptDualLinkOut3Input,	NTV2_Xpt425Mux4ARGB);
+		mDevice.Connect (NTV2_XptDualLinkOut4Input,	NTV2_Xpt425Mux4BRGB);
+	}
 	else if (mConfig.fOutputChannel == NTV2_CHANNEL5)
 	{
 		mDevice.Connect (NTV2_XptDualLinkOut5Input,	NTV2_Xpt425Mux3ARGB);
@@ -943,6 +981,23 @@ void NTV2Player4K::RouteTsiMuxToCsc (void)
 			mDevice.Connect (NTV2_XptCSC2VidInput,	NTV2_Xpt425Mux1BYUV);
 			mDevice.Connect (NTV2_XptCSC3VidInput,	NTV2_Xpt425Mux2AYUV);
 			mDevice.Connect (NTV2_XptCSC4VidInput,	NTV2_Xpt425Mux2BYUV);
+		}
+	}
+	else if (mConfig.fOutputChannel == NTV2_CHANNEL3)
+	{
+		if (::IsRGBFormat(mConfig.fPixelFormat))
+		{
+			mDevice.Connect (NTV2_XptCSC1VidInput,	NTV2_Xpt425Mux3ARGB);
+			mDevice.Connect (NTV2_XptCSC2VidInput,	NTV2_Xpt425Mux3BRGB);
+			mDevice.Connect (NTV2_XptCSC3VidInput,	NTV2_Xpt425Mux4ARGB);
+			mDevice.Connect (NTV2_XptCSC4VidInput,	NTV2_Xpt425Mux4BRGB);
+		}
+		else
+		{
+			mDevice.Connect (NTV2_XptCSC1VidInput,	NTV2_Xpt425Mux3AYUV);
+			mDevice.Connect (NTV2_XptCSC2VidInput,	NTV2_Xpt425Mux3BYUV);
+			mDevice.Connect (NTV2_XptCSC3VidInput,	NTV2_Xpt425Mux4AYUV);
+			mDevice.Connect (NTV2_XptCSC4VidInput,	NTV2_Xpt425Mux4BYUV);
 		}
 	}
 	else if (mConfig.fOutputChannel == NTV2_CHANNEL5)
@@ -974,6 +1029,13 @@ void NTV2Player4K::RouteTsiMuxTo2xSDIOut (void)
         mDevice.Connect (NTV2_XptSDIOut2Input,      NTV2_Xpt425Mux2AYUV);
         mDevice.Connect (NTV2_XptSDIOut2InputDS2,	NTV2_Xpt425Mux2BYUV);
 	}
+	else if (mConfig.fOutputChannel == NTV2_CHANNEL3)
+	{
+        mDevice.Connect (NTV2_XptSDIOut3Input,      NTV2_Xpt425Mux3AYUV);
+        mDevice.Connect (NTV2_XptSDIOut3InputDS2,	NTV2_Xpt425Mux3BYUV);
+        mDevice.Connect (NTV2_XptSDIOut4Input,      NTV2_Xpt425Mux4AYUV);
+        mDevice.Connect (NTV2_XptSDIOut4InputDS2,	NTV2_Xpt425Mux4BYUV);
+	}
 	else if (mConfig.fOutputChannel == NTV2_CHANNEL5)
 	{
         mDevice.Connect (NTV2_XptSDIOut5Input,      NTV2_Xpt425Mux3AYUV);
@@ -992,6 +1054,14 @@ void NTV2Player4K::RouteTsiMuxTo4xSDIOut (void)
         mDevice.Connect (NTV2_XptSDIOut2Input,	NTV2_Xpt425Mux1BYUV);
         mDevice.Connect (NTV2_XptSDIOut3Input,	NTV2_Xpt425Mux2AYUV);
         mDevice.Connect (NTV2_XptSDIOut4Input,	NTV2_Xpt425Mux2BYUV);
+	}
+	else if (mConfig.fOutputChannel == NTV2_CHANNEL3)
+	{
+		//Io4k+ 12G output
+        mDevice.Connect (NTV2_XptSDIOut1Input,	NTV2_Xpt425Mux3AYUV);
+        mDevice.Connect (NTV2_XptSDIOut2Input,	NTV2_Xpt425Mux3BYUV);
+        mDevice.Connect (NTV2_XptSDIOut3Input,	NTV2_Xpt425Mux4AYUV);
+        mDevice.Connect (NTV2_XptSDIOut4Input,	NTV2_Xpt425Mux4BYUV);
 	}
 	else if (mConfig.fOutputChannel == NTV2_CHANNEL5)
 	{
@@ -1083,23 +1153,37 @@ void NTV2Player4K::ConsumeFrames (void)
 	//	Initialize & start AutoCirculate...
     if (::NTV2DeviceCanDo12gRouting(mDeviceID))
     {
-        uint32_t startNum(0), endNum(0);
-		switch (mConfig.fOutputChannel)
-		{
-			case NTV2_CHANNEL2:	startNum = numACFramesPerChannel;		break;
-			case NTV2_CHANNEL3:	startNum = numACFramesPerChannel * 2;	break;
-			case NTV2_CHANNEL4:	startNum = numACFramesPerChannel * 3;	break;
-			default:			break;
-		}
-        endNum = startNum + numACFramesPerChannel - 1;
+		uint32_t startNum(0), endNum(0);
+		startNum = numACFramesPerChannel * mConfig.fOutputChannel;
+		endNum = startNum + numACFramesPerChannel - 1;
         mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  0,	//	0 frameCount: we'll specify start & end frame numbers
 											mConfig.fAudioSystem,  acOptions,
                                             1 /*numChannels*/,  UByte(startNum),  UByte(endNum));
     }
     else
     {
-		const uint8_t	startNum	(mConfig.fOutputChannel < 4	?						0	:	numACFramesPerChannel);		//	Ch1: frames 0-6
-		const uint8_t	endNum		(mConfig.fOutputChannel < 4	?	numACFramesPerChannel-1	:	numACFramesPerChannel*2-1);	//	Ch5: frames 7-13
+		uint32_t startNum(0), endNum(0);
+		switch(mConfig.fOutputChannel)
+		{
+		case NTV2_CHANNEL1:
+		case NTV2_CHANNEL2:
+			startNum = numACFramesPerChannel * 0;
+			break;
+		case NTV2_CHANNEL3:
+		case NTV2_CHANNEL4:
+			startNum = numACFramesPerChannel * 1;
+			break;
+		case NTV2_CHANNEL5:
+		case NTV2_CHANNEL6:
+			startNum = numACFramesPerChannel * 2;
+			break;
+		case NTV2_CHANNEL7:
+		case NTV2_CHANNEL8:
+			startNum = numACFramesPerChannel * 3;
+			break;
+			
+		}
+		endNum = startNum + numACFramesPerChannel - 1;
         mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  0,	//	0 frameCount: we'll specify start & end frame numbers
 											mConfig.fAudioSystem,  acOptions,
 											1 /*numChannels*/,  startNum,  endNum);

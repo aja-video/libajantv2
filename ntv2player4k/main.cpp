@@ -41,6 +41,7 @@ int main (int argc, const char ** argv)
 	int				doRGBOnWire		(0);				//  Route the output to put RGB on the wire
 	int				doTsiRouting	(0);				//  Route the output through the Tsi Muxes
 	int				hdrType			(0);				//	Insert HDR anc packet? If so, what kind?
+	int				doLinkGrouping	(0);				//	Use 6/12G output mode - IoXT+ and Kona5 Retail
 	poptContext		optionsContext; 					//	Context for parsing command line arguments
 	AJADebug::Open();
 
@@ -57,6 +58,7 @@ int main (int argc, const char ** argv)
 		{"rgb",			'r',	POPT_ARG_NONE,		&doRGBOnWire,		0,	"use RGB output?",				NULL},
 		{"tsi",			't',	POPT_ARG_NONE,		&doTsiRouting,		0,	"use Tsi routing?",				NULL},
 		{"hdrType",		'x',	POPT_ARG_INT,		&hdrType,			1,	"which HDR Packet to send",		"1:SDR,2:HDR10,3:HLG"},
+		{"6G/12G",		'g',	POPT_ARG_NONE,		&doLinkGrouping,	0,	"use 6G/12G output mode",		NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -94,6 +96,7 @@ int main (int argc, const char ** argv)
 	config.fDoMultiChannel	= doMultiChannel ? true : false;
 	config.fDoTsiRouting	= doTsiRouting ? true : false;
 	config.fDoRGBOnWire		= doRGBOnWire ? true : false;
+	config.fDoLinkGrouping	= doLinkGrouping ? true : false;
 	switch (hdrType)
 	{
 		case 1:		config.fSendAncType = AJAAncillaryDataType_HDR_SDR;		break;
