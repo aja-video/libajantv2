@@ -3459,7 +3459,6 @@ bool NTV2DeviceCanDoWarmBootFPGA (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_KONA5:
 		case DEVICE_ID_KONA5_8K:
 		case DEVICE_ID_KONA5_8KMK:
-		case DEVICE_ID_KONAHDMI:
 			return true;
 	#if defined(_DEBUG)
 		case DEVICE_ID_CORVID1:
@@ -3479,6 +3478,7 @@ bool NTV2DeviceCanDoWarmBootFPGA (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_KONA3G:
 		case DEVICE_ID_KONA3GQUAD:
 		case DEVICE_ID_KONA4UFC:
+		case DEVICE_ID_KONAHDMI:
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 		case DEVICE_ID_KONAIP_1RX_1TX_2110:
 		case DEVICE_ID_KONAIP_2022:
