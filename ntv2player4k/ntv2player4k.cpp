@@ -238,7 +238,16 @@ AJAStatus NTV2Player4K::SetUpVideo (void)
             mDevice.SetSDIOutLevelAtoLevelBConversion (chan, false);
 			mDevice.SetSDIOutRGBLevelAConversion (chan, false);
 		}
-
+	}
+	else
+	{
+		//	Configure the device to handle the requested video format...
+		mDevice.SetVideoFormat (mConfig.fVideoFormat, false, false, mConfig.fOutputChannel);
+		//	VANC data is not processed by this application
+		mDevice.SetEnableVANCData (false, false, mConfig.fOutputChannel);
+		//  Disable SDI output conversions
+		mDevice.SetSDIOutLevelAtoLevelBConversion (mConfig.fOutputChannel, false);
+		mDevice.SetSDIOutRGBLevelAConversion (mConfig.fOutputChannel, false);
 	}
 
 	//	Set the frame buffer pixel format for all the channels on the device.
