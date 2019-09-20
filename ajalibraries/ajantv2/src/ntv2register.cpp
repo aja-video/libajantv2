@@ -7310,7 +7310,7 @@ bool CNTV2Card::SetSDIOut6GEnable (const NTV2Channel inChannel, const bool inEna
 	NTV2Channel channel (inChannel);
 	if (!NTV2DeviceCanDo12gRouting(GetDeviceID()))
 		channel = NTV2_CHANNEL3;
-	if (enable)
+	if (inEnable)
 		WriteRegister(gChannelToSDIOutControlRegNum[channel], 0, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
 	return WriteRegister(gChannelToSDIOutControlRegNum[channel], inEnable, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
 }
@@ -7339,7 +7339,7 @@ bool CNTV2Card::SetSDIOut12GEnable (const NTV2Channel inChannel, const bool inEn
 	NTV2Channel channel (inChannel);
 	if (!NTV2DeviceCanDo12gRouting(GetDeviceID()))
 		channel = NTV2_CHANNEL3;
-	if (enable)
+	if (inEnable)
 		WriteRegister(gChannelToSDIOutControlRegNum[channel], 0, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
 	return WriteRegister(gChannelToSDIOutControlRegNum[channel], inEnable, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
 }
