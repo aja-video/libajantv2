@@ -135,6 +135,11 @@ class NTV2Player4K
 			@brief	Sets up board routing for playout.
 		**/
 		void			RouteOutputSignal (void);
+		
+		/**
+			@brief	Sets up bi-directional SDI transmitters
+		**/
+		void			SetupSDITransmitters(const NTV2Channel startChannel, const uint32_t numChannels);
 
 		/**
 			@brief	Sets up board routing for the 4K Down Converter to the SDI Monitor (if available).

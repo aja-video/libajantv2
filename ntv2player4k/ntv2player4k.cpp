@@ -444,46 +444,83 @@ void NTV2Player4K::RouteOutputSignal (void)
 	{
 		case 0:		//	Low Frame Rate, Square, Pixel YCbCr, Wire YCbCr
 			RouteFsToSDIOut();
+			SetupSDITransmitters(mConfig.fOutputChannel, 4);
 			break;
 		case 1:		//	Low Frame Rate, Square, Pixel YCbCr, Wire RGB
 			RouteFsToCsc();
 			RouteCscToDLOut();
 			RouteDLOutToSDIOut();
+			SetupSDITransmitters(mConfig.fOutputChannel, 4);
 			break;
 		case 2:		//	Low Frame Rate, Square, Pixel RGB, Wire YCbCr
 			RouteFsToCsc();
             RouteCscTo4xSDIOut();
+			SetupSDITransmitters(mConfig.fOutputChannel, 4);
 			break;
 		case 3:		//	Low Frame Rate, Square, Pixel RGB, Wire RGB
 			RouteFsToDLOut();
 			RouteDLOutToSDIOut();
+			SetupSDITransmitters(mConfig.fOutputChannel, 4);
 			break;
 		case 4:		//	Low Frame Rate, Tsi, Pixel YCbCr, Wire YCbCr
 			RouteFsToTsiMux();
             RouteTsiMuxTo2xSDIOut();
-			if(useLinkGrouping) mDevice.SetSDIOut6GEnable(NTV2_CHANNEL3, true);
+			if(useLinkGrouping)
+			{
+				mDevice.SetSDIOut6GEnable(NTV2_CHANNEL3, true);
+				SetupSDITransmitters(NTV2_CHANNEL3, 1);
+			}
+			else
+			{
+				SetupSDITransmitters(mConfig.fOutputChannel, 2);
+			}
 			break;
 		case 5:		//	Low Frame Rate, Tsi, Pixel YCbCr, Wire RGB
 			RouteFsToTsiMux();
 			RouteTsiMuxToCsc();
 			RouteCscToDLOut();
 			RouteDLOutToSDIOut();
-			if(useLinkGrouping) mDevice.SetSDIOut12GEnable(NTV2_CHANNEL3, true);
+			if(useLinkGrouping)
+			{
+				mDevice.SetSDIOut12GEnable(NTV2_CHANNEL3, true);
+				SetupSDITransmitters(NTV2_CHANNEL3, 1);
+			}
+			else
+			{
+				SetupSDITransmitters(mConfig.fOutputChannel, 4);
+			}
 			break;
 		case 6:		//	Low Frame Rate, Tsi, Pixel RGB, Wire YCbCr
 			RouteFsToTsiMux();
 			RouteTsiMuxToCsc();
             RouteCscTo2xSDIOut();
-			if(useLinkGrouping) mDevice.SetSDIOut6GEnable(NTV2_CHANNEL3, true);
+			if(useLinkGrouping)
+			{
+				mDevice.SetSDIOut6GEnable(NTV2_CHANNEL3, true);
+				SetupSDITransmitters(NTV2_CHANNEL3, 1);
+			}
+			else
+			{
+				SetupSDITransmitters(mConfig.fOutputChannel, 2);
+			}
 			break;
 		case 7:		//	Low Frame Rate, Tsi, Pixel RGB, Wire RGB
 			RouteFsToTsiMux();
 			RouteTsiMuxToDLOut();
 			RouteDLOutToSDIOut();
-			if(useLinkGrouping) mDevice.SetSDIOut12GEnable(NTV2_CHANNEL3, true);
+			if(useLinkGrouping)
+			{
+				mDevice.SetSDIOut12GEnable(NTV2_CHANNEL3, true);
+				SetupSDITransmitters(NTV2_CHANNEL3, 1);
+			}
+			else
+			{
+				SetupSDITransmitters(mConfig.fOutputChannel, 4);
+			}
 			break;
 		case 8:		//	High Frame Rate, Square, Pixel YCbCr, Wire YCbCr
 			RouteFsToSDIOut();
+			SetupSDITransmitters(mConfig.fOutputChannel, 4);
 			break;
 		case 9:		//	High Frame Rate, Square, Pixel YCbCr, Wire RGB
 			//	No valid routing for this case
@@ -491,6 +528,7 @@ void NTV2Player4K::RouteOutputSignal (void)
 		case 10:	//	High Frame Rate, Square, Pixel RGB, Wire YCbCr
 			RouteFsToCsc();
             RouteCscTo4xSDIOut();
+			SetupSDITransmitters(mConfig.fOutputChannel, 4);
 			break;
 		case 11:	//	High Frame Rate, Square, Pixel RGB, Wire RGB
 			//	No valid routing for this case
@@ -498,7 +536,15 @@ void NTV2Player4K::RouteOutputSignal (void)
 		case 12:	//	High Frame Rate, Tsi, Pixel YCbCr, Wire YCbCr
 			RouteFsToTsiMux();
             RouteTsiMuxTo4xSDIOut();
-			if(useLinkGrouping) mDevice.SetSDIOut12GEnable(NTV2_CHANNEL3, true);
+			if(useLinkGrouping)
+			{
+				mDevice.SetSDIOut12GEnable(NTV2_CHANNEL3, true);
+				SetupSDITransmitters(NTV2_CHANNEL3, 1);
+			}
+			else
+			{
+				SetupSDITransmitters(mConfig.fOutputChannel, 4);
+			}
 			break;
 		case 13:	//	High Frame Rate, Tsi, Pixel YCbCr, Wire RGB
 			//	No valid routing for this case
@@ -507,7 +553,15 @@ void NTV2Player4K::RouteOutputSignal (void)
 			RouteFsToTsiMux();
 			RouteTsiMuxToCsc();
             RouteCscTo4xSDIOut();
-			if(useLinkGrouping) mDevice.SetSDIOut12GEnable(NTV2_CHANNEL3, true);
+			if(useLinkGrouping)
+			{
+				mDevice.SetSDIOut12GEnable(NTV2_CHANNEL3, true);
+				SetupSDITransmitters(NTV2_CHANNEL3, 1);
+			}
+			else
+			{
+				SetupSDITransmitters(mConfig.fOutputChannel, 4);
+			}
 			break;
 		case 15:	//	High Frame Rate, Tsi, Pixel RGB, Wire RGB
 			//	No valid routing for this case
@@ -527,29 +581,25 @@ void NTV2Player4K::RouteOutputSignal (void)
 	Route4KDownConverter();
 	RouteHDMIOutput();
 
+}	//	RouteOutputSignal
+
+void NTV2Player4K::SetupSDITransmitters(const NTV2Channel startChannel, const uint32_t numChannels)
+{
 	//	Enable SDI output from all channels,
 	//	but only if the device supports bi-directional SDI.
 	if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
 	{
 		if (::NTV2DeviceCanDo12gRouting(mDeviceID))
-			mDevice.SetSDITransmitEnable (mConfig.fOutputChannel, true);
-		else if (mConfig.fOutputChannel == NTV2_CHANNEL1 || mConfig.fOutputChannel == NTV2_CHANNEL3)
 		{
-			mDevice.SetSDITransmitEnable (NTV2_CHANNEL1, true);
-			mDevice.SetSDITransmitEnable (NTV2_CHANNEL2, true);
-			mDevice.SetSDITransmitEnable (NTV2_CHANNEL3, true);
-			mDevice.SetSDITransmitEnable (NTV2_CHANNEL4, true);
+			mDevice.SetSDITransmitEnable (startChannel, true);
 		}
 		else
 		{
-			mDevice.SetSDITransmitEnable (NTV2_CHANNEL5, true);
-			mDevice.SetSDITransmitEnable (NTV2_CHANNEL6, true);
-			mDevice.SetSDITransmitEnable (NTV2_CHANNEL7, true);
-			mDevice.SetSDITransmitEnable (NTV2_CHANNEL8, true);
+			for(uint32_t i = (uint32_t)startChannel; i < ((uint32_t)startChannel+numChannels); i++)
+				mDevice.SetSDITransmitEnable((NTV2Channel)i, true);
 		}
 	}
-
-}	//	RouteOutputSignal
+}
 
 
 void NTV2Player4K::Route4KDownConverter (void)
