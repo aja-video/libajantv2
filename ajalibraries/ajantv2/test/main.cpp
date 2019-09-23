@@ -43,7 +43,7 @@ TEST_SUITE("ntv2debug" * doctest::description("ntv2 debug string functions")) {
 		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_KONA5)) == "DEVICE_ID_KONA5");
 		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_CORVID44)) == "DEVICE_ID_CORVID44");
 		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_CORVID88)) == "DEVICE_ID_CORVID88");
-		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_CORVID44_12G)) == "DEVICE_ID_CORVID44_12G");
+		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_CORVID44_8KMK)) == "DEVICE_ID_CORVID44_8KMK");
 		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_KONAIP_2110)) == "DEVICE_ID_KONAIP_2110");
 		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_IOIP_2110)) == "DEVICE_ID_IOIP_2110");
     }
@@ -59,7 +59,7 @@ TEST_SUITE("ntv2debug" * doctest::description("ntv2 debug string functions")) {
 		CHECK(std::string(NTV2DeviceString(DEVICE_ID_KONA5)) == "Kona5");
 		CHECK(std::string(NTV2DeviceString(DEVICE_ID_CORVID44)) == "Corvid44");
 		CHECK(std::string(NTV2DeviceString(DEVICE_ID_CORVID88)) == "Corvid88");
-		CHECK(std::string(NTV2DeviceString(DEVICE_ID_CORVID44_12G)) == "Corvid44_12G");
+		CHECK(std::string(NTV2DeviceString(DEVICE_ID_CORVID44_8KMK)) == "Corvid44_8KMK");
 		CHECK(std::string(NTV2DeviceString(DEVICE_ID_KONAIP_2110)) == "KonaIP_2110");
 		CHECK(std::string(NTV2DeviceString(DEVICE_ID_IOIP_2110)) == "DNxIP_2110");
 	}
