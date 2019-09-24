@@ -1,4 +1,4 @@
-﻿/**
+/**
 	@file		ntv2utils.cpp
 	@brief		Implementations for the NTV2 utility functions.
 	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
@@ -8784,8 +8784,8 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_KONAHDMI:					return useWindowsName ? "kona_hdmi_4rx.bit"         : "kona_hdmi_4rx.bit";
 	case DEVICE_ID_KONA1:						return useWindowsName ? "kona1_pcie.bit"            : "kona1.bit";
 	case DEVICE_ID_KONA5:						return useWindowsName ? "kona5_pcie.bit"            : "kona5.bit";
-	case DEVICE_ID_KONA5_8KMK:					return "kona5_8kmk";
-	case DEVICE_ID_KONA5_8K:					return "kona5_8k";
+	case DEVICE_ID_KONA5_8KMK:					return "kona5_8k_mk.bit";
+	case DEVICE_ID_KONA5_8K:					return "kona5_8k.bit";
 	case DEVICE_ID_CORVID44_8KMK:				return "c44_8kmk.bit";
 	case DEVICE_ID_CORVID44_8K:					return "c44_8k.bit";
 	default:									return "";
