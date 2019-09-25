@@ -2215,9 +2215,9 @@ bool CNTV2Card::GetFrameBufferOrientation (const NTV2Channel inChannel, NTV2FBOr
 // Method: SetFrameBufferSize
 // Input:  NTV2Channel,  NTV2K2Framesize
 // Output: NONE
-bool CNTV2Card::SetFrameBufferSize(NTV2Channel channel, NTV2Framesize value)
+bool CNTV2Card::SetFrameBufferSize (const NTV2Channel inChannel, const NTV2Framesize inValue)
 {
-	if (IS_CHANNEL_INVALID (channel))
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 #if defined (NTV2_ALLOW_2MB_FRAMES)
 	ULWord	supports2m (0);
@@ -2225,7 +2225,7 @@ bool CNTV2Card::SetFrameBufferSize(NTV2Channel channel, NTV2Framesize value)
 	if(supports2m == 1)
 	{
 		ULWord value2M (0);
-		switch(value)
+		switch(inValue)
 		{
 		case NTV2_FRAMESIZE_2MB:	value2M = 1;	break;
 		case NTV2_FRAMESIZE_4MB:	value2M = 2;	break;
@@ -2249,8 +2249,8 @@ bool CNTV2Card::SetFrameBufferSize(NTV2Channel channel, NTV2Framesize value)
 	}
 	else
 #endif	//	defined (NTV2_ALLOW_2MB_FRAMES)
-	if (value == NTV2_FRAMESIZE_2MB || value == NTV2_FRAMESIZE_4MB || value == NTV2_FRAMESIZE_8MB || value == NTV2_FRAMESIZE_16MB)
-		return WriteRegister (gChannelToControlRegNum [NTV2_CHANNEL1], value, kK2RegMaskFrameSize, kK2RegShiftFrameSize);
+	if (inValue == NTV2_FRAMESIZE_2MB || inValue == NTV2_FRAMESIZE_4MB || inValue == NTV2_FRAMESIZE_8MB || inValue == NTV2_FRAMESIZE_16MB)
+		return WriteRegister (gChannelToControlRegNum [NTV2_CHANNEL1], inValue, kK2RegMaskFrameSize, kK2RegShiftFrameSize);
 	return false;
 }
 
@@ -3790,33 +3790,28 @@ bool CNTV2Card::GetLUTControlSelect(NTV2LUTControlSelect & outLUTSelect)
 	return CNTV2DriverInterface::ReadRegister (kRegCh1ColorCorrectioncontrol, outLUTSelect, kRegMaskLUTSelect, kRegShiftLUTSelect);
 }
 
-bool CNTV2Card::SetDualLinkOutputEnable(bool enable)
+bool CNTV2Card::SetDualLinkOutputEnable (const bool enable)
 {
-	ULWord value = (ULWord)enable;
-	return WriteRegister (kRegGlobalControl,
-						value,
-						kRegMaskDualLinkOutEnable,
-						kRegShiftDualLinKOutput);
+	return WriteRegister (kRegGlobalControl,  enable ? 1 : 0,  kRegMaskDualLinkOutEnable,  kRegShiftDualLinKOutput);
 }
 
 bool CNTV2Card::GetDualLinkOutputEnable (bool & outIsEnabled)
 {
-	ULWord	value	(0);
-	bool	readOk	(ReadRegister (kRegGlobalControl,  value,  kRegMaskDualLinkOutEnable,  kRegShiftDualLinKOutput));
-	outIsEnabled = readOk ? (value ? true : false) : false;
-	return readOk;
+	outIsEnabled = false;
+	return CNTV2DriverInterface::ReadRegister (kRegGlobalControl, outIsEnabled, kRegMaskDualLinkOutEnable,  kRegShiftDualLinKOutput);
 }
 
 
-bool CNTV2Card::SetDualLinkInputEnable (bool enable)		{return WriteRegister (kRegGlobalControl,  enable,  kRegMaskDualLinkInEnable,  kRegShiftDualLinkInput);}
+bool CNTV2Card::SetDualLinkInputEnable (const bool enable)
+{
+	return WriteRegister (kRegGlobalControl,  enable ? 1 : 0,  kRegMaskDualLinkInEnable,  kRegShiftDualLinkInput);
+}
 
 
 bool CNTV2Card::GetDualLinkInputEnable (bool & outIsEnabled)
 {
-	ULWord	value	(0);
-	bool	readOk	(ReadRegister (kRegGlobalControl,  value,  kRegMaskDualLinkInEnable,  kRegShiftDualLinkInput));
-	outIsEnabled = readOk ? (value ? true : false) : false;
-	return readOk;
+	outIsEnabled = false;
+	return CNTV2DriverInterface::ReadRegister (kRegGlobalControl,  outIsEnabled,  kRegMaskDualLinkInEnable,  kRegShiftDualLinkInput);
 }
 
 
