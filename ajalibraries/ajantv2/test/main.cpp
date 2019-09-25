@@ -567,3 +567,102 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 	}
 
 } // ntv2utils
+
+void ntv2devicescanner_marker() {}
+TEST_SUITE("ntv2devicescanner" * doctest::description("ntv2 device scanner functions")) {
+
+	// NOTE: these are implemented in ntv2devicescanner.cpp but declared in ntv2publicinterface.hs
+
+	TEST_CASE("NTV2DeviceGetSupportedPixelFormats")
+	{
+		// Make sure that ticket# 4220 doesn't happen again
+		// spot check with Kona4
+		NTV2FrameBufferFormatSet fbf_set;
+		CHECK(NTV2DeviceGetSupportedPixelFormats(DEVICE_ID_KONA4, fbf_set));
+		CHECK(fbf_set.count(NTV2_FBF_10BIT_YCBCR) > 0);
+	}
+
+	TEST_CASE("NTV2DeviceGetSupportedVideoFormats")
+	{
+		// spot check with Kona4
+		NTV2VideoFormatSet vf_set;
+		CHECK(NTV2DeviceGetSupportedVideoFormats(DEVICE_ID_KONA4, vf_set));
+		// supported
+		CHECK(vf_set.count(NTV2_FORMAT_1080i_5000) > 0);
+		CHECK(vf_set.count(NTV2_FORMAT_1080psf_3000_2) > 0);
+		CHECK(vf_set.count(NTV2_FORMAT_525_5994) > 0);
+		CHECK(vf_set.count(NTV2_FORMAT_4x1920x1080psf_2398) > 0);
+		CHECK(vf_set.count(NTV2_FORMAT_4x2048x1080p_4800) > 0);
+		CHECK(vf_set.count(NTV2_FORMAT_1080p_2K_6000_A) > 0);
+		CHECK(vf_set.count(NTV2_FORMAT_1080p_2K_4800_A) > 0);
+		// not supported
+		CHECK(vf_set.count(NTV2_FORMAT_4x2048x1080p_11988) == 0);
+		CHECK(vf_set.count(NTV2_FORMAT_4x2048x1080p_12000) == 0);
+		CHECK(vf_set.count(NTV2_FORMAT_1080p_2K_4795_B) == 0);
+		CHECK(vf_set.count(NTV2_FORMAT_1080p_2K_6000_B) == 0);
+		CHECK(vf_set.count(NTV2_FORMAT_3840x2160psf_2398) == 0);
+		CHECK(vf_set.count(NTV2_FORMAT_3840x2160p_6000_B) == 0);
+		CHECK(vf_set.count(NTV2_FORMAT_4096x2160psf_2398) == 0);
+		CHECK(vf_set.count(NTV2_FORMAT_4096x2160p_6000_B) == 0);
+		CHECK(vf_set.count(NTV2_FORMAT_4x1920x1080p_5000_B) == 0);
+		CHECK(vf_set.count(NTV2_FORMAT_4x2048x1080p_4800_B) == 0);
+		CHECK(vf_set.count(NTV2_FORMAT_4x3840x2160p_2398) == 0);
+		CHECK(vf_set.count(NTV2_FORMAT_4x3840x2160p_6000_B) == 0);
+		CHECK(vf_set.count(NTV2_FORMAT_4x4096x2160p_2398) == 0);
+		CHECK(vf_set.count(NTV2_FORMAT_4x4096x2160p_6000_B) == 0);
+	}
+
+	TEST_CASE("NTV2DeviceGetSupportedStandards")
+	{
+		// spot check with Kona4
+		NTV2StandardSet std_set;
+		CHECK(NTV2DeviceGetSupportedStandards(DEVICE_ID_KONA4, std_set));
+		// supported
+		CHECK(std_set.count(NTV2_STANDARD_1080) > 0);
+		CHECK(std_set.count(NTV2_STANDARD_720) > 0);
+		CHECK(std_set.count(NTV2_STANDARD_525) > 0);
+		CHECK(std_set.count(NTV2_STANDARD_625) > 0);
+		CHECK(std_set.count(NTV2_STANDARD_1080p) > 0);
+		CHECK(std_set.count(NTV2_STANDARD_2Kx1080p) > 0);
+		CHECK(std_set.count(NTV2_STANDARD_3840x2160p) > 0);
+		CHECK(std_set.count(NTV2_STANDARD_4096x2160p) > 0);
+		CHECK(std_set.count(NTV2_STANDARD_3840HFR) > 0);
+		CHECK(std_set.count(NTV2_STANDARD_4096HFR) > 0);
+		// not supported
+		CHECK(std_set.count(NTV2_STANDARD_2K) == 0);
+		CHECK(std_set.count(NTV2_STANDARD_2Kx1080i) == 0);
+		CHECK(std_set.count(NTV2_STANDARD_7680) == 0);
+		CHECK(std_set.count(NTV2_STANDARD_8192) == 0);
+		CHECK(std_set.count(NTV2_STANDARD_3840i) == 0);
+		CHECK(std_set.count(NTV2_STANDARD_4096i) == 0);
+	}
+
+	TEST_CASE("NTV2DeviceGetSupportedGeometries")
+	{
+		NTV2GeometrySet geom_set;
+		CHECK(NTV2DeviceGetSupportedGeometries(DEVICE_ID_KONA4, geom_set));
+		// supported
+		CHECK(geom_set.count(NTV2_FG_1920x1080) > 0);
+		CHECK(geom_set.count(NTV2_FG_1280x720) > 0);
+		CHECK(geom_set.count(NTV2_FG_720x486) > 0);
+		CHECK(geom_set.count(NTV2_FG_720x576) > 0);
+		CHECK(geom_set.count(NTV2_FG_1920x1114) > 0);
+		CHECK(geom_set.count(NTV2_FG_2048x1114) > 0);
+		CHECK(geom_set.count(NTV2_FG_720x508) > 0);
+		CHECK(geom_set.count(NTV2_FG_720x598) > 0);
+		CHECK(geom_set.count(NTV2_FG_1920x1112) > 0);
+		CHECK(geom_set.count(NTV2_FG_1280x740) > 0);
+		CHECK(geom_set.count(NTV2_FG_2048x1080) > 0);
+		CHECK(geom_set.count(NTV2_FG_2048x1112) > 0);
+		CHECK(geom_set.count(NTV2_FG_720x514) > 0);
+		CHECK(geom_set.count(NTV2_FG_720x612) > 0);
+		CHECK(geom_set.count(NTV2_FG_4x1920x1080) > 0);
+		CHECK(geom_set.count(NTV2_FG_4x2048x1080) > 0);
+		// not supported
+		CHECK(geom_set.count(NTV2_FG_2048x1556) == 0);
+		CHECK(geom_set.count(NTV2_FG_2048x1588) == 0);
+		CHECK(geom_set.count(NTV2_FG_4x3840x2160) == 0);
+		CHECK(geom_set.count(NTV2_FG_4x4096x2160) == 0);
+	}
+
+} // ntv2devicescanner
