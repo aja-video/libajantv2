@@ -38,20 +38,22 @@ dual-link HD-SDI and 3G-SDI formats, 6Gbps, 12Gbps, even up to 8K video.
 </table>
 
 @subsubsection		vidformats2k		2K×1080 Formats
+
 @note	These formats are unrelated to the ancient 2K “Film” formats — e.g. ::NTV2_FORMAT_2K_1498,
 		::NTV2_FORMAT_2K_1500, ::NTV2_FORMAT_2K_2398, ::NTV2_FORMAT_2K_2400, ::NTV2_FORMAT_2K_2500.
 		These older 2K film formats are obsolete and no longer supported by NTV2 devices.
+
 <table>
-	<tr><td><b>2K 2398</b>	<td>::NTV2_FORMAT_1080p_2K_2398
-	<tr><td><b>2K 24</b>	<td>::NTV2_FORMAT_1080p_2K_2400
-	<tr><td><b>2K 25</b>	<td>::NTV2_FORMAT_1080p_2K_2500
-	<tr><td><b>2K 2997</b>	<td>::NTV2_FORMAT_1080p_2K_2997
-	<tr><td><b>2K 30</b>	<td>::NTV2_FORMAT_1080p_2K_3000
-	<tr><td><b>2K 4795</b>	<td>::NTV2_FORMAT_1080p_2K_4795
-	<tr><td><b>2K 48</b>	<td>::NTV2_FORMAT_1080p_2K_4800
-	<tr><td><b>2K 50</b>	<td>::NTV2_FORMAT_1080p_2K_5000
-	<tr><td><b>2K 5994</b>	<td>::NTV2_FORMAT_1080p_2K_5994
-	<tr><td><b>2K 60</b>	<td>::NTV2_FORMAT_1080p_2K_6000
+	<tr><td><b>2K×1080p 2398</b>		<td>::NTV2_FORMAT_1080p_2K_2398
+	<tr><td><b>2K×1080p 24</b>			<td>::NTV2_FORMAT_1080p_2K_2400
+	<tr><td><b>2K×1080p 25</b>			<td>::NTV2_FORMAT_1080p_2K_2500
+	<tr><td><b>2K×1080p 2997</b>		<td>::NTV2_FORMAT_1080p_2K_2997
+	<tr><td><b>2K×1080p 30</b>			<td>::NTV2_FORMAT_1080p_2K_3000
+	<tr><td><b>2K×1080p 4795</b>		<td>::NTV2_FORMAT_1080p_2K_4795_A
+	<tr><td><b>2K×1080p 48</b>			<td>::NTV2_FORMAT_1080p_2K_4800_A
+	<tr><td><b>2K×1080p 50</b>			<td>::NTV2_FORMAT_1080p_2K_5000_A
+	<tr><td><b>2K×1080p 5994</b>		<td>::NTV2_FORMAT_1080p_2K_5994_A
+	<tr><td><b>2K×1080p 60</b>			<td>::NTV2_FORMAT_1080p_2K_6000_A
 </table>
 
 @subsubsection		vidformatsuhd		UHD “Square” Formats

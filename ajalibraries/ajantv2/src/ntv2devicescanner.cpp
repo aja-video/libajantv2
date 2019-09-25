@@ -714,11 +714,8 @@ bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2Fram
 
 	outFormats.clear ();
 
-	for (unsigned formatIndex (1);  formatIndex < NTV2_FBF_NUMFRAMEBUFFERFORMATS;  formatIndex++)
-	{
-		const NTV2FrameBufferFormat	pixelFormat	(static_cast <NTV2FrameBufferFormat> (formatIndex));
+	for (NTV2PixelFormat pixelFormat(NTV2_FBF_FIRST);  pixelFormat < NTV2_FBF_LAST;  pixelFormat = NTV2PixelFormat(pixelFormat+1))
 		if (::NTV2DeviceCanDoFrameBufferFormat (inDeviceID, pixelFormat))
-		{
 			try
 			{
 				outFormats.insert (pixelFormat);
@@ -729,10 +726,8 @@ bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2Fram
 				outFormats.clear ();
 				break;
 			}
-		}
-	}	//	for each pixel format
 
-	assert ((isOkay && !outFormats.empty () ) || (!isOkay && outFormats.empty () ));
+	NTV2_ASSERT ((isOkay && !outFormats.empty () ) || (!isOkay && outFormats.empty () ));
 	return isOkay;
 
 }	//	NTV2DeviceGetSupportedPixelFormats
