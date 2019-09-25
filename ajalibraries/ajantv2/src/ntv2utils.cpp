@@ -8786,7 +8786,7 @@ string NTV2GetFirmwareFolderPath (void)
 		DWORD	bufferSize	(1024);
 		char *	lpData		(new char [bufferSize]);
 
-		if (RegOpenKeyExA (HKEY_CURRENT_USER, "Software\\AJA", NULL, KEY_READ, &hKey) == ERROR_SUCCESS
+		if (RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\AJA", NULL, KEY_READ, &hKey) == ERROR_SUCCESS
 			&& RegQueryValueExA (hKey, "firmwarePath", NULL, NULL, (LPBYTE) lpData, &bufferSize) == ERROR_SUCCESS)
 				return string (lpData);
 		RegCloseKey (hKey);
