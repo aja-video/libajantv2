@@ -1223,24 +1223,18 @@ void NTV2Player4K::ConsumeFrames (void)
     {
 		uint32_t startNum(0), endNum(0);
 		switch(mConfig.fOutputChannel)
-		{
-		case NTV2_CHANNEL1:
-		case NTV2_CHANNEL2:
-			startNum = numACFramesPerChannel * 0;
-			break;
-		case NTV2_CHANNEL3:
-		case NTV2_CHANNEL4:
-			startNum = numACFramesPerChannel * 1;
-			break;
-		case NTV2_CHANNEL5:
-		case NTV2_CHANNEL6:
-			startNum = numACFramesPerChannel * 2;
-			break;
-		case NTV2_CHANNEL7:
-		case NTV2_CHANNEL8:
-			startNum = numACFramesPerChannel * 3;
-			break;
-			
+		{	default:
+			case NTV2_CHANNEL1:
+			case NTV2_CHANNEL2:		startNum = numACFramesPerChannel * 0;		break;
+
+			case NTV2_CHANNEL3:
+			case NTV2_CHANNEL4:		startNum = numACFramesPerChannel * 1;		break;
+
+			case NTV2_CHANNEL5:
+			case NTV2_CHANNEL6:		startNum = numACFramesPerChannel * 2;		break;
+
+			case NTV2_CHANNEL7:
+			case NTV2_CHANNEL8:		startNum = numACFramesPerChannel * 3;		break;
 		}
 		endNum = startNum + numACFramesPerChannel - 1;
         mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  0,	//	0 frameCount: we'll specify start & end frame numbers
