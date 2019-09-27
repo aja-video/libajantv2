@@ -1594,10 +1594,11 @@ void NTV2CCPlayer::PlayoutFrames (void)
 		}	//	else HD video
 
 		CCPLDBG("Xmit pkts: " << packetList);	//	DEBUG: Packet list to be transmitted
+		packetList.SetAllowMultiRTPTransmit(mConfig.fForceRTP & BIT(1));
 		if (mConfig.fForceVanc)	//	Write FB VANC lines...
 			packetList.GetVANCTransmitData (mVideoBuffer,  formatDesc);
 		else if (mConfig.fForceRTP)	//	Force RTP? Non-IP2110 devices won't understand what's in the Anc buffer...
-			packetList.GetIPTransmitData(xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, isProgressive, F2StartLine, (mConfig.fForceRTP & BIT(1)) == 0);
+			packetList.GetIPTransmitData(xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, isProgressive, F2StartLine);
 		else	//	Else use the Anc inserter firmware:
 			packetList.GetTransmitData (xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, isProgressive, F2StartLine);
 
