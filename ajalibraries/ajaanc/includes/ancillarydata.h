@@ -583,35 +583,35 @@ public:
 	**/
 	///@{
 
-	virtual inline uint8_t					GetDID (void) const							{return m_DID;}				///< @return	My Data ID (DID).
-	virtual inline uint8_t					GetSID (void) const							{return m_SID;}				///< @return	My secondary data ID (SID).
+	virtual inline uint8_t					GetDID (void) const							{return m_DID;}							///< @return	My Data ID (DID).
+	virtual inline uint8_t					GetSID (void) const							{return m_SID;}							///< @return	My secondary data ID (SID).
 	virtual inline uint32_t					GetDC (void) const							{return uint32_t(m_payload.size());}	///< @return	My payload data count, in bytes.
-	virtual inline size_t					GetPayloadByteCount (void) const			{return size_t(GetDC());}	///< @return	My current payload byte count.
-	virtual AJAAncillaryDataType			GetAncillaryDataType (void) const			{return m_ancType;}			///< @return	My anc data type (if known).
-	virtual inline uint32_t					GetFrameID (void) const						{return m_frameID;}			///< @return	My anc data type (if known).
+	virtual inline size_t					GetPayloadByteCount (void) const			{return size_t(GetDC());}				///< @return	My current payload byte count.
+	virtual AJAAncillaryDataType			GetAncillaryDataType (void) const			{return m_ancType;}						///< @return	My anc data type (if known).
+	virtual inline uint32_t					GetFrameID (void) const						{return m_frameID;}						///< @return	My anc data type (if known).
 
-	virtual inline const AJAAncillaryDataLocation &		GetDataLocation (void) const	{return m_location;}		///< @brief	My ancillary data "location" within the video stream.
-	virtual inline AJAAncillaryDataCoding	GetDataCoding (void) const					{return m_coding;}			///< @return	The ancillary data coding type (e.g., digital or analog/raw waveform).
-	virtual inline AJAAncillaryBufferFormat	GetBufferFormat (void) const				{return m_bufferFmt;}		///< @return	The ancillary buffer format (e.g., SDI/GUMP, RTP or Unknown).
-	virtual uint8_t							GetChecksum (void) const					{return m_checksum;}		///< @return	My 8-bit checksum.
+	virtual inline const AJAAncillaryDataLocation &		GetDataLocation (void) const	{return m_location;}					///< @brief	My ancillary data "location" within the video stream.
+	virtual inline AJAAncillaryDataCoding	GetDataCoding (void) const					{return m_coding;}						///< @return	The ancillary data coding type (e.g., digital or analog/raw waveform).
+	virtual inline AJAAncillaryBufferFormat	GetBufferFormat (void) const				{return m_bufferFmt;}					///< @return	The ancillary buffer format (e.g., SDI/GUMP, RTP or Unknown).
+	virtual uint8_t							GetChecksum (void) const					{return m_checksum;}					///< @return	My 8-bit checksum.
 
-	virtual inline AJAAncillaryDataLink		GetLocationVideoLink (void) const			{return GetDataLocation().GetDataLink();}		///< @return	My current anc data video link value (A or B).
-	virtual inline AJAAncillaryDataStream	GetLocationDataStream (void) const			{return GetDataLocation().GetDataStream();}		///< @return	My current anc data location's data stream (DS1,DS2...).
-	virtual inline AJAAncillaryDataChannel	GetLocationDataChannel (void) const			{return GetDataLocation().GetDataChannel();}	///< @return	My current anc data location's video stream (Y or C).
-	virtual inline AJAAncillaryDataSpace	GetLocationVideoSpace (void) const			{return GetDataLocation().GetDataSpace();}		///< @return	My current ancillary data space (HANC or VANC).
-	virtual inline uint16_t					GetLocationLineNumber (void) const			{return GetDataLocation().GetLineNumber();}		///< @return	My current frame line number value (SMPTE line numbering).
+	virtual inline AJAAncillaryDataLink		GetLocationVideoLink (void) const			{return GetDataLocation().GetDataLink();}				///< @return	My current anc data video link value (A or B).
+	virtual inline AJAAncillaryDataStream	GetLocationDataStream (void) const			{return GetDataLocation().GetDataStream();}				///< @return	My current anc data location's data stream (DS1,DS2...).
+	virtual inline AJAAncillaryDataChannel	GetLocationDataChannel (void) const			{return GetDataLocation().GetDataChannel();}			///< @return	My current anc data location's video stream (Y or C).
+	virtual inline AJAAncillaryDataSpace	GetLocationVideoSpace (void) const			{return GetDataLocation().GetDataSpace();}				///< @return	My current ancillary data space (HANC or VANC).
+	virtual inline uint16_t					GetLocationLineNumber (void) const			{return GetDataLocation().GetLineNumber();}				///< @return	My current frame line number value (SMPTE line numbering).
 	virtual inline uint16_t					GetLocationHorizOffset (void) const			{return GetDataLocation().GetHorizontalOffset();}		///< @return	My current horizontal offset value.
-	virtual uint16_t						GetStreamInfo (void) const;												///< @return	My 7-bit stream info (if relevant)
+	virtual uint16_t						GetStreamInfo (void) const;																			///< @return	My 7-bit stream info (if relevant)
 
 	/**
 		@return	True if I have valid DataLink/DataStream stream information (rather than unknown).
 	**/
 	virtual inline bool						HasStreamInfo (void) const					{return IS_VALID_AJAAncillaryDataLink(GetLocationVideoLink()) && IS_VALID_AJAAncillaryDataStream(GetLocationDataStream());}
-	virtual inline bool						IsEmpty (void) const						{return GetDC() == 0;}							///< @return	True if I have an empty payload.
-	virtual inline bool						IsLumaChannel (void) const					{return GetDataLocation().IsLumaChannel ();}	///< @return	True if my location component stream is Y (luma).
-	virtual inline bool						IsChromaChannel (void) const				{return GetDataLocation().IsChromaChannel ();}	///< @return	True if my location component stream is C (chroma).
-	virtual inline bool						IsVanc (void) const							{return GetDataLocation().IsVanc ();}			///< @return	True if my location data space is VANC.
-	virtual inline bool						IsHanc (void) const							{return GetDataLocation().IsHanc ();}			///< @return	True if my location data space is HANC.
+	virtual inline bool						IsEmpty (void) const						{return GetDC() == 0;}										///< @return	True if I have an empty payload.
+	virtual inline bool						IsLumaChannel (void) const					{return GetDataLocation().IsLumaChannel ();}				///< @return	True if my location component stream is Y (luma).
+	virtual inline bool						IsChromaChannel (void) const				{return GetDataLocation().IsChromaChannel ();}				///< @return	True if my location component stream is C (chroma).
+	virtual inline bool						IsVanc (void) const							{return GetDataLocation().IsVanc ();}						///< @return	True if my location data space is VANC.
+	virtual inline bool						IsHanc (void) const							{return GetDataLocation().IsHanc ();}						///< @return	True if my location data space is HANC.
 	virtual inline bool						IsDigital (void) const						{return GetDataCoding() == AJAAncillaryDataCoding_Digital;}	///< @return	True if my coding type is digital.
 	virtual inline bool						IsRaw (void) const							{return GetDataCoding() == AJAAncillaryDataCoding_Raw;}		///< @return	True if my coding type is "raw" (i.e., from an digitized waveform).
 
@@ -826,7 +826,7 @@ public:
 		@param[in]	inAddParity		If true, each UDW will have even parity added.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						GetPayloadData (std::vector<uint16_t> & outUDWs, const bool inAddParity = true) const;
+	virtual AJAStatus						GetPayloadData (UWordSequence & outUDWs, const bool inAddParity = true) const;
 	///@}
 
 
@@ -939,9 +939,10 @@ public:
 										On exit, if successful, receives the zero-based starting index number
 										of the first 32-bit word associated with the NEXT packet that may be
 										in the vector.
+		@param[in]	inIgnoreChecksum	If true, ignores checksum failures. Defaults to false (don't ignore).
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						InitWithReceivedData (const std::vector<uint32_t> & inData, uint16_t & inOutStartIndex);
+	virtual AJAStatus						InitWithReceivedData (const ULWordSequence & inData, uint16_t & inOutStartIndex, const bool inIgnoreChecksum = false);
 	///@}
 
 
@@ -972,7 +973,7 @@ public:
 		@param		outData				Specifies the vector to which data will be appended.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						GenerateTransmitData (std::vector<uint16_t> & outData);
+	virtual AJAStatus						GenerateTransmitData (UWordSequence & outData);
 
 	/**
 		@brief		Generates the 32-bit IP packet words necessary for constructing an outgoing IP/RTP stream.
@@ -980,7 +981,7 @@ public:
 										The data will be in network byte order (big-endian).
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						GenerateTransmitData (std::vector<uint32_t> & outData);
+	virtual AJAStatus						GenerateTransmitData (ULWordSequence & outData);
 	///@}
 
 
@@ -1037,7 +1038,7 @@ public:
 	static uint16_t							AddEvenParity (const uint8_t inDataByte);
 
 
-	typedef std::vector<uint16_t>	U16Packet;	///< @brief	An ordered sequence of 10-bit packet words stored in uint16_t values.
+	typedef UWordSequence			U16Packet;	///< @brief	An ordered sequence of 10-bit packet words stored in uint16_t values.
 	typedef std::vector<U16Packet>	U16Packets;	///< @brief	An ordered sequence of zero or more U16Packet values. 
 
 	/**
@@ -1057,7 +1058,7 @@ public:
 		@return		True if successful;  false if failed.
 		@note		This function will not finish parsing the line once a parity, checksum, or overrun error is discovered in the line.
 	**/
-	static bool								GetAncPacketsFromVANCLine (const std::vector<uint16_t> &	inYUV16Line,
+	static bool								GetAncPacketsFromVANCLine (const UWordSequence &			inYUV16Line,
 																		const AncChannelSearchSelect	inChanSelect,
 																		U16Packets &					outRawPackets,
 																		U16Packet &						outWordOffsets);
@@ -1117,7 +1118,7 @@ static inline std::ostream & operator << (std::ostream & inOutStream, const AJAA
 
 
 /**
-	@brief		I represent the header of an RTP network packet.
+	@brief		I represent the header of a SMPTE 2110 compliant RTP Anc network packet.
 **/
 class AJAExport AJARTPAncPayloadHeader
 {
@@ -1151,20 +1152,20 @@ class AJAExport AJARTPAncPayloadHeader
 		@name	Inquiry Methods
 	**/
 	///@{
-		virtual bool			IsNULL (void) const;													///< @return	True if all of my fields are currently zero or false.
-		virtual bool			IsValid (void) const;													///< @return	True if I'm considered "valid" in my current state.
-		virtual inline bool		IsEndOfFieldOrFrame (void) const		{return mMarkerBit;}			///< @return	True if my current Marker Bit value is non-zero;  otherwise false.
-		virtual inline uint8_t	GetPayloadType (void) const				{return mPayloadType;}			///< @return	My current Payload Type value.
-		virtual inline uint32_t	GetSequenceNumber (void) const			{return mSequenceNumber;}		///< @return	My current 32-bit Sequence Number value, in native host byte order.
-		virtual inline uint32_t	GetTimeStamp (void) const				{return mTimeStamp;}			///< @return	My current 32-bit RTP Time Stamp value, in native host byte order.
-		virtual inline uint32_t	GetSyncSourceID (void) const			{return mSyncSourceID;}			///< @return	My current Sync Source ID (SSID) value, in native host byte order.
-		virtual inline uint16_t	GetPacketLength (void) const			{return mPacketLength;}			///< @return	My current RTP packet length, in bytes, in native host byte order.
-		virtual inline uint8_t	GetAncPacketCount (void) const			{return mAncCount;}				///< @return	My current Anc packet count.
-		virtual inline uint8_t	GetFieldSignal (void) const				{return mFieldSignal & 3;}		///< @return	My current 3-bit Field Bits value.
-		virtual inline bool		IsProgressive (void) const				{return mFieldSignal == 0;}		///< @return	True if my current Field Bits indicate Progressive video.
-		virtual inline bool		NoFieldSpecified (void) const			{return IsProgressive();}		///< @return	True if my current Field Bits indicate No Field Specified.
-		virtual inline bool		IsField1 (void) const					{return mFieldSignal == 2;}		///< @return	True if my current Field Bits indicate Field1.
-		virtual inline bool		IsField2 (void) const					{return mFieldSignal == 3;}		///< @return	True if my current Field Bits indicate Field2.
+		virtual bool			IsNULL (void) const;												///< @return	True if all of my fields are currently zero or false.
+		virtual bool			IsValid (void) const;												///< @return	True if I'm considered "valid" in my current state.
+		virtual inline bool		IsEndOfFieldOrFrame (void) const	{return mMarkerBit;}			///< @return	True if my Marker Bit value is non-zero;  otherwise false.
+		virtual inline uint8_t	GetPayloadType (void) const			{return mPayloadType;}			///< @return	The Payload Type value.
+		virtual inline uint32_t	GetSequenceNumber (void) const		{return mSequenceNumber;}		///< @return	The 32-bit Sequence Number value (in native host byte order).
+		virtual inline uint32_t	GetTimeStamp (void) const			{return mTimeStamp;}			///< @return	The 32-bit RTP Time Stamp value (in native host byte order).
+		virtual inline uint32_t	GetSyncSourceID (void) const		{return mSyncSourceID;}			///< @return	The Sync Source ID (SSID) value (in native host byte order).
+		virtual inline uint16_t	GetPayloadLength (void) const		{return mPayloadLength;}		///< @return	The RTP packet payload length, in bytes (native host byte order).
+		virtual inline uint8_t	GetAncPacketCount (void) const		{return mAncCount;}				///< @return	The number of SMPTE 291 Anc packets in this RTP packet payload.
+		virtual inline uint8_t	GetFieldSignal (void) const			{return mFieldSignal & 3;}		///< @return	The 3-bit Field Bits value.
+		virtual inline bool		IsProgressive (void) const			{return mFieldSignal == 0;}		///< @return	True if my Field Bits indicate Progressive video.
+		virtual inline bool		NoFieldSpecified (void) const		{return IsProgressive();}		///< @return	True if my Field Bits indicate No Field Specified.
+		virtual inline bool		IsField1 (void) const				{return mFieldSignal == 2;}		///< @return	True if my Field Bits indicate Field1.
+		virtual inline bool		IsField2 (void) const				{return mFieldSignal == 3;}		///< @return	True if my Field Bits indicate Field2.
 
 		/**
 			@return		True if the RHS payload header state matches my own current state;  otherwise false.
@@ -1251,24 +1252,24 @@ class AJAExport AJARTPAncPayloadHeader
 
 		/**
 			@brief		Sets my Payload Type value.
-			@param[in]	inPayloadType	Specifies my new Payload Type value.
+			@param[in]	inPayloadType	Specifies the new Payload Type value.
 			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
 		**/
 		virtual inline AJARTPAncPayloadHeader &	SetPayloadType (const uint8_t inPayloadType)		{mPayloadType = inPayloadType & 0x7F;  return *this;}
 
 		/**
 			@brief		Sets my RTP Packet Length value.
-			@param[in]	inPktLength		Specifies my new RTP Packet Length value, which must be in native host byte order.
+			@param[in]	inByteCount		Specifies the new RTP Payload Length value, which must be in native host byte order.
 			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
 		**/
-		virtual inline AJARTPAncPayloadHeader &	SetPacketLength (const uint16_t inPktLength)		{mPacketLength		= inPktLength;		return *this;}
+		virtual inline AJARTPAncPayloadHeader &	SetPayloadLength (const uint16_t inByteCount)		{mPayloadLength		= inByteCount;		return *this;}
 
 		/**
-			@brief		Sets my RTP Packet Count value.
-			@param[in]	inAncCount	Specifies my new Payload Type value.
+			@brief		Sets my RTP Anc Packet Count value.
+			@param[in]	inPktCount	Specifies the new Anc Packet Count value.
 			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
 		**/
-		virtual inline AJARTPAncPayloadHeader &	SetAncPacketCount (const uint8_t inAncCount)		{mAncCount			= inAncCount;		return *this;}
+		virtual inline AJARTPAncPayloadHeader &	SetAncPacketCount (const uint8_t inPktCount)		{mAncCount			= inPktCount;		return *this;}
 
 		/**
 			@brief		Sets my RTP Packet Time Stamp value.
@@ -1306,6 +1307,13 @@ class AJAExport AJARTPAncPayloadHeader
 		virtual inline AJARTPAncPayloadHeader &	SetEndOfFieldOrFrame (const bool inIsLast = true)	{mMarkerBit			= inIsLast;			return *this;}
 	///@}
 
+	#if !defined(NTV2_DEPRECATE_15_5)
+		/**
+			@deprecated	To get the full RTP packet length, add GetPayloadLength and GetHeaderByteCount.
+		**/
+		virtual inline uint16_t	GetPacketLength (void) const		{return GetPayloadLength()+GetHeaderByteCount();}
+	#endif	//	!defined(NTV2_DEPRECATE_15_5)
+
 	protected:
 		/**
 			@brief		Resets (part of) my state from a given 32-bit word in an existing RTP header.
@@ -1324,15 +1332,15 @@ class AJAExport AJARTPAncPayloadHeader
 
 		/**
 			@brief		Answers with the 32-bit RTP packet header value for the given position. The returned value will be in network byte order.
-			@param[in]	Specifies which 32-bit word of the RTP packet header to calculate and return. It's a zero-based index number, and must be under 5.
-			@param[out]	Receives the requested 32-bit RTP packet header value. It will be in network byte order.
+			@param[in]	inIndex0	Specifies which 32-bit word of the RTP packet header to calculate and return. It's a zero-based index number, and must be under 5.
+			@param[out]	outULWord	Receives the requested 32-bit RTP packet header value. It will be in network byte order.
 			@return		True if successful;  otherwise false.
 		**/
 		virtual bool			GetPacketHeaderULWordForIndex (const unsigned inIndex0, uint32_t & outULWord) const;
 
 		/**
 			@return		The 32-bit RTP packet header value for a given position. It will be in network byte order.
-			@param[in]	Specifies which 32-bit word of the RTP packet header to calculate and return. It's a zero-based index number, and must be under 5.
+			@param[in]	inIndex0	Specifies which 32-bit word of the RTP packet header to calculate and return. It's a zero-based index number, and must be under 5.
 		**/
 		virtual inline uint32_t	GetPacketHeaderULWordForIndex (const unsigned inIndex0) const		{uint32_t result(0); GetPacketHeaderULWordForIndex(inIndex0, result); return result;}
 
@@ -1346,7 +1354,9 @@ class AJAExport AJARTPAncPayloadHeader
 		uint32_t	mSequenceNumber;///< @brief	Sequence Number (native host byte order) -- Hardware gets/sets this
 		uint32_t	mTimeStamp;		///< @brief	Time Stamp (native host byte order) -- Hardware gets/sets this
 		uint32_t	mSyncSourceID;	///< @brief	Sync Source ID (native host byte order) -- Playout: client sets this
-		uint16_t	mPacketLength;	///< @brief	Total RTP Packet Length, in bytes (native host byte order) -- Playout: WriteRTPPackets sets this
+		uint16_t	mPayloadLength;	///< @brief	RTP Payload Length, in bytes (native host byte order)
+									///			Playout: WriteRTPPackets sets this
+									///			Payload starts at 'C' bit of first SMPTE Anc packet data
 		uint8_t		mAncCount;		///< @brief	Anc Packet Count -- Playout: WriteRTPPackets sets this
 		uint8_t		mFieldSignal;	///< @brief	Field Signal -- Playout: WriteRTPPackets sets this
 };	//	AJARTPAncPayloadHeader
@@ -1496,7 +1506,7 @@ class AJAExport AJARTPAncPacketHeader
 
 /**
 	@brief		Streams a human-readable representation of the given ::AJARTPAncPacketHeader to the given output stream.
-	@param[in]	inOutStream		Specifies the output stream to receive my state information.
+	@param[in]	inOutStrm		Specifies the output stream to receive my state information.
 	@param[in]	inObj			Specifies the ::AJARTPAncPacketHeader of interest.
 	@return		A non-constant reference to the given output stream.
 **/

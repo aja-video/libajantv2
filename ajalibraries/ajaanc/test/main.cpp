@@ -33,6 +33,7 @@ using namespace std::rel_ops;
 static int	gIsVerbose(0);	//	Verbose output?
 static NTV2_POINTER	gGumpBuffers[NTV2_MAX_NUM_VIDEO_FORMATS];
 static NTV2_POINTER gRTPBuffers[NTV2_MAX_NUM_VIDEO_FORMATS];
+static NTV2_POINTER gVanc8Buffers[NTV2_MAX_NUM_VIDEO_FORMATS];
 static NTV2_POINTER gVanc10Buffers[NTV2_MAX_NUM_VIDEO_FORMATS];
 
 
@@ -1505,7 +1506,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 					ULWord						smpteLineF1(0), smpteLineF2(0);
 					bool						isF2	(false);
 //if (vFormat != NTV2_FORMAT_1080p_3000)	continue;	//	TEST 1080p ONLY??
-					LOGMYDEBUG("Trying " << fd);	if (gIsVerbose)	cerr << "Trying " << fd << endl;
+					LOGMYDEBUG("Trying " << (isSingleRTPPkt?"SingleRTP ":"MultiRTP ") << fd);	if (gIsVerbose)	cerr << "Trying " << fd << endl;
 					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
 					if (isF2)
 						smpteLineF2 = smpteLineF1;
@@ -1514,6 +1515,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 
 					//	Make the transmit packets...
 					AJAAncillaryList	txPkts;
+					txPkts.SetAllowMultiRTPTransmit(!isSingleRTPPkt);
 					if (true)
 					{
 						AJAAncDataLoc loc;
@@ -1579,9 +1581,9 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 					NTV2_POINTER	IPF1(2048), IPF2(2048);
 					uint32_t		IPF1bytes(0), IPF2bytes(0);
 LOGMYDEBUG("Call GetIPTransmitDataLength:");
-					SHOULD_SUCCEED(txPkts.GetIPTransmitDataLength (IPF1bytes, IPF2bytes, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2, isSingleRTPPkt));
+					SHOULD_SUCCEED(txPkts.GetIPTransmitDataLength (IPF1bytes, IPF2bytes, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
 LOGMYDEBUG("IPF1bytes=" << DEC(IPF1bytes) << ", IPF2bytes=" << DEC(IPF2bytes) << " -- Call GetIPTransmitData:");
-					SHOULD_SUCCEED(txPkts.GetIPTransmitData (IPF1, IPF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2, isSingleRTPPkt));
+					SHOULD_SUCCEED(txPkts.GetIPTransmitData (IPF1, IPF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
 //cerr << "POST-TRANSMIT:" << endl << "IP F1 (" << DEC(IPF1bytes) << " bytes):" << endl;	IPF1.Dump(cerr, 0, IPF1bytes, 16, 4, 16);
 //if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
 //	{cerr << "IP F2 (" << DEC(IPF2bytes) << " bytes):" << endl;	IPF2.Dump(cerr, 0, IPF2bytes, 16, 4, 16);}
@@ -1594,12 +1596,13 @@ LOGMYDEBUG("IPF1bytes=" << DEC(IPF1bytes) << ", IPF2bytes=" << DEC(IPF2bytes) <<
 
 					//	Receive packets from the IP buffer...
 					AJAAncillaryList	rxPkts;
+					rxPkts.SetAllowMultiRTPReceive(!isSingleRTPPkt);
 					LOGMYDEBUG("Receive packets from IP buffers");
 					SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers(IPF1, IPF2, rxPkts));
 					LOGMYDEBUG("Rx: " << rxPkts);	if (gIsVerbose)	cerr << "Rx: " << rxPkts << endl;
 
 					//	Compare the Tx and Rx packet lists...
-					LOGMYDEBUG("Compare Tx vs Rx packets");
+					LOGMYDEBUG("Compare Tx vs Rx packets for " << fd);
 					const string	cmpInfo	(txPkts.CompareWithInfo(rxPkts, /*ignoreLocation*/false, /*ignoreChecksum*/true));
 					if (!cmpInfo.empty())
 						LOGMYWARN(cmpInfo);
@@ -1612,7 +1615,95 @@ LOGMYDEBUG("IPF1bytes=" << DEC(IPF1bytes) << ", IPF2bytes=" << DEC(IPF2bytes) <<
 
 		static bool BFT_AncListToFBYUV8ToAncList (void)
 		{
-			cerr << "BFT_AncListToFBYUV8ToAncList passed" << endl;
+			const NTV2VideoFormat	vFormats[]	=	{/*NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000,*/ NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
+			LOGMYNOTE("Starting");	if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToRTPToAncList..." << endl;
+			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
+			{
+				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
+				const NTV2FormatDescriptor	fd		(vFormat, NTV2_FBF_8BIT_YCBCR, NTV2_VANCMODE_TALLER);
+				ULWord						smpteLineF1(0), smpteLineF2(0);
+				bool						isF2	(false);
+				if (gIsVerbose)	cerr << "Trying " << ::NTV2VideoFormatToString(vFormat) << endl;
+				SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
+				if (isF2)
+					smpteLineF2 = smpteLineF1;
+				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
+					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
+
+				AJAAncillaryList	txPkts;
+				if (true)
+				{
+					//	Make the transmit packets...
+					AJAAncDataLoc	loc;
+					loc.SetDataLink(AJAAncillaryDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
+					AJAAncillaryData_Cea608_Vanc	pkt608F1;
+					SHOULD_SUCCEED(pkt608F1.SetLine(false/*isF1*/, 10));
+					SHOULD_SUCCEED(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B')));
+					SHOULD_SUCCEED(pkt608F1.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+10 : 10)));
+					SHOULD_SUCCEED(pkt608F1.GeneratePayloadData());
+
+					AJAAncillaryData_Cea608_Vanc	pkt608F2;
+					SHOULD_SUCCEED(pkt608F2.SetLine(true/*isF2*/, 11));
+					SHOULD_SUCCEED(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b')));
+					SHOULD_SUCCEED(pkt608F2.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11)));
+					SHOULD_SUCCEED(pkt608F2.GeneratePayloadData());
+	
+					AJAAncillaryData_HDR_HLG		pktHDR;
+					SHOULD_SUCCEED(pktHDR.GeneratePayloadData());
+	
+					AJAAncillaryData				pktCustomY;
+					SHOULD_SUCCEED(pktCustomY.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(12)));
+					SHOULD_SUCCEED(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital));
+					SHOULD_SUCCEED(pktCustomY.SetDID(0x7A));
+					SHOULD_SUCCEED(pktCustomY.SetSID(0x01));
+					static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0A	};
+					SHOULD_SUCCEED(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY)));
+	
+					AJAAncillaryData				pktCustomC;
+					SHOULD_SUCCEED(pktCustomC.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C).SetLineNumber(13)));
+					SHOULD_SUCCEED(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital));
+					SHOULD_SUCCEED(pktCustomC.SetDID(0x8A));
+					SHOULD_SUCCEED(pktCustomC.SetSID(0x02));
+					static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
+					SHOULD_SUCCEED(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC)));
+	
+					//	Make the transmit packet list...
+					SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F1));
+					if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
+						SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F2));
+					SHOULD_SUCCEED(txPkts.AddAncillaryData(pktHDR));
+					SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomY));
+					SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomC));
+				}
+
+				//	Transmit the packets into the 8-bit YCbCr frame buffer...
+				NTV2_POINTER	vanc8(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
+				vanc8.Fill(uint8_t(0x80));
+				SHOULD_SUCCEED(txPkts.GetVANCTransmitData (vanc8, fd));
+/* cerr << ::NTV2VideoFormatToString(vFormat) << " " << ::NTV2FrameBufferFormatToString(fd.GetPixelFormat()) << " VANC: " << endl;
+for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset++) {
+	NTV2_POINTER	blankLine(fd.GetBytesPerRow());
+	NTV2_POINTER	oneLine(fd.GetRowAddress(vanc8.GetHostPointer(), lineOffset), fd.GetBytesPerRow());
+	blankLine.Fill(uint8_t(0x80));
+	if (!oneLine.IsContentEqual(blankLine)) {
+		cerr << "+" << DEC0N(lineOffset,2) << ": ";  fd.PrintSMPTELineNumber(cerr, lineOffset, false);  cerr << ":" << endl;
+		CNTV2CaptionLogConfig::DumpMemory(oneLine.GetHostPointer(), 32*4, cerr, 16, 4, 32,0,false);
+} } */
+
+				//	NOTE:	This test saves the VANC buffer for use later by BFT_FBYUV8ToAncListToFBYUV8...
+				gVanc8Buffers[vFormat] = NTV2_POINTER(vanc8);
+
+				//	Receive packets from the 8-bit GUMP buffer...
+				AJAAncillaryList	rxPkts;
+				SHOULD_SUCCEED(AJAAncillaryList::SetFromVANCData (vanc8, fd, rxPkts));
+
+				//	Compare the Tx and Rx packet lists...
+				AJAStatus	result	(txPkts.Compare(rxPkts,  false /*do not ignoreLocation*/,  false /*do not ignoreChecksum*/));
+				if (AJA_FAILURE(result))
+					cerr << "MISCOMPARE:" << endl << "Tx: " << txPkts << endl	<< "Rx: " << rxPkts << endl;
+				SHOULD_SUCCEED(result);
+			}	//	for each video format
+			LOGMYNOTE("Passed");	cerr << "BFT_AncListToFBYUV8ToAncList passed" << endl;
 			return true;
 		}
 
@@ -1633,48 +1724,51 @@ LOGMYDEBUG("IPF1bytes=" << DEC(IPF1bytes) << ", IPF2bytes=" << DEC(IPF2bytes) <<
 				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
 					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
 
-				//	Make the transmit packets...
-				AJAAncDataLoc	loc;
-				loc.SetDataLink(AJAAncillaryDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
-				AJAAncillaryData_Cea608_Vanc	pkt608F1;
-				SHOULD_SUCCEED(pkt608F1.SetLine(false/*isF1*/, 10));
-				SHOULD_SUCCEED(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B')));
-				SHOULD_SUCCEED(pkt608F1.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+10 : 10)));
-				SHOULD_SUCCEED(pkt608F1.GeneratePayloadData());
-
-				AJAAncillaryData_Cea608_Vanc	pkt608F2;
-				SHOULD_SUCCEED(pkt608F2.SetLine(true/*isF2*/, 11));
-				SHOULD_SUCCEED(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b')));
-				SHOULD_SUCCEED(pkt608F2.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11)));
-				SHOULD_SUCCEED(pkt608F2.GeneratePayloadData());
-	
-				AJAAncillaryData_HDR_HLG		pktHDR;
-				SHOULD_SUCCEED(pktHDR.GeneratePayloadData());
-	
-				AJAAncillaryData				pktCustomY;
-				SHOULD_SUCCEED(pktCustomY.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(12)));
-				SHOULD_SUCCEED(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital));
-				SHOULD_SUCCEED(pktCustomY.SetDID(0x7A));
-				SHOULD_SUCCEED(pktCustomY.SetSID(0x01));
-				static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0A	};
-				SHOULD_SUCCEED(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY)));
-	
-				AJAAncillaryData				pktCustomC;
-				SHOULD_SUCCEED(pktCustomC.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C).SetLineNumber(13)));
-				SHOULD_SUCCEED(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital));
-				SHOULD_SUCCEED(pktCustomC.SetDID(0x8A));
-				SHOULD_SUCCEED(pktCustomC.SetSID(0x02));
-				static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
-				SHOULD_SUCCEED(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC)));
-	
-				//	Make the transmit packet list...
 				AJAAncillaryList	txPkts;
-				SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F1));
-				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
-					SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F2));
-				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktHDR));
-				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomY));
-				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomC));
+				if (true)
+				{
+					//	Make the transmit packets...
+					AJAAncDataLoc	loc;
+					loc.SetDataLink(AJAAncillaryDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
+					AJAAncillaryData_Cea608_Vanc	pkt608F1;
+					SHOULD_SUCCEED(pkt608F1.SetLine(false/*isF1*/, 10));
+					SHOULD_SUCCEED(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B')));
+					SHOULD_SUCCEED(pkt608F1.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+10 : 10)));
+					SHOULD_SUCCEED(pkt608F1.GeneratePayloadData());
+
+					AJAAncillaryData_Cea608_Vanc	pkt608F2;
+					SHOULD_SUCCEED(pkt608F2.SetLine(true/*isF2*/, 11));
+					SHOULD_SUCCEED(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b')));
+					SHOULD_SUCCEED(pkt608F2.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11)));
+					SHOULD_SUCCEED(pkt608F2.GeneratePayloadData());
+	
+					AJAAncillaryData_HDR_HLG		pktHDR;
+					SHOULD_SUCCEED(pktHDR.GeneratePayloadData());
+	
+					AJAAncillaryData				pktCustomY;
+					SHOULD_SUCCEED(pktCustomY.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(12)));
+					SHOULD_SUCCEED(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital));
+					SHOULD_SUCCEED(pktCustomY.SetDID(0x7A));
+					SHOULD_SUCCEED(pktCustomY.SetSID(0x01));
+					static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0A	};
+					SHOULD_SUCCEED(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY)));
+	
+					AJAAncillaryData				pktCustomC;
+					SHOULD_SUCCEED(pktCustomC.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C).SetLineNumber(13)));
+					SHOULD_SUCCEED(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital));
+					SHOULD_SUCCEED(pktCustomC.SetDID(0x8A));
+					SHOULD_SUCCEED(pktCustomC.SetSID(0x02));
+					static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
+					SHOULD_SUCCEED(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC)));
+	
+					//	Make the transmit packet list...
+					SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F1));
+					if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
+						SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F2));
+					SHOULD_SUCCEED(txPkts.AddAncillaryData(pktHDR));
+					SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomY));
+					SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomC));
+				}
 
 				//	Transmit the packets into the 10-bit YCbCr frame buffer...
 				NTV2_POINTER	vanc10(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
@@ -1816,6 +1910,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				AJAAncDataLoc		loc;
 				//	This test requires a 5K anc buffer for single-RTP, 10K for multiple-RTP:
 				NTV2_POINTER		F1Buffer((isSingleRTPPacket?5:10)*1024), F2Buffer;
+				pkts.SetAllowMultiRTPTransmit(!isSingleRTPPacket);
 				for (UWord lineNum(9);  lineNum < 42;  lineNum++)
 				{
 					for (UWord pktInLine(0);  pktInLine < 8;  pktInLine++)
@@ -1836,15 +1931,14 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 						pkt.SetPayloadData(reinterpret_cast<const UByte*>(&pktNumBE), sizeof(ULWord));
 						pkts.AddAncillaryData(pkt);
 
-						SHOULD_SUCCEED(pkts.GetIPTransmitData (F1Buffer, F2Buffer,
-																/*isProgressive=*/true, /*F2StartLine=*/0,
-																/*inSingleRTPPkt=*/isSingleRTPPacket));
+						SHOULD_SUCCEED(pkts.GetIPTransmitData (F1Buffer, F2Buffer, /*isProgressive=*/true, /*F2StartLine=*/0));
 					}	//	7 pkts per line
 				}	//	for lineNum from 8 thru 41
 
 				//	At this point, pkts should contain 264 packets, but F1Buffer will only have 255 (max for RTP).
 				//	Convert F1Buffer into a comparison packet list...
 				AJAAncillaryList	cmpPkts;
+				cmpPkts.SetAllowMultiRTPReceive(!isSingleRTPPacket);
 				SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers (F1Buffer, F2Buffer, cmpPkts));
 				SHOULD_BE_UNEQUAL(pkts.CountAncillaryData(), cmpPkts.CountAncillaryData());
 
@@ -2066,13 +2160,13 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			//	Set stuff the hardware ordinarily sets...
 			hdrB.SetCCBits(0x5).SetPayloadType(0xF5).SetSequenceNumber(0x12345678).SetTimeStamp(0x6789ABCD).SetSyncSourceID(0xBaadF00d);
 			//	Set stuff the client needs to set...
-			hdrB.SetPacketLength(0x4321).SetAncPacketCount(20).SetField2();
+			hdrB.SetPayloadLength(0x4321).SetAncPacketCount(20).SetField2();
 			SHOULD_BE_TRUE(hdrB.IsValid());
 			SHOULD_BE_UNEQUAL(hdrA, hdrB);
 			SHOULD_BE_FALSE(hdrB.IsField1());
 			SHOULD_BE_TRUE(hdrB.IsField2());
 			SHOULD_BE_FALSE(hdrB.IsProgressive());
-			SHOULD_BE_EQUAL(hdrB.GetPacketLength(), 0x4321);
+			SHOULD_BE_EQUAL(hdrB.GetPayloadLength(), 0x4321);
 			SHOULD_BE_EQUAL(hdrB.GetAncPacketCount(), 20);
 			SHOULD_BE_EQUAL(hdrB.GetSyncSourceID(), 0xBaadF00d);
 			SHOULD_BE_EQUAL(hdrB.GetPayloadType(), 0x75);

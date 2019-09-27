@@ -1201,10 +1201,10 @@ public:
 	**/
 	AJA_VIRTUAL bool		GetInputFrame (const NTV2Channel inChannel, ULWord & outValue);
 
-	AJA_VIRTUAL bool		SetDualLinkOutputEnable (bool inIsEnabled);
+	AJA_VIRTUAL bool		SetDualLinkOutputEnable (const bool inIsEnabled);
 	AJA_VIRTUAL bool		GetDualLinkOutputEnable (bool & outIsEnabled);
 
-	AJA_VIRTUAL bool		SetDualLinkInputEnable (bool inIsEnabled);
+	AJA_VIRTUAL bool		SetDualLinkInputEnable (const bool inIsEnabled);
 	AJA_VIRTUAL bool		GetDualLinkInputEnable (bool & outIsEnabled);
 
 	AJA_VIRTUAL bool		SetVideoLimiting (const NTV2VideoLimiting inValue);
@@ -3797,7 +3797,7 @@ public:
 					the device to 16MB frames, which would result in the capture of several "glitched" frames in Channel 1. To prevent
 					the glitch, call this function to set 16MB frames before starting capture in Channel 1.
 	**/
-	AJA_VIRTUAL bool	SetFrameBufferSize(NTV2Channel inChannel, NTV2Framesize inValue);
+	AJA_VIRTUAL bool	SetFrameBufferSize (const NTV2Channel inChannel, const NTV2Framesize inValue);
 
 	/**
 		@brief		Answers with the frame size currently being used on the device.
@@ -3805,7 +3805,7 @@ public:
 		@param[out]	outValue	Receives the device's current frame size.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetFrameBufferSize (NTV2Channel inChannel, NTV2Framesize & outValue);
+	AJA_VIRTUAL bool	GetFrameBufferSize (const NTV2Channel inChannel, NTV2Framesize & outValue);
 #if !defined(NTV2_DEPRECATE_14_3)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetFrameBufferSize (NTV2Channel inChannel, NTV2Framesize * pOutValue))	{return pOutValue ? GetFrameBufferSize (inChannel, *pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 #endif	//	NTV2_DEPRECATE_14_3

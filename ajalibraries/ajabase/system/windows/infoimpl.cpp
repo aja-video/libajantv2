@@ -531,11 +531,12 @@ AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
             path.append(szPath);
     #endif
             mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = path;
+			path.append("ntv2\\Firmware\\");
+			mValueMap[int(AJA_SystemInfoTag_Path_Firmware)] = path;
         }
 
         mValueMap[int(AJA_SystemInfoTag_Path_Applications)] = "C:\\Program Files\\AJA\\windows\\Applications\\";
         mValueMap[int(AJA_SystemInfoTag_Path_Utilities)] = "C:\\Program Files\\AJA\\windows\\Applications\\";
-        mValueMap[int(AJA_SystemInfoTag_Path_Firmware)] = "C:\\Program Files\\AJA\\windows\\Firmware\\";
 
         ret = AJA_STATUS_SUCCESS;
     } //end if (sections & AJA_SystemInfoSection_Path)
