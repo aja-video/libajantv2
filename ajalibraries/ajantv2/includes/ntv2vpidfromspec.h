@@ -15,6 +15,9 @@
 	@brief	Contains all the information needed to generate a valid VPID
 **/
 
+////VPID Stuff
+///////////////////////////////////////////////////////////////
+
 typedef struct
 {
 	NTV2VideoFormat			videoFormat;			///< @brief	Specifies the format of the video stream.
@@ -36,6 +39,29 @@ typedef struct
 	NTV2VPIDColorimetry		colorimetry;			///< @brief Describes the Colorimetry
 	NTV2VPIDLuminance		luminance;				///< @bried Describes the luminance and color difference
 } VPIDSpec;
+
+typedef enum
+{
+	dualStreamFlag = 1,
+	output3GFlag = 2,
+	output3GbFlag = 4,
+	SMPTE425Flag = 8,
+	DC4KInPath = 16,
+	CSCInPath = 32
+} VPIDFlags;
+
+typedef struct
+{
+	VPIDSpec		vpidSpec;
+	ULWord			deviceNumber;
+	NTV2Channel		videoChannel;
+	ULWord			frameStoreIndex;
+	VPIDFlags		flags;
+	bool			is3G;
+	bool			isDS2;
+	bool			isComplete;
+	ULWord			value;
+} VPIDControl;
 
 /**
 	@brief		Generates a VPID based on the supplied specification.
