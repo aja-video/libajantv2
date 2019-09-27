@@ -135,7 +135,7 @@ void AJATimeLog::PrintDelta(bool bReset)
 {
     uint64_t currTime = AJATime::GetSystemMicroseconds();
     #if defined(AJA_DEBUG) && (AJA_LOGTYPE != 2)
-		AJA_LOG("%s = %lld\n", _tag, currTime-_time));
+		AJA_LOG("%s = %lld\n", _tag.c_str(), currTime-_time);
 	#else
 		if (AJADebug::IsActive(_unit))
 			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
@@ -164,7 +164,7 @@ void AJATimeLog::PrintDelta(const char* addTag, bool bReset)
     uint64_t currTime = AJATime::GetSystemMicroseconds();
     
     #if defined(AJA_DEBUG) && (AJA_LOGTYPE!=2)
-		AJA_LOG("%s-%s = %lld\n", _tag, addTag, currTime-_time);
+		AJA_LOG("%s-%s = %lld\n", _tag.c_str(), addTag, currTime-_time);
 	#else
 		if (AJADebug::IsActive(_unit))
 			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
