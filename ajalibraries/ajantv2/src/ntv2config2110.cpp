@@ -1951,7 +1951,7 @@ bool CNTV2Config2110::GenVideoStreamSDPInfo(stringstream & sdp, const eSFP sfp, 
     sdp << "/" << To_String(config.ttl) << endl;
 
 	// source information
-	sdp << "a=source-filter:incl IN IP4 ";
+	sdp << "a=source-filter: incl IN IP4 ";
 	uint32_t val;
 
 	if (sfp == SFP_2)
@@ -2080,7 +2080,7 @@ bool CNTV2Config2110::GenVideoStreamMultiSDPInfo(stringstream & sdp, char* gmInf
 		sdp << "/" << To_String(config.ttl) << endl;
 
 		// source information
-		sdp << "a=source-filter:incl IN IP4 ";
+		sdp << "a=source-filter: incl IN IP4 ";
 		uint32_t val;
 
 		if (enabledB)
@@ -2182,7 +2182,7 @@ bool CNTV2Config2110::GenAudioStreamSDPInfo(stringstream & sdp, const eSFP sfp, 
     sdp << "/" << To_String(config.ttl) << endl;
 
 	// source information
-	sdp << "a=source-filter:incl IN IP4 ";
+	sdp << "a=source-filter: incl IN IP4 ";
 	uint32_t val;
 
 	if (sfp == SFP_2)
@@ -2288,7 +2288,7 @@ bool CNTV2Config2110::GenAncStreamSDPInfo(stringstream & sdp, const eSFP sfp, co
 	sdp << "/" << To_String(config.ttl) << endl;
 
 	// source information
-	sdp << "a=source-filter:incl IN IP4 ";
+	sdp << "a=source-filter: incl IN IP4 ";
 	uint32_t val;
 
 	if (sfp == SFP_2)

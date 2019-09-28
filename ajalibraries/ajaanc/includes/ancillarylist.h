@@ -29,7 +29,7 @@ typedef std::vector<ULWordSequence>	AJAU32Pkts;						///< @brief	Ordered sequenc
 typedef AJAU32Pkts::const_iterator	AJAU32PktsConstIter;			///< @brief	Handy const iterator over AJAU32Pkts
 typedef AJAU32Pkts::iterator		AJAU32PktsIter;					///< @brief	Handy non-const iterator over AJAU32Pkts
 
-typedef std::vector<uint8_t>		AJAAncPktCounts;				///< @brief	Ordered sequence of SMPTE Anc packet counts
+typedef UByteSequence				AJAAncPktCounts;				///< @brief	Ordered sequence of SMPTE Anc packet counts
 typedef AJAAncPktCounts::const_iterator	AJAAncPktCountsConstIter;	///< @brief	Handy const iterator over AJAAncPktCounts
 class CNTV2Card;
 
@@ -390,16 +390,13 @@ public:	//	INSTANCE METHODS
 										otherwise, specify false. Defaults to true (is progressive).
 		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
 										Defaults to zero (progressive).
-		@param[in]	inSingleRTPPkt		If true (the default), build a single RTP packet per field;
-										otherwise, build a separate RTP packet for each SMPTE Anc packet.
 		@note		This function has the following side-effects:
 					-	Sorts my packets by ascending location before encoding.
 					-	Calls AJAAncillaryData::GenerateTransmitData on each of my packets.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
-																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0,
-																const bool inSingleRTPPkt = true);
+																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0);
 
 	/**
 		@brief		Answers with the number of bytes required to store IP/RTP for my AJAAncillaryData packets in \ref ancrtpformat .
@@ -409,13 +406,52 @@ public:	//	INSTANCE METHODS
 										otherwise, specify false. Defaults to true (is progressive).
 		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
 										Defaults to zero (progressive).
-		@param[in]	inSingleRTPPkt		If true (the default), assume a single RTP packet per field;
-										otherwise, base the calculation on a separate RTP packet for each SMPTE Anc packet.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						GetIPTransmitDataLength (uint32_t & outF1ByteCount, uint32_t & outF2ByteCount,
-																	const bool inIsProgressive = true, const uint32_t inF2StartLine = 0,
-																	const bool inSingleRTPPkt = true);
+																	const bool inIsProgressive = true, const uint32_t inF2StartLine = 0);
+
+	/**
+		@brief		Answers true if multiple RTP packets will be transmitted/encoded.
+					The default behavior is to transmit/encode a single RTP packet.
+		@return		True if multiple RTP packets are allowed to be encoded;  otherwise false.
+	**/
+	virtual inline bool						AllowMultiRTPTransmit (void) const					{return m_xmitMultiRTP;}
+
+	/**
+		@brief		Determines if multiple RTP packets will be encoded for playout (via GetIPTransmitData).
+					The default behavior is to transmit/encode a single RTP packet.
+		@param[in]	inAllow		Specify true to allow encoding more than one RTP packet into the destination Anc buffer.
+								Specify false to transmit/encode a single RTP packet (the default).
+	**/
+	virtual inline void						SetAllowMultiRTPTransmit (const bool inAllow)		{m_xmitMultiRTP = inAllow;}
+
+#if !defined(NTV2_DEPRECATE_15_5)
+	/**
+		@deprecated	Use SetAllowMultiRTPTransmit with the 4-parameter version of this function.
+	**/
+	virtual NTV2_DEPRECATED_f(AJAStatus	GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
+															const bool inIsProgressive, const uint32_t inF2StartLine,
+															const bool inSingleRTPPkt))
+			{	const bool oldValue(AllowMultiRTPTransmit());
+				SetAllowMultiRTPTransmit(!inSingleRTPPkt);
+				const AJAStatus result(GetIPTransmitData(F1Buffer, F2Buffer, inIsProgressive, inF2StartLine));
+				SetAllowMultiRTPTransmit(oldValue);
+				return result;
+			}
+	/**
+		@deprecated	Use SetAllowMultiRTPTransmit with the 4-parameter version of this function.
+	**/
+	virtual NTV2_DEPRECATED_f(AJAStatus	GetIPTransmitDataLength (uint32_t & outF1ByteCount, uint32_t & outF2ByteCount,
+																const bool inIsProgressive, const uint32_t inF2StartLine,
+																const bool inSingleRTPPkt))
+			{	const bool oldValue(AllowMultiRTPTransmit());
+				SetAllowMultiRTPTransmit(!inSingleRTPPkt);
+				const AJAStatus result(GetIPTransmitDataLength(outF1ByteCount, outF2ByteCount, inIsProgressive, inF2StartLine));
+				SetAllowMultiRTPTransmit(oldValue);
+				return result;
+			}
+#endif	//	!defined(NTV2_DEPRECATE_15_5)
 	///@}
 
 
@@ -451,17 +487,47 @@ public:	//	INSTANCE METHODS
 		@param[in]	inLocation			Specifies where the packet was found.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						AddVANCData (const std::vector<uint16_t> & inPacketWords,
+	virtual AJAStatus						AddVANCData (const UWordSequence & inPacketWords,
 														const AJAAncillaryDataLocation & inLocation);
+
+	/**
+		@brief		Answers true if multiple RTP packets are allowed for capture/receive.
+					The default behavior is to process all (multiple) received RTP packets.
+		@return		True if multiple RTP packets are allowed to be decoded;  otherwise false.
+	**/
+	virtual inline bool						AllowMultiRTPReceive (void) const					{return m_rcvMultiRTP;}
+
+	/**
+		@brief		Determines if more than one RTP packet will be processed/decoded (via AddReceivedAncillaryData).
+		@param[in]	inAllow		Specify true to allow processing/decoding multiple RTP packets from the receiving Anc buffer.
+								Specify false to only process/decode the first RTP packet found in the receiving Anc buffer.
+	**/
+	virtual inline void						SetAllowMultiRTPReceive (const bool inAllow)		{m_rcvMultiRTP = inAllow;}
+
+	/**
+		@brief		Answers if checksum errors are to be ignored or not.
+					The default behavior is to not ignore them.
+		@note		This applies to capture/ingest (i.e. AddReceivedAncillaryData methods).
+		@return		True if ignoring checksum errors;  otherwise false.
+	**/
+	virtual inline bool						IgnoreChecksumErrors (void) const	{return m_ignoreCS;}
+
+	/**
+		@brief		Determines if checksum errors encountered during capture/ingest
+					(via AddReceivedAncillaryData) will be ignored or not.
+		@param[in]	inIgnore	Specify true to ignore checksum errors;  otherwise use false.
+	**/
+	virtual inline void						SetIgnoreChecksumErrors (const bool inIgnore)		{m_ignoreCS = inIgnore;}
 
 
 #if !defined(NTV2_DEPRECATE_14_2)
 	/**
 		@deprecated	Use the 2-parameter version of this function instead.
 	**/
-	virtual NTV2_DEPRECATED_f(AJAStatus		AddVANCData (const std::vector<uint16_t> & inPacketWords, const uint16_t inLineNum,
-														const AJAAncillaryDataVideoStream inStream = AJAAncillaryDataChannel_Y));
+	virtual NTV2_DEPRECATED_f(AJAStatus	AddVANCData (const UWordSequence & inPacketWords, const uint16_t inLineNum,
+													const AJAAncillaryDataVideoStream inStream = AJAAncillaryDataChannel_Y));
 #endif	//	!defined(NTV2_DEPRECATE_14_2)
+
 
 	/**
 		@brief		Sends a "ParsePayloadData" command to all of my AJAAncillaryData objects.
@@ -501,13 +567,11 @@ protected:
 		@brief		Appends whatever can be decoded from the given device Anc buffer to the AJAAncillaryList.
 		@param[in]	inAncBuffer			Specifies the Anc buffer to be parsed.
 		@param		outPacketList		The AJAAncillaryList to be appended to, for whatever packets are found in the buffer.
-		@param[in]	inAllowMultiRTP		If true (the default), look for multiple RTP packets in the buffer; otherwise stop after the first.
 		@note		Called by SetFromDeviceAncBuffers, once for the F1 buffer, another time for the F2 buffer.
 		@return		AJA_STATUS_SUCCESS if successful, including if no Anc packets are found and added to the list.
 	**/
 	static AJAStatus						AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBuffer,
-																	AJAAncillaryList & outPacketList,
-																	const bool inAllowMultiRTP = true);
+																	AJAAncillaryList & outPacketList);
 
 	/**
 		@brief		Answers with my F1 & F2 SMPTE anc packets encoded as RTP ULWordSequences.
@@ -519,8 +583,6 @@ protected:
 		@param[in]	inIsProgressive	Specify false for interlace;  true for progressive/Psf.
 		@param[in]	inF2StartLine	For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
 									Defaults to zero (progressive).
-		@param[in]	inSingleRTPPkt	If true, build a single RTP packet per field;
-									otherwise, build a separate RTP packet for each SMPTE Anc packet.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						GetRTPPackets (AJAU32Pkts & outF1U32Pkts,
@@ -528,14 +590,13 @@ protected:
 															AJAAncPktCounts & outF1AncCounts,
 															AJAAncPktCounts & outF2AncCounts,
 															const bool inIsProgressive,
-															const uint32_t inF2StartLine,
-															const bool inSingleRTPPkt);
+															const uint32_t inF2StartLine);
 	/**
 		@brief		Fills the buffer with the given RTP packets.
 		@param		theBuffer		The buffer to be filled. An empty/NULL buffer is permitted, and
 									will copy no data, but instead will return the byte count that
 									otherwise would've been written.
-		@param[out]	outByteCount	Receives the total bytes written into the buffer (or that would
+		@param[out]	outBytesWritten	Receives the total bytes written into the buffer (or that would
 									be written if given a non-NULL buffer).
 		@param[in]	inRTPPkts		The RTP packets, a vector of zero or more RTP ULWordSequences.
 		@param[in]	inAncCounts		The per-RTP-packet anc packet counts.
@@ -551,7 +612,10 @@ protected:
 															const bool inIsProgressive);
 
 private:
-	AJAAncillaryDataList	m_ancList;	///< @brief	My packet list
+	AJAAncillaryDataList	m_ancList;		///< @brief	My packet list
+	bool					m_rcvMultiRTP;	///< @brief	True: Rcv 1 RTP pkt per Anc pkt;  False: Rcv 1 RTP pkt for all Anc pkts
+	bool					m_xmitMultiRTP;	///< @brief	True: Xmit 1 RTP pkt per Anc pkt;  False: Xmit 1 RTP pkt for all Anc pkts
+	bool					m_ignoreCS;		///< @brief	True: ignore checksum errors;  False: don't ignore CS errors
 
 };	//	AJAAncillaryList
 
