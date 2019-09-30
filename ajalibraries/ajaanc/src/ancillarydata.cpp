@@ -463,10 +463,10 @@ AJAStatus AJAAncillaryData::GetPayloadData (uint8_t * pOutData, const uint32_t i
 }
 
 
-AJAStatus AJAAncillaryData::GetPayloadData (vector<uint16_t> & outUDWs, const bool inAddParity) const
+AJAStatus AJAAncillaryData::GetPayloadData (UWordSequence & outUDWs, const bool inAddParity) const
 {
 	AJAStatus	status	(AJA_STATUS_SUCCESS);
-	const vector<uint16_t>::size_type	origSize	(outUDWs.size());
+	const UWordSequence::size_type	origSize	(outUDWs.size());
 	for (ByteVectorConstIter iter(m_payload.begin());  iter != m_payload.end()  &&  AJA_SUCCESS(status);  ++iter)
 	{
 		const uint16_t	UDW	(inAddParity ? AddEvenParity(*iter) : *iter);
@@ -795,10 +795,10 @@ uint8_t AJAAncillaryData::GetGUMPHeaderByte2 (void) const
 }
 
 
-AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint16_t> & outRawComponents)
+AJAStatus AJAAncillaryData::GenerateTransmitData (UWordSequence & outRawComponents)
 {
-	AJAStatus							status		(GeneratePayloadData());
-	const vector<uint16_t>::size_type	origSize	(outRawComponents.size());
+	AJAStatus						status		(GeneratePayloadData());
+	const UWordSequence::size_type	origSize	(outRawComponents.size());
 
 	if (IsDigital())
 	{
@@ -845,11 +845,11 @@ static const uint32_t	gMasks[]	=	{	0xFFC00000, 0x003FF000, 0x00000FFC, 0x0000000
 											0xC0000000, 0x3FF00000, 0x000FFC00, 0x000003FF	};
 
 
-AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData)
+AJAStatus AJAAncillaryData::GenerateTransmitData (ULWordSequence & outData)
 {
-	AJAStatus							status		(GeneratePayloadData());
-	const vector<uint32_t>::size_type	origSize	(outData.size());
-	uint32_t							u32			(0);	//	32-bit value
+	AJAStatus						status		(GeneratePayloadData());
+	const ULWordSequence::size_type	origSize	(outData.size());
+	uint32_t						u32			(0);	//	32-bit value
 
 	if (!IsDigital())
 		{XMT2110WARN("Analog/raw packet skipped/ignored: " << AsString(32));	return AJA_STATUS_SUCCESS;}
@@ -863,7 +863,7 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData)
 		const uint16_t	dc	(AddEvenParity(uint8_t(GetDC())));
 		const uint16_t	cs	(Calculate9BitChecksum());
 
-		vector<uint16_t>	UDW16s;	//	10-bit even-parity words
+		UWordSequence	UDW16s;		//	10-bit even-parity words
 		UDW16s.reserve(GetDC()+4);	//	Reserve DID + SID + DC + UDWs + CS
 		UDW16s.push_back(did);
 		UDW16s.push_back(sid);
@@ -960,7 +960,7 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (vector<uint32_t> & outData)
 }	//	GenerateTransmitData
 
 
-AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32s, uint16_t & inOutU32Ndx)
+AJAStatus AJAAncillaryData::InitWithReceivedData (const ULWordSequence & inU32s, uint16_t & inOutU32Ndx, const bool inIgnoreChecksum)
 {
 	const size_t	numU32s	(inU32s.size());
 
@@ -997,11 +997,11 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 	if (AJA_FAILURE(result))	{RCV2110ERR("SetLocationLineNumber failed, dataLoc: " << dataLoc);	return result;}
 
 	//	Unpack this anc packet...
-	vector<uint16_t>	u16s;	//	10-bit even-parity words
-	bool				gotChecksum		(false);
-	size_t				dataCount		(0);
-	uint32_t			u32				(ENDIAN_32NtoH(inU32s.at(inOutU32Ndx)));
-	const size_t		startU32Ndx		(inOutU32Ndx);
+	UWordSequence	u16s;	//	10-bit even-parity words
+	bool			gotChecksum	(false);
+	size_t			dataCount	(0);
+	uint32_t		u32			(ENDIAN_32NtoH(inU32s.at(inOutU32Ndx)));
+	const size_t	startU32Ndx	(inOutU32Ndx);
 	RCV2110DDBG("u32=" << xHEX0N(u32,8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "]");
 	do
 	{
@@ -1064,7 +1064,12 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 
 	result = SetChecksum(uint8_t(u16s.at(u16s.size()-1)), true /*validate*/);
 	if (AJA_FAILURE(result))
-		{RCV2110ERR("SetChecksum=" << xHEX0N(u16s.at(u16s.size()-1),3) << " failed, calculated=" << xHEX0N(Calculate9BitChecksum(),3));	return result;}
+	{
+		if (inIgnoreChecksum)
+			{RCV2110WARN("SetChecksum=" << xHEX0N(u16s.at(u16s.size()-1),3) << " failed, calculated=" << xHEX0N(Calculate9BitChecksum(),3));  result = AJA_STATUS_SUCCESS;}
+		else
+			{RCV2110ERR("SetChecksum=" << xHEX0N(u16s.at(u16s.size()-1),3) << " failed, calculated=" << xHEX0N(Calculate9BitChecksum(),3));  return result;}
+	}
 	SetBufferFormat(AJAAncillaryBufferFormat_RTP);
 	RCV2110DBG(AsString(64));
 
@@ -1116,7 +1121,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const vector<uint32_t> & inU32
 		u16s.push_back(u16);
 */
 	return result;
-}	//	InitWithReceivedData (const vector<uint32_t>&,uint16_t&)
+}	//	InitWithReceivedData (const ULWordSequence&,uint16_t&)
 
 
 static const string		gEmptyString;
@@ -1502,10 +1507,10 @@ static bool CheckAncParityAndChecksum (const AJAAncillaryData::U16Packet &	inYUV
 }	//	CheckAncParityAndChecksum
 
 
-bool AJAAncillaryData::GetAncPacketsFromVANCLine (const vector<uint16_t> &			inYUV16Line,
+bool AJAAncillaryData::GetAncPacketsFromVANCLine (const UWordSequence &				inYUV16Line,
 													const AncChannelSearchSelect	inChanSelect,
 													U16Packets &					outRawPackets,
-													vector<uint16_t> &				outWordOffsets)
+													UWordSequence &					outWordOffsets)
 {
 	const UWord	wordCountMax	(UWord(inYUV16Line.size ()));
 
@@ -1575,7 +1580,7 @@ bool AJAAncillaryData::GetAncPacketsFromVANCLine (const vector<uint16_t> &			inY
 
 
 bool AJAAncillaryData::Unpack8BitYCbCrToU16sVANCLine (const void * pInYUV8Line,
-														vector<uint16_t> & outU16YUVLine,
+														UWordSequence & outU16YUVLine,
 														const uint32_t inNumPixels)
 {
 	const UByte *	pInYUV8Buffer	(reinterpret_cast <const UByte *> (pInYUV8Line));
@@ -1812,7 +1817,7 @@ AJARTPAncPayloadHeader::AJARTPAncPayloadHeader()
 		mSequenceNumber	(0),		//	Playout: don't care -- hardware sets this
 		mTimeStamp		(0),		//	Playout: don't care -- hardware sets this
 		mSyncSourceID	(0),		//	Playout: client sets this
-		mPacketLength	(0),		//	Playout: WriteIPAncData sets this
+		mPayloadLength	(0),		//	Playout: WriteIPAncData sets this
 		mAncCount		(0),		//	Playout: WriteIPAncData sets this
 		mFieldSignal	(0)			//	Playout: WriteIPAncData sets this
 {
@@ -1846,7 +1851,7 @@ bool AJARTPAncPayloadHeader::GetPacketHeaderULWordForIndex (const unsigned inInd
 
 		case 3:
 		{
-			const uint32_t	u32	((GetSequenceNumber() & 0xFFFF0000) | (GetPacketLength()));
+			const uint32_t	u32	((GetSequenceNumber() & 0xFFFF0000) | (GetPayloadLength()));
 			outULWord = ENDIAN_32HtoN(u32);
 			break;
 		}
@@ -1887,7 +1892,7 @@ bool AJARTPAncPayloadHeader::SetFromPacketHeaderULWordAtIndex(const unsigned inI
 					break;
 
 		case 3:		mSequenceNumber = (u32 & 0xFFFF0000) | (mSequenceNumber & 0x0000FFFF);	//	Replace MS 16 bits
-					mPacketLength = uint16_t(u32 & 0x0000FFFF);
+					mPayloadLength = uint16_t(u32 & 0x0000FFFF);
 					break;
 
 		case 4:		mAncCount = uint8_t((u32 & 0xFF000000) >> 24);
@@ -1960,7 +1965,7 @@ bool AJARTPAncPayloadHeader::operator == (const AJARTPAncPayloadHeader & inRHS) 
 		&&  mSequenceNumber	== inRHS.mSequenceNumber
 		&&  mTimeStamp		== inRHS.mTimeStamp
 		&&  mSyncSourceID	== inRHS.mSyncSourceID
-		&&  mPacketLength	== inRHS.mPacketLength
+		&&  mPayloadLength	== inRHS.mPayloadLength
 		&&  mAncCount		== inRHS.mAncCount
 		&&  mFieldSignal	== inRHS.mFieldSignal;
 }
@@ -1974,7 +1979,7 @@ ostream & AJARTPAncPayloadHeader::Print (ostream & inOutStream) const
 				<< " P=" << mPBit << " X=" << mXBit << " CC=" << DEC(uint16_t(mCCBits))
 				<< " M=" << (IsEndOfFieldOrFrame()?"EOF":"0") << " PT=" << xHEX0N(uint16_t(GetPayloadType()),2)
 				<< " Seq#=" << xHEX0N(GetSequenceNumber(),8) << " TS=" << xHEX0N(GetTimeStamp(),8)
-				<< " SSRC=" << xHEX0N(GetSyncSourceID(),8) << " PktLen=" << DEC(GetPacketLength())
+				<< " SSRC=" << xHEX0N(GetSyncSourceID(),8) << " PayLen=" << DEC(GetPayloadLength())
 				<< " AncCnt=" << DEC(uint16_t(GetAncPacketCount())) << " F=" << FieldSignalToString(GetFieldSignal())
 				<< (IsValid() ? "" : " (invalid)");
 	return inOutStream;
@@ -1982,7 +1987,7 @@ ostream & AJARTPAncPayloadHeader::Print (ostream & inOutStream) const
 
 bool AJARTPAncPayloadHeader::IsNULL(void) const
 {	//	Return TRUE if all of my fields are zero...
-	return !(mVBits || mPBit || mXBit || mCCBits || mMarkerBit || mPayloadType || mSequenceNumber || mTimeStamp || mSyncSourceID || mPacketLength || mAncCount || mFieldSignal);
+	return !(mVBits || mPBit || mXBit || mCCBits || mMarkerBit || mPayloadType || mSequenceNumber || mTimeStamp || mSyncSourceID || mPayloadLength || mAncCount || mFieldSignal);
 }
 
 bool AJARTPAncPayloadHeader::IsValid(void) const

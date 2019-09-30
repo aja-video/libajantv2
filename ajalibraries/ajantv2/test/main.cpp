@@ -16,6 +16,7 @@
 #include "ntv2card.h"
 #include "ntv2debug.h"
 #include "ntv2utils.h"
+#include "ntv2vpid.h"
 
 #if 0
 template
@@ -666,3 +667,181 @@ TEST_SUITE("ntv2devicescanner" * doctest::description("ntv2 device scanner funct
 	}
 
 } // ntv2devicescanner
+
+void ntv2vpid_marker() {}
+
+TEST_SUITE("CNTV2VPID" * doctest::description("CNTV2VPID functions")) {
+	TEST_CASE("CNTV2VPID::GetVPID")
+	{
+		const ULWord data = 0x85c62000;
+		const CNTV2VPID vpid(data);
+		CHECK(vpid.GetVPID() == data);
+	}
+
+	TEST_CASE("CNTV2VPID::GetBitDepth")
+	{
+		{ // 8-bit
+			const ULWord data = 0x85c62000;
+			const CNTV2VPID vpid(data);
+			const VPIDBitDepth& bit_depth = vpid.GetBitDepth();
+			CHECK(bit_depth == VPIDBitDepth_8);
+		}
+		{ // 10-bit
+			const ULWord data = 0x85c62001;
+			const CNTV2VPID vpid(data);
+			const auto& bit_depth = vpid.GetBitDepth();
+			CHECK(bit_depth == VPIDBitDepth_10);
+		}
+		{ // 12-bit
+			const ULWord data = 0x85c62002;
+			const CNTV2VPID vpid(data);
+			const auto& bit_depth = vpid.GetBitDepth();
+			CHECK(bit_depth == VPIDBitDepth_12);
+		}
+		{ // Reserved
+			const ULWord data = 0x85c62003;
+			const CNTV2VPID vpid(data);
+			const auto& bit_depth = vpid.GetBitDepth();
+			CHECK(bit_depth == VPIDBitDepth_Reserved3);
+		}
+	}
+
+	TEST_CASE("CNTV2VPID::SetBitDepth")
+	{
+		{ // 8-bit
+			const ULWord data = 0x8a052201;
+			const VPIDBitDepth bd = VPIDBitDepth_8;
+			CNTV2VPID vpid(data);
+			vpid.SetBitDepth(bd);
+			CHECK(vpid.GetBitDepth() == bd);
+		}
+		{ // 10-bit
+			const ULWord data = 0x8a052200;
+			const VPIDBitDepth bd = VPIDBitDepth_10;
+			CNTV2VPID vpid(data);
+			vpid.SetBitDepth(bd);
+			CHECK(vpid.GetBitDepth() == bd);
+		}
+		{ // 12-bit
+			const ULWord data = 0x8a052200;
+			const VPIDBitDepth bd = VPIDBitDepth_12;
+			CNTV2VPID vpid(data);
+			vpid.SetBitDepth(bd);
+			CHECK(vpid.GetBitDepth() == bd);
+		}
+		{ // Reserved
+			const ULWord data = 0x8a052200;
+			const VPIDBitDepth bd = VPIDBitDepth_Reserved3;
+			CNTV2VPID vpid(data);
+			vpid.SetBitDepth(bd);
+			CHECK(vpid.GetBitDepth() == bd);
+		}
+	}
+
+	TEST_CASE("CNTV2VPID::GetChannel/GetDualLinkChannel")
+	{
+		{ // Channel 1
+			const ULWord data = 0x85c62001;
+			const CNTV2VPID vpid(data);
+			const auto& chan = vpid.GetChannel();
+			CHECK(chan == VPIDChannel_1);
+		}
+		{ // Channel 2
+			const ULWord data = 0x85c62041;
+			const CNTV2VPID vpid(data);
+			const auto& chan = vpid.GetChannel();
+			CHECK(chan == VPIDChannel_2);
+		}
+		{ // Channel 3
+			const ULWord data = 0x85c62081;
+			const CNTV2VPID vpid(data);
+			const auto& chan = vpid.GetChannel();
+			CHECK(chan == VPIDChannel_3);
+		}
+		{ // Channel 4
+			const ULWord data = 0x85c620c1;
+			const CNTV2VPID vpid(data);
+			const auto& chan = vpid.GetChannel();
+			CHECK(chan == VPIDChannel_4);
+		}
+		{ // Channel 5
+			const ULWord data = 0x85c62081;
+			const CNTV2VPID vpid(data);
+			const auto& chan = vpid.GetDualLinkChannel();
+			CHECK(chan == VPIDChannel_5);
+		}
+		{ // Channel 6
+			const ULWord data = 0x85c620a1;
+			const CNTV2VPID vpid(data);
+			const auto& chan = vpid.GetDualLinkChannel();
+			CHECK(chan == VPIDChannel_6);
+		}
+		{ // Channel 7
+			const ULWord data = 0x85c620c1;
+			const CNTV2VPID vpid(data);
+			const auto& chan = vpid.GetDualLinkChannel();
+			CHECK(chan == VPIDChannel_7);
+		}
+		{ // Channel 8
+			const ULWord data = 0x85c620e1;
+			const CNTV2VPID vpid(data);
+			const auto& chan = vpid.GetDualLinkChannel();
+			CHECK(chan == VPIDChannel_8);
+		}
+	}
+
+	TEST_CASE("CNTV2VPID::SetChannel/SetDualLinkChannel")
+	{
+		{ // Get/SetChannel 1-4
+			for (int i = 0; i < 4; i++)
+			{
+				const ULWord data = 0x85c62001;
+				CNTV2VPID vpid(data);
+				vpid.SetChannel((VPIDChannel)i);
+				CHECK(vpid.GetChannel() == (VPIDChannel)i);
+			}
+		}
+		{ // Get/SetDualLinkChannel
+			for (int i = 4; i < 8; i++)
+			{
+				const ULWord data = 0x85c62001;
+				CNTV2VPID vpid(data);
+				vpid.SetDualLinkChannel((VPIDChannel)i);
+				CHECK(vpid.GetDualLinkChannel() == (VPIDChannel)i);
+			}
+		}
+	}
+
+	TEST_CASE("CNTV2VPID GetVideoFormat")
+	{
+		//TODO(paulh): add more checks
+		const ULWord data = 0x85c62001;
+		const CNTV2VPID vpid(data);
+		const auto& fmt = vpid.GetVideoFormat();
+		CHECK(fmt == NTV2_FORMAT_1080p_2997);
+	}
+
+	TEST_CASE("CNTV2VPID::GetStandard")
+	{
+		//TODO(paulh): add more checks
+		const size_t num_stds = 6;
+		const VPIDStandard standards[num_stds] = {
+			VPIDStandard_483_576,
+			VPIDStandard_720,
+			VPIDStandard_1080,
+			VPIDStandard_1080_DualLink_3Gb,
+			VPIDStandard_2160_QuadLink_3Ga,
+			VPIDStandard_2160_Single_12Gb
+		};
+
+		const ULWord vpid_other_bytes = 0xc62001;
+
+		for (int i = 0; i < num_stds; i++)
+		{
+			const uint8_t new_std = (uint8_t)standards[i];
+			ULWord data = (new_std << 24) | vpid_other_bytes;
+			CNTV2VPID vpid(data);
+			CHECK(vpid.GetStandard() == (VPIDStandard)new_std);
+		}
+	}
+} // ntv2vpid

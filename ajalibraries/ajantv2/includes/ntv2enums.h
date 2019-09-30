@@ -3005,38 +3005,38 @@ typedef enum
 	,NTV2_Wgt3GSDIIn4
 	,NTV2_WgtSDIOut1
 	,NTV2_WgtSDIOut2
-	,NTV2_WgtSDIOut3
-	,NTV2_WgtSDIOut4
+	,NTV2_WgtSDIOut3				//	UNUSED
+	,NTV2_WgtSDIOut4				//	UNUSED
 	,NTV2_Wgt3GSDIOut1
 	,NTV2_Wgt3GSDIOut2
 	,NTV2_Wgt3GSDIOut3
 	,NTV2_Wgt3GSDIOut4
-	,NTV2_WgtDualLinkIn1
+	,NTV2_WgtDualLinkIn1			//	UNUSED
 	,NTV2_WgtDualLinkV2In1
 	,NTV2_WgtDualLinkV2In2
-	,NTV2_WgtDualLinkOut1
-	,NTV2_WgtDualLinkOut2
+	,NTV2_WgtDualLinkOut1			//	UNUSED
+	,NTV2_WgtDualLinkOut2			//	UNUSED
 	,NTV2_WgtDualLinkV2Out1
 	,NTV2_WgtDualLinkV2Out2
 	,NTV2_WgtAnalogIn1
 	,NTV2_WgtAnalogOut1
-	,NTV2_WgtAnalogCompositeOut1
+	,NTV2_WgtAnalogCompositeOut1	//	UNUSED
 	,NTV2_WgtHDMIIn1
 	,NTV2_WgtHDMIOut1
 	,NTV2_WgtUpDownConverter1
 	,NTV2_WgtUpDownConverter2
 	,NTV2_WgtMixer1
 	,NTV2_WgtCompression1
-	,NTV2_WgtProcAmp1
+	,NTV2_WgtProcAmp1				//	UNUSED
 	,NTV2_WgtWaterMarker1
 	,NTV2_WgtWaterMarker2
-	,NTV2_WgtIICT1
-	,NTV2_WgtIICT2
-	,NTV2_WgtTestPattern1
+	,NTV2_WgtIICT1					//	UNUSED
+	,NTV2_WgtIICT2					//	UNUSED
+	,NTV2_WgtTestPattern1			//	UNUSED
 	,NTV2_WgtGenLock
-	,NTV2_WgtDCIMixer1
+	,NTV2_WgtDCIMixer1				//	UNUSED
 	,NTV2_WgtMixer2
-	,NTV2_WgtStereoCompressor
+	,NTV2_WgtStereoCompressor		//	UNUSED
 	,NTV2_WgtLUT3
 	,NTV2_WgtLUT4
 	,NTV2_WgtDualLinkV2In3
@@ -3516,8 +3516,11 @@ typedef enum
         NTV2K2_Rec709Matrix		= NTV2_Rec709Matrix,
         NTV2K2_Rec601Matrix		= NTV2_Rec601Matrix,
     #endif	//	!defined (NTV2_DEPRECATE)
-    NTV2_MAX_NUM_ColorSpaceMatrixTypes
+    NTV2_MAX_NUM_ColorSpaceMatrixTypes,
+    NTV2_CSC_MATRIX_TYPE_INVALID = NTV2_MAX_NUM_ColorSpaceMatrixTypes
 } NTV2ColorSpaceMatrixType;
+
+#define	NTV2_IS_VALID_CSC_MATRIX_TYPE(__p__)	((__p__) >= NTV2_Rec709Matrix	&& (__p__) < NTV2_MAX_NUM_ColorSpaceMatrixTypes)
 
 
 typedef enum
