@@ -296,14 +296,14 @@ CGpuVideoIO::Capture()
 	// Signal done with this buffer.
 	mGPUCircularBuffer->EndProduceNextBuffer();
 
+	// Set source frame
+	mBoard->SetInputFrame(mChannel, mFrameNumber);
+
 	// Update source frame
 	mFrameNumber++;
 	if(mFrameNumber > (ULWord)s_iIndexLastSource) {
 		mFrameNumber = s_iIndexFirstSource;
 	}
-
-	// Set source frame
-	mBoard->SetInputFrame(mChannel, mFrameNumber);
 
 	return true;
 }
