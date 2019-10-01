@@ -7094,7 +7094,12 @@ bool CNTV2Card::GetLTCInputPresent (bool & outIsPresent, const UWord inLTCInputN
 	if (inLTCInputNdx)	//	LTCIn2
 		return CNTV2DriverInterface::ReadRegister (kRegLTCStatusControl, outIsPresent, kRegMaskLTC2InPresent, kRegShiftLTC2InPresent);
 	else				//	LTCIn1
-		return CNTV2DriverInterface::ReadRegister (kRegStatus, outIsPresent, kRegMaskLTCInPresent, kRegShiftLTCInPresent);
+	{
+		CNTV2DriverInterface::ReadRegister (kRegStatus, outIsPresent, kRegMaskLTCInPresent, kRegShiftLTCInPresent);
+		if(outIsPresent)
+			return true;
+		return CNTV2DriverInterface::ReadRegister (kRegLTCStatusControl, outIsPresent, kRegMaskLTC1InPresent, kRegShiftLTC1InPresent);
+	}		
 }
 
 bool CNTV2Card::SetLTCEmbeddedOutEnable(bool value)
