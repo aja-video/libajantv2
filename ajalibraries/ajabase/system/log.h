@@ -117,6 +117,65 @@ extern AJALog gLogInit;
 
 #define TAG_SIZE    64
 
+
+
+//---------------------------------------------------------------------------------------------------------------------
+// class AJARunAverage
+// calculates a running average of input values
+//---------------------------------------------------------------------------------------------------------------------
+class AJA_EXPORT AJARunAverage
+{
+protected:
+	explicit AJARunAverage() {}
+	int _samplesTotal;
+	int _sampleSize;
+	std::vector<int> _samples;
+	
+public:
+	AJARunAverage(int sampleSize)
+		{ Resize(sampleSize); }
+	virtual ~AJARunAverage() 
+		{}
+		
+	virtual void Resize(int sampleSize);
+	virtual void Reset();
+	
+	void Mark(int val);
+	int LastValue();
+	int MarkAverage(int val);
+	int Average();
+	int Total()	 		{ return _samplesTotal; } 
+	int SampleSize() 	{ return _sampleSize; }
+};
+
+
+//---------------------------------------------------------------------------------------------------------------------
+// class AJARunTimeAverage
+// calculates a running average of time deltas
+//---------------------------------------------------------------------------------------------------------------------
+class AJA_EXPORT AJARunTimeAverage : public AJARunAverage
+{
+protected:
+	explicit AJARunTimeAverage() {}
+	int _lastTime;
+	
+public:
+	AJARunTimeAverage(int sampleSize);
+	virtual ~AJARunTimeAverage() 
+		{}
+
+	virtual void Resize(int sampleSize);
+	virtual void Reset();
+
+	int MarkDeltaTime();
+	int MarkDeltaAverage();
+};
+
+
+//---------------------------------------------------------------------------------------------------------------------
+//  class AJARunAverage
+//	caculates timelogs
+//---------------------------------------------------------------------------------------------------------------------
 class AJA_EXPORT AJATimeLog
 {
 public:
@@ -169,6 +228,7 @@ public:
 	 *  @param[in]	bReset          true if time is reset after print
 	 */
     void PrintDelta(const char* addedTag, bool bReset=true);
+    void PrintDelta(const std::string& addedTag, bool bReset=true);
 	
     /**
 	 *	Optional print tag, appended tag, and delta-time since last reset.

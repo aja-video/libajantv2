@@ -77,7 +77,105 @@ AJALog::~AJALog()
 
 
 //---------------------------------------------------------------------------------------------------------------------
-//  class AJATimeLog
+// MARK: - AJARunAverage
+//---------------------------------------------------------------------------------------------------------------------
+
+void AJARunAverage::Mark(int val)
+{
+	int index = _samplesTotal++ % _sampleSize;
+	_samples[index] = val;
+}
+
+int AJARunAverage::MarkAverage(int val)
+{
+	Mark(val);
+	return Average();
+}
+
+int AJARunAverage::LastValue()
+{
+	if (_samplesTotal <= 0)
+		{ _samplesTotal = 0; return -1; }
+	int lastIndex = ((_samplesTotal-1) % _sampleSize);
+	return _samples[lastIndex];
+}
+
+int AJARunAverage::Average()
+{
+	int sampleSize = _samplesTotal < _sampleSize ? _samplesTotal : _sampleSize;
+	int average = 0;
+	for (int i=0; i <sampleSize; i++)
+		average += _samples[i];
+		
+	average = average / sampleSize;
+	return average;
+}
+
+void AJARunAverage::Reset()
+{
+	_samplesTotal = 0; 
+	std::fill(_samples.begin(), _samples.end(), 0);
+}
+
+void AJARunAverage::Resize(int sampleSize)
+{
+	_sampleSize = sampleSize;
+	_samples.resize(sampleSize);
+	Reset();
+}
+
+
+
+//---------------------------------------------------------------------------------------------------------------------
+// MARK: - AJARunTimeAverage
+// calculates a running average of time deltas
+//---------------------------------------------------------------------------------------------------------------------
+
+AJARunTimeAverage::AJARunTimeAverage(int sampleSize) : AJARunAverage(sampleSize)
+{
+	Reset();
+}
+
+void AJARunTimeAverage::Resize(int sampleSize)
+{
+	AJARunAverage::Resize(sampleSize);
+	
+}
+
+void AJARunTimeAverage::Reset()
+{
+	AJARunAverage::Reset();
+	_lastTime = AJATime::GetSystemMicroseconds();
+}
+
+// mark current delta-time
+// return delta-time
+int AJARunTimeAverage::MarkDeltaTime()
+{
+    uint64_t currTime = AJATime::GetSystemMicroseconds();
+	int deltaTime = currTime - _lastTime;
+	_lastTime = currTime;
+	
+	Mark(deltaTime);
+	return deltaTime;
+}
+
+// mark current delta-time
+// return running average delta-time
+int AJARunTimeAverage::MarkDeltaAverage()
+{
+    uint64_t currTime = AJATime::GetSystemMicroseconds();
+	int deltaTime = currTime - _lastTime;
+	_lastTime = currTime;
+	
+	Mark(deltaTime);
+	return Average();
+}
+
+
+
+//---------------------------------------------------------------------------------------------------------------------
+//  MARK: - class AJATimeLog
 //---------------------------------------------------------------------------------------------------------------------
 
 AJATimeLog::AJATimeLog()
@@ -87,14 +185,12 @@ AJATimeLog::AJATimeLog()
     Reset();
 }
 
-
 AJATimeLog::AJATimeLog(const char* tag, int unit)
 {	
 	_unit = unit;
 	_tag = tag;
     Reset();
 }
-
 
 AJATimeLog::AJATimeLog(const std::string& tag, int unit)
 {	
@@ -103,18 +199,15 @@ AJATimeLog::AJATimeLog(const std::string& tag, int unit)
     Reset();
 }
 
-
 AJATimeLog::~AJATimeLog()
 {
 }
-
 
 // reset time
 void AJATimeLog::Reset()
 {
     _time = AJATime::GetSystemMicroseconds();
 }
-
 
 // reset time
 void AJATimeLog::PrintReset()
@@ -157,20 +250,25 @@ int32_t AJATimeLog::GetDelta(bool bReset)
 	return delta;
 }
 
-
-// print dela time in micro seconds, use additional tag
-void AJATimeLog::PrintDelta(const char* addTag, bool bReset)
+// print delta time in micro seconds, use additional tag
+void AJATimeLog::PrintDelta(const char* addedTag, bool bReset)
 {
     uint64_t currTime = AJATime::GetSystemMicroseconds();
     
     #if defined(AJA_DEBUG) && (AJA_LOGTYPE!=2)
-		AJA_LOG("%s-%s = %lld\n", _tag.c_str(), addTag, currTime-_time);
+		if (_unit == AJA_DebugUnit_Critical)
+			AJA_LOG("%s-%s = %lld\n", _tag.c_str(), addedTag, currTime-_time);
 	#else
 		if (AJADebug::IsActive(_unit))
 			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
-				"%s-%s = %lld\n", _tag.c_str(), addTag, currTime-_time);
+				"%s-%s = %lld\n", _tag.c_str(), addedTag, currTime-_time);
 	#endif
 
     if (bReset)
         _time = currTime;
+}
+
+void AJATimeLog::PrintDelta(const std::string& addedTag, bool bReset)
+{
+	return PrintDelta(addedTag.c_str(), bReset);
 }
