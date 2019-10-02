@@ -80,31 +80,34 @@ AJALog::~AJALog()
 // MARK: - AJARunAverage
 //---------------------------------------------------------------------------------------------------------------------
 
-void AJARunAverage::Mark(int val)
+void AJARunAverage::Mark(int64_t val)
 {
-	int index = _samplesTotal++ % _sampleSize;
+	uint64_t index = _samplesTotal++ % _sampleSize;
 	_samples[index] = val;
 }
 
-int AJARunAverage::MarkAverage(int val)
+int64_t AJARunAverage::MarkAverage(int64_t val)
 {
 	Mark(val);
 	return Average();
 }
 
-int AJARunAverage::LastValue()
+int64_t AJARunAverage::LastValue()
 {
-	if (_samplesTotal <= 0)
-		{ _samplesTotal = 0; return -1; }
-	int lastIndex = ((_samplesTotal-1) % _sampleSize);
+	if (_samplesTotal == 0)
+		return -1;
+	uint64_t lastIndex = ((_samplesTotal-1) % _sampleSize);
 	return _samples[lastIndex];
 }
 
-int AJARunAverage::Average()
+int64_t AJARunAverage::Average()
 {
-	int sampleSize = _samplesTotal < _sampleSize ? _samplesTotal : _sampleSize;
-	int average = 0;
-	for (int i=0; i <sampleSize; i++)
+	uint64_t sampleSize = _samplesTotal < _sampleSize ? _samplesTotal : _sampleSize;
+	if (sampleSize == 0)
+		return 0;
+	
+	int64_t average = 0;
+	for (uint64_t i=0; i <sampleSize; i++)
 		average += _samples[i];
 		
 	average = average / sampleSize;
@@ -117,7 +120,7 @@ void AJARunAverage::Reset()
 	std::fill(_samples.begin(), _samples.end(), 0);
 }
 
-void AJARunAverage::Resize(int sampleSize)
+void AJARunAverage::Resize(uint64_t sampleSize)
 {
 	_sampleSize = sampleSize;
 	_samples.resize(sampleSize);
@@ -133,10 +136,10 @@ void AJARunAverage::Resize(int sampleSize)
 
 AJARunTimeAverage::AJARunTimeAverage(int sampleSize) : AJARunAverage(sampleSize)
 {
-	_lastTime = (int)AJATime::GetSystemMicroseconds();
+	_lastTime = (int64_t)AJATime::GetSystemMicroseconds();
 }
 
-void AJARunTimeAverage::Resize(int sampleSize)
+void AJARunTimeAverage::Resize(uint64_t sampleSize)
 {
 	AJARunAverage::Resize(sampleSize);
 }
@@ -144,15 +147,15 @@ void AJARunTimeAverage::Resize(int sampleSize)
 void AJARunTimeAverage::Reset()
 {
 	AJARunAverage::Reset();
-	_lastTime = (int)AJATime::GetSystemMicroseconds();
+	_lastTime = (int64_t)AJATime::GetSystemMicroseconds();
 }
 
 // mark current delta-time
 // return delta-time
-int AJARunTimeAverage::MarkDeltaTime()
+int64_t AJARunTimeAverage::MarkDeltaTime()
 {
-    int currTime = (int) AJATime::GetSystemMicroseconds();
-	int deltaTime = currTime - _lastTime;
+    int64_t currTime = (int64_t) AJATime::GetSystemMicroseconds();
+	int64_t deltaTime = currTime - _lastTime;
 	_lastTime = currTime;
 	
 	Mark(deltaTime);
@@ -161,10 +164,10 @@ int AJARunTimeAverage::MarkDeltaTime()
 
 // mark current delta-time
 // return running average delta-time
-int AJARunTimeAverage::MarkDeltaAverage()
+int64_t AJARunTimeAverage::MarkDeltaAverage()
 {
-    int currTime = (int) AJATime::GetSystemMicroseconds();
-	int deltaTime = currTime - _lastTime;
+    int64_t currTime = (int64_t) AJATime::GetSystemMicroseconds();
+	int64_t deltaTime = currTime - _lastTime;
 	_lastTime = currTime;
 	
 	Mark(deltaTime);
@@ -210,28 +213,15 @@ void AJATimeLog::Reset()
 // reset time
 void AJATimeLog::PrintReset()
 {
-    #if defined(AJA_DEBUG) && (AJA_LOGTYPE!=2)
-		AJA_LOG("%s - Reset\n", _tag.c_str());
-	#else
-		if (AJADebug::IsActive(_unit))
-			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
-				"%s - Reset\n", _tag.c_str());
-	#endif
-	
 	Reset();
+	PrintValue(0, "(** Reset **)");
 }
 
 // print dela time in micro seconds
 void AJATimeLog::PrintDelta(bool bReset)
 {
     uint64_t currTime = AJATime::GetSystemMicroseconds();
-    #if defined(AJA_DEBUG) && (AJA_LOGTYPE != 2)
-		AJA_LOG("%s = %lld\n", _tag.c_str(), currTime-_time);
-	#else
-		if (AJADebug::IsActive(_unit))
-			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
-				"%s = %lld\n", _tag.c_str(), currTime-_time);
-	#endif
+    PrintValue(currTime-_time);
     if (bReset)
         _time = currTime;
 }
@@ -244,7 +234,6 @@ int32_t AJATimeLog::GetDelta(bool bReset)
 	int32_t delta = int32_t(currTime - _time);
 	if (bReset)
 		_time = currTime;
-		
 	return delta;
 }
 
@@ -252,21 +241,48 @@ int32_t AJATimeLog::GetDelta(bool bReset)
 void AJATimeLog::PrintDelta(const char* addedTag, bool bReset)
 {
     uint64_t currTime = AJATime::GetSystemMicroseconds();
-    
-    #if defined(AJA_DEBUG) && (AJA_LOGTYPE!=2)
-		if (_unit == AJA_DebugUnit_Critical)
-			AJA_LOG("%s-%s = %lld\n", _tag.c_str(), addedTag, currTime-_time);
-	#else
-		if (AJADebug::IsActive(_unit))
-			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
-				"%s-%s = %lld\n", _tag.c_str(), addedTag, currTime-_time);
-	#endif
-
+    PrintValue(currTime-_time, addedTag);
     if (bReset)
         _time = currTime;
 }
 
-void AJATimeLog::PrintDelta(const std::string& addedTag, bool bReset)
+
+void AJATimeLog::PrintValue(int64_t val)
 {
-	return PrintDelta(addedTag.c_str(), bReset);
+    #if defined(AJA_DEBUG) && (AJA_LOGTYPE!=2)
+		if (_unit == AJA_DebugUnit_Critical)
+			AJA_LOG("%s = %lld\n", _tag.c_str(), val);
+	#else
+		if (AJADebug::IsActive(_unit))
+			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
+				"%s = %lld\n", _tag.c_str(), val);
+	#endif
 }
+
+
+void AJATimeLog::PrintValue(int64_t val, const char* addedTag)
+{
+    #if defined(AJA_DEBUG) && (AJA_LOGTYPE!=2)
+		if (_unit == AJA_DebugUnit_Critical)
+			AJA_LOG("%s-%s = %lld\n", _tag.c_str(), addedTag, val);
+	#else
+		if (AJADebug::IsActive(_unit))
+			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
+				"%s-%s = %lld\n", _tag.c_str(), addedTag, val);
+	#endif
+}
+
+void AJATimeLog::Print(const char* str)
+{
+    #if defined(AJA_DEBUG) && (AJA_LOGTYPE!=2)
+		if (_unit == AJA_DebugUnit_Critical)
+			AJA_LOG("%s-%s\n", _tag.c_str(), str);
+	#else
+		if (AJADebug::IsActive(_unit))
+			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
+				"%s-%s\n", _tag.c_str(), str);
+	#endif
+}
+
+
+
