@@ -133,26 +133,25 @@ void AJARunAverage::Resize(int sampleSize)
 
 AJARunTimeAverage::AJARunTimeAverage(int sampleSize) : AJARunAverage(sampleSize)
 {
-	Reset();
+	_lastTime = (int)AJATime::GetSystemMicroseconds();
 }
 
 void AJARunTimeAverage::Resize(int sampleSize)
 {
 	AJARunAverage::Resize(sampleSize);
-	
 }
 
 void AJARunTimeAverage::Reset()
 {
 	AJARunAverage::Reset();
-	_lastTime = AJATime::GetSystemMicroseconds();
+	_lastTime = (int)AJATime::GetSystemMicroseconds();
 }
 
 // mark current delta-time
 // return delta-time
 int AJARunTimeAverage::MarkDeltaTime()
 {
-    uint64_t currTime = AJATime::GetSystemMicroseconds();
+    int currTime = (int) AJATime::GetSystemMicroseconds();
 	int deltaTime = currTime - _lastTime;
 	_lastTime = currTime;
 	
@@ -164,14 +163,13 @@ int AJARunTimeAverage::MarkDeltaTime()
 // return running average delta-time
 int AJARunTimeAverage::MarkDeltaAverage()
 {
-    uint64_t currTime = AJATime::GetSystemMicroseconds();
+    int currTime = (int) AJATime::GetSystemMicroseconds();
 	int deltaTime = currTime - _lastTime;
 	_lastTime = currTime;
 	
 	Mark(deltaTime);
 	return Average();
 }
-
 
 
 //---------------------------------------------------------------------------------------------------------------------
