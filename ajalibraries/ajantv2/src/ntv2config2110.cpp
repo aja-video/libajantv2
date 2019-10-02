@@ -2233,9 +2233,13 @@ bool CNTV2Config2110::GenAudioStreamSDPInfo(stringstream & sdp, const eSFP sfp, 
     sdp << endl;
 
     if (config. audioPktInterval == PACKET_INTERVAL_125uS)
+    {
         sdp << "a=ptime:0.125" << endl;
+    }
     else
+    {
         sdp << "a=ptime:1.000" << endl;
+    }
 
 	sdp << "a=ts-refclk:ptp=IEEE1588-2008:" << gmInfo << endl;
     sdp << "a=mediaclk:direct=0" << endl;

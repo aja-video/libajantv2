@@ -3458,7 +3458,7 @@ void CNTV2Card::AdjustFor2048x1080(ULWord& numPixels,ULWord& linePitch)
 		case NTV2_FBF_12BIT_RGB_PACKED:
 			numPixels = HD_NUMCOMPONENTPIXELS_2K;
 			linePitch = RGB12PLINEPITCH_2048;
-		
+            break;
 	
 		// Formats not yet supported, kill warning
 		case NTV2_FBF_10BIT_YCBCR_DPX:		
