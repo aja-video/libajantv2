@@ -166,6 +166,7 @@ public:
 
 	virtual void Resize(uint64_t sampleSize);
 	virtual void Reset();
+	virtual void ResetTime();
 
 	int64_t MarkDeltaTime();
 	int64_t MarkDeltaAverage();
