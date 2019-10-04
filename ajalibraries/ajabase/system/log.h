@@ -117,6 +117,65 @@ extern AJALog gLogInit;
 
 #define TAG_SIZE    64
 
+
+
+//---------------------------------------------------------------------------------------------------------------------
+// class AJARunAverage
+// calculates a running average of input values
+//---------------------------------------------------------------------------------------------------------------------
+class AJA_EXPORT AJARunAverage
+{
+protected:
+	explicit AJARunAverage() {}
+	uint64_t _samplesTotal;
+	uint64_t _sampleSize;
+	std::vector<int64_t> _samples;
+	
+public:
+	AJARunAverage(uint64_t sampleSize)
+		{ Resize(sampleSize); }
+	virtual ~AJARunAverage() 
+		{}
+		
+	virtual void Resize(uint64_t sampleSize);
+	virtual void Reset();
+	
+	void Mark(int64_t val);
+	int64_t LastValue();
+	int64_t MarkAverage(int64_t val);
+	int64_t Average();
+	uint64_t Total()	 	{ return _samplesTotal; } 
+	uint64_t SampleSize() 	{ return _sampleSize; }
+};
+
+
+//---------------------------------------------------------------------------------------------------------------------
+// class AJARunTimeAverage
+// calculates a running average of time deltas
+//---------------------------------------------------------------------------------------------------------------------
+class AJA_EXPORT AJARunTimeAverage : public AJARunAverage
+{
+protected:
+	explicit AJARunTimeAverage() {}
+	int64_t _lastTime;
+	
+public:
+	AJARunTimeAverage(int sampleSize);
+	virtual ~AJARunTimeAverage() 
+		{}
+
+	virtual void Resize(uint64_t sampleSize);
+	virtual void Reset();
+
+	int64_t MarkDeltaTime();
+	int64_t MarkDeltaAverage();
+};
+
+
+//---------------------------------------------------------------------------------------------------------------------
+//  class AJARunAverage
+//	caculates timelogs
+//---------------------------------------------------------------------------------------------------------------------
 class AJA_EXPORT AJATimeLog
 {
 public:
@@ -128,47 +187,24 @@ public:
     /**
 	 *	reset timer.
 	 */
-    void Reset();
+	void Reset();
 	
     /**
 	 *	Print does reset along with print
 	 */
     void PrintReset();
-    void PrintResetIf(bool bEnable=true)
-		{
-			if (bEnable)
-				PrintReset();
-		}
+	inline void PrintResetIf(bool bEnable=true)
+		{ if (bEnable) PrintReset(); }
 	
-    /**
-	 *	Print tag and reset message.
-	 *  @param[in]	bReset          true if time is reset after print
-	 */
-    void PrintDelta(bool bReset=true);
-	
-    /**
-	 *	Optional print tag and delta-time since last reset.
-	 *  @param[in]	bEnable         true to print, false inhibits printing
-	 *  @param[in]	bReset          true if time is reset after print
-	 */
-	inline void PrintDeltaIf(bool bEnable, bool bReset=true)
-		{
-			if (bEnable)
-				PrintDelta(bReset);
-		}
-	
-    /**
-	 *	Get delta-time since last reset.
-	 *  @param[in]	bReset          true if time is reset after get
-	 */
-    int32_t GetDelta(bool bReset=true);
-    
     /**
 	 *	Print tag, appended tag, and delta-time since last reset.
 	 *  @param[in]	addedTag        add this tag to current tag
 	 *  @param[in]	bReset          true if time is reset after print
 	 */
+    void PrintDelta(bool bReset=true);
     void PrintDelta(const char* addedTag, bool bReset=true);
+    inline void PrintDelta(const std::string& addedTag, bool bReset=true)
+		{ PrintDelta(addedTag.c_str(), bReset); }
 	
     /**
 	 *	Optional print tag, appended tag, and delta-time since last reset.
@@ -176,20 +212,42 @@ public:
 	 *  @param[in]	addedTag        add this tag to current tag
 	 *  @param[in]	bReset          true if time is reset after print
 	 */
+	inline void PrintDeltaIf(bool bEnable, bool bReset=true)
+		{ if (bEnable) PrintDelta(bReset); }
     inline void PrintDeltaIf(bool bEnable, const char* addedTag, bool bReset=true)
-		{
-			if (bEnable)
-				PrintDelta(addedTag, bReset);
-		}
+		{ if (bEnable) PrintDelta(addedTag, bReset); }
+    inline void PrintDeltaIf(bool bEnable, const std::string& addedTag, bool bReset=true)
+		{ PrintDeltaIf(bEnable, addedTag.c_str(), bReset); }
 		
-	inline int GetUnit() {return _unit; }
+    /**
+	 *	Get delta-time since last reset.
+	 *  @param[in]	bReset          true if time is reset after get
+	 */
+    int32_t GetDelta(bool bReset=true);
+	
+    /**
+	 *	Optional print tag, appended tag, and delta-time since last reset.
+	 *  @param[in]	val        		value to print
+	 *  @param[in]	addedTag        add this tag to current tag
+	 */
+	void PrintValue(int64_t val);
+	void PrintValue(int64_t val, const char* addedTag);
+	inline void PrintValue(int64_t val, const std::string& addedTag)
+		{ PrintValue(val, addedTag.c_str()); }
+	
+	void Print(const char* str);
+	void Print(const std::string& str)
+		{ Print(str.c_str()); }
+		
+	inline int GetUnit() 
+		{ return _unit; }
 	inline void SetUnit(int unit)
 		{ _unit = unit; }
 		
-	inline std::string GetTag() {return _tag;}
+	inline std::string GetTag() 
+		{return _tag;}
 	inline void SetTag(const char* tag)
 		{ _tag = tag; }
-
 	
 protected:
     std::string 	_tag;

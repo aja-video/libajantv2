@@ -1187,11 +1187,22 @@ bool CNTV2SignalRouter::PrintCode (string & outCode, const PrintCodeConfig & inC
 	if (inConfig.mShowComments)
 		for (NTV2ActualConnectionsConstIter pGone(inConfig.mMissing.begin());  pGone != inConfig.mMissing.end();  ++pGone)
 			if (mConnections.find(pGone->first) == mConnections.end())
-				oss << inConfig.mPreCommentText << varName << "." << funcName << " ("
-					<< ::NTV2InputCrosspointIDToString(pGone->first, false) << ", "
-					<< ::NTV2OutputCrosspointIDToString(pGone->second, false) << ");" << inConfig.mPostCommentText
-					<< inConfig.mFieldBreakText << inConfig.mPreCommentText << "Deleted" << inConfig.mPostCommentText
-					<< inConfig.mLineBreakText;
+			{
+				if (inConfig.mUseRouter)
+					oss << inConfig.mPreCommentText << varName << "." << "RemoveConnection" << " ("
+						<< ::NTV2InputCrosspointIDToString(pGone->first, false)
+						<< ", " << ::NTV2OutputCrosspointIDToString(pGone->second, false)
+						<< ");" << inConfig.mPostCommentText
+						<< inConfig.mFieldBreakText << inConfig.mPreCommentText << "Deleted" << inConfig.mPostCommentText
+						<< inConfig.mLineBreakText;
+				else
+					oss << inConfig.mPreCommentText << varName << "." << "Disconnect" << " ("
+						<< ::NTV2InputCrosspointIDToString(pGone->first, false)
+						<< ");" << inConfig.mPostCommentText << inConfig.mFieldBreakText
+						<< inConfig.mPreCommentText
+							<< "From " << ::NTV2OutputCrosspointIDToString(pGone->second, false)
+						<< inConfig.mPostCommentText << inConfig.mLineBreakText;
+			}
 
 	outCode = oss.str();
 	return true;
