@@ -136,7 +136,7 @@ void AJARunAverage::Resize(uint64_t sampleSize)
 
 AJARunTimeAverage::AJARunTimeAverage(int sampleSize) : AJARunAverage(sampleSize)
 {
-	_lastTime = (int64_t)AJATime::GetSystemMicroseconds();
+	ResetTime();
 }
 
 void AJARunTimeAverage::Resize(uint64_t sampleSize)
@@ -147,6 +147,11 @@ void AJARunTimeAverage::Resize(uint64_t sampleSize)
 void AJARunTimeAverage::Reset()
 {
 	AJARunAverage::Reset();
+	ResetTime();
+}
+
+void AJARunTimeAverage::ResetTime()
+{
 	_lastTime = (int64_t)AJATime::GetSystemMicroseconds();
 }
 
