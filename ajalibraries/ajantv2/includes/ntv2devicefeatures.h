@@ -31,6 +31,10 @@
 //	The script writes the implementations into 'ntv2devicefeatures.hpp', and the declarations into 'ntv2devicefeatures.hh'...
 #include "ntv2devicefeatures.hh"
 
+#if defined(__cplusplus) && defined(NTV2_BUILDING_DRIVER)
+extern "C"
+{
+#endif
 /*
 	@return	True if the device having the given ID can do audio output;  otherwise false.
 	@param[in]	inDeviceID	Specifies the NTV2DeviceID of the device of interest.
@@ -296,5 +300,9 @@ AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoRS422N (const NTV2DeviceID inDev
 	#define	NTV2BoardNeedsRoutingSetup					NTV2DeviceNeedsRoutingSetup						///< @deprecated	Use NTV2DeviceNeedsRoutingSetup instead.
 	#define	NTV2BoardSoftwareCanChangeFrameBufferSize	NTV2DeviceSoftwareCanChangeFrameBufferSize		///< @deprecated	Use NTV2DeviceSoftwareCanChangeFrameBufferSize instead.
 #endif	//	!defined (NTV2_DEPRECATE)
+
+#if defined(__cplusplus) && defined(NTV2_BUILDING_DRIVER)
+}
+#endif
 
 #endif	//	NTV2DEVICEFEATURES_H
