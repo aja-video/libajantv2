@@ -2223,6 +2223,20 @@ typedef enum
 } NTV2RGB10Range;
 
 
+typedef enum
+{
+    NTV2_AudioMap12_12,
+    NTV2_AudioMap34_12,
+    NTV2_AudioMap56_12,
+    NTV2_AudioMap78_12,
+    NTV2_AudioMap910_12,
+    NTV2_AudioMap1112_12,
+    NTV2_AudioMap1314_12,
+    NTV2_AudioMap1516_12,
+    NTV2_MAX_NUM_AudioMapSelectEnums
+} NTV2AudioMapSelect;
+
+
 #if !defined(R2_DEPRECATE)
 
 /**
@@ -2334,20 +2348,6 @@ typedef enum
     NTV2_AutoAudioSelect,
     NTV2_MAX_NUM_InputAudioSelectEnums
 } NTV2InputAudioSelect;
-
-
-typedef enum
-{
-    NTV2_AudioMap12_12,
-    NTV2_AudioMap34_12,
-    NTV2_AudioMap56_12,
-    NTV2_AudioMap78_12,
-    NTV2_AudioMap910_12,
-    NTV2_AudioMap1112_12,
-    NTV2_AudioMap1314_12,
-    NTV2_AudioMap1516_12,
-    NTV2_MAX_NUM_AudioMapSelectEnums
-} NTV2AudioMapSelect;
 
 typedef enum
 {
