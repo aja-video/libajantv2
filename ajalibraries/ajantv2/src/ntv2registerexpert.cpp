@@ -3073,10 +3073,15 @@ private:
 		{
 			(void) inRegNum;
 			(void) inDeviceID;
+			const bool	isReceivingRP188 (inRegValue & BIT(16));
+			const bool	isReceivingSelectedRP188 (inRegValue & BIT(17));
+			const bool	isReceivingLTC (inRegValue & BIT(18));
+			const bool	isReceivingVITC (inRegValue & BIT(19));
 			ostringstream	oss;
-			oss	<< "RP188: "	<< ((inRegValue & BIT(16)) ? (inRegValue & BIT(17) ? "Selected" : "Unselected") : "No") << " RP-188 received"	<< endl
-				<< "Bypass: "	<< (inRegValue & BIT(23) ? (inRegValue & BIT(22) ? "SDI In 2" : "SDI In 1") : "Disabled")						<< endl
-				<< "Filter: "	<< HEX0N((inRegValue & 0xFF000000) >> 24, 2)																		<< endl
+			oss	<< "RP188: "	<< (isReceivingRP188 ? (isReceivingSelectedRP188 ? "Selected" : "Unselected") : "No") << " RP-188 received"
+								<< (isReceivingLTC ? " +LTC" : "") << (isReceivingVITC ? " +VITC" : "")					<< endl
+				<< "Bypass: "	<< (inRegValue & BIT(23) ? (inRegValue & BIT(22) ? "SDI In 2" : "SDI In 1") : "Disabled")	<< endl
+				<< "Filter: "	<< HEX0N((inRegValue & 0xFF000000) >> 24, 2)												<< endl
 				<< "DBB: "		<< HEX0N((inRegValue & 0x0000FF00) >> 8, 2) << " " << HEX0N(inRegValue & 0x000000FF, 2);
 			return oss.str();
 		}
