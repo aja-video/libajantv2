@@ -557,7 +557,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 		byte4 |= (luminance << 4);
 	}
 
-	if (NTV2_IS_QUAD_FRAME_FORMAT(outputFormat))
+	if (NTV2_IS_QUAD_FRAME_FORMAT(outputFormat) && pInVPIDSpec->isTwoSampleInterleave)
 	{
 		byte4 |= VPIDAudio_Copied << 2;
 	}
