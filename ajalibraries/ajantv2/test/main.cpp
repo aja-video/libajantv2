@@ -836,7 +836,7 @@ TEST_SUITE("CNTV2VPID" * doctest::description("CNTV2VPID functions")) {
 
 		const ULWord vpid_other_bytes = 0xc62001;
 
-		for (int i = 0; i < num_stds; i++)
+		for (size_t i = 0; i < num_stds; i++)
 		{
 			const uint8_t new_std = (uint8_t)standards[i];
 			ULWord data = (new_std << 24) | vpid_other_bytes;
