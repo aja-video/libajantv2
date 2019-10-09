@@ -41,6 +41,7 @@ typedef enum
 	kVRegAnalogOutputSelect					= VIRTUALREG_START+24,		// Primary, Secondary
 	kVRegAnalogOutputType					= VIRTUALREG_START+25,		// Analog output type
 	kVRegAnalogOutBlackLevel				= VIRTUALREG_START+26,		// Analog output black level
+	kVRegInputSelectUser					= VIRTUALREG_START+27,		// Input 1, Input 2, DualLink, set by user
 
 	// COMMON_VIRTUAL_REGS_MISC
 	kVRegVideoOutPauseMode					= VIRTUALREG_START+40,		// whether we pause on a frame or a field
