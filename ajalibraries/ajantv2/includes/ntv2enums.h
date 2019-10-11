@@ -2254,12 +2254,18 @@ typedef enum					// Virtual Register: kVRegInputSelect - set in services
 } NTV2InputVideoSelect;
 
 
+typedef enum
+{
+    NTV2_AUDIOLEVEL_24dBu,
+    NTV2_AUDIOLEVEL_18dBu,
+    NTV2_AUDIOLEVEL_12dBu,
+    NTV2_AUDIOLEVEL_15dBu,
+    NTV2_MAX_NUM_AudioLevels
+} NTV2AudioLevel;
+
+
 #if !defined(R2_DEPRECATE)
 
-/**
-    @brief	This is a user-pref control (currently only used on the Mac) that allows the user
-            to specify which gamma-correction function to use when converting between RGB and YUV
-**/
 typedef enum					// Deprecated
 {
     NTV2_GammaNone,				// don't change LUTs for gamma (aka "Custom")
@@ -2272,10 +2278,6 @@ typedef enum					// Deprecated
 } NTV2GammaType;
 
 
-/**
-    @brief	This is a user-pref control (currently only used on the Mac) that allows the user
-            to specify which Color Space
-**/
 typedef enum						// Deprecated
 {
     NTV2_ColorSpaceModeAuto,		// Auto Select
@@ -2285,10 +2287,6 @@ typedef enum						// Deprecated
 } NTV2ColorSpaceMode;
 
 
-/**
-    @brief	This is a user-pref control (currently only used on the Mac) that allows the user
-    to specify which RTB range of CSC function to use when converting between RGB and YUV
-**/
 typedef enum						// Deprecated
 {
     NTV2_RGBRangeAuto,				// don't change LUTs for gamma (aka "Custom")
@@ -2296,16 +2294,6 @@ typedef enum						// Deprecated
     NTV2_RGBRangeSMPTE,				// Levels are 64 - 940 (SMPTE)
     NTV2_MAX_NUM_RGBRangeModes
 } NTV2RGBRangeMode;
-
-
-typedef enum
-{
-    NTV2_AUDIOLEVEL_24dBu,
-    NTV2_AUDIOLEVEL_18dBu,
-    NTV2_AUDIOLEVEL_12dBu,
-    NTV2_AUDIOLEVEL_15dBu,
-    NTV2_MAX_NUM_AudioLevels
-} NTV2AudioLevel;
 
 
 typedef enum
@@ -2322,10 +2310,10 @@ typedef enum
 
 typedef enum
 {
-    NTV2_Black75IRE,			//	7.5 IRE (NTSC-US)
-    NTV2_Black0IRE,				//	0   IRE (NTSC-J)
-    NTV2_MAX_NUM_AnalogBlackLevels
-} NTV2AnalogBlackLevel;
+    R2_Black_75IRE,			//	7.5 IRE (NTSC-US)
+    R2_Black_0IRE,				//	0   IRE (NTSC-J)
+    R2_Black_Last
+} R2BlackLevel;
 
 
 #if !defined(NTV2_DEPRECATE_15_1)
@@ -4318,7 +4306,7 @@ typedef enum
 
 
 #if !defined (NTV2_DEPRECATE)
-    typedef		NTV2AnalogBlackLevel				NTV2K2AnalogBlackLevel;				///< @deprecated	Use NTV2AnalogBlackLevel instead.
+    typedef		R2BlackLevel				NTV2K2AnalogBlackLevel;				///< @deprecated	Use R2BlackLevel instead.
     typedef		NTV2AnalogType						NTV2K2AnalogType;					///< @deprecated	Use NTV2AnalogType instead.
     typedef		NTV2Audio2ChannelSelect				NTV2K2Audio2ChannelSelect;			///< @deprecated	Use NTV2Audio2ChannelSelect instead.
     typedef		NTV2Audio4ChannelSelect				NTV2K2Audio4ChannelSelect;			///< @deprecated	Use NTV2Audio4ChannelSelect instead.
@@ -4601,9 +4589,9 @@ typedef enum
     #define		NTV2K2_AnlgXVGA						NTV2_AnlgXVGA						///< @deprecated	Use NTV2_AnlgXVGA instead.
     #define		NTV2K2_AnlgSVideo					NTV2_AnlgSVideo						///< @deprecated	Use NTV2_AnlgSVideo instead.
 
-    //	NTV2AnalogBlackLevel
-    #define		NTV2K2_Black75IRE					NTV2_Black75IRE						///< @deprecated	Use NTV2_Black75IRE instead.
-    #define		NTV2K2_Black0IRE					NTV2_Black0IRE						///< @deprecated	Use NTV2_Black0IRE instead.
+    //	R2BlackLevel
+    #define		NTV2K2_Black75IRE					R2_Black_75IRE						///< @deprecated	Use R2_Black_75IRE instead.
+    #define		NTV2K2_Black0IRE					R2_Black_0IRE						///< @deprecated	Use R2_Black_0IRE instead.
 
     //	NTV2InputVideoSelect
     #define		NTV2K2_Input1Select					NTV2_Input1Select					///< @deprecated	Use NTV2_Input1Select instead.
