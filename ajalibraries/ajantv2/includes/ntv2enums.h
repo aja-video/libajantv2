@@ -2237,13 +2237,30 @@ typedef enum
 } NTV2AudioMapSelect;
 
 
+typedef enum					// Virtual Register: kVRegInputSelect - set in services
+{
+    NTV2_Input1Select,
+    NTV2_Input2Select,
+    NTV2_Input3Select,
+    NTV2_Input4Select,
+    NTV2_Input5Select,
+    NTV2_Input2xDLHDSelect,
+    NTV2_Input2x4kSelect,
+    NTV2_Input4x4kSelect,
+    NTV2_Input2x8kSelect,
+    NTV2_Input4x8kSelect,
+    NTV2_InputAutoSelect,
+    NTV2_MAX_NUM_InputVideoSelectEnums
+} NTV2InputVideoSelect;
+
+
 #if !defined(R2_DEPRECATE)
 
 /**
     @brief	This is a user-pref control (currently only used on the Mac) that allows the user
             to specify which gamma-correction function to use when converting between RGB and YUV
 **/
-typedef enum
+typedef enum					// Deprecated
 {
     NTV2_GammaNone,				// don't change LUTs for gamma (aka "Custom")
     NTV2_GammaAuto,				// switch between Rec 601 for SD and Rec 709 for HD
@@ -2259,7 +2276,7 @@ typedef enum
     @brief	This is a user-pref control (currently only used on the Mac) that allows the user
             to specify which Color Space
 **/
-typedef enum
+typedef enum						// Deprecated
 {
     NTV2_ColorSpaceModeAuto,		// Auto Select
     NTV2_ColorSpaceModeYCbCr,		// YCbCr (TBD, add 420, 444 options)
@@ -2272,7 +2289,7 @@ typedef enum
     @brief	This is a user-pref control (currently only used on the Mac) that allows the user
     to specify which RTB range of CSC function to use when converting between RGB and YUV
 **/
-typedef enum
+typedef enum						// Deprecated
 {
     NTV2_RGBRangeAuto,				// don't change LUTs for gamma (aka "Custom")
     NTV2_RGBRangeFull,				// Levels are 0 - 1023 (Full)
@@ -2322,7 +2339,7 @@ typedef enum
 #endif	//	!defined(NTV2_DEPRECATE_15_1)
 
 
-typedef enum
+typedef enum								// Deprecated
 {
     NTV2_DeviceUnavailable		= -1,
     NTV2_DeviceNotInitialized	= 0,
@@ -2330,7 +2347,7 @@ typedef enum
 } NTV2DeviceInitialized;
 
 
-typedef enum
+typedef enum								// Deprecated
 {
     NTV2_AES_EBU_XLRSelect,
     NTV2_AES_EBU_BNCSelect,
@@ -2396,23 +2413,6 @@ typedef enum								// Deprecated
 	NTV2_4kTransport_12g_6g_1wire,			// 12G / 6G 1wire
     NTV2_MAX_NUM_4kTransportTypes
 } NTV24kTransportType;
-
-
-typedef enum					// used in Virtual Register: kVRegInputSelect
-{
-    NTV2_Input1Select,
-    NTV2_Input2Select,
-    NTV2_Input3Select,
-    NTV2_Input4Select,
-    NTV2_Input5Select,
-    NTV2_Input2xDLHDSelect,
-    NTV2_Input2x4kSelect,
-    NTV2_Input4x4kSelect,
-    NTV2_Input2x8kSelect,
-    NTV2_Input4x8kSelect,
-    NTV2_InputAutoSelect,
-    NTV2_MAX_NUM_InputVideoSelectEnums
-} NTV2InputVideoSelect;
 
 
 typedef enum								// Deprecated
