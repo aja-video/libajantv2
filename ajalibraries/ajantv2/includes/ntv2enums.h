@@ -2310,10 +2310,10 @@ typedef enum
 
 typedef enum
 {
-    R2_Black_75IRE,			//	7.5 IRE (NTSC-US)
-    R2_Black_0IRE,				//	0   IRE (NTSC-J)
-    R2_Black_Last
-} R2BlackLevel;
+    NTV2_Black75IRE,			//	7.5 IRE (NTSC-US)
+    NTV2_Black0IRE,				//	0   IRE (NTSC-J)
+    NTV2_MAX_NUM_AnalogBlackLevels
+} NTV2AnalogBlackLevel;
 
 
 #if !defined(NTV2_DEPRECATE_15_1)
