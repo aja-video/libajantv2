@@ -881,6 +881,7 @@ private:
 		DefineRegName	(kVRegAnalogOutputSelect,				"kVRegAnalogOutputSelect");
 		DefineRegName	(kVRegAnalogOutputType,					"kVRegAnalogOutputType");
 		DefineRegName	(kVRegAnalogOutBlackLevel,				"kVRegAnalogOutBlackLevel");
+		DefineRegName	(kVRegInputSelectUser,					"kVRegInputSelectUser");
 		DefineRegName	(kVRegVideoOutPauseMode,				"kVRegVideoOutPauseMode");
 		DefineRegName	(kVRegPulldownPattern,					"kVRegPulldownPattern");
 		DefineRegName	(kVRegColorSpaceMode,					"kVRegColorSpaceMode");
