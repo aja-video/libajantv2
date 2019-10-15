@@ -616,6 +616,43 @@ bool CNTV2DriverInterface::DriverGetBuildInformation (BUILD_INFO_STRUCT & buildI
 #endif
 }
 
+bool CNTV2DriverInterface::BitstreamLoad (const NTV2_POINTER & inBuffer, bool partial, bool swap)
+{
+	NTV2Bitstream bsMsg (inBuffer, BITSTREAM_LOAD | (partial? BITSTREAM_PARTIAL : 0) | (swap? BITSTREAM_SWAP : 0));
+	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&bsMsg));
+}
+
+bool CNTV2DriverInterface::BitstreamReset (bool configuration, bool interface)
+{
+	NTV2_POINTER inBuffer;
+	
+	NTV2Bitstream bsMsg (inBuffer,
+						 (configuration? BITSTREAM_RESET_CONFIG : 0) |
+						 (interface? BITSTREAM_RESET_MODULE : 0));
+	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&bsMsg));
+}
+
+bool CNTV2DriverInterface::BitstreamStatus (ULWord* regs, ULWord count)
+{
+	NTV2_POINTER inBuffer;
+	ULWord i;
+	
+	if ((regs == NULL) || (count == 0))
+		return false;
+
+	NTV2Bitstream bsMsg (inBuffer, BITSTREAM_READ_REGISTERS);
+	if (!NTV2Message (reinterpret_cast<NTV2_HEADER*>(&bsMsg)))
+		return false;
+
+	if (count > BITSTREAM_MCAP_DATA)
+		count = BITSTREAM_MCAP_DATA;
+
+	for (i = 0; i < count; i++)
+		regs[i] = bsMsg.mRegisters[i];
+
+	return true;
+}
+
 
 //
 // InitMemberVariablesOnOpen

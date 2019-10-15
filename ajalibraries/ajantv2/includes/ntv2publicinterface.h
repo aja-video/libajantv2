@@ -5678,6 +5678,7 @@ typedef enum
 		#define	AUTOCIRCULATE_TYPE_SDISTATS		NTV2_FOURCC ('s', 'd', 'i', 'S')	///< @brief	Identifies NTV2SDIStatus struct
         #define	NTV2_TYPE_AJADEBUGLOGGING		NTV2_FOURCC ('d', 'b', 'l', 'g')	///< @brief	Identifies NTV2DebugLogging struct
 		#define	NTV2_TYPE_AJABUFFERLOCK			NTV2_FOURCC ('b', 'f', 'l', 'k')	///< @brief	Identifies NTV2BufferLock struct
+		#define	NTV2_TYPE_AJABITSTREAM			NTV2_FOURCC ('b', 't', 's', 't')	///< @brief	Identifies NTV2Bitstream struct
 
 		#define	NTV2_IS_VALID_STRUCT_TYPE(_x_)	(	(_x_) == AUTOCIRCULATE_TYPE_STATUS		||	\
 													(_x_) == AUTOCIRCULATE_TYPE_XFER		||	\
@@ -5690,7 +5691,8 @@ typedef enum
                                                     (_x_) == NTV2_TYPE_BANKGETSET			||	\
                                                     (_x_) == NTV2_TYPE_VIRTUAL_DATA_RW		||	\
 													(_x_) == NTV2_TYPE_AJADEBUGLOGGING		||	\
-													(_x_) == NTV2_TYPE_AJABUFFERLOCK	)
+													(_x_) == NTV2_TYPE_AJABUFFERLOCK		||	\
+													(_x_) == NTV2_TYPE_AJABITSTREAM	)
 
 
 		//	NTV2_POINTER FLAGS
@@ -5727,6 +5729,23 @@ typedef enum
 		#define DMABUFFERLOCK_MANUAL				BIT(5)		///< @brief Used in ::NTV2BufferLock to manual page lock buffers.
 		#define DMABUFFERLOCK_MAX_SIZE				BIT(6)		///< @brief Used in ::NTV2BufferLock to set max locked size.
 
+		// Bitstream flags
+		#define BITSTREAM_LOAD						BIT(0)		///< @brief Used in ::NTV2Bitstream to load a bitstream
+		#define BITSTREAM_PARTIAL					BIT(1)		///< @brief Used in ::NTV2Bitstream to indicate a partial bitstream
+		#define BITSTREAM_SWAP						BIT(2)		///< @brief Used in ::NTV2Bitstream to byte swap bitstream data
+		#define BITSTREAM_RESET_CONFIG				BIT(3)		///< @brief Used in ::NTV2Bitstream to reset config
+		#define BITSTREAM_RESET_MODULE				BIT(4)		///< @brief Used in ::NTV2Bitstream to reset module
+		#define BITSTREAM_READ_REGISTERS			BIT(5)		///< @brief Used in ::NTV2Bitstream to get status registers
+
+		// Bitstream registers
+		#define BITSTREAM_EXT_CAP					0			///< @brief Extended capability register
+		#define BITSTREAM_VENDOR_HEADER				1			///< @brief Vender specific register
+		#define BITSTREAM_JTAG_ID					2			///< @brief JTAG ID register
+		#define BITSTREAM_VERSION					3			///< @brief Bitstream version register
+		#define BITSTREAM_MCAP_STATUS				4			///< @brief MCAP status register
+		#define BITSTREAM_MCAP_CONTROL				5			///< @brief MCAP control register
+		#define BITSTREAM_MCAP_DATA					6			///< @brief MCAP data register
+	
 		#if !defined (NTV2_BUILDING_DRIVER)
 			/**
 				Convenience macros that delimit the new structs.
@@ -8100,6 +8119,88 @@ typedef enum
 
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 		NTV2_STRUCT_END (NTV2BufferLock)
+
+
+		/**
+			@brief	This is used for bitstream maintainance.
+			@note	This struct uses a constructor to properly initialize itself.
+					Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
+		**/
+		NTV2_STRUCT_BEGIN (NTV2Bitstream)
+			NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
+				NTV2_POINTER	mBuffer;			///< @brief	Virtual address of a bitstream buffer and its length.
+				ULWord			mFlags;				///< @brief Action flags (lock, unlock, etc)
+				ULWord			mStatus;			///< @brief Action status
+				ULWord			mRegisters[16];		///< @brief Resister data
+				ULWord			mReserved[32];		///< @brief	Reserved for future expansion.
+			NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
+
+			#if !defined (NTV2_BUILDING_DRIVER)
+				/**
+					@name	Construction & Destruction
+				**/
+				///@{
+				explicit	NTV2Bitstream ();		///< @brief	Constructs a default NTV2Bitstream struct.
+				inline		~NTV2Bitstream ()	{}	///< @brief	My default destructor, which frees all allocatable fields that I own.
+
+				/**
+					@brief	Constructs an NTV2Bitstream object to use in a CNTV2Card::LoadBitstream call.
+					@param	inBuffer		Specifies the memory containing the bitstream to load.
+					@param	inFlags			Specifies action flags (partial, swap, etc.).
+				**/
+				explicit	NTV2Bitstream (const NTV2_POINTER & inBuffer, const ULWord inFlags);
+
+				/**
+					@brief	Constructs an NTV2Bitstream object to use in a CNTV2Card::LoadBitstream call.
+					@param	pInBuffer		Specifies a pointer to the host buffer containing the bitstream to load.
+					@param	inByteCount		Specifies a the length of the bitstream in bytes.
+					@param	inFlags			Specifies action flags (partial, swap, etc)
+				**/
+				explicit	NTV2Bitstream (const ULWord * pInBuffer, const ULWord inByteCount, const ULWord inFlags);
+				///@}
+
+				/**
+					@name	Changing
+				**/
+				///@{
+				/**
+					@brief	Sets the buffer to lock for use in a subsequent call to CNTV2Card::LoadBitstream.
+					@param	inBuffer		Specifies the memory containing the bitstream to load.
+					@return	True if successful;  otherwise false.
+				**/
+				bool		SetBuffer (const NTV2_POINTER & inBuffer);
+
+				/**
+					@brief	Sets the buffer to lock for use in a subsequent call to CNTV2Card::LoadBitstream.
+					@param	pInBuffer			Specifies a pointer to the host buffer contiaining the bitstread to load.
+					@param	inByteCount			Specifies a the length of the buffer to load in bytes.
+					@return	True if successful;  otherwise false.
+				**/
+				inline bool	SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)	{return SetBuffer(NTV2_POINTER(pInBuffer, inByteCount));}
+
+				/**
+					@brief	Sets the action flags for use in a subsequent call to CNTV2Card::LoadBitstream.
+					@param	inFlags			Specifies action flags (partial, swap, etc)
+				**/
+				inline void	SetFlags (const ULWord inFlags)		{NTV2_ASSERT_STRUCT_VALID;  mFlags = inFlags;}
+
+				/**
+					@brief	Resets the struct to its initialized state.
+				**/
+				inline void	Clear (void)		{SetBuffer(NTV2_POINTER());}
+				///@}
+
+				/**
+					@brief	Prints a human-readable representation of me to the given output stream.
+					@param	inOutStream		Specifies the output stream to use.
+					@return	A reference to the output stream.
+				**/
+				std::ostream &	Print (std::ostream & inOutStream) const;
+
+				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
+
+			#endif	//	!defined (NTV2_BUILDING_DRIVER)
+		NTV2_STRUCT_END (NTV2Bitstream)
 
 
 		#if !defined (NTV2_BUILDING_DRIVER)
