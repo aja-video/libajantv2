@@ -124,7 +124,7 @@ class CNTV2DemoHevcCommon
         uint32_t                    mRawFileFrameCount;                                    /// Raw file number of frames written
         uint32_t                    mMaxRawFrames;                                         /// Maximum number of frames to write to raw file
 
-};	//	CNTV2DemoCommon
+};	//	CNTV2DemoHevcCommon
 
 
 #endif	//	_NTV2DEMOHEVCCOMMON_H
