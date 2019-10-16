@@ -2259,6 +2259,7 @@ bool CNTV2Card::SetFrameBufferSize (const NTV2Channel inChannel, const NTV2Frame
 // Output: NTV2K2Framesize
 bool CNTV2Card::GetFrameBufferSize (const NTV2Channel inChannel, NTV2Framesize & outValue)
 {
+	outValue = NTV2_FRAMESIZE_INVALID;
 	if (!NTV2_IS_VALID_CHANNEL (inChannel))
 		return false;
 #if defined (NTV2_ALLOW_2MB_FRAMES)

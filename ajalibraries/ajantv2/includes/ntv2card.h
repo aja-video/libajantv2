@@ -742,6 +742,14 @@ public:
 											const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All);
 
 	/**
+		@brief		Answers with the device memory address (offset) of the first byte of the given frame.
+		@param[in]	inFrameNumber	Specifies the zero-based frame number of the frame of interest.
+		@param[in]	inChannel		Specifies the channel of interest (for multi-format).
+		@return		Offset, in bytes, of the first byte of the frame.
+	**/
+	AJA_VIRTUAL ULWord	GetDeviceMemoryOffset (	const UWord inFrameNumber, const NTV2Channel inChannel);
+
+	/**
 		@brief		Answers with the offset and size of an ancillary data region within a device frame buffer.
 		@param[out]	outByteOffset	Receives the byte offset where the ancillary data region starts in the frame buffer,
 									(measured from the start of the frame buffer).
