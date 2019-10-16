@@ -300,6 +300,7 @@ typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief	An alias for NTV2Fram
                                             ||	(__fbf__) == NTV2_FBF_24BIT_BGR					\
                                             ||	(__fbf__) == NTV2_FBF_10BIT_DPX_LE				\
                                             ||	(__fbf__) == NTV2_FBF_48BIT_RGB					\
+                                            ||	(__fbf__) == NTV2_FBF_12BIT_RGB_PACKED			\
                                             ||	(__fbf__) == NTV2_FBF_10BIT_RGB_PACKED			\
                                             ||	(__fbf__) == NTV2_FBF_10BIT_ARGB				\
                                             ||	(__fbf__) == NTV2_FBF_16BIT_ARGB				\
