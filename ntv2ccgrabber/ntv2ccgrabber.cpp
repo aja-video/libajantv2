@@ -41,7 +41,7 @@ static const uint32_t				MAX_ACCUM_FRAME_COUNT		(30);	//	At least every second?
 NTV2CCGrabber::NTV2CCGrabber (const CCGrabberConfig & inConfigData)
 
 	:	mConfig				(inConfigData),
-		mCaptureThread		(NULL),
+		mCaptureThread		(AJA_NULL),
 		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mSavedTaskMode		(NTV2_DISABLE_TASKS),
 		mAudioSystem		(mConfig.fCaptureAudio ? NTV2_AUDIOSYSTEM_1 : NTV2_AUDIOSYSTEM_INVALID),
@@ -57,7 +57,7 @@ NTV2CCGrabber::NTV2CCGrabber (const CCGrabberConfig & inConfigData)
 		mHeadUpDisplayOn	(true),
 		mOutputChannel		(NTV2_CHANNEL_INVALID),
 		mPlayoutFBF			(NTV2_FBF_ARGB),
-		mPlayoutThread		(NULL)
+		mPlayoutThread		(AJA_NULL)
 {
 	::memset (mAVHostBuffer, 0x0, sizeof (mAVHostBuffer));
 	CNTV2CaptionDecoder608::Create(m608Decoder);
@@ -77,7 +77,7 @@ NTV2CCGrabber::~NTV2CCGrabber ()
 	Quit();
 
 	delete mCaptureThread;
-	mCaptureThread = NULL;
+	mCaptureThread = AJA_NULL;
 
 	//	Unsubscribe from input vertical event...
 	mDevice.UnsubscribeInputVerticalEvent(mConfig.fInputChannel);
@@ -193,32 +193,32 @@ AJAStatus NTV2CCGrabber::SetupHostBuffers (const NTV2VideoFormat inVideoFormat)
 	mCaptureBufferSize = ::GetVideoWriteSize (inVideoFormat, mConfig.fPixelFormat, vancMode);
 
 	//	Allocate and add each in-host AVDataBuffer to my circular buffer member variable...
-	for (unsigned bufferNdx (0);  bufferNdx < CIRCULAR_BUFFER_SIZE;  bufferNdx++)
+	for (unsigned bufferNdx(0);  bufferNdx < CIRCULAR_BUFFER_SIZE;  bufferNdx++)
 	{
 		//	Video buffer...
-		mAVHostBuffer [bufferNdx].fVideoBufferSize = mCaptureBufferSize;
-		mAVHostBuffer [bufferNdx].fVideoBuffer = reinterpret_cast <uint32_t *> (new uint8_t [mCaptureBufferSize]);
-		if (mAVHostBuffer [bufferNdx].fVideoBufferSize && mAVHostBuffer [bufferNdx].fVideoBuffer == NULL)
+		mAVHostBuffer[bufferNdx].fVideoBufferSize = mCaptureBufferSize;
+		mAVHostBuffer[bufferNdx].fVideoBuffer = reinterpret_cast <uint32_t *> (new uint8_t [mCaptureBufferSize]);
+		if (mAVHostBuffer[bufferNdx].fVideoBufferSize  &&  !mAVHostBuffer[bufferNdx].fVideoBuffer)
 			return AJA_STATUS_MEMORY;
 
 		//	Audio buffer...
-		mAVHostBuffer [bufferNdx].fAudioBuffer = NULL;		//	No need to capture audio
-		mAVHostBuffer [bufferNdx].fAudioBufferSize = 0;
-		if (mAVHostBuffer [bufferNdx].fAudioBufferSize && mAVHostBuffer [bufferNdx].fAudioBuffer == NULL)
+		mAVHostBuffer[bufferNdx].fAudioBuffer = AJA_NULL;	//	No need to capture audio
+		mAVHostBuffer[bufferNdx].fAudioBufferSize = 0;
+		if (mAVHostBuffer[bufferNdx].fAudioBufferSize  &&  !mAVHostBuffer[bufferNdx].fAudioBuffer)
 			return AJA_STATUS_MEMORY;
 
 		//	Ancillary data buffer --- don't bother allocating storage for it if mConfig.fUseVanc is true, since anc packets will be in Vanc lines in video buffer...
-		mAVHostBuffer [bufferNdx].fAncBuffer = mConfig.fUseVanc ? NULL : reinterpret_cast<uint32_t *>(new uint8_t[NTV2_ANCSIZE_MAX]);
-		mAVHostBuffer [bufferNdx].fAncBufferSize = mConfig.fUseVanc ? 0 : NTV2_ANCSIZE_MAX;
-		if (mAVHostBuffer [bufferNdx].fAncBufferSize && mAVHostBuffer [bufferNdx].fAncBuffer == NULL)
+		mAVHostBuffer[bufferNdx].fAncBuffer = mConfig.fUseVanc ? AJA_NULL : reinterpret_cast<uint32_t *>(new uint8_t[NTV2_ANCSIZE_MAX]);
+		mAVHostBuffer[bufferNdx].fAncBufferSize = mConfig.fUseVanc ? 0 : NTV2_ANCSIZE_MAX;
+		if (mAVHostBuffer[bufferNdx].fAncBufferSize  &&  !mAVHostBuffer[bufferNdx].fAncBuffer)
 			return AJA_STATUS_MEMORY;
-		mAVHostBuffer [bufferNdx].fAncF2Buffer = mConfig.fUseVanc ? NULL : reinterpret_cast<uint32_t *>(new uint8_t[NTV2_ANCSIZE_MAX]);
-		mAVHostBuffer [bufferNdx].fAncF2BufferSize = mConfig.fUseVanc ? 0 : NTV2_ANCSIZE_MAX;
-		if (mAVHostBuffer [bufferNdx].fAncF2BufferSize && mAVHostBuffer [bufferNdx].fAncF2Buffer == NULL)
+		mAVHostBuffer[bufferNdx].fAncF2Buffer = mConfig.fUseVanc ? AJA_NULL : reinterpret_cast<uint32_t *>(new uint8_t[NTV2_ANCSIZE_MAX]);
+		mAVHostBuffer[bufferNdx].fAncF2BufferSize = mConfig.fUseVanc ? 0 : NTV2_ANCSIZE_MAX;
+		if (mAVHostBuffer[bufferNdx].fAncF2BufferSize  &&  !mAVHostBuffer[bufferNdx].fAncF2Buffer)
 			return AJA_STATUS_MEMORY;
 
 		//	Add this buffer to my circular buffer...
-		mAVCircularBuffer.Add (& mAVHostBuffer [bufferNdx]);
+		mAVCircularBuffer.Add(&mAVHostBuffer[bufferNdx]);
 	}	//	for each AVDataBuffer
 
 	return AJA_STATUS_SUCCESS;
@@ -234,25 +234,25 @@ void NTV2CCGrabber::ReleaseHostBuffers (void)
 		if (mAVHostBuffer[bufferNdx].fVideoBuffer)
 		{
 			delete mAVHostBuffer[bufferNdx].fVideoBuffer;
-			mAVHostBuffer[bufferNdx].fVideoBuffer = NULL;
+			mAVHostBuffer[bufferNdx].fVideoBuffer = AJA_NULL;
 		}
 		mAVHostBuffer [bufferNdx].fVideoBufferSize = 0;
 		if (mAVHostBuffer[bufferNdx].fAudioBuffer)
 		{
 			delete mAVHostBuffer[bufferNdx].fAudioBuffer;
-			mAVHostBuffer[bufferNdx].fAudioBuffer = NULL;
+			mAVHostBuffer[bufferNdx].fAudioBuffer = AJA_NULL;
 		}
 		mAVHostBuffer [bufferNdx].fAudioBufferSize = 0;
 		if (mAVHostBuffer[bufferNdx].fAncBuffer)
 		{
 			delete mAVHostBuffer[bufferNdx].fAncBuffer;
-			mAVHostBuffer[bufferNdx].fAncBuffer = NULL;
+			mAVHostBuffer[bufferNdx].fAncBuffer = AJA_NULL;
 		}
 		mAVHostBuffer [bufferNdx].fAncBufferSize = 0;
 		if (mAVHostBuffer[bufferNdx].fAncF2Buffer)
 		{
 			delete mAVHostBuffer[bufferNdx].fAncF2Buffer;
-			mAVHostBuffer[bufferNdx].fAncF2Buffer = NULL;
+			mAVHostBuffer[bufferNdx].fAncF2Buffer = AJA_NULL;
 		}
 		mAVHostBuffer [bufferNdx].fAncF2BufferSize = 0;
 	}	//	for each AVDataBuffer
@@ -326,11 +326,11 @@ AJAStatus NTV2CCGrabber::SetupInputVideo (void)
 			case NTV2_CHANNEL_INVALID:	return AJA_STATUS_BAD_PARAM;
 		}
 
-	//	Configure the input FrameStore...
+	//	Configure the input FrameStore:  pixel format, mode...
 	mDevice.EnableChannel(mConfig.fInputChannel);
-	mDevice.SetMode(mConfig.fInputChannel, NTV2_MODE_INPUT);	//	AutoCirculateInitForInput will do this, but what the heck
+	mDevice.SetMode(mConfig.fInputChannel, NTV2_MODE_INPUT);	//	Optional -- AutoCirculateInitForInput will do this
 	if (!::NTV2DeviceCanDoFrameBufferFormat(mDeviceID, mConfig.fPixelFormat))
-		mConfig.fPixelFormat = NTV2_FBF_8BIT_YCBCR;	//	Override, force '2vuy'
+		{cerr << "## ERROR:  Device '" << deviceName << "' doesn't support '" << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << "'" << endl;  return AJA_STATUS_FAIL;}
 	mDevice.SetFrameBufferFormat(mConfig.fInputChannel, mConfig.fPixelFormat);
 
 	//	Enable and subscribe to the interrupts for the channel to be used...
@@ -404,13 +404,30 @@ static const NTV2WidgetID	g3GSDIOutputs []	=	{	NTV2_Wgt3GSDIOut1,			NTV2_Wgt3GSD
 
 void NTV2CCGrabber::RouteInputSignal (void)
 {
-	const NTV2Channel				sdiInputAsChannel(::NTV2InputSourceToChannel(mConfig.fInputSource));
-	const NTV2OutputCrosspointID	sdiInputOutputXpt(::GetSDIInputOutputXptFromChannel(sdiInputAsChannel));
+	const NTV2Channel		sdiInputAsChannel(::NTV2InputSourceToChannel(mConfig.fInputSource));
+	const NTV2OutputXptID	sdiInputOutputXpt(::GetSDIInputOutputXptFromChannel(sdiInputAsChannel));
+	const NTV2InputXptID	frameBufferInputXpt(::GetFrameBufferInputXptFromChannel (mConfig.fInputChannel));
+	const NTV2InputXptID	cscWidgetVideoInputXpt(::GetCSCInputXptFromChannel(mConfig.fInputChannel));
+	const NTV2OutputXptID	cscWidgetRGBOutputXpt(::GetCSCOutputXptFromChannel(mConfig.fInputChannel, /*inIsKey*/ false, /*inIsRGB*/ true));
+	const NTV2OutputXptID	cscWidgetYUVOutputXpt(::GetCSCOutputXptFromChannel(mConfig.fInputChannel, /*inIsKey*/ false, /*inIsRGB*/ false));
+	const bool				isInputRGB(false);	//	Maybe in the future, we'll accept RGB-over-SDI
+	const bool				isFrameRGB(::IsRGBFormat(mConfig.fPixelFormat));
 	if (!mConfig.fDoMultiFormat)
 		mDevice.ClearRouting();
 
-	//	Route frameStore's input to sdiInput's output
-	mDevice.Connect(::GetFrameBufferInputXptFromChannel(mConfig.fInputChannel), sdiInputOutputXpt);
+	//	Route frameStore's input to sdiInput's output (possibly through CSC, if required)
+	if (isInputRGB && !isFrameRGB)
+	{
+		mDevice.Connect (frameBufferInputXpt,		cscWidgetYUVOutputXpt);	//	Frame store input to CSC widget's YUV output
+		mDevice.Connect (cscWidgetVideoInputXpt,	sdiInputOutputXpt);		//	CSC widget's RGB input to input widget's output
+	}
+	else if (!isInputRGB && isFrameRGB)
+	{
+		mDevice.Connect (frameBufferInputXpt,		cscWidgetRGBOutputXpt);	//	Frame store input to CSC widget's RGB output
+		mDevice.Connect (cscWidgetVideoInputXpt,	sdiInputOutputXpt);		//	CSC widget's YUV input to input widget's output
+	}
+	else
+		mDevice.Connect (frameBufferInputXpt,		sdiInputOutputXpt);		//	Frame store input to input widget's output
 
 	if (!mConfig.fBurnCaptions  &&  !mConfig.fDoMultiFormat)
 	{	//	Not doing caption burn-in:  route E-E pass-thru...
@@ -425,7 +442,14 @@ void NTV2CCGrabber::RouteInputSignal (void)
 				mDevice.SetSDITransmitEnable(chan, true);
 			if (chan != sdiInputAsChannel)
 				if (::NTV2DeviceCanDoWidget(mDeviceID, g3GSDIOutputs[chan])  ||  ::NTV2DeviceCanDoWidget(mDeviceID, gSDIOutputs[chan]))
-					mDevice.Connect(::GetSDIOutputInputXpt(chan), sdiInputOutputXpt);
+				{
+					const NTV2InputXptID sdiOutputInputXpt(::GetSDIOutputInputXpt(chan));
+					if (isInputRGB)
+					{	//	TBD
+					}
+					else
+						mDevice.Connect(sdiOutputInputXpt, sdiInputOutputXpt);
+				}
 		}	//	for each output spigot
 	}	//	if not burning captions and not multiFormat
 	//	NOTE: When burning-in captions, Mixer & Output routing is done by RouteOutputSignal
@@ -549,8 +573,13 @@ void NTV2CCGrabber::CaptureFrames (void)
 			StartPlayThread();						//	Start a new playout thread
 
 		mDevice.AutoCirculateStop(mConfig.fInputChannel);
-		mDevice.AutoCirculateInitForInput(mConfig.fInputChannel, 7, mAudioSystem,
-											AUTOCIRCULATE_WITH_RP188 | (DeviceAncExtractorIsAvailable() ? AUTOCIRCULATE_WITH_ANC : 0));
+		mDevice.AutoCirculateInitForInput(	mConfig.fInputChannel,		//	primary channel
+											mConfig.fFrames.count(),	//	numFrames (zero if specifying range)
+											mAudioSystem,				//	audio system
+											AUTOCIRCULATE_WITH_RP188
+												| (DeviceAncExtractorIsAvailable() ? AUTOCIRCULATE_WITH_ANC : 0),	//	flags
+											1,	//	numChannels to gang
+											mConfig.fFrames.firstFrame(), mConfig.fFrames.lastFrame());
 
 		//	Start AutoCirculate running...
 		mDevice.AutoCirculateStart(mConfig.fInputChannel);
@@ -729,7 +758,7 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 	if (NTV2_IS_SD_VIDEO_FORMAT(inVideoFormat)  &&  (mConfig.fPixelFormat == NTV2_FBF_8BIT_YCBCR || mConfig.fPixelFormat == NTV2_FBF_10BIT_YCBCR))
 	{	//	Anything encoded in Line 21?
 		ULWord	line21RowOffset(0);
-		const UByte *	pLine21(NULL);
+		const UByte *	pLine21(AJA_NULL);
 		formatDesc.GetLineOffsetFromSMPTELine (21, line21RowOffset);
 		pLine21 = reinterpret_cast<const UByte*>(formatDesc.GetRowAddress(mInputXferInfo.acVideoBuffer.GetHostPointer(),
 																			line21RowOffset));
@@ -831,10 +860,10 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 
 	//	Compare CaptionData results...
 	ostringstream		ossCompare;
-	const CaptionData *	p608CaptionData(NULL);
+	const CaptionData *	p608CaptionData(AJA_NULL);
 	if (NTV2_IS_SD_VIDEO_FORMAT(inVideoFormat))
 	{
-		const CaptionData *	pL21CaptionData (NULL);
+		const CaptionData *	pL21CaptionData (AJA_NULL);
 		if (captionDataL21.HasData() && captionDataL21Anc.HasData())
 			if (captionDataL21 != captionDataL21Anc)
 				ossCompare << "L21Vanc != L21Anlg: " << captionDataL21 << " " << captionDataL21Anc << endl;
@@ -1136,7 +1165,7 @@ void NTV2CCGrabber::PlayFrames (void)
 	mDevice.GetVANCMode (vancMode, mConfig.fInputChannel);
 	if (mDevice.AutoCirculateInitForOutput (mOutputChannel, 2))	//	Let A/C reserve buffer pair
 		if (mDevice.AutoCirculateGetStatus (mOutputChannel, acStatus))	//	Find out which buffers we got
-			fbNum = acStatus.acStartFrame;	//	Use them
+			fbNum = ULWord(acStatus.acStartFrame);	//	Use them
 
 	const NTV2FormatDescriptor	formatDesc		(videoFormat, mPlayoutFBF, vancMode);
 	const ULWord				bytesPerRow		(formatDesc.GetBytesPerRow ());
@@ -1170,7 +1199,7 @@ void NTV2CCGrabber::PlayFrames (void)
 		if (pPlayData)
 		{
 			//	"Burn" captions into the host buffer before it gets sent to the AJA device...
-			m608Decoder->BurnCaptions (pActiveBuffer, formatDesc.GetVisibleRasterDimensions(), mPlayoutFBF, bytesPerRow);
+			m608Decoder->BurnCaptions (pActiveBuffer, formatDesc.GetVisibleRasterDimensions(), mPlayoutFBF, UWord(bytesPerRow));
 			m608Decoder->IdleFrame();	//	This is needed for captions that flash/blink
 
 			if (mHeadUpDisplayOn)
@@ -1184,7 +1213,7 @@ void NTV2CCGrabber::PlayFrames (void)
 
 				const ULWord					newErrorTally	(mErrorTally);
 				const NTV2Line21Attributes &	color			(lastErrorTally != newErrorTally ? kRedOnTransparentBG : kGreenOnTransparentBG);
-				CNTV2CaptionRenderer::BurnString (oss.str(), color, pActiveBuffer, formatDesc.GetVisibleRasterDimensions(), mPlayoutFBF, bytesPerRow, 7, 1);
+				CNTV2CaptionRenderer::BurnString (oss.str(), color, pActiveBuffer, formatDesc.GetVisibleRasterDimensions(), mPlayoutFBF, UWord(bytesPerRow), 7, 1);
 				lastErrorTally = newErrorTally;
 
 				const NTV2_RP188	tc	(pPlayData->fRP188Data);
@@ -1192,7 +1221,7 @@ void NTV2CCGrabber::PlayFrames (void)
 				{
 					CRP188	rp188	(tc);
 					CNTV2CaptionRenderer::BurnString (string(rp188.GetRP188CString()), kGreenOnTransparentBG, pActiveBuffer,
-														formatDesc.GetVisibleRasterDimensions(), mPlayoutFBF, bytesPerRow, 8, 1);
+														formatDesc.GetVisibleRasterDimensions(), mPlayoutFBF, UWord(bytesPerRow), 8, 1);
 				}
 			}
 
@@ -1290,6 +1319,7 @@ AJALabelValuePairs CCGrabberConfig::Get (const bool inCompact) const
 	AJASystemInfo::append(result, "Timecode Source",	::NTV2TCIndexToString(fTimecodeSrc, inCompact));
 	AJASystemInfo::append(result, "Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
 	AJASystemInfo::append(result, "Caption Channel",	::NTV2Line21ChannelToStr(fCaptionChannel, inCompact));
+	AJASystemInfo::append(result, "AutoCirc Frames",	fFrames.toString());
 	AJASystemInfo::append(result, "Burn-In Captions",	fBurnCaptions ? "Y" : "N");
 	AJASystemInfo::append(result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
 	AJASystemInfo::append(result, "Use Vanc",			fUseVanc ? "Y" : "N");

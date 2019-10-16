@@ -7,7 +7,10 @@
 #include "ntv2democommon.h"
 #include "ntv2devicescanner.h"
 #include "ntv2devicefeatures.h"
+#include "ntv2debug.h"
 #include "ntv2utils.h"
+#include "ntv2bft.h"
+#include "ajabase/common/common.h"
 #include <algorithm>
 #include <map>
 #include <iomanip>
@@ -864,12 +867,11 @@ AJA_PixelFormat CNTV2DemoCommon::GetAJAPixelFormat (const NTV2FrameBufferFormat 
 
 bool CNTV2DemoCommon::Get4KInputFormat (NTV2VideoFormat & inOutVideoFormat)
 {
-	bool	status	(false);
-	struct	VideoFormatPair
+	static struct	VideoFormatPair
 	{
 		NTV2VideoFormat	vIn;
 		NTV2VideoFormat	vOut;
-	} VideoFormatPairs [] =	{	//			vIn								vOut
+	} VideoFormatPairs[] =	{	//			vIn								vOut
 								{NTV2_FORMAT_1080psf_2398,		NTV2_FORMAT_4x1920x1080psf_2398},
 								{NTV2_FORMAT_1080psf_2400,		NTV2_FORMAT_4x1920x1080psf_2400},
 								{NTV2_FORMAT_1080p_2398,		NTV2_FORMAT_4x1920x1080p_2398},
@@ -897,30 +899,23 @@ bool CNTV2DemoCommon::Get4KInputFormat (NTV2VideoFormat & inOutVideoFormat)
 								{NTV2_FORMAT_1080p_2K_5994_A,	NTV2_FORMAT_4x2048x1080p_5994},
 								{NTV2_FORMAT_1080p_2K_6000_A,	NTV2_FORMAT_4x2048x1080p_6000}
 	};
-
-	for (size_t formatNdx = 0;  formatNdx < sizeof (VideoFormatPairs) / sizeof (VideoFormatPair);  formatNdx++)
-	{
-		if (VideoFormatPairs [formatNdx].vIn == inOutVideoFormat)
+	for (size_t formatNdx(0);  formatNdx < sizeof(VideoFormatPairs) / sizeof(VideoFormatPair);  formatNdx++)
+		if (VideoFormatPairs[formatNdx].vIn == inOutVideoFormat)
 		{
-			inOutVideoFormat = VideoFormatPairs [formatNdx].vOut;
-			status = true;
+			inOutVideoFormat = VideoFormatPairs[formatNdx].vOut;
+			return true;
 		}
-	}
-
-	return status;
+	return false;
 
 }	//	get4KInputFormat
 
 bool CNTV2DemoCommon::Get8KInputFormat (NTV2VideoFormat & inOutVideoFormat)
 {
-	bool	status	(false);
-	struct	VideoFormatPair
+	static struct	VideoFormatPair
 	{
 		NTV2VideoFormat	vIn;
 		NTV2VideoFormat	vOut;
-		
-	} VideoFormatPairs [] =	{	//			vIn								vOut
-
+	} VideoFormatPairs[] =	{	//			vIn								vOut
 								{NTV2_FORMAT_3840x2160p_2398,		NTV2_FORMAT_4x3840x2160p_2398},
 								{NTV2_FORMAT_3840x2160p_2400,		NTV2_FORMAT_4x3840x2160p_2400},
 								{NTV2_FORMAT_3840x2160p_2500,		NTV2_FORMAT_4x3840x2160p_2500},
@@ -947,24 +942,313 @@ bool CNTV2DemoCommon::Get8KInputFormat (NTV2VideoFormat & inOutVideoFormat)
 								{NTV2_FORMAT_4096x2160p_5000_B,		NTV2_FORMAT_4x4096x2160p_5000_B},
 								{NTV2_FORMAT_4096x2160p_5994_B,		NTV2_FORMAT_4x4096x2160p_5994_B},
 								{NTV2_FORMAT_4096x2160p_6000_B,		NTV2_FORMAT_4x4096x2160p_6000_B}
-
 	};
-
-	for (size_t formatNdx = 0;  formatNdx < sizeof (VideoFormatPairs) / sizeof (VideoFormatPair);  formatNdx++)
-	{
-		if (VideoFormatPairs [formatNdx].vIn == inOutVideoFormat)
+	for (size_t formatNdx(0);  formatNdx < sizeof(VideoFormatPairs) / sizeof(VideoFormatPair);  formatNdx++)
+		if (VideoFormatPairs[formatNdx].vIn == inOutVideoFormat)
 		{
-			inOutVideoFormat = VideoFormatPairs [formatNdx].vOut;
-			status = true;
+			inOutVideoFormat = VideoFormatPairs[formatNdx].vOut;
+			return true;
 		}
-	}
-
-	return status;
+	return false;
 
 }	//	get8KInputFormat
 
 
 const char * CNTV2DemoCommon::GetGlobalMutexName (void)
 {
-	return gGlobalMutexName.c_str ();
+	return gGlobalMutexName.c_str();
+}
+
+string CNTV2DemoCommon::ACFrameRange::setFromString (const string & inStr)
+{
+	makeInvalid();
+	if (inStr.empty())
+		return "Frame count/range not specified";
+	const bool hasCount(inStr.find('@') != string::npos);
+	const bool hasRange(inStr.find('-') != string::npos);
+	NTV2StringList	strs;
+	if (hasCount && hasRange)
+		return "'@' and '-' cannot both be specified";
+	else if (hasCount)
+		aja::split(inStr, '@', strs);
+	else if (hasRange)
+		aja::split(inStr, '-', strs);
+	else
+		strs.push_back(inStr);
+	if (strs.empty())
+		return "No frame count/range values parsed";
+	if (strs.size() > 2)
+		return "More than 2 frame count/range values parsed";
+	if (hasCount || hasRange)
+		if (strs.size() != 2)
+			return "Expected exactly 2 frame count/range values";
+
+	//	Check that all characters are decimal digits...
+	for (size_t strNdx(0);  strNdx < strs.size();  strNdx++)
+	{	string	str(strs.at(strNdx));
+		if (aja::strip(str).empty())
+			return "Expected unsigned decimal integer value";
+		for (size_t chNdx(0);  chNdx < str.length();  chNdx++)
+			if (!isdigit(str.at(chNdx)))
+				return "Non-digit character encountered in '" + str + "'";
+	}
+
+	UWordSequence numbers;
+	for (NTV2StringListConstIter it(strs.begin());  it != strs.end();  ++it)
+	{
+		string	str(*it);
+		numbers.push_back(UWord(aja::stoul(aja::strip(str))));
+	}
+	if (hasCount)
+		{mIsCountOnly = false;  mFrameCount = 0;  mFirstFrame = numbers[1];  mLastFrame = mFirstFrame + numbers[0] - 1;}
+	else if (hasRange)
+		{mIsCountOnly = false;  mFrameCount = 0;  mFirstFrame = numbers[0];  mLastFrame = numbers[1];}
+	else
+		{mIsCountOnly = true;  mFrameCount = numbers[0];  mFirstFrame = mLastFrame = 0;}
+	if (!isCount()  &&  lastFrame() < firstFrame())
+		{makeInvalid();  return "First frame past last frame";}
+	return "";
+}
+
+string CNTV2DemoCommon::ACFrameRange::toString(void) const
+{
+	ostringstream oss;
+	if (!valid())
+		oss << "<invalid>";
+	else if (isFrameRange())
+		oss << "Frames " << DEC(firstFrame()) << "-" << DEC(lastFrame()) << " (" << DEC(lastFrame()-firstFrame()+1) << "@" << DEC(firstFrame()) << ")";
+	else
+		oss << DEC(count()) << " frames (auto-allocated)";
+	return oss.str();
+}
+
+
+bool CNTV2DemoCommon::BFT(void)
+{
+	typedef struct {string fName; NTV2VideoFormat fFormat;} Foo;
+	static const Foo foo[] = {	{"1080i50",				NTV2_FORMAT_1080i_5000},
+								{"1080i",				NTV2_FORMAT_1080i_5994},
+								{"1080i5994",			NTV2_FORMAT_1080i_5994},
+								{"hd",					NTV2_FORMAT_1080i_5994},
+								{"1080i60",				NTV2_FORMAT_1080i_6000},
+								{"720p",				NTV2_FORMAT_720p_5994},
+								{"720p5994",			NTV2_FORMAT_720p_5994},
+								{"720p60",				NTV2_FORMAT_720p_6000},
+								{"1080psf2398",			NTV2_FORMAT_1080psf_2398},
+								{"1080psf24",			NTV2_FORMAT_1080psf_2400},
+								{"1080p2997",			NTV2_FORMAT_1080p_2997},
+								{"1080p30",				NTV2_FORMAT_1080p_3000},
+								{"1080p25",				NTV2_FORMAT_1080p_2500},
+								{"1080p2398",			NTV2_FORMAT_1080p_2398},
+								{"1080p24",				NTV2_FORMAT_1080p_2400},
+								{"2048x1080p2398",		NTV2_FORMAT_1080p_2K_2398},
+								{"2048x1080p24",		NTV2_FORMAT_1080p_2K_2400},
+								{"2048x1080psf2398",	NTV2_FORMAT_1080psf_2K_2398},
+								{"2048x1080psf24",		NTV2_FORMAT_1080psf_2K_2400},
+								{"720p50",				NTV2_FORMAT_720p_5000},
+								{"1080p50b",			NTV2_FORMAT_1080p_5000_B},
+								{"1080p",				NTV2_FORMAT_1080p_5994_B},
+								{"1080p5994b",			NTV2_FORMAT_1080p_5994_B},
+								{"1080p60b",			NTV2_FORMAT_1080p_6000_B},
+								{"720p2398",			NTV2_FORMAT_720p_2398},
+								{"720p25",				NTV2_FORMAT_720p_2500},
+								{"1080p50",				NTV2_FORMAT_1080p_5000_A},
+								{"1080p5994",			NTV2_FORMAT_1080p_5994_A},
+								{"1080p60",				NTV2_FORMAT_1080p_6000_A},
+								{"2048x1080p25",		NTV2_FORMAT_1080p_2K_2500},
+								{"2048x1080psf25",		NTV2_FORMAT_1080psf_2K_2500},
+								{"1080psf25",			NTV2_FORMAT_1080psf_2500_2},
+								{"1080psf2997",			NTV2_FORMAT_1080psf_2997_2},
+								{"1080psf30",			NTV2_FORMAT_1080psf_3000_2},
+								{"525i",				NTV2_FORMAT_525_5994},
+								{"525i2997",			NTV2_FORMAT_525_5994},
+								{"sd",					NTV2_FORMAT_525_5994},
+								{"625i",				NTV2_FORMAT_625_5000},
+								{"625i25",				NTV2_FORMAT_625_5000},
+								{"525i2398",			NTV2_FORMAT_525_2398},
+								{"525i24",				NTV2_FORMAT_525_2400},
+								{"525psf2997",			NTV2_FORMAT_525psf_2997},
+								{"625psf25",			NTV2_FORMAT_625psf_2500},
+								{"2048x1556psf1498",	NTV2_FORMAT_2K_1498},
+								{"2048x1556psf15",		NTV2_FORMAT_2K_1500},
+								{"2048x1556psf2398",	NTV2_FORMAT_2K_2398},
+								{"2048x1556psf24",		NTV2_FORMAT_2K_2400},
+								{"2048x1556psf25",		NTV2_FORMAT_2K_2500},
+								{"4x1920x1080psf2398",	NTV2_FORMAT_4x1920x1080psf_2398},
+								{"4x1920x1080psf24",	NTV2_FORMAT_4x1920x1080psf_2400},
+								{"4x1920x1080psf25",	NTV2_FORMAT_4x1920x1080psf_2500},
+								{"4x1920x1080p2398",	NTV2_FORMAT_4x1920x1080p_2398},
+								{"uhd2398",				NTV2_FORMAT_4x1920x1080p_2398},
+								{"4x1920x1080p24",		NTV2_FORMAT_4x1920x1080p_2400},
+								{"uhd24",				NTV2_FORMAT_4x1920x1080p_2400},
+								{"4x1920x1080p25",		NTV2_FORMAT_4x1920x1080p_2500},
+								{"uhd25",				NTV2_FORMAT_4x1920x1080p_2500},
+								{"4x2048x1080psf2398",	NTV2_FORMAT_4x2048x1080psf_2398},
+								{"4x2048x1080psf24",	NTV2_FORMAT_4x2048x1080psf_2400},
+								{"4x2048x1080psf25",	NTV2_FORMAT_4x2048x1080psf_2500},
+								{"4k2398",				NTV2_FORMAT_4x2048x1080p_2398},
+								{"4x2048x1080p2398",	NTV2_FORMAT_4x2048x1080p_2398},
+								{"4k24",				NTV2_FORMAT_4x2048x1080p_2400},
+								{"4x2048x1080p24",		NTV2_FORMAT_4x2048x1080p_2400},
+								{"4k25",				NTV2_FORMAT_4x2048x1080p_2500},
+								{"4x2048x1080p25",		NTV2_FORMAT_4x2048x1080p_2500},
+								{"4x1920x1080p2997",	NTV2_FORMAT_4x1920x1080p_2997},
+								{"4x1920x1080p30",		NTV2_FORMAT_4x1920x1080p_3000},
+								{"4x1920x1080psf2997",	NTV2_FORMAT_4x1920x1080psf_2997},
+								{"4x1920x1080psf30",	NTV2_FORMAT_4x1920x1080psf_3000},
+								{"4x2048x1080p2997",	NTV2_FORMAT_4x2048x1080p_2997},
+								{"4x2048x1080p30",		NTV2_FORMAT_4x2048x1080p_3000},
+								{"4x2048x1080psf2997",	NTV2_FORMAT_4x2048x1080psf_2997},
+								{"4x2048x1080psf30",	NTV2_FORMAT_4x2048x1080psf_3000},
+								{"4x1920x1080p50",		NTV2_FORMAT_4x1920x1080p_5000},
+								{"uhd50",				NTV2_FORMAT_4x1920x1080p_5000},
+								{"4x1920x1080p5994",	NTV2_FORMAT_4x1920x1080p_5994},
+								{"uhd5994",				NTV2_FORMAT_4x1920x1080p_5994},
+								{"4x1920x1080p60",		NTV2_FORMAT_4x1920x1080p_6000},
+								{"uhd",					NTV2_FORMAT_4x1920x1080p_6000},
+								{"uhd60",				NTV2_FORMAT_4x1920x1080p_6000},
+								{"4k50",				NTV2_FORMAT_4x2048x1080p_5000},
+								{"4x2048x1080p50",		NTV2_FORMAT_4x2048x1080p_5000},
+								{"4k5994",				NTV2_FORMAT_4x2048x1080p_5994},
+								{"4x2048x1080p5994",	NTV2_FORMAT_4x2048x1080p_5994},
+								{"4k",					NTV2_FORMAT_4x2048x1080p_6000},
+								{"4k60",				NTV2_FORMAT_4x2048x1080p_6000},
+								{"4x2048x1080p60",		NTV2_FORMAT_4x2048x1080p_6000},
+								{"4k4795",				NTV2_FORMAT_4x2048x1080p_4795},
+								{"4x2048x1080p4795",	NTV2_FORMAT_4x2048x1080p_4795},
+								{"4k48",				NTV2_FORMAT_4x2048x1080p_4800},
+								{"4x2048x1080p48",		NTV2_FORMAT_4x2048x1080p_4800},
+								{"4k11988",				NTV2_FORMAT_4x2048x1080p_11988},
+								{"4x2048x1080p11988",	NTV2_FORMAT_4x2048x1080p_11988},
+								{"4k120",				NTV2_FORMAT_4x2048x1080p_12000},
+								{"4x2048x1080p120",		NTV2_FORMAT_4x2048x1080p_12000},
+								{"2048x1080p60",		NTV2_FORMAT_1080p_2K_6000_A},
+								{"2048x1080p5994",		NTV2_FORMAT_1080p_2K_5994_A},
+								{"2048x1080p2997",		NTV2_FORMAT_1080p_2K_2997},
+								{"2048x1080p30",		NTV2_FORMAT_1080p_2K_3000},
+								{"2048x1080p50",		NTV2_FORMAT_1080p_2K_5000_A},
+								{"2048x1080p4795",		NTV2_FORMAT_1080p_2K_4795_A},
+								{"2048x1080p48",		NTV2_FORMAT_1080p_2K_4800_A},
+								{"2048x1080p60b",		NTV2_FORMAT_1080p_2K_6000_B},
+								{"2048x1080p5994b",		NTV2_FORMAT_1080p_2K_5994_B},
+								{"2048x1080p50b",		NTV2_FORMAT_1080p_2K_5000_B},
+								{"2048x1080p48b",		NTV2_FORMAT_1080p_2K_4800_B},
+								{"2048x1080p4795b",		NTV2_FORMAT_1080p_2K_4795_B},
+								{"",					NTV2_FORMAT_UNKNOWN}	};
+	if (true)
+	{
+		//	Dump the gString2VideoFormatMap map...
+		for (String2VideoFormatMapConstIter it(gString2VideoFormatMap.begin());  it != gString2VideoFormatMap.end();  ++it)
+		{
+			cout << "'" << it->first << "'\t'" << ::NTV2VideoFormatToString(it->second) << "'\t" << ::NTV2VideoFormatString(it->second) << "\t" << DEC(it->second) << endl;
+		}
+	}
+	cout << endl << endl;
+	for (unsigned ndx(0);  !foo[ndx].fName.empty();  ndx++)
+	{
+		const string &			str		(foo[ndx].fName);
+		const NTV2VideoFormat	vFormat	(foo[ndx].fFormat);
+		String2VideoFormatMapConstIter	it	(gString2VideoFormatMap.find(str));
+		const NTV2VideoFormat	vFormat2	(it != gString2VideoFormatMap.end() ? it->second : NTV2_FORMAT_UNKNOWN);
+		if (vFormat != vFormat2)
+			cerr << "'" << str << "': '" << ::NTV2VideoFormatString(vFormat) << "' (" << DEC(vFormat) << ") != '" << ::NTV2VideoFormatString(vFormat2) << "' (" << DEC(vFormat2) << ")" << endl;
+		//SHOULD_BE_EQUAL(vFormat, vFormat2);
+	}
+	if (true)
+	{
+		CNTV2DemoCommon::ACFrameRange foo(0);
+		SHOULD_BE_FALSE(foo.valid());
+		cerr << foo.setFromString("") << endl;
+		SHOULD_BE_FALSE(foo.valid());	//	Nothing -- empty string
+		cerr << foo.setFromString("    \t    ") << endl;
+		SHOULD_BE_FALSE(foo.valid());	//	Nothing -- whitespace
+
+		cerr << foo.setFromString("10") << endl;
+		SHOULD_BE_TRUE(foo.valid());
+		SHOULD_BE_TRUE(foo.isCount());
+		SHOULD_BE_FALSE(foo.isFrameRange());
+		SHOULD_BE_EQUAL(foo.count(), 10);
+
+		SHOULD_BE_FALSE(foo.makeInvalid().valid());
+
+		cerr << foo.setFromString("   \t   15   \t   ") << endl;
+		SHOULD_BE_TRUE(foo.valid());
+		SHOULD_BE_TRUE(foo.isCount());
+		SHOULD_BE_FALSE(foo.isFrameRange());
+		SHOULD_BE_EQUAL(foo.count(), 15);
+
+		cerr << foo.setFromString("@") << endl;
+		SHOULD_BE_FALSE(foo.valid());	//	Missing integer values
+		cerr << foo.setFromString("20@") << endl;
+		SHOULD_BE_FALSE(foo.valid());	//	Missing 2nd integer value
+		cerr << foo.setFromString("@20") << endl;
+		SHOULD_BE_FALSE(foo.valid());	//	Missing 1st integer value
+
+		cerr << foo.setFromString("20@10") << endl;
+		SHOULD_BE_TRUE(foo.valid());
+		SHOULD_BE_FALSE(foo.isCount());
+		SHOULD_BE_TRUE(foo.isFrameRange());
+		SHOULD_BE_EQUAL(foo.count(), 0);
+		SHOULD_BE_EQUAL(foo.firstFrame(), 10);
+		SHOULD_BE_EQUAL(foo.lastFrame(), 29);
+
+		cerr << foo.setFromString("   \t   25   @   15   \t   ") << endl;
+		SHOULD_BE_TRUE(foo.valid());
+		SHOULD_BE_FALSE(foo.isCount());
+		SHOULD_BE_TRUE(foo.isFrameRange());
+		SHOULD_BE_EQUAL(foo.count(), 0);
+		SHOULD_BE_EQUAL(foo.firstFrame(), 15);
+		SHOULD_BE_EQUAL(foo.lastFrame(), 39);
+
+		cerr << foo.setFromString("   \t   2.5   @   1 $ 5   \t   ") << endl;
+		SHOULD_BE_FALSE(foo.valid());
+		cerr << foo.setFromString("~!@#$%^&*()_+{}|[]:;<>?/.,`") << endl;
+		SHOULD_BE_FALSE(foo.valid());
+		cerr << foo.setFromString("@@@@@@@@@--------") << endl;
+		SHOULD_BE_FALSE(foo.valid());
+		cerr << foo.setFromString("1@2@3@4@5@6@7@8@9@1") << endl;
+		SHOULD_BE_FALSE(foo.valid());
+
+		cerr << foo.setFromString("-") << endl;
+		SHOULD_BE_FALSE(foo.valid());	//	Missing integer values
+		cerr << foo.setFromString("10-") << endl;
+		SHOULD_BE_FALSE(foo.valid());	//	Missing 2nd integer value
+		cerr << foo.setFromString("-10") << endl;
+		SHOULD_BE_FALSE(foo.valid());	//	Missing 1st integer value
+		cerr << foo.setFromString("1-2-3-4-5-6-7-8-9-1") << endl;
+		SHOULD_BE_FALSE(foo.valid());
+		cerr << foo.setFromString("-1-2-3-4-5-6-7-8-9-") << endl;
+		SHOULD_BE_FALSE(foo.valid());
+
+		cerr << foo.setFromString("20-30") << endl;
+		SHOULD_BE_TRUE(foo.valid());
+		SHOULD_BE_FALSE(foo.isCount());
+		SHOULD_BE_TRUE(foo.isFrameRange());
+		SHOULD_BE_EQUAL(foo.count(), 0);
+		SHOULD_BE_EQUAL(foo.firstFrame(), 20);
+		SHOULD_BE_EQUAL(foo.lastFrame(), 30);
+
+		cerr << foo.setFromString("2.0-3#0") << endl;
+		SHOULD_BE_FALSE(foo.valid());
+
+		cerr << foo.setFromString("                   25            -                35         ") << endl;
+		SHOULD_BE_TRUE(foo.valid());
+		SHOULD_BE_FALSE(foo.isCount());
+		SHOULD_BE_TRUE(foo.isFrameRange());
+		SHOULD_BE_EQUAL(foo.count(), 0);
+		SHOULD_BE_EQUAL(foo.firstFrame(), 25);
+		SHOULD_BE_EQUAL(foo.lastFrame(), 35);
+
+		cerr << foo.setFromString("36-36") << endl;
+		SHOULD_BE_TRUE(foo.valid());
+		SHOULD_BE_FALSE(foo.isCount());
+		SHOULD_BE_TRUE(foo.isFrameRange());
+		SHOULD_BE_EQUAL(foo.count(), 0);
+		SHOULD_BE_EQUAL(foo.firstFrame(), 36);
+		SHOULD_BE_EQUAL(foo.lastFrame(), 36);
+
+		cerr << foo.setFromString("36-1") << endl;
+		SHOULD_BE_FALSE(foo.valid());
+	}
+	return true;
 }

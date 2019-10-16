@@ -386,7 +386,47 @@ class CNTV2DemoCommon
 		static const char *					GetGlobalMutexName (void);
 	///@}
 
-	//static bool		DoBFT(void);	//	Implementation is inside ntv2bft/main.cpp
+
+	/**
+		@brief	AutoCirculate Frame Range
+	**/
+	class ACFrameRange
+	{
+		public:
+			explicit inline	ACFrameRange (const UWord inFrameCount)
+						:	mIsCountOnly(true),
+							mFrameCount(inFrameCount),
+							mFirstFrame(0),
+							mLastFrame(0)
+						{}
+			explicit inline	ACFrameRange (const UWord inFirstFrame, const UWord inLastFrame)
+						:	mIsCountOnly(true),
+							mFrameCount(0),
+							mFirstFrame(inFirstFrame),
+							mLastFrame(inLastFrame)
+						{}
+			inline bool		isCount(void) const			{return mIsCountOnly;}
+			inline bool		isFrameRange(void) const	{return !isCount();}
+			inline UWord	count(void) const			{return isCount() ? mFrameCount : 0;}
+			inline UWord	firstFrame(void) const		{return mFirstFrame;}
+			inline UWord	lastFrame(void) const		{return mLastFrame;}
+			inline bool		valid(void) const
+							{
+								if (isCount())
+									return count() > 0;
+								return lastFrame() >= firstFrame();
+							}
+			inline ACFrameRange &	makeInvalid(void)	{mIsCountOnly = true;  mFrameCount = mFirstFrame = mLastFrame = 0; return *this;}
+			std::string		setFromString(const std::string & inStr);
+			std::string		toString(void) const;
+		private:
+			bool	mIsCountOnly;	///< @brief	Frame count only? If false, specifies absolute frame range.
+			UWord	mFrameCount;	///< @brief	Frame count (mIsCountOnly == true).
+			UWord	mFirstFrame;	///< @brief	First frame (mIsCountOnly == false).
+			UWord	mLastFrame;		///< @brief	Last frame (mIsCountOnly == false).
+	};
+
+	static bool	BFT(void);
 
 };	//	CNTV2DemoCommon
 

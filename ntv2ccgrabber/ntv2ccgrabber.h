@@ -60,18 +60,19 @@ typedef enum _CaptionDataSrc
 typedef struct CCGrabberConfig
 {
 	public:
-		std::string				fDeviceSpecifier;		///< @brief	The AJA device to use
-		NTV2Channel				fInputChannel;			///< @brief	The device channel to use
-		NTV2InputSource			fInputSource;			///< @brief	The device input connector to use
-		OutputMode				fOutputMode;			///< @brief	Desired output (captionStream, Screen etc)
-		CaptionDataSrc			fCaptionSrc;			///< @brief	Caption data source (Line21? 608 VANC? 608 Anc?  etc)
-		NTV2TCIndex				fTimecodeSrc;			///< @brief	Timecode source to use (if any)
-		NTV2FrameBufferFormat	fPixelFormat;			///< @brief	Pixel format to use
-		NTV2Line21Channel		fCaptionChannel;		///< @brief	Caption channel to monitor (defaults to CC1)
-		bool					fBurnCaptions;			///< @brief	If true, burn-in captions on 2nd channel
-		bool					fDoMultiFormat;			///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
-		bool					fUseVanc;				///< @brief	If true, use Vanc, even if the device supports Anc insertion
-		bool					fCaptureAudio;			///< @brief	If true, also capture audio
+		std::string						fDeviceSpecifier;	///< @brief	The AJA device to use
+		NTV2Channel						fInputChannel;		///< @brief	The device channel to use
+		NTV2InputSource					fInputSource;		///< @brief	The device input connector to use
+		CNTV2DemoCommon::ACFrameRange	fFrames;			///< @brief	AutoCirculate frame count or range
+		OutputMode						fOutputMode;		///< @brief	Desired output (captionStream, Screen etc)
+		CaptionDataSrc					fCaptionSrc;		///< @brief	Caption data source (Line21? 608 VANC? 608 Anc?  etc)
+		NTV2TCIndex						fTimecodeSrc;		///< @brief	Timecode source to use (if any)
+		NTV2FrameBufferFormat			fPixelFormat;		///< @brief	Pixel format to use
+		NTV2Line21Channel				fCaptionChannel;	///< @brief	Caption channel to monitor (defaults to CC1)
+		bool							fBurnCaptions;		///< @brief	If true, burn-in captions on 2nd channel
+		bool							fDoMultiFormat;		///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
+		bool							fUseVanc;			///< @brief	If true, use Vanc, even if the device supports Anc insertion
+		bool							fCaptureAudio;		///< @brief	If true, also capture audio
 
 		/**
 			@brief	Constructs a default CCPlayer configuration.
@@ -80,6 +81,7 @@ typedef struct CCGrabberConfig
 			:	fDeviceSpecifier	(inDeviceSpecifier),
 				fInputChannel		(NTV2_CHANNEL_INVALID),
 				fInputSource		(NTV2_INPUTSOURCE_INVALID),
+				fFrames				(7),
 				fOutputMode			(kOutputMode_CaptionStream),
 				fCaptionSrc			(kCaptionDataSrc_Default),
 				fTimecodeSrc		(NTV2_TCINDEX_INVALID),

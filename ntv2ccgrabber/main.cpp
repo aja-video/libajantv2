@@ -67,6 +67,7 @@ int main (int argc, const char ** argv)
 	const string	legalChannels	(NTV2CCGrabber::GetLine21ChannelNames("|"));
 	const string	legal608Sources	(CCGrabberConfig::CaptionDataSrcToString(kCaptionDataSrc_INVALID));
 	const string	legalOutputModes(CCGrabberConfig::OutputModeToString(kOutputMode_INVALID));
+	const string	legalFramesSpec	("{frameCount}[@{firstFrameNum}]  or  {firstFrameNum}-{lastFrameNum}");
 	AJAStatus		status			(AJA_STATUS_SUCCESS);	//	Init result
 	char *			pDeviceSpec		(NULL);					//	Device spec
 	char *			pInputSrcSpec	(NULL);					//	SDI source spec
@@ -75,6 +76,7 @@ int main (int argc, const char ** argv)
 	char *			pCaptionChannel	(NULL);					//	Caption channel of interest (cc1, cc2 ... text1, text2, ...)
 	char *			pCaptionSource	(NULL);					//	Caption source of interest (line21, 608vanc, 608anc ...)
 	char *			pOutputMode		(NULL);					//	Output mode (stream, screen, file ...)
+	char *			pFramesSpec		(NULL);					//	AutoCirculate frames spec
 	int				channelNumber	(0);					//	Channel (framestore) spec
 	int				bBurnCaptions	(0);					//	Burn-in captions?
 	int				bMultiFormat	(0);					//	Enable multi-format?
@@ -98,6 +100,7 @@ int main (int argc, const char ** argv)
 		{"608src",		0,		POPT_ARG_STRING,	&pCaptionSource,	0,	"608 source to use",			legal608Sources.c_str()		},
 		{"output",		0,		POPT_ARG_STRING,	&pOutputMode,		0,	"608 output mode",				legalOutputModes.c_str()	},
 		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,		0,	"channel/frameStore to use",	"1-8"						},
+		{"frames",		0,		POPT_ARG_STRING,	&pFramesSpec,		0,	"frames to AutoCirc",			"num[@min] or min-max"		},
 		{"burn",		'b',	POPT_ARG_NONE,		&bBurnCaptions,		0,	"burn-in captions",				NULL						},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&bMultiFormat,		0,	"enables multi-channel/format",	NULL},
 		{"vanc",		'v',	POPT_ARG_NONE,		&bUseVanc,			0,	"use vanc geometry",			NULL},
@@ -113,7 +116,8 @@ int main (int argc, const char ** argv)
 	const string	deviceSpec		(pDeviceSpec   ? pDeviceSpec : "0");
 	const string	inputSourceStr	(pInputSrcSpec ? CNTV2DemoCommon::ToLower(string(pInputSrcSpec)) : "");
 	const string	tcSourceStr		(pTimecodeSpec ? CNTV2DemoCommon::ToLower(string(pTimecodeSpec)) : "");
-	const string	pixelFormatStr	(pPixelFmtSpec  ?  pPixelFmtSpec  :  "");
+	const string	pixelFormatStr	(pPixelFmtSpec ? pPixelFmtSpec  :  "");
+	const string	framesSpec		(pFramesSpec   ? pFramesSpec  :  "");
 
 	//	Device
 	const string	legalDevices(CNTV2DemoCommon::GetDeviceStrings());
@@ -199,6 +203,16 @@ int main (int argc, const char ** argv)
 		grabberConfig.fInputChannel = NTV2_CHANNEL1;
 		grabberConfig.fInputSource = NTV2_INPUTSOURCE_SDI1;
 	}
+
+	//	AutoCirculate frames
+	if (!framesSpec.empty())
+	{
+		const string parseResult(grabberConfig.fFrames.setFromString(framesSpec));
+		if (!parseResult.empty())
+			{cerr << "## ERROR:  Bad 'frames' spec '" << framesSpec << "'\n## " << parseResult << endl;  return 1;}
+	}
+	if (!grabberConfig.fFrames.valid())
+		{cerr << "## ERROR:  Bad 'frames' spec '" << framesSpec << "'\n## Expected " << legalFramesSpec << endl;  return 1;}
 
 	//	Configure the grabber...
 	grabberConfig.fBurnCaptions		= bBurnCaptions	? true : false;
