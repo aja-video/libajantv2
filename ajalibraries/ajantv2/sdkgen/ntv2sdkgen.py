@@ -69,17 +69,24 @@ def get_canonical_device_ids (args, ntv2enums):
             if len(line) == 0:
                 continue
             if len(line)>1 and line[0] == "/" and line[1] == "/":
+                #print("SKIPPED: %s" % (line))
+                continue
+            if len(line)>0 and line[0] == "#":
+                #print("SKIPPED: %s" % (line))
                 continue
             if "deprecate" in line:
+                #print("SKIPPED: %s" % (line))
                 continue
             pieces = line.split(None,2)
             key = pieces[0]
             if key[0:10] == "DEVICE_ID_":
                 if key == "DEVICE_ID_NOTFOUND":
                     break
+                #print("ACCEPTED: %s" % (key))
                 device_ids[key] = False
     if args.verbose:
         print("## NOTE:  %d canonical device IDs parsed from %d lines in 'ntv2enums.h'" % (len(device_ids), line_num))
+        #print(device_ids)
     return {'err': 0,	'device_ids': device_ids}
 
 

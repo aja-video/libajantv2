@@ -92,7 +92,6 @@ typedef enum
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief	See \ref konaip
     DEVICE_ID_KONAIP_2022               = 0x10646700,	///< @brief	See \ref konaip
     DEVICE_ID_KONAIP_2110               = 0x10646706,	///< @brief	See \ref konaip
-	DEVICE_ID_KONAIP_2RX_1SFP_J2K		= 0x10646704,	///< @brief	See \ref konaip
     DEVICE_ID_KONAIP_2TX_1SFP_J2K		= 0x10646703,	///< @brief	See \ref konaip
     DEVICE_ID_KONAIP_4CH_2SFP			= 0x10646701,	///< @brief	See \ref konaip
     DEVICE_ID_KONALHEPLUS				= 0x10352300,	///< @brief	See \ref konalheplus
@@ -111,6 +110,9 @@ typedef enum
     DEVICE_ID_KONAIP_2IN_2OUT		= DEVICE_ID_KONAIP_2022,    //	Will deprecate eventually
     DEVICE_ID_KONAIP_4I				= DEVICE_ID_KONAIP_4CH_2SFP,//	Will deprecate eventually
 #endif	//	NTV2_DEPRECATE_14_0
+#if !defined(NTV2_DEPRECATE_15_6)
+//	DEVICE_ID_KONAIP_2RX_1SFP_J2K		= 0x10646704,		//	Never built or shipped
+#endif	//	NTV2_DEPRECATE_15_6
     DEVICE_ID_NOTFOUND				= -1
 
 } NTV2DeviceID;
@@ -3437,7 +3439,9 @@ typedef enum
     NTV2_BITFILE_KONAIP_4CH_2SFP    = 45,
     NTV2_BITFILE_KONAIP_1RX_1TX_1SFP_J2K= 46,
     NTV2_BITFILE_KONAIP_2TX_1SFP_J2K= 47,
-	NTV2_BITFILE_KONAIP_2RX_1SFP_J2K= 48,
+#if !defined(NTV2_DEPRECATE_15_6)
+//	NTV2_BITFILE_KONAIP_2RX_1SFP_J2K= 48,	//	Never built or shipped
+#endif	//	NTV2_DEPRECATE_15_6
     NTV2_BITFILE_KONAIP_1RX_1TX_2110= 49,
 	NTV2_BITFILE_IO4KPLUS_MAIN	= 50,
     NTV2_BITFILE_IOIP_2022          = 51,
