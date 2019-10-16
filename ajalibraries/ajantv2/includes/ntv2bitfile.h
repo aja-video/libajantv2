@@ -101,8 +101,7 @@ class AJAExport CNTV2Bitfile
 		virtual std::string					ParseHeaderFromBuffer(const uint8_t* bitfileBuffer);
 
 	private:
-		virtual bool						FindSyncWord (void) const;
-		virtual std::string					ParseHeader (unsigned & outPreambleSize);
+		virtual std::string					ParseHeader ();
 		virtual void						Init (void);
 
 		std::ifstream				_bitFileStream;
@@ -116,7 +115,6 @@ class AJAExport CNTV2Bitfile
 		unsigned					_numBytes;
 		unsigned					_fileSize;
 		bool						_fileReady;
-		bool						_bitFileCompressed;
 		unsigned					_programStreamPos;
 		unsigned					_fileStreamPos;
 

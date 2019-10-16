@@ -2407,6 +2407,41 @@ ostream & NTV2BufferLock::Print (ostream & inOutStream) const
 }
 
 
+NTV2Bitstream::NTV2Bitstream()
+	:	mHeader	(NTV2_TYPE_AJABITSTREAM, sizeof(NTV2Bitstream))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+}
+
+NTV2Bitstream::NTV2Bitstream (const NTV2_POINTER & inBuffer, const ULWord inFlags)
+	:	mHeader	(NTV2_TYPE_AJABITSTREAM, sizeof(NTV2Bitstream))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	SetBuffer(inBuffer);
+	SetFlags(inFlags);
+}
+
+NTV2Bitstream::NTV2Bitstream(const ULWord * pInBuffer, const ULWord inByteCount, const ULWord inFlags)
+	:	mHeader	(NTV2_TYPE_AJABITSTREAM, sizeof(NTV2Bitstream))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	SetBuffer (NTV2_POINTER(pInBuffer, inByteCount));
+	SetFlags (inFlags);
+}
+
+bool NTV2Bitstream::SetBuffer (const NTV2_POINTER & inBuffer)
+{	//	Just use address & length (don't deep copy)...
+	NTV2_ASSERT_STRUCT_VALID;
+	return mBuffer.Set (inBuffer.GetHostPointer(), inBuffer.GetByteCount());
+}
+
+ostream & NTV2Bitstream::Print (ostream & inOutStream) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	inOutStream	<< mHeader << mBuffer << " flags=" << xHEX0N(mFlags,8) << " " << mTrailer;
+	return inOutStream;
+}
+
 
 NTV2GetRegisters::NTV2GetRegisters (const NTV2RegNumSet & inRegisterNumbers)
 	:	mHeader				(AUTOCIRCULATE_TYPE_GETREGS, sizeof (NTV2GetRegisters)),

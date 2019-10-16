@@ -18,10 +18,8 @@ using namespace std;
 
 
 // TODO: Handle compressed bit-files
-#define MAX_BITFILEHEADERSIZE 184
-#define BITFILE_SYNCWORD_SIZE 6
+#define MAX_BITFILEHEADERSIZE 512
 static unsigned char signature[8] = {0xFF,0xFF,0xFF,0xFF,0xAA,0x99,0x55,0x66};
-static const unsigned char SyncWord[ BITFILE_SYNCWORD_SIZE ] = {0xFF,0xFF,0xFF,0xFF,0xAA,0x99};
 static const unsigned char Head13[] = { 0x00, 0x09, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x00, 0x00, 0x01 };
 
 
@@ -36,7 +34,6 @@ void CNTV2Bitfile::Close (void)
 	if (_fileReady)
 		_bitFileStream.close();
 	_fileReady = false;
-	_bitFileCompressed = false;
 	_programStreamPos = 0;
 	_fileStreamPos = 0;
 	_fileProgrammingPosition = 0;
@@ -68,8 +65,6 @@ bool CNTV2Bitfile::Open (const string & inBitfileName)
 
 	do
 	{
-		unsigned	preambleSize	(0);
-
 		if (_bitFileStream.fail ())
 			{_lastError = "Unable to open bitfile";		break;}
 
@@ -77,19 +72,9 @@ bool CNTV2Bitfile::Open (const string & inBitfileName)
 		for (int i = 0; i < MAX_BITFILEHEADERSIZE - 1; i++)
 			_fileHeader.push_back (_bitFileStream.get ());
 
-		_lastError = ParseHeader (preambleSize);
+		_lastError = ParseHeader ();
 		if (!_lastError.empty ())
 			break;
-
-		if (!_bitFileCompressed)
-		{
-			//	tellg fails on a pipe and we only get 0xffs afterwards.
-			_fileProgrammingPosition = (int) _bitFileStream.tellg ();
-
-			//	Back up to include preamble in download
-			//	preamble is all ff's preceding the signature
-			_fileProgrammingPosition -= preambleSize;
-		}
 
 		_fileReady = true;
 	}
@@ -105,13 +90,11 @@ string CNTV2Bitfile::ParseHeaderFromBuffer(const uint8_t* bitfileBuffer)
 
 	do
 	{
-		unsigned	preambleSize(0);
-
 		//	Preload bitfile header into mem
 		for (int i = 0; i < MAX_BITFILEHEADERSIZE - 1; i++)
 			_fileHeader.push_back(bitfileBuffer[i]);
 
-		_lastError = ParseHeader(preambleSize);
+		_lastError = ParseHeader();
 		if (!_lastError.empty())
 			break;
 
@@ -123,29 +106,8 @@ string CNTV2Bitfile::ParseHeaderFromBuffer(const uint8_t* bitfileBuffer)
 }	//	Open
 
 
-// FindSyncWord()
-// Check last BITFILE_SYNCWORD_SIZE bytes in header for signature
-// returns true if the signature is found.
-bool CNTV2Bitfile::FindSyncWord (void) const
-{
-	const size_t	headerSize	(static_cast <int> (_fileHeader.size ()));
-
-	if (headerSize < BITFILE_SYNCWORD_SIZE)
-		return false;
-
-	//	Brute force check for signature...
-	size_t	headerPos	(headerSize - BITFILE_SYNCWORD_SIZE);
-	for (size_t ndx (0);  ndx < BITFILE_SYNCWORD_SIZE;  ndx++)
-		if (SyncWord [ndx] != _fileHeader [headerPos + ndx])
-			return false;
-
-	return true;
-
-}	//	FindSyncWord
-
-
 //	ParseHeader returns empty string if header looks OK, otherwise string will contain failure explanation
-string CNTV2Bitfile::ParseHeader (unsigned & outPreambleSize)
+string CNTV2Bitfile::ParseHeader ()
 {
 	uint32_t		fieldLen	(0);	//	Holds size of various header fields, in bytes
 	int				pos			(0);	//	Byte offset during parse
@@ -154,8 +116,6 @@ string CNTV2Bitfile::ParseHeader (unsigned & outPreambleSize)
 
 	//	This really is bad form -- it precludes the ability to make this method 'const' (which it really is), plus it's safer to use iterators...
 	char *	p	(reinterpret_cast <char *> (&_fileHeader [0]));
-
-	outPreambleSize = 0;		//	Non-zero if auto bus sizing preamble is present
 
 	do
 	{
@@ -171,7 +131,8 @@ string CNTV2Bitfile::ParseHeader (unsigned & outPreambleSize)
 		testByte = *p++;
 		if (testByte != 'a')
 			{oss << "ParseHeader failed at or near byte offset " << pos << ", expected 'a', instead got '" << testByte << "'";	break;}
-
+		pos++;
+		
 		fieldLen = htons (*((uint16_t *)p));// the next 2 bytes are the length of the FileName (including /0)
 
 		p += 2;							// now pointing at the beginning of the file name
@@ -187,7 +148,8 @@ string CNTV2Bitfile::ParseHeader (unsigned & outPreambleSize)
 		testByte = *p++;
 		if (testByte != 'b')
 			{oss << "ParseHeader failed at or near byte offset " << pos << ", expected 'b', instead got '" << testByte << "'";	break;}
-
+		pos++;
+		
 		fieldLen = htons (*((uint16_t *)p));// the next 2 bytes are the length of the Part Name (including /0)
 
 		p += 2;							// now pointing at the beginning of the part name
@@ -198,11 +160,11 @@ string CNTV2Bitfile::ParseHeader (unsigned & outPreambleSize)
 		p += fieldLen;					// skip over part name - now pointing to beginning of 'c' field
 		pos += fieldLen;
 
-
 		//	The next byte should be 'c'...
 		testByte = *p++;
 		if (testByte != 'c')
 			{oss << "ParseHeader failed at or near byte offset " << pos << ", expected 'c', instead got '" << testByte << "'";	break;}
+		pos++;
 
 		fieldLen = htons (*((uint16_t *)p));// the next 2 bytes are the length of the date string (including /0)
 
@@ -214,11 +176,11 @@ string CNTV2Bitfile::ParseHeader (unsigned & outPreambleSize)
 		p += fieldLen;					// skip over date string - now pointing to beginning of 'd' field
 		pos += fieldLen;
 
-
 		//	The next byte should be 'd'...
 		testByte = *p++;
 		if (testByte != 'd')
 			{oss << "ParseHeader failed at or near byte offset " << pos << ", expected 'd', instead got '" << testByte << "'";	break;}
+		pos++;
 
 		fieldLen = htons (*((uint16_t *)p));// the next 2 bytes are the length of the time string (including /0)
 
@@ -235,8 +197,14 @@ string CNTV2Bitfile::ParseHeader (unsigned & outPreambleSize)
 		testByte = *p++;
 		if (testByte != 'e')
 			{oss << "ParseHeader failed at or near byte offset " << pos << ", expected 'e', instead got '" << testByte << "'";	break;}
+		pos++;
 
 		_numBytes = htonl (*((uint32_t *)p));	// the next 4 bytes are the length of the raw program data
+
+		p += 4;							// now pointing at the beginning of the time string
+		pos += 4;
+		
+		_fileProgrammingPosition = pos;	// this is where to start the programming stream
 
 		//Search for the start signature
 		bool bFound = (strncmp(p, (const char*)signature, 8) == 0);
@@ -251,8 +219,8 @@ string CNTV2Bitfile::ParseHeader (unsigned & outPreambleSize)
 				pos++;
 			}
 		}
-
-		outPreambleSize = (int32_t) _fileHeader.size () - pos;
+		if (!bFound)
+			{oss << "ParseHeader failed at or near byte offset " << pos << ", signature not found";	break;}
 
 		assert (oss.str ().empty ());	//	If we made it this far it must be an OK Header - and no error messages
 	} while (false);
@@ -306,7 +274,7 @@ unsigned CNTV2Bitfile::GetProgramByteStream (unsigned char * buffer, unsigned bu
 		if (_bitFileStream.eof ())
 		{
 			//	Unexpected end of file!
-			printf ("Unexpected EOF at %d bytes!\n", _programStreamPos);
+			ostringstream	oss;	oss << "Unexpected EOF at " << _programStreamPos << "bytes";	_lastError = oss.str ();
 			return unsigned (-1);
 		}
 		buffer [posInBuffer++] = _bitFileStream.get ();
