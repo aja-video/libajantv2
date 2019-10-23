@@ -732,25 +732,26 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 	mDevice.GetVANCMode(vancMode, mConfig.fInputChannel);
 	const NTV2FormatDescriptor	formatDesc (inVideoFormat, mConfig.fPixelFormat, vancMode);
 
-	NTV2_ASSERT(NTV2_IS_VANCMODE_ON(vancMode) || DeviceAncExtractorIsAvailable());	//	Gotta have at least VANC or AncExt
-
-	//	Get all VANC packets...
-	if (NTV2_IS_VANCMODE_ON(vancMode))
+	if (NTV2_IS_VANCMODE_ON(vancMode) || DeviceAncExtractorIsAvailable())	//	Gotta have at least VANC or AncExt
 	{
-		AJAAncillaryList::SetFromVANCData (mInputXferInfo.acVideoBuffer, formatDesc, vancPackets);
-		vancPackets.ParseAllAncillaryData();
-	}
-
-	//	Get all anc extractor packets...
-	if (DeviceAncExtractorIsAvailable())
-	{
-		AJAAncillaryList::SetFromDeviceAncBuffers (mInputXferInfo.acANCBuffer, mInputXferInfo.acANCField2Buffer, ancPackets);
-		ancPackets.ParseAllAncillaryData();
+		//	Get all VANC packets...
 		if (NTV2_IS_VANCMODE_ON(vancMode))
-		{	//	Compare with what we got from VANC lines:
-			const string	pktCompare(ancPackets.CompareWithInfo(vancPackets, true/*ignoreLoc*/, false /*ignoreChksum*/));
-			if (!pktCompare.empty())
-				CCGDBG("VANC/AncExt diff(s): " << pktCompare);
+		{
+			AJAAncillaryList::SetFromVANCData (mInputXferInfo.acVideoBuffer, formatDesc, vancPackets);
+			vancPackets.ParseAllAncillaryData();
+		}
+
+		//	Get all anc extractor packets...
+		if (DeviceAncExtractorIsAvailable())
+		{
+			AJAAncillaryList::SetFromDeviceAncBuffers (mInputXferInfo.acANCBuffer, mInputXferInfo.acANCField2Buffer, ancPackets);
+			ancPackets.ParseAllAncillaryData();
+			if (NTV2_IS_VANCMODE_ON(vancMode))
+			{	//	Compare with what we got from VANC lines:
+				const string	pktCompare(ancPackets.CompareWithInfo(vancPackets, true/*ignoreLoc*/, false /*ignoreChksum*/));
+				if (!pktCompare.empty())
+					CCGDBG("VANC/AncExt diff(s): " << pktCompare);
+			}
 		}
 	}
 
