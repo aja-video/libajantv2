@@ -171,15 +171,16 @@
 
 	@subsection	commonelectricalchars		Common Electrical Characteristics
 
-	Unless otherwise noted, physical and electrical characteristics of inputs and outputs -- SDI, HDMI, analog video, analog audio, reference,
-	LTC, etc. -- are generally identical across all AJA devices.
+	Unless otherwise noted, physical and electrical characteristics of inputs and outputs — SDI, HDMI, analog video, analog audio, reference,
+	LTC, etc. — are generally identical across all AJA devices.
 
 	<b>SDI Input(s)</b>
 	-	AC-coupled input terminated with 75 ohms to ground
+	-	SMPTE 292 compliant — 800mV peak-to-peak ±10%
 
 	<b>SDI Output(s)</b>
 	-	AC-coupled output terminated with 75 ohms to ground
-	-	<b>Output Level:</b>  800 mV peak-to-peak +/- 10%, terminated into 75 ohms
+	-	<b>Output Level:</b>  800mV peak-to-peak ±10%, terminated into 75 ohms
 
 	<b>Video Reference Input(s)</b>
 	-	Analog video reference, NTSC, PAL, or tri-level sync
@@ -906,7 +907,7 @@
 
 	Incoming audio is de-embedded from incoming audio HANC packets (SMPTE 299M for HD, SMPTE 272M for SD).
 	For HD, each audio sample consists of 24 bits of sample data (normally PCM).
-	For SD, each audio sample consists of 20 bits of sample data (normally PCM) -- audio extended packets are ignored.
+	For SD, each audio sample consists of 20 bits of sample data (normally PCM) — audio extended packets are ignored.
 
 	Call CNTV2Card::IsAudioInputRunning to determine if the capture side of the <b>Audio System</b> is running or not.
 	Call CNTV2Card::StartAudioInput to start the capture side of the <b>Audio System</b> running.
@@ -1015,7 +1016,7 @@
 	SDI output embedders can usually be driven by any Audio System (see CNTV2Card::SetSDIOutputAudioSystem and CNTV2Card::SetSDIOutputDS2AudioSystem).
 
 	Downstream equipment can be told that the outgoing audio is not carrying PCM data, by setting the non-PCM indicator in the AES header.
-	Older AJA devices can only do this on an audio-system-wide basis -- i.e., all outgoing audio groups are marked PCM or non-PCM.
+	Older AJA devices can only do this on an audio-system-wide basis — i.e., all outgoing audio groups are marked PCM or non-PCM.
 	Use the simpler form of the CNTV2Card::SetAudioPCMControl function for these devices.
 
 	Newer AJA devices can mark individual audio channel pairs as non-PCM (the ::NTV2DeviceCanDoPCMControl function returns true for
