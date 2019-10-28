@@ -85,7 +85,7 @@ GENERATING THE SDK
 
 
 	METHOD 1  ---  Run the script from the top-level directory (that contains 'ajalibraries'):
-	        $  ./sdkgen/ntv2sdkgen.py   --ajantv2 ajalibraries/ajantv2   --ohh ajalibraries/ajantv2/includes   --ohpp ajalibraries/ajantv2/src
+	        $  ./ajalibraries/ajantv2/sdkgen/ntv2sdkgen.py   --ajantv2 ajalibraries/ajantv2   --ohh ajalibraries/ajantv2/includes   --ohpp ajalibraries/ajantv2/src
 
 
 	METHOD 2  ---  Run the script from the 'ajalibraries/ajantv2' directory
