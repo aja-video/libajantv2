@@ -1954,28 +1954,28 @@ string AUTOCIRCULATE_STATUS::operator [] (const unsigned inIndexNum) const
 	else if (!IsStopped())
 		switch (inIndexNum)
 		{
-			case 1:		oss << dec << acStartFrame;								break;
-			case 2:		oss << dec << acEndFrame;								break;
-			case 3:		oss << dec << acEndFrame - acStartFrame + 1;			break;
-			case 4:		oss << dec << acActiveFrame;							break;
-			case 5:		oss << xHEX0N(acRDTSCStartTime,16);						break;
-			case 6:		oss << xHEX0N(acAudioClockStartTime,16);				break;
-			case 7:		oss << dec << acRDTSCCurrentTime;						break;
-			case 8:		oss << dec << acAudioClockCurrentTime;					break;
-			case 9:		oss << CommaStr (acFramesProcessed);					break;
-			case 10:	oss << CommaStr (acFramesDropped);						break;
-			case 11:	oss << dec << acBufferLevel;							break;
-			case 12:	oss << ::NTV2AudioSystemToString (acAudioSystem, true);	break;
-			case 13:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_RP188			? "Yes" : "No");	break;
-			case 14:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_LTC			? "Yes" : "No");	break;
-			case 15:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_FBFCHANGE		? "Yes" : "No");	break;
-			case 16:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_FBOCHANGE		? "Yes" : "No");	break;
-			case 17:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_COLORCORRECT	? "Yes" : "No");	break;
-			case 18:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_VIDPROC		? "Yes" : "No");	break;
-			case 19:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_ANC			? "Yes" : "No");	break;
-			case 20:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_HDMIAUX		? "Yes" : "No");	break;
-			case 21:	oss << dec << (acOptionFlags & AUTOCIRCULATE_WITH_FIELDS		? "Yes" : "No");	break;
-			default:																						break;
+			case 1:		oss << DEC(acStartFrame);					break;
+			case 2:		oss << DEC(acEndFrame);						break;
+			case 3:		oss << DEC(acEndFrame - acStartFrame + 1);	break;
+			case 4:		oss << DEC(acActiveFrame);					break;
+			case 5:		oss << xHEX0N(acRDTSCStartTime,16);			break;
+			case 6:		oss << xHEX0N(acAudioClockStartTime,16);	break;
+			case 7:		oss << DEC(acRDTSCCurrentTime);				break;
+			case 8:		oss << DEC(acAudioClockCurrentTime);		break;
+			case 9:		oss << CommaStr (acFramesProcessed);		break;
+			case 10:	oss << CommaStr (acFramesDropped);			break;
+			case 11:	oss << DEC(acBufferLevel);					break;
+			case 12:	oss << ::NTV2AudioSystemToString (acAudioSystem, true);						break;
+			case 13:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_RP188		? "Yes" : "No");	break;
+			case 14:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_LTC			? "Yes" : "No");	break;
+			case 15:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_FBFCHANGE	? "Yes" : "No");	break;
+			case 16:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_FBOCHANGE	? "Yes" : "No");	break;
+			case 17:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_COLORCORRECT	? "Yes" : "No");	break;
+			case 18:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_VIDPROC		? "Yes" : "No");	break;
+			case 19:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_ANC			? "Yes" : "No");	break;
+			case 20:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_HDMIAUX		? "Yes" : "No");	break;
+			case 21:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_FIELDS		? "Yes" : "No");	break;
+			default:	break;
 		}
 	else if (inIndexNum < 22)
 		oss << "---";

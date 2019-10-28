@@ -792,6 +792,7 @@ void RoutingExpert::InitOutputXpt2WidgetIDs(void)
 	//	gOutputXpt2WidgetIDs
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptAnalogIn,				NTV2_WgtAnalogIn1));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptTestPatternYUV,		NTV2_WgtTestPattern1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptConversionModule,		NTV2_WgtUpDownConverter1));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn1,				NTV2_WgtSDIIn1));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn1,				NTV2_Wgt3GSDIIn1));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptSDIIn1DS2,				NTV2_Wgt3GSDIIn1));
@@ -1039,18 +1040,17 @@ bool CNTV2SignalRouter::ResetFromRegisters (const NTV2InputXptIDSet & inInputs, 
         uint32_t	regNum(0),	maskNdx(0);
         CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo (*it, regNum, maskNdx);
         NTV2RegisterReadsConstIter	iter	(::FindFirstMatchingRegisterNumber(regNum, inRegReads));
-        NTV2_ASSERT(iter != inRegReads.end());
-        if (iter != inRegReads.end())
-        {
-            NTV2_ASSERT(iter->registerNumber == regNum);
-            NTV2_ASSERT(iter->registerMask == 0xFFFFFFFF);
-            NTV2_ASSERT(iter->registerShift == 0);
-            NTV2_ASSERT(maskNdx < 4);
-            const uint32_t	regValue	(iter->registerValue & sSignalRouterRegMasks[maskNdx]);
-            const NTV2OutputCrosspointID	outputXpt	(NTV2OutputCrosspointID(regValue >> sSignalRouterRegShifts[maskNdx]));
-            if (outputXpt != NTV2_XptBlack)
-                mConnections.insert(NTV2SignalConnection (*it, outputXpt));
-        }
+        if(iter == inRegReads.end())
+			continue;
+
+		NTV2_ASSERT(iter->registerNumber == regNum);
+		NTV2_ASSERT(iter->registerMask == 0xFFFFFFFF);
+		NTV2_ASSERT(iter->registerShift == 0);
+		NTV2_ASSERT(maskNdx < 4);
+		const uint32_t	regValue	(iter->registerValue & sSignalRouterRegMasks[maskNdx]);
+		const NTV2OutputCrosspointID	outputXpt	(NTV2OutputCrosspointID(regValue >> sSignalRouterRegShifts[maskNdx]));
+		if (outputXpt != NTV2_XptBlack)
+			mConnections.insert(NTV2SignalConnection (*it, outputXpt));
     }	//	for each NTV2InputCrosspointID
     return true;
 }

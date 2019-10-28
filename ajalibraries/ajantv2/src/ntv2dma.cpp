@@ -368,20 +368,22 @@ bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
 }
 
 
-ULWord CNTV2Card::GetDeviceMemoryOffset (const UWord inFrameNumber, const NTV2Channel inChannel)
+bool CNTV2Card::GetDeviceFrameInfo (const UWord inFrameNumber, const NTV2Channel inChannel, uint64_t & outAddress, uint64_t & outLength)
 {
+	outAddress = outLength = 0;
 	NTV2Framesize	hwFrameSize(NTV2_FRAMESIZE_INVALID);
 	if (!GetFrameBufferSize(inChannel, hwFrameSize))
-		return 0xFFFFFFFF;	//	Bad channel
-	ULWord frameSizeInBytes(::NTV2FramesizeToByteCount(hwFrameSize));
+		return false;	//	Bad channel
+	outLength = uint64_t(::NTV2FramesizeToByteCount(hwFrameSize));
 	bool quadEnabled(false), quadQuadEnabled(false);
 	GetQuadFrameEnable(quadEnabled, inChannel);
 	GetQuadQuadFrameEnable(quadQuadEnabled, inChannel);
 	if (quadEnabled)
-		frameSizeInBytes *= 4;
+		outLength *= 4;
 	if (quadQuadEnabled)
-		frameSizeInBytes *= 4;
-	return ULWord(inFrameNumber) * frameSizeInBytes;
+		outLength *= 4;
+	outAddress = uint64_t(inFrameNumber) * outLength;
+	return true;
 }
 
 

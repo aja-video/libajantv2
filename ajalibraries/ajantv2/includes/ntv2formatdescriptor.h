@@ -81,11 +81,15 @@ public:
 
 	/**
 		@return		The total number of bytes required to hold the raster.
-		@note		To determine the byte count of all planes of a planar format, call GetNumPlanes,
-					then sum the byte counts for each plane.
+		@note		To determine the byte count of all planes of a planar format, call GetTotalBytes.
 		@param[in]	inPlaneIndex0		Specifies the plane of interest. Defaults to zero.
 	**/
 	inline ULWord	GetTotalRasterBytes (const UWord inPlaneIndex0 = 0) const	{return GetFullRasterHeight() * GetBytesPerRow(inPlaneIndex0);}
+
+	/**
+		@return		The total number of bytes required to hold the raster, including all planes of planar formats.
+	**/
+	ULWord			GetTotalBytes (void) const;
 
 	/**
 		@return		The total number of bytes required to hold the visible raster.
