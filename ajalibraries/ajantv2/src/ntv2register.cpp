@@ -662,6 +662,7 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 	int				nominalH, minH, maxH, nominalV, minV, maxV;
 	ULWord			timingValue, lineCount, lineCount2;
 	NTV2DeviceID	boardID = GetDeviceID();
+	int				count;
 
 	
 	// Get the nominal values for H and V
@@ -700,11 +701,14 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 				WriteOutputTimingControl(timingValue);
 				
 				// Wait a scanline
+				count = 0;
 				ReadLineCount (lineCount);
 				do
 				{	
 					ReadLineCount (lineCount2);
-				} while (lineCount != lineCount2);
+					if (count > 1000000) return false;
+					count++;
+				} while (lineCount == lineCount2);
 				
 				// Now move timing back by 2.
 				timingValue -= 2;
@@ -719,11 +723,14 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 				WriteOutputTimingControl(timingValue);
 				
 				// Wait a scanline
+				count = 0;
 				ReadLineCount (lineCount);
 				do
 				{	
 					ReadLineCount (lineCount2);
-				} while (lineCount != lineCount2);				
+					if (count > 1000000) return false;
+					count++;
+				} while (lineCount == lineCount2);				
 				
 				// Now move timing forward by 2.
 				timingValue += 2;
