@@ -3558,6 +3558,66 @@ NTV2FrameRate GetFrameRateFromScale(long scale, long duration, NTV2FrameRate pla
 	return result;
 }
 
+
+NTV2FrameRate GetNTV2FrameRateFromNumeratorDenominator (ULWord numerator, ULWord denominator)
+{
+	NTV2FrameRate ntv2Rate = NTV2_FRAMERATE_UNKNOWN;
+	if (denominator == 1)
+	{
+		numerator *= 1000;
+		denominator *= 1000;
+	}
+
+	switch (numerator)
+	{
+		case 120000:
+			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_12000;
+			else ntv2Rate = NTV2_FRAMERATE_11988;
+			break;
+
+		case 60000:
+			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_6000;
+			else ntv2Rate = NTV2_FRAMERATE_5994;
+			break;
+
+		case 50000:
+			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_5000;
+			break;
+
+		case 48000:
+			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_4800;
+			else ntv2Rate = NTV2_FRAMERATE_4795;
+			break;
+
+		case 30000:
+			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_3000;
+			else ntv2Rate = NTV2_FRAMERATE_2997;
+			break;
+
+		case 25000:
+			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_2500;
+			break;
+
+		case 24000:
+			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_2400;
+			else ntv2Rate = NTV2_FRAMERATE_2398;
+			break;
+
+		case 15000:
+			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_1500;
+			else ntv2Rate = NTV2_FRAMERATE_1498;
+			break;
+
+		default:
+			break;
+
+
+	}
+
+	return ntv2Rate;
+}
+
+
 NTV2FrameRate GetNTV2FrameRateFromVideoFormat(NTV2VideoFormat videoFormat)
 {
     NTV2FrameRate frameRate = NTV2_FRAMERATE_UNKNOWN;
@@ -5281,7 +5341,6 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_KONAIP_4CH_2SFP:			return "KonaIP s2022 2+2";
         case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	return "KonaIP J2K 1I 1O";
         case DEVICE_ID_KONAIP_2TX_1SFP_J2K:		return "KonaIP J2K 2O";
-        case DEVICE_ID_KONAIP_2RX_1SFP_J2K:     return "KonaIP J2K 2I";
         case DEVICE_ID_KONAIP_1RX_1TX_2110:     return "KonaIP s2110 1I 1O";
 		case DEVICE_ID_CORVIDHBR:               return inForRetailDisplay ? "Corvid HB-R"               : "CorvidHBR";
         case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "Avid DNxIV"                : "Io4KPlus";
@@ -8726,8 +8785,8 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_KONA5:						return useWindowsName ? "kona5_pcie.bit"            : "kona5.bit";
 	case DEVICE_ID_KONA5_8KMK:					return "kona5_8k_mk.bit";
 	case DEVICE_ID_KONA5_8K:					return "kona5_8k.bit";
-	case DEVICE_ID_CORVID44_8KMK:				return "c44_8k_mk.bit";
-	case DEVICE_ID_CORVID44_8K:					return "c44_8k.bit";
+	case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk.bit";
+	case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k.bit";
 	default:									return "";
 	}
 	return "";
@@ -8827,7 +8886,6 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_KONAIP_4CH_2SFP,
 														DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K,
 														DEVICE_ID_KONAIP_2TX_1SFP_J2K,
-														DEVICE_ID_KONAIP_2RX_1SFP_J2K,
 														DEVICE_ID_KONAIP_1RX_1TX_2110,
 														DEVICE_ID_KONAIP_2110,
 														DEVICE_ID_KONALHEPLUS,

@@ -88,7 +88,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 		return true;
 	}
 
-	if (is6G || is12G)
+	if (!NTV2_IS_QUAD_QUAD_FORMAT(outputFormat) && (is6G || is12G))
 		vpidChannel = VPIDChannel_1;
 
 	frameRate				= GetNTV2FrameRateFromVideoFormat			(outputFormat);

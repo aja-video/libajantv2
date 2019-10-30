@@ -4509,7 +4509,7 @@ typedef enum _AutoCircCommand_
 
 
 /**
-	@brief	Describes the state of an AutoCirculate channel.
+	@brief	Describes the state of an AutoCirculate channel. See ::AUTOCIRCULATE_STATUS.
 **/
 typedef enum
 {
@@ -4526,15 +4526,14 @@ typedef enum
 #define	NTV2_IS_VALID_AUTO_CIRC_STATE(__m__)		((__m__) >= NTV2_AUTOCIRCULATE_DISABLED  &&  (__m__) < NTV2_AUTOCIRCULATE_INVALID)
 
 
-/////////////////////////////////////////////////////////////////////////////////////
-// EveryFrame Services
-/////////////////////////////////////////////////////////////////////////////////////
-
+/**
+	@brief	Describes the task mode state. See also: \ref devicesharing
+**/
 typedef enum
 {
-	NTV2_DISABLE_TASKS,				//	0	Disabled		--	Board config completely up to controlling app
-	NTV2_STANDARD_TASKS,			//	1	Standard/Retail	--	Board config set by AJA ControlPanel + service + driver
-	NTV2_OEM_TASKS,					//	2	OEM				--	Board config set by controlling app, minimal driver involvement
+	NTV2_DISABLE_TASKS,				///< @brief	0: Disabled: Device is completely configured by controlling application(s) -- no driver involvement.
+	NTV2_STANDARD_TASKS,			///< @brief	1: Standard/Retail: Device is completely controlled by AJA ControlPanel, service/daemon, and driver.
+	NTV2_OEM_TASKS,					///< @brief	2: OEM: Device is configured by controlling application(s), with minimal driver involvement.
 	NTV2_TASK_MODE_INVALID	= 0xFF
 } NTV2EveryFrameTaskMode, NTV2TaskMode;
 
