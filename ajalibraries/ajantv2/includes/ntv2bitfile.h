@@ -70,6 +70,36 @@ class AJAExport CNTV2Bitfile
 		virtual inline const std::string &	GetDesignName (void) const		{ return _designName; }
 
 		/**
+			@brief		Answers true if design includes tandem flag, as extracted from the bitfile.
+			@return		True if the bitfile header includes tandem flag; otherwise false.
+		**/
+		virtual inline bool					IsTandem (void) const		{ return _tandem; }
+
+		/**
+			@brief		Answers true if design includes partial flag, as extracted from the bitfile.
+			@return		True if the bitfile header includes partial flag; otherwise false.
+		**/
+		virtual inline bool					IsPartial (void) const		{ return _partial; }
+
+		/**
+			@brief		Answers true if design includes clear flag, as extracted from the bitfile.
+			@return		True if the bitfile header includes clear flag; otherwise false.
+		**/
+		virtual inline bool					IsClear (void) const		{ return _clear; }
+
+		/**
+			@brief		Answers true if design includes compress flag, as extracted from the bitfile.
+			@return		True if the bitfile header includes compress flag; otherwise false.
+		**/
+		virtual inline bool					IsCompress (void) const		{ return _compress; }
+
+		/**
+			@brief		Answers with the design userID, as extracted from the bitfile.
+			@return		A ULWord containing the bitfile design userID.
+		**/
+		virtual inline ULWord				GetUserID (void) const		{ return _userID; }
+
+		/**
 			@brief		Answers with the part name, as extracted from the bitfile.
 			@return		A std::string containing the bitfile part name.
 		**/
@@ -97,7 +127,9 @@ class AJAExport CNTV2Bitfile
 		virtual unsigned					GetFileStreamLength (void) const;
 		virtual unsigned					GetProgramByteStream (unsigned char * buffer, unsigned bufferLength);
 		virtual unsigned					GetFileByteStream (unsigned char * buffer, unsigned bufferLength);
-		virtual void						SetDesignName (const char * pInBuffer);
+		virtual void						SetDesignName (const char * pInBuffer, unsigned bufferLength);
+		virtual void						SetDesignFlags (const char * pInBuffer, unsigned bufferLength);
+		virtual void						SetDesignUserID (const char * pInBuffer, unsigned bufferLength);
 		virtual std::string					ParseHeaderFromBuffer(const uint8_t* bitfileBuffer);
 
 	private:
@@ -117,6 +149,11 @@ class AJAExport CNTV2Bitfile
 		bool						_fileReady;
 		unsigned					_programStreamPos;
 		unsigned					_fileStreamPos;
+		bool						_tandem;
+		bool						_partial;
+		bool						_clear;
+		bool						_compress;
+		ULWord						_userID;
 
 };	//	CNTV2Bitfile
 

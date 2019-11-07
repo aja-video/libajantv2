@@ -38,6 +38,11 @@ void CNTV2Bitfile::Close (void)
 	_fileStreamPos = 0;
 	_fileProgrammingPosition = 0;
 	_date = _time = _designName = _partName = _lastError = "";
+	_tandem = false;
+	_partial = false;
+	_clear = false;
+	_compress = false;
+	_userID = 0xdefedefe;
 }
 
 
@@ -138,7 +143,9 @@ string CNTV2Bitfile::ParseHeader ()
 		p += 2;							// now pointing at the beginning of the file name
 		pos += 2;
 
-		SetDesignName (p);				// grab design name
+		SetDesignName (p, fieldLen);	// grab design name
+		SetDesignFlags (p, fieldLen);	// grab design flags
+		SetDesignUserID (p, fieldLen);	// grab design userid
 
 		p += fieldLen;					// skip over design name - now pointing to beginning of 'b' field
 		pos += fieldLen;
@@ -321,16 +328,58 @@ unsigned CNTV2Bitfile::GetFileByteStream (unsigned char * buffer, unsigned buffe
 }	//	GetFileByteStream
 
 
-void CNTV2Bitfile::SetDesignName (const char * pInBuffer)
+void CNTV2Bitfile::SetDesignName (const char * pInBuffer, unsigned bufferLength)
 {
-	if (pInBuffer)
-		for (unsigned pos (0);  pos < ::strlen (pInBuffer);  pos++)
-		{
-			const char ch (pInBuffer [pos]);
-			if ((ch < 'A' || ch > 'Z') && (ch < 'a' || ch > 'z') && (ch < '0' || ch > '9') && ch != '_')
-				break;	//	Stop here
-			_designName += ch;
-		}
+	if (!pInBuffer)
+		return;
+	
+	for (unsigned pos (0);  pos < bufferLength;  pos++)
+	{
+		const char ch (pInBuffer [pos]);
+		if ((ch < 'A' || ch > 'Z') && (ch < 'a' || ch > 'z') && (ch < '0' || ch > '9') && ch != '_')
+			break;	//	Stop here
+		_designName += ch;
+	}
+}
+
+
+void CNTV2Bitfile::SetDesignFlags (const char * pInBuffer, unsigned bufferLength)
+{
+	if (!pInBuffer)
+		return;
+		
+	string buffer(pInBuffer, (size_t)bufferLength);
+	
+	if (buffer.find("TANDEM=TRUE") != string::npos)
+		_tandem = true;
+	if (buffer.find("PARTIAL=TRUE") != string::npos)
+		_partial = true;
+	if (buffer.find("CLEAR=TRUE") != string::npos)
+		_clear = true;
+	if (buffer.find("COMPRESS=TRUE") != string::npos)
+		_compress = true;
+}
+
+
+void CNTV2Bitfile::SetDesignUserID (const char * pInBuffer, unsigned bufferLength)
+{
+	_userID = 0xdefedefe;
+
+	if (!pInBuffer)
+		return;
+		
+	string buffer(pInBuffer, (size_t)bufferLength);
+
+	size_t pos = buffer.find("UserID=0X");
+	if ((pos == string::npos) || (pos > (bufferLength - 17)))
+		return;
+
+	ULWord userID;
+	int num = sscanf(buffer.substr(pos + 9, 8).c_str(), "%x", &userID);
+	if (num != 1)
+		return;
+	
+	_userID = userID;
 }
 
 
