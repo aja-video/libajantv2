@@ -246,8 +246,8 @@ AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DIDSet 
 //////////////////////////////////////////////////////////
 
 typedef std::bitset<16>		NTV2AudioChannelsMuted16;				///< @brief	Per-audio-channel mute state for up to 16 audio channels.
-const NTV2AudioChannelsMuted16	NTV2AudioChannelsMuteAll(0xFFFF);	///< @brief	All 16 audio channels muted/disabled.
-const NTV2AudioChannelsMuted16	NTV2AudioChannelsEnableAll(0x0000);	///< @brief	All 16 audio channels unmuted/enabled.
+const NTV2AudioChannelsMuted16	NTV2AudioChannelsMuteAll = NTV2AudioChannelsMuted16(0xFFFF);	///< @brief	All 16 audio channels muted/disabled.
+const NTV2AudioChannelsMuted16	NTV2AudioChannelsEnableAll = NTV2AudioChannelsMuted16(0x0000);	///< @brief	All 16 audio channels unmuted/enabled.
 
 
 
@@ -740,6 +740,18 @@ public:
 	AJA_VIRTUAL bool	DMAClearAncRegion (	const UWord inStartFrameNumber,
 											const UWord inEndFrameNumber,
 											const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All);
+
+	/**
+		@brief		Answers with the address and size of the given frame.
+		@param[in]	inFrameNumber	Specifies the zero-based frame number of the frame of interest.
+		@param[in]	inChannel		Specifies the channel of interest (for multi-format).
+									Specify NTV2_CHANNEL1 for uni-format.
+		@param[out]	outAddress		Receives the device memory address of the first byte of the given frame.
+		@param[out]	outLength		Receives the frame size, in bytes.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetDeviceFrameInfo (	const UWord inFrameNumber,  const NTV2Channel inChannel,
+												uint64_t & outAddress,  uint64_t & outLength);
 
 	/**
 		@brief		Answers with the offset and size of an ancillary data region within a device frame buffer.

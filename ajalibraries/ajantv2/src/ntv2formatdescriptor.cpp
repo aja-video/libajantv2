@@ -935,6 +935,17 @@ void NTV2FormatDescriptor::MakeInvalid (void)
 	mFrameGeometry	= NTV2_FG_INVALID;
 }
 
+ULWord NTV2FormatDescriptor::GetTotalBytes (void) const
+{
+	ULWord bytes(0);
+	UWord plane(0);
+	do
+	{
+		bytes += GetTotalRasterBytes(plane);
+	} while (++plane < GetNumPlanes());
+	return bytes;
+}
+
 bool NTV2FormatDescriptor::Is2KFormat (void) const
 {
 	if (NTV2_IS_VALID_VIDEO_FORMAT(mVideoFormat))

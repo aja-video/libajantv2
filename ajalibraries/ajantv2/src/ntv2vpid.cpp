@@ -26,6 +26,8 @@ static NTV2VideoFormat	stTable2048i		[VPIDPictureRate_ReservedF + 1];
 static NTV2VideoFormat	stTable1920i		[VPIDPictureRate_ReservedF + 1];
 static NTV2VideoFormat	stTable3840pSID		[VPIDPictureRate_ReservedF + 1];
 static NTV2VideoFormat	stTable4096pSID		[VPIDPictureRate_ReservedF + 1];
+static NTV2VideoFormat	stTable3840psfSID	[VPIDPictureRate_ReservedF + 1];
+static NTV2VideoFormat	stTable4096psfSID	[VPIDPictureRate_ReservedF + 1];
 static NTV2VideoFormat	stTable3840pTSI		[VPIDPictureRate_ReservedF + 1];
 static NTV2VideoFormat	stTable4096pTSI		[VPIDPictureRate_ReservedF + 1];
 static NTV2VideoFormat	stTable7680p		[VPIDPictureRate_ReservedF + 1];
@@ -86,11 +88,11 @@ class VPIDTableInitializer
 			stTable2048psf[VPIDPictureRate_2500] = NTV2_FORMAT_1080psf_2K_2500;
 	//		stTable2048psf[VPIDPictureRate_2997] = NTV2_FORMAT_1080psf_2K_2997;
 	//		stTable2048psf[VPIDPictureRate_3000] = NTV2_FORMAT_1080psf_2K_3000;
-			stTable2048psf[VPIDPictureRate_4795] = NTV2_FORMAT_1080p_2K_4795_A;		// 3G-B or Duallink 1.5G
-			stTable2048psf[VPIDPictureRate_4800] = NTV2_FORMAT_1080p_2K_4800_A;		// 3G-B or Duallink 1.5G
-			stTable2048psf[VPIDPictureRate_5000] = NTV2_FORMAT_1080p_2K_5000_A;		// 3G-B or Duallink 1.5G
-			stTable2048psf[VPIDPictureRate_5994] = NTV2_FORMAT_1080p_2K_5994_A;		// 3G-B or Duallink 1.5G
-			stTable2048psf[VPIDPictureRate_6000] = NTV2_FORMAT_1080p_2K_6000_A;		// 3G-B or Duallink 1.5G
+			stTable2048psf[VPIDPictureRate_4795] = NTV2_FORMAT_1080p_2K_4795_B;		// 3G-B or Duallink 1.5G
+			stTable2048psf[VPIDPictureRate_4800] = NTV2_FORMAT_1080p_2K_4800_B;		// 3G-B or Duallink 1.5G
+			stTable2048psf[VPIDPictureRate_5000] = NTV2_FORMAT_1080p_2K_5000_B;		// 3G-B or Duallink 1.5G
+			stTable2048psf[VPIDPictureRate_5994] = NTV2_FORMAT_1080p_2K_5994_B;		// 3G-B or Duallink 1.5G
+			stTable2048psf[VPIDPictureRate_6000] = NTV2_FORMAT_1080p_2K_6000_B;		// 3G-B or Duallink 1.5G
 		
 			stTable1920psf[VPIDPictureRate_2398] = NTV2_FORMAT_1080psf_2398;
 			stTable1920psf[VPIDPictureRate_2400] = NTV2_FORMAT_1080psf_2400;
@@ -119,6 +121,15 @@ class VPIDTableInitializer
 			stTable3840pSID[VPIDPictureRate_5000] = NTV2_FORMAT_4x1920x1080p_5000;
 			stTable3840pSID[VPIDPictureRate_5994] = NTV2_FORMAT_4x1920x1080p_5994;
 			stTable3840pSID[VPIDPictureRate_6000] = NTV2_FORMAT_4x1920x1080p_6000;
+			
+			stTable3840psfSID[VPIDPictureRate_2398] = NTV2_FORMAT_4x1920x1080psf_2398;
+			stTable3840psfSID[VPIDPictureRate_2400] = NTV2_FORMAT_4x1920x1080psf_2400;	
+			stTable3840psfSID[VPIDPictureRate_2500] = NTV2_FORMAT_4x1920x1080psf_2500;
+			stTable3840psfSID[VPIDPictureRate_2997] = NTV2_FORMAT_4x1920x1080psf_2997;			
+			stTable3840psfSID[VPIDPictureRate_3000] = NTV2_FORMAT_4x1920x1080psf_3000;			
+			stTable3840psfSID[VPIDPictureRate_5000] = NTV2_FORMAT_4x1920x1080p_5000;
+			stTable3840psfSID[VPIDPictureRate_5994] = NTV2_FORMAT_4x1920x1080p_5994;
+			stTable3840psfSID[VPIDPictureRate_6000] = NTV2_FORMAT_4x1920x1080p_6000;
 
 			stTable4096pSID[VPIDPictureRate_2398] = NTV2_FORMAT_4x2048x1080p_2398;
 			stTable4096pSID[VPIDPictureRate_2400] = NTV2_FORMAT_4x2048x1080p_2400;
@@ -130,6 +141,17 @@ class VPIDTableInitializer
 			stTable4096pSID[VPIDPictureRate_5000] = NTV2_FORMAT_4x2048x1080p_5000;
 			stTable4096pSID[VPIDPictureRate_5994] = NTV2_FORMAT_4x2048x1080p_5994;
 			stTable4096pSID[VPIDPictureRate_6000] = NTV2_FORMAT_4x2048x1080p_6000;
+			
+			stTable4096psfSID[VPIDPictureRate_2398] = NTV2_FORMAT_4x2048x1080psf_2398;
+			stTable4096psfSID[VPIDPictureRate_2400] = NTV2_FORMAT_4x2048x1080psf_2400;
+			stTable4096psfSID[VPIDPictureRate_2500] = NTV2_FORMAT_4x2048x1080psf_2500;
+			stTable4096psfSID[VPIDPictureRate_2997] = NTV2_FORMAT_4x2048x1080psf_2997;
+			stTable4096psfSID[VPIDPictureRate_3000] = NTV2_FORMAT_4x2048x1080psf_3000;
+			stTable4096psfSID[VPIDPictureRate_4795] = NTV2_FORMAT_4x2048x1080p_4795;
+			stTable4096psfSID[VPIDPictureRate_4800] = NTV2_FORMAT_4x2048x1080p_4800;
+			stTable4096psfSID[VPIDPictureRate_5000] = NTV2_FORMAT_4x2048x1080p_5000;
+			stTable4096psfSID[VPIDPictureRate_5994] = NTV2_FORMAT_4x2048x1080p_5994;
+			stTable4096psfSID[VPIDPictureRate_6000] = NTV2_FORMAT_4x2048x1080p_6000;
 
             stTable3840pTSI[VPIDPictureRate_2398] = NTV2_FORMAT_3840x2160p_2398;
             stTable3840pTSI[VPIDPictureRate_2400] = NTV2_FORMAT_3840x2160p_2400;
@@ -689,13 +711,27 @@ NTV2VideoFormat CNTV2VPID::GetVideoFormat (void) const
 	case VPIDStandard_2160_QuadDualLink_3Gb:
 	case VPIDStandard_2160_Single_6Gb:
 	case VPIDStandard_2160_Single_12Gb:
-		if (vpidHorizontal2048)
+		if (vpidProgTransport)
 		{
-			videoFormat = stTable4096pSID[vpidFrameRate];
+			if (vpidHorizontal2048)
+			{
+				videoFormat = stTable4096pSID[vpidFrameRate];
+			}
+			else
+			{
+				videoFormat = stTable3840pSID[vpidFrameRate];
+			}
 		}
 		else
 		{
-			videoFormat = stTable3840pSID[vpidFrameRate];
+			if (vpidHorizontal2048)
+			{
+				videoFormat = stTable4096psfSID[vpidFrameRate];
+			}
+			else
+			{
+				videoFormat = stTable3840psfSID[vpidFrameRate];
+			}
 		}
 		break;
 	case VPIDStandard_4320_DualLink_12Gb:

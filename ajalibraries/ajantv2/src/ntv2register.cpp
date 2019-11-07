@@ -662,6 +662,7 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 	int				nominalH, minH, maxH, nominalV, minV, maxV;
 	ULWord			timingValue, lineCount, lineCount2;
 	NTV2DeviceID	boardID = GetDeviceID();
+	int				count;
 
 	
 	// Get the nominal values for H and V
@@ -700,11 +701,14 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 				WriteOutputTimingControl(timingValue);
 				
 				// Wait a scanline
+				count = 0;
 				ReadLineCount (lineCount);
 				do
 				{	
 					ReadLineCount (lineCount2);
-				} while (lineCount != lineCount2);
+					if (count > 1000000) return false;
+					count++;
+				} while (lineCount == lineCount2);
 				
 				// Now move timing back by 2.
 				timingValue -= 2;
@@ -719,11 +723,14 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 				WriteOutputTimingControl(timingValue);
 				
 				// Wait a scanline
+				count = 0;
 				ReadLineCount (lineCount);
 				do
 				{	
 					ReadLineCount (lineCount2);
-				} while (lineCount != lineCount2);				
+					if (count > 1000000) return false;
+					count++;
+				} while (lineCount == lineCount2);				
 				
 				// Now move timing forward by 2.
 				timingValue += 2;
@@ -2259,6 +2266,7 @@ bool CNTV2Card::SetFrameBufferSize (const NTV2Channel inChannel, const NTV2Frame
 // Output: NTV2K2Framesize
 bool CNTV2Card::GetFrameBufferSize (const NTV2Channel inChannel, NTV2Framesize & outValue)
 {
+	outValue = NTV2_FRAMESIZE_INVALID;
 	if (!NTV2_IS_VALID_CHANNEL (inChannel))
 		return false;
 #if defined (NTV2_ALLOW_2MB_FRAMES)
@@ -7147,8 +7155,7 @@ bool CNTV2Card::GetAnalogLTCInClockChannel (const UWord inLTCInput, NTV2Channel 
 
 	ULWord		value			(0);
 	ULWord		shift			(inLTCInput == 0 ? 1 : (inLTCInput == 1 ? 9 : 0));	//	Bits 1|2|3 for LTCIn1, bits 9|10|11 for LTCIn2
-	bool		isMultiFormat	(false);
-	const bool	retVal 			(shift && GetMultiFormatMode (isMultiFormat) && isMultiFormat && ReadRegister (kRegLTCStatusControl, value, 0x7, shift));
+	const bool	retVal 			(ReadRegister (kRegLTCStatusControl, value, 0x7, shift));
 	if (retVal)
 		outChannel = static_cast <NTV2Channel> (value + 1);
 	return retVal;
@@ -7161,10 +7168,9 @@ bool CNTV2Card::SetAnalogLTCInClockChannel (const UWord inLTCInput, const NTV2Ch
 		return false;
 
 	ULWord	shift			(inLTCInput == 0 ? 1 : (inLTCInput == 1 ? 9 : 0));	//	Bits 1|2|3 for LTCIn1, bits 9|10|11 for LTCIn2
-	bool	isMultiFormat	(false);
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
-	return shift && GetMultiFormatMode (isMultiFormat) && isMultiFormat && WriteRegister (kRegLTCStatusControl, inChannel - 1, 0x7, shift);
+	return WriteRegister (kRegLTCStatusControl, inChannel - 1, 0x7, shift);
 }
 
 

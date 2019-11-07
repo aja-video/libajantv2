@@ -92,7 +92,6 @@ typedef enum
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief	See \ref konaip
     DEVICE_ID_KONAIP_2022               = 0x10646700,	///< @brief	See \ref konaip
     DEVICE_ID_KONAIP_2110               = 0x10646706,	///< @brief	See \ref konaip
-	DEVICE_ID_KONAIP_2RX_1SFP_J2K		= 0x10646704,	///< @brief	See \ref konaip
     DEVICE_ID_KONAIP_2TX_1SFP_J2K		= 0x10646703,	///< @brief	See \ref konaip
     DEVICE_ID_KONAIP_4CH_2SFP			= 0x10646701,	///< @brief	See \ref konaip
     DEVICE_ID_KONALHEPLUS				= 0x10352300,	///< @brief	See \ref konalheplus
@@ -111,6 +110,9 @@ typedef enum
     DEVICE_ID_KONAIP_2IN_2OUT		= DEVICE_ID_KONAIP_2022,    //	Will deprecate eventually
     DEVICE_ID_KONAIP_4I				= DEVICE_ID_KONAIP_4CH_2SFP,//	Will deprecate eventually
 #endif	//	NTV2_DEPRECATE_14_0
+#if !defined(NTV2_DEPRECATE_15_6)
+//	DEVICE_ID_KONAIP_2RX_1SFP_J2K		= 0x10646704,		//	Never built or shipped
+#endif	//	NTV2_DEPRECATE_15_6
     DEVICE_ID_NOTFOUND				= -1
 
 } NTV2DeviceID;
@@ -298,6 +300,7 @@ typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief	An alias for NTV2Fram
                                             ||	(__fbf__) == NTV2_FBF_24BIT_BGR					\
                                             ||	(__fbf__) == NTV2_FBF_10BIT_DPX_LE				\
                                             ||	(__fbf__) == NTV2_FBF_48BIT_RGB					\
+                                            ||	(__fbf__) == NTV2_FBF_12BIT_RGB_PACKED			\
                                             ||	(__fbf__) == NTV2_FBF_10BIT_RGB_PACKED			\
                                             ||	(__fbf__) == NTV2_FBF_10BIT_ARGB				\
                                             ||	(__fbf__) == NTV2_FBF_16BIT_ARGB				\
@@ -2254,12 +2257,18 @@ typedef enum					// Virtual Register: kVRegInputSelect - set in services
 } NTV2InputVideoSelect;
 
 
+typedef enum
+{
+    NTV2_AUDIOLEVEL_24dBu,
+    NTV2_AUDIOLEVEL_18dBu,
+    NTV2_AUDIOLEVEL_12dBu,
+    NTV2_AUDIOLEVEL_15dBu,
+    NTV2_MAX_NUM_AudioLevels
+} NTV2AudioLevel;
+
+
 #if !defined(R2_DEPRECATE)
 
-/**
-    @brief	This is a user-pref control (currently only used on the Mac) that allows the user
-            to specify which gamma-correction function to use when converting between RGB and YUV
-**/
 typedef enum					// Deprecated
 {
     NTV2_GammaNone,				// don't change LUTs for gamma (aka "Custom")
@@ -2272,10 +2281,6 @@ typedef enum					// Deprecated
 } NTV2GammaType;
 
 
-/**
-    @brief	This is a user-pref control (currently only used on the Mac) that allows the user
-            to specify which Color Space
-**/
 typedef enum						// Deprecated
 {
     NTV2_ColorSpaceModeAuto,		// Auto Select
@@ -2285,10 +2290,6 @@ typedef enum						// Deprecated
 } NTV2ColorSpaceMode;
 
 
-/**
-    @brief	This is a user-pref control (currently only used on the Mac) that allows the user
-    to specify which RTB range of CSC function to use when converting between RGB and YUV
-**/
 typedef enum						// Deprecated
 {
     NTV2_RGBRangeAuto,				// don't change LUTs for gamma (aka "Custom")
@@ -2296,16 +2297,6 @@ typedef enum						// Deprecated
     NTV2_RGBRangeSMPTE,				// Levels are 64 - 940 (SMPTE)
     NTV2_MAX_NUM_RGBRangeModes
 } NTV2RGBRangeMode;
-
-
-typedef enum
-{
-    NTV2_AUDIOLEVEL_24dBu,
-    NTV2_AUDIOLEVEL_18dBu,
-    NTV2_AUDIOLEVEL_12dBu,
-    NTV2_AUDIOLEVEL_15dBu,
-    NTV2_MAX_NUM_AudioLevels
-} NTV2AudioLevel;
 
 
 typedef enum
@@ -3437,7 +3428,9 @@ typedef enum
     NTV2_BITFILE_KONAIP_4CH_2SFP    = 45,
     NTV2_BITFILE_KONAIP_1RX_1TX_1SFP_J2K= 46,
     NTV2_BITFILE_KONAIP_2TX_1SFP_J2K= 47,
-	NTV2_BITFILE_KONAIP_2RX_1SFP_J2K= 48,
+#if !defined(NTV2_DEPRECATE_15_6)
+//	NTV2_BITFILE_KONAIP_2RX_1SFP_J2K= 48,	//	Never built or shipped
+#endif	//	NTV2_DEPRECATE_15_6
     NTV2_BITFILE_KONAIP_1RX_1TX_2110= 49,
 	NTV2_BITFILE_IO4KPLUS_MAIN	= 50,
     NTV2_BITFILE_IOIP_2022          = 51,
@@ -3598,8 +3591,11 @@ typedef enum
     NTV2_LUTGamma18_Rec601_SMPTE,	//	Same as NTV2_LUTGamma18_Rec601, SMPTE range
     NTV2_LUTGamma18_Rec709_SMPTE,	//	Same as NTV2_LUTGamma18_Rec709, SMPTE range
     NTV2_LUTRGBRangeFull_SMPTE,		//	Translates Full <-> SMPTE range
-    NTV2_MAX_NUM_LutTypes
+    NTV2_MAX_NUM_LutTypes,
+    NTV2_INVALID_LUT_TYPE = NTV2_MAX_NUM_LutTypes
 } NTV2LutType;
+
+#define	NTV2_IS_VALID_LUT_TYPE(__x__)		((__x__) >= NTV2_LUTUnknown  &&  (__x__) < NTV2_MAX_NUM_LutTypes)
 
 
 /**
@@ -4318,7 +4314,7 @@ typedef enum
 
 
 #if !defined (NTV2_DEPRECATE)
-    typedef		NTV2AnalogBlackLevel				NTV2K2AnalogBlackLevel;				///< @deprecated	Use NTV2AnalogBlackLevel instead.
+    typedef		R2BlackLevel				NTV2K2AnalogBlackLevel;				///< @deprecated	Use R2BlackLevel instead.
     typedef		NTV2AnalogType						NTV2K2AnalogType;					///< @deprecated	Use NTV2AnalogType instead.
     typedef		NTV2Audio2ChannelSelect				NTV2K2Audio2ChannelSelect;			///< @deprecated	Use NTV2Audio2ChannelSelect instead.
     typedef		NTV2Audio4ChannelSelect				NTV2K2Audio4ChannelSelect;			///< @deprecated	Use NTV2Audio4ChannelSelect instead.
@@ -4601,9 +4597,9 @@ typedef enum
     #define		NTV2K2_AnlgXVGA						NTV2_AnlgXVGA						///< @deprecated	Use NTV2_AnlgXVGA instead.
     #define		NTV2K2_AnlgSVideo					NTV2_AnlgSVideo						///< @deprecated	Use NTV2_AnlgSVideo instead.
 
-    //	NTV2AnalogBlackLevel
-    #define		NTV2K2_Black75IRE					NTV2_Black75IRE						///< @deprecated	Use NTV2_Black75IRE instead.
-    #define		NTV2K2_Black0IRE					NTV2_Black0IRE						///< @deprecated	Use NTV2_Black0IRE instead.
+    //	R2BlackLevel
+    #define		NTV2K2_Black75IRE					R2_Black_75IRE						///< @deprecated	Use R2_Black_75IRE instead.
+    #define		NTV2K2_Black0IRE					R2_Black_0IRE						///< @deprecated	Use R2_Black_0IRE instead.
 
     //	NTV2InputVideoSelect
     #define		NTV2K2_Input1Select					NTV2_Input1Select					///< @deprecated	Use NTV2_Input1Select instead.

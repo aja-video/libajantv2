@@ -425,6 +425,7 @@ AJAExport LWord64				GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr (NTV2Frame
 AJAExport ULWord				GetVaricamRepeatCount (NTV2FrameRate sequenceRate, NTV2FrameRate playRate, ULWord cadenceFrame=0);
 AJAExport ULWord				GetScaleFromFrameRate (NTV2FrameRate playFrameRate);
 AJAExport NTV2FrameRate			GetFrameRateFromScale (long scale, long duration, NTV2FrameRate playFrameRate);
+AJAExport NTV2FrameRate			GetNTV2FrameRateFromNumeratorDenominator (ULWord numerator, ULWord denominator);
 AJAExport NTV2FrameRate			GetNTV2FrameRateFromVideoFormat (NTV2VideoFormat videoFormat);
 
 /**

@@ -400,8 +400,8 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
         case DEVICE_ID_KONA5:           return "kona5";
         case DEVICE_ID_KONA5_8KMK:      return "kona5_8k_mk";
 		case DEVICE_ID_KONA5_8K:        return "kona5_8k";
-		case DEVICE_ID_CORVID44_8KMK:   return "c44_8k_mk";
-		case DEVICE_ID_CORVID44_8K:     return "c44_8k";
+		case DEVICE_ID_CORVID44_8KMK:   return "c44_12g_8k_mk";
+		case DEVICE_ID_CORVID44_8K:     return "c44_12g_8k";
         default:
 			break;
 	}

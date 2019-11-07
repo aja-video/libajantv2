@@ -44,18 +44,17 @@ bool CNTV2Card::DMAReadFrame (const ULWord inFrameNumber, ULWord * pFrameBuffer,
 
 bool CNTV2Card::DMAReadFrame (const ULWord inFrameNumber, ULWord * pFrameBuffer, const ULWord inByteCount, const NTV2Channel inChannel)
 {
-	NTV2Framesize hwFrameSize;
+	NTV2Framesize hwFrameSize(NTV2_FRAMESIZE_INVALID);
 	GetFrameBufferSize(inChannel, hwFrameSize);
-	ULWord actualFrameSize = NTV2FramesizeToByteCount(hwFrameSize);
-	bool quadEnabled = false, quadQuadEnabled = false;
+	ULWord actualFrameSize (::NTV2FramesizeToByteCount(hwFrameSize));
+	bool quadEnabled(false), quadQuadEnabled(false);
 	GetQuadFrameEnable(quadEnabled, inChannel);
 	GetQuadQuadFrameEnable(quadQuadEnabled, inChannel);
-	if(quadEnabled)
+	if (quadEnabled)
 		actualFrameSize *= 4;
-	if(quadQuadEnabled)
+	if (quadQuadEnabled)
 		actualFrameSize *= 4;
-	ULWord offsetFromZero = inFrameNumber * actualFrameSize;
-	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, true, 0, pFrameBuffer, offsetFromZero, inByteCount, true);
+	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, true, 0, pFrameBuffer, inFrameNumber * actualFrameSize, inByteCount, true);
 }
 
 
@@ -66,18 +65,17 @@ bool CNTV2Card::DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pFrame
 
 bool CNTV2Card::DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pFrameBuffer, const ULWord inByteCount, const NTV2Channel inChannel)
 {
-	NTV2Framesize hwFrameSize;
+	NTV2Framesize hwFrameSize(NTV2_FRAMESIZE_INVALID);
 	GetFrameBufferSize(inChannel, hwFrameSize);
-	ULWord actualFrameSize = NTV2FramesizeToByteCount(hwFrameSize);
-	bool quadEnabled = false, quadQuadEnabled = false;
+	ULWord actualFrameSize (::NTV2FramesizeToByteCount(hwFrameSize));
+	bool quadEnabled(false), quadQuadEnabled(false);
 	GetQuadFrameEnable(quadEnabled, inChannel);
 	GetQuadQuadFrameEnable(quadQuadEnabled, inChannel);
-	if(quadEnabled)
+	if (quadEnabled)
 		actualFrameSize *= 4;
-	if(quadQuadEnabled)
+	if (quadQuadEnabled)
 		actualFrameSize *= 4;
-	ULWord offsetFromZero = inFrameNumber * actualFrameSize;
-	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, 0, const_cast <ULWord *> (pFrameBuffer), offsetFromZero, inByteCount, true);
+	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, 0, const_cast <ULWord *> (pFrameBuffer), inFrameNumber * actualFrameSize, inByteCount, true);
 }
 
 
@@ -232,9 +230,9 @@ bool CNTV2Card::DMAReadAnc (const ULWord		inFrameNumber,
 							const NTV2Channel	inChannel)
 {
 	ULWord			F1Offset(0),  F2Offset(0), inByteCount(0), bytesToTransfer(0), byteOffsetToAncData(0);
-	NTV2Framesize	frameSize(NTV2_FRAMESIZE_INVALID);
+	NTV2Framesize	hwFrameSize(NTV2_FRAMESIZE_INVALID);
 	bool			result(true);
-	if (!::NTV2DeviceCanDoCustomAnc (GetDeviceID ()))
+	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
 		return false;
 	if (!ReadRegister (kVRegAncField1Offset, F1Offset))
 		return false;
@@ -242,10 +240,17 @@ bool CNTV2Card::DMAReadAnc (const ULWord		inFrameNumber,
 		return false;
 	if (outAncF1Buffer.IsNULL()  &&  outAncF2Buffer.IsNULL())
 		return false;
-	if (!GetFrameBufferSize (NTV2_CHANNEL1, frameSize))
+	if (!GetFrameBufferSize (inChannel, hwFrameSize))
 		return false;
 
-	const ULWord	frameSizeInBytes(::NTV2FramesizeToByteCount(frameSize));
+	ULWord frameSizeInBytes(::NTV2FramesizeToByteCount(hwFrameSize));
+	bool quadEnabled(false), quadQuadEnabled(false);
+	GetQuadFrameEnable(quadEnabled, inChannel);
+	GetQuadQuadFrameEnable(quadQuadEnabled, inChannel);
+	if (quadEnabled)
+		frameSizeInBytes *= 4;
+	if (quadQuadEnabled)
+		frameSizeInBytes *= 4;
 
 	//	IMPORTANT ASSUMPTION:	F1 data is first (at lower address) in the frame buffer...!
 	inByteCount      =  outAncF1Buffer.IsNULL()  ?  0  :  outAncF1Buffer.GetByteCount();
@@ -299,9 +304,9 @@ bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
 							const NTV2Channel	inChannel)
 {
 	ULWord			F1Offset(0),  F2Offset(0), inByteCount(0), bytesToTransfer(0), byteOffsetToAncData(0);
-	NTV2Framesize	frameSize(NTV2_FRAMESIZE_INVALID);
+	NTV2Framesize	hwFrameSize(NTV2_FRAMESIZE_INVALID);
 	bool			result(true);
-	if (!::NTV2DeviceCanDoCustomAnc (GetDeviceID ()))
+	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
 		return false;
 	if (!ReadRegister (kVRegAncField1Offset, F1Offset))
 		return false;
@@ -309,10 +314,17 @@ bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
 		return false;
 	if (inAncF1Buffer.IsNULL()  &&  inAncF2Buffer.IsNULL())
 		return false;
-	if (!GetFrameBufferSize (NTV2_CHANNEL1, frameSize))
+	if (!GetFrameBufferSize (inChannel, hwFrameSize))
 		return false;
 
-	const ULWord	frameSizeInBytes(::NTV2FramesizeToByteCount(frameSize));
+	ULWord frameSizeInBytes(::NTV2FramesizeToByteCount(hwFrameSize));
+	bool quadEnabled(false), quadQuadEnabled(false);
+	GetQuadFrameEnable(quadEnabled, inChannel);
+	GetQuadQuadFrameEnable(quadQuadEnabled, inChannel);
+	if (quadEnabled)
+		frameSizeInBytes *= 4;
+	if (quadQuadEnabled)
+		frameSizeInBytes *= 4;
 
 	//	Seamless Anc playout...
 	bool	tmpLocalRP188F1AncBuffer(false), tmpLocalRP188F2AncBuffer(false);
@@ -353,6 +365,46 @@ bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
 	if (tmpLocalRP188F1AncBuffer)	inAncF1Buffer.Deallocate();
 	if (tmpLocalRP188F2AncBuffer)	inAncF2Buffer.Deallocate();
 	return result;
+}
+
+
+bool CNTV2Card::GetDeviceFrameInfo (const UWord inFrameNumber, const NTV2Channel inChannel, uint64_t & outAddress, uint64_t & outLength)
+{
+	outAddress = outLength = 0;
+	static const ULWord frameSizes[] = {2, 4, 8, 16};	//	'00'=2MB    '01'=4MB    '10'=8MB    '11'=16MB
+	UWord				frameSizeNdx(0);
+	bool				frameSizeSetBySW(false), quadEnabled(false);
+
+	CNTV2DriverInterface::ReadRegister (kRegCh1Control, frameSizeNdx,     kK2RegMaskFrameSize,      kK2RegShiftFrameSize);
+	CNTV2DriverInterface::ReadRegister (kRegCh1Control, frameSizeSetBySW, kRegMaskFrameSizeSetBySW, kRegShiftFrameSizeSetBySW);
+	if (::NTV2DeviceCanReportFrameSize(GetDeviceID()))
+	{	//	All modern devices
+		ULWord quadMultiplier(1);
+		if (GetQuadFrameEnable(quadEnabled, inChannel) && quadEnabled)
+			quadMultiplier = 8;	//	4!
+        if (GetQuadQuadFrameEnable(quadEnabled, inChannel) && quadEnabled)
+            quadMultiplier = 32;//	16!
+		outLength = frameSizes[frameSizeNdx] * 1024 * 1024 * quadMultiplier;
+	}
+	else
+	{	//	Corvid1, Corvid22, Corvid3G, IoExpress, Kona3G, Kona3GQuad, KonaLHe+, KonaLHi, TTap
+		if (::NTV2DeviceSoftwareCanChangeFrameBufferSize(GetDeviceID()))
+		{	//	Kona3G only at this point
+			if (!GetQuadFrameEnable(quadEnabled, inChannel) || !quadEnabled)
+				if (frameSizeSetBySW)
+					outLength = frameSizes[frameSizeNdx] * 1024 * 1024;
+		}
+	}
+	if (!outLength)
+	{
+		NTV2FrameBufferFormat frameBufferFormat(NTV2_FBF_10BIT_YCBCR);
+		GetFrameBufferFormat(NTV2_CHANNEL1, frameBufferFormat);
+		NTV2FrameGeometry frameGeometry;
+		GetFrameGeometry(frameGeometry, NTV2_CHANNEL1);
+		outLength = ::NTV2DeviceGetFrameBufferSize (GetDeviceID(), frameGeometry, frameBufferFormat);
+	}
+	outAddress = uint64_t(inFrameNumber) * outLength;
+	return true;
 }
 
 
