@@ -3591,8 +3591,11 @@ typedef enum
     NTV2_LUTGamma18_Rec601_SMPTE,	//	Same as NTV2_LUTGamma18_Rec601, SMPTE range
     NTV2_LUTGamma18_Rec709_SMPTE,	//	Same as NTV2_LUTGamma18_Rec709, SMPTE range
     NTV2_LUTRGBRangeFull_SMPTE,		//	Translates Full <-> SMPTE range
-    NTV2_MAX_NUM_LutTypes
+    NTV2_MAX_NUM_LutTypes,
+    NTV2_INVALID_LUT_TYPE = NTV2_MAX_NUM_LutTypes
 } NTV2LutType;
+
+#define	NTV2_IS_VALID_LUT_TYPE(__x__)		((__x__) >= NTV2_LUTUnknown  &&  (__x__) < NTV2_MAX_NUM_LutTypes)
 
 
 /**
