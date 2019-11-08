@@ -248,6 +248,7 @@ AJAIPSocket::SetSocketOption(int option, const void* pValue)
 				{
 					status = true;
 				}
+				break;
 			}
 
 			case SO_LINGER:
@@ -265,6 +266,7 @@ AJAIPSocket::SetSocketOption(int option, const void* pValue)
 				{
 					status = true;
 				}
+				break;
 			}
 
 			case IP_ADD_MEMBERSHIP:
@@ -283,6 +285,7 @@ AJAIPSocket::SetSocketOption(int option, const void* pValue)
 				{
 					status = true;
 				}
+				break;
 			}
 
 			default:
