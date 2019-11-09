@@ -2125,8 +2125,11 @@ typedef enum
     NTV2_2Kx1080SMPTE,
     NTV2_2Kx1080XVGA,
     NTV2_END_DACMODES,
-    NTV2_MAX_NUM_VideoDACModes
+    NTV2_MAX_NUM_VideoDACModes,
+    NTV2_VIDEO_DAC_MODE_INVALID = NTV2_END_DACMODES
 } NTV2VideoDACMode;
+
+#define	NTV2_IS_VALID_VIDEO_DAC_MODE(__x__)		((__x__) >= NTV2_480iRGB  &&  (__x__) < NTV2_END_DACMODES)
 
 
 typedef enum
