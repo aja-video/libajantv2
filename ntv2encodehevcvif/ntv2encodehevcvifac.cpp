@@ -405,12 +405,12 @@ AJAStatus NTV2EncodeHEVCVifAc::Init (void)
 		return status;
 
 	//	Setup to capture video/audio/anc input
-    SetupAutoCirculate ();
+	SetupAutoCirculate ();
 
 	//	Setup codec
-    status = mHevcCommon->SetupHEVC (mM31, mPreset, mEncodeChannel, mMultiStream, mWithInfo);
-    if (AJA_FAILURE (status))
-        return status;
+	status = mHevcCommon->SetupHEVC (mM31, mPreset, mEncodeChannel, mMultiStream, mWithInfo);
+	if (AJA_FAILURE (status))
+		return status;
 
 	//	Setup the circular buffers
 	SetupHostBuffers ();
@@ -427,9 +427,9 @@ AJAStatus NTV2EncodeHEVCVifAc::Init (void)
 			return status;
 	}
 
-    if (mWithInfo)
-    {
-        //	Create encoded data output file
+	if (mWithInfo)
+	{
+		//	Create encoded data output file
 		ostringstream	fileName;
 		if (mMultiStream)
 			fileName << "raw_" << (mInputChannel+1) << ".txt";
@@ -440,9 +440,9 @@ AJAStatus NTV2EncodeHEVCVifAc::Init (void)
 			return status;
 	}
 
-    if (mWithAudio)
-    {
-        //	Create audio output file
+	if (mWithAudio)
+	{
+		//	Create audio output file
 		ostringstream	fileName;
 		if (mMultiStream)
 			fileName << "raw_" << (mInputChannel+1) << ".aiff";
@@ -453,7 +453,7 @@ AJAStatus NTV2EncodeHEVCVifAc::Init (void)
 			return status;
 	}
 
-    return AJA_STATUS_SUCCESS;
+	return AJA_STATUS_SUCCESS;
 
 }	//	Init
 

@@ -410,46 +410,46 @@ AJAStatus NTV2EncodeHEVC::Init (void)
 		return status;
 
 	//	Setup to capture video/audio/anc input
-    SetupAutoCirculate ();
+	SetupAutoCirculate ();
 
 	//	Setup codec
-    status = mHevcCommon->SetupHEVC (mM31, mPreset, mEncodeChannel, mMultiStream, mWithInfo);
-    if (AJA_FAILURE (status))
-        return status;
+	status = mHevcCommon->SetupHEVC (mM31, mPreset, mEncodeChannel, mMultiStream, mWithInfo);
+	if (AJA_FAILURE (status))
+	return status;
 
 	//	Setup the circular buffers
 	SetupHostBuffers ();
-  
+
 	//	Create encoded video output file
 	{
 		ostringstream	oss;
-	    if (mMultiStream) oss << "raw_" << (mInputChannel+1) << ".hevc";  else oss << "raw.hevc";
+		if (mMultiStream) oss << "raw_" << (mInputChannel+1) << ".hevc";  else oss << "raw.hevc";
 		status = mHevcCommon->CreateHevcFile (oss.str(), mMaxFrames);
 		if (AJA_FAILURE (status))
 			return status;
-    }
+	}
 
-    if (mWithInfo)
-    {
-        //	Create encoded data output file
+	if (mWithInfo)
+	{
+		//	Create encoded data output file
 		ostringstream	oss;
-	    if (mMultiStream) oss << "raw_" << (mInputChannel+1) << ".txt";  else oss << "raw.txt";
-        status = mHevcCommon->CreateEncFile (oss.str(), mMaxFrames);
-        if (AJA_FAILURE (status))
-            return status;
-    }
+		if (mMultiStream) oss << "raw_" << (mInputChannel+1) << ".txt";  else oss << "raw.txt";
+			status = mHevcCommon->CreateEncFile (oss.str(), mMaxFrames);
+		if (AJA_FAILURE (status))
+			return status;
+	}
 
-    if (mWithAudio)
-    {
-        //	Create audio output file
+	if (mWithAudio)
+	{
+		//	Create audio output file
 		ostringstream	oss;
-	    if (mMultiStream) oss << "raw_" << (mInputChannel+1) << ".aiff";  else oss << "raw.aiff";
-        status = mHevcCommon->CreateAiffFile (oss.str(), mFileAudioChannels, mMaxFrames, NTV2_AUDIOSIZE_MAX);
-        if (AJA_FAILURE (status))
-            return status;
-    }
+		if (mMultiStream) oss << "raw_" << (mInputChannel+1) << ".aiff";  else oss << "raw.aiff";
+			status = mHevcCommon->CreateAiffFile (oss.str(), mFileAudioChannels, mMaxFrames, NTV2_AUDIOSIZE_MAX);
+		if (AJA_FAILURE (status))
+			return status;
+	}
 
-    return AJA_STATUS_SUCCESS;
+	return AJA_STATUS_SUCCESS;
 
 }	//	Init
 

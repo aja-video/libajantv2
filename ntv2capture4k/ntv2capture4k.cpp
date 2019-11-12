@@ -46,6 +46,7 @@ NTV2Capture4K::NTV2Capture4K (const string					inDeviceSpecifier,
 		mWithAnc			(inWithAnc),
 		mVideoBufferSize	(0),
 		mAudioBufferSize	(0),
+		mAncBufferSize		(0),
 		mDoTsiRouting		(inDoTsiRouting)
 
 {
@@ -144,6 +145,7 @@ AJAStatus NTV2Capture4K::Init (void)
 		mDevice.EnableChannel(NTV2_CHANNEL7);
 		mDevice.EnableChannel(NTV2_CHANNEL6);
 		mDevice.EnableChannel(NTV2_CHANNEL5);
+		AJA_FALL_THRU;
 	case 4:
 		mDevice.EnableChannel(NTV2_CHANNEL4);
 		mDevice.EnableChannel(NTV2_CHANNEL3);
@@ -234,6 +236,7 @@ AJAStatus NTV2Capture4K::SetupVideo (void)
 				mDevice.SetSDITransmitEnable(NTV2_CHANNEL7, false);
 				mDevice.SetSDITransmitEnable(NTV2_CHANNEL6, false);
 				mDevice.SetSDITransmitEnable(NTV2_CHANNEL5, false);
+				AJA_FALL_THRU;
 			case 4:
 				mDevice.SetSDITransmitEnable(NTV2_CHANNEL4, false);
 				mDevice.SetSDITransmitEnable(NTV2_CHANNEL3, false);

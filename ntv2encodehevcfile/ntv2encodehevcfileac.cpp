@@ -406,12 +406,12 @@ AJAStatus NTV2EncodeHEVCFileAc::Init (void)
 		return status;
 
 	//	Setup to capture video/audio/anc input
-    SetupAutoCirculate ();
+	SetupAutoCirculate ();
 
 	//	Setup codec
-    status = mHevcCommon->SetupHEVC (mM31, mPreset, mEncodeChannel, mMultiStream, mWithInfo);
-    if (AJA_FAILURE (status))
-        return status;
+	status = mHevcCommon->SetupHEVC (mM31, mPreset, mEncodeChannel, mMultiStream, mWithInfo);
+	if (AJA_FAILURE (status))
+		return status;
 
 	//	Setup the circular buffers
 	SetupHostBuffers ();

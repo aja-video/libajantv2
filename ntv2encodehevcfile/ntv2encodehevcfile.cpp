@@ -294,21 +294,21 @@ AJAStatus NTV2EncodeHEVCFile::Init (void)
     }
 
 	//	Setup codec
-    status = mHevcCommon->SetupHEVC (mM31, mPreset, mEncodeChannel, mMultiStream, false);
-    if (AJA_FAILURE (status))
-        return status;
+	status = mHevcCommon->SetupHEVC (mM31, mPreset, mEncodeChannel, mMultiStream, false);
+	if (AJA_FAILURE (status))
+		return status;
 
 	//	Setup the circular buffers
 	SetupHostBuffers ();
-    
-    //	Open the YUV input file
-    status = mHevcCommon->OpenYuv420File (mFileName, RAWFILEWIDTH, RAWFILEHEIGHT);
-    if (AJA_FAILURE (status))
+
+	//	Open the YUV input file
+	status = mHevcCommon->OpenYuv420File (mFileName, RAWFILEWIDTH, RAWFILEHEIGHT);
+	if (AJA_FAILURE (status))
 	{
 		cerr << "OpenYuv420File " << mFileName << " failed " << status << endl;
-        return status;
+		return status;
 	}
-  
+
 	{
 		//	Create encoded video output file
 		ostringstream	fileName;
@@ -319,8 +319,8 @@ AJAStatus NTV2EncodeHEVCFile::Init (void)
 		status = mHevcCommon->CreateHevcFile (fileName.str(), mHevcCommon->YuvNumFrames());
 		if (AJA_FAILURE (status))
 			return status;
-    }
-    return AJA_STATUS_SUCCESS;
+	}
+	return AJA_STATUS_SUCCESS;
 
 }	//	Init
 
