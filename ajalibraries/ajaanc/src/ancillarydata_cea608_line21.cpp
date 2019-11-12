@@ -205,16 +205,15 @@ const uint32_t TRANSITION_PRE	= 1;		// one sample of the transition "belongs" to
 const uint32_t TRANSITION_POST  = 2;		// two samples of the transition "belong" to the next bit
 const uint32_t TRANSITION_WIDTH = (TRANSITION_PRE + TRANSITION_POST);
 
-// 1 cycle of the Line 21 Clock Run-In (see note in header file about freq. approximation)
-uint8_t cc_clock[27] = { 16,  17,  22,  29,  38,  49,  61,  74,  86,  98, 108, 116, 122, 125,
-								 125, 122, 116, 108,  98,  86,  74,  61,  49,  38,  29,  22,  17      };
-	
-
 
 // Initialize a prototype Line 21 buffer with the parts that DON'T change:
 // i.e. the Clock Run-In and the Start bits.
 AJAStatus AJAAncillaryData_Cea608_Line21::InitEncodeBuffer (uint32_t lineStartOffset, uint32_t & dataStartOffset)
 {
+	// 1 cycle of the Line 21 Clock Run-In (see note in header file about freq. approximation)
+	static const uint8_t cc_clock[27] = { 16,  17,  22,  29,  38,  49,  61,  74,  86,  98, 108, 116, 122, 125,
+										 125, 122, 116, 108,  98,  86,  74,  61,  49,  38,  29,  22,  17      };
+
 	// sanity check...
 	if (GetDC() < AJAAncillaryData_Cea608_Line21_PayloadSize)
 		return AJA_STATUS_FAIL;
