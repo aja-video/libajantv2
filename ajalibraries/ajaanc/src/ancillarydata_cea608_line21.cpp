@@ -224,7 +224,6 @@ AJAStatus AJAAncillaryData_Cea608_Line21::InitEncodeBuffer (uint32_t lineStartOf
 	uint32_t i, j;
 	ByteVectorIndex	pos(0);
 	const uint8_t	kSMPTE_Y_Black	(0x10);
-	uint8_t *ptr = &m_payload[0];
 
 	// fill Black until beginning of Clock Run-In
 	// both the user-supplied offset to the first bit-cell, plus the "missing" quarter-cycle of the clock
@@ -245,7 +244,8 @@ AJAStatus AJAAncillaryData_Cea608_Line21::InitEncodeBuffer (uint32_t lineStartOf
 		m_payload[pos++] = CC_LEVEL_LO;
 
 	// encode transition between low and high
-	ptr = EncodeTransition (ptr, 0, 1);
+	EncodeTransition (&m_payload[pos], 0, 1);
+	pos += TRANSITION_WIDTH;
 
 	// Start bit: 1 CC bit of '1'
 	for (i = 0; i < CC_BIT_WIDTH - TRANSITION_PRE; i++)
@@ -269,22 +269,22 @@ AJAStatus AJAAncillaryData_Cea608_Line21::EncodeLine (uint8_t char1, uint8_t cha
 {
 	// pointer to first data bit, minus room for transition
 	uint8_t *ptr = &m_payload[0] + (dataStartOffset - TRANSITION_PRE);
-	
+
 	// encode transition from last start bit to first bit of first character
 	ptr = EncodeTransition (ptr, 1, (char1 & 0x01) );
-	
+
 	// encode first byte
 	ptr = EncodeCharacter (ptr, char1);
-	
+
 	// encode transition between characters
 	ptr = EncodeTransition (ptr, (char1 & 0x80), (char2 & 0x01) );
-	
+
 	// encode second byte
 	ptr = EncodeCharacter (ptr, char2);
-	
+
 	// encode final transition
 	ptr = EncodeTransition (ptr, (char2 & 0x80), 0);
-	
+
 	// return ptr to the beginning of the encode buffer
 	return AJA_STATUS_SUCCESS;
 }
