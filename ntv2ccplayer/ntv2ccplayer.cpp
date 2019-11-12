@@ -20,6 +20,7 @@
 #include "ajabase/common/videotypes.h"
 #include "ajabase/system/debugshare.h"
 #include "ajabase/common/timecode.h"
+#include "ajabase/common/common.h"
 #include "ajaanc/includes/ancillarylist.h"
 #include "ajaanc/includes/ancillarydata_cea608_line21.h"
 #include "ajaanc/includes/ancillarydata_cea608_vanc.h"
@@ -212,6 +213,56 @@ static AJALock			gLogLock;	//	Prevent interleaving cerr messages from multiple t
 
 #endif	//	MEASURE_ACCURACY
 
+AJALabelValuePairs CCGeneratorConfig::Get (void) const
+{
+	static const string EndActions[] = {"Quit", "Repeat", "Idle", ""};
+	AJALabelValuePairs result;
+	string	filesToPlay(aja::join(fFilesToPlay, "\n"));
+	if (filesToPlay.empty())	filesToPlay = "<default>";
+	AJASystemInfo::append(result, "Files to Play",			filesToPlay);
+	AJASystemInfo::append(result, "End Action",				EndActions[fEndAction]);
+	AJASystemInfo::append(result, "Caption Mode",			::NTV2Line21ModeToStr(fCaptionMode));
+	AJASystemInfo::append(result, "Caption Channel",		::NTV2Line21ChannelToStr(fCaptionChannel));
+	AJASystemInfo::append(result, "Newlines Make New Rows",	fNewLinesAreNewRows ? "Y" : "N");
+	AJASystemInfo::append(result, "Chars Per Minute",		aja::to_string(fCharsPerMinute));
+	AJASystemInfo::append(result, "Attributes",				::NTV2Line21AttributesToStr(fAttributes));
+	return result;
+}
+
+AJALabelValuePairs CCPlayerConfig::Get (const bool inCompact) const
+{
+	AJALabelValuePairs result;
+	AJASystemInfo::append(result, "CCPlayer Config");
+	AJASystemInfo::append(result, "Device Specifier",	fDeviceSpecifier);
+	AJASystemInfo::append(result, "Output Channel",		::NTV2ChannelToString(fOutputChannel, inCompact));
+	AJASystemInfo::append(result, "Video Format",		::NTV2VideoFormatToString(fVideoFormat));
+	AJASystemInfo::append(result, "Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
+	AJASystemInfo::append(result, "AutoCirc Frames",	fFrames.toString());
+	AJASystemInfo::append(result, "Emit Statistics",	fEmitStats ? "Y" : "N");
+	AJASystemInfo::append(result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
+	AJASystemInfo::append(result, "Force Vanc",			fForceVanc ? "Y" : "N");
+	AJASystemInfo::append(result, "Force RTP",			fForceRTP ? (fForceRTP&2 ? "MultiPkt" : "UniPkt") : "Normal");
+	AJASystemInfo::append(result, "Suppress Audio",		fSuppressAudio ? "Y" : "N");
+	AJASystemInfo::append(result, "Suppress Line21",	fSuppressLine21 ? "Y" : "N");
+	AJASystemInfo::append(result, "Suppress 608 Pkt",	fSuppress608 ? "Y" : "N");
+	AJASystemInfo::append(result, "Suppress 708 Pkt",	fSuppress708 ? "Y" : "N");
+	AJASystemInfo::append(result, "Suppress Timecode",	fSuppressTimecode ? "Y" : "N");
+	for (CaptionChanGenMapConstIter it(fChannelGenerators.begin());  it != fChannelGenerators.end();  ++it)
+	{
+		AJASystemInfo::append(result, ::NTV2Line21ChannelToStr(it->first, false));
+		AJALabelValuePairs pairs(it->second.Get());
+		for (AJALabelValuePairsConstIter iter(pairs.begin());  iter != pairs.end();  ++iter)
+			result.push_back(*iter);
+	}
+	return result;
+}
+
+std::ostream & operator << (std::ostream & ioStrm,  const CCPlayerConfig & inObj)
+{
+	ioStrm	<< AJASystemInfo::ToString(inObj.Get());
+	return ioStrm;
+}
+
 
 //////////////////////////////////////////////
 //	Caption Source
@@ -332,7 +383,7 @@ class CaptionSource
 					*mpInputStream >> rawBytes[ndx];
 					if (mpInputStream->eof())
 						SetFinished();
-					resultChar += string(1, rawBytes [ndx]);
+					resultChar += string(1, rawBytes[ndx]);
 				}
 				if (!IsFinished())	NTV2_ASSERT(resultChar.length() == 3);
 			}
@@ -1509,10 +1560,15 @@ void NTV2CCPlayer::PlayoutFrames (void)
 		acOptionFlags |= AUTOCIRCULATE_WITH_RP188;
 	if (!mConfig.fSuppressTimecode  &&  !mConfig.fDoMultiFormat  &&  ::NTV2DeviceGetNumLTCOutputs(mDeviceID))
 		acOptionFlags |= AUTOCIRCULATE_WITH_LTC;		//	Emit analog LTC if we "own" the device
-	mDevice.AutoCirculateStop (mConfig.fOutputChannel);			//	Maybe some other app left this A/C channel running
+	mDevice.AutoCirculateStop (mConfig.fOutputChannel);	//	Maybe some other app left this A/C channel running
 	if (NTV2_IS_SD_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  mConfig.fSuppressLine21  &&  mConfig.fSuppress608)
 		cerr << "## WARNING:  SD video with '--noline21' option and '--no608' option won't produce captions" << endl;
-	mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  7,  audioSystem,  acOptionFlags);
+	mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,
+										mConfig.fFrames.count(),	//	numFrames (zero if specifying range)
+										audioSystem,
+										acOptionFlags,
+										1,							//	numChannels to gang
+										mConfig.fFrames.firstFrame(), mConfig.fFrames.lastFrame());
 	mDevice.AutoCirculateStart (mConfig.fOutputChannel);
 
 	//	Repeat until time to quit...

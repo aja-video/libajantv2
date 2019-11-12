@@ -220,7 +220,7 @@ int main (int argc, const char ** argv)
 	grabberConfig.fUseVanc			= bUseVanc		? true : false;
 	grabberConfig.fCaptureAudio		= bWithAudio	? true : false;
 
-	cerr << grabberConfig << endl;
+	cerr << grabberConfig << endl;	//	Dump config
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)

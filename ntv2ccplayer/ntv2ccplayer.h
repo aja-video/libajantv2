@@ -11,6 +11,7 @@
 #include "ntv2devicescanner.h"
 #include "ntv2democommon.h"
 #include "ajabase/system/thread.h"
+#include "ajabase/system/info.h"
 #include "ajacc/includes/ajacc.h"
 #include <vector>
 
@@ -60,6 +61,8 @@ typedef struct CCGeneratorConfig
 				fAttributes			()
 		{
 		}
+
+		AJALabelValuePairs Get(void)const;
 }	CCGeneratorConfig;
 
 
@@ -74,20 +77,21 @@ typedef CaptionChanGenMap::iterator							CaptionChanGenMapIter;
 typedef struct CCPlayerConfig
 {
 	public:
-		std::string				fDeviceSpecifier;		///< @brief	The AJA device to use
-		NTV2Channel				fOutputChannel;			///< @brief	The device channel to use
-		bool					fEmitStats;				///< @brief	If true, show stats while playing; otherwise echo caption text being played
-		bool					fDoMultiFormat;			///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
-		bool					fForceVanc;				///< @brief	If true, force the use of Vanc, even if the device supports Anc insertion
-		bool					fSuppressLine21;		///< @brief	SD output only:  if true, do not encode Line 21 waveform;  otherwise encode Line 21 waveform
-		bool					fSuppress608;			///< @brief	If true, don't transmit CEA608 packets;  otherwise include 608 packets
-		bool					fSuppress708;			///< @brief	If true, don't transmit CEA708 packets;  otherwise include 708 packets
-		bool					fSuppressAudio;			///< @brief	If true, suppress audio;  otherwise generate audio tones
-		bool					fSuppressTimecode;		///< @brief	If true, suppress timecode;  otherwise embed VITC/LTC
-		uint16_t				fForceRTP;				///< @brief	BIT(0):0=normal,1=forceRTP  BIT(1):0=uniPkt,1=multiPkt  BIT(2):0=normal,1=patchDeviceID
-		NTV2VideoFormat			fVideoFormat;			///< @brief	The video format to use
-		NTV2FrameBufferFormat	fPixelFormat;			///< @brief	The pixel format to use
-		CaptionChanGenMap		fChannelGenerators;		///< @brief	Caption channel generators
+		std::string						fDeviceSpecifier;		///< @brief	The AJA device to use
+		NTV2Channel						fOutputChannel;			///< @brief	The device channel to use
+		CNTV2DemoCommon::ACFrameRange	fFrames;				///< @brief	AutoCirculate frame count or range
+		bool							fEmitStats;				///< @brief	If true, show stats while playing; otherwise echo caption text being played
+		bool							fDoMultiFormat;			///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
+		bool							fForceVanc;				///< @brief	If true, force the use of Vanc, even if the device supports Anc insertion
+		bool							fSuppressLine21;		///< @brief	SD output only:  if true, do not encode Line 21 waveform;  otherwise encode Line 21 waveform
+		bool							fSuppress608;			///< @brief	If true, don't transmit CEA608 packets;  otherwise include 608 packets
+		bool							fSuppress708;			///< @brief	If true, don't transmit CEA708 packets;  otherwise include 708 packets
+		bool							fSuppressAudio;			///< @brief	If true, suppress audio;  otherwise generate audio tones
+		bool							fSuppressTimecode;		///< @brief	If true, suppress timecode;  otherwise embed VITC/LTC
+		uint16_t						fForceRTP;				///< @brief	BIT(0):0=normal,1=forceRTP  BIT(1):0=uniPkt,1=multiPkt  BIT(2):0=normal,1=patchDeviceID
+		NTV2VideoFormat					fVideoFormat;			///< @brief	The video format to use
+		NTV2FrameBufferFormat			fPixelFormat;			///< @brief	The pixel format to use
+		CaptionChanGenMap				fChannelGenerators;		///< @brief	Caption channel generators
 
 		/**
 			@brief	Constructs a default CCPlayer configuration.
@@ -95,6 +99,7 @@ typedef struct CCPlayerConfig
 		inline explicit	CCPlayerConfig (const std::string & inDeviceSpecifier	= "0")
 			:	fDeviceSpecifier	(inDeviceSpecifier),
 				fOutputChannel		(NTV2_CHANNEL1),
+				fFrames				(7),
 				fEmitStats			(true),
 				fDoMultiFormat		(false),
 				fForceVanc			(false),
@@ -108,8 +113,11 @@ typedef struct CCPlayerConfig
 				fPixelFormat		(NTV2_FBF_10BIT_YCBCR)
 		{
 		}
+		AJALabelValuePairs Get(const bool inCompact = false)const;
 
 }	CCPlayerConfig;
+
+std::ostream &	operator << (std::ostream & ioStrm, const CCPlayerConfig & inObj);
 
 
 
@@ -226,7 +234,7 @@ class NTV2CCPlayer
 		AUTOCIRCULATE_STATUS		mACStatus;							///< @brief	My AutoCirculate status
 		CNTV2Card					mDevice;							///< @brief	My CNTV2Card instance
 		NTV2DeviceID				mDeviceID;							///< @brief	My device (model) identifier
-		NTV2EveryFrameTaskMode		mSavedTaskMode;						///< @brief	Used to restore the previous state
+		NTV2TaskMode				mSavedTaskMode;						///< @brief	Used to restore the previous state
 		NTV2VANCMode				mVancMode;							///< @brief	VANC mode
 		bool						mPlayerQuit;						///< @brief	Set "true" to terminate player
 		bool						mCaptionGeneratorQuit;				///< @brief	Set "true" to terminate caption generator(s)

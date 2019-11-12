@@ -65,32 +65,6 @@ static string GetLine21ChannelNames (string inDelimiterStr = "|")
 }	//	GetLine21ChannelNames
 
 
-static NTV2StringList Split (string inStr, const string inDelimiter = string(","))
-{
-	NTV2StringList	result;
-	size_t	pos	(inStr.find (inDelimiter));
-	while (pos != string::npos)
-	{
-		const string	piece	(inStr.substr (0, pos));
-		result.push_back (piece);
-		inStr.erase (0, pos+1);
-		pos = inStr.find (inDelimiter);
-	}
-	result.push_back (inStr);
-	return result;
-}
-
-static void PrintStringList (const NTV2StringList & inStrList)
-{
-	for (NTV2StringListConstIter it (inStrList.begin());  it != inStrList.end();  )
-	{
-		cerr << *it;
-		if (++it != inStrList.end ())
-			cerr << ", ";
-	}
-}
-
-
 /**
 	@brief	Plays out video containing closed-captions generated internally (no file arguments) or from
 			one or more text files (or from standard input).
@@ -102,26 +76,27 @@ static void PrintStringList (const NTV2StringList & inStrList)
 int main (int argc, const char ** argv)
 {
 	AJAStatus			status			(AJA_STATUS_SUCCESS);
-	char *				pDeviceSpec		(NULL);				//	Which device?
-	char *				pCaptionChannel	(NULL);				//	Caption channel of interest (cc1, cc2 ... text1, text2, ...)
-	char *				pMode			(NULL);				//	Kind of 608 display (roll, paint, pop)?
-	char *				pVideoFormat	(NULL);				//	Video format (525, 625, etc.)?
-	char *				pPixelFormat	(NULL);				//	Pixel format (2vuy, argb, etc.?
-	char *				pEndAction		(NULL);				//	End action (quit, repeat, idle)?
-	char *				pCaptionRate	(NULL);				//	Caption rate (chars/min)
-	int					noAudio			(0);				//	Disable audio tone?
-	int					noTimecode		(0);				//	Disable timecode?
-	int					doMultiChannel	(0);				//	Enable multi-format?
-	uint32_t			channelNumber	(1);				//	Number of the channel to use
-	uint16_t			forceRTP		(0);				//	Force RTP?
-	int					bEmitStats		(0);				//	Emit stats while running?
-	int					bBreakNewLines	(0);				//	Newlines break rows instead of treated as whitespace?
-	int					bForceVanc		(0);				//	Force use of Vanc?
-	int					bSuppressLine21	(0);				//	Suppress line 21 waveform (SD only)?
-	int					bSuppress608	(0);				//	Don't transmit CEA608 packets?
-	int					bSuppress708	(0);				//	Don't transmit CEA708 packets (HD only)?
-	NTV2StringList		pathList;							//	List of text files (paths) to "play"
-	poptContext			optionsContext; 					//	Context for parsing command line arguments
+	char *				pDeviceSpec		(AJA_NULL);		//	Which device?
+	char *				pCaptionChannel	(AJA_NULL);		//	Caption channel of interest (cc1, cc2 ... text1, text2, ...)
+	char *				pMode			(AJA_NULL);		//	Kind of 608 display (roll, paint, pop)?
+	char *				pVideoFormat	(AJA_NULL);		//	Video format (525, 625, etc.)?
+	char *				pPixelFormat	(AJA_NULL);		//	Pixel format (2vuy, argb, etc.?
+	char *				pEndAction		(AJA_NULL);		//	End action (quit, repeat, idle)?
+	char *				pCaptionRate	(AJA_NULL);		//	Caption rate (chars/min)
+	char *				pFramesSpec		(AJA_NULL);		//	AutoCirculate frames spec
+	int					noAudio			(0);			//	Disable audio tone?
+	int					noTimecode		(0);			//	Disable timecode?
+	int					doMultiChannel	(0);			//	Enable multi-format?
+	uint32_t			channelNumber	(1);			//	Number of the channel to use
+	uint16_t			forceRTP		(0);			//	Force RTP?
+	int					bEmitStats		(0);			//	Emit stats while running?
+	int					bBreakNewLines	(0);			//	Newlines break rows instead of treated as whitespace?
+	int					bForceVanc		(0);			//	Force use of Vanc?
+	int					bSuppressLine21	(0);			//	Suppress line 21 waveform (SD only)?
+	int					bSuppress608	(0);			//	Don't transmit CEA608 packets?
+	int					bSuppress708	(0);			//	Don't transmit CEA708 packets (HD only)?
+	NTV2StringList		pathList;						//	List of text files (paths) to "play"
+	poptContext			optionsContext; 				//	Context for parsing command line arguments
 	AJADebug::Open();
 
 	//	Command line option descriptions:
@@ -132,29 +107,30 @@ int main (int argc, const char ** argv)
 		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,		0,	"device channel to use",		"1..8"},
 		{"format",		'f',	POPT_ARG_STRING,	&pVideoFormat,		0,	"video format to produce",		"'?' or 'list' to list"},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,		0,	"pixel format to use",			"'?' or 'list' to list"},
-		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,			0,	"disable audio tone?",			NULL},
-		{"notimecode",	0,		POPT_ARG_NONE,		&noTimecode,		0,	"disable timecode?",			NULL},
-		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,	0,	"enable multi-chl/fmt?",		NULL},
+		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,			0,	"disable audio tone?",			AJA_NULL},
+		{"notimecode",	0,		POPT_ARG_NONE,		&noTimecode,		0,	"disable timecode?",			AJA_NULL},
+		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,	0,	"enable multi-chl/fmt?",		AJA_NULL},
 
 		//	CCPlayer global config options...
-		{"stats",		's',	POPT_ARG_NONE,		&bEmitStats,		0,	"show queue stats?",			NULL},
-		{"vanc",		'v',	POPT_ARG_NONE,		&bForceVanc,		0,	"force use of vanc",			NULL},
-		{"noline21",	'n',	POPT_ARG_NONE,		&bSuppressLine21,	0,	"disable line 21 wvfrm?",		NULL},
-		{"no608",		0,		POPT_ARG_NONE,		&bSuppress608,		0,	"don't xmit 608 packets?",		NULL},
-		{"no708",		0,		POPT_ARG_NONE,		&bSuppress708,		0,	"don't xmit 708 packets?",		NULL},
+		{"stats",		's',	POPT_ARG_NONE,		&bEmitStats,		0,	"show queue stats?",			AJA_NULL},
+		{"vanc",		'v',	POPT_ARG_NONE,		&bForceVanc,		0,	"force use of vanc",			AJA_NULL},
+		{"noline21",	'n',	POPT_ARG_NONE,		&bSuppressLine21,	0,	"disable line 21 wvfrm?",		AJA_NULL},
+		{"no608",		0,		POPT_ARG_NONE,		&bSuppress608,		0,	"don't xmit 608 packets?",		AJA_NULL},
+		{"no708",		0,		POPT_ARG_NONE,		&bSuppress708,		0,	"don't xmit 708 packets?",		AJA_NULL},
+		{"frames",		0,		POPT_ARG_STRING,	&pFramesSpec,		0,	"frames to AutoCirc",			"num[@min] or min-max"		},
 
 		//	Per-caption-channel options -- specify more than one by separating with comma (e.g., --end loop,idle,idle,loop  --608chan cc1,cc2,tx3,tx4)
 		{"end",			'e',	POPT_ARG_STRING,	&pEndAction,		0,	"end action",					"exit|loop|idle,..."},
 		{"rate",		'r',	POPT_ARG_STRING,	&pCaptionRate,		0,	"caption rate",					"chars/min,..."},
 		{"608mode",		0,		POPT_ARG_STRING,	&pMode,				0,	"608 caption mode",				"roll|roll4|roll3|roll2|paint|pop,..."},
 		{"608chan",		0,		POPT_ARG_STRING,	&pCaptionChannel,	0,	"608 caption channel",			::GetLine21ChannelNames().c_str ()},
-		{"newline",		0,		POPT_ARG_NONE,		&bBreakNewLines,	0,	"newlines break rows?",			NULL},
+		{"newline",		0,		POPT_ARG_NONE,		&bBreakNewLines,	0,	"newlines break rows?",			AJA_NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
 
 	//	Read command line arguments...
-	optionsContext = ::poptGetContext(NULL, argc, argv, userOptionsTable, 0);
+	optionsContext = ::poptGetContext(AJA_NULL, argc, argv, userOptionsTable, 0);
 	::poptGetNextOpt(optionsContext);
 
 	const char * pStr	(::poptGetArg(optionsContext));
@@ -242,10 +218,17 @@ int main (int argc, const char ** argv)
 	playerConfig.fSuppressAudio		= noAudio			? true : false;
 	playerConfig.fSuppressTimecode	= noTimecode		? true : false;
 
-	cerr	<< "CCPlayer config:  '" << ::NTV2VideoFormatToString(videoFormat) << "', " << ::NTV2FrameBufferFormatToString(pixelFormat)
-			<< ", NTV2_CHANNEL" << (channel+1) << (forceRTP?", ForceRTP":"") << (bEmitStats?", Stats":"") << (doMultiChannel?", multiChan":"")
-			<< (bForceVanc?", VANC":"") << (bSuppressLine21?", NoLine21":"") << (bSuppress608?", No608":"")
-			<< (bSuppress708?", No708":"") << (noAudio?", NoAudio":"") << (noTimecode?", NoTC":"") << endl;
+	//	Frames
+	const string framesSpec(pFramesSpec ? pFramesSpec : "");
+	static const string	legalFramesSpec("{frameCount}[@{firstFrameNum}]  or  {firstFrameNum}-{lastFrameNum}");
+	if (!framesSpec.empty())
+	{
+		const string parseResult(playerConfig.fFrames.setFromString(framesSpec));
+		if (!parseResult.empty())
+			{cerr << "## ERROR:  Bad 'frames' spec '" << framesSpec << "'\n## " << parseResult << endl;  return 1;}
+	}
+	if (!playerConfig.fFrames.valid())
+		{cerr << "## ERROR:  Bad 'frames' spec '" << framesSpec << "'\n## Expected " << legalFramesSpec << endl;  return 1;}
 
 	//	NOTE:	From one command line invocation, you can inject different captions into separate caption channels.
 	//			For example:
@@ -256,12 +239,12 @@ int main (int argc, const char ** argv)
 
 	//	Users can play one or more caption channels by specifying more than one, separating each with a comma:		--608chan cc2,cc4,tx1,tx2
 	//	You can vary the mode, end-action and rate for each caption channel in the same way:						--608mode pop,paint,roll  --rate 1500,800,300,600
-	const NTV2StringList	sCaptionChannels	(::Split (CNTV2DemoCommon::ToLower (pCaptionChannel	? pCaptionChannel	: "CC1")));
-	const NTV2StringList	sCaptionModes		(::Split (CNTV2DemoCommon::ToLower (pMode			? pMode				: "roll4")));
-	const NTV2StringList	sEndActions			(::Split (CNTV2DemoCommon::ToLower (pEndAction		? pEndAction		: "exit")));
-	const NTV2StringList	sCaptionRates		(::Split (CNTV2DemoCommon::ToLower (pCaptionRate	? pCaptionRate		: "500")));
-	size_t					ndx					(0);
-	size_t					fileNdx				(0);
+	const NTV2StringList	sCaptionChannels(aja::split(CNTV2DemoCommon::ToLower(pCaptionChannel	? pCaptionChannel	: "CC1"), ','));
+	const NTV2StringList	sCaptionModes	(aja::split(CNTV2DemoCommon::ToLower(pMode				? pMode				: "roll4"), ','));
+	const NTV2StringList	sEndActions		(aja::split(CNTV2DemoCommon::ToLower(pEndAction			? pEndAction		: "exit"), ','));
+	const NTV2StringList	sCaptionRates	(aja::split(CNTV2DemoCommon::ToLower(pCaptionRate		? pCaptionRate		: "500"), ','));
+	size_t					ndx				(0);
+	size_t					fileNdx			(0);
 
 	for (NTV2StringListConstIter iter (sCaptionChannels.begin());  iter != sCaptionChannels.end();  ++iter, ++ndx)
 	{
@@ -311,14 +294,10 @@ int main (int argc, const char ** argv)
 				while (fileNdx < pathList.size())
 					generatorConfig.fFilesToPlay.push_back (pathList.at (fileNdx++));
 		}
-		cerr	<< *iter << ":  mode=" << sCaptionMode << ", newLinesAreNewRows=" << (generatorConfig.fNewLinesAreNewRows?"Y":"N")
-				<< ", endAction=" << sEndAction << ", rate=" << charsPerMin << ", " << generatorConfig.fFilesToPlay.size() << " file(s):  ";
-		PrintStringList (generatorConfig.fFilesToPlay);
-		cerr	<< endl;
-
 		playerConfig.fChannelGenerators [generatorConfig.fCaptionChannel] = generatorConfig;	//	Add this generator to the player configuration
 	}	//	for each specified caption channel
 
+	cerr << playerConfig << endl;	//	Dump config
 
 	//	Instantiate the CC player object, and pass it the config object...
 	NTV2CCPlayer	player (playerConfig);
