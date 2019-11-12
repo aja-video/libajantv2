@@ -4317,7 +4317,6 @@ typedef enum
 
 
 #if !defined (NTV2_DEPRECATE)
-    typedef		R2BlackLevel				NTV2K2AnalogBlackLevel;				///< @deprecated	Use R2BlackLevel instead.
     typedef		NTV2AnalogType						NTV2K2AnalogType;					///< @deprecated	Use NTV2AnalogType instead.
     typedef		NTV2Audio2ChannelSelect				NTV2K2Audio2ChannelSelect;			///< @deprecated	Use NTV2Audio2ChannelSelect instead.
     typedef		NTV2Audio4ChannelSelect				NTV2K2Audio4ChannelSelect;			///< @deprecated	Use NTV2Audio4ChannelSelect instead.
