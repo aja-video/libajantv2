@@ -71,16 +71,18 @@ int main (int argc, const char ** argv)
 		return 2;
 	}
 
-	if (channelNumber < 1 || channelNumber > 8)
-		{cerr << "## ERROR:  Invalid channel number " << channelNumber << " -- expected 1 thru 8" << endl;  return 2;}
+    if (channelNumber != 1 && channelNumber != 3)
+        {cerr << "## ERROR:  Invalid channel number " << channelNumber << " -- expected 1 or 3" << endl;  return 2;}
 
 	//	Instantiate the NTV2Capture object, using the specified AJA device...
 	NTV2Capture8K	capturer (pDeviceSpec ? string (pDeviceSpec) : "0",
-							  (noAudio ? false : true), ::GetNTV2ChannelForIndex (channelNumber - 1),
+                              (noAudio ? false : true),
+                              ::GetNTV2ChannelForIndex (channelNumber - 1),
 							  pixelFormat,
 							  false,
 							  doMultiFormat ? true : false,
-							  true);
+                              true,
+                              doTsiRouting ? true : false);
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)

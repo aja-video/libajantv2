@@ -44,7 +44,8 @@ class NTV2Capture8K
 						const NTV2FrameBufferFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
 						const bool					inDoLvlABConversion	= false,
 						const bool					inMultiFormat		= false,
-						const bool					inWithAnc			= false);
+                        const bool					inWithAnc			= false,
+                        const bool					inDoTsiRouting		= false);
 
 		virtual						~NTV2Capture8K ();
 
@@ -162,9 +163,10 @@ class NTV2Capture8K
 		bool						mDoMultiFormat;			///< @brief	Demonstrates how to configure the board for multi-format
 		bool						mGlobalQuit;			///< @brief	Set "true" to gracefully stop
 		bool						mWithAnc;				///< @brief	Capture custom anc data?
-		uint32_t					mVideoBufferSize;		///< @brief	My video buffer size, in bytes
+        uint32_t					mVideoBufferSize;		///< @brief	My video buffer size, in bytes
 		uint32_t					mAudioBufferSize;		///< @brief	My audio buffer size, in bytes
-		uint32_t					mAncBufferSize;
+        bool						mDoTsiRouting;          ///< @brief	Input is TSI
+        uint32_t					mAncBufferSize;
 		AVDataBuffer				mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
 		MyCircularBuffer			mAVCircularBuffer;		///< @brief	My ring buffer object
 

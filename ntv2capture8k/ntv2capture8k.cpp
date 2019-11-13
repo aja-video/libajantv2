@@ -35,7 +35,8 @@ NTV2Capture8K::NTV2Capture8K (const string					inDeviceSpecifier,
 							  const NTV2FrameBufferFormat	pixelFormat,
 							  const bool					inLevelConversion,
 							  const bool					inDoMultiFormat,
-							  const bool					inWithAnc)
+                              const bool					inWithAnc,
+                              const bool                    inDoTsiRouting)
 
 	:	mConsumerThread		(NULL),
 		mProducerThread		(NULL),
@@ -53,7 +54,8 @@ NTV2Capture8K::NTV2Capture8K (const string					inDeviceSpecifier,
 		mGlobalQuit			(false),
 		mWithAnc			(inWithAnc),
 		mVideoBufferSize	(0),
-		mAudioBufferSize	(0)
+        mAudioBufferSize	(0),
+        mDoTsiRouting		(inDoTsiRouting)
 
 {
 	::memset (mAVHostBuffer, 0x0, sizeof (mAVHostBuffer));
@@ -153,8 +155,6 @@ AJAStatus NTV2Capture8K::Init (void)
 	if (::NTV2DeviceCanDoMultiFormat (mDeviceID))
 		mDevice.SetMultiFormatMode (mDoMultiFormat);
 
-	mInputChannel = NTV2_CHANNEL1;
-
 	//	Set up the video and audio...
 	status = SetupVideo ();
 	if (AJA_FAILURE (status))
@@ -206,6 +206,14 @@ AJAStatus NTV2Capture8K::SetupVideo (void)
 	// Convert the signal wire format to a 4k format
 	CNTV2DemoCommon::Get8KInputFormat(mVideoFormat);
 	mDevice.SetVideoFormat(mVideoFormat, false, false, mInputChannel);
+    if (mDoTsiRouting)
+    {
+        mDevice.SetQuadQuadFrameEnable(true, mInputChannel);
+    }
+    else
+    {
+        mDevice.SetQuadQuadSquaresEnable(true, mInputChannel);
+    }
 
 	//	Set the device video format to whatever we detected at the input...
 	//	The user has an option here. If doing multi-format, we are, lock to the board.
@@ -218,14 +226,46 @@ AJAStatus NTV2Capture8K::SetupVideo (void)
 		mPixelFormat = NTV2_FBF_8BIT_YCBCR;
 
 	//	...and set all buffers pixel format...
-	mDevice.SetFrameBufferFormat(NTV2_CHANNEL1, mPixelFormat);
-	mDevice.SetFrameBufferFormat(NTV2_CHANNEL2, mPixelFormat);
-	mDevice.SetFrameBufferFormat(NTV2_CHANNEL3, mPixelFormat);
-	mDevice.SetFrameBufferFormat(NTV2_CHANNEL4, mPixelFormat);
-	mDevice.SetEnableVANCData(false, false, NTV2_CHANNEL1);
-	mDevice.SetEnableVANCData(false, false, NTV2_CHANNEL2);
-	mDevice.SetEnableVANCData(false, false, NTV2_CHANNEL3);
-	mDevice.SetEnableVANCData(false, false, NTV2_CHANNEL4);
+    if (mDoTsiRouting)
+    {
+        if (mInputChannel < NTV2_CHANNEL3)
+        {
+            mDevice.SetFrameBufferFormat(NTV2_CHANNEL1, mPixelFormat);
+            mDevice.SetFrameBufferFormat(NTV2_CHANNEL2, mPixelFormat);
+            mDevice.SetEnableVANCData(false, false, NTV2_CHANNEL1);
+            mDevice.SetEnableVANCData(false, false, NTV2_CHANNEL2);
+            mDevice.EnableChannel(NTV2_CHANNEL1);
+            mDevice.EnableChannel(NTV2_CHANNEL2);
+            mDevice.DisableChannel(NTV2_CHANNEL3);
+            mDevice.DisableChannel(NTV2_CHANNEL4);
+        }
+        else
+        {
+            mDevice.SetFrameBufferFormat(NTV2_CHANNEL3, mPixelFormat);
+            mDevice.SetFrameBufferFormat(NTV2_CHANNEL4, mPixelFormat);
+            mDevice.SetEnableVANCData(false, false, NTV2_CHANNEL3);
+            mDevice.SetEnableVANCData(false, false, NTV2_CHANNEL4);
+            mDevice.DisableChannel(NTV2_CHANNEL1);
+            mDevice.DisableChannel(NTV2_CHANNEL2);
+            mDevice.EnableChannel(NTV2_CHANNEL3);
+            mDevice.EnableChannel(NTV2_CHANNEL4);
+        }
+    }
+    else
+    {
+        mDevice.SetFrameBufferFormat(NTV2_CHANNEL1, mPixelFormat);
+        mDevice.SetFrameBufferFormat(NTV2_CHANNEL2, mPixelFormat);
+        mDevice.SetFrameBufferFormat(NTV2_CHANNEL3, mPixelFormat);
+        mDevice.SetFrameBufferFormat(NTV2_CHANNEL4, mPixelFormat);
+        mDevice.SetEnableVANCData(false, false, NTV2_CHANNEL1);
+        mDevice.SetEnableVANCData(false, false, NTV2_CHANNEL2);
+        mDevice.SetEnableVANCData(false, false, NTV2_CHANNEL3);
+        mDevice.SetEnableVANCData(false, false, NTV2_CHANNEL4);
+        mDevice.EnableChannel(NTV2_CHANNEL1);
+        mDevice.EnableChannel(NTV2_CHANNEL2);
+        mDevice.EnableChannel(NTV2_CHANNEL3);
+        mDevice.EnableChannel(NTV2_CHANNEL4);
+    }
 	
 	return AJA_STATUS_SUCCESS;
 
@@ -289,21 +329,47 @@ void NTV2Capture8K::SetupHostBuffers (void)
 
 void NTV2Capture8K::RouteInputSignal(void)
 {
-	if (IsRGBFormat(mPixelFormat))
-	{
-		mDevice.Connect(NTV2_XptCSC1VidInput, NTV2_XptSDIIn1);
-		mDevice.Connect(NTV2_XptCSC2VidInput, NTV2_XptSDIIn2);
-		mDevice.Connect(NTV2_XptCSC3VidInput, NTV2_XptSDIIn3);
-		mDevice.Connect(NTV2_XptCSC4VidInput, NTV2_XptSDIIn4);
+    if (mDoTsiRouting)
+    {
+        if (mInputChannel < NTV2_CHANNEL3)
+        {
+            if (NTV2_IS_QUAD_QUAD_HFR_VIDEO_FORMAT(mVideoFormat))
+            {
+                mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);
+                mDevice.Connect(NTV2_XptFrameBuffer1DS2Input, NTV2_XptSDIIn2);
+                mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_XptSDIIn3);
+                mDevice.Connect(NTV2_XptFrameBuffer2DS2Input, NTV2_XptSDIIn4);
+            }
+            else
+            {
+                mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);
+                mDevice.Connect(NTV2_XptFrameBuffer1DS2Input, NTV2_XptSDIIn1DS2);
+                mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_XptSDIIn2);
+                mDevice.Connect(NTV2_XptFrameBuffer2DS2Input, NTV2_XptSDIIn2DS2);
+            }
+        }
+        else
+        {
+            if (NTV2_IS_QUAD_QUAD_HFR_VIDEO_FORMAT(mVideoFormat))
+            {
+                mDevice.Connect(NTV2_XptFrameBuffer3Input, NTV2_XptSDIIn1);
+                mDevice.Connect(NTV2_XptFrameBuffer3DS2Input, NTV2_XptSDIIn2);
+                mDevice.Connect(NTV2_XptFrameBuffer4Input, NTV2_XptSDIIn3);
+                mDevice.Connect(NTV2_XptFrameBuffer4DS2Input, NTV2_XptSDIIn4);
+            }
+            else
+            {
+                mDevice.Connect(NTV2_XptFrameBuffer3Input, NTV2_XptSDIIn3);
+                mDevice.Connect(NTV2_XptFrameBuffer3DS2Input, NTV2_XptSDIIn3DS2);
+                mDevice.Connect(NTV2_XptFrameBuffer4Input, NTV2_XptSDIIn4);
+                mDevice.Connect(NTV2_XptFrameBuffer4DS2Input, NTV2_XptSDIIn4DS2);
+            }
+        }
 
-		mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidRGB);
-		mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_XptCSC2VidRGB);
-		mDevice.Connect(NTV2_XptFrameBuffer3Input, NTV2_XptCSC3VidRGB);
-		mDevice.Connect(NTV2_XptFrameBuffer4Input, NTV2_XptCSC4VidRGB);
 	}
 	else
 	{
-		mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);
+        mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);
 		mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_XptSDIIn2);
 		mDevice.Connect(NTV2_XptFrameBuffer3Input, NTV2_XptSDIIn3);
 		mDevice.Connect(NTV2_XptFrameBuffer4Input, NTV2_XptSDIIn4);
