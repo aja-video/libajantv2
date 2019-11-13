@@ -42,7 +42,10 @@ void CNTV2Bitfile::Close (void)
 	_partial = false;
 	_clear = false;
 	_compress = false;
-	_userID = 0xdefedefe;
+	_userID = 0xffffffff;
+	_designVersion = 0xffffffff;
+	_bitfileID = 0xffffffff;
+	_bitfileVersion = 0xffffffff;
 }
 
 
@@ -363,7 +366,10 @@ void CNTV2Bitfile::SetDesignFlags (const char * pInBuffer, unsigned bufferLength
 
 void CNTV2Bitfile::SetDesignUserID (const char * pInBuffer, unsigned bufferLength)
 {
-	_userID = 0xdefedefe;
+	_userID = 0xffffffff;
+	_designVersion = 0xffffffff;
+	_bitfileID = 0xffffffff;
+	_bitfileVersion = 0xffffffff;
 
 	if (!pInBuffer)
 		return;
@@ -380,12 +386,15 @@ void CNTV2Bitfile::SetDesignUserID (const char * pInBuffer, unsigned bufferLengt
 		return;
 	
 	_userID = userID;
+	_designVersion = userID & 0x000000ff;
+	_bitfileID = (userID & 0x0000ff00) >> 8;
+	_bitfileVersion = (userID & 0x00ff0000) >> 16;
 }
 
 
-static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
+static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID)
 {
-	switch (inBoardID)
+	switch (inDeviceID)
 	{
 		case DEVICE_ID_NOTFOUND:		break;
 		case DEVICE_ID_CORVID1:			return "corvid1pcie";		//	top.ncd
@@ -426,9 +435,11 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
 	return "";
 }
 
-
 bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 {
+	if (IsPartial ())
+		return false;
+	
 	if (_designName == ::NTV2GetPrimaryHardwareDesignName (inDeviceID))
 		return true;
 
@@ -477,46 +488,75 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 }
 
 
-typedef map <string, NTV2DeviceID>		DesignNameToID;
-typedef pair <string, NTV2DeviceID>		DesignNameToIDPair;
-typedef DesignNameToID::iterator		DesignNameToIDIter;
-typedef DesignNameToID::const_iterator	DesignNameToIDConstIter;
-static	DesignNameToID					sDesignNamesToIDs;
-
-class CDesignNameToDeviceIDMapMaker
+class CDesignNameToIDMapMaker
 {
-	public:
-		CDesignNameToDeviceIDMapMaker ()
+public:
+	typedef map <string, NTV2DeviceID>			DesignNameToIDMap;
+	typedef DesignNameToIDMap::iterator			DesignNameToIDIter;
+	typedef DesignNameToIDMap::const_iterator	DesignNameToIDConstIter;	
+	static DesignNameToIDMap					sDesignNameToIDMap;
+
+	CDesignNameToIDMapMaker ()
 		{
-			assert (sDesignNamesToIDs.empty ());
+			assert (sDesignNameToIDMap.empty ());
 			const NTV2DeviceIDSet goodDeviceIDs (::NTV2GetSupportedDevices ());
 			for (NTV2DeviceIDSetConstIter iter (goodDeviceIDs.begin ());  iter != goodDeviceIDs.end ();  ++iter)
-				sDesignNamesToIDs.insert (DesignNameToIDPair (::NTV2GetPrimaryHardwareDesignName (*iter), *iter));
-			sDesignNamesToIDs.insert (DesignNameToIDPair ("K3G_quad_p2p", DEVICE_ID_KONA3GQUAD));	//	special case
-			sDesignNamesToIDs.insert (DesignNameToIDPair ("K3G_p2p", DEVICE_ID_KONA3G));			//	special case
-			sDesignNamesToIDs.insert (DesignNameToIDPair ("CORVID88", DEVICE_ID_CORVID88));			//	special case
-			sDesignNamesToIDs.insert (DesignNameToIDPair ("ZARTAN", DEVICE_ID_CORVIDHBR));			//	special case
+				sDesignNameToIDMap[::NTV2GetPrimaryHardwareDesignName (*iter)] = *iter;
+			sDesignNameToIDMap["K3G_quad_p2p"] = DEVICE_ID_KONA3GQUAD;	//	special case
+			sDesignNameToIDMap["K3G_p2p"] = DEVICE_ID_KONA3G;			//	special case
+			sDesignNameToIDMap["CORVID88"] = DEVICE_ID_CORVID88;		//	special case
+			sDesignNameToIDMap["ZARTAN"] = DEVICE_ID_CORVIDHBR;			//	special case
 		}
-		virtual ~CDesignNameToDeviceIDMapMaker ()
+	virtual ~CDesignNameToIDMapMaker ()
 		{
-			sDesignNamesToIDs.clear ();
+			sDesignNameToIDMap.clear ();
 		}
-		static NTV2DeviceID DesignNameToDeviceID (const string & inDesignName)
+	static NTV2DeviceID DesignNameToID (const string & inDesignName)
 		{
-			assert (!sDesignNamesToIDs.empty ());
-			const DesignNameToIDConstIter	iter	(sDesignNamesToIDs.find (inDesignName));
-			return iter != sDesignNamesToIDs.end () ? iter->second : DEVICE_ID_NOTFOUND;
+			assert (!sDesignNameToIDMap.empty ());
+			const DesignNameToIDConstIter	iter	(sDesignNameToIDMap.find (inDesignName));
+			return iter != sDesignNameToIDMap.end () ? iter->second : DEVICE_ID_NOTFOUND;
 		}
 };
 
-static CDesignNameToDeviceIDMapMaker	sDesignNameToIDMapMaker;
+static CDesignNameToIDMapMaker	sDesignNameToIDMapMaker;
 
+class CDesignPairToIDMapMaker
+{
+public:
+	typedef pair <string, ULWord>				DesignPair;
+	typedef map <DesignPair, NTV2DeviceID>		DesignPairToIDMap;
+	typedef DesignPairToIDMap::const_iterator	DesignPairToIDMapConstIter;
+	static DesignPairToIDMap					sDesignPairToIDMap;
+
+	CDesignPairToIDMapMaker ()
+		{
+			assert (sDesignPairToIDMap.empty ());
+			sDesignPairToIDMap[make_pair("kona5_dr", 0x00)] = DEVICE_ID_KONA5;
+		}
+	~CDesignPairToIDMapMaker ()
+		{
+			sDesignPairToIDMap.clear ();
+		}
+	static NTV2DeviceID DesignPairToID(const string & inDesignName, ULWord bitfileID)
+		{
+			assert (!sDesignPairToIDMap.empty ());
+			const DesignPairToIDMapConstIter	iter	(sDesignPairToIDMap.find (make_pair(inDesignName, bitfileID)));
+			return iter != sDesignPairToIDMap.end () ? iter->second : DEVICE_ID_NOTFOUND;
+		}
+};
+
+static CDesignPairToIDMapMaker sDesignPairToIDMapMaker;
 
 NTV2DeviceID CNTV2Bitfile::GetDeviceID (void) const
 {
-	return sDesignNameToIDMapMaker.DesignNameToDeviceID (GetDesignName ());
+	if (IsPartial())
+	{
+		return sDesignPairToIDMapMaker.DesignPairToID (GetDesignName (), GetBitfileID ());
+	}
+	
+	return sDesignNameToIDMapMaker.DesignNameToID (GetDesignName ());
 }
-
 
 CNTV2Bitfile::~CNTV2Bitfile ()
 {
