@@ -675,7 +675,7 @@ One or more frames can be written:
 
 There are currently three ways to fill buffer memory:
 	-#	<b>Numeric Value</b> — Fills one or more buffers with any 8, 16, 32 or 64-bit numeric value.
-		@image	html	watcher-fillfb-numeric.png
+		@image	html	watcher-tool-fill-num.png
 		Click <b>Apply</b> to write the numeric value into the frame buffer(s).
 		Checkboxes are provided for skipping certain regions of each frame buffer being filled:
 		-	<b>Field1</b> — Skips “Field 1” lines.
@@ -685,10 +685,10 @@ There are currently three ways to fill buffer memory:
 		-	<b>Anc F1 Region</b> — Skips the F1 Ancillary Data region.
 		-	<b>Anc F2 Region</b> — Skips the F2 Ancillary Data region.
 	-#	<b>Test Pattern</b> — Fills one or more buffers with any of several predefined test patterns.
-		@image	html	watcher-fillfb-pattern.png
+		@image	html	watcher-tool-fill-pat.png
 		The test pattern image is written to the buffer(s) immediately after choosing the test pattern.
 	-#	<b>Text</b> — Fills one or more buffers with glyphs rendered using the ::CNTV2CaptionRenderer class.
-		@image	html	watcher-fillfb-text.png
+		@image	html	watcher-tool-fill-txt.png
 		Note that the frame buffer(s) are written immediately after making any changes or selections in the panel.
 		-	<b>Display Text</b> — A text edit box for specifying the text to be rendered.
 		-	<b>Blit Over Test Pattern</b> — Renders the text <i>after</i> [re]writing the test pattern into the frame buffer(s).
@@ -706,12 +706,12 @@ There are currently three ways to fill buffer memory:
 
 
 <hr size="50px">
-@subsection	anc608viewer		“CEA-608 Caption” Tool
+@subsection	anc608viewer		“EIA/CEA-608 Caption” Tool
 
-@image	html	cea608viewer.png
+@image	html	watcher-tool-608caption.png
 
-The <b>CEA-608 Caption Tool</b> is a handy debugging aid for viewing EIA-608 and/or CEA-608 caption byte-pair streams.
-It works with the \ref inspectorac to supply its CEA-608 decoder with a stream of caption byte pairs to supply sufficient
+The <b>EIA/CEA-608 Caption Tool</b> is a handy debugging aid for viewing EIA-608 and/or CEA-608 caption byte-pair streams.
+It works with the \ref inspectoranc to supply its CEA-608 decoder with a stream of caption byte pairs to supply sufficient
 context in order to properly render captions. The tool window is dominated by two panels:
 	-	<b>Byte-Pair Stream</b> — Displays a hexadecimal representation of the caption byte-pair stream being decoded.
 		-	The text represents a byte-pair FIFO that holds up to 90 byte pairs (maximum):
@@ -725,8 +725,8 @@ context in order to properly render captions. The tool window is dominated by tw
 				-	The left-most 2 digits (most-significant byte) is “byte 1”;
 				-	The right-most 2 digits (least-significant byte) is “byte 2”.
 				-	Byte sequences from “.scc” sidecar files should work (but remove the timecodes).
-			-	<b>Example:</b> Try the byte-pair sequence “<tt>9425 94ad 9170 c845 cc4c 4f20</tt>”.
-				It should render “Hello” for CC1.
+			-	<b>Example:</b> Try the byte-pair sequence “<tt>9425 94ad 9170 c845 cc4c 4f20</tt>” —
+				it should render “Hello” for CC1.
 	-	<b>Decoded Captions</b> — Renders the decoded captions, as they appear on-screen.
 		-	The 608 decoder always re-decodes the entire FIFO whenever it changes, processing the byte pairs top-left to bottom-right.
 			-	The last pair in the FIFO enters the decoder first;
@@ -744,7 +744,7 @@ A <b>Reset</b> button is provided to manually reset the decoder, if necessary.
 Add or remove a space to/from it to force the decoder to re-render what’s in the byte stream.
 
 To render captions in real-time, the decoder’s byte-pair FIFO requires a steady stream of caption
-byte-pairs transmitted by the \ref inspectorac :
+byte-pairs transmitted by the \ref inspectoranc:
 	-	<b>“Analog” Captioning</b> — All of the following are true:
 		-	The monitored FrameStore/Channel is receiving or transmitting SD video;
 		-	The monitored FrameStore/Channel has a 'v210' or '2vuy' pixel format;
@@ -766,17 +766,17 @@ byte-pairs transmitted by the \ref inspectorac :
 			-	a CEA-608 packet.
 
 	@note	Successful caption rendering relies on getting a continuous byte pair sequence (no dropped frames).
-			If the <b>Anc Inspector</b>’s refresh rate lags the frame rate, byte pairs will be
+			If the refresh rate of the \ref inspectoranc lags the frame rate, byte pairs will be
 			skipped, resulting in garbled and unreadable captions. Hiding one or more of the
-			Anc Inspector’s viewers (VANC, Anc Registers, F1, F2) can save CPU cycles.
+			\ref inspectoranc viewers (VANC, Anc Registers, F1, F2) can save CPU cycles.
 
 To freeze the <b>Byte-Pair Stream</b> (perhaps to permit interacting with it manually),
 leave the <b>Caption Viewer</b> window open, but switch NTV2Watcher to an Inspector other than
-the <b>Anc Inspector</b>. (You can also stop viewing “Packets” — use “Raw” or “Hide” instead.)
+the \ref inspectoranc — or stop viewing “Packets” and instead switch to “Raw” or “Hide”).
 
 <b>Generating Captions</b>
 
-Using the controls at the bottom of the tool window, the <b>CEA-608 Caption Tool</b> can also generate captions:
+This tool can also generate caption byte pairs by using the controls at the bottom of the tool window:
 	-	<b>Type</b> — This controls the type of caption to generate:
 		-	<b>PopOn</b>
 		-	<b>RollUp2</b>
@@ -792,8 +792,9 @@ Using the controls at the bottom of the tool window, the <b>CEA-608 Caption Tool
 	-	<b>Blnk</b> checkbox — If checked, the caption text should blink.
 	-	Transparency popup menu — Choose from <b>Opaque</b>, <b>Translucent</b> or <b>Transparent</b>.
 	-	<b>Text</b> box — Enter the caption text to be generated.
-	-	Click <b>Xmit</b> to generate the CEA608 caption bytes.
-		These will be transmitted, encoded and DMA’d starting at the Anc inspector’s current frame’s F1 Anc or VANC region.
+	-	Click <b>Xmit</b> to generate and “transmit” the caption byte pairs.
+		These will be DMA’d starting at the current frame’s F1 Anc or VANC region (in the \ref inspectoranc).
+		It will continue pulling byte pairs from the FIFO and DMA’ing into subsequent frame buffers on the device.
 
 
 To close the <b>“CEA-608 Caption” Tool</b>:
@@ -808,9 +809,12 @@ To close the <b>“CEA-608 Caption” Tool</b>:
 The <b>“Register Cycler”</b> is a handy tool for automatically cycling the value of a register
 from a minimum to a maximum numeric value at a particular step rate.
 
-For example, it can be used to step an <b>OutputFrame</b> register to automatically cycle through several
+For example, it can be used to step an <b>OutputFrame</b> register to periodically cycle through several
 pre-loaded frame images.
 
+@image	html	watcher-tool-regcycler.png
+
+<b>Controls:</b>
 	-	<b>Reg</b> — Specifies the register to be cycled.
 	-	<b>Min</b> — Specifies the minimum value for the register.
 	-	<b>Max</b> — Specifies the maximum value for the register.
@@ -820,19 +824,22 @@ pre-loaded frame images.
 	-	<b>Stop</b> — Stops the cycler. When stopped, this button will be disabled and will be titled “Stopped”.
 
 To close the <b>Register Cycler</b>:
-	-	click its close box;
-	-	or un-check the <b>View</b> menu’s <b>Register Cycler</b> command.
+	-	click its close box; or…
+	-	un-check the <b>View</b> menu’s <b>Register Cycler</b> command.
 
 
 
 <hr size="50px">
 @subsection	tonegenerator		“Tone Generator” Tool
 
-The <b>Tone Generator</b> is a handy tool for generating one or more channels of audio.
+The <b>Tone Generator</b> is a handy tool for generating one or more channels of sinusoidal audio tones.
 
+@image	html	watcher-tool-tonegen.png
+
+<b>Controls:</b>
 	-	“Channel Enable” checkboxes — There’s one checkbox for each audio channel.
 		-	Disabled channels always produce silence (zero values).
-		-	Enabled channels reveal other controls:
+		-	An enabled channel has its own additional controls:
 			-	<b>Freq</b> — Adjusts the frequency of the generated waveform.
 			-	<b>Phase</b> — Adjusts the phase of the generated waveform.
 			-	<b>Ampl</b> — Adjusts the amplitude of the generated waveform.
@@ -846,8 +853,8 @@ The <b>Tone Generator</b> is a handy tool for generating one or more channels of
 		When stopped, this button will be disabled and will be titled “Stopped”.
 
 To close the <b>Tone Generator</b> tool window:
-	-	click its close box;
-	-	or un-check the <b>View</b> menu’s <b>Tone Generator</b> command.
+	-	click its close box;  or…
+	-	un-check the <b>View</b> menu’s <b>Tone Generator</b> command.
 
 
 
@@ -868,7 +875,7 @@ It can readily indicate \ref vidop-fbconflict and/or \ref audioclobber.
 		-	Address zero (0x00000000) is at the far left edge;
 		-	The highest addressable byte is at the far right edge.
 	-	The vertical space is irrelevant.
-	-	<b>Scrolling</b> — Scroll bars will be visible to allow you to scroll the Map in the window, if needed.
+	-	<b>Scrolling</b> — When needed, scroll bars are provided to allow scrolling offscreen areas of the Map into view.
 	-	<b>Zoom Controls</b> — Click <b>+</b> to zoom in;  click <b>−</b> to zoom out.
 	-	Memory Region objects:
 		-	<b>Frame</b> — The gray boxes represent the intrinsic 8MB or 16MB frame boundaries.
