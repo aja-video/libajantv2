@@ -744,7 +744,7 @@ A <b>Reset</b> button is provided to manually reset the decoder, if necessary.
 Add or remove a space to/from it to force the decoder to re-render what’s in the byte stream.
 
 To render captions in real-time, the decoder’s byte-pair FIFO requires a steady stream of caption
-byte-pairs transmitted by the \ref inspectoranc:
+byte-pairs transmitted by the \ref inspectoranc :
 	-	<b>“Analog” Captioning</b> — All of the following are true:
 		-	The monitored FrameStore/Channel is receiving or transmitting SD video;
 		-	The monitored FrameStore/Channel has a 'v210' or '2vuy' pixel format;
@@ -778,11 +778,11 @@ the \ref inspectoranc — or stop viewing “Packets” and instead switch to �
 
 This tool can also generate caption byte pairs by using the controls at the bottom of the tool window:
 	-	<b>Type</b> — This controls the type of caption to generate:
-		-	<b>PopOn</b>
-		-	<b>RollUp2</b>
-		-	<b>RollUp3</b>
-		-	<b>RollUp4</b>
-		-	<b>PaintOn</b>
+		-	<b>PopOn</b> — This uses the CNTV2CaptionEncoder608::EnqueuePopOnMessage function.
+		-	<b>RollUp2</b> — This uses the CNTV2CaptionEncoder608::EnqueueRollUpMessage function to produce two-row “roll-up” captions.
+		-	<b>RollUp3</b> — This uses the CNTV2CaptionEncoder608::EnqueueRollUpMessage function to produce three-row “roll-up” captions.
+		-	<b>RollUp4</b> — This uses the CNTV2CaptionEncoder608::EnqueueRollUpMessage function to produce four-row “roll-up” captions.
+		-	<b>PaintOn</b> — This uses the CNTV2CaptionEncoder608::EnqueuePaintOnMessage function.
 	-	<b>Row</b> spin control — specifies the row number where the caption text will appear.
 	-	<b>Col</b> spin control — specifies the column number where the caption text will begin.
 	-	<b>FG</b> — Specifies the foreground color of the caption text.
