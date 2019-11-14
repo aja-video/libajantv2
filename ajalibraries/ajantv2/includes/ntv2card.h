@@ -6050,6 +6050,13 @@ public:
 	AJA_VIRTUAL bool			GetInstalledBitfileInfo (ULWord & outNumBytes, std::string & outDateStr, std::string & outTimeStr);
 
 	/**
+		@brief		Generates and returns an info string with date, time and name for the given inBifFileInfo.
+		@param[in]	inBitFileInfo	BitFile Info structure to get information from, no validity checks are made on the structure before use.
+		@return		A string containing the bitfile information.
+	**/
+	AJAExport std::string		GetBitfileInfoString (const BITFILE_INFO_STRUCT & inBitFileInfo);
+
+	/**
 		@brief		Answers whether or not the "fail-safe" (aka "safe-boot") bitfile is currently loaded and running in the FPGA.
 		@param[out]	outIsFailSafe	Receives true if the "fail-safe" bitfile is currently loaded and running in the FPGA;
 									otherwise receives false. This return value cannot be trusted if the function result

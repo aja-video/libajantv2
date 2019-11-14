@@ -355,6 +355,81 @@ bool CNTV2Card::GetInstalledBitfileInfo (ULWord & outNumBytes, std::string & out
 	return true;
 }
 
+string CNTV2Card::GetBitfileInfoString (const BITFILE_INFO_STRUCT & inBitFileInfo)
+{
+	string name;
+	string date;
+	string time;
+	date = inBitFileInfo.dateStr;
+	time = inBitFileInfo.timeStr;
+	switch (inBitFileInfo.bitFileType)
+	{
+	#if !defined (NTV2_DEPRECATE)
+		case NTV2_BITFILE_XENA2_UPCVT:		//	DEPRECATION_CANDIDATE
+		case NTV2_BITFILE_MOAB_UPCVT:		//	DEPRECATION_CANDIDATE
+			name = "UpConvert"; break;
+		case NTV2_BITFILE_XENA2_DNCVT:		//	DEPRECATION_CANDIDATE
+		case NTV2_BITFILE_MOAB_DNCVT:		//	DEPRECATION_CANDIDATE
+			name = "DownConvert"; break;
+		case NTV2_BITFILE_XENA2_XUCVT:		//	DEPRECATION_CANDIDATE
+		case NTV2_BITFILE_MOAB_XUCVT:		//	DEPRECATION_CANDIDATE
+			name = "Cross Convert 720->1080"; break;
+		case NTV2_BITFILE_XENA2_XDCVT:		//	DEPRECATION_CANDIDATE
+		case NTV2_BITFILE_MOAB_XDCVT:		//	DEPRECATION_CANDIDATE
+			name = "Cross Convert 1080->720"; break;
+		case NTV2_BITFILE_XENA2_CSCVT:
+			name = "AutoDesk Main"; break;
+	#endif	//	!defined (NTV2_DEPRECATE)
+	case NTV2_BITFILE_LHI_MAIN:				name = "LHi Main";break;
+	case NTV2_BITFILE_LHI_T_MAIN:			name = "LHi T Main";break;
+	case NTV2_BITFILE_IOEXPRESS_MAIN:		name = "IoExpress Main";break;
+	case NTV2_BITFILE_CORVID1_MAIN:			name = "Corvid1 Main"; break;
+	case NTV2_BITFILE_CORVID22_MAIN:		name = "Corvid22 Main"; break;
+	case NTV2_BITFILE_CORVID24_MAIN:		name = "Corvid24 Main"; break;
+	case NTV2_BITFILE_CORVID3G_MAIN:		name = "Corvid3G Main"; break;
+	case NTV2_BITFILE_CORVID88:				name = "Corvid88 Main"; break;
+	case NTV2_BITFILE_CORVID44:				name = "Corvid44 Main"; break;
+	case NTV2_BITFILE_KONA3G_MAIN:			name = "Kona 3G Main"; break;
+	case NTV2_BITFILE_KONA3G_QUAD:			name = "Kona 3G Quad"; break;
+	case NTV2_BITFILE_KONALHE_PLUS:			name = "Kona LHe+"; break;
+	case NTV2_BITFILE_IOXT_MAIN:			name = "IoXT Main"; break;
+	case NTV2_BITFILE_TTAP_MAIN:			name = "T-Tap Main"; break;
+	case NTV2_BITFILE_IO4K_MAIN:			name = "Io4K Main"; break;
+	case NTV2_BITFILE_IO4KUFC_MAIN:			name = "Io4K UFC"; break;
+	case NTV2_BITFILE_KONA4_MAIN:			name = "Kona4 Main"; break;
+	case NTV2_BITFILE_KONA4UFC_MAIN:		name = "Kona4 UFC"; break;
+	case NTV2_BITFILE_KONAIP_2022:			name = "KonaIP 2022"; break;
+	case NTV2_BITFILE_KONAIP_4CH_2SFP:		name = "KonaIP 4CH 2SFP"; break;
+	case NTV2_BITFILE_IO4KPLUS_MAIN:
+		{
+			if (DeviceIsDNxIV())
+				name = "DNxIV";
+			else
+				name = "Io4K Plus";
+			break;
+		}
+	case NTV2_BITFILE_IOIP_2022:			name = "IoIP 2022"; break;
+	case NTV2_BITFILE_IOIP_2110:			name = "IoIP 2110"; break;
+	case NTV2_BITFILE_KONAIP_2110:			name = "KonaIP 2110"; break;
+	case NTV2_BITFILE_KONA1:				name = "Kona1"; break;
+	case NTV2_BITFILE_KONAHDMI:				name = "Kona HDMI"; break;
+	case NTV2_BITFILE_KONA5_MAIN:			name = "Kona5"; break;
+	case NTV2_BITFILE_KONA5_8K_MAIN:		name = "Kona5 8K"; break;
+	case NTV2_BITFILE_KONA5_8KMK_MAIN:		name = "Kona5 8KMK"; break;
+	case NTV2_BITFILE_CORVID44_8K_MAIN:		name = "Corvid44 8K"; break;
+	case NTV2_BITFILE_CORVID44_8KMK_MAIN:	name = "Corvid44 8KMK"; break;
+
+	default:
+		date = "????";
+		time = "????";
+		name = "(bad bitfile type!!!)"; break;
+	}
+
+	string infoStr;
+	// format like: "date time name"
+	infoStr.append(date).append(" ").append(time).append(" ").append(name);
+	return infoStr;
+}
 
 bool CNTV2Card::IsFailSafeBitfileLoaded (bool & outIsSafeBoot)
 {
