@@ -19,7 +19,7 @@
 #include "ntv2publicinterface.h"
 
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
-#else
+#elif !defined(NTV2_BUILDING_DRIVER)
 	#define false (0)
 	#define true (!false)
 #endif
@@ -66,7 +66,7 @@ AJAExport UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2F
 // 
 // TODO: Audit all platforms and switch all the original calls to the _Ex
 // versions.
-#if defined(__CPLUSPLUS__) || defined(__cplusplus)
+#if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
 	AJAExport ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID boardID);		//	Revisit for 2MB granularity
 	AJAExport ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID boardID);		//	Revisit for 2MB granularity
 	AJAExport ULWord NTV2DeviceGetAudioFrameBuffer(NTV2DeviceID boardID);		//	Revisit for 2MB granularity

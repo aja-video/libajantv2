@@ -69,9 +69,16 @@ typedef struct
 	@param[in]	pInVPIDSpec	Specifies the location of the settings describing the VPID to be generated.
 	@return		True if generation was successful, otherwise false.
 **/
-
+#if defined(__cplusplus) && defined(NTV2_BUILDING_DRIVER)
+extern "C"
+{
+#endif
 AJAExport	bool	SetVPIDFromSpec (ULWord * const			pOutVPID,
 									 const VPIDSpec * const	pInVPIDSpec);
+
+#if defined(__cplusplus) && defined(NTV2_BUILDING_DRIVER)
+}
+#endif
 
 #endif	// NTV2VPIDFROMSPEC_H
 
