@@ -205,16 +205,15 @@ const uint32_t TRANSITION_PRE	= 1;		// one sample of the transition "belongs" to
 const uint32_t TRANSITION_POST  = 2;		// two samples of the transition "belong" to the next bit
 const uint32_t TRANSITION_WIDTH = (TRANSITION_PRE + TRANSITION_POST);
 
-// 1 cycle of the Line 21 Clock Run-In (see note in header file about freq. approximation)
-uint8_t cc_clock[27] = { 16,  17,  22,  29,  38,  49,  61,  74,  86,  98, 108, 116, 122, 125,
-								 125, 122, 116, 108,  98,  86,  74,  61,  49,  38,  29,  22,  17      };
-	
-
 
 // Initialize a prototype Line 21 buffer with the parts that DON'T change:
 // i.e. the Clock Run-In and the Start bits.
 AJAStatus AJAAncillaryData_Cea608_Line21::InitEncodeBuffer (uint32_t lineStartOffset, uint32_t & dataStartOffset)
 {
+	// 1 cycle of the Line 21 Clock Run-In (see note in header file about freq. approximation)
+	static const uint8_t cc_clock[27] = { 16,  17,  22,  29,  38,  49,  61,  74,  86,  98, 108, 116, 122, 125,
+										 125, 122, 116, 108,  98,  86,  74,  61,  49,  38,  29,  22,  17      };
+
 	// sanity check...
 	if (GetDC() < AJAAncillaryData_Cea608_Line21_PayloadSize)
 		return AJA_STATUS_FAIL;
@@ -224,7 +223,6 @@ AJAStatus AJAAncillaryData_Cea608_Line21::InitEncodeBuffer (uint32_t lineStartOf
 	uint32_t i, j;
 	ByteVectorIndex	pos(0);
 	const uint8_t	kSMPTE_Y_Black	(0x10);
-	uint8_t *ptr = &m_payload[0];
 
 	// fill Black until beginning of Clock Run-In
 	// both the user-supplied offset to the first bit-cell, plus the "missing" quarter-cycle of the clock
@@ -245,7 +243,8 @@ AJAStatus AJAAncillaryData_Cea608_Line21::InitEncodeBuffer (uint32_t lineStartOf
 		m_payload[pos++] = CC_LEVEL_LO;
 
 	// encode transition between low and high
-	ptr = EncodeTransition (ptr, 0, 1);
+	EncodeTransition (&m_payload[pos], 0, 1);
+	pos += TRANSITION_WIDTH;
 
 	// Start bit: 1 CC bit of '1'
 	for (i = 0; i < CC_BIT_WIDTH - TRANSITION_PRE; i++)
@@ -269,22 +268,22 @@ AJAStatus AJAAncillaryData_Cea608_Line21::EncodeLine (uint8_t char1, uint8_t cha
 {
 	// pointer to first data bit, minus room for transition
 	uint8_t *ptr = &m_payload[0] + (dataStartOffset - TRANSITION_PRE);
-	
+
 	// encode transition from last start bit to first bit of first character
 	ptr = EncodeTransition (ptr, 1, (char1 & 0x01) );
-	
+
 	// encode first byte
 	ptr = EncodeCharacter (ptr, char1);
-	
+
 	// encode transition between characters
 	ptr = EncodeTransition (ptr, (char1 & 0x80), (char2 & 0x01) );
-	
+
 	// encode second byte
 	ptr = EncodeCharacter (ptr, char2);
-	
+
 	// encode final transition
 	ptr = EncodeTransition (ptr, (char2 & 0x80), 0);
-	
+
 	// return ptr to the beginning of the encode buffer
 	return AJA_STATUS_SUCCESS;
 }

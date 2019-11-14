@@ -538,12 +538,32 @@ typedef enum
 	kVRegHdrMasterLumMinCh1					= VIRTUALREG_START+569,
 	kVRegHdrMaxCLLCh1						= VIRTUALREG_START+570,
 	kVRegHdrMaxFALLCh1						= VIRTUALREG_START+571,
-	
 	kVRegHDROverrideState					= VIRTUALREG_START+572,
+	
+	kVRegUserInColorimetry					= VIRTUALREG_START+573,
+	kVRegUserInTransfer						= VIRTUALREG_START+574,
+	kVRegUserInLuminance					= VIRTUALREG_START+575,
+	
+	kVRegHdrInColorimetryCh1				= VIRTUALREG_START+576,
+	kVRegHdrInTransferCh1					= VIRTUALREG_START+577,
+	kVRegHdrInLuminanceCh1					= VIRTUALREG_START+578,
+	kVRegHdrInGreenXCh1						= VIRTUALREG_START+579,
+	kVRegHdrInGreenYCh1						= VIRTUALREG_START+580,
+	kVRegHdrInBlueXCh1						= VIRTUALREG_START+581,
+	kVRegHdrInBlueYCh1						= VIRTUALREG_START+582,
+	kVRegHdrInRedXCh1						= VIRTUALREG_START+583,
+	kVRegHdrInRedYCh1						= VIRTUALREG_START+584,
+	kVRegHdrInWhiteXCh1						= VIRTUALREG_START+585,
+	kVRegHdrInWhiteYCh1						= VIRTUALREG_START+586,
+	kVRegHdrInMasterLumMaxCh1				= VIRTUALREG_START+587,
+	kVRegHdrInMasterLumMinCh1				= VIRTUALREG_START+588,
+	kVRegHdrInMaxCLLCh1						= VIRTUALREG_START+589,
+	kVRegHdrInMaxFALLCh1					= VIRTUALREG_START+587,
+	kVRegHDRInOverrideState					= VIRTUALREG_START+588,
 
-	kVRegPCIMaxReadRequestSize				= VIRTUALREG_START+573,
+	kVRegPCIMaxReadRequestSize				= VIRTUALREG_START+589,
 
-	kVRegLastAJA							= VIRTUALREG_START+574,		///< @brief	The last AJA virtual register slot
+	kVRegLastAJA							= VIRTUALREG_START+590,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 

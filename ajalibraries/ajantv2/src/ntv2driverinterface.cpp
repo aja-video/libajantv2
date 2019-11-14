@@ -524,8 +524,7 @@ bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageIn
     else
     {
         ULWord baseAddress = (16 * 1024 * 1024) - (3 * 256 * 1024);
-        ULWord* bitFilePtr =  new ULWord[256/4];
-        ULWord dwordSizeCount = 256/4;
+		const ULWord dwordSizeCount = 256/4;
 
         WriteRegister(kRegXenaxFlashAddress, (ULWord)1);   // bank 1
         WriteRegister(kRegXenaxFlashControlStatus, 0x17);
@@ -546,6 +545,7 @@ bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageIn
         if (timeoutCount == 0)
             return false;
 
+		ULWord* bitFilePtr =  new ULWord[dwordSizeCount];
         for ( ULWord count = 0; count < dwordSizeCount; count++, baseAddress += 4 )
         {
             WriteRegister(kRegXenaxFlashAddress, baseAddress);
@@ -565,11 +565,16 @@ bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageIn
                     busy = false;
             } while(busy == true && timeoutCount > 0);
             if (timeoutCount == 0)
+			{
+				delete [] bitFilePtr;
                 return false;
+			}
             ReadRegister(kRegXenaxFlashDOUT, bitFilePtr[count]);
         }
 
         packInfo = (char*)bitFilePtr;
+
+		delete [] bitFilePtr;
     }
 
     istringstream iss(packInfo);
@@ -641,8 +646,7 @@ void CNTV2DriverInterface::InitMemberVariablesOnOpen (NTV2FrameGeometry frameGeo
 bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 {
 	ULWord baseAddress = 0;
-	ULWord* bitFilePtr =  new ULWord[256/4];
-	ULWord dwordSizeCount = 256/4;
+	const ULWord dwordSizeCount = 256/4;
 
 	if(!IsDeviceReady(false))
 	{
@@ -683,6 +687,8 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 			return false;
 	}
 
+	ULWord* bitFilePtr =  new ULWord[dwordSizeCount];
+
 	for ( ULWord count = 0; count < dwordSizeCount; count++, baseAddress += 4 )
 	{
 		WriteRegister(kRegXenaxFlashAddress, baseAddress);
@@ -702,7 +708,10 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 				busy = false;
 		} while(busy == true && timeoutCount > 0);
 		if (timeoutCount == 0)
+		{
+			delete [] bitFilePtr;
 			return false;
+		}
 		ReadRegister(kRegXenaxFlashDOUT, bitFilePtr[count]);
 	}
 

@@ -2125,8 +2125,11 @@ typedef enum
     NTV2_2Kx1080SMPTE,
     NTV2_2Kx1080XVGA,
     NTV2_END_DACMODES,
-    NTV2_MAX_NUM_VideoDACModes
+    NTV2_MAX_NUM_VideoDACModes,
+    NTV2_VIDEO_DAC_MODE_INVALID = NTV2_END_DACMODES
 } NTV2VideoDACMode;
+
+#define	NTV2_IS_VALID_VIDEO_DAC_MODE(__x__)		((__x__) >= NTV2_480iRGB  &&  (__x__) < NTV2_END_DACMODES)
 
 
 typedef enum
@@ -4053,7 +4056,8 @@ typedef enum
 {
     NTV2_HDMI_V2_HDSD_BIDIRECTIONAL,
     NTV2_HDMI_V2_4K_CAPTURE,
-    NTV2_HDMI_V2_4K_PLAYBACK
+    NTV2_HDMI_V2_4K_PLAYBACK,
+    NTV2_HDMI_V2_MODE_INVALID
 } NTV2HDMIV2Mode;
 
 typedef enum
@@ -4314,7 +4318,6 @@ typedef enum
 
 
 #if !defined (NTV2_DEPRECATE)
-    typedef		R2BlackLevel				NTV2K2AnalogBlackLevel;				///< @deprecated	Use R2BlackLevel instead.
     typedef		NTV2AnalogType						NTV2K2AnalogType;					///< @deprecated	Use NTV2AnalogType instead.
     typedef		NTV2Audio2ChannelSelect				NTV2K2Audio2ChannelSelect;			///< @deprecated	Use NTV2Audio2ChannelSelect instead.
     typedef		NTV2Audio4ChannelSelect				NTV2K2Audio4ChannelSelect;			///< @deprecated	Use NTV2Audio4ChannelSelect instead.

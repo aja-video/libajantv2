@@ -388,17 +388,13 @@ bool CNTV2Card::SetHDMIOutBitDepth (const NTV2HDMIBitDepth value)
 
 bool CNTV2Card::GetHDMIOutBitDepth (NTV2HDMIBitDepth & outValue)
 {
-	ULWord d10;
-	ULWord d12;
-	bool ret = true;
-	
+	ULWord d10(0), d12(0);
+	outValue = NTV2_INVALID_HDMIBitDepth;
 	if (::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) == 0)
 		return false;
 
-	ret &= CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, d10, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
-	ret &= CNTV2DriverInterface::ReadRegister (kRegHDMIInputControl, d12,  kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
-
-	if (!ret)
+	if (!(ReadRegister(kRegHDMIOutControl, d10, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth)
+			&&  ReadRegister (kRegHDMIInputControl, d12,  kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit)))
 		return false;
 	
 	if (d12 > 0)
@@ -407,7 +403,6 @@ bool CNTV2Card::GetHDMIOutBitDepth (NTV2HDMIBitDepth & outValue)
 		outValue = NTV2_HDMI10Bit;
 	else
 		outValue = NTV2_HDMI8Bit;
-
 	return true;
 }
 

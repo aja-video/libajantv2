@@ -754,6 +754,16 @@ public:
 												uint64_t & outAddress,  uint64_t & outLength);
 
 	/**
+		@brief		Answers with the frame number that contains the given address.
+		@param[in]	inAddress		Specifies the device memory address of the first byte of the given frame.
+		@param[out]	outFrameNumber	Receives the zero-based frame number.
+		@param[in]	inChannel		Optionally specifies the channel of interest (for multi-format).
+									Defaults to NTV2_CHANNEL1 for uni-format.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	DeviceAddressToFrameNumber (const uint64_t inAddress,  UWord & outFrameNumber,  const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
 		@brief		Answers with the offset and size of an ancillary data region within a device frame buffer.
 		@param[out]	outByteOffset	Receives the byte offset where the ancillary data region starts in the frame buffer,
 									(measured from the start of the frame buffer).
@@ -6038,6 +6048,13 @@ public:
 		@note		This function has nothing to do with the firmware bitfiles that are currently installed on the local host's file system.
 	**/
 	AJA_VIRTUAL bool			GetInstalledBitfileInfo (ULWord & outNumBytes, std::string & outDateStr, std::string & outTimeStr);
+
+	/**
+		@brief		Generates and returns an info string with date, time and name for the given inBifFileInfo.
+		@param[in]	inBitFileInfo	BitFile Info structure to get information from, no validity checks are made on the structure before use.
+		@return		A string containing the bitfile information.
+	**/
+	AJA_VIRTUAL std::string		GetBitfileInfoString (const BITFILE_INFO_STRUCT & inBitFileInfo);
 
 	/**
 		@brief		Answers whether or not the "fail-safe" (aka "safe-boot") bitfile is currently loaded and running in the FPGA.

@@ -159,6 +159,7 @@ CNTV2HEVCFirmwareInstallerThread::CNTV2HEVCFirmwareInstallerThread (const CNTV2H
 
 CNTV2HEVCFirmwareInstallerThread & CNTV2HEVCFirmwareInstallerThread::operator = (const CNTV2HEVCFirmwareInstallerThread & inObj)
 {
+	(void) inObj;
 	assert (false);
 	return *this;
 }
@@ -1995,6 +1996,9 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::FlashMCPU(char* fileName, uint32_t r
 
 HEVCError CNTV2HEVCFirmwareInstallerThread::FlashSystem(char* fileName, char* configName, ULWord flashOffset, ULWord fileOffset, ULWord length)
 {
+	(void) flashOffset;
+	(void) fileOffset;
+	(void) length;
     HEVCError       result;
     
     result = FlashMainModeCommon();

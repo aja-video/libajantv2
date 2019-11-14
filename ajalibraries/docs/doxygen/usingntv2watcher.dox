@@ -5,18 +5,22 @@
 
 This page describes how to use the <b>NTV2 Watcher</b> tool to interactively monitor and control an AJA device.
 
-Contents:
+<b>Inspectors:</b>
 	-	\ref inspectorgeneralop
 	-	\ref inspectorframebuffer
-		-	\ref fillbufferdlog
 	-	\ref inspectoraudio
 	-	\ref inspectoranc
-		-	\ref anc608viewer
 	-	\ref inspectorac
 	-	\ref inspectormixerkeyer
 	-	\ref inspectorregs
-		-	\ref regautocycler
 	-	\ref inspectorroute
+
+<b>Tool Windows:</b>
+	-	\ref fillbufferdlog
+	-	\ref anc608viewer
+	-	\ref regautocycler
+	-	\ref tonegenerator
+	-	\ref memmapdlog
 
 
 
@@ -313,43 +317,35 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 				-	If the raw file is larger than the frame buffer, only the current frame being written will be changed.
 
 
-@subsubsection	fillbufferdlog		Fill Buffer Window
+The address space rectangle is overlaid with a number of gray-colored, non-overlapping smaller boxes that represent <b>Frames</b>
+or individual <b>Frame Buffers</b> in device memory.
+-	Each <b>Frame</b> is labeled with its unique <b>Frame Number</b>.
+-	The first frame, frame <b>0</b>, is the left-most one.
+-	Each frame represents a specific, unique byte range in device memory. No two frames ever overlap.
+-	In memory, NTV2 device FrameStore widgets (see \ref vidop-fs ) always read or write video at the start of a frame boundary.
+-	The width of these frames indicate the device’s <b>Intrinsic Frame Size</b>. At this time, NTV2 devices
+	use an intrinsic frame size of either 8MB or 16MB. When using AutoCirculate in <b>Quad Mode</b> or <b>Quad-Quad Mode</b>,
+	the logical frame size is 4 or 8 times (respectively) the intrinsic frame size.
 
-The <b>Fill Buffer Window</b> is a handy debugging aid for filling device buffer memory with various values and/or patterns.
+If an \ref aboutautocirculate channel is running, a translucent box will appear over its <b>Frame Range</b>.
+Its color depends on the video format of the FrameStore/channel: green for SD, purple for HD, blue for 4K, etc.
 
-The <b>Start Frame</b> and <b>End Frame</b> spinner controls are used to adjust the range of frames to be filled.
-Check the <b>All Frames</b> checkbox to easily select all frames on the device.
+If a <b>FrameStore</b> is enabled and set for <b>Capture</b> mode, a red box will overlay its current <b>Input Frame</b>,
+indicating that it is currently writing data into that frame.
+The width of the red box indicates the actual raster size, in bytes, being written into the <b>Frame</b>.
 
-There are currently three ways to fill buffer memory:
-	-	<b>Numeric Value</b> — Fills one or more buffers with any 8, 16, 32 or 64-bit numeric value.
-		@image	html	watcher-fillfb-numeric.png
-		Click <b>Apply</b> to write the numeric value into the frame buffer(s).
-		Checkboxes are provided for skipping certain regions of each frame buffer being filled:
-		-	<b>Field1</b> — Skips “Field 1” lines.
-		-	<b>Field2</b> — Skips “Field 2” lines.
-		-	<b>VANC</b> — Skips VANC lines. (Enabled only when the FrameStore geometry is “tall” or “taller”.)
-		-	<b>Visible Raster</b> — Skips the visible raster lines.
-		-	<b>Anc F1 Region</b> — Skips the F1 Ancillary Data region.
-		-	<b>Anc F2 Region</b> — Skips the F2 Ancillary Data region.
-	-	<b>Test Pattern</b> — Fills one or more buffers with any of several predefined test patterns.
-		@image	html	watcher-fillfb-pattern.png
-		The test pattern image is written to the buffer(s) immediately after choosing the test pattern.
-	-	<b>Text</b> — Fills one or more buffers with glyphs rendered using the ::CNTV2CaptionRenderer class.
-		@image	html	watcher-fillfb-text.png
-		Note that the frame buffer(s) are written immediately after making any changes or selections in the panel.
-		-	<b>Display Text</b> — A text edit box for specifying the text to be rendered.
-		-	<b>Blit Over Test Pattern</b> — Renders the text <i>after</i> [re]writing the test pattern into the frame buffer(s).
-		-	<b>Y</b> and <b>X</b> Position — Starting position where text rendering begins in the frame.
-			The coordinate units depend on the <b>Use Pixel Position</b> checkbox.
-		-	<b>Use Pixel Position</b> — Determines the position coordinate units where the text is rendered.
-			-	Unchecked — use CEA608 row/column coordinates.
-			-	Checked — use pixel offset from the top-left corner (where top-left is 0,0).
-		-	<b>Italic</b> — Check the box to render in italics;  un-check for non-italic (normal).
-		-	<b>Underline</b> — Check the box to render with underline;  un-check for no underline (normal).
-		-	<b>FG</b> — Specifies the foreground color attribute.
-		-	<b>BG</b> — Specifies the background color attribute.
-		-	<b>Opacity</b> — Specifies the opacity attribute: Opaque, Translucent, or Transparent.
-		-	<b>Clear Caches</b> — Clears the ::CNTV2CaptionRenderer caches.	
+If a <b>FrameStore</b> is enabled and set for <b>Playout</b> mode, a green box will overlay its current <b>Output Frame</b>,
+indicating that it is currently reading data from that frame.
+The width of the green box indicates the actual raster size, in bytes, being read from the <b>Frame</b>.
+It’s visually apparent that larger frame geometries and less compact pixel formats use more memory.
+
+<b>Audio Buffers</b> appear at the top end of device SDRAM, near the right edge.
+
+During \ref audiocapture, a red box that represents the Audio System’s capture buffer will overlay the memory display.
+
+During \ref audioplayout, a green box that represents the Audio System’s playout buffer will overlay the memory display.
+
+At any time, you may hover the mouse pointer over any object in the <b>Memory Map</b> to pop up a “tooltip” that contains information about the object.
 
 
 
@@ -538,78 +534,6 @@ Changed data are highlighted with a brighter color.
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the displayed information to the Clipboard.
 
 
-@subsubsection	anc608viewer		CEA-608 Caption Viewer
-
-@image	html	cea608viewer.png
-
-The <b>CEA-608 Caption Viewer</b> window is a handy debugging aid for viewing EIA-608 and/or CEA-608 caption byte-pair streams.
-Since a CEA-608 decoder is a fairly complex state machine, this requires maintaining a stream of caption byte pairs
-to supply sufficient context in order to properly render captions. Thus, two panels are provided:
-	-	<b>Byte-Pair Stream</b> — Displays a hexadecimal representation of the caption byte-pair stream being decoded.
-		-	The text represents a byte-pair FIFO that holds up to 90 byte pairs (maximum):
-			-	New byte pairs enter the FIFO at the bottom-right corner.
-			-	The oldest byte pairs drop out of the FIFO at the top-left corner.
-		-	When no caption data is being streamed, the text content can be edited:
-			-	You can select all or part of the text, and copy it to the host’s clipboard.
-			-	You can add, remove, or change its contents by typing, or by pasting text from the clipboard.
-			-	The text must consist of 2-byte hexadecimal “words” separated by a single space (case is irrelevant).
-				Any other format will fail to decode properly.
-				-	The left-most 2 digits (most-significant byte) is “byte 1”;
-				-	The right-most 2 digits (least-significant byte) is “byte 2”.
-				-	Byte sequences from “.scc” sidecar files should work (but remove the timecodes).
-			-	<b>Example:</b> Try the byte-pair sequence “<tt>9425 94ad 9170 c845 cc4c 4f20</tt>”.
-				It should render “Hello” for CC1.
-	-	<b>Decoded Captions</b> — Renders the decoded captions, as they appear on-screen.
-		-	The 608 decoder always re-decodes the entire FIFO whenever it changes, processing the byte pairs top-left to bottom-right.
-			-	The last pair in the FIFO enters the decoder first;
-			-	The first pair in the FIFO enters the decoder last.
-
-A <b>Channel</b> selector menu is provided to change the channel being decoded and displayed:
-	-	CC1 — the normal, primary (English language) closed-caption channel sourced from Field 1.
-	-	CC2 — the secondary (often Spanish language) closed-caption channel, also sourced from Field 1.
-	-	CC3, CC4 — additional closed-caption channels, sourced from Field 2.
-	-	TX1, TX2 — text-only channels sourced from Field 1.
-	-	TX3, TX4 — text-only channels sourced from Field 2.
-	-	XDS is currently not available for decoding or display.
-
-A <b>Reset</b> button is provided to manually reset the decoder, if necessary.
-Add or remove a space to/from it to force the decoder to re-render what’s in the byte stream.
-
-To render captions in real-time, the decoder’s byte-pair FIFO requires a steady stream of caption
-byte-pairs transmitted by the <b>Anc Inspector</b>:
-	-	<b>“Analog” Captioning</b> — All of the following are true:
-		-	The monitored FrameStore/Channel is receiving or transmitting SD video;
-		-	The monitored FrameStore/Channel has a 'v210' or '2vuy' pixel format;
-		-	The current frame buffer contains a valid “analog” caption byte pair encoded
-			as a waveform per EIA-608 in “line 21” of active video.
-	-	<b>VANC Frame Geometry</b> — All of the following are true:
-		-	“Tall” or “Taller” VANC mode is enabled;
-		-	The monitored FrameStore/Channel has a 'v210' or '2vuy' pixel format;
-			-	If 8-bit YCbCr, VANC Shift Mode must be enabled;
-		-	The VANC anc display is set to “Packets”;
-		-	The packet display must contain:
-			-	a CEA-708 packet that contains “Service 0“ CEA-608 caption data, or…
-			-	at least one CEA-608 packet.
-	-	<b>Anc Extractor/Inserter F1 and/or F2</b> — All of the following are true:
-		-	The monitored Anc Inserter/Extractor must be running;
-		-	The Field 1 or Field 2 displays (or both) must be set to display “Packets”.
-		-	One of the packet displays contains:
-			-	a CEA-708 packet that contains “Service 0“ CEA-608 caption data, or…
-			-	a CEA-608 packet.
-
-	@note	Successful caption rendering relies on getting a continuous byte pair sequence (no dropped frames).
-			If the <b>Anc Inspector</b>’s refresh rate lags the frame rate, byte pairs will be
-			skipped, resulting in garbled and unreadable captions. Hiding one or more of the
-			Anc Inspector’s viewers (VANC, Anc Registers, F1, F2) can save CPU cycles.
-
-To freeze the <b>Byte-Pair Stream</b> (perhaps to permit interacting with it manually),
-leave the <b>Caption Viewer</b> window open, but switch NTV2Watcher to an Inspector other than
-the <b>Anc Inspector</b>. (You can also stop viewing “Packets” — use “Raw” or “Hide” instead.)
-
-To close the <b>Caption Viewer</b> window, click its close box, or un-check the
-<b>EIA/CEA-608 Caption Viewer</b> checkbox in the <b>Anc Inspector</b>.
-
-
 <hr size="50px">
 @subsection	inspectorac		AutoCirculate Inspector
 
@@ -675,7 +599,8 @@ Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot o
 
 @image	html	watcher-inspector-regs.png
 
-The <b>Regs</b> inspector is a faster alternative to the register pages, and allows easy, immediate customization to focus on specific registers of interest.
+The <b>Regs</b> inspector monitors any number of real and/or virtual 32-bit registers at NTV2Watcher’s current Polling Interval.
+Its <b>Filter</b> feature permits immediate customization to focus on specific registers of interest.
 
 The inspector has the following:
 	-	A scrollable table of registers, one register per row, in ascending register number (i.e. bar address) order.
@@ -710,29 +635,10 @@ To change a register’s value:
 	-	Press <b>Enter</b> or <b>Return</b> to confirm your changes, and write the new register value to the device. The edit box will disappear.
 	-	Press <b>Escape</b> to abandon your changes. The edit box will disappear.
 
-Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the displayed registers to the Clipboard.
+Choose <b>Copy</b> from the <b>Edit</b> menu to copy to the host’s Clipboard a set of CNTV2Card::WriteRegister
+function calls that will produce the register values seen in the display.
 
-
-
-@subsubsection	regautocycler		Register Auto-Cycler Window
-
-The <b>Register Auto-Cycler Window</b> is a handy tool for automatically cycling the value of a register
-from a minimum to a maximum numeric value at a particular step rate.
-
-For example, it can be used to step the <b>OutputFrame</b> register to automatically cycle through several
-pre-loaded frame images.
-
-	-	<b>Reg</b> — This specifies the register to be cycled.
-	-	<b>Min</b> — This specifies the minimum value for the register.
-	-	<b>Max</b> — This specifies the maximum value for the register.
-		When the register reaches this value, when it’s time for the next step,
-		it will start over at the <b>min</b> value.
-	-	<b>Rate</b> — This slider control adjusts the time between steps.
-	-	<b>Start</b> — Click to start the auto-cycler.
-		When running, this button will be disabled and will be titled “Running”.
-	-	<b>Stop</b> — Click to stop the auto-cycler.
-		When stopped, this button will be disabled and will be titled “Stopped”.
-
+<b>TIP:</b>  The \ref regautocycler can be used to periodically cycle a register between a minimum and maximum value.
 
 
 
@@ -754,6 +660,254 @@ The inspector has the following individual panels:
 	-	<b>Routing Registers</b> — A panel containing a list of the device’s routing registers. The register values can be changed.
  
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the displayed routing information to the Clipboard.
+
+
+
+<hr size="50px">
+@subsection	fillbufferdlog		“Fill Buffer” Tool
+
+The <b>“Fill Buffer” Tool</b> is a handy debugging aid for filling device buffer memory with various values and/or patterns.
+
+One or more frames can be written:
+-	<b>Start Frame</b> — Specifies the first frame to be written.
+-	<b>End Frame</b> — Determines the last frame to be written.
+-	<b>All Frames</b> — Check this to quickly select all frames on the device to be written.
+
+There are currently three ways to fill buffer memory:
+	-#	<b>Numeric Value</b> — Fills one or more buffers with any 8, 16, 32 or 64-bit numeric value.
+		@image	html	watcher-tool-fill-num.png
+		Click <b>Apply</b> to write the numeric value into the frame buffer(s).
+		Checkboxes are provided for skipping certain regions of each frame buffer being filled:
+		-	<b>Field1</b> — Skips “Field 1” lines.
+		-	<b>Field2</b> — Skips “Field 2” lines.
+		-	<b>VANC</b> — Skips VANC lines. (Enabled only when the FrameStore geometry is “tall” or “taller”.)
+		-	<b>Visible Raster</b> — Skips the visible raster lines.
+		-	<b>Anc F1 Region</b> — Skips the F1 Ancillary Data region.
+		-	<b>Anc F2 Region</b> — Skips the F2 Ancillary Data region.
+	-#	<b>Test Pattern</b> — Fills one or more buffers with any of several predefined test patterns.
+		@image	html	watcher-tool-fill-pat.png
+		The test pattern image is written to the buffer(s) immediately after choosing the test pattern.
+	-#	<b>Text</b> — Fills one or more buffers with glyphs rendered using the ::CNTV2CaptionRenderer class.
+		@image	html	watcher-tool-fill-txt.png
+		Note that the frame buffer(s) are written immediately after making any changes or selections in the panel.
+		-	<b>Display Text</b> — A text edit box for specifying the text to be rendered.
+		-	<b>Blit Over Test Pattern</b> — Renders the text <i>after</i> [re]writing the test pattern into the frame buffer(s).
+		-	<b>Y</b> and <b>X</b> Position — Starting position where text rendering begins in the frame.
+			The coordinate units depend on the <b>Use Pixel Position</b> checkbox.
+		-	<b>Use Pixel Position</b> — Determines the position coordinate units where the text is rendered.
+			-	Unchecked — use CEA608 row/column coordinates.
+			-	Checked — use pixel offset from the top-left corner (where top-left is 0,0).
+		-	<b>Italic</b> — Check the box to render in italics;  un-check for non-italic (normal).
+		-	<b>Underline</b> — Check the box to render with underline;  un-check for no underline (normal).
+		-	<b>FG</b> — Specifies the foreground color attribute.
+		-	<b>BG</b> — Specifies the background color attribute.
+		-	<b>Opacity</b> — Specifies the opacity attribute: Opaque, Translucent, or Transparent.
+		-	<b>Clear Caches</b> — Clears the ::CNTV2CaptionRenderer caches.	
+
+
+<hr size="50px">
+@subsection	anc608viewer		“EIA/CEA-608 Caption” Tool
+
+@image	html	watcher-tool-608caption.png
+
+The <b>EIA/CEA-608 Caption Tool</b> is a handy debugging aid for viewing EIA-608 and/or CEA-608 caption byte-pair streams.
+It works with the \ref inspectoranc to supply its CEA-608 decoder with a stream of caption byte pairs to supply sufficient
+context in order to properly render captions. The tool window is dominated by two panels:
+	-	<b>Byte-Pair Stream</b> — Displays a hexadecimal representation of the caption byte-pair stream being decoded.
+		-	The text represents a byte-pair FIFO that holds up to 90 byte pairs (maximum):
+			-	New byte pairs enter the FIFO at the bottom-right corner.
+			-	The oldest byte pairs drop out of the FIFO at the top-left corner.
+		-	When no caption data is being streamed, the text content can be edited:
+			-	You can select all or part of the text, and copy it to the host’s clipboard.
+			-	You can add, remove, or change its contents by typing, or by pasting text from the clipboard.
+			-	The text must consist of 2-byte hexadecimal “words” separated by a single space (case is irrelevant).
+				Any other format will fail to decode properly.
+				-	The left-most 2 digits (most-significant byte) is “byte 1”;
+				-	The right-most 2 digits (least-significant byte) is “byte 2”.
+				-	Byte sequences from “.scc” sidecar files should work (but remove the timecodes).
+			-	<b>Example:</b> Try the byte-pair sequence “<tt>9425 94ad 9170 c845 cc4c 4f20</tt>” —
+				it should render “Hello” for CC1.
+	-	<b>Decoded Captions</b> — Renders the decoded captions, as they appear on-screen.
+		-	The 608 decoder always re-decodes the entire FIFO whenever it changes, processing the byte pairs top-left to bottom-right.
+			-	The last pair in the FIFO enters the decoder first;
+			-	The first pair in the FIFO enters the decoder last.
+
+A <b>Channel</b> selector menu is provided to change the channel being decoded and displayed:
+	-	CC1 — the normal, primary (English language) closed-caption channel sourced from Field 1.
+	-	CC2 — the secondary (often Spanish language) closed-caption channel, also sourced from Field 1.
+	-	CC3, CC4 — additional closed-caption channels, sourced from Field 2.
+	-	TX1, TX2 — text-only channels sourced from Field 1.
+	-	TX3, TX4 — text-only channels sourced from Field 2.
+	-	XDS is currently not available for decoding or display.
+
+A <b>Reset</b> button is provided to manually reset the decoder, if necessary.
+Add or remove a space to/from it to force the decoder to re-render what’s in the byte stream.
+
+To render captions in real-time, the decoder’s byte-pair FIFO requires a steady stream of caption
+byte-pairs transmitted by the \ref inspectoranc :
+	-	<b>“Analog” Captioning</b> — All of the following are true:
+		-	The monitored FrameStore/Channel is receiving or transmitting SD video;
+		-	The monitored FrameStore/Channel has a 'v210' or '2vuy' pixel format;
+		-	The current frame buffer contains a valid “analog” caption byte pair encoded
+			as a waveform per EIA-608 in “line 21” of active video.
+	-	<b>VANC Frame Geometry</b> — All of the following are true:
+		-	“Tall” or “Taller” VANC mode is enabled;
+		-	The monitored FrameStore/Channel has a 'v210' or '2vuy' pixel format;
+			-	If 8-bit YCbCr, VANC Shift Mode must be enabled;
+		-	The VANC anc display is set to “Packets”;
+		-	The packet display must contain:
+			-	a CEA-708 packet that contains “Service 0“ CEA-608 caption data, or…
+			-	at least one CEA-608 packet.
+	-	<b>Anc Extractor/Inserter F1 and/or F2</b> — All of the following are true:
+		-	The monitored Anc Inserter/Extractor must be running;
+		-	The Field 1 or Field 2 displays (or both) must be set to display “Packets”.
+		-	One of the packet displays contains:
+			-	a CEA-708 packet that contains “Service 0“ CEA-608 caption data, or…
+			-	a CEA-608 packet.
+
+	@note	Successful caption rendering relies on getting a continuous byte pair sequence (no dropped frames).
+			If the refresh rate of the \ref inspectoranc lags the frame rate, byte pairs will be
+			skipped, resulting in garbled and unreadable captions. Hiding one or more of the
+			\ref inspectoranc viewers (VANC, Anc Registers, F1, F2) can save CPU cycles.
+
+To freeze the <b>Byte-Pair Stream</b> (perhaps to permit interacting with it manually),
+leave the <b>Caption Viewer</b> window open, but switch NTV2Watcher to an Inspector other than
+the \ref inspectoranc — or stop viewing “Packets” and instead switch to “Raw” or “Hide”).
+
+<b>Generating Captions</b>
+
+This tool can also generate caption byte pairs by using the controls at the bottom of the tool window:
+	-	<b>Type</b> — This controls the type of caption to generate:
+		-	<b>PopOn</b> — This uses the CNTV2CaptionEncoder608::EnqueuePopOnMessage function.
+		-	<b>RollUp2</b> — This uses the CNTV2CaptionEncoder608::EnqueueRollUpMessage function to produce two-row “roll-up” captions.
+		-	<b>RollUp3</b> — This uses the CNTV2CaptionEncoder608::EnqueueRollUpMessage function to produce three-row “roll-up” captions.
+		-	<b>RollUp4</b> — This uses the CNTV2CaptionEncoder608::EnqueueRollUpMessage function to produce four-row “roll-up” captions.
+		-	<b>PaintOn</b> — This uses the CNTV2CaptionEncoder608::EnqueuePaintOnMessage function.
+	-	<b>Row</b> spin control — specifies the row number where the caption text will appear.
+	-	<b>Col</b> spin control — specifies the column number where the caption text will begin.
+	-	<b>FG</b> — Specifies the foreground color of the caption text.
+	-	<b>BG</b> — Specifies the background color of the caption text.
+	-	<b>Ital</b> checkbox — If checked, the caption text should be italicized.
+	-	<b>Undr</b> checkbox — If checked, the caption text should be underlined.
+	-	<b>Blnk</b> checkbox — If checked, the caption text should blink.
+	-	Transparency popup menu — Choose from <b>Opaque</b>, <b>Translucent</b> or <b>Transparent</b>.
+	-	<b>Text</b> box — Enter the caption text to be generated.
+	-	Click <b>Xmit</b> to generate and “transmit” the caption byte pairs.
+		These will be DMA’d starting at the current frame’s F1 Anc or VANC region (in the \ref inspectoranc).
+		It will continue pulling byte pairs from the FIFO and DMA’ing into subsequent frame buffers on the device.
+
+
+To close the <b>“CEA-608 Caption” Tool</b>:
+	-	click its close box;
+	-	or un-check the <b>View</b> menu’s <b>CEA608 Monitor</b> command.
+
+
+
+<hr size="50px">
+@subsection	regautocycler		“Register Cycler” Tool
+
+The <b>“Register Cycler”</b> is a handy tool for automatically cycling the value of a register
+from a minimum to a maximum numeric value at a particular step rate.
+
+For example, it can be used to step an <b>OutputFrame</b> register to periodically cycle through several
+pre-loaded frame images.
+
+@image	html	watcher-tool-regcycler.png
+
+<b>Controls:</b>
+	-	<b>Reg</b> — Specifies the register to be cycled.
+	-	<b>Min</b> — Specifies the minimum value for the register.
+	-	<b>Max</b> — Specifies the maximum value for the register.
+		When the register reaches this value, it will start over at the <b>Min</b> value.
+	-	<b>Rate</b> slider — Adjusts the time between steps.
+	-	<b>Start</b> — Starts the cycler running. When running, this button will be disabled and will be titled “Running”.
+	-	<b>Stop</b> — Stops the cycler. When stopped, this button will be disabled and will be titled “Stopped”.
+
+To close the <b>Register Cycler</b>:
+	-	click its close box; or…
+	-	un-check the <b>View</b> menu’s <b>Register Cycler</b> command.
+
+
+
+<hr size="50px">
+@subsection	tonegenerator		“Tone Generator” Tool
+
+The <b>Tone Generator</b> is a handy tool for generating one or more channels of sinusoidal audio tones.
+
+@image	html	watcher-tool-tonegen.png
+
+<b>Controls:</b>
+	-	“Channel Enable” checkboxes — There’s one checkbox for each audio channel.
+		-	Disabled channels always produce silence (zero values).
+		-	An enabled channel has its own additional controls:
+			-	<b>Freq</b> — Adjusts the frequency of the generated waveform.
+			-	<b>Phase</b> — Adjusts the phase of the generated waveform.
+			-	<b>Ampl</b> — Adjusts the amplitude of the generated waveform.
+			-	<b>Offs</b> — Adjusts the (amplitude) offset of the generated waveform (like adding a DC component to it).
+	-	<b>Audio System</b> popup menu — Specifies the target Audio System whose buffer will receive the generated audio samples.
+		Choosing a new Audio System will automatically stop the generator (if running).
+	-	<b>Fill</b> — Generates samples and Fills the given Audio System’s output buffer.
+	-	<b>Start</b> — Starts the generator to run continuously.
+		When running, this button will be disabled and will be titled “Running”.
+	-	<b>Stop</b> — Stops the generator.
+		When stopped, this button will be disabled and will be titled “Stopped”.
+
+To close the <b>Tone Generator</b> tool window:
+	-	click its close box;  or…
+	-	un-check the <b>View</b> menu’s <b>Tone Generator</b> command.
+
+
+
+<hr size="50px">
+@subsection	memmapdlog		“Memory Map” Tool
+
+@image	html	watcher-tool-memmap.png
+
+The <b>Memory Map</b> is a handy debugging aid for visualizing how device memory is being used.
+It can readily indicate \ref vidop-fbconflict and/or \ref audioclobber.
+
+-	The top of the window has two indicators:
+	-	<b>Intrinsic Frame Size</b> — indicates the “natural” size of a non-4K, non-8K frame, in megabytes.
+		This is what the hardware is using for normal, non-4K/8K frames.
+	-	<b>Total SDRAM</b> — displays the total SDRAM complement of the device, in megabytes.
+-	The remainder of the window contains the <b>Memory Map</b>:
+	-	The horizontal space represents the device’s addressable SDRAM storage:
+		-	Address zero (0x00000000) is at the far left edge;
+		-	The highest addressable byte is at the far right edge.
+	-	The vertical space is irrelevant.
+	-	<b>Scrolling</b> — When needed, scroll bars are provided to allow scrolling offscreen areas of the Map into view.
+	-	<b>Zoom Controls</b> — Click <b>+</b> to zoom in;  click <b>−</b> to zoom out.
+	-	Memory Region objects:
+		-	<b>Frame</b> — The gray boxes represent the intrinsic 8MB or 16MB frame boundaries.
+			-	The numbers represent the zero-based frame number.
+		-	<b>AutoCirculate</b> — These translucent boxes span multiple Frames, and represents the frames being used
+			by an \ref aboutautocirculate channel.
+			-	Label contains the AutoCirculate Mode and Channel (e.g. “In1", “Out2”, etc.).
+			-	Double-click to open the \ref inspectorac.
+			-	Right-click and choose <b>Inspect</b> to open the \ref inspectorac.
+		-	<b>Video Read</b> — (Green) — Represents the “Output Frame” being read by an enabled FrameStore.
+			-	Labeled with the FrameStore’s channel number (e.g. “1”, “2”, etc.).
+			-	Double-click to open the \ref inspectorframebuffer.
+			-	Right-click and choose <b>Inspect</b> to open the \ref inspectorframebuffer.
+			-	Drag to change the FrameStore’s “Output Frame”.
+		-	<b>Video Write</b> — (Red) — Represents the “Input Frame” being written by an enabled FrameStore.
+			-	Labeled with the FrameStore’s channel number (e.g. “1”, “2”, etc.).
+			-	Double-click to open the \ref inspectorframebuffer.
+			-	Right-click and choose <b>Inspect</b> to open the \ref inspectorframebuffer.
+			-	Drag to change the FrameStore’s “Input Frame”.
+		-	<b>Audio Read</b> — (Green) — Represents the playout audio buffer being read by a running Audio System.
+			-	Labeled with the Audio System (e.g. “A1", “A2”, etc.).
+			-	Double-click to open the \ref inspectoraudio.
+			-	Right-click and choose <b>Inspect</b> to open the \ref inspectoraudio.
+		-	<b>Audio Write</b> — (Red) — Represents the capture audio buffer being written by a running Audio System.
+			-	Labeled with the Audio System (e.g. “A1", “A2”, etc.).
+			-	Double-click to open the \ref inspectoraudio.
+			-	Right-click and choose <b>Inspect</b> to open the \ref inspectoraudio.
+		-	You can <b>hover</b> over any object to pop up a tooltip that contains detailed information about the region.
+
+To close the <b>Memory Map</b> tool window:
+	-	click its close box;
+	-	or un-check the <b>View</b> menu’s <b>Memory Map</b> command.
 
 
 <hr size="50px">
