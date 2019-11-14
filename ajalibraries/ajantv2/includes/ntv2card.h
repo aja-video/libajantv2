@@ -6054,7 +6054,7 @@ public:
 		@param[in]	inBitFileInfo	BitFile Info structure to get information from, no validity checks are made on the structure before use.
 		@return		A string containing the bitfile information.
 	**/
-	AJAExport std::string		GetBitfileInfoString (const BITFILE_INFO_STRUCT & inBitFileInfo);
+	AJA_VIRTUAL std::string		GetBitfileInfoString (const BITFILE_INFO_STRUCT & inBitFileInfo);
 
 	/**
 		@brief		Answers whether or not the "fail-safe" (aka "safe-boot") bitfile is currently loaded and running in the FPGA.
