@@ -92,7 +92,7 @@ bool CNTV2Bitfile::Open (const string & inBitfileName)
 
 }	//	Open
 
-string CNTV2Bitfile::ParseHeaderFromBuffer(const uint8_t* bitfileBuffer)
+string CNTV2Bitfile::ParseHeaderFromBuffer(const uint8_t* inBitfileBuffer)
 {
 	Close();
 
@@ -100,7 +100,7 @@ string CNTV2Bitfile::ParseHeaderFromBuffer(const uint8_t* bitfileBuffer)
 	{
 		//	Preload bitfile header into mem
 		for (int i = 0; i < MAX_BITFILEHEADERSIZE - 1; i++)
-			_fileHeader.push_back(bitfileBuffer[i]);
+			_fileHeader.push_back(inBitfileBuffer[i]);
 
 		_lastError = ParseHeader();
 		if (!_lastError.empty())

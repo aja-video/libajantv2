@@ -52,6 +52,13 @@ class AJAExport CNTV2Bitfile
 		virtual void						Close (void);
 
 		/**
+			@brief		Parse a bitfile header in a buffer.
+			@param[in]	inBitfileBuffer	Specifies the buffer of the bitfile to be parsed.
+			@return		A std::string containing parsing errors.
+		**/
+		virtual std::string					ParseHeaderFromBuffer(const uint8_t* inBitfileBuffer);
+
+		/**
 			@brief		Answers with the bitfile build date, as extracted from the bitfile.
 			@return		A std::string containing the bitfile build date.
 		**/
@@ -135,18 +142,42 @@ class AJAExport CNTV2Bitfile
 		**/
 		virtual inline const std::string &	GetLastError (void) const		{ return _lastError; }
 
+		/**
+			@brief		Answers with the length of the program stream.
+			@return		Program stream length.
+		**/
 		virtual unsigned					GetProgramStreamLength (void) const;
+
+		/**
+			@brief		Answers with the length of the file stream.
+			@return		File stream length.
+		**/
 		virtual unsigned					GetFileStreamLength (void) const;
+		
+		/**
+			@brief		Retrieve the program bitstream.
+			@param[in]	buffer			Specifies the buffer to receive the data.
+			@param[in]	bufferLength	Specifies the length of the buffer.
+			@return		Program stream length.
+		**/
 		virtual unsigned					GetProgramByteStream (unsigned char * buffer, unsigned bufferLength);
+
+		/**
+			@brief		Retrieve the file bitstream.
+			@param[in]	buffer			Specifies the buffer to receive the data.
+			@param[in]	bufferLength	Specifies the length of the buffer.
+			@return		File stream length.
+		**/
 		virtual unsigned					GetFileByteStream (unsigned char * buffer, unsigned bufferLength);
+
+		static std::vector <std::string> &	GetPartialDesignNames (ULWord deviceID);
+
+	private:
+		virtual void						Init (void);
+		virtual std::string					ParseHeader ();
 		virtual void						SetDesignName (const char * pInBuffer, unsigned bufferLength);
 		virtual void						SetDesignFlags (const char * pInBuffer, unsigned bufferLength);
 		virtual void						SetDesignUserID (const char * pInBuffer, unsigned bufferLength);
-		virtual std::string					ParseHeaderFromBuffer(const uint8_t* bitfileBuffer);
-
-	private:
-		virtual std::string					ParseHeader ();
-		virtual void						Init (void);
 
 		std::ifstream				_bitFileStream;
 		std::vector <unsigned char> _fileHeader;
