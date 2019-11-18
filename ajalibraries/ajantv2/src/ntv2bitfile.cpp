@@ -487,14 +487,14 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 	return false;
 }
 
+typedef map <string, NTV2DeviceID>			DesignNameToIDMap;
+typedef DesignNameToIDMap::iterator			DesignNameToIDIter;
+typedef DesignNameToIDMap::const_iterator	DesignNameToIDConstIter;	
+static DesignNameToIDMap					sDesignNameToIDMap;
 
 class CDesignNameToIDMapMaker
 {
 public:
-	typedef map <string, NTV2DeviceID>			DesignNameToIDMap;
-	typedef DesignNameToIDMap::iterator			DesignNameToIDIter;
-	typedef DesignNameToIDMap::const_iterator	DesignNameToIDConstIter;	
-	static DesignNameToIDMap					sDesignNameToIDMap;
 
 	CDesignNameToIDMapMaker ()
 		{
@@ -519,15 +519,16 @@ public:
 		}
 };
 
-static CDesignNameToIDMapMaker	sDesignNameToIDMapMaker;
+static CDesignNameToIDMapMaker				sDesignNameToIDMapMaker;
+
+typedef pair <string, ULWord>				DesignPair;
+typedef map <DesignPair, NTV2DeviceID>		DesignPairToIDMap;
+typedef DesignPairToIDMap::const_iterator	DesignPairToIDMapConstIter;
+static DesignPairToIDMap					sDesignPairToIDMap;
 
 class CDesignPairToIDMapMaker
 {
 public:
-	typedef pair <string, ULWord>				DesignPair;
-	typedef map <DesignPair, NTV2DeviceID>		DesignPairToIDMap;
-	typedef DesignPairToIDMap::const_iterator	DesignPairToIDMapConstIter;
-	static DesignPairToIDMap					sDesignPairToIDMap;
 
 	CDesignPairToIDMapMaker ()
 		{
@@ -546,7 +547,7 @@ public:
 		}
 };
 
-static CDesignPairToIDMapMaker sDesignPairToIDMapMaker;
+static CDesignPairToIDMapMaker 				sDesignPairToIDMapMaker;
 
 NTV2DeviceID CNTV2Bitfile::GetDeviceID (void) const
 {
