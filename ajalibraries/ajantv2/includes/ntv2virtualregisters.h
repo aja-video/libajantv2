@@ -173,6 +173,7 @@ typedef enum
 	kVRegFrameBufferInstalled				= VIRTUALREG_START+179,		// deprecated
 
 	kVRegAnalogInStandard					= VIRTUALREG_START+180,		// deprecated
+	kVRegAnalogIoSelect						= VIRTUALREG_START+180,
 	kVRegOutputTimecodeOffset				= VIRTUALREG_START+181,		// deprecated
 	kVRegOutputTimecodeType					= VIRTUALREG_START+182,		// deprecated
 	kVRegQuicktimeUsingBoard				= VIRTUALREG_START+183,		// deprecated
