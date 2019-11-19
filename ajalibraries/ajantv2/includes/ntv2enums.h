@@ -3093,6 +3093,7 @@ typedef enum
 	,NTV2_WgtHDMIIn3v4
 	,NTV2_WgtHDMIIn4v4
 	,NTV2_WgtHDMIOut1v4
+	,NTV2_WgtHDMIOut1v5
 	,NTV2_WgtModuleTypeCount
 	,NTV2_WgtUndefined = NTV2_WgtModuleTypeCount
 	,NTV2_WIDGET_INVALID = NTV2_WgtModuleTypeCount
