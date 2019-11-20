@@ -1009,6 +1009,7 @@ private:
 		DefineRegName	(kVRegSDIInput1Raster,					"kVRegSDIInput1Raster");
 		DefineRegName	(kVRegInputChangedCount,				"kVRegInputChangedCount");
 		DefineRegName	(kVReg8kOutputTransportSelection,		"kVReg8kOutputTransportSelection");
+		DefineRegName	(kVRegAnalogIoSelect,					"kVRegAnalogIoSelect");
 		DefineRegName	(kVRegProcAmpSDRegsInitialized,			"kVRegProcAmpSDRegsInitialized");
 		DefineRegName	(kVRegProcAmpStandardDefBrightness,		"kVRegProcAmpStandardDefBrightness");
 		DefineRegName	(kVRegProcAmpStandardDefContrast,		"kVRegProcAmpStandardDefContrast");
@@ -1292,6 +1293,26 @@ private:
 		DefineRegName	(kVRegHdrMaxCLLCh1,						"kVRegHdrMaxCLLCh1");
 		DefineRegName	(kVRegHdrMaxFALLCh1,					"kVRegHdrMaxFALLCh1");
 		DefineRegName	(kVRegHDROverrideState,					"kVRegHDROverrideState");
+		DefineRegName	(kVRegUserInColorimetry,				"kVRegUserInColorimetry");					
+		DefineRegName	(kVRegUserInTransfer,					"kVRegUserInTransfer");
+		DefineRegName	(kVRegUserInLuminance,					"kVRegUserInLuminance");
+		DefineRegName	(kVRegHdrInColorimetryCh1,				"kVRegHdrInColorimetryCh1");
+		DefineRegName	(kVRegHdrInTransferCh1,					"kVRegHdrInTransferCh1");
+		DefineRegName	(kVRegHdrInLuminanceCh1,				"kVRegHdrInLuminanceCh1");
+		DefineRegName	(kVRegHdrInGreenXCh1,					"kVRegHdrInGreenXCh1");
+		DefineRegName	(kVRegHdrInGreenYCh1,					"kVRegHdrInGreenYCh1");
+		DefineRegName	(kVRegHdrInBlueXCh1,					"kVRegHdrInBlueXCh1");
+		DefineRegName	(kVRegHdrInBlueYCh1,					"kVRegHdrInBlueYCh1");
+		DefineRegName	(kVRegHdrInRedXCh1,						"kVRegHdrInRedXCh1");
+		DefineRegName	(kVRegHdrInRedYCh1,						"kVRegHdrInRedYCh1");
+		DefineRegName	(kVRegHdrInWhiteXCh1,					"kVRegHdrInWhiteXCh1");
+		DefineRegName	(kVRegHdrInWhiteYCh1,					"kVRegHdrInWhiteYCh1");
+		DefineRegName	(kVRegHdrInMasterLumMaxCh1,				"kVRegHdrInMasterLumMaxCh1");
+		DefineRegName	(kVRegHdrInMasterLumMinCh1,				"kVRegHdrInMasterLumMinCh1");
+		DefineRegName	(kVRegHdrInMaxCLLCh1,					"kVRegHdrInMaxCLLCh1");
+		DefineRegName	(kVRegHdrInMaxFALLCh1,					"kVRegHdrInMaxFALLCh1");
+		DefineRegName	(kVRegHDRInOverrideState,				"kVRegHDRInOverrideState");
+		
 		DefineRegName	(kVRegPCIMaxReadRequestSize,			"kVRegPCIMaxReadRequestSize");
 		DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
 		DefineRegName	(kVRegFirstOEM,							"kVRegFirstOEM");

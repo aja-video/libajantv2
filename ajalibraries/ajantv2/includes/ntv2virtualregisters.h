@@ -173,7 +173,6 @@ typedef enum
 	kVRegFrameBufferInstalled				= VIRTUALREG_START+179,		// deprecated
 
 	kVRegAnalogInStandard					= VIRTUALREG_START+180,		// deprecated
-	kVRegAnalogIoSelect						= VIRTUALREG_START+180,
 	kVRegOutputTimecodeOffset				= VIRTUALREG_START+181,		// deprecated
 	kVRegOutputTimecodeType					= VIRTUALREG_START+182,		// deprecated
 	kVRegQuicktimeUsingBoard				= VIRTUALREG_START+183,		// deprecated
@@ -186,6 +185,8 @@ typedef enum
 	kVRegSDIInput1Raster					= VIRTUALREG_START+190,
 	kVRegInputChangedCount					= VIRTUALREG_START+191,
 	kVReg8kOutputTransportSelection			= VIRTUALREG_START+192,
+	kVRegAnalogIoSelect						= VIRTUALREG_START+193,
+
 
 	// COMMON_VIRTUAL_REGS_PROCAMP_CONTROLS
 	kVRegProcAmpSDRegsInitialized			= VIRTUALREG_START+200,
@@ -559,12 +560,12 @@ typedef enum
 	kVRegHdrInMasterLumMaxCh1				= VIRTUALREG_START+587,
 	kVRegHdrInMasterLumMinCh1				= VIRTUALREG_START+588,
 	kVRegHdrInMaxCLLCh1						= VIRTUALREG_START+589,
-	kVRegHdrInMaxFALLCh1					= VIRTUALREG_START+587,
-	kVRegHDRInOverrideState					= VIRTUALREG_START+588,
+	kVRegHdrInMaxFALLCh1					= VIRTUALREG_START+590,
+	kVRegHDRInOverrideState					= VIRTUALREG_START+591,
 
-	kVRegPCIMaxReadRequestSize				= VIRTUALREG_START+589,
+	kVRegPCIMaxReadRequestSize				= VIRTUALREG_START+592,
 
-	kVRegLastAJA							= VIRTUALREG_START+590,		///< @brief	The last AJA virtual register slot
+	kVRegLastAJA							= VIRTUALREG_START+593,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 
