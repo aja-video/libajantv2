@@ -2186,7 +2186,8 @@ typedef enum
     NTV2_UpConvertZoom14x9,
     NTV2_UpConvertZoomLetterbox,
     NTV2_UpConvertZoomWide,
-    NTV2_MAX_NUM_UpConvertModes
+    NTV2_MAX_NUM_UpConvertModes,
+    NTV2_UpConvertMode_Invalid	= NTV2_MAX_NUM_UpConvertModes
 } NTV2UpConvertMode;
 
 
@@ -2205,7 +2206,8 @@ typedef enum
     NTV2_DownConvertCrop,
     NTV2_DownConvertAnamorphic,
     NTV2_DownConvert14x9,
-    NTV2_MAX_NUM_DownConvertModes
+    NTV2_MAX_NUM_DownConvertModes,
+    NTV2_DownConvertMode_Invalid	= NTV2_MAX_NUM_DownConvertModes
 } NTV2DownConvertMode;
 
 
@@ -2217,7 +2219,8 @@ typedef enum
     NTV2_IsoVCrop,
     NTV2_Iso14x9,
     NTV2_IsoPassThrough,
-    NTV2_MAX_NUM_IsoConvertModes
+    NTV2_MAX_NUM_IsoConvertModes,
+    NTV2_IsoConvertMode_Invalid	= NTV2_MAX_NUM_IsoConvertModes
 } NTV2IsoConvertMode;
 
 
