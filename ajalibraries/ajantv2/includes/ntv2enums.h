@@ -98,6 +98,7 @@ typedef enum
     DEVICE_ID_KONALHI					= 0x10266400,	///< @brief	See \ref konalhi
     DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief	See \ref konalhi
     DEVICE_ID_TTAP						= 0x10416000,	///< @brief	See \ref ttap
+	DEVICE_ID_T3TAP						= 0x10879000,	///< @brief See \ref t3tap
 #if !defined (NTV2_DEPRECATE_12_6)
     DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
 #endif	//	NTV2_DEPRECATE_12_6
@@ -3092,6 +3093,7 @@ typedef enum
 	,NTV2_WgtHDMIIn3v4
 	,NTV2_WgtHDMIIn4v4
 	,NTV2_WgtHDMIOut1v4
+	,NTV2_WgtHDMIOut1v5
 	,NTV2_WgtModuleTypeCount
 	,NTV2_WgtUndefined = NTV2_WgtModuleTypeCount
 	,NTV2_WIDGET_INVALID = NTV2_WgtModuleTypeCount
@@ -3446,6 +3448,7 @@ typedef enum
 	NTV2_BITFILE_CORVID44_8KMK_MAIN	= 58,
 	NTV2_BITFILE_KONA5_8K_MAIN		= 59,
 	NTV2_BITFILE_CORVID44_8K_MAIN	= 60,
+	NTV2_BITFILE_T3TAP_MAIN			= 61,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 

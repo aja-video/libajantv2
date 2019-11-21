@@ -402,6 +402,7 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inBoardID)
 		case DEVICE_ID_KONA5_8K:        return "kona5_8k";
 		case DEVICE_ID_CORVID44_8KMK:   return "c44_12g_8k_mk";
 		case DEVICE_ID_CORVID44_8K:     return "c44_12g_8k";
+		case DEVICE_ID_T3TAP:			return "t3_tap";
         default:
 			break;
 	}
@@ -448,6 +449,7 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 		case DEVICE_ID_CORVID44_8KMK:
 		case DEVICE_ID_CORVID44_8K:	return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_8KMK) == _designName
 											|| _designName == ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_8K);
+		case DEVICE_ID_T3TAP:		return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_T3TAP) == _designName;
 		default:					break;
 	}
 	return false;

@@ -69,6 +69,7 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_KONA5_8K);
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_CORVID44_8KMK);
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_CORVID44_8K);
+		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_T3TAP);
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_NOTFOUND);
 	}
 	return "";
@@ -115,6 +116,7 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_KONA5_8K:					return "Kona5_8K";
 		case DEVICE_ID_CORVID44_8KMK:				return "Corvid44_8KMK";
 		case DEVICE_ID_CORVID44_8K:					return "Corvid44_8K";
+		case DEVICE_ID_T3TAP:						return "T3Tap";
 		case DEVICE_ID_NOTFOUND:					return "Unknown";
 	}
 
