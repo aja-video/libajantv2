@@ -225,7 +225,7 @@ UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBuffer
 
 
 // Overloading not supported by the ANSI C compiler used for Linux drivers.
-#if defined(__CPLUSPLUS__) || defined(__cplusplus)
+#if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
 ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID boardID)
 #else
 ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID boardID)
@@ -372,7 +372,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 		break;
 	}
 
-#if defined(__CPLUSPLUS__) || defined(__cplusplus)
+#if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
 	return (NTV2DeviceGetFrameBufferSize(boardID)* multiplier);
 #else
 	return (NTV2DeviceGetFrameBufferSize_Ex(boardID)* multiplier);
@@ -380,7 +380,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 }
 
 
-#if defined(__CPLUSPLUS__) || defined(__cplusplus)
+#if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
 ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID boardID)
 #else
 ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
@@ -536,7 +536,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 		divisor *= 2;
 	}
 
-#if defined(__CPLUSPLUS__) || defined(__cplusplus)
+#if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
 	return (NTV2DeviceGetNumberFrameBuffers(boardID)/divisor);
 #else
 	return (NTV2DeviceGetNumberFrameBuffers_Ex(boardID)/divisor);
@@ -544,13 +544,13 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 }
 
 
-#if defined(__CPLUSPLUS__) || defined(__cplusplus)
+#if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
 ULWord NTV2DeviceGetAudioFrameBuffer(NTV2DeviceID boardID)
 #else
 ULWord NTV2DeviceGetAudioFrameBuffer_Ex(NTV2DeviceID boardID)
 #endif
 {
-#if defined(__CPLUSPLUS__) || defined(__cplusplus)
+#if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
 
 	return (NTV2DeviceGetNumberFrameBuffers(boardID) - NTV2DeviceGetNumAudioSystems(boardID));		// audio base is 2 MB buffer at top - 2MB (16 - 1 for 2 MB buffers)
 
@@ -568,7 +568,7 @@ ULWord NTV2DeviceGetAudioFrameBuffer2(NTV2DeviceID boardID)
 ULWord NTV2DeviceGetAudioFrameBuffer2_Ex(NTV2DeviceID boardID)
 #endif
 {
-#if defined(__CPLUSPLUS__) || defined(__cplusplus)
+#if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
 	return (NTV2DeviceGetNumberFrameBuffers(boardID)-2);
 
 #else		// #if defined(__CPLUSPLUS__) || defined(__cplusplus)
