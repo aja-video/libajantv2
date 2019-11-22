@@ -2301,6 +2301,7 @@ NTV2BufferLock::NTV2BufferLock()
 	:	mHeader	(NTV2_TYPE_AJABUFFERLOCK, sizeof(NTV2BufferLock))
 {
 	NTV2_ASSERT_STRUCT_VALID;
+    SetFlags(0);
 }
 
 NTV2BufferLock::NTV2BufferLock (const NTV2_POINTER & inBuffer, const ULWord inFlags)
