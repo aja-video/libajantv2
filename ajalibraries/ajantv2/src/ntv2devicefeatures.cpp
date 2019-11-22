@@ -562,7 +562,7 @@ ULWord NTV2DeviceGetAudioFrameBuffer_Ex(NTV2DeviceID boardID)
 }
 
 
-#if defined(__CPLUSPLUS__) || defined(__cplusplus)
+#if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
 ULWord NTV2DeviceGetAudioFrameBuffer2(NTV2DeviceID boardID)
 #else
 ULWord NTV2DeviceGetAudioFrameBuffer2_Ex(NTV2DeviceID boardID)
