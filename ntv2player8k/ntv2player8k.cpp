@@ -704,8 +704,8 @@ void NTV2Player8K::SetUpTestPatternVideoBuffers (void)
 													  (AJAMemory::AllocateAligned (mVideoBufferSize, BUFFER_ALIGNMENT));
 
 		// Page lock the memory
-		if (mTestPatternVideoBuffers [testPatternIndex] != NULL)
-			mDevice.DMABufferLock((ULWord*)mTestPatternVideoBuffers [testPatternIndex], mVideoBufferSize);
+        if (mTestPatternVideoBuffers [testPatternIndex] != NULL)
+            mDevice.DMABufferLock((ULWord*)mTestPatternVideoBuffers [testPatternIndex], mVideoBufferSize);
 
 		//	Use the test pattern generator to fill an NTV2TestPatternBuffer...
 		NTV2TestPatternBuffer	testPatternBuffer;
