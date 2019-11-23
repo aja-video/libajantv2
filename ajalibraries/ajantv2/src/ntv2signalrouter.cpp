@@ -1002,14 +1002,14 @@ bool CNTV2SignalRouter::HasInput (const NTV2InputCrosspointID inSignalInput) con
 
 NTV2OutputCrosspointID CNTV2SignalRouter::GetConnectedOutput (const NTV2InputCrosspointID inSignalInput) const
 {
-	NTV2ActualConnectionsConstIter it(mConnections.find(inSignalInput));
+	NTV2XptConnectionsConstIter it(mConnections.find(inSignalInput));
 	return it != mConnections.end()  ?  it->second  :  NTV2_XptBlack;
 }
 
 
 bool CNTV2SignalRouter::HasConnection (const NTV2InputCrosspointID inSignalInput, const NTV2OutputCrosspointID inSignalOutput) const
 {
-    NTV2ActualConnectionsConstIter	iter (mConnections.find (inSignalInput));
+    NTV2XptConnectionsConstIter	iter (mConnections.find (inSignalInput));
     if (iter == mConnections.end())
         return false;
     return iter->second == inSignalOutput;
@@ -1018,7 +1018,7 @@ bool CNTV2SignalRouter::HasConnection (const NTV2InputCrosspointID inSignalInput
 
 bool CNTV2SignalRouter::RemoveConnection (const NTV2InputCrosspointID inSignalInput, const NTV2OutputCrosspointID inSignalOutput)
 {
-    NTV2ActualConnectionsIter	iter (mConnections.find (inSignalInput));
+    NTV2XptConnectionsIter	iter (mConnections.find (inSignalInput));
     if (iter == mConnections.end())
         return false;	//	Not in map
     if (iter->second != inSignalOutput)
@@ -1034,13 +1034,13 @@ static const ULWord	sSignalRouterRegShifts[]	=	{	         0,	         8,	       
 
 bool CNTV2SignalRouter::ResetFromRegisters (const NTV2InputXptIDSet & inInputs, const NTV2RegisterReads & inRegReads)
 {
-    Reset();
-    for (NTV2InputXptIDSetConstIter it(inInputs.begin());  it != inInputs.end();  ++it)
-    {
-        uint32_t	regNum(0),	maskNdx(0);
-        CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo (*it, regNum, maskNdx);
-        NTV2RegisterReadsConstIter	iter	(::FindFirstMatchingRegisterNumber(regNum, inRegReads));
-        if(iter == inRegReads.end())
+	Reset();
+	for (NTV2InputXptIDSetConstIter it(inInputs.begin());  it != inInputs.end();  ++it)
+	{
+		uint32_t	regNum(0),	maskNdx(0);
+		CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo (*it, regNum, maskNdx);
+		NTV2RegisterReadsConstIter	iter	(::FindFirstMatchingRegisterNumber(regNum, inRegReads));
+		if (iter == inRegReads.end())
 			continue;
 
 		NTV2_ASSERT(iter->registerNumber == regNum);
@@ -1051,8 +1051,8 @@ bool CNTV2SignalRouter::ResetFromRegisters (const NTV2InputXptIDSet & inInputs, 
 		const NTV2OutputCrosspointID	outputXpt	(NTV2OutputCrosspointID(regValue >> sSignalRouterRegShifts[maskNdx]));
 		if (outputXpt != NTV2_XptBlack)
 			mConnections.insert(NTV2SignalConnection (*it, outputXpt));
-    }	//	for each NTV2InputCrosspointID
-    return true;
+	}	//	for each NTV2InputCrosspointID
+	return true;
 }
 
 
@@ -1060,7 +1060,7 @@ bool CNTV2SignalRouter::GetRegisterWrites (NTV2RegisterWrites & outRegWrites) co
 {
     outRegWrites.clear ();
 
-    for (NTV2ActualConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
+    for (NTV2XptConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
     {
         const NTV2InputCrosspointID		inputXpt	(iter->first);
         const NTV2OutputCrosspointID	outputXpt	(iter->second);
@@ -1089,12 +1089,12 @@ bool CNTV2SignalRouter::GetRegisterWrites (NTV2RegisterWrites & outRegWrites) co
 }
 
 
-bool CNTV2SignalRouter::Compare (const CNTV2SignalRouter & inRHS, NTV2ActualConnections & outNew,
-								NTV2ActualConnections & outChanged, NTV2ActualConnections & outMissing) const
+bool CNTV2SignalRouter::Compare (const CNTV2SignalRouter & inRHS, NTV2XptConnections & outNew,
+								NTV2XptConnections & outChanged, NTV2XptConnections & outMissing) const
 {
 	outNew.clear();  outChanged.clear();  outMissing.clear();
 	//	Check that my connections are also in RHS:
-	for (NTV2ActualConnectionsConstIter it(mConnections.begin());  it != mConnections.end();  ++it)
+	for (NTV2XptConnectionsConstIter it(mConnections.begin());  it != mConnections.end();  ++it)
 	{
 		const NTV2SignalConnection &	connection (*it);
 		const NTV2InputXptID			inputXpt(connection.first);
@@ -1108,13 +1108,13 @@ bool CNTV2SignalRouter::Compare (const CNTV2SignalRouter & inRHS, NTV2ActualConn
 	}
 
 	//	Check that RHS' connections are also in me...
-	const NTV2ActualConnections	connectionsRHS(inRHS.GetConnections());
-	for (NTV2ActualConnectionsConstIter it(connectionsRHS.begin());  it != connectionsRHS.end();  ++it)
+	const NTV2XptConnections	connectionsRHS(inRHS.GetConnections());
+	for (NTV2XptConnectionsConstIter it(connectionsRHS.begin());  it != connectionsRHS.end();  ++it)
 	{
 		const NTV2SignalConnection &	connectionRHS (*it);
 		const NTV2InputXptID			inputXpt(connectionRHS.first);
 		const NTV2OutputXptID			outputXpt(connectionRHS.second);
-		NTV2ActualConnectionsConstIter	pFind (mConnections.find(inputXpt));
+		NTV2XptConnectionsConstIter		pFind (mConnections.find(inputXpt));
 		if (pFind == mConnections.end())		//	If not found in me...
 			outMissing.insert(connectionRHS);	//	...in RHS, but missing in me
 		else if (pFind->second != outputXpt)	//	If output xpt differs...
@@ -1130,13 +1130,13 @@ ostream & CNTV2SignalRouter::Print (ostream & inOutStream, const bool inForRetai
     if (inForRetailDisplay)
     {
         inOutStream << mConnections.size() << " routing entries:" << endl;
-        for (NTV2ActualConnectionsConstIter iter (mConnections.begin());  iter != mConnections.end();  ++iter)
+        for (NTV2XptConnectionsConstIter iter (mConnections.begin());  iter != mConnections.end();  ++iter)
             inOutStream << ::NTV2InputCrosspointIDToString(iter->first, inForRetailDisplay)
 						<< " <== " << ::NTV2OutputCrosspointIDToString(iter->second, inForRetailDisplay) << endl;
     }
     else
     {
-        for (NTV2ActualConnectionsConstIter iter (mConnections.begin());  iter != mConnections.end();  ++iter)
+        for (NTV2XptConnectionsConstIter iter (mConnections.begin());  iter != mConnections.end();  ++iter)
             inOutStream << CNTV2SignalRouter::NTV2InputCrosspointIDToString(iter->first)
             			<< " <== " << CNTV2SignalRouter::NTV2OutputCrosspointIDToString(iter->second) << endl;
     }
@@ -1172,7 +1172,7 @@ bool CNTV2SignalRouter::PrintCode (string & outCode, const PrintCodeConfig & inC
 	const string	variableNameText	(inConfig.mPreVariableText + varName + inConfig.mPostVariableText);
 	const string	funcName			(inConfig.mUseRouter ? "AddConnection" : "Connect");
 	const string	functionCallText	(inConfig.mPreFunctionText + funcName + inConfig.mPostFunctionText);
-	for (NTV2ActualConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
+	for (NTV2XptConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
 	{
 		const string	inXptStr	(inConfig.mPreXptText + ::NTV2InputCrosspointIDToString(iter->first, false) + inConfig.mPostXptText);
 		const string	outXptStr	(inConfig.mPreXptText + ::NTV2OutputCrosspointIDToString(iter->second, false) + inConfig.mPostXptText);
@@ -1181,8 +1181,8 @@ bool CNTV2SignalRouter::PrintCode (string & outCode, const PrintCodeConfig & inC
 
 		if (inConfig.mShowComments)
 		{
-			NTV2ActualConnectionsConstIter pNew(inConfig.mNew.find(iter->first));
-			NTV2ActualConnectionsConstIter pChanged(inConfig.mChanged.find(iter->first));
+			NTV2XptConnectionsConstIter pNew(inConfig.mNew.find(iter->first));
+			NTV2XptConnectionsConstIter pChanged(inConfig.mChanged.find(iter->first));
 			if (pNew != inConfig.mNew.end()  &&  pNew->second == iter->second)
 				oss << inConfig.mFieldBreakText << inConfig.mPreCommentText << "New" << inConfig.mPostCommentText;
 			else if (pChanged != inConfig.mChanged.end()  &&  pChanged->second != iter->second)
@@ -1193,7 +1193,7 @@ bool CNTV2SignalRouter::PrintCode (string & outCode, const PrintCodeConfig & inC
 	}	//	for each connection
 
 	if (inConfig.mShowComments)
-		for (NTV2ActualConnectionsConstIter pGone(inConfig.mMissing.begin());  pGone != inConfig.mMissing.end();  ++pGone)
+		for (NTV2XptConnectionsConstIter pGone(inConfig.mMissing.begin());  pGone != inConfig.mMissing.end();  ++pGone)
 			if (mConnections.find(pGone->first) == mConnections.end())
 			{
 				if (inConfig.mUseRouter)
@@ -1404,16 +1404,19 @@ bool CNTV2SignalRouter::GetAllWidgetInputs (const NTV2DeviceID inDeviceID, NTV2I
 }
 
 
-bool CNTV2SignalRouter::GetAllRoutingRegInfos (const NTV2InputCrosspointIDSet & inInputs, NTV2RegisterWrites & outRegInfos)		//	STATIC
+bool CNTV2SignalRouter::GetAllRoutingRegInfos (const NTV2InputCrosspointIDSet & inInputs, NTV2RegisterWrites & outRegInfos) 	//	STATIC
 {
     outRegInfos.clear();
 
-    set<uint32_t>	regNums;
-    uint32_t			regNum(0),	maskNdx(0);
-    for (NTV2InputXptIDSetConstIter it(inInputs.begin());  it != inInputs.end();  ++it)
-        if (CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo (*it, regNum, maskNdx))
-            if (regNums.find(regNum) == regNums.end())
-                outRegInfos.push_back(NTV2RegInfo(regNum));
+	set<uint32_t>	regNums;
+	uint32_t		regNum(0),	maskNdx(0);
+	for (NTV2InputXptIDSetConstIter it(inInputs.begin());  it != inInputs.end();  ++it)
+		if (CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo (*it, regNum, maskNdx))
+			if (regNums.find(regNum) == regNums.end())
+				regNums.insert(regNum);
+	for (set<uint32_t>::const_iterator iter(regNums.begin());  iter != regNums.end();  ++iter)
+		outRegInfos.push_back(NTV2RegInfo(*iter));
+
     return true;
 }
 
@@ -1423,6 +1426,75 @@ bool CNTV2SignalRouter::GetWidgetOutputs (const NTV2WidgetID inWidgetID, NTV2Out
 	outOutputs.clear();
 	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
 	return pExpert ? pExpert->GetWidgetOutputs(inWidgetID, outOutputs) : false;
+}
+
+
+bool CNTV2SignalRouter::GetConnectionsFromRegs (const NTV2InputXptIDSet & inInputXptIDs, const NTV2RegisterReads & inRegValues, NTV2XptConnections & outConnections)
+{
+	outConnections.clear();
+	for (NTV2InputXptIDSetConstIter it(inInputXptIDs.begin());  it != inInputXptIDs.end();  ++it)
+	{
+		uint32_t	regNum(0),	maskNdx(0);
+		CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo (*it, regNum, maskNdx);
+		NTV2RegisterReadsConstIter	iter	(::FindFirstMatchingRegisterNumber(regNum, inRegValues));
+		if (iter == inRegValues.end())
+			continue;
+
+		if (iter->registerNumber != regNum)
+			return false;	//	Register numbers must match here
+		if (iter->registerMask != 0xFFFFFFFF)
+			return false;	//	Mask must be 0xFFFFFFFF
+		if (iter->registerShift)
+			return false;	//	Shift must be zero
+		NTV2_ASSERT(maskNdx < 4);
+		const uint32_t	regValue	(iter->registerValue & sSignalRouterRegMasks[maskNdx]);
+		const NTV2OutputCrosspointID	outputXpt	(NTV2OutputCrosspointID(regValue >> sSignalRouterRegShifts[maskNdx]));
+		if (outputXpt != NTV2_XptBlack)
+			outConnections.insert(NTV2SignalConnection (*it, outputXpt));
+	}	//	for each NTV2InputCrosspointID
+	return true;
+}
+
+
+bool CNTV2SignalRouter::CompareConnections (const NTV2XptConnections & inLHS,
+											const NTV2XptConnections & inRHS,
+											NTV2XptConnections & outNew,
+											NTV2XptConnections & outMissing)
+{
+	outNew.clear();  outMissing.clear();
+	//	Check that LHS connections are also in RHS:
+	for (NTV2XptConnectionsConstIter it(inLHS.begin());  it != inLHS.end();  ++it)
+	{
+		const NTV2SignalConnection &	LHSconnection(*it);
+		const NTV2InputXptID			inputXpt(LHSconnection.first);
+		const NTV2OutputXptID			outputXpt(LHSconnection.second);
+		NTV2XptConnectionsConstIter		RHSit(inRHS.find(inputXpt));
+		if (RHSit == inRHS.end())
+			outMissing.insert(LHSconnection);	//	LHSConnection's inputXpt missing from RHS
+		else if (RHSit->second == outputXpt)
+			;	//	LHS's input xpt connected to same output xpt as RHS
+		else
+		{
+			outMissing.insert(LHSconnection);	//	LHS connection missing from RHS
+			outNew.insert(*RHSit);				//	RHS connection is new
+		}
+	}
+
+	//	Check that RHS connections are also in LHS...
+	for (NTV2XptConnectionsConstIter it(inRHS.begin());  it != inRHS.end();  ++it)
+	{
+		const NTV2SignalConnection &	connectionRHS (*it);
+		const NTV2InputXptID			inputXpt(connectionRHS.first);
+		const NTV2OutputXptID			outputXpt(connectionRHS.second);
+		NTV2XptConnectionsConstIter		LHSit(inLHS.find(inputXpt));
+		if (LHSit == inLHS.end())				//	If RHS input xpt not in LHS...
+			outNew.insert(connectionRHS);		//	...then RHS connection is new
+		else if (LHSit->second != outputXpt)	//	Else if output xpt changed...
+			//	Should've already been handled in previous for loop
+			NTV2_ASSERT(outMissing.find(LHSit->first) != outMissing.end()  &&  outNew.find(LHSit->first) != outNew.end());
+	}
+
+	return outNew.empty() && outMissing.empty();	//	Return true if identical
 }
 
 
@@ -2419,9 +2491,9 @@ ostream & operator << (ostream & inOutStream, const NTV2WidgetIDSet & inObj)
 	return inOutStream;
 }
 
-ostream & operator << (ostream & inOutStream, const NTV2ActualConnections & inObj)
+ostream & operator << (ostream & inOutStream, const NTV2XptConnections & inObj)
 {
-	for (NTV2ActualConnectionsConstIter it(inObj.begin());  it != inObj.end();  )
+	for (NTV2XptConnectionsConstIter it(inObj.begin());  it != inObj.end();  )
 	{
 		inOutStream << ::NTV2InputCrosspointIDToString(it->first) << "-" << ::NTV2OutputCrosspointIDToString(it->second);
 		if (++it != inObj.end())
