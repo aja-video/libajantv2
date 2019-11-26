@@ -2332,7 +2332,7 @@ NTV2Standard Get4xSizedStandard(NTV2Standard standard, bool bIs4k)
 }
 
 
-NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat, const bool inForHardware)
+NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat)
 {
 	NTV2Standard standard = NTV2_STANDARD_INVALID;
 	
@@ -2381,7 +2381,7 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 	case NTV2_FORMAT_1080psf_2K_2398:
 	case NTV2_FORMAT_1080psf_2K_2400:
 	case NTV2_FORMAT_1080psf_2K_2500:
-		standard = inForHardware ? NTV2_STANDARD_2Kx1080i : NTV2_STANDARD_2Kx1080p;
+		standard = NTV2_STANDARD_2Kx1080p;
 		break;
 	case NTV2_FORMAT_720p_2398:
 	case NTV2_FORMAT_720p_5000:
@@ -2429,7 +2429,7 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 	case NTV2_FORMAT_3840x2160psf_2500:
 	case NTV2_FORMAT_3840x2160psf_2997:
 	case NTV2_FORMAT_3840x2160psf_3000:
-		standard = inForHardware ? NTV2_STANDARD_3840i : NTV2_STANDARD_3840x2160p;
+		standard = NTV2_STANDARD_3840x2160p;
 		break;		
 	case NTV2_FORMAT_4x1920x1080p_5000:
 	case NTV2_FORMAT_4x1920x1080p_5994:
@@ -2465,7 +2465,7 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 	case NTV2_FORMAT_4096x2160psf_2500:
 	case NTV2_FORMAT_4096x2160psf_2997:
 	case NTV2_FORMAT_4096x2160psf_3000:
-		standard = inForHardware ? NTV2_STANDARD_4096i : NTV2_STANDARD_4096x2160p;
+		standard = NTV2_STANDARD_4096x2160p;
 		break;
 	case NTV2_FORMAT_4x2048x1080p_5000:
 	case NTV2_FORMAT_4x2048x1080p_5994:
