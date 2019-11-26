@@ -279,7 +279,19 @@ bool CNTV2Card::SetVideoFormat (NTV2VideoFormat value, bool ajaRetail, bool keep
 	if (NTV2_IS_TSI_FORMAT(value) && !NTV2DeviceCanDoVideoFormat(GetDeviceID(), value))
 		return false;
 
-    NTV2Standard inStandard = GetNTV2StandardFromVideoFormat(value, true);;
+    NTV2Standard inStandard = GetNTV2StandardFromVideoFormat(value);
+	if(inStandard == NTV2_STANDARD_2Kx1080p && NTV2_IS_PSF_VIDEO_FORMAT(value))
+	{
+		inStandard = NTV2_STANDARD_2Kx1080i;
+	}
+	else if(inStandard == NTV2_STANDARD_3840x2160p && NTV2_IS_PSF_VIDEO_FORMAT(value))
+	{
+		inStandard = NTV2_STANDARD_3840i;
+	}
+	else if(inStandard == NTV2_STANDARD_4096x2160p && NTV2_IS_PSF_VIDEO_FORMAT(value))
+	{
+		inStandard = NTV2_STANDARD_4096i;
+	}
     NTV2FrameRate inFrameRate = GetNTV2FrameRateFromVideoFormat(value);
     NTV2FrameGeometry inFrameGeometry = GetNTV2FrameGeometryFromVideoFormat(value);
 	bool squares;

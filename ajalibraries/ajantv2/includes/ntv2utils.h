@@ -302,7 +302,7 @@ AJAExport NTV2VideoFormat GetSupportedNTV2VideoFormatFromInputVideoFormat (const
 	@param[in]	inVideoFormat	Specifies the ::NTV2VideoFormat of interest.
 	@see		::GetNTV2FrameGeometryFromVideoFormat, ::GetGeometryFromStandard
 **/
-AJAExport NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat, const bool inForhardware = false);
+AJAExport NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat);
 
 /**
 	@return		The ::NTV2FrameGeometry that corresponds to the given ::NTV2VideoFormat.
