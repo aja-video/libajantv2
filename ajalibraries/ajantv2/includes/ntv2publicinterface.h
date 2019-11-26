@@ -5339,17 +5339,20 @@ typedef struct
 	char excludeString[KONA_DEBUGFILTER_STRINGLENGTH];
 } KonaDebugFilterStringInfo;
 
-typedef struct
-{
-	NTV2RelayState	manualControl12;
-	NTV2RelayState	manualControl34;
-	NTV2RelayState	relayPosition12;
-	NTV2RelayState	relayPosition34;
-	NTV2RelayState	watchdogStatus;
-	bool			watchdogEnable12;
-	bool			watchdogEnable34;
-	ULWord			watchdogTimeout;
-} NTV2SDIWatchdogState;
+
+#if !defined(NTV2_DEPRECATE_15_6)
+	typedef struct
+	{
+		NTV2RelayState	manualControl12;
+		NTV2RelayState	manualControl34;
+		NTV2RelayState	relayPosition12;
+		NTV2RelayState	relayPosition34;
+		NTV2RelayState	watchdogStatus;
+		bool			watchdogEnable12;
+		bool			watchdogEnable34;
+		ULWord			watchdogTimeout;
+	} NTV2SDIWatchdogState;
+#endif	//	!defined(NTV2_DEPRECATE_15_6)
 
 typedef enum
 {
@@ -5835,7 +5838,7 @@ typedef enum
 														ULWord	num(inBytesPerElement),  lengthBits(0);
 														while (num >>= 1)
 															lengthBits++;
-														mFlags = (mFlags & ~3) | (lengthBits & 3);
+														mFlags = (mFlags & ~3UL) | (lengthBits & 3UL);
 													}
 												return *this;
 											}

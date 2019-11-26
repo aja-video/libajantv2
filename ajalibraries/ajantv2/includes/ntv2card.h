@@ -5373,165 +5373,115 @@ public:
 	**/
 	///@{
 	/**
-		@brief	Passes back an enum specifying if the watchdog timer would put
-				the SDI relays into bypass or send the signals through the device.
-		@return	True if successful; otherwise false.
-		@param[out]		outValue	Receives the current state of the watchdog
-									timer, either NTV2_DEVICE_BYPASSED or NTV2_THROUGH_DEVICE.
-		@note	The watchdog timer will not change the state of the relays
-				if they are under manual control.
+		@brief		Answers if the bypass relays between connectors 1/2 or 3/4 are currently
+					in bypass or routing the signals through the device.
+		@return		True if successful; otherwise false.
+		@param[out]	outValue	Receives the current state of the relays (::NTV2_DEVICE_BYPASSED
+								or ::NTV2_THROUGH_DEVICE).
+		@param[in]	inIndex0	Specifies the relay/connector pair of interest.
+								Use 0 for SDI 1&2, or 1 for SDI 3&4.
+	**/
+	AJA_VIRTUAL bool	GetSDIRelayPosition (NTV2RelayState & outValue, const UWord inIndex0);
+
+	/**
+		@brief		Answers if the bypass relays between connectors 1 and 2 would be in
+					bypass or would route signals through the device, if under manual control.
+		@param[out]	outValue	Receives the relay state (::NTV2_DEVICE_BYPASSED or ::NTV2_THROUGH_DEVICE).
+		@param[in]	inIndex0	Specifies the relay/connector pair of interest.
+								Use 0 for SDI 1&2, or 1 for SDI 3&4.
+		@return		True if successful; otherwise false.
+		@note		Manual control will not change the state of the relays if
+					the watchdog timer for the relays is enabled.
+	**/
+	AJA_VIRTUAL bool	GetSDIRelayManualControl (NTV2RelayState & outValue, const UWord inIndex0);
+
+	/**
+		@brief		Sets the state of the given connector pair relays to ::NTV2_DEVICE_BYPASSED
+					(or ::NTV2_THROUGH_DEVICE if under manual control).
+		@param[in]	inValue		Specifies the desired relay state.
+		@param[in]	inIndex0	Specifies the relay/connector pair of interest.
+								Use 0 for SDI 1&2, or 1 for SDI 3&4.
+		@return		True if successful; otherwise false.
+		@note		Manual control won't change the state of the relays if the watchdog timer for the relays
+					is enabled. Because this call modifies the control register, it sends a "kick" sequence,
+					which has the side effect of restarting the timeout counter.
+	**/
+	AJA_VIRTUAL bool	SetSDIRelayManualControl (const NTV2RelayState inValue, const UWord inIndex0);
+
+	/**
+		@brief		Answers true if the given connector pair relays are under watchdog timer control,
+					or false if they're under manual control.
+		@param[out]	outIsEnabled	Receives 'true' if the watchdog timer is controlling the relays;
+									receives 'false' if the relays are under manual control.
+		@param[in]	inIndex0	Specifies the relay/connector pair of interest.
+								Use 0 for SDI 1&2, or 1 for SDI 3&4.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetSDIWatchdogEnable (bool & outIsEnabled, const UWord inIndex0);
+
+	/**
+		@brief		Sets the connector pair relays to be under watchdog timer control or manual control.
+		@param[in] 	inEnable	Specify true to have the watchdog timer control the relays.
+								Specify false to manually control the relays.
+		@param[in]	inIndex0	Specifies the relay/connector pair of interest.
+								Use 0 for SDI 1&2, or 1 for SDI 3&4.
+		@return		True if successful; otherwise false.
+		@note		Because this call modifies the control register, it sends a kick sequence,
+					which restarts the timeout counter.
+		@note		If the board's jumpers aren't set in the position to enable the watchdog timer,
+					this call will have no effect. See the <b>Hardware Jumpers</b> section in the
+					\ref corvid24 documentation for more information.
+	**/
+	AJA_VIRTUAL bool	SetSDIWatchdogEnable (const bool inEnable, const UWord inIndex0);
+
+	/**
+		@brief		Answers if the watchdog timer would put the SDI relays into ::NTV2_DEVICE_BYPASSED
+					or ::NTV2_THROUGH_DEVICE.
+		@param[out]	outValue	Receives the current state of the watchdog timer.
+		@return		True if successful; otherwise false.
+		@note		The watchdog timer won't change the state of the relays if they're under manual control.
 	**/
 	AJA_VIRTUAL bool	GetSDIWatchdogStatus (NTV2RelayState & outValue);
 
 	/**
-		@brief	Answers if the bypass relays between connectors 1 and 2 are currently
-				in bypass or routing the signals through the device.
-		@return	True if successful; otherwise false.
-		@param[out]		outValue	Receives the current state of the relays (NTV2_DEVICE_BYPASSED or NTV2_THROUGH_DEVICE).
-	**/
-	AJA_VIRTUAL bool	GetSDIRelayPosition12 (NTV2RelayState & outValue);
-
-	/**
-		@brief	Answers if the bypass relays between connectors 3 and 4 are currently
-				in bypass or routing the signals through the device.
-		@return	True if successful; otherwise false.
-		@param[out]		outValue	Receives the current state of the relays (NTV2_DEVICE_BYPASSED or NTV2_THROUGH_DEVICE).
-	**/
-	AJA_VIRTUAL bool	GetSDIRelayPosition34 (NTV2RelayState & outValue);
-
-	/**
-		@brief	Answers if the bypass relays between connectors 1 and 2 would be in
-				bypass or would route signals through the device, if under manual control.
-		@return	True if successful; otherwise false.
-		@param[out]		outValue	Receives the relay state (NTV2_DEVICE_BYPASSED or NTV2_THROUGH_DEVICE).
-		@note	Manual control will not change the state of the relays if
-				the watchdog timer for the relays is enabled.
-	**/
-	AJA_VIRTUAL bool	GetSDIRelayManualControl12 (NTV2RelayState & outValue);
-
-	/**
-		@brief	Sets the state of the relays between connectors 1 and 2 to
-				bypass or through the device, if under manual control.
-		@return	True if successful; otherwise false.
-		@param[in]	inValue		Specifies the desired relay state (NTV2_DEVICE_BYPASSED or NTV2_THROUGH_DEVICE).
-		@note	Manual control will not change the state of the relays if
-				the watchdog timer for the relays is enabled. Because this
-				call modifies the control register, it sends a kick
-				sequence, which has the side effect of restarting the
-				timeout counter.
-	**/
-	AJA_VIRTUAL bool	SetSDIRelayManualControl12 (const NTV2RelayState inValue);
-
-	/**
-		@brief	Answers if the bypass relays between connectors 3 and 4 would be
-				in bypass or would route through the device, if under manual control.
-		@return	True if successful; otherwise false.
-		@param[out]		outValue	Receives the relay state (NTV2_DEVICE_BYPASSED or NTV2_THROUGH_DEVICE).
-		@note	Manual control will not change the state of the relays if
-				the watchdog timer for the relays is enabled.
-	**/
-	AJA_VIRTUAL bool	GetSDIRelayManualControl34 (NTV2RelayState & outValue);
-
-	/**
-		@brief	Sets the state of the relays between connectors 3 and 4 to
-				bypass or through the device, if under manual control.
-		@return	True if successful; otherwise false.
-		@param[in]	inValue		Specifies the relay state (NTV2_DEVICE_BYPASSED or NTV2_THROUGH_DEVICE).
-		@note	Manual control will not change the state of the relays if
-				the watchdog timer for the relays is enabled. Because this
-				call modifies the control register, it sends a kick
-				sequence, which has the side effect of restarting the
-				timeout counter.
-	**/
-	AJA_VIRTUAL bool	SetSDIRelayManualControl34 (const NTV2RelayState inValue);
-
-	/**
-		@brief	Answers true if the relays between connectors 1 and 2 are under
-				watchdog timer control, or false if they are under manual control.
-		@return	True if successful; otherwise false.
-		@param[out]		outValue	Receives 'true' if the watchdog timer is in control
-				of the relays; otherwise false if the relays are under manual control.
-	**/
-	AJA_VIRTUAL bool	GetSDIWatchdogEnable12 (bool & outValue);
-
-	/**
-		@brief	Specifies if the relays between connectors 1 and 2 should be under
-				watchdog timer control or manual control.
-		@return	True if successful; otherwise false.
-		@param[in] 	inValue	Specify true if if the watchdog timer is to be in control
-							of the relays, or false if the relays are to be under
-							manual control.
-		@note	Because this call modifies the control register, it sends
-				a kick sequence, which has the side effect of restarting
-				the timeout counter.
-	**/
-	AJA_VIRTUAL bool	SetSDIWatchdogEnable12 (const bool inValue);
-
-	/**
-		@brief	Answers true if the relays between connectors 3 and 4 are under
-				watchdog timer control, or false if they are under manual control.
-		@return	True if successful; otherwise false.
-		@param[out]		outValue	Receives 'true' if the watchdog timer is in control
-									of the relays; otherwise 'false' if the relays are under
-									manual control.
-	**/
-	AJA_VIRTUAL bool	GetSDIWatchdogEnable34 (bool & outValue);
-
-	/**
-		@brief	Specifies if the relays between connectors 3 and 4 should be under
-				watchdog timer control or manual control.
-		@return	True if successful; otherwise false.
-		@param[in]	inValue		Specify true if if the watchdog timer is to be in control
-								of the relays, or false if the relays are to be under
-								manual control.
-		@note	Because this call modifies the control register, it sends
-				a kick sequence, which has the side effect of restarting
-				the timeout counter.
-	**/
-	AJA_VIRTUAL bool	SetSDIWatchdogEnable34 (const bool inValue);
-
-	/**
-		@brief	Answers with the amount of time that must elapse before the watchdog
-				timer times out.
-		@return	True if successful; otherwise false.
-	 	@param[out]		outValue	Receives the time value in units of 8 nanoseconds.
-		@note	The timeout interval begins or is reset when a kick
-				sequence is received.
+		@brief		Answers with the amount of time that must elapse before the watchdog timer times out.
+	 	@param[out]	outValue	Receives the time value in units of 8 nanoseconds.
+		@return		True if successful; otherwise false.
+		@note		The timeout interval begins or is reset when a kick sequence is received.
 	**/
 	AJA_VIRTUAL bool	GetSDIWatchdogTimeout (ULWord & outValue);
 
 	/**
-		@brief	Specifies the amount of time that must elapse before the watchdog
-				timer times out.
-		@return	True if successful; otherwise false.
+		@brief		Specifies the amount of time that must elapse before the watchdog timer times out.
 		@param[in]	inValue		Specifies the timeout interval in units of 8 nanoseconds.
-		@note	The timeout interval begins or is reset when a kick
-				sequence is received. This call resets the timeout counter
-				to zero, which will then start counting up until this value
-				is reached, triggering the watchdog timer if it's enabled.
+		@return		True if successful; otherwise false.
+		@note		The timeout interval begins or is reset when a kick sequence is received.
+					This call resets the timeout counter to zero, which will then start counting
+					until this value is reached, triggering the watchdog timer (if it's enabled).
 	**/
 	AJA_VIRTUAL bool	SetSDIWatchdogTimeout (const ULWord inValue);
 
 	/**
-		@brief	Restarts the countdown timer to prevent the watchdog timer from
-				timing out.
-		@return	True if successful; otherwise false.
+		@brief		Restarts the countdown timer to prevent the watchdog timer from timing out.
+		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	KickSDIWatchdog (void);
 
-	/**
-		@brief	Answers with the current state of all the control registers.
-		@return	True if successful; otherwise false.
-		@param[out]		outState	Receives the state of the control registers.
-	**/
-	AJA_VIRTUAL bool	GetSDIWatchdogState (NTV2SDIWatchdogState & outState);
-
-	/**
-		@brief	Sets all of the control registers to a given state.
-		@return	True if successful; otherwise false.
-		@param[in]	inState		Specifies the new control register state.
-	**/
-	AJA_VIRTUAL bool	SetSDIWatchdogState (const NTV2SDIWatchdogState & inState);
+	#if !defined(NTV2_DEPRECATE_15_6)
+		//	Old APIs
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetSDIRelayPosition12 (NTV2RelayState & outValue))			{return GetSDIRelayPosition(outValue,0);}		///< @deprecated	Use GetSDIRelayPosition instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetSDIRelayPosition34 (NTV2RelayState & outValue))			{return GetSDIRelayPosition(outValue,1);}		///< @deprecated	Use GetSDIRelayPosition instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetSDIRelayManualControl12 (NTV2RelayState & outValue))		{return GetSDIRelayManualControl(outValue,0);}	///< @deprecated	Use GetSDIRelayManualControl instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetSDIRelayManualControl34 (NTV2RelayState & outValue))		{return GetSDIRelayManualControl(outValue,1);}	///< @deprecated	Use GetSDIRelayManualControl instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetSDIWatchdogEnable12 (bool & outIsEnabled))				{return GetSDIWatchdogEnable(outIsEnabled,0);}	///< @deprecated	Use GetSDIWatchdogEnable instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetSDIWatchdogEnable34 (bool & outIsEnabled))				{return GetSDIWatchdogEnable(outIsEnabled,1);}	///< @deprecated	Use GetSDIWatchdogEnable instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetSDIRelayManualControl12 (const NTV2RelayState inValue))	{return SetSDIRelayManualControl(inValue,0);}	///< @deprecated	Use SetSDIRelayManualControl instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetSDIRelayManualControl34 (const NTV2RelayState inValue))	{return SetSDIRelayManualControl(inValue,1);}	///< @deprecated	Use SetSDIRelayManualControl instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetSDIWatchdogEnable12 (const bool inEnable))				{return SetSDIWatchdogEnable(inEnable,0);}		///< @deprecated	Use SetSDIWatchdogEnable instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetSDIWatchdogEnable34 (const bool inEnable))				{return SetSDIWatchdogEnable(inEnable,1);}		///< @deprecated	Use SetSDIWatchdogEnable instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetSDIWatchdogState (NTV2SDIWatchdogState & outState));		///< @deprecated	Use the other GetSDI... functions instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetSDIWatchdogState (const NTV2SDIWatchdogState & inState));	///< @deprecated	Use the other SetSDI... functions instead.
+	#endif	//	!defined(NTV2_DEPRECATE_15_6)
 	///@}
 
 	/**
@@ -6134,7 +6084,7 @@ public:
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							RenderTestPatternToBuffer (UWord testPatternNumber, ULWord * buffer));					///< Originally in CNTV2TestPattern.
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool							RenderTestPatternBuffer (NTV2Channel channel, UByte * buffer, NTV2VideoFormat videoFormat, NTV2FrameBufferFormat fbFormat, ULWord width, ULWord height, ULWord rowBytes));	///< @deprecated	Originally in CNTV2TestPattern.
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							DownloadTestPatternBuffer (ULWord * buffer, ULWord size = 0));							///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(ULWord						GetPatternBufferSize (ULWord * width = 0, ULWord * height = 0, ULWord * rowBytes = 0, ULWord * firstLine = 0));	///< Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(ULWord						GetPatternBufferSize (ULWord * width = AJA_NULL, ULWord * height = AJA_NULL, ULWord * rowBytes = AJA_NULL, ULWord * firstLine = AJA_NULL));	///< Originally in CNTV2TestPattern.
 	
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(int							MakeSineWaveVideo (double radians, bool bChroma));										///< Originally in CNTV2TestPattern.
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							ConvertLinePixelFormat (UWord * unPackedBuffer, ULWord * packedBuffer, int numPixels));	///< Originally in CNTV2TestPattern.
