@@ -145,8 +145,8 @@ AJAStatus NTV2Burn::Init (void)
 	{
 		//	Note that if the board's jumpers are not set in the position
 		//	to enable the watchdog timer, these calls will have no effect.
-		mDevice.SetSDIWatchdogEnable12(true);
-		mDevice.SetSDIWatchdogEnable34(true);
+		mDevice.SetSDIWatchdogEnable(true, 0);	//	SDI 1/2
+		mDevice.SetSDIWatchdogEnable(true, 1);	//	SDI 3/4
 
 		//	Set timeout delay to 2 seconds expressed in multiples of 8 ns
 		//	and take the relays out of bypass...
