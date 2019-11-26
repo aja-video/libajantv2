@@ -169,7 +169,7 @@ void check_fmts_are_std(std::vector<NTV2VideoFormat> formats, NTV2Standard expec
 
 	for (auto &fmt : formats)
 	{
-		NTV2Standard have = GetNTV2StandardFromVideoFormat(fmt, inHardware);
+		NTV2Standard have = GetNTV2StandardFromVideoFormat(fmt);
 		std::string msg = msgBase;
 		msg += NTV2StandardString(have);
 		msg += " = " + std::to_string(int(have));
