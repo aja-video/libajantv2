@@ -553,19 +553,19 @@ public:
 		@param[in]	pFrameBuffer		Specifies the non-NULL address of the host buffer that is to supply the frame data.
 										The memory it points to must be writeable.
 		@param[in]	inOffsetBytes		Specifies the initial device memory byte offset for the first bytes transferred.
-		@param[in]	inByteCount			Specifies the total number of bytes to transfer.
+		@param[in]	inBytesPerSegment	Specifies the number of bytes per segment to transfer.
 		@param[in]	inNumSegments		Specifies the number of segments to transfer.
 		@param[in]	inSegmentHostPitch	Specifies the number of bytes to increment the host memory pointer after each segment is transferred.
 		@param[in]	inSegmentCardPitch	Specifies the number of bytes to increment the on-device memory pointer after each segment is transferred.
 		@return		True if successful; otherwise false.
-		@note		The host buffer should be at least inByteCount + inOffsetBytes in size, or a host memory access violation may occur.
+		@note		The host buffer should be at least inBytesPerSegment*inNumSegments+inOffsetBytes in size, or a host memory access violation may occur.
 		@note		This function will block and not return until the transfer has finished or failed.
 		@see		CNTV2Card::DMAWriteSegments, CNTV2Card::DMARead, CNTV2Card::DMAReadFrame, \ref vidop-fbaccess
 	**/
 	AJA_VIRTUAL bool	DMAReadSegments (	const ULWord		inFrameNumber,
 											ULWord *			pFrameBuffer,
 											const ULWord		inOffsetBytes,
-											const ULWord		inByteCount,
+											const ULWord		inBytesPerSegment,
 											const ULWord		inNumSegments,
 											const ULWord		inSegmentHostPitch,
 											const ULWord		inSegmentCardPitch);
@@ -576,19 +576,19 @@ public:
 		@param[in]	pFrameBuffer		Specifies the non-NULL address of the host buffer that is to supply the frame data.
 										The memory it points to must be readable.
 		@param[in]	inOffsetBytes		Specifies the initial device memory byte offset for the first bytes transferred.
-		@param[in]	inByteCount			Specifies the total number of bytes to transfer.
+		@param[in]	inBytesPerSegment	Specifies the number of bytes per segment to transfer.
 		@param[in]	inNumSegments		Specifies the number of segments to transfer.
 		@param[in]	inSegmentHostPitch	Specifies the number of bytes to increment the host memory pointer after each segment is transferred.
 		@param[in]	inSegmentCardPitch	Specifies the number of bytes to increment the on-device memory pointer after each segment is transferred.
 		@return		True if successful; otherwise false.
-		@note		The host buffer should be at least inByteCount + inOffsetBytes in size, or a host memory access violation may occur.
+		@note		The host buffer should be at least inBytesPerSegment*inNumSegments+inOffsetBytes in size, or a host memory access violation may occur.
 		@note		This function will block and not return until the transfer has finished or failed.
 		@see		CNTV2Card::DMAReadSegments, CNTV2Card::DMAWrite, CNTV2Card::DMAWriteFrame, \ref vidop-fbaccess
 	**/
 	AJA_VIRTUAL bool	DMAWriteSegments (	const ULWord		inFrameNumber,
 											const ULWord *		pFrameBuffer,
 											const ULWord		inOffsetBytes,
-											const ULWord		inByteCount,
+											const ULWord		inBytesPerSegment,
 											const ULWord		inNumSegments,
 											const ULWord		inSegmentHostPitch,
 											const ULWord		inSegmentCardPitch);
