@@ -1311,7 +1311,7 @@ class AJAExport AJARTPAncPayloadHeader
 		/**
 			@deprecated	To get the full RTP packet length, add GetPayloadLength and GetHeaderByteCount.
 		**/
-		virtual inline uint16_t	GetPacketLength (void) const		{return GetPayloadLength()+GetHeaderByteCount();}
+		virtual inline uint16_t	GetPacketLength (void) const		{return GetPayloadLength()+uint16_t(GetHeaderByteCount());}
 	#endif	//	!defined(NTV2_DEPRECATE_15_5)
 
 	protected:
