@@ -672,7 +672,7 @@ The Routing Diagram is where routing changes are performed interactively. This i
 There are two principal types of objects in the diagram:
 
 -	<b>Widgets</b> — These represent the functional widgets implemented in the device firmware, such as FrameStores, SDI Inputs, etc.
-	-	<b>Widget</b>s contain one or more <b>Sockets<b> that represent each of the <b>Widget</b>’s crosspoint connections.
+	-	<b>Widget</b>s contain one or more <b>Sockets</b> that represent each of the <b>Widget</b>’s crosspoint connections.
 	-	<b>Sockets</b> are little square boxes inside a <b>Widget</b>.
 		They cannot move independently — they always move with their owning <b>Widget</b>.
 		There are two kinds of <b>Sockets</b>:
