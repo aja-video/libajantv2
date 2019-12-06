@@ -645,21 +645,70 @@ function calls that will produce the register values seen in the display.
 <hr size="50px">
 @subsection	inspectorroute		Routing Inspector
 
+@image	html	watcher-inspector-routing.png
+
 The <b>Routing</b> inspector monitors widget signal crosspoint routing.
 
-@bug	The routing diagram of the classic \ref usingcables utility needs to be ported to this inspector.
-		When completed, it will replace \ref usingcables.
+@note	This inspector replaces the original \ref usingcables utility.
 
 The inspector has the following individual panels:
 	-	<b>Routing Diagram</b> — Shows the device widgets and signal connections between them.
-	-	<b>Code</b> — A text-only representation of the device’s current routing connections. It can display the routing in three different ways:
-		-	<b>Symbolic</b>	-- Widget connections are shown mnemonically.
-		-	<b>C++ (CNTV2Card calls)</b> — C++ code that will produce the current routing configuration.
-		-	<b>C++ (CNTV2Card calls)</b> — C++ code that will produce the current routing configuration using CNTV2Card::Connect calls.
-		-	<b>C++ (CNTV2SignalRouter calls)</b> — C++ code that will produce the current routing configuration using CNTV2SignalRouter::AddConnection calls.
-	-	<b>Routing Registers</b> — A panel containing a list of the device’s routing registers. The register values can be changed.
- 
+	-	<b>Code</b> — A text-only representation of the device’s current routing connections.
+		It can display the routing in three different ways:
+		-	<b>C++ Code</b> — C++ code that will produce the current routing configuration
+			using CNTV2Card::Connect calls. This is the default.
+		-	<b>Shorthand</b> — Widget connections are shown mnemonically.
+	-	<b>Routing Registers</b> — A panel containing a list of the device’s routing registers.
+		The register values are editable, and can be changed.
+
+This inspector supports these two Choose <b>Print…</b> from the <b>File</b> menu to print a two-page report of the current routing configuration.
+
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the displayed routing information to the Clipboard.
+
+<b>Routing Diagram Operation</b>
+
+The Routing Diagram is where routing changes are performed interactively. This is the panel in which most tasks are performed.
+
+There are two principal types of objects in the diagram:
+
+-	<b>Widgets</b> — These represent the functional widgets implemented in the device firmware, such as FrameStores, SDI Inputs, etc.
+	-	<b>Widget</b>s contain one or more <b>Sockets<b> that represent each of the <b>Widget</b>’s crosspoint connections.
+	-	<b>Sockets</b> are little square boxes inside a <b>Widget</b>.
+		They cannot move independently — they always move with their owning <b>Widget</b>.
+		There are two kinds of <b>Sockets</b>:
+		-	<b>Input</b> — This is a signal “sink” or “destination” crosspoint.
+			-	<b>Input</b>s are always on the widget’s left side.
+			-	<b>Input</b>s can only be connected to one <b>Output<b> crosspoint.
+			-	Depending on the parent <b>Widget</b>, <b>Input Socket</b>s sometimes can accept both RGB or YCbCr signals, or only RGB or YCbCr.
+			-	Depending on the parent <b>Widget</b> and how it’s configured, an <b>Input</b> can be disabled, in which case it appears dimmed.
+				Signals arriving at a disabled input are ignored by the Widget.
+		-	<b>Output</b> — This is a signal “source” crosspoint.
+			-	<b>Output</b>s are always on the widget’s right side.
+			-	<b>Output</b>s can be connected to any number of <b>Input<b> crosspoints.
+			-	<b>Output</b>s have a fixed signal type that they emit (if enabled): YCbCr or RGB.
+			-	Depending on the parent <b>Widget</b> and how it’s configured, an <b>Output</b> can be disabled, in which case it appears dimmed.
+	-	<b>Socket</b>s can be logically <b>enabled</b> or <b>disabled</b>, usually determined by the parent <b>Widget</b>’s configuration.
+-	<b>Cables/Wires</b> — These represent the currently existing widget crosspoint connections,
+	as read from the device’s “crosspoint select” registers.
+
+Hovering the mouse pointer over any of these aforementioned objects will display a “Tool Tip” that gives detailed information about the object.
+
+Right-clicking on any object will pop up a context menu with command functions that are relevant for the object and its current state.
+
+Right-clicking in the diagram’s gray “desktop” pops up a context menu with command functions that affect all channels of the device.
+
+-	<b>Video Format</b> — Pops up a sub-menu of video formats supported by the device.
+	Choosing one of these formats globally changes the video format for all channels on the device.
+	Note that if the device is multi-format capable, choosing a format here will place the device into single-format
+	(“uniformat”) mode before globally changing the video format.
+-	<b>4K Mode</b> — Available only if the device supports 4K/UHD video. If clicked, pops up a sub-menu of 4K modes supported by the device:
+	-	<b>Tsi</b> — Selects two-sample-interleave (per SMPTE 425-5).
+	-	<b>Squares</b> — Selects the classic behavior.
+-	<b>Frame Buffer Format</b> — Pops up a sub-menu of frame buffer pixel formats supported by the device.
+	Choosing one of the formats globally changes the video format for all channels on the device.
+
+@note	Changing video or pixel formats by right-clicking in a <b>Frame Store</b> widget (see below) only changes that
+		particular channel’s video or pixel format (except for “quad” formats that require ganging channels 1-4 or 5-8).
 
 
 
@@ -732,7 +781,7 @@ context in order to properly render captions. The tool window is dominated by tw
 			-	The last pair in the FIFO enters the decoder first;
 			-	The first pair in the FIFO enters the decoder last.
 
-A <b>Channel</b> selector menu is provided to change the channel being decoded and displayed:
+A <b>Channel</b> selector menu is provided to change the caption channel being decoded and displayed:
 	-	CC1 — the normal, primary (English language) closed-caption channel sourced from Field 1.
 	-	CC2 — the secondary (often Spanish language) closed-caption channel, also sourced from Field 1.
 	-	CC3, CC4 — additional closed-caption channels, sourced from Field 2.
@@ -746,7 +795,7 @@ Add or remove a space to/from it to force the decoder to re-render what’s in t
 To render captions in real-time, the decoder’s byte-pair FIFO requires a steady stream of caption
 byte-pairs transmitted by the \ref inspectoranc :
 	-	<b>“Analog” Captioning</b> — All of the following are true:
-		-	The monitored FrameStore/Channel is receiving or transmitting SD video;
+		-	The monitored FrameStore/Channel is receiving or transmitting SD (U.S. NTSC 525i) video;
 		-	The monitored FrameStore/Channel has a 'v210' or '2vuy' pixel format;
 		-	The current frame buffer contains a valid “analog” caption byte pair encoded
 			as a waveform per EIA-608 in “line 21” of active video.
@@ -768,11 +817,14 @@ byte-pairs transmitted by the \ref inspectoranc :
 	@note	Successful caption rendering relies on getting a continuous byte pair sequence (no dropped frames).
 			If the refresh rate of the \ref inspectoranc lags the frame rate, byte pairs will be
 			skipped, resulting in garbled and unreadable captions. Hiding one or more of the
-			\ref inspectoranc viewers (VANC, Anc Registers, F1, F2) can save CPU cycles.
+			\ref inspectoranc viewers (VANC, Anc Registers, F1, F2) can save CPU cycles and prevent lagging
+			refresh rates.
 
 To freeze the <b>Byte-Pair Stream</b> (perhaps to permit interacting with it manually),
-leave the <b>Caption Viewer</b> window open, but switch NTV2Watcher to an Inspector other than
-the \ref inspectoranc — or stop viewing “Packets” and instead switch to “Raw” or “Hide”).
+leave the <b>Caption Viewer</b> window open, but do one of the following:
+	-	Switch NTV2Watcher to an Inspector other than the \ref inspectoranc, or…
+	-	Stop viewing “Packets” and instead switch to “Raw” or “Hide” in the \ref inspectoranc, or…
+	-	Uncheck the <b>Polling</b> checkbox at the top of the main window.
 
 <b>Generating Captions</b>
 
