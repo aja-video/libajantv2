@@ -1639,8 +1639,6 @@ bool CNTV2Card::CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFir
 	ULWord geometry = 0;
 	ULWord format = 0;
 	bool status = false;
-	ULWord quadEnable = false;
-	ULWord quadQuadEnable = false;
 
 	status = ReadRegister (gChannelToGlobalControlRegNum[inSrc], standard,  kRegMaskStandard,  kRegShiftStandard);
 	status &= ReadRegister (gChannelToGlobalControlRegNum[inSrc], rate1, kRegMaskFrameRate, kRegShiftFrameRate);
