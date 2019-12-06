@@ -35,27 +35,38 @@
 
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
 	#if defined(AJAMac)
-		//	On MacOS...
-		//		... when building for CLANG_CXX_LIBRARY=libc++		...then 'nullptr' is defined.
-		//		... when building for CLANG_CXX_LIBRARY=libstdc++	...then 'nullptr' is NOT defined.
-		//		TBD FIX FIX FIX     How to tell when building for libc++ versus libstdc++ ?!?!?!?!
-		#define AJA_NULL	NULL
+		#if defined(__clang__)
+			#ifndef __has_feature
+				#define __has_feature(__x__)	0
+			#endif
+			#if __has_feature(cxx_nullptr)
+				#define AJA_CXX11_NULLPTR_AVAILABLE
+			#endif
+		#endif
 	#elif defined(AJALinux)
-		//	On Linux...
-		//		... when building libajacc, using 'nullptr' fails.
-		//		TBD FIX FIX FIX
-		#define AJA_NULL	NULL
+		#if defined(__clang__)
+			#ifndef __has_feature
+				#define __has_feature(__x__)	0
+			#endif
+			#if __has_feature(cxx_nullptr)
+				#define AJA_CXX11_NULLPTR_AVAILABLE
+			#endif
+		#elif defined(__GNUC__)
+			#if __GNUC__ >= 5
+				#define AJA_CXX11_NULLPTR_AVAILABLE
+			#endif
+		#endif
 	#elif defined(MSWindows)
 		#if defined(_MSC_VER) && _MSC_VER >= 1700		//	VS2012 or later:
-			#define AJA_NULL	nullptr
-		#else
-			#define AJA_NULL	NULL
+			#define AJA_CXX11_NULLPTR_AVAILABLE
 		#endif
-	#else
-		#define AJA_NULL	NULL
 	#endif
+#endif
+
+#if defined(AJA_CXX11_NULLPTR_AVAILABLE)
+	#define AJA_NULL	nullptr
 #else
-	#define AJA_NULL		NULL
+	#define AJA_NULL	NULL
 #endif
 
 #if defined(__clang__)
