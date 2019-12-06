@@ -1292,7 +1292,14 @@ bool CNTV2Card::SetQuadQuadFrameEnable (const bool inEnable, const NTV2Channel i
 	bool ok(NTV2_IS_VALID_CHANNEL(inChannel) && ::NTV2DeviceCanDo8KVideo(_boardID));
 	if (inEnable)
 	{
-		if (inChannel < NTV2_CHANNEL3)
+		if (!IsMultiFormatActive())
+		{
+			if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL1);
+			if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL2);
+			if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL3);
+			if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL4);
+		}
+		else if (inChannel < NTV2_CHANNEL3)
 		{
 			if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL1);
 			if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL2);
@@ -1308,7 +1315,15 @@ bool CNTV2Card::SetQuadQuadFrameEnable (const bool inEnable, const NTV2Channel i
 		if(ok)	ok = SetQuadQuadSquaresEnable(false, inChannel);
 	}
 
-	if (ok)	ok = WriteRegister(kRegGlobalControl3, ULWord(inEnable ? 1 : 0), (inChannel < NTV2_CHANNEL3) ? kRegMaskQuadQuadMode : kRegMaskQuadQuadMode2, (inChannel < NTV2_CHANNEL3) ? kRegShiftQuadQuadMode : kRegShiftQuadQuadMode2);
+	if(!IsMultiFormatActive())
+	{
+		WriteRegister(kRegGlobalControl3, ULWord(inEnable ? 1 : 0), kRegMaskQuadQuadMode, kRegShiftQuadQuadMode);
+		WriteRegister(kRegGlobalControl3, ULWord(inEnable ? 1 : 0), kRegMaskQuadQuadMode2, kRegShiftQuadQuadMode2);		
+	}
+	else
+	{
+		if (ok)	ok = WriteRegister(kRegGlobalControl3, ULWord(inEnable ? 1 : 0), (inChannel < NTV2_CHANNEL3) ? kRegMaskQuadQuadMode : kRegMaskQuadQuadMode2, (inChannel < NTV2_CHANNEL3) ? kRegShiftQuadQuadMode : kRegShiftQuadQuadMode2);
+	}
 	if (inEnable)
 	{
 		if (inChannel < NTV2_CHANNEL3)
@@ -1624,8 +1639,8 @@ bool CNTV2Card::CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFir
 	ULWord geometry = 0;
 	ULWord format = 0;
 	bool status = false;
-	bool quadEnable = false;
-	bool quadQuadEnable = false;
+	ULWord quadEnable = false;
+	ULWord quadQuadEnable = false;
 
 	status = ReadRegister (gChannelToGlobalControlRegNum[inSrc], standard,  kRegMaskStandard,  kRegShiftStandard);
 	status &= ReadRegister (gChannelToGlobalControlRegNum[inSrc], rate1, kRegMaskFrameRate, kRegShiftFrameRate);
@@ -1633,9 +1648,6 @@ bool CNTV2Card::CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFir
 	status &= ReadRegister (gChannelToSmpte372RegisterNum[inSrc], s372, gChannelToSmpte372Masks[inSrc], gChannelToSmpte372Shifts[inSrc]);
 	status &= ReadRegister (gChannelToGlobalControlRegNum[inSrc], geometry, kRegMaskGeometry, kRegShiftGeometry);
 	status &= ReadRegister (kVRegVideoFormatCh1 + inSrc, format);
-	status &= GetQuadFrameEnable(quadEnable, inSrc);
-	status &= GetQuadQuadFrameEnable(quadQuadEnable, inSrc);
-
 	if (!status) return false;
 
 	for (int channel = inFirst; channel <= inLast; channel++)
@@ -1646,9 +1658,6 @@ bool CNTV2Card::CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFir
 		status &= WriteRegister (gChannelToSmpte372RegisterNum[channel], s372, gChannelToSmpte372Masks[channel], gChannelToSmpte372Shifts[channel]);
 		status &= WriteRegister (gChannelToGlobalControlRegNum[channel], geometry, kRegMaskGeometry, kRegShiftGeometry);
 		status &= WriteRegister (kVRegVideoFormatCh1 + channel, format);
-		status &= SetQuadFrameEnable(quadEnable, (NTV2Channel)channel);
-		status &= SetQuadQuadFrameEnable(quadQuadEnable, (NTV2Channel)channel);
-
 		if (!status) return false;
 	}
 
