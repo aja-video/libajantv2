@@ -878,21 +878,23 @@ public:
 	AJA_VIRTUAL bool		GetReference (NTV2ReferenceSource & outRefSource);
 
 	/**
-		@brief		Retrieves the device's current "retail service" task mode. See \ref devicesharing for more information.
+		@brief		Retrieves the device's current "retail service" task mode.
 		@return		True if successful; otherwise false.
 		@param[out]	outMode		Receives the device's current "every frame task mode" setting. If successful, the
 								variable will contain ::NTV2_DISABLE_TASKS, ::NTV2_STANDARD_TASKS, or ::NTV2_OEM_TASKS.
+		@see		CNTV2DriverInterface::GetStreamingApplication, \ref devicesharing
 	**/
 	AJA_VIRTUAL bool		GetEveryFrameServices (NTV2EveryFrameTaskMode & outMode);
 
 	/**
-		@brief		Enables or disables all or part of the retail mode service task that continuously controls
-					the "retail mode" device configuration. See \ref devicesharing for more information.
+		@brief		Sets the device's task mode.
 		@return		True if successful; otherwise false.
-		@param[in]	mode		Specifies the "every frame task mode" the device is to assume,
-								and must be one of the following values: ::NTV2_DISABLE_TASKS, ::NTV2_STANDARD_TASKS, or ::NTV2_OEM_TASKS.
+		@param[in]	inMode		Specifies the task mode the device is to assume, and must be one of the following values:
+								::NTV2_DISABLE_TASKS, ::NTV2_STANDARD_TASKS, or ::NTV2_OEM_TASKS.
+		@warning	Do not use task mode ::NTV2_STANDARD_TASKS for OEM applications.
+		@see		CNTV2DriverInterface::GetStreamingApplication, \ref devicesharing
 	**/
-	AJA_VIRTUAL bool		SetEveryFrameServices (NTV2EveryFrameTaskMode mode);
+	AJA_VIRTUAL bool		SetEveryFrameServices (const NTV2EveryFrameTaskMode inMode);
 
 	AJA_VIRTUAL bool		SetDefaultVideoOutMode (ULWord mode);
 	AJA_VIRTUAL bool		GetDefaultVideoOutMode (ULWord & outMode);
@@ -1180,6 +1182,12 @@ public:
 		@note		Setting a new value takes effect at the next output VBI. For example, if line 300 of frame 5 is currently
 					going "out the jack" at the instant this function is called with frame 6, frame 6 won't go "out the jack"
 					until the output VBI fires after the last line of frame 5 has gone out the spigot.
+		@warning	If the designated FrameStore/channel is enabled and in playout mode, and the given frame is within
+					the frame range being used by another FrameStore/channel, this will likely result in wrong/torn/bad
+					output video. \see vidop-fbconflict
+		@warning	If the designated FrameStore/channel is enabled and in playout mode, and the given frame is in
+					Audio Buffer memory that's in use by a running Audio System, this will likely result in wrong/torn/bad
+					output video. \see audioclobber
 		@see		CNTV2Card::GetOutputFrame, \ref vidop-fs
 	**/
 	AJA_VIRTUAL bool		SetOutputFrame (const NTV2Channel inChannel, const ULWord inValue);
@@ -1207,6 +1215,12 @@ public:
 					currently being written in device memory at the instant this function is called with frame 6,
 					video won't be written into frame 6 in device memory until the input VBI fires after the last line
 					of frame 5 has been written.
+		@warning	If the designated FrameStore/channel is enabled and in capture mode, and the given frame is within
+					the frame range being used by another FrameStore/channel, this will likely result in torn/bad video
+					in either or both channels. \see vidop-fbconflict
+		@warning	If the designated FrameStore/channel is enabled and in capture mode, and the given frame is in
+					Audio Buffer memory that's in use by a running Audio System, this will likely result in torn/bad video
+					and/or bad audio. \see audioclobber
 		@see		CNTV2Card::GetInputFrame, \ref vidop-fs
 	**/
 	AJA_VIRTUAL bool		SetInputFrame (const NTV2Channel inChannel, const ULWord inValue);
@@ -3434,27 +3448,31 @@ public:
 
 	/**
 		@brief		Prepares for subsequent AutoCirculate ingest, designating a contiguous block of frame buffers on the device for use
-					by the FrameStore/channel, and also specifies other optional behaviors.
-					Upon successful return, the driver's AutoCirculate status for the given channel will be ::NTV2_AUTOCIRCULATE_INIT.
-					Callers can bypass the default frame buffer allocator by specifying zero for \c inFrameCount, and explicitly
-					specify a frame number range using the \c inStartFrameNumber and \c inEndFrameNumber parameters.
+					by the FrameStore/channel, and specifies other optional behaviors.
+					Upon successful return, the channel's ::NTV2AutoCirculateState is set to ::NTV2_AUTOCIRCULATE_INIT where
+					it will remain until a subsequent call is made to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateStop.
+		@note		For Multi-Channel applications (i.e. where more than one channel is used for streaming video), AJA recommends
+					bypassing the default frame buffer allocator, and specifying zero for \c inFrameCount, and explicitly specifying
+					a frame number range using the \c inStartFrameNumber and \c inEndFrameNumber parameters.
 		@return		\c true if successful; otherwise \c false.
 		@param[in]	inChannel				Specifies the ::NTV2Channel to use. Call ::NTV2DeviceGetNumFrameStores to discover how many
 											Frame Stores (and therefore channels) are available on the device.
-		@param[in]	inFrameCount			Specifies the number of contiguous device frame buffers to be continuously cycled through.
-											Defaults to 7. Specify zero to explicitly specify the starting and ending frame numbers
-											and avoid using the default frame buffer allocator (see "inStartFrameNumber" and "inEndFrameNumber"
-											parameters below).
+		@param[in]	inFrameCount			Optionally specifies the number of contiguous device frame buffers to be continuously cycled
+											through if zero (default) values are specified for \c inStartFrameNumber and \c inEndFrameNumber.
+											Defaults to 7. This value is ignored if legitimate frame numbers are specified (see
+											\c inStartFrameNumber and \c inEndFrameNumber parameters below).
 		@param[in]	inAudioSystem			Specifies the Audio System to use, if any. Defaults to ::NTV2_AUDIOSYSTEM_INVALID (no audio).
 		@param[in]	inOptionFlags			A bit mask that specifies additional AutoCirculate options (e.g., ::AUTOCIRCULATE_WITH_RP188,
 											::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
 		@param[in]	inNumChannels			Optionally specifies the number of channels to operate on when CNTV2Card::AutoCirculateStart or
 											CNTV2Card::AutoCirculateStop are called. Defaults to 1. Must be greater than zero.
 		@param[in]	inStartFrameNumber		Optionally specifies the starting frame number as a zero-based unsigned decimal integer.
-											Defaults to zero. This parameter is ignored if "inFrameCount" is non-zero.
+											Defaults to zero. This parameter overrides \c inFrameCount if, in conjunction with \c inEndFrameNumber,
+											infers a non-zero frame count.
 		@param[in]	inEndFrameNumber		Optionally specifies the ending frame number as a zero-based unsigned decimal integer.
-											Defaults to zero. This parameter is ignored if "inFrameCount" is non-zero.
-		@details	If this function returns \c true, the driver will have designated a contiguous set of device frame buffers for use by the
+											Defaults to zero. This parameter overrides \c inFrameCount if, in conjunction with \c inStartFrameNumber,
+											infers a non-zero frame count.
+		@details	If this function returns \c true, the driver will have designated a contiguous set of device frame buffers to be written by the
 					FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for a subsequent
 					call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
 					AutoCirculateInitForInput's behavior depends on the device's ::NTV2EveryFrameTaskMode (\see CNTV2Card::GetEveryFrameServices).
@@ -3464,11 +3482,10 @@ public:
 					If the device's task mode is ::NTV2_DISABLE_TASKS, the driver won't perform most of the device setup. In this case, the caller
 					must manage <i>all</i> aspects of the device -- the Frame Store ::NTV2Mode, ::NTV2VideoFormat, etc. -- must be configured properly
 					before calling CNTV2Card::AutoCirculateInitForInput.
-					If the device's task mode is ::NTV2_STANDARD_TASKS, and the AJA Agent service (daemon) is running on the host, the device
-					configuration is dictated by the device's current <b>AJA ControlPanel</b> settings. In this case, the <b>AJA ControlPanel</b>
-					settings should agree with what CNTV2Card::AutoCirculateInitForInput is being asked to do. For example, setting the device
-					output to "Test Pattern" in the <b>AJA ControlPanel</b>, then calling CNTV2Card::AutoCirculateInitForInput is contradictory,
-					because AutoCirculate is being asked to capture from a device that's configured for playout.
+		@warning	If the designated or resulting frame range being used overlaps or includes other frames used by any other enabled
+					FrameStore/channel, this will likely result in torn/bad video. \see vidop-fbconflict
+		@warning	If the designated or resulting frame range runs into Audio Buffer memory that's used by a running Audio System, this
+					will likely result in torn/bad video and/or bad audio. \see audioclobber
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForOutput, \ref autocirculatecapture
 	**/
 
@@ -3482,27 +3499,31 @@ public:
 
 	/**
 		@brief		Prepares for subsequent AutoCirculate playout, designating a contiguous block of frame buffers on the device for use
-					by the FrameStore/channel, and also specifies other optional behaviors.
-					Upon successful return, the driver's AutoCirculate status for the given channel will be ::NTV2_AUTOCIRCULATE_INIT.
-					Callers can bypass the default frame buffer allocator by specifying zero for \c inFrameCount, and explicitly
-					specify a frame number range using the \c inStartFrameNumber and \c inEndFrameNumber parameters.
+					by the FrameStore/channel, and specifies other optional behaviors.
+					Upon successful return, the channel's ::NTV2AutoCirculateState is set to ::NTV2_AUTOCIRCULATE_INIT where
+					it will remain until a subsequent call is made to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateStop.
+		@note		For Multi-Channel applications (i.e. where more than one channel is used for streaming video), AJA recommends
+					bypassing the default frame buffer allocator, and specifying zero for \c inFrameCount, and explicitly specifying
+					a frame number range using the \c inStartFrameNumber and \c inEndFrameNumber parameters.
 		@return		\c true if successful; otherwise \c false.
 		@param[in]	inChannel				Specifies the ::NTV2Channel to use. Call ::NTV2DeviceGetNumFrameStores to discover how many
 											Frame Stores (and therefore channels) are available on the device.
-		@param[in]	inFrameCount			Specifies the number of contiguous device frame buffers to be continuously cycled through.
-											Defaults to 7. Specify zero to explicitly specify the starting and ending frame numbers
-											and avoid using the default frame buffer allocator (see "inStartFrameNumber" and "inEndFrameNumber"
-											parameters below).
+		@param[in]	inFrameCount			Optionally specifies the number of contiguous device frame buffers to be continuously cycled
+											through if zero (default) values are specified for \c inStartFrameNumber and \c inEndFrameNumber.
+											Defaults to 7. This value is ignored if legitimate frame numbers are specified (see
+											\c inStartFrameNumber and \c inEndFrameNumber parameters below).
 		@param[in]	inAudioSystem			Specifies the Audio System to use, if any. Defaults to ::NTV2_AUDIOSYSTEM_INVALID (no audio).
 		@param[in]	inOptionFlags			A bit mask that specifies additional AutoCirculate options (e.g., ::AUTOCIRCULATE_WITH_RP188,
 											::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
 		@param[in]	inNumChannels			Optionally specifies the number of channels to operate on when CNTV2Card::AutoCirculateStart or
 											CNTV2Card::AutoCirculateStop are called. Defaults to 1. Must be greater than zero.
 		@param[in]	inStartFrameNumber		Optionally specifies the starting frame number as a zero-based unsigned decimal integer.
-											Defaults to zero. This parameter is ignored if "inFrameCount" is non-zero.
+											Defaults to zero. This parameter overrides \c inFrameCount if, in conjunction with \c inEndFrameNumber,
+											infers a non-zero frame count.
 		@param[in]	inEndFrameNumber		Optionally specifies the ending frame number as a zero-based unsigned decimal integer.
-											Defaults to zero. This parameter is ignored if "inFrameCount" is non-zero.
-		@details	If this function returns \c true, the driver will have designated a contiguous set of device frame buffers for use by the
+											Defaults to zero. This parameter overrides \c inFrameCount if, in conjunction with \c inStartFrameNumber,
+											infers a non-zero frame count.
+		@details	If this function returns \c true, the driver will have designated a contiguous set of device frame buffers to be read by the
 					FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for a subsequent
 					call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
 					AutoCirculateInitForOutput's behavior depends on the device's ::NTV2EveryFrameTaskMode (\see CNTV2Card::GetEveryFrameServices).
@@ -3512,11 +3533,6 @@ public:
 					If the device's task mode is ::NTV2_DISABLE_TASKS, the driver won't perform most of the device setup. In this case, the caller
 					must manage <i>all</i> aspects of the device -- the Frame Store ::NTV2Mode, ::NTV2VideoFormat, etc. -- must be configured properly
 					before calling CNTV2Card::AutoCirculateInitForOutput.
-					If the device's task mode is ::NTV2_STANDARD_TASKS, and the AJA Agent service (daemon) is running on the host, the device
-					configuration is dictated by the device's current <b>AJA ControlPanel</b> settings. In this case, the <b>AJA ControlPanel</b>
-					settings should agree with what CNTV2Card::AutoCirculateInitForOutput is being asked to do. For example, setting the device
-					output to "Input Passthrough" in the <b>AJA ControlPanel</b>, then calling CNTV2Card::AutoCirculateInitForOutput is contradictory,
-					because AutoCirculate is being asked to play video from a device that's configured for input.
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForInput, \ref autocirculateplayout
 	**/
 
