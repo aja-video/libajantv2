@@ -258,7 +258,7 @@
     <ClCompile Include="..\..\ajabase\system\systemtime.cpp" />
     <ClCompile Include="..\..\ajabase\system\thread.cpp" />
     <ClCompile Include="..\..\ajabase\system\windows\eventimpl.cpp" />
-    <ClCompile Include="..\..\ajabase\system\windows\file_io.cpp" />
+    <ClCompile Include="..\..\ajabase\system\file_io.cpp" />
     <ClCompile Include="..\..\ajabase\system\windows\infoimpl.cpp" />
     <ClCompile Include="..\..\ajabase\system\windows\lockimpl.cpp" />
     <ClCompile Include="..\..\ajabase\system\windows\processimpl.cpp" />
