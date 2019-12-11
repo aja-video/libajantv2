@@ -3618,7 +3618,7 @@ NTV2FrameRate GetNTV2FrameRateFromNumeratorDenominator (ULWord numerator, ULWord
 }
 
 
-NTV2FrameRate GetNTV2FrameRateFromVideoFormat(NTV2VideoFormat videoFormat)
+NTV2FrameRate GetNTV2FrameRateFromVideoFormat (const NTV2VideoFormat videoFormat)
 {
     NTV2FrameRate frameRate = NTV2_FRAMERATE_UNKNOWN;
 	switch ( videoFormat )
