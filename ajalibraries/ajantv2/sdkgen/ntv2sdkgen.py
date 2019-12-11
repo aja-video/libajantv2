@@ -552,6 +552,59 @@ def write_can_do_function (args, f, device_ids, funcName, typeName, paramName, c
             f.write("}\t//  %s (auto-generated)\n" % (funcName))
 
 
+def write_can_do_function_by_device (args, f, device_ids, funcName, typeName, paramName, canonical_enums, Enum_to_devs_map, invalid_enum = ""):
+            f.write("\n\n/**\n\t%s\n**/\n" % (funcName))
+            f.write("bool %s (const NTV2DeviceID inDeviceID, const %s %s)\n" % (funcName, typeName, paramName))
+            f.write("{\n")
+
+            f.write("\tswitch (inDeviceID)\n")
+            f.write("\t{\n")
+
+            sorted_devices = sorted(device_ids, key=str.lower)
+            all_devices = {}
+            for device in sorted_devices:
+                all_devices[device] = False
+
+            for device in sorted_devices:
+                if device == "DEVICE_ID_NOTFOUND":
+                    continue  # Skip DEVICE_ID_NOTFOUND
+                f.write("\t\tcase %s:\n" % (device))
+                f.write("\t\t\tswitch (%s)\n" % (paramName))
+                f.write("\t\t\t{\n")
+
+                all_enums = canonical_enums
+                for enum in all_enums:
+                    all_enums[enum] = False
+                if invalid_enum:
+                    all_enums[invalid_enum] = False
+                for enum in sorted(all_enums, key=str.lower):
+                    if enum in Enum_to_devs_map:
+                        devs_can_do = Enum_to_devs_map[enum]
+                        if device in devs_can_do:
+                            all_enums[enum] = True;
+                            f.write("\t\t\t\tcase %s:\n" % (enum))
+                f.write("\t\t\t\t\treturn true;\n")
+                f.write("\t\t\t#if defined(_DEBUG)\t\t// %ss not supported by %s:\n" % (typeName, device))
+                for enum in sorted(all_enums, key=str.lower):
+                    if not all_enums[enum]:
+                        f.write("\t\t\t\tcase %s:\n" % (enum))
+                f.write("\t\t\t#else\n")
+                f.write("\t\t\t\tdefault:\n")
+                f.write("\t\t\t#endif\n")
+                f.write("\t\t\t\t\tbreak;\n")
+                f.write("\t\t\t}\t//\tswitch on %s\n" % (paramName))
+                f.write("\t\t\tbreak;\t//\tcase %s\n" % (device))
+                f.write("\n")
+
+            f.write("\t\tcase DEVICE_ID_NOTFOUND:\n")
+            f.write("\t\t\tbreak;\t//\tcase DEVICE_ID_NOTFOUND\n")
+            f.write("\t}\t//  switch on device ID\n")
+            f.write("\n")
+            f.write("\treturn false;\n")
+            f.write("\n")
+            f.write("}\t//  %s (auto-generated)\n" % (funcName))
+
+
 def main ():
     err = 0
     devicesDir = ""
@@ -1076,12 +1129,12 @@ def main ():
                 f.write("\n")
                 f.write("}\t//  %s (auto-generated)\n" % (func))
 
-            write_can_do_function (args, f, device_ids, "NTV2DeviceCanDoConversionMode",    "NTV2ConversionMode",    "inConversionMode", conversion_modes, ConversionModes,    "NTV2_CONVERSIONMODE_INVALID")
-            write_can_do_function (args, f, device_ids, "NTV2DeviceCanDoDSKMode",           "NTV2DSKMode",           "inDSKMode",        dsk_modes,        DSKModes,           "NTV2_DSKMODE_INVALID")
-            write_can_do_function (args, f, device_ids, "NTV2DeviceCanDoFrameBufferFormat", "NTV2FrameBufferFormat", "inFBFormat",       pixel_formats,    FrameBufferFormats, "NTV2_FBF_INVALID")
-            write_can_do_function (args, f, device_ids, "NTV2DeviceCanDoInputSource",       "NTV2InputSource",       "inInputSource",    input_sources,    InputSources,       "NTV2_INPUTSOURCE_INVALID")
-            write_can_do_function (args, f, device_ids, "NTV2DeviceCanDoVideoFormat",       "NTV2VideoFormat",       "inVideoFormat",    video_formats,    VideoFormats,       "NTV2_FORMAT_UNKNOWN")
-            write_can_do_function (args, f, device_ids, "NTV2DeviceCanDoWidget",            "NTV2WidgetID",          "inWidgetID",       widget_ids,       WidgetIDs,          "NTV2_WIDGET_INVALID")
+            write_can_do_function           (args, f, device_ids, "NTV2DeviceCanDoConversionMode",    "NTV2ConversionMode",    "inConversionMode", conversion_modes, ConversionModes,    "NTV2_CONVERSIONMODE_INVALID")
+            write_can_do_function           (args, f, device_ids, "NTV2DeviceCanDoDSKMode",           "NTV2DSKMode",           "inDSKMode",        dsk_modes,        DSKModes,           "NTV2_DSKMODE_INVALID")
+            write_can_do_function           (args, f, device_ids, "NTV2DeviceCanDoFrameBufferFormat", "NTV2FrameBufferFormat", "inFBFormat",       pixel_formats,    FrameBufferFormats, "NTV2_FBF_INVALID")
+            write_can_do_function           (args, f, device_ids, "NTV2DeviceCanDoInputSource",       "NTV2InputSource",       "inInputSource",    input_sources,    InputSources,       "NTV2_INPUTSOURCE_INVALID")
+            write_can_do_function_by_device (args, f, device_ids, "NTV2DeviceCanDoVideoFormat",       "NTV2VideoFormat",       "inVideoFormat",    video_formats,    VideoFormats,       "NTV2_FORMAT_UNKNOWN")
+            write_can_do_function_by_device (args, f, device_ids, "NTV2DeviceCanDoWidget",            "NTV2WidgetID",          "inWidgetID",       widget_ids,       WidgetIDs,          "NTV2_WIDGET_INVALID")
         if args.verbose:
             print("## NOTE:  '%s' written successfully" % (ohppFile))
         if result != 0:
