@@ -6912,6 +6912,36 @@ typedef enum
 				inline bool				WithAudio (void) const								{return NTV2_IS_VALID_AUDIO_SYSTEM (GetAudioSystem ());}
 
 				/**
+					@return		The option flags.
+				**/
+				inline ULWord			OptionFlags (void) const							{return acOptionFlags;}
+
+				/**
+					@return		True if operating the custom Anc inserter/extractor;  otherwise false.
+				**/
+				inline bool				WithCustomAnc (void) const							{return OptionFlags() & AUTOCIRCULATE_WITH_ANC;}
+
+				/**
+					@return		True if capturing/playing RP188 timecode;  otherwise false.
+				**/
+				inline bool				WithRP188 (void) const								{return OptionFlags() & AUTOCIRCULATE_WITH_RP188;}
+
+				/**
+					@return		True if capturing/playing analog LTC timecode;  otherwise false.
+				**/
+				inline bool				WithLTC (void) const								{return OptionFlags() & AUTOCIRCULATE_WITH_LTC;}
+
+				/**
+					@return		True if running in field mode;  otherwise false.
+				**/
+				inline bool				IsFieldMode (void) const							{return OptionFlags() & AUTOCIRCULATE_WITH_FIELDS;}
+
+				/**
+					@return		True if capturing/playing with HDMI auxiliary data;  otherwise false.
+				**/
+				inline bool				WithHDMIAuxData (void) const						{return OptionFlags() & AUTOCIRCULATE_WITH_HDMIAUX;}
+
+				/**
 					@return		True if capturing;  otherwise false.
 				**/
 				inline bool				IsInput (void) const								{return NTV2_IS_INPUT_CROSSPOINT (acCrosspoint);}
