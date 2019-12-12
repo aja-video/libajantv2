@@ -51,7 +51,7 @@
 	Level B is handled much easier with newer AJA devices (e.g., \ref io4kquad, \ref io4kufc, \ref io4kquad, \ref io4kufc, \ref corvid44, \ref corvid88, etc.).
 	Simply route the SDI input directly to a single frame store, then configure the SDI input to <b>3G Level B</b>.
 
-	@note	<b>IMPORTANT:</b><br>When writing software to handle Level A and Level B formats, there’s a difference between ::NTV2_FORMAT_1080p_6000
+	@note	<b>IMPORTANT:</b><br>When writing software to handle Level A and Level B formats, there’s a difference between <b>NTV2_FORMAT_1080p_6000</b>
 			(which is synonymous with ::NTV2_FORMAT_1080p_6000_B), and ::NTV2_FORMAT_1080p_6000_A. The former was a way for AJA’s older devices
 			with slower FPGAs to process high frame rate progressive formats, which was done by using two Frame Stores, each running at 30 Hz, to
 			handle a 60 Hz signal.<br>

@@ -426,7 +426,15 @@ AJAExport ULWord				GetVaricamRepeatCount (NTV2FrameRate sequenceRate, NTV2Frame
 AJAExport ULWord				GetScaleFromFrameRate (NTV2FrameRate playFrameRate);
 AJAExport NTV2FrameRate			GetFrameRateFromScale (long scale, long duration, NTV2FrameRate playFrameRate);
 AJAExport NTV2FrameRate			GetNTV2FrameRateFromNumeratorDenominator (ULWord numerator, ULWord denominator);
-AJAExport NTV2FrameRate			GetNTV2FrameRateFromVideoFormat (NTV2VideoFormat videoFormat);
+
+/**
+	@return		The NTV2FrameRate of the given NTV2VideoFormat.
+	@param[in]	inVideoFormat	Specifies the NTV2VideoFormat of interest.
+	@note		This function is physical-transport-centric, so "B" formats will answer with the frame rate
+				of a single link. For example, ::NTV2_FORMAT_1080p_6000_B will result in ::NTV2_FRAMERATE_3000.
+				See \ref duallinkoverview for more information.
+**/
+AJAExport NTV2FrameRate			GetNTV2FrameRateFromVideoFormat (const NTV2VideoFormat inVideoFormat);
 
 /**
 	@return		The equivalent non-VANC ::NTV2FrameGeometry value for a given ::NTV2FrameGeometry.

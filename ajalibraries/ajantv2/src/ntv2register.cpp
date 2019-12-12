@@ -1292,7 +1292,14 @@ bool CNTV2Card::SetQuadQuadFrameEnable (const bool inEnable, const NTV2Channel i
 	bool ok(NTV2_IS_VALID_CHANNEL(inChannel) && ::NTV2DeviceCanDo8KVideo(_boardID));
 	if (inEnable)
 	{
-		if (inChannel < NTV2_CHANNEL3)
+		if (!IsMultiFormatActive())
+		{
+			if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL1);
+			if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL2);
+			if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL3);
+			if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL4);
+		}
+		else if (inChannel < NTV2_CHANNEL3)
 		{
 			if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL1);
 			if(ok)	ok = SetQuadFrameEnable(true, NTV2_CHANNEL2);
@@ -1308,7 +1315,15 @@ bool CNTV2Card::SetQuadQuadFrameEnable (const bool inEnable, const NTV2Channel i
 		if(ok)	ok = SetQuadQuadSquaresEnable(false, inChannel);
 	}
 
-	if (ok)	ok = WriteRegister(kRegGlobalControl3, ULWord(inEnable ? 1 : 0), (inChannel < NTV2_CHANNEL3) ? kRegMaskQuadQuadMode : kRegMaskQuadQuadMode2, (inChannel < NTV2_CHANNEL3) ? kRegShiftQuadQuadMode : kRegShiftQuadQuadMode2);
+	if(!IsMultiFormatActive())
+	{
+		WriteRegister(kRegGlobalControl3, ULWord(inEnable ? 1 : 0), kRegMaskQuadQuadMode, kRegShiftQuadQuadMode);
+		WriteRegister(kRegGlobalControl3, ULWord(inEnable ? 1 : 0), kRegMaskQuadQuadMode2, kRegShiftQuadQuadMode2);		
+	}
+	else
+	{
+		if (ok)	ok = WriteRegister(kRegGlobalControl3, ULWord(inEnable ? 1 : 0), (inChannel < NTV2_CHANNEL3) ? kRegMaskQuadQuadMode : kRegMaskQuadQuadMode2, (inChannel < NTV2_CHANNEL3) ? kRegShiftQuadQuadMode : kRegShiftQuadQuadMode2);
+	}
 	if (inEnable)
 	{
 		if (inChannel < NTV2_CHANNEL3)
@@ -1631,7 +1646,6 @@ bool CNTV2Card::CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFir
 	status &= ReadRegister (gChannelToSmpte372RegisterNum[inSrc], s372, gChannelToSmpte372Masks[inSrc], gChannelToSmpte372Shifts[inSrc]);
 	status &= ReadRegister (gChannelToGlobalControlRegNum[inSrc], geometry, kRegMaskGeometry, kRegShiftGeometry);
 	status &= ReadRegister (kVRegVideoFormatCh1 + inSrc, format);
-
 	if (!status) return false;
 
 	for (int channel = inFirst; channel <= inLast; channel++)
@@ -1642,7 +1656,6 @@ bool CNTV2Card::CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFir
 		status &= WriteRegister (gChannelToSmpte372RegisterNum[channel], s372, gChannelToSmpte372Masks[channel], gChannelToSmpte372Shifts[channel]);
 		status &= WriteRegister (gChannelToGlobalControlRegNum[channel], geometry, kRegMaskGeometry, kRegShiftGeometry);
 		status &= WriteRegister (kVRegVideoFormatCh1 + channel, format);
-
 		if (!status) return false;
 	}
 
@@ -7374,11 +7387,6 @@ bool CNTV2Card::GetSDIOut12GEnable(const NTV2Channel inChannel, bool & outIsEnab
 
 
 // SDI bypass relay control
-static inline bool ReadWatchdogControlBit (CNTV2Card & card, ULWord & outValue, const ULWord inMask, const ULWord inShift)
-{
-	return card.ReadRegister (kRegSDIWatchdogControlStatus, outValue, inMask, inShift);
-}
-
 static bool WriteWatchdogControlBit (CNTV2Card & card, const ULWord inValue, const ULWord inMask, const ULWord inShift)
 {
 	if (!card.KickSDIWatchdog())
@@ -7388,7 +7396,10 @@ static bool WriteWatchdogControlBit (CNTV2Card & card, const ULWord inValue, con
 
 
 bool CNTV2Card::KickSDIWatchdog()
-{	//	Write 0x01234567 into Kick2 register to begin watchdog reset, then in < 30 msec,
+{
+	if (!::NTV2DeviceHasSDIRelays(GetDeviceID()))
+		return false;
+	//	Write 0x01234567 into Kick2 register to begin watchdog reset, then in < 30 msec,
 	//	write 0xA5A55A5A into Kick1 register to complete the reset...
 	const bool status (WriteRegister(kRegSDIWatchdogKick2, 0x01234567));
 	return status && WriteRegister(kRegSDIWatchdogKick1, 0xA5A55A5A);
@@ -7396,100 +7407,93 @@ bool CNTV2Card::KickSDIWatchdog()
 
 bool CNTV2Card::GetSDIWatchdogStatus (NTV2RelayState & outValue)
 {
-	ULWord statusBit(0);
-	if (!ReadWatchdogControlBit (*this, statusBit, kRegMaskSDIWatchdogStatus, kRegShiftSDIWatchdogStatus))
+	outValue = NTV2_RELAY_STATE_INVALID;
+	if (!::NTV2DeviceHasSDIRelays(GetDeviceID()))
 		return false;
-
+	ULWord statusBit(0);
+	if (!ReadRegister (kRegSDIWatchdogControlStatus, statusBit, kRegMaskSDIWatchdogStatus, kRegShiftSDIWatchdogStatus))
+		return false;
 	outValue = statusBit ? NTV2_THROUGH_DEVICE : NTV2_DEVICE_BYPASSED;
 	return true;
 }
 
-bool CNTV2Card::GetSDIRelayPosition12 (NTV2RelayState & outValue)
+bool CNTV2Card::GetSDIRelayPosition (NTV2RelayState & outValue, const UWord inIndex0)
 {
 	ULWord statusBit(0);
-	if (!ReadWatchdogControlBit (*this, statusBit, kRegMaskSDIRelayPosition12, kRegShiftSDIRelayPosition12))
+	outValue = NTV2_RELAY_STATE_INVALID;
+	if (!::NTV2DeviceHasSDIRelays(GetDeviceID()))
 		return false;
-
+	if (inIndex0 > 1)
+		return false;
+	if (!ReadRegister (kRegSDIWatchdogControlStatus, statusBit,
+						inIndex0 ? kRegMaskSDIRelayPosition34 : kRegMaskSDIRelayPosition12,
+						inIndex0 ? kRegShiftSDIRelayPosition34 : kRegShiftSDIRelayPosition12))
+		return false;
 	outValue = statusBit ? NTV2_THROUGH_DEVICE : NTV2_DEVICE_BYPASSED;
 	return true;
 }
 
-bool CNTV2Card::GetSDIRelayPosition34 (NTV2RelayState & outValue)
+bool CNTV2Card::GetSDIRelayManualControl (NTV2RelayState & outValue, const UWord inIndex0)
 {
 	ULWord statusBit(0);
-	if (!ReadWatchdogControlBit (*this, statusBit, kRegMaskSDIRelayPosition34, kRegShiftSDIRelayPosition34))
+	outValue = NTV2_RELAY_STATE_INVALID;
+	if (!::NTV2DeviceHasSDIRelays(GetDeviceID()))
 		return false;
-
+	if (inIndex0 > 1)
+		return false;
+	if (!ReadRegister (kRegSDIWatchdogControlStatus, statusBit,
+						inIndex0 ? kRegMaskSDIRelayControl34 : kRegMaskSDIRelayControl12,
+						inIndex0 ? kRegShiftSDIRelayControl34 : kRegShiftSDIRelayControl12))
+		return false;
 	outValue = statusBit ? NTV2_THROUGH_DEVICE : NTV2_DEVICE_BYPASSED;
 	return true;
 }
 
-bool CNTV2Card::GetSDIRelayManualControl12 (NTV2RelayState & outValue)
-{
-	ULWord statusBit(0);
-	if (!ReadWatchdogControlBit (*this, statusBit, kRegMaskSDIRelayControl12, kRegShiftSDIRelayControl12))
-		return false;
-
-	outValue = statusBit ? NTV2_THROUGH_DEVICE : NTV2_DEVICE_BYPASSED;
-	return true;
-}
-
-bool CNTV2Card::SetSDIRelayManualControl12 (const NTV2RelayState inValue)
+bool CNTV2Card::SetSDIRelayManualControl (const NTV2RelayState inValue, const UWord inIndex0)
 {
 	const ULWord statusBit ((inValue == NTV2_THROUGH_DEVICE) ? 1 : 0);
-	return WriteWatchdogControlBit (*this, statusBit, kRegMaskSDIRelayControl12, kRegShiftSDIRelayControl12);
+	if (!::NTV2DeviceHasSDIRelays(GetDeviceID()))
+		return false;
+	if (inIndex0 > 1)
+		return false;
+	return WriteWatchdogControlBit (*this, statusBit,
+									inIndex0 ? kRegMaskSDIRelayControl34 : kRegMaskSDIRelayControl12,
+									inIndex0 ? kRegShiftSDIRelayControl34 : kRegShiftSDIRelayControl12);
 }
 
-bool CNTV2Card::GetSDIRelayManualControl34 (NTV2RelayState & outValue)
+bool CNTV2Card::GetSDIWatchdogEnable (bool & outValue, const UWord inIndex0)
 {
 	ULWord statusBit(0);
-	if (!ReadWatchdogControlBit (*this, statusBit, kRegMaskSDIRelayControl34, kRegShiftSDIRelayControl34))
+	outValue = false;
+	if (!::NTV2DeviceHasSDIRelays(GetDeviceID()))
 		return false;
-
-	outValue = statusBit ? NTV2_THROUGH_DEVICE : NTV2_DEVICE_BYPASSED;
-	return true;
-}
-
-bool CNTV2Card::SetSDIRelayManualControl34 (const NTV2RelayState inValue)
-{
-	const ULWord statusBit ((inValue == NTV2_THROUGH_DEVICE) ? 1 : 0);
-	return WriteWatchdogControlBit (*this, statusBit, kRegMaskSDIRelayControl34, kRegShiftSDIRelayControl34);
-}
-
-bool CNTV2Card::GetSDIWatchdogEnable12 (bool & outValue)
-{
-	ULWord statusBit(0);
-	if (!ReadWatchdogControlBit (*this, statusBit, kRegMaskSDIWatchdogEnable12, kRegShiftSDIWatchdogEnable12))
+	if (inIndex0 > 1)
 		return false;
-
+	if (!ReadRegister (kRegSDIWatchdogControlStatus, statusBit,
+						inIndex0 ? kRegMaskSDIWatchdogEnable34 : kRegMaskSDIWatchdogEnable12,
+						inIndex0 ? kRegShiftSDIWatchdogEnable34 : kRegShiftSDIWatchdogEnable12))
+		return false;
 	outValue = statusBit ? true : false;
 	return true;
 }
 
-bool CNTV2Card::SetSDIWatchdogEnable12 (const bool inValue)
+bool CNTV2Card::SetSDIWatchdogEnable (const bool inValue, const UWord inIndex0)
 {
 	const ULWord statusBit ((inValue == NTV2_THROUGH_DEVICE) ? 1 : 0);
-	return WriteWatchdogControlBit (*this, statusBit, kRegMaskSDIWatchdogEnable12, kRegShiftSDIWatchdogEnable12);
-}
-
-bool CNTV2Card::GetSDIWatchdogEnable34 (bool & outValue)
-{
-	ULWord statusBit(0);
-	if (!ReadWatchdogControlBit (*this, statusBit, kRegMaskSDIWatchdogEnable34, kRegShiftSDIWatchdogEnable34))
+	if (!::NTV2DeviceHasSDIRelays(GetDeviceID()))
 		return false;
-
-	outValue = statusBit ? true : false;
-	return true;
-}
-
-bool CNTV2Card::SetSDIWatchdogEnable34 (const bool inValue)
-{
-	const ULWord statusBit ((inValue == NTV2_THROUGH_DEVICE) ? 1 : 0);
-	return WriteWatchdogControlBit (*this, statusBit, kRegMaskSDIWatchdogEnable34, kRegShiftSDIWatchdogEnable34);
+	if (inIndex0 > 1)
+		return false;
+	return WriteWatchdogControlBit (*this, statusBit,
+									inIndex0 ? kRegMaskSDIWatchdogEnable34 : kRegMaskSDIWatchdogEnable12,
+									inIndex0 ? kRegShiftSDIWatchdogEnable34 : kRegShiftSDIWatchdogEnable12);
 }
 
 bool CNTV2Card::GetSDIWatchdogTimeout (ULWord & outValue)
 {
+	outValue = 0;
+	if (!::NTV2DeviceHasSDIRelays(GetDeviceID()))
+		return false;
 	return ReadRegister (kRegSDIWatchdogTimeout, outValue);
 }
 
@@ -7498,32 +7502,34 @@ bool CNTV2Card::SetSDIWatchdogTimeout (const ULWord inValue)
 	return KickSDIWatchdog()  &&  WriteRegister (kRegSDIWatchdogTimeout, inValue);
 }
 
-bool CNTV2Card::GetSDIWatchdogState (NTV2SDIWatchdogState & outState)
-{
-	NTV2SDIWatchdogState tempState;
-	if (   GetSDIRelayManualControl12 (tempState.manualControl12  )
-		&& GetSDIRelayManualControl34 (tempState.manualControl34  )
-		&& GetSDIRelayPosition12      (tempState.relayPosition12  )
-		&& GetSDIRelayPosition34      (tempState.relayPosition34  )
-		&& GetSDIWatchdogStatus       (tempState.watchdogStatus   )
-		&& GetSDIWatchdogEnable12     (tempState.watchdogEnable12 )
-		&& GetSDIWatchdogEnable34     (tempState.watchdogEnable34 )
-		&& GetSDIWatchdogTimeout      (tempState.watchdogTimeout  ))
+#if !defined(NTV2_DEPRECATE_15_6)
+	bool CNTV2Card::GetSDIWatchdogState (NTV2SDIWatchdogState & outState)
 	{
-		outState = tempState;
-		return true;
+		NTV2SDIWatchdogState tempState;
+		if (   GetSDIRelayManualControl (tempState.manualControl12, 0  )
+			&& GetSDIRelayManualControl (tempState.manualControl34, 1  )
+			&& GetSDIRelayPosition      (tempState.relayPosition12, 0  )
+			&& GetSDIRelayPosition      (tempState.relayPosition34, 1  )
+			&& GetSDIWatchdogStatus     (tempState.watchdogStatus      )
+			&& GetSDIWatchdogEnable     (tempState.watchdogEnable12, 0 )
+			&& GetSDIWatchdogEnable     (tempState.watchdogEnable34, 1 )
+			&& GetSDIWatchdogTimeout    (tempState.watchdogTimeout     ))
+		{
+			outState = tempState;
+			return true;
+		}
+		return false;
 	}
-	return false;
-}
 
-bool CNTV2Card::SetSDIWatchdogState (const NTV2SDIWatchdogState & inState)
-{
-	return SetSDIRelayManualControl12 (inState.manualControl12)
-		&& SetSDIRelayManualControl34 (inState.manualControl34)
-		&& SetSDIWatchdogTimeout      (inState.watchdogTimeout)
-		&& SetSDIWatchdogEnable12     (inState.watchdogEnable12)
-		&& SetSDIWatchdogEnable34     (inState.watchdogEnable34);
-}
+	bool CNTV2Card::SetSDIWatchdogState (const NTV2SDIWatchdogState & inState)
+	{
+		return SetSDIRelayManualControl (inState.manualControl12,  0)
+			&& SetSDIRelayManualControl (inState.manualControl34,  1)
+			&& SetSDIWatchdogTimeout    (inState.watchdogTimeout    )
+			&& SetSDIWatchdogEnable     (inState.watchdogEnable12, 0)
+			&& SetSDIWatchdogEnable     (inState.watchdogEnable34, 1);
+	}
+#endif	//	!defined(NTV2_DEPRECATE_15_6)
 
 
 bool CNTV2Card::Enable4KDCRGBMode(bool enable)

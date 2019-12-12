@@ -95,6 +95,8 @@ NTV2_WgtDualLinkV2Out1
 NTV2_WgtGenLock
 NTV2_Wgt12GSDIOut1
 NTV2_WgtHDMIOut1v5
+NTV2_WgtCSC1
+NTV2_WgtLUT1
 
 
 // NTV2InputSources

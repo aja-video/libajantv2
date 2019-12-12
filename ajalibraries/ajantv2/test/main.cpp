@@ -160,7 +160,7 @@ TEST_SUITE("ntv2debug" * doctest::description("ntv2 debug string functions")) {
 
 void ntv2utils_marker() {}
 
-void check_fmts_are_std(std::vector<NTV2VideoFormat> formats, NTV2Standard expected, bool inHardware)
+void check_fmts_are_std(std::vector<NTV2VideoFormat> formats, NTV2Standard expected)
 {
 	std::string msgBase("expected: ");
 	msgBase += NTV2StandardString(expected);
@@ -169,7 +169,7 @@ void check_fmts_are_std(std::vector<NTV2VideoFormat> formats, NTV2Standard expec
 
 	for (auto &fmt : formats)
 	{
-		NTV2Standard have = GetNTV2StandardFromVideoFormat(fmt, inHardware);
+		NTV2Standard have = GetNTV2StandardFromVideoFormat(fmt);
 		std::string msg = msgBase;
 		msg += NTV2StandardString(have);
 		msg += " = " + std::to_string(int(have));
@@ -213,7 +213,7 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 							NTV2_FORMAT_1080p_2K_4800_B,
 							NTV2_FORMAT_1080p_2K_5000_B,
 							NTV2_FORMAT_1080p_2K_5994_B,
-							NTV2_FORMAT_1080p_2K_6000_B}, NTV2_STANDARD_1080, false);
+							NTV2_FORMAT_1080p_2K_6000_B}, NTV2_STANDARD_1080);
 
 		check_fmts_are_std({NTV2_FORMAT_1080p_2500,
 							NTV2_FORMAT_1080p_2997,
@@ -222,7 +222,7 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 							NTV2_FORMAT_1080p_2400,
 							NTV2_FORMAT_1080p_5000_A,
 							NTV2_FORMAT_1080p_5994_A,
-							NTV2_FORMAT_1080p_6000_A}, NTV2_STANDARD_1080p, false);
+							NTV2_FORMAT_1080p_6000_A}, NTV2_STANDARD_1080p);
 
 		check_fmts_are_std({NTV2_FORMAT_1080p_2K_2398,
 							NTV2_FORMAT_1080p_2K_2400,
@@ -233,35 +233,31 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 							NTV2_FORMAT_1080p_2K_4800_A,
 							NTV2_FORMAT_1080p_2K_5000_A,
 							NTV2_FORMAT_1080p_2K_5994_A,
-							NTV2_FORMAT_1080p_2K_6000_A}, NTV2_STANDARD_2Kx1080p, false);
+							NTV2_FORMAT_1080p_2K_6000_A}, NTV2_STANDARD_2Kx1080p);
 
 		check_fmts_are_std({NTV2_FORMAT_1080psf_2K_2398,
 							NTV2_FORMAT_1080psf_2K_2400,
-							NTV2_FORMAT_1080psf_2K_2500}, NTV2_STANDARD_2Kx1080i, true);
-
-		check_fmts_are_std({NTV2_FORMAT_1080psf_2K_2398,
-							NTV2_FORMAT_1080psf_2K_2400,
-							NTV2_FORMAT_1080psf_2K_2500}, NTV2_STANDARD_2Kx1080p, false);
+							NTV2_FORMAT_1080psf_2K_2500}, NTV2_STANDARD_2Kx1080p);
 
 		check_fmts_are_std({NTV2_FORMAT_720p_2398,
 							NTV2_FORMAT_720p_5000,
 							NTV2_FORMAT_720p_5994,
 							NTV2_FORMAT_720p_6000,
-							NTV2_FORMAT_720p_2500}, NTV2_STANDARD_720, false);
+							NTV2_FORMAT_720p_2500}, NTV2_STANDARD_720);
 
 		check_fmts_are_std({NTV2_FORMAT_525_5994,
 							NTV2_FORMAT_525_2398,
 							NTV2_FORMAT_525_2400,
-							NTV2_FORMAT_525psf_2997}, NTV2_STANDARD_525, false);
+							NTV2_FORMAT_525psf_2997}, NTV2_STANDARD_525);
 
 		check_fmts_are_std({NTV2_FORMAT_625_5000,
-							NTV2_FORMAT_625psf_2500}, NTV2_STANDARD_625, false);
+							NTV2_FORMAT_625psf_2500}, NTV2_STANDARD_625);
 
 		check_fmts_are_std({NTV2_FORMAT_2K_1498,
 							NTV2_FORMAT_2K_1500,
 							NTV2_FORMAT_2K_2398,
 							NTV2_FORMAT_2K_2400,
-							NTV2_FORMAT_2K_2500}, NTV2_STANDARD_2K, false);
+							NTV2_FORMAT_2K_2500}, NTV2_STANDARD_2K);
 
 		check_fmts_are_std({NTV2_FORMAT_4x1920x1080p_2398,
 							NTV2_FORMAT_4x1920x1080p_2400,
@@ -272,7 +268,7 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 							NTV2_FORMAT_3840x2160p_2400,
 							NTV2_FORMAT_3840x2160p_2500,
 							NTV2_FORMAT_3840x2160p_2997,
-							NTV2_FORMAT_3840x2160p_3000}, NTV2_STANDARD_3840x2160p, false);
+							NTV2_FORMAT_3840x2160p_3000}, NTV2_STANDARD_3840x2160p);
 
 		check_fmts_are_std({NTV2_FORMAT_4x1920x1080psf_2398,
 							NTV2_FORMAT_4x1920x1080psf_2400,
@@ -283,25 +279,14 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 							NTV2_FORMAT_3840x2160psf_2400,
 							NTV2_FORMAT_3840x2160psf_2500,
 							NTV2_FORMAT_3840x2160psf_2997,
-							NTV2_FORMAT_3840x2160psf_3000}, NTV2_STANDARD_3840i, true);
-
-		check_fmts_are_std({NTV2_FORMAT_4x1920x1080psf_2398,
-							NTV2_FORMAT_4x1920x1080psf_2400,
-							NTV2_FORMAT_4x1920x1080psf_2500,
-							NTV2_FORMAT_4x1920x1080psf_2997,
-							NTV2_FORMAT_4x1920x1080psf_3000,
-							NTV2_FORMAT_3840x2160psf_2398,
-							NTV2_FORMAT_3840x2160psf_2400,
-							NTV2_FORMAT_3840x2160psf_2500,
-							NTV2_FORMAT_3840x2160psf_2997,
-							NTV2_FORMAT_3840x2160psf_3000}, NTV2_STANDARD_3840x2160p, false);
+							NTV2_FORMAT_3840x2160psf_3000}, NTV2_STANDARD_3840x2160p);
 
 		check_fmts_are_std({NTV2_FORMAT_4x1920x1080p_5000,
 							NTV2_FORMAT_4x1920x1080p_5994,
 							NTV2_FORMAT_4x1920x1080p_6000,
 							NTV2_FORMAT_3840x2160p_5000,
 							NTV2_FORMAT_3840x2160p_5994,
-							NTV2_FORMAT_3840x2160p_6000}, NTV2_STANDARD_3840HFR, false);
+							NTV2_FORMAT_3840x2160p_6000}, NTV2_STANDARD_3840HFR);
 
 		check_fmts_are_std({NTV2_FORMAT_4x2048x1080p_2398,
 							NTV2_FORMAT_4x2048x1080p_2400,
@@ -316,7 +301,7 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 							NTV2_FORMAT_4096x2160p_2997,
 							NTV2_FORMAT_4096x2160p_3000,
 							NTV2_FORMAT_4096x2160p_4795,
-							NTV2_FORMAT_4096x2160p_4800}, NTV2_STANDARD_4096x2160p, false);
+							NTV2_FORMAT_4096x2160p_4800}, NTV2_STANDARD_4096x2160p);
 
 		check_fmts_are_std({NTV2_FORMAT_4x2048x1080psf_2398,
 							NTV2_FORMAT_4x2048x1080psf_2400,
@@ -327,18 +312,7 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 							NTV2_FORMAT_4096x2160psf_2400,
 							NTV2_FORMAT_4096x2160psf_2500,
 							NTV2_FORMAT_4096x2160psf_2997,
-							NTV2_FORMAT_4096x2160psf_3000}, NTV2_STANDARD_4096i, true);
-
-		check_fmts_are_std({NTV2_FORMAT_4x2048x1080psf_2398,
-							NTV2_FORMAT_4x2048x1080psf_2400,
-							NTV2_FORMAT_4x2048x1080psf_2500,
-							NTV2_FORMAT_4x2048x1080psf_2997,
-							NTV2_FORMAT_4x2048x1080psf_3000,
-							NTV2_FORMAT_4096x2160psf_2398,
-							NTV2_FORMAT_4096x2160psf_2400,
-							NTV2_FORMAT_4096x2160psf_2500,
-							NTV2_FORMAT_4096x2160psf_2997,
-							NTV2_FORMAT_4096x2160psf_3000}, NTV2_STANDARD_4096x2160p, false);
+							NTV2_FORMAT_4096x2160psf_3000}, NTV2_STANDARD_4096x2160p);
 
 		check_fmts_are_std({NTV2_FORMAT_4x2048x1080p_5000,
 							NTV2_FORMAT_4x2048x1080p_5994,
@@ -349,7 +323,7 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 							NTV2_FORMAT_4096x2160p_5994,
 							NTV2_FORMAT_4096x2160p_6000,
 							NTV2_FORMAT_4096x2160p_11988,
-							NTV2_FORMAT_4096x2160p_12000}, NTV2_STANDARD_4096HFR, false);
+							NTV2_FORMAT_4096x2160p_12000}, NTV2_STANDARD_4096HFR);
 
 		check_fmts_are_std({NTV2_FORMAT_4x3840x2160p_2398,
 							NTV2_FORMAT_4x3840x2160p_2400,
@@ -358,7 +332,7 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 							NTV2_FORMAT_4x3840x2160p_3000,
 							NTV2_FORMAT_4x3840x2160p_5000,
 							NTV2_FORMAT_4x3840x2160p_5994,
-							NTV2_FORMAT_4x3840x2160p_6000}, NTV2_STANDARD_7680, false);
+							NTV2_FORMAT_4x3840x2160p_6000}, NTV2_STANDARD_7680);
 
 		check_fmts_are_std({NTV2_FORMAT_4x4096x2160p_2398,
 							NTV2_FORMAT_4x4096x2160p_2400,
@@ -369,7 +343,7 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 							NTV2_FORMAT_4x4096x2160p_4800,
 							NTV2_FORMAT_4x4096x2160p_5000,
 							NTV2_FORMAT_4x4096x2160p_5994,
-							NTV2_FORMAT_4x4096x2160p_6000}, NTV2_STANDARD_8192, false);
+							NTV2_FORMAT_4x4096x2160p_6000}, NTV2_STANDARD_8192);
 	}
 
 	TEST_CASE("GetNTV2FrameGeometryFromVideoFormat")

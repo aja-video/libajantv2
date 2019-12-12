@@ -3935,11 +3935,12 @@ typedef enum
 
 /**
     @brief	This enumerated data type identifies the two possible states of the bypass relays.
+			See CNTV2Card::GetSDIRelayPosition, CNTV2Card::GetSDIRelayManualControl, CNTV2Card::GetSDIWatchdogStatus, etc.
 **/
 typedef enum
 {
-    NTV2_DEVICE_BYPASSED,		///	Input & output directly connected
-    NTV2_THROUGH_DEVICE,		///	Input & output routed through device
+    NTV2_DEVICE_BYPASSED,		///< @brief	Input & output directly connected
+    NTV2_THROUGH_DEVICE,		///< @brief	Input & output routed through device
     #if !defined (NTV2_DEPRECATE)
         NTV2_BYPASS				= NTV2_DEVICE_BYPASSED,
         NTV2_STRAIGHT_THROUGH	= NTV2_THROUGH_DEVICE,

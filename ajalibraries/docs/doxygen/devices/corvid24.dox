@@ -73,8 +73,8 @@
 
 	Users of the bypass relay feature will want to cable their systems with SDI 1 and SDI 3 as inputs, and SDI 2 and SDI 4
 	as outputs. Note that by default the Corvid24 firmware will configure SDI 1 and SDI 2 as inputs, and SDI 3 and SDI 4 as
-	outputs. Because of this, during initialization user applications should use the SetSDITransmitEnable SDK call to set
-	the correct direction of the SDI ports before taking the relays out of bypass.
+	outputs. Because of this, during initialization user applications should use the CNTV2Card::SetSDITransmitEnable SDK call
+	to set the correct direction of the SDI ports before taking the relays out of bypass.
 
 	@par		Hardware Jumpers
 
@@ -88,28 +88,13 @@
 	@image	html	corvid24jumpers.png
 
 
-	The NTV2 SDK provides several data structures and functions that can be used to query and/or control the bypass relays.
-
-	Bypass Relay Data Structures:
-	-	NTV2RelayState
-	-	NTV2SDIWatchdogState
-
-	CNTV2Card Member Functions:
-	-	CNTV2Card::GetSDIRelayManualControl12
-	-	CNTV2Card::GetSDIRelayManualControl34
-	-	CNTV2Card::GetSDIRelayPosition12
-	-	CNTV2Card::GetSDIRelayPosition34
-	-	CNTV2Card::GetSDIWatchdogEnable12
-	-	CNTV2Card::GetSDIWatchdogEnable34
-	-	CNTV2Card::GetSDIWatchdogState
+	The NTV2 SDK provides several functions for querying and/or controlling the bypass relays:
+	-	CNTV2Card::GetSDIWatchdogState and CNTV2Card::SetSDIWatchdogState
+	-	CNTV2Card::GetSDIRelayManualControl and CNTV2Card::SetSDIRelayManualControl
+	-	CNTV2Card::GetSDIWatchdogEnable and CNTV2Card::SetSDIWatchdogEnable
+	-	CNTV2Card::GetSDIWatchdogTimeout and CNTV2Card::SetSDIWatchdogTimeout
 	-	CNTV2Card::GetSDIWatchdogStatus
-	-	CNTV2Card::GetSDIWatchdogTimeout
-	-	CNTV2Card::SetSDIRelayManualControl12
-	-	CNTV2Card::SetSDIRelayManualControl34
-	-	CNTV2Card::SetSDIWatchdogEnable12
-	-	CNTV2Card::SetSDIWatchdogEnable34
-	-	CNTV2Card::SetSDIWatchdogState
-	-	CNTV2Card::SetSDIWatchdogTimeout
+	-	CNTV2Card::GetSDIRelayPosition
 
 	@par		Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/131/25>
