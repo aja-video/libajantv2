@@ -315,7 +315,7 @@ AJAStatus NTV2Burn::SetupVideo (void)
 	//	Now that newer AJA devices can capture/play anc data from separate buffers,
 	//	there's no need to enable VANC frame geometries...
 	NTV2FrameGeometry geometry;
-	mDevice.GetFrameGeometry(geometry);
+	mDevice.GetFrameGeometry(geometry, mInputChannel);
 	mDevice.SetVANCMode (mVancMode, ::GetNTV2StandardFromVideoFormat (mVideoFormat), geometry, mInputChannel);
 	mDevice.SetVANCMode (mVancMode, ::GetNTV2StandardFromVideoFormat (mVideoFormat), geometry, mOutputChannel);
 	if (::Is8BitFrameBufferFormat (mPixelFormat))
