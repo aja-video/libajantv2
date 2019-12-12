@@ -12,6 +12,7 @@
 
 #include "stdint.h"
 #include "ntv2rp188.h"
+#include "ntv2publicinterface.h"
 #include "ajabase/common/timecodeburn.h"
 #include "ajabase/system/debug.h"
 #include <algorithm>
@@ -41,6 +42,60 @@ typedef struct
 	uint8_t *		fVideoBufferUnaligned;	///< @brief	For future use
 	uint32_t		fFrameFlags;			///< @brief Frame data flags
 } AVDataBuffer;
+
+
+/**
+	@brief	I encapsulate the video, audio and anc host buffers used in the AutoCirculate demos.
+			I'm a more modern version of the AVDataBuffer.
+**/
+AJAExport class NTV2FrameData
+{
+	public:
+		NTV2_POINTER	fVideoBuffer;		///< @brief	Host video buffer
+		NTV2_POINTER	fVideoBuffer2;		///< @brief	Additional host video buffer, usually F2
+		NTV2_POINTER	fAudioBuffer;		///< @brief	Host audio buffer
+		NTV2_POINTER	fAncBuffer;			///< @brief	Host ancillary data buffer
+		NTV2_POINTER	fAncBuffer2;		///< @brief	Additional "F2" host anc buffer
+		NTV2TimeCodes	fTimecodes;			///< @brief	Timecodes
+		ULWord			fNumAudioBytes;		///< @brief	Actual number of captured audio bytes
+		ULWord			fNumAncBytes;		///< @brief	Actual number of captured F1 anc bytes
+		ULWord			fNumAnc2Bytes;		///< @brief	Actual number of captured F2 anc bytes
+		uint32_t		fFrameFlags;		///< @brief Frame data flags
+	public:
+		explicit inline NTV2FrameData()
+			:	fVideoBuffer	(0),
+				fVideoBuffer2	(0),
+				fAudioBuffer	(0),
+				fAncBuffer		(0),
+				fAncBuffer2		(0),
+				fTimecodes		(),
+				fNumAudioBytes	(0),
+				fNumAncBytes	(0),
+				fNumAnc2Bytes	(0),
+				fFrameFlags(0)	{}
+
+		inline ULWord *	VideoBuffer (void) const			{return reinterpret_cast<ULWord*>(fVideoBuffer.GetHostPointer());}
+		inline ULWord	VideoBufferSize (void) const		{return fVideoBuffer.GetByteCount();}
+
+		inline char *	AudioBytes (void) const				{return reinterpret_cast<char*>(fAudioBuffer.GetHostPointer());}
+		inline ULWord *	AudioBuffer (void) const			{return reinterpret_cast<ULWord*>(fAudioBuffer.GetHostPointer());}
+		inline ULWord	AudioBufferSize (void) const		{return fAudioBuffer.GetByteCount();}
+		inline ULWord	NumCapturedAudioBytes (void) const	{return fNumAudioBytes;}
+
+		inline char *	AncBytes (void) const				{return reinterpret_cast<char*>(fAncBuffer.GetHostPointer());}
+		inline ULWord *	AncBuffer (void) const				{return reinterpret_cast<ULWord*>(fAncBuffer.GetHostPointer());}
+		inline ULWord	AncBufferSize (void) const			{return fAncBuffer.GetByteCount();}
+		inline ULWord	NumCapturedAncBytes (void) const	{return fNumAncBytes;}
+
+		inline char *	AncBytes2 (void) const				{return reinterpret_cast<char*>(fAncBuffer2.GetHostPointer());}
+		inline ULWord *	AncBuffer2 (void) const				{return reinterpret_cast<ULWord*>(fAncBuffer2.GetHostPointer());}
+		inline ULWord	AncBuffer2Size (void) const			{return fAncBuffer2.GetByteCount();}
+		inline ULWord	NumCapturedAnc2Bytes (void) const	{return fNumAnc2Bytes;}
+};
+
+typedef std::vector<NTV2FrameData>			NTV2FrameDataArray;				///< @brief A vector of NTV2FrameData elements
+typedef NTV2FrameDataArray::iterator		NTV2FrameDataArrayIter;			///< @brief Handy non-const iterator
+typedef NTV2FrameDataArray::const_iterator	NTV2FrameDataArrayConstIter;	///< @brief Handy const iterator
 
 
 
@@ -451,9 +506,9 @@ class CNTV2DemoCommon
 												ofstream _ostrm(_filename.str(), ios::binary);
 
 	#define		AJA_NTV2_AUDIO_RECORD_DO		if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem))									\
-													if (pFrameData->fAudioBuffer  &&  pFrameData->fAudioBufferSize)				\
-														_ostrm.write(reinterpret_cast<char*>(pFrameData->fAudioBuffer),			\
-																	streamsize(pFrameData->fAudioBufferSize));
+													if (pFrameData->fAudioBuffer)												\
+														_ostrm.write(pFrameData->AudioBytes(),									\
+																	streamsize(pFrameData->NumCapturedAudioBytes()));
 
 	#define		AJA_NTV2_AUDIO_RECORD_END		
 #elif defined(AJA_WAV_AUDIO_RECORD)
@@ -473,10 +528,9 @@ class CNTV2DemoCommon
 												_wavWriter.open();
 
 	#define		AJA_NTV2_AUDIO_RECORD_DO		if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem))										\
-													if (pFrameData->fAudioBuffer  &&  pFrameData->fAudioBufferSize)					\
+													if (pFrameData->fAudioBuffer)													\
 														if (_wavWriter.IsOpen())													\
-															_wavWriter.write(reinterpret_cast<char*>(pFrameData->fAudioBuffer),		\
-																pFrameData->fAudioBufferSize);
+															_wavWriter.write(pFrameData->AudioBytes(), pFrameData->NumCapturedAudioBytes());
 
 	#define		AJA_NTV2_AUDIO_RECORD_END		if (_wavWriter.IsOpen())															\
 													_wavWriter.close();
@@ -484,6 +538,38 @@ class CNTV2DemoCommon
 	#define		AJA_NTV2_AUDIO_RECORD_BEGIN		
 	#define		AJA_NTV2_AUDIO_RECORD_DO			
 	#define		AJA_NTV2_AUDIO_RECORD_END		
+#endif
+
+
+//	These AJA_NTV2_ANC_RECORD* macros can, if enabled, record raw ancillary data into a file in the current directory.
+//	Optionally used in the CNTV2Capture demo.
+#if defined(AJA_RAW_ANC_RECORD)
+	#include "ntv2debug.h"					//	For NTV2DeviceString
+	#include <fstream>						//	For ofstream
+	#define		AJA_NTV2_ANC_RECORD_BEGIN		ostringstream _ancfn; uint64_t _ancTally(0);								\
+												_ancfn	<< ::NTV2DeviceString(mDeviceID) << "-" << mDevice.GetIndexNumber()	\
+														<< "." << ::NTV2ChannelToString(mInputChannel,true)					\
+														<< "." << ::NTV2InputSourceToString(mInputSource, true)				\
+														<< "." << ::NTV2VideoFormatToString(mVideoFormat)					\
+														<< "." << AJAProcess::GetPid()										\
+														<< ".anc";															\
+												ofstream _ancostrm(_ancfn.str(), ios::binary);
+
+	#define		AJA_NTV2_ANC_RECORD_DO			if (!_ancTally++) cerr << "Writing raw anc to '" << _ancfn.str() << "', "	\
+													<< DEC(pFrameData->AncBufferSize() + pFrameData->AncBuffer2Size())		\
+													<< " bytes per frame" << endl;											\
+												if (pFrameData->fAncBuffer)													\
+													_ancostrm.write(pFrameData->AncBytes(),									\
+																	streamsize(pFrameData->AncBufferSize()));				\
+												if (pFrameData->fAncBuffer2)												\
+													_ancostrm.write(pFrameData->AncBytes2(),								\
+																	streamsize(pFrameData->AncBuffer2Size()));
+
+	#define		AJA_NTV2_ANC_RECORD_END			cerr << "Wrote " << DEC(_ancTally) << " frames of raw anc data" << endl;
+#else
+	#define		AJA_NTV2_ANC_RECORD_BEGIN		
+	#define		AJA_NTV2_ANC_RECORD_DO			
+	#define		AJA_NTV2_ANC_RECORD_END		
 #endif
 
 

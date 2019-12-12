@@ -4,6 +4,7 @@
 	@copyright	Copyright (C) 2012-2019 AJA Video Systems, Inc.  All rights reserved.
 **/
 
+//#define AJA_RAW_ANC_RECORD	//	Uncomment to record raw anc data file
 //#define AJA_RAW_AUDIO_RECORD	//	Uncomment to record raw audio file
 //#define AJA_WAV_AUDIO_RECORD	//	Uncomment to record WAV audio file
 #include "ntv2capture.h"
@@ -16,10 +17,16 @@
 using namespace std;
 
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
-#define NTV2_ANCSIZE_MAX	(0x2000)
+
+//	Convenience macros for EZ logging:
+#define	CAPFAIL(_expr_)		AJA_sERROR  (AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	CAPWARN(_expr_)		AJA_sWARNING(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	CAPDBG(_expr_)		AJA_sDEBUG	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	CAPNOTE(_expr_)		AJA_sNOTICE	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	CAPINFO(_expr_)		AJA_sINFO	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
 
 
-static const ULWord	kAppSignature	AJA_FOURCC ('D','E','M','O');
+static const ULWord	kAppSignature	NTV2_FOURCC ('D','E','M','O');
 
 
 //////////////////////////////////////////////////////////////////////////////////////	NTV2Capture IMPLEMENTATION
@@ -32,8 +39,8 @@ NTV2Capture::NTV2Capture (const string					inDeviceSpecifier,
 						  const bool					inDoMultiFormat,
 						  const bool					inWithAnc)
 
-	:	mConsumerThread		(NULL),
-		mProducerThread		(NULL),
+	:	mConsumerThread		(AJA_NULL),
+		mProducerThread		(AJA_NULL),
 		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mDeviceSpecifier	(inDeviceSpecifier),
 		mInputChannel		(inChannel),
@@ -45,11 +52,8 @@ NTV2Capture::NTV2Capture (const string					inDeviceSpecifier,
 		mDoLevelConversion	(inLevelConversion),
 		mDoMultiFormat		(inDoMultiFormat),
 		mGlobalQuit			(false),
-		mWithAnc			(inWithAnc),
-		mVideoBufferSize	(0)
+		mWithAnc			(inWithAnc)
 {
-	::memset (mAVHostBuffer, 0x0, sizeof (mAVHostBuffer));
-
 }	//	constructor
 
 
@@ -59,33 +63,13 @@ NTV2Capture::~NTV2Capture ()
 	Quit ();
 
 	delete mConsumerThread;
-	mConsumerThread = NULL;
+	mConsumerThread = AJA_NULL;
 
 	delete mProducerThread;
-	mProducerThread = NULL;
+	mProducerThread = AJA_NULL;
 
 	//	Unsubscribe from input vertical event...
 	mDevice.UnsubscribeInputVerticalEvent (mInputChannel);
-
-	//	Free all my buffers...
-	for (unsigned bufferNdx = 0; bufferNdx < CIRCULAR_BUFFER_SIZE; bufferNdx++)
-	{
-		if (mAVHostBuffer[bufferNdx].fVideoBuffer)
-		{
-			delete mAVHostBuffer[bufferNdx].fVideoBuffer;
-			mAVHostBuffer[bufferNdx].fVideoBuffer = NULL;
-		}
-		if (mAVHostBuffer[bufferNdx].fAudioBuffer)
-		{
-			delete mAVHostBuffer[bufferNdx].fAudioBuffer;
-			mAVHostBuffer[bufferNdx].fAudioBuffer = NULL;
-		}
-		if (mAVHostBuffer[bufferNdx].fAncBuffer)
-		{
-			delete mAVHostBuffer[bufferNdx].fAncBuffer;
-			mAVHostBuffer[bufferNdx].fAncBuffer = NULL;
-		}
-	}	//	for each buffer in the ring
 
 }	//	destructor
 
@@ -120,10 +104,10 @@ AJAStatus NTV2Capture::Init (void)
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mDeviceSpecifier, mDevice))
 		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not found" << endl;  return AJA_STATUS_OPEN;}
 
-    if (!mDevice.IsDeviceReady (false))
+    if (!mDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
-	mDeviceID = mDevice.GetDeviceID ();						//	Keep the device ID handy, as it's used frequently
+	mDeviceID = mDevice.GetDeviceID();						//	Keep the device ID handy, as it's used frequently
 	if (!::NTV2DeviceCanDoCapture (mDeviceID))
 		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' cannot capture" << endl;  return AJA_STATUS_FEATURE;}
 
@@ -131,29 +115,29 @@ AJAStatus NTV2Capture::Init (void)
 	{
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 			return AJA_STATUS_BUSY;							//	Another app is using the device
-		mDevice.GetEveryFrameServices (mSavedTaskMode);		//	Save the current state before we change it
+		mDevice.GetEveryFrameServices(mSavedTaskMode);		//	Save the current state before we change it
 	}
-	mDevice.SetEveryFrameServices (NTV2_OEM_TASKS);			//	Since this is an OEM demo, use the OEM service level
+	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Since this is an OEM demo, use the OEM service level
 
-	if (::NTV2DeviceCanDoMultiFormat (mDeviceID))
-		mDevice.SetMultiFormatMode (mDoMultiFormat);
+	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
+		mDevice.SetMultiFormatMode(mDoMultiFormat);
 
-	if (::NTV2DeviceGetNumHDMIVideoInputs (mDeviceID) > 1)
-		mInputSource = ::NTV2ChannelToInputSource (mInputChannel, NTV2_INPUTSOURCES_HDMI);
+	if (::NTV2DeviceGetNumHDMIVideoInputs(mDeviceID) > 1)
+		mInputSource = ::NTV2ChannelToInputSource(mInputChannel, NTV2_INPUTSOURCES_HDMI);
 
 	//	Set up the video and audio...
-	status = SetupVideo ();
-	if (AJA_FAILURE (status))
+	status = SetupVideo();
+	if (AJA_FAILURE(status))
 		return status;
 
-	if (NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem))
+	if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem))
 		status = SetupAudio ();
-	if (AJA_FAILURE (status))
+	if (AJA_FAILURE(status))
 		return status;
 
 	//	Set up the circular buffers, the device signal routing, and both playout and capture AutoCirculate...
-	SetupHostBuffers ();
-	RouteInputSignal ();
+	SetupHostBuffers();
+	RouteInputSignal();
 
 	return AJA_STATUS_SUCCESS;
 
@@ -231,29 +215,36 @@ AJAStatus NTV2Capture::SetupAudio (void)
 
 void NTV2Capture::SetupHostBuffers (void)
 {
-	NTV2VANCMode	vancMode	(NTV2_VANCMODE_INVALID);
-	NTV2Standard	standard	(NTV2_STANDARD_INVALID);
+	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
+	NTV2Standard	standard(NTV2_STANDARD_INVALID);
+	ULWord			F1AncSize(0), F2AncSize(0);
 	mDevice.GetVANCMode (vancMode);
 	mDevice.GetStandard (standard);
 
 	//	Let my circular buffer know when it's time to quit...
 	mAVCircularBuffer.SetAbortFlag (&mGlobalQuit);
 
-	mVideoBufferSize = ::GetVideoWriteSize (mVideoFormat, mPixelFormat, vancMode);
+	if (mWithAnc)
+	{
+		ULWord	F1OffsetFromEnd(0), F2OffsetFromEnd(0);
+		mDevice.ReadRegister(kVRegAncField1Offset, F1OffsetFromEnd);
+		mDevice.ReadRegister(kVRegAncField2Offset, F2OffsetFromEnd);
+		F1AncSize = F2OffsetFromEnd > F1OffsetFromEnd ? 0 : F1OffsetFromEnd - F2OffsetFromEnd;
+		F2AncSize = F2OffsetFromEnd > F1OffsetFromEnd ? F2OffsetFromEnd - F1OffsetFromEnd : F2OffsetFromEnd;
+	}
 	mFormatDesc = NTV2FormatDescriptor (standard, mPixelFormat, vancMode);
 
 	//	Allocate and add each in-host AVDataBuffer to my circular buffer member variable...
-	for (unsigned bufferNdx (0);  bufferNdx < CIRCULAR_BUFFER_SIZE;  bufferNdx++)
+	mHostBuffers.reserve(size_t(CIRCULAR_BUFFER_SIZE));
+	while (mHostBuffers.size() < size_t(CIRCULAR_BUFFER_SIZE))
 	{
-		mAVHostBuffer [bufferNdx].fVideoBuffer		= reinterpret_cast <uint32_t *> (new uint8_t [mVideoBufferSize]);
-		mAVHostBuffer [bufferNdx].fVideoBufferSize	= mVideoBufferSize;
-		mAVHostBuffer [bufferNdx].fAudioBuffer		= NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem) ? reinterpret_cast <uint32_t *> (new uint8_t [NTV2_AUDIOSIZE_MAX]) : 0;
-		mAVHostBuffer [bufferNdx].fAudioBufferSize	= NTV2_IS_VALID_AUDIO_SYSTEM (mAudioSystem) ? NTV2_AUDIOSIZE_MAX : 0;
-		mAVHostBuffer [bufferNdx].fAncBuffer		= mWithAnc ? reinterpret_cast <uint32_t *> (new uint8_t [NTV2_ANCSIZE_MAX]) : 0;
-		mAVHostBuffer [bufferNdx].fAncBufferSize	= mWithAnc ? NTV2_ANCSIZE_MAX : 0;
-		mAVHostBuffer [bufferNdx].fAncF2Buffer		= mWithAnc ? reinterpret_cast <uint32_t *> (new uint8_t [NTV2_ANCSIZE_MAX]) : 0;
-		mAVHostBuffer [bufferNdx].fAncF2BufferSize	= mWithAnc ? NTV2_ANCSIZE_MAX : 0;
-		mAVCircularBuffer.Add (& mAVHostBuffer [bufferNdx]);
+		mHostBuffers.push_back(NTV2FrameData());
+		NTV2FrameData & frameData(mHostBuffers.back());
+		frameData.fVideoBuffer.Allocate(::GetVideoWriteSize (mVideoFormat, mPixelFormat, vancMode));
+		frameData.fAudioBuffer.Allocate(NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem) ? NTV2_AUDIOSIZE_MAX : 0);
+		frameData.fAncBuffer.Allocate(F1AncSize);
+		frameData.fAncBuffer2.Allocate(F2AncSize);
+		mAVCircularBuffer.Add(&frameData);
 	}	//	for each AVDataBuffer
 
 }	//	SetupHostBuffers
@@ -339,24 +330,29 @@ void NTV2Capture::ConsumerThreadStatic (AJAThread * pThread, void * pContext)		/
 
 void NTV2Capture::ConsumeFrames (void)
 {
+	CAPNOTE("Started");
 	AJA_NTV2_AUDIO_RECORD_BEGIN	//	Active when AJA_RAW_AUDIO_RECORD or AJA_WAV_AUDIO_RECORD defined
+	AJA_NTV2_ANC_RECORD_BEGIN	//	Active when AJA_RAW_ANC_RECORD is defined
 	while (!mGlobalQuit)
 	{
 		//	Wait for the next frame to become ready to "consume"...
-		AVDataBuffer *	pFrameData	(mAVCircularBuffer.StartConsumeNextBuffer ());
+		NTV2FrameData *	pFrameData	(mAVCircularBuffer.StartConsumeNextBuffer ());
 		if (pFrameData)
 		{
 			//	Do something useful with the frame data...
 			//	. . .		. . .		. . .		. . .
 			//		. . .		. . .		. . .		. . .
 			//			. . .		. . .		. . .		. . .
+			AJA_NTV2_ANC_RECORD_DO		//	Active when AJA_RAW_ANC_RECORD is defined
 			AJA_NTV2_AUDIO_RECORD_DO	//	Active when AJA_RAW_AUDIO_RECORD or AJA_WAV_AUDIO_RECORD defined
 
 			//	Now release and recycle the buffer...
 			mAVCircularBuffer.EndConsumeNextBuffer ();
 		}	//	if pFrameData
 	}	//	loop til quit signaled
+	AJA_NTV2_ANC_RECORD_END		//	Active when AJA_RAW_ANC_RECORD is defined
 	AJA_NTV2_AUDIO_RECORD_END	//	Active when AJA_RAW_AUDIO_RECORD or AJA_WAV_AUDIO_RECORD defined
+	CAPNOTE("Done");
 
 }	//	ConsumeFrames
 
@@ -392,8 +388,9 @@ void NTV2Capture::CaptureFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	inputXfer;	//	My A/C input transfer info
 	NTV2AudioChannelPairs	nonPcmPairs, oldNonPcmPairs;
-	ULWord					acOptions			(AUTOCIRCULATE_WITH_RP188 | (mWithAnc ? AUTOCIRCULATE_WITH_ANC : 0));
+	ULWord					acOptions (AUTOCIRCULATE_WITH_RP188 | (mWithAnc ? AUTOCIRCULATE_WITH_ANC : 0));
 
+	CAPNOTE("Started");
 	mDevice.AutoCirculateStop (mInputChannel);	//	Just in case
 
 	//	Tell AutoCirculate to use 7 frame buffers for capturing from the device...
@@ -402,38 +399,64 @@ void NTV2Capture::CaptureFrames (void)
 										acOptions);			//	Include timecode (and maybe Anc too)
 	
 	//	Start AutoCirculate running...
-	mDevice.AutoCirculateStart (mInputChannel);
+	mDevice.AutoCirculateStart(mInputChannel);
 
 	while (!mGlobalQuit)
 	{
 		AUTOCIRCULATE_STATUS	acStatus;
 		mDevice.AutoCirculateGetStatus (mInputChannel, acStatus);
 
-		if (acStatus.IsRunning () && acStatus.HasAvailableInputFrame ())
+		if (acStatus.IsRunning()  &&  acStatus.HasAvailableInputFrame())
 		{
 			//	At this point, there's at least one fully-formed frame available in the device's
 			//	frame buffer to transfer to the host. Reserve an AVDataBuffer to "produce", and
 			//	use it in the next transfer from the device...
-			AVDataBuffer *	captureData	(mAVCircularBuffer.StartProduceNextBuffer ());
+			NTV2FrameData *	pCaptureData(mAVCircularBuffer.StartProduceNextBuffer());
 
-			inputXfer.SetVideoBuffer (captureData->fVideoBuffer, captureData->fVideoBufferSize);
+			inputXfer.SetVideoBuffer (pCaptureData->VideoBuffer(), pCaptureData->VideoBufferSize());
 			if (acStatus.WithAudio())
-				inputXfer.SetAudioBuffer (captureData->fAudioBuffer, NTV2_AUDIOSIZE_MAX);
-			if (mWithAnc)
-				inputXfer.SetAncBuffers (captureData->fAncBuffer, captureData->fAncBufferSize, captureData->fAncF2Buffer, captureData->fAncF2BufferSize);
+				inputXfer.SetAudioBuffer (pCaptureData->VideoBuffer(), pCaptureData->AudioBufferSize());
+			if (acStatus.WithCustomAnc())
+				inputXfer.SetAncBuffers (pCaptureData->AncBuffer(), pCaptureData->AncBufferSize(),
+										 pCaptureData->AncBuffer2(), pCaptureData->AncBuffer2Size());
 
-			//	Do the transfer from the device into our host AVDataBuffer...
+			//	Transfer video/audio/anc from the device into our host AVDataBuffer...
 			mDevice.AutoCirculateTransfer (mInputChannel, inputXfer);
+
+			//	Remember the actual amount of audio captured...
 			if (acStatus.WithAudio())
-				captureData->fAudioBufferSize = inputXfer.GetCapturedAudioByteCount();  //	Store the actual amount of audio captured
+				pCaptureData->fNumAudioBytes = inputXfer.GetCapturedAudioByteCount();
 
-			NTV2SDIInStatistics	sdiStats;
-			mDevice.ReadSDIStatistics (sdiStats);
+			//	If capturing Anc, clear stale anc data from the anc buffers...
+			if (acStatus.WithCustomAnc()  &&  pCaptureData->fAncBuffer)
+			{
+				pCaptureData->fNumAncBytes = inputXfer.GetCapturedAncByteCount(/*isF2*/false);
+				NTV2_POINTER stale (pCaptureData->fAncBuffer.GetHostAddress(inputXfer.GetCapturedAncByteCount(/*isF2*/false), /*fromEnd*/true),
+									pCaptureData->fNumAncBytes);
+				stale.Fill(uint32_t(0));
+			}
+			if (acStatus.WithCustomAnc()  &&  pCaptureData->fAncBuffer2)
+			{
+				pCaptureData->fNumAnc2Bytes = inputXfer.GetCapturedAncByteCount(/*isF2*/true);
+				NTV2_POINTER excess(pCaptureData->fAncBuffer2.GetHostAddress(inputXfer.GetCapturedAncByteCount(/*isF2*/true), /*fromEnd*/true),
+									pCaptureData->fNumAnc2Bytes);
+				excess.Fill(uint32_t(0));
+			}
 
-			//	"Capture" timecode into the host AVDataBuffer while we have full access to it...
+			//	Log SDI input CRC/VPID/TRS errors...
+			if (::NTV2DeviceCanDoSDIErrorChecks(mDeviceID) && NTV2_INPUT_SOURCE_IS_SDI(mInputSource))
+			{
+				NTV2SDIInStatistics	sdiStats;
+				NTV2SDIInputStatus	inputStatus;
+				mDevice.ReadSDIStatistics(sdiStats);
+				sdiStats.GetSDIInputStatus(inputStatus, UWord(::GetIndexForNTV2InputSource(mInputSource)));
+				if (inputStatus.mCRCTallyA || !inputStatus.mVPIDValidA || inputStatus.mFrameTRSError)
+					CAPWARN(inputStatus);
+			}
+
+			//	Grab all valid timecodes that were captured...
 			NTV2_RP188	timecode;
-			inputXfer.GetInputTimeCode (timecode);
-			captureData->fRP188Data = timecode;
+			inputXfer.GetInputTimeCodes (pCaptureData->fTimecodes, mInputChannel, /*ValidOnly*/ true);
 
 			if (acStatus.WithAudio())
 				//	Look for PCM/NonPCM changes in the audio stream...
@@ -450,19 +473,20 @@ void NTV2Capture::CaptureFrames (void)
 				}
 
 			//	Signal that we're done "producing" the frame, making it available for future "consumption"...
-			mAVCircularBuffer.EndProduceNextBuffer ();
+			mAVCircularBuffer.EndProduceNextBuffer();
 		}	//	if A/C running and frame(s) are available for transfer
 		else
 		{
 			//	Either AutoCirculate is not running, or there were no frames available on the device to transfer.
 			//	Rather than waste CPU cycles spinning, waiting until a frame becomes available, it's far more
 			//	efficient to wait for the next input vertical interrupt event to get signaled...
-			mDevice.WaitForInputVerticalInterrupt (mInputChannel);
+			mDevice.WaitForInputVerticalInterrupt(mInputChannel);
 		}
 	}	//	loop til quit signaled
 
 	//	Stop AutoCirculate...
-	mDevice.AutoCirculateStop (mInputChannel);
+	mDevice.AutoCirculateStop(mInputChannel);
+	CAPNOTE("Done");
 
 }	//	CaptureFrames
 

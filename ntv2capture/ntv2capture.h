@@ -140,7 +140,7 @@ class NTV2Capture
 
 	//	Private Member Data
 	private:
-		typedef	AJACircularBuffer <AVDataBuffer *>	MyCircularBuffer;
+		typedef	AJACircularBuffer <NTV2FrameData *>	MyCircularBuffer;
 
 		AJAThread *					mConsumerThread;		///< @brief	My consumer thread object -- consumes the captured frames.
 		AJAThread *					mProducerThread;		///< @brief	My producer thread object -- does the frame capturing
@@ -158,9 +158,7 @@ class NTV2Capture
 		bool						mDoMultiFormat;			///< @brief	Demonstrates how to configure the board for multi-format
 		bool						mGlobalQuit;			///< @brief	Set "true" to gracefully stop
 		bool						mWithAnc;				///< @brief	Capture custom anc data?
-		uint32_t					mVideoBufferSize;		///< @brief	My video buffer size, in bytes
-
-		AVDataBuffer				mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
+		NTV2FrameDataArray			mHostBuffers;			///< @brief	My host buffers
 		MyCircularBuffer			mAVCircularBuffer;		///< @brief	My ring buffer object
 
 };	//	NTV2Capture

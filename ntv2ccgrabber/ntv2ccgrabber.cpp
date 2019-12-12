@@ -32,7 +32,7 @@ using namespace std::rel_ops;
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 #define NTV2_ANCSIZE_MAX	(2048)
 
-static const ULWord					kAppSignature				AJA_FOURCC ('C','C','G','R');
+static const ULWord					kAppSignature				NTV2_FOURCC ('C','C','G','R');
 static const NTV2Line21Attributes	kRedOnTransparentBG			(NTV2_CC608_Red, NTV2_CC608_Blue, NTV2_CC608_Transparent);
 static const NTV2Line21Attributes	kGreenOnTransparentBG		(NTV2_CC608_Green, NTV2_CC608_Blue, NTV2_CC608_Transparent);
 static const uint32_t				MAX_ACCUM_FRAME_COUNT		(30);	//	At least every second?
