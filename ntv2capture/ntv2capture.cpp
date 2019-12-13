@@ -415,7 +415,7 @@ void NTV2Capture::CaptureFrames (void)
 
 			inputXfer.SetVideoBuffer (pCaptureData->VideoBuffer(), pCaptureData->VideoBufferSize());
 			if (acStatus.WithAudio())
-				inputXfer.SetAudioBuffer (pCaptureData->VideoBuffer(), pCaptureData->AudioBufferSize());
+				inputXfer.SetAudioBuffer (pCaptureData->AudioBuffer(), pCaptureData->AudioBufferSize());
 			if (acStatus.WithCustomAnc())
 				inputXfer.SetAncBuffers (pCaptureData->AncBuffer(), pCaptureData->AncBufferSize(),
 										 pCaptureData->AncBuffer2(), pCaptureData->AncBuffer2Size());
