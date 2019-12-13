@@ -25,8 +25,14 @@
 #include "ajabase/system/info.h"
 #include "ajabase/system/systemtime.h"
 
+#include <algorithm>
 #include <clocale>
 #include <iostream>
+
+#ifdef AJA_WINDOWS
+#include <windows.h>
+#include <mmsystem.h>
+#endif
 
 /*
 //template
@@ -729,6 +735,16 @@ TEST_SUITE("time" * doctest::description("functions in ajabase/system/systemtime
 
     TEST_CASE("AJATime")
     {
+#ifdef AJA_WINDOWS
+		TIMECAPS tc;
+		if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) == MMSYSERR_NOERROR)
+		{
+			// Attempt to set the timer resolution to 1 millisecond
+			uint32_t eventPeriod = std::min<uint32_t>(std::max<uint32_t>(tc.wPeriodMin, 1), tc.wPeriodMax);
+			timeBeginPeriod(eventPeriod);
+		}
+#endif
+
         uint64_t startMs = AJATime::GetSystemMilliseconds();
         uint64_t startUs = AJATime::GetSystemMicroseconds();
         uint64_t startNs = AJATime::GetSystemNanoseconds();
@@ -806,7 +822,7 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 		AJAStatus status = AJAFileIO::TempDirectory(tempDir);
 		CHECK(status == AJA_STATUS_SUCCESS);
 		status = AJAFileIO::DoesDirectoryExist(tempDir);
-		CHECK(status == AJA_STATUS_SUCCESS);
+		CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "expected: temp dir '" + tempDir + "' to exist");
 
 #if defined(AJA_WINDOWS)
 		std::string pathsep = "\\";
@@ -825,7 +841,7 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 
 		AJAFileIO file;
 		status = file.Open(tempFilePath, eAJAReadWrite|eAJACreateAlways, 0);
-		REQUIRE(status == AJA_STATUS_SUCCESS);
+		REQUIRE_MESSAGE(status == AJA_STATUS_SUCCESS, "expected: file '" + tempFilePath + "' to be created");
 		CHECK(file.IsOpen() == true);
 		CHECK(file.Tell() == 0);
 		// seek forward 64
