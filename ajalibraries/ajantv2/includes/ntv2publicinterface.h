@@ -4539,6 +4539,7 @@ typedef enum
 
 #define	NTV2_IS_VALID_TASK_MODE(__m__)		((__m__) == NTV2_DISABLE_TASKS  ||  (__m__) == NTV2_STANDARD_TASKS  ||  (__m__) == NTV2_OEM_TASKS)
 #define	NTV2_IS_STANDARD_TASKS(__m__)		((__m__) == NTV2_STANDARD_TASKS)
+#define NTV2_IS_DRIVER_ACTIVE_TASKS(__m__)	((__m__) == NTV2_STANDARD_TASKS  ||  (__m__) == NTV2_OEM_TASKS)
 
 
 typedef enum
