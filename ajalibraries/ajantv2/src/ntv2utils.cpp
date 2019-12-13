@@ -5395,36 +5395,14 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 #endif	//	!defined (NTV2_DEPRECATE)
 
 
-NTV2Channel GetNTV2ChannelForIndex (const ULWord index)
+NTV2Channel GetNTV2ChannelForIndex (const ULWord inIndex)
 {
-	switch(index)
-	{
-	default:
-	case 0:	return NTV2_CHANNEL1;
-	case 1:	return NTV2_CHANNEL2;
-	case 2:	return NTV2_CHANNEL3;
-	case 3:	return NTV2_CHANNEL4;
-	case 4: return NTV2_CHANNEL5;
-	case 5: return NTV2_CHANNEL6;
-	case 6: return NTV2_CHANNEL7;
-	case 7: return NTV2_CHANNEL8;
-	}
+	return inIndex < NTV2_MAX_NUM_CHANNELS ? NTV2Channel(inIndex) : NTV2_CHANNEL1;
 }
 
-ULWord GetIndexForNTV2Channel (const NTV2Channel channel)
+ULWord GetIndexForNTV2Channel (const NTV2Channel inChannel)
 {
-	switch(channel)
-	{
-	default:
-	case NTV2_CHANNEL1:	return 0;
-	case NTV2_CHANNEL2:	return 1;
-	case NTV2_CHANNEL3:	return 2;
-	case NTV2_CHANNEL4:	return 3;
-	case NTV2_CHANNEL5: return 4;
-	case NTV2_CHANNEL6: return 5;
-	case NTV2_CHANNEL7: return 6;
-	case NTV2_CHANNEL8: return 7;
-	}
+	return NTV2_IS_VALID_CHANNEL(inChannel) ? ULWord(inChannel) : 0;
 }
 
 
