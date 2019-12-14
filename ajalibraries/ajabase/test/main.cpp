@@ -30,9 +30,12 @@
 #include <iostream>
 
 #ifdef AJA_WINDOWS
+#include <direct.h>
 #include <windows.h>
 #include <mmsystem.h>
-#include <direct.h>
+#else
+#include <sys/stat.h>
+#include <sys/types.h>
 #endif
 
 /*
@@ -829,7 +832,10 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 #if defined(AJA_WINDOWS)
 			_mkdir(tempDir.c_str());
 #else
-			mkdir(tempDir.c_str());
+			if (mkdir(tempDir.c_str(), ACCESSPERMS) == 0)
+			{
+				chmod(tempDir.c_str(), ACCESSPERMS);
+			}
 #endif
 		}
 
