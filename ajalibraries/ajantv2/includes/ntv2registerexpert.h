@@ -63,6 +63,7 @@
 #define	kRegClass_ReadOnly	std::string ("kRegClass_ReadOnly")
 #define	kRegClass_WriteOnly	std::string ("kRegClass_WriteOnly")
 #define	kRegClass_Virtual	std::string ("kRegClass_Virtual")
+#define kRegClass_Interrupt	std::string ("kRegClass_Interrupt")
 
 
 /**
