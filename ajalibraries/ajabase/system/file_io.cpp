@@ -240,41 +240,24 @@ AJAFileIO::Open(
 
 		if (NULL != mpFile)
 		{
-			#if defined(AJA_MAC)
-
-				if (eAJANoCaching & properties)
-				{
-					fcntl(fileno(mpFile), F_NOCACHE, 1);
-				}
-
-				if (eAJAUnbuffered & properties)
-				{
-					if (-1 != (mFileDescriptor = fileno(mpFile)))
-					{
-						status = AJA_STATUS_SUCCESS;
-					}
-				}
-				else
+			mFileDescriptor = fileno(mpFile);
+#if defined(AJA_MAC)			
+			if (eAJANoCaching & properties)
+			{
+				fcntl(fileno(mpFile), F_NOCACHE, 1);
+			}
+#endif
+			if (eAJAUnbuffered & properties)
+			{
+				if (-1 != mFileDescriptor)
 				{
 					status = AJA_STATUS_SUCCESS;
 				}
-			
-			#else
-
-				mFileDescriptor = fileno(mpFile);
-				if (eAJAUnbuffered & properties)
-				{
-					if (-1 != mFileDescriptor)
-					{
-						status = AJA_STATUS_SUCCESS;
-					}
-				}
-				else
-				{
-					status = AJA_STATUS_SUCCESS;
-				}
-				
-			#endif
+			}
+			else
+			{
+				status = AJA_STATUS_SUCCESS;
+			}
 		}
 	}
 	return status;
@@ -339,20 +322,11 @@ AJAFileIO::Read(uint8_t* pBuffer, const uint32_t length)
 #else
 	uint32_t retVal = 0;
 
-	if (-1 != mFileDescriptor)
-	{
-		ssize_t bytesRead = 0;
-
-		if ((bytesRead = read(mFileDescriptor, pBuffer, length)) > 0)
-		{
-			retVal = uint32_t(bytesRead);
-		}
-	}
-	else if (NULL != mpFile)
+	if (NULL != mpFile)
 	{
 		size_t bytesRead = 0;
 
-		if ((bytesRead = fread(pBuffer, length, 1, mpFile)) > 0)
+		if ((bytesRead = fread(pBuffer, 1, length, mpFile)) > 0)
 		{
 			retVal = uint32_t(bytesRead);
 		}
@@ -393,20 +367,11 @@ AJAFileIO::Write(const uint8_t* pBuffer, const uint32_t length) const
 #else
 	uint32_t retVal = 0;
 
-	if (-1 != mFileDescriptor)
-	{
-		ssize_t bytesWritten = 0;
-
-		if ((bytesWritten = write(mFileDescriptor, pBuffer, length)) > 0)
-		{
-			retVal = uint32_t(bytesWritten);
-		}
-	}
-	else if (NULL != mpFile)
+	if (NULL != mpFile)
 	{
 		size_t bytesWritten = 0;
 
-		if ((bytesWritten = fwrite(pBuffer, length, 1, mpFile)) > 0)
+		if ((bytesWritten = fwrite(pBuffer, 1, length, mpFile)) > 0)
 		{
 			retVal = uint32_t(bytesWritten);
 		}
