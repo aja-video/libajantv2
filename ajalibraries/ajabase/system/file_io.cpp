@@ -182,7 +182,8 @@ AJAFileIO::Open(
 	AJAStatus status = Open(wString,flags,properties);
 
 	return status;
-#else
+#endif
+
 	AJAStatus status = AJA_STATUS_FAIL;
 	string    flagsAndAttributes;
 
@@ -237,31 +238,47 @@ AJAFileIO::Open(
 					fileName.c_str(),
 					flagsAndAttributes.c_str());
 
+
 		if (NULL != mpFile)
 		{
-			mFileDescriptor = fileno(mpFile);
-#if defined(AJA_MAC)
-			if (eAJANoCaching & properties)
-			{
-				fcntl(mFileDescriptor, F_NOCACHE, 1);
-			}
-#endif
+			#if defined(AJA_MAC)
 
-			if (eAJAUnbuffered & properties)
-			{
-				if (-1 != mFileDescriptor)
+				if (eAJANoCaching & properties)
+				{
+					fcntl(fileno(mpFile), F_NOCACHE, 1);
+				}
+
+				if (eAJAUnbuffered & properties)
+				{
+					if (-1 != (mFileDescriptor = fileno(mpFile)))
+					{
+						status = AJA_STATUS_SUCCESS;
+					}
+				}
+				else
 				{
 					status = AJA_STATUS_SUCCESS;
 				}
-			}
-			else
-			{
-				status = AJA_STATUS_SUCCESS;
-			}
+			
+			#else
+
+				mFileDescriptor = fileno(mpFile);
+				if (eAJAUnbuffered & properties)
+				{
+					if (-1 != mFileDescriptor)
+					{
+						status = AJA_STATUS_SUCCESS;
+					}
+				}
+				else
+				{
+					status = AJA_STATUS_SUCCESS;
+				}
+				
+			#endif
 		}
 	}
 	return status;
-#endif
 }
 
 
