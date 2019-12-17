@@ -182,8 +182,7 @@ AJAFileIO::Open(
 	AJAStatus status = Open(wString,flags,properties);
 
 	return status;
-#endif
-
+#else
 	AJAStatus status = AJA_STATUS_FAIL;
 	string    flagsAndAttributes;
 
@@ -279,6 +278,7 @@ AJAFileIO::Open(
 		}
 	}
 	return status;
+#endif
 }
 
 
