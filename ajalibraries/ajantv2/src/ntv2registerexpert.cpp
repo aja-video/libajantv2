@@ -247,11 +247,21 @@ private:
 		DefineRegister (kRegBitfileTime,		"",	mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegCPLDVersion,		"",	mDecodeCPLDVersion,			READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 
-		DefineRegister (kRegStatus,				"",	mDecodeStatusReg,			READWRITE,	kRegClass_DMA,		kRegClass_Channel1,	kRegClass_Channel2);
+		DefineRegister (kRegVidIntControl,		"",	mDecodeVidIntControl,		READWRITE,	kRegClass_Interrupt,		kRegClass_Channel1,	kRegClass_Channel2);
+			DefineRegClass (kRegVidIntControl, kRegClass_Channel3);
+			DefineRegClass (kRegVidIntControl, kRegClass_Channel4);
+		DefineRegister (kRegStatus,				"",	mDecodeStatusReg,			READWRITE,	kRegClass_Interrupt,		kRegClass_Channel1,	kRegClass_Channel2);
 			DefineRegClass (kRegStatus, kRegClass_Timecode);
-		DefineRegister (kRegStatus2,			"",	mDecodeStatus2Reg,			READWRITE,	kRegClass_DMA,		kRegClass_Channel3,	kRegClass_Channel4);
-		DefineRegClass (kRegStatus2, kRegClass_Channel5);	DefineRegClass (kRegStatus2, kRegClass_Channel6);	DefineRegClass (kRegStatus2, kRegClass_Channel7);	DefineRegClass (kRegStatus2, kRegClass_Channel8);
-		DefineRegister (kRegInputStatus,		"",	mDecodeInputStatusReg,		READONLY,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);	DefineRegClass (kRegInputStatus, kRegClass_Audio);
+		DefineRegister (kRegVidIntControl2,		"",	mDecodeVidIntControl2,		READWRITE,	kRegClass_Interrupt,		kRegClass_Channel5,	kRegClass_Channel5);
+			DefineRegClass (kRegVidIntControl2, kRegClass_Channel7);
+			DefineRegClass (kRegVidIntControl2, kRegClass_Channel8);
+		DefineRegister (kRegStatus2,			"",	mDecodeStatus2Reg,			READWRITE,	kRegClass_Interrupt,		kRegClass_Channel3,	kRegClass_Channel4);
+			DefineRegClass (kRegStatus2, kRegClass_Channel5);
+			DefineRegClass (kRegStatus2, kRegClass_Channel6);
+			DefineRegClass (kRegStatus2, kRegClass_Channel7);
+			DefineRegClass (kRegStatus2, kRegClass_Channel8);
+		DefineRegister (kRegInputStatus,		"",	mDecodeInputStatusReg,		READONLY,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);
+			DefineRegClass (kRegInputStatus, kRegClass_Audio);
 		DefineRegister (kRegSDIInput3GStatus,	"",	mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel1,	kRegClass_Channel2);
 		DefineRegister (kRegSDIInput3GStatus2,	"",	mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel3,	kRegClass_Channel4);
 		DefineRegister (kRegSDI5678Input3GStatus,"",mDecodeSDIInputStatusReg,	READWRITE,	kRegClass_Input,	kRegClass_Channel5,	kRegClass_Channel6);
@@ -263,9 +273,12 @@ private:
 
 		DefineRegister (kRegFS1ReferenceSelect,	"", mDecodeFS1RefSelectReg,		READWRITE,	kRegClass_Input,	kRegClass_Timecode, kRegClass_NULL);
 		DefineRegister (kRegSysmonVccIntDieTemp,"",	mDecodeSysmonVccIntDieTemp,	READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
-		DefineRegister (kRegSDITransmitControl,	"",	mDecodeSDITransmitCtrl,		READWRITE,	kRegClass_Channel1,	kRegClass_Channel2,	kRegClass_Channel3);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel4);
-			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel5);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel6);
-			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel7);	DefineRegClass (kRegSDITransmitControl, kRegClass_Channel8);
+		DefineRegister (kRegSDITransmitControl,	"",	mDecodeSDITransmitCtrl,		READWRITE,	kRegClass_Channel1,	kRegClass_Channel2,	kRegClass_Channel3);
+			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel4);
+			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel5);
+			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel6);
+			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel7);
+			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel8);
 		DefineRegister (kRegCh1InputFrame,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel1,	kRegClass_NULL);
 
 		DefineRegister (kRegSDIWatchdogControlStatus,"", mDecodeRelayCtrlStat,	READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
@@ -422,12 +435,14 @@ private:
 		DefineRegister (kRegAud7InputLastAddr,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Audio,	kRegClass_Channel7,	kRegClass_Input);
 		DefineRegister (kRegAud8InputLastAddr,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Audio,	kRegClass_Channel8,	kRegClass_Input);
 		DefineRegister (kRegPCMControl4321,		"",	mDecodePCMControlReg,		READWRITE,	kRegClass_Audio,	kRegClass_Channel1,	kRegClass_Channel2);
+			DefineRegClass (kRegPCMControl4321, kRegClass_Channel3);
+			DefineRegClass (kRegPCMControl4321, kRegClass_Channel4);
 		DefineRegister (kRegPCMControl8765,		"",	mDecodePCMControlReg,		READWRITE,	kRegClass_Audio,	kRegClass_Channel5,	kRegClass_Channel6);
-		DefineRegClass (kRegPCMControl4321, kRegClass_Channel3);	DefineRegClass (kRegPCMControl4321, kRegClass_Channel4);
-		DefineRegClass (kRegPCMControl8765, kRegClass_Channel7);	DefineRegClass (kRegPCMControl8765, kRegClass_Channel8);
+			DefineRegClass (kRegPCMControl8765, kRegClass_Channel7);
+			DefineRegClass (kRegPCMControl8765, kRegClass_Channel8);
 		DefineRegister (kRegAud1Counter,		"",	mDefaultRegDecoder,			READONLY,	kRegClass_Audio,	kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegAudioOutputSourceMap,"",mDecodeAudOutputSrcMap,		READWRITE,	kRegClass_Audio,	kRegClass_Output,	kRegClass_AES);
-		DefineRegClass (kRegAudioOutputSourceMap, kRegClass_HDMI);
+			DefineRegClass (kRegAudioOutputSourceMap, kRegClass_HDMI);
 
 		DefineRegister (kRegAudioMixerInputSelects,				"kRegAudioMixerInputSelects",				mAudMxrInputSelDecoder,	READWRITE,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
 		DefineRegister (kRegAudioMixerMainGain,					"kRegAudioMixerMainGain",					mAudMxrGainDecoder,		READWRITE,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
@@ -1980,6 +1995,73 @@ private:
 		}
 		virtual	~DecodeVidControlReg()	{}
 	}	mDecodeVidControlReg;
+
+	struct DecodeVidIntControl : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+			ostringstream	oss;
+			oss	<< "Output 1 Vertical Enable: "		<< YesNo(inRegValue & BIT(0))					<< endl
+				<< "Input 1 Vertical Enable: "		<< YesNo(inRegValue & BIT(1))					<< endl
+				<< "Input 2 Vertical Enable: "		<< YesNo(inRegValue & BIT(2))					<< endl
+				<< "Audio Out Wrap Interrupt Enable: "	<< YesNo(inRegValue & BIT(4))				<< endl
+				<< "Audio In Wrap Interrupt Enable: "	<< YesNo(inRegValue & BIT(5))				<< endl
+				<< "Wrap Rate Interrupt Enable: "	<< YesNo(inRegValue & BIT(6))					<< endl
+				<< "UART Tx Interrupt Enable"		<< YesNo(inRegValue & BIT(7))					<< endl
+				<< "UART Rx Interrupt Enable"		<< YesNo(inRegValue & BIT(8))					<< endl
+				<< "UART Rx Interrupt Clear"		<< ActInact(inRegValue & BIT(15))				<< endl
+				<< "UART 2 Tx Interrupt Enable"		<< YesNo(inRegValue & BIT(17))					<< endl
+				<< "Output 2 Vertical Enable: "		<< YesNo(inRegValue & BIT(18))					<< endl
+				<< "Output 3 Vertical Enable: "		<< YesNo(inRegValue & BIT(19))					<< endl
+				<< "Output 4 Vertical Enable: "		<< YesNo(inRegValue & BIT(20))					<< endl
+				<< "Output 4 Vertical Clear: "		<< ActInact(inRegValue & BIT(21))				<< endl
+				<< "Output 3 Vertical Clear: "		<< ActInact(inRegValue & BIT(22))				<< endl
+				<< "Output 2 Vertical Clear: "		<< ActInact(inRegValue & BIT(23))				<< endl
+				<< "UART Tx Interrupt Clear"		<< ActInact(inRegValue & BIT(24))				<< endl
+				<< "Wrap Rate Interrupt Clear"		<< ActInact(inRegValue & BIT(25))				<< endl
+				<< "UART 2 Tx Interrupt Clear"		<< ActInact(inRegValue & BIT(26))				<< endl
+				<< "Audio Out Wrap Interrupt Clear"	<< ActInact(inRegValue & BIT(27))				<< endl
+				<< "Input 2 Vertical Clear: "		<< ActInact(inRegValue & BIT(29))				<< endl
+				<< "Input 1 Vertical Clear: "		<< ActInact(inRegValue & BIT(30))				<< endl
+				<< "Output 1 Vertical Clear: "		<< ActInact(inRegValue & BIT(31));
+			return oss.str();
+		}
+		virtual	~DecodeVidIntControl()	{}
+	}	mDecodeVidIntControl;
+	
+	struct DecodeVidIntControl2 : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+			ostringstream	oss;
+			oss	<< "Input 3 Vertical Enable: "		<< YesNo(inRegValue & BIT(1))					<< endl
+				<< "Input 4 Vertical Enable: "		<< YesNo(inRegValue & BIT(2))					<< endl
+				<< "Input 5 Vertical Enable: "		<< YesNo(inRegValue & BIT(8))					<< endl
+				<< "Input 6 Vertical Enable: "		<< YesNo(inRegValue & BIT(9))					<< endl
+				<< "Input 7 Vertical Enable: "		<< YesNo(inRegValue & BIT(10))					<< endl
+				<< "Input 8 Vertical Enable: "		<< YesNo(inRegValue & BIT(11))					<< endl
+				<< "Output 5 Vertical Enable: "		<< YesNo(inRegValue & BIT(12))					<< endl
+				<< "Output 6 Vertical Enable: "		<< YesNo(inRegValue & BIT(13))					<< endl
+				<< "Output 7 Vertical Enable: "		<< YesNo(inRegValue & BIT(14))					<< endl
+				<< "Output 8 Vertical Enable: "		<< YesNo(inRegValue & BIT(15))					<< endl
+				<< "Output 8 Vertical Clear: "		<< ActInact(inRegValue & BIT(16))				<< endl
+				<< "Output 7 Vertical Clear: "		<< ActInact(inRegValue & BIT(17))				<< endl
+				<< "Output 6 Vertical Clear: "		<< ActInact(inRegValue & BIT(18))				<< endl
+				<< "Output 5 Vertical Clear: "		<< ActInact(inRegValue & BIT(19))				<< endl
+				<< "Input 8 Vertical Clear: "		<< ActInact(inRegValue & BIT(25))				<< endl
+				<< "Input 7 Vertical Clear: "		<< ActInact(inRegValue & BIT(26))				<< endl
+				<< "Input 6 Vertical Clear: "		<< ActInact(inRegValue & BIT(27))				<< endl
+				<< "Input 5 Vertical Clear: "		<< ActInact(inRegValue & BIT(28))				<< endl
+				<< "Input 4 Vertical Clear: "		<< ActInact(inRegValue & BIT(29))				<< endl
+				<< "Input 3 Vertical Clear: "		<< ActInact(inRegValue & BIT(30));
+			return oss.str();
+		}
+		virtual	~DecodeVidIntControl2()	{}
+	}	mDecodeVidIntControl2;
 
 	struct DecodeStatusReg : public Decoder
 	{
