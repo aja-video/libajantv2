@@ -562,10 +562,11 @@
 			CNTV2Card::UnsubscribeOutputVerticalEvent, CNTV2Card::UnsubscribeEvent), and automatically when
 			the CNTV2Card object is closed or destroyed (via CNTV2Card::Close). However, abnormal program
 			terminations, crashes, or force-quitting from a debugger will prevent this handle clean-up,
-			which can result in their exhaustion. The only recovery at this point is to close all running
-			NTV2 client applications (including the AJA Service, if the “retail” software is installed and
-			running), then manually disabling and re-enabling the AJA driver. (Of course you can always
-			recover by restarting the machine.)
+			which, after many repetitions of this, can result in their exhaustion. The are three ways to
+			recover from this: 1) Reboot the machine. 2) Manually disabling and re-enabling the AJA driver
+			(after closing all running NTV2 client applications, including the AJA Service. 3) Set virtual
+			register kVRegClearAllSubscriptions to a non-zero value (this can be easily done in NTV2Watcher’s
+			\ref inspectorregs ).
 
 	@subsection	vidop-fbconflict	When Frame Stores Access the Same Frame Buffer Memory
 
