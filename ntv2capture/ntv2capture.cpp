@@ -455,7 +455,6 @@ void NTV2Capture::CaptureFrames (void)
 			}
 
 			//	Grab all valid timecodes that were captured...
-			NTV2_RP188	timecode;
 			inputXfer.GetInputTimeCodes (pCaptureData->fTimecodes, mInputChannel, /*ValidOnly*/ true);
 
 			if (acStatus.WithAudio())
