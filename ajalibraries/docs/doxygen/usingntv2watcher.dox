@@ -547,6 +547,10 @@ The inspector shows the following:
 		call for each ::NTV2Channel.
 	-	<b>Timecodes</b> — This area shows the contents of the ::NTV2TimeCodeList returned from CNTV2Card::AutoCirculateGetFrameStamp
 		for each AutoCirculate frame buffer. Use the <b>Timecodes</b> popup menu to control which channel to display (or “Hide” to not display timecodes).
+		-	<b>NOTE:</b> This area doesn’t appear on S2110 devices (i.e. \ref konaip \ref ioip running S2110 firmware).
+			This is because the driver’s internal AutoCirculate structures are tied to the hardware timecode registers,
+			which are uninvolved in S2110. In S2110, timecodes are obtained (capture) or produced (playout) in ATC-LTC
+			or ATC-VITC packets embedded in RTP packet(s).
 
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable frame-accurate snapshot of the AutoCirculate state of the device to the Clipboard.
 

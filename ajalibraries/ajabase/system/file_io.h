@@ -275,7 +275,6 @@ private:
     HANDLE       mFileDescriptor;
 #else
 	FILE*        mpFile;
-	int          mFileDescriptor;
 #endif
 };
 

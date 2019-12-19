@@ -64,7 +64,6 @@ AJAFileIO::AJAFileIO()
 	mFileDescriptor = INVALID_HANDLE_VALUE;
 #else
 	mpFile          = NULL;
-	mFileDescriptor = -1;
 #endif
 }
 
@@ -186,8 +185,7 @@ AJAFileIO::Open(
 	AJAStatus status = AJA_STATUS_FAIL;
 	string    flagsAndAttributes;
 
-	if ((-1 == mFileDescriptor) &&
-		(0 != fileName.length()))
+	if ((mpFile == NULL) && (0 != fileName.length()))
 	{
 		// If the flags are not compatable, we will let
 		// Linux provide the error checking.
@@ -233,23 +231,20 @@ AJAFileIO::Open(
 		// One can also change the buffering behavior via:
 		// setvbuf(FILE*, char* pBuffer, _IOFBF,  size_t size);
 		//printf ("fopen name=%s attr=%s\n", fileName.c_str(), flagsAndAttributes.c_str());
-		mpFile = fopen(
-					fileName.c_str(),
-					flagsAndAttributes.c_str());
+		mpFile = fopen(fileName.c_str(), flagsAndAttributes.c_str());
 
 		if (NULL != mpFile)
 		{
-			mFileDescriptor = fileno(mpFile);
-#if defined(AJA_MAC)
+			int fd = fileno(mpFile);
+#if defined(AJA_MAC)			
 			if (eAJANoCaching & properties)
 			{
-				fcntl(mFileDescriptor, F_NOCACHE, 1);
+				fcntl(fd, F_NOCACHE, 1);
 			}
 #endif
-
 			if (eAJAUnbuffered & properties)
 			{
-				if (-1 != mFileDescriptor)
+				if (-1 != fd)
 				{
 					status = AJA_STATUS_SUCCESS;
 				}
@@ -289,8 +284,7 @@ AJAFileIO::Close()
 		{
 			status = AJA_STATUS_SUCCESS;
 		}
-		mpFile          = NULL;
-		mFileDescriptor = -1;
+		mpFile = NULL;
 	}
 	return status;
 #endif
@@ -321,21 +315,10 @@ AJAFileIO::Read(uint8_t* pBuffer, const uint32_t length)
 	return bytesRead;
 #else
 	uint32_t retVal = 0;
-
-	if (-1 != mFileDescriptor)
-	{
-		ssize_t bytesRead = 0;
-
-		if ((bytesRead = read(mFileDescriptor, pBuffer, length)) > 0)
-		{
-			retVal = uint32_t(bytesRead);
-		}
-	}
-	else if (NULL != mpFile)
+	if (NULL != mpFile)
 	{
 		size_t bytesRead = 0;
-
-		if ((bytesRead = fread(pBuffer, length, 1, mpFile)) > 0)
+		if ((bytesRead = fread(pBuffer, 1, length, mpFile)) > 0)
 		{
 			retVal = uint32_t(bytesRead);
 		}
@@ -375,21 +358,10 @@ AJAFileIO::Write(const uint8_t* pBuffer, const uint32_t length) const
 	return bytesWritten;
 #else
 	uint32_t retVal = 0;
-
-	if (-1 != mFileDescriptor)
-	{
-		ssize_t bytesWritten = 0;
-
-		if ((bytesWritten = write(mFileDescriptor, pBuffer, length)) > 0)
-		{
-			retVal = uint32_t(bytesWritten);
-		}
-	}
-	else if (NULL != mpFile)
+	if (NULL != mpFile)
 	{
 		size_t bytesWritten = 0;
-
-		if ((bytesWritten = fwrite(pBuffer, length, 1, mpFile)) > 0)
+		if ((bytesWritten = fwrite(pBuffer, 1, length, mpFile)) > 0)
 		{
 			retVal = uint32_t(bytesWritten);
 		}
@@ -423,10 +395,14 @@ AJAFileIO::Sync()
 	return status;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
-	if (-1 != mFileDescriptor)
+	if (IsOpen())
 	{
-		if (fsync(mFileDescriptor) == 0)
-			status = AJA_STATUS_SUCCESS;
+		int fd = fileno(mpFile);
+		if (-1 != fd)
+		{
+			if (fsync(fd) == 0)
+				status = AJA_STATUS_SUCCESS;
+		}
 	}
 	return status;
 #endif
@@ -457,12 +433,16 @@ AJAFileIO::Truncate(int32_t size)
 	return status;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
-	if (-1 != mFileDescriptor)
+	if (IsOpen())
 	{
-		int res = ftruncate(mFileDescriptor, size);
-		if (res == 0)
+		int fd = fileno(mpFile);
+		if (-1 != fd)
 		{
-			status = AJA_STATUS_SUCCESS;
+			int res = ftruncate(fd, size);
+			if (res == 0)
+			{
+				status = AJA_STATUS_SUCCESS;
+			}
 		}
 	}
 	return status;
@@ -496,7 +476,7 @@ AJAFileIO::Tell()
 	return retVal;
 #else
 	int64_t retVal = 0;
-	if (NULL != mpFile)
+	if (IsOpen())
 	{
 		retVal = (int64_t)ftello(mpFile);
 	}
@@ -636,10 +616,11 @@ AJAFileIO::FileInfo(int64_t& createTime, int64_t& modTime, int64_t& size, std::s
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
 
-	if( NULL != mpFile)
+	if (IsOpen())
 	{
 		struct stat fileStatus;
-		int fErr = fstat(fileno(mpFile), &fileStatus);
+		int fd = fileno(mpFile);
+		int fErr = fstat(fd, &fileStatus);
 
 		if (fErr == 0)
 		{
@@ -649,12 +630,6 @@ AJAFileIO::FileInfo(int64_t& createTime, int64_t& modTime, int64_t& size, std::s
 
 #if defined(AJA_LINUX)
 			// Linux way to get path of file descriptor
-			int fd = mFileDescriptor;
-			if (fd == -1)
-			{
-				fd = fileno(mpFile);
-			}
-
 			ssize_t n = 0;
 			if (fd != -1)
 			{
@@ -674,12 +649,6 @@ AJAFileIO::FileInfo(int64_t& createTime, int64_t& modTime, int64_t& size, std::s
 			filePath.resize(n);
 #elif defined(AJA_MAC)
 			// Mac way to get path of file descriptor
-			int fd = mFileDescriptor;
-			if (fd == -1)
-			{
-				fd = fileno(mpFile);
-			}
-
 			if (fd != -1)
 			{
 				filePath.resize(PATH_MAX);
