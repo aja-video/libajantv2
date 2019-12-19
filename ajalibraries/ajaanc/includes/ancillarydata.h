@@ -588,7 +588,7 @@ public:
 	virtual inline uint32_t					GetDC (void) const							{return uint32_t(m_payload.size());}	///< @return	My payload data count, in bytes.
 	virtual inline size_t					GetPayloadByteCount (void) const			{return size_t(GetDC());}				///< @return	My current payload byte count.
 	virtual AJAAncillaryDataType			GetAncillaryDataType (void) const			{return m_ancType;}						///< @return	My anc data type (if known).
-	virtual inline uint32_t					GetFrameID (void) const						{return m_frameID;}						///< @return	My anc data type (if known).
+	virtual inline uint32_t					GetFrameID (void) const						{return m_frameID;}						///< @return	My frame identifier (if known).
 
 	virtual inline const AJAAncillaryDataLocation &		GetDataLocation (void) const	{return m_location;}					///< @brief	My ancillary data "location" within the video stream.
 	virtual inline AJAAncillaryDataCoding	GetDataCoding (void) const					{return m_coding;}						///< @return	The ancillary data coding type (e.g., digital or analog/raw waveform).
