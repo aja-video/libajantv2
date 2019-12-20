@@ -1508,15 +1508,17 @@ bool CNTV2SignalRouter::CompareConnections (const NTV2XptConnections & inLHS,
 
 bool CNTV2SignalRouter::CreateFromString (const string & inString, NTV2XptConnections & outConnections)	//	STATIC
 {
-    NTV2StringList	lines;
-    string	stringToParse(inString); aja::strip(aja::lower(stringToParse));
+	NTV2StringList	lines;
+	string	stringToParse(inString);    aja::strip(aja::lower(stringToParse));
+	aja::replace(stringToParse, " ", "");
+	aja::replace(stringToParse, "\t", "");
 
-    outConnections.clear();
-    if (Tokenize(stringToParse, lines, "\n\r", true).empty())	//	Split the string at line breaks
-    {
-        SRWARN("No lines resulted from input string '" << stringToParse << "'");
-        return true;	//	Nothing there
-    }
+	outConnections.clear();
+	if (Tokenize(stringToParse, lines, "\n\r", true).empty())	//	Split the string at line breaks
+	{
+		SRWARN("No lines resulted from input string '" << stringToParse << "'");
+		return true;	//	Nothing there
+	}
 
 	if (lines.front().find("<==") != string::npos)
 	{
@@ -1571,6 +1573,7 @@ bool CNTV2SignalRouter::CreateFromString (const string & inString, NTV2XptConnec
 	}
 	else
 		{SRFAIL("Unable to parse '" << lines.front() << "' -- expected '.contains(' or '<=='");  return false;}
+	SRINFO(DEC(outConnections.size()) << " connection(s) created from input string");
     return true;
 }
 
