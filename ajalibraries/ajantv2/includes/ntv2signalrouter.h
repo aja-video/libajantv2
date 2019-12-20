@@ -161,6 +161,14 @@ class AJAExport CNTV2SignalRouter
 		virtual bool								ResetFromRegisters (const NTV2InputCrosspointIDSet & inInputXpts, const NTV2RegisterReads & inRegReads);
 
 		/**
+			@brief		Resets me, replacing any/all existing connections with the given connections.
+			@param[in]	inConnections	Specifies the new routing connections.
+			@return		True if successful;  otherwise false.
+			@see		CNTV2SignalRouter::Reset
+		**/
+		virtual bool								ResetFrom (const NTV2XptConnections & inConnections)	{mConnections = inConnections; return true;}
+
+		/**
 			@return	The current number of connections (signal routes).
 			@see		CNTV2SignalRouter::IsEmpty
 		**/
@@ -415,6 +423,17 @@ class AJAExport CNTV2SignalRouter
 														const NTV2XptConnections & inRHS,
 														NTV2XptConnections & outNew,
 														NTV2XptConnections & outRemoved);
+
+		/**
+			@brief		Decodes a given string into a map of crosspoint connections.
+			@param[in]	inString			Specifies the string to be parsed. It can contain the pnemonics that
+											CNTV2SignalRouter::PrintCode generates, or a simple C++ code snippet that contains
+											one or more "device.Connect(...)" calls.
+			@param[out]	outConnections		Receives the connections from what is successfully parsed from the string.
+											It will be empty if this function fails.
+			@return		True if successful;  otherwise false.
+		**/
+		static bool					CreateFromString (const std::string & inString, NTV2XptConnections & outConnections);
 
 		/**
 			@brief		Sets the router from the given string.
