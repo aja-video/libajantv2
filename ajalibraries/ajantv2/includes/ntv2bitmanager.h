@@ -33,11 +33,12 @@ struct AJAExport NTV2BitfileInfo
 {
 	std::string bitfilePath;
 	std::string designName;
+	ULWord designID;
 	ULWord designVersion;
-	ULWord deviceID;
 	ULWord bitfileID;
-	ULWord bitfileVesion;
+	ULWord bitfileVersion;
 	ULWord flags;
+	ULWord deviceID;
 };
 
 typedef std::vector <NTV2BitfileInfo>		NTV2BitfileInfoList;
@@ -61,11 +62,18 @@ public:
 	virtual								~CNTV2BitManager ();
 
 	/**
-	   @brief		Add the bitfile(s) at the given path to the list of bitfiles.
-	   @param[in]	inBitfilePath	Specifies the path name of the bitfile or directory.
+	   @brief		Add the bitfile at the given path to the list of bitfiles.
+	   @param[in]	inBitfilePath	Specifies the path name of the bitfile.
 	   @return		True if add succeeds; otherwise false.
 	**/
-	virtual bool						Add (const std::string & inBitfilePath);
+	virtual bool						AddFile (const std::string & inBitfilePath);
+
+	/**
+	   @brief		Add the bitfile(s) at the given path to the list of bitfiles.
+	   @param[in]	inBitfilePath	Specifies the path name of the directory.
+	   @return		True if add succeeds; otherwise false.
+	**/
+	virtual bool						AddDirectory (const std::string & inDirectory);
 
 	/**
 	   @brief		Clear the list of bitfiles.

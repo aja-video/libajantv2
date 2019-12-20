@@ -101,6 +101,12 @@ class AJAExport CNTV2Bitfile
 		virtual inline bool					IsCompress (void) const		{ return _compress; }
 
 		/**
+			@brief		Answers with the design design ID, as extracted from the bitfile.
+			@return		A ULWord containing the design design ID.
+		**/
+		virtual inline ULWord				GetDesignID (void) const	{ return _designID; }
+
+		/**
 			@brief		Answers with the design version, as extracted from the bitfile.
 			@return		A ULWord containing the design version.
 		**/
@@ -197,6 +203,7 @@ class AJAExport CNTV2Bitfile
 		bool						_clear;
 		bool						_compress;
 		ULWord						_userID;
+		ULWord						_designID;
 		ULWord						_designVersion;
 		ULWord						_bitfileID;
 		ULWord						_bitfileVersion;

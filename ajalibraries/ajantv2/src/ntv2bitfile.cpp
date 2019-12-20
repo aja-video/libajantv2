@@ -42,10 +42,11 @@ void CNTV2Bitfile::Close (void)
 	_partial = false;
 	_clear = false;
 	_compress = false;
-	_userID = 0xffffffff;
-	_designVersion = 0xffffffff;
-	_bitfileID = 0xffffffff;
-	_bitfileVersion = 0xffffffff;
+	_userID = 0;
+	_designID = 0;
+	_designVersion = 0;
+	_bitfileID = 0;
+	_bitfileVersion = 0;
 }
 
 
@@ -366,10 +367,11 @@ void CNTV2Bitfile::SetDesignFlags (const char * pInBuffer, unsigned bufferLength
 
 void CNTV2Bitfile::SetDesignUserID (const char * pInBuffer, unsigned bufferLength)
 {
-	_userID = 0xffffffff;
-	_designVersion = 0xffffffff;
-	_bitfileID = 0xffffffff;
-	_bitfileVersion = 0xffffffff;
+	_userID = 0;
+	_designID = 0;
+	_designVersion = 0;
+	_bitfileID = 0;
+	_bitfileVersion = 0;
 
 	if (!pInBuffer)
 		return;
@@ -386,9 +388,10 @@ void CNTV2Bitfile::SetDesignUserID (const char * pInBuffer, unsigned bufferLengt
 		return;
 	
 	_userID = userID;
-	_designVersion = userID & 0x000000ff;
+	_designID = (userID & 0xff000000) >> 24;
+	_designVersion = (userID & 0x00ff0000) >> 16;
 	_bitfileID = (userID & 0x0000ff00) >> 8;
-	_bitfileVersion = (userID & 0x00ff0000) >> 16;
+	_bitfileVersion = (userID & 0x000000ff) >> 0;
 }
 
 
@@ -521,7 +524,7 @@ public:
 
 static CDesignNameToIDMapMaker				sDesignNameToIDMapMaker;
 
-typedef pair <string, ULWord>				DesignPair;
+typedef pair <ULWord, ULWord>				DesignPair;
 typedef map <DesignPair, NTV2DeviceID>		DesignPairToIDMap;
 typedef DesignPairToIDMap::const_iterator	DesignPairToIDMapConstIter;
 static DesignPairToIDMap					sDesignPairToIDMap;
@@ -533,16 +536,16 @@ public:
 	CDesignPairToIDMapMaker ()
 		{
 			assert (sDesignPairToIDMap.empty ());
-			sDesignPairToIDMap[make_pair("kona5_dr", 0x00)] = DEVICE_ID_KONA5;
+			sDesignPairToIDMap[make_pair(0x01, 0x01)] = DEVICE_ID_KONA5;
 		}
 	~CDesignPairToIDMapMaker ()
 		{
 			sDesignPairToIDMap.clear ();
 		}
-	static NTV2DeviceID DesignPairToID(const string & inDesignName, ULWord bitfileID)
+	static NTV2DeviceID DesignPairToID(ULWord designID, ULWord bitfileID)
 		{
 			assert (!sDesignPairToIDMap.empty ());
-			const DesignPairToIDMapConstIter	iter	(sDesignPairToIDMap.find (make_pair(inDesignName, bitfileID)));
+			const DesignPairToIDMapConstIter	iter	(sDesignPairToIDMap.find (make_pair(designID, bitfileID)));
 			return iter != sDesignPairToIDMap.end () ? iter->second : DEVICE_ID_NOTFOUND;
 		}
 };
@@ -551,12 +554,12 @@ static CDesignPairToIDMapMaker 				sDesignPairToIDMapMaker;
 
 NTV2DeviceID CNTV2Bitfile::GetDeviceID (void) const
 {
-	if (IsPartial())
+	if ((_userID != 0) && (_userID != 0xffffffff))
 	{
-		return sDesignPairToIDMapMaker.DesignPairToID (GetDesignName (), GetBitfileID ());
+		return sDesignPairToIDMapMaker.DesignPairToID (_designID, _bitfileID);
 	}
 	
-	return sDesignNameToIDMapMaker.DesignNameToID (GetDesignName ());
+	return sDesignNameToIDMapMaker.DesignNameToID (_designName);
 }
 
 CNTV2Bitfile::~CNTV2Bitfile ()
