@@ -707,26 +707,55 @@ public:
 	/**
 		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
 		@param[in]	inBuffer	Specifies the host buffer to lock.
-								If inBuffer.IsNULL(), the driver will unlock all host buffers.
+		@param[in]	inMap		Also try to lock the segment map.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	DMABufferLock (const NTV2_POINTER & inBuffer);
+	AJA_VIRTUAL bool	DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap = false);
 
 	/**
 		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
 		@param[in]	pInBuffer		Specifies the starting address of the host buffer to lock.
 		@param[in]	inByteCount		Specifies the total length of the host buffer.
-		@note		Specifying NULL for "pInBuffer" and 0 for "inByteCount" will command the driver to unlock all buffers.
+		@param[in]	inMap			Also try to lock the segment map.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL inline bool	DMABufferLock (const ULWord * pInBuffer, const ULWord inByteCount)	{return DMABufferLock(NTV2_POINTER(pInBuffer, inByteCount));}
+	AJA_VIRTUAL inline bool	DMABufferLock (const ULWord * pInBuffer, const ULWord inByteCount, bool inMap = false)
+	{
+		return DMABufferLock(NTV2_POINTER(pInBuffer, inByteCount), inMap);
+	}
 
+
+	/**
+		@brief		Unlocks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
+		@param[in]	inBuffer	Specifies the host buffer to unlock.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	DMABufferUnlock (const NTV2_POINTER & inBuffer);
+
+	/**
+		@brief		Unlocks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
+		@param[in]	pInBuffer		Specifies the starting address of the host buffer to unlock.
+		@param[in]	inByteCount		Specifies the total length of the host buffer.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL inline bool	DMABufferUnlock (const ULWord * pInBuffer, const ULWord inByteCount)
+	{
+		return DMABufferUnlock(NTV2_POINTER(pInBuffer, inByteCount));
+	}
 
 	/**
 		@brief		Unlocks all buffers used for DMA transfers.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	DMABufferUnlockAll ();
+
+	/**
+		@brief		Control automatic buffer locking.
+		@param[in]	inEnable		Specify auto locking state.
+		@param[in]	inMaxLockSize	Specify maximum number of locked bytes.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	DMABufferAutoLock (const bool inEnable, const ULWord64 inMaxLockSize = 0);
 
 
 	/**
