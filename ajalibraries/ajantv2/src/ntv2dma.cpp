@@ -485,7 +485,7 @@ bool CNTV2Card::DMABufferUnlockAll (void)
 	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&unlockAllMsg));
 }
 
-bool CNTV2Card::DMABufferAutoLock (const bool inEnable, const ULWord64 inMaxLockSize)
+bool CNTV2Card::DMABufferAutoLock (const bool inEnable, const bool inMap, const ULWord64 inMaxLockSize)
 {
 	if (!_boardOpened)
 		return false;		//	Device not open!
@@ -494,7 +494,7 @@ bool CNTV2Card::DMABufferAutoLock (const bool inEnable, const ULWord64 inMaxLock
 	if (inEnable)
 	{
 		autoMsg.SetMaxLockSize (inMaxLockSize);
-		autoMsg.SetFlags (DMABUFFERLOCK_AUTO | DMABUFFERLOCK_MAX_SIZE);
+        autoMsg.SetFlags (DMABUFFERLOCK_AUTO | DMABUFFERLOCK_MAX_SIZE | (inMap? DMABUFFERLOCK_MAP : 0));
 	}
 	else
 	{

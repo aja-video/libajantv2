@@ -752,10 +752,11 @@ public:
 	/**
 		@brief		Control automatic buffer locking.
 		@param[in]	inEnable		Specify auto locking state.
-		@param[in]	inMaxLockSize	Specify maximum number of locked bytes.
+        @param[in]	inMap			Also try to lock the segment map.
+        @param[in]	inMaxLockSize	Specify maximum number of locked bytes.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	DMABufferAutoLock (const bool inEnable, const ULWord64 inMaxLockSize = 0);
+    AJA_VIRTUAL bool	DMABufferAutoLock (const bool inEnable, const bool inMap = false, const ULWord64 inMaxLockSize = 0);
 
 
 	/**
