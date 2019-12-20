@@ -399,18 +399,17 @@ void NTV2Capture4K::SetupHostBuffers (void)
 
 void NTV2Capture4K::RouteInputSignal(void)
 {
-	if (NTV2_INPUT_SOURCE_IS_HDMI (mInputSource))
-	{
-		NTV2LHIHDMIColorSpace	inputColor	(NTV2_LHIHDMIColorSpaceYCbCr);
+	const bool	isFrameRGB (::IsRGBFormat(mPixelFormat));
+	if (NTV2_INPUT_SOURCE_IS_HDMI(mInputSource))
+	{	//	HDMI
+		NTV2LHIHDMIColorSpace	inputColor(NTV2_LHIHDMIColorSpaceYCbCr);
 		mDevice.GetHDMIInputColor (inputColor, mInputChannel);
-
-		const bool						isInputRGB				(inputColor == NTV2_LHIHDMIColorSpaceRGB);
-		const bool						isFrameRGB				(::IsRGBFormat (mPixelFormat));
+		const bool	isInputRGB	(inputColor == NTV2_LHIHDMIColorSpaceRGB);
 
 		if (mInputChannel == NTV2_CHANNEL1)
-		{
+		{	//	HDMI CH1234
 			if (isInputRGB && isFrameRGB)
-			{
+			{	//	HDMI CH1234 RGB SIGNAL AND RGB FBF
 				mDevice.Connect(NTV2_Xpt425Mux1AInput, NTV2_XptHDMIIn1RGB);
 				mDevice.Connect(NTV2_Xpt425Mux1BInput, NTV2_XptHDMIIn1Q2RGB);
 				mDevice.Connect(NTV2_Xpt425Mux2AInput, NTV2_XptHDMIIn1Q3RGB);
@@ -420,9 +419,9 @@ void NTV2Capture4K::RouteInputSignal(void)
 				mDevice.Connect(NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BRGB);
 				mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2ARGB);
 				mDevice.Connect(NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BRGB);
-			}
+			}	//	HDMI CH1234 RGB SIGNAL AND RGB FBF
 			else if (isInputRGB && !isFrameRGB)
-			{
+			{	//	HDMI CH1234 RGB SIGNAL AND YUV FBF
 				mDevice.Connect(NTV2_XptCSC1VidInput, NTV2_XptHDMIIn1RGB);
 				mDevice.Connect(NTV2_XptCSC2VidInput, NTV2_XptHDMIIn1Q2RGB);
 				mDevice.Connect(NTV2_XptCSC3VidInput, NTV2_XptHDMIIn1Q3RGB);
@@ -437,9 +436,9 @@ void NTV2Capture4K::RouteInputSignal(void)
 				mDevice.Connect(NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BYUV);
 				mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2AYUV);
 				mDevice.Connect(NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BYUV);
-			}
+			}	//	HDMI CH1234 RGB SIGNAL AND YUV FBF
 			else if (!isInputRGB && isFrameRGB)
-			{
+			{	//	HDMI CH1234 YUV SIGNAL AND RGB FBF
 				mDevice.Connect(NTV2_XptCSC1VidInput, NTV2_XptHDMIIn1);
 				mDevice.Connect(NTV2_XptCSC2VidInput, NTV2_XptHDMIIn1Q2);
 				mDevice.Connect(NTV2_XptCSC3VidInput, NTV2_XptHDMIIn1Q3);
@@ -454,9 +453,9 @@ void NTV2Capture4K::RouteInputSignal(void)
 				mDevice.Connect(NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BRGB);
 				mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2ARGB);
 				mDevice.Connect(NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BRGB);
-			}
+			}	//	HDMI CH1234 YUV SIGNAL AND RGB FBF
 			else
-			{
+			{	//	HDMI CH1234 YUV SIGNAL AND YUV FBF
 				mDevice.Connect(NTV2_Xpt425Mux1AInput, NTV2_XptHDMIIn1);
 				mDevice.Connect(NTV2_Xpt425Mux1BInput, NTV2_XptHDMIIn1Q2);
 				mDevice.Connect(NTV2_Xpt425Mux2AInput, NTV2_XptHDMIIn1Q3);
@@ -466,82 +465,25 @@ void NTV2Capture4K::RouteInputSignal(void)
 				mDevice.Connect(NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BYUV);
 				mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2AYUV);
 				mDevice.Connect(NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BYUV);
-			}
-		}
+			}	//	HDMI CH1234 YUV SIGNAL AND YUV FBF
+		}	//	HDMI CH1234
 		else
-		{
-			if (isInputRGB && isFrameRGB)
-			{
-				mDevice.Connect(NTV2_Xpt425Mux1AInput, NTV2_XptHDMIIn1RGB);
-				mDevice.Connect(NTV2_Xpt425Mux1BInput, NTV2_XptHDMIIn1Q2RGB);
-				mDevice.Connect(NTV2_Xpt425Mux2AInput, NTV2_XptHDMIIn1Q3RGB);
-				mDevice.Connect(NTV2_Xpt425Mux2BInput, NTV2_XptHDMIIn1Q4RGB);
-
-				mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_Xpt425Mux1ARGB);
-				mDevice.Connect(NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BRGB);
-				mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2ARGB);
-				mDevice.Connect(NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BRGB);
-			}
-			else if (isInputRGB && !isFrameRGB)
-			{
-				mDevice.Connect(NTV2_XptCSC5VidInput, NTV2_XptHDMIIn2RGB);
-				mDevice.Connect(NTV2_XptCSC6VidInput, NTV2_XptHDMIIn2Q2RGB);
-				mDevice.Connect(NTV2_XptCSC7VidInput, NTV2_XptHDMIIn2Q3RGB);
-				mDevice.Connect(NTV2_XptCSC8VidInput, NTV2_XptHDMIIn2Q4RGB);
-
-				mDevice.Connect(NTV2_Xpt425Mux3AInput, NTV2_XptCSC5VidYUV);
-				mDevice.Connect(NTV2_Xpt425Mux3BInput, NTV2_XptCSC6VidYUV);
-				mDevice.Connect(NTV2_Xpt425Mux4AInput, NTV2_XptCSC7VidYUV);
-				mDevice.Connect(NTV2_Xpt425Mux4BInput, NTV2_XptCSC8VidYUV);
-
-				mDevice.Connect(NTV2_XptFrameBuffer3Input, NTV2_Xpt425Mux3AYUV);
-				mDevice.Connect(NTV2_XptFrameBuffer3BInput, NTV2_Xpt425Mux3BYUV);
-				mDevice.Connect(NTV2_XptFrameBuffer4Input, NTV2_Xpt425Mux4AYUV);
-				mDevice.Connect(NTV2_XptFrameBuffer4BInput, NTV2_Xpt425Mux4BYUV);
-			}
-			else if (!isInputRGB && isFrameRGB)
-			{
-				mDevice.Connect(NTV2_XptCSC5VidInput, NTV2_XptHDMIIn2);
-				mDevice.Connect(NTV2_XptCSC6VidInput, NTV2_XptHDMIIn2Q2);
-				mDevice.Connect(NTV2_XptCSC7VidInput, NTV2_XptHDMIIn2Q3);
-				mDevice.Connect(NTV2_XptCSC8VidInput, NTV2_XptHDMIIn2Q4);
-
-				mDevice.Connect(NTV2_Xpt425Mux3AInput, NTV2_XptCSC5VidRGB);
-				mDevice.Connect(NTV2_Xpt425Mux3BInput, NTV2_XptCSC6VidRGB);
-				mDevice.Connect(NTV2_Xpt425Mux4AInput, NTV2_XptCSC7VidRGB);
-				mDevice.Connect(NTV2_Xpt425Mux4BInput, NTV2_XptCSC8VidRGB);
-
-				mDevice.Connect(NTV2_XptFrameBuffer3Input, NTV2_Xpt425Mux3ARGB);
-				mDevice.Connect(NTV2_XptFrameBuffer3BInput, NTV2_Xpt425Mux3BRGB);
-				mDevice.Connect(NTV2_XptFrameBuffer4Input, NTV2_Xpt425Mux4ARGB);
-				mDevice.Connect(NTV2_XptFrameBuffer4BInput, NTV2_Xpt425Mux4BRGB);
-			}
-			else
-			{
-				mDevice.Connect(NTV2_Xpt425Mux3AInput, NTV2_XptHDMIIn2);
-				mDevice.Connect(NTV2_Xpt425Mux3BInput, NTV2_XptHDMIIn2Q2);
-				mDevice.Connect(NTV2_Xpt425Mux4AInput, NTV2_XptHDMIIn2Q3);
-				mDevice.Connect(NTV2_Xpt425Mux4BInput, NTV2_XptHDMIIn2Q4);
-
-				mDevice.Connect(NTV2_XptFrameBuffer3Input, NTV2_Xpt425Mux3AYUV);
-				mDevice.Connect(NTV2_XptFrameBuffer3BInput, NTV2_Xpt425Mux3BYUV);
-				mDevice.Connect(NTV2_XptFrameBuffer4Input, NTV2_Xpt425Mux4AYUV);
-				mDevice.Connect(NTV2_XptFrameBuffer4BInput, NTV2_Xpt425Mux4BYUV);
-			}
-		}
-	}
+		{	//	HDMI CH5678
+			NTV2_ASSERT(false && "Ch5678 is Corvid88, but it has no HDMI!");
+		}	//	HDMI CH5678
+	}	//	HDMI
 	else
-	{
+	{	//	SDI
 		if (::NTV2DeviceCanDo12gRouting(mDeviceID))
 		{
 			mDevice.Connect (::GetFrameBufferInputXptFromChannel (mInputChannel), ::GetInputSourceOutputXpt (mInputSource, false, false, 0));
 		}
 		else if (mInputChannel == NTV2_CHANNEL1)
-		{
-			if (IsRGBFormat(mPixelFormat))
-			{
+		{	//	SDI CH1234
+			if (isFrameRGB)
+			{	//	SDI CH1234 RGB
 				if(mDoTsiRouting)
-				{
+				{	//	SDI CH1234 RGB TSI
 					mDevice.Connect(NTV2_XptCSC1VidInput, NTV2_XptSDIIn1);
 					mDevice.Connect(NTV2_XptCSC2VidInput, NTV2_XptSDIIn2);
 					mDevice.Connect(NTV2_XptCSC3VidInput, NTV2_XptSDIIn3);
@@ -556,9 +498,9 @@ void NTV2Capture4K::RouteInputSignal(void)
 					mDevice.Connect(NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BRGB);
 					mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2ARGB);
 					mDevice.Connect(NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BRGB);
-				}
+				}	//	SDI CH1234 RGB TSI
 				else
-				{
+				{	//	SDI CH1234 RGB SQUARES
 					mDevice.Connect(NTV2_XptCSC1VidInput, NTV2_XptSDIIn1);
 					mDevice.Connect(NTV2_XptCSC2VidInput, NTV2_XptSDIIn2);
 					mDevice.Connect(NTV2_XptCSC3VidInput, NTV2_XptSDIIn3);
@@ -568,11 +510,11 @@ void NTV2Capture4K::RouteInputSignal(void)
 					mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_XptCSC2VidRGB);
 					mDevice.Connect(NTV2_XptFrameBuffer3Input, NTV2_XptCSC3VidRGB);
 					mDevice.Connect(NTV2_XptFrameBuffer4Input, NTV2_XptCSC4VidRGB);
-				}
-			}
+				}	//	SDI CH1234 RGB SQUARES
+			}	//	SDI CH1234 RGB FBF
 			else
 			{
-				if(mDoTsiRouting)
+				if (mDoTsiRouting)
 				{
 					mDevice.Connect(NTV2_Xpt425Mux1AInput, NTV2_XptSDIIn1);
 					mDevice.Connect(NTV2_Xpt425Mux1BInput, NTV2_XptSDIIn2);
@@ -583,22 +525,22 @@ void NTV2Capture4K::RouteInputSignal(void)
 					mDevice.Connect(NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BYUV);
 					mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2AYUV);
 					mDevice.Connect(NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BYUV);
-				}
+				}	//	SDI CH1234 YUV TSI
 				else
 				{
 					mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);
 					mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_XptSDIIn2);
 					mDevice.Connect(NTV2_XptFrameBuffer3Input, NTV2_XptSDIIn3);
 					mDevice.Connect(NTV2_XptFrameBuffer4Input, NTV2_XptSDIIn4);
-				}
-			}
-		}
+				}	//	SDI CH1234 YUV SQUARES
+			}	//	SDI CH1234 YUV FBF
+		}	//	SDI CH1234
 		else
-		{
-			if (IsRGBFormat(mPixelFormat))
-			{
-				if(mDoTsiRouting)
-				{
+		{	//	SDI CH5678
+			if (isFrameRGB)
+			{	//	SDI CH5678 RGB FBF
+				if (mDoTsiRouting)
+				{	//	SDI CH5678 RGB TSI
 					mDevice.Connect(NTV2_XptCSC5VidInput, NTV2_XptSDIIn5);
 					mDevice.Connect(NTV2_XptCSC6VidInput, NTV2_XptSDIIn6);
 					mDevice.Connect(NTV2_XptCSC7VidInput, NTV2_XptSDIIn7);
@@ -613,9 +555,9 @@ void NTV2Capture4K::RouteInputSignal(void)
 					mDevice.Connect(NTV2_XptFrameBuffer5BInput, NTV2_Xpt425Mux3BRGB);
 					mDevice.Connect(NTV2_XptFrameBuffer6Input, NTV2_Xpt425Mux4ARGB);
 					mDevice.Connect(NTV2_XptFrameBuffer6BInput, NTV2_Xpt425Mux4BRGB);
-				}
+				}	//	SDI CH5678 RGB TSI
 				else
-				{
+				{	//	SDI CH5678 RGB SQUARES
 					mDevice.Connect(NTV2_XptCSC5VidInput, NTV2_XptSDIIn5);
 					mDevice.Connect(NTV2_XptCSC6VidInput, NTV2_XptSDIIn6);
 					mDevice.Connect(NTV2_XptCSC7VidInput, NTV2_XptSDIIn7);
@@ -625,12 +567,12 @@ void NTV2Capture4K::RouteInputSignal(void)
 					mDevice.Connect(NTV2_XptFrameBuffer6Input, NTV2_XptCSC6VidRGB);
 					mDevice.Connect(NTV2_XptFrameBuffer7Input, NTV2_XptCSC7VidRGB);
 					mDevice.Connect(NTV2_XptFrameBuffer8Input, NTV2_XptCSC8VidRGB);
-				}
-			}
+				}	//	SDI CH5678 RGB SQUARES
+			}	//	SDI CH5678 RGB FBF
 			else
-			{
-				if(mDoTsiRouting)
-				{
+			{	//	SDI CH5678 YUV FBF
+				if (mDoTsiRouting)
+				{	//	SDI CH5678 YUV TSI
 					mDevice.Connect(NTV2_Xpt425Mux3AInput, NTV2_XptSDIIn5);
 					mDevice.Connect(NTV2_Xpt425Mux3BInput, NTV2_XptSDIIn6);
 					mDevice.Connect(NTV2_Xpt425Mux4AInput, NTV2_XptSDIIn7);
@@ -640,17 +582,17 @@ void NTV2Capture4K::RouteInputSignal(void)
 					mDevice.Connect(NTV2_XptFrameBuffer5BInput, NTV2_Xpt425Mux3BYUV);
 					mDevice.Connect(NTV2_XptFrameBuffer6Input, NTV2_Xpt425Mux4AYUV);
 					mDevice.Connect(NTV2_XptFrameBuffer6BInput, NTV2_Xpt425Mux4BYUV);
-				}
+				}	//	SDI CH5678 YUV TSI
 				else
-				{
+				{	//	SDI CH5678 YUV SQUARES
 					mDevice.Connect(NTV2_XptFrameBuffer5Input, NTV2_XptSDIIn5);
 					mDevice.Connect(NTV2_XptFrameBuffer6Input, NTV2_XptSDIIn6);
 					mDevice.Connect(NTV2_XptFrameBuffer7Input, NTV2_XptSDIIn7);
 					mDevice.Connect(NTV2_XptFrameBuffer8Input, NTV2_XptSDIIn8);
-				}
-			}
-		}
-	}
+				}	//	SDI CH5678 YUV SQUARES
+			}	//	SDI CH5678 YUV FBF
+		}	//	SDI CH5678
+	}	//	SDI
 }	//	RouteInputSignal
 
 
