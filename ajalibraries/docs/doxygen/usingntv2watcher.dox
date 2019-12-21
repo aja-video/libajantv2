@@ -252,8 +252,6 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 		-	<b>Show Fields</b> — (<b>Lines</b> and <b>Components</b> views only) — Enables/disables the display of lines F1, F2 or both.
 		-	<b>Copy</b> — Copies multiple representations of the selection to the Clipboard. If there’s no selection, the entire raster is used.
 		-	<b>Paste</b> — (Available only if an entire frame was previously Copied) — Replaces the current 8MB or 16MB frame with the 8MB or 16MB frame that was Copied earlier.
-		-	<b>Set Color…</b> — (<b>Auto</b> mode OFF only) — Displays a color picker.
-			Choosing a color will set the active lines of the current frame buffer to the chosen color.
 		-	<b>Fill…</b> — (<b>Auto</b> mode OFF only) — Reveals the \ref fillbufferdlog for filling device frame memory with specific values or test patterns.
 		-	<b>Compare to Frame…</b> — (<b>Auto</b> mode OFF only) — Enables <b>Frame Differencing mode</b>,
 			comparing the current frame with another, highlighting the differences.  To cancel this mode,
@@ -665,13 +663,41 @@ The inspector has the following individual panels:
 	-	<b>Routing Registers</b> — A panel containing a list of the device’s routing registers.
 		The register values are editable, and can be changed.
 
-This inspector supports these two Choose <b>Print…</b> from the <b>File</b> menu to print a two-page report of the current routing configuration.
+Choose <b>Print…</b> from the <b>File</b> menu to print a two-page report of the current routing configuration.
 
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the displayed routing information to the Clipboard.
 
-<b>Routing Diagram Operation</b>
+This inspector will accept plain text either pasted in (using the <b>Paste</b> command from the <b>Edit</b> menu),
+or by dropping it in (using drag-and-drop) from another application. To be interpreted correctly as a set of routing
+connections, the text must syntactically conform to:
+	-	<b>C++ Statements</b> — One or more lines, each containing a call to CNTV2Card::Connect :
+		@code{.cpp}
+			device.Connect (NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);
+			device.Connect (NTV2_XptCSC1VidInput, NTV2_XptSDIIn1);
+			device.Connect (NTV2_XptCSC2VidInput, NTV2_XptSDIIn1DS2);
+			device.Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
+			device.Connect (NTV2_XptLUT2Input, NTV2_XptCSC2VidRGB);
+			device.Connect (NTV2_XptSDIOut3Input, NTV2_XptSDIIn1);
+			device.Connect (NTV2_XptSDIOut4Input, NTV2_XptSDIIn1DS2);
+			device.Connect (NTV2_XptHDMIOutInput, NTV2_XptSDIIn1);
+			device.Connect (NTV2_XptAnalogOutInput, NTV2_XptSDIIn1);
+		@endcode
+	-	<b>Shorthand Notation</b> — One or more lines having the “shorthand” notation:
+		@code
+			FB1 <== SDIIn1
+			CSC1 <== SDIIn1
+			CSC2 <== SDIIn1DS2
+			LUT1 <== CSC1RGB
+			LUT2 <== CSC2RGB
+			SDIOut3 <== SDIIn1
+			SDIOut4 <== SDIIn1DS2
+			HDMIOutQ1 <== SDIIn1
+			AnalogOut <== SDIIn1
+		@endcode
 
-The Routing Diagram is where routing changes are performed interactively. This is the panel in which most tasks are performed.
+<b>Routing Diagram</b>
+
+The <b>Routing Diagram</b> is where routing changes are performed interactively. This is the panel in which most tasks are performed.
 
 There are two principal types of objects in the diagram:
 
@@ -690,8 +716,10 @@ There are two principal types of objects in the diagram:
 			-	<b>Output</b>s are always on the widget’s right side.
 			-	<b>Output</b>s can be connected to any number of <b>Input<b> crosspoints.
 			-	<b>Output</b>s have a fixed signal type that they emit (if enabled): YCbCr or RGB.
-			-	Depending on the parent <b>Widget</b> and how it’s configured, an <b>Output</b> can be disabled, in which case it appears dimmed.
-	-	<b>Socket</b>s can be logically <b>enabled</b> or <b>disabled</b>, usually determined by the parent <b>Widget</b>’s configuration.
+			-	Depending on the parent <b>Widget</b> and how it’s configured, an <b>Output</b> can be disabled,
+				in which case it appears dimmed.
+	-	<b>Socket</b>s can be logically <b>enabled</b> or <b>disabled</b>, usually determined
+		by the parent <b>Widget</b>’s configuration.
 -	<b>Cables/Wires</b> — These represent the currently existing widget crosspoint connections,
 	as read from the device’s “crosspoint select” registers.
 
@@ -699,7 +727,7 @@ Hovering the mouse pointer over any of these aforementioned objects will display
 
 Right-clicking on any object will pop up a context menu with command functions that are relevant for the object and its current state.
 
-Right-clicking in the diagram’s gray “desktop” pops up a context menu with command functions that affect all channels of the device.
+Right-clicking in the diagram’s gray background pops up a context menu with command functions that affect all channels of the device.
 
 -	<b>Video Format</b> — Pops up a sub-menu of video formats supported by the device.
 	Choosing one of these formats globally changes the video format for all channels on the device.
@@ -707,12 +735,34 @@ Right-clicking in the diagram’s gray “desktop” pops up a context menu with
 	(“uniformat”) mode before globally changing the video format.
 -	<b>4K Mode</b> — Available only if the device supports 4K/UHD video. If clicked, pops up a sub-menu of 4K modes supported by the device:
 	-	<b>Tsi</b> — Selects two-sample-interleave (per SMPTE 425-5).
-	-	<b>Squares</b> — Selects the classic behavior.
+	-	<b>Squares</b> — Selects the “quad” mode (aka “squares”).
+-	<b>8K Mode</b> — Available only if the device supports 8K/UHD2 video. If clicked, pops up a sub-menu of 8K modes supported by the device:
+	-	<b>Tsi</b> — Selects two-sample-interleave (per SMPTE 425-5).
+	-	<b>Squares</b> — Selects “quad-quad” mode.
 -	<b>Frame Buffer Format</b> — Pops up a sub-menu of frame buffer pixel formats supported by the device.
 	Choosing one of the formats globally changes the video format for all channels on the device.
+-	<b>Clear Cables</b> — Disconnects all connections between widgets.
+-	<b>Copy (Diagram)</b> — Copies the diagram image to the clipboard.
+-	<b>Copy (Source Code)</b> — Copies the CNTV2Card::Connect calls that are needed
+	to produce the current routing as C/C++ source to the clipboard.
+-	<b>Paste Routing</b> — Replaces the current routing with the routing determined by the encoded text from the clipboard.
+-	<b>Show All</b> — Reveals all hidden widgets.
+-	<b>Hide Unconnected</b> — Hides all widgets that aren’t connected to anything else.
 
-@note	Changing video or pixel formats by right-clicking in a <b>Frame Store</b> widget (see below) only changes that
-		particular channel’s video or pixel format (except for “quad” formats that require ganging channels 1-4 or 5-8).
+<b>Code Panel</b>
+
+The Code Panel textually shows the device’s current routing configuration in one of two ways:
+	-	<b>C++ Code</b> — shows the SDK calls necessary to produce the routing configuration.
+	-	<b>Shorthand</b> — shows the “shorthand” notation for it.
+
+The menu control allows you to choose which encoding form to display.
+The text panel is read-only — i.e., you can’t change what’s in it.
+However, you can make selections, and copy the selected text to the host windowing system’s clipboard.
+
+<b>Routing Registers Panel</b>
+
+The Registers Panel shows the device’s routing registers.
+To edit a register’s value, click in its value, change the value, then press Enter (or click elsewhere).
 
 
 
@@ -740,6 +790,9 @@ There are currently three ways to fill buffer memory:
 	-#	<b>Test Pattern</b> — Fills one or more buffers with any of several predefined test patterns.
 		@image	html	watcher-tool-fill-pat.png
 		The test pattern image is written to the buffer(s) immediately after choosing the test pattern.
+	-#	<b>Color</b> — Fills one or more buffers with any color chosen from a standard color picker.
+		@image	html	watcher-tool-fill-color.png
+		The color raster is written immediately to the buffer(s) as the color is changed in the dialog.
 	-#	<b>Text</b> — Fills one or more buffers with glyphs rendered using the ::CNTV2CaptionRenderer class.
 		@image	html	watcher-tool-fill-txt.png
 		Note that the frame buffer(s) are written immediately after making any changes or selections in the panel.

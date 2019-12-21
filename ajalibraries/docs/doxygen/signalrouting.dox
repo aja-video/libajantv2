@@ -61,16 +61,14 @@
 	The CNTV2Card::Connect call is used to make and/or break these output-to-input crosspoint connections.
 	The CNTV2Card::ClearRouting function breaks <i>all</i> crosspoint connections.
 
-	Historically, there was no programmatic way in NTV2 to determine at runtime if a device implemented a specific connection path.
-	Starting in SDK 14.0, AJA finally implemented a program that inspects the FPGA source code to compile a static “implemented routes”
-	table that’s queried by the CNTV2Card::CanConnect function. These tables are correct and complete for firmware versions used
-	at the time of the SDK release. However, subsequent firmware updates may add or remove interconnect routes that would not be
-	reflected in the tables used by the SDK. We hope to improve this process going forward.
+	Sadly, there’s never been a programmatic way in NTV2 to determine at runtime if a device implemented a specific connection path.
+	The APIs are all in place to support this, but at this time, they aren’t functional.
+	Attempts were made in the past to compile a static “implemented routes” table for popular firmware around the SDK 14.0
+	period, but it wasn’t reliable. AJA still intends to resolve this issue at some point in the future.
 
-	The NTV2 SDK provides two tools that graphically show the available device widgets and the signal routing between them.
-	-	\ref usingcables — An ancient, but still functional graphical utility that allows you to inspect and interactively change
-		widget configuration and signal routing paths between widgets.
-	-	The \ref inspectorroute in \ref usingntv2watcher — This will eventually incorporate the functionality of \ref usingcables .
+	The NTV2 SDK provides the \ref inspectorroute in \ref usingntv2watcher that graphically shows the available device widgets
+	and the signal routing between them. It lets you inspect and interactively change widget configuration and signal routing
+	paths between widgets.
 
 
 
