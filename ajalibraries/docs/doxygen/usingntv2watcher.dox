@@ -442,7 +442,8 @@ The display highlights changed content with a brighter color.
 		-	<b>Copy</b> — Copies the audio buffer contents to the clipboard.
 		-	<b>Paste</b> — (<b>Output</b> mode only) Pastes the clipboard contents into the output audio buffer.
 			Available only if previously copied from an Audio inspector view.
-		-	<b>Fill</b> — (<b>Output</b> mode only) Fills the output audio buffer with 440Hz constant-amplitude identical-phase sinusoidal tone.
+
+Use the \ref tonegenerator to fill the audio output buffer, either statically (one-time data fill) or dynamically (continuously).
 
 
 <hr size="50px">
