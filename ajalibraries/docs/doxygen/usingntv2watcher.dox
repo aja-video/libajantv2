@@ -608,35 +608,44 @@ Its <b>Filter</b> feature permits immediate customization to focus on specific r
 The inspector has the following:
 	-	A scrollable table of registers, one register per row, in ascending register number (i.e. bar address) order.
 	-	<b>Virtuals</b> — A checkbox that controls if virtual registers are included in the list or not.
-	-	<b>Filter</b> — An editable text box whose content determines which registers are seen in the list:
+	-	<b>Filter</b> — An editable text box whose content determines which registers are seen in the list.
+		It’s accompanied by a pop-up menu containing several named register groups, and any saved filters.
+		The text in the box acts as a filter:
 		-	<i>empty</i> — No filtering takes place. All registers are shown.
-		-	<i>non-empty</i> — Filtering takes place based on what’s in the search box:
-			-	<b>decimal numbers</b> — A comma-separated list of register number ranges. For example:
-				-	<b>25</b> — Only show register 25
-				-	<b>25-31</b> — Only show registers 25, 26, 27, 28, 29, 30 and 31.
-				-	<b>3,5,7</b> — Only show registers 3, 5 and 7.
-				-	<b>3-5,7</b> — Only show registers 3, 4, 5 and 7.
-			-	<b>kRegClass</b>… — A predefined group of registers. The popup menu shows these predefined register groups (e.g., inputs, outputs, HDMI, etc.).
-			-	Anything else is used in a case-insensitive search for register names containing that character sequence.
-	-	<b>Horizontal Ruler</b> — This ruler shows the table column headings.
-		-	Right-click in the horizontal ruler to control the register table view:
-			-	<b>Column Display</b> — Controls which columns are shown, and in what order:
-				-	<b>Reg Number</b> — The register number
-				-	<b>Reg Offset</b> — The register offset into its base address range (BAR).
-				-	<b>Reg Name</b> — The register name.
-				-	<b>Reg Value</b> — The register value.
-				-	<b>Reg Decoded Value</b> — Text that shows the register value in a human-readable format.
-			-	<b>Radix</b> — Controls the radix of the displayed register values.
-				-	<b>Bin (Base 2)</b> — Display register values in base 2 (binary).
-				-	<b>Oct (Base 8)</b> — Display register values in base 8 (octal).
-				-	<b>Dec (Base 10)</b> — Display register values in base 10 (unsigned decimal).
-				-	<b>Hex (Base 16)</b> — Display register values in base 16 (hexadecimal).
+		-	<i>decimal numbers</i> — A comma-separated list of register number ranges. For example:
+			-	<b>25</b> — Only show register 25
+			-	<b>25-31</b> — Only show registers 25, 26, 27, 28, 29, 30 and 31.
+			-	<b>3,5,7</b> — Only show registers 3, 5 and 7.
+			-	<b>3-7,20</b> — Only show registers 3, 4, 5, 6, 7 and 20.
+		-	<b>kRegClass</b>… — A predefined group of registers.
+			The popup menu shows these predefined register groups (e.g., inputs, outputs, HDMI, etc.).
+		-	Anything else is used in a case-insensitive search for register names containing the text.
+	-	<b>Save</b> — Available if the filter text isn’t currently a preset in the popup menu.
+		Click to save the filter as a new preset.
+	-	<b>Remove</b> — Available if the filter text matches a previously-saved preset in the popup menu.
+		Click to remove it from the popup menu.
+
+The register list is a table of register values in register number order.
+Right-clicking in any of the column headings pops up a menu:
+	-	<b>Column Display</b> — Controls which columns are shown, and their order:
+		-	<b>Reg Number</b> — The register number
+		-	<b>Reg Offset</b> — The register offset into its base address range (BAR).
+		-	<b>Reg Name</b> — The register name.
+		-	<b>Reg Value</b> — The register value.
+		-	<b>Reg Decoded Value</b> — Text that shows the register value in a human-readable format.
+	-	<b>Radix</b> — Controls the radix of the displayed register values.
+		-	<b>Bin (Base 2)</b> — Display register values in base 2 (binary).
+		-	<b>Oct (Base 8)</b> — Display register values in base 8 (octal).
+		-	<b>Dec (Base 10)</b> — Display register values in base 10 (unsigned decimal).
+		-	<b>Hex (Base 16)</b> — Display register values in base 16 (hexadecimal).
 
 To change a register’s value:
-	-	Click in the value. An edit box will appear.
-	-	Changes the value in the edit box as desired (keeping to the existing display radix).
-	-	Press <b>Enter</b> or <b>Return</b> to confirm your changes, and write the new register value to the device. The edit box will disappear.
-	-	Press <b>Escape</b> to abandon your changes. The edit box will disappear.
+	-	Click inside the register value. An edit box will appear.
+	-	Change the value in the edit box as desired (keeping to the existing display radix).
+	-	Press <b>Enter</b> or <b>Return</b> to confirm your changes, and write the new register value to the device.
+		The edit box will disappear.
+	-	Press <b>Escape</b> or click elsewhere to abandon your changes.
+		The edit box will disappear.
 
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy to the host’s Clipboard a set of CNTV2Card::WriteRegister
 function calls that will produce the register values seen in the display.
@@ -709,13 +718,13 @@ There are two principal types of objects in the diagram:
 		There are two kinds of <b>Sockets</b>:
 		-	<b>Input</b> — This is a signal “sink” or “destination” crosspoint.
 			-	<b>Input</b>s are always on the widget’s left side.
-			-	<b>Input</b>s can only be connected to one <b>Output<b> crosspoint.
+			-	<b>Input</b>s can only be connected to one <b>Output</b> crosspoint.
 			-	Depending on the parent <b>Widget</b>, <b>Input Socket</b>s sometimes can accept both RGB or YCbCr signals, or only RGB or YCbCr.
 			-	Depending on the parent <b>Widget</b> and how it’s configured, an <b>Input</b> can be disabled, in which case it appears dimmed.
 				Signals arriving at a disabled input are ignored by the Widget.
 		-	<b>Output</b> — This is a signal “source” crosspoint.
 			-	<b>Output</b>s are always on the widget’s right side.
-			-	<b>Output</b>s can be connected to any number of <b>Input<b> crosspoints.
+			-	<b>Output</b>s can be connected to any number of <b>Input</b> crosspoints.
 			-	<b>Output</b>s have a fixed signal type that they emit (if enabled): YCbCr or RGB.
 			-	Depending on the parent <b>Widget</b> and how it’s configured, an <b>Output</b> can be disabled,
 				in which case it appears dimmed.
