@@ -676,7 +676,7 @@
 		B455DF3B210F9703002A69FD /* thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = thread.h; path = ../../ajabase/system/thread.h; sourceTree = SOURCE_ROOT; };
 		B455DF56210F9719002A69FD /* eventimpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = eventimpl.cpp; path = ../../ajabase/system/mac/eventimpl.cpp; sourceTree = SOURCE_ROOT; };
 		B455DF57210F9719002A69FD /* eventimpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = eventimpl.h; path = ../../ajabase/system/mac/eventimpl.h; sourceTree = SOURCE_ROOT; };
-		B455DF58210F9719002A69FD /* file_io.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file_io.cpp; path = ../../ajabase/system/mac/file_io.cpp; sourceTree = SOURCE_ROOT; };
+		B455DF58210F9719002A69FD /* file_io.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file_io.cpp; path = ../../ajabase/system/file_io.cpp; sourceTree = SOURCE_ROOT; };
 		B455DF59210F9719002A69FD /* infoimpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = infoimpl.h; path = ../../ajabase/system/mac/infoimpl.h; sourceTree = SOURCE_ROOT; };
 		B455DF5A210F9719002A69FD /* infoimpl.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = infoimpl.mm; path = ../../ajabase/system/mac/infoimpl.mm; sourceTree = SOURCE_ROOT; };
 		B455DF5B210F9719002A69FD /* lockimpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lockimpl.cpp; path = ../../ajabase/system/mac/lockimpl.cpp; sourceTree = SOURCE_ROOT; };
@@ -1041,6 +1041,7 @@
 				B455DF28210F9703002A69FD /* diskstatus.h */,
 				B455DF29210F9703002A69FD /* event.cpp */,
 				B455DF2A210F9703002A69FD /* event.h */,
+				B455DF58210F9719002A69FD /* file_io.cpp */,
 				B455DF2B210F9703002A69FD /* file_io.h */,
 				B455DF2C210F9703002A69FD /* info.cpp */,
 				B455DF2D210F9703002A69FD /* info.h */,
@@ -1069,7 +1070,6 @@
 			children = (
 				B455DF56210F9719002A69FD /* eventimpl.cpp */,
 				B455DF57210F9719002A69FD /* eventimpl.h */,
-				B455DF58210F9719002A69FD /* file_io.cpp */,
 				B455DF59210F9719002A69FD /* infoimpl.h */,
 				B455DF5A210F9719002A69FD /* infoimpl.mm */,
 				B455DF5B210F9719002A69FD /* lockimpl.cpp */,

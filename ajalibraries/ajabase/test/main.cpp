@@ -21,11 +21,22 @@
 #include "ajabase/common/timer.h"
 #include "ajabase/persistence/persistence.h"
 #include "ajabase/system/atomic.h"
+#include "ajabase/system/file_io.h"
 #include "ajabase/system/info.h"
 #include "ajabase/system/systemtime.h"
 
+#include <algorithm>
 #include <clocale>
 #include <iostream>
+
+#ifdef AJA_WINDOWS
+#include <direct.h>
+#include <windows.h>
+#include <mmsystem.h>
+#else
+#include <sys/stat.h>
+#include <sys/types.h>
+#endif
 
 /*
 //template
@@ -728,6 +739,16 @@ TEST_SUITE("time" * doctest::description("functions in ajabase/system/systemtime
 
     TEST_CASE("AJATime")
     {
+#ifdef AJA_WINDOWS
+		TIMECAPS tc;
+		if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) == MMSYSERR_NOERROR)
+		{
+			// Attempt to set the timer resolution to 1 millisecond
+			uint32_t eventPeriod = std::min<uint32_t>(std::max<uint32_t>(tc.wPeriodMin, 1), tc.wPeriodMax);
+			timeBeginPeriod(eventPeriod);
+		}
+#endif
+
         uint64_t startMs = AJATime::GetSystemMilliseconds();
         uint64_t startUs = AJATime::GetSystemMicroseconds();
         uint64_t startNs = AJATime::GetSystemNanoseconds();
@@ -795,3 +816,119 @@ TEST_SUITE("info" * doctest::description("functions in ajabase/system/info.h")) 
     }
 
 } //info
+
+void file_marker() {}
+TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h")) {
+
+	TEST_CASE("AJAFileIO")
+	{
+		std::string tempDir;
+		AJAStatus status = AJAFileIO::TempDirectory(tempDir);
+		WARN_MESSAGE(status == AJA_STATUS_SUCCESS, "TempDirectory() could not find standard temp dir, trying secondary location.");
+
+		if (status != AJA_STATUS_SUCCESS)
+		{
+			tempDir = "ajafileio_tmp_dir";
+#if defined(AJA_WINDOWS)
+			_mkdir(tempDir.c_str());
+#else
+			if (mkdir(tempDir.c_str(), ACCESSPERMS) == 0)
+			{
+				chmod(tempDir.c_str(), ACCESSPERMS);
+			}
+#endif
+		}
+
+		status = AJAFileIO::DoesDirectoryExist(tempDir);
+		CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "expected: temp dir '" + tempDir + "' to exist");
+
+#if defined(AJA_WINDOWS)
+		std::string pathsep = "\\";
+#else
+		std::string pathsep = "/";
+#endif
+
+		std::string tempFilePath = tempDir;
+
+		// remove any trailing path separator on tempDir
+		// then add the pathsep, simple way to sanitize the created path
+		aja::rstrip(tempFilePath, pathsep);
+		tempFilePath += pathsep;
+		tempFilePath += "AJAFileIO_unittest_file_";
+		tempFilePath += aja::to_string((unsigned long)AJATime::GetSystemMilliseconds()) + ".txt";
+
+		AJAFileIO file;
+		status = file.Open(tempFilePath, eAJAReadWrite|eAJACreateAlways, 0);
+		REQUIRE_MESSAGE(status == AJA_STATUS_SUCCESS, "expected: file '" + tempFilePath + "' to be created");
+		CHECK(file.IsOpen() == true);
+		CHECK(file.Tell() == 0);
+		// seek forward 64
+		status = file.Seek(64, eAJASeekSet);
+		CHECK(status == AJA_STATUS_SUCCESS);
+		CHECK(file.Tell() == 64);
+		// seek backward 32
+		status = file.Seek(-32, eAJASeekCurrent);
+		CHECK(status == AJA_STATUS_SUCCESS);
+		CHECK(file.Tell() == 32);
+		status = file.Truncate(16);
+		CHECK(status == AJA_STATUS_SUCCESS);
+		// truncate should not change offset
+		CHECK(file.Tell() == 32);
+		status = file.Sync();
+		CHECK(status == AJA_STATUS_SUCCESS);
+		int64_t createTime;
+		int64_t modTime;
+		int64_t size;
+		status = file.FileInfo(createTime, modTime, size);
+		CHECK(status == AJA_STATUS_SUCCESS);
+		std::string fullFilePath;
+		status = file.FileInfo(createTime, modTime, size, fullFilePath);
+		CHECK(status == AJA_STATUS_SUCCESS);
+		// Checking this way because on Mac it returns /private/var/folders... for fullFilePath
+		// while tempFilePath is /var/folders...
+		// var is a symbolic link to /private/var
+		CHECK(fullFilePath.find(tempFilePath) != std::string::npos);
+		// size should equal the truncate
+		CHECK(size == 16);
+		status = file.Seek(0, eAJASeekSet);
+		CHECK(status == AJA_STATUS_SUCCESS);
+		CHECK(file.Write("test") == 4);
+		status = file.Truncate(4);
+		CHECK(status == AJA_STATUS_SUCCESS);
+		status = file.Close();
+		CHECK(status == AJA_STATUS_SUCCESS);
+
+		AJAFileIO fileRead;
+		status = fileRead.Open(tempFilePath, eAJAReadOnly, 0);
+		CHECK(status == AJA_STATUS_SUCCESS);
+		status = fileRead.FileInfo(createTime, modTime, size);
+		CHECK(status == AJA_STATUS_SUCCESS);
+		std::vector<uint8_t> tmp;
+		tmp.resize(size);
+		CHECK(fileRead.Read((uint8_t*)&tmp[0], (uint32_t)size) == size);
+		status = fileRead.Seek(0, eAJASeekSet);
+		CHECK(status == AJA_STATUS_SUCCESS);
+		std::string fileContents;
+		CHECK(fileRead.Read(fileContents, 4) == 4);
+		status = fileRead.Close();
+		CHECK(status == AJA_STATUS_SUCCESS);
+
+		// should not be empty
+		status = AJAFileIO::IsDirectoryEmpty(tempDir);
+		CHECK(status != AJA_STATUS_SUCCESS);
+
+		// should be atleast one from above test
+		status = AJAFileIO::DoesDirectoryContain(tempDir, "*");
+		CHECK(status == AJA_STATUS_SUCCESS);
+
+		// should not exist
+		status = AJAFileIO::DoesDirectoryContain(tempDir, "*.someBonkersExt");
+		CHECK(status != AJA_STATUS_SUCCESS);
+
+		CHECK(AJAFileIO::FileExists(tempFilePath));
+		status = AJAFileIO::Delete(tempFilePath);
+		CHECK(status == AJA_STATUS_SUCCESS);
+		CHECK(AJAFileIO::FileExists(tempFilePath) == false);
+	}
+
+} //file

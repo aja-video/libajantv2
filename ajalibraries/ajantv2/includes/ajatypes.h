@@ -52,7 +52,7 @@
 				#define AJA_CXX11_NULLPTR_AVAILABLE
 			#endif
 		#elif defined(__GNUC__)
-			#if __GNUC__ >= 5
+			#if __GNUC__ >= 6
 				#define AJA_CXX11_NULLPTR_AVAILABLE
 			#endif
 		#endif

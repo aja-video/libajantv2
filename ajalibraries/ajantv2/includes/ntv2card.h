@@ -4701,6 +4701,27 @@ public:
 	**/
 	AJA_VIRTUAL bool	ApplySignalRoute (const CNTV2SignalRouter & inRouter, const bool inReplace = false);
 
+
+	/**
+		@brief		Applies the given widget routing connections to the AJA device.
+		@return		True if successful; otherwise false.
+		@param[in]	inConnections	Specifies the routing connections to be applied to the device.
+		@param[in]	inReplace		If true, replaces the device's existing widget routing with the given one.
+									If false, augments the device's existing widget routing.
+									Defaults to false.
+		@details	Most modern AJA devices do not have fixed interconnections between inputs, outputs, frame stores
+					and the various video processing widgets (e.g., colorspace converters, mixer/keyers, etc.).
+					Instead, these routing configurations are designated by a set of registers, one for each input
+					of each widget. The register's value determines which widget output node (crosspoint) the input
+					is connected to. A zero value in the register means that the input is not connected to anything.
+					To simplify this process of routing widgets on the device, a set of signal paths (i.e., interconnects)
+					are built and then applied to the device in this function call.
+					This function iterates over each connection that's specified in the given routing table and updates
+					the appropriate register in the device.
+		@see		ntv2signalrouting
+	**/
+	AJA_VIRTUAL bool	ApplySignalRoute (const NTV2XptConnections & inConnections, const bool inReplace = false);
+
 	/**
 		@brief		Removes all existing signal path connections between any and all widgets on the AJA device.
 		@return		True if successful; otherwise false.

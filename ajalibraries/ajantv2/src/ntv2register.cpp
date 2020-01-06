@@ -6035,6 +6035,19 @@ bool CNTV2Card::ApplySignalRoute (const CNTV2SignalRouter & inRouter, const bool
 	return WriteRegisters (registerWrites);
 }
 
+bool CNTV2Card::ApplySignalRoute (const NTV2XptConnections & inConnections, const bool inReplace)
+{
+	if (inReplace)
+		if (!ClearRouting ())
+			return false;
+
+	unsigned failures(0);
+	for (NTV2XptConnectionsConstIter iter(inConnections.begin());  iter != inConnections.end();  ++iter)
+		if (!Connect(iter->first, iter->second))
+			failures++;
+	return failures == 0;
+}
+
 
 bool CNTV2Card::ClearRouting (void)
 {

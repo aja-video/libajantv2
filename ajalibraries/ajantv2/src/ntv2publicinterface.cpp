@@ -716,7 +716,7 @@ bool NTV2_POINTER::PutU8s (const vector<uint8_t> & inU8s, const size_t inU8Offse
 ostream & operator << (ostream & inOutStream, const NTV2_RP188 & inObj)
 {
 	if (inObj.IsValid ())
-		return inOutStream << "{DBx" << hex << inObj.fDBB << dec << "|LOx" << hex << inObj.fLo << dec << "|HIx" << hex << inObj.fHi << dec << "}";
+		return inOutStream << "{Dx" << HEX0N(inObj.fDBB,8) << "|Lx" << HEX0N(inObj.fLo,8) << "|Hx" << HEX0N(inObj.fHi,8) << "}";
 	else
 		return inOutStream << "{invalid}";
 }
@@ -747,9 +747,9 @@ ostream & operator << (std::ostream & inOutStream, const NTV2TimeCodes & inObj)
 	inOutStream << inObj.size () << ":[";
 	for (NTV2TimeCodesConstIter iter (inObj.begin ());  iter != inObj.end ();  )
 	{
-		inOutStream << ::NTV2TCIndexToString (iter->first) << " => " << iter->second;
+		inOutStream << ::NTV2TCIndexToString (iter->first,true) << "=" << iter->second;
 		if (++iter != inObj.end ())
-			inOutStream << ",  ";
+			inOutStream << ", ";
 	}
 	return inOutStream << "]";
 }

@@ -1072,6 +1072,13 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 		}	//	else KonaIP 2110 playout
 		S2110DeviceAncToXferBuffers(inChannel, inOutXferInfo);
 	}	//	if SMPTE 2110 playout
+	else if (::NTV2DeviceCanDo2110(_boardID)  &&  NTV2_IS_INPUT_CROSSPOINT(crosspoint))
+	{	//	Need local host buffers to receive 2110 Anc VPID & ATC
+		if (inOutXferInfo.acANCBuffer.IsNULL())
+			tmpLocalF1AncBuffer = inOutXferInfo.acANCBuffer.Allocate(2048);
+		if (inOutXferInfo.acANCField2Buffer.IsNULL())
+			tmpLocalF2AncBuffer = inOutXferInfo.acANCField2Buffer.Allocate(2048);
+	}	//	if SMPTE 2110 capture
 
 	/////////////////////////////////////////////////////////////////////////////
 	//	Call the driver...
@@ -1083,10 +1090,6 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 	{
 		if (::NTV2DeviceCanDo2110(_boardID))
 		{	//	S2110:  decode VPID and timecode anc packets from RTP, and put into A/C Xfer and device regs
-			if (inOutXferInfo.acANCBuffer.IsNULL())
-				tmpLocalF1AncBuffer = inOutXferInfo.acANCBuffer.Allocate(2048);
-			if (inOutXferInfo.acANCField2Buffer.IsNULL())
-				tmpLocalF2AncBuffer = inOutXferInfo.acANCField2Buffer.Allocate(2048);
 			S2110DeviceAncFromXferBuffers(inChannel, inOutXferInfo);
 		}
 		if (taskMode == NTV2_STANDARD_TASKS)

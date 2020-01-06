@@ -252,8 +252,6 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 		-	<b>Show Fields</b> — (<b>Lines</b> and <b>Components</b> views only) — Enables/disables the display of lines F1, F2 or both.
 		-	<b>Copy</b> — Copies multiple representations of the selection to the Clipboard. If there’s no selection, the entire raster is used.
 		-	<b>Paste</b> — (Available only if an entire frame was previously Copied) — Replaces the current 8MB or 16MB frame with the 8MB or 16MB frame that was Copied earlier.
-		-	<b>Set Color…</b> — (<b>Auto</b> mode OFF only) — Displays a color picker.
-			Choosing a color will set the active lines of the current frame buffer to the chosen color.
 		-	<b>Fill…</b> — (<b>Auto</b> mode OFF only) — Reveals the \ref fillbufferdlog for filling device frame memory with specific values or test patterns.
 		-	<b>Compare to Frame…</b> — (<b>Auto</b> mode OFF only) — Enables <b>Frame Differencing mode</b>,
 			comparing the current frame with another, highlighting the differences.  To cancel this mode,
@@ -444,7 +442,8 @@ The display highlights changed content with a brighter color.
 		-	<b>Copy</b> — Copies the audio buffer contents to the clipboard.
 		-	<b>Paste</b> — (<b>Output</b> mode only) Pastes the clipboard contents into the output audio buffer.
 			Available only if previously copied from an Audio inspector view.
-		-	<b>Fill</b> — (<b>Output</b> mode only) Fills the output audio buffer with 440Hz constant-amplitude identical-phase sinusoidal tone.
+
+Use the \ref tonegenerator to fill the audio output buffer, either statically (one-time data fill) or dynamically (continuously).
 
 
 <hr size="50px">
@@ -547,6 +546,10 @@ The inspector shows the following:
 		call for each ::NTV2Channel.
 	-	<b>Timecodes</b> — This area shows the contents of the ::NTV2TimeCodeList returned from CNTV2Card::AutoCirculateGetFrameStamp
 		for each AutoCirculate frame buffer. Use the <b>Timecodes</b> popup menu to control which channel to display (or “Hide” to not display timecodes).
+		-	<b>NOTE:</b> This area doesn’t appear on S2110 devices (i.e. \ref konaip \ref ioip running S2110 firmware).
+			This is because the driver’s internal AutoCirculate structures are tied to the hardware timecode registers,
+			which are uninvolved in S2110. In S2110, timecodes are obtained (capture) or produced (playout) in ATC-LTC
+			or ATC-VITC packets embedded in RTP packet(s).
 
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable frame-accurate snapshot of the AutoCirculate state of the device to the Clipboard.
 
@@ -605,35 +608,44 @@ Its <b>Filter</b> feature permits immediate customization to focus on specific r
 The inspector has the following:
 	-	A scrollable table of registers, one register per row, in ascending register number (i.e. bar address) order.
 	-	<b>Virtuals</b> — A checkbox that controls if virtual registers are included in the list or not.
-	-	<b>Filter</b> — An editable text box whose content determines which registers are seen in the list:
+	-	<b>Filter</b> — An editable text box whose content determines which registers are seen in the list.
+		It’s accompanied by a pop-up menu containing several named register groups, and any saved filters.
+		The text in the box acts as a filter:
 		-	<i>empty</i> — No filtering takes place. All registers are shown.
-		-	<i>non-empty</i> — Filtering takes place based on what’s in the search box:
-			-	<b>decimal numbers</b> — A comma-separated list of register number ranges. For example:
-				-	<b>25</b> — Only show register 25
-				-	<b>25-31</b> — Only show registers 25, 26, 27, 28, 29, 30 and 31.
-				-	<b>3,5,7</b> — Only show registers 3, 5 and 7.
-				-	<b>3-5,7</b> — Only show registers 3, 4, 5 and 7.
-			-	<b>kRegClass</b>… — A predefined group of registers. The popup menu shows these predefined register groups (e.g., inputs, outputs, HDMI, etc.).
-			-	Anything else is used in a case-insensitive search for register names containing that character sequence.
-	-	<b>Horizontal Ruler</b> — This ruler shows the table column headings.
-		-	Right-click in the horizontal ruler to control the register table view:
-			-	<b>Column Display</b> — Controls which columns are shown, and in what order:
-				-	<b>Reg Number</b> — The register number
-				-	<b>Reg Offset</b> — The register offset into its base address range (BAR).
-				-	<b>Reg Name</b> — The register name.
-				-	<b>Reg Value</b> — The register value.
-				-	<b>Reg Decoded Value</b> — Text that shows the register value in a human-readable format.
-			-	<b>Radix</b> — Controls the radix of the displayed register values.
-				-	<b>Bin (Base 2)</b> — Display register values in base 2 (binary).
-				-	<b>Oct (Base 8)</b> — Display register values in base 8 (octal).
-				-	<b>Dec (Base 10)</b> — Display register values in base 10 (unsigned decimal).
-				-	<b>Hex (Base 16)</b> — Display register values in base 16 (hexadecimal).
+		-	<i>decimal numbers</i> — A comma-separated list of register number ranges. For example:
+			-	<b>25</b> — Only show register 25
+			-	<b>25-31</b> — Only show registers 25, 26, 27, 28, 29, 30 and 31.
+			-	<b>3,5,7</b> — Only show registers 3, 5 and 7.
+			-	<b>3-7,20</b> — Only show registers 3, 4, 5, 6, 7 and 20.
+		-	<b>kRegClass</b>… — A predefined group of registers.
+			The popup menu shows these predefined register groups (e.g., inputs, outputs, HDMI, etc.).
+		-	Anything else is used in a case-insensitive search for register names containing the text.
+	-	<b>Save</b> — Available if the filter text isn’t currently a preset in the popup menu.
+		Click to save the filter as a new preset.
+	-	<b>Remove</b> — Available if the filter text matches a previously-saved preset in the popup menu.
+		Click to remove it from the popup menu.
+
+The register list is a table of register values in register number order.
+Right-clicking in any of the column headings pops up a menu:
+	-	<b>Column Display</b> — Controls which columns are shown, and their order:
+		-	<b>Reg Number</b> — The register number
+		-	<b>Reg Offset</b> — The register offset into its base address range (BAR).
+		-	<b>Reg Name</b> — The register name.
+		-	<b>Reg Value</b> — The register value.
+		-	<b>Reg Decoded Value</b> — Text that shows the register value in a human-readable format.
+	-	<b>Radix</b> — Controls the radix of the displayed register values.
+		-	<b>Bin (Base 2)</b> — Display register values in base 2 (binary).
+		-	<b>Oct (Base 8)</b> — Display register values in base 8 (octal).
+		-	<b>Dec (Base 10)</b> — Display register values in base 10 (unsigned decimal).
+		-	<b>Hex (Base 16)</b> — Display register values in base 16 (hexadecimal).
 
 To change a register’s value:
-	-	Click in the value. An edit box will appear.
-	-	Changes the value in the edit box as desired (keeping to the existing display radix).
-	-	Press <b>Enter</b> or <b>Return</b> to confirm your changes, and write the new register value to the device. The edit box will disappear.
-	-	Press <b>Escape</b> to abandon your changes. The edit box will disappear.
+	-	Click inside the register value. An edit box will appear.
+	-	Change the value in the edit box as desired (keeping to the existing display radix).
+	-	Press <b>Enter</b> or <b>Return</b> to confirm your changes, and write the new register value to the device.
+		The edit box will disappear.
+	-	Press <b>Escape</b> or click elsewhere to abandon your changes.
+		The edit box will disappear.
 
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy to the host’s Clipboard a set of CNTV2Card::WriteRegister
 function calls that will produce the register values seen in the display.
@@ -661,13 +673,41 @@ The inspector has the following individual panels:
 	-	<b>Routing Registers</b> — A panel containing a list of the device’s routing registers.
 		The register values are editable, and can be changed.
 
-This inspector supports these two Choose <b>Print…</b> from the <b>File</b> menu to print a two-page report of the current routing configuration.
+Choose <b>Print…</b> from the <b>File</b> menu to print a two-page report of the current routing configuration.
 
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the displayed routing information to the Clipboard.
 
-<b>Routing Diagram Operation</b>
+This inspector will accept plain text either pasted in (using the <b>Paste</b> command from the <b>Edit</b> menu),
+or by dropping it in (using drag-and-drop) from another application. To be interpreted correctly as a set of routing
+connections, the text must syntactically conform to:
+	-	<b>C++ Statements</b> — One or more lines, each containing a call to CNTV2Card::Connect :
+		@code{.cpp}
+			device.Connect (NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1);
+			device.Connect (NTV2_XptCSC1VidInput, NTV2_XptSDIIn1);
+			device.Connect (NTV2_XptCSC2VidInput, NTV2_XptSDIIn1DS2);
+			device.Connect (NTV2_XptLUT1Input, NTV2_XptCSC1VidRGB);
+			device.Connect (NTV2_XptLUT2Input, NTV2_XptCSC2VidRGB);
+			device.Connect (NTV2_XptSDIOut3Input, NTV2_XptSDIIn1);
+			device.Connect (NTV2_XptSDIOut4Input, NTV2_XptSDIIn1DS2);
+			device.Connect (NTV2_XptHDMIOutInput, NTV2_XptSDIIn1);
+			device.Connect (NTV2_XptAnalogOutInput, NTV2_XptSDIIn1);
+		@endcode
+	-	<b>Shorthand Notation</b> — One or more lines having the “shorthand” notation:
+		@code
+			FB1 <== SDIIn1
+			CSC1 <== SDIIn1
+			CSC2 <== SDIIn1DS2
+			LUT1 <== CSC1RGB
+			LUT2 <== CSC2RGB
+			SDIOut3 <== SDIIn1
+			SDIOut4 <== SDIIn1DS2
+			HDMIOutQ1 <== SDIIn1
+			AnalogOut <== SDIIn1
+		@endcode
 
-The Routing Diagram is where routing changes are performed interactively. This is the panel in which most tasks are performed.
+<b>Routing Diagram</b>
+
+The <b>Routing Diagram</b> is where routing changes are performed interactively. This is the panel in which most tasks are performed.
 
 There are two principal types of objects in the diagram:
 
@@ -678,16 +718,18 @@ There are two principal types of objects in the diagram:
 		There are two kinds of <b>Sockets</b>:
 		-	<b>Input</b> — This is a signal “sink” or “destination” crosspoint.
 			-	<b>Input</b>s are always on the widget’s left side.
-			-	<b>Input</b>s can only be connected to one <b>Output<b> crosspoint.
+			-	<b>Input</b>s can only be connected to one <b>Output</b> crosspoint.
 			-	Depending on the parent <b>Widget</b>, <b>Input Socket</b>s sometimes can accept both RGB or YCbCr signals, or only RGB or YCbCr.
 			-	Depending on the parent <b>Widget</b> and how it’s configured, an <b>Input</b> can be disabled, in which case it appears dimmed.
 				Signals arriving at a disabled input are ignored by the Widget.
 		-	<b>Output</b> — This is a signal “source” crosspoint.
 			-	<b>Output</b>s are always on the widget’s right side.
-			-	<b>Output</b>s can be connected to any number of <b>Input<b> crosspoints.
+			-	<b>Output</b>s can be connected to any number of <b>Input</b> crosspoints.
 			-	<b>Output</b>s have a fixed signal type that they emit (if enabled): YCbCr or RGB.
-			-	Depending on the parent <b>Widget</b> and how it’s configured, an <b>Output</b> can be disabled, in which case it appears dimmed.
-	-	<b>Socket</b>s can be logically <b>enabled</b> or <b>disabled</b>, usually determined by the parent <b>Widget</b>’s configuration.
+			-	Depending on the parent <b>Widget</b> and how it’s configured, an <b>Output</b> can be disabled,
+				in which case it appears dimmed.
+	-	<b>Socket</b>s can be logically <b>enabled</b> or <b>disabled</b>, usually determined
+		by the parent <b>Widget</b>’s configuration.
 -	<b>Cables/Wires</b> — These represent the currently existing widget crosspoint connections,
 	as read from the device’s “crosspoint select” registers.
 
@@ -695,7 +737,7 @@ Hovering the mouse pointer over any of these aforementioned objects will display
 
 Right-clicking on any object will pop up a context menu with command functions that are relevant for the object and its current state.
 
-Right-clicking in the diagram’s gray “desktop” pops up a context menu with command functions that affect all channels of the device.
+Right-clicking in the diagram’s gray background pops up a context menu with command functions that affect all channels of the device.
 
 -	<b>Video Format</b> — Pops up a sub-menu of video formats supported by the device.
 	Choosing one of these formats globally changes the video format for all channels on the device.
@@ -703,12 +745,34 @@ Right-clicking in the diagram’s gray “desktop” pops up a context menu with
 	(“uniformat”) mode before globally changing the video format.
 -	<b>4K Mode</b> — Available only if the device supports 4K/UHD video. If clicked, pops up a sub-menu of 4K modes supported by the device:
 	-	<b>Tsi</b> — Selects two-sample-interleave (per SMPTE 425-5).
-	-	<b>Squares</b> — Selects the classic behavior.
+	-	<b>Squares</b> — Selects the “quad” mode (aka “squares”).
+-	<b>8K Mode</b> — Available only if the device supports 8K/UHD2 video. If clicked, pops up a sub-menu of 8K modes supported by the device:
+	-	<b>Tsi</b> — Selects two-sample-interleave (per SMPTE 425-5).
+	-	<b>Squares</b> — Selects “quad-quad” mode.
 -	<b>Frame Buffer Format</b> — Pops up a sub-menu of frame buffer pixel formats supported by the device.
 	Choosing one of the formats globally changes the video format for all channels on the device.
+-	<b>Clear Cables</b> — Disconnects all connections between widgets.
+-	<b>Copy (Diagram)</b> — Copies the diagram image to the clipboard.
+-	<b>Copy (Source Code)</b> — Copies the CNTV2Card::Connect calls that are needed
+	to produce the current routing as C/C++ source to the clipboard.
+-	<b>Paste Routing</b> — Replaces the current routing with the routing determined by the encoded text from the clipboard.
+-	<b>Show All</b> — Reveals all hidden widgets.
+-	<b>Hide Unconnected</b> — Hides all widgets that aren’t connected to anything else.
 
-@note	Changing video or pixel formats by right-clicking in a <b>Frame Store</b> widget (see below) only changes that
-		particular channel’s video or pixel format (except for “quad” formats that require ganging channels 1-4 or 5-8).
+<b>Code Panel</b>
+
+The Code Panel textually shows the device’s current routing configuration in one of two ways:
+	-	<b>C++ Code</b> — shows the SDK calls necessary to produce the routing configuration.
+	-	<b>Shorthand</b> — shows the “shorthand” notation for it.
+
+The menu control allows you to choose which encoding form to display.
+The text panel is read-only — i.e., you can’t change what’s in it.
+However, you can make selections, and copy the selected text to the host windowing system’s clipboard.
+
+<b>Routing Registers Panel</b>
+
+The Registers Panel shows the device’s routing registers.
+To edit a register’s value, click in its value, change the value, then press Enter (or click elsewhere).
 
 
 
@@ -736,6 +800,9 @@ There are currently three ways to fill buffer memory:
 	-#	<b>Test Pattern</b> — Fills one or more buffers with any of several predefined test patterns.
 		@image	html	watcher-tool-fill-pat.png
 		The test pattern image is written to the buffer(s) immediately after choosing the test pattern.
+	-#	<b>Color</b> — Fills one or more buffers with any color chosen from a standard color picker.
+		@image	html	watcher-tool-fill-color.png
+		The color raster is written immediately to the buffer(s) as the color is changed in the dialog.
 	-#	<b>Text</b> — Fills one or more buffers with glyphs rendered using the ::CNTV2CaptionRenderer class.
 		@image	html	watcher-tool-fill-txt.png
 		Note that the frame buffer(s) are written immediately after making any changes or selections in the panel.

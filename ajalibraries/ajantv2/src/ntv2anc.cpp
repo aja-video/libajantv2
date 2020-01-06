@@ -294,7 +294,13 @@ bool CNTV2Card::AncInsertInit (const UWord inSDIOutput, const NTV2Channel inChan
 
 bool CNTV2Card::AncInsertSetEnable (const UWord inSDIOutput, const bool inIsEnabled)
 {
-	bool ok(NTV2_IS_VALID_CHANNEL(inSDIOutput));
+	if (!::NTV2DeviceCanDoPlayback(_boardID))
+		return false;
+	if (!::NTV2DeviceCanDoCustomAnc(_boardID))
+		return false;
+	if (IS_OUTPUT_SPIGOT_INVALID(inSDIOutput))
+		return false;
+	bool ok(true);
     if (!inIsEnabled)
     {
         if (ok)	ok = EnableAncInsHancC(*this, inSDIOutput, false);
@@ -357,8 +363,8 @@ bool CNTV2Card::AncInsertSetReadParams (const UWord inSDIOutput, const ULWord in
 	ULWord			F1Offset(0);
 	if (ok)	ok = ReadRegister (kVRegAncField1Offset, F1Offset);
 	const ULWord	ANCStartMemory (frameLocation - F1Offset);
-	if (ok)	ok = SetAncInsField1StartAddr (*this, inChannel, ANCStartMemory);
-	if (ok)	ok = SetAncInsField1Bytes (*this, inChannel, inF1Size);
+	if (ok)	ok = SetAncInsField1StartAddr (*this, inSDIOutput, ANCStartMemory);
+	if (ok)	ok = SetAncInsField1Bytes (*this, inSDIOutput, inF1Size);
 	return ok;
 }
 
@@ -391,8 +397,8 @@ bool CNTV2Card::AncInsertSetField2ReadParams (const UWord inSDIOutput, const ULW
 	ULWord			F2Offset(0);
 	if (ok)	ok = ReadRegister (kVRegAncField2Offset, F2Offset);
 	const ULWord	ANCStartMemory (frameLocation - F2Offset);
-	if (ok)	ok = SetAncInsField2StartAddr (*this, inChannel, ANCStartMemory);
-	if (ok)	ok = SetAncInsField2Bytes (*this, inChannel, inF2Size);
+	if (ok)	ok = SetAncInsField2StartAddr (*this, inSDIOutput, ANCStartMemory);
+	if (ok)	ok = SetAncInsField2Bytes (*this, inSDIOutput, inF2Size);
 	return ok;
 }
 

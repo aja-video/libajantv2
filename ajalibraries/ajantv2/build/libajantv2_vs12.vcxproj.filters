@@ -324,7 +324,7 @@
     <ClCompile Include="..\..\ajabase\system\windows\eventimpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\ajabase\system\windows\file_io.cpp">
+    <ClCompile Include="..\..\ajabase\system\file_io.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\ajabase\system\windows\infoimpl.cpp">
