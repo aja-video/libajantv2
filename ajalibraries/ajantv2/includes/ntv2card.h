@@ -1130,6 +1130,14 @@ public:
 	**/
 	AJA_VIRTUAL bool		GetTsiFrameEnable (bool & outIsEnabled, const NTV2Channel inChannel);
 
+	/**
+		@brief		Answers if the SMPTE 425 two-sample-interleave mux/demux input sync has failed or not.
+		@return		True if successful; otherwise false.
+		@param[out]	outSyncFailed	Receives true if the device's Tsi Mux input sync detect is indicating failure.
+		@param[in]	inWhichTsiMux	Specifies the Tsi Mux of interest. Use NTV2_CHANNEL1 for Tsi Mux 1, etc.
+	**/
+	AJA_VIRTUAL bool		GetTsiMuxSyncFail (bool & outSyncFailed, const NTV2Channel inWhichTsiMux);
+
 	AJA_VIRTUAL bool		SetFrameBufferQuarterSizeMode (NTV2Channel inChannel, NTV2QuarterSizeExpandMode inValue);
 	AJA_VIRTUAL bool		GetFrameBufferQuarterSizeMode (NTV2Channel inChannel, NTV2QuarterSizeExpandMode & outValue);
 

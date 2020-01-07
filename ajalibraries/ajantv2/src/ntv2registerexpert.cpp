@@ -2236,12 +2236,11 @@ private:
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 		{
 			(void) inDeviceID;
-			uint16_t		numSpigots	(0);
-			uint16_t		startSpigot	(0);
+			uint16_t		numSpigots(0), startSpigot(0), doTsiMuxSync(0);
 			ostringstream	oss;
 			switch (inRegNum)
 			{
-				case kRegSDIInput3GStatus:		numSpigots = 2;		startSpigot = 1;	break;
+				case kRegSDIInput3GStatus:		numSpigots = 2;		startSpigot = 1;	doTsiMuxSync = 1;	break;
 				case kRegSDIInput3GStatus2:		numSpigots = 2;		startSpigot = 3;	break;
 				case kRegSDI5678Input3GStatus:	numSpigots = 4;		startSpigot = 5;	break;
 			}
@@ -2274,6 +2273,12 @@ private:
 				if (++spigotNdx < numSpigots)
 					oss << endl;
 			}	//	for each spigot
+			if (doTsiMuxSync  &&  ::NTV2DeviceCanDo425Mux(inDeviceID))
+				for (UWord tsiMux(0);  tsiMux < 4;  )
+				{	oss	<< "TsiMux" << DEC(tsiMux+1) << " Sync Fail: " << ((inRegValue & (0x00010000UL << tsiMux)) ? "FAILED" : "OK");
+					if (++tsiMux < 4)
+						oss << endl;
+				}
 			return oss.str();
 		}
 		virtual	~DecodeSDIInputStatusReg()	{}
