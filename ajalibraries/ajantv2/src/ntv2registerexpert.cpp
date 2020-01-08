@@ -2274,11 +2274,9 @@ private:
 					oss << endl;
 			}	//	for each spigot
 			if (doTsiMuxSync  &&  ::NTV2DeviceCanDo425Mux(inDeviceID))
-				for (UWord tsiMux(0);  tsiMux < 4;  )
-				{	oss	<< "TsiMux" << DEC(tsiMux+1) << " Sync Fail: " << ((inRegValue & (0x00010000UL << tsiMux)) ? "FAILED" : "OK");
-					if (++tsiMux < 4)
-						oss << endl;
-				}
+				for (UWord tsiMux(0);  tsiMux < 4;  ++tsiMux)
+					oss	<< endl
+						<< "TsiMux" << DEC(tsiMux+1) << " Sync Fail: " << ((inRegValue & (0x00010000UL << tsiMux)) ? "FAILED" : "OK");
 			return oss.str();
 		}
 		virtual	~DecodeSDIInputStatusReg()	{}
