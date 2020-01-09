@@ -5350,6 +5350,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONA1:					return inForRetailDisplay ? "Kona 1"					: "Kona1";
         case DEVICE_ID_KONAHDMI:				return inForRetailDisplay ? "Kona HDMI"					: "KonaHDMI";
 		case DEVICE_ID_KONA5:					return inForRetailDisplay ?	"KONA 5"					: "Kona5";
+		case DEVICE_ID_KONA5_2:					return inForRetailDisplay ?	"KONA 5 2"					: "Kona5-2";
         case DEVICE_ID_KONA5_8KMK:				return inForRetailDisplay ?	"KONA 5 8KMK"				: "Kona5-8KMK";
 		case DEVICE_ID_CORVID44_8KMK:			return inForRetailDisplay ?	"Corvid 44 8KMK"			: "Corvid44-8KMK";
 		case DEVICE_ID_KONA5_8K:				return inForRetailDisplay ?	"KONA 5 8K"					: "Kona5-8K";
@@ -8763,6 +8764,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_KONAHDMI:					return useWindowsName ? "kona_hdmi_4rx.bit"         : "kona_hdmi_4rx.bit";
 	case DEVICE_ID_KONA1:						return useWindowsName ? "kona1_pcie.bit"            : "kona1.bit";
 	case DEVICE_ID_KONA5:						return useWindowsName ? "kona5_pcie.bit"            : "kona5.bit";
+	case DEVICE_ID_KONA5_2:						return "kona5_2x4k.bit";
 	case DEVICE_ID_KONA5_8KMK:					return "kona5_8k_mk.bit";
 	case DEVICE_ID_KONA5_8K:					return "kona5_8k.bit";
 	case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk.bit";
@@ -8808,7 +8810,7 @@ NTV2DeviceID NTV2GetDeviceIDFromBitfileName (const string & inBitfileName)
 													DEVICE_ID_KONALHEPLUS,	DEVICE_ID_TTAP,		DEVICE_ID_CORVID1,		DEVICE_ID_CORVID22,	DEVICE_ID_CORVID24,
 													DEVICE_ID_CORVID3G,		DEVICE_ID_IOXT,		DEVICE_ID_IOEXPRESS,	DEVICE_ID_IO4K,		DEVICE_ID_IO4KUFC,
                                                     DEVICE_ID_KONA1,		DEVICE_ID_KONAHDMI, DEVICE_ID_KONA5,        DEVICE_ID_KONA5_8KMK,DEVICE_ID_CORVID44_8KMK,
-													DEVICE_ID_KONA5_8K,		DEVICE_ID_CORVID44_8K,	DEVICE_ID_T3TAP,
+													DEVICE_ID_KONA5_8K,		DEVICE_ID_CORVID44_8K,	DEVICE_ID_T3TAP,	DEVICE_ID_KONA5_2,
 													DEVICE_ID_NOTFOUND };
 		for (unsigned ndx (0);  ndx < sizeof (sDeviceIDs) / sizeof (NTV2DeviceID);  ndx++)
 			sBitfileName2DeviceID [::NTV2GetBitfileName (sDeviceIDs [ndx])] = sDeviceIDs [ndx];
@@ -8862,6 +8864,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_KONA4,
 														DEVICE_ID_KONA4UFC,
 														DEVICE_ID_KONA5,
+														DEVICE_ID_KONA5_2,
                                                         DEVICE_ID_KONAHDMI,
 														DEVICE_ID_KONAIP_2022,
 														DEVICE_ID_KONAIP_4CH_2SFP,

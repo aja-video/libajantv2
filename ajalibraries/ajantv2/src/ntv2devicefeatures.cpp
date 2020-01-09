@@ -290,6 +290,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 	case DEVICE_ID_KONA5:
     case DEVICE_ID_KONA5_8KMK:
 	case DEVICE_ID_KONA5_8K:
+	case DEVICE_ID_KONA5_2:
 	case DEVICE_ID_CORVID44_8KMK:
 	case DEVICE_ID_CORVID44_8K:
 	case DEVICE_ID_T3TAP:
@@ -495,6 +496,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 	case DEVICE_ID_KONA5:
     case DEVICE_ID_KONA5_8KMK:
 	case DEVICE_ID_KONA5_8K:
+	case DEVICE_ID_KONA5_2:
 	case DEVICE_ID_CORVID44_8KMK:
 	case DEVICE_ID_CORVID44_8K:
 	case DEVICE_ID_T3TAP:
