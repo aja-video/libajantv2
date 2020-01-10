@@ -1981,6 +1981,7 @@ typedef enum
 	kRegMaskSDIIn2VPIDLinkBValid = BIT(13),
 	kRegMaskSDIIn26GbpsMode = BIT(14),
 	kRegMaskSDIIn212GbpsMode = BIT(15),
+	kRegMaskSDIInTsiMuxSyncFail = BIT(16)+BIT(17)+BIT(18)+BIT(19),
 
 
 	// kRegSDIInput3GStatus2
@@ -3114,6 +3115,7 @@ typedef enum
 	kRegShiftSDIIn2VPIDLinkBValid 		= 13,
 	kRegShiftSDIIn26GbpsMode			= 14,
 	kRegShiftSDIIn212GbpsMode			= 15,
+	kRegShiftSDIInTsiMuxSyncFail		= 16,
 
 	// kRegSDIInput3GStatus2
 	kRegShiftSDIIn33GbpsMode 			= 0,

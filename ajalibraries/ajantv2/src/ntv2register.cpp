@@ -1630,6 +1630,21 @@ bool CNTV2Card::GetTsiFrameEnable (bool & outIsEnabled, const NTV2Channel inChan
 	return readOkay;
 }
 
+bool CNTV2Card::GetTsiMuxSyncFail (bool & outSyncFailed, const NTV2Channel inWhichTsiMux)
+{
+	ULWord value(0);
+	outSyncFailed = false;
+	if (!::NTV2DeviceCanDo425Mux(_boardID))
+		return false;
+	if (!NTV2_IS_VALID_CHANNEL(inWhichTsiMux))
+		return false;
+	if (!ReadRegister(kRegSDIInput3GStatus, value, kRegMaskSDIInTsiMuxSyncFail, kRegShiftSDIInTsiMuxSyncFail))
+		return false;
+	if (value & (1<<inWhichTsiMux))
+		outSyncFailed = true;
+	return true;
+}
+
 bool CNTV2Card::CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFirst, const NTV2Channel inLast)
 {
 	ULWord standard = 0;
