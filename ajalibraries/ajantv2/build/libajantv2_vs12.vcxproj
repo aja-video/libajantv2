@@ -276,6 +276,7 @@
     <ClCompile Include="..\src\ntv2card.cpp" />
     <ClCompile Include="..\src\ntv2config2022.cpp" />
     <ClCompile Include="..\src\ntv2configts2022.cpp" />
+    <ClCompile Include="..\src\ntv2config2110.cpp" />
     <ClCompile Include="..\src\ntv2debug.cpp" />
     <ClCompile Include="..\src\ntv2devicefeatures.cpp" />
     <ClCompile Include="..\src\ntv2devicescanner.cpp" />
@@ -402,6 +403,7 @@
     <ClInclude Include="..\includes\ntv2colorcorrection.h" />
     <ClInclude Include="..\includes\ntv2config2022.h" />
     <ClInclude Include="..\includes\ntv2configts2022.h" />
+    <ClInclude Include="..\includes\ntv2config2110.h" />
     <ClInclude Include="..\includes\ntv2debug.h" />
     <ClInclude Include="..\includes\ntv2devicefeatures.h" />
     <ClInclude Include="..\includes\ntv2devicefeatures.hh" />

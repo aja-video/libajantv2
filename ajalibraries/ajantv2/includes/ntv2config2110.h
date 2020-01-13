@@ -229,7 +229,7 @@ inline int AncStreamToCh(NTV2Stream s)
     @brief	Configures a SMPTE 2110 Transmit Channel.
 **/
 
-class tx_2110Config
+class AJAExport tx_2110Config
 {
 public:
     tx_2110Config() { init(); }
@@ -259,7 +259,7 @@ public:
     @brief	Configures a SMPTE 2110 Receive Channel.
 **/
 
-class rx_2110Config
+class AJAExport rx_2110Config
 {
 public:
     rx_2110Config() { init(); }
