@@ -219,13 +219,13 @@ static const ULWord	gChannelToSDIInputProgressiveMask []	= {	kRegMaskInput1Progr
 static const ULWord	gChannelToSDIInputProgressiveShift []	= {	kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,
 																kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			0};
 
-static const ULWord	gChannelToSDIOutVPIDTransferCharacteristics []		= {	kVRegNTV2VPIDTransferCharacteristics,		kVRegNTV2VPIDTransferCharacteristics2,		kVRegNTV2VPIDTransferCharacteristics3,		kVRegNTV2VPIDTransferCharacteristics4,
+static const ULWord	gChannelToVPIDTransferCharacteristics []		= {	kVRegNTV2VPIDTransferCharacteristics,		kVRegNTV2VPIDTransferCharacteristics2,		kVRegNTV2VPIDTransferCharacteristics3,		kVRegNTV2VPIDTransferCharacteristics4,
 																kVRegNTV2VPIDTransferCharacteristics5,		kVRegNTV2VPIDTransferCharacteristics6,		kVRegNTV2VPIDTransferCharacteristics7,		kVRegNTV2VPIDTransferCharacteristics8,	0};
 
-static const ULWord	gChannelToSDIOutVPIDColorimetry []		= {	kVRegNTV2VPIDColorimetry,		kVRegNTV2VPIDColorimetry2,		kVRegNTV2VPIDColorimetry3,		kVRegNTV2VPIDColorimetry4,
+static const ULWord	gChannelToVPIDColorimetry []		= {	kVRegNTV2VPIDColorimetry,		kVRegNTV2VPIDColorimetry2,		kVRegNTV2VPIDColorimetry3,		kVRegNTV2VPIDColorimetry4,
 																kVRegNTV2VPIDColorimetry5,		kVRegNTV2VPIDColorimetry6,		kVRegNTV2VPIDColorimetry7,		kVRegNTV2VPIDColorimetry8,	0};
 
-static const ULWord	gChannelToSDIOutVPIDLuminance []		= {	kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,
+static const ULWord	gChannelToVPIDLuminance []		= {	kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,
 																kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,	0};
 
 
@@ -8115,18 +8115,46 @@ bool CNTV2Card::ReadSDIStatistics (NTV2SDIInStatistics & outStats)
 
 bool CNTV2Card::SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister(gChannelToSDIOutVPIDTransferCharacteristics[inChannel], inValue);
+	return WriteRegister(gChannelToVPIDTransferCharacteristics[inChannel], inValue);
+}
+
+bool CNTV2Card::GetVPIDTransferCharacteristics (NTV2VPIDTransferCharacteristics & outValue, const NTV2Channel inChannel)
+{
+	ULWord	tempVal (0);
+	if (!ReadRegister(gChannelToVPIDTransferCharacteristics[inChannel], tempVal))
+		return false;
+	outValue = static_cast <NTV2VPIDTransferCharacteristics> (tempVal);
+	return true;
 }
 
 bool CNTV2Card::SetVPIDColorimetry (const NTV2VPIDColorimetry inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister(gChannelToSDIOutVPIDColorimetry[inChannel], inValue);
+	return WriteRegister(gChannelToVPIDColorimetry[inChannel], inValue);
+}
+
+bool CNTV2Card::GetVPIDColorimetry (NTV2VPIDColorimetry & outValue, const NTV2Channel inChannel)
+{
+	ULWord	tempVal (0);
+	if (!ReadRegister(gChannelToVPIDColorimetry[inChannel], tempVal))
+		return false;
+	outValue = static_cast <NTV2VPIDColorimetry> (tempVal);
+	return true;
 }
 
 bool CNTV2Card::SetVPIDVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister(gChannelToSDIOutVPIDLuminance[inChannel], inValue);
+	return WriteRegister(gChannelToVPIDLuminance[inChannel], inValue);
 }
+
+bool CNTV2Card::GetVPIDVPIDLuminance (NTV2VPIDLuminance & outValue, const NTV2Channel inChannel)
+{
+	ULWord	tempVal (0);
+	if (!ReadRegister(gChannelToVPIDLuminance[inChannel], tempVal))
+		return false;
+	outValue = static_cast <NTV2VPIDLuminance> (tempVal);
+	return true;
+}
+
 
 #if !defined (NTV2_DEPRECATE)
 // deprecated - does not support progressivePicture, 3G, 2K
