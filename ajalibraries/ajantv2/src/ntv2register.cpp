@@ -1281,8 +1281,8 @@ bool CNTV2Card::SetQuadFrameEnable (const bool inEnable, const NTV2Channel inCha
 	}
 	else
 	{
-		if(ok)	ok = SetTsiFrameEnable(false, inChannel);
-		if(ok)	ok = Set4kSquaresEnable(false, inChannel);
+		SetTsiFrameEnable(false, inChannel);
+		Set4kSquaresEnable(false, inChannel);
 	}
 	return ok;
 }
