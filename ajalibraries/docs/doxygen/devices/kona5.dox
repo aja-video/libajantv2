@@ -9,7 +9,14 @@
 	This page describes the KONA 5 capture/playout board.
 	It has two different firmware personalities:
 	-	::DEVICE_ID_KONA5 — “retail” personality, similar to the \ref io4kplus (4 × 3G FrameStores, one 12G/6G in & out);
-	-	::DEVICE_ID_KONA5_12G — “OEM” personality, with all-new 12G FrameStore architecture.  This page describes this mode of operation.
+		-	See <a href="https://www.aja.com/products/kona-5#techspecs">KONA5 “Tech Specs”</a> for details.
+	-	::DEVICE_ID_KONA5_8K — “OEM” personality, with all-new 12G FrameStore architecture.  The specifications on this page reflect this firmware.
+		-	Up to 8K YUV or RGB in/out
+		-	No CSCs, no Mixer/Keyers, no audio mixer
+	-	::DEVICE_ID_KONA5_8KMK — Another “OEM” personality for the new 12G FrameStore architecture.
+ 		-	Up to 8K YUV in/out
+		-	Up to 4K using CSCs & mixer/keyers
+		-	No audio mixer
 
 	@image	html	kona5.png
 	@image	html	kona5end.png
@@ -72,11 +79,13 @@
 
 	@par	Video Formats
 
-	-	<b>4K:</b> 4096 × 2160P 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
-	-	<b>UHD:</b> 3840 × 2160P 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
+	-	<b>8K:</b> 8192×4320P 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
+	-	<b>UHD2:</b> 7680×4320P 23.98, 24, 25, 29.97, 30, 50, 59.94, 60
+	-	<b>4K:</b> 4096×2160P 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
+	-	<b>UHD:</b> 3840×2160P 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
 	-	<b>2K:</b>
-		-	2048 × 1080p 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
-		-	2048 × 1080PsF 23.98, 24, 25, 29.97, 30
+		-	2048×1080p 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
+		-	2048×1080PsF 23.98, 24, 25, 29.97, 30
 	-	<b>HD:</b>
 		-	1080p 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
 		-	1080PsF 23.98, 24, 25, 29.97, 30
@@ -106,8 +115,8 @@
 
 	-	Introduced in <a href="https://sdksupport.aja.com/docs/NTV2SDK_docs_15_0">SDK v15.0</a>.
 
-	@par	Firmware
-	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/137/25>
+	@par	Firmware (8K)
+	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/kona-5-8k>
 
 	@par	Physical
 
