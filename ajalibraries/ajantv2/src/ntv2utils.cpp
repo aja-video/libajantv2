@@ -5946,9 +5946,8 @@ bool IsTransportCompatibleFormat (const NTV2VideoFormat inFormat1, const NTV2Vid
 		case NTV2_FORMAT_1080psf_2500_2:	return inFormat2 == NTV2_FORMAT_1080i_5000;
 		case NTV2_FORMAT_1080psf_2997_2:	return inFormat2 == NTV2_FORMAT_1080i_5994;
 		case NTV2_FORMAT_1080psf_3000_2:	return inFormat2 == NTV2_FORMAT_1080i_6000;
-		default:							break;
+		default:							return false;
 	}
-	return false;
 }
 
 
