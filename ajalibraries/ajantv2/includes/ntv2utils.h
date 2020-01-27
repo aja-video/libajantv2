@@ -56,7 +56,7 @@ AJAExport uint32_t CalcRowBytesForFormat (const NTV2FrameBufferFormat inPixelFor
 AJAExport void UnPack10BitYCbCrBuffer (uint32_t* packedBuffer, uint16_t* ycbcrBuffer, uint32_t numPixels);
 AJAExport void PackTo10BitYCbCrBuffer (const uint16_t *ycbcrBuffer, uint32_t *packedBuffer, const uint32_t numPixels);
 AJAExport void MakeUnPacked10BitYCbCrBuffer (uint16_t* buffer, uint16_t Y , uint16_t Cb , uint16_t Cr,uint32_t numPixels);
-AJAExport void ConvertLineTo8BitYCbCr (uint16_t * ycbcr10BitBuffer, uint8_t * ycbcr8BitBuffer,	uint32_t numPixels);
+AJAExport void ConvertLineTo8BitYCbCr (const uint16_t * ycbcr10BitBuffer, uint8_t * ycbcr8BitBuffer,	const uint32_t numPixels);
 AJAExport void ConvertUnpacked10BitYCbCrToPixelFormat (uint16_t *unPackedBuffer, uint32_t *packedBuffer, uint32_t numPixels, NTV2FrameBufferFormat pixelFormat,
 														bool bUseSmpteRange=false, bool bAlphaFromLuma=false);
 AJAExport void MaskUnPacked10BitYCbCrBuffer (uint16_t* ycbcrUnPackedBuffer, uint16_t signalMask , uint32_t numPixels);
@@ -139,22 +139,22 @@ AJAExport void UnpackLine_10BitYUVto16BitYUV (const ULWord * pIn10BitYUVLine, UW
 **/
 AJAExport void PackLine_16BitYUVto10BitYUV (const UWord * pIn16BitYUVLine, ULWord * pOut10BitYUVLine, const ULWord inNumPixels);
 
-AJAExport void RePackLineDataForYCbCrDPX(ULWord *packedycbcrLine, ULWord numULWords);
-AJAExport void UnPack10BitDPXtoRGBAlpha10BitPixel(RGBAlpha10BitPixel* rgba10BitBuffer,ULWord* DPXLinebuffer ,ULWord numPixels, bool bigEndian);
+AJAExport void RePackLineDataForYCbCrDPX (ULWord *packedycbcrLine, ULWord numULWords);
+AJAExport void UnPack10BitDPXtoRGBAlpha10BitPixel (RGBAlpha10BitPixel* rgba10BitBuffer, const ULWord * DPXLinebuffer, ULWord numPixels, bool bigEndian);
 AJAExport void UnPack10BitDPXtoForRP215withEndianSwap(UWord* rawrp215Buffer,ULWord* DPXLinebuffer ,ULWord numPixels);
 AJAExport void UnPack10BitDPXtoForRP215(UWord* rawrp215Buffer,ULWord* DPXLinebuffer ,ULWord numPixels);
 AJAExport void MaskYCbCrLine(UWord* ycbcrLine, UWord signalMask , ULWord numPixels);
 
 /**
 	@brief		Writes a line of unpacked 10-bit Y/C legal SMPTE black values into the given UWord buffer.
-	@param[in]	pLineData		A valid, non-NULL pointer to the destination UWord buffer.
+	@param[in]	pOutLineData	A valid, non-NULL pointer to the destination UWord buffer.
 	@param[in]	inNumPixels		Specifies the width of the line, in pixels. Defaults to 1920.
 	@warning	This function performs no error checking. Memory corruption will occur if the destination buffer
 				is smaller than 4 x inNumPixels bytes (i.e. smaller than 2 x inNumPixels UWords).
 **/
-AJAExport void Make10BitBlackLine (UWord * pLineData, const UWord inNumPixels = 1920);
+AJAExport void Make10BitBlackLine (UWord * pOutLineData, const ULWord inNumPixels = 1920);
 
-AJAExport void Make10BitWhiteLine(UWord* lineData,UWord numPixels=1920);
+AJAExport void Make10BitWhiteLine(UWord* pOutLineData, const ULWord numPixels=1920);
 #if !defined(NTV2_DEPRECATE_13_0)
 	AJAExport NTV2_DEPRECATED_f(void Fill10BitYCbCrVideoFrame (PULWord _baseVideoAddress,
 																const NTV2Standard inStandard,
@@ -175,7 +175,7 @@ AJAExport bool Fill10BitYCbCrVideoFrame (void * pBaseVideoAddress,
 
 AJAExport void Make8BitBlackLine(UByte* lineData,UWord numPixels=1920,NTV2FrameBufferFormat=NTV2_FBF_8BIT_YCBCR);
 AJAExport void Make8BitWhiteLine(UByte* lineData,UWord numPixels=1920,NTV2FrameBufferFormat=NTV2_FBF_8BIT_YCBCR);
-AJAExport void Make10BitLine(UWord* lineData, UWord Y , UWord Cb , UWord Cr,UWord numPixels=1920);
+AJAExport void Make10BitLine(UWord* lineData, const UWord Y, const UWord Cb, const UWord Cr, const ULWord numPixels = 1920);
 AJAExport void Make8BitLine(UByte* lineData, UByte Y , UByte Cb , UByte Cr,ULWord numPixels=1920,NTV2FrameBufferFormat=NTV2_FBF_8BIT_YCBCR);
 #if !defined(NTV2_DEPRECATE_13_0)
 	AJAExport NTV2_DEPRECATED_f(void Fill8BitYCbCrVideoFrame (PULWord _baseVideoAddress,
@@ -218,7 +218,7 @@ AJAExport void CopyRGBAImageToFrame(ULWord* pSrcBuffer, ULWord srcHeight, ULWord
 **/
 AJAExport bool	SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 										UByte *						pDstBuffer,
-										const UWord					inDstBytesPerLine,
+										const ULWord					inDstBytesPerLine,
 										const UWord					inDstTotalLines);
 
 /**
@@ -277,12 +277,12 @@ AJAExport bool	SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 **/
 AJAExport bool	CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,
 							UByte *						pDstBuffer,
-							const UWord					inDstBytesPerLine,
+							const ULWord					inDstBytesPerLine,
 							const UWord					inDstTotalLines,
 							const UWord					inDstVertLineOffset,
 							const UWord					inDstHorzPixelOffset,
 							const UByte *				pSrcBuffer,
-							const UWord					inSrcBytesPerLine,
+							const ULWord					inSrcBytesPerLine,
 							const UWord					inSrcTotalLines,
 							const UWord					inSrcVertLineOffset,
 							const UWord					inSrcVertLinesToCopy,
@@ -400,7 +400,7 @@ AJAExport bool GetFramesPerSecond (const NTV2FrameRate inFrameRate, ULWord & out
 	@todo		This function needs to be deprecated. Its implementation is inefficient. Avoid calling it every frame.
 	@return		True if the device having the given NTV2DeviceID supports the given NTV2VideoFormat as specified by frame rate, geometry and standard.
 **/
-AJAExport NTV2_SHOULD_BE_DEPRECATED(bool NTV2DeviceCanDoFormat(NTV2DeviceID		inDeviceID,
+AJAExport NTV2_SHOULD_BE_DEPRECATED(bool NTV2DeviceCanDoFormat (NTV2DeviceID		inDeviceID,
 																NTV2FrameRate		inFrameRate,
 																NTV2FrameGeometry	inFrameGeometry, 
 																NTV2Standard		inStandard));

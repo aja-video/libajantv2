@@ -277,7 +277,9 @@ public:
 	void							MakeInvalid (void);				///< @brief	Resets me into an invalid (NULL) state.
 
 	private:
-		void						FinalizePlanar (void);			///< @brief	Finishes initialization for planar formats
+		friend class CNTV2CaptionRenderer;	//	The caption renderer needs to call SetPixelFormat
+		inline void					SetPixelFormat (const NTV2PixelFormat inPixFmt)		{mPixelFormat = inPixFmt;}	//	Internal use only
+		void						FinalizePlanar (void);	//	Completes initialization for planar formats
 
 	//	Member Data
 	public:
