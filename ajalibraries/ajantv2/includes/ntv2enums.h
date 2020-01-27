@@ -4814,6 +4814,7 @@ typedef enum
     NTV2IpErrSDPNoANC,
     NTV2IpErrSFPNotFound,
     NTV2IpErrInvalidConfig,
+    NTV2IpErrLLDPNotFound,
     NTV2IpNumErrTypes
 } NTV2IpError;
 
