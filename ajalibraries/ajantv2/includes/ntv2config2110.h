@@ -371,6 +371,10 @@ public:
 	static uint32_t  Get2110TxStreamIndex(NTV2Stream stream );
     static uint32_t  GetDecapsulatorAddress(eSFP sfp, NTV2Stream stream);
 
+	bool SetLLDPInfo(std::string sysname);
+	bool GetLLDPInfo(std::string &chassisId0, std::string &portId0,
+					std::string &chassisId1, std::string &portId1);
+
     // If method returns false call this to get details
     std::string getLastError();
     NTV2IpError getLastErrorCode();

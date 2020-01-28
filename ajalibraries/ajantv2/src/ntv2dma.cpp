@@ -450,12 +450,28 @@ bool CNTV2Card::DeviceAddressToFrameNumber (const uint64_t inAddress,  UWord & o
 }
 
 
-bool CNTV2Card::DMABufferLock (const NTV2_POINTER & inBuffer)
+bool CNTV2Card::DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap)
 {
 	if (!_boardOpened)
 		return false;		//	Device not open!
 
-	NTV2BufferLock lockMsg (inBuffer, inBuffer.IsNULL() ? DMABUFFERLOCK_UNLOCK_ALL : DMABUFFERLOCK_LOCK);
+    if ((inBuffer.GetHostPointer() == NULL) || inBuffer.GetByteCount() == 0)
+        return false;
+
+    NTV2BufferLock lockMsg (inBuffer, (DMABUFFERLOCK_LOCK | (inMap? DMABUFFERLOCK_MAP : 0)));
+	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&lockMsg));
+}
+
+
+bool CNTV2Card::DMABufferUnlock (const NTV2_POINTER & inBuffer)
+{
+	if (!_boardOpened)
+		return false;		//	Device not open!
+
+    if ((inBuffer.GetHostPointer() == NULL) || inBuffer.GetByteCount() == 0)
+        return false;
+
+    NTV2BufferLock lockMsg (inBuffer, DMABUFFERLOCK_UNLOCK);
 	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&lockMsg));
 }
 
@@ -469,6 +485,24 @@ bool CNTV2Card::DMABufferUnlockAll (void)
 	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&unlockAllMsg));
 }
 
+bool CNTV2Card::DMABufferAutoLock (const bool inEnable, const bool inMap, const ULWord64 inMaxLockSize)
+{
+	if (!_boardOpened)
+		return false;		//	Device not open!
+
+	NTV2BufferLock autoMsg;
+	if (inEnable)
+	{
+		autoMsg.SetMaxLockSize (inMaxLockSize);
+        autoMsg.SetFlags (DMABUFFERLOCK_AUTO | DMABUFFERLOCK_MAX_SIZE | (inMap? DMABUFFERLOCK_MAP : 0));
+	}
+	else
+	{
+		autoMsg.SetMaxLockSize (0);
+		autoMsg.SetFlags (DMABUFFERLOCK_MANUAL | DMABUFFERLOCK_MAX_SIZE);
+	}
+	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&autoMsg));
+}
 
 typedef map<ULWord,NTV2AncDataRgn>	OffsetAncRgns, SizeAncRgns;
 typedef pair<ULWord,NTV2AncDataRgn>	OffsetAncRgn, SizeAncRgn;

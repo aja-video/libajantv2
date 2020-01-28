@@ -5692,8 +5692,13 @@ typedef enum
 		#define AUTOCIRCULATE_P2P_TARGET			BIT(30)		///< @brief prepare p2p target for asynchronous transfer (with message)
 		#define AUTOCIRCULATE_P2P_TRANSFER			BIT(31)		///< @brief transfer to p2p sync or async target
 
-		#define DMABUFFERLOCK_LOCK					BIT(0)		///< @brief Used in ::NTV2BufferLock to page lock the buffer.
+		#define DMABUFFERLOCK_LOCK					BIT(0)		///< @brief Used in ::NTV2BufferLock to page lock a buffer.
 		#define DMABUFFERLOCK_UNLOCK_ALL			BIT(1)		///< @brief Used in ::NTV2BufferLock to unlock all locked buffers.
+        #define DMABUFFERLOCK_MAP                   BIT(2)		///< @brief Used in ::NTV2BufferLock to IO map a buffer.
+		#define DMABUFFERLOCK_UNLOCK				BIT(3)		///< @brief Used in ::NTV2BufferLock to unlock a buffer.
+		#define DMABUFFERLOCK_AUTO					BIT(4)		///< @brief Used in ::NTV2BufferLock to auto page lock buffers.
+		#define DMABUFFERLOCK_MANUAL				BIT(5)		///< @brief Used in ::NTV2BufferLock to manual page lock buffers.
+		#define DMABUFFERLOCK_MAX_SIZE				BIT(6)		///< @brief Used in ::NTV2BufferLock to set max locked size.
 
 		#if !defined (NTV2_BUILDING_DRIVER)
 			/**
@@ -7952,7 +7957,8 @@ typedef enum
 				NTV2_POINTER	mBuffer;			///< @brief	Virtual address of a buffer to prelock, and its length.
 													//			A NULL buffer (or zero length) releases all locked buffers.
 				ULWord			mFlags;				///< @brief Action flags (lock, unlock, etc)
-				ULWord			mReserved[32];		///< @brief	Reserved for future expansion.
+				ULWord64		mMaxLockSize;		///< @brief Max locked bytes.
+				ULWord			mReserved[30];		///< @brief	Reserved for future expansion.
 			NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
@@ -7977,7 +7983,14 @@ typedef enum
 					@param	inFlags			Specifies action flags (lock, unlock, etc)
 				**/
 				explicit	NTV2BufferLock (const ULWord * pInBuffer, const ULWord inByteCount, const ULWord inFlags);
-				///@}
+
+				/**
+					@brief	Constructs an NTV2BufferLock object to use in a CNTV2Card::DMABufferLock call.
+					@param	inMaxLockSize	Specifies the maximum lock size in bytes
+					@param	inFlags			Specifies action flags (lock, unlock, etc)
+				**/
+				explicit	NTV2BufferLock (const ULWord64 inMaxLockSize, const ULWord inFlags);
+///@}
 
 				/**
 					@name	Changing
@@ -7996,7 +8009,10 @@ typedef enum
 					@param	inByteCount			Specifies a the length of the buffer to lock in bytes.
 					@return	True if successful;  otherwise false.
 				**/
-				inline bool	SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)	{return SetBuffer(NTV2_POINTER(pInBuffer, inByteCount));}
+				inline bool	SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)
+				{
+					return SetBuffer(NTV2_POINTER(pInBuffer, inByteCount));
+				}
 
 				/**
 					@brief	Sets the action flags for use in a subsequent call to CNTV2Card::DMABufferLock.
@@ -8005,10 +8021,21 @@ typedef enum
 				inline void	SetFlags (const ULWord inFlags)		{NTV2_ASSERT_STRUCT_VALID;  mFlags = inFlags;}
 
 				/**
+					@brief	Sets the maximum lock size for use in a subsequent call to CNTV2Card::DMABufferLock.
+					@param	inFlags			Specifies maximum lock size in bytes
+				**/
+				inline void	SetMaxLockSize (const ULWord64 inSize)		{NTV2_ASSERT_STRUCT_VALID;  mMaxLockSize = inSize;}
+
+				/**
 					@brief	Resets the struct to its initialized state.
 					@note	This does not release locked buffers.
 				**/
-				inline void	Clear (void)		{SetBuffer(NTV2_POINTER());}
+				inline void	Clear (void)
+				{
+					SetBuffer(NTV2_POINTER());
+					SetFlags(0);
+					SetMaxLockSize(0);
+				}
 				///@}
 
 				/**

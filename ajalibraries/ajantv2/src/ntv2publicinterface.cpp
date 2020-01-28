@@ -2301,6 +2301,8 @@ NTV2BufferLock::NTV2BufferLock()
 	:	mHeader	(NTV2_TYPE_AJABUFFERLOCK, sizeof(NTV2BufferLock))
 {
 	NTV2_ASSERT_STRUCT_VALID;
+    SetFlags(0);
+	SetMaxLockSize(0);
 }
 
 NTV2BufferLock::NTV2BufferLock (const NTV2_POINTER & inBuffer, const ULWord inFlags)
@@ -2309,6 +2311,7 @@ NTV2BufferLock::NTV2BufferLock (const NTV2_POINTER & inBuffer, const ULWord inFl
 	NTV2_ASSERT_STRUCT_VALID;
 	SetBuffer(inBuffer);
 	SetFlags(inFlags);
+	SetMaxLockSize(0);
 }
 
 NTV2BufferLock::NTV2BufferLock(const ULWord * pInBuffer, const ULWord inByteCount, const ULWord inFlags)
@@ -2317,6 +2320,16 @@ NTV2BufferLock::NTV2BufferLock(const ULWord * pInBuffer, const ULWord inByteCoun
 	NTV2_ASSERT_STRUCT_VALID;
 	SetBuffer (NTV2_POINTER(pInBuffer, inByteCount));
 	SetFlags (inFlags);
+	SetMaxLockSize(0);
+}
+
+NTV2BufferLock::NTV2BufferLock(const ULWord64 inMaxLockSize, const ULWord inFlags)
+	:	mHeader	(NTV2_TYPE_AJABUFFERLOCK, sizeof(NTV2BufferLock))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	SetBuffer (NTV2_POINTER());
+	SetFlags (inFlags);
+	SetMaxLockSize(inMaxLockSize);
 }
 
 bool NTV2BufferLock::SetBuffer (const NTV2_POINTER & inBuffer)
