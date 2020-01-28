@@ -567,10 +567,12 @@ void NTV2Player8K::PlayFrames (void)
 
 	uint32_t*	fAncBuffer = mAncType != AJAAncillaryDataType_Unknown ? reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (NTV2_ANCSIZE_MAX, AJA_PAGE_SIZE)) : NULL;
 	uint32_t	fAncBufferSize = mAncType != AJAAncillaryDataType_Unknown ? NTV2_ANCSIZE_MAX : 0;
-	::memset((void*)fAncBuffer, 0x00, fAncBufferSize);
 
-	if (fAncBuffer != NULL)
-		mDevice.DMABufferLock(fAncBuffer, fAncBufferSize);
+    if ((fAncBuffer != NULL) && (fAncBufferSize != 0))
+    {
+        ::memset((void*)fAncBuffer, 0x00, fAncBufferSize);
+        mDevice.DMABufferLock(fAncBuffer, fAncBufferSize);
+    }
 
 	uint32_t	packetSize = 0;
 	switch(mAncType)
@@ -702,8 +704,8 @@ void NTV2Player8K::SetUpTestPatternVideoBuffers (void)
 													  (AJAMemory::AllocateAligned (mVideoBufferSize, BUFFER_ALIGNMENT));
 
 		// Page lock the memory
-		if (mTestPatternVideoBuffers [testPatternIndex] != NULL)
-			mDevice.DMABufferLock((ULWord*)mTestPatternVideoBuffers [testPatternIndex], mVideoBufferSize);
+        if (mTestPatternVideoBuffers [testPatternIndex] != NULL)
+            mDevice.DMABufferLock((ULWord*)mTestPatternVideoBuffers [testPatternIndex], mVideoBufferSize);
 
 		//	Use the test pattern generator to fill an NTV2TestPatternBuffer...
 		NTV2TestPatternBuffer	testPatternBuffer;
