@@ -1,16 +1,8 @@
-/**************************************************************************
-
-    ntv2windriverinterface.h
-
-	Copyright (C) 2003, 2004, 2009 AJA Video Systems, Inc.  Proprietary and Confidential information.
-
-    Purpose:
-	
-       Defines that are shared between usermode software and driver  
-	   software
-	   Windows Platform Only
-
-**************************************************************************/
+/**
+	@file		ntv2winpublicinterface.h
+	@brief		Defines & structs shared between user-space and Windows kernel driver.
+	@copyright	(C) 2003-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
+**/
 #ifndef NTV2WINPUBLICINTERFACE_H
 #define NTV2WINPUBLICINTERFACE_H
 

@@ -1,7 +1,7 @@
 /**
     @file		main.cpp
 	@brief		Unittests for the Base part of AJA NTV2 Library (using doctest).
-	@copyright	Copyright (c) 2019 AJA Video Systems, Inc. All rights reserved.
+	@copyright	(C) 2019 AJA Video Systems, Inc. All rights reserved.
 **/
 // for doctest usage see: https://github.com/onqtam/doctest/blob/1.1.4/doc/markdown/tutorial.md
 
@@ -662,7 +662,7 @@ TEST_SUITE("persistence" * doctest::description("functions in ajabase/persistenc
         CHECK(strValue == "testing 1,2,3");
         CHECK(strcmp(blobValue,"blob test data")==0);
         CHECK(longStrValue == orgLongStrValue);
-        // as of 12/06/2017 AJAPersistence was changed to not default to
+        // as of 12/06/2017, AJAPersistence was changed to not default to
         // matching any device if exact or partial match not found
         // if it is ever changed back hierarchyValue1 should be 17
         CHECK(hierarchyValue1 == 0);

@@ -1,7 +1,7 @@
 /**
     @file		ntv2supportlogger.h
     @brief		Declares the CNTV2SupportLogger class.
-    @copyright	(C) 2017 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
+    @copyright	(C) 2017-2020 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
 **/
 
 #ifndef NTV2SUPPORTLOGGER_H

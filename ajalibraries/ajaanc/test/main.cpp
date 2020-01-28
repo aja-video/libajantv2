@@ -1,7 +1,7 @@
 /**
 	@file		main.cpp
 	@brief		Basic Functionality Tests for the AJA Anc Library.
-	@copyright	Copyright (c) 2013-2015 AJA Video Systems, Inc. All rights reserved.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc. All rights reserved.
 **/
 #include "ntv2bft.h"
 #include "ntv2endian.h"

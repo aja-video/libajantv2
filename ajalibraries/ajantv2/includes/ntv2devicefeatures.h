@@ -1,9 +1,8 @@
 /**
 	@file		ntv2devicefeatures.h
-	@brief		Declares all device capability functions.
-	@note		Although this is a .cpp file, it must be compiled by the Linux driver, which is C, not C++.
-				Also, it's used in the Mac driver, which uses a restricted subset of C++ . . . so no STL!
-	@copyright	(C) 2004-2014 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@brief		Declares device capability functions.
+	@note		Although this is a .cpp file, it must be compilable for Lin/Mac/Win kernel device drivers.
+	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2DEVICEFEATURES_H

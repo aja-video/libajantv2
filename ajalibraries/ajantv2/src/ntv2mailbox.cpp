@@ -1,7 +1,7 @@
 /**
 	@file		ntv2mailbox.cpp
 	@brief		Implementation of CNTV2MailBox class.
-	@copyright	(C) 2015-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2015-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2mailbox.h"

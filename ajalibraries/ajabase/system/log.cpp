@@ -1,7 +1,7 @@
 /**
 	@file		log.cpp
-	@copyright	Copyright (C) 2012-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Implements the AJATimeLog class.
+	@copyright	(C) 2012-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 //#include "ajabase/system/systemtime.h"

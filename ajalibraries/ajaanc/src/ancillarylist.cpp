@@ -1,7 +1,7 @@
 /**
 	@file		ancillarylist.cpp
 	@brief		Implementation of the AJAAncillaryList class.
-	@copyright	(C) 2010-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2010-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ancillarylist.h"

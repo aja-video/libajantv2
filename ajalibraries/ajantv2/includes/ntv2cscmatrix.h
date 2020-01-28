@@ -1,7 +1,7 @@
 /**
 	@file		ntv2cscmatrix.h
 	@brief		Declares the utility class for abstract color space matrix operations.
-	@copyright	Copyright 2004-2019 AJA Video Systems, Inc. All rights reserved.
+	@copyright	2004-2020 AJA Video Systems, Inc. All rights reserved.
 **/
 
 #ifndef NTV2_CSCMATRIX_H

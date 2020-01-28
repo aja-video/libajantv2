@@ -1,7 +1,7 @@
 /**
 	@file		timecodeburn.cpp
-	@copyright	Copyright (C) 2012-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Implements the AJATimeCodeBurn class.
+	@copyright	(C) 2012-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 #include "videoutilities.h"
 #include "timecodeburn.h"

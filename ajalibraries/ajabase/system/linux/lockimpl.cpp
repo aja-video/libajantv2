@@ -1,7 +1,7 @@
 /**
 	@file		linux/lockimpl.cpp
-	@copyright	Copyright (C) 2009-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Implements the AJALockImpl class on the Linux platform.
+	@copyright	(C) 2009-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include <errno.h>

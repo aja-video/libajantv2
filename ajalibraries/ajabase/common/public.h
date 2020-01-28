@@ -1,7 +1,7 @@
 /**
 	@file		public.h
-	@copyright	Copyright (C) 2009-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Master header for the ajabase library.
+	@copyright	(C) 2009-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_PUBLIC_H

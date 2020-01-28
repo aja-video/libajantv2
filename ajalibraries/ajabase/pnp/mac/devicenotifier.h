@@ -2,7 +2,7 @@
 	@file		devicenotifier.h
 	@brief		Declares the MacOS-specific KonaNotifier and DeviceNotifier classes, which invoke
 				a client-registered callback function when devices are attached and/or detached.
-	@copyright	(C) 2011-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2011-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #if !defined (__DEVICE_NOTIFIER_H__)

@@ -1,7 +1,7 @@
 /**
 	@file		dpx_hdr.h
-	@copyright	Copyright (C) 2015 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declaration of DpxHdr class adapted from STwo's dpx file I/O.
+	@copyright	(C) 2015-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef DPX_HDR_H

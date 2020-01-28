@@ -1,3 +1,9 @@
+/**
+	@file		ntv2mbcontroller.h
+	@brief		Declares the CNTV2MBController class.
+	@copyright	(C) 2015-2020 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
+**/
+
 #ifndef NTV2MBCONTROLLER_H
 #define NTV2MBCONTROLLER_H
 

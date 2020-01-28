@@ -1,9 +1,8 @@
-/////////////////////////////////////////////////////////////////////////////
-// ntv2spiinterface.h
-//
-// Copyright (C) 2017 AJA Video Systems, Inc.  Proprietary and Confidential information.
-//
-/////////////////////////////////////////////////////////////////////////////
+/**
+    @file		ntv2spiinterface.h
+    @brief		Declares the CNTV2SpiFlash and CNTV2AxiSpiFlash classes.
+    @copyright	(C) 2017-2020 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
+**/
 #ifndef NTV2SPIINTERFACE_H
 #define NTV2SPIINTERFACE_H
 

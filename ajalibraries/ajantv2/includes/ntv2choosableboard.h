@@ -1,11 +1,8 @@
-//
-//  ntv2choosableboard.h
-//
-//	Copyright (C) 2005, 2006, 2010 AJA Video Systems, Inc.  
-//	Proprietary and Confidential information.
-//
-//   Types and constants for network-aware choosable board list.
-//
+/**
+    @file		ntv2config2022.h
+    @brief		Declares the NTV2ChoosableBoard struct used for "nub" discovery.
+    @copyright	(C) 2005-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
+**/
 
 #ifndef NTV2CHOOSABLEBOARD_H
 #define NTV2CHOOSABLEBOARD_H

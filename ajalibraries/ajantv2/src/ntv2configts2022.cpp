@@ -1,7 +1,7 @@
 /**
     @file		ntv2config2022.cpp
-    @brief		Implements the CNTV2Config2022 class.
-	@copyright	(C) 2014-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @brief		Implements the CNTV2ConfigTs2022 class.
+	@copyright	(C) 2014-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2configts2022.h"

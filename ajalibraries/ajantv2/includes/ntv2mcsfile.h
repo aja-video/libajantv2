@@ -1,7 +1,7 @@
 /**
 	@file		ntv2mcsfile.h
 	@brief		Declares the CNTV2MCSfile class.
-	@copyright	(C) 2015 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
+	@copyright	(C) 2015-2020 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
 **/
 
 #ifndef NTV2MCSFILE_H

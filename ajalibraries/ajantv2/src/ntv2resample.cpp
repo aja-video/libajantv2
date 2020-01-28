@@ -1,7 +1,7 @@
 /**
 	@file		ntv2resample.cpp
-	@brief		Implementation for the pixel resampling functions.
-	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@brief		Implementations for the pixel resampling functions.
+	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2resample.h"

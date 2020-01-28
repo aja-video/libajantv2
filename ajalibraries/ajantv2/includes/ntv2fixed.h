@@ -1,7 +1,7 @@
 /**
 	@file		ntv2fixed.h
-	@copyright	Copyright (C) 2004-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares several fixed-point math routines. Assumes 16-bit fraction.
+	@copyright	(C) 2004-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef NTV2FIXED_H

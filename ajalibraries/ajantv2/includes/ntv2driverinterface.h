@@ -1,7 +1,7 @@
 /**
 	@file		ntv2driverinterface.h
 	@brief		Declares the CNTV2DriverInterface base class.
-	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2DRIVERINTERFACE_H

@@ -1,3 +1,9 @@
+/**
+	@file		ntv2mailbox.h
+	@brief		Declares the CNTV2MailBox class.
+	@copyright	(C) 2014-2020 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
+**/
+
 #ifndef CNTV2MAILBOX_H
 #define CNTV2MAILBOX_H
 

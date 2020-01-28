@@ -1,15 +1,8 @@
- /*
- *
-	ntv2windriverinterface.cpp
-
-	Copyright (C) 2003, 2004 AJA Video Systems, Inc.  Proprietary and Confidential information.
-
-	Purpose:
-
-	Platform dependent implementations for NTV2 Driver Interface
-	on Windows.
-
- */
+/**
+	@file		ntv2windriverinterface.cpp
+	@brief		Implementation of CNTV2WinDriverInterface.
+	@copyright	(C) 2003-2020 AJA Video Systems, Inc.
+**/
 
 #include "ntv2windriverinterface.h"
 #include "ntv2winpublicinterface.h"

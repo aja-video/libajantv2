@@ -1,7 +1,7 @@
 /**
 	@file		ntv2autocirculate.cpp
 	@brief		Implements the CNTV2Card AutoCirculate API functions.
-	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2card.h"

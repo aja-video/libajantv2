@@ -1,7 +1,7 @@
 /**
 	@file		ntv2rp215.h
 	@brief		Declares the CNTV2RP215Decoder class. See SMPTE RP215 standard for details.
-	@copyright	(C) 2006-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2006-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef __NTV2_RP215_

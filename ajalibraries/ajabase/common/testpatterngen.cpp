@@ -1,7 +1,7 @@
 /**
 	@file		testpatterngen.cpp
-	@copyright	Copyright (C) 2010-2015 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Implements the AJATestPatternGen class.
+	@copyright	(C) 2010-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 #if !defined(NTV2_DEPRECATE_15_0)
 #include "types.h"

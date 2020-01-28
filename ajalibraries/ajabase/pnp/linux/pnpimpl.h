@@ -1,7 +1,7 @@
 /**
 	@file		pnp/linux/pnpimpl.h
-	@copyright	Copyright (C) 2011-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares the AJAPnpImpl class.
+	@copyright	(C) 2011-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_PNP_IMPL_H

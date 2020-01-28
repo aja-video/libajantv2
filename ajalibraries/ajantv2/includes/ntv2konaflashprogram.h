@@ -1,9 +1,9 @@
-/////////////////////////////////////////////////////////////////////////////
-// ntv2konaflashprogram.h
-//
-// Copyright (C) 2010 AJA Video Systems, Inc.  Proprietary and Confidential information.
-//
-/////////////////////////////////////////////////////////////////////////////
+/**
+	@file		ntv2konaflashprogram.h
+	@brief		Declares the CNTV2KonaFlashProgram class.
+	@copyright	(C) 2010-2020 AJA Video Systems, Inc.  All rights reserved.
+**/
+
 #ifndef NTV2KONAFLASHPROGRAM_H
 #define NTV2KONAFLASHPROGRAM_H
 

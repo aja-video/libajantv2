@@ -1,7 +1,7 @@
 /**
 	@file		ntv2formatdescriptor.h
 	@brief		Declares the NTV2FormatDescriptor class.
-	@copyright	(C) 2016-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2016-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2FORMATDESC_H

@@ -1,7 +1,7 @@
 /**
 	@file		linux/eventimpl.h
-	@copyright	Copyright (C) 2010-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares the AJAEventImpl class.
+	@copyright	(C) 2010-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_EVENT_IMPL_H

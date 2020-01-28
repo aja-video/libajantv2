@@ -1,7 +1,7 @@
 /**
 	@file		ntv2utils.cpp
 	@brief		Implementations for the NTV2 utility functions.
-	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 #include "ajatypes.h"
 #include "ntv2utils.h"

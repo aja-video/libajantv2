@@ -1,7 +1,7 @@
 /**
 	@file		ancillarydata_timecode_vitc.h
 	@brief		Declares the AJAAncillaryData_Timecode_VITC class.
-	@copyright	(C) 2010-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2010-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef AJA_ANCILLARYDATA_TIMECODE_VITC_H

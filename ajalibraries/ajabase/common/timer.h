@@ -1,7 +1,7 @@
 /**
 	@file		timer.h
-	@copyright	Copyright (C) 2009-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares the AJATimer class.
+	@copyright	(C) 2009-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_TIMER_H
