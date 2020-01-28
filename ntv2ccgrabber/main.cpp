@@ -2,7 +2,7 @@
 	@file		ntv2ccgrabber/main.cpp
 	@brief		Demonstration application that grabs closed-captioning data from frames captured
 				from SDI input (using AutoCirculate), and writes the captions to standard output.
-	@copyright	Copyright (C) 2013-2019 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 

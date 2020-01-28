@@ -1,7 +1,7 @@
 /**
 	@file	ntv2fieldburn.h
 	@brief	Header file for the NTV2FieldBurn demonstration class.
-	@copyright	Copyright (C) 2013-2019 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef _NTV2FIELDBURN_H

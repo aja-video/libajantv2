@@ -1,7 +1,7 @@
 /**
 	@file		ntv2qtmultiinput.cpp
 	@brief		Implementation of the NTV2QtMultiInput class.
-	@copyright	Copyright 2013 AJA Video Systems, Inc. All rights reserved.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc. All rights reserved.
 **/
 
 #include "ntv2qtmultiinput.h"

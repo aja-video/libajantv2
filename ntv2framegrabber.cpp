@@ -1,7 +1,7 @@
 /**
 	@file		ntv2framegrabber.cpp
 	@brief		Contains the implementation of the NTV2FrameGrabber class.
-	@copyright	Copyright (C) 2013-2014 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 #include <ostream>
 #include "ntv2framegrabber.h"

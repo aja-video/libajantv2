@@ -1,7 +1,7 @@
 /**
 	@file	ntv2llburn.h
 	@brief	Header file for the low latency NTV2Burn demonstration class.
-	@copyright	Copyright (C) 2012-2019 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2012-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef _NTV2LLBURN_H

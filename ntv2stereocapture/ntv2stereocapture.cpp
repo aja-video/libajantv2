@@ -1,7 +1,7 @@
 /**
 	@file		ntv2stereocapture.cpp
 	@brief		Contains the implementation of the NTV2StereoCapture class.
-	@copyright	Copyright (C) 2013 AJA Video Systems, Inc. All rights reserved.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc. All rights reserved.
 **/
 
 

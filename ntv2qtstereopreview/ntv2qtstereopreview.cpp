@@ -1,7 +1,7 @@
 /**
 	@file		ntv2qtstereopreview.cpp
 	@brief		Implementation of the NTV2QtStereoPreview class.
-	@copyright	Copyright 2013 AJA Video Systems, Inc. All rights reserved.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc. All rights reserved.
 **/
 
 

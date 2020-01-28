@@ -1,7 +1,7 @@
 /**
 	@file		ntv2outputtestpattern.cpp
 	@brief		Header file for NTV2OutputTestPattern demonstration class
-	@copyright	Copyright (C) 2013-2019 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 

@@ -1,7 +1,7 @@
 /**
 	@file		ntv2framegrabber.h
 	@brief		Header file for the NTV2FrameGrabber class.
-	@copyright	Copyright (C) 2013-2014 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef NTV2FRAMEGRABBER_H

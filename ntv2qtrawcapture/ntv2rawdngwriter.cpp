@@ -1,7 +1,7 @@
 /**
 	@file		ntv2rawdngwriter.cpp
 	@brief		Implementation if the NTV2RawDNGWriter class.
-	@copyright	Copyright (C) 2014 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2014-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 

@@ -2,7 +2,7 @@
 	@file		main.cpp
 	@brief		Demonstration application that uses AutoCirculate to capture 3D video and display
 				the captured video in a Qt window, with or without audio.
-	@copyright	Copyright (C) 2013 AJA Video Systems, Inc.	All rights reserved.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc.	All rights reserved.
 **/
 
 

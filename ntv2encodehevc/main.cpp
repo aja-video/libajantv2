@@ -1,9 +1,8 @@
 /**
- @file		ntv2encodehevc/main.cpp
- @brief		Demonstration application to capture frames from SDI input.
- @copyright	Copyright (C) 2012-2015 AJA Video Systems, Inc.  All rights reserved.
- **/
-
+	@file		ntv2encodehevc/main.cpp
+	@brief		Demonstration application to capture frames from SDI input.
+	@copyright	(C) 2012-2020 AJA Video Systems, Inc.  All rights reserved.
+**/
 
 //	Includes
 #include "ntv2utils.h"

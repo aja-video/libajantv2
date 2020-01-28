@@ -1,7 +1,7 @@
 /**
 	@file		ntv2qtrawcapture.cpp
 	@brief		Implementation of the NTV2QtRawCapture class.
-	@copyright	Copyright 2014 AJA Video Systems, Inc. All rights reserved.
+	@copyright	(C) 2014-2020 AJA Video Systems, Inc. All rights reserved.
 **/
 
 

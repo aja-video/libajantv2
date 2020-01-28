@@ -2,7 +2,7 @@
 	@file		ntv2enumerateboards/main.cpp
 	@brief		Demonstration application to enumerate the AJA devices for the host system.
 				Shows two ways of dynamically getting a device's features.
-	@copyright	Copyright (C) 2012-2015 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2012-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 

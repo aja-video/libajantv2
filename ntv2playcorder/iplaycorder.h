@@ -2,7 +2,7 @@
 	@file		i_playcorder.h
 	@brief		Header file for the interface between a playcorder UI
 				and an inplementation class that does the actuall work.
-	@copyright	Copyright 2013 AJA Video Systems, Inc. All rights reserved.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc. All rights reserved.
 **/
 
 #ifndef IPLAYCORDER_H

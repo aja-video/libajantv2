@@ -1,6 +1,6 @@
 /**
 	@file		ntv2testOGL/main.cpp
-	@copyright	Copyright (C) 2012-2014 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2012-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 //	Includes

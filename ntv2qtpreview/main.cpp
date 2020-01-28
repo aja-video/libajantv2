@@ -2,7 +2,7 @@
 	@file		ntv2qtpreview/main.cpp
 	@brief		Demonstration application that uses AutoCirculate to capture frames from a single
 				SDI input and display the captured video in a Qt window, with or without audio.
-	@copyright	Copyright (C) 2013 AJA Video Systems, Inc.	All rights reserved.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc.	All rights reserved.
 **/
 
 #include "ntv2qtpreview.h"

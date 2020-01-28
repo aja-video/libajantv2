@@ -1,7 +1,7 @@
 /**
 	@file		ntv2qtstereopreview.h
 	@brief		Header file for NTV2QtStereoPreview demo application.
-	@copyright	Copyright 2013 AJA Video Systems, Inc. All rights reserved.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc. All rights reserved.
 **/
 
 #ifndef NTV2QTSTEREOPREVIEW_H

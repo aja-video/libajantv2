@@ -2,7 +2,7 @@
 	@file		ntv2rawpreview.h
 	@brief		Header file for the NTV2RawPreview class that is used to prepare frames
 				in raw format for display on the computer monitor.
-	@copyright	Copyright (C) 2013-2014 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef _NTV2RAWPREVIEW_H

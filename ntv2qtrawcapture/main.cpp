@@ -3,7 +3,7 @@
 	@brief		Demonstration application that uses AutoCirculate to capture frames in raw format
 				from a CION camera via SDI, display the captured video in a Qt window, and write
 				the frames to a storage medium as DNG files.
-	@copyright	Copyright (C) 2014 AJA Video Systems, Inc.	All rights reserved.
+	@copyright	(C) 2014-2020 AJA Video Systems, Inc.	All rights reserved.
 **/
 
 

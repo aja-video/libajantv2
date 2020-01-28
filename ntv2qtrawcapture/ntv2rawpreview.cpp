@@ -1,7 +1,7 @@
 /**
 	@file		ntv2rawpreview.cpp
 	@brief		Implementation if the NTV2RawPreview class.
-	@copyright	Copyright (C) 2014 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2014-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include <stdio.h>

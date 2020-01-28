@@ -2,7 +2,7 @@
 	@file		ntv2rawdngwriter.h
 	@brief		Header file for the NTV2RawDngWriter class that is used to write frames
 				in raw format to files on the storage medium.
-	@copyright	Copyright (C) 2013-2014 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef _NTV2RAWDNGWRITER_H

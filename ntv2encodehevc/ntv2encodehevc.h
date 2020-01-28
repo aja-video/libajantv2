@@ -1,7 +1,7 @@
 /**
 	@file		ntv2encodehevc.h
 	@brief		Declares the NTV2EncodeHEVC class.
-	@copyright	Copyright (C) 2015-2019 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2015-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 

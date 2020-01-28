@@ -2,7 +2,7 @@
 	@file		ntv2qtrawcapture.h
 	@brief		Header file for NTV2QtRawCapture demo application.
 				Demonstrates how to capture raw video from devices like the AJA CION camera.
-	@copyright	Copyright 2014 AJA Video Systems, Inc. All rights reserved.
+	@copyright	(C) 2014-2020 AJA Video Systems, Inc. All rights reserved.
 **/
 
 #ifndef NTV2QTRAWCAPTURE_H
