@@ -435,11 +435,11 @@ public:
     **/
 	AJA_VIRTUAL bool	DeviceCanDoHDMIQuadRasterConversion (void);
 
-    /**
-		@brief		Returns true if the device having the given ID supports the audio mixer.
-		@return		True if the device supports the given input source.
-	**/
 	AJA_VIRTUAL bool	DeviceIsDNxIV (void);
+
+    /**
+		@return		Returns true if the device has a microphone input connector.
+	**/
 	AJA_VIRTUAL bool	DeviceHasMicInput (void);
 
 	/**

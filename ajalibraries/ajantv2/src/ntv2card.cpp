@@ -104,16 +104,17 @@ Word CNTV2Card::GetDeviceVersion (void)
 string CNTV2Card::GetDeviceVersionString (void)
 {
 	ostringstream	oss;
-	oss << ::NTV2DeviceIDToString (GetDeviceID ());
-	return oss.str ();
+	oss << ::NTV2DeviceIDToString(GetDeviceID());
+	return oss.str();
 }
 
 
 string CNTV2Card::GetDisplayName (void)
 {
 	ostringstream	oss;
-	oss << ::NTV2DeviceIDToString (GetDeviceID ()) << " - " << GetIndexNumber ();
-	return oss.str ();
+	oss << ::NTV2DeviceIDToString(GetDeviceID(), GetDeviceID() == DEVICE_ID_IO4KPLUS ? DeviceHasMicInput() : false)
+		<< " - " << GetIndexNumber();
+	return oss.str();
 }
 
 
