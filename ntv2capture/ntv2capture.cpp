@@ -31,28 +31,17 @@ static const ULWord	kAppSignature	NTV2_FOURCC ('D','E','M','O');
 
 //////////////////////////////////////////////////////////////////////////////////////	NTV2Capture IMPLEMENTATION
 
-NTV2Capture::NTV2Capture (const string					inDeviceSpecifier,
-						  const bool					inWithAudio,
-						  const NTV2Channel				inChannel,
-						  const NTV2FrameBufferFormat	inPixelFormat,
-						  const bool					inLevelConversion,
-						  const bool					inDoMultiFormat,
-						  const bool					inWithAnc)
-
+NTV2Capture::NTV2Capture (const CaptureConfig & inConfig)
 	:	mConsumerThread		(AJA_NULL),
 		mProducerThread		(AJA_NULL),
 		mDeviceID			(DEVICE_ID_NOTFOUND),
-		mDeviceSpecifier	(inDeviceSpecifier),
-		mInputChannel		(inChannel),
-		mInputSource		(::NTV2ChannelToInputSource (inChannel)),
+		mConfig				(inConfig),
 		mVideoFormat		(NTV2_FORMAT_UNKNOWN),
-		mPixelFormat		(inPixelFormat),
 		mSavedTaskMode		(NTV2_DISABLE_TASKS),
-		mAudioSystem		(inWithAudio ? NTV2_AUDIOSYSTEM_1 : NTV2_AUDIOSYSTEM_INVALID),
-		mDoLevelConversion	(inLevelConversion),
-		mDoMultiFormat		(inDoMultiFormat),
+		mAudioSystem		(inConfig.fWithAudio ? NTV2_AUDIOSYSTEM_1 : NTV2_AUDIOSYSTEM_INVALID),
 		mGlobalQuit			(false),
-		mWithAnc			(inWithAnc)
+		mHostBuffers		(),
+		mAVCircularBuffer	()
 {
 }	//	constructor
 
@@ -69,7 +58,7 @@ NTV2Capture::~NTV2Capture ()
 	mProducerThread = AJA_NULL;
 
 	//	Unsubscribe from input vertical event...
-	mDevice.UnsubscribeInputVerticalEvent (mInputChannel);
+	mDevice.UnsubscribeInputVerticalEvent(mConfig.fInputChannel);
 
 }	//	destructor
 
@@ -87,7 +76,7 @@ void NTV2Capture::Quit (void)
 		while (mProducerThread->Active ())
 			AJATime::Sleep (10);
 
-	if (!mDoMultiFormat)
+	if (!mConfig.fDoMultiFormat)
 	{
 		mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
 		mDevice.SetEveryFrameServices (mSavedTaskMode);		//	Restore prior task mode
@@ -101,17 +90,17 @@ AJAStatus NTV2Capture::Init (void)
 	AJAStatus	status	(AJA_STATUS_SUCCESS);
 
 	//	Open the device...
-	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mDeviceSpecifier, mDevice))
-		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not found" << endl;  return AJA_STATUS_OPEN;}
+	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
+		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
 
     if (!mDevice.IsDeviceReady(false))
-		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	mDeviceID = mDevice.GetDeviceID();						//	Keep the device ID handy, as it's used frequently
-	if (!::NTV2DeviceCanDoCapture (mDeviceID))
-		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' cannot capture" << endl;  return AJA_STATUS_FEATURE;}
+	if (!::NTV2DeviceCanDoCapture(mDeviceID))
+		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' cannot capture" << endl;  return AJA_STATUS_FEATURE;}
 
-	if (!mDoMultiFormat)
+	if (!mConfig.fDoMultiFormat)
 	{
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 			return AJA_STATUS_BUSY;							//	Another app is using the device
@@ -120,18 +109,25 @@ AJAStatus NTV2Capture::Init (void)
 	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Since this is an OEM demo, use the OEM service level
 
 	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
-		mDevice.SetMultiFormatMode(mDoMultiFormat);
+		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
 
-	if (::NTV2DeviceGetNumHDMIVideoInputs(mDeviceID) > 1)
-		mInputSource = ::NTV2ChannelToInputSource(mInputChannel, NTV2_INPUTSOURCES_HDMI);
+	if (!NTV2_IS_VALID_CHANNEL(mConfig.fInputChannel)  &&  !NTV2_IS_VALID_INPUT_SOURCE(mConfig.fInputSource))
+		mConfig.fInputChannel = NTV2_CHANNEL1;
+	else if (!NTV2_IS_VALID_CHANNEL(mConfig.fInputChannel)  &&  NTV2_IS_VALID_INPUT_SOURCE(mConfig.fInputSource))
+		mConfig.fInputChannel = ::NTV2InputSourceToChannel(mConfig.fInputSource);
+	else if (NTV2_IS_VALID_CHANNEL(mConfig.fInputChannel)  &&  !NTV2_IS_VALID_INPUT_SOURCE(mConfig.fInputSource))
+		mConfig.fInputSource = ::NTV2ChannelToInputSource(mConfig.fInputChannel, NTV2_INPUTSOURCES_SDI);
+	//	On KonaHDMI, map specified SDI input to equivalent HDMI input...
+	if (::NTV2DeviceGetNumHDMIVideoInputs(mDeviceID) > 1  &&  NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
+		mConfig.fInputSource = ::NTV2ChannelToInputSource(::NTV2InputSourceToChannel(mConfig.fInputSource), NTV2_INPUTSOURCES_HDMI);
 
 	//	Set up the video and audio...
 	status = SetupVideo();
 	if (AJA_FAILURE(status))
 		return status;
 
-	if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem))
-		status = SetupAudio ();
+	if (mConfig.fWithAudio)
+		status = SetupAudio();
 	if (AJA_FAILURE(status))
 		return status;
 
@@ -139,6 +135,7 @@ AJAStatus NTV2Capture::Init (void)
 	SetupHostBuffers();
 	RouteInputSignal();
 
+	cerr << mConfig << endl;	//	Dump config
 	return AJA_STATUS_SUCCESS;
 
 }	//	Init
@@ -147,26 +144,26 @@ AJAStatus NTV2Capture::Init (void)
 AJAStatus NTV2Capture::SetupVideo (void)
 {
 	//	Sometimes other applications disable some or all of the frame buffers, so turn on ours now...
-	mDevice.EnableChannel (mInputChannel);
+	mDevice.EnableChannel(mConfig.fInputChannel);
 
 	//	Enable and subscribe to the interrupts for the channel to be used...
-	mDevice.EnableInputInterrupt (mInputChannel);
-	mDevice.SubscribeInputVerticalEvent (mInputChannel);
-	mDevice.SubscribeOutputVerticalEvent (NTV2_CHANNEL1);
+	mDevice.EnableInputInterrupt(mConfig.fInputChannel);
+	mDevice.SubscribeInputVerticalEvent(mConfig.fInputChannel);
+	mDevice.SubscribeOutputVerticalEvent(NTV2_CHANNEL1);
 
 	//	If the device supports bi-directional SDI and the
 	//	requested input is SDI, ensure the SDI connector
 	//	is configured to receive...
-	if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID) && NTV2_INPUT_SOURCE_IS_SDI (mInputSource))
+	if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID) && NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
 	{
-		mDevice.SetSDITransmitEnable (mInputChannel, false);
+		mDevice.SetSDITransmitEnable(mConfig.fInputChannel, false);
 
 		//	Give the input circuit some time (~10 VBIs) to lock onto the input signal...
-		mDevice.WaitForInputVerticalInterrupt (mInputChannel, 10);
+		mDevice.WaitForInputVerticalInterrupt (mConfig.fInputChannel, 10);
 	}
 
 	//	Determine the input video signal format...
-	mVideoFormat = mDevice.GetInputVideoFormat (mInputSource);
+	mVideoFormat = mDevice.GetInputVideoFormat (mConfig.fInputSource);
 	if (mVideoFormat == NTV2_FORMAT_UNKNOWN)
 	{
 		cerr << "## ERROR:  No input signal or unknown format" << endl;
@@ -174,19 +171,23 @@ AJAStatus NTV2Capture::SetupVideo (void)
 	}
 
 	//	Set the device video format to whatever we detected at the input...
-	mDevice.SetReference (::NTV2InputSourceToReferenceSource (mInputSource));
-	mDevice.SetVideoFormat (mVideoFormat, false, false, mInputChannel);
+	mDevice.SetReference (::NTV2InputSourceToReferenceSource(mConfig.fInputSource));
+	mDevice.SetVideoFormat (mVideoFormat, false, false, mConfig.fInputChannel);
 
 	//	Set the frame buffer pixel format for all the channels on the device
 	//	(assuming it supports that pixel format -- otherwise default to 8-bit YCbCr)...
-	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mPixelFormat))
-		mPixelFormat = NTV2_FBF_8BIT_YCBCR;
-
-	mDevice.SetFrameBufferFormat (mInputChannel, mPixelFormat);
+	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
+	{
+		cerr	<< "## WARNING:  " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat)
+				<< " unsupported, using " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat)
+				<< " instead" << endl;
+		mConfig.fPixelFormat = NTV2_FBF_8BIT_YCBCR;
+	}
+	mDevice.SetFrameBufferFormat (mConfig.fInputChannel, mConfig.fPixelFormat);
 
 	//	Disable Anc capture if the device can't do it...
 	if (!::NTV2DeviceCanDoCustomAnc (mDeviceID))
-		mWithAnc = false;
+		mConfig.fWithAnc = false;
 
 	return AJA_STATUS_SUCCESS;
 
@@ -196,11 +197,14 @@ AJAStatus NTV2Capture::SetupVideo (void)
 AJAStatus NTV2Capture::SetupAudio (void)
 {
 	//	In multiformat mode, base the audio system on the channel...
-	if (mDoMultiFormat  &&  ::NTV2DeviceGetNumAudioSystems(mDeviceID) > 1  &&  UWord(mInputChannel) < ::NTV2DeviceGetNumAudioSystems(mDeviceID))
-		mAudioSystem = ::NTV2ChannelToAudioSystem (mInputChannel);
+	mAudioSystem = NTV2_AUDIOSYSTEM_1;
+	if (mConfig.fDoMultiFormat)
+		if (::NTV2DeviceGetNumAudioSystems(mDeviceID) > 1)
+			if (UWord(mConfig.fInputChannel) < ::NTV2DeviceGetNumAudioSystems(mDeviceID))
+				mAudioSystem = ::NTV2ChannelToAudioSystem(mConfig.fInputChannel);
 
 	//	Have the audio system capture audio from the designated device input (i.e., ch1 uses SDIIn1, ch2 uses SDIIn2, etc.)...
-	mDevice.SetAudioSystemInputSource (mAudioSystem, NTV2_AUDIO_EMBEDDED, ::NTV2ChannelToEmbeddedAudioInput (mInputChannel));
+	mDevice.SetAudioSystemInputSource (mAudioSystem, NTV2_AUDIO_EMBEDDED, ::NTV2ChannelToEmbeddedAudioInput(mConfig.fInputChannel));
 
 	mDevice.SetNumberAudioChannels (::NTV2DeviceGetMaxAudioChannels (mDeviceID), mAudioSystem);
 	mDevice.SetAudioRate (NTV2_AUDIO_48K, mAudioSystem);
@@ -224,7 +228,7 @@ void NTV2Capture::SetupHostBuffers (void)
 	//	Let my circular buffer know when it's time to quit...
 	mAVCircularBuffer.SetAbortFlag (&mGlobalQuit);
 
-	if (mWithAnc)
+	if (mConfig.fWithAnc)
 	{
 		ULWord	F1OffsetFromEnd(0), F2OffsetFromEnd(0);
 		mDevice.ReadRegister(kVRegAncField1Offset, F1OffsetFromEnd);
@@ -232,7 +236,7 @@ void NTV2Capture::SetupHostBuffers (void)
 		F1AncSize = F2OffsetFromEnd > F1OffsetFromEnd ? 0 : F1OffsetFromEnd - F2OffsetFromEnd;
 		F2AncSize = F2OffsetFromEnd > F1OffsetFromEnd ? F2OffsetFromEnd - F1OffsetFromEnd : F2OffsetFromEnd;
 	}
-	mFormatDesc = NTV2FormatDescriptor (standard, mPixelFormat, vancMode);
+	mFormatDesc = NTV2FormatDescriptor (standard, mConfig.fPixelFormat, vancMode);
 
 	//	Allocate and add each in-host AVDataBuffer to my circular buffer member variable...
 	mHostBuffers.reserve(size_t(CIRCULAR_BUFFER_SIZE));
@@ -240,7 +244,7 @@ void NTV2Capture::SetupHostBuffers (void)
 	{
 		mHostBuffers.push_back(NTV2FrameData());
 		NTV2FrameData & frameData(mHostBuffers.back());
-		frameData.fVideoBuffer.Allocate(::GetVideoWriteSize (mVideoFormat, mPixelFormat, vancMode));
+		frameData.fVideoBuffer.Allocate(::GetVideoWriteSize (mVideoFormat, mConfig.fPixelFormat, vancMode));
 		frameData.fAudioBuffer.Allocate(NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem) ? NTV2_AUDIOSIZE_MAX : 0);
 		frameData.fAncBuffer.Allocate(F1AncSize);
 		frameData.fAncBuffer2.Allocate(F2AncSize);
@@ -254,25 +258,23 @@ void NTV2Capture::RouteInputSignal (void)
 {
 	//	For this simple example, tie the user-selected input to frame buffer 1.
 	//	Is this user-selected input supported on the device?
-	if (!::NTV2DeviceCanDoInputSource (mDeviceID, mInputSource))
-		mInputSource = NTV2_INPUTSOURCE_SDI1;
+	if (!::NTV2DeviceCanDoInputSource (mDeviceID, mConfig.fInputSource))
+		mConfig.fInputSource = NTV2_INPUTSOURCE_SDI1;
 
 	NTV2LHIHDMIColorSpace	inputColor	(NTV2_LHIHDMIColorSpaceYCbCr);
-	if (NTV2_INPUT_SOURCE_IS_HDMI (mInputSource))
-	{
-		mDevice.GetHDMIInputColor (inputColor, mInputChannel);
-	}
+	if (NTV2_INPUT_SOURCE_IS_HDMI(mConfig.fInputSource))
+		mDevice.GetHDMIInputColor (inputColor, mConfig.fInputChannel);
 
 	const bool						isInputRGB				(inputColor == NTV2_LHIHDMIColorSpaceRGB);
-	const bool						isFrameRGB				(::IsRGBFormat (mPixelFormat));
-	const NTV2OutputCrosspointID	inputWidgetOutputXpt	(::GetInputSourceOutputXpt (mInputSource, false, isInputRGB, 0));
-	const NTV2InputCrosspointID		frameBufferInputXpt		(::GetFrameBufferInputXptFromChannel (mInputChannel));
-	const NTV2InputCrosspointID		cscWidgetVideoInputXpt	(::GetCSCInputXptFromChannel (mInputChannel));
-	const NTV2OutputCrosspointID	cscWidgetRGBOutputXpt	(::GetCSCOutputXptFromChannel (mInputChannel, /*inIsKey*/ false, /*inIsRGB*/ true));
-	const NTV2OutputCrosspointID	cscWidgetYUVOutputXpt	(::GetCSCOutputXptFromChannel (mInputChannel, /*inIsKey*/ false, /*inIsRGB*/ false));
+	const bool						isFrameRGB				(::IsRGBFormat(mConfig.fPixelFormat));
+	const NTV2OutputCrosspointID	inputWidgetOutputXpt	(::GetInputSourceOutputXpt(mConfig.fInputSource, false, isInputRGB, 0));
+	const NTV2InputCrosspointID		frameBufferInputXpt		(::GetFrameBufferInputXptFromChannel(mConfig.fInputChannel));
+	const NTV2InputCrosspointID		cscWidgetVideoInputXpt	(::GetCSCInputXptFromChannel(mConfig.fInputChannel));
+	const NTV2OutputCrosspointID	cscWidgetRGBOutputXpt	(::GetCSCOutputXptFromChannel(mConfig.fInputChannel, /*inIsKey*/ false, /*inIsRGB*/ true));
+	const NTV2OutputCrosspointID	cscWidgetYUVOutputXpt	(::GetCSCOutputXptFromChannel(mConfig.fInputChannel, /*inIsKey*/ false, /*inIsRGB*/ false));
 
 
-	if (!mDoMultiFormat)
+	if (!mConfig.fDoMultiFormat)
 		mDevice.ClearRouting ();
 
 	if (isInputRGB && !isFrameRGB)
@@ -388,23 +390,25 @@ void NTV2Capture::CaptureFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	inputXfer;	//	My A/C input transfer info
 	NTV2AudioChannelPairs	nonPcmPairs, oldNonPcmPairs;
-	ULWord					acOptions (AUTOCIRCULATE_WITH_RP188 | (mWithAnc ? AUTOCIRCULATE_WITH_ANC : 0));
+	ULWord					acOptions (AUTOCIRCULATE_WITH_RP188);
+	if (mConfig.fWithAnc  &&  ::NTV2DeviceCanDoCustomAnc(mDeviceID))
+		acOptions |= AUTOCIRCULATE_WITH_ANC;
 
 	CAPNOTE("Started");
-	mDevice.AutoCirculateStop (mInputChannel);	//	Just in case
-
-	//	Tell AutoCirculate to use 7 frame buffers for capturing from the device...
-	mDevice.AutoCirculateInitForInput (mInputChannel,	7,	//	Number of frames to circulate
-										mAudioSystem,		//	Which audio system (if any)?
-										acOptions);			//	Include timecode (and maybe Anc too)
-	
-	//	Start AutoCirculate running...
-	mDevice.AutoCirculateStart(mInputChannel);
+	//	Initialize and start capture AutoCirculate...
+	mDevice.AutoCirculateStop(mConfig.fInputChannel);	//	Just in case
+	mDevice.AutoCirculateInitForInput (	mConfig.fInputChannel,		//	primary channel
+										mConfig.fFrames.count(),	//	numFrames (zero if specifying range)
+										mAudioSystem,				//	audio system
+										acOptions,					//	flags
+										1,							//	numChannels to gang
+										mConfig.fFrames.firstFrame(), mConfig.fFrames.lastFrame());
+	mDevice.AutoCirculateStart(mConfig.fInputChannel);
 
 	while (!mGlobalQuit)
 	{
-		AUTOCIRCULATE_STATUS	acStatus;
-		mDevice.AutoCirculateGetStatus (mInputChannel, acStatus);
+		AUTOCIRCULATE_STATUS acStatus;
+		mDevice.AutoCirculateGetStatus (mConfig.fInputChannel, acStatus);
 
 		if (acStatus.IsRunning()  &&  acStatus.HasAvailableInputFrame())
 		{
@@ -421,7 +425,7 @@ void NTV2Capture::CaptureFrames (void)
 										 pCaptureData->AncBuffer2(), pCaptureData->AncBuffer2Size());
 
 			//	Transfer video/audio/anc from the device into our host AVDataBuffer...
-			mDevice.AutoCirculateTransfer (mInputChannel, inputXfer);
+			mDevice.AutoCirculateTransfer (mConfig.fInputChannel, inputXfer);
 
 			//	Remember the actual amount of audio captured...
 			if (acStatus.WithAudio())
@@ -444,22 +448,22 @@ void NTV2Capture::CaptureFrames (void)
 			}
 
 			//	Log SDI input CRC/VPID/TRS errors...
-			if (::NTV2DeviceCanDoSDIErrorChecks(mDeviceID) && NTV2_INPUT_SOURCE_IS_SDI(mInputSource))
+			if (::NTV2DeviceCanDoSDIErrorChecks(mDeviceID) && NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
 			{
 				NTV2SDIInStatistics	sdiStats;
 				NTV2SDIInputStatus	inputStatus;
 				mDevice.ReadSDIStatistics(sdiStats);
-				sdiStats.GetSDIInputStatus(inputStatus, UWord(::GetIndexForNTV2InputSource(mInputSource)));
+				sdiStats.GetSDIInputStatus(inputStatus, UWord(::GetIndexForNTV2InputSource(mConfig.fInputSource)));
 				if (inputStatus.mCRCTallyA || !inputStatus.mVPIDValidA || inputStatus.mFrameTRSError)
 					CAPWARN(inputStatus);
 			}
 
 			//	Grab all valid timecodes that were captured...
-			inputXfer.GetInputTimeCodes (pCaptureData->fTimecodes, mInputChannel, /*ValidOnly*/ true);
+			inputXfer.GetInputTimeCodes (pCaptureData->fTimecodes, mConfig.fInputChannel, /*ValidOnly*/ true);
 
 			if (acStatus.WithAudio())
 				//	Look for PCM/NonPCM changes in the audio stream...
-				if (mDevice.GetInputAudioChannelPairsWithoutPCM (mInputChannel, nonPcmPairs))
+				if (mDevice.GetInputAudioChannelPairsWithoutPCM (mConfig.fInputChannel, nonPcmPairs))
 				{
 					NTV2AudioChannelPairs	becomingNonPCM, becomingPCM;
 					set_difference (oldNonPcmPairs.begin(), oldNonPcmPairs.end(), nonPcmPairs.begin(), nonPcmPairs.end(),  inserter (becomingPCM, becomingPCM.begin()));
@@ -479,25 +483,49 @@ void NTV2Capture::CaptureFrames (void)
 			//	Either AutoCirculate is not running, or there were no frames available on the device to transfer.
 			//	Rather than waste CPU cycles spinning, waiting until a frame becomes available, it's far more
 			//	efficient to wait for the next input vertical interrupt event to get signaled...
-			mDevice.WaitForInputVerticalInterrupt(mInputChannel);
+			mDevice.WaitForInputVerticalInterrupt(mConfig.fInputChannel);
 		}
 	}	//	loop til quit signaled
 
 	//	Stop AutoCirculate...
-	mDevice.AutoCirculateStop(mInputChannel);
+	mDevice.AutoCirculateStop(mConfig.fInputChannel);
 	CAPNOTE("Done");
 
 }	//	CaptureFrames
 
 
-//////////////////////////////////////////////
-
-
 void NTV2Capture::GetACStatus (ULWord & outGoodFrames, ULWord & outDroppedFrames, ULWord & outBufferLevel)
 {
 	AUTOCIRCULATE_STATUS	status;
-	mDevice.AutoCirculateGetStatus (mInputChannel, status);
+	mDevice.AutoCirculateGetStatus (mConfig.fInputChannel, status);
 	outGoodFrames = status.acFramesProcessed;
 	outDroppedFrames = status.acFramesDropped;
 	outBufferLevel = status.acBufferLevel;
+}
+
+
+//////////////////////////////////////////////
+
+
+AJALabelValuePairs CaptureConfig::Get (const bool inCompact) const
+{
+	AJALabelValuePairs result;
+	AJASystemInfo::append(result, "Capture Config");
+	AJASystemInfo::append(result, "Device Specifier",	fDeviceSpec);
+	AJASystemInfo::append(result, "Input Channel",		::NTV2ChannelToString(fInputChannel, inCompact));
+	AJASystemInfo::append(result, "Input Source",		::NTV2InputSourceToString(fInputSource, inCompact));
+	AJASystemInfo::append(result, "Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
+	AJASystemInfo::append(result, "AutoCirc Frames",	fFrames.toString());
+	AJASystemInfo::append(result, "A/B Conversion",		fABConversion ? "Y" : "N");
+	AJASystemInfo::append(result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
+	AJASystemInfo::append(result, "Capture Anc",		fWithAnc ? "Y" : "N");
+	AJASystemInfo::append(result, "Capture Audio",		fWithAudio ? "Y" : "N");
+	return result;
+}
+
+
+std::ostream & operator << (std::ostream & ioStrm,  const CaptureConfig & inObj)
+{
+	ioStrm	<< AJASystemInfo::ToString(inObj.Get());
+	return ioStrm;
 }

@@ -16,36 +16,59 @@
 #include "ajabase/common/videotypes.h"
 #include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/thread.h"
+#include "ajabase/system/info.h"
+
+
+/**
+	@brief	This class is used to configure an NTV2Capture instance.
+**/
+typedef struct CaptureConfig
+{
+	public:
+		std::string						fDeviceSpec;	///< @brief	The AJA device to use
+		NTV2Channel						fInputChannel;	///< @brief	The device channel to use
+		NTV2InputSource					fInputSource;	///< @brief	The device input connector to use
+		CNTV2DemoCommon::ACFrameRange	fFrames;		///< @brief	AutoCirculate frame count or range
+		NTV2PixelFormat					fPixelFormat;	///< @brief	Pixel format to use
+		bool							fABConversion;	///< @brief	If true, do level-A/B conversion
+		bool							fDoMultiFormat;	///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
+		bool							fWithAnc;		///< @brief	If true, also capture Anc
+		bool							fWithAudio;		///< @brief	If true, also capture Audio
+
+		/**
+			@brief	Constructs a default NTV2Capture configuration.
+		**/
+		inline explicit	CaptureConfig (const std::string & inDeviceSpec	= "0")
+			:	fDeviceSpec		(inDeviceSpec),
+				fInputChannel	(NTV2_CHANNEL_INVALID),
+				fInputSource	(NTV2_INPUTSOURCE_INVALID),
+				fFrames			(7),
+				fPixelFormat	(NTV2_FBF_8BIT_YCBCR),
+				fABConversion	(false),
+				fDoMultiFormat	(false),
+				fWithAnc		(false),
+				fWithAudio		(true)
+		{
+		}
+		AJALabelValuePairs	Get (const bool inCompact = false) const;
+} CaptureConfig;
+
+std::ostream &	operator << (std::ostream & ioStrm, const CaptureConfig & inObj);
 
 
 /**
 	@brief	Instances of me capture frames in real time from a video signal provided to an input of an AJA device.
 **/
-
 class NTV2Capture
 {
 	//	Public Instance Methods
 	public:
 		/**
-			@brief	Constructs me using the given settings.
-			@note	I'm not completely initialized and ready to use until after my Init method has been called.
-			@param[in]	inDeviceSpecifier	Specifies the AJA device to use.  Defaults to "0" (first device found).
-			@param[in]	inWithAudio			If true (the default), capture audio in addition to video;  otherwise, don't capture audio.
-			@param[in]	inChannel			Specifies the channel to use. Defaults to NTV2_CHANNEL1.
-			@param[in]	inPixelFormat		Specifies the pixel format to use for the device's frame buffers. Defaults to 8-bit YUV.
-			@param[in]	inDoLvlABConversion	Specifies if level-A/B conversion should be done or not.  Defaults to false (no conversion).
-			@param[in]	inMultiFormat		If true, enables multiformat/multichannel mode if the device supports it, and won't acquire
-											or release the device. If false (the default), acquires/releases exclusive use of the device.
-			@param[in]	inWithAnc			If true, captures ancillary data using the new AutoCirculate APIs (if the device supports it).
-											Defaults to false.
+			@brief		Constructs me using the given settings.
+			@param[in]	inConfig	Specifies how to configure capture.
+			@note		I'm not completely initialized and ready to use until after my Init method has been called.
 		**/
-		NTV2Capture (	const std::string			inDeviceSpecifier	= "0",
-						const bool					inWithAudio			= true,
-						const NTV2Channel			inChannel			= NTV2_CHANNEL1,
-						const NTV2FrameBufferFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
-						const bool					inDoLvlABConversion	= false,
-						const bool					inMultiFormat		= false,
-						const bool					inWithAnc			= false);
+		NTV2Capture (const CaptureConfig & inConfig);
 
 		virtual						~NTV2Capture ();
 
@@ -56,7 +79,7 @@ class NTV2Capture
 
 		/**
 			@brief	Runs me.
-			@note	Do not call this method without first calling my Init method.
+			@note	Call this method only after calling Init and it returned AJA_STATUS_SUCCESS.
 		**/
 		virtual AJAStatus			Run (void);
 
@@ -140,26 +163,20 @@ class NTV2Capture
 
 	//	Private Member Data
 	private:
-		typedef	AJACircularBuffer <NTV2FrameData *>	MyCircularBuffer;
+		typedef	AJACircularBuffer<NTV2FrameData*>	MyCircularBuffer;
 
-		AJAThread *					mConsumerThread;		///< @brief	My consumer thread object -- consumes the captured frames.
-		AJAThread *					mProducerThread;		///< @brief	My producer thread object -- does the frame capturing
-		CNTV2Card					mDevice;				///< @brief	My CNTV2Card instance. This is what I use to talk to the device.
-		NTV2DeviceID				mDeviceID;				///< @brief	My device identifier
-		const std::string			mDeviceSpecifier;		///< @brief	The device specifier string
-		const NTV2Channel			mInputChannel;			///< @brief	My input channel
-		NTV2InputSource				mInputSource;			///< @brief	The input source I'm using
-		NTV2VideoFormat				mVideoFormat;			///< @brief	My video format
-		NTV2FrameBufferFormat		mPixelFormat;			///< @brief	My pixel format
-		NTV2FormatDescriptor		mFormatDesc;			///< @brief	Describes my video/pixel format
-		NTV2EveryFrameTaskMode		mSavedTaskMode;			///< @brief	Used to restore prior every-frame task mode
-		NTV2AudioSystem				mAudioSystem;			///< @brief	The audio system I'm using (if any)
-		bool						mDoLevelConversion;		///< @brief	Demonstrates a level A to level B conversion
-		bool						mDoMultiFormat;			///< @brief	Demonstrates how to configure the board for multi-format
-		bool						mGlobalQuit;			///< @brief	Set "true" to gracefully stop
-		bool						mWithAnc;				///< @brief	Capture custom anc data?
-		NTV2FrameDataArray			mHostBuffers;			///< @brief	My host buffers
-		MyCircularBuffer			mAVCircularBuffer;		///< @brief	My ring buffer object
+		AJAThread *				mConsumerThread;	///< @brief	My consumer thread object -- consumes the captured frames.
+		AJAThread *				mProducerThread;	///< @brief	My producer thread object -- does the frame capturing
+		CNTV2Card				mDevice;			///< @brief	My CNTV2Card instance. This is what I use to talk to the device.
+		NTV2DeviceID			mDeviceID;			///< @brief	My device identifier
+		CaptureConfig			mConfig;			///< @brief	My operating configuration
+		NTV2VideoFormat			mVideoFormat;		///< @brief	My video format
+		NTV2FormatDescriptor	mFormatDesc;		///< @brief	Describes my video/pixel format
+		NTV2EveryFrameTaskMode	mSavedTaskMode;		///< @brief	Used to restore prior every-frame task mode
+		NTV2AudioSystem			mAudioSystem;		///< @brief	The audio system I'm using (if any)
+		bool					mGlobalQuit;		///< @brief	Set "true" to gracefully stop
+		NTV2FrameDataArray		mHostBuffers;		///< @brief	My host buffers
+		MyCircularBuffer		mAVCircularBuffer;	///< @brief	My ring buffer object
 
 };	//	NTV2Capture
 

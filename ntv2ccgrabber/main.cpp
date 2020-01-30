@@ -69,14 +69,14 @@ int main (int argc, const char ** argv)
 	const string	legalOutputModes(CCGrabberConfig::OutputModeToString(kOutputMode_INVALID));
 	const string	legalFramesSpec	("{frameCount}[@{firstFrameNum}]  or  {firstFrameNum}-{lastFrameNum}");
 	AJAStatus		status			(AJA_STATUS_SUCCESS);	//	Init result
-	char *			pDeviceSpec		(NULL);					//	Device spec
-	char *			pInputSrcSpec	(NULL);					//	SDI source spec
-	char *			pTimecodeSpec	(NULL);					//	Timecode source spec
-	char *			pPixelFmtSpec	(NULL);					//	Pixel format spec
-	char *			pCaptionChannel	(NULL);					//	Caption channel of interest (cc1, cc2 ... text1, text2, ...)
-	char *			pCaptionSource	(NULL);					//	Caption source of interest (line21, 608vanc, 608anc ...)
-	char *			pOutputMode		(NULL);					//	Output mode (stream, screen, file ...)
-	char *			pFramesSpec		(NULL);					//	AutoCirculate frames spec
+	char *			pDeviceSpec		(AJA_NULL);				//	Device spec
+	char *			pInputSrcSpec	(AJA_NULL);				//	SDI source spec
+	char *			pTimecodeSpec	(AJA_NULL);				//	Timecode source spec
+	char *			pPixelFormat	(AJA_NULL);				//	Pixel format spec
+	char *			pCaptionChannel	(AJA_NULL);				//	Caption channel of interest (cc1, cc2 ... text1, text2, ...)
+	char *			pCaptionSource	(AJA_NULL);				//	Caption source of interest (line21, 608vanc, 608anc ...)
+	char *			pOutputMode		(AJA_NULL);				//	Output mode (stream, screen, file ...)
+	char *			pFramesSpec		(AJA_NULL);				//	AutoCirculate frames spec
 	int				channelNumber	(0);					//	Channel (framestore) spec
 	int				bBurnCaptions	(0);					//	Burn-in captions?
 	int				bMultiFormat	(0);					//	Enable multi-format?
@@ -95,16 +95,16 @@ int main (int argc, const char ** argv)
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",			"index#, serial#, or model"	},
 		{"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,		0,	"which SDI input",				"1-8, ?=list"				},
 		{"tcsource",	't',	POPT_ARG_STRING,	&pTimecodeSpec,		0,	"time code source",				"'?' or 'list' to list"		},
-		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFmtSpec,		0,	"pixel format to use",			"'?' or 'list' to list"		},
+		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,		0,	"pixel format to use",			"'?' or 'list' to list"		},
 		{"608chan",		0,		POPT_ARG_STRING,	&pCaptionChannel,	0,	"608 caption chl to monitor",	legalChannels.c_str()		},
 		{"608src",		0,		POPT_ARG_STRING,	&pCaptionSource,	0,	"608 source to use",			legal608Sources.c_str()		},
 		{"output",		0,		POPT_ARG_STRING,	&pOutputMode,		0,	"608 output mode",				legalOutputModes.c_str()	},
 		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,		0,	"channel/frameStore to use",	"1-8"						},
 		{"frames",		0,		POPT_ARG_STRING,	&pFramesSpec,		0,	"frames to AutoCirc",			"num[@min] or min-max"		},
-		{"burn",		'b',	POPT_ARG_NONE,		&bBurnCaptions,		0,	"burn-in captions",				NULL						},
-		{"multiChannel",'m',	POPT_ARG_NONE,		&bMultiFormat,		0,	"enables multi-channel/format",	NULL},
-		{"vanc",		'v',	POPT_ARG_NONE,		&bUseVanc,			0,	"use vanc geometry",			NULL},
-		{"audio",		'a',	POPT_ARG_NONE,		&bWithAudio,		0,	"also capture audio",			NULL},
+		{"burn",		'b',	POPT_ARG_NONE,		&bBurnCaptions,		0,	"burn-in captions",				AJA_NULL					},
+		{"multiChannel",'m',	POPT_ARG_NONE,		&bMultiFormat,		0,	"enables multi-channel/format",	AJA_NULL					},
+		{"vanc",		'v',	POPT_ARG_NONE,		&bUseVanc,			0,	"use vanc geometry",			AJA_NULL					},
+		{"audio",		'a',	POPT_ARG_NONE,		&bWithAudio,		0,	"also capture audio",			AJA_NULL					},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -116,7 +116,7 @@ int main (int argc, const char ** argv)
 	const string	deviceSpec		(pDeviceSpec   ? pDeviceSpec : "0");
 	const string	inputSourceStr	(pInputSrcSpec ? CNTV2DemoCommon::ToLower(string(pInputSrcSpec)) : "");
 	const string	tcSourceStr		(pTimecodeSpec ? CNTV2DemoCommon::ToLower(string(pTimecodeSpec)) : "");
-	const string	pixelFormatStr	(pPixelFmtSpec ? pPixelFmtSpec  :  "");
+	const string	pixelFormatStr	(pPixelFormat  ? pPixelFormat :  "");
 	const string	framesSpec		(pFramesSpec   ? pFramesSpec  :  "");
 
 	//	Device
@@ -126,13 +126,13 @@ int main (int argc, const char ** argv)
 	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
 		{cout << "## ERROR:  No such device '" << deviceSpec << "'" << endl << legalDevices;  return 1;}
 
-	CCGrabberConfig	grabberConfig(deviceSpec);
+	CCGrabberConfig	config(deviceSpec);
 
 	//	Channel
 	if (channelNumber > 8)
 		{cerr << "## ERROR:  Bad channel number '" << DEC(channelNumber) << "', must be between 1 and 8" << endl;	return 1;}
 	if (channelNumber)
-		grabberConfig.fInputChannel = NTV2Channel(channelNumber - 1);
+		config.fInputChannel = NTV2Channel(channelNumber - 1);
 
 	//	Input source
 	const string	legalSources(CNTV2DemoCommon::GetInputSourceStrings(NTV2_INPUTSOURCES_SDI, deviceSpec));
@@ -140,8 +140,8 @@ int main (int argc, const char ** argv)
 		{cout << legalSources << endl;  return 0;}
 	if (!inputSourceStr.empty())
 	{
-		grabberConfig.fInputSource = CNTV2DemoCommon::GetInputSourceFromString(inputSourceStr);
-		if (!NTV2_IS_VALID_INPUT_SOURCE(grabberConfig.fInputSource))
+		config.fInputSource = CNTV2DemoCommon::GetInputSourceFromString(inputSourceStr);
+		if (!NTV2_IS_VALID_INPUT_SOURCE(config.fInputSource))
 			{cerr << "## ERROR:  Input source '" << inputSourceStr << "' not one of these:" << endl << legalSources << endl;	return 1;}
 	}	//	if input source specified
 
@@ -151,8 +151,8 @@ int main (int argc, const char ** argv)
 		{cout << legalTCSources << endl;  return 0;}
 	if (!tcSourceStr.empty())
 	{
-		grabberConfig.fTimecodeSrc = CNTV2DemoCommon::GetTCIndexFromString(tcSourceStr);
-		if (!NTV2_IS_VALID_TIMECODE_INDEX(grabberConfig.fTimecodeSrc))
+		config.fTimecodeSrc = CNTV2DemoCommon::GetTCIndexFromString(tcSourceStr);
+		if (!NTV2_IS_VALID_TIMECODE_INDEX(config.fTimecodeSrc))
 			{cerr << "## ERROR:  Timecode source '" << tcSourceStr << "' not one of these:" << endl << legalTCSources << endl;	return 1;}
 	}
 
@@ -162,16 +162,16 @@ int main (int argc, const char ** argv)
 		{cout << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
 	else if (!pixelFormatStr.empty())
 	{
-		grabberConfig.fPixelFormat = CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);
-		if (!NTV2_IS_VALID_FRAME_BUFFER_FORMAT(grabberConfig.fPixelFormat))
+		config.fPixelFormat = CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);
+		if (!NTV2_IS_VALID_FRAME_BUFFER_FORMAT(config.fPixelFormat))
 			{cerr << "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl << legalFBFs << endl;  return 2;}
 	}
 
 	//	Caption channel
 	if (pCaptionChannel)
 	{
-		grabberConfig.fCaptionChannel = ::StrToNTV2Line21Channel(string(pCaptionChannel));
-		if (grabberConfig.fCaptionChannel == NTV2_CC608_ChannelMax)
+		config.fCaptionChannel = ::StrToNTV2Line21Channel(string(pCaptionChannel));
+		if (config.fCaptionChannel == NTV2_CC608_ChannelMax)
 			{cerr << "## ERROR:  Bad '608chan' value '" << pCaptionChannel << "' -- expected '" << legalChannels << "'" << endl;	return 1;}
 	}
 
@@ -181,8 +181,8 @@ int main (int argc, const char ** argv)
 		{cout << "## NOTE: Legal --608src values: " << legal608Sources << endl;  return 0;}
 	else if (!captionSrcStr.empty())
 	{
-		grabberConfig.fCaptionSrc = CCGrabberConfig::StringToCaptionDataSrc(captionSrcStr);
-		if (!IS_VALID_CaptionDataSrc(grabberConfig.fCaptionSrc))
+		config.fCaptionSrc = CCGrabberConfig::StringToCaptionDataSrc(captionSrcStr);
+		if (!IS_VALID_CaptionDataSrc(config.fCaptionSrc))
 			{cerr << "## ERROR:  Bad '608src' value '" << captionSrcStr << "' -- expected '" << legal608Sources << "'" << endl;	return 1;}
 	}
 
@@ -192,35 +192,35 @@ int main (int argc, const char ** argv)
 		{cout << "## NOTE: Legal --output values: " << legalOutputModes << endl;  return 0;}
 	else if (!outputModeStr.empty())
 	{
-		grabberConfig.fOutputMode = CCGrabberConfig::StringToOutputMode(outputModeStr);
-		if (!IS_VALID_OutputMode(grabberConfig.fOutputMode))
+		config.fOutputMode = CCGrabberConfig::StringToOutputMode(outputModeStr);
+		if (!IS_VALID_OutputMode(config.fOutputMode))
 			{cerr << "## ERROR:  Bad 'output' value '" << outputModeStr << "' -- expected '" << legalOutputModes << "'" << endl;	return 1;}
 	}
 
-	if (!grabberConfig.GetNumSourceSpecs())
+	if (!config.GetNumSourceSpecs())
 	{
 		cerr << "## WARNING:  No input channel, or input source, or timecode source specified -- will use NTV2_INPUTSOURCE_SDI1, NTV2_CHANNEL1" << endl;
-		grabberConfig.fInputChannel = NTV2_CHANNEL1;
-		grabberConfig.fInputSource = NTV2_INPUTSOURCE_SDI1;
+		config.fInputChannel = NTV2_CHANNEL1;
+		config.fInputSource = NTV2_INPUTSOURCE_SDI1;
 	}
 
 	//	AutoCirculate frames
 	if (!framesSpec.empty())
 	{
-		const string parseResult(grabberConfig.fFrames.setFromString(framesSpec));
+		const string parseResult(config.fFrames.setFromString(framesSpec));
 		if (!parseResult.empty())
 			{cerr << "## ERROR:  Bad 'frames' spec '" << framesSpec << "'\n## " << parseResult << endl;  return 1;}
 	}
-	if (!grabberConfig.fFrames.valid())
+	if (!config.fFrames.valid())
 		{cerr << "## ERROR:  Bad 'frames' spec '" << framesSpec << "'\n## Expected " << legalFramesSpec << endl;  return 1;}
 
 	//	Configure the grabber...
-	grabberConfig.fBurnCaptions		= bBurnCaptions	? true : false;
-	grabberConfig.fDoMultiFormat	= bMultiFormat	? true : false;
-	grabberConfig.fUseVanc			= bUseVanc		? true : false;
-	grabberConfig.fCaptureAudio		= bWithAudio	? true : false;
+	config.fBurnCaptions	= bBurnCaptions	? true : false;
+	config.fDoMultiFormat	= bMultiFormat	? true : false;
+	config.fUseVanc			= bUseVanc		? true : false;
+	config.fCaptureAudio	= bWithAudio	? true : false;
 
-	cerr << grabberConfig << endl;	//	Dump config
+	cerr << config << endl;	//	Dump config
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)
@@ -228,7 +228,7 @@ int main (int argc, const char ** argv)
 		::signal (SIGQUIT, SignalHandler);
 	#endif
 
-	NTV2CCGrabber	ccGrabber (grabberConfig);	//	Instantiate the NTV2CCGrabber, configure it with the CCGrabberConfig
+	NTV2CCGrabber	ccGrabber(config);
 
 	//	Initialize the ccGrabber instance...
 	status = ccGrabber.Init();

@@ -284,7 +284,7 @@ int main (int argc, const char ** argv)
 		istringstream iss(sCaptionRate);
 		uint32_t	charsPerMin;
 		iss >> charsPerMin;
-		generatorConfig.fCharsPerMinute = static_cast <double> (charsPerMin);
+		generatorConfig.fCharsPerMinute = double(charsPerMin);
 
 		if (!pathList.empty())
 		{
