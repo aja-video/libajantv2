@@ -44,6 +44,17 @@
 		B43C7CBC17259FE50030A94E /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */; };
 		B43C7CBD17259FF50030A94E /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD7B167915A7001D4AA8 /* IOKit.framework */; };
 		B43C7CBE1725A0030030A94E /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */; };
+		B44A4A4C23E49B56008048FD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AE8038D208A60D700FCC91B /* Foundation.framework */; };
+		B44A4A4D23E49B64008048FD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AE8038D208A60D700FCC91B /* Foundation.framework */; };
+		B44A4A4E23E49B6E008048FD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AE8038D208A60D700FCC91B /* Foundation.framework */; };
+		B44A4A4F23E49B7A008048FD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AE8038D208A60D700FCC91B /* Foundation.framework */; };
+		B44A4A5023E49B8C008048FD /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */; };
+		B44A4A5123E49B93008048FD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AE8038D208A60D700FCC91B /* Foundation.framework */; };
+		B44A4A5223E49B9B008048FD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AE8038D208A60D700FCC91B /* Foundation.framework */; };
+		B44A4A5323E49BA1008048FD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AE8038D208A60D700FCC91B /* Foundation.framework */; };
+		B44A4A5423E49BA7008048FD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AE8038D208A60D700FCC91B /* Foundation.framework */; };
+		B44A4A5523E49BAD008048FD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AE8038D208A60D700FCC91B /* Foundation.framework */; };
+		B44A4A5623E49BB3008048FD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AE8038D208A60D700FCC91B /* Foundation.framework */; };
 		B44C0B051B61C25100D7F59A /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */; };
 		B44C0B061B61C25100D7F59A /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD7B167915A7001D4AA8 /* IOKit.framework */; };
 		B44C0B071B61C25100D7F59A /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */; };
@@ -320,6 +331,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B44A4A5323E49BA1008048FD /* Foundation.framework in Frameworks */,
 				A401623E1EBA80A4001B8830 /* CoreServices.framework in Frameworks */,
 				A401623C1EBA8095001B8830 /* CoreFoundation.framework in Frameworks */,
 				A401623D1EBA8095001B8830 /* IOKit.framework in Frameworks */,
@@ -341,6 +353,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B44A4A5423E49BA7008048FD /* Foundation.framework in Frameworks */,
 				B44C0B051B61C25100D7F59A /* CoreFoundation.framework in Frameworks */,
 				B44C0B061B61C25100D7F59A /* IOKit.framework in Frameworks */,
 				B44C0B071B61C25100D7F59A /* CoreServices.framework in Frameworks */,
@@ -362,6 +375,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B44A4A5223E49B9B008048FD /* Foundation.framework in Frameworks */,
 				B46B5FA21729B03A004E84C3 /* CoreFoundation.framework in Frameworks */,
 				B46B5FA11729B031004E84C3 /* IOKit.framework in Frameworks */,
 				B46B5FA01729B027004E84C3 /* CoreServices.framework in Frameworks */,
@@ -372,6 +386,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B44A4A5623E49BB3008048FD /* Foundation.framework in Frameworks */,
 				B4A7012316794F82001D4AA8 /* CoreFoundation.framework in Frameworks */,
 				B4A7012416794F82001D4AA8 /* IOKit.framework in Frameworks */,
 				B4A7012516794F82001D4AA8 /* CoreServices.framework in Frameworks */,
@@ -382,6 +397,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B44A4A5523E49BAD008048FD /* Foundation.framework in Frameworks */,
 				B4A7016316795594001D4AA8 /* CoreFoundation.framework in Frameworks */,
 				B4A7016416795594001D4AA8 /* IOKit.framework in Frameworks */,
 				B4A7016516795594001D4AA8 /* CoreServices.framework in Frameworks */,
@@ -403,6 +419,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B44A4A5123E49B93008048FD /* Foundation.framework in Frameworks */,
+				B44A4A5023E49B8C008048FD /* CoreServices.framework in Frameworks */,
 				B4A7FD4A16791597001D4AA8 /* CoreFoundation.framework in Frameworks */,
 				B4A7FD7C167915A7001D4AA8 /* IOKit.framework in Frameworks */,
 			);
@@ -412,6 +430,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B44A4A4E23E49B6E008048FD /* Foundation.framework in Frameworks */,
 				B4A7FE5116791755001D4AA8 /* CoreFoundation.framework in Frameworks */,
 				B4A7FE5216791755001D4AA8 /* IOKit.framework in Frameworks */,
 				B4A7FFA9167927B3001D4AA8 /* CoreServices.framework in Frameworks */,
@@ -422,6 +441,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B44A4A4F23E49B7A008048FD /* Foundation.framework in Frameworks */,
 				B4AEFE391EFDEA39002F08BD /* CoreFoundation.framework in Frameworks */,
 				B4AEFE3A1EFDEA39002F08BD /* CoreServices.framework in Frameworks */,
 				B4AEFE3B1EFDEA39002F08BD /* IOKit.framework in Frameworks */,
@@ -432,6 +452,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B44A4A4D23E49B64008048FD /* Foundation.framework in Frameworks */,
 				B4CADACF180F037B004C9057 /* CoreFoundation.framework in Frameworks */,
 				B4CADAD0180F037E004C9057 /* CoreServices.framework in Frameworks */,
 				B4CADAD1180F0382004C9057 /* IOKit.framework in Frameworks */,
@@ -442,6 +463,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B44A4A4C23E49B56008048FD /* Foundation.framework in Frameworks */,
 				B4E76F5716AA1B1B00473DBD /* CoreFoundation.framework in Frameworks */,
 				B4E76F5816AA1B1B00473DBD /* CoreServices.framework in Frameworks */,
 				B4E76F5916AA1B1B00473DBD /* IOKit.framework in Frameworks */,
