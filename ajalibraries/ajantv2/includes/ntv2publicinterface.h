@@ -101,7 +101,7 @@ typedef enum
 	kRegRP188InOut2DBB,				// 64
 	kRegRP188InOut2Bits0_31,		// 65
 	kRegRP188InOut2Bits32_63,		// 66
-	kRegReserved67,					// 67
+	kRegCanDoStatus,				// 67	SDK 15.6 and later
 	kRegCh1ColorCorrectioncontrol,	// 68
 	kRegCh2ColorCorrectioncontrol,	// 69
 	kRegRS422Transmit,				// 70
@@ -747,6 +747,15 @@ typedef enum _NTV2NonPCMAudioDetectRegisters
 	kRegLastNonPCMAudioDetectRegister	= kRegNonPCMAudioDetectEngine8
 } NTV2NonPCMAudioDetectRegisters;
 
+//	New in SDK 15.6:
+//	Some boards have new firmware that implements a "valid route" bitmap ROM accessed by a contiguous block of registers:
+typedef enum _NTV2XptValidROMRegisters
+{
+	kRegFirstValidXptROMRegister	= 3072,	//	Starts at reg 3072
+	kRegNumValidXptROMRegisters		= 1024,	//	It's 4096 bytes long
+	kRegLastValidXptROMRegister		= kRegFirstValidXptROMRegister + kRegNumValidXptROMRegisters - 1,
+	kRegInvalidValidXptROMRegister	= kRegFirstValidXptROMRegister + kRegNumValidXptROMRegisters
+} NTV2XptValidROMRegisters;
 
 //	Discontinuous block of registers used to control the enhanced color space converters
 typedef enum
@@ -1462,17 +1471,20 @@ typedef enum
 	kRegMaskDMAPauseDisable = BIT(16),
 
 	// Color Correction Control
-	kRegMaskSaturationValue = BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7)+BIT(8)+BIT(9),
-	kRegMaskCCOutputBankSelect    = BIT(16),
-	kRegMaskCCMode          = BIT(17)+BIT(18),
-	kRegMaskCC5HostAccessBankSelect = BIT(20),
-	kRegMaskCC5OutputBankSelect = BIT(21),
-	kRegMaskLUT5Select		= BIT(28),
-	kRegMaskLUTSelect		= BIT(29),
-	kRegMaskCC3OutputBankSelect	= BIT(30),
-	kRegMaskCC4OutputBankSelect = BIT(31),
+	kRegMaskSaturationValue			= BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7)+BIT(8)+BIT(9),
+	kRegMaskCCOutputBankSelect		= BIT(16),
+	kRegMaskCCMode					= BIT(17)+BIT(18),
+	kRegMaskCC5HostAccessBankSelect	= BIT(20),
+	kRegMaskCC5OutputBankSelect		= BIT(21),
+	kRegMaskLUT5Select				= BIT(28),
+	kRegMaskLUTSelect				= BIT(29),
+	kRegMaskCC3OutputBankSelect		= BIT(30),
+	kRegMaskCC4OutputBankSelect		= BIT(31),
 
-	// kRegLUTV2Control
+	//	kRegCanDoStatus
+	kRegMaskCanDoValidXptROM			= BIT(0),
+
+	//	kRegLUTV2Control
 	kRegMaskLUT1Enable					= BIT(0),
 	kRegMaskLUT2Enable					= BIT(1),
 	kRegMaskLUT3Enable					= BIT(2),
@@ -2631,7 +2643,10 @@ typedef enum
 	kRegShiftCC3OutputBankSelect		= 30,
 	kRegShiftCC4OutputBankSelect		= 31,
 
-	// kRegLUTV2Control
+	//	kRegCanDoStatus
+	kRegShiftCanDoValidXptROM			= 0,
+
+	//	kRegLUTV2Control
 	kRegShiftLUT1Enable					= 0,
 	kRegShiftLUT2Enable					= 1,
 	kRegShiftLUT3Enable					= 2,

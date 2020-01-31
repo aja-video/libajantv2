@@ -2083,6 +2083,12 @@ bool CNTV2Card::IsMultiFormatActive (void)
 	return isEnabled;
 }
 
+bool CNTV2Card::HasCanConnectROM (void)
+{
+	ULWord hasCanConnectROM(0);
+	return ReadRegister(kRegCanDoStatus, hasCanConnectROM, kRegMaskCanDoValidXptROM, kRegShiftCanDoValidXptROM)  &&  (hasCanConnectROM ? true : false);
+}
+
 /////////////////////////////////
 
 // Method: SetFrameBufferFormat
@@ -5944,7 +5950,7 @@ bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2Outpu
 		if (CanConnect(inInputXpt, inOutputXpt, canConnect))	//	If answer can be trusted
 			if (!canConnect)	//	If route not valid
 			{
-				ROUTEFAIL (GetDisplayName() << ": Cannot connect " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(inOutputXpt)
+				ROUTEFAIL (GetDisplayName() << ": Unsupported route " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(inOutputXpt)
 							<< ": reg=" << DEC(regNum) << " val=" << DEC(inOutputXpt) << " mask=" << xHEX0N(sMasks[ndx],8) << " shift=" << DEC(sShifts[ndx]));
 				return false;
 			}
@@ -6030,9 +6036,46 @@ bool CNTV2Card::IsConnected (const NTV2InputCrosspointID inInputXpt, bool & outI
 
 bool CNTV2Card::CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, bool & outCanConnect)
 {
-	(void) inInputXpt;
-	(void) inOutputXpt;
-	outCanConnect = ::NTV2DeviceCanConnect (GetDeviceID (), inInputXpt, inOutputXpt);
+	outCanConnect = false;
+	if (HasCanConnectROM())
+	{	//	Check for reasonable input xpt...
+		if (ULWord(inInputXpt) < ULWord(NTV2_FIRST_INPUT_CROSSPOINT)  ||  ULWord(inInputXpt) >= 0x80UL)
+		{
+			ROUTEFAIL(GetDisplayName() << ": " << xHEX0N(UWord(inInputXpt),4) << " >= 0x0080 (out of range 0x0001 thru 0x0080)");
+			return false;
+		}
+
+		//	Every input xpt can connect to XptBlack...
+		if (inOutputXpt == NTV2_XptBlack)
+			{outCanConnect = true;	return true;}
+
+		//	Check for reasonable output xpt...
+		if (ULWord(inOutputXpt) >= 0xFFUL)
+		{
+			ROUTEFAIL(GetDisplayName() << ":  Bad output xpt " << xHEX0N(ULWord(inOutputXpt),8) << " >= 0x0000007F");
+			return false;
+		}
+
+		//	Calculate which ROM register to use...
+		const ULWord rawOutputXptID  (ULWord(inOutputXpt) & 0x0000007FUL);	//	Lop off high bit, so 1 thru 127
+		const ULWord firstValidXptReg(ULWord(kRegFirstValidXptROMRegister) + 4UL * (ULWord(inInputXpt) - ULWord(NTV2_FIRST_INPUT_CROSSPOINT)));	//	4 regs per inputXpt
+		const ULWord ROMReg(firstValidXptReg + rawOutputXptID / 4UL);	//	Then by outputXpt
+		if (ROMReg < kRegFirstValidXptROMRegister  ||  ROMReg > kRegLastValidXptROMRegister)
+		{
+			ROUTEFAIL(GetDisplayName() << ":  Bad ROM register " << DEC(ROMReg) << " (" << xHEX0N(ULWord(ROMReg),8) << ")");
+			return false;
+		}
+		ULWord validRoutes(0);
+		if (!ReadRegister(ROMReg, validRoutes))
+		{
+			ROUTEFAIL(GetDisplayName() << ":  ReadRegister failed for ROM reg " << DEC(ROMReg) << " (" << xHEX0N(ULWord(ROMReg),8) << ")");
+			return false;
+		}
+
+		//	Is the route implemented?
+		if (validRoutes & ULWord(1 << (rawOutputXptID % 4UL)))
+			outCanConnect = true;
+	}
 	return true;
 }
 

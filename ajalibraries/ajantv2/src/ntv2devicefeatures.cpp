@@ -895,54 +895,13 @@ bool NTV2DeviceGetVideoFormatFromState_Ex2(	NTV2VideoFormat *		pOutValue,
 	return true;
 }
 
-
-bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt)
-{	(void) inDeviceID;  (void) inInputXpt;  (void) inOutputXpt;
-	//	In SDK 15, this will be re-done to fix missing connections
-	/*
-    switch(inDeviceID)
-    {
-        case DEVICE_ID_CORVID44:
-            return xpt_c44Matrix[inInputXpt][inOutputXpt];
-        case DEVICE_ID_CORVID88:
-            return xpt_c88Matrix[inInputXpt][inOutputXpt];
-        case DEVICE_ID_IO4K:
-            return xpt_io4kMatrix[inInputXpt][inOutputXpt];
-        case DEVICE_ID_IO4KUFC:
-            return xpt_io4k_ufcMatrix[inInputXpt][inOutputXpt];
-        case DEVICE_ID_IO4KPLUS:
-            return xpt_io4kplusMatrix[inInputXpt][inOutputXpt];
-        case DEVICE_ID_KONA4:
-            return xpt_kona4Matrix[inInputXpt][inOutputXpt];
-        case DEVICE_ID_KONA4UFC:
-            return xpt_kona4_ufcMatrix[inInputXpt][inOutputXpt];
-        case DEVICE_ID_KONAIP_2022:
-            return xpt_kip_4rxtxMatrix[inInputXpt][inOutputXpt];
-        case DEVICE_ID_KONAIP_4CH_2SFP:
-            return xpt_kip_2p2rxtcMatrix[inInputXpt][inOutputXpt];
-        case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-            return xpt_kip_j2k2txMatrix[inInputXpt][inOutputXpt];
-        case DEVICE_ID_KONAIP_1RX_1TX_2110:
-            return xpt_kip_2100_1rxtxMatrix[inInputXpt][inOutputXpt];
-        case DEVICE_ID_KONAIP_2110:
-            return xpt_kip_2100_4txMatrix[inInputXpt][inOutputXpt];
-        case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-            return xpt_kip_j2k1rxtxMatrix[inInputXpt][inOutputXpt];
-        case DEVICE_ID_IOIP_2022:
-            return xpt_ioip_2022Matrix[inInputXpt][inOutputXpt];
-        // PSM for now lets use the 4kplus matrix
-        // TODO: need to generate these for IOIP cards
-        case DEVICE_ID_IOIP_2110:
-            return xpt_io4kplusMatrix[inInputXpt][inOutputXpt];
-//		case DEVICE_ID_KONA5:
-//			return xpt_kona5Matrix[inInputXpt][inOutputXpt];
-
-        default:
-            return true;
-    }
-	*/
-	return false;
-}
+#if !defined(NTV2_DEPRECATE_15_6)
+	//	Starting in SDK 15.6, CNTV2Card::HasCanConnectROM returns true if device firmware has ROM that lists valid xpt connections
+	bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt)
+	{	(void) inDeviceID;  (void) inInputXpt;  (void) inOutputXpt;
+		return false;
+	}
+#endif	//	NTV2_DEPRECATE_15_6
 
 
 #define	MAX_OF(__a__,__b__)		((__a__) > (__b__) ? (__a__) : (__b__))

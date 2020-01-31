@@ -588,7 +588,7 @@ const char * ntv2RegStrings[] =
 	"kRegRP188InOut2DBB",							//  64
 	"kRegRP188InOut2Bits0_31",						//  65
 	"kRegRP188InOut2Bits32_63",						//  66
-	"kRegReserved67",								//  67
+	"kRegCanDoStatus",								//  67
 	"kRegCh1ColorCorrectioncontrol",				//  68
 	"kRegCh2ColorCorrectioncontrol",				//  69
 	"kRegRS422Transmit",							//  70

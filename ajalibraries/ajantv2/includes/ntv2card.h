@@ -4712,8 +4712,6 @@ public:
 		@param[in]	inOutputXpt		Specifies the output (signal source) of interest.
 		@param[out]	outCanConnect	Receives true if the input can be connected to the specified output;  otherwise false.
 		@return		True if successful;  otherwise false.
-		@bug		This function is not currently implemented.
-		@todo		This needs to be implemented.
 		@see		ntv2signalrouting, CNTV2Card::Connect
 	**/
 	AJA_VIRTUAL bool	CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, bool & outCanConnect);
@@ -4785,6 +4783,8 @@ public:
 		@see		ntv2signalrouting, CNTV2SignalRouter, CNTV2Card::GetRouting, CNTV2Card::ApplySignalRoute
 	**/
 	AJA_VIRTUAL bool	GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRouter & outRouting);
+
+	AJA_VIRTUAL bool	HasCanConnectROM (void);	///< @return	True if the device firmware has ROM containing legal xpt routes
 
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	OutputRoutingTable (const NTV2RoutingTable * pInRoutingTable));	///< @deprecated	Use the ApplySignalRoute call instead.
@@ -6727,6 +6727,7 @@ private:
 	AJA_VIRTUAL bool	GetFBSizeAndCountFromHW(ULWord* size, ULWord* count);
 
 	AJA_VIRTUAL bool	IsMultiFormatActive (void);	///< @return	True if the device supports the multi format feature and it's enabled; otherwise false.
+
 	/**
 		@brief		Answers with the NTV2RegInfo of the register associated with the given boolean (i.e., "Can Do") device feature.
 		@param[in]	inParamID		Specifies the device features parameter of interest.
