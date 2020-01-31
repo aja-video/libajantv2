@@ -4712,6 +4712,7 @@ public:
 		@param[in]	inOutputXpt		Specifies the output (signal source) of interest.
 		@param[out]	outCanConnect	Receives true if the input can be connected to the specified output;  otherwise false.
 		@return		True if successful;  otherwise false.
+		@note		This function will return false (failure) if the device firmware doesn't support route validation.
 		@see		ntv2signalrouting, CNTV2Card::Connect
 	**/
 	AJA_VIRTUAL bool	CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, bool & outCanConnect);
