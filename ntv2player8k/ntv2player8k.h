@@ -135,46 +135,6 @@ class NTV2Player8K
 		void			RouteOutputSignal (void);
 
 		/**
-			@brief	Sets up board routing for the 4K Down Converter to the SDI Monitor (if available).
-		**/
-		void			Route4KDownConverter (void);
-
-		/**
-			@brief	Sets up board routing output via the HDMI (if available).
-		**/
-		void			RouteHDMIOutput (void);
-
-		/**
-			@brief	Sets up board routing from the Frame Stores to the Dual Link out.
-		**/
-		void			RouteFsToDLOut (void);
-
-		/**
-			@brief	Sets up board routing from the Frame Stores to the Color Space Converters.
-		**/
-		void			RouteFsToCsc (void);
-
-		/**
-			@brief	Sets up board routing from the Frame Stores to the SDI outputs.
-		**/
-		void			RouteFsToSDIOut (void);
-
-		/**
-			@brief	Sets up board routing from the Dual Link outputs to the SDI outputs.
-		**/
-		void			RouteDLOutToSDIOut (void);
-
-		/**
-			@brief	Sets up board routing from the Color Space Converters to the SDI outputs.
-		**/
-		void			RouteCscToSDIOut (void);
-
-		/**
-			@brief	Sets up board routing from the Color Space Converters to the Dual Link outputs.
-		**/
-		void			RouteCscToDLOut (void);
-
-		/**
 			@brief	Sets up my circular buffers.
 		**/
 		void			SetUpHostBuffers (void);
@@ -264,6 +224,7 @@ class NTV2Player8K
 		NTV2AudioSystem				mAudioSystem;				///< @brief	The audio system I'm using
 		bool						mDoMultiChannel;			///< @brief	Allow more than one player 4k to play
 		bool						mDoRGBOnWire;				///< @brief	Route the output through the Dual Link to put RGB on the wire
+		bool						mDoTsiRouting;				///< @brief Route TSI instread of SQD
 
 		bool						mGlobalQuit;				///< @brief	Set "true" to gracefully stop
 		AJATimeCodeBurn				mTCBurner;					///< @brief	My timecode burner
