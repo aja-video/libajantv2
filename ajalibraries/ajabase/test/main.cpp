@@ -13,6 +13,7 @@
 
 #include "limits.h"
 
+#include "ajabase/common/bytestream.h"
 #include "ajabase/common/common.h"
 #include "ajabase/common/guid.h"
 #include "ajabase/common/performance.h"
@@ -28,6 +29,7 @@
 #include <algorithm>
 #include <clocale>
 #include <iostream>
+#include <string.h>
 
 #ifdef AJA_WINDOWS
 #include <direct.h>
@@ -64,6 +66,86 @@ TEST_SUITE("types" * doctest::description("functions in ajabase/common/types.h")
     }
 
 } //types
+
+void bytestream_marker() {}
+TEST_SUITE("bytestream" * doctest::description("functions in ajabase/common/bytestream.h")) {
+    TEST_CASE("Bytestream Constructor, Pos, Seek, Read/Write methods")
+    {
+        const size_t bufsize = 4096;
+        uint8_t buf[bufsize] = { 0 };
+        uint8_t txt[32] = { 0 };
+
+        AJAByteStream b(buf);
+        CHECK(b.Pos() == 0);
+
+        b.Set(42, 13);
+        CHECK(b.Pos() == 13);
+
+        b.Write("Hello World", 12);
+        CHECK(b.Pos() == 25);
+
+        b.Write8(0xab);
+        CHECK(b.Pos() == 26);
+
+        b.Write16LE(0x1337);
+        CHECK(b.Pos() == 28);
+
+        b.Write16BE(0xabcd);
+        CHECK(b.Pos() == 30);
+
+        b.SeekRev(2);
+        CHECK(b.Pos() == 28);
+        CHECK(b.Read16LE() == 0xcdab);
+
+        b.SeekRev(2);
+        CHECK(b.Read16BE() == 0xabcd);
+
+        b.SeekRev(4);
+        CHECK(b.Read16LE() == 0x1337);
+
+        b.SeekRev(2);
+        CHECK(b.Read16BE() == 0x3713);
+
+        // CHECK(b.Read)
+        b.Reset();
+        CHECK(b.Pos() == 0);
+
+        CHECK(b.Read8() == 42);
+        b.SeekFwd(12);
+        b.Read(txt, 12);
+        CHECK(!memcmp(txt, "Hello World\0", 12));
+
+        b.Write32BE(0xdecafbad);
+        b.Write32LE(0xd4c3b2a1);
+        b.Write64BE(0x0102030405060708);
+        b.Write64LE(0x0807060504030201);
+        b.SeekRev(24);
+        CHECK(b.Read32LE() == 0xadfbcade);
+        b.SeekRev(4);
+        CHECK(b.Read32BE() == 0xdecafbad);
+        CHECK(b.Read32BE() == 0xa1b2c3d4);
+        b.SeekRev(4);
+        CHECK(b.Read32LE() == 0xd4c3b2a1);
+        CHECK(b.Read64BE() == 0x0102030405060708);
+        CHECK(b.Read64LE() == 0x0807060504030201);
+        b.SeekRev(16);
+        CHECK(b.Read64LE() == 0x0807060504030201);
+        CHECK(b.Read64BE() == 0x0102030405060708);
+
+        b.Seek(25);
+        CHECK(b.Read8() == 0xde);
+        CHECK(b.Read8() == 0xca);
+        CHECK(b.Read8() == 0xfb);
+        CHECK(b.Read8() == 0xad);
+
+        uint8_t* get_buf = (uint8_t*)b.Buffer();
+        CHECK(get_buf[0] == 42);
+        CHECK(get_buf[25] == 0xde);
+        CHECK(get_buf[26] == 0xca);
+        CHECK(get_buf[27] == 0xfb);
+        CHECK(get_buf[28] == 0xad);
+    }
+} //bytestream
 
 void common_marker() {}
 TEST_SUITE("common" * doctest::description("functions in ajabase/common/common.h")) {
