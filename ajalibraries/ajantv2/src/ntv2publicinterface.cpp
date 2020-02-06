@@ -1107,6 +1107,13 @@ ostream & NTV2SegmentedXferInfo::Print (ostream & inStrm, const bool inDumpSegme
 	return inStrm;
 }
 
+NTV2SegmentedXferInfo & NTV2SegmentedXferInfo::swapSourceAndDestination (void)
+{
+	std::swap(mSrcElementsPerRow, mDstElementsPerRow);
+	std::swap(mInitialSrcOffset, mInitialDstOffset);
+	return *this;
+}
+
 
 NTV2_POINTER::NTV2_POINTER (const void * pInUserPointer, const size_t inByteCount)
 	:	fUserSpacePtr		(NTV2_POINTER_TO_ULWORD64 (pInUserPointer)),
