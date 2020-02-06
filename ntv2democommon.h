@@ -497,8 +497,8 @@ class CNTV2DemoCommon
 	//		3)	Click "Import"
 	#define		AJA_NTV2_AUDIO_RECORD_BEGIN		ostringstream	_filename;														\
 												_filename	<< ::NTV2DeviceString(mDeviceID) << "-" << mDevice.GetIndexNumber()	\
-															<< "." << ::NTV2ChannelToString(mInputChannel,true)					\
-															<< "." << ::NTV2InputSourceToString(mInputSource, true)				\
+															<< "." << ::NTV2ChannelToString(mConfig.fInputChannel,true)					\
+															<< "." << ::NTV2InputSourceToString(mConfig.fInputSource, true)				\
 															<< "." << ::NTV2VideoFormatToString(mVideoFormat)					\
 															<< "." << ::NTV2AudioSystemToString(mAudioSystem, true)				\
 															<< "." << AJAProcess::GetPid()										\
@@ -516,8 +516,8 @@ class CNTV2DemoCommon
 	#include "ajabase/common/wavewriter.h"	//	For AJAWavWriter
 	#define		AJA_NTV2_AUDIO_RECORD_BEGIN		ostringstream	_wavfilename;														\
 												_wavfilename	<< ::NTV2DeviceString(mDeviceID) << "-" << mDevice.GetIndexNumber()	\
-																<< "." << ::NTV2ChannelToString(mInputChannel,true)					\
-																<< "." << ::NTV2InputSourceToString(mInputSource, true)				\
+																<< "." << ::NTV2ChannelToString(mConfig.fInputChannel,true)					\
+																<< "." << ::NTV2InputSourceToString(mConfig.fInputSource, true)				\
 																<< "." << ::NTV2VideoFormatToString(mVideoFormat)					\
 																<< "." << ::NTV2AudioSystemToString(mAudioSystem, true)				\
 																<< "." << AJAProcess::GetPid()										\
@@ -548,8 +548,8 @@ class CNTV2DemoCommon
 	#include <fstream>						//	For ofstream
 	#define		AJA_NTV2_ANC_RECORD_BEGIN		ostringstream _ancfn; uint64_t _ancTally(0);								\
 												_ancfn	<< ::NTV2DeviceString(mDeviceID) << "-" << mDevice.GetIndexNumber()	\
-														<< "." << ::NTV2ChannelToString(mInputChannel,true)					\
-														<< "." << ::NTV2InputSourceToString(mInputSource, true)				\
+														<< "." << ::NTV2ChannelToString(mConfig.fInputChannel,true)					\
+														<< "." << ::NTV2InputSourceToString(mConfig.fInputSource, true)				\
 														<< "." << ::NTV2VideoFormatToString(mVideoFormat)					\
 														<< "." << AJAProcess::GetPid()										\
 														<< ".anc";															\
