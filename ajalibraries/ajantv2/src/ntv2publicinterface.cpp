@@ -1180,6 +1180,42 @@ NTV2_POINTER::~NTV2_POINTER ()
 }
 
 
+bool NTV2_POINTER::ByteSwap64 (void)
+{
+	uint64_t *	pU64s(reinterpret_cast<uint64_t*>(GetHostPointer()));
+	const size_t loopCount(GetByteCount() / sizeof(uint64_t));
+	if (IsNULL())
+		return false;
+	for (size_t ndx(0);  ndx < loopCount;  ndx++)
+		pU64s[ndx] = NTV2EndianSwap64(pU64s[ndx]);
+	return true;
+}
+
+
+bool NTV2_POINTER::ByteSwap32 (void)
+{
+	uint32_t *	pU32s(reinterpret_cast<uint32_t*>(GetHostPointer()));
+	const size_t loopCount(GetByteCount() / sizeof(uint32_t));
+	if (IsNULL())
+		return false;
+	for (size_t ndx(0);  ndx < loopCount;  ndx++)
+		pU32s[ndx] = NTV2EndianSwap32(pU32s[ndx]);
+	return true;
+}
+
+
+bool NTV2_POINTER::ByteSwap16 (void)
+{
+	uint16_t *	pU16s(reinterpret_cast<uint16_t*>(GetHostPointer()));
+	const size_t loopCount(GetByteCount() / sizeof(uint16_t));
+	if (IsNULL())
+		return false;
+	for (size_t ndx(0);  ndx < loopCount;  ndx++)
+		pU16s[ndx] = NTV2EndianSwap16(pU16s[ndx]);
+	return true;
+}
+
+
 bool NTV2_POINTER::Set (const void * pInUserPointer, const size_t inByteCount)
 {
 	Deallocate();

@@ -6191,6 +6191,27 @@ typedef enum
 								that was allocated in an EXE).
 				**/
 				bool			SwapWith (NTV2_POINTER & inBuffer);
+
+				/**
+					@brief		Byte-swaps my contents 64-bits at a time.
+					@return		True if successful;  otherwise false.
+					@note		If my size (in bytes) is not evenly divisible by 8, the very last byte(s) won't get swapped.
+				**/
+				bool			ByteSwap64 (void);
+
+				/**
+					@brief		Byte-swaps my contents 32-bits at a time.
+					@return		True if successful;  otherwise false.
+					@note		If my size (in bytes) is not evenly divisible by 4, the very last byte(s) won't get swapped.
+				**/
+				bool			ByteSwap32 (void);
+
+				/**
+					@brief		Byte-swaps my contents 16-bits at a time.
+					@return		True if successful;  otherwise false.
+					@note		If my size (in bytes) is not evenly divisible by 2, the very last byte won't get swapped.
+				**/
+				bool			ByteSwap16 (void);
 				///@}
 
 				/**
