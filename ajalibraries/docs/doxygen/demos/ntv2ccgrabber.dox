@@ -62,6 +62,9 @@ Displays captured CEA608 captions from incoming video.
 	--pixelFormat=formatSpec                             Defaults to v210 (10-bit YCbCr).
 	                                                     Specify 'list' or '?' to display the valid pixel formats for the device.
 
+	-v, --vanc                                           Uses (tall) VANC frame geometry to also capture VANC data in the frame buffer.
+	                                                     By default, ntv2ccgrabber uses normal frame geometry.
+
 	--608chan=cc1|cc2|cc3|cc4|tx1|tx2|tx3|tx4,...        Specifies the CEA608 caption channel of interest.
 	                                                     Legal values:   CC1 | cc1      Caption channel 1. This is the default.
 	                                                                     CC2 | cc2      Caption channel 2.
@@ -95,8 +98,9 @@ Displays captured CEA608 captions from incoming video.
 	-m, --multiChannel                                   Shares the device with other programs, performs minimal routing changes, and if the
 	                                                     device is capable of it, configures it to allow the use of different video formats
 	                                                     on other device channels.
-
-	-v, --vanc                                           Uses (tall) VANC frame geometry to also capture VANC data in the frame buffer.
-	                                                     By default, ntv2ccgrabber uses normal frame geometry.
+	
+	--frames {spec}                                      Specifies which device frame buffers to use for AutoCirculate capture:
+                                                             numFrames[@startFrame]    Specifies frame count (and optional start frame).
+	                                                         startFrame-endFrame       Explicitly specifies start and end frame numbers.
 @endcode
 **/
