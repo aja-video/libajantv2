@@ -41,7 +41,6 @@
 #define SAREK_2110_FRAMESYNC          			(0x219000/4)
 #define SAREK_2110_AUDIO_STREAMSELECT           (0x230000/4)
 #define SAREK_2110_VIDEO_TIMING_CTRLR			(0x240000/4)
-#define SAREK_2110_VIDEO_DMA					(0x250000/4)
 
 #define SAREK_2110_TEST_GENERATOR               (0x308000/4)
 #define SAREK_AXIS_PCAP							(0x309000/4)
@@ -319,60 +318,6 @@
 #define kRegVTC_frame_sync_cfg_14		(0x138/4)
 #define kRegVTC_frame_sync_cfg_15		(0x13c/4)
 #define kRegVTC_generator_global_delay	(0x140/4)
-
-/////////////////////////////////////////////////////////////////////
-//
-// Video DMA
-//
-/////////////////////////////////////////////////////////////////////
-
-#define kRegVDMA_mm2s_vdmacr			(0x00/4)
-#define kRegVDMA_mm2s_vdmasr			(0x04/4)
-#define kRegVDMA_mm2s_reg_index			(0x14/4)
-#define kRegVDMA_park_ptr_reg			(0x28/4)
-#define kRegVDMA_vdma_version			(0x2c/4)
-#define kRegVDMA_s2mm_vdmacr			(0x30/4)
-#define kRegVDMA_s2mm_vdmasr			(0x34/4)
-#define kRegVDMA_s2mm_vdma_irq_mask		(0x3c/4)
-#define kRegVDMA_s2mm_reg_index			(0x44/4)
-#define kRegVDMA_mm2s_vsize				(0x50/4)
-#define kRegVDMA_mm2s_hsize				(0x54/4)
-#define kRegVDMA_mm2s_frmdly_stride		(0x58/4)
-#define kRegVDMA_mm2s_start_address01	(0x5c/4)
-#define kRegVDMA_mm2s_start_address02	(0x60/4)
-#define kRegVDMA_mm2s_start_address03	(0x64/4)
-#define kRegVDMA_mm2s_start_address04	(0x68/4)
-#define kRegVDMA_mm2s_start_address05	(0x6c/4)
-#define kRegVDMA_mm2s_start_address06	(0x70/4)
-#define kRegVDMA_mm2s_start_address07	(0x74/4)
-#define kRegVDMA_mm2s_start_address08	(0x78/4)
-#define kRegVDMA_mm2s_start_address09	(0x7c/4)
-#define kRegVDMA_mm2s_start_address10	(0x80/4)
-#define kRegVDMA_mm2s_start_address11	(0x84/4)
-#define kRegVDMA_mm2s_start_address12	(0x88/4)
-#define kRegVDMA_mm2s_start_address13	(0x8c/4)
-#define kRegVDMA_mm2s_start_address14	(0x90/4)
-#define kRegVDMA_mm2s_start_address15	(0x94/4)
-#define kRegVDMA_mm2s_start_address16	(0x98/4)
-#define kRegVDMA_s2mm_vsize				(0xa0/4)
-#define kRegVDMA_s2mm_hsize				(0xa4/4)
-#define kRegVDMA_s2mm_frmdly_stride		(0xa8/4)
-#define kRegVDMA_s2mm_start_address01	(0xac/4)
-#define kRegVDMA_s2mm_start_address02	(0xb0/4)
-#define kRegVDMA_s2mm_start_address03	(0xb4/4)
-#define kRegVDMA_s2mm_start_address04	(0xb8/4)
-#define kRegVDMA_s2mm_start_address05	(0xbc/4)
-#define kRegVDMA_s2mm_start_address06	(0xc0/4)
-#define kRegVDMA_s2mm_start_address07	(0xc4/4)
-#define kRegVDMA_s2mm_start_address08	(0xc8/4)
-#define kRegVDMA_s2mm_start_address09	(0xcc/4)
-#define kRegVDMA_s2mm_start_address10	(0xd0/4)
-#define kRegVDMA_s2mm_start_address11	(0xd4/4)
-#define kRegVDMA_s2mm_start_address12	(0xd8/4)
-#define kRegVDMA_s2mm_start_address13	(0xdc/4)
-#define kRegVDMA_s2mm_start_address14	(0xe0/4)
-#define kRegVDMA_s2mm_start_address15	(0xe4/4)
-#define kRegVDMA_s2mm_start_address16	(0xe8/4)
 
 /////////////////////////////////////////////////////////////////////
 //

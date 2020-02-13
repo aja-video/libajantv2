@@ -218,7 +218,7 @@ AJAExport void CopyRGBAImageToFrame(ULWord* pSrcBuffer, ULWord srcHeight, ULWord
 **/
 AJAExport bool	SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 										UByte *						pDstBuffer,
-										const ULWord					inDstBytesPerLine,
+										const ULWord				inDstBytesPerLine,
 										const UWord					inDstTotalLines);
 
 /**
