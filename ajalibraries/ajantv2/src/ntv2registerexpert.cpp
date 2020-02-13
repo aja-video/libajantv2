@@ -544,7 +544,7 @@ private:
 		DefineXptReg	(kRegXptSelectGroup35,	NTV2_XptFrameBuffer5BInput,		NTV2_XptFrameBuffer6BInput,		NTV2_XptFrameBuffer7BInput,		NTV2_XptFrameBuffer8BInput);
 
 		//	Expose the CanConnect ROM registers:
-		for (ULWord regNum(kRegFirstValidXptROMRegister);  regNum < ULWord(kRegLastValidXptROMRegister);  regNum++)
+		for (ULWord regNum(kRegFirstValidXptROMRegister);  regNum < ULWord(kRegInvalidValidXptROMRegister);  regNum++)
 		{	ostringstream regName;	//	used to synthesize reg name
 			const ULWord rawInputXpt	((regNum - ULWord(kRegFirstValidXptROMRegister)) / 4UL + ULWord(NTV2_FIRST_INPUT_CROSSPOINT));
 			const ULWord ndx			((regNum - ULWord(kRegFirstValidXptROMRegister)) % 4UL);
@@ -2951,22 +2951,18 @@ private:
 			{
 				NTV2WidgetID	widgetID (NTV2_WIDGET_INVALID);
 				CNTV2SignalRouter::GetWidgetForInput (inputXpt, widgetID, inDeviceID);
-				oss	<< "Input Crosspoint ID: "	<< DEC(rawInputXptID) << " (" << xHEX0N(rawInputXptID,2) << ")"		<< endl
-					<< "Enum: "					<< ::NTV2InputCrosspointIDToString(inputXpt, false)					<< endl
-					<< "Name: "					<< "'" << ::NTV2InputCrosspointIDToString(inputXpt, true) << "'"	<< endl;
+				oss	<< "Input Xpt: "	<< "'" << ::NTV2InputCrosspointIDToString(inputXpt, true) << "' (" << ::NTV2InputCrosspointIDToString(inputXpt, false) << ")"	<< endl
+					<< "Input Xpt ID: "	<< DEC(rawInputXptID) << " (" << xHEX0N(rawInputXptID,2) << ")";
 				if (NTV2_IS_VALID_WIDGET(widgetID))
-					oss	<< "Parent Widget Enum: "	<< ::NTV2WidgetIDToString(widgetID, false)							<< endl
-						<< "Widget ID:"				<< DEC(UWord(widgetID)) << " (" << xHEX0N(UWord(widgetID),4) << ")" << endl
-						<< "Widget Name: '"			<< ::NTV2WidgetIDToString(widgetID, true) << "'"					<< endl;
+					oss	<< endl
+						<< "Widget: "	<< "'" << ::NTV2WidgetIDToString(widgetID, true) << "' (" << ::NTV2WidgetIDToString(widgetID, false) << ")";
 				NTV2StringList	outputXptNames;
 				for (UWord bitNdx(0);  bitNdx < 32;  bitNdx++)
 					if (inRegValue & ULWord((1 << bitNdx)))
 					{
 						const ULWord rawOutputXptID (1 << (bitNdx + outputXptShift));
 						const NTV2OutputXptID YUVoutputXptID(static_cast<NTV2OutputXptID>(rawOutputXptID));
-						NTV2_ASSERT(NTV2_IS_VALID_OutputCrosspointID(YUVoutputXptID));
 						const NTV2OutputXptID RGBoutputXptID(static_cast<NTV2OutputXptID>(rawOutputXptID | 0x00000080));
-						NTV2_ASSERT(NTV2_IS_VALID_OutputCrosspointID(RGBoutputXptID));
 						const string YUVstr(::NTV2OutputCrosspointIDToString(YUVoutputXptID,true));
 						const string RGBstr(::NTV2OutputCrosspointIDToString(RGBoutputXptID,true));
 						ostringstream yuvName, rgbName;
@@ -2976,7 +2972,8 @@ private:
 							{rgbName << "'" << RGBstr << "'";	outputXptNames.push_back(rgbName.str());}
 					}
 				if (!outputXptNames.empty())
-					oss << "Legal Output Connections: " << outputXptNames;
+					oss << endl
+						<< "Legal Output Connections: " << outputXptNames;
 				return oss.str();
 			}
 			else

@@ -5112,7 +5112,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 			isProgressivePic = inIsProgressivePicture;
 			format = GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
 		}
-		if (::NTV2DeviceCanDo12GIn(_boardID, inChannel) && format != NTV2_FORMAT_UNKNOWN)
+		if (::NTV2DeviceCanDo12GIn(_boardID, inChannel) && format != NTV2_FORMAT_UNKNOWN && !isValidVPID)
 		{
 			bool is6G = false, is12G = false;
 			GetSDIInput6GPresent(is6G, inChannel);

@@ -5844,27 +5844,28 @@ typedef enum
 				inline NTV2SegmentedXferInfo &	setSegmentCount (const ULWord inNumSegments)	{mNumSegments = inNumSegments;  return *this;}
 				inline NTV2SegmentedXferInfo &	setSegmentLength (const ULWord inNumElements)	{mElementsPerSegment = inNumElements;  return *this;}
 				inline NTV2SegmentedXferInfo &	setSourceInfo (const ULWord inOffset, const ULWord inPitch)
-											{return setSourceOffset(inOffset).setSourcePitch(inPitch);}
+												{return setSourceOffset(inOffset).setSourcePitch(inPitch);}
 				inline NTV2SegmentedXferInfo &	setSourceOffset (const ULWord inOffset)			{mInitialSrcOffset = inOffset;  return *this;}
 				inline NTV2SegmentedXferInfo &	setSourcePitch (const ULWord inPitch)			{mSrcElementsPerRow = inPitch;  return *this;}
 				inline NTV2SegmentedXferInfo &	setSourceDirection (const bool inTopDown)		{mFlags = (0xFFFFFFFF - BIT(8)); if (!inTopDown) mFlags |= BIT(8);  return *this;}
 				inline NTV2SegmentedXferInfo &	setDestInfo (const ULWord inOffset, const ULWord inPitch)
-											{return setDestOffset(inOffset).setDestPitch(inPitch);}
+												{return setDestOffset(inOffset).setDestPitch(inPitch);}
 				inline NTV2SegmentedXferInfo &	setDestOffset (const ULWord inOffset)			{mInitialDstOffset = inOffset;  return *this;}
 				inline NTV2SegmentedXferInfo &	setDestPitch (const ULWord inPitch)				{mDstElementsPerRow = inPitch;  return *this;}
 				inline NTV2SegmentedXferInfo &	setDestDirection (const bool inTopDown)			{mFlags = (0xFFFFFFFF - BIT(9)); if (!inTopDown) mFlags |= BIT(9);  return *this;}
 				inline NTV2SegmentedXferInfo &	setElementLength (const ULWord inBytesPerElement)	
-											{
-												if (inBytesPerElement  &&  inBytesPerElement < 9)
-													if (!(inBytesPerElement & (inBytesPerElement - 1)))  // Power of 2?
-													{
-														ULWord	num(inBytesPerElement),  lengthBits(0);
-														while (num >>= 1)
-															lengthBits++;
-														mFlags = (mFlags & ~3UL) | (lengthBits & 3UL);
-													}
-												return *this;
-											}
+												{
+													if (inBytesPerElement  &&  inBytesPerElement < 9)
+														if (!(inBytesPerElement & (inBytesPerElement - 1)))  // Power of 2?
+														{
+															ULWord	num(inBytesPerElement),  lengthBits(0);
+															while (num >>= 1)
+																lengthBits++;
+															mFlags = (mFlags & ~3UL) | (lengthBits & 3UL);
+														}
+													return *this;
+												}
+				NTV2SegmentedXferInfo &			swapSourceAndDestination (void);
 			private:
 				ULWord	mFlags;					///< @brief	Lowest 2 bits determines element size, kRegMaskFrameOrientation is bit 10
 				ULWord	mNumSegments;			///< @brief	Number of segments to transfer (i.e. row count).
@@ -6191,6 +6192,27 @@ typedef enum
 								that was allocated in an EXE).
 				**/
 				bool			SwapWith (NTV2_POINTER & inBuffer);
+
+				/**
+					@brief		Byte-swaps my contents 64-bits at a time.
+					@return		True if successful;  otherwise false.
+					@note		If my size (in bytes) is not evenly divisible by 8, the very last byte(s) won't get swapped.
+				**/
+				bool			ByteSwap64 (void);
+
+				/**
+					@brief		Byte-swaps my contents 32-bits at a time.
+					@return		True if successful;  otherwise false.
+					@note		If my size (in bytes) is not evenly divisible by 4, the very last byte(s) won't get swapped.
+				**/
+				bool			ByteSwap32 (void);
+
+				/**
+					@brief		Byte-swaps my contents 16-bits at a time.
+					@return		True if successful;  otherwise false.
+					@note		If my size (in bytes) is not evenly divisible by 2, the very last byte won't get swapped.
+				**/
+				bool			ByteSwap16 (void);
 				///@}
 
 				/**
