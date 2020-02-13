@@ -53,11 +53,14 @@
 			while a widget’s input can only be sourced by one other widget’s output.
 			In other words, widget outputs are one-to-many, while widget inputs are one-to-one.
 
-	The CNTV2Card::Connect call is used to make and/or break these output-to-input crosspoint connections.
-	The CNTV2Card::ClearRouting function breaks <i>all</i> crosspoint connections.
-
 	@note	Widget inputs that are left open — i.e., disconnected — i.e. aren’t connected to any other widget’s output — default
 			to the ::NTV2_XptBlack output crosspoint.
+
+	The ::CNTV2Card class has several methods dedicated to widget routing:
+	-	Call CNTV2Card::Connect to connect (or re-connect) a widget’s output to another widget’s input.
+	-	Call CNTV2Card::Disconnect to break an existing connection.
+	-	Call CNTV2Card::IsConnected to see if a connection exists between an input and output crosspoint.
+	-	Call CNTV2Card::ClearRouting to break <i>all</i> crosspoint connections.
 
 	Due to FPGA size limitations, only a small fraction of the possible widget interconnection routes are implemented. Unfortunately,
 	for many years, there was never a programmatic way to determine at runtime if a device implemented a specific connection path.
