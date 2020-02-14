@@ -1,7 +1,7 @@
 /**
-	@file	ntv2anc.cpp
-	@brief	Implementations of anc-centric NTV2Card methods.
-	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@file		ntv2anc.cpp
+	@brief		Implementations of anc-centric CNTV2Card methods.
+	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2card.h"

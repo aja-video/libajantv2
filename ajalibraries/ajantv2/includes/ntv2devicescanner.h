@@ -1,7 +1,7 @@
 /**
 	@file		ntv2devicescanner.h
-	@brief		Declares NTV2DeviceInfo and CNTV2DeviceScanner.
-	@copyright	(C) 2004-2014 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@brief		Declares the CNTV2DeviceScanner class.
+	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2DEVICESCANNER_H
@@ -239,21 +239,37 @@ public:
 		@param[in]	inNameSubString		Specifies a portion of the device name to search for.
 		@param[out]	outDevice			Receives the open, ready-to-use CNTV2Card instance.
 	**/
-	static bool									GetFirstDeviceWithName (const std::string inNameSubString, CNTV2Card & outDevice);
+	static bool									GetFirstDeviceWithName (const std::string & inNameSubString, CNTV2Card & outDevice);
 
 	/**
-		@brief		Rescans the host, and returns an open CNTV2Card instance for the AJA device that matches using the given argument string
-					(assuming it came from a command-line parameter) according to the following rules:
-					If the argument string is an unsigned decimal integer, then it's interpreted as a zero-based device index number.
-					Otherwise, if the argument string is exactly 8 characters, it is first tested as a device serial number.
-					If there is no serial number match, or if the argument string is at least 2 characters in length, then it's checked if
-					a device model name ends with the string (case-insensitively). (The model names are 'corvid1', ... 'ioxt', ... etc.)
-					The device having the lowest index number and matching model name, if any, is chosen and opened.
+		@brief		Rescans the host, and returns an open CNTV2Card instance for the first AJA device whose serial number contains the given value.
+		@note		The serial value is compared case-sensitively.
 		@return		True if successful; otherwise false.
-		@param[in]	inArgument			A string containing a decimal index number, device serial number, or portion of a device model name.
+		@param[in]	inSerialStr			Specifies the device serial value to search for.
+		@param[out]	outDevice			Receives the open, ready-to-use CNTV2Card instance of the first matching device.
+	**/
+	static bool									GetFirstDeviceWithSerial (const std::string & inSerialStr, CNTV2Card & outDevice);
+
+	/**
+		@brief		Rescans the host, and returns an open CNTV2Card instance for the first AJA device whose serial number matches the given value.
+		@return		True if successful; otherwise false.
+		@param[in]	inSerialNumber		Specifies the device serial value to search for.
 		@param[out]	outDevice			Receives the open, ready-to-use CNTV2Card instance.
 	**/
-	static bool									GetFirstDeviceFromArgument (const std::string inArgument, CNTV2Card & outDevice);
+	static bool									GetDeviceWithSerial (const uint64_t inSerialNumber, CNTV2Card & outDevice);
+
+	/**
+		@brief		Rescans the host, and returns an open CNTV2Card instance for the AJA device that matches a command line argument
+					according to the following evaluation sequence:
+					-#	1 or 2 digit unsigned decimal integer:  a zero-based device index number;
+					-#	8 or 9 character alphanumeric string:   device with a matching serial number string (case-insensitive comparison);
+					-#	3-16 character hexadecimal integer, optionally preceded by '0x':  device having a matching 64-bit serial number;
+					-#	All other cases:  first device (lowest index number) whose name contains the argument string (compared case-insensitively).
+		@return		True if successful; otherwise false.
+		@param[in]	inArgument			The argument string.
+		@param[out]	outDevice			Receives the open, ready-to-use CNTV2Card instance.
+	**/
+	static bool									GetFirstDeviceFromArgument (const std::string & inArgument, CNTV2Card & outDevice);
 
 	/**
 		@brief	Compares two NTV2DeviceInfoLists and returns a list of additions and a list of removals.

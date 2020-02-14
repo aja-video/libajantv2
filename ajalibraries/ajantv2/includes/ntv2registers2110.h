@@ -1,7 +1,7 @@
 /**
 	@file		ntv2registers2110.h
-	@brief		Defines the Sarek board's registers.
-	@copyright	(C) 2014-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@brief		Defines the KonaIP/IoIP S2110 registers.
+	@copyright	(C) 2014-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef REGISTERS_2110_H
@@ -40,6 +40,7 @@
 #define SAREK_2110_VOIPFEC_CTL          		(0x218000/4)
 #define SAREK_2110_FRAMESYNC          			(0x219000/4)
 #define SAREK_2110_AUDIO_STREAMSELECT           (0x230000/4)
+#define SAREK_2110_VIDEO_TIMING_CTRLR			(0x240000/4)
 
 #define SAREK_2110_TEST_GENERATOR               (0x308000/4)
 #define SAREK_AXIS_PCAP							(0x309000/4)
@@ -265,6 +266,58 @@
 #define kRegVFS_s2mm_start_addr14      	(0xe0/4)
 #define kRegVFS_s2mm_start_addr15      	(0xe4/4)
 #define kRegVFS_s2mm_start_addr16      	(0xe8/4)
+
+/////////////////////////////////////////////////////////////////////
+//
+// Video Timing Controller
+//
+/////////////////////////////////////////////////////////////////////
+
+#define kRegVTC_control					(0x000/4)
+#define kRegVTC_status					(0x004/4)
+#define kRegVTC_error					(0x008/4)
+#define kRegVTC_irq_enable				(0x00c/4)
+#define kRegVTC_version					(0x010/4)
+#define kRegVTC_detector_active_size	(0x020/4)
+#define kRegVTC_detector_timing_status	(0x024/4)
+#define kRegVTC_detector_encoding		(0x028/4)
+#define kRegVTC_detector_polarity		(0x02c/4)
+#define kRegVTC_detector_hsize			(0x030/4)
+#define kRegVTC_detector_vsize			(0x034/4)
+#define kRegVTC_detector_hsync			(0x038/4)
+#define kRegVTC_detector_f0_vblank_h	(0x03c/4)
+#define kRegVTC_detector_f0_vsync_v		(0x040/4)
+#define kRegVTC_detector_f0_vsync_h		(0x044/4)
+#define kRegVTC_generator_active_size	(0x060/4)
+#define kRegVTC_generator_tmng_status	(0x064/4)
+#define kRegVTC_generator_encoding		(0x068/4)
+#define kRegVTC_generator_polarity		(0x06c/4)
+#define kRegVTC_generator_hsize			(0x070/4)
+#define kRegVTC_generator_vsize			(0x074/4)
+#define kRegVTC_generator_hsync			(0x078/4)
+#define kRegVTC_generator_f0_vblank_h	(0x07c/4)
+#define kRegVTC_generator_f0_vsync_v	(0x080/4)
+#define kRegVTC_generator_f0_vsync_h	(0x084/4)
+#define kRegVTC_generator_f1_vblank_h	(0x088/4)
+#define kRegVTC_generator_f1_vsync_v	(0x08c/4)
+#define kRegVTC_generator_f1_vsync_h	(0x090/4)
+#define kRegVTC_frame_sync_cfg_00		(0x100/4)
+#define kRegVTC_frame_sync_cfg_01		(0x104/4)
+#define kRegVTC_frame_sync_cfg_02		(0x108/4)
+#define kRegVTC_frame_sync_cfg_03		(0x10c/4)
+#define kRegVTC_frame_sync_cfg_04		(0x110/4)
+#define kRegVTC_frame_sync_cfg_05		(0x114/4)
+#define kRegVTC_frame_sync_cfg_06		(0x118/4)
+#define kRegVTC_frame_sync_cfg_07		(0x11c/4)
+#define kRegVTC_frame_sync_cfg_08		(0x120/4)
+#define kRegVTC_frame_sync_cfg_09		(0x124/4)
+#define kRegVTC_frame_sync_cfg_10		(0x128/4)
+#define kRegVTC_frame_sync_cfg_11		(0x12c/4)
+#define kRegVTC_frame_sync_cfg_12		(0x130/4)
+#define kRegVTC_frame_sync_cfg_13		(0x134/4)
+#define kRegVTC_frame_sync_cfg_14		(0x138/4)
+#define kRegVTC_frame_sync_cfg_15		(0x13c/4)
+#define kRegVTC_generator_global_delay	(0x140/4)
 
 /////////////////////////////////////////////////////////////////////
 //

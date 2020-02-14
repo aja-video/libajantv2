@@ -1,7 +1,7 @@
 /**
 	@file		videoutilities.h
-	@copyright	Copyright (C) 2010-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares the ajabase library's video utility functions.
+	@copyright	(C) 2010-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_VIDEOUTILS_H

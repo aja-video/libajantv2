@@ -1,7 +1,7 @@
 /**
 	@file		ntv2nubaccess.cpp
 	@brief		Implementation of NTV2 "nub" functions that connect/open/close/send/receive data.
-	@copyright	(C) 2006-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2006-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include <stdio.h>

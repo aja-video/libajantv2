@@ -1,7 +1,7 @@
 /**
 	@file		linux/processimpl.h
-	@copyright	Copyright (C) 2009-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares the AJAProcessImpl class.
+	@copyright	(C) 2009-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_PROCESS_IMPL_H

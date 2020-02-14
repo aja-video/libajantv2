@@ -1,7 +1,7 @@
 /**
 	@file		dpxfileio.h
-	@copyright	Copyright (C) 2009-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declaration of the AJADPXFileIO class, for low level file I/O.
+	@copyright	(C) 2009-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_DPXFILEIO_H

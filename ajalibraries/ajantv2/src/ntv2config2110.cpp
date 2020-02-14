@@ -1,7 +1,7 @@
 /**
     @file       ntv2config2110.cpp
     @brief      Implements the CNTV2Config2110 class.
-    @copyright  (C) 2014-2019 AJA Video Systems, Inc.   Proprietary and confidential information.
+    @copyright  (C) 2014-2020 AJA Video Systems, Inc.   Proprietary and confidential information.
 **/
 
 #include "ntv2config2110.h"
@@ -3160,3 +3160,15 @@ void CNTV2Config2110::GetArbiter(const eSFP sfp, NTV2Stream stream, bool & enabl
     uint32_t bit = (1 << Get2110TxStreamIndex(stream)) << (int(sfp) * 16);
     enable = (val & bit);
 }
+
+bool CNTV2Config2110::SetLLDPInfo(std::string sysname)
+{
+    return CNTV2MBController::SetLLDPInfo(sysname);
+}
+
+bool CNTV2Config2110::GetLLDPInfo(std::string &chassisId0, std::string &portId0,
+					std::string &chassisId1, std::string &portId1)
+{
+	return CNTV2MBController::GetLLDPInfo(chassisId0, portId0, chassisId1, portId1);
+}
+

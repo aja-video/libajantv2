@@ -1,7 +1,7 @@
 /**
 	@file		udp_socket.cpp
-	@copyright	Copyright (C) 2011-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Implements the AJAUDPSocket class.
+	@copyright	(C) 2011-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 /////////////////////////////

@@ -1,7 +1,7 @@
 /**
 	@file		ntv2publicinterface.h
-	@copyright	Copyright (C) 2012-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares enums and structs used by all platform drivers and the SDK.
+	@copyright	(C) 2012-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef NTV2PUBLICINTERFACE_H
@@ -101,7 +101,7 @@ typedef enum
 	kRegRP188InOut2DBB,				// 64
 	kRegRP188InOut2Bits0_31,		// 65
 	kRegRP188InOut2Bits32_63,		// 66
-	kRegReserved67,					// 67
+	kRegCanDoStatus,				// 67	SDK 15.6 and later
 	kRegCh1ColorCorrectioncontrol,	// 68
 	kRegCh2ColorCorrectioncontrol,	// 69
 	kRegRS422Transmit,				// 70
@@ -747,6 +747,15 @@ typedef enum _NTV2NonPCMAudioDetectRegisters
 	kRegLastNonPCMAudioDetectRegister	= kRegNonPCMAudioDetectEngine8
 } NTV2NonPCMAudioDetectRegisters;
 
+//	New in SDK 15.6:
+//	Some boards have new firmware that implements a "valid route" bitmap ROM accessed by a contiguous block of registers:
+typedef enum _NTV2XptValidROMRegisters
+{
+	kRegFirstValidXptROMRegister	= 3072,	//	Starts at reg 3072
+	kRegNumValidXptROMRegisters		= 1024,	//	It's 4096 bytes long
+	kRegLastValidXptROMRegister		= kRegFirstValidXptROMRegister + kRegNumValidXptROMRegisters - 1,
+	kRegInvalidValidXptROMRegister	= kRegFirstValidXptROMRegister + kRegNumValidXptROMRegisters
+} NTV2XptValidROMRegisters;
 
 //	Discontinuous block of registers used to control the enhanced color space converters
 typedef enum
@@ -1462,17 +1471,20 @@ typedef enum
 	kRegMaskDMAPauseDisable = BIT(16),
 
 	// Color Correction Control
-	kRegMaskSaturationValue = BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7)+BIT(8)+BIT(9),
-	kRegMaskCCOutputBankSelect    = BIT(16),
-	kRegMaskCCMode          = BIT(17)+BIT(18),
-	kRegMaskCC5HostAccessBankSelect = BIT(20),
-	kRegMaskCC5OutputBankSelect = BIT(21),
-	kRegMaskLUT5Select		= BIT(28),
-	kRegMaskLUTSelect		= BIT(29),
-	kRegMaskCC3OutputBankSelect	= BIT(30),
-	kRegMaskCC4OutputBankSelect = BIT(31),
+	kRegMaskSaturationValue			= BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7)+BIT(8)+BIT(9),
+	kRegMaskCCOutputBankSelect		= BIT(16),
+	kRegMaskCCMode					= BIT(17)+BIT(18),
+	kRegMaskCC5HostAccessBankSelect	= BIT(20),
+	kRegMaskCC5OutputBankSelect		= BIT(21),
+	kRegMaskLUT5Select				= BIT(28),
+	kRegMaskLUTSelect				= BIT(29),
+	kRegMaskCC3OutputBankSelect		= BIT(30),
+	kRegMaskCC4OutputBankSelect		= BIT(31),
 
-	// kRegLUTV2Control
+	//	kRegCanDoStatus
+	kRegMaskCanDoValidXptROM			= BIT(0),
+
+	//	kRegLUTV2Control
 	kRegMaskLUT1Enable					= BIT(0),
 	kRegMaskLUT2Enable					= BIT(1),
 	kRegMaskLUT3Enable					= BIT(2),
@@ -2631,7 +2643,10 @@ typedef enum
 	kRegShiftCC3OutputBankSelect		= 30,
 	kRegShiftCC4OutputBankSelect		= 31,
 
-	// kRegLUTV2Control
+	//	kRegCanDoStatus
+	kRegShiftCanDoValidXptROM			= 0,
+
+	//	kRegLUTV2Control
 	kRegShiftLUT1Enable					= 0,
 	kRegShiftLUT2Enable					= 1,
 	kRegShiftLUT3Enable					= 2,
@@ -5692,8 +5707,13 @@ typedef enum
 		#define AUTOCIRCULATE_P2P_TARGET			BIT(30)		///< @brief prepare p2p target for asynchronous transfer (with message)
 		#define AUTOCIRCULATE_P2P_TRANSFER			BIT(31)		///< @brief transfer to p2p sync or async target
 
-		#define DMABUFFERLOCK_LOCK					BIT(0)		///< @brief Used in ::NTV2BufferLock to page lock the buffer.
+		#define DMABUFFERLOCK_LOCK					BIT(0)		///< @brief Used in ::NTV2BufferLock to page lock a buffer.
 		#define DMABUFFERLOCK_UNLOCK_ALL			BIT(1)		///< @brief Used in ::NTV2BufferLock to unlock all locked buffers.
+        #define DMABUFFERLOCK_MAP                   BIT(2)		///< @brief Used in ::NTV2BufferLock to IO map a buffer.
+		#define DMABUFFERLOCK_UNLOCK				BIT(3)		///< @brief Used in ::NTV2BufferLock to unlock a buffer.
+		#define DMABUFFERLOCK_AUTO					BIT(4)		///< @brief Used in ::NTV2BufferLock to auto page lock buffers.
+		#define DMABUFFERLOCK_MANUAL				BIT(5)		///< @brief Used in ::NTV2BufferLock to manual page lock buffers.
+		#define DMABUFFERLOCK_MAX_SIZE				BIT(6)		///< @brief Used in ::NTV2BufferLock to set max locked size.
 
 		#if !defined (NTV2_BUILDING_DRIVER)
 			/**
@@ -5824,27 +5844,28 @@ typedef enum
 				inline NTV2SegmentedXferInfo &	setSegmentCount (const ULWord inNumSegments)	{mNumSegments = inNumSegments;  return *this;}
 				inline NTV2SegmentedXferInfo &	setSegmentLength (const ULWord inNumElements)	{mElementsPerSegment = inNumElements;  return *this;}
 				inline NTV2SegmentedXferInfo &	setSourceInfo (const ULWord inOffset, const ULWord inPitch)
-											{return setSourceOffset(inOffset).setSourcePitch(inPitch);}
+												{return setSourceOffset(inOffset).setSourcePitch(inPitch);}
 				inline NTV2SegmentedXferInfo &	setSourceOffset (const ULWord inOffset)			{mInitialSrcOffset = inOffset;  return *this;}
 				inline NTV2SegmentedXferInfo &	setSourcePitch (const ULWord inPitch)			{mSrcElementsPerRow = inPitch;  return *this;}
 				inline NTV2SegmentedXferInfo &	setSourceDirection (const bool inTopDown)		{mFlags = (0xFFFFFFFF - BIT(8)); if (!inTopDown) mFlags |= BIT(8);  return *this;}
 				inline NTV2SegmentedXferInfo &	setDestInfo (const ULWord inOffset, const ULWord inPitch)
-											{return setDestOffset(inOffset).setDestPitch(inPitch);}
+												{return setDestOffset(inOffset).setDestPitch(inPitch);}
 				inline NTV2SegmentedXferInfo &	setDestOffset (const ULWord inOffset)			{mInitialDstOffset = inOffset;  return *this;}
 				inline NTV2SegmentedXferInfo &	setDestPitch (const ULWord inPitch)				{mDstElementsPerRow = inPitch;  return *this;}
 				inline NTV2SegmentedXferInfo &	setDestDirection (const bool inTopDown)			{mFlags = (0xFFFFFFFF - BIT(9)); if (!inTopDown) mFlags |= BIT(9);  return *this;}
 				inline NTV2SegmentedXferInfo &	setElementLength (const ULWord inBytesPerElement)	
-											{
-												if (inBytesPerElement  &&  inBytesPerElement < 9)
-													if (!(inBytesPerElement & (inBytesPerElement - 1)))  // Power of 2?
-													{
-														ULWord	num(inBytesPerElement),  lengthBits(0);
-														while (num >>= 1)
-															lengthBits++;
-														mFlags = (mFlags & ~3UL) | (lengthBits & 3UL);
-													}
-												return *this;
-											}
+												{
+													if (inBytesPerElement  &&  inBytesPerElement < 9)
+														if (!(inBytesPerElement & (inBytesPerElement - 1)))  // Power of 2?
+														{
+															ULWord	num(inBytesPerElement),  lengthBits(0);
+															while (num >>= 1)
+																lengthBits++;
+															mFlags = (mFlags & ~3UL) | (lengthBits & 3UL);
+														}
+													return *this;
+												}
+				NTV2SegmentedXferInfo &			swapSourceAndDestination (void);
 			private:
 				ULWord	mFlags;					///< @brief	Lowest 2 bits determines element size, kRegMaskFrameOrientation is bit 10
 				ULWord	mNumSegments;			///< @brief	Number of segments to transfer (i.e. row count).
@@ -6171,6 +6192,27 @@ typedef enum
 								that was allocated in an EXE).
 				**/
 				bool			SwapWith (NTV2_POINTER & inBuffer);
+
+				/**
+					@brief		Byte-swaps my contents 64-bits at a time.
+					@return		True if successful;  otherwise false.
+					@note		If my size (in bytes) is not evenly divisible by 8, the very last byte(s) won't get swapped.
+				**/
+				bool			ByteSwap64 (void);
+
+				/**
+					@brief		Byte-swaps my contents 32-bits at a time.
+					@return		True if successful;  otherwise false.
+					@note		If my size (in bytes) is not evenly divisible by 4, the very last byte(s) won't get swapped.
+				**/
+				bool			ByteSwap32 (void);
+
+				/**
+					@brief		Byte-swaps my contents 16-bits at a time.
+					@return		True if successful;  otherwise false.
+					@note		If my size (in bytes) is not evenly divisible by 2, the very last byte won't get swapped.
+				**/
+				bool			ByteSwap16 (void);
 				///@}
 
 				/**
@@ -7952,7 +7994,8 @@ typedef enum
 				NTV2_POINTER	mBuffer;			///< @brief	Virtual address of a buffer to prelock, and its length.
 													//			A NULL buffer (or zero length) releases all locked buffers.
 				ULWord			mFlags;				///< @brief Action flags (lock, unlock, etc)
-				ULWord			mReserved[32];		///< @brief	Reserved for future expansion.
+				ULWord64		mMaxLockSize;		///< @brief Max locked bytes.
+				ULWord			mReserved[30];		///< @brief	Reserved for future expansion.
 			NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
@@ -7977,7 +8020,14 @@ typedef enum
 					@param	inFlags			Specifies action flags (lock, unlock, etc)
 				**/
 				explicit	NTV2BufferLock (const ULWord * pInBuffer, const ULWord inByteCount, const ULWord inFlags);
-				///@}
+
+				/**
+					@brief	Constructs an NTV2BufferLock object to use in a CNTV2Card::DMABufferLock call.
+					@param	inMaxLockSize	Specifies the maximum lock size in bytes
+					@param	inFlags			Specifies action flags (lock, unlock, etc)
+				**/
+				explicit	NTV2BufferLock (const ULWord64 inMaxLockSize, const ULWord inFlags);
+///@}
 
 				/**
 					@name	Changing
@@ -7996,7 +8046,10 @@ typedef enum
 					@param	inByteCount			Specifies a the length of the buffer to lock in bytes.
 					@return	True if successful;  otherwise false.
 				**/
-				inline bool	SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)	{return SetBuffer(NTV2_POINTER(pInBuffer, inByteCount));}
+				inline bool	SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)
+				{
+					return SetBuffer(NTV2_POINTER(pInBuffer, inByteCount));
+				}
 
 				/**
 					@brief	Sets the action flags for use in a subsequent call to CNTV2Card::DMABufferLock.
@@ -8005,10 +8058,21 @@ typedef enum
 				inline void	SetFlags (const ULWord inFlags)		{NTV2_ASSERT_STRUCT_VALID;  mFlags = inFlags;}
 
 				/**
+					@brief	Sets the maximum lock size for use in a subsequent call to CNTV2Card::DMABufferLock.
+					@param	inFlags			Specifies maximum lock size in bytes
+				**/
+				inline void	SetMaxLockSize (const ULWord64 inSize)		{NTV2_ASSERT_STRUCT_VALID;  mMaxLockSize = inSize;}
+
+				/**
 					@brief	Resets the struct to its initialized state.
 					@note	This does not release locked buffers.
 				**/
-				inline void	Clear (void)		{SetBuffer(NTV2_POINTER());}
+				inline void	Clear (void)
+				{
+					SetBuffer(NTV2_POINTER());
+					SetFlags(0);
+					SetMaxLockSize(0);
+				}
 				///@}
 
 				/**

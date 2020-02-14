@@ -1,7 +1,7 @@
 /**
 	@file		ntv2nubaccess.h
 	@brief		Declares functions to connect/open/close/send/receive data via the NTV2 "nub".
-	@copyright	(C) 2006-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2006-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2NUBACCESS_H

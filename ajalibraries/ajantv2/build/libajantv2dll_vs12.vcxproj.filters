@@ -114,6 +114,9 @@
     <ClCompile Include="..\src\ntv2config2022.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ntv2config2110.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\ntv2hevc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -459,6 +462,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\ntv2config2022.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\ntv2config2110.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\ntv2registers2022.h">

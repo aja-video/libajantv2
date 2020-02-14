@@ -1,7 +1,7 @@
 /**
-	@file	dllmain.cpp
-	@brief	Implementation of Windows DLL entry.
-	@copyright	(C) 2008-2019 AJA Video Systems, Inc.
+	@file		dllmain.cpp
+	@brief		Implementation of Windows DLL entry.
+	@copyright	(C) 2008-2020 AJA Video Systems, Inc.
 **/
 
 #ifdef AJADLL_BUILD

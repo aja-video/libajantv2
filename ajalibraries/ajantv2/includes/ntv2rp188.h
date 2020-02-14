@@ -1,7 +1,7 @@
 /**
 	@file		ntv2rp188.h
 	@brief		Declares the CRP188 class. See SMPTE RP188 standard for details.
-	@copyright	(C) 2007-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2007-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef __NTV2_RP188_

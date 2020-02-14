@@ -1,7 +1,7 @@
 /**
 	@file		testpatterngen.h
-	@copyright	Copyright (C) 2010-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares the AJATestPatternGen class.
+	@copyright	(C) 2010-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_TESTPATTERN_GEN

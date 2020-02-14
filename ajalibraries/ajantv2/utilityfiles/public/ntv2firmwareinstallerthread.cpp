@@ -1,7 +1,7 @@
 /**
-	@file	ntv2firmwareinstallerthread.cpp
-	@brief	Implementation of CNTV2FirmwareInstallerThread class.
-	@copyright	(C) 2014 AJA Video Systems, Inc.	Proprietary and confidential information.  All rights reserved.
+	@file		ntv2firmwareinstallerthread.cpp
+	@brief		Implementation of CNTV2FirmwareInstallerThread class.
+	@copyright	(C) 2014-2020 AJA Video Systems, Inc.	Proprietary and confidential information.  All rights reserved.
 **/
 
 #include "ntv2firmwareinstallerthread.h"

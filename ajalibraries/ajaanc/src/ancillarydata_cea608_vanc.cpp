@@ -1,7 +1,7 @@
 /**
 	@file		ancillarydata_cea608_vanc.cpp
 	@brief		Implements the AJAAncillaryData_Cea608_Vanc class.
-	@copyright	(C) 2010-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2010-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ancillarydata_cea608_vanc.h"

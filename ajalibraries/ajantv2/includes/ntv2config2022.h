@@ -1,7 +1,7 @@
 /**
     @file		ntv2config2022.h
     @brief		Declares the CNTV2Config2022 class.
-    @copyright	(C) 2014-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @copyright	(C) 2014-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2_2022CONFIG_H
@@ -18,7 +18,7 @@
     @brief	Configures a SMPTE 2022 Transmit Channel.
 **/
 
-class tx_2022_channel
+class AJAExport tx_2022_channel
 {
 public:
     tx_2022_channel() { init(); }
@@ -49,7 +49,7 @@ public:
     @brief	Configures a SMPTE 2022 Receive Channel.
 **/
 
-class rx_2022_channel
+class AJAExport rx_2022_channel
 {
 public:
     rx_2022_channel() { init(); }
@@ -83,7 +83,7 @@ public:
     uint32_t	playoutDelay;           ///< @brief	Specifies the wait time in milliseconds to SDI playout from incoming packet (0-150).
 };
 
-class j2kEncoderConfig
+class AJAExport j2kEncoderConfig
 {
 public:
     j2kEncoderConfig() { init(); }
@@ -106,7 +106,7 @@ public:
     uint32_t                audio1Pid;          ///< @brief	Specifies the PID for audio 1.
 };
 
-class j2kDecoderConfig
+class AJAExport j2kDecoderConfig
 {
 public:
     typedef enum
@@ -131,7 +131,7 @@ public:
     uint32_t        audioNumber;
 };
 
-class j2kDecoderStatus
+class AJAExport j2kDecoderStatus
 {
 public:
     j2kDecoderStatus() {init();}

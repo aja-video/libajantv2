@@ -1,11 +1,8 @@
 /**
 	@file		ntv2tshelper.h
-	@brief		Declares the CNTV2TsHelper class that is fundamental in generating register settings for IPX MPEG2-TS encapsulator.
-                This is a class for generating Transport Stream encode / decode programming data, and decoding ingress PAT/PMT and 
-                PES packets to setup decap for different streams. 
- 
-                This is modified version of the original code from Macnica.
- **/
+	@brief		Declares Transport Stream helper classes.
+	@copyright	(C) 2008-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
+**/
 
 #ifndef NTV2TSHELPER_H
 #define NTV2TSHELPER_H

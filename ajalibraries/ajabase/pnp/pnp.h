@@ -1,7 +1,7 @@
 /**
 	@file		pnp/pnp.h
-	@copyright	Copyright (C) 2011-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares the AJAPnp (plug-and-play) class.
+	@copyright	(C) 2011-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_PNP_H

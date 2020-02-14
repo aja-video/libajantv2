@@ -1,6 +1,6 @@
 /**
 	@file		ajarefptr.h
-	@copyright	Copyright (C) 2013-2019 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Defines the AJARefPtr template class.
 **/
 

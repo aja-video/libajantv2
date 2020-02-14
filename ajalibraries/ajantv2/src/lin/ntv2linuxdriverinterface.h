@@ -1,9 +1,8 @@
-////////////////////////////////////////////////////////////
-//
-//	Copyright (C) 2003, 2004, 2005, 2006, 2007, 2009, 2011 AJA Video Systems, Inc.
-//	Proprietary and Confidential information.
-//
-////////////////////////////////////////////////////////////
+/**
+	@file		ntv2linuxdriverinterface.h
+	@brief		Declares the CNTV2LinuxDriverInterface class.
+	@copyright	(C) 2003-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
+**/
 #ifndef NTV2LINUXDRIVERINTERFACE_H
 #define NTV2LINUXDRIVERINTERFACE_H
 

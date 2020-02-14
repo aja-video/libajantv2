@@ -1,3 +1,9 @@
+/**
+	@file		ntv2mbcontroller.h
+	@brief		Declares the CNTV2MBController class.
+	@copyright	(C) 2015-2020 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
+**/
+
 #ifndef NTV2MBCONTROLLER_H
 #define NTV2MBCONTROLLER_H
 
@@ -17,7 +23,9 @@ enum eMBCmd
     MB_CMD_TAKE_SDP               = 8,
     MB_CMD_FETCH_SDP              = 9,
     MB_CMD_DISABLE_NET_IF         = 10,
-    MB_CMD_FETCH_SFP_INFO         = 11
+    MB_CMD_FETCH_SFP_INFO         = 11,
+	MB_CMD_SET_LLDP_INFO          = 12,
+	MB_CMD_GET_LLDP_INFO          = 13
 };
 
 enum eNTV2PacketInterval
@@ -55,7 +63,6 @@ typedef struct
 {
     uint8_t	mac[6];
 } MACAddr;
-
 
 typedef struct
 {
@@ -155,6 +162,10 @@ protected:
     bool GetSDP(std::string url, std::string & sdp);
 
     bool GetSFPInfo(eSFP port, SFPMSAData & sfpdata);
+
+	bool SetLLDPInfo(std::string sysname);
+	bool GetLLDPInfo(std::string &chassisId0, std::string &portId0,
+					std::string &chassisId1, std::string &portId1);
 
 
 private:

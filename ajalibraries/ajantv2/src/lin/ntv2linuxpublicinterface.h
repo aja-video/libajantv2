@@ -1,12 +1,8 @@
-///////////////////////////////////////////////////////////
-//  ntv2linuxpublicinterface.h
-//
-//	Copyright (C) 2004, 2005, 2006, 2009 AJA Video Systems, Inc.
-//	Proprietary and Confidential information.
-//
-//  Types and defines shared between NTV2 user application interface
-//  and Linux device driver.
-///////////////////////////////////////////////////////////
+/**
+	@file		ntv2linuxpublicinterface.h
+	@brief		Types and defines shared between NTV2 user application interface and Linux device driver.
+	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
+**/
 #ifndef NTV2LINUXPUBLICINTERFACE_H
 #define NTV2LINUXPUBLICINTERFACE_H
 

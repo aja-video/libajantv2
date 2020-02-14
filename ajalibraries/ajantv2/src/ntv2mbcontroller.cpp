@@ -1,7 +1,7 @@
 /**
-    @file		ntv2mbcontroller.cpp
-    @brief		Implementation of CNTV2MBController class.
-    @copyright	(C) 2015-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @file       ntv2mbcontroller.cpp
+    @brief      Implementation of CNTV2MBController class.
+    @copyright  (C) 2015-2020 AJA Video Systems, Inc.   Proprietary and confidential information.
 **/
 
 #include "ntv2mbcontroller.h"
@@ -403,7 +403,7 @@ void CNTV2MBController::UnsetIGMPGroup(eSFP port, NTV2Stream stream)
 
 void CNTV2MBController::EnableIGMPGroup(eSFP port, NTV2Stream stream, bool enable)
 {
-	uint32_t val = 0;
+    uint32_t val = 0;
     uint32_t offset = getIGMPCBOffset(port, stream);
     mDevice.ReadRegister(SAREK_REGS2 + IGMP_BLOCK_BASE + offset + IGMPCB_REG_STATE, val);
     if (val != 0)
@@ -428,9 +428,9 @@ uint32_t CNTV2MBController::getIGMPCBOffset(eSFP port, NTV2Stream stream)
         uint32_t source_addr;
     };
 
-	if (NTV2_IS_VALID_SFP(port) && NTV2_IS_VALID_RX_SINGLE_STREAM(stream))
+    if (NTV2_IS_VALID_SFP(port) && NTV2_IS_VALID_RX_SINGLE_STREAM(stream))
     { 
-		uint32_t index = (int)stream + (NTV2_MAX_NUM_SINGLE_STREAMS * (int)port);
+        uint32_t index = (int)stream + (NTV2_MAX_NUM_SINGLE_STREAMS * (int)port);
         uint32_t reg   = (index * sizeof(IGMPCB))/4;
         return reg;
     }
@@ -843,3 +843,118 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
      mIpErrorCode = NTV2IpErrInvalidMBResponse;
      return false;
  }
+
+bool CNTV2MBController::GetLLDPInfo(std::string &chassisId0, std::string &portId0,
+         std::string &chassisId1, std::string &portId1)
+{
+    if (!(getFeatures() & SAREK_MB_PRESENT))
+        return true;
+
+    sprintf((char*)txBuf,"cmd=%d",(int)MB_CMD_GET_LLDP_INFO);
+    bool rv = sendMsg(5000);
+    if (!rv)
+    {
+        mIpErrorCode = NTV2IpErrNoResponseFromMB;
+        return false;
+    }
+
+    string response;
+    getResponse(response);
+    vector<string> msg;
+    splitResponse(response, msg);
+    if (msg.size() >=6)
+    {
+        string status;
+        rv = getString(msg[0],"status",status);
+        if (rv && (status == "OK"))
+        {
+            rv = getString(msg[2],"chassisId0",chassisId0);
+            if (rv == false)
+            {
+                mIpErrorCode = NTV2IpErrLLDPNotFound;
+                return false;
+            }
+            rv = getString(msg[3],"portId0",portId0);
+            if (rv == false)
+            {
+                mIpErrorCode = NTV2IpErrLLDPNotFound;
+                return false;
+            }
+            rv = getString(msg[4],"chassisId1",chassisId1);
+            if (rv == false)
+            {
+                mIpErrorCode = NTV2IpErrLLDPNotFound;
+                return false;
+            }
+            rv = getString(msg[5],"portId1",portId1);
+            if (rv == false)
+            {
+                mIpErrorCode = NTV2IpErrLLDPNotFound;
+                return false;
+            }
+            return true;
+        }
+        else if (rv && (status == "FAIL"))
+        {
+            if (msg.size() >= 3)
+            {
+                rv = getString(msg[2],"error",mIpInternalErrorString);
+                mIpErrorCode = NTV2IpErrLLDPNotFound;
+                return false;
+            }
+        }
+    }
+
+    mIpErrorCode = NTV2IpErrInvalidMBResponse;
+    return false;
+}
+
+bool CNTV2MBController::SetLLDPInfo(string sysName)
+{
+   if (!(getFeatures() & SAREK_MB_PRESENT))
+       return true;
+
+    bool rv = AcquireMailbox();
+    if (!rv) return false;
+
+    sprintf((char*)txBuf,"cmd=%d,sysName=%s", (int)MB_CMD_SET_LLDP_INFO,
+                                                            sysName.c_str());
+
+    rv = sendMsg(5000);
+    if (!rv)
+    {
+        ReleaseMailbox();
+        mIpErrorCode = NTV2IpErrNoResponseFromMB;
+        return false;
+    }
+
+    string response;
+    getResponse(response);
+    vector<string> msg;
+    splitResponse(response, msg);
+    if (msg.size() >=1)
+    {
+        string status;
+        rv = getString(msg[0],"status",status);
+        if (rv && (status == "OK"))
+        {
+            ReleaseMailbox();
+            return true;
+        }
+        else if (rv && (status == "FAIL"))
+        {
+            if (msg.size() >= 3)
+            {
+                rv = getString(msg[2],"error",mIpInternalErrorString);
+                mIpErrorCode = NTV2IpErrMBStatusFail;
+                ReleaseMailbox();
+                return false;
+            }
+        }
+    }
+
+    ReleaseMailbox();
+    mIpErrorCode = NTV2IpErrInvalidMBResponse;
+    return false;
+}
+

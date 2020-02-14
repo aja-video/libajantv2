@@ -1,7 +1,7 @@
 /**
 	@file		ntv2registerexpert.cpp
 	@brief		Implements the CNTV2RegisterExpert class.
-	@copyright	(C) 2016-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2016-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
  **/
 #include "ntv2registerexpert.h"
 #include "ntv2devicefeatures.h"
@@ -243,6 +243,7 @@ private:
 		DefineRegister (kRegCh1ControlExtended,	"",	mDecodeChannelControlExt,	READWRITE,	kRegClass_NULL,		kRegClass_Channel1,	kRegClass_NULL);
 		DefineRegister (kRegCh2ControlExtended,	"",	mDecodeChannelControlExt,	READWRITE,	kRegClass_NULL,		kRegClass_Channel2,	kRegClass_NULL);
 
+		DefineRegister (kRegCanDoStatus,		"",	mDecodeCanDoStatus,			READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegBitfileDate,		"",	mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegBitfileTime,		"",	mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegCPLDVersion,		"",	mDecodeCPLDVersion,			READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
@@ -541,6 +542,25 @@ private:
 		DefineXptReg	(kRegXptSelectGroup33,	NTV2_Xpt425Mux3AInput,			NTV2_Xpt425Mux3BInput,			NTV2_Xpt425Mux4AInput,			NTV2_Xpt425Mux4BInput);
 		DefineXptReg	(kRegXptSelectGroup34,	NTV2_XptFrameBuffer1BInput,		NTV2_XptFrameBuffer2BInput,		NTV2_XptFrameBuffer3BInput,		NTV2_XptFrameBuffer4BInput);
 		DefineXptReg	(kRegXptSelectGroup35,	NTV2_XptFrameBuffer5BInput,		NTV2_XptFrameBuffer6BInput,		NTV2_XptFrameBuffer7BInput,		NTV2_XptFrameBuffer8BInput);
+
+		//	Expose the CanConnect ROM registers:
+		for (ULWord regNum(kRegFirstValidXptROMRegister);  regNum < ULWord(kRegLastValidXptROMRegister);  regNum++)
+		{	ostringstream regName;	//	used to synthesize reg name
+			const ULWord rawInputXpt	((regNum - ULWord(kRegFirstValidXptROMRegister)) / 4UL + ULWord(NTV2_FIRST_INPUT_CROSSPOINT));
+			const ULWord ndx			((regNum - ULWord(kRegFirstValidXptROMRegister)) % 4UL);
+			const NTV2InputXptID inputXpt	(static_cast<NTV2InputXptID>(rawInputXpt));
+			if (NTV2_IS_VALID_InputCrosspointID(inputXpt))
+			{
+				string inputXptEnumName	(::NTV2InputCrosspointIDToString(inputXpt,false));	//	e.g. "NTV2_XptFrameBuffer1Input"
+				if (inputXptEnumName.empty())
+					regName << "kRegXptValid" << DEC0N(rawInputXpt,3) << "N" << DEC(ndx);
+				else
+					regName << "kRegXptValid" << aja::replace(inputXptEnumName, "NTV2_Xpt", "") << DEC(ndx);
+			}
+			else
+				regName << "kRegXptValue" << HEX0N(regNum,4);
+			DefineRegister (regNum, regName.str(),	mDecodeXptValidReg,	READONLY,	kRegClass_NULL,	kRegClass_NULL,	kRegClass_NULL);
+		}
 	}	//	SetupXptSelect
 	
 	void SetupAncInsExt(void)
@@ -1980,6 +2000,17 @@ private:
 		virtual	~DecodeBitfileDateTime()	{}
 	}	mDecodeBitfileDateTime;
 
+	struct DecodeCanDoStatus : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void) inRegNum;	(void) inDeviceID;
+			ostringstream	oss;
+			oss	<< "Has CanConnect Xpt Route ROM: "		<< YesNo(inRegValue & BIT(0));
+			return oss.str();
+		}
+		virtual	~DecodeCanDoStatus()	{}
+	}	mDecodeCanDoStatus;
+
 	struct DecodeVidControlReg : public Decoder		//	Bit31=Is16x9 | Bit30=IsMono
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -2907,6 +2938,53 @@ private:
 		virtual	~DecodeXptGroupReg()	{}
 	}	mDecodeXptGroupReg;
 	
+	struct DecodeXptValidReg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void) inDeviceID;
+			NTV2_ASSERT(inRegNum >= uint32_t(kRegFirstValidXptROMRegister)  &&  inRegNum < uint32_t(kRegInvalidValidXptROMRegister));
+			const ULWord rawInputXptID ((inRegNum - ULWord(kRegFirstValidXptROMRegister)) / 4UL + ULWord(NTV2_FIRST_INPUT_CROSSPOINT));	//	4 regs per inputXpt
+			const UWord outputXptShift (32U * UWord((inRegNum - ULWord(kRegFirstValidXptROMRegister)) % 4));	//	Num bits to shift for outputXpts
+			const NTV2InputXptID inputXpt (static_cast<NTV2InputXptID>(rawInputXptID));
+			ostringstream	oss;
+			if (NTV2_IS_VALID_InputCrosspointID(inputXpt))
+			{
+				NTV2WidgetID	widgetID (NTV2_WIDGET_INVALID);
+				CNTV2SignalRouter::GetWidgetForInput (inputXpt, widgetID, inDeviceID);
+				oss	<< "Input Crosspoint ID: "	<< DEC(rawInputXptID) << " (" << xHEX0N(rawInputXptID,2) << ")"		<< endl
+					<< "Enum: "					<< ::NTV2InputCrosspointIDToString(inputXpt, false)					<< endl
+					<< "Name: "					<< "'" << ::NTV2InputCrosspointIDToString(inputXpt, true) << "'"	<< endl;
+				if (NTV2_IS_VALID_WIDGET(widgetID))
+					oss	<< "Parent Widget Enum: "	<< ::NTV2WidgetIDToString(widgetID, false)							<< endl
+						<< "Widget ID:"				<< DEC(UWord(widgetID)) << " (" << xHEX0N(UWord(widgetID),4) << ")" << endl
+						<< "Widget Name: '"			<< ::NTV2WidgetIDToString(widgetID, true) << "'"					<< endl;
+				NTV2StringList	outputXptNames;
+				for (UWord bitNdx(0);  bitNdx < 32;  bitNdx++)
+					if (inRegValue & ULWord((1 << bitNdx)))
+					{
+						const ULWord rawOutputXptID (1 << (bitNdx + outputXptShift));
+						const NTV2OutputXptID YUVoutputXptID(static_cast<NTV2OutputXptID>(rawOutputXptID));
+						NTV2_ASSERT(NTV2_IS_VALID_OutputCrosspointID(YUVoutputXptID));
+						const NTV2OutputXptID RGBoutputXptID(static_cast<NTV2OutputXptID>(rawOutputXptID | 0x00000080));
+						NTV2_ASSERT(NTV2_IS_VALID_OutputCrosspointID(RGBoutputXptID));
+						const string YUVstr(::NTV2OutputCrosspointIDToString(YUVoutputXptID,true));
+						const string RGBstr(::NTV2OutputCrosspointIDToString(RGBoutputXptID,true));
+						ostringstream yuvName, rgbName;
+						if (!YUVstr.empty())
+							{yuvName << "'" << YUVstr << "'";	outputXptNames.push_back(yuvName.str());}
+						if (!RGBstr.empty())
+							{rgbName << "'" << RGBstr << "'";	outputXptNames.push_back(rgbName.str());}
+					}
+				if (!outputXptNames.empty())
+					oss << "Legal Output Connections: " << outputXptNames;
+				return oss.str();
+			}
+			else
+				return Decoder::operator()(inRegNum, inRegValue, inDeviceID);
+		}
+		virtual	~DecodeXptValidReg()	{}
+	}	mDecodeXptValidReg;
+
 	struct DecodeHDMIOutputControl : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const

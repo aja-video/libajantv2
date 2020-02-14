@@ -1,7 +1,7 @@
 /**
 	@file		guid.cpp
-	@copyright	Copyright (C) 2015 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Generates a new, unique UUID as an STL string.
+	@copyright	(C) 2015-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "guid.h"

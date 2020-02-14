@@ -1,7 +1,7 @@
 /**
 	@file		ancillarydata_hdr_sdr.h
 	@brief		Declares the AJAAncillaryData_HDR_SDR class.
-	@copyright	(C) 2012-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2012-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef AJA_ANCILLARYDATA_HDR_SDR_H

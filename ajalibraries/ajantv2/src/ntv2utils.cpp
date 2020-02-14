@@ -1,7 +1,7 @@
 /**
 	@file		ntv2utils.cpp
 	@brief		Implementations for the NTV2 utility functions.
-	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 #include "ajatypes.h"
 #include "ntv2utils.h"
@@ -211,13 +211,10 @@ void MakeUnPacked10BitYCbCrBuffer( uint16_t* buffer, uint16_t Y , uint16_t Cb , 
 
 // ConvertLineTo8BitYCbCr
 // 10 Bit YCbCr to 8 Bit YCbCr
-void ConvertLineTo8BitYCbCr(uint16_t * ycbcr10BitBuffer, uint8_t * ycbcr8BitBuffer,	uint32_t numPixels)
+void ConvertLineTo8BitYCbCr (const uint16_t * ycbcr10BitBuffer, uint8_t * ycbcr8BitBuffer,	const uint32_t numPixels)
 {
-	for ( uint32_t pixel=0;pixel<numPixels*2;pixel++)
-	{
-		ycbcr8BitBuffer[pixel] = ycbcr10BitBuffer[pixel]>>2;
-	}
-
+	for (uint32_t pixel(0);  pixel < numPixels * 2;  pixel++)
+		ycbcr8BitBuffer[pixel] = uint8_t(ycbcr10BitBuffer[pixel] >> 2);
 }
 
 //***********************************************************************************************************
@@ -239,36 +236,36 @@ void ConvertUnpacked10BitYCbCrToPixelFormat(uint16_t *unPackedBuffer, uint32_t *
 			break;
 
 		case NTV2_FBF_8BIT_YCBCR:
-			ConvertLineTo8BitYCbCr(unPackedBuffer,(uint8_t*)packedBuffer, numPixels);
+			ConvertLineTo8BitYCbCr(unPackedBuffer, reinterpret_cast<uint8_t*>(packedBuffer), numPixels);
 			break;
 		
 		case NTV2_FBF_ARGB:
-			ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD, bUseSmpteRange, bAlphaFromLuma);
+			ConvertLinetoRGB(unPackedBuffer, reinterpret_cast<RGBAlphaPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange, bAlphaFromLuma);
 			break;
 		
 		case NTV2_FBF_RGBA:
-			ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD, bUseSmpteRange, bAlphaFromLuma);
-			ConvertARGBYCbCrToRGBA((UByte*)packedBuffer,numPixels);
+			ConvertLinetoRGB(unPackedBuffer, reinterpret_cast<RGBAlphaPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange, bAlphaFromLuma);
+			ConvertARGBYCbCrToRGBA(reinterpret_cast<UByte*>(packedBuffer), numPixels);
 			break;
 			
 		case NTV2_FBF_10BIT_RGB:
-			ConvertLineto10BitRGB(unPackedBuffer,(RGBAlpha10BitPixel*)packedBuffer,numPixels, bIsSD, bUseSmpteRange);
-			PackRGB10BitFor10BitRGB((RGBAlpha10BitPixel*)packedBuffer,numPixels);
+			ConvertLineto10BitRGB(unPackedBuffer, reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange);
+			PackRGB10BitFor10BitRGB(reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels);
 			break;
 
 		case NTV2_FBF_8BIT_YCBCR_YUY2:
-			ConvertLineTo8BitYCbCr(unPackedBuffer,(uint8_t*)packedBuffer, numPixels);
-			Convert8BitYCbCrToYUY2((uint8_t*)packedBuffer, numPixels);
+			ConvertLineTo8BitYCbCr(unPackedBuffer, reinterpret_cast<uint8_t*>(packedBuffer), numPixels);
+			Convert8BitYCbCrToYUY2(reinterpret_cast<uint8_t*>(packedBuffer), numPixels);
 			break;
 			
 		case NTV2_FBF_ABGR:
-			ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD, bUseSmpteRange, bAlphaFromLuma);
-			ConvertARGBYCbCrToABGR((UByte*)packedBuffer,numPixels);
+			ConvertLinetoRGB(unPackedBuffer, reinterpret_cast<RGBAlphaPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange, bAlphaFromLuma);
+			ConvertARGBYCbCrToABGR(reinterpret_cast<uint8_t*>(packedBuffer), numPixels);
 			break;
 			
 		case NTV2_FBF_10BIT_DPX:
-			ConvertLineto10BitRGB(unPackedBuffer,(RGBAlpha10BitPixel*)packedBuffer,numPixels, bIsSD, bUseSmpteRange);
-			PackRGB10BitFor10BitDPX((RGBAlpha10BitPixel*)packedBuffer,numPixels);
+			ConvertLineto10BitRGB(unPackedBuffer, reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange);
+			PackRGB10BitFor10BitDPX(reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels);
 			break;
 
 		case NTV2_FBF_10BIT_YCBCR_DPX:
@@ -276,33 +273,33 @@ void ConvertUnpacked10BitYCbCrToPixelFormat(uint16_t *unPackedBuffer, uint32_t *
 			break;
 
 		case NTV2_FBF_24BIT_RGB:
-			ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD, bUseSmpteRange);
-			ConvertARGBToRGB((UByte*)packedBuffer, (UByte*)packedBuffer, numPixels);
+			ConvertLinetoRGB(unPackedBuffer,reinterpret_cast<RGBAlphaPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange);
+			ConvertARGBToRGB(reinterpret_cast<UByte*>(packedBuffer), reinterpret_cast<UByte*>(packedBuffer), numPixels);
 			break;
 
 		case NTV2_FBF_24BIT_BGR:
-			ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD, bUseSmpteRange);
-			ConvertARGBToBGR((UByte*)packedBuffer, (UByte*)packedBuffer, numPixels);
+			ConvertLinetoRGB(unPackedBuffer,reinterpret_cast<RGBAlphaPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange);
+			ConvertARGBToBGR(reinterpret_cast<UByte*>(packedBuffer), reinterpret_cast<UByte*>(packedBuffer), numPixels);
 			break;
 
         case NTV2_FBF_10BIT_DPX_LE:
-			ConvertLineto10BitRGB(unPackedBuffer,(RGBAlpha10BitPixel*)packedBuffer,numPixels, bIsSD, bUseSmpteRange);
-			PackRGB10BitFor10BitDPX((RGBAlpha10BitPixel*)packedBuffer,numPixels, false);
+			ConvertLineto10BitRGB(unPackedBuffer, reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange);
+			PackRGB10BitFor10BitDPX(reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels, false);
 			break;
 
 		case NTV2_FBF_48BIT_RGB:
-			ConvertLineto16BitRGB(unPackedBuffer, (RGBAlpha16BitPixel*)packedBuffer, numPixels, bIsSD, bUseSmpteRange);
-			Convert16BitARGBTo16BitRGB((RGBAlpha16BitPixel*)packedBuffer, (UWord*)packedBuffer, numPixels);
+			ConvertLineto16BitRGB(unPackedBuffer, reinterpret_cast<RGBAlpha16BitPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange);
+			Convert16BitARGBTo16BitRGB(reinterpret_cast<RGBAlpha16BitPixel*>(packedBuffer), reinterpret_cast<UWord*>(packedBuffer), numPixels);
 			break;
 
 		case NTV2_FBF_10BIT_RGB_PACKED:
-			ConvertLineto10BitRGB(unPackedBuffer, (RGBAlpha10BitPixel*)packedBuffer, numPixels, bIsSD, bUseSmpteRange);
-			PackRGB10BitFor10BitRGBPacked((RGBAlpha10BitPixel*)packedBuffer, numPixels);
+			ConvertLineto10BitRGB(unPackedBuffer, reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange);
+			PackRGB10BitFor10BitRGBPacked(reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels);
 			break;
 			
 		case NTV2_FBF_12BIT_RGB_PACKED:
-			ConvertLineto16BitRGB(unPackedBuffer, (RGBAlpha16BitPixel*)packedBuffer, numPixels, bIsSD, bUseSmpteRange);
-			Convert16BitARGBTo12BitRGBPacked((RGBAlpha16BitPixel*)packedBuffer, (UByte*)packedBuffer, numPixels);
+			ConvertLineto16BitRGB(unPackedBuffer, reinterpret_cast<RGBAlpha16BitPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange);
+			Convert16BitARGBTo12BitRGBPacked(reinterpret_cast<RGBAlpha16BitPixel*>(packedBuffer), reinterpret_cast<UByte*>(packedBuffer), numPixels);
 			break;
 	#if defined(_DEBUG)
 		case NTV2_FBF_8BIT_DVCPRO:
@@ -597,12 +594,12 @@ bool YUVComponentsTo10BitYUVPackedBuffer (const vector<uint16_t> & inYCbCrLine, 
 		return false;	//	Not 'v210' pixel format
 
 	const uint32_t	pixPerLineX2	(inDescriptor.GetRasterWidth() * 2);
-	uint32_t *		pOutPackedLine	(NULL);
+	uint32_t *		pOutPackedLine	(AJA_NULL);
 	if (inFrameBuffer.GetByteCount() < inDescriptor.GetBytesPerRow() * ULWord(inLineOffset+1))
 		return false;	//	Buffer too small
 
-	pOutPackedLine = (uint32_t*) inDescriptor.GetWriteableRowAddress(inFrameBuffer.GetHostAddress(0), inLineOffset);
-	if (pOutPackedLine == NULL)
+	pOutPackedLine = reinterpret_cast<uint32_t*>(inDescriptor.GetWriteableRowAddress(inFrameBuffer.GetHostAddress(0), inLineOffset));
+	if (pOutPackedLine == AJA_NULL)
 		return false;	//	Buffer too small
 
 	for (uint32_t inputCount = 0, outputCount = 0;   inputCount < pixPerLineX2;   outputCount += 4, inputCount += 12)
@@ -664,16 +661,16 @@ void RePackLineDataForYCbCrDPX(ULWord *packedycbcrLine, ULWord numULWords )
 	}
 }
 // UnPack 10 Bit DPX Format linebuffer to RGBAlpha10BitPixel linebuffer.
-void UnPack10BitDPXtoRGBAlpha10BitPixel(RGBAlpha10BitPixel* rgba10BitBuffer,ULWord* DPXLinebuffer ,ULWord numPixels, bool bigEndian)
+void UnPack10BitDPXtoRGBAlpha10BitPixel(RGBAlpha10BitPixel* rgba10BitBuffer, const ULWord* DPXLinebuffer ,ULWord numPixels, bool bigEndian)
 {
 	for ( ULWord pixel=0;pixel<numPixels;pixel++)
 	{
 		ULWord value = DPXLinebuffer[pixel];
 		if ( bigEndian)
 		{
-			rgba10BitBuffer[pixel].Red = ((value&0xC0)>>14) + ((value&0xFF)<<2);
-			rgba10BitBuffer[pixel].Green = ((value&0x3F00)>>4) + ((value&0xF00000)>>20);
-			rgba10BitBuffer[pixel].Blue = ((value&0xFC000000)>>26) + ((value&0xF0000)>>12);
+			rgba10BitBuffer[pixel].Red = UWord((value&0xC0)>>14) + UWord((value&0xFF)<<2);
+			rgba10BitBuffer[pixel].Green = UWord((value&0x3F00)>>4) + UWord((value&0xF00000)>>20);
+			rgba10BitBuffer[pixel].Blue = UWord((value&0xFC000000)>>26) + UWord((value&0xF0000)>>12);
 		}
 		else
 		{
@@ -782,35 +779,35 @@ void MaskYCbCrLine(UWord* ycbcrLine, UWord signalMask , ULWord numPixels)
 
 }
 
-void Make10BitBlackLine (UWord * pOutLineData, const UWord inNumPixels)
+void Make10BitBlackLine (UWord * pOutLineData, const ULWord inNumPixels)
 {
 	// Assume 1080 format
-	for (UWord count(0);  count < inNumPixels*2;  count+=2)
+	for (ULWord count(0);  count < inNumPixels*2;  count+=2)
 	{
 		pOutLineData[count]   = UWord(CCIR601_10BIT_CHROMAOFFSET);
 		pOutLineData[count+1] = UWord(CCIR601_10BIT_BLACK);
 	}
 }
 
-void Make10BitWhiteLine(UWord* lineData,UWord numPixels)
+void Make10BitWhiteLine (UWord* pOutLineData, const ULWord inNumPixels)
 {
 	// assumes lineData is large enough for numPixels
-	for ( int count = 0; count < numPixels*2; count+=2 )
+	for (ULWord count(0);  count < inNumPixels*2;  count+=2)
 	{
-		lineData[count] = (UWord)CCIR601_10BIT_CHROMAOFFSET;
-		lineData[count+1] = (UWord)CCIR601_10BIT_WHITE;
+		pOutLineData[count] = UWord(CCIR601_10BIT_CHROMAOFFSET);
+		pOutLineData[count+1] = UWord(CCIR601_10BIT_WHITE);
 	}
 }
 
-void Make10BitLine(UWord* lineData, UWord Y , UWord Cb , UWord Cr,UWord numPixels)
+void Make10BitLine (UWord* pOutLineData, const UWord Y, const UWord Cb, const UWord Cr, const ULWord inNumPixels)
 {
 	// assumes lineData is large enough for numPixels
-	for ( int count = 0; count < numPixels*2; count+=4 )
+	for (ULWord count(0);  count < inNumPixels*2;  count+=4)
 	{
-		lineData[count] = Cb;
-		lineData[count+1] = Y;
-		lineData[count+2] = Cr;
-		lineData[count+3] = Y;
+		pOutLineData[count] = Cb;
+		pOutLineData[count+1] = Y;
+		pOutLineData[count+2] = Cr;
+		pOutLineData[count+3] = Y;
 	}
 }
 
@@ -846,11 +843,11 @@ bool Fill10BitYCbCrVideoFrame (void * pBaseVideoAddress,
 	const NTV2FormatDescriptor fd (inStandard, inFBF, inVancMode);
 	UWord		lineBuffer[2048*2];
 	ULWord *	pBaseAddress	(reinterpret_cast<ULWord*>(pBaseVideoAddress));
-	Make10BitLine (lineBuffer, inPixelColor.y, inPixelColor.cb, inPixelColor.cr, fd.numPixels);
+	Make10BitLine (lineBuffer, inPixelColor.y, inPixelColor.cb, inPixelColor.cr, UWord(fd.GetRasterWidth()));
 
 	for (UWord lineNdx(0);  lineNdx < fd.numLines;  lineNdx++)
 	{
-		::PackLine_16BitYUVto10BitYUV (lineBuffer, pBaseAddress, fd.numPixels);
+		::PackLine_16BitYUVto10BitYUV (lineBuffer, pBaseAddress, fd.GetRasterWidth());
 		pBaseAddress += fd.linePitch;
 	}
 	return true;
@@ -864,8 +861,8 @@ void Make8BitBlackLine(UByte* lineData,UWord numPixels,NTV2FrameBufferFormat fbF
 	{
 		for ( int count = 0; count < numPixels*2; count+=2 )
 		{
-			lineData[count] = (UWord)CCIR601_8BIT_CHROMAOFFSET;
-			lineData[count+1] = (UWord)CCIR601_8BIT_BLACK;
+			lineData[count] = UWord(CCIR601_8BIT_CHROMAOFFSET);
+			lineData[count+1] = UWord(CCIR601_8BIT_BLACK);
 		}
 	}
 	else
@@ -873,8 +870,8 @@ void Make8BitBlackLine(UByte* lineData,UWord numPixels,NTV2FrameBufferFormat fbF
 		// NTV2_FBF_8BIT_YCBCR_YUY2
 		for ( int count = 0; count < numPixels*2; count+=2 )
 		{
-			lineData[count] = (UWord)CCIR601_8BIT_BLACK;
-			lineData[count+1] = (UWord)CCIR601_8BIT_CHROMAOFFSET;
+			lineData[count] = UWord(CCIR601_8BIT_BLACK);
+			lineData[count+1] = UWord(CCIR601_8BIT_CHROMAOFFSET);
 		}
 	}
 }
@@ -887,8 +884,8 @@ void Make8BitWhiteLine(UByte* lineData,UWord numPixels,NTV2FrameBufferFormat fbF
 	{
 		for ( int count = 0; count < numPixels*2; count+=2 )
 		{
-			lineData[count] = (UWord)CCIR601_8BIT_CHROMAOFFSET;
-			lineData[count+1] = (UWord)CCIR601_8BIT_WHITE;
+			lineData[count] = UWord(CCIR601_8BIT_CHROMAOFFSET);
+			lineData[count+1] = UWord(CCIR601_8BIT_WHITE);
 		}
 	}
 	else
@@ -896,8 +893,8 @@ void Make8BitWhiteLine(UByte* lineData,UWord numPixels,NTV2FrameBufferFormat fbF
 		// NTV2_FBF_8BIT_YCBCR_YUY2
 		for ( int count = 0; count < numPixels*2; count+=2 )
 		{
-			lineData[count] = (UWord)CCIR601_8BIT_WHITE;
-			lineData[count+1] = (UWord)CCIR601_8BIT_CHROMAOFFSET;
+			lineData[count] = UWord(CCIR601_8BIT_WHITE);
+			lineData[count+1] = UWord(CCIR601_8BIT_CHROMAOFFSET);
 		}
 	}
 
@@ -991,7 +988,7 @@ void Fill4k8BitYCbCrVideoFrame(PULWord _baseVideoAddress,
 		fd.linePitch = 3840*2/4;
 	}
 
-	Make8BitLine((UByte*)_baseVideoAddress,color.y,color.cb,color.cr,fd.numPixels*fd.numLines,frameBufferFormat);
+	Make8BitLine(reinterpret_cast<UByte*>(_baseVideoAddress), color.y, color.cb, color.cr, fd.numPixels*fd.numLines, frameBufferFormat);
 }
 
 
@@ -1055,14 +1052,15 @@ void CopyRGBAImageToFrame(ULWord* pSrcBuffer, ULWord srcWidth, ULWord srcHeight,
 
 
 static bool SetRasterLinesBlack8BitYCbCr (UByte *			pDstBuffer,
-											const UWord		inDstBytesPerLine,
+											const ULWord		inDstBytesPerLine,
 											const UWord		inDstTotalLines)
 {
-	const UWord	dstMaxPixelWidth	(inDstBytesPerLine / 2);	//	2 bytes per pixel for '2vuy'
-	UByte *		pLine				(pDstBuffer);
-	for (UWord lineNum (0);  lineNum < inDstTotalLines;  lineNum++)
+	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / 2);	//	2 bytes per pixel for '2vuy'
+	UByte *			pLine				(pDstBuffer);
+	NTV2_ASSERT(dstMaxPixelWidth < 64UL*1024UL);	//	Because Make8BitBlackLine takes uint16_t pixelWidth
+	for (UWord lineNum(0);  lineNum < inDstTotalLines;  lineNum++)
 	{
-		::Make8BitBlackLine (pLine, dstMaxPixelWidth);
+		::Make8BitBlackLine (pLine, UWord(dstMaxPixelWidth));
 		pLine += inDstBytesPerLine;
 	}
 	return true;
@@ -1070,10 +1068,10 @@ static bool SetRasterLinesBlack8BitYCbCr (UByte *			pDstBuffer,
 
 
 static bool SetRasterLinesBlack10BitYCbCr (UByte *			pDstBuffer,
-											const UWord		inDstBytesPerLine,
+											const ULWord		inDstBytesPerLine,
 											const UWord		inDstTotalLines)
 {
-	const UWord	dstMaxPixelWidth	(inDstBytesPerLine / 16 * 6);
+	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / 16 * 6);
 	UByte *		pLine				(pDstBuffer);
 	for (UWord lineNum (0);  lineNum < inDstTotalLines;  lineNum++)
 	{
@@ -1089,12 +1087,12 @@ static bool SetRasterLinesBlack10BitYCbCr (UByte *			pDstBuffer,
 
 static bool SetRasterLinesBlack8BitRGBs (const NTV2FrameBufferFormat	inPixelFormat,
 											UByte *						pDstBuffer,
-											const UWord					inDstBytesPerLine,
+											const ULWord					inDstBytesPerLine,
 											const UWord					inDstTotalLines,
 											const bool					inIsSD	= false)
 {
 	UByte *			pLine				(pDstBuffer);
-	const UWord		dstMaxPixelWidth	(inDstBytesPerLine / 4);	//	4 bytes per pixel
+	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / 4);	//	4 bytes per pixel
 	YCbCrAlphaPixel	YCbCr = {0 /*Alpha*/,	44/*cr*/,	10/*Y*/,	44/*cb*/};
 	RGBAlphaPixel	rgb;
 	if (inIsSD)
@@ -1103,13 +1101,13 @@ static bool SetRasterLinesBlack8BitRGBs (const NTV2FrameBufferFormat	inPixelForm
 		::HDConvertYCbCrtoRGBSmpte (&YCbCr, &rgb);
 
 	//	Set the first line...
-	for (UWord pixNum (0);  pixNum < dstMaxPixelWidth;  pixNum++)
+	for (ULWord pixNum (0);  pixNum < dstMaxPixelWidth;  pixNum++)
 	{
 		switch (inPixelFormat)
 		{
-			case NTV2_FBF_ARGB:	pLine [0] = rgb.Alpha;	pLine [0] = rgb.Red;	pLine [0] = rgb.Green;	pLine [0] = rgb.Blue;	break;
-			case NTV2_FBF_RGBA:	pLine [0] = rgb.Red;	pLine [0] = rgb.Green;	pLine [0] = rgb.Blue;	pLine [0] = rgb.Alpha;	break;
-			case NTV2_FBF_ABGR:	pLine [0] = rgb.Alpha;	pLine [0] = rgb.Blue;	pLine [0] = rgb.Green;	pLine [0] = rgb.Red;	break;
+			case NTV2_FBF_ARGB:	pLine[0] = rgb.Alpha;	pLine[0] = rgb.Red;		pLine[0] = rgb.Green;	pLine[0] = rgb.Blue;	break;
+			case NTV2_FBF_RGBA:	pLine[0] = rgb.Red;		pLine[0] = rgb.Green;	pLine[0] = rgb.Blue;	pLine[0] = rgb.Alpha;	break;
+			case NTV2_FBF_ABGR:	pLine[0] = rgb.Alpha;	pLine[0] = rgb.Blue;	pLine[0] = rgb.Green;	pLine[0] = rgb.Red;		break;
 			default:			return false;
 		}
 		pLine += 4;		//	4 bytes per pixel
@@ -1127,21 +1125,21 @@ static bool SetRasterLinesBlack8BitRGBs (const NTV2FrameBufferFormat	inPixelForm
 
 
 static bool SetRasterLinesBlack10BitRGB (UByte *			pDstBuffer,
-											const UWord		inDstBytesPerLine,
+											const ULWord		inDstBytesPerLine,
 											const UWord		inDstTotalLines,
 											const bool		inIsSD	= false)
 {
 	UByte *			pLine				(pDstBuffer + inDstBytesPerLine);
 	ULWord *		pPixels				(reinterpret_cast <ULWord *> (pDstBuffer));
-	const UWord		dstMaxPixelWidth	(inDstBytesPerLine / 4);	//	4 bytes per pixel
+	const ULWord		dstMaxPixelWidth	(inDstBytesPerLine / 4);	//	4 bytes per pixel
 	ULWord			blackOpaque			(0xC0400004);	(void) inIsSD;	//	For now
 
 	//	Set the first line...
-	for (UWord pixNum (0);  pixNum < dstMaxPixelWidth;  pixNum++)
-		pPixels [pixNum] = blackOpaque;
+	for (ULWord pixNum(0);  pixNum < dstMaxPixelWidth;  pixNum++)
+		pPixels[pixNum] = blackOpaque;
 
 	//	Set the rest...
-	for (UWord lineNum (1);  lineNum < inDstTotalLines;  lineNum++)
+	for (UWord lineNum(1);  lineNum < inDstTotalLines;  lineNum++)
 	{
 		::memcpy (pLine, pDstBuffer, inDstBytesPerLine);
 		pLine += inDstBytesPerLine;
@@ -1152,7 +1150,7 @@ static bool SetRasterLinesBlack10BitRGB (UByte *			pDstBuffer,
 
 bool SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 							UByte *						pDstBuffer,
-							const UWord					inDstBytesPerLine,
+							const ULWord					inDstBytesPerLine,
 							const UWord					inDstTotalLines)
 {
 	if (!pDstBuffer)					//	NULL buffer
@@ -1208,36 +1206,36 @@ bool SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 }	//	SetRasterLinesBlack
 
 
-static const UByte * GetReadAddress_2vuy (const UByte * pInFrameBuffer, const UWord inBytesPerVertLine, const UWord inVertLineOffset, const UWord inHorzPixelOffset, const UWord inBytesPerHorzPixel)
+static const UByte * GetReadAddress_2vuy (const UByte * pInFrameBuffer, const ULWord inBytesPerVertLine, const UWord inVertLineOffset, const UWord inHorzPixelOffset, const UWord inBytesPerHorzPixel)
 {
 	const UByte *	pResult	(pInFrameBuffer);
 	NTV2_ASSERT (inBytesPerVertLine);
 	NTV2_ASSERT ((inHorzPixelOffset & 1) == 0);	//	For '2vuy', horizontal pixel offset must be even!!
-	pResult += inBytesPerVertLine * inVertLineOffset;
-	pResult += inBytesPerHorzPixel * inHorzPixelOffset;
+	pResult += inBytesPerVertLine * ULWord(inVertLineOffset);
+	pResult += ULWord(inBytesPerHorzPixel) * ULWord(inHorzPixelOffset);
 	return pResult;
 }
 
 
-static UByte * GetWriteAddress_2vuy (UByte * pInFrameBuffer, const UWord inBytesPerVertLine, const UWord inVertLineOffset, const UWord inHorzPixelOffset, const UWord inBytesPerHorzPixel)
+static UByte * GetWriteAddress_2vuy (UByte * pInFrameBuffer, const ULWord inBytesPerVertLine, const UWord inVertLineOffset, const UWord inHorzPixelOffset, const UWord inBytesPerHorzPixel)
 {
 	UByte *	pResult	(pInFrameBuffer);
 	NTV2_ASSERT (inBytesPerVertLine);
 	NTV2_ASSERT ((inHorzPixelOffset & 1) == 0);	//	For '2vuy', horizontal pixel offset must be even!!
-	pResult += inBytesPerVertLine * inVertLineOffset;
-	pResult += inBytesPerHorzPixel * inHorzPixelOffset;
+	pResult += inBytesPerVertLine * ULWord(inVertLineOffset);
+	pResult += ULWord(inBytesPerHorzPixel) * ULWord(inHorzPixelOffset);
 	return pResult;
 }
 
 
 //	This function should work on all 4-byte-per-2-pixel formats
 static bool CopyRaster4BytesPer2Pixels (UByte *			pDstBuffer,				//	Dest buffer to be modified
-										const UWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
+										const ULWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
 										const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
 										const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
 										const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear
 										const UByte *	pSrcBuffer,				//	Src buffer
-										const UWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
+										const ULWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
 										const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
 										const UWord		inSrcVertLineOffset,	//	Src image top edge
 										const UWord		inSrcVertLinesToCopy,	//	Src image height
@@ -1249,9 +1247,9 @@ static bool CopyRaster4BytesPer2Pixels (UByte *			pDstBuffer,				//	Dest buffer 
 	if (inSrcHorzPixelOffset & 1)					//	src odd pixel offset
 		return false;
 
-	const UWord	TWO_BYTES_PER_PIXEL	(2);			//	2 bytes per pixel for '2vuy'
-	const UWord	dstMaxPixelWidth	(inDstBytesPerLine / TWO_BYTES_PER_PIXEL);
-	const UWord	srcMaxPixelWidth	(inSrcBytesPerLine / TWO_BYTES_PER_PIXEL);
+	const ULWord	TWO_BYTES_PER_PIXEL	(2);			//	2 bytes per pixel for '2vuy'
+	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / TWO_BYTES_PER_PIXEL);
+	const ULWord	srcMaxPixelWidth	(inSrcBytesPerLine / TWO_BYTES_PER_PIXEL);
 	UWord		numHorzPixelsToCopy	(inSrcHorzPixelsToCopy);
 	UWord		numVertLinesToCopy	(inSrcVertLinesToCopy);
 
@@ -1301,12 +1299,12 @@ static bool CopyRaster4BytesPer2Pixels (UByte *			pDstBuffer,				//	Dest buffer 
 
 //	This function should work on all 16-byte-per-6-pixel formats
 static bool CopyRaster16BytesPer6Pixels (	UByte *			pDstBuffer,				//	Dest buffer to be modified
-											const UWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width) -- must be evenly divisible by 16
+											const ULWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width) -- must be evenly divisible by 16
 											const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
 											const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
 											const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear -- must be evenly divisible by 6
 											const UByte *	pSrcBuffer,				//	Src buffer
-											const UWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width) -- must be evenly divisible by 16
+											const ULWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width) -- must be evenly divisible by 16
 											const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
 											const UWord		inSrcVertLineOffset,	//	Src image top edge
 											const UWord		inSrcVertLinesToCopy,	//	Src image height
@@ -1324,9 +1322,9 @@ static bool CopyRaster16BytesPer6Pixels (	UByte *			pDstBuffer,				//	Dest buffe
 	if (inSrcHorzPixelsToCopy % 6)		//	pixel width of src image portion to copy must be on 6-pixel boundary
 		return false;
 
-	const UWord	dstMaxPixelWidth	(inDstBytesPerLine / 16 * 6);
-	const UWord	srcMaxPixelWidth	(inSrcBytesPerLine / 16 * 6);
-	UWord		numHorzPixelsToCopy	(inSrcHorzPixelsToCopy);
+	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / 16 * 6);
+	const ULWord	srcMaxPixelWidth	(inSrcBytesPerLine / 16 * 6);
+	ULWord		numHorzPixelsToCopy	(inSrcHorzPixelsToCopy);
 	UWord		numVertLinesToCopy	(inSrcVertLinesToCopy);
 
 	if (inDstHorzPixelOffset >= dstMaxPixelWidth)	//	dst past right edge
@@ -1362,12 +1360,12 @@ static bool CopyRaster16BytesPer6Pixels (	UByte *			pDstBuffer,				//	Dest buffe
 
 //	This function should work on all 20-byte-per-16-pixel formats
 static bool CopyRaster20BytesPer16Pixels (	UByte *			pDstBuffer,				//	Dest buffer to be modified
-											const UWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
+											const ULWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
 											const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
 											const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
 											const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear
 											const UByte *	pSrcBuffer,				//	Src buffer
-											const UWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
+											const ULWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
 											const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
 											const UWord		inSrcVertLineOffset,	//	Src image top edge
 											const UWord		inSrcVertLinesToCopy,	//	Src image height
@@ -1385,9 +1383,9 @@ static bool CopyRaster20BytesPer16Pixels (	UByte *			pDstBuffer,				//	Dest buff
 	if (inSrcHorzPixelsToCopy % 16)		//	pixel width of src image portion to copy must be on 16-pixel boundary
 		return false;
 
-	const UWord	dstMaxPixelWidth	(inDstBytesPerLine / 20 * 16);
-	const UWord	srcMaxPixelWidth	(inSrcBytesPerLine / 20 * 16);
-	UWord		numHorzPixelsToCopy	(inSrcHorzPixelsToCopy);
+	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / 20 * 16);
+	const ULWord	srcMaxPixelWidth	(inSrcBytesPerLine / 20 * 16);
+	ULWord		numHorzPixelsToCopy	(inSrcHorzPixelsToCopy);
 	UWord		numVertLinesToCopy	(inSrcVertLinesToCopy);
 
 	if (inDstHorzPixelOffset >= dstMaxPixelWidth)	//	dst past right edge
@@ -1422,12 +1420,12 @@ static bool CopyRaster20BytesPer16Pixels (	UByte *			pDstBuffer,				//	Dest buff
 
 //	This function should work on all 36-byte-per-8-pixel formats
 static bool CopyRaster36BytesPer8Pixels (	UByte *			pDstBuffer,				//	Dest buffer to be modified
-											const UWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
+											const ULWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
 											const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
 											const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
 											const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear
 											const UByte *	pSrcBuffer,				//	Src buffer
-											const UWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
+											const ULWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
 											const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
 											const UWord		inSrcVertLineOffset,	//	Src image top edge
 											const UWord		inSrcVertLinesToCopy,	//	Src image height
@@ -1445,9 +1443,9 @@ static bool CopyRaster36BytesPer8Pixels (	UByte *			pDstBuffer,				//	Dest buffe
 	if (inSrcHorzPixelsToCopy % 8)		//	pixel width of src image portion to copy must be on 16-pixel boundary
 		return false;
 
-	const UWord	dstMaxPixelWidth	(inDstBytesPerLine / 36 * 8);
-	const UWord	srcMaxPixelWidth	(inSrcBytesPerLine / 36 * 8);
-	UWord		numHorzPixelsToCopy	(inSrcHorzPixelsToCopy);
+	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / 36 * 8);
+	const ULWord	srcMaxPixelWidth	(inSrcBytesPerLine / 36 * 8);
+	ULWord		numHorzPixelsToCopy	(inSrcHorzPixelsToCopy);
 	UWord		numVertLinesToCopy	(inSrcVertLinesToCopy);
 
 	if (inDstHorzPixelOffset >= dstMaxPixelWidth)	//	dst past right edge
@@ -1483,12 +1481,12 @@ static bool CopyRaster36BytesPer8Pixels (	UByte *			pDstBuffer,				//	Dest buffe
 
 //	This function should work on all 4-byte-per-pixel formats
 static bool CopyRaster4BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer to be modified
-										const UWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
+										const ULWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
 										const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
 										const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
 										const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear -- must be evenly divisible by 6
 										const UByte *	pSrcBuffer,				//	Src buffer
-										const UWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
+										const ULWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
 										const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
 										const UWord		inSrcVertLineOffset,	//	Src image top edge
 										const UWord		inSrcVertLinesToCopy,	//	Src image height
@@ -1502,9 +1500,9 @@ static bool CopyRaster4BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer t
 	if (inSrcBytesPerLine % FOUR_BYTES_PER_PIXEL)	//	src raster width (in bytes) must be evenly divisible by 4
 		return false;
 
-	const UWord	dstMaxPixelWidth	(inDstBytesPerLine / FOUR_BYTES_PER_PIXEL);
-	const UWord	srcMaxPixelWidth	(inSrcBytesPerLine / FOUR_BYTES_PER_PIXEL);
-	UWord		numHorzPixelsToCopy	(inSrcHorzPixelsToCopy);
+	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / FOUR_BYTES_PER_PIXEL);
+	const ULWord	srcMaxPixelWidth	(inSrcBytesPerLine / FOUR_BYTES_PER_PIXEL);
+	ULWord		numHorzPixelsToCopy	(inSrcHorzPixelsToCopy);
 	UWord		numVertLinesToCopy	(inSrcVertLinesToCopy);
 
 	if (inDstHorzPixelOffset >= dstMaxPixelWidth)	//	dst past right edge
@@ -1539,12 +1537,12 @@ static bool CopyRaster4BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer t
 
 //	This function should work on all 3-byte-per-pixel formats
 static bool CopyRaster3BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer to be modified
-										const UWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
+										const ULWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
 										const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
 										const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
 										const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear -- must be evenly divisible by 6
 										const UByte *	pSrcBuffer,				//	Src buffer
-										const UWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
+										const ULWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
 										const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
 										const UWord		inSrcVertLineOffset,	//	Src image top edge
 										const UWord		inSrcVertLinesToCopy,	//	Src image height
@@ -1558,9 +1556,9 @@ static bool CopyRaster3BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer t
 	if (inSrcBytesPerLine % THREE_BYTES_PER_PIXEL)	//	src raster width (in bytes) must be evenly divisible by 3
 		return false;
 
-	const UWord	dstMaxPixelWidth	(inDstBytesPerLine / THREE_BYTES_PER_PIXEL);
-	const UWord	srcMaxPixelWidth	(inSrcBytesPerLine / THREE_BYTES_PER_PIXEL);
-	UWord		numHorzPixelsToCopy	(inSrcHorzPixelsToCopy);
+	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / THREE_BYTES_PER_PIXEL);
+	const ULWord	srcMaxPixelWidth	(inSrcBytesPerLine / THREE_BYTES_PER_PIXEL);
+	ULWord		numHorzPixelsToCopy	(inSrcHorzPixelsToCopy);
 	UWord		numVertLinesToCopy	(inSrcVertLinesToCopy);
 
 	if (inDstHorzPixelOffset >= dstMaxPixelWidth)	//	dst past right edge
@@ -1595,12 +1593,12 @@ static bool CopyRaster3BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer t
 
 //	This function should work on all 6-byte-per-pixel formats
 static bool CopyRaster6BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer to be modified
-										const UWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
+										const ULWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
 										const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
 										const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
 										const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear -- must be evenly divisible by 6
 										const UByte *	pSrcBuffer,				//	Src buffer
-										const UWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
+										const ULWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
 										const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
 										const UWord		inSrcVertLineOffset,	//	Src image top edge
 										const UWord		inSrcVertLinesToCopy,	//	Src image height
@@ -1614,9 +1612,9 @@ static bool CopyRaster6BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer t
 	if (inSrcBytesPerLine % SIX_BYTES_PER_PIXEL)	//	src raster width (in bytes) must be evenly divisible by 6
 		return false;
 
-	const UWord	dstMaxPixelWidth	(inDstBytesPerLine / SIX_BYTES_PER_PIXEL);
-	const UWord	srcMaxPixelWidth	(inSrcBytesPerLine / SIX_BYTES_PER_PIXEL);
-	UWord		numHorzPixelsToCopy	(inSrcHorzPixelsToCopy);
+	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / SIX_BYTES_PER_PIXEL);
+	const ULWord	srcMaxPixelWidth	(inSrcBytesPerLine / SIX_BYTES_PER_PIXEL);
+	ULWord		numHorzPixelsToCopy	(inSrcHorzPixelsToCopy);
 	UWord		numVertLinesToCopy	(inSrcVertLinesToCopy);
 
 	if (inDstHorzPixelOffset >= dstMaxPixelWidth)	//	dst past right edge
@@ -1651,12 +1649,12 @@ static bool CopyRaster6BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer t
 
 bool CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,			//	Pixel format of both src and dst buffers
 				UByte *							pDstBuffer,				//	Dest buffer to be modified
-				const UWord						inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
+				const ULWord						inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
 				const UWord						inDstTotalLines,		//	Dest buffer total lines in raster (max height)
 				const UWord						inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
 				const UWord						inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear
 				const UByte *					pSrcBuffer,				//	Src buffer
-				const UWord						inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
+				const ULWord						inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
 				const UWord						inSrcTotalLines,		//	Src buffer total lines in raster (max height)
 				const UWord						inSrcVertLineOffset,	//	Src image top edge
 				const UWord						inSrcVertLinesToCopy,	//	Src image height
@@ -3494,8 +3492,8 @@ NTV2FrameRate GetFrameRateFromScale(long scale, long duration, NTV2FrameRate pla
 	}
 	else
 	{
-		float scaleFloat = scale / duration * (float)100.0;
-		long scaleInt = (long) scaleFloat;
+		float scaleFloat = scale / duration * float(100.0);
+		long scaleInt = long(scaleFloat);
 
 		// In this case we need to derive the sequence rate based on scale, duration and what
 		// our playback rate is.  So first we break down what we might expect based on our
@@ -4150,7 +4148,7 @@ bool NTV2DeviceCanDoFormat(NTV2DeviceID		inDeviceID,
 
 	const NTV2FrameGeometry	fg	(::GetNormalizedFrameGeometry(inFrameGeometry));
 	//	Look for a video format that matches the given frame rate, geometry and standard...
-	for (NTV2VideoFormat vFmt((NTV2VideoFormat)NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT);  vFmt < NTV2_MAX_NUM_VIDEO_FORMATS;  vFmt = NTV2VideoFormat(vFmt+1))
+	for (NTV2VideoFormat vFmt(NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT);  vFmt < NTV2_MAX_NUM_VIDEO_FORMATS;  vFmt = NTV2VideoFormat(vFmt+1))
 	{
 		if (!NTV2_IS_VALID_VIDEO_FORMAT(vFmt))
 			continue;
@@ -5094,7 +5092,7 @@ int RecordCopyAudio(PULWord pAja, PULWord pSR, int iStartSample, int iNumBytes, 
 
     // Driver records audio to offset 24 bytes
     PULWord pIn = &pAja[NTV2_NUMAUDIO_CHANNELS];
-    UWord * puwOut = (UWord *) pSR;
+    UWord * puwOut = reinterpret_cast<UWord*>(pSR);
 
     // If our transfer size has a remainder and our chans are in it,
     // adjust number samples
@@ -5135,7 +5133,7 @@ int RecordCopyAudio(PULWord pAja, PULWord pSR, int iStartSample, int iNumBytes, 
         {
             for (int c = iChan0; c < iChan0 + iNumChans; c++)
             {
-                *puwOut++ = (UWord) (pIn[c] >> 16);
+                *puwOut++ = UWord(pIn[c] >> 16);
             }
 
             pIn += NTV2_NUMAUDIO_CHANNELS;
@@ -5170,8 +5168,8 @@ ULWord	AddAudioTone (	ULWord *		pAudioBuffer,
 	{
 		for (ULWord i = 0;  i < inNumSamples;  i++)
 		{
-			const float	nextFloat	= (float) (::sin (j / cycleLength * (M_PI * 2.0)) * inAmplitude);
-			ULWord		value		= static_cast <ULWord> ((nextFloat * scale) + float (0.5));
+			const double	nextFloat	= double(::sin (j / cycleLength * (M_PI * 2.0)) * inAmplitude);
+			ULWord		value		= static_cast <ULWord> ((nextFloat * scale) + double(0.5));
 
 			if (inByteSwap)
 				value = NTV2EndianSwap32 (value);
@@ -5210,11 +5208,11 @@ ULWord	AddAudioTone (	UWord *			pAudioBuffer,
 	{
 		for (ULWord i = 0;  i < inNumSamples;  i++)
 		{
-			const float	nextFloat	= float (::sin (j / cycleLength * (M_PI * 2.0)) * inAmplitude);
-			UWord		value		= static_cast <UWord> ((nextFloat * scale) + float (0.5));
+			const double	nextFloat	= double(::sin (j / cycleLength * (M_PI * 2.0)) * inAmplitude);
+			UWord		value		= static_cast <UWord> ((nextFloat * scale) + double(0.5));
 
 			if (inByteSwap)
-				value = NTV2EndianSwap16 (value);
+				value = NTV2EndianSwap16(value);
 
 			for (ULWord channel = 0;  channel < inNumChannels;  channel++)
 				*pAudioBuffer++ = value;
@@ -5257,8 +5255,8 @@ ULWord	AddAudioTone (	ULWord *		pAudioBuffer,
 		{
 			for (ULWord channel (0);  channel < inNumChannels;  channel++)
 			{
-				const float	nextFloat	= float (::sin (j[channel] / cycleLength[channel] * (M_PI * 2.0)) * pInAmplitudes[channel]);
-				ULWord		value		= static_cast <ULWord> ((nextFloat * scale) + float (0.5));
+				const double	nextFloat	= double(::sin (j[channel] / cycleLength[channel] * (M_PI * 2.0)) * pInAmplitudes[channel]);
+				ULWord		value		= static_cast <ULWord> ((nextFloat * scale) + double(0.5));
 
 				if (inByteSwap)
 					value = NTV2EndianSwap32(value);
@@ -5563,17 +5561,17 @@ bool IsNTV2CrosspointOutput (const NTV2Crosspoint inChannel)
 
 NTV2EmbeddedAudioInput NTV2ChannelToEmbeddedAudioInput (const NTV2Channel inChannel)
 {
-	NTV2_ASSERT ((NTV2Channel)NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1 == NTV2_CHANNEL1);
-	NTV2_ASSERT ((NTV2Channel)NTV2_MAX_NUM_EmbeddedAudioInputs == NTV2_MAX_NUM_CHANNELS);
-	return static_cast <NTV2EmbeddedAudioInput> (inChannel);
+	NTV2_ASSERT (NTV2Channel(NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1) == NTV2_CHANNEL1);
+	NTV2_ASSERT (NTV2Channel(NTV2_MAX_NUM_EmbeddedAudioInputs) == NTV2_MAX_NUM_CHANNELS);
+	return static_cast<NTV2EmbeddedAudioInput>(inChannel);
 }
 
 
 NTV2AudioSystem NTV2ChannelToAudioSystem (const NTV2Channel inChannel)
 {
-	NTV2_ASSERT ((NTV2Channel)NTV2_AUDIOSYSTEM_1 == NTV2_CHANNEL1);
-	NTV2_ASSERT ((NTV2Channel)NTV2_MAX_NUM_AudioSystemEnums == NTV2_MAX_NUM_CHANNELS);
-	return static_cast <NTV2AudioSystem> (inChannel);
+	NTV2_ASSERT (NTV2Channel(NTV2_AUDIOSYSTEM_1) == NTV2_CHANNEL1);
+	NTV2_ASSERT (NTV2Channel(NTV2_MAX_NUM_AudioSystemEnums) == NTV2_MAX_NUM_CHANNELS);
+	return static_cast<NTV2AudioSystem>(inChannel);
 }
 
 
@@ -5593,7 +5591,7 @@ NTV2EmbeddedAudioInput NTV2InputSourceToEmbeddedAudioInput (const NTV2InputSourc
 																					/* NTV2_INPUTSOURCE_SDI7 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_7,
 																					/* NTV2_INPUTSOURCE_SDI8 */		NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_8,
 																					/* NTV2_INPUTSOURCE_INVALID */	NTV2_MAX_NUM_EmbeddedAudioInputs};
-	if (inInputSource < NTV2_NUM_INPUTSOURCES  &&  inInputSource < (int)(sizeof (gInputSourceToEmbeddedAudioInputs) / sizeof (NTV2EmbeddedAudioInput)))
+	if (inInputSource < NTV2_NUM_INPUTSOURCES  &&  inInputSource < NTV2InputSource(sizeof(gInputSourceToEmbeddedAudioInputs) / sizeof(NTV2EmbeddedAudioInput)))
 		return gInputSourceToEmbeddedAudioInputs [inInputSource];
 	else
 		return NTV2_MAX_NUM_EmbeddedAudioInputs;
@@ -5787,7 +5785,7 @@ NTV2AudioSystem NTV2InputSourceToAudioSystem (const NTV2InputSource inInputSourc
 																		/* NTV2_INPUTSOURCE_SDI7 */			NTV2_AUDIOSYSTEM_7,
 																		/* NTV2_INPUTSOURCE_SDI8 */			NTV2_AUDIOSYSTEM_8,
 																		/* NTV2_NUM_INPUTSOURCES */			NTV2_NUM_AUDIOSYSTEMS};
-	if (inInputSource < NTV2_NUM_INPUTSOURCES  &&  inInputSource < (int)(sizeof (gInputSourceToAudioSystem) / sizeof (NTV2AudioSystem)))
+	if (inInputSource < NTV2_NUM_INPUTSOURCES  &&  inInputSource < NTV2InputSource(sizeof(gInputSourceToAudioSystem) / sizeof(NTV2AudioSystem)))
 		return gInputSourceToAudioSystem [inInputSource];
 	else
 		return NTV2_AUDIOSYSTEM_INVALID;
@@ -5946,9 +5944,8 @@ bool IsTransportCompatibleFormat (const NTV2VideoFormat inFormat1, const NTV2Vid
 		case NTV2_FORMAT_1080psf_2500_2:	return inFormat2 == NTV2_FORMAT_1080i_5000;
 		case NTV2_FORMAT_1080psf_2997_2:	return inFormat2 == NTV2_FORMAT_1080i_5994;
 		case NTV2_FORMAT_1080psf_3000_2:	return inFormat2 == NTV2_FORMAT_1080i_6000;
-		default:							break;
+		default:							return false;
 	}
-	return false;
 }
 
 
@@ -6010,7 +6007,7 @@ ULWord NTV2FramesizeToByteCount (const NTV2Framesize inFrameSize)
 													18 /* NTV2_FRAMESIZE_18MB */,	20 /* NTV2_FRAMESIZE_20MB */,	22 /* NTV2_FRAMESIZE_22MB */,	24 /* NTV2_FRAMESIZE_24MB */,
 													26 /* NTV2_FRAMESIZE_26MB */,	28 /* NTV2_FRAMESIZE_28MB */,	30 /* NTV2_FRAMESIZE_30MB */,	32 /* NTV2_FRAMESIZE_32MB */,
 													0	};
-	if (inFrameSize < NTV2_MAX_NUM_Framesizes  &&  inFrameSize < (int)(sizeof (gFrameSizeToByteCount) / sizeof (ULWord)))
+	if (inFrameSize < NTV2_MAX_NUM_Framesizes  &&  inFrameSize < NTV2Framesize(sizeof(gFrameSizeToByteCount) / sizeof(ULWord)))
 		return gFrameSizeToByteCount [inFrameSize] * 1024 * 1024;
 	else
 		return 0;
@@ -7665,7 +7662,9 @@ string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID inValue, con
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FS 1 2nd Conv", NTV2_XptFS1SecondConverter);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FS 1 ProcAmp", NTV2_XptFS1ProcAmp);
 	#endif	//	!defined (NTV2_DEPRECATE)
+	#if !defined(_DEBUG)
 	default:								break;
+	#endif
 	}	//	switch on inValue
 	return "";
 }	//	NTV2OutputCrosspointIDToString
@@ -8263,15 +8262,15 @@ string NTV2FrameBufferFormatToString (const NTV2FrameBufferFormat inValue,	const
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "RGB-10", NTV2_FBF_10BIT_RGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "YUY2-8", NTV2_FBF_8BIT_YCBCR_YUY2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "ABGR-8", NTV2_FBF_ABGR);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "RGB-10", NTV2_FBF_10BIT_DPX);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "YUV-DPX10", NTV2_FBF_10BIT_YCBCR_DPX);
+        NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "RGB-10DPX", NTV2_FBF_10BIT_DPX);
+        NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "YUV-10DPX", NTV2_FBF_10BIT_YCBCR_DPX);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DVCProHD", NTV2_FBF_8BIT_DVCPRO);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "YUV-P420", NTV2_FBF_8BIT_YCBCR_420PL3);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "HDV", NTV2_FBF_8BIT_HDV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "RGB-8", NTV2_FBF_24BIT_RGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "BGR-8", NTV2_FBF_24BIT_BGR);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "YUVA-10", NTV2_FBF_10BIT_YCBCRA);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "RGB-L10", NTV2_FBF_10BIT_DPX_LE);
+        NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "RGB-10LDPX", NTV2_FBF_10BIT_DPX_LE);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "RGB-12", NTV2_FBF_48BIT_RGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "RGB-12P", NTV2_FBF_12BIT_RGB_PACKED);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "ProRes-DVC", NTV2_FBF_PRORES_DVCPRO);
@@ -8826,7 +8825,7 @@ string NTV2GetFirmwareFolderPath (void)
 	#if defined (AJAMac)
 		return "/Library/Application Support/AJA/Firmware";
 	#elif defined (MSWindows)
-		HKEY	hKey		(NULL);
+		HKEY	hKey		(AJA_NULL);
 		DWORD	bufferSize	(1024);
 		char *	lpData		(new char [bufferSize]);
 
@@ -8990,26 +8989,26 @@ string NTV2ColorCorrectionModeToString (const NTV2ColorCorrectionMode inValue, c
 
 bool convertHDRFloatToRegisterValues(const HDRFloatValues & inFloatValues, HDRRegValues & outRegisterValues)
 {
-	if ((inFloatValues.greenPrimaryX < 0 || inFloatValues.greenPrimaryX > 1.0) ||
-		(inFloatValues.greenPrimaryY < 0 || inFloatValues.greenPrimaryY > 1.0) ||
-		(inFloatValues.bluePrimaryX < 0 || inFloatValues.bluePrimaryX > 1.0) ||
-		(inFloatValues.bluePrimaryY < 0 || inFloatValues.bluePrimaryY > 1.0) ||
-		(inFloatValues.redPrimaryX < 0 || inFloatValues.redPrimaryX > 1.0) ||
-		(inFloatValues.redPrimaryY < 0 || inFloatValues.redPrimaryY > 1.0) ||
-		(inFloatValues.whitePointX < 0 || inFloatValues.whitePointX > 1.0) ||
-        (inFloatValues.whitePointY < 0 || inFloatValues.whitePointY > 1.0) ||
-        (inFloatValues.minMasteringLuminance < 0 || inFloatValues.minMasteringLuminance > 6.5535))
+	if ((inFloatValues.greenPrimaryX < 0 || inFloatValues.greenPrimaryX > float(1.0)) ||
+		(inFloatValues.greenPrimaryY < 0 || inFloatValues.greenPrimaryY > float(1.0)) ||
+		(inFloatValues.bluePrimaryX < 0 || inFloatValues.bluePrimaryX > float(1.0)) ||
+		(inFloatValues.bluePrimaryY < 0 || inFloatValues.bluePrimaryY > float(1.0)) ||
+		(inFloatValues.redPrimaryX < 0 || inFloatValues.redPrimaryX > float(1.0)) ||
+		(inFloatValues.redPrimaryY < 0 || inFloatValues.redPrimaryY > float(1.0)) ||
+		(inFloatValues.whitePointX < 0 || inFloatValues.whitePointX > float(1.0)) ||
+        (inFloatValues.whitePointY < 0 || inFloatValues.whitePointY > float(1.0)) ||
+        (inFloatValues.minMasteringLuminance < 0 || inFloatValues.minMasteringLuminance > float(6.5535)))
 		return false;
 
-	outRegisterValues.greenPrimaryX = static_cast<uint16_t>(inFloatValues.greenPrimaryX / 0.00002);
-	outRegisterValues.greenPrimaryY = static_cast<uint16_t>(inFloatValues.greenPrimaryY / 0.00002);
-	outRegisterValues.bluePrimaryX = static_cast<uint16_t>(inFloatValues.bluePrimaryX / 0.00002);
-	outRegisterValues.bluePrimaryY = static_cast<uint16_t>(inFloatValues.bluePrimaryY / 0.00002);
-	outRegisterValues.redPrimaryX = static_cast<uint16_t>(inFloatValues.redPrimaryX / 0.00002);
-	outRegisterValues.redPrimaryY = static_cast<uint16_t>(inFloatValues.redPrimaryY / 0.00002);
-	outRegisterValues.whitePointX = static_cast<uint16_t>(inFloatValues.whitePointX / 0.00002);
-	outRegisterValues.whitePointY = static_cast<uint16_t>(inFloatValues.whitePointY / 0.00002);
-    outRegisterValues.minMasteringLuminance = static_cast<uint16_t>(inFloatValues.minMasteringLuminance / 0.0001);
+	outRegisterValues.greenPrimaryX = static_cast<uint16_t>(inFloatValues.greenPrimaryX / float(0.00002));
+	outRegisterValues.greenPrimaryY = static_cast<uint16_t>(inFloatValues.greenPrimaryY / float(0.00002));
+	outRegisterValues.bluePrimaryX = static_cast<uint16_t>(inFloatValues.bluePrimaryX / float(0.00002));
+	outRegisterValues.bluePrimaryY = static_cast<uint16_t>(inFloatValues.bluePrimaryY / float(0.00002));
+	outRegisterValues.redPrimaryX = static_cast<uint16_t>(inFloatValues.redPrimaryX / float(0.00002));
+	outRegisterValues.redPrimaryY = static_cast<uint16_t>(inFloatValues.redPrimaryY / float(0.00002));
+	outRegisterValues.whitePointX = static_cast<uint16_t>(inFloatValues.whitePointX / float(0.00002));
+	outRegisterValues.whitePointY = static_cast<uint16_t>(inFloatValues.whitePointY / float(0.00002));
+    outRegisterValues.minMasteringLuminance = static_cast<uint16_t>(inFloatValues.minMasteringLuminance / float(0.0001));
     outRegisterValues.maxMasteringLuminance = inFloatValues.maxMasteringLuminance;
     outRegisterValues.maxContentLightLevel = inFloatValues.maxContentLightLevel;
     outRegisterValues.maxFrameAverageLightLevel = inFloatValues.maxFrameAverageLightLevel;

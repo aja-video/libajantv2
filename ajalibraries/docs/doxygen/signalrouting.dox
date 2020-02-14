@@ -53,18 +53,22 @@
 			while a widget’s input can only be sourced by one other widget’s output.
 			In other words, widget outputs are one-to-many, while widget inputs are one-to-one.
 
-	@note	Due to FPGA size limitations, only a small fraction of the possible widget interconnection routes are implemented.
+	The CNTV2Card::Connect call is used to make and/or break these output-to-input crosspoint connections.
+	The CNTV2Card::ClearRouting function breaks <i>all</i> crosspoint connections.
 
 	@note	Widget inputs that are left open — i.e., disconnected — i.e. aren’t connected to any other widget’s output — default
 			to the ::NTV2_XptBlack output crosspoint.
 
-	The CNTV2Card::Connect call is used to make and/or break these output-to-input crosspoint connections.
-	The CNTV2Card::ClearRouting function breaks <i>all</i> crosspoint connections.
+	Due to FPGA size limitations, only a small fraction of the possible widget interconnection routes are implemented. Unfortunately,
+	for many years, there was never a programmatic way to determine at runtime if a device implemented a specific connection path.
+	The CNTV2Card::CanConnect function was in place to support this, but it was never functional. Around SDK 14.0, an attempt was
+	made to compile a static “implemented routes” table for some firmware, but it wasn’t reliable and was abandoned.
 
-	Sadly, there’s never been a programmatic way in NTV2 to determine at runtime if a device implemented a specific connection path.
-	The APIs are all in place to support this, but at this time, they aren’t functional.
-	Attempts were made in the past to compile a static “implemented routes” table for popular firmware around the SDK 14.0
-	period, but it wasn’t reliable. AJA still intends to resolve this issue at some point in the future.
+	Starting with SDK 15.6, newer devices have a firmware ROM table that implements a bitmask that provides a true indication
+	of actual, implemented connection paths. The CNTV2Card::CanConnect function makes use of this bitmask for those devices
+	that support it.
+
+	@image	html	watcher-inspector-routing.png
 
 	The NTV2 SDK provides the \ref inspectorroute in \ref usingntv2watcher that graphically shows the available device widgets
 	and the signal routing between them. It lets you inspect and interactively change widget configuration and signal routing

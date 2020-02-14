@@ -1,7 +1,7 @@
 /**
 	@file		ntv2card.cpp
-	@brief		Partially implements the CNTV2Card class. Other implementation files are 'ntv2audio.cpp', 'ntv2dma.cpp', and 'ntv2register.cpp'.
-	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@brief		Implements several CNTV2Card methods. Other implementation files are 'ntv2audio.cpp', 'ntv2dma.cpp', 'ntv2register.cpp', ...
+	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2devicefeatures.h"
@@ -104,16 +104,17 @@ Word CNTV2Card::GetDeviceVersion (void)
 string CNTV2Card::GetDeviceVersionString (void)
 {
 	ostringstream	oss;
-	oss << ::NTV2DeviceIDToString (GetDeviceID ());
-	return oss.str ();
+	oss << ::NTV2DeviceIDToString(GetDeviceID());
+	return oss.str();
 }
 
 
 string CNTV2Card::GetDisplayName (void)
 {
 	ostringstream	oss;
-	oss << ::NTV2DeviceIDToString (GetDeviceID ()) << " - " << GetIndexNumber ();
-	return oss.str ();
+	oss << ::NTV2DeviceIDToString(GetDeviceID(), GetDeviceID() == DEVICE_ID_IO4KPLUS ? DeviceHasMicInput() : false)
+		<< " - " << GetIndexNumber();
+	return oss.str();
 }
 
 
@@ -357,78 +358,61 @@ bool CNTV2Card::GetInstalledBitfileInfo (ULWord & outNumBytes, std::string & out
 
 string CNTV2Card::GetBitfileInfoString (const BITFILE_INFO_STRUCT & inBitFileInfo)
 {
-	string name;
-	string date;
-	string time;
-	date = inBitFileInfo.dateStr;
-	time = inBitFileInfo.timeStr;
+	ostringstream oss;
+	// format like: "date time name"
+	oss << inBitFileInfo.dateStr << " " << inBitFileInfo.timeStr << " ";
 	switch (inBitFileInfo.bitFileType)
 	{
-	#if !defined (NTV2_DEPRECATE)
-		case NTV2_BITFILE_XENA2_UPCVT:		//	DEPRECATION_CANDIDATE
-		case NTV2_BITFILE_MOAB_UPCVT:		//	DEPRECATION_CANDIDATE
-			name = "UpConvert"; break;
-		case NTV2_BITFILE_XENA2_DNCVT:		//	DEPRECATION_CANDIDATE
-		case NTV2_BITFILE_MOAB_DNCVT:		//	DEPRECATION_CANDIDATE
-			name = "DownConvert"; break;
-		case NTV2_BITFILE_XENA2_XUCVT:		//	DEPRECATION_CANDIDATE
-		case NTV2_BITFILE_MOAB_XUCVT:		//	DEPRECATION_CANDIDATE
-			name = "Cross Convert 720->1080"; break;
-		case NTV2_BITFILE_XENA2_XDCVT:		//	DEPRECATION_CANDIDATE
-		case NTV2_BITFILE_MOAB_XDCVT:		//	DEPRECATION_CANDIDATE
-			name = "Cross Convert 1080->720"; break;
-		case NTV2_BITFILE_XENA2_CSCVT:
-			name = "AutoDesk Main"; break;
-	#endif	//	!defined (NTV2_DEPRECATE)
-	case NTV2_BITFILE_LHI_MAIN:				name = "LHi Main";break;
-	case NTV2_BITFILE_LHI_T_MAIN:			name = "LHi T Main";break;
-	case NTV2_BITFILE_IOEXPRESS_MAIN:		name = "IoExpress Main";break;
-	case NTV2_BITFILE_CORVID1_MAIN:			name = "Corvid1 Main"; break;
-	case NTV2_BITFILE_CORVID22_MAIN:		name = "Corvid22 Main"; break;
-	case NTV2_BITFILE_CORVID24_MAIN:		name = "Corvid24 Main"; break;
-	case NTV2_BITFILE_CORVID3G_MAIN:		name = "Corvid3G Main"; break;
-	case NTV2_BITFILE_CORVID88:				name = "Corvid88 Main"; break;
-	case NTV2_BITFILE_CORVID44:				name = "Corvid44 Main"; break;
-	case NTV2_BITFILE_KONA3G_MAIN:			name = "Kona 3G Main"; break;
-	case NTV2_BITFILE_KONA3G_QUAD:			name = "Kona 3G Quad"; break;
-	case NTV2_BITFILE_KONALHE_PLUS:			name = "Kona LHe+"; break;
-	case NTV2_BITFILE_IOXT_MAIN:			name = "IoXT Main"; break;
-	case NTV2_BITFILE_TTAP_MAIN:			name = "T-Tap Main"; break;
-	case NTV2_BITFILE_IO4K_MAIN:			name = "Io4K Main"; break;
-	case NTV2_BITFILE_IO4KUFC_MAIN:			name = "Io4K UFC"; break;
-	case NTV2_BITFILE_KONA4_MAIN:			name = "Kona4 Main"; break;
-	case NTV2_BITFILE_KONA4UFC_MAIN:		name = "Kona4 UFC"; break;
-	case NTV2_BITFILE_KONAIP_2022:			name = "KonaIP 2022"; break;
-	case NTV2_BITFILE_KONAIP_4CH_2SFP:		name = "KonaIP 4CH 2SFP"; break;
-	case NTV2_BITFILE_IO4KPLUS_MAIN:
-		{
-			if (DeviceIsDNxIV())
-				name = "DNxIV";
-			else
-				name = "Io4K Plus";
-			break;
-		}
-	case NTV2_BITFILE_IOIP_2022:			name = "IoIP 2022"; break;
-	case NTV2_BITFILE_IOIP_2110:			name = "IoIP 2110"; break;
-	case NTV2_BITFILE_KONAIP_2110:			name = "KonaIP 2110"; break;
-	case NTV2_BITFILE_KONA1:				name = "Kona1"; break;
-	case NTV2_BITFILE_KONAHDMI:				name = "Kona HDMI"; break;
-	case NTV2_BITFILE_KONA5_MAIN:			name = "Kona5"; break;
-	case NTV2_BITFILE_KONA5_8K_MAIN:		name = "Kona5 8K"; break;
-	case NTV2_BITFILE_KONA5_8KMK_MAIN:		name = "Kona5 8KMK"; break;
-	case NTV2_BITFILE_CORVID44_8K_MAIN:		name = "Corvid44 8K"; break;
-	case NTV2_BITFILE_CORVID44_8KMK_MAIN:	name = "Corvid44 8KMK"; break;
-
-	default:
-		date = "????";
-		time = "????";
-		name = "(bad bitfile type!!!)"; break;
+		#if !defined (NTV2_DEPRECATE)
+			case NTV2_BITFILE_XENA2_UPCVT:		//	DEPRECATION_CANDIDATE
+			case NTV2_BITFILE_MOAB_UPCVT:		//	DEPRECATION_CANDIDATE
+				oss << "UpConvert"; break;
+			case NTV2_BITFILE_XENA2_DNCVT:		//	DEPRECATION_CANDIDATE
+			case NTV2_BITFILE_MOAB_DNCVT:		//	DEPRECATION_CANDIDATE
+				oss << "DownConvert"; break;
+			case NTV2_BITFILE_XENA2_XUCVT:		//	DEPRECATION_CANDIDATE
+			case NTV2_BITFILE_MOAB_XUCVT:		//	DEPRECATION_CANDIDATE
+				oss << "Cross Convert 720->1080"; break;
+			case NTV2_BITFILE_XENA2_XDCVT:		//	DEPRECATION_CANDIDATE
+			case NTV2_BITFILE_MOAB_XDCVT:		//	DEPRECATION_CANDIDATE
+				oss << "Cross Convert 1080->720"; break;
+			case NTV2_BITFILE_XENA2_CSCVT:
+				oss << "AutoDesk Main"; break;
+		#endif	//	!defined (NTV2_DEPRECATE)
+		case NTV2_BITFILE_LHI_MAIN:				oss << "LHi Main";				break;
+		case NTV2_BITFILE_LHI_T_MAIN:			oss << "LHi T Main";			break;
+		case NTV2_BITFILE_IOEXPRESS_MAIN:		oss << "IoExpress Main";		break;
+		case NTV2_BITFILE_CORVID1_MAIN:			oss << "Corvid1 Main";			break;
+		case NTV2_BITFILE_CORVID22_MAIN:		oss << "Corvid22 Main";			break;
+		case NTV2_BITFILE_CORVID24_MAIN:		oss << "Corvid24 Main";			break;
+		case NTV2_BITFILE_CORVID3G_MAIN:		oss << "Corvid3G Main";			break;
+		case NTV2_BITFILE_CORVID88:				oss << "Corvid88 Main";			break;
+		case NTV2_BITFILE_CORVID44:				oss << "Corvid44 Main";			break;
+		case NTV2_BITFILE_KONA3G_MAIN:			oss << "Kona 3G Main";			break;
+		case NTV2_BITFILE_KONA3G_QUAD:			oss << "Kona 3G Quad";			break;
+		case NTV2_BITFILE_KONALHE_PLUS:			oss << "Kona LHe+";				break;
+		case NTV2_BITFILE_IOXT_MAIN:			oss << "IoXT Main";				break;
+		case NTV2_BITFILE_TTAP_MAIN:			oss << "T-Tap Main";			break;
+		case NTV2_BITFILE_IO4K_MAIN:			oss << "Io4K Main";				break;
+		case NTV2_BITFILE_IO4KUFC_MAIN:			oss << "Io4K UFC";				break;
+		case NTV2_BITFILE_KONA4_MAIN:			oss << "Kona4 Main";			break;
+		case NTV2_BITFILE_KONA4UFC_MAIN:		oss << "Kona4 UFC";				break;
+		case NTV2_BITFILE_KONAIP_2022:			oss << "KonaIP 2022";			break;
+		case NTV2_BITFILE_KONAIP_4CH_2SFP:		oss << "KonaIP 4CH 2SFP";		break;
+		case NTV2_BITFILE_IO4KPLUS_MAIN:		oss << (DeviceIsDNxIV() ? "DNxIV" : "Io4K Plus");	break;
+		case NTV2_BITFILE_IOIP_2022:			oss << "IoIP 2022";				break;
+		case NTV2_BITFILE_IOIP_2110:			oss << "IoIP 2110";				break;
+		case NTV2_BITFILE_KONAIP_2110:			oss << "KonaIP 2110";			break;
+		case NTV2_BITFILE_KONA1:				oss << "Kona1";					break;
+		case NTV2_BITFILE_KONAHDMI:				oss << "Kona HDMI";				break;
+		case NTV2_BITFILE_KONA5_MAIN:			oss << "Kona5";					break;
+		case NTV2_BITFILE_KONA5_8K_MAIN:		oss << "Kona5 8K";				break;
+		case NTV2_BITFILE_KONA5_8KMK_MAIN:		oss << "Kona5 8KMK";			break;
+		case NTV2_BITFILE_CORVID44_8K_MAIN:		oss << "Corvid44 8K";			break;
+		case NTV2_BITFILE_CORVID44_8KMK_MAIN:	oss << "Corvid44 8KMK";			break;
+		default:								oss << "(bad bitfile type!!!)";	break;
 	}
-
-	string infoStr;
-	// format like: "date time name"
-	infoStr.append(date).append(" ").append(time).append(" ").append(name);
-	return infoStr;
+	return oss.str();
 }
 
 bool CNTV2Card::IsFailSafeBitfileLoaded (bool & outIsSafeBoot)

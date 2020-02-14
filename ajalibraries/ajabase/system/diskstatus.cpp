@@ -1,7 +1,7 @@
 /**
 	@file		diskstatus.cpp
-	@copyright	Copyright (C) 2013-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Implements the AJADiskStatus class.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ajabase/common/common.h"

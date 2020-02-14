@@ -1,7 +1,7 @@
 /**
 	@file		timebase.cpp
-	@copyright	Copyright (C) 2009-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Implements the AJATimeBase class.
+	@copyright	(C) 2009-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ajabase/common/common.h"

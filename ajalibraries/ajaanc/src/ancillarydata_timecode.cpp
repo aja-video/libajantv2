@@ -1,7 +1,7 @@
 /**
 	@file		ancillarydata_timecode.cpp
 	@brief		Implements the AJAAncillaryData_Timecode class.
-	@copyright	(C) 2010-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2010-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ancillarydata_timecode.h"

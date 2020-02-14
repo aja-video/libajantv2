@@ -1,7 +1,7 @@
 /**
 	@file		ntv2enhancedcsc.cpp
 	@brief		Implementation of CNTV2EnhancedCSC class.
-	@copyright	(C) 2015-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2015-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2publicinterface.h"

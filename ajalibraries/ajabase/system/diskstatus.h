@@ -1,7 +1,7 @@
 /**
 	@file		diskstatus.h
-	@copyright	Copyright (C) 2013-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares the AJADiskStatus class.
+	@copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_DISK_STATUS_H

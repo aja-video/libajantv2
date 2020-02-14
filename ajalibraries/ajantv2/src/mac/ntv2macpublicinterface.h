@@ -1,7 +1,7 @@
 /**
 	@file		ntv2macpublicinterface.h
-	@copyright	Copyright (C) 2012-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares MacOS-only enums used by the Mac driver and the SDK.
+	@copyright	(C) 2012-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef NTV2MACPUBLICINTERFACE_H

@@ -1,7 +1,7 @@
 /**
 	@file		ancillarydata_cea708.cpp
 	@brief		Implements the AJAAncillaryData_Cea708 class.
-	@copyright	(C) 2010-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2010-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ancillarydata_cea708.h"

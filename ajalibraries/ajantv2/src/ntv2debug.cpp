@@ -1,7 +1,7 @@
 /**
 	@file		ntv2debug.cpp
 	@brief		Implements the NTV2 debug output functions.
-	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 	@note		Because this module is compiled into the driver, it must remain straight ANSI 'C' -- no C++ or STL.
 **/
 
@@ -588,7 +588,7 @@ const char * ntv2RegStrings[] =
 	"kRegRP188InOut2DBB",							//  64
 	"kRegRP188InOut2Bits0_31",						//  65
 	"kRegRP188InOut2Bits32_63",						//  66
-	"kRegReserved67",								//  67
+	"kRegCanDoStatus",								//  67
 	"kRegCh1ColorCorrectioncontrol",				//  68
 	"kRegCh2ColorCorrectioncontrol",				//  69
 	"kRegRS422Transmit",							//  70

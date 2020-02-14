@@ -1,7 +1,7 @@
 /**
 	@file		ntv2register.cpp
 	@brief		Implements most of CNTV2Card's register-based functions.
-	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2card.h"
@@ -219,13 +219,13 @@ static const ULWord	gChannelToSDIInputProgressiveMask []	= {	kRegMaskInput1Progr
 static const ULWord	gChannelToSDIInputProgressiveShift []	= {	kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,
 																kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			0};
 
-static const ULWord	gChannelToSDIOutVPIDTransferCharacteristics []		= {	kVRegNTV2VPIDTransferCharacteristics,		kVRegNTV2VPIDTransferCharacteristics2,		kVRegNTV2VPIDTransferCharacteristics3,		kVRegNTV2VPIDTransferCharacteristics4,
+static const ULWord	gChannelToVPIDTransferCharacteristics []		= {	kVRegNTV2VPIDTransferCharacteristics,		kVRegNTV2VPIDTransferCharacteristics2,		kVRegNTV2VPIDTransferCharacteristics3,		kVRegNTV2VPIDTransferCharacteristics4,
 																kVRegNTV2VPIDTransferCharacteristics5,		kVRegNTV2VPIDTransferCharacteristics6,		kVRegNTV2VPIDTransferCharacteristics7,		kVRegNTV2VPIDTransferCharacteristics8,	0};
 
-static const ULWord	gChannelToSDIOutVPIDColorimetry []		= {	kVRegNTV2VPIDColorimetry,		kVRegNTV2VPIDColorimetry2,		kVRegNTV2VPIDColorimetry3,		kVRegNTV2VPIDColorimetry4,
+static const ULWord	gChannelToVPIDColorimetry []		= {	kVRegNTV2VPIDColorimetry,		kVRegNTV2VPIDColorimetry2,		kVRegNTV2VPIDColorimetry3,		kVRegNTV2VPIDColorimetry4,
 																kVRegNTV2VPIDColorimetry5,		kVRegNTV2VPIDColorimetry6,		kVRegNTV2VPIDColorimetry7,		kVRegNTV2VPIDColorimetry8,	0};
 
-static const ULWord	gChannelToSDIOutVPIDLuminance []		= {	kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,
+static const ULWord	gChannelToVPIDLuminance []		= {	kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,
 																kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,	0};
 
 
@@ -1281,8 +1281,8 @@ bool CNTV2Card::SetQuadFrameEnable (const bool inEnable, const NTV2Channel inCha
 	}
 	else
 	{
-		if(ok)	ok = SetTsiFrameEnable(false, inChannel);
-		if(ok)	ok = Set4kSquaresEnable(false, inChannel);
+		SetTsiFrameEnable(false, inChannel);
+		Set4kSquaresEnable(false, inChannel);
 	}
 	return ok;
 }
@@ -2081,6 +2081,12 @@ bool CNTV2Card::IsMultiFormatActive (void)
 		return false;
 
 	return isEnabled;
+}
+
+bool CNTV2Card::HasCanConnectROM (void)
+{
+	ULWord hasCanConnectROM(0);
+	return ReadRegister(kRegCanDoStatus, hasCanConnectROM, kRegMaskCanDoValidXptROM, kRegShiftCanDoValidXptROM)  &&  (hasCanConnectROM ? true : false);
 }
 
 /////////////////////////////////
@@ -5106,7 +5112,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 			isProgressivePic = inIsProgressivePicture;
 			format = GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
 		}
-		if (::NTV2DeviceCanDo12GIn(_boardID, inChannel) && format != NTV2_FORMAT_UNKNOWN)
+		if (::NTV2DeviceCanDo12GIn(_boardID, inChannel) && format != NTV2_FORMAT_UNKNOWN && !isValidVPID)
 		{
 			bool is6G = false, is12G = false;
 			GetSDIInput6GPresent(is6G, inChannel);
@@ -5944,7 +5950,7 @@ bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2Outpu
 		if (CanConnect(inInputXpt, inOutputXpt, canConnect))	//	If answer can be trusted
 			if (!canConnect)	//	If route not valid
 			{
-				ROUTEFAIL (GetDisplayName() << ": Cannot connect " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(inOutputXpt)
+				ROUTEFAIL (GetDisplayName() << ": Unsupported route " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(inOutputXpt)
 							<< ": reg=" << DEC(regNum) << " val=" << DEC(inOutputXpt) << " mask=" << xHEX0N(sMasks[ndx],8) << " shift=" << DEC(sShifts[ndx]));
 				return false;
 			}
@@ -6030,9 +6036,47 @@ bool CNTV2Card::IsConnected (const NTV2InputCrosspointID inInputXpt, bool & outI
 
 bool CNTV2Card::CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, bool & outCanConnect)
 {
-	(void) inInputXpt;
-	(void) inOutputXpt;
-	outCanConnect = ::NTV2DeviceCanConnect (GetDeviceID (), inInputXpt, inOutputXpt);
+	outCanConnect = false;
+	if (!HasCanConnectROM())
+		return false;
+
+	//	Check for reasonable input xpt...
+	if (ULWord(inInputXpt) < ULWord(NTV2_FIRST_INPUT_CROSSPOINT)  ||  ULWord(inInputXpt) >= 0x80UL)
+	{
+		ROUTEFAIL(GetDisplayName() << ": " << xHEX0N(UWord(inInputXpt),4) << " >= 0x0080 (out of range 0x0001 thru 0x0080)");
+		return false;
+	}
+
+	//	Every input xpt can connect to XptBlack...
+	if (inOutputXpt == NTV2_XptBlack)
+		{outCanConnect = true;	return true;}
+
+	//	Check for reasonable output xpt...
+	if (ULWord(inOutputXpt) >= 0xFFUL)
+	{
+		ROUTEFAIL(GetDisplayName() << ":  Bad output xpt " << xHEX0N(ULWord(inOutputXpt),8) << " >= 0x0000007F");
+		return false;
+	}
+
+	//	Calculate which ROM register to use...
+	const ULWord rawOutputXptID  (ULWord(inOutputXpt) & 0x0000007FUL);	//	Lop off high bit, so 1 thru 127
+	const ULWord firstValidXptReg(ULWord(kRegFirstValidXptROMRegister) + 4UL * (ULWord(inInputXpt) - ULWord(NTV2_FIRST_INPUT_CROSSPOINT)));	//	4 regs per inputXpt
+	const ULWord ROMReg(firstValidXptReg + rawOutputXptID / 4UL);	//	Then by outputXpt
+	if (ROMReg < kRegFirstValidXptROMRegister  ||  ROMReg > kRegLastValidXptROMRegister)
+	{
+		ROUTEFAIL(GetDisplayName() << ":  Bad ROM register " << DEC(ROMReg) << " (" << xHEX0N(ULWord(ROMReg),8) << ")");
+		return false;
+	}
+	ULWord validRoutes(0);
+	if (!ReadRegister(ROMReg, validRoutes))
+	{
+		ROUTEFAIL(GetDisplayName() << ":  ReadRegister failed for ROM reg " << DEC(ROMReg) << " (" << xHEX0N(ULWord(ROMReg),8) << ")");
+		return false;
+	}
+
+	//	Is the route implemented?
+	if (validRoutes & ULWord(1 << (rawOutputXptID % 4UL)))
+		outCanConnect = true;
 	return true;
 }
 
@@ -8115,18 +8159,46 @@ bool CNTV2Card::ReadSDIStatistics (NTV2SDIInStatistics & outStats)
 
 bool CNTV2Card::SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister(gChannelToSDIOutVPIDTransferCharacteristics[inChannel], inValue);
+	return WriteRegister(gChannelToVPIDTransferCharacteristics[inChannel], inValue);
+}
+
+bool CNTV2Card::GetVPIDTransferCharacteristics (NTV2VPIDTransferCharacteristics & outValue, const NTV2Channel inChannel)
+{
+	ULWord	tempVal (0);
+	if (!ReadRegister(gChannelToVPIDTransferCharacteristics[inChannel], tempVal))
+		return false;
+	outValue = static_cast <NTV2VPIDTransferCharacteristics> (tempVal);
+	return true;
 }
 
 bool CNTV2Card::SetVPIDColorimetry (const NTV2VPIDColorimetry inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister(gChannelToSDIOutVPIDColorimetry[inChannel], inValue);
+	return WriteRegister(gChannelToVPIDColorimetry[inChannel], inValue);
+}
+
+bool CNTV2Card::GetVPIDColorimetry (NTV2VPIDColorimetry & outValue, const NTV2Channel inChannel)
+{
+	ULWord	tempVal (0);
+	if (!ReadRegister(gChannelToVPIDColorimetry[inChannel], tempVal))
+		return false;
+	outValue = static_cast <NTV2VPIDColorimetry> (tempVal);
+	return true;
 }
 
 bool CNTV2Card::SetVPIDVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister(gChannelToSDIOutVPIDLuminance[inChannel], inValue);
+	return WriteRegister(gChannelToVPIDLuminance[inChannel], inValue);
 }
+
+bool CNTV2Card::GetVPIDVPIDLuminance (NTV2VPIDLuminance & outValue, const NTV2Channel inChannel)
+{
+	ULWord	tempVal (0);
+	if (!ReadRegister(gChannelToVPIDLuminance[inChannel], tempVal))
+		return false;
+	outValue = static_cast <NTV2VPIDLuminance> (tempVal);
+	return true;
+}
+
 
 #if !defined (NTV2_DEPRECATE)
 // deprecated - does not support progressivePicture, 3G, 2K

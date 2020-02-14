@@ -1,7 +1,7 @@
 /**
 	@file		ntv2publicinterface.cpp
 	@brief		Implementations of methods declared in 'ntv2publicinterface.h'.
-	@copyright	(C) 2016-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2016-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2publicinterface.h"
@@ -120,10 +120,10 @@ AUTOCIRCULATE_DATA::AUTOCIRCULATE_DATA (const AUTO_CIRC_COMMAND inCommand, const
 		bVal6		(false),
 		bVal7		(false),
 		bVal8		(false),
-		pvVal1		(NULL),
-		pvVal2		(NULL),
-		pvVal3		(NULL),
-		pvVal4		(NULL)
+		pvVal1		(AJA_NULL),
+		pvVal2		(AJA_NULL),
+		pvVal3		(AJA_NULL),
+		pvVal4		(AJA_NULL)
 {
 }
 
@@ -249,7 +249,7 @@ ostream & NTV2_POINTER::Dump (	ostream &		inOStream,
 		const unsigned	maxByteWidth		(inRadix == 8 ? 4 : (inRadix == 10 ? 3 : (inRadix == 2 ? 8 : 2)));
 		const UByte *	pBuffer				(reinterpret_cast <const UByte *> (pInStartAddress));
 		const size_t	asciiBufferSize		(inShowAscii && inGroupsPerRow ? (inBytesPerGroup * inGroupsPerRow + 1) * sizeof (UByte) : 0);	//	Size in bytes, not chars
-		UByte *			pAsciiBuffer		(asciiBufferSize ? new UByte[asciiBufferSize / sizeof(UByte)] : NULL);
+		UByte *			pAsciiBuffer		(asciiBufferSize ? new UByte[asciiBufferSize / sizeof(UByte)] : AJA_NULL);
 
 		if (!pInStartAddress)
 			return inOStream;
@@ -348,7 +348,7 @@ string & NTV2_POINTER::Dump (	string &		inOutputString,
 		const unsigned	maxByteWidth		(inRadix == 8 ? 4 : (inRadix == 10 ? 3 : (inRadix == 2 ? 8 : 2)));
 		const UByte *	pBuffer				(reinterpret_cast <const UByte *> (pInStartAddress));
 		const size_t	asciiBufferSize		(inShowAscii && inGroupsPerRow ? (inBytesPerGroup * inGroupsPerRow + 1) * sizeof (UByte) : 0);	//	Size in bytes, not chars
-		UByte *			pAsciiBuffer		(asciiBufferSize ? new UByte[asciiBufferSize / sizeof(UByte)] : NULL);
+		UByte *			pAsciiBuffer		(asciiBufferSize ? new UByte[asciiBufferSize / sizeof(UByte)] : AJA_NULL);
 
 		if (!pInStartAddress)
 			return inOutputString;
@@ -702,12 +702,15 @@ bool NTV2_POINTER::PutU8s (const vector<uint8_t> & inU8s, const size_t inU8Offse
 		maxU8s = inU8s.size();	//	Truncate incoming vector to not go past end
 	if (inU8s.size() > maxU8s)
 		return false;	//	Will write past end
-
+#if 1
+	::memcpy(pU8, &inU8s[0], maxU8s);
+#else
 	for (unsigned ndx(0);  ndx < maxU8s;  ndx++)
 #if defined(_DEBUG)
 		*pU8++ = inU8s.at(ndx);
 #else
 		*pU8++ = inU8s[ndx];
+#endif
 #endif
 	return true;
 }
@@ -1065,7 +1068,7 @@ ostream & operator << (ostream & inOutStrm, const NTV2SegmentedXferInfo & inRun)
 //	Implementation of NTV2AutoCirculateStateToString...
 string NTV2AutoCirculateStateToString (const NTV2AutoCirculateState inState)
 {
-	static const char *	sStateStrings []	= {	"Disabled", "Initializing", "Starting", "Paused", "Stopping", "Running", "StartingAtTime", NULL};
+	static const char *	sStateStrings []	= {	"Disabled", "Initializing", "Starting", "Paused", "Stopping", "Running", "StartingAtTime", AJA_NULL};
 	if (inState >= NTV2_AUTOCIRCULATE_DISABLED && inState <= NTV2_AUTOCIRCULATE_STARTING_AT_TIME)
 		return string (sStateStrings [inState]);
 	else
@@ -1102,6 +1105,13 @@ ostream & NTV2SegmentedXferInfo::Print (ostream & inStrm, const bool inDumpSegme
 				<< " totElm=" << DEC(getTotalElements()) << " totByt=" << DEC(getTotalBytes());
 	}
 	return inStrm;
+}
+
+NTV2SegmentedXferInfo & NTV2SegmentedXferInfo::swapSourceAndDestination (void)
+{
+	std::swap(mSrcElementsPerRow, mDstElementsPerRow);
+	std::swap(mInitialSrcOffset, mInitialDstOffset);
+	return *this;
 }
 
 
@@ -1160,7 +1170,7 @@ NTV2_POINTER & NTV2_POINTER::operator = (const NTV2_POINTER & inRHS)
 	if (&inRHS != this)
 	{
 		if (inRHS.IsNULL ())
-			Set (NULL, 0);
+			Set (AJA_NULL, 0);
 		else
 		{
 			if (Allocate (inRHS.GetByteCount ()))
@@ -1173,7 +1183,43 @@ NTV2_POINTER & NTV2_POINTER::operator = (const NTV2_POINTER & inRHS)
 
 NTV2_POINTER::~NTV2_POINTER ()
 {
-	Set (NULL, 0);	//	Call 'Set' to delete the array (if I allocated it)
+	Set (AJA_NULL, 0);	//	Call 'Set' to delete the array (if I allocated it)
+}
+
+
+bool NTV2_POINTER::ByteSwap64 (void)
+{
+	uint64_t *	pU64s(reinterpret_cast<uint64_t*>(GetHostPointer()));
+	const size_t loopCount(GetByteCount() / sizeof(uint64_t));
+	if (IsNULL())
+		return false;
+	for (size_t ndx(0);  ndx < loopCount;  ndx++)
+		pU64s[ndx] = NTV2EndianSwap64(pU64s[ndx]);
+	return true;
+}
+
+
+bool NTV2_POINTER::ByteSwap32 (void)
+{
+	uint32_t *	pU32s(reinterpret_cast<uint32_t*>(GetHostPointer()));
+	const size_t loopCount(GetByteCount() / sizeof(uint32_t));
+	if (IsNULL())
+		return false;
+	for (size_t ndx(0);  ndx < loopCount;  ndx++)
+		pU32s[ndx] = NTV2EndianSwap32(pU32s[ndx]);
+	return true;
+}
+
+
+bool NTV2_POINTER::ByteSwap16 (void)
+{
+	uint16_t *	pU16s(reinterpret_cast<uint16_t*>(GetHostPointer()));
+	const size_t loopCount(GetByteCount() / sizeof(uint16_t));
+	if (IsNULL())
+		return false;
+	for (size_t ndx(0);  ndx < loopCount;  ndx++)
+		pU16s[ndx] = NTV2EndianSwap16(pU16s[ndx]);
+	return true;
 }
 
 
@@ -1206,22 +1252,27 @@ bool NTV2_POINTER::Allocate (const size_t inByteCount, const bool inPageAligned)
 			return true;										//	...and return true
 		}
 
-	bool	result	(false);
+	bool result(Set(AJA_NULL, 0));	//	Jettison existing buffer (if any)
 	if (inByteCount)
-	{
-		//	Allocate the byte array, and call Set...
-		result = Set (inPageAligned  ?  AJAMemory::AllocateAligned(inByteCount, DefaultPageSize())  :  new UByte[inByteCount],
-					  inByteCount);
-		if (result)
+	{	//	Allocate the byte array, and call Set...
+		UByte * pBuffer(AJA_NULL);
+		result = false;
+		if (inPageAligned)
+			pBuffer = reinterpret_cast<UByte*>(AJAMemory::AllocateAligned(inByteCount, DefaultPageSize()));
+		else
+			try
+				{pBuffer = new UByte[inByteCount];}
+			catch (std::bad_alloc)
+				{pBuffer = AJA_NULL;}
+		if (pBuffer  &&  Set(pBuffer, inByteCount))
 		{	//	SDK owns this memory -- set NTV2_POINTER_ALLOCATED bit -- I'm responsible for deleting
+			result = true;
 			fFlags |= NTV2_POINTER_ALLOCATED;
 			if (inPageAligned)
 				fFlags |= NTV2_POINTER_PAGE_ALIGNED;		//	Set "page aligned" flag
 			::memset (GetHostPointer(), 0, inByteCount);	//	Zero it
 		}
-	}
-	else
-		result = Set (NULL, 0);
+	}	//	if requested size is non-zero
 	return result;
 }
 
@@ -1230,7 +1281,7 @@ bool NTV2_POINTER::Deallocate (void)
 {
 	if (fFlags & NTV2_POINTER_ALLOCATED)
 	{
-		if (GetHostPointer() && GetByteCount())
+		if (!IsNULL())
 		{
 			if (fFlags & NTV2_POINTER_PAGE_ALIGNED)
 			{
@@ -1251,10 +1302,10 @@ bool NTV2_POINTER::Deallocate (void)
 void * NTV2_POINTER::GetHostAddress (const ULWord inByteOffset, const bool inFromEnd) const
 {
 	if (IsNULL())
-		return NULL;
+		return AJA_NULL;
 	if (inByteOffset >= GetByteCount())
-		return NULL;
-	UByte *	pBytes	(reinterpret_cast <UByte *> (GetHostPointer ()));
+		return AJA_NULL;
+	UByte *	pBytes	(reinterpret_cast<UByte*>(GetHostPointer()));
 	if (inFromEnd)
 		pBytes += GetByteCount() - inByteOffset;
 	else
@@ -1265,17 +1316,17 @@ void * NTV2_POINTER::GetHostAddress (const ULWord inByteOffset, const bool inFro
 
 bool NTV2_POINTER::SetFrom (const NTV2_POINTER & inBuffer)
 {
-	if (inBuffer.IsNULL ())
+	if (inBuffer.IsNULL())
 		return false;	//	NULL or empty
-	if (IsNULL ())
+	if (IsNULL())
 		return false;	//	I am NULL or empty
-	if (inBuffer.GetByteCount () == GetByteCount ()  &&  inBuffer.GetHostPointer () == GetHostPointer ())
+	if (inBuffer.GetByteCount() == GetByteCount()  &&  inBuffer.GetHostPointer() == GetHostPointer())
 		return true;	//	Same buffer
 
-	size_t	bytesToCopy	(inBuffer.GetByteCount ());
-	if (bytesToCopy > GetByteCount ())
-		bytesToCopy = GetByteCount ();
-	::memcpy (GetHostPointer (), inBuffer.GetHostPointer (), bytesToCopy);
+	size_t	bytesToCopy	(inBuffer.GetByteCount());
+	if (bytesToCopy > GetByteCount())
+		bytesToCopy = GetByteCount();
+	::memcpy (GetHostPointer(), inBuffer.GetHostPointer(), bytesToCopy);
 	return true;
 }
 
@@ -1283,7 +1334,7 @@ bool NTV2_POINTER::SetFrom (const NTV2_POINTER & inBuffer)
 bool NTV2_POINTER::CopyFrom (const void * pInSrcBuffer, const ULWord inByteCount)
 {
 	if (!inByteCount)
-		return Set (NULL, 0);	//	Zero bytes
+		return Set (AJA_NULL, 0);	//	Zero bytes
 	if (!pInSrcBuffer)
 		return false;	//	NULL src ptr
 	if (!Allocate (inByteCount))
@@ -1296,17 +1347,17 @@ bool NTV2_POINTER::CopyFrom (const void * pInSrcBuffer, const ULWord inByteCount
 bool NTV2_POINTER::CopyFrom (const NTV2_POINTER & inBuffer,
 							const ULWord inSrcByteOffset, const ULWord inDstByteOffset, const ULWord inByteCount)
 {
-	if (inBuffer.IsNULL () || IsNULL ())
+	if (inBuffer.IsNULL() || IsNULL())
 		return false;	//	NULL or empty
-	if (inSrcByteOffset + inByteCount > inBuffer.GetByteCount ())
+	if (inSrcByteOffset + inByteCount > inBuffer.GetByteCount())
 		return false;	//	Past end of src
-	if (inDstByteOffset + inByteCount > GetByteCount ())
+	if (inDstByteOffset + inByteCount > GetByteCount())
 		return false;	//	Past end of me
 
-	const UByte *	pSrc	(reinterpret_cast <const UByte *> (inBuffer.GetHostPointer ()));
+	const UByte *	pSrc	(reinterpret_cast<const UByte*>(inBuffer.GetHostPointer()));
 	pSrc += inSrcByteOffset;
 
-	UByte *			pDst	(reinterpret_cast <UByte *> (GetHostPointer ()));
+	UByte *			pDst	(reinterpret_cast<UByte*>(GetHostPointer()));
 	pDst += inDstByteOffset;
 
 	::memcpy (pDst, pSrc, inByteCount);
@@ -2034,7 +2085,7 @@ void NTV2ColorCorrectionData::Clear (void)
 	ccSaturationValue = 0;
 	if (ccLookupTables.GetHostPointer ())
 		delete [] (UByte *) ccLookupTables.GetHostPointer ();
-	ccLookupTables.Set (NULL, 0);
+	ccLookupTables.Set (AJA_NULL, 0);
 }
 
 
@@ -2221,7 +2272,7 @@ bool AUTOCIRCULATE_TRANSFER::SetFrameBufferFormat (const NTV2FrameBufferFormat i
 void AUTOCIRCULATE_TRANSFER::Clear (void)
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	SetBuffers (NULL, 0, NULL, 0, NULL, 0, NULL, 0);
+	SetBuffers (AJA_NULL, 0, AJA_NULL, 0, AJA_NULL, 0, AJA_NULL, 0);
 }
 
 
@@ -2275,7 +2326,7 @@ bool AUTOCIRCULATE_TRANSFER::GetInputTimeCodes (NTV2TimeCodes & outTimeCodes, co
 
 NTV2DebugLogging::NTV2DebugLogging(const bool inEnable)
 	:	mHeader				(NTV2_TYPE_AJADEBUGLOGGING, sizeof (NTV2DebugLogging)),
-		mSharedMemory		(inEnable ? AJADebug::GetPrivateDataLoc() : NULL,  inEnable ? AJADebug::GetPrivateDataLen() : 0)
+		mSharedMemory		(inEnable ? AJADebug::GetPrivateDataLoc() : AJA_NULL,  inEnable ? AJADebug::GetPrivateDataLen() : 0)
 {
 }
 
@@ -2293,6 +2344,8 @@ NTV2BufferLock::NTV2BufferLock()
 	:	mHeader	(NTV2_TYPE_AJABUFFERLOCK, sizeof(NTV2BufferLock))
 {
 	NTV2_ASSERT_STRUCT_VALID;
+    SetFlags(0);
+	SetMaxLockSize(0);
 }
 
 NTV2BufferLock::NTV2BufferLock (const NTV2_POINTER & inBuffer, const ULWord inFlags)
@@ -2301,6 +2354,7 @@ NTV2BufferLock::NTV2BufferLock (const NTV2_POINTER & inBuffer, const ULWord inFl
 	NTV2_ASSERT_STRUCT_VALID;
 	SetBuffer(inBuffer);
 	SetFlags(inFlags);
+	SetMaxLockSize(0);
 }
 
 NTV2BufferLock::NTV2BufferLock(const ULWord * pInBuffer, const ULWord inByteCount, const ULWord inFlags)
@@ -2309,6 +2363,16 @@ NTV2BufferLock::NTV2BufferLock(const ULWord * pInBuffer, const ULWord inByteCoun
 	NTV2_ASSERT_STRUCT_VALID;
 	SetBuffer (NTV2_POINTER(pInBuffer, inByteCount));
 	SetFlags (inFlags);
+	SetMaxLockSize(0);
+}
+
+NTV2BufferLock::NTV2BufferLock(const ULWord64 inMaxLockSize, const ULWord inFlags)
+	:	mHeader	(NTV2_TYPE_AJABUFFERLOCK, sizeof(NTV2BufferLock))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	SetBuffer (NTV2_POINTER());
+	SetFlags (inFlags);
+	SetMaxLockSize(inMaxLockSize);
 }
 
 bool NTV2BufferLock::SetBuffer (const NTV2_POINTER & inBuffer)

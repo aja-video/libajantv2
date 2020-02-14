@@ -1,7 +1,7 @@
 /**
 	@file		ntv2transcode.cpp
 	@brief		Implements a number of pixel format transcoder functions.
-	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2transcode.h"

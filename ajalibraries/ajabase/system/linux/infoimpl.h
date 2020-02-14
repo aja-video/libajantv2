@@ -1,7 +1,7 @@
 /**
     @file		linux/infoimpl.h
-	@copyright	Copyright (C) 2009-2019 AJA Video Systems, Inc.  All rights reserved.
     @brief		Declares the AJASystemInfoImpl class.
+	@copyright	(C) 2009-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_INFO_IMPL_H

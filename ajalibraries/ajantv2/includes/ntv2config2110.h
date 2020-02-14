@@ -1,7 +1,7 @@
 /**
     @file		ntv2config2110.h
     @brief		Declares the CNTV2Config2110 class.
-    @copyright	(C) 2014-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @copyright	(C) 2014-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2_2110CONFIG_H
@@ -229,7 +229,7 @@ inline int AncStreamToCh(NTV2Stream s)
     @brief	Configures a SMPTE 2110 Transmit Channel.
 **/
 
-class tx_2110Config
+class AJAExport tx_2110Config
 {
 public:
     tx_2110Config() { init(); }
@@ -259,7 +259,7 @@ public:
     @brief	Configures a SMPTE 2110 Receive Channel.
 **/
 
-class rx_2110Config
+class AJAExport rx_2110Config
 {
 public:
     rx_2110Config() { init(); }
@@ -370,6 +370,10 @@ public:
 
 	static uint32_t  Get2110TxStreamIndex(NTV2Stream stream );
     static uint32_t  GetDecapsulatorAddress(eSFP sfp, NTV2Stream stream);
+
+	bool SetLLDPInfo(std::string sysname);
+	bool GetLLDPInfo(std::string &chassisId0, std::string &portId0,
+					std::string &chassisId1, std::string &portId1);
 
     // If method returns false call this to get details
     std::string getLastError();

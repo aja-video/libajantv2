@@ -1,7 +1,7 @@
 /**
     @file		ntv2enums.h
-    @copyright	Copyright (C) 2013-2019 AJA Video Systems, Inc.  All rights reserved.
     @brief		Enumerations for controlling NTV2 devices.
+    @copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef NTV2ENUMS_H
@@ -4814,6 +4814,7 @@ typedef enum
     NTV2IpErrSDPNoANC,
     NTV2IpErrSFPNotFound,
     NTV2IpErrInvalidConfig,
+    NTV2IpErrLLDPNotFound,
     NTV2IpNumErrTypes
 } NTV2IpError;
 

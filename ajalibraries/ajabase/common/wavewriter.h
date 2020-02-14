@@ -1,7 +1,7 @@
 /**
 	@file		wavewriter.h
-	@copyright	Copyright (C) 2010-2019 AJA Video Systems, Inc.  All rights reserved.
 	@brief		Declares the AJAWavWriter class.
+	@copyright	(C) 2010-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJAWAVEWRITER_H

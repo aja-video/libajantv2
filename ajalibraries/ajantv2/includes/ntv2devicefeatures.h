@@ -1,9 +1,8 @@
 /**
 	@file		ntv2devicefeatures.h
-	@brief		Declares all device capability functions.
-	@note		Although this is a .cpp file, it must be compiled by the Linux driver, which is C, not C++.
-				Also, it's used in the Mac driver, which uses a restricted subset of C++ . . . so no STL!
-	@copyright	(C) 2004-2014 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@brief		Declares device capability functions.
+	@note		Although this is a .cpp file, it must be compilable for Lin/Mac/Win kernel device drivers.
+	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2DEVICEFEATURES_H
@@ -109,7 +108,9 @@ AJAExport bool NTV2DeviceGetVideoFormatFromState_Ex2 (	NTV2VideoFormat *		pOutVa
                                                         const bool				inIsProgressivePicture,
                                                         const bool              inIsSquareDivision);
 
-AJAExport bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt);	///< @note	!!! NOT IMPLEMENTED YET !!!
+#if !defined(NTV2_DEPRECATE_15_6)
+	AJAExport bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt);	///< @deprecated	Obsoleted by CNTV2Card::HasCanConnectROM and CNTV2Card::CanConnect
+#endif	//	NTV2_DEPRECATE_15_6
 AJAExport bool NTV2DeviceCanDoTCIndex (const NTV2DeviceID inDeviceID, const NTV2TCIndex inTCIndex);	///< @return	True if the device having the given ID supports the specified NTV2TCIndex.
 AJAExport bool NTV2DeviceCanDoInputTCIndex (const NTV2DeviceID inDeviceID, const NTV2TCIndex inTCIndex);	///< @return	True if the device having the given ID supports the specified NTV2TCIndex for input.
 AJAExport NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID);

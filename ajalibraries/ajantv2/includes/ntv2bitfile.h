@@ -1,7 +1,7 @@
 /**
 	@file		ntv2bitfile.h
-	@brief		Declares the CNTV2Bitfile class that knows how to parse Xilinx bit-files and extract configuration bytestream.
-	@copyright	(C) 2010-2014 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
+	@brief		Declares the CNTV2Bitfile class.
+	@copyright	(C) 2010-2020 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
 **/
 
 #ifndef NTV2BITFILE_H

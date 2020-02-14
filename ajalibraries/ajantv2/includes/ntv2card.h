@@ -1,7 +1,7 @@
 /**
 	@file		ntv2card.h
-	@brief		Declares the CNTV2Card class and the NTV2VideoFormatSet.
-	@copyright	(C) 2004-2019 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@brief		Declares the CNTV2Card class.
+	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2CARD_H
@@ -435,11 +435,11 @@ public:
     **/
 	AJA_VIRTUAL bool	DeviceCanDoHDMIQuadRasterConversion (void);
 
-    /**
-		@brief		Returns true if the device having the given ID supports the audio mixer.
-		@return		True if the device supports the given input source.
-	**/
 	AJA_VIRTUAL bool	DeviceIsDNxIV (void);
+
+    /**
+		@return		Returns true if the device has a microphone input connector.
+	**/
 	AJA_VIRTUAL bool	DeviceHasMicInput (void);
 
 	/**
@@ -707,26 +707,56 @@ public:
 	/**
 		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
 		@param[in]	inBuffer	Specifies the host buffer to lock.
-								If inBuffer.IsNULL(), the driver will unlock all host buffers.
+		@param[in]	inMap		Also try to lock the segment map.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	DMABufferLock (const NTV2_POINTER & inBuffer);
+	AJA_VIRTUAL bool	DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap = false);
 
 	/**
 		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
 		@param[in]	pInBuffer		Specifies the starting address of the host buffer to lock.
 		@param[in]	inByteCount		Specifies the total length of the host buffer.
-		@note		Specifying NULL for "pInBuffer" and 0 for "inByteCount" will command the driver to unlock all buffers.
+		@param[in]	inMap			Also try to lock the segment map.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL inline bool	DMABufferLock (const ULWord * pInBuffer, const ULWord inByteCount)	{return DMABufferLock(NTV2_POINTER(pInBuffer, inByteCount));}
+	AJA_VIRTUAL inline bool	DMABufferLock (const ULWord * pInBuffer, const ULWord inByteCount, bool inMap = false)
+	{
+		return DMABufferLock(NTV2_POINTER(pInBuffer, inByteCount), inMap);
+	}
 
+
+	/**
+		@brief		Unlocks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
+		@param[in]	inBuffer	Specifies the host buffer to unlock.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	DMABufferUnlock (const NTV2_POINTER & inBuffer);
+
+	/**
+		@brief		Unlocks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
+		@param[in]	pInBuffer		Specifies the starting address of the host buffer to unlock.
+		@param[in]	inByteCount		Specifies the total length of the host buffer.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL inline bool	DMABufferUnlock (const ULWord * pInBuffer, const ULWord inByteCount)
+	{
+		return DMABufferUnlock(NTV2_POINTER(pInBuffer, inByteCount));
+	}
 
 	/**
 		@brief		Unlocks all buffers used for DMA transfers.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	DMABufferUnlockAll ();
+
+	/**
+		@brief		Control automatic buffer locking.
+		@param[in]	inEnable		Specify auto locking state.
+        @param[in]	inMap			Also try to lock the segment map.
+        @param[in]	inMaxLockSize	Specify maximum number of locked bytes.
+		@return		True if successful; otherwise false.
+	**/
+    AJA_VIRTUAL bool	DMABufferAutoLock (const bool inEnable, const bool inMap = false, const ULWord64 inMaxLockSize = 0);
 
 
 	/**
@@ -4682,8 +4712,7 @@ public:
 		@param[in]	inOutputXpt		Specifies the output (signal source) of interest.
 		@param[out]	outCanConnect	Receives true if the input can be connected to the specified output;  otherwise false.
 		@return		True if successful;  otherwise false.
-		@bug		This function is not currently implemented.
-		@todo		This needs to be implemented.
+		@note		This function will return false (failure) if the device firmware doesn't support route validation.
 		@see		ntv2signalrouting, CNTV2Card::Connect
 	**/
 	AJA_VIRTUAL bool	CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, bool & outCanConnect);
@@ -4755,6 +4784,8 @@ public:
 		@see		ntv2signalrouting, CNTV2SignalRouter, CNTV2Card::GetRouting, CNTV2Card::ApplySignalRoute
 	**/
 	AJA_VIRTUAL bool	GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRouter & outRouting);
+
+	AJA_VIRTUAL bool	HasCanConnectROM (void);	///< @return	True if the device firmware has ROM containing legal xpt routes
 
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	OutputRoutingTable (const NTV2RoutingTable * pInRoutingTable));	///< @deprecated	Use the ApplySignalRoute call instead.
@@ -6496,8 +6527,11 @@ public:
 	AJA_VIRTUAL bool SetHDMIHDRDCIP3 (void);
 	
 	AJA_VIRTUAL bool SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel);
+	AJA_VIRTUAL bool GetVPIDTransferCharacteristics (NTV2VPIDTransferCharacteristics & outValue, const NTV2Channel inChannel);
 	AJA_VIRTUAL bool SetVPIDColorimetry (const NTV2VPIDColorimetry inValue, const NTV2Channel inChannel);
+	AJA_VIRTUAL bool GetVPIDColorimetry (NTV2VPIDColorimetry & outValue, const NTV2Channel inChannel);
 	AJA_VIRTUAL bool SetVPIDVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel);
+	AJA_VIRTUAL bool GetVPIDVPIDLuminance (NTV2VPIDLuminance & outValue, const NTV2Channel inChannel);
 
 	///@}
 
@@ -6694,6 +6728,7 @@ private:
 	AJA_VIRTUAL bool	GetFBSizeAndCountFromHW(ULWord* size, ULWord* count);
 
 	AJA_VIRTUAL bool	IsMultiFormatActive (void);	///< @return	True if the device supports the multi format feature and it's enabled; otherwise false.
+
 	/**
 		@brief		Answers with the NTV2RegInfo of the register associated with the given boolean (i.e., "Can Do") device feature.
 		@param[in]	inParamID		Specifies the device features parameter of interest.
