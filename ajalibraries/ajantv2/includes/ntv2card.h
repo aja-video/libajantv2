@@ -1675,14 +1675,20 @@ public:
 	AJA_VIRTUAL bool	GetAudioReadOffset (ULWord & outReadOffset, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
-		@brief		Answers with the absolute byte offset in device memory to the given audio buffer offset for the specified
+		@brief		Answers with the byte offset in device memory to the given audio buffer offset for the specified
 					Audio System.
 		@return		True if successful; otherwise false.
-		@param[in]	inOffsetBytes		Specifies a byte offset into the Audio System's audio buffer memory.
-		@param[out]	outAbsByteOffset	Receives the absolute byte offset in device memory.
+		@param[in]	inOffsetBytes		Specifies a byte offset as measured from the top of the Audio System's audio buffer memory.
+										If "inCaptureBuffer" is set to 'true', this value represents the offset as measured from
+										the top of the Audio System's capture buffer.
+		@param[out]	outAbsByteOffset	Receives the equivalent absolute byte offset in device SDRAM.
 		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@param[in]	inCaptureBuffer		If true, "inOffsetBytes" is to be interpreted as relative to the start of the audio
+										capture buffer. If false, the default, "inOffsetBytes" is relative to the start of
+										the audio playout buffer.
 	**/
-	AJA_VIRTUAL bool	GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outAbsByteOffset, const NTV2AudioSystem	inAudioSystem);
+	AJA_VIRTUAL bool	GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outAbsByteOffset,
+												const NTV2AudioSystem	inAudioSystem, const bool inCaptureBuffer = false);
 
 	/**
 		@brief		For the given Audio System, specifies the byte offset in the device's output audio buffer

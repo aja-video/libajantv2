@@ -210,19 +210,27 @@ bool CNTV2Card::GetAudioRate (NTV2AudioRate & outRate, const NTV2AudioSystem inA
 
 bool CNTV2Card::SetAudioBufferSize (const NTV2AudioBufferSize inValue, const NTV2AudioSystem inAudioSystem)
 {
-	if (inValue != NTV2_AUDIO_BUFFER_BIG && ::NTV2DeviceCanDoStackedAudio (_boardID))
+	if (!NTV2_IS_VALID_AUDIO_SYSTEM(inAudioSystem))
+		return false;
+	if (inValue != NTV2_AUDIO_BUFFER_SIZE_4MB && ::NTV2DeviceCanDoStackedAudio(_boardID))
 		return false;	//	Stacked audio devices are fixed at 4MB
-	return WriteRegister (gAudioSystemToAudioControlRegNum [inAudioSystem], inValue, kK2RegMaskAudioBufferSize, kK2RegShiftAudioBufferSize);
+	return WriteRegister (gAudioSystemToAudioControlRegNum[inAudioSystem], inValue, kK2RegMaskAudioBufferSize, kK2RegShiftAudioBufferSize);
 }
 
 
 bool CNTV2Card::GetAudioBufferSize (NTV2AudioBufferSize & outSize, const NTV2AudioSystem inAudioSystem)
 {
-	ULWord		value	(0);
-	const bool	status	(ReadRegister (gAudioSystemToAudioControlRegNum [inAudioSystem], value, kK2RegMaskAudioBufferSize, kK2RegShiftAudioBufferSize));
-	if (status)
-		outSize = static_cast <NTV2AudioBufferSize> (value);
-	return status;
+	if (!NTV2_IS_VALID_AUDIO_SYSTEM(inAudioSystem))
+		return false;
+	outSize = NTV2_AUDIO_BUFFER_SIZE_4MB;	//	NTV2 has standardized on 4MB audio buffers
+	if (::NTV2DeviceCanDoStackedAudio(_boardID))
+		return true;	//	Done!
+
+	ULWord	value(0);
+	if (!ReadRegister (gAudioSystemToAudioControlRegNum[inAudioSystem], value, kK2RegMaskAudioBufferSize, kK2RegShiftAudioBufferSize))
+		return false;
+	outSize = NTV2AudioBufferSize(value);
+	return true;
 }
 
 
