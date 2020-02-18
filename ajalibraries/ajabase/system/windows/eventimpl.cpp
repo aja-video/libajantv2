@@ -153,7 +153,7 @@ AJAEventImpl::WaitForSignal(uint32_t timeout)
 	else
 	{
 		// special case timeout==0, min wait
-		SwitchToThread()
+		SwitchToThread();
 	}
 
 	// the event was signaled
