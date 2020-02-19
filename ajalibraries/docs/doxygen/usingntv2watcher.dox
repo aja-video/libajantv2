@@ -5,15 +5,17 @@
 
 This page describes how to use the <b>NTV2 Watcher</b> tool to interactively monitor and control an AJA device.
 
-<b>Inspectors:</b>
-	-	\ref inspectorgeneralop
-	-	\ref inspectorframebuffer
-	-	\ref inspectoraudio
-	-	\ref inspectoranc
-	-	\ref inspectorac
-	-	\ref inspectormixerkeyer
-	-	\ref inspectorregs
-	-	\ref inspectorroute
+\ref inspectorgeneralop
+	-	Device Selection
+	-	Common Settings
+	-	<b>Inspectors</b>
+		-	\ref inspectorframebuffer
+		-	\ref inspectoraudio
+		-	\ref inspectoranc
+		-	\ref inspectorac
+		-	\ref inspectormixerkeyer
+		-	\ref inspectorregs
+		-	\ref inspectorroute
 
 <b>Tool Windows:</b>
 	-	\ref fillbufferdlog
@@ -53,14 +55,49 @@ To remove a remote device, be sure it’s the currently selected one, then click
 @note	The “NTV2 Nub” must be running on any machine to permit its devices to be monitored remotely.
 
 
+@par	Menu Commands
+
+Here’s what’s in the menu bar:
+-	<b>File</b> Menu
+	-	<b>Save As…</b> — Saves (exports) “raw” data for the \ref inspectorframebuffer and \ref inspectoraudio.
+	-	<b>Print…</b> — Prints the diagram and code panels for the \ref inspectorroute.
+	-	<b>Quit</b> (Linux & Windows only) — Closes/exits the tool.
+-	<b>Edit</b> Menu
+	-	<b>Cut</b> — Disabled.
+	-	<b>Copy</b> — Copies the currently highlighted/selected data, if any, to the host computer’s clipboard.
+	-	<b>Paste</b> — Pastes the host computer’s clipboard contents into the current inspector’s data view, if possible.
+	-	<b>Clear</b> — Deletes or zero’s the currently highlighted/selected data, if possible.
+	-	<b>Select All</b> — Highlights/selects everything in the current inspector’s data view, if possible.
+-	<b>View</b> Menu
+	-	<b>Memory Map</b> — Shows/Hides the \ref memmapdlog.
+	-	<b>CEA608 Monitor</b> — Shows/Hides the \ref anc608viewer.
+	-	<b>Fill Buffers</b> — Shows/Hides the \ref fillbufferdlog.
+	-	<b>Register Cycler</b> — Shows/Hides the \ref regautocycler.
+	-	<b>Tone Generator</b> — Shows/Hides the \ref tonegenerator.
+	-	<b>Register Name</b> — <i>(IP Device inspectors only)</i> — Shows/Hides register names.
+	-	<b>Hex Reg Numbers</b> — <i>(IP Device inspectors only)</i> — Toggles showing IP Device register numbers in hexadecimal or decimal.
+	-	<b>Register Address</b> — <i>(IP Device inspectors only)</i> — Displays IP Device registers as a hexadecimal (BAR) address.
+	-	<b>Register Offset</b> — <i>(IP Device inspectors only)</i> — Displays IP Device registers as a byte offset (from base address).
+	-	<b>Register Number</b> — <i>(IP Device inspectors only)</i> — Displays IP Device registers as an index number (normally ¼ the byte offset).
+	-	<b>Register Number Offset</b> — <i>(IP Device inspectors only)</i> — .
+-	<b>Help</b> Menu
+	-	<b>SDK Support Login</b> — Opens your web browser to the AJA SDK Support site’s home/login page.
+	-	<b>Generate Support Log</b> — Generates a “register log” (aka “support log”) file, which is essential for AJA SDK Support staff
+		to diagnose issues and ascertain the state of the AJA device.
+	-	<b>SDK Documentation</b> — Opens your web browser to the main page of the online SDK Documentation.
+	-	<b>NTV2Watcher User Guide</b> — Opens your web browser to the online \ref usingntv2watcher User Guide.
+
+
 @par	Common Settings
 
 @image	html	watcher-commonsettings.png
 
 There are several settings that are common to the device and apply to all inspectors:
--	<b>Poll Device</b> — Check the box to repeatedly poll the device, and update the Watcher’s data displays. Un-check the box to “freeze” the Watcher’s data displays.
-	Note that some inspectors are sync’d to an input/output/reference VBI and ignore this setting.
--	<b>Polling Interval</b> — Adjusts the polling interval, from 25 milliseconds up to 2 seconds. Note that some inspectors are sync’d to an input/output/reference VBI and ignore this setting.
+-	<b>Poll Device</b> — Check the box to repeatedly poll the device, and update the Watcher’s data displays.
+	Un-check the box to “freeze” the Watcher’s data displays.
+	Some inspectors are sync’d to an input/output/reference VBI and ignore this setting.
+-	<b>Polling Interval</b> — Adjusts the polling interval, from 25 milliseconds up to 2 seconds.
+	Some inspectors are sync’d to an input/output/reference VBI and ignore this setting.
 -	<b>Task Mode</b> — Indicates the device’s current task mode, and allows it to be changed by choosing a different setting.
 -	<b>Multi-Format Mode</b> — Indicates the device’s “multi-format” mode, and allows it to be changed by choosing a different setting.
 -	<b>Reference</b> — Indicates the device’s current clock reference setting, and allows it to be changed by choosing a different setting.

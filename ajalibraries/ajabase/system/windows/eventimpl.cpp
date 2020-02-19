@@ -131,6 +131,8 @@ AJAEventImpl::GetManualReset(bool* pManualReset)
 AJAStatus 
 AJAEventImpl::WaitForSignal(uint32_t timeout)
 {
+	DWORD retCode = WAIT_OBJECT_0;
+
 	// check for open
 	if (mEvent == NULL)
 	{
@@ -142,9 +144,17 @@ AJAEventImpl::WaitForSignal(uint32_t timeout)
 	{
 		timeout = INFINITE;
 	}
-
-	// wait for the event to be signaled
-	DWORD retCode = WaitForSingleObject(mEvent, (DWORD)timeout);
+	
+	if (timeout != 0)
+	{
+		// wait for the event to be signaled
+		retCode = WaitForSingleObject(mEvent, (DWORD)timeout);
+	}
+	else
+	{
+		// special case timeout==0, min wait
+		SwitchToThread();
+	}
 
 	// the event was signaled
 	if (retCode == WAIT_OBJECT_0)

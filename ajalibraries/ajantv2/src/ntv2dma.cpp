@@ -142,10 +142,11 @@ bool CNTV2Card::DmaP2PTransferFrame(NTV2DMAEngine DMAEngine,
 }
 
 
-bool CNTV2Card::GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outAbsByteOffset,  const NTV2AudioSystem inAudioSystem)
+bool CNTV2Card::GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outAbsByteOffset,
+										const NTV2AudioSystem inAudioSystem, const bool inCaptureBuffer)
 {
 	outAbsByteOffset = 0;
-	const NTV2DeviceID	deviceID	(GetDeviceID());
+	const NTV2DeviceID	deviceID(GetDeviceID());
 	if (UWord(inAudioSystem) >= (::NTV2DeviceGetNumAudioSystems(deviceID) + (DeviceCanDoAudioMixer() ? 1 : 0)))
 		return false;	//	Invalid audio system
 
@@ -166,6 +167,8 @@ bool CNTV2Card::GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outA
 		const ULWord	audioFrameBuffer	(::NTV2DeviceGetNumberFrameBuffers(deviceID, fg, fbf) - 1);
 		outAbsByteOffset = inOffsetBytes  +  audioFrameBuffer * ::NTV2DeviceGetFrameBufferSize(deviceID, fg, fbf);
 	}
+	if (inCaptureBuffer)
+		outAbsByteOffset += 0x400000;	//	Add 4MB offset to point to capture buffer
 	return true;
 }
 
