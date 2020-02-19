@@ -145,7 +145,7 @@ AJAEventImpl::WaitForSignal(uint32_t timeout)
 		timeout = INFINITE;
 	}
 	
-	if (timeout != 0)
+	if (true)//(timeout != 0)
 	{
 		// wait for the event to be signaled
 		retCode = WaitForSingleObject(mEvent, (DWORD)timeout);
