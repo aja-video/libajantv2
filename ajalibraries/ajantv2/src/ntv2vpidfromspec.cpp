@@ -11,7 +11,7 @@
 #if !defined(NTV2_BUILDING_DRIVER)
 	#include "ntv2utils.h"
 #elif defined(AJALinux)
-	#define GetNTV2FrameRateFromVideoFormat GetNTV2ActualFrameRateFromVideoFormat
+	#include "ntv2kona.h"
 	NTV2Standard    GetNTV2StandardFromVideoFormat  (NTV2VideoFormat videoFormat);
 	NTV2FrameRate   GetNTV2ActualFrameRateFromVideoFormat (NTV2VideoFormat videoFormat);
 #elif defined(AJAWindows)
