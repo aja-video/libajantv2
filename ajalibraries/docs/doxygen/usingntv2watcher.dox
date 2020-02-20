@@ -5,15 +5,17 @@
 
 This page describes how to use the <b>NTV2 Watcher</b> tool to interactively monitor and control an AJA device.
 
-<b>Inspectors:</b>
-	-	\ref inspectorgeneralop
-	-	\ref inspectorframebuffer
-	-	\ref inspectoraudio
-	-	\ref inspectoranc
-	-	\ref inspectorac
-	-	\ref inspectormixerkeyer
-	-	\ref inspectorregs
-	-	\ref inspectorroute
+\ref inspectorgeneralop
+	-	Device Selection
+	-	Common Settings
+	-	<b>Inspectors</b>
+		-	\ref inspectorframebuffer
+		-	\ref inspectoraudio
+		-	\ref inspectoranc
+		-	\ref inspectorac
+		-	\ref inspectormixerkeyer
+		-	\ref inspectorregs
+		-	\ref inspectorroute
 
 <b>Tool Windows:</b>
 	-	\ref fillbufferdlog
@@ -53,14 +55,49 @@ To remove a remote device, be sure it’s the currently selected one, then click
 @note	The “NTV2 Nub” must be running on any machine to permit its devices to be monitored remotely.
 
 
+@par	Menu Commands
+
+Here’s what’s in the menu bar:
+-	<b>File</b> Menu
+	-	<b>Save As…</b> — Saves (exports) “raw” data for the \ref inspectorframebuffer and \ref inspectoraudio.
+	-	<b>Print…</b> — Prints the diagram and code panels for the \ref inspectorroute.
+	-	<b>Quit</b> (Linux & Windows only) — Closes/exits the tool.
+-	<b>Edit</b> Menu
+	-	<b>Cut</b> — Disabled.
+	-	<b>Copy</b> — Copies the currently highlighted/selected data, if any, to the host computer’s clipboard.
+	-	<b>Paste</b> — Pastes the host computer’s clipboard contents into the current inspector’s data view, if possible.
+	-	<b>Clear</b> — Deletes or zero’s the currently highlighted/selected data, if possible.
+	-	<b>Select All</b> — Highlights/selects everything in the current inspector’s data view, if possible.
+-	<b>View</b> Menu
+	-	<b>Memory Map</b> — Shows/Hides the \ref memmapdlog.
+	-	<b>CEA608 Monitor</b> — Shows/Hides the \ref anc608viewer.
+	-	<b>Fill Buffers</b> — Shows/Hides the \ref fillbufferdlog.
+	-	<b>Register Cycler</b> — Shows/Hides the \ref regautocycler.
+	-	<b>Tone Generator</b> — Shows/Hides the \ref tonegenerator.
+	-	<b>Register Name</b> — <i>(IP Device inspectors only)</i> — Shows/Hides register names.
+	-	<b>Hex Reg Numbers</b> — <i>(IP Device inspectors only)</i> — Toggles showing IP Device register numbers in hexadecimal or decimal.
+	-	<b>Register Address</b> — <i>(IP Device inspectors only)</i> — Displays IP Device registers as a hexadecimal (BAR) address.
+	-	<b>Register Offset</b> — <i>(IP Device inspectors only)</i> — Displays IP Device registers as a byte offset (from base address).
+	-	<b>Register Number</b> — <i>(IP Device inspectors only)</i> — Displays IP Device registers as an index number (normally ¼ the byte offset).
+	-	<b>Register Number Offset</b> — <i>(IP Device inspectors only)</i> — .
+-	<b>Help</b> Menu
+	-	<b>SDK Support Login</b> — Opens your web browser to the AJA SDK Support site’s home/login page.
+	-	<b>Generate Support Log</b> — Generates a “register log” (aka “support log”) file, which is essential for AJA SDK Support staff
+		to diagnose issues and ascertain the state of the AJA device.
+	-	<b>SDK Documentation</b> — Opens your web browser to the main page of the online SDK Documentation.
+	-	<b>NTV2Watcher User Guide</b> — Opens your web browser to the online \ref usingntv2watcher User Guide.
+
+
 @par	Common Settings
 
 @image	html	watcher-commonsettings.png
 
 There are several settings that are common to the device and apply to all inspectors:
--	<b>Poll Device</b> — Check the box to repeatedly poll the device, and update the Watcher’s data displays. Un-check the box to “freeze” the Watcher’s data displays.
-	Note that some inspectors are sync’d to an input/output/reference VBI and ignore this setting.
--	<b>Polling Interval</b> — Adjusts the polling interval, from 25 milliseconds up to 2 seconds. Note that some inspectors are sync’d to an input/output/reference VBI and ignore this setting.
+-	<b>Poll Device</b> — Check the box to repeatedly poll the device, and update the Watcher’s data displays.
+	Un-check the box to “freeze” the Watcher’s data displays.
+	Some inspectors are sync’d to an input/output/reference VBI and ignore this setting.
+-	<b>Polling Interval</b> — Adjusts the polling interval, from 25 milliseconds up to 2 seconds.
+	Some inspectors are sync’d to an input/output/reference VBI and ignore this setting.
 -	<b>Task Mode</b> — Indicates the device’s current task mode, and allows it to be changed by choosing a different setting.
 -	<b>Multi-Format Mode</b> — Indicates the device’s “multi-format” mode, and allows it to be changed by choosing a different setting.
 -	<b>Reference</b> — Indicates the device’s current clock reference setting, and allows it to be changed by choosing a different setting.
@@ -144,11 +181,12 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 	-	<b>Auto</b> — If checked, the frame number being monitored will automatically follow the input or output
 		(depending on frame-store mode) “current frame” register, and the frame number spin control will be disabled.
 		If this is unchecked, the frame number spin control will be available, and the frame being watched can be manually controlled.
-		When unchecked, many other aspects of the device can be controlled (e.g., <b>Mode</b>, <b>Geometry</b>, <b>Format</b>, <b>Size</b>, etc.
+		When unchecked, many other aspects of the device can be controlled (e.g., <b>Mode</b>, <b>Geometry</b>, <b>Format</b>, <b>Size</b>, etc.),
+		including the ability to manually edit/change the buffer content.
 	-	<b>Frame Number</b> spin control:  When available, controls which frame to view.
 		When unavailable, indicates the frame being viewed.
-		@note	Even though the current frame’s contents may have been written in the context of another channel/FrameStore (e.g. '2vuy'),
-				the inspector displays the frame’s data in the context of the current channel/FrameStore (e.g. 'v210'), and thus may
+		@note	Even though the current frame’s contents may have been written in the context of <i>another</i> channel/FrameStore (e.g. '2vuy'),
+				this inspector displays the frame’s data in the context of its <i>current</i> channel/FrameStore (e.g. 'v210'), and thus may
 				appear completely wrong.
 
 @par	Device/Channel Configuration
@@ -244,21 +282,45 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 			copy the underlying raster data in the frame buffer to the position where the selection frame was moved
 			(<b>Line</b> or <b>Raw</b> views only).
 			@image	html	watcher-fb11kMouseDragMode_MoveContents.png
+		-	Press <b>Enter</b> or <b>Return</b> to enter an interactive editing mode:
+			-	Works in <b>Lines</b> or <b>Raw</b> view modes only.
+			-	Starts in the selection’s top-left “cell”.
+			-	Standard text editing behaviors apply.
+			-	Press <b>Esc</b>ape to cancel and make no changes.
+			-	Press <b>Enter</b> or <b>Return</b> to commit the change.
+				This will replace every “cell” of the selection with the new value.
 	-	<b>Right-Click Operations</b>
-		-	<b>View</b> — Changes the view to <b>Lines</b>, <b>Raw</b>, <b>Components</b> or <b>Image</b>.
+		-	<b>View Mode</b> — Changes the view to <b>Lines</b>, <b>Raw</b>, <b>Components</b> or <b>Image</b>.
 		-	<b>Grouping</b> — (<b>Lines</b> and <b>Raw</b> views only) — Changes the data grouping to 8-bit (1-byte), 16-bit (2-byte), 32-bit (4-byte) or 64-bit (8-byte).
 		-	<b>Component Radix</b> — (<b>Components</b> view only) — Changes the radix of the component data to Hexadecimal or Decimal.
 		-	<b>Show Components</b> — (<b>Components</b> view only) — Enables/disables the display of the Luma/Cb/Cr/A or R/G/B/A components.
 		-	<b>Show Fields</b> — (<b>Lines</b> and <b>Components</b> views only) — Enables/disables the display of lines F1, F2 or both.
-		-	<b>Copy</b> — Copies multiple representations of the selection to the Clipboard. If there’s no selection, the entire raster is used.
-		-	<b>Paste</b> — (Available only if an entire frame was previously Copied) — Replaces the current 8MB or 16MB frame with the 8MB or 16MB frame that was Copied earlier.
-		-	<b>Fill…</b> — (<b>Auto</b> mode OFF only) — Reveals the \ref fillbufferdlog for filling device frame memory with specific values or test patterns.
+		-	<b>Bytes/Line</b> — (<b>Raw</b> view only) — Changes the number of bytes to display in each line of the Raw data view.
+			Choose from 64 bytes up to 32K bytes by powers of 2.
+			Note that larger values make for fewer lines and many more columns.
+			Smaller values show many more lines with fewer columns.
+		-	<b>Show/Hide Line Boundaries</b> — (<b>Raw</b> view only) — Shows or hides the line boundary markers.
+		-	<b>Show Little/Big Endian</b> — (<b>Lines</b> and <b>Raw</b> views only) — Toggles endianness of 16/32/64-bit word data display.
+		-	<b>Copy … (Image)</b> — Copies the frame image (or the selected portion) to the host Clipboard.
+		-	<b>Copy … Data (Text)</b> — Copies the frame data (or the currently-selected portion) to the host Clipboard.
+			The data is encoded such that it’s readily usable in C/C++ code, as well as importing into spreadsheet and database programs (.csv).
+		-	<b>Copy … Description</b> — Copies a description of the frame data (or the currently-selected portion) to the host Clipboard.
+		-	<b>Paste</b> — (<b>Auto</b> mode OFF, and only if an entire frame was previously Copied) — Replaces the current 8/16/32MB frame with the 8/16/32MB frame that was Copied earlier.
+		-	<b>Clear</b> — (<b>Auto</b> mode OFF only) — Zeroes the frame (or the currently-selected portion of it).
+		-	<b>Select All</b> — Selects everything possible in the current view mode:
+			-	<b>Image</b> view — Selects the visible lines of the frame.
+			-	<b>Lines</b> and <b>Components</b> views — Selects the visible lines plus VANC lines (if VANC enabled).
+			-	<b>Waveform</b> view — Selects the entire line that’s currently displayed.
+			-	<b>Raw</b> view — Selects the entire 8/16/32MB buffer.
+		-	<b>Fill Frames…</b> — (<b>Auto</b> mode OFF, and nothing selected) — Reveals the \ref fillbufferdlog for filling
+			device frame memory with specific values, colors, test patterns, etc.
+		-	<b>Edit Value…</b> — (<b>Auto</b> mode OFF, <b>Lines</b> or <b>Raw</b> views, something selected) — Enters the interactive editing mode.
+			See “Press <b>Enter</b> or <b>Return</b>” discussion above.
+		-	<b>Swap Byte Order</b> — (<b>Auto</b> mode OFF, <b>Lines</b> or <b>Raw</b> views, 16/32/64-bit groups) — Swaps the byte order
+			of the frame data (or the currently-selected portion).
 		-	<b>Compare to Frame…</b> — (<b>Auto</b> mode OFF only) — Enables <b>Frame Differencing mode</b>,
 			comparing the current frame with another, highlighting the differences.  To cancel this mode,
 			toggle the “Auto” setting, or change the current frame being viewed.
-		-	<b>Bytes/Line</b> — (<b>Raw</b> view only) — Changes the number of bytes to display in each line of the Raw data view. Choose from 64 bytes up to 32K bytes by powers of 2.
-			Note that larger values make for fewer lines and many more columns. Smaller values show many more lines with fewer columns.
-		-	<b>Show/Hide Line Boundaries</b> — (<b>Raw</b> view only) — Shows or hides the line boundary markers.
 
 @par	Data Operations
 	-	<b>File</b> menu
@@ -279,8 +341,11 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 			-	<b>Image</b> — The selected raster image, or, if there’s no selection, the full raster.
 			-	All Others — Text that’s a human-readable, C-compilable dump of the selected data,
 				or if there’s no selection, the entire buffer.
-		-	<b>Select All</b> — Selects (highlights) the entire image (<b>Image</b> view), the entire raster (<b>Lines</b>
-			and <b>Components</b> view), the entire line (<b>Waveform</b> view), or the entire buffer (<b>Raw</b> view).
+		-	<b>Select All</b> — Selects everything possible in the current view mode:
+			-	<b>Image</b> view — Selects the visible lines of the frame.
+			-	<b>Lines</b> and <b>Components</b> views — Selects the visible lines plus VANC lines (if VANC enabled).
+			-	<b>Waveform</b> view — Selects the entire line that’s currently displayed.
+			-	<b>Raw</b> view — Selects the entire 8/16/32MB buffer.
 	-	<b>Buffer Editing</b> — (<b>Lines</b> or <b>Raw</b> view only)
 		-	This will fill a portion of the currently displayed frame buffer with a specific value that you enter from the keyboard.
 		-#	Highlight a selection area of any size.
@@ -314,36 +379,6 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 					All subsequent content in the buffer will remain unchanged.
 				-	If the raw file is larger than the frame buffer, only the current frame being written will be changed.
 
-
-The address space rectangle is overlaid with a number of gray-colored, non-overlapping smaller boxes that represent <b>Frames</b>
-or individual <b>Frame Buffers</b> in device memory.
--	Each <b>Frame</b> is labeled with its unique <b>Frame Number</b>.
--	The first frame, frame <b>0</b>, is the left-most one.
--	Each frame represents a specific, unique byte range in device memory. No two frames ever overlap.
--	In memory, NTV2 device FrameStore widgets (see \ref vidop-fs ) always read or write video at the start of a frame boundary.
--	The width of these frames indicate the device’s <b>Intrinsic Frame Size</b>. At this time, NTV2 devices
-	use an intrinsic frame size of either 8MB or 16MB. When using AutoCirculate in <b>Quad Mode</b> or <b>Quad-Quad Mode</b>,
-	the logical frame size is 4 or 8 times (respectively) the intrinsic frame size.
-
-If an \ref aboutautocirculate channel is running, a translucent box will appear over its <b>Frame Range</b>.
-Its color depends on the video format of the FrameStore/channel: green for SD, purple for HD, blue for 4K, etc.
-
-If a <b>FrameStore</b> is enabled and set for <b>Capture</b> mode, a red box will overlay its current <b>Input Frame</b>,
-indicating that it is currently writing data into that frame.
-The width of the red box indicates the actual raster size, in bytes, being written into the <b>Frame</b>.
-
-If a <b>FrameStore</b> is enabled and set for <b>Playout</b> mode, a green box will overlay its current <b>Output Frame</b>,
-indicating that it is currently reading data from that frame.
-The width of the green box indicates the actual raster size, in bytes, being read from the <b>Frame</b>.
-It’s visually apparent that larger frame geometries and less compact pixel formats use more memory.
-
-<b>Audio Buffers</b> appear at the top end of device SDRAM, near the right edge.
-
-During \ref audiocapture, a red box that represents the Audio System’s capture buffer will overlay the memory display.
-
-During \ref audioplayout, a green box that represents the Audio System’s playout buffer will overlay the memory display.
-
-At any time, you may hover the mouse pointer over any object in the <b>Memory Map</b> to pop up a “tooltip” that contains information about the object.
 
 
 
@@ -709,8 +744,7 @@ connections, the text must syntactically conform to:
 
 The <b>Routing Diagram</b> is where routing changes are performed interactively. This is the panel in which most tasks are performed.
 
-There are two principal types of objects in the diagram:
-
+There are these principal types of objects in the diagram:
 -	<b>Widgets</b> — These represent the functional widgets implemented in the device firmware, such as FrameStores, SDI Inputs, etc.
 	-	<b>Widget</b>s contain one or more <b>Sockets</b> that represent each of the <b>Widget</b>’s crosspoint connections.
 	-	<b>Sockets</b> are little square boxes inside a <b>Widget</b>.
@@ -733,46 +767,71 @@ There are two principal types of objects in the diagram:
 -	<b>Cables/Wires</b> — These represent the currently existing widget crosspoint connections,
 	as read from the device’s “crosspoint select” registers.
 
-Hovering the mouse pointer over any of these aforementioned objects will display a “Tool Tip” that gives detailed information about the object.
-
-Right-clicking on any object will pop up a context menu with command functions that are relevant for the object and its current state.
-
-Right-clicking in the diagram’s gray background pops up a context menu with command functions that affect all channels of the device.
-
--	<b>Video Format</b> — Pops up a sub-menu of video formats supported by the device.
-	Choosing one of these formats globally changes the video format for all channels on the device.
-	Note that if the device is multi-format capable, choosing a format here will place the device into single-format
-	(“uniformat”) mode before globally changing the video format.
--	<b>4K Mode</b> — Available only if the device supports 4K/UHD video. If clicked, pops up a sub-menu of 4K modes supported by the device:
-	-	<b>Tsi</b> — Selects two-sample-interleave (per SMPTE 425-5).
-	-	<b>Squares</b> — Selects the “quad” mode (aka “squares”).
--	<b>8K Mode</b> — Available only if the device supports 8K/UHD2 video. If clicked, pops up a sub-menu of 8K modes supported by the device:
-	-	<b>Tsi</b> — Selects two-sample-interleave (per SMPTE 425-5).
-	-	<b>Squares</b> — Selects “quad-quad” mode.
--	<b>Frame Buffer Format</b> — Pops up a sub-menu of frame buffer pixel formats supported by the device.
-	Choosing one of the formats globally changes the video format for all channels on the device.
--	<b>Clear Cables</b> — Disconnects all connections between widgets.
--	<b>Copy (Diagram)</b> — Copies the diagram image to the clipboard.
--	<b>Copy (Source Code)</b> — Copies the CNTV2Card::Connect calls that are needed
-	to produce the current routing as C/C++ source to the clipboard.
--	<b>Paste Routing</b> — Replaces the current routing with the routing determined by the encoded text from the clipboard.
--	<b>Show All</b> — Reveals all hidden widgets.
--	<b>Hide Unconnected</b> — Hides all widgets that aren’t connected to anything else.
+Standard behaviors:
+-	<b>Hovering</b>
+	-	Hovering the mouse pointer over any object will display a “Tool Tip” that gives detailed information about the object and its current state.
+-	<b>Right-Clicking</b>
+	-	On <b>widgets</b> — Displays a context menu with commands that are relevant for the <b>widget</b> in its current state.
+		<b>Disconnect</b> is common to all widgets.
+	-	On enabled <b>output sockets</b> — Displays a context menu with these commands:
+		-	<b>Disconnect</b> — Disconnects whatever is connected to the <b>output socket</b>, breaking the connection.
+			(This command will be dimmed if the <b>output socket</b> has nothing connected to it.)
+		-	<b>Connect To…</b> — Pops up a submenu listing the available <b>widget input socket</b> connections.
+	-	On enabled <b>input sockets</b> — Displays a context menu with these commands:
+		-	<b>Disconnect</b> — Disconnects whatever is connected to the <b>input socket</b>, breaking the connection.
+			(This menu command will be dimmed if the <b>input socket</b> has nothing connected to it.)
+		-	<b>Connect To…</b> — Pops up a submenu listing the available <b>widget output socket</b> connections.
+			This command will be labeled “Reconnect To…” if the <b>input socket</b> already has a <b>cable</b> connected to it.
+	-	On <b>cables</b> — Displays a context menu with these two commands:
+		-	<b>Copy (Source Code)</b> — Copies the source code containing the CNTV2Card::Connect function call that’s
+			relevant to the <b>cable</b> — i.e. the connection — to the clipboard.
+		-	<b>Disconnect</b> — Disconnects the <b>cable</b>, breaking the connection.
+	-	In the background area — Displays a context menu with commands that globally affect the device:
+		-	<b>Video Format</b> — Pops up a sub-menu of video formats supported by the device.
+			Choosing one of these formats globally changes the video format for all FrameStores on the device.
+			Note that if the device is multi-format capable, choosing a format here will place the device into single-format
+			(“uniformat”) mode before globally changing the video format.
+		-	<b>Pixel Format</b> — Pops up a sub-menu of frame buffer pixel formats supported by the device.
+			Choosing one of the formats globally changes the pixel format for all FrameStores on the device.
+		-	<b>4K Mode</b> — Available only if the device supports 4K/UHD video. If selected, pops up a sub-menu of 4K modes supported by the device:
+			-	<b>Tsi</b> — Selects two-sample-interleave (per SMPTE 425-5).
+			-	<b>Squares</b> — Selects the “quad” mode (aka “squares”).
+		-	<b>8K Mode</b> — Available only if the device supports 8K/UHD2 video. If selected, pops up a sub-menu of 8K modes supported by the device:
+			-	<b>Tsi</b> — Selects two-sample-interleave (per SMPTE 425-5).
+			-	<b>Squares</b> — Selects “quad-quad” mode.
+		-	<b>Clear Cables</b> — Deletes all <b>cable</b> connections.
+		-	<b>Copy (Diagram)</b> — Copies the diagram image to the clipboard.
+		-	<b>Copy (Source Code)</b> — Copies the CNTV2Card::Connect calls that are needed to produce the current routing as C/C++ source to the clipboard.
+		-	<b>Paste Routing</b> — Replaces the current routing with the routing determined by the encoded text from the clipboard.
+		-	<b>Show All</b> — Reveals all hidden widgets.
+		-	<b>Hide Unconnected</b> — Hides all widgets that aren’t connected to anything else.
+		-	<b>Enable/Disable Animation</b> — Enables or disables animation effects.
+		-	<b>Clean Up</b> — Re-arrange the widget layout. (Not yet implemented.)
+-	<b>Drag & Drop</b>
+	-	For IDEs, text editors and word processors that support dragging/dropping text, the <b>Routing Diagram</b> panel will accept
+		text data containing C++ code that contains CNTV2Card::Connect calls. If the dropped code parses correctly, whatever is
+		stipulated by the code will replace the current routing. (NOTE: The parser is dirt-simple — it only works if the <b>Connect</b>
+		function’s parameters are ::NTV2InputCrosspointID and ::NTV2OutputCrosspointID enums.)
 
 <b>Code Panel</b>
 
-The Code Panel textually shows the device’s current routing configuration in one of two ways:
-	-	<b>C++ Code</b> — shows the SDK calls necessary to produce the routing configuration.
-	-	<b>Shorthand</b> — shows the “shorthand” notation for it.
-
-The menu control allows you to choose which encoding form to display.
-The text panel is read-only — i.e., you can’t change what’s in it.
-However, you can make selections, and copy the selected text to the host windowing system’s clipboard.
+The Code Panel shows the device’s current routing configuration in textual form.
+	-	It does this in one of two ways:
+		-	<b>C++ Code</b> — shows the SDK calls necessary to produce the routing configuration.
+		-	<b>Shorthand</b> — shows the “shorthand” notation for it.
+	-	The menu control allows you to choose which encoding form to display.
+	-	The text panel is read-only — i.e., you can’t change what’s in it.
+	-	It supports dragging text from it for dropping elsewhere (e.g. into a code editor window).
+	-	Left-clicking allows text in the panel to be highlighted (selected) interactively with the mouse.
+	-	Right-clicking pops up a context menu with these commands:
+		-	<b>Copy</b> — Copies whatever text is highlighted in the panel to the host clipboard.
+		-	<b>Select All</b> — Highlights all of the text in the panel.
 
 <b>Routing Registers Panel</b>
 
 The Registers Panel shows the device’s routing registers.
 To edit a register’s value, click in its value, change the value, then press Enter (or click elsewhere).
+If this causes a routing change, the diagram (and code panel) will reflect the change.
 
 
 
@@ -998,31 +1057,43 @@ It can readily indicate \ref vidop-fbconflict and/or \ref audioclobber.
 	-	<b>Zoom Controls</b> — Click <b>+</b> to zoom in;  click <b>−</b> to zoom out.
 	-	Memory Region objects:
 		-	<b>Frame</b> — The gray boxes represent the intrinsic 8MB or 16MB frame boundaries.
-			-	The numbers represent the zero-based frame number.
+			-	The numeric labels show the zero-based frame number.
+			-	Each frame represents a specific, unique byte range in device memory. No two frames ever overlap.
+			-	The width indicates the device’s <b>Intrinsic Frame Size</b>. At this time, NTV2 devices use an
+				intrinsic frame size of either 8MB or 16MB.
 		-	<b>AutoCirculate</b> — These translucent boxes span multiple Frames, and represents the frames being used
 			by an \ref aboutautocirculate channel.
-			-	Label contains the AutoCirculate Mode and Channel (e.g. “In1", “Out2”, etc.).
+			-	Color depends on the Channel video format: green for SD, purple for HD, etc.
+			-	Label identifies the Mode and Channel (e.g. “In1", “Out2”, etc.).
+			-	When in <b>Quad Mode</b> (4K/UHD) or <b>Quad-Quad Mode</b> (8K/UHD2), the logical frame size is 4 or 8 times
+				(respectively) the device’s intrinsic frame size.
 			-	Double-click to open the \ref inspectorac.
 			-	Right-click and choose <b>Inspect</b> to open the \ref inspectorac.
 		-	<b>Video Read</b> — (Green) — Represents the “Output Frame” being read by an enabled FrameStore.
 			-	Labeled with the FrameStore’s channel number (e.g. “1”, “2”, etc.).
+			-	In memory, NTV2 FrameStore widgets (see \ref vidop-fs ) always read video starting at the frame boundary
+				(at the lowest address).
+			-	The width of the box indicates how much memory is being read by the FrameStore.
 			-	Double-click to open the \ref inspectorframebuffer.
 			-	Right-click and choose <b>Inspect</b> to open the \ref inspectorframebuffer.
 			-	Drag to change the FrameStore’s “Output Frame”.
 		-	<b>Video Write</b> — (Red) — Represents the “Input Frame” being written by an enabled FrameStore.
 			-	Labeled with the FrameStore’s channel number (e.g. “1”, “2”, etc.).
+			-	In memory, NTV2 FrameStore widgets (see \ref vidop-fs ) always write video starting at the frame boundary
+				(at the lowest address).
+			-	The width of the box indicates how much memory is being written by the FrameStore.
 			-	Double-click to open the \ref inspectorframebuffer.
 			-	Right-click and choose <b>Inspect</b> to open the \ref inspectorframebuffer.
 			-	Drag to change the FrameStore’s “Input Frame”.
-		-	<b>Audio Read</b> — (Green) — Represents the playout audio buffer being read by a running Audio System.
+		-	<b>Audio Read</b> — (Green) — Represents the playout audio buffer being read during \ref audioplayout .
 			-	Labeled with the Audio System (e.g. “A1", “A2”, etc.).
 			-	Double-click to open the \ref inspectoraudio.
 			-	Right-click and choose <b>Inspect</b> to open the \ref inspectoraudio.
-		-	<b>Audio Write</b> — (Red) — Represents the capture audio buffer being written by a running Audio System.
+		-	<b>Audio Write</b> — (Red) — Represents the capture audio buffer being written during \ref audiocapture .
 			-	Labeled with the Audio System (e.g. “A1", “A2”, etc.).
 			-	Double-click to open the \ref inspectoraudio.
 			-	Right-click and choose <b>Inspect</b> to open the \ref inspectoraudio.
-		-	You can <b>hover</b> over any object to pop up a tooltip that contains detailed information about the region.
+		-	You can <b>hover</b> over any object to display a tooltip that contains detailed information about the region.
 
 To close the <b>Memory Map</b> tool window:
 	-	click its close box;

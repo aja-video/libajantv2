@@ -55,6 +55,10 @@ Plays video containing closed-caption data sourced from...
 
 	-v, --vanc                               Uses a (tall) VANC frame geometry for the frame buffer.
 	                                         By default, ntv2ccplayer uses normal frame geometry.
+	
+	--frames {spec}                          Specifies which device frame buffers to use for AutoCirculate capture:
+                                                 numFrames[@startFrame]    Specifies frame count (and optional start frame).
+	                                             startFrame-endFrame       Explicitly specifies start and end frame numbers.
 
 	-n, --noline21                           Don't encode/embed "analog" caption data into line 21 (SD only).
 	                                         By default, for SD output, ntv2ccplayer will encode "analog" CC data into line 21.

@@ -502,9 +502,14 @@ void CNTV2SupportLogger::FetchRegisterLog(std::ostringstream& oss) const
 {
     NTV2RegisterReads	regs;
     const NTV2DeviceID	deviceID	(mDevice.GetDeviceID());
-    const NTV2RegNumSet	deviceRegs	(CNTV2RegisterExpert::GetRegistersForDevice (deviceID));
+    NTV2RegNumSet		deviceRegs	(CNTV2RegisterExpert::GetRegistersForDevice (deviceID));
     const NTV2RegNumSet	virtualRegs	(CNTV2RegisterExpert::GetRegistersForClass (kRegClass_Virtual));
     static const string	sDashes		(96, '-');
+
+	//	Dang, GetRegistersForDevice doesn't/can't read kRegCanDoRegister, so add the CanConnectROM regs here...
+	if (mDevice.HasCanConnectROM())
+		for (ULWord regNum(kRegFirstValidXptROMRegister);  regNum < ULWord(kRegInvalidValidXptROMRegister);  regNum++)
+			deviceRegs.insert(regNum);
 
     oss	<< endl << deviceRegs.size() << " Device Registers " << sDashes << endl << endl;
     regs = ::FromRegNumSet (deviceRegs);
