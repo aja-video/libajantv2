@@ -187,6 +187,7 @@ NTV2DeviceCanDoPlayback
 NTV2DeviceCanDoProgrammableRS422
 NTV2DeviceCanDoQuarterExpand
 NTV2DeviceCanDoRP188
+NTV2DeviceCanDoSDIErrorChecks
 NTV2DeviceCanDoSDVideo
 NTV2DeviceCanDoStackedAudio
 NTV2DeviceCanDoStereoIn
