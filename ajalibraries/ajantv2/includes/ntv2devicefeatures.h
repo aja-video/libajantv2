@@ -18,7 +18,7 @@
 #include "ntv2publicinterface.h"
 
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
-#else
+#elif !defined(NTV2_BUILDING_DRIVER)
 	#define false (0)
 	#define true (!false)
 #endif
@@ -30,6 +30,10 @@
 //	The script writes the implementations into 'ntv2devicefeatures.hpp', and the declarations into 'ntv2devicefeatures.hh'...
 #include "ntv2devicefeatures.hh"
 
+#if defined(__cplusplus) && defined(NTV2_BUILDING_DRIVER)
+extern "C"
+{
+#endif
 /*
 	@return	True if the device having the given ID can do audio output;  otherwise false.
 	@param[in]	inDeviceID	Specifies the NTV2DeviceID of the device of interest.
@@ -61,7 +65,7 @@ AJAExport UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2F
 // 
 // TODO: Audit all platforms and switch all the original calls to the _Ex
 // versions.
-#if defined(__CPLUSPLUS__) || defined(__cplusplus)
+#if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
 	AJAExport ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID boardID);		//	Revisit for 2MB granularity
 	AJAExport ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID boardID);		//	Revisit for 2MB granularity
 	AJAExport ULWord NTV2DeviceGetAudioFrameBuffer(NTV2DeviceID boardID);		//	Revisit for 2MB granularity
@@ -297,5 +301,9 @@ AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoRS422N (const NTV2DeviceID inDev
 	#define	NTV2BoardNeedsRoutingSetup					NTV2DeviceNeedsRoutingSetup						///< @deprecated	Use NTV2DeviceNeedsRoutingSetup instead.
 	#define	NTV2BoardSoftwareCanChangeFrameBufferSize	NTV2DeviceSoftwareCanChangeFrameBufferSize		///< @deprecated	Use NTV2DeviceSoftwareCanChangeFrameBufferSize instead.
 #endif	//	!defined (NTV2_DEPRECATE)
+
+#if defined(__cplusplus) && defined(NTV2_BUILDING_DRIVER)
+}
+#endif
 
 #endif	//	NTV2DEVICEFEATURES_H

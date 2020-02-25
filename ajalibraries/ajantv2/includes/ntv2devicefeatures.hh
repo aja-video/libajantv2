@@ -8,6 +8,12 @@
 #ifndef NTV2DEVICEFEATURES_HH
 #define NTV2DEVICEFEATURES_HH
 
+#if defined(__cplusplus) && defined(NTV2_BUILDING_DRIVER)
+extern "C"
+{
+#endif
+
+
 /**
 	@param[in]	inDeviceID		Specifies the NTV2DeviceID of interest.
 **/
@@ -875,6 +881,12 @@ AJAExport bool NTV2DeviceCanDoVideoFormat (const NTV2DeviceID inDeviceID, const 
 	@param[in]	inWidgetID		Specifies the NTV2WidgetID.
 **/
 AJAExport bool NTV2DeviceCanDoWidget (const NTV2DeviceID inDeviceID, const NTV2WidgetID inWidgetID);
+#define NTV2DEVICEFEATURES_HH
+
+#if defined(__cplusplus) && defined(NTV2_BUILDING_DRIVER)
+}
+#endif
+
 
 
 #endif	//	NTV2DEVICEFEATURES_HH

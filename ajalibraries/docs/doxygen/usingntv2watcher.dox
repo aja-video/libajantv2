@@ -457,26 +457,58 @@ The display highlights changed content with a brighter color.
 		-	Use the page-up or page-down keys to scroll the display up or down by a larger amount.
 	-	<b>Vertical Ruler</b> — This ruler identifies each audio channel in the display.
 		Each channel can be augmented with “Absent”, “PCM” or “Non-PCM” (or “Mute” or “Non-PCM Dolby” with <b>AutoDetect</b> enabled).
+		-	Right-click to change the <b>Vertical Scale</b>. Choose from “Shortest” to “Tallest”.
 	-	<b>Horizontal Ruler</b> — This ruler identifies the offset into the audio buffer of each column (or pixel, horizontally) in the audio buffer.
 		-	Right-click in the horizontal ruler to pop up the <b>Units</b> menu:
 			-	<b>Byte Offset</b> — Shows the buffer offset as a byte count, in hexadecimal.
 			-	<b>Samples</b> — Shows the buffer offset as a zero-based decimal sample index number.
 			-	<b>Seconds</b> — Shows the buffer offset as a fixed-point decimal time value (in microseconds, milliseconds, or seconds, as appropriate).
+			-	<b>Abs Address</b> — Shows the buffer offset as an absolute physical device SDRAM address (in hex).
 			-	This setting affects the units used in the <b>Change Indicator</b> in the status bar.
 	-	Right-click in the display to pop up a context-sensitive menu:
 		-	<b>View</b> menu:
 			-	<b>Raw</b> — Switch to the <b>Raw</b> view.
 			-	<b>Waveform</b> — Switch to the <b>Waveform</b> view.
 			-	<b>Phase</b> — Switch to the <b>Phase</b> view.
-		-	<b>Units</b> menu:
+		-	<b>Units</b> menu (<b>Raw</b> View only):
 			-	<b>Hex</b> — Shows raw sample data as 4-byte hexadecimal values.
 			-	<b>Decimal</b> — Shows raw sample data as decimal values.
 			-	<b>Percent</b> — Shows raw sample data as a decimal percentage of maximum.
 			-	<b>Float</b> — Shows samples as floating point values.
 			-	<b>dB</b> — Shows samples in decibels.
-		-	<b>Copy</b> — Copies the audio buffer contents to the clipboard.
-		-	<b>Paste</b> — (<b>Output</b> mode only) Pastes the clipboard contents into the output audio buffer.
+		-	<b>Scale</b> menu (<b>Waveform</b> View only):
+			-	<b>Fit in Window</b> — Shows all samples in audio buffer in the window.
+			-	<b>1:1</b> — Shows 1 sample per pixel.
+			-	<b>1:2</b> — Shows 2 samples per pixel.
+			-	<b>1:4</b> — Shows 4 samples per pixel.
+			-	<b>1:8</b> — Shows 8 samples per pixel.
+			-	<b>1:16</b> — Shows 16 samples per pixel.
+		-	<b>Copy Waveform</b> — (<b>Waveform</b> View only) — Copies the selected waveform to the host’s clipboard.
+		-	<b>Copy Text</b> — (<b>Raw</b> View only) — Copies the selected samples to the host’s clipboard.
+		-	<b>Copy All Raw Data</b> — Copies the entire buffer to the host’s clipboard.
+		-	<b>Paste Raw Data</b> — Pastes the entire buffer into the audio buffer.
 			Available only if previously copied from an Audio inspector view.
+		-	<b>Clear</b> — Sets the selected samples in the audio buffer to zero (silence).
+		-	<b>Import Audio…</b> — Opens a file-picker dialog to choose an audio file to import and fill the audio buffer.
+		-	<b>Export WAV…</b> — Opens a file-save dialog, and if confirmed, exports the selected audio samples to a WAV audio file.
+		-	<b>Export RAW…</b> — Opens a file-save dialog, and if confirmed, copies the selected audio samples from the audio buffer into a RAW audio file.
+		-	<b>View in Frame Buffer</b> — Shows the selected audio samples in the <b>Raw View</b> of the \ref inspectorframebuffer .
+	-	<b>Selecting</b> — A rectangular <b>region-of-interest</b> of the audio buffer can be selected/highlighted,
+		and shown as a yellow box in the view.
+		-	The current selection, if any, is described in the status bar, to the left of the refresh timing indicator.
+		-	To cancel the current selection, press <b>Esc</b>ape.
+		-	Switching views will attempt to retain the current selection. If this is not possible, then the selection will be reset/cancelled.
+		-	Left-click in the display (and optionally drag up/down/left/right) to select a portion of the audio buffer.
+			-	Vertically, one or more <b>Channel</b>s will be selected.
+			-	Horizontally, one or more <b>Sample</b>s (sometimes called “frames”) will be selected.
+		-	Use the arrow keys to precisely and incrementally change the existing selection:
+			-	By default, the selection will change to a single-sample selection above/left of the top/left corner,
+				or below/right of the bottom/right corner.
+			-	Hold the <b>Shift</b> key down to expand the selection from the top/left or bottom/right corner.
+			-	Hold the <b>Ctrl</b> (<b>Command</b> on MacOS) key down to shrink the selection from the top/left or bottom/right corner.
+		-	Choose <b>Select All</b> from the <b>Edit</b> menu to select all samples in the buffer.
+		-	Moving the mouse cursor into the selection will cause a ToolTip to appear that describes the selection.
+		-	Dragging from inside the selection box will start making a new selection.
 
 Use the \ref tonegenerator to fill the audio output buffer, either statically (one-time data fill) or dynamically (continuously).
 
