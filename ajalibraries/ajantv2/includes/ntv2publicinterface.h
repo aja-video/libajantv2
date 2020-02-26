@@ -6149,6 +6149,8 @@ typedef enum
 				/**
 					@brief		Replaces my contents from the given memory buffer.
 					@param[in]	inBuffer	Specifies the memory buffer whose contents are to be copied into my own.
+											If this buffer is larger than I am, I am not resized; instead, only
+											those bytes that fit in me will be copied.
 					@return		True if successful; otherwise false.
 				**/
 				bool			SetFrom (const NTV2_POINTER & inBuffer);
