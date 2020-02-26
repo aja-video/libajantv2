@@ -216,7 +216,7 @@ inline uint64_t AJAByteStream::Read64LE() {
 
 inline uint64_t AJAByteStream::Read64BE() {
 	uint64_t ret;
-	ret |= (uint64_t)c[0] << 56;
+	ret = (uint64_t)c[0] << 56;
 	ret |= (uint64_t)c[1] << 48;
 	ret |= (uint64_t)c[2] << 40;
 	ret |= (uint64_t)c[3] << 32;

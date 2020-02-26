@@ -117,7 +117,7 @@ TEST_SUITE("bytestream" * doctest::description("functions in ajabase/common/byte
 
         b.Write32BE(0xdecafbad);
         b.Write32LE(0xd4c3b2a1);
-        b.Write64BE(0x0102030405060708);
+        b.Write64BE(0x1337c0de1337c0de);
         b.Write64LE(0x0807060504030201);
         b.SeekRev(24);
         CHECK(b.Read32LE() == 0xadfbcade);
@@ -126,10 +126,10 @@ TEST_SUITE("bytestream" * doctest::description("functions in ajabase/common/byte
         CHECK(b.Read32BE() == 0xa1b2c3d4);
         b.SeekRev(4);
         CHECK(b.Read32LE() == 0xd4c3b2a1);
-        CHECK(b.Read64BE() == 0x0102030405060708);
+        CHECK(b.Read64BE() == 0x1337c0de1337c0de);
         CHECK(b.Read64LE() == 0x0807060504030201);
         b.SeekRev(16);
-        CHECK(b.Read64LE() == 0x0807060504030201);
+        CHECK(b.Read64LE() == 0xdec03713dec03713);
         CHECK(b.Read64BE() == 0x0102030405060708);
 
         b.Seek(25);
