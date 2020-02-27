@@ -11,10 +11,14 @@
 #if !defined(NTV2_BUILDING_DRIVER)
 	#include "ntv2utils.h"
 #else
+#ifdef __cplusplus
 	extern "C"
 	{
+#endif
 	#include "ntv2kona.h"
+#ifdef __cplusplus
 	}
+#endif
 #endif
 
 bool SetVPIDFromSpec (ULWord * const			pOutVPID,
