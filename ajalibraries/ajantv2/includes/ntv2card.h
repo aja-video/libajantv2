@@ -906,6 +906,36 @@ public:
 		@param[out]		outRefSource	Receives the ::NTV2ReferenceSource value.
 	**/
 	AJA_VIRTUAL bool		GetReference (NTV2ReferenceSource & outRefSource);
+	
+	/**
+		@brief		Enables the device's frame pulse reference select. See \ref deviceclockingandsync for more information.
+		@return		True if successful; otherwise false.
+		@param[in]	inRefSource		Specifies the ::NTV2ReferenceSource to use.
+					
+	**/
+	AJA_VIRTUAL	bool		EnableFramePulseReference (bool enable);
+	
+	/**
+		@brief			Answers with the device's current frame pulse reference source. See \ref deviceclockingandsync for more information.
+		@return			True if successful; otherwise false.
+		@param[out]		outRefSource	Receives the ::NTV2ReferenceSource value.
+	**/
+	AJA_VIRTUAL	bool		GetEnableFramePulseReference (bool & outValue);
+	
+	/**
+		@brief		Sets the device's frame pulse reference source. See \ref deviceclockingandsync for more information.
+		@return		True if successful; otherwise false.
+		@param[in]	inRefSource		Specifies the ::NTV2ReferenceSource to use.
+					
+	**/
+	AJA_VIRTUAL	bool		SetFramePulseReference (NTV2ReferenceSource value);
+	
+	/**
+		@brief			Answers with the device's current frame pulse reference source. See \ref deviceclockingandsync for more information.
+		@return			True if successful; otherwise false.
+		@param[out]		outRefSource	Receives the ::NTV2ReferenceSource value.
+	**/
+	AJA_VIRTUAL	bool		GetFramePulseReference (NTV2ReferenceSource & outValue);
 
 	/**
 		@brief		Retrieves the device's current "retail service" task mode.

@@ -1335,6 +1335,9 @@ typedef enum
 	kRegMaskQuadQuadMode		= BIT(2),
 	kRegMaskQuadQuadMode2		= BIT(3),
 	kRegMaskQuadQuadSquaresMode	= BIT(4),
+	kRegMaskVUMeterSelect		= BIT(5),
+	kRegMaskFramePulseEnable	= BIT(6),
+	kRegMaskFramePulseRefSelect	= BIT(8) + BIT(9) + BIT(10) + BIT(11),
 
 
 	// Channel Control - kRegCh1Control, kRegCh2Control, kRegCh3Control, kRegCh4Control
@@ -2498,6 +2501,9 @@ typedef enum
 	kRegShiftQuadQuadMode = 2,
 	kRegShiftQuadQuadMode2 = 3,
 	kRegShiftQuadQuadSquaresMode = 4,
+	kRegShiftVUMeterSelect = 5,
+	kRegShiftFramePulseEnable = 6,
+	kRegShiftFramePulseRefSelect = 8,
 
 	// Channel Control - kRegCh1Control, kRegCh2Control, kRegCh3Control, kRegCh4Control
 	kRegShiftMode						= 0,
