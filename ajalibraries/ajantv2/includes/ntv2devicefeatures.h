@@ -54,6 +54,12 @@ AJAExport bool NTV2DeviceCanDo12GIn(NTV2DeviceID boardID, UWord index0);
 AJAExport bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0);
 
 /**
+	@return	True if the device having the given ID supports the given output destination connector;  otherwise false.
+	@param[in]	inDeviceID	Specifies the NTV2DeviceID of the device of interest.
+**/
+AJAExport bool NTV2DeviceCanDoOutputDestination (const NTV2DeviceID inDeviceID, const NTV2OutputDestination inOutputDest);
+
+/**
 	@return	The minimum number of 8MB chunks that will accommodate a raster having the given frame geometry and pixel format.
 	@param[in]	inFG	A valid frame geometry.
 	@param[in]	inFBF	A valid frame buffer format.

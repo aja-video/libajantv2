@@ -13,6 +13,7 @@
 //	Most of the device features functions are generated using a Python script from files inside 'ntv2projects/sdkgen/device'.
 //	The script writes the declarations into 'ntv2devicefeatures.hh', and implementations into 'ntv2devicefeatures.hpp'...
 #include "ntv2devicefeatures.hpp"
+#include "ntv2utils.h"
 
 ///////////////////////////////////////////////////////////////////////////
 //	The rest of the non-sdkgen-generated function implementations follow...
@@ -129,6 +130,26 @@ bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0)
 		default:	return false;
 	}
 }	//	NTV2DeviceCanDoLTCEmbeddedN
+
+bool NTV2DeviceCanDoOutputDestination (const NTV2DeviceID inDeviceID, const NTV2OutputDestination inOutputDest)
+{
+	
+	switch(inOutputDest)
+	{
+		case NTV2_OUTPUTDESTINATION_ANALOG:	return ::NTV2DeviceGetNumAnalogVideoOutputs(inDeviceID) >= 1;
+		case NTV2_OUTPUTDESTINATION_HDMI:	return ::NTV2DeviceGetNumHDMIVideoOutputs(inDeviceID) >= 1;
+		case NTV2_OUTPUTDESTINATION_SDI1:
+		case NTV2_OUTPUTDESTINATION_SDI2:
+		case NTV2_OUTPUTDESTINATION_SDI3:
+		case NTV2_OUTPUTDESTINATION_SDI4:
+		case NTV2_OUTPUTDESTINATION_SDI5:
+		case NTV2_OUTPUTDESTINATION_SDI6:
+		case NTV2_OUTPUTDESTINATION_SDI7:
+		case NTV2_OUTPUTDESTINATION_SDI8:	return ::GetIndexForNTV2Channel(::NTV2OutputDestinationToChannel(inOutputDest)) < ::NTV2DeviceGetNumVideoOutputs(inDeviceID);
+		default:							break;
+	}
+	return false;
+}
 
 
 UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBufferFormat inFBF)
