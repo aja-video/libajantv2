@@ -132,11 +132,11 @@ bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0)
 
 bool NTV2DeviceCanDoOutputDestination (const NTV2DeviceID inDeviceID, const NTV2OutputDestination inOutputDest)
 {
-	const UWord numSDIs(::NTV2DeviceGetNumVideoOutputs(inDeviceID));
+	const UWord numSDIs = NTV2DeviceGetNumVideoOutputs(inDeviceID);
 	switch(inOutputDest)
 	{
-		case NTV2_OUTPUTDESTINATION_ANALOG:	return ::NTV2DeviceGetNumAnalogVideoOutputs(inDeviceID) > 0;
-		case NTV2_OUTPUTDESTINATION_HDMI:	return ::NTV2DeviceGetNumHDMIVideoOutputs(inDeviceID) > 0;
+		case NTV2_OUTPUTDESTINATION_ANALOG:	return NTV2DeviceGetNumAnalogVideoOutputs(inDeviceID) > 0;
+		case NTV2_OUTPUTDESTINATION_HDMI:	return NTV2DeviceGetNumHDMIVideoOutputs(inDeviceID) > 0;
 		case NTV2_OUTPUTDESTINATION_SDI1:	return numSDIs > 0;
 		case NTV2_OUTPUTDESTINATION_SDI2:	return numSDIs > 1;
 		case NTV2_OUTPUTDESTINATION_SDI3:	return numSDIs > 2;
