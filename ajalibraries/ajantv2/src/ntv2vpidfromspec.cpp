@@ -15,6 +15,7 @@
 extern "C"
 {
 #endif
+#endif
 	#include "ntv2kona.h"
 #ifdef __cplusplus
 }
