@@ -711,24 +711,24 @@ AJAExport bool IsMultiFormatCompatible (const NTV2FrameRate inFrameRate1, const 
 **/
 AJAExport bool IsMultiFormatCompatible (const NTV2VideoFormat inFormat1, const NTV2VideoFormat inFormat2);
 
-AJAExport bool IsPSF(NTV2VideoFormat format);
-AJAExport bool IsProgressivePicture(NTV2VideoFormat format);
-AJAExport bool IsProgressiveTransport(NTV2VideoFormat format);
-AJAExport bool IsProgressiveTransport(NTV2Standard format);
-AJAExport bool IsRGBFormat(NTV2FrameBufferFormat format);
-AJAExport bool IsYCbCrFormat(NTV2FrameBufferFormat format);
-AJAExport bool IsAlphaChannelFormat(NTV2FrameBufferFormat format);
-AJAExport bool Is2KFormat(NTV2VideoFormat format);
-AJAExport bool Is4KFormat(NTV2VideoFormat format);
-AJAExport bool Is8KFormat(NTV2VideoFormat format);
-AJAExport bool IsRaw(NTV2FrameBufferFormat format);
-AJAExport bool Is8BitFrameBufferFormat(NTV2FrameBufferFormat fbFormat);
-AJAExport bool IsVideoFormatA(NTV2VideoFormat format);
-AJAExport bool IsVideoFormatB(NTV2VideoFormat format);
-AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format);
+AJAExport bool IsPSF (const NTV2VideoFormat format);
+AJAExport bool IsProgressivePicture (const NTV2VideoFormat format);
+AJAExport bool IsProgressiveTransport (const NTV2VideoFormat format);
+AJAExport bool IsProgressiveTransport (const NTV2Standard format);
+AJAExport bool IsRGBFormat (const NTV2FrameBufferFormat format);
+AJAExport bool IsYCbCrFormat (const NTV2FrameBufferFormat format);
+AJAExport bool IsAlphaChannelFormat (const NTV2FrameBufferFormat format);
+AJAExport bool Is2KFormat (const NTV2VideoFormat format);
+AJAExport bool Is4KFormat (const NTV2VideoFormat format);
+AJAExport bool Is8KFormat (const NTV2VideoFormat format);
+AJAExport bool IsRaw (const NTV2FrameBufferFormat format);
+AJAExport bool Is8BitFrameBufferFormat (const NTV2FrameBufferFormat fbFormat);
+AJAExport bool IsVideoFormatA (const NTV2VideoFormat format);
+AJAExport bool IsVideoFormatB (const NTV2VideoFormat format);
+AJAExport bool IsVideoFormatJ2KSupported (const NTV2VideoFormat format);
 
 
-AJAExport int  RecordCopyAudio(PULWord pAja, PULWord pSR, int iStartSample, int iNumBytes, int iChan0,
+AJAExport int  RecordCopyAudio (PULWord pAja, PULWord pSR, int iStartSample, int iNumBytes, int iChan0,
 							   int iNumChans, bool bKeepAudio24Bits);
 
 /**

@@ -6098,93 +6098,93 @@ AJAExport bool IsMultiFormatCompatible (const NTV2VideoFormat inFormat1, const N
 }	//	IsMultiFormatCompatible (NTV2VideoFormat)
 
 
-AJAExport bool IsPSF(NTV2VideoFormat format)
+AJAExport bool IsPSF (const NTV2VideoFormat format)
 {
-	return NTV2_IS_PSF_VIDEO_FORMAT (format);
+	return NTV2_IS_PSF_VIDEO_FORMAT(format);
 }
 
 
-AJAExport bool IsProgressivePicture(NTV2VideoFormat format)
+AJAExport bool IsProgressivePicture (const NTV2VideoFormat format)
 {
-	return NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE (format);
+	return NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(format);
 }
 
 
-AJAExport bool IsProgressiveTransport(NTV2VideoFormat format)
+AJAExport bool IsProgressiveTransport (const NTV2VideoFormat format)
 {
-	NTV2Standard standard = GetNTV2StandardFromVideoFormat(format);
+	NTV2Standard standard (::GetNTV2StandardFromVideoFormat(format));
 	return IsProgressiveTransport(standard);
 }
 
 
-AJAExport bool IsProgressiveTransport(NTV2Standard standard)
+AJAExport bool IsProgressiveTransport (const NTV2Standard standard)
 {
-	return NTV2_IS_PROGRESSIVE_STANDARD (standard);
+	return NTV2_IS_PROGRESSIVE_STANDARD(standard);
 }
 
 
-AJAExport bool IsRGBFormat(NTV2FrameBufferFormat format)
+AJAExport bool IsRGBFormat (const NTV2FrameBufferFormat format)
 {
-	return NTV2_IS_FBF_RGB (format);
+	return NTV2_IS_FBF_RGB(format);
 }
 
 
-AJAExport bool IsYCbCrFormat(NTV2FrameBufferFormat format)
+AJAExport bool IsYCbCrFormat (const NTV2FrameBufferFormat format)
 {
-	return !NTV2_IS_FBF_RGB (format);	// works for now
+	return !NTV2_IS_FBF_RGB(format);	// works for now
 }
 
 
-AJAExport bool IsAlphaChannelFormat(NTV2FrameBufferFormat format)
+AJAExport bool IsAlphaChannelFormat (const NTV2FrameBufferFormat format)
 {
-	return NTV2_FBF_HAS_ALPHA (format);
+	return NTV2_FBF_HAS_ALPHA(format);
 }
 
 
-AJAExport bool Is2KFormat(NTV2VideoFormat format)
+AJAExport bool Is2KFormat (const NTV2VideoFormat format)
 {
-	return NTV2_IS_2K_1080_VIDEO_FORMAT (format) || NTV2_IS_2K_VIDEO_FORMAT (format);
+	return NTV2_IS_2K_1080_VIDEO_FORMAT(format)  ||  NTV2_IS_2K_VIDEO_FORMAT(format);
 }
 
 
-AJAExport bool Is4KFormat(NTV2VideoFormat format)
+AJAExport bool Is4KFormat (const NTV2VideoFormat format)
 {
-	return NTV2_IS_4K_4096_VIDEO_FORMAT (format) || NTV2_IS_4K_QUADHD_VIDEO_FORMAT (format);
+	return NTV2_IS_4K_4096_VIDEO_FORMAT(format)  ||  NTV2_IS_4K_QUADHD_VIDEO_FORMAT(format);
 }
 
 
-AJAExport bool Is8KFormat(NTV2VideoFormat format)
+AJAExport bool Is8KFormat (const NTV2VideoFormat format)
 {
-	return NTV2_IS_QUAD_QUAD_FORMAT (format);
+	return NTV2_IS_QUAD_QUAD_FORMAT(format);
 }
 
 
-AJAExport bool IsRaw(NTV2FrameBufferFormat frameBufferFormat)
+AJAExport bool IsRaw (const NTV2FrameBufferFormat frameBufferFormat)
 {
-	return NTV2_FBF_IS_RAW (frameBufferFormat);
+	return NTV2_FBF_IS_RAW(frameBufferFormat);
 }
 
 
-AJAExport bool Is8BitFrameBufferFormat(NTV2FrameBufferFormat format)
+AJAExport bool Is8BitFrameBufferFormat (const NTV2FrameBufferFormat format)
 {
-	return NTV2_IS_FBF_8BIT (format);
+	return NTV2_IS_FBF_8BIT(format);
 }
 
 
-AJAExport bool IsVideoFormatA (NTV2VideoFormat format)
+AJAExport bool IsVideoFormatA (const NTV2VideoFormat format)
 {
-	return NTV2_VIDEO_FORMAT_IS_A (format);
+	return NTV2_VIDEO_FORMAT_IS_A(format);
 }
 
 
-AJAExport bool IsVideoFormatB(NTV2VideoFormat format)
+AJAExport bool IsVideoFormatB (const NTV2VideoFormat format)
 {
-	return NTV2_IS_3Gb_FORMAT (format);
+	return NTV2_IS_3Gb_FORMAT(format);
 }
 
-AJAExport bool IsVideoFormatJ2KSupported(NTV2VideoFormat format)
+AJAExport bool IsVideoFormatJ2KSupported (const NTV2VideoFormat format)
 {
-    return NTV2_VIDEO_FORMAT_IS_J2K_SUPPORTED (format);
+    return NTV2_VIDEO_FORMAT_IS_J2K_SUPPORTED(format);
 }
 
 
@@ -8553,8 +8553,8 @@ string NTV2OutputDestinationToString (const NTV2OutputDestination inValue, const
 	{
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Analog", NTV2_OUTPUTDESTINATION_ANALOG);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "HDMI", NTV2_OUTPUTDESTINATION_HDMI);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI 1", NTV2_OUTPUTDESTINATION_SDI1);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI 2", NTV2_OUTPUTDESTINATION_SDI2);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI1", NTV2_OUTPUTDESTINATION_SDI1);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI2", NTV2_OUTPUTDESTINATION_SDI2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI3", NTV2_OUTPUTDESTINATION_SDI3);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI4", NTV2_OUTPUTDESTINATION_SDI4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI5", NTV2_OUTPUTDESTINATION_SDI5);
