@@ -14,9 +14,7 @@
 	#include <stdint.h>
 	#include <stdlib.h>
 #endif
-#include "ajatypes.h"
-#include "ajaexport.h"
-#include "ntv2enums.h"
+#include "ntv2publicinterface.h"
 
 /**
 	@brief	Bitfile information flags.
@@ -37,7 +35,7 @@ struct AJAExport NTV2BitfileInfo
 	ULWord designVersion;
 	ULWord bitfileID;
 	ULWord bitfileVersion;
-	ULWord flags;
+	ULWord bitfileFlags;
 	ULWord deviceID;
 };
 
@@ -90,49 +88,37 @@ public:
 		@brief	Returns an NTV2BitfileInfoList standard C++ vector.
 		@return	A reference to my NTV2BitfileInfoList.
 	**/
-	virtual NTV2DeviceInfoList &		GetBitfileInfoList (void);
+	virtual NTV2BitfileInfoList &		GetBitfileInfoList (void);
 
 	/**
-	   @brief		Get a pointer to the specified tandem bitfile.
+	   @brief		Get a pointer to the specified bitstream.
 	   @param[in]	deviceID		Specifies the device ID of the bitfile.
-	   @param[in]	bitfileVersion	Specifies the bitfile version (0xff for latest).
 	   @param[in]	designVersion	Specifies the design version of the bitfile (0xff for latest).
+	   @param[in]	bitfileVersion	Specifies the bitfile version (0xff for latest).
+	   @param[in]	bitfileFlags	Specifies the bitfile flags.
 	   @return		True if the bitfile is present; otherwise false.
 	**/
-	virtual bool						GetTandemStream (NTV2_POINTER & bitstream,
-														 ULWord deviceID,
-														 ULWord bitfileVersion,
-														 ULWord designVersion);
-
-	/**
-	   @brief		Get a pointer to the specified clear bitfile.
-	   @param[in]	deviceID		Specifies the device ID of the bitfile.
-	   @param[in]	bitfileVersion	Specifies the bitfile version (0xff for latest).
-	   @param[in]	designVersion	Specifies the design version of the bitfile (0xff for latest).
-	   @return		True if the bitfile is present; otherwise false.
-	**/
-	virtual bool						GetClearStream (NTV2_POINTER & bitstream,
-														ULWord deviceID,
-														ULWord bitfileVersion,
-														ULWord designVersion);
-
-	/**
-	   @brief		Get a pointer to the specified partial bitfile.
-	   @param[in]	deviceID		Specifies the device ID of the bitfile.
-	   @param[in]	bitfileVersion	Specifies the bitfile version (0xff for latest).
-	   @param[in]	designVersion	Specifies the design version of the bitfile (0xff for latest).
-	   @return		True if the bitfile is present; otherwise false.
-	**/
-	virtual bool						GetPartialStream (NTV2_POINTER & bitstream,
-														  ULWord deviceID,
-														  ULWord bitfileVersion,
-														  ULWord designVersion);
+	virtual bool						GetBitStream (NTV2_POINTER & bitstream,
+													  ULWord deviceID,
+													  ULWord designVersion,
+													  ULWord bitfileVersion,
+													  ULWord bitfileFlags);
 
 private:
 
+	/**
+	   @brief		Read the specified bitstream.
+	   @param[in]	index		Specifies the index of the bitfile info.
+	   @return		True if the bitstream was read; otherwise false.
+	**/
+	bool ReadBitstream(int index);
+		
 	typedef std::vector <NTV2_POINTER>		NTV2BitstreamList;
 	typedef NTV2BitstreamList::iterator		NTV2BitstreamListIter;
 
-	NTV2BitfileInfoList		BitfileList;
-	NTV2BitstreamList		BitstreamList;
+	NTV2BitfileInfoList		_bitfileList;
+	NTV2BitstreamList		_bitstreamList;
 };
+
+
+#endif
