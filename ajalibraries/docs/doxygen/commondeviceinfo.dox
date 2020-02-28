@@ -997,14 +997,22 @@
 	current <b>Play Head</b> position. Audio data continues to be read from the <b>Output Buffer</b> until the end is reached, whereupon the
 	<b>Play Head</b> wraps back to the start of the buffer, where reading continues.
 
-	Newer AJA hardware firmware implements an adjustable <b>Output Delay</b> that can be applied while samples are being read from the
-	<b>Audio Output Buffer</b>. Call ::NTV2DeviceCanDoAudioDelay to determine if this feature is available. Call CNTV2Card::GetAudioOutputDelay
-	to obtain the current delay value. Call CNTV2Card::SetAudioOutputDelay to change it.
+	<b>Startup Delay:</b> Ordinarily, when playout starts, the Audio System immediately starts pulling samples from the <b>Audio Output Buffer</b>,
+	encoding them into audio packets and embedding those first several packets into the current outgoing video frame, often mid-frame, preceded by
+	a number of packets containing silence. This makes it difficult for applications to precisely determine the location of frame breaks in the
+	<b>Audio Output Buffer</b>. Starting in SDK 15.6, and using newer AJA hardware and firmware (see CNTV2Card::CanDoAudioWaitForVBI),
+	CNTV2Card::StartAudioOutput has an optional “<i>waitForVBI</i>” parameter that if set <tt>True</tt>, causes the firmware to delay starting
+	Audio Playout until the next output VBI, so that the first samples from the <b>Audio Output Buffer</b> end up in the first audio packets
+	in the next outgoing video frame.
 
-	The playout engine has an optional <b>Erase Mode</b>, in which it will automatically clear (zero) the <b>Output Buffer</b> memory immediately behind
-	the <b>Play Head</b> as it runs. If the host application fails to transfer new samples into the <b>Audio Output Buffer</b>, the buffer will eventually
-	contain all zeroes, and the output embedder will thereafter only transmit silence. Use the CNTV2Card::SetAudioOutputEraseMode function
-	to configure this feature.
+	<b>Output Delay:</b> Newer AJA hardware firmware implements an adjustable <b>Output Delay</b> that can be applied while samples are
+	being read from the <b>Audio Output Buffer</b>. Call ::NTV2DeviceCanDoAudioDelay to determine if this feature is available.
+	Call CNTV2Card::GetAudioOutputDelay to obtain the current delay value. Call CNTV2Card::SetAudioOutputDelay to change it.
+
+	<b>Erase Mode:</b> The playout engine has an optional <b>Erase Mode</b>, in which it will automatically clear (zero) the
+	<b>Output Buffer</b> memory immediately behind the <b>Play Head</b> as it runs. If the host application fails to transfer
+	new samples into the <b>Audio Output Buffer</b>, the buffer will eventually contain all zeroes, and the output embedder
+	will thereafter only transmit silence. Use the CNTV2Card::SetAudioOutputEraseMode function to configure this feature.
 
 	Audio data can be transferred from the host to the device audio buffer via DMA by calling CNTV2Card::DMAWriteAudio. The last address
 	written into the <b>Audio Output Buffer</b> (via DMA) is latched and available for readback at <b>Audio Output Last Address</b> (within 256 bytes).

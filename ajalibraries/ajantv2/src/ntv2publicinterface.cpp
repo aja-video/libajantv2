@@ -1035,19 +1035,15 @@ NTV2GeometrySet & operator += (NTV2GeometrySet & inOutSet, const NTV2GeometrySet
 //	Implementation of NTV2FrameBufferFormatSet's ostream writer...
 ostream & operator << (ostream & inOStream, const NTV2InputSourceSet & inSet)
 {
-	NTV2InputSourceSetConstIter	iter	(inSet.begin ());
-
-	inOStream	<< inSet.size ()
-				<< (inSet.size () == 1 ? " input source:  " : " input sources:  ");
-
-	while (iter != inSet.end ())
+	NTV2InputSourceSetConstIter	iter(inSet.begin());
+	inOStream	<< inSet.size()
+				<< (inSet.size() == 1 ? " input:  " : " inputs:  ");
+	while (iter != inSet.end())
 	{
 		inOStream << ::NTV2InputSourceToString (*iter);
-		inOStream << (++iter == inSet.end ()  ?  ""  :  ", ");
+		inOStream << (++iter == inSet.end()  ?  ""  :  ", ");
 	}
-
 	return inOStream;
-
 }	//	operator <<
 
 
@@ -1055,6 +1051,28 @@ NTV2InputSourceSet & operator += (NTV2InputSourceSet & inOutSet, const NTV2Input
 {
 	for (NTV2InputSourceSetConstIter iter (inSet.begin ());  iter != inSet.end ();  ++iter)
 		inOutSet.insert (*iter);
+	return inOutSet;
+}
+
+
+ostream & operator << (ostream & inOStream, const NTV2OutputDestinations & inSet)
+{
+	NTV2OutputDestinationsConstIter	iter(inSet.begin());
+	inOStream	<< inSet.size()
+				<< (inSet.size() == 1 ? " output:  " : " outputs:  ");
+	while (iter != inSet.end())
+	{
+		inOStream << ::NTV2OutputDestinationToString(*iter);
+		inOStream << (++iter == inSet.end()  ?  ""  :  ", ");
+	}
+	return inOStream;
+}
+
+
+NTV2OutputDestinations & operator += (NTV2OutputDestinations & inOutSet, const NTV2OutputDestinations & inSet)
+{
+	for (NTV2OutputDestinationsConstIter iter(inSet.begin());  iter != inSet.end();  ++iter)
+		inOutSet.insert(*iter);
 	return inOutSet;
 }
 

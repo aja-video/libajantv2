@@ -1759,12 +1759,16 @@ public:
 					from the Audio System's playout buffer.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@param[in]	inWaitForVBI		If 'false', the default, immediately starts reading audio samples from the
+										playout buffer and inserting into the HANC stream.  If 'true', checks if
+										the required firmware feature is present, and if so, waits until the next
+										output VBI before starting to read samples from the playout buffer.
 		@note		It is not an error to call this function when the Audio System's playout side is already running.
 		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
 					configures the Audio System automatically.
 		@see		CNTV2Card::StopAudioInput, CNTV2Card::IsAudioOutputRunning, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		StartAudioOutput (const NTV2AudioSystem inAudioSystem);
+	AJA_VIRTUAL bool		StartAudioOutput (const NTV2AudioSystem inAudioSystem, const bool inWaitForVBI = false);
 
 	/**
 		@brief		Stops the playout side of the given ::NTV2AudioSystem, parking the "Read Head" at the start
@@ -1819,12 +1823,16 @@ public:
 					into the Audio System's capture buffer.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@param[in]	inWaitForVBI		If 'false', the default, immediately starts writing captured audio samples
+										into the capture buffer.  If 'true', checks if the required firmware feature
+										is present, and if so, waits until the next input VBI before starting to
+										write captured samples into the capture buffer.
 		@note		It is not an error to call this function when the Audio System's capture side is already running.
 		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
 					configures the Audio System automatically.
 		@see		CNTV2Card::StopAudioInput, CNTV2Card::IsAudioInputRunning, \ref audiocapture
 	**/
-	AJA_VIRTUAL bool		StartAudioInput (const NTV2AudioSystem inAudioSystem);
+	AJA_VIRTUAL bool		StartAudioInput (const NTV2AudioSystem inAudioSystem, const bool inWaitForVBI = false);
 
 	/**
 		@brief		Stops the capture side of the given ::NTV2AudioSystem, and resets the capture position
@@ -2320,6 +2328,8 @@ public:
 		@note		This counter will overflow and wrap back to zero in 24:51:00 [hh:mm:ss].
 	**/
     AJA_VIRTUAL bool		GetRawAudioTimer (ULWord & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+
+	AJA_VIRTUAL bool		CanDoAudioWaitForVBI (void);	///< @return	True if the device firmware supports audio start delay-til-VBI.
 
 	AJA_VIRTUAL bool NTV2_SHOULD_BE_DEPRECATED(WriteAudioSource (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1));
 	AJA_VIRTUAL bool NTV2_SHOULD_BE_DEPRECATED(ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1));

@@ -1408,12 +1408,14 @@ typedef enum
 	kRegMaskAudioTone				= BIT(7),
 	kRegMaskResetAudioInput			= BIT(8),
 	kRegMaskResetAudioOutput		= BIT(9),
+	kRegMaskInputStartAtVBI			= BIT(10),	// New in 15.6
 	kRegMaskPauseAudio				= BIT(11),
-    kRegMaskEmbeddedOutputMuteCh1   = BIT(12), // added for FS1
-    kRegMaskEmbeddedOutputSupressCh1 = BIT(13), // added for FS1 but available on other boards
+	kRegMaskEmbeddedOutputMuteCh1   = BIT(12), // added for FS1
+	kRegMaskEmbeddedOutputSupressCh1 = BIT(13), // added for FS1 but available on other boards
+	kRegMaskOutputStartAtVBI		= BIT(14),	// New in 15.6
 	kRegMaskEmbeddedOutputSupressCh2 = BIT(15), // added for FS1 but available on other boards
 	kRegMaskNumChannels				= BIT(16),
-    kRegMaskEmbeddedOutputMuteCh2   = BIT(17), // added for FS1
+	kRegMaskEmbeddedOutputMuteCh2   = BIT(17), // added for FS1
 	kRegMaskAudioRate				= BIT(18),
 	kRegMaskEncodedAudioMode		= BIT(19), // addded for FS1 but available on other boards
 	kRegMaskAudio16Channel			= BIT(20),
@@ -1486,6 +1488,7 @@ typedef enum
 
 	//	kRegCanDoStatus
 	kRegMaskCanDoValidXptROM			= BIT(0),
+	kRegMaskCanDoAudioWaitForVBI		= BIT(1),
 
 	//	kRegLUTV2Control
 	kRegMaskLUT1Enable					= BIT(0),
@@ -2576,12 +2579,14 @@ typedef enum
 	kRegShiftAudioTone					= 7,
 	kRegShiftResetAudioInput			= 8,
 	kRegShiftResetAudioOutput			= 9,
+	kRegShiftInputStartAtVBI			= 10,	//	New in 15.6
 	kRegShiftPauseAudio					= 11,
-    kRegShiftEmbeddedOutputMuteCh1      = 12, // added for FS1
-    kRegShiftEmbeddedOutputSupressCh1   = 13, // added for FS1 but available on other boards
+	kRegShiftEmbeddedOutputMuteCh1      = 12, // added for FS1
+	kRegShiftEmbeddedOutputSupressCh1   = 13, // added for FS1 but available on other boards
+	kRegShiftOutputStartAtVBI			= 14,	//	New in 15.6
 	kRegShiftEmbeddedOutputSupressCh2	= 15, // added for FS1 but available on other boards
 	kRegShiftNumChannels				= 16,
-    kRegShiftEmbeddedOutputMuteCh2      = 17, // added for FS1
+	kRegShiftEmbeddedOutputMuteCh2      = 17, // added for FS1
 	kRegShiftAudioRate					= 18,
 	kRegShiftEncodedAudioMode			= 19,
 	kRegShiftAudio16Channel				= 20,
@@ -2651,6 +2656,7 @@ typedef enum
 
 	//	kRegCanDoStatus
 	kRegShiftCanDoValidXptROM			= 0,
+	kRegShiftCanDoAudioWaitForVBI		= 1,
 
 	//	kRegLUTV2Control
 	kRegShiftLUT1Enable					= 0,
@@ -8112,6 +8118,9 @@ typedef enum
 			typedef std::set <NTV2InputSource>					NTV2InputSourceSet;					///< @brief	A set of distinct NTV2InputSource values.
 			typedef NTV2InputSourceSet::const_iterator			NTV2InputSourceSetConstIter;		///< @brief	A handy const iterator for iterating over an NTV2InputSourceSet.
 
+			typedef std::set <NTV2OutputDestination>			NTV2OutputDestinations;				///< @brief	A set of distinct NTV2OutputDestination values.
+			typedef NTV2OutputDestinations::const_iterator		NTV2OutputDestinationsConstIter;	///< @brief	A handy const iterator for iterating over an NTV2OutputDestinations.
+
 			typedef	std::vector <uint8_t>						UByteSequence;						///< @brief	An ordered sequence of UByte (uint8_t) values.
 			typedef	UByteSequence::const_iterator				UByteSequenceConstIter;				///< @brief	A handy const iterator for iterating over a UByteSequence.
 			typedef	UByteSequence::iterator						UByteSequenceIter;					///< @brief	A handy non-const iterator for iterating over a UByteSequence.
@@ -8265,6 +8274,22 @@ typedef enum
 				@return		A reference to the modified set.
 			**/
 			AJAExport NTV2InputSourceSet & operator += (NTV2InputSourceSet & inOutSet, const NTV2InputSourceSet & inSet);
+
+			/**
+				@brief		Prints the given ::NTV2OutputDestinations' contents into the given output stream.
+				@param		inOStream	The stream into which the human-readable list will be written.
+				@param[in]	inSet		Specifies the set to be streamed.
+				@return		The "inOStream" that was specified.
+			**/
+			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2OutputDestinations & inSet);
+
+			/**
+				@brief		Appends the given ::NTV2OutputDestinations' contents into the given set.
+				@param		inOutSet	The set to which the other set will be appended.
+				@param[in]	inSet		Specifies the set whose contents will be appended.
+				@return		A reference to the modified set.
+			**/
+			AJAExport NTV2OutputDestinations & operator += (NTV2OutputDestinations & inOutSet, const NTV2OutputDestinations & inSet);
 
 
 			/**

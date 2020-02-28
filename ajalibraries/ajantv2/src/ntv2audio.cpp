@@ -1067,10 +1067,27 @@ bool CNTV2Card::GetAudioOutputMonitorSource (NTV2AudioMonitorSelect * pOutValue,
 #endif	//	NTV2_DEPRECATE_14_3
 
 
-bool CNTV2Card::StartAudioOutput (const NTV2AudioSystem inAudioSystem)
+bool CNTV2Card::CanDoAudioWaitForVBI (void)
 {
-	return UWord(inAudioSystem) < ::NTV2DeviceGetNumAudioSystems(_boardID)
-			&&  WriteRegister (gAudioSystemToAudioControlRegNum[inAudioSystem], 0, kRegMaskResetAudioOutput, kRegShiftResetAudioOutput);
+	ULWord canDo(0);
+	return ReadRegister(kRegCanDoStatus, canDo, kRegMaskCanDoAudioWaitForVBI, kRegShiftCanDoAudioWaitForVBI)
+			&&  (canDo ? true : false);
+}
+
+bool CNTV2Card::StartAudioOutput (const NTV2AudioSystem inAudioSystem, const bool inWaitForVBI)
+{
+	if (UWord(inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems(_boardID))
+		return false;	//	Bad AudioSystem
+	const ULWord audioCtrlRegNum(gAudioSystemToAudioControlRegNum[inAudioSystem]);
+	if (inWaitForVBI)
+	{
+		if (!CanDoAudioWaitForVBI())
+			return false;	//	Caller requested wait-til-VBI, but firmware doesn't support it
+		//	Set or clear the start-at-VBI bit...
+		if (!WriteRegister(audioCtrlRegNum, inWaitForVBI ? 1UL : 0UL,  kRegMaskOutputStartAtVBI, kRegShiftOutputStartAtVBI))
+			return false;
+	}
+	return WriteRegister (audioCtrlRegNum, 0, kRegMaskResetAudioOutput, kRegShiftResetAudioOutput);
 }
 
 bool CNTV2Card::StopAudioOutput (const NTV2AudioSystem inAudioSystem)
@@ -1121,10 +1138,20 @@ bool CNTV2Card::GetAudioOutputPause (const NTV2AudioSystem inAudioSystem, bool &
 }
 
 
-bool CNTV2Card::StartAudioInput (const NTV2AudioSystem inAudioSystem)
+bool CNTV2Card::StartAudioInput (const NTV2AudioSystem inAudioSystem, const bool inWaitForVBI)
 {
-	return UWord(inAudioSystem) < ::NTV2DeviceGetNumAudioSystems(_boardID)
-		&& WriteRegister (gAudioSystemToAudioControlRegNum [inAudioSystem], 0, kRegMaskResetAudioInput, kRegShiftResetAudioInput);
+	if (UWord(inAudioSystem) >= ::NTV2DeviceGetNumAudioSystems(_boardID))
+		return false;	//	Bad AudioSystem
+	const ULWord audioCtrlRegNum(gAudioSystemToAudioControlRegNum[inAudioSystem]);
+	if (inWaitForVBI)
+	{
+		if (!CanDoAudioWaitForVBI())
+			return false;	//	Caller requested wait-til-VBI, but firmware doesn't support it
+		//	Set or clear the start-at-VBI bit...
+		if (!WriteRegister(audioCtrlRegNum, inWaitForVBI ? 1UL : 0UL,  kRegMaskInputStartAtVBI, kRegShiftInputStartAtVBI))
+			return false;
+	}
+	return WriteRegister (audioCtrlRegNum, 0, kRegMaskResetAudioInput, kRegShiftResetAudioInput);
 }
 
 
