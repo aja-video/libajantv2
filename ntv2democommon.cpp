@@ -36,6 +36,9 @@ typedef	String2AudioSystemMap::const_iterator	String2AudioSystemMapConstIter;
 typedef	map <string, NTV2InputSource>			String2InputSourceMap;
 typedef	String2InputSourceMap::const_iterator	String2InputSourceMapConstIter;
 
+typedef	map <string, NTV2OutputDestination>		String2OutputDestMap;
+typedef	String2OutputDestMap::const_iterator	String2OutputDestMapConstIter;
+
 typedef	map <string, NTV2TCIndex>				String2TCIndexMap;
 typedef	pair <string, NTV2TCIndex>				String2TCIndexPair;
 typedef	String2TCIndexMap::const_iterator		String2TCIndexMapConstIter;
@@ -56,10 +59,12 @@ static NTV2InputSourceSet		gInputSources;
 static NTV2InputSourceSet		gInputSourcesSDI;
 static NTV2InputSourceSet		gInputSourcesHDMI;
 static NTV2InputSourceSet		gInputSourcesAnalog;
+static NTV2OutputDestinations	gOutputDestinations;
 static String2VideoFormatMap	gString2VideoFormatMap;
 static String2PixelFormatMap	gString2PixelFormatMap;
 static String2AudioSystemMap	gString2AudioSystemMap;
 static String2InputSourceMap	gString2InputSourceMap;
+static String2OutputDestMap		gString2OutputDestMap;
 static NTV2TCIndexSet			gTCIndexes;
 static NTV2TCIndexSet			gTCIndexesSDI;
 static NTV2TCIndexSet			gTCIndexesHDMI;
@@ -79,6 +84,7 @@ class DemoCommonInitializer
 			typedef	pair <string, NTV2FrameBufferFormat>	String2PixelFormatPair;
 			typedef	pair <string, NTV2AudioSystem>			String2AudioSystemPair;
 			typedef	pair <string, NTV2InputSource>			String2InputSourcePair;
+			typedef	pair <string, NTV2OutputDestination>	String2OutputDestPair;
 
 			NTV2_ASSERT (gNon4KFormats.empty ());
 			for (NTV2VideoFormat legalFormat (NTV2_FORMAT_UNKNOWN);  legalFormat < NTV2_MAX_NUM_VIDEO_FORMATS;  legalFormat = NTV2VideoFormat (legalFormat + 1))
@@ -284,6 +290,20 @@ class DemoCommonInitializer
 				gString2InputSourceMap.insert(String2InputSourcePair(CNTV2DemoCommon::ToLower(::NTV2InputSourceToString (inputSource, true)), inputSource));
 			}	//	for each input source
 			gString2InputSourceMap.insert(String2InputSourcePair(string("hdmi"),NTV2_INPUTSOURCE_HDMI1));
+
+			//	Output Destinations...
+			for (NTV2OutputDestination outputDest(NTV2_OUTPUTDESTINATION_ANALOG);  outputDest < NTV2_OUTPUTDESTINATION_INVALID;  outputDest = NTV2OutputDestination(outputDest+1))
+			{
+				gOutputDestinations.insert(outputDest);
+				gString2OutputDestMap.insert(String2OutputDestPair(::NTV2OutputDestinationToString(outputDest,false), outputDest));
+				gString2OutputDestMap.insert(String2OutputDestPair(::NTV2OutputDestinationToString(outputDest,true), outputDest));
+				gString2OutputDestMap.insert(String2OutputDestPair(CNTV2DemoCommon::ToLower(::NTV2OutputDestinationToString(outputDest, true)), outputDest));
+				if (NTV2_OUTPUT_DEST_IS_SDI(outputDest))
+				{	ostringstream oss;  oss << DEC(UWord(::NTV2OutputDestinationToChannel(outputDest)+1));
+					gString2OutputDestMap.insert(String2OutputDestPair(oss.str(), outputDest));
+				}
+			}	//	for each output dest
+			gString2OutputDestMap.insert(String2OutputDestPair(string("hdmi1"),NTV2_OUTPUTDESTINATION_HDMI));
 
 			//	TCIndexes...
 			for (uint16_t ndx (0);  ndx < NTV2_MAX_NUM_TIMECODE_INDEXES;  ndx++)
@@ -596,6 +616,43 @@ NTV2InputSource CNTV2DemoCommon::GetInputSourceFromString (const string & inStr)
 	String2InputSourceMapConstIter	iter	(gString2InputSourceMap.find (inStr));
 	if (iter == gString2InputSourceMap.end ())
 		return NTV2_INPUTSOURCE_INVALID;
+	return iter->second;
+}
+
+
+string CNTV2DemoCommon::GetOutputDestinationStrings (const string inDeviceSpecifier)
+{
+	const NTV2OutputDestinations &	dests (gOutputDestinations);
+	ostringstream					oss;
+	CNTV2Card						theDevice;
+	if (!inDeviceSpecifier.empty())
+		CNTV2DeviceScanner::GetFirstDeviceFromArgument(inDeviceSpecifier, theDevice);
+
+	oss	<< setw (25) << left << "Output Destination"		<< "\t" << setw(16) << left << "Legal -o Values" << endl
+		<< setw (25) << left << "------------------------"	<< "\t" << setw(16) << left << "----------------" << endl;
+	for (NTV2OutputDestinationsConstIter iter(dests.begin());  iter != dests.end();  ++iter)
+	{
+		string	destName(::NTV2OutputDestinationToString(*iter));
+		for (String2OutputDestMapConstIter it(gString2OutputDestMap.begin ());  it != gString2OutputDestMap.end ();  ++it)
+			if (*iter == it->second)
+			{
+				oss << setw(25) << left << destName << "\t" << setw(16) << left << it->first;
+				if (!inDeviceSpecifier.empty()  &&  theDevice.IsOpen()  &&  !::NTV2DeviceCanDoOutputDestination(theDevice.GetDeviceID(), *iter))
+					oss << "\t## Incompatible with " << theDevice.GetDisplayName();
+				oss << endl;
+				destName.clear();
+			}
+		oss << endl;
+	}
+	return oss.str ();
+}
+
+
+NTV2OutputDestination CNTV2DemoCommon::GetOutputDestinationFromString (const string & inStr)
+{
+	String2OutputDestMapConstIter iter(gString2OutputDestMap.find(inStr));
+	if (iter == gString2OutputDestMap.end())
+		return NTV2_OUTPUTDESTINATION_INVALID;
 	return iter->second;
 }
 

@@ -79,6 +79,7 @@ typedef struct CCPlayerConfig
 	public:
 		std::string						fDeviceSpecifier;		///< @brief	The AJA device to use
 		NTV2Channel						fOutputChannel;			///< @brief	The device channel to use
+		NTV2OutputDestination			fOutputDestination;		///< @brief	The desired output connector to use
 		CNTV2DemoCommon::ACFrameRange	fFrames;				///< @brief	AutoCirculate frame count or range
 		bool							fEmitStats;				///< @brief	If true, show stats while playing; otherwise echo caption text being played
 		bool							fDoMultiFormat;			///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
@@ -88,6 +89,7 @@ typedef struct CCPlayerConfig
 		bool							fSuppress708;			///< @brief	If true, don't transmit CEA708 packets;  otherwise include 708 packets
 		bool							fSuppressAudio;			///< @brief	If true, suppress audio;  otherwise generate audio tones
 		bool							fSuppressTimecode;		///< @brief	If true, suppress timecode;  otherwise embed VITC/LTC
+		bool							fDualLinkRGB;			///< @brief	If true, route dual-link RGB output;  otherwise normal YCbCr
 		uint16_t						fForceRTP;				///< @brief	BIT(0):0=normal,1=forceRTP  BIT(1):0=uniPkt,1=multiPkt  BIT(2):0=normal,1=patchDeviceID
 		NTV2VideoFormat					fVideoFormat;			///< @brief	The video format to use
 		NTV2FrameBufferFormat			fPixelFormat;			///< @brief	The pixel format to use
@@ -99,6 +101,7 @@ typedef struct CCPlayerConfig
 		inline explicit	CCPlayerConfig (const std::string & inDeviceSpecifier	= "0")
 			:	fDeviceSpecifier	(inDeviceSpecifier),
 				fOutputChannel		(NTV2_CHANNEL1),
+				fOutputDestination	(NTV2_OUTPUTDESTINATION_INVALID),
 				fFrames				(7),
 				fEmitStats			(true),
 				fDoMultiFormat		(false),
@@ -108,6 +111,7 @@ typedef struct CCPlayerConfig
 				fSuppress708		(false),
 				fSuppressAudio		(false),
 				fSuppressTimecode	(false),
+				fDualLinkRGB		(false),
 				fForceRTP			(0),
 				fVideoFormat		(NTV2_FORMAT_525_5994),
 				fPixelFormat		(NTV2_FBF_10BIT_YCBCR)

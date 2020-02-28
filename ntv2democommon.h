@@ -339,6 +339,27 @@ class CNTV2DemoCommon
 	///@}
 
 	/**
+		@name	Output Destination Functions
+	**/
+	///@{
+		/**
+			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
+											warns if the output destination is incompatible with that device.
+			@return		A string that can be printed to show the available output destinations (or those that are supported by a given device).
+			@note		These output destination strings are mere conveniences for specifying output destinations in the command-line-based demo apps,
+						and are subject to change without notice. They are not intended to be canonical in any way.
+		**/
+		static std::string					GetOutputDestinationStrings (const std::string inDeviceSpecifier = std::string ());
+
+		/**
+			@brief		Returns the ::NTV2OutputDestination that matches the given string.
+			@param[in]	inStr	Specifies the string to be converted to an ::NTV2OutputDestination.
+			@return		The given string converted to an ::NTV2InputSource, or ::NTV2_INPUTSOURCE_INVALID if there's no match.
+		**/
+		static NTV2OutputDestination		GetOutputDestinationFromString (const std::string & inStr);
+	///@}
+
+	/**
 		@name	Timecode Functions
 	**/
 	///@{

@@ -78,6 +78,7 @@ int main (int argc, const char ** argv)
 	AJAStatus			status			(AJA_STATUS_SUCCESS);
 	char *				pDeviceSpec		(AJA_NULL);		//	Which device?
 	char *				pCaptionChannel	(AJA_NULL);		//	Caption channel of interest (cc1, cc2 ... text1, text2, ...)
+	char *				pOutputDest		(AJA_NULL);		//	Output connector of interest (sdi1 ... sdi8)
 	char *				pMode			(AJA_NULL);		//	Kind of 608 display (roll, paint, pop)?
 	char *				pVideoFormat	(AJA_NULL);		//	Video format (525, 625, etc.)?
 	char *				pPixelFormat	(AJA_NULL);		//	Pixel format (2vuy, argb, etc.?
@@ -87,7 +88,7 @@ int main (int argc, const char ** argv)
 	int					noAudio			(0);			//	Disable audio tone?
 	int					noTimecode		(0);			//	Disable timecode?
 	int					doMultiChannel	(0);			//	Enable multi-format?
-	uint32_t			channelNumber	(1);			//	Number of the channel to use
+	uint32_t			channelNumber	(0);			//	Number of the channel to use
 	uint16_t			forceRTP		(0);			//	Force RTP?
 	int					bEmitStats		(0);			//	Emit stats while running?
 	int					bBreakNewLines	(0);			//	Newlines break rows instead of treated as whitespace?
@@ -95,6 +96,7 @@ int main (int argc, const char ** argv)
 	int					bSuppressLine21	(0);			//	Suppress line 21 waveform (SD only)?
 	int					bSuppress608	(0);			//	Don't transmit CEA608 packets?
 	int					bSuppress708	(0);			//	Don't transmit CEA708 packets (HD only)?
+	int					doRGBOutput		(0);			//	Dual-link RGB output?
 	NTV2StringList		pathList;						//	List of text files (paths) to "play"
 	poptContext			optionsContext; 				//	Context for parsing command line arguments
 	AJADebug::Open();
@@ -104,12 +106,14 @@ int main (int argc, const char ** argv)
 	{
 		//	Device config options...
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",			"index#, serial#, or model"	},
-		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,		0,	"device channel to use",		"1..8"},
+		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,		9,	"frameStore/channel to use",	"1..8"},
+		{"output",		'o',	POPT_ARG_STRING,	&pOutputDest,		0,	"output connector to use",		"'?' or 'list' to list"},
 		{"format",		'f',	POPT_ARG_STRING,	&pVideoFormat,		0,	"video format to produce",		"'?' or 'list' to list"},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,		0,	"pixel format to use",			"'?' or 'list' to list"},
 		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,			0,	"disable audio tone?",			AJA_NULL},
 		{"notimecode",	0,		POPT_ARG_NONE,		&noTimecode,		0,	"disable timecode?",			AJA_NULL},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,	0,	"enable multi-chl/fmt?",		AJA_NULL},
+		{"rgbout",		0,		POPT_ARG_NONE,		&doRGBOutput,		0,	"dual-link RGB output?",		AJA_NULL},
 
 		//	CCPlayer global config options...
 		{"stats",		's',	POPT_ARG_NONE,		&bEmitStats,		0,	"show queue stats?",			AJA_NULL},
@@ -158,11 +162,32 @@ int main (int argc, const char ** argv)
 		{cout << "## ERROR:  No such device '" << deviceSpec << "'" << endl << legalDevices;  return 1;}
 
 	//	Channel
-	NTV2Channel	channel(NTV2_CHANNEL1);	//	Default to channel 1
+	NTV2Channel	channel(NTV2_CHANNEL_INVALID);	//	No channel specified
 	if (channelNumber > 0 && channelNumber < 9)
-		channel = NTV2Channel (channelNumber - 1);
-	else
-		{cerr << "## ERROR:  Bad channel number '" << channelNumber << "'" << endl;	return 1;}
+		channel = NTV2Channel(channelNumber - 1);
+
+	//	Output Spigot
+	const string legalOutputs (CNTV2DemoCommon::GetOutputDestinationStrings(deviceSpec));
+	const string outputDestStr (pOutputDest ? CNTV2DemoCommon::ToLower(string(pOutputDest)) : "");
+	NTV2OutputDestination outputSpigot(NTV2_OUTPUTDESTINATION_INVALID);
+	if (outputDestStr == "?" || outputDestStr == "list")
+		{cout << legalOutputs << endl;  return 0;}
+	if (!outputDestStr.empty())
+	{
+		outputSpigot = CNTV2DemoCommon::GetOutputDestinationFromString(outputDestStr);
+		if (!NTV2_IS_VALID_OUTPUT_DEST(outputSpigot))
+			{cerr << "## ERROR:  Output '" << outputDestStr << "' not of:" << endl << legalOutputs << endl;	return 1;}
+	}	//	if output spigot specified
+
+	if (!NTV2_IS_VALID_OUTPUT_DEST(outputSpigot)  &&  !NTV2_IS_VALID_CHANNEL(channel))
+	{
+		channel = NTV2_CHANNEL1;
+		outputSpigot = ::NTV2ChannelToOutputDestination(channel);
+	}
+	else if (!NTV2_IS_VALID_OUTPUT_DEST(outputSpigot)  &&  NTV2_IS_VALID_CHANNEL(channel))
+		outputSpigot = ::NTV2ChannelToOutputDestination(channel);
+	else if (NTV2_IS_VALID_OUTPUT_DEST(outputSpigot)  &&  !NTV2_IS_VALID_CHANNEL(channel))
+		channel = ::NTV2OutputDestinationToChannel(outputSpigot);
 
 	//	Video Format
 	NTV2VideoFormat			videoFormat		(NTV2_FORMAT_1080i_5994);	//	Default to 1080i5994
@@ -208,6 +233,7 @@ int main (int argc, const char ** argv)
 	playerConfig.fVideoFormat		= videoFormat;
 	playerConfig.fPixelFormat		= pixelFormat;
 	playerConfig.fOutputChannel		= channel;
+	playerConfig.fOutputDestination	= outputSpigot;
 	playerConfig.fForceRTP			= forceRTP;
 	playerConfig.fEmitStats			= bEmitStats		? true : false;
 	playerConfig.fDoMultiFormat		= doMultiChannel	? true : false;
@@ -217,6 +243,7 @@ int main (int argc, const char ** argv)
 	playerConfig.fSuppress708		= bSuppress708		? true : false;
 	playerConfig.fSuppressAudio		= noAudio			? true : false;
 	playerConfig.fSuppressTimecode	= noTimecode		? true : false;
+	playerConfig.fDualLinkRGB		= doRGBOutput		? true : false;
 
 	//	Frames
 	const string framesSpec(pFramesSpec ? pFramesSpec : "");
