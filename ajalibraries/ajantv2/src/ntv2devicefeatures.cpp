@@ -13,7 +13,6 @@
 //	Most of the device features functions are generated using a Python script from files inside 'ntv2projects/sdkgen/device'.
 //	The script writes the declarations into 'ntv2devicefeatures.hh', and implementations into 'ntv2devicefeatures.hpp'...
 #include "ntv2devicefeatures.hpp"
-#include "ntv2utils.h"
 
 ///////////////////////////////////////////////////////////////////////////
 //	The rest of the non-sdkgen-generated function implementations follow...
@@ -133,19 +132,19 @@ bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0)
 
 bool NTV2DeviceCanDoOutputDestination (const NTV2DeviceID inDeviceID, const NTV2OutputDestination inOutputDest)
 {
-	
+	const UWord numSDIs(::NTV2DeviceGetNumVideoOutputs(inDeviceID));
 	switch(inOutputDest)
 	{
-		case NTV2_OUTPUTDESTINATION_ANALOG:	return ::NTV2DeviceGetNumAnalogVideoOutputs(inDeviceID) >= 1;
-		case NTV2_OUTPUTDESTINATION_HDMI:	return ::NTV2DeviceGetNumHDMIVideoOutputs(inDeviceID) >= 1;
-		case NTV2_OUTPUTDESTINATION_SDI1:
-		case NTV2_OUTPUTDESTINATION_SDI2:
-		case NTV2_OUTPUTDESTINATION_SDI3:
-		case NTV2_OUTPUTDESTINATION_SDI4:
-		case NTV2_OUTPUTDESTINATION_SDI5:
-		case NTV2_OUTPUTDESTINATION_SDI6:
-		case NTV2_OUTPUTDESTINATION_SDI7:
-		case NTV2_OUTPUTDESTINATION_SDI8:	return ::GetIndexForNTV2Channel(::NTV2OutputDestinationToChannel(inOutputDest)) < ::NTV2DeviceGetNumVideoOutputs(inDeviceID);
+		case NTV2_OUTPUTDESTINATION_ANALOG:	return ::NTV2DeviceGetNumAnalogVideoOutputs(inDeviceID) > 0;
+		case NTV2_OUTPUTDESTINATION_HDMI:	return ::NTV2DeviceGetNumHDMIVideoOutputs(inDeviceID) > 0;
+		case NTV2_OUTPUTDESTINATION_SDI1:	return numSDIs > 0;
+		case NTV2_OUTPUTDESTINATION_SDI2:	return numSDIs > 1;
+		case NTV2_OUTPUTDESTINATION_SDI3:	return numSDIs > 2;
+		case NTV2_OUTPUTDESTINATION_SDI4:	return numSDIs > 3;
+		case NTV2_OUTPUTDESTINATION_SDI5:	return numSDIs > 4;
+		case NTV2_OUTPUTDESTINATION_SDI6:	return numSDIs > 5;
+		case NTV2_OUTPUTDESTINATION_SDI7:	return numSDIs > 6;
+		case NTV2_OUTPUTDESTINATION_SDI8:	return numSDIs > 7;
 		default:							break;
 	}
 	return false;
