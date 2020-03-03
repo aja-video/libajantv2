@@ -291,7 +291,7 @@ public:
 
     virtual bool GetPackageInformation(PACKAGE_INFO_STRUCT & packageInfo);
 
-	virtual bool BitstreamLoad (const NTV2_POINTER & inBuffer, bool partial, bool swap);
+	virtual bool BitstreamWrite (const NTV2_POINTER & inBuffer, bool fragment, bool swap);
 	virtual bool BitstreamReset (bool configuration, bool interface);
 	virtual bool BitstreamStatus (ULWord* regs, ULWord count);
 

@@ -616,11 +616,11 @@ bool CNTV2DriverInterface::DriverGetBuildInformation (BUILD_INFO_STRUCT & buildI
 #endif
 }
 
-bool CNTV2DriverInterface::BitstreamLoad (const NTV2_POINTER & inBuffer, bool partial, bool swap)
+bool CNTV2DriverInterface::BitstreamWrite (const NTV2_POINTER & inBuffer, bool fragment, bool swap)
 {
 	NTV2Bitstream bsMsg (inBuffer,
-						 BITSTREAM_LOAD |
-						 (partial? BITSTREAM_PARTIAL : 0) |
+						 BITSTREAM_WRITE |
+						 (fragment? BITSTREAM_FRAGMENT : 0) |
 						 (swap? BITSTREAM_SWAP : 0));
 	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&bsMsg));
 }

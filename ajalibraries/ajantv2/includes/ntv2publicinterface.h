@@ -5730,8 +5730,8 @@ typedef enum
 		#define DMABUFFERLOCK_MAX_SIZE				BIT(6)		///< @brief Used in ::NTV2BufferLock to set max locked size.
 
 		// Bitstream flags
-		#define BITSTREAM_LOAD						BIT(0)		///< @brief Used in ::NTV2Bitstream to load a bitstream
-		#define BITSTREAM_PARTIAL					BIT(1)		///< @brief Used in ::NTV2Bitstream to indicate a partial bitstream
+		#define BITSTREAM_WRITE						BIT(0)		///< @brief Used in ::NTV2Bitstream to write a bitstream
+		#define BITSTREAM_FRAGMENT					BIT(1)		///< @brief Used in ::NTV2Bitstream to indicate bitstream is a fragment
 		#define BITSTREAM_SWAP						BIT(2)		///< @brief Used in ::NTV2Bitstream to byte swap bitstream data
 		#define BITSTREAM_RESET_CONFIG				BIT(3)		///< @brief Used in ::NTV2Bitstream to reset config
 		#define BITSTREAM_RESET_MODULE				BIT(4)		///< @brief Used in ::NTV2Bitstream to reset module
@@ -8146,7 +8146,7 @@ typedef enum
 				/**
 					@brief	Constructs an NTV2Bitstream object to use in a CNTV2Card::LoadBitstream call.
 					@param	inBuffer		Specifies the memory containing the bitstream to load.
-					@param	inFlags			Specifies action flags (partial, swap, etc.).
+					@param	inFlags			Specifies action flags (fragment swap, etc.).
 				**/
 				explicit	NTV2Bitstream (const NTV2_POINTER & inBuffer, const ULWord inFlags);
 
@@ -8154,7 +8154,7 @@ typedef enum
 					@brief	Constructs an NTV2Bitstream object to use in a CNTV2Card::LoadBitstream call.
 					@param	pInBuffer		Specifies a pointer to the host buffer containing the bitstream to load.
 					@param	inByteCount		Specifies a the length of the bitstream in bytes.
-					@param	inFlags			Specifies action flags (partial, swap, etc)
+					@param	inFlags			Specifies action flags (fragment, swap, etc)
 				**/
 				explicit	NTV2Bitstream (const ULWord * pInBuffer, const ULWord inByteCount, const ULWord inFlags);
 				///@}
@@ -8180,7 +8180,7 @@ typedef enum
 
 				/**
 					@brief	Sets the action flags for use in a subsequent call to CNTV2Card::LoadBitstream.
-					@param	inFlags			Specifies action flags (partial, swap, etc)
+					@param	inFlags			Specifies action flags (fragment, swap, etc)
 				**/
 				inline void	SetFlags (const ULWord inFlags)		{NTV2_ASSERT_STRUCT_VALID;  mFlags = inFlags;}
 

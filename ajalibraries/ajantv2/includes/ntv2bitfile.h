@@ -125,6 +125,12 @@ class AJAExport CNTV2Bitfile
 		virtual inline ULWord				GetBitfileVersion (void) const	{ return _bitfileVersion; }
 
 		/**
+			@brief		Answers with the design user ID, as extracted from the bitfile.
+			@return		A ULWord containing the design user ID.
+		**/
+		virtual inline ULWord				GetUserID (void) const	{ return _userID; }
+
+		/**
 			@brief		Answers with the part name, as extracted from the bitfile.
 			@return		A std::string containing the bitfile part name.
 		**/
