@@ -616,6 +616,7 @@ bool CNTV2DriverInterface::DriverGetBuildInformation (BUILD_INFO_STRUCT & buildI
 #endif
 }
 
+#if defined(NTV2_BITSTREAM_SUPPORT)
 bool CNTV2DriverInterface::BitstreamWrite (const NTV2_POINTER & inBuffer, bool fragment, bool swap)
 {
 	NTV2Bitstream bsMsg (inBuffer,
@@ -655,6 +656,7 @@ bool CNTV2DriverInterface::BitstreamStatus (ULWord* regs, ULWord count)
 
 	return true;
 }
+#endif	//NTV2_BITSTREAM_SUPPORT
 
 
 //

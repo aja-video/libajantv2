@@ -289,11 +289,12 @@ public:
 
 	virtual bool DriverGetBuildInformation (BUILD_INFO_STRUCT & outBuildInfo);
 
-    virtual bool GetPackageInformation(PACKAGE_INFO_STRUCT & packageInfo);
-
+	virtual bool GetPackageInformation(PACKAGE_INFO_STRUCT & packageInfo);
+#if defined(NTV2_BITSTREAM_SUPPORT)
 	virtual bool BitstreamWrite (const NTV2_POINTER & inBuffer, bool fragment, bool swap);
 	virtual bool BitstreamReset (bool configuration, bool interface);
 	virtual bool BitstreamStatus (ULWord* regs, ULWord count);
+#endif	//	NTV2_BITSTREAM_SUPPORT
 
 	
 	// Functions for cards that support more than one bitfile
