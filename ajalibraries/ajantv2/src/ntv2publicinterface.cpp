@@ -2693,6 +2693,14 @@ ostream & NTV2RegInfo::Print (ostream & oss, const bool inAsCode) const
 }
 
 
+ostream & NTV2PrintULWordVector (const NTV2ULWordVector & inObj, ostream & inOutStream)
+{
+	for (NTV2ULWordVector::const_iterator it(inObj.begin());  it != inObj.end();  ++it)
+		inOutStream << " " << HEX0N(*it,8);
+	return inOutStream;
+}
+
+
 ostream & NTV2PrintRasterLineOffsets(const NTV2RasterLineOffsets & inObj, ostream & inOutStream)
 {
 	NTV2StringList	pieces;

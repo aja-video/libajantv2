@@ -2740,6 +2740,7 @@ public:
 		@see		CNTV2Card::GetRunningFirmwareTime, CNTV2Card::GetRunningFirmwareRevision, \ref devicefirmware.
 	**/
 	AJA_VIRTUAL bool	GetRunningFirmwareDate (std::string & outDate, std::string & outTime);
+
 #if !defined(NTV2_DEPRECATE_14_2)
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFirmwareRev (ULWord * pOutRevisionNumber));	///< @deprecated	Use GetRunningFirmwareRevision instead.
 #endif

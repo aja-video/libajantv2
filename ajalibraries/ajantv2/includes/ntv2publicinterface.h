@@ -4218,6 +4218,16 @@ typedef enum
 
 
 #if !defined (NTV2_BUILDING_DRIVER)
+	typedef std::vector <ULWord>					NTV2ULWordVector;					///< @brief	An ordered sequence of ULWords.
+
+	/**
+		@brief		Streams a human-readable dump of the given NTV2ULWordVector into the specified output stream.
+		@param[in]	inObj			Specifies the NTV2ULWordVector to be printed on the output stream.
+		@param		inOutStream		Specifies the output stream to receive the dump. Defaults to std::cout.
+		@return		A non-constant reference to the given output stream.
+	**/
+	AJAExport std::ostream & NTV2PrintULWordVector (const NTV2ULWordVector & inObj, std::ostream & inOutStream = std::cout);
+
 	typedef std::vector <ULWord>					NTV2RasterLineOffsets;				///< @brief	An ordered sequence of zero-based line offsets into a frame buffer.
 	typedef NTV2RasterLineOffsets::const_iterator	NTV2RasterLineOffsetsConstIter;		///< @brief	A handy const iterator into an NTV2RasterLineOffsets.
 	typedef NTV2RasterLineOffsets::iterator			NTV2RasterLineOffsetsIter;			///< @brief	A handy non-const iterator into an NTV2RasterLineOffsets.

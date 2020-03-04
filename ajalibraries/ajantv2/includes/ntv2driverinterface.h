@@ -290,12 +290,10 @@ public:
 	virtual bool DriverGetBuildInformation (BUILD_INFO_STRUCT & outBuildInfo);
 
 	virtual bool GetPackageInformation(PACKAGE_INFO_STRUCT & packageInfo);
-#if defined(NTV2_BITSTREAM_SUPPORT)
-	virtual bool BitstreamWrite (const NTV2_POINTER & inBuffer, bool fragment, bool swap);
-	virtual bool BitstreamReset (bool configuration, bool interface);
-	virtual bool BitstreamStatus (ULWord* regs, ULWord count);
-#endif	//	NTV2_BITSTREAM_SUPPORT
 
+	virtual bool BitstreamWrite (const NTV2_POINTER & inBuffer, const bool inFragment, const bool inSwap);
+	virtual bool BitstreamReset (const bool inConfiguration, const bool inInterface);
+	virtual bool BitstreamStatus (NTV2ULWordVector & outRegValues);
 	
 	// Functions for cards that support more than one bitfile
 #if !defined(NTV2_DEPRECATE_12_7)
