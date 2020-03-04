@@ -108,3 +108,4 @@ NTV2DeviceCanReportRunningFirmwareDate		True if the device having the given ID c
 NTV2DeviceCanDo8KVideo						True if the device having the given ID can handle 8K/UHD2 video.
 NTV2DeviceCanDoWarmBootFPGA					True if the device is capable of doing a warm boot rather than power cycling after firmware update.
 NTV2DeviceCanDoHFRRGB						True if the device supports 1080p > 50 RGB rates
+NTV2DeviceCanDoFramePulseSelect				True if the device supports frame pulse source independent of reference source

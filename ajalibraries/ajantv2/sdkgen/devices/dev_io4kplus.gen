@@ -231,6 +231,7 @@ NTV2DeviceHasHeadphoneJack
 NTV2DeviceHasBiDirectionalAnalogAudio
 NTV2DeviceCanReportRunningFirmwareDate
 NTV2DeviceCanDoHFRRGB
+NTV2DeviceCanDoFramePulseSelect
 
 
 // NTV2ConversionModes

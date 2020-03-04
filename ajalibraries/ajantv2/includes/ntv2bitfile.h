@@ -52,6 +52,13 @@ class AJAExport CNTV2Bitfile
 		virtual void						Close (void);
 
 		/**
+			@brief		Parse a bitfile header in a buffer.
+			@param[in]	inBitfileBuffer	Specifies the buffer of the bitfile to be parsed.
+			@return		A std::string containing parsing errors.
+		**/
+		virtual std::string					ParseHeaderFromBuffer(const uint8_t* inBitfileBuffer);
+
+		/**
 			@brief		Answers with the bitfile build date, as extracted from the bitfile.
 			@return		A std::string containing the bitfile build date.
 		**/
@@ -68,6 +75,60 @@ class AJAExport CNTV2Bitfile
 			@return		A std::string containing the bitfile design name.
 		**/
 		virtual inline const std::string &	GetDesignName (void) const		{ return _designName; }
+
+		/**
+			@brief		Answers true if design includes tandem flag, as extracted from the bitfile.
+			@return		True if the bitfile header includes tandem flag; otherwise false.
+		**/
+		virtual inline bool					IsTandem (void) const		{ return _tandem; }
+
+		/**
+			@brief		Answers true if design includes partial flag, as extracted from the bitfile.
+			@return		True if the bitfile header includes partial flag; otherwise false.
+		**/
+		virtual inline bool					IsPartial (void) const		{ return _partial; }
+
+		/**
+			@brief		Answers true if design includes clear flag, as extracted from the bitfile.
+			@return		True if the bitfile header includes clear flag; otherwise false.
+		**/
+		virtual inline bool					IsClear (void) const		{ return _clear; }
+
+		/**
+			@brief		Answers true if design includes compress flag, as extracted from the bitfile.
+			@return		True if the bitfile header includes compress flag; otherwise false.
+		**/
+		virtual inline bool					IsCompress (void) const		{ return _compress; }
+
+		/**
+			@brief		Answers with the design design ID, as extracted from the bitfile.
+			@return		A ULWord containing the design design ID.
+		**/
+		virtual inline ULWord				GetDesignID (void) const	{ return _designID; }
+
+		/**
+			@brief		Answers with the design version, as extracted from the bitfile.
+			@return		A ULWord containing the design version.
+		**/
+		virtual inline ULWord				GetDesignVersion (void) const	{ return _designVersion; }
+
+		/**
+			@brief		Answers with the design bitfile ID, as extracted from the bitfile.
+			@return		A ULWord containing the design bitfile ID.
+		**/
+		virtual inline ULWord				GetBitfileID (void) const	{ return _bitfileID; }
+
+		/**
+			@brief		Answers with the design bitfile version, as extracted from the bitfile.
+			@return		A ULWord containing the design bitfile version.
+		**/
+		virtual inline ULWord				GetBitfileVersion (void) const	{ return _bitfileVersion; }
+
+		/**
+			@brief		Answers with the design user ID, as extracted from the bitfile.
+			@return		A ULWord containing the design user ID.
+		**/
+		virtual inline ULWord				GetUserID (void) const	{ return _userID; }
 
 		/**
 			@brief		Answers with the part name, as extracted from the bitfile.
@@ -93,17 +154,42 @@ class AJAExport CNTV2Bitfile
 		**/
 		virtual inline const std::string &	GetLastError (void) const		{ return _lastError; }
 
+		/**
+			@brief		Answers with the length of the program stream.
+			@return		Program stream length.
+		**/
 		virtual unsigned					GetProgramStreamLength (void) const;
+
+		/**
+			@brief		Answers with the length of the file stream.
+			@return		File stream length.
+		**/
 		virtual unsigned					GetFileStreamLength (void) const;
+		
+		/**
+			@brief		Retrieve the program bitstream.
+			@param[in]	buffer			Specifies the buffer to receive the data.
+			@param[in]	bufferLength	Specifies the length of the buffer.
+			@return		Program stream length.
+		**/
 		virtual unsigned					GetProgramByteStream (unsigned char * buffer, unsigned bufferLength);
+
+		/**
+			@brief		Retrieve the file bitstream.
+			@param[in]	buffer			Specifies the buffer to receive the data.
+			@param[in]	bufferLength	Specifies the length of the buffer.
+			@return		File stream length.
+		**/
 		virtual unsigned					GetFileByteStream (unsigned char * buffer, unsigned bufferLength);
-		virtual void						SetDesignName (const char * pInBuffer);
-		virtual std::string					ParseHeaderFromBuffer(const uint8_t* bitfileBuffer);
+
+		static std::vector <std::string> &	GetPartialDesignNames (ULWord deviceID);
 
 	private:
-		virtual bool						FindSyncWord (void) const;
-		virtual std::string					ParseHeader (unsigned & outPreambleSize);
 		virtual void						Init (void);
+		virtual std::string					ParseHeader ();
+		virtual void						SetDesignName (const char * pInBuffer, unsigned bufferLength);
+		virtual void						SetDesignFlags (const char * pInBuffer, unsigned bufferLength);
+		virtual void						SetDesignUserID (const char * pInBuffer, unsigned bufferLength);
 
 		std::ifstream				_bitFileStream;
 		std::vector <unsigned char> _fileHeader;
@@ -116,9 +202,17 @@ class AJAExport CNTV2Bitfile
 		unsigned					_numBytes;
 		unsigned					_fileSize;
 		bool						_fileReady;
-		bool						_bitFileCompressed;
 		unsigned					_programStreamPos;
 		unsigned					_fileStreamPos;
+		bool						_tandem;
+		bool						_partial;
+		bool						_clear;
+		bool						_compress;
+		ULWord						_userID;
+		ULWord						_designID;
+		ULWord						_designVersion;
+		ULWord						_bitfileID;
+		ULWord						_bitfileVersion;
 
 };	//	CNTV2Bitfile
 

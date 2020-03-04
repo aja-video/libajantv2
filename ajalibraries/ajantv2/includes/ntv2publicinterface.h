@@ -1335,6 +1335,9 @@ typedef enum
 	kRegMaskQuadQuadMode		= BIT(2),
 	kRegMaskQuadQuadMode2		= BIT(3),
 	kRegMaskQuadQuadSquaresMode	= BIT(4),
+	kRegMaskVUMeterSelect		= BIT(5),
+	kRegMaskFramePulseEnable	= BIT(6),
+	kRegMaskFramePulseRefSelect	= BIT(8) + BIT(9) + BIT(10) + BIT(11),
 
 
 	// Channel Control - kRegCh1Control, kRegCh2Control, kRegCh3Control, kRegCh4Control
@@ -1405,12 +1408,14 @@ typedef enum
 	kRegMaskAudioTone				= BIT(7),
 	kRegMaskResetAudioInput			= BIT(8),
 	kRegMaskResetAudioOutput		= BIT(9),
+	kRegMaskInputStartAtVBI			= BIT(10),	// New in 15.6
 	kRegMaskPauseAudio				= BIT(11),
-    kRegMaskEmbeddedOutputMuteCh1   = BIT(12), // added for FS1
-    kRegMaskEmbeddedOutputSupressCh1 = BIT(13), // added for FS1 but available on other boards
+	kRegMaskEmbeddedOutputMuteCh1   = BIT(12), // added for FS1
+	kRegMaskEmbeddedOutputSupressCh1 = BIT(13), // added for FS1 but available on other boards
+	kRegMaskOutputStartAtVBI		= BIT(14),	// New in 15.6
 	kRegMaskEmbeddedOutputSupressCh2 = BIT(15), // added for FS1 but available on other boards
 	kRegMaskNumChannels				= BIT(16),
-    kRegMaskEmbeddedOutputMuteCh2   = BIT(17), // added for FS1
+	kRegMaskEmbeddedOutputMuteCh2   = BIT(17), // added for FS1
 	kRegMaskAudioRate				= BIT(18),
 	kRegMaskEncodedAudioMode		= BIT(19), // addded for FS1 but available on other boards
 	kRegMaskAudio16Channel			= BIT(20),
@@ -1483,6 +1488,7 @@ typedef enum
 
 	//	kRegCanDoStatus
 	kRegMaskCanDoValidXptROM			= BIT(0),
+	kRegMaskCanDoAudioWaitForVBI		= BIT(1),
 
 	//	kRegLUTV2Control
 	kRegMaskLUT1Enable					= BIT(0),
@@ -2498,6 +2504,9 @@ typedef enum
 	kRegShiftQuadQuadMode = 2,
 	kRegShiftQuadQuadMode2 = 3,
 	kRegShiftQuadQuadSquaresMode = 4,
+	kRegShiftVUMeterSelect = 5,
+	kRegShiftFramePulseEnable = 6,
+	kRegShiftFramePulseRefSelect = 8,
 
 	// Channel Control - kRegCh1Control, kRegCh2Control, kRegCh3Control, kRegCh4Control
 	kRegShiftMode						= 0,
@@ -2570,12 +2579,14 @@ typedef enum
 	kRegShiftAudioTone					= 7,
 	kRegShiftResetAudioInput			= 8,
 	kRegShiftResetAudioOutput			= 9,
+	kRegShiftInputStartAtVBI			= 10,	//	New in 15.6
 	kRegShiftPauseAudio					= 11,
-    kRegShiftEmbeddedOutputMuteCh1      = 12, // added for FS1
-    kRegShiftEmbeddedOutputSupressCh1   = 13, // added for FS1 but available on other boards
+	kRegShiftEmbeddedOutputMuteCh1      = 12, // added for FS1
+	kRegShiftEmbeddedOutputSupressCh1   = 13, // added for FS1 but available on other boards
+	kRegShiftOutputStartAtVBI			= 14,	//	New in 15.6
 	kRegShiftEmbeddedOutputSupressCh2	= 15, // added for FS1 but available on other boards
 	kRegShiftNumChannels				= 16,
-    kRegShiftEmbeddedOutputMuteCh2      = 17, // added for FS1
+	kRegShiftEmbeddedOutputMuteCh2      = 17, // added for FS1
 	kRegShiftAudioRate					= 18,
 	kRegShiftEncodedAudioMode			= 19,
 	kRegShiftAudio16Channel				= 20,
@@ -2645,6 +2656,7 @@ typedef enum
 
 	//	kRegCanDoStatus
 	kRegShiftCanDoValidXptROM			= 0,
+	kRegShiftCanDoAudioWaitForVBI		= 1,
 
 	//	kRegLUTV2Control
 	kRegShiftLUT1Enable					= 0,
@@ -5666,6 +5678,7 @@ typedef enum
 		#define	AUTOCIRCULATE_TYPE_SDISTATS		NTV2_FOURCC ('s', 'd', 'i', 'S')	///< @brief	Identifies NTV2SDIStatus struct
         #define	NTV2_TYPE_AJADEBUGLOGGING		NTV2_FOURCC ('d', 'b', 'l', 'g')	///< @brief	Identifies NTV2DebugLogging struct
 		#define	NTV2_TYPE_AJABUFFERLOCK			NTV2_FOURCC ('b', 'f', 'l', 'k')	///< @brief	Identifies NTV2BufferLock struct
+		#define	NTV2_TYPE_AJABITSTREAM			NTV2_FOURCC ('b', 't', 's', 't')	///< @brief	Identifies NTV2Bitstream struct
 
 		#define	NTV2_IS_VALID_STRUCT_TYPE(_x_)	(	(_x_) == AUTOCIRCULATE_TYPE_STATUS		||	\
 													(_x_) == AUTOCIRCULATE_TYPE_XFER		||	\
@@ -5678,7 +5691,8 @@ typedef enum
                                                     (_x_) == NTV2_TYPE_BANKGETSET			||	\
                                                     (_x_) == NTV2_TYPE_VIRTUAL_DATA_RW		||	\
 													(_x_) == NTV2_TYPE_AJADEBUGLOGGING		||	\
-													(_x_) == NTV2_TYPE_AJABUFFERLOCK	)
+													(_x_) == NTV2_TYPE_AJABUFFERLOCK		||	\
+													(_x_) == NTV2_TYPE_AJABITSTREAM	)
 
 
 		//	NTV2_POINTER FLAGS
@@ -5715,6 +5729,23 @@ typedef enum
 		#define DMABUFFERLOCK_MANUAL				BIT(5)		///< @brief Used in ::NTV2BufferLock to manual page lock buffers.
 		#define DMABUFFERLOCK_MAX_SIZE				BIT(6)		///< @brief Used in ::NTV2BufferLock to set max locked size.
 
+		// Bitstream flags
+		#define BITSTREAM_WRITE						BIT(0)		///< @brief Used in ::NTV2Bitstream to write a bitstream
+		#define BITSTREAM_FRAGMENT					BIT(1)		///< @brief Used in ::NTV2Bitstream to indicate bitstream is a fragment
+		#define BITSTREAM_SWAP						BIT(2)		///< @brief Used in ::NTV2Bitstream to byte swap bitstream data
+		#define BITSTREAM_RESET_CONFIG				BIT(3)		///< @brief Used in ::NTV2Bitstream to reset config
+		#define BITSTREAM_RESET_MODULE				BIT(4)		///< @brief Used in ::NTV2Bitstream to reset module
+		#define BITSTREAM_READ_REGISTERS			BIT(5)		///< @brief Used in ::NTV2Bitstream to get status registers
+
+		// Bitstream registers
+		#define BITSTREAM_EXT_CAP					0			///< @brief Extended capability register
+		#define BITSTREAM_VENDOR_HEADER				1			///< @brief Vender specific register
+		#define BITSTREAM_JTAG_ID					2			///< @brief JTAG ID register
+		#define BITSTREAM_VERSION					3			///< @brief Bitstream version register
+		#define BITSTREAM_MCAP_STATUS				4			///< @brief MCAP status register
+		#define BITSTREAM_MCAP_CONTROL				5			///< @brief MCAP control register
+		#define BITSTREAM_MCAP_DATA					6			///< @brief MCAP data register
+	
 		#if !defined (NTV2_BUILDING_DRIVER)
 			/**
 				Convenience macros that delimit the new structs.
@@ -8090,6 +8121,88 @@ typedef enum
 		NTV2_STRUCT_END (NTV2BufferLock)
 
 
+		/**
+			@brief	This is used for bitstream maintainance.
+			@note	This struct uses a constructor to properly initialize itself.
+					Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
+		**/
+		NTV2_STRUCT_BEGIN (NTV2Bitstream)
+			NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
+				NTV2_POINTER	mBuffer;			///< @brief	Virtual address of a bitstream buffer and its length.
+				ULWord			mFlags;				///< @brief Action flags (lock, unlock, etc)
+				ULWord			mStatus;			///< @brief Action status
+				ULWord			mRegisters[16];		///< @brief Resister data
+				ULWord			mReserved[32];		///< @brief	Reserved for future expansion.
+			NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
+
+			#if !defined (NTV2_BUILDING_DRIVER)
+				/**
+					@name	Construction & Destruction
+				**/
+				///@{
+				explicit	NTV2Bitstream ();		///< @brief	Constructs a default NTV2Bitstream struct.
+				inline		~NTV2Bitstream ()	{}	///< @brief	My default destructor, which frees all allocatable fields that I own.
+
+				/**
+					@brief	Constructs an NTV2Bitstream object to use in a CNTV2Card::LoadBitstream call.
+					@param	inBuffer		Specifies the memory containing the bitstream to load.
+					@param	inFlags			Specifies action flags (fragment swap, etc.).
+				**/
+				explicit	NTV2Bitstream (const NTV2_POINTER & inBuffer, const ULWord inFlags);
+
+				/**
+					@brief	Constructs an NTV2Bitstream object to use in a CNTV2Card::LoadBitstream call.
+					@param	pInBuffer		Specifies a pointer to the host buffer containing the bitstream to load.
+					@param	inByteCount		Specifies a the length of the bitstream in bytes.
+					@param	inFlags			Specifies action flags (fragment, swap, etc)
+				**/
+				explicit	NTV2Bitstream (const ULWord * pInBuffer, const ULWord inByteCount, const ULWord inFlags);
+				///@}
+
+				/**
+					@name	Changing
+				**/
+				///@{
+				/**
+					@brief	Sets the buffer to lock for use in a subsequent call to CNTV2Card::LoadBitstream.
+					@param	inBuffer		Specifies the memory containing the bitstream to load.
+					@return	True if successful;  otherwise false.
+				**/
+				bool		SetBuffer (const NTV2_POINTER & inBuffer);
+
+				/**
+					@brief	Sets the buffer to lock for use in a subsequent call to CNTV2Card::LoadBitstream.
+					@param	pInBuffer			Specifies a pointer to the host buffer contiaining the bitstread to load.
+					@param	inByteCount			Specifies a the length of the buffer to load in bytes.
+					@return	True if successful;  otherwise false.
+				**/
+				inline bool	SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)	{return SetBuffer(NTV2_POINTER(pInBuffer, inByteCount));}
+
+				/**
+					@brief	Sets the action flags for use in a subsequent call to CNTV2Card::LoadBitstream.
+					@param	inFlags			Specifies action flags (fragment, swap, etc)
+				**/
+				inline void	SetFlags (const ULWord inFlags)		{NTV2_ASSERT_STRUCT_VALID;  mFlags = inFlags;}
+
+				/**
+					@brief	Resets the struct to its initialized state.
+				**/
+				inline void	Clear (void)		{SetBuffer(NTV2_POINTER());}
+				///@}
+
+				/**
+					@brief	Prints a human-readable representation of me to the given output stream.
+					@param	inOutStream		Specifies the output stream to use.
+					@return	A reference to the output stream.
+				**/
+				std::ostream &	Print (std::ostream & inOutStream) const;
+
+				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
+
+			#endif	//	!defined (NTV2_BUILDING_DRIVER)
+		NTV2_STRUCT_END (NTV2Bitstream)
+
+
 		#if !defined (NTV2_BUILDING_DRIVER)
 			typedef std::set <NTV2VideoFormat>					NTV2VideoFormatSet;					///< @brief	A set of distinct NTV2VideoFormat values.
 			typedef NTV2VideoFormatSet::const_iterator			NTV2VideoFormatSetConstIter;		///< @brief	A handy const iterator for iterating over an NTV2VideoFormatSet.
@@ -8105,6 +8218,9 @@ typedef enum
 
 			typedef std::set <NTV2InputSource>					NTV2InputSourceSet;					///< @brief	A set of distinct NTV2InputSource values.
 			typedef NTV2InputSourceSet::const_iterator			NTV2InputSourceSetConstIter;		///< @brief	A handy const iterator for iterating over an NTV2InputSourceSet.
+
+			typedef std::set <NTV2OutputDestination>			NTV2OutputDestinations;				///< @brief	A set of distinct NTV2OutputDestination values.
+			typedef NTV2OutputDestinations::const_iterator		NTV2OutputDestinationsConstIter;	///< @brief	A handy const iterator for iterating over an NTV2OutputDestinations.
 
 			typedef	std::vector <uint8_t>						UByteSequence;						///< @brief	An ordered sequence of UByte (uint8_t) values.
 			typedef	UByteSequence::const_iterator				UByteSequenceConstIter;				///< @brief	A handy const iterator for iterating over a UByteSequence.
@@ -8259,6 +8375,22 @@ typedef enum
 				@return		A reference to the modified set.
 			**/
 			AJAExport NTV2InputSourceSet & operator += (NTV2InputSourceSet & inOutSet, const NTV2InputSourceSet & inSet);
+
+			/**
+				@brief		Prints the given ::NTV2OutputDestinations' contents into the given output stream.
+				@param		inOStream	The stream into which the human-readable list will be written.
+				@param[in]	inSet		Specifies the set to be streamed.
+				@return		The "inOStream" that was specified.
+			**/
+			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2OutputDestinations & inSet);
+
+			/**
+				@brief		Appends the given ::NTV2OutputDestinations' contents into the given set.
+				@param		inOutSet	The set to which the other set will be appended.
+				@param[in]	inSet		Specifies the set whose contents will be appended.
+				@return		A reference to the modified set.
+			**/
+			AJAExport NTV2OutputDestinations & operator += (NTV2OutputDestinations & inOutSet, const NTV2OutputDestinations & inSet);
 
 
 			/**

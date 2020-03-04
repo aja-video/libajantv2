@@ -291,6 +291,11 @@ public:
 
     virtual bool GetPackageInformation(PACKAGE_INFO_STRUCT & packageInfo);
 
+	virtual bool BitstreamWrite (const NTV2_POINTER & inBuffer, bool fragment, bool swap);
+	virtual bool BitstreamReset (bool configuration, bool interface);
+	virtual bool BitstreamStatus (ULWord* regs, ULWord count);
+
+	
 	// Functions for cards that support more than one bitfile
 #if !defined(NTV2_DEPRECATE_12_7)
 	virtual inline NTV2_DEPRECATED_f(bool SwitchBitfile (NTV2DeviceID boardID, NTV2BitfileType bitfile))	{ (void) boardID; (void) bitfile; return false; }	///< @deprecated	This function is obsolete.

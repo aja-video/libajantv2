@@ -1035,19 +1035,15 @@ NTV2GeometrySet & operator += (NTV2GeometrySet & inOutSet, const NTV2GeometrySet
 //	Implementation of NTV2FrameBufferFormatSet's ostream writer...
 ostream & operator << (ostream & inOStream, const NTV2InputSourceSet & inSet)
 {
-	NTV2InputSourceSetConstIter	iter	(inSet.begin ());
-
-	inOStream	<< inSet.size ()
-				<< (inSet.size () == 1 ? " input source:  " : " input sources:  ");
-
-	while (iter != inSet.end ())
+	NTV2InputSourceSetConstIter	iter(inSet.begin());
+	inOStream	<< inSet.size()
+				<< (inSet.size() == 1 ? " input:  " : " inputs:  ");
+	while (iter != inSet.end())
 	{
 		inOStream << ::NTV2InputSourceToString (*iter);
-		inOStream << (++iter == inSet.end ()  ?  ""  :  ", ");
+		inOStream << (++iter == inSet.end()  ?  ""  :  ", ");
 	}
-
 	return inOStream;
-
 }	//	operator <<
 
 
@@ -1055,6 +1051,28 @@ NTV2InputSourceSet & operator += (NTV2InputSourceSet & inOutSet, const NTV2Input
 {
 	for (NTV2InputSourceSetConstIter iter (inSet.begin ());  iter != inSet.end ();  ++iter)
 		inOutSet.insert (*iter);
+	return inOutSet;
+}
+
+
+ostream & operator << (ostream & inOStream, const NTV2OutputDestinations & inSet)
+{
+	NTV2OutputDestinationsConstIter	iter(inSet.begin());
+	inOStream	<< inSet.size()
+				<< (inSet.size() == 1 ? " output:  " : " outputs:  ");
+	while (iter != inSet.end())
+	{
+		inOStream << ::NTV2OutputDestinationToString(*iter);
+		inOStream << (++iter == inSet.end()  ?  ""  :  ", ");
+	}
+	return inOStream;
+}
+
+
+NTV2OutputDestinations & operator += (NTV2OutputDestinations & inOutSet, const NTV2OutputDestinations & inSet)
+{
+	for (NTV2OutputDestinationsConstIter iter(inSet.begin());  iter != inSet.end();  ++iter)
+		inOutSet.insert(*iter);
 	return inOutSet;
 }
 
@@ -2388,6 +2406,41 @@ ostream & NTV2BufferLock::Print (ostream & inOutStream) const
 	return inOutStream;
 }
 
+
+NTV2Bitstream::NTV2Bitstream()
+	:	mHeader	(NTV2_TYPE_AJABITSTREAM, sizeof(NTV2Bitstream))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+}
+
+NTV2Bitstream::NTV2Bitstream (const NTV2_POINTER & inBuffer, const ULWord inFlags)
+	:	mHeader	(NTV2_TYPE_AJABITSTREAM, sizeof(NTV2Bitstream))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	SetBuffer(inBuffer);
+	SetFlags(inFlags);
+}
+
+NTV2Bitstream::NTV2Bitstream(const ULWord * pInBuffer, const ULWord inByteCount, const ULWord inFlags)
+	:	mHeader	(NTV2_TYPE_AJABITSTREAM, sizeof(NTV2Bitstream))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	SetBuffer (NTV2_POINTER(pInBuffer, inByteCount));
+	SetFlags (inFlags);
+}
+
+bool NTV2Bitstream::SetBuffer (const NTV2_POINTER & inBuffer)
+{	//	Just use address & length (don't deep copy)...
+	NTV2_ASSERT_STRUCT_VALID;
+	return mBuffer.Set (inBuffer.GetHostPointer(), inBuffer.GetByteCount());
+}
+
+ostream & NTV2Bitstream::Print (ostream & inOutStream) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	inOutStream	<< mHeader << mBuffer << " flags=" << xHEX0N(mFlags,8) << " " << mTrailer;
+	return inOutStream;
+}
 
 
 NTV2GetRegisters::NTV2GetRegisters (const NTV2RegNumSet & inRegisterNumbers)

@@ -1826,6 +1826,49 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
     return result;
 }
 
+bool CNTV2Card::EnableFramePulseReference (bool enable)
+{
+	NTV2DeviceID id = GetDeviceID();
+	if(!::NTV2DeviceCanDoFramePulseSelect(id))
+		return false;
+	
+	return WriteRegister (kRegGlobalControl3, enable ? 1 : 0, kRegMaskFramePulseEnable, kRegShiftFramePulseEnable);
+}
+
+
+bool CNTV2Card::GetEnableFramePulseReference (bool & outValue)
+{
+	NTV2DeviceID id = GetDeviceID();
+	if(!::NTV2DeviceCanDoFramePulseSelect(id))
+		return false;
+	
+	ULWord returnValue(0);
+	bool status = ReadRegister(kRegGlobalControl3, returnValue, kRegMaskFramePulseEnable, kRegShiftFramePulseEnable);
+	outValue = returnValue == 0 ? false : true;
+	return status;
+}
+
+bool CNTV2Card::SetFramePulseReference (NTV2ReferenceSource value)
+{
+	NTV2DeviceID id = GetDeviceID();
+	if(!::NTV2DeviceCanDoFramePulseSelect(id))
+		return false;
+		
+	return WriteRegister (kRegGlobalControl3, (ULWord)value, kRegMaskFramePulseRefSelect, kRegShiftFramePulseRefSelect);
+}
+
+bool CNTV2Card::GetFramePulseReference (NTV2ReferenceSource & outValue)
+{
+	ULWord	refControl1(0);
+	NTV2DeviceID id = GetDeviceID();
+	if(!::NTV2DeviceCanDoFramePulseSelect(id))
+		return false;
+	
+	bool	result	(ReadRegister (kRegGlobalControl3, refControl1, kRegMaskFramePulseRefSelect, kRegShiftFramePulseRefSelect));
+	outValue = NTV2ReferenceSource(refControl1);
+	return result;
+}
+
 #if !defined (NTV2_DEPRECATE)
 	// Deprecated - Use SetReference instead
 	bool CNTV2Card::SetReferenceSource (NTV2ReferenceSource value, bool ajaRetail)
