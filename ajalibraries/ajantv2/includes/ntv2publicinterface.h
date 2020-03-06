@@ -5821,6 +5821,7 @@ typedef enum
 		#define BITSTREAM_MCAP_STATUS				4			///< @brief MCAP status register
 		#define BITSTREAM_MCAP_CONTROL				5			///< @brief MCAP control register
 		#define BITSTREAM_MCAP_DATA					6			///< @brief MCAP data register
+		#define BITSTREAM_NUM_REGISTERS				7			///< @brief Number of MCAP registes
 	
 		#if !defined (NTV2_BUILDING_DRIVER)
 			/**

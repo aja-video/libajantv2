@@ -36,7 +36,7 @@ struct AJAExport NTV2BitfileInfo
 	ULWord bitfileID;
 	ULWord bitfileVersion;
 	ULWord bitfileFlags;
-	ULWord deviceID;
+	NTV2DeviceID deviceID;
 };
 
 typedef std::vector <NTV2BitfileInfo>		NTV2BitfileInfoList;
@@ -92,15 +92,17 @@ public:
 
 	/**
 	   @brief		Get a pointer to the specified bitstream.
-	   @param[in]	deviceID		Specifies the device ID of the bitfile.
-	   @param[in]	designVersion	Specifies the design version of the bitfile (0xff for latest).
+	   @param[in]	designID		Specifies the design ID.
+	   @param[in]	designVersion	Specifies the design version.
+	   @param[in]	bitfileID		Specifies the bitfile ID.
 	   @param[in]	bitfileVersion	Specifies the bitfile version (0xff for latest).
 	   @param[in]	bitfileFlags	Specifies the bitfile flags.
 	   @return		True if the bitfile is present; otherwise false.
 	**/
 	virtual bool						GetBitStream (NTV2_POINTER & bitstream,
-													  ULWord deviceID,
+													  ULWord designID,
 													  ULWord designVersion,
+													  ULWord bitfileID,
 													  ULWord bitfileVersion,
 													  ULWord bitfileFlags);
 

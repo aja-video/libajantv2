@@ -184,6 +184,15 @@ class AJAExport CNTV2Bitfile
 
 		static std::vector <std::string> &	GetPartialDesignNames (ULWord deviceID);
 
+		static ULWord GetDesignID(ULWord userID) { return (userID & 0xff000000) >> 24; }
+		static ULWord GetDesignVersion(ULWord userID)  { return (userID & 0x00ff0000) >> 16; }
+		static ULWord GetBitfileID(ULWord userID)  { return (userID & 0x0000ff00) >> 8; }
+		static ULWord GetBitfileVersion(ULWord userID)  { return (userID & 0x000000ff) >> 0; }
+		
+		static NTV2DeviceID ConvertToDeviceID(ULWord designID, ULWord bitfileID);
+		static ULWord ConvertToDesignID(NTV2DeviceID deviceID);
+		static ULWord ConvertToBitfileID(NTV2DeviceID deviceID);
+
 	private:
 		virtual void						Init (void);
 		virtual std::string					ParseHeader ();

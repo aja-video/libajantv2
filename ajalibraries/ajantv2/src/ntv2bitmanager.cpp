@@ -35,8 +35,10 @@ bool CNTV2BitManager::AddFile (const std::string & inBitfilePath)
 	NTV2BitfileInfo Info;
 
 	// open bitfile
-	if (!Fio.FileExists(inBitfilePath)) return false;
-	if (!Bitfile.Open(inBitfilePath)) return false;
+    if (!Fio.FileExists(inBitfilePath))
+        return false;
+    if (!Bitfile.Open(inBitfilePath))
+        return false;
 
 	// get bitfile information
 	Info.bitfilePath = inBitfilePath;
@@ -45,19 +47,29 @@ bool CNTV2BitManager::AddFile (const std::string & inBitfilePath)
 	Info.designVersion = Bitfile.GetDesignVersion();
 	Info.bitfileID = Bitfile.GetBitfileID();
 	Info.bitfileVersion = Bitfile.GetBitfileVersion();
-	Info.bitfileFlags =
-		(Bitfile.IsTandem()? NTV2_BITFILE_FLAG_TANDEM : 0) |
-		(Bitfile.IsPartial()? NTV2_BITFILE_FLAG_PARTIAL : 0) |
-		(Bitfile.IsClear()? NTV2_BITFILE_FLAG_CLEAR : 0);
+    if (Bitfile.IsTandem())
+        Info.bitfileFlags = NTV2_BITFILE_FLAG_TANDEM;
+    else if (Bitfile.IsClear())
+        Info.bitfileFlags = NTV2_BITFILE_FLAG_CLEAR;
+    else if (Bitfile.IsPartial())
+        Info.bitfileFlags = NTV2_BITFILE_FLAG_PARTIAL;
+    else
+        Info.bitfileFlags = 0;
 	Info.deviceID = Bitfile.GetDeviceID();
 
 	// check for reconfigurable bitfile
-	if ((Info.designID == 0) || (Info.designID > 0xfe)) return false;
-	if (Info.designVersion > 0xfe) return false;
-	if ((Info.bitfileID == 0) || (Info.bitfileID > 0xfe)) return false;
-	if (Info.bitfileVersion > 0xfe) return false;
-	if (Info.bitfileFlags == 0) return false;
-	if (Info.deviceID == 0) return false;
+    if ((Info.designID == 0) || (Info.designID > 0xfe))
+        return false;
+    if (Info.designVersion > 0xfe)
+        return false;
+    if ((Info.bitfileID == 0) || (Info.bitfileID > 0xfe))
+        return false;
+    if (Info.bitfileVersion > 0xfe)
+        return false;
+    if (Info.bitfileFlags == 0)
+        return false;
+    if (Info.deviceID == 0)
+        return false;
 
 	// add to list
 	_bitfileList.push_back(Info);
@@ -72,7 +84,8 @@ bool CNTV2BitManager::AddDirectory (const std::string & inDirectory)
 	std::vector<std::string>::iterator fcIter;
 
 	// check for good directory
-	if (Fio.DoesDirectoryExist(inDirectory) != AJA_STATUS_SUCCESS) return false;
+    if (Fio.DoesDirectoryExist(inDirectory) != AJA_STATUS_SUCCESS)
+        return false;
 
 	// get bitfiles
 	Fio.ReadDirectory(inDirectory, "*.bit", fileContainer);
@@ -80,7 +93,7 @@ bool CNTV2BitManager::AddDirectory (const std::string & inDirectory)
 	// add bitfiles
 	for (fcIter = fileContainer.begin(); fcIter != fileContainer.end(); fcIter++)
 	{
-		AddFile(inDirectory + "/" + *fcIter);
+        AddFile(*fcIter);
 	}
 	
 	return true;
@@ -103,53 +116,80 @@ NTV2BitfileInfoList & CNTV2BitManager::GetBitfileInfoList (void)
 }
 
 bool CNTV2BitManager::GetBitStream (NTV2_POINTER & bitstream,
-									ULWord deviceID,
+									ULWord designID,
 									ULWord designVersion,
+									ULWord bitfileID,
 									ULWord bitfileVersion,
 									ULWord bitfileFlags)
 {
 	int size = (int)GetNumBitfiles();
+	int max = size;
 	int i;
 
 	for (i = 0; i < size; i++)
 	{
 		// search for bitstream
-		if (deviceID != _bitfileList[i].deviceID) continue;
-		if ((designVersion != 0xff) && (designVersion != _bitfileList[i].designVersion)) continue;
-		if ((bitfileVersion != 0xff) && (bitfileVersion != _bitfileList[i].bitfileVersion)) continue;
-		if (bitfileFlags != _bitfileList[i].bitfileFlags) continue;
-
-		// read in bitstream
-		if (!ReadBitstream(i)) return false;
-
-		bitstream = _bitstreamList[i];
-		return true;
+        NTV2BitfileInfo info = _bitfileList[i];
+        if ((designID == info.designID) &&
+            (designVersion == info.designVersion) &&
+            (bitfileID == info.bitfileID) &&
+            ((bitfileFlags & info.bitfileFlags) != 0))
+		{
+            if (bitfileVersion == info.bitfileVersion)
+				break;
+            if ((max >= size) || (info.bitfileVersion > _bitfileList[max].bitfileVersion))
+				max = i;
+		}
 	}
+
+	// looking for latest version?
+	if ((bitfileVersion == 0xff) && (max < size))
+		i = max;
+
+	// find something?
+	if (i == size)
+		return false;
 	
-	return false;
+	// read in bitstream
+	if (!ReadBitstream(i))
+		return false;
+
+	bitstream = _bitstreamList[i];
+	return true;
 }
 
 bool CNTV2BitManager::ReadBitstream(int index)
 {
 	CNTV2Bitfile Bitfile;
+    NTV2_POINTER Bitstream;
 	unsigned char* address;
 	unsigned size;
 
 	// already in cache
-	if ((index < (int)_bitstreamList.size()) && _bitstreamList[index]) return true;
+    if ((index < (int)_bitstreamList.size()) && (_bitstreamList[index].GetByteCount() > 0))
+        return true;
 
 	// open bitfile to get bitstream
-	if (!Bitfile.Open(_bitfileList[index].bitfilePath)) return false;
+    if (!Bitfile.Open(_bitfileList[index].bitfilePath))
+        return false;
 
 	// allocate bitstream buffer
 	size = Bitfile.GetProgramStreamLength();
-	if (size == 0) return false;
-	_bitstreamList[index].Allocate (size);
+    if (size == 0)
+        return false;
+    Bitstream.Allocate (size);
 
 	// read bitstream from bitfile
-	address = (unsigned char*)_bitstreamList[index].GetHostAddress(0);
-	if (address == NULL) return false;
-	if (!Bitfile.GetProgramByteStream (address, size)) return false;
+    address = (unsigned char*)Bitstream.GetHostAddress(0);
+    if (address == NULL)
+        return false;
+    if (!Bitfile.GetProgramByteStream (address, size))
+        return false;
+
+    if (index >= (int)_bitstreamList.size())
+        _bitstreamList.resize(index + 1);
+
+    _bitstreamList[index] = Bitstream;
 
 	return true;
 }
