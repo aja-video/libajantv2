@@ -898,7 +898,7 @@ public:
 		@param[in]	inRefSource		Specifies the ::NTV2ReferenceSource to use.
 					
 	**/
-	AJA_VIRTUAL bool		SetReference (NTV2ReferenceSource inRefSource);
+	AJA_VIRTUAL bool		SetReference (NTV2ReferenceSource inRefSource, bool inKeepFramePulseSelect = false);
 
 	/**
 		@brief			Answers with the device's current clock reference source. See \ref deviceclockingandsync for more information.

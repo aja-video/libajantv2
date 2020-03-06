@@ -1680,17 +1680,23 @@ bool CNTV2Card::CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFir
 // Method: SetReference
 // Input:  NTV2Reference
 // Output: NONE
-bool CNTV2Card::SetReference (NTV2ReferenceSource value)
+bool CNTV2Card::SetReference (NTV2ReferenceSource inRefSource, bool inKeepFramePulseSelect)
 {
 	NTV2DeviceID id = GetDeviceID();
 
-	if (::NTV2DeviceCanDoLTCInOnRefPort(id) && value == NTV2_REFERENCE_EXTERNAL)
+	if (::NTV2DeviceCanDoLTCInOnRefPort(id) && inRefSource == NTV2_REFERENCE_EXTERNAL)
 		SetLTCOnReference(false);
+	
+	if (NTV2DeviceCanDoFramePulseSelect(id) && !inKeepFramePulseSelect)
+	{
+		//Reset this for backwards compatibility
+		EnableFramePulseReference(false);
+	}
 
 	//this looks slightly unusual but really
 	//it is a 4 bit counter in 2 different registers
-	ULWord refControl1 = ULWord(value), refControl2 = 0, ptpControl = 0;
-	switch(value)
+	ULWord refControl1 = ULWord(inRefSource), refControl2 = 0, ptpControl = 0;
+	switch(inRefSource)
 	{
 	case NTV2_REFERENCE_INPUT5:
 		refControl1 = 0;
