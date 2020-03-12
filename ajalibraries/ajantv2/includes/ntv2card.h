@@ -3014,6 +3014,17 @@ public:
 	**/
 	AJA_VIRTUAL bool	SubscribeOutputVerticalEvent (const NTV2Channel inChannel);
 
+	/**
+		@brief		Causes me to be notified when an output vertical blanking interrupt is generated for the given output channel(s).
+		@param[in]	inChannels	Specifies the output channel(s) of interest.
+		@return		True if successful; otherwise false, which can indicate communication with the device has been lost,
+					or on the Windows platform, there are no more event subscription handles available.
+		@note		<b>Windows Users:</b> AJA recommends calling this function on the same thread that will call
+					CNTV2Card::WaitForOutputVerticalInterrupt or CNTV2Card::WaitForOutputFieldID.
+		@see		CNTV2Card::UnsubscribeOutputVerticalEvents, CNTV2Card::SubscribeEvent, \ref fieldframeinterrupts
+	**/
+	AJA_VIRTUAL bool	SubscribeOutputVerticalEvents (const NTV2ChannelSet inChannels);
+
 
 	/**
 		@brief		Causes me to be notified when an input vertical blanking interrupt occurs on the given input channel.
@@ -3025,6 +3036,17 @@ public:
 		@see		CNTV2Card::UnsubscribeInputVerticalEvent, CNTV2Card::SubscribeEvent, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	SubscribeInputVerticalEvent (const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief		Causes me to be notified when an input vertical blanking interrupt occurs on the given input channel(s).
+		@param[in]	inChannels	Specifies the input channel(s) of interest.
+		@return		True if successful; otherwise false, which can indicate communication with the device has been lost,
+					or on the Windows platform, there are no more event subscription handles available.
+		@note		<b>Windows Users:</b> AJA recommends calling this function on the same thread that will call
+					CNTV2Card::WaitForInputVerticalInterrupt or CNTV2Card::WaitForInputFieldID.
+		@see		CNTV2Card::UnsubscribeInputVerticalEvent, CNTV2Card::SubscribeEvent, \ref fieldframeinterrupts
+	**/
+	AJA_VIRTUAL bool	SubscribeInputVerticalEvents (const NTV2ChannelSet inChannels);
 
 
 	//
@@ -3048,6 +3070,15 @@ public:
 	AJA_VIRTUAL bool	UnsubscribeOutputVerticalEvent (const NTV2Channel inChannel);
 
 	/**
+		@brief		Unregisters me so I'm no longer notified when an output VBI is signaled on the given output channel(s).
+		@param[in]	inChannels	Specifies the output channel(s) of interest.
+		@return		True if successful; otherwise false.
+		@details	This function undoes the effect of a prior call to SubscribeOutputVerticalEvents.
+		@see		CNTV2Card::SubscribeOutputVerticalEvents, CNTV2Card::UnsubscribeEvent, \ref fieldframeinterrupts
+	**/
+	AJA_VIRTUAL bool	UnsubscribeOutputVerticalEvents (const NTV2ChannelSet inChannels);
+
+	/**
 		@brief		Unregisters me so I'm no longer notified when an input VBI is signaled on the given input channel.
 		@param[in]	inChannel	Specifies the input channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
@@ -3055,6 +3086,15 @@ public:
 		@see		CNTV2Card::SubscribeInputVerticalEvent, CNTV2Card::UnsubscribeEvent, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	UnsubscribeInputVerticalEvent (const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief		Unregisters me so I'm no longer notified when an input VBI is signaled on the given input channel(s).
+		@param[in]	inChannels	Specifies the input channel(s) of interest.
+		@return		True if successful; otherwise false.
+		@details	This function undoes the effects of a prior call to SubscribeInputVerticalEvents.
+		@see		CNTV2Card::SubscribeInputVerticalEvents, CNTV2Card::UnsubscribeEvent, \ref fieldframeinterrupts
+	**/
+	AJA_VIRTUAL bool	UnsubscribeInputVerticalEvents (const NTV2ChannelSet inChannels);
 
 
 	//
@@ -3945,12 +3985,28 @@ public:
 	AJA_VIRTUAL bool	DisableChannel (const NTV2Channel inChannel);
 
 	/**
+		@brief		Disables the given frame store(s).
+		@param[in]	inChannels	Specifies the frame store(s) to be disabled.
+		@return		True if successful;  otherwise false.
+		@note		It is not an error to disable a frame store that is already disabled.
+	**/
+	AJA_VIRTUAL bool	DisableChannels (const NTV2ChannelSet inChannels);
+
+	/**
 		@brief		Enables the given frame store.
 		@param[in]	inChannel	Specifies the frame store, as identified by an NTV2Channel value.
 		@return		True if successful;  otherwise false.
 		@note		It is not an error to enable a frame store that is already enabled.
 	**/
 	AJA_VIRTUAL bool	EnableChannel (const NTV2Channel inChannel);
+
+	/**
+		@brief		Enables the given frame store(s).
+		@param[in]	inChannels	Specifies the frame store(s) to be enabled.
+		@return		True if successful;  otherwise false.
+		@note		It is not an error to enable a frame store that is already enabled.
+	**/
+	AJA_VIRTUAL bool	EnableChannels (const NTV2ChannelSet inChannels);
 
 	/**
 		@brief		Answers whether or not the given frame store is enabled.
@@ -4807,6 +4863,14 @@ public:
 	AJA_VIRTUAL bool	ApplySignalRoute (const NTV2XptConnections & inConnections, const bool inReplace = false);
 
 	/**
+		@brief		Removes the given widget routing connections from the AJA device.
+		@return		True if successful; otherwise false.
+		@param[in]	inConnections	Specifies the routing connections to be removed from the device.
+		@see		ntv2signalrouting
+	**/
+	AJA_VIRTUAL bool	RemoveConnections (const NTV2XptConnections & inConnections);
+
+	/**
 		@brief		Removes all existing signal path connections between any and all widgets on the AJA device.
 		@return		True if successful; otherwise false.
 		@details	This function writes zeroes into all crosspoint selection registers, effectively
@@ -5452,9 +5516,9 @@ public:
 	**/
 	///@{
 	/**
-		@brief		Answers whether the specified SDI connector is acting as an input or an output.
+		@brief		Sets the specified bidirectional SDI connector to act as an input or an output.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the SDI connector to be affected as an ::NTV2Channel (a zero-based index number).
+		@param[in]	inChannel		Specifies the SDI connector as an ::NTV2Channel (a zero-based index number).
 		@param[in]	inEnable		If true, specifies that the channel connector is to be used as an output.
 									If false, specifies it's to be used as an input.
 		@note		After switching a bidirectional SDI connector from output to input (i.e., inEnable = false),
@@ -5466,9 +5530,23 @@ public:
 	AJA_VIRTUAL bool		SetSDITransmitEnable (const NTV2Channel inChannel, const bool inEnable);
 
 	/**
+		@brief		Answers whether the specified SDI connector is acting as an input or an output.
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIConnectors	Specifies the SDI connector(s) to be affected.
+		@param[in]	inEnable		If true, specifies that the channel connector is to be used as an output.
+									If false, specifies it's to be used as an input.
+		@note		After switching a bidirectional SDI connector from output to input (i.e., inEnable = false),
+					it may take the hardware on the device up to approximately 10 frames to synchronize with
+					the input signal such that the device can accurately report the video format seen at the
+					input.
+		@see		::NTV2DeviceHasBiDirectionalSDI, \ref devicesignalinputsoutputs
+	**/
+	AJA_VIRTUAL bool		SetSDITransmitEnable (const NTV2ChannelSet inSDIConnectors, const bool inEnable);
+
+	/**
 		@brief		Answers whether or not the specified SDI connector is currently acting as a transmitter
 					(i.e. an output).
-		@param[in]	inChannel		Specifies the SDI connector to be affected as an ::NTV2Channel (a zero-based index number).
+		@param[in]	inChannel		Specifies the SDI connector as an ::NTV2Channel (a zero-based index number).
 		@param[in]	outEnabled		Receives true if the SDI channel connector is currently a transmitter (output),
 									or false if it's acting as an input.
 		@return		True if successful; otherwise false.

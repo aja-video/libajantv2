@@ -26,10 +26,26 @@ bool CNTV2Card::SubscribeOutputVerticalEvent (const NTV2Channel inChannel)
 	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  SubscribeEvent(gChannelToOutputVerticalInterrupt[inChannel]);
 }
 
+bool CNTV2Card::SubscribeOutputVerticalEvents (const NTV2ChannelSet inChannels)
+{	UWord failures(0);
+	for (NTV2ChannelSetConstIter it(inChannels.begin());  it != inChannels.end();  ++it)
+		if (!SubscribeOutputVerticalEvent(*it))
+			failures++;
+	return !failures;
+}
+
 
 bool CNTV2Card::SubscribeInputVerticalEvent (const NTV2Channel inChannel)
 {
 	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  SubscribeEvent(gChannelToInputVerticalInterrupt[inChannel]);
+}
+
+bool CNTV2Card::SubscribeInputVerticalEvents (const NTV2ChannelSet inChannels)
+{	UWord failures(0);
+	for (NTV2ChannelSetConstIter it(inChannels.begin());  it != inChannels.end();  ++it)
+		if (!SubscribeInputVerticalEvent(*it))
+			failures++;
+	return !failures;
 }
 
 
@@ -46,10 +62,26 @@ bool CNTV2Card::UnsubscribeOutputVerticalEvent (const NTV2Channel inChannel)
 	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  UnsubscribeEvent(gChannelToOutputVerticalInterrupt[inChannel]);
 }
 
+bool CNTV2Card::UnsubscribeOutputVerticalEvents (const NTV2ChannelSet inChannels)
+{	UWord failures(0);
+	for (NTV2ChannelSetConstIter it(inChannels.begin());  it != inChannels.end();  ++it)
+		if (!UnsubscribeOutputVerticalEvent(*it))
+			failures++;
+	return !failures;
+}
+
 
 bool CNTV2Card::UnsubscribeInputVerticalEvent (const NTV2Channel inChannel)
 {
 	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  UnsubscribeEvent(gChannelToInputVerticalInterrupt[inChannel]);
+}
+
+bool CNTV2Card::UnsubscribeInputVerticalEvents (const NTV2ChannelSet inChannels)
+{	UWord failures(0);
+	for (NTV2ChannelSetConstIter it(inChannels.begin());  it != inChannels.end();  ++it)
+		if (!UnsubscribeInputVerticalEvent(*it))
+			failures++;
+	return !failures;
 }
 
 

@@ -4239,6 +4239,72 @@ typedef enum
 		@return		A non-constant reference to the given output stream.
 	**/
 	AJAExport std::ostream & NTV2PrintRasterLineOffsets (const NTV2RasterLineOffsets & inObj, std::ostream & inOutStream = std::cout);
+
+	typedef std::vector <NTV2Channel>				NTV2ChannelList;			///< @brief	An ordered sequence of NTV2Channel values.
+	typedef NTV2ChannelList::const_iterator			NTV2ChannelListConstIter;	///< @brief	A handy const iterator into an NTV2ChannelList.
+
+	/**
+		@brief		Streams a human-readable dump of the given NTV2ChannelList into the specified output stream.
+		@param[in]	inObj			Specifies the NTV2ChannelList to be streamed to the output stream.
+		@param		inCompact		Use 'true' for a compact display (the default);  otherwise use 'false' for a long-format.
+		@param		inOutStream		Specifies the output stream to receive the dump. Defaults to std::cout.
+		@return		A non-constant reference to the given output stream.
+	**/
+	AJAExport std::ostream & NTV2PrintChannelList (const NTV2ChannelList & inObj, const bool inCompact = true, std::ostream & inOutStream = std::cout);
+
+	/**
+		@return		A human-readable string containing a dump of the channel list.
+		@param[in]	inObj			Specifies the NTV2ChannelList to be converted.
+		@param		inCompact		Use 'true' for a compact display (the default);  otherwise use 'false' for a long-format.
+	**/
+	AJAExport std::string NTV2ChannelListToStr (const NTV2ChannelList & inObj, const bool inCompact = true);
+
+	typedef std::set <NTV2Channel>					NTV2ChannelSet;				///< @brief	A set of distinct NTV2Channel values.
+	typedef NTV2ChannelSet::const_iterator			NTV2ChannelSetConstIter;	///< @brief	A handy const iterator into an NTV2ChannelSet.
+
+	/**
+		@brief		Streams a human-readable dump of the given NTV2ChannelSet into the specified output stream.
+		@param[in]	inObj			Specifies the NTV2ChannelSet to be streamed to the output stream.
+		@param		inCompact		Use 'true' for a compact display (the default);  otherwise use 'false' for a long-format.
+		@param		inOutStream		Specifies the output stream to receive the dump. Defaults to std::cout.
+		@return		A non-constant reference to the given output stream.
+	**/
+	AJAExport std::ostream & NTV2PrintChannelSet (const NTV2ChannelSet & inObj, const bool inCompact = true, std::ostream & inOutStream = std::cout);
+
+	/**
+		@return		A human-readable string containing a dump of the channel set.
+		@param[in]	inObj			Specifies the NTV2ChannelSet to be converted.
+		@param		inCompact		Use 'true' for a compact display (the default);  otherwise use 'false' for a long-format.
+	**/
+	AJAExport std::string NTV2ChannelSetToStr (const NTV2ChannelSet & inObj, const bool inCompact = true);
+
+	/**
+		@param[in]	inFirstChannel	Specifies the first NTV2Channel.
+		@param		inNumChannels	Specifies the number of channels.
+		@return		An NTV2ChannelSet having the specified contiguous range of channels.
+	**/
+	AJAExport NTV2ChannelSet NTV2MakeChannelSet (const NTV2Channel inFirstChannel, const UWord inNumChannels = 1);
+
+	/**
+		@param[in]	inChannels		Specifies the NTV2Channels that should go into the NTV2ChannelSet.
+		@param		inNumChannels	Specifies the number of channels.
+		@return		An NTV2ChannelSet having the same channels as contained in the specified list.
+	**/
+	AJAExport NTV2ChannelSet NTV2MakeChannelSet (const NTV2ChannelList inChannels);
+
+	/**
+		@param[in]	inFirstChannel	Specifies the first NTV2Channel.
+		@param		inNumChannels	Specifies the number of channels.
+		@return		An NTV2ChannelList having the specified contiguous range of channels.
+	**/
+	AJAExport NTV2ChannelList NTV2MakeChannelList (const NTV2Channel inFirstChannel, const UWord inNumChannels = 1);
+
+	/**
+		@param[in]	inChannels		Specifies the NTV2Channels that should go into the NTV2ChannelList.
+		@param		inNumChannels	Specifies the number of channels.
+		@return		An NTV2ChannelList having the same channels as contained in the specified set.
+	**/
+	AJAExport NTV2ChannelList NTV2MakeChannelList (const NTV2ChannelSet inChannels);
 #endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 

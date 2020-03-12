@@ -2766,6 +2766,82 @@ ostream & NTV2PrintRasterLineOffsets(const NTV2RasterLineOffsets & inObj, ostrea
 }
 
 
+ostream & NTV2PrintChannelList (const NTV2ChannelList & inObj, const bool inCompact, ostream & inOutStream)
+{
+	inOutStream << (inCompact ? "Ch[" : "[");
+	for (NTV2ChannelListConstIter it(inObj.begin());  it != inObj.end();  )
+	{
+		if (inCompact)
+			inOutStream << DEC(*it+1);
+		else
+			inOutStream << ::NTV2ChannelToString(*it);
+		if (++it != inObj.end())
+			inOutStream << (inCompact ? "|" : ",");
+	}
+	return inOutStream << "]";
+}
+
+string NTV2ChannelListToStr (const NTV2ChannelList & inObj, const bool inCompact)
+{	ostringstream oss;
+	::NTV2PrintChannelList (inObj, inCompact, oss);
+	return oss.str();
+}
+
+ostream & NTV2PrintChannelSet (const NTV2ChannelSet & inObj, const bool inCompact, ostream & inOutStream)
+{
+	inOutStream << (inCompact ? "Ch{" : "{");
+	for (NTV2ChannelSetConstIter it(inObj.begin());  it != inObj.end();  )
+	{
+		if (inCompact)
+			inOutStream << DEC(*it+1);
+		else
+			inOutStream << ::NTV2ChannelToString(*it);
+		if (++it != inObj.end())
+			inOutStream << (inCompact ? "|" : ",");
+	}
+	return inOutStream << "}";
+}
+
+string NTV2ChannelSetToStr (const NTV2ChannelSet & inObj, const bool inCompact)
+{	ostringstream oss;
+	::NTV2PrintChannelSet (inObj, inCompact, oss);
+	return oss.str();
+}
+
+NTV2ChannelSet NTV2MakeChannelSet (const NTV2Channel inFirstChannel, const UWord inNumChannels)
+{
+	NTV2ChannelSet result;
+	for (NTV2Channel ch(inFirstChannel);  ch < NTV2Channel(inFirstChannel+inNumChannels);  ch = NTV2Channel(ch+1))
+		if (NTV2_IS_VALID_CHANNEL(ch))
+			result.insert(ch);
+	return result;
+}
+
+NTV2ChannelSet NTV2MakeChannelSet (const NTV2ChannelList inChannels)
+{
+	NTV2ChannelSet result;
+	for (NTV2ChannelListConstIter it(inChannels.begin());  it != inChannels.end();  ++it)
+		result.insert(*it);
+	return result;
+}
+
+NTV2ChannelList NTV2MakeChannelList (const NTV2Channel inFirstChannel, const UWord inNumChannels)
+{
+	NTV2ChannelList result;
+	for (NTV2Channel ch(inFirstChannel);  ch < NTV2Channel(inFirstChannel+inNumChannels);  ch = NTV2Channel(ch+1))
+		if (NTV2_IS_VALID_CHANNEL(ch))
+			result.push_back(ch);
+	return result;
+}
+
+NTV2ChannelList NTV2MakeChannelList (const NTV2ChannelSet inChannels)
+{
+	NTV2ChannelList result;
+	for (NTV2ChannelSetConstIter it(inChannels.begin());  it != inChannels.end();  ++it)
+		result.push_back(*it);
+	return result;
+}
+
 NTV2RegisterReadsConstIter FindFirstMatchingRegisterNumber (const uint32_t inRegNum, const NTV2RegisterReads & inRegInfos)
 {
 	for (NTV2RegisterReadsConstIter	iter(inRegInfos.begin());  iter != inRegInfos.end();  ++iter)	//	Ugh -- linear search
