@@ -239,9 +239,13 @@ AJALabelValuePairs CCPlayerConfig::Get (const bool inCompact) const
 	AJASystemInfo::append(result, "Output Format",		fDualLinkRGB ? "DL-RGB" : "YCbCr");
 	AJASystemInfo::append(result, "Video Format",		::NTV2VideoFormatToString(fVideoFormat));
 	AJASystemInfo::append(result, "Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
+	AJASystemInfo::append(result, "Background Pattern",	NTV2TestPatternGen::getTestPatternNames().at(fTestPattern));
 	AJASystemInfo::append(result, "AutoCirc Frames",	fFrames.toString());
 	AJASystemInfo::append(result, "Emit Statistics",	fEmitStats ? "Y" : "N");
 	AJASystemInfo::append(result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
+	AJASystemInfo::append(result, "DL-RGB SDI Output",	fDualLinkRGB ? "Y" : "N");
+	if (NTV2_IS_QUAD_FRAME_FORMAT(fVideoFormat))
+	AJASystemInfo::append(result, "2-Sample-Interleave",fSquareDivision ? "N (Square Division)" : "Y");
 	AJASystemInfo::append(result, "Force Vanc",			fForceVanc ? "Y" : "N");
 	AJASystemInfo::append(result, "Force RTP",			fForceRTP ? (fForceRTP&2 ? "MultiPkt" : "UniPkt") : "Normal");
 	AJASystemInfo::append(result, "Suppress Audio",		fSuppressAudio ? "Y" : "N");
@@ -872,11 +876,13 @@ NTV2CCPlayer::NTV2CCPlayer (const CCPlayerConfig & inConfigData)
 		mDeviceID				(DEVICE_ID_NOTFOUND),
 		mSavedTaskMode			(NTV2_DISABLE_TASKS),
 		mVancMode				(NTV2_VANCMODE_OFF),
+		mVideoStandard			(NTV2_STANDARD_INVALID),
 		mPlayerQuit				(false),
-		mCaptionGeneratorQuit	(false)
+		mCaptionGeneratorQuit	(false),
+		mActiveFrameStores		(),
+		mConnections			()
 {
 	::memset (mGeneratorThreads, 0, sizeof(mGeneratorThreads));
-
 	NTV2_ASSERT(!mConfig.fChannelGenerators.empty());
 	gApp = this;
 }	//	constructor
@@ -887,14 +893,7 @@ NTV2CCPlayer::~NTV2CCPlayer (void)
 	//	Stop my playout and producer threads, then destroy them...
 	Quit();
 
-	if (NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
-	{
-		mDevice.UnsubscribeOutputVerticalEvent(NTV2Channel(mConfig.fOutputChannel + 3));
-		mDevice.UnsubscribeOutputVerticalEvent(NTV2Channel(mConfig.fOutputChannel + 2));
-		mDevice.UnsubscribeOutputVerticalEvent(NTV2Channel(mConfig.fOutputChannel + 1));
-	}
-	mDevice.UnsubscribeOutputVerticalEvent(mConfig.fOutputChannel);
-
+	mDevice.UnsubscribeOutputVerticalEvents(mActiveFrameStores);
 	if (!mConfig.fDoMultiFormat)
 	{
 		mDevice.SetEveryFrameServices(mSavedTaskMode);															//	Restore prior service level
@@ -946,6 +945,7 @@ void NTV2CCPlayer::Quit (const bool inQuitImmediately)
 		delete mPlayThread;
 		mPlayThread = AJA_NULL;
 	}
+	mDevice.RemoveConnections(mConnections);
 
 }	//	Quit
 
@@ -1043,7 +1043,7 @@ AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 	NTV2TestPatternGen			testPatternGen;
 	const NTV2FormatDescriptor	formatDesc	(mConfig.fVideoFormat, mConfig.fPixelFormat, mVancMode);
 
-	if (!testPatternGen.DrawTestPattern (NTV2_TestPatt_FlatField,  formatDesc.GetRasterWidth (),  formatDesc.GetVisibleRasterHeight (),
+	if (!testPatternGen.DrawTestPattern (mConfig.fTestPattern,  formatDesc.GetRasterWidth (),  formatDesc.GetVisibleRasterHeight (),
 										mConfig.fPixelFormat, testPatternBuffer))
 	{
 		cerr << "## ERROR:  DrawTestPattern failed, formatDesc: " << formatDesc << endl;
@@ -1058,8 +1058,8 @@ AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 			return AJA_STATUS_FAIL;
 		}
 
-	//	Stuff the gray pattern into my video buffer...
-	::memcpy (formatDesc.GetTopVisibleRowAddress(reinterpret_cast<UByte*>(mVideoBuffer.GetHostPointer())), &testPatternBuffer[0], testPatternBuffer.size ());
+	//	Stuff the test pattern into my video buffer...
+	::memcpy (formatDesc.GetTopVisibleRowAddress(reinterpret_cast<UByte*>(mVideoBuffer.GetHostPointer())), &testPatternBuffer[0], testPatternBuffer.size());
 
 	//	Add info to the display...
 	const string	strVideoFormat	(CNTV2DemoCommon::StripFormatString (::NTV2VideoFormatToString(mConfig.fVideoFormat)));
@@ -1079,17 +1079,52 @@ AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 {
 	//	Preflight checks...
+	if (::NTV2DeviceGetNumVideoOutputs(mDeviceID) < 1)
+		{cerr << "## ERROR:  Device cannot playout" << endl;  return AJA_STATUS_UNSUPPORTED;}
 	if ((mConfig.fOutputChannel == NTV2_CHANNEL1)  &&  !::NTV2DeviceCanDoFrameStore1Display(mDeviceID))
-		{cerr << "## NOTE:  Device cannot playout thru FrameStore 1" << endl;  return AJA_STATUS_UNSUPPORTED;}
-	if (NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat)  &&  mConfig.fOutputChannel != NTV2_CHANNEL1  &&  mConfig.fOutputChannel != NTV2_CHANNEL5)
+		{cerr << "## ERROR:  Device cannot playout thru FrameStore 1" << endl;  return AJA_STATUS_UNSUPPORTED;}
+	if (!NTV2_OUTPUT_DEST_IS_SDI(mConfig.fOutputDestination))
 	{
-		cerr << "## ERROR:  Quad-frame format must use Ch1|Ch5, not '" << ::NTV2ChannelToString(mConfig.fOutputChannel, true) << "'" << endl;
-		return AJA_STATUS_BAD_PARAM;
+		cerr << "## ERROR:  CCPlayer uses SDI only, not '" << ::NTV2OutputDestinationToString(mConfig.fOutputDestination,true) << "'" << endl;
+		return AJA_STATUS_UNSUPPORTED;
 	}
+	if (!::NTV2DeviceCanDoOutputDestination(mDeviceID, mConfig.fOutputDestination))
+	{
+		cerr << "## ERROR:  No such output connector '" << ::NTV2OutputDestinationToString(mConfig.fOutputDestination,true) << "'" << endl;
+		return AJA_STATUS_UNSUPPORTED;
+	}
+	if (NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
+	{
+		if (mConfig.fSquareDivision  &&  mConfig.fOutputChannel != NTV2_CHANNEL1  &&  mConfig.fOutputChannel != NTV2_CHANNEL5)
+		{
+			cerr << "## ERROR:  Quad-frame format must use Ch1|Ch5, not '" << ::NTV2ChannelToString(mConfig.fOutputChannel, true) << "'" << endl;
+			return AJA_STATUS_BAD_PARAM;
+		}
+		else if (!mConfig.fSquareDivision  &&  (mConfig.fOutputChannel & 1))
+		{
+			cerr << "## ERROR:  UHD/4K TSI must use Ch[1|3|5|7], not '" << ::NTV2ChannelToString(mConfig.fOutputChannel, true) << "'" << endl;
+			return AJA_STATUS_BAD_PARAM;
+		}
+		const NTV2Channel sdiChan(::NTV2OutputDestinationToChannel(mConfig.fOutputDestination));
+		if (mConfig.fSquareDivision  &&  sdiChan != NTV2_CHANNEL1  &&  sdiChan != NTV2_CHANNEL5)
+		{
+			cerr << "## ERROR:  UHD/4K Squares must use SDIOut[1|5], not '" << ::NTV2ChannelToString(mConfig.fOutputChannel, true) << "'" << endl;
+			return AJA_STATUS_BAD_PARAM;
+		}
+		else if (!mConfig.fSquareDivision  &&  (sdiChan & 1))
+		{
+			cerr << "## ERROR:  UHD/4K TSI must use SDIOut[1|3|5|7], not '" << ::NTV2ChannelToString(mConfig.fOutputChannel, true) << "'" << endl;
+			return AJA_STATUS_BAD_PARAM;
+		}
+	}
+	else
+		mConfig.fSquareDivision = true;	//	Allows RouteOutputSignal to cheat
+	if (NTV2_IS_QUAD_QUAD_FORMAT(mConfig.fVideoFormat))
+		{cerr << "## ERROR:  CCPlayer doesn't yet support UHD2/8K formats" << endl;  return AJA_STATUS_UNSUPPORTED;}
 	if (NTV2_IS_625_FORMAT(mConfig.fVideoFormat))
 		cerr << "## WARNING:  SD 625/PAL not supported -- but will insert CEA608 caption packets anyway" << endl;
 	if ((NTV2_IS_4K_VIDEO_FORMAT(mConfig.fVideoFormat) || NTV2_IS_QUAD_QUAD_FORMAT(mConfig.fVideoFormat))  &&  mConfig.fForceVanc)
-		{cerr << "## ERROR:  4K/8K formats have no VANC mode" << endl;  return AJA_STATUS_UNSUPPORTED;}
+		{cerr << "## ERROR:  UHD/4K/UHD2/8K formats have no VANC mode" << endl;  return AJA_STATUS_UNSUPPORTED;}
 	if (NTV2_IS_SD_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  !mConfig.fSuppressLine21  &&  mConfig.fPixelFormat != NTV2_FBF_8BIT_YCBCR  &&  mConfig.fPixelFormat != NTV2_FBF_10BIT_YCBCR)
 		{cerr << "## ERROR:  SD/line21 in " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << "' not '2vuy'|'v210'" << endl;  return AJA_STATUS_UNSUPPORTED;}
 	if (UWord(mConfig.fOutputChannel) >= ::NTV2DeviceGetNumFrameStores(mDeviceID))
@@ -1100,74 +1135,89 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 		if (frameRate == NTV2_FRAMERATE_2500  ||  frameRate == NTV2_FRAMERATE_5000)
 			{cerr << "## ERROR:  CEA708 CDPs can't accommodate CEA608 captions for " << ::NTV2FrameRateToString(frameRate) << endl;  return AJA_STATUS_UNSUPPORTED;}
 
+	//
 	//	Enable the required framestore(s)...
+	//
 	if (NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
 	{
-		mDevice.EnableChannel(mConfig.fOutputChannel);
-		mDevice.EnableChannel(NTV2Channel(mConfig.fOutputChannel + 1));
-		mDevice.EnableChannel(NTV2Channel(mConfig.fOutputChannel + 2));
-		mDevice.EnableChannel(NTV2Channel(mConfig.fOutputChannel + 3));
+		mActiveFrameStores = ::NTV2MakeChannelSet(mConfig.fOutputChannel, mConfig.fSquareDivision ? 4 : 2);
 		mDevice.SetMultiFormatMode(true);
 	}
 	else
 		for (UWord num(0);  num < ::NTV2DeviceGetNumFrameStores(mDeviceID);  num++)
 			if (::GetNTV2ChannelForIndex(num) == mConfig.fOutputChannel)
-				mDevice.EnableChannel(mConfig.fOutputChannel);
+				mActiveFrameStores.insert(mConfig.fOutputChannel);
 			else if (!mConfig.fDoMultiFormat)	//	Disable unused framestores in uniformat mode...
 				mDevice.DisableChannel(::GetNTV2ChannelForIndex(num));
+	mDevice.EnableChannels(mActiveFrameStores);
 
+	//
 	//	Set video format/standard...
+	//
 	if (!::NTV2DeviceCanDoVideoFormat(mDeviceID, mConfig.fVideoFormat))
 		{cerr << "## ERROR:  '" << ::NTV2VideoFormatToString(mConfig.fVideoFormat) << "' not supported" << endl;  return AJA_STATUS_UNSUPPORTED;}
-	mDevice.SetVideoFormat (mConfig.fVideoFormat, AJA_RETAIL_DEFAULT, /*keepVANC*/false, mConfig.fOutputChannel);
+	mVideoStandard = ::GetNTV2StandardFromVideoFormat(mConfig.fVideoFormat);
+	for (NTV2ChannelSetConstIter it(mActiveFrameStores.begin());  it != mActiveFrameStores.end();  ++it)
+		mDevice.SetVideoFormat (mConfig.fVideoFormat, AJA_RETAIL_DEFAULT, /*keepVANC*/false, *it);
+	if (!NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
+		{}
+	else if (mConfig.fSquareDivision)
+		mDevice.Set4kSquaresEnable(true, mConfig.fOutputChannel);
+	else
+		mDevice.SetTsiFrameEnable(true, mConfig.fOutputChannel);
 
+	//
 	//	Set frame buffer pixel format...
+	//
 	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
 		{cerr << "## ERROR:  '" << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << "' not supported" << endl;  return AJA_STATUS_UNSUPPORTED;}
 	if (mConfig.fForceVanc  &&  ::IsRGBFormat(mConfig.fPixelFormat) != mConfig.fDualLinkRGB)
 		{cerr << "## ERROR:  Routing thru CSC will corrupt VANC lines" << endl;  return AJA_STATUS_UNSUPPORTED;}
-	mDevice.SetFrameBufferFormat (mConfig.fOutputChannel, mConfig.fPixelFormat);
-	if (NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
-	{
-		mDevice.SetFrameBufferFormat (NTV2Channel(mConfig.fOutputChannel + 1), mConfig.fPixelFormat);
-		mDevice.SetFrameBufferFormat (NTV2Channel(mConfig.fOutputChannel + 2), mConfig.fPixelFormat);
-		mDevice.SetFrameBufferFormat (NTV2Channel(mConfig.fOutputChannel + 3), mConfig.fPixelFormat);
-	}
-	if (!mConfig.fForceVanc  &&  NTV2_OUTPUT_DEST_IS_SDI(mConfig.fOutputDestination))
+	for (NTV2ChannelSetConstIter it(mActiveFrameStores.begin());  it != mActiveFrameStores.end();  ++it)
+		mDevice.SetFrameBufferFormat (*it, mConfig.fPixelFormat);
+	if (!mConfig.fForceVanc)
 		if (mConfig.fOutputChannel != ::NTV2OutputDestinationToChannel(mConfig.fOutputDestination))
-			cerr << "## WARNING:  Anc inserter requires FrameStore" << DEC(mConfig.fOutputChannel+1)
-					<< "/SDIOut" << DEC(::NTV2OutputDestinationToChannel(mConfig.fOutputDestination)+1)
-					<< " to match" << endl;
+		{
+			cerr << "## ERROR:  FrameStore" << DEC(mConfig.fOutputChannel+1)
+					<< " doesn't correlate with SDIOut" << DEC(::NTV2OutputDestinationToChannel(mConfig.fOutputDestination)+1)
+					<< " -- Anc inserter requires both to match, output signal won't have captions" << endl;
+			return AJA_STATUS_FAIL;
+		}
 
-	//	Enable VANC only if device has no Anc insertion capability, or if --vanc specified...
+	//
+	//	Enable VANC only if device has no Anc inserters, or if --vanc specified...
+	//
 	NTV2FrameGeometry	geometry(NTV2_FG_INVALID);
-	mDevice.GetFrameGeometry(geometry);
-	mDevice.SetVANCMode (mVancMode, ::GetNTV2StandardFromVideoFormat (mConfig.fVideoFormat), geometry, mConfig.fOutputChannel);
-	if (NTV2_IS_VANCMODE_ON(mVancMode))
-		if (::Is8BitFrameBufferFormat(mConfig.fPixelFormat))
-			mDevice.SetVANCShiftMode (mConfig.fOutputChannel, NTV2_VANCDATA_8BITSHIFT_ENABLE);	//	8-bit FBFs require VANC bit shift
+	mDevice.GetFrameGeometry(geometry, mConfig.fOutputChannel);
+	if (NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
+		NTV2_ASSERT(NTV2_IS_VANCMODE_OFF(mVancMode));
+	for (NTV2ChannelSetConstIter it(mActiveFrameStores.begin());  it != mActiveFrameStores.end();  ++it)
+		mDevice.SetVANCMode (mVancMode, mVideoStandard, geometry, *it);
+	if (!NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
+		if (NTV2_IS_VANCMODE_ON(mVancMode))
+			if (::Is8BitFrameBufferFormat(mConfig.fPixelFormat))
+				mDevice.SetVANCShiftMode (mConfig.fOutputChannel, NTV2_VANCDATA_8BITSHIFT_ENABLE);	//	8-bit FBFs require VANC bit shift
 
-	//	Create our caption encoders...
+	//
+	//	Create the caption encoders...
+	//
 	if (!CNTV2CaptionEncoder608::Create(m608Encoder))
-		return AJA_STATUS_MEMORY;
+		{cerr << "## ERROR:  Cannot create 608 encoder" << endl;  return AJA_STATUS_MEMORY;}
 	if (!CNTV2CaptionEncoder708::Create(m708Encoder))
-		return AJA_STATUS_MEMORY;
+		{cerr << "## ERROR:  Cannot create 708 encoder" << endl;  return AJA_STATUS_MEMORY;}
 
 	mDevice.SetReference (NTV2DeviceCanDo2110(mDeviceID) ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_FREERUN);
 
-	//	Subscribe to the output interrupt...
-	mDevice.SubscribeOutputVerticalEvent(mConfig.fOutputChannel);
-	if (NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
-	{
-		mDevice.SubscribeOutputVerticalEvent(NTV2Channel(mConfig.fOutputChannel + 1));
-		mDevice.SubscribeOutputVerticalEvent(NTV2Channel(mConfig.fOutputChannel + 2));
-		mDevice.SubscribeOutputVerticalEvent(NTV2Channel(mConfig.fOutputChannel + 3));
-	}
+	//
+	//	Subscribe to the output interrupt(s)...
+	//
+	mDevice.SubscribeOutputVerticalEvents(mActiveFrameStores);
 
 	cerr	<< "## NOTE:  Generating '" << ::NTV2VideoFormatToString(mConfig.fVideoFormat)
 			<< "' using " << (mConfig.fForceVanc ? "VANC" : "device Anc inserter")
 			<< " on '" << mDevice.GetDisplayName() << "' to " << ::NTV2OutputDestinationToString(mConfig.fOutputDestination)
-			<< " from FrameStore " << DEC(mConfig.fOutputChannel+1)
+			<< (mConfig.fDualLinkRGB ? " (DL-RGB)" : "")
+			<< " from FrameStore" << DEC(mConfig.fOutputChannel+1)
 			<< " using " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << endl;
 	return AJA_STATUS_SUCCESS;
 
@@ -1176,85 +1226,137 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 
 AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 {
-	const NTV2Standard		outputStandard	(::GetNTV2StandardFromVideoFormat(mConfig.fVideoFormat));
-	bool					isRGBFBF		(::IsRGBFormat(mConfig.fPixelFormat));
-	bool					isRGBWire		(mConfig.fDualLinkRGB);	//	RGB-over-SDI?
-	NTV2OutputCrosspointID	cscOutput		(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel, /*isKey*/false, /*isRGB*/isRGBWire));
-	NTV2OutputCrosspointID	frameStoreOutput(::GetFrameBufferOutputXptFromChannel(mConfig.fOutputChannel,  isRGBFBF/*isRGB*/,  false/*is425*/));
+	const bool			isRGBFBF	(::IsRGBFormat(mConfig.fPixelFormat));
+	const bool			isRGBWire	(mConfig.fDualLinkRGB);	//	RGB-over-SDI?
+	const NTV2Channel	sdiOutput	(::NTV2OutputDestinationToChannel(mConfig.fOutputDestination));
+	NTV2ChannelSet		sdiOuts		(::NTV2MakeChannelSet(sdiOutput, UWord(mActiveFrameStores.size())));
+	NTV2ChannelList		sdiOutputs	(::NTV2MakeChannelList(sdiOuts));
+	NTV2ChannelList		frameStores	(::NTV2MakeChannelList(mActiveFrameStores));
+	NTV2ChannelList		tsiMuxes;
 
-	//	If device has no RGB conversion capability for the desired channel, use YUV instead
+	//	Does device have RGB conversion capability for the desired channel?
 	if (UWord(mConfig.fOutputChannel) > ::NTV2DeviceGetNumCSCs(mDeviceID))
-		{cerr << "## ERROR:  No CSC for channel " << (mConfig.fOutputChannel+1) << endl;
-		return AJA_STATUS_UNSUPPORTED;}
-
+		{cerr << "## ERROR:  No CSC for channel " << (mConfig.fOutputChannel+1) << endl;  return AJA_STATUS_UNSUPPORTED;}
 	if (!mConfig.fDoMultiFormat)
-		mDevice.ClearRouting ();	//	Clear routing only when -m option not specified
+		mDevice.ClearRouting();	//	Clear routing only when -m option not specified
 
-	if (NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
+	mDevice.SetSDITransmitEnable(sdiOuts, true);
+	if (isRGBFBF && isRGBWire)
 	{
-		if (mConfig.fOutputChannel != NTV2_CHANNEL1 && mConfig.fOutputChannel != NTV2_CHANNEL5)
-			{cerr << "Quad mode requires output channel 1 or 5";  return AJA_STATUS_FAIL;}
-		if (isRGBFBF)
-		{
-			//	For RGB:		FrameStore  ==>  CSC  ==>  SDIOut...
-			for (unsigned ch (0);  ch < 4;  ch++)
-			{
-				mDevice.Connect (::GetCSCInputXptFromChannel(NTV2Channel(mConfig.fOutputChannel + ch)),
-									::GetFrameBufferOutputXptFromChannel (NTV2Channel(mConfig.fOutputChannel + ch), true));
-				mDevice.Connect (::GetSDIOutputInputXpt(NTV2Channel(mConfig.fOutputChannel + ch)),
-									::GetCSCOutputXptFromChannel(NTV2Channel(mConfig.fOutputChannel + ch)));
-				if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
-					mDevice.SetSDITransmitEnable (NTV2Channel(mConfig.fOutputChannel + ch), true);
-
-				if (!mConfig.fSuppressTimecode)
-				{	//	Enable timecode output...
-					mDevice.DisableRP188Bypass(NTV2Channel(ch));
-					mDevice.SetRP188Mode (NTV2Channel(ch), NTV2_RP188_OUTPUT);
-				}
+		if (mConfig.fSquareDivision)	//	RGBFrameStore ==> DLOut ==> SDIOut
+			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
+			{	NTV2Channel frmSt(frameStores.at(ndx)), sdiOut(sdiOutputs.at(ndx));
+				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/false),  ::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/false)));
+				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/true),  ::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/true)));
+				mConnections.insert(NTV2XptConnection(::GetDLOutInputXptFromChannel(sdiOut),  ::GetFrameBufferOutputXptFromChannel(frmSt,  true/*isRGB*/,  false/*is425*/)));
+				//mDevice.ApplySignalRoute(mConnections);	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
+				//  Disable SDI output conversions
+				mDevice.SetSDIOutLevelAtoLevelBConversion(sdiOut, false);
+				mDevice.SetSDIOutRGBLevelAConversion(sdiOut, false);
 			}
-		}
 		else
-		{
-			//	For YCbCr:		FrameStore  ==>  SDIOut
-			for (UWord ch(0);  ch < ::NTV2DeviceGetNumVideoOutputs(mDeviceID);  ch++)
-			{
-				mDevice.Connect (::GetSDIOutputInputXpt(NTV2Channel(mConfig.fOutputChannel + ch)),
-									::GetFrameBufferOutputXptFromChannel(NTV2Channel(mConfig.fOutputChannel + ch)));
-				if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
-					mDevice.SetSDITransmitEnable (NTV2Channel(mConfig.fOutputChannel + ch), true);
-
-				if (!mConfig.fSuppressTimecode)
-				{	//	Enable timecode output...
-					mDevice.DisableRP188Bypass(NTV2Channel(ch));
-					mDevice.SetRP188Mode (NTV2Channel(ch), NTV2_RP188_OUTPUT);
-				}
+		{								//	RGBFrameStore ==> 425MUX ==> 2x DLOut ==> 2x SDIOut
+			sdiOuts		= ::NTV2MakeChannelSet(sdiOutput, UWord(2*mActiveFrameStores.size()));
+			sdiOutputs	= ::NTV2MakeChannelList(sdiOuts);
+			tsiMuxes = CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDeviceID, frameStores.at(0), UWord(frameStores.size()*2));
+			mDevice.SetSDITransmitEnable(sdiOuts, true);	//	Gotta do this again, since sdiOuts changed
+			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
+			{	NTV2Channel frmSt(frameStores.at(ndx/2)), tsiMux(tsiMuxes.at(ndx/2)), sdiOut(sdiOutputs.at(ndx));
+				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/false),	::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/false)));
+				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/true),	::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/true)));
+				mConnections.insert(NTV2XptConnection(::GetDLOutInputXptFromChannel(sdiOut),			::GetTSIMuxOutputXptFromChannel(tsiMux, /*isLinkB*/(ndx & 1) > 0, /*isRGB*/true)));
+				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux,/*linkB?*/false), ::GetFrameBufferOutputXptFromChannel(frmSt,  true/*isRGB*/,  false/*is425*/)));
+				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux,/*linkB?*/true), ::GetFrameBufferOutputXptFromChannel(frmSt,  true/*isRGB*/,  true/*is425*/)));
+				//mDevice.ApplySignalRoute(mConnections);	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
 			}
 		}
-	}	//	if quad/UHD
-	else
+	}
+	else if (isRGBFBF && !isRGBWire)
 	{
-		if (isRGBFBF)
-			mDevice.Connect (::GetCSCInputXptFromChannel(mConfig.fOutputChannel, false/*isKeyInput*/),  frameStoreOutput);
-
-		//	Connect the one SDI output to the CSC video output (RGB) or FrameStore output (YUV).
-		//	NOTE:	In past SDKs, if the -m option wasn't specified, we'd connect all available SDI
-		//			outputs. This worked fine for VANC geometries, but on newer devices using the Anc
-		//			inserter firmware, only the output spigot associated with the output channel had
-		//			caption data. This is because the Anc inserters are tied to a specific output's
-		//			embedder. Better to correctly drive one output than many that don't work.
-		if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
-			mDevice.SetSDITransmitEnable(mConfig.fOutputChannel, true);
-
-		mDevice.Connect (::GetSDIOutputInputXpt (mConfig.fOutputChannel, false/*isDS2*/),  isRGBFBF ? cscOutput : frameStoreOutput);
-		mDevice.SetSDIOutputStandard (mConfig.fOutputChannel, outputStandard);
-
-		if (!mConfig.fSuppressTimecode)
-		{	//	Enable timecode output...
-			mDevice.DisableRP188Bypass(mConfig.fOutputChannel);
-			mDevice.SetRP188Mode (mConfig.fOutputChannel, NTV2_RP188_OUTPUT);
+		if (mConfig.fSquareDivision)	//	RGBFrameStore ==> CSC ==> SDIOut
+			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
+			{	NTV2Channel frmStore(frameStores.at(ndx)), sdiOut(sdiOutputs.at(ndx));
+				mConnections.insert(NTV2XptConnection(::GetCSCInputXptFromChannel(frmStore),::GetFrameBufferOutputXptFromChannel(frmStore, /*isRGB*/true, /*is425*/false)));
+				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut),		::GetCSCOutputXptFromChannel(frmStore)));
+				//mDevice.ApplySignalRoute(mConnections);	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
+				//  Disable SDI output conversions
+				mDevice.SetSDIOutLevelAtoLevelBConversion(sdiOut, false);
+				mDevice.SetSDIOutRGBLevelAConversion(sdiOut, false);
+			}
+		else	//	RGBFrameStore ==> 425MUX ==> 2x CSC ==> SDIOut
+			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
+			{	NTV2Channel frmStore(frameStores.at(ndx)), sdiOut(sdiOutputs.at(ndx)),
+							firstCSC(mConfig.fOutputChannel > NTV2_CHANNEL4 ? NTV2_CHANNEL5 : NTV2_CHANNEL1);
+				mConnections.insert(NTV2XptConnection(::GetCSCInputXptFromChannel(NTV2Channel(firstCSC+2*ndx+0)),::GetTSIMuxOutputXptFromChannel(frmStore, /*isLinkB*/false, /*isRGB*/true)));
+				mConnections.insert(NTV2XptConnection(::GetCSCInputXptFromChannel(NTV2Channel(firstCSC+2*ndx+1)),::GetTSIMuxOutputXptFromChannel(frmStore, /*isLinkB*/true, /*isRGB*/true)));
+				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/false),			::GetCSCOutputXptFromChannel(NTV2Channel(firstCSC+2*ndx+0))));
+				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/true),			::GetCSCOutputXptFromChannel(NTV2Channel(firstCSC+2*ndx+1))));
+				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(frmStore,/*linkB?*/false),  ::GetFrameBufferOutputXptFromChannel(frmStore,  true/*isRGB*/,  false/*is425*/)));
+				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(frmStore,/*linkB?*/true),   ::GetFrameBufferOutputXptFromChannel(frmStore,  true/*isRGB*/,  true/*is425*/)));
+				//mDevice.ApplySignalRoute(mConnections);	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
+			}
+	}
+	else if (!isRGBFBF && isRGBWire)
+	{
+		if (mConfig.fSquareDivision)	//	YUVFrameStore ==> CSC ==> DLOut ==> SDIOut
+			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
+			{	NTV2Channel frmSt(frameStores.at(ndx)), sdiOut(sdiOutputs.at(ndx));
+				mConnections.insert(NTV2XptConnection(::GetCSCInputXptFromChannel(frmSt, /*isKeyInput*/false),	::GetFrameBufferOutputXptFromChannel(frmSt, false/*isRGB*/, false/*is425*/)));
+				mConnections.insert(NTV2XptConnection(::GetDLOutInputXptFromChannel(sdiOut),					::GetCSCOutputXptFromChannel(frmSt, /*isKey*/false, /*isRGB*/true)));
+				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/false),			::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/false)));
+				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/true),			::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/true)));
+				//mDevice.ApplySignalRoute(mConnections);	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
+				//  Disable SDI output conversions
+				mDevice.SetSDIOutLevelAtoLevelBConversion(sdiOut, false);
+				mDevice.SetSDIOutRGBLevelAConversion(sdiOut, false);
+			}
+		else
+		{								//	YUVFrameStore ==> 425MUX ==> 2x CSC ==> 2x DLOut ==> 2x SDIOut
+			sdiOuts		= ::NTV2MakeChannelSet(sdiOutput, UWord(2*mActiveFrameStores.size()));
+			sdiOutputs	= ::NTV2MakeChannelList(sdiOuts);
+			tsiMuxes = CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDeviceID, frameStores.at(0), UWord(frameStores.size()*2));
+			mDevice.SetSDITransmitEnable(sdiOuts, true);	//	Gotta do this again, since sdiOuts changed
+			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
+			{	NTV2Channel frmSt(frameStores.at(ndx/2)), tsiMux(tsiMuxes.at(ndx/2)), sdiOut(sdiOutputs.at(ndx));
+				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux,/*linkB?*/false),	::GetFrameBufferOutputXptFromChannel(frmSt,  false/*isRGB*/,  false/*is425*/)));
+				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux,/*linkB?*/true),	::GetFrameBufferOutputXptFromChannel(frmSt,  false/*isRGB*/,  true/*is425*/)));
+				mConnections.insert(NTV2XptConnection(::GetCSCInputXptFromChannel(sdiOut, /*isKeyInput*/false),	::GetTSIMuxOutputXptFromChannel(tsiMux, /*linkB*/(ndx & 1) > 0,/*isRGB*/false)));
+				mConnections.insert(NTV2XptConnection(::GetDLOutInputXptFromChannel(sdiOut),			::GetCSCOutputXptFromChannel(NTV2Channel(sdiOut),/*isKey*/false,/*isRGB*/true)));
+				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/false),	::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/false)));
+				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/true),	::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/true)));
+				//mDevice.ApplySignalRoute(mConnections);	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
+			}
 		}
-	}	//	else non-quad
-
+	}
+	else	//	!isRGBFBF && !isRGBWire
+	{
+		if (mConfig.fSquareDivision)	//	YUVFrameStore  ==>  SDIOut
+			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
+			{	NTV2Channel frmSt(frameStores.at(ndx)), sdiOut(sdiOutputs.at(ndx));
+				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut),  ::GetFrameBufferOutputXptFromChannel(frmSt)));
+				//mDevice.ApplySignalRoute(mConnections);	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
+				//  Disable SDI output conversions
+				mDevice.SetSDIOutLevelAtoLevelBConversion(sdiOut, false);
+				mDevice.SetSDIOutRGBLevelAConversion(sdiOut, false);
+			}
+		else
+		{								//	YUVFrameStore ==> 425MUX ==> SDIOut
+			sdiOuts		= ::NTV2MakeChannelSet(sdiOutput, UWord(2*mActiveFrameStores.size()));
+			sdiOutputs	= ::NTV2MakeChannelList(sdiOuts);
+			tsiMuxes = CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDeviceID, frameStores.at(0), UWord(frameStores.size()));
+			cerr << "FrameStores: " << ::NTV2ChannelListToStr(frameStores) << endl
+				<< "SDIOutputs: " << ::NTV2ChannelListToStr(sdiOutputs) << endl
+				<< "TSIMuxers: " << ::NTV2ChannelListToStr(tsiMuxes) << endl;
+			mDevice.SetSDITransmitEnable(sdiOuts, true);	//	Gotta do this again, since sdiOuts changed
+			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
+			{	NTV2Channel frmSt(frameStores.at(ndx/2)), tsiMux(tsiMuxes.at(ndx/2)), sdiOut(sdiOutputs.at(ndx));
+				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/(ndx & 1) > 0),::GetTSIMuxOutputXptFromChannel(tsiMux, /*isLinkB*/(ndx & 1) > 0, /*isRGB*/false)));
+				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux,/*linkB?*/(ndx & 1) > 0),::GetFrameBufferOutputXptFromChannel(frmSt,  false/*isRGB*/,  (ndx & 1) > 0/*is425*/)));
+				//mDevice.ApplySignalRoute(mConnections);	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
+			}
+		}
+	}
+	mDevice.ApplySignalRoute(mConnections);
 	return AJA_STATUS_SUCCESS;
 
 }	//	RouteOutputSignal
@@ -1472,9 +1574,8 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	//														1080i	720p	525i	625i	1080p	2KFilm	2K1080p	2K1080i	UHD	4K	UHDHFR	4KHFR
 	static const uint16_t		gF2LineNums608[]	=	{	573,	0,		273,	323,	0,		1000,	0,		573,	0,		0,		0	};	//	Line 10 equivs for F2
 	static const uint16_t		kF1PktLineNumCEA708(9), kF1PktLineNumCEA608(10);
-	const NTV2Standard			standard			(::GetNTV2StandardFromVideoFormat(mConfig.fVideoFormat));
-	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(standard));
-	const uint16_t				kF2PktLineNumCEA608	(gF2LineNums608[standard]);
+	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(mVideoStandard));
+	const uint16_t				kF2PktLineNumCEA608	(gF2LineNums608[mVideoStandard]);
 	const uint32_t				F2StartLine			(smpteLineNumInfo.GetLastLine(smpteLineNumInfo.firstFieldTop ? NTV2_FIELD0 : NTV2_FIELD1) + 1);	//	F2 VBI starts here
 	static const AJAAncillaryDataLocation	kCEA708LocF1(AJAAncillaryDataLink_A,  AJAAncillaryDataVideoStream_Y,  AJAAncillaryDataSpace_VANC,  kF1PktLineNumCEA708, AJAAncDataHorizOffset_AnyVanc);
 	const NTV2FormatDescriptor	formatDesc			(mConfig.fVideoFormat, mConfig.fPixelFormat, mVancMode);
@@ -1579,7 +1680,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 			pkt608F1.SetCEA608Bytes (captionData.f1_char1, captionData.f1_char2);
 			pkt608F1.GeneratePayloadData();
 			packetList.AddAncillaryData(pkt608F1);
-			if (!NTV2_IS_PROGRESSIVE_STANDARD(standard))
+			if (!NTV2_IS_PROGRESSIVE_STANDARD(mVideoStandard))
 			{	NTV2_ASSERT(kF2PktLineNumCEA608);
 				AJAAncillaryData_Cea608_Vanc	pkt608F2;
 				pkt608F2.SetLocationLineNumber(kF2PktLineNumCEA608);

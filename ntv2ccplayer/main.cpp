@@ -75,30 +75,32 @@ static string GetLine21ChannelNames (string inDelimiterStr = "|")
 **/
 int main (int argc, const char ** argv)
 {
-	AJAStatus			status			(AJA_STATUS_SUCCESS);
-	char *				pDeviceSpec		(AJA_NULL);		//	Which device?
-	char *				pCaptionChannel	(AJA_NULL);		//	Caption channel of interest (cc1, cc2 ... text1, text2, ...)
-	char *				pOutputDest		(AJA_NULL);		//	Output connector of interest (sdi1 ... sdi8)
-	char *				pMode			(AJA_NULL);		//	Kind of 608 display (roll, paint, pop)?
-	char *				pVideoFormat	(AJA_NULL);		//	Video format (525, 625, etc.)?
-	char *				pPixelFormat	(AJA_NULL);		//	Pixel format (2vuy, argb, etc.?
-	char *				pEndAction		(AJA_NULL);		//	End action (quit, repeat, idle)?
-	char *				pCaptionRate	(AJA_NULL);		//	Caption rate (chars/min)
-	char *				pFramesSpec		(AJA_NULL);		//	AutoCirculate frames spec
-	int					noAudio			(0);			//	Disable audio tone?
-	int					noTimecode		(0);			//	Disable timecode?
-	int					doMultiChannel	(0);			//	Enable multi-format?
-	uint32_t			channelNumber	(0);			//	Number of the channel to use
-	uint16_t			forceRTP		(0);			//	Force RTP?
-	int					bEmitStats		(0);			//	Emit stats while running?
-	int					bBreakNewLines	(0);			//	Newlines break rows instead of treated as whitespace?
-	int					bForceVanc		(0);			//	Force use of Vanc?
-	int					bSuppressLine21	(0);			//	Suppress line 21 waveform (SD only)?
-	int					bSuppress608	(0);			//	Don't transmit CEA608 packets?
-	int					bSuppress708	(0);			//	Don't transmit CEA708 packets (HD only)?
-	int					doRGBOutput		(0);			//	Dual-link RGB output?
-	NTV2StringList		pathList;						//	List of text files (paths) to "play"
-	poptContext			optionsContext; 				//	Context for parsing command line arguments
+	AJAStatus		status			(AJA_STATUS_SUCCESS);
+	char *			pDeviceSpec		(AJA_NULL);		//	Which device?
+	char *			pCaptionChannel	(AJA_NULL);		//	Caption channel of interest (cc1, cc2 ... text1, text2, ...)
+	char *			pOutputDest		(AJA_NULL);		//	Output connector of interest (sdi1 ... sdi8)
+	char *			pMode			(AJA_NULL);		//	Kind of 608 display (roll, paint, pop)?
+	char *			pVideoFormat	(AJA_NULL);		//	Video format (525, 625, etc.)?
+	char *			pPixelFormat	(AJA_NULL);		//	Pixel format (2vuy, argb, etc.?
+	char *			pTestPattern	(AJA_NULL);		//	Test pattern to use
+	char *			pEndAction		(AJA_NULL);		//	End action (quit, repeat, idle)?
+	char *			pCaptionRate	(AJA_NULL);		//	Caption rate (chars/min)
+	char *			pFramesSpec		(AJA_NULL);		//	AutoCirculate frames spec
+	int				noAudio			(0);			//	Disable audio tone?
+	int				noTimecode		(0);			//	Disable timecode?
+	int				doMultiChannel	(0);			//	Enable multi-format?
+	uint32_t		channelNumber	(0);			//	Number of the channel to use
+	uint16_t		forceRTP		(0);			//	Force RTP?
+	int				bEmitStats		(0);			//	Emit stats while running?
+	int				bBreakNewLines	(0);			//	Newlines break rows instead of treated as whitespace?
+	int				bForceVanc		(0);			//	Force use of Vanc?
+	int				bSuppressLine21	(0);			//	Suppress line 21 waveform (SD only)?
+	int				bSuppress608	(0);			//	Don't transmit CEA608 packets?
+	int				bSuppress708	(0);			//	Don't transmit CEA708 packets (HD only)?
+	int				doRGBOutput		(0);			//	Dual-link RGB output? (YUV is default)
+	int				doSquares		(0);			//	For UHD/4K, do squares? Otherwise, default to TSI.
+	NTV2StringList	pathList;						//	List of text files (paths) to "play"
+	poptContext		optionsContext; 				//	Context for parsing command line arguments
 	AJADebug::Open();
 
 	//	Command line option descriptions:
@@ -106,14 +108,16 @@ int main (int argc, const char ** argv)
 	{
 		//	Device config options...
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",			"index#, serial#, or model"	},
-		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,		9,	"frameStore/channel to use",	"1..8"},
 		{"output",		'o',	POPT_ARG_STRING,	&pOutputDest,		0,	"output connector to use",		"'?' or 'list' to list"},
 		{"format",		'f',	POPT_ARG_STRING,	&pVideoFormat,		0,	"video format to produce",		"'?' or 'list' to list"},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,		0,	"pixel format to use",			"'?' or 'list' to list"},
+		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,	0,	"enable multi-chl/fmt?",		AJA_NULL},
+		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,		9,	"frameStore/channel to use",	"1..8"},
+		{"pattern",		0,		POPT_ARG_STRING,	&pTestPattern,		0,	"test pattern to use",			"'?' or 'list' to list"},
 		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,			0,	"disable audio tone?",			AJA_NULL},
 		{"notimecode",	0,		POPT_ARG_NONE,		&noTimecode,		0,	"disable timecode?",			AJA_NULL},
-		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,	0,	"enable multi-chl/fmt?",		AJA_NULL},
-		{"rgbout",		0,		POPT_ARG_NONE,		&doRGBOutput,		0,	"dual-link RGB output?",		AJA_NULL},
+		{"rgb",			0,		POPT_ARG_NONE,		&doRGBOutput,		0,	"dual-link RGB output?",		AJA_NULL},
+		{"square",		0,		POPT_ARG_NONE,		&doSquares,			0,	"square-div 4K/UHD output?",	AJA_NULL},
 
 		//	CCPlayer global config options...
 		{"stats",		's',	POPT_ARG_NONE,		&bEmitStats,		0,	"show queue stats?",			AJA_NULL},
@@ -228,10 +232,24 @@ int main (int argc, const char ** argv)
 		return 2;
 	}
 
+	//	Pattern
+	NTV2TestPatternSelect	testPattern(NTV2_TestPatt_All);
+	const string	patternStr	(pTestPattern  ?  pTestPattern  :  "");
+	testPattern  =  patternStr.empty()  ?  NTV2_TestPatt_FlatField  :  CNTV2DemoCommon::GetTestPatternFromString(patternStr);
+	if (patternStr == "?" || patternStr == "list")
+		{cout << CNTV2DemoCommon::GetTestPatternStrings() << endl;  return 0;}
+	else if (!pixelFormatStr.empty() && !NTV2_IS_VALID_PATTERN(testPattern))
+	{
+		cerr	<< "## ERROR:  Invalid '--pattern' value '" << patternStr << "' -- expected values:" << endl
+				<< CNTV2DemoCommon::GetTestPatternStrings() << endl;
+		return 2;
+	}
+
 	//	Configure the player...
 	CCPlayerConfig	playerConfig(pDeviceSpec ? string(pDeviceSpec) : "0");
 	playerConfig.fVideoFormat		= videoFormat;
 	playerConfig.fPixelFormat		= pixelFormat;
+	playerConfig.fTestPattern		= testPattern;
 	playerConfig.fOutputChannel		= channel;
 	playerConfig.fOutputDestination	= outputSpigot;
 	playerConfig.fForceRTP			= forceRTP;
@@ -244,6 +262,7 @@ int main (int argc, const char ** argv)
 	playerConfig.fSuppressAudio		= noAudio			? true : false;
 	playerConfig.fSuppressTimecode	= noTimecode		? true : false;
 	playerConfig.fDualLinkRGB		= doRGBOutput		? true : false;
+	playerConfig.fSquareDivision	= doSquares			? true : false;
 
 	//	Frames
 	const string framesSpec(pFramesSpec ? pFramesSpec : "");

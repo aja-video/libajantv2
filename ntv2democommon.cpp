@@ -43,6 +43,11 @@ typedef	map <string, NTV2TCIndex>				String2TCIndexMap;
 typedef	pair <string, NTV2TCIndex>				String2TCIndexPair;
 typedef	String2TCIndexMap::const_iterator		String2TCIndexMapConstIter;
 
+typedef	map <string, NTV2TestPatternSelect>		String2TestPatternMap;
+typedef	pair <string, NTV2TestPatternSelect>	String2TestPatternPair;
+typedef	String2TestPatternMap::const_iterator	String2TestPatternMapConstIter;
+
+
 static const string				gGlobalMutexName	("com.aja.ntv2.mutex.demo");
 static NTV2VideoFormatSet		gAllFormats;
 static NTV2VideoFormatSet		gNon4KFormats;
@@ -73,6 +78,8 @@ static NTV2TCIndexSet			gTCIndexesATCLTC;
 static NTV2TCIndexSet			gTCIndexesVITC1;
 static NTV2TCIndexSet			gTCIndexesVITC2;
 static String2TCIndexMap		gString2TCIndexMap;
+static NTV2TestPatternSet		gTestPatterns;
+static String2TestPatternMap	gString2TestPatternMap;
 
 
 class DemoCommonInitializer
@@ -323,6 +330,20 @@ class DemoCommonInitializer
 					gTCIndexesVITC1.insert (tcIndex);
 				if (NTV2_IS_ATC_VITC2_TIMECODE_INDEX(tcIndex))
 					gTCIndexesVITC2.insert (tcIndex);
+			}
+
+			{	//	Test Patterns...
+				const NTV2TestPatternNames & tpNames(NTV2TestPatternGen::getTestPatternNames());
+				for (NTV2TestPatternSelect tp(NTV2_TestPatt_ColorBars100);  tp < NTV2_TestPatt_All;  tp = NTV2TestPatternSelect(tp+1))
+				{
+					string tpName(tpNames.at(tp));
+					aja::replace(aja::replace(aja::replace(tpName, " ", ""), "%", ""), "_", "");
+//					gString2TestPatternMap.insert(String2TestPatternPair(tpName, tp));
+					gString2TestPatternMap.insert(String2TestPatternPair(aja::lower(tpName), tp));
+					ostringstream oss; oss << DEC(tp);
+					gString2TestPatternMap.insert(String2TestPatternPair(oss.str(), tp));
+					gTestPatterns.insert(tp);
+				}
 			}
 		}	//	constructor
 	private:
@@ -761,11 +782,39 @@ NTV2AudioSystem CNTV2DemoCommon::GetAudioSystemFromString (const string & inStr)
 }
 
 
+string CNTV2DemoCommon::GetTestPatternStrings (void)
+{
+	ostringstream oss;
+	oss	<< setw(25) << left << "Test Pattern            " << "\t" << setw(22) << left << "Legal --pattern Values" << endl
+		<< setw(25) << left << "------------------------" << "\t" << setw(22) << left << "----------------------" << endl;
+	for (NTV2TestPatternSetConstIter iter(gTestPatterns.begin());  iter != gTestPatterns.end();  ++iter)
+	{
+		string	tpName(NTV2TestPatternGen::getTestPatternNames().at(*iter));
+		for (String2TestPatternMapConstIter it(gString2TestPatternMap.begin());  it != gString2TestPatternMap.end();  ++it)
+			if (*iter == it->second)
+			{
+				oss << setw(25) << left << tpName << "\t" << setw(16) << left << it->first << endl;
+				tpName.clear();
+			}
+		oss << endl;
+	}
+	return oss.str();
+}
+
+
+NTV2TestPatternSelect CNTV2DemoCommon::GetTestPatternFromString (const string & inStr)
+{
+	string tpName(inStr);
+	aja::lower(aja::strip(aja::replace(tpName, " ", "")));
+	String2TestPatternMapConstIter it(gString2TestPatternMap.find(tpName));
+	return (it != gString2TestPatternMap.end()) ? it->second : NTV2_TestPatt_All;
+}
+
+
 string CNTV2DemoCommon::ToLower (const string & inStr)
 {
-	string	result (inStr);
-	std::transform (result.begin (), result.end (), result.begin (), ::tolower);
-	return result;
+	string	result(inStr);
+	return aja::lower(result);
 }
 
 
@@ -1014,6 +1063,31 @@ bool CNTV2DemoCommon::Get8KInputFormat (NTV2VideoFormat & inOutVideoFormat)
 const char * CNTV2DemoCommon::GetGlobalMutexName (void)
 {
 	return gGlobalMutexName.c_str();
+}
+
+static UWord GetNumTSIMuxers (const NTV2DeviceID inDeviceID)
+{
+	UWord result(0);
+	static const NTV2WidgetID s425MuxerIDs[] = {NTV2_Wgt425Mux1, NTV2_Wgt425Mux2, NTV2_Wgt425Mux3, NTV2_Wgt425Mux4};
+	for (size_t ndx(0);  ndx < sizeof(s425MuxerIDs)/sizeof(NTV2WidgetID);  ndx++)
+		if (::NTV2DeviceCanDoWidget(inDeviceID, s425MuxerIDs[ndx]))
+			result++;
+	return result;
+}
+
+NTV2ChannelList CNTV2DemoCommon::GetTSIMuxesForFrameStore (const NTV2DeviceID inDeviceID, const NTV2Channel in1stFrameStore, const UWord inCount)
+{
+	UWord totFrameStores(::NTV2DeviceGetNumFrameStores(inDeviceID));
+	UWord totTSIMuxers(::GetNumTSIMuxers(inDeviceID));
+	UWord tsiMux(in1stFrameStore);
+	NTV2ChannelList result;
+	if (totFrameStores > totTSIMuxers)
+		tsiMux = in1stFrameStore/2;
+	else if (totFrameStores < totTSIMuxers)
+		tsiMux = in1stFrameStore*2;
+	for (UWord num(0);  num < inCount;  num++)
+		result.push_back(NTV2Channel(tsiMux + num));
+	return result;
 }
 
 string CNTV2DemoCommon::ACFrameRange::setFromString (const string & inStr)

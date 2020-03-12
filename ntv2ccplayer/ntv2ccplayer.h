@@ -10,6 +10,7 @@
 
 #include "ntv2devicescanner.h"
 #include "ntv2democommon.h"
+#include "ntv2testpatterngen.h"
 #include "ajabase/system/thread.h"
 #include "ajabase/system/info.h"
 #include "ajacc/includes/ajacc.h"
@@ -90,9 +91,11 @@ typedef struct CCPlayerConfig
 		bool							fSuppressAudio;			///< @brief	If true, suppress audio;  otherwise generate audio tones
 		bool							fSuppressTimecode;		///< @brief	If true, suppress timecode;  otherwise embed VITC/LTC
 		bool							fDualLinkRGB;			///< @brief	If true, route dual-link RGB output;  otherwise normal YCbCr
+		bool							fSquareDivision;		///< @brief	If true, square-division used for 4K/UHD;  otherwise default is TSI
 		uint16_t						fForceRTP;				///< @brief	BIT(0):0=normal,1=forceRTP  BIT(1):0=uniPkt,1=multiPkt  BIT(2):0=normal,1=patchDeviceID
 		NTV2VideoFormat					fVideoFormat;			///< @brief	The video format to use
 		NTV2FrameBufferFormat			fPixelFormat;			///< @brief	The pixel format to use
+		NTV2TestPatternSelect			fTestPattern;			///< @brief	The test pattern to use
 		CaptionChanGenMap				fChannelGenerators;		///< @brief	Caption channel generators
 
 		/**
@@ -112,9 +115,12 @@ typedef struct CCPlayerConfig
 				fSuppressAudio		(false),
 				fSuppressTimecode	(false),
 				fDualLinkRGB		(false),
+				fSquareDivision		(false),
 				fForceRTP			(0),
 				fVideoFormat		(NTV2_FORMAT_525_5994),
-				fPixelFormat		(NTV2_FBF_10BIT_YCBCR)
+				fPixelFormat		(NTV2_FBF_10BIT_YCBCR),
+				fTestPattern		(NTV2_TestPatt_FlatField),
+				fChannelGenerators	()
 		{
 		}
 		AJALabelValuePairs Get(const bool inCompact = false)const;
@@ -240,11 +246,14 @@ class NTV2CCPlayer
 		NTV2DeviceID				mDeviceID;							///< @brief	My device (model) identifier
 		NTV2TaskMode				mSavedTaskMode;						///< @brief	Used to restore the previous state
 		NTV2VANCMode				mVancMode;							///< @brief	VANC mode
+		NTV2Standard				mVideoStandard;						///< @brief	Output video standard
 		bool						mPlayerQuit;						///< @brief	Set "true" to terminate player
 		bool						mCaptionGeneratorQuit;				///< @brief	Set "true" to terminate caption generator(s)
 		CNTV2CaptionEncoder608Ptr	m608Encoder;						///< @brief	My CEA-608 caption encoder
 		CNTV2CaptionEncoder708Ptr	m708Encoder;						///< @brief	My 708 caption encoder
 		NTV2_POINTER				mVideoBuffer;						///< @brief	My video buffer
+		NTV2ChannelSet				mActiveFrameStores;					///< @brief	My active FrameStores
+		NTV2XptConnections			mConnections;						///< @brief	Routing connections I make
 
 };	//	NTV2CCPlayer
 

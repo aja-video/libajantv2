@@ -13,6 +13,7 @@
 #include "stdint.h"
 #include "ntv2rp188.h"
 #include "ntv2publicinterface.h"
+#include "ntv2testpatterngen.h"
 #include "ajabase/common/timecodeburn.h"
 #include "ajabase/system/debug.h"
 #include <algorithm>
@@ -354,7 +355,7 @@ class CNTV2DemoCommon
 		/**
 			@brief		Returns the ::NTV2OutputDestination that matches the given string.
 			@param[in]	inStr	Specifies the string to be converted to an ::NTV2OutputDestination.
-			@return		The given string converted to an ::NTV2InputSource, or ::NTV2_INPUTSOURCE_INVALID if there's no match.
+			@return		The given string converted to an ::NTV2OutputDestination, or ::NTV2_OUTPUTDESTINATION_INVALID if there's no match.
 		**/
 		static NTV2OutputDestination		GetOutputDestinationFromString (const std::string & inStr);
 	///@}
@@ -415,6 +416,25 @@ class CNTV2DemoCommon
 	///@}
 
 	/**
+		@name	Test Pattern Functions
+	**/
+	///@{
+		/**
+			@return		A string that can be printed to show the available test pattern identifiers.
+			@note		These test pattern strings are mere conveniences for specifying test patterns in the command-line-based demo apps,
+						and are subject to change without notice. They are not intended to be canonical in any way.
+		**/
+		static std::string					GetTestPatternStrings (void);
+
+		/**
+			@brief		Returns the ::NTV2TestPatternSelect that matches the given string.
+			@param[in]	inStr	Specifies the string to be converted to an ::NTV2TestPatternSelect.
+			@return		The given string converted to an ::NTV2TestPatternSelect, or ::NTV2_TestPatt_All if there's no match.
+		**/
+		static NTV2TestPatternSelect		GetTestPatternFromString (const std::string & inStr);
+	///@}
+
+	/**
 		@name	Miscellaneous Functions
 	**/
 	///@{
@@ -460,6 +480,14 @@ class CNTV2DemoCommon
 			@return		A pointer to a 'C' string containing the name of the AJA NTV2 demonstration application global mutex.
 		**/
 		static const char *					GetGlobalMutexName (void);
+
+		/**
+			@return		The TSIMuxes to use given the first FrameStore on the device and a count.
+			@param[in]	inDeviceID		Specifies the device being used.
+			@param[in]	in1stFrameStore	Specifies the first FrameStore of interest.
+			@param[in]	inCount			Specifies the number of Muxes.
+		**/
+		static NTV2ChannelList				GetTSIMuxesForFrameStore (const NTV2DeviceID inDeviceID, const NTV2Channel in1stFrameStore, const UWord inCount);
 	///@}
 
 
