@@ -671,97 +671,89 @@ bool CNTV2Card::GetNominalMinMaxHV (int & outNominalH, int & outMinH, int & outM
 
 bool CNTV2Card::SetVideoHOffset (int hOffset)
 {
-	int				nominalH, minH, maxH, nominalV, minV, maxV;
-	ULWord			timingValue, lineCount, lineCount2;
-	NTV2DeviceID	boardID = GetDeviceID();
-	int				count;
+	int				nominalH(0), minH(0), maxH(0), nominalV(0), minV(0), maxV(0), count(0);
+	ULWord			timingValue(0), lineCount(0), lineCount2(0);
+	NTV2DeviceID	boardID(GetDeviceID());
 
-	
 	// Get the nominal values for H and V
-	if ( GetNominalMinMaxHV(nominalH, minH, maxH, nominalV, minV, maxV) )
-	{
-		// Apply offset to nominal value (K2 you increment the timing by adding the timing value)
+	if (!GetNominalMinMaxHV(nominalH, minH, maxH, nominalV, minV, maxV))
+		return false;
+
+	// Apply offset to nominal value (K2 you increment the timing by adding the timing value)
+	if (::NTV2DeviceNeedsRoutingSetup(boardID))
+		nominalH = nominalH + hOffset;
+	else
+		nominalH = nominalH - hOffset;
 		
-		if (::NTV2DeviceNeedsRoutingSetup(boardID))
-			nominalH = nominalH + hOffset;
-		else
-			nominalH = nominalH - hOffset;
-			
-		// Clamp this value so that it doesn't exceed max, min 
-		if (nominalH > maxH)
-			nominalH = maxH;
-		else if (nominalH < minH)
-			nominalH = minH;
-		
-		ReadOutputTimingControl(timingValue);
-		
-		// Handle special cases where we increment or decrement the timing by one
-		// Some hardware LS/LH cannot handle this and inorder to do 1 pixel timing moves
-		// we need to move by 3 then subtract 2, or subtract 3 then add 2 depending on 
-		// direction.  Also we need to wait at least one horizontal line between the values
-		// we set.
-		
-		// Only need to do something if the value changed
-		if ( LWord((timingValue & 0x0000FFFF)) != nominalH )
-		{
-			if ( ((LWord((timingValue & 0x0000FFFF)) + 1) == nominalH) )
-			{
-				// Add 3 to the timing value. Note that nominalH is already advanced by one so
-				// we just need to add 2.
-				timingValue &= 0xFFFF0000;
-				timingValue |= ULWord(nominalH + 2);
-				WriteOutputTimingControl(timingValue);
-				
-				// Wait a scanline
-				count = 0;
-				ReadLineCount (lineCount);
-				do
-				{	
-					ReadLineCount (lineCount2);
-					if (count > 1000000) return false;
-					count++;
-				} while (lineCount == lineCount2);
-				
-				// Now move timing back by 2.
-				timingValue -= 2;
-				WriteOutputTimingControl(timingValue);
-			}
-			else if ( ((LWord((timingValue & 0x0000FFFF)) -1) == nominalH ) )
-			{
-				// Subract 3 to the timing value. Note that nominalH is already decremented by one so
-				// we just need to subtract 2.
-				timingValue &= 0xFFFF0000;
-				timingValue |= ULWord(nominalH - 2);
-				WriteOutputTimingControl(timingValue);
-				
-				// Wait a scanline
-				count = 0;
-				ReadLineCount (lineCount);
-				do
-				{	
-					ReadLineCount (lineCount2);
-					if (count > 1000000) return false;
-					count++;
-				} while (lineCount == lineCount2);				
-				
-				// Now move timing forward by 2.
-				timingValue += 2;
-				WriteOutputTimingControl(timingValue);
-			}
-			else
-			{
-				// Setting arbitrary value so we don't need to do the +3-2 or -3+2 trick and
-				// we can just set the new value
-				timingValue &= 0xFFFF0000;
-				timingValue |= ULWord(nominalH);
-				WriteOutputTimingControl(timingValue);
-			}
-		}
-				
-		return true; 
-	}
+	// Clamp this value so that it doesn't exceed max, min 
+	if (nominalH > maxH)
+		nominalH = maxH;
+	else if (nominalH < minH)
+		nominalH = minH;
 	
-	return false;
+	ReadOutputTimingControl(timingValue);
+	
+	// Handle special cases where we increment or decrement the timing by one
+	// Some hardware LS/LH cannot handle this and inorder to do 1 pixel timing moves
+	// we need to move by 3 then subtract 2, or subtract 3 then add 2 depending on 
+	// direction.  Also we need to wait at least one horizontal line between the values
+	// we set.
+		
+	if (LWord((timingValue & 0x0000FFFF)) == nominalH)
+		return true;	//	Nothing to change
+	if (((LWord((timingValue & 0x0000FFFF)) + 1) == nominalH) )
+	{
+		// Add 3 to the timing value. Note that nominalH is already advanced by one so
+		// we just need to add 2.
+		timingValue &= 0xFFFF0000;
+		timingValue |= ULWord(nominalH + 2);
+		WriteOutputTimingControl(timingValue);
+		
+		// Wait a scanline
+		count = 0;
+		ReadLineCount (lineCount);
+		do
+		{	
+			ReadLineCount (lineCount2);
+			if (count > 1000000) return false;
+			count++;
+		} while (lineCount == lineCount2);
+		
+		// Now move timing back by 2.
+		timingValue -= 2;
+		WriteOutputTimingControl(timingValue);
+	}
+	else if ( ((LWord((timingValue & 0x0000FFFF)) -1) == nominalH ) )
+	{
+		// Subract 3 to the timing value. Note that nominalH is already decremented by one so
+		// we just need to subtract 2.
+		timingValue &= 0xFFFF0000;
+		timingValue |= ULWord(nominalH - 2);
+		WriteOutputTimingControl(timingValue);
+		
+		// Wait a scanline
+		count = 0;
+		ReadLineCount (lineCount);
+		do
+		{	
+			ReadLineCount (lineCount2);
+			if (count > 1000000) return false;
+			count++;
+		} while (lineCount == lineCount2);				
+		
+		// Now move timing forward by 2.
+		timingValue += 2;
+		WriteOutputTimingControl(timingValue);
+	}
+	else
+	{
+		// Setting arbitrary value so we don't need to do the +3-2 or -3+2 trick and
+		// we can just set the new value
+		timingValue &= 0xFFFF0000;
+		timingValue |= ULWord(nominalH);
+		WriteOutputTimingControl(timingValue);
+	}
+	return true; 
 }
 
 bool CNTV2Card::GetVideoHOffset (int & outHOffset)
@@ -1680,17 +1672,23 @@ bool CNTV2Card::CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFir
 // Method: SetReference
 // Input:  NTV2Reference
 // Output: NONE
-bool CNTV2Card::SetReference (NTV2ReferenceSource value)
+bool CNTV2Card::SetReference (NTV2ReferenceSource inRefSource, bool inKeepFramePulseSelect)
 {
 	NTV2DeviceID id = GetDeviceID();
 
-	if (::NTV2DeviceCanDoLTCInOnRefPort(id) && value == NTV2_REFERENCE_EXTERNAL)
+	if (::NTV2DeviceCanDoLTCInOnRefPort(id) && inRefSource == NTV2_REFERENCE_EXTERNAL)
 		SetLTCOnReference(false);
+	
+	if (NTV2DeviceCanDoFramePulseSelect(id) && !inKeepFramePulseSelect)
+	{
+		//Reset this for backwards compatibility
+		EnableFramePulseReference(false);
+	}
 
 	//this looks slightly unusual but really
 	//it is a 4 bit counter in 2 different registers
-	ULWord refControl1 = ULWord(value), refControl2 = 0, ptpControl = 0;
-	switch(value)
+	ULWord refControl1 = ULWord(inRefSource), refControl2 = 0, ptpControl = 0;
+	switch(inRefSource)
 	{
 	case NTV2_REFERENCE_INPUT5:
 		refControl1 = 0;
@@ -2403,11 +2401,32 @@ bool CNTV2Card::DisableChannel (const NTV2Channel inChannel)
 }	//	DisableChannel
 
 
+bool CNTV2Card::DisableChannels (const NTV2ChannelSet inChannels)
+{	UWord failures(0);
+	for (NTV2ChannelSetConstIter it(inChannels.begin());  it != inChannels.end();  ++it)
+		if (!DisableChannel(*it))
+			failures++;
+	return !failures;
+
+}	//	DisableChannels
+
+
 bool CNTV2Card::EnableChannel (const NTV2Channel inChannel)
 {
-	return WriteRegister (gChannelToControlRegNum [inChannel], ULWord (false), kRegMaskChannelDisable, kRegShiftChannelDisable);
+	return NTV2_IS_VALID_CHANNEL(inChannel)
+			&&  WriteRegister (gChannelToControlRegNum[inChannel], ULWord(false), kRegMaskChannelDisable, kRegShiftChannelDisable);
 
 }	//	EnableChannel
+
+
+bool CNTV2Card::EnableChannels (const NTV2ChannelSet inChannels)
+{	UWord failures(0);
+	for (NTV2ChannelSetConstIter it(inChannels.begin());  it != inChannels.end();  ++it)
+		if (!EnableChannel(*it))
+			failures++;
+	return !failures;
+
+}	//	EnableChannels
 
 
 bool CNTV2Card::IsChannelEnabled (const NTV2Channel inChannel, bool & outEnabled)
@@ -6150,6 +6169,15 @@ bool CNTV2Card::ApplySignalRoute (const NTV2XptConnections & inConnections, cons
 	return failures == 0;
 }
 
+bool CNTV2Card::RemoveConnections (const NTV2XptConnections & inConnections)
+{
+	unsigned failures(0);
+	for (NTV2XptConnectionsConstIter iter(inConnections.begin());  iter != inConnections.end();  ++iter)
+		if (!Disconnect(iter->first))
+			failures++;
+	return failures == 0;
+}
+
 
 bool CNTV2Card::ClearRouting (void)
 {
@@ -7377,6 +7405,14 @@ bool CNTV2Card::SetSDITransmitEnable(NTV2Channel inChannel, bool enable)
 		case NTV2_CHANNEL8:		mask = kRegMaskSDI8Transmit;	shift = kRegShiftSDI8Transmit;	break;
 	}
 	return WriteRegister(kRegSDITransmitControl, enable, mask, shift);
+}
+
+bool CNTV2Card::SetSDITransmitEnable (const NTV2ChannelSet inSDIConnectors, const bool inEnable)
+{	UWord failures(0);
+	for (NTV2ChannelSetConstIter it(inSDIConnectors.begin());  it != inSDIConnectors.end();  ++it)
+		if (!SetSDITransmitEnable(*it, inEnable))
+			failures++;
+	return !failures;
 }
 
 bool CNTV2Card::GetSDITransmitEnable(NTV2Channel inChannel, bool & outIsEnabled)

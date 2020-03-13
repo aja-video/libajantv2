@@ -616,42 +616,36 @@ bool CNTV2DriverInterface::DriverGetBuildInformation (BUILD_INFO_STRUCT & buildI
 #endif
 }
 
-bool CNTV2DriverInterface::BitstreamWrite (const NTV2_POINTER & inBuffer, bool fragment, bool swap)
+bool CNTV2DriverInterface::BitstreamWrite (const NTV2_POINTER & inBuffer, const bool inFragment, const bool inSwap)
 {
 	NTV2Bitstream bsMsg (inBuffer,
 						 BITSTREAM_WRITE |
-						 (fragment? BITSTREAM_FRAGMENT : 0) |
-						 (swap? BITSTREAM_SWAP : 0));
+						 (inFragment? BITSTREAM_FRAGMENT : 0) |
+						 (inSwap? BITSTREAM_SWAP : 0));
 	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&bsMsg));
 }
 
-bool CNTV2DriverInterface::BitstreamReset (bool configuration, bool interface)
+bool CNTV2DriverInterface::BitstreamReset (const bool inConfiguration, const bool inInterface)
 {
 	NTV2_POINTER inBuffer;
-	
 	NTV2Bitstream bsMsg (inBuffer,
-						 (configuration? BITSTREAM_RESET_CONFIG : 0) |
-						 (interface? BITSTREAM_RESET_MODULE : 0));
+						 (inConfiguration? BITSTREAM_RESET_CONFIG : 0) |
+						 (inInterface? BITSTREAM_RESET_MODULE : 0));
 	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&bsMsg));
 }
 
-bool CNTV2DriverInterface::BitstreamStatus (ULWord* regs, ULWord count)
+bool CNTV2DriverInterface::BitstreamStatus (NTV2ULWordVector & outRegValues)
 {
-	NTV2_POINTER inBuffer;
-	ULWord i;
-	
-	if ((regs == NULL) || (count == 0))
-		return false;
+	outRegValues.reserve(BITSTREAM_MCAP_DATA);
+	outRegValues.clear();
 
+	NTV2_POINTER inBuffer;
 	NTV2Bitstream bsMsg (inBuffer, BITSTREAM_READ_REGISTERS);
 	if (!NTV2Message (reinterpret_cast<NTV2_HEADER*>(&bsMsg)))
 		return false;
 
-	if (count > BITSTREAM_MCAP_DATA)
-		count = BITSTREAM_MCAP_DATA;
-
-	for (i = 0; i < count; i++)
-		regs[i] = bsMsg.mRegisters[i];
+	for (UWord ndx(0);  ndx < BITSTREAM_MCAP_DATA;  ndx++)
+		outRegValues.push_back(bsMsg.mRegisters[ndx]);
 
 	return true;
 }

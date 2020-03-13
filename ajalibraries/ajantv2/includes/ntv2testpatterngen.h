@@ -12,6 +12,7 @@
 #include "ntv2enums.h"
 #include "ntv2utils.h"
 #include <vector>
+#include <set>
 #include <string>
 
 typedef std::vector <uint8_t>		NTV2TestPatternBuffer;	///< @brief	A byte vector that stores a complete video frame.
@@ -52,6 +53,9 @@ enum NTV2TestPatternSelect
 
 #define NTV2_IS_VALID_PATTERN(__S__) ((__S__) >= NTV2_TestPatt_ColorBars100  &&  (__S__) < NTV2_TestPatt_All)
 #define NTV2_IS_12B_PATTERN(__S__)	 ((__S__) >= NTV2_TestPatt_ZonePlate_12b_RGB  &&  (__S__) < NTV2_TestPatt_All)
+
+typedef std::set<NTV2TestPatternSelect>		NTV2TestPatternSet;
+typedef NTV2TestPatternSet::const_iterator	NTV2TestPatternSetConstIter;
 
 
 /**

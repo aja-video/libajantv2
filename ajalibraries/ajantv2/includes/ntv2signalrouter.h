@@ -596,18 +596,18 @@ AJAExport NTV2InputCrosspointID		GetMixerBGInputXpt (const NTV2Channel inChannel
 
 /**
     @return		The appropriate TSI Muxer's ::NTV2InputCrosspointID for the given ::NTV2Channel.
-    @param[in]	inChannel		Specifies the ::NTV2Channel of interest.
-    @param[in]	inLinkB			Specify true to obtain the second input crosspoint. Defaults to false.
+    @param[in]	inChannel		Specifies the 425Mux widget of interest as an ::NTV2Channel.
+    @param[in]	inLinkB			Specify true to obtain the "B" input crosspoint. Defaults to false, the "A" input.
 **/
 AJAExport NTV2InputCrosspointID     GetTSIMuxInputXptFromChannel(const NTV2Channel inChannel, const bool inLinkB = false);
 
 /**
     @return		The appropriate TSI Muxer's ::NTV2OutputCrosspointID for the given ::NTV2Channel.
-    @param[in]	inChannel		Specifies the ::NTV2Channel of interest.
-    @param[in]	inLinkB			Specify true to obtain the second output crosspoint. Defaults to false.
-    @param[in]	inIsRGB			Specify true to obtain the RGB output crosspoints. Defaults to false.
+    @param[in]	inChannel		Specifies the 425Mux widget of interest as an ::NTV2Channel.
+    @param[in]	inLinkB			Specify true to obtain the "B" output crosspoint. Defaults to false, the "A" output.
+    @param[in]	inIsRGB			Specify true to obtain the RGB output crosspoint. Defaults to false, the YUV output.
 **/
-AJAExport NTV2OutputCrosspointID GetTSIMuxOutputXptFromChannel (const NTV2Channel inChannel, const bool inLinkB = false, const bool inIsRGB = false);
+AJAExport NTV2OutputCrosspointID	GetTSIMuxOutputXptFromChannel (const NTV2Channel inChannel, const bool inLinkB = false, const bool inIsRGB = false);
 
 
 //	Stream operators
