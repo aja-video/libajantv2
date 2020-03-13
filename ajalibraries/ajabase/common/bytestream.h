@@ -216,7 +216,7 @@ inline uint64_t AJAByteStream::Read64LE() {
 
 inline uint64_t AJAByteStream::Read64BE() {
 	uint64_t ret;
-	ret |= (uint64_t)c[0] << 56;
+	ret = (uint64_t)c[0] << 56;
 	ret |= (uint64_t)c[1] << 48;
 	ret |= (uint64_t)c[2] << 40;
 	ret |= (uint64_t)c[3] << 32;
@@ -228,50 +228,4 @@ inline uint64_t AJAByteStream::Read64BE() {
 	return ret;
 }
 
-#ifdef AJA_BYTESTREAM_TEST
-
-#include <stdio.h>
-#include <string.h>
-
-#define TEST(n) \
-	if(!(n)) { \
-		printf("TEST '%s' FAILED AT LINE %d\n", #n, __LINE__); \
-		return 1;\
-	}
-
-int main(void) {
-	uint8_t buf[4069], txt[32];
-	AJAByteStream b(buf);
-
-	b.Set(42, 13);
-	b.Write("Hello World", 12);
-	b.Write8(0x01);
-	b.Write16LE(0x0102);
-	b.Write16BE(0x0102);
-	b.Write32LE(0x01020304);
-	b.Write32BE(0x01020304);
-	b.Write64LE(0x0102030405060708);
-	b.Write64BE(0x0102030405060708);
-
-	printf("Wrote %zd bytes\n", b.Pos() + 1);
-	b.Reset();
-
-	b.Seek(13); // Skip the first 13 bytes which were set to 42
-	b.Read(txt, 12);
-	TEST(!memcmp(txt, "Hello World", 12));
-	TEST(b.Read8() == 0x01);
-	TEST(b.Read16LE() == 0x0102);
-	TEST(b.Read16BE() == 0x0102);
-	TEST(b.Read32LE() == 0x01020304);
-	TEST(b.Read32BE() == 0x01020304);
-	TEST(b.Read64LE() == 0x0102030405060708);
-	TEST(b.Read64BE() == 0x0102030405060708);
-
-	printf("All test successful!\n");
-	return 0;
-}
-
-#endif
-
 #endif /* ifndef AJA_BYTESTREAM_H */
- 
