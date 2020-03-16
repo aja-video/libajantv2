@@ -1233,12 +1233,12 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 	NTV2ChannelList		sdiOutputs	(::NTV2MakeChannelList(sdiOuts));
 	NTV2ChannelList		frameStores	(::NTV2MakeChannelList(mActiveFrameStores));
 	NTV2ChannelList		tsiMuxes;
+	mConnections.clear();
 
 	//	Does device have RGB conversion capability for the desired channel?
 	if (UWord(mConfig.fOutputChannel) > ::NTV2DeviceGetNumCSCs(mDeviceID))
 		{cerr << "## ERROR:  No CSC for channel " << (mConfig.fOutputChannel+1) << endl;  return AJA_STATUS_UNSUPPORTED;}
-	if (!mConfig.fDoMultiFormat)
-		mDevice.ClearRouting();	//	Clear routing only when -m option not specified
+	//mDevice.ClearRouting();	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
 
 	mDevice.SetSDITransmitEnable(sdiOuts, true);
 	if (isRGBFBF && isRGBWire)
@@ -1356,7 +1356,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 			}
 		}
 	}
-	mDevice.ApplySignalRoute(mConnections);
+	mDevice.ApplySignalRoute(mConnections, /*replaceExistingRouting?*/!mConfig.fDoMultiFormat);
 	return AJA_STATUS_SUCCESS;
 
 }	//	RouteOutputSignal
