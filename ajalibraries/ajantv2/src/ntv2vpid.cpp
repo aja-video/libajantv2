@@ -292,36 +292,39 @@ bool CNTV2VPID::IsStandardTwoSampleInterleave (void) const
 	return false;
 }
 
-void CNTV2VPID::SetVersion (const VPIDVersion inVPIDVersion)
+CNTV2VPID & CNTV2VPID::SetVersion (const VPIDVersion inVPIDVersion)
 {
 	m_uVPID = (m_uVPID & ~kRegMaskVPIDVersionID) |
-		(((ULWord)inVPIDVersion << kRegShiftVPIDVersionID) & kRegMaskVPIDVersionID);
+		((ULWord(inVPIDVersion) << kRegShiftVPIDVersionID) & kRegMaskVPIDVersionID);
+	return *this;
 }
 
 
 VPIDVersion CNTV2VPID::GetVersion (void) const
 {
-	return (VPIDVersion)((m_uVPID & kRegMaskVPIDVersionID) >> kRegShiftVPIDVersionID); 
+	return VPIDVersion((m_uVPID & kRegMaskVPIDVersionID) >> kRegShiftVPIDVersionID); 
 }
 
 
-void CNTV2VPID::SetStandard (const VPIDStandard inStandard)
+CNTV2VPID & CNTV2VPID::SetStandard (const VPIDStandard inStandard)
 {
 	m_uVPID = (m_uVPID & ~kRegMaskVPIDStandard) |
-		(((ULWord)inStandard << kRegShiftVPIDStandard) & kRegMaskVPIDStandard);
+		((ULWord(inStandard) << kRegShiftVPIDStandard) & kRegMaskVPIDStandard);
+	return *this;
 }
 
 
 VPIDStandard CNTV2VPID::GetStandard (void) const
 {
-	return (VPIDStandard)((m_uVPID & kRegMaskVPIDStandard) >> kRegShiftVPIDStandard); 
+	return VPIDStandard((m_uVPID & kRegMaskVPIDStandard) >> kRegShiftVPIDStandard); 
 }
 
 
-void CNTV2VPID::SetProgressiveTransport (const bool inIsProgressiveTransport)
+CNTV2VPID & CNTV2VPID::SetProgressiveTransport (const bool inIsProgressiveTransport)
 {
 	m_uVPID = (m_uVPID & ~kRegMaskVPIDProgressiveTransport) |
-		(((inIsProgressiveTransport ? 1 : 0) << kRegShiftVPIDProgressiveTransport) & kRegMaskVPIDProgressiveTransport);
+		(((inIsProgressiveTransport ? 1UL : 0UL) << kRegShiftVPIDProgressiveTransport) & kRegMaskVPIDProgressiveTransport);
+	return *this;
 }
 
 
@@ -331,10 +334,11 @@ bool CNTV2VPID::GetProgressiveTransport (void) const
 }
 
 
-void CNTV2VPID::SetProgressivePicture (const bool inIsProgressivePicture)
+CNTV2VPID & CNTV2VPID::SetProgressivePicture (const bool inIsProgressivePicture)
 {
 	m_uVPID = (m_uVPID & ~kRegMaskVPIDProgressivePicture) |
-		(((inIsProgressivePicture ? 1 : 0) << kRegShiftVPIDProgressivePicture) & kRegMaskVPIDProgressivePicture);
+		(((inIsProgressivePicture ? 1UL : 0UL) << kRegShiftVPIDProgressivePicture) & kRegMaskVPIDProgressivePicture);
+	return *this;
 }
 
 
@@ -344,19 +348,20 @@ bool CNTV2VPID::GetProgressivePicture (void) const
 }
 
 
-void CNTV2VPID::SetPictureRate (const VPIDPictureRate inPictureRate)
+CNTV2VPID & CNTV2VPID::SetPictureRate (const VPIDPictureRate inPictureRate)
 {
 	m_uVPID = (m_uVPID & ~kRegMaskVPIDPictureRate) |
-		(((ULWord)inPictureRate << kRegShiftVPIDPictureRate) & kRegMaskVPIDPictureRate);
+		((ULWord(inPictureRate) << kRegShiftVPIDPictureRate) & kRegMaskVPIDPictureRate);
+	return *this;
 }
 
 VPIDPictureRate CNTV2VPID::GetPictureRate (void) const
 {
-	return (VPIDPictureRate)((m_uVPID & kRegMaskVPIDPictureRate) >> kRegShiftVPIDPictureRate); 
+	return VPIDPictureRate((m_uVPID & kRegMaskVPIDPictureRate) >> kRegShiftVPIDPictureRate); 
 }
 
 
-void CNTV2VPID::SetImageAspect16x9 (const bool inIs16x9Aspect)
+CNTV2VPID & CNTV2VPID::SetImageAspect16x9 (const bool inIs16x9Aspect)
 {
 	VPIDStandard standard = GetStandard();
 	if(standard == VPIDStandard_1080	||
@@ -366,13 +371,14 @@ void CNTV2VPID::SetImageAspect16x9 (const bool inIs16x9Aspect)
 		standard == VPIDStandard_2160_DualLink)
 	{
 		m_uVPID = (m_uVPID & ~kRegMaskVPIDImageAspect16x9Alt) |
-			(((inIs16x9Aspect ? 1 : 0) << kRegShiftVPIDImageAspect16x9Alt) & kRegMaskVPIDImageAspect16x9Alt);
+			(((inIs16x9Aspect ? 1UL : 0UL) << kRegShiftVPIDImageAspect16x9Alt) & kRegMaskVPIDImageAspect16x9Alt);
 	}
 	else
 	{
 		m_uVPID = (m_uVPID & ~kRegMaskVPIDImageAspect16x9) |
-			(((inIs16x9Aspect ? 1 : 0) << kRegShiftVPIDImageAspect16x9) & kRegMaskVPIDImageAspect16x9);
+			(((inIs16x9Aspect ? 1UL : 0UL) << kRegShiftVPIDImageAspect16x9) & kRegMaskVPIDImageAspect16x9);
 	}
+	return *this;
 }
 
 
@@ -391,79 +397,95 @@ bool CNTV2VPID::GetImageAspect16x9 (void) const
 }
 
 
-void CNTV2VPID::SetSampling (const VPIDSampling inSampling)
+CNTV2VPID & CNTV2VPID::SetSampling (const VPIDSampling inSampling)
 {
 	m_uVPID = (m_uVPID & ~kRegMaskVPIDSampling) |
 		(((ULWord)inSampling << kRegShiftVPIDSampling) & kRegMaskVPIDSampling);
+	return *this;
 }
 
 
 VPIDSampling CNTV2VPID::GetSampling (void) const
 {
-	return (VPIDSampling)((m_uVPID & kRegMaskVPIDSampling) >> kRegShiftVPIDSampling); 
+	return VPIDSampling((m_uVPID & kRegMaskVPIDSampling) >> kRegShiftVPIDSampling); 
 }
 
+bool CNTV2VPID::IsRGBSampling (void) const
+{
+	switch (GetSampling())
+	{
+		case VPIDSampling_GBR_444:
+		case VPIDSampling_GBRA_4444:
+		case VPIDSampling_GBRD_4444:	return true;
+		default:	break;
+	}
+	return false;
+}
 
-void CNTV2VPID::SetChannel (const VPIDChannel inChannel)
+CNTV2VPID & CNTV2VPID::SetChannel (const VPIDChannel inChannel)
 {
 	m_uVPID = (m_uVPID & ~kRegMaskVPIDChannel) |
-		(((ULWord)inChannel << kRegShiftVPIDChannel) & kRegMaskVPIDChannel);
+		((ULWord(inChannel) << kRegShiftVPIDChannel) & kRegMaskVPIDChannel);
+	return *this;
 }
 
 
 VPIDChannel CNTV2VPID::GetChannel (void) const
 {
-	return (VPIDChannel)((m_uVPID & kRegMaskVPIDChannel) >> kRegShiftVPIDChannel); 
+	return VPIDChannel((m_uVPID & kRegMaskVPIDChannel) >> kRegShiftVPIDChannel); 
 }
 
 
-void CNTV2VPID::SetDualLinkChannel (const VPIDChannel inChannel)
+CNTV2VPID & CNTV2VPID::SetDualLinkChannel (const VPIDChannel inChannel)
 {
 	m_uVPID = (m_uVPID & ~kRegMaskVPIDDualLinkChannel) |
-		(((ULWord)inChannel << kRegShiftVPIDDualLinkChannel) & kRegMaskVPIDDualLinkChannel);
+		((ULWord(inChannel) << kRegShiftVPIDDualLinkChannel) & kRegMaskVPIDDualLinkChannel);
+	return *this;
 }
 
 
 VPIDChannel CNTV2VPID::GetDualLinkChannel (void) const
 {
-	return (VPIDChannel)((m_uVPID & kRegMaskVPIDDualLinkChannel) >> kRegShiftVPIDDualLinkChannel);
+	return VPIDChannel((m_uVPID & kRegMaskVPIDDualLinkChannel) >> kRegShiftVPIDDualLinkChannel);
 }
 
 
-void CNTV2VPID::SetBitDepth (const VPIDBitDepth inBitDepth)
+CNTV2VPID & CNTV2VPID::SetBitDepth (const VPIDBitDepth inBitDepth)
 {
 	m_uVPID = (m_uVPID & ~kRegMaskVPIDBitDepth) |
-		(((ULWord)inBitDepth << kRegShiftVPIDBitDepth) & kRegMaskVPIDBitDepth);
+		((ULWord(inBitDepth) << kRegShiftVPIDBitDepth) & kRegMaskVPIDBitDepth);
+	return *this;
 }
 
 
 VPIDBitDepth CNTV2VPID::GetBitDepth (void) const
 {
-	return (VPIDBitDepth)((m_uVPID & kRegMaskVPIDBitDepth) >> kRegShiftVPIDBitDepth); 
+	return VPIDBitDepth((m_uVPID & kRegMaskVPIDBitDepth) >> kRegShiftVPIDBitDepth); 
 }
 
-void CNTV2VPID::SetTransferCharacteristics (const NTV2VPIDXferChars iXferChars)
+CNTV2VPID & CNTV2VPID::SetTransferCharacteristics (const NTV2VPIDXferChars iXferChars)
 {
 	m_uVPID = (m_uVPID & ~kRegMaskVPIDXferChars) |
-		(((ULWord)iXferChars << kRegShiftVPIDXferChars) & kRegMaskVPIDXferChars);
+		((ULWord(iXferChars) << kRegShiftVPIDXferChars) & kRegMaskVPIDXferChars);
+	return *this;
 }
 
 
 NTV2VPIDXferChars CNTV2VPID::GetTransferCharacteristics (void) const
 {
-	return (NTV2VPIDXferChars)((m_uVPID & kRegMaskVPIDXferChars) >> kRegShiftVPIDXferChars); 
+	return NTV2VPIDXferChars((m_uVPID & kRegMaskVPIDXferChars) >> kRegShiftVPIDXferChars); 
 }
 
-void CNTV2VPID::SetColorimetry (const NTV2VPIDColorimetry inColorimetry)
+CNTV2VPID & CNTV2VPID::SetColorimetry (const NTV2VPIDColorimetry inColorimetry)
 {
-	VPIDStandard standard = GetStandard();
-	if(standard == VPIDStandard_1080	||
+	VPIDStandard standard (GetStandard());
+	if (standard == VPIDStandard_1080	||
 		standard == VPIDStandard_1080_DualLink ||
 		standard == VPIDStandard_1080_DualLink_3Gb ||
 		standard == VPIDStandard_2160_QuadDualLink_3Gb ||
 		standard == VPIDStandard_2160_DualLink)
 	{
-		ULWord lowBit = 0, highBit = 0;
+		ULWord lowBit(0), highBit(0);
 		highBit = (inColorimetry&0x2)>>1;
 		lowBit = inColorimetry&0x1;
 		m_uVPID = (m_uVPID & ~kRegMaskVPIDColorimetryAltHigh) |
@@ -474,14 +496,15 @@ void CNTV2VPID::SetColorimetry (const NTV2VPIDColorimetry inColorimetry)
 	else
 	{
 		m_uVPID = (m_uVPID & ~kRegMaskVPIDColorimetry) |
-			(((ULWord)inColorimetry << kRegShiftVPIDColorimetry) & kRegMaskVPIDColorimetry);
+			((ULWord(inColorimetry) << kRegShiftVPIDColorimetry) & kRegMaskVPIDColorimetry);
 	}
+	return *this;
 }
 
 
 NTV2VPIDColorimetry CNTV2VPID::GetColorimetry (void) const
 {
-	VPIDStandard standard = GetStandard();
+	VPIDStandard standard (GetStandard());
 	if(standard == VPIDStandard_1080	||
 		standard == VPIDStandard_1080_DualLink ||
 		standard == VPIDStandard_1080_DualLink_3Gb ||
@@ -489,25 +512,26 @@ NTV2VPIDColorimetry CNTV2VPID::GetColorimetry (void) const
 		standard == VPIDStandard_2160_DualLink)
 	{
 		//The bits are sparse so...
-		uint8_t lowBit = 0, highBit = 0, value = 0;
+		uint8_t lowBit(0), highBit(0), value(0);
 		lowBit = (m_uVPID & kRegMaskVPIDColorimetryAltLow) >> kRegShiftVPIDColorimetryAltLow;
 		highBit = (m_uVPID & kRegMaskVPIDColorimetryAltHigh) >> kRegShiftVPIDColorimetryAltHigh;
 		value = (highBit << 1)|lowBit;
-		return (NTV2VPIDColorimetry)value;
+		return NTV2VPIDColorimetry(value);
 	}
-	return (NTV2VPIDColorimetry)((m_uVPID & kRegMaskVPIDColorimetry) >> kRegShiftVPIDColorimetry); 
+	return NTV2VPIDColorimetry((m_uVPID & kRegMaskVPIDColorimetry) >> kRegShiftVPIDColorimetry); 
 }
 
-void CNTV2VPID::SetLuminance (const NTV2VPIDLuminance inLuminance)
+CNTV2VPID & CNTV2VPID::SetLuminance (const NTV2VPIDLuminance inLuminance)
 {
 	m_uVPID = (m_uVPID & ~kRegmaskVPIDLuminance) |
-		(((ULWord)inLuminance << kRegShiftVPIDLuminance) & kRegmaskVPIDLuminance);
+		((ULWord(inLuminance) << kRegShiftVPIDLuminance) & kRegmaskVPIDLuminance);
+	return *this;
 }
 
 
 NTV2VPIDLuminance CNTV2VPID::GetLuminance (void) const
 {
-	return (NTV2VPIDLuminance)((m_uVPID & kRegmaskVPIDLuminance) >> kRegShiftVPIDLuminance); 
+	return NTV2VPIDLuminance((m_uVPID & kRegmaskVPIDLuminance) >> kRegShiftVPIDLuminance); 
 }
 
 #if !defined (NTV2_DEPRECATE)
@@ -764,7 +788,7 @@ NTV2VideoFormat CNTV2VPID::GetVideoFormat (void) const
 // Macro to simplify returning of string for given enum
 #define VPID_ENUM_CASE_RETURN_STR(enum_name) case(enum_name): return #enum_name;
 
-const string CNTV2VPID::VersionString(VPIDVersion version)
+const string CNTV2VPID::VersionString (const VPIDVersion version)
 {
 	switch (version)
 	{
@@ -775,7 +799,7 @@ const string CNTV2VPID::VersionString(VPIDVersion version)
 	return "";
 }
 
-const string CNTV2VPID::StandardString(VPIDStandard std)
+const string CNTV2VPID::StandardString (const VPIDStandard std)
 {
 	switch (std)
 	{
@@ -831,7 +855,7 @@ const string CNTV2VPID::StandardString(VPIDStandard std)
 	return "";
 }
 
-const string CNTV2VPID::PictureRateString(VPIDPictureRate rate)
+const string CNTV2VPID::PictureRateString (const VPIDPictureRate rate)
 {
 	switch (rate)
 	{
@@ -856,7 +880,7 @@ const string CNTV2VPID::PictureRateString(VPIDPictureRate rate)
 	return "";
 }
 
-const string CNTV2VPID::SamplingString(VPIDSampling sample)
+const string CNTV2VPID::SamplingString (const VPIDSampling sample)
 {
 	switch (sample)
 	{
@@ -881,7 +905,7 @@ const string CNTV2VPID::SamplingString(VPIDSampling sample)
 	return "";
 }
 
-const string CNTV2VPID::ChannelString(VPIDChannel chan)
+const string CNTV2VPID::ChannelString (const VPIDChannel chan)
 {
 	switch (chan)
 	{
@@ -898,7 +922,7 @@ const string CNTV2VPID::ChannelString(VPIDChannel chan)
 	return "";
 }
 
-const string CNTV2VPID::DynamicRangeString(VPIDDynamicRange range)
+const string CNTV2VPID::DynamicRangeString (const VPIDDynamicRange range)
 {
 	switch (range)
 	{
@@ -911,7 +935,7 @@ const string CNTV2VPID::DynamicRangeString(VPIDDynamicRange range)
 	return "";
 }
 
-const string CNTV2VPID::BitDepthString(VPIDBitDepth depth)
+const string CNTV2VPID::BitDepthString (const VPIDBitDepth depth)
 {
 	switch (depth)
 	{
@@ -924,7 +948,7 @@ const string CNTV2VPID::BitDepthString(VPIDBitDepth depth)
 	return "";
 }
 
-const string CNTV2VPID::LinkString(VPIDLink link)
+const string CNTV2VPID::LinkString (const VPIDLink link)
 {
 	switch (link)
 	{
@@ -941,7 +965,7 @@ const string CNTV2VPID::LinkString(VPIDLink link)
 	return "";
 }
 
-const string CNTV2VPID::AudioString(VPIDAudio audio)
+const string CNTV2VPID::AudioString (const VPIDAudio audio)
 {
 	switch (audio)
 	{
@@ -1050,17 +1074,18 @@ ostream & CNTV2VPID::Print (ostream & ostrm) const
 				<< " " << ::NTV2VideoFormatToString(GetVideoFormat())
 				<< " rate=" << sVPIDPictureRate[GetPictureRate()]
 				<< " samp=" << sVPIDSampling[GetSampling()]
-				<< " channel=" << sVPIDChannel[GetChannel()]
+				<< " chan=" << sVPIDChannel[GetChannel()]
 				//<< " dynRange=" << sVPIDDynamicRange[GetDynamicRange()]
-				<< " bitDepth=" << sVPIDBitDepth[GetBitDepth()]
+				<< " bitd=" << sVPIDBitDepth[GetBitDepth()]
 				<< " 3Ga=" << YesNo(IsStandard3Ga())
-				<< " Tsi=" << YesNo(IsStandardTwoSampleInterleave())
+				<< " tsi=" << YesNo(IsStandardTwoSampleInterleave())
 				<< " 16x9=" << YesNo(GetImageAspect16x9())
-				<< " xferChars=" << sVPIDTransfer[GetTransferCharacteristics()]
-				<< " colorimetry=" << sVPIDColorimetry[GetColorimetry()]
-				<< " luminance=" << sVPIDLuminance[GetLuminance()];
+				<< " xfer=" << sVPIDTransfer[GetTransferCharacteristics()]
+				<< " colo=" << sVPIDColorimetry[GetColorimetry()]
+				<< " lumi=" << sVPIDLuminance[GetLuminance()];
 	return ostrm;
 }
+
 
 #define	YesOrNo(__x__)		((__x__) ? "Yes" : "No")
 
@@ -1084,6 +1109,19 @@ AJALabelValuePairs & CNTV2VPID::GetInfo (AJALabelValuePairs & outInfo) const
 	AJASystemInfo::append(outInfo, "Colorimetry:",				sVPIDColorimetry[GetColorimetry()]);
 	AJASystemInfo::append(outInfo, "Luminance:",				sVPIDLuminance[GetLuminance()]);
 	return outInfo;
+}
+
+string CNTV2VPID::AsString (const bool inTabular) const
+{
+	if (inTabular)
+	{	AJALabelValuePairs table;
+		return AJASystemInfo::ToString(GetInfo(table));
+	}
+	else
+	{	ostringstream oss;
+		Print(oss);
+		return oss.str();
+	}
 }
 
 ostream & operator << (std::ostream & ostrm, const CNTV2VPID & inData)
