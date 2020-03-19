@@ -36,11 +36,11 @@
 using namespace std;
 
 //	Convenience macros for EZ logging:
-#define	CCPLFAIL(_expr_)	AJA_sERROR  (AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-#define	CCPLWARN(_expr_)	AJA_sWARNING(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-#define	CCPLNOTE(_expr_)	AJA_sNOTICE	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-#define	CCPLINFO(_expr_)	AJA_sINFO	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-#define	CCPLDBG(_expr_)		AJA_sDEBUG	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	CCPLFAIL(_expr_)	AJA_sERROR  (AJA_DebugUnit_DemoAppPlayout, AJAFUNC << ": " << _expr_)
+#define	CCPLWARN(_expr_)	AJA_sWARNING(AJA_DebugUnit_DemoAppPlayout, AJAFUNC << ": " << _expr_)
+#define	CCPLNOTE(_expr_)	AJA_sNOTICE	(AJA_DebugUnit_DemoAppPlayout, AJAFUNC << ": " << _expr_)
+#define	CCPLINFO(_expr_)	AJA_sINFO	(AJA_DebugUnit_DemoAppPlayout, AJAFUNC << ": " << _expr_)
+#define	CCPLDBG(_expr_)		AJA_sDEBUG	(AJA_DebugUnit_DemoAppPlayout, AJAFUNC << ": " << _expr_)
 
 
 //#define	MEASURE_ACCURACY	1		//	Enables a feedback mechanism to precisely generate captions at the desired rate
@@ -893,7 +893,7 @@ NTV2CCPlayer::~NTV2CCPlayer (void)
 	//	Stop my playout and producer threads, then destroy them...
 	Quit();
 
-	mDevice.UnsubscribeOutputVerticalEvents(mActiveFrameStores);
+	mDevice.UnsubscribeOutputVerticalEvent(mActiveFrameStores);
 	if (!mConfig.fDoMultiFormat)
 	{
 		mDevice.SetEveryFrameServices(mSavedTaskMode);															//	Restore prior service level
@@ -1032,6 +1032,7 @@ AJAStatus NTV2CCPlayer::Init (void)
 
 }	//	Init
 
+#define AsUBytePtr(__x__)		reinterpret_cast<UByte*>(__x__)
 
 AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 {
@@ -1039,12 +1040,10 @@ AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 	mVideoBuffer.Allocate(::GetVideoWriteSize(mConfig.fVideoFormat, mConfig.fPixelFormat, mVancMode));
 
 	//	Generate the test pattern...
-	NTV2TestPatternBuffer		testPatternBuffer;
 	NTV2TestPatternGen			testPatternGen;
 	const NTV2FormatDescriptor	formatDesc	(mConfig.fVideoFormat, mConfig.fPixelFormat, mVancMode);
 
-	if (!testPatternGen.DrawTestPattern (mConfig.fTestPattern,  formatDesc.GetRasterWidth (),  formatDesc.GetVisibleRasterHeight (),
-										mConfig.fPixelFormat, testPatternBuffer))
+	if (!testPatternGen.DrawTestPattern (mConfig.fTestPattern, formatDesc, mVideoBuffer))
 	{
 		cerr << "## ERROR:  DrawTestPattern failed, formatDesc: " << formatDesc << endl;
 		return AJA_STATUS_FAIL;
@@ -1052,25 +1051,25 @@ AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 
 	//	Set the VANC area, if any, to legal black...
 	if (formatDesc.IsVANC())
-		if (!::SetRasterLinesBlack(mConfig.fPixelFormat, reinterpret_cast<UByte*>(mVideoBuffer.GetHostPointer()), UWord(formatDesc.GetBytesPerRow()), UWord(formatDesc.firstActiveLine)))
+		if (!::SetRasterLinesBlack(mConfig.fPixelFormat, AsUBytePtr(mVideoBuffer.GetHostPointer()),
+									UWord(formatDesc.GetBytesPerRow()), UWord(formatDesc.firstActiveLine)))
 		{
 			cerr << "## ERROR:  Cannot set video buffer's VANC area to legal black" << endl;
 			return AJA_STATUS_FAIL;
 		}
 
-	//	Stuff the test pattern into my video buffer...
-	::memcpy (formatDesc.GetTopVisibleRowAddress(reinterpret_cast<UByte*>(mVideoBuffer.GetHostPointer())), &testPatternBuffer[0], testPatternBuffer.size());
-
 	//	Add info to the display...
 	const string	strVideoFormat	(CNTV2DemoCommon::StripFormatString (::NTV2VideoFormatToString(mConfig.fVideoFormat)));
-	{ostringstream	oss;	oss << setw (32) << left << string ("CCPlayer ") + strVideoFormat + string (formatDesc.IsVANC() ? " VANC" : "");
+	{ostringstream	oss;	oss << setw(32) << left << string("CCPlayer ") + strVideoFormat + string(formatDesc.IsVANC() ? " VANC" : "");
 	CNTV2CaptionRenderer::BurnString (oss.str (), NTV2Line21Attributes (NTV2_CC608_White, NTV2_CC608_Cyan),
-										formatDesc.GetTopVisibleRowAddress(reinterpret_cast<UByte*>(mVideoBuffer.GetHostPointer())),
-										formatDesc.GetVisibleRasterDimensions(), mConfig.fPixelFormat, UWord(formatDesc.GetBytesPerRow()),  1, 1);	}	//	row 1, col 1
+										formatDesc.GetTopVisibleRowAddress(AsUBytePtr(mVideoBuffer.GetHostPointer())),
+										formatDesc.GetVisibleRasterDimensions(), mConfig.fPixelFormat,
+										UWord(formatDesc.GetBytesPerRow()),  1, 1);	}	//	row 1, col 1
 	{ostringstream	oss;	oss << formatDesc.GetRasterWidth() << "Wx" << formatDesc.GetFullRasterHeight() << "H  " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, true) << string (20, ' ');
 	CNTV2CaptionRenderer::BurnString (oss.str (), NTV2Line21Attributes (NTV2_CC608_White, NTV2_CC608_Cyan),
-										formatDesc.GetTopVisibleRowAddress(reinterpret_cast<UByte*>(mVideoBuffer.GetHostPointer())),
-										formatDesc.GetVisibleRasterDimensions(), mConfig.fPixelFormat, UWord(formatDesc.GetBytesPerRow()),  2, 1);	}	//	row 2, col 1
+										formatDesc.GetTopVisibleRowAddress(AsUBytePtr(mVideoBuffer.GetHostPointer())),
+										formatDesc.GetVisibleRasterDimensions(), mConfig.fPixelFormat,
+										UWord(formatDesc.GetBytesPerRow()),  2, 1);	}	//	row 2, col 1
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetUpBackgroundPatternBuffer
@@ -1211,7 +1210,7 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 	//
 	//	Subscribe to the output interrupt(s)...
 	//
-	mDevice.SubscribeOutputVerticalEvents(mActiveFrameStores);
+	mDevice.SubscribeOutputVerticalEvent(mActiveFrameStores);
 
 	cerr	<< "## NOTE:  Generating '" << ::NTV2VideoFormatToString(mConfig.fVideoFormat)
 			<< "' using " << (mConfig.fForceVanc ? "VANC" : "device Anc inserter")
@@ -1344,9 +1343,9 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 			sdiOuts		= ::NTV2MakeChannelSet(sdiOutput, UWord(2*mActiveFrameStores.size()));
 			sdiOutputs	= ::NTV2MakeChannelList(sdiOuts);
 			tsiMuxes = CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDeviceID, frameStores.at(0), UWord(frameStores.size()));
-			cerr << "FrameStores: " << ::NTV2ChannelListToStr(frameStores) << endl
-				<< "SDIOutputs: " << ::NTV2ChannelListToStr(sdiOutputs) << endl
-				<< "TSIMuxers: " << ::NTV2ChannelListToStr(tsiMuxes) << endl;
+			//cerr << "FrameStores: " << ::NTV2ChannelListToStr(frameStores) << endl
+			//	<< "SDIOutputs: " << ::NTV2ChannelListToStr(sdiOutputs) << endl
+			//	<< "TSIMuxers: " << ::NTV2ChannelListToStr(tsiMuxes) << endl;
 			mDevice.SetSDITransmitEnable(sdiOuts, true);	//	Gotta do this again, since sdiOuts changed
 			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx/2)), tsiMux(tsiMuxes.at(ndx/2)), sdiOut(sdiOutputs.at(ndx));
