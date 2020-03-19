@@ -15,7 +15,7 @@
 #include <set>
 #include <string>
 
-typedef std::vector <uint8_t>		NTV2TestPatternBuffer;	///< @brief	A byte vector that stores a complete video frame.
+typedef std::vector <uint8_t>		NTV2TestPatternBuffer, NTV2TestPatBuffer;	///< @brief	A byte vector that stores a complete video frame.
 #if !defined(NTV2_DEPRECATE_15_0)
 	typedef std::vector <const char *>	NTV2TestPatternList;	///< @deprecated	Use NTV2TestPatternNames instead.
 #endif//!defined(NTV2_DEPRECATE_15_0)
@@ -61,24 +61,34 @@ typedef NTV2TestPatternSet::const_iterator	NTV2TestPatternSetConstIter;
 /**
 	@brief	The NTV2 test pattern generator.
 	@bug	::NTV2TestPatternGen doesn't work for planar formats.
-	@todo	Needs a new DrawTestPattern method that accepts an ::NTV2FormatDescriptor and ::NTV2_POINTER.
 **/
 class AJAExport NTV2TestPatternGen
 {
 public:
 							NTV2TestPatternGen ();
-	virtual					~NTV2TestPatternGen ();
+	virtual inline			~NTV2TestPatternGen ()	{}
 
-	virtual bool			DrawTestPattern (const NTV2TestPatternSelect inPattern, uint32_t inFrameWidth, uint32_t inFrameHeight,
-											const NTV2FrameBufferFormat inPixelFormat, NTV2TestPatternBuffer & outBuffer);
+	/**
+		@brief		Renders the given test pattern into a host raster buffer.
+		@param[in]	inPattern		Specifies the test pattern to be drawn.
+		@param[in]	inFormatDesc	Describes the raster memory.
+		@param		inBuffer		Specifies the host memory buffer to be written.
+	**/
+	virtual bool			DrawTestPattern (const NTV2TestPatternSelect inPattern,
+											const NTV2FormatDescriptor inFormatDesc,
+											NTV2_POINTER & inBuffer);
+
 	virtual inline bool		DrawTestPattern (const NTV2TestPatternSelect inPattern,
 											const NTV2FormatDescriptor & inDesc,
-											NTV2TestPatternBuffer & outBuffer)
+											NTV2TestPatBuffer & outBuffer)
 																			{return DrawTestPattern(inPattern,
 																									inDesc.GetRasterWidth(),
 																									inDesc.GetVisibleRasterHeight(),
 																									inDesc.GetPixelFormat(),
 																									outBuffer);}
+	virtual bool			DrawTestPattern (const NTV2TestPatternSelect inPattern, uint32_t inFrameWidth, uint32_t inFrameHeight,
+											const NTV2FrameBufferFormat inPixelFormat, NTV2TestPatBuffer & outBuffer);
+
 	inline void				setSignalMask (NTV2SignalMask signalMask)		{_signalMask = signalMask;}
 	inline void				setUseRGBSmpteRange (bool useRGBSmpteRange)		{_bRGBSmpteRange = useRGBSmpteRange;}
 	inline bool				getUseRGBSmpteRange (void) const				{return _bRGBSmpteRange;}
@@ -114,8 +124,9 @@ protected:
 	virtual bool	Draw12BitZonePlate();
 	virtual void	PrepareForOutput();
 
-	bool IsSDStandard();
-	bool GetStandard(int &standard, bool &b4K, bool &b8K);
+	bool			IsSDStandard();
+	bool			GetStandard(int &standard, bool &b4K, bool &b8K);
+	virtual bool	drawIt (void);
 
 protected:
 	NTV2TestPatternSelect	_patternNumber;
