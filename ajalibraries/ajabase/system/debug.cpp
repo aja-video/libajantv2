@@ -160,8 +160,10 @@ AJADebug::Open(bool incrementRefCount)
             addDebugGroupToLabelVector(AJA_DebugUnit_App_User2);
             addDebugGroupToLabelVector(AJA_DebugUnit_Anc2110Xmit);
             addDebugGroupToLabelVector(AJA_DebugUnit_Anc2110Rcv);
+            addDebugGroupToLabelVector(AJA_DebugUnit_DemoAppPlayout);
+            addDebugGroupToLabelVector(AJA_DebugUnit_DemoAppCapture);
 
-            for(int i=AJA_DebugUnit_FirstUnused;i<AJA_DebugUnit_Size;i++)
+            for (int i(AJA_DebugUnit_FirstUnused);  i < AJA_DebugUnit_Size;  i++)
             {
                 std::string name("AJA_DebugUnit_Unused_");
                 name += aja::to_string(i);
