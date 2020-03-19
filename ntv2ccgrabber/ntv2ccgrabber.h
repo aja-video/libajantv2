@@ -14,6 +14,7 @@
 #include "ntv2democommon.h"
 #include "ntv2task.h"
 #include "ntv2utils.h"
+#include "ntv2vpid.h"
 #include "ajabase/common/types.h"
 #include "ajabase/common/videotypes.h"
 #include "ajabase/common/timecode.h"
@@ -215,6 +216,12 @@ class NTV2CCGrabber
 		virtual void			CaptureFrames (void);
 
 		/**
+			@brief		Wait for a stable input signal, and return it.
+			@return		The input video format. Guaranteed to be valid unless the app is terminating.
+		**/
+		virtual NTV2VideoFormat	WaitForStableInputSignal (void);
+
+		/**
 			@brief		Sets up my circular buffers.
 			@param[in]	inVideoFormat	Specifies the video format.
 			@return		AJA_STATUS_SUCCESS if successful; otherwise a relevant AJAStatus value.
@@ -329,6 +336,13 @@ class NTV2CCGrabber
 		CNTV2CaptionDecoder608Ptr	m608Decoder;		///< @brief	My 608 closed-caption decoder
 		CNTV2CaptionDecoder708Ptr	m708DecoderAnc;		///< @brief	My 708 closed-caption decoder (for anc extractor)
 		CNTV2CaptionDecoder708Ptr	m708DecoderVanc;	///< @brief	My 708 closed-caption decoder (for VANC)
+		CNTV2VPID					mVPIDInfoDS1;		///< @brief	Input DS1 VPID info
+		CNTV2VPID					mVPIDInfoDS2;		///< @brief	Input DS2 VPID info
+		NTV2ChannelSet				mAllFrameStores;	///< @brief	All device FrameStores
+		NTV2ChannelSet				mInputFrameStores;	///< @brief	Active input FrameStores
+		NTV2ChannelSet				mActiveSDIInputs;	///< @brief	Active SDI inputs
+		NTV2ChannelSet				mActiveCSCs;		///< @brief	Active CSCs
+		NTV2XptConnections			mInputConnections;	///< @brief	Input routing connections
 
 		typedef	AJACircularBuffer <AVDataBuffer *>	MyCircularBuffer;
 		AVDataBuffer				mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
@@ -340,6 +354,8 @@ class NTV2CCGrabber
 		NTV2Channel					mOutputChannel;		///< @brief	My playout channel -- determines SDI output spigot to use
 		NTV2FrameBufferFormat		mPlayoutFBF;		///< @brief	My caption frame store's pixel format
 		AJAThread *					mPlayoutThread;		///< @brief	My playout thread object
+		NTV2ChannelSet				mOutputFrameStores;	///< @brief	My output FrameStores
+		NTV2XptConnections			mOutputConnections;	///< @brief	Output routing connections
 
 };	//	NTV2CCGrabber
 
