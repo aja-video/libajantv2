@@ -10,6 +10,8 @@
 #include "ntv2endian.h"
 #include "ajabase/system/memory.h"
 #include "ajabase/system/debug.h"
+#include "ajabase/common/common.h"
+#include "ntv2registerexpert.h"
 #include <iomanip>
 #include <locale>		//	For std::locale, std::numpunct, std::use_facet
 #include <assert.h>
@@ -2679,6 +2681,10 @@ ostream & NTV2RegInfo::Print (ostream & oss, const bool inAsCode) const
 			oss << regName;
 		else
 			oss << "Reg " << DEC(registerNumber);
+		//	Decode the reg value...
+		string info(CNTV2RegisterExpert::GetDisplayValue(registerNumber, registerValue));
+		if (!info.empty())	//	and add to end of comment
+			oss << "  // " << aja::replace(info, "\n", ", ");
 	}
 	else
 	{

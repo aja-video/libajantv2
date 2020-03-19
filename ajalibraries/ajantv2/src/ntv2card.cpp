@@ -109,11 +109,17 @@ string CNTV2Card::GetDeviceVersionString (void)
 }
 
 
+string CNTV2Card::GetModelName (void)
+{
+	ostringstream	oss;
+	oss << ::NTV2DeviceIDToString(GetDeviceID(), GetDeviceID() == DEVICE_ID_IO4KPLUS ? DeviceHasMicInput() : false);
+	return oss.str();
+}
+
 string CNTV2Card::GetDisplayName (void)
 {
 	ostringstream	oss;
-	oss << ::NTV2DeviceIDToString(GetDeviceID(), GetDeviceID() == DEVICE_ID_IO4KPLUS ? DeviceHasMicInput() : false)
-		<< " - " << GetIndexNumber();
+	oss << GetModelName() << " - " << GetIndexNumber();
 	return oss.str();
 }
 
