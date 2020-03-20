@@ -1237,7 +1237,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 	//	Does device have RGB conversion capability for the desired channel?
 	if (UWord(mConfig.fOutputChannel) > ::NTV2DeviceGetNumCSCs(mDeviceID))
 		{cerr << "## ERROR:  No CSC for channel " << (mConfig.fOutputChannel+1) << endl;  return AJA_STATUS_UNSUPPORTED;}
-	//mDevice.ClearRouting();	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
+/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ClearRouting();
 
 	mDevice.SetSDITransmitEnable(sdiOuts, true);
 	if (isRGBFBF && isRGBWire)
@@ -1248,7 +1248,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/false),  ::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/false)));
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/true),  ::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/true)));
 				mConnections.insert(NTV2XptConnection(::GetDLOutInputXptFromChannel(sdiOut),  ::GetFrameBufferOutputXptFromChannel(frmSt,  true/*isRGB*/,  false/*is425*/)));
-				//mDevice.ApplySignalRoute(mConnections);	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
+/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 				//  Disable SDI output conversions
 				mDevice.SetSDIOutLevelAtoLevelBConversion(sdiOut, false);
 				mDevice.SetSDIOutRGBLevelAConversion(sdiOut, false);
@@ -1266,7 +1266,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 				mConnections.insert(NTV2XptConnection(::GetDLOutInputXptFromChannel(sdiOut),			::GetTSIMuxOutputXptFromChannel(tsiMux, /*isLinkB*/(ndx & 1) > 0, /*isRGB*/true)));
 				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux,/*linkB?*/false), ::GetFrameBufferOutputXptFromChannel(frmSt,  true/*isRGB*/,  false/*is425*/)));
 				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux,/*linkB?*/true), ::GetFrameBufferOutputXptFromChannel(frmSt,  true/*isRGB*/,  true/*is425*/)));
-				//mDevice.ApplySignalRoute(mConnections);	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
+/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 			}
 		}
 	}
@@ -1277,7 +1277,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 			{	NTV2Channel frmStore(frameStores.at(ndx)), sdiOut(sdiOutputs.at(ndx));
 				mConnections.insert(NTV2XptConnection(::GetCSCInputXptFromChannel(frmStore),::GetFrameBufferOutputXptFromChannel(frmStore, /*isRGB*/true, /*is425*/false)));
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut),		::GetCSCOutputXptFromChannel(frmStore)));
-				//mDevice.ApplySignalRoute(mConnections);	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
+/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 				//  Disable SDI output conversions
 				mDevice.SetSDIOutLevelAtoLevelBConversion(sdiOut, false);
 				mDevice.SetSDIOutRGBLevelAConversion(sdiOut, false);
@@ -1292,7 +1292,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/true),			::GetCSCOutputXptFromChannel(NTV2Channel(firstCSC+2*ndx+1))));
 				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(frmStore,/*linkB?*/false),  ::GetFrameBufferOutputXptFromChannel(frmStore,  true/*isRGB*/,  false/*is425*/)));
 				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(frmStore,/*linkB?*/true),   ::GetFrameBufferOutputXptFromChannel(frmStore,  true/*isRGB*/,  true/*is425*/)));
-				//mDevice.ApplySignalRoute(mConnections);	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
+/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 			}
 	}
 	else if (!isRGBFBF && isRGBWire)
@@ -1304,7 +1304,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 				mConnections.insert(NTV2XptConnection(::GetDLOutInputXptFromChannel(sdiOut),					::GetCSCOutputXptFromChannel(frmSt, /*isKey*/false, /*isRGB*/true)));
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/false),			::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/false)));
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/true),			::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/true)));
-				//mDevice.ApplySignalRoute(mConnections);	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
+/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 				//  Disable SDI output conversions
 				mDevice.SetSDIOutLevelAtoLevelBConversion(sdiOut, false);
 				mDevice.SetSDIOutRGBLevelAConversion(sdiOut, false);
@@ -1323,7 +1323,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 				mConnections.insert(NTV2XptConnection(::GetDLOutInputXptFromChannel(sdiOut),			::GetCSCOutputXptFromChannel(NTV2Channel(sdiOut),/*isKey*/false,/*isRGB*/true)));
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/false),	::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/false)));
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/true),	::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/true)));
-				//mDevice.ApplySignalRoute(mConnections);	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
+/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 			}
 		}
 	}
@@ -1333,25 +1333,31 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx)), sdiOut(sdiOutputs.at(ndx));
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut),  ::GetFrameBufferOutputXptFromChannel(frmSt)));
-				//mDevice.ApplySignalRoute(mConnections);	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
+/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 				//  Disable SDI output conversions
 				mDevice.SetSDIOutLevelAtoLevelBConversion(sdiOut, false);
 				mDevice.SetSDIOutRGBLevelAConversion(sdiOut, false);
 			}
 		else
-		{								//	YUVFrameStore ==> 425MUX ==> SDIOut
-			sdiOuts		= ::NTV2MakeChannelSet(sdiOutput, UWord(2*mActiveFrameStores.size()));
+		{	// TSI						//	YUVFrameStore ==> 425MUX ==> SDIOut (both A&B links)
+			sdiOuts		= ::NTV2MakeChannelSet(sdiOutput, UWord(mActiveFrameStores.size()));
 			sdiOutputs	= ::NTV2MakeChannelList(sdiOuts);
-			tsiMuxes = CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDeviceID, frameStores.at(0), UWord(frameStores.size()));
-			//cerr << "FrameStores: " << ::NTV2ChannelListToStr(frameStores) << endl
-			//	<< "SDIOutputs: " << ::NTV2ChannelListToStr(sdiOutputs) << endl
-			//	<< "TSIMuxers: " << ::NTV2ChannelListToStr(tsiMuxes) << endl;
+			tsiMuxes	= CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDeviceID, frameStores.at(0), UWord(frameStores.size()));
+			cerr	<< "FrameStores: "	<< ::NTV2ChannelListToStr(frameStores)	<< endl
+					<< "SDIOutputs: "	<< ::NTV2ChannelListToStr(sdiOutputs)	<< endl
+					<< "TSIMuxers: "	<< ::NTV2ChannelListToStr(tsiMuxes)		<< endl;
 			mDevice.SetSDITransmitEnable(sdiOuts, true);	//	Gotta do this again, since sdiOuts changed
 			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
-			{	NTV2Channel frmSt(frameStores.at(ndx/2)), tsiMux(tsiMuxes.at(ndx/2)), sdiOut(sdiOutputs.at(ndx));
-				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/(ndx & 1) > 0),::GetTSIMuxOutputXptFromChannel(tsiMux, /*isLinkB*/(ndx & 1) > 0, /*isRGB*/false)));
-				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux,/*linkB?*/(ndx & 1) > 0),::GetFrameBufferOutputXptFromChannel(frmSt,  false/*isRGB*/,  (ndx & 1) > 0/*is425*/)));
-				//mDevice.ApplySignalRoute(mConnections);	//	UNCOMMENT THIS TO SEE ROUTING PROGRESS WHILE DEBUGGING
+			{	NTV2Channel frmSt(frameStores.at(ndx)), tsiMux(tsiMuxes.at(ndx)), sdiOut(sdiOutputs.at(ndx));
+				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/false),
+													::GetTSIMuxOutputXptFromChannel(tsiMux, /*linkB?*/false, /*RGB?*/false)));
+				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/true),
+													::GetTSIMuxOutputXptFromChannel(tsiMux, /*linkB?*/true, /*RGB?*/false)));
+				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux,/*linkB?*/false),
+													::GetFrameBufferOutputXptFromChannel(frmSt, /*RGB?*/false,  /*425?*/false)));
+				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux,/*linkB?*/true),
+													::GetFrameBufferOutputXptFromChannel(frmSt, /*RGB?*/false,  /*425?*/true)));
+/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 			}
 		}
 	}
@@ -1364,9 +1370,8 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 AJAStatus NTV2CCPlayer::Run ()
 {
 	//	Start the threads...
-	StartPlayoutThread ();
-	StartCaptionGeneratorThreads ();
-
+	StartPlayoutThread();
+	StartCaptionGeneratorThreads();
 	return AJA_STATUS_SUCCESS;
 
 }	//	Run
