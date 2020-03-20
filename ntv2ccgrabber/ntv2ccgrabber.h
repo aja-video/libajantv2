@@ -339,6 +339,7 @@ class NTV2CCGrabber
 		CNTV2VPID					mVPIDInfoDS1;		///< @brief	Input DS1 VPID info
 		CNTV2VPID					mVPIDInfoDS2;		///< @brief	Input DS2 VPID info
 		NTV2ChannelSet				mAllFrameStores;	///< @brief	All device FrameStores
+		NTV2ChannelSet				mAllCSCs;			///< @brief	All device CSCs
 		NTV2ChannelSet				mInputFrameStores;	///< @brief	Active input FrameStores
 		NTV2ChannelSet				mActiveSDIInputs;	///< @brief	Active SDI inputs
 		NTV2ChannelSet				mActiveCSCs;		///< @brief	Active CSCs
