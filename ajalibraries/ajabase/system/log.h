@@ -48,11 +48,7 @@ extern void __cdecl log_odprintf(const char *format, ...);
 		#define AJA_LOG(_format_,...)
 	#endif
 
-#elif defined(AJA_LINUX)
-
-    #define AJA_LOG(...)
-
-#elif defined(AJA_MAC) 
+#elif defined(AJA_LINUX) || defined(AJA_MAC)
 
 	#if defined(AJA_DEBUG)
 
