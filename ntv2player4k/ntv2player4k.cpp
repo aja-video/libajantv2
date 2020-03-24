@@ -23,11 +23,11 @@ using namespace std;
 #define					APP_PROCESS_ID		AS_INT32(AJAProcess::GetPid())
 
 //	Convenience macros for EZ logging:
-#define	PLFAIL(_xpr_)	AJA_sERROR  (AJA_DebugUnit_Application, AJAFUNC << ": " << _xpr_)
-#define	PLWARN(_xpr_)	AJA_sWARNING(AJA_DebugUnit_Application, AJAFUNC << ": " << _xpr_)
-#define	PLNOTE(_xpr_)	AJA_sNOTICE	(AJA_DebugUnit_Application, AJAFUNC << ": " << _xpr_)
-#define	PLINFO(_xpr_)	AJA_sINFO	(AJA_DebugUnit_Application, AJAFUNC << ": " << _xpr_)
-#define	PLDBG(_xpr_)	AJA_sDEBUG	(AJA_DebugUnit_Application, AJAFUNC << ": " << _xpr_)
+#define	PLFAIL(_xpr_)	AJA_sERROR  (AJA_DebugUnit_DemoAppPlayout, AJAFUNC << ": " << _xpr_)
+#define	PLWARN(_xpr_)	AJA_sWARNING(AJA_DebugUnit_DemoAppPlayout, AJAFUNC << ": " << _xpr_)
+#define	PLNOTE(_xpr_)	AJA_sNOTICE	(AJA_DebugUnit_DemoAppPlayout, AJAFUNC << ": " << _xpr_)
+#define	PLINFO(_xpr_)	AJA_sINFO	(AJA_DebugUnit_DemoAppPlayout, AJAFUNC << ": " << _xpr_)
+#define	PLDBG(_xpr_)	AJA_sDEBUG	(AJA_DebugUnit_DemoAppPlayout, AJAFUNC << ": " << _xpr_)
 
 static const size_t		NTV2_ANCSIZE_MAX	(0x2000);
 static const uint32_t	APP_SIGNATURE		(NTV2_FOURCC('D','E','M','O'));
@@ -1178,6 +1178,7 @@ void NTV2Player4K::ConsumeFrames (void)
 	uint32_t				hdrPktSize	(0);
 	AUTOCIRCULATE_TRANSFER	outputXferInfo;
 	AUTOCIRCULATE_STATUS	outputStatus;
+	AJAAncillaryData *		pPkt (AJA_NULL);
 
 	//	Stop AutoCirculate, just in case someone else left it running...
 	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
@@ -1186,27 +1187,25 @@ void NTV2Player4K::ConsumeFrames (void)
 
 	if (IS_KNOWN_AJAAncillaryDataType(mConfig.fSendAncType))
 	{	//	Insert one of these HDR anc packets...
-		AJAAncillaryData_HDR_SDR	sdrPkt;
-		AJAAncillaryData_HDR_HDR10	hdr10Pkt;
-		AJAAncillaryData_HDR_HLG	hlgPkt;
-		AJAAncillaryData *			pPkt	(AJA_NULL);
+		static AJAAncillaryData_HDR_SDR		sdrPkt;
+		static AJAAncillaryData_HDR_HDR10	hdr10Pkt;
+		static AJAAncillaryData_HDR_HLG		hlgPkt;
 
 		switch (mConfig.fSendAncType)
 		{
 			case AJAAncillaryDataType_HDR_SDR:		pPkt = &sdrPkt;		break;
 			case AJAAncillaryDataType_HDR_HDR10:	pPkt = &hdr10Pkt;	break;
 			case AJAAncillaryDataType_HDR_HLG:		pPkt = &hlgPkt;		break;
-			default:
-				break;
+			default:								break;
 		}
-		if (pPkt)
-		{	//	Allocate page-aligned host Anc buffer...
-			outputXferInfo.acANCBuffer.Allocate(NTV2_ANCSIZE_MAX, /*pageAligned=*/true);
-			outputXferInfo.acANCBuffer.Fill(0LL);	//	Zero it
-			pPkt->GenerateTransmitData (reinterpret_cast<uint8_t*>(outputXferInfo.acANCBuffer.GetHostPointer()),
-										outputXferInfo.acANCBuffer.GetByteCount(),  hdrPktSize);
-			acOptions |= AUTOCIRCULATE_WITH_ANC;
-		}
+	}
+	if (pPkt)
+	{	//	Allocate page-aligned host Anc buffer...
+		outputXferInfo.acANCBuffer.Allocate(NTV2_ANCSIZE_MAX, /*pageAligned=*/true);
+		outputXferInfo.acANCBuffer.Fill(0LL);	//	Zero it
+		pPkt->GenerateTransmitData (reinterpret_cast<uint8_t*>(outputXferInfo.acANCBuffer.GetHostPointer()),
+									outputXferInfo.acANCBuffer.GetByteCount(),  hdrPktSize);
+		acOptions |= AUTOCIRCULATE_WITH_ANC;
 	}
 
 	//	Initialize & start AutoCirculate...
