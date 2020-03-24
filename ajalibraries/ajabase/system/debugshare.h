@@ -89,8 +89,8 @@ typedef enum _AJADebugUnit
     AJA_DebugUnit_App_User2               	= 48,
     AJA_DebugUnit_Anc2110Xmit				= 49,
     AJA_DebugUnit_Anc2110Rcv				= 50,
-    AJA_DebugUnit_DemoAppPlayout			= 51,
-    AJA_DebugUnit_DemoAppCapture			= 52,
+    AJA_DebugUnit_DemoPlayout				= 51,
+    AJA_DebugUnit_DemoCapture				= 52,
 
     // to add a new unit:
     //
