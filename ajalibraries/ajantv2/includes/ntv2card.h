@@ -3641,8 +3641,8 @@ public:
 		@note		For Multi-Channel or 4K/8K applications (i.e. where more than one channel is used for streaming video), AJA
 					recommends specifying zero for \c inFrameCount, and explicitly specifying a frame range using \c inStartFrameNumber
 					and \c inEndFrameNumber parameters.
-		@note		Smaller frame counts increase the likelihood of frame drops.
-		@note		All widget routing should be completed prior to calling this function.
+		@note		Fewer frames reduces latency, but increases the likelihood of frame drops.
+		@note		All widget routing should be completed prior to calling this function (see \ref ntv2signalrouting ).
 		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers to be written by
 					the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
 					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
@@ -3651,9 +3651,9 @@ public:
 					otherwise (if ::NTV2_DISABLE_TASKS ), the caller must manage <i>all</i> aspects of the FrameStore ( ::NTV2Mode,
 					::NTV2VideoFormat, etc.) before calling this function.
 		@warning	If the frame range overlaps or includes other frames used by any other enabled FrameStore/channel, this will likely
-					result in torn/bad video. \see vidop-fbconflict
+					result in torn/bad video (see \ref vidop-fbconflict ).
 		@warning	If the frame range runs into Audio Buffer memory that's used by a running Audio System, this will likely result in
-					torn/bad video and/or bad audio. \see audioclobber
+					torn/bad video and/or bad audio (see \ref audioclobber ).
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForOutput, \ref autocirculatecapture
 	**/
 
@@ -3691,12 +3691,12 @@ public:
 		@note		For Multi-Channel or 4K/8K applications (i.e. where more than one channel is used for streaming video), AJA
 					recommends specifying zero for \c inFrameCount, and explicitly specifying a frame range using \c inStartFrameNumber
 					and \c inEndFrameNumber parameters.
-		@note		Smaller frame counts increase the likelihood of frame drops.
-		@note		All widget routing should be completed prior to calling this function.
+		@note		Fewer frames reduces latency, but increases the likelihood of frame drops.
+		@note		All widget routing should be completed prior to calling this function (see \ref ntv2signalrouting ).
 		@warning	If the frame range overlaps or includes other frames used by any other enabled FrameStore/channel, this will likely
-					result in torn/bad video. \see vidop-fbconflict
+					result in torn/bad video (see \ref vidop-fbconflict ).
 		@warning	If the frame range runs into Audio Buffer memory that's used by a running Audio System, this will likely result in
-					torn/bad video. \see audioclobber
+					torn/bad video (see \ref audioclobber ).
 		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers to be read by
 					the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
 					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
