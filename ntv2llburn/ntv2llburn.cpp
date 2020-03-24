@@ -17,7 +17,7 @@ using namespace std;
 
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 
-const uint32_t	kAppSignature	(AJA_FOURCC ('L','l','b','u'));
+const uint32_t	kAppSignature	(NTV2_FOURCC('L','l','b','u'));
 
 
 NTV2LLBurn::NTV2LLBurn (const string &				inDeviceSpecifier,
@@ -28,7 +28,7 @@ NTV2LLBurn::NTV2LLBurn (const string &				inDeviceSpecifier,
 						const bool					inDoMultiChannel,
 						const bool					inWithAnc)
 
-	:	mRunThread				(NULL),
+	:	mRunThread				(AJA_NULL),
 		mDeviceID				(DEVICE_ID_NOTFOUND),
 		mDeviceSpecifier		(inDeviceSpecifier),
 		mWithAudio				(inWithAudio),
@@ -57,7 +57,7 @@ NTV2LLBurn::~NTV2LLBurn ()
 	Quit ();
 
 	delete mRunThread;
-	mRunThread = NULL;
+	mRunThread = AJA_NULL;
 
 	//	Unsubscribe from input vertical event...
 	mDevice.UnsubscribeInputVerticalEvent (mInputChannel);
@@ -523,6 +523,7 @@ void NTV2LLBurn::ProcessFrames (void)
 	const AJAAncillaryDataLocation	F1AncDataLoc		(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 10, 0, AJAAncillaryDataStream_1);
 	NTV2_POINTER	zeroesBuffer(mpHostF1AncBuffer.GetByteCount());
 	zeroesBuffer.Fill(ULWord64(0));
+	BURNNOTE("Thread started");
 
 	if (mWithAnc && !isInterlace)
 		mpHostF2AncBuffer.Allocate(0);	//	Free F2 Anc buffer
@@ -749,6 +750,7 @@ void NTV2LLBurn::ProcessFrames (void)
 		mDevice.AncExtractSetEnable (sdiOutput, false);
 	if (doAncOutput)
 		mDevice.AncInsertSetEnable (sdiOutput, false);
+	BURNNOTE("Thread completed, will exit");
 
 }	//	ProcessFrames
 

@@ -22,13 +22,6 @@ using namespace std;
 #define					AS_INT32(_x_)		static_cast<int32_t>(_x_)
 #define					APP_PROCESS_ID		AS_INT32(AJAProcess::GetPid())
 
-//	Convenience macros for EZ logging:
-#define	PLFAIL(_xpr_)	AJA_sERROR  (AJA_DebugUnit_DemoAppPlayout, AJAFUNC << ": " << _xpr_)
-#define	PLWARN(_xpr_)	AJA_sWARNING(AJA_DebugUnit_DemoAppPlayout, AJAFUNC << ": " << _xpr_)
-#define	PLNOTE(_xpr_)	AJA_sNOTICE	(AJA_DebugUnit_DemoAppPlayout, AJAFUNC << ": " << _xpr_)
-#define	PLINFO(_xpr_)	AJA_sINFO	(AJA_DebugUnit_DemoAppPlayout, AJAFUNC << ": " << _xpr_)
-#define	PLDBG(_xpr_)	AJA_sDEBUG	(AJA_DebugUnit_DemoAppPlayout, AJAFUNC << ": " << _xpr_)
-
 static const size_t		NTV2_ANCSIZE_MAX	(0x2000);
 static const uint32_t	APP_SIGNATURE		(NTV2_FOURCC('D','E','M','O'));
 
@@ -1183,7 +1176,7 @@ void NTV2Player4K::ConsumeFrames (void)
 	//	Stop AutoCirculate, just in case someone else left it running...
 	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
 	mDevice.WaitForOutputVerticalInterrupt(mConfig.fOutputChannel, 4);	//	Let it stop
-	PLNOTE("Started");
+	PLNOTE("Thread started");
 
 	if (IS_KNOWN_AJAAncillaryDataType(mConfig.fSendAncType))
 	{	//	Insert one of these HDR anc packets...
@@ -1365,7 +1358,7 @@ void NTV2Player4K::ProduceFrames (void)
 	ULWord			frequencyIndex		(0);
 	ULWord			testPatternIndex	(0);
 
-	PLNOTE("Started");
+	PLNOTE("Thread started");
 	AJATimeBase	timeBase (CNTV2DemoCommon::GetAJAFrameRate(GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat)));
 
 	while (!mGlobalQuit)
@@ -1399,7 +1392,7 @@ void NTV2Player4K::ProduceFrames (void)
 		mAVCircularBuffer.EndProduceNextBuffer();
 
 	}	//	loop til mGlobalQuit goes true
-	PLNOTE("Ended");
+	PLNOTE("Thread completed, will exit");
 
 }	//	ProduceFrames
 

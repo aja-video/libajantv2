@@ -18,7 +18,7 @@ using namespace std;
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 #define NTV2_ANCSIZE_MAX	(0x2000)
 
-const uint32_t	kAppSignature	(AJA_FOURCC ('B','u','r','n'));
+const uint32_t	kAppSignature	(NTV2_FOURCC('B','u','r','n'));
 
 
 //////////////////////	IMPLEMENTATION
@@ -32,8 +32,8 @@ NTV2Burn::NTV2Burn (const string &				inDeviceSpecifier,
 					const NTV2TCIndex			inTCSource,
 					const bool					inWithAnc)
 
-	:	mPlayThread			(NULL),
-		mCaptureThread		(NULL),
+	:	mPlayThread			(AJA_NULL),
+		mCaptureThread		(AJA_NULL),
 		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mDeviceSpecifier	(inDeviceSpecifier),
 		mInputChannel		(NTV2_CHANNEL_INVALID),
@@ -62,10 +62,10 @@ NTV2Burn::~NTV2Burn ()
 	Quit ();
 
 	delete mPlayThread;
-	mPlayThread = NULL;
+	mPlayThread = AJA_NULL;
 
 	delete mCaptureThread;
-	mCaptureThread = NULL;
+	mCaptureThread = AJA_NULL;
 
 	//	Unsubscribe from input vertical event...
 	mDevice.UnsubscribeInputVerticalEvent (mInputChannel);
@@ -76,12 +76,12 @@ NTV2Burn::~NTV2Burn ()
 		if (mAVHostBuffer[bufferNdx].fVideoBuffer)
 		{
 			AJAMemory::FreeAligned (mAVHostBuffer[bufferNdx].fVideoBuffer);
-			mAVHostBuffer[bufferNdx].fVideoBuffer = NULL;
+			mAVHostBuffer[bufferNdx].fVideoBuffer = AJA_NULL;
 		}
 		if (mAVHostBuffer[bufferNdx].fAudioBuffer)
 		{
 			AJAMemory::FreeAligned (mAVHostBuffer[bufferNdx].fAudioBuffer);
-			mAVHostBuffer[bufferNdx].fAudioBuffer = NULL;
+			mAVHostBuffer[bufferNdx].fAudioBuffer = AJA_NULL;
 		}
 	}	//	for each buffer in the ring
 
@@ -392,10 +392,10 @@ AJAStatus NTV2Burn::SetupHostBuffers (void)
 		mAVHostBuffer [bufferNdx].fVideoBuffer = reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (mVideoBufferSize, AJA_PAGE_SIZE));
 		mAVHostBuffer [bufferNdx].fVideoBufferSize = mVideoBufferSize;
 
-		mAVHostBuffer [bufferNdx].fAncBuffer = mWithAnc ? reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (NTV2_ANCSIZE_MAX, AJA_PAGE_SIZE)) : NULL;
+		mAVHostBuffer [bufferNdx].fAncBuffer = mWithAnc ? reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (NTV2_ANCSIZE_MAX, AJA_PAGE_SIZE)) : AJA_NULL;
 		mAVHostBuffer [bufferNdx].fAncBufferSize = mWithAnc ? NTV2_ANCSIZE_MAX : 0;
 
-		mAVHostBuffer [bufferNdx].fAncF2Buffer = mWithAnc ? reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (NTV2_ANCSIZE_MAX, AJA_PAGE_SIZE)) : NULL;
+		mAVHostBuffer [bufferNdx].fAncF2Buffer = mWithAnc ? reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (NTV2_ANCSIZE_MAX, AJA_PAGE_SIZE)) : AJA_NULL;
 		mAVHostBuffer [bufferNdx].fAncF2BufferSize = mWithAnc ? NTV2_ANCSIZE_MAX : 0;
 
 		//	Allocate audio buffer (unless --noaudio requested)...
@@ -548,6 +548,7 @@ void NTV2Burn::PlayThreadStatic (AJAThread * pThread, void * pContext)		//	stati
 void NTV2Burn::PlayFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	outputXferInfo;	//	A/C output transfer info
+	BURNNOTE("Thread started");
 
 	//	Stop AutoCirculate on this channel, just in case some other app left it running...
 	mDevice.AutoCirculateStop (mOutputChannel);
@@ -587,6 +588,7 @@ void NTV2Burn::PlayFrames (void)
 
 	//	Stop AutoCirculate...
 	mDevice.AutoCirculateStop (mOutputChannel);
+	BURNNOTE("Thread completed, will exit");
 
 }	//	PlayFrames
 
@@ -631,6 +633,7 @@ void NTV2Burn::CaptureFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	inputXferInfo;		//	A/C input transfer info
 	Bouncer<UWord>			yPercent	(85/*upperLimit*/, 1/*lowerLimit*/, 1/*startValue*/);	//	Used to "bounce" timecode up & down in raster
+	BURNNOTE("Thread started");
 
 	//	Stop AutoCirculate on this channel, just in case some other app left it running...
 	mDevice.AutoCirculateStop (mInputChannel);
@@ -709,6 +712,7 @@ void NTV2Burn::CaptureFrames (void)
 
 	//	Stop AutoCirculate...
 	mDevice.AutoCirculateStop (mInputChannel);
+	BURNNOTE("Thread completed, will exit");
 
 }	//	CaptureFrames
 

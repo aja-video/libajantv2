@@ -19,6 +19,25 @@
 #include <algorithm>
 #include <string>
 
+//	Convenience macros for EZ logging:
+#define	CAPFAIL(_expr_)		AJA_sERROR  (AJA_DebugUnit_DemoCapture, AJAFUNC << ": " << _expr_)
+#define	CAPWARN(_expr_)		AJA_sWARNING(AJA_DebugUnit_DemoCapture, AJAFUNC << ": " << _expr_)
+#define	CAPDBG(_expr_)		AJA_sDEBUG	(AJA_DebugUnit_DemoCapture, AJAFUNC << ": " << _expr_)
+#define	CAPNOTE(_expr_)		AJA_sNOTICE	(AJA_DebugUnit_DemoCapture, AJAFUNC << ": " << _expr_)
+#define	CAPINFO(_expr_)		AJA_sINFO	(AJA_DebugUnit_DemoCapture, AJAFUNC << ": " << _expr_)
+
+#define	PLFAIL(_xpr_)		AJA_sERROR  (AJA_DebugUnit_DemoPlayout, AJAFUNC << ": " << _xpr_)
+#define	PLWARN(_xpr_)		AJA_sWARNING(AJA_DebugUnit_DemoPlayout, AJAFUNC << ": " << _xpr_)
+#define	PLNOTE(_xpr_)		AJA_sNOTICE	(AJA_DebugUnit_DemoPlayout, AJAFUNC << ": " << _xpr_)
+#define	PLINFO(_xpr_)		AJA_sINFO	(AJA_DebugUnit_DemoPlayout, AJAFUNC << ": " << _xpr_)
+#define	PLDBG(_xpr_)		AJA_sDEBUG	(AJA_DebugUnit_DemoPlayout, AJAFUNC << ": " << _xpr_)
+
+#define	BURNFAIL(_expr_)	AJA_sERROR  (AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	BURNWARN(_expr_)	AJA_sWARNING(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	BURNDBG(_expr_)		AJA_sDEBUG	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	BURNNOTE(_expr_)	AJA_sNOTICE	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	BURNINFO(_expr_)	AJA_sINFO	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+
 
 /**
 	@brief	This structure encapsulates the video, audio and anc buffers used in the AutoCirculate demos.

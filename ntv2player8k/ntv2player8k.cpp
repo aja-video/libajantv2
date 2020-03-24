@@ -39,8 +39,8 @@ static const uint32_t	AUDIOBYTES_MAX_48K	(201 * 1024);
 
 
 NTV2Player8K::NTV2Player8K (const Player8KConfig & config)
-	:	mPlayThread					(NULL),
-		mProduceFrameThread			(NULL),
+	:	mPlayThread					(AJA_NULL),
+		mProduceFrameThread			(AJA_NULL),
 		mCurrentFrame				(0),
 		mCurrentSample				(0),
 		mToneFrequency				(440.0),
@@ -55,9 +55,9 @@ NTV2Player8K::NTV2Player8K (const Player8KConfig & config)
 		mDoMultiChannel				(config.fDoMultiChannel),
 		mDoRGBOnWire				(config.fDoRGBOnWire),
 		mDoTsiRouting				(config.fDoTsiRouting),
-		mTestPatternVideoBuffers	(NULL),
-		mInstance					(NULL),
-		mPlayerCallback				(NULL),
+		mTestPatternVideoBuffers	(AJA_NULL),
+		mInstance					(AJA_NULL),
+		mPlayerCallback				(AJA_NULL),
 		mAncType					(config.fSendAncType)
 {
 	mGlobalQuit = false;
@@ -74,16 +74,16 @@ NTV2Player8K::~NTV2Player8K (void)
 
 	//	Free my threads and buffers...
 	delete mPlayThread;
-	mPlayThread = NULL;
+	mPlayThread = AJA_NULL;
 	delete mProduceFrameThread;
-	mProduceFrameThread = NULL;
+	mProduceFrameThread = AJA_NULL;
 
 	if (mTestPatternVideoBuffers)
 	{
 		for (int32_t ndx = 0;  ndx < mNumTestPatterns;  ndx++)
 			AJAMemory::FreeAligned (mTestPatternVideoBuffers [ndx]);
 		delete [] mTestPatternVideoBuffers;
-		mTestPatternVideoBuffers = NULL;
+		mTestPatternVideoBuffers = AJA_NULL;
 		mNumTestPatterns = 0;
 	}
 
@@ -93,12 +93,12 @@ NTV2Player8K::~NTV2Player8K (void)
 		if (mAVHostBuffer [ndx].fAudioBuffer)
 		{
 			AJAMemory::FreeAligned (mAVHostBuffer [ndx].fAudioBuffer);
-			mAVHostBuffer [ndx].fAudioBuffer = NULL;
+			mAVHostBuffer [ndx].fAudioBuffer = AJA_NULL;
 		}
 	}	//	for each buffer in the ring
 
 	mDevice.SetEveryFrameServices (NTV2_STANDARD_TASKS);										//	Restore the saved service level
-	mDevice.ReleaseStreamForApplication (AJA_FOURCC ('D','E','M','O'), static_cast<int32_t>(AJAProcess::GetPid()));	//	Release the device
+	mDevice.ReleaseStreamForApplication (NTV2_FOURCC('D','E','M','O'), int32_t(AJAProcess::GetPid()));	//	Release the device
 
 }	//	destructor
 
@@ -151,7 +151,7 @@ AJAStatus NTV2Player8K::Init (void)
 
 	if (!mDoMultiChannel)
 	{
-		if (!mDevice.AcquireStreamForApplication (AJA_FOURCC ('D','E','M','O'), static_cast<int32_t>(AJAProcess::GetPid())))
+		if (!mDevice.AcquireStreamForApplication (NTV2_FOURCC('D','E','M','O'), int32_t(AJAProcess::GetPid())))
 			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
 		mDevice.GetEveryFrameServices (mPreviousFrameServices);	//	Save the current service level
 	}
@@ -313,16 +313,16 @@ void NTV2Player8K::SetUpHostBuffers ()
 	for (unsigned int ndx = 0; ndx < CIRCULAR_BUFFER_SIZE; ndx++)
 	{
 		//	The video buffer address will be filled in by the producer thread
-		mAVHostBuffer [ndx].fVideoBuffer		= NULL;
+		mAVHostBuffer [ndx].fVideoBuffer		= AJA_NULL;
 		mAVHostBuffer [ndx].fVideoBufferSize	= mVideoBufferSize;
 		mAVHostBuffer [ndx].fAudioBuffer		= mWithAudio
 													? reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (mAudioBufferSize, BUFFER_ALIGNMENT))
-													: NULL;
+													: AJA_NULL;
 		mAVHostBuffer [ndx].fAudioBufferSize	= mWithAudio ? mAudioBufferSize : 0;
 
 		memset (mAVHostBuffer [ndx].fAudioBuffer, 0x00, mWithAudio ? mAudioBufferSize : 0);
 
-		if (mAVHostBuffer [ndx].fAudioBuffer != NULL)
+		if (mAVHostBuffer [ndx].fAudioBuffer != AJA_NULL)
 			mDevice.DMABufferLock(mAVHostBuffer [ndx].fAudioBuffer, mAudioBufferSize);
 
 		mAVCircularBuffer.Add (&mAVHostBuffer [ndx]);
@@ -566,16 +566,17 @@ void NTV2Player8K::PlayThreadStatic (AJAThread * pThread, void * pContext)		//	s
 void NTV2Player8K::PlayFrames (void)
 {
 	uint8_t	numberOfACFramesPerChannel	(7);
+	BURNNOTE("Thread started");
 
 	mDevice.AutoCirculateStop (mChannel);	//	Just in case someone else left it running
 
 	mDevice.WaitForOutputFieldID (NTV2_FIELD0, mChannel);
 	mDevice.WaitForOutputFieldID (NTV2_FIELD0, mChannel);
 
-	uint32_t*	fAncBuffer = mAncType != AJAAncillaryDataType_Unknown ? reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (NTV2_ANCSIZE_MAX, AJA_PAGE_SIZE)) : NULL;
+	uint32_t*	fAncBuffer = mAncType != AJAAncillaryDataType_Unknown ? reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (NTV2_ANCSIZE_MAX, AJA_PAGE_SIZE)) : AJA_NULL;
 	uint32_t	fAncBufferSize = mAncType != AJAAncillaryDataType_Unknown ? NTV2_ANCSIZE_MAX : 0;
 
-	if (fAncBuffer != NULL)
+	if (fAncBuffer != AJA_NULL)
 	{
 		::memset((void*)fAncBuffer, 0x00, fAncBufferSize);
 		mDevice.DMABufferLock(fAncBuffer, fAncBufferSize);
@@ -653,6 +654,7 @@ void NTV2Player8K::PlayFrames (void)
 
 	//	Stop AutoCirculate...
 	mDevice.AutoCirculateStop (mChannel);
+	BURNNOTE("Thread completed, will exit");
 
 }	//	PlayFrames
 
@@ -711,7 +713,7 @@ void NTV2Player8K::SetUpTestPatternVideoBuffers (void)
 													  (AJAMemory::AllocateAligned (mVideoBufferSize, BUFFER_ALIGNMENT));
 
 		// Page lock the memory
-        if (mTestPatternVideoBuffers [testPatternIndex] != NULL)
+        if (mTestPatternVideoBuffers [testPatternIndex] != AJA_NULL)
             mDevice.DMABufferLock((ULWord*)mTestPatternVideoBuffers [testPatternIndex], mVideoBufferSize);
 
 		//	Use the test pattern generator to fill an NTV2TestPatternBuffer...
@@ -744,6 +746,7 @@ void NTV2Player8K::ProduceFrames (void)
 	const ULWord	numFrequencies		(sizeof (frequencies) / sizeof (double));
 	ULWord			frequencyIndex		(0);
 	ULWord			testPatternIndex	(0);
+	BURNNOTE("Thread started");
 
 	AJATimeBase	timeBase (CNTV2DemoCommon::GetAJAFrameRate (GetNTV2FrameRateFromVideoFormat (mVideoFormat)));
 
@@ -786,6 +789,7 @@ void NTV2Player8K::ProduceFrames (void)
 		mAVCircularBuffer.EndProduceNextBuffer ();
 
 	}	//	loop til mGlobalQuit goes true
+	BURNNOTE("Thread completed, will exit");
 
 }	//	ProduceFrames
 

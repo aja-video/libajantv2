@@ -18,7 +18,7 @@ using namespace std;
 
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 
-const uint32_t	kAppSignature	(AJA_FOURCC ('F','l','d','B'));
+const uint32_t	kAppSignature	(NTV2_FOURCC('F','l','d','B'));
 
 
 //////////////////////	IMPLEMENTATION
@@ -30,8 +30,8 @@ NTV2FieldBurn::NTV2FieldBurn (const string &				inDeviceSpecifier,
 								const NTV2InputSource		inInputSource,
 								const bool					inDoMultiFormat)
 
-	:	mPlayThread			(NULL),
-		mCaptureThread		(NULL),
+	:	mPlayThread			(AJA_NULL),
+		mCaptureThread		(AJA_NULL),
 		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mDeviceSpecifier	(inDeviceSpecifier),
 		mInputChannel		(NTV2_CHANNEL_INVALID),
@@ -58,10 +58,10 @@ NTV2FieldBurn::~NTV2FieldBurn ()
 	Quit ();
 
 	delete mPlayThread;
-	mPlayThread = NULL;
+	mPlayThread = AJA_NULL;
 
 	delete mCaptureThread;
-	mCaptureThread = NULL;
+	mCaptureThread = AJA_NULL;
 
 	//	Unsubscribe from input vertical event...
 	mDevice.UnsubscribeInputVerticalEvent (mInputChannel);
@@ -72,12 +72,12 @@ NTV2FieldBurn::~NTV2FieldBurn ()
 		if (mAVHostBuffer[bufferNdx].fVideoBuffer)
 		{
 			AJAMemory::FreeAligned (mAVHostBuffer[bufferNdx].fVideoBuffer);
-			mAVHostBuffer[bufferNdx].fVideoBuffer = NULL;
+			mAVHostBuffer[bufferNdx].fVideoBuffer = AJA_NULL;
 		}
 		if (mAVHostBuffer[bufferNdx].fAudioBuffer)
 		{
 			AJAMemory::FreeAligned (mAVHostBuffer[bufferNdx].fAudioBuffer);
-			mAVHostBuffer[bufferNdx].fAudioBuffer = NULL;
+			mAVHostBuffer[bufferNdx].fAudioBuffer = AJA_NULL;
 		}
 	}	//	for each buffer in the ring
 
@@ -483,6 +483,7 @@ void NTV2FieldBurn::PlayThreadStatic (AJAThread * pThread, void * pContext)		//	
 void NTV2FieldBurn::PlayFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	outputXferField;	//	Field A/C output transfer info
+	BURNNOTE("Thread started");
 
 	//	Stop AutoCirculate on this channel, just in case some other app left it running...
 	mDevice.AutoCirculateStop (mOutputChannel);
@@ -521,6 +522,7 @@ void NTV2FieldBurn::PlayFrames (void)
 
 	//	Stop AutoCirculate...
 	mDevice.AutoCirculateStop (mOutputChannel);
+	BURNNOTE("Thread completed, will exit");
 
 }	//	PlayFrames
 
@@ -565,6 +567,7 @@ void NTV2FieldBurn::CaptureFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	inputXferField;		//	Field A/C input transfer info
 	const NTV2TCIndex		timeCodeIndex	(::NTV2ChannelToTimecodeIndex (mInputChannel));
+	BURNNOTE("Thread started");
 
 	//	Stop AutoCirculate on this channel, just in case some other app left it running...
 	mDevice.AutoCirculateStop (mInputChannel);
@@ -623,14 +626,9 @@ void NTV2FieldBurn::CaptureFrames (void)
 			tc.GetRP188Str (tcStr);
 
 			//	"Burn" the same timecode into both fields in the host AVDataBuffer while it's locked for our exclusive access...
-			if ((captureData->fFrameFlags & AUTOCIRCULATE_FRAME_FIELD0) != 0)
-			{
-				mTCBurner.BurnTimeCode (reinterpret_cast <char *> (inputXferField.acVideoBuffer.GetHostPointer ()), tcStr.c_str (), 10);
-			}
-			else
-			{
-				mTCBurner.BurnTimeCode (reinterpret_cast <char *> (inputXferField.acVideoBuffer.GetHostPointer ()), tcStr.c_str (), 30);
-			}
+			mTCBurner.BurnTimeCode (reinterpret_cast<char*>(inputXferField.acVideoBuffer.GetHostPointer()),
+									tcStr.c_str(),
+									captureData->fFrameFlags & AUTOCIRCULATE_FRAME_FIELD0 ? 10 : 30);
 
 			//	Signal that we're done "producing" the frame, making it available for future "consumption"...
 			mAVCircularBuffer.EndProduceNextBuffer ();
@@ -646,6 +644,7 @@ void NTV2FieldBurn::CaptureFrames (void)
 
 	//	Stop AutoCirculate...
 	mDevice.AutoCirculateStop (mInputChannel);
+	BURNNOTE("Thread completed, will exit");
 
 }	//	CaptureFrames
 

@@ -22,13 +22,6 @@
 using namespace std;
 using namespace std::rel_ops;
 
-//	Convenience macros for EZ logging:
-#define	CCGFAIL(_expr_)		AJA_sERROR  (AJA_DebugUnit_DemoAppCapture, AJAFUNC << ": " << _expr_)
-#define	CCGWARN(_expr_)		AJA_sWARNING(AJA_DebugUnit_DemoAppCapture, AJAFUNC << ": " << _expr_)
-#define	CCGDBG(_expr_)		AJA_sDEBUG	(AJA_DebugUnit_DemoAppCapture, AJAFUNC << ": " << _expr_)
-#define	CCGNOTE(_expr_)		AJA_sNOTICE	(AJA_DebugUnit_DemoAppCapture, AJAFUNC << ": " << _expr_)
-#define	CCGINFO(_expr_)		AJA_sINFO	(AJA_DebugUnit_DemoAppCapture, AJAFUNC << ": " << _expr_)
-
 #define AsConstUBytePtr(__p__)		reinterpret_cast<const UByte*>(__p__)
 #define AsConstULWordPtr(__p__)		reinterpret_cast<const ULWord*>(__p__)
 
@@ -617,7 +610,7 @@ void NTV2CCGrabber::CaptureThreadStatic (AJAThread * pThread, void * pContext)		
 //	The capture function -- capture frames until told to quit...
 void NTV2CCGrabber::CaptureFrames (void)
 {
-	CCGNOTE("Thread started");
+	CAPNOTE("Thread started");
 	while (!mGlobalQuit)
 	{
 		NTV2VideoFormat	currentVF (WaitForStableInputSignal());
@@ -760,7 +753,7 @@ void NTV2CCGrabber::CaptureFrames (void)
 		mDevice.AutoCirculateStop(mConfig.fInputChannel);
 
 	}	//	loop til quit signaled
-	CCGNOTE("Thread completed, will exit");
+	CAPNOTE("Thread completed, will exit");
 
 }	//	CaptureFrames
 
@@ -810,13 +803,13 @@ NTV2VideoFormat NTV2CCGrabber::WaitForStableInputSignal (void)
 		}
 		if (mVPIDInfoDS1.IsValid())
 		{	//	DS1 VPID valid --- 
-			CCGNOTE(::NTV2InputSourceToString(mConfig.fInputSource,true) << " DS1: " << mVPIDInfoDS1);
+			CAPNOTE(::NTV2InputSourceToString(mConfig.fInputSource,true) << " DS1: " << mVPIDInfoDS1);
 			NTV2VideoFormat vfVPID (mVPIDInfoDS1.GetVideoFormat());
 			if (mVPIDInfoDS2.IsValid())
-				CCGNOTE(::NTV2InputSourceToString(mConfig.fInputSource,true) << " DS2: " << mVPIDInfoDS2);
+				CAPNOTE(::NTV2InputSourceToString(mConfig.fInputSource,true) << " DS2: " << mVPIDInfoDS2);
 			if (vfVPID != result)
 			{
-				CCGWARN("VPID=" << ::NTV2VideoFormatToString(vfVPID) << " != " << ::NTV2VideoFormatToString(result));
+				CAPWARN("VPID=" << ::NTV2VideoFormatToString(vfVPID) << " != " << ::NTV2VideoFormatToString(result));
 				result = vfVPID;
 			}
 		}
@@ -828,13 +821,13 @@ NTV2VideoFormat NTV2CCGrabber::WaitForStableInputSignal (void)
 			osserr << mDevice.GetModelName() << " can't handle TSI";
 		if (!osserr.str().empty())
 		{
-			CCGWARN(osserr.str());
+			CAPWARN(osserr.str());
 			result = NTV2_FORMAT_UNKNOWN;
 			mDevice.WaitForInputVerticalInterrupt(mConfig.fInputChannel, 30);	//	Wait 30 frames
 			continue;	//	Retry
 		}
 
-		CCGNOTE(::NTV2InputSourceToString(mConfig.fInputSource,true) << " video format: " << ::NTV2VideoFormatToString(result));
+		CAPNOTE(::NTV2InputSourceToString(mConfig.fInputSource,true) << " video format: " << ::NTV2VideoFormatToString(result));
 		cerr << endl << "## NOTE:  " << ::NTV2InputSourceToString(mConfig.fInputSource,true)
 									<< " video format is " << ::NTV2VideoFormatToString(result) << endl;
 		break;	//	Done!
@@ -942,7 +935,7 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 			{	//	Compare with what we got from VANC lines:
 				const string	pktCompare(ancPackets.CompareWithInfo(vancPackets, true/*ignoreLoc*/, false /*ignoreChksum*/));
 				if (!pktCompare.empty())
-					CCGDBG("VANC/AncExt diff(s): " << pktCompare);
+					CAPDBG("VANC/AncExt diff(s): " << pktCompare);
 			}
 		}
 	}
@@ -1090,7 +1083,7 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 			p608CaptionData = &captionData608Vanc;	//	followed by 608vanc
 	}
 	if (!ossCompare.str().empty())
-		CCGDBG("CaptionData mis-compare(s): " << ossCompare.str());
+		CAPDBG("CaptionData mis-compare(s): " << ossCompare.str());
 
 	//	Set p608CaptionData based on mConfig.fCaptionSrc...
 	switch(mConfig.fCaptionSrc)
@@ -1345,7 +1338,7 @@ void NTV2CCGrabber::PlayFrames (void)
 	const string			indicators []	= {"/", "-", "\\", "|", ""};
 	AUTOCIRCULATE_STATUS	acStatus;
 
-	CCGNOTE("Thread started");
+	CAPNOTE("Thread started");
 	SetupOutputVideo (videoFormat);		//	Set up device output
 	RouteOutputSignal (videoFormat);	//	Set up output signal routing
 	mDevice.GetVANCMode (vancMode, mConfig.fInputChannel);
@@ -1444,7 +1437,7 @@ void NTV2CCGrabber::PlayFrames (void)
 	if (!acStatus.IsStopped())
 		mDevice.AutoCirculateStop(mOutputChannel);
 	delete [] pHostBuffer;
-	CCGNOTE("Thread completed, will exit");
+	CAPNOTE("Thread completed, will exit");
 
 }	//	PlayFrames
 

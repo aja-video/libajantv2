@@ -26,7 +26,7 @@ static const uint32_t	BUFFER_ALIGNMENT	(4096);		// The correct size for many sys
 #define NTV2_ANCSIZE_MAX	(0x2000)
 
 
-static const ULWord	kAppSignature	AJA_FOURCC ('D','E','M','O');
+static const ULWord	kAppSignature	NTV2_FOURCC('D','E','M','O');
 
 
 NTV2Capture8K::NTV2Capture8K (const string					inDeviceSpecifier,
@@ -38,8 +38,8 @@ NTV2Capture8K::NTV2Capture8K (const string					inDeviceSpecifier,
                               const bool					inWithAnc,
                               const bool                    inDoTsiRouting)
 
-	:	mConsumerThread		(NULL),
-		mProducerThread		(NULL),
+	:	mConsumerThread		(AJA_NULL),
+		mProducerThread		(AJA_NULL),
 		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mDeviceSpecifier	(inDeviceSpecifier),
 		mWithAudio			(withAudio),
@@ -69,10 +69,10 @@ NTV2Capture8K::~NTV2Capture8K ()
 	Quit ();
 
 	delete mConsumerThread;
-	mConsumerThread = NULL;
+	mConsumerThread = AJA_NULL;
 
 	delete mProducerThread;
-	mProducerThread = NULL;
+	mProducerThread = AJA_NULL;
 
 	//	Unsubscribe from input vertical event...
 	mDevice.UnsubscribeInputVerticalEvent (mInputChannel);
@@ -85,17 +85,17 @@ NTV2Capture8K::~NTV2Capture8K ()
 		if (mAVHostBuffer[bufferNdx].fVideoBuffer)
 		{
 			delete mAVHostBuffer[bufferNdx].fVideoBuffer;
-			mAVHostBuffer[bufferNdx].fVideoBuffer = NULL;
+			mAVHostBuffer[bufferNdx].fVideoBuffer = AJA_NULL;
 		}
 		if (mAVHostBuffer[bufferNdx].fAudioBuffer)
 		{
 			delete mAVHostBuffer[bufferNdx].fAudioBuffer;
-			mAVHostBuffer[bufferNdx].fAudioBuffer = NULL;
+			mAVHostBuffer[bufferNdx].fAudioBuffer = AJA_NULL;
 		}
 		if (mAVHostBuffer[bufferNdx].fAncBuffer)
 		{
 			delete mAVHostBuffer[bufferNdx].fAncBuffer;
-			mAVHostBuffer[bufferNdx].fAncBuffer = NULL;
+			mAVHostBuffer[bufferNdx].fAncBuffer = AJA_NULL;
 		}
 	}	//	for each buffer in the ring
 
@@ -323,7 +323,7 @@ void NTV2Capture8K::SetupHostBuffers (void)
 		mAVCircularBuffer.Add (& mAVHostBuffer [bufferNdx]);
 
 		// Page lock the memory
-		if (mAVHostBuffer [bufferNdx].fVideoBuffer != NULL)
+		if (mAVHostBuffer [bufferNdx].fVideoBuffer != AJA_NULL)
 			mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fVideoBuffer, mVideoBufferSize);
 		if (mAVHostBuffer [bufferNdx].fAudioBuffer)
             mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fAudioBuffer, mAudioBufferSize);
@@ -522,6 +522,7 @@ void NTV2Capture8K::ConsumerThreadStatic (AJAThread * pThread, void * pContext)	
 
 void NTV2Capture8K::ConsumeFrames (void)
 {
+	CAPNOTE("Thread started");
 	while (!mGlobalQuit)
 	{
 		//	Wait for the next frame to become ready to "consume"...
@@ -537,6 +538,7 @@ void NTV2Capture8K::ConsumeFrames (void)
 			mAVCircularBuffer.EndConsumeNextBuffer ();
 		}
 	}	//	loop til quit signaled
+	CAPNOTE("Thread completed, will exit");
 
 }	//	ConsumeFrames
 
@@ -575,6 +577,7 @@ void NTV2Capture8K::ProducerThreadStatic (AJAThread * pThread, void * pContext)	
 void NTV2Capture8K::CaptureFrames (void)
 {
 	NTV2AudioChannelPairs	nonPcmPairs, oldNonPcmPairs;
+	CAPNOTE("Thread started");
 
 	//	Start AutoCirculate running...
 	mDevice.AutoCirculateStart (mInputChannel);
@@ -621,6 +624,7 @@ void NTV2Capture8K::CaptureFrames (void)
 
 	//	Stop AutoCirculate...
 	mDevice.AutoCirculateStop (mInputChannel);
+	CAPNOTE("Thread completed, will exit");
 
 }	//	CaptureFrames
 

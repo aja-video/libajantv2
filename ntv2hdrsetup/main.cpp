@@ -28,7 +28,7 @@ using namespace std;
 // Globals
 static bool gGlobalQuit (false);  /// Set this "true" to exit gracefully
 
-const uint32_t kAppSignature (AJA_FOURCC ('H','d','r','s'));
+const uint32_t kAppSignature (NTV2_FOURCC('H','d','r','s'));
 
 static void SignalHandler (int inSignal)
 {

@@ -27,11 +27,6 @@ using namespace std;
 #define	TCNOTE(_expr_)	AJA_sNOTICE	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
 #define	TCINFO(_expr_)	AJA_sINFO	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
 #define	TCDBG(_expr_)	AJA_sDEBUG	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
-#define	PLFAIL(_expr_)	AJA_sERROR  (AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-#define	PLWARN(_expr_)	AJA_sWARNING(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-#define	PLNOTE(_expr_)	AJA_sNOTICE	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-#define	PLINFO(_expr_)	AJA_sINFO	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-#define	PLDBG(_expr_)	AJA_sDEBUG	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
 
 #define NTV2_ANCSIZE_MAX	(0x2000)
 
@@ -56,7 +51,7 @@ static const uint32_t	AUDIOBYTES_MAX_96K	(401 * 1024);
 /**
 	@brief	Used when reserving the AJA device, this specifies the application signature.
 **/
-static const ULWord		kAppSignature	(AJA_FOURCC ('D','E','M','O'));
+static const ULWord		kAppSignature	(NTV2_FOURCC('D','E','M','O'));
 
 
 
@@ -466,7 +461,7 @@ void NTV2Player::PlayFrames (void)
 	const bool				isPAL		(NTV2_IS_PAL_VIDEO_FORMAT(mVideoFormat));
 	AUTOCIRCULATE_TRANSFER	xferInfo;
 
-	PLNOTE("Started");
+	PLNOTE("Thread started");
 	if (mAncType != AJAAncillaryDataType_Unknown)
 	{
 		xferInfo.acANCBuffer.Allocate(NTV2_ANCSIZE_MAX);
@@ -544,7 +539,7 @@ void NTV2Player::PlayFrames (void)
 	//	Stop AutoCirculate...
 	mDevice.AutoCirculateStop(mOutputChannel);
 	//delete [] fAncBuffer;
-	PLNOTE("Ended");
+	PLNOTE("Thread completed, will exit");
 
 }	//	PlayFrames
 
@@ -663,7 +658,7 @@ void NTV2Player::ProduceFrames (void)
 	AJATimeBase	timeBase (CNTV2DemoCommon::GetAJAFrameRate (::GetNTV2FrameRateFromVideoFormat (mVideoFormat)));
 	NTV2TestPatternNames tpNames(NTV2TestPatternGen::getTestPatternNames());
 
-	PLNOTE("Started");
+	PLNOTE("Thread started");
 	while (!mGlobalQuit)
 	{
 		AVDataBuffer *	frameData	(mAVCircularBuffer.StartProduceNextBuffer ());
@@ -709,7 +704,7 @@ void NTV2Player::ProduceFrames (void)
 		mAVCircularBuffer.EndProduceNextBuffer ();
 
 	}	//	loop til mGlobalQuit goes true
-	PLNOTE("Ended");
+	PLNOTE("Thread completed, will exit");
 
 }	//	ProduceFrames
 

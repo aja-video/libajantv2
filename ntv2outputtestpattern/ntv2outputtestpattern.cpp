@@ -23,7 +23,7 @@
 using namespace std;
 
 
-const uint32_t	kAppSignature	(AJA_FOURCC ('T','e','s','t'));
+const uint32_t	kAppSignature	(NTV2_FOURCC('T','e','s','t'));
 
 
 NTV2OutputTestPattern::NTV2OutputTestPattern (const string &	inDeviceSpecifier,

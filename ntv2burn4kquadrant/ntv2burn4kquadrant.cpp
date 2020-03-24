@@ -16,7 +16,7 @@ using namespace std;
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 
 
-static const ULWord	gAppSignature	(AJA_FOURCC ('D','E','M','O'));
+static const ULWord	gAppSignature	(NTV2_FOURCC('D','E','M','O'));
 
 
 
@@ -27,8 +27,8 @@ NTV2Burn4KQuadrant::NTV2Burn4KQuadrant (const string &				inInputDeviceSpecifier
 										const NTV2FrameBufferFormat	inPixelFormat,
 										const NTV2TCIndex			inTCIndex)
 
-	:	mPlayThread				(NULL),
-		mCaptureThread			(NULL),
+	:	mPlayThread				(AJA_NULL),
+		mCaptureThread			(AJA_NULL),
 		mSingleDevice			(false),
 		mInputDeviceSpecifier	(inInputDeviceSpecifier),
 		mOutputDeviceSpecifier	(inOutputDeviceSpecifier),
@@ -55,10 +55,10 @@ NTV2Burn4KQuadrant::~NTV2Burn4KQuadrant ()
 	Quit ();
 
 	delete mPlayThread;
-	mPlayThread = NULL;
+	mPlayThread = AJA_NULL;
 
 	delete mCaptureThread;
-	mCaptureThread = NULL;
+	mCaptureThread = AJA_NULL;
 
 	//	Unsubscribe from input vertical event...
 	mInputDevice.UnsubscribeInputVerticalEvent (mInputChannel);
@@ -70,12 +70,12 @@ NTV2Burn4KQuadrant::~NTV2Burn4KQuadrant ()
 		if (mAVHostBuffer[bufferNdx].fVideoBuffer)
 		{
 			delete mAVHostBuffer[bufferNdx].fVideoBuffer;
-			mAVHostBuffer[bufferNdx].fVideoBuffer = NULL;
+			mAVHostBuffer[bufferNdx].fVideoBuffer = AJA_NULL;
 		}
 		if (mAVHostBuffer[bufferNdx].fAudioBuffer)
 		{
 			delete mAVHostBuffer[bufferNdx].fAudioBuffer;
-			mAVHostBuffer[bufferNdx].fAudioBuffer = NULL;
+			mAVHostBuffer[bufferNdx].fAudioBuffer = AJA_NULL;
 		}
 	}	//	for each buffer in the ring
 
@@ -454,7 +454,7 @@ void NTV2Burn4KQuadrant::SetupHostBuffers (void)
 	{
 		mAVHostBuffer [bufferNdx].fVideoBuffer = reinterpret_cast <uint32_t *> (new uint8_t [mVideoBufferSize]);
 		mAVHostBuffer [bufferNdx].fVideoBufferSize = mVideoBufferSize;
-		mAVHostBuffer [bufferNdx].fAudioBuffer = mWithAudio ? reinterpret_cast <uint32_t *> (new uint8_t [mAudioBufferSize]) : NULL;
+		mAVHostBuffer [bufferNdx].fAudioBuffer = mWithAudio ? reinterpret_cast <uint32_t *> (new uint8_t [mAudioBufferSize]) : AJA_NULL;
 		mAVHostBuffer [bufferNdx].fAudioBufferSize = mWithAudio ? mAudioBufferSize : 0;
 		mAVCircularBuffer.Add (& mAVHostBuffer [bufferNdx]);
 	}	//	for each AVDataBuffer
@@ -584,6 +584,7 @@ void NTV2Burn4KQuadrant::PlayThreadStatic (AJAThread * pThread, void * pContext)
 void NTV2Burn4KQuadrant::PlayFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	outputXferInfo;
+	BURNNOTE("Thread started");
 
 	if (mSingleDevice)
 	{
@@ -629,6 +630,7 @@ void NTV2Burn4KQuadrant::PlayFrames (void)
 
 	//	Stop AutoCirculate...
 	mOutputDevice.AutoCirculateStop (mOutputChannel);
+	BURNNOTE("Thread completed, will exit");
 
 }	//	PlayFrames
 
@@ -672,6 +674,7 @@ void NTV2Burn4KQuadrant::CaptureThreadStatic (AJAThread * pThread, void * pConte
 void NTV2Burn4KQuadrant::CaptureFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	inputXferInfo;
+	BURNNOTE("Thread started");
 
 	mInputDevice.AutoCirculateStop (NTV2_CHANNEL1);
 	mInputDevice.AutoCirculateStop (NTV2_CHANNEL2);
@@ -752,6 +755,7 @@ void NTV2Burn4KQuadrant::CaptureFrames (void)
 
 	//	Stop AutoCirculate...
 	mInputDevice.AutoCirculateStop (mInputChannel);
+	BURNNOTE("Thread completed, will exit");
 
 }	//	CaptureFrames
 

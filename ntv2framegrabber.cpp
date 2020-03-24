@@ -21,8 +21,15 @@
 #define	NTV2_ANCSIZE_MAX	(512)
 #define NTV2_NUM_IMAGES		(10)
 
+//	Convenience macros for EZ logging:
+#define	FGFAIL(_expr_)		AJA_sERROR  (AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	FGWARN(_expr_)		AJA_sWARNING(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	FGDBG(_expr_)		AJA_sDEBUG	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	FGNOTE(_expr_)		AJA_sNOTICE	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	FGINFO(_expr_)		AJA_sINFO	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+
 static QMutex			gMutex;
-static const uint32_t	kAppSignature			(AJA_FOURCC ('D','E','M','O'));
+static const uint32_t	kAppSignature	(NTV2_FOURCC('D','E','M','O'));
 
 
 NTV2FrameGrabber::NTV2FrameGrabber (QObject * parent)
@@ -46,8 +53,8 @@ NTV2FrameGrabber::NTV2FrameGrabber (QObject * parent)
 		mFrameBufferFormat		(NTV2_FBF_ARGB),
 		mDoMultiChannel			(false),
 		mbWithAudio				(false),
-		mAudioOutput			(NULL),
-		mAudioDevice			(NULL),
+		mAudioOutput			(AJA_NULL),
+		mAudioDevice			(AJA_NULL),
 		mNumAudioChannels		(0),
 		mAudioSystem			(NTV2_AUDIOSYSTEM_1),
 		mTimeCodeSource			(NTV2_TCINDEX_INVALID)
@@ -254,13 +261,13 @@ void NTV2FrameGrabber::changeCaptionChannel (int inNewCaptionChannelId)
 				ClearCaptionBuffer (true);
 			}
 			else
-				{m608Decoder = NULL;	m708Decoder = NULL;}
+				{m608Decoder = AJA_NULL;	m708Decoder = AJA_NULL;}
 		}
 		else if (m608Decoder)
 		{
 			NTV2_ASSERT (m708Decoder);
 			if (!IsValidLine21Channel (chosenCaptionChannel))
-				{m608Decoder = NULL;	m708Decoder = NULL;}
+				{m608Decoder = AJA_NULL;	m708Decoder = AJA_NULL;}
 			else if (m608Decoder->GetDisplayChannel () != chosenCaptionChannel)
 				m608Decoder->SetDisplayChannel (chosenCaptionChannel);
 			ClearCaptionBuffer (true);
@@ -276,6 +283,7 @@ void NTV2FrameGrabber::run (void)
 	//	Set up 2 images to ping-pong between capture and display...
 	QImage *	images [NTV2_NUM_IMAGES];
 	ULWord		framesCaptured	(0);
+	FGNOTE("Thread started");
 
 	// initialize images
 	for (int i = 0; i < NTV2_NUM_IMAGES; i++)
@@ -491,18 +499,16 @@ void NTV2FrameGrabber::run (void)
 		StopAutoCirculate ();
 		if (!mDoMultiChannel)
 		{
-			mNTV2Card.ReleaseStreamForApplicationWithReference (AJA_FOURCC ('D','E','M','O'), (uint32_t) AJAProcess::GetPid ());	//	Release the device
+			mNTV2Card.ReleaseStreamForApplicationWithReference (kAppSignature, int32_t(AJAProcess::GetPid()));	//	Release the device
 			mNTV2Card.SetEveryFrameServices (mSavedTaskMode);	//	Restore prior task mode
 		}
 		gMutex.unlock ();
 	}
 
-	for (int i = 0; i < NTV2_NUM_IMAGES; i++)
-	{
+	for (int i = 0;  i < NTV2_NUM_IMAGES;  i++)
 		delete images[i];
-	}
 
-	qDebug() << "## NOTE:  NTV2FrameGrabber thread exiting for device " << GetDeviceIndex () << " input source " << mInputSource;
+	FGNOTE("Thread completed, will exit for device" << mNTV2Card.GetDisplayName() << " input source " << ::NTV2InputSourceToString(mInputSource));
 
 }	//	run
 
@@ -691,16 +697,7 @@ bool NTV2FrameGrabber::SetupInput (void)
 
             // configure the qrc if present
             if (NTV2DeviceGetHDMIVersion(mDeviceID) == 2)
-            {
-                if (NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat))
-                {
-                    mNTV2Card.SetHDMIV2Mode (NTV2_HDMI_V2_4K_CAPTURE);
-                }
-                else
-                {
-                    mNTV2Card.SetHDMIV2Mode (NTV2_HDMI_V2_HDSD_BIDIRECTIONAL);
-                }
-            }
+                mNTV2Card.SetHDMIV2Mode (NTV2_IS_4K_VIDEO_FORMAT(mCurrentVideoFormat) ? NTV2_HDMI_V2_4K_CAPTURE : NTV2_HDMI_V2_HDSD_BIDIRECTIONAL);
 		}
 		else
 			qDebug () << "## DEBUG:  NTV2FrameGrabber::SetupInput:  Bad mInputSource switch value " << ::NTV2InputSourceToChannelSpec (mInputSource);
@@ -717,22 +714,10 @@ void NTV2FrameGrabber::StopAutoCirculate (void)
 	{
 		mNTV2Card.AutoCirculateStop (mChannel);
 
-		bool tsiEnable;
+		bool tsiEnable(false);
 		mNTV2Card.GetTsiFrameEnable (tsiEnable, NTV2_CHANNEL1);
-		if (tsiEnable)
-		{
-			for (ULWord i = 0; i < 2; i++)
-			{
-				mNTV2Card.SetMode (NTV2Channel (mChannel + i), NTV2_MODE_DISPLAY);
-			}
-		}
-		else
-		{
-			for (ULWord i = 0; i < mNumChannels; i++)
-			{
-				mNTV2Card.SetMode (NTV2Channel (mChannel + i), NTV2_MODE_DISPLAY);
-			}
-		}
+		for (ULWord i(0);  i < (tsiEnable ? 2 : mNumChannels);  i++)
+			mNTV2Card.SetMode (NTV2Channel(mChannel + i), NTV2_MODE_DISPLAY);
 	}
 	ClearCaptionBuffer (true);
 
@@ -857,7 +842,7 @@ void NTV2FrameGrabber::SetupAudio (void)
 	if (mAudioOutput)
 	{
 		delete mAudioOutput;
-		mAudioOutput = NULL;
+		mAudioOutput = AJA_NULL;
 	}
 
 	NTV2AudioSource	audioSource	(NTV2_AUDIO_EMBEDDED);
@@ -884,7 +869,7 @@ void NTV2FrameGrabber::SetupAudio (void)
 
 	QAudioDeviceInfo	audioDeviceInfo	(QAudioDeviceInfo::defaultOutputDevice ());
 	if (audioDeviceInfo.isFormatSupported (mFormat))
-		mAudioOutput = new QAudioOutput (mFormat, NULL);
+		mAudioOutput = new QAudioOutput (mFormat, AJA_NULL);
 
 }	//	SetupAudio
 

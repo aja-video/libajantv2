@@ -17,7 +17,7 @@ using namespace std;
 
 #define NTV2_AUDIOSIZE_MAX		(401 * 1024)
 
-static const ULWord	kAppSignature	AJA_FOURCC ('D','E','M','O');
+static const ULWord	kAppSignature	NTV2_FOURCC('D','E','M','O');
 
 #define NUM_OVERLAY_BARS		12
 //static const uint32_t sOverlayBar0[] = {
@@ -49,11 +49,11 @@ NTV2EncodeHEVCVif::NTV2EncodeHEVCVif (const string				inDeviceSpecifier,
                                 const bool                  inInfoData,
                                 const uint32_t              inMaxFrames)
 
-:	mACInputThread          (NULL),
-	mCodecHevcThread		(NULL),
-    mAVFileThread 			(NULL),
-    mM31					(NULL),
-    mHevcCommon             (NULL),
+:	mACInputThread          (AJA_NULL),
+	mCodecHevcThread		(AJA_NULL),
+    mAVFileThread 			(AJA_NULL),
+    mM31					(AJA_NULL),
+    mHevcCommon             (AJA_NULL),
 	mDeviceID				(DEVICE_ID_NOTFOUND),
 	mDeviceSpecifier		(inDeviceSpecifier),
     mWithAudio				(inAudioChannels != 0),
@@ -78,8 +78,8 @@ NTV2EncodeHEVCVif::NTV2EncodeHEVCVif (const string				inDeviceSpecifier,
 	mLastFrameHevc			(false),
     mLastFrameVideo			(false),
     mGlobalQuit				(false),
-	mFrameData				(NULL),
-	mSilentBuffer			(NULL),
+	mFrameData				(AJA_NULL),
+	mSilentBuffer			(AJA_NULL),
 	mVideoInputFrameCount	(0),		
 	mCodecHevcFrameCount	(0),
     mAVFileFrameCount	 	(0),
@@ -100,34 +100,34 @@ NTV2EncodeHEVCVif::~NTV2EncodeHEVCVif ()
 	//	Stop my capture and consumer threads, then destroy them...
 	Quit ();
 
-	if (mACInputThread != NULL)
+	if (mACInputThread != AJA_NULL)
 	{
 		delete mACInputThread;
-		mACInputThread = NULL;
+		mACInputThread = AJA_NULL;
 	}
 
-	if (mCodecHevcThread != NULL)
+	if (mCodecHevcThread != AJA_NULL)
 	{
 		delete mCodecHevcThread;
-		mCodecHevcThread = NULL;
+		mCodecHevcThread = AJA_NULL;
 	}
 
-    if (mAVFileThread != NULL)
+    if (mAVFileThread != AJA_NULL)
 	{
         delete mAVFileThread;
-        mAVFileThread = NULL;
+        mAVFileThread = AJA_NULL;
 	}
 
-    if (mM31 != NULL)
+    if (mM31 != AJA_NULL)
 	{
 		delete mM31;
-		mM31 = NULL;
+		mM31 = AJA_NULL;
 	}
     
-    if (mHevcCommon != NULL)
+    if (mHevcCommon != AJA_NULL)
     {
         delete mHevcCommon;
-        mHevcCommon = NULL;
+        mHevcCommon = AJA_NULL;
     }
 	
 	// unsubscribe from input vertical event...
@@ -139,50 +139,50 @@ NTV2EncodeHEVCVif::~NTV2EncodeHEVCVif ()
         if (mACInputBuffer[bufferNdx].pVideoBuffer)
 		{
             delete [] mACInputBuffer[bufferNdx].pVideoBuffer;
-            mACInputBuffer[bufferNdx].pVideoBuffer = NULL;
+            mACInputBuffer[bufferNdx].pVideoBuffer = AJA_NULL;
 		}
 		if (mACInputBuffer[bufferNdx].pInfoBuffer)
 		{
 		 	delete [] mACInputBuffer[bufferNdx].pInfoBuffer;
-			mACInputBuffer[bufferNdx].pInfoBuffer = NULL;
+			mACInputBuffer[bufferNdx].pInfoBuffer = AJA_NULL;
 		}
         if (mACInputBuffer[bufferNdx].pAudioBuffer)
 		{
             delete [] mACInputBuffer[bufferNdx].pAudioBuffer;
-            mACInputBuffer[bufferNdx].pAudioBuffer = NULL;
+            mACInputBuffer[bufferNdx].pAudioBuffer = AJA_NULL;
 		}
 
         if (mVideoHevcBuffer[bufferNdx].pVideoBuffer)
 		{
             delete [] mVideoHevcBuffer[bufferNdx].pVideoBuffer;
-            mVideoHevcBuffer[bufferNdx].pVideoBuffer = NULL;
+            mVideoHevcBuffer[bufferNdx].pVideoBuffer = AJA_NULL;
 		}
 		if (mVideoHevcBuffer[bufferNdx].pInfoBuffer)
 		{
 		 	delete [] mVideoHevcBuffer[bufferNdx].pInfoBuffer;
-			mVideoHevcBuffer[bufferNdx].pInfoBuffer = NULL;
+			mVideoHevcBuffer[bufferNdx].pInfoBuffer = AJA_NULL;
 		}
         if (mVideoHevcBuffer[bufferNdx].pAudioBuffer)
 		{
             delete [] mVideoHevcBuffer[bufferNdx].pAudioBuffer;
-            mVideoHevcBuffer[bufferNdx].pAudioBuffer = NULL;
+            mVideoHevcBuffer[bufferNdx].pAudioBuffer = AJA_NULL;
 		}
     }
 
-	if (mSilentBuffer != NULL)
+	if (mSilentBuffer != AJA_NULL)
 	{
 		delete [] mSilentBuffer;
-		mSilentBuffer = NULL;
+		mSilentBuffer = AJA_NULL;
 	}
-	if (mOverlayBuffer[0] != NULL)
+	if (mOverlayBuffer[0] != AJA_NULL)
 	{
 		delete [] mOverlayBuffer[0];
-		mOverlayBuffer[0] = NULL;
+		mOverlayBuffer[0] = AJA_NULL;
 	}
-	if (mOverlayBuffer[1] != NULL)
+	if (mOverlayBuffer[1] != AJA_NULL)
 	{
 		delete [] mOverlayBuffer[1];
-		mOverlayBuffer[1] = NULL;
+		mOverlayBuffer[1] = AJA_NULL;
 	}
 
 } // destructor
@@ -288,7 +288,7 @@ AJAStatus NTV2EncodeHEVCVif::Init (void)
     mM31 = new CNTV2m31 (&mDevice);
     mHevcCommon = new CNTV2DemoHevcCommon ();
     
-    if ((mM31 == NULL) || (mHevcCommon == NULL))
+    if ((mM31 == AJA_NULL) || (mHevcCommon == AJA_NULL))
     {
         return AJA_STATUS_FAIL;
     }
@@ -729,7 +729,7 @@ void NTV2EncodeHEVCVif::VideoInputWorker (void)
             if (pVideoData)
             {
                 // setup buffer pointers for transfer
-                inputXfer.SetBuffers (pVideoData->pVideoBuffer, pVideoData->videoBufferSize, NULL, 0, NULL, 0);
+                inputXfer.SetBuffers (pVideoData->pVideoBuffer, pVideoData->videoBufferSize, AJA_NULL, 0, AJA_NULL, 0);
 
                 if (mWithAudio)
                 {
@@ -788,7 +788,7 @@ void NTV2EncodeHEVCVif::VideoInputWorker (void)
 	// Stop AutoCirculate...
 	device.AutoCirculateStop (mInputChannel);
 
-    if (m31 != NULL)
+    if (m31 != AJA_NULL)
 	{
 		delete m31;
 	}
@@ -877,7 +877,7 @@ void NTV2EncodeHEVCVif::CodecHevcWorker ()
         }
     }	//	loop til quit signaled
 
-    if (m31 != NULL)
+    if (m31 != AJA_NULL)
 	{
 		delete m31;
 	}
@@ -911,7 +911,7 @@ void NTV2EncodeHEVCVif::AVFileWorker (void)
 	int64_t	encodeTime;
 	bool addData;
 
-	mFrameData = NULL;
+	mFrameData = AJA_NULL;
 
     while (!mGlobalQuit)
     {
@@ -951,7 +951,7 @@ void NTV2EncodeHEVCVif::AVFileWorker (void)
 			while (true)
 			{
 				addData = false;
-				if (mFrameData == NULL)
+				if (mFrameData == AJA_NULL)
 				{
 					mFrameData = mACInputCircularBuffer.StartConsumeNextBuffer ();
 				}
@@ -974,7 +974,7 @@ void NTV2EncodeHEVCVif::AVFileWorker (void)
 						// release the hevc buffer
 //						printf ( "Found autocirculate raw audio/video frame %d\n", (int32_t)(mFrameData->frameTime - encodeTime));
 						mACInputCircularBuffer.EndConsumeNextBuffer ();
-						mFrameData = NULL;
+						mFrameData = AJA_NULL;
 						break;
 					}
 					else if (mFrameData->frameTime < encodeTime)
@@ -982,7 +982,7 @@ void NTV2EncodeHEVCVif::AVFileWorker (void)
 						printf ( "Skip autocirculate raw audio/video frame - time diff %d us\n",
 								 (int32_t)(mFrameData->frameTime - encodeTime)/10);
 						mACInputCircularBuffer.EndConsumeNextBuffer ();
-						mFrameData = NULL;
+						mFrameData = AJA_NULL;
 						continue;
 					}
 					else
@@ -1035,7 +1035,7 @@ void NTV2EncodeHEVCVif::TransferPictureInfo(CNTV2m31 *	pM31)
 
 	// transfer only picture information 
 	pM31->RawTransfer(mEncodeChannel,
-					  NULL,
+					  AJA_NULL,
 					  0,
 					  (uint8_t*)&picData,
 					  sizeof(HevcPictureData),

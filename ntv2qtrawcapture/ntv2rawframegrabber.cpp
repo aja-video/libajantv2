@@ -219,14 +219,14 @@ void NTV2RawFrameGrabber::run (void)
 				if (mDevice.IsOpen ())
 				{
 					mDevice.SetEveryFrameServices (mPreviousFrameServices);
-					mDevice.ReleaseStreamForApplicationWithReference (AJA_FOURCC ('D','E','M','O'), AJAProcess::GetPid ());
+					mDevice.ReleaseStreamForApplicationWithReference (NTV2_FOURCC('D','E','M','O'), AJAProcess::GetPid ());
 					mDevice.Close ();
 				}
 			gMutex.Unlock ();
 
 			if (mDevice.Open (mDeviceIndex, false))
 			{
-				if (!mDevice.AcquireStreamForApplicationWithReference (AJA_FOURCC ('D','E','M','O'), (uint32_t) AJAProcess::GetPid ()))
+				if (!mDevice.AcquireStreamForApplicationWithReference (NTV2_FOURCC('D','E','M','O'), (uint32_t) AJAProcess::GetPid ()))
 				{
 					//We have not acquired the board continue until something changes
 					qDebug ("Could not acquire device index %d", GetDeviceIndex ());
@@ -432,7 +432,7 @@ void NTV2RawFrameGrabber::run (void)
 			//	Restore the service level that was before the acquire
 			mDevice.SetEveryFrameServices (mPreviousFrameServices);
 			//	Release the board
-			mDevice.ReleaseStreamForApplicationWithReference (AJA_FOURCC('D','E','M','O'), (uint32_t) AJAProcess::GetPid ());		
+			mDevice.ReleaseStreamForApplicationWithReference (NTV2_FOURCC('D','E','M','O'), (uint32_t) AJAProcess::GetPid ());		
 		gMutex.Unlock ();
 	}
 

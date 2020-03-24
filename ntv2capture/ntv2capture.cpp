@@ -18,13 +18,6 @@ using namespace std;
 
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 
-//	Convenience macros for EZ logging:
-#define	CAPFAIL(_expr_)		AJA_sERROR  (AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-#define	CAPWARN(_expr_)		AJA_sWARNING(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-#define	CAPDBG(_expr_)		AJA_sDEBUG	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-#define	CAPNOTE(_expr_)		AJA_sNOTICE	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-#define	CAPINFO(_expr_)		AJA_sINFO	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-
 
 static const ULWord	kAppSignature	NTV2_FOURCC ('D','E','M','O');
 
@@ -332,7 +325,7 @@ void NTV2Capture::ConsumerThreadStatic (AJAThread * pThread, void * pContext)		/
 
 void NTV2Capture::ConsumeFrames (void)
 {
-	CAPNOTE("Started");
+	CAPNOTE("Thread started");
 	AJA_NTV2_AUDIO_RECORD_BEGIN	//	Active when AJA_RAW_AUDIO_RECORD or AJA_WAV_AUDIO_RECORD defined
 	AJA_NTV2_ANC_RECORD_BEGIN	//	Active when AJA_RAW_ANC_RECORD is defined
 	while (!mGlobalQuit)
@@ -354,7 +347,7 @@ void NTV2Capture::ConsumeFrames (void)
 	}	//	loop til quit signaled
 	AJA_NTV2_ANC_RECORD_END		//	Active when AJA_RAW_ANC_RECORD is defined
 	AJA_NTV2_AUDIO_RECORD_END	//	Active when AJA_RAW_AUDIO_RECORD or AJA_WAV_AUDIO_RECORD defined
-	CAPNOTE("Done");
+	CAPNOTE("Thread completed, will exit");
 
 }	//	ConsumeFrames
 
@@ -394,7 +387,7 @@ void NTV2Capture::CaptureFrames (void)
 	if (mConfig.fWithAnc  &&  ::NTV2DeviceCanDoCustomAnc(mDeviceID))
 		acOptions |= AUTOCIRCULATE_WITH_ANC;
 
-	CAPNOTE("Started");
+	CAPNOTE("Thread started");
 	//	Initialize and start capture AutoCirculate...
 	mDevice.AutoCirculateStop(mConfig.fInputChannel);	//	Just in case
 	mDevice.AutoCirculateInitForInput (	mConfig.fInputChannel,		//	primary channel
@@ -489,7 +482,7 @@ void NTV2Capture::CaptureFrames (void)
 
 	//	Stop AutoCirculate...
 	mDevice.AutoCirculateStop(mConfig.fInputChannel);
-	CAPNOTE("Done");
+	CAPNOTE("Thread completed, will exit");
 
 }	//	CaptureFrames
 

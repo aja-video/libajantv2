@@ -14,7 +14,7 @@
 
 using namespace std;
 
-static const ULWord	kAppSignature	AJA_FOURCC ('D','E','M','O');
+static const ULWord	kAppSignature	NTV2_FOURCC('D','E','M','O');
 
 
 NTV2EncodeHEVCFile::NTV2EncodeHEVCFile (const string				inDeviceSpecifier,
@@ -24,13 +24,13 @@ NTV2EncodeHEVCFile::NTV2EncodeHEVCFile (const string				inDeviceSpecifier,
                                         const uint32_t              frameHeight,
                                         const M31VideoPreset		inPreset)
 
-:	mFileInputThread        (NULL),
-	mVideoProcessThread		(NULL),
-	mCodecRawThread			(NULL),
-	mCodecHevcThread		(NULL),
-    mVideoFileThread 		(NULL),
-    mM31					(NULL),
-    mHevcCommon             (NULL),
+:	mFileInputThread        (AJA_NULL),
+	mVideoProcessThread		(AJA_NULL),
+	mCodecRawThread			(AJA_NULL),
+	mCodecHevcThread		(AJA_NULL),
+    mVideoFileThread 		(AJA_NULL),
+    mM31					(AJA_NULL),
+    mHevcCommon             (AJA_NULL),
 	mDeviceID				(DEVICE_ID_NOTFOUND),
 	mDeviceSpecifier		(inDeviceSpecifier),
     mFileName               (fileName),
@@ -69,46 +69,46 @@ NTV2EncodeHEVCFile::~NTV2EncodeHEVCFile ()
 	//	Stop my capture and consumer threads, then destroy them...
 	Quit ();
 
-	if (mFileInputThread != NULL)
+	if (mFileInputThread != AJA_NULL)
 	{
 		delete mFileInputThread;
-		mFileInputThread = NULL;
+		mFileInputThread = AJA_NULL;
 	}
 
-	if (mVideoProcessThread != NULL)
+	if (mVideoProcessThread != AJA_NULL)
 	{
 		delete mVideoProcessThread;
-		mVideoProcessThread = NULL;
+		mVideoProcessThread = AJA_NULL;
 	}
 
-	if (mCodecRawThread != NULL)
+	if (mCodecRawThread != AJA_NULL)
 	{
 		delete mCodecRawThread;
-		mCodecRawThread = NULL;
+		mCodecRawThread = AJA_NULL;
 	}
 
-	if (mCodecHevcThread != NULL)
+	if (mCodecHevcThread != AJA_NULL)
 	{
 		delete mCodecHevcThread;
-		mCodecHevcThread = NULL;
+		mCodecHevcThread = AJA_NULL;
 	}
 
-    if (mVideoFileThread != NULL)
+    if (mVideoFileThread != AJA_NULL)
 	{
         delete mVideoFileThread;
-        mVideoFileThread = NULL;
+        mVideoFileThread = AJA_NULL;
 	}
 
-    if (mM31 != NULL)
+    if (mM31 != AJA_NULL)
 	{
 		delete mM31;
-		mM31 = NULL;
+		mM31 = AJA_NULL;
 	}
 	
-    if (mHevcCommon != NULL)
+    if (mHevcCommon != AJA_NULL)
     {
         delete mHevcCommon;
-        mHevcCommon = NULL;
+        mHevcCommon = AJA_NULL;
     }
 
 	// free all my buffers...
@@ -117,34 +117,34 @@ NTV2EncodeHEVCFile::~NTV2EncodeHEVCFile ()
         if (mFileInputBuffer[bufferNdx].pVideoBuffer)
 		{
             delete [] mFileInputBuffer[bufferNdx].pVideoBuffer;
-            mFileInputBuffer[bufferNdx].pVideoBuffer = NULL;
+            mFileInputBuffer[bufferNdx].pVideoBuffer = AJA_NULL;
 		}
 		if (mFileInputBuffer[bufferNdx].pInfoBuffer)
 		{
 		 	delete [] mFileInputBuffer[bufferNdx].pInfoBuffer;
-			mFileInputBuffer[bufferNdx].pInfoBuffer = NULL;
+			mFileInputBuffer[bufferNdx].pInfoBuffer = AJA_NULL;
 		}
 
         if (mVideoRawBuffer[bufferNdx].pVideoBuffer)
 		{
             delete [] mVideoRawBuffer[bufferNdx].pVideoBuffer;
-            mVideoRawBuffer[bufferNdx].pVideoBuffer = NULL;
+            mVideoRawBuffer[bufferNdx].pVideoBuffer = AJA_NULL;
 		}
 		if (mVideoRawBuffer[bufferNdx].pInfoBuffer)
 		{
 		 	delete [] mVideoRawBuffer[bufferNdx].pInfoBuffer;
-			mVideoRawBuffer[bufferNdx].pInfoBuffer = NULL;
+			mVideoRawBuffer[bufferNdx].pInfoBuffer = AJA_NULL;
 		}
 
         if (mVideoHevcBuffer[bufferNdx].pVideoBuffer)
 		{
             delete [] mVideoHevcBuffer[bufferNdx].pVideoBuffer;
-            mVideoHevcBuffer[bufferNdx].pVideoBuffer = NULL;
+            mVideoHevcBuffer[bufferNdx].pVideoBuffer = AJA_NULL;
 		}
 		if (mVideoHevcBuffer[bufferNdx].pInfoBuffer)
 		{
 		 	delete [] mVideoHevcBuffer[bufferNdx].pInfoBuffer;
-			mVideoHevcBuffer[bufferNdx].pInfoBuffer = NULL;
+			mVideoHevcBuffer[bufferNdx].pInfoBuffer = AJA_NULL;
 		}
     }
 	
@@ -257,7 +257,7 @@ AJAStatus NTV2EncodeHEVCFile::Init (void)
     mM31 = new CNTV2m31 (&mDevice);
     mHevcCommon = new CNTV2DemoHevcCommon ();
     
-    if ((mM31 == NULL) || (mHevcCommon == NULL))
+    if ((mM31 == AJA_NULL) || (mHevcCommon == AJA_NULL))
         return AJA_STATUS_FAIL;
     
     // Sanity check
