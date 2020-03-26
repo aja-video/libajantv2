@@ -2071,17 +2071,17 @@ bool CNTV2Card::SetFrameBufferSize (NTV2Framesize size)
 	if (!::NTV2DeviceSoftwareCanChangeFrameBufferSize(_boardID))
 		return false;
 
-	if( !ReadRegister(kRegCh1Control, reg1Contents) )
-	return false;
+	if (!ReadRegister(kRegCh1Control, reg1Contents))
+		return false;
 
 	reg1Contents |= kRegMaskFrameSizeSetBySW;
 	reg1Contents &= ~kK2RegMaskFrameSize;
 	reg1Contents |= ULWord(size) << kK2RegShiftFrameSize;
 
-	if( !WriteRegister(kRegCh1Control, reg1Contents) )
+	if (!WriteRegister(kRegCh1Control, reg1Contents))
 		return false;
 
-	if( !GetFBSizeAndCountFromHW(&_ulFrameBufferSize, &_ulNumFrameBuffers) )
+	if (!GetFBSizeAndCountFromHW(&_ulFrameBufferSize, &_ulNumFrameBuffers))
 		return false;
 
 	return true;
