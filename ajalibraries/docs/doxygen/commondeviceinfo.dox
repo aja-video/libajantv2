@@ -1032,14 +1032,20 @@
 	devices that support this capability). Use one of the overloaded versions of CNTV2Card::SetAudioPCMControl that accepts either a
 	single ::NTV2AudioChannelPair or an ::NTV2AudioChannelPairs set.
 
-	Downstream equipment can also be told that the outgoing audio is <b>synchronous</b> — i.e. a fixed number of samples per frame.
-	AJA NTV2 <b>Audio Systems</b> always operate in <b>asynchronous</b> mode — i.e. we won’t <i>guarantee</i> a fixed number of samples
-	per frame — but overall, downstream equipment <i>will</i> receive the correct number of samples for a number of frames.
-	The net effect is a <i>de facto</i> Sync Mode, even though the Sync Mode bit is not set in the AES header. Some downstream equipment
-	may complain about the AES Sync Mode bit being clear. The <b>Audio System</b> can be told to set the Sync Mode bit in order to
-	“fib” to downstream equipment (to stop them from complaining).
+	By default, the embedder clears the <b>Sync Mode bit</b> in the <b>AES header</b> in the <b>Audio Control Packet</b>s, which tells
+	downstream equipment that the outgoing audio is <b>asynchronous</b>, even though overall, the correct total number of audio samples
+	over a span of several frames always get transmitted. This is particularly relevant for 29.97/59.94 frame rates, in which the number
+	of 48 kHz audio samples varies with each frame … yet is constant/fixed over a 5-frame sequence.
+
+	If downstream equipment expects <b>synchronous</b> audio, and is alarming about the <b>asynchronous</b> audio, the output embedder
+	can be told to set the <b>Sync Mode bit</b>, but note that this is “fibbing”:
 	-	Call CNTV2Card::GetAudioOutputAESSyncModeBit to see if the device is setting the Sync Mode bit.
 	-	Call CNTV2Card::SetAudioOutputAESSyncModeBit to change the setting.
+
+	@note	When the embedder is configured to “fib” — i.e. set the <b>Sync Mode bit</b> in the <b>AES header</b> in the <b>Audio Control
+			Packet</b> — audio and video are synchronized in time, but the resulting audio doesn’t exactly follow the definition of
+			“synchronized” in SMPTE 299 § 7.2.1.3, because the embedder doesn’t set the <b>Frame Sequence Number</b> in the <b>AES header</b>.
+			SMPTE 299, however, stipulates that receivers should correctly receive audio even from equipment that doesn’t fully conform to § 7.2.1.3.
 
 	If the device supports <b>AES/EBU audio playout</b> through a breakout box or cable (see ::NTV2DeviceCanDoBreakoutBox and
 	::NTV2DeviceGetNumAESAudioOutputChannels functions), the output BNCs will automatically carry the same per-channel audio

@@ -2071,17 +2071,17 @@ bool CNTV2Card::SetFrameBufferSize (NTV2Framesize size)
 	if (!::NTV2DeviceSoftwareCanChangeFrameBufferSize(_boardID))
 		return false;
 
-	if( !ReadRegister(kRegCh1Control, reg1Contents) )
-	return false;
+	if (!ReadRegister(kRegCh1Control, reg1Contents))
+		return false;
 
 	reg1Contents |= kRegMaskFrameSizeSetBySW;
 	reg1Contents &= ~kK2RegMaskFrameSize;
 	reg1Contents |= ULWord(size) << kK2RegShiftFrameSize;
 
-	if( !WriteRegister(kRegCh1Control, reg1Contents) )
+	if (!WriteRegister(kRegCh1Control, reg1Contents))
 		return false;
 
-	if( !GetFBSizeAndCountFromHW(&_ulFrameBufferSize, &_ulNumFrameBuffers) )
+	if (!GetFBSizeAndCountFromHW(&_ulFrameBufferSize, &_ulNumFrameBuffers))
 		return false;
 
 	return true;
@@ -2193,6 +2193,20 @@ bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat 
 	SetVPIDColorimetry(inColorimetry, channel);
 	SetVPIDVPIDLuminance(inLuminance, channel);
 	return status;
+}
+
+bool CNTV2Card::SetFrameBufferFormat (const NTV2ChannelSet inFrameStores,
+									  const NTV2FrameBufferFormat inNewFormat,
+									  const bool inIsAJARetail,
+									  const NTV2HDRXferChars inXferChars,
+									  const NTV2HDRColorimetry inColorimetry,
+									  const NTV2HDRLuminance inLuminance)
+{
+	UWord failures(0);
+	for (NTV2ChannelSetConstIter it(inFrameStores.begin());  it != inFrameStores.end();  ++it)
+		if (!SetFrameBufferFormat (*it, inNewFormat, inIsAJARetail, inXferChars, inColorimetry, inLuminance))
+			failures++;
+	return failures == 0;
 }
 
 // Method: GetFrameBufferFormat
@@ -5146,65 +5160,61 @@ NTV2VideoFormat CNTV2Card::GetInputVideoFormat (NTV2InputSource inSource, const 
 
 NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool inIsProgressivePicture)
 {
-	ULWord vpidDS1 = 0, vpidDS2 = 0;
+	ULWord vpidDS1(0), vpidDS2(0);
 	CNTV2VPID inputVPID;
-	if (IS_CHANNEL_INVALID (inChannel))
+	if (IS_CHANNEL_INVALID(inChannel))
 		return NTV2_FORMAT_UNKNOWN;
 
-	bool isValidVPID = GetVPIDValidA(inChannel);
-	if(isValidVPID)
+	bool isValidVPID (GetVPIDValidA(inChannel));
+	if (isValidVPID)
 	{
 		ReadSDIInVPID(inChannel, vpidDS1, vpidDS2);
 		inputVPID.SetVPID(vpidDS1);
 	}
-	
-	if(::NTV2DeviceCanDo3GIn(_boardID, inChannel) || ::NTV2DeviceCanDo12GIn(_boardID, inChannel))
+
+	NTV2FrameRate inputRate(GetSDIInputRate(inChannel));
+	NTV2FrameGeometry inputGeometry(GetSDIInputGeometry(inChannel));
+	bool isProgressiveTrans (isValidVPID ? inputVPID.GetProgressiveTransport() : GetSDIInputIsProgressive(inChannel));
+	bool isProgressivePic (isValidVPID ? inputVPID.GetProgressivePicture() : inIsProgressivePicture);
+	bool isInput3G (false);
+	if (::NTV2DeviceCanDo3GIn(_boardID, inChannel) || ::NTV2DeviceCanDo12GIn(_boardID, inChannel))
 	{
-		NTV2FrameRate inputRate = GetSDIInputRate(inChannel);
-		NTV2FrameGeometry inputGeometry = GetSDIInputGeometry(inChannel);
-		bool isProgressiveTrans = isValidVPID ? inputVPID.GetProgressiveTransport() : GetSDIInputIsProgressive(inChannel);
-		bool isProgressivePic = isValidVPID ? inputVPID.GetProgressivePicture() : inIsProgressivePicture;
-		bool isInput3G = false;
 		GetSDIInput3GPresent(isInput3G, inChannel);
 		NTV2VideoFormat format = isValidVPID ? inputVPID.GetVideoFormat() : GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
-		if(isValidVPID && format == NTV2_FORMAT_UNKNOWN)
+		if (isValidVPID && format == NTV2_FORMAT_UNKNOWN)
 		{
-			//Something might be incorrect in VPID
+			//	Something might be incorrect in VPID
 			isProgressiveTrans = GetSDIInputIsProgressive(inChannel);
 			isProgressivePic = inIsProgressivePicture;
 			format = GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
 		}
 		if (::NTV2DeviceCanDo12GIn(_boardID, inChannel) && format != NTV2_FORMAT_UNKNOWN && !isValidVPID)
 		{
-			bool is6G = false, is12G = false;
+			bool is6G(false), is12G(false);
 			GetSDIInput6GPresent(is6G, inChannel);
 			GetSDIInput12GPresent(is12G, inChannel);
-			if(is6G || is12G)
+			if (is6G || is12G)
 			{
 				format = GetQuadSizedVideoFormat(format, !NTV2DeviceCanDo12gRouting(GetDeviceID()) ? true : false);
 			}
-			if(inputVPID.IsStandardMultiLink4320())
+			if (inputVPID.IsStandardMultiLink4320())
 			{
 				format = GetQuadSizedVideoFormat(format, true);
 			}
 		}
 		return format;
 	}
-	else if(::NTV2DeviceCanDo292In(_boardID, inChannel))
+
+	if (::NTV2DeviceCanDo292In(_boardID, inChannel))
 	{
-		NTV2FrameRate inputRate = GetSDIInputRate(inChannel);
-		NTV2FrameGeometry inputGeometry = GetSDIInputGeometry(inChannel);
-		bool isProgressiveTrans = isValidVPID ? inputVPID.GetProgressiveTransport() : GetSDIInputIsProgressive(inChannel);
-		bool isProgressivePic = isValidVPID ? inputVPID.GetProgressivePicture() : inIsProgressivePicture;
-		bool isInput3G = false;
-		if(_boardID == DEVICE_ID_KONALHI || _boardID == DEVICE_ID_KONALHIDVI)
+		if (_boardID == DEVICE_ID_KONALHI || _boardID == DEVICE_ID_KONALHIDVI)
 		{
 			GetSDIInput3GPresent(isInput3G, NTV2_CHANNEL1);
 		}
 		return GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
 	}
-	else
-		return NTV2_FORMAT_UNKNOWN;
+
+	return NTV2_FORMAT_UNKNOWN;
 }
 
 

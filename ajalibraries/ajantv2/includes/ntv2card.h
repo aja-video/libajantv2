@@ -308,6 +308,12 @@ public:
 	AJA_VIRTUAL std::string			GetDisplayName (void);
 
 	/**
+		@brief	Answers with this device's model name.
+		@return	A string containing this device's model name.
+	**/
+	AJA_VIRTUAL std::string			GetModelName (void);
+
+	/**
 		@brief	Answers with this device's version number.
 		@return	This device's version number.
 	**/
@@ -891,6 +897,28 @@ public:
 											  NTV2HDRXferChars inXferChars = NTV2_VPID_TC_SDR_TV,
 											  NTV2HDRColorimetry inColorimetry = NTV2_VPID_Color_Rec709,
 											  NTV2HDRLuminance inLuminance = NTV2_VPID_Luminance_YCbCr);
+
+	/**
+		@brief		Sets the frame buffer format for the given frame store(s) on the AJA device.
+		@return		True if successful; otherwise false.
+		@param[in]	inFrameStores	Specifies the Frame Store(s) of interest as a channel-set (a set of zero-based index numbers).
+		@param[in]	inNewFormat		Specifies the desired frame buffer format.
+									This must be a valid ::NTV2FrameBufferFormat value.
+		@param[in]	inIsAJARetail	Specifies if the AJA retail configuration settings are to be respected or not.
+									Defaults to false on all platforms other than MacOS, which defaults to true.
+		@param[in]	inXferChars		Specifies the HDR tranfer characteristc description.
+		@param[in]	inColorimetry	Specifies the HDR colorimetry description.
+		@param[in]	inLuminance		Specifies the HDR luminance description.
+		@details	This function allows client applications to control the format of frame data read or written
+					by the frame store(s) on an AJA device. This is important, because when frames are transferred
+					between the host and the AJA device, the frame data format is presumed to be identical.
+	**/
+	AJA_VIRTUAL bool	SetFrameBufferFormat (const NTV2ChannelSet inFrameStores,
+											  const NTV2FrameBufferFormat inNewFormat,
+											  const bool inIsAJARetail = AJA_RETAIL_DEFAULT,
+											  const NTV2HDRXferChars inXferChars = NTV2_VPID_TC_SDR_TV,
+											  const NTV2HDRColorimetry inColorimetry = NTV2_VPID_Color_Rec709,
+											  const NTV2HDRLuminance inLuminance = NTV2_VPID_Luminance_YCbCr);
 
 	/**
 		@brief		Sets the device's clock reference source. See \ref deviceclockingandsync for more information.
@@ -2951,20 +2979,28 @@ public:
 	AJA_VIRTUAL bool	EnableInterrupt (const INTERRUPT_ENUMS inEventCode);							//	GENERIC!
 
 	/**
-		@brief		Allows the CNTV2Card instance to wait for and respond to vertical blanking interrupts
-					originating from the given output channel on the receiver's AJA device.
-		@param[in]	channel		Specifies the output channel of interest. Defaults to ::NTV2_CHANNEL1.
+		@brief		Allows the CNTV2Card instance to wait for and respond to output vertical blanking interrupts
+					originating from the given frameStore on the receiver's AJA device.
+		@param[in]	channel		Specifies the frameStore of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	EnableOutputInterrupt (const NTV2Channel channel = NTV2_CHANNEL1);
 
 	/**
-		@brief		Allows the CNTV2Card instance to wait for and respond to vertical blanking interrupts
+		@brief		Allows the CNTV2Card instance to wait for and respond to input vertical blanking interrupts
 					originating from the given input channel on the receiver's AJA device.
 		@param[in]	channel		Specifies the input channel of interest. Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	EnableInputInterrupt (const NTV2Channel channel = NTV2_CHANNEL1);
+
+	/**
+		@brief		Allows the CNTV2Card instance to wait for and respond to input vertical blanking interrupts
+					originating from the given FrameStore(s).
+		@param[in]	inFrameStores	The input frameStore(s) of interest.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	EnableInputInterrupt (const NTV2ChannelSet inFrameStores);
 
 
 	//
@@ -2987,6 +3023,14 @@ public:
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	DisableInputInterrupt (const NTV2Channel channel = NTV2_CHANNEL1);
+
+	/**
+		@brief		Prevents the CNTV2Card instance from waiting for and responding to input vertical blanking
+					interrupts originating from the given frameStore(s) on the device.
+		@param[in]	channel		Specifies the frameStore(s) of interest.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	DisableInputInterrupt (const NTV2ChannelSet inFrameStores);
 
 	AJA_VIRTUAL bool	GetCurrentInterruptMasks (NTV2InterruptMask & outIntMask1, NTV2Interrupt2Mask & outIntMask2);
 
@@ -3023,7 +3067,7 @@ public:
 					CNTV2Card::WaitForOutputVerticalInterrupt or CNTV2Card::WaitForOutputFieldID.
 		@see		CNTV2Card::UnsubscribeOutputVerticalEvents, CNTV2Card::SubscribeEvent, \ref fieldframeinterrupts
 	**/
-	AJA_VIRTUAL bool	SubscribeOutputVerticalEvents (const NTV2ChannelSet inChannels);
+	AJA_VIRTUAL bool	SubscribeOutputVerticalEvent (const NTV2ChannelSet inChannels);
 
 
 	/**
@@ -3046,7 +3090,7 @@ public:
 					CNTV2Card::WaitForInputVerticalInterrupt or CNTV2Card::WaitForInputFieldID.
 		@see		CNTV2Card::UnsubscribeInputVerticalEvent, CNTV2Card::SubscribeEvent, \ref fieldframeinterrupts
 	**/
-	AJA_VIRTUAL bool	SubscribeInputVerticalEvents (const NTV2ChannelSet inChannels);
+	AJA_VIRTUAL bool	SubscribeInputVerticalEvent (const NTV2ChannelSet inChannels);
 
 
 	//
@@ -3076,7 +3120,7 @@ public:
 		@details	This function undoes the effect of a prior call to SubscribeOutputVerticalEvents.
 		@see		CNTV2Card::SubscribeOutputVerticalEvents, CNTV2Card::UnsubscribeEvent, \ref fieldframeinterrupts
 	**/
-	AJA_VIRTUAL bool	UnsubscribeOutputVerticalEvents (const NTV2ChannelSet inChannels);
+	AJA_VIRTUAL bool	UnsubscribeOutputVerticalEvent (const NTV2ChannelSet inChannels);
 
 	/**
 		@brief		Unregisters me so I'm no longer notified when an input VBI is signaled on the given input channel.
@@ -3094,7 +3138,7 @@ public:
 		@details	This function undoes the effects of a prior call to SubscribeInputVerticalEvents.
 		@see		CNTV2Card::SubscribeInputVerticalEvents, CNTV2Card::UnsubscribeEvent, \ref fieldframeinterrupts
 	**/
-	AJA_VIRTUAL bool	UnsubscribeInputVerticalEvents (const NTV2ChannelSet inChannels);
+	AJA_VIRTUAL bool	UnsubscribeInputVerticalEvent (const NTV2ChannelSet inChannels);
 
 
 	//
@@ -3597,8 +3641,8 @@ public:
 		@note		For Multi-Channel or 4K/8K applications (i.e. where more than one channel is used for streaming video), AJA
 					recommends specifying zero for \c inFrameCount, and explicitly specifying a frame range using \c inStartFrameNumber
 					and \c inEndFrameNumber parameters.
-		@note		Smaller frame counts increase the likelihood of frame drops.
-		@note		All widget routing should be completed prior to calling this function.
+		@note		Fewer frames reduces latency, but increases the likelihood of frame drops.
+		@note		All widget routing should be completed prior to calling this function (see \ref ntv2signalrouting ).
 		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers to be written by
 					the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
 					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
@@ -3607,9 +3651,9 @@ public:
 					otherwise (if ::NTV2_DISABLE_TASKS ), the caller must manage <i>all</i> aspects of the FrameStore ( ::NTV2Mode,
 					::NTV2VideoFormat, etc.) before calling this function.
 		@warning	If the frame range overlaps or includes other frames used by any other enabled FrameStore/channel, this will likely
-					result in torn/bad video. \see vidop-fbconflict
+					result in torn/bad video (see \ref vidop-fbconflict ).
 		@warning	If the frame range runs into Audio Buffer memory that's used by a running Audio System, this will likely result in
-					torn/bad video and/or bad audio. \see audioclobber
+					torn/bad video and/or bad audio (see \ref audioclobber ).
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForOutput, \ref autocirculatecapture
 	**/
 
@@ -3647,12 +3691,12 @@ public:
 		@note		For Multi-Channel or 4K/8K applications (i.e. where more than one channel is used for streaming video), AJA
 					recommends specifying zero for \c inFrameCount, and explicitly specifying a frame range using \c inStartFrameNumber
 					and \c inEndFrameNumber parameters.
-		@note		Smaller frame counts increase the likelihood of frame drops.
-		@note		All widget routing should be completed prior to calling this function.
+		@note		Fewer frames reduces latency, but increases the likelihood of frame drops.
+		@note		All widget routing should be completed prior to calling this function (see \ref ntv2signalrouting ).
 		@warning	If the frame range overlaps or includes other frames used by any other enabled FrameStore/channel, this will likely
-					result in torn/bad video. \see vidop-fbconflict
+					result in torn/bad video (see \ref vidop-fbconflict ).
 		@warning	If the frame range runs into Audio Buffer memory that's used by a running Audio System, this will likely result in
-					torn/bad video. \see audioclobber
+					torn/bad video (see \ref audioclobber ).
 		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers to be read by
 					the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
 					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.

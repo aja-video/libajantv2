@@ -48,6 +48,7 @@ public:
 	virtual VPIDPictureRate			GetPictureRate (void) const;
 	virtual bool					GetImageAspect16x9 (void) const;
 	virtual VPIDSampling			GetSampling (void) const;
+	virtual bool					IsRGBSampling (void) const;
 	virtual VPIDChannel				GetChannel (void) const;
 	virtual VPIDChannel				GetDualLinkChannel (void) const;
 	virtual VPIDBitDepth			GetBitDepth (void) const;
@@ -57,13 +58,14 @@ public:
 	virtual NTV2VPIDColorimetry		GetColorimetry (void) const;
 	virtual NTV2VPIDLuminance		GetLuminance (void) const;				
 	virtual std::ostream &			Print (std::ostream & ostrm) const;
+	virtual std::string				AsString (const bool inTabular = false) const;
 	///@}
 
 	/**
 		@name	Changing
 	**/
 	///@{
-	virtual inline void			SetVPID (const ULWord inData)			{m_uVPID = inData;}
+	virtual inline CNTV2VPID &	SetVPID (const ULWord inData)		{m_uVPID = inData;  return *this;}
 
 	virtual bool				SetVPID (const NTV2VideoFormat		inVideoFormat,
 										const NTV2FrameBufferFormat	inFrameBufferFormat,
@@ -80,19 +82,20 @@ public:
 
 
 	
-	virtual void				SetVersion (const VPIDVersion inVersion);
-	virtual void				SetStandard (const VPIDStandard inStandard);
-	virtual void				SetProgressiveTransport (const bool inIsProgressiveTransport);
-	virtual void				SetProgressivePicture (const bool inIsProgressivePicture);
-	virtual void				SetPictureRate (const VPIDPictureRate inPictureRate);
-	virtual void				SetImageAspect16x9 (const bool inIs16x9Aspect);
-	virtual void				SetSampling (const VPIDSampling inSampling);
-	virtual void				SetChannel (const VPIDChannel inChannel);
-	virtual void				SetDualLinkChannel (const VPIDChannel inChannel);
-	virtual void				SetBitDepth (const VPIDBitDepth inBitDepth);
-	virtual void				SetTransferCharacteristics (const NTV2VPIDXferChars inXferChars);
-	virtual void				SetColorimetry (const NTV2VPIDColorimetry inColorimetry);
-	virtual void				SetLuminance (const NTV2VPIDLuminance inLuminance);
+	virtual CNTV2VPID &			SetVersion					(const VPIDVersion inVersion);
+	virtual CNTV2VPID &			SetStandard					(const VPIDStandard inStandard);
+	virtual CNTV2VPID &			SetProgressiveTransport		(const bool inIsProgressiveTransport);
+	virtual CNTV2VPID &			SetProgressivePicture		(const bool inIsProgressivePicture);
+	virtual CNTV2VPID &			SetPictureRate				(const VPIDPictureRate inPictureRate);
+	virtual CNTV2VPID &			SetImageAspect16x9			(const bool inIs16x9Aspect);
+	virtual CNTV2VPID &			SetSampling					(const VPIDSampling inSampling);
+	virtual CNTV2VPID &			SetChannel					(const VPIDChannel inChannel);
+	virtual CNTV2VPID &			SetDualLinkChannel			(const VPIDChannel inChannel);
+	virtual CNTV2VPID &			SetBitDepth					(const VPIDBitDepth inBitDepth);
+	virtual CNTV2VPID &			SetTransferCharacteristics	(const NTV2VPIDXferChars inXferChars);
+	virtual CNTV2VPID &			SetColorimetry				(const NTV2VPIDColorimetry inColorimetry);
+	virtual CNTV2VPID &			SetLuminance				(const NTV2VPIDLuminance inLuminance);
+	virtual inline CNTV2VPID &	MakeInvalid					(void)		{return SetVPID(0);}
 								
 	///@}
 
@@ -123,15 +126,15 @@ public:
 											const NTV2VPIDColorimetry	inColorimetry = NTV2_VPID_Color_Rec709,
 											const NTV2VPIDLuminance	inLuminance = NTV2_VPID_Luminance_YCbCr);
 
-	static const std::string VersionString(VPIDVersion version);
-	static const std::string StandardString (VPIDStandard std);
-	static const std::string PictureRateString (VPIDPictureRate rate);
-	static const std::string SamplingString (VPIDSampling sample);
-	static const std::string ChannelString (VPIDChannel chan);
-	static const std::string DynamicRangeString (VPIDDynamicRange range);
-	static const std::string BitDepthString(VPIDBitDepth depth);
-	static const std::string LinkString(VPIDLink link);
-	static const std::string AudioString(VPIDAudio audio);
+	static const std::string VersionString		(const VPIDVersion version);
+	static const std::string StandardString		(const VPIDStandard std);
+	static const std::string PictureRateString	(const VPIDPictureRate rate);
+	static const std::string SamplingString		(const VPIDSampling sample);
+	static const std::string ChannelString		(const VPIDChannel chan);
+	static const std::string DynamicRangeString	(const VPIDDynamicRange range);
+	static const std::string BitDepthString		(const VPIDBitDepth depth);
+	static const std::string LinkString			(const VPIDLink link);
+	static const std::string AudioString		(const VPIDAudio audio);
 	#if !defined (NTV2_DEPRECATE)
 		virtual VPIDDynamicRange NTV2_DEPRECATED_f(GetDynamicRange (void) const);
 		virtual void NTV2_DEPRECATED_f(SetDynamicRange (const VPIDDynamicRange inDynamicRange));	
