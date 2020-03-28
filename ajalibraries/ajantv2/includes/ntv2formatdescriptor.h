@@ -80,19 +80,19 @@ public:
 	inline bool		IsPlanar (void) const				{return GetNumPlanes() > 1 || NTV2_IS_FBF_PLANAR (mPixelFormat);}	///< @return	True if planar format;  otherwise false.
 
 	/**
-		@return		The total number of bytes required to hold the raster.
+		@return		The total number of bytes required to hold the raster, including any VANC.
 		@note		To determine the byte count of all planes of a planar format, call GetTotalBytes.
 		@param[in]	inPlaneIndex0		Specifies the plane of interest. Defaults to zero.
 	**/
 	inline ULWord	GetTotalRasterBytes (const UWord inPlaneIndex0 = 0) const	{return GetFullRasterHeight() * GetBytesPerRow(inPlaneIndex0);}
 
 	/**
-		@return		The total number of bytes required to hold the raster, including all planes of planar formats.
+		@return		The total number of bytes required to hold the raster, including any VANC, and all planes of planar formats.
 	**/
 	ULWord			GetTotalBytes (void) const;
 
 	/**
-		@return		The total number of bytes required to hold the visible raster.
+		@return		The total number of bytes required to hold the visible raster (i.e. active lines after any VANC lines).
 		@param[in]	inPlaneIndex0	Specifies the plane of interest. Defaults to zero.
 	**/
 	inline ULWord	GetVisibleRasterBytes (const UWord inPlaneIndex0 = 0) const	{return GetVisibleRasterHeight() * GetBytesPerRow(inPlaneIndex0);}
