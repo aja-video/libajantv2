@@ -888,9 +888,9 @@ There are currently three ways to fill buffer memory:
 		-	<b>Visible Raster</b> — Skips the visible raster lines.
 		-	<b>Anc F1 Region</b> — Skips the F1 Ancillary Data region.
 		-	<b>Anc F2 Region</b> — Skips the F2 Ancillary Data region.
-	-#	<b>Test Pattern</b> — Fills one or more buffers with any of several predefined test patterns.
+	-#	<b>Test Pattern</b> — Fills one or more buffers with any of several predefined test patterns or colors.
 		@image	html	watcher-tool-fill-pat.png
-		The test pattern image is written to the buffer(s) immediately after choosing the test pattern.
+		The test pattern image is written to the buffer(s) immediately after selecting the test pattern or color.
 	-#	<b>Color</b> — Fills one or more buffers with any color chosen from a standard color picker.
 		@image	html	watcher-tool-fill-color.png
 		The color raster is written immediately to the buffer(s) as the color is changed in the dialog.

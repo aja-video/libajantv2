@@ -4737,7 +4737,7 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 {
 	if (!pOutTable)
 		return false;
-	vector<double>	table;
+	NTV2DoubleArray	table;
 	if (!GenerateGammaTable(inLUTType, inBank, table))
 		return false;
 	::memcpy(pOutTable, &table[0], table.size() * sizeof(double));
@@ -4745,7 +4745,7 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 }
 
 
-bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, vector<double> & outTable)
+bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, NTV2DoubleArray & outTable)
 {
 	bool bResult = true;
 	int i;
