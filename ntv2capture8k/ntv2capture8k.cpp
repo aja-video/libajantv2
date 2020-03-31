@@ -324,11 +324,11 @@ void NTV2Capture8K::SetupHostBuffers (void)
 
 		// Page lock the memory
 		if (mAVHostBuffer [bufferNdx].fVideoBuffer != AJA_NULL)
-			mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fVideoBuffer, mVideoBufferSize);
+			mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fVideoBuffer, mVideoBufferSize, true);
 		if (mAVHostBuffer [bufferNdx].fAudioBuffer)
-            mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fAudioBuffer, mAudioBufferSize);
+            mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fAudioBuffer, mAudioBufferSize, true);
 		if (mAVHostBuffer [bufferNdx].fAncBuffer)
-            mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fAncBuffer, mAncBufferSize);
+            mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fAncBuffer, mAncBufferSize, true);
 	}	//	for each AVDataBuffer
 
 }	//	SetupHostBuffers
