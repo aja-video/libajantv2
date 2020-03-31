@@ -17,13 +17,13 @@ static CNTV2BitManager s_BitManager;
 bool
 CNTV2Card::IsDynamicDevice(void)
 {
-	ULWord reg[BITSTREAM_NUM_REGISTERS];
+    NTV2ULWordVector reg;
 
 	if (!IsOpen())
 		return false;
 
 	// see if we can get bitstream status
-	if (!BitstreamStatus(reg, BITSTREAM_NUM_REGISTERS))
+    if (!BitstreamStatus(reg))
 		return false;
 
 	// the bitstream version cannot be 0
@@ -36,14 +36,14 @@ CNTV2Card::IsDynamicDevice(void)
 std::vector<NTV2DeviceID>
 CNTV2Card::GetDynamicDeviceList(void)
 {
-	ULWord reg[BITSTREAM_NUM_REGISTERS];
+    NTV2ULWordVector reg;
 	std::vector<NTV2DeviceID> devIDList;
 
 	if (!IsOpen())
 		return devIDList;
 
 	// get current design ID and version
-	if (!BitstreamStatus(reg, BITSTREAM_NUM_REGISTERS))
+    if (!BitstreamStatus(reg))
 		return devIDList;
 
 	if (reg[BITSTREAM_VERSION] == 0)
@@ -104,13 +104,13 @@ CNTV2Card::CanLoadDynamicDevice(NTV2DeviceID inDeviceID)
 bool
 CNTV2Card::LoadDynamicDevice(NTV2DeviceID inDeviceID)
 {
-	ULWord reg[BITSTREAM_NUM_REGISTERS];
+    NTV2ULWordVector reg;
 
 	if (!IsOpen())
 		return false;
 
 	// get current design ID and version
-	if (!BitstreamStatus(reg, BITSTREAM_NUM_REGISTERS))
+    if (!BitstreamStatus(reg))
 		return false;
 
 	if (reg[BITSTREAM_VERSION] == 0)
