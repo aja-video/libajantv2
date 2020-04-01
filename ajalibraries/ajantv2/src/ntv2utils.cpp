@@ -9159,3 +9159,48 @@ bool GetRegNumChanges (const NTV2RegNumSet & inBefore, const NTV2RegNumSet & inA
 	set_intersection (inBefore.begin(), inBefore.end(),  inAfter.begin(), inAfter.end(),  std::inserter(outSame, outSame.begin()));
 	return true;
 }
+
+bool GetChangedRegisters (const NTV2RegisterReads & inBefore, const NTV2RegisterReads & inAfter, NTV2RegNumSet & outChanged)
+{
+	outChanged.clear();
+	if (&inBefore == &inAfter)
+		return false;	//	Same vector, identical!
+	if (inBefore.size() != inAfter.size())
+	{	//	Only check common reg nums...
+		NTV2RegNumSet before(::ToRegNumSet(inBefore)), after(::ToRegNumSet(inAfter)), commonRegNums;
+		set_intersection (before.begin(), before.end(),  after.begin(), after.end(),
+							std::inserter(commonRegNums, commonRegNums.begin()));
+		for (NTV2RegNumSetConstIter it(commonRegNums.begin());  it != commonRegNums.end();  ++it)
+		{
+			NTV2RegisterReadsConstIter	beforeIt(::FindFirstMatchingRegisterNumber(*it, inBefore));
+			NTV2RegisterReadsConstIter	afterIt(::FindFirstMatchingRegisterNumber(*it, inAfter));
+			if (beforeIt != inBefore.end()  &&  afterIt != inAfter.end()  &&  beforeIt->registerValue != afterIt->registerValue)
+				outChanged.insert(*it);
+		}
+	}
+	else if (inBefore.at(0).registerNumber == inAfter.at(0).registerNumber
+		&& inBefore.at(inBefore.size()-1).registerNumber == inAfter.at(inAfter.size()-1).registerNumber)
+	{	//	Assume identical reg num layout
+		for (size_t ndx(0);  ndx < inBefore.size();  ndx++)
+			if (inBefore[ndx].registerValue != inAfter[ndx].registerValue)
+				outChanged.insert(inBefore[ndx].registerNumber);
+	}
+	else for (size_t ndx(0);  ndx < inBefore.size();  ndx++)
+	{
+		const NTV2RegInfo & beforeInfo(inBefore.at(ndx));
+		const NTV2RegInfo & afterInfo(inAfter.at(ndx));
+		if (beforeInfo.registerNumber == afterInfo.registerNumber)
+		{
+			if (beforeInfo.registerValue != afterInfo.registerValue)
+				outChanged.insert(beforeInfo.registerNumber);
+		}
+		else
+		{
+			NTV2RegisterReadsConstIter	it(::FindFirstMatchingRegisterNumber(beforeInfo.registerNumber, inAfter));
+			if (it != inAfter.end())
+				if (beforeInfo.registerValue != it->registerValue)
+					outChanged.insert(beforeInfo.registerNumber);
+		}
+	}
+	return !outChanged.empty();
+}
