@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{FF7020B1-2F15-4AE9-9F43-52D2FDB67E5A}</ProjectGuid>
+    <ProjectGuid>{54FC826F-3BBC-48E0-87B6-7BD54F7B0516}</ProjectGuid>
     <RootNamespace>ntv2player8k</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

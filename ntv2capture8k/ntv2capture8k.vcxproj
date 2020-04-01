@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{6742FABE-217C-4391-853B-AACCAC48068F}</ProjectGuid>
+    <ProjectGuid>{28D9931F-22B3-4A03-958C-80914768FC5E}</ProjectGuid>
     <RootNamespace>ntv2capture8k</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
