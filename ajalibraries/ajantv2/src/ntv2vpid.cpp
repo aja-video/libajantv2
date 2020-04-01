@@ -1093,21 +1093,22 @@ AJALabelValuePairs & CNTV2VPID::GetInfo (AJALabelValuePairs & outInfo) const
 {
 	if (!IsValid())
 		return outInfo;
-	AJASystemInfo::append(outInfo, "Version:",					::VPIDVersionToString(GetVersion()));
-	AJASystemInfo::append(outInfo, "Standard:",					::VPIDStandardToString(GetStandard()));
-	AJASystemInfo::append(outInfo, "Video Format:",				::NTV2VideoFormatToString(GetVideoFormat()));
-	AJASystemInfo::append(outInfo, "Progressive Transport:",	YesOrNo(GetProgressiveTransport()));
-	AJASystemInfo::append(outInfo, "Progressive Picture:",		YesOrNo(GetProgressivePicture()));
-	AJASystemInfo::append(outInfo, "Picture Rate:",				sVPIDPictureRate[GetPictureRate()]);
-	AJASystemInfo::append(outInfo, "Aspect Ratio:",				GetImageAspect16x9() ? "16x9" : "4x3");
-	AJASystemInfo::append(outInfo, "Sampling:",					sVPIDSampling[GetSampling()]);
-	AJASystemInfo::append(outInfo, "Channel:",					sVPIDChannel[GetChannel()]);
-	AJASystemInfo::append(outInfo, "Bit Depth:",				sVPIDBitDepth[GetBitDepth()]);
-	AJASystemInfo::append(outInfo, "3Ga:",						YesOrNo(IsStandard3Ga()));
-	AJASystemInfo::append(outInfo, "Two Sample Interleave:",	YesOrNo(IsStandardTwoSampleInterleave()));
-	AJASystemInfo::append(outInfo, "Xfer Characteristics:",		sVPIDTransfer[GetTransferCharacteristics()]);
-	AJASystemInfo::append(outInfo, "Colorimetry:",				sVPIDColorimetry[GetColorimetry()]);
-	AJASystemInfo::append(outInfo, "Luminance:",				sVPIDLuminance[GetLuminance()]);
+	AJASystemInfo::append(outInfo, "VPID Info");
+	AJASystemInfo::append(outInfo, "Version",				::VPIDVersionToString(GetVersion()));
+	AJASystemInfo::append(outInfo, "Standard",				::VPIDStandardToString(GetStandard()));
+	AJASystemInfo::append(outInfo, "Video Format",			::NTV2VideoFormatToString(GetVideoFormat()));
+	AJASystemInfo::append(outInfo, "Progressive Transport",	YesOrNo(GetProgressiveTransport()));
+	AJASystemInfo::append(outInfo, "Progressive Picture",	YesOrNo(GetProgressivePicture()));
+	AJASystemInfo::append(outInfo, "Picture Rate",			sVPIDPictureRate[GetPictureRate()]);
+	AJASystemInfo::append(outInfo, "Aspect Ratio",			GetImageAspect16x9() ? "16x9" : "4x3");
+	AJASystemInfo::append(outInfo, "Sampling",				sVPIDSampling[GetSampling()]);
+	AJASystemInfo::append(outInfo, "Channel",				sVPIDChannel[GetChannel()]);
+	AJASystemInfo::append(outInfo, "Bit Depth",				sVPIDBitDepth[GetBitDepth()]);
+	AJASystemInfo::append(outInfo, "3Ga",					YesOrNo(IsStandard3Ga()));
+	AJASystemInfo::append(outInfo, "Two Sample Interleave",	YesOrNo(IsStandardTwoSampleInterleave()));
+	AJASystemInfo::append(outInfo, "Xfer Characteristics",	sVPIDTransfer[GetTransferCharacteristics()]);
+	AJASystemInfo::append(outInfo, "Colorimetry",			sVPIDColorimetry[GetColorimetry()]);
+	AJASystemInfo::append(outInfo, "Luminance",				sVPIDLuminance[GetLuminance()]);
 	return outInfo;
 }
 
