@@ -1332,6 +1332,6 @@
 	even the much larger modern FPGAs. This has made it necessary to enable the ability to rapidly switch between different
 	workflow-based bitfiles.
 
-	There is a new ::CNTV2BitfileManager class that can be told where to look for other bitfiles to dynamically load onto a device.
+	There is a new ::CNTV2BitManager class that can be told where to look for other bitfiles to dynamically load onto a device.
 	It can also inspect bitfiles in that location to see what devices they can be installed on.
 **/
