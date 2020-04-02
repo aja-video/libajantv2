@@ -11,7 +11,7 @@
 	based on the Qt cross-platform application framework. For more information about Qt, please visit http://www.qt.io/   The Qt-based demos
 	should work with Qt version 5.4 or later.
 
-	All of the demos are "future ready" and will build and run with the "NTV2_DEPRECATE" macro defined (see \ref gs-deprecatemacro).
+	All of the demos are “future ready” and will build and run with the <tt>NTV2_DEPRECATE</tt> macro defined (see \ref gs-deprecatemacro).
 
 	@note	Demos that use third-party libraries to enable direct DMA video transfers between AJA devices and third-party graphics cards
 			(e.g., to exploit the GPU) are not supported on MacOS.
@@ -37,6 +37,35 @@
 
 
 
+	@par	The Demo Apps, By Function
+	-	<b>Playout</b>
+		-	\ref	ntv2outputtestpattern
+		-	\ref	ntv2player
+		-	\ref	ntv2player4k
+		-	\ref	ntv2player8k
+		-	\ref	ntv2ccplayer
+	-	<b>Capture</b>
+		-	\ref	ntv2capture
+		-	\ref	ntv2capture4k
+		-	\ref	ntv2capture8k
+		-	\ref	ntv2ccgrabber
+		-	\ref	ntv2qtpreview
+		-	\ref	ntv2qtmultiinput
+	-	<b>Capture and Playout</b>
+		-	\ref	ntv2burn
+		-	\ref	ntv2burn4kquadrant
+		-	\ref	ntv2fieldburn
+		-	\ref	ntv2llburn
+	-	<b>Other</b>
+		-	\ref	ntv2enumerateboards
+		-	\ref	ntv2konaipjsonsetup  <i>(\ref konaip and \ref ioip only)</i>
+		-	\ref	ntv2konaipj2ksetup  <i>(\ref konaip and \ref ioip only)</i>
+		-	\ref	ntv2encodehevc  <i>(\ref corvidhevc only)</i>
+		-	\ref	ntv2switchbitfile
+		-	\ref	ntv2hdrsetup    <i>(devices with HDMI v2.0a subset or higher)</i>
+
+
+
 	@par	The Demo Apps, Simple to Complex
 	-	\ref	ntv2hdrsetup    <i>(devices with HDMI v2.0a subset or higher)</i>
 	-	\ref	ntv2enumerateboards
@@ -58,6 +87,7 @@
 	-	\ref	ntv2encodehevc  <i>(\ref corvidhevc only)</i>
 	-	\ref	ntv2qtpreview
 	-	\ref	ntv2qtmultiinput
+	-	\ref	ntv2switchbitfile
 
 	@par	The Demo Apps, Alphabetical
 	-	\ref	ntv2burn
@@ -79,5 +109,6 @@
 	-	\ref	ntv2player8k
 	-	\ref	ntv2qtmultiinput
 	-	\ref	ntv2qtpreview
+	-	\ref	ntv2switchbitfile
 
 **/

@@ -1323,4 +1323,15 @@
 
 	AJA will do its best to ensure that the “CanDo” functions are correct for the specific set of firmware bitfiles that have been
 	qualified for a given SDK release. The release notes on the SDK download page will point out any firmware features added (or removed).
+
+
+	<hr size="50px">
+	@subsection	dev-bitfile-switching	Fast Bitfile Switching
+
+	New 8K and 12-bit workflows have made it extremely difficult to simultaneously fit FrameStores, CSCs, LUTs, and Mixers into
+	even the much larger modern FPGAs. This has made it necessary to enable the ability to rapidly switch between different
+	workflow-based bitfiles.
+
+	There is a new ::CNTV2BitfileManager class that can be told where to look for other bitfiles to dynamically load onto a device.
+	It can also inspect bitfiles in that location to see what devices they can be installed on.
 **/
