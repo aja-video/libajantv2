@@ -1093,7 +1093,8 @@ AJALabelValuePairs & CNTV2VPID::GetInfo (AJALabelValuePairs & outInfo) const
 {
 	if (!IsValid())
 		return outInfo;
-	AJASystemInfo::append(outInfo, "VPID Info");
+	ostringstream hexConv;	hexConv << xHEX0N(m_uVPID,8);
+	AJASystemInfo::append(outInfo, "Raw Value",				hexConv.str());
 	AJASystemInfo::append(outInfo, "Version",				::VPIDVersionToString(GetVersion()));
 	AJASystemInfo::append(outInfo, "Standard",				::VPIDStandardToString(GetStandard()));
 	AJASystemInfo::append(outInfo, "Video Format",			::NTV2VideoFormatToString(GetVideoFormat()));
