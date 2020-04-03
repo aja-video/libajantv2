@@ -162,6 +162,9 @@ AJADebug::Open(bool incrementRefCount)
             addDebugGroupToLabelVector(AJA_DebugUnit_Anc2110Rcv);
             addDebugGroupToLabelVector(AJA_DebugUnit_DemoPlayout);
             addDebugGroupToLabelVector(AJA_DebugUnit_DemoCapture);
+            addDebugGroupToLabelVector(AJA_DebugUnit_CSC);
+            addDebugGroupToLabelVector(AJA_DebugUnit_LUT);
+            addDebugGroupToLabelVector(AJA_DebugUnit_Cables);
 
             for (int i(AJA_DebugUnit_FirstUnused);  i < AJA_DebugUnit_Size;  i++)
             {
