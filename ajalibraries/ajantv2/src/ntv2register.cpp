@@ -208,7 +208,7 @@ static const ULWord	gChannelToSDIInputRateHighShift []		= {	kRegShiftInput1Frame
 static const ULWord	gChannelToSDIInputGeometryMask []		= {	kRegMaskInput1Geometry,				kRegMaskInput2Geometry,				kRegMaskInput1Geometry,				kRegMaskInput2Geometry,
 																kRegMaskInput1Geometry,				kRegMaskInput2Geometry,				kRegMaskInput1Geometry,				kRegMaskInput2Geometry,				0};
 static const ULWord	gChannelToSDIInputGeometryHighMask []	= {	kRegMaskInput1GeometryHigh,			(ULWord)kRegMaskInput2GeometryHigh,	kRegMaskInput1GeometryHigh,			(ULWord)kRegMaskInput2GeometryHigh,
-                                                                kRegMaskInput1GeometryHigh,			(ULWord)kRegMaskInput2GeometryHigh,	kRegMaskInput1GeometryHigh,			(ULWord)kRegMaskInput2GeometryHigh,			0};
+                                                                kRegMaskInput1GeometryHigh,			(ULWord)kRegMaskInput2GeometryHigh,	kRegMaskInput1GeometryHigh,			(ULWord)kRegMaskInput2GeometryHigh,	0};
 static const ULWord	gChannelToSDIInputGeometryShift []		= {	kRegShiftInput1Geometry,			kRegShiftInput2Geometry,			kRegShiftInput1Geometry,			kRegShiftInput2Geometry,
 																kRegShiftInput1Geometry,			kRegShiftInput2Geometry,			kRegShiftInput1Geometry,			kRegShiftInput2Geometry,			0};
 static const ULWord	gChannelToSDIInputGeometryHighShift []	= {	kRegShiftInput1GeometryHigh,		kRegShiftInput2GeometryHigh,		kRegShiftInput1GeometryHigh,		kRegShiftInput2GeometryHigh,
