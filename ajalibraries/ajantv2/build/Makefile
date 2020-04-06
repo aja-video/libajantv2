@@ -93,6 +93,7 @@ AJA_LIB_SRCS =\
 		ntv2devicescanner.cpp \
 		ntv2discover.cpp \
 		ntv2dma.cpp \
+		ntv2dynamicdevice.cpp \
 		ntv2hdmi.cpp \
 		ntv2hevc.cpp \
 		ntv2driverinterface.cpp \

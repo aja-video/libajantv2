@@ -28,6 +28,10 @@ CNTV2Bitfile::CNTV2Bitfile ()
 	Init ();	//	Initialize everything
 }
 
+CNTV2Bitfile::~CNTV2Bitfile ()
+{
+	Close ();
+}
 
 void CNTV2Bitfile::Close (void)
 {
@@ -378,20 +382,31 @@ void CNTV2Bitfile::SetDesignUserID (const char * pInBuffer, unsigned bufferLengt
 		
 	string buffer(pInBuffer, (size_t)bufferLength);
 
-	size_t pos = buffer.find("UserID=0X");
-	if ((pos == string::npos) || (pos > (bufferLength - 17)))
-		return;
+    ULWord userID = 0xffffffff;
 
-	ULWord userID;
-	int num = sscanf(buffer.substr(pos + 9, 8).c_str(), "%x", &userID);
-	if (num != 1)
-		return;
+    if (userID == 0xffffffff)
+    {
+        size_t pos = buffer.find("UserID=0X");
+        if ((pos != string::npos) && (pos <= (bufferLength - 17)))
+        {
+            sscanf(buffer.substr(pos + 9, 8).c_str(), "%x", &userID);
+        }
+    }
 	
-	_userID = userID;
-	_designID = (userID & 0xff000000) >> 24;
-	_designVersion = (userID & 0x00ff0000) >> 16;
-	_bitfileID = (userID & 0x0000ff00) >> 8;
-	_bitfileVersion = (userID & 0x000000ff) >> 0;
+    if (userID == 0xffffffff)
+    {
+        size_t pos = buffer.find("UserID=");
+        if ((pos != string::npos) && (pos <= (bufferLength - 15)))
+        {
+            sscanf(buffer.substr(pos + 7, 8).c_str(), "%x", &userID);
+        }
+    }
+
+    _userID = userID;
+	_designID = GetDesignID(userID);
+	_designVersion = GetDesignVersion(userID);
+	_bitfileID = GetBitfileID(userID);
+	_bitfileVersion = GetBitfileVersion(userID);
 }
 
 
@@ -536,8 +551,10 @@ public:
 	CDesignPairToIDMapMaker ()
 		{
 			assert (sDesignPairToIDMap.empty ());
-			sDesignPairToIDMap[make_pair(0x01, 0x01)] = DEVICE_ID_KONA5;
-		}
+            sDesignPairToIDMap[make_pair(0x01, 0x01)] = DEVICE_ID_KONA5_8KMK;
+            sDesignPairToIDMap[make_pair(0x01, 0x02)] = DEVICE_ID_KONA5_8K;
+            sDesignPairToIDMap[make_pair(0x01, 0x03)] = DEVICE_ID_KONA5_2;
+        }
 	~CDesignPairToIDMapMaker ()
 		{
 			sDesignPairToIDMap.clear ();
@@ -548,6 +565,32 @@ public:
 			const DesignPairToIDMapConstIter	iter	(sDesignPairToIDMap.find (make_pair(designID, bitfileID)));
 			return iter != sDesignPairToIDMap.end () ? iter->second : DEVICE_ID_NOTFOUND;
 		}
+	static ULWord DeviceIDToDesignID(NTV2DeviceID deviceID)
+		{
+			assert (!sDesignPairToIDMap.empty ());
+			DesignPairToIDMapConstIter iter;
+
+			for (iter = sDesignPairToIDMap.begin(); iter != sDesignPairToIDMap.end(); ++iter)
+			{
+				if (iter->second == deviceID)
+					return iter->first.first;
+			}
+
+			return 0;
+		}
+	static ULWord DeviceIDToBitfileID(NTV2DeviceID deviceID)
+		{
+			assert (!sDesignPairToIDMap.empty ());
+			DesignPairToIDMapConstIter iter;
+
+			for (iter = sDesignPairToIDMap.begin(); iter != sDesignPairToIDMap.end(); ++iter)
+			{
+				if (iter->second == deviceID)
+					return iter->first.second;
+			}
+
+			return 0;
+		}
 };
 
 static CDesignPairToIDMapMaker 				sDesignPairToIDMapMaker;
@@ -556,13 +599,24 @@ NTV2DeviceID CNTV2Bitfile::GetDeviceID (void) const
 {
 	if ((_userID != 0) && (_userID != 0xffffffff))
 	{
-		return sDesignPairToIDMapMaker.DesignPairToID (_designID, _bitfileID);
+		return DEVICE_ID_NOTFOUND;
 	}
 	
 	return sDesignNameToIDMapMaker.DesignNameToID (_designName);
 }
 
-CNTV2Bitfile::~CNTV2Bitfile ()
+NTV2DeviceID CNTV2Bitfile::ConvertToDeviceID (ULWord designID, ULWord bitfileID)
 {
-	Close ();
+	return sDesignPairToIDMapMaker.DesignPairToID (designID, bitfileID);
 }
+
+ULWord CNTV2Bitfile::ConvertToDesignID(NTV2DeviceID deviceID)
+{
+	return sDesignPairToIDMapMaker.DeviceIDToDesignID(deviceID);
+}
+
+ULWord CNTV2Bitfile::ConvertToBitfileID(NTV2DeviceID deviceID)
+{
+	return sDesignPairToIDMapMaker.DeviceIDToBitfileID(deviceID);
+}
+

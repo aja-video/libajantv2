@@ -6324,6 +6324,13 @@ public:
 	**/
 	AJA_VIRTUAL bool			CanWarmBootFPGA (bool & outCanWarmBoot);
 
+	AJA_VIRTUAL bool			IsDynamicDevice(void);
+	AJA_VIRTUAL std::vector<NTV2DeviceID>		GetDynamicDeviceList(void);
+    AJA_VIRTUAL bool			CanLoadDynamicDevice(NTV2DeviceID inDeviceID);
+    AJA_VIRTUAL bool			LoadDynamicDevice(NTV2DeviceID inDeviceID);
+	AJA_VIRTUAL bool			AddDynamicBitfile(const std::string & inBitfilePath);
+	AJA_VIRTUAL bool			AddDynamicDirectory(const std::string & inDirectory);
+
 				//////////////////////////////////////////////////////////
 	public:		//////////	From CNTV2Status				//////////////
 				//////////////////////////////////////////////////////////

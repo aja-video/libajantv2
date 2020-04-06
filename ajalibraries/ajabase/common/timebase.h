@@ -79,6 +79,7 @@ public:
 	 *	@param[out]	frameDuration	Time units per frame (units/frame)
 	 */
 	void GetFrameRate(int64_t& frameTimeScale, int64_t& frameDuration) const;
+	void GetFrameRate(uint32_t& frameTimeScale, uint32_t& frameDuration) const;
 
 	/**
 	 *	Get the video frame time scale used in conversions.
