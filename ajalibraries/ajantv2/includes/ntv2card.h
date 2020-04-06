@@ -2148,45 +2148,49 @@ public:
 
 	/**
 		@brief		Sets the device's ::NTV2AudioSystem that will provide audio for the given SDI output's audio embedder.
-		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[in]	inAudioSystem	Specifies the Audio System that is to be used by the SDI output's embedder (e.g., ::NTV2_AUDIOSYSTEM_1).
+					For 3G-capable SDI outputs, this affects Data Stream 1 (or Link A).
+		@param[in]	inSDIOutput		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
+		@param[in]	inAudioSystem	Specifies the Audio System to be used (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
 		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
 		@note		Use the ::NTV2DeviceGetNumVideoOutputs function to determine the number of SDI output jacks the device has.
 		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		SetSDIOutputAudioSystem (const NTV2Channel inChannel, const NTV2AudioSystem inAudioSystem);
+	AJA_VIRTUAL bool		SetSDIOutputAudioSystem (const NTV2Channel inSDIOutput, const NTV2AudioSystem inAudioSystem);
 
 	/**
 		@brief		Answers with the device's ::NTV2AudioSystem that is currently providing audio for the given SDI output's audio embedder.
-		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[in]	outAudioSystem	Receives the Audio System that is being used by the SDI output's embedder (e.g., ::NTV2_AUDIOSYSTEM_1).
+					(For 3G-capable SDI outputs, this is for Data Stream 1, or Link A.)
+		@param[in]	inSDIOutput		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
+		@param[in]	outAudioSystem	Receives the Audio System that's currently being used (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
 		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
 		@note		Use the ::NTV2DeviceGetNumVideoOutputs function to determine the number of SDI output jacks the device has.
 		@see		CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		GetSDIOutputAudioSystem (const NTV2Channel inChannel, NTV2AudioSystem & outAudioSystem);
+	AJA_VIRTUAL bool		GetSDIOutputAudioSystem (const NTV2Channel inSDIOutput, NTV2AudioSystem & outAudioSystem);
 
 	/**
-		@brief		Sets the device's Audio System that will provide audio for the given SDI output's audio embedder for the 2nd data stream on a dual-link output.
-		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
+		@brief		Sets the Audio System that will supply audio for the given SDI output's audio embedder for Data Stream 2
+					(Link B) for dual-link playout.
+		@param[in]	inSDIOutput		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
 		@param[in]	inAudioSystem	Specifies the Audio System that is to be used by the SDI output's embedder (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
 		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
 		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		SetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, const NTV2AudioSystem inAudioSystem);
+	AJA_VIRTUAL bool		SetSDIOutputDS2AudioSystem (const NTV2Channel inSDIOutput, const NTV2AudioSystem inAudioSystem);
 
 	/**
-		@brief		Answers with the device's Audio System that is currently providing audio for the given SDI output's audio embedder for the 2nd data stream on a dual-link output.
-		@param[in]	inChannel		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[in]	outAudioSystem	Receives the Audio System that is being used by the SDI output's embedder (e.g., ::NTV2_AUDIOSYSTEM_1).
+		@brief		Answers with the device's Audio System that is currently providing audio for the given SDI output's audio
+					embedder for Data Stream 2 (Link B) for dual-link output.
+		@param[in]	inSDIOutput		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
+		@param[in]	outAudioSystem	Receives the Audio System that's currently being used (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
 		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
 		@see		CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		GetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, NTV2AudioSystem & outAudioSystem);
+	AJA_VIRTUAL bool		GetSDIOutputDS2AudioSystem (const NTV2Channel inSDIOutput, NTV2AudioSystem & outAudioSystem);
 
 	/**
 		@brief		For the given SDI input (specified as a channel number), answers if the specified audio channel pair is currently PCM-encoded or not.
@@ -4334,32 +4338,73 @@ public:
 	**/
 	AJA_VIRTUAL bool	GetColorSpaceMatrixSelect (NTV2ColorSpaceMatrixType & outType, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool	DownloadLUTToHW (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT, const NTV2Channel inChannel, const int inBank);
-	AJA_VIRTUAL bool	SetLUTEnable(bool enable, NTV2Channel channel);
-
-	static bool			GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, NTV2DoubleArray & outTable);
-	static NTV2_SHOULD_BE_DEPRECATED(bool	GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, double * pOutTable));
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(NTV2ColorSpaceMethod	GetColorSpaceMethod (const NTV2Channel inChannel));
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool	DownloadLUTToHW(const double * pInTable, const NTV2Channel inChannel, const int inBank));
+	/**
+		@brief		Sends the given color lookup tables (LUTs) to the given LUT and bank.
+		@param[in]	inRedLUT	The Red LUT, a std::vector of double-precision floating-point values.
+		@param[in]	inGreenLUT	The Green LUT, a std::vector of double-precision floating-point values.
+		@param[in]	inBlueLUT	The Blue LUT, a std::vector of double-precision floating-point values.
+		@param[in]	inLUT		Specifies the LUT of interest, expressed as an ::NTV2Channel (a zero-based index number).
+		@param[in]	inBank		Specifies the LUT bank of interest (0 or 1).
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	DownloadLUTToHW (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT,
+										const NTV2Channel inLUT, const int inBank);
 
 	/**
-		@brief		Sends the given color lookup tables (LUTs) to the device.
+		@brief		Enables or disables the given LUT.
+		@param[in]	inEnable	Specify true to enable, or false to disable.
+		@param[in]	inLUT		Specifies the LUT of interest, expressed as an ::NTV2Channel (a zero-based index number).
+		@return		True if successful;  otherwise false.
+		@note		This function only affects devices having version 2 LUTs (see ::NTV2DeviceGetLUTVersion).
+	**/
+	AJA_VIRTUAL bool	SetLUTEnable (const bool inEnable, const NTV2Channel inLUT);
+
+	static bool			GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, NTV2DoubleArray & outTable);
+	static bool			GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, UWordSequence & outTable);
+
+	/**
+		@brief		Writes the LUT tables.
 		@param[in]	inRedLUT	The Red LUT, a std::vector of double-precision floating-point values.
 		@param[in]	inGreenLUT	The Green LUT, a std::vector of double-precision floating-point values.
 		@param[in]	inBlueLUT	The Blue LUT, a std::vector of double-precision floating-point values.
 		@return		True if successful;  otherwise false.
+		@note		Version 2 LUTs (see ::NTV2DeviceGetLUTVersion) require setup of ::kRegLUTV2Control (register 376)
+					for this function to work properly.
 	**/
 	AJA_VIRTUAL bool		LoadLUTTables (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT);
 
 	/**
-		@brief		Retrieves the current color lookup tables (LUTs) from the device.
+		@brief		Writes the LUT tables.
+		@param[in]	inRedLUT		The Red LUT, a std::vector of unsigned 10-bit integer values.
+		@param[in]	inGreenLUT		The Green LUT, a std::vector of unsigned 10-bit integer values.
+		@param[in]	inBlueLUT		The Blue LUT, a std::vector of unsigned 10-bit integer values.
+		@return		True if successful;  otherwise false.
+		@note		Version 2 LUTs (see ::NTV2DeviceGetLUTVersion) require setup of ::kRegLUTV2Control (register 376)
+					for this function to work properly.
+	**/
+	AJA_VIRTUAL bool		WriteLUTTables (const UWordSequence & inRedLUT, const UWordSequence & inGreenLUT, const UWordSequence & inBlueLUT);
+
+	/**
+		@brief		Reads the LUT tables (as double-precision floating point values).
 		@param[out]	outRedLUT		Receives the Red LUT, a std::vector of double-precision floating-point values.
 		@param[out]	outGreenLUT		Receives the Green LUT, a std::vector of double-precision floating-point values.
 		@param[out]	outBlueLUT		Receives the Blue LUT, a std::vector of double-precision floating-point values.
 		@return		True if successful;  otherwise false.
+		@note		Version 2 LUTs (see ::NTV2DeviceGetLUTVersion) require setup of ::kRegLUTV2Control (register 376)
+					for this function to work properly.
 	**/
 	AJA_VIRTUAL bool		GetLUTTables (NTV2DoubleArray & outRedLUT, NTV2DoubleArray & outGreenLUT, NTV2DoubleArray & outBlueLUT);
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool		LoadLUTTable (const double * pInTable));
+
+	/**
+		@brief		Reads the LUT tables (as raw, unsigned 10-bit integers).
+		@param[in]	outRedLUT		Receives the Red LUT as a vector of unsigned 10-bit values (0-1023).
+		@param[in]	outGreenLUT		Receives the Green LUT as a vector of unsigned 10-bit values (0-1023).
+		@param[in]	outBlueLUT		Receives the Blue LUT as a vector of unsigned 10-bit values (0-1023).
+		@return		True if successful;  otherwise false.
+		@note		Version 2 LUTs (see ::NTV2DeviceGetLUTVersion) require setup of ::kRegLUTV2Control (register 376)
+					for this function to work properly.
+	**/
+	AJA_VIRTUAL bool		ReadLUTTables (UWordSequence & outRedLUT, UWordSequence & outGreenLUT, UWordSequence & outBlueLUT);
 
 	AJA_VIRTUAL bool		SetLUTV2HostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue);
 	AJA_VIRTUAL bool		GetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank & outValue, const NTV2Channel inChannel);
@@ -4459,6 +4504,12 @@ public:
 
 	AJA_VIRTUAL bool		SetDitherFor8BitInputs (const NTV2Channel inChannel, const ULWord inDither);
 	AJA_VIRTUAL bool		GetDitherFor8BitInputs (const NTV2Channel inChannel, ULWord & outDither);
+
+	//	Old APIs
+	static NTV2_SHOULD_BE_DEPRECATED(bool	GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, double * pOutTable));
+	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(NTV2ColorSpaceMethod	GetColorSpaceMethod (const NTV2Channel inChannel));
+	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool	DownloadLUTToHW(const double * pInTable, const NTV2Channel inChannel, const int inBank));
+	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool		LoadLUTTable (const double * pInTable));
 	///@}
 
 

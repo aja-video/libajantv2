@@ -86,6 +86,7 @@ private:
 		SetupHDMIRegs();		//	HDMI
 		SetupSDIErrorRegs();	//	SDIError
 		SetupCSCRegs();			//	CSCs
+		SetupLUTRegs();			//	LUTs
 		SetupVRegs();			//	Virtuals
 		REiNOTE(DEC(gLivingInstances) << " extant, " << DEC(gInstanceTally) << " total");
 		if (LOGGING_MAPPINGS)
@@ -825,6 +826,11 @@ private:
 		DefineRegister (kRegRXSDIFreeRunningClockHigh, "kRegRXSDIFreeRunningClockHigh", mDefaultRegDecoder, READONLY, kRegClass_SDIError, kRegClass_NULL, kRegClass_NULL);
 	}	//	SetupSDIErrorRegs
 
+	void SetupLUTRegs (void)
+	{
+		AJAAutoLock	lock(&mGuardMutex);
+	}
+
 	void SetupCSCRegs(void)
 	{
 		static const string	sChan[8] = {kRegClass_Channel1, kRegClass_Channel2, kRegClass_Channel3, kRegClass_Channel4, kRegClass_Channel5, kRegClass_Channel6, kRegClass_Channel7, kRegClass_Channel8};
@@ -833,30 +839,30 @@ private:
 		for (unsigned num(0);  num < 8;  num++)
 		{
 			ostringstream ossRegName;  ossRegName << "kRegEnhancedCSC" << (num+1);
-			const string & chanClass (sChan[num]);						const string rootName    (ossRegName.str());
-			const string modeName    (rootName + "Mode");				const string inOff01Name (rootName + "InOffset0_1");			const string inOff2Name  (rootName + "InOffset2");
-			const string coeffA0Name (rootName + "CoeffA0");			const string coeffA1Name (rootName + "CoeffA1");				const string coeffA2Name (rootName + "CoeffA2");
-			const string coeffB0Name (rootName + "CoeffB0");			const string coeffB1Name (rootName + "CoeffB1");				const string coeffB2Name (rootName + "CoeffB2");
-			const string coeffC0Name (rootName + "CoeffC0");			const string coeffC1Name (rootName + "CoeffC1");				const string coeffC2Name (rootName + "CoeffC2");
-			const string outOffABName(rootName + "OutOffsetA_B");		const string outOffCName (rootName + "OutOffsetC");
-			const string keyModeName (rootName + "KeyMode");			const string keyClipOffName (rootName + "KeyClipOffset");		const string keyGainName (rootName + "KeyGain");
-			DefineRegister (64*num + kRegEnhancedCSC1Mode,			modeName,			mEnhCSCModeDecoder,		READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (64*num + kRegEnhancedCSC1InOffset0_1,	inOff01Name,		mEnhCSCOffsetDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (64*num + kRegEnhancedCSC1InOffset2,		inOff2Name,			mEnhCSCOffsetDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (64*num + kRegEnhancedCSC1CoeffA0,		coeffA0Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (64*num + kRegEnhancedCSC1CoeffA1,		coeffA1Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (64*num + kRegEnhancedCSC1CoeffA2,		coeffA2Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (64*num + kRegEnhancedCSC1CoeffB0,		coeffB0Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (64*num + kRegEnhancedCSC1CoeffB1,		coeffB1Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (64*num + kRegEnhancedCSC1CoeffB2,		coeffB2Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (64*num + kRegEnhancedCSC1CoeffC0,		coeffC0Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (64*num + kRegEnhancedCSC1CoeffC1,		coeffC1Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (64*num + kRegEnhancedCSC1CoeffC2,		coeffC2Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (64*num + kRegEnhancedCSC1OutOffsetA_B,	outOffABName,		mEnhCSCOffsetDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (64*num + kRegEnhancedCSC1OutOffsetC,	outOffCName,		mEnhCSCOffsetDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (64*num + kRegEnhancedCSC1KeyMode,		keyModeName,		mEnhCSCKeyModeDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (64*num + kRegEnhancedCSC1KeyClipOffset,	keyClipOffName,		mEnhCSCOffsetDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (64*num + kRegEnhancedCSC1KeyGain,		keyGainName,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			const string & chanClass (sChan[num]);					const string rootName    (ossRegName.str());
+			const string modeName    (rootName + "Mode");			const string inOff01Name (rootName + "InOffset0_1");			const string inOff2Name  (rootName + "InOffset2");
+			const string coeffA0Name (rootName + "CoeffA0");		const string coeffA1Name (rootName + "CoeffA1");				const string coeffA2Name (rootName + "CoeffA2");
+			const string coeffB0Name (rootName + "CoeffB0");		const string coeffB1Name (rootName + "CoeffB1");				const string coeffB2Name (rootName + "CoeffB2");
+			const string coeffC0Name (rootName + "CoeffC0");		const string coeffC1Name (rootName + "CoeffC1");				const string coeffC2Name (rootName + "CoeffC2");
+			const string outOffABName(rootName + "OutOffsetA_B");	const string outOffCName (rootName + "OutOffsetC");
+			const string keyModeName (rootName + "KeyMode");		const string keyClipOffName (rootName + "KeyClipOffset");		const string keyGainName (rootName + "KeyGain");
+			DefineRegister (64*num + kRegEnhancedCSC1Mode,			modeName,			mEnhCSCModeDecoder,		READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1InOffset0_1,	inOff01Name,		mEnhCSCOffsetDecoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1InOffset2,		inOff2Name,			mEnhCSCOffsetDecoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffA0,		coeffA0Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffA1,		coeffA1Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffA2,		coeffA2Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffB0,		coeffB0Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffB1,		coeffB1Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffB2,		coeffB2Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffC0,		coeffC0Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffC1,		coeffC1Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1CoeffC2,		coeffC2Name,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1OutOffsetA_B,	outOffABName,		mEnhCSCOffsetDecoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1OutOffsetC,	outOffCName,		mEnhCSCOffsetDecoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1KeyMode,		keyModeName,		mEnhCSCKeyModeDecoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1KeyClipOffset,	keyClipOffName,		mEnhCSCOffsetDecoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (64*num + kRegEnhancedCSC1KeyGain,		keyGainName,		mEnhCSCCoeffDecoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
 		}
 		static const NTV2RegisterNumber	sECSCRegs[8][5]	=	{	{	kRegCSCoefficients1_2,	kRegCSCoefficients3_4,	kRegCSCoefficients5_6,	kRegCSCoefficients7_8,	kRegCSCoefficients9_10	},
 																{	kRegCS2Coefficients1_2,	kRegCS2Coefficients3_4,	kRegCS2Coefficients5_6,	kRegCS2Coefficients7_8,	kRegCS2Coefficients9_10	},
@@ -869,12 +875,30 @@ private:
 		for (unsigned chan(0);  chan < 8;  chan++)
 		{
 			const string & chanClass (sChan[chan]);
-			DefineRegister (sECSCRegs[chan][0],	"",	mCSCoeff1234Decoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (sECSCRegs[chan][1],	"",	mCSCoeff1234Decoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (sECSCRegs[chan][2],	"",	mCSCoeff567890Decoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (sECSCRegs[chan][3],	"",	mCSCoeff567890Decoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
-			DefineRegister (sECSCRegs[chan][4],	"",	mCSCoeff567890Decoder,	READWRITE,	kRegClass_Color,	chanClass,		kRegClass_NULL);
+			DefineRegister (sECSCRegs[chan][0],	"",	mCSCoeff1234Decoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (sECSCRegs[chan][1],	"",	mCSCoeff1234Decoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (sECSCRegs[chan][2],	"",	mCSCoeff567890Decoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (sECSCRegs[chan][3],	"",	mCSCoeff567890Decoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
+			DefineRegister (sECSCRegs[chan][4],	"",	mCSCoeff567890Decoder,	READWRITE,	kRegClass_CSC,	chanClass,		kRegClass_NULL);
 		}
+
+		//	LUT/ColorCorrection Registers...
+		DefineRegister	(kRegCh1ColorCorrectionControl,	"",	mLUTV1ControlRegDecoder,	READWRITE,	kRegClass_LUT,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister	(kRegCh2ColorCorrectionControl,	"",	mLUTV1ControlRegDecoder,	READWRITE,	kRegClass_LUT,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister	(kRegLUTV2Control,				"",	mLUTV2ControlRegDecoder,	READWRITE,	kRegClass_LUT,	kRegClass_NULL,	kRegClass_NULL);
+		//	LUT tables...
+#if 1	//	V2 tables need the appropriate Enable & Bank bits set in kRegLUTV2Control, otherwise they'll always readback zero!
+		//	So it's kinda pointless to read/decode them unless we do the "bank-select" dance immediately before reading them...
+		const ULWord REDreg(kColorCorrectionLUTOffset_Red/4), GRNreg(kColorCorrectionLUTOffset_Green/4), BLUreg(kColorCorrectionLUTOffset_Blue/4);
+		for (ULWord ndx(0);  ndx < 512;  ndx++)
+		{
+			ostringstream regNameR, regNameG, regNameB;
+			regNameR << "kRegLUTRed" << DEC0N(ndx,3);  regNameG << "kRegLUTGreen" << DEC0N(ndx,3);  regNameB << "kRegLUTBlue" << DEC0N(ndx,3);
+			DefineRegister (REDreg + ndx, regNameR.str(), mLUTDecoder,	READWRITE,	kRegClass_LUT,	kRegClass_NULL,	kRegClass_NULL);
+			DefineRegister (GRNreg + ndx, regNameG.str(), mLUTDecoder,	READWRITE,	kRegClass_LUT,	kRegClass_NULL,	kRegClass_NULL);
+			DefineRegister (BLUreg + ndx, regNameB.str(), mLUTDecoder,	READWRITE,	kRegClass_LUT,	kRegClass_NULL,	kRegClass_NULL);
+		}
+#endif
 	}	//	SetupCSCRegs
 
 	void SetupMixerKeyerRegs(void)
@@ -890,10 +914,6 @@ private:
 		DefineRegister	(kRegFlatMatte2Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel3,	kRegClass_Channel4);
 		DefineRegister	(kRegFlatMatte3Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel5,	kRegClass_Channel6);
 		DefineRegister	(kRegFlatMatte4Value,	"",	mFlatMatteValueRegDecoder,	READWRITE,	kRegClass_Mixer,	kRegClass_Channel7,	kRegClass_Channel8);
-			DefineRegClass (kRegFlatMatteValue, kRegClass_Color);
-			DefineRegClass (kRegFlatMatte2Value, kRegClass_Color);
-			DefineRegClass (kRegFlatMatte3Value, kRegClass_Color);
-			DefineRegClass (kRegFlatMatte4Value, kRegClass_Color);
 		DefineRegister	(kRegMixer1Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel1,	kRegClass_Channel2);
 		DefineRegister	(kRegMixer2Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel3,	kRegClass_Channel4);
 		DefineRegister	(kRegMixer3Coefficient,	"",	mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel5,	kRegClass_Channel6);
@@ -1463,9 +1483,9 @@ public:
 	{
 		AJAAutoLock	lock(&mGuardMutex);
 		NTV2RegNumSet	result;
-		for (RegClassToRegNumConstIter	it	(mRegClassToRegNumMMap.find (inClassName));  it != mRegClassToRegNumMMap.end() && it->first == inClassName;  ++it)
-			if (result.find (it->second) == result.end())
-				result.insert (it->second);
+		for (RegClassToRegNumConstIter	it(mRegClassToRegNumMMap.find(inClassName));  it != mRegClassToRegNumMMap.end() && it->first == inClassName;  ++it)
+			if (result.find(it->second) == result.end())
+				result.insert(it->second);
 		return result;
 	}
 	
@@ -1514,7 +1534,7 @@ public:
 
 		if (::NTV2DeviceCanDoEnhancedCSC(inDeviceID))
 		{
-			const NTV2RegNumSet	ecscRegs	(GetRegistersForClass(kRegClass_Color));
+			const NTV2RegNumSet	ecscRegs	(GetRegistersForClass(kRegClass_CSC));
 			const UWord			numCSCs		(::NTV2DeviceGetNumCSCs(inDeviceID));
 			NTV2RegNumSet		allChanRegs;	//	For just those CSCs it supports
 			for (UWord num(0);  num < numCSCs;  num++)
@@ -1523,6 +1543,12 @@ public:
 				allChanRegs.insert(chRegs.begin(), chRegs.end());
 			}
 			std::set_intersection (ecscRegs.begin(), ecscRegs.end(),  allChanRegs.begin(), allChanRegs.end(),  std::inserter(result, result.begin()));
+		}
+
+		if (::NTV2DeviceGetNumLUTs(inDeviceID))
+		{
+			const NTV2RegNumSet LUTRegs (GetRegistersForClass(kRegClass_LUT));
+			result.insert(LUTRegs.begin(), LUTRegs.end());
 		}
 
 		if (::NTV2DeviceGetNumHDMIVideoInputs(inDeviceID) > 1)	//	KonaHDMI
@@ -3546,6 +3572,89 @@ private:
 		}
 		virtual	~DecodeCSCoeff567890()	{}
 	}	mCSCoeff567890Decoder;
+
+	struct DecodeLUTV1ControlReg : public Decoder	//	kRegCh1ColorCorrectionControl (68), kRegCh2ColorCorrectionControl (69)
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	static const string sModes[] = {"Off", "RGB", "YCbCr", "3-Way", "Invalid"};
+			const ULWord lutVersion (::NTV2DeviceGetLUTVersion(inDeviceID));
+			const UWord saturation (UWord(inRegValue & kRegMaskSaturationValue));
+			const UWord	mode (UWord((inRegValue & kRegMaskCCMode) >> kRegShiftCCMode));
+			const bool outBankSelect (((inRegValue & kRegMaskCCOutputBankSelect) >> kRegShiftCCOutputBankSelect) ? true : false);
+			const bool cc5HostBank (((inRegValue & kRegMaskCC5HostAccessBankSelect) >> kRegShiftCC5HostAccessBankSelect) ? true : false);
+			const bool cc5OutputBank (((inRegValue & kRegMaskCC5OutputBankSelect) >> kRegShiftCC5OutputBankSelect) ? true : false);
+			const bool cc5Select (((inRegValue & kRegMaskLUT5Select) >> kRegShiftLUT5Select) ? true : false);
+			const bool ccConfig2 (((inRegValue & kRegMaskLUTSelect) >> kRegShiftLUTSelect) ? true : false);
+			const bool cc3BankSel (((inRegValue & kRegMaskCC3OutputBankSelect) >> kRegShiftCC3OutputBankSelect) ? true : false);
+			const bool cc4BankSel (((inRegValue & kRegMaskCC4OutputBankSelect) >> kRegShiftCC4OutputBankSelect) ? true : false);
+			NTV2_ASSERT(mode < 4);
+			ostringstream	oss;
+			if (lutVersion != 1)
+				oss	<< "(Register data relevant for V1 LUT, this device has V" << DEC(lutVersion) << " LUT)";
+			else
+			{
+				oss	<< "LUT Saturation Value: "		<< xHEX0N(saturation,4) << " (" << DEC(saturation) << ")"	<< endl
+					<< "LUT Output Bank Select: "	<< SetNotset(outBankSelect)									<< endl
+					<< "LUT Mode: "					<< sModes[mode] << " (" << DEC(mode) << ")";
+				if (inRegNum == kRegCh1ColorCorrectionControl)
+					oss << endl
+						<< "LUT5 Host Bank Select: "	<< SetNotset(cc5HostBank)		<< endl
+						<< "LUT5 Output Bank Select: "	<< SetNotset(cc5OutputBank)		<< endl
+						<< "LUT5 Select: "				<< SetNotset(cc5Select)			<< endl
+						<< "Config 2nd LUT Set: "		<< YesNo(ccConfig2);
+			}
+			oss	<< endl
+				<< "LUT3 Bank Select: "		<< SetNotset(cc3BankSel)	<< endl
+				<< "LUT4 Bank Select: "		<< SetNotset(cc4BankSel);
+			return oss.str();
+		}
+		virtual	~DecodeLUTV1ControlReg()	{}
+	}	mLUTV1ControlRegDecoder;
+
+	struct DecodeLUTV2ControlReg : public Decoder	//	kRegLUTV2Control	376
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void) inRegNum;
+			const ULWord lutVersion (::NTV2DeviceGetLUTVersion(inDeviceID));
+			ostringstream	oss;
+			if (lutVersion != 2)
+				oss	<< "(Register data relevant for V2 LUT, this device has V" << DEC(lutVersion) << "LUT)";
+			else
+			{
+				for (UWord lutNum(0);  lutNum < 8;  lutNum++)
+					oss	<< "LUT" << DEC(lutNum+1) << " Enabled: " << (YesNo(inRegValue & (1<<lutNum)))							<< endl
+						<< "LUT" << DEC(lutNum+1) << " Host Access Bank Select: " << (inRegValue & (1<<(lutNum+8)) ? '1' : '0')	<< endl
+						<< "LUT" << DEC(lutNum+1) << " Output Bank Select: " << (inRegValue & (1<<(lutNum+16)) ? '1' : '0')		<< endl;
+				oss	<< "12-Bit LUT mode: " << ((inRegValue & BIT(28)) ? "12-bit" : "10-bit")								<< endl
+					<< "12-Bit LUT page reg: " << DEC(UWord((inRegValue & (BIT(24)|BIT(25))) >> 24));
+			}
+			return oss.str();
+		}
+		virtual	~DecodeLUTV2ControlReg()	{}
+	}	mLUTV2ControlRegDecoder;
+
+	struct DecodeLUT : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inDeviceID;
+			static const ULWord RedReg(kColorCorrectionLUTOffset_Red/4), GreenReg(kColorCorrectionLUTOffset_Green/4), BlueReg(kColorCorrectionLUTOffset_Blue/4);
+			const bool isRed(inRegNum >= RedReg && inRegNum < GreenReg), isGreen(inRegNum >= GreenReg && inRegNum < BlueReg), isBlue(inRegNum>=BlueReg);
+			NTV2_ASSERT(isRed||isGreen||isBlue);
+			ostringstream	oss;
+			//	Within each 32-bit LUT word are stored two 10-bit values:
+			//		-	bits <31:22> ==> LUT[2i+1]
+			//		-	bits <15:6>  ==> LUT[2i]
+			const string label(isRed ? "Red[" : (isGreen ? "Green[" : "Blue["));
+			const ULWord ndx((inRegNum - (isRed ? RedReg : (isGreen ? GreenReg : BlueReg))) * 2);
+			const ULWord lo((inRegValue >> kRegColorCorrectionLUTEvenShift) & 0x000003FF);
+			const ULWord hi((inRegValue >> kRegColorCorrectionLUTOddShift) & 0x000003FF);
+			oss	<< label << DEC0N(ndx+0,3) << "]: " << DEC0N(lo,3) << endl
+				<< label << DEC0N(ndx+1,3) << "]: " << DEC0N(hi,3);
+			return oss.str();
+		}
+		virtual	~DecodeLUT()	{}
+	}	mLUTDecoder;
 
 	struct DecodeSDIErrorStatus : public Decoder
 	{
