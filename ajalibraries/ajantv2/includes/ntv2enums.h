@@ -335,6 +335,10 @@ typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief	An alias for NTV2Fram
 											&&  !NTV2_IS_FBF_PRORES(__fbf__)					\
 										)
 
+#define NTV2_IS_FBF_12BIT_RGB(__fbf__)	(		(__fbf__) == NTV2_FBF_48BIT_RGB					\
+											||	(__fbf__) == NTV2_FBF_12BIT_RGB_PACKED			\
+										)
+
 
 /**
 	@brief	Identifies a particular video frame geometry.

@@ -102,8 +102,8 @@ typedef enum
 	kRegRP188InOut2Bits0_31,		// 65
 	kRegRP188InOut2Bits32_63,		// 66
 	kRegCanDoStatus,				// 67	SDK 15.6 and later
-	kRegCh1ColorCorrectioncontrol,	// 68
-	kRegCh2ColorCorrectioncontrol,	// 69
+	kRegCh1ColorCorrectionControl,	// 68	CamelCase fix in SDK 16.0
+	kRegCh2ColorCorrectionControl,	// 69	CamelCase fix SDK 16.0
 	kRegRS422Transmit,				// 70
 	kRegRS422Receive,				// 71
 	kRegRS422Control,				// 72
@@ -626,6 +626,10 @@ typedef enum
 } NTV2RegisterNumber;
 
 typedef NTV2RegisterNumber	RegisterNum;
+
+
+#define kRegCh1ColorCorrectioncontrol	kRegCh1ColorCorrectionControl	//	CamelCase fixed in SDK 16.0
+#define	kRegCh2ColorCorrectioncontrol	kRegCh2ColorCorrectionControl	//	CamelCase fixed in SDK 16.0
 
 
 //	Discontinuous block of registers used for monitoring the incoming SDI signals
@@ -1475,7 +1479,7 @@ typedef enum
 	kRegMaskFirmWareRev		= BIT(8)+BIT(9)+BIT(10)+BIT(11)+BIT(12)+BIT(13)+BIT(14)+BIT(15),
 	kRegMaskDMAPauseDisable = BIT(16),
 
-	// Color Correction Control
+	// Color Correction Control - kRegCh1ColorCorrectionControl (68), kRegCh2ColorCorrectionControl (69)
 	kRegMaskSaturationValue			= BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7)+BIT(8)+BIT(9),
 	kRegMaskCCOutputBankSelect		= BIT(16),
 	kRegMaskCCMode					= BIT(17)+BIT(18),
@@ -5895,6 +5899,24 @@ typedef enum
 			#define	NTV2_ASSERT_STRUCT_VALID
 		#endif
 
+		#if !defined (NTV2_BUILDING_DRIVER)
+			typedef	std::vector<uint8_t>				UByteSequence;				///< @brief	An ordered sequence of UByte (uint8_t) values.
+			typedef	UByteSequence::const_iterator		UByteSequenceConstIter;		///< @brief	A handy const iterator for iterating over a UByteSequence.
+			typedef	UByteSequence::iterator				UByteSequenceIter;			///< @brief	A handy non-const iterator for iterating over a UByteSequence.
+
+			typedef	std::vector<uint16_t>				UWordSequence;				///< @brief	An ordered sequence of UWord (uint16_t) values.
+			typedef	UWordSequence::const_iterator		UWordSequenceConstIter;		///< @brief	A handy const iterator for iterating over a UWordSequence.
+			typedef	UWordSequence::iterator				UWordSequenceIter;			///< @brief	A handy non-const iterator for iterating over a UWordSequence.
+
+			typedef	std::vector<uint32_t>				ULWordSequence;				///< @brief	An ordered sequence of ULWord (uint32_t) values.
+			typedef	ULWordSequence::const_iterator		ULWordSequenceConstIter;	///< @brief	A handy const iterator for iterating over a ULWordSequence.
+			typedef	ULWordSequence::iterator			ULWordSequenceIter;			///< @brief	A handy non-const iterator for iterating over a ULWordSequence.
+
+			typedef	std::vector<uint64_t>				ULWord64Sequence;			///< @brief	An ordered sequence of ULWord64 (uint64_t) values.
+			typedef	ULWord64Sequence::const_iterator	ULWord64SequenceConstIter;	///< @brief	A handy const iterator for iterating over a ULWord64Sequence.
+			typedef	ULWord64Sequence::iterator			ULWord64SequenceIter;		///< @brief	A handy non-const iterator for iterating over a ULWord64Sequence.
+		#endif	//	NTV2_BUILDING_DRIVER
+
 
 		#if defined (AJAMac)
 			#pragma pack (push, 4)
@@ -6422,7 +6444,7 @@ typedef enum
 					@return						True if successful;  otherwise false.
 					@note		If my length is not evenly divisible by 8, my last bytes won't appear in the resulting vector. 
 				**/
-				bool							GetU64s (std::vector<uint64_t> & outU64s, const size_t inU64Offset = 0, const size_t inMaxSize = 16, const bool inByteSwap = false) const;
+				bool							GetU64s (ULWord64Sequence & outU64s, const size_t inU64Offset = 0, const size_t inMaxSize = 16, const bool inByteSwap = false) const;
 
 				/**
 					@return		My contents as a vector of unsigned 64-bit values.
@@ -6436,7 +6458,7 @@ typedef enum
 												Defaults to 'false'.
 					@note		If my length is not evenly divisible by 8, my last bytes won't appear in the resulting vector. 
 				**/
-				inline std::vector<uint64_t>	GetU64s (const size_t inU64Offset = 0, const size_t inMaxSize = 16, const bool inByteSwap = false) const	{std::vector<uint64_t> result; GetU64s(result, inU64Offset, inMaxSize, inByteSwap); return result;}
+				inline ULWord64Sequence			GetU64s (const size_t inU64Offset = 0, const size_t inMaxSize = 16, const bool inByteSwap = false) const	{ULWord64Sequence result; GetU64s(result, inU64Offset, inMaxSize, inByteSwap); return result;}
 
 				/**
 					@brief		Answers with my contents as a vector of unsigned 32-bit values.
@@ -6452,7 +6474,7 @@ typedef enum
 					@return						True if successful;  otherwise false.
 					@note		If my length is not evenly divisible by 4, my last bytes won't appear in the resulting vector. 
 				**/
-				bool							GetU32s (std::vector<uint32_t> & outU32s, const size_t inU32Offset = 0, const size_t inMaxSize = 32, const bool inByteSwap = false) const;
+				bool							GetU32s (ULWordSequence & outU32s, const size_t inU32Offset = 0, const size_t inMaxSize = 32, const bool inByteSwap = false) const;
 
 				/**
 					@return		My contents as a vector of unsigned 32-bit values.
@@ -6466,7 +6488,7 @@ typedef enum
 												Defaults to 'false'.
 					@note		If my length is not evenly divisible by 4, my last bytes won't appear in the resulting vector. 
 				**/
-				inline std::vector<uint32_t>	GetU32s (const size_t inU32Offset = 0, const size_t inMaxSize = 32, const bool inByteSwap = false) const	{std::vector<uint32_t> result; GetU32s(result, inU32Offset, inMaxSize, inByteSwap); return result;}
+				inline ULWordSequence			GetU32s (const size_t inU32Offset = 0, const size_t inMaxSize = 32, const bool inByteSwap = false) const	{ULWordSequence result; GetU32s(result, inU32Offset, inMaxSize, inByteSwap); return result;}
 
 				/**
 					@brief		Answers with my contents as a vector of unsigned 16-bit values.
@@ -6482,7 +6504,7 @@ typedef enum
 					@return						True if successful;  otherwise false.
 					@note		If my length is not evenly divisible by 2, my last byte won't appear in the resulting vector. 
 				**/
-				bool							GetU16s (std::vector<uint16_t> & outU16s, const size_t inU16Offset = 0, const size_t inMaxSize = 64, const bool inByteSwap = false) const;
+				bool							GetU16s (UWordSequence & outU16s, const size_t inU16Offset = 0, const size_t inMaxSize = 64, const bool inByteSwap = false) const;
 
 				/**
 					@return		My contents as a vector of unsigned 16-bit values.
@@ -6496,7 +6518,7 @@ typedef enum
 												Defaults to 'false'.
 					@note		If my length is not evenly divisible by 2, my last byte won't appear in the resulting vector. 
 				**/
-				inline std::vector<uint16_t>	GetU16s (const size_t inU16Offset = 0, const size_t inMaxSize = 64, const bool inByteSwap = false) const	{std::vector<uint16_t> result; GetU16s(result, inU16Offset, inMaxSize, inByteSwap); return result;}
+				inline UWordSequence			GetU16s (const size_t inU16Offset = 0, const size_t inMaxSize = 64, const bool inByteSwap = false) const	{UWordSequence result; GetU16s(result, inU16Offset, inMaxSize, inByteSwap); return result;}
 
 				/**
 					@brief		Answers with my contents as a vector of unsigned 8-bit values.
@@ -6508,7 +6530,7 @@ typedef enum
 												Defaults to 128.
 					@return						True if successful;  otherwise false.
 				**/
-				bool							GetU8s (std::vector<uint8_t> & outU8s, const size_t inU8Offset = 0, const size_t inMaxSize = 128) const;
+				bool							GetU8s (UByteSequence & outU8s, const size_t inU8Offset = 0, const size_t inMaxSize = 128) const;
 
 				/**
 					@return		My contents as a vector of unsigned 8-bit values.
@@ -6518,7 +6540,7 @@ typedef enum
 												The actual number of returned 8-bit values may be less than this, depending on my size.
 												Defaults to 128.
 				**/
-				inline std::vector<uint8_t>		GetU8s (const size_t inU8Offset = 0, const size_t inMaxSize = 128) const	{std::vector<uint8_t> result; GetU8s(result, inU8Offset, inMaxSize); return result;}
+				inline UByteSequence			GetU8s (const size_t inU8Offset = 0, const size_t inMaxSize = 128) const	{UByteSequence result; GetU8s(result, inU8Offset, inMaxSize); return result;}
 
 				/**
 					@brief		Answers with my contents as a character string.
@@ -6553,7 +6575,7 @@ typedef enum
 												Specify 'true' to byte-swap;  otherwise specify 'false'. Defaults to 'false'.
 					@return						True if successful;  otherwise false.
 				**/
-				bool							PutU64s (const std::vector<uint64_t> & inU64s, const size_t inU64Offset = 0, const bool inByteSwap = false);
+				bool							PutU64s (const ULWord64Sequence & inU64s, const size_t inU64Offset = 0, const bool inByteSwap = false);
 
 				/**
 					@brief		Copies a vector of unsigned 32-bit values into me.
@@ -6564,7 +6586,7 @@ typedef enum
 												Specify 'true' to byte-swap;  otherwise specify 'false'. Defaults to 'false'.
 					@return						True if successful;  otherwise false.
 				**/
-				bool							PutU32s (const std::vector<uint32_t> & inU32s, const size_t inU32Offset = 0, const bool inByteSwap = false);
+				bool							PutU32s (const ULWordSequence & inU32s, const size_t inU32Offset = 0, const bool inByteSwap = false);
 
 				/**
 					@brief		Copies a vector of unsigned 16-bit values into me.
@@ -6575,7 +6597,7 @@ typedef enum
 												Specify 'true' to byte-swap;  otherwise specify 'false'. Defaults to 'false'.
 					@return						True if successful;  otherwise false.
 				**/
-				bool							PutU16s (const std::vector<uint16_t> & inU16s, const size_t inU16Offset = 0, const bool inByteSwap = false);
+				bool							PutU16s (const UWordSequence & inU16s, const size_t inU16Offset = 0, const bool inByteSwap = false);
 
 				/**
 					@brief		Copies a vector of unsigned 8-bit values into me.
@@ -6584,7 +6606,7 @@ typedef enum
 												Defaults to zero.
 					@return						True if successful;  otherwise false.
 				**/
-				bool							PutU8s (const std::vector<uint8_t> & inU8s, const size_t inU8Offset = 0);
+				bool							PutU8s (const UByteSequence & inU8s, const size_t inU8Offset = 0);
 				///@}
 
 				/**
@@ -7233,8 +7255,8 @@ typedef enum
 		**/
 		NTV2_STRUCT_BEGIN (NTV2SetRegisters)		//	AUTOCIRCULATE_TYPE_SETREGS
 			NTV2_HEADER		mHeader;			///< @brief	The common structure header -- ALWAYS FIRST!
-				ULWord			mInNumRegisters;	///< @brief	The number of NTV2ReadWriteRegisterSingle's to be set.
-				NTV2_POINTER	mInRegInfos;		///< @brief	Read-only array of NTV2ReadWriteRegisterSingle structs to be set. The SDK owns this memory.
+				ULWord			mInNumRegisters;	///< @brief	The number of NTV2RegInfo's to be set.
+				NTV2_POINTER	mInRegInfos;		///< @brief	Read-only array of NTV2RegInfo structs to be set. The SDK owns this memory.
 				ULWord			mOutNumFailures;	///< @brief	The number of registers unsuccessfully written.
 				NTV2_POINTER	mOutBadRegIndexes;	///< @brief	Array of UWords containing index numbers of the register writes that failed. The SDK owns this memory.
 			NTV2_TRAILER	mTrailer;			///< @brief	The common structure trailer -- ALWAYS LAST!
@@ -8298,22 +8320,6 @@ typedef enum
 
 			typedef std::set <NTV2OutputDestination>			NTV2OutputDestinations;				///< @brief	A set of distinct NTV2OutputDestination values.
 			typedef NTV2OutputDestinations::const_iterator		NTV2OutputDestinationsConstIter;	///< @brief	A handy const iterator for iterating over an NTV2OutputDestinations.
-
-			typedef	std::vector <uint8_t>						UByteSequence;						///< @brief	An ordered sequence of UByte (uint8_t) values.
-			typedef	UByteSequence::const_iterator				UByteSequenceConstIter;				///< @brief	A handy const iterator for iterating over a UByteSequence.
-			typedef	UByteSequence::iterator						UByteSequenceIter;					///< @brief	A handy non-const iterator for iterating over a UByteSequence.
-
-			typedef	std::vector <uint16_t>						UWordSequence;						///< @brief	An ordered sequence of UWord (uint16_t) values.
-			typedef	UWordSequence::const_iterator				UWordSequenceConstIter;				///< @brief	A handy const iterator for iterating over a UWordSequence.
-			typedef	UWordSequence::iterator						UWordSequenceIter;					///< @brief	A handy non-const iterator for iterating over a UWordSequence.
-
-			typedef	std::vector <uint32_t>						ULWordSequence;						///< @brief	An ordered sequence of ULWord (uint32_t) values.
-			typedef	ULWordSequence::const_iterator				ULWordSequenceConstIter;			///< @brief	A handy const iterator for iterating over a ULWordSequence.
-			typedef	ULWordSequence::iterator					ULWordSequenceIter;					///< @brief	A handy non-const iterator for iterating over a ULWordSequence.
-
-			typedef	std::vector <uint64_t>						ULWord64Sequence;					///< @brief	An ordered sequence of ULWord64 (uint64_t) values.
-			typedef	ULWord64Sequence::const_iterator			ULWord64SequenceConstIter;			///< @brief	A handy const iterator for iterating over a ULWord64Sequence.
-			typedef	ULWord64Sequence::iterator					ULWord64SequenceIter;				///< @brief	A handy non-const iterator for iterating over a ULWord64Sequence.
 
 			/**
 				@brief		Prints the given ::UWordSequence contents into the given output stream.

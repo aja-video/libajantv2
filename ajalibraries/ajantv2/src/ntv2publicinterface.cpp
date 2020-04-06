@@ -430,7 +430,7 @@ string & NTV2_POINTER::Dump (	string &		inOutputString,
 }
 
 
-bool NTV2_POINTER::GetU64s (vector<uint64_t> & outUint64s, const size_t inU64Offset, const size_t inMaxSize, const bool inByteSwap) const
+bool NTV2_POINTER::GetU64s (ULWord64Sequence & outUint64s, const size_t inU64Offset, const size_t inMaxSize, const bool inByteSwap) const
 {
 	outUint64s.clear();
 	if (IsNULL())
@@ -467,7 +467,7 @@ bool NTV2_POINTER::GetU64s (vector<uint64_t> & outUint64s, const size_t inU64Off
 }
 
 
-bool NTV2_POINTER::GetU32s (vector<uint32_t> & outUint32s, const size_t inU32Offset, const size_t inMaxSize, const bool inByteSwap) const
+bool NTV2_POINTER::GetU32s (ULWordSequence & outUint32s, const size_t inU32Offset, const size_t inMaxSize, const bool inByteSwap) const
 {
 	outUint32s.clear();
 	if (IsNULL())
@@ -504,7 +504,7 @@ bool NTV2_POINTER::GetU32s (vector<uint32_t> & outUint32s, const size_t inU32Off
 }
 
 
-bool NTV2_POINTER::GetU16s (vector<uint16_t> & outUint16s, const size_t inU16Offset, const size_t inMaxSize, const bool inByteSwap) const
+bool NTV2_POINTER::GetU16s (UWordSequence & outUint16s, const size_t inU16Offset, const size_t inMaxSize, const bool inByteSwap) const
 {
 	outUint16s.clear();
 	if (IsNULL())
@@ -541,7 +541,7 @@ bool NTV2_POINTER::GetU16s (vector<uint16_t> & outUint16s, const size_t inU16Off
 }
 
 
-bool NTV2_POINTER::GetU8s (vector<uint8_t> & outUint8s, const size_t inU8Offset, const size_t inMaxSize) const
+bool NTV2_POINTER::GetU8s (UByteSequence & outUint8s, const size_t inU8Offset, const size_t inMaxSize) const
 {
 	outUint8s.clear();
 	if (IsNULL())
@@ -611,7 +611,7 @@ bool NTV2_POINTER::GetString (std::string & outString, const size_t inU8Offset, 
 }
 
 
-bool NTV2_POINTER::PutU64s (const vector<uint64_t> & inU64s, const size_t inU64Offset, const bool inByteSwap)
+bool NTV2_POINTER::PutU64s (const ULWord64Sequence & inU64s, const size_t inU64Offset, const bool inByteSwap)
 {
 	if (IsNULL())
 		return false;	//	No buffer or space
@@ -637,7 +637,7 @@ bool NTV2_POINTER::PutU64s (const vector<uint64_t> & inU64s, const size_t inU64O
 }
 
 
-bool NTV2_POINTER::PutU32s (const vector<uint32_t> & inU32s, const size_t inU32Offset, const bool inByteSwap)
+bool NTV2_POINTER::PutU32s (const ULWordSequence & inU32s, const size_t inU32Offset, const bool inByteSwap)
 {
 	if (IsNULL())
 		return false;	//	No buffer or space
@@ -663,7 +663,7 @@ bool NTV2_POINTER::PutU32s (const vector<uint32_t> & inU32s, const size_t inU32O
 }
 
 
-bool NTV2_POINTER::PutU16s (const vector<uint16_t> & inU16s, const size_t inU16Offset, const bool inByteSwap)
+bool NTV2_POINTER::PutU16s (const UWordSequence & inU16s, const size_t inU16Offset, const bool inByteSwap)
 {
 	if (IsNULL())
 		return false;	//	No buffer or space
@@ -689,7 +689,7 @@ bool NTV2_POINTER::PutU16s (const vector<uint16_t> & inU16s, const size_t inU16O
 }
 
 
-bool NTV2_POINTER::PutU8s (const vector<uint8_t> & inU8s, const size_t inU8Offset)
+bool NTV2_POINTER::PutU8s (const UByteSequence & inU8s, const size_t inU8Offset)
 {
 	if (IsNULL())
 		return false;	//	No buffer or space
@@ -2892,13 +2892,13 @@ NTV2RegInfo NTV2BankSelGetSetRegs::GetRegInfo (const UWord inIndex0) const
 {
 	NTV2_ASSERT_STRUCT_VALID;
 	NTV2RegInfo	result;
-	if (!mInRegInfos.IsNULL ())
+	if (!mInRegInfos.IsNULL())
 	{
-        const UWord	maxNum	(mInRegInfos.GetByteCount () / (UWord)sizeof (NTV2RegInfo));
-		if (inIndex0 < maxNum)
+        const ULWord	maxNum	(mInRegInfos.GetByteCount() / ULWord(sizeof(NTV2RegInfo)));
+		if (ULWord(inIndex0) < maxNum)
 		{
-			const NTV2RegInfo *	pRegInfo	(reinterpret_cast <const NTV2RegInfo *> (mInRegInfos.GetHostPointer ()));
-			result = pRegInfo [inIndex0];
+			const NTV2RegInfo *	pRegInfo (reinterpret_cast<const NTV2RegInfo*>(mInRegInfos.GetHostPointer()));
+			result = pRegInfo[inIndex0];
 		}
 	}
 	return result;

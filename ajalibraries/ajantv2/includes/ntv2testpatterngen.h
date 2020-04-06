@@ -27,6 +27,7 @@ typedef NTV2StringList					NTV2TestPatternNames;	///< @brief	A list (std::vector
 enum NTV2TestPatternSelect
 {
 	NTV2_TestPatt_ColorBars100,
+	NTV2_TestPatt_FIRST			= NTV2_TestPatt_ColorBars100,
 	NTV2_TestPatt_ColorBars75,
 	NTV2_TestPatt_Ramp,
 	NTV2_TestPatt_MultiBurst,
@@ -48,7 +49,9 @@ enum NTV2TestPatternSelect
 	NTV2_TestPatt_HLG_Narrow_12b_RGB,
 	NTV2_TestPatt_PQ_Narrow_12b_RGB,
 	NTV2_TestPatt_PQ_Wide_12b_RGB,
-	NTV2_TestPatt_All
+	NTV2_TestPatt_All,
+	NTV2_TestPatt_INVALID	= NTV2_TestPatt_All,
+	NTV2_TestPatt_LAST		= NTV2_TestPatt_All
 };
 
 #define NTV2_IS_VALID_PATTERN(__S__) ((__S__) >= NTV2_TestPatt_ColorBars100  &&  (__S__) < NTV2_TestPatt_All)
@@ -69,13 +72,24 @@ public:
 	virtual inline			~NTV2TestPatternGen ()	{}
 
 	/**
+		@brief		Renders the given test pattern or color into a host raster buffer.
+		@param[in]	inTPName		Specifies the name of the test pattern or color to be drawn.
+		@param[in]	inFormatDesc	Describes the raster memory.
+		@param		inBuffer		Specifies the host memory buffer to be written.
+		@return		True if successful;  otherwise false.
+	**/
+	virtual bool			DrawTestPattern (const std::string & inTPName,
+											const NTV2FormatDescriptor & inFormatDesc,
+											NTV2_POINTER & inBuffer);
+	/**
 		@brief		Renders the given test pattern into a host raster buffer.
 		@param[in]	inPattern		Specifies the test pattern to be drawn.
 		@param[in]	inFormatDesc	Describes the raster memory.
 		@param		inBuffer		Specifies the host memory buffer to be written.
+		@return		True if successful;  otherwise false.
 	**/
 	virtual bool			DrawTestPattern (const NTV2TestPatternSelect inPattern,
-											const NTV2FormatDescriptor inFormatDesc,
+											const NTV2FormatDescriptor & inFormatDesc,
 											NTV2_POINTER & inBuffer);
 
 	virtual inline bool		DrawTestPattern (const NTV2TestPatternSelect inPattern,
@@ -86,8 +100,10 @@ public:
 																									inDesc.GetVisibleRasterHeight(),
 																									inDesc.GetPixelFormat(),
 																									outBuffer);}
-	virtual bool			DrawTestPattern (const NTV2TestPatternSelect inPattern, uint32_t inFrameWidth, uint32_t inFrameHeight,
-											const NTV2FrameBufferFormat inPixelFormat, NTV2TestPatBuffer & outBuffer);
+	virtual bool			DrawTestPattern (const NTV2TestPatternSelect inPattern,
+											uint32_t inFrameWidth, uint32_t inFrameHeight,
+											const NTV2FrameBufferFormat inPixelFormat,
+											NTV2TestPatBuffer & outBuffer);
 
 	inline void				setSignalMask (NTV2SignalMask signalMask)		{_signalMask = signalMask;}
 	inline void				setUseRGBSmpteRange (bool useRGBSmpteRange)		{_bRGBSmpteRange = useRGBSmpteRange;}
@@ -98,8 +114,42 @@ public:
 	inline void				setAlphaFromLuma (bool alphaFromLuma)			{_bAlphaFromLuma = alphaFromLuma;}
 	inline bool				getAlphaFromLuma (void) const					{return _bAlphaFromLuma;}
 
-	static bool							canDrawTestPattern (const NTV2TestPatternSelect inPattern, const NTV2FormatDescriptor & inDesc);
-	static const NTV2TestPatternNames &	getTestPatternNames (void);
+	/**
+		@param[in]	inPattern	Specifies the test pattern of interest.
+		@param[in]	inDesc		Specifies a description of the raster being used.
+		@return		True, if the given test pattern can be drawn for the given raster description.
+	**/
+	static bool						canDrawTestPattern (const NTV2TestPatternSelect inPattern,
+														const NTV2FormatDescriptor & inDesc);
+
+	/**
+		@return		An ordered collection of strings containing the names of all available test patterns.
+	**/
+	static NTV2TestPatternNames		getTestPatternNames (void);
+
+	/**
+		@return		An ordered collection of strings containing the names of all available flat-field colors.
+	**/
+	static NTV2StringList			getColorNames (void);
+
+	/**
+		@return		The test pattern that corresponds to the given name.
+		@param[in]	inName	Specifies the test pattern name. The search is done case-insensitively.
+	**/
+	static NTV2TestPatternSelect	findTestPatternByName (const std::string & inName);
+
+	/**
+		@return		The flat-field RGB color value that corresponds to the given name.
+					The highest-order byte in the 32-bit result is 0x00; the next-lower byte
+					is the Red value (0-255); the next-lower byte is the Green value (0-255);
+					the lowest-order byte is the Blue value (0-255). A zero return value
+					means "not found".
+		@param[in]	inName	Specifies the color name. The search is done case-insensitively.
+		@note		"Black" and "White" are not returned, as these are available as ordinary
+					test patterns.
+	**/
+	static ULWord					findRGBColorByName (const std::string & inStartsWith);
+
 #if !defined(NTV2_DEPRECATE_15_0)
 	static NTV2_SHOULD_BE_DEPRECATED (NTV2TestPatternList &		getTestPatternList (void));
 #endif	//	!defined(NTV2_DEPRECATE_15_0)
@@ -111,12 +161,11 @@ protected:
 	virtual bool	DrawLinearRampFrame ();
 	virtual bool	DrawSlantRampFrame ();
 	virtual bool	DrawZonePlateFrame ();
-	virtual bool	DrawQuandrantBorderFrame ();
-	virtual bool	DrawColorQuandrantFrame ();
-	virtual bool	DrawColorQuandrantFrameTsi ();
-	
+	virtual bool	DrawQuadrantBorderFrame ();
+	virtual bool	DrawColorQuadrantFrame ();
+	virtual bool	DrawColorQuadrantFrameTsi ();
+
 	//12b patterns
-	virtual void	setupHDRTestPatternGeometries();
 	virtual bool	DrawTestPatternNarrowHLG();
 	virtual bool	DrawTestPatternNarrowPQ();
 	virtual bool	DrawTestPatternWidePQ();
@@ -125,7 +174,7 @@ protected:
 	virtual void	PrepareForOutput();
 
 	bool			IsSDStandard();
-	bool			GetStandard(int &standard, bool &b4K, bool &b8K);
+	bool			GetStandard (int & outStandard, bool & outIs4K, bool & outIs8K);
 	virtual bool	drawIt (void);
 
 protected:
