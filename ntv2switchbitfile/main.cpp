@@ -47,7 +47,7 @@ int main(int argc, const char ** argv)
 	const struct poptOption userOptionsTable[] =
 	{
         { "device", 'd', POPT_ARG_STRING | POPT_ARGFLAG_OPTIONAL, &pDeviceSpec, 'd', "device index", NULL },
-        { "deviceID", 'i', POPT_ARG_STRING | POPT_ARGFLAG_OPTIONAL, &pDeviceID, 'i', "device ID", NULL },
+		{ "load", 'l', POPT_ARG_STRING | POPT_ARGFLAG_OPTIONAL, &pDeviceID, 'l', "load device ID", NULL },
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
