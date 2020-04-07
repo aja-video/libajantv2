@@ -46,8 +46,8 @@ int main(int argc, const char ** argv)
 
 	const struct poptOption userOptionsTable[] =
 	{
-        { "board", 'b', POPT_ARG_STRING | POPT_ARGFLAG_OPTIONAL, &pDeviceSpec, 'b', "device index", NULL },
-        { "deviceID", 'd', POPT_ARG_STRING | POPT_ARGFLAG_OPTIONAL, &pDeviceID, 'd', "device ID", NULL },
+        { "device", 'd', POPT_ARG_STRING | POPT_ARGFLAG_OPTIONAL, &pDeviceSpec, 'd', "device index", NULL },
+        { "deviceID", 'i', POPT_ARG_STRING | POPT_ARGFLAG_OPTIONAL, &pDeviceID, 'i', "device ID", NULL },
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -61,7 +61,7 @@ int main(int argc, const char ** argv)
 	{
 		switch (rc)
 		{
-		case 'b':
+        case 'd':
 			if (pDeviceSpec == NULL)
 			{
 				fprintf(stderr, "## ERROR:  Must specify device index\n");
