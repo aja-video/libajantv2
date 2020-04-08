@@ -415,6 +415,8 @@
 		B455E04C210F9C70002A69FD /* ntv2vpidfromspec.h in Headers */ = {isa = PBXBuildFile; fileRef = B4FE2EDB1C7E8A7500C5627A /* ntv2vpidfromspec.h */; };
 		B462E8BD2076F72E0003262A /* ntv2hdmi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B462E8BC2076F72E0003262A /* ntv2hdmi.cpp */; };
 		B462E8BE2076F7440003262A /* ntv2hdmi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B462E8BC2076F72E0003262A /* ntv2hdmi.cpp */; };
+		B46476FE243E65CC00841B8D /* ntv2csclut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46476FD243E65CB00841B8D /* ntv2csclut.cpp */; };
+		B46476FF243E65CC00841B8D /* ntv2csclut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B46476FD243E65CB00841B8D /* ntv2csclut.cpp */; };
 		B47167A824340AEE0006A7A2 /* ntv2dynamicdevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B47167A624340AEE0006A7A2 /* ntv2dynamicdevice.cpp */; };
 		B47167A924340AEE0006A7A2 /* ntv2dynamicdevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B47167A624340AEE0006A7A2 /* ntv2dynamicdevice.cpp */; };
 		B47167AA24340AEE0006A7A2 /* ntv2bitmanager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B47167A724340AEE0006A7A2 /* ntv2bitmanager.cpp */; };
@@ -722,6 +724,7 @@
 		B455E010210F97D6002A69FD /* ancillarydatafactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarydatafactory.h; path = ../../ajaanc/includes/ancillarydatafactory.h; sourceTree = SOURCE_ROOT; };
 		B455E011210F97D6002A69FD /* ancillarylist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ancillarylist.h; path = ../../ajaanc/includes/ancillarylist.h; sourceTree = SOURCE_ROOT; };
 		B462E8BC2076F72E0003262A /* ntv2hdmi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2hdmi.cpp; path = ../src/ntv2hdmi.cpp; sourceTree = SOURCE_ROOT; };
+		B46476FD243E65CB00841B8D /* ntv2csclut.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2csclut.cpp; path = ../src/ntv2csclut.cpp; sourceTree = SOURCE_ROOT; };
 		B47167A624340AEE0006A7A2 /* ntv2dynamicdevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2dynamicdevice.cpp; path = ../src/ntv2dynamicdevice.cpp; sourceTree = SOURCE_ROOT; };
 		B47167A724340AEE0006A7A2 /* ntv2bitmanager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2bitmanager.cpp; path = ../src/ntv2bitmanager.cpp; sourceTree = SOURCE_ROOT; };
 		B480B6431C6291E1003210EE /* ntv2hevc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2hevc.cpp; path = ../src/ntv2hevc.cpp; sourceTree = SOURCE_ROOT; };
@@ -809,6 +812,7 @@
 				B4F90FAD1C485204004723C9 /* ntv2config2022.cpp */,
 				7D5732711FD9CB3800862AD2 /* ntv2config2110.cpp */,
 				8A6F1B081CBEE58B008A0557 /* ntv2configts2022.cpp */,
+				B46476FD243E65CB00841B8D /* ntv2csclut.cpp */,
 				B40640FC1B825F5C0037C033 /* ntv2cscmatrix.cpp */,
 				B41B5DCE16E5330C00A9E0DC /* ntv2debug.cpp */,
 				B408066B1A3776A5002C35ED /* ntv2devicefeatures.cpp */,
@@ -1594,6 +1598,7 @@
 				B455DFFC210F97CD002A69FD /* ancillarydata_hdr_sdr.cpp in Sources */,
 				B455DFAA210F9768002A69FD /* audioutilities.cpp in Sources */,
 				B4CE1E2A16E582A10092B564 /* ntv2vpid.cpp in Sources */,
+				B46476FF243E65CC00841B8D /* ntv2csclut.cpp in Sources */,
 				B4CE1E3016E582A10092B564 /* ntv2verticalfilter.cpp in Sources */,
 				B455DFF4210F97CD002A69FD /* ancillarydata_cea608_line21.cpp in Sources */,
 				B455E001210F97CD002A69FD /* ancillarydatafactory.cpp in Sources */,
@@ -1710,6 +1715,7 @@
 				B41B5E7816E5330C00A9E0DC /* ntv2verticalfilter.cpp in Sources */,
 				B455DFEF210F97C5002A69FD /* ancillarydata_timecode_vitc.cpp in Sources */,
 				B455DEE3210F95E9002A69FD /* pixelformat.cpp in Sources */,
+				B46476FE243E65CC00841B8D /* ntv2csclut.cpp in Sources */,
 				B455DF1C210F96BD002A69FD /* masterport.cpp in Sources */,
 				B455DF6E210F9719002A69FD /* threadimpl.cpp in Sources */,
 				B455DEF0210F95E9002A69FD /* timer.cpp in Sources */,
