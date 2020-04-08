@@ -270,6 +270,7 @@
     <ClCompile Include="..\src\ntv2config2022.cpp" />
     <ClCompile Include="..\src\ntv2configts2022.cpp" />
     <ClCompile Include="..\src\ntv2config2110.cpp" />
+    <ClCompile Include="..\src\ntv2csclut.cpp" />
     <ClCompile Include="..\src\ntv2debug.cpp" />
     <ClCompile Include="..\src\ntv2devicefeatures.cpp" />
     <ClCompile Include="..\src\ntv2devicescanner.cpp" />
