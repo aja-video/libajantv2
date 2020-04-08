@@ -14,6 +14,7 @@
 		-	\ref fieldframeinterrupts
 		-	\ref vidop-fbconflict
 		-	\ref vidop-csc
+		-	\ref vidop-lut
 		-	\ref vidop-mixerkeyer
 	-	\ref audiooperation
 		-	\ref audiocapture
@@ -776,6 +777,45 @@
 	Some AJA devices support “enhanced” CSC firmware that is used to override the default Rec 601 and Rec 709 conversion
 	offsets and coefficients.  Call ::NTV2DeviceCanDoEnhancedCSC to determine if the device has the enhanced CSC firmware.
 
+
+	<hr size="50px">
+	@subsection	vidop-lut		LUT Operation
+
+	A color <b>Look Up Table</b> (a.k.a. <b>LUT</b>) is a device widget implemented in FPGA firmware that converts specific
+	input RGB values into other corresponding RGB values. It uses several registers to configure its conversion properties
+	and a contiguous bank of registers for reading or writing the conversion table.
+
+	@note	<b>LUT</b>s only work with RGB video, not YCbCr.
+
+	-	For devices that have <b>LUT</b>s, there is usually one <b>LUT</b> for every Frame Store and/or SDI Input (or Output).
+		Call ::NTV2DeviceGetNumLUTs to obtain the number of available <b>LUT</b>s.
+	-	<b>LUT</b> widgets are identified by ::NTV2_WgtLUT1, ::NTV2_WgtLUT2, …, but are normally identified in SDK calls
+		by ::NTV2Channel, a zero-based, unsigned index number.
+	-	Each <b>LUT</b> widget has one input that only accepts RGB video.
+	-	Each <b>LUT</b> widget has two outputs — <b>YUV</b> and <b>RGB</b> — that carry the converted video.
+		The <b>YUV</b> output carries the luminance of the converted video in the <b>Y</b> channel.
+	-	The ::NTV2DeviceGetLUTVersion function returns the version number of the <b>LUT</b> widget firmware implementation.
+	-	The conversion is performed on a per-component basis using 10 bits of precision.
+	-	The 10-bit Red, Green, or Blue component value (<tt>0x000</tt> thru <tt>0x3FF</tt>) is used as the index into
+		the respective R, G, or B table to fetch the converted output value, another 10-bit value in the range
+		<tt>0x000</tt> thru <tt>0x3FF</tt>.
+	-	Each <b>LUT</b> widget has two independent banks, only one of which is actively converting its input video.
+		-	A LUT bank is identified by an integer value — <b>0</b> or <b>1</b>.
+		-	To determine which bank is currently active for a given LUT, call CNTV2Card::GetColorCorrectionOutputBank.
+		-	To switch the active LUT bank, call CNTV2Card::SetColorCorrectionOutputBank.
+	-	There is currently no API call that reads the Red, Green and/or Blue conversion table values for a particular bank
+		of a given LUT. (It can be done, but a control register must be configured before and after calling CNTV2Card::ReadLUTTables.)
+	-	To change the Red, Green and/or Blue conversion table values for a particular bank:
+		-	Build a 1,024-element <tt>std::vector</tt> of <b>UWord</b> or <b>double</b> values for each R, G and/or B
+			component. Each value in the array should be in the range <tt>0 - 1023</tt> or <tt>0.00 - 1023.00</tt>, respectively.
+		-	Call CNTV2Card::DownloadLUTToHW. The array values will automatically be clamped to the legal range <tt>0x000</tt>
+			thru <tt>0x3FF</tt> prior to being written to the device.
+	-	Some newer device firmware supports 12-bit LUTs. In 12-bit mode, the LUT table is expanded in size to 4,096 values
+		per component, and the legal (output) values assume the range <tt>0x000 - 0xFFF</tt>.
+
+	@note	The reading and writing of any 10-bit “version 2” LUT bank table data flows through registers 512-2047,
+			with host access controlled by register 376 (<tt>kRegLUTV2Control</tt>). There is no software mutex
+			guarding access to this register, so calls to read or write the tables are not thread-safe.
 
 	<hr size="50px">
 	@subsection	vidop-mixerkeyer		Mixer/Keyer Operation

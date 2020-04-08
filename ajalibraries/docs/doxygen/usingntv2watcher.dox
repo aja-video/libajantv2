@@ -14,6 +14,7 @@ This page describes how to use the <b>NTV2 Watcher</b> tool to interactively mon
 		-	\ref inspectoranc
 		-	\ref inspectorac
 		-	\ref inspectormixerkeyer
+		-	\ref inspectorlut
 		-	\ref inspectorregs
 		-	\ref inspectorroute
 
@@ -665,6 +666,41 @@ Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot o
 
 
 <hr size="50px">
+@subsection	inspectorlut		LUT Inspector
+
+@image	html	watcher-inspector-lut.png
+
+The <b>LUT</b> inspector monitors and controls any one of the device’s LUT banks (see \ref vidop-lut ).
+Because of access contention issues, it does not continually poll and update its LUT display.
+
+-	To load a lut bank, set the <b>LUT</b> and <b>Bank</b> of interest, then click <b>Load</b>.
+	The contents of the displayed table are replaced.
+-	The table can be edited any time:
+	-	Make selections with the mouse and/or keyboard.
+	-	Right-click in the table to pop up a context menu of several commands:
+		-	<b>Copy</b> — 
+		-	<b>Paste</b> — Pastes the clipboard contents into the table where.
+		-	<b>Select All</b> — Highlights all cells in the table.
+		-	<b>Pre-Defined LUT</b> — Pops up a submenu of pre-defined LUTs, that if selected, will replace the entire table:
+			-	<b>Linear</b>
+			-	<b>Gamma 18 Rec608 (Full)</b>
+			-	<b>Gamma 18 Rec709 (Full)</b>
+			-	<b>Gamma 18 Rec608 (SMPTE)</b>
+			-	<b>Gamma 18 Rec709 (SMPTE)</b>
+			-	<b>RGB Full-Range SMPTE</b>
+		-	<b>Import CSV…</b> — Brings up a standard file-picker dialog for choosing a CSV file to import.
+		-	<b>Export CSV…</b> — Brings up a standard file-save dialog for exporting the table into a CSV file.
+		-	<b>Fill Selection</b> — Fills the highlighted cells with the value of the right-clicked cell.
+		-	<b>Fill Down</b> — Fills all highlighted cells with the values of the top-most cells.
+		-	<b>Fill Right</b> — Fills all highlighted cells with the values of the left-most cells.
+		-	<b>Clear</b> — Fills all highlighted cells with zero.
+		-	<b>Invert</b> — Inverts the values in all highlighted cells (i.e. subtracts its current value from 1023).
+-	To write the table to the device, set the <b>LUT</b> and <b>Bank</b> of interest, then click <b>Write</b>.
+
+			
+
+
+<hr size="50px">
 @subsection	inspectorregs		Registers Inspector
 
 @image	html	watcher-inspector-regs.png
@@ -818,6 +854,35 @@ Standard behaviors:
 		-	<b>Copy (Source Code)</b> — Copies the source code containing the CNTV2Card::Connect function call that’s
 			relevant to the <b>cable</b> — i.e. the connection — to the clipboard.
 		-	<b>Disconnect</b> — Disconnects the <b>cable</b>, breaking the connection.
+	-	On <b>Framestore</b>s:
+		-	<b>Disable</b> or <b>Enable</b>
+		-	<b>Set to Playout</b> or <b>Set to Capture</b>
+		-	<b>Video Format</b> — Changes the Framestore’s video format. If the device is Multi-Format capable, it will globally change
+			the device to multi-format mode.
+		-	<b>Pixel Format</b> — Changes the Framestore’s frame buffer format.
+		-	<b>4K Mode</b> — Changes the Framestore’s “quad” mode to “squares” or “TSI” (if device is 4K-capable).
+		-	<b>Inspect</b> — Opens the Framestore’s \ref inspectorframebuffer.
+		-	<b>Fill…</b> — Opens the \ref fillbufferdlog .
+	-	On <b>CSC</b>s:
+		-	<b>Colorspace Matrix</b> — Choose “Rec601” or “Rec709”.
+		-	<b>RGB Range</b> — Choose “Full” or “SMPTE”.
+		-	<b>Alpha Output</b> — Choose “Opaque” or “From Key”.
+	-	On <b>LUT</b>s:
+		-	<b>LUT Type</b> — Immediately rewrites the chosen LUT type to both banks of the LUT.
+		-	<b>Bank</b> — Immediately changes the active LUT output bank.
+		-	<b>Inspect</b> — Opens its \ref inspectorlut.
+	-	On <b>Mixer/Keyer</b>s:
+		-	<b>Inspect</b> — Opens the \ref inspectormixerkeyer.
+	-	On <b>SDI Input</b>s:
+		-	<b>Disable Input</b> or <b>Enable Input</b> — For bidirectional SDI connectors, immediately changes its direction.
+		-	<b>3Gb->3Ga Conversion</b> — (3G/6G/12G only) Enables or disables the input’s 3Gb-to-3Ga converter.
+	-	On <b>SDI Output</b>s:
+		-	<b>Disable Output</b> or <b>Enable Output</b> — For bidirectional SDI connectors, immediately changes its direction.
+		-	<b>SDI Output Standard</b> — Sets the output’s video standard.
+		-	<b>3Ga->3Gb Conversion</b> — (3G/6G/12G only) Enables or disables the output’s 3Ga-to-3Gb converter.
+		-	<b>RGB 3Ga Conversion</b> — (3G/6G/12G only) Enables or disables the output’s RGB 3Ga converter.
+		-	<b>3G Enabled</b> — (3G/6G/12G only) Enables or disables 3G output. If disabled, the output is restricted to 1.5G.
+		-	<b>3Gb Enabled</b> — (3G/6G/12G only) Enables or disables 3Gb output.
 	-	In the background area — Displays a context menu with commands that globally affect the device:
 		-	<b>Video Format</b> — Pops up a sub-menu of video formats supported by the device.
 			Choosing one of these formats globally changes the video format for all FrameStores on the device.

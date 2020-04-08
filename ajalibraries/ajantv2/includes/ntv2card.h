@@ -4351,6 +4351,18 @@ public:
 										const NTV2Channel inLUT, const int inBank);
 
 	/**
+		@brief		Writes the LUT tables to the given LUT and bank.
+		@param[in]	inRedLUT	The Red LUT, a std::vector of UWord values.
+		@param[in]	inGreenLUT	The Green LUT, a std::vector of UWord values.
+		@param[in]	inBlueLUT	The Blue LUT, a std::vector of UWord values.
+		@param[in]	inLUT		Specifies the LUT of interest, expressed as an ::NTV2Channel (a zero-based index number).
+		@param[in]	inBank		Specifies the LUT bank of interest (0 or 1).
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	DownloadLUTToHW (const UWordSequence & inRedLUT, const UWordSequence & inGreenLUT, const UWordSequence & inBlueLUT,
+										const NTV2Channel inLUT, const int inBank);
+
+	/**
 		@brief		Enables or disables the given LUT.
 		@param[in]	inEnable	Specify true to enable, or false to disable.
 		@param[in]	inLUT		Specifies the LUT of interest, expressed as an ::NTV2Channel (a zero-based index number).

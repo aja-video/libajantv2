@@ -595,9 +595,9 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 	return true;
 }	//	GenerateGammaTable
 
-static inline ULWord intClamp (const ULWord inMin, const ULWord inValue, const ULWord inMax)
+static inline ULWord intClamp (const int inMin, const int inValue, const int inMax)
 {
-	return inValue < inMin ? inMin : (inValue > inMax ? inMax : inValue);
+	return ULWord(inValue < inMin  ?  inMin  :  (inValue > inMax ? inMax : inValue));
 }
 
 bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, UWordSequence & outTable)
@@ -612,9 +612,10 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 	while (outTable.size() < 1024)
 		outTable.push_back(0);
 	for (size_t ndx(0);  ndx < 1024;  ndx++)
-		if ((outTable.at(ndx) = UWord(intClamp(0UL, ULWord(dblTable.at(ndx) + 0.5), 1023UL))))
+		if ((outTable.at(ndx) = UWord(intClamp(0, int(dblTable.at(ndx) + 0.5), 1023))))
 			nonzeroes++;
-	NTV2_ASSERT(nonzeroes >= 1023);
+	if (nonzeroes >= 1023)
+		{AJA_sWARNING(AJA_DebugUnit_LUT, AJAFUNC << ": " << DEC(nonzeroes) << " non-zero values -- at least 1023"); return false;}
 	return nonzeroes >= 1023;
 }
 
@@ -629,28 +630,56 @@ static const size_t	kLUTArraySize (NTV2_COLORCORRECTOR_WORDSPERTABLE * 2);
 
 
 // this allows for three 1024-entry LUTs that we're going to download to all four channels
-bool CNTV2Card::DownloadLUTToHW (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT, const NTV2Channel inChannel, const int inBank)
+bool CNTV2Card::DownloadLUTToHW (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT,
+								 const NTV2Channel inLUT, const int inBank)
 {
 	if (inRedLUT.size() < kLUTArraySize  ||  inGreenLUT.size() < kLUTArraySize  ||  inBlueLUT.size() < kLUTArraySize)
 		{LUTFAIL("Size error (< 1024): R=" << DEC(inRedLUT.size()) << " G=" << DEC(inGreenLUT.size()) << " B=" << DEC(inBlueLUT.size())); return false;}
 
-	if (IS_CHANNEL_INVALID(inChannel))
-		{LUTFAIL("Bad LUT/channel (> 7): " << DEC(inChannel)); return false;}
+	if (IS_CHANNEL_INVALID(inLUT))
+		{LUTFAIL("Bad LUT/channel (> 7): " << DEC(inLUT)); return false;}
 
 	if (inBank != 0 && inBank != 1)
 		{LUTFAIL("Bad bank value (> 1): " << DEC(inBank)); return false;}
 
 	if (::NTV2DeviceGetNumLUTs(_boardID) == 0)
-		return true;	//	It's not a sin to have been born with no LUTs
+		return true;	//	It's no sin to have been born with no LUTs
 
-	bool bResult = SetLUTEnable(true, inChannel);
+	bool bResult = SetLUTEnable(true, inLUT);
 	if (bResult)
 	{
 		//	Set up Host Access...
-		bResult = SetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank (gLUTBank0[inChannel] + inBank));
+		bResult = SetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank (gLUTBank0[inLUT] + inBank));
 		if (bResult)
 			bResult = LoadLUTTables (inRedLUT, inGreenLUT, inBlueLUT);
-		SetLUTEnable (false, inChannel);
+		SetLUTEnable (false, inLUT);
+	}
+	return bResult;
+}
+
+bool CNTV2Card::DownloadLUTToHW (const UWordSequence & inRedLUT, const UWordSequence & inGreenLUT, const UWordSequence & inBlueLUT,
+								const NTV2Channel inLUT, const int inBank)
+{
+	if (inRedLUT.size() < kLUTArraySize  ||  inGreenLUT.size() < kLUTArraySize  ||  inBlueLUT.size() < kLUTArraySize)
+		{LUTFAIL("Size error (< 1024): R=" << DEC(inRedLUT.size()) << " G=" << DEC(inGreenLUT.size()) << " B=" << DEC(inBlueLUT.size())); return false;}
+
+	if (IS_CHANNEL_INVALID(inLUT))
+		{LUTFAIL("Bad LUT/channel (> 7): " << DEC(inLUT)); return false;}
+
+	if (inBank != 0 && inBank != 1)
+		{LUTFAIL("Bad bank value (> 1): " << DEC(inBank)); return false;}
+
+	if (::NTV2DeviceGetNumLUTs(_boardID) == 0)
+		return true;	//	It's no sin to have been born with no LUTs
+
+	bool bResult = SetLUTEnable(true, inLUT);
+	if (bResult)
+	{
+		//	Set up Host Access...
+		bResult = SetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank (gLUTBank0[inLUT] + inBank));
+		if (bResult)
+			bResult = WriteLUTTables (inRedLUT, inGreenLUT, inBlueLUT);
+		SetLUTEnable (false, inLUT);
 	}
 	return bResult;
 }
@@ -666,9 +695,9 @@ bool CNTV2Card::LoadLUTTables (const NTV2DoubleArray & inRedLUT, const NTV2Doubl
 	blueLUT.resize(kLUTArraySize);
 	for (size_t ndx(0);  ndx < kLUTArraySize;  ndx++)
 	{
-		redLUT  .push_back(UWord(intClamp(0, ULWord(inRedLUT  [ndx] + 0.5), 1023)));
-		greenLUT.push_back(UWord(intClamp(0, ULWord(inGreenLUT[ndx] + 0.5), 1023)));
-		blueLUT .push_back(UWord(intClamp(0, ULWord(inBlueLUT [ndx] + 0.5), 1023)));
+		redLUT  .at(ndx) = UWord(intClamp(0, int(inRedLUT  [ndx] + 0.5), 1023));
+		greenLUT.at(ndx) = UWord(intClamp(0, int(inGreenLUT[ndx] + 0.5), 1023));
+		blueLUT .at(ndx) = UWord(intClamp(0, int(inBlueLUT [ndx] + 0.5), 1023));
 	}
 	return WriteLUTTables(redLUT, greenLUT, blueLUT);
 }
@@ -706,8 +735,8 @@ bool CNTV2Card::WriteLUTTables (const UWordSequence & inRedLUT, const UWordSeque
 		if (!WriteRegister(BTableReg++, tmp))
 			errorCount++;
 	}
-	if (errorCount)	LUTFAIL(DEC(errorCount) << " WriteRegister calls failed");
-	else if (!nonzeroes) LUTWARN("All zero LUT table values!");
+	if (errorCount)	LUTFAIL(GetDisplayName() << " " << DEC(errorCount) << " WriteRegister calls failed");
+	else if (!nonzeroes) LUTWARN(GetDisplayName() << " All zero LUT table values!");
 	return !errorCount;
 }
 
@@ -769,8 +798,8 @@ bool CNTV2Card::ReadLUTTables (UWordSequence & outRedLUT, UWordSequence & outGre
 		outBlueLUT[ndx + 1] = (temp >> kRegColorCorrectionLUTOddShift ) & 0x3FF;
 		if (temp) nonzeroes++;
 	}
-	if (errors)	LUTFAIL(DEC(errors) << " ReadRegister calls failed");
-	else if (!nonzeroes) LUTWARN("All zero LUT table values!");
+	if (errors)	LUTFAIL(GetDisplayName() << " " << DEC(errors) << " ReadRegister calls failed");
+	else if (!nonzeroes) LUTWARN(GetDisplayName() << " All zero LUT table values!");
 	return !errors;
 }
 
@@ -792,21 +821,21 @@ bool CNTV2Card::SetLUTEnable (const bool inEnable, const NTV2Channel inLUT)
 	const ULWord mask(LUTEnableMasks[inLUT]), shift(LUTEnableShifts[inLUT]); ULWord tmp(0);
 	if (ReadRegister(kRegLUTV2Control, tmp))
 		if (((tmp & mask)?true:false) == inEnable)
-			LUTWARN("V2 LUT" << DEC(inLUT+1) << " Enable bit already " << (inEnable?"set":"clear"));
+			LUTWARN(GetDisplayName() << " V2 LUT" << DEC(inLUT+1) << " Enable bit already " << (inEnable?"set":"clear"));
 	tmp &= 0x000000FF;
 	if (inEnable)
 		if (BitCountNibble[tmp & 0xF] || BitCountNibble[(tmp >> 4) & 0xF])
-			LUTWARN("Setting V2 LUT" << DEC(inLUT+1) << " Enable bit: multiple Enable bits set: " << xHEX0N(tmp,4));
+			LUTWARN(GetDisplayName() << " Setting V2 LUT" << DEC(inLUT+1) << " Enable bit: multiple Enable bits set: " << xHEX0N(tmp,4));
 
 	//	Set or Clear the Enable bit...
 	if (!WriteRegister (kRegLUTV2Control, inEnable ? 1 : 0, mask, shift))
-		{LUTFAIL("WriteRegister kRegLUTV2Control failed, enable=" << DEC(UWord(inEnable))); return false;}
+		{LUTFAIL(GetDisplayName() << " WriteRegister kRegLUTV2Control failed, enable=" << DEC(UWord(inEnable))); return false;}
 
 	//	Sanity check...
 	if (!inEnable)
 		if (ReadRegister(kRegLUTV2Control, tmp, 0x000000FF))	//	all enable masks
 			if (tmp)
-				LUTWARN("Clearing V2 LUT" << DEC(inLUT+1) << " Enable bit: still has Enable bit(s) set: " << xHEX0N(tmp,4));
+				LUTWARN(GetDisplayName() << " Clearing V2 LUT" << DEC(inLUT+1) << " Enable bit: still has Enable bit(s) set: " << xHEX0N(tmp,4));
 
 	return true;
 }
@@ -1020,7 +1049,7 @@ bool CNTV2Card::DownloadLUTToHW (const double * pInTable, const NTV2Channel inCh
 		return false;	//	Bad bank value (must be 0 or 1)
 
 	if (::NTV2DeviceGetNumLUTs (_boardID) == 0)
-		return true;	//	It's not a sin to have been born without any LUTs
+		return true;	//	It's no sin to have been born without any LUTs
 
 	bool bResult = SetLUTEnable (true, inChannel);
 	if (bResult)
