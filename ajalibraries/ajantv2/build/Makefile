@@ -87,6 +87,7 @@ AJA_LIB_SRCS =\
 		ntv2config2022.cpp \
 		ntv2config2110.cpp \
 		ntv2configts2022.cpp \
+		ntv2csclut.cpp \
 		ntv2cscmatrix.cpp \
 		ntv2debug.cpp \
 		ntv2devicefeatures.cpp \
