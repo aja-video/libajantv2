@@ -8928,11 +8928,17 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 	return result;
 }
 
+ostream & operator << (std::ostream & inOutStr, const NTV2DeviceIDList & inList)
+{
+	for (NTV2DeviceIDListConstIter iter(inList.begin());  iter != inList.end ();  ++iter)
+		inOutStr << (iter != inList.begin() ? ", " : "") << ::NTV2DeviceIDToString(*iter);
+	return inOutStr;
+}
 
 ostream & operator << (ostream & inOutStr, const NTV2DeviceIDSet & inSet)
 {
-	for (NTV2DeviceIDSetConstIter iter (inSet.begin ());  iter != inSet.end ();  ++iter)
-		inOutStr << (iter != inSet.begin () ? ", " : "") << ::NTV2DeviceIDToString (*iter);
+	for (NTV2DeviceIDSetConstIter iter(inSet.begin());  iter != inSet.end();  ++iter)
+		inOutStr << (iter != inSet.begin() ? ", " : "") << ::NTV2DeviceIDToString(*iter);
 	return inOutStr;
 }
 

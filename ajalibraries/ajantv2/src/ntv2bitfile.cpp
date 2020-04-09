@@ -83,7 +83,7 @@ bool CNTV2Bitfile::Open (const string & inBitfileName)
 
 		//	Preload bitfile header into mem
 		for (int i = 0; i < MAX_BITFILEHEADERSIZE - 1; i++)
-			_fileHeader.push_back (_bitFileStream.get ());
+			_fileHeader.push_back (static_cast<unsigned char>(_bitFileStream.get()));
 
 		_lastError = ParseHeader ();
 		if (!_lastError.empty ())
@@ -146,7 +146,7 @@ string CNTV2Bitfile::ParseHeader ()
 			{oss << "ParseHeader failed at or near byte offset " << pos << ", expected 'a', instead got '" << testByte << "'";	break;}
 		pos++;
 		
-		fieldLen = htons (*((uint16_t *)p));// the next 2 bytes are the length of the FileName (including /0)
+		fieldLen = htons(*(reinterpret_cast<uint16_t*>(p)));// the next 2 bytes are the length of the FileName (including /0)
 
 		p += 2;							// now pointing at the beginning of the file name
 		pos += 2;
@@ -165,7 +165,7 @@ string CNTV2Bitfile::ParseHeader ()
 			{oss << "ParseHeader failed at or near byte offset " << pos << ", expected 'b', instead got '" << testByte << "'";	break;}
 		pos++;
 		
-		fieldLen = htons (*((uint16_t *)p));// the next 2 bytes are the length of the Part Name (including /0)
+		fieldLen = htons(*(reinterpret_cast<uint16_t*>(p)));// the next 2 bytes are the length of the Part Name (including /0)
 
 		p += 2;							// now pointing at the beginning of the part name
 		pos += 2;
@@ -181,7 +181,7 @@ string CNTV2Bitfile::ParseHeader ()
 			{oss << "ParseHeader failed at or near byte offset " << pos << ", expected 'c', instead got '" << testByte << "'";	break;}
 		pos++;
 
-		fieldLen = htons (*((uint16_t *)p));// the next 2 bytes are the length of the date string (including /0)
+		fieldLen = htons (*(reinterpret_cast<uint16_t*>(p)));// the next 2 bytes are the length of the date string (including /0)
 
 		p += 2;							// now pointing at the beginning of the date string
 		pos += 2;
@@ -197,7 +197,7 @@ string CNTV2Bitfile::ParseHeader ()
 			{oss << "ParseHeader failed at or near byte offset " << pos << ", expected 'd', instead got '" << testByte << "'";	break;}
 		pos++;
 
-		fieldLen = htons (*((uint16_t *)p));// the next 2 bytes are the length of the time string (including /0)
+		fieldLen = htons (*(reinterpret_cast<uint16_t*>(p)));// the next 2 bytes are the length of the time string (including /0)
 
 		p += 2;							// now pointing at the beginning of the time string
 		pos += 2;
@@ -214,7 +214,7 @@ string CNTV2Bitfile::ParseHeader ()
 			{oss << "ParseHeader failed at or near byte offset " << pos << ", expected 'e', instead got '" << testByte << "'";	break;}
 		pos++;
 
-		_numBytes = htonl (*((uint32_t *)p));	// the next 4 bytes are the length of the raw program data
+		_numBytes = htonl (*(reinterpret_cast<uint32_t*>(p)));	// the next 4 bytes are the length of the raw program data
 
 		p += 4;							// now pointing at the beginning of the time string
 		pos += 4;
@@ -222,11 +222,11 @@ string CNTV2Bitfile::ParseHeader ()
 		_fileProgrammingPosition = pos;	// this is where to start the programming stream
 
 		//Search for the start signature
-		bool bFound = (strncmp(p, (const char*)signature, 8) == 0);
+		bool bFound = (strncmp(p, reinterpret_cast<const char*>(signature), 8) == 0);
 		int i = 0;
 		while (bFound == false && i < 1000)
 		{
-			bFound = strncmp(p, (const char*)signature, 8) == 0;
+			bFound = strncmp(p, reinterpret_cast<const char*>(signature), 8) == 0;
 			if(!bFound)
 			{
 				p++;
@@ -237,10 +237,10 @@ string CNTV2Bitfile::ParseHeader ()
 		if (!bFound)
 			{oss << "ParseHeader failed at or near byte offset " << pos << ", signature not found";	break;}
 
-		assert (oss.str ().empty ());	//	If we made it this far it must be an OK Header - and no error messages
+		assert (oss.str().empty());	//	If we made it this far it must be an OK Header - and no error messages
 	} while (false);
 
-	return oss.str ();
+	return oss.str();
 
 }	//	ParseHeader
 
@@ -249,10 +249,10 @@ string CNTV2Bitfile::ParseHeader ()
 // Return value:
 //   Length of program stream
 //   Return value < 0 indicates error
-unsigned CNTV2Bitfile::GetProgramStreamLength (void) const
+size_t CNTV2Bitfile::GetProgramStreamLength (void) const
 {
 	if (!_fileReady)
-		return unsigned (-1);
+		return 0;
 	return _numBytes;
 }
 
@@ -261,10 +261,10 @@ unsigned CNTV2Bitfile::GetProgramStreamLength (void) const
 // Return value:
 //   Length of file
 //   Return value < 0 indicates error
-unsigned CNTV2Bitfile::GetFileStreamLength (void) const
+size_t CNTV2Bitfile::GetFileStreamLength (void) const
 {
 	if (!_fileReady)
-		return unsigned (-1);
+		return 0;
 	return _fileSize;
 }
 
@@ -273,26 +273,29 @@ unsigned CNTV2Bitfile::GetFileStreamLength (void) const
 // Return value:
 //   number of bytes of data copied into buffer. This can be <= bufferLength
 //   zero means configuration stream has finished.
-//   Return value < 0 indicates error
-unsigned CNTV2Bitfile::GetProgramByteStream (unsigned char * buffer, unsigned bufferLength)
+//   Return value 0 indicates error
+size_t CNTV2Bitfile::GetProgramByteStream (unsigned char * pOutBuffer, const size_t bufferLength)
 {
-	unsigned	posInBuffer			= 0;
-	unsigned	programStreamLength	= GetProgramStreamLength ();
+	size_t	posInBuffer			= 0;
+	size_t	programStreamLength	= GetProgramStreamLength();
 
+	if (!pOutBuffer)
+		return 0;
 	if (!_fileReady)
-		return unsigned (-1);
+		return 0;
 
 	_bitFileStream.seekg (_fileProgrammingPosition, std::ios::beg);
 
 	while (_programStreamPos < programStreamLength)
 	{
-		if (_bitFileStream.eof ())
-		{
-			//	Unexpected end of file!
-			ostringstream	oss;	oss << "Unexpected EOF at " << _programStreamPos << "bytes";	_lastError = oss.str ();
-			return unsigned (-1);
+		if (_bitFileStream.eof())
+		{	//	Unexpected end of file!
+			ostringstream	oss;
+			oss << "Unexpected EOF at " << _programStreamPos << "bytes";
+			_lastError = oss.str ();
+			return 0;
 		}
-		buffer [posInBuffer++] = _bitFileStream.get ();
+		pOutBuffer[posInBuffer++] = static_cast<unsigned char>(_bitFileStream.get());
 		_programStreamPos++;
 		if (posInBuffer == bufferLength)
 			break;
@@ -302,31 +305,54 @@ unsigned CNTV2Bitfile::GetProgramByteStream (unsigned char * buffer, unsigned bu
 }	//	GetProgramByteStream
 
 
+size_t CNTV2Bitfile::GetProgramByteStream (NTV2_POINTER & outBuffer)
+{
+	const size_t programStreamLength(GetProgramStreamLength());
+	if (!programStreamLength)
+		return 0;
+	if (!_fileReady)
+		return 0;
+
+	ostringstream oss;
+	if (outBuffer.GetByteCount() < programStreamLength)	//	If buffer IsNULL or too small...
+		outBuffer.Allocate(programStreamLength);			//	...then Allocate or resize it
+	if (outBuffer.GetByteCount() < programStreamLength)	//	Check again
+	{	oss << "Buffer size " << DEC(outBuffer.GetByteCount()) << " < " << DEC(programStreamLength);
+		_lastError = oss.str();
+		return 0;
+	}
+	return GetProgramByteStream (reinterpret_cast<unsigned char *>(outBuffer.GetHostAddress(0)),
+								outBuffer.GetByteCount());
+}
+
+
 // Get maximum of fileLength bytes worth of configuration stream data in buffer.
 // Return value:
 //   number of bytes of data copied into buffer. This can be <= bufferLength
 //   zero means configuration stream has finished.
-//   Return value < 0 indicates error
-unsigned CNTV2Bitfile::GetFileByteStream (unsigned char * buffer, unsigned bufferLength)
+//   Return value 0 indicates error
+size_t CNTV2Bitfile::GetFileByteStream (unsigned char * pOutBuffer, const size_t bufferLength)
 {
-	unsigned	posInBuffer			(0);
-	unsigned	fileStreamLength	(GetFileStreamLength ());
-
+	size_t	posInBuffer			(0);
+	size_t	fileStreamLength	(GetFileStreamLength());
+	if (!pOutBuffer)
+		return 0;
 	if (!_fileReady)
-		return unsigned (-1);
+		return 0;
 
 	_bitFileStream.seekg (0, std::ios::beg);
 
 	while (_fileStreamPos < fileStreamLength)
 	{
-		if (_bitFileStream.eof ())
-		{
-			//	Unexpected end of file!
-			ostringstream	oss;	oss << "Unexpected EOF at " << _programStreamPos << "bytes";	_lastError = oss.str ();
-			return unsigned (-1);
+		if (_bitFileStream.eof())
+		{	//	Unexpected end of file!
+			ostringstream	oss;
+			oss << "Unexpected EOF at " << _programStreamPos << "bytes";
+			_lastError = oss.str();
+			return 0;
 		}
 
-		buffer [posInBuffer++] = _bitFileStream.get ();
+		pOutBuffer[posInBuffer++] = static_cast<unsigned char>(_bitFileStream.get());
 		_programStreamPos++;
 		if (posInBuffer == bufferLength)
 			break;
@@ -335,8 +361,28 @@ unsigned CNTV2Bitfile::GetFileByteStream (unsigned char * buffer, unsigned buffe
 
 }	//	GetFileByteStream
 
+size_t CNTV2Bitfile::GetFileByteStream (NTV2_POINTER & outBuffer)
+{
+	const size_t fileStreamLength(GetFileStreamLength());
+	if (!fileStreamLength)
+		return 0;
+	if (!_fileReady)
+		return 0;
 
-void CNTV2Bitfile::SetDesignName (const char * pInBuffer, unsigned bufferLength)
+	ostringstream oss;
+	if (outBuffer.GetByteCount() < fileStreamLength)	//	If buffer IsNULL or too small...
+		outBuffer.Allocate(fileStreamLength);			//	...then Allocate or resize it
+	if (outBuffer.GetByteCount() < fileStreamLength)	//	Check again
+	{	oss << "Buffer size " << DEC(outBuffer.GetByteCount()) << " < " << DEC(fileStreamLength);
+		_lastError = oss.str();
+		return 0;
+	}
+	return GetFileByteStream (reinterpret_cast<unsigned char *>(outBuffer.GetHostAddress(0)),
+								outBuffer.GetByteCount());
+}
+
+
+void CNTV2Bitfile::SetDesignName (const char * pInBuffer, const size_t bufferLength)
 {
 	if (!pInBuffer)
 		return;
@@ -351,12 +397,12 @@ void CNTV2Bitfile::SetDesignName (const char * pInBuffer, unsigned bufferLength)
 }
 
 
-void CNTV2Bitfile::SetDesignFlags (const char * pInBuffer, unsigned bufferLength)
+void CNTV2Bitfile::SetDesignFlags (const char * pInBuffer, const size_t bufferLength)
 {
 	if (!pInBuffer)
 		return;
-		
-	string buffer(pInBuffer, (size_t)bufferLength);
+
+	const string buffer(pInBuffer, bufferLength);
 	
 	if (buffer.find("TANDEM=TRUE") != string::npos)
 		_tandem = true;
@@ -369,7 +415,7 @@ void CNTV2Bitfile::SetDesignFlags (const char * pInBuffer, unsigned bufferLength
 }
 
 
-void CNTV2Bitfile::SetDesignUserID (const char * pInBuffer, unsigned bufferLength)
+void CNTV2Bitfile::SetDesignUserID (const char * pInBuffer, const size_t bufferLength)
 {
 	_userID = 0;
 	_designID = 0;
@@ -380,7 +426,7 @@ void CNTV2Bitfile::SetDesignUserID (const char * pInBuffer, unsigned bufferLengt
 	if (!pInBuffer)
 		return;
 		
-	string buffer(pInBuffer, (size_t)bufferLength);
+	string buffer(pInBuffer, size_t(bufferLength));
 
     ULWord userID = 0xffffffff;
 
@@ -434,21 +480,20 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_KONALHI:			return "top_pike";			//	top_pike.ncd
 		case DEVICE_ID_TTAP:			return "t_tap_top";			//	t_tap_top.ncd
 		case DEVICE_ID_CORVIDHBR:		return "corvid_hb_r";		//	corvidhb-r
-        case DEVICE_ID_IO4KPLUS:		return "io4kp";
-        case DEVICE_ID_IOIP_2022:		return "ioip_s2022";
-        case DEVICE_ID_IOIP_2110:		return "ioip_s2110";
+		case DEVICE_ID_IO4KPLUS:		return "io4kp";
+		case DEVICE_ID_IOIP_2022:		return "ioip_s2022";
+		case DEVICE_ID_IOIP_2110:		return "ioip_s2110";
 		case DEVICE_ID_KONA1:			return "kona1";
-        case DEVICE_ID_KONAHDMI:		return "kona_hdmi_4rx";
-        case DEVICE_ID_KONA5:           return "kona5";
-        case DEVICE_ID_KONA5_8KMK:      return "kona5_8k_mk";
-		case DEVICE_ID_KONA5_8K:        return "kona5_8k";
-		case DEVICE_ID_KONA5_2:         return "kona5_2x4k";
-		case DEVICE_ID_CORVID44_8KMK:   return "c44_12g_8k_mk";
-		case DEVICE_ID_CORVID44_8K:     return "c44_12g_8k";
-		case DEVICE_ID_CORVID44_8K_2:      return "c44_12g_2x4k";
+		case DEVICE_ID_KONAHDMI:		return "kona_hdmi_4rx";
+		case DEVICE_ID_KONA5:			return "kona5";
+		case DEVICE_ID_KONA5_8KMK:		return "kona5_8k_mk";
+		case DEVICE_ID_KONA5_8K:		return "kona5_8k";
+		case DEVICE_ID_KONA5_2:			return "kona5_2x4k";
+		case DEVICE_ID_CORVID44_8KMK:	return "c44_12g_8k_mk";
+		case DEVICE_ID_CORVID44_8K:		return "c44_12g_8k";
+		case DEVICE_ID_CORVID44_8K_2:	return "c44_12g_2x4k";
 		case DEVICE_ID_T3TAP:			return "t3_tap";
-        default:
-			break;
+		default:						break;
 	}
 	return "";
 }
@@ -512,9 +557,9 @@ static DesignNameToIDMap					sDesignNameToIDMap;
 
 class CDesignNameToIDMapMaker
 {
-public:
+	public:
 
-	CDesignNameToIDMapMaker ()
+		CDesignNameToIDMapMaker ()
 		{
 			assert (sDesignNameToIDMap.empty ());
 			const NTV2DeviceIDSet goodDeviceIDs (::NTV2GetSupportedDevices ());
@@ -525,11 +570,13 @@ public:
 			sDesignNameToIDMap["CORVID88"] = DEVICE_ID_CORVID88;		//	special case
 			sDesignNameToIDMap["ZARTAN"] = DEVICE_ID_CORVIDHBR;			//	special case
 		}
-	virtual ~CDesignNameToIDMapMaker ()
+
+		~CDesignNameToIDMapMaker ()
 		{
 			sDesignNameToIDMap.clear ();
 		}
-	static NTV2DeviceID DesignNameToID (const string & inDesignName)
+
+		static NTV2DeviceID DesignNameToID (const string & inDesignName)
 		{
 			assert (!sDesignNameToIDMap.empty ());
 			const DesignNameToIDConstIter	iter	(sDesignNameToIDMap.find (inDesignName));
@@ -605,17 +652,17 @@ NTV2DeviceID CNTV2Bitfile::GetDeviceID (void) const
 	return sDesignNameToIDMapMaker.DesignNameToID (_designName);
 }
 
-NTV2DeviceID CNTV2Bitfile::ConvertToDeviceID (ULWord designID, ULWord bitfileID)
+NTV2DeviceID CNTV2Bitfile::ConvertToDeviceID (const ULWord designID, const ULWord bitfileID)
 {
 	return sDesignPairToIDMapMaker.DesignPairToID (designID, bitfileID);
 }
 
-ULWord CNTV2Bitfile::ConvertToDesignID(NTV2DeviceID deviceID)
+ULWord CNTV2Bitfile::ConvertToDesignID (const NTV2DeviceID deviceID)
 {
 	return sDesignPairToIDMapMaker.DeviceIDToDesignID(deviceID);
 }
 
-ULWord CNTV2Bitfile::ConvertToBitfileID(NTV2DeviceID deviceID)
+ULWord CNTV2Bitfile::ConvertToBitfileID (const NTV2DeviceID deviceID)
 {
 	return sDesignPairToIDMapMaker.DeviceIDToBitfileID(deviceID);
 }

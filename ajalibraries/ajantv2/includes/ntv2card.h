@@ -17,7 +17,7 @@
 	#include "ntv2linuxdriverinterface.h"
 #endif
 #include "ntv2signalrouter.h"
-
+#include "ntv2utils.h"
 #include <set>
 #include <string>
 #include <iostream>
@@ -6336,12 +6336,40 @@ public:
 	**/
 	AJA_VIRTUAL bool			CanWarmBootFPGA (bool & outCanWarmBoot);
 
-	AJA_VIRTUAL bool			IsDynamicDevice(void);
-	AJA_VIRTUAL std::vector<NTV2DeviceID>		GetDynamicDeviceList(void);
-    AJA_VIRTUAL bool			CanLoadDynamicDevice(NTV2DeviceID inDeviceID);
-    AJA_VIRTUAL bool			LoadDynamicDevice(NTV2DeviceID inDeviceID);
-	AJA_VIRTUAL bool			AddDynamicBitfile(const std::string & inBitfilePath);
-	AJA_VIRTUAL bool			AddDynamicDirectory(const std::string & inDirectory);
+	AJA_VIRTUAL bool				IsDynamicDevice (void);			///< @return	True if this device can quickly change bitfiles;  otherwise false.
+	AJA_VIRTUAL NTV2DeviceIDList	GetDynamicDeviceList (void);	///< @return	A list of supported/available dynamic device IDs.
+	AJA_VIRTUAL NTV2DeviceIDSet		GetDynamicDeviceIDs (void);		///< @return	A set of supported/available dynamic device IDs.
+
+	/**
+		@param[in]	inDeviceID	Specifies the device ID of interest.
+		@return		True if the given ::NTV2DeviceID can be dynamically loaded; otherwise false.
+	**/
+    AJA_VIRTUAL bool			CanLoadDynamicDevice (const NTV2DeviceID inDeviceID);
+
+	/**
+		@brief		Quickly, dynamically loads the given device ID firmware.
+		@param[in]	inDeviceID		Specifies the device ID of interest.
+		@return		True if loaded successfully; otherwise false.
+		@note		If successful, calling CNTV2Card::GetDeviceID will return the same ::NTV2DeviceID
+					as "inDeviceID". This CNTV2Card instance will be talking to the same hardware
+					device, but it will have a different personality with different capabilities.
+	**/
+    AJA_VIRTUAL bool			LoadDynamicDevice (const NTV2DeviceID inDeviceID);
+
+	/**
+		@brief		Adds the given bitfile to the list of available dynamic bitfiles.
+		@param[in]	inBitfilePath		A string containing the path to the bitfile.
+		@return		True if added successfully; otherwise false.
+	**/
+	AJA_VIRTUAL bool			AddDynamicBitfile (const std::string & inBitfilePath);
+
+	/**
+		@brief		Adds all bitfiles found in the given host file directory to the list
+					of available dynamic bitfiles.
+		@param[in]	inDirectory		A string containing the path to the directory.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool			AddDynamicDirectory (const std::string & inDirectory);
 
 				//////////////////////////////////////////////////////////
 	public:		//////////	From CNTV2Status				//////////////

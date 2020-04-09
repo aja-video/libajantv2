@@ -969,6 +969,13 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2Smpt
 inline NTV2SmpteLineNumber GetSmpteLineNumber (const NTV2Standard inStandard)	{return NTV2SmpteLineNumber (inStandard);}
 
 
+typedef std::vector <NTV2DeviceID>			NTV2DeviceIDList;			///< @brief	An ordered list of NTV2DeviceIDs.
+typedef NTV2DeviceIDList::iterator			NTV2DeviceIDListIter;		///< @brief	A convenient non-const iterator for NTV2DeviceIDList.
+typedef NTV2DeviceIDList::const_iterator	NTV2DeviceIDListConstIter;	///< @brief	A convenient const iterator for NTV2DeviceIDList.
+
+AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DeviceIDList & inSet);		///<	@brief	Handy ostream writer for NTV2DeviceIDList.
+
+
 typedef std::set <NTV2DeviceID>			NTV2DeviceIDSet;			///< @brief	A set of NTV2DeviceIDs.
 typedef NTV2DeviceIDSet::iterator		NTV2DeviceIDSetIter;		///< @brief	A convenient non-const iterator for NTV2DeviceIDSet.
 typedef NTV2DeviceIDSet::const_iterator	NTV2DeviceIDSetConstIter;	///< @brief	A convenient const iterator for NTV2DeviceIDSet.

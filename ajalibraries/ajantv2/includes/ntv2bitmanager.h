@@ -41,6 +41,7 @@ struct AJAExport NTV2BitfileInfo
 
 typedef std::vector <NTV2BitfileInfo>		NTV2BitfileInfoList;
 typedef NTV2BitfileInfoList::iterator		NTV2BitfileInfoListIter;
+typedef NTV2BitfileInfoList::const_iterator	NTV2BitfileInfoListConstIter;
 
 
 /**

@@ -5,8 +5,7 @@
 **/
 #include "ntv2bitmanager.h"
 #include "ntv2bitfile.h"
-//#include "ntv2card.h"
-//#include "ntv2utils.h"
+#include "ntv2utils.h"
 #include "ajabase/system/file_io.h"
 #include <iostream>
 #include <sys/stat.h>
@@ -28,7 +27,7 @@ CNTV2BitManager::~CNTV2BitManager()
 	Clear();
 }
 
-bool CNTV2BitManager::AddFile (const std::string & inBitfilePath)
+bool CNTV2BitManager::AddFile (const string & inBitfilePath)
 {
 	AJAFileIO Fio;
 	CNTV2Bitfile Bitfile;
@@ -77,24 +76,21 @@ bool CNTV2BitManager::AddFile (const std::string & inBitfilePath)
 	return true;
 }
 
-bool CNTV2BitManager::AddDirectory (const std::string & inDirectory)
+bool CNTV2BitManager::AddDirectory (const string & inDirectory)
 {
 	AJAFileIO Fio;
-	std::vector<std::string> fileContainer;
-	std::vector<std::string>::iterator fcIter;
 
 	// check for good directory
-    if (Fio.DoesDirectoryExist(inDirectory) != AJA_STATUS_SUCCESS)
+    if (AJA_FAILURE(Fio.DoesDirectoryExist(inDirectory)))
         return false;
 
 	// get bitfiles
+	NTV2StringList fileContainer;
 	Fio.ReadDirectory(inDirectory, "*.bit", fileContainer);
 
 	// add bitfiles
-	for (fcIter = fileContainer.begin(); fcIter != fileContainer.end(); fcIter++)
-	{
+	for (NTV2StringListConstIter fcIter(fileContainer.begin());  fcIter != fileContainer.end();  ++fcIter)
         AddFile(*fcIter);
-	}
 	
 	return true;
 }
@@ -158,15 +154,15 @@ bool CNTV2BitManager::GetBitStream (NTV2_POINTER & bitstream,
 	return true;
 }
 
-bool CNTV2BitManager::ReadBitstream(int index)
+bool CNTV2BitManager::ReadBitstream (int inIndex)
 {
 	CNTV2Bitfile Bitfile;
     NTV2_POINTER Bitstream;
-	unsigned char* address;
+	const size_t index = size_t(inIndex);
 	unsigned size;
 
 	// already in cache
-    if ((index < (int)_bitstreamList.size()) && (_bitstreamList[index].GetByteCount() > 0))
+    if ((index < _bitstreamList.size()) && (_bitstreamList[index].GetByteCount() > 0))
         return true;
 
 	// open bitfile to get bitstream
@@ -180,13 +176,12 @@ bool CNTV2BitManager::ReadBitstream(int index)
     Bitstream.Allocate (size);
 
 	// read bitstream from bitfile
-    address = (unsigned char*)Bitstream.GetHostAddress(0);
-    if (address == NULL)
+    if (Bitstream.IsNULL())
         return false;
-    if (!Bitfile.GetProgramByteStream (address, size))
+    if (!Bitfile.GetProgramByteStream (reinterpret_cast<unsigned char*>(Bitstream.GetHostAddress(0)), size))
         return false;
 
-    if (index >= (int)_bitstreamList.size())
+    if (index >= _bitstreamList.size())
         _bitstreamList.resize(index + 1);
 
     _bitstreamList[index] = Bitstream;

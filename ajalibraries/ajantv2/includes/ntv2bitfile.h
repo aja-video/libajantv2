@@ -17,6 +17,8 @@
 #include "ajatypes.h"
 #include "ajaexport.h"
 #include "ntv2enums.h"
+#include "ntv2publicinterface.h"
+#include "ntv2utils.h"
 
 
 /**
@@ -60,19 +62,19 @@ class AJAExport CNTV2Bitfile
 
 		/**
 			@brief		Answers with the bitfile build date, as extracted from the bitfile.
-			@return		A std::string containing the bitfile build date.
+			@return		A string containing the bitfile build date.
 		**/
 		virtual inline const std::string &	GetDate (void) const			{ return _date; }
 
 		/**
 			@brief		Answers with the bitfile build time, as extracted from the bitfile.
-			@return		A std::string containing the bitfile build time.
+			@return		A string containing the bitfile build time.
 		**/
 		virtual inline const std::string &	GetTime (void) const			{ return _time; }
 
 		/**
 			@brief		Answers with the design name, as extracted from the bitfile.
-			@return		A std::string containing the bitfile design name.
+			@return		A string containing the bitfile design name.
 		**/
 		virtual inline const std::string &	GetDesignName (void) const		{ return _designName; }
 
@@ -132,7 +134,7 @@ class AJAExport CNTV2Bitfile
 
 		/**
 			@brief		Answers with the part name, as extracted from the bitfile.
-			@return		A std::string containing the bitfile part name.
+			@return		A string containing the bitfile part name.
 		**/
 		virtual inline const std::string &	GetPartName (void) const		{ return _partName; }
 
@@ -143,62 +145,58 @@ class AJAExport CNTV2Bitfile
 		virtual bool						CanFlashDevice (const NTV2DeviceID inDeviceID) const;
 
 		/**
-			@brief		Answers with my intrinsic NTV2DeviceID.
 			@return		My instrinsic NTV2DeviceID.
 		**/
 		virtual NTV2DeviceID				GetDeviceID (void) const;
 
 		/**
-			@brief		Answers with the error message, if any, from the last function that failed (e.g., Open, or ParseHeader).
-			@return		A std::string containing the error message.
+			@return		A string containing the error message, if any, from the last function that failed.
 		**/
 		virtual inline const std::string &	GetLastError (void) const		{ return _lastError; }
 
 		/**
-			@brief		Answers with the length of the program stream.
-			@return		Program stream length.
+			@return		Program stream length in bytes, or zero if error/invalid.
 		**/
-		virtual unsigned					GetProgramStreamLength (void) const;
+		virtual size_t						GetProgramStreamLength (void) const;
 
 		/**
-			@brief		Answers with the length of the file stream.
-			@return		File stream length.
+			@return		File stream length in bytes, or zero if error/invalid.
 		**/
-		virtual unsigned					GetFileStreamLength (void) const;
+		virtual size_t						GetFileStreamLength (void) const;
 		
 		/**
-			@brief		Retrieve the program bitstream.
-			@param[in]	buffer			Specifies the buffer to receive the data.
-			@param[in]	bufferLength	Specifies the length of the buffer.
-			@return		Program stream length.
+			@brief		Retrieves the program bitstream.
+			@param[out]	outBuffer		Specifies the buffer that will receive the data.
+			@return		Program stream length, in bytes, or zero upon failure.
 		**/
-		virtual unsigned					GetProgramByteStream (unsigned char * buffer, unsigned bufferLength);
+		virtual size_t						GetProgramByteStream (NTV2_POINTER & outBuffer);
 
 		/**
-			@brief		Retrieve the file bitstream.
-			@param[in]	buffer			Specifies the buffer to receive the data.
-			@param[in]	bufferLength	Specifies the length of the buffer.
-			@return		File stream length.
+			@brief		Retrieves the file bitstream.
+			@param[out]	outBuffer		Specifies the buffer that will receive the data.
+			@return		File stream length, in bytes, or zero upon failure.
 		**/
-		virtual unsigned					GetFileByteStream (unsigned char * buffer, unsigned bufferLength);
+		virtual size_t						GetFileByteStream (NTV2_POINTER & outBuffer);
 
-		static std::vector <std::string> &	GetPartialDesignNames (ULWord deviceID);
+		//	Older, non-NTV2_POINTER-based functions:
+		virtual size_t						GetProgramByteStream (unsigned char * pOutBuffer, const size_t inBufferLength);
+		virtual size_t						GetFileByteStream (unsigned char * pOutBuffer, const size_t inBufferLength);
 
-		static ULWord GetDesignID(ULWord userID) { return (userID & 0xff000000) >> 24; }
-		static ULWord GetDesignVersion(ULWord userID)  { return (userID & 0x00ff0000) >> 16; }
-		static ULWord GetBitfileID(ULWord userID)  { return (userID & 0x0000ff00) >> 8; }
-		static ULWord GetBitfileVersion(ULWord userID)  { return (userID & 0x000000ff) >> 0; }
-		
-		static NTV2DeviceID ConvertToDeviceID(ULWord designID, ULWord bitfileID);
-		static ULWord ConvertToDesignID(NTV2DeviceID deviceID);
-		static ULWord ConvertToBitfileID(NTV2DeviceID deviceID);
+		// NO IMPLEMENTATION YET:	static NTV2StringList &	GetPartialDesignNames (const ULWord deviceID);
+		static ULWord			GetDesignID			(const ULWord userID)		{ return (userID & 0xff000000) >> 24; }
+		static ULWord			GetDesignVersion	(const ULWord userID)		{ return (userID & 0x00ff0000) >> 16; }
+		static ULWord			GetBitfileID		(const ULWord userID)		{ return (userID & 0x0000ff00) >> 8; }
+		static ULWord			GetBitfileVersion	(const ULWord userID)		{ return (userID & 0x000000ff) >> 0; }
+		static NTV2DeviceID		ConvertToDeviceID	(const ULWord inDesignID, const ULWord inBitfileID);
+		static ULWord			ConvertToDesignID	(const NTV2DeviceID inDeviceID);
+		static ULWord			ConvertToBitfileID	(const NTV2DeviceID inDeviceID);
 
 	private:
 		virtual void						Init (void);
-		virtual std::string					ParseHeader ();
-		virtual void						SetDesignName (const char * pInBuffer, unsigned bufferLength);
-		virtual void						SetDesignFlags (const char * pInBuffer, unsigned bufferLength);
-		virtual void						SetDesignUserID (const char * pInBuffer, unsigned bufferLength);
+		virtual std::string					ParseHeader (void);
+		virtual void						SetDesignName (const char * pInBuffer, const size_t bufferLength);
+		virtual void						SetDesignFlags (const char * pInBuffer, const size_t bufferLength);
+		virtual void						SetDesignUserID (const char * pInBuffer, const size_t bufferLength);
 
 		std::ifstream				_bitFileStream;
 		std::vector <unsigned char> _fileHeader;
@@ -208,11 +206,11 @@ class AJAExport CNTV2Bitfile
 		std::string					_designName;
 		std::string					_partName;
 		std::string					_lastError;
-		unsigned					_numBytes;
-		unsigned					_fileSize;
+		size_t						_numBytes;
+		size_t						_fileSize;
 		bool						_fileReady;
-		unsigned					_programStreamPos;
-		unsigned					_fileStreamPos;
+		size_t						_programStreamPos;
+		size_t						_fileStreamPos;
 		bool						_tandem;
 		bool						_partial;
 		bool						_clear;
