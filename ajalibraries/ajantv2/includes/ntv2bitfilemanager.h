@@ -1,6 +1,6 @@
 /**
-	@file		ntv2bitmanager.h
-	@brief		Declares the CNTV2BitManager class that manages Xilinx bitfiles.
+	@file		ntv2bitfilemanager.h
+	@brief		Declares the CNTV2BitfileManager class that manages Xilinx bitfiles.
 	@copyright	(C) 2019-2020 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
 **/
 
@@ -45,20 +45,20 @@ typedef NTV2BitfileInfoList::const_iterator	NTV2BitfileInfoListConstIter;
 
 
 /**
-	@brief	Instances of me manages bitfiles.
+	@brief	I manage and cache any number of bitfiles for any number of NTV2 devices/designs.
 **/
-class AJAExport CNTV2BitManager
+class AJAExport CNTV2BitfileManager
 {
 public:
 	/**
 		@brief		My constructor.
 	**/
-	CNTV2BitManager ();
+	CNTV2BitfileManager ();
 
 	/**
 		@brief		My destructor.
 	**/
-	virtual								~CNTV2BitManager ();
+	virtual								~CNTV2BitfileManager ();
 
 	/**
 		@brief		Add the bitfile at the given path to the list of bitfiles.
@@ -116,13 +116,13 @@ private:
 		@param[in]	index		Specifies the index of the bitfile info.
 		@return		True if the bitstream was read; otherwise false.
 	**/
-	bool ReadBitstream(int index);
+	bool ReadBitstream (const size_t inIndex);
 		
 	typedef std::vector <NTV2_POINTER>		NTV2BitstreamList;
 	typedef NTV2BitstreamList::iterator		NTV2BitstreamListIter;
 
 	NTV2BitfileInfoList		_bitfileList;
 	NTV2BitstreamList		_bitstreamList;
-};	//	CNTV2BitManager
+};	//	CNTV2BitfileManager
 
 #endif	//	NTV2BITMANAGER_H

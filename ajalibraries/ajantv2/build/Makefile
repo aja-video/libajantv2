@@ -82,7 +82,7 @@ AJA_LIB_SRCS =\
 		ntv2anc.cpp \
 		ntv2autocirculate.cpp \
 		ntv2bitfile.cpp \
-		ntv2bitmanager.cpp \
+		ntv2bitfilemanager.cpp \
 		ntv2card.cpp \
 		ntv2config2022.cpp \
 		ntv2config2110.cpp \

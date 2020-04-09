@@ -8,12 +8,12 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
 #include "ntv2bitfile.h"
-#include "ntv2bitmanager.h"
+#include "ntv2bitfilemanager.h"
 
 using namespace std;
 
 
-static CNTV2BitManager s_BitManager;
+static CNTV2BitfileManager s_BitfileManager;
 
 
 bool CNTV2Card::IsDynamicDevice (void)
@@ -74,7 +74,7 @@ NTV2DeviceIDSet CNTV2Card::GetDynamicDeviceIDs (void)
 
 	//	Get the clear file matching current bitfile...
 	NTV2_POINTER clearStream;
-	if (!s_BitManager.GetBitStream (clearStream,
+	if (!s_BitfileManager.GetBitStream (clearStream,
 									designID,
 									designVersion,
 									currentBitfileID,
@@ -83,7 +83,7 @@ NTV2DeviceIDSet CNTV2Card::GetDynamicDeviceIDs (void)
 		return result;
 
 	//	Build the deviceID set...
-	const NTV2BitfileInfoList infoList(s_BitManager.GetBitfileInfoList());
+	const NTV2BitfileInfoList infoList(s_BitfileManager.GetBitfileInfoList());
 	for (NTV2BitfileInfoListConstIter it(infoList.begin());  it != infoList.end();  ++it)
 		if (it->designID == designID)
 			if (it->designVersion == designVersion)
@@ -131,7 +131,7 @@ bool CNTV2Card::LoadDynamicDevice (const NTV2DeviceID inDeviceID)
 
 	//	Get the clear file matching current bitfile...
 	NTV2_POINTER clearStream;
-	if (!s_BitManager.GetBitStream (clearStream,
+	if (!s_BitfileManager.GetBitStream (clearStream,
 									designID,
 									designVersion,
 									currentBitfileID,
@@ -141,7 +141,7 @@ bool CNTV2Card::LoadDynamicDevice (const NTV2DeviceID inDeviceID)
 
 	//	Get the partial file matching the inDeviceID...
 	NTV2_POINTER partialStream;
-	if (!s_BitManager.GetBitStream (partialStream,
+	if (!s_BitfileManager.GetBitStream (partialStream,
 									designID,
 									designVersion,
 									CNTV2Bitfile::ConvertToBitfileID(inDeviceID),
@@ -161,10 +161,10 @@ bool CNTV2Card::LoadDynamicDevice (const NTV2DeviceID inDeviceID)
 
 bool CNTV2Card::AddDynamicBitfile (const string & inBitfilePath)
 {
-	return s_BitManager.AddFile(inBitfilePath);
+	return s_BitfileManager.AddFile(inBitfilePath);
 }
 
 bool CNTV2Card::AddDynamicDirectory (const string & inDirectory)
 {
-	return s_BitManager.AddDirectory(inDirectory);
+	return s_BitfileManager.AddDirectory(inDirectory);
 }

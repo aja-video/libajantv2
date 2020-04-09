@@ -265,7 +265,7 @@
     <ClCompile Include="..\src\ntv2audio.cpp" />
     <ClCompile Include="..\src\ntv2autocirculate.cpp" />
     <ClCompile Include="..\src\ntv2bitfile.cpp" />
-    <ClCompile Include="..\src\ntv2bitmanager.cpp" />
+    <ClCompile Include="..\src\ntv2bitfilemanager.cpp" />
     <ClCompile Include="..\src\ntv2card.cpp" />
     <ClCompile Include="..\src\ntv2config2022.cpp" />
     <ClCompile Include="..\src\ntv2configts2022.cpp" />
@@ -394,7 +394,7 @@
     <ClInclude Include="..\includes\ajaexport.h" />
     <ClInclude Include="..\includes\basemachinecontrol.h" />
     <ClInclude Include="..\includes\ntv2bitfile.h" />
-    <ClInclude Include="..\includes\ntv2bitmanager.h" />
+    <ClInclude Include="..\includes\ntv2bitfilemanager.h" />
     <ClInclude Include="..\includes\ntv2card.h" />
     <ClInclude Include="..\includes\ntv2colorcorrection.h" />
     <ClInclude Include="..\includes\ntv2config2022.h" />

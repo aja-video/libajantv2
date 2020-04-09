@@ -1372,6 +1372,14 @@
 	even the much larger modern FPGAs. This has made it necessary to enable the ability to rapidly switch between different
 	workflow-based bitfiles.
 
-	There is a new ::CNTV2BitManager class that can be told where to look for other bitfiles to dynamically load onto a device.
-	It can also inspect bitfiles in that location to see what devices they can be installed on.
+	There’s a new API in the CNTV2Card class that adds support for this capability:
+	-	To determine if the device supports fast dynamic loading of bitfiles, call CNTV2Card::IsDynamicDevice.
+	-	To determine what device IDs are available for fast dynamic loading on the current device, call CNTV2Card::GetDynamicDeviceIDs.
+	-	To determine if a particular ::NTV2DeviceID can be loaded on the current device, call CNTV2Card::CanLoadDynamicDevice.
+	-	To quickly and dynamically load a specific ::NTV2DeviceID bitfile onto the current device, call CNTV2Card::LoadDynamicDevice.
+	-	To add a specific bitfile to the cache of known bitfiles, call CNTV2Card::AddDynamicBitfile.
+	-	To add multiple bitfiles inside a host file directory (folder) to the cache of known bitfiles, call CNTV2Card::AddDynamicDirectory.
+
+	These new API calls make use of a new ::CNTV2BitfileManager singleton class that caches and manages the available bitfiles for
+	various AJA devices. It can be used if finer control is needed over the basic functionality in CNTV2Card.
 **/
