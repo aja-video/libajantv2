@@ -117,11 +117,11 @@ bool CNTV2BitfileManager::GetBitStream (NTV2_POINTER & outBitstream,
 										const ULWord inBitfileVersion,
 										const ULWord inBitfileFlags)
 {
-	size_t size (GetNumBitfiles());
-	size_t max (size);
+	size_t numBitfiles (GetNumBitfiles());
+	size_t maxNdx (numBitfiles);
 	size_t ndx(0);
 
-	for (ndx = 0;  ndx < size;  ndx++)
+	for (ndx = 0;  ndx < numBitfiles;  ndx++)
 	{	//	Search for bitstream...
         const NTV2BitfileInfo & info (_bitfileList.at(ndx));
         if (inDesignID == info.designID)
@@ -131,17 +131,17 @@ bool CNTV2BitfileManager::GetBitStream (NTV2_POINTER & outBitstream,
 					{
 						if (inBitfileVersion == info.bitfileVersion)
 							break;
-						if ((max >= size) || (info.bitfileVersion > _bitfileList.at(max).bitfileVersion))
-							max = ndx;
+						if ((maxNdx >= numBitfiles) || (info.bitfileVersion > _bitfileList.at(maxNdx).bitfileVersion))
+							maxNdx = ndx;
 					}
 	}
 
 	//	Looking for latest version?
-	if ((inBitfileVersion == 0xff)  &&  (max < size))
-		ndx = max;
+	if ((inBitfileVersion == 0xff)  &&  (maxNdx < numBitfiles))
+		ndx = maxNdx;
 
 	//	Find something?
-	if (ndx == size)
+	if (ndx == numBitfiles)
 		return false;	//	Nope
 
 	//	Read in bitstream...
