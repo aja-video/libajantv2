@@ -1028,6 +1028,31 @@ bool CNTV2Card::GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValu
 	return result;
 }
 
+
+bool CNTV2Card::SetHDMIOutAudioRate (const NTV2AudioRate inNewValue)
+{
+	return WriteRegister (kRegHDMIOutControl, static_cast <ULWord> (inNewValue), kRegMaskHDMIAudioRate, kRegShiftHDMIAudioRate);
+}
+
+
+bool CNTV2Card::GetHDMIOutAudioRate (NTV2AudioRate & outValue)
+{
+	return CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, outValue, kRegMaskHDMIAudioRate, kRegShiftHDMIAudioRate);
+}
+
+
+bool CNTV2Card::SetHDMIOutAudioFormat (const NTV2AudioFormat inNewValue)
+{
+	return WriteRegister (kRegHDMIOutControl, static_cast <ULWord> (inNewValue), kRegMaskHDMIAudioFormat, kRegShiftHDMIAudioFormat);
+}
+
+
+bool CNTV2Card::GetHDMIOutAudioFormat (NTV2AudioFormat & outValue)
+{
+	return CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, outValue, kRegMaskHDMIAudioFormat, kRegShiftHDMIAudioFormat);
+}
+
+
 bool CNTV2Card::SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inValue, const NTV2Channel inChannel)
 {
 	const ULWord	encoding	((::GetIndexForNTV2Channel(inChannel) << 4) | inValue);
