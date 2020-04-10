@@ -20,14 +20,14 @@ using namespace std;
 static const ULWord	kAppSignature	NTV2_FOURCC('D','E','M','O');
 
 
-NTV2Capture4K::NTV2Capture4K (const string					inDeviceSpecifier,
-							  const bool					withAudio,
-							  const NTV2Channel				channel,
-							  const NTV2FrameBufferFormat	pixelFormat,
-							  const bool					inLevelConversion,
-							  const bool					inDoMultiFormat,
-							  const bool					inWithAnc,
-							  const bool					inDoTsiRouting)
+NTV2Capture4K::NTV2Capture4K (const string			inDeviceSpecifier,
+							  const bool			withAudio,
+							  const NTV2Channel		channel,
+							  const NTV2PixelFormat	pixelFormat,
+							  const bool			inLevelConversion,
+							  const bool			inDoMultiFormat,
+							  const bool			inWithAnc,
+							  const bool			inDoTsiRouting)
 
 	:	mConsumerThread		(AJA_NULL),
 		mProducerThread		(AJA_NULL),

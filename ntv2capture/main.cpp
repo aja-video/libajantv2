@@ -46,7 +46,6 @@ int main (int argc, const char ** argv)
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
-		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"	},
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"	},
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",			"1 thru 8"					},
 		{"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,	0,	"which SDI input",				"1-8, ?=list"				},

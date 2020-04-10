@@ -92,9 +92,9 @@ class NTV2EncodeHEVC
 
 		/**
 			@brief	Provides status information about my input (capture) process.
-			@param[out]	outInputStatus		Receives status information about my input (capture) process.
+			@param[out]	outStatus	Receives status information about my input (capture) process.
 		**/
-        virtual void            GetStatus (AVHevcStatus * outInputStatus);
+        virtual void            GetStatus (AVHevcStatus & outStatus);
 
         /**
             @brief	Get the codec preset

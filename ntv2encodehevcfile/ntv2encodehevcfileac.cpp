@@ -1355,15 +1355,13 @@ void NTV2EncodeHEVCFileAc::AudioFileWorker (void)
 //////////////////////////////////////////////
 
 
-void NTV2EncodeHEVCFileAc::GetStatus (AVHevcStatus * outInputStatus)
+void NTV2EncodeHEVCFileAc::GetStatus (AVHevcStatus & outStatus)
 {
-    AUTOCIRCULATE_STATUS	inputACStatus;
-    
-    mDevice.AutoCirculateGetStatus (mInputChannel, inputACStatus);
-    outInputStatus->framesProcessed = inputACStatus.GetProcessedFrameCount();
-    outInputStatus->framesDropped = inputACStatus.GetDroppedFrameCount();
-    outInputStatus->bufferLevel = inputACStatus.GetBufferLevel();
-    
+	AUTOCIRCULATE_STATUS ACStatus;
+	mDevice.AutoCirculateGetStatus (mInputChannel, ACStatus);
+	outStatus.framesProcessed	= ACStatus.GetProcessedFrameCount();
+	outStatus.framesDropped		= ACStatus.GetDroppedFrameCount();
+	outStatus.bufferLevel		= ACStatus.GetBufferLevel();
 }	//	GetStatus
 
 

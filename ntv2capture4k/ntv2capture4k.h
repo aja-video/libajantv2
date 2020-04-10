@@ -39,14 +39,14 @@ class NTV2Capture4K
 											Defaults to false.
 			@param[in]	inDoTsiRouting		If true, routes in Tsi Muxer widgets for Tsi instead of quads/squares. Defaults to false (quads).
 		**/
-		NTV2Capture4K (	const std::string			inDeviceSpecifier	= "0",
-						const bool					inWithAudio			= true,
-						const NTV2Channel			inChannel			= NTV2_CHANNEL1,
-						const NTV2FrameBufferFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
-						const bool					inDoLvlABConversion	= false,
-						const bool					inMultiFormat		= false,
-						const bool					inWithAnc			= false,
-						const bool					inDoTsiRouting		= false);
+		NTV2Capture4K (	const std::string		inDeviceSpecifier	= "0",
+						const bool				inWithAudio			= true,
+						const NTV2Channel		inChannel			= NTV2_CHANNEL1,
+						const NTV2PixelFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
+						const bool				inDoLvlABConversion	= false,
+						const bool				inMultiFormat		= false,
+						const bool				inWithAnc			= false,
+						const bool				inDoTsiRouting		= false);
 
 		virtual						~NTV2Capture4K ();
 
@@ -148,30 +148,30 @@ class NTV2Capture4K
 	private:
 		typedef	AJACircularBuffer <AVDataBuffer *>	MyCircularBuffer;
 
-		AJAThread *					mConsumerThread;		///< @brief	My consumer thread object -- consumes the captured frames.
-		AJAThread *					mProducerThread;		///< @brief	My producer thread object -- does the frame capturing
-		CNTV2Card					mDevice;				///< @brief	My CNTV2Card instance. This is what I use to talk to the device.
-		NTV2DeviceID				mDeviceID;				///< @brief	My device identifier
-		const std::string			mDeviceSpecifier;		///< @brief	The device specifier string
-		const bool					mWithAudio;				///< @brief	Capture and playout audio?
-		NTV2Channel					mInputChannel;			///< @brief	My input channel
-		NTV2InputSource				mInputSource;			///< @brief	The input source I'm using
-		NTV2VideoFormat				mVideoFormat;			///< @brief	My video format
-		NTV2FrameBufferFormat		mPixelFormat;			///< @brief	My pixel format
-		NTV2EveryFrameTaskMode		mSavedTaskMode;			///< @brief	Used to restore prior every-frame task mode
-		NTV2AudioSystem				mAudioSystem;			///< @brief	The audio system I'm using
-		bool						mDoLevelConversion;		///< @brief	Demonstrates a level A to level B conversion
-		bool						mDoMultiFormat;			///< @brief	Demonstrates how to configure the board for multi-format
-		bool						mGlobalQuit;			///< @brief	Set "true" to gracefully stop
-		bool						mWithAnc;				///< @brief	Capture custom anc data?
-		uint32_t					mVideoBufferSize;		///< @brief	My video buffer size, in bytes
-		uint32_t					mAudioBufferSize;		///< @brief	My audio buffer size, in bytes
-		uint32_t					mAncBufferSize;
-		bool						mDoTsiRouting;
-		AVDataBuffer				mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
-		MyCircularBuffer			mAVCircularBuffer;		///< @brief	My ring buffer object
+		AJAThread *				mConsumerThread;		///< @brief	My consumer thread object -- consumes the captured frames.
+		AJAThread *				mProducerThread;		///< @brief	My producer thread object -- does the frame capturing
+		CNTV2Card				mDevice;				///< @brief	My CNTV2Card instance. This is what I use to talk to the device.
+		NTV2DeviceID			mDeviceID;				///< @brief	My device identifier
+		const std::string		mDeviceSpecifier;		///< @brief	The device specifier string
+		const bool				mWithAudio;				///< @brief	Capture and playout audio?
+		NTV2Channel				mInputChannel;			///< @brief	My input channel
+		NTV2InputSource			mInputSource;			///< @brief	The input source I'm using
+		NTV2VideoFormat			mVideoFormat;			///< @brief	My video format
+		NTV2PixelFormat			mPixelFormat;			///< @brief	My pixel format
+		NTV2TaskMode			mSavedTaskMode;			///< @brief	Used to restore prior every-frame task mode
+		NTV2AudioSystem			mAudioSystem;			///< @brief	The audio system I'm using
+		bool					mDoLevelConversion;		///< @brief	Demonstrates a level A to level B conversion
+		bool					mDoMultiFormat;			///< @brief	Demonstrates how to configure the board for multi-format
+		bool					mGlobalQuit;			///< @brief	Set "true" to gracefully stop
+		bool					mWithAnc;				///< @brief	Capture custom anc data?
+		uint32_t				mVideoBufferSize;		///< @brief	My video buffer size, in bytes
+		uint32_t				mAudioBufferSize;		///< @brief	My audio buffer size, in bytes
+		uint32_t				mAncBufferSize;
+		bool					mDoTsiRouting;
+		AVDataBuffer			mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
+		MyCircularBuffer		mAVCircularBuffer;		///< @brief	My ring buffer object
 
-		AUTOCIRCULATE_TRANSFER		mInputTransfer;			///< @brief	My A/C input transfer info
+		AUTOCIRCULATE_TRANSFER	mInputTransfer;			///< @brief	My A/C input transfer info
 
 };	//	NTV2Capture
 

@@ -799,14 +799,13 @@ void NTV2EncodeHEVCFile::VideoFileWorker (void)
 //////////////////////////////////////////////
 
 
-void NTV2EncodeHEVCFile::GetStatus (AVHevcStatus * outInputStatus)
+void NTV2EncodeHEVCFile::GetStatus (AVHevcStatus & outStatus)
 {
-    // Just report frames processed for file demo, there is never a dropped frame since there is no requirement to run
-    // in realtime, tho this typically runs faster than real time, also the buffer level is not important
-    outInputStatus->framesProcessed = mVideoFileFrameCount;
-    outInputStatus->framesDropped = 0;
-    outInputStatus->bufferLevel = 0;
-    
+	//	Just report frames processed for file demo, as there's never a dropped frame,
+	//	since there's no requirement to run in realtime, though this typically runs
+	//	faster than real time.  Also the buffer level is not important.
+	outStatus.framesProcessed = mVideoFileFrameCount;
+	outStatus.framesDropped = outStatus.bufferLevel = 0;
 }	//	GetStatus
 
 

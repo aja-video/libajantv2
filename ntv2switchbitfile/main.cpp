@@ -32,11 +32,11 @@ using namespace std;
 
 int main(int argc, const char ** argv)
 {
-    char *			pDeviceSpec 	(AJA_NULL);				//	Device argument
-    char *			pDeviceID	 	(AJA_NULL);				//	Device ID argument
-    int				isVerbose		(0);					//	Verbose output?
-	NTV2DeviceID	deviceID		(NTV2DeviceID(0));		//	Desired device ID to be loaded
-	poptContext		optionsContext;							//	Context for parsing command line arguments
+    char *			pDeviceSpec 	(AJA_NULL);			//	Device argument
+    char *			pDeviceID	 	(AJA_NULL);			//	Device ID argument
+    int				isVerbose		(0);				//	Verbose output?
+	NTV2DeviceID	deviceID		(NTV2DeviceID(0));	//	Desired device ID to be loaded
+	poptContext		optionsContext;						//	Context for parsing command line arguments
 	int				resultCode		(0);
 
 	const struct poptOption userOptionsTable[] =

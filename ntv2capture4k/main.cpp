@@ -31,31 +31,29 @@ static void SignalHandler (int inSignal)
 
 int main (int argc, const char ** argv)
 {
-	AJAStatus		status			(AJA_STATUS_SUCCESS);
-	char *			pPixelFormat	(NULL);					//	Pixel format argument
-	char *			pDeviceSpec		(NULL);					//	Device specifier string, if any
+	char *			pPixelFormat	(AJA_NULL);				//	Pixel format argument
+	char *			pDeviceSpec		(AJA_NULL);				//	Device specifier string, if any
 	uint32_t		channelNumber	(1);					//	Number of the channel to use
 	int				noAudio			(0);					//	Disable audio tone?
-	int				doMultiFormat	(0);					//	Enable multi-format
-	int				doTsiRouting	(0);
+	int				doMultiFormat	(0);					//	Multi-format mode?
+	int				doTsiRouting	(0);					//	TSI routing?
 	poptContext		optionsContext; 						//	Context for parsing command line arguments
 	AJADebug::Open();
 
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
-		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"		},
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"		},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"which pixel format to use",	"'?' or 'list' to list"			},
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",			"1 thru 8"						},
-		{"multiFomat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"Configure multi-format",		NULL							},
-		{"tsi",			't',	POPT_ARG_NONE,		&doTsiRouting,	0,	"use Tsi routing?",				NULL							},
+		{"multiFomat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"Configure multi-format",		AJA_NULL						},
+		{"tsi",			't',	POPT_ARG_NONE,		&doTsiRouting,	0,	"use Tsi routing?",				AJA_NULL						},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
 
 	//	Read command line arguments...
-	optionsContext = ::poptGetContext (NULL, argc, argv, userOptionsTable, 0);
+	optionsContext = ::poptGetContext (AJA_NULL, argc, argv, userOptionsTable, 0);
 	::poptGetNextOpt (optionsContext);
 	optionsContext = ::poptFreeContext (optionsContext);
 
@@ -76,12 +74,13 @@ int main (int argc, const char ** argv)
 
 	//	Instantiate the NTV2Capture object, using the specified AJA device...
 	NTV2Capture4K	capturer (pDeviceSpec ? string (pDeviceSpec) : "0",
-							  (noAudio ? false : true), ::GetNTV2ChannelForIndex (channelNumber - 1),
-							  pixelFormat,
-							  false,
-							  doMultiFormat ? true : false,
-							  true,
-							  doTsiRouting ? true : false);
+							  (noAudio ? false : true),			//	With Audio?
+							  ::GetNTV2ChannelForIndex(channelNumber - 1),	//	Channel
+							  pixelFormat,						//	FB pixel format
+							  false,							//	A/B conversion?
+							  doMultiFormat ? true : false,		//	MultiFormat mode?
+							  true,								//	With custom anc?
+							  doTsiRouting ? true : false);		//	TSI?
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)
@@ -90,12 +89,11 @@ int main (int argc, const char ** argv)
 	#endif
 
 	//	Initialize the NTV2Capture instance...
-	status = capturer.Init ();
-	if (!AJA_SUCCESS (status))
-		{cout << "## ERROR:  Capture initialization failed with status " << status << endl;	return 1;}
+	if (AJA_FAILURE(capturer.Init()))
+		{cerr << "## ERROR:  Initialization failed" << endl;  return 1;}
 
 	//	Run the capturer...
-	capturer.Run ();
+	capturer.Run();
 
 	cout	<< "           Capture  Capture" << endl
 			<< "   Frames   Frames   Buffer" << endl
@@ -105,12 +103,11 @@ int main (int argc, const char ** argv)
 	{
 		ULWord	framesProcessed, framesDropped, bufferLevel;
 		capturer.GetACStatus (framesProcessed, framesDropped, bufferLevel);
-		cout << setw (9) << framesProcessed << setw (9) << framesDropped << setw (9) << bufferLevel << "\r" << flush;
-		AJATime::Sleep (2000);
+		cout << setw(9) << framesProcessed << setw(9) << framesDropped << setw(9) << bufferLevel << "\r" << flush;
+		AJATime::Sleep(2000);
 	} while (!gGlobalQuit);	//	loop til quit time
 
 	cout << endl;
-
-	return AJA_SUCCESS (status) ? 0 : 1;
+	return 0;
 
 }	//	main

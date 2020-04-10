@@ -30,36 +30,34 @@ static void SignalHandler (int inSignal)
 
 int main (int argc, const char ** argv)
 {
-	AJAStatus		status				(AJA_STATUS_SUCCESS);
-	char *			pVideoFormat		(NULL);					//	Video format argument
-	char *			pPixelFormat		(NULL);					//	Pixel format argument
-    char *			pDeviceSpec 		(NULL);					//	Device argument
-	uint32_t		channelNumber		(1);					//	Number of the channel to use
-	int				noAudio				(0);					//	Disable audio tone?
-	int				doMultiChannel		(0);					//	Enable multi-format?
-	int				hdrType				(0);					//	Transmit HDR anc?
-	int				xmitLTC				(0);					//	Use LTC? (Defaults to VITC)
-	poptContext		optionsContext; 							//	Context for parsing command line arguments
+	char *			pVideoFormat	(AJA_NULL);	//	Video format argument
+	char *			pPixelFormat	(AJA_NULL);	//	Pixel format argument
+    char *			pDeviceSpec 	(AJA_NULL);	//	Device argument
+	uint32_t		channelNumber	(1);		//	Number of the channel to use
+	int				noAudio			(0);		//	Disable audio tone?
+	int				doMultiChannel	(0);		//	Enable multi-format?
+	int				hdrType			(0);		//	Transmit HDR anc?
+	int				xmitLTC			(0);		//	Use LTC? (Defaults to VITC)
+	poptContext		optionsContext; 			//	Context for parsing command line arguments
 	AJADebug::Open();
 
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
-		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"	},
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"	},
 		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"which video format to use",	"'?' or 'list' to list"},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"which pixel format to use",	"'?' or 'list' to list"},
 		{"hdrType",		't',	POPT_ARG_INT,		&hdrType,		0,	"which HDR Packet to send",		"1:SDR,2:HDR10,3:HLG"},
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",			"number of the channel"},
-		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multi-channel/format",		NULL},
-		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio tone",			NULL},
-		{"ltc",			'l',	POPT_ARG_NONE,		&xmitLTC,		0,	"xmit LTC instead of VITC",		NULL},
+		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multi-channel/format",		AJA_NULL},
+		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio tone",			AJA_NULL},
+		{"ltc",			'l',	POPT_ARG_NONE,		&xmitLTC,		0,	"xmit LTC instead of VITC",		AJA_NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
 
 	//	Read command line arguments...
-	optionsContext = ::poptGetContext (NULL, argc, argv, userOptionsTable, 0);
+	optionsContext = ::poptGetContext (AJA_NULL, argc, argv, userOptionsTable, 0);
 	::poptGetNextOpt (optionsContext);
 	optionsContext = ::poptFreeContext (optionsContext);
 
@@ -87,10 +85,7 @@ int main (int argc, const char ** argv)
 	}
 
 	if (channelNumber < 1 || channelNumber > 8)
-	{
-		cerr << "## ERROR:  Invalid channel number '" << channelNumber << "' -- expected 1 thru 8" << endl;
-		return 2;
-	}
+		{cerr << "## ERROR:  Invalid channel number '" << channelNumber << "' -- expected 1 thru 8" << endl;  return 2;}
 
 	const NTV2Channel			channel		(::GetNTV2ChannelForIndex (channelNumber - 1));
 	const NTV2OutputDestination	outputDest	(::NTV2ChannelToOutputDestination (channel));
@@ -122,33 +117,28 @@ int main (int argc, const char ** argv)
 	#endif
 
 	//	Initialize the player...
-	status = player.Init ();
-	if (AJA_SUCCESS (status))
+	if (AJA_FAILURE(player.Init()))
+		{cerr << "## ERROR: Initialization failed" << endl;  return 3;}
+
+	//	Run the player...
+	player.Run ();
+
+	cout	<< "  Playout  Playout   Frames" << endl
+			<< "   Frames   Buffer  Dropped" << endl;
+	do
 	{
-		//	Run the player...
-		player.Run ();
+		ULWord	framesProcessed, framesDropped, bufferLevel;
 
-		cout	<< "  Playout  Playout   Frames" << endl
-				<< "   Frames   Buffer  Dropped" << endl;
-		do
-		{
-			ULWord	framesProcessed, framesDropped, bufferLevel;
+		//	Poll the player's status...
+		player.GetACStatus (framesProcessed, framesDropped, bufferLevel);
+		cout << setw (9) << framesProcessed << setw (9) << bufferLevel << setw (9) << framesDropped << "\r" << flush;
+		AJATime::Sleep (2000);
+	} while (player.IsRunning () && !gGlobalQuit);	//	loop til done
 
-			//	Poll the player's status...
-			player.GetACStatus (framesProcessed, framesDropped, bufferLevel);
-			cout << setw (9) << framesProcessed << setw (9) << bufferLevel << setw (9) << framesDropped << "\r" << flush;
-			AJATime::Sleep (2000);
-		} while (player.IsRunning () && !gGlobalQuit);	//	loop til done
+	//  Ask the player to stop
+	player.Quit();
 
-		cout << endl;
-
-		//  Ask the player to stop
-		player.Quit ();
-
-	}	//	if player Init succeeded
-	else
-		cerr << "Player initialization failed with status " << status << endl;
-
+	cout << endl;
 	return 0;
  
 }	//	main

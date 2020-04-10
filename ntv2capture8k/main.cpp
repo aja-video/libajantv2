@@ -32,8 +32,8 @@ static void SignalHandler (int inSignal)
 int main (int argc, const char ** argv)
 {
 	AJAStatus		status			(AJA_STATUS_SUCCESS);
-	char *			pPixelFormat	(NULL);					//	Pixel format argument
-	char *			pDeviceSpec		(NULL);					//	Device specifier string, if any
+	char *			pPixelFormat	(AJA_NULL);				//	Pixel format argument
+	char *			pDeviceSpec		(AJA_NULL);				//	Device specifier string, if any
 	uint32_t		channelNumber	(1);					//	Number of the channel to use
 	int				noAudio			(0);					//	Disable audio tone?
 	int				doMultiFormat	(0);					//	Enable multi-format
@@ -44,18 +44,17 @@ int main (int argc, const char ** argv)
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
-		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"		},
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"		},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"which pixel format to use",	"'?' or 'list' to list"			},
-		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",			"1 thru 8"						},
-		{"multiFomat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"Configure multi-format",		NULL							},
-		{"tsi",			't',	POPT_ARG_NONE,		&doTsiRouting,	0,	"use Tsi routing?",				NULL							},
+		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",			"1-8"							},
+		{"multiFomat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"Configure multi-format",		AJA_NULL						},
+		{"tsi",			't',	POPT_ARG_NONE,		&doTsiRouting,	0,	"use Tsi routing?",				AJA_NULL						},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
 
 	//	Read command line arguments...
-	optionsContext = ::poptGetContext (NULL, argc, argv, userOptionsTable, 0);
+	optionsContext = ::poptGetContext (AJA_NULL, argc, argv, userOptionsTable, 0);
 	::poptGetNextOpt (optionsContext);
 	optionsContext = ::poptFreeContext (optionsContext);
 

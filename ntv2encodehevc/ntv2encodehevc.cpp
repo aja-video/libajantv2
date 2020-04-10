@@ -1442,21 +1442,19 @@ void NTV2EncodeHEVC::AudioFileWorker (void)
 //////////////////////////////////////////////
 
 
-void NTV2EncodeHEVC::GetStatus (AVHevcStatus * outInputStatus)
+void NTV2EncodeHEVC::GetStatus (AVHevcStatus & outStatus)
 {
-    AUTOCIRCULATE_STATUS	inputACStatus;
-    
-	mDevice.AutoCirculateGetStatus (mInputChannel, inputACStatus);
-    outInputStatus->framesProcessed = inputACStatus.GetProcessedFrameCount();
-    outInputStatus->framesDropped = inputACStatus.GetDroppedFrameCount();
-    outInputStatus->bufferLevel = inputACStatus.GetBufferLevel();
+	AUTOCIRCULATE_STATUS	ACStatus;
+	mDevice.AutoCirculateGetStatus (mInputChannel, ACStatus);
+	outStatus.framesProcessed	= ACStatus.GetProcessedFrameCount();
+	outStatus.framesDropped		= ACStatus.GetDroppedFrameCount();
+	outStatus.bufferLevel		= ACStatus.GetBufferLevel();
 
 }	//	GetStatus
 
 
 AJAStatus NTV2EncodeHEVC::ProcessVideoFrame (AVHevcDataBuffer * pSrcFrame, AVHevcDataBuffer * pDstFrame, uint32_t frameNumber)
 {
-
 	//	Override this function to use the frame data in the way your application requires
 	memcpy(pDstFrame->pVideoBuffer, pSrcFrame->pVideoBuffer, pSrcFrame->videoDataSize);
     pDstFrame->videoDataSize = pSrcFrame->videoDataSize;

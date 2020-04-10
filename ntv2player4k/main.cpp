@@ -19,7 +19,7 @@ using namespace std;
 
 
 //	Globals
-static bool			gGlobalQuit		(false);	//	Set this "true" to exit gracefully
+static bool	gGlobalQuit	(false);	//	Set this "true" to exit gracefully
 
 static void SignalHandler (int inSignal)
 {
@@ -30,19 +30,18 @@ static void SignalHandler (int inSignal)
 
 int main (int argc, const char ** argv)
 {
-	AJAStatus		status			(AJA_STATUS_SUCCESS);
-	char *			pVideoFormat	(NULL);				//	Video format argument
-	char *			pPixelFormat	(NULL);				//	Pixel format argument
-    char *			pDeviceSpec 	(NULL);				//	Device argument
-	uint32_t		channelNumber	(1);				//	Number of the channel to use
-	int				noAudio			(0);				//	Disable audio tone?
-	int				useHDMIOut		(0);				//	Enable HDMI output?
-	int				doMultiChannel	(0);				//  More than one instance of player 4k
-	int				doRGBOnWire		(0);				//  Route the output to put RGB on the wire
-	int				doTsiRouting	(0);				//  Route the output through the Tsi Muxes
-	int				hdrType			(0);				//	Insert HDR anc packet? If so, what kind?
-	int				doLinkGrouping	(0);				//	Use 6/12G output mode - IoXT+ and Kona5 Retail
-	poptContext		optionsContext; 					//	Context for parsing command line arguments
+	char *			pVideoFormat	(AJA_NULL);	//	Video format argument
+	char *			pPixelFormat	(AJA_NULL);	//	Pixel format argument
+    char *			pDeviceSpec 	(AJA_NULL);	//	Device argument
+	uint32_t		channelNumber	(1);		//	Number of the channel to use
+	int				noAudio			(0);		//	Disable audio tone?
+	int				useHDMIOut		(0);		//	Enable HDMI output?
+	int				doMultiChannel	(0);		//  More than one instance of player 4k
+	int				doRGBOnWire		(0);		//  Route the output to put RGB on the wire
+	int				doTsiRouting	(0);		//  Route the output through the Tsi Muxes
+	int				hdrType			(0);		//	Insert HDR anc packet? If so, what kind?
+	int				doLinkGrouping	(0);		//	Use 6/12G output mode - IoXT+ and Kona5 Retail
+	poptContext		optionsContext; 			//	Context for parsing command line arguments
 	AJADebug::Open();
 
 	//	Command line option descriptions:
@@ -52,19 +51,19 @@ int main (int argc, const char ** argv)
 		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,		0,	"which video format to use",	"e.g. 'uhd24' or ? to list"},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,		0,	"which pixel format to use",	"e.g. 'yuv8' or ? to list"},
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,		0,	"which channel to use",			"number of the channel"},
-		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,	0,	"use multi-channel/format",		NULL},
-		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,			0,	"disable audio tone",			NULL},
-		{"hdmi",		'h',	POPT_ARG_NONE,		&useHDMIOut,		0,	"enable HDMI output?",			NULL},
-		{"rgb",			'r',	POPT_ARG_NONE,		&doRGBOnWire,		0,	"use RGB output?",				NULL},
-		{"tsi",			't',	POPT_ARG_NONE,		&doTsiRouting,		0,	"use Tsi routing?",				NULL},
+		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,	0,	"use multi-channel/format",		AJA_NULL},
+		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,			0,	"disable audio tone",			AJA_NULL},
+		{"hdmi",		'h',	POPT_ARG_NONE,		&useHDMIOut,		0,	"enable HDMI output?",			AJA_NULL},
+		{"rgb",			'r',	POPT_ARG_NONE,		&doRGBOnWire,		0,	"RGB on SDI?",					AJA_NULL},
+		{"tsi",			't',	POPT_ARG_NONE,		&doTsiRouting,		0,	"use Tsi routing?",				AJA_NULL},
 		{"hdrType",		'x',	POPT_ARG_INT,		&hdrType,			1,	"which HDR Packet to send",		"1:SDR,2:HDR10,3:HLG"},
-		{"6G/12G",		'g',	POPT_ARG_NONE,		&doLinkGrouping,	0,	"use 6G/12G output mode",		NULL},
+		{"6G/12G",		'g',	POPT_ARG_NONE,		&doLinkGrouping,	0,	"use 6G/12G output mode",		AJA_NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
 
 	//	Read command line arguments...
-	optionsContext = ::poptGetContext (NULL, argc, argv, userOptionsTable, 0);
+	optionsContext = ::poptGetContext (AJA_NULL, argc, argv, userOptionsTable, 0);
 	::poptGetNextOpt (optionsContext);
 	optionsContext = ::poptFreeContext (optionsContext);
 
@@ -114,9 +113,8 @@ int main (int argc, const char ** argv)
 	#endif
 
 	//	Initialize the player...
-	status = player.Init();
-	if (AJA_FAILURE (status))
-		{cerr << "Player initialization failed with status " << status << endl;  return 1;}
+	if (AJA_FAILURE(player.Init()))
+		{cerr << "## ERROR: Initialization failed" << endl;  return 1;}
 
 	//	Run the player...
 	player.Run();
@@ -125,24 +123,20 @@ int main (int argc, const char ** argv)
 	cout	<< "  Playout  Playout   Frames" << endl
 			<< "   Frames   Buffer  Dropped" << endl;
 	do
-	{
-		//	Poll the player's status...
+	{	//	Poll the player's status...
 		AUTOCIRCULATE_STATUS outputStatus;
 		player.GetACStatus(outputStatus);
-
 		cout	<<	DECN(outputStatus.acFramesProcessed, 9)
 				<<	DECN(outputStatus.acBufferLevel, 9)
 				<<  DECN(outputStatus.acFramesDropped, 9)
 				<< "\r" << flush;
-
 		AJATime::Sleep(2000);
 	} while (!gGlobalQuit);	//	loop til done
-
-	cout << endl;
 
 	//  Ask the player to stop
 	player.Quit();
 
+	cout << endl;
 	return 0;
 
 }	//	main
