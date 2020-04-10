@@ -3,31 +3,32 @@
 
 @section	ntv2llburn		NTV2LLBurn Demo
 
-This command-line program is identical to the NTV2Burn demo except that it does not use AutoCirculate,
+This command-line program is identical to the \ref ntv2burn except that it does not use AutoCirculate,
 and is specifically designed to reduce latency to the bare-minimum of 3 frames.
 
-The NTV2LLBurn class demonstrates...
--	how to get "close to the metal" to reduce latency;
+The NTV2LLBurn class demonstrates…
+-	how to get “close to the metal” to reduce latency;
 -	how to use CNTV2Card::DMAWriteFrame and CNTV2Card::DMAReadFrame to transfer video to/from the device;
 -	how to use CNTV2Card::DMAWriteAudio and CNTV2Card::DMAReadAudio to transfer audio samples to/from the device,
-	especially how to account for wrap-around in the device's audio sample buffer;
--	how to read input timecode (from the SDI input signal or from the device's analog LTC input);
+	especially how to account for wrap-around in the deviceʼs audio sample buffer;
+-	how to “manually” operate the Anc extractor and inserter for capturing and playing Anc packets;
+-	how to read input timecode (from the SDI input signal or from the deviceʼs analog LTC input);
 -	the proper acquire/release semantics for using an AJA device exclusively;
 -	programmatic device configuration and signal routing;
--	how to "burn" timecode into a buffer containing a frame of video data.
+-	how to “burn” timecode into a buffer containing a frame of video data.
 
 <b>Command line usage:</b>
 @code
 	ntv2llburn  [options...]
 	
-	-d|-b|--device|--board	{spec}		Specifies the device to use by index number, serial number or generic model name.
-										Defaults to first device (index 0).
-										If model name specified, uses lowest-numbered matching device.
-	-i|--input	{inputSource}			Specifies the SDI video source as an unsigned integer number 1 thru 8.
-	-t|--tcsource {timecodeSource}		Specifies the timecode source. Use '?' or 'list' to list available sources.
-	-m|--multiChannel					Enables multichannel/multiformat mode, and shares the device with other processes.
-	--noaudio							Omits audio.
-	--rgb								Uses an RGB frame buffer format (instead of YCbCr).
-	-?|--help|--usage					Shows how to use this command.
+	-d|--device {spec}          Specifies the device to use by index number, serial number or generic model name.
+	                            Defaults to first device (index 0).
+	                            If model name specified, uses lowest-numbered matching device.
+	-i|--input {inputSource}    Specifies the SDI video source as an unsigned integer number 1 thru 8.
+	-t|--tcsource {tcSource}    Specifies the timecode source. Use '?' or 'list' to list available sources.
+	-p|--pixelFormat {spec}     Specifies the pixel format to use. Use '?' or 'list' to list available formats.
+	-m|--multiChannel           Enables multichannel/multiformat mode, and shares the device with other processes.
+	--noaudio                   Omits audio.
+	-?|--help|--usage           Shows how to use this command.
 @endcode
 **/

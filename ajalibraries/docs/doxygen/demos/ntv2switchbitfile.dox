@@ -3,23 +3,27 @@
 
 @section	ntv2switchbitfile		NTV2SwitchBitfile Demo
 
-This command-line program demonstrates how to switch bitfiles on devices that permit rapidly changing their capabilities.
+This command-line program demonstrates how to dynamically switch bitfiles on devices that support dynamic
+firmware loading.
 
 @image	html	ntv2switchbitfile.png
 
-NTV2SwitchBitfile demonstrates...
--	how to detect if an AJA device supports this ability to rapidly swap bitfiles to change capability;
+NTV2SwitchBitfile demonstrates…
+-	how to detect if an AJA device supports dynamic firmware loading in order to rapidly change
+	capability on-the-fly;
 -	how to enumerate what bitfiles are available to install on a given device;
 -	how to rapidly switch to a new bitfile;
--	how to re-detect what the “new" device is after a successful switch.
+-	how to re-detect what the “new” device is after a successful switch.
 
 <b>Command line usage:</b>
 @code
 	ntv2switchbitfile  [options...]
 	
-	-d|-b|--device|--board	{spec}		Specifies the device to use by index number, serial number or generic model name.
-										Defaults to first device (index 0).
-										If model name specified, uses lowest-numbered matching device.
-	-?|--help|--usage					Shows how to use this command.
+	-d|--device {spec}    Specifies the device to use by index number, serial number or generic model name.
+	                      Defaults to first device (index 0).
+	                      If model name specified, uses lowest-numbered matching device.
+	-l|--load {devID}     Specifies the ID of the device firmware to load (hexadecimal value).
+	-v|--verbose          Specifies verbose output.
+	-?|--help|--usage     Shows how to use this command.
 @endcode
 **/

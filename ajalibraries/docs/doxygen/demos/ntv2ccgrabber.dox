@@ -12,7 +12,7 @@ This shows a screenshot of video from a device while <b>ntv2ccgrabber</b> runs w
 The status display turns red if caption data is missing or can’t be decoded, green when present and being decoded
 properly, and shows other useful status information.
 
-The NTV2CCGrabber class demonstrates...
+The NTV2CCGrabber class demonstrates…
 -	the CNTV2CaptionDecoder608 and CNTV2CaptionDecoder708 classes provided in the “libajacc” library
 	to decode CEA-608 or CEA-708 closed-caption data that may be present on a video stream;
 -	the custom ancillary data extraction feature of AJA devices (if available);
@@ -33,6 +33,14 @@ The demo’s operation can be controlled by pressing certain keys on the keyboar
 
 @note	This demo behaves differently from the others in that it cannot be stopped using Ctrl-C.
 		Press 'q' or 'Q' to quit.
+
+
+Changes in SDK 16.0
+-	Reads VPID to automatically reconfigure to receive…
+	-	Dual-Link RGB;
+	-	2Kx1080;
+	-	Low Frame Rate (LFR) 4K/UHD (Tsi & “squares”).
+
 
 <h2>Command Line Syntax</h2>
 

@@ -5,10 +5,10 @@
 
 This simple command-line program dumps information about every AJA device found on the local host.
 
-The NTV2EnumerateDevices class shows how to...
-- determine which SDK version is being used;
-- use the CNTV2DeviceScanner class to discover AJA devices on a host;
-- explore the various kinds of device information that can be obtained from the NTV2DeviceInfo structure;
-- how to use the Open function of the CNTV2Card class to access a device;
-- how to get device information using the "device features" API that's provided in the "ntv2boardfeatures.h" header file.
+The NTV2EnumerateDevices class shows how to…
+-	determine which SDK version is being used;
+-	use the ::CNTV2DeviceScanner class to discover AJA devices on a host;
+-	explore the various kinds of device information that can be obtained from the ::NTV2DeviceInfo structure;
+-	how to get device information using the “device features” API thatʼs provided in
+	the “ntv2boardfeatures.h” header file.
 **/

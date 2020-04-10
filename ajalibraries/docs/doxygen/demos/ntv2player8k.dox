@@ -3,9 +3,9 @@
 
 @section	ntv2player8k		NTV2Player8K Demo
 
-This command-line program is identical to "ntv2player" except that it plays 8K/UHD2 video.
+This command-line program is identical to the \ref ntv2player except that it plays 8K/UHD2 video.
 
-The NTV2Player8K class demonstrates everything NTV2Player does, plus...
+The NTV2Player8K class demonstrates everything NTV2Player does, plus…
 -	how to generate an 8K/UHD2 test pattern and get it into an 8K/UHD2 frame buffer;
 -	how to configure the device to use quad-quad mode;
 -	how to use AutoCirculate to efficiently stream 8K/UHD2 video with audio and timecode.
@@ -14,15 +14,18 @@ The NTV2Player8K class demonstrates everything NTV2Player does, plus...
 @code
 	ntv2player8k  [options...]
 	
-	-d|-b|--device|--board	{spec}		Specifies the device to use by index number, serial number or generic model name.
-										Defaults to first device (index 0).
-										If model name specified, uses lowest-numbered matching device.
-	-c|--channel {channelSpec}			Specifies the framestore/channel as an unsigned integer number 1 or 5.
-	-v|--videoFormat {vidFormat}		Specifies the video format to use. Use '?' or 'list' to list available formats.
-	-p|--pixelFormat {pixFormat}		Specifies the pixel format to use. Use '?' or 'list' to list available formats.
-	-x|--hdrType {hdrSpec}				Emits HDR ancillary data packets. Use 'SDR', 'HDR10' or 'HLG'.
-	-m|--multiChannel					Enables multichannel/multiformat mode, and shares the device with other processes.
-	--noaudio							Omits audio.
-	-?|--help|--usage					Shows how to use this command.
+	-d|--device {spec}              Specifies the device to use by index number, serial number or generic model name.
+	                                Defaults to first device (index 0).
+	                                If model name specified, uses lowest-numbered matching device.
+	-c|--channel {channelSpec}      Specifies the framestore/channel as an unsigned integer number 1 or 5.
+	-v|--videoFormat {vidFormat}    Specifies the video format to use. Use '?' or 'list' to list available formats.
+	-p|--pixelFormat {pixFormat}    Specifies the pixel format to use. Use '?' or 'list' to list available formats.
+	-x|--hdrType {hdrSpec}          Emits HDR ancillary data packets. Use 'SDR', 'HDR10' or 'HLG'.
+	-m|--multiChannel               Enables multichannel/multiformat mode, and shares the device with other processes.
+	-h|--hdmi                       Enables HDMI playout.
+	-t|--tsi                        Uses Two Sample Interleave (Tsi) instead of quadrants (“squares”).
+	--rgb                           Specifies “RGB on the wire” i.e. RGB over SDI (instead of YCbCr).
+	--noaudio                       Omits audio.
+	-?|--help|--usage               Shows how to use this command.
 @endcode
 **/

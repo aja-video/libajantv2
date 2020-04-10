@@ -8,7 +8,7 @@ and encodes that text into CEA-608 captions that are embedded into an outgoing S
 
 @image	html	ntv2ccplayer.png
 
-The NTV2CCPlayer class demonstrates...
+The NTV2CCPlayer class demonstrates…
 - how to generate a test pattern of a particular video geometry and get it into a frame buffer with the right format;
 - how to use the CNTV2CaptionEncoder608 and CNTV2CaptionEncoder708 classes to encode caption data into SD and HD video frames;
 - how to use the custom ancillary data insertion feature of newer AJA devices (if available);
@@ -37,6 +37,11 @@ Plays video containing closed-caption data sourced from...
 	-f formatSpec                            Specifies the video format to produce.
 	--format=formatSpec                      Defaults to 1080i5994.
 	                                         Specify 'list' or '?' to display the valid video formats for the device.
+
+	--rgb                                    Configure to emit dual-link RGB over SDI.
+
+	--square                                 For 4K/UHD formats, configure for “squares” (quadrants) instead of the
+	                                         default (two-sample interleave, aka Tsi).
 
 	-p formatSpec                            FrameStore pixel format to use.
 	--pixelFormat=formatSpec                 Defaults to v210 (10-bit YCbCr).
@@ -107,6 +112,12 @@ Plays video containing closed-caption data sourced from...
 @note	File data is assumed to be plaintext, unless the file name has a “.scc” or “.SCC” extension and
 		contains SCC caption data. SCC playout ignores the <tt>--rate</tt> and <tt>--608mode</tt> settings.
 		The default or specified <tt>--608chan</tt> may or may not be correct for the SCC file’s data.
+
+
+Changes in SDK 16.0
+-	Support for 2Kx1080 playout;
+-	Support for Dual-Link RGB-over-SDI playout;
+-	Support for Low Frame Rate (LFR) 4K/UHD (Tsi & “squares”) playout.
 
 The NTV2CCPlayer class used in the demo app is capable of simultaneously generating and injecting captions
 into more than one NTV2Line21Channel at independent rates and NTV2Line21Modes. For example, in "main.cpp"...

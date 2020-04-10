@@ -3,19 +3,19 @@
 
 @section	ntv2player		NTV2Player Demo
 
-This command-line program plays out a repeating sequence of test patterns and audio tones with realtime timecode burned
+This command-line program plays out a repeating sequence of test patterns and audio tones with realtime timecode “burned”
 into the video.
 
 @image	html	ntv2player.png
 
 This is a typical WFM display showing the output of an AJA device that's connected to a host running <b>ntv2player</b>.
-Note the timecode "burned" into the video test pattern and 8 channels of audio tone.
+Note the timecode “burned” into the video test pattern and 8 channels of audio tone.
 
-The NTV2Player class demonstrates...
+The NTV2Player class demonstrates…
 -	how to generate a test pattern of a particular video geometry and get it into a frame buffer with the right format;
--	how to generate timecode and "burn" it into a video frame buffer;
--	how to embed timecode into an AJA device's SDI output signal;
--	how to generate a buffer of audio, and embed it into an AJA device's output signal;
+-	how to generate timecode and “burn” it into a video frame buffer;
+-	how to embed timecode into an AJA deviceʼs SDI output signal;
+-	how to generate a buffer of audio, and embed it into an AJA deviceʼs output signal;
 -	how to properly acquire and release an AJA device in order to use it exclusively;
 -	how to use AutoCirculate to efficiently stream video and audio (using the old or new APIs based on a macro definition);
 -	how to use an AJACircularBuffer and the producer/consumer model with AutoCirculate.
@@ -24,15 +24,15 @@ The NTV2Player class demonstrates...
 @code
 	ntv2player  [options...]
 	
-	-d|-b|--device|--board	{spec}		Specifies the device to use by index number, serial number or generic model name.
-										Defaults to first device (index 0).
-										If model name specified, uses lowest-numbered matching device.
-	-c|--channel {channelSpec}			Specifies the framestore/channel as an unsigned integer number 1 thru 8.
-	-v|--videoFormat {vidFormat}		Specifies the video format to use. Use '?' or 'list' to list available formats.
-	-p|--pixelFormat {pixFormat}		Specifies the pixel format to use. Use '?' or 'list' to list available formats.
-	-t|--hdrType {hdrSpec}				Emits HDR ancillary data packets. Use 'SDR', 'HDR10' or 'HLG'.
-	-m|--multiChannel					Enables multichannel/multiformat mode, and shares the device with other processes.
-	--noaudio							Omits audio.
-	-?|--help|--usage					Shows how to use this command.
+	-d|--device {spec}              Specifies the device to use by index number, serial number or generic model name.
+	                                Defaults to first device (index 0).
+	                                If model name specified, uses lowest-numbered matching device.
+	-c|--channel {channelSpec}      Specifies the framestore/channel as an unsigned integer number 1 thru 8.
+	-v|--videoFormat {vidFormat}    Specifies the video format to use. Use '?' or 'list' to list available formats.
+	-p|--pixelFormat {pixFormat}    Specifies the pixel format to use. Use '?' or 'list' to list available formats.
+	-t|--hdrType {hdrSpec}          Emits HDR ancillary data packets. Use 'SDR', 'HDR10' or 'HLG'.
+	-m|--multiChannel               Enables multichannel/multiformat mode, and shares the device with other processes.
+	--noaudio                       Omits audio.
+	-?|--help|--usage               Shows how to use this command.
 @endcode
 **/

@@ -3,23 +3,24 @@
 
 @section   ntv2konaipjsonsetup     NTV2 JSON Setup Demo
 
-This Qt-based command-line program shows how to configure the network parameters for any of the KONA IP's physical SFP cages from a JSON data file.
+This Qt-based command-line program shows how to configure the network parameters for any of the KONA IPʼs
+physical SFP cages from a JSON data file.
 
-The program demonstrates...
--   how to detect if the AJA device is an IP device;
--   how to determine if the MicroBlaze on the device is up and running;
--   how to set the network configuration parameters for each of the SFP cages on the device.
+The program demonstrates…
+-	how to detect if the AJA device is an IP device;
+-	how to determine if the MicroBlaze on the device is up and running;
+-	how to set the network configuration parameters for each of the SFP cages on the device.
 
 Changes in SDK 14.0
--    'Enable2022_7' is moved from the 'sfps' block to a global setting
--    'networkPathDifferential' is moved from the 'receive' block to a global settin
--    'Protocol' is added.  It is required to configure 2110 channels.  Various 2110 only
-      fields have been added too
--    'LinkAEnable' and 'LinkBEnable' fields have been added to both 'receive' and 'transmit'
-     sections.  If 'Enable2022_7' is set true, then both these settings are automatically
-     true. For 2022-6 Tx and Rx can be on the top SFP (linkAEnable=true, linkBEnable=false)
-     or on the bottom SFP.  Since this functionality is now supported using the '4 channel rx/tx'
-     firmware, support for the '2 plus 2' firmware is now discontinued.
+-	'Enable2022_7' is moved from the 'sfps' block to a global setting
+-	'networkPathDifferential' is moved from the 'receive' block to a global setting.
+-	'Protocol' is added, and is required to configure 2110 channels.  Various 2110-only
+	fields have been added too.
+-	'LinkAEnable' and 'LinkBEnable' fields have been added to both 'receive' and 'transmit'
+	sections.  If 'Enable2022_7' is set true, then both these settings are automatically
+	true. For 2022-6, Tx and Rx can be on the top SFP (linkAEnable=true, linkBEnable=false)
+	or on the bottom SFP.  Since this functionality is now supported using the '4 channel rx/tx'
+	firmware, support for the '2 plus 2' firmware is now discontinued.
 
 In the list of keyords below, an 'IP string' refers to something like '239.0.1.123'
 
@@ -83,4 +84,3 @@ transmit
     Enable                    x      x        x     true | false
 @endcode
 **/
-

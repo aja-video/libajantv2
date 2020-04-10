@@ -3,16 +3,16 @@
 
 @section	ntv2burn4kquadrant		NTV2Burn4KQuadrant Demo
 
-This command-line program captures 4K/UHD video provided to four SDI inputs of an AJA device and "burns" timecode into the video,
+This command-line program captures 4K/UHD video provided to four SDI inputs of an AJA device and “burns” timecode into the video,
 then plays it out onto four SDI outputs of a second AJA device (or the same device, if it has at least 8 channels).
-The program will use the timecode embedded in the input signal if it has any; otherwise it "invents" its own timecode.
+The program will use the timecode embedded in the input signal if it has any; otherwise it “invents” its own timecode.
 It also embeds whatever timecode it uses into the output signal.
 
 @image	html	ntv2burn4kquadrant.png
 
 This shows a typical WFM display showing one quadrant of the output AJA device connected to a host running ntv2burn4kquadrant.
 
-The NTV2Burn4KQuadrant class demonstrates everything that NTV2Burn does, plus...
+The NTV2Burn4KQuadrant class demonstrates everything that NTV2Burn does, plus…
 - how to deduce 4K/UHD geometry by looking at four consecutive SDI inputs;
 - how to programmatically perform 4K/UHD signal routing;
 - how to use AutoCirculate to efficiently stream 4K/UHD video and audio, including timecode;
@@ -22,14 +22,15 @@ The NTV2Burn4KQuadrant class demonstrates everything that NTV2Burn does, plus...
 @code
 	ntv2burn4kquadrant  [options...]
 	
-	-i|--input	{spec}					Specifies the input/capture device by index number, serial number or generic model name.
-										Defaults to first device (index 0).
-										If model name specified, uses lowest-numbered matching device.
-	-o|--output	 {spec}					Specifies the output/playout device by index number, serial number or generic model name.
-										Defaults to first device (index 0).
-										If model name specified, uses lowest-numbered matching device.
-	-t|--tcsource {timecodeSource}		Specifies the timecode source. Use 'sdiN', 'sltcN' or 'ltcN', where N is 1 thru 4.
-	--noaudio							Omits audio.
-	-?|--help|--usage					Shows how to use this command.
+	-i|--input {spec}           Specifies the input/capture device by index number, serial number or generic model name.
+	                            Defaults to first device (index 0).
+	                            If model name specified, uses lowest-numbered matching device.
+	-o|--output {spec}          Specifies the output/playout device by index number, serial number or generic model name.
+	                            Defaults to first device (index 0).
+	                            If model name specified, uses lowest-numbered matching device.
+	-t|--tcsource {tcSource}    Specifies the timecode source. Use '?' or 'list' to list available sources.
+	-p|--pixelFormat {spec}     Specifies the pixel format to use. Use '?' or 'list' to list available formats.
+	--noaudio                   Omits audio.
+	-?|--help|--usage           Shows how to use this command.
 @endcode
 **/

@@ -5,7 +5,7 @@
 
 This command-line program is identical to the \ref ntv2capture except that it captures 8K/UHD2 video.
 
-The NTV2Capture8K class demonstrates...
+The NTV2Capture8K class demonstrates…
 - how to properly acquire and release an AJA device in order to use it exclusively;
 - how to use AutoCirculate to efficiently stream video and audio (using the old or new APIs based on a macro definition);
 - how to use an AJACircularBuffer and the producer/consumer model with AutoCirculate.
@@ -15,14 +15,14 @@ The NTV2Capture8K class demonstrates...
 @code
 	ntv2capture8k  [options...]
 	
-	-d|-b|--device|--board	{spec}		Specifies the device to use by index number, serial number or generic model name.
-										Defaults to first device (index 0).
-										If model name specified, uses lowest-numbered matching device.
-	-c|--channel	{number}			Specifies the framestore/channel to use. Must be an unsigned integer value, 1 or 5.
-										Defaults to channel 1.
-	-p|--pixelFormat {formatSpec}		Specifies the pixel format to use. Use '?' or 'list' to list available formats.
-	-m|--multiFormat					Enables multichannel/multiformat mode, and shares the device with other processes.
-										By default, it assumes full control over the device.
-	-?|--help|--usage					Shows how to use this command.
+	-d|--device  {spec}               Specifies the device to use by index number, serial number or generic model name.
+	                                  Defaults to first device (index 0).
+	                                  If model name specified, uses lowest-numbered matching device.
+	-c|--channel  {number}            Specifies the framestore/channel to use. Must be an unsigned integer value, 1 or 5.
+	                                  Defaults to channel 1.
+	-p|--pixelFormat {formatSpec}     Specifies the pixel format to use. Use '?' or 'list' to list available formats.
+	-m|--multiFormat                  Enables multichannel/multiformat mode, and shares the device with other processes.
+	                                  By default, it assumes full control over the device.
+	-?|--help|--usage                 Shows how to use this command.
 @endcode
 **/

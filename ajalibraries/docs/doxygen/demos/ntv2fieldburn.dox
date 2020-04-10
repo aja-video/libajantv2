@@ -3,33 +3,34 @@
 
 @section	ntv2fieldburn		NTV2FieldBurn Demo
 
-This command-line program captures interlaced SDI video into two separate host buffers, one for each field,
-"burns" timecode into each of them, then recombines and plays out the "burned" fields onto an SDI output of
-that same AJA device. The program will use the timecode embedded in the input signal if it has any; otherwise
-it "invents" a timecode of its own. It also embeds whatever timecode it used into the output signal.
+This command-line program is very similar to the \ref ntv2burn except that it captures interlaced SDI video
+into two separate host buffers, one for each field, “burns” timecode into each of them in different places in
+the raster, then recombines and plays out the “burned” fields onto an SDI output of the same device.
+The program will use the timecode embedded in the input signal if it has any; otherwise it “invents” a
+timecode of its own. It also embeds whatever timecode it used into the output signal.
 
 @image	html	ntv2fieldburn.png
 
-The NTV2FieldBurn class demonstrates...
+The NTV2FieldBurn class demonstrates…
 -	how to properly acquire and release an AJA device in order to use it exclusively;
 -	how to programmatically perform device configuration and signal routing;
 -	how to use AutoCirculate to efficiently stream video and audio, with or without timecode;
 -	how to use an AJACircularBuffer and the producer/consumer model with AutoCirculate;
 -	how to use and manipulate timecode;
 -	how to perform segmented DMAs using AutoCirculate;
--	how to "burn" timecode into a buffer containing a frame of video data.
+-	how to “burn” timecode into a buffer containing a frame of video data.
 
 <b>Command line usage:</b>
 @code
 	ntv2fieldburn  [options...]
 	
-	-d|-b|--device|--board	{spec}		Specifies the device to use by index number, serial number or generic model name.
-										Defaults to first device (index 0).
-										If model name specified, uses lowest-numbered matching device.
-	-i|--input	{inputSource}			Specifies the SDI video source as an unsigned integer number 1 thru 8.
-	-m|--multiChannel					Enables multichannel/multiformat mode, and shares the device with other processes.
-	--noaudio							Omits audio.
-	--rgb								Uses an RGB frame buffer format (instead of YCbCr).
-	-?|--help|--usage					Shows how to use this command.
+	-d|--device {spec}        Specifies the device to use by index number, serial number or generic model name.
+	                          Defaults to first device (index 0).
+	                          If model name specified, uses lowest-numbered matching device.
+	-i|--input  {source}      Specifies the SDI video source as an unsigned integer number 1 thru 8.
+	-p|--pixelFormat {spec}   Specifies the pixel format to use. Use '?' or 'list' to list available formats.
+	-m|--multiChannel         Enables multichannel/multiformat mode, and shares the device with other processes.
+	--noaudio                 Omits audio.
+	-?|--help|--usage         Shows how to use this command.
 @endcode
 **/

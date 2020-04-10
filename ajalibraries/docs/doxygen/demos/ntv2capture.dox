@@ -5,7 +5,7 @@
 
 This simple command-line program shows how to capture video frames provided to an AJA device.
 
-The NTV2Capture class demonstrates...
+The NTV2Capture class demonstrates…
 - how to properly acquire and release an AJA device in order to use it exclusively;
 - how to use AutoCirculate to efficiently stream video and audio (using the old or new APIs based on a macro definition);
 - how to use an AJACircularBuffer and the producer/consumer model with AutoCirculate.
@@ -14,28 +14,28 @@ The NTV2Capture class demonstrates...
 @code
 	ntv2capture  [options...]
 	
-	-d|-b|--device|--board	{spec}      Specifies the device to use by index number, serial number or generic model name.
-	                                    Defaults to first device (index 0). Model name uses lowest-numbered matching device.
+	-d|--device {spec}         Specifies the device to use by index number, serial number or generic model name.
+	                           Defaults to first device (index 0). Model name uses lowest-numbered matching device.
 
-	-c|--channel  {number}              Specifies the framestore/channel to use. Must be an unsigned integer value, 1 thru 8.
-	                                    Defaults to channel 1.
+	-c|--channel  {number}     Specifies the framestore/channel to use. Must be an unsigned integer value, 1 thru 8.
+	                           Defaults to channel 1.
 
-	-i|--input {spec}                   Specifies the device input connector to use, where inputSpec is 1|2|3…
-	                                    Defaults to '1'. Specify 'list' or '?' to display valid inputs for the device.
+	-i|--input {spec}          Specifies the device input connector to use, where inputSpec is 1|2|3…
+	                           Defaults to '1'. Specify 'list' or '?' to display valid inputs for the device.
 
-	-p|--pixelFormat {formatSpec}       Specifies the pixel format to use. Use '?' or 'list' to list available formats.
+	-p|--pixelFormat {spec}    Specifies the pixel format to use. Use '?' or 'list' to list available formats.
 	
-	-m|--multiFormat                    Enables multichannel/multiformat mode, and shares the device with other processes.
-	                                    By default, it assumes full control over the device.
+	-m|--multiFormat           Enables multichannel/multiformat mode, and shares the device with other processes.
+	                           By default, it assumes full control over the device.
 	
-	-a|--anc                            Captures ancillary data using device's Anc extractor firmware.
+	-a|--anc                   Captures ancillary data using device's Anc extractor firmware.
 	
-	--noaudio                           Disables audio capture.
+	--noaudio                  Disables audio capture.
 	
-	--frames {spec}                     Specifies which device frame buffers to use:
-	                                         numFrames[@startFrame]    Specifies frame count (and optional start frame).
-	                                         startFrame-endFrame       Explicitly specifies start and end frame numbers.
+	--frames {spec}            Specifies which device frame buffers to use:
+	                                numFrames[@startFrame]    Specifies frame count (and optional start frame).
+	                                startFrame-endFrame       Explicitly specifies start and end frame numbers.
 
-	-?|--help|--usage                   Shows command usage and options.
+	-?|--help|--usage          Shows command usage and options.
 @endcode
 **/
