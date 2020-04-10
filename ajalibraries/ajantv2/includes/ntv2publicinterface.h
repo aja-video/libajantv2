@@ -160,7 +160,7 @@ typedef enum
 	kRegLTCInBits32_63	= kRegLTCAnalogBits32_63,	// 113
 
 	kRegReserved114,				// 114
-	kRegReserved115,				// 115
+	kRegAudioControl2,				// 115
 	kRegSysmonControl,				// 116
 	kRegSysmonConfig1_0,			// 117
 	kRegSysmonConfig2,				// 118
@@ -1343,6 +1343,15 @@ typedef enum
 	kRegMaskFramePulseEnable	= BIT(6),
 	kRegMaskFramePulseRefSelect	= BIT(8) + BIT(9) + BIT(10) + BIT(11),
 
+	// Audio Control 2
+	kRegMaskAud1RateHigh		= BIT(0),
+	kRegMaskAud2RateHigh		= BIT(1),
+	kRegMaskAud3RateHigh		= BIT(2),
+	kRegMaskAud4RateHigh		= BIT(3),
+	kRegMaskAud5RateHigh		= BIT(4),
+	kRegMaskAud6RateHigh		= BIT(5),
+	kRegMaskAud7RateHigh		= BIT(6),
+	kRegMaskAud8RateHigh		= BIT(7),
 
 	// Channel Control - kRegCh1Control, kRegCh2Control, kRegCh3Control, kRegCh4Control
 	kRegMaskMode				= BIT(0),
@@ -2516,6 +2525,16 @@ typedef enum
 	kRegShiftVUMeterSelect = 5,
 	kRegShiftFramePulseEnable = 6,
 	kRegShiftFramePulseRefSelect = 8,
+
+	// Audio Control 2
+	kRegShiftAud1RateHigh		= 0,
+	kRegShiftAud2RateHigh		= 1,
+	kRegShiftAud3RateHigh		= 2,
+	kRegShiftAud4RateHigh		= 3,
+	kRegShiftAud5RateHigh		= 4,
+	kRegShiftAud6RateHigh		= 5,
+	kRegShiftAud7RateHigh		= 6,
+	kRegShiftAud8RateHigh		= 7,
 
 	// Channel Control - kRegCh1Control, kRegCh2Control, kRegCh3Control, kRegCh4Control
 	kRegShiftMode						= 0,
