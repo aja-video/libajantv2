@@ -1156,8 +1156,9 @@ string CNTV2DemoCommon::ACFrameRange::toString(void) const
 
 bool CNTV2DemoCommon::BFT(void)
 {
-	typedef struct {string fName; NTV2VideoFormat fFormat;} Foo;
-	static const Foo foo[] = {	{"1080i50",				NTV2_FORMAT_1080i_5000},
+	typedef struct {string fName; NTV2VideoFormat fFormat;} FormatNameDictionary;
+	static const FormatNameDictionary sVFmtDict[] = {
+								{"1080i50",				NTV2_FORMAT_1080i_5000},
 								{"1080i",				NTV2_FORMAT_1080i_5994},
 								{"1080i5994",			NTV2_FORMAT_1080i_5994},
 								{"hd",					NTV2_FORMAT_1080i_5994},
@@ -1275,10 +1276,10 @@ bool CNTV2DemoCommon::BFT(void)
 		}
 	}
 	cout << endl << endl;
-	for (unsigned ndx(0);  !foo[ndx].fName.empty();  ndx++)
+	for (unsigned ndx(0);  !sVFmtDict[ndx].fName.empty();  ndx++)
 	{
-		const string &			str		(foo[ndx].fName);
-		const NTV2VideoFormat	vFormat	(foo[ndx].fFormat);
+		const string &			str		(sVFmtDict[ndx].fName);
+		const NTV2VideoFormat	vFormat	(sVFmtDict[ndx].fFormat);
 		String2VideoFormatMapConstIter	it	(gString2VideoFormatMap.find(str));
 		const NTV2VideoFormat	vFormat2	(it != gString2VideoFormatMap.end() ? it->second : NTV2_FORMAT_UNKNOWN);
 		if (vFormat != vFormat2)
@@ -1287,99 +1288,99 @@ bool CNTV2DemoCommon::BFT(void)
 	}
 	if (true)
 	{
-		CNTV2DemoCommon::ACFrameRange foo(0);
-		SHOULD_BE_FALSE(foo.valid());
-		cerr << foo.setFromString("") << endl;
-		SHOULD_BE_FALSE(foo.valid());	//	Nothing -- empty string
-		cerr << foo.setFromString("    \t    ") << endl;
-		SHOULD_BE_FALSE(foo.valid());	//	Nothing -- whitespace
+		CNTV2DemoCommon::ACFrameRange sVFmtDict(0);
+		SHOULD_BE_FALSE(sVFmtDict.valid());
+		cerr << sVFmtDict.setFromString("") << endl;
+		SHOULD_BE_FALSE(sVFmtDict.valid());	//	Nothing -- empty string
+		cerr << sVFmtDict.setFromString("    \t    ") << endl;
+		SHOULD_BE_FALSE(sVFmtDict.valid());	//	Nothing -- whitespace
 
-		cerr << foo.setFromString("10") << endl;
-		SHOULD_BE_TRUE(foo.valid());
-		SHOULD_BE_TRUE(foo.isCount());
-		SHOULD_BE_FALSE(foo.isFrameRange());
-		SHOULD_BE_EQUAL(foo.count(), 10);
+		cerr << sVFmtDict.setFromString("10") << endl;
+		SHOULD_BE_TRUE(sVFmtDict.valid());
+		SHOULD_BE_TRUE(sVFmtDict.isCount());
+		SHOULD_BE_FALSE(sVFmtDict.isFrameRange());
+		SHOULD_BE_EQUAL(sVFmtDict.count(), 10);
 
-		SHOULD_BE_FALSE(foo.makeInvalid().valid());
+		SHOULD_BE_FALSE(sVFmtDict.makeInvalid().valid());
 
-		cerr << foo.setFromString("   \t   15   \t   ") << endl;
-		SHOULD_BE_TRUE(foo.valid());
-		SHOULD_BE_TRUE(foo.isCount());
-		SHOULD_BE_FALSE(foo.isFrameRange());
-		SHOULD_BE_EQUAL(foo.count(), 15);
+		cerr << sVFmtDict.setFromString("   \t   15   \t   ") << endl;
+		SHOULD_BE_TRUE(sVFmtDict.valid());
+		SHOULD_BE_TRUE(sVFmtDict.isCount());
+		SHOULD_BE_FALSE(sVFmtDict.isFrameRange());
+		SHOULD_BE_EQUAL(sVFmtDict.count(), 15);
 
-		cerr << foo.setFromString("@") << endl;
-		SHOULD_BE_FALSE(foo.valid());	//	Missing integer values
-		cerr << foo.setFromString("20@") << endl;
-		SHOULD_BE_FALSE(foo.valid());	//	Missing 2nd integer value
-		cerr << foo.setFromString("@20") << endl;
-		SHOULD_BE_FALSE(foo.valid());	//	Missing 1st integer value
+		cerr << sVFmtDict.setFromString("@") << endl;
+		SHOULD_BE_FALSE(sVFmtDict.valid());	//	Missing integer values
+		cerr << sVFmtDict.setFromString("20@") << endl;
+		SHOULD_BE_FALSE(sVFmtDict.valid());	//	Missing 2nd integer value
+		cerr << sVFmtDict.setFromString("@20") << endl;
+		SHOULD_BE_FALSE(sVFmtDict.valid());	//	Missing 1st integer value
 
-		cerr << foo.setFromString("20@10") << endl;
-		SHOULD_BE_TRUE(foo.valid());
-		SHOULD_BE_FALSE(foo.isCount());
-		SHOULD_BE_TRUE(foo.isFrameRange());
-		SHOULD_BE_EQUAL(foo.count(), 0);
-		SHOULD_BE_EQUAL(foo.firstFrame(), 10);
-		SHOULD_BE_EQUAL(foo.lastFrame(), 29);
+		cerr << sVFmtDict.setFromString("20@10") << endl;
+		SHOULD_BE_TRUE(sVFmtDict.valid());
+		SHOULD_BE_FALSE(sVFmtDict.isCount());
+		SHOULD_BE_TRUE(sVFmtDict.isFrameRange());
+		SHOULD_BE_EQUAL(sVFmtDict.count(), 0);
+		SHOULD_BE_EQUAL(sVFmtDict.firstFrame(), 10);
+		SHOULD_BE_EQUAL(sVFmtDict.lastFrame(), 29);
 
-		cerr << foo.setFromString("   \t   25   @   15   \t   ") << endl;
-		SHOULD_BE_TRUE(foo.valid());
-		SHOULD_BE_FALSE(foo.isCount());
-		SHOULD_BE_TRUE(foo.isFrameRange());
-		SHOULD_BE_EQUAL(foo.count(), 0);
-		SHOULD_BE_EQUAL(foo.firstFrame(), 15);
-		SHOULD_BE_EQUAL(foo.lastFrame(), 39);
+		cerr << sVFmtDict.setFromString("   \t   25   @   15   \t   ") << endl;
+		SHOULD_BE_TRUE(sVFmtDict.valid());
+		SHOULD_BE_FALSE(sVFmtDict.isCount());
+		SHOULD_BE_TRUE(sVFmtDict.isFrameRange());
+		SHOULD_BE_EQUAL(sVFmtDict.count(), 0);
+		SHOULD_BE_EQUAL(sVFmtDict.firstFrame(), 15);
+		SHOULD_BE_EQUAL(sVFmtDict.lastFrame(), 39);
 
-		cerr << foo.setFromString("   \t   2.5   @   1 $ 5   \t   ") << endl;
-		SHOULD_BE_FALSE(foo.valid());
-		cerr << foo.setFromString("~!@#$%^&*()_+{}|[]:;<>?/.,`") << endl;
-		SHOULD_BE_FALSE(foo.valid());
-		cerr << foo.setFromString("@@@@@@@@@--------") << endl;
-		SHOULD_BE_FALSE(foo.valid());
-		cerr << foo.setFromString("1@2@3@4@5@6@7@8@9@1") << endl;
-		SHOULD_BE_FALSE(foo.valid());
+		cerr << sVFmtDict.setFromString("   \t   2.5   @   1 $ 5   \t   ") << endl;
+		SHOULD_BE_FALSE(sVFmtDict.valid());
+		cerr << sVFmtDict.setFromString("~!@#$%^&*()_+{}|[]:;<>?/.,`") << endl;
+		SHOULD_BE_FALSE(sVFmtDict.valid());
+		cerr << sVFmtDict.setFromString("@@@@@@@@@--------") << endl;
+		SHOULD_BE_FALSE(sVFmtDict.valid());
+		cerr << sVFmtDict.setFromString("1@2@3@4@5@6@7@8@9@1") << endl;
+		SHOULD_BE_FALSE(sVFmtDict.valid());
 
-		cerr << foo.setFromString("-") << endl;
-		SHOULD_BE_FALSE(foo.valid());	//	Missing integer values
-		cerr << foo.setFromString("10-") << endl;
-		SHOULD_BE_FALSE(foo.valid());	//	Missing 2nd integer value
-		cerr << foo.setFromString("-10") << endl;
-		SHOULD_BE_FALSE(foo.valid());	//	Missing 1st integer value
-		cerr << foo.setFromString("1-2-3-4-5-6-7-8-9-1") << endl;
-		SHOULD_BE_FALSE(foo.valid());
-		cerr << foo.setFromString("-1-2-3-4-5-6-7-8-9-") << endl;
-		SHOULD_BE_FALSE(foo.valid());
+		cerr << sVFmtDict.setFromString("-") << endl;
+		SHOULD_BE_FALSE(sVFmtDict.valid());	//	Missing integer values
+		cerr << sVFmtDict.setFromString("10-") << endl;
+		SHOULD_BE_FALSE(sVFmtDict.valid());	//	Missing 2nd integer value
+		cerr << sVFmtDict.setFromString("-10") << endl;
+		SHOULD_BE_FALSE(sVFmtDict.valid());	//	Missing 1st integer value
+		cerr << sVFmtDict.setFromString("1-2-3-4-5-6-7-8-9-1") << endl;
+		SHOULD_BE_FALSE(sVFmtDict.valid());
+		cerr << sVFmtDict.setFromString("-1-2-3-4-5-6-7-8-9-") << endl;
+		SHOULD_BE_FALSE(sVFmtDict.valid());
 
-		cerr << foo.setFromString("20-30") << endl;
-		SHOULD_BE_TRUE(foo.valid());
-		SHOULD_BE_FALSE(foo.isCount());
-		SHOULD_BE_TRUE(foo.isFrameRange());
-		SHOULD_BE_EQUAL(foo.count(), 0);
-		SHOULD_BE_EQUAL(foo.firstFrame(), 20);
-		SHOULD_BE_EQUAL(foo.lastFrame(), 30);
+		cerr << sVFmtDict.setFromString("20-30") << endl;
+		SHOULD_BE_TRUE(sVFmtDict.valid());
+		SHOULD_BE_FALSE(sVFmtDict.isCount());
+		SHOULD_BE_TRUE(sVFmtDict.isFrameRange());
+		SHOULD_BE_EQUAL(sVFmtDict.count(), 0);
+		SHOULD_BE_EQUAL(sVFmtDict.firstFrame(), 20);
+		SHOULD_BE_EQUAL(sVFmtDict.lastFrame(), 30);
 
-		cerr << foo.setFromString("2.0-3#0") << endl;
-		SHOULD_BE_FALSE(foo.valid());
+		cerr << sVFmtDict.setFromString("2.0-3#0") << endl;
+		SHOULD_BE_FALSE(sVFmtDict.valid());
 
-		cerr << foo.setFromString("                   25            -                35         ") << endl;
-		SHOULD_BE_TRUE(foo.valid());
-		SHOULD_BE_FALSE(foo.isCount());
-		SHOULD_BE_TRUE(foo.isFrameRange());
-		SHOULD_BE_EQUAL(foo.count(), 0);
-		SHOULD_BE_EQUAL(foo.firstFrame(), 25);
-		SHOULD_BE_EQUAL(foo.lastFrame(), 35);
+		cerr << sVFmtDict.setFromString("                   25            -                35         ") << endl;
+		SHOULD_BE_TRUE(sVFmtDict.valid());
+		SHOULD_BE_FALSE(sVFmtDict.isCount());
+		SHOULD_BE_TRUE(sVFmtDict.isFrameRange());
+		SHOULD_BE_EQUAL(sVFmtDict.count(), 0);
+		SHOULD_BE_EQUAL(sVFmtDict.firstFrame(), 25);
+		SHOULD_BE_EQUAL(sVFmtDict.lastFrame(), 35);
 
-		cerr << foo.setFromString("36-36") << endl;
-		SHOULD_BE_TRUE(foo.valid());
-		SHOULD_BE_FALSE(foo.isCount());
-		SHOULD_BE_TRUE(foo.isFrameRange());
-		SHOULD_BE_EQUAL(foo.count(), 0);
-		SHOULD_BE_EQUAL(foo.firstFrame(), 36);
-		SHOULD_BE_EQUAL(foo.lastFrame(), 36);
+		cerr << sVFmtDict.setFromString("36-36") << endl;
+		SHOULD_BE_TRUE(sVFmtDict.valid());
+		SHOULD_BE_FALSE(sVFmtDict.isCount());
+		SHOULD_BE_TRUE(sVFmtDict.isFrameRange());
+		SHOULD_BE_EQUAL(sVFmtDict.count(), 0);
+		SHOULD_BE_EQUAL(sVFmtDict.firstFrame(), 36);
+		SHOULD_BE_EQUAL(sVFmtDict.lastFrame(), 36);
 
-		cerr << foo.setFromString("36-1") << endl;
-		SHOULD_BE_FALSE(foo.valid());
+		cerr << sVFmtDict.setFromString("36-1") << endl;
+		SHOULD_BE_FALSE(sVFmtDict.valid());
 	}
 	return true;
 }
