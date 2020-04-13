@@ -14,7 +14,7 @@
 	-	\ref widget_processing
 		-	\ref widget_framestore
 		-	\ref widget_csc
-		-	Color Look-Up-Tables (LUTs)
+		-	\ref widget_lut
 		-	\ref widget_mixkey
 		-	Dual-Link (DL) converters (input & output)
 		-	Two-sample-interleave (Tsi) muxers/demuxers
@@ -253,6 +253,24 @@
 				To obtain the <b>RGB</b> crosspoint, pass \c true for \c inIsRGB.
 
 	The \ref vidop-csc section has more information on CSC configuration.
+
+
+	@subsection	widget_lut	LUT Routing
+
+	A <b>LUT</b> widget represents the firmware entity that converts R, G, and B values into different R, G, and B values.
+	-	::NTV2DeviceGetNumLUTs reports the number of LUT widgets that are available on a given device.
+	-	LUT widgets are identified by ::NTV2_WgtLUT1, ::NTV2_WgtLUT2, etc.
+	-	Each LUT has one input crosspoint:
+		-	<b>Video Input</b>:  This input only accepts RGB video from another widget’s output crosspoint.
+		-	Call ::GetLUTInputXptFromChannel to obtain the ::NTV2InputCrosspointID for a LUT (e.g., specify ::NTV2_CHANNEL3 for LUT 3).
+	-	Each LUT has a single output crosspoint:
+		-	<b>Video Output</b>:  This emits the converted RGB video data.
+		-	Call ::GetLUTOutputXptFromChannel to obtain the LUT’s ::NTV2OutputCrosspointID value:
+			-	Specify the LUT by ::NTV2Channel (e.g., use ::NTV2_CHANNEL3 for LUT 3).
+		-	On very old devices, the one and only LUT also had a <b>Key Output</b> that emitted luminance data
+			in the Y channel of a YCbCr signal from the crosspoint. For this output, use ::NTV2_XptLUT1YUV.
+
+	The \ref vidop-lut section has more information on LUT configuration.
 
 
 	@subsection	widget_mixkey	Mixer/Keyer Routing
