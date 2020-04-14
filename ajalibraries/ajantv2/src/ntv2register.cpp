@@ -4190,6 +4190,10 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 	bool isProgressiveTrans (isValidVPID ? inputVPID.GetProgressiveTransport() : GetSDIInputIsProgressive(inChannel));
 	bool isProgressivePic (isValidVPID ? inputVPID.GetProgressivePicture() : inIsProgressivePicture);
 	bool isInput3G (false);
+	
+	if(inputRate == NTV2_FRAMERATE_INVALID)
+		return NTV2_FORMAT_UNKNOWN;
+	
 	if (::NTV2DeviceCanDo3GIn(_boardID, inChannel) || ::NTV2DeviceCanDo12GIn(_boardID, inChannel))
 	{
 		GetSDIInput3GPresent(isInput3G, inChannel);
