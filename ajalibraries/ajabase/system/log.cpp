@@ -251,7 +251,7 @@ void AJATimeLog::PrintDelta(const char* addedTag, bool bReset)
         _time = currTime;
 }
 
-void AJATimeLog::PrintDelta(int threashold, const char* addedTag, bool bReset)
+void AJATimeLog::PrintDelta(uint64_t threashold, const char* addedTag, bool bReset)
 {
 	uint64_t currTime = AJATime::GetSystemMicroseconds();
 	if ((currTime-_time) > threashold)

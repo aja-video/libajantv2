@@ -200,7 +200,7 @@ public:
 	 */
     void PrintDelta(bool bReset=true);
     void PrintDelta(const char* addedTag, bool bReset=true);
-	void PrintDelta(int threashold, const char* addedTag, bool bReset);
+	void PrintDelta(uint64_t threashold, const char* addedTag, bool bReset);
 
     inline void PrintDelta(const std::string& addedTag, bool bReset=true)
 		{ PrintDelta(addedTag.c_str(), bReset); }
