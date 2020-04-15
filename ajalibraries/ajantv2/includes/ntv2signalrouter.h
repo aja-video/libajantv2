@@ -570,8 +570,10 @@ AJAExport NTV2OutputCrosspointID	GetDLInOutputXptFromChannel(const NTV2Channel i
 	@param[in]	inOutputDest	Specifies the ::NTV2OutputDestination of interest.
 	@param[in]	inIsSDI_DS2		Specify true to obtain the DS2 input crosspoint (SDI output destinations only). Defaults to false (the DS1 input).
 								Ignored for non-SDI output destinations.
-	@param[in]	inHDMI_Quadrant	Specifies the 4K/UHD quadrant of interest (for HDMI output destinations), where 0=upperLeft, 1=upperRight, 2=lowerLeft, 3=lowerRight.
-								Defaults to 99 for non-4K/UHD. Ignored for non-HDMI output destinations.
+	@param[in]	inHDMI_Quadrant	Specifies the 4K/UHD quadrant of interest (for HDMI output destinations),
+								where 0=upperLeft, 1=upperRight, 2=lowerLeft, 3=lowerRight.
+								Values above 3 are deemed to be non-4K/UHD (the default).
+								Ignored for non-HDMI output destinations.
 **/
 AJAExport NTV2InputCrosspointID		GetOutputDestInputXpt (const NTV2OutputDestination inOutputDest,  const bool inIsSDI_DS2 = false,  const UWord inHDMI_Quadrant = 99);
 

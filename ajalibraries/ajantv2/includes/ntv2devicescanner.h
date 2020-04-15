@@ -266,7 +266,8 @@ public:
 					-#	3-16 character hexadecimal integer, optionally preceded by '0x':  device having a matching 64-bit serial number;
 					-#	All other cases:  first device (lowest index number) whose name contains the argument string (compared case-insensitively).
 		@return		True if successful; otherwise false.
-		@param[in]	inArgument			The argument string.
+		@param[in]	inArgument			The argument string. If 'list' or '?', the std::cout stream is sent some
+										"help text" showing a list of all available devices.
 		@param[out]	outDevice			Receives the open, ready-to-use CNTV2Card instance.
 	**/
 	static bool									GetFirstDeviceFromArgument (const std::string & inArgument, CNTV2Card & outDevice);

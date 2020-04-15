@@ -27,7 +27,8 @@
 //#define NTV2_DEPRECATE_15_2		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.2
 //#define NTV2_DEPRECATE_15_3		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.3 (never released)
 //#define NTV2_DEPRECATE_15_5		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.5
-//#define NTV2_DEPRECATE_15_6		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.6
+//#define NTV2_DEPRECATE_15_6		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.6 (never released)
+//#define NTV2_DEPRECATE_16_0		//	If defined, excludes all symbols/APIs to be deprecated in SDK 16.0
 
 #define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
 #define	AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
@@ -391,6 +392,9 @@
 	#endif
 	#if !defined(NTV2_DEPRECATE_15_6)
 		#define NTV2_DEPRECATE_15_6		//	(future ready)
+	#endif
+	#if !defined(NTV2_DEPRECATE_16_0)
+		#define NTV2_DEPRECATE_16_0		//	(future ready)
 	#endif
 #endif
 

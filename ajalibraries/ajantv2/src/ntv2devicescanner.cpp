@@ -332,16 +332,31 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 	if (::IsLegalDecimalNumber(inArgument))
 		return GetDeviceAtIndex (ULWord(aja::stoul(inArgument)), outDevice);
 
-	//	Serial number (string):
-	if (::IsLegalSerialNumber(inArgument))
+	CNTV2DeviceScanner	scanner;
+	const NTV2DeviceInfoList &	infoList (scanner.GetDeviceInfoList());
+	const string upperArg(::ToUpper(inArgument));
+	if (upperArg == "LIST" || upperArg == "?")
 	{
-		CNTV2DeviceScanner	scanner;
-		const string serNum(::ToUpper(inArgument));
-		const NTV2DeviceInfoList &	infoList (scanner.GetDeviceInfoList());
+		if (infoList.empty())
+			cout << "No devices detected" << endl;
+		else
+			cout << DEC(infoList.size()) << " available " << (infoList.size() == 1 ? "device:" : "devices:") << endl;
 		for (NTV2DeviceInfoListConstIter iter(infoList.begin());  iter != infoList.end();  ++iter)
-			if (CNTV2Card::SerialNum64ToString(iter->deviceSerialNumber) == serNum)
+		{
+			const string serNum(CNTV2Card::SerialNum64ToString(iter->deviceSerialNumber));
+			cout << DECN(iter->deviceIndex,2) << " | " << setw(8) << ::NTV2DeviceIDToString(iter->deviceID);
+			if (!serNum.empty())
+				cout << " | " << setw(9) << serNum << " | " << HEX0N(iter->deviceSerialNumber,8);
+			cout << endl;
+		}
+		return false;
+	}
+
+	//	Serial number (string):
+	if (::IsLegalSerialNumber(upperArg))
+		for (NTV2DeviceInfoListConstIter iter(infoList.begin());  iter != infoList.end();  ++iter)
+			if (CNTV2Card::SerialNum64ToString(iter->deviceSerialNumber) == upperArg)
 				return outDevice.Open(UWord(iter->deviceIndex));	//	Found!
-	}	//	if serial number string
 
 	//	Hex serial number:
 	const uint64_t serialNumber(::IsLegalHexSerialNumber(inArgument));

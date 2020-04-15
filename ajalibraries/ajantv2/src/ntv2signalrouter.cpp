@@ -1836,12 +1836,12 @@ NTV2OutputCrosspointID GetDLInOutputXptFromChannel(const NTV2Channel inChannel)
 
 NTV2InputCrosspointID GetOutputDestInputXpt (const NTV2OutputDestination inOutputDest,  const bool inIsSDI_DS2,  const UWord inHDMI_Quadrant)
 {
-    static const NTV2InputCrosspointID	gHDMIOutputInputs []	=	{	NTV2_XptHDMIOutQ1Input,	NTV2_XptHDMIOutQ2Input,	NTV2_XptHDMIOutQ3Input,	NTV2_XptHDMIOutQ4Input};
-    if (NTV2_OUTPUT_DEST_IS_SDI (inOutputDest))
-        return ::GetSDIOutputInputXpt (::NTV2OutputDestinationToChannel (inOutputDest), inIsSDI_DS2);
-    else if (NTV2_OUTPUT_DEST_IS_HDMI (inOutputDest))
-        return inHDMI_Quadrant == 99  ?  NTV2_XptHDMIOutInput :  gHDMIOutputInputs [inHDMI_Quadrant];
-    else if (NTV2_OUTPUT_DEST_IS_ANALOG (inOutputDest))
+    static const NTV2InputCrosspointID	gHDMIOutputInputs[] = {	NTV2_XptHDMIOutQ1Input,	NTV2_XptHDMIOutQ2Input,	NTV2_XptHDMIOutQ3Input,	NTV2_XptHDMIOutQ4Input};
+    if (NTV2_OUTPUT_DEST_IS_SDI(inOutputDest))
+        return ::GetSDIOutputInputXpt (::NTV2OutputDestinationToChannel(inOutputDest), inIsSDI_DS2);
+    else if (NTV2_OUTPUT_DEST_IS_HDMI(inOutputDest))
+        return inHDMI_Quadrant > 3  ?  NTV2_XptHDMIOutInput :  gHDMIOutputInputs[inHDMI_Quadrant];
+    else if (NTV2_OUTPUT_DEST_IS_ANALOG(inOutputDest))
         return NTV2_XptAnalogOutInput;
     else
         return NTV2_INPUT_CROSSPOINT_INVALID;

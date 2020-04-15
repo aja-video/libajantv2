@@ -298,6 +298,8 @@ public:
 
 };
 
+typedef NTV2FormatDescriptor NTV2FormatDesc;	///< @brief Same as NTV2FormatDescriptor
+
 
 /**
 	@brief		Writes the given NTV2FormatDescriptor to the specified output stream.

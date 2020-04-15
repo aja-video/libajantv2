@@ -297,9 +297,9 @@ string CNTV2Card::SerialNum64ToString (const uint64_t inSerialNumber)	//	Class m
 	serialNum[7] = char((serialNumHigh & 0xFF000000) >> 24);
 	serialNum[8] = '\0';
 
-	for (unsigned ndx (0);  ndx < 8;  ndx++)
+	for (unsigned ndx(0);  ndx < 8;  ndx++)
 	{
-		if (serialNum [ndx] == 0)
+		if (serialNum[ndx] == 0)
 		{
 			if (ndx == 0)
 				return "";		//	No characters: no serial number
@@ -313,7 +313,6 @@ string CNTV2Card::SerialNum64ToString (const uint64_t inSerialNumber)	//	Class m
 				   (serialNum[ndx] == ' ') || (serialNum[ndx] == '-') ) )
 			return "";		//	Invalid character -- assume no Serial Number programmed...
 	}
-
 	return serialNum;
 
 }	//	SerialNum64ToString
