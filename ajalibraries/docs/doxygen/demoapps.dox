@@ -19,7 +19,7 @@
 	@par	Building the Demo Apps
 
 	-#	Unzip the downloaded SDK.
-	-#	Look inside the resulting folder that appears after unzipping.
+	-#	Open the resulting unzipped folder.
 	-#	To build the demonstration applications:
 		-	<b>Windows</b> (natively):
 			-#	Open <b>ntv2_vs12.sln</b> with Visual Studio.
@@ -34,6 +34,24 @@
 		-	Using <b>Qt Creator</b> (same on all platforms):
 			-#	Inside the <b>build</b> folder, open <b>_ntv2demos.pro</b> with <b>Qt Creator</b>.
 			-#	Assign it a kit, then choose <b>Rebuild</b>.
+
+
+	@par	Running the Demo Apps
+
+	-	To run the demonstration applications:
+		-#	Open a terminal window (cmd.exe on Windows, Terminal on MacOS).
+		-#	Change the current directory to inside the unzipped SDK folder (that contains ‘ajalibrariesʼ, ‘binʼ, ‘libʼ, etc.).
+		-#	Enter the relative path to the demo (e.g. <tt>./bin/ntv2player</tt>) … plus any arguments.
+	-	Most demos use the same command line arguments for specifying…
+		-	<b>device</b> (<tt>-d|--device</tt>) — Obviously, this is important if more than one device is connected to the host.
+			-	(Some demos also used <tt>-b|--board</tt>, which is functionally identical, but itʼs been deprecated.)
+		-	<b>video format</b>  (<tt>-v|--videoFormat</tt>) — specifies the video format to use
+		-	<b>frame buffer pixel format</b> (<tt>-p|--pixelFormat</tt>) — specifies the frame buffer pixel format
+		-	<b>multiformat mode</b> (<tt>-m</tt>) — If specified, the demo will operate as if it must share the device
+			with other programs; otherwise it will operate as if itʼs the only program using the device. If you intend
+			to simultaneously run more than one demo app using the same device, we recommend starting the first demo
+			<i>without</i> the <tt>-m</tt> option, then run all subsequent demos using the <tt>-m</tt> option.
+	-	It can be fruitful to run the demos under a debugger while monitoring device state with the \ref usingntv2watcher tool.
 
 
 
