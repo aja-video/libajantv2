@@ -288,6 +288,12 @@ AJAStatus NTV2Player8K::SetUpAudio (void)
 	//	is present in whatever signal is feeding the device's SDI input...
 	mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_OFF, mAudioSystem);
 
+    if (mUseHDMIOut)
+    {
+        mDevice.SetHDMIOutAudioRate(NTV2_AUDIO_48K);
+        mDevice.SetHDMIOutAudioSource8Channel(NTV2_AudioChannel1_8, mAudioSystem);
+    }
+
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetUpAudio

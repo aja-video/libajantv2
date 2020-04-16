@@ -138,6 +138,8 @@ void NTV2DolbyPlayer::Quit (void)
 		while (mConsumerThread->Active ())
 			AJATime::Sleep (10);
 
+    mDevice.SetAudioRate (NTV2_AUDIO_48K, mAudioSystem);
+    mDevice.SetHDMIOutAudioRate(NTV2_AUDIO_48K);
 }	//	Quit
 
 

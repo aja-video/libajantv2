@@ -272,6 +272,12 @@ AJAStatus NTV2Player::SetUpAudio (void)
 	//	must be disabled --- otherwise the output audio will be pass-thru SDI input audio...
 	mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_OFF, mAudioSystem);
 
+    if (::NTV2DeviceGetNumHDMIVideoOutputs(mDeviceID))
+    {
+        mDevice.SetHDMIOutAudioRate(NTV2_AUDIO_48K);
+        mDevice.SetHDMIOutAudioSource8Channel(NTV2_AudioChannel1_8, mAudioSystem);
+    }
+
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetUpAudio

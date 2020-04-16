@@ -745,7 +745,9 @@ void NTV2Player4K::RouteHDMIOutput (void)
 		mDevice.SetHDMIOutVideoFPS (::GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat));
 		mDevice.SetLHIHDMIOutColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
 		mDevice.SetHDMIV2Mode (NTV2_HDMI_V2_4K_PLAYBACK);
-	}
+        mDevice.SetHDMIOutAudioRate(NTV2_AUDIO_48K);
+        mDevice.SetHDMIOutAudioSource8Channel(NTV2_AudioChannel1_8, mConfig.fAudioSystem);
+    }
 	else
 		mDevice.SetHDMIV2Mode (NTV2_HDMI_V2_4K_PLAYBACK);
 
