@@ -16,7 +16,7 @@
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 #define NTV2_ANCSIZE_MAX	(0x2000)
 
-const uint32_t	kAppSignature	(NTV2_FOURCC('B','u','r','n'));
+const uint32_t	kAppSignature	(NTV2_FOURCC('B','b','2','b'));
 
 
 //////////////////////	IMPLEMENTATION

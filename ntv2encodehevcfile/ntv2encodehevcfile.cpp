@@ -14,8 +14,6 @@
 
 using namespace std;
 
-static const ULWord	kAppSignature	NTV2_FOURCC('D','E','M','O');
-
 
 NTV2EncodeHEVCFile::NTV2EncodeHEVCFile (const string				inDeviceSpecifier,
                                         const NTV2Channel			inChannel,
@@ -214,7 +212,7 @@ void NTV2EncodeHEVCFile::Quit (void)
     //  Release board
     if (!mMultiStream)
 	{
-		mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
+		mDevice.ReleaseStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
 		mDevice.SetEveryFrameServices (mSavedTaskMode);		//	Restore prior task mode
 	}
 
@@ -238,7 +236,7 @@ AJAStatus NTV2EncodeHEVCFile::Init (void)
     //  Grab board in a shared environment
     if (!mMultiStream)
     {
-        if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
+        if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
             return AJA_STATUS_BUSY;							//	Another app is using the device
         mDevice.GetEveryFrameServices (mSavedTaskMode);	//	Save the current state before we change it
     }

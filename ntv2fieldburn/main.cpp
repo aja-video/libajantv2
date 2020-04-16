@@ -43,6 +43,9 @@ int main (int argc, const char ** argv)
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
+		#if !defined(NTV2_DEPRECATE_16_0)	//	--board option is deprecated!
+		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",		"(deprecated)"	},
+		#endif
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",		"index#, serial#, or model"},
 		{"input",		'i',	POPT_ARG_INT,		&inputNumber,	0,	"which SDI input to use",	"1-8"},
 		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disables audio",			AJA_NULL},

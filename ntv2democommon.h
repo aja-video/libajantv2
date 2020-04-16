@@ -94,6 +94,8 @@ AJAExport class NTV2FrameData
 				fNumAnc2Bytes	(0),
 				fFrameFlags(0)	{}
 
+		//	Inquiry Methods
+		inline char *	VideoBytes (void) const				{return reinterpret_cast<char*>(fVideoBuffer.GetHostPointer());}
 		inline ULWord *	VideoBuffer (void) const			{return reinterpret_cast<ULWord*>(fVideoBuffer.GetHostPointer());}
 		inline ULWord	VideoBufferSize (void) const		{return fVideoBuffer.GetByteCount();}
 
@@ -111,7 +113,23 @@ AJAExport class NTV2FrameData
 		inline ULWord *	AncBuffer2 (void) const				{return reinterpret_cast<ULWord*>(fAncBuffer2.GetHostPointer());}
 		inline ULWord	AncBuffer2Size (void) const			{return fAncBuffer2.GetByteCount();}
 		inline ULWord	NumCapturedAnc2Bytes (void) const	{return fNumAnc2Bytes;}
-};
+
+		bool			IsNULL (void) const					{return fVideoBuffer.IsNULL() && fVideoBuffer2.IsNULL()
+																	&& fAudioBuffer.IsNULL() && fAncBuffer.IsNULL()
+																	&& fAncBuffer2.IsNULL();}
+		//	Modifier Methods
+		void			ZeroBuffers (void)					{	if (fVideoBuffer)	fVideoBuffer.Fill(0ULL);
+																if (fVideoBuffer2)	fVideoBuffer2.Fill(0LL);
+																if (fAudioBuffer)	fAudioBuffer.Fill(0LL);
+																if (fAncBuffer)		fAncBuffer.Fill(0LL);
+																if (fAncBuffer2)	fAncBuffer2.Fill(0LL);
+																fNumAudioBytes = fNumAncBytes = fNumAnc2Bytes = 0;
+															}
+
+		bool			Reset (void)						{return fVideoBuffer.Allocate(0) && fVideoBuffer2.Allocate(0)
+																	&& fAudioBuffer.Allocate(0) && fAncBuffer.Allocate(0)
+																	&& fAncBuffer2.Allocate(0);}
+};	//	NTV2FrameData
 
 typedef std::vector<NTV2FrameData>			NTV2FrameDataArray;				///< @brief A vector of NTV2FrameData elements
 typedef NTV2FrameDataArray::iterator		NTV2FrameDataArrayIter;			///< @brief Handy non-const iterator
@@ -119,7 +137,8 @@ typedef NTV2FrameDataArray::const_iterator	NTV2FrameDataArrayConstIter;	///< @br
 
 
 
-const uint32_t	CIRCULAR_BUFFER_SIZE (10);	///< @brief	Number of AVDataBuffers in our ring
+static const size_t CIRCULAR_BUFFER_SIZE	(10);	///< @brief	Number of AVDataBuffers in our ring
+static const ULWord	kDemoAppSignature		NTV2_FOURCC('D','E','M','O');
 
 
 /**

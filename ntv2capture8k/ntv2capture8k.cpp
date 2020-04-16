@@ -26,9 +26,6 @@ static const uint32_t	BUFFER_ALIGNMENT	(4096);		// The correct size for many sys
 #define NTV2_ANCSIZE_MAX	(0x2000)
 
 
-static const ULWord	kAppSignature	NTV2_FOURCC('D','E','M','O');
-
-
 NTV2Capture8K::NTV2Capture8K (const string					inDeviceSpecifier,
 							  const bool					withAudio,
 							  const NTV2Channel				channel,
@@ -101,7 +98,7 @@ NTV2Capture8K::~NTV2Capture8K ()
 
 	if (!mDoMultiFormat)
 	{
-		mDevice.ReleaseStreamForApplication(kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
+		mDevice.ReleaseStreamForApplication(kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
 		mDevice.SetEveryFrameServices(mSavedTaskMode);		//	Restore prior task mode
 	}
 
@@ -138,7 +135,7 @@ AJAStatus NTV2Capture8K::Init (void)
 
 	if (!mDoMultiFormat)
 	{
-		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
+		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 			return AJA_STATUS_BUSY;							//	Another app is using the device
 		mDevice.GetEveryFrameServices (mSavedTaskMode);		//	Save the current state before we change it
 	}

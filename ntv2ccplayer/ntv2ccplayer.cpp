@@ -258,8 +258,7 @@ AJALabelValuePairs CCPlayerConfig::Get (const bool inCompact) const
 
 std::ostream & operator << (std::ostream & ioStrm,  const CCPlayerConfig & inObj)
 {
-	ioStrm	<< AJASystemInfo::ToString(inObj.Get());
-	return ioStrm;
+	return ioStrm << AJASystemInfo::ToString(inObj.Get());
 }
 
 

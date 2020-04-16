@@ -17,8 +17,6 @@ using namespace std;
 
 #define NTV2_AUDIOSIZE_MAX		(401 * 1024)
 
-static const ULWord	kAppSignature	NTV2_FOURCC('D','E','M','O');
-
 #define NUM_OVERLAY_BARS		12
 //static const uint32_t sOverlayBar0[] = {
 //	0xc00000c0, 0x00000000, 0xc000c000, 0x00000000, 0xc0c00000, 0x00000000,
@@ -241,7 +239,7 @@ void NTV2EncodeHEVCVif::Quit (void)
     mDevice.SetMode(mInputChannel, NTV2_MODE_DISPLAY, false);
 
     //  Release board
-	mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
+	mDevice.ReleaseStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
 	mDevice.SetEveryFrameServices (mSavedTaskMode);		//	Restore prior task mode
 
     //  Close output files
@@ -270,7 +268,7 @@ AJAStatus NTV2EncodeHEVCVif::Init (void)
     { cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not found" << endl;  return AJA_STATUS_OPEN; }
     
     //  Grab board in a shared environment
-	if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
+	if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 		return AJA_STATUS_BUSY;							//	Another app is using the device
 	mDevice.GetEveryFrameServices (mSavedTaskMode);		//	Save the current state before we change it
     mDevice.SetEveryFrameServices (NTV2_OEM_TASKS);		//	Since this is an OEM demo, use the OEM service level

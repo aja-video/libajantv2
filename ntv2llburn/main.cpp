@@ -49,6 +49,9 @@ int main (int argc, const char ** argv)
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
+		#if !defined(NTV2_DEPRECATE_16_0)	//	--board option is deprecated!
+		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",				"(deprecated)"	},
+		#endif
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",				"index#, serial#, or model"},
 		{"input",		'i',	POPT_ARG_STRING,	&pVidSource,	0,	"video input",						"{'?' to list}"},
 		{"tcsource",	't',	POPT_ARG_STRING,	&pTcSource,		0,	"time code source",					"{'?' to list}"},

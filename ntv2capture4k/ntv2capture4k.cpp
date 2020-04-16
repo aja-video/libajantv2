@@ -17,9 +17,6 @@ using namespace std;
 #define NTV2_ANCSIZE_MAX	(0x2000)
 
 
-static const ULWord	kAppSignature	NTV2_FOURCC('D','E','M','O');
-
-
 NTV2Capture4K::NTV2Capture4K (const string			inDeviceSpecifier,
 							  const bool			withAudio,
 							  const NTV2Channel		channel,
@@ -93,7 +90,7 @@ NTV2Capture4K::~NTV2Capture4K ()
 
 	if (!mDoMultiFormat)
 	{
-		mDevice.ReleaseStreamForApplication(kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
+		mDevice.ReleaseStreamForApplication(kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
 		mDevice.SetEveryFrameServices(mSavedTaskMode);		//	Restore prior task mode
 	}
 
@@ -129,7 +126,7 @@ AJAStatus NTV2Capture4K::Init (void)
 
 	if (!mDoMultiFormat)
 	{
-		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
+		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 			return AJA_STATUS_BUSY;							//	Another app is using the device
 		mDevice.GetEveryFrameServices (mSavedTaskMode);		//	Save the current state before we change it
 	}

@@ -14,7 +14,7 @@
 #include "ajabase/common/videotypes.h"
 #include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/debug.h"
-
+#include "ntv2democommon.h"
 #include "ntv2m31enums.h"
 #include "ntv2m31.h"
 #include <string>

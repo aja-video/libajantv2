@@ -165,18 +165,18 @@ class NTV2Capture
 	private:
 		typedef	AJACircularBuffer<NTV2FrameData*>	MyCircularBuffer;
 
-		AJAThread *				mConsumerThread;	///< @brief	My consumer thread object -- consumes the captured frames.
-		AJAThread *				mProducerThread;	///< @brief	My producer thread object -- does the frame capturing
-		CNTV2Card				mDevice;			///< @brief	My CNTV2Card instance. This is what I use to talk to the device.
-		NTV2DeviceID			mDeviceID;			///< @brief	My device identifier
-		CaptureConfig			mConfig;			///< @brief	My operating configuration
-		NTV2VideoFormat			mVideoFormat;		///< @brief	My video format
-		NTV2FormatDescriptor	mFormatDesc;		///< @brief	Describes my video/pixel format
-		NTV2EveryFrameTaskMode	mSavedTaskMode;		///< @brief	Used to restore prior every-frame task mode
-		NTV2AudioSystem			mAudioSystem;		///< @brief	The audio system I'm using (if any)
-		bool					mGlobalQuit;		///< @brief	Set "true" to gracefully stop
-		NTV2FrameDataArray		mHostBuffers;		///< @brief	My host buffers
-		MyCircularBuffer		mAVCircularBuffer;	///< @brief	My ring buffer object
+		AJAThread *			mConsumerThread;	///< @brief	My consumer thread object -- consumes the captured frames.
+		AJAThread *			mProducerThread;	///< @brief	My producer thread object -- does the frame capturing
+		CNTV2Card			mDevice;			///< @brief	My CNTV2Card instance. This is what I use to talk to the device.
+		NTV2DeviceID		mDeviceID;			///< @brief	My device identifier
+		CaptureConfig		mConfig;			///< @brief	My operating configuration
+		NTV2VideoFormat		mVideoFormat;		///< @brief	My video format
+		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes my video/pixel format
+		NTV2TaskMode		mSavedTaskMode;		///< @brief	Used to restore prior every-frame task mode
+		NTV2AudioSystem		mAudioSystem;		///< @brief	The audio system I'm using (if any)
+		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
+		NTV2FrameDataArray	mHostBuffers;		///< @brief	My host buffers
+		MyCircularBuffer	mAVCircularBuffer;	///< @brief	My ring buffer object
 
 };	//	NTV2Capture
 

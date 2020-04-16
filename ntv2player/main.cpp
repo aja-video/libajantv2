@@ -33,6 +33,7 @@ int main (int argc, const char ** argv)
 	char *			pVideoFormat	(AJA_NULL);	//	Video format argument
 	char *			pPixelFormat	(AJA_NULL);	//	Pixel format argument
     char *			pDeviceSpec 	(AJA_NULL);	//	Device argument
+	char *			pFramesSpec		(AJA_NULL);	//	AutoCirculate frames spec
 	uint32_t		channelNumber	(1);		//	Number of the channel to use
 	int				noAudio			(0);		//	Disable audio tone?
 	int				doMultiChannel	(0);		//	Enable multi-format?
@@ -44,9 +45,13 @@ int main (int argc, const char ** argv)
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
-		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"	},
+		#if !defined(NTV2_DEPRECATE_16_0)	//	--board option is deprecated!
+		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"(deprecated)"},
+		#endif
+		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"},
 		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"which video format to use",	"'?' or 'list' to list"},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"which pixel format to use",	"'?' or 'list' to list"},
+		{"frames",		0,		POPT_ARG_STRING,	&pFramesSpec,	0,	"frames to AutoCirc",			"num[@min] or min-max"},
 		{"hdrType",		't',	POPT_ARG_INT,		&hdrType,		0,	"which HDR Packet to send",		"1:SDR,2:HDR10,3:HLG"},
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",			"number of the channel"},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multi-channel/format",		AJA_NULL},
@@ -61,54 +66,63 @@ int main (int argc, const char ** argv)
 	::poptGetNextOpt (optionsContext);
 	optionsContext = ::poptFreeContext (optionsContext);
 
-	const string			deviceSpec		(pDeviceSpec ? pDeviceSpec : "0");
+	//	Device
+	const string deviceSpec	(pDeviceSpec ? pDeviceSpec : "0");
+	PlayerConfig playerConfig(deviceSpec);
+
+	//	VideoFormat
 	const string			videoFormatStr	(pVideoFormat  ?  pVideoFormat  :  "");
-	const NTV2VideoFormat	videoFormat		(videoFormatStr.empty () ? NTV2_FORMAT_1080i_5994 : CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr));
+	playerConfig.fVideoFormat = videoFormatStr.empty() ? NTV2_FORMAT_1080i_5994 : CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr);
 	if (videoFormatStr == "?" || videoFormatStr == "list")
 		{cout << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_NON_4KUHD, deviceSpec) << endl;  return 0;}
-	else if (!videoFormatStr.empty () && videoFormat == NTV2_FORMAT_UNKNOWN)
+	else if (!videoFormatStr.empty() && playerConfig.fVideoFormat == NTV2_FORMAT_UNKNOWN)
 	{
 		cerr	<< "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl
 				<< CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_NON_4KUHD, deviceSpec) << endl;
 		return 2;
 	}
 
-	const string				pixelFormatStr	(pPixelFormat  ?  pPixelFormat  :  "");
-	const NTV2FrameBufferFormat	pixelFormat		(pixelFormatStr.empty () ? NTV2_FBF_10BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString (pixelFormatStr));
+	//	PixelFormat
+	const string pixelFormatStr	(pPixelFormat  ?  pPixelFormat  :  "");
+	playerConfig.fPixelFormat = pixelFormatStr.empty () ? NTV2_FBF_8BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);
 	if (pixelFormatStr == "?" || pixelFormatStr == "list")
 		{cout << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
-	else if (!pixelFormatStr.empty () && !NTV2_IS_VALID_FRAME_BUFFER_FORMAT (pixelFormat))
+	else if (!pixelFormatStr.empty() && !NTV2_IS_VALID_FRAME_BUFFER_FORMAT(playerConfig.fPixelFormat))
 	{
 		cerr	<< "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl
 				<< CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;
 		return 2;
 	}
 
+	//	OutputChannel
 	if (channelNumber < 1 || channelNumber > 8)
 		{cerr << "## ERROR:  Invalid channel number '" << channelNumber << "' -- expected 1 thru 8" << endl;  return 2;}
+	playerConfig.fOutputChannel = ::GetNTV2ChannelForIndex(channelNumber - 1);
+	playerConfig.fOutputDestination = ::NTV2ChannelToOutputDestination(playerConfig.fOutputChannel);
+	playerConfig.fSuppressAudio = noAudio ? true : false;
+	playerConfig.fDoMultiFormat = doMultiChannel ? true : false;
+	playerConfig.fTransmitLTC = xmitLTC ? true : false;
 
-	const NTV2Channel			channel		(::GetNTV2ChannelForIndex (channelNumber - 1));
-	const NTV2OutputDestination	outputDest	(::NTV2ChannelToOutputDestination (channel));
-	AJAAncillaryDataType		sendType	(AJAAncillaryDataType_Unknown);
-	switch(hdrType)
+	//	HDRType
+	switch (hdrType)
 	{
-		case 1:		sendType = AJAAncillaryDataType_HDR_SDR;		break;
-		case 2:		sendType = AJAAncillaryDataType_HDR_HDR10;		break;
-		case 3:		sendType = AJAAncillaryDataType_HDR_HLG;		break;
-		default:	sendType = AJAAncillaryDataType_Unknown;		break;
+		case 1:		playerConfig.fTransmitHDRType = AJAAncillaryDataType_HDR_SDR;		break;
+		case 2:		playerConfig.fTransmitHDRType = AJAAncillaryDataType_HDR_HDR10;		break;
+		case 3:		playerConfig.fTransmitHDRType = AJAAncillaryDataType_HDR_HLG;		break;
+		default:	break;
 	}
 
-	NTV2Player	player (deviceSpec,						//	inDeviceSpecifier
-						(noAudio ? false : true),		//	inWithAudio
-						channel,						//	inChannel
-						pixelFormat,					//	inPixelFormat
-						outputDest,						//	inOutputDestination
-						videoFormat,					//	inVideoFormat
-						false,							//	inWithVanc
-						false,							//	inLevelConversion
-						doMultiChannel ? true : false,	//	inDoMultiFormat
-						xmitLTC ? true : false,			//	inXmitLTC
-						sendType);						//	inSendHDRType
+	//	Frames
+	const string framesSpec(pFramesSpec ? pFramesSpec : "");
+	static const string	legalFramesSpec("{frameCount}[@{firstFrameNum}]  or  {firstFrameNum}-{lastFrameNum}");
+	if (!framesSpec.empty())
+	{
+		const string parseResult(playerConfig.fFrames.setFromString(framesSpec));
+		if (!parseResult.empty())
+			{cerr << "## ERROR:  Bad 'frames' spec '" << framesSpec << "'\n## " << parseResult << endl;  return 1;}
+	}
+	if (!playerConfig.fFrames.valid())
+		{cerr << "## ERROR:  Bad 'frames' spec '" << framesSpec << "'\n## Expected " << legalFramesSpec << endl;  return 1;}
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)
@@ -116,12 +130,14 @@ int main (int argc, const char ** argv)
 		::signal (SIGQUIT, SignalHandler);
 	#endif
 
+	NTV2Player	player (playerConfig);
+
 	//	Initialize the player...
 	if (AJA_FAILURE(player.Init()))
 		{cerr << "## ERROR: Initialization failed" << endl;  return 3;}
 
 	//	Run the player...
-	player.Run ();
+	player.Run();
 
 	cout	<< "  Playout  Playout   Frames" << endl
 			<< "   Frames   Buffer  Dropped" << endl;
@@ -131,7 +147,9 @@ int main (int argc, const char ** argv)
 
 		//	Poll the player's status...
 		player.GetACStatus (framesProcessed, framesDropped, bufferLevel);
-		cout << setw (9) << framesProcessed << setw (9) << bufferLevel << setw (9) << framesDropped << "\r" << flush;
+		cout	<< setw(9) << framesProcessed
+				<< setw(9) << bufferLevel
+				<< setw(9) << framesDropped << "\r" << flush;
 		AJATime::Sleep (2000);
 	} while (player.IsRunning () && !gGlobalQuit);	//	loop til done
 

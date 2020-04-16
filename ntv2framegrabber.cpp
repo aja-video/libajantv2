@@ -28,8 +28,7 @@
 #define	FGNOTE(_expr_)		AJA_sNOTICE	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
 #define	FGINFO(_expr_)		AJA_sINFO	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
 
-static QMutex			gMutex;
-static const uint32_t	kAppSignature	(NTV2_FOURCC('D','E','M','O'));
+static QMutex	gMutex;
 
 
 NTV2FrameGrabber::NTV2FrameGrabber (QObject * parent)
@@ -294,7 +293,7 @@ void NTV2FrameGrabber::run (void)
 	// Make sure all Bidirectionals are set to Inputs.
 	if (mNTV2Card.Open(mBoardNumber))
 	{
-		if (!mDoMultiChannel && !mNTV2Card.AcquireStreamForApplicationWithReference (kAppSignature, (uint32_t) AJAProcess::GetPid ()))
+		if (!mDoMultiChannel && !mNTV2Card.AcquireStreamForApplicationWithReference (kDemoAppSignature, (uint32_t) AJAProcess::GetPid ()))
 		{
 			//	We have not acquired the board continue until something changes...
 			qDebug ("Could not acquire board number %d", GetDeviceIndex ());
@@ -355,7 +354,7 @@ void NTV2FrameGrabber::run (void)
 				{
 					if (!mDoMultiChannel)
 					{
-						mNTV2Card.ReleaseStreamForApplicationWithReference (kAppSignature, AJAProcess::GetPid ());
+						mNTV2Card.ReleaseStreamForApplicationWithReference (kDemoAppSignature, AJAProcess::GetPid ());
 						mNTV2Card.SetEveryFrameServices (mSavedTaskMode);
 					}
 					mNTV2Card.Close ();
@@ -365,7 +364,7 @@ void NTV2FrameGrabber::run (void)
 
 			if (mNTV2Card.Open(mBoardNumber))
 			{
-				if (!mDoMultiChannel && !mNTV2Card.AcquireStreamForApplicationWithReference (kAppSignature, (uint32_t) AJAProcess::GetPid ()))
+				if (!mDoMultiChannel && !mNTV2Card.AcquireStreamForApplicationWithReference (kDemoAppSignature, (uint32_t) AJAProcess::GetPid ()))
 				{
 					//We have not acquired the board continue until something changes
 					qDebug() << "Could not acquire board number " << GetDeviceIndex();
@@ -499,7 +498,7 @@ void NTV2FrameGrabber::run (void)
 		StopAutoCirculate ();
 		if (!mDoMultiChannel)
 		{
-			mNTV2Card.ReleaseStreamForApplicationWithReference (kAppSignature, int32_t(AJAProcess::GetPid()));	//	Release the device
+			mNTV2Card.ReleaseStreamForApplicationWithReference (kDemoAppSignature, int32_t(AJAProcess::GetPid()));	//	Release the device
 			mNTV2Card.SetEveryFrameServices (mSavedTaskMode);	//	Restore prior task mode
 		}
 		gMutex.unlock ();

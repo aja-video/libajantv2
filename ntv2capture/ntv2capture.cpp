@@ -19,9 +19,6 @@ using namespace std;
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 
 
-static const ULWord	kAppSignature	NTV2_FOURCC ('D','E','M','O');
-
-
 //////////////////////////////////////////////////////////////////////////////////////	NTV2Capture IMPLEMENTATION
 
 NTV2Capture::NTV2Capture (const CaptureConfig & inConfig)
@@ -42,7 +39,7 @@ NTV2Capture::NTV2Capture (const CaptureConfig & inConfig)
 NTV2Capture::~NTV2Capture ()
 {
 	//	Stop my capture and consumer threads, then destroy them...
-	Quit ();
+	Quit();
 
 	delete mConsumerThread;
 	mConsumerThread = AJA_NULL;
@@ -71,8 +68,8 @@ void NTV2Capture::Quit (void)
 
 	if (!mConfig.fDoMultiFormat)
 	{
-		mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
-		mDevice.SetEveryFrameServices (mSavedTaskMode);		//	Restore prior task mode
+		mDevice.ReleaseStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
+		mDevice.SetEveryFrameServices(mSavedTaskMode);		//	Restore prior task mode
 	}
 
 }	//	Quit
@@ -95,7 +92,7 @@ AJAStatus NTV2Capture::Init (void)
 
 	if (!mConfig.fDoMultiFormat)
 	{
-		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
+		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 			return AJA_STATUS_BUSY;							//	Another app is using the device
 		mDevice.GetEveryFrameServices(mSavedTaskMode);		//	Save the current state before we change it
 	}
@@ -128,7 +125,9 @@ AJAStatus NTV2Capture::Init (void)
 	SetupHostBuffers();
 	RouteInputSignal();
 
-	cerr << mConfig << endl;	//	Dump config
+	#if defined(_DEBUG)
+		cerr << mConfig << endl;
+	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 
 }	//	Init
@@ -231,7 +230,7 @@ void NTV2Capture::SetupHostBuffers (void)
 	}
 	mFormatDesc = NTV2FormatDescriptor (standard, mConfig.fPixelFormat, vancMode);
 
-	//	Allocate and add each in-host AVDataBuffer to my circular buffer member variable...
+	//	Allocate and add each in-host NTV2FrameData to my circular buffer member variable...
 	mHostBuffers.reserve(size_t(CIRCULAR_BUFFER_SIZE));
 	while (mHostBuffers.size() < size_t(CIRCULAR_BUFFER_SIZE))
 	{
@@ -242,7 +241,7 @@ void NTV2Capture::SetupHostBuffers (void)
 		frameData.fAncBuffer.Allocate(F1AncSize);
 		frameData.fAncBuffer2.Allocate(F2AncSize);
 		mAVCircularBuffer.Add(&frameData);
-	}	//	for each AVDataBuffer
+	}	//	for each NTV2FrameData
 
 }	//	SetupHostBuffers
 

@@ -14,16 +14,58 @@
 #include "ntv2democommon.h"
 #include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/thread.h"
+#include "ajabase/system/info.h"
 #include "ajaanc/includes/ancillarydata.h"
+
+/**
+	@brief	This class is used to configure an NTV2Player instance.
+**/
+typedef struct PlayerConfig
+{
+	public:
+		std::string						fDeviceSpecifier;	///< @brief	The AJA device to use
+		NTV2Channel						fOutputChannel;		///< @brief	The device channel to use
+		NTV2OutputDestination			fOutputDestination;	///< @brief	The desired output connector to use
+		NTV2VideoFormat					fVideoFormat;		///< @brief	The video format to use
+		NTV2FrameBufferFormat			fPixelFormat;		///< @brief	The pixel format to use
+		CNTV2DemoCommon::ACFrameRange	fFrames;			///< @brief	AutoCirculate frame count or range
+		AJAAncillaryDataType			fTransmitHDRType;	///< @brief	If true, route dual-link RGB output;  otherwise normal YCbCr
+		bool							fDoMultiFormat;		///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
+		bool							fSuppressAudio;		///< @brief	If true, suppress audio;  otherwise generate audio tones
+		bool							fTransmitLTC;		///< @brief	If true, embed LTC;  otherwise embed VITC
+		bool							fDoLevelConversion;	///< @brief	If true, do A-to-B conversion;  otherwise don't
+
+		/**
+			@brief	Constructs a default Player configuration.
+		**/
+		inline explicit	PlayerConfig (const std::string & inDeviceSpecifier	= "0")
+			:	fDeviceSpecifier	(inDeviceSpecifier),
+				fOutputChannel		(NTV2_CHANNEL1),
+				fOutputDestination	(NTV2_OUTPUTDESTINATION_SDI2),
+				fVideoFormat		(NTV2_FORMAT_1080i_5994),
+				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
+				fFrames				(7),
+				fTransmitHDRType	(AJAAncillaryDataType_Unknown),
+				fDoMultiFormat		(false),
+				fSuppressAudio		(false),
+				fTransmitLTC		(false),
+				fDoLevelConversion	(false)
+		{
+		}
+		AJALabelValuePairs Get (const bool inCompact = false) const;
+
+}	PlayerConfig;
+
+std::ostream &	operator << (std::ostream & ioStrm, const PlayerConfig & inObj);
+
 
 /**
 	@brief	I am an object that can play out a test pattern (with timecode) to an output of an AJA device
 			with or without audio tone in real time. I make use of the AJACircularBuffer, which simplifies
 			implementing a producer/consumer model, in which a "producer" thread generates the test pattern
 			frames, and a "consumer" thread (i.e., the "play" thread) sends those frames to the AJA device.
-			I demonstrate how to embed timecode into an SDI output signal using AutoCirculate during playout.
+			I also show how to embed timecode into an SDI output signal using AutoCirculate during playout.
 **/
-
 class NTV2Player
 {
 	//	Public Instance Methods
@@ -31,31 +73,9 @@ class NTV2Player
 		/**
 			@brief	Constructs me using the given configuration settings.
 			@note	I'm not completely initialized and ready for use until after my Init method has been called.
-			@param[in]	inDeviceSpecifier	Specifies the AJA device to use. Defaults to "0", the first device found.
-			@param[in]	inWithAudio			If true, include audio tone in the output signal;  otherwise, omit it.
-											Defaults to "true".
-			@param[in]	inChannel			Specifies the channel to use. Defaults to NTV2_CHANNEL1.
-			@param[in]	inPixelFormat		Specifies the pixel format to use for the device's frame buffers.
-											Defaults to 8-bit YUV.
-			@param[in]	inOutputDestination	Specifies which output to playout to. Defaults to SDI2.
-			@param[in]	inVideoFormat		Specifies the video format to use. Defaults to 1080i5994.
-			@param[in]	inWithVanc			If true, enable VANC; otherwise disable VANC. Defaults to false.
-			@param[in]	inLevelConversion	If true, demonstrate level A to B conversion; otherwise don't. Defaults to false.
-			@param[in]	inDoMultiFormat		If true, use multi-format mode; otherwise use uniformat mode. Defaults to false (uniformat mode).
-			@param[in]	inXmitLTC			If true, transmit LTC instead of VITC. Defaults to false (xmit VITC).
-			@param[in]	inSendHDRType		Specifies which, if any, HDR ancillary data packet should be transmitted.
+			@param[in]	inConfig	Specifies all configuration parameters.
 		**/
-								NTV2Player (const std::string &			inDeviceSpecifier	= "0",
-											const bool					inWithAudio			= true,
-											const NTV2Channel			inChannel			= NTV2_CHANNEL1,
-											const NTV2FrameBufferFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
-											const NTV2OutputDestination	inOutputDestination	= NTV2_OUTPUTDESTINATION_SDI2,
-											const NTV2VideoFormat		inVideoFormat		= NTV2_FORMAT_1080i_5994,
-											const bool					inWithVanc			= false,
-											const bool					inLevelConversion	= false,
-											const bool					inDoMultiFormat		= false,
-											const bool					inXmitLTC			= false,
-											const AJAAncillaryDataType	inSendHDRType		= AJAAncillaryDataType_Unknown);
+								NTV2Player (const PlayerConfig & inConfig);
 
 		virtual					~NTV2Player (void);
 
@@ -92,27 +112,27 @@ class NTV2Player
 	//	Protected Instance Methods
 	protected:
 		/**
-			@brief	Sets up everything I need to play video.
+			@brief	Performs all video setup.
 		**/
 		virtual AJAStatus		SetUpVideo (void);
 
 		/**
-			@brief	Sets up everything I need to play audio.
+			@brief	Performs all audio setup.
 		**/
 		virtual AJAStatus		SetUpAudio (void);
 
 		/**
-			@brief	Sets up device routing for playout.
+			@brief	Performs all widget/signal routing for playout.
 		**/
 		virtual void			RouteOutputSignal (void);
 
 		/**
-			@brief	Sets up my circular buffers.
+			@brief	Sets up my host buffers (my mHostBuffers and mAVCircularBuffer members).
 		**/
 		virtual void			SetUpHostBuffers (void);
 
 		/**
-			@brief	Creates my test pattern buffers.
+			@brief	Creates my test pattern buffers (in my mTestPatVidBuffers member).
 		**/
 		virtual AJAStatus		SetUpTestPatternVideoBuffers (void);
 
@@ -137,22 +157,23 @@ class NTV2Player
 		virtual void			ProduceFrames (void);
 
 		/**
-			@brief	Inserts audio tone (based on my current tone frequency) into the given audio buffer.
-			@param[out]	audioBuffer		Specifies a valid, non-NULL pointer to the buffer that is to receive
-										the audio tone data.
-			@return	Total number of bytes written into the buffer.
+			@brief		Inserts audio tone (based on my current tone frequency) into the given NTV2FrameData's audio buffer.
+			@param		inFrameData		The NTV2FrameData object having the audio buffer to be filled.
+			@return		Total number of bytes written into the buffer.
 		**/
-		virtual uint32_t		AddTone (ULWord * audioBuffer);
+		virtual uint32_t		AddTone (NTV2FrameData & inFrameData);
 
 		/**
-			@brief	Returns true if my current output destination's RP188 bypass is enabled; otherwise returns false.
+			@return		True if the given output destination's RP188 bypass is enabled; otherwise false.
+			@param[in]	inOutputDest	Specifies the NTV2OutputDestination of interest.
 		**/
-		virtual bool			OutputDestHasRP188BypassEnabled (void);
+		virtual bool			OutputDestHasRP188BypassEnabled (const NTV2OutputDestination inOutputDest);
 
 		/**
-			@brief	Disables my current output destination's RP188 bypass.
+			@brief	Disables the given SDI output's RP188 bypass.
+			@param[in]	inOutputDest	Specifies the NTV2OutputDestination of interest.
 		**/
-		virtual void			DisableRP188Bypass (void);
+		virtual void			DisableRP188Bypass (const NTV2OutputDestination inOutputDest);
 
 
 	//	Protected Class Methods
@@ -185,42 +206,28 @@ class NTV2Player
 
 	//	Private Member Data
 	private:
-		typedef AJACircularBuffer <AVDataBuffer *>		MyCirculateBuffer;
+		typedef AJACircularBuffer<NTV2FrameData*>	MyCircularBuffer;
+		typedef std::vector<NTV2_POINTER>			NTV2Buffers;
 
-		AJAThread *					mConsumerThread;			///< @brief	My playout (consumer) thread object
-		AJAThread *					mProducerThread;			///< @brief	My generator (producer) thread object
+		AJAThread			mConsumerThread;	///< @brief	My playout (consumer) thread object
+		AJAThread			mProducerThread;	///< @brief	My generator (producer) thread object
+		CNTV2Card			mDevice;			///< @brief	My CNTV2Card instance. This is what I use to talk to the device.
+		NTV2DeviceID		mDeviceID;			///< @brief	My device identifier
+		PlayerConfig		mConfig;			///< @brief	My operating configuration
+		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes my video/pixel format
+		NTV2TaskMode		mSavedTaskMode;		///< @brief	Used to restore prior task mode
+		NTV2AudioSystem		mAudioSystem;		///< @brief	The audio system I'm using (if any)
+		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
+		NTV2FrameDataArray	mHostBuffers;		///< @brief	My host buffers
+		MyCircularBuffer	mAVCircularBuffer;	///< @brief	My ring buffer object
 
-		uint32_t					mCurrentFrame;				///< @brief	My current frame number (used to generate timecode)
-		ULWord						mCurrentSample;				///< @brief	My current audio sample (maintains audio tone generator state)
-		double						mToneFrequency;				///< @brief	My current audio tone frequency [Hz]
+		uint32_t			mCurrentFrame;		///< @brief	My current frame number (for generating timecode)
+		ULWord				mCurrentSample;		///< @brief	My current audio sample (maintains audio tone generator state)
+		double				mToneFrequency;		///< @brief	My current audio tone frequency [Hz]
 
-		const std::string			mDeviceSpecifier;			///< @brief	Specifies the device I should use
-		CNTV2Card					mDevice;					///< @brief	My CNTV2Card instance
-		NTV2DeviceID				mDeviceID;					///< @brief	My device (model) identifier
-		NTV2Channel					mOutputChannel;				///< @brief	The channel I'm using
-		const NTV2OutputDestination	mOutputDestination;			///< @brief	The output I'm using
-		NTV2VideoFormat				mVideoFormat;				///< @brief	My video format
-		NTV2FrameBufferFormat		mPixelFormat;				///< @brief	My pixel format
-		NTV2EveryFrameTaskMode		mSavedTaskMode;				///< @brief	Used to restore the prior task mode
-		NTV2AudioSystem				mAudioSystem;				///< @brief	The audio system I'm using
-		NTV2VANCMode				mVancMode;					///< @brief	VANC mode
-		const bool					mWithAudio;					///< @brief	Playout audio?
-		bool						mEnableVanc;				///< @brief	Enable VANC?
-		bool						mGlobalQuit;				///< @brief	Set "true" to gracefully stop
-		bool						mDoLevelConversion;			///< @brief	Demonstrates a level A to level B conversion
-		bool						mDoMultiChannel;			///< @brief	Demonstrates how to configure the board for multi-format
-		bool						mXmitLTC;					///< @brief	Transmit LTC? (instead of VITC)
-		AJATimeCodeBurn				mTCBurner;					///< @brief	My timecode burner
-		NTV2TCIndexes				mTCIndexes;					///< @brief	Timecode indexes to use
-		uint32_t					mVideoBufferSize;			///< @brief	My video buffer size, in bytes
-		uint32_t					mAudioBufferSize;			///< @brief	My audio buffer size, in bytes
-
-		uint8_t **					mTestPatternVideoBuffers;	///< @brief	My test pattern buffers
-		uint32_t					mNumTestPatterns;			///< @brief	Number of test patterns to cycle through
-
-		AVDataBuffer				mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
-		MyCirculateBuffer			mAVCircularBuffer;						///< @brief	My ring buffer
-		AJAAncillaryDataType		mAncType;
+		AJATimeCodeBurn		mTCBurner;			///< @brief	My timecode burner
+		NTV2TCIndexes		mTCIndexes;			///< @brief	Timecode indexes to use
+		NTV2Buffers			mTestPatVidBuffers;	///< @brief	An array of video buffers of pre-drawn test patterns
 
 };	//	NTV2Player
 
