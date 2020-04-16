@@ -7805,9 +7805,8 @@ typedef enum
 												If zero, no video will be transferred.
 					@param	pInAudioBuffer		Specifies a pointer to the host audio buffer. On capture, audio data will be DMA'd to this buffer.
 												On playout, audio data will be read from this buffer. If NULL, no audio will be transferred.
-					@param	inAudioByteCount	On capture, specifies the maximum capacity of the host audio buffer, in bytes. After the transfer,
-												it will contain the actual number of bytes transferred.
-												On playout, specifies the number of audio bytes to transfer from the host buffer.
+					@param	inAudioByteCount	On capture, specifies the maximum capacity of the host audio buffer, in bytes.
+												On playout, specifies the number of audio bytes (and therefore audio samples) to transfer from the host buffer.
 												If zero, no audio will be transferred.
 					@param	pInANCBuffer		Specifies a pointer to the host ancillary data buffer. On capture, ancillary data will be DMA'd into this buffer.
 												On playout, ancillary data will be read from this buffer. If NULL, no ancillary data will be transferred.
@@ -7844,12 +7843,11 @@ typedef enum
 					@brief	Sets my audio buffer for use in a subsequent call to CNTV2Card::AutoCirculateTransfer.
 					@param	pInAudioBuffer		Specifies a pointer to the host audio buffer. On capture, audio data will be DMA'd into this buffer.
 												On playout, audio data will be DMA'd from this buffer. If NULL, no audio data will be transferred.
-					@param	inAudioByteCount	Specifies the maximum capacity of the host audio buffer, in bytes, or the maximum number of audio bytes to transfer.
-												If zero, no audio data will be transferred.
+					@param	inAudioByteCount	On capture, specifies the maximum capacity of the host audio buffer, in bytes;  on playout, specifies
+												the number of audio bytes (and therefore audio samples) to transfer. If zero, no audio data will be transferred.
 					@return	True if successful;  otherwise false.
-					@note	Having the \c pInAudioBuffer address start on at least an 8-byte boundary or even better, on a page boundary,
-							and the \c inAudioByteCount be a multiple of 8-bytes (or optimally a multiple of a page) increases PCIe DMA
-							efficiency on most modern operating systems.
+					@note	Having the \c pInAudioBuffer address start on at least an 8-byte boundary or even better, on a page boundary, increases PCIe
+							DMA efficiency on most modern operating systems.
 				**/
 				bool									SetAudioBuffer (ULWord * pInAudioBuffer, const ULWord inAudioByteCount);
 
