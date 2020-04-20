@@ -672,30 +672,50 @@ Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot o
 
 The <b>LUT</b> inspector monitors and controls any one of the device’s LUT banks (see \ref vidop-lut ).
 Because of access contention issues, it does not continually poll and update its LUT display.
+Instead, the displayed table data must be manually loaded from the device on demand.
 
--	To load a lut bank, set the <b>LUT</b> and <b>Bank</b> of interest, then click <b>Load</b>.
-	The contents of the displayed table are replaced.
+-	The data display is a 1,024-row table with three columns, one column per color component.
+	It represents the contents of an in-host data buffer.
+-	To load the in-host data buffer from the device, set the <b>LUT</b> of interest using the menu control,
+	then right-click inside the table, and choose one of the <b>Load from Bank</b> commands.
+	The contents of the in-host buffer are replaced.
+-	To write/save the in-host data buffer to the device, set the <b>LUT</b> using the menu control,
+	then right-click inside the table, and choose one of the <b>Write to Bank</b> commands.
+-	To write/save the in-host data buffer to a host file, right-click inside the table,
+	and choose an <b>Export</b> command.
 -	The table can be edited any time:
 	-	Make selections with the mouse and/or keyboard.
 	-	Right-click in the table to pop up a context menu of several commands:
-		-	<b>Copy</b> — 
-		-	<b>Paste</b> — Pastes the clipboard contents into the table where.
+		-	<b>Copy</b> — Copies the highlighted cell data into the host scrap buffer for pasting elsewhere later.
+		-	<b>Paste</b> — Pastes the host clipboard contents into the table starting at the top-left highlighted cell.
 		-	<b>Select All</b> — Highlights all cells in the table.
-		-	<b>Pre-Defined LUT</b> — Pops up a submenu of pre-defined LUTs, that if selected, will replace the entire table:
-			-	<b>Linear</b>
-			-	<b>Gamma 18 Rec608 (Full)</b>
+		-	<b>Set From Predefined…</b> — Pops up a submenu of predefined LUTs, that if chosen, will replace the table contents:
+			-	<b>Linear</b> — With this LUT, output component values will exactly match input component values.
+			-	<b>Gamma 18 Rec601 (Full)</b>
 			-	<b>Gamma 18 Rec709 (Full)</b>
-			-	<b>Gamma 18 Rec608 (SMPTE)</b>
+			-	<b>Gamma 18 Rec601 (SMPTE)</b>
 			-	<b>Gamma 18 Rec709 (SMPTE)</b>
 			-	<b>RGB Full-Range SMPTE</b>
-		-	<b>Import CSV…</b> — Brings up a standard file-picker dialog for choosing a CSV file to import.
-		-	<b>Export CSV…</b> — Brings up a standard file-save dialog for exporting the table into a CSV file.
+		-	<b>Import…</b> — Presents a standard file-picker dialog for choosing a CSV or tab-delimited data file to import.
+			If confirmed, replaces the in-host buffer with the contents of the chosen data file.
+		-	<b>Export Text…</b> — Presents a standard file-save dialog for exporting the table into a tab-delimited text file.
+		-	<b>Export CSV…</b> — Presents a standard file-save dialog for exporting the table into a CSV file.
+		-	<b>Load from Bank <i>N</i></b> — Discards the in-host buffer, and replaces its contents with the requested LUT bank from the device.
+		-	<b>Write to Bank <i>N</i></b> — Writes the in-host buffer to the requested LUT bank on the device.
 		-	<b>Fill Selection</b> — Fills the highlighted cells with the value of the right-clicked cell.
 		-	<b>Fill Down</b> — Fills all highlighted cells with the values of the top-most cells.
 		-	<b>Fill Right</b> — Fills all highlighted cells with the values of the left-most cells.
 		-	<b>Clear</b> — Fills all highlighted cells with zero.
 		-	<b>Invert</b> — Inverts the values in all highlighted cells (i.e. subtracts its current value from 1023).
--	To write the table to the device, set the <b>LUT</b> and <b>Bank</b> of interest, then click <b>Write</b>.
+	-	Double-click in a table cell to change its value.
+	-	There is some <b>Drag & Drop</b> support:
+		-	Dropping a CSV or tab-delimited data file into the table will replace some/all the in-host data buffer cell values
+			with the contents of the file.
+			-	Excess columns and/or rows are ignored in files containing more than 3 columns or more than 1024 rows.
+			-	If the drop location is inside the table, the in-host buffer will be overwritten starting at the highlighted cell;
+				otherwise, it will be overwritten starting at the top/left data cell.
+	-	Changes made to the table are not saved unless explicitly exported (or copy/pasted) into a file, or written to the device.
+		No warnings are given before replacing/overwriting the in-host table buffer being edited. There is no <b>Undo</b> facility.
 
 			
 

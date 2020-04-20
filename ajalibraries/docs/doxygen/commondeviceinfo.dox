@@ -120,6 +120,11 @@
 		-	Or use the result of ::GetNTV2InputSourceForIndex — specify ::NTV2_INPUTSOURCES_HDMI for the ‘<i>inKinds</i>’ parameter.
 		-	If you are expecting <b>psf</b> video, pass ‘true’ for the ‘<i>inIsProgressive</i>’ parameter.
 	-	Or call CNTV2Card::GetHDMIInputVideoFormat, specifying the HDMI input connector as an ::NTV2Channel value.
+	-	If a DVI monitor is connected to the HDMI output connector, no audio will be transmitted (since DVI doesnʼt support audio).
+	-	If an HDMI monitor is connected to the HDMI output connector, and it appears to be “DVI”, this is often caused by the firmware
+		not correctly reading the monitor configuration (EDID), so it falls back to DVI.  To force the HDMI output to HDMI:
+		-	Call CNTV2Card::SetHDMIOutProtocol and specify <tt>NTV2_HDMIProtocolHDMI</tt>, and…
+		-	Call CNTV2Card::SetHDMIOutForceConfig and specify <tt>true</tt>.
 
 	@par	Analog Video Connectors
 
@@ -799,8 +804,8 @@
 	-	The 10-bit Red, Green, or Blue component value (<tt>0x000</tt> thru <tt>0x3FF</tt>) is used as the index into
 		the respective R, G, or B table to fetch the converted output value, another 10-bit value in the range
 		<tt>0x000</tt> thru <tt>0x3FF</tt>.
-	-	Each <b>LUT</b> widget has two independent banks, only one of which is actively converting its input video.
-		-	A LUT bank is identified by an integer value — <b>0</b> or <b>1</b>.
+	-	<b>LUT</b>s have two independent banks, only one of which is actively converting input video.
+		-	A bank is identified by an integer value — <b>0</b> or <b>1</b>.
 		-	To determine which bank is currently active for a given LUT, call CNTV2Card::GetColorCorrectionOutputBank.
 		-	To switch the active LUT bank, call CNTV2Card::SetColorCorrectionOutputBank.
 	-	There is currently no API call that reads the Red, Green and/or Blue conversion table values for a particular bank
@@ -812,6 +817,8 @@
 			thru <tt>0x3FF</tt> prior to being written to the device.
 	-	Some newer device firmware supports 12-bit LUTs. In 12-bit mode, the LUT table is expanded in size to 4,096 values
 		per component, and the legal (output) values assume the range <tt>0x000 - 0xFFF</tt>.
+	-	See \ref widget_lut for a discussion on how to route signals to and from <b>LUT</b> widgets.
+	-	The NTV2Watcher toolʼs \ref inspectorlut can be used to inspect and/or modify <b>LUT</b> configuration.
 
 	@note	The reading and writing of any 10-bit “version 2” LUT bank table data flows through registers 512-2047,
 			with host access controlled by register 376 (<tt>kRegLUTV2Control</tt>). There is no software mutex
