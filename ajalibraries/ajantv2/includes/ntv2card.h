@@ -922,54 +922,56 @@ public:
 
 	/**
 		@brief		Sets the device's clock reference source. See \ref deviceclockingandsync for more information.
+		@param[in]	inRefSource				Specifies the ::NTV2ReferenceSource to use.
+		@param[in]	inKeepFramePulseSelect	For devices that support a frame pulse source that's independent of the
+											reference source, specify true to prevent resetting the frame pulse source.
 		@return		True if successful; otherwise false.
-		@param[in]	inRefSource		Specifies the ::NTV2ReferenceSource to use.
-					
 	**/
-	AJA_VIRTUAL bool		SetReference (NTV2ReferenceSource inRefSource, bool inKeepFramePulseSelect = false);
+	AJA_VIRTUAL bool		SetReference (const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect = false);
 
 	/**
 		@brief			Answers with the device's current clock reference source. See \ref deviceclockingandsync for more information.
-		@return			True if successful; otherwise false.
 		@param[out]		outRefSource	Receives the ::NTV2ReferenceSource value.
+		@return			True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool		GetReference (NTV2ReferenceSource & outRefSource);
 	
 	/**
-		@brief		Enables the device's frame pulse reference select. See \ref deviceclockingandsync for more information.
+		@brief		Enables the device's frame pulse reference select.
+					See \ref deviceclockingandsync for more information.
+		@param[in]	inEnable	Specify true to enable the frame pulse reference; otherwise specify false.
 		@return		True if successful; otherwise false.
-		@param[in]	inRefSource		Specifies the ::NTV2ReferenceSource to use.
-					
 	**/
-	AJA_VIRTUAL	bool		EnableFramePulseReference (bool enable);
+	AJA_VIRTUAL	bool		EnableFramePulseReference (const bool inEnable);
 	
 	/**
-		@brief			Answers with the device's current frame pulse reference source. See \ref deviceclockingandsync for more information.
+		@brief			Answers whether or not the device's current frame pulse reference source is enabled.
+						See \ref deviceclockingandsync for more information.
+		@param[out]		outEnabled		Receives true if the frame pulse reference is enabled; otherwise false.
 		@return			True if successful; otherwise false.
-		@param[out]		outRefSource	Receives the ::NTV2ReferenceSource value.
 	**/
-	AJA_VIRTUAL	bool		GetEnableFramePulseReference (bool & outValue);
+	AJA_VIRTUAL	bool		GetEnableFramePulseReference (bool & outEnabled);
 	
 	/**
 		@brief		Sets the device's frame pulse reference source. See \ref deviceclockingandsync for more information.
 		@return		True if successful; otherwise false.
-		@param[in]	inRefSource		Specifies the ::NTV2ReferenceSource to use.
+		@param[in]	inRefSource		Specifies the ::NTV2ReferenceSource to use for the device's frame pulse reference.
 					
 	**/
-	AJA_VIRTUAL	bool		SetFramePulseReference (NTV2ReferenceSource value);
+	AJA_VIRTUAL	bool		SetFramePulseReference (const NTV2ReferenceSource inRefSource);
 	
 	/**
-		@brief			Answers with the device's current frame pulse reference source. See \ref deviceclockingandsync for more information.
+		@brief			Answers with the device's current frame pulse reference source.
 		@return			True if successful; otherwise false.
 		@param[out]		outRefSource	Receives the ::NTV2ReferenceSource value.
 	**/
-	AJA_VIRTUAL	bool		GetFramePulseReference (NTV2ReferenceSource & outValue);
+	AJA_VIRTUAL	bool		GetFramePulseReference (NTV2ReferenceSource & outRefSource);
 
 	/**
 		@brief		Retrieves the device's current "retail service" task mode.
-		@return		True if successful; otherwise false.
 		@param[out]	outMode		Receives the device's current "every frame task mode" setting. If successful, the
 								variable will contain ::NTV2_DISABLE_TASKS, ::NTV2_STANDARD_TASKS, or ::NTV2_OEM_TASKS.
+		@return		True if successful; otherwise false.
 		@see		CNTV2DriverInterface::GetStreamingApplication, \ref devicesharing
 	**/
 	AJA_VIRTUAL bool		GetEveryFrameServices (NTV2EveryFrameTaskMode & outMode);
@@ -4421,8 +4423,8 @@ public:
 	AJA_VIRTUAL bool		SetLUTV2HostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue);
 	AJA_VIRTUAL bool		GetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank & outValue, const NTV2Channel inChannel);
 
-	AJA_VIRTUAL bool		SetLUTV2OutputBank (const NTV2Channel inChannel, const ULWord inBank);
-	AJA_VIRTUAL bool		GetLUTV2OutputBank (const NTV2Channel inChannel, ULWord & outBank);
+	AJA_VIRTUAL bool		SetLUTV2OutputBank (const NTV2Channel inLUTWidget, const ULWord inBank);
+	AJA_VIRTUAL bool		GetLUTV2OutputBank (const NTV2Channel inLUTWidget, ULWord & outBank);
 
 	/**
 		@brief		Sets the RGB range for the given CSC.
@@ -4505,7 +4507,22 @@ public:
 	AJA_VIRTUAL bool		SetColorCorrectionMode(const NTV2Channel inChannel, const NTV2ColorCorrectionMode inMode);
 	AJA_VIRTUAL bool		GetColorCorrectionMode(const NTV2Channel inChannel, NTV2ColorCorrectionMode & outMode);
 
+	/**
+		@brief		Sets the LUT bank to be used for the given LUT.
+		@param[in]	inLUTWidget		Specifies the LUT widget of interest as an ::NTV2Channel, a zero-based index number.
+		@param[in]	inBank			Specifies the bank number to be used. Must be 0 or 1.
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetColorCorrectionOutputBank, \ref vidop-lut
+	**/
 	AJA_VIRTUAL bool		SetColorCorrectionOutputBank (const NTV2Channel inChannel, const ULWord inBank);
+
+	/**
+		@brief		Answers with the current LUT bank in use for the given LUT.
+		@param[in]	inLUTWidget		Specifies the LUT widget of interest as an ::NTV2Channel, a zero-based index number.
+		@param[out]	outBank			Receives the bank number that's currently in use (0 or 1).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetColorCorrectionOutputBank, \ref vidop-lut
+	**/
 	AJA_VIRTUAL bool		GetColorCorrectionOutputBank (const NTV2Channel inChannel, ULWord & outBank);
 
 	AJA_VIRTUAL bool		SetColorCorrectionHostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue);

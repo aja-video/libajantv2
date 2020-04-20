@@ -1654,7 +1654,7 @@ bool CNTV2Card::CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFir
 // Method: SetReference
 // Input:  NTV2Reference
 // Output: NONE
-bool CNTV2Card::SetReference (NTV2ReferenceSource inRefSource, bool inKeepFramePulseSelect)
+bool CNTV2Card::SetReference (const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect)
 {
 	NTV2DeviceID id = GetDeviceID();
 
@@ -1806,7 +1806,7 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
     return result;
 }
 
-bool CNTV2Card::EnableFramePulseReference (bool enable)
+bool CNTV2Card::EnableFramePulseReference (const bool enable)
 {
 	NTV2DeviceID id = GetDeviceID();
 	if(!::NTV2DeviceCanDoFramePulseSelect(id))
@@ -1828,20 +1828,17 @@ bool CNTV2Card::GetEnableFramePulseReference (bool & outValue)
 	return status;
 }
 
-bool CNTV2Card::SetFramePulseReference (NTV2ReferenceSource value)
+bool CNTV2Card::SetFramePulseReference (const NTV2ReferenceSource value)
 {
-	NTV2DeviceID id = GetDeviceID();
-	if(!::NTV2DeviceCanDoFramePulseSelect(id))
-		return false;
-		
-	return WriteRegister (kRegGlobalControl3, (ULWord)value, kRegMaskFramePulseRefSelect, kRegShiftFramePulseRefSelect);
+	if(!::NTV2DeviceCanDoFramePulseSelect(GetDeviceID()))
+		return false;	
+	return WriteRegister (kRegGlobalControl3, ULWord(value), kRegMaskFramePulseRefSelect, kRegShiftFramePulseRefSelect);
 }
 
 bool CNTV2Card::GetFramePulseReference (NTV2ReferenceSource & outValue)
 {
 	ULWord	refControl1(0);
-	NTV2DeviceID id = GetDeviceID();
-	if(!::NTV2DeviceCanDoFramePulseSelect(id))
+	if(!::NTV2DeviceCanDoFramePulseSelect(GetDeviceID()))
 		return false;
 	
 	bool	result	(ReadRegister (kRegGlobalControl3, refControl1, kRegMaskFramePulseRefSelect, kRegShiftFramePulseRefSelect));
