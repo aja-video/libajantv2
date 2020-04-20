@@ -3614,6 +3614,16 @@ typedef enum
 
 #define	NTV2_IS_VALID_LUT_TYPE(__x__)		((__x__) >= NTV2_LUTUnknown  &&  (__x__) < NTV2_MAX_NUM_LutTypes)
 
+/**
+	   @brief  This specifies the LUT bit depth
+**/
+typedef enum
+{
+   NTV2_LUT8Bit,
+   NTV2_LUT10Bit,
+   NTV2_LUT12Bit
+} NTV2LutBitDepth;
+
 
 /**
 	@brief	This specifies the HDMI Out Stereo 3D Mode

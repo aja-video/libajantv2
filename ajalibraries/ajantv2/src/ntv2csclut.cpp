@@ -329,6 +329,11 @@ bool CNTV2Card::GetLUTControlSelect(NTV2LUTControlSelect & outLUTSelect)
 	return CNTV2DriverInterface::ReadRegister (kRegCh1ColorCorrectionControl, outLUTSelect, kRegMaskLUTSelect, kRegShiftLUTSelect);
 }
 
+bool CNTV2Card::Has12BitLUTSupport()
+{
+	ULWord has12BitLUTSupport(0);
+	return ReadRegister(kRegLUTV2Control, has12BitLUTSupport, kRegMask12BitLUTSupport, kRegShift12BitLUTSupport)  &&  (has12BitLUTSupport ? true : false);
+}
 
 ///////////////////////////////////////////////////////////////////
 
@@ -438,21 +443,51 @@ bool CNTV2Card::GetColorSpaceMatrixSelect (NTV2ColorSpaceMatrixType & outType, c
 
 
 //	STATIC:
-bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, NTV2DoubleArray & outTable)
+bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, NTV2DoubleArray & outTable, const NTV2LutBitDepth inBitDepth)
 {
-	outTable.reserve(1024);
-	while (outTable.size() < 1024)
-		outTable.push_back(double(0.0));
-
-	size_t ndx(0);
 	static const double kGammaMac(1.8);
-	double gamma1(0.0), gamma2(0.0), scale(0.0);
-	// Notes
-	//
+	double gamma1(0.0), gamma2(0.0), scale(0.0), fullWhite(0.0), fullBlack(0.0), smpteWhite(0.0), smpteBlack(0.0);
+	uint32_t tableSize(0);
+	
+	// 10 Bit Notes
 	//	1020 / 0x3FC is full-range white on the wire since 0x3FF/1023 is illegal
 	//	   4 /   0x4 is full-range black on the wire since 0x0/0 is illegal
 	//	 940 / 0x3AC is smpte-range white
 	//	  64 /  0x40 is smpte-range black
+	
+	// 12 Bit Notes
+	//	4080 / 0xFF0 is full-range white on the wire since 0xFFC/4092 is illegal
+	//	  16 /  0x10 is full-range black on the wire since 0x0/0 is illegal
+	//	3760 / 0xEB0 is smpte-range white
+	//	 256 / 0x100 is smpte-range black
+	
+	switch(inBitDepth)
+	{
+	default:
+	case NTV2_LUT10Bit:
+		fullWhite = 1023.0;
+		fullBlack = 0.0;
+		smpteWhite = 940.0;
+		smpteBlack = 64.0;
+		tableSize = 1024;
+		outTable.reserve(tableSize);
+		while (outTable.size() < tableSize)
+				outTable.push_back(double(0.0));
+		break;
+	case NTV2_LUT12Bit:
+		fullWhite = 4092.0;
+		fullBlack = 0.0;
+		smpteWhite = 3760.0;
+		smpteBlack = 256.0;
+		tableSize = 4096;
+		outTable.reserve(tableSize);
+		while (outTable.size() < tableSize)
+				outTable.push_back(double(0.0));
+		break;
+	}
+	
+	double smpteScale = (smpteWhite - smpteBlack) - 1.0;
+
 
 	switch (inLUTType)
 	{
@@ -461,7 +496,7 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 		case NTV2_LUTUnknown:	// huh?
 		case NTV2_LUTCustom:
 		default:
-			for (ndx = 0;  ndx < 1024;  ndx++)
+			for (size_t ndx = 0;  ndx < tableSize;  ndx++)
 				outTable[ndx] = double(ndx);
 			break;
 
@@ -469,23 +504,23 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 		case NTV2_LUTRGBRangeFull_SMPTE:
 			if (inBank == kLUTBank_FULL2SMPTE)
 			{
-				scale = (940.0 - 64.0) / (1023.0 - 0.0);
+				scale = (smpteWhite - smpteBlack) / (fullWhite - fullBlack);
 				
-				for (ndx = 0;  ndx < 1024;  ndx++)
-					outTable[ndx] = (double(ndx) * scale) + (64.0 - (scale * 0.0));
+				for (size_t ndx = 0;  ndx < tableSize;  ndx++)
+					outTable[ndx] = (double(ndx) * scale) + (smpteBlack - (scale * fullBlack));
 			}
 			else  // inBank == kLUTBank_SMPTE2FULL
 			{
-				scale = (1023.0 - 0.0) / (940.0 - 64.0);
+				scale = (fullWhite - fullBlack) / (smpteWhite - smpteBlack);
 
-				for (ndx = 0;  ndx < 64;  ndx++)
-					outTable[ndx] = 0.0;
+				for (size_t ndx = 0;  ndx < (uint32_t)smpteBlack;  ndx++)
+					outTable[ndx] = fullBlack;
 				
-				for (ndx = 64;  ndx < 940;  ndx++)
-					outTable[ndx] = (double(ndx) * scale) + (0.0 - (scale * 64.0));
+				for (size_t ndx = (uint32_t)smpteBlack;  ndx < (uint32_t)smpteWhite;  ndx++)
+					outTable[ndx] = (double(ndx) * scale) + ((uint32_t)fullBlack - (scale * (uint32_t)smpteBlack));
 					
-				for (ndx = 940;  ndx < 1024;  ndx++)
-					outTable[ndx] = 1023.0;
+				for (size_t ndx = (uint32_t)smpteWhite;  ndx < tableSize;  ndx++)
+					outTable[ndx] = fullWhite;
 			}
 			break;	//	NTV2_LUTRGBRangeFull_SMPTE
 			
@@ -493,20 +528,20 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 		case NTV2_LUTGamma18_Rec601:
 			// "gamma" (the exponent) = srcGamma / dstGamma
 			gamma1 = (inBank == kLUTBank_RGB2YUV ? (kGammaMac / 2.2) : (2.2 / kGammaMac) );
-			for (ndx = 0;  ndx < 1024;  ndx++)
-				outTable[ndx] = 1023.0 * ::pow(double(ndx) / 1023.0, gamma1);
+			for (size_t ndx = 0;  ndx < tableSize;  ndx++)
+				outTable[ndx] = fullWhite * ::pow(double(ndx) / fullWhite, gamma1);
 			break;
 		
 		// kGammaMac <=> Rec 601 Gamma - SMPTE Range
 		case NTV2_LUTGamma18_Rec601_SMPTE:
 			// "gamma" (the exponent) = srcGamma / dstGamma
 			gamma1 = (inBank == kLUTBank_RGB2YUV ? (kGammaMac / 2.2) : (2.2 / kGammaMac) );
-			for (ndx = 0;  ndx < 1024;  ndx++)
+			for (size_t ndx = 0;  ndx < tableSize;  ndx++)
 			{
-				if (ndx <= 64  ||  ndx >= 940)
+				if (ndx <= (uint32_t)smpteBlack  ||  ndx >= (uint32_t)smpteWhite)
 					outTable[ndx] = double(ndx);
 				else
-					outTable[ndx] = 875.0 * ::pow((double(ndx) - 64.0) / 875.0, gamma1) + 64.0;
+					outTable[ndx] = smpteScale * ::pow((double(ndx) - smpteBlack) / smpteScale, gamma1) + smpteBlack;
 			}
 			break;	//	NTV2_LUTGamma18_Rec601_SMPTE
 			
@@ -516,24 +551,24 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 			{
 				gamma1 = kGammaMac;
 				gamma2 = 0.45;
-				for (ndx = 0;  ndx < 1024;  ndx++)
+				for (size_t ndx = 0;  ndx < tableSize;  ndx++)
 				{	// remove the kGammaMac power gamma
-					double f(::pow(double(ndx) / 1023.0, gamma1));
+					double f(::pow(double(ndx) / fullWhite, gamma1));
 
 					// add the Rec 709 gamma
 					if (f < 0.018)
-						outTable[ndx] = 1023.0 * (f * 4.5);
+						outTable[ndx] = fullWhite * (f * 4.5);
 					else
-						outTable[ndx] = 1023.0 * ((1.099 * ::pow(f, gamma2)) - 0.099);
+						outTable[ndx] = fullWhite * ((1.099 * ::pow(f, gamma2)) - 0.099);
 				}
 			}
 			else
 			{
 				gamma1 = 1.0 / 0.45;
 				gamma2 = 1.0 / kGammaMac;
-				for (ndx = 0;  ndx < 1024;  ndx++)
+				for (size_t ndx = 0;  ndx < tableSize;  ndx++)
 				{
-					double f(double(ndx) / 1023.0);
+					double f(double(ndx) / fullWhite);
 					// remove the Rec 709 gamma
 					if (f < 0.081)
 						f = f / 4.5;
@@ -541,7 +576,7 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 						f = ::pow((f + 0.099) / 1.099, gamma1);
 
 					// add the kGammaMac Power gamma
-					outTable[ndx] = 1023.0 * ::pow(f, gamma2);
+					outTable[ndx] = fullWhite * ::pow(f, gamma2);
 				}
 			}
 			break;	//	NTV2_LUTGamma18_Rec709
@@ -552,19 +587,19 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 			{
 				gamma1 = kGammaMac;
 				gamma2 = 0.45;
-				for (ndx = 0;  ndx < 1024;  ndx++)
+				for (size_t ndx = 0;  ndx < tableSize;  ndx++)
 				{
-					if (ndx <= 64  ||  ndx >= 940)
+					if (ndx <= (uint32_t)smpteBlack  ||  ndx >= (uint32_t)smpteWhite)
 						outTable[ndx] = double(ndx);	// linear portion - outside SMPTE range
 					else
 					{	// remove the kGammaMac power gamma
-						double f(::pow((double(ndx) - 64.0) / 875.0, gamma1));
+						double f(::pow((double(ndx) - smpteBlack) / 875.0, gamma1));
 
 						// add the Rec 709 gamma
 						if (f < 0.018)
-							outTable[ndx] = 875.0 * (f * 4.5) + 64.0;
+							outTable[ndx] = smpteScale * (f * 4.5) + smpteBlack;
 						else
-							outTable[ndx] = 875.0 * ((1.099 * ::pow(f, gamma2)) - 0.099) + 64.0;
+							outTable[ndx] = smpteScale * ((1.099 * ::pow(f, gamma2)) - 0.099) + smpteBlack;
 					}
 				}
 			}
@@ -572,13 +607,13 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 			{
 				gamma1 = 1.0 / 0.45;
 				gamma2 = 1.0 / kGammaMac;
-				for (ndx = 0;  ndx < 1024;  ndx++)
+				for (size_t ndx = 0;  ndx < tableSize;  ndx++)
 				{
-					if (ndx <= 64  ||  ndx >= 940)
+					if (ndx <= (uint32_t)smpteBlack  ||  ndx >= (uint32_t)smpteWhite)
 						outTable[ndx] = double(ndx);	// linear portion - outside SMPTE range
 					else
 					{
-						double f ((double(ndx) - 64.0) / 875.0);
+						double f ((double(ndx) - smpteBlack) / 875.0);
 						// remove the Rec 709 gamma
 						if (f < 0.081)
 							f = f / 4.5;
@@ -586,7 +621,7 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 							f = ::pow((f + 0.099) / 1.099, gamma1);
 
 						// add the kGammaMac Power gamma
-						outTable[ndx] = 875.0 * ::pow(f, gamma2) + 64.0;
+						outTable[ndx] = smpteScale * ::pow(f, gamma2) + smpteBlack;
 					}
 				}
 			}
@@ -626,6 +661,7 @@ static const NTV2ColorCorrectionHostAccessBank	gLUTBank0[] =
 	NTV2_CCHOSTACCESS_CH7BANK0,	NTV2_CCHOSTACCESS_CH8BANK0	};	//	[6]	12		[7]	14
 
 static const size_t	kLUTArraySize (NTV2_COLORCORRECTOR_WORDSPERTABLE * 2);
+static const size_t	k12BitLUTArraySize (NTV2_12BIT_COLORCORRECTOR_WORDSPERTABLE * 2);
 
 
 
@@ -652,6 +688,36 @@ bool CNTV2Card::DownloadLUTToHW (const NTV2DoubleArray & inRedLUT, const NTV2Dou
 		bResult = SetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank (gLUTBank0[inLUT] + inBank));
 		if (bResult)
 			bResult = LoadLUTTables (inRedLUT, inGreenLUT, inBlueLUT);
+		SetLUTEnable (false, inLUT);
+	}
+	return bResult;
+}
+
+bool CNTV2Card::Download12BitLUTToHW (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT,
+								 const NTV2Channel inLUT, const int inBank)
+{
+	if (inRedLUT.size() < k12BitLUTArraySize  ||  inGreenLUT.size() < k12BitLUTArraySize  ||  inBlueLUT.size() < k12BitLUTArraySize)
+		{LUTFAIL("Size error (< 4096): R=" << DEC(inRedLUT.size()) << " G=" << DEC(inGreenLUT.size()) << " B=" << DEC(inBlueLUT.size())); return false;}
+
+	if (IS_CHANNEL_INVALID(inLUT))
+		{LUTFAIL("Bad LUT/channel (> 7): " << DEC(inLUT)); return false;}
+
+	if (inBank != 0 && inBank != 1)
+		{LUTFAIL("Bad bank value (> 1): " << DEC(inBank)); return false;}
+
+	if (!Has12BitLUTSupport())
+		return false;
+	
+	if (::NTV2DeviceGetNumLUTs(_boardID) == 0)
+		return false;
+
+	bool bResult = SetLUTEnable(true, inLUT);
+	if (bResult)
+	{
+		//	Set up Host Access...
+		bResult = SetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank (gLUTBank0[inLUT] + inBank));
+		if (bResult)
+			bResult = Load12BitLUTTables (inRedLUT, inGreenLUT, inBlueLUT);
 		SetLUTEnable (false, inLUT);
 	}
 	return bResult;
@@ -684,6 +750,36 @@ bool CNTV2Card::DownloadLUTToHW (const UWordSequence & inRedLUT, const UWordSequ
 	return bResult;
 }
 
+bool CNTV2Card::Download12BitLUTToHW (const UWordSequence & inRedLUT, const UWordSequence & inGreenLUT, const UWordSequence & inBlueLUT,
+								const NTV2Channel inLUT, const int inBank)
+{
+	if (inRedLUT.size() < k12BitLUTArraySize  ||  inGreenLUT.size() < k12BitLUTArraySize  ||  inBlueLUT.size() < k12BitLUTArraySize)
+		{LUTFAIL("Size error (< 4096): R=" << DEC(inRedLUT.size()) << " G=" << DEC(inGreenLUT.size()) << " B=" << DEC(inBlueLUT.size())); return false;}
+
+	if (IS_CHANNEL_INVALID(inLUT))
+		{LUTFAIL("Bad LUT/channel (> 7): " << DEC(inLUT)); return false;}
+
+	if (inBank != 0 && inBank != 1)
+		{LUTFAIL("Bad bank value (> 1): " << DEC(inBank)); return false;}
+
+	if (!Has12BitLUTSupport())
+		return false;
+	
+	if (::NTV2DeviceGetNumLUTs(_boardID) == 0)
+		return false;
+
+	bool bResult = SetLUTEnable(true, inLUT);
+	if (bResult)
+	{
+		//	Set up Host Access...
+		bResult = SetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank (gLUTBank0[inLUT] + inBank));
+		if (bResult)
+			bResult = Write12BitLUTTables (inRedLUT, inGreenLUT, inBlueLUT);
+		SetLUTEnable (false, inLUT);
+	}
+	return bResult;
+}
+
 bool CNTV2Card::LoadLUTTables (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT)
 {
 	if (inRedLUT.size() < kLUTArraySize  ||  inGreenLUT.size() < kLUTArraySize  ||  inBlueLUT.size() < kLUTArraySize)
@@ -702,37 +798,143 @@ bool CNTV2Card::LoadLUTTables (const NTV2DoubleArray & inRedLUT, const NTV2Doubl
 	return WriteLUTTables(redLUT, greenLUT, blueLUT);
 }
 
+bool CNTV2Card::Load12BitLUTTables (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT)
+{
+	if (inRedLUT.size() < k12BitLUTArraySize  ||  inGreenLUT.size() < k12BitLUTArraySize  ||  inBlueLUT.size() < k12BitLUTArraySize)
+		{LUTFAIL("Size error (< 4096): R=" << DEC(inRedLUT.size()) << " G=" << DEC(inGreenLUT.size()) << " B=" << DEC(inBlueLUT.size())); return false;}
+
+	UWordSequence redLUT, greenLUT, blueLUT;
+	redLUT.resize(k12BitLUTArraySize);
+	greenLUT.resize(k12BitLUTArraySize);
+	blueLUT.resize(k12BitLUTArraySize);
+	for (size_t ndx(0);  ndx < k12BitLUTArraySize;  ndx++)
+	{
+		redLUT  .at(ndx) = UWord(intClamp(0, int(inRedLUT  [ndx] + 0.5), 4095));
+		greenLUT.at(ndx) = UWord(intClamp(0, int(inGreenLUT[ndx] + 0.5), 4095));
+		blueLUT .at(ndx) = UWord(intClamp(0, int(inBlueLUT [ndx] + 0.5), 4095));
+	}
+	return Write12BitLUTTables(redLUT, greenLUT, blueLUT);
+}
+
 bool CNTV2Card::WriteLUTTables (const UWordSequence & inRedLUT, const UWordSequence & inGreenLUT, const UWordSequence & inBlueLUT)
 {
 	if (inRedLUT.size() < kLUTArraySize  ||  inGreenLUT.size() < kLUTArraySize  ||  inBlueLUT.size() < kLUTArraySize)
 		{LUTFAIL("Size error (< 1024): R=" << DEC(inRedLUT.size()) << " G=" << DEC(inGreenLUT.size()) << " B=" << DEC(inBlueLUT.size())); return false;}
 
 	size_t	errorCount(0), nonzeroes(0);
-	ULWord	RTableReg(kColorCorrectionLUTOffset_Red / 4);	//	Byte offset to LUT in register bar;  divide by sizeof (ULWord) to get register number
-	ULWord	GTableReg(kColorCorrectionLUTOffset_Green / 4);
-	ULWord	BTableReg(kColorCorrectionLUTOffset_Blue / 4);
+	ULWord	RTableReg = (Has12BitLUTSupport() ? kColorCorrection12BitLUTOffset_Red : kColorCorrectionLUTOffset_Red) / 4;	//	Byte offset to LUT in register bar;  divide by sizeof (ULWord) to get register number
+	ULWord	GTableReg = (Has12BitLUTSupport() ? kColorCorrection12BitLUTOffset_Green : kColorCorrectionLUTOffset_Green) / 4;
+	ULWord	BTableReg = (Has12BitLUTSupport() ? kColorCorrection12BitLUTOffset_Blue : kColorCorrectionLUTOffset_Blue) / 4;
 
 	for (size_t ndx(0);  ndx < NTV2_COLORCORRECTOR_WORDSPERTABLE;  ndx++)
 	{
-		ULWord	lo(ULWord(inRedLUT[2 * ndx + 0]) & 0x3FF);
-		ULWord	hi(ULWord(inRedLUT[2 * ndx + 1]) & 0x3FF);
-		ULWord	tmp((hi << kRegColorCorrectionLUTOddShift) + (lo << kRegColorCorrectionLUTEvenShift));
-		if (tmp) nonzeroes++;
-		if (!WriteRegister(RTableReg++, tmp))
-			errorCount++;
+		ULWord	loRed(ULWord(inRedLUT[2 * ndx + 0]) & 0x3FF);
+		ULWord	hiRed(ULWord(inRedLUT[2 * ndx + 1]) & 0x3FF);
 
-		lo = ULWord(inGreenLUT[2 * ndx + 0]) & 0x3FF;
-		hi = ULWord(inGreenLUT[2 * ndx + 1]) & 0x3FF;
-		tmp = (hi << kRegColorCorrectionLUTOddShift) + (lo << kRegColorCorrectionLUTEvenShift);
-		if (tmp) nonzeroes++;
-		if (!WriteRegister(GTableReg++, tmp))
-			errorCount++;
+		ULWord	loGreen = ULWord(inGreenLUT[2 * ndx + 0]) & 0x3FF;
+		ULWord	hiGreen = ULWord(inGreenLUT[2 * ndx + 1]) & 0x3FF;
 
-		lo = ULWord(inBlueLUT[2 * ndx + 0]) & 0x3FF;
-		hi = ULWord(inBlueLUT[2 * ndx + 1]) & 0x3FF;
-		tmp = (hi << kRegColorCorrectionLUTOddShift) + (lo << kRegColorCorrectionLUTEvenShift);
-		if (tmp) nonzeroes++;
-		if (!WriteRegister(BTableReg++, tmp))
+		ULWord	loBlue = ULWord(inBlueLUT[2 * ndx + 0]) & 0x3FF;
+		ULWord	hiBlue = ULWord(inBlueLUT[2 * ndx + 1]) & 0x3FF;
+		
+		if(!Has12BitLUTSupport())
+		{
+			ULWord	tmpRed((hiRed << kRegColorCorrectionLUTOddShift) + (loRed << kRegColorCorrectionLUTEvenShift));
+			if (tmpRed) nonzeroes++;
+			if (!WriteRegister(RTableReg++, tmpRed))
+				errorCount++;
+			
+			ULWord	tmpGreen = (hiGreen << kRegColorCorrectionLUTOddShift) + (loGreen << kRegColorCorrectionLUTEvenShift);
+			if (tmpGreen) nonzeroes++;
+			if (!WriteRegister(GTableReg++, tmpGreen))
+				errorCount++;
+			
+			ULWord	tmpBlue = (hiBlue << kRegColorCorrectionLUTOddShift) + (loBlue << kRegColorCorrectionLUTEvenShift);
+			if (tmpBlue) nonzeroes++;
+			if (!WriteRegister(BTableReg++, tmpBlue))
+				errorCount++;
+		}
+		else
+		{
+			ULWord	tmpRedLo((loRed << kRegColorCorrectionLUTOddShift) + (loRed << kRegColorCorrectionLUTEvenShift));
+			ULWord	tmpRedHi((hiRed << kRegColorCorrectionLUTOddShift) + (hiRed << kRegColorCorrectionLUTEvenShift));
+			if(tmpRedLo || tmpRedHi) nonzeroes++;
+			if (!WriteRegister(RTableReg++, tmpRedLo))
+				errorCount++;
+			if (!WriteRegister(RTableReg++, tmpRedLo))
+				errorCount++;
+			if (!WriteRegister(RTableReg++, tmpRedHi))
+				errorCount++;
+			if (!WriteRegister(RTableReg++, tmpRedHi))
+				errorCount++;
+			
+			ULWord	tmpGreenLo((loGreen << kRegColorCorrectionLUTOddShift) + (loGreen << kRegColorCorrectionLUTEvenShift));
+			ULWord	tmpGreenHi((hiGreen << kRegColorCorrectionLUTOddShift) + (hiGreen << kRegColorCorrectionLUTEvenShift));
+			if(tmpGreenLo || tmpGreenHi) nonzeroes++;
+			if (!WriteRegister(RTableReg++, tmpGreenLo))
+				errorCount++;
+			if (!WriteRegister(RTableReg++, tmpGreenLo))
+				errorCount++;
+			if (!WriteRegister(RTableReg++, tmpGreenHi))
+				errorCount++;
+			if (!WriteRegister(RTableReg++, tmpGreenHi))
+				errorCount++;
+			
+			ULWord	tmpBlueLo((loBlue << kRegColorCorrectionLUTOddShift) + (loBlue << kRegColorCorrectionLUTEvenShift));
+			ULWord	tmpBlueHi((hiBlue << kRegColorCorrectionLUTOddShift) + (hiBlue << kRegColorCorrectionLUTEvenShift));
+			if(tmpBlueLo || tmpBlueHi) nonzeroes++;
+			if (!WriteRegister(RTableReg++, tmpBlueLo))
+				errorCount++;
+			if (!WriteRegister(RTableReg++, tmpBlueLo))
+				errorCount++;
+			if (!WriteRegister(RTableReg++, tmpBlueHi))
+				errorCount++;
+			if (!WriteRegister(RTableReg++, tmpBlueHi))
+				errorCount++;
+		}
+	}
+	if (errorCount)	LUTFAIL(GetDisplayName() << " " << DEC(errorCount) << " WriteRegister calls failed");
+	else if (!nonzeroes) LUTWARN(GetDisplayName() << " All zero LUT table values!");
+	return !errorCount;
+}
+
+bool CNTV2Card::Write12BitLUTTables (const UWordSequence & inRedLUT, const UWordSequence & inGreenLUT, const UWordSequence & inBlueLUT)
+{
+	if (inRedLUT.size() < k12BitLUTArraySize  ||  inGreenLUT.size() < k12BitLUTArraySize  ||  inBlueLUT.size() < k12BitLUTArraySize)
+		{LUTFAIL("Size error (< 4096): R=" << DEC(inRedLUT.size()) << " G=" << DEC(inGreenLUT.size()) << " B=" << DEC(inBlueLUT.size())); return false;}
+
+	if (!Has12BitLUTSupport())
+		return false;
+	
+	size_t	errorCount(0), nonzeroes(0);
+	ULWord	RTableReg(kColorCorrection12BitLUTOffset_Red / 4);	//	Byte offset to LUT in register bar;  divide by sizeof (ULWord) to get register number
+	ULWord	GTableReg(kColorCorrection12BitLUTOffset_Green / 4);
+	ULWord	BTableReg(kColorCorrection12BitLUTOffset_Blue / 4);
+
+	for (size_t ndx(0);  ndx < NTV2_12BIT_COLORCORRECTOR_WORDSPERTABLE;  ndx++)
+	{
+		ULWord	loRed(ULWord(inRedLUT[2 * ndx + 0]) & 0xFFF);
+		ULWord	hiRed(ULWord(inRedLUT[2 * ndx + 1]) & 0xFFF);
+
+		ULWord	loGreen = ULWord(inGreenLUT[2 * ndx + 0]) & 0xFFF;
+		ULWord	hiGreen = ULWord(inGreenLUT[2 * ndx + 1]) & 0xFFF;
+
+		ULWord	loBlue = ULWord(inBlueLUT[2 * ndx + 0]) & 0xFFF;
+		ULWord	hiBlue = ULWord(inBlueLUT[2 * ndx + 1]) & 0xFFF;
+
+		ULWord	tmpRed((hiRed << kRegColorCorrectionLUTOddShift) + (loRed << kRegColorCorrectionLUTEvenShift));
+		if (tmpRed) nonzeroes++;
+		if (!WriteRegister(RTableReg++, tmpRed))
+			errorCount++;
+		
+		ULWord	tmpGreen = (hiGreen << kRegColorCorrectionLUTOddShift) + (loGreen << kRegColorCorrectionLUTEvenShift);
+		if (tmpGreen) nonzeroes++;
+		if (!WriteRegister(GTableReg++, tmpGreen))
+			errorCount++;
+		
+		ULWord	tmpBlue = (hiBlue << kRegColorCorrectionLUTOddShift) + (loBlue << kRegColorCorrectionLUTEvenShift);
+		if (tmpBlue) nonzeroes++;
+		if (!WriteRegister(BTableReg++, tmpBlue))
 			errorCount++;
 	}
 	if (errorCount)	LUTFAIL(GetDisplayName() << " " << DEC(errorCount) << " WriteRegister calls failed");
@@ -758,6 +960,35 @@ bool CNTV2Card::GetLUTTables (NTV2DoubleArray & outRedLUT, NTV2DoubleArray & out
 				<< ")"); return false;}
 
 	for (size_t ndx(0);  ndx < kLUTArraySize;  ndx++)
+	{
+		outRedLUT  [ndx] = red[ndx];
+		outGreenLUT[ndx] = green[ndx];
+		outBlueLUT [ndx] = blue[ndx];
+	}
+	return true;
+}
+
+bool CNTV2Card::Get12BitLUTTables (NTV2DoubleArray & outRedLUT, NTV2DoubleArray & outGreenLUT, NTV2DoubleArray & outBlueLUT)
+{
+	outRedLUT.clear();		outRedLUT.resize (k12BitLUTArraySize);
+	outGreenLUT.clear();	outGreenLUT.resize(k12BitLUTArraySize);
+	outBlueLUT.clear();		outBlueLUT.resize(k12BitLUTArraySize);
+	
+	if(!Has12BitLUTSupport())
+		return false;
+
+	UWordSequence red, green, blue;
+	if (!ReadLUTTables(red, green, blue))
+		return false;
+	if (red.size() != green.size() || green.size() != blue.size())
+		{LUTFAIL("Unexpected size mismatch: R(" << DEC(red.size()) << ")!=G(" << DEC(green.size()) << ")!=B(" << DEC(blue.size()) << ")"); return false;}
+	if (red.size() != outRedLUT.size() || green.size() != outGreenLUT.size() || blue.size() != outBlueLUT.size())
+		{LUTFAIL("Unexpected size mismatch: R(" << DEC(red.size()) << ")!=oR(" << DEC(outRedLUT.size())
+				<< ") G(" << DEC(green.size()) << ")!=oG(" << DEC(outGreenLUT.size())
+				<< ") B(" << DEC(blue.size()) << ")!=oB(" << DEC(outBlueLUT.size())
+				<< ")"); return false;}
+
+	for (size_t ndx(0);  ndx < k12BitLUTArraySize;  ndx++)
 	{
 		outRedLUT  [ndx] = red[ndx];
 		outGreenLUT[ndx] = green[ndx];
@@ -803,6 +1034,45 @@ bool CNTV2Card::ReadLUTTables (UWordSequence & outRedLUT, UWordSequence & outGre
 	return !errors;
 }
 
+bool CNTV2Card::Read12BitLUTTables (UWordSequence & outRedLUT, UWordSequence & outGreenLUT, UWordSequence & outBlueLUT)
+{
+	ULWord	RTableReg	(kColorCorrection12BitLUTOffset_Red / 4);	//	Byte offset to LUT in register bar;  divide by sizeof (ULWord) to get register number
+	ULWord	GTableReg	(kColorCorrection12BitLUTOffset_Green / 4);
+	ULWord	BTableReg	(kColorCorrection12BitLUTOffset_Blue / 4);
+	size_t	errors(0), nonzeroes(0);
+	
+	if(!Has12BitLUTSupport())
+		return false;
+
+	outRedLUT.clear();		outRedLUT.resize(k12BitLUTArraySize);
+	outGreenLUT.clear();	outGreenLUT.resize(k12BitLUTArraySize);
+	outBlueLUT.clear();		outBlueLUT.resize(k12BitLUTArraySize);
+
+	for (size_t ndx(0);  ndx < k12BitLUTArraySize;  ndx += 2)
+	{
+		ULWord	temp(0);
+		if (!ReadRegister(RTableReg++, temp))
+			errors++;
+		outRedLUT[ndx + 0] = (temp >> kRegColorCorrectionLUTEvenShift) & 0xFFF;
+		outRedLUT[ndx + 1] = (temp >> kRegColorCorrectionLUTOddShift ) & 0xFFF;
+		if (temp) nonzeroes++;
+
+		if (!ReadRegister(GTableReg++, temp))
+			errors++;
+		outGreenLUT[ndx + 0] = (temp >> kRegColorCorrectionLUTEvenShift) & 0xFFF;
+		outGreenLUT[ndx + 1] = (temp >> kRegColorCorrectionLUTOddShift ) & 0xFFF;
+		if (temp) nonzeroes++;
+
+		if (!ReadRegister(BTableReg++, temp))
+			errors++;
+		outBlueLUT[ndx + 0] = (temp >> kRegColorCorrectionLUTEvenShift) & 0xFFF;
+		outBlueLUT[ndx + 1] = (temp >> kRegColorCorrectionLUTOddShift ) & 0xFFF;
+		if (temp) nonzeroes++;
+	}
+	if (errors)	LUTFAIL(GetDisplayName() << " " << DEC(errors) << " ReadRegister calls failed");
+	else if (!nonzeroes) LUTWARN(GetDisplayName() << " All zero LUT table values!");
+	return !errors;
+}
 
 bool CNTV2Card::SetLUTEnable (const bool inEnable, const NTV2Channel inLUT)
 {

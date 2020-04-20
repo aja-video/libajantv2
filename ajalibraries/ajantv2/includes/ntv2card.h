@@ -4351,6 +4351,8 @@ public:
 	**/
 	AJA_VIRTUAL bool	DownloadLUTToHW (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT,
 										const NTV2Channel inLUT, const int inBank);
+	AJA_VIRTUAL bool	Download12BitLUTToHW (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT,
+										const NTV2Channel inLUT, const int inBank);
 
 	/**
 		@brief		Writes the LUT tables to the given LUT and bank.
@@ -4363,6 +4365,8 @@ public:
 	**/
 	AJA_VIRTUAL bool	DownloadLUTToHW (const UWordSequence & inRedLUT, const UWordSequence & inGreenLUT, const UWordSequence & inBlueLUT,
 										const NTV2Channel inLUT, const int inBank);
+	AJA_VIRTUAL bool	Download12BitLUTToHW (const UWordSequence & inRedLUT, const UWordSequence & inGreenLUT, const UWordSequence & inBlueLUT,
+										const NTV2Channel inLUT, const int inBank);
 
 	/**
 		@brief		Enables or disables the given LUT.
@@ -4373,7 +4377,7 @@ public:
 	**/
 	AJA_VIRTUAL bool	SetLUTEnable (const bool inEnable, const NTV2Channel inLUT);
 
-	static bool			GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, NTV2DoubleArray & outTable);
+	static bool			GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, NTV2DoubleArray & outTable, const NTV2LutBitDepth inBitDepth = NTV2_LUT10Bit);
 	static bool			GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, UWordSequence & outTable);
 
 	/**
@@ -4386,6 +4390,7 @@ public:
 					for this function to work properly.
 	**/
 	AJA_VIRTUAL bool		LoadLUTTables (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT);
+	AJA_VIRTUAL bool		Load12BitLUTTables (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT);
 
 	/**
 		@brief		Writes the LUT tables.
@@ -4397,6 +4402,7 @@ public:
 					for this function to work properly.
 	**/
 	AJA_VIRTUAL bool		WriteLUTTables (const UWordSequence & inRedLUT, const UWordSequence & inGreenLUT, const UWordSequence & inBlueLUT);
+	AJA_VIRTUAL bool		Write12BitLUTTables (const UWordSequence & inRedLUT, const UWordSequence & inGreenLUT, const UWordSequence & inBlueLUT);
 
 	/**
 		@brief		Reads the LUT tables (as double-precision floating point values).
@@ -4408,6 +4414,7 @@ public:
 					for this function to work properly.
 	**/
 	AJA_VIRTUAL bool		GetLUTTables (NTV2DoubleArray & outRedLUT, NTV2DoubleArray & outGreenLUT, NTV2DoubleArray & outBlueLUT);
+	AJA_VIRTUAL bool		Get12BitLUTTables (NTV2DoubleArray & outRedLUT, NTV2DoubleArray & outGreenLUT, NTV2DoubleArray & outBlueLUT);
 
 	/**
 		@brief		Reads the LUT tables (as raw, unsigned 10-bit integers).
@@ -4419,6 +4426,7 @@ public:
 					for this function to work properly.
 	**/
 	AJA_VIRTUAL bool		ReadLUTTables (UWordSequence & outRedLUT, UWordSequence & outGreenLUT, UWordSequence & outBlueLUT);
+	AJA_VIRTUAL bool		Read12BitLUTTables (UWordSequence & outRedLUT, UWordSequence & outGreenLUT, UWordSequence & outBlueLUT);
 
 	AJA_VIRTUAL bool		SetLUTV2HostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue);
 	AJA_VIRTUAL bool		GetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank & outValue, const NTV2Channel inChannel);
@@ -4426,6 +4434,7 @@ public:
 	AJA_VIRTUAL bool		SetLUTV2OutputBank (const NTV2Channel inLUTWidget, const ULWord inBank);
 	AJA_VIRTUAL bool		GetLUTV2OutputBank (const NTV2Channel inLUTWidget, ULWord & outBank);
 
+	AJA_VIRTUAL bool		Has12BitLUTSupport ();
 	/**
 		@brief		Sets the RGB range for the given CSC.
 		@param[in]	inRange		Specifies the new RGB range (::NTV2_CSC_RGB_RANGE_FULL or ::NTV2_CSC_RGB_RANGE_SMPTE).

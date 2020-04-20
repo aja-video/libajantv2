@@ -1519,6 +1519,7 @@ typedef enum
 	kRegMaskLUT6OutputBankSelect		= BIT(21),
 	kRegMaskLUT7OutputBankSelect		= BIT(22),
 	kRegMaskLUT8OutputBankSelect		= BIT(23),
+	kRegMask12BitLUTSupport				= BIT(28),
 
 	
 	// RS422 Control 
@@ -2687,6 +2688,7 @@ typedef enum
 	kRegShiftLUT6OutputBankSelect		= 21,
 	kRegShiftLUT7OutputBankSelect		= 22,
 	kRegShiftLUT8OutputBankSelect		= 23,
+	kRegShift12BitLUTSupport			= 28,
 
 	// RS422 Control 
 	kRegShiftRS422TXEnable				= 0,
@@ -4504,6 +4506,13 @@ typedef struct RP188_STRUCT {
 #define NTV2_COLORCORRECTOR_WORDSPERTABLE	(512)										// number of ULONG words in EACH color table
 #define NTV2_COLORCORRECTOR_TOTALWORDS		(NTV2_COLORCORRECTOR_WORDSPERTABLE * 3)		// total number of ULONG words in all 3 tables
 #define NTV2_COLORCORRECTOR_TABLESIZE		(NTV2_COLORCORRECTOR_TOTALWORDS * 4)		// total length in bytes of all 3 tables: numWords * numColors * bytes/word
+	
+// 12 bit Color Corrector has 3 tables(usually R, G and B). Each table has 4096 entries
+// with 2 entries per 32 bit word....therefore 2048 32 bit words per table.
+#define NTV2_12BIT_COLORCORRECTOR_WORDSPERTABLE	(2048)											// number of ULONG words in EACH color table
+#define NTV2_12BIT_COLORCORRECTOR_TOTALWORDS	(NTV2_12BIT_COLORCORRECTOR_WORDSPERTABLE * 3)	// total number of ULONG words in all 3 tables
+#define NTV2_12BIT_COLORCORRECTOR_TABLESIZE		(NTV2_12BIT_COLORCORRECTOR_TOTALWORDS * 4)		// total length in bytes of all 3 tables: numWords * numColors * bytes/word
+
 
 typedef struct NTV2ColorCorrectionInfo_64 {
    NTV2ColorCorrectionMode	mode;
@@ -4537,9 +4546,15 @@ typedef struct {
 #define kColorCorrectionLUTOffset_Green	(0x1000)
 #define kColorCorrectionLUTOffset_Blue	(0x1800)
 
+#define kColorCorrection12BitLUTOffset_Red		(0x8000)
+#define kColorCorrection12BitLUTOffset_Green	(0xA000)
+#define kColorCorrection12BitLUTOffset_Blue		(0xB000)
+
+
 // Note: there is code that assumes that the three LUTs are contiguous. So if this relationship
 //       changes (i.e. there are "gaps" between tables) then code will need to change!
 #define kColorCorrectionLUTOffset_Base	(0x0800)	// BYTE offset
+#define kColorCorrection12BitLUTOffset_Base	(0x08000)	// BYTE offset
 
 
 /////////////////////////////////////////////////////////////////////////////////////
