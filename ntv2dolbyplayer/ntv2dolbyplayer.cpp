@@ -54,7 +54,8 @@ NTV2DolbyPlayer::NTV2DolbyPlayer (const string &				inDeviceSpecifier,
                                   const NTV2Channel             inChannel,
 								  const NTV2FrameBufferFormat	inPixelFormat,
                                   const NTV2VideoFormat         inVideoFormat,
-								  const bool					inDoMultiChannel)
+                                  const bool					inDoMultiChannel,
+                                  AJAFileIO *                   inDolbyFile)
 
 	:	mConsumerThread				(AJA_NULL),
 		mProducerThread				(AJA_NULL),
@@ -75,7 +76,11 @@ NTV2DolbyPlayer::NTV2DolbyPlayer (const string &				inDeviceSpecifier,
 		mVideoBufferSize			(0),
 		mAudioBufferSize			(0),
 		mTestPatternVideoBuffers	(AJA_NULL),
-		mNumTestPatterns			(0)
+        mNumTestPatterns			(0),
+        mDolbyFile                  (inDolbyFile),
+        mDolbyBuffer                (NULL),
+        mDolbyOffset                (0),
+        mDolbySize                  (0)
 {
 	::memset (mAVHostBuffer, 0, sizeof (mAVHostBuffer));
 }
@@ -116,6 +121,12 @@ NTV2DolbyPlayer::~NTV2DolbyPlayer (void)
 			mAVHostBuffer [ndx].fAudioBuffer = AJA_NULL;
 		}
 	}	//	for each buffer in the ring
+
+    if (mDolbyBuffer)
+    {
+        delete [] mDolbyBuffer;
+        mDolbyBuffer = NULL;
+    }
 
 	if (!mDoMultiChannel && mDevice.IsOpen())
 	{
@@ -304,6 +315,11 @@ void NTV2DolbyPlayer::SetUpHostBuffers ()
 
 		mAVCircularBuffer.Add (&mAVHostBuffer [ndx]);
 	}	//	for each AV buffer in my circular buffer
+
+    if (mDolbyFile != NULL)
+    {
+        mDolbyBuffer = reinterpret_cast <uint16_t *> (new uint8_t [mAudioBufferSize]);
+    }
 
 }	//	SetUpHostBuffers
 
@@ -508,6 +524,8 @@ void NTV2DolbyPlayer::ProduceFrames (void)
 
 	AJATimeBase	timeBase (CNTV2DemoCommon::GetAJAFrameRate (::GetNTV2FrameRateFromVideoFormat (mVideoFormat)));
 	NTV2TestPatternNames tpNames(NTV2TestPatternGen::getTestPatternNames());
+    mBurstOffset = 0;
+    mBurstSize = 0x1800;
 
 	PLNOTE("Thread started");
 	while (!mGlobalQuit)
@@ -537,7 +555,10 @@ void NTV2DolbyPlayer::ProduceFrames (void)
 		TCDBG("F" << DEC0N(mCurrentFrame-1,6) << ": " << NTV2_RP188(frameData->fRP188Data) << ": " << timeCodeString);
 
 		//	Generate audio tone data...
-		frameData->fAudioBufferSize		= mWithAudio ? AddTone(frameData->fAudioBuffer) : 0;
+        if (mDolbyFile != NULL)
+            frameData->fAudioBufferSize		= mWithAudio ? AddDolby(frameData->fAudioBuffer) : 0;
+        else
+            frameData->fAudioBufferSize		= mWithAudio ? AddTone(frameData->fAudioBuffer) : 0;
 
 		//	Every few seconds, change the test pattern and tone frequency...
 		const double	currentTime	(timeBase.FramesToSeconds(mCurrentFrame));
@@ -579,7 +600,6 @@ uint32_t NTV2DolbyPlayer::AddTone (ULWord * pInAudioBuffer)
 	mDevice.GetFrameRate (frameRate, mOutputChannel);
 	mDevice.GetAudioRate (audioRate, mAudioSystem);
 	mDevice.GetNumberAudioChannels (numChannels, mAudioSystem);
-    audioRate = NTV2_AUDIO_192K;
 
 	//	Set per-channel tone frequencies...
 	double	pFrequencies [kNumAudioChannelsMax];
@@ -605,3 +625,119 @@ uint32_t NTV2DolbyPlayer::AddTone (ULWord * pInAudioBuffer)
 							false,				//	don't byte swap
 							numChannels);		//	number of audio channels to generate
 }	//	AddTone
+
+uint32_t NTV2DolbyPlayer::AddDolby (ULWord * pInAudioBuffer)
+{
+    NTV2FrameRate	frameRate	(NTV2_FRAMERATE_INVALID);
+    NTV2AudioRate	audioRate	(NTV2_AUDIO_RATE_INVALID);
+    ULWord			numChannels	(0);
+    ULWord          sampleOffset(0);
+
+    mDevice.GetFrameRate (frameRate, mOutputChannel);
+    mDevice.GetAudioRate (audioRate, mAudioSystem);
+    mDevice.GetNumberAudioChannels (numChannels, mAudioSystem);
+    const ULWord	numSamples		(::GetAudioSamplesPerFrame (frameRate, audioRate, mCurrentFrame));
+
+    if ((mDolbyFile == NULL) || (mDolbyBuffer == NULL))
+        goto silence;
+
+    // generate the samples for this frame
+    while (sampleOffset < numSamples)
+    {
+        // time for a new iec61937 burst
+        if (mBurstOffset >= mBurstSize)
+            mBurstOffset = 0;
+
+        // get a new dd+ sync frame
+        if (mBurstOffset == 0)
+        {
+            // read the sync word (all big endian)
+            uint32_t bytes = mDolbyFile->Read((uint8_t*)(&mDolbyBuffer[0]), 2);
+            if (bytes != 2)
+                goto silence;
+
+            // check sync word
+            if ((mDolbyBuffer[0] != 0x7705) &&
+                (mDolbyBuffer[0] != 0x770b))
+                goto silence;
+
+            // read more of the sync frame header
+            bytes = mDolbyFile->Read((uint8_t*)(&mDolbyBuffer[1]), 4);
+            if (bytes != 4)
+                goto silence;
+
+            // check sync header data for 6 audio blocks
+            // we only do one dd+ frame per burst which must be 6 blocks
+            if ((mDolbyBuffer[2] & 0x00c0) != 0x0000)
+                goto silence;
+
+            // get frame size - 16 bit words plus sync word
+            uint32_t size = (uint32_t)mDolbyBuffer[1];
+            size = (((size & 0x00ff) << 8) | ((size & 0xff00) >> 8)) + 1;
+
+            // read the rest of the sync frame
+            uint32_t len = (size - 3) * 2;
+            bytes = mDolbyFile->Read((uint8_t*)(&mDolbyBuffer[3]), len);
+            if (bytes != len)
+                goto silence;
+
+            // good frame
+            mDolbyOffset = 0;
+            mDolbySize = size;
+        }
+
+        // add the dd+ data to the audio stream
+        if (mDolbyOffset < mDolbySize)
+        {
+            uint32_t data0 = 0;
+            uint32_t data1 = 0;
+            if (mBurstOffset == 0)
+            {
+                // add iec61937 burst preamble
+                data0 = 0xf872;  // sync stuff
+                data1 = 0x4e1f;
+            }
+            else if (mBurstOffset == 1)
+            {
+                // add more iec61937 burst preamble
+                data0 = 0x0015;  // this is dd+
+                data1 = mDolbySize * 2;
+            }
+            else
+            {
+                // add sync frame data
+                data0 = (uint32_t)(mDolbyBuffer[mDolbyOffset]);
+                data0 = ((data0 & 0x00ff) << 8) | ((data0 & 0xff00) >> 8);
+                mDolbyOffset++;
+                data1 = (uint32_t)(mDolbyBuffer[mDolbyOffset]);
+                data1 = ((data1 & 0x00ff) << 8) | ((data1 & 0xff00) >> 8);
+                mDolbyOffset++;
+            }
+
+            // write data into 16 msbs of all audio channel pairs
+            for (uint8_t i = 0; i < numChannels; i += 2)
+            {
+                pInAudioBuffer[sampleOffset * numChannels + i] = data0 << 16;
+                pInAudioBuffer[sampleOffset * numChannels + i + 1] = data1 << 16;
+            }
+        }
+        else
+        {
+            // pad samples out to burst size
+            for (uint8_t i = 0; i < numChannels; i++)
+            {
+                pInAudioBuffer[sampleOffset * numChannels + i] = 0;
+            }
+        }
+        sampleOffset++;
+        mBurstOffset++;
+    }
+
+    return numSamples * numChannels * 4;
+
+silence:
+    // output silence when done with file
+    memset(&pInAudioBuffer[sampleOffset * numChannels], 0, (numSamples - sampleOffset) * numChannels * 4);
+    return numSamples * numChannels * 4;
+}
+

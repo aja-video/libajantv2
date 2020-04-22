@@ -14,6 +14,7 @@
 #include "ntv2democommon.h"
 #include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/thread.h"
+#include "ajabase/system/file_io.h"
 #include "ajaanc/includes/ancillarydata.h"
 
 /**
@@ -45,7 +46,8 @@ class NTV2DolbyPlayer
                                                  const NTV2Channel              inChannel			= NTV2_CHANNEL1,
 												 const NTV2FrameBufferFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
                                                  const NTV2VideoFormat          inVideoFormat		= NTV2_FORMAT_1080i_5994,
-                                                 const bool                     inDoMultiFormat		= false);
+                                                 const bool                     inDoMultiFormat		= false,
+                                                 AJAFileIO*                     inDolbyFile         = NULL);
 
 		virtual					~NTV2DolbyPlayer (void);
 
@@ -134,7 +136,15 @@ class NTV2DolbyPlayer
 		**/
 		virtual uint32_t		AddTone (ULWord * audioBuffer);
 
-	//	Protected Class Methods
+        /**
+             @brief	Inserts dolby audio into the given audio buffer.
+             @param[out]	audioBuffer		Specifies a valid, non-NULL pointer to the buffer that is to receive
+                                            the audio tone data.
+             @return	Total number of bytes written into the buffer.
+         **/
+         virtual uint32_t		AddDolby (ULWord * audioBuffer);
+
+    //	Protected Class Methods
 	protected:
 		/**
 			@brief	This is the consumer thread's static callback function that gets called when the consumer thread starts.
@@ -194,6 +204,13 @@ class NTV2DolbyPlayer
 
 		AVDataBuffer				mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
 		MyCirculateBuffer			mAVCircularBuffer;						///< @brief	My ring buffer
+
+        AJAFileIO *                 mDolbyFile;                 ///< @brief	Dolby audio source file
+        uint16_t *                  mDolbyBuffer;               ///< @brief	Dolby audio file data buffer
+        uint32_t                    mDolbyOffset;               ///< @brief	Dolby audio file data offset
+        uint32_t                    mDolbySize;                 ///< @brief	Dolby audio file data size
+        uint32_t                    mBurstOffset;               ///< @brief	HDMI burst audio offset
+        uint32_t                    mBurstSize;                 ///< @brief	HDMI burst audio size
 
 };	//	NTV2DolbyPlayer
 

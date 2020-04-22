@@ -13,6 +13,7 @@
 #include <iostream>
 #include <iomanip>
 #include "ajabase/system/systemtime.h"
+#include "ajabase/system/file_io.h"
 
 using namespace std;
 
@@ -32,17 +33,21 @@ int main (int argc, const char ** argv)
 	char *			pVideoFormat	(AJA_NULL);	//	Video format argument
 	char *			pPixelFormat	(AJA_NULL);	//	Pixel format argument
     char *			pDeviceSpec 	(AJA_NULL);	//	Device argument
+    char *			pDolbyName   	(AJA_NULL);	//	Dolby audio file name
     uint32_t		channelNumber	(2);		//	Number of the channel to use
 	int				noAudio			(0);		//	Disable audio tone?
 	int				doMultiChannel	(0);		//	Enable multi-format?
 	poptContext		optionsContext; 			//	Context for parsing command line arguments
+    AJAStatus       status;
+
 	AJADebug::Open();
 
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"	},
-		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"which video format to use",	"'?' or 'list' to list"},
+        {"dolbyFile",	'f',	POPT_ARG_STRING,	&pDolbyName,	0,	"dolby audio to play",			"file name"	},
+        {"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"which video format to use",	"'?' or 'list' to list"},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"which pixel format to use",	"'?' or 'list' to list"},
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",			"number of the channel"},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multi-channel/format",		AJA_NULL},
@@ -82,6 +87,16 @@ int main (int argc, const char ** argv)
     if (channelNumber < 2 || channelNumber > 4)
         {cerr << "## ERROR:  Invalid channel number '" << channelNumber << "' -- expected 2 thru 4" << endl;  return 2;}
 
+    AJAFileIO fileIO;
+    AJAFileIO* pDolbyFile = NULL;
+    const string fileStr	(pDolbyName  ?  pDolbyName  :  "");
+    if (!fileStr.empty ())
+    {
+        status = fileIO.Open(pDolbyName, eAJAReadOnly, 0);
+        if (status == AJA_STATUS_SUCCESS)
+            pDolbyFile = &fileIO;
+    }
+
 	const NTV2Channel			channel		(::GetNTV2ChannelForIndex (channelNumber - 1));
 
 	NTV2DolbyPlayer	player (deviceSpec,						//	inDeviceSpecifier
@@ -89,7 +104,8 @@ int main (int argc, const char ** argv)
 							channel,						//	inChannel
 							pixelFormat,					//	inPixelFormat
 							videoFormat,					//	inVideoFormat
-							doMultiChannel ? true : false);	//	inDoMultiFormat
+                            doMultiChannel ? true : false,  //	inDoMultiFormat
+                            pDolbyFile);                    //  inDolbyFile
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)
