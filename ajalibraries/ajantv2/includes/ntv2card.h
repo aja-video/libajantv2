@@ -4378,7 +4378,7 @@ public:
 	AJA_VIRTUAL bool	SetLUTEnable (const bool inEnable, const NTV2Channel inLUT);
 
 	static bool			GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, NTV2DoubleArray & outTable, const NTV2LutBitDepth inBitDepth = NTV2_LUT10Bit);
-	static bool			GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, UWordSequence & outTable);
+	static bool			GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, UWordSequence & outTable, const NTV2LutBitDepth inBitDepth = NTV2_LUT10Bit);
 
 	/**
 		@brief		Writes the LUT tables.

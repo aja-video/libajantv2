@@ -3619,7 +3619,6 @@ typedef enum
 **/
 typedef enum
 {
-   NTV2_LUT8Bit,
    NTV2_LUT10Bit,
    NTV2_LUT12Bit
 } NTV2LutBitDepth;

@@ -635,23 +635,24 @@ static inline ULWord intClamp (const int inMin, const int inValue, const int inM
 	return ULWord(inValue < inMin  ?  inMin  :  (inValue > inMax ? inMax : inValue));
 }
 
-bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, UWordSequence & outTable)
+bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, UWordSequence & outTable, const NTV2LutBitDepth inBitDepth)
 {
 	NTV2DoubleArray dblTable;
 	size_t nonzeroes(0);
-	if (!CNTV2Card::GenerateGammaTable (inLUTType, inBank, dblTable))
+	uint32_t tableSize = inBitDepth == NTV2_LUT10Bit ? 1024 : 4096; 
+	if (!CNTV2Card::GenerateGammaTable (inLUTType, inBank, dblTable, inBitDepth))
 		return false;
-	if (dblTable.size() < 1024)
+	if (dblTable.size() < tableSize)
 		return false;
-	outTable.reserve(1024);
-	while (outTable.size() < 1024)
+	outTable.reserve(tableSize);
+	while (outTable.size() < tableSize)
 		outTable.push_back(0);
-	for (size_t ndx(0);  ndx < 1024;  ndx++)
-		if ((outTable.at(ndx) = UWord(intClamp(0, int(dblTable.at(ndx) + 0.5), 1023))))
+	for (size_t ndx(0);  ndx < tableSize;  ndx++)
+		if ((outTable.at(ndx) = UWord(intClamp(0, int(dblTable.at(ndx) + 0.5), tableSize-1))))
 			nonzeroes++;
-	if (nonzeroes >= 1023)
-		{AJA_sWARNING(AJA_DebugUnit_LUT, AJAFUNC << ": " << DEC(nonzeroes) << " non-zero values -- at least 1023"); return false;}
-	return nonzeroes >= 1023;
+	if (nonzeroes >= tableSize-1)
+		{AJA_sWARNING(AJA_DebugUnit_LUT, AJAFUNC << ": " << DEC(nonzeroes) << " non-zero values -- at least " << DEC(tableSize-1)); return false;}
+	return nonzeroes >= tableSize-1;
 }
 
 static const NTV2ColorCorrectionHostAccessBank	gLUTBank0[] =
