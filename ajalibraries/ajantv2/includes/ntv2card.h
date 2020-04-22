@@ -614,17 +614,19 @@ public:
 											 PCHANNEL_P2P_STRUCT pP2PData);		// p2p target data
 
 	/**
-		@brief		Transfers audio data from a given Audio System's buffer memory on the AJA device to the specified host buffer.
-					It will happily read audio samples from either the capture side or playout side of the Audio System's buffer memory.
+		@brief		Synchronously transfers audio data from a given Audio System's buffer memory on the AJA device to the specified host
+					buffer, blocking until the transfer has completed.
 		@param[in]	inAudioEngine		Specifies the Audio System on the device that is to supply the audio data.
 		@param		pOutAudioBuffer		Specifies a valid, non-NULL pointer to the host buffer that is to receive the audio data.
 										This buffer must be large enough to accommodate "inByteCount" bytes of data specified (below).
 		@param[in]	inOffsetBytes		Specifies the offset into the Audio System's buffer memory on the device from which to transfer
-										audio data. The start of the capture portion of the Audio System's audio buffer is at the offset
-										value returned from CNTV2Card::GetAudioReadOffset.
+										audio data. Specify zero to start reading from the device audio output (playout) buffer.
+										Specify the value returned from CNTV2Card::GetAudioReadOffset (0x00400000) to start reading from
+										the audio input (capture) portion of the Audio System's audio buffer.
 		@param[in]	inByteCount			Specifies the number of audio bytes to transfer.
 		@return		True if successful; otherwise false.
-		@note		This function will block and not return until the transfer has finished or failed.
+		@note		This function can also be used to read audio samples from the output (playout) portion of the Audio System's buffer
+					memory.
 	**/
 	AJA_VIRTUAL bool	DMAReadAudio (	const NTV2AudioSystem	inAudioEngine,
 										ULWord *				pOutAudioBuffer,
@@ -632,18 +634,19 @@ public:
 										const ULWord			inByteCount);
 
 	/**
-		@brief		Transfers audio data from the specified host buffer to the given Audio System's buffer memory on the AJA device.
-					It will happily write audio samples into the capture portion of the Audio System's buffer memory (which will
-					quickly be overwritten if the capture engine has been started).
+		@brief		Synchronously transfers audio data from the specified host buffer to the given Audio System's buffer memory
+					on the AJA device, blocking until the transfer has completed.
 		@param[in]	inAudioEngine		Specifies the Audio System on the device that is to receive the audio data.
 		@param[in]	pInAudioBuffer		Specifies a valid, non-NULL pointer to the host buffer that is to supply the audio data.
 		@param[in]	inOffsetBytes		Specifies the offset into the Audio System's buffer memory on the device to which audio data
 										will be transferred. Use zero for the start of the playout portion of the Audio System's buffer
-										memory.
+										memory. Specifying 0 will start writing at the start of the device audio output (playout) buffer;
+										specifying 0x00400000 will start writing at the start of the audio input (capture) buffer.
 		@param[in]	inByteCount			Specifies the number of audio bytes to transfer. Note that this value must not overrun the host
-										buffer, nor the device's audio playout buffer.
+										buffer, nor the device's audio buffer.
 		@return		True if successful; otherwise false.
-		@note		This function will block and not return until the transfer has finished or failed.
+		@note		This function can also be used to write audio samples into the capture portion of the Audio System's buffer
+					memory (which will quickly be overwritten if the capture engine has been started).
 	**/
 	AJA_VIRTUAL bool	DMAWriteAudio (	const NTV2AudioSystem	inAudioEngine,
 										const ULWord *			pInAudioBuffer,
