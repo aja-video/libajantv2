@@ -151,6 +151,7 @@ void NTV2DolbyPlayer::Quit (void)
 
     mDevice.SetAudioRate (NTV2_AUDIO_48K, mAudioSystem);
     mDevice.SetHDMIOutAudioRate(NTV2_AUDIO_48K);
+	mDevice.SetHDMIOutAudioFormat(NTV2_AUDIO_FORMAT_LPCM);
 }	//	Quit
 
 
@@ -280,6 +281,8 @@ AJAStatus NTV2DolbyPlayer::SetUpAudio ()
     mDevice.SetHDMIOutAudioSource2Channel (NTV2_AudioChannel1_2, mAudioSystem);
 
     mDevice.SetHDMIOutAudioRate(mAudioRate);
+
+	mDevice.SetHDMIOutAudioFormat((mDolbyFile != NULL)? NTV2_AUDIO_FORMAT_DOLBY : NTV2_AUDIO_FORMAT_LPCM);
 
 	//	If the last app using the device left it in end-to-end mode (input passthru),
 	//	then loopback must be disabled, or else the output will contain whatever audio
@@ -654,7 +657,13 @@ uint32_t NTV2DolbyPlayer::AddDolby (ULWord * pInAudioBuffer)
             // read the sync word (all big endian)
             uint32_t bytes = mDolbyFile->Read((uint8_t*)(&mDolbyBuffer[0]), 2);
             if (bytes != 2)
-                goto silence;
+			{
+				// try to loop
+				mDolbyFile->Seek(0, eAJASeekSet);
+				bytes = mDolbyFile->Read((uint8_t*)(&mDolbyBuffer[0]), 2);
+				if (bytes != 2)
+					goto silence;
+			}
 
             // check sync word
             if ((mDolbyBuffer[0] != 0x7705) &&
