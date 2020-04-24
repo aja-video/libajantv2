@@ -28,7 +28,7 @@ NTV2LLBurn::NTV2LLBurn (const string &				inDeviceSpecifier,
 						const bool					inDoMultiChannel,
 						const bool					inWithAnc)
 
-	:	mRunThread				(AJA_NULL),
+	:	mRunThread				(AJAThread()),
 		mDeviceID				(DEVICE_ID_NOTFOUND),
 		mDeviceSpecifier		(inDeviceSpecifier),
 		mWithAudio				(inWithAudio),
@@ -56,9 +56,6 @@ NTV2LLBurn::~NTV2LLBurn ()
 	//	Stop my capture and playout threads, then destroy them...
 	Quit ();
 
-	delete mRunThread;
-	mRunThread = AJA_NULL;
-
 	//	Unsubscribe from input vertical event...
 	mDevice.UnsubscribeInputVerticalEvent (mInputChannel);
 
@@ -80,9 +77,8 @@ void NTV2LLBurn::Quit (void)
 	//	Set the global 'quit' flag, and wait for the thread to go inactive...
 	mGlobalQuit = true;
 
-	if (mRunThread)
-		while (mRunThread->Active ())
-			AJATime::Sleep (10);
+	while (mRunThread.Active())
+		AJATime::Sleep(10);
 
 }	//	Quit
 
@@ -476,10 +472,9 @@ AJAStatus NTV2LLBurn::Run ()
 void NTV2LLBurn::StartRunThread (void)
 {
 	//	Create and start the worker thread...
-	mRunThread = new AJAThread ();
-	mRunThread->Attach (RunThreadStatic, this);
-	mRunThread->SetPriority (AJA_ThreadPriority_High);
-	mRunThread->Start ();
+	mRunThread.Attach(RunThreadStatic, this);
+	mRunThread.SetPriority(AJA_ThreadPriority_High);
+	mRunThread.Start();
 
 }	//	StartRunThread
 
@@ -806,7 +801,7 @@ bool NTV2LLBurn::AnalogLTCInputHasTimecode (void)
 	{
 		case NTV2_TCINDEX_LTC1:										break;
 		case NTV2_TCINDEX_LTC2:	regMask = kRegMaskLTC2InPresent;	break;
-		default:				return false;						break;
+		default:				return false;
 	}
 	mDevice.ReadRegister (kRegLTCStatusControl, regValue, regMask);
 	return regValue ? true : false;

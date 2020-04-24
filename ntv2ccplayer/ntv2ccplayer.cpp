@@ -246,7 +246,7 @@ AJALabelValuePairs CCPlayerConfig::Get (const bool inCompact) const
 	AJASystemInfo::append(result, "Suppress 608 Pkt",	fSuppress608 ? "Y" : "N");
 	AJASystemInfo::append(result, "Suppress 708 Pkt",	fSuppress708 ? "Y" : "N");
 	AJASystemInfo::append(result, "Suppress Timecode",	fSuppressTimecode ? "Y" : "N");
-	for (CaptionChanGenMapConstIter it(fChannelGenerators.begin());  it != fChannelGenerators.end();  ++it)
+	for (CaptionChanGenMapCIter it(fChannelGenerators.begin());  it != fChannelGenerators.end();  ++it)
 	{
 		AJASystemInfo::append(result, ::NTV2Line21ChannelToStr(it->first, false));
 		AJALabelValuePairs pairs(it->second.Get());
@@ -859,12 +859,10 @@ static CaptionSourceList GetCaptionSources (const NTV2StringList & inFilesToPlay
 
 
 
-static NTV2CCPlayer *	gApp	(AJA_NULL);
-
-
 NTV2CCPlayer::NTV2CCPlayer (const CCPlayerConfig & inConfigData)
 	:	mConfig					(inConfigData),
-		mPlayThread				(AJA_NULL),
+		mPlayThread				(),
+		mGeneratorThreads		(),
 		mDeviceID				(DEVICE_ID_NOTFOUND),
 		mSavedTaskMode			(NTV2_DISABLE_TASKS),
 		mVancMode				(NTV2_VANCMODE_OFF),
@@ -874,9 +872,8 @@ NTV2CCPlayer::NTV2CCPlayer (const CCPlayerConfig & inConfigData)
 		mActiveFrameStores		(),
 		mConnections			()
 {
-	::memset (mGeneratorThreads, 0, sizeof(mGeneratorThreads));
 	NTV2_ASSERT(!mConfig.fChannelGenerators.empty());
-	gApp = this;
+	mGeneratorThreads.resize(size_t(NTV2_CC608_XDS));
 }	//	constructor
 
 
@@ -899,16 +896,11 @@ void NTV2CCPlayer::Quit (const bool inQuitImmediately)
 {
 	//	Kill the caption generators first...
 	mCaptionGeneratorQuit = true;
-	for (unsigned ccChannel (NTV2_CC608_CC1);  ccChannel < NTV2_CC608_XDS;  ccChannel++)
+	while (!mGeneratorThreads.empty())
 	{
-		AJAThread *	pThread	(mGeneratorThreads [ccChannel]);
-		if (pThread)
-		{
-			while (pThread->Active())
-				AJATime::Sleep(10);
-			delete pThread;
-			mGeneratorThreads[ccChannel] = AJA_NULL;
-		}
+		while (mGeneratorThreads.back().Active())
+			AJATime::Sleep(10);
+		mGeneratorThreads.pop_back();
 	}
 
 	if (m608Encoder)
@@ -930,13 +922,8 @@ void NTV2CCPlayer::Quit (const bool inQuitImmediately)
 	}
 
 	mPlayerQuit = true;
-	if (mPlayThread)
-	{
-		while (mPlayThread->Active())
-			AJATime::Sleep(10);
-		delete mPlayThread;
-		mPlayThread = AJA_NULL;
-	}
+	while (mPlayThread.Active())
+		AJATime::Sleep(10);
 	mDevice.RemoveConnections(mConnections);
 
 }	//	Quit
@@ -1229,7 +1216,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 	//	Does device have RGB conversion capability for the desired channel?
 	if (UWord(mConfig.fOutputChannel) > ::NTV2DeviceGetNumCSCs(mDeviceID))
 		{cerr << "## ERROR:  No CSC for channel " << (mConfig.fOutputChannel+1) << endl;  return AJA_STATUS_UNSUPPORTED;}
-/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ClearRouting();
+	//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ClearRouting();
 
 	mDevice.SetSDITransmitEnable(sdiOuts, true);
 	if (isRGBFBF && isRGBWire)
@@ -1240,7 +1227,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/false),  ::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/false)));
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/true),  ::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/true)));
 				mConnections.insert(NTV2XptConnection(::GetDLOutInputXptFromChannel(sdiOut),  ::GetFrameBufferOutputXptFromChannel(frmSt,  true/*isRGB*/,  false/*is425*/)));
-/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
+				//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 				//  Disable SDI output conversions
 				mDevice.SetSDIOutLevelAtoLevelBConversion(sdiOut, false);
 				mDevice.SetSDIOutRGBLevelAConversion(sdiOut, false);
@@ -1258,7 +1245,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 				mConnections.insert(NTV2XptConnection(::GetDLOutInputXptFromChannel(sdiOut),			::GetTSIMuxOutputXptFromChannel(tsiMux, /*isLinkB*/(ndx & 1) > 0, /*isRGB*/true)));
 				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux,/*linkB?*/false), ::GetFrameBufferOutputXptFromChannel(frmSt,  true/*isRGB*/,  false/*is425*/)));
 				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux,/*linkB?*/true), ::GetFrameBufferOutputXptFromChannel(frmSt,  true/*isRGB*/,  true/*is425*/)));
-/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
+				//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 			}
 		}
 	}
@@ -1269,7 +1256,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 			{	NTV2Channel frmStore(frameStores.at(ndx)), sdiOut(sdiOutputs.at(ndx));
 				mConnections.insert(NTV2XptConnection(::GetCSCInputXptFromChannel(frmStore),::GetFrameBufferOutputXptFromChannel(frmStore, /*isRGB*/true, /*is425*/false)));
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut),		::GetCSCOutputXptFromChannel(frmStore)));
-/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
+				//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 				//  Disable SDI output conversions
 				mDevice.SetSDIOutLevelAtoLevelBConversion(sdiOut, false);
 				mDevice.SetSDIOutRGBLevelAConversion(sdiOut, false);
@@ -1284,7 +1271,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/true),			::GetCSCOutputXptFromChannel(NTV2Channel(firstCSC+2*ndx+1))));
 				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(frmStore,/*linkB?*/false),  ::GetFrameBufferOutputXptFromChannel(frmStore,  true/*isRGB*/,  false/*is425*/)));
 				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(frmStore,/*linkB?*/true),   ::GetFrameBufferOutputXptFromChannel(frmStore,  true/*isRGB*/,  true/*is425*/)));
-/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
+				//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 			}
 	}
 	else if (!isRGBFBF && isRGBWire)
@@ -1296,7 +1283,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 				mConnections.insert(NTV2XptConnection(::GetDLOutInputXptFromChannel(sdiOut),					::GetCSCOutputXptFromChannel(frmSt, /*isKey*/false, /*isRGB*/true)));
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/false),			::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/false)));
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/true),			::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/true)));
-/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
+				//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 				//  Disable SDI output conversions
 				mDevice.SetSDIOutLevelAtoLevelBConversion(sdiOut, false);
 				mDevice.SetSDIOutRGBLevelAConversion(sdiOut, false);
@@ -1315,7 +1302,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 				mConnections.insert(NTV2XptConnection(::GetDLOutInputXptFromChannel(sdiOut),			::GetCSCOutputXptFromChannel(NTV2Channel(sdiOut),/*isKey*/false,/*isRGB*/true)));
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/false),	::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/false)));
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/true),	::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/true)));
-/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
+				//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 			}
 		}
 	}
@@ -1325,7 +1312,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx)), sdiOut(sdiOutputs.at(ndx));
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut),  ::GetFrameBufferOutputXptFromChannel(frmSt)));
-/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
+				//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 				//  Disable SDI output conversions
 				mDevice.SetSDIOutLevelAtoLevelBConversion(sdiOut, false);
 				mDevice.SetSDIOutRGBLevelAConversion(sdiOut, false);
@@ -1349,7 +1336,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 													::GetFrameBufferOutputXptFromChannel(frmSt, /*RGB?*/false,  /*425?*/false)));
 				mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux,/*linkB?*/true),
 													::GetFrameBufferOutputXptFromChannel(frmSt, /*RGB?*/false,  /*425?*/true)));
-/*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
+				//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 			}
 		}
 	}
@@ -1373,42 +1360,52 @@ AJAStatus NTV2CCPlayer::Run ()
 //	Caption generator thread
 //////////////////////////////////////////////
 
+class CapGenStartInfo
+{	public:
+		NTV2CCPlayer *		fpPlayer;
+		NTV2Line21Channel	fCapChannel;
+		uint32_t			fSpare;
+		explicit CapGenStartInfo (NTV2CCPlayer * pPlayer, const NTV2Line21Channel inCapChan)
+			:	fpPlayer(pPlayer), fCapChannel(inCapChan)
+			{}
+};
+
 
 void NTV2CCPlayer::StartCaptionGeneratorThreads ()
 {
 	//	Create and start the caption generator threads, one per caption channel...
-	for (CaptionChanGenMapConstIter iter (mConfig.fChannelGenerators.begin ());  iter != mConfig.fChannelGenerators.end ();  ++iter)
+	for (CaptionChanGenMapCIter it(mConfig.fChannelGenerators.begin());  it != mConfig.fChannelGenerators.end();  ++it)
 	{
-		const CCGeneratorConfig &	ccGeneratorConfig	(iter->second);
-		const size_t				ccChannel			(ccGeneratorConfig.fCaptionChannel);
-		AJAThread *					pThread				(new AJAThread ());
-		if (pThread)
-		{
-			mGeneratorThreads [ccChannel] = pThread;
-			pThread->Attach (CaptionGeneratorThreadStatic, reinterpret_cast<void*>(ccChannel));	//	The generator thread needs to know its caption channel
-			pThread->Start ();
-		}
+		const CCGeneratorConfig &	genConfig (it->second);
+		AJAThread &	genThread (mGeneratorThreads.at(size_t(genConfig.fCaptionChannel)));
+		//	The generator thread needs to know the NTV2CCPlayer instance, and the caption channel:
+		genThread.Attach(CaptionGeneratorThreadStatic,
+						reinterpret_cast<void*>(new CapGenStartInfo(this, genConfig.fCaptionChannel)));
+		genThread.Start();
 	}
-
 }	//	StartCaptionGeneratorThreads
 
 
-void NTV2CCPlayer::CaptionGeneratorThreadStatic (AJAThread * pThread, void * pContext)
-{
-	(void) pThread;
-	const size_t	ccChannel	(reinterpret_cast<size_t>(pContext));
+void NTV2CCPlayer::CaptionGeneratorThreadStatic (AJAThread * pThread, void * pContext)		//	STATIC
+{	(void) pThread;
+	//	Extract all the startup info I need...
+	const CapGenStartInfo * pStartInfo (reinterpret_cast<CapGenStartInfo*>(pContext));
+	NTV2_ASSERT(pStartInfo);
+	NTV2CCPlayer * pApp (pStartInfo->fpPlayer);
+	NTV2_ASSERT(pApp);
+	const NTV2Line21Channel captionChannel (pStartInfo->fCapChannel);
+	NTV2_ASSERT(IsValidLine21Channel(captionChannel));
+	delete pStartInfo;	//	Done with it, free it
 
-	//	Grab the NTV2CCPlayer instance pointer from the gApp global, call its GenerateCaptions method,
-	//	and pass it the given caption channel (passed in via the pContext parameter)...
-	if (gApp)
-		gApp->GenerateCaptions (NTV2Line21Channel (ccChannel));
+	//	Start generating captions for the given caption channel...
+	pApp->GenerateCaptions(captionChannel);
 
 }	//	CaptionGeneratorThreadStatic
 
 
 void NTV2CCPlayer::GenerateCaptions (const NTV2Line21Channel inCCChannel)
 {
-	CaptionChanGenMapConstIter	iter(mConfig.fChannelGenerators.find(inCCChannel));
+	CaptionChanGenMapCIter	iter(mConfig.fChannelGenerators.find(inCCChannel));
 	NTV2_ASSERT(iter != mConfig.fChannelGenerators.end());
 
 	const CCGeneratorConfig &	ccGeneratorConfig	(iter->second);
@@ -1432,7 +1429,7 @@ void NTV2CCPlayer::GenerateCaptions (const NTV2Line21Channel inCCChannel)
 		CaptionSourceList	captionSources(::GetCaptionSources(filesToPlay, charsPerMinute));
 		while (!mCaptionGeneratorQuit  &&  !captionSources.empty())
 		{
-			CaptionSourcePtr	captionSource(captionSources.front());
+			CaptionSourcePtr captionSource(captionSources.front());
 			captionSources.pop_front();
 
 			//	Set CaptionSource to Text Mode if caption channel is TX1/TX2/TX3/TX4...
@@ -1535,24 +1532,19 @@ void NTV2CCPlayer::GenerateCaptions (const NTV2Line21Channel inCCChannel)
 void NTV2CCPlayer::StartPlayoutThread ()
 {
 	//	Create and start the playout thread...
-	NTV2_ASSERT (mPlayThread == NULL);
-	mPlayThread = new AJAThread ();
-	mPlayThread->Attach (PlayThreadStatic, this);
-	mPlayThread->SetPriority (AJA_ThreadPriority_High);
-	mPlayThread->Start ();
-
+	mPlayThread.Attach(PlayThreadStatic, this);
+	mPlayThread.SetPriority(AJA_ThreadPriority_High);
+	mPlayThread.Start();
 }	//	StartPlayoutThread
 
 
 //	The playout thread function
 void NTV2CCPlayer::PlayThreadStatic (AJAThread * pThread, void * pContext)		//	static
-{
-	(void) pThread;
+{	(void) pThread;
 	//	Grab the NTV2CCPlayer instance pointer from the pContext parameter,
 	//	then call its PlayoutFrames method...
-	NTV2CCPlayer *	pApp	(reinterpret_cast <NTV2CCPlayer *> (pContext));
+	NTV2CCPlayer *	pApp (reinterpret_cast<NTV2CCPlayer*>(pContext));
 	pApp->PlayoutFrames ();
-
 }	//	PlayThreadStatic
 
 

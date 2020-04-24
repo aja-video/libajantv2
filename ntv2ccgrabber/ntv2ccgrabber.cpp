@@ -37,7 +37,7 @@ static const uint32_t				MAX_ACCUM_FRAME_COUNT		(30);	//	At least every second?
 NTV2CCGrabber::NTV2CCGrabber (const CCGrabberConfig & inConfigData)
 
 	:	mConfig				(inConfigData),
-		mCaptureThread		(AJA_NULL),
+		mCaptureThread		(AJAThread()),
 		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mSavedTaskMode		(NTV2_DISABLE_TASKS),
 		mAudioSystem		(mConfig.fCaptureAudio ? NTV2_AUDIOSYSTEM_1 : NTV2_AUDIOSYSTEM_INVALID),
@@ -62,7 +62,7 @@ NTV2CCGrabber::NTV2CCGrabber (const CCGrabberConfig & inConfigData)
 		mHeadUpDisplayOn	(true),
 		mOutputChannel		(NTV2_CHANNEL_INVALID),
 		mPlayoutFBF			(NTV2_FBF_ARGB),
-		mPlayoutThread		(AJA_NULL),
+		mPlayoutThread		(AJAThread()),
 		mOutputConnections	()
 {
 	::memset (mAVHostBuffer, 0x0, sizeof (mAVHostBuffer));
@@ -81,9 +81,6 @@ NTV2CCGrabber::~NTV2CCGrabber ()
 
 	//	Stop my capture thread, then destroy it...
 	Quit();
-
-	delete mCaptureThread;
-	mCaptureThread = AJA_NULL;
 
 	//	Unsubscribe from input vertical event...
 	mDevice.UnsubscribeInputVerticalEvent(mInputFrameStores);
@@ -105,13 +102,11 @@ void NTV2CCGrabber::Quit (void)
 	//	Set the 'quit' flag, and wait for the threads to go inactive...
 	mGlobalQuit = true;
 
-	if (mCaptureThread)
-		while (mCaptureThread->Active())
-			AJATime::Sleep(10);
+	while (mCaptureThread.Active())
+		AJATime::Sleep(10);
 
-	if (mPlayoutThread)
-		while (mPlayoutThread->Active())
-			AJATime::Sleep(10);
+	while (mPlayoutThread.Active())
+		AJATime::Sleep(10);
 
 	if (!mConfig.fDoMultiFormat)
 		mDevice.ClearRouting();
@@ -587,10 +582,9 @@ AJAStatus NTV2CCGrabber::Run ()
 void NTV2CCGrabber::StartCaptureThread (void)
 {
 	//	Create and start the capture thread...
-	mCaptureThread = new AJAThread ();
-	mCaptureThread->Attach (CaptureThreadStatic, this);
-	mCaptureThread->SetPriority (AJA_ThreadPriority_High);
-	mCaptureThread->Start ();
+	mCaptureThread.Attach(CaptureThreadStatic, this);
+	mCaptureThread.SetPriority(AJA_ThreadPriority_High);
+	mCaptureThread.Start ();
 
 }	//	StartCaptureThread
 
@@ -1309,11 +1303,10 @@ void NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 void NTV2CCGrabber::StartPlayThread (void)
 {
 	//	Create and start the playout thread...
-	NTV2_ASSERT (mConfig.fBurnCaptions);
-	mPlayoutThread = new AJAThread ();
-	mPlayoutThread->Attach (PlayThreadStatic, this);
-	mPlayoutThread->SetPriority (AJA_ThreadPriority_High);
-	mPlayoutThread->Start ();
+	NTV2_ASSERT(mConfig.fBurnCaptions);
+	mPlayoutThread.Attach(PlayThreadStatic, this);
+	mPlayoutThread.SetPriority(AJA_ThreadPriority_High);
+	mPlayoutThread.Start();
 
 }	//	StartPlayThread
 

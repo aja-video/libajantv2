@@ -165,7 +165,7 @@ class NTV2CCGrabber
 		/**
 			@brief	Returns true if my play thread is currently running.
 		**/
-		virtual inline bool		IsPlayThreadRunning (void) const						{return mPlayoutThread && mPlayoutThread->Active ();}
+		virtual inline bool		IsPlayThreadRunning (void) const		{return mPlayoutThread.Active();}
 
 		/**
 			@brief	Starts my playout thread.
@@ -176,7 +176,7 @@ class NTV2CCGrabber
 			@brief	Toggles the Head-Up-Display.
 			@note	This only affects caption burn-in.
 		**/
-		virtual inline void		ToggleHUD (void)										{mHeadUpDisplayOn = !mHeadUpDisplayOn;}
+		virtual inline void		ToggleHUD (void)						{mHeadUpDisplayOn = !mHeadUpDisplayOn;}
 
 		virtual void			ToggleVANC (void);			///< @brief	Toggles the use of VANC. (Debug, experimental)
 		virtual void			SwitchOutput(void);			///< @brief	Switches/rotates --output mode.
@@ -318,7 +318,7 @@ class NTV2CCGrabber
 	//	Instance Data
 	private:
 		CCGrabberConfig				mConfig;			///< @brief	My configuration
-		AJAThread *					mCaptureThread;		///< @brief	My capture thread object
+		AJAThread					mCaptureThread;		///< @brief	My capture thread object
 		CNTV2Card					mDevice;			///< @brief	My CNTV2Card instance
 		NTV2DeviceID				mDeviceID;			///< @brief	Keep device ID handy
 		NTV2EveryFrameTaskMode		mSavedTaskMode;		///< @brief	Used to restore the previous task mode
@@ -354,7 +354,7 @@ class NTV2CCGrabber
 		bool						mHeadUpDisplayOn;	///< @brief	True if the HUD is being displayed
 		NTV2Channel					mOutputChannel;		///< @brief	My playout channel -- determines SDI output spigot to use
 		NTV2FrameBufferFormat		mPlayoutFBF;		///< @brief	My caption frame store's pixel format
-		AJAThread *					mPlayoutThread;		///< @brief	My playout thread object
+		mutable AJAThread			mPlayoutThread;		///< @brief	My playout thread object
 		NTV2ChannelSet				mOutputFrameStores;	///< @brief	My output FrameStores
 		NTV2XptConnections			mOutputConnections;	///< @brief	Output routing connections
 

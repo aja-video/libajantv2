@@ -45,8 +45,8 @@ static const uint32_t	AUDIOBYTES_MAX_48K	(201 * 1024);
 
 NTV2Player4K::NTV2Player4K (const Player4KConfig & inConfig)
 	:	mConfig				(inConfig),
-		mConsumerThread		(AJA_NULL),
-		mProducerThread		(AJA_NULL),
+		mConsumerThread		(AJAThread()),
+		mProducerThread		(AJAThread()),
 		mCurrentFrame		(0),
 		mCurrentSample		(0),
 		mToneFrequency		(440.0),
@@ -64,12 +64,7 @@ NTV2Player4K::~NTV2Player4K (void)
 
 	mDevice.UnsubscribeOutputVerticalEvent(NTV2_CHANNEL1);
 
-	//	Free my threads and buffers...
-	delete mConsumerThread;
-	mConsumerThread = AJA_NULL;
-	delete mProducerThread;
-	mProducerThread = AJA_NULL;
-
+	//	Free my buffers...
 	if (mTestPatternBuffers)
 	{
 		for (uint32_t ndx(0);  ndx < mNumTestPatterns;  ndx++)
@@ -100,13 +95,11 @@ void NTV2Player4K::Quit (void)
 	//	Set the global 'quit' flag, and wait for the threads to go inactive...
 	mGlobalQuit = true;
 
-	if (mProducerThread)
-		while (mProducerThread->Active())
-			AJATime::Sleep(10);
+	while (mProducerThread.Active())
+		AJATime::Sleep(10);
 
-	if (mConsumerThread)
-		while (mConsumerThread->Active())
-			AJATime::Sleep(10);
+	while (mConsumerThread.Active())
+		AJATime::Sleep(10);
 
 }	//	Quit
 
@@ -576,33 +569,26 @@ void NTV2Player4K::RouteOutputSignal (void)
 
 }	//	RouteOutputSignal
 
-void NTV2Player4K::SetupSDITransmitters(const NTV2Channel startChannel, const uint32_t numChannels)
+void NTV2Player4K::SetupSDITransmitters (const NTV2Channel inStartChannel, const uint32_t inNumChannels)
 {
-	//	Enable SDI output from all channels,
-	//	but only if the device supports bi-directional SDI.
-	if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
-	{
-		if (::NTV2DeviceCanDo12gRouting(mDeviceID))
-		{
-			mDevice.SetSDITransmitEnable (startChannel, true);
-		}
-		else
-		{
-			for(uint32_t i = (uint32_t)startChannel; i < ((uint32_t)startChannel+numChannels); i++)
-				mDevice.SetSDITransmitEnable((NTV2Channel)i, true);
-		}
-	}
+	//	Enable SDI output from all channels...
+	if (!::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
+		return;	//	...but only if the device supports bi-directional SDI
+
+	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+		mDevice.SetSDITransmitEnable (inStartChannel, true);
+	else
+		for (NTV2Channel ch(inStartChannel);  ch < NTV2Channel(inStartChannel+inNumChannels);  ch = NTV2Channel(ch+1))
+			mDevice.SetSDITransmitEnable(ch, true);
 }
 
 
 void NTV2Player4K::Route4KDownConverter (void)
 {
-	const bool			isRGB			(::IsRGBFormat(mConfig.fPixelFormat));
-
-	if ( ! ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_Wgt4KDownConverter) || ! ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtSDIMonOut1))
+	if (!::NTV2DeviceCanDoWidget(mDeviceID, NTV2_Wgt4KDownConverter)  ||  !::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtSDIMonOut1))
 		return;
 
-	if (isRGB)
+	if (::IsRGBFormat(mConfig.fPixelFormat))
 	{
 		mDevice.Enable4KDCRGBMode(true);
 
@@ -627,7 +613,7 @@ void NTV2Player4K::Route4KDownConverter (void)
 			mDevice.Connect (NTV2_XptSDIOut5Input, NTV2_XptCSC5VidYUV);
 		}
 	}
-	else	//	!RGB
+	else	//	YUV FBF
 	{
 		mDevice.Enable4KDCRGBMode (false);
 
@@ -1143,19 +1129,16 @@ AJAStatus NTV2Player4K::Run (void)
 void NTV2Player4K::StartConsumerThread (void)
 {
 	//	Create and start the playout thread...
-	mConsumerThread = new AJAThread ();
-	mConsumerThread->Attach (PlayThreadStatic, this);
-	mConsumerThread->SetPriority (AJA_ThreadPriority_High);
-	mConsumerThread->Start ();
+	mConsumerThread.Attach(PlayThreadStatic, this);
+	mConsumerThread.SetPriority(AJA_ThreadPriority_High);
+	mConsumerThread.Start();
 
 }	//	StartPlayThread
 
 
 //	The playout thread function
 void NTV2Player4K::PlayThreadStatic (AJAThread * pThread, void * pContext)		//	static
-{
-	(void) pThread;
-
+{	(void) pThread;
 	//	Grab the NTV2Player4K instance pointer from the pContext parameter,
 	//	then call its PlayFrames method...
 	NTV2Player4K *	pApp (reinterpret_cast<NTV2Player4K*>(pContext));
@@ -1284,10 +1267,9 @@ void NTV2Player4K::ConsumeFrames (void)
 void NTV2Player4K::StartProducerThread (void)
 {
 	//	Create and start the producer thread...
-	mProducerThread = new AJAThread ();
-	mProducerThread->Attach (ProduceFrameThreadStatic, this);
-	mProducerThread->SetPriority (AJA_ThreadPriority_High);
-	mProducerThread->Start ();
+	mProducerThread.Attach(ProduceFrameThreadStatic, this);
+	mProducerThread.SetPriority(AJA_ThreadPriority_High);
+	mProducerThread.Start();
 
 }	//	StartProduceFrameThread
 

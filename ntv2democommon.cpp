@@ -338,7 +338,6 @@ class DemoCommonInitializer
 				{
 					string tpName(tpNames.at(tp));
 					aja::replace(aja::replace(aja::replace(tpName, " ", ""), "%", ""), "_", "");
-//					gString2TestPatternMap.insert(String2TestPatternPair(tpName, tp));
 					gString2TestPatternMap.insert(String2TestPatternPair(aja::lower(tpName), tp));
 					ostringstream oss; oss << DEC(tp);
 					gString2TestPatternMap.insert(String2TestPatternPair(oss.str(), tp));

@@ -32,8 +32,8 @@ NTV2Burn::NTV2Burn (const string &				inDeviceSpecifier,
 					const NTV2TCIndex			inTCSource,
 					const bool					inWithAnc)
 
-	:	mPlayThread			(AJA_NULL),
-		mCaptureThread		(AJA_NULL),
+	:	mPlayThread			(AJAThread()),
+		mCaptureThread		(AJAThread()),
 		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mDeviceSpecifier	(inDeviceSpecifier),
 		mInputChannel		(NTV2_CHANNEL_INVALID),
@@ -60,12 +60,6 @@ NTV2Burn::~NTV2Burn ()
 {
 	//	Stop my capture and playout threads, then destroy them...
 	Quit ();
-
-	delete mPlayThread;
-	mPlayThread = AJA_NULL;
-
-	delete mCaptureThread;
-	mCaptureThread = AJA_NULL;
 
 	//	Unsubscribe from input vertical event...
 	mDevice.UnsubscribeInputVerticalEvent (mInputChannel);
@@ -99,13 +93,11 @@ void NTV2Burn::Quit (void)
 	//	Set the global 'quit' flag, and wait for the threads to go inactive...
 	mGlobalQuit = true;
 
-	if (mPlayThread)
-		while (mPlayThread->Active ())
-			AJATime::Sleep (10);
+	while (mPlayThread.Active())
+		AJATime::Sleep(10);
 
-	if (mCaptureThread)
-		while (mCaptureThread->Active ())
-			AJATime::Sleep (10);
+	while (mCaptureThread.Active())
+		AJATime::Sleep(10);
 
 }	//	Quit
 
@@ -511,8 +503,8 @@ void NTV2Burn::RouteOutputSignal (void)
 AJAStatus NTV2Burn::Run ()
 {
 	//	Start the playout and capture threads...
-	StartPlayThread ();
-	StartCaptureThread ();
+	StartPlayThread();
+	StartCaptureThread();
 	return AJA_STATUS_SUCCESS;
 
 }	//	Run
@@ -525,22 +517,20 @@ AJAStatus NTV2Burn::Run ()
 void NTV2Burn::StartPlayThread (void)
 {
 	//	Create and start the playout thread...
-	mPlayThread = new AJAThread ();
-	mPlayThread->Attach (PlayThreadStatic, this);
-	mPlayThread->SetPriority (AJA_ThreadPriority_High);
-	mPlayThread->Start ();
+	mPlayThread.Attach(PlayThreadStatic, this);
+	mPlayThread.SetPriority(AJA_ThreadPriority_High);
+	mPlayThread.Start();
 
 }	//	StartPlayThread
 
 
 //	The playout thread function
 void NTV2Burn::PlayThreadStatic (AJAThread * pThread, void * pContext)		//	static
-{
-	(void) pThread;
+{	(void) pThread;
 	//	Grab the NTV2Burn instance pointer from the pContext parameter,
 	//	then call its PlayFrames method...
-	NTV2Burn *	pApp	(reinterpret_cast <NTV2Burn *> (pContext));
-	pApp->PlayFrames ();
+	NTV2Burn * pApp(reinterpret_cast<NTV2Burn*>(pContext));
+	pApp->PlayFrames();
 
 }	//	PlayThreadStatic
 
@@ -604,10 +594,9 @@ void NTV2Burn::PlayFrames (void)
 void NTV2Burn::StartCaptureThread (void)
 {
 	//	Create and start the capture thread...
-	mCaptureThread = new AJAThread ();
-	mCaptureThread->Attach (CaptureThreadStatic, this);
-	mCaptureThread->SetPriority (AJA_ThreadPriority_High);
-	mCaptureThread->Start ();
+	mCaptureThread.Attach(CaptureThreadStatic, this);
+	mCaptureThread.SetPriority(AJA_ThreadPriority_High);
+	mCaptureThread.Start();
 
 }	//	StartCaptureThread
 
@@ -616,13 +605,11 @@ void NTV2Burn::StartCaptureThread (void)
 //	The static capture thread function
 //
 void NTV2Burn::CaptureThreadStatic (AJAThread * pThread, void * pContext)		//	static
-{
-	(void) pThread;
+{	(void) pThread;
 	//	Grab the NTV2Burn instance pointer from the pContext parameter,
 	//	then call its CaptureFrames method...
-	NTV2Burn *	pApp	(reinterpret_cast <NTV2Burn *> (pContext));
-	pApp->CaptureFrames ();
-
+	NTV2Burn *	pApp (reinterpret_cast<NTV2Burn*>(pContext));
+	pApp->CaptureFrames();
 }	//	CaptureThreadStatic
 
 
@@ -741,15 +728,15 @@ static ULWord GetRP188RegisterForInput (const NTV2InputSource inInputSource)
 {
 	switch (inInputSource)
 	{
-		case NTV2_INPUTSOURCE_SDI1:		return kRegRP188InOut1DBB;	break;	//	reg 29
-		case NTV2_INPUTSOURCE_SDI2:		return kRegRP188InOut2DBB;	break;	//	reg 64
-		case NTV2_INPUTSOURCE_SDI3:		return kRegRP188InOut3DBB;	break;	//	reg 268
-		case NTV2_INPUTSOURCE_SDI4:		return kRegRP188InOut4DBB;	break;	//	reg 273
-		case NTV2_INPUTSOURCE_SDI5:		return kRegRP188InOut5DBB;	break;	//	reg 342
-		case NTV2_INPUTSOURCE_SDI6:		return kRegRP188InOut6DBB;	break;	//	reg 418
-		case NTV2_INPUTSOURCE_SDI7:		return kRegRP188InOut7DBB;	break;	//	reg 427
-		case NTV2_INPUTSOURCE_SDI8:		return kRegRP188InOut8DBB;	break;	//	reg 436
-		default:						return 0;					break;
+		case NTV2_INPUTSOURCE_SDI1:		return kRegRP188InOut1DBB;	//	reg 29
+		case NTV2_INPUTSOURCE_SDI2:		return kRegRP188InOut2DBB;	//	reg 64
+		case NTV2_INPUTSOURCE_SDI3:		return kRegRP188InOut3DBB;	//	reg 268
+		case NTV2_INPUTSOURCE_SDI4:		return kRegRP188InOut4DBB;	//	reg 273
+		case NTV2_INPUTSOURCE_SDI5:		return kRegRP188InOut5DBB;	//	reg 342
+		case NTV2_INPUTSOURCE_SDI6:		return kRegRP188InOut6DBB;	//	reg 418
+		case NTV2_INPUTSOURCE_SDI7:		return kRegRP188InOut7DBB;	//	reg 427
+		case NTV2_INPUTSOURCE_SDI8:		return kRegRP188InOut8DBB;	//	reg 436
+		default:						return 0;
 	}	//	switch on input source
 
 }	//	GetRP188RegisterForInput
@@ -776,7 +763,7 @@ bool NTV2Burn::AnalogLTCInputHasTimecode (void)
 	{
 		case NTV2_TCINDEX_LTC1:		regMask = kRegMaskLTC1InPresent;	break;
 		case NTV2_TCINDEX_LTC2:		regMask = kRegMaskLTC2InPresent;	break;
-		default:					return false;						break;
+		default:					return false;
 	}
 	mDevice.ReadRegister (kRegLTCStatusControl, regValue, regMask);
 	return regValue ? true : false;

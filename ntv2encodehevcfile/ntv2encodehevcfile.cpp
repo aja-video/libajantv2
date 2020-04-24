@@ -22,11 +22,11 @@ NTV2EncodeHEVCFile::NTV2EncodeHEVCFile (const string				inDeviceSpecifier,
                                         const uint32_t              frameHeight,
                                         const M31VideoPreset		inPreset)
 
-:	mFileInputThread        (AJA_NULL),
-	mVideoProcessThread		(AJA_NULL),
-	mCodecRawThread			(AJA_NULL),
-	mCodecHevcThread		(AJA_NULL),
-    mVideoFileThread 		(AJA_NULL),
+:	mFileInputThread        (AJAThread()),
+	mVideoProcessThread		(AJAThread()),
+	mCodecRawThread			(AJAThread()),
+	mCodecHevcThread		(AJAThread()),
+    mVideoFileThread 		(AJAThread()),
     mM31					(AJA_NULL),
     mHevcCommon             (AJA_NULL),
 	mDeviceID				(DEVICE_ID_NOTFOUND),
@@ -66,36 +66,6 @@ NTV2EncodeHEVCFile::~NTV2EncodeHEVCFile ()
 {
 	//	Stop my capture and consumer threads, then destroy them...
 	Quit ();
-
-	if (mFileInputThread != AJA_NULL)
-	{
-		delete mFileInputThread;
-		mFileInputThread = AJA_NULL;
-	}
-
-	if (mVideoProcessThread != AJA_NULL)
-	{
-		delete mVideoProcessThread;
-		mVideoProcessThread = AJA_NULL;
-	}
-
-	if (mCodecRawThread != AJA_NULL)
-	{
-		delete mCodecRawThread;
-		mCodecRawThread = AJA_NULL;
-	}
-
-	if (mCodecHevcThread != AJA_NULL)
-	{
-		delete mCodecHevcThread;
-		mCodecHevcThread = AJA_NULL;
-	}
-
-    if (mVideoFileThread != AJA_NULL)
-	{
-        delete mVideoFileThread;
-        mVideoFileThread = AJA_NULL;
-	}
 
     if (mM31 != AJA_NULL)
 	{
@@ -189,25 +159,20 @@ void NTV2EncodeHEVCFile::Quit (void)
 	//	Stop the worker threads
 	mGlobalQuit = true;
 
-    if (mFileInputThread)
-        while (mFileInputThread->Active ())
-            AJATime::Sleep (10);
+	while (mFileInputThread.Active())
+		AJATime::Sleep(10);
 
-    if (mVideoProcessThread)
-        while (mVideoProcessThread->Active ())
-            AJATime::Sleep (10);
+	while (mVideoProcessThread.Active())
+		AJATime::Sleep(10);
 
-    if (mCodecRawThread)
-        while (mCodecRawThread->Active ())
-            AJATime::Sleep (10);
+	while (mCodecRawThread.Active())
+		AJATime::Sleep(10);
 
-    if (mCodecHevcThread)
-        while (mCodecHevcThread->Active ())
-            AJATime::Sleep (10);
+	while (mCodecHevcThread.Active())
+		AJATime::Sleep(10);
 
-    if (mVideoFileThread)
-        while (mVideoFileThread->Active ())
-            AJATime::Sleep (10);
+	while (mVideoFileThread.Active())
+		AJATime::Sleep(10);
 
     //  Release board
     if (!mMultiStream)
@@ -403,10 +368,9 @@ AJAStatus NTV2EncodeHEVCFile::Run ()
 // This is where we will start the video input thread
 void NTV2EncodeHEVCFile::StartVideoInputThread (void)
 {
-    mFileInputThread = new AJAThread ();
-    mFileInputThread->Attach (VideoInputThreadStatic, this);
-    mFileInputThread->SetPriority (AJA_ThreadPriority_High);
-    mFileInputThread->Start ();
+    mFileInputThread.Attach(VideoInputThreadStatic, this);
+    mFileInputThread.SetPriority(AJA_ThreadPriority_High);
+    mFileInputThread.Start();
 
 }	// StartVideoInputThread
 
@@ -474,10 +438,9 @@ void NTV2EncodeHEVCFile::VideoInputWorker (void)
 // This is where we start the video process thread
 void NTV2EncodeHEVCFile::StartVideoProcessThread (void)
 {
-    mVideoProcessThread = new AJAThread ();
-    mVideoProcessThread->Attach (VideoProcessThreadStatic, this);
-    mVideoProcessThread->SetPriority (AJA_ThreadPriority_High);
-    mVideoProcessThread->Start ();
+    mVideoProcessThread.Attach(VideoProcessThreadStatic, this);
+    mVideoProcessThread.SetPriority(AJA_ThreadPriority_High);
+    mVideoProcessThread.Start();
 
 }	// StartVideoProcessThread
 
@@ -526,10 +489,9 @@ void NTV2EncodeHEVCFile::VideoProcessWorker (void)
 // This is where we start the codec raw thread
 void NTV2EncodeHEVCFile::StartCodecRawThread (void)
 {
-    mCodecRawThread = new AJAThread ();
-    mCodecRawThread->Attach (CodecRawThreadStatic, this);
-    mCodecRawThread->SetPriority (AJA_ThreadPriority_High);
-    mCodecRawThread->Start ();
+    mCodecRawThread.Attach(CodecRawThreadStatic, this);
+    mCodecRawThread.SetPriority(AJA_ThreadPriority_High);
+    mCodecRawThread.Start();
 
 }	// StartCodecRawThread
 
@@ -606,10 +568,9 @@ void NTV2EncodeHEVCFile::CodecRawWorker (void)
 // This is where we will start the codec hevc thread
 void NTV2EncodeHEVCFile::StartCodecHevcThread (void)
 {
-    mCodecHevcThread = new AJAThread ();
-    mCodecHevcThread->Attach (CodecHevcThreadStatic, this);
-    mCodecHevcThread->SetPriority (AJA_ThreadPriority_High);
-    mCodecHevcThread->Start ();
+    mCodecHevcThread.Attach(CodecHevcThreadStatic, this);
+    mCodecHevcThread.SetPriority(AJA_ThreadPriority_High);
+    mCodecHevcThread.Start();
 
 } // StartCodecHevcThread
 
@@ -745,10 +706,9 @@ void NTV2EncodeHEVCFile::CodecHevcWorker (void)
 // This is where we start the video file writer thread
 void NTV2EncodeHEVCFile::StartVideoFileThread (void)
 {
-    mVideoFileThread = new AJAThread ();
-    mVideoFileThread->Attach (VideoFileThreadStatic, this);
-    mVideoFileThread->SetPriority (AJA_ThreadPriority_High);
-    mVideoFileThread->Start ();
+    mVideoFileThread.Attach(VideoFileThreadStatic, this);
+    mVideoFileThread.SetPriority(AJA_ThreadPriority_High);
+    mVideoFileThread.Start();
 
 } // StartVideoFileThread
 

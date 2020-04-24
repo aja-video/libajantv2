@@ -170,8 +170,8 @@ class NTV2Burn4KQuadrant
 
 	//	Private Member Data
 	private:
-		AJAThread *					mPlayThread;			///< @brief	My playout thread object
-		AJAThread *					mCaptureThread;			///< @brief	My capture thread object
+		AJAThread					mPlayThread;			///< @brief	My playout thread object
+		AJAThread					mCaptureThread;			///< @brief	My capture thread object
 		CNTV2Card					mInputDevice;			///< @brief	My CNTV2Card input instance
 		CNTV2Card					mOutputDevice;			///< @brief	My CNTV2Card output instance
 		bool						mSingleDevice;			///< @brief	Using single 8-channel device (4K I/O on one device)?

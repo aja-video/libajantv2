@@ -27,12 +27,12 @@ NTV2EncodeHEVCVifAc::NTV2EncodeHEVCVifAc (const string				  inDeviceSpecifier,
                                           const bool                  inInfoData,
                                           const uint32_t              inMaxFrames)
 
-:	mVideoInputThread		(AJA_NULL),
-	mVideoProcessThread		(AJA_NULL),
-	mCodecRawThread			(AJA_NULL),
-	mCodecHevcThread		(AJA_NULL),
-    mVideoFileThread 		(AJA_NULL),
-    mAudioFileThread 		(AJA_NULL),
+:	mVideoInputThread		(AJAThread()),
+	mVideoProcessThread		(AJAThread()),
+	mCodecRawThread			(AJAThread()),
+	mCodecHevcThread		(AJAThread()),
+    mVideoFileThread 		(AJAThread()),
+    mAudioFileThread 		(AJAThread()),
     mM31					(AJA_NULL),
     mHevcCommon             (AJA_NULL),
 	mDeviceID				(DEVICE_ID_NOTFOUND),
@@ -80,42 +80,6 @@ NTV2EncodeHEVCVifAc::~NTV2EncodeHEVCVifAc ()
 {
 	//	Stop my capture and consumer threads, then destroy them...
 	Quit ();
-
-	if (mVideoInputThread != AJA_NULL)
-	{
-		delete mVideoInputThread;
-		mVideoInputThread = AJA_NULL;
-	}
-
-	if (mVideoProcessThread != AJA_NULL)
-	{
-		delete mVideoProcessThread;
-		mVideoProcessThread = AJA_NULL;
-	}
-
-	if (mCodecRawThread != AJA_NULL)
-	{
-		delete mCodecRawThread;
-		mCodecRawThread = AJA_NULL;
-	}
-
-	if (mCodecHevcThread != AJA_NULL)
-	{
-		delete mCodecHevcThread;
-		mCodecHevcThread = AJA_NULL;
-	}
-
-    if (mVideoFileThread != AJA_NULL)
-	{
-        delete mVideoFileThread;
-        mVideoFileThread = AJA_NULL;
-	}
-
-    if (mAudioFileThread != AJA_NULL)
-    {
-        delete mAudioFileThread;
-        mAudioFileThread = AJA_NULL;
-    }
 
     if (mM31 != AJA_NULL)
 	{
@@ -249,29 +213,23 @@ void NTV2EncodeHEVCVifAc::Quit (void)
 	//	Stop the worker threads
 	mGlobalQuit = true;
 
-    if (mVideoInputThread)
-        while (mVideoInputThread->Active ())
-            AJATime::Sleep (10);
+	while (mVideoInputThread.Active())
+		AJATime::Sleep(10);
 
-    if (mVideoProcessThread)
-        while (mVideoProcessThread->Active ())
-            AJATime::Sleep (10);
+	while (mVideoProcessThread.Active())
+		AJATime::Sleep(10);
 
-    if (mCodecRawThread)
-        while (mCodecRawThread->Active ())
-            AJATime::Sleep (10);
+	while (mCodecRawThread.Active())
+		AJATime::Sleep(10);
 
-    if (mCodecHevcThread)
-        while (mCodecHevcThread->Active ())
-            AJATime::Sleep (10);
+	while (mCodecHevcThread.Active())
+		AJATime::Sleep(10);
 
-    if (mVideoFileThread)
-        while (mVideoFileThread->Active ())
-            AJATime::Sleep (10);
+	while (mVideoFileThread.Active())
+		AJATime::Sleep(10);
 
-    if (mAudioFileThread)
-        while (mAudioFileThread->Active ())
-            AJATime::Sleep (10);
+	while (mAudioFileThread.Active())
+		AJATime::Sleep(10);
 
     //  Stop video capture
     mDevice.SetMode(mInputChannel, NTV2_MODE_DISPLAY, false);
@@ -285,16 +243,10 @@ void NTV2EncodeHEVCVifAc::Quit (void)
 
     //  Close output files
     mHevcCommon->CloseHevcFile ();
-
     if (mWithInfo)
-    {
         mHevcCommon->CloseEncFile ();
-    }
-
     if (mWithAudio)
-    {
         mHevcCommon->CloseAiffFile ();
-    }
 
 }	//	Quit
 
@@ -781,10 +733,9 @@ AJAStatus NTV2EncodeHEVCVifAc::Run ()
 // This is where we will start the video input thread
 void NTV2EncodeHEVCVifAc::StartVideoInputThread (void)
 {
-    mVideoInputThread = new AJAThread ();
-    mVideoInputThread->Attach (VideoInputThreadStatic, this);
-    mVideoInputThread->SetPriority (AJA_ThreadPriority_High);
-    mVideoInputThread->Start ();
+    mVideoInputThread.Attach(VideoInputThreadStatic, this);
+    mVideoInputThread.SetPriority(AJA_ThreadPriority_High);
+    mVideoInputThread.Start();
 
 }	// StartVideoInputThread
 
@@ -947,10 +898,9 @@ void NTV2EncodeHEVCVifAc::VideoInputWorker (void)
 // This is where we start the video process thread
 void NTV2EncodeHEVCVifAc::StartVideoProcessThread (void)
 {
-    mVideoProcessThread = new AJAThread ();
-    mVideoProcessThread->Attach (VideoProcessThreadStatic, this);
-    mVideoProcessThread->SetPriority (AJA_ThreadPriority_High);
-    mVideoProcessThread->Start ();
+    mVideoProcessThread.Attach(VideoProcessThreadStatic, this);
+    mVideoProcessThread.SetPriority(AJA_ThreadPriority_High);
+    mVideoProcessThread.Start();
 
 }	// StartVideoProcessThread
 
@@ -999,10 +949,9 @@ void NTV2EncodeHEVCVifAc::VideoProcessWorker (void)
 // This is where we start the codec raw thread
 void NTV2EncodeHEVCVifAc::StartCodecRawThread (void)
 {
-    mCodecRawThread = new AJAThread ();
-    mCodecRawThread->Attach (CodecRawThreadStatic, this);
-    mCodecRawThread->SetPriority (AJA_ThreadPriority_High);
-    mCodecRawThread->Start ();
+    mCodecRawThread.Attach(CodecRawThreadStatic, this);
+    mCodecRawThread.SetPriority(AJA_ThreadPriority_High);
+    mCodecRawThread.Start();
 
 }	// StartCodecRawThread
 
@@ -1069,10 +1018,9 @@ void NTV2EncodeHEVCVifAc::CodecRawWorker (void)
 // This is where we will start the codec hevc thread
 void NTV2EncodeHEVCVifAc::StartCodecHevcThread (void)
 {
-    mCodecHevcThread = new AJAThread ();
-    mCodecHevcThread->Attach (CodecHevcThreadStatic, this);
-    mCodecHevcThread->SetPriority (AJA_ThreadPriority_High);
-    mCodecHevcThread->Start ();
+    mCodecHevcThread.Attach(CodecHevcThreadStatic, this);
+    mCodecHevcThread.SetPriority(AJA_ThreadPriority_High);
+    mCodecHevcThread.Start();
 
 } // StartCodecHevcThread
 
@@ -1208,10 +1156,9 @@ void NTV2EncodeHEVCVifAc::CodecHevcWorker (void)
 // This is where we start the video file writer thread
 void NTV2EncodeHEVCVifAc::StartVideoFileThread (void)
 {
-    mVideoFileThread = new AJAThread ();
-    mVideoFileThread->Attach (VideoFileThreadStatic, this);
-    mVideoFileThread->SetPriority (AJA_ThreadPriority_High);
-    mVideoFileThread->Start ();
+    mVideoFileThread.Attach(VideoFileThreadStatic, this);
+    mVideoFileThread.SetPriority(AJA_ThreadPriority_High);
+    mVideoFileThread.Start();
 
 } // StartVideoFileThread
 
@@ -1268,10 +1215,9 @@ void NTV2EncodeHEVCVifAc::VideoFileWorker (void)
 // This is where we start the audio file writer thread
 void NTV2EncodeHEVCVifAc::StartAudioFileThread (void)
 {
-    mAudioFileThread = new AJAThread ();
-    mAudioFileThread->Attach (AudioFileThreadStatic, this);
-    mAudioFileThread->SetPriority (AJA_ThreadPriority_High);
-    mAudioFileThread->Start ();
+    mAudioFileThread.Attach(AudioFileThreadStatic, this);
+    mAudioFileThread.SetPriority(AJA_ThreadPriority_High);
+    mAudioFileThread.Start();
 
 } // StartAudioFileThread
 

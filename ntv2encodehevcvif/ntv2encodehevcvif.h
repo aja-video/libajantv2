@@ -184,9 +184,9 @@ class NTV2EncodeHEVCVif
 		
     //	Private Member Data
 	private:
-        AJAThread *					mACInputThread;         ///	AutoCirculate input thread
-        AJAThread *					mCodecHevcThread;		///	Codec hevc transfer thread
-        AJAThread *					mAVFileThread;			///	Audio/Video file writer thread
+        AJAThread					mACInputThread;         ///	AutoCirculate input thread
+        AJAThread					mCodecHevcThread;		///	Codec hevc transfer thread
+        AJAThread					mAVFileThread;			///	Audio/Video file writer thread
         CNTV2m31 *					mM31;					/// Object used to interface to m31
         CNTV2DemoHevcCommon *       mHevcCommon;            /// HEVC common class
 

@@ -17,9 +17,7 @@
 #include "ajaanc/includes/ancillarydata_hdr_sdr.h"
 #include "ajaanc/includes/ancillarydata_hdr_hdr10.h"
 #include "ajaanc/includes/ancillarydata_hdr_hlg.h"
-
-
-class AJAThread;
+#include "ajabase/system/thread.h"
 
 
 /**
@@ -281,8 +279,8 @@ class NTV2Player4K
 	//	Private Member Data
 	private:
 		Player4KConfig			mConfig;				///< @brief	My configuration.
-		AJAThread *				mConsumerThread;		///< @brief	My playout (consumer) thread object
-		AJAThread *				mProducerThread;		///< @brief	My generator (producer) thread object
+		AJAThread				mConsumerThread;		///< @brief	My playout (consumer) thread object
+		AJAThread				mProducerThread;		///< @brief	My generator (producer) thread object
 		uint32_t				mCurrentFrame;			///< @brief	My current frame number (used to generate timecode)
 		ULWord					mCurrentSample;			///< @brief	My current audio sample (maintains audio tone generator state)
 		double					mToneFrequency;			///< @brief	My current audio tone frequency, in Hertz

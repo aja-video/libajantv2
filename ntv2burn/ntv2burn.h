@@ -164,8 +164,8 @@ class NTV2Burn
 
 	//	Private Member Data
 	private:
-		AJAThread *					mPlayThread;		///< @brief	My playout thread object
-		AJAThread *					mCaptureThread;		///< @brief	My capture thread object
+		AJAThread					mPlayThread;		///< @brief	My playout thread object
+		AJAThread					mCaptureThread;		///< @brief	My capture thread object
 		CNTV2Card					mDevice;			///< @brief	My CNTV2Card instance
 		NTV2DeviceID				mDeviceID;			///< @brief	My device identifier
 		const std::string			mDeviceSpecifier;	///< @brief	Specifies which device I should use

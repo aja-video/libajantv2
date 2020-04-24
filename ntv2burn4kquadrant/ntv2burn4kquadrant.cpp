@@ -27,8 +27,8 @@ NTV2Burn4KQuadrant::NTV2Burn4KQuadrant (const string &				inInputDeviceSpecifier
 										const NTV2FrameBufferFormat	inPixelFormat,
 										const NTV2TCIndex			inTCIndex)
 
-	:	mPlayThread				(AJA_NULL),
-		mCaptureThread			(AJA_NULL),
+	:	mPlayThread				(AJAThread()),
+		mCaptureThread			(AJAThread()),
 		mSingleDevice			(false),
 		mInputDeviceSpecifier	(inInputDeviceSpecifier),
 		mOutputDeviceSpecifier	(inOutputDeviceSpecifier),
@@ -53,12 +53,6 @@ NTV2Burn4KQuadrant::~NTV2Burn4KQuadrant ()
 {
 	//	Stop my capture and playout threads, then destroy them...
 	Quit ();
-
-	delete mPlayThread;
-	mPlayThread = AJA_NULL;
-
-	delete mCaptureThread;
-	mCaptureThread = AJA_NULL;
 
 	//	Unsubscribe from input vertical event...
 	mInputDevice.UnsubscribeInputVerticalEvent (mInputChannel);
@@ -96,13 +90,11 @@ void NTV2Burn4KQuadrant::Quit (void)
 	//	Set the global 'quit' flag, and wait for the threads to go inactive...
 	mGlobalQuit = true;
 
-	if (mPlayThread)
-		while (mPlayThread->Active ())
-			AJATime::Sleep (10);
+	while (mPlayThread.Active())
+		AJATime::Sleep(10);
 
-	if (mCaptureThread)
-		while (mCaptureThread->Active ())
-			AJATime::Sleep (10);
+	while (mCaptureThread.Active())
+		AJATime::Sleep(10);
 
 }	//	Quit
 
@@ -561,22 +553,20 @@ AJAStatus NTV2Burn4KQuadrant::Run ()
 void NTV2Burn4KQuadrant::StartPlayThread (void)
 {
 	//	Create and start the playout thread...
-	mPlayThread = new AJAThread ();
-	mPlayThread->Attach (PlayThreadStatic, this);
-	mPlayThread->SetPriority (AJA_ThreadPriority_High);
-	mPlayThread->Start ();
+	mPlayThread.Attach(PlayThreadStatic, this);
+	mPlayThread.SetPriority(AJA_ThreadPriority_High);
+	mPlayThread.Start();
 
 }	//	StartPlayThread
 
 
 //	The playout thread function
 void NTV2Burn4KQuadrant::PlayThreadStatic (AJAThread * pThread, void * pContext)		//	static
-{
-	(void) pThread;
+{	(void) pThread;
 	//	Grab the NTV2Burn4K instance pointer from the pContext parameter,
 	//	then call its PlayFrames method...
-	NTV2Burn4KQuadrant *	pApp	(reinterpret_cast <NTV2Burn4KQuadrant *> (pContext));
-	pApp->PlayFrames ();
+	NTV2Burn4KQuadrant * pApp(reinterpret_cast<NTV2Burn4KQuadrant*>(pContext));
+	pApp->PlayFrames();
 
 }	//	PlayThreadStatic
 
@@ -646,10 +636,9 @@ void NTV2Burn4KQuadrant::PlayFrames (void)
 void NTV2Burn4KQuadrant::StartCaptureThread (void)
 {
 	//	Create and start the capture thread...
-	mCaptureThread = new AJAThread ();
-	mCaptureThread->Attach (CaptureThreadStatic, this);
-	mCaptureThread->SetPriority (AJA_ThreadPriority_High);
-	mCaptureThread->Start ();
+	mCaptureThread.Attach(CaptureThreadStatic, this);
+	mCaptureThread.SetPriority(AJA_ThreadPriority_High);
+	mCaptureThread.Start();
 
 }	//	StartCaptureThread
 
@@ -658,13 +647,11 @@ void NTV2Burn4KQuadrant::StartCaptureThread (void)
 //	The static capture thread function
 //
 void NTV2Burn4KQuadrant::CaptureThreadStatic (AJAThread * pThread, void * pContext)		//	static
-{
-	(void) pThread;
+{	(void) pThread;
 	//	Grab the NTV2Burn4K instance pointer from the pContext parameter,
 	//	then call its CaptureFrames method...
-	NTV2Burn4KQuadrant *	pApp	(reinterpret_cast <NTV2Burn4KQuadrant *> (pContext));
-	pApp->CaptureFrames ();
-
+	NTV2Burn4KQuadrant * pApp (reinterpret_cast<NTV2Burn4KQuadrant*>(pContext));
+	pApp->CaptureFrames();
 }	//	CaptureThreadStatic
 
 
@@ -775,11 +762,11 @@ ULWord NTV2Burn4KQuadrant::GetRP188RegisterForInput (const NTV2InputSource inInp
 {
 	switch (inInputSource)
 	{
-		case NTV2_INPUTSOURCE_SDI1:		return kRegRP188InOut1DBB;	break;	//	reg 29
-		case NTV2_INPUTSOURCE_SDI2:		return kRegRP188InOut2DBB;	break;	//	reg 64
-		case NTV2_INPUTSOURCE_SDI3:		return kRegRP188InOut3DBB;	break;	//	reg 268
-		case NTV2_INPUTSOURCE_SDI4:		return kRegRP188InOut4DBB;	break;	//	reg 273
-		default:						return 0;					break;
+		case NTV2_INPUTSOURCE_SDI1:		return kRegRP188InOut1DBB;	//	reg 29
+		case NTV2_INPUTSOURCE_SDI2:		return kRegRP188InOut2DBB;	//	reg 64
+		case NTV2_INPUTSOURCE_SDI3:		return kRegRP188InOut3DBB;	//	reg 268
+		case NTV2_INPUTSOURCE_SDI4:		return kRegRP188InOut4DBB;	//	reg 273
+		default:						return 0;
 	}	//	switch on input source
 
 }	//	GetRP188RegisterForInput

@@ -26,8 +26,8 @@ NTV2Capture4K::NTV2Capture4K (const string			inDeviceSpecifier,
 							  const bool			inWithAnc,
 							  const bool			inDoTsiRouting)
 
-	:	mConsumerThread		(AJA_NULL),
-		mProducerThread		(AJA_NULL),
+	:	mConsumerThread		(AJAThread()),
+		mProducerThread		(AJAThread()),
 		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mDeviceSpecifier	(inDeviceSpecifier),
 		mWithAudio			(withAudio),
@@ -56,12 +56,6 @@ NTV2Capture4K::~NTV2Capture4K ()
 {
 	//	Stop my capture and consumer threads, then destroy them...
 	Quit ();
-
-	delete mConsumerThread;
-	mConsumerThread = AJA_NULL;
-
-	delete mProducerThread;
-	mProducerThread = AJA_NULL;
 
 	//	Unsubscribe from input vertical event...
 	mDevice.UnsubscribeInputVerticalEvent (mInputChannel);
@@ -102,13 +96,11 @@ void NTV2Capture4K::Quit (void)
 	//	Set the global 'quit' flag, and wait for the threads to go inactive...
 	mGlobalQuit = true;
 
-	if (mConsumerThread)
-		while (mConsumerThread->Active ())
-			AJATime::Sleep (10);
+	while (mConsumerThread.Active())
+		AJATime::Sleep(10);
 
-	if (mProducerThread)
-		while (mProducerThread->Active ())
-			AJATime::Sleep (10);
+	while (mProducerThread.Active())
+		AJATime::Sleep(10);
 
 }	//	Quit
 
@@ -701,10 +693,9 @@ AJAStatus NTV2Capture4K::Run ()
 void NTV2Capture4K::StartConsumerThread (void)
 {
 	//	Create and start the consumer thread...
-	mConsumerThread = new AJAThread ();
-	mConsumerThread->Attach (ConsumerThreadStatic, this);
-	mConsumerThread->SetPriority (AJA_ThreadPriority_High);
-	mConsumerThread->Start ();
+	mConsumerThread.Attach(ConsumerThreadStatic, this);
+	mConsumerThread.SetPriority(AJA_ThreadPriority_High);
+	mConsumerThread.Start();
 
 }	//	StartConsumerThread
 
@@ -755,10 +746,9 @@ void NTV2Capture4K::ConsumeFrames (void)
 void NTV2Capture4K::StartProducerThread (void)
 {
 	//	Create and start the capture thread...
-	mProducerThread = new AJAThread ();
-	mProducerThread->Attach (ProducerThreadStatic, this);
-	mProducerThread->SetPriority (AJA_ThreadPriority_High);
-	mProducerThread->Start ();
+	mProducerThread.Attach(ProducerThreadStatic, this);
+	mProducerThread.SetPriority(AJA_ThreadPriority_High);
+	mProducerThread.Start();
 
 }	//	StartProducerThread
 

@@ -148,8 +148,8 @@ class NTV2Capture4K
 	private:
 		typedef	AJACircularBuffer <AVDataBuffer *>	MyCircularBuffer;
 
-		AJAThread *				mConsumerThread;		///< @brief	My consumer thread object -- consumes the captured frames.
-		AJAThread *				mProducerThread;		///< @brief	My producer thread object -- does the frame capturing
+		AJAThread				mConsumerThread;		///< @brief	My consumer thread object -- consumes the captured frames.
+		AJAThread				mProducerThread;		///< @brief	My producer thread object -- does the frame capturing
 		CNTV2Card				mDevice;				///< @brief	My CNTV2Card instance. This is what I use to talk to the device.
 		NTV2DeviceID			mDeviceID;				///< @brief	My device identifier
 		const std::string		mDeviceSpecifier;		///< @brief	The device specifier string

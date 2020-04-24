@@ -47,9 +47,9 @@ NTV2EncodeHEVCVif::NTV2EncodeHEVCVif (const string				inDeviceSpecifier,
                                 const bool                  inInfoData,
                                 const uint32_t              inMaxFrames)
 
-:	mACInputThread          (AJA_NULL),
-	mCodecHevcThread		(AJA_NULL),
-    mAVFileThread 			(AJA_NULL),
+:	mACInputThread          (AJAThread()),
+	mCodecHevcThread		(AJAThread()),
+    mAVFileThread 			(AJAThread()),
     mM31					(AJA_NULL),
     mHevcCommon             (AJA_NULL),
 	mDeviceID				(DEVICE_ID_NOTFOUND),
@@ -97,36 +97,6 @@ NTV2EncodeHEVCVif::~NTV2EncodeHEVCVif ()
 {
 	//	Stop my capture and consumer threads, then destroy them...
 	Quit ();
-
-	if (mACInputThread != AJA_NULL)
-	{
-		delete mACInputThread;
-		mACInputThread = AJA_NULL;
-	}
-
-	if (mCodecHevcThread != AJA_NULL)
-	{
-		delete mCodecHevcThread;
-		mCodecHevcThread = AJA_NULL;
-	}
-
-    if (mAVFileThread != AJA_NULL)
-	{
-        delete mAVFileThread;
-        mAVFileThread = AJA_NULL;
-	}
-
-    if (mM31 != AJA_NULL)
-	{
-		delete mM31;
-		mM31 = AJA_NULL;
-	}
-    
-    if (mHevcCommon != AJA_NULL)
-    {
-        delete mHevcCommon;
-        mHevcCommon = AJA_NULL;
-    }
 	
 	// unsubscribe from input vertical event...
 	mDevice.UnsubscribeInputVerticalEvent (mInputChannel);
@@ -223,17 +193,14 @@ void NTV2EncodeHEVCVif::Quit (void)
 	//	Stop the worker threads
 	mGlobalQuit = true;
 
-    if (mACInputThread)
-        while (mACInputThread->Active ())
-            AJATime::Sleep (10);
+	while (mACInputThread.Active())
+		AJATime::Sleep(10);
 
-    if (mCodecHevcThread)
-        while (mCodecHevcThread->Active ())
-            AJATime::Sleep (10);
+	while (mCodecHevcThread.Active())
+		AJATime::Sleep(10);
 
-    if (mAVFileThread)
-        while (mAVFileThread->Active ())
-            AJATime::Sleep (10);
+	while (mAVFileThread.Active())
+		AJATime::Sleep(10);
 
     //  Stop video capture
     mDevice.SetMode(mInputChannel, NTV2_MODE_DISPLAY, false);
@@ -243,18 +210,12 @@ void NTV2EncodeHEVCVif::Quit (void)
 	mDevice.SetEveryFrameServices (mSavedTaskMode);		//	Restore prior task mode
 
     //  Close output files
-    mHevcCommon->CloseHevcFile ();
-    mHevcCommon->CloseRawFile ();
-
+    mHevcCommon->CloseHevcFile();
+    mHevcCommon->CloseRawFile();
     if (mWithInfo)
-    {
-        mHevcCommon->CloseEncFile ();
-    }
-
+        mHevcCommon->CloseEncFile();
     if (mWithAudio)
-    {
-        mHevcCommon->CloseAiffFile ();
-    }
+        mHevcCommon->CloseAiffFile();
 
 }	//	Quit
 
@@ -677,10 +638,9 @@ AJAStatus NTV2EncodeHEVCVif::Run ()
 // This is where we will start the video input thread
 void NTV2EncodeHEVCVif::StartVideoInputThread (void)
 {
-    mACInputThread = new AJAThread ();
-    mACInputThread->Attach (VideoInputThreadStatic, this);
-    mACInputThread->SetPriority (AJA_ThreadPriority_High);
-    mACInputThread->Start ();
+    mACInputThread.Attach(VideoInputThreadStatic, this);
+    mACInputThread.SetPriority(AJA_ThreadPriority_High);
+    mACInputThread.Start();
 
 }	// StartVideoInputThread
 
@@ -796,10 +756,9 @@ void NTV2EncodeHEVCVif::VideoInputWorker (void)
 // This is where we will start the codec hevc thread
 void NTV2EncodeHEVCVif::StartCodecHevcThread (void)
 {
-    mCodecHevcThread = new AJAThread ();
-    mCodecHevcThread->Attach (CodecHevcThreadStatic, this);
-    mCodecHevcThread->SetPriority (AJA_ThreadPriority_High);
-    mCodecHevcThread->Start ();
+    mCodecHevcThread.Attach(CodecHevcThreadStatic, this);
+    mCodecHevcThread.SetPriority(AJA_ThreadPriority_High);
+    mCodecHevcThread.Start();
 
 } // StartCodecHevcThread
 
@@ -885,10 +844,9 @@ void NTV2EncodeHEVCVif::CodecHevcWorker ()
 // This is where we start the audio/video file writer thread
 void NTV2EncodeHEVCVif::StartAVFileThread (void)
 {
-    mAVFileThread = new AJAThread ();
-    mAVFileThread->Attach (AVFileThreadStatic, this);
-    mAVFileThread->SetPriority (AJA_ThreadPriority_High);
-    mAVFileThread->Start ();
+    mAVFileThread.Attach(AVFileThreadStatic, this);
+    mAVFileThread.SetPriority(AJA_ThreadPriority_High);
+    mAVFileThread.Start();
 
 } // StartAVFileThread
 

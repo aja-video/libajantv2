@@ -15,6 +15,7 @@
 #include "ajabase/system/info.h"
 #include "ajacc/includes/ajacc.h"
 #include <vector>
+#include <map>
 
 #define	SIG_AJA_STOP	31		//	Our own user-defined "stop" signal
 
@@ -68,7 +69,7 @@ typedef struct CCGeneratorConfig
 
 
 typedef std::map <NTV2Line21Channel, CCGeneratorConfig>		CaptionChanGenMap;
-typedef	CaptionChanGenMap::const_iterator					CaptionChanGenMapConstIter;
+typedef	CaptionChanGenMap::const_iterator					CaptionChanGenMapCIter;
 typedef CaptionChanGenMap::iterator							CaptionChanGenMapIter;
 
 
@@ -235,25 +236,28 @@ class NTV2CCPlayer
 
 		TimecodeFormat NTV2FrameRate2TimecodeFormat(NTV2FrameRate inFrameRate);
 
+		typedef std::vector<AJAThread>			AJAThreadList;
+		typedef AJAThreadList::const_iterator	AJAThreadListConstIter;
+
 
 	//	Private Member Data
 	private:
-		CCPlayerConfig				mConfig;							///< @brief	My configuration
-		AJAThread *					mPlayThread;						///< @brief	My playout (consumer) thread object
-		AJAThread *					mGeneratorThreads [NTV2_CC608_XDS];	///< @brief	My caption generator threads -- one per caption channel
-		AUTOCIRCULATE_STATUS		mACStatus;							///< @brief	My AutoCirculate status
-		CNTV2Card					mDevice;							///< @brief	My CNTV2Card instance
-		NTV2DeviceID				mDeviceID;							///< @brief	My device (model) identifier
-		NTV2TaskMode				mSavedTaskMode;						///< @brief	Used to restore the previous state
-		NTV2VANCMode				mVancMode;							///< @brief	VANC mode
-		NTV2Standard				mVideoStandard;						///< @brief	Output video standard
-		bool						mPlayerQuit;						///< @brief	Set "true" to terminate player
-		bool						mCaptionGeneratorQuit;				///< @brief	Set "true" to terminate caption generator(s)
-		CNTV2CaptionEncoder608Ptr	m608Encoder;						///< @brief	My CEA-608 caption encoder
-		CNTV2CaptionEncoder708Ptr	m708Encoder;						///< @brief	My 708 caption encoder
-		NTV2_POINTER				mVideoBuffer;						///< @brief	My video buffer
-		NTV2ChannelSet				mActiveFrameStores;					///< @brief	My active FrameStores
-		NTV2XptConnections			mConnections;						///< @brief	Routing connections I make
+		CCPlayerConfig				mConfig;				///< @brief	My configuration
+		AJAThread					mPlayThread;			///< @brief	My playout (consumer) thread object
+		AJAThreadList				mGeneratorThreads;		///< @brief	My caption generator threads -- one per caption channel
+		AUTOCIRCULATE_STATUS		mACStatus;				///< @brief	My AutoCirculate status
+		CNTV2Card					mDevice;				///< @brief	My CNTV2Card instance
+		NTV2DeviceID				mDeviceID;				///< @brief	My device (model) identifier
+		NTV2TaskMode				mSavedTaskMode;			///< @brief	Used to restore the previous state
+		NTV2VANCMode				mVancMode;				///< @brief	VANC mode
+		NTV2Standard				mVideoStandard;			///< @brief	Output video standard
+		bool						mPlayerQuit;			///< @brief	Set "true" to terminate player
+		bool						mCaptionGeneratorQuit;	///< @brief	Set "true" to terminate caption generator(s)
+		CNTV2CaptionEncoder608Ptr	m608Encoder;			///< @brief	My CEA-608 caption encoder
+		CNTV2CaptionEncoder708Ptr	m708Encoder;			///< @brief	My 708 caption encoder
+		NTV2_POINTER				mVideoBuffer;			///< @brief	My video buffer
+		NTV2ChannelSet				mActiveFrameStores;		///< @brief	My active FrameStores
+		NTV2XptConnections			mConnections;			///< @brief	Routing connections I make
 
 };	//	NTV2CCPlayer
 

@@ -39,8 +39,8 @@ static const uint32_t	AUDIOBYTES_MAX_48K	(201 * 1024);
 
 
 NTV2Player8K::NTV2Player8K (const Player8KConfig & config)
-	:	mPlayThread					(AJA_NULL),
-		mProduceFrameThread			(AJA_NULL),
+	:	mPlayThread					(AJAThread()),
+		mProduceFrameThread			(AJAThread()),
 		mCurrentFrame				(0),
 		mCurrentSample				(0),
 		mToneFrequency				(440.0),
@@ -68,16 +68,11 @@ NTV2Player8K::NTV2Player8K (const Player8KConfig & config)
 NTV2Player8K::~NTV2Player8K (void)
 {
 	//	Stop my playout and producer threads, then destroy them...
-	Quit ();
+	Quit();
 
 	mDevice.UnsubscribeOutputVerticalEvent (NTV2_CHANNEL1);
 
-	//	Free my threads and buffers...
-	delete mPlayThread;
-	mPlayThread = AJA_NULL;
-	delete mProduceFrameThread;
-	mProduceFrameThread = AJA_NULL;
-
+	//	Free my buffers...
 	if (mTestPatternVideoBuffers)
 	{
 		for (int32_t ndx = 0;  ndx < mNumTestPatterns;  ndx++)
@@ -108,13 +103,11 @@ void NTV2Player8K::Quit (void)
 	//	Set the global 'quit' flag, and wait for the threads to go inactive...
 	mGlobalQuit = true;
 
-	if (mProduceFrameThread)
-		while (mProduceFrameThread->Active ())
-			AJATime::Sleep (10);
+	while (mProduceFrameThread.Active())
+		AJATime::Sleep(10);
 
-	if (mPlayThread)
-		while (mPlayThread->Active ())
-			AJATime::Sleep (10);
+	while (mPlayThread.Active())
+		AJATime::Sleep(10);
 
 	mDevice.DMABufferUnlockAll();
 }	//	Quit
@@ -167,18 +160,18 @@ AJAStatus NTV2Player8K::Init (void)
 	}
 
 	//	Set up the video and audio...
-	status = SetUpVideo ();
-	if (AJA_FAILURE (status))
+	status = SetUpVideo();
+	if (AJA_FAILURE(status))
 		return status;
 
-	status = SetUpAudio ();
-	if (AJA_FAILURE (status))
+	status = SetUpAudio();
+	if (AJA_FAILURE(status))
 		return status;
 
 	//	Set up the circular buffers, the device signal routing, playout AutoCirculate, and the test pattern buffers...
-	SetUpHostBuffers ();
-	RouteOutputSignal ();
-	SetUpTestPatternVideoBuffers ();
+	SetUpHostBuffers();
+	RouteOutputSignal();
+	SetUpTestPatternVideoBuffers();
 
 	//	Lastly, prepare my AJATimeCodeBurn instance...
 	NTV2FormatDescriptor fd (mVideoFormat, mPixelFormat, mVancMode);
@@ -189,7 +182,7 @@ AJAStatus NTV2Player8K::Init (void)
 }	//	Init
 
 
-AJAStatus NTV2Player8K::SetUpVideo ()
+AJAStatus NTV2Player8K::SetUpVideo (void)
 {
 	//	Unless a video format was requested, configure the board for ...
  	if (mVideoFormat == NTV2_FORMAT_UNKNOWN)
@@ -267,7 +260,7 @@ AJAStatus NTV2Player8K::SetUpVideo ()
 }	//	SetUpVideo
 
 
-AJAStatus NTV2Player8K::SetUpAudio ()
+AJAStatus NTV2Player8K::SetUpAudio (void)
 {
 	uint16_t	numberOfAudioChannels	(::NTV2DeviceGetMaxAudioChannels (mDeviceID));
 
@@ -300,7 +293,7 @@ AJAStatus NTV2Player8K::SetUpAudio ()
 }	//	SetUpAudio
 
 
-void NTV2Player8K::SetUpHostBuffers ()
+void NTV2Player8K::SetUpHostBuffers (void)
 {
 	//	Let my circular buffer know when it's time to quit...
 	mAVCircularBuffer.SetAbortFlag (&mGlobalQuit);
@@ -525,12 +518,11 @@ void NTV2Player8K::RouteOutputSignal (void)
 }	//	RouteOutputSignal
 
 
-AJAStatus NTV2Player8K::Run ()
+AJAStatus NTV2Player8K::Run (void)
 {
 	//	Start the playout and producer threads...
-	StartPlayThread ();
-	StartProduceFrameThread ();
-
+	StartPlayThread();
+	StartProduceFrameThread();
 	return AJA_STATUS_SUCCESS;
 }	//	Run
 
@@ -542,23 +534,20 @@ AJAStatus NTV2Player8K::Run ()
 void NTV2Player8K::StartPlayThread ()
 {
 	//	Create and start the playout thread...
-	mPlayThread = new AJAThread ();
-	mPlayThread->Attach (PlayThreadStatic, this);
-	mPlayThread->SetPriority (AJA_ThreadPriority_High);
-	mPlayThread->Start ();
+	mPlayThread.Attach(PlayThreadStatic, this);
+	mPlayThread.SetPriority(AJA_ThreadPriority_High);
+	mPlayThread.Start();
 
 }	//	StartPlayThread
 
 
 //	The playout thread function
 void NTV2Player8K::PlayThreadStatic (AJAThread * pThread, void * pContext)		//	static
-{
-	(void) pThread;
-
+{	(void) pThread;
 	//	Grab the NTV2Player4K instance pointer from the pContext parameter,
 	//	then call its PlayFrames method...
-	NTV2Player8K *	pApp	(reinterpret_cast <NTV2Player8K *> (pContext));
-	pApp->PlayFrames ();
+	NTV2Player8K *	pApp(reinterpret_cast<NTV2Player8K*>(pContext));
+	pApp->PlayFrames();
 
 }	//	PlayThreadStatic
 
@@ -583,27 +572,27 @@ void NTV2Player8K::PlayFrames (void)
 	}
 
 	uint32_t	packetSize = 0;
-	switch(mAncType)
+	switch (mAncType)
 	{
-	case AJAAncillaryDataType_HDR_SDR:
-	{
-		AJAAncillaryData_HDR_SDR sdrPacket;
-		sdrPacket.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
-		break;
-	}
-	case AJAAncillaryDataType_HDR_HDR10:
-	{
-		AJAAncillaryData_HDR_HDR10 hdr10Packet;
-		hdr10Packet.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
-		break;
-	}
-	case AJAAncillaryDataType_HDR_HLG:
-	{
-		AJAAncillaryData_HDR_HLG hlgPacket;
-		hlgPacket.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
-		break;
-	}
-	default:	break;
+		case AJAAncillaryDataType_HDR_SDR:
+		{
+			AJAAncillaryData_HDR_SDR sdrPacket;
+			sdrPacket.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
+			break;
+		}
+		case AJAAncillaryDataType_HDR_HDR10:
+		{
+			AJAAncillaryData_HDR_HDR10 hdr10Packet;
+			hdr10Packet.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
+			break;
+		}
+		case AJAAncillaryDataType_HDR_HLG:
+		{
+			AJAAncillaryData_HDR_HLG hlgPacket;
+			hlgPacket.GenerateTransmitData((uint8_t*)fAncBuffer, fAncBufferSize, packetSize);
+			break;
+		}
+		default:	break;
 	}
 
 	//	Initialize & start AutoCirculate...
@@ -666,10 +655,9 @@ void NTV2Player8K::PlayFrames (void)
 void NTV2Player8K::StartProduceFrameThread ()
 {
 	//	Create and start the producer thread...
-	mProduceFrameThread = new AJAThread ();
-	mProduceFrameThread->Attach (ProduceFrameThreadStatic, this);
-	mProduceFrameThread->SetPriority (AJA_ThreadPriority_High);
-	mProduceFrameThread->Start ();
+	mProduceFrameThread.Attach(ProduceFrameThreadStatic, this);
+	mProduceFrameThread.SetPriority(AJA_ThreadPriority_High);
+	mProduceFrameThread.Start();
 
 }	//	StartProduceFrameThread
 
@@ -834,11 +822,11 @@ ULWord NTV2Player8K::GetRP188RegisterForOutput (const NTV2OutputDestination inOu
 {
 	switch (inOutputDest)
 	{
-		case NTV2_OUTPUTDESTINATION_SDI1:	return kRegRP188InOut1DBB;	break;	//	reg 29
-		case NTV2_OUTPUTDESTINATION_SDI2:	return kRegRP188InOut2DBB;	break;	//	reg 64
-		case NTV2_OUTPUTDESTINATION_SDI3:	return kRegRP188InOut3DBB;	break;	//	reg 268
-		case NTV2_OUTPUTDESTINATION_SDI4:	return kRegRP188InOut4DBB;	break;	//	reg 273
-		default:							return 0;					break;
+		case NTV2_OUTPUTDESTINATION_SDI1:	return kRegRP188InOut1DBB;	//	reg 29
+		case NTV2_OUTPUTDESTINATION_SDI2:	return kRegRP188InOut2DBB;	//	reg 64
+		case NTV2_OUTPUTDESTINATION_SDI3:	return kRegRP188InOut3DBB;	//	reg 268
+		case NTV2_OUTPUTDESTINATION_SDI4:	return kRegRP188InOut4DBB;	//	reg 273
+		default:							return 0;
 	}	//	switch on output destination
 
 }	//	GetRP188RegisterForOutput
@@ -858,4 +846,3 @@ bool NTV2Player8K::SetCallback (void * const pInstance, NTV2Player8KCallback * c
 
 	return true;
 }	//	SetCallback
-

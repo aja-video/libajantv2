@@ -144,7 +144,7 @@ class NTV2LLBurn
 
 	//	Private Member Data
 	private:
-		AJAThread *					mRunThread;				///< @brief	My worker thread object
+		AJAThread					mRunThread;				///< @brief	My worker thread object
 
 		CNTV2Card					mDevice;				///< @brief	My CNTV2Card instance
 		NTV2DeviceID				mDeviceID;				///< @brief	My device identifier

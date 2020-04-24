@@ -22,8 +22,8 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////////////////////	NTV2Capture IMPLEMENTATION
 
 NTV2Capture::NTV2Capture (const CaptureConfig & inConfig)
-	:	mConsumerThread		(AJA_NULL),
-		mProducerThread		(AJA_NULL),
+	:	mConsumerThread		(AJAThread()),
+		mProducerThread		(AJAThread()),
 		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mConfig				(inConfig),
 		mVideoFormat		(NTV2_FORMAT_UNKNOWN),
@@ -41,12 +41,6 @@ NTV2Capture::~NTV2Capture ()
 	//	Stop my capture and consumer threads, then destroy them...
 	Quit();
 
-	delete mConsumerThread;
-	mConsumerThread = AJA_NULL;
-
-	delete mProducerThread;
-	mProducerThread = AJA_NULL;
-
 	//	Unsubscribe from input vertical event...
 	mDevice.UnsubscribeInputVerticalEvent(mConfig.fInputChannel);
 
@@ -58,13 +52,11 @@ void NTV2Capture::Quit (void)
 	//	Set the global 'quit' flag, and wait for the threads to go inactive...
 	mGlobalQuit = true;
 
-	if (mConsumerThread)
-		while (mConsumerThread->Active ())
-			AJATime::Sleep (10);
+	while (mConsumerThread.Active())
+		AJATime::Sleep(10);
 
-	if (mProducerThread)
-		while (mProducerThread->Active ())
-			AJATime::Sleep (10);
+	while (mProducerThread.Active())
+		AJATime::Sleep(10);
 
 	if (!mConfig.fDoMultiFormat)
 	{
@@ -301,10 +293,9 @@ AJAStatus NTV2Capture::Run ()
 void NTV2Capture::StartConsumerThread (void)
 {
 	//	Create and start the consumer thread...
-	mConsumerThread = new AJAThread ();
-	mConsumerThread->Attach (ConsumerThreadStatic, this);
-	mConsumerThread->SetPriority (AJA_ThreadPriority_High);
-	mConsumerThread->Start ();
+	mConsumerThread.Attach(ConsumerThreadStatic, this);
+	mConsumerThread.SetPriority(AJA_ThreadPriority_High);
+	mConsumerThread.Start();
 
 }	//	StartConsumerThread
 
@@ -357,10 +348,9 @@ void NTV2Capture::ConsumeFrames (void)
 void NTV2Capture::StartProducerThread (void)
 {
 	//	Create and start the capture thread...
-	mProducerThread = new AJAThread ();
-	mProducerThread->Attach (ProducerThreadStatic, this);
-	mProducerThread->SetPriority (AJA_ThreadPriority_High);
-	mProducerThread->Start ();
+	mProducerThread.Attach(ProducerThreadStatic, this);
+	mProducerThread.SetPriority(AJA_ThreadPriority_High);
+	mProducerThread.Start();
 
 }	//	StartProducerThread
 
@@ -439,17 +429,6 @@ void NTV2Capture::CaptureFrames (void)
 				excess.Fill(uint32_t(0));
 			}
 
-			//	Log SDI input CRC/VPID/TRS errors...
-			if (::NTV2DeviceCanDoSDIErrorChecks(mDeviceID) && NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
-			{
-				NTV2SDIInStatistics	sdiStats;
-				NTV2SDIInputStatus	inputStatus;
-				mDevice.ReadSDIStatistics(sdiStats);
-				sdiStats.GetSDIInputStatus(inputStatus, UWord(::GetIndexForNTV2InputSource(mConfig.fInputSource)));
-				if (inputStatus.mCRCTallyA || !inputStatus.mVPIDValidA || inputStatus.mFrameTRSError)
-					CAPWARN(inputStatus);
-			}
-
 			//	Grab all valid timecodes that were captured...
 			inputXfer.GetInputTimeCodes (pCaptureData->fTimecodes, mConfig.fInputChannel, /*ValidOnly*/ true);
 
@@ -476,6 +455,19 @@ void NTV2Capture::CaptureFrames (void)
 			//	Rather than waste CPU cycles spinning, waiting until a frame becomes available, it's far more
 			//	efficient to wait for the next input vertical interrupt event to get signaled...
 			mDevice.WaitForInputVerticalInterrupt(mConfig.fInputChannel);
+		}
+
+		//	Log SDI input CRC/VPID/TRS errors...
+		if (::NTV2DeviceCanDoSDIErrorChecks(mDeviceID) && NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
+		{
+			NTV2SDIInStatistics	sdiStats;
+			NTV2SDIInputStatus	inputStatus;
+			if (mDevice.ReadSDIStatistics(sdiStats))
+			{
+				sdiStats.GetSDIInputStatus(inputStatus, UWord(::GetIndexForNTV2InputSource(mConfig.fInputSource)));
+				if (!inputStatus.mLocked)
+					CAPWARN(inputStatus);
+			}
 		}
 	}	//	loop til quit signaled
 
