@@ -79,15 +79,15 @@ void NTV2SDIInputStatus::Clear (void)
 
 ostream & NTV2SDIInputStatus::Print (ostream & inOutStream) const
 {
-	inOutStream	<< "[CRCA="			<< mCRCTallyA
-				<< " CRCB="			<< mCRCTallyB
-				<< " unlk="			<< mUnlockTally
-				<< " frmRefClkCnt="	<< mFrameRefClockCount
-				<< " globalClkCnt="	<< mGlobalClockCount
-				<< " frmTRS="		<< mFrameTRSError
-				<< " locked="		<< mLocked
-				<< " VPIDA="		<< mVPIDValidA
-				<< " VPIDB="		<< mVPIDValidB
+	inOutStream	<< "[CRCA="			<< DEC(mCRCTallyA)
+				<< " CRCB="			<< DEC(mCRCTallyB)
+				<< " unlk="			<< xHEX0N(mUnlockTally,8)
+				<< " frmRefClkCnt="	<< xHEX0N(mFrameRefClockCount,16)
+				<< " globalClkCnt="	<< xHEX0N(mGlobalClockCount,16)
+				<< " frmTRS="		<< YesNo(mFrameTRSError)
+				<< " locked="		<< YesNo(mLocked)
+				<< " VPIDA="		<< YesNo(mVPIDValidA)
+				<< " VPIDB="		<< YesNo(mVPIDValidB)
 				<< "]";
 	return inOutStream;
 }
@@ -1846,15 +1846,15 @@ NTV2SDIInStatistics::NTV2SDIInStatistics()
 	:	mHeader(AUTOCIRCULATE_TYPE_SDISTATS, sizeof(NTV2SDIInStatistics)),
 		mInStatistics(NTV2_MAX_NUM_CHANNELS * sizeof(NTV2SDIInputStatus))
 {
-	NTV2SDIInputStatus * pArray(reinterpret_cast <NTV2SDIInputStatus *> (mInStatistics.GetHostPointer()));
-	for (int i = 0; i < NTV2_MAX_NUM_CHANNELS; i++)
-		pArray[i].Clear();
+	Clear();
 	NTV2_ASSERT_STRUCT_VALID;
 }
 
 void NTV2SDIInStatistics::Clear(void)
 {
 	NTV2_ASSERT_STRUCT_VALID;
+	if (mInStatistics.IsNULL())
+		return;
 	NTV2SDIInputStatus * pArray(reinterpret_cast <NTV2SDIInputStatus *> (mInStatistics.GetHostPointer()));
 	for (int i = 0; i < NTV2_MAX_NUM_CHANNELS; i++)
 		pArray[i].Clear();
@@ -1874,6 +1874,21 @@ bool NTV2SDIInStatistics::GetSDIInputStatus(NTV2SDIInputStatus & outStatus, cons
 		return false;
 	outStatus = pArray[inSDIInputIndex0];
 	return true;
+}
+
+NTV2SDIInputStatus &	NTV2SDIInStatistics::operator [] (const size_t inSDIInputIndex0)
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	static NTV2SDIInputStatus dummy;
+	const ULWord	numElements(mInStatistics.GetByteCount() / sizeof(NTV2SDIInputStatus));
+	NTV2SDIInputStatus * pArray(reinterpret_cast<NTV2SDIInputStatus*>(mInStatistics.GetHostPointer()));
+	if (!pArray)
+		return dummy;
+	if (numElements != 8)
+		return dummy;
+	if (inSDIInputIndex0 >= numElements)
+		return dummy;
+	return pArray[inSDIInputIndex0];
 }
 
 std::ostream &	NTV2SDIInStatistics::Print(std::ostream & inOutStream) const

@@ -3664,7 +3664,7 @@ private:
 			(void) inDeviceID;
 			ostringstream	oss;
 			if (::NTV2DeviceCanDoSDIErrorChecks(inDeviceID))
-				oss	<< "Lock Count: "			<< DEC(inRegValue & 0x7FFF)		<< endl
+				oss	<< "Unlock Tally: "			<< DEC(inRegValue & 0x7FFF)		<< endl
 					<< "Locked: "				<< YesNo(inRegValue & BIT(16))	<< endl
 					<< "Link A VID Valid: "		<< YesNo(inRegValue & BIT(20))	<< endl
 					<< "Link B VID Valid: "		<< YesNo(inRegValue & BIT(21))	<< endl

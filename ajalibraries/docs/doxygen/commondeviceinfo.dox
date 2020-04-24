@@ -915,7 +915,7 @@
 	configured to use 8 channels.
 	Call CNTV2Card::SetNumberAudioChannels to change the number of audio channels a device <b>Audio System</b> is configured to use.
 
-	@note	AJA recommendeds configuring the <b>Audio System</b> to use the maximum number of audio channels the device is capable of.
+	@note	AJA recommends configuring the <b>Audio System</b> to use the maximum number of audio channels the device is capable of.
 
 	The audio <b>Sample Rate</b> on all AJA devices is fixed at 48 kHz. All NTV2 devices implement a 48 kHz <b>Audio Clock</b> through the
 	::kRegAud1Counter register. This register is reset to zero at power-on and PCIe reset, and increments every 20.833… µs. It’s used
@@ -1066,8 +1066,11 @@
 	If the output hardware <b>Play Head</b> pointer catches up to the <b>Audio Output Last Address</b>, the buffer will wrap, and audio/video
 	synchronization will be lost.
 
-	Note that if AutoCirculate is used for playout, AutoCirculate completely and automatically manages the <b>Audio System</b>.
-	See \ref aboutautocirculate for more information.
+	If AutoCirculate is used for playout, AutoCirculate completely and automatically runs the <b>Audio System</b>.
+	When CNTV2Card::AutoCirculateInitForOutput is called with a valid ::NTV2AudioSystem, and then CNTV2Card::AutoCirculateStart is called,
+	AutoCirculate starts the <b>Audio System</b>. Youʼll need to transfer the correct number of audio samples via AUTOCIRCULATE_TRANSFER::SetAudioBuffer
+	or AUTOCIRCULATE_TRANSFER::acAudioBuffer before calling CNTV2Card::AutoCirculateTransfer. See \ref autocirculateplayout for more information.
+	Also see \ref audiosamplecount (below) on how to calculate the correct number of audio samples for the current outgoing frame.
 
 	SDI output embedders can usually be driven by any Audio System (see CNTV2Card::SetSDIOutputAudioSystem and CNTV2Card::SetSDIOutputDS2AudioSystem).
 
@@ -1128,9 +1131,7 @@
 			hardware’s <b>Record Head</b>. Just compare its new position with its old position from the previous frame.
 		-	<b>With AutoCirculate</b> — Use the AUTOCIRCULATE_TRANSFER::GetCapturedAudioByteCount function.
 	-	<b>Playout</b>
-		-	<b>Without AutoCirculate</b> — Use ::GetAudioSamplesPerFrame to calculate the number of audio samples to write for
-			the current frame.
-		-	<b>With AutoCirculate</b> — Use ::GetAudioSamplesPerFrame to calculate the number of audio samples to write for
+		-	<b>With or Without AutoCirculate</b> — Use ::GetAudioSamplesPerFrame to calculate the number of audio samples to write for
 			the current frame.
 
 
