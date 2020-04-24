@@ -7076,7 +7076,43 @@ bool CNTV2Card::ReadSDIStatistics (NTV2SDIInStatistics & outStats)
 	if (_remoteHandle != INVALID_NUB_HANDLE)
 		return false;
 #endif	//	NTV2_NUB_CLIENT_SUPPORT
-	return NTV2Message (reinterpret_cast <NTV2_HEADER *> (&outStats));
+#if defined(AJAMac)	//	Unimplemented in Mac driver at least thru SDK 16.0, so implement it here
+	NTV2RegisterReads sdiStatRegInfos;
+	for (size_t sdi(0);  sdi < 8;  sdi++)
+		for (ULWord reg(0);  reg < 6;  reg++)
+			sdiStatRegInfos.push_back(NTV2RegInfo(reg + gChannelToRXSDIStatusRegs[sdi]));
+	sdiStatRegInfos.push_back(NTV2RegInfo(kRegRXSDIFreeRunningClockLow));
+	sdiStatRegInfos.push_back(NTV2RegInfo(kRegRXSDIFreeRunningClockHigh));
+	//	Read the registers all at once...
+	if (!ReadRegisters(sdiStatRegInfos))
+		return false;
+	//	Stuff the results into outStats...
+	for (size_t sdi(0);  sdi < 8;  sdi++)
+	{
+		NTV2SDIInputStatus & outStat(outStats[sdi]);
+		size_t ndx(sdi*6 + 0);	//	Start at kRegRXSDINStatus register
+		NTV2_ASSERT(ndx < sdiStatRegInfos.size());
+		NTV2RegInfo & regInfo(sdiStatRegInfos.at(ndx));
+		NTV2_ASSERT(regInfo.registerNumber == gChannelToRXSDIStatusRegs[sdi]);
+		outStat.mUnlockTally	= regInfo.registerValue & kRegMaskSDIInUnlockCount;
+		outStat.mLocked			= regInfo.registerValue & kRegMaskSDIInLocked ? true : false;
+		outStat.mFrameTRSError	= regInfo.registerValue & kRegMaskSDIInTRSError ? true : false;
+		outStat.mVPIDValidA		= regInfo.registerValue & kRegMaskSDIInVpidValidA ? true : false;
+		outStat.mVPIDValidB		= regInfo.registerValue & kRegMaskSDIInVpidValidB ? true : false;
+		regInfo = sdiStatRegInfos.at(ndx+1);	//	kRegRXSDINCRCErrorCount
+		outStat.mCRCTallyA		= regInfo.registerValue & kRegMaskSDIInCRCErrorCountA;
+		outStat.mCRCTallyB		= (regInfo.registerValue & kRegMaskSDIInCRCErrorCountB) >> kRegShiftSDIInCRCErrorCountB;
+		//									kRegRXSDINFrameCountHigh									kRegRXSDINFrameCountLow
+		//outStat.mFrameTally = (ULWord64(sdiStatRegInfos.at(ndx+2).registerValue) << 32) | ULWord64(sdiStatRegInfos.at(ndx+1).registerValue);
+		//									kRegRXSDINFrameRefCountHigh									kRegRXSDINFrameRefCountLow
+		outStat.mFrameRefClockCount = (ULWord64(sdiStatRegInfos.at(ndx+5).registerValue) << 32) | ULWord64(sdiStatRegInfos.at(ndx+4).registerValue);
+		//									kRegRXSDIFreeRunningClockHigh								kRegRXSDIFreeRunningClockLow
+		outStat.mGlobalClockCount = (ULWord64(sdiStatRegInfos.at(8*6+1).registerValue) << 32) | ULWord64(sdiStatRegInfos.at(8*6+0).registerValue);
+	}	//	for each SDI
+	return true;
+#else	//	else not MacOS
+	return NTV2Message(reinterpret_cast<NTV2_HEADER*>(&outStats));
+#endif
 }
 
 bool CNTV2Card::SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel)

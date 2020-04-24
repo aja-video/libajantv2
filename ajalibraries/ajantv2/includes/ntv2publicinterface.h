@@ -2133,6 +2133,7 @@ typedef enum
 	kRegMaskRasterLevelB	= BIT(4),
 	kRegMaskRasterDecimate	= BIT(8),
 
+	//	kRegRXSDI1Status, kRegRXSDI2Status, etc
 	kRegMaskSDIInUnlockCount	= BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
 	kRegMaskSDIInLocked			= BIT(16),
 	kRegMaskSDIInVpidValidA		= BIT(20),
@@ -3273,6 +3274,7 @@ typedef enum
 	kRegShiftRasterLevelB	= 4,
 	kRegShiftRasterDecimate	= 8,
 
+	//	kRegRXSDI1Status, kRegRXSDI2Status, etc
 	kRegShiftSDIInUnlockCount		= 0,
 	kRegShiftSDIInLocked			= 16,
 	kRegShiftSDIInVpidValidA		= 20,
@@ -6733,8 +6735,7 @@ typedef enum
 
 
 		/**
-			@brief	For devices that support it (see the ::NTV2DeviceCanDoSDIErrorChecks function in "ntv2devicefeatures.h"),
-					this struct reports SDI input error status information.
+			@brief	For devices that support it (see ::NTV2DeviceCanDoSDIErrorChecks ), this struct reports SDI input error status information.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2SDIInputStatus)
@@ -7410,6 +7411,12 @@ typedef enum
 					@return		True if successful;  otherwise false.
 				**/
 				bool			GetSDIInputStatus (NTV2SDIInputStatus & outStatus, const UWord inSDIInputIndex0 = 0);
+
+				/**
+					@return		A non-const reference to the NTV2SDIInputStatus record for the given SDI input.
+					@param[in]	inSDIInputIndex0	Specifies the zero-based index of the SDI input of interest.
+				**/
+				NTV2SDIInputStatus &	operator [] (const size_t inSDIInputIndex0);
 
 				/**
 					@brief	Prints a human-readable representation of me to the given output stream.
