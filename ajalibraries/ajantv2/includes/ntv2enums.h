@@ -3911,6 +3911,13 @@ typedef enum
 	NTV2_LUTCONTROL_3_4,
 	NTV2_LUTCONTROL_5
 } NTV2LUTControlSelect;
+		
+typedef enum
+{
+	NTV2_REDPLANE = 0x1,
+	NTV2_GREENPLANE = 0x2,
+	NTV2_BLUEPLANE = 0x3
+} NTV2LUTPlaneSelect;
 
 
 /**

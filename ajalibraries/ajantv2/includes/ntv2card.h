@@ -4438,6 +4438,14 @@ public:
 	AJA_VIRTUAL bool		GetLUTV2OutputBank (const NTV2Channel inLUTWidget, ULWord & outBank);
 
 	AJA_VIRTUAL bool		Has12BitLUTSupport ();
+	
+	/**
+		@brief		Sets/Gets the LUT table plane select.
+		@param[in]	inLUTPlaneSelect
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		Set12BitLUTPlaneSelect(NTV2LUTPlaneSelect inLUTPlaneSelect);
+	AJA_VIRTUAL bool		Get12BitLUTPlaneSelect(NTV2LUTPlaneSelect & outLUTPlaneSelect);
 	/**
 		@brief		Sets the RGB range for the given CSC.
 		@param[in]	inRange		Specifies the new RGB range (::NTV2_CSC_RGB_RANGE_FULL or ::NTV2_CSC_RGB_RANGE_SMPTE).

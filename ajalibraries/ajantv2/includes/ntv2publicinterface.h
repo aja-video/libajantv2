@@ -1519,6 +1519,7 @@ typedef enum
 	kRegMaskLUT6OutputBankSelect		= BIT(21),
 	kRegMaskLUT7OutputBankSelect		= BIT(22),
 	kRegMaskLUT8OutputBankSelect		= BIT(23),
+	kRegMask12BitLUTPlaneSelect			= BIT(24)+BIT(25),
 	kRegMask12BitLUTSupport				= BIT(28),
 
 	
@@ -2688,6 +2689,7 @@ typedef enum
 	kRegShiftLUT6OutputBankSelect		= 21,
 	kRegShiftLUT7OutputBankSelect		= 22,
 	kRegShiftLUT8OutputBankSelect		= 23,
+	kRegShift12BitLUTPlaneSelect		= 24,
 	kRegShift12BitLUTSupport			= 28,
 
 	// RS422 Control 
@@ -4545,16 +4547,15 @@ typedef struct {
 #define kColorCorrectionLUTOffset_Red	(0x0800)
 #define kColorCorrectionLUTOffset_Green	(0x1000)
 #define kColorCorrectionLUTOffset_Blue	(0x1800)
-
-#define kColorCorrection12BitLUTOffset_Red		(0x8000)
-#define kColorCorrection12BitLUTOffset_Green	(0xA000)
-#define kColorCorrection12BitLUTOffset_Blue		(0xB000)
-
+	
+// within each 32-bit LUT word, bits <31:22> = LUT[2i+1], bits <15:6> = LUT[2i] 
+#define kRegColorCorrection12BitLUTOddShift		16
+#define kRegColorCorrection12BitLUTEvenShift	 0
 
 // Note: there is code that assumes that the three LUTs are contiguous. So if this relationship
 //       changes (i.e. there are "gaps" between tables) then code will need to change!
 #define kColorCorrectionLUTOffset_Base	(0x0800)	// BYTE offset
-#define kColorCorrection12BitLUTOffset_Base	(0x08000)	// BYTE offset
+#define kColorCorrection12BitLUTOffset_Base	(0xe000)	// BYTE offset
 
 
 /////////////////////////////////////////////////////////////////////////////////////
