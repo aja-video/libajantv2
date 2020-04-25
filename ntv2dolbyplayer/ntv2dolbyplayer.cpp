@@ -527,8 +527,10 @@ void NTV2DolbyPlayer::ProduceFrames (void)
 
 	AJATimeBase	timeBase (CNTV2DemoCommon::GetAJAFrameRate (::GetNTV2FrameRateFromVideoFormat (mVideoFormat)));
 	NTV2TestPatternNames tpNames(NTV2TestPatternGen::getTestPatternNames());
-    mBurstOffset = 0;
-    mBurstSize = 0x1800;
+
+	//	Initialize IEC 61937 burst size (32 ms) for HDMI 192kHz sample rate
+	mBurstOffset = 0;	// Start a burst of Dolby data
+	mBurstSize = 6144;	// 192000 * 0.032 samples
 
 	PLNOTE("Thread started");
 	while (!mGlobalQuit)
