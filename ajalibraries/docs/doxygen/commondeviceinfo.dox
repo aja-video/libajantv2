@@ -480,77 +480,85 @@
 
 	@subsection	deviceclockingandsync		Device Clocking and Synchronization
 
-	On multiformat-capable devices in <b>Capture Mode</b>, the device firmware will calculate each input
+	-	NTV2 devices have <i>one</i> output clock that drives <i>all</i> SDI outputs.
+	-	When SDI output(s) are routed and connected, then device/output synchronization <i>must</i> be considered.
+
+	@subsubsection  devclock-capture	“Capture-Only”
+
+	On multiformat-capable devices in <b>Capture</b> mode, the device firmware will calculate each input
 	signal’s timing independently. If these signals are routed to FrameStores that are operating in
 	<b>Capture</b> mode, the FrameStores will each signal VBIs independently at the correct time.
-
-	<b>Capture-Only Example:</b>
+	For example:
 	@image	html	hwref-inputtiming.png
 	-	Repeated calls to <tt>CNTV2Card::WaitForInputVerticalInterrupt(NTV2_CHANNEL2)</tt> will occur at 50Hz;
 	-	Repeated calls to <tt>CNTV2Card::WaitForInputVerticalInterrupt(NTV2_CHANNEL3)</tt> will occur at 24Hz.
 
-	Since NTV2 devices have only <i>one</i> output clock that drives <i>all</i> SDI outputs, it is when
-	SDI output(s) are routed and connected that device/output synchronization <i>must</i> be considered.
+	On older, uniformat devices, the input signals can still be captured independently, but they must be
+	in the same frame rate “family” as the overall device video format.
 
-	<b>Capture &amp; Playout Example:</b> FrameStore4 is now routed to SDIOut4 and configured to playout 1080i2997:
+	<b>Related Clock “Families”</b>
+	-	24 / 48
+	-	25 / 50 (PAL)
+	-	29.97 / 59.94 (NTSC)
+	-	30 / 60 / 120
+
+	@subsubsection  devclock-inout		“Capture &amp; Playout”
+
+	Add a route from FrameStore4 to SDIOut4, configuring the FrameStore for 1080i2997 playout:
 	@image	html	hwref-inputoutputsync.png
-	In this new scenario, there are now three output synchronization options:
-	-#	Have the output signal clocked independently (of the inputs and any other reference) using
-		the device’s internal clock. In this case, call CNTV2Card::SetReference with ::NTV2_REFERENCE_FREERUN.
-	-#	Sync the outputs to a 29.97Hz (or 59.94Hz) external reference. This would require calling
-	 	CNTV2Card::SetReference with ::NTV2_REFERENCE_EXTERNAL;
+	In this scenario, there are now three output synchronization options:
+	-#	Clock the output signal independently of the inputs and any other reference using the device’s
+		internal clock. In this case, call CNTV2Card::SetReference with ::NTV2_REFERENCE_FREERUN.
+	-#	Sync the outputs to a 29.97Hz (or 59.94Hz) external reference. For this case, call
+	 	CNTV2Card::SetReference with ::NTV2_REFERENCE_EXTERNAL.
 	-#	Sync the outputs to one of the SDI inputs. But note that this option is not viable in this
 		example, because none of the input signals have 2997 or 5994 timing.
 
-	<b>“E-E” Example:</b>  Alternatively, route SDIIn2 to SDIOut4 (assuming such a route is actually
-	implemented in the firmware):
+	@subsubsection  devclock-ee			“End-to-End” (“E-E”)
+
+	Add a route from SDIIn2 to SDIOut4 (let’s assume this route is actually implemented in the firmware):
 	@image	html	hwref-ee-sync.png
 	This can be done either directly, as shown, or indirectly (for example, through a Mixer/Keyer widget).
-	This is an “<b>End-to-End</b>” scenario (aka “<b>E-E</b>”), which requires the device’s output
-	timing to be locked to the input signal. Thus, CNTV2Card::SetReference needs to be called with
-	::NTV2_REFERENCE_INPUT2.
+	This requires the device’s output timing to be locked to the input signal. In this case, call
+	CNTV2Card::SetReference with ::NTV2_REFERENCE_INPUT2.
 
-	To summarize:  SDI outputs are synchronized to one of these clock sources:
-	-	the device’s on-board crystal oscillator (a.k.a. “free run”);
-	-	an SDI input (not available on playout-only devices);
-	-	an external timing reference signal (devices having at least one external reference input).
+	When the reference source is set to an SDI input, the output signal(s) will be locked to the same
+	timebase as that of the designated source’s signal. For this to work, the output video format must
+	have a frame rate in the same clock family as that being received at the SDI input.
 
-	<b>IMPORTANT:</b> For historical reasons, if SDI Input 1 is used for input and a signal is present,
-	its signal frame rate dictates the clock family for all SDI outputs. When operating the device in
-	multiformat mode, it’s therefore best to always use NTV2_CHANNEL1 as an output/playout channel, and
-	use the other channels for input, as they don’t have the clock family restriction or any effect on
-	the outputs.
+	The actual output signal will be delayed 2~3 lines due to propagation delays through the device’s
+	circuitry, but the important point is that the phase relationship between the input and output will
+	be fixed, and will not drift.
 
-	When the device reference source is set to an SDI input, the output signal(s) will be
-	locked to the same timebase as that of input channel 1. For this to work, the output video format
-	must have a frame rate in the same clock family as that being received at the SDI input.
-	Note that the actual output will be delayed a couple of lines due to propagation delays through
-	the device’s circuitry, but the important point is that the phase relationship between the input
-	and output will be fixed, and will not drift. This form of output clocking is best suited to
-	end-to-end (E-E) routing, where an input is routed to an output, directly, or indirectly, without
-	any mediation through a pair of Frame Stores.
+	@note	For historical reasons, if SDI Input 1 is used for input and a signal is present,
+			its signal frame rate dictates the clock family for all SDI outputs. When operating
+			the device in multiformat mode, it’s therefore best to always use NTV2_CHANNEL1 as
+			an output/playout channel, and use the other channels for input, as they don’t have
+			the clock family restriction or any effect on the outputs.
 
-	However, if more than one input is feeding the device, and all share the same clock family (e.g.
-	25/50, 2997/5994, 30/60, etc.) it’s probably impossible to lock to them all, unless they’re all
-	sync’d to a common timebase (often called “house reference”). Otherwise, the signals will all drift
-	over time with respect to each other. For example, one signal may just be starting a new frame,
-	while another is already half way through its frame. Since the device clock can’t lock to more than
-	one of them, ::NTV2_REFERENCE_FREERUN must be used, to clock the outputs from the device’s own
-	internal clock source. Note that setting “free run” isn’t technically necessary (as long as none of
-	the outputs are tied to the inputs E-E) — the application would run just as well locked to one of the
-	input signals, with the only difference being when the output signals would actually come out of the
-	BNC connectors.
+	If more than one input is feeding the device, and all share the same clock family, it’s probably
+	impossible to lock to them all, unless they’re all sync’d to a common timebase (often called “house
+	reference”) … otherwise, the signals will all drift over time with respect to each other. For example,
+	one signal may just be starting a new frame, while another is already half-way through its frame.
+	Since the device clock can’t lock to more than one of them, ::NTV2_REFERENCE_FREERUN must be used,
+	to clock the outputs from the device’s own internal clock source. Note that setting “free run” isn’t
+	technically necessary (as long as none of the outputs are tied to the inputs E-E) — the application
+	would run just as well locked to one of the input signals, with the only difference being when the
+	output signals would actually come out of the BNCs.
+
+	@subsubsection  devclock-extern		External Reference
 
 	If the device’s output(s) must have a given timing (e.g., to feed a switcher), then applications
 	can pass ::NTV2_REFERENCE_EXTERNAL to CNTV2Card::SetReference, which will lock the device to an
-	analog or tri-level sync signal connected to the device’s external reference input. You can determine
-	the video format of the signal being applied to the reference input by calling
-	CNTV2Card::GetReferenceVideoFormat. Note that even when configured to sync its outputs to
-	::NTV2_REFERENCE_EXTERNAL, the device output will internally revert to Free-Run if the reference
-	signal disappears or is incompatible with the output video format.
+	analog or tri-level sync signal connected to the device’s external reference input.
 
-	@note	AJA recommends setting the device reference to ::NTV2_REFERENCE_FREERUN when
-			there is no signal at the external reference connector.
+	To determine the video format of the signal being applied to the reference input, call
+	CNTV2Card::GetReferenceVideoFormat.
+
+	@note	Even when configured for ::NTV2_REFERENCE_EXTERNAL, the device output will internally
+			revert to Free-Run if the reference signal disappears or is incompatible with the output
+			video format.  In this case, AJA still recommends setting the reference to
+			::NTV2_REFERENCE_FREERUN (when there’s no signal at the external reference connector).
 
 
 	@subsection	fieldframeinterrupts	Field/Frame Interrupts
