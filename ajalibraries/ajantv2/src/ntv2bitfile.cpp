@@ -500,7 +500,7 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID)
 
 bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 {
-	if (IsPartial ())
+	if (IsPartial () || IsClear ())
 		return false;
 	
 	if (_designName == ::NTV2GetPrimaryHardwareDesignName (inDeviceID))
@@ -646,7 +646,7 @@ NTV2DeviceID CNTV2Bitfile::GetDeviceID (void) const
 {
 	if ((_userID != 0) && (_userID != 0xffffffff))
 	{
-		return DEVICE_ID_NOTFOUND;
+		return sDesignPairToIDMapMaker.DesignPairToID(_designID, _bitfileID);
 	}
 	
 	return sDesignNameToIDMapMaker.DesignNameToID (_designName);
