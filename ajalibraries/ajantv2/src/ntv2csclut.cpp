@@ -1370,7 +1370,6 @@ bool CNTV2Card::LoadLUTTable (const double * pInTable)
 
 	//	Hope and pray that the caller's array has at least 1024 elements...
 	NTV2DoubleArray rgbLUT;
-	rgbLUT.resize(kLUTArraySize);
 	for (size_t ndx(0);  ndx < kLUTArraySize;  ndx++)
 		rgbLUT.push_back(pInTable[ndx]);
 
