@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{CC01A355-CABB-4ACD-82BD-0E62236CF32C}</ProjectGuid>
-    <RootNamespace>timecodeburn</RootNamespace>
+    <ProjectGuid>{8C029823-67EB-48D5-936C-861A32507092}</ProjectGuid>
+    <RootNamespace>ntv2dolbyplayer</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
