@@ -225,6 +225,7 @@ NTV2DeviceCanReportRunningFirmwareDate
 NTV2DeviceCanDo8KVideo
 NTV2DeviceCanDoWarmBootFPGA
 NTV2DeviceCanDoHFRRGB
+NTV2DeviceCanDoAudio192K
 
 // NTV2ConversionModes
 
