@@ -5915,18 +5915,22 @@ typedef enum
 												<< std::bitset<8>((uint64_t(__x__)&0x0000000000FF0000)>>16) << "."		\
 												<< std::bitset<8>((uint64_t(__x__)&0x000000000000FF00)>>8) << "."		\
 												<< std::bitset<8>( uint64_t(__x__)&0x00000000000000FF)
-			#define	BIN032(__x__)			std::bitset<8>((uint32_t(__x__)&0xFF000000)>>24) << "."				\
+			#define	BIN032(__x__)			std::bitset<8>((uint32_t(__x__)&0xFF000000)>>24) << "."						\
 												<< std::bitset<8>((uint32_t(__x__)&0x00FF0000)>>16) << "."				\
 												<< std::bitset<8>((uint32_t(__x__)&0x0000FF00)>>8) << "."				\
 												<< std::bitset<8>( uint32_t(__x__)&0x000000FF)
-			#define	BIN016(__x__)			std::bitset<8>((uint16_t(__x__)&0xFF00)>>8) << "."					\
+			#define	BIN016(__x__)			std::bitset<8>((uint16_t(__x__)&0xFF00)>>8) << "."							\
 												<< std::bitset<8>( uint16_t(__x__)&0x00FF)
+			#define	BIN012(__x__)			std::bitset<12>((uint16_t(__x__)&0x0FFF))
+			#define	BIN010(__x__)			std::bitset<10>((uint16_t(__x__)&0x03FF))
 			#define	BIN08(__x__)			std::bitset<8>(uint8_t(__x__))
 			#define	BIN04(__x__)			std::bitset<4>(uint8_t(__x__))
 			#define	BIN0N(__x__,__n__)		std::bitset<__n__>(uint8_t(__x__))
 			#define	bBIN064(__x__)			"b"	<< BIN064(__x__)
 			#define	bBIN032(__x__)			"b"	<< BIN032(__x__)
 			#define	bBIN016(__x__)			"b"	<< BIN016(__x__)
+			#define	bBIN012(__x__)			"b"	<< BIN012(__x__)
+			#define	bBIN010(__x__)			"b"	<< BIN010(__x__)
 			#define	bBIN08(__x__)			"b"	<< BIN08(__x__)
 			#define	bBIN04(__x__)			"b"	<< BIN04(__x__)
 			#define	bBIN0N(__x__,__n__)		"b"	<< BIN0N(__x__,__n__)
