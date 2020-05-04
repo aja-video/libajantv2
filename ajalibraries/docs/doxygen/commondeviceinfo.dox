@@ -929,23 +929,27 @@
 	<hr size="50px">
 	@section	audiooperation		Audio System Operation
 
-	NTV2-compatible devices have a minimum of one <b>Audio System</b> (sometimes referred to as an <b>Audio Engine</b>).
-	Call ::NTV2DeviceGetNumAudioSystems to determine the number of Audio Systems on a device.
+	NTV2-compatible devices have a minimum of one <b>Audio System</b> (sometimes referred to as an <b>Audio Engine</b>)
+	that make it possible to stream audio, whether in <b>Capture</b> (Record) mode, or <b>Playout</b> mode, or both.
+	Call ::NTV2DeviceGetNumAudioSystems to determine the number of <b>Audio System</b>s on a device.
 
 	An <b>Audio System</b> is implemented in FPGA firmware using several hardware registers, which together perform the following functions:
 	-	If it has any SDI, HDMI, analog, or AES inputs (see ::NTV2DeviceCanDoCapture):
 		-	It continually de-embeds 20/24-bit AES audio samples. For SDI inputs, these will come from SMPTE 272M/299M HANC packets
 			detected in the SDI input stream.
-		-	If its capture side is running, it will write the de-embedded audio samples into its input audio buffer in device SDRAM.
-		-	The audio samples can always be piped through a FIFO to source an <b>Audio System</b>’s output audio embedder for
-			“loopback” play-through.
-	-	If it has an SDI output (see ::NTV2DeviceCanDoPlayback):
-		-	Unless its embedder is disabled, it will continually embed 20/24-bit AES audio samples into SMPTE 272M/292M HANC packets
-			into its SDI output stream.
-		-	When its playout side is running, it will read from its output audio buffer in device SDRAM the audio samples to be embedded.
-		-	When its playout side is not running…
-			-	If configured for “loopback” play-through, it obtains audio samples from an <b>Audio System</b>’s input audio de-embedder.
-			-	It will otherwise embed silence (audio packets that contain all-zero sample values).
+		-	If the <b>Capture</b> aspect of the <b>Audio System</b> is <i>Running</i>, it will write the de-embedded
+			audio samples into its input audio buffer in device SDRAM.
+		-	The audio samples can always be piped through a FIFO to source an <b>Audio System</b>’s output audio
+			embedder for “loopback” play-through.
+	-	If it has any SDI, HDMI, analog or AES outputs (see ::NTV2DeviceCanDoPlayback):
+		-	Unless its embedder is disabled, it will continually embed 20/24-bit AES audio samples into SMPTE 272M/292M
+			HANC packets into its SDI output stream.
+		-	When its <b>Playout</b> aspect is <i>Running</i>, it will read from its output audio buffer in device
+			SDRAM the audio samples to be embedded.
+		-	When its <b>Playout</b> side is not running…
+			-	If configured for “loopback” play-through, it obtains audio samples from an
+				<b>Audio System</b>’s input audio de-embedder.
+			-	Otherwise, it will embed silence (audio packets that contain all-zero sample values).
 
 	Each <b>Audio System</b> can accommodate at least 8 channels of audio.
 	Call ::NTV2DeviceGetMaxAudioChannels to determine the maximum number of audio channels that a device’s <b>Audio Systems</b> can handle.
@@ -1035,9 +1039,10 @@
 			The specification allows AC-3 data to be carried in 16, 20 or 24 bits of the PCM sample.
 			This flexibility requires the application to know how the source has formatted the data into the AES samples.
 
-	Generally, each <b>Audio System</b>’s <b>Input Source</b> is selectable, to receive samples from any of the device’s video (and possibly audio)
-	Input Sources, including embedded SDI, HDMI, external AES and analog inputs (see CNTV2Card::SetAudioSystemInputSource).
-	For devices that support 3Gb Level B inputs, the audio can be taken from data stream 1 or 2.
+	Generally, each <b>Audio System</b>’s <b>Input Source</b> is selectable, to receive samples from any of the device’s video
+	(and possibly audio) Input Sources, including embedded SDI, HDMI, external AES and analog inputs
+	(see CNTV2Card::SetAudioSystemInputSource). For devices that support 3Gb Level B inputs, the audio can be taken from data
+	stream 1 or 2. HDMI inputs can be configured to supply 2 or 8 audio channels (see CNTV2Card::GetHDMIInputAudioChannels ).
 
 	Newer AJA hardware firmware implements an adjustable input delay that can be applied while samples are being written into the
 	<b>Audio Input Buffer</b>. Call ::NTV2DeviceCanDoAudioDelay to determine if this feature is available. Call CNTV2Card::GetAudioInputDelay
@@ -1046,7 +1051,7 @@
 	Audio input clocking for the running <b>Audio System</b> is ordinarily obtained from the input signal being used (SDI, HDMI, Analog, etc.).
 	AJA’s older devices, however, derived the audio input clock from the Device Reference by default (see ::NTV2ReferenceSource) and had to be
 	explicitly configured to use the input signal by passing ::NTV2_EMBEDDED_AUDIO_CLOCK_VIDEO_INPUT to CNTV2Card::SetEmbeddedAudioClock.
-	If this wasn't done, and the board reference was ::NTV2_REFERENCE_FREERUN or some other timebase that differed from the input video signal,
+	If this wasn’t done, and the board reference was ::NTV2_REFERENCE_FREERUN or some other timebase that differed from the input video signal,
 	the audio would eventually drift from the video. (See also ::NTV2DeviceCanChangeEmbeddedAudioClock.)
 
 
@@ -1111,7 +1116,24 @@
 	or AUTOCIRCULATE_TRANSFER::acAudioBuffer before calling CNTV2Card::AutoCirculateTransfer. See \ref autocirculateplayout for more information.
 	Also see \ref audiosamplecount (below) on how to calculate the correct number of audio samples for the current outgoing frame.
 
-	SDI output embedders can usually be driven by any Audio System (see CNTV2Card::SetSDIOutputAudioSystem and CNTV2Card::SetSDIOutputDS2AudioSystem).
+	<b>SDI Output:</b> SDI output embedders can ordinarily be driven by any <b>Audio System</b>.
+	-	Call CNTV2Card::GetSDIOutputAudioSystem to determine which Audio System is currently driving Data Stream 1.
+	-	Call CNTV2Card::SetSDIOutputAudioSystem to change DS1’s Audio System.
+	-	On devices that have 3G/6G/12G SDI connectors that support Dual Link output:
+		-	Call CNTV2Card::GetSDIOutputDS2AudioSystem to determine the Audio System that’s currently driving Data Stream 2.
+		-	Call CNTV2Card::SetSDIOutputDS2AudioSystem to change DS2’s Audio System.
+
+	<b>HDMI Output:</b> The HDMI standard supports a minimum baseline of 2 audio channels up to a maximum of 8.
+	If the NTV2 device has an HDMI output (see ::NTV2DeviceGetNumHDMIVideoOutputs ), it can be configured
+	to transmit audio from any <b>Audio System</b>:
+	-	To transmit 2 audio channels, call CNTV2Card::SetHDMIOutAudioSource2Channel :
+		-	Specify the ::NTV2AudioSystem that will drive the HDMI outputʼs audio;
+		-	Specify the ::NTV2AudioChannelPair that will determine which two of the
+			Audio Systemʼs 8 (or 16) audio channels will be used.
+	-	To transmit 8 audio channels, call CNTV2Card::SetHDMIOutAudioSource8Channel :
+		-	Specify the ::NTV2AudioSystem that will drive the HDMI outputʼs audio;
+		-	Specify the ::NTV2Audio8ChannelSelect that will determine which group of 8
+			contiguous channels will be used from the Audio Systemʼs (presumably) 16 channels.
 
 	Downstream equipment can be told that the outgoing audio is not carrying PCM data, by setting the non-PCM indicator in the AES header.
 	Older AJA devices can only do this on an audio-system-wide basis — i.e., all outgoing audio groups are marked PCM or non-PCM.
@@ -1131,10 +1153,11 @@
 	-	Call CNTV2Card::GetAudioOutputAESSyncModeBit to see if the device is setting the Sync Mode bit.
 	-	Call CNTV2Card::SetAudioOutputAESSyncModeBit to change the setting.
 
-	@note	When the embedder is configured to “fib” — i.e. set the <b>Sync Mode bit</b> in the <b>AES header</b> in the <b>Audio Control
-			Packet</b> — audio and video are synchronized in time, but the resulting audio doesn’t exactly follow the definition of
-			“synchronized” in SMPTE 299 § 7.2.1.3, because the embedder doesn’t set the <b>Frame Sequence Number</b> in the <b>AES header</b>.
-			SMPTE 299, however, stipulates that receivers should correctly receive audio even from equipment that doesn’t fully conform to § 7.2.1.3.
+	@note	When the embedder is configured to “fib” — i.e. set the <b>Sync Mode bit</b> in the <b>AES header</b> in the <b>Audio
+			Control Packet</b> — audio and video are synchronized in time, but the resulting audio doesn’t exactly follow the
+			definition of “synchronized” in SMPTE 299 § 7.2.1.3, because the embedder doesn’t set the <b>Frame Sequence Number</b>
+			in the <b>AES header</b>. SMPTE 299, however, stipulates that receivers should correctly receive audio even from
+			equipment that doesn’t fully conform to § 7.2.1.3.
 
 	If the device supports <b>AES/EBU audio playout</b> through a breakout box or cable (see ::NTV2DeviceCanDoBreakoutBox and
 	::NTV2DeviceGetNumAESAudioOutputChannels functions), the output BNCs will automatically carry the same per-channel audio
@@ -1178,12 +1201,13 @@
 	@subsection	audiohidden		Other “Hidden” Audio Systems
 
 	Modern AJA devices intended for “retail” markets, particularly newer “KONA” and “Io” series devices, may have firmware that
-	implements additional “hidden” <b>Audio System</b>s that aren’t reported in the ordinary ::NTV2DeviceGetNumAudioSystems call:
+	implements additional “hidden” <b>Audio System</b>s that aren’t reported by the ::NTV2DeviceGetNumAudioSystems function:
 	-	A <b>Host Audio System</b> for audio input/output to/from the host operating system (see ::NTV2DeviceGetHostAudioSystem);
 	-	A “phantom” <b>Mixer Audio System</b> that uses only FIFOs (no audio buffer memory) in order to implement an \ref audiomixer
 		(see CNTV2Card::DeviceCanDoAudioMixer and ::NTV2DeviceGetAudioMixerSystem).
 
-	These additional <b>Audio System</b>s help support AJA’s “retail” software (i.e. Adobe, Avid, Apple, Telestream, etc. plug-ins, AJA ControlRoom, etc).
+	These additional <b>Audio System</b>s help support AJA’s “retail” software (i.e. Adobe, Avid, Apple, Telestream, etc.
+	plug-ins, AJA ControlRoom, etc).
 
 	The <b>Host Audio System</b> is used to continuously deliver…
 	-	SDI/HDMI/AES audio from the AJA KONA/Io device as input to the host computer’s primary audio system.
