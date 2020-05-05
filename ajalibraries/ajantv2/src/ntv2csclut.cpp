@@ -667,11 +667,13 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 	while (outTable.size() < tableSize)
 		outTable.push_back(0);
 	for (size_t ndx(0);  ndx < tableSize;  ndx++)
+	{
 		if ((outTable.at(ndx) = UWord(intClamp(0, int(dblTable.at(ndx) + 0.5), tableSize-1))))
 			nonzeroes++;
-	if (nonzeroes >= tableSize-1)
+	}
+	if (nonzeroes >= tableSize)
 		{AJA_sWARNING(AJA_DebugUnit_LUT, AJAFUNC << ": " << DEC(nonzeroes) << " non-zero values -- at least " << DEC(tableSize-1)); return false;}
-	return nonzeroes >= tableSize-1;
+	return nonzeroes >= tableSize;
 }
 
 static const NTV2ColorCorrectionHostAccessBank	gLUTBank0[] =
