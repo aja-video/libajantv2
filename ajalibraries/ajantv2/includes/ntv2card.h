@@ -5041,6 +5041,12 @@ public:
 	AJA_VIRTUAL bool	GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRouter & outRouting);
 
 	AJA_VIRTUAL bool	HasCanConnectROM (void);	///< @return	True if the device firmware has ROM containing legal xpt routes
+	/**
+		@brief		Answers with the implemented crosspoint connections (if known).
+		@param[out]	outConnections	Receives the device's ::NTV2PossibleConnections.
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetPossibleConnections (NTV2PossibleConnections & outConnections);
 
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	OutputRoutingTable (const NTV2RoutingTable * pInRoutingTable));	///< @deprecated	Use the ApplySignalRoute call instead.
