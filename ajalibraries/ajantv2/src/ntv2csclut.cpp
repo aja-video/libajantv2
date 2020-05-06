@@ -878,8 +878,8 @@ bool CNTV2Card::WriteLUTTables (const UWordSequence & inRedLUT, const UWordSeque
 		}
 		else
 		{
-			ULWord	tmpRedLo((loRed << kRegColorCorrection12BitLUTOddShift) + (loRed << kRegColorCorrection12BitLUTEvenShift));
-			ULWord	tmpRedHi((hiRed << kRegColorCorrection12BitLUTOddShift) + (hiRed << kRegColorCorrection12BitLUTEvenShift));
+			ULWord	tmpRedLo((loRed << kRegColorCorrection10To12BitLUTOddShift) + (loRed << kRegColorCorrection10To12BitLUTEvenShift));
+			ULWord	tmpRedHi((hiRed << kRegColorCorrection10To12BitLUTOddShift) + (hiRed << kRegColorCorrection10To12BitLUTEvenShift));
 			if(tmpRedLo || tmpRedHi) nonzeroes++;
 			Set12BitLUTPlaneSelect(NTV2_REDPLANE);
 			if (!WriteRegister(RTableReg++, tmpRedLo))
@@ -891,8 +891,8 @@ bool CNTV2Card::WriteLUTTables (const UWordSequence & inRedLUT, const UWordSeque
 			if (!WriteRegister(RTableReg++, tmpRedHi))
 				errorCount++;
 			
-			ULWord	tmpGreenLo((loGreen << kRegColorCorrection12BitLUTOddShift) + (loGreen << kRegColorCorrection12BitLUTEvenShift));
-			ULWord	tmpGreenHi((hiGreen << kRegColorCorrection12BitLUTOddShift) + (hiGreen << kRegColorCorrection12BitLUTEvenShift));
+			ULWord	tmpGreenLo((loGreen << kRegColorCorrection10To12BitLUTOddShift) + (loGreen << kRegColorCorrection10To12BitLUTEvenShift));
+			ULWord	tmpGreenHi((hiGreen << kRegColorCorrection10To12BitLUTOddShift) + (hiGreen << kRegColorCorrection10To12BitLUTEvenShift));
 			if(tmpGreenLo || tmpGreenHi) nonzeroes++;
 			Set12BitLUTPlaneSelect(NTV2_GREENPLANE);
 			if (!WriteRegister(GTableReg++, tmpGreenLo))
@@ -904,8 +904,8 @@ bool CNTV2Card::WriteLUTTables (const UWordSequence & inRedLUT, const UWordSeque
 			if (!WriteRegister(GTableReg++, tmpGreenHi))
 				errorCount++;
 			
-			ULWord	tmpBlueLo((loBlue << kRegColorCorrection12BitLUTOddShift) + (loBlue << kRegColorCorrection12BitLUTEvenShift));
-			ULWord	tmpBlueHi((hiBlue << kRegColorCorrection12BitLUTOddShift) + (hiBlue << kRegColorCorrection12BitLUTEvenShift));
+			ULWord	tmpBlueLo((loBlue << kRegColorCorrection10To12BitLUTOddShift) + (loBlue << kRegColorCorrection10To12BitLUTEvenShift));
+			ULWord	tmpBlueHi((hiBlue << kRegColorCorrection10To12BitLUTOddShift) + (hiBlue << kRegColorCorrection10To12BitLUTEvenShift));
 			if(tmpBlueLo || tmpBlueHi) nonzeroes++;
 			Set12BitLUTPlaneSelect(NTV2_BLUEPLANE);
 			if (!WriteRegister(BTableReg++, tmpBlueLo))

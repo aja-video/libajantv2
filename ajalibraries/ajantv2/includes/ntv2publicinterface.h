@@ -4577,6 +4577,9 @@ typedef struct {
 #define kRegColorCorrection12BitLUTOddShift		16
 #define kRegColorCorrection12BitLUTEvenShift	 0
 
+#define kRegColorCorrection10To12BitLUTOddShift		18
+#define kRegColorCorrection10To12BitLUTEvenShift	 2
+
 // Note: there is code that assumes that the three LUTs are contiguous. So if this relationship
 //       changes (i.e. there are "gaps" between tables) then code will need to change!
 #define kColorCorrectionLUTOffset_Base	(0x0800)	// BYTE offset
