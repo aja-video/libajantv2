@@ -5041,6 +5041,12 @@ public:
 	AJA_VIRTUAL bool	GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRouter & outRouting);
 
 	AJA_VIRTUAL bool	HasCanConnectROM (void);	///< @return	True if the device firmware has ROM containing legal xpt routes
+	/**
+		@brief		Answers with the implemented crosspoint connections (if known).
+		@param[out]	outConnections	Receives the device's ::NTV2PossibleConnections.
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetPossibleConnections (NTV2PossibleConnections & outConnections);
 
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	OutputRoutingTable (const NTV2RoutingTable * pInRoutingTable));	///< @deprecated	Use the ApplySignalRoute call instead.
@@ -5275,6 +5281,34 @@ public:
 		@return						True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValue, NTV2AudioSystem & outAudioSystem);
+
+	/**
+		@brief						Sets the HDMI output's audio rate
+		@param[in]	inNewValue		Specifies the audio rate
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	SetHDMIOutAudioRate (const NTV2AudioRate inNewValue);
+
+	/**
+		@brief						Answers with the HDMI output's current audio rate.
+		@param[out]	outValue		Receives the HDMI output's current audio rate.
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetHDMIOutAudioRate (NTV2AudioRate & outValue);
+
+	/**
+		@brief						Sets the HDMI output's audio format
+		@param[in]	inNewValue		Specifies the audio format
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	SetHDMIOutAudioFormat (const NTV2AudioFormat inNewValue);
+
+	/**
+		@brief						Answers with the HDMI output's current audio format.
+		@param[out]	outValue		Receives the HDMI output's current audio format.
+		@return						True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetHDMIOutAudioFormat (NTV2AudioFormat & outValue);
 
 	/**
 		@brief						Enables or disables override of HDMI parameters.

@@ -667,11 +667,13 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 	while (outTable.size() < tableSize)
 		outTable.push_back(0);
 	for (size_t ndx(0);  ndx < tableSize;  ndx++)
+	{
 		if ((outTable.at(ndx) = UWord(intClamp(0, int(dblTable.at(ndx) + 0.5), tableSize-1))))
 			nonzeroes++;
-	if (nonzeroes >= tableSize-1)
+	}
+	if (nonzeroes >= tableSize)
 		{AJA_sWARNING(AJA_DebugUnit_LUT, AJAFUNC << ": " << DEC(nonzeroes) << " non-zero values -- at least " << DEC(tableSize-1)); return false;}
-	return nonzeroes >= tableSize-1;
+	return nonzeroes >= tableSize;
 }
 
 static const NTV2ColorCorrectionHostAccessBank	gLUTBank0[] =
@@ -876,8 +878,8 @@ bool CNTV2Card::WriteLUTTables (const UWordSequence & inRedLUT, const UWordSeque
 		}
 		else
 		{
-			ULWord	tmpRedLo((loRed << kRegColorCorrection12BitLUTOddShift) + (loRed << kRegColorCorrection12BitLUTEvenShift));
-			ULWord	tmpRedHi((hiRed << kRegColorCorrection12BitLUTOddShift) + (hiRed << kRegColorCorrection12BitLUTEvenShift));
+			ULWord	tmpRedLo((loRed << kRegColorCorrection10To12BitLUTOddShift) + (loRed << kRegColorCorrection10To12BitLUTEvenShift));
+			ULWord	tmpRedHi((hiRed << kRegColorCorrection10To12BitLUTOddShift) + (hiRed << kRegColorCorrection10To12BitLUTEvenShift));
 			if(tmpRedLo || tmpRedHi) nonzeroes++;
 			Set12BitLUTPlaneSelect(NTV2_REDPLANE);
 			if (!WriteRegister(RTableReg++, tmpRedLo))
@@ -889,8 +891,8 @@ bool CNTV2Card::WriteLUTTables (const UWordSequence & inRedLUT, const UWordSeque
 			if (!WriteRegister(RTableReg++, tmpRedHi))
 				errorCount++;
 			
-			ULWord	tmpGreenLo((loGreen << kRegColorCorrection12BitLUTOddShift) + (loGreen << kRegColorCorrection12BitLUTEvenShift));
-			ULWord	tmpGreenHi((hiGreen << kRegColorCorrection12BitLUTOddShift) + (hiGreen << kRegColorCorrection12BitLUTEvenShift));
+			ULWord	tmpGreenLo((loGreen << kRegColorCorrection10To12BitLUTOddShift) + (loGreen << kRegColorCorrection10To12BitLUTEvenShift));
+			ULWord	tmpGreenHi((hiGreen << kRegColorCorrection10To12BitLUTOddShift) + (hiGreen << kRegColorCorrection10To12BitLUTEvenShift));
 			if(tmpGreenLo || tmpGreenHi) nonzeroes++;
 			Set12BitLUTPlaneSelect(NTV2_GREENPLANE);
 			if (!WriteRegister(GTableReg++, tmpGreenLo))
@@ -902,8 +904,8 @@ bool CNTV2Card::WriteLUTTables (const UWordSequence & inRedLUT, const UWordSeque
 			if (!WriteRegister(GTableReg++, tmpGreenHi))
 				errorCount++;
 			
-			ULWord	tmpBlueLo((loBlue << kRegColorCorrection12BitLUTOddShift) + (loBlue << kRegColorCorrection12BitLUTEvenShift));
-			ULWord	tmpBlueHi((hiBlue << kRegColorCorrection12BitLUTOddShift) + (hiBlue << kRegColorCorrection12BitLUTEvenShift));
+			ULWord	tmpBlueLo((loBlue << kRegColorCorrection10To12BitLUTOddShift) + (loBlue << kRegColorCorrection10To12BitLUTEvenShift));
+			ULWord	tmpBlueHi((hiBlue << kRegColorCorrection10To12BitLUTOddShift) + (hiBlue << kRegColorCorrection10To12BitLUTEvenShift));
 			if(tmpBlueLo || tmpBlueHi) nonzeroes++;
 			Set12BitLUTPlaneSelect(NTV2_BLUEPLANE);
 			if (!WriteRegister(BTableReg++, tmpBlueLo))
@@ -1370,7 +1372,6 @@ bool CNTV2Card::LoadLUTTable (const double * pInTable)
 
 	//	Hope and pray that the caller's array has at least 1024 elements...
 	NTV2DoubleArray rgbLUT;
-	rgbLUT.resize(kLUTArraySize);
 	for (size_t ndx(0);  ndx < kLUTArraySize;  ndx++)
 		rgbLUT.push_back(pInTable[ndx]);
 

@@ -204,6 +204,7 @@ typedef enum
 #define NTV2_IS_UHD2_STANDARD(__s__)			((__s__) == NTV2_STANDARD_7680)
 #define NTV2_IS_8K_STANDARD(__s__)				((__s__) == NTV2_STANDARD_8192)
 #define NTV2_IS_QUAD_QUAD_STANDARD(__s__)		(NTV2_IS_UHD2_STANDARD(__s__) || NTV2_IS_8K_STANDARD(__s__))
+#define NTV2_IS_HFR_STANDARD(__s__)				(NTV2_STANDARD_3840HFR == (__s__) || NTV2_STANDARD_4096HFR == (__s__))
 
 #if !defined (NTV2_DEPRECATE)
 	typedef NTV2Standard	NTV2V2Standard;		///< @deprecated	Use NTV2Standard instead.
@@ -1918,6 +1919,7 @@ typedef enum
 {
 	NTV2_AUDIO_48K,
 	NTV2_AUDIO_96K,
+	NTV2_AUDIO_192K,
 	NTV2_MAX_NUM_AudioRates,
 	NTV2_AUDIO_RATE_INVALID	= NTV2_MAX_NUM_AudioRates
 } NTV2AudioRate;
@@ -1931,6 +1933,16 @@ typedef enum
 	NTV2_ENCODED_AUDIO_SRC_DISABLED // AES ch. 1/2 encoded audio mode (SRC disabled)
 } NTV2EncodedAudioMode;
 
+
+typedef enum
+{
+	NTV2_AUDIO_FORMAT_LPCM,
+	NTV2_AUDIO_FORMAT_DOLBY,
+	NTV2_MAX_NUM_AudioFormats,
+	NTV2_AUDIO_FORMAT_INVALID	= NTV2_MAX_NUM_AudioFormats
+} NTV2AudioFormat;
+
+#define	NTV2_IS_VALID_AUDIO_FORMAT(_x_)			((_x_) < NTV2_MAX_NUM_AudioFormats)
 
 /**
 	@brief	This enum value determines/states which SDI video input will be used to supply

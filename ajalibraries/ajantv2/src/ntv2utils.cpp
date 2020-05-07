@@ -3015,8 +3015,7 @@ ULWord GetAudioSamplesPerFrame(NTV2FrameRate frameRate, NTV2AudioRate audioRate,
 			break;
 		}
 	}
-	else
-	if ( audioRate == NTV2_AUDIO_96K)
+	else if ( audioRate == NTV2_AUDIO_96K)
 	{
 		switch ( frameRate)
 		{
@@ -3105,6 +3104,108 @@ ULWord GetAudioSamplesPerFrame(NTV2FrameRate frameRate, NTV2AudioRate audioRate,
 			case 3:
 			case 4:
 				audioSamplesPerFrame = 3203*2;
+				break;
+			}
+			break;
+		case NTV2_FRAMERATE_1900:	// Not supported yet
+		case NTV2_FRAMERATE_1898:	// Not supported yet
+		case NTV2_FRAMERATE_1800: 	// Not supported yet
+		case NTV2_FRAMERATE_1798:	// Not supported yet
+		case NTV2_FRAMERATE_UNKNOWN:
+		case NTV2_NUM_FRAMERATES:
+			audioSamplesPerFrame = 0*2; //haha
+			break;
+		}
+	}
+	else if ( audioRate == NTV2_AUDIO_192K)
+	{
+		switch ( frameRate)
+		{
+		case NTV2_FRAMERATE_12000:
+			audioSamplesPerFrame = 1600;
+			break;
+		case NTV2_FRAMERATE_11988:
+			switch ( cadenceFrame )
+			{
+			case 0:
+			case 2:
+			case 4:
+				audioSamplesPerFrame = 1602;
+				break;
+			case 1:
+			case 3:
+				audioSamplesPerFrame = 1601;
+				break;
+			}
+			break;
+		case NTV2_FRAMERATE_6000:
+			audioSamplesPerFrame = 3200;
+			break;
+		case NTV2_FRAMERATE_5994:
+			switch ( cadenceFrame )
+			{
+			case 0:
+				audioSamplesPerFrame = 3204;
+				break;
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+				audioSamplesPerFrame = 3203;
+				break;
+			}
+			break;
+		case NTV2_FRAMERATE_5000:
+			audioSamplesPerFrame = 3840;
+			break;
+		case NTV2_FRAMERATE_4800:
+			audioSamplesPerFrame = 4000;
+			break;
+		case NTV2_FRAMERATE_4795:
+			audioSamplesPerFrame = 4004;
+			break;
+		case NTV2_FRAMERATE_3000:
+			audioSamplesPerFrame = 6400;
+			break;
+		case NTV2_FRAMERATE_2997:
+			// depends on cadenceFrame;
+			switch ( cadenceFrame )
+			{
+			case 0:
+			case 1:
+				audioSamplesPerFrame = 6407;
+				break;
+			case 2:
+			case 3:
+			case 4:
+				audioSamplesPerFrame = 6406;
+				break;
+			}
+			break;
+		case NTV2_FRAMERATE_2500:
+			audioSamplesPerFrame = 7680;
+			break;
+		case NTV2_FRAMERATE_2400:
+			audioSamplesPerFrame = 8000;
+			break;
+		case NTV2_FRAMERATE_2398:
+			audioSamplesPerFrame = 8008;
+			break;
+		case NTV2_FRAMERATE_1500:
+			audioSamplesPerFrame = 12800;
+			break;
+		case NTV2_FRAMERATE_1498:
+			// depends on cadenceFrame;
+			switch ( cadenceFrame )
+			{
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+				audioSamplesPerFrame = 12813;
+				break;
+			case 4:
+				audioSamplesPerFrame = 12812;
 				break;
 			}
 			break;
@@ -7276,8 +7377,9 @@ string NTV2AudioRateToString (const NTV2AudioRate inValue, const bool inForRetai
 	switch (inValue)
 	{
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "48kHz", NTV2_AUDIO_48K);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "48kHz", NTV2_AUDIO_96K);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "???", NTV2_AUDIO_RATE_INVALID);
+        NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "96kHz", NTV2_AUDIO_96K);
+        NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "192kHz", NTV2_AUDIO_192K);
+        NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "???", NTV2_AUDIO_RATE_INVALID);
 	}
 	return "";
 }

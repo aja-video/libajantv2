@@ -526,7 +526,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	//	VPID channel
 	if (pInVPIDSpec->isTwoSampleInterleave)
 	{
-		if (isLevelB && NTV2_IS_4K_HFR_VIDEO_FORMAT (outputFormat))
+		if ((isLevelB && NTV2_IS_4K_HFR_VIDEO_FORMAT (outputFormat)) || isRGB)
 			byte4 |= vpidChannel << 5;
 		else
 			byte4 |= vpidChannel << 6;

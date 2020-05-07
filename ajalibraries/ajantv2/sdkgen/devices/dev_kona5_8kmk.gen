@@ -225,6 +225,7 @@ NTV2DeviceCanDoEnhancedCSC
 NTV2DeviceCanDoProgrammableCSC
 NTV2DeviceCanDoRGBPlusAlphaOut
 NTV2DeviceHasColorSpaceConverterOnChannel2
+NTV2DeviceCanDoAudio192K
 
 // NTV2ConversionModes
 

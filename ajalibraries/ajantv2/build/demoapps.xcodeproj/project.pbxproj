@@ -19,6 +19,7 @@
 				B4AEFE411EFDEA99002F08BD /* PBXTargetDependency */,
 				B43C7CB817259D910030A94E /* PBXTargetDependency */,
 				B4A7049616829CC0001D4AA8 /* PBXTargetDependency */,
+				B4BEBC2C245CA6220022B243 /* PBXTargetDependency */,
 				B4A7017E16795895001D4AA8 /* PBXTargetDependency */,
 				B46B5F971729AEF2004E84C3 /* PBXTargetDependency */,
 				A40162401EBA8295001B8830 /* PBXTargetDependency */,
@@ -115,6 +116,13 @@
 		B4AEFE3A1EFDEA39002F08BD /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */; };
 		B4AEFE3B1EFDEA39002F08BD /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD7B167915A7001D4AA8 /* IOKit.framework */; };
 		B4B0CC6B225BAFF7006D526D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AE8038D208A60D700FCC91B /* Foundation.framework */; };
+		B4BEBC1A245CA5620022B243 /* ntv2democommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4A6C4A81BF1746D0033D1AD /* ntv2democommon.cpp */; };
+		B4BEBC1D245CA5620022B243 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AE8038D208A60D700FCC91B /* Foundation.framework */; };
+		B4BEBC1E245CA5620022B243 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */; };
+		B4BEBC1F245CA5620022B243 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD7B167915A7001D4AA8 /* IOKit.framework */; };
+		B4BEBC20245CA5620022B243 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FFA8167927B3001D4AA8 /* CoreServices.framework */; };
+		B4BEBC29245CA5E50022B243 /* ntv2dolbyplayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4BEBC26245CA5E50022B243 /* ntv2dolbyplayer.cpp */; };
+		B4BEBC2A245CA5E50022B243 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4BEBC28245CA5E50022B243 /* main.cpp */; };
 		B4CADACB180F02E2004C9057 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CADABD180F00F6004C9057 /* main.cpp */; };
 		B4CADACE180F0321004C9057 /* ntv2burn4kquadrant.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4CADACC180F0321004C9057 /* ntv2burn4kquadrant.cpp */; };
 		B4CADACF180F037B004C9057 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A7FD4916791597001D4AA8 /* CoreFoundation.framework */; };
@@ -216,6 +224,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = B4AEFE331EFDEA39002F08BD;
 			remoteInfo = ntv2capture4k;
+		};
+		B4BEBC2B245CA6220022B243 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B4A7F8B71677FB4C001D4AA8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B4BEBC17245CA5620022B243;
+			remoteInfo = ntv2dolbyplayer;
 		};
 		B4CADAD2180F03A8004C9057 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -332,6 +347,10 @@
 		B4AEFE2F1EFDEA00002F08BD /* ntv2capture4k.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2capture4k.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2capture4k/ntv2capture4k.cpp; sourceTree = SOURCE_ROOT; };
 		B4AEFE301EFDEA00002F08BD /* ntv2capture4k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2capture4k.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2capture4k/ntv2capture4k.h; sourceTree = SOURCE_ROOT; };
 		B4AEFE3F1EFDEA39002F08BD /* ntv2capture4k */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2capture4k; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4BEBC24245CA5620022B243 /* ntv2dolbyplayer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2dolbyplayer; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4BEBC26245CA5E50022B243 /* ntv2dolbyplayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2dolbyplayer.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2dolbyplayer/ntv2dolbyplayer.cpp; sourceTree = SOURCE_ROOT; };
+		B4BEBC27245CA5E50022B243 /* ntv2dolbyplayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2dolbyplayer.h; path = ../../../ajaapps/crossplatform/demoapps/ntv2dolbyplayer/ntv2dolbyplayer.h; sourceTree = SOURCE_ROOT; };
+		B4BEBC28245CA5E50022B243 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2dolbyplayer/main.cpp; sourceTree = SOURCE_ROOT; };
 		B4CADABD180F00F6004C9057 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2burn4kquadrant/main.cpp; sourceTree = SOURCE_ROOT; };
 		B4CADAC2180F0134004C9057 /* ntv2burn4kquadrant */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ntv2burn4kquadrant; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4CADACC180F0321004C9057 /* ntv2burn4kquadrant.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2burn4kquadrant.cpp; path = ../../../ajaapps/crossplatform/demoapps/ntv2burn4kquadrant/ntv2burn4kquadrant.cpp; sourceTree = SOURCE_ROOT; };
@@ -472,6 +491,17 @@
 				B4AEFE391EFDEA39002F08BD /* CoreFoundation.framework in Frameworks */,
 				B4AEFE3A1EFDEA39002F08BD /* CoreServices.framework in Frameworks */,
 				B4AEFE3B1EFDEA39002F08BD /* IOKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B4BEBC1C245CA5620022B243 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B4BEBC1D245CA5620022B243 /* Foundation.framework in Frameworks */,
+				B4BEBC1E245CA5620022B243 /* CoreFoundation.framework in Frameworks */,
+				B4BEBC1F245CA5620022B243 /* IOKit.framework in Frameworks */,
+				B4BEBC20245CA5620022B243 /* CoreServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -621,6 +651,7 @@
 				A40162351EBA804E001B8830 /* ntv2hdrsetup */,
 				B4AEFE3F1EFDEA39002F08BD /* ntv2capture4k */,
 				B47167BB243663C70006A7A2 /* ntv2switchbitfile */,
+				B4BEBC24245CA5620022B243 /* ntv2dolbyplayer */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -647,6 +678,7 @@
 				B4AEFE2D1EFDE9BE002F08BD /* ntv2capture4k */,
 				B4A7048816829C07001D4AA8 /* ntv2ccgrabber */,
 				B43C7CB417259B840030A94E /* ntv2ccplayer */,
+				B4BEBC25245CA59A0022B243 /* ntv2dolbyplayer */,
 				B4A7F8C916781854001D4AA8 /* ntv2enumerateboards */,
 				B46B5F981729AF3E004E84C3 /* ntv2fieldburn */,
 				A40162421EBA835B001B8830 /* ntv2hdrsetup */,
@@ -691,6 +723,17 @@
 			);
 			name = ntv2capture4k;
 			path = ../../../ajaapps/crossplatform/demoapps/ntv2capture4k;
+			sourceTree = SOURCE_ROOT;
+		};
+		B4BEBC25245CA59A0022B243 /* ntv2dolbyplayer */ = {
+			isa = PBXGroup;
+			children = (
+				B4BEBC28245CA5E50022B243 /* main.cpp */,
+				B4BEBC26245CA5E50022B243 /* ntv2dolbyplayer.cpp */,
+				B4BEBC27245CA5E50022B243 /* ntv2dolbyplayer.h */,
+			);
+			name = ntv2dolbyplayer;
+			path = ../../../ajaapps/crossplatform/demoapps/ntv2dolbyplayer;
 			sourceTree = SOURCE_ROOT;
 		};
 		B4CADABC180F0049004C9057 /* ntv2burn4kquadrant */ = {
@@ -914,6 +957,22 @@
 			productReference = B4AEFE3F1EFDEA39002F08BD /* ntv2capture4k */;
 			productType = "com.apple.product-type.tool";
 		};
+		B4BEBC17245CA5620022B243 /* ntv2dolbyplayer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B4BEBC21245CA5620022B243 /* Build configuration list for PBXNativeTarget "ntv2dolbyplayer" */;
+			buildPhases = (
+				B4BEBC18245CA5620022B243 /* Sources */,
+				B4BEBC1C245CA5620022B243 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ntv2dolbyplayer;
+			productName = ntv2player;
+			productReference = B4BEBC24245CA5620022B243 /* ntv2dolbyplayer */;
+			productType = "com.apple.product-type.tool";
+		};
 		B4CADAC1180F0134004C9057 /* ntv2burn4kquadrant */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = B4CADAC8180F0134004C9057 /* Build configuration list for PBXNativeTarget "ntv2burn4kquadrant" */;
@@ -981,6 +1040,7 @@
 				B4AEFE331EFDEA39002F08BD /* ntv2capture4k */,
 				B4A7048B16829C4A001D4AA8 /* ntv2ccgrabber */,
 				B43C7CA917259A490030A94E /* ntv2ccplayer */,
+				B4BEBC17245CA5620022B243 /* ntv2dolbyplayer */,
 				B4A7F8C21677FC15001D4AA8 /* ntv2enumerateboards */,
 				B46B5F8B1729AD2F004E84C3 /* ntv2fieldburn */,
 				A40162341EBA804E001B8830 /* ntv2hdrsetup */,
@@ -1113,6 +1173,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B4BEBC18245CA5620022B243 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B4BEBC29245CA5E50022B243 /* ntv2dolbyplayer.cpp in Sources */,
+				B4BEBC1A245CA5620022B243 /* ntv2democommon.cpp in Sources */,
+				B4BEBC2A245CA5E50022B243 /* main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B4CADABE180F0134004C9057 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1195,6 +1265,11 @@
 			isa = PBXTargetDependency;
 			target = B4AEFE331EFDEA39002F08BD /* ntv2capture4k */;
 			targetProxy = B4AEFE401EFDEA99002F08BD /* PBXContainerItemProxy */;
+		};
+		B4BEBC2C245CA6220022B243 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B4BEBC17245CA5620022B243 /* ntv2dolbyplayer */;
+			targetProxy = B4BEBC2B245CA6220022B243 /* PBXContainerItemProxy */;
 		};
 		B4CADAD3180F03A8004C9057 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1534,6 +1609,20 @@
 			};
 			name = Release;
 		};
+		B4BEBC22245CA5620022B243 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		B4BEBC23245CA5620022B243 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		B4CADAC9180F0134004C9057 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1687,6 +1776,15 @@
 			buildConfigurations = (
 				B4AEFE3D1EFDEA39002F08BD /* Debug */,
 				B4AEFE3E1EFDEA39002F08BD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B4BEBC21245CA5620022B243 /* Build configuration list for PBXNativeTarget "ntv2dolbyplayer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B4BEBC22245CA5620022B243 /* Debug */,
+				B4BEBC23245CA5620022B243 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

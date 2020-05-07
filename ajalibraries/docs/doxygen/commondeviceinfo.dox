@@ -407,12 +407,12 @@
 			See \ref vidop-fbconflict (below) for more information.
 
 	@note	In <b>Multi-Format Mode</b>, because NTV2 devices only have one hardware clock for driving the
-			outputs, all <i>output</i> video formats must be in the same clock family.
+			outputs, all <i>output</i> video formats must be in the same <b>Clock Family</b>.
 			Call ::IsMultiFormatCompatible(const NTV2VideoFormat, const NTV2VideoFormat) to find out if two
 			video formats are multi-format compatible.
 			Call ::IsMultiFormatCompatible(const NTV2FrameRate, const NTV2FrameRate) to see if two frame
 			rates are multi-format compatible.
-			Call ::GetFrameRateFamily to determine the frame-rate “family” that a given ::NTV2FrameRate
+			Call ::GetFrameRateFamily to determine the <b>Clock Family</b> that a given ::NTV2FrameRate
 			belongs to. See \ref deviceclockingandsync for more details (below).
 
 
@@ -480,43 +480,82 @@
 
 	@subsection	deviceclockingandsync		Device Clocking and Synchronization
 
-	All SDI outputs on NTV2 devices are synchronized (clocked) to one of these three different
-	clock sources:
-	-	the device’s on-board crystal oscillator (a.k.a. “free run”);
-	-	an SDI input (unavailable on playout-only devices);
-	-	an external timing reference signal (devices with external reference inputs only).
+	-	NTV2 devices have <i>one</i> output clock that drives <i>all</i> SDI outputs.
+	-	When SDI output(s) are routed and connected, then device/output synchronization <i>must</i> be considered.
 
-	The SDK’s CNTV2Card::SetReference function is used to specify which clock source should
-	be used to generate timing for the device’s outputs. When CNTV2Card::SetReference is called
-	with ::NTV2_REFERENCE_INPUT1, the device’s outputs will be locked to the same timebase as
-	that of input channel 1. Note that the actual output will be delayed a couple of lines due
-	to propagation delays through the device’s circuitry, but the important point is that the
-	phase relationship between the input and the output will be fixed and will not drift. This
-	form of output clocking is best suited to end-to-end (E-E) routing, where an input is routed
-	to an output, directly, or indirectly (e.g., through a Mixer/Keyer) without any mediation
-	through a pair of Frame Stores.
+	@subsubsection  devclock-capture	“Capture-Only”
 
-	However, if two inputs are feeding the device, it’s probably impossible to lock to both
-	sources. Unless the sources are synced to a common timebase (often called “house reference”),
-	then the two signals will drift over time with respect to each other. One channel may just
-	be starting a new frame, while the other is already half way through its frame. Since a
-	client application can’t lock to both signals at the same time, ::NTV2_REFERENCE_FREERUN
-	should be used, to clock the outputs from the device’s own internal clock source. Note that
-	even setting “free run” isn’t technically necessary — the application would run just as
-	well locked to an input, with the only difference being when the signals would actually
-	come out of the BNC connectors.
+	On multiformat-capable devices (see ::NTV2DeviceCanDoMultiFormat) in <b>Capture</b> mode, the device firmware will calculate each input
+	signal’s timing independently. If these signals are routed to FrameStores that are operating in
+	<b>Capture</b> mode, the FrameStores will each signal VBIs independently at the correct time.
+	For example:
+	@image	html	hwref-inputtiming.png
+	-	Repeated calls to <tt>CNTV2Card::WaitForInputVerticalInterrupt(NTV2_CHANNEL2)</tt> will occur at 50Hz;
+	-	Repeated calls to <tt>CNTV2Card::WaitForInputVerticalInterrupt(NTV2_CHANNEL3)</tt> will occur at 24Hz.
 
-	If the device’s output(s) must have a given timing (e.g., to feed a switcher), then
-	applications can pass ::NTV2_REFERENCE_EXTERNAL to CNTV2Card::SetReference, which will
-	lock the device to an analog or tri-level sync signal connected to the device’s external
-	reference input. You can determine the video format of the signal being applied to the
-	reference input by calling CNTV2Card::GetReferenceVideoFormat. Note that even when
-	configured to sync its outputs to ::NTV2_REFERENCE_EXTERNAL, the device output will
-	internally revert to Free-Run if the reference signal disappears or is incompatible with
-	the output video format.
+	On older, uniformat devices, the input signals can still be captured independently, but they must be
+	in the same frame rate “family” (i.e. <b>Clock Family</b>) as the overall device video format:<br>
+	<b>Related Clock Families:</b>
+	-	24 / 48
+	-	25 / 50 (PAL)
+	-	29.97 / 59.94 (NTSC)
+	-	30 / 60 / 120
 
-	@note	AJA recommends setting the device reference to ::NTV2_REFERENCE_FREERUN when
-			there is no signal at the external reference connector.
+	@subsubsection  devclock-inout		“Capture &amp; Playout”
+
+	Add a route from FrameStore4 to SDIOut4, configuring the FrameStore for 1080i2997 playout:
+	@image	html	hwref-inputoutputsync.png
+	In this scenario, there are now three output synchronization options:
+	-#	Clock the output signal independently of the inputs and any other reference using the device’s
+		internal clock. In this case, call CNTV2Card::SetReference with ::NTV2_REFERENCE_FREERUN.
+	-#	Sync the outputs to a 29.97Hz (or 59.94Hz) external reference. For this case, call
+	 	CNTV2Card::SetReference with ::NTV2_REFERENCE_EXTERNAL.
+	-#	Sync the outputs to one of the SDI inputs. But note that this option is not viable in this
+		example, because none of the input signals have 2997 or 5994 timing.
+
+	If multiple input signals from the same <b>Clock Family</b> are feeding the device, it’s probably
+	impossible to lock to them all, unless they’re all sync’d to a common timebase (often called “house
+	reference”) … otherwise, the signals will all drift over time with respect to each other.
+	For example, one signal may just be starting a new frame, while another is already half-way through
+	its frame. Since the device clock can’t lock to more than one of them, ::NTV2_REFERENCE_FREERUN must
+	be used, to clock the outputs from the device’s own internal clock source. Note that setting “free
+	run” isn’t technically necessary — the application would run just as well locked to one of the input
+	signals, with the only difference being when the output signals would actually come out of the BNCs.
+
+	@subsubsection  devclock-ee			“End-to-End” (“E-E”)
+
+	Add a route from SDIIn2 to SDIOut4 (assume this route is actually implemented in the firmware):
+	@image	html	hwref-ee-sync.png
+	This can be done either directly, as shown, or indirectly (for example, through a Mixer/Keyer widget).
+	This requires the device’s output timing to be locked to the input signal. In this case, call
+	CNTV2Card::SetReference with ::NTV2_REFERENCE_INPUT2.
+
+	When the reference source is set to an SDI input, the output signal(s) will be locked to the same
+	timebase as that of the designated source’s signal. For this to work, the output video format must
+	have a frame rate in the same <b>Clock Family</b> as that being received at the SDI input. The actual
+	output signal will exit the BNCs with about 2~3 lines of delay due to signal propagation through
+	device circuitry, but the important point is that the phase relationship between the reference
+	input signal and the output signal will be fixed, and will not drift.
+
+	@note	For historical reasons, if SDI Input 1 is used for input and a signal is present,
+			its signal frame rate dictates the <b>Clock Family</b> for all SDI outputs. When operating
+			the device in multiformat mode, it’s therefore best to always use NTV2_CHANNEL1 as
+			an output/playout channel, and use the other channels for input, as they don’t have
+			the <b>Clock Family</b> restriction or any effect on the outputs.
+
+	@subsubsection  devclock-extern		External Reference
+
+	If the device’s output(s) must have a given timing (e.g., to feed a switcher), then applications
+	can pass ::NTV2_REFERENCE_EXTERNAL to CNTV2Card::SetReference, which will lock the device to an
+	analog or tri-level sync signal connected to the device’s external reference input.
+
+	To determine the video format of the signal being applied to the reference input, call
+	CNTV2Card::GetReferenceVideoFormat.
+
+	@note	When configured for ::NTV2_REFERENCE_EXTERNAL, the device output will internally revert
+			to Free-Run if the reference signal disappears or is incompatible with the output video
+			format. When there’s no signal detected at the external reference connector, AJA
+			recommends setting the device reference to ::NTV2_REFERENCE_FREERUN.
 
 
 	@subsection	fieldframeinterrupts	Field/Frame Interrupts
@@ -890,23 +929,27 @@
 	<hr size="50px">
 	@section	audiooperation		Audio System Operation
 
-	NTV2-compatible devices have a minimum of one <b>Audio System</b> (sometimes referred to as an <b>Audio Engine</b>).
-	Call ::NTV2DeviceGetNumAudioSystems to determine the number of Audio Systems on a device.
+	NTV2-compatible devices have a minimum of one <b>Audio System</b> (sometimes referred to as an <b>Audio Engine</b>)
+	that make it possible to stream audio, whether in <b>Capture</b> (Record) mode, or <b>Playout</b> mode, or both.
+	Call ::NTV2DeviceGetNumAudioSystems to determine the number of <b>Audio System</b>s on a device.
 
 	An <b>Audio System</b> is implemented in FPGA firmware using several hardware registers, which together perform the following functions:
 	-	If it has any SDI, HDMI, analog, or AES inputs (see ::NTV2DeviceCanDoCapture):
 		-	It continually de-embeds 20/24-bit AES audio samples. For SDI inputs, these will come from SMPTE 272M/299M HANC packets
 			detected in the SDI input stream.
-		-	If its capture side is running, it will write the de-embedded audio samples into its input audio buffer in device SDRAM.
-		-	The audio samples can always be piped through a FIFO to source an <b>Audio System</b>’s output audio embedder for
-			“loopback” play-through.
-	-	If it has an SDI output (see ::NTV2DeviceCanDoPlayback):
-		-	Unless its embedder is disabled, it will continually embed 20/24-bit AES audio samples into SMPTE 272M/292M HANC packets
-			into its SDI output stream.
-		-	When its playout side is running, it will read from its output audio buffer in device SDRAM the audio samples to be embedded.
-		-	When its playout side is not running…
-			-	If configured for “loopback” play-through, it obtains audio samples from an <b>Audio System</b>’s input audio de-embedder.
-			-	It will otherwise embed silence (audio packets that contain all-zero sample values).
+		-	If the <b>Capture</b> aspect of the <b>Audio System</b> is <i>Running</i>, it will write the de-embedded
+			audio samples into its input audio buffer in device SDRAM.
+		-	The audio samples can always be piped through a FIFO to source an <b>Audio System</b>’s output audio
+			embedder for “loopback” play-through.
+	-	If it has any SDI, HDMI, analog or AES outputs (see ::NTV2DeviceCanDoPlayback):
+		-	Unless its embedder is disabled, it will continually embed 20/24-bit AES audio samples into SMPTE 272M/292M
+			HANC packets into its SDI output stream.
+		-	When its <b>Playout</b> aspect is <i>Running</i>, it will read from its output audio buffer in device
+			SDRAM the audio samples to be embedded.
+		-	When its <b>Playout</b> side is not running…
+			-	If configured for “loopback” play-through, it obtains audio samples from an
+				<b>Audio System</b>’s input audio de-embedder.
+			-	Otherwise, it will embed silence (audio packets that contain all-zero sample values).
 
 	Each <b>Audio System</b> can accommodate at least 8 channels of audio.
 	Call ::NTV2DeviceGetMaxAudioChannels to determine the maximum number of audio channels that a device’s <b>Audio Systems</b> can handle.
@@ -996,9 +1039,10 @@
 			The specification allows AC-3 data to be carried in 16, 20 or 24 bits of the PCM sample.
 			This flexibility requires the application to know how the source has formatted the data into the AES samples.
 
-	Generally, each <b>Audio System</b>’s <b>Input Source</b> is selectable, to receive samples from any of the device’s video (and possibly audio)
-	Input Sources, including embedded SDI, HDMI, external AES and analog inputs (see CNTV2Card::SetAudioSystemInputSource).
-	For devices that support 3Gb Level B inputs, the audio can be taken from data stream 1 or 2.
+	Generally, each <b>Audio System</b>’s <b>Input Source</b> is selectable, to receive samples from any of the device’s video
+	(and possibly audio) Input Sources, including embedded SDI, HDMI, external AES and analog inputs
+	(see CNTV2Card::SetAudioSystemInputSource). For devices that support 3Gb Level B inputs, the audio can be taken from data
+	stream 1 or 2. HDMI inputs can be configured to supply 2 or 8 audio channels (see CNTV2Card::GetHDMIInputAudioChannels ).
 
 	Newer AJA hardware firmware implements an adjustable input delay that can be applied while samples are being written into the
 	<b>Audio Input Buffer</b>. Call ::NTV2DeviceCanDoAudioDelay to determine if this feature is available. Call CNTV2Card::GetAudioInputDelay
@@ -1007,7 +1051,7 @@
 	Audio input clocking for the running <b>Audio System</b> is ordinarily obtained from the input signal being used (SDI, HDMI, Analog, etc.).
 	AJA’s older devices, however, derived the audio input clock from the Device Reference by default (see ::NTV2ReferenceSource) and had to be
 	explicitly configured to use the input signal by passing ::NTV2_EMBEDDED_AUDIO_CLOCK_VIDEO_INPUT to CNTV2Card::SetEmbeddedAudioClock.
-	If this wasn't done, and the board reference was ::NTV2_REFERENCE_FREERUN or some other timebase that differed from the input video signal,
+	If this wasn’t done, and the board reference was ::NTV2_REFERENCE_FREERUN or some other timebase that differed from the input video signal,
 	the audio would eventually drift from the video. (See also ::NTV2DeviceCanChangeEmbeddedAudioClock.)
 
 
@@ -1061,18 +1105,46 @@
 	new samples into the <b>Audio Output Buffer</b>, the buffer will eventually contain all zeroes, and the output embedder
 	will thereafter only transmit silence. Use the CNTV2Card::SetAudioOutputEraseMode function to configure this feature.
 
-	Audio data can be transferred from the host to the device audio buffer via DMA by calling CNTV2Card::DMAWriteAudio. The last address
-	written into the <b>Audio Output Buffer</b> (via DMA) is latched and available for readback at <b>Audio Output Last Address</b> (within 256 bytes).
-	If the output hardware <b>Play Head</b> pointer catches up to the <b>Audio Output Last Address</b>, the buffer will wrap, and audio/video
-	synchronization will be lost.
+	<b>DMA Transfer:</b> Audio data can be transferred from the host to the device audio buffer via DMA by calling
+	CNTV2Card::DMAWriteAudio. The last address written into the <b>Audio Output Buffer</b> (via DMA) is latched and
+	available for readback at <b>Audio Output Last Address</b> (within 256 bytes). If the output hardware <b>Play Head</b>
+	pointer catches up to the <b>Audio Output Last Address</b>, the buffer will wrap, and audio/video synchronization will be lost.
 
-	If AutoCirculate is used for playout, AutoCirculate completely and automatically runs the <b>Audio System</b>.
-	When CNTV2Card::AutoCirculateInitForOutput is called with a valid ::NTV2AudioSystem, and then CNTV2Card::AutoCirculateStart is called,
-	AutoCirculate starts the <b>Audio System</b>. Youʼll need to transfer the correct number of audio samples via AUTOCIRCULATE_TRANSFER::SetAudioBuffer
-	or AUTOCIRCULATE_TRANSFER::acAudioBuffer before calling CNTV2Card::AutoCirculateTransfer. See \ref autocirculateplayout for more information.
-	Also see \ref audiosamplecount (below) on how to calculate the correct number of audio samples for the current outgoing frame.
+	If \ref autocirculateplayout is being used, AutoCirculate completely and automatically runs the <b>Audio System</b>.
+	When CNTV2Card::AutoCirculateInitForOutput is called with a valid ::NTV2AudioSystem, and then CNTV2Card::AutoCirculateStart
+	is called, AutoCirculate starts the <b>Audio System</b>. Youʼll need to transfer the correct number of audio samples via
+	AUTOCIRCULATE_TRANSFER::SetAudioBuffer or AUTOCIRCULATE_TRANSFER::acAudioBuffer before calling CNTV2Card::AutoCirculateTransfer.
+	See \ref audiosamplecount (below) on how to calculate the correct number of audio samples for the current outgoing frame.
 
-	SDI output embedders can usually be driven by any Audio System (see CNTV2Card::SetSDIOutputAudioSystem and CNTV2Card::SetSDIOutputDS2AudioSystem).
+	<b>SDI Output:</b> SDI output embedders can ordinarily be driven by any <b>Audio System</b>.
+	-	Call CNTV2Card::GetSDIOutputAudioSystem to determine which Audio System is currently driving Data Stream 1.
+	-	Call CNTV2Card::SetSDIOutputAudioSystem to change DS1’s Audio System.
+	-	On devices that have 3G/6G/12G SDI connectors that support Dual Link output:
+		-	Call CNTV2Card::GetSDIOutputDS2AudioSystem to determine the Audio System that’s currently driving Data Stream 2.
+		-	Call CNTV2Card::SetSDIOutputDS2AudioSystem to change DS2’s Audio System.
+
+	<b>HDMI Output:</b> The HDMI standard supports a minimum baseline of 2 audio channels up to a maximum of 8.
+	If the NTV2 device has an HDMI output (see ::NTV2DeviceGetNumHDMIVideoOutputs ), it can be configured
+	to transmit audio from any <b>Audio System</b>:
+	-	To transmit 2 audio channels, call CNTV2Card::SetHDMIOutAudioSource2Channel :
+		-	Specify the ::NTV2AudioSystem that will drive the HDMI outputʼs audio;
+		-	Specify the ::NTV2AudioChannelPair that will determine which two of the
+			Audio Systemʼs 8 (or 16) audio channels will be used.
+	-	To transmit 8 audio channels, call CNTV2Card::SetHDMIOutAudioSource8Channel :
+		-	Specify the ::NTV2AudioSystem that will drive the HDMI outputʼs audio;
+		-	Specify the ::NTV2Audio8ChannelSelect that will determine which group of 8
+			contiguous channels will be used from the Audio Systemʼs (presumably) 16 channels.
+
+	<b>AES/EBU Output:</b> For devices that support AES/EBU output through a breakout box or cable (see ::NTV2DeviceCanDoBreakoutBox
+	and ::NTV2DeviceGetNumAESAudioOutputChannels functions), the output BNCs will automatically carry the same per-audio-channel
+	samples being played/embedded from <b>Audio Sytem 1</b> (::NTV2_AUDIOSYSTEM_1).  This can be changed to use a different
+	set of 4 audio channels, even from a different <b>Audio System</b> (if available).
+	-	Call CNTV2Card::GetAESOutputSource to determine the current ::NTV2AudioSystem and ::NTV2Audio4ChannelSelect
+		(a contiguous band of 4 audio channels) being used for a given set of 4 AES audio channels.
+	-	Call CNTV2Card::SetAESOutputSource to set the 4 audio channels and/or ::NTV2AudioSystem to be used for a given set
+		of 4 AES audio channels.
+
+	<b>Non-PCM Data:</b><br>
 
 	Downstream equipment can be told that the outgoing audio is not carrying PCM data, by setting the non-PCM indicator in the AES header.
 	Older AJA devices can only do this on an audio-system-wide basis — i.e., all outgoing audio groups are marked PCM or non-PCM.
@@ -1081,6 +1153,8 @@
 	Newer AJA devices can mark individual audio channel pairs as non-PCM (the ::NTV2DeviceCanDoPCMControl function returns true for
 	devices that support this capability). Use one of the overloaded versions of CNTV2Card::SetAudioPCMControl that accepts either a
 	single ::NTV2AudioChannelPair or an ::NTV2AudioChannelPairs set.
+
+	<b>AES Sync-Mode Bit:</b><br>
 
 	By default, the embedder clears the <b>Sync Mode bit</b> in the <b>AES header</b> in the <b>Audio Control Packet</b>s, which tells
 	downstream equipment that the outgoing audio is <b>asynchronous</b>, even though overall, the correct total number of audio samples
@@ -1092,19 +1166,11 @@
 	-	Call CNTV2Card::GetAudioOutputAESSyncModeBit to see if the device is setting the Sync Mode bit.
 	-	Call CNTV2Card::SetAudioOutputAESSyncModeBit to change the setting.
 
-	@note	When the embedder is configured to “fib” — i.e. set the <b>Sync Mode bit</b> in the <b>AES header</b> in the <b>Audio Control
-			Packet</b> — audio and video are synchronized in time, but the resulting audio doesn’t exactly follow the definition of
-			“synchronized” in SMPTE 299 § 7.2.1.3, because the embedder doesn’t set the <b>Frame Sequence Number</b> in the <b>AES header</b>.
-			SMPTE 299, however, stipulates that receivers should correctly receive audio even from equipment that doesn’t fully conform to § 7.2.1.3.
-
-	If the device supports <b>AES/EBU audio playout</b> through a breakout box or cable (see ::NTV2DeviceCanDoBreakoutBox and
-	::NTV2DeviceGetNumAESAudioOutputChannels functions), the output BNCs will automatically carry the same per-channel audio
-	samples being played/embedded from <b>Audio Sytem 1</b> (::NTV2_AUDIOSYSTEM_1).  This can be changed to use a different
-	set of 4 audio channels, even from a different <b>Audio System</b> (if available).
-	-	Call CNTV2Card::GetAESOutputSource to determine the current ::NTV2AudioSystem and ::NTV2Audio4ChannelSelect
-		(a contiguous band of 4 audio channels) being used for a given set of 4 AES audio channels.
-	-	Call CNTV2Card::SetAESOutputSource to set the 4 audio channels and/or ::NTV2AudioSystem to be used for a given set
-		of 4 AES audio channels.
+	@note	When the embedder is configured to “fib” — i.e. set the <b>Sync Mode bit</b> in the <b>AES header</b> in the <b>Audio
+			Control Packet</b> — audio and video are synchronized in time, but the resulting audio doesn’t exactly follow the
+			definition of “synchronized” in SMPTE 299 § 7.2.1.3, because the embedder doesn’t set the <b>Frame Sequence Number</b>
+			in the <b>AES header</b>. SMPTE 299, however, stipulates that receivers should correctly receive audio even from
+			equipment that doesn’t fully conform to § 7.2.1.3.
 
 
 	<hr size="50px">
@@ -1139,12 +1205,13 @@
 	@subsection	audiohidden		Other “Hidden” Audio Systems
 
 	Modern AJA devices intended for “retail” markets, particularly newer “KONA” and “Io” series devices, may have firmware that
-	implements additional “hidden” <b>Audio System</b>s that aren’t reported in the ordinary ::NTV2DeviceGetNumAudioSystems call:
+	implements additional “hidden” <b>Audio System</b>s that aren’t reported by the ::NTV2DeviceGetNumAudioSystems function:
 	-	A <b>Host Audio System</b> for audio input/output to/from the host operating system (see ::NTV2DeviceGetHostAudioSystem);
 	-	A “phantom” <b>Mixer Audio System</b> that uses only FIFOs (no audio buffer memory) in order to implement an \ref audiomixer
 		(see CNTV2Card::DeviceCanDoAudioMixer and ::NTV2DeviceGetAudioMixerSystem).
 
-	These additional <b>Audio System</b>s help support AJA’s “retail” software (i.e. Adobe, Avid, Apple, Telestream, etc. plug-ins, AJA ControlRoom, etc).
+	These additional <b>Audio System</b>s help support AJA’s “retail” software (i.e. Adobe, Avid, Apple, Telestream, etc.
+	plug-ins, AJA ControlRoom, etc).
 
 	The <b>Host Audio System</b> is used to continuously deliver…
 	-	SDI/HDMI/AES audio from the AJA KONA/Io device as input to the host computer’s primary audio system.

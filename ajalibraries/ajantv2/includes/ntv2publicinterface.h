@@ -160,7 +160,7 @@ typedef enum
 	kRegLTCInBits32_63	= kRegLTCAnalogBits32_63,	// 113
 
 	kRegReserved114,				// 114
-	kRegReserved115,				// 115
+	kRegAudioControl2,				// 115
 	kRegSysmonControl,				// 116
 	kRegSysmonConfig1_0,			// 117
 	kRegSysmonConfig2,				// 118
@@ -1343,6 +1343,15 @@ typedef enum
 	kRegMaskFramePulseEnable	= BIT(6),
 	kRegMaskFramePulseRefSelect	= BIT(8) + BIT(9) + BIT(10) + BIT(11),
 
+	// Audio Control 2
+	kRegMaskAud1RateHigh		= BIT(0),
+	kRegMaskAud2RateHigh		= BIT(1),
+	kRegMaskAud3RateHigh		= BIT(2),
+	kRegMaskAud4RateHigh		= BIT(3),
+	kRegMaskAud5RateHigh		= BIT(4),
+	kRegMaskAud6RateHigh		= BIT(5),
+	kRegMaskAud7RateHigh		= BIT(6),
+	kRegMaskAud8RateHigh		= BIT(7),
 
 	// Channel Control - kRegCh1Control, kRegCh2Control, kRegCh3Control, kRegCh4Control
 	kRegMaskMode				= BIT(0),
@@ -1655,8 +1664,10 @@ typedef enum
 	kLHIRegMaskHDMIOutBitDepth	= BIT(14),
 	kRegMaskHDMIV2YCColor		= BIT(15),
 	kRegMaskHDMISampling		= BIT(19)+BIT(18),
+	kRegMaskHDMIAudioRate		= BIT(21)+BIT(20),
 	kRegMaskSourceIsRGB			= BIT(23),
 	kRegMaskHDMIOutPowerDown	= BIT(25),
+    kRegMaskHDMIAudioFormat		= BIT(27)+BIT(26),
 	kRegMaskHDMIOutRange		= BIT(28),
 	kRegMaskHDMIOutAudioCh		= BIT(29),
 	kLHIRegMaskHDMIOutDVI		= BIT(30),
@@ -2515,6 +2526,16 @@ typedef enum
 	kRegShiftFramePulseEnable = 6,
 	kRegShiftFramePulseRefSelect = 8,
 
+	// Audio Control 2
+	kRegShiftAud1RateHigh		= 0,
+	kRegShiftAud2RateHigh		= 1,
+	kRegShiftAud3RateHigh		= 2,
+	kRegShiftAud4RateHigh		= 3,
+	kRegShiftAud5RateHigh		= 4,
+	kRegShiftAud6RateHigh		= 5,
+	kRegShiftAud7RateHigh		= 6,
+	kRegShiftAud8RateHigh		= 7,
+
 	// Channel Control - kRegCh1Control, kRegCh2Control, kRegCh3Control, kRegCh4Control
 	kRegShiftMode						= 0,
 	kRegShiftFrameFormat				= 1,
@@ -2822,8 +2843,10 @@ typedef enum
 	kRegShiftHDMIOutProgressive			= 13,
 	kLHIRegShiftHDMIOutBitDepth			= 14,
 	kRegShiftHDMISampling				= 18,
+	kRegShiftHDMIAudioRate				= 20,
 	kRegShiftSourceIsRGB				= 23,
 	kRegShiftHDMIOutPowerDown			= 25,
+	kRegShiftHDMIAudioFormat			= 26,
 	kRegShiftHDMIOutRange				= 28,
 	kRegShiftHDMIOutAudioCh				= 29,
 	kLHIRegShiftHDMIOutDVI 				= 30,
@@ -4554,6 +4577,9 @@ typedef struct {
 #define kRegColorCorrection12BitLUTOddShift		16
 #define kRegColorCorrection12BitLUTEvenShift	 0
 
+#define kRegColorCorrection10To12BitLUTOddShift		18
+#define kRegColorCorrection10To12BitLUTEvenShift	 2
+
 // Note: there is code that assumes that the three LUTs are contiguous. So if this relationship
 //       changes (i.e. there are "gaps" between tables) then code will need to change!
 #define kColorCorrectionLUTOffset_Base	(0x0800)	// BYTE offset
@@ -5892,18 +5918,22 @@ typedef enum
 												<< std::bitset<8>((uint64_t(__x__)&0x0000000000FF0000)>>16) << "."		\
 												<< std::bitset<8>((uint64_t(__x__)&0x000000000000FF00)>>8) << "."		\
 												<< std::bitset<8>( uint64_t(__x__)&0x00000000000000FF)
-			#define	BIN032(__x__)			std::bitset<8>((uint32_t(__x__)&0xFF000000)>>24) << "."				\
+			#define	BIN032(__x__)			std::bitset<8>((uint32_t(__x__)&0xFF000000)>>24) << "."						\
 												<< std::bitset<8>((uint32_t(__x__)&0x00FF0000)>>16) << "."				\
 												<< std::bitset<8>((uint32_t(__x__)&0x0000FF00)>>8) << "."				\
 												<< std::bitset<8>( uint32_t(__x__)&0x000000FF)
-			#define	BIN016(__x__)			std::bitset<8>((uint16_t(__x__)&0xFF00)>>8) << "."					\
+			#define	BIN016(__x__)			std::bitset<8>((uint16_t(__x__)&0xFF00)>>8) << "."							\
 												<< std::bitset<8>( uint16_t(__x__)&0x00FF)
+			#define	BIN012(__x__)			std::bitset<12>((uint16_t(__x__)&0x0FFF))
+			#define	BIN010(__x__)			std::bitset<10>((uint16_t(__x__)&0x03FF))
 			#define	BIN08(__x__)			std::bitset<8>(uint8_t(__x__))
 			#define	BIN04(__x__)			std::bitset<4>(uint8_t(__x__))
 			#define	BIN0N(__x__,__n__)		std::bitset<__n__>(uint8_t(__x__))
 			#define	bBIN064(__x__)			"b"	<< BIN064(__x__)
 			#define	bBIN032(__x__)			"b"	<< BIN032(__x__)
 			#define	bBIN016(__x__)			"b"	<< BIN016(__x__)
+			#define	bBIN012(__x__)			"b"	<< BIN012(__x__)
+			#define	bBIN010(__x__)			"b"	<< BIN010(__x__)
 			#define	bBIN08(__x__)			"b"	<< BIN08(__x__)
 			#define	bBIN04(__x__)			"b"	<< BIN04(__x__)
 			#define	bBIN0N(__x__,__n__)		"b"	<< BIN0N(__x__,__n__)

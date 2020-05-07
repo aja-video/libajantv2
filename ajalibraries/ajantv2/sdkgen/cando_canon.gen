@@ -27,6 +27,7 @@ NTV2DeviceCanDoAudio2Channels				True if the audio system(s) on the device havin
 NTV2DeviceCanDoAudio6Channels				True if the audio system(s) on the device having the given ID can be configured to embed/de-embed only 6 audio channels.
 NTV2DeviceCanDoAudio8Channels				True if the audio system(s) on the device having the given ID can be configured to embed/de-embed only 8 audio channels.
 NTV2DeviceCanDoAudio96K						True if audio system(s) on the device having the given ID can be set to a 96kHz sample rate.
+NTV2DeviceCanDoAudio192K					True if audio system(s) on the device having the given ID can be set to a 192kHz sample rate.
 NTV2DeviceCanDoAudioDelay					True if audio system(s) on the device having the given ID have an adjustable delay.
 NTV2DeviceCanDoBreakoutBox					True if the device having the given ID can be connected to an AJA breakout box.
 NTV2DeviceCanDoCapture						True if the device having the given ID can capture (ingest) video.

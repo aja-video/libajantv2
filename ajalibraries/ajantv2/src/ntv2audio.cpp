@@ -51,6 +51,13 @@ static const ULWord	gAudioSystemToAudioControlRegNum []	= {	kRegAud1Control,		kR
 
 static const ULWord	gAudioSystemToAudioSrcSelectRegNum []= {kRegAud1SourceSelect,	kRegAud2SourceSelect,	kRegAud3SourceSelect,	kRegAud4SourceSelect,
 															kRegAud5SourceSelect,	kRegAud6SourceSelect,	kRegAud7SourceSelect,	kRegAud8SourceSelect,	0};
+
+static const ULWord gAudioRateHighMask [] = { kRegMaskAud1RateHigh, kRegMaskAud2RateHigh, kRegMaskAud3RateHigh, kRegMaskAud4RateHigh,
+											  kRegMaskAud5RateHigh, kRegMaskAud6RateHigh, kRegMaskAud7RateHigh, kRegMaskAud8RateHigh };
+
+static const ULWord gAudioRateHighShift [] = { kRegShiftAud1RateHigh, kRegShiftAud2RateHigh, kRegShiftAud3RateHigh, kRegShiftAud4RateHigh,
+											   kRegShiftAud5RateHigh, kRegShiftAud6RateHigh, kRegShiftAud7RateHigh, kRegShiftAud8RateHigh };
+
 struct PCM_CONTROL_INFO{
 	ULWord pcmControlReg;
 	ULWord pcmControlMask;
@@ -194,16 +201,44 @@ bool CNTV2Card::GetNumberAudioChannels (ULWord & outNumChannels, const NTV2Audio
 
 bool CNTV2Card::SetAudioRate (const NTV2AudioRate inRate, const NTV2AudioSystem inAudioSystem)
 {
-	return WriteRegister (gAudioSystemToAudioControlRegNum [inAudioSystem], inRate, kRegMaskAudioRate, kRegShiftAudioRate);
+	ULWord		rateLow	(0);
+	ULWord		rateHigh (0);
+	bool		status;
+
+	if ((inRate == NTV2_AUDIO_192K) && (inAudioSystem == NTV2_AUDIOSYSTEM_1))
+		return false;
+
+	if (inRate == NTV2_AUDIO_96K)
+		rateLow = 1;
+	else if (inRate == NTV2_AUDIO_192K)
+		rateHigh = 1;
+
+	status = WriteRegister (gAudioSystemToAudioControlRegNum [inAudioSystem], rateLow, kRegMaskAudioRate, kRegShiftAudioRate);
+	status &= WriteRegister (kRegAudioControl2, rateHigh, gAudioRateHighMask [inAudioSystem], gAudioRateHighShift [inAudioSystem]);
+
+	return status;
 }
 
 
 bool CNTV2Card::GetAudioRate (NTV2AudioRate & outRate, const NTV2AudioSystem inAudioSystem)
 {
-	ULWord		value	(0);
-	const bool	status	(ReadRegister (gAudioSystemToAudioControlRegNum [inAudioSystem], value, kRegMaskAudioRate, kRegShiftAudioRate));
+	ULWord		rateLow	(0);
+	ULWord		rateHigh (0);
+	bool		status;
+
+	status = ReadRegister (gAudioSystemToAudioControlRegNum [inAudioSystem], rateLow, kRegMaskAudioRate, kRegShiftAudioRate);
+	status &= ReadRegister (kRegAudioControl2, rateHigh, gAudioRateHighMask [inAudioSystem], gAudioRateHighShift [inAudioSystem]);
 	if (status)
-		outRate = static_cast <NTV2AudioRate> (value);
+	{
+		if ((rateLow == 0) && (rateHigh == 0))
+			outRate = NTV2_AUDIO_48K;
+		else if ((rateLow == 1) && (rateHigh == 0))
+			outRate = NTV2_AUDIO_96K;
+		else if ((rateLow == 0) && (rateHigh == 1))
+			outRate = NTV2_AUDIO_192K;
+		else
+			status = false;
+	}
 	return status;
 }
 
@@ -1027,6 +1062,31 @@ bool CNTV2Card::GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValu
 	}
 	return result;
 }
+
+
+bool CNTV2Card::SetHDMIOutAudioRate (const NTV2AudioRate inNewValue)
+{
+	return WriteRegister (kRegHDMIOutControl, static_cast <ULWord> (inNewValue), kRegMaskHDMIAudioRate, kRegShiftHDMIAudioRate);
+}
+
+
+bool CNTV2Card::GetHDMIOutAudioRate (NTV2AudioRate & outValue)
+{
+	return CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, outValue, kRegMaskHDMIAudioRate, kRegShiftHDMIAudioRate);
+}
+
+
+bool CNTV2Card::SetHDMIOutAudioFormat (const NTV2AudioFormat inNewValue)
+{
+	return WriteRegister (kRegHDMIOutControl, static_cast <ULWord> (inNewValue), kRegMaskHDMIAudioFormat, kRegShiftHDMIAudioFormat);
+}
+
+
+bool CNTV2Card::GetHDMIOutAudioFormat (NTV2AudioFormat & outValue)
+{
+	return CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, outValue, kRegMaskHDMIAudioFormat, kRegShiftHDMIAudioFormat);
+}
+
 
 bool CNTV2Card::SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inValue, const NTV2Channel inChannel)
 {
