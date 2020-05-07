@@ -845,16 +845,16 @@ void NTV2Player4K::RouteFsToTsiMux (void)
 		if (::IsRGBFormat(mConfig.fPixelFormat))
 		{
 			mDevice.Connect (NTV2_Xpt425Mux1AInput,	NTV2_XptFrameBuffer1RGB);
-			mDevice.Connect (NTV2_Xpt425Mux1BInput,	NTV2_XptFrameBuffer1_425RGB);
+			mDevice.Connect (NTV2_Xpt425Mux1BInput,	NTV2_XptFrameBuffer1_DS2RGB);
 			mDevice.Connect (NTV2_Xpt425Mux2AInput,	NTV2_XptFrameBuffer2RGB);
-			mDevice.Connect (NTV2_Xpt425Mux2BInput,	NTV2_XptFrameBuffer2_425RGB);
+			mDevice.Connect (NTV2_Xpt425Mux2BInput,	NTV2_XptFrameBuffer2_DS2RGB);
 		}
 		else
 		{
 			mDevice.Connect (NTV2_Xpt425Mux1AInput,	NTV2_XptFrameBuffer1YUV);
-			mDevice.Connect (NTV2_Xpt425Mux1BInput,	NTV2_XptFrameBuffer1_425YUV);
+			mDevice.Connect (NTV2_Xpt425Mux1BInput,	NTV2_XptFrameBuffer1_DS2YUV);
 			mDevice.Connect (NTV2_Xpt425Mux2AInput,	NTV2_XptFrameBuffer2YUV);
-			mDevice.Connect (NTV2_Xpt425Mux2BInput,	NTV2_XptFrameBuffer2_425YUV);
+			mDevice.Connect (NTV2_Xpt425Mux2BInput,	NTV2_XptFrameBuffer2_DS2YUV);
 		}
 	}
 	else if (mConfig.fOutputChannel == NTV2_CHANNEL3)
@@ -862,16 +862,16 @@ void NTV2Player4K::RouteFsToTsiMux (void)
 		if (::IsRGBFormat(mConfig.fPixelFormat))
 		{
 			mDevice.Connect (NTV2_Xpt425Mux3AInput,	NTV2_XptFrameBuffer3RGB);
-			mDevice.Connect (NTV2_Xpt425Mux3BInput,	NTV2_XptFrameBuffer3_425RGB);
+			mDevice.Connect (NTV2_Xpt425Mux3BInput,	NTV2_XptFrameBuffer3_DS2RGB);
 			mDevice.Connect (NTV2_Xpt425Mux4AInput,	NTV2_XptFrameBuffer4RGB);
-			mDevice.Connect (NTV2_Xpt425Mux4BInput,	NTV2_XptFrameBuffer4_425RGB);
+			mDevice.Connect (NTV2_Xpt425Mux4BInput,	NTV2_XptFrameBuffer4_DS2RGB);
 		}
 		else
 		{
 			mDevice.Connect (NTV2_Xpt425Mux3AInput,	NTV2_XptFrameBuffer3YUV);
-			mDevice.Connect (NTV2_Xpt425Mux3BInput,	NTV2_XptFrameBuffer3_425YUV);
+			mDevice.Connect (NTV2_Xpt425Mux3BInput,	NTV2_XptFrameBuffer3_DS2YUV);
 			mDevice.Connect (NTV2_Xpt425Mux4AInput,	NTV2_XptFrameBuffer4YUV);
-			mDevice.Connect (NTV2_Xpt425Mux4BInput,	NTV2_XptFrameBuffer4_425YUV);
+			mDevice.Connect (NTV2_Xpt425Mux4BInput,	NTV2_XptFrameBuffer4_DS2YUV);
 		}
 	}
 	else if (mConfig.fOutputChannel == NTV2_CHANNEL5)
@@ -879,16 +879,16 @@ void NTV2Player4K::RouteFsToTsiMux (void)
 		if (::IsRGBFormat(mConfig.fPixelFormat))
 		{
 			mDevice.Connect (NTV2_Xpt425Mux3AInput,	NTV2_XptFrameBuffer5RGB);
-			mDevice.Connect (NTV2_Xpt425Mux3BInput,	NTV2_XptFrameBuffer5_425RGB);
+			mDevice.Connect (NTV2_Xpt425Mux3BInput,	NTV2_XptFrameBuffer5_DS2RGB);
 			mDevice.Connect (NTV2_Xpt425Mux4AInput,	NTV2_XptFrameBuffer6RGB);
-			mDevice.Connect (NTV2_Xpt425Mux4BInput,	NTV2_XptFrameBuffer6_425RGB);
+			mDevice.Connect (NTV2_Xpt425Mux4BInput,	NTV2_XptFrameBuffer6_DS2RGB);
 		}
 		else
 		{
 			mDevice.Connect (NTV2_Xpt425Mux3AInput,	NTV2_XptFrameBuffer5YUV);
-			mDevice.Connect (NTV2_Xpt425Mux3BInput,	NTV2_XptFrameBuffer5_425YUV);
+			mDevice.Connect (NTV2_Xpt425Mux3BInput,	NTV2_XptFrameBuffer5_DS2YUV);
 			mDevice.Connect (NTV2_Xpt425Mux4AInput,	NTV2_XptFrameBuffer6YUV);
-			mDevice.Connect (NTV2_Xpt425Mux4BInput,	NTV2_XptFrameBuffer6_425YUV);
+			mDevice.Connect (NTV2_Xpt425Mux4BInput,	NTV2_XptFrameBuffer6_DS2YUV);
 		}
 	}
 }	//	RouteFsToTsiMux
