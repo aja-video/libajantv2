@@ -2612,12 +2612,12 @@ typedef enum
 **/
 typedef enum NTV2OutputCrosspointID
 {
+	NTV2_FIRST_OUTPUT_CROSSPOINT		= 0x00,
 	NTV2_XptBlack						= 0x00,
 	NTV2_XptSDIIn1						= 0x01,
 	NTV2_XptSDIIn2						= 0x02,
-	NTV2_XptLUT1YUV						= 0x04,	//	Obsolete?
-	NTV2_XptLUT1RGB						= NTV2_XptLUT1YUV | 0x80,
-	NTV2_XptLUT1Out						= NTV2_XptLUT1RGB,
+	NTV2_XptLUT1YUV						= 0x04,
+	NTV2_XptLUT1Out						= NTV2_XptLUT1YUV | 0x80,
 	NTV2_XptCSC1VidYUV					= 0x05,
 	NTV2_XptCSC1VidRGB					= NTV2_XptCSC1VidYUV | 0x80,
 	NTV2_XptConversionModule			= 0x06,
@@ -2639,15 +2639,20 @@ typedef enum NTV2OutputCrosspointID
 	NTV2_XptMixer1VidYUV				= 0x12,
 	NTV2_XptMixer1KeyYUV				= 0x13,
 	NTV2_XptWaterMarkerYUV				= 0x14,
+	NTV2_XptWaterMarkerRGB				= NTV2_XptWaterMarkerYUV | 0x80,
 	NTV2_XptAnalogIn					= 0x16,
 	NTV2_XptHDMIIn1						= 0x17,
+	NTV2_XptHDMIIn1RGB					= NTV2_XptHDMIIn1 | 0x80,
 	NTV2_XptWaterMarker2YUV				= 0x1A,
+	NTV2_XptWaterMarker2RGB				= NTV2_XptWaterMarker2YUV | 0x80,
 	NTV2_XptDuallinkOut2				= 0x1C,
 	NTV2_XptTestPatternYUV				= 0x1D,
 	NTV2_XptSDIIn1DS2					= 0x1E,
 	NTV2_XptSDIIn2DS2					= 0x1F,
 	NTV2_XptMixer2VidYUV				= 0x20,
 	NTV2_XptMixer2KeyYUV				= 0x21,
+	NTV2_XptDCIMixerVidYUV				= 0x22,
+	NTV2_XptDCIMixerVidRGB				= NTV2_XptDCIMixerVidYUV | 0x80,
 	NTV2_XptStereoCompressorOut			= 0x23,
 	NTV2_XptFrameBuffer3YUV				= 0x24,
 	NTV2_XptFrameBuffer3RGB				= NTV2_XptFrameBuffer3YUV | 0x80,
@@ -2655,8 +2660,6 @@ typedef enum NTV2OutputCrosspointID
 	NTV2_XptFrameBuffer4RGB				= NTV2_XptFrameBuffer4YUV | 0x80,
 	NTV2_XptDuallinkOut1DS2				= 0x26,
 	NTV2_XptDuallinkOut2DS2				= 0x27,
-	NTV2_XptDCIMixerVidYUV				= 0x22,
-	NTV2_XptDCIMixerVidRGB				= NTV2_XptDCIMixerVidYUV | 0x80,
 	NTV2_XptCSC5VidYUV					= 0x2C,
 	NTV2_XptCSC5VidRGB					= NTV2_XptCSC5VidYUV | 0x80,
 	NTV2_XptCSC5KeyYUV					= 0x2D,
@@ -2764,12 +2767,8 @@ typedef enum NTV2OutputCrosspointID
 	NTV2_XptHDMIIn4						= 0x7D,
 	NTV2_XptHDMIIn4RGB					= NTV2_XptHDMIIn4 | 0x80,
 	NTV2_XptDuallinkIn1					= 0x83,
-	NTV2_XptLUT2RGB						= 0x8D,
-	NTV2_XptLUT2Out						= NTV2_XptLUT2RGB,
-	NTV2_XptWaterMarkerRGB				= 0x94,
+	NTV2_XptLUT2Out						= 0x8D,
 	NTV2_XptIICTRGB						= 0x95,
-	NTV2_XptHDMIIn1RGB					= 0x97,
-	NTV2_XptWaterMarker2RGB				= 0x9A,
 	NTV2_XptIICT2RGB					= 0x9B,
 	NTV2_XptDuallinkIn2					= 0xA8,
 	NTV2_XptLUT3Out						= 0xA9,
@@ -2787,43 +2786,48 @@ typedef enum NTV2OutputCrosspointID
 	NTV2_XptRuntimeCalc					= 0xFF,
 	NTV2_LAST_OUTPUT_CROSSPOINT			= 0xFF,
 	NTV2_OUTPUT_CROSSPOINT_INVALID		= 0xFF
+	#if !defined(NTV2_DEPRECATE_16_0)
+		,
+		NTV2_XptLUT1RGB					= NTV2_XptLUT1Out,				///< @deprecated	Use NTV2_XptLUT1Out instead.
+		NTV2_XptLUT2RGB					= NTV2_XptLUT2Out				///< @deprecated	Use NTV2_XptLUT2Out instead.
+	#endif
 	#if !defined(NTV2_DEPRECATE_15_3)
 		,
-		NTV2_XptFrameBuffer1_425YUV		= NTV2_XptFrameBuffer1_DS2YUV,
-		NTV2_XptFrameBuffer1_425RGB		= NTV2_XptFrameBuffer1_DS2RGB,
-		NTV2_XptFrameBuffer2_425YUV		= NTV2_XptFrameBuffer2_DS2YUV,
-		NTV2_XptFrameBuffer2_425RGB		= NTV2_XptFrameBuffer2_DS2RGB,
-		NTV2_XptFrameBuffer3_425YUV		= NTV2_XptFrameBuffer3_DS2YUV,
-		NTV2_XptFrameBuffer3_425RGB		= NTV2_XptFrameBuffer3_DS2RGB,
-		NTV2_XptFrameBuffer4_425YUV		= NTV2_XptFrameBuffer4_DS2YUV,
-		NTV2_XptFrameBuffer4_425RGB		= NTV2_XptFrameBuffer4_DS2RGB,
-		NTV2_XptFrameBuffer5_425YUV		= NTV2_XptFrameBuffer5_DS2YUV,
-		NTV2_XptFrameBuffer5_425RGB		= NTV2_XptFrameBuffer5_DS2RGB,
-		NTV2_XptFrameBuffer6_425YUV		= NTV2_XptFrameBuffer6_DS2YUV,
-		NTV2_XptFrameBuffer6_425RGB		= NTV2_XptFrameBuffer6_DS2RGB,
-		NTV2_XptFrameBuffer7_425YUV		= NTV2_XptFrameBuffer7_DS2YUV,
-		NTV2_XptFrameBuffer7_425RGB		= NTV2_XptFrameBuffer7_DS2RGB,
-		NTV2_XptFrameBuffer8_425YUV		= NTV2_XptFrameBuffer8_DS2YUV,
-		NTV2_XptFrameBuffer8_425RGB		= NTV2_XptFrameBuffer8_DS2RGB
+		NTV2_XptFrameBuffer1_425YUV		= NTV2_XptFrameBuffer1_DS2YUV,	///< @deprecated	Use NTV2_XptFrameBuffer1_DS2YUV instead.
+		NTV2_XptFrameBuffer1_425RGB		= NTV2_XptFrameBuffer1_DS2RGB,	///< @deprecated	Use NTV2_XptFrameBuffer1_DS2RGB instead.
+		NTV2_XptFrameBuffer2_425YUV		= NTV2_XptFrameBuffer2_DS2YUV,	///< @deprecated	Use NTV2_XptFrameBuffer2_DS2YUV instead.
+		NTV2_XptFrameBuffer2_425RGB		= NTV2_XptFrameBuffer2_DS2RGB,	///< @deprecated	Use NTV2_XptFrameBuffer2_DS2RGB instead.
+		NTV2_XptFrameBuffer3_425YUV		= NTV2_XptFrameBuffer3_DS2YUV,	///< @deprecated	Use NTV2_XptFrameBuffer3_DS2YUV instead.
+		NTV2_XptFrameBuffer3_425RGB		= NTV2_XptFrameBuffer3_DS2RGB,	///< @deprecated	Use NTV2_XptFrameBuffer3_DS2RGB instead.
+		NTV2_XptFrameBuffer4_425YUV		= NTV2_XptFrameBuffer4_DS2YUV,	///< @deprecated	Use NTV2_XptFrameBuffer4_DS2YUV instead.
+		NTV2_XptFrameBuffer4_425RGB		= NTV2_XptFrameBuffer4_DS2RGB,	///< @deprecated	Use NTV2_XptFrameBuffer4_DS2RGB instead.
+		NTV2_XptFrameBuffer5_425YUV		= NTV2_XptFrameBuffer5_DS2YUV,	///< @deprecated	Use NTV2_XptFrameBuffer5_DS2YUV instead.
+		NTV2_XptFrameBuffer5_425RGB		= NTV2_XptFrameBuffer5_DS2RGB,	///< @deprecated	Use NTV2_XptFrameBuffer5_DS2RGB instead.
+		NTV2_XptFrameBuffer6_425YUV		= NTV2_XptFrameBuffer6_DS2YUV,	///< @deprecated	Use NTV2_XptFrameBuffer6_DS2YUV instead.
+		NTV2_XptFrameBuffer6_425RGB		= NTV2_XptFrameBuffer6_DS2RGB,	///< @deprecated	Use NTV2_XptFrameBuffer6_DS2RGB instead.
+		NTV2_XptFrameBuffer7_425YUV		= NTV2_XptFrameBuffer7_DS2YUV,	///< @deprecated	Use NTV2_XptFrameBuffer7_DS2YUV instead.
+		NTV2_XptFrameBuffer7_425RGB		= NTV2_XptFrameBuffer7_DS2RGB,	///< @deprecated	Use NTV2_XptFrameBuffer7_DS2RGB instead.
+		NTV2_XptFrameBuffer8_425YUV		= NTV2_XptFrameBuffer8_DS2YUV,	///< @deprecated	Use NTV2_XptFrameBuffer8_DS2YUV instead.
+		NTV2_XptFrameBuffer8_425RGB		= NTV2_XptFrameBuffer8_DS2RGB	///< @deprecated	Use NTV2_XptFrameBuffer8_DS2RGB instead.
 	#endif
 	#if !defined(NTV2_DEPRECATE_14_3)
 		,
-		NTV2_XptHDMIIn					= NTV2_XptHDMIIn1,
-		NTV2_XptHDMIInQ2				= NTV2_XptHDMIIn1Q2,
-		NTV2_XptHDMIInQ3				= NTV2_XptHDMIIn1Q3,
-		NTV2_XptHDMIInQ4				= NTV2_XptHDMIIn1Q4,
-		NTV2_XptHDMIInRGB				= NTV2_XptHDMIIn1RGB,
-		NTV2_XptHDMIInQ2RGB				= NTV2_XptHDMIIn1Q2RGB,
-		NTV2_XptHDMIInQ3RGB				= NTV2_XptHDMIIn1Q3RGB,
-		NTV2_XptHDMIInQ4RGB				= NTV2_XptHDMIIn1Q4RGB
+		NTV2_XptHDMIIn					= NTV2_XptHDMIIn1,				///< @deprecated	Use NTV2_XptHDMIIn1 instead.
+		NTV2_XptHDMIInQ2				= NTV2_XptHDMIIn1Q2,			///< @deprecated	Use NTV2_XptHDMIIn1Q2 instead.
+		NTV2_XptHDMIInQ3				= NTV2_XptHDMIIn1Q3,			///< @deprecated	Use NTV2_XptHDMIIn1Q3 instead.
+		NTV2_XptHDMIInQ4				= NTV2_XptHDMIIn1Q4,			///< @deprecated	Use NTV2_XptHDMIIn1Q4 instead.
+		NTV2_XptHDMIInRGB				= NTV2_XptHDMIIn1RGB,			///< @deprecated	Use NTV2_XptHDMIIn1RGB instead.
+		NTV2_XptHDMIInQ2RGB				= NTV2_XptHDMIIn1Q2RGB,			///< @deprecated	Use NTV2_XptHDMIIn1Q2RGB instead.
+		NTV2_XptHDMIInQ3RGB				= NTV2_XptHDMIIn1Q3RGB,			///< @deprecated	Use NTV2_XptHDMIIn1Q3RGB instead.
+		NTV2_XptHDMIInQ4RGB				= NTV2_XptHDMIIn1Q4RGB			///< @deprecated	Use NTV2_XptHDMIIn1Q4RGB instead.
 	#endif
 	#if !defined (NTV2_DEPRECATE)
 		,
-		NTV2_XptFS1SecondConverter		= 0x18,
-		NTV2_XptFS1ProcAmp				= 0x19,
-		NTV2_XptFS1TestSignalGenerator	= 0x1D,
+		NTV2_XptFS1SecondConverter		= 0x18,						///< @deprecated	Obsolete, do not use.
+		NTV2_XptFS1ProcAmp				= 0x19,						///< @deprecated	Obsolete, do not use.
+		NTV2_XptFS1TestSignalGenerator	= 0x1D,						///< @deprecated	Obsolete, do not use.
 		NTV2_XptCSCYUV					= NTV2_XptCSC1VidYUV,		///< @deprecated	Use NTV2_XptCSC1VidYUV instead.
-		NTV2_XptLUT						= NTV2_XptLUT1RGB,			///< @deprecated	Use NTV2_XptLUT1RGB instead.
+		NTV2_XptLUT						= NTV2_XptLUT1Out,			///< @deprecated	Use NTV2_XptLUT1Out instead.
 		NTV2_XptCSCRGB					= NTV2_XptCSC1VidRGB,		///< @deprecated	Use NTV2_XptCSC1VidRGB instead.
 		NTV2_XptDuallinkIn				= NTV2_XptDuallinkIn1,		///< @deprecated	Use NTV2_XptDuallinkIn1 instead.
 		NTV2_XptDuallinkOut				= NTV2_XptDuallinkOut1,		///< @deprecated	Use NTV2_XptDuallinkOut1 instead.
@@ -4432,14 +4436,14 @@ typedef enum
 	#define		NTV2K2_XptDuallinkIn2				NTV2_XptDuallinkIn2					///< @deprecated	Use NTV2_XptDuallinkIn2 instead.
 	#define		NTV2K2_XptDuallinkIn3				NTV2_XptDuallinkIn3					///< @deprecated	Use NTV2_XptDuallinkIn3 instead.
 	#define		NTV2K2_XptDuallinkIn4				NTV2_XptDuallinkIn4					///< @deprecated	Use NTV2_XptDuallinkIn4 instead.
-	#define		NTV2K2_XptLUT						NTV2_XptLUT1RGB						///< @deprecated	Use NTV2_XptLUT1RGB instead.
-	#define		NTV2K2_XptLUT1RGB					NTV2_XptLUT1RGB						///< @deprecated	Use NTV2_XptLUT1RGB instead.
+	#define		NTV2K2_XptLUT						NTV2_XptLUT1Out						///< @deprecated	Use NTV2_XptLUT1Out instead.
+	#define		NTV2K2_XptLUT1RGB					NTV2_XptLUT1Out						///< @deprecated	Use NTV2_XptLUT1Out instead.
 	#define		NTV2K2_XptCSCRGB					NTV2_XptCSC1VidRGB					///< @deprecated	Use NTV2_XptCSC1VidRGB instead.
 	#define		NTV2K2_XptCSC1VidRGB				NTV2_XptCSC1VidRGB					///< @deprecated	Use NTV2_XptCSC1VidRGB instead.
 	#define		NTV2K2_XptFrameBuffer1RGB			NTV2_XptFrameBuffer1RGB				///< @deprecated	Use NTV2_XptFrameBuffer1RGB instead.
 	#define		NTV2K2_XptFrameSync1RGB				NTV2_XptFrameSync1RGB				///< @deprecated	Use NTV2_XptFrameSync1RGB instead.
 	#define		NTV2K2_XptFrameSync2RGB				NTV2_XptFrameSync2RGB				///< @deprecated	Use NTV2_XptFrameSync2RGB instead.
-	#define		NTV2K2_XptLUT2RGB					NTV2_XptLUT2RGB						///< @deprecated	Use NTV2_XptLUT2RGB instead.
+	#define		NTV2K2_XptLUT2RGB					NTV2_XptLUT2Out						///< @deprecated	Use NTV2_XptLUT2Out instead.
 	#define		NTV2K2_XptCSC1KeyYUV				NTV2_XptCSC1KeyYUV					///< @deprecated	Use NTV2_XptCSC1KeyYUV instead.
 	#define		NTV2K2_XptFrameBuffer2YUV			NTV2_XptFrameBuffer2YUV				///< @deprecated	Use NTV2_XptFrameBuffer2YUV instead.
 	#define		NTV2K2_XptFrameBuffer2RGB			NTV2_XptFrameBuffer2RGB				///< @deprecated	Use NTV2_XptFrameBuffer2RGB instead.

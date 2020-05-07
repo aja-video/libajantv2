@@ -4089,10 +4089,10 @@ bool CNTV2Card::GetSecondConverterPulldown (ULWord & outValue)					{return ReadR
 			case NTV2_XptDuallinkOut1:
 				GetXptDuallinkOutInputSelect(&xptSelect);
 				break;
-			case NTV2_XptLUT1RGB:
+			case NTV2_XptLUT1Out:
 				GetXptLUTInputSelect(&xptSelect);
 				break;
-			case NTV2_XptLUT2RGB:
+			case NTV2_XptLUT2Out:
 				GetXptLUT2InputSelect(&xptSelect);
 				break;
 			case NTV2_XptLUT3Out:

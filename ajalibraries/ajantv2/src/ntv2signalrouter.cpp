@@ -460,47 +460,47 @@ void RoutingExpert::InitOutputXpt2String(void)
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptDuallinkOut7DS2,	"DLOut7DS");	//	, "DLOut7DS2");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptDuallinkOut8,	"DLOut8");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptDuallinkOut8DS2,	"DLOut8DS");	//	, "DLOut8DS2");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer1_425RGB,	"FB1RGB425");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer1_425YUV,	"FB1YUV425");
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer1_DS2RGB,	"FB1RGBDS2");	//	Formerly "FB1RGB425"
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer1_DS2YUV,	"FB1YUVDS2");	//	Formerly "FB1YUV425"
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer1RGB,	"FB1RGB");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer1YUV,	"FB1");		//	, "FB1YUV");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer2_425RGB,	"FB2RGB425");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer2_425YUV,	"FB2YUV425");
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer2_DS2RGB,	"FB2RGBDS2");	//	Formerly "FB2RGB425"
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer2_DS2YUV,	"FB2YUVDS2");	//	Formerly "FB2YUV425"
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer2RGB,	"FB2RGB");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer2YUV,	"FB2");		//	, "FB2YUV");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer3_425RGB,	"FB3RGB425");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer3_425YUV,	"FB3YUV425");
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer3_DS2RGB,	"FB3RGBDS2");	//	Formerly "FB3RGB425"
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer3_DS2YUV,	"FB3YUVDS2");	//	Formerly "FB3YUV425"
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer3RGB,	"FB3RGB");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer3YUV,	"FB3");		//	, "FB3YUV");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer4_425RGB,	"FB4RGB425");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer4_425YUV,	"FB4YUV425");
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer4_DS2RGB,	"FB4RGBDS2");	//	Formerly "FB4RGB425"
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer4_DS2YUV,	"FB4YUVDS2");	//	Formerly "FB4YUV425"
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer4RGB,	"FB4RGB");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer4YUV,	"FB4");		//	, "FB4YUV");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer5_425RGB,	"FB5RGB425");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer5_425YUV,	"FB5YUV425");
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer5_DS2RGB,	"FB5RGBDS2");	//	Formerly "FB5RGB425"
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer5_DS2YUV,	"FB5YUVDS2");	//	Formerly "FB5YUV425"
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer5RGB,	"FB5RGB");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer5YUV,	"FB5");		//	, "FB5YUV");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer6_425RGB,	"FB6RGB425");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer6_425YUV,	"FB6YUV425");
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer6_DS2RGB,	"FB6RGBDS2");	//	Formerly "FB6RGB425"
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer6_DS2YUV,	"FB6YUVDS2");	//	Formerly "FB6YUV425"
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer6RGB,	"FB6RGB");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer6YUV,	"FB6");		//	, "FB6YUV");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer7_425RGB,	"FB7RGB425");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer7_425YUV,	"FB7YUV425");
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer7_DS2RGB,	"FB7RGBDS2");	//	Formerly "FB7RGB425"
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer7_DS2YUV,	"FB7YUVDS2");	//	Formerly "FB7YUV425"
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer7RGB,	"FB7RGB");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer7YUV,	"FB7");		//	, "FB7YUV");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer8_425RGB,	"FB8RGB425");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer8_425YUV,	"FB8YUV425");
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer8_DS2RGB,	"FB8RGBDS2");	//	Formerly "FB8RGB425"
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer8_DS2YUV,	"FB8YUVDS2");	//	Formerly "FB8YUV425"
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer8RGB,	"FB8RGB");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptFrameBuffer8YUV,	"FB8");		//	, "FB8YUV");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT1RGB,	"LUT1RGB");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT1YUV,	"LUT1YUV");	//	, "LUT1");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT2RGB,	"LUT2RGB");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT3Out,	"LUT3RGB");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT4Out,	"LUT4RGB");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT5Out,	"LUT5RGB");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT6Out,	"LUT6RGB");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT7Out,	"LUT7RGB");
-	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT8Out,	"LUT8RGB");
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT1Out,	"LUT1");	//	Formerly "LUT1RGB"
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT1YUV,	"LUT1YUV");
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT2Out,	"LUT2");	//	Formerly "LUT2RGB"
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT3Out,	"LUT3");	//	Formerly "LUT3RGB"
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT4Out,	"LUT4");	//	Formerly "LUT4RGB"
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT5Out,	"LUT5");	//	Formerly "LUT5RGB"
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT6Out,	"LUT6");	//	Formerly "LUT6RGB"
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT7Out,	"LUT7");	//	Formerly "LUT7RGB"
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT8Out,	"LUT8");	//	Formerly "LUT8RGB"
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptMixer1KeyYUV,	"Mixer1Key");	//	, "Mixer1KeyYUV");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptMixer1VidYUV,	"Mixer1");		//	, "Mixer1Vid", "Mixer1VidYUV");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptMixer2KeyYUV,	"Mixer2Key");	//	, "Mixer2KeyYUV");
@@ -924,41 +924,41 @@ void RoutingExpert::InitOutputXpt2WidgetIDs(void)
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut7DS2,		NTV2_WgtDualLinkV2Out7));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut8,			NTV2_WgtDualLinkV2Out8));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut8DS2,		NTV2_WgtDualLinkV2Out8));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer1_425RGB,	NTV2_WgtFrameBuffer1));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer1_425YUV,	NTV2_WgtFrameBuffer1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer1_DS2RGB,	NTV2_WgtFrameBuffer1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer1_DS2YUV,	NTV2_WgtFrameBuffer1));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer1RGB,		NTV2_WgtFrameBuffer1));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer1YUV,		NTV2_WgtFrameBuffer1));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer2_425RGB,	NTV2_WgtFrameBuffer2));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer2_425YUV,	NTV2_WgtFrameBuffer2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer2_DS2RGB,	NTV2_WgtFrameBuffer2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer2_DS2YUV,	NTV2_WgtFrameBuffer2));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer2RGB,		NTV2_WgtFrameBuffer2));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer2YUV,		NTV2_WgtFrameBuffer2));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer3_425RGB,	NTV2_WgtFrameBuffer3));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer3_425YUV,	NTV2_WgtFrameBuffer3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer3_DS2RGB,	NTV2_WgtFrameBuffer3));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer3_DS2YUV,	NTV2_WgtFrameBuffer3));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer3RGB,		NTV2_WgtFrameBuffer3));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer3YUV,		NTV2_WgtFrameBuffer3));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer4_425RGB,	NTV2_WgtFrameBuffer4));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer4_425YUV,	NTV2_WgtFrameBuffer4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer4_DS2RGB,	NTV2_WgtFrameBuffer4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer4_DS2YUV,	NTV2_WgtFrameBuffer4));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer4RGB,		NTV2_WgtFrameBuffer4));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer4YUV,		NTV2_WgtFrameBuffer4));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer5_425RGB,	NTV2_WgtFrameBuffer5));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer5_425YUV,	NTV2_WgtFrameBuffer5));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer5_DS2RGB,	NTV2_WgtFrameBuffer5));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer5_DS2YUV,	NTV2_WgtFrameBuffer5));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer5RGB,		NTV2_WgtFrameBuffer5));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer5YUV,		NTV2_WgtFrameBuffer5));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer6_425RGB,	NTV2_WgtFrameBuffer6));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer6_425YUV,	NTV2_WgtFrameBuffer6));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer6_DS2RGB,	NTV2_WgtFrameBuffer6));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer6_DS2YUV,	NTV2_WgtFrameBuffer6));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer6RGB,		NTV2_WgtFrameBuffer6));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer6YUV,		NTV2_WgtFrameBuffer6));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer7_425RGB,	NTV2_WgtFrameBuffer7));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer7_425YUV,	NTV2_WgtFrameBuffer7));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer7_DS2RGB,	NTV2_WgtFrameBuffer7));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer7_DS2YUV,	NTV2_WgtFrameBuffer7));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer7RGB,		NTV2_WgtFrameBuffer7));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer7YUV,		NTV2_WgtFrameBuffer7));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer8_425RGB,	NTV2_WgtFrameBuffer8));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer8_425YUV,	NTV2_WgtFrameBuffer8));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer8_DS2RGB,	NTV2_WgtFrameBuffer8));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer8_DS2YUV,	NTV2_WgtFrameBuffer8));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer8RGB,		NTV2_WgtFrameBuffer8));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer8YUV,		NTV2_WgtFrameBuffer8));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT1RGB,				NTV2_WgtLUT1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT1Out,				NTV2_WgtLUT1));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT1YUV,				NTV2_WgtLUT1));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT2RGB,				NTV2_WgtLUT2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT2Out,				NTV2_WgtLUT2));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT3Out,				NTV2_WgtLUT3));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT4Out,				NTV2_WgtLUT4));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT5Out,				NTV2_WgtLUT5));
@@ -1757,10 +1757,10 @@ NTV2OutputCrosspointID GetFrameBufferOutputXptFromChannel (const NTV2Channel inC
                                                                                 NTV2_XptFrameBuffer5YUV,		NTV2_XptFrameBuffer6YUV,		NTV2_XptFrameBuffer7YUV,		NTV2_XptFrameBuffer8YUV};
     static const NTV2OutputCrosspointID	gFrameBufferRGBOutputs []		=	{	NTV2_XptFrameBuffer1RGB,		NTV2_XptFrameBuffer2RGB,		NTV2_XptFrameBuffer3RGB,		NTV2_XptFrameBuffer4RGB,
                                                                                 NTV2_XptFrameBuffer5RGB,		NTV2_XptFrameBuffer6RGB,		NTV2_XptFrameBuffer7RGB,		NTV2_XptFrameBuffer8RGB};
-    static const NTV2OutputCrosspointID	gFrameBufferYUV425Outputs []	=	{	NTV2_XptFrameBuffer1_425YUV,	NTV2_XptFrameBuffer2_425YUV,	NTV2_XptFrameBuffer3_425YUV,	NTV2_XptFrameBuffer4_425YUV,
-                                                                                NTV2_XptFrameBuffer5_425YUV,	NTV2_XptFrameBuffer6_425YUV,	NTV2_XptFrameBuffer7_425YUV,	NTV2_XptFrameBuffer8_425YUV};
-    static const NTV2OutputCrosspointID	gFrameBufferRGB425Outputs []	=	{	NTV2_XptFrameBuffer1_425RGB,	NTV2_XptFrameBuffer2_425RGB,	NTV2_XptFrameBuffer3_425RGB,	NTV2_XptFrameBuffer4_425RGB,
-                                                                                NTV2_XptFrameBuffer5_425RGB,	NTV2_XptFrameBuffer6_425RGB,	NTV2_XptFrameBuffer7_425RGB,	NTV2_XptFrameBuffer8_425RGB};
+    static const NTV2OutputCrosspointID	gFrameBufferYUV425Outputs []	=	{	NTV2_XptFrameBuffer1_DS2YUV,	NTV2_XptFrameBuffer2_DS2YUV,	NTV2_XptFrameBuffer3_DS2YUV,	NTV2_XptFrameBuffer4_DS2YUV,
+                                                                                NTV2_XptFrameBuffer5_DS2YUV,	NTV2_XptFrameBuffer6_DS2YUV,	NTV2_XptFrameBuffer7_DS2YUV,	NTV2_XptFrameBuffer8_DS2YUV};
+    static const NTV2OutputCrosspointID	gFrameBufferRGB425Outputs []	=	{	NTV2_XptFrameBuffer1_DS2RGB,	NTV2_XptFrameBuffer2_DS2RGB,	NTV2_XptFrameBuffer3_DS2RGB,	NTV2_XptFrameBuffer4_DS2RGB,
+                                                                                NTV2_XptFrameBuffer5_DS2RGB,	NTV2_XptFrameBuffer6_DS2RGB,	NTV2_XptFrameBuffer7_DS2RGB,	NTV2_XptFrameBuffer8_DS2RGB};
     if (NTV2_IS_VALID_CHANNEL (inChannel))
         if (inIs425)
             return inIsRGB ? gFrameBufferRGB425Outputs [inChannel] : gFrameBufferYUV425Outputs [inChannel];
@@ -2518,12 +2518,12 @@ ostream & operator << (ostream & inOutStream, const CNTV2SignalRouter & inObj)
 
 ostream & operator << (ostream & inOutStream, const NTV2OutputXptIDSet & inObj)
 {
-    NTV2OutputXptIDSetConstIter	iter (inObj.begin ());
-    while (iter != inObj.end ())
+    NTV2OutputXptIDSetConstIter	iter(inObj.begin());
+    while (iter != inObj.end())
     {
-        inOutStream << ::NTV2OutputCrosspointIDToString (*iter, false);
+        inOutStream << ::NTV2OutputCrosspointIDToString(*iter, false);
         ++iter;
-        if (iter == inObj.end ())
+        if (iter == inObj.end())
             break;
         inOutStream << ", ";
     }
@@ -2532,12 +2532,12 @@ ostream & operator << (ostream & inOutStream, const NTV2OutputXptIDSet & inObj)
 
 ostream & operator << (ostream & inOutStream, const NTV2InputXptIDSet & inObj)
 {
-    NTV2InputXptIDSetConstIter	iter (inObj.begin ());
-    while (iter != inObj.end ())
+    NTV2InputXptIDSetConstIter	iter(inObj.begin());
+    while (iter != inObj.end())
     {
-        inOutStream << ::NTV2InputCrosspointIDToString (*iter, false);
+        inOutStream << ::NTV2InputCrosspointIDToString(*iter, false);
         ++iter;
-        if (iter == inObj.end ())
+        if (iter == inObj.end())
             break;
         inOutStream << ", ";
     }
