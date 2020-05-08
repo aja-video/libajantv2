@@ -2677,39 +2677,52 @@ bool NTV2RegInfo::operator < (const NTV2RegInfo & inRHS) const
 
 ostream & NTV2RegInfo::Print (ostream & oss, const bool inAsCode) const
 {
-	const string regName (::NTV2RegisterNumberToString(NTV2RegisterNumber(registerNumber)));
 	if (inAsCode)
-	{
-		const bool badName (regName.find(' ') != string::npos);
-		oss << "theDevice.WriteRegister (";
-		if (badName)
-			oss << DEC(registerNumber);
-		else
-			oss << regName;
-		oss << ", " << xHEX0N(registerValue,8);
-		if (registerMask != 0xFFFFFFFF)
-			oss << ", " << xHEX0N(registerMask,8);
-		if (registerShift)
-			oss << ", " << DEC(registerShift);
-		oss << ");  // ";
-		if (badName)
-			oss << regName;
-		else
-			oss << "Reg " << DEC(registerNumber);
-		//	Decode the reg value...
-		string info(CNTV2RegisterExpert::GetDisplayValue(registerNumber, registerValue));
-		if (!info.empty())	//	and add to end of comment
-			oss << "  // " << aja::replace(info, "\n", ", ");
-	}
+		return PrintCode(oss);
+	const string regName (::NTV2RegisterNumberToString(NTV2RegisterNumber(registerNumber)));
+	oss << "[" << regName << "|" << DEC(registerNumber) << ": val=" << xHEX0N(registerValue,8);
+	if (registerMask != 0xFFFFFFFF)
+		oss << " msk=" << xHEX0N(registerMask,8);
+	if (registerShift)
+		oss << " shf=" << DEC(registerShift);
+	return oss << "]";
+}
+
+ostream & NTV2RegInfo::PrintCode (ostream & oss, const int inRadix) const
+{
+	const string regName (::NTV2RegisterNumberToString(NTV2RegisterNumber(registerNumber)));
+	const bool badName (regName.find(' ') != string::npos);
+	oss << "theDevice.WriteRegister (";
+	if (badName)
+		oss << DEC(registerNumber);
 	else
+		oss << regName;
+	switch (inRadix)
 	{
-		oss << "[" << regName << "|" << DEC(registerNumber) << ": val=" << xHEX0N(registerValue,8);
-		if (registerMask != 0xFFFFFFFF)
-			oss << " msk=" << xHEX0N(registerMask,8);
-		if (registerShift)
-			oss << " shf=" << DEC(registerShift);
-		oss << "]";
+		case 2:		oss << ", " << BIN032(registerValue);	break;
+		case 8:		oss << ", " << OCT(registerValue);		break;
+		case 10:	oss << ", " << DEC(registerValue);		break;
+		default:	oss << ", " << xHEX0N(registerValue,8);	break;
 	}
+	if (registerMask != 0xFFFFFFFF)
+		switch (inRadix)
+		{
+			case 2:		oss << ", " << BIN032(registerMask);	break;
+			case 8:		oss << ", " << OCT(registerMask);		break;
+			case 10:	oss << ", " << DEC(registerMask);		break;
+			default:	oss << ", " << xHEX0N(registerMask,8);	break;
+		}
+	if (registerShift)
+		oss << ", " << DEC(registerShift);
+	oss << ");  // ";
+	if (badName)
+		oss << regName;
+	else
+		oss << "Reg " << DEC(registerNumber);
+	//	Decode the reg value...
+	string info(CNTV2RegisterExpert::GetDisplayValue(registerNumber, registerValue));
+	if (!info.empty())	//	and add to end of comment
+		oss << "  // " << aja::replace(info, "\n", ", ");
 	return oss;
 }
 

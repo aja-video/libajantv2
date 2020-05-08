@@ -2114,19 +2114,11 @@ bool CNTV2Card::GetPossibleConnections (NTV2PossibleConnections & outConnections
 	outConnections.clear();
 	if (!HasCanConnectROM())
 		return false;
-	for (NTV2InputXptID inputXpt(NTV2_FIRST_INPUT_CROSSPOINT);  inputXpt < 0x80;  inputXpt = NTV2InputXptID(inputXpt+1))
-		for (ULWord reg(0);  reg < 4;  reg++)
-		{
-			ULWord val32(0), regNum(kRegFirstValidXptROMRegister + 4*(inputXpt-1) + reg);
-			if (ReadRegister(regNum, val32)  &&  val32)
-				for (UWord bitNum(0);  bitNum < 32;  bitNum++)
-					if (val32 & (1 << bitNum))
-					{
-						NTV2OutputXptID outputXpt(NTV2OutputXptID(bitNum + UWord(reg * 32)));
-						outConnections.insert(NTV2Connection(inputXpt, outputXpt));
-					}
-		}	//	for each canDo reg for this input xpt
-	return true;
+
+	NTV2RegReads ROMregs;
+	return ::MakeRouteROMRegisters(ROMregs)
+			&&  ReadRegisters(ROMregs)
+			&&  ::GetPossibleConnections(ROMregs, outConnections);
 }
 
 /////////////////////////////////

@@ -184,6 +184,13 @@ class RoutingExpert
 			return !outOutputs.empty();
 		}
 
+		bool				IsOutputXptValid (const NTV2OutputXptID inOutputXpt) const
+		{
+			AJAAutoLock	lock(&gLock);
+			NTV2_ASSERT(!gOutputXpt2WidgetIDs.empty());
+			return gOutputXpt2WidgetIDs.find(inOutputXpt) != gOutputXpt2WidgetIDs.end();
+		}
+
 		private:
 			void InitInputXpt2String(void);
 			void InitOutputXpt2String(void);
@@ -1932,6 +1939,65 @@ NTV2OutputCrosspointID GetTSIMuxOutputXptFromChannel (const NTV2Channel inChanne
         return NTV2_OUTPUT_CROSSPOINT_INVALID;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Crosspoint Utils	End
+
+
+bool GetRouteROMInfoFromReg (const ULWord inRegNum, const ULWord inRegVal,
+							NTV2InputXptID & outInputXpt, NTV2OutputXptIDSet & outOutputXpts, const bool inAppendOutputXpts)
+{
+	static const ULWord firstROMReg(kRegFirstValidXptROMRegister);
+	static const ULWord firstInpXpt(NTV2_FIRST_INPUT_CROSSPOINT);
+	if (!inAppendOutputXpts)
+		outOutputXpts.clear();
+	outInputXpt = NTV2_INPUT_CROSSPOINT_INVALID;
+	if (inRegNum < uint32_t(kRegFirstValidXptROMRegister))
+		return false;
+	if (inRegNum >= uint32_t(kRegInvalidValidXptROMRegister))
+		return false;
+
+	const ULWord regOffset(inRegNum - firstROMReg);
+	const ULWord bitOffset((regOffset % 4) * 32);
+	outInputXpt = NTV2InputXptID(firstInpXpt  +  regOffset / 4UL);	//	4 regs per inputXpt
+	if (!inRegVal)
+		return true;	//	No bits set
+
+	RoutingExpertPtr pExpert(RoutingExpert::GetInstance());
+	NTV2_ASSERT(pExpert);
+	for (UWord bitNdx(0);  bitNdx < 32;  bitNdx++)
+		if (inRegVal & ULWord(1UL << bitNdx))
+		{
+			const NTV2OutputXptID yuvOutputXpt (NTV2OutputXptID((bitOffset + bitNdx) & 0x0000007F));
+			const NTV2OutputXptID rgbOutputXpt (NTV2OutputXptID(yuvOutputXpt | 0x80));
+			if (pExpert  &&  pExpert->IsOutputXptValid(yuvOutputXpt))
+				outOutputXpts.insert(yuvOutputXpt);
+			if (pExpert  &&  pExpert->IsOutputXptValid(rgbOutputXpt))
+				outOutputXpts.insert(rgbOutputXpt);
+		}
+	return true;
+}
+
+bool GetPossibleConnections (const NTV2RegReads & inROMRegs, NTV2PossibleConnections & outConnections)
+{
+	outConnections.clear();
+	NTV2RegReadsConstIter iter (FindFirstMatchingRegisterNumber (kRegFirstValidXptROMRegister, inROMRegs));
+	while (iter != inROMRegs.end()  &&  iter->registerNumber >= kRegFirstValidXptROMRegister  &&  iter->registerNumber < kRegInvalidValidXptROMRegister)
+	{
+		NTV2InputXptID inputXpt(NTV2_INPUT_CROSSPOINT_INVALID);
+		NTV2OutputXptIDSet	outputXpts;
+		if (GetRouteROMInfoFromReg (iter->registerNumber, iter->registerValue, inputXpt, outputXpts, true))
+			for (NTV2OutputXptIDSetConstIter it(outputXpts.begin());  it != outputXpts.end();  ++it)
+				outConnections.insert(NTV2Connection(inputXpt, *it));
+		++iter;
+	}
+	return !outConnections.empty();
+}
+
+bool MakeRouteROMRegisters (NTV2RegReads & outROMRegs)
+{
+	outROMRegs.clear();
+	for (uint32_t regNum(kRegFirstValidXptROMRegister);  regNum < kRegInvalidValidXptROMRegister;  regNum++)
+		outROMRegs.push_back(NTV2RegInfo(regNum));
+	return true;
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// NTV2RoutingEntry	Begin
