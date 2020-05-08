@@ -6339,7 +6339,7 @@ AJAExport bool IsVideoFormatJ2KSupported (const NTV2VideoFormat format)
 					outRouter.addWithValue(GetXptLUTInputSelectEntry(),NTV2_XptFrameBuffer1RGB);
 
 					// then hook up lut1 to dualLink
-					outRouter.addWithValue(GetDuallinkOutInputSelectEntry(),NTV2_XptLUT1RGB);
+					outRouter.addWithValue(GetDuallinkOutInputSelectEntry(),NTV2_XptLUT1Out);
 
 					// then hook up dualLink to SDI 1 and SDI 2
 					outRouter.addWithValue(GetSDIOut1InputSelectEntry(),NTV2_XptDuallinkOut1);
@@ -6353,7 +6353,7 @@ AJAExport bool IsVideoFormatJ2KSupported (const NTV2VideoFormat format)
 						outRouter.addWithValue(GetXptLUTInputSelectEntry(),NTV2_XptFrameBuffer1RGB);
 
 						// then hook up lut1 to csc1
-						outRouter.addWithValue(GetCSC1VidInputSelectEntry(),NTV2_XptLUT1RGB);
+						outRouter.addWithValue(GetCSC1VidInputSelectEntry(),NTV2_XptLUT1Out);
 
 						// then hook up csc1 to sdi 1
 						status = outRouter.addWithValue(GetSDIOut1InputSelectEntry(),NTV2_XptCSC1VidYUV);
@@ -6394,7 +6394,7 @@ AJAExport bool IsVideoFormatJ2KSupported (const NTV2VideoFormat format)
 					outRouter.addWithValue(::GetXptLUT2InputSelectEntry(),NTV2_XptFrameBuffer2RGB);
 
 					// then hook up lut2 to csc2
-					outRouter.addWithValue(::GetCSC2VidInputSelectEntry(),NTV2_XptLUT2RGB);
+					outRouter.addWithValue(::GetCSC2VidInputSelectEntry(),NTV2_XptLUT2Out);
 
 					// then hook up csc2 to sdi 2 and any other output
 					outRouter.addWithValue(::GetSDIOut1InputSelectEntry(), NTV2_XptCSC2VidYUV);
@@ -6429,7 +6429,7 @@ AJAExport bool IsVideoFormatJ2KSupported (const NTV2VideoFormat format)
 					outRouter.addWithValue(::GetXptLUTInputSelectEntry(),NTV2_XptCSC1VidRGB);
 
 					// lut 1 to duallink in
-					outRouter.addWithValue(::GetDuallinkOutInputSelectEntry(),NTV2_XptLUT1RGB);
+					outRouter.addWithValue(::GetDuallinkOutInputSelectEntry(),NTV2_XptLUT1Out);
 
 					// then hook up dualLink to SDI 1 and SDI 2
 					outRouter.addWithValue(::GetSDIOut1InputSelectEntry(),NTV2_XptDuallinkOut1);
@@ -6449,7 +6449,7 @@ AJAExport bool IsVideoFormatJ2KSupported (const NTV2VideoFormat format)
 						outRouter.addWithValue(::GetXptLUTInputSelectEntry(),NTV2_XptCSC1VidRGB);
 
 						// lut 1 to color space convert 2
-						outRouter.addWithValue(::GetCSC2VidInputSelectEntry(),NTV2_XptLUT1RGB);
+						outRouter.addWithValue(::GetCSC2VidInputSelectEntry(),NTV2_XptLUT1Out);
 
 						// color space converter 2 to outputs
 						outRouter.addWithValue(::GetSDIOut2InputSelectEntry(),NTV2_XptCSC2VidYUV);
@@ -6491,7 +6491,7 @@ AJAExport bool IsVideoFormatJ2KSupported (const NTV2VideoFormat format)
 					outRouter.addWithValue (::GetXptLUTInputSelectEntry (), NTV2_XptCSC1VidRGB);
 
 					// lut 1 to duallink in
-					outRouter.addWithValue (::GetDuallinkOutInputSelectEntry (), NTV2_XptLUT1RGB);
+					outRouter.addWithValue (::GetDuallinkOutInputSelectEntry (), NTV2_XptLUT1Out);
 
 					// then hook up dualLink to SDI 1 and SDI 2
 					outRouter.addWithValue (::GetSDIOut1InputSelectEntry (), NTV2_XptDuallinkOut1);
@@ -6508,7 +6508,7 @@ AJAExport bool IsVideoFormatJ2KSupported (const NTV2VideoFormat format)
 					outRouter.addWithValue (::GetXptLUTInputSelectEntry (), NTV2_XptCSC1VidRGB);
 
 					// lut 1 to color space convert 2
-					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptLUT1RGB);
+					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptLUT1Out);
 
 					// color space converter 2 to outputs
 					outRouter.addWithValue (::GetSDIOut2InputSelectEntry (), NTV2_XptCSC2VidYUV);
@@ -7635,12 +7635,12 @@ string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID inValue, con
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL In 2", NTV2_XptDuallinkIn2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL In 3", NTV2_XptDuallinkIn3);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL In 4", NTV2_XptDuallinkIn4);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 1 RGB", NTV2_XptLUT1RGB);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 1", NTV2_XptLUT1Out);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "CSC 1 Vid RGB", NTV2_XptCSC1VidRGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 1 RGB", NTV2_XptFrameBuffer1RGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FrameSync 1 RGB", NTV2_XptFrameSync1RGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FrameSync 2 RGB", NTV2_XptFrameSync2RGB);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 2 RGB", NTV2_XptLUT2RGB);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 2", NTV2_XptLUT2Out);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "CSC 1 Key YUV", NTV2_XptCSC1KeyYUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 2 YUV", NTV2_XptFrameBuffer2YUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 2 RGB", NTV2_XptFrameBuffer2RGB);
@@ -7661,8 +7661,8 @@ string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID inValue, con
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Mixer 2 Vid YUV", NTV2_XptMixer2VidYUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Mixer 2 Key YUV", NTV2_XptMixer2KeyYUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Stereo Compressor Out", NTV2_XptStereoCompressorOut);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 3 RGB", NTV2_XptLUT3Out);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 4 RGB", NTV2_XptLUT4Out);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 3", NTV2_XptLUT3Out);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 4", NTV2_XptLUT4Out);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 3 YUV", NTV2_XptFrameBuffer3YUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 3 RGB", NTV2_XptFrameBuffer3RGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 4 YUV", NTV2_XptFrameBuffer4YUV);
@@ -7680,7 +7680,7 @@ string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID inValue, con
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "CSC 5 Vid YUV", NTV2_XptCSC5VidYUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "CSC 5 Vid RGB", NTV2_XptCSC5VidRGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "CSC 5 Key YUV", NTV2_XptCSC5KeyYUV);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 5 RGB", NTV2_XptLUT5Out);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 5", NTV2_XptLUT5Out);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL Out 5", NTV2_XptDuallinkOut5);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL Out 5 DS2", NTV2_XptDuallinkOut5DS2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "4K DownConv Out", NTV2_Xpt4KDownConverterOut);
@@ -7710,9 +7710,9 @@ string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID inValue, con
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "CSC 8 Vid YUV", NTV2_XptCSC8VidYUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "CSC 8 Vid RGB", NTV2_XptCSC8VidRGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "CSC 8 Key YUV", NTV2_XptCSC8KeyYUV);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 6 RGB", NTV2_XptLUT6Out);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 7 RGB", NTV2_XptLUT7Out);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 8 RGB", NTV2_XptLUT8Out);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 6", NTV2_XptLUT6Out);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 7", NTV2_XptLUT7Out);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 8", NTV2_XptLUT8Out);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL Out 6", NTV2_XptDuallinkOut6);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL Out 6 DS2", NTV2_XptDuallinkOut6DS2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL Out 7", NTV2_XptDuallinkOut7);
@@ -7743,22 +7743,22 @@ string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID inValue, con
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425Mux 4a RGB", NTV2_Xpt425Mux4ARGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425Mux 4b YUV", NTV2_Xpt425Mux4BYUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425Mux 4b RGB", NTV2_Xpt425Mux4BRGB);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425FB 1 YUV", NTV2_XptFrameBuffer1_425YUV);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425FB 1 RGB", NTV2_XptFrameBuffer1_425RGB);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425FB 2 YUV", NTV2_XptFrameBuffer2_425YUV);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425FB 2 RGB", NTV2_XptFrameBuffer2_425RGB);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425FB 3 YUV", NTV2_XptFrameBuffer3_425YUV);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425FB 3 RGB", NTV2_XptFrameBuffer3_425RGB);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425FB 4 YUV", NTV2_XptFrameBuffer4_425YUV);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425FB 4 RGB", NTV2_XptFrameBuffer4_425RGB);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425FB 5 YUV", NTV2_XptFrameBuffer5_425YUV);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425FB 5 RGB", NTV2_XptFrameBuffer5_425RGB);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425FB 6 YUV", NTV2_XptFrameBuffer6_425YUV);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425FB 6 RGB", NTV2_XptFrameBuffer6_425RGB);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425FB 7 YUV", NTV2_XptFrameBuffer7_425YUV);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425FB 7 RGB", NTV2_XptFrameBuffer7_425RGB);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425FB 8 YUV", NTV2_XptFrameBuffer8_425YUV);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425FB 8 RGB", NTV2_XptFrameBuffer8_425RGB);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 1 DS2 YUV", NTV2_XptFrameBuffer1_DS2YUV);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 1 DS2 RGB", NTV2_XptFrameBuffer1_DS2RGB);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 2 DS2 YUV", NTV2_XptFrameBuffer2_DS2YUV);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 2 DS2 RGB", NTV2_XptFrameBuffer2_DS2RGB);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 3 DS2 YUV", NTV2_XptFrameBuffer3_DS2YUV);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 3 DS2 RGB", NTV2_XptFrameBuffer3_DS2RGB);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 4 DS2 YUV", NTV2_XptFrameBuffer4_DS2YUV);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 4 DS2 RGB", NTV2_XptFrameBuffer4_DS2RGB);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 5 DS2 YUV", NTV2_XptFrameBuffer5_DS2YUV);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 5 DS2 RGB", NTV2_XptFrameBuffer5_DS2RGB);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 6 DS2 YUV", NTV2_XptFrameBuffer6_DS2YUV);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 6 DS2 RGB", NTV2_XptFrameBuffer6_DS2RGB);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 7 DS2 YUV", NTV2_XptFrameBuffer7_DS2YUV);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 7 DS2 RGB", NTV2_XptFrameBuffer7_DS2RGB);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 8 DS2 YUV", NTV2_XptFrameBuffer8_DS2YUV);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 8 DS2 RGB", NTV2_XptFrameBuffer8_DS2RGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Runtime Calc", NTV2_XptRuntimeCalc);
 	#if !defined (NTV2_DEPRECATE)
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FS 1 2nd Conv", NTV2_XptFS1SecondConverter);
@@ -9195,7 +9195,7 @@ ostream & operator << (ostream & inOutStr, const NTV2OutputCrosspointIDs & inLis
 	inOutStr << "[";
 	for (NTV2OutputCrosspointIDsConstIter it (inList.begin());  it != inList.end();  )
 	{
-		inOutStr << ::NTV2OutputCrosspointIDToString (*it);
+		inOutStr << ::NTV2OutputCrosspointIDToString(*it);
 		++it;
 		if (it != inList.end())
 			inOutStr << ",";
@@ -9210,7 +9210,7 @@ static ostream & operator << (ostream & inOutStr, const NTV2InputCrosspointIDs &
 	inOutStr << "[";
 	for (NTV2InputCrosspointIDsConstIter it (inList.begin());  it != inList.end();  )
 	{
-		inOutStr << ::NTV2InputCrosspointIDToString (*it);
+		inOutStr << ::NTV2InputCrosspointIDToString(*it);
 		++it;
 		if (it != inList.end())
 			inOutStr << ",";

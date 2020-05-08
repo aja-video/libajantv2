@@ -842,34 +842,40 @@ There are these principal types of objects in the diagram:
 			-	<b>Input</b>s are always on the widget’s left side.
 			-	<b>Input</b>s can only be connected to one <b>Output</b> crosspoint.
 			-	Depending on the parent <b>Widget</b>, <b>Input Socket</b>s sometimes can accept both RGB or YCbCr signals, or only RGB or YCbCr.
-			-	Depending on the parent <b>Widget</b> and how it’s configured, an <b>Input</b> can be disabled, in which case it appears dimmed.
-				Signals arriving at a disabled input are ignored by the Widget.
 		-	<b>Output</b> — This is a signal “source” crosspoint.
 			-	<b>Output</b>s are always on the widget’s right side.
 			-	<b>Output</b>s can be connected to any number of <b>Input</b> crosspoints.
 			-	<b>Output</b>s have a fixed signal type that they emit (if enabled): YCbCr or RGB.
-			-	Depending on the parent <b>Widget</b> and how it’s configured, an <b>Output</b> can be disabled,
-				in which case it appears dimmed.
-	-	<b>Socket</b>s can be logically <b>enabled</b> or <b>disabled</b>, usually determined
-		by the parent <b>Widget</b>’s configuration.
+	-	<b>Socket</b>s can be logically <b>enabled</b> or <b>disabled</b>, usually determined by
+		the parent <b>Widget</b>’s configuration.
 -	<b>Cables/Wires</b> — These represent the currently existing widget crosspoint connections,
 	as read from the device’s “crosspoint select” registers.
 
 Standard behaviors:
 -	<b>Hovering</b>
-	-	Hovering the mouse pointer over any object will display a “Tool Tip” that gives detailed information about the object and its current state.
+	-	Hovering the mouse pointer over any object will display a “Tool Tip” that gives detailed information
+		about the object and its current state.
 -	<b>Right-Clicking</b>
 	-	On <b>widgets</b> — Displays a context menu with commands that are relevant for the <b>widget</b> in its current state.
-		<b>Disconnect</b> is common to all widgets.
+		-	<b>Disconnect</b> — Disconnects whatever is connected to the widget.
+		-	<b>Show Legal Routes</b> — On devices that support this feature, displays all implemented crosspoint routes
+			from every <b>input socket</b> and <b>output socket</b>.
+		-	<b>Hide Legal Routes</b> — Hides any/all displayed implemented crosspoint routes.
 	-	On enabled <b>output sockets</b> — Displays a context menu with these commands:
 		-	<b>Disconnect</b> — Disconnects whatever is connected to the <b>output socket</b>, breaking the connection.
 			(This command will be dimmed if the <b>output socket</b> has nothing connected to it.)
 		-	<b>Connect To…</b> — Pops up a submenu listing the available <b>widget input socket</b> connections.
+		-	<b>Show Legal Routes</b> — On devices that support this feature, displays all implemented crosspoint routes
+			from the socket.
+		-	<b>Hide Legal Routes</b> — Hides any/all displayed implemented crosspoint routes that originate with the socket.
 	-	On enabled <b>input sockets</b> — Displays a context menu with these commands:
 		-	<b>Disconnect</b> — Disconnects whatever is connected to the <b>input socket</b>, breaking the connection.
 			(This menu command will be dimmed if the <b>input socket</b> has nothing connected to it.)
 		-	<b>Connect To…</b> — Pops up a submenu listing the available <b>widget output socket</b> connections.
 			This command will be labeled “Reconnect To…” if the <b>input socket</b> already has a <b>cable</b> connected to it.
+		-	<b>Show Legal Routes</b> — On devices that support this feature, displays all implemented crosspoint routes
+			that can terminate in the <b>input socket</b>.
+		-	<b>Hide Legal Routes</b> — Hides any displayed implemented crosspoint routes that terminate at the <b>input socket</b>.
 	-	On <b>cables</b> — Displays a context menu with these two commands:
 		-	<b>Copy (Source Code)</b> — Copies the source code containing the CNTV2Card::Connect function call that’s
 			relevant to the <b>cable</b> — i.e. the connection — to the clipboard.

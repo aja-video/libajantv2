@@ -51,7 +51,6 @@ static uint32_t						gInstanceTally(0);
 static uint32_t						gLivingInstances(0);
 
 
-
 /**
 	I'm the the root source of register information. I provide answers to the public-facing CNTV2RegisterExpert class.
 	There's only one instance of me.
@@ -2963,43 +2962,33 @@ private:
 		}
 		virtual	~DecodeXptGroupReg()	{}
 	}	mDecodeXptGroupReg;
-	
+
 	struct DecodeXptValidReg : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 		{	(void) inDeviceID;
-			NTV2_ASSERT(inRegNum >= uint32_t(kRegFirstValidXptROMRegister)  &&  inRegNum < uint32_t(kRegInvalidValidXptROMRegister));
-			const ULWord rawInputXptID ((inRegNum - ULWord(kRegFirstValidXptROMRegister)) / 4UL + ULWord(NTV2_FIRST_INPUT_CROSSPOINT));	//	4 regs per inputXpt
-			const UWord outputXptShift (32U * UWord((inRegNum - ULWord(kRegFirstValidXptROMRegister)) % 4));	//	Num bits to shift for outputXpts
-			const NTV2InputXptID inputXpt (static_cast<NTV2InputXptID>(rawInputXptID));
+			NTV2_ASSERT(inRegNum >= uint32_t(kRegFirstValidXptROMRegister));
+			NTV2_ASSERT(inRegNum < uint32_t(kRegInvalidValidXptROMRegister));
 			ostringstream	oss;
-			if (NTV2_IS_VALID_InputCrosspointID(inputXpt))
+			NTV2InputXptID	inputXpt;
+			NTV2OutputXptIDSet	outputXpts;
+			if (::GetRouteROMInfoFromReg (inRegNum, inRegValue, inputXpt, outputXpts)
+				&& NTV2_IS_VALID_InputCrosspointID(inputXpt))
 			{
-				NTV2WidgetID	widgetID (NTV2_WIDGET_INVALID);
-				CNTV2SignalRouter::GetWidgetForInput (inputXpt, widgetID, inDeviceID);
-				oss	<< "Input Xpt: "	<< "'" << ::NTV2InputCrosspointIDToString(inputXpt, true) << "' (" << ::NTV2InputCrosspointIDToString(inputXpt, false) << ")"	<< endl
-					<< "Input Xpt ID: "	<< DEC(rawInputXptID) << " (" << xHEX0N(rawInputXptID,2) << ")";
-				if (NTV2_IS_VALID_WIDGET(widgetID))
-					oss	<< endl
-						<< "Widget: "	<< "'" << ::NTV2WidgetIDToString(widgetID, true) << "' (" << ::NTV2WidgetIDToString(widgetID, false) << ")";
 				NTV2StringList	outputXptNames;
-				for (UWord bitNdx(0);  bitNdx < 32;  bitNdx++)
-					if (inRegValue & ULWord((1 << bitNdx)))
-					{
-						const ULWord rawOutputXptID (1 << (bitNdx + outputXptShift));
-						const NTV2OutputXptID YUVoutputXptID(static_cast<NTV2OutputXptID>(rawOutputXptID));
-						const NTV2OutputXptID RGBoutputXptID(static_cast<NTV2OutputXptID>(rawOutputXptID | 0x00000080));
-						const string YUVstr(::NTV2OutputCrosspointIDToString(YUVoutputXptID,true));
-						const string RGBstr(::NTV2OutputCrosspointIDToString(RGBoutputXptID,true));
-						ostringstream yuvName, rgbName;
-						if (!YUVstr.empty())
-							{yuvName << "'" << YUVstr << "'";	outputXptNames.push_back(yuvName.str());}
-						if (!RGBstr.empty())
-							{rgbName << "'" << RGBstr << "'";	outputXptNames.push_back(rgbName.str());}
-					}
+				for (NTV2OutputXptIDSetConstIter it(outputXpts.begin());  it != outputXpts.end();  ++it)
+				{
+					const NTV2OutputXptID outputXpt(*it);
+					const string name(::NTV2OutputCrosspointIDToString(outputXpt,true));
+					ostringstream oss;
+					if (name.empty())
+						oss << xHEX0N(outputXpt,2) << "(" << DEC(outputXpt) << ")";
+					else
+						oss << "'" << name << "'";
+					outputXptNames.push_back(oss.str());
+				}
 				if (!outputXptNames.empty())
-					oss << endl
-						<< "Legal Output Connections: " << outputXptNames;
+					oss << "Valid Xpts: " << outputXptNames;
 				return oss.str();
 			}
 			else

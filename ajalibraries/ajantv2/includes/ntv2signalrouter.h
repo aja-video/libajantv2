@@ -70,6 +70,35 @@ typedef std::multimap <NTV2WidgetID, NTV2InputXptID>	Widget2InputXpts;
 typedef Widget2InputXpts::const_iterator				Widget2InputXptsConstIter;
 
 /**
+	@brief	Answers with the NTV2InputXptID and NTV2OutputXptIDSet for the given ROM register value.
+	@param[in]	inROMRegNum		Specifies the ROM register number.
+	@param[in]	inROMRegValue	Specifies the ROM register value.
+	@param[out]	outInputXpt		Receives the input crosspoint associated with the ROM register.
+	@param[out]	outOutputXpts	Receives the valid (implemented) output crosspoint routes.
+	@param[in]	inAppendXpts	If true, appends output crosspoints to the output set;
+								otherwise clears the output crosspoint set (the default).
+	@return	True if successful;  otherwise false.
+**/
+AJAExport bool GetRouteROMInfoFromReg (const ULWord inROMRegNum, const ULWord inROMRegValue,
+										NTV2InputXptID & outInputXpt, NTV2OutputXptIDSet & outOutputXpts,
+										const bool inAppendOutputXpts = false);
+
+/**
+	@brief		Answers with the implemented crosspoint connections as obtained from the given ROM registers.
+	@param[in]	inROMRegisters	The ROM register numbers and values.
+	@param[out]	outConnections	Receives the legal implemented connections/routes.
+	@return	True if successful;  otherwise false.
+**/
+AJAExport bool GetPossibleConnections (const NTV2RegReads & inROMRegisters, NTV2PossibleConnections & outConnections);
+
+/**
+	@brief		Prepares an initialized, zeroed NTV2RegReads that's prepared to read all ROM registers from a device.
+	@param[out]	outROMRegisters	Receives the prepared NTV2RegReads.
+	@return		True if successful;  otherwise false.
+**/
+AJAExport bool MakeRouteROMRegisters (NTV2RegReads & outROMRegisters);
+
+/**
 	@brief	This class is a collection of widget input-to-output connections that can be applied all-at-once to an NTV2 device.
 			Call AddConnection to connect a widget input (specified by NTV2InputCrosspointID) to a widget's output (specified by NTV2OutputCrosspointID).
 			Call the CNTV2Card::ApplySignalRoute function to apply this route to the device.
