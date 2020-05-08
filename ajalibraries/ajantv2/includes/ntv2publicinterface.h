@@ -4395,11 +4395,27 @@ typedef struct NTV2RegInfo
 																			&& registerMask == inRHS.registerMask && registerShift == inRHS.registerShift;}
 		/**
 			@return		True if I'm less than the right-hand-side NTV2RegInfo.
-			@param[in]	inRHS	Specifies the right-hand-side NTV2RegInfo that will be compared to me.
+			@param[in]	inRHS		Specifies the right-hand-side NTV2RegInfo that will be compared to me.
 			@note		To synthesize the other comparison operators (!=, <=, >, >=), in client code, add "#include <utility>", and "using namespace std::rel_ops;".
 		**/
 		AJAExport bool			operator < (const NTV2RegInfo & inRHS) const;
+
+		/**
+			@brief		Renders me to the given output stream in a human-readable format.
+			@param		outputStream	Specifies the output stream in which to Print my contents.
+			@param		inAsCode		Deprecated as of SDK 16.0 -- use PrintCode instead. Defaults to false.
+										If true, renders me as source code.
+			@return		The output stream.
+		**/
 		AJAExport std::ostream & Print (std::ostream & outputStream, const bool inAsCode = false) const;
+
+		/**
+			@brief		Renders me to the given output stream as source code using a "WriteRegister" function call.
+			@param		outputStream	Specifies the output stream to write into.
+			@param[in]	inRadix			Specifies the radix to use for the my register value. Defaults to hexadecimal (base 16).
+			@return		The output stream.
+		**/
+		AJAExport std::ostream & PrintCode (std::ostream & outputStream, const int inRadix = 16) const;
 	#endif	//	not NTV2_BUILDING_DRIVER
 } NTV2RegInfo;
 
@@ -4407,12 +4423,12 @@ typedef struct NTV2RegInfo
 typedef NTV2RegInfo	NTV2ReadWriteRegisterSingle;	///< @brief	This is an alias for NTV2RegInfo -- everything needed to make a future ReadRegister or WriteRegister call.
 
 #if !defined (NTV2_BUILDING_DRIVER)
-	typedef std::vector <NTV2RegInfo>			NTV2RegisterWrites;				///< @brief	An ordered sequence of zero or more NTV2RegInfo structs intended for WriteRegister.
-	typedef NTV2RegisterWrites::const_iterator	NTV2RegisterWritesConstIter;	///< @brief	A handy const (read-only) iterator for iterating over the contents of an NTV2RegisterWrites instance.
-	typedef NTV2RegisterWrites::iterator		NTV2RegisterWritesIter;			///< @brief	A handy non-const iterator for iterating over the contents of an NTV2RegisterWrites instance.
-	typedef NTV2RegisterWrites					NTV2RegisterReads;				///< @brief	An ordered sequence of zero or more NTV2RegInfo structs intended for ReadRegister.
-	typedef NTV2RegisterWritesConstIter			NTV2RegisterReadsConstIter;		///< @brief	A handy const (read-only) iterator for iterating over the contents of an NTV2RegisterReads instance.
-	typedef NTV2RegisterWritesIter				NTV2RegisterReadsIter;			///< @brief	A handy non-const iterator for iterating over the contents of an NTV2RegisterReads instance.
+	typedef std::vector <NTV2RegInfo>		NTV2RegisterWrites, NTV2RegWrites;						///< @brief	An ordered sequence of zero or more NTV2RegInfo structs intended for WriteRegister.
+	typedef NTV2RegWrites::const_iterator	NTV2RegisterWritesConstIter, NTV2RegWritesConstIter;	///< @brief	A handy const (read-only) iterator for iterating over the contents of an NTV2RegisterWrites instance.
+	typedef NTV2RegWrites::iterator			NTV2RegisterWritesIter, NTV2RegWritesIter;				///< @brief	A handy non-const iterator for iterating over the contents of an NTV2RegisterWrites instance.
+	typedef NTV2RegWrites					NTV2RegisterReads, NTV2RegReads;						///< @brief	An ordered sequence of zero or more NTV2RegInfo structs intended for ReadRegister.
+	typedef NTV2RegWritesConstIter			NTV2RegisterReadsConstIter, NTV2RegReadsConstIter;		///< @brief	A handy const (read-only) iterator for iterating over the contents of an NTV2RegisterReads instance.
+	typedef NTV2RegWritesIter				NTV2RegisterReadsIter, NTV2RegReadsIter;				///< @brief	A handy non-const iterator for iterating over the contents of an NTV2RegisterReads instance.
 
 	/**
 		@brief		Returns a const iterator to the first entry in the NTV2RegInfo collection with a matching register number.
@@ -4420,7 +4436,7 @@ typedef NTV2RegInfo	NTV2ReadWriteRegisterSingle;	///< @brief	This is an alias fo
 		@param[in]	inRegInfos	Specifies the NTV2RegInfo collection to search.
 		@return		A const_iterator that references the entry in the NTV2RegInfo collection, or "end()" if not found.
 	**/
-	AJAExport NTV2RegisterReadsConstIter	FindFirstMatchingRegisterNumber (const uint32_t inRegNum, const NTV2RegisterReads & inRegInfos);
+	AJAExport NTV2RegReadsConstIter	FindFirstMatchingRegisterNumber (const uint32_t inRegNum, const NTV2RegReads & inRegInfos);
 
 	/**
 		@brief		Writes the given NTV2RegInfo to the specified output stream.
@@ -5754,10 +5770,10 @@ typedef enum
 															((uint32_t(_c_)) <<  8)	|		\
 															((uint32_t(_d_)) <<  0) )
 				#if !defined (NTV2_BUILDING_DRIVER)
-					#define	NTV2_4CC_AS_STRING(_x_)			std::string (1, ((_x_) & 0xFF000000) >> 24) +	\
-															std::string (1, ((_x_) & 0x00FF0000) >> 16) +	\
-															std::string (1, ((_x_) & 0x0000FF00) >>  8) +	\
-															std::string (1, ((_x_) & 0x000000FF) >>  0)
+					#define	NTV2_4CC_AS_STRING(_x_)			std::string (1, (char((_x_) & 0xFF000000) >> 24)) +	\
+															std::string (1, (char((_x_) & 0x00FF0000) >> 16)) +	\
+															std::string (1, (char((_x_) & 0x0000FF00) >>  8)) +	\
+															std::string (1, (char((_x_) & 0x000000FF) >>  0))
 				#endif	//	!defined (NTV2_BUILDING_DRIVER)
 			#else
 				#define	NTV2_4CC(_str_)					(	((uint32_t)(((UByte *)(_str_))[3]) <<  0)  |	\
