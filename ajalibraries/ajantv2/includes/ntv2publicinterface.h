@@ -4590,8 +4590,11 @@ typedef struct {
 #define kColorCorrectionLUTOffset_Blue	(0x1800)
 	
 // within each 32-bit LUT word, bits <31:22> = LUT[2i+1], bits <15:6> = LUT[2i] 
-#define kRegColorCorrection12BitLUTOddShift		18
-#define kRegColorCorrection12BitLUTEvenShift	 2
+#define kRegColorCorrection12BitLUTOddShift		16
+#define kRegColorCorrection12BitLUTEvenShift	 0
+
+#define kRegColorCorrection10To12BitLUTOddShift		18
+#define kRegColorCorrection10To12BitLUTEvenShift	 2
 
 // Note: there is code that assumes that the three LUTs are contiguous. So if this relationship
 //       changes (i.e. there are "gaps" between tables) then code will need to change!
