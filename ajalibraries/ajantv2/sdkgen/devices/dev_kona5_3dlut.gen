@@ -86,12 +86,15 @@ NTV2_WgtLUT4
 NTV2_WgtDualLinkV2In1
 NTV2_WgtDualLinkV2Out1
 NTV2_Wgt12GSDIIn1
+NTV2_Wgt12GSDIIn2
 NTV2_Wgt12GSDIOut1
+NTV2_Wgt12GSDIOut2
 NTV2_WgtHDMIOut1v4
 
 
 // NTV2InputSources
 NTV2_INPUTSOURCE_SDI1
+NTV2_INPUTSOURCE_SDI2
 
 
 // GetNums		(see 'getnum_canon.gen' for legal values)
@@ -119,8 +122,8 @@ NTV2DeviceGetNumLUTs							4
 NTV2DeviceGetNumMixers							0
 NTV2DeviceGetNumReferenceVideoInputs			0
 NTV2DeviceGetNumSerialPorts						0
-NTV2DeviceGetNumVideoInputs						1
-NTV2DeviceGetNumVideoOutputs					1
+NTV2DeviceGetNumVideoInputs						2
+NTV2DeviceGetNumVideoOutputs					2
 NTV2DeviceGetNumLTCInputs						0
 NTV2DeviceGetNumLTCOutputs						0
 
