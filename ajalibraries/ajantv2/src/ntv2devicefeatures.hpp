@@ -24247,7 +24247,6 @@ bool NTV2DeviceCanDoWidget (const NTV2DeviceID inDeviceID, const NTV2WidgetID in
 			{
 				case NTV2_Wgt12GSDIOut1:
 				case NTV2_WgtCSC1:
-				case NTV2_WgtDualLinkV2In1:
 				case NTV2_WgtDualLinkV2Out1:
 				case NTV2_WgtFrameBuffer1:
 				case NTV2_WgtGenLock:
@@ -24298,6 +24297,7 @@ bool NTV2DeviceCanDoWidget (const NTV2DeviceID inDeviceID, const NTV2WidgetID in
 				case NTV2_WgtDualLinkIn1:
 				case NTV2_WgtDualLinkOut1:
 				case NTV2_WgtDualLinkOut2:
+				case NTV2_WgtDualLinkV2In1:
 				case NTV2_WgtDualLinkV2In2:
 				case NTV2_WgtDualLinkV2In3:
 				case NTV2_WgtDualLinkV2In4:
