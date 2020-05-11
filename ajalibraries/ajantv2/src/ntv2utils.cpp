@@ -8866,12 +8866,12 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_KONAHDMI:					return useWindowsName ? "kona_hdmi_4rx.bit"         : "kona_hdmi_4rx.bit";
 	case DEVICE_ID_KONA1:						return useWindowsName ? "kona1_pcie.bit"            : "kona1.bit";
 	case DEVICE_ID_KONA5:						return useWindowsName ? "kona5_pcie.bit"            : "kona5.bit";
-	case DEVICE_ID_KONA5_2:						return "kona5_2x4k.bit";
-	case DEVICE_ID_KONA5_8KMK:					return "kona5_8k_mk.bit";
-	case DEVICE_ID_KONA5_8K:					return "kona5_8k.bit";
-	case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk.bit";
-	case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k.bit";
-	case DEVICE_ID_CORVID44_8K_2:				return "c44_12g_2x4k.bit";
+	case DEVICE_ID_KONA5_2:						return "kona5_2x4k_tprom.bit";
+	case DEVICE_ID_KONA5_8KMK:					return "kona5_8k_mk_tprom.bit";
+	case DEVICE_ID_KONA5_8K:					return "kona5_8k_tprom.bit";
+	case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk_tprom.bit";
+	case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k_tprom.bit";
+	case DEVICE_ID_CORVID44_8K_2:				return "c44_12g_2x4k_tprom.bit";
 	case DEVICE_ID_T3TAP:						return "t3_tap.bit";
 	default:									return "";
 	}
