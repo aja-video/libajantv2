@@ -5449,13 +5449,13 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONA1:					return inForRetailDisplay ? "Kona 1"					: "Kona1";
         case DEVICE_ID_KONAHDMI:				return inForRetailDisplay ? "Kona HDMI"					: "KonaHDMI";
 		case DEVICE_ID_KONA5:					return inForRetailDisplay ?	"KONA 5"					: "Kona5";
-		case DEVICE_ID_KONA5_2X4K:					return inForRetailDisplay ?	"KONA 5 2"					: "Kona5-2";
+		case DEVICE_ID_KONA5_2X4K:				return inForRetailDisplay ?	"KONA 5 2x4K"				: "Kona5-2x4K";
 		case DEVICE_ID_KONA5_3DLUT:				return inForRetailDisplay ?	"KONA 5 3DLUT"				: "Kona5-3DLUT";
         case DEVICE_ID_KONA5_8KMK:				return inForRetailDisplay ?	"KONA 5 8KMK"				: "Kona5-8KMK";
 		case DEVICE_ID_CORVID44_8KMK:			return inForRetailDisplay ?	"Corvid 44 8KMK"			: "Corvid44-8KMK";
 		case DEVICE_ID_KONA5_8K:				return inForRetailDisplay ?	"KONA 5 8K"					: "Kona5-8K";
 		case DEVICE_ID_CORVID44_8K:				return inForRetailDisplay ?	"Corvid 44 8K"				: "Corvid44-8K";
-		case DEVICE_ID_CORVID44_2X4K:			return inForRetailDisplay ?	"Corvid 44 8K 2"			: "Corvid44-8K-2";
+		case DEVICE_ID_CORVID44_2X4K:			return inForRetailDisplay ?	"Corvid 44 2x4K"			: "Corvid44-2x4K";
 		case DEVICE_ID_T3TAP:					return inForRetailDisplay ? "T3-Tap"					: "T3Tap";
 #if defined(_DEBUG)
 #else
@@ -8867,9 +8867,10 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_KONAHDMI:					return useWindowsName ? "kona_hdmi_4rx.bit"         : "kona_hdmi_4rx.bit";
 	case DEVICE_ID_KONA1:						return useWindowsName ? "kona1_pcie.bit"            : "kona1.bit";
 	case DEVICE_ID_KONA5:						return useWindowsName ? "kona5_pcie.bit"            : "kona5.bit";
-	case DEVICE_ID_KONA5_2X4K:						return "kona5_2x4k_tprom.bit";
+	case DEVICE_ID_KONA5_2X4K:					return "kona5_2x4k_tprom.bit";
 	case DEVICE_ID_KONA5_8KMK:					return "kona5_8k_mk_tprom.bit";
 	case DEVICE_ID_KONA5_8K:					return "kona5_8k_tprom.bit";
+	case DEVICE_ID_KONA5_3DLUT:					return "kona5_3d_lut_tprom.bit";
 	case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk_tprom.bit";
 	case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k_tprom.bit";
 	case DEVICE_ID_CORVID44_2X4K:				return "c44_12g_2x4k_tprom.bit";
