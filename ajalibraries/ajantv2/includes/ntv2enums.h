@@ -69,7 +69,7 @@ typedef enum
 	DEVICE_ID_CORVID44					= 0x10565400,	///< @brief	See \ref corvid44
 	DEVICE_ID_CORVID44_8KMK				= 0x10832400,	///< @brief	See \ref corvid4412g
 	DEVICE_ID_CORVID44_8K				= 0X10832401,	///< @brief	See \ref corvid4412g
-	DEVICE_ID_CORVID44_8K_2				= 0X10832403,	///< @brief	See \ref corvid4412g
+	DEVICE_ID_CORVID44_2X4K				= 0X10832402,	///< @brief	See \ref corvid4412g
 	DEVICE_ID_CORVID88					= 0x10538200,	///< @brief	See \ref corvid88
 	DEVICE_ID_CORVIDHBR					= 0x10668200,	///< @brief	See \ref corvidhbr
 	DEVICE_ID_CORVIDHEVC				= 0x10634500,	///< @brief	See \ref corvidhevc
@@ -88,7 +88,7 @@ typedef enum
 	DEVICE_ID_KONA5						= 0x10798400,	///< @brief	See \ref kona5
 	DEVICE_ID_KONA5_8KMK				= 0x10798401,	///< @brief	See \ref kona5
 	DEVICE_ID_KONA5_8K					= 0x10798402,	///< @brief	See \ref kona5
-	DEVICE_ID_KONA5_2					= 0x10798403,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5_2X4K				= 0x10798403,	///< @brief	See \ref kona5
 	DEVICE_ID_KONA5_3DLUT				= 0x10798404,	///< @brief	See \ref kona5
 	DEVICE_ID_KONAHDMI					= 0x10767400,	///< @brief	See \ref konahdmi
 	DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,	///< @brief	See \ref konaip
@@ -3475,8 +3475,8 @@ typedef enum
 	NTV2_BITFILE_KONA5_8K_MAIN		= 59,
 	NTV2_BITFILE_CORVID44_8K_MAIN	= 60,
 	NTV2_BITFILE_T3TAP_MAIN			= 61,
-	NTV2_BITFILE_KONA5_2_MAIN		= 62,
-	NTV2_BITFILE_CORVID44_8K_2_MAIN	= 63,
+	NTV2_BITFILE_KONA5_2X4K_MAIN	= 62,
+	NTV2_BITFILE_CORVID44_2X4K_MAIN	= 63,
 	NTV2_BITFILE_KONA5_3DLUT_MAIN	= 64,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
