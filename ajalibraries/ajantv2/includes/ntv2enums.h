@@ -88,7 +88,7 @@ typedef enum
 	DEVICE_ID_KONA5						= 0x10798400,	///< @brief	See \ref kona5
 	DEVICE_ID_KONA5_8KMK				= 0x10798401,	///< @brief	See \ref kona5
 	DEVICE_ID_KONA5_8K					= 0x10798402,	///< @brief	See \ref kona5
-	DEVICE_ID_KONA5_2					= 0x10798403,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5_2X4K				= 0x10798403,	///< @brief	See \ref kona5
 	DEVICE_ID_KONAHDMI					= 0x10767400,	///< @brief	See \ref konahdmi
 	DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,	///< @brief	See \ref konaip
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief	See \ref konaip

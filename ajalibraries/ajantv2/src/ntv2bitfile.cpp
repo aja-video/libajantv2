@@ -488,7 +488,7 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_KONA5:			return "kona5";
 		case DEVICE_ID_KONA5_8KMK:		return "kona5_8k_mk";
 		case DEVICE_ID_KONA5_8K:		return "kona5_8k";
-		case DEVICE_ID_KONA5_2:			return "kona5_2x4k";
+		case DEVICE_ID_KONA5_2X4K:			return "kona5_2x4k";
 		case DEVICE_ID_CORVID44_8KMK:	return "c44_12g_8k_mk";
 		case DEVICE_ID_CORVID44_8K:		return "c44_12g_8k";
 		case DEVICE_ID_CORVID44_2X4K:	return "c44_12g_2x4k";
@@ -532,13 +532,13 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
         case DEVICE_ID_IOIP_2110:	return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110) == _designName;
 		case DEVICE_ID_KONAHDMI:	return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_KONAHDMI) == _designName
 											|| _designName == "Corvid_HDMI_4Rx_Top";
-		case DEVICE_ID_KONA5_2:
+		case DEVICE_ID_KONA5_2X4K:
 		case DEVICE_ID_KONA5_8KMK:
 		case DEVICE_ID_KONA5_8K:
         case DEVICE_ID_KONA5:		return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5) == _designName
                                             || _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_8KMK)
 											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_8K)
-											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_2);
+											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_2X4K);
 		case DEVICE_ID_CORVID44_8KMK:
 		case DEVICE_ID_CORVID44_8K:
 		case DEVICE_ID_CORVID44_2X4K: return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_8KMK) == _designName
@@ -600,7 +600,7 @@ public:
 			assert (sDesignPairToIDMap.empty ());
             sDesignPairToIDMap[make_pair(0x01, 0x01)] = DEVICE_ID_KONA5_8KMK;
             sDesignPairToIDMap[make_pair(0x01, 0x02)] = DEVICE_ID_KONA5_8K;
-            sDesignPairToIDMap[make_pair(0x01, 0x03)] = DEVICE_ID_KONA5_2;
+            sDesignPairToIDMap[make_pair(0x01, 0x03)] = DEVICE_ID_KONA5_2X4K;
         }
 	~CDesignPairToIDMapMaker ()
 		{
