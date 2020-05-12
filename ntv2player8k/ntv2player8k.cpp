@@ -322,7 +322,7 @@ void NTV2Player8K::SetUpHostBuffers (void)
 		memset (mAVHostBuffer [ndx].fAudioBuffer, 0x00, mWithAudio ? mAudioBufferSize : 0);
 
 		if (mAVHostBuffer [ndx].fAudioBuffer != AJA_NULL)
-			mDevice.DMABufferLock(mAVHostBuffer [ndx].fAudioBuffer, mAudioBufferSize);
+			mDevice.DMABufferLock(mAVHostBuffer [ndx].fAudioBuffer, mAudioBufferSize, true);
 
 		mAVCircularBuffer.Add (&mAVHostBuffer [ndx]);
 	}
@@ -574,7 +574,7 @@ void NTV2Player8K::PlayFrames (void)
 	if (fAncBuffer != AJA_NULL)
 	{
 		::memset((void*)fAncBuffer, 0x00, fAncBufferSize);
-		mDevice.DMABufferLock(fAncBuffer, fAncBufferSize);
+		mDevice.DMABufferLock(fAncBuffer, fAncBufferSize, true);
 	}
 
 	uint32_t	packetSize = 0;
@@ -707,8 +707,8 @@ void NTV2Player8K::SetUpTestPatternVideoBuffers (void)
 													  (AJAMemory::AllocateAligned (mVideoBufferSize, BUFFER_ALIGNMENT));
 
 		// Page lock the memory
-        if (mTestPatternVideoBuffers [testPatternIndex] != AJA_NULL)
-            mDevice.DMABufferLock((ULWord*)mTestPatternVideoBuffers [testPatternIndex], mVideoBufferSize);
+		if (mTestPatternVideoBuffers [testPatternIndex] != AJA_NULL)
+			mDevice.DMABufferLock((ULWord*)mTestPatternVideoBuffers [testPatternIndex], mVideoBufferSize, true);
 
 		//	Use the test pattern generator to fill an NTV2TestPatternBuffer...
 		NTV2TestPatternBuffer	testPatternBuffer;
