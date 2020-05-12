@@ -116,10 +116,10 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_KONA5:						return "Kona5";
 		case DEVICE_ID_KONA5_8KMK:					return "Kona5_8KMK";
 		case DEVICE_ID_KONA5_8K:					return "Kona5_8K";
-		case DEVICE_ID_KONA5_2X4K:						return "Kona5_2";
+		case DEVICE_ID_KONA5_2X4K:					return "Kona5_2X4K";
 		case DEVICE_ID_CORVID44_8KMK:				return "Corvid44_8KMK";
 		case DEVICE_ID_CORVID44_8K:					return "Corvid44_8K";
-		case DEVICE_ID_CORVID44_2X4K:					return "Corvid44_8K_2";
+		case DEVICE_ID_CORVID44_2X4K:				return "Corvid44_2X4K";
 		case DEVICE_ID_T3TAP:						return "T3Tap";
 		case DEVICE_ID_NOTFOUND:					return "Unknown";
 	}
