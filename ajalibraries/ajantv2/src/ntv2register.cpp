@@ -5136,7 +5136,12 @@ bool CNTV2Card::CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2Ou
 {
 	outCanConnect = false;
 	if (!HasCanConnectROM())
-		return false;
+		return false;	//	No CanConnect ROM -- can't say
+
+	//	NOTE:	This is not a very efficient implementation, but CanConnect probably isn't being
+	//			called every frame. The good news is that this function now gets its information
+	//			"straight from the horse's mouth" via the validated GetRouteROMInfoFromReg function,
+	//			so its answer will be trustworthy.
 
 	//	Check for reasonable input xpt...
 	if (ULWord(inInputXpt) < ULWord(NTV2_FIRST_INPUT_CROSSPOINT)  ||  ULWord(inInputXpt) > NTV2_LAST_INPUT_CROSSPOINT)
@@ -5158,26 +5163,21 @@ bool CNTV2Card::CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2Ou
 		return false;
 	}
 
-	//	Calculate which ROM register to use...
-	const ULWord rawOutputXptID  (ULWord(inOutputXpt)+0);	//	Lop off high bit, so 1 thru 127
-	const ULWord firstValidXptReg(ULWord(kRegFirstValidXptROMRegister)
-									+ 4UL * (ULWord(inInputXpt) - ULWord(NTV2_FIRST_INPUT_CROSSPOINT)));	//	4 regs per inputXpt
-	const ULWord ROMReg(firstValidXptReg + rawOutputXptID / 4UL);	//	Then by outputXpt
-	if (ROMReg < kRegFirstValidXptROMRegister  ||  ROMReg > kRegLastValidXptROMRegister)
+	//	Determine all legal output xpts for this input xpt...
+	NTV2OutputXptIDSet legalOutputXpts;
+	const uint32_t regBase(uint32_t(kRegFirstValidXptROMRegister)  +  4UL * uint32_t(inInputXpt - NTV2_FIRST_INPUT_CROSSPOINT));
+	for (uint32_t ndx(0);  ndx < 4;  ndx++)
 	{
-		ROUTEFAIL(GetDisplayName() << ":  Bad ROM register " << DEC(ROMReg) << " (" << xHEX0N(ULWord(ROMReg),8) << ")");
-		return false;
-	}
-	ULWord validRoutes(0);
-	if (!ReadRegister(ROMReg, validRoutes))
-	{
-		ROUTEFAIL(GetDisplayName() << ":  ReadRegister failed for ROM reg " << DEC(ROMReg) << " (" << xHEX0N(ULWord(ROMReg),8) << ")");
-		return false;
+		ULWord regVal(0);
+		NTV2InputXptID inputXpt;
+		ReadRegister(regBase + ndx, regVal);
+		if (!::GetRouteROMInfoFromReg (regBase + ndx, regVal, inputXpt, legalOutputXpts, true/*append*/))
+			ROUTEWARN(GetDisplayName() << ":  GetRouteROMInfoFromReg failed for register " << DEC(regBase+ndx)
+					<< ", input xpt ' " << ::NTV2InputCrosspointIDToString(inInputXpt) << "' " << xHEX0N(UWord(inInputXpt),2));
 	}
 
 	//	Is the route implemented?
-	if (validRoutes & ULWord(1 << (rawOutputXptID % 4UL)))
-		outCanConnect = true;
+	outCanConnect = legalOutputXpts.find(inOutputXpt) != legalOutputXpts.end();
 	return true;
 }
 

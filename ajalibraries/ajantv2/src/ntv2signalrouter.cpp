@@ -1162,14 +1162,22 @@ ostream & CNTV2SignalRouter::Print (ostream & inOutStream, const bool inForRetai
 
 bool CNTV2SignalRouter::PrintCode (string & outCode, const PrintCodeConfig & inConfig) const
 {
+	return ToCodeString(outCode, mConnections, inConfig);
+
+}	//	PrintCode
+
+
+bool CNTV2SignalRouter::ToCodeString (string & outCode, const NTV2XptConnections & inConnections,
+										const PrintCodeConfig & inConfig)
+{
 	ostringstream	oss;
 
 	outCode.clear ();
 
 	if (inConfig.mShowComments)
 	{
-		oss << inConfig.mPreCommentText << DEC(mConnections.size()) << " routing ";
-		oss << ((mConnections.size () == 1) ? "entry:" : "entries:");
+		oss << inConfig.mPreCommentText << DEC(inConnections.size()) << " routing ";
+		oss << ((inConnections.size () == 1) ? "entry:" : "entries:");
 		oss << inConfig.mPostCommentText << inConfig.mLineBreakText;
 	}
 
@@ -1188,7 +1196,7 @@ bool CNTV2SignalRouter::PrintCode (string & outCode, const PrintCodeConfig & inC
 	const string	variableNameText	(inConfig.mPreVariableText + varName + inConfig.mPostVariableText);
 	const string	funcName			(inConfig.mUseRouter ? "AddConnection" : "Connect");
 	const string	functionCallText	(inConfig.mPreFunctionText + funcName + inConfig.mPostFunctionText);
-	for (NTV2XptConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
+	for (NTV2XptConnectionsConstIter iter (inConnections.begin ());  iter != inConnections.end ();  ++iter)
 	{
 		const string	inXptStr	(inConfig.mPreXptText + ::NTV2InputCrosspointIDToString(iter->first, false) + inConfig.mPostXptText);
 		const string	outXptStr	(inConfig.mPreXptText + ::NTV2OutputCrosspointIDToString(iter->second, false) + inConfig.mPostXptText);
@@ -1210,7 +1218,7 @@ bool CNTV2SignalRouter::PrintCode (string & outCode, const PrintCodeConfig & inC
 
 	if (inConfig.mShowComments)
 		for (NTV2XptConnectionsConstIter pGone(inConfig.mMissing.begin());  pGone != inConfig.mMissing.end();  ++pGone)
-			if (mConnections.find(pGone->first) == mConnections.end())
+			if (inConnections.find(pGone->first) == inConnections.end())
 			{
 				if (inConfig.mUseRouter)
 					oss << inConfig.mPreCommentText << varName << "." << "RemoveConnection" << " ("
@@ -1230,8 +1238,7 @@ bool CNTV2SignalRouter::PrintCode (string & outCode, const PrintCodeConfig & inC
 
 	outCode = oss.str();
 	return true;
-
-}	//	PrintCode
+}
 
 
 CNTV2SignalRouter::PrintCodeConfig::PrintCodeConfig ()
@@ -1978,15 +1985,15 @@ bool GetRouteROMInfoFromReg (const ULWord inRegNum, const ULWord inRegVal,
 bool GetPossibleConnections (const NTV2RegReads & inROMRegs, NTV2PossibleConnections & outConnections)
 {
 	outConnections.clear();
-	NTV2RegReadsConstIter iter (FindFirstMatchingRegisterNumber (kRegFirstValidXptROMRegister, inROMRegs));
-	while (iter != inROMRegs.end()  &&  iter->registerNumber >= kRegFirstValidXptROMRegister  &&  iter->registerNumber < kRegInvalidValidXptROMRegister)
+	for (NTV2RegReadsConstIter iter(inROMRegs.begin());  iter != inROMRegs.end();  ++iter)
 	{
+		if (iter->registerNumber < kRegFirstValidXptROMRegister  ||  iter->registerNumber >= kRegInvalidValidXptROMRegister)
+			continue;	//	Skip -- not a ROM reg
 		NTV2InputXptID inputXpt(NTV2_INPUT_CROSSPOINT_INVALID);
 		NTV2OutputXptIDSet	outputXpts;
 		if (GetRouteROMInfoFromReg (iter->registerNumber, iter->registerValue, inputXpt, outputXpts, true))
 			for (NTV2OutputXptIDSetConstIter it(outputXpts.begin());  it != outputXpts.end();  ++it)
 				outConnections.insert(NTV2Connection(inputXpt, *it));
-		++iter;
 	}
 	return !outConnections.empty();
 }
