@@ -926,6 +926,9 @@ Standard behaviors:
 		-	<b>Copy (Diagram)</b> — Copies the diagram image to the clipboard.
 		-	<b>Copy (Source Code)</b> — Copies the CNTV2Card::Connect calls that are needed to produce the current routing as C/C++ source to the clipboard.
 		-	<b>Paste Routing</b> — Replaces the current routing with the routing determined by the encoded text from the clipboard.
+		-	<b>Load Preset</b> — Reveals a submenu of stored presets. Choosing one will replace the current routing with the saved Preset routing.
+		-	<b>Delete Preset ‘</b><i>name</i><b>’</b> — Deletes the saved preset.
+		-	<b>Add Preset…</b> — Prompts for a name under which to save the current routing configuration.
 		-	<b>Show All</b> — Reveals all hidden widgets.
 		-	<b>Hide Unconnected</b> — Hides all widgets that aren’t connected to anything else.
 		-	<b>Enable/Disable Animation</b> — Enables or disables animation effects.
@@ -942,13 +945,19 @@ The Code Panel shows the device’s current routing configuration in textual for
 	-	It does this in one of two ways:
 		-	<b>C++ Code</b> — shows the SDK calls necessary to produce the routing configuration.
 		-	<b>Shorthand</b> — shows the “shorthand” notation for it.
-	-	The menu control allows you to choose which encoding form to display.
 	-	The text panel is read-only — i.e., you can’t change what’s in it.
 	-	It supports dragging text from it for dropping elsewhere (e.g. into a code editor window).
 	-	Left-clicking allows text in the panel to be highlighted (selected) interactively with the mouse.
 	-	Right-clicking pops up a context menu with these commands:
 		-	<b>Copy</b> — Copies whatever text is highlighted in the panel to the host clipboard.
 		-	<b>Select All</b> — Highlights all of the text in the panel.
+	-	Other controls:
+		-	<b>Code</b> Menu — Selects which encoding form to display.
+		-	<b>Presets</b> Menu — Shows which preset matches the device’s current routing configuration (if any).
+			Choosing one of the presets will replace the device’s current routing with the selected one.
+		-	<b>+</b> Button — Click to define a new preset for the device’s current routing configuration.
+		-	<b>-</b> Button — Click to delete the current routing preset.
+
 
 <b>Routing Registers Panel</b>
 
