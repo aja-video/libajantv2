@@ -1,5 +1,5 @@
-//	@file		dev_kona5.gen
-//	@brief		Kona 5 (DEVICE_ID_KONA5) device features.
+//	@file		dev_kona5_3dlut.gen
+//	@brief		Kona 5 3D LUT(DEVICE_ID_KONA5_3DLUT) device features.
 //	@copyright	Copyright (C) 2017-2018 AJA Video Systems, Inc.  Proprietary and Confidential information.
 
 
