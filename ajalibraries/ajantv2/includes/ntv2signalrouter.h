@@ -474,6 +474,18 @@ class AJAExport CNTV2SignalRouter
 		**/
 		static bool					CreateFromString (const std::string & inString, CNTV2SignalRouter & outRouter);
 
+		/**
+			@brief		Converts the given map of crosspoint connections into source code.
+			@param[out]	outCode			Receives the generated source code.
+			@param[in]	inConnections	Receives the connections from what is successfully parsed from the string.
+										It will be empty if this function fails.
+			@param[in]	inConfig		Specifies how the source code will be generated.
+										If unspecified, uses the PrintCodeConfig's default settings.
+			@return		True if successful;  otherwise false.
+		**/
+		static bool					ToCodeString (std::string & outCode, const NTV2XptConnections & inConnections,
+													const PrintCodeConfig & inConfig = PrintCodeConfig());
+
 
 		#if !defined (NTV2_DEPRECATE_12_5)
 			static NTV2_DEPRECATED_f(const NTV2RoutingEntry &		GetInputSelectEntry (const NTV2InputCrosspointID inInputXpt));	///< @deprecated	NTV2RoutingEntry is deprecated.

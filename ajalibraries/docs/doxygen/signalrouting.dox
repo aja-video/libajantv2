@@ -21,6 +21,7 @@
 		-	4K Down-converters
 		-	DVC Pro converters
 		-	Universal Frequency Converters (UFCs)
+	-	\ref recipes_endtoend
 	-	\ref recipes_capture
 	-	\ref recipes_playout
 	-	\ref recipes_endtoend
@@ -67,15 +68,16 @@
 	The CNTV2Card::CanConnect function was in place to support this, but it was never functional. Around SDK 14.0, an attempt was
 	made to compile a static “implemented routes” table for some firmware, but it wasn’t reliable and was abandoned.
 
-	Starting with SDK 15.6, newer devices have a firmware ROM table that implements a bitmask that provides a true indication
-	of actual, implemented connection paths. The CNTV2Card::CanConnect function makes use of this bitmask for those devices
-	that support it.
+	Starting with SDK 16.0, newer devices have a firmware ROM bitmask that provides a true indication of actual, implemented
+	connection paths. The CNTV2Card::CanConnect function makes use of this bitmask for those devices that support it.
 
 	@image	html	watcher-inspector-routing.png
 
 	The NTV2 SDK provides the \ref inspectorroute in \ref usingntv2watcher that graphically shows the available device widgets
 	and the signal routing between them. It lets you inspect and interactively change widget configuration and signal routing
-	paths between widgets.
+	paths between widgets. Also, for devices that support this feature, it displays the legal, implemented routes when creating
+	a new connection from a widget socket. Finally, as a programming aid, once a working routing has been achieved, NTV2Watcher
+	can generate the C++ source code that implements it.
 
 
 
@@ -305,6 +307,15 @@
 			-	Specify the ::NTV2Channel used. (The actual zero-based Mixer index that’s used will be half the
 				ordinal value of ::NTV2Channel.)
 			-	Pass \c false for \c inIsKey for the Mixer’s Video output;  pass \c true for the Mixer’s Key output.
+
+
+	<hr size="50px">
+	@section	recipes_endtoend	End-to-End (E-E) Routing
+
+	This section shows how to programmatically set up a device to pass through an input signal to at least one
+	corresponding output.
+
+	TBD
 
 
 	<hr size="50px">

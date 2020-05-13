@@ -1,5 +1,5 @@
-//	@file		dev_kona5.gen
-//	@brief		Kona 5 (DEVICE_ID_KONA5) device features.
+//	@file		dev_corvid44_2x4k.gen
+//	@brief		Corvid44 2x4k (DEVICE_ID_CORVID44_2x4K) device features.
 //	@copyright	Copyright (C) 2017-2018 AJA Video Systems, Inc.  Proprietary and Confidential information.
 
 
@@ -136,7 +136,6 @@ NTV2_Wgt12GSDIOut1
 NTV2_Wgt12GSDIOut2
 NTV2_Wgt12GSDIOut3
 NTV2_Wgt12GSDIOut4
-NTV2_WgtHDMIOut1v4
 
 
 // NTV2InputSources
@@ -148,7 +147,7 @@ NTV2_INPUTSOURCE_SDI4
 
 // GetNums		(see 'getnum_canon.gen' for legal values)
 NTV2DeviceGetActiveMemorySize					0xF8000000
-NTV2DeviceGetHDMIVersion						4
+NTV2DeviceGetHDMIVersion						0
 NTV2DeviceGetLUTVersion							2
 NTV2DeviceGetMaxAudioChannels					16
 NTV2DeviceGetMaxRegisterNumber					kRegReserved511
@@ -160,15 +159,11 @@ NTV2DeviceGetUFCVersion							1
 NTV2DeviceGetNum4kQuarterSizeConverters			1
 NTV2DeviceGetNumAESAudioInputChannels			8
 NTV2DeviceGetNumAESAudioOutputChannels			8
-//NTV2DeviceGetNumAnalogAudioInputChannels		8
-//NTV2DeviceGetNumAnalogAudioOutputChannels		8
 NTV2DeviceGetNumAudioSystems					2
 NTV2DeviceGetNumCSCs							2
 NTV2DeviceGetNumEmbeddedAudioInputChannels		16
 NTV2DeviceGetNumEmbeddedAudioOutputChannels		16
 NTV2DeviceGetNumFrameStores						2
-NTV2DeviceGetNumHDMIAudioOutputChannels			8
-NTV2DeviceGetNumHDMIVideoOutputs				1
 NTV2DeviceGetNumLUTs							2
 NTV2DeviceGetNumMixers							1
 NTV2DeviceGetNumReferenceVideoInputs			1
@@ -208,6 +203,7 @@ NTV2DeviceCanDoProgrammableRS422
 NTV2DeviceCanDoQuarterExpand
 NTV2DeviceCanDoRGBPlusAlphaOut
 NTV2DeviceCanDoRP188
+NTV2DeviceCanDoSDIErrorChecks
 NTV2DeviceCanDoSDVideo
 NTV2DeviceCanDoStackedAudio
 NTV2DeviceCanDoStereoIn
@@ -238,7 +234,6 @@ NTV2DeviceCanReportRunningFirmwareDate
 NTV2DeviceCanDo8KVideo
 NTV2DeviceCanDoWarmBootFPGA
 NTV2DeviceCanDoHFRRGB
-NTV2DeviceCanDoAudio192K
 
 // NTV2ConversionModes
 

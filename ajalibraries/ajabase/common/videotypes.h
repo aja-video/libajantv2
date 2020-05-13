@@ -10,9 +10,9 @@
 enum AJA_VideoFormat
 {
 	AJA_VideoFormat_Unknown,
-	AJA_VideoFormat_525i_2398,				// 525
-	AJA_VideoFormat_525i_2997,
+	AJA_VideoFormat_525i_2997,				// 525
 	AJA_VideoFormat_525p_5994,
+	AJA_VideoFormat_525i_2398,
     AJA_VideoFormat_525_2400,
     AJA_VideoFormat_525psf_2997,
     AJA_VideoFormat_625psf_2500,			// 625
