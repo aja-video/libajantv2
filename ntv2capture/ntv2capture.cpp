@@ -17,6 +17,7 @@
 using namespace std;
 
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
+//#define NTV2_BUFFER_LOCK
 
 
 //////////////////////////////////////////////////////////////////////////////////////	NTV2Capture IMPLEMENTATION
@@ -233,6 +234,16 @@ void NTV2Capture::SetupHostBuffers (void)
 		frameData.fAncBuffer.Allocate(F1AncSize);
 		frameData.fAncBuffer2.Allocate(F2AncSize);
 		mAVCircularBuffer.Add(&frameData);
+
+#ifdef NTV2_BUFFER_LOCK
+		// Page lock the memory
+		if (frameData.fVideoBuffer.GetHostPointer() != AJA_NULL)
+			mDevice.DMABufferLock(frameData.fVideoBuffer, true);
+		if (frameData.fAudioBuffer.GetHostPointer() != AJA_NULL)
+			mDevice.DMABufferLock(frameData.fAudioBuffer, true);
+		if (frameData.fAncBuffer.GetHostPointer() != AJA_NULL)
+			mDevice.DMABufferLock(frameData.fAncBuffer, true);
+#endif
 	}	//	for each NTV2FrameData
 
 }	//	SetupHostBuffers

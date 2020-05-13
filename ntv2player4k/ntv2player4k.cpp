@@ -22,6 +22,8 @@ using namespace std;
 #define					AS_INT32(_x_)		static_cast<int32_t>(_x_)
 #define					APP_PROCESS_ID		AS_INT32(AJAProcess::GetPid())
 
+//#define NTV2_BUFFER_LOCK
+
 static const size_t		NTV2_ANCSIZE_MAX	(0x2000);
 static const uint32_t	APP_SIGNATURE		(NTV2_FOURCC('D','E','M','O'));
 
@@ -396,6 +398,11 @@ void NTV2Player4K::SetUpHostBuffers (void)
 		mHostBuffers[ndx].fAudioBufferSize	= mConfig.WithAudio() ? mAudioBufferSize : 0;
 		::memset (mHostBuffers[ndx].fAudioBuffer,  0x00,  mConfig.WithAudio() ? mAudioBufferSize : 0);
 		mAVCircularBuffer.Add (&mHostBuffers[ndx]);
+
+#ifdef NTV2_BUFFER_LOCK
+		if (mHostBuffers[ndx].fAudioBuffer != AJA_NULL)
+			mDevice.DMABufferLock(mHostBuffers[ndx].fAudioBuffer, mAudioBufferSize, true);
+#endif
 	}
 }	//	SetUpHostBuffers
 
@@ -1186,6 +1193,12 @@ void NTV2Player4K::ConsumeFrames (void)
 		acOptions |= AUTOCIRCULATE_WITH_ANC;
 	}
 
+#ifdef NTV2_BUFFER_LOCK
+	if (outputXferInfo.acANCBuffer.GetHostPointer() != AJA_NULL)
+	{
+		mDevice.DMABufferLock(outputXferInfo.acANCBuffer, true);
+	}
+#endif
 	//	Initialize & start AutoCirculate...
     if (::NTV2DeviceCanDo12gRouting(mDeviceID))
     {
@@ -1328,6 +1341,11 @@ void NTV2Player4K::SetUpTestPatternVideoBuffers (void)
 		uint8_t * const	pVideoBuffer	(mTestPatternBuffers[tpIndex]);
 		for (size_t ndx(0);  ndx < testPatternSize;  ndx++)
 			pVideoBuffer[ndx] = testPatternBuffer[ndx];
+
+#ifdef NTV2_BUFFER_LOCK
+		if (mTestPatternBuffers[tpIndex] != AJA_NULL)
+			mDevice.DMABufferLock((ULWord*)mTestPatternBuffers[tpIndex], mVideoBufferSize, true);
+#endif
 	}	//	loop for each predefined pattern
 
 }	//	SetUpTestPatternVideoBuffers

@@ -15,6 +15,7 @@ using namespace std;
 
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 #define NTV2_ANCSIZE_MAX	(0x2000)
+//#define NTV2_BUFFER_LOCK
 
 
 NTV2Capture4K::NTV2Capture4K (const string			inDeviceSpecifier,
@@ -381,6 +382,16 @@ void NTV2Capture4K::SetupHostBuffers (void)
 		mAVHostBuffer [bufferNdx].fAncBuffer		= mWithAnc ? reinterpret_cast <uint32_t *> (new uint8_t [mAncBufferSize]) : AJA_NULL;
 		mAVHostBuffer [bufferNdx].fAncBufferSize	= mAncBufferSize;
 		mAVCircularBuffer.Add (& mAVHostBuffer [bufferNdx]);
+
+#ifdef NTV2_BUFFER_LOCK
+		// Page lock the memory
+		if (mAVHostBuffer [bufferNdx].fVideoBuffer != AJA_NULL)
+			mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fVideoBuffer, mVideoBufferSize, true);
+		if (mAVHostBuffer [bufferNdx].fAudioBuffer)
+			mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fAudioBuffer, mAudioBufferSize, true);
+		if (mAVHostBuffer [bufferNdx].fAncBuffer)
+			mDevice.DMABufferLock((ULWord*)mAVHostBuffer [bufferNdx].fAncBuffer, mAncBufferSize, true);
+#endif
 	}	//	for each AVDataBuffer
 
 }	//	SetupHostBuffers

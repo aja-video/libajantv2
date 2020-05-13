@@ -29,7 +29,7 @@ using namespace std;
 #define	TCDBG(_expr_)	AJA_sDEBUG	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
 
 #define NTV2_ANCSIZE_MAX	(0x2000)
-
+//#define NTV2_BUFFER_LOCK
 
 AJALabelValuePairs PlayerConfig::Get(const bool inCompact) const
 {
@@ -309,6 +309,11 @@ void NTV2Player::SetUpHostBuffers (void)
 			case AJAAncDataType_HDR_HLG:	hlgPkt.GenerateTransmitData(AsU8Ptr(ancBuf.GetHostPointer()),	ancBuf.GetByteCount(), pktSize);	break;
 			default:						break;
 		}
+
+#ifdef NTV2_BUFFER_LOCK
+		if (ancBuf.GetHostPointer() != AJA_NULL)
+			mDevice.DMABufferLock(ancBuf, false);
+#endif
 	}
 
 	//	Allocate and add each in-host NTV2FrameData to my circular buffer member variable...
@@ -319,8 +324,16 @@ void NTV2Player::SetUpHostBuffers (void)
 		NTV2FrameData & frameData(mHostBuffers.back());	//	...and get a reference to it
 		//	Allocate a page-aligned video buffer
 		frameData.fVideoBuffer.Allocate(mFormatDesc.GetTotalBytes(), /*pageAlign?*/true);
+#ifdef NTV2_BUFFER_LOCK
+		if (frameData.fVideoBuffer.GetHostPointer() != AJA_NULL)
+			mDevice.DMABufferLock(frameData.fVideoBuffer, true);
+#endif
 		if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem))
 			frameData.fAudioBuffer.Allocate(1UL*1024UL*1024UL);	//	Allocate audio buffer
+#ifdef NTV2_BUFFER_LOCK
+		if (frameData.fAudioBuffer.GetHostPointer() != AJA_NULL)
+			mDevice.DMABufferLock(frameData.fAudioBuffer, true);
+#endif
 		if (ancBuf  &&  mHostBuffers.size() == 1)	//	Only first has Anc buffer
 			frameData.fAncBuffer.CopyFrom(ancBuf.GetHostPointer(), ancBuf.GetByteCount());
 		mAVCircularBuffer.Add(&frameData);
