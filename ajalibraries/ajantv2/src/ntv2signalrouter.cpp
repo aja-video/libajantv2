@@ -992,6 +992,8 @@ void RoutingExpert::InitOutputXpt2WidgetIDs(void)
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameSync2RGB,			NTV2_WgtFrameSync2));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameSync2YUV,			NTV2_WgtFrameSync2));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptCompressionModule,		NTV2_WgtCompression1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMultiLinkOut1,			NTV2_WgtDualLinkV2Out1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptDuallinkOut1DS2,		NTV2_WgtDualLinkV2Out1));
 
 	//	gWidget2OutputXpts
 	for (OutputXpt2WidgetIDsConstIter iter (gOutputXpt2WidgetIDs.begin ());  iter != gOutputXpt2WidgetIDs.end ();  ++iter)

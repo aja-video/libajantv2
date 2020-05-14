@@ -7889,6 +7889,7 @@ string NTV2WidgetIDToString (const NTV2WidgetID inValue, const bool inCompactDis
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4In4", NTV2_WgtHDMIIn4v4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4Out1", NTV2_WgtHDMIOut1v4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv5Out1", NTV2_WgtHDMIOut1v5);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "MultiLinkOut1", NTV2_WgtMultiLinkOut1);
 		case NTV2_WgtModuleTypeCount:				return "???";  //special case
 	}
 	return "";
