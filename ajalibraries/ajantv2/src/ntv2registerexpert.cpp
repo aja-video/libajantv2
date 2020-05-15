@@ -542,6 +542,8 @@ private:
 		DefineXptReg	(kRegXptSelectGroup33,	NTV2_Xpt425Mux3AInput,			NTV2_Xpt425Mux3BInput,			NTV2_Xpt425Mux4AInput,			NTV2_Xpt425Mux4BInput);
 		DefineXptReg	(kRegXptSelectGroup34,	NTV2_XptFrameBuffer1BInput,		NTV2_XptFrameBuffer2BInput,		NTV2_XptFrameBuffer3BInput,		NTV2_XptFrameBuffer4BInput);
 		DefineXptReg	(kRegXptSelectGroup35,	NTV2_XptFrameBuffer5BInput,		NTV2_XptFrameBuffer6BInput,		NTV2_XptFrameBuffer7BInput,		NTV2_XptFrameBuffer8BInput);
+		DefineXptReg	(kRegXptSelectGroup36,	NTV2_XptMultiLinkOut1Input,		NTV2_INPUT_CROSSPOINT_INVALID,	NTV2_INPUT_CROSSPOINT_INVALID,	NTV2_INPUT_CROSSPOINT_INVALID);
+		
 
 		//	Expose the CanConnect ROM registers:
 		for (ULWord regNum(kRegFirstValidXptROMRegister);  regNum < ULWord(kRegInvalidValidXptROMRegister);  regNum++)

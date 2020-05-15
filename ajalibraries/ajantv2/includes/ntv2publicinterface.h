@@ -225,7 +225,7 @@ typedef enum
 	kRegAFDVANCInserterSDI1,		// 171
 	kRegAFDVANCInserterSDI2,		// 172
     kRegAudioChannelMappingCh1,     // 173
-    kRegAudioChannelMappingCh2,     // 174
+    kRegXptSelectGroup36,		    // 174
     kRegAudioChannelMappingCh3,     // 175
     kRegAudioChannelMappingCh4,     // 176
     kRegAudioChannelMappingCh5,     // 177

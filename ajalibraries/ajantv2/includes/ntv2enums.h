@@ -2784,6 +2784,10 @@ typedef enum NTV2OutputCrosspointID
 	NTV2_XptLUT6Out						= 0xDF,
 	NTV2_XptLUT7Out						= 0xE0,
 	NTV2_XptLUT8Out						= 0xE1,
+	NTV2_XptMultiLinkOut1DS1			= 0xE2,
+	NTV2_XptMultiLinkOut1DS2			= 0xE3,
+	NTV2_XptMultiLinkOut1DS3			= 0xE4,
+	NTV2_XptMultiLinkOut1DS4			= 0xE5,
 	NTV2_XptRuntimeCalc					= 0xFF,
 	NTV2_LAST_OUTPUT_CROSSPOINT			= 0xFF,
 	NTV2_OUTPUT_CROSSPOINT_INVALID		= 0xFF
@@ -2926,7 +2930,6 @@ typedef enum NTV2InputCrosspointID
 	NTV2_XptDualLinkIn8Input		= 0x4B,
 	NTV2_XptDualLinkIn8DSInput		= 0x4C,
 	NTV2_XptDualLinkOut1Input		= 0x4D,
-	NTV2_XptDualLinkOut1InputA		= NTV2_XptDualLinkOut1Input,
 	NTV2_XptDualLinkOut2Input		= 0x4E,
 	NTV2_XptDualLinkOut3Input		= 0x4F,
 	NTV2_XptDualLinkOut4Input		= 0x50,
@@ -2983,7 +2986,7 @@ typedef enum NTV2InputCrosspointID
 	NTV2_XptCSC1KeyFromInput2		= 0x82,	//	deprecate?
 	NTV2_XptFrameSync2Input			= 0x83,	//	deprecate?
 	NTV2_XptFrameSync1Input			= 0x84,	//	deprecate?
-	NTV2_XptDualLinkOut1InputB		= 0x85,
+	NTV2_XptMultiLinkOut1Input		= 0x85,
 	NTV2_LAST_INPUT_CROSSPOINT		= 0x85,
 	NTV2_INPUT_CROSSPOINT_INVALID	= 0xFFFFFFFF
 	#if !defined(NTV2_DEPRECATE_15_3)
