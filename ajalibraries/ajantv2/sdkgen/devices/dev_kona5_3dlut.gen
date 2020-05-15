@@ -91,6 +91,7 @@ NTV2_FBF_10BIT_YCBCR_422PL3_LE
 
 // NTV2WidgetIDs
 NTV2_WgtFrameBuffer1
+NTV2_WgtFrameBuffer2
 NTV2_WgtCSC1
 NTV2_WgtCSC2
 NTV2_WgtCSC3
@@ -122,7 +123,7 @@ NTV2DeviceGetMaxAudioChannels					16
 NTV2DeviceGetMaxRegisterNumber					kRegReserved511
 NTV2DeviceGetMaxTransferCount					BIT(21)-1
 NTV2DeviceGetNumDMAEngines						2
-NTV2DeviceGetNumVideoChannels					1
+NTV2DeviceGetNumVideoChannels					2
 NTV2DeviceGetPingLED							BIT(16)
 NTV2DeviceGetUFCVersion							1
 NTV2DeviceGetNum4kQuarterSizeConverters			1
@@ -132,7 +133,7 @@ NTV2DeviceGetNumAudioSystems					1
 NTV2DeviceGetNumCSCs							4
 NTV2DeviceGetNumEmbeddedAudioInputChannels		16
 NTV2DeviceGetNumEmbeddedAudioOutputChannels		16
-NTV2DeviceGetNumFrameStores						1
+NTV2DeviceGetNumFrameStores						2
 NTV2DeviceGetNumHDMIAudioOutputChannels			8
 NTV2DeviceGetNumHDMIVideoOutputs				1
 NTV2DeviceGetNumLUTs							4
