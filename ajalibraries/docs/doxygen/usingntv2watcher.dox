@@ -118,8 +118,8 @@ Clicking on an inspector item in the list replaces the one that was previously s
 If you click back to return to an inspector that was previously in use, its state is exactly as it was left.
 (Only when the device is changed does a new inspector get started in its default state.)
 
-Right-clicking an inspector item in the list pops up a menu with one choice: “Float”.
-Choosing <b>Float</b> — or double-clicking an inspector item in the list — opens the inspector in a separate window.
+Right-clicking an inspector item in the list pops up a menu with one choice: “Move to Separate Window”.
+Choosing <b>Move to Separate Window</b> — or double-clicking an inspector item in the list — opens the inspector in a separate window.
 This permits multiple inspectors to be open simultaneously.
 
 @note	Having multiple inspectors open in separate windows increases CPU utilization,
