@@ -373,9 +373,9 @@ bool KonaNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 		return false;
 	}
 	
-	// Get the CFRunLoopSource for the notification port and add it to the default run loop.
-	// It is not necessary to call CFRunLoopRemoveSource() duringing tear down because that is implicitly done when
-	// the the notification port is destroyed.
+	//	Get the CFRunLoopSource for the notification port and add it to the default run loop.
+	//	It is not necessary to call CFRunLoopRemoveSource() during tear down because that is
+	//	implicitly done when the the notification port is destroyed.
 	CFRunLoopSourceRef runLoopSource = ::IONotificationPortGetRunLoopSource (m_notificationPort);
 	::CFRunLoopAddSource (::CFRunLoopGetCurrent(), runLoopSource, kCFRunLoopDefaultMode);
 	

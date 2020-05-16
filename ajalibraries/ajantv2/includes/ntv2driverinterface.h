@@ -300,13 +300,12 @@ public:
 	virtual inline NTV2_DEPRECATED_f(bool SwitchBitfile (NTV2DeviceID boardID, NTV2BitfileType bitfile))	{ (void) boardID; (void) bitfile; return false; }	///< @deprecated	This function is obsolete.
 #endif
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	virtual inline const char *	GetHostName (void) const							{ return _hostname.c_str (); }
-
-	virtual inline NTV2NubProtocolVersion	GetNubProtocolVersion (void) const		{return _nubProtocolVersion;}
-
-	virtual inline bool						IsRemote (void) const					{return _remoteHandle != INVALID_NUB_HANDLE;}
+	virtual inline const char *				GetHostName (void) const			{return _hostname.c_str();}
+	virtual inline NTV2NubProtocolVersion	GetNubProtocolVersion (void) const	{return _nubProtocolVersion;}
+	virtual inline bool						IsRemote (void) const				{return _remoteHandle != INVALID_NUB_HANDLE;}
 #else
-	virtual inline bool						IsRemote (void) const					{return false;}
+	virtual inline const char *				GetHostName (void) const			{return AJA_NULL;}
+	virtual inline bool						IsRemote (void) const				{return false;}
 #endif
 
     virtual inline bool						HevcSendMessage (HevcMessageHeader * /*pMessage*/)		{ return false; }

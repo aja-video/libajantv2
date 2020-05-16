@@ -275,7 +275,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithName (const string & inNameSubString,
 		return false;
 
 	CNTV2DeviceScanner	scanner;
-	const string		nameSubString(::ToLower(inNameSubString));
+	string				nameSubString(::ToLower(inNameSubString));
 	const NTV2DeviceInfoList &	deviceInfoList(scanner.GetDeviceInfoList ());
 
 	for (NTV2DeviceInfoListConstIter iter(deviceInfoList.begin());  iter != deviceInfoList.end();  ++iter)
@@ -283,6 +283,16 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithName (const string & inNameSubString,
 		const string	deviceName(::ToLower(iter->deviceIdentifier));
 		if (deviceName.find(nameSubString) != string::npos)
 			return outDevice.Open(UWord(iter->deviceIndex));	//	Found!
+	}
+	if (nameSubString == "io4kplus")
+	{	//	Io4K+ == DNXIV...
+		nameSubString = "avid dnxiv";
+		for (NTV2DeviceInfoListConstIter iter(deviceInfoList.begin());  iter != deviceInfoList.end();  ++iter)
+		{
+			const string	deviceName(::ToLower(iter->deviceIdentifier));
+			if (deviceName.find(nameSubString) != string::npos)
+				return outDevice.Open(UWord(iter->deviceIndex));	//	Found!
+		}
 	}
 	return false;	//	Not found
 
@@ -334,7 +344,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 
 	CNTV2DeviceScanner	scanner;
 	const NTV2DeviceInfoList &	infoList (scanner.GetDeviceInfoList());
-	const string upperArg(::ToUpper(inArgument));
+	string upperArg(::ToUpper(inArgument));
 	if (upperArg == "LIST" || upperArg == "?")
 	{
 		if (infoList.empty())
@@ -354,9 +364,13 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 
 	//	Serial number (string):
 	if (::IsLegalSerialNumber(upperArg))
+	{
+		if (upperArg.length() == 9)	//	Special case for DNXIV serial numbers
+			upperArg.erase(0,1);	//	Remove 1st character
 		for (NTV2DeviceInfoListConstIter iter(infoList.begin());  iter != infoList.end();  ++iter)
 			if (CNTV2Card::SerialNum64ToString(iter->deviceSerialNumber) == upperArg)
 				return outDevice.Open(UWord(iter->deviceIndex));	//	Found!
+	}
 
 	//	Hex serial number:
 	const uint64_t serialNumber(::IsLegalHexSerialNumber(inArgument));
