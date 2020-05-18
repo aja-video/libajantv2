@@ -313,8 +313,8 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 			-	<b>Lines</b> and <b>Components</b> views — Selects the visible lines plus VANC lines (if VANC enabled).
 			-	<b>Waveform</b> view — Selects the entire line that’s currently displayed.
 			-	<b>Raw</b> view — Selects the entire 8/16/32MB buffer.
-		-	<b>Set Input/Output Frame Here</b> — (<b>Auto</b> mode OFF, and current frame being viewed doesn’t match device’s current Input or Output Frame) — Changes
-			the device’s Input or Output Frame to the current frame being viewed.
+		-	<b>Set Input/Output Frame Here</b> — (<b>Auto</b> mode OFF, and current frame being viewed doesn’t match the FrameStore’s
+			current Input or Output Frame) — Changes the FrameStore’s Input or Output Frame to the current frame being viewed.
 		-	<b>Fill Frames…</b> — (<b>Auto</b> mode OFF, and nothing selected) — Reveals the \ref fillbufferdlog for filling
 			device frame memory with specific values, colors, test patterns, etc.
 		-	<b>Edit Value…</b> — (<b>Auto</b> mode OFF, <b>Lines</b> or <b>Raw</b> views, something selected) — Enters the interactive editing mode.
