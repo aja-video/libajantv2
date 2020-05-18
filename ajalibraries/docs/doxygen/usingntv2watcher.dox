@@ -118,8 +118,8 @@ Clicking on an inspector item in the list replaces the one that was previously s
 If you click back to return to an inspector that was previously in use, its state is exactly as it was left.
 (Only when the device is changed does a new inspector get started in its default state.)
 
-Right-clicking an inspector item in the list pops up a menu with one choice: “Float”.
-Choosing <b>Float</b> — or double-clicking an inspector item in the list — opens the inspector in a separate window.
+Right-clicking an inspector item in the list pops up a menu with one choice: “Move to Separate Window”.
+Choosing <b>Move to Separate Window</b> — or double-clicking an inspector item in the list — opens the inspector in a separate window.
 This permits multiple inspectors to be open simultaneously.
 
 @note	Having multiple inspectors open in separate windows increases CPU utilization,
@@ -313,6 +313,8 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 			-	<b>Lines</b> and <b>Components</b> views — Selects the visible lines plus VANC lines (if VANC enabled).
 			-	<b>Waveform</b> view — Selects the entire line that’s currently displayed.
 			-	<b>Raw</b> view — Selects the entire 8/16/32MB buffer.
+		-	<b>Set Input/Output Frame Here</b> — (<b>Auto</b> mode OFF, and current frame being viewed doesn’t match device’s current Input or Output Frame) — Changes
+			the device’s Input or Output Frame to the current frame being viewed.
 		-	<b>Fill Frames…</b> — (<b>Auto</b> mode OFF, and nothing selected) — Reveals the \ref fillbufferdlog for filling
 			device frame memory with specific values, colors, test patterns, etc.
 		-	<b>Edit Value…</b> — (<b>Auto</b> mode OFF, <b>Lines</b> or <b>Raw</b> views, something selected) — Enters the interactive editing mode.

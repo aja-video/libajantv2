@@ -135,6 +135,32 @@ This resynchronization requires restarting the audio engine, which often results
 (See \ref anctimecode for more information about timecode capture and AutoCirculate.)
 
 
+@subsubsection	autocirctimebudget		Per-Frame “Time Budget”
+
+-	The video frame rate determines the per-frame “time budget”.
+-	If the budget is exceeded long enough, the application will drop frames.
+-	The “time budget” is spent doing three things:
+	-	<b>DMA Transfer</b>: The elapsed time spent in the CNTV2Card::AutoCirculateTransfer function.
+	-	<b>Processing</b>: The elapsed time from the moment CNTV2Card::AutoCirculateTransfer returns and the next
+		time it’s about to be called (minus any <b>Waiting</b> time … see next item).
+	-	<b>Waiting</b>: The time spent waiting for a new frame to become ready to transfer from the device.
+		-	If the application has fallen behind (i.e. the <b>Buffer Level</b> exceeds 1), this time should be zero.
+		-	If the application has caught up, this time will be non-zero.
+-	It’s a good practice to add code that continuously measures the above quantities.
+-	The sum of the <b>Processing</b> and <b>DMA Transfer</b> times must remain within the per-frame “time budget”
+	(i.e. below frame time).
+-	The proper action to take if the per-frame “time budget” is exceeded is application-dependent, and could include:
+	-	log a message to the application or host logging facility;
+	-	trigger an event;
+	-	set an alarm;
+	-	etc.
+-	Occasionally exceeding the “time budget” for a one or more frames can be tolerated…
+	-	if the application can catch up by sustained sub-frame-time DMA and frame processing, and…
+	-	the number of AutoCirculate device frame buffers is large enough to give the application
+		time to catch up.
+
+
+
 AutoCirculate capture demos:
 -	@subpage	ntv2capture
 -	@subpage	ntv2ccgrabber
