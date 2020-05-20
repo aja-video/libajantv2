@@ -534,8 +534,8 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
     case DEVICE_ID_IOIP_2110:
         return (designName == GetPrimaryDesignName(DEVICE_ID_IOIP_2022) ||
                 designName == GetPrimaryDesignName(DEVICE_ID_IOIP_2110));
-	case DEVICE_ID_T3TAP:
-		return designName == GetPrimaryDesignName(DEVICE_ID_T3TAP);
+	case DEVICE_ID_TTAP_PRO:
+		return designName == GetPrimaryDesignName(DEVICE_ID_TTAP_PRO);
 	default: break;
 	}
 	return false;
@@ -582,7 +582,7 @@ std::string CNTV2FirmwareInstallerThread::GetPrimaryDesignName(const NTV2DeviceI
 		case DEVICE_ID_KONA5_8K:					return "kona5_8k";
 		case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k";
 		case DEVICE_ID_CORVID44_2X4K:				return "c44_12g_2X4K";
-		case DEVICE_ID_T3TAP:						return "t3_tap";
+		case DEVICE_ID_TTAP_PRO:					return "t_tap_pro";
         default: return "";
 	}
 }
