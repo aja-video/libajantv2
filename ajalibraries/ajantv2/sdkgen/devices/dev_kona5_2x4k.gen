@@ -120,6 +120,7 @@ NTV2_WgtLUT1
 NTV2_WgtLUT2
 NTV2_WgtDualLinkV2In1
 NTV2_WgtDualLinkV2In2
+NTV2_WgtDualLinkV2Out1
 NTV2_WgtDualLinkV2Out2
 NTV2_WgtMixer1
 NTV2_WgtGenLock
