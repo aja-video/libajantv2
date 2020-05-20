@@ -19,8 +19,6 @@
 #include "ajaanc/includes/ancillarydata_hdr_hlg.h"
 #include "ajaanc/includes/ancillarylist.h"
 
-#include "ntv2enhancedcsc.h"
-
 using namespace std;
 
 //	Convenience macros for EZ logging:
@@ -178,8 +176,6 @@ AJAStatus NTV2Player::Init (void)
 
 AJAStatus NTV2Player::SetUpVideo (void)
 {
-	CNTV2EnhancedCSC eCSC;
-	eCSC.SetInputPixelFormat(NTV2_Enhanced_CSC_Pixel_Format_RGB444);
 	//	Configure the device to output the requested video format...
 	if (!::NTV2DeviceCanDoVideoFormat (mDeviceID, mConfig.fVideoFormat))
 		{cerr << "## ERROR:  Video format '" << ::NTV2VideoFormatToString(mConfig.fVideoFormat) << "' not supported on this device" << endl;
