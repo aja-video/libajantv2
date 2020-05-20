@@ -67,7 +67,7 @@ class AJAExport CNTV2EnhancedCSC
 public:
 	//	Construction, Copying, Assigning
 	#if defined (NTV2_DEPRECATE)
-		explicit	CNTV2EnhancedCSC ();
+		explicit	CNTV2EnhancedCSC ()	{	};
 	#else
 		explicit	CNTV2EnhancedCSC (CNTV2Card & inCard)
 						:	mDevice (inCard)	{	};
