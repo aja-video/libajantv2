@@ -125,37 +125,37 @@ AJAStatus NTV2Capture4K::Init (void)
 	}
 	mDevice.SetEveryFrameServices (NTV2_OEM_TASKS);			//	Since this is an OEM demo, use the OEM service level
 
-	mDeviceID = mDevice.GetDeviceID ();						//	Keep the device ID handy, as it's used frequently
+	mDeviceID = mDevice.GetDeviceID();						//	Keep the device ID handy, as it's used frequently
 
 	//	Sometimes other applications disable some or all of the frame buffers, so turn them all on here...
 	switch (::NTV2DeviceGetNumFrameStores(mDeviceID))
 	{
-	case 8:
-		mDevice.EnableChannel(NTV2_CHANNEL8);
-		mDevice.EnableChannel(NTV2_CHANNEL7);
-		mDevice.EnableChannel(NTV2_CHANNEL6);
-		mDevice.EnableChannel(NTV2_CHANNEL5);
-		AJA_FALL_THRU;
-	case 4:
-		mDevice.EnableChannel(NTV2_CHANNEL4);
-		mDevice.EnableChannel(NTV2_CHANNEL3);
-		mDevice.EnableChannel(NTV2_CHANNEL2);
-		mDevice.EnableChannel(NTV2_CHANNEL1);
-		break;
+		case 8:
+			mDevice.EnableChannel(NTV2_CHANNEL8);
+			mDevice.EnableChannel(NTV2_CHANNEL7);
+			mDevice.EnableChannel(NTV2_CHANNEL6);
+			mDevice.EnableChannel(NTV2_CHANNEL5);
+			AJA_FALL_THRU;
+		case 4:
+			mDevice.EnableChannel(NTV2_CHANNEL4);
+			mDevice.EnableChannel(NTV2_CHANNEL3);
+			mDevice.EnableChannel(NTV2_CHANNEL2);
+			mDevice.EnableChannel(NTV2_CHANNEL1);
+			break;
 	}
 
-	if (::NTV2DeviceCanDoMultiFormat (mDeviceID))
-		mDevice.SetMultiFormatMode (mDoMultiFormat);
+	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
+		mDevice.SetMultiFormatMode(mDoMultiFormat);
 
-	if (::NTV2DeviceGetNumHDMIVideoInputs (mDeviceID) > 1)
+	if (::NTV2DeviceGetNumHDMIVideoInputs(mDeviceID) > 1)
 	{
 		if (mInputChannel == NTV2_CHANNEL1)
 		{
-			mInputSource = ::NTV2ChannelToInputSource (NTV2_CHANNEL1, NTV2_INPUTSOURCES_HDMI);
+			mInputSource = ::NTV2ChannelToInputSource(NTV2_CHANNEL1, NTV2_INPUTSOURCES_HDMI);
 		}
 		else
 		{
-			mInputSource = ::NTV2ChannelToInputSource (NTV2_CHANNEL2, NTV2_INPUTSOURCES_HDMI);
+			mInputSource = ::NTV2ChannelToInputSource(NTV2_CHANNEL2, NTV2_INPUTSOURCES_HDMI);
 			mInputChannel = NTV2_CHANNEL3;
 		}
 		mDoTsiRouting = true;
@@ -168,10 +168,10 @@ AJAStatus NTV2Capture4K::Init (void)
 		}
 		else if (mDoTsiRouting)
 		{
-			if (mInputChannel < NTV2_CHANNEL3) mInputChannel = NTV2_CHANNEL1;
-			else if (mInputChannel < NTV2_CHANNEL5) mInputChannel = NTV2_CHANNEL3;
-			else if (mInputChannel < NTV2_CHANNEL7) mInputChannel = NTV2_CHANNEL5;
-			else mInputChannel = NTV2_CHANNEL7;
+			if (mInputChannel < NTV2_CHANNEL3)		mInputChannel = NTV2_CHANNEL1;
+			else if (mInputChannel < NTV2_CHANNEL5)	mInputChannel = NTV2_CHANNEL3;
+			else if (mInputChannel < NTV2_CHANNEL7)	mInputChannel = NTV2_CHANNEL5;
+			else									mInputChannel = NTV2_CHANNEL7;
 
 		}
 		else
@@ -182,18 +182,18 @@ AJAStatus NTV2Capture4K::Init (void)
 	}
 
 	//	Set up the video and audio...
-	status = SetupVideo ();
-	if (AJA_FAILURE (status))
+	status = SetupVideo();
+	if (AJA_FAILURE(status))
 		return status;
 
-	status = SetupAudio ();
-	if (AJA_FAILURE (status))
+	status = SetupAudio();
+	if (AJA_FAILURE(status))
 		return status;
 
 	//	Set up the circular buffers, the device signal routing, and both playout and capture AutoCirculate...
-	SetupHostBuffers ();
-	RouteInputSignal ();
-	SetupInputAutoCirculate ();
+	SetupHostBuffers();
+	RouteInputSignal();
+	SetupInputAutoCirculate();
 
 	return AJA_STATUS_SUCCESS;
 
@@ -255,10 +255,8 @@ AJAStatus NTV2Capture4K::SetupVideo (void)
 	mDevice.SetVideoFormat(mVideoFormat, false, false, mInputChannel);
 
 	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
-	{
 		mDevice.SetTsiFrameEnable(true, mInputChannel);
-	}
-	else if(mDoTsiRouting)
+	else if (mDoTsiRouting)
 		mDevice.SetTsiFrameEnable(true, mInputChannel);
 	else
 		mDevice.Set4kSquaresEnable(true, mInputChannel);
@@ -278,7 +276,7 @@ AJAStatus NTV2Capture4K::SetupVideo (void)
 		mDevice.SetFrameBufferFormat(mInputChannel, mPixelFormat);
 		mDevice.SetEnableVANCData(false, false, mInputChannel);
 	}
-	else if(mDoTsiRouting)
+	else if (mDoTsiRouting)
 	{
 		if (mInputChannel < NTV2_CHANNEL3)
 		{

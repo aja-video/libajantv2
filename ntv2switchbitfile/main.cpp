@@ -42,7 +42,7 @@ int main(int argc, const char ** argv)
 	const struct poptOption userOptionsTable[] =
 	{
 		{ "device",	'd', POPT_ARG_STRING | POPT_ARGFLAG_OPTIONAL, &pDeviceSpec,	0,	"which device to use",	"index#, serial#, or model"	},
-		{ "load",	'l', POPT_ARG_STRING | POPT_ARGFLAG_OPTIONAL, &pDeviceID,	'l',"device ID to load",	"hex32value" },
+		{ "load",	'l', POPT_ARG_STRING | POPT_ARGFLAG_OPTIONAL, &pDeviceID,	'l',"device ID to load",	"index# or hex32value" },
 		{ "verbose",'v', POPT_ARG_NONE   | POPT_ARGFLAG_OPTIONAL, &isVerbose,	0,	"verbose output?",		AJA_NULL },
 		POPT_AUTOHELP
 		POPT_TABLEEND
@@ -59,30 +59,52 @@ int main(int argc, const char ** argv)
 		{cerr << "## ERROR: Opening device '" << deviceSpec << "' failed" << endl;  return 1;}
 	NTV2DeviceID eBoardID (device.GetDeviceID());
 
+	//	Scan the current directory for bitfiles...
+	device.AddDynamicDirectory(".");
+
 	const string deviceStr(pDeviceID ? pDeviceID : "");
     if (!deviceStr.empty())
 	{
 		size_t checkIndex(0);
-		deviceID = NTV2DeviceID(aja::stoul(deviceStr, &checkIndex, 16));
+		size_t index = aja::stoul(deviceStr, &checkIndex, 10);
+		if (index < 100)
+		{
+			const NTV2DeviceIDList deviceList (device.GetDynamicDeviceList());
+			if ((index == 0) || (index > deviceList.size()))
+				{cerr << "## ERROR: Bad device index '" << index << "'" << endl;  return 1;}
+			deviceID = deviceList.at(index-1);
+		}
+		else
+		{
+			deviceID = NTV2DeviceID(aja::stoul(deviceStr, &checkIndex, 16));
+			isVerbose = true;
+		}
 	}
 
 	if (isVerbose)
-		cout << "## NOTE: Active device is " << xHEX0N(eBoardID,8) << " ("
-				<< ::NTV2DeviceIDToString(eBoardID) << ")" << endl;
+		cout << "Active device is " << ::NTV2DeviceIDToString(eBoardID) << " ("
+				<< xHEX0N(eBoardID,8) << ")" << endl;
+	else
+		cout << "Active device is " << ::NTV2DeviceIDToString(eBoardID) << endl;
+
 	do
 	{
-		//	Scan the current directory for bitfiles...
-        device.AddDynamicDirectory(".");
-
 		//	Check if requested device loadable...
 		if (deviceID)
 		{
 			if (!device.CanLoadDynamicDevice(deviceID))
-			{	cerr << "Cannot load DeviceID: " << xHEX0N(deviceID,8) << " ("
-						<< ::NTV2DeviceIDToString(deviceID) << ")" << endl;
+			{
+				cerr << "## ERROR: Cannot load device: " << ::NTV2DeviceIDToString(deviceID) << " ("
+						<< xHEX0N(deviceID,8) << ")" << endl;
 				deviceID = NTV2DeviceID(0);
 			}
-			else cout << "Can load DeviceID: " << xHEX0N(deviceID,8) << " (" << ::NTV2DeviceIDToString(deviceID) << ")" << endl;
+			else
+			{
+				if (isVerbose)
+					cout << "Can load device: " << ::NTV2DeviceIDToString(deviceID) << " (" << xHEX0N(deviceID,8) << ")" << endl;
+				else
+					cout << "Can load device: " << ::NTV2DeviceIDToString(deviceID) << endl;
+			}
 		}
 
 		//	Load requested device...
@@ -91,18 +113,23 @@ int main(int argc, const char ** argv)
 			if (!device.LoadDynamicDevice(deviceID))
 			{
 				eBoardID = device.GetDeviceID();
-				cerr << "## ERROR:  Load failed for DeviceID: " << xHEX0N(eBoardID,8)
-						<< " (" << ::NTV2DeviceIDToString(eBoardID) << ")";
+				cerr << "## ERROR: Load failed for device: " << ::NTV2DeviceIDToString(eBoardID)
+						<< " (" << xHEX0N(eBoardID,8) << ")";
 				resultCode = 2;
 			}
 			eBoardID = device.GetDeviceID();
 			if (deviceID == eBoardID)
-				cout << "DeviceID: " << xHEX0N(eBoardID,8) << " (" << ::NTV2DeviceIDToString(eBoardID)
-						<< ") loaded successfully" << endl;
+			{
+				if (isVerbose)
+					cout << "Device: " << ::NTV2DeviceIDToString(eBoardID) << " (" << xHEX0N(eBoardID,8)
+							<< ") loaded successfully" << endl;
+				else
+					cout << "Device: " << ::NTV2DeviceIDToString(eBoardID) << " loaded successfully" << endl;
+			}
 			else
 			{
-				cerr << "## ERROR: Unexpected DeviceID: " << xHEX0N(eBoardID,8)
-						<< " (" << ::NTV2DeviceIDToString(eBoardID) << ")";
+				cerr << "## ERROR: Unexpected device: " << ::NTV2DeviceIDToString(eBoardID)
+						<< " (" << xHEX0N(eBoardID,8) << ")";
 				resultCode = 3;
 			}
 		}
@@ -112,12 +139,17 @@ int main(int argc, const char ** argv)
 		{
 			const NTV2DeviceIDList deviceList (device.GetDynamicDeviceList());
 			if (deviceList.empty())
-				{cout << "## NOTE:  No loadable devices found" << endl;  break;}
+				{cout << "No loadable devices found" << endl;  break;}
 
-			cout << DEC(deviceList.size()) << " DeviceID(s) for dynamic loading:" << endl;
+			cout << DEC(deviceList.size()) << " Device(s) for dynamic loading:" << endl;
 			for (size_t ndx(0);  ndx < deviceList.size();  ndx++)
-				cout << DECN(ndx+1,2) << ": " << xHEX0N(deviceList.at(ndx),8)
-					<< " (" << ::NTV2DeviceIDToString(deviceList.at(ndx)) << endl;
+			{
+				if (isVerbose)
+					cout << DECN(ndx+1,2) << ": " << ::NTV2DeviceIDToString(deviceList.at(ndx))
+						<< " (" << xHEX0N(deviceList.at(ndx),8) << ")" << endl;
+				else
+					cout << DECN(ndx+1,2) << ": " << ::NTV2DeviceIDToString(deviceList.at(ndx)) << endl;
+			}
 		}
 		
 	} while (false);
