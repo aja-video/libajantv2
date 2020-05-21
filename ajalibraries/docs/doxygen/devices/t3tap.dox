@@ -1,0 +1,87 @@
+/**
+	@page			ntv2devices
+
+	@section		ntv2hwio
+
+	<hr>
+	@subsection		t3tap		T3-Tap
+
+	This page describes the T3-Tap video playout device.
+	It’s identified by ::DEVICE_ID_T3TAP.
+
+	@image	html	t3tap.png
+
+	The T3-Tap has one Thunderbolt-3 input on the left side.
+	On the right side, it has one 12G SDI output, and one HDMI 2.0 output.
+
+	@par	PCI Interface
+	-	PCI device ID: <b>0xEB26</b>
+	-	Four-lane gen 1 PCI Express
+	-	2 DMA engines
+	-	Legacy and MSI interrupt delivery
+	-	1 × Thunderbolt I connector
+
+	@par	Inputs & Outputs
+	-	1 × 12G SDI output
+		-	Up to 4:2:2 10-bit YCbCr with HFR up to 60p
+		-	Up to 4:4:4 12-bit RGB up to 30p
+		-	12G, SMPTE-2082, 12-bit, 10-bit and 8-bit
+		-	6G, SMPTE-2081, 12-bit, 10-bit and 8-bit
+		-	3G, SMPTE-259/292/296/424, 12-bit, 10-bit and 8-bit
+		-	1.5G, SMPTE 372M, Level B Dual Link (single-wire), 10-bit and 8-bit
+		-	1.5G, SMPTE 292M, Single Link 4:2:2, 10-bit and 8-bit
+	-	1 × HDMI v2.0 output
+		-	30/36-bpp, RGB/YUV, 6-Gbps per color component
+		-	4K/UHD/2K/HD/SD + HFR up to 60p 4:2:2, 10/8-bit
+		-	HDR10 support — HDR InfoFrame metadata, compatible with HDMI 2.0a/CTA-861.3
+		-	HLG support — compatible with HDMI 2.0b/CTA-861-G
+		-	8 Audio Channels (max.), 24-bit HDMI embedded audio, 48 kHz sample rate, synchronous
+
+	@par	Frame Buffer
+	-	128 MB SDRAM
+	-	16 × 8MB frames
+
+	@par	Audio
+	-	1 audio system
+	-	16 channels (max.) per audio system
+	-	Audio system’s 8MB buffer memory ends at the end of SDRAM
+
+	@par	Video Formats
+	-	<b>4K:</b> 4096×2160P 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
+	-	<b>UHD:</b> 3840×2160P 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
+	-	<b>2K:</b>
+		-	2048×1080p 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
+		-	2048×1080PsF 23.98, 24, 25, 29.97, 30
+	-	<b>HD:</b>
+		-	1080p 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
+		-	1080PsF 23.98, 24, 25, 29.97, 30
+		-	1080i 50, 59.94, 60
+		-	720p 50, 59.94, 60
+	-	<b>SD:</b>
+		-	625i 50
+		-	525i 59.94
+
+	@par		Ancillary Data
+	-	Anc inserters (SDI)
+	-	\ref vancframegeometries (SD/HD SDI)
+	-	HDMI HDR
+
+	@par	Physical
+
+	-	Size (W × D × H):  5" × 1" × 5" (127mm × 25.4mm × 127mm)
+	-	Weight: TBA lb (TBA kg)
+
+	@par	Power
+
+	-	TBA typical, TBA maximum
+
+	@par	Environment
+
+	-	Safe Operating Temperature: 0°C to 35°C (32°F to 95°F)
+	-	Operating Relative Humidity: 10-90% non-condensing
+	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
+	-	Safe Storage Temperature (Power OFF): -40°C to +60°C (-40°F to +140°F)
+
+	@par		Firmware
+	TBA
+**/

@@ -44,13 +44,13 @@ static NTV2StringList & Tokenize (const string & inString, NTV2StringList & outT
         {
             pos = inString.length ();
             if (pos != lastPos || !inTrimEmpty)
-                outTokens.push_back (NTV2StringList::value_type (inString.data () + lastPos, (NTV2StringList::size_type) pos - lastPos));
+                outTokens.push_back (NTV2StringList::value_type (inString.data () + lastPos, NTV2StringList::size_type(pos - lastPos)));
             break;
         }
         else
         {
             if (pos != lastPos || !inTrimEmpty)
-                outTokens.push_back (NTV2StringList::value_type (inString.data () + lastPos, (NTV2StringList::size_type) pos - lastPos));
+                outTokens.push_back (NTV2StringList::value_type (inString.data () + lastPos, NTV2StringList::size_type(pos - lastPos)));
         }
         lastPos = pos + 1;
     }
@@ -191,6 +191,27 @@ class RoutingExpert
 			return gOutputXpt2WidgetIDs.find(inOutputXpt) != gOutputXpt2WidgetIDs.end();
 		}
 
+		bool				IsRGBOnlyInputXpt (const NTV2InputXptID inInputXpt) const
+		{
+			AJAAutoLock	lock(&gLock);
+			NTV2_ASSERT(!gRGBOnlyInputXpts.empty());
+			return gRGBOnlyInputXpts.find(inInputXpt) != gRGBOnlyInputXpts.end();
+		}
+
+		bool				IsYUVOnlyInputXpt (const NTV2InputXptID inInputXpt) const
+		{
+			AJAAutoLock	lock(&gLock);
+			NTV2_ASSERT(!gYUVOnlyInputXpts.empty());
+			return gYUVOnlyInputXpts.find(inInputXpt) != gYUVOnlyInputXpts.end();
+		}
+
+		bool				IsKeyInputXpt (const NTV2InputXptID inInputXpt) const
+		{
+			AJAAutoLock	lock(&gLock);
+			NTV2_ASSERT(!gKeyInputXpts.empty());
+			return gKeyInputXpts.find(inInputXpt) != gKeyInputXpts.end();
+		}
+
 		private:
 			void InitInputXpt2String(void);
 			void InitOutputXpt2String(void);
@@ -206,6 +227,9 @@ class RoutingExpert
 			OutputXpt2WidgetIDs		gOutputXpt2WidgetIDs;
 			Widget2OutputXpts		gWidget2OutputXpts;
 			Widget2InputXpts		gWidget2InputXpts;
+			NTV2InputXptIDSet		gRGBOnlyInputXpts;
+			NTV2InputXptIDSet		gYUVOnlyInputXpts;
+			NTV2InputXptIDSet		gKeyInputXpts;
 
 };	//	RoutingExpert
 
@@ -225,7 +249,7 @@ bool RoutingExpert::DisposeInstance(void)
 	AJAAutoLock		locker(&gRoutingExpertLock);
 	if (!gpRoutingExpert)
 		return false;
-	gpRoutingExpert = NULL;
+	gpRoutingExpert = AJA_NULL;
 	return true;
 }
 
@@ -806,6 +830,81 @@ void RoutingExpert::InitInputXpt2WidgetIDs(void)
 	//	gWidget2InputXpts
 	for (InputXpt2WidgetIDsConstIter iter (gInputXpt2WidgetIDs.begin ());  iter != gInputXpt2WidgetIDs.end ();  ++iter)
 		gWidget2InputXpts.insert (Widget2InputXptPair (iter->second, iter->first));
+
+	//	gRGBOnlyInputXpts
+	gRGBOnlyInputXpts.insert (NTV2_XptLUT1Input);
+	gRGBOnlyInputXpts.insert (NTV2_XptLUT2Input);
+	gRGBOnlyInputXpts.insert (NTV2_XptLUT3Input);
+	gRGBOnlyInputXpts.insert (NTV2_XptLUT4Input);
+	gRGBOnlyInputXpts.insert (NTV2_XptLUT5Input);
+	gRGBOnlyInputXpts.insert (NTV2_XptLUT6Input);
+	gRGBOnlyInputXpts.insert (NTV2_XptLUT7Input);
+	gRGBOnlyInputXpts.insert (NTV2_XptLUT8Input);
+	gRGBOnlyInputXpts.insert (NTV2_XptDualLinkOut1Input);
+	gRGBOnlyInputXpts.insert (NTV2_XptDualLinkOut2Input);
+	gRGBOnlyInputXpts.insert (NTV2_XptDualLinkOut3Input);
+	gRGBOnlyInputXpts.insert (NTV2_XptDualLinkOut4Input);
+	gRGBOnlyInputXpts.insert (NTV2_XptDualLinkOut5Input);
+	gRGBOnlyInputXpts.insert (NTV2_XptDualLinkOut6Input);
+	gRGBOnlyInputXpts.insert (NTV2_XptDualLinkOut7Input);
+	gRGBOnlyInputXpts.insert (NTV2_XptDualLinkOut8Input);
+
+	//	gYUVOnlyInputXpts
+	gYUVOnlyInputXpts.insert (NTV2_XptMixer1BGKeyInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptMixer1BGVidInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptMixer1FGKeyInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptMixer1FGVidInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptMixer2BGKeyInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptMixer2BGVidInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptMixer2FGKeyInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptMixer2FGVidInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptMixer3BGKeyInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptMixer3BGVidInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptMixer3FGKeyInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptMixer3FGVidInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptMixer4BGKeyInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptMixer4BGVidInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptMixer4FGKeyInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptMixer4FGVidInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptDualLinkIn1Input);
+	gYUVOnlyInputXpts.insert (NTV2_XptDualLinkIn1DSInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptDualLinkIn2Input);
+	gYUVOnlyInputXpts.insert (NTV2_XptDualLinkIn2DSInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptDualLinkIn3Input);
+	gYUVOnlyInputXpts.insert (NTV2_XptDualLinkIn3DSInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptDualLinkIn4Input);
+	gYUVOnlyInputXpts.insert (NTV2_XptDualLinkIn4DSInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptDualLinkIn5Input);
+	gYUVOnlyInputXpts.insert (NTV2_XptDualLinkIn5DSInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptDualLinkIn6Input);
+	gYUVOnlyInputXpts.insert (NTV2_XptDualLinkIn6DSInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptDualLinkIn7Input);
+	gYUVOnlyInputXpts.insert (NTV2_XptDualLinkIn7DSInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptDualLinkIn8Input);
+	gYUVOnlyInputXpts.insert (NTV2_XptDualLinkIn8DSInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptConversionModInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptConversionMod2Input);
+	gYUVOnlyInputXpts.insert (NTV2_XptAnalogOutInput);
+	gYUVOnlyInputXpts.insert (NTV2_XptAnalogOutCompositeOut);
+
+	gKeyInputXpts.insert (NTV2_XptCSC1KeyInput);
+	gKeyInputXpts.insert (NTV2_XptCSC2KeyInput);
+	gKeyInputXpts.insert (NTV2_XptCSC3KeyInput);
+	gKeyInputXpts.insert (NTV2_XptCSC4KeyInput);
+	gKeyInputXpts.insert (NTV2_XptCSC5KeyInput);
+	gKeyInputXpts.insert (NTV2_XptCSC6KeyInput);
+	gKeyInputXpts.insert (NTV2_XptCSC7KeyInput);
+	gKeyInputXpts.insert (NTV2_XptCSC8KeyInput);
+	gKeyInputXpts.insert (NTV2_XptMixer1BGKeyInput);
+	gKeyInputXpts.insert (NTV2_XptMixer1FGKeyInput);
+	gKeyInputXpts.insert (NTV2_XptMixer2BGKeyInput);
+	gKeyInputXpts.insert (NTV2_XptMixer2FGKeyInput);
+	gKeyInputXpts.insert (NTV2_XptMixer3BGKeyInput);
+	gKeyInputXpts.insert (NTV2_XptMixer3FGKeyInput);
+	gKeyInputXpts.insert (NTV2_XptMixer4BGKeyInput);
+	gKeyInputXpts.insert (NTV2_XptMixer4FGKeyInput);
+	gKeyInputXpts.insert (NTV2_XptCSC1KeyFromInput2);
+
 }
 
 void RoutingExpert::InitOutputXpt2WidgetIDs(void)
@@ -1458,6 +1557,24 @@ bool CNTV2SignalRouter::GetWidgetOutputs (const NTV2WidgetID inWidgetID, NTV2Out
 	outOutputs.clear();
 	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
 	return pExpert ? pExpert->GetWidgetOutputs(inWidgetID, outOutputs) : false;
+}
+
+bool CNTV2SignalRouter::IsRGBOnlyInputXpt (const NTV2InputXptID inInputXpt)
+{
+	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
+	return pExpert ? pExpert->IsRGBOnlyInputXpt(inInputXpt) : false;
+}
+
+bool CNTV2SignalRouter::IsYUVOnlyInputXpt (const NTV2InputXptID inInputXpt)
+{
+	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
+	return pExpert ? pExpert->IsYUVOnlyInputXpt(inInputXpt) : false;
+}
+
+bool CNTV2SignalRouter::IsKeyInputXpt (const NTV2InputXptID inInputXpt)
+{
+	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
+	return pExpert ? pExpert->IsKeyInputXpt(inInputXpt) : false;
 }
 
 

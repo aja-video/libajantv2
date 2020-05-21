@@ -137,15 +137,17 @@ This resynchronization requires restarting the audio engine, which often results
 
 @subsubsection	autocirctimebudget		Per-Frame “Time Budget”
 
+To prevent dropping frames, the application must stay within its per-frame “time budget”.
+
 -	The video frame rate determines the per-frame “time budget”.
--	If the budget is exceeded long enough, the application will drop frames.
+-	If the budget is exceeded long enough, the application <b><i>will</b></i> drop frames.
 -	The “time budget” is spent doing three things:
 	-	<b>DMA Transfer</b>: The elapsed time spent in the CNTV2Card::AutoCirculateTransfer function.
 	-	<b>Processing</b>: The elapsed time from the moment CNTV2Card::AutoCirculateTransfer returns and the next
 		time it’s about to be called (minus any <b>Waiting</b> time … see next item).
 	-	<b>Waiting</b>: The time spent waiting for a new frame to become ready to transfer from the device.
-		-	If the application has fallen behind (i.e. the <b>Buffer Level</b> exceeds 1), this time should be zero.
-		-	If the application has caught up, this time will be non-zero.
+		-	If the application has fallen behind (i.e. the <b>Buffer Level</b> exceeds 1), this wait time should be zero.
+		-	If the application has caught up, this wait time will be non-zero.
 -	It’s a good practice to add code that continuously measures the above quantities.
 -	The sum of the <b>Processing</b> and <b>DMA Transfer</b> times must remain within the per-frame “time budget”
 	(i.e. below frame time).
@@ -154,9 +156,9 @@ This resynchronization requires restarting the audio engine, which often results
 	-	trigger an event;
 	-	set an alarm;
 	-	etc.
--	Occasionally exceeding the “time budget” for a one or more frames can be tolerated…
-	-	if the application can catch up by sustained sub-frame-time DMA and frame processing, and…
-	-	the number of AutoCirculate device frame buffers is large enough to give the application
+-	Occasionally exceeding the “time budget” for one or more frames can be tolerated…
+	-	…if the application can catch up by sustained sub-frame-time DMA and frame processing, and…
+	-	…the number of AutoCirculate device frame buffers is large enough to give the application
 		time to catch up.
 
 
@@ -189,6 +191,8 @@ As long as the host application that’s transferring frames takes less than 33 
 to produce each frame, all will be well. If the host takes longer than 33 milliseconds to produce a frame, the <b>Transfer Frame</b>
 will start to fall behind, and the <b>Buffer Level</b> will decrease. If this is allowed to continue, the <b>Active Frame</b> will
 overtake the <b>Transfer Frame</b>, which will result in “dropped” frames that will end up being played more than once.
+
+The \ref autocirctimebudget discussed in the \ref autocirculatecapture section applies equally for playout.
 
 AutoCirculate assumes that the video and audio being transferred via CNTV2Card::AutoCirculateTransfer should be played together in-sync.
 It continuously monitors the sync, and if it detects a difference of more than about 10 milliseconds, it will resync the audio to the video.

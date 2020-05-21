@@ -1059,6 +1059,235 @@ static string VPIDStandardToString (const VPIDStandard inStd)
 	return "";
 }
 
+bool CNTV2VPID::VPIDStandardIsSingleLink (const VPIDStandard inStd)
+{
+	switch (inStd)
+	{
+		case VPIDStandard_483_576:
+		case VPIDStandard_483_576_540Mbs:
+		case VPIDStandard_720:
+		case VPIDStandard_1080:
+		case VPIDStandard_720_3Ga:
+		case VPIDStandard_1080_3Ga:
+		case VPIDStandard_720_3Gb:
+		case VPIDStandard_1080_3Gb:
+		case VPIDStandard_483_576_3Gb:
+		case VPIDStandard_VC2:
+		case VPIDStandard_VC2_Level65_270Mbs:
+		case VPIDStandard_FT_2048x1556_3Gb:
+		case VPIDStandard_2160_Single_6Gb:
+		case VPIDStandard_1080_Single_6Gb:
+		case VPIDStandard_1080_AFR_Single_6Gb:
+		case VPIDStandard_2160_Single_12Gb:
+		case VPIDStandard_1080_10_12_AFR_Single_12Gb:	return true;
+
+		case VPIDStandard_720_Stereo_3Gb:
+		case VPIDStandard_1080_Stereo_3Gb:
+		case VPIDStandard_483_576_1485Mbs:
+		case VPIDStandard_720_Stereo_3Ga:
+		case VPIDStandard_1080_Stereo_3Ga:
+//		case VPIDStandard_483_576_360Mbs:
+		case VPIDStandard_483_576_DualLink:
+		case VPIDStandard_1080_DualLink:
+		case VPIDStandard_1080_DualLink_3Gb:
+		case VPIDStandard_1080_QuadLink:
+		case VPIDStandard_1080_Stereo_DualLink_3Gb:
+		case VPIDStandard_1080_Dual_3Ga:
+		case VPIDStandard_1080_Dual_3Gb:
+		case VPIDStandard_2160_DualLink:
+		case VPIDStandard_2160_QuadLink_3Ga:
+		case VPIDStandard_2160_QuadDualLink_3Gb:
+		case VPIDStandard_1080_Stereo_Quad_3Ga:
+		case VPIDStandard_1080_Stereo_Quad_3Gb:
+		case VPIDStandard_2160_Stereo_Quad_3Gb:
+		case VPIDStandard_1080_OctLink:
+		case VPIDStandard_UHDTV1_Single_DualLink_10Gb:
+		case VPIDStandard_UHDTV2_Quad_OctaLink_10Gb:
+		case VPIDStandard_UHDTV1_MultiLink_10Gb:
+		case VPIDStandard_UHDTV2_MultiLink_10Gb:
+		case VPIDStandard_720_1080_Stereo:
+		case VPIDStandard_4K_DCPIF_FSW709_10Gbs:
+		case VPIDStandard_FT_2048x1556_Dual:
+		case VPIDStandard_4320_DualLink_12Gb:
+		case VPIDStandard_2160_DualLink_12Gb:
+		case VPIDStandard_4320_QuadLink_12Gb:
+		default:	break;
+	}
+	return false;
+}
+
+bool CNTV2VPID::VPIDStandardIsDualLink (const VPIDStandard inStd)
+{
+	switch (inStd)
+	{
+		case VPIDStandard_720_Stereo_3Gb:
+		case VPIDStandard_1080_Stereo_3Gb:
+		case VPIDStandard_483_576_1485Mbs:
+		case VPIDStandard_720_Stereo_3Ga:
+		case VPIDStandard_1080_Stereo_3Ga:
+//		case VPIDStandard_483_576_360Mbs:
+		case VPIDStandard_483_576_DualLink:
+		case VPIDStandard_1080_DualLink:
+		case VPIDStandard_1080_DualLink_3Gb:
+		case VPIDStandard_1080_Stereo_DualLink_3Gb:
+		case VPIDStandard_1080_Dual_3Ga:
+		case VPIDStandard_1080_Dual_3Gb:
+		case VPIDStandard_2160_DualLink:
+		case VPIDStandard_2160_QuadDualLink_3Gb:
+		case VPIDStandard_UHDTV1_Single_DualLink_10Gb:
+		case VPIDStandard_FT_2048x1556_Dual:
+		case VPIDStandard_4320_DualLink_12Gb:
+		case VPIDStandard_2160_DualLink_12Gb:
+		case VPIDStandard_4320_QuadLink_12Gb:	return true;
+
+		case VPIDStandard_483_576:
+		case VPIDStandard_483_576_540Mbs:
+		case VPIDStandard_720:
+		case VPIDStandard_1080:
+		case VPIDStandard_720_3Ga:
+		case VPIDStandard_1080_3Ga:
+		case VPIDStandard_720_3Gb:
+		case VPIDStandard_1080_3Gb:
+		case VPIDStandard_483_576_3Gb:
+		case VPIDStandard_VC2:
+		case VPIDStandard_VC2_Level65_270Mbs:
+		case VPIDStandard_FT_2048x1556_3Gb:
+		case VPIDStandard_2160_Single_6Gb:
+		case VPIDStandard_1080_Single_6Gb:
+		case VPIDStandard_1080_AFR_Single_6Gb:
+		case VPIDStandard_2160_Single_12Gb:
+		case VPIDStandard_1080_10_12_AFR_Single_12Gb:
+		case VPIDStandard_1080_QuadLink:
+		case VPIDStandard_2160_QuadLink_3Ga:
+		case VPIDStandard_1080_Stereo_Quad_3Ga:
+		case VPIDStandard_1080_Stereo_Quad_3Gb:
+		case VPIDStandard_2160_Stereo_Quad_3Gb:
+		case VPIDStandard_1080_OctLink:
+		case VPIDStandard_UHDTV2_Quad_OctaLink_10Gb:
+		case VPIDStandard_UHDTV1_MultiLink_10Gb:
+		case VPIDStandard_UHDTV2_MultiLink_10Gb:
+		case VPIDStandard_720_1080_Stereo:
+		case VPIDStandard_4K_DCPIF_FSW709_10Gbs:
+		default:	break;
+	}
+	return false;
+}
+
+bool CNTV2VPID::VPIDStandardIsQuadLink (const VPIDStandard inStd)
+{
+	switch (inStd)
+	{
+		case VPIDStandard_2160_QuadDualLink_3Gb:
+		case VPIDStandard_1080_QuadLink:
+		case VPIDStandard_2160_QuadLink_3Ga:
+		case VPIDStandard_1080_Stereo_Quad_3Ga:
+		case VPIDStandard_1080_Stereo_Quad_3Gb:
+		case VPIDStandard_2160_Stereo_Quad_3Gb:
+		case VPIDStandard_UHDTV2_Quad_OctaLink_10Gb:
+		case VPIDStandard_4320_QuadLink_12Gb:		return true;
+
+		case VPIDStandard_720_Stereo_3Gb:
+		case VPIDStandard_1080_Stereo_3Gb:
+		case VPIDStandard_483_576_1485Mbs:
+		case VPIDStandard_720_Stereo_3Ga:
+		case VPIDStandard_1080_Stereo_3Ga:
+//		case VPIDStandard_483_576_360Mbs:
+		case VPIDStandard_483_576_DualLink:
+		case VPIDStandard_1080_DualLink:
+		case VPIDStandard_1080_DualLink_3Gb:
+		case VPIDStandard_1080_Stereo_DualLink_3Gb:
+		case VPIDStandard_1080_Dual_3Ga:
+		case VPIDStandard_1080_Dual_3Gb:
+		case VPIDStandard_2160_DualLink:
+		case VPIDStandard_UHDTV1_Single_DualLink_10Gb:
+		case VPIDStandard_FT_2048x1556_Dual:
+		case VPIDStandard_4320_DualLink_12Gb:
+		case VPIDStandard_2160_DualLink_12Gb:
+		case VPIDStandard_483_576:
+		case VPIDStandard_483_576_540Mbs:
+		case VPIDStandard_720:
+		case VPIDStandard_1080:
+		case VPIDStandard_720_3Ga:
+		case VPIDStandard_1080_3Ga:
+		case VPIDStandard_720_3Gb:
+		case VPIDStandard_1080_3Gb:
+		case VPIDStandard_483_576_3Gb:
+		case VPIDStandard_VC2:
+		case VPIDStandard_VC2_Level65_270Mbs:
+		case VPIDStandard_FT_2048x1556_3Gb:
+		case VPIDStandard_2160_Single_6Gb:
+		case VPIDStandard_1080_Single_6Gb:
+		case VPIDStandard_1080_AFR_Single_6Gb:
+		case VPIDStandard_2160_Single_12Gb:
+		case VPIDStandard_1080_10_12_AFR_Single_12Gb:
+		case VPIDStandard_1080_OctLink:
+		case VPIDStandard_UHDTV1_MultiLink_10Gb:
+		case VPIDStandard_UHDTV2_MultiLink_10Gb:
+		case VPIDStandard_720_1080_Stereo:
+		case VPIDStandard_4K_DCPIF_FSW709_10Gbs:
+		default:	break;
+	}
+	return false;
+}
+
+bool CNTV2VPID::VPIDStandardIsOctLink (const VPIDStandard inStd)
+{
+	switch (inStd)
+	{
+		case VPIDStandard_UHDTV2_Quad_OctaLink_10Gb:
+		case VPIDStandard_1080_OctLink:		return true;
+
+		case VPIDStandard_2160_QuadDualLink_3Gb:
+		case VPIDStandard_1080_QuadLink:
+		case VPIDStandard_2160_QuadLink_3Ga:
+		case VPIDStandard_1080_Stereo_Quad_3Ga:
+		case VPIDStandard_1080_Stereo_Quad_3Gb:
+		case VPIDStandard_2160_Stereo_Quad_3Gb:
+		case VPIDStandard_4320_QuadLink_12Gb:
+		case VPIDStandard_720_Stereo_3Gb:
+		case VPIDStandard_1080_Stereo_3Gb:
+		case VPIDStandard_483_576_1485Mbs:
+		case VPIDStandard_720_Stereo_3Ga:
+		case VPIDStandard_1080_Stereo_3Ga:
+//		case VPIDStandard_483_576_360Mbs:
+		case VPIDStandard_483_576_DualLink:
+		case VPIDStandard_1080_DualLink:
+		case VPIDStandard_1080_DualLink_3Gb:
+		case VPIDStandard_1080_Stereo_DualLink_3Gb:
+		case VPIDStandard_1080_Dual_3Ga:
+		case VPIDStandard_1080_Dual_3Gb:
+		case VPIDStandard_2160_DualLink:
+		case VPIDStandard_UHDTV1_Single_DualLink_10Gb:
+		case VPIDStandard_FT_2048x1556_Dual:
+		case VPIDStandard_4320_DualLink_12Gb:
+		case VPIDStandard_2160_DualLink_12Gb:
+		case VPIDStandard_483_576:
+		case VPIDStandard_483_576_540Mbs:
+		case VPIDStandard_720:
+		case VPIDStandard_1080:
+		case VPIDStandard_720_3Ga:
+		case VPIDStandard_1080_3Ga:
+		case VPIDStandard_720_3Gb:
+		case VPIDStandard_1080_3Gb:
+		case VPIDStandard_483_576_3Gb:
+		case VPIDStandard_VC2:
+		case VPIDStandard_VC2_Level65_270Mbs:
+		case VPIDStandard_FT_2048x1556_3Gb:
+		case VPIDStandard_2160_Single_6Gb:
+		case VPIDStandard_1080_Single_6Gb:
+		case VPIDStandard_1080_AFR_Single_6Gb:
+		case VPIDStandard_2160_Single_12Gb:
+		case VPIDStandard_1080_10_12_AFR_Single_12Gb:
+		case VPIDStandard_UHDTV1_MultiLink_10Gb:
+		case VPIDStandard_UHDTV2_MultiLink_10Gb:
+		case VPIDStandard_720_1080_Stereo:
+		case VPIDStandard_4K_DCPIF_FSW709_10Gbs:
+		default:	break;
+	}
+	return false;
+}
+
+
 static const string sVPIDPictureRate[]	= {	"None", "Reserved1", "23.98", "24.00", "47.95", "25.00", "29.97", "30.00", "48.00", "50.00", "59.94", "60.00",
 											"ReservedC",    "ReservedD",    "ReservedE",    "ReservedF"	};
 static const string sVPIDSampling[]		= {	"YCbCr 4:2:2",	"YCbCr 4:4:4",	"GBR 4:4:4",	"YCbCr 4:2:0",	"YCbCrA 4:2:2:4",	"YCbCrA 4:4:4:4",
@@ -1085,6 +1314,7 @@ ostream & CNTV2VPID::Print (ostream & ostrm) const
 				<< " rate=" << sVPIDPictureRate[GetPictureRate()]
 				<< " samp=" << sVPIDSampling[GetSampling()]
 				<< " chan=" << sVPIDChannel[GetChannel()]
+				<< " links=" << (VPIDStandardIsSingleLink(GetStandard()) ? "1" : "mult")
 				//<< " dynRange=" << sVPIDDynamicRange[GetDynamicRange()]
 				<< " bitd=" << sVPIDBitDepth[GetBitDepth()]
 				<< " 3Ga=" << YesNo(IsStandard3Ga())
