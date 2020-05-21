@@ -247,13 +247,15 @@ int main (int argc, const char ** argv)
 		else if (keyPressed >= '1' && keyPressed <= '9')
 			ccGrabber.SetCaptionDisplayChannel(NTV2Line21Channel(keyPressed - '1'));
 		else if (keyPressed == '?')
-			cerr << endl << "## HELP:  1=CC1 2=CC2 3=CC3 4=CC4 5=Txt1 6=Txt2 7=Txt3 8=Txt4 Q=Quit H=HUD O=Output S=608Src ?=Help" << endl;
+			cerr << endl << "## HELP:  1=CC1 2=CC2 3=CC3 4=CC4 5=Txt1 6=Txt2 7=Txt3 8=Txt4 Q=Quit H=HUD O=Output S=608Src P=PixFmt ?=Help" << endl;
 		else if (keyPressed == 'h' || keyPressed == 'H')
 			ccGrabber.ToggleHUD();
 		else if (keyPressed == 'v' || keyPressed == 'V')
 			ccGrabber.ToggleVANC();
 		else if (keyPressed == 'o' || keyPressed == 'O')
 			ccGrabber.SwitchOutput();
+		else if (keyPressed == 'p' || keyPressed == 'P')
+			ccGrabber.SwitchPixelFormat();
 		else if (keyPressed == 's' || keyPressed == 'S')
 			ccGrabber.Switch608Source();
 		AJATime::Sleep(500);

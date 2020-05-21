@@ -181,6 +181,7 @@ class NTV2CCGrabber
 		virtual void			ToggleVANC (void);			///< @brief	Toggles the use of VANC. (Debug, experimental)
 		virtual void			SwitchOutput(void);			///< @brief	Switches/rotates --output mode.
 		virtual void			Switch608Source(void);		///< @brief	Switches/rotates --608src.
+		virtual void			SwitchPixelFormat(void);	///< @brief	Switches/rotates --pixelFormat.
 
 	//	Protected Instance Methods
 	protected:
@@ -196,8 +197,9 @@ class NTV2CCGrabber
 
 		/**
 			@brief	Sets up board routing for capture (and sets the output standard based on the given video format).
+			@param[in]	inVideoFormat	Specifies the video format in use.
 		**/
-		virtual void			RouteInputSignal (void);
+		virtual void			RouteInputSignal (const NTV2VideoFormat inVideoFormat);
 
 		/**
 			@brief	Sets the device output standard based on the given video format.
@@ -240,12 +242,6 @@ class NTV2CCGrabber
 			@param[in]	inVideoFormat	Specifies the current video format of the captured video.
 		**/
 		virtual void			ExtractClosedCaptionData (const uint32_t inFrameCount, const NTV2VideoFormat inVideoFormat);
-
-
-		/**
-			@brief	Returns the address of the first line of captured video data in the host frame buffer.
-		**/
-		virtual const UByte *	GetVideoData (void) const;
 
 
 		/**
@@ -325,6 +321,7 @@ class NTV2CCGrabber
 		NTV2AudioSystem				mAudioSystem;		///< @brief	The audio system I'm using
 		NTV2VANCMode				mVancMode;			///< @brief	Actual NTV2VANCMode in use
 		bool						mGlobalQuit;		///< @brief	Set "true" to gracefully stop
+		bool						mSquares;			///< @brief	Is capturing square-division? (i.e. not TSI)
 		std::string					mLastOutStr;		///< @brief	Last thing I emitted to cout
 		uint32_t					mFirstOutFrame;		///< @brief	First frame number for output
 		uint32_t					mLastOutFrame;		///< @brief	Last frame number for output
