@@ -1119,17 +1119,11 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 	//	Enable the required framestore(s)...
 	//
 	if (NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
-	{
 		mActiveFrameStores = ::NTV2MakeChannelSet(mConfig.fOutputChannel, mConfig.fSquareDivision ? 4 : 2);
-		mDevice.SetMultiFormatMode(true);
-	}
 	else
-		for (UWord num(0);  num < ::NTV2DeviceGetNumFrameStores(mDeviceID);  num++)
-			if (::GetNTV2ChannelForIndex(num) == mConfig.fOutputChannel)
-				mActiveFrameStores.insert(mConfig.fOutputChannel);
-			else if (!mConfig.fDoMultiFormat)	//	Disable unused framestores in uniformat mode...
-				mDevice.DisableChannel(::GetNTV2ChannelForIndex(num));
-	mDevice.EnableChannels(mActiveFrameStores);
+		mActiveFrameStores.insert(mConfig.fOutputChannel);
+	mDevice.EnableChannels (mActiveFrameStores,
+							!mConfig.fDoMultiFormat);	//	Disable other channels if not MultiFormat mode
 
 	//
 	//	Set video format/standard...
@@ -1137,8 +1131,7 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 	if (!::NTV2DeviceCanDoVideoFormat(mDeviceID, mConfig.fVideoFormat))
 		{cerr << "## ERROR:  '" << ::NTV2VideoFormatToString(mConfig.fVideoFormat) << "' not supported" << endl;  return AJA_STATUS_UNSUPPORTED;}
 	mVideoStandard = ::GetNTV2StandardFromVideoFormat(mConfig.fVideoFormat);
-	for (NTV2ChannelSetConstIter it(mActiveFrameStores.begin());  it != mActiveFrameStores.end();  ++it)
-		mDevice.SetVideoFormat (mConfig.fVideoFormat, AJA_RETAIL_DEFAULT, /*keepVANC*/false, *it);
+	mDevice.SetVideoFormat (mActiveFrameStores, mConfig.fVideoFormat, AJA_RETAIL_DEFAULT);
 	if (!NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
 		{}
 	else if (mConfig.fSquareDivision)
@@ -1152,9 +1145,8 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
 		{cerr << "## ERROR:  '" << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << "' not supported" << endl;  return AJA_STATUS_UNSUPPORTED;}
 	if (mConfig.fForceVanc  &&  ::IsRGBFormat(mConfig.fPixelFormat) != mConfig.fDualLinkRGB)
-		{cerr << "## ERROR:  Routing thru CSC will corrupt VANC lines" << endl;  return AJA_STATUS_UNSUPPORTED;}
-	for (NTV2ChannelSetConstIter it(mActiveFrameStores.begin());  it != mActiveFrameStores.end();  ++it)
-		mDevice.SetFrameBufferFormat (*it, mConfig.fPixelFormat);
+		{cerr << "## ERROR:  Routing thru CSC will corrupt VANC in frame buffer" << endl;  return AJA_STATUS_UNSUPPORTED;}
+	mDevice.SetFrameBufferFormat (mActiveFrameStores, mConfig.fPixelFormat);
 	if (!mConfig.fForceVanc)
 		if (mConfig.fOutputChannel != ::NTV2OutputDestinationToChannel(mConfig.fOutputDestination))
 		{
@@ -1326,7 +1318,8 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 		if (mConfig.fSquareDivision)	//	YUVFrameStore  ==>  SDIOut
 			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx)), sdiOut(sdiOutputs.at(ndx));
-				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut),  ::GetFrameBufferOutputXptFromChannel(frmSt)));
+				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut),
+														::GetFrameBufferOutputXptFromChannel(frmSt)));
 				//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mConnections);
 				//  Disable SDI output conversions
 				mDevice.SetSDIOutLevelAtoLevelBConversion(sdiOut, false);
@@ -1608,14 +1601,16 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	if (!mConfig.fSuppressAudio)
 	{
 		//	Audio setup...
-		audioSystem = (::NTV2DeviceGetNumAudioSystems (mDeviceID) > 1)  ?  ::NTV2ChannelToAudioSystem(mConfig.fOutputChannel)  :  NTV2_AUDIOSYSTEM_1;
-		mDevice.SetNumberAudioChannels (::NTV2DeviceGetMaxAudioChannels (mDeviceID), audioSystem);	//	Use all possible audio channels
-		mDevice.GetNumberAudioChannels (numAudioChannels, audioSystem);		//	Get actual number of audio channels in use
-		mDevice.SetAudioRate (NTV2_AUDIO_48K, audioSystem);					//	48kHz sample rate
-		mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, audioSystem);	//	Use 4MB output buffer
+		audioSystem = (::NTV2DeviceGetNumAudioSystems(mDeviceID) > 1)  ?  ::NTV2ChannelToAudioSystem(mConfig.fOutputChannel)  :  NTV2_AUDIOSYSTEM_1;
+		numAudioChannels = ::NTV2DeviceGetMaxAudioChannels(mDeviceID);
+		if (NTV2_IS_4K_4096_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  numAudioChannels > 8)
+			numAudioChannels = 8;	//	2K/4096-pixel lines have narrower HANC space & can't handle 16 channels
+		mDevice.SetNumberAudioChannels (numAudioChannels, audioSystem);		//	Config audio: # channels
+		mDevice.SetAudioRate (NTV2_AUDIO_48K, audioSystem);					//	Config audio: 48kHz sample rate
+		mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, audioSystem);	//	Config audio: Use 4MB output buffer
 		mDevice.SetSDIOutputAudioSystem (mConfig.fOutputChannel, audioSystem);		//	Set output DS1 audio embedders to use designated audio system
 		mDevice.SetSDIOutputDS2AudioSystem (mConfig.fOutputChannel, audioSystem);	//	Set output DS2 audio embedders to use designated audio system
-		mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_OFF, audioSystem);	//	Disable loopback, since not E-E mode
+		mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_OFF, audioSystem);	//	Config audio: Disable loopback (not E-E)
 		pAudioBuffer.Allocate(AUDIOBYTES_MAX_48K);							//	Allocate audio buffer (large enough for one frame's audio)
 		pAudioBuffer.Fill(UByte(0));										//	Zero audio buffer
 		if (!mConfig.fDoMultiFormat)
