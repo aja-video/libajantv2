@@ -20,7 +20,7 @@ bool CNTV2Card::GetCurrentInterruptMasks (NTV2InterruptMask & outIntMask1, NTV2I
 bool CNTV2Card::EnableInterrupt			(const INTERRUPT_ENUMS inInterruptCode)	{return ConfigureInterrupt (true, inInterruptCode);}
 bool CNTV2Card::EnableOutputInterrupt	(const NTV2Channel channel)				{return EnableInterrupt (gChannelToOutputInterrupt [channel]);}
 bool CNTV2Card::EnableInputInterrupt	(const NTV2Channel channel)				{return EnableInterrupt (gChannelToInputInterrupt [channel]);}
-bool CNTV2Card::EnableInputInterrupt	(const NTV2ChannelSet inFrameStores)
+bool CNTV2Card::EnableInputInterrupt	(const NTV2ChannelSet & inFrameStores)
 {
 	UWord failures(0);
 	for (NTV2ChannelSetConstIter it(inFrameStores.begin());  it != inFrameStores.end();  ++it)
@@ -37,7 +37,7 @@ bool CNTV2Card::DisableInterrupt		(const INTERRUPT_ENUMS inInterruptCode)
 }
 bool CNTV2Card::DisableOutputInterrupt	(const NTV2Channel channel)				{return DisableInterrupt (gChannelToOutputInterrupt [channel]);}
 bool CNTV2Card::DisableInputInterrupt	(const NTV2Channel channel)				{return DisableInterrupt (gChannelToInputInterrupt [channel]);}
-bool CNTV2Card::DisableInputInterrupt	(const NTV2ChannelSet inFrameStores)
+bool CNTV2Card::DisableInputInterrupt	(const NTV2ChannelSet & inFrameStores)
 {
 	UWord failures(0);
 	for (NTV2ChannelSetConstIter it(inFrameStores.begin());  it != inFrameStores.end();  ++it)

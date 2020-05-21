@@ -868,7 +868,20 @@ public:
 					frame geometry (e.g., 1920x1080, 720x486, etc.) and frame rate (e.g., 59.94 fps, 29.97 fps, etc.),
 					plus a few other settings (e.g., progressive/interlaced, etc.), all based on the given video format.
 	**/
-	AJA_VIRTUAL bool	SetVideoFormat (NTV2VideoFormat inVideoFormat, bool inIsAJARetail = AJA_RETAIL_DEFAULT, bool inKeepVancSettings = false, NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool	SetVideoFormat (const NTV2VideoFormat inVideoFormat, const bool inIsAJARetail = AJA_RETAIL_DEFAULT, const bool inKeepVancSettings = false, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief		Sets the video format for one or more FrameStores.
+		@param[in]	inFrameStores			Specifies the Frame Store(s) of interest as a channel-set (a set of zero-based index numbers).
+		@param[in]	inVideoFormat			Specifies the desired video format. It must be a valid ::NTV2VideoFormat constant.
+		@param[in]	inIsAJARetail			Specify 'true' to preserve the current horizontal and vertical timing settings.
+											Defaults to true on MacOS, false on other platforms.
+		@return		True if successful; otherwise false.
+		@details	This function changes the device configuration to a specific video standard (e.g., 525, 1080, etc.),
+					frame geometry (e.g., 1920x1080, 720x486, etc.) and frame rate (e.g., 59.94 fps, 29.97 fps, etc.),
+					plus a few other settings (e.g., progressive/interlaced, etc.), all based on the given video format.
+	**/
+	AJA_VIRTUAL bool	SetVideoFormat (const NTV2ChannelSet & inFrameStores, const NTV2VideoFormat inVideoFormat, const bool inIsAJARetail = AJA_RETAIL_DEFAULT);
 
 	/**
 		@brief		Sets the frame geometry of the given channel.
@@ -916,7 +929,7 @@ public:
 					by the frame store(s) on an AJA device. This is important, because when frames are transferred
 					between the host and the AJA device, the frame data format is presumed to be identical.
 	**/
-	AJA_VIRTUAL bool	SetFrameBufferFormat (const NTV2ChannelSet inFrameStores,
+	AJA_VIRTUAL bool	SetFrameBufferFormat (const NTV2ChannelSet & inFrameStores,
 											  const NTV2FrameBufferFormat inNewFormat,
 											  const bool inIsAJARetail = AJA_RETAIL_DEFAULT,
 											  const NTV2HDRXferChars inXferChars = NTV2_VPID_TC_SDR_TV,
@@ -1349,6 +1362,7 @@ public:
 
 	AJA_VIRTUAL bool		SetEnableVANCData (const bool inVANCenabled, const bool inTallerVANC, const NTV2Standard inStandard, const NTV2FrameGeometry inGeometry, const NTV2Channel inChannel = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool		SetEnableVANCData (const bool inVANCenabled, const bool inTallerVANC = false, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		SetEnableVANCData (const NTV2ChannelSet & inChannels, const bool inVANCenable, const bool inTallerVANC = false);
 
 	/**
 		@brief		Sets the VANC mode for the given Frame Store.
@@ -3009,7 +3023,7 @@ public:
 		@param[in]	inFrameStores	The input frameStore(s) of interest.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	EnableInputInterrupt (const NTV2ChannelSet inFrameStores);
+	AJA_VIRTUAL bool	EnableInputInterrupt (const NTV2ChannelSet & inFrameStores);
 
 
 	//
@@ -3039,7 +3053,7 @@ public:
 		@param[in]	channel		Specifies the frameStore(s) of interest.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	DisableInputInterrupt (const NTV2ChannelSet inFrameStores);
+	AJA_VIRTUAL bool	DisableInputInterrupt (const NTV2ChannelSet & inFrameStores);
 
 	AJA_VIRTUAL bool	GetCurrentInterruptMasks (NTV2InterruptMask & outIntMask1, NTV2Interrupt2Mask & outIntMask2);
 
@@ -3076,7 +3090,7 @@ public:
 					CNTV2Card::WaitForOutputVerticalInterrupt or CNTV2Card::WaitForOutputFieldID.
 		@see		CNTV2Card::UnsubscribeOutputVerticalEvents, CNTV2Card::SubscribeEvent, \ref fieldframeinterrupts
 	**/
-	AJA_VIRTUAL bool	SubscribeOutputVerticalEvent (const NTV2ChannelSet inChannels);
+	AJA_VIRTUAL bool	SubscribeOutputVerticalEvent (const NTV2ChannelSet & inChannels);
 
 
 	/**
@@ -3099,7 +3113,7 @@ public:
 					CNTV2Card::WaitForInputVerticalInterrupt or CNTV2Card::WaitForInputFieldID.
 		@see		CNTV2Card::UnsubscribeInputVerticalEvent, CNTV2Card::SubscribeEvent, \ref fieldframeinterrupts
 	**/
-	AJA_VIRTUAL bool	SubscribeInputVerticalEvent (const NTV2ChannelSet inChannels);
+	AJA_VIRTUAL bool	SubscribeInputVerticalEvent (const NTV2ChannelSet & inChannels);
 
 
 	//
@@ -3129,7 +3143,7 @@ public:
 		@details	This function undoes the effect of a prior call to SubscribeOutputVerticalEvents.
 		@see		CNTV2Card::SubscribeOutputVerticalEvents, CNTV2Card::UnsubscribeEvent, \ref fieldframeinterrupts
 	**/
-	AJA_VIRTUAL bool	UnsubscribeOutputVerticalEvent (const NTV2ChannelSet inChannels);
+	AJA_VIRTUAL bool	UnsubscribeOutputVerticalEvent (const NTV2ChannelSet & inChannels);
 
 	/**
 		@brief		Unregisters me so I'm no longer notified when an input VBI is signaled on the given input channel.
@@ -3147,7 +3161,7 @@ public:
 		@details	This function undoes the effects of a prior call to SubscribeInputVerticalEvents.
 		@see		CNTV2Card::SubscribeInputVerticalEvents, CNTV2Card::UnsubscribeEvent, \ref fieldframeinterrupts
 	**/
-	AJA_VIRTUAL bool	UnsubscribeInputVerticalEvent (const NTV2ChannelSet inChannels);
+	AJA_VIRTUAL bool	UnsubscribeInputVerticalEvent (const NTV2ChannelSet & inChannels);
 
 
 	//
@@ -4043,7 +4057,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@note		It is not an error to disable a frame store that is already disabled.
 	**/
-	AJA_VIRTUAL bool	DisableChannels (const NTV2ChannelSet inChannels);
+	AJA_VIRTUAL bool	DisableChannels (const NTV2ChannelSet & inChannels);
 
 	/**
 		@brief		Enables the given frame store.
@@ -4055,11 +4069,14 @@ public:
 
 	/**
 		@brief		Enables the given frame store(s).
-		@param[in]	inChannels	Specifies the frame store(s) to be enabled.
+		@param[in]	inChannels			Specifies the frame store(s) to be enabled.
+		@param[in]	inDisableOthers		If true, disables all other FrameStores on the device.
+										Otherwise, leaves other FrameStores untouched.
+										Defaults to false.
 		@return		True if successful;  otherwise false.
 		@note		It is not an error to enable a frame store that is already enabled.
 	**/
-	AJA_VIRTUAL bool	EnableChannels (const NTV2ChannelSet inChannels);
+	AJA_VIRTUAL bool	EnableChannels (const NTV2ChannelSet & inChannels, const bool inDisableOthers = false);
 
 	/**
 		@brief		Answers whether or not the given frame store is enabled.
@@ -5719,7 +5736,7 @@ public:
 					input.
 		@see		::NTV2DeviceHasBiDirectionalSDI, \ref devicesignalinputsoutputs
 	**/
-	AJA_VIRTUAL bool		SetSDITransmitEnable (const NTV2ChannelSet inSDIConnectors, const bool inEnable);
+	AJA_VIRTUAL bool		SetSDITransmitEnable (const NTV2ChannelSet & inSDIConnectors, const bool inEnable);
 
 	/**
 		@brief		Answers whether or not the specified SDI connector is currently acting as a transmitter
@@ -6343,6 +6360,12 @@ public:
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool		GetDieTemperature (double & outTemp, const NTV2DieTempScale inTempScale = NTV2DieTempScale_Celsius);
+
+	/**
+		@brief		Reads the current "Vcc" voltage of the device.
+		@param[out]	outVoltage		Receives the "Vcc" voltage that was read from the device.
+		@return		True if successful;  otherwise false.
+	**/
 	AJA_VIRTUAL bool		GetDieVoltage (double & outVoltage);
 	///@}
 public:

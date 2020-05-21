@@ -56,7 +56,7 @@ public:
 	virtual AJALabelValuePairs &	GetInfo (AJALabelValuePairs & outInfo) const;
 	virtual NTV2VPIDXferChars		GetTransferCharacteristics (void) const;
 	virtual NTV2VPIDColorimetry		GetColorimetry (void) const;
-	virtual NTV2VPIDLuminance		GetLuminance (void) const;				
+	virtual NTV2VPIDLuminance		GetLuminance (void) const;
 	virtual std::ostream &			Print (std::ostream & ostrm) const;
 	virtual std::string				AsString (const bool inTabular = false) const;
 	///@}
@@ -126,15 +126,19 @@ public:
 											const NTV2VPIDColorimetry	inColorimetry = NTV2_VPID_Color_Rec709,
 											const NTV2VPIDLuminance	inLuminance = NTV2_VPID_Luminance_YCbCr);
 
-	static const std::string VersionString		(const VPIDVersion version);
-	static const std::string StandardString		(const VPIDStandard std);
-	static const std::string PictureRateString	(const VPIDPictureRate rate);
-	static const std::string SamplingString		(const VPIDSampling sample);
-	static const std::string ChannelString		(const VPIDChannel chan);
-	static const std::string DynamicRangeString	(const VPIDDynamicRange range);
-	static const std::string BitDepthString		(const VPIDBitDepth depth);
-	static const std::string LinkString			(const VPIDLink link);
-	static const std::string AudioString		(const VPIDAudio audio);
+	static const std::string	VersionString				(const VPIDVersion version);
+	static const std::string	StandardString				(const VPIDStandard std);
+	static const std::string	PictureRateString			(const VPIDPictureRate rate);
+	static const std::string	SamplingString				(const VPIDSampling sample);
+	static const std::string	ChannelString				(const VPIDChannel chan);
+	static const std::string	DynamicRangeString			(const VPIDDynamicRange range);
+	static const std::string	BitDepthString				(const VPIDBitDepth depth);
+	static const std::string	LinkString					(const VPIDLink link);
+	static const std::string	AudioString					(const VPIDAudio audio);
+	static bool					VPIDStandardIsSingleLink	(const VPIDStandard inStd);
+	static bool					VPIDStandardIsDualLink		(const VPIDStandard inStd);
+	static bool					VPIDStandardIsQuadLink		(const VPIDStandard inStd);
+	static bool					VPIDStandardIsOctLink		(const VPIDStandard inStd);
 	#if !defined (NTV2_DEPRECATE)
 		virtual VPIDDynamicRange NTV2_DEPRECATED_f(GetDynamicRange (void) const);
 		virtual void NTV2_DEPRECATED_f(SetDynamicRange (const VPIDDynamicRange inDynamicRange));	
