@@ -441,6 +441,24 @@ class AJAExport CNTV2SignalRouter
 		static bool					GetConnectionsFromRegs (const NTV2InputXptIDSet & inInputXptIDs, const NTV2RegisterReads & inRegValues, NTV2XptConnections & outConnections);
 
 		/**
+			@param[in]	inInputXptID	Specifies the input crosspoint ID of interest.
+			@return		True if the input only accepts RGB;  otherwise false.
+		**/
+		static bool					IsRGBOnlyInputXpt (const NTV2InputXptID inInputXpt);
+
+		/**
+			@param[in]	inInputXptID	Specifies the input crosspoint ID of interest.
+			@return		True if the input only accepts YCbCr;  otherwise false.
+		**/
+		static bool					IsYUVOnlyInputXpt (const NTV2InputXptID inInputXpt);
+
+		/**
+			@param[in]	inInputXptID	Specifies the input crosspoint ID of interest.
+			@return		True if the input is a mask/key input;  otherwise false.
+		**/
+		static bool					IsKeyInputXpt (const NTV2InputXptID inInputXpt);
+
+		/**
 			@brief		Compares two sets of crosspoint connections.
 			@param[in]	inLHS		Specifies the input crosspoints.
 			@param[in]	inRHS		Specifies the crosspoint register values.
