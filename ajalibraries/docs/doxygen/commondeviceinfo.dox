@@ -1362,7 +1362,17 @@
 	an additional, separate firmware bitfile that bootstraps and operates it. This extra firmware is bundled into a “package” that is
 	also stored in (and loaded from) a separate partition in the EEPROM.
 
+	All NTV2 devices have two on-board LEDs that indicate readiness:
+	-#	<b>Power</b> — If the board has power, this will indicate <b>Green</b>; otherwise it won’t be lit.
+	-#	<b>FPGA Load State:</b>
+		-	<b>Green</b> — Normal firmware bitfile loaded successfully.
+		-	<b>Amber</b> — Fail-safe firmware bitfile loaded.
+		-	<b>Red</b> — FPGA not programmed; firmware load failed.
 
+	When operating normally, both LEDs will be <b>Green</b>.
+
+	@note	On the Io and T-Tap products, the LEDs are hidden inside the chassis and can’t be seen.
+ 
 	<hr size="50px">
 	@subsection	dev-firmware-loading	Loading Firmware
 
@@ -1408,7 +1418,7 @@
 	-	If the device still fails to show up, please <a href="https://sdksupport.aja.com/index.php?/Tickets/Submit">submit a Ticket</a>.
 
 	<b>“Warm Boot” Reload</b><br />
-	Some newer AJA devices are capable of reloading the FPGA upon a <b>PCIe Reset</b> -- aka a “warm boot”.
+	Some newer AJA devices are capable of reloading the FPGA upon a <b>PCIe Reset</b> — aka a “warm boot”.
 	-	To test if the device can do a “warm boot” FPGA reload, call CNTV2Card::CanWarmBootFPGA.
 	-	Note that AJA devices with Thunderbolt ports (e.g. \ref io4kplus ), or AJA boards installed on Thunderbolt PCIe
 		card-cages receive a <b>PCIe Reset</b> when the Thunderbolt cable is unplugged and subsequently reconnected.
