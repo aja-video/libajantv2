@@ -237,8 +237,9 @@ bool CNTV2Card::GetDefaultVideoOutMode(ULWord & outMode)
 // Method: SetVideoFormat
 // Input:  NTV2VideoFormat
 // Output: NONE
-bool CNTV2Card::SetVideoFormat (const NTV2VideoFormat value, const bool ajaRetail, const bool keepVancSettings, const NTV2Channel inChannel)
+bool CNTV2Card::SetVideoFormat (const NTV2VideoFormat value, const bool inIsRetail, const bool keepVancSettings, const NTV2Channel inChannel)
 {	AJA_UNUSED(keepVancSettings);
+	bool ajaRetail(inIsRetail);
 #ifdef  MSWindows
 	NTV2EveryFrameTaskMode mode;
 	GetEveryFrameServices(mode);
