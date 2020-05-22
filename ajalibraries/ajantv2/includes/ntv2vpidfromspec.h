@@ -37,7 +37,8 @@ typedef struct
 	bool					enableBT2020;			///< @brief	If true, the VPID will insert BT.2020 data.
 	NTV2VPIDTransferCharacteristics	transferCharacteristics;	///< @brief Describes the transfer characteristics
 	NTV2VPIDColorimetry		colorimetry;			///< @brief Describes the Colorimetry
-	NTV2VPIDLuminance		luminance;				///< @bried Describes the luminance and color difference
+	NTV2VPIDLuminance		luminance;				///< @brief Describes the luminance and color difference
+	bool					isMultiLink;			///< @brief If true, the video stream is 12G -> 3G multi-link
 } VPIDSpec;
 
 typedef enum

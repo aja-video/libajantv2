@@ -1937,6 +1937,10 @@ typedef enum
 	kK2RegMaskFrameBuffer7BInputSelect	= BIT(16)+BIT(17)+BIT(18)+BIT(19)+BIT(20)+BIT(21)+BIT(22)+BIT(23),
 	kK2RegMaskFrameBuffer8BInputSelect	= BIT(24)+BIT(25)+BIT(26)+BIT(27)+BIT(28)+BIT(29)+BIT(30)+BIT(31),
 
+	//kRegXptSelectGroup36
+	kK2RegMaskMultiLinkOut1InputSelect	= BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7),
+	kK2RegMaskMultiLinkOut1DS2InputSelect	= BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7),
+
 	//kK2RegCSCoefficients1_2
 	//kK2RegCSC2oefficients1_2,
 	//kK2RegCSC3oefficients1_2,
@@ -3102,6 +3106,10 @@ typedef enum
 	kK2RegShiftFrameBuffer2BInputSelect = 8,
 	kK2RegShiftFrameBuffer3BInputSelect = 16,
 	kK2RegShiftFrameBuffer4BInputSelect = 24,
+
+	//kRegXptSelectGroup36
+	kK2RegShiftMultiLinkOut1InputSelect = 0,
+	kK2RegShiftMultiLinkOut1DS2InputSelect = 8,
 
 	//kRegXptSelectGroup34
 	kK2RegShiftFrameBuffer5BInputSelect = 0,
