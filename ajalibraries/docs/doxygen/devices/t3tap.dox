@@ -4,14 +4,14 @@
 	@section		ntv2hwio
 
 	<hr>
-	@subsection		t3tap		T3-Tap
+	@subsection		ttappro		T-Tap Pro
 
-	This page describes the T3-Tap video playout device.
-	It’s identified by ::DEVICE_ID_T3TAP.
+	This page describes the T-Tap Pro video playout device.
+	It’s identified by ::DEVICE_ID_TTAP_PRO.
 
-	@image	html	t3tap.png
+	@image	html	ttappro.png
 
-	The T3-Tap has one Thunderbolt-3 input on the left side.
+	The T-Tap Pro has one Thunderbolt-3 input on the left side.
 	On the right side, it has one 12G SDI output, and one HDMI 2.0 output.
 
 	@par	PCI Interface
