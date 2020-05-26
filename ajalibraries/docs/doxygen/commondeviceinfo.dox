@@ -181,17 +181,21 @@
 	LTC, etc. — are generally identical across all AJA devices.
 
 	<b>SDI Input(s)</b>
-	-	AC-coupled input terminated with 75 ohms to ground
+	-	AC-coupled input terminated with 75Ω to ground
 	-	SMPTE 292 compliant — 800mV peak-to-peak ±10%
 
 	<b>SDI Output(s)</b>
-	-	AC-coupled output terminated with 75 ohms to ground
-	-	<b>Output Level:</b>  800mV peak-to-peak ±10%, terminated into 75 ohms
+	-	AC-coupled output terminated with 75Ω to ground
+	-	<b>Output Level:</b>  800mV peak-to-peak ±10%, terminated into 75Ω
 
 	<b>Video Reference Input(s)</b>
 	-	Analog video reference, NTSC, PAL, or tri-level sync
-	-	Active loop-through, input terminated by 75 ohms to ground
+	-	Input terminated by 75Ω to ground
 	-	<b>Input level:</b>  0.5 Volts peak-to-peak to 2.0 Volts peak-to-peak
+	-	Tri-level sync:
+		-	Analog Color Black (700 mV sync nominal, plus burst)
+		-	Composite Sync (700 mV sync nominal, plus burst and video)
+		-	HD Tri-Level Sync (±700 mV sync)
 
 	<b>Analog LTC Input(s)</b>
 	-	Designed to work with inverted or non-inverted inputs
@@ -203,12 +207,12 @@
 	-	Connector: Type-A (unless otherwise noted)
 
 	<b>AES Input(s)</b>
-	-	DC-coupled input terminated with 75 ohms to ground
+	-	DC-coupled input terminated with 75Ω to ground
 	-	<b>Minimum input level:</b>  100 mV peak-to-peak
 
 	<b>AES Output(s)</b>
-	-	AC-coupled output terminated with 75 ohms to ground
-	-	<b>Output level:</b>  1.55 Volts peak-to-peak, +/- 10%, terminated into 75 ohms
+	-	AC-coupled output terminated with 75Ω to ground
+	-	<b>Output level:</b>  1.55 Volts peak-to-peak, +/- 10%, terminated into 75Ω
 
 	<b>Analog Video Output(s)</b>
 	-	12-bit precision DAC output
