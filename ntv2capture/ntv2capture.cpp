@@ -237,11 +237,11 @@ void NTV2Capture::SetupHostBuffers (void)
 
 #ifdef NTV2_BUFFER_LOCK
 		// Page lock the memory
-		if (frameData.fVideoBuffer.GetHostPointer() != AJA_NULL)
+		if (frameData.fVideoBuffer)
 			mDevice.DMABufferLock(frameData.fVideoBuffer, true);
-		if (frameData.fAudioBuffer.GetHostPointer() != AJA_NULL)
+		if (frameData.fAudioBuffer)
 			mDevice.DMABufferLock(frameData.fAudioBuffer, true);
-		if (frameData.fAncBuffer.GetHostPointer() != AJA_NULL)
+		if (frameData.fAncBuffer)
 			mDevice.DMABufferLock(frameData.fAncBuffer, true);
 #endif
 	}	//	for each NTV2FrameData
