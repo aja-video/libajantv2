@@ -61,7 +61,7 @@ bool CNTV2BitfileManager::AddFile (const string & inBitfilePath)
         return false;
     if (Info.designVersion > 0xfe)
         return false;
-    if ((Info.bitfileID == 0) || (Info.bitfileID > 0xfe))
+	if ((Info.bitfileID > 0xfe))
         return false;
     if (Info.bitfileVersion > 0xfe)
         return false;
