@@ -103,7 +103,6 @@ There are several settings that are common to the device and apply to all inspec
 -	<b>Task Mode</b> — Indicates the device’s current task mode, and allows it to be changed by choosing a different setting.
 -	<b>Multi-Format Mode</b> — Indicates the device’s “multi-format” mode, and allows it to be changed by choosing a different setting.
 -	<b>Reference</b> — Indicates the device’s current clock reference setting, and allows it to be changed by choosing a different setting.
--	<b>FBSize</b> — Indicates the device’s current frame buffer size, and allows it to be changed by choosing a different setting.
 
 
 @par	Inspectors
