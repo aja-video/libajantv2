@@ -195,9 +195,9 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 	if (IsOpen()  &&  inDeviceIndexNumber == _boardNumber)
 	{
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-		if (hostName.empty()  &&  _remoteHandle == INVALID_NUB_HANDLE)
+		if (hostName.empty()  &&  !IsRemote())
 			return true;	//	Same local device requested, already open
-		if (_hostname == hostName  &&  _remoteHandle != INVALID_NUB_HANDLE)
+		if (_hostname == hostName  &&  IsRemote())
 			return true;	//	Same remote device requested, already open
 #else
 		return true;		//	Same local device requested, already open
@@ -360,7 +360,7 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 	// Read driver version (local devices only)...
 	uint16_t	drvrVersComps[4]	=	{0, 0, 0, 0};
 	ULWord		driverVersionRaw	(0);
-	if (_remoteHandle == INVALID_NUB_HANDLE  &&  !ReadRegister (kVRegDriverVersion, driverVersionRaw))
+	if (!IsRemote()  &&  !ReadRegister (kVRegDriverVersion, driverVersionRaw))
 		{WDIFAIL("ReadRegister(kVRegDriverVersion) failed");  Close();  return false;}
 	drvrVersComps[0] = uint16_t(NTV2DriverVersionDecode_Major(driverVersionRaw));	//	major
 	drvrVersComps[1] = uint16_t(NTV2DriverVersionDecode_Minor(driverVersionRaw));	//	minor
@@ -368,7 +368,7 @@ bool CNTV2WinDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 	drvrVersComps[3] = uint16_t(NTV2DriverVersionDecode_Build(driverVersionRaw));	//	build
 
 	//	Check driver version (local devices only)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 		;	//	Skip driver version comparison on remote devices
 	else if (!(AJA_NTV2_SDK_VERSION_MAJOR))
 		WDIWARN ("Driver version v" << DEC(drvrVersComps[0]) << "." << DEC(drvrVersComps[1]) << "." << DEC(drvrVersComps[2]) << "."
@@ -436,7 +436,7 @@ bool CNTV2WinDriverInterface::SetOverlappedMode (bool bOverlapped)
 bool CNTV2WinDriverInterface::Close()
 {
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		return CloseRemote();
 	}
@@ -584,7 +584,7 @@ bool CNTV2WinDriverInterface::ReadRegister(const ULWord registerNumber, ULWord &
 							   const ULWord registerShift)
 {
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		if (!CNTV2DriverInterface::ReadRegister(
 					registerNumber,
@@ -668,7 +668,7 @@ bool CNTV2WinDriverInterface::WriteRegister (ULWord registerNumber,ULWord regist
 	}
 #endif	//	defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		if (!CNTV2DriverInterface::WriteRegister(
 					registerNumber,
@@ -899,7 +899,7 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (INTERRUPT_ENUMS eInterruptType,
 												ULWord timeOutMs)
 {
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		return CNTV2DriverInterface::WaitForInterrupt(eInterruptType,timeOutMs);
 	}
@@ -1465,7 +1465,7 @@ bool CNTV2WinDriverInterface::MapMemory (PVOID pvUserVa, ULWord ulNumBytes, bool
 bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 {
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		if (!CNTV2DriverInterface::AutoCirculate(autoCircData))
 		{
@@ -2197,7 +2197,7 @@ CNTV2WinDriverInterface::DriverGetBitFileInformation(
 		NTV2BitFileType bitFileType)
 {
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		if (!CNTV2DriverInterface::DriverGetBitFileInformation(
 				bitFileInfo,

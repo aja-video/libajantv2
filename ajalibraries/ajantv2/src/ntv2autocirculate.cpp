@@ -934,7 +934,7 @@ bool CNTV2Card::AutoCirculateGetStatus (const NTV2Channel inChannel, AUTOCIRCULA
 
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	// Auto circulate status is not implemented in the NUB yet
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 		return false;
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	const bool result(NTV2Message(reinterpret_cast<NTV2_HEADER *>(&outStatus)));

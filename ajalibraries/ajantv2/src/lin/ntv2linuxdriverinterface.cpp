@@ -70,9 +70,9 @@ bool CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & h
 	if (IsOpen()  &&  inDeviceIndexNumber == _boardNumber)
 	{
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-		if (hostName.empty()  &&  _remoteHandle == INVALID_NUB_HANDLE)
+		if (hostName.empty()  &&  !IsRemote())
 			return true;	//	Same local device requested, already open
-		if (_hostname == hostName  &&  _remoteHandle != INVALID_NUB_HANDLE)
+		if (_hostname == hostName  &&  IsRemote())
 			return true;	//	Same remote device requested, already open
 #else
 		return true;		//	Same local device requested, already open
@@ -105,7 +105,7 @@ bool CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & h
 		_hDevice = open(boardStr.c_str(),O_RDWR);
 	}
 
-	if (_hDevice == INVALID_HANDLE_VALUE  &&  _remoteHandle == INVALID_NUB_HANDLE)
+	if (_hDevice == INVALID_HANDLE_VALUE  &&  !IsRemote())
 		{LDIFAIL("Failed to open '" << boardStr << "'");  return false;}
 
 	_boardNumber = inDeviceIndexNumber;
@@ -115,7 +115,7 @@ bool CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & h
 	// Read driver version (local devices only)...
 	uint16_t	drvrVersComps[4]	=	{0, 0, 0, 0};
 	ULWord		driverVersionRaw	(0);
-	if (_remoteHandle == INVALID_NUB_HANDLE  &&  !ReadRegister (kVRegDriverVersion, driverVersionRaw))
+	if (!IsRemote()  &&  !ReadRegister (kVRegDriverVersion, driverVersionRaw))
 		{LDIFAIL("ReadRegister(kVRegDriverVersion) failed");  Close();  return false;}
 	drvrVersComps[0] = uint16_t(NTV2DriverVersionDecode_Major(driverVersionRaw));	//	major
 	drvrVersComps[1] = uint16_t(NTV2DriverVersionDecode_Minor(driverVersionRaw));	//	minor
@@ -123,7 +123,7 @@ bool CNTV2LinuxDriverInterface::Open(UWord inDeviceIndexNumber, const string & h
 	drvrVersComps[3] = uint16_t(NTV2DriverVersionDecode_Build(driverVersionRaw));	//	build
 
 	//	Check driver version (local devices only)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 		;	//	Skip driver version comparison on remote devices
 	else if (!(AJA_NTV2_SDK_VERSION_MAJOR))
 		LDIWARN ("Driver version v" << DEC(drvrVersComps[0]) << "." << DEC(drvrVersComps[1]) << "." << DEC(drvrVersComps[2]) << "."
@@ -210,7 +210,7 @@ CNTV2LinuxDriverInterface::SetShareMode (bool bShared)
 bool
 CNTV2LinuxDriverInterface::Close()
 {
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 		return CloseRemote();
 	if( !_boardOpened )
 		return true;
@@ -246,7 +246,7 @@ CNTV2LinuxDriverInterface::ReadRegister(
 	const ULWord registerShift)
 {
 
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		if (!CNTV2DriverInterface::ReadRegister(
 					registerNumber,
@@ -299,7 +299,7 @@ CNTV2LinuxDriverInterface::WriteRegister (
 			return true;
 	}
 #endif	//	defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		if (!CNTV2DriverInterface::WriteRegister(
 					registerNumber,
@@ -423,7 +423,7 @@ CNTV2LinuxDriverInterface::WaitForInterrupt (
 	ULWord			timeOutMs		// Num of milliseconds to wait before timing out
 	)
 {
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		return CNTV2DriverInterface::WaitForInterrupt(eInterrupt, timeOutMs);
 	}
@@ -772,7 +772,7 @@ CNTV2LinuxDriverInterface::DmaTransfer (
 	ULWord			bytes,
 	bool			bSync)
 {
-	if (_remoteHandle != INVALID_NUB_HANDLE) {
+	if (IsRemote()) {
 		if (!CNTV2DriverInterface::DmaTransfer(DMAEngine,
 					bRead,
 					frameNumber,
@@ -1050,7 +1050,7 @@ CNTV2LinuxDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine,
 bool
 CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 {
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		if (!CNTV2DriverInterface::AutoCirculate(autoCircData))
 		{
@@ -1369,7 +1369,7 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 		if( !pInMessage )
 			return false;	//	NULL message pointer
 
-		if (_remoteHandle != INVALID_NUB_HANDLE)
+		if (IsRemote())
 		{
 			return false;	//	Implement NTV2Message on nub
 		}

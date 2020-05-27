@@ -2067,7 +2067,7 @@ void CNTV2Card::InitNTV2TestPattern (void)
 bool CNTV2Card::DownloadTestPattern (UWord testPatternNumber )
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		return NTV2DownloadTestPatternRemote(	
 					_sockfd,

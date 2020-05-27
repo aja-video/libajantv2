@@ -530,9 +530,9 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, const string & ho
 	if (IsOpen()  &&  inDeviceIndexNumber == _boardNumber)
 	{
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-		if (hostName.empty()  &&  _remoteHandle == INVALID_NUB_HANDLE)
+		if (hostName.empty()  &&  !IsRemote())
 			return true;	//	Same local device requested, already open
-		if (_hostname == hostName  &&  _remoteHandle != INVALID_NUB_HANDLE)
+		if (_hostname == hostName  &&  IsRemote())
 			return true;	//	Same remote device requested, already open
 #else
 		return true;	//	Same local device requested, already open
@@ -641,7 +641,7 @@ bool CNTV2MacDriverInterface::TestOpen()
 bool CNTV2MacDriverInterface::Close (void)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 		return CloseRemote ();
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 
@@ -830,7 +830,7 @@ bool CNTV2MacDriverInterface::MapMemory( MemoryType memType, void **memPtr )
 bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outRegValue, const ULWord inRegMask, const ULWord inRegShift)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		if (!CNTV2DriverInterface::ReadRegister (inRegNum, outRegValue, inRegMask, inRegShift))
 		{
@@ -893,7 +893,7 @@ bool CNTV2MacDriverInterface::WriteRegister( ULWord registerNumber,
 	}
 #endif	//	defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		if (!CNTV2DriverInterface::WriteRegister (registerNumber, registerValue, registerMask, registerShift))
 		{
@@ -1303,7 +1303,7 @@ bool CNTV2MacDriverInterface::LockFormat( void )
 bool CNTV2MacDriverInterface::WaitForInterrupt( INTERRUPT_ENUMS type, unsigned int  timeout )
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 		return CNTV2DriverInterface::WaitForInterrupt(type, timeout);
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 
@@ -1750,7 +1750,7 @@ bool CNTV2MacDriverInterface::AutoCirculate( AUTOCIRCULATE_DATA &autoCircData )
 	bool success = true;
 	UserClientCommandCodes	whichMethod	(kNumberUserClientCommands);
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		if (!CNTV2DriverInterface::AutoCirculate (autoCircData))
 		{
@@ -1914,7 +1914,7 @@ bool CNTV2MacDriverInterface::NTV2Message (NTV2_HEADER * pInOutMessage)
 	io_connect_t	connection	(GetIOConnect ());
 
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 		return CNTV2DriverInterface::NTV2Message (pInOutMessage);
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (!pInOutMessage)
