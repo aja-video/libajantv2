@@ -24,6 +24,7 @@ This page describes how to use the <b>NTV2 Watcher</b> tool to interactively mon
 	-	\ref regautocycler
 	-	\ref tonegenerator
 	-	\ref memmapdlog
+	-	\ref scraptool
 
 
 
@@ -784,9 +785,11 @@ function calls that will produce the register values seen in the display.
 
 @image	html	watcher-inspector-routing.png
 
-The <b>Routing</b> inspector monitors widget signal crosspoint routing.
+The <b>Routing</b> inspector monitors and controls widget signal crosspoint routing as well as widget state (to some degree).
 
-@note	This inspector replaces the original \ref usingcables utility.
+@note	This inspector replaces the original \ref usingcables utility with this significant difference:
+		-	RGB and YCbCr output crosspoints are shown in separate sockets.
+			In the old \ref usingcables they were shown as one socket, which caused some confusion.
 
 The inspector has the following individual panels:
 	-	<b>Routing Diagram</b> — Shows the device widgets and signal connections between them.
@@ -1232,6 +1235,38 @@ It can readily indicate \ref vidop-fbconflict and/or \ref audioclobber.
 To close the <b>Memory Map</b> tool window:
 	-	click its close box;
 	-	or un-check the <b>View</b> menu’s <b>Memory Map</b> command.
+
+
+
+<hr size="50px">
+@subsection	scraptool		“Scrap Buffer” Tool
+
+@image	html	watcher-tool-scrap.png
+
+The <b>Scrap Buffer</b> is a handy debugging aid for viewing the contents of the host operating system’s “desk scrap”
+buffer (aka “clipboard” or “paste buffer”). It can also display the contents of files dropped into the window.
+
+-	It periodically monitors for scrap changes and updates automatically.
+-	The top of the window shows the number of bytes being viewed.
+-	The remainder of the window displays the data.
+	-	<b>Data View Options</b> — (Right-Click Operations)
+		-	<b>Grouping</b> — Changes the data grouping to 8-bit (1-byte), 16-bit (2-byte), 32-bit (4-byte) or 64-bit (8-byte).
+		-	<b>Radix</b> — Changes the radix of the data to Binary, Octal, Decimal or Hexadecimal.
+		-	<b>Bytes/Line</b> — Changes the number of bytes to display in each line of the data view.
+			Choose from 8 bytes up to 8K bytes by powers of 2.
+			Note that larger values make for fewer lines and many more columns.
+			Smaller values show many more lines with fewer columns.
+	-	<b>Row & Column Label Options</b> — (Right-Click Operations)
+		-	<b>Reference</b> — Choose “Byte Offset From Start” or “Byte Offset From End”.
+		-	<b>Radix</b> — Choose “Binary”, “Octal”, “Decimal” or “Hexadecimal”.
+-	<b>Drag and Drop</b> — Dropping a single file or text clipping from outside the tool window is supported.
+	-	The file’s raw contents are displayed in the window.
+	-	Viewing a file or clipping stops host scrap/clipboard monitoring.
+		To resume host scrap/clipboard monitoring, click “Monitor Clipboard" button (or close and re-open the tool).
+
+To close the <b>Scrap Buffer</b> tool window:
+	-	click its close box;
+	-	or un-check the <b>View</b> menu’s <b>Scrap Buffer</b> command.
 
 
 <hr size="50px">

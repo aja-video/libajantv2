@@ -11,8 +11,9 @@
 
 	@image	html	ttappro.png
 
-	The T-Tap Pro has one Thunderbolt-3 input on the left side.
-	On the right side, it has one 12G SDI output, and one HDMI 2.0 output.
+	On the front, the T-Tap Pro has a standard headphone jack and a volume control.
+	The rear panel has a Thunderbolt-3 connector, a single 12G SDI output BNC connector,
+	an HDMI 2.0 socket, and an external 12VDC power jack.
 
 	@par	PCI Interface
 	-	PCI device ID: <b>0xEB26</b>
@@ -36,6 +37,10 @@
 		-	HDR10 support — HDR InfoFrame metadata, compatible with HDMI 2.0a/CTA-861.3
 		-	HLG support — compatible with HDMI 2.0b/CTA-861-G
 		-	8 Audio Channels (max.), 24-bit HDMI embedded audio, 48 kHz sample rate, synchronous
+	-	1 × Analog Audio output
+		-	Standard 3.5mm headphone jack
+		-	Unbalanced 1.2V RMS full-scale output level (0 dBFS)
+		-	2 Audio Channels, 18-bit D/A, 48 kHz sample rate
 
 	@par	Frame Buffer
 	-	128 MB SDRAM
@@ -73,7 +78,7 @@
 
 	@par	Power
 
-	-	TBA typical, TBA maximum
+	-	18W maximum
 
 	@par	Environment
 
