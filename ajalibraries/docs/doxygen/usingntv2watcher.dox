@@ -32,9 +32,20 @@ This page describes how to use the <b>NTV2 Watcher</b> tool to interactively mon
 @subsection	inspectorgeneralop		General Operation
 
 The <b>NTV2 Watcher</b> is a graphical tool that interactively monitors and configures an NTV2 device.
-The user interface consists of a main window that contains three panels:
 
 @image	html	watcherlayout.png
+
+The user interface consists of a main window that contains these major elements:
+-	<b>Common Device Controls</b> — These Toolbars are common to all devices (and can be undocked, if desired):
+	-	<b>Device Selection</b> Toolbar — for selecting which device to monitor/control;
+	-	<b>Common Controls</b> Toolbar — for changing the poll rate, task mode, and other “global” aspects of the device.
+-	<b>Inspector List</b> — for selecting which aspect of the device to inspect and/or control;
+-	<b>Inspector Display Area</b> — the main data display area;
+-	<b>Status Bar</b> — which holds the status indicators:
+	-	<b>Status Message</b> — for messages;
+	-	<b>Selection Indicator</b> — Some inspectors allow data portions to be selected interactively using the keyboard or mouse.
+		This part of the Status Bar indicates the current selection.
+	-	<b>Refresh Rate</b> — This part of the Status Bar shows the measured refresh rate of the inspector display (a moving average).
 
 
 @par	Device Selection
@@ -50,11 +61,11 @@ the list of available inspectors may change.
 
 To monitor an NTV2 device that’s running on another machine in your local network, click the <b>+</b> button
 and enter the machine’s IP address in the dialog that appears … then click OK.
-The devices on that machine will be added to the popup menu.
+The first device local to that machine will be added to the popup menu.
 
 To remove a remote device, be sure it’s the currently selected one, then click the <b>-</b> button.
 
-@note	The “NTV2 Nub” must be running on any machine to permit its devices to be monitored remotely.
+@note	The “NTV2 Nub” server must be running on any machine to permit its devices to be monitored remotely.
 
 
 @par	Menu Commands
