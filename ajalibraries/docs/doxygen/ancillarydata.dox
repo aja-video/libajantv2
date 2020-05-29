@@ -1,26 +1,34 @@
 /**
 @page	ancillarydata	Ancillary Data
 
-Traditionally, AJA's NTV2 devices processed active video and ancillary data using separate data paths in the hardware.
-This is still very much the case, although the introduction of the Anc inserter/extractor firmware has created further
+Traditionally, AJA’s NTV2 devices processed active video and ancillary data using separate data paths in the hardware.
+This is still very much the case, although the introduction of Anc inserter/extractor firmware has created further
 options.
 
 <b>CONTENTS:</b>
--	\ref ancembeddedaudio
--	\ref anctimecode
-	-	\ref anctimecodeinput
-	-	\ref anctimecodeoutput
-	-	\ref ancanalogltcinput
-	-	\ref ancanalogltcoutput
--	\ref ancvpid
+-	\ref ancdatatypes
+	-	\ref ancembeddedaudio
+	-	\ref anctimecode
+		-	\ref anctimecodeinput
+		-	\ref anctimecodeoutput
+		-	\ref ancanalogltcinput
+		-	\ref ancanalogltcoutput
+	-	\ref ancvpid
+	-	\ref anccaptions
 -	\ref anccapture
 -	\ref ancplayout
--	\ref ancgumpformat
--	\ref ancrtpformat
+-	\ref ancbufferformats
+	-	\ref ancgumpformat
+	-	\ref ancrtpformat
 -	\ref vancframegeometries
 
 
-@section	ancembeddedaudio	Embedded Audio
+@section	ancdatatypes		Common Ancillary Data Types
+
+The common Ancillary Data Types are audio, timecode, VPID, and Closed Captions.
+
+
+@subsection	ancembeddedaudio	Embedded Audio
 
 Embedded audio in HANC is handled by the Audio System(s) in firmware — see \ref audiooperation for more information.
 
@@ -30,7 +38,7 @@ them per SMPTE/AES specifications.  See \ref anccapture (below) for information 
 <hr size="50px">
 
 
-@section	anctimecode		Timecode (RP-188, SMPTE-12M)
+@subsection	anctimecode		Timecode (RP-188, SMPTE-12M)
 
 The timecode aspects of NTV2’s SDK and firmware has its origins in the early 2000s — when NTV2 devices were SD-only, and the
 SMPTE 12M spec was still evolving. FPGA space was very tight in those days, including the number of registers available … which
@@ -66,7 +74,7 @@ from an SDI input…
 -	Call CNTV2Card::SetRP188SourceFilter to specify which input timecode to use — e.g. 0 for LTC, 1 for VITC1, etc.
 
 
-@subsection		anctimecodeinput		Embedded SDI Timecode Input
+@subsubsection		anctimecodeinput		Embedded SDI Timecode Input
 
 Any RP-188 data in the SDI input video with DBB-1 data matching the input’s current RP-188 source select filter (see
 CNTV2Card::SetRP188SourceFilter) will be placed into the input’s RP-188 registers.
@@ -224,7 +232,7 @@ bool GetReceivedTCForChannel (CNTV2Card & inCard, const NTV2Channel inChannel, N
 
 
 
-@subsection		anctimecodeoutput		Embedded SDI Timecode Output
+@subsubsection		anctimecodeoutput		Embedded SDI Timecode Output
 
 When RP-188 output is enabled for an SDI output (by calling CNTV2Card::SetRP188Mode and passing it ::NTV2_RP188_OUTPUT),
 whatever RP-188 data was written into the RP-188 registers is inserted into the HANC of the SDI output video after the next
@@ -261,7 +269,7 @@ There are two ways to transmit timecode:
 		(prior to calling AUTOCIRCULATE_TRANSFER::SetAncBuffers and CNTV2Card::AutoCirculateTransfer).
 
 
-@subsection		ancanalogltcinput		Analog LTC Input
+@subsubsection		ancanalogltcinput		Analog LTC Input
 
 On AJA devices having one or more analog LTC inputs — or devices that can receive LTC from the Reference Input — there’s a pair
 of registers for each LTC input that store the received timecode:  one for the high-order 32 bits, the other for the low-order
@@ -322,7 +330,7 @@ There are two ways to input analog LTC:
 @endcode
 
 
-@subsection		ancanalogltcoutput		Analog LTC Output
+@subsubsection		ancanalogltcoutput		Analog LTC Output
 
 On AJA devices having one or more analog LTC outputs — there’s a pair of registers for each LTC output for placing
 the timecode to be transmitted:  one for the high-order 32 bits, the other for the low-order 32 bits. 
@@ -345,7 +353,7 @@ There are two ways to output analog LTC:
 <hr size="50px">
 
 
-@section		ancvpid		VPID
+@subsection		ancvpid		VPID
 
 <b>Input</b>
 
@@ -379,6 +387,30 @@ automatically insert a VPID packet in the outgoing SDI data stream.
 		-	Don’t forget to set ::kVRegDisableAutoVPID back to zero when your program exits.
 
 <hr size="50px">
+
+
+@subsection		anccaptions		Closed-Captions
+
+Closed-captions are an important category of ancillary data. The popular captioning standards (by transport):
+
+-	<b>Analog (SD) “Line 21”:</b>
+	-	US NTSC 525i: EIA-608
+	-	PAL 625i: Teletext OP-42
+-	<b>SDI:</b> Encoded into one or more ancillary data packets, per SMPTE ST-291.
+	There are several captioning standards that encapsulate their data into SMPTE 291 packets:
+	-	U.S. NTSC CEA-608
+	-	U.S. NTSC CEA-708
+	-	Teletext OP-47
+	-	ARIB STD-B37
+	-	etc.
+-	<b>TCP/IP:</b>
+	-	SMPTE ST 2022:  Same as SDI (above) with SDI data frame encapsulated into network packet(s).
+	-	SMPTE ST 2110:  Same as SDI (above) with SMPTE ST-291 packets encoded into separate RTP stream
+		(separate from video and audio RTP streams).
+-	<b>HDMI:</b> Only supports Open Captions (burned-in);  Closed Captions not supported.
+
+<hr size="50px">
+
 
 
 
@@ -427,6 +459,8 @@ There are two ways to capture any/all Ancillary data packets:
 		-	Use AJAAncillaryList::SetFromVANCData to obtain a list of ::AJAAncillaryData packets found in the frame buffer.
 
 <b>TIP:</b> The \ref usingntv2watcher tool’s \ref inspectoranc is useful for diagnosing issues with ancillary data capture.
+
+<hr size="50px">
 
 
 @section	ancplayout	Custom Anc Packet Playout
@@ -485,8 +519,12 @@ There are two ways to play out custom Ancillary data packets:
 <hr size="50px">
 
 
+@section	ancbufferformats	Anc Buffer Data Formats
 
-@section	ancgumpformat	SDI Anc Buffer Data Format
+This section details the format of the data in the ancillary data buffers.
+
+
+@subsection	ancgumpformat	SDI Anc Buffer Data Format
 
 This is the default format in the host ancillary data buffers. The data bytes in the ancillary data buffer consist of one or more packets having the following format:
 
@@ -515,7 +553,7 @@ For <b>Playout</b>:
 
 
 
-@section	ancrtpformat	RTP Anc Buffer Data Format
+@subsection	ancrtpformat	RTP Anc Buffer Data Format
 
 The data in the ancillary data buffer, except where noted (below), matches the RTP specification documented
 in <a href="https://tools.ietf.org/html/draft-ietf-payload-rtp-ancillary-14" target="_blank">SMPTE ST 291-1</a>:
