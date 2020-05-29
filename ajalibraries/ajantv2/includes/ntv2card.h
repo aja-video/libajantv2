@@ -1813,7 +1813,7 @@ public:
 		@note		It is not an error to call this function when the Audio System's playout side is already running.
 		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
 					configures the Audio System automatically.
-		@see		CNTV2Card::StopAudioInput, CNTV2Card::IsAudioOutputRunning, \ref audioplayout
+		@see		CNTV2Card::StopAudioOutput, CNTV2Card::IsAudioOutputRunning, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		StartAudioOutput (const NTV2AudioSystem inAudioSystem, const bool inWaitForVBI = false);
 
@@ -1825,7 +1825,7 @@ public:
 		@note		It is not an error to call this function when the Audio System's playout side is already stopped.
 		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
 					configures the Audio System automatically.
-		@see		CNTV2Card::StartAudioInput, CNTV2Card::IsAudioOutputRunning, \ref audioplayout
+		@see		CNTV2Card::StartAudioOutput, CNTV2Card::IsAudioOutputRunning, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		StopAudioOutput (const NTV2AudioSystem inAudioSystem);
 
