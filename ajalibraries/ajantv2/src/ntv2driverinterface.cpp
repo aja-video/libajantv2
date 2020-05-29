@@ -272,7 +272,7 @@ CNTV2DriverInterface::CNTV2DriverInterface (const CNTV2DriverInterface & inObjTo
 bool CNTV2DriverInterface::ReadRegister (const ULWord inRegisterNumber, ULWord & outRegisterValue, const ULWord inRegisterMask, const ULWord inRegisterShift)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 		return !NTV2ReadRegisterRemote (_sockfd, _remoteHandle, _nubProtocolVersion,
 										inRegisterNumber, &outRegisterValue, inRegisterMask, inRegisterShift);
 #else
@@ -290,7 +290,7 @@ bool CNTV2DriverInterface::ReadRegister (const ULWord inRegisterNumber, ULWord &
 bool CNTV2DriverInterface::ReadRegisterMulti (ULWord numRegs, ULWord *whichRegisterFailed, NTV2ReadWriteRegisterSingle aRegs[])
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		return !NTV2ReadRegisterMultiRemote(_sockfd,
 								_remoteHandle,
@@ -344,7 +344,7 @@ bool CNTV2DriverInterface::WriteRegister (ULWord registerNumber, ULWord register
 	//	Recording is done in platform-specific WriteRegister
 #endif	//	NTV2_WRITEREG_PROFILING
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
+	NTV2_ASSERT(IsRemote());
 
 	return !NTV2WriteRegisterRemote(_sockfd,
 								_remoteHandle,
@@ -367,7 +367,7 @@ bool CNTV2DriverInterface::WriteRegister (ULWord registerNumber, ULWord register
 bool CNTV2DriverInterface::WaitForInterrupt (INTERRUPT_ENUMS eInterrupt, ULWord timeOutMs)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
+	NTV2_ASSERT(IsRemote());
 
 	return !NTV2WaitForInterruptRemote(	_sockfd,
 										_remoteHandle,
@@ -386,7 +386,7 @@ bool CNTV2DriverInterface::WaitForInterrupt (INTERRUPT_ENUMS eInterrupt, ULWord 
 bool CNTV2DriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
+	NTV2_ASSERT(IsRemote());
 
 	switch(autoCircData.eCommand)
 	{
@@ -412,8 +412,8 @@ bool CNTV2DriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bitFileInfo, NTV2BitFileType bitFileType)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	//NTV2_ASSERT(_remoteHandle != INVALID_NUB_HANDLE);
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	//NTV2_ASSERT(IsRemote());
+	if (IsRemote())
 	{
 		return ! NTV2DriverGetBitFileInformationRemote(	_sockfd,
 														_remoteHandle,
@@ -609,7 +609,7 @@ bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageIn
 bool CNTV2DriverInterface::DriverGetBuildInformation (BUILD_INFO_STRUCT & buildInfo)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	NTV2_ASSERT (_remoteHandle != INVALID_NUB_HANDLE);
+	NTV2_ASSERT (IsRemote());
 	return ! NTV2DriverGetBuildInformationRemote (_sockfd,  _remoteHandle,  _nubProtocolVersion,  buildInfo);
 #else
 	(void) buildInfo;

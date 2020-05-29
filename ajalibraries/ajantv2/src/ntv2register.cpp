@@ -7014,7 +7014,7 @@ bool CNTV2Card::BankSelectWriteRegister (const NTV2RegInfo & inBankSelect, const
 {
 	bool					result	(false);
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		// NOTE: DO NOT REMOVE THIS
 		// It's needed for the nub client to work
@@ -7039,7 +7039,7 @@ bool CNTV2Card::BankSelectReadRegister (const NTV2RegInfo & inBankSelect, NTV2Re
 {
 	bool					result	(false);
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 	{
 		// NOTE: DO NOT REMOVE THIS
 		// It's needed for the nub client to work
@@ -7067,7 +7067,7 @@ bool CNTV2Card::WriteVirtualData (const ULWord inTag, const void* inVirtualData,
 {
     bool	result	(false);
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-    if (_remoteHandle != INVALID_NUB_HANDLE)
+    if (IsRemote())
     {
         // NOTE: DO NOT REMOVE THIS
         // It's needed for the nub client to work
@@ -7086,7 +7086,7 @@ bool CNTV2Card::ReadVirtualData (const ULWord inTag, void* outVirtualData, const
 {
     bool	result	(false);
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-    if (_remoteHandle != INVALID_NUB_HANDLE)
+    if (IsRemote())
     {
         // NOTE: DO NOT REMOVE THIS
         // It's needed for the nub client to work
@@ -7109,7 +7109,7 @@ bool CNTV2Card::ReadSDIStatistics (NTV2SDIInStatistics & outStats)
 	if (!::NTV2DeviceCanDoSDIErrorChecks (_boardID))
 		return false;	//	Device doesn't support it!
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (_remoteHandle != INVALID_NUB_HANDLE)
+	if (IsRemote())
 		return false;
 #endif	//	NTV2_NUB_CLIENT_SUPPORT
 #if defined(AJAMac)	//	Unimplemented in Mac driver at least thru SDK 16.0, so implement it here
