@@ -62,6 +62,9 @@ typedef struct
 	bool			isDS2;
 	bool			isComplete;
 	ULWord			value;
+	bool			isDS1;
+	bool			isDS3;
+	bool			isDS4;
 } VPIDControl;
 
 /**
