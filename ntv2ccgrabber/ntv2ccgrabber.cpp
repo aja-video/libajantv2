@@ -24,6 +24,7 @@ using namespace std::rel_ops;
 
 #define AsConstUBytePtr(__p__)		reinterpret_cast<const UByte*>(__p__)
 #define AsConstULWordPtr(__p__)		reinterpret_cast<const ULWord*>(__p__)
+#define AsUBytePtr(__p__)			reinterpret_cast<UByte*>(__p__)
 
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 #define NTV2_ANCSIZE_MAX	(2048)
@@ -408,8 +409,6 @@ void NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 	NTV2ChannelList			sdiInputs		(::NTV2MakeChannelList(mActiveSDIInputs));
 	const NTV2ChannelList	activeCSCs		(::NTV2MakeChannelList(mActiveCSCs));
 
-	const NTV2OutputXptID	sdiInputOutputXpt(::GetSDIInputOutputXptFromChannel(sdiInput));
-	const NTV2InputXptID	cscWidgetVideoInputXpt(::GetCSCInputXptFromChannel(mConfig.fInputChannel));
 	mInputConnections.clear();
 //*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ClearRouting();
 
@@ -1041,7 +1040,7 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 		if (pLine21)
 		{
 			if (mConfig.fPixelFormat == NTV2_FBF_10BIT_YCBCR)	//	CNTV2Line21Captioner::DecodeLine requires 8-bit YUV
-				::ConvertLine_v210_to_2vuy(AsConstULWordPtr(pLine21), (UByte*) pLine21, 720);	//	Convert YUV10 to YUV8 in-place
+				::ConvertLine_v210_to_2vuy(AsConstULWordPtr(pLine21), (UByte*)(pLine21), 720);	//	Convert YUV10 to YUV8 in-place
 			captionDataL21.bGotField1Data = CNTV2Line21Captioner::DecodeLine(pLine21, captionDataL21.f1_char1, captionDataL21.f1_char2);
 		}
 		pLine21 = AsConstUBytePtr(formatDesc.GetRowAddress(mInputXferInfo.acVideoBuffer.GetHostPointer(),
@@ -1049,7 +1048,7 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 		if (pLine21)
 		{
 			if (mConfig.fPixelFormat == NTV2_FBF_10BIT_YCBCR)	//	CNTV2Line21Captioner::DecodeLine requires 8-bit YUV
-				::ConvertLine_v210_to_2vuy(AsConstULWordPtr(pLine21), (UByte*) pLine21, 720);	//	Convert YUV10 to YUV8 in-place
+				::ConvertLine_v210_to_2vuy(AsConstULWordPtr(pLine21), (UByte*)(pLine21), 720);	//	Convert YUV10 to YUV8 in-place
 			captionDataL21.bGotField2Data = CNTV2Line21Captioner::DecodeLine(pLine21, captionDataL21.f2_char1, captionDataL21.f2_char2);
 		}
 	}
