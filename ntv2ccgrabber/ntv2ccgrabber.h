@@ -310,6 +310,7 @@ class NTV2CCGrabber
 		**/
 		static void				Caption608ChangedStatic (void * pInstance, const NTV2Caption608ChangeInfo & inChangeInfo);
 
+		typedef	AJACircularBuffer <NTV2FrameData *>	MyCircularBuffer;
 
 	//	Instance Data
 	private:
@@ -325,7 +326,6 @@ class NTV2CCGrabber
 		std::string					mLastOutStr;		///< @brief	Last thing I emitted to cout
 		uint32_t					mFirstOutFrame;		///< @brief	First frame number for output
 		uint32_t					mLastOutFrame;		///< @brief	Last frame number for output
-		uint32_t					mCaptureBufferSize;	///< @brief	My capture video buffer size, in bytes
 		ULWord						mErrorTally;		///< @brief	Number of caption detect/decode errors
 		ULWord						mCaptionDataTally;	///< @brief	Number of caption detections
 		NTV2Line21Channel			m608Channel;		///< @brief	Caption channel to "tune" to
@@ -335,16 +335,12 @@ class NTV2CCGrabber
 		CNTV2CaptionDecoder708Ptr	m708DecoderVanc;	///< @brief	My 708 closed-caption decoder (for VANC)
 		CNTV2VPID					mVPIDInfoDS1;		///< @brief	Input DS1 VPID info
 		CNTV2VPID					mVPIDInfoDS2;		///< @brief	Input DS2 VPID info
-		NTV2ChannelSet				mAllFrameStores;	///< @brief	All device FrameStores
-		NTV2ChannelSet				mAllCSCs;			///< @brief	All device CSCs
 		NTV2ChannelSet				mInputFrameStores;	///< @brief	Active input FrameStores
 		NTV2ChannelSet				mActiveSDIInputs;	///< @brief	Active SDI inputs
 		NTV2ChannelSet				mActiveCSCs;		///< @brief	Active CSCs
 		NTV2XptConnections			mInputConnections;	///< @brief	Input routing connections
-
-		typedef	AJACircularBuffer <AVDataBuffer *>	MyCircularBuffer;
-		AVDataBuffer				mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
-		MyCircularBuffer			mAVCircularBuffer;	///< @brief	My circular buffer
+		NTV2FrameDataArray			mHostBuffers;		///< @brief	My host buffers
+		MyCircularBuffer			mCircularBuffer;	///< @brief	My circular buffer
 		AUTOCIRCULATE_TRANSFER		mInputXferInfo;		///< @brief	My input AutoCirculate transfer info
 
 		//	Instance data only used for caption burn-in:
