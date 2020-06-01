@@ -1695,13 +1695,13 @@ bool CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer(NTV2DMAEngine DMAEngine
 
 	if (downSample && !bPrintedDownsampleDeprecatedMsg)
 	{
-		fprintf(stderr, "CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer(): downSample is deprecated.\n");
+		LDIWARN("downSample is deprecated");
 		bPrintedDownsampleDeprecatedMsg = true;
 	}
 
 	if (ioctl( _hDevice, IOCTL_NTV2_DMA_READ_FRAME, &dmaControlBuf))
 	{
-		DisplayNTV2Error("IOCTL_NTV2_DMA_READ_FRAME failed");
+		LDIFAIL("IOCTL_NTV2_DMA_READ_FRAME failed");
 		return false;
 	}
 
@@ -1749,13 +1749,13 @@ bool CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer(NTV2DMAEngine DMAEngine
 
 	if (downSample && !bPrintedDownsampleDeprecatedMsg)
 	{
-		fprintf(stderr, "CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer(): downSample is deprecated.\n");
+		LDIWARN("downSample is deprecated");
 		bPrintedDownsampleDeprecatedMsg = true;
 	}
 
 	if (ioctl( _hDevice, IOCTL_NTV2_DMA_READ_FRAME, &dmaControlBuf))
 	{
-		DisplayNTV2Error("IOCTL_NTV2_DMA_READ_FRAME failed");
+		LDIFAIL("IOCTL_NTV2_DMA_READ_FRAME failed");
 		return false;
 	}
 
@@ -1811,7 +1811,7 @@ CNTV2LinuxDriverInterface::DmaWriteWithOffsets(
 
 	if (ioctl( _hDevice, request, &dmaControlBuf))
 	{
-		DisplayNTV2Error(errMsg);
+		LDIFAIL(errMsg);
 		return false;
 	}
 
@@ -1869,7 +1869,7 @@ CNTV2LinuxDriverInterface::DmaReadWithOffsets(
 
 	if (ioctl( _hDevice, request, &dmaControlBuf))
 	{
-		DisplayNTV2Error(errMsg);
+		LDIFAIL(errMsg);
 		return false;
 	}
 
