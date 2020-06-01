@@ -43,6 +43,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	bool	is6G					= false;
 	bool	is12G					= false;
 	bool	enableBT2020			= false;
+	bool	isMultiLink				= false;
 	VPIDChannel vpidChannel			= VPIDChannel_1;
 
 	uint8_t	byte1 = 0;
@@ -74,6 +75,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	transferCharacteristics = pInVPIDSpec->transferCharacteristics;
 	colorimetry				= pInVPIDSpec->colorimetry;
 	luminance				= pInVPIDSpec->luminance;
+	isMultiLink				= pInVPIDSpec->isMultiLink;
 
 
 	if (! NTV2_IS_WIRE_FORMAT (outputFormat))
@@ -260,7 +262,17 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
     case NTV2_FORMAT_4096x2160p_3000:
     case NTV2_FORMAT_4096x2160psf_2997:
     case NTV2_FORMAT_4096x2160psf_3000:
-		byte1 = isDualLink ? (uint8_t) VPIDStandard_2160_Single_12Gb : (uint8_t) VPIDStandard_2160_Single_6Gb; //0xCE : 0xC0
+		if(isMultiLink)
+		{
+			if (isLevelB)
+				byte1 = isDualLink? (uint8_t) VPIDStandard_2160_QuadDualLink_3Gb : (uint8_t) VPIDStandard_2160_DualLink;  //  0x98 : 0x96
+			else
+				byte1 = (uint8_t) VPIDStandard_2160_QuadLink_3Ga;  //  0x97
+		}
+		else
+		{
+			byte1 = isDualLink ? (uint8_t) VPIDStandard_2160_Single_12Gb : (uint8_t) VPIDStandard_2160_Single_6Gb; //0xCE : 0xC0
+		}
 		break;
 
 	case NTV2_FORMAT_4x1920x1080p_5000:
@@ -295,7 +307,14 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
     case NTV2_FORMAT_4096x2160p_6000:
     case NTV2_FORMAT_4096x2160p_11988:
     case NTV2_FORMAT_4096x2160p_12000:
-		byte1 = isDualLink ? (uint8_t) VPIDStandard_2160_DualLink_12Gb : (uint8_t) VPIDStandard_2160_Single_12Gb; // 0xD1 : 0xCE
+		if(isMultiLink)
+		{
+			byte1 = isLevelB ? (uint8_t) VPIDStandard_2160_QuadDualLink_3Gb : (uint8_t) VPIDStandard_2160_QuadLink_3Ga;	//	0x98 : 0x97
+		}
+		else
+		{
+			byte1 = isDualLink ? (uint8_t) VPIDStandard_2160_DualLink_12Gb : (uint8_t) VPIDStandard_2160_Single_12Gb; // 0xD1 : 0xCE
+		}
 		break;
 
 	case NTV2_FORMAT_4x3840x2160p_2398:
