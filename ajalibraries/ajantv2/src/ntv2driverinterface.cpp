@@ -323,8 +323,19 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 										const ULWord		inByteCount,
 										const bool			inSynchronous)
 {
-	// NOTE: DO NOT REMOVE THIS FUNCTION
-	// It's needed for the nub client to work
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
+	NTV2_ASSERT(IsRemote());
+	return !NTV2DMATransferRemote(_sockfd,
+								_remoteHandle,
+								_nubProtocolVersion,
+								inDMAEngine,
+								inIsRead,
+								inFrameNumber,
+								pFrameBuffer,
+								inOffsetBytes,
+								inByteCount,
+								inSynchronous);
+#else
 	(void) inDMAEngine;
 	(void) inIsRead;
 	(void) inFrameNumber;
@@ -333,6 +344,7 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 	(void) inByteCount;
 	(void) inSynchronous;
 	return false;
+#endif
 }
 
 
@@ -402,6 +414,17 @@ bool CNTV2DriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 	}
 #else
 	(void) autoCircData;
+	return false;
+#endif
+}
+
+bool CNTV2DriverInterface::NTV2Message (NTV2_HEADER * pInMessage)
+{
+	(void) pInMessage;
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
+	NTV2_ASSERT(IsRemote());
+	return !NTV2MessageRemote(_sockfd, _remoteHandle, _nubProtocolVersion, pInMessage);
+#else
 	return false;
 #endif
 }

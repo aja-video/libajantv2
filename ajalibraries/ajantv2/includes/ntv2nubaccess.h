@@ -54,6 +54,7 @@ NTV2ConnectToNub(	const char *hostname,
 #define NTV2_REMOTE_ACCESS_READ_REG_FAILED					-24
 #define NTV2_REMOTE_ACCESS_DRIVER_GET_BUILD_INFO_FAILED		-25
 #define NTV2_REMOTE_ACCESS_NOT_DRIVER_GET_BUILD_INFO		-26
+#define NTV2_REMOTE_ACCESS_UNIMPLEMENTED					-27
 
 
 AJAExport int 
@@ -131,4 +132,22 @@ NTV2GetDriverVersionRemote(AJASocket sockfd,
 							LWord remoteHandle,
 							NTV2NubProtocolVersion nubProtocolVersion,
 							ULWord *driverVersion);
+
+AJAExport int 
+NTV2DMATransferRemote (AJASocket sockfd,
+						LWord remoteHandle,
+						NTV2NubProtocolVersion nubProtocolVersion,
+						const NTV2DMAEngine	inDMAEngine,
+						const bool			inIsRead,
+						const ULWord		inFrameNumber,
+						ULWord *			pFrameBuffer,
+						const ULWord		inOffsetBytes,
+						const ULWord		inByteCount,
+						const bool			inSynchronous);
+
+AJAExport int 
+NTV2MessageRemote (AJASocket sockfd,
+					LWord remoteHandle,
+					NTV2NubProtocolVersion nubProtocolVersion,
+					NTV2_HEADER *	pInMessage);
 #endif	//	NTV2NUBACCESS_H

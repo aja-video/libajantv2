@@ -1426,4 +1426,31 @@ NTV2ReadRegisterMultiRemote(AJASocket sockfd,
 	return retcode;
 }
 
+int NTV2DMATransferRemote (AJASocket sockfd,
+							LWord remoteHandle,
+							NTV2NubProtocolVersion nubProtocolVersion,
+							const NTV2DMAEngine	inDMAEngine,
+							const bool			inIsRead,
+							const ULWord		inFrameNumber,
+							ULWord *			pFrameBuffer,
+							const ULWord		inOffsetBytes,
+							const ULWord		inByteCount,
+							const bool			inSynchronous)
+{
+	(void) sockfd; (void) remoteHandle; (void) nubProtocolVersion;
+	(void) inDMAEngine; (void) inIsRead; (void) inFrameNumber; (void) pFrameBuffer;
+	(void) inOffsetBytes; (void) inByteCount; (void) inSynchronous;
+	return NTV2_REMOTE_ACCESS_UNIMPLEMENTED;
+}
+
+int NTV2MessageRemote (AJASocket sockfd,
+						LWord remoteHandle,
+						NTV2NubProtocolVersion nubProtocolVersion,
+						NTV2_HEADER *	pInMessage)
+{
+	(void) sockfd; (void) remoteHandle; (void) nubProtocolVersion;
+	(void) pInMessage;
+	return NTV2_REMOTE_ACCESS_UNIMPLEMENTED;
+}
+
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
