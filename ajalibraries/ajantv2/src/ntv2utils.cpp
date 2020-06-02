@@ -3661,56 +3661,80 @@ NTV2FrameRate GetFrameRateFromScale(long scale, long duration, NTV2FrameRate pla
 NTV2FrameRate GetNTV2FrameRateFromNumeratorDenominator (ULWord numerator, ULWord denominator)
 {
 	NTV2FrameRate ntv2Rate = NTV2_FRAMERATE_UNKNOWN;
-	if (denominator == 1)
+
+	if (denominator == 100)
 	{
-		numerator *= 1000;
-		denominator *= 1000;
+		switch (numerator)
+		{
+			case 12000: ntv2Rate = NTV2_FRAMERATE_12000; break;
+			case 11988: ntv2Rate = NTV2_FRAMERATE_11988; break;
+			case 6000: ntv2Rate = NTV2_FRAMERATE_6000; break;
+			case 5994: ntv2Rate = NTV2_FRAMERATE_5994; break;
+			case 5000: ntv2Rate = NTV2_FRAMERATE_5000; break;
+			case 4800: ntv2Rate = NTV2_FRAMERATE_4800; break;
+			case 4795: ntv2Rate = NTV2_FRAMERATE_4795; break;
+			case 3000: ntv2Rate = NTV2_FRAMERATE_3000; break;
+			case 2997: ntv2Rate = NTV2_FRAMERATE_2997; break;
+			case 2500: ntv2Rate = NTV2_FRAMERATE_2500; break;
+			case 2400: ntv2Rate = NTV2_FRAMERATE_2400; break;
+			case 2398: ntv2Rate = NTV2_FRAMERATE_2398; break;
+			case 1500: ntv2Rate = NTV2_FRAMERATE_1500; break;
+			case 1498: ntv2Rate = NTV2_FRAMERATE_1498; break;
+			default: break;
+		}
 	}
 
-	switch (numerator)
+	else
 	{
-		case 120000:
-			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_12000;
-			else ntv2Rate = NTV2_FRAMERATE_11988;
-			break;
+		if (denominator == 1)
+		{
+			numerator *= 1000;
+			denominator *= 1000;
+		}
 
-		case 60000:
-			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_6000;
-			else ntv2Rate = NTV2_FRAMERATE_5994;
-			break;
+		switch (numerator)
+		{
+			case 120000:
+				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_12000;
+				else ntv2Rate = NTV2_FRAMERATE_11988;
+				break;
 
-		case 50000:
-			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_5000;
-			break;
+			case 60000:
+				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_6000;
+				else ntv2Rate = NTV2_FRAMERATE_5994;
+				break;
 
-		case 48000:
-			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_4800;
-			else ntv2Rate = NTV2_FRAMERATE_4795;
-			break;
+			case 50000:
+				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_5000;
+				break;
 
-		case 30000:
-			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_3000;
-			else ntv2Rate = NTV2_FRAMERATE_2997;
-			break;
+			case 48000:
+				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_4800;
+				else ntv2Rate = NTV2_FRAMERATE_4795;
+				break;
 
-		case 25000:
-			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_2500;
-			break;
+			case 30000:
+				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_3000;
+				else ntv2Rate = NTV2_FRAMERATE_2997;
+				break;
 
-		case 24000:
-			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_2400;
-			else ntv2Rate = NTV2_FRAMERATE_2398;
-			break;
+			case 25000:
+				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_2500;
+				break;
 
-		case 15000:
-			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_1500;
-			else ntv2Rate = NTV2_FRAMERATE_1498;
-			break;
+			case 24000:
+				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_2400;
+				else ntv2Rate = NTV2_FRAMERATE_2398;
+				break;
 
-		default:
-			break;
+			case 15000:
+				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_1500;
+				else ntv2Rate = NTV2_FRAMERATE_1498;
+				break;
 
-
+			default:
+				break;
+		}
 	}
 
 	return ntv2Rate;
