@@ -17,8 +17,9 @@
 #include "ajabase/system/memory.h"
 #include <iostream>
 #include <iomanip>
-#include <utility>	//	std::rel_ops
+#include <utility>		//	std::rel_ops
 #include <algorithm>	//	set_difference
+#include <iterator>		//	for inserter
 
 using namespace std;
 using namespace std::rel_ops;
