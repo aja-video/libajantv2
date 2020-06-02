@@ -33,7 +33,7 @@
 #define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
 #define	AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
 #define NTV2_WRITEREG_PROFILING		//	If defined, enables register write profiling
-#define NTV2_FORCE_NO_DEVICE		//	If defined, forces "NO DEVICE"
+//#define NTV2_FORCE_NO_DEVICE		//	If defined, forces "NO DEVICE"
 
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
 	#if defined(AJAMac)

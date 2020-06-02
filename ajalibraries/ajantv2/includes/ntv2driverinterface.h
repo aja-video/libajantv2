@@ -367,6 +367,10 @@ private:
 	**/
 	CNTV2DriverInterface (const CNTV2DriverInterface & inObjToCopy);
 
+#if defined(NTV2_FORCE_NO_DEVICE)
+	virtual void	NTV2NoDevInitRegisters(void);
+#endif
+
 protected:
 
     UWord					_boardNumber;			///< @brief	My device index number.

@@ -523,8 +523,14 @@ ULWord CNTV2MacDriverInterface::GetMacRawDriverVersion (void)
 //--------------------------------------------------------------------------------------------------------------------
 //	Open
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, const string & hostName)
+bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, const string & inHostName)
 {
+	string hostName(inHostName);
+	#if defined(NTV2_FORCE_NO_DEVICE)
+	hostName = "NODEVICE";
+	if (inDeviceIndexNumber)
+		return false;	//	Only one NODEVICE
+	#endif// defined(NTV2_FORCE_NO_DEVICE)
 	if (inDeviceIndexNumber >= kMaxNumDevices)
 		return false;
 

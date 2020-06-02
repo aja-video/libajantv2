@@ -5764,7 +5764,7 @@ typedef enum
 															(uint32_t((UByte*(_str_))[2]) <<  8)  |	\
 															(uint32_t((UByte*(_str_))[1]) << 16)  |	\
 															(uint32_t((UByte*(_str_))[0]) << 24))
-	
+
 				#define	NTV2_FOURCC(_a_,_b_,_c_,_d_)	(	((uint32_t(_a_)) << 24)	|		\
 															((uint32_t(_b_)) << 16)	|		\
 															((uint32_t(_c_)) <<  8)	|		\
