@@ -49,7 +49,8 @@ public:
 	AJAWavWriter(const std::string & name,
                  const AJAWavWriterAudioFormat & audioFormat = AJAWavWriterAudioFormat(),
                  const AJAWavWriterVideoFormat & videoFormat = AJAWavWriterVideoFormat(),
-                 const std::string & startTimecode = "00:00:00;00", AJAWavWriterChunkFlag flags = AJAWavWriterChunkFlagStandard);
+				 const std::string & startTimecode = "00:00:00;00", AJAWavWriterChunkFlag flags = AJAWavWriterChunkFlagStandard,
+				 bool useFloatNotPCM = false);
 	bool open();
 	void close();
     
@@ -75,6 +76,7 @@ private:
     AJAWavWriterChunkFlag       mFlags;
     bool                        mLittleEndian;
     int32_t                     mSizeOfHeader;
+	bool						mUseFloatData;
 };
 
 #endif	//	AJAWAVEWRITER_H
