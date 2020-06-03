@@ -23,10 +23,6 @@
 
 #include "ntv2nubtypes.h"
 
-AJAExport int
-NTV2ConnectToNub(	const char *hostname, 
-					AJASocket *sockfd);
-
 #define NTV2_REMOTE_ACCESS_SUCCESS						  	 0
 #define NTV2_REMOTE_ACCESS_NOT_CONNECTED  				 	-1
 #define NTV2_REMOTE_ACCESS_OUT_OF_MEMORY				 	-2
@@ -56,13 +52,12 @@ NTV2ConnectToNub(	const char *hostname,
 #define NTV2_REMOTE_ACCESS_NOT_DRIVER_GET_BUILD_INFO		-26
 #define NTV2_REMOTE_ACCESS_UNIMPLEMENTED					-27
 
+AJAExport int NTV2ConnectToNub (const char *hostname,  AJASocket *sockfd);
+AJAExport int NTV2DisconnectFromNub (AJASocket & inOutSockFD);
 
-AJAExport int 
-NTV2OpenRemoteCard(	AJASocket sockfd, 
-					UWord inDeviceIndex, 
-					UWord boardType, 
-					LWord *handle,
-					NTV2NubProtocolVersion *nubProtocolVersion);
+AJAExport int NTV2OpenRemoteCard (AJASocket sockfd, UWord inDeviceIndex, UWord boardType, 
+									LWord *handle, NTV2NubProtocolVersion *nubProtocolVersion);
+AJAExport int NTV2CloseRemoteCard (AJASocket sockfd, LWord handle);
 
 AJAExport int
 NTV2ReadRegisterRemote(	AJASocket sockfd,
