@@ -33,22 +33,22 @@ using namespace std;
 #define	HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') <<               uint64_t(__x__)  << dec
 #define INSTP(_p_)			HEX16(uint64_t(_p_))
 
-#define	LDIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << __FUNCTION__ << ": " << __x__)
-#define	LDIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << __FUNCTION__ << ": " << __x__)
-#define	LDINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << __FUNCTION__ << ": " << __x__)
-#define	LDIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << __FUNCTION__ << ": " << __x__)
-#define	LDIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << __FUNCTION__ << ": " << __x__)
+#define	LDIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	LDIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	LDINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	LDIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	LDIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 
 
 CNTV2LinuxDriverInterface::CNTV2LinuxDriverInterface()
 	:	_bitfileDirectory			("../xilinx"),
 		_hDevice					(INVALID_HANDLE_VALUE),
 		_bOpenShared				(true),
-		_pDMADriverBufferAddress	(NULL),
+		_pDMADriverBufferAddress	(AJA_NULL),
 		_BA0MemorySize				(0),
-		_pDNXRegisterBaseAddress	(NULL),
+		_pDNXRegisterBaseAddress	(AJA_NULL),
 		_BA2MemorySize				(0),
-		_pXena2FlashBaseAddress		(NULL),
+		_pXena2FlashBaseAddress		(AJA_NULL),
 		_BA4MemorySize				(0)
 {
 }
@@ -254,7 +254,7 @@ CNTV2LinuxDriverInterface::ReadRegister(
 					registerMask,
 					registerShift))
 		{
-			DisplayNTV2Error("NTV2ReadRegisterRemote failed");
+			LDIFAIL("NTV2ReadRegisterRemote failed");
 			return false;
 		}
 	}
@@ -272,7 +272,7 @@ CNTV2LinuxDriverInterface::ReadRegister(
 
 		if (ioctl( _hDevice, IOCTL_NTV2_READ_REGISTER, &ra))
 		{
-			DisplayNTV2Error("IOCTL_NTV2_READ_REGISTER failed");
+			LDIFAIL("IOCTL_NTV2_READ_REGISTER failed");
 			return false;
 		}
 
@@ -307,7 +307,7 @@ CNTV2LinuxDriverInterface::WriteRegister (
 					registerMask,
 					registerShift))
 		{
-			DisplayNTV2Error("NTV2WriteRegisterRemote failed");
+			LDIFAIL("NTV2WriteRegisterRemote failed");
 			return false;
 		}
 	}
@@ -324,7 +324,7 @@ CNTV2LinuxDriverInterface::WriteRegister (
 
 		if (ioctl( _hDevice, IOCTL_NTV2_WRITE_REGISTER, &ra))
 		{
-			DisplayNTV2Error("IOCTL_NTV2_WRITE_REGISTER failed");
+			LDIFAIL("IOCTL_NTV2_WRITE_REGISTER failed");
 			return false;
 		}
 	}
@@ -340,7 +340,7 @@ CNTV2LinuxDriverInterface::RestoreHardwareProcampRegisters()
 
 	if (ioctl( _hDevice, IOCTL_NTV2_RESTORE_HARDWARE_PROCAMP_REGISTERS))
 	{
-		DisplayNTV2Error("IOCTL_NTV2_RESTORE_HARDWARE_PROCAMP_REGISTERS failed");
+		LDIFAIL("IOCTL_NTV2_RESTORE_HARDWARE_PROCAMP_REGISTERS failed");
 	}
 	else
 	{
@@ -372,7 +372,7 @@ CNTV2LinuxDriverInterface::ConfigureInterrupt (
 
 	if (ioctl( _hDevice, IOCTL_NTV2_INTERRUPT_CONTROL, &intrControlStruct))
 	{
-		DisplayNTV2Error("IOCTL_NTV2_INTERRUPT_CONTROL failed");
+		LDIFAIL("IOCTL_NTV2_INTERRUPT_CONTROL failed");
 		return false;
 	}
 
@@ -394,9 +394,7 @@ CNTV2LinuxDriverInterface::GetInterruptCount(
 		  && eInterruptType != eAuxVerticalInterrupt
 		  )
 	{
-		DisplayNTV2Error("Unsupported interrupt count request.  Only vertical, input "
-
-	"interrupts are counted.");
+		LDIFAIL("Unsupported interrupt count request. Only vertical input interrupts counted.");
 		return false;
 	}
 
@@ -407,7 +405,7 @@ CNTV2LinuxDriverInterface::GetInterruptCount(
 
 	if (ioctl( _hDevice, IOCTL_NTV2_INTERRUPT_CONTROL, &intrControlStruct))
 	{
-		DisplayNTV2Error("IOCTL_NTV2_INTERRUPT_CONTROL failed");
+		LDIFAIL("IOCTL_NTV2_INTERRUPT_CONTROL failed");
 		return false;
 	}
 
@@ -437,7 +435,7 @@ CNTV2LinuxDriverInterface::WaitForInterrupt (
 
 	if (ioctl( _hDevice, IOCTL_NTV2_WAITFOR_INTERRUPT, &waitIntrStruct))
 	{
-		DisplayNTV2Error("IOCTL_NTV2_WAITFOR_INTERRUPT failed");
+		LDIFAIL("IOCTL_NTV2_WAITFOR_INTERRUPT failed");
 		return false;
 	}
 	BumpEventCount (eInterrupt);
@@ -462,7 +460,7 @@ CNTV2LinuxDriverInterface::ControlDriverDebugMessages(
 			 	IOCTL_NTV2_CONTROL_DRIVER_DEBUG_MESSAGES,
 				&cddmStruct))
 	{
-		DisplayNTV2Error("IOCTL_NTV2_CONTROL_DRIVER_DEBUG_MESSAGES failed");
+		LDIFAIL("IOCTL_NTV2_CONTROL_DRIVER_DEBUG_MESSAGES failed");
 		return false;
 	}
 
@@ -483,7 +481,7 @@ CNTV2LinuxDriverInterface::SetupBoard()
 				0		// Suppress valgrind error
 				))
 	{
-		DisplayNTV2Error("IOCTL_NTV2_SETUP_BOARD failed");
+		LDIFAIL("IOCTL_NTV2_SETUP_BOARD failed");
 		return false;
 	}
 
@@ -508,14 +506,14 @@ CNTV2LinuxDriverInterface::MapFrameBuffers (void)
 		ULWord BA1MemorySize;
 		if (!GetBA1MemorySize(&BA1MemorySize))
 		{
-			DisplayNTV2Error ("MapFrameBuffers failed - couldn't get BA1MemorySize");
+			LDIFAIL ("MapFrameBuffers failed - couldn't get BA1MemorySize");
 			return false;
 		}
 
 		if (BA1MemorySize == 0)
 		{
-			DisplayNTV2Error ("BA1MemorySize is 0 -- module loaded with MapFrameBuffers=0?");
-			DisplayNTV2Error ("PIO mode not available, only driverbuffer DMA.");
+			LDIFAIL ("BA1MemorySize is 0 -- module loaded with MapFrameBuffers=0?");
+			LDIFAIL ("PIO mode not available, only driverbuffer DMA.");
 			return false;
 		}
 
@@ -531,7 +529,7 @@ CNTV2LinuxDriverInterface::MapFrameBuffers (void)
 		if ( _pFrameBaseAddress == MAP_FAILED )
 		{
 			_pFrameBaseAddress = NULL;
-			DisplayNTV2Error ("MapFrameBuffers failed in call to mmap()");
+			LDIFAIL ("MapFrameBuffers failed in call to mmap()");
 			return false;
 		}
 
@@ -560,7 +558,7 @@ CNTV2LinuxDriverInterface::UnmapFrameBuffers (void)
 	ULWord BA1MemorySize;
 	if (!GetBA1MemorySize(&BA1MemorySize))
 	{
-		DisplayNTV2Error ("UnmapFrameBuffers failed - couldn't get BA1MemorySize");
+		LDIFAIL ("UnmapFrameBuffers failed - couldn't get BA1MemorySize");
 		return false;
 	}
 
@@ -585,14 +583,14 @@ CNTV2LinuxDriverInterface::MapRegisters (void)
 		// Get register window size from driver
 		if (!GetBA0MemorySize(&_BA0MemorySize))
 		{
-			DisplayNTV2Error ("MapRegisters failed - couldn't get BA0MemorySize");
+			LDIFAIL ("MapRegisters failed - couldn't get BA0MemorySize");
 			_pRegisterBaseAddress = NULL;
 			return false;
 		}
 
 		if (_BA0MemorySize == 0)
 		{
-			DisplayNTV2Error ("BA0MemorySize is 0, registers not mapped.");
+			LDIFAIL ("BA0MemorySize is 0, registers not mapped.");
 			_pRegisterBaseAddress = NULL;
 			return false;
 		}
@@ -647,13 +645,13 @@ CNTV2LinuxDriverInterface::MapXena2Flash (void)
 	{
 		if ( !GetBA4MemorySize(&BA4MemorySize) )
 		{
-			DisplayNTV2Error ("MapXena2Flash failed - couldn't get BA4MemorySize");
+			LDIFAIL ("MapXena2Flash failed - couldn't get BA4MemorySize");
 			_pXena2FlashBaseAddress = NULL;
 			return false;
 		}
 		if ( BA4MemorySize == 0 )
 		{
-			DisplayNTV2Error ("MapXena2Flash failed - BA4MemorySize == 0");
+			LDIFAIL ("MapXena2Flash failed - BA4MemorySize == 0");
 			_pXena2FlashBaseAddress = NULL;
 			return false;
 		}
@@ -666,7 +664,7 @@ CNTV2LinuxDriverInterface::MapXena2Flash (void)
 		if (  _pXena2FlashBaseAddress == MAP_FAILED )
 		{
 			_pXena2FlashBaseAddress = NULL;
-			DisplayNTV2Error ("MapXena2Flash(): mmap of BAR4 for PCI Flash failed");
+			LDIFAIL ("MapXena2Flash(): mmap of BAR4 for PCI Flash failed");
 			return false;
 		}
 	}
@@ -708,12 +706,12 @@ CNTV2LinuxDriverInterface::MapDNXRegisters (void)
 	{
 		if ( !GetBA2MemorySize(&BA2MemorySize) )
 		{
-			DisplayNTV2Error ("MapDNXRegisters failed - couldn't get BA2MemorySize");
+			LDIFAIL ("MapDNXRegisters failed - couldn't get BA2MemorySize");
 			return false;
 		}
 		if ( BA2MemorySize == 0 )
 		{
-			DisplayNTV2Error ("MapDNXRegisters failed - BA2MemorySize == 0");
+			LDIFAIL ("MapDNXRegisters failed - BA2MemorySize == 0");
 			return false;
 		}
 		_BA2MemorySize = BA2MemorySize;
@@ -727,7 +725,7 @@ CNTV2LinuxDriverInterface::MapDNXRegisters (void)
 		{
 			_pDNXRegisterBaseAddress = NULL;
 			_BA2MemorySize           = 0;
-			DisplayNTV2Error ("MapDNXRegisters failed - couldn't map BAR2");
+			LDIFAIL ("MapDNXRegisters failed - couldn't map BAR2");
 			return false;
 		}
 	}
@@ -780,7 +778,7 @@ CNTV2LinuxDriverInterface::DmaTransfer (
 					offsetBytes,
 					bytes, bSync))
 		{
-			DisplayNTV2Error("DmaTransfer with remote failed");
+			LDIFAIL("DmaTransfer with remote failed");
 			return false;
 		}
 		return true;
@@ -867,7 +865,7 @@ CNTV2LinuxDriverInterface::DmaTransfer (
 	// 4 IOCTLs into one.
 	if (ioctl( _hDevice, request, &dmaControlBuf))
 	{
-		DisplayNTV2Error(errMsg);
+		LDIFAIL(errMsg);
 		return false;
 	}
 
@@ -966,7 +964,7 @@ CNTV2LinuxDriverInterface::DmaTransfer (
 	// 4 IOCTLs into one.
 	if (ioctl( _hDevice, request, &dmaControlBuf))
 	{
-		DisplayNTV2Error(errMsg);
+		LDIFAIL(errMsg);
 		return false;
 	}
 
@@ -991,7 +989,7 @@ CNTV2LinuxDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine,
 
 	if( pP2PData == NULL )
 	{
-		DisplayNTV2Error( "DmaTransfer failed: pP2PData == NULL\n" );
+		LDIFAIL( "DmaTransfer failed: pP2PData == NULL" );
 		return false;
 	}
 
@@ -1010,7 +1008,7 @@ CNTV2LinuxDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine,
 		// check for valid p2p struct
 		if( pP2PData->p2pSize != sizeof(CHANNEL_P2P_STRUCT) )
 		{
-			DisplayNTV2Error( "DmaTransfer failed: pP2PData->p2pSize != sizeof(CHANNEL_P2P_STRUCT)\n" );
+			LDIFAIL( "DmaTransfer failed: pP2PData->p2pSize != sizeof(CHANNEL_P2P_STRUCT)" );
 			return false;
 		}
 	}
@@ -1031,7 +1029,7 @@ CNTV2LinuxDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine,
 
 	if (ioctl( _hDevice, IOCTL_NTV2_DMA_P2P, &dmaP2PStruct))
 	{
-		DisplayNTV2Error( " DmaTransfer failed: IOCTL error\n");
+		LDIFAIL( " DmaTransfer failed: IOCTL error");
 		return false;
 	}
 
@@ -1054,7 +1052,7 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 	{
 		if (!CNTV2DriverInterface::AutoCirculate(autoCircData))
 		{
-			DisplayNTV2Error("NTV2AutoCirculateRemote failed");
+			LDIFAIL("NTV2AutoCirculateRemote failed");
 			return false;
 		}
 		return true;
@@ -1082,7 +1080,7 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 									&autoCircData);
 				if (result)
 				{
-					DisplayNTV2Error("IOCTL_NTV2_AUTOCIRCULATE_CONTROL failed");
+					LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_CONTROL failed");
 
 					return false;
 				}
@@ -1096,7 +1094,7 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 							IOCTL_NTV2_AUTOCIRCULATE_STATUS,
 							(AUTOCIRCULATE_STATUS_STRUCT *)autoCircData.pvVal1))
 				{
-					DisplayNTV2Error("IOCTL_NTV2_AUTOCIRCULATE_STATUS, failed");
+					LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_STATUS, failed");
 					return false;
 				}
 				return true;
@@ -1116,7 +1114,7 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 							IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP,
 						    &acFrameStampCombo))
 				{
-					DisplayNTV2Error("IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP failed");
+					LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP failed");
 					return false;
 				}
 
@@ -1143,7 +1141,7 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 							IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP,
 						    &acFrameStampCombo))
 				{
-					DisplayNTV2Error("IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP failed");
+					LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP failed");
 					return false;
 				}
 
@@ -1164,7 +1162,7 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 				{
 					if (acTransfer->audioBufferSize % 4)
 					{
-						DisplayNTV2Error ("TransferAutoCirculate failed - audio buffer size not mod 4");
+						LDIFAIL ("TransferAutoCirculate failed - audio buffer size not mod 4");
 						return false;
 					}
 
@@ -1175,7 +1173,7 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 						  && (unsigned long)acTransfer->audioBuffer % 4
 					   )
 					{
-						DisplayNTV2Error ("TransferAutoCirculate failed - audio buffer address not mod 4");
+						LDIFAIL ("TransferAutoCirculate failed - audio buffer address not mod 4");
 						return false;
 					}
 				}
@@ -1207,7 +1205,7 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 							IOCTL_NTV2_AUTOCIRCULATE_TRANSFER,
 							&acXferCombo))
 				{
-					DisplayNTV2Error("IOCTL_NTV2_AUTOCIRCULATE_TRANSFER failed");
+					LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_TRANSFER failed");
 					return false;
 				}
 				// Copy the results back into the status buffer we were
@@ -1225,7 +1223,7 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 				{
 					if (acTransfer->audioBufferSize % 4)
 					{
-						DisplayNTV2Error ("TransferAutoCirculate failed - audio buffer size not mod 4");
+						LDIFAIL ("TransferAutoCirculate failed - audio buffer size not mod 4");
 						return false;
 					}
 
@@ -1236,7 +1234,7 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 						  && (unsigned long)acTransfer->audioBuffer % 4
 					   )
 					{
-						DisplayNTV2Error ("TransferAutoCirculate failed - audio buffer address not mod 4");
+						LDIFAIL ("TransferAutoCirculate failed - audio buffer address not mod 4");
 						return false;
 					}
 				}
@@ -1268,7 +1266,7 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 							IOCTL_NTV2_AUTOCIRCULATE_TRANSFER,
 							&acXferCombo))
 				{
-					DisplayNTV2Error("IOCTL_NTV2_AUTOCIRCULATE_TRANSFER failed");
+					LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_TRANSFER failed");
 					return false;
 				}
 				// Copy the results back into the status buffer we were
@@ -1286,7 +1284,7 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 				{
 					if (acTransfer->audioBufferSize % 4)
 					{
-						DisplayNTV2Error ("TransferAutoCirculate failed - audio buffer size not mod 4");
+						LDIFAIL ("TransferAutoCirculate failed - audio buffer size not mod 4");
 						return false;
 					}
 
@@ -1297,7 +1295,7 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 						  && (unsigned long)acTransfer->audioBuffer % 4
 					   )
 					{
-						DisplayNTV2Error ("TransferAutoCirculate failed - audio buffer address not mod 4");
+						LDIFAIL ("TransferAutoCirculate failed - audio buffer address not mod 4");
 						return false;
 					}
 				}
@@ -1330,7 +1328,7 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 							IOCTL_NTV2_AUTOCIRCULATE_TRANSFER,
 							&acXferCombo))
 				{
-					DisplayNTV2Error("IOCTL_NTV2_AUTOCIRCULATE_TRANSFER failed");
+					LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_TRANSFER failed");
 					return false;
 				}
 				// Copy the results back into the status buffer we were
@@ -1350,14 +1348,14 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 							IOCTL_NTV2_AUTOCIRCULATE_CAPTURETASK,
 						    &acFrameStampCombo))
 				{
-					DisplayNTV2Error("IOCTL_NTV2_AUTOCIRCULATE_CAPTURETASK failed");
+					LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_CAPTURETASK failed");
 					return false;
 				}
 
 				return true;
 			}
 		default:
-			DisplayNTV2Error("Unsupported AC command type in AutoCirculate()\n");
+			LDIFAIL("Unsupported AC command type in AutoCirculate()");
 			return false;
 		}
 	}
@@ -1370,14 +1368,12 @@ CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 			return false;	//	NULL message pointer
 
 		if (IsRemote())
-		{
-			return false;	//	Implement NTV2Message on nub
-		}
+			return CNTV2DriverInterface::NTV2Message(pInMessage);	//	Implement NTV2Message on nub
 		NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
-		if( ioctl( _hDevice,  IOCTL_AJANTV2_MESSAGE,  pInMessage) )
+		if (ioctl(_hDevice,  IOCTL_AJANTV2_MESSAGE,  pInMessage))
 		{
-			DisplayNTV2Error("IOCTL_AJANTV2_MESSAGE failed\n");
+			LDIFAIL("IOCTL_AJANTV2_MESSAGE failed");
 			return false;
 		}
 
@@ -1464,7 +1460,8 @@ bool CNTV2LinuxDriverInterface::DisplayNTV2Error (const char *str)
 {
 	if ( _displayErrorMessage )
 	{
-		fprintf(stderr, "CNTV2Card: %s\n", str);
+		if (str)
+			LDIFAIL(str);
 		return true;
 	}
 
@@ -1491,25 +1488,25 @@ CNTV2LinuxDriverInterface::SleepMs(LWord milliseconds)
 
    req.tv_sec = milliseconds / 1000;
    req.tv_nsec = 1000000UL *(milliseconds - (1000 * req.tv_sec));
-   return nanosleep(&req, NULL); // NULL: don't care about remaining time if interrupted for now
+   return nanosleep(&req, AJA_NULL); // NULL: don't care about remaining time if interrupted for now
 }
 // Method: MapDMADriverBuffer(Maps 8 Frames worth of memory from kernel space to user space.
 // Input:
 // Output:
 bool CNTV2LinuxDriverInterface::MapDMADriverBuffer()
 {
-	if ( _pDMADriverBufferAddress == NULL )
+	if ( _pDMADriverBufferAddress == AJA_NULL )
 	{
 		ULWord numDmaDriverBuffers;
 		if (!GetDMANumDriverBuffers(&numDmaDriverBuffers))
 		{
-			DisplayNTV2Error("CNTV2LinuxDriverInterface::MapDMADriverBuffer(): GetDMANumDriverBuffers() failed");
+			LDIFAIL("GetDMANumDriverBuffers() failed");
 			return false;
 		}
 
 		if (numDmaDriverBuffers == 0)
 		{
-			DisplayNTV2Error("CNTV2LinuxDriverInterface::MapDMADriverBuffer(): numDmaDriverBuffers == 0");
+			LDIFAIL("numDmaDriverBuffers == 0");
 			return false;
 		}
 
@@ -1519,7 +1516,7 @@ bool CNTV2LinuxDriverInterface::MapDMADriverBuffer()
 		_pDMADriverBufferAddress = (ULWord *) mmap(NULL,GetFrameBufferSize()*numDmaDriverBuffers,PROT_READ | PROT_WRITE,MAP_SHARED,_hDevice,0x2000);
 		if ( _pDMADriverBufferAddress == MAP_FAILED )
 		{
-			_pDMADriverBufferAddress = NULL;
+			_pDMADriverBufferAddress = AJA_NULL;
 			return false;
 		}
 	}
@@ -1530,7 +1527,7 @@ bool CNTV2LinuxDriverInterface::MapDMADriverBuffer()
 
 bool CNTV2LinuxDriverInterface::GetDMADriverBufferAddress(ULWord** pDMADriverBufferAddress)
 {
-	if ( _pDMADriverBufferAddress == NULL )
+	if ( _pDMADriverBufferAddress == AJA_NULL )
 	{
 		if ( MapDMADriverBuffer() == false )
 			return false;
@@ -1547,24 +1544,24 @@ bool CNTV2LinuxDriverInterface::GetDMADriverBufferAddress(ULWord** pDMADriverBuf
 bool CNTV2LinuxDriverInterface::UnmapDMADriverBuffer()
 {
 
-	if ( _pDMADriverBufferAddress != NULL )
+	if ( _pDMADriverBufferAddress )
 	{
 		ULWord numDmaDriverBuffers;
 		if (!GetDMANumDriverBuffers(&numDmaDriverBuffers))
 		{
-			DisplayNTV2Error("CNTV2LinuxDriverInterface::UnmapDMADriverBuffer(): GetDMANumDriverBuffers() failed");
+			LDIFAIL("GetDMANumDriverBuffers() failed");
 			return false;
 		}
 
 		if (numDmaDriverBuffers == 0)
 		{
 
-			DisplayNTV2Error("CNTV2LinuxDriverInterface::UnmapDMADriverBuffer(): numDmaDriverBuffers == 0");
+			LDIFAIL("numDmaDriverBuffers == 0");
 			return false;
 		}
 		munmap(_pDMADriverBufferAddress, GetFrameBufferSize() * numDmaDriverBuffers);
 	}
-	_pDMADriverBufferAddress = NULL;
+	_pDMADriverBufferAddress = AJA_NULL;
 
 	return true;
 
@@ -1605,7 +1602,7 @@ bool CNTV2LinuxDriverInterface::DmaWriteFrameDriverBuffer(NTV2DMAEngine DMAEngin
 
 	if (ioctl( _hDevice, IOCTL_NTV2_DMA_WRITE_FRAME, &dmaControlBuf))
 	{
-		DisplayNTV2Error("IOCTL_NTV2_DMA_WRITE_FRAME failed");
+		LDIFAIL("IOCTL_NTV2_DMA_WRITE_FRAME failed");
 		return false;
 	}
 
@@ -1650,7 +1647,7 @@ bool CNTV2LinuxDriverInterface::DmaWriteFrameDriverBuffer(NTV2DMAEngine DMAEngin
 
 	if (ioctl( _hDevice, IOCTL_NTV2_DMA_WRITE_FRAME, &dmaControlBuf))
 	{
-		DisplayNTV2Error("IOCTL_NTV2_DMA_WRITE_FRAME failed");
+		LDIFAIL("IOCTL_NTV2_DMA_WRITE_FRAME failed");
 		return false;
 	}
 
@@ -1698,13 +1695,13 @@ bool CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer(NTV2DMAEngine DMAEngine
 
 	if (downSample && !bPrintedDownsampleDeprecatedMsg)
 	{
-		fprintf(stderr, "CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer(): downSample is deprecated.\n");
+		LDIWARN("downSample is deprecated");
 		bPrintedDownsampleDeprecatedMsg = true;
 	}
 
 	if (ioctl( _hDevice, IOCTL_NTV2_DMA_READ_FRAME, &dmaControlBuf))
 	{
-		DisplayNTV2Error("IOCTL_NTV2_DMA_READ_FRAME failed");
+		LDIFAIL("IOCTL_NTV2_DMA_READ_FRAME failed");
 		return false;
 	}
 
@@ -1752,13 +1749,13 @@ bool CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer(NTV2DMAEngine DMAEngine
 
 	if (downSample && !bPrintedDownsampleDeprecatedMsg)
 	{
-		fprintf(stderr, "CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer(): downSample is deprecated.\n");
+		LDIWARN("downSample is deprecated");
 		bPrintedDownsampleDeprecatedMsg = true;
 	}
 
 	if (ioctl( _hDevice, IOCTL_NTV2_DMA_READ_FRAME, &dmaControlBuf))
 	{
-		DisplayNTV2Error("IOCTL_NTV2_DMA_READ_FRAME failed");
+		LDIFAIL("IOCTL_NTV2_DMA_READ_FRAME failed");
 		return false;
 	}
 
@@ -1814,7 +1811,7 @@ CNTV2LinuxDriverInterface::DmaWriteWithOffsets(
 
 	if (ioctl( _hDevice, request, &dmaControlBuf))
 	{
-		DisplayNTV2Error(errMsg);
+		LDIFAIL(errMsg);
 		return false;
 	}
 
@@ -1872,7 +1869,7 @@ CNTV2LinuxDriverInterface::DmaReadWithOffsets(
 
 	if (ioctl( _hDevice, request, &dmaControlBuf))
 	{
-		DisplayNTV2Error(errMsg);
+		LDIFAIL(errMsg);
 		return false;
 	}
 

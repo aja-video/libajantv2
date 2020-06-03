@@ -485,7 +485,7 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IOIP_2110:		return "ioip_s2110";
 		case DEVICE_ID_KONA1:			return "kona1";
 		case DEVICE_ID_KONAHDMI:		return "kona_hdmi_4rx";
-		case DEVICE_ID_KONA5:			return "kona5";
+		case DEVICE_ID_KONA5:			return "kona5_retail";
 		case DEVICE_ID_KONA5_8KMK:		return "kona5_8k_mk";
 		case DEVICE_ID_KONA5_8K:		return "kona5_8k";
 		case DEVICE_ID_KONA5_2X4K:		return "kona5_2x4k";
