@@ -398,7 +398,7 @@ AJAExport bool GetFramesPerSecond (const NTV2FrameRate inFrameRate, ULWord & out
 	@param[out]	outFractionNumerator	Receives the numerator of the fractional frame rate.
 										This will be zero if the function returns false.
 	@param[out]	outFractionDenominator	Receives the denominator of the fractional frame rate.
-										If the function is successful, this will be 100.
+										If the function is successful, this will be 100 or 1.
 										This will be zero if the function returns false.
 	@return		True if successful;  otherwise false.
 **/
