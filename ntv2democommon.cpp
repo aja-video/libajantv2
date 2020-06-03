@@ -357,6 +357,49 @@ class DemoCommonInitializer
 static const DemoCommonInitializer	gInitializer;
 
 
+bool NTV2FrameData::LockAll (CNTV2Card & inDevice)
+{
+	size_t errorCount(0);
+	if (fVideoBuffer)
+		if (!inDevice.DMABufferLock(fVideoBuffer, true))
+			errorCount++;
+	if (fVideoBuffer2)
+		if (!inDevice.DMABufferLock(fVideoBuffer2, true))
+			errorCount++;
+	if (fAudioBuffer)
+		if (!inDevice.DMABufferLock(fAudioBuffer, true))
+			errorCount++;
+	if (fAncBuffer)
+		if (!inDevice.DMABufferLock(fAncBuffer, true))
+			errorCount++;
+	if (fAncBuffer2)
+		if (!inDevice.DMABufferLock(fAncBuffer2, true))
+			errorCount++;
+	return !errorCount;
+}
+
+bool NTV2FrameData::UnlockAll (CNTV2Card & inDevice)
+{
+	size_t errorCount(0);
+	if (fVideoBuffer)
+		if (!inDevice.DMABufferUnlock(fVideoBuffer))
+			errorCount++;
+	if (fVideoBuffer2)
+		if (!inDevice.DMABufferUnlock(fVideoBuffer2))
+			errorCount++;
+	if (fAudioBuffer)
+		if (!inDevice.DMABufferUnlock(fAudioBuffer))
+			errorCount++;
+	if (fAncBuffer)
+		if (!inDevice.DMABufferUnlock(fAncBuffer))
+			errorCount++;
+	if (fAncBuffer2)
+		if (!inDevice.DMABufferUnlock(fAncBuffer2))
+			errorCount++;
+	return !errorCount;
+}
+
+
 bool CNTV2DemoCommon::IsValidDevice (const string & inDeviceSpec)
 {
 	CNTV2Card	device;

@@ -14,6 +14,7 @@
 #include "ntv2rp188.h"
 #include "ntv2publicinterface.h"
 #include "ntv2testpatterngen.h"
+#include "ntv2card.h"
 #include "ajabase/common/timecodeburn.h"
 #include "ajabase/system/debug.h"
 #include <algorithm>
@@ -114,17 +115,19 @@ AJAExport class NTV2FrameData
 		inline ULWord	AncBuffer2Size (void) const			{return fAncBuffer2.GetByteCount();}
 		inline ULWord	NumCapturedAnc2Bytes (void) const	{return fNumAnc2Bytes;}
 
-		bool			IsNULL (void) const					{return fVideoBuffer.IsNULL() && fVideoBuffer2.IsNULL()
+		inline bool		IsNULL (void) const					{return fVideoBuffer.IsNULL() && fVideoBuffer2.IsNULL()
 																	&& fAudioBuffer.IsNULL() && fAncBuffer.IsNULL()
 																	&& fAncBuffer2.IsNULL();}
 		//	Modifier Methods
-		void			ZeroBuffers (void)					{	if (fVideoBuffer)	fVideoBuffer.Fill(0ULL);
+		inline void		ZeroBuffers (void)					{	if (fVideoBuffer)	fVideoBuffer.Fill(0ULL);
 																if (fVideoBuffer2)	fVideoBuffer2.Fill(0LL);
 																if (fAudioBuffer)	fAudioBuffer.Fill(0LL);
 																if (fAncBuffer)		fAncBuffer.Fill(0LL);
 																if (fAncBuffer2)	fAncBuffer2.Fill(0LL);
 																fNumAudioBytes = fNumAncBytes = fNumAnc2Bytes = 0;
 															}
+		bool			LockAll								(CNTV2Card & inDevice);
+		bool			UnlockAll							(CNTV2Card & inDevice);
 
 		bool			Reset (void)						{return fVideoBuffer.Allocate(0) && fVideoBuffer2.Allocate(0)
 																	&& fAudioBuffer.Allocate(0) && fAncBuffer.Allocate(0)
