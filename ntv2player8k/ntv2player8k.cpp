@@ -291,7 +291,8 @@ AJAStatus NTV2Player8K::SetUpAudio (void)
     if (mUseHDMIOut)
     {
         mDevice.SetHDMIOutAudioRate(NTV2_AUDIO_48K);
-        mDevice.SetHDMIOutAudioSource8Channel(NTV2_AudioChannel1_8, mAudioSystem);
+		mDevice.SetHDMIOutAudioFormat(NTV2_AUDIO_FORMAT_LPCM);
+		mDevice.SetHDMIOutAudioSource8Channel(NTV2_AudioChannel1_8, mAudioSystem);
     }
 
 	return AJA_STATUS_SUCCESS;
