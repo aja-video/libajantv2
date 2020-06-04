@@ -15,6 +15,7 @@
 
 #include "ajabase/common/bytestream.h"
 #include "ajabase/common/common.h"
+#include "ajabase/common/graph.h"
 #include "ajabase/common/guid.h"
 #include "ajabase/common/performance.h"
 #include "ajabase/common/timebase.h"
@@ -66,6 +67,43 @@ TEST_SUITE("types" * doctest::description("functions in ajabase/common/types.h")
     }
 
 } //types
+
+
+void graph_marker() {}
+TEST_SUITE("graph" * doctest::description("functions in ajabase/common/graph.h")) {
+    TEST_CASE("GraphVertex")
+    {
+        aja::GraphVertex* a = new aja::GraphVertex("A");
+        aja::GraphVertex* b = new aja::GraphVertex("B");
+        aja::GraphVertex* c = new aja::GraphVertex("C");
+        aja::GraphVertex* d = new aja::GraphVertexPayload<int>("D");
+        CHECK(a->GetID() == "A");
+
+        auto d_cast = static_cast<aja::GraphVertexPayload<int>*>(d);
+        int val = 42;
+        d_cast->SetData(&val);
+
+        aja::GraphEdge* a_to_b = new aja::GraphEdge("A->B");
+        aja::GraphEdge* b_to_c = new aja::GraphEdge("B->C");
+        aja::GraphEdge* a_to_c = new aja::GraphEdge("A->C");
+        aja::GraphEdge* c_to_a = new aja::GraphEdge("C->A");
+        aja::GraphEdge* a_to_d = new aja::GraphEdge("A->D");
+        a_to_b->Connect(a, b);
+        b_to_c->Connect(b, c);
+        a_to_c->Connect(a, c);
+        c_to_a->Connect(c, a);
+        a_to_d->Connect(a, d);
+
+        aja::Graph* g = new aja::Graph();
+        // add unique vertices to the graph
+        CHECK(g->AddVertex(a) == true);
+        CHECK(g->AddVertex(b) == true);
+        CHECK(g->AddVertex(c) == true);
+        CHECK(g->AddVertex(d) == true);
+        // try to add vertex that already exists in the graph
+        CHECK(g->AddVertex(a) == false);
+    }
+}
 
 void bytestream_marker() {}
 TEST_SUITE("bytestream" * doctest::description("functions in ajabase/common/bytestream.h")) {
