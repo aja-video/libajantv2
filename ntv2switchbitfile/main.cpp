@@ -16,6 +16,7 @@
 #include "ntv2devicescanner.h"
 #include "ntv2utils.h"
 #include "ntv2bitfile.h"
+#include "ntv2bitfilemanager.h"
 #include "ajabase/common/options_popt.h"
 #include "ajabase/common/common.h"
 
@@ -35,6 +36,7 @@ int main(int argc, const char ** argv)
     char *			pDeviceSpec 	(AJA_NULL);			//	Device argument
     char *			pDeviceID	 	(AJA_NULL);			//	Device ID argument
     int				isVerbose		(0);				//	Verbose output?
+	int				isInfo			(0);				//	Info output?
 	NTV2DeviceID	deviceID		(NTV2DeviceID(0));	//	Desired device ID to be loaded
 	poptContext		optionsContext;						//	Context for parsing command line arguments
 	int				resultCode		(0);
@@ -42,6 +44,7 @@ int main(int argc, const char ** argv)
 	const struct poptOption userOptionsTable[] =
 	{
 		{ "device",	'd', POPT_ARG_STRING | POPT_ARGFLAG_OPTIONAL, &pDeviceSpec,	0,	"which device to use",	"index#, serial#, or model"	},
+		{ "info",	'i', POPT_ARG_NONE   | POPT_ARGFLAG_OPTIONAL, &isInfo,		0,	"bitfile info?",		AJA_NULL },
 		{ "load",	'l', POPT_ARG_STRING | POPT_ARGFLAG_OPTIONAL, &pDeviceID,	'l',"device ID to load",	"index# or hex32value" },
 		{ "verbose",'v', POPT_ARG_NONE   | POPT_ARGFLAG_OPTIONAL, &isVerbose,	0,	"verbose output?",		AJA_NULL },
 		POPT_AUTOHELP
@@ -135,7 +138,7 @@ int main(int argc, const char ** argv)
 		}
 
 		//	Print loadable device list...
-		if (!deviceID)
+		if (!deviceID && !isInfo)
 		{
 			const NTV2DeviceIDList deviceList (device.GetDynamicDeviceList());
 			if (deviceList.empty())
@@ -149,6 +152,45 @@ int main(int argc, const char ** argv)
 						<< " (" << xHEX0N(deviceList.at(ndx),8) << ")" << endl;
 				else
 					cout << DECN(ndx+1,2) << ": " << ::NTV2DeviceIDToString(deviceList.at(ndx)) << endl;
+			}
+		}
+
+		// Print detailed bitfile info
+		if (isInfo)
+		{
+			//	Get current design ID and version...
+			NTV2ULWordVector reg;
+			device.BitstreamStatus(reg);
+			ULWord designID (CNTV2Bitfile::GetDesignID(reg[BITSTREAM_VERSION]));
+			ULWord designVersion (CNTV2Bitfile::GetDesignVersion(reg[BITSTREAM_VERSION]));
+			NTV2DeviceID currentDeviceID (device.GetDeviceID());
+			ULWord bitfileID (CNTV2Bitfile::ConvertToBitfileID(currentDeviceID));
+			UWord bitfileVersion(0);
+			string flags = " Active";
+			device.GetRunningFirmwareRevision(bitfileVersion);
+			cout << std::setw(20) << std::left << ::NTV2DeviceIDToString(currentDeviceID) << std::right
+				 << " DevID " << xHEX0N(currentDeviceID,8)
+				 << "  DesID " << xHEX0N(designID,2) << "  DesVer " << xHEX0N(designVersion,2)
+				 << "  BitID " << xHEX0N(bitfileID,2) << "  BitVer " << xHEX0N(bitfileVersion,2)
+				 << " " << flags << endl;
+
+			CNTV2BitfileManager bitMan;
+			bitMan.AddDirectory(".");
+			const NTV2BitfileInfoList infoList(bitMan.GetBitfileInfoList());
+			for (NTV2BitfileInfoListConstIter it(infoList.begin());  it != infoList.end();  ++it)
+			{
+				flags = "";
+				if (it->bitfileFlags & NTV2_BITFILE_FLAG_TANDEM)
+					flags += " Tandem";
+				if (it->bitfileFlags & NTV2_BITFILE_FLAG_PARTIAL)
+					flags += " Partial";
+				if (it->bitfileFlags & NTV2_BITFILE_FLAG_CLEAR)
+					flags += " Clear";
+				cout << std::setw(20) << std::left << ::NTV2DeviceIDToString(it->deviceID) << std::right
+					 << " DevID " << xHEX0N(it->deviceID,8)
+					 << "  DesID " << xHEX0N(it->designID,2) << "  DesVer " << xHEX0N(it->designVersion,2)
+					 << "  BitID " << xHEX0N(it->bitfileID,2) << "  BitVer " << xHEX0N(it->bitfileVersion,2)
+					 << " " << flags << endl;
 			}
 		}
 		
