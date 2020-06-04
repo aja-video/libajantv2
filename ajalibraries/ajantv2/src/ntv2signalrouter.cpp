@@ -589,6 +589,8 @@ void RoutingExpert::InitOutputXpt2String(void)
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptMultiLinkOut1DS2,	"MLOut1DS2");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptMultiLinkOut1DS3,	"MLOut1DS3");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptMultiLinkOut1DS4,	"MLOut1DS4");
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_Xpt3DLUT1RGB,	"3DLUT1RGB");	//	Formerly "LUT1RGB"
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_Xpt3DLUT1YUV,	"3DLUT1YUV");
 
 	//	gString2OutputXpt
 	for (OutputXpt2StringConstIter iter (gOutputXpt2String.begin ());  iter != gOutputXpt2String.end ();  ++iter)
