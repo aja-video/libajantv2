@@ -1846,6 +1846,39 @@ bool GetFramesPerSecond (const NTV2FrameRate inFrameRate, ULWord & outFractionNu
 	return true;
 }
 
+// NDI prefers Numerator/Denominator this way, appears most apps send this
+bool GetFramesPerSecondNDI (const NTV2FrameRate inFrameRate, ULWord & outFractionNumerator, ULWord & outFractionDenominator)
+{
+	switch (inFrameRate)
+	{
+	case NTV2_FRAMERATE_12000:		outFractionNumerator = 120;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_11988:		outFractionNumerator = 11988;	outFractionDenominator = 100;	break;
+	case NTV2_FRAMERATE_6000:		outFractionNumerator = 60;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_5994:		outFractionNumerator = 5994;	outFractionDenominator = 100;	break;
+	case NTV2_FRAMERATE_5000:		outFractionNumerator = 50;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_4800:		outFractionNumerator = 48;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_4795:		outFractionNumerator = 4795;	outFractionDenominator = 100;	break;
+	case NTV2_FRAMERATE_3000:		outFractionNumerator = 30;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_2997:		outFractionNumerator = 2997;	outFractionDenominator = 100;	break;
+	case NTV2_FRAMERATE_2500:		outFractionNumerator = 25;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_2400:		outFractionNumerator = 24;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_2398:		outFractionNumerator = 2398;	outFractionDenominator = 100;	break;
+	case NTV2_FRAMERATE_1900:		outFractionNumerator = 19;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_1898:		outFractionNumerator = 1898;	outFractionDenominator = 100;	break;
+	case NTV2_FRAMERATE_1800:		outFractionNumerator = 18;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_1798:		outFractionNumerator = 1798;	outFractionDenominator = 100;	break;
+	case NTV2_FRAMERATE_1500:		outFractionNumerator = 15;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_1498:		outFractionNumerator = 1498;	outFractionDenominator = 100;	break;
+#if defined(_DEBUG)
+	case NTV2_NUM_FRAMERATES:
+	case NTV2_FRAMERATE_UNKNOWN:	outFractionNumerator = 0;		outFractionDenominator = 0;		return false;
+#else
+	default:						outFractionNumerator = 0;		outFractionDenominator = 0;		return false;
+#endif
+	}
+	return true;
+}
+
 
 NTV2Standard GetNTV2StandardFromScanGeometry(UByte geometry, bool progressiveTransport)
 {
