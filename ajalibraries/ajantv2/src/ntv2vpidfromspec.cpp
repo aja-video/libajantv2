@@ -43,6 +43,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	bool	is6G					= false;
 	bool	is12G					= false;
 	bool	enableBT2020			= false;
+	bool	isMultiLink				= false;
 	VPIDChannel vpidChannel			= VPIDChannel_1;
 
 	uint8_t	byte1 = 0;
@@ -74,6 +75,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	transferCharacteristics = pInVPIDSpec->transferCharacteristics;
 	colorimetry				= pInVPIDSpec->colorimetry;
 	luminance				= pInVPIDSpec->luminance;
+	isMultiLink				= pInVPIDSpec->isMultiLink;
 
 
 	if (! NTV2_IS_WIRE_FORMAT (outputFormat))
@@ -189,8 +191,8 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	case NTV2_FORMAT_1080p_2K_5994_B:
 	case NTV2_FORMAT_1080p_2K_6000_A:
 	case NTV2_FORMAT_1080p_2K_6000_B:
-		if (isDualLink)
-			byte1 = isLevelB ? (uint8_t) VPIDStandard_1080_DualLink_3Gb : (uint8_t) VPIDStandard_1080_DualLink;		//	0x8A : 0x87
+		if (isRGB)
+			byte1 = isLevelB ? (uint8_t) VPIDStandard_1080_Dual_3Gb : (uint8_t) VPIDStandard_1080_Dual_3Ga;		//	0x95 : 0x94
 		else
 			byte1 = isLevelB ? (uint8_t) VPIDStandard_1080_DualLink_3Gb : (uint8_t) VPIDStandard_1080_3Ga;			//	0x8A : 0x89
 		break;
@@ -211,26 +213,6 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	case NTV2_FORMAT_4x2048x1080p_2500:
 	case NTV2_FORMAT_4x2048x1080p_2997:
 	case NTV2_FORMAT_4x2048x1080p_3000:
-    case NTV2_FORMAT_3840x2160psf_2398:
-    case NTV2_FORMAT_3840x2160psf_2400:
-    case NTV2_FORMAT_3840x2160psf_2500:
-    case NTV2_FORMAT_3840x2160p_2398:
-    case NTV2_FORMAT_3840x2160p_2400:
-    case NTV2_FORMAT_3840x2160p_2500:
-    case NTV2_FORMAT_3840x2160p_2997:
-    case NTV2_FORMAT_3840x2160p_3000:
-    case NTV2_FORMAT_3840x2160psf_2997:
-    case NTV2_FORMAT_3840x2160psf_3000:
-    case NTV2_FORMAT_4096x2160psf_2398:
-    case NTV2_FORMAT_4096x2160psf_2400:
-    case NTV2_FORMAT_4096x2160psf_2500:
-    case NTV2_FORMAT_4096x2160p_2398:
-    case NTV2_FORMAT_4096x2160p_2400:
-    case NTV2_FORMAT_4096x2160p_2500:
-    case NTV2_FORMAT_4096x2160p_2997:
-    case NTV2_FORMAT_4096x2160p_3000:
-    case NTV2_FORMAT_4096x2160psf_2997:
-    case NTV2_FORMAT_4096x2160psf_3000:
 		if (isTSI)
 		{
 			if(is12G)
@@ -260,6 +242,38 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 				byte1 = isDualLink? (uint8_t) VPIDStandard_1080_DualLink : (uint8_t) VPIDStandard_1080;  //  0x87 : 0x85
 		}
 		break;
+    case NTV2_FORMAT_3840x2160psf_2398:
+    case NTV2_FORMAT_3840x2160psf_2400:
+    case NTV2_FORMAT_3840x2160psf_2500:
+    case NTV2_FORMAT_3840x2160p_2398:
+    case NTV2_FORMAT_3840x2160p_2400:
+    case NTV2_FORMAT_3840x2160p_2500:
+    case NTV2_FORMAT_3840x2160p_2997:
+    case NTV2_FORMAT_3840x2160p_3000:
+    case NTV2_FORMAT_3840x2160psf_2997:
+    case NTV2_FORMAT_3840x2160psf_3000:
+    case NTV2_FORMAT_4096x2160psf_2398:
+    case NTV2_FORMAT_4096x2160psf_2400:
+    case NTV2_FORMAT_4096x2160psf_2500:
+    case NTV2_FORMAT_4096x2160p_2398:
+    case NTV2_FORMAT_4096x2160p_2400:
+    case NTV2_FORMAT_4096x2160p_2500:
+    case NTV2_FORMAT_4096x2160p_2997:
+    case NTV2_FORMAT_4096x2160p_3000:
+    case NTV2_FORMAT_4096x2160psf_2997:
+    case NTV2_FORMAT_4096x2160psf_3000:
+		if(isMultiLink)
+		{
+			if (isLevelB)
+				byte1 = isDualLink? (uint8_t) VPIDStandard_2160_QuadDualLink_3Gb : (uint8_t) VPIDStandard_2160_DualLink;  //  0x98 : 0x96
+			else
+				byte1 = (uint8_t) VPIDStandard_2160_QuadLink_3Ga;  //  0x97
+		}
+		else
+		{
+			byte1 = isDualLink ? (uint8_t) VPIDStandard_2160_Single_12Gb : (uint8_t) VPIDStandard_2160_Single_6Gb; //0xCE : 0xC0
+		}
+		break;
 
 	case NTV2_FORMAT_4x1920x1080p_5000:
 	case NTV2_FORMAT_4x1920x1080p_5994:
@@ -269,6 +283,20 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	case NTV2_FORMAT_4x2048x1080p_5000:
 	case NTV2_FORMAT_4x2048x1080p_5994:
 	case NTV2_FORMAT_4x2048x1080p_6000:
+		if (isTSI)
+		{
+			if(is12G)
+				byte1 = VPIDStandard_2160_Single_12Gb; // 0xCE
+			else if(is6G)
+				byte1 = VPIDStandard_2160_Single_6Gb; // 0xC0
+			else
+				byte1 = isLevelB ? (uint8_t) VPIDStandard_2160_QuadDualLink_3Gb : (uint8_t) VPIDStandard_2160_QuadLink_3Ga;	//	0x98 : 0x97
+		}
+		else
+		{
+			byte1 = isLevelB ? (uint8_t) VPIDStandard_1080_DualLink_3Gb : (uint8_t) VPIDStandard_1080_3Ga;		//	0x8A : 0x89
+		}
+		break;
     case NTV2_FORMAT_3840x2160p_5000:
     case NTV2_FORMAT_3840x2160p_5994:
     case NTV2_FORMAT_3840x2160p_6000:
@@ -279,21 +307,16 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
     case NTV2_FORMAT_4096x2160p_6000:
     case NTV2_FORMAT_4096x2160p_11988:
     case NTV2_FORMAT_4096x2160p_12000:
-		if (isTSI)
+		if(isMultiLink)
 		{
-			if(is12G)
-				byte1 = VPIDStandard_2160_Single_12Gb;
-			else if(is6G)
-				byte1 = VPIDStandard_2160_Single_6Gb;
-			else
-				byte1 = isLevelB ? (uint8_t) VPIDStandard_2160_QuadDualLink_3Gb : (uint8_t) VPIDStandard_2160_QuadLink_3Ga;	//	0x98 : 0x97
+			byte1 = isLevelB ? (uint8_t) VPIDStandard_2160_QuadDualLink_3Gb : (uint8_t) VPIDStandard_2160_QuadLink_3Ga;	//	0x98 : 0x97
 		}
 		else
 		{
-			byte1 = isLevelB ? (uint8_t) VPIDStandard_1080_DualLink_3Gb : (uint8_t) VPIDStandard_1080_3Ga;		//	0x8A : 0x89
+			byte1 = isDualLink ? (uint8_t) VPIDStandard_2160_DualLink_12Gb : (uint8_t) VPIDStandard_2160_Single_12Gb; // 0xD1 : 0xCE
 		}
 		break;
-		
+
 	case NTV2_FORMAT_4x3840x2160p_2398:
 	case NTV2_FORMAT_4x3840x2160p_2400:
 	case NTV2_FORMAT_4x3840x2160p_2500:
@@ -304,7 +327,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	case NTV2_FORMAT_4x4096x2160p_2500:
 	case NTV2_FORMAT_4x4096x2160p_2997:
 	case NTV2_FORMAT_4x4096x2160p_3000:
-		byte1 = isRGB ? (uint8_t)VPIDStandard_4320_QuadLink_12Gb : (uint8_t)VPIDStandard_4320_DualLink_12Gb;
+		byte1 = isRGB ? (uint8_t)VPIDStandard_4320_QuadLink_12Gb : (uint8_t)VPIDStandard_4320_DualLink_12Gb; // 0xD2 : 0xD0
 		break;
 		
 	case NTV2_FORMAT_4x3840x2160p_5000:
@@ -323,7 +346,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	case NTV2_FORMAT_4x4096x2160p_5000_B:
 	case NTV2_FORMAT_4x4096x2160p_5994_B:
 	case NTV2_FORMAT_4x4096x2160p_6000_B:
-		byte1 = VPIDStandard_4320_QuadLink_12Gb;
+		byte1 = VPIDStandard_4320_QuadLink_12Gb; // 0xD2
         break;
             
 	default:
