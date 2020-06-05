@@ -7197,14 +7197,14 @@ bool CNTV2Card::Set3DLUTTableLocation (const ULWord frameNumber)
 {
 	NTV2Framesize theFrameSize;
 	GetFrameBufferSize(NTV2_CHANNEL1, theFrameSize);
-	ULWord lutTableLocation (::NTV2FramesizeToByteCount(theFrameSize) * frameNumber);
+	ULWord lutTableLocation ((::NTV2FramesizeToByteCount(theFrameSize) * frameNumber)/4);
 	return WriteRegister(kReg3DLUTLoadControl, lutTableLocation, 0x3FFFFFFF, 0);
 }
 
 bool CNTV2Card::Load3DLUTTable ()
 {
-	WriteRegister(kReg3DLUTLoadControl, 0, 0xC0000000, 31);
-	return WriteRegister(kReg3DLUTLoadControl, 1, 0xC0000000, 31);
+	WriteRegister(kReg3DLUTLoadControl, 0, 0x80000000, 31);
+	return WriteRegister(kReg3DLUTLoadControl, 1, 0x80000000, 31);
 }
 
 
