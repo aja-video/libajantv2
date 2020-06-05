@@ -1071,7 +1071,6 @@ void RoutingExpert::InitOutputXpt2WidgetIDs(void)
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer8RGB,		NTV2_WgtFrameBuffer8));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptFrameBuffer8YUV,		NTV2_WgtFrameBuffer8));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT1Out,				NTV2_WgtLUT1));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT1YUV,				NTV2_WgtLUT1));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT2Out,				NTV2_WgtLUT2));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT3Out,				NTV2_WgtLUT3));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT4Out,				NTV2_WgtLUT4));
@@ -1104,7 +1103,6 @@ void RoutingExpert::InitOutputXpt2WidgetIDs(void)
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMultiLinkOut1DS3,		NTV2_WgtMultiLinkOut1));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMultiLinkOut1DS4,		NTV2_WgtMultiLinkOut1));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt3DLUT1RGB,				NTV2_Wgt3DLUT1));
-	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt3DLUT1YUV,				NTV2_Wgt3DLUT1));
 
 	//	gWidget2OutputXpts
 	for (OutputXpt2WidgetIDsConstIter iter (gOutputXpt2WidgetIDs.begin ());  iter != gOutputXpt2WidgetIDs.end ();  ++iter)
