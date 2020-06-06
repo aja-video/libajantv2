@@ -392,6 +392,19 @@ AJAExport NTV2VideoFormat	GetFirstMatchingVideoFormat (const NTV2FrameRate inFra
 AJAExport bool GetFramesPerSecond (const NTV2FrameRate inFrameRate, ULWord & outFractionNumerator, ULWord & outFractionDenominator);
 
 /**
+	@brief		Answers with the given frame rate, in frames per second, as two components:
+				the numerator and denominator of the fractional rate.
+	@param[in]	inFrameRate				Specifies the frame rate of interest.
+	@param[out]	outFractionNumerator	Receives the numerator of the fractional frame rate.
+										This will be zero if the function returns false.
+	@param[out]	outFractionDenominator	Receives the denominator of the fractional frame rate.
+										If the function is successful, this will be 100 or 1.
+										This will be zero if the function returns false.
+	@return		True if successful;  otherwise false.
+**/
+AJAExport bool GetFramesPerSecondNDI (const NTV2FrameRate inFrameRate, ULWord & outFractionNumerator, ULWord & outFractionDenominator);
+
+/**
 	@param[in]	inDeviceID		Specifies the ID of the device of interest.
 	@param[in]	inFrameRate		Specifies the frame rate.
 	@param[in]	inFrameGeometry	Specifies the frame geometry.
