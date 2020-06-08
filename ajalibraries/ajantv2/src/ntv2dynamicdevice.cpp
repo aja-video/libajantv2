@@ -78,7 +78,7 @@ NTV2DeviceIDSet CNTV2Card::GetDynamicDeviceIDs (void)
 									designID,
 									designVersion,
 									currentBitfileID,
-									bitfileVersion,
+                                    0xff, // bitfileVersion,
 									NTV2_BITFILE_FLAG_CLEAR) || !clearStream)
 		return result;
 
@@ -135,7 +135,7 @@ bool CNTV2Card::LoadDynamicDevice (const NTV2DeviceID inDeviceID)
 									designID,
 									designVersion,
 									currentBitfileID,
-									bitfileVersion,
+                                    0xff, // bitfileVersion,
 									NTV2_BITFILE_FLAG_CLEAR) || !clearStream)
 		return false;
 

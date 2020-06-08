@@ -7193,6 +7193,20 @@ bool CNTV2Card::GetVPIDVPIDLuminance (NTV2VPIDLuminance & outValue, const NTV2Ch
 	return true;
 }
 
+bool CNTV2Card::Set3DLUTTableLocation (const ULWord frameNumber)
+{
+	NTV2Framesize theFrameSize;
+	GetFrameBufferSize(NTV2_CHANNEL1, theFrameSize);
+	ULWord lutTableLocation ((::NTV2FramesizeToByteCount(theFrameSize) * frameNumber)/4);
+	return WriteRegister(kReg3DLUTLoadControl, lutTableLocation, 0x3FFFFFFF, 0);
+}
+
+bool CNTV2Card::Load3DLUTTable ()
+{
+	WriteRegister(kReg3DLUTLoadControl, 0, 0x80000000, 31);
+	return WriteRegister(kReg3DLUTLoadControl, 1, 0x80000000, 31);
+}
+
 
 #if !defined (NTV2_DEPRECATE)
 // deprecated - does not support progressivePicture, 3G, 2K
