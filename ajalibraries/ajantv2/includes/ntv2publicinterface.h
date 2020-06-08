@@ -2318,7 +2318,7 @@ typedef enum
 
 #if !defined (NTV2_DEPRECATE)
 	// kRegSDIInput3GStatus
-	,kLHIRegMaskSDIIn3GbpsMode = BIT(0),
+	kLHIRegMaskSDIIn3GbpsMode = BIT(0),
 	kLHIRegMaskSDIIn3GbpsSMPTELevelBMode = BIT(1),
 	kLHIRegMaskSDIInVPIDLinkAValid = BIT(4),
 	kLHIRegMaskSDIInVPIDLinkBValid = BIT(5),
