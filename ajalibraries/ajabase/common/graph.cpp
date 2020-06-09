@@ -2,6 +2,9 @@
 
 #include "ajantv2/includes/ajatypes.h"
 
+#include <iostream>
+#include <sstream>
+
 namespace aja {
 
 //
@@ -15,17 +18,24 @@ m_output_vertex(AJA_NULL)
 {
 }
 
-void GraphEdge::SetInputVertex(GraphVertex* vertex) {
-    m_input_vertex = vertex;
+bool GraphEdge::operator==(GraphEdge* rhs) const {
+    return Equals(rhs);
 }
 
-void GraphEdge::SetOutputVertex(GraphVertex* vertex) {
-    m_output_vertex = vertex;
+bool GraphEdge::Equals(GraphEdge* rhs) const {
+    if (rhs->GetID() == GetID())
+        return true;
+    return false;
 }
 
 void GraphEdge::Connect(GraphVertex* src, GraphVertex* dst) {
     src->AddEdge(this, GraphEdge::Direction::Outgoing);
     dst->AddEdge(this, GraphEdge::Direction::Incoming);
+}
+
+void GraphEdge::Disconnect() {
+    m_input_vertex->RemoveEdge(this, GraphEdge::Direction::Outgoing);
+    m_output_vertex->RemoveEdge(this, GraphEdge::Direction::Incoming);
 }
 
 //
@@ -57,21 +67,28 @@ void GraphVertex::AddEdge(GraphEdge* edge, GraphEdge::Direction direction) {
     }
 }
 
-void GraphVertex::RemoveEdge(GraphEdge* edge) {
-    // if (edge) {
-    //     if (edge->Direction() == GraphEdge::EdgeDirection::Incoming) {
-    //         std::list<GraphEdge*>::iterator iter = m_input_edges.begin();
-    //         for (iter; iter != m_input_edges.end(); iter++)
-    //             if (edge->GetID() == (*iter)->GetID())
-    //                 m_input_edges.remove(*iter);
-    //     }
-    //     if (edge->Direction() == GraphEdge::EdgeDirection::Outgoing) {
-    //         std::list<GraphEdge*>::iterator iter = m_output_edges.begin();
-    //         for (iter; iter != m_output_edges.end(); iter++)
-    //             if (edge->GetID() == (*iter)->GetID())
-    //                 m_output_edges.remove(*iter);
-    //     }
-    // }
+// NOTE: This function only removes the edge from one vertex. The edge may be still connected to the other side.
+void GraphVertex::RemoveEdge(GraphEdge* edge, GraphEdge::Direction direction) {
+    if (edge) {
+        if (direction == GraphEdge::Direction::Incoming) {
+            std::list<GraphEdge*>::iterator iter = m_input_edges.begin();
+            for (iter; iter != m_input_edges.end(); iter++)
+                if (edge == *iter) {
+                    m_input_edges.remove(*iter);
+                    edge->SetOutputVertex(nullptr);
+                    break;
+                }
+        }
+        if (direction == GraphEdge::Direction::Outgoing) {
+            std::list<GraphEdge*>::iterator iter = m_output_edges.begin();
+            for (iter; iter != m_output_edges.end(); iter++)
+                if (edge == *iter) {
+                    m_output_edges.remove(*iter);
+                    edge->SetInputVertex(nullptr);
+                    break;
+                }
+        }
+    }
 }
 
 //
@@ -107,6 +124,16 @@ bool Graph::RemoveVertex(GraphVertex* vertex) {
     }
 
     return removed;
+}
+
+void Graph::PrintGraphViz() {
+    std::ostringstream dotfile;
+    dotfile << "digraph G {" << std::endl;
+    for (const auto& v : m_vertices)
+        for (const auto& e : v->OutputEdges())
+            dotfile << "\t" << e->InputVertex()->GetID() << " -> " << e->OutputVertex()->GetID() << ";" << std::endl;
+    dotfile << "}" << std::endl;
+    std::cout << dotfile.str();
 }
 
 } // namespace aja
