@@ -21,6 +21,7 @@
 #include "ajabase/common/timebase.h"
 #include "ajabase/common/timecode.h"
 #include "ajabase/common/timer.h"
+#include "ajabase/common/variant.h"
 #include "ajabase/persistence/persistence.h"
 #include "ajabase/system/atomic.h"
 #include "ajabase/system/file_io.h"
@@ -68,22 +69,134 @@ TEST_SUITE("types" * doctest::description("functions in ajabase/common/types.h")
 
 } //types
 
+void variant_marker() {}
+TEST_SUITE("variant" * doctest::description("functions in ajabase/common/variant.h")) {
+    TEST_CASE("Variant - Bool") {
+        aja::Variant v(true);
+        CHECK(v.GetBool() == true);
+        // conversions
+        CHECK(v.AsBool() == true);
+        CHECK(v.AsFloat() == doctest::Approx(1.f));
+        CHECK(v.AsDouble() == doctest::Approx(1.0));
+        CHECK(v.AsInt8() == 1);
+        CHECK(v.AsUInt8() == 1);
+        CHECK(v.AsInt16() == 1);
+        CHECK(v.AsUInt16() == 1);
+        CHECK(v.AsInt32() == 1);
+        CHECK(v.AsUInt32() == 1);
+        CHECK(v.AsInt64() == 1);
+        CHECK(v.AsUInt64() == 1);
+        CHECK(v.AsString() == std::string("true"));
+    }
+    TEST_CASE("Variant - Float") {
+        aja::Variant v(1.f);
+        CHECK(v.GetFloat() == doctest::Approx(1.f));
+        // conversions
+        CHECK(v.AsBool() == true);
+        CHECK(v.AsFloat() == doctest::Approx(1.f));
+        CHECK(v.AsDouble() == doctest::Approx(1.0));
+        CHECK(v.AsInt8() == 1);
+        CHECK(v.AsUInt8() == 1);
+        CHECK(v.AsInt16() == 1);
+        CHECK(v.AsUInt16() == 1);
+        CHECK(v.AsInt32() == 1);
+        CHECK(v.AsUInt32() == 1);
+        CHECK(v.AsInt64() == 1);
+        CHECK(v.AsUInt64() == 1);
+        CHECK(v.AsString() == std::string("1.000000"));
+    }
+    TEST_CASE("Variant - Double") {
+        aja::Variant v(3.14159);
+        CHECK(v.GetDouble() == doctest::Approx(3.14159));
+        // conversions
+        CHECK(v.AsBool() == true);
+        CHECK(v.AsFloat() == doctest::Approx(3.14159f));
+        CHECK(v.AsDouble() == doctest::Approx(3.14159));
+        CHECK(v.AsInt8() == 3);
+        CHECK(v.AsUInt8() == 3);
+        CHECK(v.AsInt16() == 3);
+        CHECK(v.AsUInt16() == 3);
+        CHECK(v.AsInt32() == 3);
+        CHECK(v.AsUInt32() == 3);
+        CHECK(v.AsInt64() == 3);
+        CHECK(v.AsUInt64() == 3);
+        CHECK(v.AsString() == std::string("3.141590"));
+    }
+    TEST_CASE("Variant - Int8") {
+        aja::Variant v(static_cast<int8_t>(127));
+        CHECK(v.GetInt8() == 127);
+        // conversions
+        CHECK(v.AsBool() == true);
+        CHECK(v.AsFloat() == doctest::Approx(127.f));
+        CHECK(v.AsDouble() == doctest::Approx(127.0));
+        CHECK(v.AsInt8() == 127);
+        CHECK(v.AsUInt8() == 127);
+        CHECK(v.AsInt16() == 127);
+        CHECK(v.AsUInt16() == 127);
+        CHECK(v.AsInt32() == 127);
+        CHECK(v.AsUInt32() == 127);
+        CHECK(v.AsInt64() == 127);
+        CHECK(v.AsUInt64() == 127);
+        CHECK(v.AsString() == std::string("127"));
+    }
+    TEST_CASE("Variant - UInt8") {
+        aja::Variant v(static_cast<uint8_t>(255));
+        CHECK(v.GetUInt8() == 255);
+        // conversions
+        CHECK(v.AsBool() == true);
+        CHECK(v.AsFloat() == doctest::Approx(255.f));
+        CHECK(v.AsDouble() == doctest::Approx(255.0));
+        CHECK(v.AsInt8() == -1);
+        CHECK(v.AsUInt8() == 255);
+        CHECK(v.AsInt16() == 255);
+        CHECK(v.AsUInt16() == 255);
+        CHECK(v.AsInt32() == 255);
+        CHECK(v.AsUInt32() == 255);
+        CHECK(v.AsInt64() == 255);
+        CHECK(v.AsUInt64() == 255);
+        CHECK(v.AsString() == std::string("255"));
+    }
+}
 
 void graph_marker() {}
 TEST_SUITE("graph" * doctest::description("functions in ajabase/common/graph.h")) {
-    TEST_CASE("GraphVertex")
-    {
+    TEST_CASE("GraphVertex Constructors") {
         aja::GraphVertex* a = new aja::GraphVertex("A");
-        aja::GraphVertex* b = new aja::GraphVertex("B");
-        aja::GraphVertex* c = new aja::GraphVertex("C");
-        aja::GraphVertex* d = new aja::GraphVertexPayload<int>("D");
-        CHECK(a->GetID() == "A");
+        aja::GraphVertex* b = new aja::GraphVertex("B", "Vertex B"); // setting a label
 
-        auto d_cast = static_cast<aja::GraphVertexPayload<int>*>(d);
+        CHECK(a->GetID() == "A");
+        CHECK(a->GetLabel() == "");
+        CHECK(b->GetID() == "B");
+        CHECK(b->GetLabel() == "Vertex B");
+
+        delete a;
+        delete b;
+        a = nullptr;
+        b = nullptr;
+    }
+
+    TEST_CASE("Graph Edge Constructors") {
+        aja::GraphVertex a("a", "node 1");
+        aja::GraphVertex b("b", "node 2");
+        aja::GraphEdge e("e", "connection");
+        CHECK(e.GetID() == "e");
+        CHECK(e.GetLabel() == "connection");
+        e.Connect(&a, &b);
+    }
+
+    TEST_CASE("Graph Connections") {
+        aja::GraphVertex* a = new aja::GraphVertex("A");
+        aja::GraphVertex* b = new aja::GraphVertex("B", "Vertex B"); // setting a label
+        aja::GraphVertex* c = new aja::GraphVertex("C");
+        aja::GraphVertex* d = new aja::GraphDataVertex<int>("D");
+
+        auto d_cast = static_cast<aja::GraphDataVertex<int>*>(d);
         int val = 42;
         d_cast->SetData(&val);
+        auto get_val = d_cast->GetData();
+        CHECK(*get_val == 42);
 
-        aja::GraphEdge* a_to_b = new aja::GraphEdge("A->B");
+        aja::GraphEdge* a_to_b = new aja::GraphEdge("A->B", "First Edge");
         aja::GraphEdge* b_to_c = new aja::GraphEdge("B->C");
         aja::GraphEdge* a_to_c = new aja::GraphEdge("A->C");
         aja::GraphEdge* c_to_a = new aja::GraphEdge("C->A");
@@ -93,8 +206,12 @@ TEST_SUITE("graph" * doctest::description("functions in ajabase/common/graph.h")
         a_to_c->Connect(a, c);
         c_to_a->Connect(c, a);
         a_to_d->Connect(a, d);
+        CHECK(a_to_b->GetID() == "A->B");
+        CHECK(a_to_b->GetLabel() == "First Edge");
+        CHECK(b_to_c->GetLabel() == "");
 
         aja::Graph* g = new aja::Graph();
+
         // add unique vertices to the graph
         CHECK(g->AddVertex(a) == true);
         CHECK(g->AddVertex(b) == true);
@@ -102,6 +219,21 @@ TEST_SUITE("graph" * doctest::description("functions in ajabase/common/graph.h")
         CHECK(g->AddVertex(d) == true);
         // try to add vertex that already exists in the graph
         CHECK(g->AddVertex(a) == false);
+
+        g->PrintGraphViz();
+
+        a_to_d->Disconnect();
+
+        delete a;
+        delete b;
+        delete c;
+        delete d;
+        delete a_to_b;
+        delete b_to_c;
+        delete a_to_c;
+        delete c_to_a;
+        delete a_to_d;
+        delete g;
     }
 }
 

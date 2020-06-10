@@ -1,3 +1,9 @@
+/**
+	@file		graph.cpp
+	@brief		Contains the implementation of the AJA Directed Graph class
+	@copyright	(C) 2020 AJA Video Systems, Inc.  All rights reserved.
+**/
+
 #include "graph.h"
 
 #include "ajantv2/includes/ajatypes.h"
@@ -7,12 +13,60 @@
 
 namespace aja {
 
+bool GraphElement::AddProperty(const std::string& key, const Variant& prop) {
+    if (!HasProperty(key)) {
+        m_properties.emplace(std::pair<std::string, Variant>(key, prop));
+        return true;
+    }
+    return false;
+}
+
+bool GraphElement::AddProperty(const std::string& key, Variant&& prop) {
+    if (!HasProperty(key)) {
+        m_properties.emplace(std::pair<std::string, Variant>(key, std::move(prop)));
+        return true;
+    }
+    return false;
+}
+
+bool GraphElement::RemoveProperty(const std::string& key) {
+    bool removed = false;
+    for(auto it = m_properties.begin(); it != m_properties.end(); ) {
+        if((*it).first == key) {
+            it = m_properties.erase(it);
+            removed = true;
+            break;
+        }
+        else
+            ++it;
+    }
+    return removed;
+}
+
+Variant GraphElement::GetProperty(const std::string& key) const {
+    auto prop = m_properties.find(key);
+    if (prop != m_properties.end())
+        return prop->second;
+    return Variant();
+}
+
+bool GraphElement::HasProperty(const std::string& key) const {
+    return m_properties.find(key) != m_properties.end();
+}
 //
 // GraphEdge
 //
 GraphEdge::GraphEdge(const std::string& id)
 :
-m_id(id),
+GraphElement(id),
+m_input_vertex(AJA_NULL),
+m_output_vertex(AJA_NULL)
+{
+}
+
+GraphEdge::GraphEdge(const std::string& id, const std::string& label)
+:
+GraphElement(id, label),
 m_input_vertex(AJA_NULL),
 m_output_vertex(AJA_NULL)
 {
@@ -29,8 +83,10 @@ bool GraphEdge::Equals(GraphEdge* rhs) const {
 }
 
 void GraphEdge::Connect(GraphVertex* src, GraphVertex* dst) {
-    src->AddEdge(this, GraphEdge::Direction::Outgoing);
-    dst->AddEdge(this, GraphEdge::Direction::Incoming);
+    if (src)
+        src->AddEdge(this, GraphEdge::Direction::Outgoing);
+    if (dst)
+        dst->AddEdge(this, GraphEdge::Direction::Incoming);
 }
 
 void GraphEdge::Disconnect() {
@@ -41,6 +97,18 @@ void GraphEdge::Disconnect() {
 //
 // GraphVertex
 //
+
+GraphVertex::GraphVertex(const std::string& id)
+:
+GraphElement(id)
+{
+}
+
+GraphVertex::GraphVertex(const std::string& id, const std::string& label)
+:
+GraphElement(id, label)
+{
+}
 
 bool GraphVertex::operator==(GraphVertex* rhs) const {
     return Equals(rhs);
@@ -72,21 +140,23 @@ void GraphVertex::RemoveEdge(GraphEdge* edge, GraphEdge::Direction direction) {
     if (edge) {
         if (direction == GraphEdge::Direction::Incoming) {
             std::list<GraphEdge*>::iterator iter = m_input_edges.begin();
-            for (iter; iter != m_input_edges.end(); iter++)
+            for (iter; iter != m_input_edges.end(); iter++) {
                 if (edge == *iter) {
                     m_input_edges.remove(*iter);
                     edge->SetOutputVertex(nullptr);
                     break;
                 }
+            }
         }
         if (direction == GraphEdge::Direction::Outgoing) {
             std::list<GraphEdge*>::iterator iter = m_output_edges.begin();
-            for (iter; iter != m_output_edges.end(); iter++)
+            for (iter; iter != m_output_edges.end(); iter++) {
                 if (edge == *iter) {
                     m_output_edges.remove(*iter);
                     edge->SetInputVertex(nullptr);
                     break;
                 }
+            }
         }
     }
 }
@@ -131,7 +201,7 @@ void Graph::PrintGraphViz() {
     dotfile << "digraph G {" << std::endl;
     for (const auto& v : m_vertices)
         for (const auto& e : v->OutputEdges())
-            dotfile << "\t" << e->InputVertex()->GetID() << " -> " << e->OutputVertex()->GetID() << ";" << std::endl;
+            dotfile << "\t" << e->InputVertex()->GetLabel() << " -> " << e->OutputVertex()->GetLabel() << ";" << std::endl;
     dotfile << "}" << std::endl;
     std::cout << dotfile.str();
 }
