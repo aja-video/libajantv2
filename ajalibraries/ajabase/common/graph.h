@@ -114,19 +114,24 @@ public:
     GraphDataVertex(const std::string& id, const std::string& label)
         : GraphVertex(id, label) {}
 
-    virtual ~GraphDataVertex() { delete m_data; m_data = nullptr; }
+    virtual ~GraphDataVertex() {}
 
-    T* GetData() const { return m_data; }
-    virtual void SetData(T data) {
-        m_data = new T();
-        *m_data = data;
+    T* GetData() const {
+        if (m_data)
+            return m_data.get();
+        return nullptr;
     }
+
     virtual void SetData(T* data) {
-        m_data = data;
+        m_data.reset(data);
+    }
+
+    virtual void SetData(T&& data) {
+        m_data = aja::make_unique<T>(std::move(data));
     }
 
 protected:
-    T* m_data;
+    std::unique_ptr<T> m_data;
 };
 
 /*
@@ -139,8 +144,8 @@ public:
 
     bool AddVertex(GraphVertex* vertex);
     bool RemoveVertex(GraphVertex* vertex);
-    GraphVertex* GetVertex();
-    void PrintGraphViz();
+    // GraphVertex* GetVertex();
+    std::string GraphVizString();
 
 private:
     GraphVertexList m_vertices;

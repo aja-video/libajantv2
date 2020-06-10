@@ -47,6 +47,12 @@ m_type(type)
         case Type::String:
             new (&m_string_value) std::string();
             return;
+        case Type::Blob:
+            new (&m_blob_value) std::vector<uint8_t>;
+        // case Type::Map:
+        //     new (&m_map_value) std::map<std::string, Variant>;
+        // case Type::Vector:
+        //     new (&m_vector_value) std::vector<Variant>;
     }
 }
 
@@ -168,6 +174,36 @@ Variant::Variant(Variant&& other) noexcept : Variant(other.m_type) {
 }
 
 Variant::~Variant() {
+    switch(m_type) {
+        case Type::None:
+            return;
+        case Type::Boolean:
+        case Type::Float:
+        case Type::Double:
+        case Type::Int8:
+        case Type::UInt8:
+        case Type::Int16:
+        case Type::UInt16:
+        case Type::Int32:
+        case Type::UInt32:
+        case Type::Int64:
+        case Type::UInt64:
+            // Nothing to do!
+            return;
+        case Type::String:
+            m_string_value.~basic_string();
+            return;
+        case Type::Blob:
+            m_blob_value.~BlobStorage();
+            return;
+        // case Type::Map:
+        //     m_map_value.~MapStorage();
+        //     return;
+        // case Type::Vector:
+        //     m_vector_value.~VectorStorage();
+        //     return;
+    }
+
     m_type = Type::None;
 }
 

@@ -196,14 +196,34 @@ bool Graph::RemoveVertex(GraphVertex* vertex) {
     return removed;
 }
 
-void Graph::PrintGraphViz() {
+std::string Graph::GraphVizString() {
     std::ostringstream dotfile;
+    std::ostringstream vert_attr_str;
+
     dotfile << "digraph G {" << std::endl;
-    for (const auto& v : m_vertices)
-        for (const auto& e : v->OutputEdges())
-            dotfile << "\t" << e->InputVertex()->GetLabel() << " -> " << e->OutputVertex()->GetLabel() << ";" << std::endl;
+
+    for (const auto& v : m_vertices) {
+        auto vertex_id = v->GetID();
+        auto vertex_label = v->GetLabel();
+
+        if (!vertex_label.empty()) {
+            vert_attr_str << "\t" << vertex_id;
+            vert_attr_str << " [label=\"" << vertex_label << "\"];" << std::endl;
+        }
+
+        for (auto e : v->OutputEdges()) {
+            if (e) {
+                const auto& in_vert_id = e->InputVertex()->GetID();
+                const auto& out_vert_id = e->OutputVertex()->GetID();
+
+                dotfile << "\t" << in_vert_id << " -> " << out_vert_id << ";" << std::endl;
+            }
+        }
+    }
+    dotfile << vert_attr_str.str();
     dotfile << "}" << std::endl;
-    std::cout << dotfile.str();
+
+    return dotfile.str();
 }
 
 } // namespace aja
