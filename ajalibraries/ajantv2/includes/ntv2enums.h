@@ -1650,12 +1650,16 @@ typedef enum
 	NTV2_BUSERROR_CLEAR= 0x80000000
 } NTV2DMAStatusBits;
 
+/**
+	@brief	These values are used to determine when certain register writes actually take effect.
+			See CNTV2Card::SetRegisterWriteMode or \ref fieldframeinterrupts
+**/
 typedef enum
 {
-	NTV2_REGWRITE_SYNCTOFIELD,
-	NTV2_REGWRITE_SYNCTOFRAME,
-	NTV2_REGWRITE_IMMEDIATE,
-	NTV2_REGWRITE_SYNCTOFIELD_AFTER10LINES
+	NTV2_REGWRITE_SYNCTOFIELD,	///< @brief	<b>Field Mode:</b> Register changes take effect at the next field VBI.
+	NTV2_REGWRITE_SYNCTOFRAME,	///< @brief	<b>Frame Mode:</b> Register changes take effect at the next frame VBI (power-up default).
+	NTV2_REGWRITE_IMMEDIATE,	///< @brief	Register changes take effect immediately, without waiting for a field or frame VBI.
+	NTV2_REGWRITE_SYNCTOFIELD_AFTER10LINES	///< @brief	Register changes take effect after 10 lines after the next field VBI (not commonly used).
 } NTV2RegisterWriteMode;
 
 typedef enum
