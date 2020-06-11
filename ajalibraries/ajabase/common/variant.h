@@ -130,8 +130,8 @@ protected:
         uint64_t m_uint64_value;
         std::string m_string_value;
         BlobStorage m_blob_value;
-        // MapStorage m_map_value;
-        // VectorStorage m_vector_value;
+        MapStorage m_map_value;
+        VectorStorage m_vector_value;
     };
 };
 

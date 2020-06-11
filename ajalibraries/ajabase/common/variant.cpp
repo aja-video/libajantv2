@@ -49,10 +49,10 @@ m_type(type)
             return;
         case Type::Blob:
             new (&m_blob_value) std::vector<uint8_t>;
-        // case Type::Map:
-        //     new (&m_map_value) std::map<std::string, Variant>;
-        // case Type::Vector:
-        //     new (&m_vector_value) std::vector<Variant>;
+        case Type::Map:
+            new (&m_map_value) std::map<std::string, Variant>;
+        case Type::Vector:
+            new (&m_vector_value) std::vector<Variant>;
     }
 }
 
@@ -196,12 +196,12 @@ Variant::~Variant() {
         case Type::Blob:
             m_blob_value.~BlobStorage();
             return;
-        // case Type::Map:
-        //     m_map_value.~MapStorage();
-        //     return;
-        // case Type::Vector:
-        //     m_vector_value.~VectorStorage();
-        //     return;
+        case Type::Map:
+            m_map_value.~MapStorage();
+            return;
+        case Type::Vector:
+            m_vector_value.~VectorStorage();
+            return;
     }
 
     m_type = Type::None;
