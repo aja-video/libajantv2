@@ -224,14 +224,14 @@ typedef enum
 	kRegSDIOut4Control,				// 170
 	kRegAFDVANCInserterSDI1,		// 171
 	kRegAFDVANCInserterSDI2,		// 172
-    kRegAudioChannelMappingCh1,     // 173
+    kRegAudioChannelMappingCh1,     // 173		//	OBSOLETE
     kRegXptSelectGroup36,		    // 174
-    kRegAudioChannelMappingCh3,     // 175
-    kRegAudioChannelMappingCh4,     // 176
-    kRegAudioChannelMappingCh5,     // 177
-    kRegAudioChannelMappingCh6,     // 178
-    kRegAudioChannelMappingCh7,     // 179
-    kRegAudioChannelMappingCh8,     // 180
+    kRegAudioChannelMappingCh3,     // 175		//	OBSOLETE
+    kRegAudioChannelMappingCh4,     // 176		//	OBSOLETE
+    kRegAudioChannelMappingCh5,     // 177		//	OBSOLETE
+    kRegAudioChannelMappingCh6,     // 178		//	OBSOLETE
+    kRegAudioChannelMappingCh7,     // 179		//	OBSOLETE
+    kRegAudioChannelMappingCh8,     // 180		//	OBSOLETE
 	
 	kRegReserved181,				// 181
 	kRegReserved182,				// 182
@@ -2318,7 +2318,7 @@ typedef enum
 
 #if !defined (NTV2_DEPRECATE)
 	// kRegSDIInput3GStatus
-	,kLHIRegMaskSDIIn3GbpsMode = BIT(0),
+	kLHIRegMaskSDIIn3GbpsMode = BIT(0),
 	kLHIRegMaskSDIIn3GbpsSMPTELevelBMode = BIT(1),
 	kLHIRegMaskSDIInVPIDLinkAValid = BIT(4),
 	kLHIRegMaskSDIInVPIDLinkBValid = BIT(5),

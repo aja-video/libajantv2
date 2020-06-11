@@ -94,6 +94,8 @@ typedef enum _AJADebugUnit
     AJA_DebugUnit_CSC						= 53,
     AJA_DebugUnit_LUT						= 54,
     AJA_DebugUnit_Cables					= 55,
+    AJA_DebugUnit_RPCXmit					= 56,
+    AJA_DebugUnit_RPCRcv					= 57,
 
     // to add a new unit:
     //
@@ -112,10 +114,8 @@ typedef enum _AJADebugUnit
     // if no more unused units
     //   * set AJA_DebugUnit_FirstUnused to the same value as AJA_DebugUnit_Size
     //
-    AJA_DebugUnit_FirstUnused               = 56,
-    AJA_DebugUnit_Unused_56                 = AJA_DebugUnit_FirstUnused,
-    AJA_DebugUnit_Unused_57                 = 57,
-    AJA_DebugUnit_Unused_58                 = 58,
+    AJA_DebugUnit_FirstUnused               = 58,
+    AJA_DebugUnit_Unused_58                 = AJA_DebugUnit_FirstUnused,
     AJA_DebugUnit_Unused_59                 = 59,
     AJA_DebugUnit_Unused_60                 = 60,
     AJA_DebugUnit_Unused_61                 = 61,
