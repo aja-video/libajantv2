@@ -119,7 +119,7 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 		memset(mpVidBufferSource, 0, mActiveVideoSize);
 
 		// Set register update mode to frame
-		mBoard->SetRegisterWritemode(NTV2_REGWRITE_SYNCTOFRAME);
+		mBoard->SetRegisterWriteMode(NTV2_REGWRITE_SYNCTOFRAME);
 
 		// Set source to capture first frame
 		mFrameNumber = s_iIndexFirstSource;
@@ -200,7 +200,7 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 		mBoard->SetSDIOutVPID(vpidValue, vpidValue, NTV2_CHANNEL3); 
 
 		// Set register update mode to frame
-		mBoard->SetRegisterWritemode(NTV2_REGWRITE_SYNCTOFRAME);
+		mBoard->SetRegisterWriteMode(NTV2_REGWRITE_SYNCTOFRAME);
 
 		// Set target to output first frame
 		mBoard->SetOutputFrame(mChannel, mFrameNumber);

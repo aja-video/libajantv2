@@ -336,7 +336,7 @@ bool AJA_SDIInOut::setupInputChannel(unsigned int uiSDIChannel, NTV2FrameBufferF
     }
     else
     {
-        m_ntv2Card.SetRegisterWritemode(NTV2_REGWRITE_SYNCTOFRAME);
+        m_ntv2Card.SetRegisterWriteMode(NTV2_REGWRITE_SYNCTOFRAME);
     }
 
     ++m_uiNumChannels;
@@ -489,7 +489,7 @@ bool AJA_SDIInOut::setupOutputChannel(unsigned int uiSDIChannel, NTV2FrameBuffer
     }
     else
     {
-        m_ntv2Card.SetRegisterWritemode(NTV2_REGWRITE_SYNCTOFRAME);
+        m_ntv2Card.SetRegisterWriteMode(NTV2_REGWRITE_SYNCTOFRAME);
 
         if (m_bUseP2P)
         {
