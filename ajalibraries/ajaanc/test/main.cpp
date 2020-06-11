@@ -264,9 +264,11 @@ class CNTV2AncDataTester
 
 		static bool	BFT_AncDataCEA608Vanc (void)
 		{
-			static const uint8_t			pGump608Vanc[]	=	{	0xFF,	0xA0,	0x09,	0x61,	0x02,	0x03,
-																	0x09,	0xC1,	0xC2,	0xF2,	//	end of packet
-																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10};
+			static const uint8_t pGump608Vanc[]	= {	0xFF,	0xA0,	0x09,	0x61,	0x02,	0x03,
+													0x09,	0xC1,	0xC2,	0xF2,	//	end of packet
+													//	Extra bytes
+													0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
+													0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10};
 			uint32_t						packetByteCount	(0);
 			AJAAncillaryData_Cea608_Vanc	pktRX, pktTX;
 			AJAAncillaryData				defaultPkt;
@@ -294,8 +296,10 @@ class CNTV2AncDataTester
 			SHOULD_BE_TRUE (pktRX.GotValidReceiveData());
 			uint8_t	fieldNumber(0), lineNumber(0), char1(0), char2(0);	bool isValid(false);
 			SHOULD_SUCCEED (pktRX.GetLine(fieldNumber, lineNumber));
-			SHOULD_BE_EQUAL (fieldNumber, 0);	//	F1
-			SHOULD_BE_EQUAL (lineNumber, 9);	//	SMPTE line 9
+			SHOULD_BE_EQUAL (fieldNumber, 1);	//	F2 == NTV2_FIELD1
+			SHOULD_BE_TRUE (pktRX.IsField2());	//	F2
+			SHOULD_BE_EQUAL (lineNumber, 9);			//	SMPTE line 9
+			SHOULD_BE_EQUAL (pktRX.GetLineNumber(), 9);	//	SMPTE line 9
 			SHOULD_SUCCEED (pktRX.GetCEA608Characters(char1, char2, isValid));
 			SHOULD_BE_EQUAL (char1, 'A');
 			SHOULD_BE_EQUAL (char2, 'B');
@@ -303,7 +307,7 @@ class CNTV2AncDataTester
 			return true;
 		}
 
-		static bool	BFT_AncDataCEA608Raw (void)
+		static bool	BFT_AncDataCEA608Analog (void)
 		{
 			static const uint8_t			pGump608Raw[]	=	{	0xFF,	0xE0,	0x00,	0x00,	0x00,	0xFF,
 																	0x24,	0x47,	0x6a,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x11,	0x16,	0x1d,	0x26,	0x31,	0x3d,	0x4a,	0x56,	0x62,	0x6c,	0x74,
@@ -377,7 +381,7 @@ class CNTV2AncDataTester
 			SHOULD_BE_EQUAL (AJAAncillaryDataFactory::GuessAncillaryDataType(pLine21Packet), AJAAncillaryDataType_Cea608_Line21);
 
 			return true;
-		}	//	BFT_AncDataCEA608Raw
+		}	//	BFT_AncDataCEA608Analog
 
 
 		static bool	BFT_AncDataCEA708 (void)
@@ -1404,6 +1408,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktHDR));
 				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomY));
 				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomC));
+				SHOULD_SUCCEED(txPkts.SortListByLocation());
 				//cerr << "Tx: " << txPkts << endl;
 
 				//	Transmit the packets into the 8-bit GUMP buffer...
@@ -1419,8 +1424,12 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers(gumpF1, gumpF2, rxPkts));
 				//cerr << "Rx: " << rxPkts << endl;
 
-				//	Compare the Tx and Rx packet lists...
-				SHOULD_SUCCEED(txPkts.Compare(rxPkts, false/*ignoreLocation*/, false/*ignoreChecksum*/));
+				//	Compare the Tx and Rx packet lists.
+				//	The txPkts all have zero checksums because we never set them.
+				//	The rxPkts all have valid checksums because txPkts.GetTransmitData generates them,
+				//	and SetFromDeviceAncBuffers uses the checksums when it creates packets.
+				//	Therefore, when comparing the two lists, we must ignore checksums...
+				SHOULD_SUCCEED(txPkts.Compare(rxPkts, false/*ignoreLocation*/, true/*ignoreChecksum*/));
 			}	//	for each video format
 			cerr << "BFT_AncListToGumpToAncList passed" << endl;
 			return true;
@@ -1675,7 +1684,7 @@ LOGMYDEBUG("IPF1bytes=" << DEC(IPF1bytes) << ", IPF2bytes=" << DEC(IPF2bytes) <<
 					SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomY));
 					SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomC));
 				}
-
+				txPkts.SortListByLocation();	//	To match rxPkts order at Compare (below)
 				//	Transmit the packets into the 8-bit YCbCr frame buffer...
 				NTV2_POINTER	vanc8(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
 				vanc8.Fill(uint8_t(0x80));
@@ -1696,9 +1705,14 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				//	Receive packets from the 8-bit GUMP buffer...
 				AJAAncillaryList	rxPkts;
 				SHOULD_SUCCEED(AJAAncillaryList::SetFromVANCData (vanc8, fd, rxPkts));
+				rxPkts.SortListByLocation();	//	To match txPkts order -- for Compare below
 
 				//	Compare the Tx and Rx packet lists...
-				AJAStatus	result	(txPkts.Compare(rxPkts,  false /*do not ignoreLocation*/,  false /*do not ignoreChecksum*/));
+				//	The txPkts have zero checksums because we never set them.
+				//	The rxPkts all have valid checksums because rxPkts.SetFromVANCData sets them.
+				//	Also, the rxPkts have unknown link values in their Locations.
+				//	Therefore, when comparing the two lists, we must ignore location and checksums...
+				AJAStatus	result	(txPkts.Compare(rxPkts,  true/*ignoreLocation?*/,  true/*ignoreChecksum?*/));
 				if (AJA_FAILURE(result))
 					cerr << "MISCOMPARE:" << endl << "Tx: " << txPkts << endl	<< "Rx: " << rxPkts << endl;
 				SHOULD_SUCCEED(result);
@@ -1773,6 +1787,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				//	Transmit the packets into the 10-bit YCbCr frame buffer...
 				NTV2_POINTER	vanc10(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
 				vanc10.Fill(uint8_t(0x80));
+				txPkts.SortListByLocation();	//	To match rxPkts order in Compare (below)
 				SHOULD_SUCCEED(txPkts.GetVANCTransmitData (vanc10, fd));
 /* cerr << ::NTV2VideoFormatToString(vFormat) << " " << ::NTV2FrameBufferFormatToString(fd.GetPixelFormat()) << " VANC: " << endl;
 for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset++) {
@@ -1790,9 +1805,10 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				//	Receive packets from the 8-bit GUMP buffer...
 				AJAAncillaryList	rxPkts;
 				SHOULD_SUCCEED(AJAAncillaryList::SetFromVANCData (vanc10, fd, rxPkts));
+				rxPkts.SortListByLocation();	//	To match txPkts order for Compare (below)
 
 				//	Compare the Tx and Rx packet lists...
-				AJAStatus	result	(txPkts.Compare(rxPkts,  false /*do not ignoreLocation*/,  false /*do not ignoreChecksum*/));
+				AJAStatus	result	(txPkts.Compare(rxPkts,  true /*ignoreLocation*/,  true /*ignoreChecksum*/));
 				if (AJA_FAILURE(result))
 					cerr << "MISCOMPARE:" << endl << "Tx: " << txPkts << endl	<< "Rx: " << rxPkts << endl;
 				SHOULD_SUCCEED(result);
@@ -2377,9 +2393,9 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			{
 				if (true)
 					SHOULD_BE_TRUE(RTPHeaderBFT());
-				if (false)
+				if (true)
 					SHOULD_BE_TRUE(BFT_AncListToGumpToAncList());
-				if (false)
+				if (true)
 					SHOULD_BE_TRUE(BFT_GumpToAncListToGump());
 				if (true)
 					SHOULD_BE_TRUE(BFT_AncListToSortToAncList());
@@ -2391,13 +2407,13 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 					SHOULD_BE_TRUE(BFT_RTPXmitTooManyPackets());
 				if (true)
 					SHOULD_BE_TRUE(BFT_RTPXmitTooMuchData());
-				if (false)
+				if (true)
 					SHOULD_BE_TRUE(BFT_AncListToFBYUV8ToAncList());
-				if (false)
+				if (true)
 					SHOULD_BE_TRUE(BFT_FBYUV8ToAncListToFBYUV8());
-				if (false)
+				if (true)
 					SHOULD_BE_TRUE(BFT_AncListToFBYUV10ToAncList());
-				if (false)
+				if (true)
 					SHOULD_BE_TRUE(BFT_FBYUV10ToAncListToFBYUV10());
 				cerr << "AJAAncillaryList-to-buffer-to-AJAAncillaryList and Buffer-to-AJAAncillaryList-to-buffer round-trip BFTs passed" << endl;
 			}
@@ -2406,7 +2422,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				SHOULD_BE_TRUE (BFT_AncDataCEA608Vanc());
 
 			if (false /* NOT YET READY FOR PRIME TIME */)
-				SHOULD_BE_TRUE (BFT_AncDataCEA608Raw());
+				SHOULD_BE_TRUE (BFT_AncDataCEA608Analog());
 
 			if (true)
 				SHOULD_BE_TRUE (BFT_AncDataCEA708());
