@@ -139,6 +139,19 @@ CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread (const NTV2DeviceInfo
 	::memset (&m_statusStruct, 0, sizeof (m_statusStruct));
 }
 
+CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread (const NTV2DeviceInfo & inDeviceInfo,
+															const string & inDRFilesPath,
+															const NTV2DeviceID inDesiredID,
+															const bool inVerbose)
+	:	m_deviceInfo		(inDeviceInfo),
+		m_drFilesPath		(inDRFilesPath),
+		m_desiredID			(inDesiredID),
+		m_updateSuccessful	(false),
+		m_verbose			(inVerbose)
+{
+	::memset (&m_statusStruct, 0, sizeof (m_statusStruct));
+}
+
 
 
 AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
