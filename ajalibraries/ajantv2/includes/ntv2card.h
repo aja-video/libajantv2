@@ -1293,15 +1293,20 @@ public:
 		@return		True if successful;  otherwise false.
 		@note		For the effect to be noticeable, the Frame Store should be enabled (see CNTV2Card::EnableChannel)
 					and in playout mode (see CNTV2Card::GetMode and CNTV2Card::SetMode).
-		@note		Setting a new value takes effect at the next output VBI. For example, if line 300 of frame 5 is currently
+		@note		Normally, if the device ::NTV2RegisterWriteMode is ::NTV2_REGWRITE_SYNCTOFRAME, the new value takes
+					effect at the next output <b>frame</b> interrupt. For example, if line 300 of frame 5 is currently
 					going "out the jack" at the instant this function is called with frame 6, frame 6 won't go "out the jack"
 					until the output VBI fires after the last line of frame 5 has gone out the spigot.
+		@note		If the FrameStore's ::NTV2RegisterWriteMode is ::NTV2_REGWRITE_SYNCTOFIELD, the new value takes effect
+					at the next output <b>field</b> interrupt, which makes it possible to playout lines for ::NTV2_FIELD0
+					and ::NTV2_FIELD1 from separate frame buffers, if desired. See CNTV2Card::SetRegisterWriteMode and/or
+					\ref fieldframeinterrupts for more information.
 		@warning	If the designated FrameStore/channel is enabled and in playout mode, and the given frame is within
 					the frame range being used by another FrameStore/channel, this will likely result in wrong/torn/bad
-					output video. \see vidop-fbconflict
+					output video. See \ref vidop-fbconflict
 		@warning	If the designated FrameStore/channel is enabled and in playout mode, and the given frame is in
 					Audio Buffer memory that's in use by a running Audio System, this will likely result in wrong/torn/bad
-					output video. \see audioclobber
+					output video. See \ref audioclobber
 		@see		CNTV2Card::GetOutputFrame, \ref vidop-fs
 	**/
 	AJA_VIRTUAL bool		SetOutputFrame (const NTV2Channel inChannel, const ULWord inValue);
@@ -1325,16 +1330,21 @@ public:
 		@return		True if successful;  otherwise false.
 		@note		For the effect to be noticeable, the Frame Store should be enabled (see CNTV2Card::EnableChannel)
 					and in ::NTV2_MODE_CAPTURE mode (see CNTV2Card::GetMode and CNTV2Card::SetMode).
-		@note		The new value takes effect at the next input VBI. For example, if line 300 of frame 5 is
-					currently being written in device memory at the instant this function is called with frame 6,
-					video won't be written into frame 6 in device memory until the input VBI fires after the last line
-					of frame 5 has been written.
+		@note		Normally, if the device ::NTV2RegisterWriteMode is ::NTV2_REGWRITE_SYNCTOFRAME, the new value takes
+					effect at the next input <b>frame</b> interrupt. For example, if line 300 of frame 5 is currently
+					being written in device memory at the instant this function is called with frame 6, video won't be
+					written into frame 6 in device memory until the input VBI fires after the last line of frame 5 has
+					been written.
+		@note		If the FrameStore's ::NTV2RegisterWriteMode is ::NTV2_REGWRITE_SYNCTOFIELD, the new value takes effect
+					at the next input <b>field</b> interrupt. This makes it possible to capture lines from ::NTV2_FIELD0
+					and ::NTV2_FIELD1 in separate frame buffers, if desired. See CNTV2Card::SetRegisterWriteMode and/or
+					\ref fieldframeinterrupts for more information.
 		@warning	If the designated FrameStore/channel is enabled and in capture mode, and the given frame is within
 					the frame range being used by another FrameStore/channel, this will likely result in torn/bad video
-					in either or both channels. \see vidop-fbconflict
+					in either or both channels. See \ref vidop-fbconflict
 		@warning	If the designated FrameStore/channel is enabled and in capture mode, and the given frame is in
 					Audio Buffer memory that's in use by a running Audio System, this will likely result in torn/bad video
-					and/or bad audio. \see audioclobber
+					and/or bad audio. See \ref audioclobber
 		@see		CNTV2Card::GetInputFrame, \ref vidop-fs
 	**/
 	AJA_VIRTUAL bool		SetInputFrame (const NTV2Channel inChannel, const ULWord inValue);
@@ -2985,13 +2995,6 @@ public:
 	///@}
 
 
-	//
-	//	RegisterAccess Control
-	//
-	AJA_VIRTUAL bool	SetRegisterWritemode (NTV2RegisterWriteMode inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool	GetRegisterWritemode (NTV2RegisterWriteMode & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
-
-
 	/**
 		@name	Interrupts & Events
 	**/
@@ -3333,7 +3336,33 @@ public:
 	**/
 	AJA_VIRTUAL bool	WaitForInputFieldID (const NTV2FieldID inFieldID, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
+	//
+	//	RegisterAccess Control
+	//
+	/**
+		@brief		Sets the FrameStore's ::NTV2RegisterWriteMode, which determines when CNTV2Card::SetInputFrame or
+					CNTV2Card::SetOutputFrame calls (and others) actually take effect.
+		@param[in]	inValue			Specifies the ::NTV2RegisterWriteMode to set for the FrameStore.
+		@param[in]	inFrameStore	Specifies the FrameStore of interest as an ::NTV2Channel, a zero-based index number.
+									If omitted, defaults to NTV2_CHANNEL1.
+		@see		CNTV2Card::GetRegisterWriteMode, CNTV2Card::SetInputFrame, CNTV2Card::SetOutputFrame, \ref fieldframeinterrupts
+	**/
+	AJA_VIRTUAL bool	SetRegisterWriteMode (const NTV2RegisterWriteMode inValue, const NTV2Channel inFrameStore = NTV2_CHANNEL1);
 
+	/**
+		@brief		Answers with the FrameStore's current ::NTV2RegisterWriteMode setting, which determines when
+					CNTV2Card::SetInputFrame or CNTV2Card::SetOutputFrame calls (and others) actually take effect.
+		@param[out]	outValue		Receives the ::NTV2RegisterWriteMode that's currently being used by the FrameStore.
+		@param[in]	inFrameStore	Specifies the FrameStore of interest as an ::NTV2Channel, a zero-based index number.
+									If omitted, defaults to NTV2_CHANNEL1.
+		@see		CNTV2Card::SetRegisterWriteMode, CNTV2Card::SetInputFrame, CNTV2Card::SetOutputFrame, \ref fieldframeinterrupts
+	**/
+	AJA_VIRTUAL bool	GetRegisterWriteMode (NTV2RegisterWriteMode & outValue, const NTV2Channel inFrameStore = NTV2_CHANNEL1);
+
+	#if !defined (NTV2_DEPRECATE_16_0)
+		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	SetRegisterWritemode(NTV2RegisterWriteMode inVal, const NTV2Channel inChan=NTV2_CHANNEL1))	{return SetRegisterWriteMode(inVal,inChan);}		///< @deprecated	Use CNTV2Card::SetRegisterWriteMode instead.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetRegisterWritemode(NTV2RegisterWriteMode & outVal, const NTV2Channel inChan=NTV2_CHANNEL1))	{return SetRegisterWriteMode(outVal,inChan);}	///< @deprecated	Use CNTV2Card::GetRegisterWriteMode instead.
+	#endif	//	NTV2_DEPRECATE_16_0
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	EnableVerticalInterrupt(void));				///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	EnableOutput2VerticalInterrupt(void));		///< @deprecated	Use EnableOutputInterrupt(NTV2Channel) instead.
@@ -7031,7 +7060,7 @@ public:
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	ReadAudioLastOut						(ULWord * pOutValue,									const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? ReadAudioLastOut(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	ReadAudioLastIn							(ULWord *pOutValue,										const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? ReadAudioLastIn(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	ReadAudioSource							(ULWord * pOutValue,									const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? ReadAudioSource(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetRegisterWritemode					(NTV2RegisterWriteMode * pOutValue,						const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetRegisterWritemode(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetRegisterWritemode					(NTV2RegisterWriteMode * pOutValue,						const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetRegisterWriteMode(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetFrameGeometry						(NTV2FrameGeometry * pOutValue,							const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetFrameGeometry(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetVideoFormat							(NTV2VideoFormat * pOutValue,							const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetVideoFormat(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetStandard								(NTV2Standard * pOutValue,								const NTV2Channel inChannel = NTV2_CHANNEL1)	) {return pOutValue ? GetStandard(*pOutValue, inChannel) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
