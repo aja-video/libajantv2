@@ -1826,10 +1826,14 @@ typedef enum
 	PROP_NONE
 } NTV2Prop ;
 
+/**
+	@brief	These values are used to identify fields for interlaced video.
+			See \ref fieldframeinterrupts and CNTV2Card::WaitForInputFieldID.
+**/
 typedef enum
 {
-	NTV2_FIELD0,
-	NTV2_FIELD1,
+	NTV2_FIELD0,	///< @brief	Identifies the first field in time for an interlaced video frame, or the first and only field in a progressive video frame.
+	NTV2_FIELD1,	///< @brief	Identifies the last field in time for an interlaced video frame.
 	NTV2_FIELD_INVALID
 } NTV2FieldID;
 
