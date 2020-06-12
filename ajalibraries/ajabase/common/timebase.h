@@ -165,6 +165,14 @@ public:
 	double FramesToSeconds(int64_t frames) const;
 
 	/**
+	 *	Convert time scale units to time in seconds.
+	 *
+	 *	@param[in]	Time scale units to convert.
+	 *	@return				Time in seconds.
+	 */
+	double ScaleUnitsToSeconds(int64_t frames) const;
+
+	/**
 	 *	Convert video frames to time in microseconds.
 	 *
 	 *	@param[in]	frames	Video frame count to convert.
