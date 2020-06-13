@@ -71,6 +71,30 @@ TEST_SUITE("types" * doctest::description("functions in ajabase/common/types.h")
 
 void variant_marker() {}
 TEST_SUITE("variant" * doctest::description("functions in ajabase/common/variant.h")) {
+    TEST_CASE("Variant::Constructors") {
+        aja::Variant v0;
+        CHECK(v0.GetType() == aja::Variant::Type::None);
+        // copy ctor
+        aja::Variant v1(3.14159f);
+        aja::Variant v2(v1);
+        CHECK(v2.GetFloat() == doctest::Approx(3.14159f));
+        CHECK(v2.GetType() == aja::Variant::Type::Float);
+
+        // move ctor
+        aja::Variant v3(std::move(v1));
+        CHECK(v3.GetType() == aja::Variant::Type::Float);
+        CHECK(v3.GetFloat() == doctest::Approx(3.14159f));
+
+        // move ctor w/ std::string
+        const std::string& str_val = "Hello, world!";
+        aja::Variant v_str(str_val);
+        aja::Variant v_str_copy(v_str);
+        CHECK(v_str_copy.GetString() == str_val);
+        aja::Variant v_str_move(std::move(v_str));
+        CHECK(v_str_move.GetString() == str_val);
+        CHECK(v_str.GetString().empty());
+    }
+
     TEST_CASE("Variant::Type::Boolean") {
         aja::Variant v(true);
         CHECK(v.GetBool() == true);

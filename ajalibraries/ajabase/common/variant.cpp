@@ -1,5 +1,7 @@
 #include "variant.h"
 
+#include "ajabase/common/common.h"
+
 #include <new>
 
 namespace aja {
@@ -48,11 +50,14 @@ m_type(type)
             new (&m_string_value) std::string();
             return;
         case Type::Blob:
-            new (&m_blob_value) std::vector<uint8_t>;
+            new (&m_blob_value) BlobStorage;
+            return;
         case Type::Map:
-            new (&m_map_value) std::map<std::string, Variant>;
+            new (&m_map_value) MapStorage;
+            return;
         case Type::Vector:
-            new (&m_vector_value) std::vector<Variant>;
+            new (&m_vector_value) VectorStorage;
+            return;
     }
 }
 
@@ -84,8 +89,107 @@ Variant::Variant(const char* value, std::size_t length)
     : m_type(Type::String), m_string_value(std::string(value, length)) {}
 Variant::Variant(const std::string& value)
     : m_type(Type::String), m_string_value(value) {}
+Variant::Variant(const BlobStorage& value)
+    : m_type(Type::Blob), m_blob_value(value) {}
+Variant::Variant(const MapStorage& value)
+    : m_type(Type::Map), m_map_value(value) {}
+Variant::Variant(const VectorStorage& value)
+    : m_type(Type::Vector), m_vector_value(value) {}
 
+// copy ctor
 Variant::Variant(const Variant& other) : Variant(other.m_type) {
+    operator=(other);
+}
+
+// move ctor
+Variant::Variant(Variant&& other) noexcept : Variant(other.m_type) {
+    m_type = other.m_type;
+    switch (m_type) {
+        case Type::None:
+            return;
+        case Type::Boolean:
+            m_boolean_value = other.m_boolean_value;
+            return;
+        case Type::Float:
+            m_float_value = other.m_float_value;
+            return;
+        case Type::Double:
+            m_double_value = other.m_double_value;
+            return;
+        case Type::Int8:
+            m_int8_value = other.m_int8_value;
+            return;
+        case Type::UInt8:
+            m_uint8_value = other.m_uint8_value;
+            return;
+        case Type::Int16:
+            m_int16_value = other.m_int16_value;
+            return;
+        case Type::UInt16:
+            m_uint16_value = other.m_uint16_value;
+            return;
+        case Type::Int32:
+            m_int32_value = other.m_int32_value;
+            return;
+        case Type::UInt32:
+            m_uint32_value = other.m_uint32_value;
+            return;
+        case Type::Int64:
+            m_int64_value = other.m_int64_value;
+            return;
+        case Type::UInt64:
+            m_uint64_value = other.m_uint64_value;
+            return;
+        case Type::String:
+            m_string_value = std::move(other.m_string_value);
+            return;
+        case Type::Blob:
+            m_blob_value = BlobStorage(std::move(other.m_blob_value));
+            return;
+        case Type::Map:
+            m_map_value = MapStorage(std::move(other.m_map_value));
+            return;
+        case Type::Vector:
+            m_vector_value = VectorStorage(std::move(other.m_vector_value));
+            return;
+    }
+}
+
+Variant::~Variant() {
+    switch(m_type) {
+        case Type::None:
+            return;
+        case Type::Boolean:
+        case Type::Float:
+        case Type::Double:
+        case Type::Int8:
+        case Type::UInt8:
+        case Type::Int16:
+        case Type::UInt16:
+        case Type::Int32:
+        case Type::UInt32:
+        case Type::Int64:
+        case Type::UInt64:
+            // Nothing to do!
+            return;
+        case Type::String:
+            m_string_value.~basic_string();
+            return;
+        case Type::Blob:
+            m_blob_value.~BlobStorage();
+            return;
+        case Type::Map:
+            m_map_value.~MapStorage();
+            return;
+        case Type::Vector:
+            m_vector_value.~VectorStorage();
+            return;
+    }
+
+    m_type = Type::None;
+}
+
+void Variant::operator=(const Variant& other) {
     m_type = other.m_type;
     switch (m_type) {
         case Type::None:
@@ -126,85 +230,16 @@ Variant::Variant(const Variant& other) : Variant(other.m_type) {
         case Type::String:
             m_string_value = std::string(other.m_string_value);
             return;
-    }
-}
-
-Variant::Variant(Variant&& other) noexcept : Variant(other.m_type) {
-    m_type = other.m_type;
-    switch (m_type) {
-        case Type::None:
-            return;
-        case Type::Boolean:
-            m_boolean_value = other.m_boolean_value;
-            return;
-        case Type::Float:
-            m_float_value = other.m_float_value;
-            return;
-        case Type::Double:
-            m_double_value = other.m_double_value;
-            return;
-        case Type::Int8:
-            m_int8_value = other.m_int8_value;
-            return;
-        case Type::UInt8:
-            m_uint8_value = other.m_uint8_value;
-            return;
-        case Type::Int16:
-            m_int16_value = other.m_int16_value;
-            return;
-        case Type::UInt16:
-            m_uint16_value = other.m_uint16_value;
-            return;
-        case Type::Int32:
-            m_int32_value = other.m_int32_value;
-            return;
-        case Type::UInt32:
-            m_uint32_value = other.m_uint32_value;
-            return;
-        case Type::Int64:
-            m_int64_value = other.m_int64_value;
-            return;
-        case Type::UInt64:
-            m_uint64_value = other.m_uint64_value;
-            return;
-        case Type::String:
-            m_string_value = other.m_string_value;
-            return;
-    }
-}
-
-Variant::~Variant() {
-    switch(m_type) {
-        case Type::None:
-            return;
-        case Type::Boolean:
-        case Type::Float:
-        case Type::Double:
-        case Type::Int8:
-        case Type::UInt8:
-        case Type::Int16:
-        case Type::UInt16:
-        case Type::Int32:
-        case Type::UInt32:
-        case Type::Int64:
-        case Type::UInt64:
-            // Nothing to do!
-            return;
-        case Type::String:
-            m_string_value.~basic_string();
-            return;
         case Type::Blob:
-            m_blob_value.~BlobStorage();
+            m_blob_value = other.m_blob_value;
             return;
         case Type::Map:
-            m_map_value.~MapStorage();
+            m_map_value = other.m_map_value;
             return;
         case Type::Vector:
-            m_vector_value.~VectorStorage();
+            m_vector_value = other.m_vector_value;
             return;
     }
-
-    m_type = Type::None;
 }
 
 // Getters
@@ -244,6 +279,16 @@ uint64_t Variant::GetUInt64() const {
 const std::string& Variant::GetString() const {
     return m_string_value;
 }
+const Variant::BlobStorage& Variant::GetBlob() const {
+    return m_blob_value;
+}
+const Variant::MapStorage& Variant::GetMap() const {
+    return m_map_value;
+}
+const Variant::VectorStorage& Variant::GetVector() const {
+    return m_vector_value;
+}
+
 
 // Setters
 void Variant::SetBool(const bool value) {
@@ -291,6 +336,15 @@ void Variant::SetString(const std::string& value) {
 void Variant::SetString(std::string&& value) {
     m_string_value = std::move(value);
 }
+void Variant::SetBlob(const Variant::BlobStorage& value) {
+    m_blob_value = value;
+}
+void Variant::SetMap(const Variant::MapStorage& value) {
+    m_map_value = value;
+}
+void Variant::SetVector(const Variant::VectorStorage& value) {
+    m_vector_value = value;
+}
 
 // Type conversion methods
 bool Variant::AsBool() const {
@@ -321,7 +375,34 @@ bool Variant::AsBool() const {
             return m_uint64_value ? true : false;
         case Type::String:
         {
-            if (!m_string_value.empty())
+            if (!m_string_value.empty()) {
+                std::string tmp = std::string(m_string_value);
+                std::string lower = aja::lower(tmp);
+                if (tmp == "true")
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+        case Type::Blob:
+        {
+            if (!m_blob_value.empty())
+                return true;
+            else
+                return false;
+        }
+        case Type::Map:
+        {
+            if (!m_map_value.empty())
+                return true;
+            else
+                return false;
+        }
+        case Type::Vector:
+        {
+            if (!m_vector_value.empty())
                 return true;
             else
                 return false;
@@ -330,6 +411,7 @@ bool Variant::AsBool() const {
 
     return false;
 }
+
 float Variant::AsFloat() const {
     switch(m_type) {
         case Type::None:
@@ -722,9 +804,9 @@ std::string Variant::AsString() const {
                 return std::string("false");
         }
         case Type::Float:
-            return std::to_string(m_float_value);
+            return aja::to_string(m_float_value);
         case Type::Double:
-            return std::to_string(m_double_value);
+            return aja::to_string(m_double_value);
         case Type::Int8:
             return std::to_string(m_int8_value);
         case Type::UInt8:
@@ -743,6 +825,10 @@ std::string Variant::AsString() const {
             return std::to_string(m_uint64_value);
         case Type::String:
             return m_string_value;
+        case Type::Blob:
+        case Type::Map:
+        case Type::Vector:
+            return std::string();
     }
 
     return std::string();

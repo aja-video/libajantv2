@@ -35,7 +35,7 @@ public:
     // Binary blob storage
     using BlobStorage = std::vector<uint8_t>;
     using VectorStorage = std::vector<Variant>;
-    using MapStorage = std::map<std::string, std::unique_ptr<Variant>>;
+    using MapStorage = std::map<std::string, Variant>;
 
     Variant() noexcept {} // a null Variant
 
@@ -54,13 +54,15 @@ public:
     explicit Variant(const char* value);
     explicit Variant(const char* value, std::size_t length);
     explicit Variant(const std::string& value);
-    // explicit Variant(const BlobStorage& value);
-    // explicit Variant(const MapStorage& value);
-    // explicit Variant(const VectorStorage& value);
+    explicit Variant(const BlobStorage& value);
+    explicit Variant(const MapStorage& value);
+    explicit Variant(const VectorStorage& value);
 
     Variant(const Variant& other);
     Variant(Variant&& other) noexcept;
     ~Variant();
+
+    void operator=(const Variant& other);
 
     Type GetType() const { return m_type; }
 
@@ -76,9 +78,9 @@ public:
     int64_t GetInt64() const;
     uint64_t GetUInt64() const;
     const std::string& GetString() const;
-    // const BlobStorage& AsBlob() const;
-    // const MapStorage& AsMap() const;
-    // const VectorStorage& AsVector() const;
+    const BlobStorage& GetBlob() const;
+    const MapStorage& GetMap() const;
+    const VectorStorage& GetVector() const;
 
     void SetBool(const bool value);
     void SetFloat(const float value);
@@ -95,9 +97,9 @@ public:
     void SetString(const char* value, std::size_t length);
     void SetString(const std::string& value);
     void SetString(std::string&& value);
-    // void SetBlob(const BlobStorage& value);
-    // void SetMap(const MapStorage& value);
-    // void SetVector(const VectorStorage& value);
+    void SetBlob(const BlobStorage& value);
+    void SetMap(const MapStorage& value);
+    void SetVector(const VectorStorage& value);
 
     // Type conversion methods
     bool AsBool() const;
