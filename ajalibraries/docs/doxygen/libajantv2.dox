@@ -13,6 +13,31 @@
 
 
 
+	@section	ntv2devicescannerclass		Device Scanner Class
+
+	The “CNTV2DeviceScanner” class is used to enumerate or find available devices.
+
+	@par	Example: Discovering all attached devices
+	@code{.cpp}
+		CNTV2Card   device;
+		ULWord		ndx(0);
+		while (CNTV2DeviceScanner::GetDeviceAtIndex (ndx, device))
+		{
+			//	The device instance is guaranteed to be open and valid if GetDeviceAtIndex returns true
+			std::cout << ndx << ": " << device.GetDisplayName() << std::endl;
+			ndx++;
+		}
+	@endcode
+
+
+
+	@section	ntv2cardclass		CNTV2Card Class
+
+	The “CNTV2Card” class is used to interrogate and control an NTV2 device.
+	Normally an instance of this class is obtained from one of the CNTV2DeviceScanner functions.
+
+
+
 	@section	ntv2devicefeatures		Device Features API
 
 	The “NTV2Device…” functions describe AJA NTV2 device capabilities. All of the functions accept an ::NTV2DeviceID parameter,

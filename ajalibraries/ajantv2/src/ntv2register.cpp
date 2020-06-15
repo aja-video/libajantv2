@@ -2922,28 +2922,25 @@ bool CNTV2Card::SupportsP2PTarget (void)
 }
 
 
-bool CNTV2Card::SetRegisterWritemode (NTV2RegisterWriteMode value, NTV2Channel inChannel)
+bool CNTV2Card::SetRegisterWriteMode (const NTV2RegisterWriteMode value, const NTV2Channel inFrameStore)
 {
-	if (IS_CHANNEL_INVALID (inChannel))
+	if (IS_CHANNEL_INVALID(inFrameStore))
 		return false;
-	if (!IsMultiFormatActive ())
-		inChannel = NTV2_CHANNEL1;
-	return WriteRegister (gChannelToGlobalControlRegNum [inChannel], value, kRegMaskRegClocking, kRegShiftRegClocking);
+	return WriteRegister (gChannelToGlobalControlRegNum[IsMultiFormatActive() ? inFrameStore : NTV2_CHANNEL1],
+							value, kRegMaskRegClocking, kRegShiftRegClocking);
 }
 
 
-bool CNTV2Card::GetRegisterWritemode (NTV2RegisterWriteMode & outValue, NTV2Channel inChannel)
+bool CNTV2Card::GetRegisterWriteMode (NTV2RegisterWriteMode & outValue, const NTV2Channel inFrameStore)
 {
-	if (IS_CHANNEL_INVALID (inChannel))
+	if (IS_CHANNEL_INVALID (inFrameStore))
 		return false;
-	ULWord	value	(0);
-	if (!IsMultiFormatActive())
-		inChannel = NTV2_CHANNEL1;
-	bool	result = ReadRegister(gChannelToGlobalControlRegNum[inChannel],
-									value, kRegMaskRegClocking, kRegShiftRegClocking);
-	if (result)
-		outValue = static_cast <NTV2RegisterWriteMode> (value);
-	return result;
+	ULWord	value(0);
+	if (!ReadRegister(gChannelToGlobalControlRegNum[IsMultiFormatActive() ? inFrameStore : NTV2_CHANNEL1],
+								value, kRegMaskRegClocking, kRegShiftRegClocking))
+		return false;
+	outValue = NTV2RegisterWriteMode(value);
+	return true;
 }
 
 
@@ -5857,41 +5854,39 @@ bool CNTV2Card::GetAnalogInputADCMode				(NTV2LSVideoADCMode & outValue)				{ret
 	bool CNTV2Card::GetFS1OutputTone					(NTV2FS1OutputTone *value)			{return ReadRegister  (kRegAudControl,				(ULWord*)value,	kRegMaskOutputTone,						kRegShiftOutputTone);}
 	bool CNTV2Card::SetFS1AudioTone						(NTV2FS1AudioTone value)			{return WriteRegister (kRegAudControl,				value,			kRegMaskAudioTone,						kRegShiftAudioTone);}
 	bool CNTV2Card::GetFS1AudioTone						(NTV2FS1AudioTone *value)			{return ReadRegister  (kRegAudControl,				(ULWord*)value,	kRegMaskAudioTone,						kRegShiftAudioTone);}
-
-	bool CNTV2Card::SetFS1AudioGain_Ch1					(int value)							{return WriteRegister (kRegAudioChannelMappingCh1,	value,			kFS1RegMaskAudioChannelMapping_Gain,	kFS1RegShiftAudioChannelMapping_Gain);}
-	bool CNTV2Card::SetFS1AudioGain_Ch2					(int value)							{return WriteRegister (kRegAudioChannelMappingCh2,	value,			kFS1RegMaskAudioChannelMapping_Gain,	kFS1RegShiftAudioChannelMapping_Gain);}
-	bool CNTV2Card::SetFS1AudioGain_Ch3					(int value)							{return WriteRegister (kRegAudioChannelMappingCh3,	value,			kFS1RegMaskAudioChannelMapping_Gain,	kFS1RegShiftAudioChannelMapping_Gain);}
-	bool CNTV2Card::SetFS1AudioGain_Ch4					(int value)							{return WriteRegister (kRegAudioChannelMappingCh4,	value,			kFS1RegMaskAudioChannelMapping_Gain,	kFS1RegShiftAudioChannelMapping_Gain);}
-	bool CNTV2Card::SetFS1AudioGain_Ch5					(int value)							{return WriteRegister (kRegAudioChannelMappingCh5,	value,			kFS1RegMaskAudioChannelMapping_Gain,	kFS1RegShiftAudioChannelMapping_Gain);}
-	bool CNTV2Card::SetFS1AudioGain_Ch6					(int value)							{return WriteRegister (kRegAudioChannelMappingCh6,	value,			kFS1RegMaskAudioChannelMapping_Gain,	kFS1RegShiftAudioChannelMapping_Gain);}
-	bool CNTV2Card::SetFS1AudioGain_Ch7					(int value)							{return WriteRegister (kRegAudioChannelMappingCh7,	value,			kFS1RegMaskAudioChannelMapping_Gain,	kFS1RegShiftAudioChannelMapping_Gain);}
-	bool CNTV2Card::SetFS1AudioGain_Ch8					(int value)							{return WriteRegister (kRegAudioChannelMappingCh8,	value,			kFS1RegMaskAudioChannelMapping_Gain,	kFS1RegShiftAudioChannelMapping_Gain);}
-
-	bool CNTV2Card::SetFS1AudioPhase_Ch1				(bool value)						{return WriteRegister (kRegAudioChannelMappingCh1,	value,			kFS1RegMaskAudioChannelMapping_Phase,	kFS1RegShiftAudioChannelMapping_Phase);}
-	bool CNTV2Card::SetFS1AudioPhase_Ch2				(bool value)						{return WriteRegister (kRegAudioChannelMappingCh2,	value,			kFS1RegMaskAudioChannelMapping_Phase,	kFS1RegShiftAudioChannelMapping_Phase);}
-	bool CNTV2Card::SetFS1AudioPhase_Ch3				(bool value)						{return WriteRegister (kRegAudioChannelMappingCh3,	value,			kFS1RegMaskAudioChannelMapping_Phase,	kFS1RegShiftAudioChannelMapping_Phase);}
-	bool CNTV2Card::SetFS1AudioPhase_Ch4				(bool value)						{return WriteRegister (kRegAudioChannelMappingCh4,	value,			kFS1RegMaskAudioChannelMapping_Phase,	kFS1RegShiftAudioChannelMapping_Phase);}
-	bool CNTV2Card::SetFS1AudioPhase_Ch5				(bool value)						{return WriteRegister (kRegAudioChannelMappingCh5,	value,			kFS1RegMaskAudioChannelMapping_Phase,	kFS1RegShiftAudioChannelMapping_Phase);}
-	bool CNTV2Card::SetFS1AudioPhase_Ch6				(bool value)						{return WriteRegister (kRegAudioChannelMappingCh6,	value,			kFS1RegMaskAudioChannelMapping_Phase,	kFS1RegShiftAudioChannelMapping_Phase);}
-	bool CNTV2Card::SetFS1AudioPhase_Ch7				(bool value)						{return WriteRegister (kRegAudioChannelMappingCh7,	value,			kFS1RegMaskAudioChannelMapping_Phase,	kFS1RegShiftAudioChannelMapping_Phase);}
-	bool CNTV2Card::SetFS1AudioPhase_Ch8				(bool value)						{return WriteRegister (kRegAudioChannelMappingCh8,	value,			kFS1RegMaskAudioChannelMapping_Phase,	kFS1RegShiftAudioChannelMapping_Phase);}
-	bool CNTV2Card::SetFS1AudioSource_Ch1				(NTV2AudioChannelMapping value)		{return WriteRegister (kRegAudioChannelMappingCh1,	value,			kFS1RegMaskAudioChannelMapping_Source,	kFS1RegShiftAudioChannelMapping_Source);}
-	bool CNTV2Card::SetFS1AudioSource_Ch2				(NTV2AudioChannelMapping value)		{return WriteRegister (kRegAudioChannelMappingCh2,	value,			kFS1RegMaskAudioChannelMapping_Source,	kFS1RegShiftAudioChannelMapping_Source);}
-	bool CNTV2Card::SetFS1AudioSource_Ch3				(NTV2AudioChannelMapping value)		{return WriteRegister (kRegAudioChannelMappingCh3,	value,			kFS1RegMaskAudioChannelMapping_Source,	kFS1RegShiftAudioChannelMapping_Source);}
-	bool CNTV2Card::SetFS1AudioSource_Ch4				(NTV2AudioChannelMapping value)		{return WriteRegister (kRegAudioChannelMappingCh4,	value,			kFS1RegMaskAudioChannelMapping_Source,	kFS1RegShiftAudioChannelMapping_Source);}
-	bool CNTV2Card::SetFS1AudioSource_Ch5				(NTV2AudioChannelMapping value)		{return WriteRegister (kRegAudioChannelMappingCh5,	value,			kFS1RegMaskAudioChannelMapping_Source,	kFS1RegShiftAudioChannelMapping_Source);}
-	bool CNTV2Card::SetFS1AudioSource_Ch6				(NTV2AudioChannelMapping value)		{return WriteRegister (kRegAudioChannelMappingCh6,	value,			kFS1RegMaskAudioChannelMapping_Source,	kFS1RegShiftAudioChannelMapping_Source);}
-	bool CNTV2Card::SetFS1AudioSource_Ch7				(NTV2AudioChannelMapping value)		{return WriteRegister (kRegAudioChannelMappingCh7,	value,			kFS1RegMaskAudioChannelMapping_Source,	kFS1RegShiftAudioChannelMapping_Source);}
-	bool CNTV2Card::SetFS1AudioSource_Ch8				(NTV2AudioChannelMapping value)		{return WriteRegister (kRegAudioChannelMappingCh8,	value,			kFS1RegMaskAudioChannelMapping_Source,	kFS1RegShiftAudioChannelMapping_Source);}
-
-	bool CNTV2Card::SetFS1AudioMute_Ch1					(bool value)						{return WriteRegister (kRegAudioChannelMappingCh1,	value,			kFS1RegMaskAudioChannelMapping_Mute,	kFS1RegShiftAudioChannelMapping_Mute);}
-	bool CNTV2Card::SetFS1AudioMute_Ch2					(bool value)						{return WriteRegister (kRegAudioChannelMappingCh2,	value,			kFS1RegMaskAudioChannelMapping_Mute,	kFS1RegShiftAudioChannelMapping_Mute);}
-	bool CNTV2Card::SetFS1AudioMute_Ch3					(bool value)						{return WriteRegister (kRegAudioChannelMappingCh3,	value,			kFS1RegMaskAudioChannelMapping_Mute,	kFS1RegShiftAudioChannelMapping_Mute);}
-	bool CNTV2Card::SetFS1AudioMute_Ch4					(bool value)						{return WriteRegister (kRegAudioChannelMappingCh4,	value,			kFS1RegMaskAudioChannelMapping_Mute,	kFS1RegShiftAudioChannelMapping_Mute);}
-	bool CNTV2Card::SetFS1AudioMute_Ch5					(bool value)						{return WriteRegister (kRegAudioChannelMappingCh5,	value,			kFS1RegMaskAudioChannelMapping_Mute,	kFS1RegShiftAudioChannelMapping_Mute);}
-	bool CNTV2Card::SetFS1AudioMute_Ch6					(bool value)						{return WriteRegister (kRegAudioChannelMappingCh6,	value,			kFS1RegMaskAudioChannelMapping_Mute,	kFS1RegShiftAudioChannelMapping_Mute);}
-	bool CNTV2Card::SetFS1AudioMute_Ch7					(bool value)						{return WriteRegister (kRegAudioChannelMappingCh7,	value,			kFS1RegMaskAudioChannelMapping_Mute,	kFS1RegShiftAudioChannelMapping_Mute);}
-	bool CNTV2Card::SetFS1AudioMute_Ch8					(bool value)						{return WriteRegister (kRegAudioChannelMappingCh8,	value,			kFS1RegMaskAudioChannelMapping_Mute,	kFS1RegShiftAudioChannelMapping_Mute);}
+	//	OBSOLETE: This function group modified regs 172-180, but no supported NTV2 devices use those regs:
+		bool CNTV2Card::SetFS1AudioGain_Ch1				(int value)							{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioGain_Ch2				(int value)							{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioGain_Ch3				(int value)							{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioGain_Ch4				(int value)							{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioGain_Ch5				(int value)							{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioGain_Ch6				(int value)							{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioGain_Ch7				(int value)							{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioGain_Ch8				(int value)							{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioPhase_Ch1			(bool value)						{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioPhase_Ch2			(bool value)						{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioPhase_Ch3			(bool value)						{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioPhase_Ch4			(bool value)						{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioPhase_Ch5			(bool value)						{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioPhase_Ch6			(bool value)						{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioPhase_Ch7			(bool value)						{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioPhase_Ch8			(bool value)						{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioSource_Ch1			(NTV2AudioChannelMapping value)		{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioSource_Ch2			(NTV2AudioChannelMapping value)		{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioSource_Ch3			(NTV2AudioChannelMapping value)		{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioSource_Ch4			(NTV2AudioChannelMapping value)		{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioSource_Ch5			(NTV2AudioChannelMapping value)		{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioSource_Ch6			(NTV2AudioChannelMapping value)		{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioSource_Ch7			(NTV2AudioChannelMapping value)		{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioSource_Ch8			(NTV2AudioChannelMapping value)		{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioMute_Ch1				(bool value)						{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioMute_Ch2				(bool value)						{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioMute_Ch3				(bool value)						{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioMute_Ch4				(bool value)						{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioMute_Ch5				(bool value)						{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioMute_Ch6				(bool value)						{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioMute_Ch7				(bool value)						{(void) value; return false;}
+		bool CNTV2Card::SetFS1AudioMute_Ch8				(bool value)						{(void) value; return false;}
 
 
 	///////////////////////////////////////////////////////////////
