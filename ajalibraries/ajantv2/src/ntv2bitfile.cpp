@@ -485,7 +485,7 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_IOIP_2110:		return "ioip_s2110";
 		case DEVICE_ID_KONA1:			return "kona1";
 		case DEVICE_ID_KONAHDMI:		return "kona_hdmi_4rx";
-		case DEVICE_ID_KONA5:			return "kona5";
+		case DEVICE_ID_KONA5:			return "kona5_retail";
 		case DEVICE_ID_KONA5_8KMK:		return "kona5_8k_mk";
 		case DEVICE_ID_KONA5_8K:		return "kona5_8k";
 		case DEVICE_ID_KONA5_2X4K:		return "kona5_2x4k";
@@ -493,7 +493,7 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_CORVID44_8KMK:	return "c44_12g_8k_mk";
 		case DEVICE_ID_CORVID44_8K:		return "c44_12g_8k";
 		case DEVICE_ID_CORVID44_2X4K:	return "c44_12g_2x4k";
-		case DEVICE_ID_T3TAP:			return "t3_tap";
+		case DEVICE_ID_TTAP_PRO:		return "t_tap_pro";
 		default:						break;
 	}
 	return "";
@@ -547,7 +547,7 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 		case DEVICE_ID_CORVID44_2X4K: return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_8KMK) == _designName
 											|| _designName == ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_8K)
 											|| _designName == ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_2X4K);
-		case DEVICE_ID_T3TAP:		return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_T3TAP) == _designName;
+		case DEVICE_ID_TTAP_PRO:		return ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_TTAP_PRO) == _designName;
 		default:					break;
 	}
 	return false;
@@ -601,7 +601,8 @@ public:
 	CDesignPairToIDMapMaker ()
 		{
 			assert (sDesignPairToIDMap.empty ());
-            sDesignPairToIDMap[make_pair(0x01, 0x01)] = DEVICE_ID_KONA5_8KMK;
+			sDesignPairToIDMap[make_pair(0x01, 0x00)] = DEVICE_ID_KONA5;
+			sDesignPairToIDMap[make_pair(0x01, 0x01)] = DEVICE_ID_KONA5_8KMK;
             sDesignPairToIDMap[make_pair(0x01, 0x02)] = DEVICE_ID_KONA5_8K;
             sDesignPairToIDMap[make_pair(0x01, 0x03)] = DEVICE_ID_KONA5_2X4K;
 			sDesignPairToIDMap[make_pair(0x01, 0x04)] = DEVICE_ID_KONA5_3DLUT;

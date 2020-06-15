@@ -76,8 +76,10 @@ static void getDataAndTimeInBextFormat(std::string& formattedDate, std::string& 
 }
 
 AJAWavWriter::AJAWavWriter(const std::string & name, const AJAWavWriterAudioFormat & audioFormat, const AJAWavWriterVideoFormat & videoFormat,
-                           const std::string & startTimecode, AJAWavWriterChunkFlag flags)
-: AJAFileIO(), mFileName(name), mAudioFormat(audioFormat), mVideoFormat(videoFormat), mStartTimecode(startTimecode), mFlags(flags), mLittleEndian(true)
+						   const std::string & startTimecode, AJAWavWriterChunkFlag flags,
+						   bool useFloatNotPCM)
+: AJAFileIO(), mFileName(name), mAudioFormat(audioFormat), mVideoFormat(videoFormat), mStartTimecode(startTimecode), mFlags(flags), mLittleEndian(true),
+  mUseFloatData(useFloatNotPCM)
 {
     mSizeOfHeader = sizeOf_riff + sizeOf_fmt + sizeOf_data;
     
@@ -233,7 +235,12 @@ void AJAWavWriter::writeHeader()
 	// Format description chunk
 	wtn += writeRawData("fmt ", 4);
 	wtn += writeRaw_uint32_t(16);                              // "fmt " chunk size (always 16 for PCM)
-	wtn += writeRaw_uint16_t(1);                               // data format (1 => PCM)
+	int audioFormat = 1; //PCM
+	if (mUseFloatData)
+	{
+		audioFormat = 3; //IEEE Float
+	}
+	wtn += writeRaw_uint16_t(audioFormat);                     // data format (1 => PCM), (3 => IEEE Float)
 	wtn += writeRaw_uint16_t(mAudioFormat.channelCount);
 	wtn += writeRaw_uint32_t(mAudioFormat.sampleRate);
 	wtn += writeRaw_uint32_t(mAudioFormat.sampleRate * mAudioFormat.channelCount * mAudioFormat.sampleSize / 8 ); // bytes per second

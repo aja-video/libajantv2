@@ -181,17 +181,21 @@
 	LTC, etc. — are generally identical across all AJA devices.
 
 	<b>SDI Input(s)</b>
-	-	AC-coupled input terminated with 75 ohms to ground
+	-	AC-coupled input terminated with 75Ω to ground
 	-	SMPTE 292 compliant — 800mV peak-to-peak ±10%
 
 	<b>SDI Output(s)</b>
-	-	AC-coupled output terminated with 75 ohms to ground
-	-	<b>Output Level:</b>  800mV peak-to-peak ±10%, terminated into 75 ohms
+	-	AC-coupled output terminated with 75Ω to ground
+	-	<b>Output Level:</b>  800mV peak-to-peak ±10%, terminated into 75Ω
 
 	<b>Video Reference Input(s)</b>
 	-	Analog video reference, NTSC, PAL, or tri-level sync
-	-	Active loop-through, input terminated by 75 ohms to ground
+	-	Input terminated by 75Ω to ground
 	-	<b>Input level:</b>  0.5 Volts peak-to-peak to 2.0 Volts peak-to-peak
+	-	Tri-level sync:
+		-	Analog Color Black (700 mV sync nominal, plus burst)
+		-	Composite Sync (700 mV sync nominal, plus burst and video)
+		-	HD Tri-Level Sync (±700 mV sync)
 
 	<b>Analog LTC Input(s)</b>
 	-	Designed to work with inverted or non-inverted inputs
@@ -203,12 +207,12 @@
 	-	Connector: Type-A (unless otherwise noted)
 
 	<b>AES Input(s)</b>
-	-	DC-coupled input terminated with 75 ohms to ground
+	-	DC-coupled input terminated with 75Ω to ground
 	-	<b>Minimum input level:</b>  100 mV peak-to-peak
 
 	<b>AES Output(s)</b>
-	-	AC-coupled output terminated with 75 ohms to ground
-	-	<b>Output level:</b>  1.55 Volts peak-to-peak, +/- 10%, terminated into 75 ohms
+	-	AC-coupled output terminated with 75Ω to ground
+	-	<b>Output level:</b>  1.55 Volts peak-to-peak, +/- 10%, terminated into 75Ω
 
 	<b>Analog Video Output(s)</b>
 	-	12-bit precision DAC output
@@ -561,28 +565,38 @@
 	@subsection	fieldframeinterrupts	Field/Frame Interrupts
 
 	Many device hardware registers are updated on the video frame sync (i.e. the VBI associated with
-	the start of a new frame). For example, CNTV2Card::SetInputFrame is called by the client
-	application to instruct the device’s Frame Store to write the next video frame that arrives
-	into a specific frame buffer number in device memory. The function call immediately changes
-	the Frame Store’s input frame register, but internally, the device firmware ensures that the
-	Frame Store uses the new frame number value at the next “Field0” (first field in time) sync pulse.
-	To avoid a race condition, though, the client application needs to wait for (synchronize with)
-	the VBI, which gives it an entire frame time to update hardware registers and configure the
-	device widget settings that are required for the next frame to be processed.
+	the start of a new frame). This is determined by the FrameStore’s ::NTV2RegisterWriteMode and is
+	normally set to ::NTV2_REGWRITE_SYNCTOFRAME.
 
-	For interlaced video, where the frame is transmitted as two fields, each field contains every
-	other line of the frame. For HD video, the first field in time contains the first active line
-	of the frame (i.e. the “top field” or “field0”), the second field contains the last active
-	line of the frame (i.e. the “bottom field” or “field1”). Each field starts with a video sync —
-	however, the hardware registers are only updated at the “field0” (first field in time) sync.
-	Each of the syncs (“field0” and “field1”) produces an interrupt to the driver,
-	but CNTV2Card::WaitForInputFieldID (or CNTV2Card::WaitForOutputFieldID) check a hardware register
-	and return only when “field0” is detected (not “field1”). For progressive video, all syncs are
-	flagged by the hardware as “field0” syncs, so registers are updated for the next frame and the
-	CNTV2Card::WaitForInputFieldID (or CNTV2Card::WaitForOutputFieldID) work as expected.
+	For example, CNTV2Card::SetInputFrame is called by the client application to instruct the device’s
+	FrameStore to write the next video frame that arrives into a specific frame buffer number in device
+	memory. The function call immediately changes the Frame Store’s input frame register, but internally,
+	the device firmware ensures that the FrameStore uses the new frame number value at the next ::NTV2_FIELD0
+	(first field in time) sync pulse. (To avoid a race condition, though, the client application must wait
+	for the VBI, which gives it an entire frame time to update hardware registers and configure the
+	device widget settings that are required for the next frame to be processed.)
 
-	To wait for an event (such as a VBI) from a particular Frame Store, your application should
-	subscribe to it by calling CNTV2Card::SubscribeInputVerticalEvent or CNTV2Card::SubscribeOutputVerticalEvent.
+	For interlaced video, where the frame is transmitted as two fields, each field contains every other line
+	of the frame. For HD video, the first field in time contains the first active line of the frame (i.e. the
+	“top field” <i>a.k.a.</i> ::NTV2_FIELD0 <i>a.k.a.</i> <b>F1</b>); the second field contains the last
+	active line of the frame (i.e. the “bottom field” <i>a.k.a.</i> ::NTV2_FIELD1 <i>a.k.a.</i> <b>F2</b>).
+	Each field starts with a video sync — however, normally, in ::NTV2_REGWRITE_SYNCTOFRAME mode, the hardware
+	registers are only updated at the ::NTV2_FIELD0 sync. Each of the syncs (::NTV2_FIELD0 and ::NTV2_FIELD1 )
+	signals an interrupt to the driver, but CNTV2Card::WaitForInputFieldID (or CNTV2Card::WaitForOutputFieldID)
+	check a hardware register and return only when the requested ::NTV2FieldID is detected.
+
+	The FrameStore can alternatively be configured for <b>Field Mode</b> by passing ::NTV2_REGWRITE_SYNCTOFIELD
+	into CNTV2Card::SetRegisterWriteMode, which causes calls to CNTV2Card::SetInputFrame or CNTV2Card::SetOutputFrame
+	to take effect at the next <b>field</b> interrupt. In this mode of operation, the client application must wait
+	for the next field interrupt – not frame interrupt – which gives it half the frame time to prepare/configure
+	the device for the next field to be processed.
+
+	For progressive video, all syncs are flagged by the hardware as ::NTV2_FIELD0 syncs, so registers
+	are updated for the next frame and the CNTV2Card::WaitForInputFieldID (or CNTV2Card::WaitForOutputFieldID)
+	work as expected.
+
+	To wait for an event (such as a VBI) from a particular FrameStore, your application should subscribe
+	to it by calling CNTV2Card::SubscribeInputVerticalEvent or CNTV2Card::SubscribeOutputVerticalEvent.
 
 	Once subscribed, to efficiently wait for an input vertical interrupt, call CNTV2Card::WaitForInputFieldID or
 	CNTV2Card::WaitForInputVerticalInterrupt, referencing the Frame Store that’s configured for capture,
@@ -591,16 +605,16 @@
 	To efficiently wait for an output vertical interrupt, call CNTV2Card::WaitForOutputFieldID or
 	CNTV2Card::WaitForOutputVerticalInterrupt, referencing the Frame Store that’s configured for playout.
 
-	You can inquire as to the number of input or output vertical events that have successfully been waited
-	on and fired by calling CNTV2Card::GetInputVerticalEventCount or CNTV2Card::GetOutputVerticalEventCount.
+	The number of input or output vertical events that have successfully been waited on and fired can be obtained
+	by calling CNTV2Card::GetInputVerticalEventCount or CNTV2Card::GetOutputVerticalEventCount.
 	By calling either of these methods before and after calling the “wait for input/output” function, you
 	can determine if indeed the interrupt event actually triggered. Call CNTV2Card::SetInputVerticalEventCount
 	or CNTV2Card::SetOutputVerticalEventCount to reset the tally counter.
 
 	Normally it’s not necessary to explicitly unsubscribe the CNTV2Card instance’s event subscriptions, as
-	its destructor automatically calls CNTV2Card::Close, but it’s considered a good practice.
+	its destructor automatically calls CNTV2Card::Close.
 
-	@note	On <b>Windows</b>, the AJA NTV2 driver supplies a finite number of event subscription handles
+	@note	On the <b>Windows</b> platform, the AJA NTV2 driver supplies a finite number of event subscription handles
 			to client applications, which get consumed when subscribed (via CNTV2Card::SubscribeInputVerticalEvent,
 			CNTV2Card::SubscribeOutputVerticalEvent, CNTV2Card::SubscribeEvent). They’re made available
 			again to other clients when unsubscribed (via CNTV2Card::UnsubscribeInputVerticalEvent,
@@ -612,6 +626,7 @@
 			(after closing all running NTV2 client applications, including the AJA Service. 3) Set virtual
 			register kVRegClearAllSubscriptions to a non-zero value (this can be easily done in NTV2Watcher’s
 			\ref inspectorregs ).
+
 
 	@subsection	vidop-fbconflict	When Frame Stores Access the Same Frame Buffer Memory
 
@@ -1358,47 +1373,56 @@
 	Traditionally, the FPGA is only loaded from flash memory upon power-up.
 	The “failsafe” bitfile only loads if the board’s “failsafe” button is held down while power is applied to the board.
 
-	@note	Our newest boards — starting with the \ref kona5 — can be instructed to reload their FPGA upon PCIe reset
-			without an intervening power-down.
-
-	Some of our boards — like the \ref konaip — have, in addition to the normal FPGA hardware, a microprocessor, which requires
+	Some AJA devices — like the \ref konaip — have, in addition to the normal FPGA hardware, a microprocessor, which requires
 	an additional, separate firmware bitfile that bootstraps and operates it. This extra firmware is bundled into a “package” that is
 	also stored in (and loaded from) a separate partition in the EEPROM.
 
+	All NTV2 devices have two on-board LEDs that indicate readiness:
+	-#	<b>Power</b> — If the board has power, this will indicate <b>Green</b>; otherwise it won’t be lit.
+	-#	<b>FPGA Load State:</b>
+		-	<b>Green</b> — Normal firmware bitfile loaded successfully.
+		-	<b>Amber</b> — Fail-safe firmware bitfile loaded.
+		-	<b>Red</b> — FPGA not programmed; firmware load failed.
 
+	When operating normally, both LEDs will be <b>Green</b>.
+
+	@note	On the Io and T-Tap products, the LEDs are hidden inside the chassis and can’t be seen.
+ 
 	<hr size="50px">
 	@subsection	dev-firmware-loading	Loading Firmware
 
 	Loading the FPGA from EEPROM after power-up takes a finite amount of time.
 	If this exceeds the amount of time allotted by the BIOS for PCIe devices to become ready, the AJA device
 	won’t be detected by the BIOS, and thus won’t be probed by — or matched to — any device drivers.
-	On Windows PCs, this is shown as an “<i>Unknown device</i>” in the Windows <b>Device Manager</b>.
-	On Linux PCs, the ‘<b>lspci</b>’ command can help diagnose these issues.
-	For example, here’s what ‘<b>lspci</b>’ should normally show when looking for devices with AJA’s PCIe vendor
-	ID of \c 0xF1D0 (e.g. for a Corvid88):
-	@code{.sh}
-		$ lspci -d f1d0:
-		03:00.0 Multimedia video controller: AJA Video Device eb0d
-		$ lspci -n  -d f1d0:
-		03:00.0 0400: f1d0:eb0d
-		$ lspci -nn  -d f1d0:
-		03:00.0 Multimedia video controller [0400]: AJA Video Device [f1d0:eb0d]
-	@endcode
+	-	On Windows PCs, this is shown as an “<i>Unknown device</i>” in the Windows <b>Device Manager</b>.
+	-	On Linux PCs, the ‘<b>lspci</b>’ command can help diagnose these issues.
+		For example, here’s what ‘<b>lspci</b>’ should normally show when looking for devices with AJA’s PCIe vendor
+		ID of \c 0xF1D0 (e.g. for a Corvid88):
+		@code{.sh}
+			$ lspci -d f1d0:
+			03:00.0 Multimedia video controller: AJA Video Device eb0d
+			$ lspci -n  -d f1d0:
+			03:00.0 0400: f1d0:eb0d
+			$ lspci -nn  -d f1d0:
+			03:00.0 Multimedia video controller [0400]: AJA Video Device [f1d0:eb0d]
+		@endcode
 
-	@note	<b>Disable Fast-Boot Option:</b> On PCs running Windows or Linux, be sure to disable all fast-boot options in the BIOS.
+	<b>Disable Fast-Boot Option:</b><br />
+	On PCs running Windows or Linux, be sure to disable all fast-boot options in the BIOS.
 
-	@note	<b>Disable Power-Saving Modes:</b> AJA’s NTV2 devices do not support PCIe power management.
-			-	Be sure to disable any and all Energy-Saving features in the OS,
-				particularly PCIe “Link State Power Management” (LSPM).
-			-	<b>Windows</b> — This is in “Advanced Power Settings” ==≻ “Power Options” ==≻
-				“PCI Express” ==≻ “Link State Power Management” ==≻ <b>Off</b>.
-			-	<b>Linux</b> — Use the \c lspci command:
-				@code{.sh}
-					$ sudo lspci -vvv  -d f1d0:
-				@endcode
-				… and confirm that “LnkCtl: ASPM Disabled” is shown for each AJA device.
-			-	On some motherboards, power management is controlled by the BIOS, in which case,
-				try <b>disabling ASPM</b> under the BIOS’ <b>power options</b>.
+	<b>Disable Power-Saving Modes:</b><br />
+	AJA’s NTV2 devices do not support PCIe power management.
+	-	Be sure to disable any and all Energy-Saving features in the OS,
+		particularly PCIe “Link State Power Management” (LSPM).
+	-	<b>Windows</b> — This is in “Advanced Power Settings” ==≻ “Power Options” ==≻
+		“PCI Express” ==≻ “Link State Power Management” ==≻ <b>Off</b>.
+	-	<b>Linux</b> — Use the \c lspci command:
+		@code{.sh}
+			$ sudo lspci -vvv  -d f1d0:
+		@endcode
+		… and confirm that “LnkCtl: ASPM Disabled” is shown for each AJA device.
+	-	On some motherboards, power management is controlled by the BIOS, in which case,
+		try <b>disabling ASPM</b> under the BIOS’ <b>power options</b>.
 
 	If, even after disabling “fast-boot”, the AJA device fails to show up, …
 	-	Try “warm-booting” the PC. If the device is recognized after a warm-boot, then it’s likely a firmware load-time issue.
@@ -1407,6 +1431,12 @@
 		manufacturers use a custom BIOS that has options for configuring PCIe slots, so be sure to check those BIOS settings
 		and adjust them if needed.
 	-	If the device still fails to show up, please <a href="https://sdksupport.aja.com/index.php?/Tickets/Submit">submit a Ticket</a>.
+
+	<b>“Warm Boot” Reload</b><br />
+	Some newer AJA devices are capable of reloading the FPGA upon a <b>PCIe Reset</b> — aka a “warm boot”.
+	-	To test if the device can do a “warm boot” FPGA reload, call CNTV2Card::CanWarmBootFPGA.
+	-	Note that AJA devices with Thunderbolt ports (e.g. \ref io4kplus ), or AJA boards installed on Thunderbolt PCIe
+		card-cages receive a <b>PCIe Reset</b> when the Thunderbolt cable is unplugged and subsequently reconnected.
 
 
 	<hr size="50px">
@@ -1417,7 +1447,8 @@
 		command-line utility, described in \ref toolsandutilities.
 	-#	Using the <b>AJA ControlPanel</b>, which is part of the “retail” software that can be downloaded from https://www.aja.com/.
 
-	Once the new firmware has been written into the device EEPROM storage, it won’t “run” until the device FPGA gets reloaded.
+	Once the new firmware has been written into the device EEPROM storage, it won’t “run” until the device FPGA gets reloaded
+	(see \ref dev-firmware-loading above).
 
 
 	<hr size="50px">
@@ -1431,10 +1462,10 @@
 	-	the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/129">ntv2firmwareinstaller</a> command line
 		utility, using its <b>--info</b> option;
 	-	the “Info” or “Firmware” panels of the <b>AJA ControlPanel</b> application (in AJA’s “retail” software);
-	-	programmatically using certain SDK API calls (see below).
+	-	programmatically using certain SDK API calls (described below).
 
 	Newer AJA devices (starting with the \ref corvid88) report their <b>currently-running firmware date</b> in register 88,
-	which is made available as numeric date components or a standard string by calling CNTV2Card::GetRunningFirmwareDate.
+	which is made available as numeric date components or a <tt>std::string</tt> by calling CNTV2Card::GetRunningFirmwareDate.
 
 	Older AJA devices prior to the introduction of the \ref corvid88 have no way of reporting their <b>currently-running firmware date</b>
 	— they can only report the running firmware’s <i>revision number</i> (which was stored in a portion of register 48 and made
@@ -1443,10 +1474,9 @@
 	<a href="https://sdksupport.aja.com/index.php?/Knowledgebase/List/Index/25/ntv2-firmware">AJA SDK support site’s KnowledgeBase</a>
 	(not very convenient).
 
-	To determine if a device is capable of reporting its <b>currently-running firmware date</b>, call ::NTV2DeviceCanReportRunningFirmwareDate.
-
-	To determine the <b>currently-installed firmware</b> date, the firmware header must be read out of flash memory and parsed.
-	The CNTV2KonaFlashProgram class does this, and after parsing, the CNTV2KonaFlashProgram::GetDate method will provide the date.
+	-	To determine if a device is capable of reporting its <b>currently-running firmware date</b>, call ::NTV2DeviceCanReportRunningFirmwareDate.
+	-	To determine the <b>currently-installed firmware</b> date, call CNTV2Card::GetInstalledBitfileInfo.
+	-	To test if the fail-safe firmware is currently loaded, call CNTV2Card::IsFailSafeBitfileLoaded.
 
 
 	<hr size="50px">

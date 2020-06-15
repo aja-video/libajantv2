@@ -69,7 +69,7 @@ NTV2DeviceIDSet CNTV2Card::GetDynamicDeviceIDs (void)
 	if (!GetRunningFirmwareRevision(bitfileVersion))
 		return result;
 
-	if (!currentDeviceID  ||  !currentBitfileID)
+	if (!currentDeviceID)
 		return result;
 
 	//	Get the clear file matching current bitfile...
@@ -78,7 +78,7 @@ NTV2DeviceIDSet CNTV2Card::GetDynamicDeviceIDs (void)
 									designID,
 									designVersion,
 									currentBitfileID,
-									bitfileVersion,
+                                    0xff, // bitfileVersion,
 									NTV2_BITFILE_FLAG_CLEAR) || !clearStream)
 		return result;
 
@@ -126,7 +126,7 @@ bool CNTV2Card::LoadDynamicDevice (const NTV2DeviceID inDeviceID)
 	if (!GetRunningFirmwareRevision(bitfileVersion))
 		return false;
 
-	if (!currentDeviceID  ||  !currentBitfileID)
+	if (!currentDeviceID)
 		return false;
 
 	//	Get the clear file matching current bitfile...
@@ -135,7 +135,7 @@ bool CNTV2Card::LoadDynamicDevice (const NTV2DeviceID inDeviceID)
 									designID,
 									designVersion,
 									currentBitfileID,
-									bitfileVersion,
+                                    0xff, // bitfileVersion,
 									NTV2_BITFILE_FLAG_CLEAR) || !clearStream)
 		return false;
 

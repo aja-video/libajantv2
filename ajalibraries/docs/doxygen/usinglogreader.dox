@@ -132,7 +132,23 @@ Each <b>Debug Unit</b> can be specified by a <b>Debug Unit identifier</b> (which
 -	<b>Avid</b> (or <b>37</b>)
 -	<b>DriverInterface</b> (or <b>38</b>)
 -	<b>AutoCirculate</b> (or <b>39</b>)
--	…plus the “unused” set <b>40</b> thru <b>84</b>
+-	<b>NMOS</b> (or <b>40</b>)
+-	<b>App_DiskRead</b> (or <b>41</b>)
+-	<b>App_DiskWrite</b> (or <b>42</b>)
+-	<b>App_Decode</b> (or <b>43</b>)
+-	<b>App_Encode</b> (or <b>44</b>)
+-	<b>App_DMA</b> (or <b>45</b>)
+-	<b>App_Screen</b> (or <b>46</b>)
+-	<b>App_User1</b> (or <b>47</b>)
+-	<b>App_User2</b> (or <b>48</b>)
+-	<b>Anc2110Xmit</b> (or <b>49</b>)
+-	<b>Anc2110Rcv</b> (or <b>50</b>)
+-	<b>DemoPlayout</b> (or <b>51</b>)
+-	<b>DemoCapture</b> (or <b>52</b>)
+-	<b>CSC</b> (or <b>53</b>)
+-	<b>LUT</b> (or <b>54</b>)
+-	<b>Cables</b> (or <b>55</b>)
+-	…plus the “unused” set <b>56</b> thru <b>84</b>
 
 The <b>--unit</b> or <b>-u</b> option allows you to specify which <b>Debug Unit</b>(s) to display.
 
@@ -167,9 +183,9 @@ $ ./bin/logreader  --unit "*-AncGeneric-CC608Decode"
 
 To display only messages from the <b>DriverInterface</b> and <b>AutoCirculate</b> groups:
 \code{.sh}
-$ ./bin/logreader  -s+not+warn
-$ ./bin/logreader  -s+5+4
-$ ./bin/logreader  -s+debug+info+notice+warning+error+assert+alert+emergency-alert-emergency-assert-error-info-debug
+$ ./bin/logreader  -u+driverint+autocirc
+$ ./bin/logreader  -u+38+39
+$ ./bin/logreader  -u+39+driverint
 \endcode
 
 Use the <b>--enable</b> option to forcibly <b>Enable</b> the specified <b>Debug Units</b> and permit messages
@@ -210,7 +226,7 @@ $ ./bin/logreader  --threshold Info  2>debuginfo.txt  >errors.txt
 
 By default, <b>logreader</b> writes the following information fields to the output stream, each field delimited by
 a single horizontal tab character (ASCII 0x08), and each message delimited by the default platform-specific
-“newline” character (\c <CR><LF> on Windows, and \c <LF> on Mac and Linux):
+“newline” character (<tt>≺CR≻≺LF≻</tt> on Windows, and <tt>≺LF≻</tt> on Mac and Linux):
 -	<b>Message Index Number</b> (unsigned decimal number)
 -	<b>Process ID</b> (unsigned decimal number)
 -	<b>Thread ID</b> (unsigned decimal number)

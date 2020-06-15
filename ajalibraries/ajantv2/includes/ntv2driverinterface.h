@@ -52,14 +52,12 @@ public:
 
 public:
 	/**
-		@brief	Answers with a 4-byte value that uniquely identifies the kind of AJA device I'm talking to.
 		@return	The 4-byte value that identifies the kind of AJA device this is.
 	**/
 	virtual NTV2DeviceID		GetDeviceID (void);
 
 	/**
-		@brief	Answers with this device's zero-based index number (relative to other known devices).
-		@return	This device's zero-based index number.
+		@return	This device's zero-based index number (relative to other known devices attached to the host).
 	**/
 	virtual inline UWord		GetIndexNumber (void) const		{return _boardNumber;}
 
@@ -242,7 +240,7 @@ public:
 							Valid messages start with an NTV2_HEADER and end with an NTV2_TRAILER.
 		@return	True if successful;  otherwise false.
 	**/
-	virtual inline bool		NTV2Message (NTV2_HEADER * pInMessage)					{ (void) pInMessage;  return false; }
+	virtual bool NTV2Message (NTV2_HEADER * pInMessage);
 
 	virtual bool ControlDriverDebugMessages(NTV2_DriverDebugMessageSet msgSet,
 		  									bool enable ) = 0;
@@ -368,6 +366,10 @@ private:
 		@param[in]	inObjToCopy		The object to be copied.
 	**/
 	CNTV2DriverInterface (const CNTV2DriverInterface & inObjToCopy);
+
+#if defined(NTV2_FORCE_NO_DEVICE)
+	virtual void	NTV2NoDevInitRegisters(void);
+#endif
 
 protected:
 

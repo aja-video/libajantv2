@@ -220,8 +220,8 @@ bool CNTV2Card::DMAWriteAudio (	const NTV2AudioSystem	inAudioSystem,
 		if (!NTV2_IS_VALID_FIELD(inFieldID))
 			return false;
 	
-		NTV2_POINTER	ancF1Buffer	(inFieldID ? NULL : pOutAncBuffer, inFieldID ? 0 : inByteCount);
-		NTV2_POINTER	ancF2Buffer	(inFieldID ? pOutAncBuffer : NULL, inFieldID ? inByteCount : 0);
+		NTV2_POINTER	ancF1Buffer	(inFieldID ? AJA_NULL : pOutAncBuffer, inFieldID ? 0 : inByteCount);
+		NTV2_POINTER	ancF2Buffer	(inFieldID ? pOutAncBuffer : AJA_NULL, inFieldID ? inByteCount : 0);
 		return DMAReadAnc (inFrameNumber, ancF1Buffer, ancF2Buffer);
 	}
 #endif	//	!defined(NTV2_DEPRECATE_15_2)
@@ -294,8 +294,8 @@ bool CNTV2Card::DMAReadAnc (const ULWord		inFrameNumber,
 		if (!NTV2_IS_VALID_FIELD(inFieldID))
 			return false;
 	
-		NTV2_POINTER	ancF1Buffer	(inFieldID ? NULL : pInAncBuffer, inFieldID ? 0 : inByteCount);
-		NTV2_POINTER	ancF2Buffer	(inFieldID ? pInAncBuffer : NULL, inFieldID ? inByteCount : 0);
+		NTV2_POINTER	ancF1Buffer	(inFieldID ? AJA_NULL : pInAncBuffer, inFieldID ? 0 : inByteCount);
+		NTV2_POINTER	ancF2Buffer	(inFieldID ? pInAncBuffer : AJA_NULL, inFieldID ? inByteCount : 0);
 		return DMAWriteAnc (inFrameNumber, ancF1Buffer, ancF2Buffer);
 	}
 #endif	//	!defined(NTV2_DEPRECATE_15_2)
@@ -458,10 +458,10 @@ bool CNTV2Card::DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap)
 	if (!_boardOpened)
 		return false;		//	Device not open!
 
-    if ((inBuffer.GetHostPointer() == NULL) || inBuffer.GetByteCount() == 0)
-        return false;
+	if (!inBuffer)
+		return false;
 
-    NTV2BufferLock lockMsg (inBuffer, (DMABUFFERLOCK_LOCK | (inMap? DMABUFFERLOCK_MAP : 0)));
+	NTV2BufferLock lockMsg (inBuffer, (DMABUFFERLOCK_LOCK | (inMap? DMABUFFERLOCK_MAP : 0)));
 	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&lockMsg));
 }
 
@@ -471,10 +471,10 @@ bool CNTV2Card::DMABufferUnlock (const NTV2_POINTER & inBuffer)
 	if (!_boardOpened)
 		return false;		//	Device not open!
 
-    if ((inBuffer.GetHostPointer() == NULL) || inBuffer.GetByteCount() == 0)
-        return false;
+	if (!inBuffer)
+		return false;
 
-    NTV2BufferLock lockMsg (inBuffer, DMABUFFERLOCK_UNLOCK);
+	NTV2BufferLock lockMsg (inBuffer, DMABUFFERLOCK_UNLOCK);
 	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&lockMsg));
 }
 

@@ -21,7 +21,258 @@
 // max number of bytes we can get at once 
 #define MAXDATASIZE (sizeof(NTV2NubPktHeader) + NTV2_NUBPKT_MAX_DATASIZE)
 
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+
+#if defined(NTV2_FORCE_NO_DEVICE)
+#include "ajabase/common/common.h"
+#include "ajabase/system/atomic.h"
+#include "ajabase/system/debug.h"
+#include "ajabase/system/memory.h"
+#include "ajabase/system/lock.h"
+
+#define FAKE_DEVICE_SHARE_NAME		"aja-shm-fakedevice"
+
+typedef struct _AJANTV2FakeDevice
+{
+	uint32_t	fMagicID;			//	'0DEV'
+	uint32_t	fVersion;			//	1
+	uint32_t	fNumRegBytes;		//	128MB
+	uint32_t	fNumFBBytes;		//	1024MB
+	uint32_t	fClientRefCount;	//	initially 0
+	uint32_t	fReserved[1004];	//	reserved
+} AJANTV2FakeDevice;
+
+static const uint32_t		kNumRegBytes		(128ULL * 1024ULL * 1024ULL);	//	128 MB
+static const uint32_t		kNumFBBytes			(1024ULL * 1024ULL * 1024ULL);	//	1 GB
+static const size_t			kFakeDevTotalBytes	(sizeof(AJANTV2FakeDevice)+kNumRegBytes+kNumFBBytes);
+static const uint32_t		kFakeDevCookie		(0xFACEDE00);
+static AJANTV2FakeDevice *	spFakeDevice		(AJA_NULL);
+static AJALock				sLock;
+
+int NTV2ConnectToNub (const char * hostname, AJASocket * sockfd)
+{
+	(void) hostname;
+	if (!sLock.IsValid())
+		return AJA_STATUS_INITIALIZE;
+	AJAAutoLock lock(&sLock);
+
+	try
+	{
+		// allocate the shared memory region
+		if (spFakeDevice == AJA_NULL)
+		{
+			// allocate the shared memory storage
+			size_t sizeInBytes(kFakeDevTotalBytes);
+			spFakeDevice = reinterpret_cast<AJANTV2FakeDevice*>(AJAMemory::AllocateShared (&sizeInBytes, FAKE_DEVICE_SHARE_NAME));
+			if (spFakeDevice == AJA_NULL || spFakeDevice == (void*)(-1))
+			{
+				spFakeDevice = AJA_NULL;
+				NTV2DisconnectFromNub(*sockfd);
+				return -1;
+			}
+
+			if (sizeInBytes < kFakeDevTotalBytes)
+			{
+				NTV2DisconnectFromNub(*sockfd);
+				return -1;
+			}
+
+			// check version
+			if (spFakeDevice->fVersion == 0)
+			{
+				::memset(spFakeDevice, 0, kFakeDevTotalBytes);
+				spFakeDevice->fMagicID			= kFakeDevCookie;
+				spFakeDevice->fVersion			= 1;
+				spFakeDevice->fNumRegBytes		= kNumRegBytes;
+				spFakeDevice->fNumFBBytes		= kNumFBBytes;
+				spFakeDevice->fClientRefCount	= 0;
+			}
+
+			// must be correct version
+			if (spFakeDevice->fVersion != 1)
+			{
+				NTV2DisconnectFromNub(*sockfd);
+				return -1;
+			}
+
+            spFakeDevice->fClientRefCount++;
+		}
+	}
+	catch(...)
+	{
+		NTV2DisconnectFromNub(*sockfd);
+		return -1;
+	}
+	*sockfd = 999;
+	return 0;
+}
+
+int NTV2DisconnectFromNub (AJASocket & sockfd)
+{
+	sockfd = -1;
+	return 0;
+}
+
+int NTV2OpenRemoteCard (AJASocket sockfd, UWord inDeviceIndex, UWord boardType, 
+					LWord *handle,	NTV2NubProtocolVersion *nubProtocolVersion)
+{
+	*nubProtocolVersion = 0;
+	*handle = -1;
+	if (sockfd != 999)
+		return -1;
+	*handle = 99;
+	*nubProtocolVersion = ntv2NubProtocolVersion3;
+	return 0;
+}
+
+int NTV2CloseRemoteCard (AJASocket sockfd, LWord handle)
+{
+	return 0;
+}
+
+int NTV2ReadRegisterRemote (AJASocket sockfd, LWord  handle, NTV2NubProtocolVersion nubProtocolVersion,
+						ULWord registerNumber, ULWord *registerValue, ULWord registerMask, ULWord registerShift)
+{
+	if (!registerValue)
+		return -1;
+	if (registerShift > 31)
+		return -1;
+	if (sockfd != 999)
+		return -1;
+	if (handle != 99)
+		return -1;
+	if (nubProtocolVersion != ntv2NubProtocolVersion3)
+		return -1;
+	AJAAutoLock lock(&sLock);
+	if (!spFakeDevice)
+		return -1;
+	if (spFakeDevice->fVersion != 1)
+		return -1;
+	NTV2_POINTER fakeDevMem(spFakeDevice, kFakeDevTotalBytes);
+	NTV2_POINTER fakeDevRegisterMem(fakeDevMem.GetHostAddress(sizeof(AJANTV2FakeDevice)), spFakeDevice->fNumRegBytes);
+	NTV2_POINTER fakeDevFrameBufferMem(fakeDevMem.GetHostAddress(sizeof(AJANTV2FakeDevice)+fakeDevRegisterMem.GetByteCount()), spFakeDevice->fNumFBBytes);
+	const ULWord* pReg(reinterpret_cast<const ULWord*>(fakeDevRegisterMem.GetHostAddress(sizeof(ULWord) * registerNumber)));
+	if (!pReg)
+		return -1;
+	ULWord value(*pReg & registerMask);
+	if (registerShift)
+		value >>= registerShift;
+	*registerValue = value;
+	return 0;
+}
+
+int NTV2WriteRegisterRemote (AJASocket sockfd, LWord  handle, NTV2NubProtocolVersion nubProtocolVersion,
+							ULWord registerNumber, ULWord registerValue, ULWord registerMask, ULWord registerShift)
+{
+	if (registerShift > 31)
+		return -1;
+	if (sockfd != 999)
+		return -1;
+	if (handle != 99)
+		return -1;
+	if (nubProtocolVersion != ntv2NubProtocolVersion3)
+		return -1;
+	AJAAutoLock lock(&sLock);
+	if (!spFakeDevice)
+		return -1;
+	if (spFakeDevice->fVersion != 1)
+		return -1;
+	NTV2_POINTER fakeDevMem(spFakeDevice, kFakeDevTotalBytes);
+	NTV2_POINTER fakeDevRegisterMem(fakeDevMem.GetHostAddress(sizeof(AJANTV2FakeDevice)), spFakeDevice->fNumRegBytes);
+	NTV2_POINTER fakeDevFrameBufferMem(fakeDevMem.GetHostAddress(sizeof(AJANTV2FakeDevice)+fakeDevRegisterMem.GetByteCount()), spFakeDevice->fNumFBBytes);
+	ULWord* pReg(reinterpret_cast<ULWord*>(fakeDevRegisterMem.GetHostAddress(sizeof(ULWord) * registerNumber)));
+	if (!pReg)
+		return -1;
+	ULWord oldValue(*pReg & registerMask);
+	ULWord newValue(registerValue & registerMask);
+	if (registerShift)
+		newValue <<= registerShift;
+	*pReg = newValue;
+	return 0;
+}
+
+int NTV2AutoCirculateRemote (AJASocket sockfd, LWord handle, NTV2NubProtocolVersion nubProtocolVersion,
+							AUTOCIRCULATE_DATA & autoCircData)
+{
+	if (sockfd != 999)
+		return -1;
+	if (handle != 99)
+		return -1;
+	if (nubProtocolVersion != ntv2NubProtocolVersion3)
+		return -1;
+	AJAAutoLock lock(&sLock);
+	if (!spFakeDevice)
+		return -1;
+	if (spFakeDevice->fVersion != 1)
+		return -1;
+	//	TBD
+	return 0;
+}
+
+int NTV2WaitForInterruptRemote (AJASocket sockfd, LWord  handle, NTV2NubProtocolVersion nubProtocolVersion,
+								INTERRUPT_ENUMS eInterrupt, ULWord timeOutMs)
+{
+	if (sockfd != 999)
+		return -1;
+	if (handle != 99)
+		return -1;
+	if (nubProtocolVersion != ntv2NubProtocolVersion3)
+		return -1;
+	AJAAutoLock lock(&sLock);
+	if (!spFakeDevice)
+		return -1;
+	if (spFakeDevice->fVersion != 1)
+		return -1;
+	//	TBD
+	return 0;
+}
+
+int NTV2DriverGetBitFileInformationRemote (AJASocket sockfd, LWord  handle, NTV2NubProtocolVersion nubProtocolVersion,
+										BITFILE_INFO_STRUCT &bitFileInfo, NTV2BitFileType bitFileType)
+{	(void) sockfd; (void) handle; (void) nubProtocolVersion;
+	return -1;
+}
+
+int NTV2DriverGetBuildInformationRemote (AJASocket sockfd, LWord  handle, NTV2NubProtocolVersion nubProtocolVersion,
+										BUILD_INFO_STRUCT &buildInfo)
+{	(void) sockfd; (void) handle; (void) nubProtocolVersion;
+	return -1;
+}
+
+int NTV2DownloadTestPatternRemote (AJASocket sockfd, LWord handle, NTV2NubProtocolVersion nubProtocolVersion,
+									NTV2Channel channel, NTV2FrameBufferFormat testPatternFrameBufferFormat,
+									UWord signalMask, bool testPatternDMAEnable, ULWord testPatternNumber)
+{	(void) sockfd; (void) handle; (void) nubProtocolVersion;
+	return -1;
+}
+
+int NTV2ReadRegisterMultiRemote (AJASocket sockfd, LWord remoteHandle, NTV2NubProtocolVersion nubProtocolVersion,
+								ULWord numRegs, ULWord *whichRegisterFailed, NTV2ReadWriteRegisterSingle aRegs[])
+{	(void) sockfd; (void) remoteHandle; (void) nubProtocolVersion;
+	return -1;
+}
+
+int NTV2GetDriverVersionRemote (AJASocket sockfd, LWord remoteHandle, NTV2NubProtocolVersion nubProtocolVersion,
+								ULWord * driverVersion)
+{	(void) sockfd; (void) remoteHandle; (void) nubProtocolVersion;
+	return -1;
+}
+
+int NTV2DMATransferRemote (AJASocket sockfd, LWord remoteHandle, NTV2NubProtocolVersion nubProtocolVersion,
+							const NTV2DMAEngine	inDMAEngine, const bool inIsRead, const ULWord inFrameNumber,
+							ULWord * pFrameBuffer, const ULWord inOffsetBytes, const ULWord inByteCount,
+							const bool inSynchronous)
+{	(void) sockfd; (void) remoteHandle; (void) nubProtocolVersion;
+	return -1;
+}
+
+int NTV2MessageRemote (AJASocket sockfd, LWord remoteHandle, NTV2NubProtocolVersion nubProtocolVersion,
+						NTV2_HEADER *	pInMessage)
+{	(void) sockfd; (void) remoteHandle; (void) nubProtocolVersion;
+	return -1;
+}
+
+#else
 
 static bool 
 isNubOpenRespPacket(NTV2NubPkt *pPkt)
@@ -416,6 +667,20 @@ int NTV2ConnectToNub(	const char *hostname,
 
 }
 
+int NTV2DisconnectFromNub (AJASocket & sockfd)
+{
+	if (sockfd != -1)
+	{
+		#ifdef MSWindows
+			closesocket (sockfd);
+		#else
+			close (sockfd);
+		#endif
+		sockfd = -1;
+	}
+	return -1;
+}
+
 
 static void
 deNBOifyAndCopyGetAutoCirculateData(AUTOCIRCULATE_STATUS_STRUCT *pACStatus, NTV2GetAutoCircPayload *pGACP)
@@ -575,6 +840,11 @@ NTV2OpenRemoteCard(	AJASocket sockfd,
 	}
 	delete pPkt;
 	return retcode;
+}
+
+int NTV2CloseRemoteCard (AJASocket sockfd, LWord handle)
+{
+	return -1;
 }
 
 int
@@ -1426,4 +1696,32 @@ NTV2ReadRegisterMultiRemote(AJASocket sockfd,
 	return retcode;
 }
 
+int NTV2DMATransferRemote (AJASocket sockfd,
+							LWord remoteHandle,
+							NTV2NubProtocolVersion nubProtocolVersion,
+							const NTV2DMAEngine	inDMAEngine,
+							const bool			inIsRead,
+							const ULWord		inFrameNumber,
+							ULWord *			pFrameBuffer,
+							const ULWord		inOffsetBytes,
+							const ULWord		inByteCount,
+							const bool			inSynchronous)
+{
+	(void) sockfd; (void) remoteHandle; (void) nubProtocolVersion;
+	(void) inDMAEngine; (void) inIsRead; (void) inFrameNumber; (void) pFrameBuffer;
+	(void) inOffsetBytes; (void) inByteCount; (void) inSynchronous;
+	return NTV2_REMOTE_ACCESS_UNIMPLEMENTED;
+}
+
+int NTV2MessageRemote (AJASocket sockfd,
+						LWord remoteHandle,
+						NTV2NubProtocolVersion nubProtocolVersion,
+						NTV2_HEADER *	pInMessage)
+{
+	(void) sockfd; (void) remoteHandle; (void) nubProtocolVersion;
+	(void) pInMessage;
+	return NTV2_REMOTE_ACCESS_UNIMPLEMENTED;
+}
+
+#endif	//	NTV2_FORCE_NO_DEVICE
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)

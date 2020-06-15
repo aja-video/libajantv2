@@ -90,8 +90,8 @@ AJAStatus AJAAncillaryData_Cea608_Vanc::SetLine (const bool inIsF2, const uint8_
 
 AJAStatus AJAAncillaryData_Cea608_Vanc::GetLine (uint8_t & fieldNum, uint8_t & lineNum) const
 {
-	fieldNum = m_isF2 ? 0x01 : 0x00;
-	lineNum  = m_lineNum;
+	fieldNum = IsField2()  ?  0x01/*NTV2_FIELD1*/  :  0x00/*NTV2_FIELD0*/;
+	lineNum  = uint8_t(GetLineNumber());
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -105,8 +105,9 @@ AJAStatus AJAAncillaryData_Cea608_Vanc::ParsePayloadData (void)
 		return AJA_STATUS_FAIL;
 	}
 
-	//	Try to parse the payload data...
-	m_isF2 = ((m_payload[0] >> 7) & 0x01) ? true : false;	//	Field number (flag) is bit 7 of the 1st payload word
+	//	Parse the payload data...
+	m_isF2 = ((m_payload[0] >> 7) & 0x01) ? false : true;	//	Field number (flag) is bit 7 of the 1st payload word
+															//	SDKs prior to 16.0 had the sense of this bit wrong.
 	m_lineNum  = (m_payload[0] & 0x1F);						//	Line number is bits [4:0] of the 1st payload word
 	m_char1	   = m_payload[1];		// the 1st character
 	m_char2    = m_payload[2];		// the 2nd character
@@ -134,8 +135,9 @@ AJAStatus AJAAncillaryData_Cea608_Vanc::GeneratePayloadData (void)
 					line 272 of 525-line F2
 					line 5 of 625-line F1
 					line 318 of 625-line F2
+			NOTE: SDKs prior to 16.0 used the opposite sense of this bit.
 		*/
-		m_payload[0] = ((m_isF2 ? 0x01 : 0x00) << 7) | (m_lineNum & 0x1F);	//	F2 flag goes in b7, line num in bits [4:0]
+		m_payload[0] = uint8_t((m_isF2 ? 0x00 : 0x01) << 7) | (m_lineNum & 0x1F);	//	F2 flag goes in b7, line num in bits [4:0]
 		m_payload[1] = m_char1;
 		m_payload[2] = m_char2;
 	}

@@ -101,7 +101,7 @@ typedef enum
 	DEVICE_ID_KONALHI					= 0x10266400,	///< @brief	See \ref konalhi
 	DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief	See \ref konalhi
 	DEVICE_ID_TTAP						= 0x10416000,	///< @brief	See \ref ttap
-	DEVICE_ID_T3TAP						= 0x10879000,	///< @brief See \ref t3tap
+	DEVICE_ID_TTAP_PRO					= 0x10879000,	///< @brief See \ref ttappro
 #if !defined (NTV2_DEPRECATE_12_6)
 	DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
 #endif	//	NTV2_DEPRECATE_12_6
@@ -1650,12 +1650,16 @@ typedef enum
 	NTV2_BUSERROR_CLEAR= 0x80000000
 } NTV2DMAStatusBits;
 
+/**
+	@brief	These values are used to determine when certain register writes actually take effect.
+			See CNTV2Card::SetRegisterWriteMode or \ref fieldframeinterrupts
+**/
 typedef enum
 {
-	NTV2_REGWRITE_SYNCTOFIELD,
-	NTV2_REGWRITE_SYNCTOFRAME,
-	NTV2_REGWRITE_IMMEDIATE,
-	NTV2_REGWRITE_SYNCTOFIELD_AFTER10LINES
+	NTV2_REGWRITE_SYNCTOFIELD,	///< @brief	<b>Field Mode:</b> Register changes take effect at the next field VBI.
+	NTV2_REGWRITE_SYNCTOFRAME,	///< @brief	<b>Frame Mode:</b> Register changes take effect at the next frame VBI (power-up default).
+	NTV2_REGWRITE_IMMEDIATE,	///< @brief	Register changes take effect immediately, without waiting for a field or frame VBI.
+	NTV2_REGWRITE_SYNCTOFIELD_AFTER10LINES	///< @brief	Register changes take effect after 10 lines after the next field VBI (not commonly used).
 } NTV2RegisterWriteMode;
 
 typedef enum
@@ -2680,6 +2684,8 @@ typedef enum NTV2OutputCrosspointID
 	NTV2_XptCSC4KeyYUV					= 0x3D,
 	NTV2_XptDuallinkOut5				= 0x3E,
 	NTV2_XptDuallinkOut5DS2				= 0x3F,
+	NTV2_Xpt3DLUT1YUV					= 0x40,
+	NTV2_Xpt3DLUT1RGB					= NTV2_Xpt3DLUT1YUV | 0x80,
 	NTV2_XptHDMIIn1Q2					= 0x41,
 	NTV2_XptHDMIIn1Q2RGB				= NTV2_XptHDMIIn1Q2 | 0x80,
 	NTV2_XptHDMIIn1Q3					= 0x42,
@@ -2784,6 +2790,10 @@ typedef enum NTV2OutputCrosspointID
 	NTV2_XptLUT6Out						= 0xDF,
 	NTV2_XptLUT7Out						= 0xE0,
 	NTV2_XptLUT8Out						= 0xE1,
+	NTV2_XptMultiLinkOut1DS1			= 0xE2,
+	NTV2_XptMultiLinkOut1DS2			= 0xE3,
+	NTV2_XptMultiLinkOut1DS3			= 0xE4,
+	NTV2_XptMultiLinkOut1DS4			= 0xE5,
 	NTV2_XptRuntimeCalc					= 0xFF,
 	NTV2_LAST_OUTPUT_CROSSPOINT			= 0xFF,
 	NTV2_OUTPUT_CROSSPOINT_INVALID		= 0xFF
@@ -2982,7 +2992,9 @@ typedef enum NTV2InputCrosspointID
 	NTV2_XptCSC1KeyFromInput2		= 0x82,	//	deprecate?
 	NTV2_XptFrameSync2Input			= 0x83,	//	deprecate?
 	NTV2_XptFrameSync1Input			= 0x84,	//	deprecate?
-	NTV2_LAST_INPUT_CROSSPOINT		= 0x84,
+	NTV2_XptMultiLinkOut1Input		= 0x85,
+	NTV2_Xpt3DLUT1Input				= 0x86,
+	NTV2_LAST_INPUT_CROSSPOINT		= 0x86,
 	NTV2_INPUT_CROSSPOINT_INVALID	= 0xFFFFFFFF
 	#if !defined(NTV2_DEPRECATE_15_3)
 		,
@@ -3120,6 +3132,8 @@ typedef enum
 	,NTV2_WgtHDMIIn4v4
 	,NTV2_WgtHDMIOut1v4
 	,NTV2_WgtHDMIOut1v5
+	,NTV2_WgtMultiLinkOut1
+	,NTV2_Wgt3DLUT1
 	,NTV2_WgtModuleTypeCount
 	,NTV2_WgtUndefined = NTV2_WgtModuleTypeCount
 	,NTV2_WIDGET_INVALID = NTV2_WgtModuleTypeCount
@@ -3474,7 +3488,7 @@ typedef enum
 	NTV2_BITFILE_CORVID44_8KMK_MAIN	= 58,
 	NTV2_BITFILE_KONA5_8K_MAIN		= 59,
 	NTV2_BITFILE_CORVID44_8K_MAIN	= 60,
-	NTV2_BITFILE_T3TAP_MAIN			= 61,
+	NTV2_BITFILE_TTAP_PRO_MAIN		= 61,
 	NTV2_BITFILE_KONA5_2X4K_MAIN	= 62,
 	NTV2_BITFILE_CORVID44_2X4K_MAIN	= 63,
 	NTV2_BITFILE_KONA5_3DLUT_MAIN	= 64,

@@ -166,10 +166,10 @@ public:
 	AJA_VIRTUAL bool	NTV2Message (NTV2_HEADER * pInMessage);
 	AJA_VIRTUAL bool	ControlDriverDebugMessages( NTV2_DriverDebugMessageSet /*msgSet*/, bool /*enable*/ ) {return false;}
 	AJA_VIRTUAL bool	RestoreHardwareProcampRegisters( void );
-
+#if !defined(NTV2_DEPRECATE_16_0)
 	AJA_VIRTUAL	Word	SleepMs( LWord msec ) const;
 	AJA_VIRTUAL void	Sleep( int /*milliseconds*/ ) {}
-
+#endif	//	defined(NTV2_DEPRECATE_16_0)
 	AJA_VIRTUAL bool	SetUserModeDebugLevel( ULWord  level );
 	AJA_VIRTUAL bool	GetUserModeDebugLevel( ULWord* level );
 	AJA_VIRTUAL bool	SetKernelModeDebugLevel( ULWord  level );

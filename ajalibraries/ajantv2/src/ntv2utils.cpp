@@ -1846,6 +1846,39 @@ bool GetFramesPerSecond (const NTV2FrameRate inFrameRate, ULWord & outFractionNu
 	return true;
 }
 
+// NDI prefers Numerator/Denominator this way, appears most apps send this
+bool GetFramesPerSecondNDI (const NTV2FrameRate inFrameRate, ULWord & outFractionNumerator, ULWord & outFractionDenominator)
+{
+	switch (inFrameRate)
+	{
+	case NTV2_FRAMERATE_12000:		outFractionNumerator = 120;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_11988:		outFractionNumerator = 11988;	outFractionDenominator = 100;	break;
+	case NTV2_FRAMERATE_6000:		outFractionNumerator = 60;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_5994:		outFractionNumerator = 5994;	outFractionDenominator = 100;	break;
+	case NTV2_FRAMERATE_5000:		outFractionNumerator = 50;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_4800:		outFractionNumerator = 48;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_4795:		outFractionNumerator = 4795;	outFractionDenominator = 100;	break;
+	case NTV2_FRAMERATE_3000:		outFractionNumerator = 30;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_2997:		outFractionNumerator = 2997;	outFractionDenominator = 100;	break;
+	case NTV2_FRAMERATE_2500:		outFractionNumerator = 25;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_2400:		outFractionNumerator = 24;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_2398:		outFractionNumerator = 2398;	outFractionDenominator = 100;	break;
+	case NTV2_FRAMERATE_1900:		outFractionNumerator = 19;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_1898:		outFractionNumerator = 1898;	outFractionDenominator = 100;	break;
+	case NTV2_FRAMERATE_1800:		outFractionNumerator = 18;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_1798:		outFractionNumerator = 1798;	outFractionDenominator = 100;	break;
+	case NTV2_FRAMERATE_1500:		outFractionNumerator = 15;		outFractionDenominator = 1;		break;
+	case NTV2_FRAMERATE_1498:		outFractionNumerator = 1498;	outFractionDenominator = 100;	break;
+#if defined(_DEBUG)
+	case NTV2_NUM_FRAMERATES:
+	case NTV2_FRAMERATE_UNKNOWN:	outFractionNumerator = 0;		outFractionDenominator = 0;		return false;
+#else
+	default:						outFractionNumerator = 0;		outFractionDenominator = 0;		return false;
+#endif
+	}
+	return true;
+}
+
 
 NTV2Standard GetNTV2StandardFromScanGeometry(UByte geometry, bool progressiveTransport)
 {
@@ -3661,56 +3694,80 @@ NTV2FrameRate GetFrameRateFromScale(long scale, long duration, NTV2FrameRate pla
 NTV2FrameRate GetNTV2FrameRateFromNumeratorDenominator (ULWord numerator, ULWord denominator)
 {
 	NTV2FrameRate ntv2Rate = NTV2_FRAMERATE_UNKNOWN;
-	if (denominator == 1)
+
+	if (denominator == 100)
 	{
-		numerator *= 1000;
-		denominator *= 1000;
+		switch (numerator)
+		{
+			case 12000: ntv2Rate = NTV2_FRAMERATE_12000; break;
+			case 11988: ntv2Rate = NTV2_FRAMERATE_11988; break;
+			case 6000: ntv2Rate = NTV2_FRAMERATE_6000; break;
+			case 5994: ntv2Rate = NTV2_FRAMERATE_5994; break;
+			case 5000: ntv2Rate = NTV2_FRAMERATE_5000; break;
+			case 4800: ntv2Rate = NTV2_FRAMERATE_4800; break;
+			case 4795: ntv2Rate = NTV2_FRAMERATE_4795; break;
+			case 3000: ntv2Rate = NTV2_FRAMERATE_3000; break;
+			case 2997: ntv2Rate = NTV2_FRAMERATE_2997; break;
+			case 2500: ntv2Rate = NTV2_FRAMERATE_2500; break;
+			case 2400: ntv2Rate = NTV2_FRAMERATE_2400; break;
+			case 2398: ntv2Rate = NTV2_FRAMERATE_2398; break;
+			case 1500: ntv2Rate = NTV2_FRAMERATE_1500; break;
+			case 1498: ntv2Rate = NTV2_FRAMERATE_1498; break;
+			default: break;
+		}
 	}
 
-	switch (numerator)
+	else
 	{
-		case 120000:
-			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_12000;
-			else ntv2Rate = NTV2_FRAMERATE_11988;
-			break;
+		if (denominator == 1)
+		{
+			numerator *= 1000;
+			denominator *= 1000;
+		}
 
-		case 60000:
-			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_6000;
-			else ntv2Rate = NTV2_FRAMERATE_5994;
-			break;
+		switch (numerator)
+		{
+			case 120000:
+				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_12000;
+				else ntv2Rate = NTV2_FRAMERATE_11988;
+				break;
 
-		case 50000:
-			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_5000;
-			break;
+			case 60000:
+				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_6000;
+				else ntv2Rate = NTV2_FRAMERATE_5994;
+				break;
 
-		case 48000:
-			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_4800;
-			else ntv2Rate = NTV2_FRAMERATE_4795;
-			break;
+			case 50000:
+				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_5000;
+				break;
 
-		case 30000:
-			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_3000;
-			else ntv2Rate = NTV2_FRAMERATE_2997;
-			break;
+			case 48000:
+				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_4800;
+				else ntv2Rate = NTV2_FRAMERATE_4795;
+				break;
 
-		case 25000:
-			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_2500;
-			break;
+			case 30000:
+				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_3000;
+				else ntv2Rate = NTV2_FRAMERATE_2997;
+				break;
 
-		case 24000:
-			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_2400;
-			else ntv2Rate = NTV2_FRAMERATE_2398;
-			break;
+			case 25000:
+				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_2500;
+				break;
 
-		case 15000:
-			if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_1500;
-			else ntv2Rate = NTV2_FRAMERATE_1498;
-			break;
+			case 24000:
+				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_2400;
+				else ntv2Rate = NTV2_FRAMERATE_2398;
+				break;
 
-		default:
-			break;
+			case 15000:
+				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_1500;
+				else ntv2Rate = NTV2_FRAMERATE_1498;
+				break;
 
-
+			default:
+				break;
+		}
 	}
 
 	return ntv2Rate;
@@ -5456,7 +5513,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONA5_8K:				return inForRetailDisplay ?	"KONA 5 8K"					: "Kona5-8K";
 		case DEVICE_ID_CORVID44_8K:				return inForRetailDisplay ?	"Corvid 44 8K"				: "Corvid44-8K";
 		case DEVICE_ID_CORVID44_2X4K:			return inForRetailDisplay ?	"Corvid 44 2x4K"			: "Corvid44-2x4K";
-		case DEVICE_ID_T3TAP:					return inForRetailDisplay ? "T3-Tap"					: "T3Tap";
+		case DEVICE_ID_TTAP_PRO:				return inForRetailDisplay ? "T-Tap-Pro"					: "TTapPro";
 #if defined(_DEBUG)
 #else
 	    default:					break;
@@ -7579,6 +7636,8 @@ string NTV2InputCrosspointIDToString (const NTV2InputCrosspointID inValue, const
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "CSC 1 Key From In 2", NTV2_XptCSC1KeyFromInput2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FrameSync2", NTV2_XptFrameSync2Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FrameSync1", NTV2_XptFrameSync1Input);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "ML Out 1", NTV2_XptMultiLinkOut1Input);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "3D LUT 1", NTV2_Xpt3DLUT1Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "???", NTV2_INPUT_CROSSPOINT_INVALID);
 	}
 	return "";
@@ -7761,6 +7820,13 @@ string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID inValue, con
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 8 DS2 YUV", NTV2_XptFrameBuffer8_DS2YUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 8 DS2 RGB", NTV2_XptFrameBuffer8_DS2RGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Runtime Calc", NTV2_XptRuntimeCalc);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Multi-Link Out 1 DS1", NTV2_XptMultiLinkOut1DS1);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Multi-Link Out 1 DS2", NTV2_XptMultiLinkOut1DS2);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Multi-Link Out 1 DS3", NTV2_XptMultiLinkOut1DS3);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Multi-Link Out 1 DS4", NTV2_XptMultiLinkOut1DS4);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "3D LUT 1 YUV", NTV2_Xpt3DLUT1YUV);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "3D LUT 1 RGB", NTV2_Xpt3DLUT1RGB);
+		
 	#if !defined (NTV2_DEPRECATE)
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FS 1 2nd Conv", NTV2_XptFS1SecondConverter);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FS 1 ProcAmp", NTV2_XptFS1ProcAmp);
@@ -7889,6 +7955,8 @@ string NTV2WidgetIDToString (const NTV2WidgetID inValue, const bool inCompactDis
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4In4", NTV2_WgtHDMIIn4v4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4Out1", NTV2_WgtHDMIOut1v4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv5Out1", NTV2_WgtHDMIOut1v5);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "MultiLinkOut1", NTV2_WgtMultiLinkOut1);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "3DLUT1", NTV2_Wgt3DLUT1);
 		case NTV2_WgtModuleTypeCount:				return "???";  //special case
 	}
 	return "";
@@ -8866,7 +8934,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_KONAIP_2110:					return useWindowsName ? "kip_s2110.mcs"             : "kip_s2110.mcs";
 	case DEVICE_ID_KONAHDMI:					return useWindowsName ? "kona_hdmi_4rx.bit"         : "kona_hdmi_4rx.bit";
 	case DEVICE_ID_KONA1:						return useWindowsName ? "kona1_pcie.bit"            : "kona1.bit";
-	case DEVICE_ID_KONA5:						return useWindowsName ? "kona5_pcie.bit"            : "kona5.bit";
+	case DEVICE_ID_KONA5:						return "kona5_retail_tprom.bit";
 	case DEVICE_ID_KONA5_2X4K:					return "kona5_2x4k_tprom.bit";
 	case DEVICE_ID_KONA5_8KMK:					return "kona5_8k_mk_tprom.bit";
 	case DEVICE_ID_KONA5_8K:					return "kona5_8k_tprom.bit";
@@ -8874,7 +8942,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk_tprom.bit";
 	case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k_tprom.bit";
 	case DEVICE_ID_CORVID44_2X4K:				return "c44_12g_2x4k_tprom.bit";
-	case DEVICE_ID_T3TAP:						return "t3_tap.bit";
+	case DEVICE_ID_TTAP_PRO:						return "t3_tap.bit";
 	default:									return "";
 	}
 	return "";
@@ -8915,7 +8983,7 @@ NTV2DeviceID NTV2GetDeviceIDFromBitfileName (const string & inBitfileName)
 													DEVICE_ID_KONALHEPLUS,	DEVICE_ID_TTAP,		DEVICE_ID_CORVID1,		DEVICE_ID_CORVID22,	DEVICE_ID_CORVID24,
 													DEVICE_ID_CORVID3G,		DEVICE_ID_IOXT,		DEVICE_ID_IOEXPRESS,	DEVICE_ID_IO4K,		DEVICE_ID_IO4KUFC,
                                                     DEVICE_ID_KONA1,		DEVICE_ID_KONAHDMI, DEVICE_ID_KONA5,        DEVICE_ID_KONA5_8KMK,DEVICE_ID_CORVID44_8KMK,
-													DEVICE_ID_KONA5_8K,		DEVICE_ID_CORVID44_8K,	DEVICE_ID_T3TAP,	DEVICE_ID_KONA5_2X4K,	DEVICE_ID_CORVID44_2X4K,
+													DEVICE_ID_KONA5_8K,		DEVICE_ID_CORVID44_8K,	DEVICE_ID_TTAP_PRO,	DEVICE_ID_KONA5_2X4K,	DEVICE_ID_CORVID44_2X4K,
 													DEVICE_ID_NOTFOUND };
 		for (unsigned ndx (0);  ndx < sizeof (sDeviceIDs) / sizeof (NTV2DeviceID);  ndx++)
 			sBitfileName2DeviceID [::NTV2GetBitfileName (sDeviceIDs [ndx])] = sDeviceIDs [ndx];
@@ -8987,7 +9055,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_KONA5_8K,
 														DEVICE_ID_CORVID44_8K,
 														DEVICE_ID_CORVID44_2X4K,
-														DEVICE_ID_T3TAP,
+														DEVICE_ID_TTAP_PRO,
                                                         DEVICE_ID_NOTFOUND	};
 	NTV2DeviceIDSet	result;
 	if (inKinds != NTV2_DEVICEKIND_NONE)

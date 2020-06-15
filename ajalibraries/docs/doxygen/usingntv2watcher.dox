@@ -24,6 +24,7 @@ This page describes how to use the <b>NTV2 Watcher</b> tool to interactively mon
 	-	\ref regautocycler
 	-	\ref tonegenerator
 	-	\ref memmapdlog
+	-	\ref scraptool
 
 
 
@@ -31,9 +32,20 @@ This page describes how to use the <b>NTV2 Watcher</b> tool to interactively mon
 @subsection	inspectorgeneralop		General Operation
 
 The <b>NTV2 Watcher</b> is a graphical tool that interactively monitors and configures an NTV2 device.
-The user interface consists of a main window that contains three panels:
 
 @image	html	watcherlayout.png
+
+The user interface consists of a main window that contains these major elements:
+-	<b>Common Device Controls</b> — These Toolbars are common to all devices (and can be undocked, if desired):
+	-	<b>Device Selection</b> Toolbar — for selecting which device to monitor/control;
+	-	<b>Common Controls</b> Toolbar — for changing the poll rate, task mode, and other “global” aspects of the device.
+-	<b>Inspector List</b> — for selecting which aspect of the device to inspect and/or control;
+-	<b>Inspector Display Area</b> — the main data display area;
+-	<b>Status Bar</b> — which holds the status indicators:
+	-	<b>Status Message</b> — for messages;
+	-	<b>Selection Indicator</b> — Some inspectors allow data portions to be selected interactively using the keyboard or mouse.
+		This part of the Status Bar indicates the current selection.
+	-	<b>Refresh Rate</b> — This part of the Status Bar shows the measured refresh rate of the inspector display (a moving average).
 
 
 @par	Device Selection
@@ -49,11 +61,11 @@ the list of available inspectors may change.
 
 To monitor an NTV2 device that’s running on another machine in your local network, click the <b>+</b> button
 and enter the machine’s IP address in the dialog that appears … then click OK.
-The devices on that machine will be added to the popup menu.
+The first device local to that machine will be added to the popup menu.
 
 To remove a remote device, be sure it’s the currently selected one, then click the <b>-</b> button.
 
-@note	The “NTV2 Nub” must be running on any machine to permit its devices to be monitored remotely.
+@note	The “NTV2 Nub” server must be running on any machine to permit its devices to be monitored remotely.
 
 
 @par	Menu Commands
@@ -102,7 +114,6 @@ There are several settings that are common to the device and apply to all inspec
 -	<b>Task Mode</b> — Indicates the device’s current task mode, and allows it to be changed by choosing a different setting.
 -	<b>Multi-Format Mode</b> — Indicates the device’s “multi-format” mode, and allows it to be changed by choosing a different setting.
 -	<b>Reference</b> — Indicates the device’s current clock reference setting, and allows it to be changed by choosing a different setting.
--	<b>FBSize</b> — Indicates the device’s current frame buffer size, and allows it to be changed by choosing a different setting.
 
 
 @par	Inspectors
@@ -313,8 +324,8 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 			-	<b>Lines</b> and <b>Components</b> views — Selects the visible lines plus VANC lines (if VANC enabled).
 			-	<b>Waveform</b> view — Selects the entire line that’s currently displayed.
 			-	<b>Raw</b> view — Selects the entire 8/16/32MB buffer.
-		-	<b>Set Input/Output Frame Here</b> — (<b>Auto</b> mode OFF, and current frame being viewed doesn’t match device’s current Input or Output Frame) — Changes
-			the device’s Input or Output Frame to the current frame being viewed.
+		-	<b>Set Input/Output Frame Here</b> — (<b>Auto</b> mode OFF, and current frame being viewed doesn’t match the FrameStore’s
+			current Input or Output Frame) — Changes the FrameStore’s Input or Output Frame to the current frame being viewed.
 		-	<b>Fill Frames…</b> — (<b>Auto</b> mode OFF, and nothing selected) — Reveals the \ref fillbufferdlog for filling
 			device frame memory with specific values, colors, test patterns, etc.
 		-	<b>Edit Value…</b> — (<b>Auto</b> mode OFF, <b>Lines</b> or <b>Raw</b> views, something selected) — Enters the interactive editing mode.
@@ -784,9 +795,11 @@ function calls that will produce the register values seen in the display.
 
 @image	html	watcher-inspector-routing.png
 
-The <b>Routing</b> inspector monitors widget signal crosspoint routing.
+The <b>Routing</b> inspector monitors and controls widget signal crosspoint routing as well as widget state (to some degree).
 
-@note	This inspector replaces the original \ref usingcables utility.
+@note	This inspector replaces the original \ref usingcables utility with this significant difference:
+		-	RGB and YCbCr output crosspoints are shown in separate sockets.
+			In the old \ref usingcables they were shown as one socket, which caused some confusion.
 
 The inspector has the following individual panels:
 	-	<b>Routing Diagram</b> — Shows the device widgets and signal connections between them.
@@ -1232,6 +1245,38 @@ It can readily indicate \ref vidop-fbconflict and/or \ref audioclobber.
 To close the <b>Memory Map</b> tool window:
 	-	click its close box;
 	-	or un-check the <b>View</b> menu’s <b>Memory Map</b> command.
+
+
+
+<hr size="50px">
+@subsection	scraptool		“Scrap Buffer” Tool
+
+@image	html	watcher-tool-scrap.png
+
+The <b>Scrap Buffer</b> is a handy debugging aid for viewing the contents of the host operating system’s “desk scrap”
+buffer (aka “clipboard” or “paste buffer”). It can also display the contents of files dropped into the window.
+
+-	It periodically monitors for scrap changes and updates automatically.
+-	The top of the window shows the number of bytes being viewed.
+-	The remainder of the window displays the data.
+	-	<b>Data View Options</b> — (Right-Click Operations)
+		-	<b>Grouping</b> — Changes the data grouping to 8-bit (1-byte), 16-bit (2-byte), 32-bit (4-byte) or 64-bit (8-byte).
+		-	<b>Radix</b> — Changes the radix of the data to Binary, Octal, Decimal or Hexadecimal.
+		-	<b>Bytes/Line</b> — Changes the number of bytes to display in each line of the data view.
+			Choose from 8 bytes up to 8K bytes by powers of 2.
+			Note that larger values make for fewer lines and many more columns.
+			Smaller values show many more lines with fewer columns.
+	-	<b>Row & Column Label Options</b> — (Right-Click Operations)
+		-	<b>Reference</b> — Choose “Byte Offset From Start” or “Byte Offset From End”.
+		-	<b>Radix</b> — Choose “Binary”, “Octal”, “Decimal” or “Hexadecimal”.
+-	<b>Drag and Drop</b> — Dropping a single file or text clipping from outside the tool window is supported.
+	-	The file’s raw contents are displayed in the window.
+	-	Viewing a file or clipping stops host scrap/clipboard monitoring.
+		To resume host scrap/clipboard monitoring, click “Monitor Clipboard" button (or close and re-open the tool).
+
+To close the <b>Scrap Buffer</b> tool window:
+	-	click its close box;
+	-	or un-check the <b>View</b> menu’s <b>Scrap Buffer</b> command.
 
 
 <hr size="50px">
