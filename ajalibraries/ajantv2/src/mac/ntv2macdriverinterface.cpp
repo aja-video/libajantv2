@@ -525,21 +525,15 @@ ULWord CNTV2MacDriverInterface::GetMacRawDriverVersion (void)
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, const string & inHostName)
 {
-	string hostName(inHostName);
-	#if defined(NTV2_FORCE_NO_DEVICE)
-	hostName = "NODEVICE";
-	if (inDeviceIndexNumber)
-		return false;	//	Only one NODEVICE
-	#endif// defined(NTV2_FORCE_NO_DEVICE)
 	if (inDeviceIndexNumber >= kMaxNumDevices)
 		return false;
 
 	if (IsOpen()  &&  inDeviceIndexNumber == _boardNumber)
 	{
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-		if (hostName.empty()  &&  !IsRemote())
+		if (inHostName.empty()  &&  !IsRemote())
 			return true;	//	Same local device requested, already open
-		if (_hostname == hostName  &&  IsRemote())
+		if (GetHostName() == inHostName  &&  IsRemote())
 			return true;	//	Same remote device requested, already open
 #else
 		return true;	//	Same local device requested, already open
@@ -550,11 +544,11 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, const string & in
 		Close();	//	Close if different device requested
 
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (!hostName.empty())
-		_boardOpened = OpenRemote (inDeviceIndexNumber, false, 256, hostName.c_str());	//	Remote host open
+	if (!inHostName.empty())
+		_boardOpened = OpenRemote (inDeviceIndexNumber, inHostName); //	Remote host open
 	else
 #else
-	(void) hostName;
+	(void) inHostName;
 #endif
 	{
 		// Local host open -- get a Mach connection
@@ -574,7 +568,7 @@ bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, const string & in
 		AJAAtomic::Increment(&(gClientStats.fOpenCount));
 	}
 
-	if (IsOpen ())
+	if (IsOpen())
 	{
 		// Set _boardNumber now, because ReadRegister needs it to talk to the correct device
 		_boardNumber = inDeviceIndexNumber;	
@@ -1426,8 +1420,14 @@ bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
 											const ULWord		inByteCount,
 											const bool			inSynchronous)
 {
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::DmaTransfer(inDMAEngine, inIsRead, inFrameNumber, pFrameBuffer, inOffsetBytes, inByteCount,
+													inSynchronous);
+#else
 	(void)inSynchronous;
-	
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
+
 	kern_return_t kernResult = KERN_FAILURE;
 
 	uint64_t	scalarI_64[6];
@@ -1466,35 +1466,39 @@ bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
 //	much more) for the memory block to be prepared.
 //	This function will sleep (block) until the DMA finishes.
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::DmaTransfer( NTV2DMAEngine DMAEngine,
-										   bool bRead,
-										   ULWord frameNumber,
-										   ULWord * pFrameBuffer,
-										   ULWord offsetBytes,
-										   ULWord bytes,
-										   ULWord videoNumSegments,
-									       ULWord videoSegmentHostPitch,
-									       ULWord videoSegmentCardPitch,
-										   bool bSync )
+bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine inDMAEngine,
+											const bool inIsRead,
+											const ULWord inFrameNumber,
+											ULWord * pFrameBuffer,
+											const ULWord inCardOffsetBytes,
+											const ULWord inByteCount,
+											const ULWord inNumSegments,
+											const ULWord inSegmentHostPitch,
+											const ULWord inSegmentCardPitch,
+											const bool inSynchronous)
 {
-	(void) bSync;
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::DmaTransfer (inDMAEngine, inIsRead, inFrameNumber, pFrameBuffer, inCardOffsetBytes, inByteCount,
+													inNumSegments, inSegmentHostPitch, inSegmentCardPitch, inSynchronous);
+#else
+	(void)inSynchronous;
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	kern_return_t kernResult = KERN_FAILURE;
 	size_t	outputStructSize = 0;
 
 	DMA_TRANSFER_STRUCT_64 dmaTransfer64;
-
-	dmaTransfer64.dmaEngine = DMAEngine;
-	dmaTransfer64.dmaFlags = 0;
-
-	dmaTransfer64.dmaHostBuffer = Pointer64(pFrameBuffer);		// virtual address of host buffer
-	dmaTransfer64.dmaSize = bytes;								// total number of bytes to DMA
-	dmaTransfer64.dmaCardFrameNumber = frameNumber;				// card frame number
-	dmaTransfer64.dmaCardFrameOffset = offsetBytes;				// offset (in bytes) into card frame to begin DMA
-	dmaTransfer64.dmaNumberOfSegments = videoNumSegments;		// number of segments of size videoBufferSize to DMA
-	dmaTransfer64.dmaSegmentSize = (bytes / videoNumSegments);	// size of each segment (if videoNumSegments > 1)
-	dmaTransfer64.dmaSegmentHostPitch = videoSegmentHostPitch;	// offset between the beginning of one host-memory segment and the next host-memory segment
-	dmaTransfer64.dmaSegmentCardPitch = videoSegmentCardPitch;	// offset between the beginning of one Kona-memory segment and the next Kona-memory segment
-	dmaTransfer64.dmaToCard = !bRead;							// direction of DMA transfer
+	dmaTransfer64.dmaEngine				= inDMAEngine;
+	dmaTransfer64.dmaFlags				= 0;
+	dmaTransfer64.dmaHostBuffer			= Pointer64(pFrameBuffer);			// virtual address of host buffer
+	dmaTransfer64.dmaSize				= inByteCount;						// total number of bytes to DMA
+	dmaTransfer64.dmaCardFrameNumber	= inFrameNumber;					// card frame number
+	dmaTransfer64.dmaCardFrameOffset	= inCardOffsetBytes;				// offset (in bytes) into card frame to begin DMA
+	dmaTransfer64.dmaNumberOfSegments	= inNumSegments;					// number of segments of size videoBufferSize to DMA
+	dmaTransfer64.dmaSegmentSize		= (inByteCount / inNumSegments);	// size of each segment (if videoNumSegments > 1)
+	dmaTransfer64.dmaSegmentHostPitch	= inSegmentHostPitch;				// offset between the beginning of one host-memory segment and the next host-memory segment
+	dmaTransfer64.dmaSegmentCardPitch	= inSegmentCardPitch;				// offset between the beginning of one Kona-memory segment and the next Kona-memory segment
+	dmaTransfer64.dmaToCard				= !inIsRead;						// direction of DMA transfer
 
 	if (GetIOConnect())
 		kernResult = IOConnectCallStructMethod(GetIOConnect(),					// an io_connect_t returned from IOServiceOpen().
@@ -1511,27 +1515,33 @@ bool CNTV2MacDriverInterface::DmaTransfer( NTV2DMAEngine DMAEngine,
 }
 
 
-bool CNTV2MacDriverInterface::DmaTransfer (NTV2DMAEngine DMAEngine,
-											NTV2Channel DMAChannel,
-											bool bTarget,
-											ULWord frameNumber,
-											ULWord frameOffset,
-											ULWord videoSize,
-											ULWord videoNumSegments,
-											ULWord videoSegmentHostPitch,
-											ULWord videoSegmentCardPitch,
-											PCHANNEL_P2P_STRUCT pP2PData)
+bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine inDMAEngine,
+											const NTV2Channel inDMAChannel,
+											const bool inIsTarget,
+											const ULWord inFrameNumber,
+											const ULWord inCardOffsetBytes,
+											const ULWord inByteCount,
+											const ULWord inNumSegments,
+											const ULWord inSegmentHostPitch,
+											const ULWord inSegmentCardPitch,
+											const PCHANNEL_P2P_STRUCT & inP2PData)
 {
-	(void) DMAEngine;
-	(void) DMAChannel;
-	(void) bTarget;
-	(void) frameNumber;
-	(void) frameOffset;
-	(void) videoSize;
-	(void) videoNumSegments;
-	(void) videoSegmentHostPitch;
-	(void) videoSegmentCardPitch;
-	(void) pP2PData;
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::DmaTransfer (inDMAEngine, inDMAChannel, inIsTarget, inFrameNumber, inCardOffsetBytes, inByteCount,
+													inNumSegments, inSegmentHostPitch, inSegmentCardPitch, inP2PData);
+#else
+	(void) inDMAEngine;
+	(void) inDMAChannel;
+	(void) inIsTarget;
+	(void) inFrameNumber;
+	(void) inCardOffsetBytes;
+	(void) inByteCount;
+	(void) inNumSegments;
+	(void) inSegmentHostPitch;
+	(void) inSegmentCardPitch;
+	(void) inP2PData;
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	return false;
 }
 

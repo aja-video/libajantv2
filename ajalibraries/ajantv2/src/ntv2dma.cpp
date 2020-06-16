@@ -82,12 +82,12 @@ bool CNTV2Card::DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pFrame
 bool CNTV2Card::DMAReadSegments (	const ULWord		inFrameNumber,
 									ULWord *			pFrameBuffer,
 									const ULWord		inOffsetBytes,
-									const ULWord		inByteCount,
+									const ULWord		inBytesPerSegment,
 									const ULWord		inNumSegments,
 									const ULWord		inSegmentHostPitch,
 									const ULWord		inSegmentCardPitch)
 {
-	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, true, inFrameNumber, pFrameBuffer, inOffsetBytes, inByteCount,
+	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, true, inFrameNumber, pFrameBuffer, inOffsetBytes, inBytesPerSegment,
 						inNumSegments, inSegmentHostPitch, inSegmentCardPitch, true);
 }
 

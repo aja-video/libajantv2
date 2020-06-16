@@ -25,32 +25,36 @@ const ULWord maxKnownProtocolVersion = 3;
 
 typedef enum
 {
-	eDiscoverQueryPkt = 0,
-	eDiscoverRespPkt = 1,
-	eNubOpenQueryPkt = 2,
-	eNubOpenRespPkt = 3,
-	eNubReadRegisterSingleQueryPkt = 4,
-	eNubReadRegisterSingleRespPkt = 5,
-	eNubWriteRegisterQueryPkt = 6,
-	eNubWriteRegisterRespPkt = 7,
-	eNubGetAutoCirculateQueryPkt = 8,
-	eNubGetAutoCirculateRespPkt = 9,
-	eNubV1ControlAutoCirculateQueryPkt = 8,	// Dupe #, maintained for bkwd compat
-	eNubV1ControlAutoCirculateRespPkt = 9,	// Dupe #, maintained for bkwd compat
-	eNubWaitForInterruptQueryPkt = 10,
-	eNubWaitForInterruptRespPkt = 11,
-	eNubDriverGetBitFileInformationQueryPkt = 12,
-	eNubDriverGetBitFileInformationRespPkt = 13,
-	eNubDownloadTestPatternQueryPkt = 14,
-	eNubDownloadTestPatternRespPkt = 15,
-	eNubReadRegisterMultiQueryPkt = 16,
-	eNubReadRegisterMultiRespPkt = 17,
-	eNubGetDriverVersionQueryPkt = 18,
-	eNubGetDriverVersionRespPkt = 19,
-	eNubV2ControlAutoCirculateQueryPkt = 20,// Replaces eNubV1ControlAutoCirculateQueryPkt
-	eNubV2ControlAutoCirculateRespPkt = 21,// Replaces eNubV1ControlAutoCirculateRespPkt
-	eNubDriverGetBuildInformationQueryPkt = 22,
-	eNubDriverGetBuildInformationRespPkt = 23,
+	eDiscoverQueryPkt						= 0,
+	eDiscoverRespPkt						= 1,
+	eNubOpenQueryPkt						= 2,
+	eNubOpenRespPkt							= 3,
+	eNubReadRegisterSingleQueryPkt			= 4,
+	eNubReadRegisterSingleRespPkt			= 5,
+	eNubWriteRegisterQueryPkt				= 6,
+	eNubWriteRegisterRespPkt				= 7,
+	eNubGetAutoCirculateQueryPkt			= 8,
+	eNubGetAutoCirculateRespPkt				= 9,
+	eNubV1ControlAutoCirculateQueryPkt		= 8,	// Dupe #, maintained for bkwd compat
+	eNubV1ControlAutoCirculateRespPkt		= 9,	// Dupe #, maintained for bkwd compat
+	eNubWaitForInterruptQueryPkt			= 10,
+	eNubWaitForInterruptRespPkt				= 11,
+	eNubDriverGetBitFileInformationQueryPkt	= 12,
+	eNubDriverGetBitFileInformationRespPkt	= 13,
+	eNubDownloadTestPatternQueryPkt			= 14,
+	eNubDownloadTestPatternRespPkt			= 15,
+	eNubReadRegisterMultiQueryPkt			= 16,
+	eNubReadRegisterMultiRespPkt			= 17,
+	eNubGetDriverVersionQueryPkt			= 18,
+	eNubGetDriverVersionRespPkt				= 19,
+	eNubV2ControlAutoCirculateQueryPkt		= 20,	// Replaces eNubV1ControlAutoCirculateQueryPkt
+	eNubV2ControlAutoCirculateRespPkt		= 21,	// Replaces eNubV1ControlAutoCirculateRespPkt
+	eNubDriverGetBuildInformationQueryPkt	= 22,
+	eNubDriverGetBuildInformationRespPkt	= 23,
+	eNubDriverDmaTransferQueryPkt			= 24,
+	eNubDriverDmaTransferRespPkt			= 25,
+	eNubDriverMessageQueryPkt				= 26,
+	eNubDriverMessageRespPkt				= 27,
 	eNumNTV2NubPktTypes
 } NTV2NubPktType;
 

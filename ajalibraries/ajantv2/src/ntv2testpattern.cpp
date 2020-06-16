@@ -2068,49 +2068,21 @@ bool CNTV2Card::DownloadTestPattern (UWord testPatternNumber )
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
-	{
-		return NTV2DownloadTestPatternRemote(	
-					_sockfd,
-					_remoteHandle,
-					_nubProtocolVersion,
-					GetChannel(),
-					GetTestPatternFrameBufferFormat(),
-					GetSignalMask(),
-					GetTestPatternDMAEnable(),
-					testPatternNumber) ? false : true;
-	}
+		return !_pRPCAPI->NTV2DownloadTestPatternRemote (GetChannel(), GetTestPatternFrameBufferFormat(),
+														GetSignalMask(), GetTestPatternDMAEnable(), testPatternNumber);
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 
-	if ( testPatternNumber >= numSegmentTestPatterns )
-	{
-		switch ( testPatternNumber - numSegmentTestPatterns )
+	if (testPatternNumber >= numSegmentTestPatterns)
+		switch (testPatternNumber - numSegmentTestPatterns)
 		{
-		case 0:
-			// Black
-			DownloadBlackTestPattern();
-			break;
-		case 1:
-			// Border
-			DownloadBorderTestPattern();
-			break;
-		case 2:
-			// Slant Ramp
-			DownloadSlantRampTestPattern();
-			break;
-		case 3:
-			// Vertical Sweep
-			DownloadVerticalSweepTestPattern();
-			break;
-		case 4:
-			// Zone Plate
-			DownloadZonePlateTestPattern();
-			break;
+			case 0:		DownloadBlackTestPattern();			break;	// Black
+			case 1:		DownloadBorderTestPattern();		break;	// Border
+			case 2:		DownloadSlantRampTestPattern();		break;	// Slant Ramp
+			case 3:		DownloadVerticalSweepTestPattern();	break;	// Vertical Sweep
+			case 4:		DownloadZonePlateTestPattern();		break;	// Zone Plate
 		}
-	}
 	else
-	{
 		DownloadSegmentedTestPattern(&NTV2TestPatternSegments[testPatternNumber]);
-	}
 	return true;
 }
 
