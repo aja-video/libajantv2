@@ -19,8 +19,7 @@
 
 // oem dma: save locked pages in a stl::vector
 #include <vector>
-using namespace std;
-typedef vector<ULWord *> DMA_LOCKED_VEC;
+typedef std::vector<ULWord *> DMA_LOCKED_VEC;
 
 
 class CNTV2LinuxDriverInterface : public CNTV2DriverInterface
