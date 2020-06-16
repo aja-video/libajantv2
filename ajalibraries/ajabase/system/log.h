@@ -30,22 +30,29 @@ extern void __cdecl log_odprintf(const char *format, ...);
 
 		#if (AJA_LOGTYPE==0)
 			// no log
-			#define AJA_LOG(_format_,...)
+			#define AJA_LOG(...)
+			#define AJA_ULOG(_unit_,...)
 
 		#elif (AJA_LOGTYPE==1)
 			#define AJA_LOG(...) log_odprintf(__VA_ARGS__)
+			#define AJA_ULOG(_unit_,...)	\
+				do {if (AJADebug::IsActive(_unit_)) log_odprintf(__VA_ARGS__);} while(0);
 
 		#elif (AJA_LOGTYPE==2)
 			#define AJA_LOG(...) AJA_REPORT(AJA_DebugUnit_Critical, AJA_DebugSeverity_Info, __VA_ARGS__)
+			#define AJA_ULOG(_unit_,...)	\
+				do {if (AJADebug::IsActive(_unit_)) AJA_REPORT(_unit_, AJA_DebugSeverity_Info, __VA_ARGS__);} while(0);
 
         #else
 			//catch all, so builds won't break
-			#define AJA_LOG(_format_,...)
+			#define AJA_LOG(...)
+			#define AJA_ULOG(_unit_,...)
 		#endif
 
 	#else
 		// no log
-		#define AJA_LOG(_format_,...)
+		#define AJA_LOG(...)
+		#define AJA_ULOG(_unit_,...)
 	#endif
 
 #elif defined(AJA_LINUX) || defined(AJA_MAC)
@@ -55,20 +62,26 @@ extern void __cdecl log_odprintf(const char *format, ...);
 		#if (AJA_LOGTYPE==0)
             // no log
 			#define AJA_LOG(_format_...)
+			#define AJA_ULOG(_unit_, _format_...)
         
         #elif (AJA_LOGTYPE==1)
             // printf
 			#include <stdio.h>
 			#define AJA_LOG(_format_...) printf(_format_)
+			#define AJA_ULOG(_unit_, _format_...)	\
+				do {if (AJADebug::IsActive(_unit_)) printf(_format_);} while(0);
 
         #elif (AJA_LOGTYPE==2)
             #define AJA_LOG(_format_...) AJA_REPORT(AJA_DebugUnit_Critical, AJA_DebugSeverity_Info, _format_)
-
+			#define AJA_ULOG(_unit_, _format_...)	\
+				do {if (AJADebug::IsActive(_unit_)) AJA_REPORT(_unit_, AJA_DebugSeverity_Info, _format_);} while(0);
+		
 		#endif
 			
 	#else
         // no log
         #define AJA_LOG(_format_...)
+		#define AJA_ULOG(_unit_, _format_...)
 	#endif
 
 #endif

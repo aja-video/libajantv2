@@ -8942,7 +8942,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk_tprom.bit";
 	case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k_tprom.bit";
 	case DEVICE_ID_CORVID44_2X4K:				return "c44_12g_2x4k_tprom.bit";
-	case DEVICE_ID_TTAP_PRO:						return "t3_tap.bit";
+	case DEVICE_ID_TTAP_PRO:					return "t_tap_pro.bit";
 	default:									return "";
 	}
 	return "";
