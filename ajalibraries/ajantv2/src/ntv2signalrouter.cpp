@@ -830,6 +830,7 @@ void RoutingExpert::InitInputXpt2WidgetIDs(void)
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptHDMIOutInput,			NTV2_WgtHDMIOut1v5));
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMultiLinkOut1Input,		NTV2_WgtMultiLinkOut1));
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_Xpt3DLUT1Input,				NTV2_Wgt3DLUT1));
+	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMultiLinkOut1InputDS2,	NTV2_WgtMultiLinkOut1));
 
 	//	gWidget2InputXpts
 	for (InputXpt2WidgetIDsConstIter iter (gInputXpt2WidgetIDs.begin ());  iter != gInputXpt2WidgetIDs.end ();  ++iter)
