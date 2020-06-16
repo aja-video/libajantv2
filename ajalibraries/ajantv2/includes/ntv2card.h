@@ -4505,7 +4505,7 @@ public:
 
 	/**
 		@brief		Answers with the current RGB range being used by a given CSC.
-		@param[out]	outRange	Receives the RGB range (NTV2_CSC_RGB_RANGE_FULL, NTV2_CSC_RGB_RANGE_SMPTE, or NTV2_CSC_RGB_RANGE_INVALID upon failure).
+		@param[out]	outRange	Receives the RGB range (::NTV2_CSC_RGB_RANGE_FULL, ::NTV2_CSC_RGB_RANGE_SMPTE, or ::NTV2_CSC_RGB_RANGE_INVALID upon failure).
 		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
 								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
 								Defaults to ::NTV2_CHANNEL1 (CSC1).
