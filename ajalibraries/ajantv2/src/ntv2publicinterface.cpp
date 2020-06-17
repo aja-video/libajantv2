@@ -1248,7 +1248,7 @@ bool NTV2_POINTER::Set (const void * pInUserPointer, const size_t inByteCount)
 	Deallocate();
 	fUserSpacePtr = NTV2_POINTER_TO_ULWORD64 (pInUserPointer);
 	fByteCount = static_cast <ULWord> (inByteCount);
-	return true;
+	return (GetHostPointer() && GetByteCount())  ||  (!GetHostPointer() && !GetByteCount());
 }
 
 

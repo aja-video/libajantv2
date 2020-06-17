@@ -90,8 +90,8 @@ AJAStatus AJAAncillaryData_Cea608_Vanc::SetLine (const bool inIsF2, const uint8_
 
 AJAStatus AJAAncillaryData_Cea608_Vanc::GetLine (uint8_t & fieldNum, uint8_t & lineNum) const
 {
-	fieldNum = m_isF2 ? 0x01 : 0x00;
-	lineNum  = m_lineNum;
+	fieldNum = IsField2()  ?  0x01/*NTV2_FIELD1*/  :  0x00/*NTV2_FIELD0*/;
+	lineNum  = uint8_t(GetLineNumber());
 	return AJA_STATUS_SUCCESS;
 }
 

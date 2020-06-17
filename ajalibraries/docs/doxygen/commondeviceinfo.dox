@@ -565,28 +565,38 @@
 	@subsection	fieldframeinterrupts	Field/Frame Interrupts
 
 	Many device hardware registers are updated on the video frame sync (i.e. the VBI associated with
-	the start of a new frame). For example, CNTV2Card::SetInputFrame is called by the client
-	application to instruct the device’s Frame Store to write the next video frame that arrives
-	into a specific frame buffer number in device memory. The function call immediately changes
-	the Frame Store’s input frame register, but internally, the device firmware ensures that the
-	Frame Store uses the new frame number value at the next “Field0” (first field in time) sync pulse.
-	To avoid a race condition, though, the client application needs to wait for (synchronize with)
-	the VBI, which gives it an entire frame time to update hardware registers and configure the
-	device widget settings that are required for the next frame to be processed.
+	the start of a new frame). This is determined by the FrameStore’s ::NTV2RegisterWriteMode and is
+	normally set to ::NTV2_REGWRITE_SYNCTOFRAME.
 
-	For interlaced video, where the frame is transmitted as two fields, each field contains every
-	other line of the frame. For HD video, the first field in time contains the first active line
-	of the frame (i.e. the “top field” or “field0”), the second field contains the last active
-	line of the frame (i.e. the “bottom field” or “field1”). Each field starts with a video sync —
-	however, the hardware registers are only updated at the “field0” (first field in time) sync.
-	Each of the syncs (“field0” and “field1”) produces an interrupt to the driver,
-	but CNTV2Card::WaitForInputFieldID (or CNTV2Card::WaitForOutputFieldID) check a hardware register
-	and return only when “field0” is detected (not “field1”). For progressive video, all syncs are
-	flagged by the hardware as “field0” syncs, so registers are updated for the next frame and the
-	CNTV2Card::WaitForInputFieldID (or CNTV2Card::WaitForOutputFieldID) work as expected.
+	For example, CNTV2Card::SetInputFrame is called by the client application to instruct the device’s
+	FrameStore to write the next video frame that arrives into a specific frame buffer number in device
+	memory. The function call immediately changes the Frame Store’s input frame register, but internally,
+	the device firmware ensures that the FrameStore uses the new frame number value at the next ::NTV2_FIELD0
+	(first field in time) sync pulse. (To avoid a race condition, though, the client application must wait
+	for the VBI, which gives it an entire frame time to update hardware registers and configure the
+	device widget settings that are required for the next frame to be processed.)
 
-	To wait for an event (such as a VBI) from a particular Frame Store, your application should
-	subscribe to it by calling CNTV2Card::SubscribeInputVerticalEvent or CNTV2Card::SubscribeOutputVerticalEvent.
+	For interlaced video, where the frame is transmitted as two fields, each field contains every other line
+	of the frame. For HD video, the first field in time contains the first active line of the frame (i.e. the
+	“top field” <i>a.k.a.</i> ::NTV2_FIELD0 <i>a.k.a.</i> <b>F1</b>); the second field contains the last
+	active line of the frame (i.e. the “bottom field” <i>a.k.a.</i> ::NTV2_FIELD1 <i>a.k.a.</i> <b>F2</b>).
+	Each field starts with a video sync — however, normally, in ::NTV2_REGWRITE_SYNCTOFRAME mode, the hardware
+	registers are only updated at the ::NTV2_FIELD0 sync. Each of the syncs (::NTV2_FIELD0 and ::NTV2_FIELD1 )
+	signals an interrupt to the driver, but CNTV2Card::WaitForInputFieldID (or CNTV2Card::WaitForOutputFieldID)
+	check a hardware register and return only when the requested ::NTV2FieldID is detected.
+
+	The FrameStore can alternatively be configured for <b>Field Mode</b> by passing ::NTV2_REGWRITE_SYNCTOFIELD
+	into CNTV2Card::SetRegisterWriteMode, which causes calls to CNTV2Card::SetInputFrame or CNTV2Card::SetOutputFrame
+	to take effect at the next <b>field</b> interrupt. In this mode of operation, the client application must wait
+	for the next field interrupt – not frame interrupt – which gives it half the frame time to prepare/configure
+	the device for the next field to be processed.
+
+	For progressive video, all syncs are flagged by the hardware as ::NTV2_FIELD0 syncs, so registers
+	are updated for the next frame and the CNTV2Card::WaitForInputFieldID (or CNTV2Card::WaitForOutputFieldID)
+	work as expected.
+
+	To wait for an event (such as a VBI) from a particular FrameStore, your application should subscribe
+	to it by calling CNTV2Card::SubscribeInputVerticalEvent or CNTV2Card::SubscribeOutputVerticalEvent.
 
 	Once subscribed, to efficiently wait for an input vertical interrupt, call CNTV2Card::WaitForInputFieldID or
 	CNTV2Card::WaitForInputVerticalInterrupt, referencing the Frame Store that’s configured for capture,
@@ -595,16 +605,16 @@
 	To efficiently wait for an output vertical interrupt, call CNTV2Card::WaitForOutputFieldID or
 	CNTV2Card::WaitForOutputVerticalInterrupt, referencing the Frame Store that’s configured for playout.
 
-	You can inquire as to the number of input or output vertical events that have successfully been waited
-	on and fired by calling CNTV2Card::GetInputVerticalEventCount or CNTV2Card::GetOutputVerticalEventCount.
+	The number of input or output vertical events that have successfully been waited on and fired can be obtained
+	by calling CNTV2Card::GetInputVerticalEventCount or CNTV2Card::GetOutputVerticalEventCount.
 	By calling either of these methods before and after calling the “wait for input/output” function, you
 	can determine if indeed the interrupt event actually triggered. Call CNTV2Card::SetInputVerticalEventCount
 	or CNTV2Card::SetOutputVerticalEventCount to reset the tally counter.
 
 	Normally it’s not necessary to explicitly unsubscribe the CNTV2Card instance’s event subscriptions, as
-	its destructor automatically calls CNTV2Card::Close, but it’s considered a good practice.
+	its destructor automatically calls CNTV2Card::Close.
 
-	@note	On <b>Windows</b>, the AJA NTV2 driver supplies a finite number of event subscription handles
+	@note	On the <b>Windows</b> platform, the AJA NTV2 driver supplies a finite number of event subscription handles
 			to client applications, which get consumed when subscribed (via CNTV2Card::SubscribeInputVerticalEvent,
 			CNTV2Card::SubscribeOutputVerticalEvent, CNTV2Card::SubscribeEvent). They’re made available
 			again to other clients when unsubscribed (via CNTV2Card::UnsubscribeInputVerticalEvent,
@@ -616,6 +626,7 @@
 			(after closing all running NTV2 client applications, including the AJA Service. 3) Set virtual
 			register kVRegClearAllSubscriptions to a non-zero value (this can be easily done in NTV2Watcher’s
 			\ref inspectorregs ).
+
 
 	@subsection	vidop-fbconflict	When Frame Stores Access the Same Frame Buffer Memory
 

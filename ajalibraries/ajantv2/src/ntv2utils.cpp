@@ -7637,6 +7637,7 @@ string NTV2InputCrosspointIDToString (const NTV2InputCrosspointID inValue, const
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FrameSync2", NTV2_XptFrameSync2Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FrameSync1", NTV2_XptFrameSync1Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "ML Out 1", NTV2_XptMultiLinkOut1Input);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "ML Out 1 DS2", NTV2_XptMultiLinkOut1InputDS2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "3D LUT 1", NTV2_Xpt3DLUT1Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "???", NTV2_INPUT_CROSSPOINT_INVALID);
 	}
@@ -8942,7 +8943,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk_tprom.bit";
 	case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k_tprom.bit";
 	case DEVICE_ID_CORVID44_2X4K:				return "c44_12g_2x4k_tprom.bit";
-	case DEVICE_ID_TTAP_PRO:						return "t3_tap.bit";
+	case DEVICE_ID_TTAP_PRO:					return "t_tap_pro.bit";
 	default:									return "";
 	}
 	return "";

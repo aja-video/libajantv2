@@ -63,8 +63,10 @@ typedef struct
 	bool			isComplete;
 	ULWord			value;
 	bool			isDS1;
-	bool			isDS3;
-	bool			isDS4;
+	bool			isML1;
+	bool			isML2;
+	bool			isML3;
+	bool			isML4;
 } VPIDControl;
 
 /**

@@ -2922,28 +2922,25 @@ bool CNTV2Card::SupportsP2PTarget (void)
 }
 
 
-bool CNTV2Card::SetRegisterWritemode (NTV2RegisterWriteMode value, NTV2Channel inChannel)
+bool CNTV2Card::SetRegisterWriteMode (const NTV2RegisterWriteMode value, const NTV2Channel inFrameStore)
 {
-	if (IS_CHANNEL_INVALID (inChannel))
+	if (IS_CHANNEL_INVALID(inFrameStore))
 		return false;
-	if (!IsMultiFormatActive ())
-		inChannel = NTV2_CHANNEL1;
-	return WriteRegister (gChannelToGlobalControlRegNum [inChannel], value, kRegMaskRegClocking, kRegShiftRegClocking);
+	return WriteRegister (gChannelToGlobalControlRegNum[IsMultiFormatActive() ? inFrameStore : NTV2_CHANNEL1],
+							value, kRegMaskRegClocking, kRegShiftRegClocking);
 }
 
 
-bool CNTV2Card::GetRegisterWritemode (NTV2RegisterWriteMode & outValue, NTV2Channel inChannel)
+bool CNTV2Card::GetRegisterWriteMode (NTV2RegisterWriteMode & outValue, const NTV2Channel inFrameStore)
 {
-	if (IS_CHANNEL_INVALID (inChannel))
+	if (IS_CHANNEL_INVALID (inFrameStore))
 		return false;
-	ULWord	value	(0);
-	if (!IsMultiFormatActive())
-		inChannel = NTV2_CHANNEL1;
-	bool	result = ReadRegister(gChannelToGlobalControlRegNum[inChannel],
-									value, kRegMaskRegClocking, kRegShiftRegClocking);
-	if (result)
-		outValue = static_cast <NTV2RegisterWriteMode> (value);
-	return result;
+	ULWord	value(0);
+	if (!ReadRegister(gChannelToGlobalControlRegNum[IsMultiFormatActive() ? inFrameStore : NTV2_CHANNEL1],
+								value, kRegMaskRegClocking, kRegShiftRegClocking))
+		return false;
+	outValue = NTV2RegisterWriteMode(value);
+	return true;
 }
 
 
