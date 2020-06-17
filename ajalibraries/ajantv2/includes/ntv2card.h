@@ -3344,7 +3344,7 @@ public:
 					CNTV2Card::SetOutputFrame calls (and others) actually take effect.
 		@param[in]	inValue			Specifies the ::NTV2RegisterWriteMode to set for the FrameStore.
 		@param[in]	inFrameStore	Specifies the FrameStore of interest as an ::NTV2Channel, a zero-based index number.
-									If omitted, defaults to NTV2_CHANNEL1.
+									If omitted, defaults to ::NTV2_CHANNEL1.
 		@see		CNTV2Card::GetRegisterWriteMode, CNTV2Card::SetInputFrame, CNTV2Card::SetOutputFrame, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	SetRegisterWriteMode (const NTV2RegisterWriteMode inValue, const NTV2Channel inFrameStore = NTV2_CHANNEL1);
@@ -3354,7 +3354,7 @@ public:
 					CNTV2Card::SetInputFrame or CNTV2Card::SetOutputFrame calls (and others) actually take effect.
 		@param[out]	outValue		Receives the ::NTV2RegisterWriteMode that's currently being used by the FrameStore.
 		@param[in]	inFrameStore	Specifies the FrameStore of interest as an ::NTV2Channel, a zero-based index number.
-									If omitted, defaults to NTV2_CHANNEL1.
+									If omitted, defaults to ::NTV2_CHANNEL1.
 		@see		CNTV2Card::SetRegisterWriteMode, CNTV2Card::SetInputFrame, CNTV2Card::SetOutputFrame, \ref fieldframeinterrupts
 	**/
 	AJA_VIRTUAL bool	GetRegisterWriteMode (NTV2RegisterWriteMode & outValue, const NTV2Channel inFrameStore = NTV2_CHANNEL1);
@@ -4505,7 +4505,7 @@ public:
 
 	/**
 		@brief		Answers with the current RGB range being used by a given CSC.
-		@param[out]	outRange	Receives the RGB range (NTV2_CSC_RGB_RANGE_FULL, NTV2_CSC_RGB_RANGE_SMPTE, or NTV2_CSC_RGB_RANGE_INVALID upon failure).
+		@param[out]	outRange	Receives the RGB range (::NTV2_CSC_RGB_RANGE_FULL, ::NTV2_CSC_RGB_RANGE_SMPTE, or ::NTV2_CSC_RGB_RANGE_INVALID upon failure).
 		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
 								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.
 								Defaults to ::NTV2_CHANNEL1 (CSC1).

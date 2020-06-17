@@ -6337,7 +6337,9 @@ typedef enum
 					@brief		Sets (or resets) me from a client-supplied address and size.
 					@param[in]	pInUserPointer	Specifies the user-space virtual memory address. The client is entirely responsible for it.
 					@param[in]	inByteCount		Specifies the byte count.
-					@return		True if successful;  otherwise false.
+					@return		True if both pInUserPointer and inByteCount agree (i.e. if pInUserPointer
+								and inByteCount are both zero, or if they're both non-zero);  otherwise false
+								if they don't agree (i.e. one is non-zero and the other is zero, or vice-versa).
 					@note		Any memory that I was referencing prior to this call that I was responsible for will automatically be freed.
 				**/
 				bool			Set (const void * pInUserPointer, const size_t inByteCount);
