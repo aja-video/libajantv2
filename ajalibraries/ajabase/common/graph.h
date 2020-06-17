@@ -29,9 +29,9 @@ using GraphVertexList = std::list<GraphVertex*>;
  */
 class AJA_EXPORT GraphElement {
 public:
-    GraphElement(const std::string& id)
+    explicit GraphElement(const std::string& id)
         : m_id(id), m_label(std::string()) {}
-    GraphElement(const std::string& id, const std::string& label)
+    explicit GraphElement(const std::string& id, const std::string& label)
         : m_id(id), m_label(label) {}
     virtual ~GraphElement() {}
 
@@ -59,7 +59,7 @@ public:
     enum Direction { Incoming, Outgoing };
 
     explicit GraphEdge(const std::string& id);
-    GraphEdge(const std::string& id, const std::string& label);
+    explicit GraphEdge(const std::string& id, const std::string& label);
     ~GraphEdge() = default;
 
     virtual bool operator==(GraphEdge* rhs) const;
@@ -83,8 +83,8 @@ private:
  */
 class AJA_EXPORT GraphVertex : public GraphElement {
 public:
-    GraphVertex(const std::string& id);
-    GraphVertex(const std::string& id, const std::string& label);
+    explicit GraphVertex(const std::string& id);
+    explicit GraphVertex(const std::string& id, const std::string& label);
 
     bool operator==(GraphVertex* rhs) const;
     bool Equals(GraphVertex* rhs) const;
@@ -109,9 +109,9 @@ protected:
 template <typename T>
 class AJA_EXPORT GraphDataVertex : public GraphVertex {
 public:
-    GraphDataVertex(const std::string& id)
+    explicit GraphDataVertex(const std::string& id)
         : GraphVertex(id) {}
-    GraphDataVertex(const std::string& id, const std::string& label)
+    explicit GraphDataVertex(const std::string& id, const std::string& label)
         : GraphVertex(id, label) {}
 
     virtual ~GraphDataVertex() {}
@@ -148,6 +148,7 @@ public:
     std::string GraphVizString();
 
 private:
+    std::vector<Graph*> m_sub_graphs;
     GraphVertexList m_vertices;
 };
 
