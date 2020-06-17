@@ -13,6 +13,8 @@
 #ifdef MSWindows
 	#include <WinSock2.h>
 	typedef int socklen_t ;
+#else
+	#include <sys/socket.h>
 #endif
 
 extern AJAExport const char *NTV2NubQueryRespStrProtVer1[eNumNTV2NubPktTypes];

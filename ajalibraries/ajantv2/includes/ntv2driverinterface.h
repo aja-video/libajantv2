@@ -170,26 +170,33 @@ public:
 								return result;
 							}
 
-	// Read multiple registers at once.
-	AJA_VIRTUAL bool ReadRegisterMulti(	ULWord numRegs,
-									ULWord *whichRegisterFailed,
-							  		NTV2ReadWriteRegisterSingle aRegs[]);	///< @deprecated	Use CNTV2Card::ReadRegisters instead.
+#if !defined(READREGMULTICHANGE)
+	/**
+		@brief		Reads the register(s) specified by the given ::NTV2RegInfo sequence.
+		@param[in]	inOutValues		Specifies the register(s) to be read, and upon return, contains their values.
+		@return		True only if all registers were read successfully;  otherwise false.
+		@note		This operation is not guaranteed to be performed atomically.
+	**/
+	AJA_VIRTUAL bool	ReadRegisters (NTV2RegisterReads & inOutValues);
+#endif	//	!defined(READREGMULTICHANGE)
 
-	AJA_VIRTUAL bool RestoreHardwareProcampRegisters() = 0;
+	AJA_VIRTUAL bool	ReadRegisterMulti (const ULWord numRegs, ULWord * pOutWhichRegFailed, NTV2RegInfo aRegs[]);	///< @deprecated	Use CNTV2DriverInterface::ReadRegisters instead.
+
+	AJA_VIRTUAL bool	RestoreHardwareProcampRegisters() = 0;
 
 	/**
 		@brief		Transfers data between the AJA device and the host. This function will block and not return to the caller until
 					the transfer has finished or failed.
-		@param[in]	inDMAEngine		Specifies the device DMA engine to use. Use NTV2_DMA_FIRST_AVAILABLE for most applications.
-									(Use the ::NTV2DeviceGetNumDMAEngines function to determine how many are available.)
-		@param[in]	inIsRead		Specifies the transfer direction. Use 'true' for reading (device-to-host).
-									Use 'false' for writing (host-to-device).
-		@param[in]	inFrameNumber	Specifies the zero-based frame number of the starting frame to be transferred to/from the device.
-		@param		pFrameBuffer	Specifies a valid, non-NULL address of the host buffer. If reading (device-to-host), this memory
-									will be written into. If writing (host-to-device), this memory will be read from.
-		@param[in]	inOffsetBytes	Specifies the byte offset into the device frame buffer where the data transfer will start.
-		@param[in]	inByteCount		Specifies the total number of bytes to be transferred.
-		@param[in]	inSynchronous	This parameter is obsolete, and ignored.
+		@param[in]	inDMAEngine			Specifies the device DMA engine to use. Use NTV2_DMA_FIRST_AVAILABLE for most applications.
+										(Use the ::NTV2DeviceGetNumDMAEngines function to determine how many are available.)
+		@param[in]	inIsRead			Specifies the transfer direction. Use 'true' for reading (device-to-host).
+										Use 'false' for writing (host-to-device).
+		@param[in]	inFrameNumber		Specifies the zero-based frame number of the starting frame to be transferred to/from the device.
+		@param		pFrameBuffer		Specifies a valid, non-NULL address of the host buffer. If reading (device-to-host), this memory
+										will be written into. If writing (host-to-device), this memory will be read from.
+		@param[in]	inOffsetBytes		Specifies the byte offset into the device frame buffer where the data transfer will start.
+		@param[in]	inTotalByteCount	Specifies the total number of bytes to be transferred.
+		@param[in]	inSynchronous		This parameter is obsolete, and ignored.
 		@return		True if successful; otherwise false.
 		@note		The host buffer must be at least inByteCount + inOffsetBytes in size; otherwise, host memory will be corrupted,
 					or a bus error or other runtime exception may occur.
@@ -199,18 +206,45 @@ public:
 									const ULWord		inFrameNumber,
 									ULWord *			pFrameBuffer,
 									const ULWord		inOffsetBytes,
-									const ULWord		inByteCount,
+									const ULWord		inTotalByteCount,
 									const bool			inSynchronous = true);
 
+	/**
+		@brief		Transfers data between the AJA device and the host. This function will block and not
+					return to the caller until the transfer has finished or failed.
+		@param[in]	inDMAEngine			Specifies the device DMA engine to use. Use ::NTV2_DMA_FIRST_AVAILABLE
+										for most applications. (Use the ::NTV2DeviceGetNumDMAEngines function
+										to determine how many are available.)
+		@param[in]	inIsRead			Specifies the transfer direction. Use 'true' for reading (device-to-host).
+										Use 'false' for writing (host-to-device).
+		@param[in]	inFrameNumber		Specifies the zero-based frame number of the starting frame to be
+										transferred to/from the device.
+		@param		pFrameBuffer		Specifies a valid, non-NULL address of the host buffer. If reading
+										(device-to-host), this memory will be written into. If writing
+										(host-to-device), this memory will be read from.
+		@param[in]	inCardOffsetBytes	Specifies the byte offset into the device frame buffer where the data
+										transfer will start.
+		@param[in]	inTotalByteCount	Specifies the total number of bytes to be transferred.
+		@param[in]	inNumSegments		Specifies the number of segments to transfer. Note that this determines
+										the number of bytes per segment (by dividing into <i>inTotalByteCount</i>).
+		@param[in]	inHostPitchPerSeg	Specifies the number of bytes to increment the host memory pointer
+										after each segment is transferred.
+		@param[in]	inCardPitchPerSeg	Specifies the number of bytes to increment the on-device memory pointer
+										after each segment is transferred.
+		@param[in]	inSynchronous		This parameter is obsolete, and ignored.
+		@return		True if successful; otherwise false.
+		@note		The host buffer must be at least inByteCount + inOffsetBytes in size; otherwise, host memory will be corrupted,
+					or a bus error or other runtime exception may occur.
+	**/
 	AJA_VIRTUAL bool DmaTransfer (	const NTV2DMAEngine inDMAEngine,
 									const bool inIsRead,
 									const ULWord inFrameNumber,
 									ULWord * pFrameBuffer,
 									const ULWord inCardOffsetBytes,
-									const ULWord inByteCount,
+									const ULWord inTotalByteCount,
 									const ULWord inNumSegments,
-									const ULWord inSegmentHostPitch,
-									const ULWord inSegmentCardPitch,
+									const ULWord inHostPitchPerSeg,
+									const ULWord inCardPitchPerSeg,
 									const bool inSynchronous = true)	= 0;
 
 	AJA_VIRTUAL bool DmaTransfer (	const NTV2DMAEngine inDMAEngine,
@@ -274,7 +308,7 @@ public:
 					power-up or wake from sleep. Calls to Open, IsOpen, ReadRegister and WriteRegister will all succeed,
 					but the device won't be capable of either ingesting or playing video or performing DMA operations.
 	**/
-    AJA_VIRTUAL bool		IsDeviceReady (bool inCheckValid = false);
+    AJA_VIRTUAL bool		IsDeviceReady (const bool inCheckValid = false);
 	AJA_VIRTUAL bool		IsMBSystemValid (void);
 	AJA_VIRTUAL bool		IsMBSystemReady (void);
 #if !defined(NTV2_DEPRECATE_15_0)
@@ -387,33 +421,32 @@ private:
 	CNTV2DriverInterface (const CNTV2DriverInterface & inObjToCopy);
 
 protected:
-
-    UWord					_boardNumber;			///< @brief	My device index number.
-    bool					_boardOpened;			///< @brief	True if I'm open and connected to the device.
-	NTV2DeviceID			_boardID;				///< @brief	My cached device ID.
-    bool					_displayErrorMessage;	///< @brief	This is obsolete.
-	ULWord					_pciSlot;				//	FIXFIXFIX	Replace this with a std::string that identifies my location in the host device tree.
-	ULWord					_programStatus;
+    UWord			_boardNumber;			///< @brief	My device index number.
+    bool			_boardOpened;			///< @brief	True if I'm open and connected to the device.
+	NTV2DeviceID	_boardID;				///< @brief	My cached device ID.
+    bool			_displayErrorMessage;	///< @brief	This is obsolete.
+	ULWord			_pciSlot;				//	FIXFIXFIX	Replace this with a std::string that identifies my location in the host device tree.
+	ULWord			_programStatus;
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	NTV2RPCAPI*				_pRPCAPI;
+	NTV2RPCAPI *	_pRPCAPI;
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-	PULWord					mInterruptEventHandles	[eNumInterruptTypes];	///< @brief	For subscribing to each possible event, one for each interrupt type
-	ULWord					mEventCounts			[eNumInterruptTypes];	///< @brief	My event tallies, one for each interrupt type. Note that these
-																			///<		tallies are different from the interrupt tallies kept by the driver.
-	ULWord *				_pFrameBaseAddress;
+	PULWord			mInterruptEventHandles	[eNumInterruptTypes];	///< @brief	For subscribing to each possible event, one for each interrupt type
+	ULWord			mEventCounts			[eNumInterruptTypes];	///< @brief	My event tallies, one for each interrupt type. Note that these
+																	///<		tallies are different from the interrupt tallies kept by the driver.
+	ULWord *		_pFrameBaseAddress;
 
 	// for old KSD and KHD boards
-	ULWord *				_pCh1FrameBaseAddress;			//	DEPRECATE!
-	ULWord *				_pCh2FrameBaseAddress;			//	DEPRECATE!
+	ULWord *		_pCh1FrameBaseAddress;			//	DEPRECATE!
+	ULWord *		_pCh2FrameBaseAddress;			//	DEPRECATE!
 
-	ULWord *				_pRegisterBaseAddress;
-	ULWord					_pRegisterBaseAddressLength;
-	ULWord *				_pFS1FPGARegisterBaseAddress;	//	DEPRECATE!
+	ULWord *		_pRegisterBaseAddress;
+	ULWord			_pRegisterBaseAddressLength;
+	ULWord *		_pFS1FPGARegisterBaseAddress;	//	DEPRECATE!
 
-	ULWord *				_pXena2FlashBaseAddress;
+	ULWord *		_pXena2FlashBaseAddress;
 
-	ULWord					_ulNumFrameBuffers;
-	ULWord					_ulFrameBufferSize;
+	ULWord			_ulNumFrameBuffers;
+	ULWord			_ulFrameBufferSize;
 
 };	//	CNTV2DriverInterface
 

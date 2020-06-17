@@ -110,11 +110,11 @@ class AJAExport NTV2RPCAPI
 	
 		AJA_VIRTUAL int	NTV2DMATransferRemote	(const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
 												const ULWord inFrameNumber,			ULWord * pFrameBuffer,
-												const ULWord inCardOffsetBytes,		const ULWord inByteCount,
+												const ULWord inCardOffsetBytes,		const ULWord inTotalByteCount,
 												const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
 												const ULWord inSegmentCardPitch,	const bool inSynchronous)
 												{(void) inDMAEngine; (void) inIsRead;	(void) inFrameNumber; (void) pFrameBuffer;
-												(void) inCardOffsetBytes; (void) inByteCount; (void) inNumSegments; (void) inSegmentHostPitch;
+												(void) inCardOffsetBytes; (void) inTotalByteCount; (void) inNumSegments; (void) inSegmentHostPitch;
 												(void) inSegmentCardPitch; (void) inSynchronous;
 												return -1;}
 	

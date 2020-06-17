@@ -33,7 +33,7 @@ bool CNTV2Card::DMARead (const ULWord inFrameNumber, ULWord * pFrameBuffer, cons
 
 bool CNTV2Card::DMAWrite (const ULWord inFrameNumber, const ULWord * pFrameBuffer, const ULWord inOffsetBytes, const ULWord inByteCount)
 {
-	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, inFrameNumber, const_cast <ULWord *> (pFrameBuffer), inOffsetBytes, inByteCount, true);
+	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, inFrameNumber, const_cast<ULWord*>(pFrameBuffer), inOffsetBytes, inByteCount, true);
 }
 
 
@@ -75,19 +75,20 @@ bool CNTV2Card::DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pFrame
 		actualFrameSize *= 4;
 	if (quadQuadEnabled)
 		actualFrameSize *= 4;
-	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, 0, const_cast <ULWord *> (pFrameBuffer), inFrameNumber * actualFrameSize, inByteCount, true);
+	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, 0, const_cast<ULWord*>(pFrameBuffer),
+						inFrameNumber * actualFrameSize, inByteCount, true);
 }
 
 
 bool CNTV2Card::DMAReadSegments (	const ULWord		inFrameNumber,
 									ULWord *			pFrameBuffer,
 									const ULWord		inOffsetBytes,
-									const ULWord		inBytesPerSegment,
+									const ULWord		inTotalByteCount,
 									const ULWord		inNumSegments,
 									const ULWord		inSegmentHostPitch,
 									const ULWord		inSegmentCardPitch)
 {
-	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, true, inFrameNumber, pFrameBuffer, inOffsetBytes, inBytesPerSegment,
+	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, true, inFrameNumber, pFrameBuffer, inOffsetBytes, inTotalByteCount,
 						inNumSegments, inSegmentHostPitch, inSegmentCardPitch, true);
 }
 
@@ -95,32 +96,23 @@ bool CNTV2Card::DMAReadSegments (	const ULWord		inFrameNumber,
 bool CNTV2Card::DMAWriteSegments (	const ULWord		inFrameNumber,
 									const ULWord *		pFrameBuffer,
 									const ULWord		inOffsetBytes,
-									const ULWord		inByteCount,
+									const ULWord		inTotalByteCount,
 									const ULWord		inNumSegments,
 									const ULWord		inSegmentHostPitch,
 									const ULWord		inSegmentCardPitch)
 {
-	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, inFrameNumber, const_cast <ULWord *> (pFrameBuffer), inOffsetBytes, inByteCount,
-						inNumSegments, inSegmentHostPitch, inSegmentCardPitch, true);
+	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, inFrameNumber, const_cast<ULWord*>(pFrameBuffer),
+						inOffsetBytes, inTotalByteCount, inNumSegments, inSegmentHostPitch, inSegmentCardPitch, true);
 }
 
 
-bool CNTV2Card::DmaP2PTargetFrame(NTV2Channel channel,
-								  ULWord frameNumber,
-								  ULWord frameOffset,
-								  PCHANNEL_P2P_STRUCT pP2PData)
+bool CNTV2Card::DmaP2PTargetFrame (NTV2Channel channel, ULWord frameNumber, ULWord frameOffset, PCHANNEL_P2P_STRUCT pP2PData)
 {
-	return DmaTransfer (NTV2_PIO,
-					   channel,
-					   true,
-					   frameNumber,
-					   frameOffset,
-					   0, 0, 0, 0,
-					   pP2PData);
+	return DmaTransfer (NTV2_PIO, channel, true, frameNumber, frameOffset,  0, 0, 0, 0,  pP2PData);
 }
 
 
-bool CNTV2Card::DmaP2PTransferFrame(NTV2DMAEngine DMAEngine,
+bool CNTV2Card::DmaP2PTransferFrame (NTV2DMAEngine DMAEngine,
 									ULWord frameNumber,
 									ULWord frameOffset,
 									ULWord transferSize,
@@ -129,16 +121,8 @@ bool CNTV2Card::DmaP2PTransferFrame(NTV2DMAEngine DMAEngine,
 									ULWord segmentCardPitch,
 									PCHANNEL_P2P_STRUCT pP2PData)
 {
-	return DmaTransfer(DMAEngine,
-					   NTV2_CHANNEL1,
-					   false,
-					   frameNumber,
-					   frameOffset,
-					   transferSize,
-					   numSegments,
-					   segmentTargetPitch,
-					   segmentCardPitch,
-					   pP2PData);
+	return DmaTransfer (DMAEngine, NTV2_CHANNEL1, false, frameNumber, frameOffset, transferSize, numSegments,
+					   segmentTargetPitch, segmentCardPitch, pP2PData);
 }
 
 

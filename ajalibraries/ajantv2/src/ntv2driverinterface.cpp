@@ -196,26 +196,64 @@ bool CNTV2DriverInterface::ReadRegister (const ULWord inRegisterNumber, ULWord &
 	return false;
 }
 
+bool CNTV2DriverInterface::ReadRegisters (NTV2RegisterReads & inOutValues)
+{
+	if (!IsOpen())
+		return false;		//	Device not open!
+	if (inOutValues.empty())
+		return true;		//	Nothing to do!
+
+	NTV2GetRegisters getRegsParams (inOutValues);
+	if (NTV2Message(reinterpret_cast<NTV2_HEADER*>(&getRegsParams)))
+	{
+		if (!getRegsParams.GetRegisterValues(inOutValues))
+			return false;
+	}
+	else	//	Non-atomic user-space workaround until GETREGS implemented in driver...
+		for (NTV2RegisterReadsIter iter(inOutValues.begin());  iter != inOutValues.end();  ++iter)
+			if (iter->registerNumber != kRegXenaxFlashDOUT)	//	Prevent firmware erase/program/verify failures
+				if (!ReadRegister (iter->registerNumber, iter->registerValue))
+					return false;
+	return true;
+}
 
 // Common remote card read multiple registers.  Subclasses have overloaded function
-// that does platform-specific read of multiple register on local card.
-bool CNTV2DriverInterface::ReadRegisterMulti (ULWord numRegs, ULWord *whichRegisterFailed, NTV2ReadWriteRegisterSingle aRegs[])
+bool CNTV2DriverInterface::ReadRegisterMulti (const ULWord inNumRegs, ULWord * pOutWhichRegFailed, NTV2RegInfo pOutRegInfos[])
 {
+	if (!pOutWhichRegFailed)
+		return false;	//	NULL pointer
+	*pOutWhichRegFailed = 0xFFFFFFFF;
+	if (!inNumRegs)
+		return false;	//	numRegs is zero
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
-		return whichRegisterFailed ? !_pRPCAPI->NTV2ReadRegisterMultiRemote(numRegs, *whichRegisterFailed, aRegs) : false;
+		return !_pRPCAPI->NTV2ReadRegisterMultiRemote(inNumRegs, *pOutWhichRegFailed, pOutRegInfos);
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 
-	// TODO: Make platform specific versions that pass the whole shebang
-	// down to the drivers which fills in the desired values in a single
-	// context switch OR just get them from register set mapped into userspace
-	for (ULWord i(0);  i < numRegs;  i++)
-		if (!ReadRegister (aRegs[i].registerNumber, aRegs[i].registerValue, aRegs[i].registerMask, aRegs[i].registerShift))
+#if defined(READREGMULTICHANGE)
+	for (ULWord ndx(0);  ndx < inNumRegs;  ndx++)
+	{
+		NTV2RegInfo & regInfo(pOutRegInfos[ndx]);
+		if (!ReadRegister (regInfo.registerNumber, regInfo.registerValue, regInfo.registerMask, regInfo.registerShift))
 		{
-			*whichRegisterFailed = aRegs[i].registerNumber;
+			*pOutWhichRegFailed = regInfo.registerNumber;
 			return false;
 		}
+	}
 	return true;
+#else
+	//	New in SDK 16.0:  Use ReadRegs NTV2Message
+	NTV2RegReads regReads, result;
+	regReads.reserve(inNumRegs);  result.reserve(inNumRegs);
+	for (size_t ndx(0);  ndx < size_t(inNumRegs);  ndx++)
+		regReads.push_back(pOutRegInfos[ndx]);
+	result = regReads;
+	bool retVal (ReadRegisters(result));
+	NTV2_ASSERT(result.size() <= regReads.size());
+	if (result.size() < regReads.size())
+		*pOutWhichRegFailed = result.empty() ? regReads.front().registerNumber : result.back().registerNumber;
+	return retVal;
+#endif
 }
 
 bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
@@ -223,50 +261,51 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 										const ULWord		inFrameNumber,
 										ULWord *			pFrameBuffer,
 										const ULWord		inCardOffsetBytes,
-										const ULWord		inByteCount,
+										const ULWord		inTotalByteCount,
 										const bool			inSynchronous)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(IsRemote());
-	return !_pRPCAPI->NTV2DMATransferRemote(inDMAEngine, inIsRead, inFrameNumber, pFrameBuffer, inCardOffsetBytes, inByteCount,
-											0/*numSegments*/,  0/*segHostPitch*/,  0/*segCardPitch*/, inSynchronous);
+	return !_pRPCAPI->NTV2DMATransferRemote(inDMAEngine, inIsRead, inFrameNumber, pFrameBuffer, inCardOffsetBytes,
+											inTotalByteCount, 0/*numSegs*/,  0/*hostPitch*/,  0/*cardPitch*/, inSynchronous);
 #else
 	(void) inDMAEngine;
 	(void) inIsRead;
 	(void) inFrameNumber;
 	(void) pFrameBuffer;
 	(void) inCardOffsetBytes;
-	(void) inByteCount;
+	(void) inTotalByteCount;
 	(void) inSynchronous;
 	return false;
 #endif
 }
 
-bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine inDMAEngine,
-									const bool inIsRead,
-									const ULWord inFrameNumber,
-									ULWord * pFrameBuffer,
-									const ULWord inCardOffsetBytes,
-									const ULWord inByteCount,
-									const ULWord inNumSegments,
-									const ULWord inSegmentHostPitch,
-									const ULWord inSegmentCardPitch,
-									const bool inSynchronous)
+bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
+										const bool			inIsRead,
+										const ULWord		inFrameNumber,
+										ULWord *			pFrameBuffer,
+										const ULWord		inCardOffsetBytes,
+										const ULWord		inTotalByteCount,
+										const ULWord		inNumSegments,
+										const ULWord		inHostPitchPerSeg,
+										const ULWord		inCardPitchPerSeg,
+										const bool			inSynchronous)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(IsRemote());
 	return !_pRPCAPI->NTV2DMATransferRemote(inDMAEngine, inIsRead, inFrameNumber, pFrameBuffer, inCardOffsetBytes,
-											inByteCount, inNumSegments, inSegmentHostPitch, inSegmentCardPitch, inSynchronous);
+											inTotalByteCount, inNumSegments, inHostPitchPerSeg, inCardPitchPerSeg,
+											inSynchronous);
 #else
 	(void) inDMAEngine;
 	(void) inIsRead;
 	(void) inFrameNumber;
 	(void) pFrameBuffer;
 	(void) inCardOffsetBytes;
-	(void) inByteCount;
+	(void) inTotalByteCount;
 	(void) inNumSegments;
-	(void) inSegmentHostPitch;
-	(void) inSegmentCardPitch;
+	(void) inHostPitchPerSeg;
+	(void) inCardPitchPerSeg;
 	(void) inSynchronous;
 	return false;
 #endif
@@ -523,8 +562,7 @@ bool CNTV2DriverInterface::GetPackageInformation(PACKAGE_INFO_STRUCT & packageIn
             ReadRegister(kRegXenaxFlashDOUT, bitFilePtr[count]);
         }
 
-        packInfo = (char*)bitFilePtr;
-
+        packInfo = reinterpret_cast<char*>(bitFilePtr);
 		delete [] bitFilePtr;
     }
 
@@ -609,45 +647,39 @@ void CNTV2DriverInterface::InitMemberVariablesOnOpen (NTV2FrameGeometry frameGeo
 	if(::NTV2DeviceCanDo425Mux(_boardID))
 		ReadRegister(kRegGlobalControl2, returnVal2, kRegMask425FB12, kRegShift425FB12);
 
-    _pFrameBaseAddress = 0;
+    _pFrameBaseAddress = AJA_NULL;
 	//	for old KSD and KHD boards
-	_pCh1FrameBaseAddress = 0;			//	DEPRECATE!
-	_pCh2FrameBaseAddress = 0;			//	DEPRECATE!
+	_pCh1FrameBaseAddress = AJA_NULL;			//	DEPRECATE!
+	_pCh2FrameBaseAddress = AJA_NULL;			//	DEPRECATE!
 
-    _pRegisterBaseAddress = 0;
+    _pRegisterBaseAddress = AJA_NULL;
 	_pRegisterBaseAddressLength = 0;
 
-	_pFS1FPGARegisterBaseAddress = 0;	//	DEPRECATE!
-	_pXena2FlashBaseAddress  = 0;
+	_pFS1FPGARegisterBaseAddress = AJA_NULL;	//	DEPRECATE!
+	_pXena2FlashBaseAddress  = AJA_NULL;
 
 }	//	InitMemberVariablesOnOpen
 
 
 bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 {
-	ULWord baseAddress = 0;
-	const ULWord dwordSizeCount = 256/4;
+	ULWord baseAddress(0);
+	static const ULWord dwordSizeCount(256/4);
 
-	if(!IsDeviceReady(false))
+	if (!IsDeviceReady(false))
+		return false;	// cannot read flash
+
+	if (::NTV2DeviceHasSPIv4(_boardID))
 	{
-		// cannot read flash
-		return false;
+		uint32_t val;
+		ReadRegister((0x100000 + 0x08) / 4, val);
+		if (val != 0x01)
+			return false;	// cannot read flash
 	}
-
-	if (NTV2DeviceHasSPIv4(_boardID))
-    {
-        uint32_t val;
-        ReadRegister((0x100000 + 0x08) / 4, val);
-        if (val != 0x01)
-        {
-            // cannot read flash
-            return false;
-        }
-    }
 
     if (::NTV2DeviceHasSPIv3(_boardID) || ::NTV2DeviceHasSPIv4(_boardID) || ::NTV2DeviceHasSPIv5(_boardID))
 	{
-		WriteRegister(kRegXenaxFlashAddress, (ULWord)0);
+		WriteRegister(kRegXenaxFlashAddress, 0ULL);
 		WriteRegister(kRegXenaxFlashControlStatus, 0x17);
 		bool busy = true;
 		ULWord timeoutCount = 1000;
@@ -662,14 +694,14 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 			}
 			else
 				busy = false;
-		} while (busy == true && timeoutCount > 0);
-		if (timeoutCount == 0)
+		} while (busy  &&  timeoutCount);
+		if (!timeoutCount)
 			return false;
 	}
 
-	ULWord* bitFilePtr =  new ULWord[dwordSizeCount];
+	ULWord* bitFilePtr (new ULWord[dwordSizeCount]);
 
-	for ( ULWord count = 0; count < dwordSizeCount; count++, baseAddress += 4 )
+	for (ULWord count(0);  count < dwordSizeCount;  count++, baseAddress += 4)
 	{
 		WriteRegister(kRegXenaxFlashAddress, baseAddress);
 		WriteRegister(kRegXenaxFlashControlStatus, 0x0B);
@@ -679,15 +711,15 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 		{
 			ULWord regValue;
 			ReadRegister(kRegXenaxFlashControlStatus, regValue);
-			if ( regValue & BIT(8))
+			if (regValue & BIT(8))
 			{
 				busy = true;
 				timeoutCount--;
 			}
 			else
 				busy = false;
-		} while(busy == true && timeoutCount > 0);
-		if (timeoutCount == 0)
+		} while (busy  &&  timeoutCount);
+		if (!timeoutCount)
 		{
 			delete [] bitFilePtr;
 			return false;
@@ -696,79 +728,65 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 	}
 
 	CNTV2Bitfile fileInfo;
-	std::string headerError = fileInfo.ParseHeaderFromBuffer((uint8_t*)bitFilePtr);
+	std::string headerError (fileInfo.ParseHeaderFromBuffer(reinterpret_cast<uint8_t*>(bitFilePtr)));
 	if (headerError.size() == 0)
 	{
-		strncpy(bitFileInfo.dateStr, fileInfo.GetDate().c_str(), NTV2_BITFILE_DATETIME_STRINGLENGTH);
-		strncpy(bitFileInfo.timeStr, fileInfo.GetTime().c_str(), NTV2_BITFILE_DATETIME_STRINGLENGTH);
-		strncpy(bitFileInfo.designNameStr, fileInfo.GetDesignName().c_str(), NTV2_BITFILE_DESIGNNAME_STRINGLENGTH);
-		strncpy(bitFileInfo.partNameStr, fileInfo.GetPartName().c_str(), NTV2_BITFILE_PARTNAME_STRINGLENGTH);
-		bitFileInfo.numBytes = fileInfo.GetProgramStreamLength();
+		::strncpy(bitFileInfo.dateStr, fileInfo.GetDate().c_str(), NTV2_BITFILE_DATETIME_STRINGLENGTH);
+		::strncpy(bitFileInfo.timeStr, fileInfo.GetTime().c_str(), NTV2_BITFILE_DATETIME_STRINGLENGTH);
+		::strncpy(bitFileInfo.designNameStr, fileInfo.GetDesignName().c_str(), NTV2_BITFILE_DESIGNNAME_STRINGLENGTH);
+		::strncpy(bitFileInfo.partNameStr, fileInfo.GetPartName().c_str(), NTV2_BITFILE_PARTNAME_STRINGLENGTH);
+		bitFileInfo.numBytes = ULWord(fileInfo.GetProgramStreamLength());
 	}
 
 	delete [] bitFilePtr;
-
-	if (headerError.size() == 0)
-		return true;
-	else
-		return false;
+	return headerError.empty();
 }
 
 void CNTV2DriverInterface::BumpEventCount (const INTERRUPT_ENUMS eInterruptType)
 {
-	mEventCounts [eInterruptType] = mEventCounts [eInterruptType] + 1;
+	if (NTV2_IS_VALID_INTERRUPT_ENUM(eInterruptType))
+		mEventCounts[eInterruptType] += 1;
 
 }	//	BumpEventCount
 
-bool CNTV2DriverInterface::IsDeviceReady(bool checkValid)
+bool CNTV2DriverInterface::IsDeviceReady (const bool checkValid)
 {
-	if (IsIPDevice())
-	{
-		if(!IsMBSystemReady())
-			return false;
+	if (!IsIPDevice())
+		return true;	//	Non-IP devices always ready
 
-        if(checkValid && !IsMBSystemValid())
-			return false;
-	}
-	return true;
+	if (!IsMBSystemReady())
+		return false;
+
+	if (checkValid && !IsMBSystemValid())
+		return false;
+
+	return true;	//	Ready!
 }
 
-bool CNTV2DriverInterface::IsMBSystemValid()
+bool CNTV2DriverInterface::IsMBSystemValid (void)
 {
 	if (IsIPDevice())
 	{
         uint32_t val;
         ReadRegister(SAREK_REGS + kRegSarekIfVersion, val);
-        if (val == SAREK_IF_VERSION)
-            return true;
-        else
-            return false;
+        return val == SAREK_IF_VERSION;
 	}
 	return true;
 }
 
-bool CNTV2DriverInterface::IsMBSystemReady()
+bool CNTV2DriverInterface::IsMBSystemReady (void)
 {
-	if (IsIPDevice())
-	{
-		uint32_t val;
-		ReadRegister(SAREK_REGS + kRegSarekMBState, val);
-		if (val != 0x01)
-		{
-			//MB not ready
-			return false;
-		}
-		else
-		{
-            // Not enough to read MB State, we need to make sure MB is running
-            ReadRegister(SAREK_REGS + kRegSarekMBUptime, val);
-            if (val < 2)
-                return false;
-            else
-                return true;
-		}
-	}
-	return false;
+	if (!IsIPDevice())
+		return false;	//	No microblaze
+
+	uint32_t val;
+	ReadRegister(SAREK_REGS + kRegSarekMBState, val);
+	if (val != 0x01)
+		return false;	//	MB not ready
+
+	// Not enough to read MB State, we need to make sure MB is running
+	ReadRegister(SAREK_REGS + kRegSarekMBUptime, val);
+	return (val < 2) ? false : true;
 }
 
 #if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling

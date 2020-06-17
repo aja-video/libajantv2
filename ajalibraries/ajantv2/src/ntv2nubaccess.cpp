@@ -78,7 +78,7 @@ public:
 	AJA_VIRTUAL	int		NTV2GetDriverVersionRemote	(ULWord & outDriverVersion)		{(void) outDriverVersion;	return -1;}
 	AJA_VIRTUAL	int		NTV2DMATransferRemote		(const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
 													const ULWord inFrameNumber,			ULWord * pFrameBuffer,
-													const ULWord inCardOffsetBytes,		const ULWord inByteCount,
+													const ULWord inCardOffsetBytes,		const ULWord inTotalByteCount,
 													const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
 													const ULWord inSegmentCardPitch,	const bool inSynchronous);
 	AJA_VIRTUAL	int		NTV2MessageRemote	(NTV2_HEADER *	pInMessage);
@@ -450,6 +450,7 @@ int NTV2NubRPCAPI::NTV2Connect (const string & inHostName, const UWord inDeviceI
 			// Failed, but don't close connection, can try with another card on same connection.
 			NBWARN("OpenRemote failed, _remoteHandle came back as " << _remoteHandle);
 			_remoteHandle = LWord(INVALID_NUB_HANDLE);
+			break;
 	}
 	return retval;
 
@@ -473,51 +474,44 @@ int NTV2NubRPCAPI::NTV2Disconnect (void)
 }	//	NTV2NubRPCAPI::NTV2Disconnect
 
 
-static void deNBOifyAndCopyGetAutoCirculateData (AUTOCIRCULATE_STATUS_STRUCT * pACStatus,  NTV2GetAutoCircPayload * pGACP)
+static void deNBOifyAndCopyGetAutoCirculateData (AUTOCIRCULATE_STATUS_STRUCT & outACStatus,  NTV2GetAutoCircPayload * pGACP)
 {
 	// Some 32 bit quantities
-	pACStatus->channelSpec	= NTV2Crosspoint(ntohl(pGACP->channelSpec));
-	pACStatus->state		= NTV2AutoCirculateState(ntohl(pGACP->state));
-	pACStatus->startFrame	= LWord(ntohl(pGACP->startFrame));
-	pACStatus->endFrame		= LWord(ntohl(pGACP->endFrame));
-	pACStatus->activeFrame	= LWord(ntohl(pGACP->activeFrame));
+	outACStatus.channelSpec	= NTV2Crosspoint(ntohl(pGACP->channelSpec));
+	outACStatus.state		= NTV2AutoCirculateState(ntohl(pGACP->state));
+	outACStatus.startFrame	= LWord(ntohl(pGACP->startFrame));
+	outACStatus.endFrame	= LWord(ntohl(pGACP->endFrame));
+	outACStatus.activeFrame	= LWord(ntohl(pGACP->activeFrame));
 
 	// Note: the following four items are 64-bit quantities!
-#if defined(AJAMac)	//	'ntohll' was introduced in MacOS 10.9 (Xcode9)
-	pACStatus->rdtscStartTime			= NTV2EndianSwap64BtoH(pGACP->rdtscStartTime);
-	pACStatus->audioClockStartTime		= NTV2EndianSwap64BtoH(pGACP->audioClockStartTime);
-	pACStatus->rdtscCurrentTime			= NTV2EndianSwap64BtoH(pGACP->rdtscCurrentTime);
-	pACStatus->audioClockCurrentTime	= NTV2EndianSwap64BtoH(pGACP->audioClockCurrentTime);
-#else
-	pACStatus->rdtscStartTime			= ntohll(pGACP->rdtscStartTime);
-	pACStatus->audioClockStartTime		= ntohll(pGACP->audioClockStartTime);
-	pACStatus->rdtscCurrentTime			= ntohll(pGACP->rdtscCurrentTime);
-	pACStatus->audioClockCurrentTime	= ntohll(pGACP->audioClockCurrentTime);
-#endif
+	outACStatus.rdtscStartTime			= ntohll(pGACP->rdtscStartTime);
+	outACStatus.audioClockStartTime		= ntohll(pGACP->audioClockStartTime);
+	outACStatus.rdtscCurrentTime		= ntohll(pGACP->rdtscCurrentTime);
+	outACStatus.audioClockCurrentTime	= ntohll(pGACP->audioClockCurrentTime);
 
 	// Back to 32 bit quantities.
-	pACStatus->framesProcessed	= ntohl(pGACP->framesProcessed);
-	pACStatus->framesDropped	= ntohl(pGACP->framesDropped);
-	pACStatus->bufferLevel		= ntohl(pGACP->bufferLevel);
+	outACStatus.framesProcessed	= ntohl(pGACP->framesProcessed);
+	outACStatus.framesDropped	= ntohl(pGACP->framesDropped);
+	outACStatus.bufferLevel		= ntohl(pGACP->bufferLevel);
 
 	// These are bools, which natively on some systems (Linux) are 1 byte and others 4 (MacOSX)
 	// So the portable structures makes them all ULWords.
 #ifdef MSWindows
 #pragma warning(disable: 4800) 
 #endif	
-	pACStatus->bWithAudio			= bool(ntohl(pGACP->bWithAudio));
-	pACStatus->bWithRP188			= bool(ntohl(pGACP->bWithRP188));
-	pACStatus->bFbfChange			= bool(ntohl(pGACP->bFboChange));
-	pACStatus->bWithColorCorrection	= bool(ntohl(pGACP->bWithColorCorrection));
-	pACStatus->bWithVidProc			= bool(ntohl(pGACP->bWithVidProc));
-	pACStatus->bWithCustomAncData	= bool(ntohl(pGACP->bWithCustomAncData));
+	outACStatus.bWithAudio				= bool(ntohl(pGACP->bWithAudio));
+	outACStatus.bWithRP188				= bool(ntohl(pGACP->bWithRP188));
+	outACStatus.bFbfChange				= bool(ntohl(pGACP->bFboChange));
+	outACStatus.bWithColorCorrection	= bool(ntohl(pGACP->bWithColorCorrection));
+	outACStatus.bWithVidProc			= bool(ntohl(pGACP->bWithVidProc));
+	outACStatus.bWithCustomAncData		= bool(ntohl(pGACP->bWithCustomAncData));
 #ifdef MSWindows
 #pragma warning(default: 4800)
 #endif
 }
 
 
-static void deNBOifyAndCopyGetDriverBitFileInformation( BITFILE_INFO_STRUCT &localBitFileInfo,
+static void deNBOifyAndCopyGetDriverBitFileInformation (BITFILE_INFO_STRUCT &localBitFileInfo,
 														BITFILE_INFO_STRUCT &remoteBitFileInfo)
 {
 	localBitFileInfo.checksum = ntohl(remoteBitFileInfo.checksum);
@@ -525,10 +519,10 @@ static void deNBOifyAndCopyGetDriverBitFileInformation( BITFILE_INFO_STRUCT &loc
 	localBitFileInfo.structSize = ntohl(remoteBitFileInfo.structSize);
 
 	localBitFileInfo.numBytes = ntohl(remoteBitFileInfo.numBytes);
-	
-	memcpy(localBitFileInfo.dateStr, remoteBitFileInfo.dateStr, NTV2_BITFILE_DATETIME_STRINGLENGTH); 
-	memcpy(localBitFileInfo.timeStr, remoteBitFileInfo.timeStr, NTV2_BITFILE_DATETIME_STRINGLENGTH); 
-	memcpy(localBitFileInfo.designNameStr , remoteBitFileInfo.designNameStr, NTV2_BITFILE_DESIGNNAME_STRINGLENGTH); 
+
+	::memcpy(localBitFileInfo.dateStr, remoteBitFileInfo.dateStr, NTV2_BITFILE_DATETIME_STRINGLENGTH); 
+	::memcpy(localBitFileInfo.timeStr, remoteBitFileInfo.timeStr, NTV2_BITFILE_DATETIME_STRINGLENGTH); 
+	::memcpy(localBitFileInfo.designNameStr , remoteBitFileInfo.designNameStr, NTV2_BITFILE_DESIGNNAME_STRINGLENGTH); 
 
 	localBitFileInfo.bitFileType = ntohl(remoteBitFileInfo.bitFileType);
 	localBitFileInfo.whichFPGA = (NTV2XilinxFPGA)ntohl(remoteBitFileInfo.whichFPGA);
@@ -654,16 +648,16 @@ int NTV2NubRPCAPI::NTV2ReadRegisterRemote (const ULWord regNum, ULWord & outRegV
 							NBFAIL("'recvtimeout_sec' returned zero bytes:  remote access connection closed");
 							break;
 
-				case -1: // error occurred
-						NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
-						retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
-						break;
-			
-				case -2: // timeout occurred
-						retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-						NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
-						break;
-			
+				case -1:	// error occurred
+							NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
+							retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
+							break;
+
+				case -2:	// timeout occurred
+							retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
+							NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
+							break;
+
 				default: // got some data.  Open response packet?
 						if (deNBOifyNTV2NubPkt(pPkt, numbytes)) 
 						{
@@ -743,24 +737,23 @@ int NTV2NubRPCAPI::NTV2WriteRegisterRemote (const ULWord regNum, const ULWord re
 							NBFAIL("'recvtimeout_sec' returned zero bytes:  remote access connection closed");
 							break;
 
-				case -1: // error occurred
-						NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
-						retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
-						break;
-			
-				case -2: // timeout occurred
-						retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-						NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
-						break;
-			
+				case -1:	// error occurred
+							NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
+							retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
+							break;
+
+				case -2:	// timeout occurred
+							retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
+							NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
+							break;
+
 				default: // got some data.  Open response packet?
 						if (deNBOifyNTV2NubPkt(pPkt, numbytes)) 
 						{
 							if (isNubWriteRegisterRespPacket(pPkt)) 
 							{
 								// printf("Got a write register response packet\n");
-								NTV2ReadWriteRegisterPayload * pRWRP;
-								pRWRP = (NTV2ReadWriteRegisterPayload *)getNubPktPayload(pPkt);
+								NTV2ReadWriteRegisterPayload * pRWRP(reinterpret_cast<NTV2ReadWriteRegisterPayload*>(getNubPktPayload(pPkt)));
 								// Did card go away?
 								LWord hdl (LWord(ntohl(pRWRP->handle)));
 								// printf("hdl = %d\n", hdl);
@@ -793,9 +786,9 @@ int NTV2NubRPCAPI::NTV2WriteRegisterRemote (const ULWord regNum, const ULWord re
 							retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
 							NBFAIL("Non-nub packet on NTV2 port, socket=" << Socket());
 						}
-			}
-		}
-	}
+			}	//	switch
+		}	//	else
+	}	//	NBOify OK
 	delete pPkt;
 	return retcode;
 }	//	NTV2NubRPCAPI::NTV2WriteRegisterRemote
@@ -831,15 +824,15 @@ int NTV2NubRPCAPI::NTV2AutoCirculateRemote (AUTOCIRCULATE_DATA & autoCircData)
 							NBFAIL("'recvtimeout_sec' returned zero bytes:  remote access connection closed");
 							break;
 
-				case -1: // error occurred
-						NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
-						retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
-						break;
+				case -1:	// error occurred
+							NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
+							retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
+							break;
 			
-				case -2: // timeout occurred
-						retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-						NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
-						break;
+				case -2:	// timeout occurred
+							retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
+							NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
+							break;
 			
 				default: // got some data.  Autocirculate response packet?
 						if (deNBOifyNTV2NubPkt(pPkt, numbytes)) 
@@ -847,21 +840,20 @@ int NTV2NubRPCAPI::NTV2AutoCirculateRemote (AUTOCIRCULATE_DATA & autoCircData)
 							if (isNubGetAutoCirculateRespPacket(pPkt)) 
 							{
 								// printf("Got an autocirculate response packet\n");
-								NTV2GetAutoCircPayload * pGACP;
-								pGACP = (NTV2GetAutoCircPayload *)getNubPktPayload(pPkt);
+								NTV2GetAutoCircPayload * pGACP (reinterpret_cast<NTV2GetAutoCircPayload*>(getNubPktPayload(pPkt)));
 								// Did card go away?
 								LWord hdl (LWord(ntohl(pGACP->handle)));
 								// printf("hdl = %d\n", hdl);
-								if (hdl == (LWord)INVALID_NUB_HANDLE)
+								if (hdl == LWord(INVALID_NUB_HANDLE))
 								{
 									NBFAIL("Got invalid nub handle back");
 									retcode = NTV2_REMOTE_ACCESS_NO_CARD;
 								}
-								ULWord result = ntohl (pGACP->result);
+								ULWord result (ntohl(pGACP->result));
 								if (result)
-								{
-									// Success
-									deNBOifyAndCopyGetAutoCirculateData((AUTOCIRCULATE_STATUS_STRUCT *)autoCircData.pvVal1, pGACP);
+								{	// Success
+									AUTOCIRCULATE_STATUS_STRUCT * pStatus (reinterpret_cast<AUTOCIRCULATE_STATUS_STRUCT*>(autoCircData.pvVal1));
+									deNBOifyAndCopyGetAutoCirculateData(*pStatus, pGACP);
 									NBDBG("Success");
 								}
 								else // GetAutocirculate failed on remote side
@@ -874,14 +866,14 @@ int NTV2NubRPCAPI::NTV2AutoCirculateRemote (AUTOCIRCULATE_DATA & autoCircData)
 								// printf("Got an autocirculate response packet\n");
 								NTV2ControlAutoCircPayload * pCACP(reinterpret_cast<NTV2ControlAutoCircPayload*>(getNubPktPayload(pPkt)));
 								// Did card go away?
-								LWord hdl = ntohl(pCACP->handle);
+								LWord hdl (ntohl(pCACP->handle));
 								// printf("hdl = %d\n", hdl);
 								if (hdl == LWord(INVALID_NUB_HANDLE))
 								{
 									NBFAIL("Got invalid nub handle back");
 									retcode = NTV2_REMOTE_ACCESS_NO_CARD;
 								}
-								ULWord result = ntohl (pCACP->result);
+								ULWord result (ntohl(pCACP->result));
 								if (result)
 								{
 									// Success
@@ -1056,7 +1048,7 @@ int NTV2NubRPCAPI::NTV2DriverGetBitFileInformationRemote (BITFILE_INFO_STRUCT & 
 										printf("Got invalid nub handle back from get bitfile info.\n");
 										retcode = NTV2_REMOTE_ACCESS_NO_CARD;
 									}
-									ULWord result = ntohl (pDGBFIP->result);
+									ULWord result (ntohl(pDGBFIP->result));
 									if (result)
 									{
 										deNBOifyAndCopyGetDriverBitFileInformation(outInfo, pDGBFIP->bitFileInfo);
@@ -1120,60 +1112,59 @@ int NTV2NubRPCAPI::NTV2DriverGetBuildInformationRemote (BUILD_INFO_STRUCT & outB
 							NBFAIL("'recvtimeout_sec' returned zero bytes:  remote access connection closed");
 							break;
 
-				case -1: // error occurred
-						NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
-						retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
-						break;
+				case -1:	// error occurred
+							NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
+							retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
+							break;
 			
-				case -2: // timeout occurred
-						retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-						NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
-						break;
+				case -2:	// timeout occurred
+							retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
+							NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
+							break;
 			
-				default: // got some data.  Open response packet?
-						if (deNBOifyNTV2NubPkt(pPkt, numbytes)) 
-						{
-							if (isNubDriverGetBuildInformationRespPacket((NTV2NubPkt *)pPkt)) 
+				default:	// got some data.  Open response packet?
+							if (deNBOifyNTV2NubPkt(pPkt, numbytes)) 
 							{
-								// printf("Got a driver get build info response packet\n");
-								NTV2DriverGetBuildInformationPayload * pDGBIP;
-								pDGBIP = (NTV2DriverGetBuildInformationPayload *)getNubPktPayload(pPkt);
-								// Did card go away?
-								LWord hdl (LWord(ntohl(pDGBIP->handle)));
-								// printf("hdl = %d\n", hdl);
-								if (hdl == LWord(INVALID_NUB_HANDLE))
+								if (isNubDriverGetBuildInformationRespPacket((NTV2NubPkt *)pPkt)) 
 								{
-									printf("Got invalid nub handle back from get build info.\n");
-									retcode = NTV2_REMOTE_ACCESS_NO_CARD;
+									// printf("Got a driver get build info response packet\n");
+									NTV2DriverGetBuildInformationPayload * pDGBIP (reinterpret_cast<NTV2DriverGetBuildInformationPayload*>(getNubPktPayload(pPkt)));
+									// Did card go away?
+									LWord hdl (LWord(ntohl(pDGBIP->handle)));
+									// printf("hdl = %d\n", hdl);
+									if (hdl == LWord(INVALID_NUB_HANDLE))
+									{
+										printf("Got invalid nub handle back from get build info.\n");
+										retcode = NTV2_REMOTE_ACCESS_NO_CARD;
+									}
+									ULWord result (ntohl(pDGBIP->result));
+									if (result)
+									{
+										deNBOifyAndCopyGetDriverBuildInformation (outBuildInfo, pDGBIP->buildInfo);
+										// printf("Driver get buildinfo succeeded.\n");
+									}
+									else // failed on remote side
+									{
+										// printf("Driver get buildinfo failed on remote side.\n");
+										retcode = NTV2_REMOTE_ACCESS_DRIVER_GET_BUILD_INFO_FAILED;
+									}
 								}
-								ULWord result = ntohl (pDGBIP->result);
-								if (result)
+								else // Not a write register response packet, count it and discard it.
 								{
-									deNBOifyAndCopyGetDriverBuildInformation (outBuildInfo, pDGBIP->buildInfo);
-									// printf("Driver get buildinfo succeeded.\n");
-								}
-								else // failed on remote side
-								{
-									// printf("Driver get buildinfo failed on remote side.\n");
-									retcode = NTV2_REMOTE_ACCESS_DRIVER_GET_BUILD_INFO_FAILED;
+									static unsigned long ignoredNTV2pkts;
+									++ignoredNTV2pkts;
+									retcode = NTV2_REMOTE_ACCESS_NOT_DRIVER_GET_BUILD_INFO;
 								}
 							}
-							else // Not a write register response packet, count it and discard it.
+							else // Non ntv2 packet on our port.
 							{
-								static unsigned long ignoredNTV2pkts;
-								++ignoredNTV2pkts;
-								retcode = NTV2_REMOTE_ACCESS_NOT_DRIVER_GET_BUILD_INFO;
+								// NOTE: Defragmentation of jumbo packets would probably go here.
+								retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
+								NBFAIL("Non-nub packet on NTV2 port, socket=" << Socket());
 							}
-						}
-						else // Non ntv2 packet on our port.
-						{
-							// NOTE: Defragmentation of jumbo packets would probably go here.
-							retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
-							NBFAIL("Non-nub packet on NTV2 port, socket=" << Socket());
-						}
-			}
-		}
-	}
+			}	//	switch
+		}	//	else
+	}	//	if NBOify OK
 	delete pPkt;
 	return retcode;
 }	//	NTV2DriverGetBuildInformationRemote
@@ -1211,55 +1202,55 @@ int NTV2NubRPCAPI::NTV2DownloadTestPatternRemote	(const NTV2Channel channel, con
 							NBFAIL("'recvtimeout_sec' returned zero bytes:  remote access connection closed");
 							break;
 
-				case -1: // error occurred
-						NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
-						retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
-						break;
+				case -1:	// error occurred
+							NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
+							retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
+							break;
 			
-				case -2: // timeout occurred
-						retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-						NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
-						break;
+				case -2:	// timeout occurred
+							retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
+							NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
+							break;
 			
-				default: // got some data.  Open response packet?
-						if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
-						{
-							if (isNubDownloadTestPatternRespPacket(reinterpret_cast<NTV2NubPkt*>(pPkt))) 
+				default:	// got some data.  Open response packet?
+							if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
 							{
-								// printf("Got a download test pattern response packet\n");
-								NTV2DownloadTestPatternPayload * pDTPP(reinterpret_cast<NTV2DownloadTestPatternPayload*>(getNubPktPayload(pPkt)));
-								// Did card go away?
-								LWord hdl (LWord(ntohl(pDTPP->handle)));
-								// printf("hdl = %d\n", hdl);
-								if (hdl == LWord(INVALID_NUB_HANDLE))
+								if (isNubDownloadTestPatternRespPacket(reinterpret_cast<NTV2NubPkt*>(pPkt))) 
 								{
-									printf("Got invalid nub handle back from download test pattern.\n");
-									retcode = NTV2_REMOTE_ACCESS_NO_CARD;
+									// printf("Got a download test pattern response packet\n");
+									NTV2DownloadTestPatternPayload * pDTPP(reinterpret_cast<NTV2DownloadTestPatternPayload*>(getNubPktPayload(pPkt)));
+									// Did card go away?
+									LWord hdl (LWord(ntohl(pDTPP->handle)));
+									// printf("hdl = %d\n", hdl);
+									if (hdl == LWord(INVALID_NUB_HANDLE))
+									{
+										printf("Got invalid nub handle back from download test pattern.\n");
+										retcode = NTV2_REMOTE_ACCESS_NO_CARD;
+									}
+									ULWord result (ntohl(pDTPP->result));
+									if (result)
+									{
+										// printf("Download test pattern remote succeeded.\n");
+									}
+									else // write register failed on remote side
+									{
+										printf("Download test pattern failed on remote side.\n");
+										retcode = NTV2_REMOTE_ACCESS_DOWNLOAD_TEST_PATTERN_FAILED;
+									}
 								}
-								ULWord result (ntohl(pDTPP->result));
-								if (result)
+								else // Not a write register response packet, count it and discard it.
 								{
-									// printf("Download test pattern remote succeeded.\n");
-								}
-								else // write register failed on remote side
-								{
-									printf("Download test pattern failed on remote side.\n");
-									retcode = NTV2_REMOTE_ACCESS_DOWNLOAD_TEST_PATTERN_FAILED;
+									static unsigned long ignoredNTV2pkts;
+									++ignoredNTV2pkts;
+									retcode = NTV2_REMOTE_ACCESS_NOT_DOWNLOAD_TEST_PATTERN;
 								}
 							}
-							else // Not a write register response packet, count it and discard it.
+							else // Non ntv2 packet on our port.
 							{
-								static unsigned long ignoredNTV2pkts;
-								++ignoredNTV2pkts;
-								retcode = NTV2_REMOTE_ACCESS_NOT_DOWNLOAD_TEST_PATTERN;
+								// NOTE: Defragmentation of jumbo packets would probably go here.
+								retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
+								NBFAIL("Non-nub packet on NTV2 port, socket=" << Socket());
 							}
-						}
-						else // Non ntv2 packet on our port.
-						{
-							// NOTE: Defragmentation of jumbo packets would probably go here.
-							retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
-							NBFAIL("Non-nub packet on NTV2 port, socket=" << Socket());
-						}
 			}	//	switch
 		}	//	else
 	}	//	if NBOify OK
@@ -1310,86 +1301,86 @@ int NTV2NubRPCAPI::NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULWord & o
 							NBFAIL("'recvtimeout_sec' returned zero bytes:  remote access connection closed");
 							break;
 
-				case -1: // error occurred
-						NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
-						retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
-						break;
+				case -1:	// error occurred
+							NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
+							retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
+							break;
 			
-				case -2: // timeout occurred
-						retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-						NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
-						break;
+				case -2:	// timeout occurred
+							retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
+							NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
+							break;
 			
-				default: // got some data.  Open response packet?
-						numbytestotal += numbytes;
-						if (numbytestotal <  maxPktFetchsize)
-							goto defrag;
+				default:	// got some data.  Open response packet?
+							numbytestotal += numbytes;
+							if (numbytestotal <  maxPktFetchsize)
+								goto defrag;
 
-						if (deNBOifyNTV2NubPkt(pPkt, numbytestotal)) 
-						{
-							if (isNubReadRegisterMultiRespPacket((NTV2NubPkt *)pPkt)) 
+							if (deNBOifyNTV2NubPkt(pPkt, numbytestotal)) 
 							{
-								// printf("Got a read register multi response packet\n");
-								NTV2ReadWriteMultiRegisterPayload * pRWMRP;
-								pRWMRP = (NTV2ReadWriteMultiRegisterPayload *)getNubPktPayload(pPkt);
-								// Did card go away?
-								LWord hdl = ntohl(pRWMRP->payloadHeader.handle);
-								// printf("hdl = %d\n", hdl);
-								if (hdl == (LWord)INVALID_NUB_HANDLE)
+								if (isNubReadRegisterMultiRespPacket((NTV2NubPkt *)pPkt)) 
 								{
-									NBWARN("Received invalid nub handle from ReadRegMulti");
-									retcode = NTV2_REMOTE_ACCESS_NO_CARD;
-								}
-								ULWord result = ntohl (pRWMRP->payloadHeader.result);
-								outFailedRegNum = ntohl(pRWMRP->payloadHeader.whichRegisterFailed);
-
-								if (result)
-								{
-									NBINFO("ReadRegMulti succeeded, numRegs=" << numRegs);
-									for (ULWord i(0);  i < numRegs;  i++)
+									// printf("Got a read register multi response packet\n");
+									NTV2ReadWriteMultiRegisterPayload * pRWMRP;
+									pRWMRP = (NTV2ReadWriteMultiRegisterPayload *)getNubPktPayload(pPkt);
+									// Did card go away?
+									LWord hdl = ntohl(pRWMRP->payloadHeader.handle);
+									// printf("hdl = %d\n", hdl);
+									if (hdl == (LWord)INVALID_NUB_HANDLE)
 									{
-										outRegs[i].registerNumber = ntohl(pRWMRP->aRegs[i].registerNumber);
-										outRegs[i].registerValue = ntohl(pRWMRP->aRegs[i].registerValue);
+										NBWARN("Received invalid nub handle from ReadRegMulti");
+										retcode = NTV2_REMOTE_ACCESS_NO_CARD;
+									}
+									ULWord result = ntohl (pRWMRP->payloadHeader.result);
+									outFailedRegNum = ntohl(pRWMRP->payloadHeader.whichRegisterFailed);
+	
+									if (result)
+									{
+										NBINFO("ReadRegMulti succeeded, numRegs=" << numRegs);
+										for (ULWord i(0);  i < numRegs;  i++)
+										{
+											outRegs[i].registerNumber = ntohl(pRWMRP->aRegs[i].registerNumber);
+											outRegs[i].registerValue = ntohl(pRWMRP->aRegs[i].registerValue);
+										}
+									}
+									else // Read register failed on remote side
+									{
+										// Guard against buffer overrun from remote side
+										ULWord maxRegs (outFailedRegNum > numRegs ? numRegs : outFailedRegNum);
+										NBFAIL("ReadRegMulti failed on remote side, regNum=" << outFailedRegNum);
+										retcode = NTV2_REMOTE_ACCESS_READ_REG_MULTI_FAILED;
+										for (ULWord i(0);  i < maxRegs;  i++)
+											outRegs[i].registerValue = ntohl(pRWMRP->aRegs[i].registerValue);
 									}
 								}
-								else // Read register failed on remote side
+								else // Not a write register response packet, count it and discard it.
 								{
-									// Guard against buffer overrun from remote side
-									ULWord maxRegs (outFailedRegNum > numRegs ? numRegs : outFailedRegNum);
-									NBFAIL("ReadRegMulti failed on remote side, regNum=" << outFailedRegNum);
-									retcode = NTV2_REMOTE_ACCESS_READ_REG_MULTI_FAILED;
-									for (ULWord i(0);  i < maxRegs;  i++)
-										outRegs[i].registerValue = ntohl(pRWMRP->aRegs[i].registerValue);
+									static unsigned long ignoredNTV2pkts;
+									++ignoredNTV2pkts;
+									retcode = NTV2_REMOTE_ACCESS_NOT_READ_REG_MULTI;
+									NBWARN("Received non-ReadRegMulti response pkt, " << ignoredNTV2pkts << " ignored pkts");
 								}
 							}
-							else // Not a write register response packet, count it and discard it.
+							else // Non ntv2 packet on our port.
 							{
-								static unsigned long ignoredNTV2pkts;
-								++ignoredNTV2pkts;
-								retcode = NTV2_REMOTE_ACCESS_NOT_READ_REG_MULTI;
-								NBWARN("Received non-ReadRegMulti response pkt, " << ignoredNTV2pkts << " ignored pkts");
+								// NOTE: Defragmentation of jumbo packets would probably go here.
+								retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
+								NBFAIL("Non-nub packet on NTV2 port, socket=" << Socket());
 							}
-						}
-						else // Non ntv2 packet on our port.
-						{
-							// NOTE: Defragmentation of jumbo packets would probably go here.
-							retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
-							NBFAIL("Non-nub packet on NTV2 port, socket=" << Socket());
-						}
-			}
-		}
-	}
+			}	//	else switch
+		}	//	else
+	}	//	if NBOify OK
 	delete pPkt;
 	return retcode;
 }	//	NTV2NubRPCAPI::NTV2ReadRegisterMultiRemote
 
 int NTV2NubRPCAPI::NTV2DMATransferRemote (	const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
 											const ULWord inFrameNumber,			ULWord * pFrameBuffer,
-											const ULWord inCardOffsetBytes,		const ULWord inByteCount,
+											const ULWord inCardOffsetBytes,		const ULWord inTotalByteCount,
 											const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
 											const ULWord inSegmentCardPitch,	const bool inSynchronous)
 {	(void) inDMAEngine; (void) inIsRead;	(void) inFrameNumber; (void) pFrameBuffer; (void) inCardOffsetBytes;
-	(void) inByteCount; (void) inNumSegments; (void) inSegmentHostPitch; (void) inSegmentCardPitch; (void) inSynchronous;
+	(void) inTotalByteCount; (void) inNumSegments; (void) inSegmentHostPitch; (void) inSegmentCardPitch; (void) inSynchronous;
 	return -1;	//	TBD
 }
 
@@ -1713,7 +1704,7 @@ int NTV2FakeDevice::NTV2ReadRegisterMultiRemote (const ULWord numRegs, ULWord & 
 
 int NTV2FakeDevice::NTV2DMATransferRemote (	const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
 											const ULWord inFrameNumber,			ULWord * pFrameBuffer,
-											const ULWord inCardOffsetBytes,		const ULWord inByteCount,
+											const ULWord inCardOffsetBytes,		const ULWord inTotalByteCount,
 											const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
 											const ULWord inSegmentCardPitch,	const bool inSynchronous)
 {
@@ -1730,7 +1721,7 @@ int NTV2FakeDevice::NTV2DMATransferRemote (	const NTV2DMAEngine inDMAEngine,	con
 	{
 		NTV2SegmentedXferInfo	xferInfo;
 		xferInfo.setDestOffset(inCardOffsetBytes).setSegmentCount(inNumSegments);
-		xferInfo.setSegmentLength(inByteCount);	//	byteCount == bytesPerSegment
+		xferInfo.setSegmentLength(inTotalByteCount / inNumSegments);
 		xferInfo.setSourceOffset(0);
 		xferInfo.setSourcePitch(inSegmentHostPitch);
 		xferInfo.setDestOffset(inFrameNumber * 8ULL*1024ULL*1024ULL + inCardOffsetBytes);	//	!!! ASSUMES 8MB FRAMES!
@@ -1751,13 +1742,13 @@ int NTV2FakeDevice::NTV2DMATransferRemote (	const NTV2DMAEngine inDMAEngine,	con
 	{
 		if (inIsRead)
 		{
-			NTV2_POINTER destination(pFrameBuffer, inByteCount);
-			return destination.CopyFrom(fbMemory, inFrameNumber * 8UL*1024ULL*1024ULL,  0,  inByteCount) ? 0 : -1;
+			NTV2_POINTER destination(pFrameBuffer, inTotalByteCount);
+			return destination.CopyFrom(fbMemory, inFrameNumber * 8UL*1024ULL*1024ULL,  0,  inTotalByteCount) ? 0 : -1;
 		}
 		else
 		{
-			NTV2_POINTER source(pFrameBuffer, inByteCount);
-			return fbMemory.CopyFrom(source, inFrameNumber * 8UL*1024ULL*1024ULL,  0,  inByteCount) ? 0 : -1;
+			NTV2_POINTER source(pFrameBuffer, inTotalByteCount);
+			return fbMemory.CopyFrom(source, inFrameNumber * 8UL*1024ULL*1024ULL,  0,  inTotalByteCount) ? 0 : -1;
 		}
 	}
 }
@@ -2229,6 +2220,6 @@ void NTV2FakeDevice::InitRegs (void)
 	NTV2WriteRegisterRemote (kVRegHdrMasterLumMinCh1, 0x0000FFFF);  // Reg 10569
 	NTV2WriteRegisterRemote (kVRegHdrMaxCLLCh1, 0x0000FFFF);  // Reg 10570
 	NTV2WriteRegisterRemote (kVRegHdrMaxFALLCh1, 0x0000FFFF);  // Reg 10571
-}
+}	//	InitRegs
 
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)

@@ -1873,10 +1873,9 @@ bool CNTV2MacDriverInterface::AutoCirculate( AUTOCIRCULATE_DATA &autoCircData )
 
 bool CNTV2MacDriverInterface::NTV2Message (NTV2_HEADER * pInOutMessage)
 {
-	kern_return_t 	kernResult	(KERN_FAILURE);
-	io_connect_t	connection	(GetIOConnect ());
-
 	if (!pInOutMessage)
+		return false;
+	if (!pInOutMessage->IsValid())
 		return false;
 	if (!pInOutMessage->GetSizeInBytes())
 		return false;
@@ -1885,8 +1884,11 @@ bool CNTV2MacDriverInterface::NTV2Message (NTV2_HEADER * pInOutMessage)
 		return CNTV2DriverInterface::NTV2Message (pInOutMessage);
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 
-	uint64_t	scalarI_64 [2];
-	uint32_t	numScalarOutputs (0);
+	kern_return_t 	kernResult	(KERN_FAILURE);
+	io_connect_t	connection	(GetIOConnect ());
+	uint64_t		scalarI_64 [2];
+	uint32_t		numScalarOutputs(0);
+
 	//	The NTV2Message call passes two things to the driver:
 	scalarI_64[0] = uint64_t(pInOutMessage);			//	Pointer to the NTV2 Message/struct
 	scalarI_64[1] = pInOutMessage->GetSizeInBytes();	//	The size, in bytes, of the entire message/struct
@@ -1898,10 +1900,9 @@ bool CNTV2MacDriverInterface::NTV2Message (NTV2_HEADER * pInOutMessage)
 											   2,					//	the number of scalar input values
 											   AJA_NULL,			//	array of scalar (64-bit) output values
 											   &numScalarOutputs);	//	pointer (in: number of scalar output values capable of receiving;  out: actual number of scalar output values)
-	if (kernResult != KERN_SUCCESS && kernResult != kIOReturnOffline)
+	if (kernResult != KERN_SUCCESS  &&  kernResult != kIOReturnOffline)
 		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(connection) << endl << *pInOutMessage);
 
-	//cerr << (kernResult == KERN_SUCCESS ? "KERN_SUCCESS: " : "(Failed): ") << *pInOutMessage << endl;
 	return kernResult == KERN_SUCCESS;
 
 }	//	NTV2Message
