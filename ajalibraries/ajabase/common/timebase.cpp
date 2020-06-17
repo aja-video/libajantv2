@@ -190,6 +190,11 @@ double AJATimeBase::FramesToSeconds(int64_t frames) const
 	return (double)frames * (double)mFrameDuration / (double)mFrameTimeScale;
 }
 
+double AJATimeBase::ScaleUnitsToSeconds(int64_t scaleUnits) const
+{
+	return (double)scaleUnits / (double)mFrameTimeScale;
+}
+
 float AJATimeBase::GetFramesPerSecond(void) const
 {
 	float val = 0.f;
