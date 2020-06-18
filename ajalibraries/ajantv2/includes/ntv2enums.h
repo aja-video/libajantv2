@@ -2647,13 +2647,15 @@ typedef enum NTV2OutputCrosspointID
 	NTV2_XptCSC2KeyYUV					= 0x11,
 	NTV2_XptMixer1VidYUV				= 0x12,
 	NTV2_XptMixer1KeyYUV				= 0x13,
-	NTV2_XptWaterMarkerYUV				= 0x14,
-	NTV2_XptWaterMarkerRGB				= NTV2_XptWaterMarkerYUV | 0x80,
+	NTV2_XptMultiLinkOut1DS1			= 0x14,
+	NTV2_XptMultiLinkOut1DS2			= 0x15,
 	NTV2_XptAnalogIn					= 0x16,
 	NTV2_XptHDMIIn1						= 0x17,
 	NTV2_XptHDMIIn1RGB					= NTV2_XptHDMIIn1 | 0x80,
-	NTV2_XptWaterMarker2YUV				= 0x1A,
-	NTV2_XptWaterMarker2RGB				= NTV2_XptWaterMarker2YUV | 0x80,
+	NTV2_XptMultiLinkOut1DS3			= 0x18,
+	NTV2_XptMultiLinkOut1DS4			= 0x19,
+	NTV2_XptMultiLinkOut2DS1			= 0x1A,
+	NTV2_XptMultiLinkOut2DS2			= 0x1B,
 	NTV2_XptDuallinkOut2				= 0x1C,
 	NTV2_XptTestPatternYUV				= 0x1D,
 	NTV2_XptSDIIn1DS2					= 0x1E,
@@ -2672,6 +2674,8 @@ typedef enum NTV2OutputCrosspointID
 	NTV2_XptCSC5VidYUV					= 0x2C,
 	NTV2_XptCSC5VidRGB					= NTV2_XptCSC5VidYUV | 0x80,
 	NTV2_XptCSC5KeyYUV					= 0x2D,
+	NTV2_XptMultiLinkOut2DS3			= 0x2E,
+	NTV2_XptMultiLinkOut2DS4			= 0x2F,
 	NTV2_XptSDIIn3						= 0x30,
 	NTV2_XptSDIIn4						= 0x31,
 	NTV2_XptSDIIn3DS2					= 0x32,
@@ -2794,10 +2798,6 @@ typedef enum NTV2OutputCrosspointID
 	NTV2_XptLUT6Out						= 0xDF,
 	NTV2_XptLUT7Out						= 0xE0,
 	NTV2_XptLUT8Out						= 0xE1,
-	NTV2_XptMultiLinkOut1DS1			= 0xE2,
-	NTV2_XptMultiLinkOut1DS2			= 0xE3,
-	NTV2_XptMultiLinkOut1DS3			= 0xE4,
-	NTV2_XptMultiLinkOut1DS4			= 0xE5,
 	NTV2_XptRuntimeCalc					= 0xFF,
 	NTV2_LAST_OUTPUT_CROSSPOINT			= 0xFF,
 	NTV2_OUTPUT_CROSSPOINT_INVALID		= 0xFF
@@ -2903,10 +2903,10 @@ typedef enum NTV2InputCrosspointID
 	NTV2_XptLUT6Input				= 0x26,
 	NTV2_XptLUT7Input				= 0x27,
 	NTV2_XptLUT8Input				= 0x28,
-	NTV2_XptSDIOut1Standard			= 0x29,	//	deprecate?
-	NTV2_XptSDIOut2Standard			= 0x2A,	//	deprecate?
-	NTV2_XptSDIOut3Standard			= 0x2B,	//	deprecate?
-	NTV2_XptSDIOut4Standard			= 0x2C,	//	deprecate?
+	NTV2_XptMultiLinkOut1Input		= 0x29,
+	NTV2_XptMultiLinkOut1InputDS2	= 0x2A,
+	NTV2_XptMultiLinkOut2Input		= 0x2B,
+	NTV2_XptMultiLinkOut2InputDS2	= 0x2C,
 	NTV2_XptSDIOut1Input			= 0x2D,
 	NTV2_XptSDIOut1InputDS2			= 0x2E,
 	NTV2_XptSDIOut2Input			= 0x2F,
@@ -2981,7 +2981,7 @@ typedef enum NTV2InputCrosspointID
 	NTV2_Xpt425Mux4AInput			= 0x73,
 	NTV2_Xpt425Mux4BInput			= 0x74,
 	NTV2_XptAnalogOutInput			= 0x75,
-	NTV2_XptIICT2Input				= 0x76,	//	deprecate?
+	NTV2_Xpt3DLUT1Input				= 0x76,
 	NTV2_XptAnalogOutCompositeOut	= 0x77,	//	deprecate?
 	NTV2_XptStereoLeftInput			= 0x78,	//	deprecate?
 	NTV2_XptStereoRightInput		= 0x79,	//	deprecate?
@@ -2996,10 +2996,7 @@ typedef enum NTV2InputCrosspointID
 	NTV2_XptCSC1KeyFromInput2		= 0x82,	//	deprecate?
 	NTV2_XptFrameSync2Input			= 0x83,	//	deprecate?
 	NTV2_XptFrameSync1Input			= 0x84,	//	deprecate?
-	NTV2_XptMultiLinkOut1Input		= 0x85,
-	NTV2_Xpt3DLUT1Input				= 0x86,
-	NTV2_XptMultiLinkOut1InputDS2	= 0x87,
-	NTV2_LAST_INPUT_CROSSPOINT		= 0x87,
+	NTV2_LAST_INPUT_CROSSPOINT		= 0x84,
 	NTV2_INPUT_CROSSPOINT_INVALID	= 0xFFFFFFFF
 	#if !defined(NTV2_DEPRECATE_15_3)
 		,
@@ -3139,6 +3136,7 @@ typedef enum
 	,NTV2_WgtHDMIOut1v5
 	,NTV2_WgtMultiLinkOut1
 	,NTV2_Wgt3DLUT1
+	,NTV2_WgtMultiLinkOut2
 	,NTV2_WgtModuleTypeCount
 	,NTV2_WgtUndefined = NTV2_WgtModuleTypeCount
 	,NTV2_WIDGET_INVALID = NTV2_WgtModuleTypeCount
