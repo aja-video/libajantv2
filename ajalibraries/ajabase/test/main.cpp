@@ -230,7 +230,7 @@ TEST_SUITE("graph" * doctest::description("functions in ajabase/common/graph.h")
         CHECK(a_to_b->GetLabel() == "Edge A->B");
         CHECK(b_to_c->GetLabel() == "");
 
-        aja::Graph* g = new aja::Graph();
+        aja::Graph* g = new aja::Graph("root");
 
         // // add unique vertices to the graph
         CHECK(g->AddVertex(a) == true);
@@ -240,6 +240,7 @@ TEST_SUITE("graph" * doctest::description("functions in ajabase/common/graph.h")
         CHECK(g->AddVertex(a) == false);
 
         auto graph_viz_str = g->GraphVizString();
+        std::cout << graph_viz_str << std::endl;
         CHECK(graph_viz_str == "digraph G {\n\tA -> B;\n\tA -> C;\n\tB -> C;\n\tC -> A;\n\tA [label=\"Vertex A\"];\n\tB [label=\"Vertex B\"];\n}\n");
         delete a;
         delete b;
@@ -249,6 +250,32 @@ TEST_SUITE("graph" * doctest::description("functions in ajabase/common/graph.h")
         delete a_to_c;
         delete c_to_a;
         delete g;
+    }
+
+    TEST_CASE("Graph - Subgraphs") {
+        aja::GraphVertex* a = new aja::GraphVertex("A", "Vertex A");
+        aja::GraphVertex* b = new aja::GraphVertex("B", "Vertex B");
+        aja::GraphVertex* c = new aja::GraphVertex("C");
+
+        aja::GraphEdge* a_to_b = new aja::GraphEdge("A->B");
+        aja::GraphEdge* b_to_c = new aja::GraphEdge("B->C");
+        aja::GraphEdge* a_to_c = new aja::GraphEdge("A->C");
+        aja::GraphEdge* c_to_a = new aja::GraphEdge("C->A");
+        a_to_b->Connect(a, b);
+        b_to_c->Connect(b, c);
+        a_to_c->Connect(a, c);
+        c_to_a->Connect(c, a);
+
+        aja::Graph* g0 = new aja::Graph("G0", "Root Graph");
+        aja::Graph* g1 = new aja::Graph("G1", "Graph 1");
+        aja::Graph* g2 = new aja::Graph("G2", "Graph 2");
+        g1->AddVertex(a);
+        g1->AddVertex(b);
+        g2->AddVertex(c);
+        g0->AddSubGraph(g1);
+        g0->AddSubGraph(g2);
+        std::string gv_str = g0->GraphVizString();
+        CHECK(gv_str == "digraph G {\n\tsubgraph cluster_0 {\n\t\tlabel=\"Graph 1\";\n\t\tA [label=\"Vertex A\"];\n\t\tB [label=\"Vertex B\"];\n\t\tA -> B;\n\t}\n\tsubgraph cluster_1 {\n\t\tlabel=\"Graph 2\";\n\t\tC;\n\t}\n\tA -> C;\n\tB -> C;\n\tC -> A;\n}\n");
     }
 
     TEST_CASE("GraphDataVertex - Vertex that accepts a data payload") {
@@ -264,7 +291,7 @@ TEST_SUITE("graph" * doctest::description("functions in ajabase/common/graph.h")
 
         auto edge = new aja::GraphEdge("a_to_b");
         edge->Connect(a, b);
-        auto g = new aja::Graph();
+        auto g = new aja::Graph("root");
         g->AddVertex(a);
         g->AddVertex(b);
         auto graph_viz_str = g->GraphVizString();

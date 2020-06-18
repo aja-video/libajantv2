@@ -6,12 +6,23 @@
 
 #include "graph.h"
 
+#include "ajabase/common/common.h"
 #include "ajantv2/includes/ajatypes.h"
 
 #include <iostream>
 #include <sstream>
 
 namespace aja {
+
+bool GraphElement::operator==(GraphElement* rhs) const {
+    return Equals(rhs);
+}
+
+bool GraphElement::Equals(GraphElement* rhs) const {
+    if (rhs->GetID() == GetID())
+        return true;
+    return false;
+}
 
 bool GraphElement::AddProperty(const std::string& key, const Variant& prop) {
     if (!HasProperty(key)) {
@@ -72,16 +83,6 @@ m_output_vertex(AJA_NULL)
 {
 }
 
-bool GraphEdge::operator==(GraphEdge* rhs) const {
-    return Equals(rhs);
-}
-
-bool GraphEdge::Equals(GraphEdge* rhs) const {
-    if (rhs->GetID() == GetID())
-        return true;
-    return false;
-}
-
 void GraphEdge::Connect(GraphVertex* src, GraphVertex* dst) {
     if (src)
         src->AddEdge(this, GraphEdge::Direction::Outgoing);
@@ -108,18 +109,6 @@ GraphVertex::GraphVertex(const std::string& id, const std::string& label)
 :
 GraphElement(id, label)
 {
-}
-
-bool GraphVertex::operator==(GraphVertex* rhs) const {
-    return Equals(rhs);
-}
-
-bool GraphVertex::Equals(GraphVertex* rhs) const {
-    if (rhs) {
-        if (rhs->GetID() == GetID())
-            return true;
-    }
-    return false;
 }
 
 void GraphVertex::AddEdge(GraphEdge* edge, GraphEdge::Direction direction) {
@@ -164,6 +153,18 @@ void GraphVertex::RemoveEdge(GraphEdge* edge, GraphEdge::Direction direction) {
 //
 // Graph
 //
+Graph::Graph(const std::string& id)
+:
+GraphElement(id)
+{
+}
+
+Graph::Graph(const std::string& id, const std::string& label)
+:
+GraphElement(id, label)
+{
+}
+
 bool Graph::AddVertex(GraphVertex* vertex) {
     bool exists = false;
     std::list<GraphVertex*>::iterator iter = m_vertices.begin();
@@ -175,6 +176,7 @@ bool Graph::AddVertex(GraphVertex* vertex) {
     }
 
     if (!exists) {
+        vertex->SetOwner(this);
         m_vertices.push_back(vertex);
         return true;
     }
@@ -187,6 +189,7 @@ bool Graph::RemoveVertex(GraphVertex* vertex) {
     std::list<GraphVertex*>::iterator iter = m_vertices.begin();
     for (iter; iter != m_vertices.end(); iter++) {
         if (vertex->Equals(*iter)) {
+            vertex->SetOwner(nullptr);
             m_vertices.remove(*iter);
             removed = true;
             break;
@@ -196,12 +199,79 @@ bool Graph::RemoveVertex(GraphVertex* vertex) {
     return removed;
 }
 
+bool Graph::AddSubGraph(Graph* sub_graph) {
+    //TODO(paulh): check if sub-graph exists first before adding
+    m_sub_graphs.push_back(sub_graph);
+    return true;
+}
+
 std::string Graph::GraphVizString() {
     std::ostringstream dotfile;
     std::ostringstream vert_attr_str;
 
     dotfile << "digraph G {" << std::endl;
+    
+    std::vector<GraphEdge*> cached_edges = {};
 
+    // Render subgraph cluster defs
+    uint32_t cluster_num = 0;
+    for (const auto& sg : m_sub_graphs) {
+        dotfile << "\tsubgraph cluster_" << aja::to_string(cluster_num) << " {" << std::endl;
+        // Render subgraph label
+        if (sg->GetLabel().empty())
+            dotfile << "\t\tlabel=\"" << sg->GetID() << "\";" << std::endl;
+        else
+            dotfile << "\t\tlabel=\"" << sg->GetLabel() << "\";" << std::endl;
+
+        // Render vertex declarations for this subgraph
+        for (const auto& v : sg->Vertices()) {
+            auto vertex_id = v->GetID();
+            dotfile << "\t\t" << vertex_id;
+
+            auto vertex_label = v->GetLabel();
+            if (!vertex_label.empty())
+                dotfile << " [label=\"" << vertex_label << "\"]";
+            dotfile << ";" << std::endl;
+        }
+
+        // Render vertex connections owned by this subgraph
+        for (const auto& v : sg->Vertices()) {
+            for (auto e : v->OutputEdges()) {
+                if (e && e->OutputVertex()) {                    
+                    if (e->OutputVertex()->Owner() == sg) {
+                        const auto& in_vert_id = e->InputVertex()->GetID();
+                        const auto& out_vert_id = e->OutputVertex()->GetID();
+                        dotfile << "\t\t" << in_vert_id << " -> " << out_vert_id << ";" << std::endl;
+                        cached_edges.push_back(e);
+                    }
+                }
+            }
+        }
+
+        dotfile << "\t}" << std::endl;
+        cluster_num++;
+    }
+
+    // render sub-graph vertex edge connections
+    for (const auto& sg : m_sub_graphs) {
+        for (const auto& v : sg->Vertices()) {
+            auto vertex_id = v->GetID();
+            auto vertex_label = v->GetLabel();
+
+            for (auto e : v->OutputEdges()) {
+                if (e) {
+                    // Ignore rendering connections that were rendered in sub-graphs
+                    if (std::find(cached_edges.begin(), cached_edges.end(), e) != cached_edges.end())
+                        continue;
+                    const auto& in_vert_id = e->InputVertex()->GetID();
+                    const auto& out_vert_id = e->OutputVertex()->GetID();
+                    dotfile << "\t" << in_vert_id << " -> " << out_vert_id << ";" << std::endl;
+                }
+            }
+        }
+    }
+
+    // Render any non-subgraph vertices
     for (const auto& v : m_vertices) {
         auto vertex_id = v->GetID();
         auto vertex_label = v->GetLabel();
@@ -220,6 +290,7 @@ std::string Graph::GraphVizString() {
             }
         }
     }
+
     dotfile << vert_attr_str.str();
     dotfile << "}" << std::endl;
 

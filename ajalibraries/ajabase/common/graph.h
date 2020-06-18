@@ -19,6 +19,7 @@ using VariantMap = std::map<std::string, aja::Variant>;
 
 class GraphVertex;
 class GraphEdge;
+class Graph;
 
 using GraphEdgeList = std::list<GraphEdge*>;
 using GraphVertexList = std::list<GraphVertex*>;
@@ -35,9 +36,14 @@ public:
         : m_id(id), m_label(label) {}
     virtual ~GraphElement() {}
 
+    virtual bool operator==(GraphElement* rhs) const;
+    virtual bool Equals(GraphElement* rhs) const;
+
     virtual std::string GetID() const { return m_id; }
     virtual std::string GetLabel() const { return m_label; }
     virtual void SetLabel(const std::string& label) { m_label = label; }
+    virtual void SetOwner(Graph* owner) { m_owning_graph = owner; }
+    virtual Graph* Owner() const { return m_owning_graph; }
 
     virtual bool AddProperty(const std::string& key, const Variant& prop);
     virtual bool AddProperty(const std::string& key, Variant&& prop);
@@ -49,6 +55,7 @@ private:
     std::string m_id;
     std::string m_label;
     VariantMap m_properties;
+    Graph* m_owning_graph;
 };
 
 /*
@@ -61,9 +68,6 @@ public:
     explicit GraphEdge(const std::string& id);
     explicit GraphEdge(const std::string& id, const std::string& label);
     ~GraphEdge() = default;
-
-    virtual bool operator==(GraphEdge* rhs) const;
-    virtual bool Equals(GraphEdge* rhs) const;
 
     void Connect(GraphVertex* src, GraphVertex* dst);
     void Disconnect();
@@ -85,9 +89,6 @@ class AJA_EXPORT GraphVertex : public GraphElement {
 public:
     explicit GraphVertex(const std::string& id);
     explicit GraphVertex(const std::string& id, const std::string& label);
-
-    bool operator==(GraphVertex* rhs) const;
-    bool Equals(GraphVertex* rhs) const;
 
     void AddEdge(GraphEdge* edge, GraphEdge::Direction direction);
     void RemoveEdge(GraphEdge* edge, GraphEdge::Direction direction);
@@ -137,13 +138,15 @@ protected:
 /*
  *  Graph - A container for the vertices and edges which make up a directed graph.
  */
-class AJA_EXPORT Graph {
+class AJA_EXPORT Graph : public GraphElement {
 public:
-    Graph() = default;
-    ~Graph() = default;
+    explicit Graph(const std::string& id);
+    explicit Graph(const std::string& id, const std::string& label);
 
     bool AddVertex(GraphVertex* vertex);
     bool RemoveVertex(GraphVertex* vertex);
+    bool AddSubGraph(Graph* sub_graph);
+    GraphVertexList Vertices() const { return m_vertices; }
     // GraphVertex* GetVertex();
     std::string GraphVizString();
 
