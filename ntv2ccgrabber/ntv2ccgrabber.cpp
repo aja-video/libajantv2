@@ -624,7 +624,7 @@ void NTV2CCGrabber::CaptureThreadStatic (AJAThread * pThread, void * pContext)		
 //	The capture function -- capture frames until told to quit...
 void NTV2CCGrabber::CaptureFrames (void)
 {
-	ULWord xferTally(0), noVideoTally(0), waitTally(0);
+	ULWord xferTally(0), xferFails(0), noVideoTally(0), waitTally(0);
 	CAPNOTE("Thread started");
 	NTV2_ASSERT(!mActiveSDIInputs.empty());
 
@@ -706,8 +706,8 @@ void NTV2CCGrabber::CaptureFrames (void)
 												pCaptureData->AncBuffer2(), pCaptureData->AncBuffer2Size());
 
 					//	Transfer the frame data from the device into our host AVDataBuffer...
-					mDevice.AutoCirculateTransfer (mConfig.fInputChannel, mInputXferInfo);
-					xferTally++;
+					if (mDevice.AutoCirculateTransfer (mConfig.fInputChannel, mInputXferInfo))	xferTally++;
+					else xferFails++;
 
 					if (mConfig.fBurnCaptions)
 					{
@@ -786,8 +786,8 @@ void NTV2CCGrabber::CaptureFrames (void)
 		mDevice.AutoCirculateStop(mConfig.fInputChannel);
 
 	}	//	loop til quit signaled
-	CAPNOTE("Thread completed, will exit, " << DEC(xferTally) << " frame(s) transferred, "
-			<< DEC(waitTally) << " wait(s), " << DEC(noVideoTally) << " signal change(s)");
+	CAPNOTE("Thread completed, " << DEC(xferTally) << " of " << DEC(xferTally+xferFails) << " frms xferred, "
+			<< DEC(waitTally) << " waits, " << DEC(noVideoTally) << " sig chgs");
 
 }	//	CaptureFrames
 

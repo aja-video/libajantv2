@@ -346,7 +346,7 @@ void NTV2Player::RouteOutputSignal (void)
 {
 	const NTV2Standard	outputStandard	(::GetNTV2StandardFromVideoFormat(mConfig.fVideoFormat));
 	const UWord			numSDIOutputs	(::NTV2DeviceGetNumVideoOutputs (mDeviceID));
-	bool				isRGB			(::IsRGBFormat(mConfig.fPixelFormat));
+	const bool			isRGB			(::IsRGBFormat(mConfig.fPixelFormat));
 
 	//	Since this function figures out which SDI spigots will be set up for output,
 	//	it also sets the "mTCIndexes" member, which determines which timecodes will
@@ -489,7 +489,7 @@ void NTV2Player::PlayFrames (void)
 			//	Transfer the timecode-burned frame to the device for playout...
 			xferInfo.SetVideoBuffer (pFrameData->VideoBuffer(), pFrameData->VideoBufferSize());
 			//	If also playing audio...
-			if (pFrameData->fAudioBuffer)	//	...also xfer this frame's audio samples...
+			if (pFrameData->HasAudio())	//	...also xfer this frame's audio samples...
 				xferInfo.SetAudioBuffer (pFrameData->AudioBuffer(), pFrameData->fNumAudioBytes);
 
 			//	Perform the DMA transfer to the device...

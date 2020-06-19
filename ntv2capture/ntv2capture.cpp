@@ -83,10 +83,17 @@ AJAStatus NTV2Capture::Init (void)
 	if (!::NTV2DeviceCanDoCapture(mDeviceID))
 		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' cannot capture" << endl;  return AJA_STATUS_FEATURE;}
 
+	ULWord	appSignature	(0);
+	int32_t	appPID			(0);
+	mDevice.GetStreamingApplication (&appSignature, &appPID);	//	Who currently "owns" the device?
+	mDevice.GetEveryFrameServices(mSavedTaskMode);				//	Save the current device state
 	if (!mConfig.fDoMultiFormat)
 	{
 		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
-			return AJA_STATUS_BUSY;							//	Another app is using the device
+		{
+			cerr << "## ERROR:  Unable to acquire device because another app (pid " << appPID << ") owns it" << endl;
+			return AJA_STATUS_BUSY;		//	Another app is using the device
+		}
 		mDevice.GetEveryFrameServices(mSavedTaskMode);		//	Save the current state before we change it
 	}
 	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Since this is an OEM demo, use the OEM service level
@@ -164,7 +171,7 @@ AJAStatus NTV2Capture::SetupVideo (void)
 	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
 	{
 		cerr	<< "## WARNING:  " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat)
-				<< " unsupported, using " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat)
+				<< " unsupported, using " << ::NTV2FrameBufferFormatToString(NTV2_FBF_8BIT_YCBCR)
 				<< " instead" << endl;
 		mConfig.fPixelFormat = NTV2_FBF_8BIT_YCBCR;
 	}
@@ -191,7 +198,8 @@ AJAStatus NTV2Capture::SetupAudio (void)
 	//	Have the audio system capture audio from the designated device input (i.e., ch1 uses SDIIn1, ch2 uses SDIIn2, etc.)...
 	mDevice.SetAudioSystemInputSource (mAudioSystem, NTV2_AUDIO_EMBEDDED, ::NTV2ChannelToEmbeddedAudioInput(mConfig.fInputChannel));
 
-	mDevice.SetNumberAudioChannels (::NTV2DeviceGetMaxAudioChannels (mDeviceID), mAudioSystem);
+	//	It's best to use all available audio channels...
+	mDevice.SetNumberAudioChannels(::NTV2DeviceGetMaxAudioChannels(mDeviceID), mAudioSystem);
 	mDevice.SetAudioRate (NTV2_AUDIO_48K, mAudioSystem);
 
 	//	The on-device audio buffer should be 4MB to work best across all devices & platforms...
@@ -406,7 +414,7 @@ void NTV2Capture::CaptureFrames (void)
 		if (acStatus.IsRunning()  &&  acStatus.HasAvailableInputFrame())
 		{
 			//	At this point, there's at least one fully-formed frame available in the device's
-			//	frame buffer to transfer to the host. Reserve an AVDataBuffer to "produce", and
+			//	frame buffer to transfer to the host. Reserve an NTV2FrameData to "produce", and
 			//	use it in the next transfer from the device...
 			NTV2FrameData *	pCaptureData(mAVCircularBuffer.StartProduceNextBuffer());
 
@@ -417,7 +425,7 @@ void NTV2Capture::CaptureFrames (void)
 				inputXfer.SetAncBuffers (pCaptureData->AncBuffer(), pCaptureData->AncBufferSize(),
 										 pCaptureData->AncBuffer2(), pCaptureData->AncBuffer2Size());
 
-			//	Transfer video/audio/anc from the device into our host AVDataBuffer...
+			//	Transfer video/audio/anc from the device into our host buffers...
 			mDevice.AutoCirculateTransfer (mConfig.fInputChannel, inputXfer);
 
 			//	Remember the actual amount of audio captured...
@@ -432,7 +440,7 @@ void NTV2Capture::CaptureFrames (void)
 									pCaptureData->fNumAncBytes);
 				stale.Fill(uint32_t(0));
 			}
-			if (acStatus.WithCustomAnc()  &&  pCaptureData->fAncBuffer2)
+			if (acStatus.WithCustomAnc()  &&  pCaptureData->HasAnc2())
 			{
 				pCaptureData->fNumAnc2Bytes = inputXfer.GetCapturedAncByteCount(/*isF2*/true);
 				NTV2_POINTER excess(pCaptureData->fAncBuffer2.GetHostAddress(inputXfer.GetCapturedAncByteCount(/*isF2*/true), /*fromEnd*/true),
