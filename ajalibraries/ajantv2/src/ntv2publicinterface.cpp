@@ -2242,8 +2242,8 @@ static const NTV2_RP188		INVALID_TIMECODE_VALUE;
 bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes (const NTV2TimeCodes & inValues)
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	ULWord			maxNumValues	(acOutputTimeCodes.GetByteCount () / sizeof (NTV2_RP188));
-	NTV2_RP188 *	pArray	(reinterpret_cast <NTV2_RP188 *> (acOutputTimeCodes.GetHostPointer ()));
+	ULWord			maxNumValues (acOutputTimeCodes.GetByteCount() / sizeof(NTV2_RP188));
+	NTV2_RP188 *	pArray (reinterpret_cast<NTV2_RP188*>(acOutputTimeCodes.GetHostPointer()));
 	if (!pArray)
 		return false;
 	if (maxNumValues > NTV2_MAX_NUM_TIMECODE_INDEXES)
@@ -2251,9 +2251,9 @@ bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes (const NTV2TimeCodes & inValues)
 
 	for (UWord ndx (0);  ndx < UWord(maxNumValues);  ndx++)
 	{
-		const NTV2TCIndex		tcIndex	(static_cast <const NTV2TCIndex> (ndx));
-		NTV2TimeCodesConstIter	iter	(inValues.find (tcIndex));
-		pArray [ndx] = (iter != inValues.end ())  ?  iter->second  :  INVALID_TIMECODE_VALUE;
+		const NTV2TCIndex		tcIndex	(static_cast<const NTV2TCIndex>(ndx));
+		NTV2TimeCodesConstIter	iter	(inValues.find(tcIndex));
+		pArray[ndx] = (iter != inValues.end())  ?  iter->second  :  INVALID_TIMECODE_VALUE;
 	}	//	for each possible NTV2TCSource value
 	return true;
 }
@@ -2262,16 +2262,16 @@ bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes (const NTV2TimeCodes & inValues)
 bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCode (const NTV2_RP188 & inTimeCode, const NTV2TCIndex inTCIndex)
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	ULWord			maxNumValues	(acOutputTimeCodes.GetByteCount () / sizeof (NTV2_RP188));
-	NTV2_RP188 *	pArray			(reinterpret_cast <NTV2_RP188 *> (acOutputTimeCodes.GetHostPointer ()));
+	ULWord			maxNumValues (acOutputTimeCodes.GetByteCount() / sizeof(NTV2_RP188));
+	NTV2_RP188 *	pArray (reinterpret_cast<NTV2_RP188*>(acOutputTimeCodes.GetHostPointer()));
 	if (!pArray)
 		return false;
 	if (maxNumValues > NTV2_MAX_NUM_TIMECODE_INDEXES)
 		maxNumValues = NTV2_MAX_NUM_TIMECODE_INDEXES;
-	if (!NTV2_IS_VALID_TIMECODE_INDEX (inTCIndex))
+	if (!NTV2_IS_VALID_TIMECODE_INDEX(inTCIndex))
 		return false;
 
-	pArray [inTCIndex] = inTimeCode;
+	pArray[inTCIndex] = inTimeCode;
 	return true;
 }
 
