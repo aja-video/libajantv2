@@ -151,7 +151,7 @@ public:
     std::string GraphVizString();
 
 private:
-    std::vector<Graph*> m_sub_graphs;
+    std::list<Graph*> m_sub_graphs;
     GraphVertexList m_vertices;
 };
 

@@ -200,11 +200,23 @@ bool Graph::RemoveVertex(GraphVertex* vertex) {
 }
 
 bool Graph::AddSubGraph(Graph* sub_graph) {
-    //TODO(paulh): check if sub-graph exists first before adding
-    m_sub_graphs.push_back(sub_graph);
-    return true;
+    bool exists = false;
+    std::list<Graph*>::iterator iter = m_sub_graphs.begin();
+    for (iter; iter != m_sub_graphs.end(); iter++) {
+        if (sub_graph->Equals(*iter)) {
+            exists = true;
+            break;
+        }
+    }
+    if (!exists) {
+        m_sub_graphs.push_back(sub_graph);
+        return true;
+    }
+
+    return false;
 }
 
+// This is just a super minimal function to render GraphViz w/ subgraphs
 std::string Graph::GraphVizString() {
     std::ostringstream dotfile;
     std::ostringstream vert_attr_str;
