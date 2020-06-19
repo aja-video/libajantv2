@@ -1104,18 +1104,20 @@ NTV2_TRAILER::NTV2_TRAILER ()
 }
 
 
+static const string sSegXferUnits[] = {"", " U8", " U16", "", " U32", "", "", "", " U64", ""};
+
 ostream & NTV2SegmentedXferInfo::Print (ostream & inStrm, const bool inDumpSegments) const
 {
 	if (!isValid())
 		return inStrm << "(invalid)";
 	if (inDumpSegments)
 	{
+		//	TBD
 	}
 	else
 	{
-		static const string sUnits[] = {"", " U8", " U16", "", " U32", "", "", "", " U64", ""};
 		inStrm	<< DEC(getSegmentCount()) << " x " << DEC(getSegmentLength())
-				<< sUnits[getElementLength()] << " segs";
+				<< sSegXferUnits[getElementLength()] << " segs";
 		if (getSourceOffset())
 			inStrm	<< " srcOff=" << DEC(getSourceOffset());
 		inStrm << " srcSpan=" << DEC(getSourcePitch()) << (isSourceBottomUp()?" VF":"");
@@ -1125,6 +1127,36 @@ ostream & NTV2SegmentedXferInfo::Print (ostream & inStrm, const bool inDumpSegme
 				<< " totElm=" << DEC(getTotalElements()) << " totByt=" << DEC(getTotalBytes());
 	}
 	return inStrm;
+}
+
+string NTV2SegmentedXferInfo::getSourceCode (const bool inInclDecl) const
+{
+	static string var("segInfo");
+	ostringstream oss;
+	string units("\t// bytes");
+	if (!isValid())
+		return "";
+	if (inInclDecl)
+		oss << "NTV2SegmentedXferInfo " << var << ";" << endl;
+	if (getElementLength() > 1)
+	{
+		units = "\t// " + sSegXferUnits[getElementLength()] + "s";
+		oss << var << ".setElementLength(" << getElementLength() << ");" << endl;
+	}
+	oss << var << ".setSegmentCount(" << DEC(getSegmentCount()) << ");" << endl;
+	oss << var << ".setSegmentLength(" << DEC(getSegmentLength()) << ");" << units << endl;
+	if (getSourceOffset())
+		oss << var << ".setSourceOffset(" << DEC(getSourceOffset()) << ");" << units << endl;
+	oss << var << ".setSourcePitch(" << DEC(getSourcePitch()) << ");" << units << endl;
+	if (isSourceBottomUp())
+		oss << var << ".setSourceDirection(false);" << endl;
+	if (getDestOffset())
+		oss << var << ".setDestOffset(" << DEC(getDestOffset()) << ");" << units << endl;
+	if (getDestPitch())
+		oss << var << ".setDestPitch(" << DEC(getDestPitch()) << ");" << units << endl;
+	if (isDestBottomUp())
+		oss << var << ".setDestDirection(false);" << endl;
+	return oss.str();
 }
 
 NTV2SegmentedXferInfo & NTV2SegmentedXferInfo::swapSourceAndDestination (void)
