@@ -38,12 +38,15 @@ class NTV2FieldBurn
 			@note	I'm not completely initialized and ready for use until after my Init method has been called.
 			@param[in]	inDeviceSpecifier	Specifies the AJA device to use. Defaults to "0", the first device found.
 			@param[in]	inWithAudio			If true (the default), include audio in the output signal;  otherwise, omit it.
+			@param[in]	inFieldMode			If true (the default), use AutoCirculate's "Field Mode" (introduced in SDK 15.1);
+											otherwise use "Frame Mode".
 			@param[in]	inPixelFormat		Specifies the pixel format to use for the device's frame buffers. Defaults to 8-bit YUV.
 			@param[in]	inInputSource		Specifies which input to capture from. Defaults to SDI1.
 			@param[in]	inDoMultiFormat		If true, use multi-format mode; otherwise use uniformat mode. Defaults to false (uniformat mode).
 		**/
 						NTV2FieldBurn (const std::string &			inDeviceSpecifier	= "0",
 										const bool					inWithAudio			= true,
+										const bool					inFieldMode			= true,
 										const NTV2FrameBufferFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
 										const NTV2InputSource		inInputSource		= NTV2_INPUTSOURCE_SDI1,
 										const bool					inDoMultiFormat		= false);
@@ -67,14 +70,14 @@ class NTV2FieldBurn
 
 		/**
 			@brief	Provides status information about my input (capture) and output (playout) processes.
-			@param[out]	outFramesProcessed		Receives the number of frames successfully processed.
-			@param[out]	outCaptureFramesDropped	Receives the number of dropped capture frames.
-			@param[out]	outPlayoutFramesDropped	Receives the number of dropped playout frames.
-			@param[out]	outCaptureBufferLevel	Receives the capture driver buffer level.
-			@param[out]	outPlayoutBufferLevel	Receives the playout driver buffer level.
+			@param[out]	outNumProcessed		Receives the number of fields/frames successfully processed.
+			@param[out]	outCaptureDrops		Receives the number of dropped capture fields/frames.
+			@param[out]	outPlayoutDrops		Receives the number of dropped playout fields/frames.
+			@param[out]	outCaptureLevel		Receives the capture driver buffer level.
+			@param[out]	outPlayoutLevel		Receives the playout driver buffer level.
 		**/
-		virtual void			GetStatus (ULWord & outFramesProcessed, ULWord & outCaptureFramesDropped, ULWord & outPlayoutFramesDropped,
-											ULWord & outCaptureBufferLevel, ULWord & outPlayoutBufferLevel);
+		virtual void			GetStatus (ULWord & outNumProcessed, ULWord & outCaptureDrops, ULWord & outPlayoutDrops,
+											ULWord & outCaptureLevel, ULWord & outPlayoutLevel);
 
 
 	//	Protected Instance Methods
@@ -151,6 +154,7 @@ class NTV2FieldBurn
 		**/
 		static void				CaptureThreadStatic (AJAThread * pThread, void * pContext);
 
+		typedef	AJACircularBuffer<NTV2FrameData*>	NTV2CircularBuffer;
 
 	//	Private Member Data
 	private:
@@ -169,13 +173,13 @@ class NTV2FieldBurn
 		NTV2EveryFrameTaskMode		mSavedTaskMode;		///< @brief	We will restore the previous state
 		NTV2VANCMode				mVancMode;			///< @brief	VANC mode
 		NTV2AudioSystem				mAudioSystem;		///< @brief	The audio system I'm using
+		const bool					mIsFieldMode;		///< @brief	True if Field Mode, false if Frame Mode
 		bool						mGlobalQuit;		///< @brief	Set "true" to gracefully stop
 		bool						mDoMultiChannel;	///< @brief	Set the board up for multi-format
 		AJATimeCodeBurn				mTCBurner;			///< @brief	My timecode burner
-		uint32_t					mVideoBufferSize;	///< @brief	My video buffer size, in bytes
-		NTV2TCIndexes				mTCOutputs;			///< @brief	My output timecode destinations
-		AVDataBuffer						mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
-		AJACircularBuffer <AVDataBuffer *>	mAVCircularBuffer;						///< @brief	My ring buffer
+		NTV2ChannelList				mTCOutputs;			///< @brief	My output timecode destinations
+		NTV2FrameDataArray			mHostBuffers;		///< @brief	My host buffers
+		NTV2CircularBuffer			mAVCircularBuffer;	///< @brief	My ring buffer object
 
 };	//	NTV2FieldBurn
 

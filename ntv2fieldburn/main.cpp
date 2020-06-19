@@ -34,8 +34,9 @@ int main (int argc, const char ** argv)
 {
 	char *		pDeviceSpec 	(AJA_NULL);	//	Which device to use
 	char *		pPixelFormat	(AJA_NULL);	//	Pixel format spec
-	uint32_t	inputNumber		(1);		//	Number of the input to use (1-8, defaults to 1)
+	uint32_t	inputNumber		(1);		//	Which input to use (1-8, defaults to 1)
 	int			noAudio			(0);		//	Disable audio?
+	int			noFieldMode		(0);		//	Disable AutoCirculate Field Mode?
 	int			doMultiChannel	(0);		//  Set the board up for multi-channel/format
 	poptContext	optionsContext;				//	Context for parsing command line arguments
 	AJADebug::Open();
@@ -49,6 +50,7 @@ int main (int argc, const char ** argv)
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",		"index#, serial#, or model"},
 		{"input",		'i',	POPT_ARG_INT,		&inputNumber,	0,	"which SDI input to use",	"1-8"},
 		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disables audio",			AJA_NULL},
+		{"nofield",		0,		POPT_ARG_NONE,		&noFieldMode,	0,	"disables field mode",		AJA_NULL},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format",				"'?' or 'list' to list"},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"multiformat mode?",		AJA_NULL},
 		POPT_AUTOHELP
@@ -87,6 +89,7 @@ int main (int argc, const char ** argv)
 	//	Instantiate our NTV2FieldBurn object...
 	NTV2FieldBurn	burner (deviceSpec,										//	Which device?
 							(noAudio ? false : true),						//	Include audio?
+							(noFieldMode ? false : true),					//	Field mode?
 							pixelFormat,									//	Frame buffer format
 							::GetNTV2InputSourceForIndex(inputNumber - 1),	//	Which input source?
 							doMultiChannel ? true : false);					//  Set the device up for multi-channel/format?
@@ -96,6 +99,11 @@ int main (int argc, const char ** argv)
 		::signal (SIGHUP, SignalHandler);
 		::signal (SIGQUIT, SignalHandler);
 	#endif
+	const string hdg1 ("           Capture  Playout  Capture  Playout");
+	const string hdg2a("   Fields   Fields   Fields   Buffer   Buffer");
+	const string hdg2b("   Frames   Frames   Frames   Buffer   Buffer");
+	const string hdg3 ("Processed  Dropped  Dropped    Level    Level");
+	const string hdg2 (noFieldMode ? hdg2b : hdg2a);
 
 	//	Initialize the NTV2FieldBurn instance...
 	if (AJA_FAILURE(burner.Init()))
@@ -105,9 +113,7 @@ int main (int argc, const char ** argv)
 	burner.Run ();
 
 	//	Loop until someone tells us to stop...
-	cout	<< "           Capture  Playout  Capture  Playout" << endl
-			<< "   Fields   Fields   Fields   Buffer   Buffer" << endl
-			<< "Processed  Dropped  Dropped    Level    Level" << endl;
+	cout << hdg1 << endl << hdg2 << endl << hdg3 << endl;
 	do
 	{
 		ULWord	totalFrames(0),  inputDrops(0),  outputDrops(0),  inputBufferLevel(0), outputBufferLevel(0);
