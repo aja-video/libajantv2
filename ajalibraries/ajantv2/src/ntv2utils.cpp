@@ -5435,27 +5435,24 @@ ULWord	AddAudioTone (	ULWord *		pAudioBuffer,
 }	//	AddAudioTone (per-chl freq & ampl)
 
 
-ULWord	AddAudioTestPattern (ULWord*            audioBuffer,
-							 ULWord&            currentSample,
-							 ULWord             numSamples,
-							 ULWord             modulus,
-							 bool               endianConvert,
-							 ULWord   		    numChannels)
+ULWord AddAudioTestPattern (ULWord *		pAudioBuffer,
+							ULWord &		inOutCurrentSample,
+							const ULWord	inNumSamples,
+							const ULWord	inModulus,
+							const bool		inEndianConvert,
+							const ULWord	inNumChannels)
 {
 
-	for (ULWord i = 0; i <numSamples; i++)
+	for (ULWord i(0);  i < inNumSamples;  i++)
 	{
-		ULWord value = (currentSample%modulus)<<16;
-		if ( endianConvert )
+		ULWord value ((inOutCurrentSample % inModulus) << 16);
+		if (inEndianConvert)
 			value = NTV2EndianSwap32(value);
-		for (ULWord channel = 0; channel< numChannels; channel++)
-		{
-			*audioBuffer++ = value;
-		}
-		currentSample++;
+		for (ULWord channel(0);  channel < inNumChannels;  channel++)
+			*pAudioBuffer++ = value;
+		inOutCurrentSample++;
 	}
-	return numSamples*4*numChannels;
-
+	return inNumSamples * 4 * inNumChannels;
 }
 
 
@@ -7149,7 +7146,7 @@ AJAExport bool IsVideoFormatJ2KSupported (const NTV2VideoFormat format)
 #endif	//	!defined (NTV2_DEPRECATE)
 
 
-NTV2ConversionMode GetConversionMode( NTV2VideoFormat inFormat, NTV2VideoFormat outFormat)
+NTV2ConversionMode GetConversionMode (const NTV2VideoFormat inFormat, const NTV2VideoFormat outFormat)
 {
 	NTV2ConversionMode cMode = NTV2_CONVERSIONMODE_UNKNOWN;
 
@@ -7297,7 +7294,7 @@ NTV2ConversionMode GetConversionMode( NTV2VideoFormat inFormat, NTV2VideoFormat 
 	return cMode;
 }
 
-NTV2VideoFormat GetInputForConversionMode(NTV2ConversionMode conversionMode)
+NTV2VideoFormat GetInputForConversionMode (const NTV2ConversionMode conversionMode)
 {
 	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
 
@@ -7341,7 +7338,7 @@ NTV2VideoFormat GetInputForConversionMode(NTV2ConversionMode conversionMode)
 }
 
 
-NTV2VideoFormat GetOutputForConversionMode(NTV2ConversionMode conversionMode)
+NTV2VideoFormat GetOutputForConversionMode (const NTV2ConversionMode conversionMode)
 {
 	NTV2VideoFormat outputFormat = NTV2_FORMAT_UNKNOWN;
 
@@ -7637,6 +7634,7 @@ string NTV2InputCrosspointIDToString (const NTV2InputCrosspointID inValue, const
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FrameSync2", NTV2_XptFrameSync2Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FrameSync1", NTV2_XptFrameSync1Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "ML Out 1", NTV2_XptMultiLinkOut1Input);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "ML Out 1 DS2", NTV2_XptMultiLinkOut1InputDS2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "3D LUT 1", NTV2_Xpt3DLUT1Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "???", NTV2_INPUT_CROSSPOINT_INVALID);
 	}
