@@ -514,7 +514,7 @@ private:
 			if (mInputXpt2XptRegNumMaskIndexMap.find (NTV2_XptHDMIOutQ1Input) == mInputXpt2XptRegNumMaskIndexMap.end())
 				mInputXpt2XptRegNumMaskIndexMap[NTV2_XptHDMIOutQ1Input] = regNumAndNdx;
 		}
-		DefineXptReg	(kRegXptSelectGroup7,	NTV2_XptWaterMarker2Input,		NTV2_XptIICT2Input,				NTV2_XptDualLinkOut2Input,		NTV2_INPUT_CROSSPOINT_INVALID);
+		DefineXptReg	(kRegXptSelectGroup7,	NTV2_XptWaterMarker2Input,		NTV2_INPUT_CROSSPOINT_INVALID,	NTV2_XptDualLinkOut2Input,		NTV2_INPUT_CROSSPOINT_INVALID);
 		DefineXptReg	(kRegXptSelectGroup8,	NTV2_XptSDIOut3Input,			NTV2_XptSDIOut4Input,			NTV2_XptSDIOut5Input,			NTV2_INPUT_CROSSPOINT_INVALID);
 		DefineXptReg	(kRegXptSelectGroup9,	NTV2_XptMixer2FGVidInput,		NTV2_XptMixer2FGKeyInput,		NTV2_XptMixer2BGVidInput,		NTV2_XptMixer2BGKeyInput);
 		DefineXptReg	(kRegXptSelectGroup10,	NTV2_XptSDIOut1InputDS2,		NTV2_XptSDIOut2InputDS2,		NTV2_INPUT_CROSSPOINT_INVALID,	NTV2_INPUT_CROSSPOINT_INVALID);

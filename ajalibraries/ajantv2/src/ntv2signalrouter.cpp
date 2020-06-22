@@ -772,8 +772,6 @@ void RoutingExpert::InitInputXpt2WidgetIDs(void)
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer4BGVidInput,		NTV2_WgtMixer4));
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer4FGKeyInput,		NTV2_WgtMixer4));
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptMixer4FGVidInput,		NTV2_WgtMixer4));
-	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptIICT1Input,				NTV2_WgtIICT1));
-	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptIICT2Input,				NTV2_WgtIICT2));
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptStereoLeftInput,			NTV2_WgtStereoCompressor));
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptStereoRightInput,		NTV2_WgtStereoCompressor));
 	gInputXpt2WidgetIDs.insert (InputXpt2WidgetIDPair (NTV2_XptWaterMarker1Input,		NTV2_WgtWaterMarker1));
