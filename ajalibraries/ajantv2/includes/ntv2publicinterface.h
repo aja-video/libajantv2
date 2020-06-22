@@ -6045,6 +6045,7 @@ typedef enum
 				std::ostream &	Print (std::ostream & inStrm, const bool inDumpSegments = false) const;
 				ULWord			getTotalElements (void) const		{return getSegmentCount() * getSegmentLength();}
 				ULWord			getTotalBytes (void) const			{return getTotalElements() * getElementLength();}
+				std::string		getSourceCode (const bool inInclDecl = true) const;
 
 				// Changing
 				inline NTV2SegmentedXferInfo &	setSegmentCount (const ULWord inNumSegments)	{mNumSegments = inNumSegments;  return *this;}

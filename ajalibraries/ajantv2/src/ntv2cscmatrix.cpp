@@ -4,12 +4,10 @@
 	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
-
 #include "ntv2cscmatrix.h"
 #include <math.h>
-#include <assert.h>
 
-static const double kPi = 3.1415926536;
+static const double kPi(3.1415926536);
 
 
 CNTV2CSCMatrix::CNTV2CSCMatrix (const NTV2ColorSpaceMatrixType inPreset)
@@ -18,8 +16,7 @@ CNTV2CSCMatrix::CNTV2CSCMatrix (const NTV2ColorSpaceMatrixType inPreset)
 }
 
 
-void
-CNTV2CSCMatrix::InitMatrix (const NTV2ColorSpaceMatrixType inPreset)
+void CNTV2CSCMatrix::InitMatrix (const NTV2ColorSpaceMatrixType inPreset)
 {
 	switch (inPreset)
 	{
@@ -327,133 +324,77 @@ CNTV2CSCMatrix::InitMatrix (const NTV2ColorSpaceMatrixType inPreset)
 }
 
 
-double
-CNTV2CSCMatrix::GetCoefficient (const NTV2CSCCoeffIndex inCoeffIndex) const
+double CNTV2CSCMatrix::GetCoefficient (const NTV2CSCCoeffIndex inCoeffIndex) const
 {
 	switch (inCoeffIndex)
 	{
-	case NTV2CSCCoeffIndex_A0:
-		return mA0;
-	case NTV2CSCCoeffIndex_A1:
-		return mA1;
-	case NTV2CSCCoeffIndex_A2:
-		return mA2;
-	case NTV2CSCCoeffIndex_B0:
-		return mB0;
-	case NTV2CSCCoeffIndex_B1:
-		return mB1;
-	case NTV2CSCCoeffIndex_B2:
-		return mB2;
-	case NTV2CSCCoeffIndex_C0:
-		return mC0;
-	case NTV2CSCCoeffIndex_C1:
-		return mC1;
-	case NTV2CSCCoeffIndex_C2:
-		return mC2;
+		case NTV2CSCCoeffIndex_A0:	return mA0;
+		case NTV2CSCCoeffIndex_A1:	return mA1;
+		case NTV2CSCCoeffIndex_A2:	return mA2;
+		case NTV2CSCCoeffIndex_B0:	return mB0;
+		case NTV2CSCCoeffIndex_B1:	return mB1;
+		case NTV2CSCCoeffIndex_B2:	return mB2;
+		case NTV2CSCCoeffIndex_C0:	return mC0;
+		case NTV2CSCCoeffIndex_C1:	return mC1;
+		case NTV2CSCCoeffIndex_C2:	return mC2;
 	}
-
 	//	Must never get here
-	assert (false && "Unhandled coefficient index");
+	NTV2_ASSERT (false && "Unhandled coefficient index");
 	return 0.0;
 }
 
 
-void
-CNTV2CSCMatrix::SetCoefficient (const NTV2CSCCoeffIndex inCoeffIndex, const double inCoefficient)
+void CNTV2CSCMatrix::SetCoefficient (const NTV2CSCCoeffIndex inCoeffIndex, const double inCoefficient)
 {
 	switch (inCoeffIndex)
 	{
-	case NTV2CSCCoeffIndex_A0:
-		mA0 = inCoefficient;
-		break;
-	case NTV2CSCCoeffIndex_A1:
-		mA1 = inCoefficient;
-		break;
-	case NTV2CSCCoeffIndex_A2:
-		mA2 = inCoefficient;
-		break;
-	case NTV2CSCCoeffIndex_B0:
-		mB0 = inCoefficient;
-		break;
-	case NTV2CSCCoeffIndex_B1:
-		mB1 = inCoefficient;
-		break;
-	case NTV2CSCCoeffIndex_B2:
-		mB2 = inCoefficient;
-		break;
-	case NTV2CSCCoeffIndex_C0:
-		mC0 = inCoefficient;
-		break;
-	case NTV2CSCCoeffIndex_C1:
-		mC1 = inCoefficient;
-		break;
-	case NTV2CSCCoeffIndex_C2:
-		mC2 = inCoefficient;
-		break;
+		case NTV2CSCCoeffIndex_A0:	mA0 = inCoefficient;	break;
+		case NTV2CSCCoeffIndex_A1:	mA1 = inCoefficient;	break;
+		case NTV2CSCCoeffIndex_A2:	mA2 = inCoefficient;	break;
+		case NTV2CSCCoeffIndex_B0:	mB0 = inCoefficient;	break;
+		case NTV2CSCCoeffIndex_B1:	mB1 = inCoefficient;	break;
+		case NTV2CSCCoeffIndex_B2:	mB2 = inCoefficient;	break;
+		case NTV2CSCCoeffIndex_C0:	mC0 = inCoefficient;	break;
+		case NTV2CSCCoeffIndex_C1:	mC1 = inCoefficient;	break;
+		case NTV2CSCCoeffIndex_C2:	mC2 = inCoefficient;	break;
 	}
-
 	mPreset = NTV2_Custom_Matrix;
 }
 
 
-int16_t
-CNTV2CSCMatrix::GetOffset (const NTV2CSCOffsetIndex inOffsetIndex) const
+int16_t CNTV2CSCMatrix::GetOffset (const NTV2CSCOffsetIndex inOffsetIndex) const
 {
 	switch (inOffsetIndex)
 	{
-	case NTV2CSCOffsetIndex_Pre0:
-		return mPreOffset0;
-	case NTV2CSCOffsetIndex_Pre1:
-		return mPreOffset1;
-	case NTV2CSCOffsetIndex_Pre2:
-		return mPreOffset2;
-
-	case NTV2CSCOffsetIndex_PostA:
-		return mPostOffsetA;
-	case NTV2CSCOffsetIndex_PostB:
-		return mPostOffsetB;
-	case NTV2CSCOffsetIndex_PostC:
-		return mPostOffsetC;
+		case NTV2CSCOffsetIndex_Pre0:	return mPreOffset0;
+		case NTV2CSCOffsetIndex_Pre1:	return mPreOffset1;
+		case NTV2CSCOffsetIndex_Pre2:	return mPreOffset2;
+		case NTV2CSCOffsetIndex_PostA:	return mPostOffsetA;
+		case NTV2CSCOffsetIndex_PostB:	return mPostOffsetB;
+		case NTV2CSCOffsetIndex_PostC:	return mPostOffsetC;
 	}
-
 	//	Must never get here
-	assert (false && "Unhandled offset index");
+	NTV2_ASSERT(false && "Unhandled offset index");
 	return 0;
 }
 
 
-void
-CNTV2CSCMatrix::SetOffset (const NTV2CSCOffsetIndex inOffsetIndex, const int16_t inOffset)
+void CNTV2CSCMatrix::SetOffset (const NTV2CSCOffsetIndex inOffsetIndex, const int16_t inOffset)
 {
 	switch (inOffsetIndex)
 	{
-	case NTV2CSCOffsetIndex_Pre0:
-		mPreOffset0 = inOffset;
-		break;
-	case NTV2CSCOffsetIndex_Pre1:
-		mPreOffset1 = inOffset;
-		break;
-	case NTV2CSCOffsetIndex_Pre2:
-		mPreOffset2 = inOffset;
-		break;
-
-	case NTV2CSCOffsetIndex_PostA:
-		mPostOffsetA = inOffset;
-		break;
-	case NTV2CSCOffsetIndex_PostB:
-		mPostOffsetB = inOffset;
-		break;
-	case NTV2CSCOffsetIndex_PostC:
-		mPostOffsetC = inOffset;
-		break;
+		case NTV2CSCOffsetIndex_Pre0:	mPreOffset0 = inOffset;		break;
+		case NTV2CSCOffsetIndex_Pre1:	mPreOffset1 = inOffset;		break;
+		case NTV2CSCOffsetIndex_Pre2:	mPreOffset2 = inOffset;		break;
+		case NTV2CSCOffsetIndex_PostA:	mPostOffsetA = inOffset;	break;
+		case NTV2CSCOffsetIndex_PostB:	mPostOffsetB = inOffset;	break;
+		case NTV2CSCOffsetIndex_PostC:	mPostOffsetC = inOffset;	break;
 	}
-
 	mPreset = NTV2_Custom_Matrix;
 }
 
 
-void
-CNTV2CSCMatrix::PreMultiply (const CNTV2CSCMatrix & pre)
+void CNTV2CSCMatrix::PreMultiply (const CNTV2CSCMatrix & pre)
 {
 	// clone the current settings
 	CNTV2CSCMatrix current (*this);
@@ -475,8 +416,7 @@ CNTV2CSCMatrix::PreMultiply (const CNTV2CSCMatrix & pre)
 }
 
 
-void
-CNTV2CSCMatrix::PostMultiply (const CNTV2CSCMatrix & post)
+void CNTV2CSCMatrix::PostMultiply (const CNTV2CSCMatrix & post)
 {
 	// clone the current settings 
 	CNTV2CSCMatrix current (*this);
@@ -498,76 +438,62 @@ CNTV2CSCMatrix::PostMultiply (const CNTV2CSCMatrix & post)
 }
 
 
-void
-CNTV2CSCMatrix::SetGain (const double inGain0, const double inGain1, const double inGain2)
+void CNTV2CSCMatrix::SetGain (const double inGain0, const double inGain1, const double inGain2)
 {
 	mA0 = inGain0;
 	mB1 = inGain1;
 	mC2 = inGain2;
-
 	mPreset = NTV2_Custom_Matrix;
 }
 
 
-void
-CNTV2CSCMatrix::SetHueRotate (const double inDegrees)
+void CNTV2CSCMatrix::SetHueRotate (const double inDegrees)
 {
 	double rad = kPi * inDegrees / 180.0;
-
 	mB1 =  cos (rad);
 	mB2 =  sin (rad);
 	mC1 = -sin (rad);
 	mC2 =  cos (rad);
-
 	mPreset = NTV2_Custom_Matrix;
 }
 
 
-void
-CNTV2CSCMatrix::SetPreOffsets (const int16_t inOffset0, const int16_t inOffset1, const int16_t inOffset2)
+void CNTV2CSCMatrix::SetPreOffsets (const int16_t inOffset0, const int16_t inOffset1, const int16_t inOffset2)
 {
 	mPreOffset0 = inOffset0;
 	mPreOffset1 = inOffset1;
 	mPreOffset2 = inOffset2;
-
 	mPreset = NTV2_Custom_Matrix;
 }
 
 
-void
-CNTV2CSCMatrix::AddPreOffsets (const int16_t inOffset0, const int16_t inOffset1, const int16_t inOffset2)
+void CNTV2CSCMatrix::AddPreOffsets (const int16_t inOffset0, const int16_t inOffset1, const int16_t inOffset2)
 {
 	mPreOffset0 += inOffset0;
 	mPreOffset1 += inOffset1;
 	mPreOffset2 += inOffset2;
-
 	mPreset = NTV2_Custom_Matrix;
 }
 
 
-void
-CNTV2CSCMatrix::SetPostOffsets (const int16_t inOffsetA, const int16_t inOffsetB, const int16_t inOffsetC)
+void CNTV2CSCMatrix::SetPostOffsets (const int16_t inOffsetA, const int16_t inOffsetB, const int16_t inOffsetC)
 {
 	mPostOffsetA = inOffsetA;
 	mPostOffsetB = inOffsetB;
 	mPostOffsetC = inOffsetC;
-
 	mPreset = NTV2_Custom_Matrix;
 }
 
-void
-CNTV2CSCMatrix::AddPostOffsets (const int16_t inOffsetA, const int16_t inOffsetB, const int16_t inOffsetC)
+void CNTV2CSCMatrix::AddPostOffsets (const int16_t inOffsetA, const int16_t inOffsetB, const int16_t inOffsetC)
 {
 	mPostOffsetA += inOffsetA;
 	mPostOffsetB += inOffsetB;
 	mPostOffsetC += inOffsetC;
-
 	mPreset = NTV2_Custom_Matrix;
 }
 
 
-bool
-CNTV2CSCMatrix::IsUnityMatrix (void)
+bool CNTV2CSCMatrix::IsUnityMatrix (void)
 {
 	bool bResult = true;	// assume positive result: now look for a reason to negate it
 
@@ -582,13 +508,11 @@ CNTV2CSCMatrix::IsUnityMatrix (void)
 
 	// note: we're NOT looking at offsets, so this test will return true for EITHER
 	//       NTV2_Unity_Matrix or NTV2_Unity_SMPTE_Matrix
-
 	return bResult;
 }
 
 
-bool
-CNTV2CSCMatrix::operator == (const CNTV2CSCMatrix & rhs) const
+bool CNTV2CSCMatrix::operator == (const CNTV2CSCMatrix & rhs) const
 {
 	if ( (mA0 != rhs.mA0) || (mA1 != rhs.mA1) || (mA2 != rhs.mA2) )
 		return false;
@@ -609,27 +533,25 @@ CNTV2CSCMatrix::operator == (const CNTV2CSCMatrix & rhs) const
 }
 
 
-bool
-CNTV2CSCMatrix::IsEqual (const CNTV2CSCMatrix & inCSCMatrix, const double inMaxDiff)
+bool CNTV2CSCMatrix::IsEqual (const CNTV2CSCMatrix & inCSCMatrix, const double inMaxDiff)
 {
 	bool bResult = true;	// assume positive result: now look for a reason to negate it
 
-	if ( !CoeffEqual(mA0, inCSCMatrix.mA0, inMaxDiff) || !CoeffEqual(mA1, inCSCMatrix.mA1, inMaxDiff) || !CoeffEqual(mA2, inCSCMatrix.mA2, inMaxDiff) )
+	if (!CoeffEqual(mA0, inCSCMatrix.mA0, inMaxDiff) || !CoeffEqual(mA1, inCSCMatrix.mA1, inMaxDiff) || !CoeffEqual(mA2, inCSCMatrix.mA2, inMaxDiff))
 		bResult = false;
 
-	if ( !CoeffEqual(mB0, inCSCMatrix.mB0, inMaxDiff) || !CoeffEqual(mB1, inCSCMatrix.mB1, inMaxDiff) || !CoeffEqual(mB2, inCSCMatrix.mB2, inMaxDiff) )
+	if (!CoeffEqual(mB0, inCSCMatrix.mB0, inMaxDiff) || !CoeffEqual(mB1, inCSCMatrix.mB1, inMaxDiff) || !CoeffEqual(mB2, inCSCMatrix.mB2, inMaxDiff))
 		bResult = false;
 
-	if ( !CoeffEqual(mC0, inCSCMatrix.mC0, inMaxDiff) || !CoeffEqual(mC1, inCSCMatrix.mC1, inMaxDiff) || !CoeffEqual(mC2, inCSCMatrix.mC2, inMaxDiff) )
+	if (!CoeffEqual(mC0, inCSCMatrix.mC0, inMaxDiff) || !CoeffEqual(mC1, inCSCMatrix.mC1, inMaxDiff) || !CoeffEqual(mC2, inCSCMatrix.mC2, inMaxDiff))
 		bResult = false;
 
 	return bResult;
 }
 
 
-bool
-CNTV2CSCMatrix::CoeffEqual (const double inCoeff1, const double inCoeff2, const double inMaxDiff)
+bool CNTV2CSCMatrix::CoeffEqual (const double inCoeff1, const double inCoeff2, const double inMaxDiff)
 {
-	return ( fabs(inCoeff1 - inCoeff2) < inMaxDiff );
+	return ::fabs(inCoeff1 - inCoeff2) < inMaxDiff;
 }
 
