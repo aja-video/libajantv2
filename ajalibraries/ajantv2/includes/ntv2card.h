@@ -4257,6 +4257,15 @@ public:
 	AJA_VIRTUAL bool	SetSDIOutputStandard (const UWord inOutputSpigot, const NTV2Standard inValue);
 
 	/**
+		@brief		Sets the video standard for the given SDI output(s).
+		@param[in]	inSDIOutputs	Specifies the SDI output connector(s) of interest.
+									Each is a zero-based index number, where zero is "SDIOut1".
+		@param[in]	inValue			Specifies the video standard.
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool	SetSDIOutputStandard (const NTV2ChannelSet & inSDIOutputs, const NTV2Standard inValue);	//	New in SDK v16.0
+
+	/**
 		@brief	Answers with the current video standard of the given SDI output spigot.
 		@param[in]	inOutputSpigot	Specifies the SDI output spigot of interest as a zero-based index number, where zero is "SDI Out 1".
 		@param[out]	outValue		Receives the video standard.
@@ -5076,6 +5085,14 @@ public:
 		@see		ntv2signalrouting, CNTV2SignalRouter, CNTV2Card::GetRoutingForChannel, CNTV2Card::ApplySignalRoute
 	**/
 	AJA_VIRTUAL bool	GetRouting (CNTV2SignalRouter & outRouting);
+
+	/**
+		@brief		Answers with the device's current widget routing connections.
+		@return		True if successful; otherwise false.
+		@param[out]	outConnections	Receives the current routing connections.
+		@see		ntv2signalrouting
+	**/
+	AJA_VIRTUAL bool	GetConnections (NTV2XptConnections & outConnections);	//	New in SDK 16.0
 
 	/**
 		@brief		Answers with the current signal routing for the given channel.
@@ -5984,6 +6001,16 @@ public:
 	AJA_VIRTUAL bool		SetSDIOutLevelAtoLevelBConversion (const UWord inOutputSpigot, const bool inEnable);
 
 	/**
+		@brief		Enables or disables 3G level A to 3G level B conversion at the given SDI output(s).
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIOutputs	Specifies the SDI output(s) to be affected, each specified by an ::NTV2Channel,
+									a zero-based index (where 0 == SDIOut1, 1 == SDIOut2, etc.).
+		@param[in]	inEnable		If true, outgoing 3G level A signal converted to 3G level B signal at SDI output widget.
+									If false, specifies normal operation.
+	**/
+	AJA_VIRTUAL bool		SetSDIOutLevelAtoLevelBConversion (const NTV2ChannelSet & inSDIOutputs, const bool inEnable);	//	New in SDK v16.0
+
+	/**
 		@brief		Answers with the device's current 3G level A to 3G level B conversion setting for the given SDI output spigot (assuming the device can do such a conversion).
 		@return		True if successful; otherwise false.
 		@param[in]	inOutputSpigot	Specifies the SDI output widget of interest (0 == SDIOut1, 1 == SDIOut2, etc.).
@@ -5998,6 +6025,16 @@ public:
 		@param[in]	inEnable		If true, perform the conversion at the output SDI spigot;  otherwise have the SDI output spigot operate normally (no conversion).
 	**/
 	AJA_VIRTUAL bool		SetSDIOutRGBLevelAConversion (const UWord inOutputSpigot, const bool inEnable);
+
+	/**
+		@brief		Enables or disables an RGB-over-3G-level-A conversion at the given SDI output(s).
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIOutputs	Specifies the SDI output(s) to be affected, each specified by an ::NTV2Channel,
+									a zero-based index (where 0 == SDIOut1, 1 == SDIOut2, etc.).
+		@param[in]	inEnable		If true, perform the conversion at the output SDI spigot;
+									otherwise have the SDI output spigot operate normally (no conversion).
+	**/
+	AJA_VIRTUAL bool		SetSDIOutRGBLevelAConversion (const NTV2ChannelSet & inSDIOutputs, const bool inEnable);	//	New in SDK v16.0
 
 	/**
 		@brief		Answers with the device's current RGB-over-3G-level-A conversion at the given SDI output spigot (assuming the device can do such a conversion).

@@ -5435,27 +5435,24 @@ ULWord	AddAudioTone (	ULWord *		pAudioBuffer,
 }	//	AddAudioTone (per-chl freq & ampl)
 
 
-ULWord	AddAudioTestPattern (ULWord*            audioBuffer,
-							 ULWord&            currentSample,
-							 ULWord             numSamples,
-							 ULWord             modulus,
-							 bool               endianConvert,
-							 ULWord   		    numChannels)
+ULWord AddAudioTestPattern (ULWord *		pAudioBuffer,
+							ULWord &		inOutCurrentSample,
+							const ULWord	inNumSamples,
+							const ULWord	inModulus,
+							const bool		inEndianConvert,
+							const ULWord	inNumChannels)
 {
 
-	for (ULWord i = 0; i <numSamples; i++)
+	for (ULWord i(0);  i < inNumSamples;  i++)
 	{
-		ULWord value = (currentSample%modulus)<<16;
-		if ( endianConvert )
+		ULWord value ((inOutCurrentSample % inModulus) << 16);
+		if (inEndianConvert)
 			value = NTV2EndianSwap32(value);
-		for (ULWord channel = 0; channel< numChannels; channel++)
-		{
-			*audioBuffer++ = value;
-		}
-		currentSample++;
+		for (ULWord channel(0);  channel < inNumChannels;  channel++)
+			*pAudioBuffer++ = value;
+		inOutCurrentSample++;
 	}
-	return numSamples*4*numChannels;
-
+	return inNumSamples * 4 * inNumChannels;
 }
 
 
@@ -7149,7 +7146,7 @@ AJAExport bool IsVideoFormatJ2KSupported (const NTV2VideoFormat format)
 #endif	//	!defined (NTV2_DEPRECATE)
 
 
-NTV2ConversionMode GetConversionMode( NTV2VideoFormat inFormat, NTV2VideoFormat outFormat)
+NTV2ConversionMode GetConversionMode (const NTV2VideoFormat inFormat, const NTV2VideoFormat outFormat)
 {
 	NTV2ConversionMode cMode = NTV2_CONVERSIONMODE_UNKNOWN;
 
@@ -7297,7 +7294,7 @@ NTV2ConversionMode GetConversionMode( NTV2VideoFormat inFormat, NTV2VideoFormat 
 	return cMode;
 }
 
-NTV2VideoFormat GetInputForConversionMode(NTV2ConversionMode conversionMode)
+NTV2VideoFormat GetInputForConversionMode (const NTV2ConversionMode conversionMode)
 {
 	NTV2VideoFormat inputFormat = NTV2_FORMAT_UNKNOWN;
 
@@ -7341,7 +7338,7 @@ NTV2VideoFormat GetInputForConversionMode(NTV2ConversionMode conversionMode)
 }
 
 
-NTV2VideoFormat GetOutputForConversionMode(NTV2ConversionMode conversionMode)
+NTV2VideoFormat GetOutputForConversionMode (const NTV2ConversionMode conversionMode)
 {
 	NTV2VideoFormat outputFormat = NTV2_FORMAT_UNKNOWN;
 
@@ -7544,10 +7541,10 @@ string NTV2InputCrosspointIDToString (const NTV2InputCrosspointID inValue, const
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 6", NTV2_XptLUT6Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 7", NTV2_XptLUT7Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "LUT 8", NTV2_XptLUT8Input);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI Out 1 Standard", NTV2_XptSDIOut1Standard);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI Out 2 Standard", NTV2_XptSDIOut2Standard);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI Out 3 Standard", NTV2_XptSDIOut3Standard);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI Out 4 Standard", NTV2_XptSDIOut4Standard);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "ML Out 1", NTV2_XptMultiLinkOut1Input);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "ML Out 1 DS2", NTV2_XptMultiLinkOut1InputDS2);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "ML Out 2", NTV2_XptMultiLinkOut2Input);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "ML Out 2 DS2", NTV2_XptMultiLinkOut2InputDS2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI Out 1", NTV2_XptSDIOut1Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI Out 1 DS2", NTV2_XptSDIOut1InputDS2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI Out 2", NTV2_XptSDIOut2Input);
@@ -7621,7 +7618,6 @@ string NTV2InputCrosspointIDToString (const NTV2InputCrosspointID inValue, const
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425Mux 4A", NTV2_Xpt425Mux4AInput);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425Mux 4B", NTV2_Xpt425Mux4BInput);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Analog Out", NTV2_XptAnalogOutInput);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "IICT 2", NTV2_XptIICT2Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Analog Composite Out", NTV2_XptAnalogOutCompositeOut);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Stereo Left", NTV2_XptStereoLeftInput);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Stereo Right", NTV2_XptStereoRightInput);
@@ -7636,8 +7632,6 @@ string NTV2InputCrosspointIDToString (const NTV2InputCrosspointID inValue, const
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "CSC 1 Key From In 2", NTV2_XptCSC1KeyFromInput2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FrameSync2", NTV2_XptFrameSync2Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FrameSync1", NTV2_XptFrameSync1Input);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "ML Out 1", NTV2_XptMultiLinkOut1Input);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "ML Out 1 DS2", NTV2_XptMultiLinkOut1InputDS2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "3D LUT 1", NTV2_Xpt3DLUT1Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "???", NTV2_INPUT_CROSSPOINT_INVALID);
 	}
@@ -7710,10 +7704,6 @@ string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID inValue, con
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "CSC 2 Key YUV", NTV2_XptCSC2KeyYUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Mixer 1 Vid YUV", NTV2_XptMixer1VidYUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Mixer 1 Key YUV", NTV2_XptMixer1KeyYUV);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Water Marker 1 RGB", NTV2_XptWaterMarkerRGB);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Water Marker 1 YUV", NTV2_XptWaterMarkerYUV);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Water Marker 2 RGB", NTV2_XptWaterMarker2RGB);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Water Marker 2 YUV", NTV2_XptWaterMarker2YUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "IICT RGB", NTV2_XptIICTRGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "IICT 2 RGB", NTV2_XptIICT2RGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Test Pattern YUV", NTV2_XptTestPatternYUV);
@@ -7825,6 +7815,10 @@ string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID inValue, con
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Multi-Link Out 1 DS2", NTV2_XptMultiLinkOut1DS2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Multi-Link Out 1 DS3", NTV2_XptMultiLinkOut1DS3);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Multi-Link Out 1 DS4", NTV2_XptMultiLinkOut1DS4);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Multi-Link Out 2 DS1", NTV2_XptMultiLinkOut2DS1);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Multi-Link Out 2 DS2", NTV2_XptMultiLinkOut2DS2);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Multi-Link Out 2 DS3", NTV2_XptMultiLinkOut2DS3);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Multi-Link Out 2 DS4", NTV2_XptMultiLinkOut2DS4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "3D LUT 1 YUV", NTV2_Xpt3DLUT1YUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "3D LUT 1 RGB", NTV2_Xpt3DLUT1RGB);
 		
@@ -7957,6 +7951,7 @@ string NTV2WidgetIDToString (const NTV2WidgetID inValue, const bool inCompactDis
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4Out1", NTV2_WgtHDMIOut1v4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv5Out1", NTV2_WgtHDMIOut1v5);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "MultiLinkOut1", NTV2_WgtMultiLinkOut1);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "MultiLinkOut2", NTV2_WgtMultiLinkOut2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "3DLUT1", NTV2_Wgt3DLUT1);
 		case NTV2_WgtModuleTypeCount:				return "???";  //special case
 	}

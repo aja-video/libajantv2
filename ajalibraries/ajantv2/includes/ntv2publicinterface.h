@@ -226,7 +226,7 @@ typedef enum
 	kRegAFDVANCInserterSDI2,		// 172
     kRegAudioChannelMappingCh1,     // 173		//	OBSOLETE
     kRegXptSelectGroup36,		    // 174
-    kRegAudioChannelMappingCh3,     // 175		//	OBSOLETE
+    kRegXptSelectGroup37,		    // 175
     kRegAudioChannelMappingCh4,     // 176		//	OBSOLETE
     kRegAudioChannelMappingCh5,     // 177		//	OBSOLETE
     kRegAudioChannelMappingCh6,     // 178		//	OBSOLETE
@@ -1939,8 +1939,8 @@ typedef enum
 	kK2RegMaskFrameBuffer8BInputSelect	= BIT(24)+BIT(25)+BIT(26)+BIT(27)+BIT(28)+BIT(29)+BIT(30)+BIT(31),
 
 	//kRegXptSelectGroup36
-	kK2RegMaskMultiLinkOut1InputSelect	= BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7),
-	kK2RegMaskMultiLinkOut1DS2InputSelect	= BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7),
+	kK2RegMaskMultiLinkOutInputSelect	= BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7),
+	kK2RegMaskMultiLinkOutDS2InputSelect	= BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7),
 
 	//kK2RegCSCoefficients1_2
 	//kK2RegCSC2oefficients1_2,
@@ -3112,8 +3112,8 @@ typedef enum
 	kK2RegShiftFrameBuffer4BInputSelect = 24,
 
 	//kRegXptSelectGroup36
-	kK2RegShiftMultiLinkOut1InputSelect = 0,
-	kK2RegShiftMultiLinkOut1DS2InputSelect = 8,
+	kK2RegShiftMultiLinkOutInputSelect = 0,
+	kK2RegShiftMultiLinkOutDS2InputSelect = 8,
 
 	//kRegXptSelectGroup34
 	kK2RegShiftFrameBuffer5BInputSelect = 0,
@@ -6045,6 +6045,7 @@ typedef enum
 				std::ostream &	Print (std::ostream & inStrm, const bool inDumpSegments = false) const;
 				ULWord			getTotalElements (void) const		{return getSegmentCount() * getSegmentLength();}
 				ULWord			getTotalBytes (void) const			{return getTotalElements() * getElementLength();}
+				std::string		getSourceCode (const bool inInclDecl = true) const;
 
 				// Changing
 				inline NTV2SegmentedXferInfo &	setSegmentCount (const ULWord inNumSegments)	{mNumSegments = inNumSegments;  return *this;}

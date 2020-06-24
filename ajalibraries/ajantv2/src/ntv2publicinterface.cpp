@@ -1104,18 +1104,20 @@ NTV2_TRAILER::NTV2_TRAILER ()
 }
 
 
+static const string sSegXferUnits[] = {"", " U8", " U16", "", " U32", "", "", "", " U64", ""};
+
 ostream & NTV2SegmentedXferInfo::Print (ostream & inStrm, const bool inDumpSegments) const
 {
 	if (!isValid())
 		return inStrm << "(invalid)";
 	if (inDumpSegments)
 	{
+		//	TBD
 	}
 	else
 	{
-		static const string sUnits[] = {"", " U8", " U16", "", " U32", "", "", "", " U64", ""};
 		inStrm	<< DEC(getSegmentCount()) << " x " << DEC(getSegmentLength())
-				<< sUnits[getElementLength()] << " segs";
+				<< sSegXferUnits[getElementLength()] << " segs";
 		if (getSourceOffset())
 			inStrm	<< " srcOff=" << DEC(getSourceOffset());
 		inStrm << " srcSpan=" << DEC(getSourcePitch()) << (isSourceBottomUp()?" VF":"");
@@ -1125,6 +1127,36 @@ ostream & NTV2SegmentedXferInfo::Print (ostream & inStrm, const bool inDumpSegme
 				<< " totElm=" << DEC(getTotalElements()) << " totByt=" << DEC(getTotalBytes());
 	}
 	return inStrm;
+}
+
+string NTV2SegmentedXferInfo::getSourceCode (const bool inInclDecl) const
+{
+	static string var("segInfo");
+	ostringstream oss;
+	string units("\t// bytes");
+	if (!isValid())
+		return "";
+	if (inInclDecl)
+		oss << "NTV2SegmentedXferInfo " << var << ";" << endl;
+	if (getElementLength() > 1)
+	{
+		units = "\t// " + sSegXferUnits[getElementLength()] + "s";
+		oss << var << ".setElementLength(" << getElementLength() << ");" << endl;
+	}
+	oss << var << ".setSegmentCount(" << DEC(getSegmentCount()) << ");" << endl;
+	oss << var << ".setSegmentLength(" << DEC(getSegmentLength()) << ");" << units << endl;
+	if (getSourceOffset())
+		oss << var << ".setSourceOffset(" << DEC(getSourceOffset()) << ");" << units << endl;
+	oss << var << ".setSourcePitch(" << DEC(getSourcePitch()) << ");" << units << endl;
+	if (isSourceBottomUp())
+		oss << var << ".setSourceDirection(false);" << endl;
+	if (getDestOffset())
+		oss << var << ".setDestOffset(" << DEC(getDestOffset()) << ");" << units << endl;
+	if (getDestPitch())
+		oss << var << ".setDestPitch(" << DEC(getDestPitch()) << ");" << units << endl;
+	if (isDestBottomUp())
+		oss << var << ".setDestDirection(false);" << endl;
+	return oss.str();
 }
 
 NTV2SegmentedXferInfo & NTV2SegmentedXferInfo::swapSourceAndDestination (void)
@@ -2242,8 +2274,8 @@ static const NTV2_RP188		INVALID_TIMECODE_VALUE;
 bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes (const NTV2TimeCodes & inValues)
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	ULWord			maxNumValues	(acOutputTimeCodes.GetByteCount () / sizeof (NTV2_RP188));
-	NTV2_RP188 *	pArray	(reinterpret_cast <NTV2_RP188 *> (acOutputTimeCodes.GetHostPointer ()));
+	ULWord			maxNumValues (acOutputTimeCodes.GetByteCount() / sizeof(NTV2_RP188));
+	NTV2_RP188 *	pArray (reinterpret_cast<NTV2_RP188*>(acOutputTimeCodes.GetHostPointer()));
 	if (!pArray)
 		return false;
 	if (maxNumValues > NTV2_MAX_NUM_TIMECODE_INDEXES)
@@ -2251,9 +2283,9 @@ bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes (const NTV2TimeCodes & inValues)
 
 	for (UWord ndx (0);  ndx < UWord(maxNumValues);  ndx++)
 	{
-		const NTV2TCIndex		tcIndex	(static_cast <const NTV2TCIndex> (ndx));
-		NTV2TimeCodesConstIter	iter	(inValues.find (tcIndex));
-		pArray [ndx] = (iter != inValues.end ())  ?  iter->second  :  INVALID_TIMECODE_VALUE;
+		const NTV2TCIndex		tcIndex	(static_cast<const NTV2TCIndex>(ndx));
+		NTV2TimeCodesConstIter	iter	(inValues.find(tcIndex));
+		pArray[ndx] = (iter != inValues.end())  ?  iter->second  :  INVALID_TIMECODE_VALUE;
 	}	//	for each possible NTV2TCSource value
 	return true;
 }
@@ -2262,16 +2294,16 @@ bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes (const NTV2TimeCodes & inValues)
 bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCode (const NTV2_RP188 & inTimeCode, const NTV2TCIndex inTCIndex)
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	ULWord			maxNumValues	(acOutputTimeCodes.GetByteCount () / sizeof (NTV2_RP188));
-	NTV2_RP188 *	pArray			(reinterpret_cast <NTV2_RP188 *> (acOutputTimeCodes.GetHostPointer ()));
+	ULWord			maxNumValues (acOutputTimeCodes.GetByteCount() / sizeof(NTV2_RP188));
+	NTV2_RP188 *	pArray (reinterpret_cast<NTV2_RP188*>(acOutputTimeCodes.GetHostPointer()));
 	if (!pArray)
 		return false;
 	if (maxNumValues > NTV2_MAX_NUM_TIMECODE_INDEXES)
 		maxNumValues = NTV2_MAX_NUM_TIMECODE_INDEXES;
-	if (!NTV2_IS_VALID_TIMECODE_INDEX (inTCIndex))
+	if (!NTV2_IS_VALID_TIMECODE_INDEX(inTCIndex))
 		return false;
 
-	pArray [inTCIndex] = inTimeCode;
+	pArray[inTCIndex] = inTimeCode;
 	return true;
 }
 
