@@ -19,9 +19,8 @@
 
 
 /**
-	@brief	I transfer a test pattern into an AJA device's frame buffer for steady-state playout.
-			This demonstrates how to perform direct DMA from a host frame buffer.
-	@note	I do not use the AutoCirculate API to transfer frame data to the device.
+	@brief	I generate and transfer a test pattern into an AJA device's frame buffer for steady-state
+			playout using NTV2TestPatternGen::DrawTestPattern and CNTV2Card::DMAWriteFrame.
 **/
 
 class NTV2OutputTestPattern
@@ -32,11 +31,18 @@ class NTV2OutputTestPattern
 		/**
 			@brief		Constructs me using the given configuration settings.
 			@note		I'm not completely initialized and ready for use until after my Init method has been called.
-			@param[in]	inDeviceSpecifier	Specifies the AJA device to use. Defaults to "0", the first device found.
-			@param[in]	inChannel			Specifies the channel (frame store) to use. Defaults to NTV2_CHANNEL1.
+			@param[in]	inDeviceSpecifier	Specifies the AJA device to use.
+											Defaults to "0", the first device found.
+			@param[in]	inTestPatternSpec	Optionally specifies the test pattern (or flat-field color) to use.
+											If empty (the default), uses 100% bars.
+			@param[in]	inVideoFormat		If not NTV2_FORMAT_UNKNOWN, specifies the video format to use.
+											If NTV2_FORMAT_UNKNOWN (the default), uses the current video format.
+			@param[in]	inChannel			Specifies the FrameStore to use. Defaults to NTV2_CHANNEL1.
 		**/
-		NTV2OutputTestPattern (const std::string &	inDeviceSpecifier	= "0",
-							   const NTV2Channel	inChannel			= NTV2_CHANNEL1);
+		NTV2OutputTestPattern (	const std::string &		inDeviceSpecifier	= "0",
+								const std::string &		inTestPatternSpec	= "",
+								const NTV2VideoFormat	inVideoFormat		= NTV2_FORMAT_UNKNOWN,
+								const NTV2Channel		inChannel			= NTV2_CHANNEL1);
 
 		~NTV2OutputTestPattern (void);
 
@@ -47,13 +53,11 @@ class NTV2OutputTestPattern
 		AJAStatus		Init (void);
 
 		/**
-			@brief		Displays the requested test pattern on the output.
-			@param[in]	testPatternIndex	Specifies which test pattern to display.
-											Defaults to 0 (100% color bars).
+			@brief		Generates, transfers and displays the test pattern on the output.
 			@return		AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
 			@note		Do not call this method without first calling my Init method.
 		**/
-		AJAStatus		EmitPattern (const UWord testPatternIndex = 0);
+		AJAStatus		EmitPattern (void);
 
 
 	//	Protected Instance Methods
@@ -72,14 +76,16 @@ class NTV2OutputTestPattern
 
 	//	Private Member Data
 	private:
-		CNTV2Card					mDevice;			///< @brief	My CNTV2Card instance
-		NTV2DeviceID				mDeviceID;			///< @brief	My device identifier
-		const std::string			mDeviceSpecifier;	///< @brief	Specifies the device I should use
-		const NTV2Channel			mOutputChannel;		///< @brief	The channel I'm using
-		NTV2VideoFormat				mVideoFormat;		///< @brief	My video format
-		NTV2FrameBufferFormat		mPixelFormat;		///< @brief	My pixel format
-		NTV2EveryFrameTaskMode		mSavedTaskMode;		///< @brief For restoring previous task mode
-		NTV2VANCMode				mVancMode;			///< @brief	My VANC mode
+		CNTV2Card				mDevice;			///< @brief	My CNTV2Card instance
+		NTV2DeviceID			mDeviceID;			///< @brief	My device identifier
+		const std::string		mDeviceSpecifier;	///< @brief	Specifies the device I should use
+		const std::string		mTestPatternSpec;	///< @brief	Specifies the test pattern I should use
+		const NTV2Channel		mOutputChannel;		///< @brief	The channel I'm using
+		const NTV2PixelFormat	mPixelFormat;		///< @brief	My pixel format
+		NTV2VideoFormat			mVideoFormat;		///< @brief	My video format
+		NTV2TaskMode			mSavedTaskMode;		///< @brief For restoring previous task mode
+		NTV2XptConnections		mSavedConnections;	///< @brief	For restoring previous routing
+		NTV2VANCMode			mVancMode;			///< @brief	My VANC mode
 
 };	//	NTV2OutputTestPattern
 

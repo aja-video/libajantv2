@@ -233,23 +233,27 @@ int main (int argc, const char ** argv)
 	}
 
 	//	Pattern
-	NTV2TestPatternSelect	testPattern(NTV2_TestPatt_All);
-	const string	patternStr	(pTestPattern  ?  pTestPattern  :  "");
-	testPattern  =  patternStr.empty()  ?  NTV2_TestPatt_FlatField  :  CNTV2DemoCommon::GetTestPatternFromString(patternStr);
-	if (patternStr == "?" || patternStr == "list")
+	string testPattern(pTestPattern  ?  pTestPattern  :  "");
+	if (testPattern == "?" || testPattern == "list")
 		{cout << CNTV2DemoCommon::GetTestPatternStrings() << endl;  return 0;}
-	else if (!pixelFormatStr.empty() && !NTV2_IS_VALID_PATTERN(testPattern))
+	if (!testPattern.empty())
 	{
-		cerr	<< "## ERROR:  Invalid '--pattern' value '" << patternStr << "' -- expected values:" << endl
-				<< CNTV2DemoCommon::GetTestPatternStrings() << endl;
-		return 2;
+		testPattern = CNTV2DemoCommon::GetTestPatternNameFromString(testPattern);
+		if (testPattern.empty())
+		{
+			cerr	<< "## ERROR:  Invalid '--pattern' value '" << pTestPattern << "' -- expected values:" << endl
+					<< CNTV2DemoCommon::GetTestPatternStrings() << endl;
+			return 2;
+		}
 	}
+	else
+		testPattern = "Flat Field";
 
 	//	Configure the player...
 	CCPlayerConfig	playerConfig(pDeviceSpec ? string(pDeviceSpec) : "0");
 	playerConfig.fVideoFormat		= videoFormat;
 	playerConfig.fPixelFormat		= pixelFormat;
-	playerConfig.fTestPattern		= testPattern;
+	playerConfig.fTestPatternName	= testPattern;
 	playerConfig.fOutputChannel		= channel;
 	playerConfig.fOutputDestination	= outputSpigot;
 	playerConfig.fForceRTP			= forceRTP;

@@ -46,17 +46,17 @@ int main (int argc, const char ** argv)
 	const struct poptOption userOptionsTable [] =
 	{
 		#if !defined(NTV2_DEPRECATE_16_0)	//	--board option is deprecated!
-		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"(deprecated)"},
+		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",		"(deprecated)"},
 		#endif
-		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"},
-		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"which video format to use",	"'?' or 'list' to list"},
-		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"which pixel format to use",	"'?' or 'list' to list"},
-		{"frames",		0,		POPT_ARG_STRING,	&pFramesSpec,	0,	"frames to AutoCirc",			"num[@min] or min-max"},
-		{"hdrType",		't',	POPT_ARG_INT,		&hdrType,		0,	"which HDR Packet to send",		"1:SDR,2:HDR10,3:HLG"},
-		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",			"number of the channel"},
-		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multi-channel/format",		AJA_NULL},
-		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio tone",			AJA_NULL},
-		{"ltc",			'l',	POPT_ARG_NONE,		&xmitLTC,		0,	"xmit LTC instead of VITC",		AJA_NULL},
+		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",		"index#, serial#, or model"},
+		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"video format to use",		"'?' or 'list' to list"},
+		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",		"'?' or 'list' to list"},
+		{"frames",		0,		POPT_ARG_STRING,	&pFramesSpec,	0,	"frames to AutoCirculate",	"num[@min] or min-max"},
+		{"hdrType",		't',	POPT_ARG_INT,		&hdrType,		0,	"which HDR pkt to send",	"1:SDR,2:HDR10,3:HLG"},
+		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",		"number of the channel"},
+		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multi-channel/format",	AJA_NULL},
+		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio tone",		AJA_NULL},
+		{"ltc",			'l',	POPT_ARG_NONE,		&xmitLTC,		0,	"xmit LTC instead of VITC",	AJA_NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -71,7 +71,7 @@ int main (int argc, const char ** argv)
 	PlayerConfig playerConfig(deviceSpec);
 
 	//	VideoFormat
-	const string			videoFormatStr	(pVideoFormat  ?  pVideoFormat  :  "");
+	const string videoFormatStr	(pVideoFormat  ?  pVideoFormat  :  "");
 	playerConfig.fVideoFormat = videoFormatStr.empty() ? NTV2_FORMAT_1080i_5994 : CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr);
 	if (videoFormatStr == "?" || videoFormatStr == "list")
 		{cout << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_NON_4KUHD, deviceSpec) << endl;  return 0;}

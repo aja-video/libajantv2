@@ -470,18 +470,17 @@ class CNTV2DemoCommon
 	**/
 	///@{
 		/**
-			@return		A string that can be printed to show the available test pattern identifiers.
+			@return		A string that can be printed to show the available test pattern and color identifiers.
 			@note		These test pattern strings are mere conveniences for specifying test patterns in the command-line-based demo apps,
 						and are subject to change without notice. They are not intended to be canonical in any way.
 		**/
 		static std::string					GetTestPatternStrings (void);
 
 		/**
-			@brief		Returns the ::NTV2TestPatternSelect that matches the given string.
-			@param[in]	inStr	Specifies the string to be converted to an ::NTV2TestPatternSelect.
-			@return		The given string converted to an ::NTV2TestPatternSelect, or ::NTV2_TestPatt_All if there's no match.
+			@param[in]	inStr	Specifies the string to be converted to a valid test pattern or color name.
+			@return		The test pattern or color name that best matches the given string, or an empty string if invalid.
 		**/
-		static NTV2TestPatternSelect		GetTestPatternFromString (const std::string & inStr);
+		static std::string					GetTestPatternNameFromString (const std::string & inStr);
 	///@}
 
 	/**
