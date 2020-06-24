@@ -232,7 +232,7 @@ AJALabelValuePairs CCPlayerConfig::Get (const bool inCompact) const
 	AJASystemInfo::append(result, "Output Format",		fDualLinkRGB ? "DL-RGB" : "YCbCr");
 	AJASystemInfo::append(result, "Video Format",		::NTV2VideoFormatToString(fVideoFormat));
 	AJASystemInfo::append(result, "Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
-	AJASystemInfo::append(result, "Background Pattern",	NTV2TestPatternGen::getTestPatternNames().at(fTestPattern));
+	AJASystemInfo::append(result, "Background Pattern",	fTestPatternName);
 	AJASystemInfo::append(result, "AutoCirc Frames",	fFrames.toString());
 	AJASystemInfo::append(result, "Emit Statistics",	fEmitStats ? "Y" : "N");
 	AJASystemInfo::append(result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
@@ -1024,7 +1024,7 @@ AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 	NTV2TestPatternGen			testPatternGen;
 	const NTV2FormatDescriptor	formatDesc	(mConfig.fVideoFormat, mConfig.fPixelFormat, mVancMode);
 
-	if (!testPatternGen.DrawTestPattern (mConfig.fTestPattern, formatDesc, mVideoBuffer))
+	if (!testPatternGen.DrawTestPattern (mConfig.fTestPatternName, formatDesc, mVideoBuffer))
 	{
 		cerr << "## ERROR:  DrawTestPattern failed, formatDesc: " << formatDesc << endl;
 		return AJA_STATUS_FAIL;

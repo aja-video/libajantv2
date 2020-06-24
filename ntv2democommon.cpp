@@ -43,9 +43,9 @@ typedef	map <string, NTV2TCIndex>				String2TCIndexMap;
 typedef	pair <string, NTV2TCIndex>				String2TCIndexPair;
 typedef	String2TCIndexMap::const_iterator		String2TCIndexMapConstIter;
 
-typedef	map <string, NTV2TestPatternSelect>		String2TestPatternMap;
-typedef	pair <string, NTV2TestPatternSelect>	String2TestPatternPair;
-typedef	String2TestPatternMap::const_iterator	String2TestPatternMapConstIter;
+typedef	map <string, string>					String2TPNamesMap;
+typedef	pair <string, string>					String2TPNamePair;
+typedef	String2TPNamesMap::const_iterator		String2TPNamesMapConstIter;
 
 
 static const string				gGlobalMutexName	("com.aja.ntv2.mutex.demo");
@@ -78,8 +78,8 @@ static NTV2TCIndexSet			gTCIndexesATCLTC;
 static NTV2TCIndexSet			gTCIndexesVITC1;
 static NTV2TCIndexSet			gTCIndexesVITC2;
 static String2TCIndexMap		gString2TCIndexMap;
-static NTV2TestPatternSet		gTestPatterns;
-static String2TestPatternMap	gString2TestPatternMap;
+static String2TPNamesMap		gString2TPNamesMap;
+static NTV2StringList			gTestPatternNames;
 
 
 class DemoCommonInitializer
@@ -333,15 +333,21 @@ class DemoCommonInitializer
 			}
 
 			{	//	Test Patterns...
-				const NTV2TestPatternNames & tpNames(NTV2TestPatternGen::getTestPatternNames());
+				const NTV2StringList & tpNames(NTV2TestPatternGen::getTestPatternNames());
+				const NTV2StringList colorNames(NTV2TestPatternGen::getColorNames());
 				for (NTV2TestPatternSelect tp(NTV2_TestPatt_ColorBars100);  tp < NTV2_TestPatt_All;  tp = NTV2TestPatternSelect(tp+1))
 				{
 					string tpName(tpNames.at(tp));
 					aja::replace(aja::replace(aja::replace(tpName, " ", ""), "%", ""), "_", "");
-					gString2TestPatternMap.insert(String2TestPatternPair(aja::lower(tpName), tp));
+					gString2TPNamesMap.insert(String2TPNamePair(aja::lower(tpName), tpNames.at(tp)));
 					ostringstream oss; oss << DEC(tp);
-					gString2TestPatternMap.insert(String2TestPatternPair(oss.str(), tp));
-					gTestPatterns.insert(tp);
+					gString2TPNamesMap.insert(String2TPNamePair(oss.str(), tpNames.at(tp)));
+				}
+				for (NTV2StringListConstIter it(colorNames.begin());  it != colorNames.end();  ++it)
+				{
+					string colorName(*it);
+					aja::replace(aja::replace(aja::replace(colorName, " ", ""), "%", ""), "_", "");
+					gString2TPNamesMap.insert(String2TPNamePair(aja::lower(colorName), *it));
 				}
 			}
 		}	//	constructor
@@ -826,30 +832,39 @@ NTV2AudioSystem CNTV2DemoCommon::GetAudioSystemFromString (const string & inStr)
 
 string CNTV2DemoCommon::GetTestPatternStrings (void)
 {
-	ostringstream oss;
-	oss	<< setw(25) << left << "Test Pattern            " << "\t" << setw(22) << left << "Legal --pattern Values" << endl
-		<< setw(25) << left << "------------------------" << "\t" << setw(22) << left << "----------------------" << endl;
-	for (NTV2TestPatternSetConstIter iter(gTestPatterns.begin());  iter != gTestPatterns.end();  ++iter)
+	typedef set<string>	NTV2StringSet;
+	typedef map<string,string>	NTV2StringMap;
+	NTV2StringSet keys;
+	for (String2TPNamesMapConstIter it(gString2TPNamesMap.begin());  it != gString2TPNamesMap.end();  ++it)
+		if (keys.find(it->second) == keys.end())
+			keys.insert(it->second);
+
+	NTV2StringMap legals;
+	for (NTV2StringSet::const_iterator kit(keys.begin());  kit != keys.end();  ++kit)
 	{
-		string	tpName(NTV2TestPatternGen::getTestPatternNames().at(*iter));
-		for (String2TestPatternMapConstIter it(gString2TestPatternMap.begin());  it != gString2TestPatternMap.end();  ++it)
-			if (*iter == it->second)
-			{
-				oss << setw(25) << left << tpName << "\t" << setw(16) << left << it->first << endl;
-				tpName.clear();
-			}
-		oss << endl;
+		const string & officialPatName(*kit);
+		NTV2StringList legalValues;
+		for (String2TPNamesMapConstIter it(gString2TPNamesMap.begin());  it != gString2TPNamesMap.end();  ++it)
+			if (it->second == officialPatName)
+				legalValues.push_back(it->first);
+		legals[officialPatName] = aja::join(legalValues, ", ");
 	}
+
+	ostringstream oss;
+	oss	<< setw(25) << left << "Test Pattern or Color   " << "\t" << setw(22) << left << "Legal --pattern Values" << endl
+		<< setw(25) << left << "------------------------" << "\t" << setw(22) << left << "----------------------" << endl;
+	for (NTV2StringMap::const_iterator it(legals.begin());  it != legals.end();  ++it)
+		oss << setw(25) << left << it->first << "\t" << setw(22) << left << it->second << endl;
 	return oss.str();
 }
 
 
-NTV2TestPatternSelect CNTV2DemoCommon::GetTestPatternFromString (const string & inStr)
+string CNTV2DemoCommon::GetTestPatternNameFromString (const string & inStr)
 {
 	string tpName(inStr);
 	aja::lower(aja::strip(aja::replace(tpName, " ", "")));
-	String2TestPatternMapConstIter it(gString2TestPatternMap.find(tpName));
-	return (it != gString2TestPatternMap.end()) ? it->second : NTV2_TestPatt_All;
+	String2TPNamesMapConstIter it(gString2TPNamesMap.find(tpName));
+	return (it != gString2TPNamesMap.end()) ? it->second : "";
 }
 
 
@@ -881,8 +896,8 @@ char CNTV2DemoCommon::ReadCharacterPress (void)
 		::memset (&terminalStatus, 0, sizeof (terminalStatus));
 		if (::tcgetattr (0, &terminalStatus) < 0)
 			cerr << "tcsetattr()";
-		terminalStatus.c_lflag &= ~ICANON;
-		terminalStatus.c_lflag &= ~ECHO;
+		terminalStatus.c_lflag &= ~uint32_t(ICANON);
+		terminalStatus.c_lflag &= ~uint32_t(ECHO);
 		terminalStatus.c_cc[VMIN] = 1;
 		terminalStatus.c_cc[VTIME] = 0;
 		if (::tcsetattr (0, TCSANOW, &terminalStatus) < 0)
