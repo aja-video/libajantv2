@@ -558,8 +558,8 @@ public:
 		@param[in]	inFrameNumber		Specifies the zero-based frame number of the frame to be read from the device.
 		@param[in]	pFrameBuffer		Specifies the non-NULL address of the host buffer that is to supply the frame data.
 										The memory it points to must be writeable.
-		@param[in]	inOffsetBytes		Specifies the initial device memory byte offset for the first bytes transferred.
-		@param[in]	inBytesPerSegment	Specifies the number of bytes per segment to transfer.
+		@param[in]	inCardOffsetBytes	Specifies the initial on-device memory byte offset for the first bytes transferred.
+		@param[in]	inTotalByteCount	Specifies the total number of bytes to transfer.
 		@param[in]	inNumSegments		Specifies the number of segments to transfer.
 		@param[in]	inSegmentHostPitch	Specifies the number of bytes to increment the host memory pointer after each segment is transferred.
 		@param[in]	inSegmentCardPitch	Specifies the number of bytes to increment the on-device memory pointer after each segment is transferred.
@@ -568,13 +568,13 @@ public:
 		@note		This function will block and not return until the transfer has finished or failed.
 		@see		CNTV2Card::DMAWriteSegments, CNTV2Card::DMARead, CNTV2Card::DMAReadFrame, \ref vidop-fbaccess
 	**/
-	AJA_VIRTUAL bool	DMAReadSegments (	const ULWord		inFrameNumber,
-											ULWord *			pFrameBuffer,
-											const ULWord		inOffsetBytes,
-											const ULWord		inBytesPerSegment,
-											const ULWord		inNumSegments,
-											const ULWord		inSegmentHostPitch,
-											const ULWord		inSegmentCardPitch);
+	AJA_VIRTUAL bool	DMAReadSegments (	const ULWord	inFrameNumber,
+											ULWord *		pFrameBuffer,
+											const ULWord	inCardOffsetBytes,
+											const ULWord	inTotalByteCount,
+											const ULWord	inNumSegments,
+											const ULWord	inSegmentHostPitch,
+											const ULWord	inSegmentCardPitch);
 
 	/**
 		@brief		Performs a segmented data transfer from the host to the AJA device.
@@ -582,7 +582,7 @@ public:
 		@param[in]	pFrameBuffer		Specifies the non-NULL address of the host buffer that is to supply the frame data.
 										The memory it points to must be readable.
 		@param[in]	inOffsetBytes		Specifies the initial device memory byte offset for the first bytes transferred.
-		@param[in]	inBytesPerSegment	Specifies the number of bytes per segment to transfer.
+		@param[in]	inTotalByteCount	Specifies the total number of bytes to transfer.
 		@param[in]	inNumSegments		Specifies the number of segments to transfer.
 		@param[in]	inSegmentHostPitch	Specifies the number of bytes to increment the host memory pointer after each segment is transferred.
 		@param[in]	inSegmentCardPitch	Specifies the number of bytes to increment the on-device memory pointer after each segment is transferred.
@@ -591,13 +591,13 @@ public:
 		@note		This function will block and not return until the transfer has finished or failed.
 		@see		CNTV2Card::DMAReadSegments, CNTV2Card::DMAWrite, CNTV2Card::DMAWriteFrame, \ref vidop-fbaccess
 	**/
-	AJA_VIRTUAL bool	DMAWriteSegments (	const ULWord		inFrameNumber,
-											const ULWord *		pFrameBuffer,
-											const ULWord		inOffsetBytes,
-											const ULWord		inBytesPerSegment,
-											const ULWord		inNumSegments,
-											const ULWord		inSegmentHostPitch,
-											const ULWord		inSegmentCardPitch);
+	AJA_VIRTUAL bool	DMAWriteSegments (	const ULWord	inFrameNumber,
+											const ULWord *	pFrameBuffer,
+											const ULWord	inOffsetBytes,
+											const ULWord	inTotalByteCount,
+											const ULWord	inNumSegments,
+											const ULWord	inSegmentHostPitch,
+											const ULWord	inSegmentCardPitch);
 
 	AJA_VIRTUAL bool	DmaP2PTargetFrame (NTV2Channel channel,					// frame buffer channel output frame to update on completion
 											ULWord frameNumber,					// frame number to target
@@ -3973,6 +3973,7 @@ public:
 	AJA_VIRTUAL bool	FindUnallocatedFrames (const UWord inFrameCount, LWord & outStartFrameNumber, LWord & outEndFrameNumber);
 	///@}
 
+#if defined(READREGMULTICHANGE)
 	/**
 		@brief			Reads the register(s) specified by the given NTV2RegInfo sequence.
 		@param[in]		inOutValues		Specifies the register(s) to be read, and upon return, receives their values.
@@ -3983,13 +3984,16 @@ public:
 
 	/**
 		@brief			Reads the given set of registers.
-		@param[in]		inRegisters				Specifies the set of registers to be read.
-		@param[out]		outValues				Receives the resulting register/value map. Any registers in the "inRegisters" set that don't
-												appear in this map were not able to be read successfully.
+		@param[in]		inRegNums		Specifies the set of registers to be read.
+		@param[out]		outValues		Receives the resulting register/value map. Any registers
+										in the "inRegNums" set that don't appear in this map were
+										not able to be read successfully.
 		@return			True if all requested registers were successfully read; otherwise false.
-		@note			This operation is not guaranteed to be performed atomically. A VBI may occur while the requested registers are being read.
+		@note			This operation is not guaranteed to be performed atomically.
+						A VBI may occur while the requested registers are being read.
 	**/
-	AJA_VIRTUAL bool	ReadRegisters (const NTV2RegNumSet & inRegisters,  NTV2RegisterValueMap & outValues);
+	AJA_VIRTUAL bool	ReadRegisters (const NTV2RegNumSet & inRegNums,  NTV2RegisterValueMap & outValues);
+#endif	//	defined(READREGMULTICHANGE)
 
 	/**
 		@brief			Reads the given set of registers from the bank specified in position 0

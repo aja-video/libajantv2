@@ -12,7 +12,7 @@
 #include "ntv2enums.h"
 #include "ntv2videodefines.h"
 #include "ntv2audiodefines.h"
-#include "ntv2nubtypes.h"
+#include "ntv2nubaccess.h"
 #include "ntv2publicinterface.h"
 #include "ntv2devicefeatures.h"
 #if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
@@ -54,12 +54,12 @@ public:
 	/**
 		@return	The 4-byte value that identifies the kind of AJA device this is.
 	**/
-	virtual NTV2DeviceID		GetDeviceID (void);
+	AJA_VIRTUAL NTV2DeviceID		GetDeviceID (void);
 
 	/**
 		@return	This device's zero-based index number (relative to other known devices attached to the host).
 	**/
-	virtual inline UWord		GetIndexNumber (void) const		{return _boardNumber;}
+	AJA_VIRTUAL inline UWord		GetIndexNumber (void) const		{return _boardNumber;}
 
 	/**
 		@brief		Opens an AJA device so that it can be monitored and/or controlled.
@@ -70,19 +70,19 @@ public:
 										one or more AJA devices attached to it. Defaults to the empty string, which attempts
 										to open AJA devices on the local host.
 	**/
-	virtual bool Open(const UWord inDeviceIndex = 0,
+	AJA_VIRTUAL bool Open(const UWord inDeviceIndex = 0,
 					  const std::string & inHostName = std::string()) = 0;
 #if !defined(NTV2_DEPRECATE_14_3)
-	virtual bool Open(UWord inDeviceIndex, bool displayError,
+	AJA_VIRTUAL bool Open(UWord inDeviceIndex, bool displayError,
 					  NTV2DeviceType eDeviceType,
 					  const char *hostName) = 0;
 #endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 	// call this before Open to set the shareable feature of the Card
-	virtual bool SetShareMode (bool bShared) = 0;
+	AJA_VIRTUAL bool SetShareMode (bool bShared) = 0;
 
 	// call this before Open to set the overlapped feature of the Card
-	virtual bool SetOverlappedMode (bool bOverlapped) = 0;
+	AJA_VIRTUAL bool SetOverlappedMode (bool bOverlapped) = 0;
 
 	/**
 		@brief		Closes the AJA device, releasing host resources that may have been allocated in a previous Open call.
@@ -91,7 +91,7 @@ public:
 					Once closed, the device can no longer be queried or controlled by the CNTV2Card instance.
 					The CNTV2Card instance can be "reconnected" to another AJA device by calling its Open member function again.
 	**/
-	virtual bool Close() = 0;
+	AJA_VIRTUAL bool Close() = 0;
 
 	/**
 		@brief		Updates or replaces all or part of the 32-bit contents of a specific register (real or virtual) on the AJA device.
@@ -121,7 +121,7 @@ public:
 
 //protected:
 #if !defined(NTV2_DEPRECATE_14_3)
-	virtual inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0x0))
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0x0))
 	{
 		return pOutValue ? ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift) : false;
 	}
@@ -143,7 +143,7 @@ public:
 		@note		This function should be used only when there is no higher-level function available to accomplish the desired task.
 		@note		The mask and shift parameters are ignored when reading a virtual register.
 	**/
-	virtual bool	ReadRegister (const ULWord inRegisterNumber,  ULWord & outValue,  const ULWord inMask = 0xFFFFFFFF,  const ULWord inShift = 0);
+	AJA_VIRTUAL bool	ReadRegister (const ULWord inRegisterNumber,  ULWord & outValue,  const ULWord inMask = 0xFFFFFFFF,  const ULWord inShift = 0);
 
 	/**
 		@brief		This template function reads all or part of the 32-bit contents of a specific register (real or virtual)
@@ -170,68 +170,124 @@ public:
 								return result;
 							}
 
-	// Read multiple registers at once.
-	virtual bool ReadRegisterMulti(	ULWord numRegs,
-									ULWord *whichRegisterFailed,
-							  		NTV2ReadWriteRegisterSingle aRegs[]);	///< @deprecated	Use CNTV2Card::ReadRegisters instead.
+#if !defined(READREGMULTICHANGE)
+	/**
+		@brief		Reads the register(s) specified by the given ::NTV2RegInfo sequence.
+		@param[in]	inOutValues		Specifies the register(s) to be read, and upon return, contains their values.
+		@return		True only if all registers were read successfully;  otherwise false.
+		@note		This operation is not guaranteed to be performed atomically.
+	**/
+	AJA_VIRTUAL bool	ReadRegisters (NTV2RegisterReads & inOutValues);
+#endif	//	!defined(READREGMULTICHANGE)
 
-	virtual bool RestoreHardwareProcampRegisters() = 0;
+	AJA_VIRTUAL bool	ReadRegisterMulti (const ULWord numRegs, ULWord * pOutWhichRegFailed, NTV2RegInfo aRegs[]);	///< @deprecated	Use CNTV2DriverInterface::ReadRegisters instead.
+
+	AJA_VIRTUAL bool	RestoreHardwareProcampRegisters() = 0;
 
 	/**
 		@brief		Transfers data between the AJA device and the host. This function will block and not return to the caller until
 					the transfer has finished or failed.
-		@param[in]	inDMAEngine		Specifies the device DMA engine to use. Use NTV2_DMA_FIRST_AVAILABLE for most applications.
-									(Use the ::NTV2DeviceGetNumDMAEngines function to determine how many are available.)
-		@param[in]	inIsRead		Specifies the transfer direction. Use 'true' for reading (device-to-host).
-									Use 'false' for writing (host-to-device).
-		@param[in]	inFrameNumber	Specifies the zero-based frame number of the starting frame to be transferred to/from the device.
-		@param		pFrameBuffer	Specifies a valid, non-NULL address of the host buffer. If reading (device-to-host), this memory
-									will be written into. If writing (host-to-device), this memory will be read from.
-		@param[in]	inOffsetBytes	Specifies the byte offset into the device frame buffer where the data transfer will start.
-		@param[in]	inByteCount		Specifies the total number of bytes to be transferred.
-		@param[in]	inSynchronous	This parameter is obsolete, and ignored.
+		@param[in]	inDMAEngine			Specifies the device DMA engine to use. Use NTV2_DMA_FIRST_AVAILABLE for most applications.
+										(Use the ::NTV2DeviceGetNumDMAEngines function to determine how many are available.)
+		@param[in]	inIsRead			Specifies the transfer direction. Use 'true' for reading (device-to-host).
+										Use 'false' for writing (host-to-device).
+		@param[in]	inFrameNumber		Specifies the zero-based frame number of the starting frame to be transferred to/from the device.
+		@param		pFrameBuffer		Specifies a valid, non-NULL address of the host buffer. If reading (device-to-host), this memory
+										will be written into. If writing (host-to-device), this memory will be read from.
+		@param[in]	inOffsetBytes		Specifies the byte offset into the device frame buffer where the data transfer will start.
+		@param[in]	inTotalByteCount	Specifies the total number of bytes to be transferred.
+		@param[in]	inSynchronous		This parameter is obsolete, and ignored.
 		@return		True if successful; otherwise false.
 		@note		The host buffer must be at least inByteCount + inOffsetBytes in size; otherwise, host memory will be corrupted,
 					or a bus error or other runtime exception may occur.
 	**/
-    virtual bool DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
-								const bool			inIsRead,
-								const ULWord		inFrameNumber,
-								ULWord *			pFrameBuffer,
-								const ULWord		inOffsetBytes,
-								const ULWord		inByteCount,
-								const bool			inSynchronous = true);
+    AJA_VIRTUAL bool DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
+									const bool			inIsRead,
+									const ULWord		inFrameNumber,
+									ULWord *			pFrameBuffer,
+									const ULWord		inOffsetBytes,
+									const ULWord		inTotalByteCount,
+									const bool			inSynchronous = true);
 
-	virtual bool DmaUnlock   (void)  = 0;
+	/**
+		@brief		Transfers data between the AJA device and the host. This function will block and not
+					return to the caller until the transfer has finished or failed.
+		@param[in]	inDMAEngine			Specifies the device DMA engine to use. Use ::NTV2_DMA_FIRST_AVAILABLE
+										for most applications. (Use the ::NTV2DeviceGetNumDMAEngines function
+										to determine how many are available.)
+		@param[in]	inIsRead			Specifies the transfer direction. Use 'true' for reading (device-to-host).
+										Use 'false' for writing (host-to-device).
+		@param[in]	inFrameNumber		Specifies the zero-based frame number of the starting frame to be
+										transferred to/from the device.
+		@param		pFrameBuffer		Specifies a valid, non-NULL address of the host buffer. If reading
+										(device-to-host), this memory will be written into. If writing
+										(host-to-device), this memory will be read from.
+		@param[in]	inCardOffsetBytes	Specifies the byte offset into the device frame buffer where the data
+										transfer will start.
+		@param[in]	inTotalByteCount	Specifies the total number of bytes to be transferred.
+		@param[in]	inNumSegments		Specifies the number of segments to transfer. Note that this determines
+										the number of bytes per segment (by dividing into <i>inTotalByteCount</i>).
+		@param[in]	inHostPitchPerSeg	Specifies the number of bytes to increment the host memory pointer
+										after each segment is transferred.
+		@param[in]	inCardPitchPerSeg	Specifies the number of bytes to increment the on-device memory pointer
+										after each segment is transferred.
+		@param[in]	inSynchronous		This parameter is obsolete, and ignored.
+		@return		True if successful; otherwise false.
+		@note		The host buffer must be at least inByteCount + inOffsetBytes in size; otherwise, host memory will be corrupted,
+					or a bus error or other runtime exception may occur.
+	**/
+	AJA_VIRTUAL bool DmaTransfer (	const NTV2DMAEngine inDMAEngine,
+									const bool inIsRead,
+									const ULWord inFrameNumber,
+									ULWord * pFrameBuffer,
+									const ULWord inCardOffsetBytes,
+									const ULWord inTotalByteCount,
+									const ULWord inNumSegments,
+									const ULWord inHostPitchPerSeg,
+									const ULWord inCardPitchPerSeg,
+									const bool inSynchronous = true)	= 0;
 
-	virtual bool CompleteMemoryForDMA (ULWord * pFrameBuffer)  = 0;
+	AJA_VIRTUAL bool DmaTransfer (	const NTV2DMAEngine inDMAEngine,
+									const NTV2Channel inDMAChannel,
+									const bool inTarget,
+									const ULWord inFrameNumber,
+									const ULWord inCardOffsetBytes,
+									const ULWord inByteCount,
+									const ULWord inNumSegments,
+									const ULWord inSegmentHostPitch,
+									const ULWord inSegmentCardPitch,
+									const PCHANNEL_P2P_STRUCT & inP2PData)	= 0;
+
+	AJA_VIRTUAL bool DmaUnlock   (void)  = 0;
+
+	AJA_VIRTUAL bool CompleteMemoryForDMA (ULWord * pFrameBuffer)  = 0;
 
 
-	virtual bool PrepareMemoryForDMA (ULWord * pFrameBuffer, ULWord ulNumBytes)  = 0;
+	AJA_VIRTUAL bool PrepareMemoryForDMA (ULWord * pFrameBuffer, ULWord ulNumBytes)  = 0;
 
 
-	virtual bool ConfigureInterrupt (bool bEnable,  INTERRUPT_ENUMS eInterruptType) = 0;
+	AJA_VIRTUAL bool ConfigureInterrupt (bool bEnable,  INTERRUPT_ENUMS eInterruptType) = 0;
 
-	virtual bool MapFrameBuffers (void)  = 0;
+	AJA_VIRTUAL bool MapFrameBuffers (void)  = 0;
 
-	virtual bool UnmapFrameBuffers (void)  = 0;
+	AJA_VIRTUAL bool UnmapFrameBuffers (void)  = 0;
 
-	virtual bool MapRegisters (void)  = 0;
+	AJA_VIRTUAL bool MapRegisters (void)  = 0;
 
-	virtual bool UnmapRegisters (void)  = 0;
+	AJA_VIRTUAL bool UnmapRegisters (void)  = 0;
 
-	virtual bool MapXena2Flash (void)  = 0;
+	AJA_VIRTUAL bool MapXena2Flash (void)  = 0;
 
-	virtual bool UnmapXena2Flash (void)  = 0;
+	AJA_VIRTUAL bool UnmapXena2Flash (void)  = 0;
 
-	virtual bool ConfigureSubscription (bool bSubscribe, INTERRUPT_ENUMS eInterruptType, PULWord & hSubcription);
+	AJA_VIRTUAL bool ConfigureSubscription (bool bSubscribe, INTERRUPT_ENUMS eInterruptType, PULWord & hSubcription);
 
-	virtual bool GetInterruptCount (INTERRUPT_ENUMS eInterrupt,
+	AJA_VIRTUAL bool GetInterruptCount (INTERRUPT_ENUMS eInterrupt,
 								    ULWord *pCount)  = 0;
 
-	virtual bool WaitForInterrupt (INTERRUPT_ENUMS eInterrupt, ULWord timeOutMs = 68);
+	AJA_VIRTUAL bool WaitForInterrupt (INTERRUPT_ENUMS eInterrupt, ULWord timeOutMs = 68);
 
-	virtual bool	AutoCirculate (AUTOCIRCULATE_DATA &autoCircData);
+	AJA_VIRTUAL bool	AutoCirculate (AUTOCIRCULATE_DATA &autoCircData);
 
 	/**
 		@brief	Sends a message to the NTV2 driver.
@@ -240,9 +296,9 @@ public:
 							Valid messages start with an NTV2_HEADER and end with an NTV2_TRAILER.
 		@return	True if successful;  otherwise false.
 	**/
-	virtual bool NTV2Message (NTV2_HEADER * pInMessage);
+	AJA_VIRTUAL bool NTV2Message (NTV2_HEADER * pInMessage);
 
-	virtual bool ControlDriverDebugMessages(NTV2_DriverDebugMessageSet msgSet,
+	AJA_VIRTUAL bool ControlDriverDebugMessages(NTV2_DriverDebugMessageSet msgSet,
 		  									bool enable ) = 0;
 
 	/**
@@ -252,13 +308,13 @@ public:
 					power-up or wake from sleep. Calls to Open, IsOpen, ReadRegister and WriteRegister will all succeed,
 					but the device won't be capable of either ingesting or playing video or performing DMA operations.
 	**/
-    virtual bool		IsDeviceReady (bool inCheckValid = false);
-	virtual bool		IsMBSystemValid (void);
-	virtual bool		IsMBSystemReady (void);
+    AJA_VIRTUAL bool		IsDeviceReady (const bool inCheckValid = false);
+	AJA_VIRTUAL bool		IsMBSystemValid (void);
+	AJA_VIRTUAL bool		IsMBSystemReady (void);
 #if !defined(NTV2_DEPRECATE_15_0)
-	virtual inline bool	IsKonaIPDevice (void)			{return IsIPDevice();}	///< @deprecated	Call CNTV2Card::IsIPDevice instead.
+	AJA_VIRTUAL inline bool	IsKonaIPDevice (void)			{return IsIPDevice();}	///< @deprecated	Call CNTV2Card::IsIPDevice instead.
 #endif //	!defined(NTV2_DEPRECATE_12_7)
-	virtual inline bool	IsIPDevice (void)				{return ::NTV2DeviceCanDoIP(GetDeviceID());}	///< @return	True if I am an IP device (instead of SDI or HDMI).
+	AJA_VIRTUAL inline bool	IsIPDevice (void)				{return ::NTV2DeviceCanDoIP(GetDeviceID());}	///< @return	True if I am an IP device (instead of SDI or HDMI).
 
 
     // Utility methods:
@@ -271,42 +327,42 @@ public:
 		@brief	Returns true if I'm able to communicate with the device I represent.
 		@return	True if I'm able to communicate with the device I represent;  otherwise false.
 	**/
-	virtual inline bool			IsOpen (void) const									{ return _boardOpened; }
+	AJA_VIRTUAL inline bool			IsOpen (void) const									{ return _boardOpened; }
 
 	AJA_VIRTUAL void			InitMemberVariablesOnOpen (NTV2FrameGeometry frameGeometry, NTV2FrameBufferFormat frameFormat);
 
-	virtual inline ULWord		GetPCISlotNumber (void) const						{ return _pciSlot; }
+	AJA_VIRTUAL inline ULWord		GetPCISlotNumber (void) const						{ return _pciSlot; }
 
-	virtual inline Word			SleepMs (LWord msec) const							{ (void) msec; return 0; }
+	AJA_VIRTUAL inline Word			SleepMs (LWord msec) const							{ (void) msec; return 0; }
 
-	virtual inline ULWord		GetNumFrameBuffers (void) const						{ return _ulNumFrameBuffers; }
-	virtual inline ULWord		GetAudioFrameBufferNumber (void) const				{ return (GetNumFrameBuffers () - 1); }
-	virtual inline ULWord		GetFrameBufferSize (void) const						{ return _ulFrameBufferSize; }
+	AJA_VIRTUAL inline ULWord		GetNumFrameBuffers (void) const						{ return _ulNumFrameBuffers; }
+	AJA_VIRTUAL inline ULWord		GetAudioFrameBufferNumber (void) const				{ return (GetNumFrameBuffers () - 1); }
+	AJA_VIRTUAL inline ULWord		GetFrameBufferSize (void) const						{ return _ulFrameBufferSize; }
 
-	virtual bool DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bitFileInfo,  NTV2BitFileType bitFileType = NTV2_VideoProcBitFile);
+	AJA_VIRTUAL bool DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bitFileInfo,  NTV2BitFileType bitFileType = NTV2_VideoProcBitFile);
 
-	virtual bool DriverGetBuildInformation (BUILD_INFO_STRUCT & outBuildInfo);
+	AJA_VIRTUAL bool DriverGetBuildInformation (BUILD_INFO_STRUCT & outBuildInfo);
 
-	virtual bool GetPackageInformation(PACKAGE_INFO_STRUCT & packageInfo);
+	AJA_VIRTUAL bool GetPackageInformation(PACKAGE_INFO_STRUCT & packageInfo);
 
-	virtual bool BitstreamWrite (const NTV2_POINTER & inBuffer, const bool inFragment, const bool inSwap);
-	virtual bool BitstreamReset (const bool inConfiguration, const bool inInterface);
-	virtual bool BitstreamStatus (NTV2ULWordVector & outRegValues);
+	AJA_VIRTUAL bool BitstreamWrite (const NTV2_POINTER & inBuffer, const bool inFragment, const bool inSwap);
+	AJA_VIRTUAL bool BitstreamReset (const bool inConfiguration, const bool inInterface);
+	AJA_VIRTUAL bool BitstreamStatus (NTV2ULWordVector & outRegValues);
 	
 	// Functions for cards that support more than one bitfile
 #if !defined(NTV2_DEPRECATE_12_7)
-	virtual inline NTV2_DEPRECATED_f(bool SwitchBitfile (NTV2DeviceID boardID, NTV2BitfileType bitfile))	{ (void) boardID; (void) bitfile; return false; }	///< @deprecated	This function is obsolete.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SwitchBitfile (NTV2DeviceID boardID, NTV2BitfileType bitfile))	{ (void) boardID; (void) bitfile; return false; }	///< @deprecated	This function is obsolete.
 #endif
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	virtual inline const char *				GetHostName (void) const			{return _hostname.c_str();}
-	virtual inline NTV2NubProtocolVersion	GetNubProtocolVersion (void) const	{return _nubProtocolVersion;}
-	virtual inline bool						IsRemote (void) const				{return _remoteHandle != INVALID_NUB_HANDLE;}
+	AJA_VIRTUAL inline std::string				GetHostName (void) const			{return _pRPCAPI ? _pRPCAPI->Name() : "";}
+	AJA_VIRTUAL inline NTV2NubProtocolVersion	GetNubProtocolVersion (void) const	{return _pRPCAPI ? _pRPCAPI->ProtocolVersion() : ntv2NubProtocolVersionNone;}
+	AJA_VIRTUAL inline bool						IsRemote (void) const				{return _pRPCAPI  &&  _pRPCAPI->IsConnected();}
 #else
-	virtual inline const char *				GetHostName (void) const			{return AJA_NULL;}
-	virtual inline bool						IsRemote (void) const				{return false;}
+	AJA_VIRTUAL inline std::string				GetHostName (void) const			{return "";}
+	AJA_VIRTUAL inline bool						IsRemote (void) const				{return false;}
 #endif
 
-    virtual inline bool						HevcSendMessage (HevcMessageHeader * /*pMessage*/)		{ return false; }
+    AJA_VIRTUAL inline bool						HevcSendMessage (HevcMessageHeader * /*pMessage*/)		{ return false; }
 
 #if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 	/**
@@ -314,13 +370,13 @@ public:
 	**/
 	///@{
 public:
-	virtual bool				GetRecordedRegisterWrites (NTV2RegisterWrites & outRegWrites) const;	///< @brief	Answers with the recorded register writes.
-	virtual bool				StartRecordRegisterWrites (const bool inSkipActualWrites = false);	///< @brief	Starts recording all WriteRegister calls.
-	virtual bool				IsRecordingRegisterWrites (void) const;		///< @return	True if WriteRegister calls are currently being recorded (and not paused);  otherwise false.
-	virtual bool				StopRecordRegisterWrites (void);			///< @brief		Stops recording all WriteRegister calls.
-	virtual bool				PauseRecordRegisterWrites (void);			///< @brief		Pauses recording WriteRegister calls.
-	virtual bool				ResumeRecordRegisterWrites (void);			///< @brief		Resumes recording WriteRegister calls (after a prior call to PauseRecordRegisterWrites).
-	virtual ULWord				GetNumRecordedRegisterWrites (void) const;	///< @return	The number of recorded WriteRegister calls.
+	AJA_VIRTUAL bool				GetRecordedRegisterWrites (NTV2RegisterWrites & outRegWrites) const;	///< @brief	Answers with the recorded register writes.
+	AJA_VIRTUAL bool				StartRecordRegisterWrites (const bool inSkipActualWrites = false);	///< @brief	Starts recording all WriteRegister calls.
+	AJA_VIRTUAL bool				IsRecordingRegisterWrites (void) const;		///< @return	True if WriteRegister calls are currently being recorded (and not paused);  otherwise false.
+	AJA_VIRTUAL bool				StopRecordRegisterWrites (void);			///< @brief		Stops recording all WriteRegister calls.
+	AJA_VIRTUAL bool				PauseRecordRegisterWrites (void);			///< @brief		Pauses recording WriteRegister calls.
+	AJA_VIRTUAL bool				ResumeRecordRegisterWrites (void);			///< @brief		Resumes recording WriteRegister calls (after a prior call to PauseRecordRegisterWrites).
+	AJA_VIRTUAL ULWord				GetNumRecordedRegisterWrites (void) const;	///< @return	The number of recorded WriteRegister calls.
 protected:
 	NTV2RegisterWrites			mRegWrites;			///< @brief	Stores WriteRegister data
 	mutable AJALock				mRegWritesLock;		///< @brief	Guard mutex for mRegWrites
@@ -334,11 +390,8 @@ protected:
 	virtual inline NTV2_DEPRECATED_f(bool	DisplayNTV2Error (const char * str))	{ (void) str; return  false;}	///< @deprecated	This function is obsolete.
 #endif
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	virtual bool				OpenRemote (UWord inDeviceIndex,
-											bool displayErrorMessage,
-											UWord ulBoardType,
-											const char * hostname);
-	virtual bool				CloseRemote (void);
+	AJA_VIRTUAL bool				OpenRemote (UWord inDeviceIndex,const std::string & inHostName);
+	AJA_VIRTUAL bool				CloseRemote (void);
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	AJA_VIRTUAL bool			ParseFlashHeader (BITFILE_INFO_STRUCT &bitFileInfo);
 
@@ -347,7 +400,7 @@ protected:
 		@param[in]	eInterruptType	Specifies the type of interrupt that occurred, which determines
 									the counter to be incremented.
 	**/
-	virtual void	BumpEventCount (const INTERRUPT_ENUMS eInterruptType);
+	AJA_VIRTUAL void	BumpEventCount (const INTERRUPT_ENUMS eInterruptType);
 
 private:
 	/**
@@ -357,7 +410,7 @@ private:
 		@param[in]	inRHS	The rvalue to be assigned to the lvalue.
 		@return	A non-constant reference to the lvalue.
 	**/
-	virtual CNTV2DriverInterface & operator = (const CNTV2DriverInterface & inRHS);
+	AJA_VIRTUAL CNTV2DriverInterface & operator = (const CNTV2DriverInterface & inRHS);
 
 	/**
 		@brief	My copy constructor.
@@ -367,42 +420,33 @@ private:
 	**/
 	CNTV2DriverInterface (const CNTV2DriverInterface & inObjToCopy);
 
-#if defined(NTV2_FORCE_NO_DEVICE)
-	virtual void	NTV2NoDevInitRegisters(void);
-#endif
-
 protected:
-
-    UWord					_boardNumber;			///< @brief	My device index number.
-    bool					_boardOpened;			///< @brief	True if I'm open and connected to the device.
-	NTV2DeviceID			_boardID;				///< @brief	My cached device ID.
-    bool					_displayErrorMessage;	///< @brief	This is obsolete.
-	ULWord					_pciSlot;				//	FIXFIXFIX	Replace this with a std::string that identifies my location in the host device tree.
-	ULWord					_programStatus;
+    UWord			_boardNumber;			///< @brief	My device index number.
+    bool			_boardOpened;			///< @brief	True if I'm open and connected to the device.
+	NTV2DeviceID	_boardID;				///< @brief	My cached device ID.
+    bool			_displayErrorMessage;	///< @brief	This is obsolete.
+	ULWord			_pciSlot;				//	FIXFIXFIX	Replace this with a std::string that identifies my location in the host device tree.
+	ULWord			_programStatus;
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	struct sockaddr_in		_sockAddr;				///< @brief	Socket address (if using nub to talk to remote host)
-	AJASocket				_sockfd;				///< @brief	Socket descriptor (if using nub to talk to remote host)
-	std::string				_hostname;				///< @brief	Remote host name (if using nub to talk to remote host)
-	LWord					_remoteHandle;			///< @brief	Remote host handle (if using nub to talk to remote host)
-	NTV2NubProtocolVersion	_nubProtocolVersion;	///< @brief	Protocol version (if using nub to talk to remote host)
+	NTV2RPCAPI *	_pRPCAPI;
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-	PULWord					mInterruptEventHandles	[eNumInterruptTypes];	///< @brief	For subscribing to each possible event, one for each interrupt type
-	ULWord					mEventCounts			[eNumInterruptTypes];	///< @brief	My event tallies, one for each interrupt type. Note that these
-																			///<		tallies are different from the interrupt tallies kept by the driver.
-	ULWord *				_pFrameBaseAddress;
+	PULWord			mInterruptEventHandles	[eNumInterruptTypes];	///< @brief	For subscribing to each possible event, one for each interrupt type
+	ULWord			mEventCounts			[eNumInterruptTypes];	///< @brief	My event tallies, one for each interrupt type. Note that these
+																	///<		tallies are different from the interrupt tallies kept by the driver.
+	ULWord *		_pFrameBaseAddress;
 
 	// for old KSD and KHD boards
-	ULWord *				_pCh1FrameBaseAddress;			//	DEPRECATE!
-	ULWord *				_pCh2FrameBaseAddress;			//	DEPRECATE!
+	ULWord *		_pCh1FrameBaseAddress;			//	DEPRECATE!
+	ULWord *		_pCh2FrameBaseAddress;			//	DEPRECATE!
 
-	ULWord *				_pRegisterBaseAddress;
-	ULWord					_pRegisterBaseAddressLength;
-	ULWord *				_pFS1FPGARegisterBaseAddress;	//	DEPRECATE!
+	ULWord *		_pRegisterBaseAddress;
+	ULWord			_pRegisterBaseAddressLength;
+	ULWord *		_pFS1FPGARegisterBaseAddress;	//	DEPRECATE!
 
-	ULWord *				_pXena2FlashBaseAddress;
+	ULWord *		_pXena2FlashBaseAddress;
 
-	ULWord					_ulNumFrameBuffers;
-	ULWord					_ulFrameBufferSize;
+	ULWord			_ulNumFrameBuffers;
+	ULWord			_ulFrameBufferSize;
 
 };	//	CNTV2DriverInterface
 

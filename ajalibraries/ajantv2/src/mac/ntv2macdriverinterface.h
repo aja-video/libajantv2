@@ -132,35 +132,35 @@ public:
 	AJA_VIRTUAL bool	GetInterruptCount( INTERRUPT_ENUMS eInterrupt, ULWord *pCount );
 	AJA_VIRTUAL bool	WaitForChangeEvent( UInt32 timeout = 0 );
 	AJA_VIRTUAL bool    GetQuickTimeTime( UInt32 *time, UInt32 *scale );	//	Formerly called "GetTime" which shadowed CNTV2KonaFlashProgram::GetTime
-	AJA_VIRTUAL bool	DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
-										const bool			inIsRead,
-										const ULWord		inFrameNumber,
-										ULWord *			pFrameBuffer,
-										const ULWord		inOffsetBytes,
-										const ULWord		inByteCount,
-										const bool			inSynchronous = true);
+	AJA_VIRTUAL bool	DmaTransfer (const NTV2DMAEngine inDMAEngine,
+									const bool		inIsRead,
+									const ULWord	inFrameNumber,
+									ULWord *		pFrameBuffer,
+									const ULWord	inOffsetBytes,
+									const ULWord	inByteCount,
+									const bool		inSynchronous = true);
 
-	AJA_VIRTUAL bool	DmaTransfer ( NTV2DMAEngine DMAEngine,
-									  bool bRead,
-									  ULWord frameNumber,
-									  ULWord * pFrameBuffer,
-									  ULWord offsetBytes,
-									  ULWord bytes,
-									  ULWord videoNumSegments,
-									  ULWord videoSegmentHostPitch,
-									  ULWord videoSegmentCardPitch,
-									  bool bSync );
+	AJA_VIRTUAL bool	DmaTransfer (const NTV2DMAEngine inDMAEngine,
+									const bool inIsRead,
+									const ULWord inFrameNumber,
+									ULWord * pFrameBuffer,
+									const ULWord inCardOffsetBytes,
+									const ULWord inByteCount,
+									const ULWord inNumSegments,
+									const ULWord inSegmentHostPitch,
+									const ULWord inSegmentCardPitch,
+									const bool inSynchronous = true);
 
-	AJA_VIRTUAL bool	DmaTransfer (NTV2DMAEngine DMAEngine,
-									NTV2Channel DMAChannel,
-									bool bTarget,
-									ULWord frameNumber,
-									ULWord frameOffset,
-									ULWord videoSize,
-									ULWord videoNumSegments,
-									ULWord videoSegmentHostPitch,
-									ULWord videoSegmentCardPitch,
-									PCHANNEL_P2P_STRUCT pP2PData);
+	AJA_VIRTUAL bool	DmaTransfer (const NTV2DMAEngine inDMAEngine,
+									const NTV2Channel inDMAChannel,
+									const bool inIsTarget,
+									const ULWord inFrameNumber,
+									const ULWord inCardOffsetBytes,
+									const ULWord inByteCount,
+									const ULWord inNumSegments,
+									const ULWord inSegmentHostPitch,
+									const ULWord inSegmentCardPitch,
+									const PCHANNEL_P2P_STRUCT & inP2PData);
 
 	AJA_VIRTUAL bool	AutoCirculate( AUTOCIRCULATE_DATA &autoCircData );
 	AJA_VIRTUAL bool	NTV2Message (NTV2_HEADER * pInMessage);

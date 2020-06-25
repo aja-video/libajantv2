@@ -6969,15 +6969,21 @@ bool CNTV2Card::SetWarmBootFirmwareReload(bool enable)
 	return WriteRegister(kRegCPLDVersion, enable ? 1:0, BIT(8), 8);
 }
 
+#if defined(READREGMULTICHANGE)
 bool CNTV2Card::ReadRegisters (const NTV2RegNumSet & inRegisters,  NTV2RegisterValueMap & outValues)
 {
 	outValues.clear ();
-	if (!_boardOpened)
+	if (!IsOpen())
 		return false;		//	Device not open!
+	if (inRegisters.empty())
+		return false;		//	Nothing to do!
 
-	NTV2GetRegisters	getRegsParams (inRegisters);
-	if (NTV2Message (reinterpret_cast <NTV2_HEADER *> (&getRegsParams)))
-		return getRegsParams.GetRegisterValues (outValues);
+	NTV2GetRegisters getRegsParams (inRegisters);
+	if (NTV2Message(reinterpret_cast <NTV2_HEADER*>(&getRegsParams)))
+	{
+		if (!getRegsParams.GetRegisterValues(outValues))
+			return false;
+	}
 	else	//	Non-atomic user-space workaround until GETREGS implemented in driver...
 		for (NTV2RegNumSetConstIter iter(inRegisters.begin());  iter != inRegisters.end();  ++iter)
 		{
@@ -6986,7 +6992,6 @@ bool CNTV2Card::ReadRegisters (const NTV2RegNumSet & inRegisters,  NTV2RegisterV
 				if (ReadRegister (*iter, tempVal))
 					outValues[*iter] = tempVal;
 		}
-
 	return outValues.size() == inRegisters.size();
 }
 
@@ -7010,6 +7015,7 @@ bool CNTV2Card::ReadRegisters (NTV2RegisterReads & inOutValues)
 					return false;
 	return true;
 }
+#endif	//	defined(READREGMULTICHANGE)
 
 bool CNTV2Card::WriteRegisters (const NTV2RegisterWrites & inRegWrites)
 {
