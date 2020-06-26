@@ -6029,37 +6029,194 @@ typedef enum
 										mDstElementsPerRow	(0)		{setElementLength(1);}
 
 				// Inquiry -- Essentials
-				inline bool		isValid (void) const				{return getSegmentCount() && getSegmentLength() ? true : false;}
+				/**
+					@return	True if valid (i.e. a non-zero segment count and segment length);  otherwise false.
+				**/
+				inline bool		isValid (void) const	{return getSegmentCount() && getSegmentLength() ? true : false;}
+
+				/**
+					@return	The number of segments.
+				**/
 				inline ULWord	getSegmentCount (void) const		{return mNumSegments;}
+
+				/**
+					@return	The segment length, in elements.
+				**/
 				inline ULWord	getSegmentLength (void) const		{return mElementsPerSegment;}
+
+				/**
+					@return	The offset, in elements, to the start of the first source segment.
+				**/
 				inline ULWord	getSourceOffset (void) const		{return mInitialSrcOffset;}
+
+				/**
+					@return	The offset, in elements, to the start of the first destination segment.
+				**/
 				inline ULWord	getDestOffset (void) const			{return mInitialDstOffset;}
+
+				/**
+					@return	The number of elements between each source row.
+				**/
 				inline ULWord	getSourcePitch (void) const			{return mSrcElementsPerRow;}
+
+				/**
+					@return	The number of elements between each destination row.
+				**/
 				inline ULWord	getDestPitch (void) const			{return mDstElementsPerRow;}
+
 				// Inquiry -- Non-Essentials
+				/**
+					@return	The size of each element, in bytes.
+				**/
 				inline ULWord	getElementLength (void) const		{return ULWord(1 << (mFlags & 3));}
+
+				/**
+					@return	True if source rows should be traversed bottom-to-top;  otherwise false.
+				**/
 				inline bool		isSourceBottomUp (void) const		{return mFlags & BIT(8) ? true : false;}
+
+				/**
+					@return	True if source rows should be traversed top-to-bottom;  otherwise false.
+				**/
 				inline bool		isSourceTopDown (void) const		{return mFlags & BIT(8) ? false : true;}
+
+				/**
+					@return	True if destination rows should be traversed bottom-to-top;  otherwise false.
+				**/
 				inline bool		isDestBottomUp (void) const			{return mFlags & BIT(9) ? true : false;}
+
+				/**
+					@return	True if destination rows should be traversed top-to-bottom;  otherwise false.
+				**/
 				inline bool		isDestTopDown (void) const			{return mFlags & BIT(9) ? false : true;}
+
+				/**
+					@brief		Writes a human-readable description of me into a given output stream.
+					@param		inStrm		A non-constant reference to the output stream that will receive the description.
+					@param[in]	inDumpSegs	If true, also dumps a description of each segment. Defaults to false.
+					@return		A reference to the output stream.
+				**/
 				std::ostream &	Print (std::ostream & inStrm, const bool inDumpSegments = false) const;
+
+				/**
+					@return	The total number of elements (i.e. the product of the segment count and length).
+				**/
 				ULWord			getTotalElements (void) const		{return getSegmentCount() * getSegmentLength();}
+
+				/**
+					@return	The total number of bytes.
+				**/
 				ULWord			getTotalBytes (void) const			{return getTotalElements() * getElementLength();}
+
+				/**
+					@param[in]	inInclDecl	If true, the default, include a declaration statement in the source code.
+					@return		A string containing C++ source code that, when compiled, will result in a NTV2SegmentedXferInfo
+								instance that will perfectly match me.
+				**/
 				std::string		getSourceCode (const bool inInclDecl = true) const;
 
 				// Changing
-				inline NTV2SegmentedXferInfo &	setSegmentCount (const ULWord inNumSegments)	{mNumSegments = inNumSegments;  return *this;}
-				inline NTV2SegmentedXferInfo &	setSegmentLength (const ULWord inNumElements)	{mElementsPerSegment = inNumElements;  return *this;}
+
+				inline NTV2SegmentedXferInfo &	reset (void);	///< @brief	Resets me to an invalid (all zero) state.
+
+				/**
+					@brief		Sets both my segment count and length.
+					@param[in]	inNumSegs	My new segment count.
+					@param[in]	inSegLength	My new segment length, in elements.
+					@return		A reference to me.
+				**/
+				inline NTV2SegmentedXferInfo &	setSegmentInfo (const ULWord inNumSegs, const ULWord inSegLength)
+												{return setSegmentCount(inNumSegs).setSegmentLength(inSegLength);}
+
+				/**
+					@brief		Sets my segment count.
+					@param[in]	inNumSegments	My new segment count.
+					@return		A reference to me.
+				**/
+				inline NTV2SegmentedXferInfo &	setSegmentCount (const ULWord inNumSegments)
+												{mNumSegments = inNumSegments;  return *this;}
+
+				/**
+					@brief		Sets my segment length.
+					@param[in]	inNumElements	My new segment length, in elements.
+					@return		A reference to me.
+				**/
+				inline NTV2SegmentedXferInfo &	setSegmentLength (const ULWord inNumElements)
+												{mElementsPerSegment = inNumElements;  return *this;}
+
+				/**
+					@brief		A convenience function that sets both my source offset and pitch.
+					@param[in]	inOffset	The new offset, in elements, to the start of the first source segment.
+					@param[in]	inPitch		The new number of elements between each source row.
+					@return		A reference to me.
+				**/
 				inline NTV2SegmentedXferInfo &	setSourceInfo (const ULWord inOffset, const ULWord inPitch)
 												{return setSourceOffset(inOffset).setSourcePitch(inPitch);}
-				inline NTV2SegmentedXferInfo &	setSourceOffset (const ULWord inOffset)			{mInitialSrcOffset = inOffset;  return *this;}
-				inline NTV2SegmentedXferInfo &	setSourcePitch (const ULWord inPitch)			{mSrcElementsPerRow = inPitch;  return *this;}
-				inline NTV2SegmentedXferInfo &	setSourceDirection (const bool inTopDown)		{mFlags = (0xFFFFFFFF - BIT(8)); if (!inTopDown) mFlags |= BIT(8);  return *this;}
+
+				/**
+					@brief		Sets my source offset.
+					@param[in]	inOffset	The new offset, in elements, to the start of the first source segment.
+					@return		A reference to me.
+				**/
+				inline NTV2SegmentedXferInfo &	setSourceOffset (const ULWord inOffset)
+												{mInitialSrcOffset = inOffset;  return *this;}
+
+				/**
+					@brief		Sets my source pitch.
+					@param[in]	inPitch		The new number of elements between each source row.
+					@return		A reference to me.
+				**/
+				inline NTV2SegmentedXferInfo &	setSourcePitch (const ULWord inPitch)
+												{mSrcElementsPerRow = inPitch;  return *this;}
+
+				/**
+					@brief		Sets my source direction.
+					@param[in]	inTopDown	Specify true to traverse the source segments top-to-bottom;  otherwise specify false for bottom-to-top.
+					@return		A reference to me.
+				**/
+				inline NTV2SegmentedXferInfo &	setSourceDirection (const bool inTopDown)
+												{	mFlags &= (0xFFFFFFFF - BIT(8));
+													if (!inTopDown)
+														mFlags |= BIT(8);
+													return *this;
+												}
+
+				/**
+					@brief		A convenience function that sets both my destination offset and pitch.
+					@param[in]	inOffset	The new offset, in elements, to the start of the first destination segment.
+					@param[in]	inPitch		The new number of elements between each destination row.
+					@return		A reference to me.
+				**/
 				inline NTV2SegmentedXferInfo &	setDestInfo (const ULWord inOffset, const ULWord inPitch)
 												{return setDestOffset(inOffset).setDestPitch(inPitch);}
+
+				/**
+					@brief		Sets my destination offset.
+					@param[in]	inOffset	The new offset, in elements, to the start of the first destination segment.
+					@return		A reference to me.
+				**/
 				inline NTV2SegmentedXferInfo &	setDestOffset (const ULWord inOffset)			{mInitialDstOffset = inOffset;  return *this;}
+
+				/**
+					@brief		Sets my destination pitch.
+					@param[in]	inPitch		The new number of elements between each destination row.
+					@return		A reference to me.
+				**/
 				inline NTV2SegmentedXferInfo &	setDestPitch (const ULWord inPitch)				{mDstElementsPerRow = inPitch;  return *this;}
+
+				/**
+					@brief		Sets my destination scan direction.
+					@param[in]	inTopDown	Specify true to traverse the destination segments top-to-bottom;  otherwise specify false for bottom-to-top.
+					@return		A reference to me.
+				**/
 				inline NTV2SegmentedXferInfo &	setDestDirection (const bool inTopDown)			{mFlags = (0xFFFFFFFF - BIT(9)); if (!inTopDown) mFlags |= BIT(9);  return *this;}
+
+				/**
+					@brief		Sets my element length.
+					@param[in]	inBytesPerElement	The new element size, in bytes. Must be a power of two (1, 2, 4, or 8).
+					@note		This function does not transform any of my offsets, pitches or lengths.
+					@return		A reference to me.
+				**/
 				inline NTV2SegmentedXferInfo &	setElementLength (const ULWord inBytesPerElement)	
 												{
 													if (inBytesPerElement  &&  inBytesPerElement < 9)
@@ -6072,7 +6229,12 @@ typedef enum
 														}
 													return *this;
 												}
+				/**
+					@brief		Swaps my source and destination offsets and pitches.
+					@return		A reference to me.
+				**/
 				NTV2SegmentedXferInfo &			swapSourceAndDestination (void);
+
 			private:
 				ULWord	mFlags;					///< @brief	Lowest 2 bits determines element size, kRegMaskFrameOrientation is bit 10
 				ULWord	mNumSegments;			///< @brief	Number of segments to transfer (i.e. row count).

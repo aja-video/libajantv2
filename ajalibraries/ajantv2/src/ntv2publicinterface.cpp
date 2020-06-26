@@ -1159,6 +1159,19 @@ string NTV2SegmentedXferInfo::getSourceCode (const bool inInclDecl) const
 	return oss.str();
 }
 
+NTV2SegmentedXferInfo &	NTV2SegmentedXferInfo::reset (void)
+{
+	mFlags				= 0;
+	mNumSegments		= 0;
+	mElementsPerSegment	= 0;
+	mInitialSrcOffset	= 0;
+	mInitialDstOffset	= 0;
+	mSrcElementsPerRow	= 0;
+	mDstElementsPerRow	= 0;
+	setElementLength(1);
+	return *this;
+}
+
 NTV2SegmentedXferInfo & NTV2SegmentedXferInfo::swapSourceAndDestination (void)
 {
 	std::swap(mSrcElementsPerRow, mDstElementsPerRow);
