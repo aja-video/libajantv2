@@ -615,6 +615,8 @@ bool NTV2_POINTER::PutU64s (const ULWord64Sequence & inU64s, const size_t inU64O
 {
 	if (IsNULL())
 		return false;	//	No buffer or space
+	if (inU64s.empty())
+		return true;	//	Nothing to copy
 
 	size_t		maxU64s	(GetByteCount() / sizeof(uint64_t));
 	uint64_t *	pU64	(reinterpret_cast<uint64_t*>(GetHostAddress(ULWord(inU64Offset * sizeof(uint64_t)))));
@@ -641,6 +643,8 @@ bool NTV2_POINTER::PutU32s (const ULWordSequence & inU32s, const size_t inU32Off
 {
 	if (IsNULL())
 		return false;	//	No buffer or space
+	if (inU32s.empty())
+		return true;	//	Nothing to copy
 
 	size_t		maxU32s	(GetByteCount() / sizeof(uint32_t));
 	uint32_t *	pU32	(reinterpret_cast<uint32_t*>(GetHostAddress(ULWord(inU32Offset * sizeof(uint32_t)))));
@@ -667,6 +671,8 @@ bool NTV2_POINTER::PutU16s (const UWordSequence & inU16s, const size_t inU16Offs
 {
 	if (IsNULL())
 		return false;	//	No buffer or space
+	if (inU16s.empty())
+		return true;	//	Nothing to copy
 
 	size_t		maxU16s	(GetByteCount() / sizeof(uint16_t));
 	uint16_t *	pU16	(reinterpret_cast<uint16_t*>(GetHostAddress(ULWord(inU16Offset * sizeof(uint16_t)))));
@@ -693,6 +699,8 @@ bool NTV2_POINTER::PutU8s (const UByteSequence & inU8s, const size_t inU8Offset)
 {
 	if (IsNULL())
 		return false;	//	No buffer or space
+	if (inU8s.empty())
+		return true;	//	Nothing to copy
 
 	size_t		maxU8s	(GetByteCount());
 	uint8_t *	pU8		(reinterpret_cast<uint8_t*>(GetHostAddress(ULWord(inU8Offset))));
@@ -708,11 +716,11 @@ bool NTV2_POINTER::PutU8s (const UByteSequence & inU8s, const size_t inU8Offset)
 	::memcpy(pU8, &inU8s[0], maxU8s);
 #else
 	for (unsigned ndx(0);  ndx < maxU8s;  ndx++)
-#if defined(_DEBUG)
+	#if defined(_DEBUG)
 		*pU8++ = inU8s.at(ndx);
-#else
+	#else
 		*pU8++ = inU8s[ndx];
-#endif
+	#endif
 #endif
 	return true;
 }
@@ -1481,25 +1489,25 @@ bool NTV2_POINTER::SwapWith (NTV2_POINTER & inBuffer)
 
 bool NTV2_POINTER::IsContentEqual (const NTV2_POINTER & inBuffer, const ULWord inByteOffset, const ULWord inByteCount) const
 {
-	if (IsNULL () || inBuffer.IsNULL ())
+	if (IsNULL() || inBuffer.IsNULL())
 		return false;	//	NULL or empty
-	if (inBuffer.GetByteCount () != GetByteCount ())
+	if (inBuffer.GetByteCount() != GetByteCount())
 		return false;	//	Different byte counts
-	if (inBuffer.GetHostPointer () == GetHostPointer ())
+	if (inBuffer.GetHostPointer() == GetHostPointer())
 		return true;	//	Same buffer
 
-	ULWord	totalBytes	(GetByteCount());
+	ULWord	totalBytes(GetByteCount());
 	if (inByteOffset >= totalBytes)
 		return false;	//	Bad offset
 
 	totalBytes -= inByteOffset;
 
-	ULWord	byteCount	(inByteCount);
+	ULWord	byteCount(inByteCount);
 	if (byteCount > totalBytes)
 		byteCount = totalBytes;
 
-	const UByte *	pByte1 (reinterpret_cast <const UByte *> (GetHostPointer()));
-	const UByte *	pByte2 (reinterpret_cast <const UByte *> (inBuffer.GetHostPointer()));
+	const UByte *	pByte1 (reinterpret_cast<const UByte*>(GetHostPointer()));
+	const UByte *	pByte2 (reinterpret_cast<const UByte*>(inBuffer.GetHostPointer()));
 	pByte1 += inByteOffset;
 	pByte2 += inByteOffset;
 	return ::memcmp (pByte1, pByte2, byteCount) == 0;

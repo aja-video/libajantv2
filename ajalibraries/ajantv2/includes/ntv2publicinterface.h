@@ -6019,6 +6019,9 @@ typedef enum
 		class AJAExport NTV2SegmentedXferInfo
 		{
 			public:
+				/**
+					@brief	Constructs me as empty/invalid.
+				**/
 								NTV2SegmentedXferInfo()
 									:	mFlags				(0),
 										mNumSegments		(0),
@@ -6028,7 +6031,10 @@ typedef enum
 										mSrcElementsPerRow	(0),
 										mDstElementsPerRow	(0)		{setElementLength(1);}
 
-				// Inquiry -- Essentials
+				/**
+					@name	Inquiry -- Essentials
+				**/
+				///@{
 				/**
 					@return	True if valid (i.e. a non-zero segment count and segment length);  otherwise false.
 				**/
@@ -6063,8 +6069,12 @@ typedef enum
 					@return	The number of elements between each destination row.
 				**/
 				inline ULWord	getDestPitch (void) const			{return mDstElementsPerRow;}
+				///@}
 
-				// Inquiry -- Non-Essentials
+				/**
+					@name	Inquiry
+				**/
+				///@{
 				/**
 					@return	The size of each element, in bytes.
 				**/
@@ -6091,14 +6101,6 @@ typedef enum
 				inline bool		isDestTopDown (void) const			{return mFlags & BIT(9) ? false : true;}
 
 				/**
-					@brief		Writes a human-readable description of me into a given output stream.
-					@param		inStrm		A non-constant reference to the output stream that will receive the description.
-					@param[in]	inDumpSegs	If true, also dumps a description of each segment. Defaults to false.
-					@return		A reference to the output stream.
-				**/
-				std::ostream &	Print (std::ostream & inStrm, const bool inDumpSegments = false) const;
-
-				/**
 					@return	The total number of elements (i.e. the product of the segment count and length).
 				**/
 				ULWord			getTotalElements (void) const		{return getSegmentCount() * getSegmentLength();}
@@ -6109,13 +6111,37 @@ typedef enum
 				ULWord			getTotalBytes (void) const			{return getTotalElements() * getElementLength();}
 
 				/**
+					@return	The offset to the first element immediately past the last source segment.
+				**/
+				inline ULWord	getSourceEndOffset (void) const
+								{return getSourceOffset()  +  getSourcePitch() * getSegmentCount()  +  getSegmentLength();}
+
+				/**
+					@return	The offset to the first element immediately past the last destination segment.
+				**/
+				inline ULWord	getDestEndOffset (void) const
+								{return getDestOffset()  +  getDestPitch() * getSegmentCount()  +  getSegmentLength();}
+
+				/**
+					@brief		Writes a human-readable description of me into a given output stream.
+					@param		inStrm		A non-constant reference to the output stream that will receive the description.
+					@param[in]	inDumpSegs	If true, also dumps a description of each segment. Defaults to false.
+					@return		A reference to the output stream.
+				**/
+				std::ostream &	Print (std::ostream & inStrm, const bool inDumpSegments = false) const;
+
+				/**
 					@param[in]	inInclDecl	If true, the default, include a declaration statement in the source code.
 					@return		A string containing C++ source code that, when compiled, will result in a NTV2SegmentedXferInfo
 								instance that will perfectly match me.
 				**/
 				std::string		getSourceCode (const bool inInclDecl = true) const;
+				///@}
 
-				// Changing
+				/**
+					@name	Changing
+				**/
+				///@{
 
 				NTV2SegmentedXferInfo &	reset (void);	///< @brief	Resets me to an invalid (all zero) state.
 
@@ -6234,6 +6260,7 @@ typedef enum
 					@return		A reference to me.
 				**/
 				NTV2SegmentedXferInfo &			swapSourceAndDestination (void);
+				///@}
 
 			private:
 				ULWord	mFlags;					///< @brief	Lowest 2 bits determines element size, kRegMaskFrameOrientation is bit 10
