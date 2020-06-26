@@ -6117,7 +6117,7 @@ typedef enum
 
 				// Changing
 
-				inline NTV2SegmentedXferInfo &	reset (void);	///< @brief	Resets me to an invalid (all zero) state.
+				NTV2SegmentedXferInfo &	reset (void);	///< @brief	Resets me to an invalid (all zero) state.
 
 				/**
 					@brief		Sets both my segment count and length.
@@ -6320,13 +6320,13 @@ typedef enum
 
 				/**
 					@brief		Constructs me from another NTV2_POINTER instance.
-					@param[in]	inObj		NTV2_POINTER instance to copy.
+					@param[in]	inObj		NTV2_POINTER instance to "deep" copy into me.
 				**/
 				explicit		NTV2_POINTER (const NTV2_POINTER & inObj);
 
 				/**
 					@brief		Assigns me from another NTV2_POINTER instance.
-					@param[in]	inRHS		Specifies the NTV2_POINTER instance to assign (copy) to me.
+					@param[in]	inRHS		Specifies the NTV2_POINTER instance to assign ("deep" copy) to me.
 				**/
 				NTV2_POINTER &	operator = (const NTV2_POINTER & inRHS);
 
