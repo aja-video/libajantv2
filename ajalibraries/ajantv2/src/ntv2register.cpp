@@ -2191,7 +2191,7 @@ bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat 
 
 	SetVPIDTransferCharacteristics(inXferChars, channel);
 	SetVPIDColorimetry(inColorimetry, channel);
-	SetVPIDVPIDLuminance(inLuminance, channel);
+	SetVPIDLuminance(inLuminance, channel);
 	return status;
 }
 

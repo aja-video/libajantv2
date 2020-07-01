@@ -1368,7 +1368,15 @@ private:
 		DefineRegName	(kVRegHdrInMaxCLLCh1,					"kVRegHdrInMaxCLLCh1");
 		DefineRegName	(kVRegHdrInMaxFALLCh1,					"kVRegHdrInMaxFALLCh1");
 		DefineRegName	(kVRegHDRInOverrideState,				"kVRegHDRInOverrideState");
-		
+		DefineRegName	(kVRegNTV2VPIDRGBRange1,				"kVRegNTV2VPIDRGBRange1");
+		DefineRegName	(kVRegNTV2VPIDRGBRange2,				"kVRegNTV2VPIDRGBRange2");
+		DefineRegName	(kVRegNTV2VPIDRGBRange3,				"kVRegNTV2VPIDRGBRange3");
+		DefineRegName	(kVRegNTV2VPIDRGBRange4,				"kVRegNTV2VPIDRGBRange4");
+		DefineRegName	(kVRegNTV2VPIDRGBRange5,				"kVRegNTV2VPIDRGBRange5");
+		DefineRegName	(kVRegNTV2VPIDRGBRange6,				"kVRegNTV2VPIDRGBRange6");
+		DefineRegName	(kVRegNTV2VPIDRGBRange7,				"kVRegNTV2VPIDRGBRange7");
+		DefineRegName	(kVRegNTV2VPIDRGBRange8,				"kVRegNTV2VPIDRGBRange8");
+
 		DefineRegName	(kVRegPCIMaxReadRequestSize,			"kVRegPCIMaxReadRequestSize");
 		DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
 		DefineRegName	(kVRegFirstOEM,							"kVRegFirstOEM");
