@@ -197,7 +197,7 @@ string NTV2_POINTER::AsString (UWord inDumpMaxBytes) const
 {
 	ostringstream	oss;
 	oss << xHEX0N(GetRawHostPointer(),16) << ":" << DEC(GetByteCount()) << " bytes";
-	if (inDumpMaxBytes)
+	if (inDumpMaxBytes  &&  GetHostPointer())
 	{
 		oss << ":";
 		if (inDumpMaxBytes > 64)
