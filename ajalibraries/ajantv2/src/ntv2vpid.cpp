@@ -615,7 +615,8 @@ bool CNTV2VPID::SetVPIDData (ULWord &				outVPID,
 							const bool				inOutputIs12G,
 							const NTV2VPIDXferChars	inXferChars,
 							const NTV2VPIDColorimetry	inColorimetry,
-							const NTV2VPIDLuminance	inLuminance)
+							const NTV2VPIDLuminance	inLuminance,
+							const NTV2VPIDRGBRange	inRGBRange)
 {
 	VPIDSpec vpidSpec;
 
@@ -639,6 +640,7 @@ bool CNTV2VPID::SetVPIDData (ULWord &				outVPID,
 	vpidSpec.transferCharacteristics = inXferChars;
 	vpidSpec.colorimetry			= inColorimetry;
 	vpidSpec.luminance				= inLuminance;
+	vpidSpec.rgbRange				= inRGBRange;
 
 	return ::SetVPIDFromSpec (&outVPID, &vpidSpec);
 }
@@ -949,10 +951,10 @@ const string CNTV2VPID::BitDepthString (const VPIDBitDepth depth)
 {
 	switch (depth)
 	{
-		VPID_ENUM_CASE_RETURN_STR(VPIDBitDepth_8);
+		VPID_ENUM_CASE_RETURN_STR(VPIDBitDepth_10_Full);
 		VPID_ENUM_CASE_RETURN_STR(VPIDBitDepth_10);
 		VPID_ENUM_CASE_RETURN_STR(VPIDBitDepth_12);
-		VPID_ENUM_CASE_RETURN_STR(VPIDBitDepth_Reserved3);
+		VPID_ENUM_CASE_RETURN_STR(VPIDBitDepth_12_Full);
 		// intentionally not setting a default: so compiler will warn about missing enums
 	}
 	return "";
@@ -1295,7 +1297,7 @@ static const string sVPIDSampling[]		= {	"YCbCr 4:2:2",	"YCbCr 4:4:4",	"GBR 4:4:
 											"ReservedC",	"ReservedD",	"ReservedE",	"XYZ 4:4:4"	};
 static const string sVPIDChannel[]		= {	"1", "2", "3", "4", "5", "6", "7", "8"	};
 static const string sVPIDDynamicRange[]	= {	"100", "200", "400", "Reserved3"	};
-static const string sVPIDBitDepth[]		= {	"8", "10", "12", "Reserved3"	};
+static const string sVPIDBitDepth[]		= {	"10 Full", "10", "12", "12 Full"	};
 static const string sVPIDLink[]			= {	"1", "2", "3", "4", "5", "6", "7", "8"	};
 static const string	sVPIDAudio[]		= {	"Unknown", "Copied", "Additional", "Reserved" };
 static const string sVPIDTransfer[]		= { "SDR", "HLG", "PQ", "Unspecified" };

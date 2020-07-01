@@ -4258,9 +4258,10 @@ typedef enum
 typedef enum
 {
 	VPIDBitDepth_8				= 0x0,
+	VPIDBitDepth_10_Full		= 0x0,
 	VPIDBitDepth_10				= 0x1,
 	VPIDBitDepth_12				= 0x2,
-	VPIDBitDepth_Reserved3		= 0x3
+	VPIDBitDepth_12_Full		= 0x3
 } VPIDBitDepth;
 
 typedef enum
@@ -4392,6 +4393,12 @@ typedef enum
 	NTV2_VPID_Luminance_YCbCr,
 	NTV2_VPID_Luminance_ICtCp
 } NTV2VPIDLuminance, NTV2HDRLuminance;
+		
+typedef enum
+{
+	NTV2_VPID_Range_Narrow,
+	NTV2_VPID_Range_Full
+} NTV2VPIDRGBRange;
 
 
 #if !defined (NTV2_DEPRECATE)

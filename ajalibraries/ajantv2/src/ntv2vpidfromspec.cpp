@@ -30,6 +30,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	NTV2VPIDTransferCharacteristics transferCharacteristics = NTV2_VPID_TC_SDR_TV;
 	NTV2VPIDColorimetry		colorimetry		= NTV2_VPID_Color_Rec709;
 	NTV2VPIDLuminance		luminance		= NTV2_VPID_Luminance_YCbCr;
+	NTV2VPIDRGBRange		rgbRange		= NTV2_VPID_Range_Narrow;
 
 	bool	isProgressivePicture	= false;
 	bool	isProgressiveTransport	= false;
@@ -75,6 +76,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	transferCharacteristics = pInVPIDSpec->transferCharacteristics;
 	colorimetry				= pInVPIDSpec->colorimetry;
 	luminance				= pInVPIDSpec->luminance;
+	rgbRange				= pInVPIDSpec->rgbRange;
 	isMultiLink				= pInVPIDSpec->isMultiLink;
 
 
@@ -584,7 +586,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	if(NTV2_IS_VALID_FBF(pixelFormat))
 	{
 		bool is12Bit = (pixelFormat == NTV2_FBF_48BIT_RGB || pixelFormat == NTV2_FBF_12BIT_RGB_PACKED) ? true : false;
-		byte4 |= is12Bit ? VPIDBitDepth_12 : VPIDBitDepth_10;
+		byte4 |= is12Bit ? (rgbRange == NTV2_VPID_Range_Narrow ? VPIDBitDepth_12 : VPIDBitDepth_12_Full) : (rgbRange == NTV2_VPID_Range_Narrow ? VPIDBitDepth_10 : VPIDBitDepth_10_Full);
 	}
 	else
 	{

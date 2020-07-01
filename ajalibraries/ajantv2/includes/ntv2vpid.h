@@ -57,6 +57,7 @@ public:
 	virtual NTV2VPIDXferChars		GetTransferCharacteristics (void) const;
 	virtual NTV2VPIDColorimetry		GetColorimetry (void) const;
 	virtual NTV2VPIDLuminance		GetLuminance (void) const;
+	virtual NTV2VPIDRGBRange		GetRGBRange (void) const;
 	virtual std::ostream &			Print (std::ostream & ostrm) const;
 	virtual std::string				AsString (const bool inTabular = false) const;
 	///@}
@@ -95,6 +96,7 @@ public:
 	virtual CNTV2VPID &			SetTransferCharacteristics	(const NTV2VPIDXferChars inXferChars);
 	virtual CNTV2VPID &			SetColorimetry				(const NTV2VPIDColorimetry inColorimetry);
 	virtual CNTV2VPID &			SetLuminance				(const NTV2VPIDLuminance inLuminance);
+	virtual CNTV2VPID &			SetRGBRange					(const NTV2VPIDRGBRange inRGBRange);
 	virtual inline CNTV2VPID &	MakeInvalid					(void)		{return SetVPID(0);}
 								
 	///@}
@@ -124,7 +126,8 @@ public:
 											const bool				inOutputIs12G = false,
 											const NTV2VPIDXferChars	inXferChars = NTV2_VPID_TC_SDR_TV,
 											const NTV2VPIDColorimetry	inColorimetry = NTV2_VPID_Color_Rec709,
-											const NTV2VPIDLuminance	inLuminance = NTV2_VPID_Luminance_YCbCr);
+											const NTV2VPIDLuminance	inLuminance = NTV2_VPID_Luminance_YCbCr,
+											const NTV2VPIDRGBRange	inRGBRange = NTV2_VPID_Range_Narrow);
 
 	static const std::string	VersionString				(const VPIDVersion version);
 	static const std::string	StandardString				(const VPIDStandard std);
