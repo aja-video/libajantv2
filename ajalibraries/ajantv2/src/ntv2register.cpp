@@ -7212,12 +7212,12 @@ bool CNTV2Card::GetVPIDColorimetry (NTV2VPIDColorimetry & outValue, const NTV2Ch
 	return true;
 }
 
-bool CNTV2Card::SetVPIDVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel)
+bool CNTV2Card::SetVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel)
 {
 	return WriteRegister(gChannelToVPIDLuminance[inChannel], inValue);
 }
 
-bool CNTV2Card::GetVPIDVPIDLuminance (NTV2VPIDLuminance & outValue, const NTV2Channel inChannel)
+bool CNTV2Card::GetVPIDLuminance (NTV2VPIDLuminance & outValue, const NTV2Channel inChannel)
 {
 	ULWord	tempVal (0);
 	if (!ReadRegister(gChannelToVPIDLuminance[inChannel], tempVal))
