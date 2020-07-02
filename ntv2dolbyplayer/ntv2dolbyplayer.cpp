@@ -638,10 +638,12 @@ uint32_t NTV2DolbyPlayer::AddTone (ULWord * pInAudioBuffer)
 
 uint32_t NTV2DolbyPlayer::AddDolby (ULWord * pInAudioBuffer)
 {
+	static bool		initialize	(true);
     NTV2FrameRate	frameRate	(NTV2_FRAMERATE_INVALID);
     NTV2AudioRate	audioRate	(NTV2_AUDIO_RATE_INVALID);
     ULWord			numChannels	(0);
     ULWord          sampleOffset(0);
+	ULWord			sampleCount	(0);
 	NTV2DolbyBSI	bsi;
 
     mDevice.GetFrameRate (frameRate, mOutputChannel);
@@ -652,103 +654,172 @@ uint32_t NTV2DolbyPlayer::AddDolby (ULWord * pInAudioBuffer)
 	if ((mDolbyFile == NULL) || (mDolbyBuffer == NULL))
 		goto silence;
 
+	if (initialize)
+	{
+		initialize = false;
+
+		// Find first Dolby Digital Plus burst frame
+		while (true)
+		{
+			if (!GetDolbyFrame(&mDolbyBuffer[0], sampleCount))
+			{
+				cerr << "## ERROR:  Dolby frame not found" << endl;
+				mDolbyFile = NULL;
+				goto silence;
+			}
+
+			if (!ParseBSI(&mDolbyBuffer[1], sampleCount - 1, &bsi))
+				continue;
+
+			if ((bsi.strmtyp == 0) &&
+				(bsi.substreamid == 0) &&
+				(bsi.bsid == 16) &&
+				((bsi.numblkscod == 3) || (bsi.convsync == 1)))
+				break;
+		}
+
+		mBurstOffset = 0;
+		mDolbyOffset = 0;
+		mDolbySize = sampleCount;
+
+		switch (bsi.numblkscod)
+		{
+		case 0: mDolbyBlocks = 1; break;
+		case 1: mDolbyBlocks = 2; break;
+		case 2: mDolbyBlocks = 3; break;
+		case 3: mDolbyBlocks = 6; break;
+		default: goto silence;
+		}
+	}
+
     //  Generate the samples for this frame
     while (sampleOffset < numSamples)
     {
-        //  Time for a new IEC61937 burst
-        if (mBurstOffset >= mBurstSize)
+		if (mDolbyBlocks <= 6)
 		{
-            mBurstOffset = 0;
-			mDolbyBlocks = 0;
-
-			//  Get a new Dolby Digital Plus sync frame
-			uint32_t offset = 0;
-			uint32_t size = 0;
-			while (mDolbyBlocks < 6)
+			if (mDolbyOffset < mDolbySize)
 			{
-				uint32_t samples;
-				if (!GetDolbyFrame(&mDolbyBuffer[offset], samples))
-					goto silence;
-
-				if (!ParseBSI(&mDolbyBuffer[offset + 1], samples - 1, &bsi))
-					goto silence;
-
-				// first burst frame check
-				if ((mDolbyBlocks == 0) &&
-						((bsi.strmtyp != 0) ||
-						 (bsi.substreamid != 0) ||
-						 (bsi.bsid != 16) ||
-						 (bsi.convsync != 1)))
-					continue;
-
-				//  Update counter
-				offset += size;
-
-				if ((mDolbyOffset >= mDolbySize) &&
-						(bsi.strmtyp == 0) &&
-						(bsi.substreamid == 0))
+				uint32_t data0 = 0;
+				uint32_t data1 = 0;
+				if (mBurstOffset == 0)
 				{
-					// increment block count
-					switch (bsi.numblkscod)
-					{
-					case 0: mDolbyBlocks += 1; break;
-					case 1: mDolbyBlocks += 2; break;
-					case 2: mDolbyBlocks += 3; break;
-					case 3: mDolbyBlocks += 6; break;
-					default: goto silence;
-					}
+					//  Add IEC61937 burst preamble
+					data0 = 0xf872;             //  Sync stuff
+					data1 = 0x4e1f;
 				}
-			}
+				else if (mBurstOffset == 1)
+				{
+					//  Add more IEC61937 burst preamble
+					data0 = ((bsi.bsmod & 0x7) << 8) | 0x0015;	//  This is Dolby
+					data1 = mDolbySize * 2;						//  Data size in bytes
+				}
+				else
+				{
+					//  Add sync frame data
+					data0 = (uint32_t)(mDolbyBuffer[mDolbyOffset]);
+					data0 = ((data0 & 0x00ff) << 8) | ((data0 & 0xff00) >> 8);
+					mDolbyOffset++;
+					data1 = (uint32_t)(mDolbyBuffer[mDolbyOffset]);
+					data1 = ((data1 & 0x00ff) << 8) | ((data1 & 0xff00) >> 8);
+					mDolbyOffset++;
+				}
 
-				mDolbyOffset = 0;
-				mDolbySize = samples;
-			//  Add the Dolby data to the audio stream
-			uint32_t data0 = 0;
-			uint32_t data1 = 0;
-			if (mBurstOffset == 0)
-			{
-				//  Add IEC61937 burst preamble
-				data0 = 0xf872;             //  Sync stuff
-				data1 = 0x4e1f;
-			}
-			else if (mBurstOffset == 1)
-			{
-				//  Add more IEC61937 burst preamble
-				data0 = ((bsi.bsmod & 0x7) << 8) | 0x0015;	//  This is Dolby
-				data1 = mDolbySize * 2;						//  Data size in bytes
+				//  Write data into 16 msbs of all audio channel pairs
+				data0 <<= 16;
+				data1 <<= 16;
+				for (ULWord i = 0; i < numChannels; i += 2)
+				{
+					pInAudioBuffer[sampleOffset * numChannels + i] = data0;
+					pInAudioBuffer[sampleOffset * numChannels + i + 1] = data1;
+				}
+				sampleOffset++;
+				mBurstOffset++;
+
+				// Check for burst size overrun
+				if (mBurstOffset > mBurstSize)
+				{
+					cerr << "## ERROR:  Dolby burst too large" << endl;
+					mDolbyFile = NULL;
+					goto silence;
+				}
 			}
 			else
 			{
-				//  Add sync frame data
-				data0 = (uint32_t)(mDolbyBuffer[mDolbyOffset]);
-				data0 = ((data0 & 0x00ff) << 8) | ((data0 & 0xff00) >> 8);
-				mDolbyOffset++;
-				data1 = (uint32_t)(mDolbyBuffer[mDolbyOffset]);
-				data1 = ((data1 & 0x00ff) << 8) | ((data1 & 0xff00) >> 8);
-				mDolbyOffset++;
-			}
+				if (!GetDolbyFrame(&mDolbyBuffer[0], sampleCount))
+				{
+					// try to loop
+					if (!GetDolbyFrame(&mDolbyBuffer[0], sampleCount))
+					{
+						cerr << "## ERROR:  Dolby frame not found" << endl;
+						mDolbyFile = NULL;
+						goto silence;
+					}
+				}
 
-			//  Write data into 16 msbs of all audio channel pairs
-			data0 <<= 16;
-			data1 <<= 16;
-			for (ULWord i = 0; i < numChannels; i += 2)
+				if (!ParseBSI(&mDolbyBuffer[1], sampleCount - 1, &bsi))
+					continue;
+
+				// Only Dolby Digital Plus
+				if (bsi.bsid != 16)
+				{
+					cerr << "## ERROR:  Dolby frame bad bsid = " << bsi.bsid << endl;
+					continue;
+				}
+
+				// Increment first stream block count
+				if ((bsi.strmtyp == 0) && (bsi.substreamid == 0))
+				{
+					uint32_t numBlocks = 0;
+					switch (bsi.numblkscod)
+					{
+					case 0: numBlocks = 1; break;
+					case 1: numBlocks = 2; break;
+					case 2: numBlocks = 3; break;
+					case 3: numBlocks = 6; break;
+					default:
+						cerr << "## ERROR:  Dolby frame bad numblkscod = " << bsi.numblkscod << endl;
+						goto silence;
+					}
+
+					// Limit burst blocks to 6
+					if ((mDolbyBlocks < 6) && ((mDolbyBlocks + numBlocks) > 6))
+						mDolbyBlocks = 6;
+
+					// First frame of new burst must have convsync == 1
+					if ((mDolbyBlocks == 6) &&
+						(bsi.numblkscod != 3) &&
+						(bsi.convsync != 1))
+					{
+						cerr << "## ERROR:  Dolby frame unexpected convsync = " << bsi.convsync << endl;
+						continue;
+					}
+
+					// increment block count
+					mDolbyBlocks += numBlocks;
+				}
+
+				mDolbyOffset = 0;
+				mDolbySize = sampleCount;
+			}
+		}
+		else
+		{
+			if (mBurstOffset < mBurstSize)
 			{
-				pInAudioBuffer[sampleOffset * numChannels + i] = data0;
-				pInAudioBuffer[sampleOffset * numChannels + i + 1] = data1;
+				//  Pad samples out to burst size
+				for (ULWord i = 0; i < numChannels; i++)
+				{
+					pInAudioBuffer[sampleOffset * numChannels + i] = 0;
+				}
+				sampleOffset++;
+				mBurstOffset++;
 			}
-
-        }
-        else
-        {
-            //  Pad samples out to burst size
-            for (ULWord i = 0; i < numChannels; i++)
-            {
-                pInAudioBuffer[sampleOffset * numChannels + i] = 0;
-            }
-        }
-
-        sampleOffset++;
-        mBurstOffset++;
+			else
+			{
+				mDolbyBlocks -= 6;
+				mBurstOffset = 0;
+			}
+		}
     }
 
     return numSamples * numChannels * 4;
@@ -763,22 +834,16 @@ silence:
 bool NTV2DolbyPlayer::GetDolbyFrame (uint16_t * pInDolbyBuffer, uint32_t & numSamples)
 {
 	uint32_t bytes;
-	bool loop = false;
 	bool done = false;
 
 	while (!done)
 	{
-		bytes = mDolbyFile->Read((uint8_t*)(pInDolbyBuffer[0]), 2);
+		bytes = mDolbyFile->Read((uint8_t*)(&pInDolbyBuffer[0]), 2);
 		if (bytes != 2)
 		{
-			//  Try to loop
+			//  Reset file
 			mDolbyFile->Seek(0, eAJASeekSet);
-			bytes = mDolbyFile->Read((uint8_t*)(pInDolbyBuffer[0]), 2);
-			if (bytes != 2)
-				return false;
-			if (loop)
-				return false;
-			loop = true;
+			return false;
 		}
 
 		//  Check sync word
@@ -788,7 +853,7 @@ bool NTV2DolbyPlayer::GetDolbyFrame (uint16_t * pInDolbyBuffer, uint32_t & numSa
 	}
 
 	//  Read more of the sync frame header
-	bytes = mDolbyFile->Read((uint8_t*)(pInDolbyBuffer[1]), 4);
+	bytes = mDolbyFile->Read((uint8_t*)(&pInDolbyBuffer[1]), 4);
 	if (bytes != 4)
 		return false;
 
@@ -799,7 +864,7 @@ bool NTV2DolbyPlayer::GetDolbyFrame (uint16_t * pInDolbyBuffer, uint32_t & numSa
 
 	//  Read the rest of the sync frame
 	uint32_t len = (size - 3) * 2;
-	bytes = mDolbyFile->Read((uint8_t*)(pInDolbyBuffer[3]), len);
+	bytes = mDolbyFile->Read((uint8_t*)(&pInDolbyBuffer[3]), len);
 	if (bytes != len)
 		return false;
 
