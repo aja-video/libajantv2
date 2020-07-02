@@ -80,7 +80,10 @@ NTV2DolbyPlayer::NTV2DolbyPlayer (const string &				inDeviceSpecifier,
         mDolbyFile                  (inDolbyFile),
         mDolbyBuffer                (NULL),
         mDolbyOffset                (0),
-        mDolbySize                  (0)
+		mDolbySize                  (0),
+		mDolbyBlocks				(0),
+		mBurstOffset				(0),
+		mBurstSize					(0)
 {
 	::memset (mAVHostBuffer, 0, sizeof (mAVHostBuffer));
 }
@@ -531,6 +534,8 @@ void NTV2DolbyPlayer::ProduceFrames (void)
     //  Initialize IEC61937 burst size (32 milliseconds) for HDMI 192 kHz sample rate
     mBurstOffset = 0;   //  Start a burst of Dolby data
     mBurstSize = 6144;  //  192000 * 0.032 samples
+	mDolbyOffset = 0;
+	mDolbySize = 0;
 
 	PLNOTE("Thread started");
 	while (!mGlobalQuit)
@@ -637,6 +642,7 @@ uint32_t NTV2DolbyPlayer::AddDolby (ULWord * pInAudioBuffer)
     NTV2AudioRate	audioRate	(NTV2_AUDIO_RATE_INVALID);
     ULWord			numChannels	(0);
     ULWord          sampleOffset(0);
+	NTV2DolbyBSI	bsi;
 
     mDevice.GetFrameRate (frameRate, mOutputChannel);
     mDevice.GetAudioRate (audioRate, mAudioSystem);
@@ -651,88 +657,86 @@ uint32_t NTV2DolbyPlayer::AddDolby (ULWord * pInAudioBuffer)
     {
         //  Time for a new IEC61937 burst
         if (mBurstOffset >= mBurstSize)
+		{
             mBurstOffset = 0;
+			mDolbyBlocks = 0;
 
-        //  Get a new Dolby Digital Plus sync frame
-        if (mBurstOffset == 0)
-        {
-            //  Read the sync word (all big endian)
-            uint32_t bytes = mDolbyFile->Read((uint8_t*)(&mDolbyBuffer[0]), 2);
-            if (bytes != 2)
+			//  Get a new Dolby Digital Plus sync frame
+			uint32_t offset = 0;
+			uint32_t size = 0;
+			while (mDolbyBlocks < 6)
 			{
-                //  Try to loop
-				mDolbyFile->Seek(0, eAJASeekSet);
-				bytes = mDolbyFile->Read((uint8_t*)(&mDolbyBuffer[0]), 2);
-				if (bytes != 2)
+				uint32_t samples;
+				if (!GetDolbyFrame(&mDolbyBuffer[offset], samples))
 					goto silence;
+
+				if (!ParseBSI(&mDolbyBuffer[offset + 1], samples - 1, &bsi))
+					goto silence;
+
+				// first burst frame check
+				if ((mDolbyBlocks == 0) &&
+						((bsi.strmtyp != 0) ||
+						 (bsi.substreamid != 0) ||
+						 (bsi.bsid != 16) ||
+						 (bsi.convsync != 1)))
+					continue;
+
+				//  Update counter
+				offset += size;
+
+				if ((mDolbyOffset >= mDolbySize) &&
+						(bsi.strmtyp == 0) &&
+						(bsi.substreamid == 0))
+				{
+					// increment block count
+					switch (bsi.numblkscod)
+					{
+					case 0: mDolbyBlocks += 1; break;
+					case 1: mDolbyBlocks += 2; break;
+					case 2: mDolbyBlocks += 3; break;
+					case 3: mDolbyBlocks += 6; break;
+					default: goto silence;
+					}
+				}
 			}
 
-            //  Check sync word
-            if ((mDolbyBuffer[0] != 0x7705) &&
-                (mDolbyBuffer[0] != 0x770b))
-                goto silence;
+				mDolbyOffset = 0;
+				mDolbySize = samples;
+			//  Add the Dolby data to the audio stream
+			uint32_t data0 = 0;
+			uint32_t data1 = 0;
+			if (mBurstOffset == 0)
+			{
+				//  Add IEC61937 burst preamble
+				data0 = 0xf872;             //  Sync stuff
+				data1 = 0x4e1f;
+			}
+			else if (mBurstOffset == 1)
+			{
+				//  Add more IEC61937 burst preamble
+				data0 = ((bsi.bsmod & 0x7) << 8) | 0x0015;	//  This is Dolby
+				data1 = mDolbySize * 2;						//  Data size in bytes
+			}
+			else
+			{
+				//  Add sync frame data
+				data0 = (uint32_t)(mDolbyBuffer[mDolbyOffset]);
+				data0 = ((data0 & 0x00ff) << 8) | ((data0 & 0xff00) >> 8);
+				mDolbyOffset++;
+				data1 = (uint32_t)(mDolbyBuffer[mDolbyOffset]);
+				data1 = ((data1 & 0x00ff) << 8) | ((data1 & 0xff00) >> 8);
+				mDolbyOffset++;
+			}
 
-            //  Read more of the sync frame header
-            bytes = mDolbyFile->Read((uint8_t*)(&mDolbyBuffer[1]), 4);
-            if (bytes != 4)
-                goto silence;
+			//  Write data into 16 msbs of all audio channel pairs
+			data0 <<= 16;
+			data1 <<= 16;
+			for (ULWord i = 0; i < numChannels; i += 2)
+			{
+				pInAudioBuffer[sampleOffset * numChannels + i] = data0;
+				pInAudioBuffer[sampleOffset * numChannels + i + 1] = data1;
+			}
 
-            //  Check sync header data for 6 audio blocks
-            //  We only do one Dolby frame per burst which must be 6 blocks
-            if ((mDolbyBuffer[2] & 0x00c0) != 0x0000)
-                goto silence;
-
-            //  Get frame size - 16 bit words plus sync word
-            uint32_t size = (uint32_t)mDolbyBuffer[1];
-            size = (((size & 0x00ff) << 8) | ((size & 0xff00) >> 8)) + 1;
-
-            //  Read the rest of the sync frame
-            uint32_t len = (size - 3) * 2;
-            bytes = mDolbyFile->Read((uint8_t*)(&mDolbyBuffer[3]), len);
-            if (bytes != len)
-                goto silence;
-
-            //  Good frame
-            mDolbyOffset = 0;
-            mDolbySize = size;
-        }
-
-        //  Add the Dolby data to the audio stream
-        if (mDolbyOffset < mDolbySize)
-        {
-            uint32_t data0 = 0;
-            uint32_t data1 = 0;
-            if (mBurstOffset == 0)
-            {
-                //  Add IEC61937 burst preamble
-                data0 = 0xf872;             //  Sync stuff
-                data1 = 0x4e1f;
-            }
-            else if (mBurstOffset == 1)
-            {
-                //  Add more IEC61937 burst preamble
-                data0 = 0x0015;             //  This is Dolby
-                data1 = mDolbySize * 2;     //  Data size in bytes
-            }
-            else
-            {
-                //  Add sync frame data
-                data0 = (uint32_t)(mDolbyBuffer[mDolbyOffset]);
-                data0 = ((data0 & 0x00ff) << 8) | ((data0 & 0xff00) >> 8);
-                mDolbyOffset++;
-                data1 = (uint32_t)(mDolbyBuffer[mDolbyOffset]);
-                data1 = ((data1 & 0x00ff) << 8) | ((data1 & 0xff00) >> 8);
-                mDolbyOffset++;
-            }
-
-            //  Write data into 16 msbs of all audio channel pairs
-            data0 <<= 16;
-            data1 <<= 16;
-            for (ULWord i = 0; i < numChannels; i += 2)
-            {
-                pInAudioBuffer[sampleOffset * numChannels + i] = data0;
-                pInAudioBuffer[sampleOffset * numChannels + i + 1] = data1;
-            }
         }
         else
         {
