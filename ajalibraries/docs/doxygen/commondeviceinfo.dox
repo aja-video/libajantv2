@@ -287,6 +287,9 @@
 				this, call CNTV2Card::SetFrameBufferSize to pre-configure the device to use the
 				largest expected ::NTV2Framesize when your application starts.
 
+	@note		The \ref usingntv2watcher tool has a helpful \ref memmapdlog that visually displays
+				how device SDRAM is being used.
+
 	Video data in the device frame buffer is always stored full-frame. Interlaced video is
 	always stored in the frame buffer with the first line of Field 1 (F1L1) at the top of the
 	buffer, followed by the first line of Field 2 (F2L1), then F1L2, F2L2, F1L3, F2L3, etc.,
