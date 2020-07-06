@@ -627,7 +627,6 @@ typedef enum
 
 typedef NTV2RegisterNumber	RegisterNum;
 
-
 #define kRegCh1ColorCorrectioncontrol	kRegCh1ColorCorrectionControl	//	CamelCase fixed in SDK 16.0
 #define	kRegCh2ColorCorrectioncontrol	kRegCh2ColorCorrectionControl	//	CamelCase fixed in SDK 16.0
 
