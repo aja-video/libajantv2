@@ -201,14 +201,17 @@ static const ULWord	gChannelToSDIInputProgressiveMask []	= {	kRegMaskInput1Progr
 static const ULWord	gChannelToSDIInputProgressiveShift []	= {	kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,
 																kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			0};
 
-static const ULWord	gChannelToVPIDTransferCharacteristics []		= {	kVRegNTV2VPIDTransferCharacteristics,		kVRegNTV2VPIDTransferCharacteristics2,		kVRegNTV2VPIDTransferCharacteristics3,		kVRegNTV2VPIDTransferCharacteristics4,
-																kVRegNTV2VPIDTransferCharacteristics5,		kVRegNTV2VPIDTransferCharacteristics6,		kVRegNTV2VPIDTransferCharacteristics7,		kVRegNTV2VPIDTransferCharacteristics8,	0};
+static const ULWord	gChannelToVPIDTransferCharacteristics []	= {	kVRegNTV2VPIDTransferCharacteristics1,		kVRegNTV2VPIDTransferCharacteristics2,		kVRegNTV2VPIDTransferCharacteristics3,		kVRegNTV2VPIDTransferCharacteristics4,
+																	kVRegNTV2VPIDTransferCharacteristics5,		kVRegNTV2VPIDTransferCharacteristics6,		kVRegNTV2VPIDTransferCharacteristics7,		kVRegNTV2VPIDTransferCharacteristics8,	0};
 
-static const ULWord	gChannelToVPIDColorimetry []		= {	kVRegNTV2VPIDColorimetry,		kVRegNTV2VPIDColorimetry2,		kVRegNTV2VPIDColorimetry3,		kVRegNTV2VPIDColorimetry4,
-																kVRegNTV2VPIDColorimetry5,		kVRegNTV2VPIDColorimetry6,		kVRegNTV2VPIDColorimetry7,		kVRegNTV2VPIDColorimetry8,	0};
+static const ULWord	gChannelToVPIDColorimetry []	= {	kVRegNTV2VPIDColorimetry1,		kVRegNTV2VPIDColorimetry2,		kVRegNTV2VPIDColorimetry3,		kVRegNTV2VPIDColorimetry4,
+														kVRegNTV2VPIDColorimetry5,		kVRegNTV2VPIDColorimetry6,		kVRegNTV2VPIDColorimetry7,		kVRegNTV2VPIDColorimetry8,	0};
 
-static const ULWord	gChannelToVPIDLuminance []		= {	kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,
-																kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,	0};
+static const ULWord	gChannelToVPIDLuminance []	= {	kVRegNTV2VPIDLuminance1,		kVRegNTV2VPIDLuminance2,		kVRegNTV2VPIDLuminance3,		kVRegNTV2VPIDLuminance4,
+													kVRegNTV2VPIDLuminance5,		kVRegNTV2VPIDLuminance6,		kVRegNTV2VPIDLuminance7,		kVRegNTV2VPIDLuminance8,	0};
+
+static const ULWord	gChannelToVPIDRGBRange []	= {	kVRegNTV2VPIDRGBRange1,		kVRegNTV2VPIDRGBRange2,		kVRegNTV2VPIDRGBRange3,		kVRegNTV2VPIDRGBRange4,
+													kVRegNTV2VPIDRGBRange5,		kVRegNTV2VPIDRGBRange6,		kVRegNTV2VPIDRGBRange7,		kVRegNTV2VPIDRGBRange8,	0};
 
 
 // Method: SetEveryFrameServices
@@ -2188,7 +2191,7 @@ bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat 
 
 	SetVPIDTransferCharacteristics(inXferChars, channel);
 	SetVPIDColorimetry(inColorimetry, channel);
-	SetVPIDVPIDLuminance(inLuminance, channel);
+	SetVPIDLuminance(inLuminance, channel);
 	return status;
 }
 
@@ -3725,10 +3728,10 @@ bool CNTV2Card::GetAnalogOutHTiming (ULWord & outValue)							{return ReadRegist
 
 bool CNTV2Card::SetSDIOutputStandard (const UWord inOutputSpigot, const NTV2Standard inValue)
 {
-	if (IS_OUTPUT_SPIGOT_INVALID (inOutputSpigot))
+	if (IS_OUTPUT_SPIGOT_INVALID(inOutputSpigot))
 		return false;
 
-	bool is2kx1080 = false;
+	bool is2Kx1080(false);
 	switch(inValue)
 	{
 		case NTV2_STANDARD_2Kx1080p:
@@ -3736,40 +3739,46 @@ bool CNTV2Card::SetSDIOutputStandard (const UWord inOutputSpigot, const NTV2Stan
 		case NTV2_STANDARD_4096x2160p:
 		case NTV2_STANDARD_4096HFR:
 		case NTV2_STANDARD_4096i:
-			is2kx1080 = true;
+			is2Kx1080 = true;
 			break;
 		default:
 			break;
 	}
 
-	WriteRegister (gChannelToSDIOutControlRegNum [inOutputSpigot], inValue, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard);
-	return SetSDIOut2Kx1080Enable(NTV2Channel(inOutputSpigot), is2kx1080);
+	return WriteRegister (gChannelToSDIOutControlRegNum[inOutputSpigot], inValue, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard)
+			&&  SetSDIOut2Kx1080Enable(NTV2Channel(inOutputSpigot), is2Kx1080);
+}
+
+bool CNTV2Card::SetSDIOutputStandard (const NTV2ChannelSet & inSDIOutputs, const NTV2Standard inValue)
+{
+	size_t errors(0);
+	for (NTV2ChannelSetConstIter it(inSDIOutputs.begin());  it != inSDIOutputs.end();  ++it)
+		if (!SetSDIOutputStandard(*it, inValue))
+			errors++;
+	return !errors;
 }
 
 bool CNTV2Card::GetSDIOutputStandard (const UWord inOutputSpigot, NTV2Standard & outValue)
 {
-	if (IS_OUTPUT_SPIGOT_INVALID (inOutputSpigot))
+	if (IS_OUTPUT_SPIGOT_INVALID(inOutputSpigot))
 		return false;
-	bool is2kx1080 = false;
-	NTV2Standard newStandard = NTV2_STANDARD_INVALID;
-	bool returnValue = CNTV2DriverInterface::ReadRegister (gChannelToSDIOutControlRegNum[inOutputSpigot], newStandard, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard);
-	returnValue = GetSDIOut2Kx1080Enable(NTV2Channel(inOutputSpigot), is2kx1080);
-	outValue = newStandard;
-	switch(newStandard)
+	bool is2kx1080(false);
+	NTV2Standard newStd(NTV2_STANDARD_INVALID);
+	const bool result (CNTV2DriverInterface::ReadRegister (gChannelToSDIOutControlRegNum[inOutputSpigot], newStd, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard)
+						&& GetSDIOut2Kx1080Enable(NTV2Channel(inOutputSpigot), is2kx1080));
+	outValue = newStd;
+	switch (newStd)
 	{
-	case NTV2_STANDARD_1080:
-		if(is2kx1080)
-			outValue = NTV2_STANDARD_2Kx1080i;
-		break;
-	case NTV2_STANDARD_1080p:
-		if(is2kx1080)
-			outValue = NTV2_STANDARD_2Kx1080p;
-		break;
-	default:
-		break;
-
+		case NTV2_STANDARD_1080:	if (is2kx1080)
+										outValue = NTV2_STANDARD_2Kx1080i;
+									break;
+		case NTV2_STANDARD_1080p:	if (is2kx1080)
+										outValue = NTV2_STANDARD_2Kx1080p;
+									break;
+		default:
+			break;
 	}
-	return returnValue;
+	return result;
 }
 
 #if !defined (NTV2_DEPRECATE)
@@ -5240,7 +5249,7 @@ bool CNTV2Card::ClearRouting (void)
 	unsigned			nFailures			(0);
 	ULWord				tally				(0);
 
-	for (NTV2RegNumSetConstIter it (routingRegisters.begin());  it != routingRegisters.end();  ++it)	//	for each routing register
+	for (NTV2RegNumSetConstIter it(routingRegisters.begin());  it != routingRegisters.end();  ++it)	//	for each routing register
 		if (*it <= maxRegisterNumber)																	//		if it's valid for this board
 		{	ULWord	num(0);
 			if (ReadRegister (*it, num))
@@ -5299,6 +5308,17 @@ bool CNTV2Card::GetRouting (CNTV2SignalRouter & outRouting)
 	return true;
 
 }	//	GetRouting
+
+bool CNTV2Card::GetConnections (NTV2XptConnections & outConnections)
+{
+	outConnections.clear();
+	NTV2RegisterReads regInfos;
+	NTV2InputCrosspointIDSet inputXpts;
+	return CNTV2SignalRouter::GetAllWidgetInputs (_boardID, inputXpts)
+			&&  CNTV2SignalRouter::GetAllRoutingRegInfos (inputXpts, regInfos)
+			&&  ReadRegisters(regInfos)
+			&&  CNTV2SignalRouter::GetConnectionsFromRegs (inputXpts, regInfos, outConnections);
+}
 
 
 typedef deque <NTV2InputCrosspointID>				NTV2InputCrosspointQueue;
@@ -6713,12 +6733,21 @@ bool CNTV2Card::GetSDIInLevelBtoLevelAConversion (const UWord inInputSpigot, boo
 
 bool CNTV2Card::SetSDIOutLevelAtoLevelBConversion (const UWord inOutputSpigot, const bool inEnable)
 {
-	if (!::NTV2DeviceCanDo3GLevelConversion (_boardID))
+	if (!::NTV2DeviceCanDo3GLevelConversion(_boardID))
 		return false;
-	if (IS_OUTPUT_SPIGOT_INVALID (inOutputSpigot))
+	if (IS_OUTPUT_SPIGOT_INVALID(inOutputSpigot))
 		return false;
 
-	return WriteRegister (gChannelToSDIOutControlRegNum [inOutputSpigot], inEnable, kRegMaskSDIOutLevelAtoLevelB, kRegShiftSDIOutLevelAtoLevelB);
+	return WriteRegister(gChannelToSDIOutControlRegNum[inOutputSpigot], inEnable, kRegMaskSDIOutLevelAtoLevelB, kRegShiftSDIOutLevelAtoLevelB);
+}
+
+bool CNTV2Card::SetSDIOutLevelAtoLevelBConversion (const NTV2ChannelSet & inSDIOutputs, const bool inEnable)
+{
+	size_t errors(0);
+	for (NTV2ChannelSetConstIter it(inSDIOutputs.begin());  it != inSDIOutputs.end();  ++it)
+		if (!SetSDIOutLevelAtoLevelBConversion(*it, inEnable))
+			errors++;
+	return !errors;
 }
 
 bool CNTV2Card::GetSDIOutLevelAtoLevelBConversion (const UWord inOutputSpigot, bool & outEnable)
@@ -6742,6 +6771,15 @@ bool CNTV2Card::SetSDIOutRGBLevelAConversion(const UWord inOutputSpigot, const b
 		return false;
 
 	return WriteRegister(gChannelToSDIOutControlRegNum[inOutputSpigot], inEnable, kRegMaskRGBLevelA, kRegShiftRGBLevelA);
+}
+
+bool CNTV2Card::SetSDIOutRGBLevelAConversion (const NTV2ChannelSet & inSDIOutputs, const bool inEnable)
+{
+	size_t errors(0);
+	for (NTV2ChannelSetConstIter it(inSDIOutputs.begin());  it != inSDIOutputs.end();  ++it)
+		if (!SetSDIOutRGBLevelAConversion(*it, inEnable))
+			errors++;
+	return !errors;
 }
 
 bool CNTV2Card::GetSDIOutRGBLevelAConversion(const UWord inOutputSpigot, bool & outEnable)
@@ -7174,17 +7212,31 @@ bool CNTV2Card::GetVPIDColorimetry (NTV2VPIDColorimetry & outValue, const NTV2Ch
 	return true;
 }
 
-bool CNTV2Card::SetVPIDVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel)
+bool CNTV2Card::SetVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel)
 {
 	return WriteRegister(gChannelToVPIDLuminance[inChannel], inValue);
 }
 
-bool CNTV2Card::GetVPIDVPIDLuminance (NTV2VPIDLuminance & outValue, const NTV2Channel inChannel)
+bool CNTV2Card::GetVPIDLuminance (NTV2VPIDLuminance & outValue, const NTV2Channel inChannel)
 {
 	ULWord	tempVal (0);
 	if (!ReadRegister(gChannelToVPIDLuminance[inChannel], tempVal))
 		return false;
 	outValue = static_cast <NTV2VPIDLuminance> (tempVal);
+	return true;
+}
+
+bool CNTV2Card::SetVPIDRGBRange (const NTV2VPIDRGBRange inValue, const NTV2Channel inChannel)
+{
+	return WriteRegister(gChannelToVPIDRGBRange[inChannel], inValue);
+}
+
+bool CNTV2Card::GetVPIDRGBRange (NTV2VPIDRGBRange & outValue, const NTV2Channel inChannel)
+{
+	ULWord	tempVal (0);
+	if (!ReadRegister(gChannelToVPIDRGBRange[inChannel], tempVal))
+		return false;
+	outValue = static_cast <NTV2VPIDRGBRange> (tempVal);
 	return true;
 }
 

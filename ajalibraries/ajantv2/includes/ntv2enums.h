@@ -1833,7 +1833,7 @@ typedef enum
 typedef enum
 {
 	NTV2_FIELD0,	///< @brief	Identifies the first field in time for an interlaced video frame, or the first and only field in a progressive video frame.
-	NTV2_FIELD1,	///< @brief	Identifies the last field in time for an interlaced video frame.
+	NTV2_FIELD1,	///< @brief	Identifies the last (second) field in time for an interlaced video frame.
 	NTV2_FIELD_INVALID
 } NTV2FieldID;
 
@@ -2617,7 +2617,7 @@ typedef enum
 /**
 	@brief	Identifies a widget output, a signal source, that potentially can drive
 			another widget's input (identified by ::NTV2InputCrosspointID).
-	@see	CNTV2Card::Connect
+	@see	CNTV2Card::Connect and also \ref ntv2signalrouting
 **/
 typedef enum NTV2OutputCrosspointID
 {
@@ -2647,13 +2647,15 @@ typedef enum NTV2OutputCrosspointID
 	NTV2_XptCSC2KeyYUV					= 0x11,
 	NTV2_XptMixer1VidYUV				= 0x12,
 	NTV2_XptMixer1KeyYUV				= 0x13,
-	NTV2_XptWaterMarkerYUV				= 0x14,
-	NTV2_XptWaterMarkerRGB				= NTV2_XptWaterMarkerYUV | 0x80,
+	NTV2_XptMultiLinkOut1DS1			= 0x14,								///< @brief	New in SDK 16.0
+	NTV2_XptMultiLinkOut1DS2			= 0x15,								///< @brief	New in SDK 16.0
 	NTV2_XptAnalogIn					= 0x16,
 	NTV2_XptHDMIIn1						= 0x17,
 	NTV2_XptHDMIIn1RGB					= NTV2_XptHDMIIn1 | 0x80,
-	NTV2_XptWaterMarker2YUV				= 0x1A,
-	NTV2_XptWaterMarker2RGB				= NTV2_XptWaterMarker2YUV | 0x80,
+	NTV2_XptMultiLinkOut1DS3			= 0x18,								///< @brief	New in SDK 16.0
+	NTV2_XptMultiLinkOut1DS4			= 0x19,								///< @brief	New in SDK 16.0
+	NTV2_XptMultiLinkOut2DS1			= 0x1A,								///< @brief	New in SDK 16.0
+	NTV2_XptMultiLinkOut2DS2			= 0x1B,								///< @brief	New in SDK 16.0
 	NTV2_XptDuallinkOut2				= 0x1C,
 	NTV2_XptTestPatternYUV				= 0x1D,
 	NTV2_XptSDIIn1DS2					= 0x1E,
@@ -2672,6 +2674,8 @@ typedef enum NTV2OutputCrosspointID
 	NTV2_XptCSC5VidYUV					= 0x2C,
 	NTV2_XptCSC5VidRGB					= NTV2_XptCSC5VidYUV | 0x80,
 	NTV2_XptCSC5KeyYUV					= 0x2D,
+	NTV2_XptMultiLinkOut2DS3			= 0x2E,								///< @brief	New in SDK 16.0
+	NTV2_XptMultiLinkOut2DS4			= 0x2F,								///< @brief	New in SDK 16.0
 	NTV2_XptSDIIn3						= 0x30,
 	NTV2_XptSDIIn4						= 0x31,
 	NTV2_XptSDIIn3DS2					= 0x32,
@@ -2794,47 +2798,44 @@ typedef enum NTV2OutputCrosspointID
 	NTV2_XptLUT6Out						= 0xDF,
 	NTV2_XptLUT7Out						= 0xE0,
 	NTV2_XptLUT8Out						= 0xE1,
-	NTV2_XptMultiLinkOut1DS1			= 0xE2,
-	NTV2_XptMultiLinkOut1DS2			= 0xE3,
-	NTV2_XptMultiLinkOut1DS3			= 0xE4,
-	NTV2_XptMultiLinkOut1DS4			= 0xE5,
 	NTV2_XptRuntimeCalc					= 0xFF,
 	NTV2_LAST_OUTPUT_CROSSPOINT			= 0xFF,
 	NTV2_OUTPUT_CROSSPOINT_INVALID		= 0xFF
 	#if !defined(NTV2_DEPRECATE_16_0)
-		,
-		NTV2_XptLUT1RGB					= NTV2_XptLUT1Out,				///< @deprecated	Use NTV2_XptLUT1Out instead.
-		NTV2_XptLUT2RGB					= NTV2_XptLUT2Out				///< @deprecated	Use NTV2_XptLUT2Out instead.
+		,NTV2_XptLUT1RGB				= NTV2_XptLUT1Out					///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptLUT1Out
+		,NTV2_XptLUT2RGB				= NTV2_XptLUT2Out					///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptLUT2Out
+		,NTV2_XptWaterMarkerYUV			= NTV2_XptMultiLinkOut1DS1			///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptMultiLinkOut1DS1
+		,NTV2_XptWaterMarkerRGB			= NTV2_XptWaterMarkerYUV | 0x80		///< @deprecated	Removed in SDK 16.0
+		,NTV2_XptWaterMarker2YUV		= NTV2_XptMultiLinkOut2DS1			///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptMultiLinkOut2DS1
+		,NTV2_XptWaterMarker2RGB		= NTV2_XptWaterMarker2YUV | 0x80	///< @deprecated	Removed in SDK 16.0
 	#endif
 	#if !defined(NTV2_DEPRECATE_15_3)
-		,
-		NTV2_XptFrameBuffer1_425YUV		= NTV2_XptFrameBuffer1_DS2YUV,	///< @deprecated	Use NTV2_XptFrameBuffer1_DS2YUV instead.
-		NTV2_XptFrameBuffer1_425RGB		= NTV2_XptFrameBuffer1_DS2RGB,	///< @deprecated	Use NTV2_XptFrameBuffer1_DS2RGB instead.
-		NTV2_XptFrameBuffer2_425YUV		= NTV2_XptFrameBuffer2_DS2YUV,	///< @deprecated	Use NTV2_XptFrameBuffer2_DS2YUV instead.
-		NTV2_XptFrameBuffer2_425RGB		= NTV2_XptFrameBuffer2_DS2RGB,	///< @deprecated	Use NTV2_XptFrameBuffer2_DS2RGB instead.
-		NTV2_XptFrameBuffer3_425YUV		= NTV2_XptFrameBuffer3_DS2YUV,	///< @deprecated	Use NTV2_XptFrameBuffer3_DS2YUV instead.
-		NTV2_XptFrameBuffer3_425RGB		= NTV2_XptFrameBuffer3_DS2RGB,	///< @deprecated	Use NTV2_XptFrameBuffer3_DS2RGB instead.
-		NTV2_XptFrameBuffer4_425YUV		= NTV2_XptFrameBuffer4_DS2YUV,	///< @deprecated	Use NTV2_XptFrameBuffer4_DS2YUV instead.
-		NTV2_XptFrameBuffer4_425RGB		= NTV2_XptFrameBuffer4_DS2RGB,	///< @deprecated	Use NTV2_XptFrameBuffer4_DS2RGB instead.
-		NTV2_XptFrameBuffer5_425YUV		= NTV2_XptFrameBuffer5_DS2YUV,	///< @deprecated	Use NTV2_XptFrameBuffer5_DS2YUV instead.
-		NTV2_XptFrameBuffer5_425RGB		= NTV2_XptFrameBuffer5_DS2RGB,	///< @deprecated	Use NTV2_XptFrameBuffer5_DS2RGB instead.
-		NTV2_XptFrameBuffer6_425YUV		= NTV2_XptFrameBuffer6_DS2YUV,	///< @deprecated	Use NTV2_XptFrameBuffer6_DS2YUV instead.
-		NTV2_XptFrameBuffer6_425RGB		= NTV2_XptFrameBuffer6_DS2RGB,	///< @deprecated	Use NTV2_XptFrameBuffer6_DS2RGB instead.
-		NTV2_XptFrameBuffer7_425YUV		= NTV2_XptFrameBuffer7_DS2YUV,	///< @deprecated	Use NTV2_XptFrameBuffer7_DS2YUV instead.
-		NTV2_XptFrameBuffer7_425RGB		= NTV2_XptFrameBuffer7_DS2RGB,	///< @deprecated	Use NTV2_XptFrameBuffer7_DS2RGB instead.
-		NTV2_XptFrameBuffer8_425YUV		= NTV2_XptFrameBuffer8_DS2YUV,	///< @deprecated	Use NTV2_XptFrameBuffer8_DS2YUV instead.
-		NTV2_XptFrameBuffer8_425RGB		= NTV2_XptFrameBuffer8_DS2RGB	///< @deprecated	Use NTV2_XptFrameBuffer8_DS2RGB instead.
+		,NTV2_XptFrameBuffer1_425YUV	= NTV2_XptFrameBuffer1_DS2YUV		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer1_DS2YUV
+		,NTV2_XptFrameBuffer1_425RGB	= NTV2_XptFrameBuffer1_DS2RGB		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer1_DS2RGB
+		,NTV2_XptFrameBuffer2_425YUV	= NTV2_XptFrameBuffer2_DS2YUV		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer2_DS2YUV
+		,NTV2_XptFrameBuffer2_425RGB	= NTV2_XptFrameBuffer2_DS2RGB		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer2_DS2RGB
+		,NTV2_XptFrameBuffer3_425YUV	= NTV2_XptFrameBuffer3_DS2YUV		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer3_DS2YUV
+		,NTV2_XptFrameBuffer3_425RGB	= NTV2_XptFrameBuffer3_DS2RGB		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer3_DS2RGB
+		,NTV2_XptFrameBuffer4_425YUV	= NTV2_XptFrameBuffer4_DS2YUV		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer4_DS2YUV
+		,NTV2_XptFrameBuffer4_425RGB	= NTV2_XptFrameBuffer4_DS2RGB		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer4_DS2RGB
+		,NTV2_XptFrameBuffer5_425YUV	= NTV2_XptFrameBuffer5_DS2YUV		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer5_DS2YUV
+		,NTV2_XptFrameBuffer5_425RGB	= NTV2_XptFrameBuffer5_DS2RGB		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer5_DS2RGB
+		,NTV2_XptFrameBuffer6_425YUV	= NTV2_XptFrameBuffer6_DS2YUV		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer6_DS2YUV
+		,NTV2_XptFrameBuffer6_425RGB	= NTV2_XptFrameBuffer6_DS2RGB		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer6_DS2RGB
+		,NTV2_XptFrameBuffer7_425YUV	= NTV2_XptFrameBuffer7_DS2YUV		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer7_DS2YUV
+		,NTV2_XptFrameBuffer7_425RGB	= NTV2_XptFrameBuffer7_DS2RGB		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer7_DS2RGB
+		,NTV2_XptFrameBuffer8_425YUV	= NTV2_XptFrameBuffer8_DS2YUV		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer8_DS2YUV
+		,NTV2_XptFrameBuffer8_425RGB	= NTV2_XptFrameBuffer8_DS2RGB		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer8_DS2RGB
 	#endif
 	#if !defined(NTV2_DEPRECATE_14_3)
-		,
-		NTV2_XptHDMIIn					= NTV2_XptHDMIIn1,				///< @deprecated	Use NTV2_XptHDMIIn1 instead.
-		NTV2_XptHDMIInQ2				= NTV2_XptHDMIIn1Q2,			///< @deprecated	Use NTV2_XptHDMIIn1Q2 instead.
-		NTV2_XptHDMIInQ3				= NTV2_XptHDMIIn1Q3,			///< @deprecated	Use NTV2_XptHDMIIn1Q3 instead.
-		NTV2_XptHDMIInQ4				= NTV2_XptHDMIIn1Q4,			///< @deprecated	Use NTV2_XptHDMIIn1Q4 instead.
-		NTV2_XptHDMIInRGB				= NTV2_XptHDMIIn1RGB,			///< @deprecated	Use NTV2_XptHDMIIn1RGB instead.
-		NTV2_XptHDMIInQ2RGB				= NTV2_XptHDMIIn1Q2RGB,			///< @deprecated	Use NTV2_XptHDMIIn1Q2RGB instead.
-		NTV2_XptHDMIInQ3RGB				= NTV2_XptHDMIIn1Q3RGB,			///< @deprecated	Use NTV2_XptHDMIIn1Q3RGB instead.
-		NTV2_XptHDMIInQ4RGB				= NTV2_XptHDMIIn1Q4RGB			///< @deprecated	Use NTV2_XptHDMIIn1Q4RGB instead.
+		,NTV2_XptHDMIIn					= NTV2_XptHDMIIn1					///< @deprecated	Renamed in SDK 14.3 as ::NTV2_XptHDMIIn1
+		,NTV2_XptHDMIInQ2				= NTV2_XptHDMIIn1Q2					///< @deprecated	Renamed in SDK 14.3 as ::NTV2_XptHDMIIn1Q2
+		,NTV2_XptHDMIInQ3				= NTV2_XptHDMIIn1Q3					///< @deprecated	Renamed in SDK 14.3 as ::NTV2_XptHDMIIn1Q3
+		,NTV2_XptHDMIInQ4				= NTV2_XptHDMIIn1Q4					///< @deprecated	Renamed in SDK 14.3 as ::NTV2_XptHDMIIn1Q4
+		,NTV2_XptHDMIInRGB				= NTV2_XptHDMIIn1RGB				///< @deprecated	Renamed in SDK 14.3 as ::NTV2_XptHDMIIn1RGB
+		,NTV2_XptHDMIInQ2RGB			= NTV2_XptHDMIIn1Q2RGB				///< @deprecated	Renamed in SDK 14.3 as ::NTV2_XptHDMIIn1Q2RGB
+		,NTV2_XptHDMIInQ3RGB			= NTV2_XptHDMIIn1Q3RGB				///< @deprecated	Renamed in SDK 14.3 as ::NTV2_XptHDMIIn1Q3RGB
+		,NTV2_XptHDMIInQ4RGB			= NTV2_XptHDMIIn1Q4RGB				///< @deprecated	Renamed in SDK 14.3 as ::NTV2_XptHDMIIn1Q4RGB
 	#endif
 	#if !defined (NTV2_DEPRECATE)
 		,
@@ -2850,7 +2851,9 @@ typedef enum NTV2OutputCrosspointID
 	#endif	//	!defined (NTV2_DEPRECATE)
 } NTV2OutputCrosspointID, NTV2OutputXptID;
 
-typedef NTV2OutputCrosspointID	NTV2CrosspointID;	///< @deprecated	Use ::NTV2OutputCrosspointID instead.
+#if !defined(NTV2_DEPRECATE_16_0)
+	typedef NTV2OutputXptID		NTV2CrosspointID;		///< @deprecated	In SDK 16.0, use ::NTV2OutputXptID instead.
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 #define	NTV2_IS_VALID_OutputCrosspointID(__s__)			((__s__) >= NTV2_XptBlack && (__s__) < NTV2_OUTPUT_CROSSPOINT_INVALID)
 #define	NTV2_IS_RGB_OutputCrosspointID(__s__)			(((unsigned char)(__s__)) & 0x80)
@@ -2858,7 +2861,7 @@ typedef NTV2OutputCrosspointID	NTV2CrosspointID;	///< @deprecated	Use ::NTV2Outp
 /**
 	@brief	Identifies a widget input that potentially can accept a signal emitted
 			from another widget's output (identified by ::NTV2OutputCrosspointID).
-	@see	CNTV2Card::Connect
+	@see	CNTV2Card::Connect and also \ref ntv2signalrouting
 **/
 typedef enum NTV2InputCrosspointID
 {
@@ -2903,10 +2906,10 @@ typedef enum NTV2InputCrosspointID
 	NTV2_XptLUT6Input				= 0x26,
 	NTV2_XptLUT7Input				= 0x27,
 	NTV2_XptLUT8Input				= 0x28,
-	NTV2_XptSDIOut1Standard			= 0x29,	//	deprecate?
-	NTV2_XptSDIOut2Standard			= 0x2A,	//	deprecate?
-	NTV2_XptSDIOut3Standard			= 0x2B,	//	deprecate?
-	NTV2_XptSDIOut4Standard			= 0x2C,	//	deprecate?
+	NTV2_XptMultiLinkOut1Input		= 0x29,	///< @brief	New in SDK 16.0
+	NTV2_XptMultiLinkOut1InputDS2	= 0x2A,	///< @brief	New in SDK 16.0
+	NTV2_XptMultiLinkOut2Input		= 0x2B,	///< @brief	New in SDK 16.0
+	NTV2_XptMultiLinkOut2InputDS2	= 0x2C,	///< @brief	New in SDK 16.0
 	NTV2_XptSDIOut1Input			= 0x2D,
 	NTV2_XptSDIOut1InputDS2			= 0x2E,
 	NTV2_XptSDIOut2Input			= 0x2F,
@@ -2981,7 +2984,7 @@ typedef enum NTV2InputCrosspointID
 	NTV2_Xpt425Mux4AInput			= 0x73,
 	NTV2_Xpt425Mux4BInput			= 0x74,
 	NTV2_XptAnalogOutInput			= 0x75,
-	NTV2_XptIICT2Input				= 0x76,	//	deprecate?
+	NTV2_Xpt3DLUT1Input				= 0x76,	///< @brief	New in SDK 16.0
 	NTV2_XptAnalogOutCompositeOut	= 0x77,	//	deprecate?
 	NTV2_XptStereoLeftInput			= 0x78,	//	deprecate?
 	NTV2_XptStereoRightInput		= 0x79,	//	deprecate?
@@ -2996,21 +2999,24 @@ typedef enum NTV2InputCrosspointID
 	NTV2_XptCSC1KeyFromInput2		= 0x82,	//	deprecate?
 	NTV2_XptFrameSync2Input			= 0x83,	//	deprecate?
 	NTV2_XptFrameSync1Input			= 0x84,	//	deprecate?
-	NTV2_XptMultiLinkOut1Input		= 0x85,
-	NTV2_Xpt3DLUT1Input				= 0x86,
-	NTV2_XptMultiLinkOut1InputDS2	= 0x87,
-	NTV2_LAST_INPUT_CROSSPOINT		= 0x87,
+	NTV2_LAST_INPUT_CROSSPOINT		= 0x84,
 	NTV2_INPUT_CROSSPOINT_INVALID	= 0xFFFFFFFF
+	#if !defined(NTV2_DEPRECATE_16_0)
+		,NTV2_XptSDIOut1Standard	= NTV2_XptMultiLinkOut1Input	///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptMultiLinkOut1Input
+		,NTV2_XptSDIOut2Standard	= NTV2_XptMultiLinkOut1InputDS2	///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptMultiLinkOut1InputDS2
+		,NTV2_XptSDIOut3Standard	= NTV2_XptMultiLinkOut2Input	///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptMultiLinkOut2Input
+		,NTV2_XptSDIOut4Standard	= NTV2_XptMultiLinkOut2InputDS2	///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptMultiLinkOut2InputDS2
+		,NTV2_XptIICT2Input			= NTV2_Xpt3DLUT1Input			///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_Xpt3DLUT1Input
+	#endif
 	#if !defined(NTV2_DEPRECATE_15_3)
-		,
-		NTV2_XptFrameBuffer1BInput = NTV2_XptFrameBuffer1DS2Input,
-		NTV2_XptFrameBuffer2BInput = NTV2_XptFrameBuffer2DS2Input,
-		NTV2_XptFrameBuffer3BInput = NTV2_XptFrameBuffer3DS2Input,
-		NTV2_XptFrameBuffer4BInput = NTV2_XptFrameBuffer4DS2Input,
-		NTV2_XptFrameBuffer5BInput = NTV2_XptFrameBuffer5DS2Input,
-		NTV2_XptFrameBuffer6BInput = NTV2_XptFrameBuffer6DS2Input,
-		NTV2_XptFrameBuffer7BInput = NTV2_XptFrameBuffer7DS2Input,
-		NTV2_XptFrameBuffer8BInput = NTV2_XptFrameBuffer8DS2Input
+		,NTV2_XptFrameBuffer1BInput = NTV2_XptFrameBuffer1DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer1DS2Input
+		,NTV2_XptFrameBuffer2BInput = NTV2_XptFrameBuffer2DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer2DS2Input
+		,NTV2_XptFrameBuffer3BInput = NTV2_XptFrameBuffer3DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer3DS2Input
+		,NTV2_XptFrameBuffer4BInput = NTV2_XptFrameBuffer4DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer4DS2Input
+		,NTV2_XptFrameBuffer5BInput = NTV2_XptFrameBuffer5DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer5DS2Input
+		,NTV2_XptFrameBuffer6BInput = NTV2_XptFrameBuffer6DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer6DS2Input
+		,NTV2_XptFrameBuffer7BInput = NTV2_XptFrameBuffer7DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer7DS2Input
+		,NTV2_XptFrameBuffer8BInput = NTV2_XptFrameBuffer8DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer8DS2Input
 	#endif
 } NTV2InputCrosspointID, NTV2InputXptID;
 
@@ -3139,6 +3145,7 @@ typedef enum
 	,NTV2_WgtHDMIOut1v5
 	,NTV2_WgtMultiLinkOut1
 	,NTV2_Wgt3DLUT1
+	,NTV2_WgtMultiLinkOut2
 	,NTV2_WgtModuleTypeCount
 	,NTV2_WgtUndefined = NTV2_WgtModuleTypeCount
 	,NTV2_WIDGET_INVALID = NTV2_WgtModuleTypeCount
@@ -4251,9 +4258,10 @@ typedef enum
 typedef enum
 {
 	VPIDBitDepth_8				= 0x0,
+	VPIDBitDepth_10_Full		= 0x0,
 	VPIDBitDepth_10				= 0x1,
 	VPIDBitDepth_12				= 0x2,
-	VPIDBitDepth_Reserved3		= 0x3
+	VPIDBitDepth_12_Full		= 0x3
 } VPIDBitDepth;
 
 typedef enum
@@ -4385,6 +4393,12 @@ typedef enum
 	NTV2_VPID_Luminance_YCbCr,
 	NTV2_VPID_Luminance_ICtCp
 } NTV2VPIDLuminance, NTV2HDRLuminance;
+		
+typedef enum
+{
+	NTV2_VPID_Range_Narrow,
+	NTV2_VPID_Range_Full
+} NTV2VPIDRGBRange;
 
 
 #if !defined (NTV2_DEPRECATE)

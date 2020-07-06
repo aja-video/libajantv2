@@ -124,7 +124,8 @@ public:
 											const bool				inOutputIs12G = false,
 											const NTV2VPIDXferChars	inXferChars = NTV2_VPID_TC_SDR_TV,
 											const NTV2VPIDColorimetry	inColorimetry = NTV2_VPID_Color_Rec709,
-											const NTV2VPIDLuminance	inLuminance = NTV2_VPID_Luminance_YCbCr);
+											const NTV2VPIDLuminance	inLuminance = NTV2_VPID_Luminance_YCbCr,
+											const NTV2VPIDRGBRange	inRGBRange = NTV2_VPID_Range_Narrow);
 
 	static const std::string	VersionString				(const VPIDVersion version);
 	static const std::string	StandardString				(const VPIDStandard std);

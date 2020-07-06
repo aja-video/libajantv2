@@ -341,12 +341,16 @@ AJAExport ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat,
 
 
 /**
-	@brief		Identical to the ::GetVideoActiveSize function, except rounds the result up to the nearest 4096-byte multiple.
+	@brief		Identical to the ::GetVideoActiveSize function, except rounds the result up to the nearest 4K page
+				size multiple.
 	@return		The number of bytes required to store a single frame of video in the given frame buffer format
 				having the given video format, including VANC lines, if any, rounded up to the nearest 4096-byte multiple.
 	@param[in]	inVideoFormat	Specifies the video format.
 	@param[in]	inFBFormat		Specifies the frame buffer format.
 	@param[in]	inVancMode		Optionally specifies the VANC mode. Defaults to OFF (no VANC lines).
+	@details	Historically, this "nearest 4K page size" was necessary to get high-speed I/O bursting to work
+				between the AJA device and the Windows disk system. The file needed to be opened with FILE_FLAG_NO_BUFFERING
+				to bypass the file system cache.
 **/
 AJAExport ULWord GetVideoWriteSize (const NTV2VideoFormat inVideoFormat,
 									const NTV2FrameBufferFormat inFBFormat,
@@ -517,11 +521,11 @@ AJAExport NTV2FrameGeometry		GetGeometryFromStandard (const NTV2Standard inStand
 **/
 AJAExport NTV2Standard			GetStandardFromGeometry (const NTV2FrameGeometry inGeometry, const bool inIsProgressive = true);
 
-AJAExport ULWord				GetDisplayWidth (NTV2VideoFormat videoFormat);
-AJAExport ULWord				GetDisplayHeight (NTV2VideoFormat videoFormat);
-AJAExport NTV2ConversionMode	GetConversionMode (NTV2VideoFormat inFormat, NTV2VideoFormat outFormat);
-AJAExport NTV2VideoFormat		GetInputForConversionMode (NTV2ConversionMode conversionMode);
-AJAExport NTV2VideoFormat		GetOutputForConversionMode (NTV2ConversionMode conversionMode);
+AJAExport ULWord				GetDisplayWidth (const NTV2VideoFormat videoFormat);
+AJAExport ULWord				GetDisplayHeight (const NTV2VideoFormat videoFormat);
+AJAExport NTV2ConversionMode	GetConversionMode (const NTV2VideoFormat inFormat, const NTV2VideoFormat outFormat);
+AJAExport NTV2VideoFormat		GetInputForConversionMode (const NTV2ConversionMode conversionMode);
+AJAExport NTV2VideoFormat		GetOutputForConversionMode (const NTV2ConversionMode conversionMode);
 
 AJAExport NTV2Channel			GetNTV2ChannelForIndex (const ULWord inIndex0);
 AJAExport ULWord				GetIndexForNTV2Channel (const NTV2Channel inChannel);
@@ -553,45 +557,45 @@ AJAExport NTV2InputSource		GetNTV2InputSourceForIndex (const ULWord inIndex0, co
 AJAExport ULWord				GetIndexForNTV2InputSource (const NTV2InputSource inValue);		//	0-based index
 
 /**
-	@brief		Converts the given NTV2Channel value into the equivalent input INTERRUPT_ENUMS value.
-	@param[in]	inChannel		Specifies the NTV2Channel to be converted.
-	@return		The equivalent input INTERRUPT_ENUMS value.
+	@brief		Converts the given ::NTV2Channel value into the equivalent input ::INTERRUPT_ENUMS value.
+	@param[in]	inChannel		Specifies the ::NTV2Channel to be converted.
+	@return		The equivalent input ::INTERRUPT_ENUMS value.
 **/
 AJAExport INTERRUPT_ENUMS		NTV2ChannelToInputInterrupt (const NTV2Channel inChannel);
 
 /**
-	@brief		Converts the given NTV2Channel value into the equivalent output INTERRUPT_ENUMS value.
-	@param[in]	inChannel		Specifies the NTV2Channel to be converted.
-	@return		The equivalent output INTERRUPT_ENUMS value.
+	@brief		Converts the given ::NTV2Channel value into the equivalent output ::INTERRUPT_ENUMS value.
+	@param[in]	inChannel		Specifies the ::NTV2Channel to be converted.
+	@return		The equivalent output ::INTERRUPT_ENUMS value.
 **/
 AJAExport INTERRUPT_ENUMS		NTV2ChannelToOutputInterrupt (const NTV2Channel inChannel);
 
 /**
-	@brief		Converts the given NTV2Channel value into the equivalent NTV2TCIndex value.
-	@param[in]	inChannel		Specifies the NTV2Channel to be converted.
+	@brief		Converts the given ::NTV2Channel value into the equivalent ::NTV2TCIndex value.
+	@param[in]	inChannel		Specifies the ::NTV2Channel to be converted.
 	@param[in]	inEmbeddedLTC	Specify true for embedded LTC. Defaults to false.
 	@param[in]	inIsF2			Specify true for VITC2. Defaults to false.
-	@return		The equivalent NTV2TCIndex value.
+	@return		The equivalent ::NTV2TCIndex value.
 **/
 AJAExport NTV2TCIndex			NTV2ChannelToTimecodeIndex (const NTV2Channel inChannel, const bool inEmbeddedLTC = false, const bool inIsF2 = false);
 
 /**
 	@return		The NTV2TCIndexes that are associated with the given SDI connector.
-	@param[in]	inSDIConnector	The SDI connector of interest, specified as an NTV2Channel (a zero-based index number).
+	@param[in]	inSDIConnector	The SDI connector of interest, specified as an ::NTV2Channel (a zero-based index number).
 **/
 AJAExport NTV2TCIndexes			GetTCIndexesForSDIConnector (const NTV2Channel inSDIConnector);
 
 /**
-	@brief		Converts the given NTV2TCIndex value into the appropriate NTV2Channel value.
-	@param[in]	inTCIndex		Specifies the NTV2TCIndex to be converted.
-	@return		The equivalent NTV2Channel value.
+	@brief		Converts the given ::NTV2TCIndex value into the appropriate ::NTV2Channel value.
+	@param[in]	inTCIndex		Specifies the ::NTV2TCIndex to be converted.
+	@return		The equivalent ::NTV2Channel value.
 **/
 AJAExport NTV2Channel			NTV2TimecodeIndexToChannel (const NTV2TCIndex inTCIndex);
 
 /**
-	@brief		Converts the given NTV2TCIndex value into the appropriate NTV2InputSource value.
-	@param[in]	inTCIndex		Specifies the NTV2TCIndex to be converted.
-	@return		The equivalent NTV2InputSource value.
+	@brief		Converts the given ::NTV2TCIndex value into the appropriate ::NTV2InputSource value.
+	@param[in]	inTCIndex		Specifies the ::NTV2TCIndex to be converted.
+	@return		The equivalent ::NTV2InputSource value.
 **/
 AJAExport NTV2InputSource		NTV2TimecodeIndexToInputSource (const NTV2TCIndex inTCIndex);
 
@@ -605,8 +609,8 @@ AJAExport NTV2InputSource		NTV2TimecodeIndexToInputSource (const NTV2TCIndex inT
 
 
 /**
-	@brief		Converts the given NTV2Framesize value into an exact byte count.
-	@param[in]	inFrameSize		Specifies the NTV2Framesize to be converted.
+	@brief		Converts the given ::NTV2Framesize value into an exact byte count.
+	@param[in]	inFrameSize		Specifies the ::NTV2Framesize to be converted.
 	@return		The equivalent number of bytes.
 **/
 AJAExport ULWord	NTV2FramesizeToByteCount (const NTV2Framesize inFrameSize);
@@ -830,13 +834,12 @@ AJAExport ULWord	AddAudioTone (	UWord *			pAudioBuffer,
 									const bool		inByteSwap,
 									const ULWord	inNumChannels);
 
-AJAExport 
-ULWord	AddAudioTestPattern (ULWord*             audioBuffer,
-							 ULWord&            currentSample,
-							 ULWord             numSamples,
-							 ULWord             modulus,
-							 bool               endianConvert,
-							 ULWord   		    numChannels);
+AJAExport ULWord	AddAudioTestPattern (ULWord *		pAudioBuffer,
+										 ULWord &		inOutCurrentSample,
+										 const ULWord	inNumSamples,
+										 const ULWord	inModulus,
+										 const bool		inEndianConvert,
+										 const ULWord	inNumChannels);
 
 #if !defined (NTV2_DEPRECATE)
 	AJAExport bool BuildRoutingTableForOutput (CNTV2SignalRouter &		outRouter,

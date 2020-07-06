@@ -197,7 +197,7 @@ string NTV2_POINTER::AsString (UWord inDumpMaxBytes) const
 {
 	ostringstream	oss;
 	oss << xHEX0N(GetRawHostPointer(),16) << ":" << DEC(GetByteCount()) << " bytes";
-	if (inDumpMaxBytes)
+	if (inDumpMaxBytes  &&  GetHostPointer())
 	{
 		oss << ":";
 		if (inDumpMaxBytes > 64)
@@ -615,6 +615,8 @@ bool NTV2_POINTER::PutU64s (const ULWord64Sequence & inU64s, const size_t inU64O
 {
 	if (IsNULL())
 		return false;	//	No buffer or space
+	if (inU64s.empty())
+		return true;	//	Nothing to copy
 
 	size_t		maxU64s	(GetByteCount() / sizeof(uint64_t));
 	uint64_t *	pU64	(reinterpret_cast<uint64_t*>(GetHostAddress(ULWord(inU64Offset * sizeof(uint64_t)))));
@@ -641,6 +643,8 @@ bool NTV2_POINTER::PutU32s (const ULWordSequence & inU32s, const size_t inU32Off
 {
 	if (IsNULL())
 		return false;	//	No buffer or space
+	if (inU32s.empty())
+		return true;	//	Nothing to copy
 
 	size_t		maxU32s	(GetByteCount() / sizeof(uint32_t));
 	uint32_t *	pU32	(reinterpret_cast<uint32_t*>(GetHostAddress(ULWord(inU32Offset * sizeof(uint32_t)))));
@@ -667,6 +671,8 @@ bool NTV2_POINTER::PutU16s (const UWordSequence & inU16s, const size_t inU16Offs
 {
 	if (IsNULL())
 		return false;	//	No buffer or space
+	if (inU16s.empty())
+		return true;	//	Nothing to copy
 
 	size_t		maxU16s	(GetByteCount() / sizeof(uint16_t));
 	uint16_t *	pU16	(reinterpret_cast<uint16_t*>(GetHostAddress(ULWord(inU16Offset * sizeof(uint16_t)))));
@@ -693,6 +699,8 @@ bool NTV2_POINTER::PutU8s (const UByteSequence & inU8s, const size_t inU8Offset)
 {
 	if (IsNULL())
 		return false;	//	No buffer or space
+	if (inU8s.empty())
+		return true;	//	Nothing to copy
 
 	size_t		maxU8s	(GetByteCount());
 	uint8_t *	pU8		(reinterpret_cast<uint8_t*>(GetHostAddress(ULWord(inU8Offset))));
@@ -708,11 +716,11 @@ bool NTV2_POINTER::PutU8s (const UByteSequence & inU8s, const size_t inU8Offset)
 	::memcpy(pU8, &inU8s[0], maxU8s);
 #else
 	for (unsigned ndx(0);  ndx < maxU8s;  ndx++)
-#if defined(_DEBUG)
+	#if defined(_DEBUG)
 		*pU8++ = inU8s.at(ndx);
-#else
+	#else
 		*pU8++ = inU8s[ndx];
-#endif
+	#endif
 #endif
 	return true;
 }
@@ -1104,18 +1112,20 @@ NTV2_TRAILER::NTV2_TRAILER ()
 }
 
 
+static const string sSegXferUnits[] = {"", " U8", " U16", "", " U32", "", "", "", " U64", ""};
+
 ostream & NTV2SegmentedXferInfo::Print (ostream & inStrm, const bool inDumpSegments) const
 {
 	if (!isValid())
 		return inStrm << "(invalid)";
 	if (inDumpSegments)
 	{
+		//	TBD
 	}
 	else
 	{
-		static const string sUnits[] = {"", " U8", " U16", "", " U32", "", "", "", " U64", ""};
 		inStrm	<< DEC(getSegmentCount()) << " x " << DEC(getSegmentLength())
-				<< sUnits[getElementLength()] << " segs";
+				<< sSegXferUnits[getElementLength()] << " segs";
 		if (getSourceOffset())
 			inStrm	<< " srcOff=" << DEC(getSourceOffset());
 		inStrm << " srcSpan=" << DEC(getSourcePitch()) << (isSourceBottomUp()?" VF":"");
@@ -1125,6 +1135,49 @@ ostream & NTV2SegmentedXferInfo::Print (ostream & inStrm, const bool inDumpSegme
 				<< " totElm=" << DEC(getTotalElements()) << " totByt=" << DEC(getTotalBytes());
 	}
 	return inStrm;
+}
+
+string NTV2SegmentedXferInfo::getSourceCode (const bool inInclDecl) const
+{
+	static string var("segInfo");
+	ostringstream oss;
+	string units("\t// bytes");
+	if (!isValid())
+		return "";
+	if (inInclDecl)
+		oss << "NTV2SegmentedXferInfo " << var << ";" << endl;
+	if (getElementLength() > 1)
+	{
+		units = "\t// " + sSegXferUnits[getElementLength()] + "s";
+		oss << var << ".setElementLength(" << getElementLength() << ");" << endl;
+	}
+	oss << var << ".setSegmentCount(" << DEC(getSegmentCount()) << ");" << endl;
+	oss << var << ".setSegmentLength(" << DEC(getSegmentLength()) << ");" << units << endl;
+	if (getSourceOffset())
+		oss << var << ".setSourceOffset(" << DEC(getSourceOffset()) << ");" << units << endl;
+	oss << var << ".setSourcePitch(" << DEC(getSourcePitch()) << ");" << units << endl;
+	if (isSourceBottomUp())
+		oss << var << ".setSourceDirection(false);" << endl;
+	if (getDestOffset())
+		oss << var << ".setDestOffset(" << DEC(getDestOffset()) << ");" << units << endl;
+	if (getDestPitch())
+		oss << var << ".setDestPitch(" << DEC(getDestPitch()) << ");" << units << endl;
+	if (isDestBottomUp())
+		oss << var << ".setDestDirection(false);" << endl;
+	return oss.str();
+}
+
+NTV2SegmentedXferInfo &	NTV2SegmentedXferInfo::reset (void)
+{
+	mFlags				= 0;
+	mNumSegments		= 0;
+	mElementsPerSegment	= 0;
+	mInitialSrcOffset	= 0;
+	mInitialDstOffset	= 0;
+	mSrcElementsPerRow	= 0;
+	mDstElementsPerRow	= 0;
+	setElementLength(1);
+	return *this;
 }
 
 NTV2SegmentedXferInfo & NTV2SegmentedXferInfo::swapSourceAndDestination (void)
@@ -1436,25 +1489,25 @@ bool NTV2_POINTER::SwapWith (NTV2_POINTER & inBuffer)
 
 bool NTV2_POINTER::IsContentEqual (const NTV2_POINTER & inBuffer, const ULWord inByteOffset, const ULWord inByteCount) const
 {
-	if (IsNULL () || inBuffer.IsNULL ())
+	if (IsNULL() || inBuffer.IsNULL())
 		return false;	//	NULL or empty
-	if (inBuffer.GetByteCount () != GetByteCount ())
+	if (inBuffer.GetByteCount() != GetByteCount())
 		return false;	//	Different byte counts
-	if (inBuffer.GetHostPointer () == GetHostPointer ())
+	if (inBuffer.GetHostPointer() == GetHostPointer())
 		return true;	//	Same buffer
 
-	ULWord	totalBytes	(GetByteCount());
+	ULWord	totalBytes(GetByteCount());
 	if (inByteOffset >= totalBytes)
 		return false;	//	Bad offset
 
 	totalBytes -= inByteOffset;
 
-	ULWord	byteCount	(inByteCount);
+	ULWord	byteCount(inByteCount);
 	if (byteCount > totalBytes)
 		byteCount = totalBytes;
 
-	const UByte *	pByte1 (reinterpret_cast <const UByte *> (GetHostPointer()));
-	const UByte *	pByte2 (reinterpret_cast <const UByte *> (inBuffer.GetHostPointer()));
+	const UByte *	pByte1 (reinterpret_cast<const UByte*>(GetHostPointer()));
+	const UByte *	pByte2 (reinterpret_cast<const UByte*>(inBuffer.GetHostPointer()));
 	pByte1 += inByteOffset;
 	pByte2 += inByteOffset;
 	return ::memcmp (pByte1, pByte2, byteCount) == 0;
@@ -2242,8 +2295,8 @@ static const NTV2_RP188		INVALID_TIMECODE_VALUE;
 bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes (const NTV2TimeCodes & inValues)
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	ULWord			maxNumValues	(acOutputTimeCodes.GetByteCount () / sizeof (NTV2_RP188));
-	NTV2_RP188 *	pArray	(reinterpret_cast <NTV2_RP188 *> (acOutputTimeCodes.GetHostPointer ()));
+	ULWord			maxNumValues (acOutputTimeCodes.GetByteCount() / sizeof(NTV2_RP188));
+	NTV2_RP188 *	pArray (reinterpret_cast<NTV2_RP188*>(acOutputTimeCodes.GetHostPointer()));
 	if (!pArray)
 		return false;
 	if (maxNumValues > NTV2_MAX_NUM_TIMECODE_INDEXES)
@@ -2251,9 +2304,9 @@ bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes (const NTV2TimeCodes & inValues)
 
 	for (UWord ndx (0);  ndx < UWord(maxNumValues);  ndx++)
 	{
-		const NTV2TCIndex		tcIndex	(static_cast <const NTV2TCIndex> (ndx));
-		NTV2TimeCodesConstIter	iter	(inValues.find (tcIndex));
-		pArray [ndx] = (iter != inValues.end ())  ?  iter->second  :  INVALID_TIMECODE_VALUE;
+		const NTV2TCIndex		tcIndex	(static_cast<const NTV2TCIndex>(ndx));
+		NTV2TimeCodesConstIter	iter	(inValues.find(tcIndex));
+		pArray[ndx] = (iter != inValues.end())  ?  iter->second  :  INVALID_TIMECODE_VALUE;
 	}	//	for each possible NTV2TCSource value
 	return true;
 }
@@ -2262,16 +2315,16 @@ bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes (const NTV2TimeCodes & inValues)
 bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCode (const NTV2_RP188 & inTimeCode, const NTV2TCIndex inTCIndex)
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	ULWord			maxNumValues	(acOutputTimeCodes.GetByteCount () / sizeof (NTV2_RP188));
-	NTV2_RP188 *	pArray			(reinterpret_cast <NTV2_RP188 *> (acOutputTimeCodes.GetHostPointer ()));
+	ULWord			maxNumValues (acOutputTimeCodes.GetByteCount() / sizeof(NTV2_RP188));
+	NTV2_RP188 *	pArray (reinterpret_cast<NTV2_RP188*>(acOutputTimeCodes.GetHostPointer()));
 	if (!pArray)
 		return false;
 	if (maxNumValues > NTV2_MAX_NUM_TIMECODE_INDEXES)
 		maxNumValues = NTV2_MAX_NUM_TIMECODE_INDEXES;
-	if (!NTV2_IS_VALID_TIMECODE_INDEX (inTCIndex))
+	if (!NTV2_IS_VALID_TIMECODE_INDEX(inTCIndex))
 		return false;
 
-	pArray [inTCIndex] = inTimeCode;
+	pArray[inTCIndex] = inTimeCode;
 	return true;
 }
 

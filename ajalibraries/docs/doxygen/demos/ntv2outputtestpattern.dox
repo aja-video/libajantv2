@@ -11,16 +11,20 @@ video signal forever without further action needed by the host.
 Typical WFM display showing the output of an AJA device thatʼs connected to a host running <b>ntv2outputtestpattern</b>.
 (Audio playout is shown because “loopback” was enabled and an input signal was connected to the deviceʼs input.)
 
-The NTV2OutputTestPattern class demonstrates…
--	how to generate a test pattern of a particular video geometry and get it into a frame buffer with the right format;
+The ::NTV2OutputTestPattern class demonstrates…
+-	how to generate a test pattern of a particular video geometry and get it into a host buffer with the correct pixel format;
 -	how to transfer a single frame to an AJA device using DMA;
 -	how to programmatically perform device configuration and signal routing;
 -	how to be a “good citizen” to detect if another application is already using the device.
 
 The critical parts of the demo (for troubleshooting):
 -	Configuring the FrameStore/Channel being used:
+	-	Enabling a FrameStore using CNTV2Card::EnableChannel.
 	-	Setting the FrameStoreʼs mode to “playout” (as opposed to “capture”) using CNTV2Card::SetMode.
 	-	Setting the FrameStoreʼs raster pixel format using CNTV2Card::SetFrameBufferFormat (fixed at 8-bit YCbCr).
+	-	By default, this demo uses the FrameStoreʼs existing video format, but this can be overridden using the <tt>-v</tt> option.
+		-	If the -v option is used, CNTV2Card::SetVideoFormat will be called.
+		-	If the -v option is <b><i>not</i></b> used, CNTV2Card::GetVideoFormat will be called.
 -	Setting the output clocking reference to “free run” using CNTV2Card::SetReference.
 -	Routing the signal from the FrameStore to whatever video outputs are available on the device by calling CNTV2Card::Connect.
 -	Ensuring that bi-directional SDI connectors are configured for output by calling CNTV2Card::SetSDITransmitEnable.
@@ -35,31 +39,22 @@ The critical parts of the demo (for troubleshooting):
 @code
 	ntv2outputtestpattern  [options...]
 	
-	-d|--device  {spec}                 Specifies the device to use by index number, serial number or generic model name.
-	                                    Defaults to first device (index 0).
-	                                    If model name specified, uses lowest-numbered matching device.
+	-d|--device  {spec}        Specifies the device to use by index number, serial number or generic model name.
+	                           Defaults to first device (index 0).
+	                           If model name specified, uses lowest-numbered matching device.
+	                           Specify '?' to list the available devices.
 
-	-c|--channel  {channelSpec}         Specifies the framestore/channel as an unsigned integer number 1 thru 8.
+	-c|--channel  {spec}       Specifies the framestore/channel as an unsigned integer number 1 thru 8.
+	                           Defaults to first channel (index 0).
 
-	-p|--pattern {patternSpec}          Specifies the test pattern to show as an unsigned integer number 0 thru 16:
-	                                    0:  100% ColorBars
-	                                    1:  75% ColorBars
-	                                    2:  Ramp
-	                                    3:  Multiburst
-	                                    4:  Linesweep
-	                                    5:  Check Field
-	                                    6:  Flat Field
-	                                    7:  Multi Pattern
-	                                    8:  Black
-	                                    9:  White
-	                                    10: Border
-	                                    11: Linear Ramp
-	                                    12: Slant Ramp
-	                                    13: Zone Plate
-	                                    14: Color Quadrant
-	                                    15: Color Quadrant Border
-	                                    16: Color Quadrant Tsi
+	-p|--pattern {spec}        Optionally specifies the test pattern (or flat-field color) to show.
+	                           Defaults to 100% Bars.
+	                           Specify '?' to list the available patterns or colors.
 
-	-?|--help|--usage                   Shows how to use this command.
+	-v|--videoFormat {spec}    Optionally specifies the video format to use.
+	                           Defaults to whatever video format the device is currently using.
+	                           Specify '?' or 'list' to list the available video formats.
+
+	-?|--help|--usage          Shows how to use this command.
 @endcode
 **/

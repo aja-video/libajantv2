@@ -17,6 +17,7 @@
 #include "ajacc/includes/ntv2captionlogging.h"
 #include <iomanip>
 #include <utility>	//	std::rel_ops
+#include <random>	//	std::uniform_int_distribution
 #if defined(AJA_LINUX)
 	#include <string.h>
 #endif
@@ -2286,6 +2287,55 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			return true;
 		}
 
+		static bool BFT_AddFromDeviceAncBuffer (void)
+		{	//	This test is intended to elicit crashes (access violations), not to validate outcomes
+			LOGMYNOTE("Starting");
+			AJAAncillaryList pkts;
+			NTV2_POINTER nullBuffer(0);
+			AJARTPAncPayloadHeader rtpHdr;
+			//	Exercise RTP (variable-length runs of zeroes)
+			for (ULWord sz(20);  sz < 65;  sz++)
+			{
+				NTV2_POINTER buff(sz*4);
+				SHOULD_BE_EQUAL(buff.GetByteCount(), sz*4);
+				SHOULD_BE_TRUE(rtpHdr.WriteToBuffer(buff, /*offset*/sz/4%8));
+				SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers(buff, nullBuffer, pkts));
+				SHOULD_BE_EQUAL(pkts.CountAncillaryData(), 0);
+			}
+			//	Exercise RTP (variable-length runs of random data)
+			for (ULWord sz(15);  sz < 65;  sz++)
+			{
+				NTV2_POINTER buff(sz*4);
+				SHOULD_BE_EQUAL(buff.GetByteCount(), sz*4);
+				std::random_device rd;	//	Seeds the random number engine
+				std::mt19937 gen(rd());	//	Standard mersenne_twister_engine seeded with rd()
+				std::uniform_int_distribution<> distrib(0, 255);
+				for (ULWord ndx(0);  ndx < sz;  ++ndx)
+					SHOULD_BE_TRUE(buff.PutU8s(UByteSequence{UByte(distrib(gen))}, ndx));
+				SHOULD_BE_TRUE(rtpHdr.WriteToBuffer(buff, /*offset*/sz/4%8));
+				SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers(buff, nullBuffer, pkts));
+				SHOULD_BE_EQUAL(pkts.CountAncillaryData(), 0);
+			}
+			//	Exercise GUMP (variable-length runs of random data)
+			for (ULWord sz(8);  sz < 200;  sz++)
+			{
+				NTV2_POINTER buff(sz);
+				SHOULD_BE_EQUAL(buff.GetByteCount(), sz);
+				std::random_device rd;	//	Seeds the random number engine
+				std::mt19937 gen(rd());	//	Standard mersenne_twister_engine seeded with rd()
+				std::uniform_int_distribution<> distrib(0, 255);
+				for (ULWord ndx(0);  ndx < sz;  ++ndx)
+					SHOULD_BE_TRUE(buff.PutU8s(UByteSequence{UByte(distrib(gen))}, ndx));
+				SHOULD_BE_TRUE(buff.PutU8s(UByteSequence{0xFF}, 0));
+				if (AJAAncillaryList::SetFromDeviceAncBuffers(buff, nullBuffer, pkts))
+					LOGMYINFO("whoa, a successful parse! " << pkts);
+				if (pkts.CountAncillaryData())
+					LOGMYINFO(pkts);
+			}
+			LOGMYNOTE("Passed");
+			return true;
+		}
+
 		static bool BFT (void)
 		{
 			AJADebug::Open();
@@ -2415,6 +2465,8 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 					SHOULD_BE_TRUE(BFT_AncListToFBYUV10ToAncList());
 				if (true)
 					SHOULD_BE_TRUE(BFT_FBYUV10ToAncListToFBYUV10());
+				if (true)
+					SHOULD_BE_TRUE(BFT_AddFromDeviceAncBuffer());
 				cerr << "AJAAncillaryList-to-buffer-to-AJAAncillaryList and Buffer-to-AJAAncillaryList-to-buffer round-trip BFTs passed" << endl;
 			}
 
