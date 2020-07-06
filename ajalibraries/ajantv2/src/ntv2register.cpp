@@ -201,14 +201,17 @@ static const ULWord	gChannelToSDIInputProgressiveMask []	= {	kRegMaskInput1Progr
 static const ULWord	gChannelToSDIInputProgressiveShift []	= {	kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,
 																kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			0};
 
-static const ULWord	gChannelToVPIDTransferCharacteristics []		= {	kVRegNTV2VPIDTransferCharacteristics,		kVRegNTV2VPIDTransferCharacteristics2,		kVRegNTV2VPIDTransferCharacteristics3,		kVRegNTV2VPIDTransferCharacteristics4,
-																kVRegNTV2VPIDTransferCharacteristics5,		kVRegNTV2VPIDTransferCharacteristics6,		kVRegNTV2VPIDTransferCharacteristics7,		kVRegNTV2VPIDTransferCharacteristics8,	0};
+static const ULWord	gChannelToVPIDTransferCharacteristics []	= {	kVRegNTV2VPIDTransferCharacteristics1,		kVRegNTV2VPIDTransferCharacteristics2,		kVRegNTV2VPIDTransferCharacteristics3,		kVRegNTV2VPIDTransferCharacteristics4,
+																	kVRegNTV2VPIDTransferCharacteristics5,		kVRegNTV2VPIDTransferCharacteristics6,		kVRegNTV2VPIDTransferCharacteristics7,		kVRegNTV2VPIDTransferCharacteristics8,	0};
 
-static const ULWord	gChannelToVPIDColorimetry []		= {	kVRegNTV2VPIDColorimetry,		kVRegNTV2VPIDColorimetry2,		kVRegNTV2VPIDColorimetry3,		kVRegNTV2VPIDColorimetry4,
-																kVRegNTV2VPIDColorimetry5,		kVRegNTV2VPIDColorimetry6,		kVRegNTV2VPIDColorimetry7,		kVRegNTV2VPIDColorimetry8,	0};
+static const ULWord	gChannelToVPIDColorimetry []	= {	kVRegNTV2VPIDColorimetry1,		kVRegNTV2VPIDColorimetry2,		kVRegNTV2VPIDColorimetry3,		kVRegNTV2VPIDColorimetry4,
+														kVRegNTV2VPIDColorimetry5,		kVRegNTV2VPIDColorimetry6,		kVRegNTV2VPIDColorimetry7,		kVRegNTV2VPIDColorimetry8,	0};
 
-static const ULWord	gChannelToVPIDLuminance []		= {	kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,
-																kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,		kVRegNTV2VPIDLuminance,	0};
+static const ULWord	gChannelToVPIDLuminance []	= {	kVRegNTV2VPIDLuminance1,		kVRegNTV2VPIDLuminance2,		kVRegNTV2VPIDLuminance3,		kVRegNTV2VPIDLuminance4,
+													kVRegNTV2VPIDLuminance5,		kVRegNTV2VPIDLuminance6,		kVRegNTV2VPIDLuminance7,		kVRegNTV2VPIDLuminance8,	0};
+
+static const ULWord	gChannelToVPIDRGBRange []	= {	kVRegNTV2VPIDRGBRange1,		kVRegNTV2VPIDRGBRange2,		kVRegNTV2VPIDRGBRange3,		kVRegNTV2VPIDRGBRange4,
+													kVRegNTV2VPIDRGBRange5,		kVRegNTV2VPIDRGBRange6,		kVRegNTV2VPIDRGBRange7,		kVRegNTV2VPIDRGBRange8,	0};
 
 
 // Method: SetEveryFrameServices
@@ -2188,7 +2191,7 @@ bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat 
 
 	SetVPIDTransferCharacteristics(inXferChars, channel);
 	SetVPIDColorimetry(inColorimetry, channel);
-	SetVPIDVPIDLuminance(inLuminance, channel);
+	SetVPIDLuminance(inLuminance, channel);
 	return status;
 }
 
@@ -7209,17 +7212,31 @@ bool CNTV2Card::GetVPIDColorimetry (NTV2VPIDColorimetry & outValue, const NTV2Ch
 	return true;
 }
 
-bool CNTV2Card::SetVPIDVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel)
+bool CNTV2Card::SetVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel)
 {
 	return WriteRegister(gChannelToVPIDLuminance[inChannel], inValue);
 }
 
-bool CNTV2Card::GetVPIDVPIDLuminance (NTV2VPIDLuminance & outValue, const NTV2Channel inChannel)
+bool CNTV2Card::GetVPIDLuminance (NTV2VPIDLuminance & outValue, const NTV2Channel inChannel)
 {
 	ULWord	tempVal (0);
 	if (!ReadRegister(gChannelToVPIDLuminance[inChannel], tempVal))
 		return false;
 	outValue = static_cast <NTV2VPIDLuminance> (tempVal);
+	return true;
+}
+
+bool CNTV2Card::SetVPIDRGBRange (const NTV2VPIDRGBRange inValue, const NTV2Channel inChannel)
+{
+	return WriteRegister(gChannelToVPIDRGBRange[inChannel], inValue);
+}
+
+bool CNTV2Card::GetVPIDRGBRange (NTV2VPIDRGBRange & outValue, const NTV2Channel inChannel)
+{
+	ULWord	tempVal (0);
+	if (!ReadRegister(gChannelToVPIDRGBRange[inChannel], tempVal))
+		return false;
+	outValue = static_cast <NTV2VPIDRGBRange> (tempVal);
 	return true;
 }
 

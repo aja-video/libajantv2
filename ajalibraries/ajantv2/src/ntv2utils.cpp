@@ -1230,21 +1230,21 @@ static UByte * GetWriteAddress_2vuy (UByte * pInFrameBuffer, const ULWord inByte
 
 //	This function should work on all 4-byte-per-2-pixel formats
 static bool CopyRaster4BytesPer2Pixels (UByte *			pDstBuffer,				//	Dest buffer to be modified
-										const ULWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
+										const ULWord	inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
 										const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
 										const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
 										const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear
 										const UByte *	pSrcBuffer,				//	Src buffer
-										const ULWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
+										const ULWord	inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
 										const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
 										const UWord		inSrcVertLineOffset,	//	Src image top edge
 										const UWord		inSrcVertLinesToCopy,	//	Src image height
 										const UWord		inSrcHorzPixelOffset,	//	Src image left edge
 										const UWord		inSrcHorzPixelsToCopy)	//	Src image width
 {
-	if (inDstHorzPixelOffset & 1)					//	dst odd pixel offset
+	if (inDstHorzPixelOffset & 1)	//	dst odd pixel offset
 		return false;
-	if (inSrcHorzPixelOffset & 1)					//	src odd pixel offset
+	if (inSrcHorzPixelOffset & 1)	//	src odd pixel offset
 		return false;
 
 	const ULWord	TWO_BYTES_PER_PIXEL	(2);			//	2 bytes per pixel for '2vuy'
@@ -1257,7 +1257,7 @@ static bool CopyRaster4BytesPer2Pixels (UByte *			pDstBuffer,				//	Dest buffer 
 		return false;
 	if (inSrcHorzPixelOffset >= srcMaxPixelWidth)	//	src past right edge
 		return false;
-	if (inSrcHorzPixelOffset + inSrcHorzPixelsToCopy > srcMaxPixelWidth)
+	if (ULWord(inSrcHorzPixelOffset + inSrcHorzPixelsToCopy) > srcMaxPixelWidth)
 		numHorzPixelsToCopy -= inSrcHorzPixelOffset + inSrcHorzPixelsToCopy - srcMaxPixelWidth;	//	Clip to src raster's right edge
 	if (inSrcVertLineOffset + inSrcVertLinesToCopy > inSrcTotalLines)
 		numVertLinesToCopy -= inSrcVertLineOffset + inSrcVertLinesToCopy - inSrcTotalLines;		//	Clip to src raster's bottom edge
@@ -1282,7 +1282,7 @@ static bool CopyRaster4BytesPer2Pixels (UByte *			pDstBuffer,				//	Dest buffer 
 			pDst[0] = pSrc[0];
 			pDst[1] = pSrc[1];
 			dstPixelsCopied++;
-			if (dstPixelsCopied + inDstHorzPixelOffset >= dstMaxPixelWidth)
+			if (dstPixelsCopied + inDstHorzPixelOffset >= UWord(dstMaxPixelWidth))
 				break;	//	Clip to dst raster's right edge
 			pDst += TWO_BYTES_PER_PIXEL;
 			pSrc += TWO_BYTES_PER_PIXEL;
@@ -1299,27 +1299,27 @@ static bool CopyRaster4BytesPer2Pixels (UByte *			pDstBuffer,				//	Dest buffer 
 
 //	This function should work on all 16-byte-per-6-pixel formats
 static bool CopyRaster16BytesPer6Pixels (	UByte *			pDstBuffer,				//	Dest buffer to be modified
-											const ULWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width) -- must be evenly divisible by 16
+											const ULWord	inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width) -- must be evenly divisible by 16
 											const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
 											const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
 											const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear -- must be evenly divisible by 6
 											const UByte *	pSrcBuffer,				//	Src buffer
-											const ULWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width) -- must be evenly divisible by 16
+											const ULWord	inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width) -- must be evenly divisible by 16
 											const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
 											const UWord		inSrcVertLineOffset,	//	Src image top edge
 											const UWord		inSrcVertLinesToCopy,	//	Src image height
 											const UWord		inSrcHorzPixelOffset,	//	Src image left edge -- must be evenly divisible by 6
 											const UWord		inSrcHorzPixelsToCopy)	//	Src image width -- must be evenly divisible by 6
 {
-	if (inDstHorzPixelOffset % 6)		//	dst pixel offset must be on 6-pixel boundary
+	if (inDstHorzPixelOffset % 6)	//	dst pixel offset must be on 6-pixel boundary
 		return false;
-	if (inSrcHorzPixelOffset % 6)		//	src pixel offset must be on 6-pixel boundary
+	if (inSrcHorzPixelOffset % 6)	//	src pixel offset must be on 6-pixel boundary
 		return false;
-	if (inDstBytesPerLine % 16)			//	dst raster width must be evenly divisible by 16 (width must be multiple of 6)
+	if (inDstBytesPerLine % 16)		//	dst raster width must be evenly divisible by 16 (width must be multiple of 6)
 		return false;
-	if (inSrcBytesPerLine % 16)			//	src raster width must be evenly divisible by 16 (width must be multiple of 6)
+	if (inSrcBytesPerLine % 16)		//	src raster width must be evenly divisible by 16 (width must be multiple of 6)
 		return false;
-	if (inSrcHorzPixelsToCopy % 6)		//	pixel width of src image portion to copy must be on 6-pixel boundary
+	if (inSrcHorzPixelsToCopy % 6)	//	pixel width of src image portion to copy must be on 6-pixel boundary
 		return false;
 
 	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / 16 * 6);
@@ -1331,7 +1331,7 @@ static bool CopyRaster16BytesPer6Pixels (	UByte *			pDstBuffer,				//	Dest buffe
 		return false;
 	if (inSrcHorzPixelOffset >= srcMaxPixelWidth)	//	src past right edge
 		return false;
-	if (inSrcHorzPixelOffset + inSrcHorzPixelsToCopy > srcMaxPixelWidth)
+	if (inSrcHorzPixelOffset + inSrcHorzPixelsToCopy > UWord(srcMaxPixelWidth))
 		numHorzPixelsToCopy -= inSrcHorzPixelOffset + inSrcHorzPixelsToCopy - srcMaxPixelWidth;	//	Clip to src raster's right edge
 	if (inDstHorzPixelOffset + numHorzPixelsToCopy > dstMaxPixelWidth)
 		numHorzPixelsToCopy = inDstHorzPixelOffset + numHorzPixelsToCopy - dstMaxPixelWidth;
@@ -1360,27 +1360,27 @@ static bool CopyRaster16BytesPer6Pixels (	UByte *			pDstBuffer,				//	Dest buffe
 
 //	This function should work on all 20-byte-per-16-pixel formats
 static bool CopyRaster20BytesPer16Pixels (	UByte *			pDstBuffer,				//	Dest buffer to be modified
-											const ULWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
+											const ULWord	inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
 											const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
 											const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
 											const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear
 											const UByte *	pSrcBuffer,				//	Src buffer
-											const ULWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
+											const ULWord	inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
 											const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
 											const UWord		inSrcVertLineOffset,	//	Src image top edge
 											const UWord		inSrcVertLinesToCopy,	//	Src image height
 											const UWord		inSrcHorzPixelOffset,	//	Src image left edge
 											const UWord		inSrcHorzPixelsToCopy)	//	Src image width
 {
-	if (inDstHorzPixelOffset % 16)		//	dst pixel offset must be on 16-pixel boundary
+	if (inDstHorzPixelOffset % 16)	//	dst pixel offset must be on 16-pixel boundary
 		return false;
-	if (inSrcHorzPixelOffset % 16)		//	src pixel offset must be on 16-pixel boundary
+	if (inSrcHorzPixelOffset % 16)	//	src pixel offset must be on 16-pixel boundary
 		return false;
-	if (inDstBytesPerLine % 20)			//	dst raster width must be evenly divisible by 20
+	if (inDstBytesPerLine % 20)		//	dst raster width must be evenly divisible by 20
 		return false;
-	if (inSrcBytesPerLine % 20)			//	src raster width must be evenly divisible by 20
+	if (inSrcBytesPerLine % 20)		//	src raster width must be evenly divisible by 20
 		return false;
-	if (inSrcHorzPixelsToCopy % 16)		//	pixel width of src image portion to copy must be on 16-pixel boundary
+	if (inSrcHorzPixelsToCopy % 16)	//	pixel width of src image portion to copy must be on 16-pixel boundary
 		return false;
 
 	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / 20 * 16);
@@ -1392,7 +1392,7 @@ static bool CopyRaster20BytesPer16Pixels (	UByte *			pDstBuffer,				//	Dest buff
 		return false;
 	if (inSrcHorzPixelOffset >= srcMaxPixelWidth)	//	src past right edge
 		return false;
-	if (inSrcHorzPixelOffset + inSrcHorzPixelsToCopy > srcMaxPixelWidth)
+	if (inSrcHorzPixelOffset + inSrcHorzPixelsToCopy > UWord(srcMaxPixelWidth))
 		numHorzPixelsToCopy -= inSrcHorzPixelOffset + inSrcHorzPixelsToCopy - srcMaxPixelWidth;	//	Clip to src raster's right edge
 	if (inDstHorzPixelOffset + numHorzPixelsToCopy > dstMaxPixelWidth)
 		numHorzPixelsToCopy = inDstHorzPixelOffset + numHorzPixelsToCopy - dstMaxPixelWidth;
@@ -1420,27 +1420,27 @@ static bool CopyRaster20BytesPer16Pixels (	UByte *			pDstBuffer,				//	Dest buff
 
 //	This function should work on all 36-byte-per-8-pixel formats
 static bool CopyRaster36BytesPer8Pixels (	UByte *			pDstBuffer,				//	Dest buffer to be modified
-											const ULWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
+											const ULWord	inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
 											const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
 											const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
 											const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear
 											const UByte *	pSrcBuffer,				//	Src buffer
-											const ULWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
+											const ULWord	inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width) -- must be evenly divisible by 20
 											const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
 											const UWord		inSrcVertLineOffset,	//	Src image top edge
 											const UWord		inSrcVertLinesToCopy,	//	Src image height
 											const UWord		inSrcHorzPixelOffset,	//	Src image left edge
 											const UWord		inSrcHorzPixelsToCopy)	//	Src image width
 {
-	if (inDstHorzPixelOffset % 8)		//	dst pixel offset must be on 16-pixel boundary
+	if (inDstHorzPixelOffset % 8)	//	dst pixel offset must be on 16-pixel boundary
 		return false;
-	if (inSrcHorzPixelOffset % 8)		//	src pixel offset must be on 16-pixel boundary
+	if (inSrcHorzPixelOffset % 8)	//	src pixel offset must be on 16-pixel boundary
 		return false;
-	if (inDstBytesPerLine % 36)			//	dst raster width must be evenly divisible by 20
+	if (inDstBytesPerLine % 36)		//	dst raster width must be evenly divisible by 20
 		return false;
-	if (inSrcBytesPerLine % 36)			//	src raster width must be evenly divisible by 20
+	if (inSrcBytesPerLine % 36)		//	src raster width must be evenly divisible by 20
 		return false;
-	if (inSrcHorzPixelsToCopy % 8)		//	pixel width of src image portion to copy must be on 16-pixel boundary
+	if (inSrcHorzPixelsToCopy % 8)	//	pixel width of src image portion to copy must be on 16-pixel boundary
 		return false;
 
 	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / 36 * 8);
@@ -1452,7 +1452,7 @@ static bool CopyRaster36BytesPer8Pixels (	UByte *			pDstBuffer,				//	Dest buffe
 		return false;
 	if (inSrcHorzPixelOffset >= srcMaxPixelWidth)	//	src past right edge
 		return false;
-	if (inSrcHorzPixelOffset + inSrcHorzPixelsToCopy > srcMaxPixelWidth)
+	if (inSrcHorzPixelOffset + inSrcHorzPixelsToCopy > UWord(srcMaxPixelWidth))
 		numHorzPixelsToCopy -= inSrcHorzPixelOffset + inSrcHorzPixelsToCopy - srcMaxPixelWidth;	//	Clip to src raster's right edge
 	if (inDstHorzPixelOffset + numHorzPixelsToCopy > dstMaxPixelWidth)
 		numHorzPixelsToCopy = inDstHorzPixelOffset + numHorzPixelsToCopy - dstMaxPixelWidth;
@@ -1481,12 +1481,12 @@ static bool CopyRaster36BytesPer8Pixels (	UByte *			pDstBuffer,				//	Dest buffe
 
 //	This function should work on all 4-byte-per-pixel formats
 static bool CopyRaster4BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer to be modified
-										const ULWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
+										const ULWord	inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
 										const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
 										const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
 										const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear -- must be evenly divisible by 6
 										const UByte *	pSrcBuffer,				//	Src buffer
-										const ULWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
+										const ULWord	inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
 										const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
 										const UWord		inSrcVertLineOffset,	//	Src image top edge
 										const UWord		inSrcVertLinesToCopy,	//	Src image height
@@ -1509,7 +1509,7 @@ static bool CopyRaster4BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer t
 		return false;
 	if (inSrcHorzPixelOffset >= srcMaxPixelWidth)	//	src past right edge
 		return false;
-	if (inSrcHorzPixelOffset + inSrcHorzPixelsToCopy > srcMaxPixelWidth)
+	if (inSrcHorzPixelOffset + inSrcHorzPixelsToCopy > UWord(srcMaxPixelWidth))
 		numHorzPixelsToCopy -= inSrcHorzPixelOffset + inSrcHorzPixelsToCopy - srcMaxPixelWidth;	//	Clip to src raster's right edge
 	if (inDstHorzPixelOffset + numHorzPixelsToCopy > dstMaxPixelWidth)
 		numHorzPixelsToCopy = inDstHorzPixelOffset + numHorzPixelsToCopy - dstMaxPixelWidth;
@@ -1537,12 +1537,12 @@ static bool CopyRaster4BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer t
 
 //	This function should work on all 3-byte-per-pixel formats
 static bool CopyRaster3BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer to be modified
-										const ULWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
+										const ULWord	inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
 										const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
 										const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
 										const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear -- must be evenly divisible by 6
 										const UByte *	pSrcBuffer,				//	Src buffer
-										const ULWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
+										const ULWord	inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
 										const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
 										const UWord		inSrcVertLineOffset,	//	Src image top edge
 										const UWord		inSrcVertLinesToCopy,	//	Src image height
@@ -1565,7 +1565,7 @@ static bool CopyRaster3BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer t
 		return false;
 	if (inSrcHorzPixelOffset >= srcMaxPixelWidth)	//	src past right edge
 		return false;
-	if (inSrcHorzPixelOffset + inSrcHorzPixelsToCopy > srcMaxPixelWidth)
+	if (inSrcHorzPixelOffset + inSrcHorzPixelsToCopy > UWord(srcMaxPixelWidth))
 		numHorzPixelsToCopy -= inSrcHorzPixelOffset + inSrcHorzPixelsToCopy - srcMaxPixelWidth;	//	Clip to src raster's right edge
 	if (inDstHorzPixelOffset + numHorzPixelsToCopy > dstMaxPixelWidth)
 		numHorzPixelsToCopy = inDstHorzPixelOffset + numHorzPixelsToCopy - dstMaxPixelWidth;
@@ -1593,12 +1593,12 @@ static bool CopyRaster3BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer t
 
 //	This function should work on all 6-byte-per-pixel formats
 static bool CopyRaster6BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer to be modified
-										const ULWord		inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
+										const ULWord	inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
 										const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
 										const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
 										const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear -- must be evenly divisible by 6
 										const UByte *	pSrcBuffer,				//	Src buffer
-										const ULWord		inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
+										const ULWord	inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
 										const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
 										const UWord		inSrcVertLineOffset,	//	Src image top edge
 										const UWord		inSrcVertLinesToCopy,	//	Src image height
@@ -1621,7 +1621,7 @@ static bool CopyRaster6BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer t
 		return false;
 	if (inSrcHorzPixelOffset >= srcMaxPixelWidth)	//	src past right edge
 		return false;
-	if (inSrcHorzPixelOffset + inSrcHorzPixelsToCopy > srcMaxPixelWidth)
+	if (inSrcHorzPixelOffset + inSrcHorzPixelsToCopy > UWord(srcMaxPixelWidth))
 		numHorzPixelsToCopy -= inSrcHorzPixelOffset + inSrcHorzPixelsToCopy - srcMaxPixelWidth;	//	Clip to src raster's right edge
 	if (inDstHorzPixelOffset + numHorzPixelsToCopy > dstMaxPixelWidth)
 		numHorzPixelsToCopy = inDstHorzPixelOffset + numHorzPixelsToCopy - dstMaxPixelWidth;
@@ -7821,11 +7821,6 @@ string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID inValue, con
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Multi-Link Out 2 DS4", NTV2_XptMultiLinkOut2DS4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "3D LUT 1 YUV", NTV2_Xpt3DLUT1YUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "3D LUT 1 RGB", NTV2_Xpt3DLUT1RGB);
-		
-	#if !defined (NTV2_DEPRECATE)
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FS 1 2nd Conv", NTV2_XptFS1SecondConverter);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FS 1 ProcAmp", NTV2_XptFS1ProcAmp);
-	#endif	//	!defined (NTV2_DEPRECATE)
 	#if !defined(_DEBUG)
 	default:								break;
 	#endif

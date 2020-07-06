@@ -739,7 +739,7 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 		strncpy(bitFileInfo.timeStr, fileInfo.GetTime().c_str(), NTV2_BITFILE_DATETIME_STRINGLENGTH);
 		strncpy(bitFileInfo.designNameStr, fileInfo.GetDesignName().c_str(), NTV2_BITFILE_DESIGNNAME_STRINGLENGTH);
 		strncpy(bitFileInfo.partNameStr, fileInfo.GetPartName().c_str(), NTV2_BITFILE_PARTNAME_STRINGLENGTH);
-		bitFileInfo.numBytes = fileInfo.GetProgramStreamLength();
+		bitFileInfo.numBytes = ULWord(fileInfo.GetProgramStreamLength());
 	}
 
 	delete [] bitFilePtr;

@@ -6957,8 +6957,10 @@ public:
 	AJA_VIRTUAL bool GetVPIDTransferCharacteristics (NTV2VPIDTransferCharacteristics & outValue, const NTV2Channel inChannel);
 	AJA_VIRTUAL bool SetVPIDColorimetry (const NTV2VPIDColorimetry inValue, const NTV2Channel inChannel);
 	AJA_VIRTUAL bool GetVPIDColorimetry (NTV2VPIDColorimetry & outValue, const NTV2Channel inChannel);
-	AJA_VIRTUAL bool SetVPIDVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel);
-	AJA_VIRTUAL bool GetVPIDVPIDLuminance (NTV2VPIDLuminance & outValue, const NTV2Channel inChannel);
+	AJA_VIRTUAL bool SetVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel);
+	AJA_VIRTUAL bool GetVPIDLuminance (NTV2VPIDLuminance & outValue, const NTV2Channel inChannel);
+	AJA_VIRTUAL bool SetVPIDRGBRange (const NTV2VPIDRGBRange inValue, const NTV2Channel inChannel);
+	AJA_VIRTUAL bool GetVPIDRGBRange (NTV2VPIDRGBRange & outValue, const NTV2Channel inChannel);
 	
 	AJA_VIRTUAL bool Set3DLUTTableLocation (const ULWord frameNumber);
 	AJA_VIRTUAL bool Load3DLUTTable ();

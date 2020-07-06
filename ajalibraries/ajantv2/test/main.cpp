@@ -658,7 +658,7 @@ TEST_SUITE("CNTV2VPID" * doctest::description("CNTV2VPID functions")) {
 			const ULWord data = 0x85c62000;
 			const CNTV2VPID vpid(data);
 			const VPIDBitDepth& bit_depth = vpid.GetBitDepth();
-			CHECK(bit_depth == VPIDBitDepth_8);
+			CHECK(bit_depth == VPIDBitDepth_10_Full);
 		}
 		{ // 10-bit
 			const ULWord data = 0x85c62001;
@@ -676,7 +676,7 @@ TEST_SUITE("CNTV2VPID" * doctest::description("CNTV2VPID functions")) {
 			const ULWord data = 0x85c62003;
 			const CNTV2VPID vpid(data);
 			const auto& bit_depth = vpid.GetBitDepth();
-			CHECK(bit_depth == VPIDBitDepth_Reserved3);
+			CHECK(bit_depth == VPIDBitDepth_12_Full);
 		}
 	}
 
@@ -684,7 +684,7 @@ TEST_SUITE("CNTV2VPID" * doctest::description("CNTV2VPID functions")) {
 	{
 		{ // 8-bit
 			const ULWord data = 0x8a052201;
-			const VPIDBitDepth bd = VPIDBitDepth_8;
+			const VPIDBitDepth bd = VPIDBitDepth_10_Full;
 			CNTV2VPID vpid(data);
 			vpid.SetBitDepth(bd);
 			CHECK(vpid.GetBitDepth() == bd);
@@ -705,7 +705,7 @@ TEST_SUITE("CNTV2VPID" * doctest::description("CNTV2VPID functions")) {
 		}
 		{ // Reserved
 			const ULWord data = 0x8a052200;
-			const VPIDBitDepth bd = VPIDBitDepth_Reserved3;
+			const VPIDBitDepth bd = VPIDBitDepth_12_Full;
 			CNTV2VPID vpid(data);
 			vpid.SetBitDepth(bd);
 			CHECK(vpid.GetBitDepth() == bd);
