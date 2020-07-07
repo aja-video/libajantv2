@@ -577,7 +577,9 @@ typedef enum
 	kVRegNTV2VPIDRGBRange7					= VIRTUALREG_START+599,
 	kVRegNTV2VPIDRGBRange8					= VIRTUALREG_START+600,
 
-	kVRegLastAJA							= VIRTUALREG_START+601,		///< @brief	The last AJA virtual register slot
+	kVRegRotaryGainOverrideEnable			= VIRTUALREG_START+601,
+
+	kVRegLastAJA							= VIRTUALREG_START+602,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 
