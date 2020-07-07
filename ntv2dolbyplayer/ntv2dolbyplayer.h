@@ -17,6 +17,8 @@
 #include "ajabase/system/file_io.h"
 #include "ajaanc/includes/ancillarydata.h"
 
+//	Define to parse ec3 files with multiple sync frames per HDMI burst vs single sync frame per HDMI burst.
+#define DOLBY_FULL_PARSER
 
 /**
 	@brief	I am an object that can play out a test pattern (with timecode) to an output of an AJA device
@@ -246,6 +248,7 @@ class NTV2DolbyPlayer
 		 **/
 		virtual uint32_t		AddDolby (ULWord * audioBuffer);
 
+#ifdef DOLBY_FULL_PARSER
 		/**
 			@brief	Get a dolby audio audio frame from the input file.
 			@param[out]	pInDolbyBuffer		Specifies a valid, non-NULL pointer to the buffer that is to receive
@@ -266,8 +269,23 @@ class NTV2DolbyPlayer
 			@return	True if parser suceeded.
 		 **/
 		virtual bool ParseBSI(uint16_t * pInDolbyBuffer, uint32_t numSamples, NTV2DolbyBSI * pBsi);
+
+
+		/**
+			@brief	Set the bitstream buffer for bit retrieval
+			@param[in]	pBuffer				Specifies a valid, non-NULL pointer to the bitstream buffer
+			@param[in]	size				Bitstream buffer size
+		 **/
 		virtual void SetBitBuffer(uint8_t * pBuffer, uint32_t size);
+
+		/**
+			@brief	Retreive the specified number of bits from the bitstream buffer
+			@param[out]	data				Bitstream data
+			@param[out]	BITS				Number of bits to retrieve from the buffer
+			@return	True if suceeded.
+		 **/
 		virtual bool GetBits(uint32_t & data, uint32_t bits);
+#endif
 
     //	Protected Class Methods
 	protected:
@@ -330,13 +348,18 @@ class NTV2DolbyPlayer
 		AVDataBuffer				mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
 		MyCirculateBuffer			mAVCircularBuffer;						///< @brief	My ring buffer
 
-        AJAFileIO *                 mDolbyFile;                 ///< @brief	Dolby audio source file
-        uint16_t *                  mDolbyBuffer;               ///< @brief	Dolby audio file data buffer
-        uint32_t                    mDolbyOffset;               ///< @brief	Dolby audio file data offset
-        uint32_t                    mDolbySize;                 ///< @brief	Dolby audio file data size
+		uint32_t                    mBurstIndex;				///< @brief	HDMI burst sample index
+		uint32_t                    mBurstSamples;				///< @brief	HDMI burst sample size
+
+		uint16_t *                  mBurstBuffer;               ///< @brief	HDMI burst audio data buffer
+		uint32_t                    mBurstSize;                 ///< @brief	HDMI burst audio data size
+		uint32_t                    mBurstOffset;               ///< @brief	HDMI burst audio data offset
+		uint32_t                    mBurstMax;			        ///< @brief	HDMI burst and dolby max size
+
+		AJAFileIO *                 mDolbyFile;                 ///< @brief	Dolby audio source file
+		uint16_t *                  mDolbyBuffer;               ///< @brief	Dolby audio data buffer
+		uint32_t                    mDolbySize;                 ///< @brief	Dolby audio data size
 		uint32_t					mDolbyBlocks;				///< @brief	Dolby audio block count
-        uint32_t                    mBurstOffset;               ///< @brief	HDMI burst audio offset
-        uint32_t                    mBurstSize;                 ///< @brief	HDMI burst audio size
 
 		uint8_t *					mBitBuffer;
 		ULWord						mBitSize;
