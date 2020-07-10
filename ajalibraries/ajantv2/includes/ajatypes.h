@@ -34,6 +34,7 @@
 #define	AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
 #define NTV2_WRITEREG_PROFILING		//	If defined, enables register write profiling
 //#define NTV2_FORCE_NO_DEVICE		//	If defined, forces "NO DEVICE"
+#define	NTV2_UNUSED(__p__)			(void)__p__
 
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
 	#if defined(AJAMac)
