@@ -73,12 +73,16 @@
 
 	@note	A hardware color-space converter (CSC) can convert the input/output YCbCr SDI to/from RGB when using RGB buffer formats.
 
-	@par		Ancillary Data
+	@par	Ancillary Data
 
 	-	Anc inserters and extractors (use ::AUTOCIRCULATE_TRANSFER)
 	-	\ref vancframegeometries
 
-	@par		Firmware
+	@par	SDK Support
+
+	-	Introduced in 2015 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/148">SDK v12.1</a>.
+
+	@par	Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/154/25>
 
 	@par	Physical

@@ -11,8 +11,10 @@
 
 	@image	html	corvidhbr.png
 
-	The HB-R provides a single RJ-45 HDBaseT connector that supplies power (up to 10 watts), ingests HDMI video
-	(up to 4Kp60, 8-bit 4:2:0) and audio (up to 8 embedded audio channels), and includes bi-directional VISCA/RS-232 control.
+	The HB-R provides a single RJ-45 <a href="https://hdbaset.org/">HDBaseT</a> connector that supplies power (up to 10 watts),
+	ingests HDMI video (up to 4Kp60, 8-bit 4:2:0) and audio (up to 8 embedded audio channels), and includes bi-directional
+	VISCA/RS-232 control. It was developed as an OEM ingest solution for AJA’s <a href="https://www.aja.com/products/rovocam">RovoCam</a>
+	and other <a href="https://hdbaset.org/">HDBaseT</a> camera devices.
 
 	@par	PCI Interface
 
@@ -46,6 +48,10 @@
 
 	@note	A hardware 4K down-converter can convert incoming 4K/UHD video to standard HD (1080) rasters.
 
+	@par	SDK Support
+
+	-	Introduced in 2016 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/175">SDK v12.5</a>.
+
 	@par		Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/203/25>
 
@@ -63,7 +69,4 @@
 	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
 	-	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
 
-	@par	SDK/Driver Support
-
-	-	NTV2 SDK versions 12.5 and later
 **/
