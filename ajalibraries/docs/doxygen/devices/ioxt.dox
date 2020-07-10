@@ -35,7 +35,7 @@
 
 	-	256MB SDRAM (64MB reserved for UFC, 192MB for frame storage)
 	-	32 × 8MB frames
-	-	16 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	16 × 16MB frames for 2K (1080×2048), 1920×1080 VANC, and 16-bit RGB
 
 	@par	Audio
 
@@ -61,9 +61,14 @@
 
 	@par	Video Processing
 
-	-	2 independent Video Processing modules, each with its own Mix Coefficient
-	-	Can mix keys on and off
-	-	Can differentiate between shaped and unshaped video
+	-	2 independent Mixer/Keyers, each with its own Mix Coefficient
+		-	Can mix keys on and off
+		-	Can differentiate between shaped and unshaped video
+
+	@par	SDK Support
+
+	-	Introduced in 2011 in <a href=""https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/20"">SDK v3.0 (MacOS)</a>
+		and in 2012 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/43">SDK 10.2.1 (Windows)</a>.
 
 	@par		Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/136/25>
@@ -84,7 +89,7 @@
 	@image	html	ioxtsafemode.jpg
 
 	If the IoXT is recognized by the host OS and AJA software, you may try re-flashing the firmware.
-	If it’s still not recognized, you should contact <a href="https://www.aja.com/support/contact">AJA Tech Support</a>.
+	If it’s still not recognized, you should contact <a href="https://www.aja.com/support/contact">AJA Support</a>.
 
 	@par	Environment
 

@@ -39,7 +39,7 @@
 
 	-	2GB SDRAM
 	-	256 × 8MB frames
-	-	128 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	128 × 16MB frames for 2K (1080×2048), 1920×1080 VANC, and 16-bit RGB
 
 	@par	Audio
 
@@ -72,8 +72,13 @@
 		so it won't respond to configuration changes for a minute or two. To detect when the MicroBlaze is running,
 		and thus when the SFPs can be configured, poll CNTV2DriverInterface::IsDeviceReady until it returns \c true.
 
+	@par	SDK Support
+
+	-	Introduced in 2018 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/205">SDK v14.1</a>.
+
 	@par	Firmware
-	TBD
+	-	<b>SMPTE 2110:</b>	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/ioip-2110>
+	-	<b>SMPTE 2022:</b>	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/214>
 
 	@par	Physical
 
@@ -87,9 +92,5 @@
 	-	Operating Relative Humidity: 10-90% non-condensing
 	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
 	-	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
-
-	@par	SDK/Driver Support
-
-	-	NTV2 SDK versions 14.1 and later
 
 **/

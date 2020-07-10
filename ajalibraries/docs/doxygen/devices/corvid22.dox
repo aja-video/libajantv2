@@ -56,6 +56,10 @@
 
 	-	Optional breakout cable (AJA \ref aja102953) provides access to other inputs and outputs
 
+	@par	SDK Support
+
+	-	At least since 2009 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/3">SDK v2.1 (MacOS)</a>.
+
 	@par		Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/130/25>
 
