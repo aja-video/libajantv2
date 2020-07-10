@@ -104,7 +104,7 @@ class RoutingExpert
 			return iter != gInputXpt2String.end() ? iter->second : string();
 		}
 
-		string				OutputXptToString (const NTV2OutputCrosspointID inOutputXpt) const
+		string				OutputXptToString (const NTV2OutputXptID inOutputXpt) const
 		{
 			AJAAutoLock	lock(&gLock);
 			NTV2_ASSERT(!gOutputXpt2String.empty());
@@ -130,7 +130,7 @@ class RoutingExpert
 			return iter != gString2OutputXpt.end() ? iter->second : NTV2_XptBlack;
 		}
 
-		bool				GetWidgetsForOutput (const NTV2OutputCrosspointID inOutputXpt, NTV2WidgetIDSet & outWidgetIDs) const
+		bool				GetWidgetsForOutput (const NTV2OutputXptID inOutputXpt, NTV2WidgetIDSet & outWidgetIDs) const
 		{
 			AJAAutoLock	lock(&gLock);
 			NTV2_ASSERT(!gOutputXpt2WidgetIDs.empty());
@@ -142,7 +142,7 @@ class RoutingExpert
 			return !outWidgetIDs.empty();
 		}
 
-		bool				GetWidgetsForInput (const NTV2InputCrosspointID inInputXpt, NTV2WidgetIDSet & outWidgetIDs) const
+		bool				GetWidgetsForInput (const NTV2InputXptID inInputXpt, NTV2WidgetIDSet & outWidgetIDs) const
 		{
 			AJAAutoLock	lock(&gLock);
 			NTV2_ASSERT(!gInputXpt2WidgetIDs.empty());
@@ -156,7 +156,7 @@ class RoutingExpert
 			return !outWidgetIDs.empty();
 		}
 
-		bool				GetWidgetInputs (const NTV2WidgetID inWidgetID, NTV2InputCrosspointIDSet & outInputs) const
+		bool				GetWidgetInputs (const NTV2WidgetID inWidgetID, NTV2InputXptIDSet & outInputs) const
 		{
 			AJAAutoLock	lock(&gLock);
 			NTV2_ASSERT(!gWidget2InputXpts.empty());
@@ -170,7 +170,7 @@ class RoutingExpert
 			return !outInputs.empty();
 		}
 
-		bool				GetWidgetOutputs (const NTV2WidgetID inWidgetID, NTV2OutputCrosspointIDSet & outOutputs) const
+		bool				GetWidgetOutputs (const NTV2WidgetID inWidgetID, NTV2OutputXptIDSet & outOutputs) const
 		{
 			AJAAutoLock	lock(&gLock);
 			NTV2_ASSERT(!gWidget2OutputXpts.empty());
@@ -1115,7 +1115,7 @@ void RoutingExpert::InitOutputXpt2WidgetIDs(void)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// CNTV2SignalRouter	Begin
 
-bool CNTV2SignalRouter::AddConnection (const NTV2InputCrosspointID inSignalInput, const NTV2OutputCrosspointID inSignalOutput)
+bool CNTV2SignalRouter::AddConnection (const NTV2InputXptID inSignalInput, const NTV2OutputXptID inSignalOutput)
 {
     mConnections.insert (NTV2SignalConnection (inSignalInput, inSignalOutput));
 	SRiDBG(NTV2InputCrosspointIDToString(inSignalInput) << ", " << NTV2OutputCrosspointIDToString(inSignalOutput) << ": " << *this);
@@ -1123,20 +1123,20 @@ bool CNTV2SignalRouter::AddConnection (const NTV2InputCrosspointID inSignalInput
 }
 
 
-bool CNTV2SignalRouter::HasInput (const NTV2InputCrosspointID inSignalInput) const
+bool CNTV2SignalRouter::HasInput (const NTV2InputXptID inSignalInput) const
 {
     return mConnections.find (inSignalInput) != mConnections.end ();
 }
 
 
-NTV2OutputCrosspointID CNTV2SignalRouter::GetConnectedOutput (const NTV2InputCrosspointID inSignalInput) const
+NTV2OutputXptID CNTV2SignalRouter::GetConnectedOutput (const NTV2InputXptID inSignalInput) const
 {
 	NTV2XptConnectionsConstIter it(mConnections.find(inSignalInput));
 	return it != mConnections.end()  ?  it->second  :  NTV2_XptBlack;
 }
 
 
-bool CNTV2SignalRouter::HasConnection (const NTV2InputCrosspointID inSignalInput, const NTV2OutputCrosspointID inSignalOutput) const
+bool CNTV2SignalRouter::HasConnection (const NTV2InputXptID inSignalInput, const NTV2OutputXptID inSignalOutput) const
 {
     NTV2XptConnectionsConstIter	iter (mConnections.find (inSignalInput));
     if (iter == mConnections.end())
@@ -1145,7 +1145,7 @@ bool CNTV2SignalRouter::HasConnection (const NTV2InputCrosspointID inSignalInput
 }
 
 
-bool CNTV2SignalRouter::RemoveConnection (const NTV2InputCrosspointID inSignalInput, const NTV2OutputCrosspointID inSignalOutput)
+bool CNTV2SignalRouter::RemoveConnection (const NTV2InputXptID inSignalInput, const NTV2OutputXptID inSignalOutput)
 {
     NTV2XptConnectionsIter	iter (mConnections.find (inSignalInput));
     if (iter == mConnections.end())
@@ -1177,10 +1177,10 @@ bool CNTV2SignalRouter::ResetFromRegisters (const NTV2InputXptIDSet & inInputs, 
 		NTV2_ASSERT(iter->registerShift == 0);
 		NTV2_ASSERT(maskNdx < 4);
 		const uint32_t	regValue	(iter->registerValue & sSignalRouterRegMasks[maskNdx]);
-		const NTV2OutputCrosspointID	outputXpt	(NTV2OutputCrosspointID(regValue >> sSignalRouterRegShifts[maskNdx]));
+		const NTV2OutputXptID	outputXpt	(NTV2OutputXptID(regValue >> sSignalRouterRegShifts[maskNdx]));
 		if (outputXpt != NTV2_XptBlack)
 			mConnections.insert(NTV2SignalConnection (*it, outputXpt));
-	}	//	for each NTV2InputCrosspointID
+	}	//	for each NTV2InputXptID
 	return true;
 }
 
@@ -1191,10 +1191,9 @@ bool CNTV2SignalRouter::GetRegisterWrites (NTV2RegisterWrites & outRegWrites) co
 
     for (NTV2XptConnectionsConstIter iter (mConnections.begin ());  iter != mConnections.end ();  ++iter)
     {
-        const NTV2InputCrosspointID		inputXpt	(iter->first);
-        const NTV2OutputCrosspointID	outputXpt	(iter->second);
-        uint32_t						regNum		(0);
-        uint32_t						ndx			(999);
+        const NTV2InputXptID	inputXpt(iter->first);
+        const NTV2OutputXptID	outputXpt(iter->second);
+        uint32_t regNum(0), ndx(999);
 
         if (!CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo (inputXpt, regNum, ndx)  ||  !regNum  ||  ndx > 3)
         {
@@ -1414,7 +1413,7 @@ bool CNTV2SignalRouter::IsInitialized (void)		//	STATIC
 }
 
 
-string CNTV2SignalRouter::NTV2InputCrosspointIDToString (const NTV2InputCrosspointID inInputXpt)		//	STATIC
+string CNTV2SignalRouter::NTV2InputCrosspointIDToString (const NTV2InputXptID inInputXpt)		//	STATIC
 {
 	AJAAutoLock		locker(&gRoutingExpertLock);
 	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
@@ -1422,7 +1421,7 @@ string CNTV2SignalRouter::NTV2InputCrosspointIDToString (const NTV2InputCrosspoi
 }
 
 
-string CNTV2SignalRouter::NTV2OutputCrosspointIDToString (const NTV2OutputCrosspointID inOutputXpt)		//	STATIC
+string CNTV2SignalRouter::NTV2OutputCrosspointIDToString (const NTV2OutputXptID inOutputXpt)		//	STATIC
 {
 	AJAAutoLock		locker(&gRoutingExpertLock);
 	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
@@ -1430,7 +1429,7 @@ string CNTV2SignalRouter::NTV2OutputCrosspointIDToString (const NTV2OutputCrossp
 }
 
 
-NTV2InputCrosspointID CNTV2SignalRouter::StringToNTV2InputCrosspointID (const string & inStr)		//	STATIC
+NTV2InputXptID CNTV2SignalRouter::StringToNTV2InputCrosspointID (const string & inStr)		//	STATIC
 {
 	AJAAutoLock		locker(&gRoutingExpertLock);
 	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
@@ -1438,7 +1437,7 @@ NTV2InputCrosspointID CNTV2SignalRouter::StringToNTV2InputCrosspointID (const st
 }
 
 
-NTV2OutputCrosspointID CNTV2SignalRouter::StringToNTV2OutputCrosspointID (const string & inStr)		//	STATIC
+NTV2OutputXptID CNTV2SignalRouter::StringToNTV2OutputCrosspointID (const string & inStr)		//	STATIC
 {
 	AJAAutoLock		locker(&gRoutingExpertLock);
 	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
@@ -1456,7 +1455,7 @@ bool CNTV2SignalRouter::GetWidgetIDs (const NTV2DeviceID inDeviceID, NTV2WidgetI
 }
 
 
-bool CNTV2SignalRouter::GetWidgetsForInput (const NTV2InputCrosspointID inInputXpt, NTV2WidgetIDSet & outWidgetIDs)		//	STATIC
+bool CNTV2SignalRouter::GetWidgetsForInput (const NTV2InputXptID inInputXpt, NTV2WidgetIDSet & outWidgetIDs)		//	STATIC
 {
 	outWidgetIDs.clear();
 	AJAAutoLock		locker(&gRoutingExpertLock);
@@ -1465,7 +1464,7 @@ bool CNTV2SignalRouter::GetWidgetsForInput (const NTV2InputCrosspointID inInputX
 }
 
 
-bool CNTV2SignalRouter::GetWidgetForInput (const NTV2InputCrosspointID inInputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDeviceID)		//	STATIC
+bool CNTV2SignalRouter::GetWidgetForInput (const NTV2InputXptID inInputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDeviceID)		//	STATIC
 {
 	outWidgetID = NTV2_WIDGET_INVALID;
 	NTV2WidgetIDSet	wgts;
@@ -1484,7 +1483,7 @@ bool CNTV2SignalRouter::GetWidgetForInput (const NTV2InputCrosspointID inInputXp
 }
 
 
-bool CNTV2SignalRouter::GetWidgetsForOutput (const NTV2OutputCrosspointID inOutputXpt, NTV2WidgetIDSet & outWidgetIDs)		//	STATIC
+bool CNTV2SignalRouter::GetWidgetsForOutput (const NTV2OutputXptID inOutputXpt, NTV2WidgetIDSet & outWidgetIDs)		//	STATIC
 {
 	outWidgetIDs.clear();
 	AJAAutoLock		locker(&gRoutingExpertLock);
@@ -1493,7 +1492,7 @@ bool CNTV2SignalRouter::GetWidgetsForOutput (const NTV2OutputCrosspointID inOutp
 }
 
 
-bool CNTV2SignalRouter::GetWidgetForOutput (const NTV2OutputCrosspointID inOutputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDeviceID)		//	STATIC
+bool CNTV2SignalRouter::GetWidgetForOutput (const NTV2OutputXptID inOutputXpt, NTV2WidgetID & outWidgetID, const NTV2DeviceID inDeviceID)		//	STATIC
 {
 	outWidgetID = NTV2_WIDGET_INVALID;
 	NTV2WidgetIDSet	wgts;
@@ -1515,7 +1514,7 @@ bool CNTV2SignalRouter::GetWidgetForOutput (const NTV2OutputCrosspointID inOutpu
 }
 
 
-bool CNTV2SignalRouter::GetWidgetInputs (const NTV2WidgetID inWidgetID, NTV2InputCrosspointIDSet & outInputs)		//	STATIC
+bool CNTV2SignalRouter::GetWidgetInputs (const NTV2WidgetID inWidgetID, NTV2InputXptIDSet & outInputs)		//	STATIC
 {
 	outInputs.clear();
 	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
@@ -1523,7 +1522,7 @@ bool CNTV2SignalRouter::GetWidgetInputs (const NTV2WidgetID inWidgetID, NTV2Inpu
 }
 
 
-bool CNTV2SignalRouter::GetAllWidgetInputs (const NTV2DeviceID inDeviceID, NTV2InputCrosspointIDSet & outInputs)		//	STATIC
+bool CNTV2SignalRouter::GetAllWidgetInputs (const NTV2DeviceID inDeviceID, NTV2InputXptIDSet & outInputs)		//	STATIC
 {
     outInputs.clear();
     NTV2WidgetIDSet	widgetIDs;
@@ -1532,7 +1531,7 @@ bool CNTV2SignalRouter::GetAllWidgetInputs (const NTV2DeviceID inDeviceID, NTV2I
 
     for (NTV2WidgetIDSetConstIter iter(widgetIDs.begin());  iter != widgetIDs.end ();  ++iter)
     {
-        NTV2InputCrosspointIDSet	inputs;
+        NTV2InputXptIDSet	inputs;
         CNTV2SignalRouter::GetWidgetInputs (*iter, inputs);
         outInputs.insert(inputs.begin(), inputs.end());
     }
@@ -1540,7 +1539,7 @@ bool CNTV2SignalRouter::GetAllWidgetInputs (const NTV2DeviceID inDeviceID, NTV2I
 }
 
 
-bool CNTV2SignalRouter::GetAllRoutingRegInfos (const NTV2InputCrosspointIDSet & inInputs, NTV2RegisterWrites & outRegInfos) 	//	STATIC
+bool CNTV2SignalRouter::GetAllRoutingRegInfos (const NTV2InputXptIDSet & inInputs, NTV2RegisterWrites & outRegInfos) 	//	STATIC
 {
     outRegInfos.clear();
 
@@ -1557,7 +1556,7 @@ bool CNTV2SignalRouter::GetAllRoutingRegInfos (const NTV2InputCrosspointIDSet & 
 }
 
 
-bool CNTV2SignalRouter::GetWidgetOutputs (const NTV2WidgetID inWidgetID, NTV2OutputCrosspointIDSet & outOutputs)		//	STATIC
+bool CNTV2SignalRouter::GetWidgetOutputs (const NTV2WidgetID inWidgetID, NTV2OutputXptIDSet & outOutputs)		//	STATIC
 {
 	outOutputs.clear();
 	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
@@ -1602,10 +1601,10 @@ bool CNTV2SignalRouter::GetConnectionsFromRegs (const NTV2InputXptIDSet & inInpu
 			return false;	//	Shift must be zero
 		NTV2_ASSERT(maskNdx < 4);
 		const uint32_t	regValue	(iter->registerValue & sSignalRouterRegMasks[maskNdx]);
-		const NTV2OutputCrosspointID	outputXpt	(NTV2OutputCrosspointID(regValue >> sSignalRouterRegShifts[maskNdx]));
+		const NTV2OutputXptID	outputXpt	(NTV2OutputXptID(regValue >> sSignalRouterRegShifts[maskNdx]));
 		if (outputXpt != NTV2_XptBlack)
 			outConnections.insert(NTV2SignalConnection (*it, outputXpt));
-	}	//	for each NTV2InputCrosspointID
+	}	//	for each NTV2InputXptID
 	return true;
 }
 
@@ -1813,12 +1812,12 @@ bool CNTV2SignalRouter::CreateFromString (const string & inString, CNTV2SignalRo
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Crosspoint Utils	Begin
 
-NTV2InputCrosspointID GetFrameBufferInputXptFromChannel (const NTV2Channel inChannel, const bool inIsBInput)
+NTV2InputXptID GetFrameBufferInputXptFromChannel (const NTV2Channel inChannel, const bool inIsBInput)
 {
-    static const NTV2InputCrosspointID	gFrameBufferInputs []	=	{	NTV2_XptFrameBuffer1Input,	NTV2_XptFrameBuffer2Input,	NTV2_XptFrameBuffer3Input,	NTV2_XptFrameBuffer4Input,
-                                                                        NTV2_XptFrameBuffer5Input,	NTV2_XptFrameBuffer6Input,	NTV2_XptFrameBuffer7Input,	NTV2_XptFrameBuffer8Input};
-    static const NTV2InputCrosspointID	gFrameBufferBInputs []	=	{	NTV2_XptFrameBuffer1BInput,	NTV2_XptFrameBuffer2BInput,	NTV2_XptFrameBuffer3BInput,	NTV2_XptFrameBuffer4BInput,
-                                                                        NTV2_XptFrameBuffer5BInput,	NTV2_XptFrameBuffer6BInput,	NTV2_XptFrameBuffer7BInput,	NTV2_XptFrameBuffer8BInput};
+    static const NTV2InputXptID	gFrameBufferInputs []	=	{	NTV2_XptFrameBuffer1Input,	NTV2_XptFrameBuffer2Input,	NTV2_XptFrameBuffer3Input,	NTV2_XptFrameBuffer4Input,
+																NTV2_XptFrameBuffer5Input,	NTV2_XptFrameBuffer6Input,	NTV2_XptFrameBuffer7Input,	NTV2_XptFrameBuffer8Input};
+    static const NTV2InputXptID	gFrameBufferBInputs []	=	{	NTV2_XptFrameBuffer1BInput,	NTV2_XptFrameBuffer2BInput,	NTV2_XptFrameBuffer3BInput,	NTV2_XptFrameBuffer4BInput,
+																NTV2_XptFrameBuffer5BInput,	NTV2_XptFrameBuffer6BInput,	NTV2_XptFrameBuffer7BInput,	NTV2_XptFrameBuffer8BInput};
     if (NTV2_IS_VALID_CHANNEL (inChannel))
         return inIsBInput ? gFrameBufferBInputs [inChannel] : gFrameBufferInputs [inChannel];
     else
@@ -1826,43 +1825,43 @@ NTV2InputCrosspointID GetFrameBufferInputXptFromChannel (const NTV2Channel inCha
 }
 
 
-NTV2InputCrosspointID GetCSCInputXptFromChannel (const NTV2Channel inChannel, const bool inIsKeyInput)
+NTV2InputXptID GetCSCInputXptFromChannel (const NTV2Channel inChannel, const bool inIsKeyInput)
 {
-    static const NTV2InputCrosspointID	gCSCVideoInput []		=	{	NTV2_XptCSC1VidInput,		NTV2_XptCSC2VidInput,		NTV2_XptCSC3VidInput,		NTV2_XptCSC4VidInput,
-                                                                        NTV2_XptCSC5VidInput,		NTV2_XptCSC6VidInput,		NTV2_XptCSC7VidInput,		NTV2_XptCSC8VidInput};
-    static const NTV2InputCrosspointID	gCSCKeyInput []			=	{	NTV2_XptCSC1KeyInput,		NTV2_XptCSC2KeyInput,		NTV2_XptCSC3KeyInput,		NTV2_XptCSC4KeyInput,
-                                                                        NTV2_XptCSC5KeyInput,		NTV2_XptCSC6KeyInput,		NTV2_XptCSC7KeyInput,		NTV2_XptCSC8KeyInput};
-    if (NTV2_IS_VALID_CHANNEL (inChannel))
-        return inIsKeyInput ? gCSCKeyInput [inChannel] : gCSCVideoInput [inChannel];
+    static const NTV2InputXptID	gCSCVideoInput [] = {	NTV2_XptCSC1VidInput,	NTV2_XptCSC2VidInput,	NTV2_XptCSC3VidInput,	NTV2_XptCSC4VidInput,
+														NTV2_XptCSC5VidInput,	NTV2_XptCSC6VidInput,	NTV2_XptCSC7VidInput,	NTV2_XptCSC8VidInput};
+    static const NTV2InputXptID	gCSCKeyInput [] = {		NTV2_XptCSC1KeyInput,	NTV2_XptCSC2KeyInput,	NTV2_XptCSC3KeyInput,	NTV2_XptCSC4KeyInput,
+														NTV2_XptCSC5KeyInput,	NTV2_XptCSC6KeyInput,	NTV2_XptCSC7KeyInput,	NTV2_XptCSC8KeyInput};
+    if (NTV2_IS_VALID_CHANNEL(inChannel))
+        return inIsKeyInput ? gCSCKeyInput[inChannel] : gCSCVideoInput[inChannel];
     else
         return NTV2_INPUT_CROSSPOINT_INVALID;
 }
 
 
-NTV2InputCrosspointID GetLUTInputXptFromChannel (const NTV2Channel inLUT)
+NTV2InputXptID GetLUTInputXptFromChannel (const NTV2Channel inLUT)
 {
-    static const NTV2InputCrosspointID	gLUTInput[] = {NTV2_XptLUT1Input,	NTV2_XptLUT2Input,	NTV2_XptLUT3Input,	NTV2_XptLUT4Input,
-														NTV2_XptLUT5Input,	NTV2_XptLUT6Input,	NTV2_XptLUT7Input,	NTV2_XptLUT8Input};
+    static const NTV2InputXptID	gLUTInput[] = {	NTV2_XptLUT1Input,	NTV2_XptLUT2Input,	NTV2_XptLUT3Input,	NTV2_XptLUT4Input,
+												NTV2_XptLUT5Input,	NTV2_XptLUT6Input,	NTV2_XptLUT7Input,	NTV2_XptLUT8Input};
 	return NTV2_IS_VALID_CHANNEL(inLUT) ? gLUTInput[inLUT] : NTV2_INPUT_CROSSPOINT_INVALID;
 }
 
 
-NTV2InputCrosspointID GetDLInInputXptFromChannel(const NTV2Channel inChannel, const bool inLinkB)
+NTV2InputXptID GetDLInInputXptFromChannel (const NTV2Channel inChannel, const bool inLinkB)
 {
-    static const NTV2InputCrosspointID	gDLInputs[] = { NTV2_XptDualLinkIn1Input, NTV2_XptDualLinkIn2Input, NTV2_XptDualLinkIn3Input, NTV2_XptDualLinkIn4Input,
-        NTV2_XptDualLinkIn5Input, NTV2_XptDualLinkIn6Input, NTV2_XptDualLinkIn7Input, NTV2_XptDualLinkIn8Input };
-    static const NTV2InputCrosspointID	gDLBInputs[] = { NTV2_XptDualLinkIn1DSInput, NTV2_XptDualLinkIn2DSInput, NTV2_XptDualLinkIn3DSInput, NTV2_XptDualLinkIn4DSInput,
-        NTV2_XptDualLinkIn5DSInput, NTV2_XptDualLinkIn6DSInput, NTV2_XptDualLinkIn7DSInput, NTV2_XptDualLinkIn8DSInput };
+    static const NTV2InputXptID	gDLInputs[] = {	NTV2_XptDualLinkIn1Input, NTV2_XptDualLinkIn2Input, NTV2_XptDualLinkIn3Input, NTV2_XptDualLinkIn4Input,
+												NTV2_XptDualLinkIn5Input, NTV2_XptDualLinkIn6Input, NTV2_XptDualLinkIn7Input, NTV2_XptDualLinkIn8Input };
+    static const NTV2InputXptID	gDLBInputs[] = {NTV2_XptDualLinkIn1DSInput, NTV2_XptDualLinkIn2DSInput, NTV2_XptDualLinkIn3DSInput, NTV2_XptDualLinkIn4DSInput,
+												NTV2_XptDualLinkIn5DSInput, NTV2_XptDualLinkIn6DSInput, NTV2_XptDualLinkIn7DSInput, NTV2_XptDualLinkIn8DSInput };
     if (NTV2_IS_VALID_CHANNEL(inChannel))
         return inLinkB ? gDLBInputs[inChannel] : gDLInputs[inChannel];
     else
         return NTV2_INPUT_CROSSPOINT_INVALID;
 }
 
-NTV2InputCrosspointID GetDLOutInputXptFromChannel(const NTV2Channel inChannel)
+NTV2InputXptID GetDLOutInputXptFromChannel (const NTV2Channel inChannel)
 {
-    static const NTV2InputCrosspointID	gDLOutInputs[] = { NTV2_XptDualLinkOut1Input, NTV2_XptDualLinkOut2Input, NTV2_XptDualLinkOut3Input, NTV2_XptDualLinkOut4Input,
-        NTV2_XptDualLinkOut5Input, NTV2_XptDualLinkOut6Input, NTV2_XptDualLinkOut7Input, NTV2_XptDualLinkOut8Input };
+    static const NTV2InputXptID	gDLOutInputs[] = {	NTV2_XptDualLinkOut1Input, NTV2_XptDualLinkOut2Input, NTV2_XptDualLinkOut3Input, NTV2_XptDualLinkOut4Input,
+													NTV2_XptDualLinkOut5Input, NTV2_XptDualLinkOut6Input, NTV2_XptDualLinkOut7Input, NTV2_XptDualLinkOut8Input };
     if (NTV2_IS_VALID_CHANNEL(inChannel))
         return gDLOutInputs[inChannel];
     else
@@ -1870,62 +1869,62 @@ NTV2InputCrosspointID GetDLOutInputXptFromChannel(const NTV2Channel inChannel)
 }
 
 
-NTV2OutputCrosspointID GetCSCOutputXptFromChannel (const NTV2Channel inChannel, const bool inIsKey, const bool inIsRGB)
+NTV2OutputXptID GetCSCOutputXptFromChannel (const NTV2Channel inChannel, const bool inIsKey, const bool inIsRGB)
 {
-	static const NTV2OutputCrosspointID	gCSCKeyOutputs []	=	{	NTV2_XptCSC1KeyYUV,		NTV2_XptCSC2KeyYUV,		NTV2_XptCSC3KeyYUV,		NTV2_XptCSC4KeyYUV,
-																	NTV2_XptCSC5KeyYUV,		NTV2_XptCSC6KeyYUV,		NTV2_XptCSC7KeyYUV,		NTV2_XptCSC8KeyYUV};
-	static const NTV2OutputCrosspointID	gCSCRGBOutputs []	=	{	NTV2_XptCSC1VidRGB,		NTV2_XptCSC2VidRGB,		NTV2_XptCSC3VidRGB,		NTV2_XptCSC4VidRGB,
-																	NTV2_XptCSC5VidRGB,		NTV2_XptCSC6VidRGB,		NTV2_XptCSC7VidRGB,		NTV2_XptCSC8VidRGB};
-	static const NTV2OutputCrosspointID	gCSCYUVOutputs []	=	{	NTV2_XptCSC1VidYUV,		NTV2_XptCSC2VidYUV,		NTV2_XptCSC3VidYUV,		NTV2_XptCSC4VidYUV,
-																	NTV2_XptCSC5VidYUV,		NTV2_XptCSC6VidYUV,		NTV2_XptCSC7VidYUV,		NTV2_XptCSC8VidYUV};
-	if (NTV2_IS_VALID_CHANNEL (inChannel))
+	static const NTV2OutputXptID gCSCKeyOutputs [] = {	NTV2_XptCSC1KeyYUV,		NTV2_XptCSC2KeyYUV,		NTV2_XptCSC3KeyYUV,		NTV2_XptCSC4KeyYUV,
+														NTV2_XptCSC5KeyYUV,		NTV2_XptCSC6KeyYUV,		NTV2_XptCSC7KeyYUV,		NTV2_XptCSC8KeyYUV};
+	static const NTV2OutputXptID gCSCRGBOutputs [] = {	NTV2_XptCSC1VidRGB,		NTV2_XptCSC2VidRGB,		NTV2_XptCSC3VidRGB,		NTV2_XptCSC4VidRGB,
+														NTV2_XptCSC5VidRGB,		NTV2_XptCSC6VidRGB,		NTV2_XptCSC7VidRGB,		NTV2_XptCSC8VidRGB};
+	static const NTV2OutputXptID gCSCYUVOutputs [] = {	NTV2_XptCSC1VidYUV,		NTV2_XptCSC2VidYUV,		NTV2_XptCSC3VidYUV,		NTV2_XptCSC4VidYUV,
+														NTV2_XptCSC5VidYUV,		NTV2_XptCSC6VidYUV,		NTV2_XptCSC7VidYUV,		NTV2_XptCSC8VidYUV};
+	if (NTV2_IS_VALID_CHANNEL(inChannel))
 	{
 		if (inIsKey)
-			return gCSCKeyOutputs [inChannel];
+			return gCSCKeyOutputs[inChannel];
 		else
-			return inIsRGB  ?  gCSCRGBOutputs [inChannel]  :  gCSCYUVOutputs [inChannel];
+			return inIsRGB  ?  gCSCRGBOutputs[inChannel]  :  gCSCYUVOutputs[inChannel];
 	}
 	else
 		return NTV2_OUTPUT_CROSSPOINT_INVALID;
 }
 
-NTV2OutputCrosspointID GetLUTOutputXptFromChannel (const NTV2Channel inLUT)
+NTV2OutputXptID GetLUTOutputXptFromChannel (const NTV2Channel inLUT)
 {
-	static const NTV2OutputCrosspointID	gLUTRGBOutputs[] = {NTV2_XptLUT1Out, NTV2_XptLUT2Out, NTV2_XptLUT3Out, NTV2_XptLUT4Out,
-															NTV2_XptLUT5Out, NTV2_XptLUT6Out, NTV2_XptLUT7Out, NTV2_XptLUT8Out};
+	static const NTV2OutputXptID gLUTRGBOutputs[] = {	NTV2_XptLUT1Out, NTV2_XptLUT2Out, NTV2_XptLUT3Out, NTV2_XptLUT4Out,
+														NTV2_XptLUT5Out, NTV2_XptLUT6Out, NTV2_XptLUT7Out, NTV2_XptLUT8Out};
 	return NTV2_IS_VALID_CHANNEL(inLUT) ? gLUTRGBOutputs[inLUT] : NTV2_OUTPUT_CROSSPOINT_INVALID;
 }
 
-NTV2OutputCrosspointID GetFrameBufferOutputXptFromChannel (const NTV2Channel inChannel, const bool inIsRGB, const bool inIs425)
+NTV2OutputXptID GetFrameBufferOutputXptFromChannel (const NTV2Channel inChannel, const bool inIsRGB, const bool inIs425)
 {
-    static const NTV2OutputCrosspointID	gFrameBufferYUVOutputs []		=	{	NTV2_XptFrameBuffer1YUV,		NTV2_XptFrameBuffer2YUV,		NTV2_XptFrameBuffer3YUV,		NTV2_XptFrameBuffer4YUV,
-                                                                                NTV2_XptFrameBuffer5YUV,		NTV2_XptFrameBuffer6YUV,		NTV2_XptFrameBuffer7YUV,		NTV2_XptFrameBuffer8YUV};
-    static const NTV2OutputCrosspointID	gFrameBufferRGBOutputs []		=	{	NTV2_XptFrameBuffer1RGB,		NTV2_XptFrameBuffer2RGB,		NTV2_XptFrameBuffer3RGB,		NTV2_XptFrameBuffer4RGB,
-                                                                                NTV2_XptFrameBuffer5RGB,		NTV2_XptFrameBuffer6RGB,		NTV2_XptFrameBuffer7RGB,		NTV2_XptFrameBuffer8RGB};
-    static const NTV2OutputCrosspointID	gFrameBufferYUV425Outputs []	=	{	NTV2_XptFrameBuffer1_DS2YUV,	NTV2_XptFrameBuffer2_DS2YUV,	NTV2_XptFrameBuffer3_DS2YUV,	NTV2_XptFrameBuffer4_DS2YUV,
-                                                                                NTV2_XptFrameBuffer5_DS2YUV,	NTV2_XptFrameBuffer6_DS2YUV,	NTV2_XptFrameBuffer7_DS2YUV,	NTV2_XptFrameBuffer8_DS2YUV};
-    static const NTV2OutputCrosspointID	gFrameBufferRGB425Outputs []	=	{	NTV2_XptFrameBuffer1_DS2RGB,	NTV2_XptFrameBuffer2_DS2RGB,	NTV2_XptFrameBuffer3_DS2RGB,	NTV2_XptFrameBuffer4_DS2RGB,
-                                                                                NTV2_XptFrameBuffer5_DS2RGB,	NTV2_XptFrameBuffer6_DS2RGB,	NTV2_XptFrameBuffer7_DS2RGB,	NTV2_XptFrameBuffer8_DS2RGB};
-    if (NTV2_IS_VALID_CHANNEL (inChannel))
+    static const NTV2OutputXptID gFrameBufferYUVOutputs[] = {		NTV2_XptFrameBuffer1YUV,		NTV2_XptFrameBuffer2YUV,		NTV2_XptFrameBuffer3YUV,		NTV2_XptFrameBuffer4YUV,
+																	NTV2_XptFrameBuffer5YUV,		NTV2_XptFrameBuffer6YUV,		NTV2_XptFrameBuffer7YUV,		NTV2_XptFrameBuffer8YUV};
+    static const NTV2OutputXptID gFrameBufferRGBOutputs[] = {		NTV2_XptFrameBuffer1RGB,		NTV2_XptFrameBuffer2RGB,		NTV2_XptFrameBuffer3RGB,		NTV2_XptFrameBuffer4RGB,
+																	NTV2_XptFrameBuffer5RGB,		NTV2_XptFrameBuffer6RGB,		NTV2_XptFrameBuffer7RGB,		NTV2_XptFrameBuffer8RGB};
+    static const NTV2OutputXptID gFrameBufferYUV425Outputs[] = {	NTV2_XptFrameBuffer1_DS2YUV,	NTV2_XptFrameBuffer2_DS2YUV,	NTV2_XptFrameBuffer3_DS2YUV,	NTV2_XptFrameBuffer4_DS2YUV,
+																	NTV2_XptFrameBuffer5_DS2YUV,	NTV2_XptFrameBuffer6_DS2YUV,	NTV2_XptFrameBuffer7_DS2YUV,	NTV2_XptFrameBuffer8_DS2YUV};
+    static const NTV2OutputXptID gFrameBufferRGB425Outputs[] = {	NTV2_XptFrameBuffer1_DS2RGB,	NTV2_XptFrameBuffer2_DS2RGB,	NTV2_XptFrameBuffer3_DS2RGB,	NTV2_XptFrameBuffer4_DS2RGB,
+																	NTV2_XptFrameBuffer5_DS2RGB,	NTV2_XptFrameBuffer6_DS2RGB,	NTV2_XptFrameBuffer7_DS2RGB,	NTV2_XptFrameBuffer8_DS2RGB};
+    if (NTV2_IS_VALID_CHANNEL(inChannel))
         if (inIs425)
-            return inIsRGB ? gFrameBufferRGB425Outputs [inChannel] : gFrameBufferYUV425Outputs [inChannel];
+            return inIsRGB ? gFrameBufferRGB425Outputs[inChannel] : gFrameBufferYUV425Outputs[inChannel];
         else
-            return inIsRGB ? gFrameBufferRGBOutputs [inChannel] : gFrameBufferYUVOutputs [inChannel];
+            return inIsRGB ? gFrameBufferRGBOutputs[inChannel] : gFrameBufferYUVOutputs[inChannel];
     else
         return NTV2_OUTPUT_CROSSPOINT_INVALID;
 }
 
 
-NTV2OutputCrosspointID GetInputSourceOutputXpt (const NTV2InputSource inInputSource, const bool inIsSDI_DS2, const bool inIsHDMI_RGB, const UWord inHDMI_Quadrant)
+NTV2OutputXptID GetInputSourceOutputXpt (const NTV2InputSource inInputSource, const bool inIsSDI_DS2, const bool inIsHDMI_RGB, const UWord inHDMI_Quadrant)
 {
-	static const NTV2OutputCrosspointID	gHDMIInputOutputs [4][4] =		{	{	NTV2_XptHDMIIn1,	NTV2_XptHDMIIn1Q2,		NTV2_XptHDMIIn1Q3,		NTV2_XptHDMIIn1Q4		},
-																			{   NTV2_XptHDMIIn2,	NTV2_XptHDMIIn2Q2,		NTV2_XptHDMIIn2Q3,		NTV2_XptHDMIIn2Q4		},
-																			{   NTV2_XptHDMIIn3,	NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack			},
-																			{   NTV2_XptHDMIIn4,	NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack			}   };
-	static const NTV2OutputCrosspointID	gHDMIInputRGBOutputs [4][4]	=	{	{	NTV2_XptHDMIIn1RGB, NTV2_XptHDMIIn1Q2RGB,	NTV2_XptHDMIIn1Q3RGB,	NTV2_XptHDMIIn1Q4RGB	},
-																			{	NTV2_XptHDMIIn2RGB,	NTV2_XptHDMIIn2Q2RGB,	NTV2_XptHDMIIn2Q3RGB,	NTV2_XptHDMIIn2Q4RGB	},
-																			{	NTV2_XptHDMIIn3RGB,	NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack			},
-																			{	NTV2_XptHDMIIn4RGB,	NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack			}	};
+	static const NTV2OutputXptID gHDMIInputOutputs [4][4] =		{	{	NTV2_XptHDMIIn1,	NTV2_XptHDMIIn1Q2,		NTV2_XptHDMIIn1Q3,		NTV2_XptHDMIIn1Q4		},
+																	{   NTV2_XptHDMIIn2,	NTV2_XptHDMIIn2Q2,		NTV2_XptHDMIIn2Q3,		NTV2_XptHDMIIn2Q4		},
+																	{   NTV2_XptHDMIIn3,	NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack			},
+																	{   NTV2_XptHDMIIn4,	NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack			}   };
+	static const NTV2OutputXptID gHDMIInputRGBOutputs [4][4] =	{	{	NTV2_XptHDMIIn1RGB, NTV2_XptHDMIIn1Q2RGB,	NTV2_XptHDMIIn1Q3RGB,	NTV2_XptHDMIIn1Q4RGB	},
+																	{	NTV2_XptHDMIIn2RGB,	NTV2_XptHDMIIn2Q2RGB,	NTV2_XptHDMIIn2Q3RGB,	NTV2_XptHDMIIn2Q4RGB	},
+																	{	NTV2_XptHDMIIn3RGB,	NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack			},
+																	{	NTV2_XptHDMIIn4RGB,	NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack			}	};
 
     if (NTV2_INPUT_SOURCE_IS_SDI (inInputSource))
         return ::GetSDIInputOutputXptFromChannel (::NTV2InputSourceToChannel (inInputSource), inIsSDI_DS2);
@@ -1944,34 +1943,34 @@ NTV2OutputCrosspointID GetInputSourceOutputXpt (const NTV2InputSource inInputSou
 }
 
 
-NTV2OutputCrosspointID GetSDIInputOutputXptFromChannel (const NTV2Channel inChannel,  const bool inIsDS2)
+NTV2OutputXptID GetSDIInputOutputXptFromChannel (const NTV2Channel inChannel,  const bool inIsDS2)
 {
-    static const NTV2OutputCrosspointID	gSDIInputOutputs []		=	{	NTV2_XptSDIIn1,		NTV2_XptSDIIn2,		NTV2_XptSDIIn3,		NTV2_XptSDIIn4,
-                                                                        NTV2_XptSDIIn5,		NTV2_XptSDIIn6,		NTV2_XptSDIIn7,		NTV2_XptSDIIn8};
-    static const NTV2OutputCrosspointID	gSDIInputDS2Outputs []	=	{	NTV2_XptSDIIn1DS2,	NTV2_XptSDIIn2DS2,	NTV2_XptSDIIn3DS2,	NTV2_XptSDIIn4DS2,
-                                                                        NTV2_XptSDIIn5DS2,	NTV2_XptSDIIn6DS2,	NTV2_XptSDIIn7DS2,	NTV2_XptSDIIn8DS2};
-    if (NTV2_IS_VALID_CHANNEL (inChannel))
-        return inIsDS2  ?  gSDIInputDS2Outputs [inChannel]  :  gSDIInputOutputs [inChannel];
+    static const NTV2OutputXptID gSDIInputOutputs []	=	{	NTV2_XptSDIIn1,		NTV2_XptSDIIn2,		NTV2_XptSDIIn3,		NTV2_XptSDIIn4,
+																NTV2_XptSDIIn5,		NTV2_XptSDIIn6,		NTV2_XptSDIIn7,		NTV2_XptSDIIn8};
+    static const NTV2OutputXptID gSDIInputDS2Outputs []	=	{	NTV2_XptSDIIn1DS2,	NTV2_XptSDIIn2DS2,	NTV2_XptSDIIn3DS2,	NTV2_XptSDIIn4DS2,
+																NTV2_XptSDIIn5DS2,	NTV2_XptSDIIn6DS2,	NTV2_XptSDIIn7DS2,	NTV2_XptSDIIn8DS2};
+    if (NTV2_IS_VALID_CHANNEL(inChannel))
+        return inIsDS2  ?  gSDIInputDS2Outputs[inChannel]  :  gSDIInputOutputs[inChannel];
     else
         return NTV2_OUTPUT_CROSSPOINT_INVALID;
 }
 
-NTV2OutputCrosspointID GetDLOutOutputXptFromChannel(const NTV2Channel inChannel, const bool inIsLinkB)
+NTV2OutputXptID GetDLOutOutputXptFromChannel(const NTV2Channel inChannel, const bool inIsLinkB)
 {
-    static const NTV2OutputCrosspointID	gDLOutOutputs[] = { NTV2_XptDuallinkOut1, NTV2_XptDuallinkOut2, NTV2_XptDuallinkOut3, NTV2_XptDuallinkOut4,
-        NTV2_XptDuallinkOut5, NTV2_XptDuallinkOut6, NTV2_XptDuallinkOut7, NTV2_XptDuallinkOut8 };
-    static const NTV2OutputCrosspointID	gDLOutDS2Outputs[] = { NTV2_XptDuallinkOut1DS2, NTV2_XptDuallinkOut2DS2, NTV2_XptDuallinkOut3DS2, NTV2_XptDuallinkOut4DS2,
-        NTV2_XptDuallinkOut5DS2, NTV2_XptDuallinkOut6DS2, NTV2_XptDuallinkOut7DS2, NTV2_XptDuallinkOut8DS2 };
+    static const NTV2OutputXptID gDLOutOutputs[] = {	NTV2_XptDuallinkOut1, NTV2_XptDuallinkOut2, NTV2_XptDuallinkOut3, NTV2_XptDuallinkOut4,
+														NTV2_XptDuallinkOut5, NTV2_XptDuallinkOut6, NTV2_XptDuallinkOut7, NTV2_XptDuallinkOut8 };
+    static const NTV2OutputXptID gDLOutDS2Outputs[] = {	NTV2_XptDuallinkOut1DS2, NTV2_XptDuallinkOut2DS2, NTV2_XptDuallinkOut3DS2, NTV2_XptDuallinkOut4DS2,
+														NTV2_XptDuallinkOut5DS2, NTV2_XptDuallinkOut6DS2, NTV2_XptDuallinkOut7DS2, NTV2_XptDuallinkOut8DS2 };
     if (NTV2_IS_VALID_CHANNEL(inChannel))
         return inIsLinkB ? gDLOutDS2Outputs[inChannel] : gDLOutOutputs[inChannel];
     else
         return NTV2_OUTPUT_CROSSPOINT_INVALID;
 }
 
-NTV2OutputCrosspointID GetDLInOutputXptFromChannel(const NTV2Channel inChannel)
+NTV2OutputXptID GetDLInOutputXptFromChannel(const NTV2Channel inChannel)
 {
-    static const NTV2OutputCrosspointID	gDLInOutputs[] = { NTV2_XptDuallinkIn1, NTV2_XptDuallinkIn2, NTV2_XptDuallinkIn3, NTV2_XptDuallinkIn4,
-        NTV2_XptDuallinkIn5, NTV2_XptDuallinkIn6, NTV2_XptDuallinkIn7, NTV2_XptDuallinkIn8 };
+    static const NTV2OutputXptID gDLInOutputs[] = {	NTV2_XptDuallinkIn1, NTV2_XptDuallinkIn2, NTV2_XptDuallinkIn3, NTV2_XptDuallinkIn4,
+													NTV2_XptDuallinkIn5, NTV2_XptDuallinkIn6, NTV2_XptDuallinkIn7, NTV2_XptDuallinkIn8 };
     if (NTV2_IS_VALID_CHANNEL(inChannel))
         return gDLInOutputs[inChannel];
     else
@@ -1979,9 +1978,9 @@ NTV2OutputCrosspointID GetDLInOutputXptFromChannel(const NTV2Channel inChannel)
 }
 
 
-NTV2InputCrosspointID GetOutputDestInputXpt (const NTV2OutputDestination inOutputDest,  const bool inIsSDI_DS2,  const UWord inHDMI_Quadrant)
+NTV2InputXptID GetOutputDestInputXpt (const NTV2OutputDestination inOutputDest,  const bool inIsSDI_DS2,  const UWord inHDMI_Quadrant)
 {
-    static const NTV2InputCrosspointID	gHDMIOutputInputs[] = {	NTV2_XptHDMIOutQ1Input,	NTV2_XptHDMIOutQ2Input,	NTV2_XptHDMIOutQ3Input,	NTV2_XptHDMIOutQ4Input};
+    static const NTV2InputXptID	gHDMIOutputInputs[] = {	NTV2_XptHDMIOutQ1Input,	NTV2_XptHDMIOutQ2Input,	NTV2_XptHDMIOutQ3Input,	NTV2_XptHDMIOutQ4Input};
     if (NTV2_OUTPUT_DEST_IS_SDI(inOutputDest))
         return ::GetSDIOutputInputXpt (::NTV2OutputDestinationToChannel(inOutputDest), inIsSDI_DS2);
     else if (NTV2_OUTPUT_DEST_IS_HDMI(inOutputDest))
@@ -1993,12 +1992,12 @@ NTV2InputCrosspointID GetOutputDestInputXpt (const NTV2OutputDestination inOutpu
 }
 
 
-NTV2InputCrosspointID GetSDIOutputInputXpt (const NTV2Channel inChannel,  const bool inIsDS2)
+NTV2InputXptID GetSDIOutputInputXpt (const NTV2Channel inChannel,  const bool inIsDS2)
 {
-    static const NTV2InputCrosspointID	gSDIOutputInputs []		=	{	NTV2_XptSDIOut1Input,		NTV2_XptSDIOut2Input,		NTV2_XptSDIOut3Input,		NTV2_XptSDIOut4Input,
-                                                                        NTV2_XptSDIOut5Input,		NTV2_XptSDIOut6Input,		NTV2_XptSDIOut7Input,		NTV2_XptSDIOut8Input};
-    static const NTV2InputCrosspointID	gSDIOutputDS2Inputs []	=	{	NTV2_XptSDIOut1InputDS2,	NTV2_XptSDIOut2InputDS2,	NTV2_XptSDIOut3InputDS2,	NTV2_XptSDIOut4InputDS2,
-                                                                        NTV2_XptSDIOut5InputDS2,	NTV2_XptSDIOut6InputDS2,	NTV2_XptSDIOut7InputDS2,	NTV2_XptSDIOut8InputDS2};
+    static const NTV2InputXptID	gSDIOutputInputs []		=	{	NTV2_XptSDIOut1Input,		NTV2_XptSDIOut2Input,		NTV2_XptSDIOut3Input,		NTV2_XptSDIOut4Input,
+																NTV2_XptSDIOut5Input,		NTV2_XptSDIOut6Input,		NTV2_XptSDIOut7Input,		NTV2_XptSDIOut8Input};
+    static const NTV2InputXptID	gSDIOutputDS2Inputs []	=	{	NTV2_XptSDIOut1InputDS2,	NTV2_XptSDIOut2InputDS2,	NTV2_XptSDIOut3InputDS2,	NTV2_XptSDIOut4InputDS2,
+																NTV2_XptSDIOut5InputDS2,	NTV2_XptSDIOut6InputDS2,	NTV2_XptSDIOut7InputDS2,	NTV2_XptSDIOut8InputDS2};
     if (NTV2_IS_VALID_CHANNEL (inChannel))
         return inIsDS2  ?  gSDIOutputDS2Inputs [inChannel]  :  gSDIOutputInputs [inChannel];
     else
@@ -2006,72 +2005,72 @@ NTV2InputCrosspointID GetSDIOutputInputXpt (const NTV2Channel inChannel,  const 
 }
 
 
-NTV2OutputCrosspointID GetMixerOutputXptFromChannel (const NTV2Channel inChannel, const bool inIsKey)
+NTV2OutputXptID GetMixerOutputXptFromChannel (const NTV2Channel inChannel, const bool inIsKey)
 {
-    static const NTV2OutputCrosspointID	gMixerVidYUVOutputs []	=	{	NTV2_XptMixer1VidYUV,	NTV2_XptMixer1VidYUV,	NTV2_XptMixer2VidYUV,	NTV2_XptMixer2VidYUV,
-                                                                        NTV2_XptMixer3VidYUV,	NTV2_XptMixer3VidYUV,	NTV2_XptMixer4VidYUV,	NTV2_XptMixer4VidYUV};
-    static const NTV2OutputCrosspointID	gMixerKeyYUVOutputs []	=	{	NTV2_XptMixer1KeyYUV,	NTV2_XptMixer1KeyYUV,	NTV2_XptMixer2KeyYUV,	NTV2_XptMixer2KeyYUV,
-                                                                        NTV2_XptMixer3KeyYUV,	NTV2_XptMixer3KeyYUV,	NTV2_XptMixer4KeyYUV,	NTV2_XptMixer4KeyYUV};
-    if (NTV2_IS_VALID_CHANNEL (inChannel))
-        return inIsKey  ?  gMixerKeyYUVOutputs [inChannel]  :  gMixerVidYUVOutputs [inChannel];
+    static const NTV2OutputXptID gMixerVidYUVOutputs []	= {	NTV2_XptMixer1VidYUV,	NTV2_XptMixer1VidYUV,	NTV2_XptMixer2VidYUV,	NTV2_XptMixer2VidYUV,
+															NTV2_XptMixer3VidYUV,	NTV2_XptMixer3VidYUV,	NTV2_XptMixer4VidYUV,	NTV2_XptMixer4VidYUV};
+    static const NTV2OutputXptID gMixerKeyYUVOutputs []	= {	NTV2_XptMixer1KeyYUV,	NTV2_XptMixer1KeyYUV,	NTV2_XptMixer2KeyYUV,	NTV2_XptMixer2KeyYUV,
+															NTV2_XptMixer3KeyYUV,	NTV2_XptMixer3KeyYUV,	NTV2_XptMixer4KeyYUV,	NTV2_XptMixer4KeyYUV};
+    if (NTV2_IS_VALID_CHANNEL(inChannel))
+        return inIsKey  ?  gMixerKeyYUVOutputs[inChannel]  :  gMixerVidYUVOutputs[inChannel];
     else
         return NTV2_OUTPUT_CROSSPOINT_INVALID;
 }
 
 
-NTV2InputCrosspointID GetMixerFGInputXpt (const NTV2Channel inChannel,  const bool inIsKey)
+NTV2InputXptID GetMixerFGInputXpt (const NTV2Channel inChannel,  const bool inIsKey)
 {
-    static const NTV2InputCrosspointID	gMixerFGVideoInputs []	=	{	NTV2_XptMixer1FGVidInput,	NTV2_XptMixer1FGVidInput,	NTV2_XptMixer2FGVidInput,	NTV2_XptMixer2FGVidInput,
-                                                                        NTV2_XptMixer3FGVidInput,	NTV2_XptMixer3FGVidInput,	NTV2_XptMixer4FGVidInput,	NTV2_XptMixer4FGVidInput};
-    static const NTV2InputCrosspointID	gMixerFGKeyInputs []	=	{	NTV2_XptMixer1FGKeyInput,	NTV2_XptMixer1FGKeyInput,	NTV2_XptMixer2FGKeyInput,	NTV2_XptMixer2FGKeyInput,
-                                                                        NTV2_XptMixer3FGKeyInput,	NTV2_XptMixer3FGKeyInput,	NTV2_XptMixer4FGKeyInput,	NTV2_XptMixer4FGKeyInput};
-    if (NTV2_IS_VALID_CHANNEL (inChannel))
-        return inIsKey  ?  gMixerFGKeyInputs [inChannel]  :  gMixerFGVideoInputs [inChannel];
+    static const NTV2InputXptID	gMixerFGVideoInputs []	= {	NTV2_XptMixer1FGVidInput,	NTV2_XptMixer1FGVidInput,	NTV2_XptMixer2FGVidInput,	NTV2_XptMixer2FGVidInput,
+															NTV2_XptMixer3FGVidInput,	NTV2_XptMixer3FGVidInput,	NTV2_XptMixer4FGVidInput,	NTV2_XptMixer4FGVidInput};
+    static const NTV2InputXptID	gMixerFGKeyInputs []	= {	NTV2_XptMixer1FGKeyInput,	NTV2_XptMixer1FGKeyInput,	NTV2_XptMixer2FGKeyInput,	NTV2_XptMixer2FGKeyInput,
+															NTV2_XptMixer3FGKeyInput,	NTV2_XptMixer3FGKeyInput,	NTV2_XptMixer4FGKeyInput,	NTV2_XptMixer4FGKeyInput};
+    if (NTV2_IS_VALID_CHANNEL(inChannel))
+        return inIsKey  ?  gMixerFGKeyInputs[inChannel]  :  gMixerFGVideoInputs[inChannel];
     else
         return NTV2_INPUT_CROSSPOINT_INVALID;
 }
 
 
-NTV2InputCrosspointID GetMixerBGInputXpt (const NTV2Channel inChannel,  const bool inIsKey)
+NTV2InputXptID GetMixerBGInputXpt (const NTV2Channel inChannel,  const bool inIsKey)
 {
-    static const NTV2InputCrosspointID	gMixerBGVideoInputs []	=	{	NTV2_XptMixer1BGVidInput,	NTV2_XptMixer1BGVidInput,	NTV2_XptMixer2BGVidInput,	NTV2_XptMixer2BGVidInput,
-                                                                        NTV2_XptMixer3BGVidInput,	NTV2_XptMixer3BGVidInput,	NTV2_XptMixer4BGVidInput,	NTV2_XptMixer4BGVidInput};
-    static const NTV2InputCrosspointID	gMixerBGKeyInputs []	=	{	NTV2_XptMixer1BGKeyInput,	NTV2_XptMixer1BGKeyInput,	NTV2_XptMixer2BGKeyInput,	NTV2_XptMixer2BGKeyInput,
-                                                                        NTV2_XptMixer3BGKeyInput,	NTV2_XptMixer3BGKeyInput,	NTV2_XptMixer4BGKeyInput,	NTV2_XptMixer4BGKeyInput};
-    if (NTV2_IS_VALID_CHANNEL (inChannel))
-        return inIsKey  ?  gMixerBGKeyInputs [inChannel]  :  gMixerBGVideoInputs [inChannel];
+    static const NTV2InputXptID	gMixerBGVideoInputs []	= {	NTV2_XptMixer1BGVidInput,	NTV2_XptMixer1BGVidInput,	NTV2_XptMixer2BGVidInput,	NTV2_XptMixer2BGVidInput,
+															NTV2_XptMixer3BGVidInput,	NTV2_XptMixer3BGVidInput,	NTV2_XptMixer4BGVidInput,	NTV2_XptMixer4BGVidInput};
+    static const NTV2InputXptID	gMixerBGKeyInputs []	= {	NTV2_XptMixer1BGKeyInput,	NTV2_XptMixer1BGKeyInput,	NTV2_XptMixer2BGKeyInput,	NTV2_XptMixer2BGKeyInput,
+															NTV2_XptMixer3BGKeyInput,	NTV2_XptMixer3BGKeyInput,	NTV2_XptMixer4BGKeyInput,	NTV2_XptMixer4BGKeyInput};
+    if (NTV2_IS_VALID_CHANNEL(inChannel))
+        return inIsKey  ?  gMixerBGKeyInputs[inChannel]  :  gMixerBGVideoInputs[inChannel];
     else
         return NTV2_INPUT_CROSSPOINT_INVALID;
 }
 
-NTV2InputCrosspointID GetTSIMuxInputXptFromChannel(const NTV2Channel inChannel, const bool inLinkB)
+NTV2InputXptID GetTSIMuxInputXptFromChannel (const NTV2Channel inChannel, const bool inLinkB)
 {
-    static const NTV2InputCrosspointID	gDLInputs[] = { NTV2_Xpt425Mux1AInput, NTV2_Xpt425Mux2AInput, NTV2_Xpt425Mux3AInput, NTV2_Xpt425Mux4AInput,
-                                                      NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID};
-    static const NTV2InputCrosspointID	gDLBInputs[] = { NTV2_Xpt425Mux1BInput, NTV2_Xpt425Mux2BInput, NTV2_Xpt425Mux3BInput, NTV2_Xpt425Mux4BInput,
-                                                       NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID};
+    static const NTV2InputXptID	gDLInputs[] = {	NTV2_Xpt425Mux1AInput, NTV2_Xpt425Mux2AInput, NTV2_Xpt425Mux3AInput, NTV2_Xpt425Mux4AInput,
+												NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID};
+    static const NTV2InputXptID	gDLBInputs[]= {	NTV2_Xpt425Mux1BInput, NTV2_Xpt425Mux2BInput, NTV2_Xpt425Mux3BInput, NTV2_Xpt425Mux4BInput,
+												NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID,NTV2_INPUT_CROSSPOINT_INVALID};
     if (NTV2_IS_VALID_CHANNEL(inChannel))
         return inLinkB ? gDLBInputs[inChannel] : gDLInputs[inChannel];
     else
         return NTV2_INPUT_CROSSPOINT_INVALID;
 }
 
-NTV2OutputCrosspointID GetTSIMuxOutputXptFromChannel (const NTV2Channel inChannel, const bool inLinkB, const bool inIsRGB)
+NTV2OutputXptID GetTSIMuxOutputXptFromChannel (const NTV2Channel inChannel, const bool inLinkB, const bool inIsRGB)
 {
-    static const NTV2OutputCrosspointID	gMuxARGBOutputs []	=	{	NTV2_Xpt425Mux1ARGB,		NTV2_Xpt425Mux2ARGB,		NTV2_Xpt425Mux3ARGB,		NTV2_Xpt425Mux4ARGB,
-                                                                    NTV2_XptBlack,              NTV2_XptBlack,              NTV2_XptBlack,              NTV2_XptBlack};
-    static const NTV2OutputCrosspointID	gMuxAYUVOutputs []	=	{	NTV2_Xpt425Mux1AYUV,		NTV2_Xpt425Mux2AYUV,		NTV2_Xpt425Mux3AYUV,		NTV2_Xpt425Mux4AYUV,
-                                                                    NTV2_XptBlack,              NTV2_XptBlack,              NTV2_XptBlack,              NTV2_XptBlack};
-    static const NTV2OutputCrosspointID	gMuxBRGBOutputs []	=	{	NTV2_Xpt425Mux1BRGB,		NTV2_Xpt425Mux2BRGB,		NTV2_Xpt425Mux3BRGB,		NTV2_Xpt425Mux4BRGB,
-                                                                    NTV2_XptBlack,              NTV2_XptBlack,              NTV2_XptBlack,              NTV2_XptBlack};
-    static const NTV2OutputCrosspointID	gMuxBYUVOutputs []	=	{	NTV2_Xpt425Mux1BYUV,		NTV2_Xpt425Mux2BYUV,		NTV2_Xpt425Mux3BYUV,		NTV2_Xpt425Mux4BYUV,
-                                                                    NTV2_XptBlack,              NTV2_XptBlack,              NTV2_XptBlack,              NTV2_XptBlack};
-    if (NTV2_IS_VALID_CHANNEL (inChannel))
+    static const NTV2OutputXptID gMuxARGBOutputs[] = {	NTV2_Xpt425Mux1ARGB,	NTV2_Xpt425Mux2ARGB,	NTV2_Xpt425Mux3ARGB,	NTV2_Xpt425Mux4ARGB,
+														NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack};
+    static const NTV2OutputXptID gMuxAYUVOutputs[] = {	NTV2_Xpt425Mux1AYUV,	NTV2_Xpt425Mux2AYUV,	NTV2_Xpt425Mux3AYUV,	NTV2_Xpt425Mux4AYUV,
+														NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack};
+    static const NTV2OutputXptID gMuxBRGBOutputs[] = {	NTV2_Xpt425Mux1BRGB,	NTV2_Xpt425Mux2BRGB,	NTV2_Xpt425Mux3BRGB,	NTV2_Xpt425Mux4BRGB,
+														NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack};
+    static const NTV2OutputXptID gMuxBYUVOutputs[] = {	NTV2_Xpt425Mux1BYUV,	NTV2_Xpt425Mux2BYUV,	NTV2_Xpt425Mux3BYUV,	NTV2_Xpt425Mux4BYUV,
+														NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack,			NTV2_XptBlack};
+    if (NTV2_IS_VALID_CHANNEL(inChannel))
     {
         if (inLinkB)
             return inIsRGB ? gMuxBRGBOutputs[inChannel] : gMuxBYUVOutputs[inChannel];
         else
-            return inIsRGB  ?  gMuxARGBOutputs [inChannel]  :  gMuxAYUVOutputs [inChannel];
+            return inIsRGB  ?  gMuxARGBOutputs[inChannel]  :  gMuxAYUVOutputs[inChannel];
     }
     else
         return NTV2_OUTPUT_CROSSPOINT_INVALID;
