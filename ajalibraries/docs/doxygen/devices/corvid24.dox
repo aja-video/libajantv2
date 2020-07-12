@@ -89,12 +89,16 @@
 
 
 	The NTV2 SDK provides several functions for querying and/or controlling the bypass relays:
-	-	CNTV2Card::GetSDIWatchdogState and CNTV2Card::SetSDIWatchdogState
 	-	CNTV2Card::GetSDIRelayManualControl and CNTV2Card::SetSDIRelayManualControl
 	-	CNTV2Card::GetSDIWatchdogEnable and CNTV2Card::SetSDIWatchdogEnable
 	-	CNTV2Card::GetSDIWatchdogTimeout and CNTV2Card::SetSDIWatchdogTimeout
 	-	CNTV2Card::GetSDIWatchdogStatus
 	-	CNTV2Card::GetSDIRelayPosition
+
+	@par	SDK Support
+
+	-	At least since 2012 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/25">SDK v4.4 (Windows)</a>
+		and <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/51">SDK v3.6.2 (MacOS)</a>.
 
 	@par		Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/131/25>

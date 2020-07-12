@@ -66,7 +66,7 @@
 		-	625i 50
 		-	525i 59.94
 
-	@par		Ancillary Data
+	@par	Ancillary Data
 	-	Anc inserters (SDI)
 	-	\ref vancframegeometries (SD/HD SDI)
 	-	HDMI HDR
@@ -87,6 +87,10 @@
 	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
 	-	Safe Storage Temperature (Power OFF): -40°C to +60°C (-40°F to +140°F)
 
-	@par		Firmware
+	@par	SDK Support
+
+	-	Introduced in 2020 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/232">SDK v16.0</a>.
+
+	@par	Firmware
 	TBA
 **/

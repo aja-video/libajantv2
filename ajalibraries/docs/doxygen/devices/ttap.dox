@@ -38,9 +38,14 @@
 	-	Supports most standard SD and HD video formats up to 1080p30 and 2Kp25.
 	-	RGB is not supported.
 
-	@par		Ancillary Data
+	@par	Ancillary Data
 	-	\ref vancframegeometries only
 
-	@par		Firmware
+	@par	SDK Support
+
+	-	Introduced in 2012 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/51">SDK v3.6.2 (MacOS)</a>
+		and <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/72">SDK v11.1 (Windows)</a>.
+
+	@par	Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/144/25>
 **/
