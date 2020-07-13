@@ -28,7 +28,7 @@
 
 	-	2 GB SDRAM
 	-	256 × 8MB frames
-	-	128 × 16MB frames for 2K (1080x2048) and RGB-16+
+	-	128 × 16MB frames for 2K (1080×2048) and RGB-16+
 	-	64 × 32MB frames for 4K RGB
 
 	@par	Audio
@@ -59,7 +59,7 @@
 
 	@par	SDK Support
 
-	-	Introduced in <a href="https://sdksupport.aja.com/docs/NTV2SDK_docs_14_2">SDK v14.2</a>.
+	-	Introduced in 2018 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/205">SDK v14.2</a>.
 
 	@par	Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/201/25>

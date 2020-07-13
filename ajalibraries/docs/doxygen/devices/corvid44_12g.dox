@@ -57,9 +57,15 @@
 	-	\ref vancframegeometries
 	-	See \ref anccapture and/or \ref ancplayout for more information
 
+	@par	SDK Support
+
+	-	Introduced in 2019 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/ntv2sdk152official">SDK v15.2</a>.
+
 	@par		Firmware
 
-	(TBD)
+	-	<b>Standard OEM:</b>  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/corvid4412g-oem-firmware>
+	-	<b>Mixer/Keyer:</b>  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/corvid448kmk-firmware>
+	-	<b>2×4K:</b>  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/corvid448k2x4k-firmware>
 
 	@par	Physical
 

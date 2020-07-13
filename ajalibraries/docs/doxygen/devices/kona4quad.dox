@@ -36,7 +36,7 @@
 
 	-	512 MB SDRAM
 	-	64 × 8MB frames
-	-	32 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	32 × 16MB frames for 2K (1080×2048), 1920×1080 VANC, and 16-bit RGB
 
 	@par	Audio
 
@@ -66,11 +66,11 @@
 	@par	External Connectivity
 
 	-	Optional \ref aja103226 provides access to other inputs and outputs
-	-	Optional \ref ajak3gbox provides convenient access to most of the board's inputs and outputs in a 1U rack-mountable chassis
+	-	Optional \ref ajak3gbox provides convenient access to most of the board’s inputs and outputs in a 1U rack-mountable chassis
 
 	@par	SDK Support
 
-	-	Introduced in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/122">SDK v11.3</a>.
+	-	Introduced in 2014 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/122">SDK v11.3</a>.
 
 	@par	Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/137/25>

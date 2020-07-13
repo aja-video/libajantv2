@@ -2870,6 +2870,11 @@ ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameB
 	//	Planar formats are special -- and VANC doesn't apply...
 	switch (inFBFormat)
 	{
+	case NTV2_FBF_8BIT_YCBCR_420PL3:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 3 / 2;
+	case NTV2_FBF_8BIT_YCBCR_422PL3:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 2;
+	case NTV2_FBF_10BIT_YCBCR_420PL3_LE:return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 3;
+	case NTV2_FBF_10BIT_YCBCR_422PL3_LE:return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 4;
+	
 	case NTV2_FBF_10BIT_YCBCR_420PL2:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 3 / 2 * 10 / 8;
 	case NTV2_FBF_10BIT_YCBCR_422PL2:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 2 * 10 / 8;
 	case NTV2_FBF_8BIT_YCBCR_420PL2:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 3 / 2;

@@ -3,7 +3,6 @@
 
 	@section	ntv2hwcorvid	Corvid OEM Boards
 
-	-	\ref corvid1corvid3g
 	-	\ref corvid22
 	-	\ref corvid24
 	-	\ref corvid44
@@ -25,13 +24,17 @@
 	@section	ntv2hwkona		Kona Boards
 
 	-	\ref kona1
-	-	\ref kona3gquad and \ref kona3gufc
 	-	\ref kona4quad and \ref kona4ufc
 	-	\ref kona5
 	-	\ref konahdmi
 	-	\ref konaip
 	-	\ref konalheplus
 	-	\ref konalhi
+
+	@section	ntv2hwlegacy	Legacy Devices
+
+	-	\ref corvid1corvid3g
+	-	\ref kona3gquad and \ref kona3gufc
 
 	@section	ntv2hwaccessories	Breakout Boxes and Cables
 

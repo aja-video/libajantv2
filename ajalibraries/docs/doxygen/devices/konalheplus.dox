@@ -56,15 +56,19 @@
 	-	1 mixer/keyer, with Mix Coefficient and Wipe Generator
 	-	Compression widget
 
-	@par		Ancillary Data
+	@par	Ancillary Data
 
 	-	\ref vancframegeometries only
 
-	@par		External Connectivity
+	@par	External Connectivity
 
 	-	Optional \ref aja101884 provides access to other inputs and outputs
 	-	Optional \ref ajaklboxlh provides convenient access to the board's inputs and outputs in a 1U rack-mountable chassis.
 
-	@par		Firmware
+	@par	SDK Support
+
+	-	Since before 2009 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/3">SDK v2.1 (MacOS)</a>.
+
+	@par	Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/142/25>
 **/
