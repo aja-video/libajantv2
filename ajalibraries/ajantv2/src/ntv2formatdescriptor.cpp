@@ -944,20 +944,19 @@ ULWord NTV2FormatDescriptor::GetTotalBytes (void) const
 
 ULWord NTV2FormatDescriptor::GetVerticalSampleRatio (const UWord inPlaneIndex0) const
 {
-	ULWord sampleCount;
+	if (inPlaneIndex0 >= mNumPlanes)
+		return 0;	//	no such plane!
 	switch (mPixelFormat)
 	{
 		case NTV2_FBF_8BIT_YCBCR_420PL3:
 		case NTV2_FBF_10BIT_YCBCR_420PL3_LE:
 		case NTV2_FBF_10BIT_YCBCR_420PL2:
 		case NTV2_FBF_8BIT_YCBCR_420PL2:
-			sampleCount = inPlaneIndex0 != 0 ? 2 : 1;
-			break;
+			return inPlaneIndex0 ? 2 : 1;
 		default:
-			sampleCount = 1;
 			break;
 	}
-	return inPlaneIndex0 < mNumPlanes ? sampleCount : 0;
+	return 1;
 }
 
 bool NTV2FormatDescriptor::Is2KFormat (void) const
