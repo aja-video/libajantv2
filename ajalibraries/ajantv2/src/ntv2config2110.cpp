@@ -3172,3 +3172,8 @@ bool CNTV2Config2110::GetLLDPInfo(std::string &chassisId0, std::string &portId0,
 	return CNTV2MBController::GetLLDPInfo(chassisId0, portId0, chassisId1, portId1);
 }
 
+uint64_t CNTV2Config2110::GetNTPTimestamp()
+{
+	return CNTV2MBController::GetNTPTimestamp();
+}
+
