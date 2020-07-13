@@ -13,5 +13,6 @@
 #include <vector>
 #include <map>
 #include "ajabase/common/types.h"
+#include <mutex>
 
 #endif	//	AJA_PUBLIC_H
