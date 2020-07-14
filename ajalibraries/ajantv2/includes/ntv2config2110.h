@@ -374,6 +374,7 @@ public:
 	bool SetLLDPInfo(std::string sysname);
 	bool GetLLDPInfo(std::string &chassisId0, std::string &portId0,
 					std::string &chassisId1, std::string &portId1);
+    uint64_t GetNTPTimestamp();
 
     // If method returns false call this to get details
     std::string getLastError();
