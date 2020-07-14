@@ -13,6 +13,8 @@
 #include <vector>
 #include <map>
 #include "ajabase/common/types.h"
-#include <mutex>
+#if defined(AJA_USE_CPLUSPLUS11)
+	#include <mutex>
+#endif
 
 #endif	//	AJA_PUBLIC_H
