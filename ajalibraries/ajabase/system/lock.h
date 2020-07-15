@@ -9,6 +9,11 @@
 
 #include "ajabase/common/public.h"
 
+// warning: hack code to fix compiler issues
+#if defined(NTV2_USE_CPLUSPLUS11)
+#undef NTV2_USE_CPLUSPLUS11
+#endif
+
 #if defined(NTV2_USE_CPLUSPLUS11)
 #include <mutex>
 #include <string>
