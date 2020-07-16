@@ -959,10 +959,12 @@ AJA_FrameRate CNTV2DemoCommon::GetAJAFrameRate (const NTV2FrameRate inFrameRate)
 	{
 		case NTV2_FRAMERATE_1498:		return AJA_FrameRate_1498;
 		case NTV2_FRAMERATE_1500:		return AJA_FrameRate_1500;
+#if !defined(NTV2_DEPRECATE_16_0)
 		case NTV2_FRAMERATE_1798:		return AJA_FrameRate_1798;
 		case NTV2_FRAMERATE_1800:		return AJA_FrameRate_1800;
 		case NTV2_FRAMERATE_1898:		return AJA_FrameRate_1898;
 		case NTV2_FRAMERATE_1900:		return AJA_FrameRate_1900;
+#endif	//!defined(NTV2_DEPRECATE_16_0)
 		case NTV2_FRAMERATE_5000:		return AJA_FrameRate_5000;
 		case NTV2_FRAMERATE_2398:		return AJA_FrameRate_2398;
 		case NTV2_FRAMERATE_2400:		return AJA_FrameRate_2400;
