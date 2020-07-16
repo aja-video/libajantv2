@@ -18,7 +18,7 @@
 	#endif
 #endif
 
-#if defined (AJAMac)
+#if defined (AJAMac) | defined (AJAVirtual)
 	//	MacOS still defines the functions below in CarbonCore/FixMath.h
 	#ifdef FixedRound
 		#undef FixedRound

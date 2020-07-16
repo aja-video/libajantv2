@@ -246,6 +246,10 @@
 
         typedef int32_t				AJASocket;
     #else
+		#if defined (AJAVirtual)
+			#include <stdbool.h>
+        	#include <stdint.h>
+		#endif
         typedef long				HANDLE;
         // this is what is is in Windows:
         // typedef void *				HANDLE;
