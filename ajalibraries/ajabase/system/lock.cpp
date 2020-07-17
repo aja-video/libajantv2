@@ -4,27 +4,25 @@
 	@copyright	(C) 2009-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
-// include the system dependent implementation class
-#if defined(AJA_WINDOWS)
-	#include "ajabase/system/windows/lockimpl.h"
-#endif
-
-#if defined(AJA_LINUX)
-	#include "ajabase/system/linux/lockimpl.h"
-#endif
-
-#if defined(AJA_MAC)
-	#include "ajabase/system/mac/lockimpl.h"
-#endif
-
-#if defined(NTV2_USE_CPLUSPLUS11)
-#include <chrono>
+#if defined(AJA_USE_CPLUSPLUS11)
+	#include <chrono>
+#else
+	// include the system dependent implementation class
+	#if defined(AJA_WINDOWS)
+		#include "ajabase/system/windows/lockimpl.h"
+	#endif
+	#if defined(AJA_LINUX)
+		#include "ajabase/system/linux/lockimpl.h"
+	#endif
+	#if defined(AJA_MAC)
+		#include "ajabase/system/mac/lockimpl.h"
+	#endif
 #endif
 
 
 AJALock::AJALock(const char* pName)
 {
-#if defined(NTV2_USE_CPLUSPLUS11)
+#if defined(AJA_USE_CPLUSPLUS11)
 	mpMutex = new recursive_timed_mutex;
 	if (pName != nullptr)
 		name = pName;
@@ -37,7 +35,7 @@ AJALock::AJALock(const char* pName)
 
 AJALock::~AJALock()
 {
-#if defined(NTV2_USE_CPLUSPLUS11)
+#if defined(AJA_USE_CPLUSPLUS11)
 	delete mpMutex;
 	mpMutex = nullptr;
 #else
@@ -51,7 +49,7 @@ AJALock::~AJALock()
 AJAStatus
 AJALock::Lock(uint32_t timeout)
 {
-#if defined(NTV2_USE_CPLUSPLUS11)
+#if defined(AJA_USE_CPLUSPLUS11)
 	if (timeout != LOCK_TIME_INFINITE)
 	{
 		bool success = mpMutex->try_lock_for(std::chrono::milliseconds(timeout));
@@ -71,7 +69,7 @@ AJALock::Lock(uint32_t timeout)
 AJAStatus
 AJALock::Unlock()
 {
-#if defined(NTV2_USE_CPLUSPLUS11)
+#if defined(AJA_USE_CPLUSPLUS11)
 	mpMutex->unlock();
 	return AJA_STATUS_SUCCESS;
 #else
