@@ -289,7 +289,7 @@ AJAExport bool	CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,
 							const UWord					inSrcHorzPixelOffset,
 							const UWord					inSrcHorzPixelsToCopy);
 
-AJAExport NTV2Standard GetNTV2StandardFromScanGeometry (UByte geometry, bool progressiveTransport);
+AJAExport NTV2Standard GetNTV2StandardFromScanGeometry (const UByte inScanGeometry, const bool inIsProgressiveTransport);
 
 /**
 	@return		The ::NTV2VideoFormat that is supported by the device (in frame buffer).
@@ -364,7 +364,8 @@ AJAExport NTV2Standard GetQuarterSizedStandard (const NTV2Standard inGeometry);
 AJAExport NTV2Standard Get4xSizedStandard (const NTV2Standard inGeometry, const bool bIs4k = false);
 
 AJAExport double GetFramesPerSecond (const NTV2FrameRate inFrameRate);
-AJAExport double GetFrameTime (const NTV2FrameRate inFrameRate);
+inline double GetFrameTime (const NTV2FrameRate inFrameRate)	{return double(1.0) / GetFramesPerSecond(inFrameRate);}
+
 /**
 	@return		The first NTV2VideoFormat that matches the given frame rate and raster dimensions (and whether it's interlaced or not).
 	@param[in]	inFrameRate		Specifies the frame rate of interest.
@@ -409,18 +410,15 @@ AJAExport bool GetFramesPerSecond (const NTV2FrameRate inFrameRate, ULWord & out
 AJAExport bool GetFramesPerSecondNDI (const NTV2FrameRate inFrameRate, ULWord & outFractionNumerator, ULWord & outFractionDenominator);
 
 /**
-	@param[in]	inDeviceID		Specifies the ID of the device of interest.
-	@param[in]	inFrameRate		Specifies the frame rate.
-	@param[in]	inFrameGeometry	Specifies the frame geometry.
-	@param[in]	inStandard		Specifies the video standard.
-	@note		This function was moved from the C-only "ntv2devicefeatures" module because its implementation now uses functions in the C++ "ntv2utils" module.
-	@todo		This function needs to be deprecated. Its implementation is inefficient. Avoid calling it every frame.
-	@return		True if the device having the given NTV2DeviceID supports the given NTV2VideoFormat as specified by frame rate, geometry and standard.
+	@param[in]	inDevID		Specifies the ::NTV2DeviceID of the device of interest.
+	@param[in]	inFR		Specifies the ::NTV2FrameRate of interest.
+	@param[in]	inFG		Specifies the ::NTV2FrameGeometry of interest.
+	@param[in]	inStd		Specifies the ::NTV2Standard of interest.
+	@deprecated	This function is deprecated.
+	@note		The implementation of this function is very inefficient. Do not call it every frame.
+	@return		True if the device having the given NTV2DeviceID supports the given frame rate, geometry and standard.
 **/
-AJAExport NTV2_SHOULD_BE_DEPRECATED(bool NTV2DeviceCanDoFormat (NTV2DeviceID		inDeviceID,
-																NTV2FrameRate		inFrameRate,
-																NTV2FrameGeometry	inFrameGeometry, 
-																NTV2Standard		inStandard));
+AJAExport NTV2_SHOULD_BE_DEPRECATED(bool NTV2DeviceCanDoFormat (const NTV2DeviceID inDevID, const NTV2FrameRate inFR, const NTV2FrameGeometry inFG, const NTV2Standard inStd));
 
 /**
 	@brief	Returns the number of audio samples for a given video frame rate, audio sample rate, and frame number.
@@ -437,12 +435,13 @@ AJAExport NTV2_SHOULD_BE_DEPRECATED(bool NTV2DeviceCanDoFormat (NTV2DeviceID		in
 	@return	The number of audio samples.
 	@see	See \ref audiosamplecount
 **/
-AJAExport ULWord				GetAudioSamplesPerFrame (NTV2FrameRate frameRate, NTV2AudioRate audioRate, ULWord cadenceFrame=0,bool smpte372Enabled=false);
+AJAExport ULWord				GetAudioSamplesPerFrame (const NTV2FrameRate frameRate, const NTV2AudioRate audioRate, ULWord inCadenceFrame = 0, bool inIsSMPTE372Enabled = false);
 AJAExport LWord64				GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr (NTV2FrameRate frameRate, NTV2AudioRate audioRate, ULWord frameNbrNonInclusive);
-AJAExport ULWord				GetVaricamRepeatCount (NTV2FrameRate sequenceRate, NTV2FrameRate playRate, ULWord cadenceFrame=0);
-AJAExport ULWord				GetScaleFromFrameRate (NTV2FrameRate playFrameRate);
+
+AJAExport NTV2_SHOULD_BE_DEPRECATED(ULWord GetVaricamRepeatCount (const NTV2FrameRate inSequenceRate, const NTV2FrameRate inPlayRate, const ULWord inCadenceFrame = 0));
+AJAExport ULWord				GetScaleFromFrameRate (const NTV2FrameRate inFrameRate);
 AJAExport NTV2FrameRate			GetFrameRateFromScale (long scale, long duration, NTV2FrameRate playFrameRate);
-AJAExport NTV2FrameRate			GetNTV2FrameRateFromNumeratorDenominator (ULWord numerator, ULWord denominator);
+AJAExport NTV2FrameRate			GetNTV2FrameRateFromNumeratorDenominator (const ULWord inNumerator, const ULWord inDenominator);
 
 /**
 	@return		The NTV2FrameRate of the given NTV2VideoFormat.

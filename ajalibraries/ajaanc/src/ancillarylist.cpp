@@ -891,7 +891,7 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBu
 				retries = 0;	//	Reset our retry counter when we get a good header
 
 				//	Process the full RTP packet U32s...
-				AJAStatus result (outPackets.AddReceivedAncillaryData(U32s));
+				result = outPackets.AddReceivedAncillaryData(U32s);
 				if (AJA_FAILURE(result))
 					break;	//	Done -- failed!
 

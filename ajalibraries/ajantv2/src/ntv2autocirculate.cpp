@@ -1212,45 +1212,51 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 }	//	AutoCirculateTransfer
 
 
-static const AJA_FrameRate	sNTV2Rate2AJARate[] = {	AJA_FrameRate_Unknown,	//	NTV2_FRAMERATE_UNKNOWN	= 0,
-													AJA_FrameRate_6000,		//	NTV2_FRAMERATE_6000		= 1,
-													AJA_FrameRate_5994,		//	NTV2_FRAMERATE_5994		= 2,
-													AJA_FrameRate_3000,		//	NTV2_FRAMERATE_3000		= 3,
-													AJA_FrameRate_2997,		//	NTV2_FRAMERATE_2997		= 4,
-													AJA_FrameRate_2500,		//	NTV2_FRAMERATE_2500		= 5,
-													AJA_FrameRate_2400,		//	NTV2_FRAMERATE_2400		= 6,
-													AJA_FrameRate_2398,		//	NTV2_FRAMERATE_2398		= 7,
-													AJA_FrameRate_5000,		//	NTV2_FRAMERATE_5000		= 8,
-													AJA_FrameRate_4800,		//	NTV2_FRAMERATE_4800		= 9,
-													AJA_FrameRate_4795,		//	NTV2_FRAMERATE_4795		= 10,
-													AJA_FrameRate_12000,	//	NTV2_FRAMERATE_12000	= 11,
-													AJA_FrameRate_11988,	//	NTV2_FRAMERATE_11988	= 12,
-													AJA_FrameRate_1500,		//	NTV2_FRAMERATE_1500		= 13,
-													AJA_FrameRate_1498,		//	NTV2_FRAMERATE_1498		= 14,
-													AJA_FrameRate_1900,		//	NTV2_FRAMERATE_1900		= 15,	// Formerly 09 in older SDKs
-													AJA_FrameRate_1898,		//	NTV2_FRAMERATE_1898		= 16, 	// Formerly 10 in older SDKs
-													AJA_FrameRate_1800,		//	NTV2_FRAMERATE_1800		= 17,	// Formerly 11 in older SDKs
-													AJA_FrameRate_1798};	//	NTV2_FRAMERATE_1798		= 18,	// Formerly 12 in older SDKs
+static const AJA_FrameRate	sNTV2Rate2AJARate[] = {	AJA_FrameRate_Unknown	//	NTV2_FRAMERATE_UNKNOWN	= 0,
+													,AJA_FrameRate_6000		//	NTV2_FRAMERATE_6000		= 1,
+													,AJA_FrameRate_5994		//	NTV2_FRAMERATE_5994		= 2,
+													,AJA_FrameRate_3000		//	NTV2_FRAMERATE_3000		= 3,
+													,AJA_FrameRate_2997		//	NTV2_FRAMERATE_2997		= 4,
+													,AJA_FrameRate_2500		//	NTV2_FRAMERATE_2500		= 5,
+													,AJA_FrameRate_2400		//	NTV2_FRAMERATE_2400		= 6,
+													,AJA_FrameRate_2398		//	NTV2_FRAMERATE_2398		= 7,
+													,AJA_FrameRate_5000		//	NTV2_FRAMERATE_5000		= 8,
+													,AJA_FrameRate_4800		//	NTV2_FRAMERATE_4800		= 9,
+													,AJA_FrameRate_4795		//	NTV2_FRAMERATE_4795		= 10,
+													,AJA_FrameRate_12000	//	NTV2_FRAMERATE_12000	= 11,
+													,AJA_FrameRate_11988	//	NTV2_FRAMERATE_11988	= 12,
+													,AJA_FrameRate_1500		//	NTV2_FRAMERATE_1500		= 13,
+													,AJA_FrameRate_1498		//	NTV2_FRAMERATE_1498		= 14,
+#if !defined(NTV2_DEPRECATE_16_0)
+													,AJA_FrameRate_1900		//	NTV2_FRAMERATE_1900		= 15,	// Formerly 09 in older SDKs
+													,AJA_FrameRate_1898		//	NTV2_FRAMERATE_1898		= 16, 	// Formerly 10 in older SDKs
+													,AJA_FrameRate_1800		//	NTV2_FRAMERATE_1800		= 17,	// Formerly 11 in older SDKs
+													,AJA_FrameRate_1798		//	NTV2_FRAMERATE_1798		= 18,	// Formerly 12 in older SDKs
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
+													};
 
-static const TimecodeFormat	sNTV2Rate2TCFormat[] = {kTCFormatUnknown,	//	NTV2_FRAMERATE_UNKNOWN	= 0,
-													kTCFormat60fps,		//	NTV2_FRAMERATE_6000		= 1,
-													kTCFormat30fps,		//	NTV2_FRAMERATE_5994		= 2,
-													kTCFormat30fps,		//	NTV2_FRAMERATE_3000		= 3,
-													kTCFormat30fps,		//	NTV2_FRAMERATE_2997		= 4,
-													kTCFormat25fps,		//	NTV2_FRAMERATE_2500		= 5,
-													kTCFormat24fps,		//	NTV2_FRAMERATE_2400		= 6,
-													kTCFormat24fps,		//	NTV2_FRAMERATE_2398		= 7,
-													kTCFormat50fps,		//	NTV2_FRAMERATE_5000		= 8,
-													kTCFormat48fps,		//	NTV2_FRAMERATE_4800		= 9,
-													kTCFormat48fps,		//	NTV2_FRAMERATE_4795		= 10,
-													kTCFormat60fps,		//	NTV2_FRAMERATE_12000	= 11,
-													kTCFormat60fps,		//	NTV2_FRAMERATE_11988	= 12,
-													kTCFormat30fps,		//	NTV2_FRAMERATE_1500		= 13,
-													kTCFormat30fps,		//	NTV2_FRAMERATE_1498		= 14,
-													kTCFormatUnknown,	//	NTV2_FRAMERATE_1900		= 15,
-													kTCFormatUnknown,	//	NTV2_FRAMERATE_1898		= 16,
-													kTCFormatUnknown,	//	NTV2_FRAMERATE_1800		= 17,
-													kTCFormatUnknown};	//	NTV2_FRAMERATE_1798		= 18,
+static const TimecodeFormat	sNTV2Rate2TCFormat[] = {kTCFormatUnknown	//	NTV2_FRAMERATE_UNKNOWN	= 0,
+													,kTCFormat60fps		//	NTV2_FRAMERATE_6000		= 1,
+													,kTCFormat30fps		//	NTV2_FRAMERATE_5994		= 2,
+													,kTCFormat30fps		//	NTV2_FRAMERATE_3000		= 3,
+													,kTCFormat30fps		//	NTV2_FRAMERATE_2997		= 4,
+													,kTCFormat25fps		//	NTV2_FRAMERATE_2500		= 5,
+													,kTCFormat24fps		//	NTV2_FRAMERATE_2400		= 6,
+													,kTCFormat24fps		//	NTV2_FRAMERATE_2398		= 7,
+													,kTCFormat50fps		//	NTV2_FRAMERATE_5000		= 8,
+													,kTCFormat48fps		//	NTV2_FRAMERATE_4800		= 9,
+													,kTCFormat48fps		//	NTV2_FRAMERATE_4795		= 10,
+													,kTCFormat60fps		//	NTV2_FRAMERATE_12000	= 11,
+													,kTCFormat60fps		//	NTV2_FRAMERATE_11988	= 12,
+													,kTCFormat30fps		//	NTV2_FRAMERATE_1500		= 13,
+													,kTCFormat30fps		//	NTV2_FRAMERATE_1498		= 14,
+#if !defined(NTV2_DEPRECATE_16_0)
+													,kTCFormatUnknown	//	NTV2_FRAMERATE_1900		= 15,
+													,kTCFormatUnknown	//	NTV2_FRAMERATE_1898		= 16,
+													,kTCFormatUnknown	//	NTV2_FRAMERATE_1800		= 17,
+													,kTCFormatUnknown	//	NTV2_FRAMERATE_1798		= 18,
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
+													};
 
 //	VPID Packet Insertion						1080	720		525		625		1080p	2K		2K1080p		2K1080i		UHD		4K		UHDHFR		4KHFR
 static const uint16_t	sVPIDLineNumsF1[] = {	10,		10,		13,		9,		10,		10,		10,			10,			10,		10,		10,			10	};
