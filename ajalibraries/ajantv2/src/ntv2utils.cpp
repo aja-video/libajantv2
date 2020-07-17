@@ -1811,27 +1811,6 @@ bool GetFramesPerSecond (const NTV2FrameRate inFrameRate, ULWord & outFractionNu
 	return true;
 }
 
-// NDI prefers Numerator/Denominator this way, appears most apps send this
-bool GetFramesPerSecondNDI (const NTV2FrameRate inFrameRate, ULWord & outFractionNumerator, ULWord & outFractionDenominator)
-{
-	switch (inFrameRate)
-	{	//	These fractional rates are different in NDI:
-		case NTV2_FRAMERATE_11988:	outFractionNumerator = 11988;	outFractionDenominator = 100;	break;
-		case NTV2_FRAMERATE_5994:	outFractionNumerator = 5994;	outFractionDenominator = 100;	break;
-		case NTV2_FRAMERATE_4795:	outFractionNumerator = 4795;	outFractionDenominator = 100;	break;
-		case NTV2_FRAMERATE_2997:	outFractionNumerator = 2997;	outFractionDenominator = 100;	break;
-		case NTV2_FRAMERATE_2398:	outFractionNumerator = 2398;	outFractionDenominator = 100;	break;
-		case NTV2_FRAMERATE_1498:	outFractionNumerator = 1498;	outFractionDenominator = 100;	break;
-#if !defined(NTV2_DEPRECATE_16_0)
-		case NTV2_FRAMERATE_1898:	outFractionNumerator = 1898;	outFractionDenominator = 100;	break;
-		case NTV2_FRAMERATE_1798:	outFractionNumerator = 1798;	outFractionDenominator = 100;	break;
-#endif	//	!defined(NTV2_DEPRECATE_16_0)
-		//	All others same as NTV2:
-		default:	return GetFramesPerSecond(inFrameRate, outFractionNumerator, outFractionDenominator);
-	}
-	return true;
-}
-
 
 NTV2Standard GetNTV2StandardFromScanGeometry (const UByte inScanGeometry, const bool inIsProgressiveTransport)
 {
