@@ -1681,136 +1681,99 @@ bool CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,			//	Pixel format of
 		return false;
 	switch (inPixelFormat)
 	{
-	case NTV2_FBF_10BIT_YCBCR:
-	case NTV2_FBF_10BIT_YCBCR_DPX:			return CopyRaster16BytesPer6Pixels (pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
+		case NTV2_FBF_10BIT_YCBCR:
+		case NTV2_FBF_10BIT_YCBCR_DPX:			return CopyRaster16BytesPer6Pixels (pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
+																					pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
+																					inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
+	
+		case NTV2_FBF_8BIT_YCBCR:
+		case NTV2_FBF_8BIT_YCBCR_YUY2:			return CopyRaster4BytesPer2Pixels (pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
+																					pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
+																					inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
+	
+		case NTV2_FBF_ARGB:
+		case NTV2_FBF_RGBA:
+		case NTV2_FBF_ABGR:
+		case NTV2_FBF_10BIT_DPX:
+		case NTV2_FBF_10BIT_DPX_LE:
+		case NTV2_FBF_10BIT_RGB:				return CopyRaster4BytesPerPixel (pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
 																				pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
 																				inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
-
-	case NTV2_FBF_8BIT_YCBCR:
-	case NTV2_FBF_8BIT_YCBCR_YUY2:			return CopyRaster4BytesPer2Pixels (pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
+	
+		case NTV2_FBF_24BIT_RGB:
+		case NTV2_FBF_24BIT_BGR:				return CopyRaster3BytesPerPixel	(pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
 																				pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
 																				inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
-
-	case NTV2_FBF_ARGB:
-	case NTV2_FBF_RGBA:
-	case NTV2_FBF_ABGR:
-	case NTV2_FBF_10BIT_DPX:
-	case NTV2_FBF_10BIT_DPX_LE:
-	case NTV2_FBF_10BIT_RGB:				return CopyRaster4BytesPerPixel (pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
-																			pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
-																			inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
-
-	case NTV2_FBF_24BIT_RGB:
-	case NTV2_FBF_24BIT_BGR:				return CopyRaster3BytesPerPixel	(pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
-																			pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
-																			inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
-
-	case NTV2_FBF_48BIT_RGB:				return CopyRaster6BytesPerPixel	(pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
-																			pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
-																			inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
-
-	case NTV2_FBF_12BIT_RGB_PACKED:			return CopyRaster36BytesPer8Pixels (pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
+	
+		case NTV2_FBF_48BIT_RGB:				return CopyRaster6BytesPerPixel	(pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
 																				pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
 																				inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
-	case NTV2_FBF_10BIT_RAW_YCBCR:			return CopyRaster20BytesPer16Pixels (pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
-																				pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
-																				inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
-
-	case NTV2_FBF_8BIT_DVCPRO:	//	Lossy
-	case NTV2_FBF_8BIT_HDV:		//	Lossy
-	case NTV2_FBF_8BIT_YCBCR_420PL3:
-	case NTV2_FBF_10BIT_YCBCRA:
-	case NTV2_FBF_PRORES_DVCPRO:
-	case NTV2_FBF_PRORES_HDV:
-	case NTV2_FBF_10BIT_RGB_PACKED:
-	case NTV2_FBF_10BIT_ARGB:
-	case NTV2_FBF_16BIT_ARGB:
-	case NTV2_FBF_10BIT_RAW_RGB:
-	case NTV2_FBF_8BIT_YCBCR_422PL3:
-	case NTV2_FBF_10BIT_YCBCR_420PL3_LE:
-	case NTV2_FBF_10BIT_YCBCR_422PL3_LE:
-	case NTV2_FBF_10BIT_YCBCR_420PL2:
-	case NTV2_FBF_10BIT_YCBCR_422PL2:
-	case NTV2_FBF_8BIT_YCBCR_420PL2:
-	case NTV2_FBF_8BIT_YCBCR_422PL2:
-	case NTV2_FBF_NUMFRAMEBUFFERFORMATS:
-		return false;	//	Unsupported
+	
+		case NTV2_FBF_12BIT_RGB_PACKED:			return CopyRaster36BytesPer8Pixels (pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
+																					pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
+																					inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
+		case NTV2_FBF_10BIT_RAW_YCBCR:			return CopyRaster20BytesPer16Pixels (pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
+																					pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
+																					inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
+	
+		case NTV2_FBF_8BIT_DVCPRO:	//	Lossy
+		case NTV2_FBF_8BIT_HDV:		//	Lossy
+		case NTV2_FBF_8BIT_YCBCR_420PL3:
+		case NTV2_FBF_10BIT_YCBCRA:
+		case NTV2_FBF_PRORES_DVCPRO:
+		case NTV2_FBF_PRORES_HDV:
+		case NTV2_FBF_10BIT_RGB_PACKED:
+		case NTV2_FBF_10BIT_ARGB:
+		case NTV2_FBF_16BIT_ARGB:
+		case NTV2_FBF_10BIT_RAW_RGB:
+		case NTV2_FBF_8BIT_YCBCR_422PL3:
+		case NTV2_FBF_10BIT_YCBCR_420PL3_LE:
+		case NTV2_FBF_10BIT_YCBCR_422PL3_LE:
+		case NTV2_FBF_10BIT_YCBCR_420PL2:
+		case NTV2_FBF_10BIT_YCBCR_422PL2:
+		case NTV2_FBF_8BIT_YCBCR_420PL2:
+		case NTV2_FBF_8BIT_YCBCR_422PL2:
+		case NTV2_FBF_NUMFRAMEBUFFERFORMATS:
+			return false;	//	Unsupported
 	}
 	return false;
 
 }	//	CopyRaster
 
 
-// GetFramesPerSecond(NTV2FrameRate frameRate)
-// seconds per frame.
-double GetFramesPerSecond(NTV2FrameRate frameRate)
+// frames per second
+double GetFramesPerSecond (const NTV2FrameRate inFrameRate)
 {
-	double framesPerSecond(30.0 / 1.001);
-    switch (frameRate)
+    switch (inFrameRate)
     {
-	case NTV2_FRAMERATE_12000:		framesPerSecond = 120.0;			break;
-	case NTV2_FRAMERATE_11988:		framesPerSecond = 120.0 / 1.001;	break;
-	case NTV2_FRAMERATE_6000:		framesPerSecond = 60.0;				break;
-	case NTV2_FRAMERATE_5994:		framesPerSecond = 60.0 / 1.001;		break;
-	case NTV2_FRAMERATE_5000:		framesPerSecond = 50.0;				break;
-	case NTV2_FRAMERATE_4800:		framesPerSecond = 48.0;				break;
-	case NTV2_FRAMERATE_4795:		framesPerSecond = 48.0 / 1.001;		break;
-	case NTV2_FRAMERATE_3000:		framesPerSecond = 30.0;				break;
-	case NTV2_FRAMERATE_2997:		framesPerSecond = 30.0 / 1.001;		break;
-	case NTV2_FRAMERATE_2500:		framesPerSecond = 25.0;				break;
-	case NTV2_FRAMERATE_2400:		framesPerSecond = 24.0;				break;
-	case NTV2_FRAMERATE_2398:		framesPerSecond = 24.0 / 1.001;		break;
-	case NTV2_FRAMERATE_1900:		framesPerSecond = 19.0;				break;
-	case NTV2_FRAMERATE_1898:		framesPerSecond = 19.0 / 1.001;		break;
-	case NTV2_FRAMERATE_1800:		framesPerSecond = 18.0;				break;
-	case NTV2_FRAMERATE_1798:		framesPerSecond = 18.0 / 1.001;		break;
-	case NTV2_FRAMERATE_1500:		framesPerSecond = 15.0;				break;
-	case NTV2_FRAMERATE_1498:		framesPerSecond = 15.0 / 1.001;		break;
-
-	#if defined(_DEBUG)
-		case NTV2_NUM_FRAMERATES:
-		case NTV2_FRAMERATE_UNKNOWN:break;
-	#else
-		default:					break;
-	#endif
-	}
-	return framesPerSecond;
-}
-
-// GetFrameTime(NTV2FrameRate frameRate)
-// seconds per frame.
-double GetFrameTime(NTV2FrameRate frameRate)
-{
-	double frameTime(1.001 / 30.0);
-    switch (frameRate)
-    {
-	case NTV2_FRAMERATE_12000:		frameTime = 1.0   / 120.0;		break;
-	case NTV2_FRAMERATE_11988:		frameTime = 1.001 / 120.0;		break;
-	case NTV2_FRAMERATE_6000:		frameTime = 1.0   / 60.0;		break;
-	case NTV2_FRAMERATE_5994:		frameTime = 1.001 / 60.0;		break;
-	case NTV2_FRAMERATE_5000:		frameTime = 1.0   / 50.0;		break;
-	case NTV2_FRAMERATE_4800:		frameTime = 1.0   / 48.0;		break;
-	case NTV2_FRAMERATE_4795:		frameTime = 1.001 / 48.0;		break;
-	case NTV2_FRAMERATE_3000:		frameTime = 1.0   / 30.0;		break;
-	case NTV2_FRAMERATE_2997:		frameTime = 1.001 / 30.0;		break;
-	case NTV2_FRAMERATE_2500:		frameTime = 1.0   / 25.0;		break;
-	case NTV2_FRAMERATE_2400:		frameTime = 1.0   / 24.0;		break;
-	case NTV2_FRAMERATE_2398:		frameTime = 1.001 / 24.0;		break;
-	case NTV2_FRAMERATE_1900:		frameTime = 1.0   / 19.0;		break;
-	case NTV2_FRAMERATE_1898:		frameTime = 1.001 / 19.0;		break;
-	case NTV2_FRAMERATE_1800:		frameTime = 1.0   / 18.0;		break;
-	case NTV2_FRAMERATE_1798:		frameTime = 1.001 / 18.0;		break;
-	case NTV2_FRAMERATE_1500:		frameTime = 1.0   / 15.0;		break;
-	case NTV2_FRAMERATE_1498:		frameTime = 1.001 / 15.0;		break;
-
+		case NTV2_FRAMERATE_12000:	return 120.0;
+		case NTV2_FRAMERATE_11988:	return 120.0 / 1.001;
+		case NTV2_FRAMERATE_6000:	return 60.0;
+		case NTV2_FRAMERATE_5994:	return 60.0 / 1.001;
+		case NTV2_FRAMERATE_5000:	return 50.0;
+		case NTV2_FRAMERATE_4800:	return 48.0;
+		case NTV2_FRAMERATE_4795:	return 48.0 / 1.001;
+		case NTV2_FRAMERATE_3000:	return 30.0;
+		case NTV2_FRAMERATE_2997:	return 30.0 / 1.001;
+		case NTV2_FRAMERATE_2500:	return 25.0;
+		case NTV2_FRAMERATE_2400:	return 24.0;
+		case NTV2_FRAMERATE_2398:	return 24.0 / 1.001;
+		case NTV2_FRAMERATE_1500:	return 15.0;
+		case NTV2_FRAMERATE_1498:	return 15.0 / 1.001;
+#if !defined(NTV2_DEPRECATE_16_0)
+		case NTV2_FRAMERATE_1900:	return 19.0;
+		case NTV2_FRAMERATE_1898:	return 19.0 / 1.001;
+		case NTV2_FRAMERATE_1800:	return 18.0;
+		case NTV2_FRAMERATE_1798:	return 18.0 / 1.001;
+#endif	//!defined(NTV2_DEPRECATE_16_0)
 #if defined(_DEBUG)
-	case NTV2_NUM_FRAMERATES:
-	case NTV2_FRAMERATE_UNKNOWN:	break;
+		case NTV2_NUM_FRAMERATES:
+		case NTV2_FRAMERATE_UNKNOWN:	break;
 #else
-	default:						break;
+		default:						break;
 #endif
 	}
-	return frameTime;
+	return 30.0 / 1.001;
 }
 
 
@@ -1818,96 +1781,52 @@ bool GetFramesPerSecond (const NTV2FrameRate inFrameRate, ULWord & outFractionNu
 {
 	switch (inFrameRate)
     {
-	case NTV2_FRAMERATE_12000:		outFractionNumerator = 120;     outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_11988:		outFractionNumerator = 120000;	outFractionDenominator = 1001;	break;
-	case NTV2_FRAMERATE_6000:		outFractionNumerator = 60;      outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_5994:		outFractionNumerator = 60000;	outFractionDenominator = 1001;	break;
-	case NTV2_FRAMERATE_5000:		outFractionNumerator = 50;      outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_4800:		outFractionNumerator = 48;      outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_4795:		outFractionNumerator = 48000;	outFractionDenominator = 1001;	break;
-	case NTV2_FRAMERATE_3000:		outFractionNumerator = 30;      outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_2997:		outFractionNumerator = 30000;	outFractionDenominator = 1001;	break;
-	case NTV2_FRAMERATE_2500:		outFractionNumerator = 25;      outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_2400:		outFractionNumerator = 24;      outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_2398:		outFractionNumerator = 24000;	outFractionDenominator = 1001;	break;
-	case NTV2_FRAMERATE_1900:		outFractionNumerator = 19;      outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_1898:		outFractionNumerator = 19000;	outFractionDenominator = 1001;	break;
-	case NTV2_FRAMERATE_1800:		outFractionNumerator = 18;      outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_1798:		outFractionNumerator = 18000;	outFractionDenominator = 1001;	break;
-	case NTV2_FRAMERATE_1500:		outFractionNumerator = 15;      outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_1498:		outFractionNumerator = 15000;	outFractionDenominator = 1001;	break;
+		case NTV2_FRAMERATE_12000:		outFractionNumerator = 120;     outFractionDenominator = 1;		break;
+		case NTV2_FRAMERATE_11988:		outFractionNumerator = 120000;	outFractionDenominator = 1001;	break;
+		case NTV2_FRAMERATE_6000:		outFractionNumerator = 60;      outFractionDenominator = 1;		break;
+		case NTV2_FRAMERATE_5994:		outFractionNumerator = 60000;	outFractionDenominator = 1001;	break;
+		case NTV2_FRAMERATE_5000:		outFractionNumerator = 50;      outFractionDenominator = 1;		break;
+		case NTV2_FRAMERATE_4800:		outFractionNumerator = 48;      outFractionDenominator = 1;		break;
+		case NTV2_FRAMERATE_4795:		outFractionNumerator = 48000;	outFractionDenominator = 1001;	break;
+		case NTV2_FRAMERATE_3000:		outFractionNumerator = 30;      outFractionDenominator = 1;		break;
+		case NTV2_FRAMERATE_2997:		outFractionNumerator = 30000;	outFractionDenominator = 1001;	break;
+		case NTV2_FRAMERATE_2500:		outFractionNumerator = 25;      outFractionDenominator = 1;		break;
+		case NTV2_FRAMERATE_2400:		outFractionNumerator = 24;      outFractionDenominator = 1;		break;
+		case NTV2_FRAMERATE_2398:		outFractionNumerator = 24000;	outFractionDenominator = 1001;	break;
+		case NTV2_FRAMERATE_1500:		outFractionNumerator = 15;      outFractionDenominator = 1;		break;
+		case NTV2_FRAMERATE_1498:		outFractionNumerator = 15000;	outFractionDenominator = 1001;	break;
+#if !defined(NTV2_DEPRECATE_16_0)
+		case NTV2_FRAMERATE_1900:		outFractionNumerator = 19;      outFractionDenominator = 1;		break;
+		case NTV2_FRAMERATE_1898:		outFractionNumerator = 19000;	outFractionDenominator = 1001;	break;
+		case NTV2_FRAMERATE_1800:		outFractionNumerator = 18;      outFractionDenominator = 1;		break;
+		case NTV2_FRAMERATE_1798:		outFractionNumerator = 18000;	outFractionDenominator = 1001;	break;
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
 #if defined(_DEBUG)
-	case NTV2_NUM_FRAMERATES:
-	case NTV2_FRAMERATE_UNKNOWN:	outFractionNumerator = 0;		outFractionDenominator = 0;		return false;
+		case NTV2_NUM_FRAMERATES:
+		case NTV2_FRAMERATE_UNKNOWN:	outFractionNumerator = 0;		outFractionDenominator = 0;		return false;
 #else
-	default:						outFractionNumerator = 0;		outFractionDenominator = 0;		return false;
-#endif
-	}
-	return true;
-}
-
-// NDI prefers Numerator/Denominator this way, appears most apps send this
-bool GetFramesPerSecondNDI (const NTV2FrameRate inFrameRate, ULWord & outFractionNumerator, ULWord & outFractionDenominator)
-{
-	switch (inFrameRate)
-	{
-	case NTV2_FRAMERATE_12000:		outFractionNumerator = 120;		outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_11988:		outFractionNumerator = 11988;	outFractionDenominator = 100;	break;
-	case NTV2_FRAMERATE_6000:		outFractionNumerator = 60;		outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_5994:		outFractionNumerator = 5994;	outFractionDenominator = 100;	break;
-	case NTV2_FRAMERATE_5000:		outFractionNumerator = 50;		outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_4800:		outFractionNumerator = 48;		outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_4795:		outFractionNumerator = 4795;	outFractionDenominator = 100;	break;
-	case NTV2_FRAMERATE_3000:		outFractionNumerator = 30;		outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_2997:		outFractionNumerator = 2997;	outFractionDenominator = 100;	break;
-	case NTV2_FRAMERATE_2500:		outFractionNumerator = 25;		outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_2400:		outFractionNumerator = 24;		outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_2398:		outFractionNumerator = 2398;	outFractionDenominator = 100;	break;
-	case NTV2_FRAMERATE_1900:		outFractionNumerator = 19;		outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_1898:		outFractionNumerator = 1898;	outFractionDenominator = 100;	break;
-	case NTV2_FRAMERATE_1800:		outFractionNumerator = 18;		outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_1798:		outFractionNumerator = 1798;	outFractionDenominator = 100;	break;
-	case NTV2_FRAMERATE_1500:		outFractionNumerator = 15;		outFractionDenominator = 1;		break;
-	case NTV2_FRAMERATE_1498:		outFractionNumerator = 1498;	outFractionDenominator = 100;	break;
-#if defined(_DEBUG)
-	case NTV2_NUM_FRAMERATES:
-	case NTV2_FRAMERATE_UNKNOWN:	outFractionNumerator = 0;		outFractionDenominator = 0;		return false;
-#else
-	default:						outFractionNumerator = 0;		outFractionDenominator = 0;		return false;
+		default:						outFractionNumerator = 0;		outFractionDenominator = 0;		return false;
 #endif
 	}
 	return true;
 }
 
 
-NTV2Standard GetNTV2StandardFromScanGeometry(UByte geometry, bool progressiveTransport)
+NTV2Standard GetNTV2StandardFromScanGeometry (const UByte inScanGeometry, const bool inIsProgressiveTransport)
 {
-	NTV2Standard standard(NTV2_STANDARD_INVALID);
-
-	switch ( geometry )
+	switch (inScanGeometry)
 	{
-	case 1:
-		standard = NTV2_STANDARD_525;
-		break;
-	case 2:
-		standard = NTV2_STANDARD_625;
-		break;
-	case 3:
-		standard = NTV2_STANDARD_720;
-		break;
-	case 4:
-	case 8:
-		if ( progressiveTransport )
-			standard = NTV2_STANDARD_1080p;
-		else
-			standard = NTV2_STANDARD_1080;
-		break;
-	case 9:
-		standard = NTV2_STANDARD_2K;
-		break;
-	}
+		case NTV2_SG_525:		return NTV2_STANDARD_525;
+		case NTV2_SG_625:		return NTV2_STANDARD_625;
+		case NTV2_SG_750:		return NTV2_STANDARD_720;
+		case NTV2_SG_2Kx1556:	return NTV2_STANDARD_2K;
 
-	return standard;
+		case NTV2_SG_1125:
+		case NTV2_SG_2Kx1080:	return inIsProgressiveTransport ? NTV2_STANDARD_1080p : NTV2_STANDARD_1080;
+
+		default:	break;
+	}
+	return NTV2_STANDARD_INVALID;
 }
 
 
@@ -1930,190 +1849,189 @@ NTV2VideoFormat GetFirstMatchingVideoFormat (const NTV2FrameRate inFrameRate,
 }
 
 
-NTV2VideoFormat GetQuarterSizedVideoFormat(NTV2VideoFormat videoFormat)
+NTV2VideoFormat GetQuarterSizedVideoFormat (const NTV2VideoFormat inVideoFormat)
 {
-	NTV2VideoFormat quarterSizedFormat;
+	NTV2VideoFormat quarterSizedFormat(inVideoFormat);
 
-	switch (videoFormat)
+	switch (inVideoFormat)
 	{
-	case NTV2_FORMAT_3840x2160psf_2398:
-	case NTV2_FORMAT_4x1920x1080psf_2398:	quarterSizedFormat = NTV2_FORMAT_1080psf_2398;   break;
-	case NTV2_FORMAT_3840x2160psf_2400:
-	case NTV2_FORMAT_4x1920x1080psf_2400:	quarterSizedFormat = NTV2_FORMAT_1080psf_2400;   break;
-	case NTV2_FORMAT_3840x2160psf_2500:
-	case NTV2_FORMAT_4x1920x1080psf_2500:	quarterSizedFormat = NTV2_FORMAT_1080psf_2500_2; break;
-	case NTV2_FORMAT_3840x2160psf_2997:
-	case NTV2_FORMAT_4x1920x1080psf_2997:	quarterSizedFormat = NTV2_FORMAT_1080i_5994;   break;	//	NTV2_FORMAT_1080psf_2997
-	case NTV2_FORMAT_3840x2160psf_3000:
-	case NTV2_FORMAT_4x1920x1080psf_3000:	quarterSizedFormat = NTV2_FORMAT_1080i_6000;   break;	//	NTV2_FORMAT_1080psf_3000
-		
-	case NTV2_FORMAT_4096x2160psf_2398:
-	case NTV2_FORMAT_4x2048x1080psf_2398:	quarterSizedFormat = NTV2_FORMAT_1080psf_2K_2398; break;
-	case NTV2_FORMAT_4096x2160psf_2400:
-	case NTV2_FORMAT_4x2048x1080psf_2400:	quarterSizedFormat = NTV2_FORMAT_1080psf_2K_2400; break;
-	case NTV2_FORMAT_4096x2160psf_2500:
-	case NTV2_FORMAT_4x2048x1080psf_2500:	quarterSizedFormat = NTV2_FORMAT_1080psf_2K_2500; break;
-	//case NTV2_FORMAT_4x2048x1080psf_2997:	quarterSizedFormat = NTV2_FORMAT_1080psf_2K_2997; break;
-	//case NTV2_FORMAT_4x2048x1080psf_3000:	quarterSizedFormat = NTV2_FORMAT_1080psf_2K_3000; break;
-		
-	case NTV2_FORMAT_3840x2160p_2398:
-	case NTV2_FORMAT_4x1920x1080p_2398:		quarterSizedFormat = NTV2_FORMAT_1080p_2398; break;
-	case NTV2_FORMAT_3840x2160p_2400:
-	case NTV2_FORMAT_4x1920x1080p_2400:		quarterSizedFormat = NTV2_FORMAT_1080p_2400; break;
-	case NTV2_FORMAT_3840x2160p_2500:
-	case NTV2_FORMAT_4x1920x1080p_2500:		quarterSizedFormat = NTV2_FORMAT_1080p_2500; break;
-	case NTV2_FORMAT_3840x2160p_2997:
-	case NTV2_FORMAT_4x1920x1080p_2997:		quarterSizedFormat = NTV2_FORMAT_1080p_2997; break;
-	case NTV2_FORMAT_3840x2160p_3000:
-	case NTV2_FORMAT_4x1920x1080p_3000:		quarterSizedFormat = NTV2_FORMAT_1080p_3000; break;
-	case NTV2_FORMAT_3840x2160p_5000:
-	case NTV2_FORMAT_4x1920x1080p_5000:		quarterSizedFormat = NTV2_FORMAT_1080p_5000_A; break;
-	case NTV2_FORMAT_3840x2160p_5994:
-	case NTV2_FORMAT_4x1920x1080p_5994:		quarterSizedFormat = NTV2_FORMAT_1080p_5994_A; break;
-	case NTV2_FORMAT_3840x2160p_6000:
-	case NTV2_FORMAT_4x1920x1080p_6000:		quarterSizedFormat = NTV2_FORMAT_1080p_6000_A; break;
-	case NTV2_FORMAT_3840x2160p_5000_B:
-	case NTV2_FORMAT_4x1920x1080p_5000_B:	quarterSizedFormat = NTV2_FORMAT_1080p_5000_B; break;
-	case NTV2_FORMAT_3840x2160p_5994_B:
-	case NTV2_FORMAT_4x1920x1080p_5994_B:	quarterSizedFormat = NTV2_FORMAT_1080p_5994_B; break;
-	case NTV2_FORMAT_3840x2160p_6000_B:
-	case NTV2_FORMAT_4x1920x1080p_6000_B:	quarterSizedFormat = NTV2_FORMAT_1080p_6000_B; break;
+		case NTV2_FORMAT_3840x2160psf_2398:
+		case NTV2_FORMAT_4x1920x1080psf_2398:	quarterSizedFormat = NTV2_FORMAT_1080psf_2398;   break;
+		case NTV2_FORMAT_3840x2160psf_2400:
+		case NTV2_FORMAT_4x1920x1080psf_2400:	quarterSizedFormat = NTV2_FORMAT_1080psf_2400;   break;
+		case NTV2_FORMAT_3840x2160psf_2500:
+		case NTV2_FORMAT_4x1920x1080psf_2500:	quarterSizedFormat = NTV2_FORMAT_1080psf_2500_2; break;
+		case NTV2_FORMAT_3840x2160psf_2997:
+		case NTV2_FORMAT_4x1920x1080psf_2997:	quarterSizedFormat = NTV2_FORMAT_1080i_5994;   break;	//	NTV2_FORMAT_1080psf_2997
+		case NTV2_FORMAT_3840x2160psf_3000:
+		case NTV2_FORMAT_4x1920x1080psf_3000:	quarterSizedFormat = NTV2_FORMAT_1080i_6000;   break;	//	NTV2_FORMAT_1080psf_3000
 
-	case NTV2_FORMAT_4096x2160p_2398:
-	case NTV2_FORMAT_4x2048x1080p_2398:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_2398; break;
-	case NTV2_FORMAT_4096x2160p_2400:
-	case NTV2_FORMAT_4x2048x1080p_2400:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_2400; break;
-	case NTV2_FORMAT_4096x2160p_2500:
-	case NTV2_FORMAT_4x2048x1080p_2500:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_2500; break;
-	case NTV2_FORMAT_4096x2160p_2997:
-	case NTV2_FORMAT_4x2048x1080p_2997:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_2997; break;
-	case NTV2_FORMAT_4096x2160p_3000:
-	case NTV2_FORMAT_4x2048x1080p_3000:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_3000; break;
-	case NTV2_FORMAT_4096x2160p_4795:
-	case NTV2_FORMAT_4x2048x1080p_4795:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_4795_A; break;
-	case NTV2_FORMAT_4096x2160p_4800:
-	case NTV2_FORMAT_4x2048x1080p_4800:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_4800_A; break;
-	case NTV2_FORMAT_4096x2160p_5000:
-	case NTV2_FORMAT_4x2048x1080p_5000:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_5000_A; break;
-	case NTV2_FORMAT_4096x2160p_5994:
-	case NTV2_FORMAT_4x2048x1080p_5994:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_5994_A; break;
-	case NTV2_FORMAT_4096x2160p_6000:
-	case NTV2_FORMAT_4x2048x1080p_6000:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_6000_A; break;
-	case NTV2_FORMAT_4096x2160p_4795_B:
-	case NTV2_FORMAT_4x2048x1080p_4795_B:	quarterSizedFormat = NTV2_FORMAT_1080p_2K_4795_B; break;
-	case NTV2_FORMAT_4096x2160p_4800_B:
-	case NTV2_FORMAT_4x2048x1080p_4800_B:	quarterSizedFormat = NTV2_FORMAT_1080p_2K_4800_B; break;
-	case NTV2_FORMAT_4096x2160p_5000_B:
-	case NTV2_FORMAT_4x2048x1080p_5000_B:	quarterSizedFormat = NTV2_FORMAT_1080p_2K_5000_B; break;
-	case NTV2_FORMAT_4096x2160p_5994_B:
-	case NTV2_FORMAT_4x2048x1080p_5994_B:	quarterSizedFormat = NTV2_FORMAT_1080p_2K_5994_B; break;
-	case NTV2_FORMAT_4096x2160p_6000_B:
-	case NTV2_FORMAT_4x2048x1080p_6000_B:	quarterSizedFormat = NTV2_FORMAT_1080p_2K_6000_B; break;
-	// No quarter sized formats for 119.88 or 120 Hz
-	
-	case NTV2_FORMAT_4x3840x2160p_2398:		quarterSizedFormat = NTV2_FORMAT_3840x2160p_2398; break;
-	case NTV2_FORMAT_4x3840x2160p_2400:		quarterSizedFormat = NTV2_FORMAT_3840x2160p_2400; break;
-	case NTV2_FORMAT_4x3840x2160p_2500:		quarterSizedFormat = NTV2_FORMAT_3840x2160p_2500; break;
-	case NTV2_FORMAT_4x3840x2160p_2997:		quarterSizedFormat = NTV2_FORMAT_3840x2160p_2997; break;
-	case NTV2_FORMAT_4x3840x2160p_3000:		quarterSizedFormat = NTV2_FORMAT_3840x2160p_3000; break;
-	case NTV2_FORMAT_4x3840x2160p_5000:		quarterSizedFormat = NTV2_FORMAT_3840x2160p_5000; break;
-	case NTV2_FORMAT_4x3840x2160p_5994:		quarterSizedFormat = NTV2_FORMAT_3840x2160p_5994; break;
-	case NTV2_FORMAT_4x3840x2160p_6000:		quarterSizedFormat = NTV2_FORMAT_3840x2160p_6000; break;
-	case NTV2_FORMAT_4x3840x2160p_5000_B:	quarterSizedFormat = NTV2_FORMAT_3840x2160p_5000_B; break;
-	case NTV2_FORMAT_4x3840x2160p_5994_B:	quarterSizedFormat = NTV2_FORMAT_3840x2160p_5994_B; break;
-	case NTV2_FORMAT_4x3840x2160p_6000_B:	quarterSizedFormat = NTV2_FORMAT_3840x2160p_6000_B; break;
-	
-	case NTV2_FORMAT_4x4096x2160p_2398:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_2398; break;
-	case NTV2_FORMAT_4x4096x2160p_2400:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_2400; break;
-	case NTV2_FORMAT_4x4096x2160p_2500:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_2500; break;
-	case NTV2_FORMAT_4x4096x2160p_2997:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_2997; break;
-	case NTV2_FORMAT_4x4096x2160p_3000:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_3000; break;
-	case NTV2_FORMAT_4x4096x2160p_4795:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_4795; break;
-	case NTV2_FORMAT_4x4096x2160p_4800:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_4800; break;
-	case NTV2_FORMAT_4x4096x2160p_5000:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_5000; break;
-	case NTV2_FORMAT_4x4096x2160p_5994:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_5994; break;
-	case NTV2_FORMAT_4x4096x2160p_6000:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_6000; break;
-	case NTV2_FORMAT_4x4096x2160p_4795_B:	quarterSizedFormat = NTV2_FORMAT_4096x2160p_4795_B; break;
-	case NTV2_FORMAT_4x4096x2160p_4800_B:	quarterSizedFormat = NTV2_FORMAT_4096x2160p_4800_B; break;
-	case NTV2_FORMAT_4x4096x2160p_5000_B:	quarterSizedFormat = NTV2_FORMAT_4096x2160p_5000_B; break;
-	case NTV2_FORMAT_4x4096x2160p_5994_B:	quarterSizedFormat = NTV2_FORMAT_4096x2160p_5994_B; break;
-	case NTV2_FORMAT_4x4096x2160p_6000_B:	quarterSizedFormat = NTV2_FORMAT_4096x2160p_6000_B; break;
+		case NTV2_FORMAT_4096x2160psf_2398:
+		case NTV2_FORMAT_4x2048x1080psf_2398:	quarterSizedFormat = NTV2_FORMAT_1080psf_2K_2398; break;
+		case NTV2_FORMAT_4096x2160psf_2400:
+		case NTV2_FORMAT_4x2048x1080psf_2400:	quarterSizedFormat = NTV2_FORMAT_1080psf_2K_2400; break;
+		case NTV2_FORMAT_4096x2160psf_2500:
+		case NTV2_FORMAT_4x2048x1080psf_2500:	quarterSizedFormat = NTV2_FORMAT_1080psf_2K_2500; break;
+		//case NTV2_FORMAT_4x2048x1080psf_2997:	quarterSizedFormat = NTV2_FORMAT_1080psf_2K_2997; break;
+		//case NTV2_FORMAT_4x2048x1080psf_3000:	quarterSizedFormat = NTV2_FORMAT_1080psf_2K_3000; break;
+
+		case NTV2_FORMAT_3840x2160p_2398:
+		case NTV2_FORMAT_4x1920x1080p_2398:		quarterSizedFormat = NTV2_FORMAT_1080p_2398; break;
+		case NTV2_FORMAT_3840x2160p_2400:
+		case NTV2_FORMAT_4x1920x1080p_2400:		quarterSizedFormat = NTV2_FORMAT_1080p_2400; break;
+		case NTV2_FORMAT_3840x2160p_2500:
+		case NTV2_FORMAT_4x1920x1080p_2500:		quarterSizedFormat = NTV2_FORMAT_1080p_2500; break;
+		case NTV2_FORMAT_3840x2160p_2997:
+		case NTV2_FORMAT_4x1920x1080p_2997:		quarterSizedFormat = NTV2_FORMAT_1080p_2997; break;
+		case NTV2_FORMAT_3840x2160p_3000:
+		case NTV2_FORMAT_4x1920x1080p_3000:		quarterSizedFormat = NTV2_FORMAT_1080p_3000; break;
+		case NTV2_FORMAT_3840x2160p_5000:
+		case NTV2_FORMAT_4x1920x1080p_5000:		quarterSizedFormat = NTV2_FORMAT_1080p_5000_A; break;
+		case NTV2_FORMAT_3840x2160p_5994:
+		case NTV2_FORMAT_4x1920x1080p_5994:		quarterSizedFormat = NTV2_FORMAT_1080p_5994_A; break;
+		case NTV2_FORMAT_3840x2160p_6000:
+		case NTV2_FORMAT_4x1920x1080p_6000:		quarterSizedFormat = NTV2_FORMAT_1080p_6000_A; break;
+		case NTV2_FORMAT_3840x2160p_5000_B:
+		case NTV2_FORMAT_4x1920x1080p_5000_B:	quarterSizedFormat = NTV2_FORMAT_1080p_5000_B; break;
+		case NTV2_FORMAT_3840x2160p_5994_B:
+		case NTV2_FORMAT_4x1920x1080p_5994_B:	quarterSizedFormat = NTV2_FORMAT_1080p_5994_B; break;
+		case NTV2_FORMAT_3840x2160p_6000_B:
+		case NTV2_FORMAT_4x1920x1080p_6000_B:	quarterSizedFormat = NTV2_FORMAT_1080p_6000_B; break;
+
+		case NTV2_FORMAT_4096x2160p_2398:
+		case NTV2_FORMAT_4x2048x1080p_2398:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_2398; break;
+		case NTV2_FORMAT_4096x2160p_2400:
+		case NTV2_FORMAT_4x2048x1080p_2400:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_2400; break;
+		case NTV2_FORMAT_4096x2160p_2500:
+		case NTV2_FORMAT_4x2048x1080p_2500:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_2500; break;
+		case NTV2_FORMAT_4096x2160p_2997:
+		case NTV2_FORMAT_4x2048x1080p_2997:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_2997; break;
+		case NTV2_FORMAT_4096x2160p_3000:
+		case NTV2_FORMAT_4x2048x1080p_3000:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_3000; break;
+		case NTV2_FORMAT_4096x2160p_4795:
+		case NTV2_FORMAT_4x2048x1080p_4795:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_4795_A; break;
+		case NTV2_FORMAT_4096x2160p_4800:
+		case NTV2_FORMAT_4x2048x1080p_4800:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_4800_A; break;
+		case NTV2_FORMAT_4096x2160p_5000:
+		case NTV2_FORMAT_4x2048x1080p_5000:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_5000_A; break;
+		case NTV2_FORMAT_4096x2160p_5994:
+		case NTV2_FORMAT_4x2048x1080p_5994:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_5994_A; break;
+		case NTV2_FORMAT_4096x2160p_6000:
+		case NTV2_FORMAT_4x2048x1080p_6000:		quarterSizedFormat = NTV2_FORMAT_1080p_2K_6000_A; break;
+		case NTV2_FORMAT_4096x2160p_4795_B:
+		case NTV2_FORMAT_4x2048x1080p_4795_B:	quarterSizedFormat = NTV2_FORMAT_1080p_2K_4795_B; break;
+		case NTV2_FORMAT_4096x2160p_4800_B:
+		case NTV2_FORMAT_4x2048x1080p_4800_B:	quarterSizedFormat = NTV2_FORMAT_1080p_2K_4800_B; break;
+		case NTV2_FORMAT_4096x2160p_5000_B:
+		case NTV2_FORMAT_4x2048x1080p_5000_B:	quarterSizedFormat = NTV2_FORMAT_1080p_2K_5000_B; break;
+		case NTV2_FORMAT_4096x2160p_5994_B:
+		case NTV2_FORMAT_4x2048x1080p_5994_B:	quarterSizedFormat = NTV2_FORMAT_1080p_2K_5994_B; break;
+		case NTV2_FORMAT_4096x2160p_6000_B:
+		case NTV2_FORMAT_4x2048x1080p_6000_B:	quarterSizedFormat = NTV2_FORMAT_1080p_2K_6000_B; break;
+		// No quarter sized formats for 119.88 or 120 Hz
+
+		case NTV2_FORMAT_4x3840x2160p_2398:		quarterSizedFormat = NTV2_FORMAT_3840x2160p_2398; break;
+		case NTV2_FORMAT_4x3840x2160p_2400:		quarterSizedFormat = NTV2_FORMAT_3840x2160p_2400; break;
+		case NTV2_FORMAT_4x3840x2160p_2500:		quarterSizedFormat = NTV2_FORMAT_3840x2160p_2500; break;
+		case NTV2_FORMAT_4x3840x2160p_2997:		quarterSizedFormat = NTV2_FORMAT_3840x2160p_2997; break;
+		case NTV2_FORMAT_4x3840x2160p_3000:		quarterSizedFormat = NTV2_FORMAT_3840x2160p_3000; break;
+		case NTV2_FORMAT_4x3840x2160p_5000:		quarterSizedFormat = NTV2_FORMAT_3840x2160p_5000; break;
+		case NTV2_FORMAT_4x3840x2160p_5994:		quarterSizedFormat = NTV2_FORMAT_3840x2160p_5994; break;
+		case NTV2_FORMAT_4x3840x2160p_6000:		quarterSizedFormat = NTV2_FORMAT_3840x2160p_6000; break;
+		case NTV2_FORMAT_4x3840x2160p_5000_B:	quarterSizedFormat = NTV2_FORMAT_3840x2160p_5000_B; break;
+		case NTV2_FORMAT_4x3840x2160p_5994_B:	quarterSizedFormat = NTV2_FORMAT_3840x2160p_5994_B; break;
+		case NTV2_FORMAT_4x3840x2160p_6000_B:	quarterSizedFormat = NTV2_FORMAT_3840x2160p_6000_B; break;
+
+		case NTV2_FORMAT_4x4096x2160p_2398:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_2398; break;
+		case NTV2_FORMAT_4x4096x2160p_2400:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_2400; break;
+		case NTV2_FORMAT_4x4096x2160p_2500:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_2500; break;
+		case NTV2_FORMAT_4x4096x2160p_2997:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_2997; break;
+		case NTV2_FORMAT_4x4096x2160p_3000:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_3000; break;
+		case NTV2_FORMAT_4x4096x2160p_4795:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_4795; break;
+		case NTV2_FORMAT_4x4096x2160p_4800:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_4800; break;
+		case NTV2_FORMAT_4x4096x2160p_5000:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_5000; break;
+		case NTV2_FORMAT_4x4096x2160p_5994:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_5994; break;
+		case NTV2_FORMAT_4x4096x2160p_6000:		quarterSizedFormat = NTV2_FORMAT_4096x2160p_6000; break;
+		case NTV2_FORMAT_4x4096x2160p_4795_B:	quarterSizedFormat = NTV2_FORMAT_4096x2160p_4795_B; break;
+		case NTV2_FORMAT_4x4096x2160p_4800_B:	quarterSizedFormat = NTV2_FORMAT_4096x2160p_4800_B; break;
+		case NTV2_FORMAT_4x4096x2160p_5000_B:	quarterSizedFormat = NTV2_FORMAT_4096x2160p_5000_B; break;
+		case NTV2_FORMAT_4x4096x2160p_5994_B:	quarterSizedFormat = NTV2_FORMAT_4096x2160p_5994_B; break;
+		case NTV2_FORMAT_4x4096x2160p_6000_B:	quarterSizedFormat = NTV2_FORMAT_4096x2160p_6000_B; break;
 #if defined(_DEBUG)
-	case NTV2_FORMAT_UNKNOWN:
-	case NTV2_FORMAT_1080i_5000:
-	case NTV2_FORMAT_1080i_5994:
-	case NTV2_FORMAT_1080i_6000:
-	case NTV2_FORMAT_720p_5994:
-	case NTV2_FORMAT_720p_6000:
-	case NTV2_FORMAT_1080psf_2398:
-	case NTV2_FORMAT_1080psf_2400:
-	case NTV2_FORMAT_1080p_2997:
-	case NTV2_FORMAT_1080p_3000:
-	case NTV2_FORMAT_1080p_2500:
-	case NTV2_FORMAT_1080p_2398:
-	case NTV2_FORMAT_1080p_2400:
-	case NTV2_FORMAT_1080p_2K_2398:
-	case NTV2_FORMAT_1080p_2K_2400:
-	case NTV2_FORMAT_1080psf_2K_2398:
-	case NTV2_FORMAT_1080psf_2K_2400:
-	case NTV2_FORMAT_720p_5000:
-	case NTV2_FORMAT_1080p_5000_B:
-	case NTV2_FORMAT_1080p_5994_B:
-	case NTV2_FORMAT_1080p_6000_B:
-	case NTV2_FORMAT_720p_2398:
-	case NTV2_FORMAT_720p_2500:
-	case NTV2_FORMAT_1080p_5000_A:
-	case NTV2_FORMAT_1080p_5994_A:
-	case NTV2_FORMAT_1080p_6000_A:
-	case NTV2_FORMAT_1080p_2K_2500:
-	case NTV2_FORMAT_1080psf_2K_2500:
-	case NTV2_FORMAT_1080psf_2500_2:
-	case NTV2_FORMAT_1080psf_2997_2:
-	case NTV2_FORMAT_1080psf_3000_2:
-	case NTV2_FORMAT_END_HIGH_DEF_FORMATS:
-	case NTV2_FORMAT_525_5994:
-	case NTV2_FORMAT_625_5000:
-	case NTV2_FORMAT_525_2398:
-	case NTV2_FORMAT_525_2400:
-	case NTV2_FORMAT_525psf_2997:
-	case NTV2_FORMAT_625psf_2500:
-	case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
-	case NTV2_FORMAT_2K_1498:
-	case NTV2_FORMAT_2K_1500:
-	case NTV2_FORMAT_2K_2398:
-	case NTV2_FORMAT_2K_2400:
-	case NTV2_FORMAT_2K_2500:
-	case NTV2_FORMAT_END_2K_DEF_FORMATS:
-	case NTV2_FORMAT_4x2048x1080psf_2997:
-	case NTV2_FORMAT_4x2048x1080psf_3000:
-	case NTV2_FORMAT_4x2048x1080p_11988:
-	case NTV2_FORMAT_4x2048x1080p_12000:
-	case NTV2_FORMAT_1080p_2K_6000_A:
-	case NTV2_FORMAT_1080p_2K_5994_A:
-	case NTV2_FORMAT_1080p_2K_2997:
-	case NTV2_FORMAT_1080p_2K_3000:
-	case NTV2_FORMAT_1080p_2K_5000_A:
-	case NTV2_FORMAT_1080p_2K_4795_A:
-	case NTV2_FORMAT_1080p_2K_4800_A:
-	case NTV2_FORMAT_1080p_2K_4795_B:
-	case NTV2_FORMAT_1080p_2K_4800_B:
-	case NTV2_FORMAT_1080p_2K_5000_B:
-	case NTV2_FORMAT_1080p_2K_5994_B:
-	case NTV2_FORMAT_1080p_2K_6000_B:
-	case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
-	case NTV2_FORMAT_END_4K_DEF_FORMATS2:
-	case NTV2_FORMAT_4096x2160p_11988:
-	case NTV2_FORMAT_4096x2160p_12000:
-	case NTV2_FORMAT_4096x2160psf_2997:
-	case NTV2_FORMAT_4096x2160psf_3000:
-	case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
-	case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
-	case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
-		quarterSizedFormat = videoFormat;
-		break;
+		case NTV2_FORMAT_UNKNOWN:
+		case NTV2_FORMAT_1080i_5000:
+		case NTV2_FORMAT_1080i_5994:
+		case NTV2_FORMAT_1080i_6000:
+		case NTV2_FORMAT_720p_5994:
+		case NTV2_FORMAT_720p_6000:
+		case NTV2_FORMAT_1080psf_2398:
+		case NTV2_FORMAT_1080psf_2400:
+		case NTV2_FORMAT_1080p_2997:
+		case NTV2_FORMAT_1080p_3000:
+		case NTV2_FORMAT_1080p_2500:
+		case NTV2_FORMAT_1080p_2398:
+		case NTV2_FORMAT_1080p_2400:
+		case NTV2_FORMAT_1080p_2K_2398:
+		case NTV2_FORMAT_1080p_2K_2400:
+		case NTV2_FORMAT_1080psf_2K_2398:
+		case NTV2_FORMAT_1080psf_2K_2400:
+		case NTV2_FORMAT_720p_5000:
+		case NTV2_FORMAT_1080p_5000_B:
+		case NTV2_FORMAT_1080p_5994_B:
+		case NTV2_FORMAT_1080p_6000_B:
+		case NTV2_FORMAT_720p_2398:
+		case NTV2_FORMAT_720p_2500:
+		case NTV2_FORMAT_1080p_5000_A:
+		case NTV2_FORMAT_1080p_5994_A:
+		case NTV2_FORMAT_1080p_6000_A:
+		case NTV2_FORMAT_1080p_2K_2500:
+		case NTV2_FORMAT_1080psf_2K_2500:
+		case NTV2_FORMAT_1080psf_2500_2:
+		case NTV2_FORMAT_1080psf_2997_2:
+		case NTV2_FORMAT_1080psf_3000_2:
+		case NTV2_FORMAT_END_HIGH_DEF_FORMATS:
+		case NTV2_FORMAT_525_5994:
+		case NTV2_FORMAT_625_5000:
+		case NTV2_FORMAT_525_2398:
+		case NTV2_FORMAT_525_2400:
+		case NTV2_FORMAT_525psf_2997:
+		case NTV2_FORMAT_625psf_2500:
+		case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
+		case NTV2_FORMAT_2K_1498:
+		case NTV2_FORMAT_2K_1500:
+		case NTV2_FORMAT_2K_2398:
+		case NTV2_FORMAT_2K_2400:
+		case NTV2_FORMAT_2K_2500:
+		case NTV2_FORMAT_END_2K_DEF_FORMATS:
+		case NTV2_FORMAT_4x2048x1080psf_2997:
+		case NTV2_FORMAT_4x2048x1080psf_3000:
+		case NTV2_FORMAT_4x2048x1080p_11988:
+		case NTV2_FORMAT_4x2048x1080p_12000:
+		case NTV2_FORMAT_1080p_2K_6000_A:
+		case NTV2_FORMAT_1080p_2K_5994_A:
+		case NTV2_FORMAT_1080p_2K_2997:
+		case NTV2_FORMAT_1080p_2K_3000:
+		case NTV2_FORMAT_1080p_2K_5000_A:
+		case NTV2_FORMAT_1080p_2K_4795_A:
+		case NTV2_FORMAT_1080p_2K_4800_A:
+		case NTV2_FORMAT_1080p_2K_4795_B:
+		case NTV2_FORMAT_1080p_2K_4800_B:
+		case NTV2_FORMAT_1080p_2K_5000_B:
+		case NTV2_FORMAT_1080p_2K_5994_B:
+		case NTV2_FORMAT_1080p_2K_6000_B:
+		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
+		case NTV2_FORMAT_END_4K_DEF_FORMATS2:
+		case NTV2_FORMAT_4096x2160p_11988:
+		case NTV2_FORMAT_4096x2160p_12000:
+		case NTV2_FORMAT_4096x2160psf_2997:
+		case NTV2_FORMAT_4096x2160psf_3000:
+		case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
+		case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
+		case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
 #else
-	default:								quarterSizedFormat = videoFormat; break;
+		default:
 #endif
+			break;
 	}
 	return quarterSizedFormat;
 }
@@ -2123,242 +2041,243 @@ NTV2VideoFormat GetQuadSizedVideoFormat (const NTV2VideoFormat inVideoFormat, co
 {
 	switch (inVideoFormat)
 	{
-    case  NTV2_FORMAT_1080psf_2398:		return isSquareDivision ? NTV2_FORMAT_4x1920x1080psf_2398 : NTV2_FORMAT_3840x2160psf_2398;
-    case  NTV2_FORMAT_1080psf_2400:		return isSquareDivision ? NTV2_FORMAT_4x1920x1080psf_2400 : NTV2_FORMAT_3840x2160psf_2400;
-    case  NTV2_FORMAT_1080psf_2500_2:	return isSquareDivision ? NTV2_FORMAT_4x1920x1080psf_2500 : NTV2_FORMAT_3840x2160psf_2500;
-    case  NTV2_FORMAT_1080i_5994:       return isSquareDivision ? NTV2_FORMAT_4x1920x1080psf_2997 : NTV2_FORMAT_3840x2160psf_2997;
-    case  NTV2_FORMAT_1080i_6000:       return isSquareDivision ? NTV2_FORMAT_4x1920x1080psf_3000 : NTV2_FORMAT_3840x2160psf_3000;
-                                                                
-    case  NTV2_FORMAT_1080psf_2K_2398:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080psf_2398 : NTV2_FORMAT_4096x2160psf_2398;
-    case  NTV2_FORMAT_1080psf_2K_2400:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080psf_2400 : NTV2_FORMAT_4096x2160psf_2400;
-    case  NTV2_FORMAT_1080psf_2K_2500:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080psf_2500 : NTV2_FORMAT_4096x2160psf_2500;
-    //case NTV2_FORMAT_1080psf_2K_2997:	return NTV2_FORMAT_4x2048x1080psf_29;
-    //case NT2_FORMAT_1080psf_2K_3000:	return NTV2V2_FORMAT_4x2048x1080psf_3000;
-                                                                
-    case  NTV2_FORMAT_1080p_2398:		return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_2398 : NTV2_FORMAT_3840x2160p_2398;
-    case  NTV2_FORMAT_1080p_2400: 		return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_2400 : NTV2_FORMAT_3840x2160p_2400;
-    case  NTV2_FORMAT_1080p_2500: 		return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_2500 : NTV2_FORMAT_3840x2160p_2500;
-    case  NTV2_FORMAT_1080p_2997: 		return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_2997 : NTV2_FORMAT_3840x2160p_2997;
-    case  NTV2_FORMAT_1080p_3000: 		return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_3000 : NTV2_FORMAT_3840x2160p_3000;
-    case  NTV2_FORMAT_1080p_5000_A: 	return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_5000 : NTV2_FORMAT_3840x2160p_5000;
-    case  NTV2_FORMAT_1080p_5994_A: 	return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_5994 : NTV2_FORMAT_3840x2160p_5994;
-    case  NTV2_FORMAT_1080p_6000_A: 	return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_6000 : NTV2_FORMAT_3840x2160p_6000;
-    case  NTV2_FORMAT_1080p_5000_B:		return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_5000_B : NTV2_FORMAT_3840x2160p_5000_B;
-    case  NTV2_FORMAT_1080p_5994_B:		return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_5994_B : NTV2_FORMAT_3840x2160p_5994_B;
-    case  NTV2_FORMAT_1080p_6000_B:		return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_6000_B : NTV2_FORMAT_3840x2160p_6000_B;
-                                                                
-    case  NTV2_FORMAT_1080p_2K_2398: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_2398 : NTV2_FORMAT_4096x2160p_2398;
-    case  NTV2_FORMAT_1080p_2K_2400: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_2400 : NTV2_FORMAT_4096x2160p_2400;
-    case  NTV2_FORMAT_1080p_2K_2500: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_2500 : NTV2_FORMAT_4096x2160p_2500;
-    case  NTV2_FORMAT_1080p_2K_2997: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_2997 : NTV2_FORMAT_4096x2160p_2997;
-    case  NTV2_FORMAT_1080p_2K_3000: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_3000 : NTV2_FORMAT_4096x2160p_3000;
-    case  NTV2_FORMAT_1080p_2K_4795_A: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_4795 : NTV2_FORMAT_4096x2160p_4795;
-    case  NTV2_FORMAT_1080p_2K_4800_A: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_4800 : NTV2_FORMAT_4096x2160p_4800;
-    case  NTV2_FORMAT_1080p_2K_5000_A:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_5000 : NTV2_FORMAT_4096x2160p_5000;
-    case  NTV2_FORMAT_1080p_2K_5994_A:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_5994 : NTV2_FORMAT_4096x2160p_5994;
-    case  NTV2_FORMAT_1080p_2K_6000_A:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_6000 : NTV2_FORMAT_4096x2160p_6000;
-    case  NTV2_FORMAT_1080p_2K_4795_B: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_4795_B : NTV2_FORMAT_4096x2160p_4795_B;
-    case  NTV2_FORMAT_1080p_2K_4800_B: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_4800_B : NTV2_FORMAT_4096x2160p_4800_B;
-    case  NTV2_FORMAT_1080p_2K_5000_B:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_5000_B : NTV2_FORMAT_4096x2160p_5000_B;
-    case  NTV2_FORMAT_1080p_2K_5994_B:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_5994_B : NTV2_FORMAT_4096x2160p_5994_B;
-    case  NTV2_FORMAT_1080p_2K_6000_B:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_6000_B : NTV2_FORMAT_4096x2160p_6000_B;
+		case  NTV2_FORMAT_1080psf_2398:		return isSquareDivision ? NTV2_FORMAT_4x1920x1080psf_2398 : NTV2_FORMAT_3840x2160psf_2398;
+		case  NTV2_FORMAT_1080psf_2400:		return isSquareDivision ? NTV2_FORMAT_4x1920x1080psf_2400 : NTV2_FORMAT_3840x2160psf_2400;
+		case  NTV2_FORMAT_1080psf_2500_2:	return isSquareDivision ? NTV2_FORMAT_4x1920x1080psf_2500 : NTV2_FORMAT_3840x2160psf_2500;
+		case  NTV2_FORMAT_1080i_5994:       return isSquareDivision ? NTV2_FORMAT_4x1920x1080psf_2997 : NTV2_FORMAT_3840x2160psf_2997;
+		case  NTV2_FORMAT_1080i_6000:       return isSquareDivision ? NTV2_FORMAT_4x1920x1080psf_3000 : NTV2_FORMAT_3840x2160psf_3000;
 
-	case NTV2_FORMAT_3840x2160p_2398:	return NTV2_FORMAT_4x3840x2160p_2398;
-	case NTV2_FORMAT_3840x2160p_2400:	return NTV2_FORMAT_4x3840x2160p_2400;
-	case NTV2_FORMAT_3840x2160p_2500:	return NTV2_FORMAT_4x3840x2160p_2500;
-	case NTV2_FORMAT_3840x2160p_2997:	return NTV2_FORMAT_4x3840x2160p_2997;
-	case NTV2_FORMAT_3840x2160p_3000:	return NTV2_FORMAT_4x3840x2160p_3000;
-	case NTV2_FORMAT_3840x2160p_5000:	return NTV2_FORMAT_4x3840x2160p_5000;
-	case NTV2_FORMAT_3840x2160p_5994:	return NTV2_FORMAT_4x3840x2160p_5994;
-	case NTV2_FORMAT_3840x2160p_6000:	return NTV2_FORMAT_4x3840x2160p_6000;
-	case NTV2_FORMAT_3840x2160p_5000_B:	return NTV2_FORMAT_4x3840x2160p_5000_B;
-	case NTV2_FORMAT_3840x2160p_5994_B:	return NTV2_FORMAT_4x3840x2160p_5994_B;
-	case NTV2_FORMAT_3840x2160p_6000_B:	return NTV2_FORMAT_4x3840x2160p_6000_B;
+		case  NTV2_FORMAT_1080psf_2K_2398:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080psf_2398 : NTV2_FORMAT_4096x2160psf_2398;
+		case  NTV2_FORMAT_1080psf_2K_2400:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080psf_2400 : NTV2_FORMAT_4096x2160psf_2400;
+		case  NTV2_FORMAT_1080psf_2K_2500:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080psf_2500 : NTV2_FORMAT_4096x2160psf_2500;
+		//case NTV2_FORMAT_1080psf_2K_2997:	return NTV2_FORMAT_4x2048x1080psf_29;
+		//case NT2_FORMAT_1080psf_2K_3000:	return NTV2V2_FORMAT_4x2048x1080psf_3000;
 
-	case NTV2_FORMAT_4096x2160p_2398:	return NTV2_FORMAT_4x4096x2160p_2398;
-	case NTV2_FORMAT_4096x2160p_2400:	return NTV2_FORMAT_4x4096x2160p_2400;
-	case NTV2_FORMAT_4096x2160p_2500:	return NTV2_FORMAT_4x4096x2160p_2500;
-	case NTV2_FORMAT_4096x2160p_2997:	return NTV2_FORMAT_4x4096x2160p_2997;
-	case NTV2_FORMAT_4096x2160p_3000:	return NTV2_FORMAT_4x4096x2160p_3000;
-	case NTV2_FORMAT_4096x2160p_4795:	return NTV2_FORMAT_4x4096x2160p_4795;
-	case NTV2_FORMAT_4096x2160p_4800:	return NTV2_FORMAT_4x4096x2160p_4800;
-	case NTV2_FORMAT_4096x2160p_5000:	return NTV2_FORMAT_4x4096x2160p_5000;
-	case NTV2_FORMAT_4096x2160p_5994:	return NTV2_FORMAT_4x4096x2160p_5994;
-	case NTV2_FORMAT_4096x2160p_6000:	return NTV2_FORMAT_4x4096x2160p_6000;
-	case NTV2_FORMAT_4096x2160p_4795_B:	return NTV2_FORMAT_4x4096x2160p_4795_B;
-	case NTV2_FORMAT_4096x2160p_4800_B:	return NTV2_FORMAT_4x4096x2160p_4800_B;
-	case NTV2_FORMAT_4096x2160p_5000_B:	return NTV2_FORMAT_4x4096x2160p_5000_B;
-	case NTV2_FORMAT_4096x2160p_5994_B:	return NTV2_FORMAT_4x4096x2160p_5994_B;
-	case NTV2_FORMAT_4096x2160p_6000_B:	return NTV2_FORMAT_4x4096x2160p_6000_B;
+		case  NTV2_FORMAT_1080p_2398:		return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_2398 : NTV2_FORMAT_3840x2160p_2398;
+		case  NTV2_FORMAT_1080p_2400: 		return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_2400 : NTV2_FORMAT_3840x2160p_2400;
+		case  NTV2_FORMAT_1080p_2500: 		return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_2500 : NTV2_FORMAT_3840x2160p_2500;
+		case  NTV2_FORMAT_1080p_2997: 		return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_2997 : NTV2_FORMAT_3840x2160p_2997;
+		case  NTV2_FORMAT_1080p_3000: 		return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_3000 : NTV2_FORMAT_3840x2160p_3000;
+		case  NTV2_FORMAT_1080p_5000_A: 	return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_5000 : NTV2_FORMAT_3840x2160p_5000;
+		case  NTV2_FORMAT_1080p_5994_A: 	return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_5994 : NTV2_FORMAT_3840x2160p_5994;
+		case  NTV2_FORMAT_1080p_6000_A: 	return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_6000 : NTV2_FORMAT_3840x2160p_6000;
+		case  NTV2_FORMAT_1080p_5000_B:		return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_5000_B : NTV2_FORMAT_3840x2160p_5000_B;
+		case  NTV2_FORMAT_1080p_5994_B:		return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_5994_B : NTV2_FORMAT_3840x2160p_5994_B;
+		case  NTV2_FORMAT_1080p_6000_B:		return isSquareDivision ? NTV2_FORMAT_4x1920x1080p_6000_B : NTV2_FORMAT_3840x2160p_6000_B;
+
+		case  NTV2_FORMAT_1080p_2K_2398: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_2398 : NTV2_FORMAT_4096x2160p_2398;
+		case  NTV2_FORMAT_1080p_2K_2400: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_2400 : NTV2_FORMAT_4096x2160p_2400;
+		case  NTV2_FORMAT_1080p_2K_2500: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_2500 : NTV2_FORMAT_4096x2160p_2500;
+		case  NTV2_FORMAT_1080p_2K_2997: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_2997 : NTV2_FORMAT_4096x2160p_2997;
+		case  NTV2_FORMAT_1080p_2K_3000: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_3000 : NTV2_FORMAT_4096x2160p_3000;
+		case  NTV2_FORMAT_1080p_2K_4795_A: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_4795 : NTV2_FORMAT_4096x2160p_4795;
+		case  NTV2_FORMAT_1080p_2K_4800_A: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_4800 : NTV2_FORMAT_4096x2160p_4800;
+		case  NTV2_FORMAT_1080p_2K_5000_A:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_5000 : NTV2_FORMAT_4096x2160p_5000;
+		case  NTV2_FORMAT_1080p_2K_5994_A:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_5994 : NTV2_FORMAT_4096x2160p_5994;
+		case  NTV2_FORMAT_1080p_2K_6000_A:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_6000 : NTV2_FORMAT_4096x2160p_6000;
+		case  NTV2_FORMAT_1080p_2K_4795_B: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_4795_B : NTV2_FORMAT_4096x2160p_4795_B;
+		case  NTV2_FORMAT_1080p_2K_4800_B: 	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_4800_B : NTV2_FORMAT_4096x2160p_4800_B;
+		case  NTV2_FORMAT_1080p_2K_5000_B:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_5000_B : NTV2_FORMAT_4096x2160p_5000_B;
+		case  NTV2_FORMAT_1080p_2K_5994_B:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_5994_B : NTV2_FORMAT_4096x2160p_5994_B;
+		case  NTV2_FORMAT_1080p_2K_6000_B:	return isSquareDivision ? NTV2_FORMAT_4x2048x1080p_6000_B : NTV2_FORMAT_4096x2160p_6000_B;
+
+		case NTV2_FORMAT_3840x2160p_2398:	return NTV2_FORMAT_4x3840x2160p_2398;
+		case NTV2_FORMAT_3840x2160p_2400:	return NTV2_FORMAT_4x3840x2160p_2400;
+		case NTV2_FORMAT_3840x2160p_2500:	return NTV2_FORMAT_4x3840x2160p_2500;
+		case NTV2_FORMAT_3840x2160p_2997:	return NTV2_FORMAT_4x3840x2160p_2997;
+		case NTV2_FORMAT_3840x2160p_3000:	return NTV2_FORMAT_4x3840x2160p_3000;
+		case NTV2_FORMAT_3840x2160p_5000:	return NTV2_FORMAT_4x3840x2160p_5000;
+		case NTV2_FORMAT_3840x2160p_5994:	return NTV2_FORMAT_4x3840x2160p_5994;
+		case NTV2_FORMAT_3840x2160p_6000:	return NTV2_FORMAT_4x3840x2160p_6000;
+		case NTV2_FORMAT_3840x2160p_5000_B:	return NTV2_FORMAT_4x3840x2160p_5000_B;
+		case NTV2_FORMAT_3840x2160p_5994_B:	return NTV2_FORMAT_4x3840x2160p_5994_B;
+		case NTV2_FORMAT_3840x2160p_6000_B:	return NTV2_FORMAT_4x3840x2160p_6000_B;
+
+		case NTV2_FORMAT_4096x2160p_2398:	return NTV2_FORMAT_4x4096x2160p_2398;
+		case NTV2_FORMAT_4096x2160p_2400:	return NTV2_FORMAT_4x4096x2160p_2400;
+		case NTV2_FORMAT_4096x2160p_2500:	return NTV2_FORMAT_4x4096x2160p_2500;
+		case NTV2_FORMAT_4096x2160p_2997:	return NTV2_FORMAT_4x4096x2160p_2997;
+		case NTV2_FORMAT_4096x2160p_3000:	return NTV2_FORMAT_4x4096x2160p_3000;
+		case NTV2_FORMAT_4096x2160p_4795:	return NTV2_FORMAT_4x4096x2160p_4795;
+		case NTV2_FORMAT_4096x2160p_4800:	return NTV2_FORMAT_4x4096x2160p_4800;
+		case NTV2_FORMAT_4096x2160p_5000:	return NTV2_FORMAT_4x4096x2160p_5000;
+		case NTV2_FORMAT_4096x2160p_5994:	return NTV2_FORMAT_4x4096x2160p_5994;
+		case NTV2_FORMAT_4096x2160p_6000:	return NTV2_FORMAT_4x4096x2160p_6000;
+		case NTV2_FORMAT_4096x2160p_4795_B:	return NTV2_FORMAT_4x4096x2160p_4795_B;
+		case NTV2_FORMAT_4096x2160p_4800_B:	return NTV2_FORMAT_4x4096x2160p_4800_B;
+		case NTV2_FORMAT_4096x2160p_5000_B:	return NTV2_FORMAT_4x4096x2160p_5000_B;
+		case NTV2_FORMAT_4096x2160p_5994_B:	return NTV2_FORMAT_4x4096x2160p_5994_B;
+		case NTV2_FORMAT_4096x2160p_6000_B:	return NTV2_FORMAT_4x4096x2160p_6000_B;
+
 #if defined(_DEBUG)
-	case NTV2_FORMAT_UNKNOWN:
-	case NTV2_FORMAT_1080i_5000:
-	case NTV2_FORMAT_720p_5994:
-	case NTV2_FORMAT_720p_6000:
-	case NTV2_FORMAT_720p_5000:
-	case NTV2_FORMAT_720p_2398:
-	case NTV2_FORMAT_720p_2500:
-	case NTV2_FORMAT_1080psf_2997_2:
-	case NTV2_FORMAT_1080psf_3000_2:
-	case NTV2_FORMAT_END_HIGH_DEF_FORMATS:
-	case NTV2_FORMAT_525_5994:
-	case NTV2_FORMAT_625_5000:
-	case NTV2_FORMAT_525_2398:
-	case NTV2_FORMAT_525_2400:
-	case NTV2_FORMAT_525psf_2997:
-	case NTV2_FORMAT_625psf_2500:
-	case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
-	case NTV2_FORMAT_2K_1498:
-	case NTV2_FORMAT_2K_1500:
-	case NTV2_FORMAT_2K_2398:
-	case NTV2_FORMAT_2K_2400:
-	case NTV2_FORMAT_2K_2500:
-	case NTV2_FORMAT_END_2K_DEF_FORMATS:
-	case NTV2_FORMAT_4x2048x1080psf_2997:
-	case NTV2_FORMAT_4x2048x1080psf_3000:
-	case NTV2_FORMAT_4x2048x1080p_11988:
-	case NTV2_FORMAT_4x2048x1080p_12000:
-	case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
-	case NTV2_FORMAT_END_4K_DEF_FORMATS2:
-	case NTV2_FORMAT_4096x2160p_11988:
-	case NTV2_FORMAT_4096x2160p_12000:
-	case NTV2_FORMAT_4096x2160psf_2997:
-	case NTV2_FORMAT_4096x2160psf_3000:
-	case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
-	case NTV2_FORMAT_FIRST_4K_DEF_FORMAT:
-	case NTV2_FORMAT_4x1920x1080psf_2400:
-	case NTV2_FORMAT_4x1920x1080psf_2500:
-	case NTV2_FORMAT_4x1920x1080p_2398:
-	case NTV2_FORMAT_4x1920x1080p_2400:
-	case NTV2_FORMAT_4x1920x1080p_2500:
-	case NTV2_FORMAT_4x2048x1080psf_2398:
-	case NTV2_FORMAT_4x2048x1080psf_2400:
-	case NTV2_FORMAT_4x2048x1080psf_2500:
-	case NTV2_FORMAT_4x2048x1080p_2398:
-	case NTV2_FORMAT_4x2048x1080p_2400:
-	case NTV2_FORMAT_4x2048x1080p_2500:
-	case NTV2_FORMAT_4x1920x1080p_2997:
-	case NTV2_FORMAT_4x1920x1080p_3000:
-	case NTV2_FORMAT_4x1920x1080psf_2997:
-	case NTV2_FORMAT_4x1920x1080psf_3000:
-	case NTV2_FORMAT_4x2048x1080p_2997:
-	case NTV2_FORMAT_4x2048x1080p_3000:
-	case NTV2_FORMAT_4x1920x1080p_5000:
-	case NTV2_FORMAT_4x1920x1080p_5994:
-	case NTV2_FORMAT_4x1920x1080p_6000:
-	case NTV2_FORMAT_4x2048x1080p_5000:
-	case NTV2_FORMAT_4x2048x1080p_5994:
-	case NTV2_FORMAT_4x2048x1080p_6000:
-	case NTV2_FORMAT_4x2048x1080p_4795:
-	case NTV2_FORMAT_4x2048x1080p_4800:
-	case NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT:
-	case NTV2_FORMAT_3840x2160psf_2400:
-	case NTV2_FORMAT_3840x2160psf_2500:
-	case NTV2_FORMAT_3840x2160psf_2997:
-	case NTV2_FORMAT_3840x2160psf_3000:
-	case NTV2_FORMAT_FIRST_4K_TSI_DEF_FORMAT:
-	case NTV2_FORMAT_4096x2160psf_2400:
-	case NTV2_FORMAT_4096x2160psf_2500:
-	case NTV2_FORMAT_FIRST_4K_DEF_FORMAT2:
-	case NTV2_FORMAT_4x1920x1080p_5994_B:
-	case NTV2_FORMAT_4x1920x1080p_6000_B:
-	case NTV2_FORMAT_4x2048x1080p_5000_B:
-	case NTV2_FORMAT_4x2048x1080p_5994_B:
-	case NTV2_FORMAT_4x2048x1080p_6000_B:
-	case NTV2_FORMAT_4x2048x1080p_4795_B:
-	case NTV2_FORMAT_4x2048x1080p_4800_B:
-	case NTV2_FORMAT_FIRST_UHD2_DEF_FORMAT:
-	case NTV2_FORMAT_4x3840x2160p_2400:
-	case NTV2_FORMAT_4x3840x2160p_2500:
-	case NTV2_FORMAT_4x3840x2160p_2997:
-	case NTV2_FORMAT_4x3840x2160p_3000:
-	case NTV2_FORMAT_4x3840x2160p_5000:
-	case NTV2_FORMAT_4x3840x2160p_5994:
-	case NTV2_FORMAT_4x3840x2160p_6000:
-	case NTV2_FORMAT_4x3840x2160p_5000_B:
-	case NTV2_FORMAT_4x3840x2160p_5994_B:
-	case NTV2_FORMAT_4x3840x2160p_6000_B:
-	case NTV2_FORMAT_FIRST_UHD2_FULL_DEF_FORMAT:
-	case NTV2_FORMAT_4x4096x2160p_2400:
-	case NTV2_FORMAT_4x4096x2160p_2500:
-	case NTV2_FORMAT_4x4096x2160p_2997:
-	case NTV2_FORMAT_4x4096x2160p_3000:
-	case NTV2_FORMAT_4x4096x2160p_4795:
-	case NTV2_FORMAT_4x4096x2160p_4800:
-	case NTV2_FORMAT_4x4096x2160p_5000:
-	case NTV2_FORMAT_4x4096x2160p_5994:
-	case NTV2_FORMAT_4x4096x2160p_6000:
-	case NTV2_FORMAT_4x4096x2160p_4795_B:
-	case NTV2_FORMAT_4x4096x2160p_4800_B:
-	case NTV2_FORMAT_4x4096x2160p_5000_B:
-	case NTV2_FORMAT_4x4096x2160p_5994_B:
-	case NTV2_FORMAT_4x4096x2160p_6000_B:
-	case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
-	case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
+		case NTV2_FORMAT_UNKNOWN:
+		case NTV2_FORMAT_1080i_5000:
+		case NTV2_FORMAT_720p_5994:
+		case NTV2_FORMAT_720p_6000:
+		case NTV2_FORMAT_720p_5000:
+		case NTV2_FORMAT_720p_2398:
+		case NTV2_FORMAT_720p_2500:
+		case NTV2_FORMAT_1080psf_2997_2:
+		case NTV2_FORMAT_1080psf_3000_2:
+		case NTV2_FORMAT_END_HIGH_DEF_FORMATS:
+		case NTV2_FORMAT_525_5994:
+		case NTV2_FORMAT_625_5000:
+		case NTV2_FORMAT_525_2398:
+		case NTV2_FORMAT_525_2400:
+		case NTV2_FORMAT_525psf_2997:
+		case NTV2_FORMAT_625psf_2500:
+		case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
+		case NTV2_FORMAT_2K_1498:
+		case NTV2_FORMAT_2K_1500:
+		case NTV2_FORMAT_2K_2398:
+		case NTV2_FORMAT_2K_2400:
+		case NTV2_FORMAT_2K_2500:
+		case NTV2_FORMAT_END_2K_DEF_FORMATS:
+		case NTV2_FORMAT_4x2048x1080psf_2997:
+		case NTV2_FORMAT_4x2048x1080psf_3000:
+		case NTV2_FORMAT_4x2048x1080p_11988:
+		case NTV2_FORMAT_4x2048x1080p_12000:
+		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
+		case NTV2_FORMAT_END_4K_DEF_FORMATS2:
+		case NTV2_FORMAT_4096x2160p_11988:
+		case NTV2_FORMAT_4096x2160p_12000:
+		case NTV2_FORMAT_4096x2160psf_2997:
+		case NTV2_FORMAT_4096x2160psf_3000:
+		case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
+		case NTV2_FORMAT_FIRST_4K_DEF_FORMAT:
+		case NTV2_FORMAT_4x1920x1080psf_2400:
+		case NTV2_FORMAT_4x1920x1080psf_2500:
+		case NTV2_FORMAT_4x1920x1080p_2398:
+		case NTV2_FORMAT_4x1920x1080p_2400:
+		case NTV2_FORMAT_4x1920x1080p_2500:
+		case NTV2_FORMAT_4x2048x1080psf_2398:
+		case NTV2_FORMAT_4x2048x1080psf_2400:
+		case NTV2_FORMAT_4x2048x1080psf_2500:
+		case NTV2_FORMAT_4x2048x1080p_2398:
+		case NTV2_FORMAT_4x2048x1080p_2400:
+		case NTV2_FORMAT_4x2048x1080p_2500:
+		case NTV2_FORMAT_4x1920x1080p_2997:
+		case NTV2_FORMAT_4x1920x1080p_3000:
+		case NTV2_FORMAT_4x1920x1080psf_2997:
+		case NTV2_FORMAT_4x1920x1080psf_3000:
+		case NTV2_FORMAT_4x2048x1080p_2997:
+		case NTV2_FORMAT_4x2048x1080p_3000:
+		case NTV2_FORMAT_4x1920x1080p_5000:
+		case NTV2_FORMAT_4x1920x1080p_5994:
+		case NTV2_FORMAT_4x1920x1080p_6000:
+		case NTV2_FORMAT_4x2048x1080p_5000:
+		case NTV2_FORMAT_4x2048x1080p_5994:
+		case NTV2_FORMAT_4x2048x1080p_6000:
+		case NTV2_FORMAT_4x2048x1080p_4795:
+		case NTV2_FORMAT_4x2048x1080p_4800:
+		case NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT:
+		case NTV2_FORMAT_3840x2160psf_2400:
+		case NTV2_FORMAT_3840x2160psf_2500:
+		case NTV2_FORMAT_3840x2160psf_2997:
+		case NTV2_FORMAT_3840x2160psf_3000:
+		case NTV2_FORMAT_FIRST_4K_TSI_DEF_FORMAT:
+		case NTV2_FORMAT_4096x2160psf_2400:
+		case NTV2_FORMAT_4096x2160psf_2500:
+		case NTV2_FORMAT_FIRST_4K_DEF_FORMAT2:
+		case NTV2_FORMAT_4x1920x1080p_5994_B:
+		case NTV2_FORMAT_4x1920x1080p_6000_B:
+		case NTV2_FORMAT_4x2048x1080p_5000_B:
+		case NTV2_FORMAT_4x2048x1080p_5994_B:
+		case NTV2_FORMAT_4x2048x1080p_6000_B:
+		case NTV2_FORMAT_4x2048x1080p_4795_B:
+		case NTV2_FORMAT_4x2048x1080p_4800_B:
+		case NTV2_FORMAT_FIRST_UHD2_DEF_FORMAT:
+		case NTV2_FORMAT_4x3840x2160p_2400:
+		case NTV2_FORMAT_4x3840x2160p_2500:
+		case NTV2_FORMAT_4x3840x2160p_2997:
+		case NTV2_FORMAT_4x3840x2160p_3000:
+		case NTV2_FORMAT_4x3840x2160p_5000:
+		case NTV2_FORMAT_4x3840x2160p_5994:
+		case NTV2_FORMAT_4x3840x2160p_6000:
+		case NTV2_FORMAT_4x3840x2160p_5000_B:
+		case NTV2_FORMAT_4x3840x2160p_5994_B:
+		case NTV2_FORMAT_4x3840x2160p_6000_B:
+		case NTV2_FORMAT_FIRST_UHD2_FULL_DEF_FORMAT:
+		case NTV2_FORMAT_4x4096x2160p_2400:
+		case NTV2_FORMAT_4x4096x2160p_2500:
+		case NTV2_FORMAT_4x4096x2160p_2997:
+		case NTV2_FORMAT_4x4096x2160p_3000:
+		case NTV2_FORMAT_4x4096x2160p_4795:
+		case NTV2_FORMAT_4x4096x2160p_4800:
+		case NTV2_FORMAT_4x4096x2160p_5000:
+		case NTV2_FORMAT_4x4096x2160p_5994:
+		case NTV2_FORMAT_4x4096x2160p_6000:
+		case NTV2_FORMAT_4x4096x2160p_4795_B:
+		case NTV2_FORMAT_4x4096x2160p_4800_B:
+		case NTV2_FORMAT_4x4096x2160p_5000_B:
+		case NTV2_FORMAT_4x4096x2160p_5994_B:
+		case NTV2_FORMAT_4x4096x2160p_6000_B:
+		case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
+		case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
 #else
-	default:
+		default:
 #endif
-		break;
+			break;
 	}
 	return inVideoFormat;
 }
 
-NTV2FrameGeometry GetQuarterSizedGeometry(NTV2FrameGeometry geometry)
+NTV2FrameGeometry GetQuarterSizedGeometry (const NTV2FrameGeometry inGeometry)
 {
-	switch ( geometry )
+	switch (inGeometry)
 	{
-	case NTV2_FG_4x1920x1080:	return NTV2_FG_1920x1080;
-	case NTV2_FG_4x2048x1080:	return NTV2_FG_2048x1080;
-	case NTV2_FG_4x3840x2160:	return NTV2_FG_4x1920x1080;
-	case NTV2_FG_4x4096x2160:	return NTV2_FG_4x2048x1080;
-	default:					return geometry;
+		case NTV2_FG_4x1920x1080:	return NTV2_FG_1920x1080;
+		case NTV2_FG_4x2048x1080:	return NTV2_FG_2048x1080;
+		case NTV2_FG_4x3840x2160:	return NTV2_FG_4x1920x1080;
+		case NTV2_FG_4x4096x2160:	return NTV2_FG_4x2048x1080;
+		default:					return inGeometry;
 	}
 }
 
 
-NTV2FrameGeometry Get4xSizedGeometry(NTV2FrameGeometry geometry)
+NTV2FrameGeometry Get4xSizedGeometry (const NTV2FrameGeometry inGeometry)
 {
-	switch ( geometry )
+	switch (inGeometry)
 	{
-	case NTV2_FG_1920x1080:		return NTV2_FG_4x1920x1080;
-	case NTV2_FG_2048x1080:		return NTV2_FG_4x2048x1080;
-	case NTV2_FG_4x1920x1080:	return NTV2_FG_4x3840x2160;
-	case NTV2_FG_4x2048x1080:	return NTV2_FG_4x4096x2160;
-	default:					return geometry;
+		case NTV2_FG_1920x1080:		return NTV2_FG_4x1920x1080;
+		case NTV2_FG_2048x1080:		return NTV2_FG_4x2048x1080;
+		case NTV2_FG_4x1920x1080:	return NTV2_FG_4x3840x2160;
+		case NTV2_FG_4x2048x1080:	return NTV2_FG_4x4096x2160;
+		default:					return inGeometry;
 	}
 }
 
-NTV2Standard GetQuarterSizedStandard(NTV2Standard standard)
+NTV2Standard GetQuarterSizedStandard (const NTV2Standard inStandard)
 {
-	switch (standard)
+	switch (inStandard)
 	{
-	case NTV2_STANDARD_3840x2160p:
-	case NTV2_STANDARD_3840HFR:		return NTV2_STANDARD_1080p;
-	case NTV2_STANDARD_3840i:		return NTV2_STANDARD_1080;
-	case NTV2_STANDARD_4096x2160p:
-	case NTV2_STANDARD_4096HFR:		return NTV2_STANDARD_2Kx1080p;
-	case NTV2_STANDARD_4096i:		return NTV2_STANDARD_2Kx1080i;
-	case NTV2_STANDARD_7680:		return NTV2_STANDARD_3840x2160p;
-	case NTV2_STANDARD_8192:		return NTV2_STANDARD_4096x2160p;
-	default:						return standard;
+		case NTV2_STANDARD_3840x2160p:
+		case NTV2_STANDARD_3840HFR:		return NTV2_STANDARD_1080p;
+		case NTV2_STANDARD_3840i:		return NTV2_STANDARD_1080;
+		case NTV2_STANDARD_4096x2160p:
+		case NTV2_STANDARD_4096HFR:		return NTV2_STANDARD_2Kx1080p;
+		case NTV2_STANDARD_4096i:		return NTV2_STANDARD_2Kx1080i;
+		case NTV2_STANDARD_7680:		return NTV2_STANDARD_3840x2160p;
+		case NTV2_STANDARD_8192:		return NTV2_STANDARD_4096x2160p;
+		default:						return inStandard;
 	}
 }
 
 
-NTV2Standard Get4xSizedStandard(NTV2Standard standard, bool bIs4k)
+NTV2Standard Get4xSizedStandard (const NTV2Standard inStandard, const bool bIs4k)
 {
-	switch (standard)
+	switch (inStandard)
 	{
-	case NTV2_STANDARD_1080:		return bIs4k ? NTV2_STANDARD_4096i : NTV2_STANDARD_3840i;
-	case NTV2_STANDARD_1080p:		return bIs4k ? NTV2_STANDARD_4096x2160p : NTV2_STANDARD_3840x2160p;
+		case NTV2_STANDARD_1080:		return bIs4k ? NTV2_STANDARD_4096i : NTV2_STANDARD_3840i;
+		case NTV2_STANDARD_1080p:		return bIs4k ? NTV2_STANDARD_4096x2160p : NTV2_STANDARD_3840x2160p;
 
-	case NTV2_STANDARD_3840HFR:
-	case NTV2_STANDARD_3840x2160p:	return NTV2_STANDARD_7680;
+		case NTV2_STANDARD_3840HFR:
+		case NTV2_STANDARD_3840x2160p:	return NTV2_STANDARD_7680;
 
-	case NTV2_STANDARD_4096HFR:
-	case NTV2_STANDARD_4096x2160p:	return NTV2_STANDARD_8192;
+		case NTV2_STANDARD_4096HFR:
+		case NTV2_STANDARD_4096x2160p:	return NTV2_STANDARD_8192;
 
-	default:						return standard;
+		default:						return inStandard;
 	}
 }
 
@@ -2860,38 +2779,8 @@ NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(const NTV2VideoFormat inVi
 
 ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat, const NTV2VANCMode inVancMode)
 {
-	if (!NTV2_IS_VALID_VANCMODE (inVancMode))
-		return 0;
-	if (!NTV2_IS_VALID_VIDEO_FORMAT (inVideoFormat))
-		return 0;
-	if (!NTV2_IS_VALID_FRAME_BUFFER_FORMAT (inFBFormat))
-		return 0;
-
-	//	Planar formats are special -- and VANC doesn't apply...
-	switch (inFBFormat)
-	{
-	case NTV2_FBF_8BIT_YCBCR_420PL3:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 3 / 2;
-	case NTV2_FBF_8BIT_YCBCR_422PL3:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 2;
-	case NTV2_FBF_10BIT_YCBCR_420PL3_LE:return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 3;
-	case NTV2_FBF_10BIT_YCBCR_422PL3_LE:return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 4;
-	
-	case NTV2_FBF_10BIT_YCBCR_420PL2:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 3 / 2 * 10 / 8;
-	case NTV2_FBF_10BIT_YCBCR_422PL2:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 2 * 10 / 8;
-	case NTV2_FBF_8BIT_YCBCR_420PL2:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 3 / 2;
-	case NTV2_FBF_8BIT_YCBCR_422PL2:	return GetDisplayWidth (inVideoFormat) * GetDisplayHeight (inVideoFormat) * 2;
-	default:							break;
-	}
-
-	const NTV2Standard	videoStandard	(::GetNTV2StandardFromVideoFormat (inVideoFormat));
-	if (!NTV2_IS_VALID_STANDARD (videoStandard))
-		return 0;
-
-	const NTV2FormatDescriptor	fd	(videoStandard, inFBFormat, inVancMode);
-	if (!fd.IsValid ())
-		return 0;
-
-    return fd.linePitch * fd.GetFullRasterHeight () * 4 /*sizeof(ULWord)*/;
-
+	const NTV2FormatDescriptor fd (inVideoFormat, inFBFormat, inVancMode);
+	return fd.GetTotalBytes();
 }	//	GetVideoActiveSize
 
 
@@ -2907,354 +2796,264 @@ ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameB
 
 ULWord GetVideoWriteSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat, const NTV2VANCMode inVancMode)
 {
-	ULWord ulSize = ::GetVideoActiveSize (inVideoFormat, inFBFormat, inVancMode);
+	ULWord ulSize (::GetVideoActiveSize (inVideoFormat, inFBFormat, inVancMode));
 	if (ulSize % 4096)
 		ulSize = ((ulSize / 4096) + 1) * 4096;
 	return ulSize;
 }
 
 
-// GetAudioSamplesPerFrame(NTV2FrameRate frameRate, NTV2AudioRate audioRate)
 // For a given framerate and audiorate, returns how many audio samples there
 // will be in a frame's time. cadenceFrame is only used for 5994 or 2997 @ 48k.
 // smpte372Enabled indicates that you are doing 1080p60,1080p5994 or 1080p50
 // in this mode the boards framerate might be NTV2_FRAMERATE_3000, but since
 // 2 links are coming out, the video rate is actually NTV2_FRAMERATE_6000
-ULWord GetAudioSamplesPerFrame(NTV2FrameRate frameRate, NTV2AudioRate audioRate, ULWord cadenceFrame,bool smpte372Enabled)
+ULWord GetAudioSamplesPerFrame (const NTV2FrameRate inFrameRate, const NTV2AudioRate inAudioRate, ULWord inCadenceFrame, const bool inIsSMPTE372Enabled)
 {
-	ULWord audioSamplesPerFrame=0;
-	cadenceFrame %= 5;
+	NTV2FrameRate	frameRate(inFrameRate);
+	ULWord			audioSamplesPerFrame(0);
+	inCadenceFrame %= 5;
 
-	if( smpte372Enabled )
+	if (inIsSMPTE372Enabled)
 	{
 		// the video is actually coming out twice as fast as the board rate
 		// since there are 2 links.
-		switch ( frameRate )
+		switch (inFrameRate)
 		{
-		case NTV2_FRAMERATE_3000:
-			frameRate = NTV2_FRAMERATE_6000;
-			break;
-		case NTV2_FRAMERATE_2997:
-			frameRate = NTV2_FRAMERATE_5994;
-			break;
-		case NTV2_FRAMERATE_2500:
-			frameRate = NTV2_FRAMERATE_5000;
-			break;
-		case NTV2_FRAMERATE_2400:
-			frameRate = NTV2_FRAMERATE_4800;
-			break;
-		case NTV2_FRAMERATE_2398:
-			frameRate = NTV2_FRAMERATE_4795;
-			break;
+			case NTV2_FRAMERATE_3000:	frameRate = NTV2_FRAMERATE_6000;	break;
+			case NTV2_FRAMERATE_2997:	frameRate = NTV2_FRAMERATE_5994;	break;
+			case NTV2_FRAMERATE_2500:	frameRate = NTV2_FRAMERATE_5000;	break;
+			case NTV2_FRAMERATE_2400:	frameRate = NTV2_FRAMERATE_4800;	break;
+			case NTV2_FRAMERATE_2398:	frameRate = NTV2_FRAMERATE_4795;	break;
 		default:
 			break;
 		}
 	}
 
-	if ( audioRate == NTV2_AUDIO_48K)
+	if (inAudioRate == NTV2_AUDIO_48K)
 	{
-		switch ( frameRate)
+		switch (frameRate)
 		{
-		case NTV2_FRAMERATE_12000:
-			audioSamplesPerFrame = 400;
-			break;
-		case NTV2_FRAMERATE_11988:
-			switch ( cadenceFrame )
-			{
-			case 0:
-			case 2:
-			case 4:
+			case NTV2_FRAMERATE_12000:
 				audioSamplesPerFrame = 400;
 				break;
-			case 1:
-			case 3:
-				audioSamplesPerFrame = 401;
+			case NTV2_FRAMERATE_11988:
+				switch (inCadenceFrame)
+				{
+					case 0:
+					case 2:
+					case 4:	audioSamplesPerFrame = 400;	break;
+	
+					case 1:
+					case 3:	audioSamplesPerFrame = 401;	break;
+				}
 				break;
-			}
-			break;
-		case NTV2_FRAMERATE_6000:
-			audioSamplesPerFrame = 800;
-			break;
-		case NTV2_FRAMERATE_5994:
-			switch ( cadenceFrame )
-			{
-			case 0:
+			case NTV2_FRAMERATE_6000:
 				audioSamplesPerFrame = 800;
 				break;
-			case 1:
-			case 2:
-			case 3:
-			case 4:
-				audioSamplesPerFrame = 801;
+			case NTV2_FRAMERATE_5994:
+				switch (inCadenceFrame)
+				{
+				case 0:	audioSamplesPerFrame = 800;	break;
+	
+				case 1:
+				case 2:
+				case 3:
+				case 4:	audioSamplesPerFrame = 801;	break;
+				}
+				break;
+			case NTV2_FRAMERATE_5000:	audioSamplesPerFrame = 1920/2;	break;
+			case NTV2_FRAMERATE_4800:	audioSamplesPerFrame = 1000;	break;
+			case NTV2_FRAMERATE_4795:	audioSamplesPerFrame = 1001;	break;
+			case NTV2_FRAMERATE_3000:	audioSamplesPerFrame = 1600;	break;
+			case NTV2_FRAMERATE_2997:
+				// depends on cadenceFrame;
+				switch (inCadenceFrame)
+				{
+					case 0:
+					case 2:
+					case 4:	audioSamplesPerFrame = 1602;	break;
+	
+					case 1:
+					case 3:	audioSamplesPerFrame = 1601;	break;
+				}
+				break;
+			case NTV2_FRAMERATE_2500:	audioSamplesPerFrame = 1920;	break;
+			case NTV2_FRAMERATE_2400:	audioSamplesPerFrame = 2000;	break;
+			case NTV2_FRAMERATE_2398:	audioSamplesPerFrame = 2002;	break;
+			case NTV2_FRAMERATE_1500:	audioSamplesPerFrame = 3200;	break;
+			case NTV2_FRAMERATE_1498:
+				// depends on cadenceFrame;
+				switch (inCadenceFrame)
+				{
+					case 0:	audioSamplesPerFrame = 3204;	break;
+	
+					case 1:
+					case 2:
+					case 3:
+					case 4:	audioSamplesPerFrame = 3203;	break;
+				}
+				break;
+	#if !defined(NTV2_DEPRECATE_16_0)
+			case NTV2_FRAMERATE_1900:	// Not supported yet
+			case NTV2_FRAMERATE_1898:	// Not supported yet
+			case NTV2_FRAMERATE_1800: 	// Not supported yet
+			case NTV2_FRAMERATE_1798:	// Not supported yet
+	#endif	//!defined(NTV2_DEPRECATE_16_0)
+			case NTV2_FRAMERATE_UNKNOWN:
+			case NTV2_NUM_FRAMERATES:
+				audioSamplesPerFrame = 0;
 				break;
 			}
-			break;
-		case NTV2_FRAMERATE_5000:
-			audioSamplesPerFrame = 1920/2;
-			break;
-		case NTV2_FRAMERATE_4800:
-			audioSamplesPerFrame = 1000;
-			break;
-		case NTV2_FRAMERATE_4795:
-			audioSamplesPerFrame = 1001;
-			break;
-		case NTV2_FRAMERATE_3000:
-			audioSamplesPerFrame = 1600;
-			break;
-		case NTV2_FRAMERATE_2997:
-			// depends on cadenceFrame;
-			switch ( cadenceFrame )
-			{
-			case 0:
-			case 2:
-			case 4:
-				audioSamplesPerFrame = 1602;
-				break;
-			case 1:
-			case 3:
-				audioSamplesPerFrame = 1601;
-				break;
-			}
-			break;
-		case NTV2_FRAMERATE_2500:
-			audioSamplesPerFrame = 1920;
-			break;
-		case NTV2_FRAMERATE_2400:
-			audioSamplesPerFrame = 2000;
-			break;
-		case NTV2_FRAMERATE_2398:
-			audioSamplesPerFrame = 2002;
-			break;
-		case NTV2_FRAMERATE_1500:
-			audioSamplesPerFrame = 3200;
-			break;
-		case NTV2_FRAMERATE_1498:
-			// depends on cadenceFrame;
-			switch ( cadenceFrame )
-			{
-			case 0:
-				audioSamplesPerFrame = 3204;
-				break;
-			case 1:
-			case 2:
-			case 3:
-			case 4:
-				audioSamplesPerFrame = 3203;
-				break;
-			}
-			break;
-		case NTV2_FRAMERATE_1900:	// Not supported yet
-		case NTV2_FRAMERATE_1898:	// Not supported yet
-		case NTV2_FRAMERATE_1800: 	// Not supported yet
-		case NTV2_FRAMERATE_1798:	// Not supported yet
-		case NTV2_FRAMERATE_UNKNOWN:
-		case NTV2_NUM_FRAMERATES:
-			audioSamplesPerFrame = 0;
-			break;
-		}
 	}
-	else if ( audioRate == NTV2_AUDIO_96K)
+	else if (inAudioRate == NTV2_AUDIO_96K)
 	{
-		switch ( frameRate)
+		switch (frameRate)
 		{
-		case NTV2_FRAMERATE_12000:
-			audioSamplesPerFrame = 800;
-			break;
-		case NTV2_FRAMERATE_11988:
-			switch ( cadenceFrame )
-			{
-			case 0:
-			case 1:
-			case 2:
-			case 3:
-				audioSamplesPerFrame = 901;
-				break;
-			case 4:
+			case NTV2_FRAMERATE_12000:
 				audioSamplesPerFrame = 800;
 				break;
-			}
-			break;
-		case NTV2_FRAMERATE_6000:
-			audioSamplesPerFrame = 800*2;
-			break;
-		case NTV2_FRAMERATE_5994:
-			switch ( cadenceFrame )
-			{
-			case 0:
-			case 2:
-			case 4:
-				audioSamplesPerFrame = 1602;
+			case NTV2_FRAMERATE_11988:
+				switch (inCadenceFrame)
+				{
+					case 0:
+					case 1:
+					case 2:
+					case 3:	audioSamplesPerFrame = 901;	break;
+	
+					case 4:	audioSamplesPerFrame = 800;	break;
+				}
 				break;
-			case 1:
-			case 3:
-				audioSamplesPerFrame = 1601;
+			case NTV2_FRAMERATE_6000:	audioSamplesPerFrame = 800*2;	break;
+			case NTV2_FRAMERATE_5994:
+				switch (inCadenceFrame)
+				{
+					case 0:
+					case 2:
+					case 4:	audioSamplesPerFrame = 1602;	break;
+	
+					case 1:
+					case 3:	audioSamplesPerFrame = 1601;	break;
+				}
 				break;
-			}
-			break;
-		case NTV2_FRAMERATE_5000:
-			audioSamplesPerFrame = 1920;
-			break;
-		case NTV2_FRAMERATE_4800:
-			audioSamplesPerFrame = 2000;
-			break;
-		case NTV2_FRAMERATE_4795:
-			audioSamplesPerFrame = 2002;
-			break;
-		case NTV2_FRAMERATE_3000:
-			audioSamplesPerFrame = 1600*2;
-			break;
-		case NTV2_FRAMERATE_2997:
-			// depends on cadenceFrame;
-			switch ( cadenceFrame )
-			{
-			case 0:
-				audioSamplesPerFrame = 3204;
+			case NTV2_FRAMERATE_5000:	audioSamplesPerFrame = 1920;	break;
+			case NTV2_FRAMERATE_4800:	audioSamplesPerFrame = 2000;	break;
+			case NTV2_FRAMERATE_4795:	audioSamplesPerFrame = 2002;	break;
+			case NTV2_FRAMERATE_3000:	audioSamplesPerFrame = 1600*2;	break;
+			case NTV2_FRAMERATE_2997:
+				// depends on cadenceFrame;
+				switch (inCadenceFrame)
+				{
+					case 0:	audioSamplesPerFrame = 3204;	break;
+	
+					case 1:
+					case 2:
+					case 3:
+					case 4:	audioSamplesPerFrame = 3203;	break;
+				}
 				break;
-			case 1:
-			case 2:
-			case 3:
-			case 4:
-				audioSamplesPerFrame = 3203;
+			case NTV2_FRAMERATE_2500:	audioSamplesPerFrame = 1920*2;	break;
+			case NTV2_FRAMERATE_2400:	audioSamplesPerFrame = 2000*2;	break;
+			case NTV2_FRAMERATE_2398:	audioSamplesPerFrame = 2002*2;	break;
+			case NTV2_FRAMERATE_1500:	audioSamplesPerFrame = 3200*2;	break;
+			case NTV2_FRAMERATE_1498:
+				// depends on cadenceFrame;
+				switch (inCadenceFrame)
+				{
+					case 0:	audioSamplesPerFrame = 3204*2;	break;
+	
+					case 1:
+					case 2:
+					case 3:
+					case 4:	audioSamplesPerFrame = 3203*2;	break;
+				}
 				break;
-			}
-			break;
-		case NTV2_FRAMERATE_2500:
-			audioSamplesPerFrame = 1920*2;
-			break;
-		case NTV2_FRAMERATE_2400:
-			audioSamplesPerFrame = 2000*2;
-			break;
-		case NTV2_FRAMERATE_2398:
-			audioSamplesPerFrame = 2002*2;
-			break;
-		case NTV2_FRAMERATE_1500:
-			audioSamplesPerFrame = 3200*2;
-			break;
-		case NTV2_FRAMERATE_1498:
-			// depends on cadenceFrame;
-			switch ( cadenceFrame )
-			{
-			case 0:
-				audioSamplesPerFrame = 3204*2;
-				break;
-			case 1:
-			case 2:
-			case 3:
-			case 4:
-				audioSamplesPerFrame = 3203*2;
+	#if !defined(NTV2_DEPRECATE_16_0)
+			case NTV2_FRAMERATE_1900:	// Not supported yet
+			case NTV2_FRAMERATE_1898:	// Not supported yet
+			case NTV2_FRAMERATE_1800: 	// Not supported yet
+			case NTV2_FRAMERATE_1798:	// Not supported yet
+	#endif	//!defined(NTV2_DEPRECATE_16_0)
+			case NTV2_FRAMERATE_UNKNOWN:
+			case NTV2_NUM_FRAMERATES:
+				audioSamplesPerFrame = 0*2; //haha
 				break;
 			}
-			break;
-		case NTV2_FRAMERATE_1900:	// Not supported yet
-		case NTV2_FRAMERATE_1898:	// Not supported yet
-		case NTV2_FRAMERATE_1800: 	// Not supported yet
-		case NTV2_FRAMERATE_1798:	// Not supported yet
-		case NTV2_FRAMERATE_UNKNOWN:
-		case NTV2_NUM_FRAMERATES:
-			audioSamplesPerFrame = 0*2; //haha
-			break;
-		}
 	}
-	else if ( audioRate == NTV2_AUDIO_192K)
+	else if (inAudioRate == NTV2_AUDIO_192K)
 	{
-		switch ( frameRate)
+		switch (frameRate)
 		{
-		case NTV2_FRAMERATE_12000:
-			audioSamplesPerFrame = 1600;
-			break;
-		case NTV2_FRAMERATE_11988:
-			switch ( cadenceFrame )
-			{
-			case 0:
-			case 2:
-			case 4:
-				audioSamplesPerFrame = 1602;
+			case NTV2_FRAMERATE_12000:
+				audioSamplesPerFrame = 1600;
 				break;
-			case 1:
-			case 3:
-				audioSamplesPerFrame = 1601;
+			case NTV2_FRAMERATE_11988:
+				switch (inCadenceFrame)
+				{
+					case 0:
+					case 2:
+					case 4:	audioSamplesPerFrame = 1602;	break;
+	
+					case 1:
+					case 3:	audioSamplesPerFrame = 1601;	break;
+				}
 				break;
-			}
-			break;
-		case NTV2_FRAMERATE_6000:
-			audioSamplesPerFrame = 3200;
-			break;
-		case NTV2_FRAMERATE_5994:
-			switch ( cadenceFrame )
-			{
-			case 0:
-				audioSamplesPerFrame = 3204;
+			case NTV2_FRAMERATE_6000:
+				audioSamplesPerFrame = 3200;
 				break;
-			case 1:
-			case 2:
-			case 3:
-			case 4:
-				audioSamplesPerFrame = 3203;
+			case NTV2_FRAMERATE_5994:
+				switch (inCadenceFrame)
+				{
+					case 0:	audioSamplesPerFrame = 3204;	break;
+
+					case 1:
+					case 2:
+					case 3:
+					case 4:	audioSamplesPerFrame = 3203;	break;
+				}
 				break;
-			}
-			break;
-		case NTV2_FRAMERATE_5000:
-			audioSamplesPerFrame = 3840;
-			break;
-		case NTV2_FRAMERATE_4800:
-			audioSamplesPerFrame = 4000;
-			break;
-		case NTV2_FRAMERATE_4795:
-			audioSamplesPerFrame = 4004;
-			break;
-		case NTV2_FRAMERATE_3000:
-			audioSamplesPerFrame = 6400;
-			break;
-		case NTV2_FRAMERATE_2997:
-			// depends on cadenceFrame;
-			switch ( cadenceFrame )
-			{
-			case 0:
-			case 1:
-				audioSamplesPerFrame = 6407;
+			case NTV2_FRAMERATE_5000:	audioSamplesPerFrame = 3840;	break;
+			case NTV2_FRAMERATE_4800:	audioSamplesPerFrame = 4000;	break;
+			case NTV2_FRAMERATE_4795:	audioSamplesPerFrame = 4004;	break;
+			case NTV2_FRAMERATE_3000:	audioSamplesPerFrame = 6400;	break;
+			case NTV2_FRAMERATE_2997:
+				// depends on cadenceFrame;
+				switch (inCadenceFrame)
+				{
+					case 0:
+					case 1:	audioSamplesPerFrame = 6407;	break;
+	
+					case 2:
+					case 3:
+					case 4:	audioSamplesPerFrame = 6406;	break;
+				}
 				break;
-			case 2:
-			case 3:
-			case 4:
-				audioSamplesPerFrame = 6406;
+			case NTV2_FRAMERATE_2500:	audioSamplesPerFrame = 7680;	break;
+			case NTV2_FRAMERATE_2400:	audioSamplesPerFrame = 8000;	break;
+			case NTV2_FRAMERATE_2398:	audioSamplesPerFrame = 8008;	break;
+			case NTV2_FRAMERATE_1500:	audioSamplesPerFrame = 12800;	break;
+			case NTV2_FRAMERATE_1498:
+				// depends on cadenceFrame;
+				switch (inCadenceFrame)
+				{
+					case 0:
+					case 1:
+					case 2:
+					case 3:	audioSamplesPerFrame = 12813;	break;
+	
+					case 4:	audioSamplesPerFrame = 12812;	break;
+				}
 				break;
-			}
-			break;
-		case NTV2_FRAMERATE_2500:
-			audioSamplesPerFrame = 7680;
-			break;
-		case NTV2_FRAMERATE_2400:
-			audioSamplesPerFrame = 8000;
-			break;
-		case NTV2_FRAMERATE_2398:
-			audioSamplesPerFrame = 8008;
-			break;
-		case NTV2_FRAMERATE_1500:
-			audioSamplesPerFrame = 12800;
-			break;
-		case NTV2_FRAMERATE_1498:
-			// depends on cadenceFrame;
-			switch ( cadenceFrame )
-			{
-			case 0:
-			case 1:
-			case 2:
-			case 3:
-				audioSamplesPerFrame = 12813;
+#if !defined(NTV2_DEPRECATE_16_0)
+			case NTV2_FRAMERATE_1900:	// Not supported yet
+			case NTV2_FRAMERATE_1898:	// Not supported yet
+			case NTV2_FRAMERATE_1800: 	// Not supported yet
+			case NTV2_FRAMERATE_1798:	// Not supported yet
+#endif	//!defined(NTV2_DEPRECATE_16_0)
+			case NTV2_FRAMERATE_UNKNOWN:
+			case NTV2_NUM_FRAMERATES:
+				audioSamplesPerFrame = 0*2; //haha
 				break;
-			case 4:
-				audioSamplesPerFrame = 12812;
-				break;
-			}
-			break;
-		case NTV2_FRAMERATE_1900:	// Not supported yet
-		case NTV2_FRAMERATE_1898:	// Not supported yet
-		case NTV2_FRAMERATE_1800: 	// Not supported yet
-		case NTV2_FRAMERATE_1798:	// Not supported yet
-		case NTV2_FRAMERATE_UNKNOWN:
-		case NTV2_NUM_FRAMERATES:
-			audioSamplesPerFrame = 0*2; //haha
-			break;
 		}
 	}
 
@@ -3262,12 +3061,11 @@ ULWord GetAudioSamplesPerFrame(NTV2FrameRate frameRate, NTV2AudioRate audioRate,
 }
 
 
-// GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr(NTV2FrameRate frameRate, NTV2AudioRate audioRate, ULWord frameNbrNonInclusive)
 // For a given framerate and audiorate and ending frame number (non-inclusive), returns the total number of audio samples over
-// the range of video frames starting at frame number zero up to and not including the passed in frame number, frameNbrNonInclusive.
+// the range of video frames starting at frame number zero up to and not including the passed in frame number, inFrameNumNonInclusive.
 // Utilizes cadence patterns in function immediately above,  GetAudioSamplesPerFrame().
 // No smpte372Enabled support
-LWord64 GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr(NTV2FrameRate frameRate, NTV2AudioRate audioRate, ULWord frameNbrNonInclusive)
+LWord64 GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr (const NTV2FrameRate inFrameRate, const NTV2AudioRate inAudioRate, const ULWord inFrameNumNonInclusive)
 {
 	LWord64 numTotalAudioSamples;
 	LWord64 numAudioSamplesFromWholeGroups;
@@ -3276,19 +3074,19 @@ LWord64 GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr(NTV2FrameRate frameRate
 	ULWord numAudioSamplesFromRemainder;
 	ULWord remainder;
 
-	numWholeGroupsOfFive = frameNbrNonInclusive/5;
-	remainder = frameNbrNonInclusive % 5;
+	numWholeGroupsOfFive = inFrameNumNonInclusive / 5;
+	remainder = inFrameNumNonInclusive % 5;
 
 	numTotalAudioSamples = 0;
 	numAudioSamplesFromWholeGroups = 0;
 	numAudioSamplesFromRemainder = 0;
 
-	if (audioRate == NTV2_AUDIO_48K)
+	if (inAudioRate == NTV2_AUDIO_48K)
 	{
-		switch (frameRate)
+		switch (inFrameRate)
 		{
 		case NTV2_FRAMERATE_12000:
-			numTotalAudioSamples = 400 * frameNbrNonInclusive;
+			numTotalAudioSamples = 400 * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_11988:
 			numAudioSamplesFromWholeGroups = ((2*401) + (3*400)) * numWholeGroupsOfFive;
@@ -3296,7 +3094,7 @@ LWord64 GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr(NTV2FrameRate frameRate
 			numTotalAudioSamples = numAudioSamplesFromWholeGroups + numAudioSamplesFromRemainder;
 			break;
 		case NTV2_FRAMERATE_6000:
-			numTotalAudioSamples = 800 * frameNbrNonInclusive;
+			numTotalAudioSamples = 800 * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_5994:
 			// depends on cadenceFrame;
@@ -3305,16 +3103,16 @@ LWord64 GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr(NTV2FrameRate frameRate
 			numTotalAudioSamples = numAudioSamplesFromWholeGroups + numAudioSamplesFromRemainder;
 			break;
 		case NTV2_FRAMERATE_5000:
-			numTotalAudioSamples = 1920/2 * frameNbrNonInclusive;
+			numTotalAudioSamples = 1920/2 * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_4800:
-			numTotalAudioSamples = 1000 * frameNbrNonInclusive;
+			numTotalAudioSamples = 1000 * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_4795:
-			numTotalAudioSamples = 1001 * frameNbrNonInclusive;
+			numTotalAudioSamples = 1001 * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_3000:
-			numTotalAudioSamples = 1600 * frameNbrNonInclusive;
+			numTotalAudioSamples = 1600 * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_2997:
 			// depends on cadenceFrame;
@@ -3323,16 +3121,16 @@ LWord64 GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr(NTV2FrameRate frameRate
 			numTotalAudioSamples = numAudioSamplesFromWholeGroups + numAudioSamplesFromRemainder;
 			break;
 		case NTV2_FRAMERATE_2500:
-			numTotalAudioSamples = 1920 * frameNbrNonInclusive;
+			numTotalAudioSamples = 1920 * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_2400:
-			numTotalAudioSamples = 2000 * frameNbrNonInclusive;
+			numTotalAudioSamples = 2000 * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_2398:
-			numTotalAudioSamples = 2002 * frameNbrNonInclusive;
+			numTotalAudioSamples = 2002 * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_1500:
-			numTotalAudioSamples = 3200 * frameNbrNonInclusive;
+			numTotalAudioSamples = 3200 * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_1498:
 			// depends on cadenceFrame;
@@ -3340,23 +3138,24 @@ LWord64 GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr(NTV2FrameRate frameRate
 			numAudioSamplesFromRemainder = (remainder == 0) ? 0 : ((3203 * remainder) + 1);
 			numTotalAudioSamples = numAudioSamplesFromWholeGroups + numAudioSamplesFromRemainder;
 			break;
+#if !defined(NTV2_DEPRECATE_16_0)
 		case NTV2_FRAMERATE_1900:	// Not supported yet
 		case NTV2_FRAMERATE_1898:	// Not supported yet
 		case NTV2_FRAMERATE_1800: 	// Not supported yet
 		case NTV2_FRAMERATE_1798:	// Not supported yet
+#endif	//!defined(NTV2_DEPRECATE_16_0)
 		case NTV2_FRAMERATE_UNKNOWN:
 		case NTV2_NUM_FRAMERATES:
 			numTotalAudioSamples = 0;
 			break;
 		}
 	}
-	else
-	if (audioRate == NTV2_AUDIO_96K)
+	else if (inAudioRate == NTV2_AUDIO_96K)
 	{
-		switch (frameRate)
+		switch (inFrameRate)
 		{
 		case NTV2_FRAMERATE_12000:
-			numTotalAudioSamples = 800 * frameNbrNonInclusive;
+			numTotalAudioSamples = 800 * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_11988:
 			numAudioSamplesFromWholeGroups = ((4*801) + (1*800)) * numWholeGroupsOfFive;
@@ -3364,7 +3163,7 @@ LWord64 GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr(NTV2FrameRate frameRate
 			numTotalAudioSamples = numAudioSamplesFromWholeGroups + numAudioSamplesFromRemainder;
 			break;
 		case NTV2_FRAMERATE_6000:
-			numTotalAudioSamples = (800*2) * frameNbrNonInclusive;
+			numTotalAudioSamples = (800*2) * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_5994:
 			numAudioSamplesFromWholeGroups = ((3*1602) + (2*1601)) * numWholeGroupsOfFive;
@@ -3372,16 +3171,16 @@ LWord64 GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr(NTV2FrameRate frameRate
 			numTotalAudioSamples = numAudioSamplesFromWholeGroups + numAudioSamplesFromRemainder;
 			break;
 		case NTV2_FRAMERATE_5000:
-			numTotalAudioSamples = 1920 * frameNbrNonInclusive;
+			numTotalAudioSamples = 1920 * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_4800:
-			numTotalAudioSamples = 2000 * frameNbrNonInclusive;
+			numTotalAudioSamples = 2000 * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_4795:
-			numTotalAudioSamples = 2002 * frameNbrNonInclusive;
+			numTotalAudioSamples = 2002 * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_3000:
-			numTotalAudioSamples = (1600*2) * frameNbrNonInclusive;
+			numTotalAudioSamples = (1600*2) * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_2997:
 			// depends on cadenceFrame;
@@ -3390,16 +3189,16 @@ LWord64 GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr(NTV2FrameRate frameRate
 			numTotalAudioSamples = numAudioSamplesFromWholeGroups + numAudioSamplesFromRemainder;
 			break;
 		case NTV2_FRAMERATE_2500:
-			numTotalAudioSamples = (1920*2) * frameNbrNonInclusive;
+			numTotalAudioSamples = (1920*2) * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_2400:
-			numTotalAudioSamples = (2000*2) * frameNbrNonInclusive;
+			numTotalAudioSamples = (2000*2) * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_2398:
-			numTotalAudioSamples = (2002*2) * frameNbrNonInclusive;
+			numTotalAudioSamples = (2002*2) * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_1500:
-			numTotalAudioSamples = (3200*2) * frameNbrNonInclusive;
+			numTotalAudioSamples = (3200*2) * inFrameNumNonInclusive;
 			break;
 		case NTV2_FRAMERATE_1498:
 			// depends on cadenceFrame;
@@ -3407,10 +3206,12 @@ LWord64 GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr(NTV2FrameRate frameRate
 			numAudioSamplesFromRemainder = (remainder == 0) ? 0 : (((3203*2) * remainder) + 2);
 			numTotalAudioSamples = numAudioSamplesFromWholeGroups + numAudioSamplesFromRemainder;
 			break;
+#if !defined(NTV2_DEPRECATE_16_0)
 		case NTV2_FRAMERATE_1900:	// Not supported yet
 		case NTV2_FRAMERATE_1898:	// Not supported yet
 		case NTV2_FRAMERATE_1800: 	// Not supported yet
 		case NTV2_FRAMERATE_1798:	// Not supported yet
+#endif	//!defined(NTV2_DEPRECATE_16_0)
 		case NTV2_FRAMERATE_UNKNOWN:
 		case NTV2_NUM_FRAMERATES:
 			numTotalAudioSamples = 0*2; //haha
@@ -3421,25 +3222,25 @@ LWord64 GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr(NTV2FrameRate frameRate
 	return numTotalAudioSamples;
 }
 
-// GetVaricamRepeatCount(NTV2FrameRate sequenceRate, NTV2FrameRate playRate, ULWord cadenceFrame)
+
 // For a given sequenceRate and playRate, given the cadenceFrame it returns how many times we
 // repeate the frame to output varicam.  If the result is zero then this is an unsupported varicam
 // rate.
-ULWord GetVaricamRepeatCount(NTV2FrameRate sequenceRate, NTV2FrameRate playRate, ULWord cadenceFrame)
+ULWord GetVaricamRepeatCount (const NTV2FrameRate inSequenceRate, const NTV2FrameRate inPlayRate, const ULWord inCadenceFrame)
 {
 	ULWord result = 0;
 
-	switch (playRate)
+	switch (inPlayRate)
 	{
 	case NTV2_FRAMERATE_6000:
-		switch (sequenceRate)
+		switch (inSequenceRate)
 		{
 		case NTV2_FRAMERATE_1500:
 			result = 4;
 			break;
 		case NTV2_FRAMERATE_2400:			// 24 -> 60					2:3|2:3|2:3 ...
-			cadenceFrame %= 2;
-			switch (cadenceFrame)
+			//inCadenceFrame %= 2;
+			switch (inCadenceFrame % 2)
 			{
 				case 0:
 					result = 2;
@@ -3450,8 +3251,8 @@ ULWord GetVaricamRepeatCount(NTV2FrameRate sequenceRate, NTV2FrameRate playRate,
 			}
 			break;
 		case NTV2_FRAMERATE_2500:			// 25 -> 60					2:3:2:3:2|2:3:2:3:2 ...
-			cadenceFrame %= 5;
-			switch (cadenceFrame)
+			//inCadenceFrame %= 5;
+			switch (inCadenceFrame % 5)
 			{
 				case 0:
 				case 2:
@@ -3468,8 +3269,8 @@ ULWord GetVaricamRepeatCount(NTV2FrameRate sequenceRate, NTV2FrameRate playRate,
 			result = 2;
 			break;
 		case NTV2_FRAMERATE_4800:			// 48 -> 60					2:1:1:1|2:1:1:1 ...
-			cadenceFrame %= 4;
-			switch (cadenceFrame)
+			//inCadenceFrame %= 4;
+			switch (inCadenceFrame % 4)
 			{
 				case 0:
 					result = 2;
@@ -3482,8 +3283,8 @@ ULWord GetVaricamRepeatCount(NTV2FrameRate sequenceRate, NTV2FrameRate playRate,
 			}
 			break;
 		case NTV2_FRAMERATE_5000:			// 50 -> 60					2:1:1:1:1|2:1:1:1:1: ...
-			cadenceFrame %= 5;
-			switch (cadenceFrame)
+			//inCadenceFrame %= 5;
+			switch (inCadenceFrame % 5)
 			{
 				case 0:
 					result = 2;
@@ -3505,14 +3306,14 @@ ULWord GetVaricamRepeatCount(NTV2FrameRate sequenceRate, NTV2FrameRate playRate,
 		break;
 
 	case NTV2_FRAMERATE_5994:
-		switch (sequenceRate)
+		switch (inSequenceRate)
 		{
 		case NTV2_FRAMERATE_1498:
 			result = 4;
 			break;
 		case NTV2_FRAMERATE_2398:			// 23.98 -> 59.94			2:3|2:3|2:3 ...
-			cadenceFrame %= 2;
-			switch (cadenceFrame)
+			//inCadenceFrame %= 2;
+			switch (inCadenceFrame % 2)
 			{
 				case 0:
 					result = 2;
@@ -3526,8 +3327,8 @@ ULWord GetVaricamRepeatCount(NTV2FrameRate sequenceRate, NTV2FrameRate playRate,
 			result = 2;
 			break;
 		case NTV2_FRAMERATE_4795:			// 47.95 -> 59.94			2:1:1:1|2:1:1:1 ...
-			cadenceFrame %= 4;
-			switch (cadenceFrame)
+			//inCadenceFrame %= 4;
+			switch (inCadenceFrame % 4)
 			{
 				case 0:
 					result = 2;
@@ -3548,7 +3349,7 @@ ULWord GetVaricamRepeatCount(NTV2FrameRate sequenceRate, NTV2FrameRate playRate,
 		break;
 
 	case NTV2_FRAMERATE_5000:
-		switch (sequenceRate)
+		switch (inSequenceRate)
 		{
 		case NTV2_FRAMERATE_2500:			// 25 -> 50					2|2|2|2|2| ...
 			result = 2;
@@ -3564,33 +3365,35 @@ ULWord GetVaricamRepeatCount(NTV2FrameRate sequenceRate, NTV2FrameRate playRate,
 	return result;
 }
 
-ULWord GetScaleFromFrameRate(NTV2FrameRate frameRate)
+ULWord GetScaleFromFrameRate (const NTV2FrameRate inFrameRate)
 {
-	switch (frameRate)
+	switch (inFrameRate)
 	{
-	case NTV2_FRAMERATE_12000:		return 12000;
-	case NTV2_FRAMERATE_11988:		return 11988;
-	case NTV2_FRAMERATE_6000:		return 6000;
-	case NTV2_FRAMERATE_5994:		return 5994;
-	case NTV2_FRAMERATE_5000:		return 5000;
-	case NTV2_FRAMERATE_4800:		return 4800;
-	case NTV2_FRAMERATE_4795:		return 4795;
-	case NTV2_FRAMERATE_3000:		return 3000;
-	case NTV2_FRAMERATE_2997:		return 2997;
-	case NTV2_FRAMERATE_2500:		return 2500;
-	case NTV2_FRAMERATE_2400:		return 2400;
-	case NTV2_FRAMERATE_2398:		return 2398;
-	case NTV2_FRAMERATE_1900:		return 1900;
-	case NTV2_FRAMERATE_1898:		return 1898;
-	case NTV2_FRAMERATE_1800:		return 1800;
-	case NTV2_FRAMERATE_1798:		return 1798;
-	case NTV2_FRAMERATE_1500:		return 1500;
-	case NTV2_FRAMERATE_1498:		return 1498;
-	case NTV2_FRAMERATE_UNKNOWN:	break;
+		case NTV2_FRAMERATE_12000:		return 12000;
+		case NTV2_FRAMERATE_11988:		return 11988;
+		case NTV2_FRAMERATE_6000:		return 6000;
+		case NTV2_FRAMERATE_5994:		return 5994;
+		case NTV2_FRAMERATE_5000:		return 5000;
+		case NTV2_FRAMERATE_4800:		return 4800;
+		case NTV2_FRAMERATE_4795:		return 4795;
+		case NTV2_FRAMERATE_3000:		return 3000;
+		case NTV2_FRAMERATE_2997:		return 2997;
+		case NTV2_FRAMERATE_2500:		return 2500;
+		case NTV2_FRAMERATE_2400:		return 2400;
+		case NTV2_FRAMERATE_2398:		return 2398;
+		case NTV2_FRAMERATE_1500:		return 1500;
+		case NTV2_FRAMERATE_1498:		return 1498;
+#if !defined(NTV2_DEPRECATE_16_0)
+		case NTV2_FRAMERATE_1900:		return 1900;
+		case NTV2_FRAMERATE_1898:		return 1898;
+		case NTV2_FRAMERATE_1800:		return 1800;
+		case NTV2_FRAMERATE_1798:		return 1798;
+#endif	//!defined(NTV2_DEPRECATE_16_0)
+		case NTV2_FRAMERATE_UNKNOWN:	break;
 #if defined(_DEBUG)
-	case NTV2_NUM_FRAMERATES:		break;
+		case NTV2_NUM_FRAMERATES:		break;
 #else
-	default:						break;
+		default:						break;
 #endif
 	}
 	return 0;
@@ -3599,7 +3402,7 @@ ULWord GetScaleFromFrameRate(NTV2FrameRate frameRate)
 // GetFrameRateFromScale(long scale, long duration, NTV2FrameRate playFrameRate)
 // For a given scale value it returns the associated frame rate.  This routine is
 // used to calculate and decipher the sequence frame rate.
-NTV2FrameRate GetFrameRateFromScale(long scale, long duration, NTV2FrameRate playFrameRate)
+NTV2FrameRate GetFrameRateFromScale (long scale, long duration, NTV2FrameRate playFrameRate)
 {
 	NTV2FrameRate result = NTV2_FRAMERATE_6000;
 
@@ -3609,20 +3412,20 @@ NTV2FrameRate GetFrameRateFromScale(long scale, long duration, NTV2FrameRate pla
 	{
 		switch (scale)
 		{
-		case 12000:	result = NTV2_FRAMERATE_12000;	break;
-		case 11988:	result = NTV2_FRAMERATE_11988;	break;
-		case 6000:	result = NTV2_FRAMERATE_6000;	break;
-		case 5994:	result = NTV2_FRAMERATE_5994;	break;
-		case 5000:	result = NTV2_FRAMERATE_5000;	break;
-		case 4800:	result = NTV2_FRAMERATE_4800;	break;
-		case 4795:	result = NTV2_FRAMERATE_4795;	break;
-		case 3000:	result = NTV2_FRAMERATE_3000;	break;
-		case 2997:	result = NTV2_FRAMERATE_2997;	break;
-		case 2500:	result = NTV2_FRAMERATE_2500;	break;
-		case 2400:	result = NTV2_FRAMERATE_2400;	break;
-		case 2398:	result = NTV2_FRAMERATE_2398;	break;
-		case 1500:	result = NTV2_FRAMERATE_1500;	break;
-		case 1498:	result = NTV2_FRAMERATE_1498;	break;
+			case 12000:	result = NTV2_FRAMERATE_12000;	break;
+			case 11988:	result = NTV2_FRAMERATE_11988;	break;
+			case 6000:	result = NTV2_FRAMERATE_6000;	break;
+			case 5994:	result = NTV2_FRAMERATE_5994;	break;
+			case 5000:	result = NTV2_FRAMERATE_5000;	break;
+			case 4800:	result = NTV2_FRAMERATE_4800;	break;
+			case 4795:	result = NTV2_FRAMERATE_4795;	break;
+			case 3000:	result = NTV2_FRAMERATE_3000;	break;
+			case 2997:	result = NTV2_FRAMERATE_2997;	break;
+			case 2500:	result = NTV2_FRAMERATE_2500;	break;
+			case 2400:	result = NTV2_FRAMERATE_2400;	break;
+			case 2398:	result = NTV2_FRAMERATE_2398;	break;
+			case 1500:	result = NTV2_FRAMERATE_1500;	break;
+			case 1498:	result = NTV2_FRAMERATE_1498;	break;
 		}
 	}
 	else if (duration == 0)
@@ -3696,86 +3499,45 @@ NTV2FrameRate GetFrameRateFromScale(long scale, long duration, NTV2FrameRate pla
 }
 
 
-NTV2FrameRate GetNTV2FrameRateFromNumeratorDenominator (ULWord numerator, ULWord denominator)
+NTV2FrameRate GetNTV2FrameRateFromNumeratorDenominator (const ULWord inNumerator, const ULWord inDenominator)
 {
-	NTV2FrameRate ntv2Rate = NTV2_FRAMERATE_UNKNOWN;
-
-	if (denominator == 100)
-	{
-		switch (numerator)
+	if (inDenominator == 100)
+		switch (inNumerator)
 		{
-			case 12000: ntv2Rate = NTV2_FRAMERATE_12000; break;
-			case 11988: ntv2Rate = NTV2_FRAMERATE_11988; break;
-			case 6000: ntv2Rate = NTV2_FRAMERATE_6000; break;
-			case 5994: ntv2Rate = NTV2_FRAMERATE_5994; break;
-			case 5000: ntv2Rate = NTV2_FRAMERATE_5000; break;
-			case 4800: ntv2Rate = NTV2_FRAMERATE_4800; break;
-			case 4795: ntv2Rate = NTV2_FRAMERATE_4795; break;
-			case 3000: ntv2Rate = NTV2_FRAMERATE_3000; break;
-			case 2997: ntv2Rate = NTV2_FRAMERATE_2997; break;
-			case 2500: ntv2Rate = NTV2_FRAMERATE_2500; break;
-			case 2400: ntv2Rate = NTV2_FRAMERATE_2400; break;
-			case 2398: ntv2Rate = NTV2_FRAMERATE_2398; break;
-			case 1500: ntv2Rate = NTV2_FRAMERATE_1500; break;
-			case 1498: ntv2Rate = NTV2_FRAMERATE_1498; break;
-			default: break;
+			case 12000:	return NTV2_FRAMERATE_12000;
+			case 11988:	return NTV2_FRAMERATE_11988;
+			case 6000:	return NTV2_FRAMERATE_6000;
+			case 5994:	return NTV2_FRAMERATE_5994;
+			case 5000:	return NTV2_FRAMERATE_5000;
+			case 4800:	return NTV2_FRAMERATE_4800;
+			case 4795:	return NTV2_FRAMERATE_4795;
+			case 3000:	return NTV2_FRAMERATE_3000;
+			case 2997:	return NTV2_FRAMERATE_2997;
+			case 2500:	return NTV2_FRAMERATE_2500;
+			case 2400:	return NTV2_FRAMERATE_2400;
+			case 2398:	return NTV2_FRAMERATE_2398;
+			case 1500:	return NTV2_FRAMERATE_1500;
+			case 1498:	return NTV2_FRAMERATE_1498;
+			default:	break;
 		}
-	}
-
 	else
 	{
-		if (denominator == 1)
-		{
-			numerator *= 1000;
-			denominator *= 1000;
-		}
-
+		const ULWord denominator(inDenominator == 1 ? inDenominator * 1000ULL : inDenominator);
+		const ULWord numerator(inDenominator == 1 ? inNumerator * 1000ULL : inNumerator);
 		switch (numerator)
 		{
-			case 120000:
-				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_12000;
-				else ntv2Rate = NTV2_FRAMERATE_11988;
-				break;
-
-			case 60000:
-				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_6000;
-				else ntv2Rate = NTV2_FRAMERATE_5994;
-				break;
-
-			case 50000:
-				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_5000;
-				break;
-
-			case 48000:
-				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_4800;
-				else ntv2Rate = NTV2_FRAMERATE_4795;
-				break;
-
-			case 30000:
-				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_3000;
-				else ntv2Rate = NTV2_FRAMERATE_2997;
-				break;
-
-			case 25000:
-				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_2500;
-				break;
-
-			case 24000:
-				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_2400;
-				else ntv2Rate = NTV2_FRAMERATE_2398;
-				break;
-
-			case 15000:
-				if (denominator == 1000) ntv2Rate = NTV2_FRAMERATE_1500;
-				else ntv2Rate = NTV2_FRAMERATE_1498;
-				break;
-
-			default:
-				break;
+			case 120000:	return (denominator == 1000) ? NTV2_FRAMERATE_12000 : NTV2_FRAMERATE_11988;
+			case 60000:		return (denominator == 1000) ? NTV2_FRAMERATE_6000 : NTV2_FRAMERATE_5994;
+			case 50000:		return (denominator == 1000) ? NTV2_FRAMERATE_5000 : NTV2_FRAMERATE_UNKNOWN;
+			case 48000:		return (denominator == 1000) ? NTV2_FRAMERATE_4800 : NTV2_FRAMERATE_4795;
+			case 30000:		return (denominator == 1000) ? NTV2_FRAMERATE_3000 : NTV2_FRAMERATE_2997;
+			case 25000:		return (denominator == 1000) ? NTV2_FRAMERATE_2500 : NTV2_FRAMERATE_UNKNOWN;
+			case 24000:		return (denominator == 1000) ? NTV2_FRAMERATE_2400 : NTV2_FRAMERATE_2398;
+			case 15000:		return (denominator == 1000) ? NTV2_FRAMERATE_1500 : NTV2_FRAMERATE_1498;
+			default:		break;
 		}
 	}
-
-	return ntv2Rate;
+	return NTV2_FRAMERATE_UNKNOWN;
 }
 
 
@@ -4008,44 +3770,44 @@ NTV2FrameGeometry GetNormalizedFrameGeometry (const NTV2FrameGeometry inFrameGeo
 {
 	switch (inFrameGeometry)
 	{
-	case NTV2_FG_1920x1080:		//	1080i, 1080p
-	case NTV2_FG_1280x720:		//	720p
-	case NTV2_FG_720x486:		//	ntsc 525i, 525p60
-	case NTV2_FG_720x576:		//	pal 625i
-	case NTV2_FG_2048x1080:		//	2k1080p
-	case NTV2_FG_2048x1556:		//	2k1556psf
-	case NTV2_FG_4x1920x1080:	//	UHD
-	case NTV2_FG_4x2048x1080:	//	4K
-	case NTV2_FG_4x3840x2160:
-	case NTV2_FG_4x4096x2160:
-		return inFrameGeometry;	//	No change, already normalized
+		case NTV2_FG_1920x1080:		//	1080i, 1080p
+		case NTV2_FG_1280x720:		//	720p
+		case NTV2_FG_720x486:		//	ntsc 525i, 525p60
+		case NTV2_FG_720x576:		//	pal 625i
+		case NTV2_FG_2048x1080:		//	2k1080p
+		case NTV2_FG_2048x1556:		//	2k1556psf
+		case NTV2_FG_4x1920x1080:	//	UHD
+		case NTV2_FG_4x2048x1080:	//	4K
+		case NTV2_FG_4x3840x2160:
+		case NTV2_FG_4x4096x2160:
+			return inFrameGeometry;	//	No change, already normalized
 
-														//	525i
-	case NTV2_FG_720x508:	return NTV2_FG_720x486;		//	720x486 + tall vanc
-	case NTV2_FG_720x514:	return NTV2_FG_720x486;		//	720x486 + taller vanc (extra-wide ntsc)
+															//	525i
+		case NTV2_FG_720x508:	return NTV2_FG_720x486;		//	720x486 + tall vanc
+		case NTV2_FG_720x514:	return NTV2_FG_720x486;		//	720x486 + taller vanc (extra-wide ntsc)
 
-														//	625i
-	case NTV2_FG_720x598:	return NTV2_FG_720x576;		//	pal 625i + tall vanc
-	case NTV2_FG_720x612:	return NTV2_FG_720x576;		//	720x576 + taller vanc (extra-wide pal)
+															//	625i
+		case NTV2_FG_720x598:	return NTV2_FG_720x576;		//	pal 625i + tall vanc
+		case NTV2_FG_720x612:	return NTV2_FG_720x576;		//	720x576 + taller vanc (extra-wide pal)
 
-														//	720p
-	case NTV2_FG_1280x740:	return NTV2_FG_1280x720;	//	1280x720 + tall vanc
+															//	720p
+		case NTV2_FG_1280x740:	return NTV2_FG_1280x720;	//	1280x720 + tall vanc
 
-														//	1080
-	case NTV2_FG_1920x1112:	return NTV2_FG_1920x1080;	//	1920x1080 + tall vanc
-	case NTV2_FG_1920x1114:	return NTV2_FG_1920x1080;	//	1920x1080 + taller vanc
+															//	1080
+		case NTV2_FG_1920x1112:	return NTV2_FG_1920x1080;	//	1920x1080 + tall vanc
+		case NTV2_FG_1920x1114:	return NTV2_FG_1920x1080;	//	1920x1080 + taller vanc
 
-														//	2kx1080
-	case NTV2_FG_2048x1112:	return NTV2_FG_2048x1080;	//	2048x1080 + tall vanc
-	case NTV2_FG_2048x1114:	return NTV2_FG_2048x1080;	//	2048x1080 + taller vanc
+															//	2kx1080
+		case NTV2_FG_2048x1112:	return NTV2_FG_2048x1080;	//	2048x1080 + tall vanc
+		case NTV2_FG_2048x1114:	return NTV2_FG_2048x1080;	//	2048x1080 + taller vanc
 
-														//	2kx1556 film
-	case NTV2_FG_2048x1588:	return NTV2_FG_2048x1556;	//	2048x1556 + tall vanc
+															//	2kx1556 film
+		case NTV2_FG_2048x1588:	return NTV2_FG_2048x1556;	//	2048x1556 + tall vanc
 
 #if defined (_DEBUG)
-	case NTV2_FG_INVALID:	break;
+		case NTV2_FG_INVALID:	break;
 #else
-	default:				break;
+		default:				break;
 #endif
 	}
 	return NTV2_FG_INVALID;	//	fail
@@ -4297,11 +4059,11 @@ NTV2Standard GetStandardFromGeometry (const NTV2FrameGeometry inGeometry, const 
 }
 
 
-bool NTV2DeviceCanDoFormat(NTV2DeviceID		inDeviceID,
-						  NTV2FrameRate		inFrameRate,
-  			              NTV2FrameGeometry inFrameGeometry,
-						  NTV2Standard		inStandard)
-{
+bool NTV2DeviceCanDoFormat (const NTV2DeviceID		inDeviceID,
+							const NTV2FrameRate		inFrameRate,
+							const NTV2FrameGeometry	inFrameGeometry,
+							const NTV2Standard		inStandard)
+{	//	DEPRECATED FUNCTION
 	//	This implementation is very inefficient, but...
 	//	a)	this function is deprecated;
 	//	b)	nobody should be calling it (they should be calling NTV2DeviceCanDoVideoFormat instead)
@@ -4324,478 +4086,39 @@ bool NTV2DeviceCanDoFormat(NTV2DeviceID		inDeviceID,
 	return false;
 }
 
-ULWord GetNTV2FrameGeometryHeight(const NTV2FrameGeometry geometry)
+ULWord GetNTV2FrameGeometryHeight (const NTV2FrameGeometry inGeometry)
 {
-	switch (geometry)
-	{
-	case NTV2_FG_1920x1080:		return 1080;
-	case NTV2_FG_1280x720:		return 720;
-	case NTV2_FG_720x486:		return 486;
-	case NTV2_FG_720x576:		return 576;
-	case NTV2_FG_720x508:		return 508;
-	case NTV2_FG_720x598:		return 598;
-	case NTV2_FG_1920x1112:		return 1112;
-	case NTV2_FG_1920x1114:		return 1114;
-	case NTV2_FG_1280x740:		return 740;
-	case NTV2_FG_2048x1080:		return 1080;
-	case NTV2_FG_2048x1556:		return 1556;
-	case NTV2_FG_2048x1588:		return 1588;
-	case NTV2_FG_2048x1112:		return 1112;
-	case NTV2_FG_2048x1114:		return 1114;
-	case NTV2_FG_720x514:		return 514;
-	case NTV2_FG_720x612:		return 612;
-	case NTV2_FG_4x1920x1080:	return 2160;
-	case NTV2_FG_4x2048x1080:	return 2160;
-	case NTV2_FG_4x3840x2160:	return 4320;
-	case NTV2_FG_4x4096x2160:	return 4320;
-	default:					return 0;
-	}
+	const NTV2FormatDescriptor fd (::GetStandardFromGeometry(inGeometry), NTV2_FBF_8BIT_YCBCR);
+	return fd.GetRasterHeight(/*visOnly?*/false);	//	Include VANC
 }
 
-ULWord GetNTV2FrameGeometryWidth(const NTV2FrameGeometry geometry)
+ULWord GetNTV2FrameGeometryWidth (const NTV2FrameGeometry inGeometry)
 {
-	switch ( geometry )
-	{
-	case NTV2_FG_720x486:
-	case NTV2_FG_720x576:
-	case NTV2_FG_720x508:
-	case NTV2_FG_720x598:
-	case NTV2_FG_720x514:
-	case NTV2_FG_720x612:
-		return 720;
-	case NTV2_FG_1280x720:
-	case NTV2_FG_1280x740:
-		return 1280;
-	case NTV2_FG_1920x1080:
-	case NTV2_FG_1920x1112:
-	case NTV2_FG_1920x1114:
-		return 1920;
-	case NTV2_FG_2048x1080:
-	case NTV2_FG_2048x1112:
-	case NTV2_FG_2048x1114:
-	case NTV2_FG_2048x1556:
-	case NTV2_FG_2048x1588:
-		return 2048;
-	case NTV2_FG_4x1920x1080:
-		return 3840;
-	case NTV2_FG_4x2048x1080:
-		return 4096;
-	case NTV2_FG_4x3840x2160:
-		return 7680;
-	case NTV2_FG_4x4096x2160:
-		return 8192;
-	default:
-		return 0;
-	}
+	const NTV2FormatDescriptor fd (::GetStandardFromGeometry(inGeometry), NTV2_FBF_8BIT_YCBCR);
+	return fd.GetRasterWidth();
 }
 
 
 //	Displayable width of format, not counting HANC/VANC
-ULWord GetDisplayWidth (const NTV2VideoFormat videoFormat)
+ULWord GetDisplayWidth (const NTV2VideoFormat inVideoFormat)
 {
-	ULWord width = 0;
-
-	switch (videoFormat)
-	{
-	case NTV2_FORMAT_525_2398:
-	case NTV2_FORMAT_525_2400:
-	case NTV2_FORMAT_525_5994:
-	case NTV2_FORMAT_525psf_2997:
-	case NTV2_FORMAT_625_5000:
-	case NTV2_FORMAT_625psf_2500:
-		width = 720;
-		break;
-	case NTV2_FORMAT_720p_5000:
-	case NTV2_FORMAT_720p_5994:
-	case NTV2_FORMAT_720p_6000:
-	case NTV2_FORMAT_720p_2398:
-	case NTV2_FORMAT_720p_2500:
-		width = 1280;
-		break;
-	case NTV2_FORMAT_1080i_5000:
-	case NTV2_FORMAT_1080i_5994:
-	case NTV2_FORMAT_1080i_6000:
-	case NTV2_FORMAT_1080psf_2398:
-	case NTV2_FORMAT_1080psf_2400:
-	case NTV2_FORMAT_1080psf_2500_2:
-	case NTV2_FORMAT_1080psf_2997_2:
-	case NTV2_FORMAT_1080psf_3000_2:
-	case NTV2_FORMAT_1080p_2997:
-	case NTV2_FORMAT_1080p_3000:
-	case NTV2_FORMAT_1080p_2500:
-	case NTV2_FORMAT_1080p_2398:
-	case NTV2_FORMAT_1080p_2400:
-	case NTV2_FORMAT_1080p_5000_A:
-	case NTV2_FORMAT_1080p_5994_A:
-	case NTV2_FORMAT_1080p_6000_A:
-	case NTV2_FORMAT_1080p_5000_B:
-	case NTV2_FORMAT_1080p_5994_B:
-	case NTV2_FORMAT_1080p_6000_B:
-		width = 1920;
-		break;
-	case NTV2_FORMAT_1080p_2K_2398:
-	case NTV2_FORMAT_1080p_2K_2400:
-	case NTV2_FORMAT_1080p_2K_2500:
-	case NTV2_FORMAT_1080p_2K_2997:
-	case NTV2_FORMAT_1080p_2K_3000:
-	case NTV2_FORMAT_1080p_2K_4795_A:
-	case NTV2_FORMAT_1080p_2K_4800_A:
-	case NTV2_FORMAT_1080p_2K_5000_A:
-	case NTV2_FORMAT_1080p_2K_5994_A:
-	case NTV2_FORMAT_1080p_2K_6000_A:
-	case NTV2_FORMAT_1080p_2K_4795_B:
-	case NTV2_FORMAT_1080p_2K_4800_B:
-	case NTV2_FORMAT_1080p_2K_5000_B:
-	case NTV2_FORMAT_1080p_2K_5994_B:
-	case NTV2_FORMAT_1080p_2K_6000_B:
-	case NTV2_FORMAT_1080psf_2K_2398:
-	case NTV2_FORMAT_1080psf_2K_2400:
-	case NTV2_FORMAT_1080psf_2K_2500:
-	case NTV2_FORMAT_2K_1498:
-	case NTV2_FORMAT_2K_1500:
-	case NTV2_FORMAT_2K_2398:
-	case NTV2_FORMAT_2K_2400:
-	case NTV2_FORMAT_2K_2500:
-		width = 2048;
-		break;
-	case NTV2_FORMAT_4x1920x1080psf_2398:
-	case NTV2_FORMAT_4x1920x1080psf_2400:
-	case NTV2_FORMAT_4x1920x1080psf_2500:
-	case NTV2_FORMAT_4x1920x1080psf_2997:
-	case NTV2_FORMAT_4x1920x1080psf_3000:
-	case NTV2_FORMAT_4x1920x1080p_2398:
-	case NTV2_FORMAT_4x1920x1080p_2400:
-	case NTV2_FORMAT_4x1920x1080p_2500:
-	case NTV2_FORMAT_4x1920x1080p_2997:
-	case NTV2_FORMAT_4x1920x1080p_3000:
-	case NTV2_FORMAT_4x1920x1080p_5000:
-	case NTV2_FORMAT_4x1920x1080p_5994:
-	case NTV2_FORMAT_4x1920x1080p_6000:
-	case NTV2_FORMAT_3840x2160psf_2398:
-	case NTV2_FORMAT_3840x2160psf_2400:
-	case NTV2_FORMAT_3840x2160psf_2500:
-	case NTV2_FORMAT_3840x2160p_2398:
-	case NTV2_FORMAT_3840x2160p_2400:
-	case NTV2_FORMAT_3840x2160p_2500:
-	case NTV2_FORMAT_3840x2160p_2997:
-	case NTV2_FORMAT_3840x2160p_3000:
-	case NTV2_FORMAT_3840x2160psf_2997:
-	case NTV2_FORMAT_3840x2160psf_3000:
-	case NTV2_FORMAT_3840x2160p_5000:
-	case NTV2_FORMAT_3840x2160p_5994:
-	case NTV2_FORMAT_3840x2160p_6000:
-	case NTV2_FORMAT_3840x2160p_5000_B:
-	case NTV2_FORMAT_3840x2160p_5994_B:
-	case NTV2_FORMAT_3840x2160p_6000_B:
-	case NTV2_FORMAT_4x1920x1080p_5000_B:
-	case NTV2_FORMAT_4x1920x1080p_5994_B:
-	case NTV2_FORMAT_4x1920x1080p_6000_B:
-		width = 3840;
-		break;
-	case NTV2_FORMAT_4x2048x1080psf_2398:
-	case NTV2_FORMAT_4x2048x1080psf_2400:
-	case NTV2_FORMAT_4x2048x1080psf_2500:
-	case NTV2_FORMAT_4x2048x1080psf_2997:
-	case NTV2_FORMAT_4x2048x1080psf_3000:
-	case NTV2_FORMAT_4x2048x1080p_2398:
-	case NTV2_FORMAT_4x2048x1080p_2400:
-	case NTV2_FORMAT_4x2048x1080p_2500:
-	case NTV2_FORMAT_4x2048x1080p_2997:
-	case NTV2_FORMAT_4x2048x1080p_3000:
-	case NTV2_FORMAT_4x2048x1080p_4795:
-	case NTV2_FORMAT_4x2048x1080p_4800:
-	case NTV2_FORMAT_4x2048x1080p_5000:
-	case NTV2_FORMAT_4x2048x1080p_5994:
-	case NTV2_FORMAT_4x2048x1080p_6000:
-	case NTV2_FORMAT_4x2048x1080p_11988:
-	case NTV2_FORMAT_4x2048x1080p_12000:
-	case NTV2_FORMAT_4096x2160psf_2398:
-	case NTV2_FORMAT_4096x2160psf_2400:
-	case NTV2_FORMAT_4096x2160psf_2500:
-	case NTV2_FORMAT_4096x2160p_2398:
-	case NTV2_FORMAT_4096x2160p_2400:
-	case NTV2_FORMAT_4096x2160p_2500:
-	case NTV2_FORMAT_4096x2160p_2997:
-	case NTV2_FORMAT_4096x2160p_3000:
-	case NTV2_FORMAT_4096x2160psf_2997:
-	case NTV2_FORMAT_4096x2160psf_3000:
-	case NTV2_FORMAT_4096x2160p_4795:
-	case NTV2_FORMAT_4096x2160p_4800:
-	case NTV2_FORMAT_4096x2160p_5000:
-	case NTV2_FORMAT_4096x2160p_5994:
-	case NTV2_FORMAT_4096x2160p_6000:
-	case NTV2_FORMAT_4096x2160p_11988:
-	case NTV2_FORMAT_4096x2160p_12000:
-	case NTV2_FORMAT_4096x2160p_4795_B:
-	case NTV2_FORMAT_4096x2160p_4800_B:
-	case NTV2_FORMAT_4096x2160p_5000_B:
-	case NTV2_FORMAT_4096x2160p_5994_B:
-	case NTV2_FORMAT_4096x2160p_6000_B:
-	case NTV2_FORMAT_4x2048x1080p_4795_B:
-	case NTV2_FORMAT_4x2048x1080p_4800_B:
-	case NTV2_FORMAT_4x2048x1080p_5000_B:
-	case NTV2_FORMAT_4x2048x1080p_5994_B:
-	case NTV2_FORMAT_4x2048x1080p_6000_B:
-		width = 4096;
-		break;
-	
-		
-	case NTV2_FORMAT_4x3840x2160p_2398:
-	case NTV2_FORMAT_4x3840x2160p_2400:
-	case NTV2_FORMAT_4x3840x2160p_2500:
-	case NTV2_FORMAT_4x3840x2160p_2997:
-	case NTV2_FORMAT_4x3840x2160p_3000:
-	case NTV2_FORMAT_4x3840x2160p_5000:
-	case NTV2_FORMAT_4x3840x2160p_5994:
-	case NTV2_FORMAT_4x3840x2160p_6000:
-	case NTV2_FORMAT_4x3840x2160p_5000_B:
-	case NTV2_FORMAT_4x3840x2160p_5994_B:
-	case NTV2_FORMAT_4x3840x2160p_6000_B:
-		width = 7680;
-		break;
-	
-	case NTV2_FORMAT_4x4096x2160p_2398:
-	case NTV2_FORMAT_4x4096x2160p_2400:
-	case NTV2_FORMAT_4x4096x2160p_2500:
-	case NTV2_FORMAT_4x4096x2160p_2997:
-	case NTV2_FORMAT_4x4096x2160p_3000:
-	case NTV2_FORMAT_4x4096x2160p_4795:
-	case NTV2_FORMAT_4x4096x2160p_4800:
-	case NTV2_FORMAT_4x4096x2160p_5000:
-	case NTV2_FORMAT_4x4096x2160p_5994:
-	case NTV2_FORMAT_4x4096x2160p_6000:
-	case NTV2_FORMAT_4x4096x2160p_4795_B:
-	case NTV2_FORMAT_4x4096x2160p_4800_B:
-	case NTV2_FORMAT_4x4096x2160p_5000_B:
-	case NTV2_FORMAT_4x4096x2160p_5994_B:
-	case NTV2_FORMAT_4x4096x2160p_6000_B:
-		width = 8192;
-		break;
-		
-#if defined(_DEBUG)
-	case NTV2_FORMAT_UNKNOWN:
-	case NTV2_FORMAT_END_HIGH_DEF_FORMATS:
-	case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
-	case NTV2_FORMAT_END_2K_DEF_FORMATS:
-	case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
-	case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
-	case NTV2_FORMAT_END_4K_DEF_FORMATS2:
-	case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
-	case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
-#else
-	default:
-#endif
-		break;
-	}
-
-	return width;
-
+	const NTV2FormatDescriptor fd (inVideoFormat, NTV2_FBF_8BIT_YCBCR);
+	return fd.GetRasterWidth();
 }	//	GetDisplayWidth
 
 
 //	Displayable height of format, not counting HANC/VANC
-ULWord GetDisplayHeight (const NTV2VideoFormat videoFormat)
+ULWord GetDisplayHeight (const NTV2VideoFormat inVideoFormat)
 {
-	ULWord height = 0;
-
-	switch (videoFormat)
-	{
-	case NTV2_FORMAT_525_2398:
-	case NTV2_FORMAT_525_2400:
-	case NTV2_FORMAT_525_5994:
-	case NTV2_FORMAT_525psf_2997:
-		height = 486;
-		break;
-	case NTV2_FORMAT_625_5000:
-	case NTV2_FORMAT_625psf_2500:
-		height = 576;
-		break;
-	case NTV2_FORMAT_720p_5000:
-	case NTV2_FORMAT_720p_5994:
-	case NTV2_FORMAT_720p_6000:
-	case NTV2_FORMAT_720p_2398:
-	case NTV2_FORMAT_720p_2500:
-		height = 720;
-		break;
-	case NTV2_FORMAT_1080i_5000:
-	case NTV2_FORMAT_1080i_5994:
-	case NTV2_FORMAT_1080i_6000:
-	case NTV2_FORMAT_1080psf_2398:
-	case NTV2_FORMAT_1080psf_2400:
-	case NTV2_FORMAT_1080psf_2500_2:
-	case NTV2_FORMAT_1080psf_2997_2:
-	case NTV2_FORMAT_1080psf_3000_2:
-	case NTV2_FORMAT_1080p_2997:
-	case NTV2_FORMAT_1080p_3000:
-	case NTV2_FORMAT_1080p_2500:
-	case NTV2_FORMAT_1080p_2398:
-	case NTV2_FORMAT_1080p_2400:
-	case NTV2_FORMAT_1080p_5000_A:
-	case NTV2_FORMAT_1080p_5994_A:
-	case NTV2_FORMAT_1080p_6000_A:
-	case NTV2_FORMAT_1080p_5000_B:
-	case NTV2_FORMAT_1080p_5994_B:
-	case NTV2_FORMAT_1080p_6000_B:
-	case NTV2_FORMAT_1080p_2K_2398:
-	case NTV2_FORMAT_1080p_2K_2400:
-	case NTV2_FORMAT_1080p_2K_2500:
-	case NTV2_FORMAT_1080p_2K_2997:
-	case NTV2_FORMAT_1080p_2K_3000:
-	case NTV2_FORMAT_1080p_2K_4795_A:
-	case NTV2_FORMAT_1080p_2K_4800_A:
-	case NTV2_FORMAT_1080p_2K_5000_A:
-	case NTV2_FORMAT_1080p_2K_5994_A:
-	case NTV2_FORMAT_1080p_2K_6000_A:
-	case NTV2_FORMAT_1080p_2K_4795_B:
-	case NTV2_FORMAT_1080p_2K_4800_B:
-	case NTV2_FORMAT_1080p_2K_5000_B:
-	case NTV2_FORMAT_1080p_2K_5994_B:
-	case NTV2_FORMAT_1080p_2K_6000_B:
-	case NTV2_FORMAT_1080psf_2K_2398:
-	case NTV2_FORMAT_1080psf_2K_2400:
-	case NTV2_FORMAT_1080psf_2K_2500:
-		height = 1080;
-		break;
-	case NTV2_FORMAT_2K_1498:
-	case NTV2_FORMAT_2K_1500:
-	case NTV2_FORMAT_2K_2398:
-	case NTV2_FORMAT_2K_2400:
-	case NTV2_FORMAT_2K_2500:
-		height = 1556;
-		break;
-	case NTV2_FORMAT_4x1920x1080psf_2398:
-	case NTV2_FORMAT_4x1920x1080psf_2400:
-	case NTV2_FORMAT_4x1920x1080psf_2500:
-	case NTV2_FORMAT_4x1920x1080psf_2997:
-	case NTV2_FORMAT_4x1920x1080psf_3000:
-	case NTV2_FORMAT_4x1920x1080p_2398:
-	case NTV2_FORMAT_4x1920x1080p_2400:
-	case NTV2_FORMAT_4x1920x1080p_2500:
-	case NTV2_FORMAT_4x1920x1080p_2997:
-	case NTV2_FORMAT_4x1920x1080p_3000:
-	case NTV2_FORMAT_4x2048x1080psf_2398:
-	case NTV2_FORMAT_4x2048x1080psf_2400:
-	case NTV2_FORMAT_4x2048x1080psf_2500:
-	case NTV2_FORMAT_4x2048x1080psf_2997:
-	case NTV2_FORMAT_4x2048x1080psf_3000:
-	case NTV2_FORMAT_4x2048x1080p_2398:
-	case NTV2_FORMAT_4x2048x1080p_2400:
-	case NTV2_FORMAT_4x2048x1080p_2500:
-	case NTV2_FORMAT_4x2048x1080p_2997:
-	case NTV2_FORMAT_4x2048x1080p_3000:
-	case NTV2_FORMAT_4x1920x1080p_5000:
-	case NTV2_FORMAT_4x1920x1080p_5994:
-	case NTV2_FORMAT_4x1920x1080p_6000:
-	case NTV2_FORMAT_4x2048x1080p_4795:
-	case NTV2_FORMAT_4x2048x1080p_4800:
-	case NTV2_FORMAT_4x2048x1080p_5000:
-	case NTV2_FORMAT_4x2048x1080p_5994:
-	case NTV2_FORMAT_4x2048x1080p_6000:
-	case NTV2_FORMAT_4x2048x1080p_11988:
-	case NTV2_FORMAT_4x2048x1080p_12000:
-	case NTV2_FORMAT_3840x2160psf_2398:
-	case NTV2_FORMAT_3840x2160psf_2400:
-	case NTV2_FORMAT_3840x2160psf_2500:
-	case NTV2_FORMAT_3840x2160p_2398:
-	case NTV2_FORMAT_3840x2160p_2400:
-	case NTV2_FORMAT_3840x2160p_2500:
-	case NTV2_FORMAT_3840x2160p_2997:
-	case NTV2_FORMAT_3840x2160p_3000:
-	case NTV2_FORMAT_3840x2160psf_2997:
-	case NTV2_FORMAT_3840x2160psf_3000:
-	case NTV2_FORMAT_3840x2160p_5000:
-	case NTV2_FORMAT_3840x2160p_5994:
-	case NTV2_FORMAT_3840x2160p_6000:
-	case NTV2_FORMAT_4096x2160psf_2398:
-	case NTV2_FORMAT_4096x2160psf_2400:
-	case NTV2_FORMAT_4096x2160psf_2500:
-	case NTV2_FORMAT_4096x2160p_2398:
-	case NTV2_FORMAT_4096x2160p_2400:
-	case NTV2_FORMAT_4096x2160p_2500:
-	case NTV2_FORMAT_4096x2160p_2997:
-	case NTV2_FORMAT_4096x2160p_3000:
-	case NTV2_FORMAT_4096x2160psf_2997:
-	case NTV2_FORMAT_4096x2160psf_3000:
-	case NTV2_FORMAT_4096x2160p_4795:
-	case NTV2_FORMAT_4096x2160p_4800:
-	case NTV2_FORMAT_4096x2160p_5000:
-	case NTV2_FORMAT_4096x2160p_5994:
-	case NTV2_FORMAT_4096x2160p_6000:
-	case NTV2_FORMAT_4096x2160p_11988:
-	case NTV2_FORMAT_4096x2160p_12000:
-	case NTV2_FORMAT_3840x2160p_5000_B:
-	case NTV2_FORMAT_3840x2160p_5994_B:
-	case NTV2_FORMAT_3840x2160p_6000_B:
-	case NTV2_FORMAT_4096x2160p_4795_B:
-	case NTV2_FORMAT_4096x2160p_4800_B:
-	case NTV2_FORMAT_4096x2160p_5000_B:
-	case NTV2_FORMAT_4096x2160p_5994_B:
-	case NTV2_FORMAT_4096x2160p_6000_B:
-	case NTV2_FORMAT_4x1920x1080p_5000_B:
-	case NTV2_FORMAT_4x1920x1080p_5994_B:
-	case NTV2_FORMAT_4x1920x1080p_6000_B:
-	case NTV2_FORMAT_4x2048x1080p_4795_B:
-	case NTV2_FORMAT_4x2048x1080p_4800_B:
-	case NTV2_FORMAT_4x2048x1080p_5000_B:
-	case NTV2_FORMAT_4x2048x1080p_5994_B:
-	case NTV2_FORMAT_4x2048x1080p_6000_B:
-		height = 2160;
-		break;
-		
-	case NTV2_FORMAT_4x3840x2160p_2398:
-	case NTV2_FORMAT_4x3840x2160p_2400:
-	case NTV2_FORMAT_4x3840x2160p_2500:
-	case NTV2_FORMAT_4x3840x2160p_2997:
-	case NTV2_FORMAT_4x3840x2160p_3000:
-	case NTV2_FORMAT_4x3840x2160p_5000:
-	case NTV2_FORMAT_4x3840x2160p_5994:
-	case NTV2_FORMAT_4x3840x2160p_6000:
-	case NTV2_FORMAT_4x3840x2160p_5000_B:
-	case NTV2_FORMAT_4x3840x2160p_5994_B:
-	case NTV2_FORMAT_4x3840x2160p_6000_B:
-	case NTV2_FORMAT_4x4096x2160p_2398:
-	case NTV2_FORMAT_4x4096x2160p_2400:
-	case NTV2_FORMAT_4x4096x2160p_2500:
-	case NTV2_FORMAT_4x4096x2160p_2997:
-	case NTV2_FORMAT_4x4096x2160p_3000:
-	case NTV2_FORMAT_4x4096x2160p_4795:
-	case NTV2_FORMAT_4x4096x2160p_4800:
-	case NTV2_FORMAT_4x4096x2160p_5000:
-	case NTV2_FORMAT_4x4096x2160p_5994:
-	case NTV2_FORMAT_4x4096x2160p_6000:
-	case NTV2_FORMAT_4x4096x2160p_4795_B:
-	case NTV2_FORMAT_4x4096x2160p_4800_B:
-	case NTV2_FORMAT_4x4096x2160p_5000_B:
-	case NTV2_FORMAT_4x4096x2160p_5994_B:
-	case NTV2_FORMAT_4x4096x2160p_6000_B:
-		height = 4320;
-		break;
-		
-#if defined(_DEBUG)
-	case NTV2_FORMAT_UNKNOWN:
-	case NTV2_FORMAT_END_HIGH_DEF_FORMATS:
-	case NTV2_FORMAT_END_STANDARD_DEF_FORMATS:
-	case NTV2_FORMAT_END_2K_DEF_FORMATS:
-	case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
-	case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
-	case NTV2_FORMAT_END_4K_DEF_FORMATS2:
-	case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
-	case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
-#else
-	default:
-#endif
-		break;
-	}
-
-	return height;
-
+	const NTV2FormatDescriptor fd (inVideoFormat, NTV2_FBF_8BIT_YCBCR);
+	return fd.GetVisibleRasterHeight();
 }	//	GetDisplayHeight
+
 
 
 //	NTV2SmpteLineNumber::NTV2SmpteLineNumber (const NTV2Standard inStandard)
 //	IMPLEMENTATION MOVED INTO 'ntv2formatdescriptor.cpp'
 //	SO AS TO USE SAME LineNumbersF1/LineNumbersF2 TABLES
-
 
 ULWord NTV2SmpteLineNumber::GetFirstActiveLine (const NTV2FieldID inFieldID) const
 {
@@ -7826,6 +7149,10 @@ string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID inValue, con
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Multi-Link Out 2 DS4", NTV2_XptMultiLinkOut2DS4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "3D LUT 1 YUV", NTV2_Xpt3DLUT1YUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "3D LUT 1 RGB", NTV2_Xpt3DLUT1RGB);
+	#if !defined(NTV2_DEPRECATE_16_0)
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "WaterMarker 1 RGB", NTV2_XptWaterMarkerRGB);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "WaterMarker 2 RGB", NTV2_XptWaterMarker2RGB);
+	#endif
 	#if !defined(_DEBUG)
 	default:								break;
 	#endif
@@ -8681,10 +8008,12 @@ string NTV2FrameRateToString (const NTV2FrameRate inValue,	const bool inForRetai
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "119.88", NTV2_FRAMERATE_11988);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "15.00", NTV2_FRAMERATE_1500);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "14.98",	NTV2_FRAMERATE_1498);
+#if !defined(NTV2_DEPRECATE_16_0)
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "19.00",	NTV2_FRAMERATE_1900);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "18.98",	NTV2_FRAMERATE_1898);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "18.00",	NTV2_FRAMERATE_1800);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "17.98", NTV2_FRAMERATE_1798);
+#endif	//!defined(NTV2_DEPRECATE_16_0)
 		case NTV2_NUM_FRAMERATES:					return "";  //special case
 	}
 	return "";

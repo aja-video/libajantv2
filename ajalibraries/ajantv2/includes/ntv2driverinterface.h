@@ -20,6 +20,21 @@
 #endif	//	NTV2_WRITEREG_PROFILING		Register Write Profiling
 #include <string>
 
+//	Check consistent use of AJA_USE_CPLUSPLUS11 and NTV2_USE_CPLUSPLUS11
+#ifdef AJA_USE_CPLUSPLUS11
+	#ifndef NTV2_USE_CPLUSPLUS11
+		#error "AJA_USE_CPLUSPLUS11 && !NTV2_USE_CPLUSPLUS11"
+	#else
+		//#warning "AJA_USE_CPLUSPLUS11 && NTV2_USE_CPLUSPLUS11"
+	#endif
+#else
+	#ifdef NTV2_USE_CPLUSPLUS11
+		#error "!AJA_USE_CPLUSPLUS11 && NTV2_USE_CPLUSPLUS11"
+	#else
+		//#warning "!AJA_USE_CPLUSPLUS11 && !NTV2_USE_CPLUSPLUS11"
+	#endif
+#endif
+
 #if defined(AJALinux ) || defined(AJAMac)
 	#include <sys/types.h>
 	#include <netinet/in.h>

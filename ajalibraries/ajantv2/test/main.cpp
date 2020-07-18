@@ -99,7 +99,7 @@ TEST_SUITE("ntv2debug" * doctest::description("ntv2 debug string functions")) {
 	{
 		// spot check a few
 		CHECK(std::string(NTV2FrameRateString(NTV2_FRAMERATE_6000)) == "NTV2_FRAMERATE_6000");
-		CHECK(std::string(NTV2FrameRateString(NTV2_FRAMERATE_1798)) == "NTV2_FRAMERATE_1798");
+		CHECK(std::string(NTV2FrameRateString(NTV2_FRAMERATE_1500)) == "NTV2_FRAMERATE_1500");
 		CHECK(std::string(NTV2FrameRateString(NTV2_NUM_FRAMERATES)) == "");
 		CHECK(std::string(NTV2FrameRateString(NTV2_FRAMERATE_UNKNOWN)) == "NTV2_FRAMERATE_INVALID");
 		CHECK(std::string(NTV2FrameRateString(NTV2_FRAMERATE_INVALID)) == "NTV2_FRAMERATE_INVALID");
