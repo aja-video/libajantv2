@@ -8,13 +8,11 @@
 	-	\ref corvid44
 	-	\ref corvid4412g
 	-	\ref corvid88
-	-	\ref corvidhbr
 	-	\ref corvidhevc
 
 	@section	ntv2hwio		Io Thunderbolt and PCMCIA Devices
 
 	-	\ref io4kplus
-	-	\ref io4kquad and \ref io4kufc
 	-	\ref ioexpress
 	-	\ref ioip
 	-	\ref ioxt
@@ -34,6 +32,8 @@
 	@section	ntv2hwlegacy	Legacy Devices
 
 	-	\ref corvid1corvid3g
+	-	\ref corvidhbr
+	-	\ref io4kquad and \ref io4kufc
 	-	\ref kona3gquad and \ref kona3gufc
 
 	@section	ntv2hwaccessories	Breakout Boxes and Cables
