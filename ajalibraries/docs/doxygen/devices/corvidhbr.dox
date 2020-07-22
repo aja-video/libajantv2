@@ -6,6 +6,9 @@
 	<hr>
 	@subsection		corvidhbr		Corvid HB-R
 
+	@note	This product was End-Of-Lifeʼd on 20JUL2020.
+			See the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/eol-notice-corvidhbr">official EOL notice</a>.
+
 	This page describes the <b>Corvid HB-R</b> OEM capture board.
 	It’s identified by ::DEVICE_ID_CORVIDHBR.
 
@@ -51,7 +54,7 @@
 	@par	SDK Support
 
 	-	Introduced in 2016 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/175">SDK v12.5</a>.
-	-	Feature-complete in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/ntv2sdk152official">SDK v15.2</a>.
+	-	Feature-complete in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/ntv2-sdk-1550">SDK v15.5</a>.
 
 	@par		Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/203/25>
@@ -61,13 +64,13 @@
 	-	Size, without bracket (W × D × H):  0.7" × 6.7" × 2.7" (18mm × 170mm × 69mm)
 	-	Bracket is standard full-height PCIe card size
 	-	Conforms to PCIe Card Electromechanical Specification Rev 1.0A low-profile add-in card
-	-	Power: 10-20V, 10W (typical, card only), 16W (typical, when powering RovoCam), 18W (max)
+	-	Power: 10-20V, 10W (typical, card only), 16W (typical, when powering <a href="https://www.aja.com/products/rovocam">RovoCam</a>), 18W (max)
 
 	@par	Environment
 
-	-	Safe Operating Temperature: 0 to 40 degrees Celcius (32 to 104 degrees Fahrenheit)
+	-	Safe Operating Temperature: 0°C to 40°C (32°F to 104°F)
 	-	Operating Relative Humidity: 10-90% non-condensing
 	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
-	-	Safe Storage Temperature (Power OFF): -40 to 60 degrees Celcius (-40 to 140 degrees Fahrenheit)
+	-	Safe Storage Temperature (Power OFF): -40°C to 60°C (-40°F to 140°F)
 
 **/
