@@ -16,6 +16,7 @@ using namespace std;
 
 
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
+#define NTV2_ANCSIZE_MAX	(256 * 1024)
 
 const uint32_t	kAppSignature	(NTV2_FOURCC('L','l','b','u'));
 
@@ -201,6 +202,7 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 		default:
 		case NTV2_INPUTSOURCE_INVALID:	cerr << "## ERROR:  Bad input source" << endl;  return AJA_STATUS_BAD_PARAM;
 	}
+	mOutputChannel = NTV2_CHANNEL2;
 
 	bool	isTransmit	(false);
 	if (::NTV2DeviceHasBiDirectionalSDI (mDevice.GetDeviceID ())			//	If device has bidirectional SDI connectors...
@@ -209,7 +211,7 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 				&& isTransmit)												//	...and input is set to "transmit"...
 	{
 		mDevice.SetSDITransmitEnable (mInputChannel, false);				//	...then disable transmit mode...
-		mDevice.WaitForInputVerticalInterrupt(mInputChannel, 12);			//	...and give the device a dozen frames or so to lock to the input signal
+		mDevice.WaitForInputVerticalInterrupt(mInputChannel, 20);			//	...and give the device a dozen frames or so to lock to the input signal
 	}	//	if input SDI connector needs to switch from transmit mode
 
 	if (mWithAnc && !NTV2_INPUT_SOURCE_IS_SDI(mInputSource))
@@ -365,8 +367,8 @@ AJAStatus NTV2LLBurn::SetupHostBuffers (void)
 	//	Note that DMA performance can be accelerated slightly by using page-aligned video buffers...
 	mpHostVideoBuffer = NTV2_POINTER(::GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancMode));
 	mpHostAudioBuffer = NTV2_POINTER(NTV2_AUDIOSIZE_MAX);
-	mpHostF1AncBuffer = NTV2_POINTER(mWithAnc ? 4096 : 0);
-	mpHostF2AncBuffer = NTV2_POINTER(mWithAnc ? 4096 : 0);
+	mpHostF1AncBuffer = NTV2_POINTER(mWithAnc ? NTV2_ANCSIZE_MAX : 0);
+	mpHostF2AncBuffer = NTV2_POINTER(mWithAnc ? NTV2_ANCSIZE_MAX : 0);
 
 	if (!mpHostVideoBuffer || !mpHostAudioBuffer  ||  (mWithAnc && !mpHostF1AncBuffer)  ||  (mWithAnc && !mpHostF2AncBuffer))
 	{
@@ -465,7 +467,6 @@ AJAStatus NTV2LLBurn::Run ()
 }	//	Run
 
 
-
 //////////////////////////////////////////////
 
 //	This is where we will start the worker thread
@@ -491,8 +492,11 @@ void NTV2LLBurn::RunThreadStatic (AJAThread * pThread, void * pContext)		//	stat
 }	//	RunThreadStatic
 
 
-static const bool	REPLACE_OUTGOING_ANC_WITH_CUSTOM_PACKETS	(false);
+static const bool	EXTRACT_INSERT_HANC_AUDIO					(false);
+static const bool	CLEAR_HOST_ANC_BUFFER_BEFORE_READ			(false);
+static const bool	PRINT_ANC_PACKETS_AFTER_READ				(false);
 static const bool	CLEAR_DEVICE_ANC_BUFFER_AFTER_READ			(false);
+static const bool	REPLACE_OUTGOING_ANC_WITH_CUSTOM_PACKETS	(false);
 
 
 void NTV2LLBurn::ProcessFrames (void)
@@ -509,6 +513,8 @@ void NTV2LLBurn::ProcessFrames (void)
 	uint32_t	audioInWrapAddress		(0);
 	uint32_t	audioOutWrapAddress		(0);
 	uint32_t	audioBytesCaptured		(0);
+	uint32_t	ancBytesCapturedF1		(0);
+	uint32_t	ancBytesCapturedF2		(0);
 	bool		audioIsReset			(true);
 	string		timeCodeString;
 
@@ -520,18 +526,63 @@ void NTV2LLBurn::ProcessFrames (void)
 	zeroesBuffer.Fill(ULWord64(0));
 	BURNNOTE("Thread started");
 
-	if (mWithAnc && !isInterlace)
-		mpHostF2AncBuffer.Allocate(0);	//	Free F2 Anc buffer
+	mDevice.AncSetFrameBufferSize(NTV2_ANCSIZE_MAX, NTV2_ANCSIZE_MAX);
+
 	if (doAncInput)
 	{
+		// Configure extractor
 		mDevice.AncExtractInit(sdiInput, mInputChannel);
+
+		if (EXTRACT_INSERT_HANC_AUDIO)
+		{
+			NTV2DIDSet dids;
+			dids.insert(0xe0);
+			dids.insert(0xe1);
+			dids.insert(0xe2);
+//			dids.insert(0xe3);
+			dids.insert(0xe4);
+			dids.insert(0xe5);
+			dids.insert(0xe6);
+//			dids.insert(0xe7);
+			dids.insert(0xa0);
+			dids.insert(0xa1);
+			dids.insert(0xa3);
+			dids.insert(0xa4);
+			dids.insert(0xa5);
+			dids.insert(0xa6);
+			dids.insert(0xa7);
+			dids.insert(0x41); // vpid
+			dids.insert(0x60); // timecode
+			mDevice.AncExtractSetFilterDIDs (sdiInput, dids);
+			mDevice.AncExtractSetComponents (sdiInput, true, true, true, true);
+		}
+		else
+		{
+			mDevice.AncExtractSetComponents (sdiInput, true, true, false, false);
+		}
+
+		// Start extractor
 		mDevice.AncExtractSetEnable (sdiInput, true);
 	}
+
 	if (doAncOutput)
 	{
-		mDevice.AncInsertInit(sdiOutput, mInputChannel);
-		mDevice.AncInsertSetEnable (sdiOutput, true);
+		// Configure inserter
+		mDevice.AncInsertInit (sdiOutput, mInputChannel);
+		if (EXTRACT_INSERT_HANC_AUDIO)
+		{
+			mDevice.AncInsertSetComponents (sdiOutput, true, true, true, true);
+		}
+		else
+		{
+			mDevice.AncInsertSetComponents (sdiOutput, true, true, false, false);
+		}
+		mDevice.AncInsertSetReadParams (sdiOutput, 0, 0, mOutputChannel);
+		mDevice.AncInsertSetField2ReadParams (sdiOutput, 0, 0, mOutputChannel);
 	}
+
+	if (!mWithAudio)
+		mDevice.SetAudioOutputEmbedderState (::NTV2OutputDestinationToChannel(mOutputDestination), false);
 
 	mFramesProcessed = mFramesDropped = 0;	//	Start with a fresh frame count
 
@@ -540,12 +591,22 @@ void NTV2LLBurn::ProcessFrames (void)
 
 	//	Wait to make sure the next two SDK calls will be made during the same frame...
 	mDevice.WaitForInputFieldID (NTV2_FIELD0, mInputChannel);
+    mDevice.DMAWriteAnc (0, zeroesBuffer, zeroesBuffer);
+    mDevice.DMAWriteAnc (1, zeroesBuffer, zeroesBuffer);
+    mDevice.DMAWriteAnc (2, zeroesBuffer, zeroesBuffer);
+    mDevice.DMAWriteAnc (3, zeroesBuffer, zeroesBuffer);
 
 	//	Before the main loop starts, ping-pong the buffers so the hardware will use
 	//	different buffers than the ones it was using while idling...
 	currentInFrame	^= 1;
 	currentOutFrame	^= 1;
+
 	mDevice.SetInputFrame	(mInputChannel,  currentInFrame);
+	if (doAncInput)
+		mDevice.AncExtractSetWriteParams (sdiInput, currentInFrame, mInputChannel);
+	if (doAncInput && isInterlace)
+		mDevice.AncExtractSetField2WriteParams (sdiInput, currentInFrame, mInputChannel);
+
 	mDevice.SetOutputFrame	(mOutputChannel, currentOutFrame);
 
 	//	Wait until the hardware starts filling the new buffers, and then start audio
@@ -559,22 +620,23 @@ void NTV2LLBurn::ProcessFrames (void)
 
 	currentInFrame	^= 1;
 	currentOutFrame	^= 1;
+
 	mDevice.SetInputFrame	(mInputChannel,  currentInFrame);
+	if (doAncInput)
+		mDevice.AncExtractSetWriteParams (sdiInput, currentInFrame, mInputChannel);
+	if (doAncInput && isInterlace)
+		mDevice.AncExtractSetField2WriteParams (sdiInput, currentInFrame, mInputChannel);
+
 	mDevice.SetOutputFrame	(mOutputChannel, currentOutFrame);
 
 	while (!mGlobalQuit)
 	{
-		if (doAncInput)
-			mDevice.AncExtractSetWriteParams (sdiInput, currentInFrame, mInputChannel);
-		if (doAncInput && isInterlace)
-			mDevice.AncExtractSetField2WriteParams (sdiInput, currentInFrame, mInputChannel);
-
 		//	Wait until the input has completed capturing a frame...
 		mDevice.WaitForInputFieldID (NTV2_FIELD0, mInputChannel);
 
-		if (doAncOutput  &&  mDevice.AncInsertSetReadParams (sdiOutput, currentOutFrame, mpHostF1AncBuffer.GetByteCount()-1, mOutputChannel))
-			if (isInterlace)
-				mDevice.AncInsertSetField2ReadParams (sdiOutput, currentOutFrame, mpHostF2AncBuffer.GetByteCount()-1, mOutputChannel);
+		//	Flip sense of the buffers again to refer to the buffers that the hardware isn't using (i.e. the off-screen buffers)...
+		currentInFrame	^= 1;
+		currentOutFrame	^= 1;
 
 		if (mWithAudio)
 		{
@@ -615,18 +677,30 @@ void NTV2LLBurn::ProcessFrames (void)
 			mAudioInLastAddress = currentAudioInAddress;
 		}	//	if mWithAudio
 
-		//	Flip sense of the buffers again to refer to the buffers that the hardware isn't using (i.e. the off-screen buffers)...
-		currentInFrame	^= 1;
-		currentOutFrame	^= 1;
-
 		//	Transfer the new frame to system memory...
 		mDevice.DMAReadFrame (currentInFrame, (ULWord*)mpHostVideoBuffer.GetHostPointer(), mpHostVideoBuffer.GetByteCount());
+
 		if (doAncInput)
 		{	//	Transfer received Anc data into my F1 & F2 buffers...
 			AJAAncillaryList	capturedPackets;
+			//	Read ANC bytes captured
+			mDevice.AncExtractGetField1Size (sdiInput, ancBytesCapturedF1);
+			if (isInterlace)
+				mDevice.AncExtractGetField2Size (sdiInput, ancBytesCapturedF2);
+			if (CLEAR_HOST_ANC_BUFFER_BEFORE_READ)
+			{
+				mpHostF1AncBuffer.Fill(0);
+				if (isInterlace)
+					mpHostF2AncBuffer.Fill(0);
+			}
+			//	Read ANC data
 			mDevice.DMAReadAnc (currentInFrame, mpHostF1AncBuffer, mpHostF2AncBuffer);
-			AJAAncillaryList::SetFromDeviceAncBuffers (mpHostF1AncBuffer, mpHostF2AncBuffer, capturedPackets);
-			//	if (capturedPackets.CountAncillaryData())	capturedPackets.Print(cerr, false);		//	Dump packets
+
+			if (PRINT_ANC_PACKETS_AFTER_READ)
+			{
+				AJAAncillaryList::SetFromDeviceAncBuffers (mpHostF1AncBuffer, mpHostF2AncBuffer, capturedPackets);
+				if (capturedPackets.CountAncillaryData())	capturedPackets.Print(cerr, false);		//	Dump packets
+			}
 			if (CLEAR_DEVICE_ANC_BUFFER_AFTER_READ)
 				mDevice.DMAWriteAnc (currentInFrame, zeroesBuffer, zeroesBuffer);
 		}
@@ -664,38 +738,6 @@ void NTV2LLBurn::ProcessFrames (void)
 		//	"Burn" the timecode into the host buffer while we have full access to it...
 		mTCBurner.BurnTimeCode (reinterpret_cast <char *> (mpHostVideoBuffer.GetHostPointer()), timeCodeString.c_str(), yPercent.Next());
 
-		//	Send the updated frame back to the board for display...
-		mDevice.DMAWriteFrame (currentOutFrame, (ULWord*)mpHostVideoBuffer.GetHostPointer(), mpHostVideoBuffer.GetByteCount());
-		if (doAncOutput)
-		{
-			if (REPLACE_OUTGOING_ANC_WITH_CUSTOM_PACKETS)
-			{
-				AJAAncillaryData pkt;	AJAAncillaryList pkts;
-				AJAAncillaryDataLocation F2Loc(F1AncDataLoc);
-				LWord pktData(NTV2EndianSwap32(mFramesProcessed));
-				pkt.SetDID(0xC0);  pkt.SetSID(0x00);  pkt.SetDataLocation(F1AncDataLoc);  pkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
-				pkt.SetPayloadData((const uint8_t*) &pktData, 4);
-				pkts.AddAncillaryData(pkt);
-				if (isInterlace)
-				{
-					F2Loc.SetLineNumber(uint16_t(smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD1)
-													+ ULWord(F1AncDataLoc.GetLineNumber())
-													- smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD0)));
-					pkt.SetDID(0xC1);  pkt.SetSID(0x01);  pkt.SetDataLocation(F2Loc);
-					pktData = ULWord(pktData << 16) | ULWord(pktData >> 16);
-					pkt.SetPayloadData((const uint8_t*) &pktData, 4);
-					pkts.AddAncillaryData(pkt);
-				}
-				//pkts.Print(cerr, true); cerr << endl;
-				pkts.GetTransmitData (mpHostF1AncBuffer, mpHostF2AncBuffer, !isInterlace, isInterlace ? smpteLineNumInfo.GetLastLine(NTV2_FIELD0)+1 : 0);
-			}
-			mDevice.DMAWriteAnc (currentOutFrame, mpHostF1AncBuffer, mpHostF2AncBuffer);
-		}
-
-		//	Write the output timecode (for all SDI output spigots)...
-		for (NTV2ChannelSetConstIter iter(mRP188Outputs.begin());  iter != mRP188Outputs.end();  ++iter)
-			mDevice.SetRP188Data (*iter, timecodeValue);
-
 		if (mWithAudio)
 		{
 			//	Calculate where the next audio samples should go in the buffer, taking wraparound into account...
@@ -719,6 +761,40 @@ void NTV2LLBurn::ProcessFrames (void)
 			}
 		}	//	if mWithAudio
 
+		//	Send the updated frame back to the board for display...
+		mDevice.DMAWriteFrame (currentOutFrame, (ULWord*)mpHostVideoBuffer.GetHostPointer(), mpHostVideoBuffer.GetByteCount());
+
+		if (doAncOutput)
+		{
+			if (REPLACE_OUTGOING_ANC_WITH_CUSTOM_PACKETS)
+			{
+				AJAAncillaryData pkt;	AJAAncillaryList pkts;
+				AJAAncillaryDataLocation F2Loc(F1AncDataLoc);
+				LWord pktData(NTV2EndianSwap32(mFramesProcessed));
+				pkt.SetDID(0xC0);  pkt.SetSID(0x00);  pkt.SetDataLocation(F1AncDataLoc);  pkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
+				pkt.SetPayloadData((const uint8_t*) &pktData, 4);
+				pkts.AddAncillaryData(pkt);
+				if (isInterlace)
+				{
+					F2Loc.SetLineNumber(uint16_t(smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD1)
+													+ ULWord(F1AncDataLoc.GetLineNumber())
+													- smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD0)));
+					pkt.SetDID(0xC1);  pkt.SetSID(0x01);  pkt.SetDataLocation(F2Loc);
+					pktData = ULWord(pktData << 16) | ULWord(pktData >> 16);
+					pkt.SetPayloadData((const uint8_t*) &pktData, 4);
+					pkts.AddAncillaryData(pkt);
+				}
+				//pkts.Print(cerr, true); cerr << endl;
+				pkts.GetTransmitData (mpHostF1AncBuffer, mpHostF2AncBuffer, !isInterlace, isInterlace ? smpteLineNumInfo.GetLastLine(NTV2_FIELD0)+1 : 0);
+			}
+			//	Write ANC data
+            mDevice.DMAWriteAnc (currentOutFrame, mpHostF1AncBuffer, mpHostF2AncBuffer);
+		}
+
+		//	Write the output timecode (for all SDI output spigots)...
+		for (NTV2ChannelSetConstIter iter(mRP188Outputs.begin());  iter != mRP188Outputs.end();  ++iter)
+			mDevice.SetRP188Data (*iter, timecodeValue);
+
 		//	Check for dropped frames by ensuring the hardware has not started to process
 		//	the buffers that were just filled....
 		uint32_t readBackIn;
@@ -737,12 +813,27 @@ void NTV2LLBurn::ProcessFrames (void)
 
 		//	Tell the hardware which buffers to start using at the beginning of the next frame...
 		mDevice.SetInputFrame	(mInputChannel,  currentInFrame);
+		if (doAncInput)
+			mDevice.AncExtractSetWriteParams (sdiInput, currentInFrame, mInputChannel);
+		if (doAncInput && isInterlace)
+			mDevice.AncExtractSetField2WriteParams (sdiInput, currentInFrame, mInputChannel);
+
 		mDevice.SetOutputFrame	(mOutputChannel, currentOutFrame);
+		if (doAncOutput)
+			mDevice.AncInsertSetReadParams (sdiOutput, currentOutFrame, ancBytesCapturedF1, mOutputChannel);
+		if (doAncOutput && isInterlace)
+			mDevice.AncInsertSetField2ReadParams (sdiOutput, currentOutFrame, ancBytesCapturedF2, mOutputChannel);
+
+		//	Enable ANC insertion on first output frame
+		if (mFramesProcessed == 1)
+		{
+			mDevice.AncInsertSetEnable (sdiOutput, true);
+		}
 
 	}	//	loop til quit signaled
 
 	if (doAncInput)
-		mDevice.AncExtractSetEnable (sdiOutput, false);
+		mDevice.AncExtractSetEnable (sdiInput, false);
 	if (doAncOutput)
 		mDevice.AncInsertSetEnable (sdiOutput, false);
 	BURNNOTE("Thread completed, will exit");
