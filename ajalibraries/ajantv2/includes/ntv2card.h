@@ -6179,6 +6179,19 @@ public:
 		@name	Ancillary Data
 	**/
 	///@{
+
+	/**
+		@brief		Sets the size of the ANC frame buffers.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inF1Size		Specifies the size of the ANC field 1 frame buffer.
+		@param[in]	inF2Size		Specifies the size of the ANC field 2 frame buffer.
+		@note		Use this function before configuring ancillary extractors and inserters.  The sizes apply
+					to all channels.
+	**/
+	AJA_VIRTUAL bool	AncSetFrameBufferSize (const ULWord inF1Size, const ULWord inF2Size);
+
+
 	/**
 		@brief		Initializes the given SDI output's Anc inserter for custom Anc packet insertion.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
@@ -6196,7 +6209,23 @@ public:
 										const NTV2Standard inStandard = NTV2_STANDARD_INVALID);
 
 	/**
-		@brief		Enables or disables the given SDI output's Anc inserter.
+		@brief		Enables or disables the given SDI output's Anc insertion component.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[in]	inVancY			Specify true to enable Vanc Y component insertion;  otherwise false to disable it.
+		@param[in]	inVancC			Specify true to enable Vanc C component insertion;  otherwise false to disable it.
+		@param[in]	inHancY			Specify true to enable Hanc Y component insertion;  otherwise false to disable it.
+		@param[in]	inHancC			Specify true to enable Hanc C component insertion;  otherwise false to disable it.
+		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
+					use \ref aboutautocirculate.
+	**/
+	AJA_VIRTUAL bool	AncInsertSetComponents (const UWord inSDIOutput,
+												const bool inVancY, const bool inVancC,
+												const bool inHancY, const bool inHancC);
+
+	/**
+		@brief		Enables or disables the given SDI output's Anc inserter frame buffer reads.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
@@ -6285,6 +6314,22 @@ public:
 										const NTV2Standard inStandard = NTV2_STANDARD_INVALID);
 
 	/**
+		@brief		Enables or disables the given SDI output's Anc extraction components.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[in]	inVancY			Specify true to enable Vanc Y component extraction;  otherwise false to disable it.
+		@param[in]	inVancC			Specify true to enable Vanc C component extraction;  otherwise false to disable it.
+		@param[in]	inHancY			Specify true to enable Hanc Y component extraction;  otherwise false to disable it.
+		@param[in]	inHancC			Specify true to enable Hanc C component extraction;  otherwise false to disable it.
+		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
+					use \ref aboutautocirculate.
+	**/
+	AJA_VIRTUAL bool	AncExtractSetComponents (const UWord inSDIInput,
+													const bool inVancY, const bool inVancC,
+													const bool inHancY, const bool inHancC);
+
+	/**
 		@brief		Enables or disables the given SDI input's Anc extractor.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc extractor firmware.)
 		@return		True if successful; otherwise false.
@@ -6367,6 +6412,24 @@ public:
 		@see		CNTV2Card::AncExtractGetFilterDIDs, \ref anccapture
 	**/
 	AJA_VIRTUAL bool	AncExtractSetFilterDIDs (const UWord inSDIInput, const NTV2DIDSet & inDIDs);
+
+	/**
+		@brief		Answers with the number of bytes of field 1 ANC extracted.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
+		@param[out]	outF1Size		Receives the number of bytes of field 1 ANC extracted;
+	**/
+	AJA_VIRTUAL bool	AncExtractGetField1Size (const UWord inSDIInput, ULWord & outF1Size);
+
+	/**
+		@brief		Answers with the number of bytes of field 2 ANC extracted.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
+		@param[out]	outF2Size		Receives the number of bytes of field 2 ANC extracted;
+	**/
+	AJA_VIRTUAL bool	AncExtractGetField2Size (const UWord inSDIInput, ULWord & outF2Size);
 
 	/**
 		@brief		Answers whether or not the given SDI input's Anc extractor reached its buffer limits.
