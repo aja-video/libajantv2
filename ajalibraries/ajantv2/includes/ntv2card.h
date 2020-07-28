@@ -1633,7 +1633,7 @@ public:
 										be obtained by calling the ::NTV2DeviceGetMaxAudioChannels function.
 		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
 	**/
-	AJA_VIRTUAL bool	SetNumberAudioChannels (const ULWord inNumChannels, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool		SetNumberAudioChannels (const ULWord inNumChannels, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
 		@brief		Returns the current number of audio channels being captured or played by a given Audio System on the AJA device.
@@ -1645,10 +1645,10 @@ public:
 		@details	This function allows client applications to determine how many audio channels the AJA hardware is
 					currently capturing/playing into/from the given Audio System on the device.
 	**/
-	AJA_VIRTUAL bool	GetNumberAudioChannels (ULWord & outNumChannels, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool		GetNumberAudioChannels (ULWord & outNumChannels, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
-	AJA_VIRTUAL bool	SetAudioRate (const NTV2AudioRate inRate, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);	///< @deprecated	Current generation NTV2 devices only support a fixed 48 kHz sample rate.
-	AJA_VIRTUAL bool	GetAudioRate (NTV2AudioRate & outRate, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);	///< @deprecated	Current generation NTV2 devices only support a fixed 48 kHz sample rate.
+	AJA_VIRTUAL bool		SetAudioRate (const NTV2AudioRate inRate, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);	///< @deprecated	Current generation NTV2 devices only support a fixed 48 kHz sample rate.
+	AJA_VIRTUAL bool		GetAudioRate (NTV2AudioRate & outRate, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);	///< @deprecated	Current generation NTV2 devices only support a fixed 48 kHz sample rate.
 
 	/**
 		@brief		Changes the size of the audio buffer that is used for a given Audio System in the AJA device.
@@ -1657,7 +1657,7 @@ public:
 									All modern AJA devices use ::NTV2_AUDIO_BUFFER_BIG (4 MB).
 		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
 	**/
-	AJA_VIRTUAL bool	SetAudioBufferSize (const NTV2AudioBufferSize inValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool		SetAudioBufferSize (const NTV2AudioBufferSize inValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
 		@brief		Retrieves the size of the input or output audio buffer being used for a given Audio System on the AJA device.
@@ -1665,7 +1665,7 @@ public:
 		@param[out]	outSize			Receives the size of the capture/playout audio buffer for the given Audio System on the AJA device.
 		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
 	**/
-	AJA_VIRTUAL bool	GetAudioBufferSize (NTV2AudioBufferSize & outSize, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool		GetAudioBufferSize (NTV2AudioBufferSize & outSize, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
 		@brief		Enables or disables 20-bit mode for the ::NTV2AudioSystem.
@@ -1697,7 +1697,7 @@ public:
 		@param[in]	inAudioSystem	Optionally specifies the Audio System on the device to be affected. Defaults to ::NTV2_AUDIOSYSTEM_1.
 		@see		CNTV2Card::GetAudioLoopBack, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool	SetAudioLoopBack (const NTV2AudioLoopBack inMode, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool		SetAudioLoopBack (const NTV2AudioLoopBack inMode, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
 		@brief		Answers if ::NTV2AudioLoopBack mode is currently on or off for the given ::NTV2AudioSystem.
@@ -1709,13 +1709,13 @@ public:
 		@param[in]	inAudioSystem	Optionally specifies the Audio System on the device to be affected. Defaults to ::NTV2_AUDIOSYSTEM_1.
 		@see		CNTV2Card::SetAudioLoopBack, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool	GetAudioLoopBack (NTV2AudioLoopBack & outMode, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool		GetAudioLoopBack (NTV2AudioLoopBack & outMode, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 
-	AJA_VIRTUAL bool	SetAudioAnalogLevel (const NTV2AudioLevel value, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
-	AJA_VIRTUAL bool	GetAudioAnalogLevel (NTV2AudioLevel & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
-	AJA_VIRTUAL bool	SetEncodedAudioMode (const NTV2EncodedAudioMode value, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
-	AJA_VIRTUAL bool	GetEncodedAudioMode (NTV2EncodedAudioMode & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool		SetAudioAnalogLevel (const NTV2AudioLevel value, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool		GetAudioAnalogLevel (NTV2AudioLevel & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool		SetEncodedAudioMode (const NTV2EncodedAudioMode value, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool		GetEncodedAudioMode (NTV2EncodedAudioMode & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
 		@brief		Sets the ::NTV2EmbeddedAudioClock setting for the given ::NTV2AudioSystem.
@@ -1724,7 +1724,7 @@ public:
 		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
 		@see		CNTV2Card::SetEmbeddedAudioClock, ::NTV2DeviceCanChangeEmbeddedAudioClock, \ref audiocapture
 	**/
-	AJA_VIRTUAL bool	SetEmbeddedAudioClock (const NTV2EmbeddedAudioClock inValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool		SetEmbeddedAudioClock (const NTV2EmbeddedAudioClock inValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
 		@brief		For the given ::NTV2AudioSystem, answers with the current ::NTV2EmbeddedAudioClock setting.
@@ -1733,7 +1733,7 @@ public:
 		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
 		@see		CNTV2Card::SetEmbeddedAudioClock, ::NTV2DeviceCanChangeEmbeddedAudioClock, \ref audiocapture
 	**/
-	AJA_VIRTUAL bool	GetEmbeddedAudioClock (NTV2EmbeddedAudioClock & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool		GetEmbeddedAudioClock (NTV2EmbeddedAudioClock & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
 		@brief		For the given Audio System, answers with the wrap address, the threshold at which input/record or output/play transfers
@@ -1748,7 +1748,7 @@ public:
 									one to fill to the end of the buffer, and the remainder from the start of the buffer.
 		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
 	**/
-	AJA_VIRTUAL bool	GetAudioWrapAddress (ULWord & outWrapAddress, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool		GetAudioWrapAddress (ULWord & outWrapAddress, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
 		@brief		For the given Audio System, answers with the byte offset from the start of the audio buffer to the first byte
@@ -1759,7 +1759,7 @@ public:
 									This will typically be 4MB.
 		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
 	**/
-	AJA_VIRTUAL bool	GetAudioReadOffset (ULWord & outReadOffset, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool		GetAudioReadOffset (ULWord & outReadOffset, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
 		@brief		Answers with the byte offset in device memory to the given audio buffer offset for the specified
@@ -1774,42 +1774,43 @@ public:
 										capture buffer. If false, the default, "inOffsetBytes" is relative to the start of
 										the audio playout buffer.
 	**/
-	AJA_VIRTUAL bool	GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outAbsByteOffset,
+	AJA_VIRTUAL bool		GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outAbsByteOffset,
 												const NTV2AudioSystem	inAudioSystem, const bool inCaptureBuffer = false);
 
 	/**
 		@brief		For the given Audio System, specifies the byte offset in the device's output audio buffer
-					where its audio embedder will fetch the next 128-byte audio sample. This essentially moves
-					the "play head" for audio output.
-		@param[in]	inValue		Specifies the new byte offset into the device's output audio buffer.
-		@param[in]	inChannel	Specifies the NTV2Channel (output audio embedder) of interest.
+					where its audio embedder will fetch the next chunk of audio samples. This essentially moves
+					the "Play Head" for audio output.
+		@param[in]	inValue		Specifies the new byte offset into the device's output audio buffer. The firmware
+								will truncate or round this as appropriate for proper 4-byte alignment.
+		@param[in]	inChannel	Specifies the ::NTV2Channel (output audio embedder) of interest.
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::ReadAudioLastOut, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool	WriteAudioLastOut (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		WriteAudioLastOut (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
-		@brief		For the given Audio System, answers with the byte offset of the last 128-byte audio sample
-					read by the device's output audio embedder. This is essentially the position of the "play
-					"head" during audio output.
-		@param[out]	outValue	Receives the byte offset of the last 128-byte audio sample read by the device's output audio
-								embedder in its output audio buffer.
-		@param[in]	inChannel	Specifies the NTV2Channel (output audio embedder) of interest.
+		@brief		For the given Audio System, answers with the byte offset of the tail end of the last chunk of
+					audio samples read by the device's output audio embedder. This is essentially the position of
+					the "Play Head" during audio output.
+		@param[out]	outValue	Receives the byte offset of the tail end of the last chunk of audio samples read
+								by the device's output audio embedder in its output audio buffer.
+		@param[in]	inChannel	Specifies the ::NTV2Channel (output audio embedder) of interest.
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::WriteAudioLastOut, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool	ReadAudioLastOut (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		ReadAudioLastOut (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
-		@brief		For the given Audio System, answers with the byte offset of the last 128-byte audio sample
+		@brief		For the given Audio System, answers with the byte offset of the last chunk of audio samples
 					written by the device's input audio de-embedder. This is essentially the position of the
-					"write head" during audio capture.
-		@param[out]	outValue	Receives the byte offset of the last 128-byte audio sample written by the device's input audio
-								de-embedder in its input audio buffer.
-		@param[in]	inChannel	Specifies the NTV2Channel (input audio de-embedder) of interest.
+					"Write Head" during audio capture.
+		@param[out]	outValue	Receives the byte offset of the last chunk of audio samples written by the device's
+								input audio de-embedder in its input audio buffer.
+		@param[in]	inChannel	Specifies the ::NTV2Channel (input audio de-embedder) of interest.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool	ReadAudioLastIn (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		ReadAudioLastIn (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
 		@brief		Starts the playout side of the given ::NTV2AudioSystem, reading outgoing audio samples
@@ -1893,8 +1894,8 @@ public:
 
 	/**
 		@brief		Stops the capture side of the given ::NTV2AudioSystem, and resets the capture position
-					(i.e. "Write Head") back to the start of the Audio System's capture buffer. This can be useful
-					for resynchronizing audio and video.
+					(i.e. "Write Head") back to the start of the Audio System's capture buffer (offset zero).
+					This can be useful for resynchronizing audio and video.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem		Specifies the Audio System of interest.
 		@note		It is not an error to call this function when the Audio System's capture side is already stopped.
