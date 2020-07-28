@@ -203,7 +203,7 @@ AJA_EXPORT std::vector<std::string> split(const std::string& str, const char del
  *  @param[in]  inDelim The delimiter string to split the string at
  *	@return		A vector of strings that contains all the substrings
  */
-AJA_EXPORT std::vector<std::string> split (const std::string & inStr, const std::string inDelim);
+AJA_EXPORT std::vector<std::string> split (const std::string & inStr, const std::string & inDelim);
 
 /**
  *	Converts the passed string to lowercase
