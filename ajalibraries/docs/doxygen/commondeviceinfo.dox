@@ -1036,19 +1036,22 @@
 	@subsection	audiocapture		Audio Capture
 
 	Incoming audio is de-embedded from incoming audio HANC packets (SMPTE 299M for HD, SMPTE 272M for SD).
-	For HD, each audio sample consists of 24 bits of sample data (normally PCM).
-	For SD, each audio sample consists of 20 bits of sample data (normally PCM) — audio extended packets are ignored.
+	For <b>HD</b>, each audio sample consists of 24 bits of sample data (normally PCM).
+	For <b>SD</b>, each audio sample consists of 20 bits of sample data (normally PCM) — audio extended packets are ignored.
 
 	Call CNTV2Card::IsAudioInputRunning to determine if the capture side of the <b>Audio System</b> is running or not.
 	Call CNTV2Card::StartAudioInput to start the capture side of the <b>Audio System</b> running.
 	Call CNTV2Card::StopAudioInput to stop the capture side of the <b>Audio System</b> running.
 
-	When the <b>Audio System</b> is running, each 24-bit sample is copied as-is into the most-significant 3 bytes of each 4-byte sample word
-	in the <b>Audio Input Buffer</b> in device memory at the address specified by the <b>Audio System</b>’s Audio Input Last Address register (i.e.,
-	the <b>Record Head</b> or “write head”). Call CNTV2Card::ReadAudioLastIn to obtain the current <b>Record Head</b> position. Audio data continues to
-	be written into the <b>Input Buffer</b> until filled, whereupon the <b>Record Head</b> wraps back to the start of the buffer, where writing continues.
-	The least-significant byte of each 32-bit sample word in the <b>Audio Input Buffer</b> is always set to zero. (Note that for SD, because
-	extended packets are ignored, an extra 4-bit nibble in each 32-bit sample word will also be zero.)
+	When the <b>Audio System</b> is running, each 24-bit sample is copied as-is into the most-significant 3 bytes of each 4-byte
+	sample word in the <b>Audio Input Buffer</b> in device memory at the address specified by the <b>Audio System</b>’s Audio Input
+	Last Address register (i.e., the <b>Record Head</b> or “write head”). On older (non-stacked-audio) devices, this sample-copying
+	process is done in 128-byte chunks. On newer (stacked-audio) devices, 512-byte chunks are used.
+
+	Call CNTV2Card::ReadAudioLastIn to obtain the current <b>Record Head</b> position. Audio data continues to be written into the
+	<b>Input Buffer</b> until filled, whereupon the <b>Record Head</b> wraps back to the start of the buffer, where writing
+	continues. The least-significant byte of each 32-bit sample word in the <b>Audio Input Buffer</b> is always set to zero.
+	(Note that for SD, because extended packets are ignored, an extra 4-bit nibble in each 32-bit sample word will also be zero.)
 
 	@image	html	hwref-fig3-audiorecordplay.png
 
@@ -1120,21 +1123,25 @@
 	(see CNTV2Card::SetAudioLoopBack).
 
 	When the <b>Audio System</b> is running, each 24-bit audio sample is copied from the most-significant 3 bytes of each 32-bit longword
-	in the device audio buffer (the least-significant byte is ignored). Note, however, for SD, only the most-significant 20 bits are
-	used (since the embedder does not create extended audio packets).
+	in the device audio buffer (the least-significant byte is ignored). Note, however, for <b>SD</b>, only the most-significant 20 bits
+	are used (since the embedder does not create extended audio packets).
 
-	During playout, the output embedder pulls audio samples from the <b>Audio Output Buffer</b> in device memory at the address specified by the
-	<b>Audio System</b>’s <b>Audio Output Last Address</b> register (i.e., the <b>Play Head</b> or “read head”). Call CNTV2Card::ReadAudioLastOut to get the
-	current <b>Play Head</b> position. Audio data continues to be read from the <b>Output Buffer</b> until the end is reached, whereupon the
-	<b>Play Head</b> wraps back to the start of the buffer, where reading continues.
+	During playout, the output embedder pulls audio samples from the <b>Audio Output Buffer</b> in device memory at the address
+	specified by the <b>Audio System</b>’s <b>Audio Output Last Address</b> register (i.e., the <b>Play Head</b> or “read head”).
+	On older, non-stacked-audio devices, this is done in 128-byte chunks. On newer, stacked-audio devices, it’s done in 512-byte chunks.
 
-	<b>Startup Delay:</b> Ordinarily, when playout starts, the Audio System immediately starts pulling samples from the <b>Audio Output Buffer</b>,
-	encoding them into audio packets and embedding those first several packets into the current outgoing video frame, often mid-frame, preceded by
-	a number of packets containing silence. This makes it difficult for applications to precisely determine the location of frame breaks in the
-	<b>Audio Output Buffer</b>. Starting in SDK 15.6, and using newer AJA hardware and firmware (see CNTV2Card::CanDoAudioWaitForVBI),
-	CNTV2Card::StartAudioOutput has an optional “<i>waitForVBI</i>” parameter that if set <tt>True</tt>, causes the firmware to delay starting
-	Audio Playout until the next output VBI, so that the first samples from the <b>Audio Output Buffer</b> end up in the first audio packets
-	in the next outgoing video frame.
+	Call CNTV2Card::ReadAudioLastOut to get the current <b>Play Head</b> position. Audio data continues to be read from the
+	<b>Output Buffer</b> until the end is reached, whereupon the <b>Play Head</b> wraps back to the start of the buffer, where
+	reading continues.
+
+	<b>Startup Delay:</b> Ordinarily, when playout starts, the Audio System immediately starts pulling samples from the
+	<b>Audio Output Buffer</b>, encoding them into audio packets and embedding those first several packets into the current
+	outgoing video frame, often mid-frame, preceded by a number of packets containing silence. This makes it difficult for
+	applications to precisely determine the location of frame breaks in the <b>Audio Output Buffer</b>. Starting in SDK 15.6,
+	and using newer AJA hardware and firmware (see CNTV2Card::CanDoAudioWaitForVBI), CNTV2Card::StartAudioOutput has an optional
+	“<i>waitForVBI</i>” parameter that if set <tt>True</tt>, causes the firmware to delay starting Audio Playout until the next
+	output VBI, so that the first samples from the <b>Audio Output Buffer</b> end up in the first audio packets in the next
+	outgoing video frame.
 
 	<b>Output Delay:</b> Newer AJA hardware firmware implements an adjustable <b>Output Delay</b> that can be applied while samples are
 	being read from the <b>Audio Output Buffer</b>. Call ::NTV2DeviceCanDoAudioDelay to determine if this feature is available.

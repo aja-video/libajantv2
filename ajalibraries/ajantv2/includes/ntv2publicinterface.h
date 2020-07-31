@@ -5558,15 +5558,21 @@ typedef enum
 	shiftField1CutoffLine = 0,
 	maskField2CutoffLine = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26),
 	shiftField2CutoffLine = 16,
-	maskTotalBytesIn = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	maskTotalBytesIn = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) +
+							BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15) +
+							BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23),
 	shiftTotalBytesIn = 0,
 	maskTotalOverrun = BIT(28),
 	shiftTotalOverrun = 28,
-	maskField1BytesIn = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	maskField1BytesIn = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) +
+							BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15) +
+							BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23),
 	shiftField1BytesIn = 0,
 	maskField1Overrun = BIT(28),
 	shiftField1Overrun = 28,
-	maskField2BytesIn = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	maskField2BytesIn = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) +
+							BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15) +
+							BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23),
 	shiftField2BytesIn = 0,
 	maskField2Overrun = BIT(28),
 	shiftField2Overrun = 28,
@@ -5647,7 +5653,7 @@ typedef enum
 	regAncInsBlankCStartLine,
 	regAncInsBlankField1CLines,
 	regAncInsBlankField2CLines,
-	regAncInsReserved14,
+	regAncInsFieldBytesHigh,
 	regAncInsReserved15,
 	regAncInsRtpPayloadID,
 	regAncInsRtpSSRC,
@@ -5673,6 +5679,12 @@ typedef enum
 	shiftInsSetProgressive = 24,
 	maskInsDisableInserter = BIT(28),
 	shiftInsDisableInserter = 28,
+	maskInsExtendedMode = BIT(29),
+	shiftInsExtendedMode = 29,
+	maskInsField1x512 = BIT(29),
+	shiftInsField1x512 = 29,
+	maskInsField2x512 = BIT(30),
+	shiftInsField2x512 = 30,
 	maskInsEnablePktSplitSD = BIT(31),
 	shiftInsEnablePktSplitSD = 31,
 	maskInsHancDelay = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9),

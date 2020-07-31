@@ -176,7 +176,7 @@ AJA_EXPORT bool wstring_to_string(const std::wstring& wstr, std::string& str);
  *  @param[in]  c_str_size  The size of the passed in c_str buffer in bytes
  *	@return		true if success else false
  */
-AJA_EXPORT bool string_to_cstring(const std::string &str, char *c_str, size_t c_str_size);
+AJA_EXPORT bool string_to_cstring (const std::string & str, char * c_str, size_t c_str_size);
 
 /**
  *	Splits a string into substrings at a character delimiter
@@ -185,7 +185,7 @@ AJA_EXPORT bool string_to_cstring(const std::string &str, char *c_str, size_t c_
  *  @param[in]   delim The character delimiter to split the string at
  *  @param[out]  elems A vector of strings that contains all the substrings
  */
-AJA_EXPORT void split(const std::string& str, const char delim, std::vector<std::string>& elems);
+AJA_EXPORT void split (const std::string & str, const char delim, std::vector<std::string> & elems);
 
 /**
  *	Splits a string into substrings at a character delimiter
@@ -194,7 +194,7 @@ AJA_EXPORT void split(const std::string& str, const char delim, std::vector<std:
  *  @param[in]  delim The character delimiter to split the string at
  *	@return		A vector of strings that contains all the substrings
  */
-AJA_EXPORT std::vector<std::string> split(const std::string& str, const char delim);
+AJA_EXPORT std::vector<std::string> split (const std::string & str, const char delim);
 
 /**
  *	Splits a string into substrings at a string delimiter
@@ -203,7 +203,7 @@ AJA_EXPORT std::vector<std::string> split(const std::string& str, const char del
  *  @param[in]  inDelim The delimiter string to split the string at
  *	@return		A vector of strings that contains all the substrings
  */
-AJA_EXPORT std::vector<std::string> split (const std::string & inStr, const std::string inDelim);
+AJA_EXPORT std::vector<std::string> split (const std::string & inStr, const std::string & inDelim);
 
 /**
  *	Converts the passed string to lowercase
@@ -211,7 +211,7 @@ AJA_EXPORT std::vector<std::string> split (const std::string & inStr, const std:
  *  @param[in,out]  str   The string to make lowercase
  *	@return		    Reference to the modified STL string
  */
-AJA_EXPORT std::string& lower(std::string& str);
+AJA_EXPORT std::string & lower (std::string & str);
 
 /**
  *	Converts the passed string to uppercase
@@ -219,7 +219,7 @@ AJA_EXPORT std::string& lower(std::string& str);
  *  @param[in,out]  str   The string to make uppercase
  *	@return		    Reference to the modified STL string
  */
-AJA_EXPORT std::string& upper(std::string& str);
+AJA_EXPORT std::string & upper (std::string & str);
 
 /**
  *	Strips the leading whitespace characters from the string
@@ -228,7 +228,7 @@ AJA_EXPORT std::string& upper(std::string& str);
  *  @param[in]      ws   The whitespace characters to strip
  *	@return		    Reference to the modified STL string
  */
-AJA_EXPORT std::string& lstrip(std::string& str, const std::string& ws=aja::WHITESPACE);
+AJA_EXPORT std::string & lstrip (std::string & str, const std::string & ws = aja::WHITESPACE);
 
 /**
  *	Strips the trailing whitespace characters from the string
@@ -237,7 +237,7 @@ AJA_EXPORT std::string& lstrip(std::string& str, const std::string& ws=aja::WHIT
  *  @param[in]      ws   The whitespace characters to strip
  *	@return		    Reference to the modified STL string
  */
-AJA_EXPORT std::string& rstrip(std::string& str, const std::string& ws=aja::WHITESPACE);
+AJA_EXPORT std::string & rstrip (std::string & str, const std::string & ws = aja::WHITESPACE);
 
 /**
  *	Strips the leading & trailing whitespace characters from the string
@@ -246,7 +246,7 @@ AJA_EXPORT std::string& rstrip(std::string& str, const std::string& ws=aja::WHIT
  *  @param[in]      ws   The whitespace characters to strip
  *	@return		    Reference to the modified STL string
  */
-AJA_EXPORT std::string& strip(std::string& str, const std::string& ws=aja::WHITESPACE);
+AJA_EXPORT std::string & strip (std::string & str, const std::string & ws = aja::WHITESPACE);
 
 /**
  *	Join a vector of strings separated by a string delimeter
@@ -255,7 +255,7 @@ AJA_EXPORT std::string& strip(std::string& str, const std::string& ws=aja::WHITE
  *  @param[in]  delim  The string delimeter that will separate the strings
  *	@return		The joined string made up of the parts concatinated with delimeter string
  */
-AJA_EXPORT std::string join(std::vector<std::string> parts, const std::string& delim=" ");
+AJA_EXPORT std::string join (const std::vector<std::string> & parts, const std::string & delim=" ");
 
 /**
  *	Like strncpy() but always adds a null-character at last index of target string

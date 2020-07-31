@@ -60,7 +60,7 @@ std::string& replace(std::string& str, const std::string& from, const std::strin
 {
     if (!from.empty())
     {
-        for (size_t pos = 0; (pos = str.find(from, pos)) != std::string::npos; pos += to.size())
+        for (size_t pos = 0;  (pos = str.find(from, pos)) != std::string::npos;  pos += to.size())
         {
             str.replace(pos, from.size(), to);
         }
@@ -68,12 +68,12 @@ std::string& replace(std::string& str, const std::string& from, const std::strin
     return str;
 }
 
-int stoi(const std::string& str, std::size_t* idx, int base)
+int stoi (const std::string & str, std::size_t * idx, int base)
 {
     return (int)aja::stol(str, idx, base);
 }
 
-long stol(const std::string& str, std::size_t* idx, int base)
+long stol (const std::string & str, std::size_t * idx, int base)
 {
     char* pEnd = NULL;
     long retVal = ::strtol(str.c_str(), &pEnd, base);
@@ -84,12 +84,12 @@ long stol(const std::string& str, std::size_t* idx, int base)
     return retVal;
 }
 /*
-long long stoll(const std::string& str, std::size_t* idx, int base)
+long long stoll (const std::string & str, std::size_t * idx, int base)
 {
     return (long long)aja::stol(str, idx, base);
 }
 */
-unsigned long stoul(const std::string& str, std::size_t* idx, int base)
+unsigned long stoul (const std::string & str, std::size_t * idx, int base)
 {
     char* pEnd = NULL;
     unsigned long retVal = ::strtoul(str.c_str(), &pEnd, base);
@@ -100,17 +100,17 @@ unsigned long stoul(const std::string& str, std::size_t* idx, int base)
     return retVal;
 }
 /*
-unsigned long long stoull(const std::string& str, std::size_t* idx, int base)
+unsigned long long stoull (const std::string & str, std::size_t * idx, int base)
 {
     return (unsigned long long)aja::stoul(str, idx, base);
 }
 */
-float stof(const std::string& str, std::size_t* idx)
+float stof (const std::string & str, std::size_t * idx)
 {
     return (float)aja::stod(str, idx);
 }
 
-double stod(const std::string& str, std::size_t* idx)
+double stod (const std::string & str, std::size_t * idx)
 {
     char* pEnd = NULL;
     double retVal = ::strtod(str.c_str(), &pEnd);
@@ -121,53 +121,53 @@ double stod(const std::string& str, std::size_t* idx)
     return retVal;
 }
 
-long double stold(const std::string& str, std::size_t* idx)
+long double stold (const std::string & str, std::size_t * idx)
 {
     return (long double)aja::stod(str, idx);
 }
 
-std::string to_string(bool val)
+std::string to_string (bool val)
 {
     return val ? "true" : "false";
 }
 
-std::string to_string(int val)
+std::string to_string (int val)
 {
     std::ostringstream oss; oss << val;
     return oss.str();
 }
 
-std::string to_string(long val)
+std::string to_string (long val)
 {
     std::ostringstream oss; oss << val;
     return oss.str();
 }
 /*
-std::string to_string(long long val)
+std::string to_string (long long val)
 {
     std::ostringstream oss; oss << val;
     return oss.str();
 }
 */
-std::string to_string(unsigned val)
+std::string to_string (unsigned val)
 {
     std::ostringstream oss; oss << val;
     return oss.str();
 }
 
-std::string to_string(unsigned long val)
+std::string to_string (unsigned long val)
 {
     std::ostringstream oss; oss << val;
     return oss.str();
 }
 /*
-std::string to_string(unsigned long long val)
+std::string to_string (unsigned long long val)
 {
     std::ostringstream oss; oss << val;
     return oss.str();
 }
 */
-std::string to_string(float val)
+std::string to_string (float val)
 {
     std::ostringstream oss;
     oss.precision(6);
@@ -176,7 +176,7 @@ std::string to_string(float val)
     return oss.str();
 }
 
-std::string to_string(double val)
+std::string to_string (double val)
 {
     std::ostringstream oss;
     oss.precision(6);
@@ -185,7 +185,7 @@ std::string to_string(double val)
     return oss.str();
 }
 
-std::string to_string(long double val)
+std::string to_string (long double val)
 {
     std::ostringstream oss;
     oss.precision(6);
@@ -194,7 +194,7 @@ std::string to_string(long double val)
     return oss.str();
 }
 
-bool string_to_wstring(const std::string& str, std::wstring& wstr)
+bool string_to_wstring (const std::string & str, std::wstring & wstr)
 {
 // use C++11 functionality if available
 #if defined(AJA_BASE_USECPP_11)
@@ -231,7 +231,7 @@ bool string_to_wstring(const std::string& str, std::wstring& wstr)
 #endif
 }
 
-bool wstring_to_string(const std::wstring& wstr, std::string& str)
+bool wstring_to_string (const std::wstring & wstr, std::string & str)
 {
 // use C++11 functionality if available
 #if defined(AJA_BASE_USECPP_11)
@@ -268,7 +268,7 @@ bool wstring_to_string(const std::wstring& wstr, std::string& str)
 #endif
 }
 
-inline size_t local_min(const size_t& a, const size_t& b)
+inline size_t local_min (const size_t & a, const size_t & b)
 {
 #if defined(AJA_WINDOWS) && !defined(AJA_BASE_USECPP_11)
     // By including the Windows.h header that brings in the min() macro which prevents us from using std::min()
@@ -282,7 +282,7 @@ inline size_t local_min(const size_t& a, const size_t& b)
 #endif
 }
 
-bool string_to_cstring(const std::string &str, char *c_str, size_t c_str_size)
+bool string_to_cstring (const std::string & str, char * c_str, size_t c_str_size)
 {
     if(c_str == NULL || c_str_size < 1)
         return false;
@@ -296,7 +296,7 @@ bool string_to_cstring(const std::string &str, char *c_str, size_t c_str_size)
     return true;
 }
 
-void split(const std::string& str, const char delim, std::vector<std::string>& elems)
+void split (const std::string & str, const char delim, std::vector<std::string> & elems)
 {
 	elems.clear();
     std::stringstream ss(str);
@@ -313,78 +313,71 @@ void split(const std::string& str, const char delim, std::vector<std::string>& e
     }
 }
 
-std::vector<std::string> split(const std::string& str, const char delim)
+std::vector<std::string> split (const std::string & str, const char delim)
 {
     std::vector<std::string> elems;
     split(str, delim, elems);
     return elems;
 }
 
-std::vector<std::string> split(const std::string& str, const std::string & delim)
+std::vector<std::string> split (const std::string & inStr, const std::string & inDelim)
 {
 	std::vector<std::string> result;
     size_t	startPos(0);
-    size_t	delimPos(str.find(delim, startPos));
+    size_t	delimPos(inStr.find(inDelim, startPos));
     while(delimPos != std::string::npos)
     {
-        const std::string item (str.substr(startPos, delimPos - startPos));
+        const std::string item (inStr.substr(startPos, delimPos - startPos));
         result.push_back(item);
-        startPos = delimPos + delim.length();
-        delimPos = str.find(delim, startPos);
+        startPos = delimPos + inDelim.length();
+        delimPos = inStr.find(inDelim, startPos);
 	}
     // if last character in string matches the split delim add an empty string
-    if (startPos == str.length())
+    if (startPos == inStr.length())
         result.push_back(std::string());
     return result;
 }
 
-std::string& lower(std::string& str)
+std::string & lower (std::string & str)
 {
-    std::transform (str.begin (), str.end (), str.begin (), ::tolower);
+    std::transform (str.begin(), str.end(), str.begin(), ::tolower);
     return str;
 }
 
-std::string& upper(std::string& str)
+std::string & upper (std::string & str)
 {
-    std::transform (str.begin (), str.end (), str.begin (), ::toupper);
+    std::transform (str.begin(), str.end(), str.begin(), ::toupper);
     return str;
 }
 
-std::string& lstrip(std::string& str, const std::string& ws)
+std::string & lstrip (std::string & str, const std::string & ws)
 {
     str.erase(0, str.find_first_not_of(ws));
     return str;
 }
 
-std::string& rstrip(std::string& str, const std::string& ws)
+std::string & rstrip (std::string & str, const std::string & ws)
 {
-    if(str.length() > 0)
-    {
-        str.erase(str.find_last_not_of(ws)+1,str.length()-1);
-    }
+    if (!str.empty())
+        str.erase (str.find_last_not_of(ws)+1, str.length()-1);
     return str;
 }
 
-std::string& strip(std::string& str, const std::string& ws)
+std::string & strip (std::string & str, const std::string & ws)
 {
     lstrip(str,ws);
     rstrip(str,ws);
     return str;
 }
 
-std::string join(std::vector<std::string> parts, const std::string& delim)
+std::string join (const std::vector<std::string> & parts, const std::string & delim)
 {
     std::ostringstream oss;
-    std::vector<std::string>::iterator it;
-    int count=0;
-    for(it=parts.begin();it!= parts.end();++it)
+    for (std::vector<std::string>::const_iterator it(parts.begin());  it != parts.end();  )
     {
-        if (count==0)
-            oss << *it;
-        else
-            oss << delim << *it;
-
-        count++;
+        oss << *it;
+        if (++it != parts.end())
+            oss << delim;
     }
     return oss.str();
 }
