@@ -87,11 +87,22 @@ int NeedsFirmwareUpdate (const NTV2DeviceInfo & inDeviceInfo, string & outReason
 					return -1;	//	on-device firmware older than on-disk bitfile firmware
 				}
 			}
-		}
+        }
 		else if (device.GetInstalledBitfileInfo (numBytes, installedDate, installedTime))
 		{
 			if (bitfile.Open (firmwarePath))
 			{
+                //if we can dynamically reconfig return true
+                if(device.IsDynamicDevice())
+                {
+                    device.AddDynamicDirectory((::NTV2GetFirmwareFolderPath ()));
+                    NTV2DeviceID desiredID (bitfile.GetDeviceID());
+#ifdef AJA_WINDOWS
+                    if(device.CanLoadDynamicDevice(desiredID))
+                        return false;
+#endif
+                }
+
 				//cout << inDeviceInfo.deviceIdentifier << ":  file: " << bitfile.GetDate () << "  device: " << installedDate << endl;
 				if (bitfile.GetDate () == installedDate)
 					return 0;	//	Identical!
@@ -145,8 +156,8 @@ CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread (const NTV2DeviceInfo
 															const NTV2DeviceID inDesiredID,
 															const bool inVerbose)
 	:	m_deviceInfo		(inDeviceInfo),
-		m_drFilesPath		(inDRFilesPath),
 		m_desiredID			(inDesiredID),
+        m_drFilesPath		(inDRFilesPath),
 		m_updateSuccessful	(false),
 		m_verbose			(inVerbose),
 		m_forceUpdate		(false),
@@ -259,12 +270,12 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 				const string	extraInfo	(bitfile.GetLastError());
 				cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  Bitfile '" << m_bitfilePath << "' open/parse error";
 				if (!extraInfo.empty())
-					cerr << ": " << extraInfo;
+                    cerr << ": " << extraInfo;
 				cerr << endl;
 				return AJA_STATUS_OPEN;
 			}
 	
-			const unsigned	bitfileLength	(bitfile.GetFileStreamLength ());
+            const unsigned	bitfileLength	(bitfile.GetFileStreamLength ());
 			unsigned char *	bitfileBuffer	(new unsigned char [bitfileLength + 512]);
 			if (bitfileBuffer == NULL)
 			{
