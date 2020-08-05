@@ -40,7 +40,13 @@ static const char * GetKernErrStr (const kern_return_t inError);
 #define	HEX8(__x__)			xHEX0N(0xFFFFFFFF & uint32_t(__x__),8)
 #define	HEX16(__x__)		xHEX0N(uint64_t(__x__),16)
 #define KR(_kr_)			"kernResult=" << HEX8(_kr_) << "(" << GetKernErrStr(_kr_) << ")"
-#define INSTP(_p_)			" instance=" << HEX16(_p_)
+#define INSTP(_p_)			HEX0N(uint64_t(_p_),16)
+
+#define	DIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	DIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	DINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	DIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	DIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 
 #define	MDIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
 #define	MDIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
@@ -240,7 +246,7 @@ class DeviceMap
 			NTV2_ASSERT (mMasterPort && "No MasterPort!");
 
 			//	Create an iterator to search for our driver...
-			error = OS_IOServiceGetMatchingServices (mMasterPort, OS_IOServiceMatching(CNTV2MacDriverInterface::GetIOServiceName()), &ioIterator);
+			error = OS_IOServiceGetMatchingServices (mMasterPort, OS_IOServiceMatching(CNTV2MacDriverInterface::GetIOServiceName().c_str()), &ioIterator);
 			if (error != kIOReturnSuccess)
 			{
 				MDIFAIL (KR(error) << " -- IOServiceGetMatchingServices failed, no match for '" << sNTV2PCIDriverName << "', device index " << inDeviceIndex << " requested");
@@ -267,13 +273,6 @@ class DeviceMap
 			if (error != kIOReturnSuccess)
 			{
 				MDIFAIL (KR(error) << " -- IOServiceOpen failed on device " << inDeviceIndex);
-				return 0;
-			}
-
-			//	Check driver compatibility...
-			if (!CheckDriverVersion (ioConnect))
-			{
-				OS_IOServiceClose (ioConnect);
 				return 0;
 			}
 
@@ -385,72 +384,6 @@ class DeviceMap
 			return false;
 		}
 
-
-		bool	CheckDriverVersion (io_connect_t inConnection)
-		{
-			if (!inConnection)
-			{
-				MDIWARN ("CheckDriverVersion:  bad 'inConnection' parameter " << inConnection);
-				return false;
-			}
-			const uint64_t	scalarI_64[2]	=	{kVRegDriverVersion, 0xFFFFFFFF};	//	ReadRegister accepts two 64-bit values:  [0]=regNum [1]=bitMask
-			uint64_t		scalarO_64[1]	=	{0};								//	ReadRegister returns one 64-bit value (requested register value)
-			uint32_t		inputCount	(sizeof(scalarI_64) / sizeof(scalarI_64[0]));
-			uint32_t		outputCount	(sizeof(scalarO_64) / sizeof(scalarO_64[0]));
-			kern_return_t	kernResult	(OS_IOConnectCallScalarMethod(inConnection, kDriverReadRegister, scalarI_64, inputCount, scalarO_64, &outputCount));
-			if (kernResult != KERN_SUCCESS)
-			{	//	ReadRegister MUST succeed -- if it doesn't, we're dead meat...
-				MDIFAIL ("IOConnectCallScalarMethod returned " << KR(kernResult) << " for 'kDriverReadRegister' using connection " << HEX8(inConnection));
-				return false;	//	Just fail
-			}
-			if (!scalarO_64[0])		//	kVRegDriverVersion zero?
-			{	//	kVRegDriverVersion is zero -- might be 14.3 or earlier driver -- try calling old kDriverGetDrvrVersion function...
-				uint64_t	dvscalarO_64 [2];	//	Returns two 64-bit values:  [0]=9, [1]=0xMMmmPPBB  (MM=major mm=minor PP=point BB=build)
-				uint32_t	dvoutputCount(sizeof(dvscalarO_64)/sizeof(dvscalarO_64[0]));
-				kernResult = OS_IOConnectCallScalarMethod (inConnection, kDriverGetDrvrVersion, AJA_NULL, 0, dvscalarO_64, &dvoutputCount);
-				if (kernResult != KERN_SUCCESS)
-				{	//	Failed -- we're out of options...
-					MDIFAIL ("IOConnectCallScalerMethod returned " << KR(kernResult) << " for 'kDriverGetDrvrVersion' using connection " << HEX8(inConnection));
-					return false;	//	Fail
-				}
-				const uint32_t	interfaceVers(static_cast<uint32_t>(dvscalarO_64[0]));
-				if (interfaceVers != 9)
-				{	//	Mac driver interface level before 9 is 'way too old...
-					MDIFAIL ("'kDriverGetDrvrVersion' using connection " << HEX8(inConnection) << " returned interface level " << DEC(interfaceVers) << " -- require 9");
-					return false;
-				}
-				mDriverVersion = uint32_t(dvscalarO_64[1]);	//	Decode the packed driver version...
-				mDrvrVersComps[0] =	uint16_t(mDriverVersion >> 24) & 0x00FF;	//	major
-				mDrvrVersComps[1] = uint16_t(mDriverVersion >> 16) & 0x00FF;	//	minor
-				mDrvrVersComps[2] = uint16_t(mDriverVersion >>  8) & 0x00FF;	//	point
-				mDrvrVersComps[3] = uint16_t(mDriverVersion      ) & 0x00FF;	//	build
-			}
-			else
-			{
-				mDriverVersion = uint32_t(scalarO_64[0]);	//	Decode the packed driver version...
-				mDrvrVersComps[0] =	uint16_t(NTV2DriverVersionDecode_Major(mDriverVersion));	//	major
-				mDrvrVersComps[1] = uint16_t(NTV2DriverVersionDecode_Minor(mDriverVersion));	//	minor
-				mDrvrVersComps[2] = uint16_t(NTV2DriverVersionDecode_Point(mDriverVersion));	//	point
-				mDrvrVersComps[3] = uint16_t(NTV2DriverVersionDecode_Build(mDriverVersion));	//	build
-			}
-			if (!(AJA_NTV2_SDK_VERSION_MAJOR))
-				MDIWARN ("connection " << inConnection << " allowed in dev mode (SDK v0.0.0.0) -- may be incompatible with driver v"
-						<< DEC(mDrvrVersComps[0]) << "." << DEC(mDrvrVersComps[1]) << "." << DEC(mDrvrVersComps[2]) << "."
-						<< DEC(mDrvrVersComps[3]) << ", mDriverVersion=" << xHEX0N(mDriverVersion,8));
-			else if (mDrvrVersComps[0] == uint16_t(AJA_NTV2_SDK_VERSION_MAJOR))
-				MDIDBG ("connection " << inConnection << " -- driver v" << DEC(mDrvrVersComps[0]) << "." << DEC(mDrvrVersComps[1])
-						<< "." << DEC(mDrvrVersComps[2]) << "." << DEC(mDrvrVersComps[3]) << " == client SDK v"
-						<< DEC(uint16_t(AJA_NTV2_SDK_VERSION_MAJOR)) << "." << DEC(uint16_t(AJA_NTV2_SDK_VERSION_MINOR))
-						<< "." << DEC(uint16_t(AJA_NTV2_SDK_VERSION_POINT)) << "." << DEC(uint16_t(AJA_NTV2_SDK_BUILD_NUMBER)));
-			else
-				MDIWARN ("connection " << inConnection << " -- driver v" << DEC(mDrvrVersComps[0]) << "." << DEC(mDrvrVersComps[1])
-						<< "." << DEC(mDrvrVersComps[2]) << "." << DEC(mDrvrVersComps[3]) << " != client SDK v"
-						<< DEC(uint16_t(AJA_NTV2_SDK_VERSION_MAJOR)) << "." << DEC(uint16_t(AJA_NTV2_SDK_VERSION_MINOR)) << "."
-						<< DEC(uint16_t(AJA_NTV2_SDK_VERSION_POINT)) << "." << DEC(uint16_t(AJA_NTV2_SDK_BUILD_NUMBER))
-						<< ", mDriverVersion=" << xHEX0N(mDriverVersion,8));
-			return true;	//	OK
-		}
-
 	private:
 		io_connect_t	mIOConnections	[kMaxNumDevices];	//	My io_connect_t map
 		uint64_t		mRecheckTally	[kMaxNumDevices];	//	Used to calc when it's time to test if connection still ok
@@ -463,23 +396,12 @@ class DeviceMap
 };	//	DeviceMap
 
 
-static DeviceMap		gDeviceMap;		//	The DeviceMap singleton
-static MDIStats			gClientStats;	//	Client stats
+static DeviceMap	gDeviceMap;		//	The DeviceMap singleton
 
-MDIStats::~MDIStats()
+
+const string & CNTV2MacDriverInterface::GetIOServiceName (void)
 {
-	//MDIDBG (dec << fConstructCount << " construct(s), " << fDestructCount << " destruct(s), " << fOpenCount << " open(s), " << fCloseCount << " close(s)");
-}
-
-void CNTV2MacDriverInterface::GetClientStats (MDIStats & outStats)
-{
-	outStats = gClientStats;
-}
-
-
-const char * CNTV2MacDriverInterface::GetIOServiceName (void)
-{
-	return sNTV2PCIDriverName.c_str ();
+	return sNTV2PCIDriverName;
 }
 
 
@@ -489,22 +411,18 @@ const char * CNTV2MacDriverInterface::GetIOServiceName (void)
 //
 //	Constructor
 //--------------------------------------------------------------------------------------------------------------------
-CNTV2MacDriverInterface::CNTV2MacDriverInterface( void )
+CNTV2MacDriverInterface::CNTV2MacDriverInterface (void)
 {
-	_boardOpened = false;
-	_boardNumber = 0;
-	AJAAtomic::Increment(&(gClientStats.fConstructCount));
-	MDIDBG (INSTP(this));
 }
 
 
 //--------------------------------------------------------------------------------------------------------------------
 //	~CNTV2MacDriverInterface
 //--------------------------------------------------------------------------------------------------------------------
-CNTV2MacDriverInterface::~CNTV2MacDriverInterface( void )
+CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 {
-	AJAAtomic::Increment(&(gClientStats.fDestructCount));
-	MDIDBG (INSTP(this));
+	if (IsOpen())
+		Close();
 }
 
 
@@ -514,141 +432,58 @@ io_connect_t CNTV2MacDriverInterface::GetIOConnect (const bool inDoNotAllocate) 
 }
 
 
-ULWord CNTV2MacDriverInterface::GetMacRawDriverVersion (void)
-{
-	return gDeviceMap.GetDriverVersion();
-}
-
-
 //--------------------------------------------------------------------------------------------------------------------
 //	Open
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, const string & inHostName)
+bool CNTV2MacDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 {
-	if (inDeviceIndexNumber >= kMaxNumDevices)
-		return false;
-
-	if (IsOpen()  &&  inDeviceIndexNumber == _boardNumber)
-	{
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-		if (inHostName.empty()  &&  !IsRemote())
-			return true;	//	Same local device requested, already open
-		if (GetHostName() == inHostName  &&  IsRemote())
-			return true;	//	Same remote device requested, already open
-#else
-		return true;	//	Same local device requested, already open
-#endif
-	}
-
-	if (IsOpen())
-		Close();	//	Close if different device requested
-
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (!inHostName.empty())
-		_boardOpened = OpenRemote (inDeviceIndexNumber, inHostName); //	Remote host open
-	else
-#else
-	(void) inHostName;
-#endif
-	{
-		// Local host open -- get a Mach connection
-		_boardOpened = gDeviceMap.GetConnection (inDeviceIndexNumber) != 0;								
-		
-		// When device is unplugged, saved static io_connect_t value goes stale, yet remains non-zero.
-		// This resets it it to zero, reestablishes a connection on replug. Fixes many pnp/sleep issues.
-		if (_boardOpened)
-		{
-			if (gDeviceMap.ConnectionIsStillOkay(inDeviceIndexNumber) == false)
-			{
-				gDeviceMap.Reset();
-				_boardOpened = gDeviceMap.GetConnection (inDeviceIndexNumber) != 0;
-			}
-		}
-		
-		AJAAtomic::Increment(&(gClientStats.fOpenCount));
-	}
-
+	// Local host open -- get a Mach connection
+	_boardOpened = gDeviceMap.GetConnection (inDeviceIndex) != 0;								
+	
+	// When device is unplugged, saved static io_connect_t value goes stale, yet remains non-zero.
+	// This resets it it to zero, reestablishes a connection on replug. Fixes many pnp/sleep issues.
 	if (IsOpen())
 	{
-		// Set _boardNumber now, because ReadRegister needs it to talk to the correct device
-		_boardNumber = inDeviceIndexNumber;	
-		const NTV2DeviceIDSet	legalDeviceIDs	(::NTV2GetSupportedDevices ());
-		if (!CNTV2DriverInterface::ReadRegister (kRegBoardID, _boardID))
+		if (!gDeviceMap.ConnectionIsStillOkay(inDeviceIndex))
 		{
-			MDIFAIL ("ReadRegister failed for 'kRegBoardID' -- " << INSTP(this) << ", ndx=" << inDeviceIndexNumber << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndexNumber, false)) << ", id=" << HEX8(_boardID));
-			if (!CNTV2DriverInterface::ReadRegister (kRegBoardID, _boardID))
-			{
-				MDIFAIL ("ReadRegister retry failed for 'kRegBoardID' -- " << INSTP(this) << ", ndx=" << inDeviceIndexNumber << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndexNumber, false)) << ", id=" << HEX8(_boardID));
-				_boardNumber = 0;
-				_boardOpened = false;
-				return false;
-			}
-			MDIDBG (INSTP(this) << " retry succeeded, ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber, false)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
+			gDeviceMap.Reset();
+			_boardOpened = gDeviceMap.GetConnection(inDeviceIndex) != 0;
 		}
-		if (legalDeviceIDs.find (_boardID) == legalDeviceIDs.end ())
+	}
+
+	if (!IsOpen())
+		{DIFAIL("No connection: ndx=" << inDeviceIndex);  return false;}
+
+	// Set _boardNumber now, because ReadRegister needs it to talk to the correct device
+	_boardNumber = inDeviceIndex;	
+	const NTV2DeviceIDSet	legalDeviceIDs(::NTV2GetSupportedDevices());
+	if (!CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID))
+	{
+		DIFAIL ("ReadRegister failed for 'kRegBoardID' -- " << ", ndx=" << inDeviceIndex << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndex, false)) << ", id=" << HEX8(_boardID));
+		if (!CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID))
 		{
-			_boardNumber = 0;
-			_boardOpened = false;
-			MDIFAIL ("Unsupported _boardID " << HEX8(_boardID) << INSTP(this) << ", ndx=" << inDeviceIndexNumber << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndexNumber, false)));
+			DIFAIL("ReadRegister retry failed for 'kRegBoardID', ndx=" << inDeviceIndex << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndex, false)) << ", id=" << HEX8(_boardID));
+			Close();
 			return false;
 		}
-
-		// Kludge Warning.....
-		// InitMemberVariablesOnOpen needs frame geometry to determine frame buffer size and number.
-		NTV2FrameGeometry fg;
-		ULWord returnVal1, returnVal2;
-
-		CNTV2DriverInterface::ReadRegister (kRegGlobalControl, fg, kRegMaskGeometry, kRegShiftGeometry);
-		ReadRegister (kRegCh1Control, returnVal1, kRegMaskFrameFormat, kRegShiftFrameFormat);
-		ReadRegister (kRegCh1Control, returnVal2, kRegMaskFrameFormatHiBit, kRegShiftFrameFormatHiBit);
-
-		InitMemberVariablesOnOpen (fg, NTV2FrameBufferFormat((returnVal1&0x0f) | ((returnVal2&0x1)<<4)));
+		DIDBG("Retry succeeded, ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber, false)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
 	}
-	MDIDBG (INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber, false)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
+	if (legalDeviceIDs.find (_boardID) == legalDeviceIDs.end ())
+	{
+		DIFAIL("Unsupported _boardID " << HEX8(_boardID) << ", ndx=" << inDeviceIndex << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndex, false)));
+		Close();
+		return false;
+	}
+	DIDBG ("ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber, false)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
+	return true;
 
-	return IsOpen ();
+}	//	OpenLocalPhysical
 
-}	//	Open
 
-#if !defined(NTV2_DEPRECATE_14_3)
-bool CNTV2MacDriverInterface::Open (UWord inDeviceIndexNumber, bool displayError, NTV2DeviceType eBoardType, const char * pInHostName)
+bool CNTV2MacDriverInterface::CloseLocalPhysical (void)
 {
-	(void) displayError;
-	(void) eBoardType;
-	const string host(pInHostName ? pInHostName : "");
-	return Open(inDeviceIndexNumber, host);
-}
-#endif	//	!defined(NTV2_DEPRECATE_14_3)
-
-
-//--------------------------------------------------------------------------------------------------------------------
-//	TestOpen
-//
-//	return true if device is still present
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::TestOpen()
-{
-	ULWord appType;
-	int32_t pid;
-	return GetStreamingApplication (&appType, &pid);	//	A cheap & fast way to test if the device is still present
-}
-
-
-//--------------------------------------------------------------------------------------------------------------------
-//	Close
-//
-//	Close our connection (use mutex)
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::Close (void)
-{
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (IsRemote())
-		return CloseRemote ();
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-
-	AJAAtomic::Increment(&(gClientStats.fCloseCount));
-	MDIDBG (INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
-
+	NTV2_ASSERT(!IsRemote());
+	DIDBG (INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection(_boardNumber)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
 	_boardOpened = false;
 	_boardNumber = 0;
 	return true; // success
@@ -656,158 +491,126 @@ bool CNTV2MacDriverInterface::Close (void)
 }	//	Close
 
 
-//--------------------------------------------------------------------------------------------------------------------
-//	GetPCISlotNumber
-//
-//	Returns my PCI slot number, if known; otherwise returns zero.
-//--------------------------------------------------------------------------------------------------------------------
-ULWord CNTV2MacDriverInterface::GetPCISlotNumber (void) const
-{
-	ULWord				result (0);
-	io_registry_entry_t	ioRegistryEntry	(0);
-	CFTypeRef			pDataObj (AJA_NULL);
-	const char *		pSlotName (AJA_NULL);
-
-	if (_boardOpened && GetIOConnect())
+#if !defined(NTV2_DEPRECATE_16_0)
+	ULWord CNTV2MacDriverInterface::GetPCISlotNumber (void) const
 	{
-		//	TBD: Figure out where in the IORegistry the io_connect_t is, then navigate up to the io_registry_entry
-		//			for our driver that contains the "AJAPCISlot" property. Then proceed as before...
-		ioRegistryEntry = static_cast<io_registry_entry_t>(GetIOConnect());
-		return 0;		//	FINISH THIS
+		ULWord				result (0);
+		io_registry_entry_t	ioRegistryEntry	(0);
+		CFTypeRef			pDataObj (AJA_NULL);
+		const char *		pSlotName (AJA_NULL);
 
-		//	Ask our driver for the "AJAPCISlot" property...
-		pDataObj = OS_IORegistryEntryCreateCFProperty (ioRegistryEntry, CFSTR("AJAPCISlot"), AJA_NULL, 0);
-		if (pDataObj)
+		if (_boardOpened && GetIOConnect())
 		{
-			//	Cast the property data to a standard "C" string...
-			pSlotName = ::CFStringGetCStringPtr(static_cast<CFStringRef>(pDataObj), kCFStringEncodingMacRoman);
-			if (pSlotName)
+			//	TBD:	Determine where in the IORegistry the io_connect_t is, then navigate up to the io_registry_entry
+			//			for our driver that contains the "AJAPCISlot" property. Then proceed as before...
+			ioRegistryEntry = static_cast<io_registry_entry_t>(GetIOConnect());
+			return 0;		//	FINISH THIS
+
+			//	Ask our driver for the "AJAPCISlot" property...
+			pDataObj = OS_IORegistryEntryCreateCFProperty (ioRegistryEntry, CFSTR("AJAPCISlot"), AJA_NULL, 0);
+			if (pDataObj)
 			{
-				//	Extract the slot number from the name...
-				const string	slotName (pSlotName);
-				if (slotName.find ("Slot") == 0)
+				//	Cast the property data to a standard "C" string...
+				pSlotName = ::CFStringGetCStringPtr(static_cast<CFStringRef>(pDataObj), kCFStringEncodingMacRoman);
+				if (pSlotName)
 				{
-					const char	lastChar (slotName.at (slotName.length () - 1));
-					if (lastChar >= '0' && lastChar <= '9')
-						result = static_cast<ULWord>(lastChar) - static_cast<ULWord>('0');
-
-				}	//	if slotName starts with "Slot"
-
-			}	//	if pSlotName non-NULL
-
-			::CFRelease (pDataObj);
-
-		}	//	if AJAPCISlot property obtained okay
-
-	}	//	if _boardOpened && GetIOConnect()
-
-	return result;
-
-}	//	GetPCISlotNumber
+					//	Extract the slot number from the name...
+					const string	slotName (pSlotName);
+					if (slotName.find ("Slot") == 0)
+					{
+						const char	lastChar (slotName.at (slotName.length () - 1));
+						if (lastChar >= '0' && lastChar <= '9')
+							result = static_cast<ULWord>(lastChar) - static_cast<ULWord>('0');
+					}	//	if slotName starts with "Slot"
+				}	//	if pSlotName non-NULL
+				::CFRelease (pDataObj);
+			}	//	if AJAPCISlot property obtained okay
+		}	//	if _boardOpened && GetIOConnect()
+		return result;
+	}	//	GetPCISlotNumber
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 
-//--------------------------------------------------------------------------------------------------------------------
-//	MapMemory
-//
-//	Return a pointer and size of either the register map or frame buffer memory.
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::MapFrameBuffers( void )
-{
-	UByte	*baseAddr;
-	if (!MapMemory (kFrameBufferMemory, reinterpret_cast<void**>(&baseAddr)))
+#if !defined(NTV2_DEPRECATE_16_0)
+	//--------------------------------------------------------------------------------------------------------------------
+	//	MapMemory
+	//	Return a pointer and size of either the register map or frame buffer memory.
+	//--------------------------------------------------------------------------------------------------------------------
+	bool CNTV2MacDriverInterface::MapFrameBuffers (void)
+	{
+		UByte	*baseAddr;
+		if (!MapMemory (kFrameBufferMemory, reinterpret_cast<void**>(&baseAddr)))
+		{
+			_pFrameBaseAddress = AJA_NULL;
+			_pCh1FrameBaseAddress = _pCh2FrameBaseAddress = AJA_NULL;	//	DEPRECATE!
+			return false;
+		}
+		_pFrameBaseAddress = reinterpret_cast<ULWord*>(baseAddr);
+		return true;
+	}
+
+	bool CNTV2MacDriverInterface::UnmapFrameBuffers (void)
 	{
 		_pFrameBaseAddress = AJA_NULL;
 		_pCh1FrameBaseAddress = _pCh2FrameBaseAddress = AJA_NULL;	//	DEPRECATE!
-		return false;
+		return true;
 	}
-	_pFrameBaseAddress = reinterpret_cast<ULWord*>(baseAddr);
-	return true;
-}
 
-bool CNTV2MacDriverInterface::UnmapFrameBuffers (void)
-{
-    _pFrameBaseAddress = AJA_NULL;
-	_pCh1FrameBaseAddress = _pCh2FrameBaseAddress = AJA_NULL;	//	DEPRECATE!
-    return true;
-}
+	//--------------------------------------------------------------------------------------------------------------------
+	//	MapRegisters
+	//--------------------------------------------------------------------------------------------------------------------
+	bool CNTV2MacDriverInterface::MapRegisters (void)
+	{
+		ULWord	*baseAddr;
+		if (!MapMemory (kRegisterMemory, reinterpret_cast<void**>(&baseAddr)))
+		{
+			_pRegisterBaseAddress = AJA_NULL;
+			return false;
+		}
+		_pRegisterBaseAddress = reinterpret_cast<ULWord*>(baseAddr);
+		return true;
+	}
 
-
-//--------------------------------------------------------------------------------------------------------------------
-//	MapRegisters
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::MapRegisters( void )
-{
-	ULWord	*baseAddr;
-	if (!MapMemory (kRegisterMemory, reinterpret_cast<void**>(&baseAddr)))
+	bool CNTV2MacDriverInterface::UnmapRegisters (void)
 	{
 		_pRegisterBaseAddress = AJA_NULL;
-		return false;
+		return true;
 	}
-	_pRegisterBaseAddress = reinterpret_cast<ULWord*>(baseAddr);
-	return true;
 
-}
-
-bool CNTV2MacDriverInterface::UnmapRegisters ()
-{
-	_pRegisterBaseAddress = AJA_NULL;
-	return true;
-}
-
-
-//--------------------------------------------------------------------------------------------------------------------
-//	Map / Unmap Xena2Flash
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::MapXena2Flash( void )
-{
-	ULWord	*baseAddr;
-	if (!MapMemory (kXena2FlashMemory, reinterpret_cast<void**>(&baseAddr)))
+	//--------------------------------------------------------------------------------------------------------------------
+	//	Map / Unmap Xena2Flash
+	//--------------------------------------------------------------------------------------------------------------------
+	bool CNTV2MacDriverInterface::MapXena2Flash ( void )
+	{
+		ULWord	*baseAddr;
+		if (!MapMemory (kXena2FlashMemory, reinterpret_cast<void**>(&baseAddr)))
+		{
+			_pXena2FlashBaseAddress = AJA_NULL;
+			return false;
+		}
+		_pXena2FlashBaseAddress = reinterpret_cast<ULWord*>(baseAddr);
+		return true;
+	}
+	
+	bool CNTV2MacDriverInterface::UnmapXena2Flash (void)
 	{
 		_pXena2FlashBaseAddress = AJA_NULL;
+		return true;
+	}
+
+	bool CNTV2MacDriverInterface::MapMemory (const MemoryType memType, void **memPtr)
+	{
+		if (GetIOConnect())
+		{
+			mach_vm_size_t	size(0);
+			IOConnectMapMemory (GetIOConnect(), memType, mach_task_self(),
+								reinterpret_cast<mach_vm_address_t*>(memPtr),
+								&size, kIOMapDefaultCache | kIOMapAnywhere);
+			return size > 0;
+		}
 		return false;
 	}
-	_pXena2FlashBaseAddress = reinterpret_cast<ULWord*>(baseAddr);
-	return true;
-}
-
-bool CNTV2MacDriverInterface::UnmapXena2Flash ()
-{
-	_pXena2FlashBaseAddress = AJA_NULL;
-	return true;
-}
-
-
-//--------------------------------------------------------------------------------------------------------------------
-//	MapMemory
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::MapMemory( MemoryType memType, void **memPtr )
-{
-	if (GetIOConnect())
-	{
-#ifndef __LP64__
-		vm_size_t			size = 0;
-
-		IOConnectMapMemory (GetIOConnect(),
-							memType,
-							mach_task_self(),
-							(vm_address_t*)memPtr,
-							(vm_size_t*)&size,
-							kIOMapDefaultCache | kIOMapAnywhere);
-		return (size > 0);
-
-#else
-		mach_vm_size_t		size = 0;
-		IOConnectMapMemory (GetIOConnect(),
-							memType,
-							mach_task_self(),
-							reinterpret_cast<mach_vm_address_t*>(memPtr),
-							&size,
-							kIOMapDefaultCache | kIOMapAnywhere);
-		return (size > 0);
-#endif
-	}
-	return false;
-}
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 #pragma mark - New Driver Calls
 
@@ -816,46 +619,36 @@ bool CNTV2MacDriverInterface::MapMemory( MemoryType memType, void **memPtr )
 //
 //	Return the value of specified register after masking and shifting the value.
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outRegValue, const ULWord inRegMask, const ULWord inRegShift)
+bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outValue, const ULWord inMask, const ULWord inShift)
 {
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (IsRemote())
+	if (inShift >= 32)
 	{
-		if (!CNTV2DriverInterface::ReadRegister (inRegNum, outRegValue, inRegMask, inRegShift))
-		{
-			MDIFAIL (INSTP(this) << ":  NTV2ReadRegisterRemote failed");
-			return false;
-		}
-		return true;
-	}
-	else
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-	NTV2_ASSERT (inRegShift < 32);
-	{
-		kern_return_t 	kernResult			= KERN_FAILURE;
-
-		uint64_t	scalarI_64[2];
-		uint64_t	scalarO_64 = outRegValue;
-		uint32_t	outputCount = 1;
-
-		scalarI_64[0] = inRegNum;
-		scalarI_64[1] = inRegMask;
-
-		if (GetIOConnect())
-			kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
-												   kDriverReadRegister,		// selector of the function to be called via the user client.
-												   scalarI_64,				// array of scalar (64-bit) input values.
-												   2,						// the number of scalar input values.
-												   &scalarO_64,				// array of scalar (64-bit) output values.
-												   &outputCount);			// pointer to the number of scalar output values.
-		outRegValue = uint32_t(scalarO_64);
-		if (kernResult == KERN_SUCCESS)
-			return true;
-
-		MDIFAIL (KR(kernResult) << INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(GetIOConnect(false))
-					<< " -- reg=" << DEC(inRegNum) << ", mask=" << HEX8(inRegMask) << ", shift=" << HEX8(inRegShift));
+		DIFAIL("Shift " << DEC(inShift) << " > 31, reg=" << DEC(inRegNum) << " msk=" << xHEX0N(inMask,8));
 		return false;
 	}
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::ReadRegister(inRegNum, outValue, inMask, inShift);
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
+	kern_return_t kernResult(KERN_FAILURE);
+	uint64_t	scalarI_64[2] = {inRegNum, inMask};
+	uint64_t	scalarO_64 = outValue;
+	uint32_t	outputCount = 1;
+
+	if (GetIOConnect())
+		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
+											   kDriverReadRegister,		// selector of the function to be called via the user client.
+											   scalarI_64,				// array of scalar (64-bit) input values.
+											   2,						// the number of scalar input values.
+											   &scalarO_64,				// array of scalar (64-bit) output values.
+											   &outputCount);			// pointer to the number of scalar output values.
+	outValue = uint32_t(scalarO_64);
+	if (kernResult == KERN_SUCCESS)
+		return true;
+
+	DIFAIL(KR(kernResult) << ": ndx=" << _boardNumber << ", con=" << HEX8(GetIOConnect(false))
+			<< " -- reg=" << DEC(inRegNum) << ", mask=" << HEX8(inMask) << ", shift=" << HEX8(inShift));
+	return false;
 }
 
 
@@ -865,57 +658,43 @@ bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outR
 //	Set the specified register value taking into accout the bit mask.
 //	If the bit mask is not 0xFFFFFFFF (default) or 0, then this does a read-modify-write.
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::WriteRegister( ULWord registerNumber,
-											 ULWord registerValue,
-											 ULWord registerMask,
-											 ULWord registerShift)
+bool CNTV2MacDriverInterface::WriteRegister (const ULWord inRegNum, const ULWord inValue, const ULWord inMask, const ULWord inShift)
 {
+	if (inShift >= 32)
+	{
+		DIFAIL("Shift " << DEC(inShift) << " > 31, reg=" << DEC(inRegNum) << " msk=" << xHEX0N(inMask,8));
+		return false;
+	}
 #if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 	if (mRecordRegWrites)
 	{
 		AJAAutoLock	autoLock(&mRegWritesLock);
-		mRegWrites.push_back(NTV2RegInfo(registerNumber, registerValue, registerMask, registerShift));
+		mRegWrites.push_back(NTV2RegInfo(inRegNum, inValue, inMask, inShift));
 		if (mSkipRegWrites)
 			return true;
 	}
 #endif	//	defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
-	{
-		if (!CNTV2DriverInterface::WriteRegister (registerNumber, registerValue, registerMask, registerShift))
-		{
-			MDIFAIL (INSTP(this) << ":  NTV2WriteRegisterRemote failed");
-			return false;
-		}
-		return true;
-	}
-	else
+		return CNTV2DriverInterface::WriteRegister(inRegNum, inValue, inMask, inShift);
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-	NTV2_ASSERT (registerShift < 32);
-	{
-		kern_return_t 	kernResult			= KERN_FAILURE;
 
-		uint64_t	scalarI_64[3];
-		uint32_t	outputCount = 0;
+	kern_return_t kernResult(KERN_FAILURE);
+	uint64_t	scalarI_64[3] = {inRegNum, inValue, inMask};
+	uint32_t	outputCount = 0;
 
-		scalarI_64[0] = registerNumber;
-		scalarI_64[1] = registerValue;
-		scalarI_64[2] = registerMask;
-
-		if (GetIOConnect())
-			kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
-												   kDriverWriteRegister,	// selector of the function to be called via the user client.
-												   scalarI_64,				// array of scalar (64-bit) input values.
-												   3,						// the number of scalar input values.
-												   AJA_NULL,				// array of scalar (64-bit) output values.
-												   &outputCount);			// pointer to the number of scalar output values.
-		if (kernResult == KERN_SUCCESS)
-			return true;
-
-		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()) << " -- reg=" << registerNumber << ", val=" << HEX8(registerValue)
-				 << ", mask=" << HEX8(registerMask) << ", shift=" << HEX8(registerShift));
-		return false;
-	}
+	if (GetIOConnect())
+		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
+											   kDriverWriteRegister,	// selector of the function to be called via the user client.
+											   scalarI_64,				// array of scalar (64-bit) input values.
+											   3,						// the number of scalar input values.
+											   AJA_NULL,				// array of scalar (64-bit) output values.
+											   &outputCount);			// pointer to the number of scalar output values.
+	if (kernResult == KERN_SUCCESS)
+		return true;
+	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()) << " -- reg=" << inRegNum
+			<< ", val=" << HEX8(inValue) << ", mask=" << HEX8(inMask) << ", shift=" << HEX8(inShift));
+	return false;
 }
 
 
@@ -925,14 +704,11 @@ bool CNTV2MacDriverInterface::WriteRegister( ULWord registerNumber,
 //	For IoHD this is currently a no-op
 //	For Kona this starts the driver after all of the bitFiles have been sent to the driver.
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::StartDriver( DriverStartPhase phase )
+bool CNTV2MacDriverInterface::StartDriver (DriverStartPhase phase)
 {
 	kern_return_t kernResult = KERN_FAILURE;
-
-	uint64_t	scalarI_64[1];
+	uint64_t	scalarI_64[1] = {phase};
 	uint32_t	outputCount = 0;
-
-	scalarI_64[0] = phase;
 
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),		// an io_connect_t returned from IOServiceOpen().
@@ -943,8 +719,7 @@ bool CNTV2MacDriverInterface::StartDriver( DriverStartPhase phase )
 											   &outputCount);		// pointer to the number of scalar output values.
 	if (kernResult == KERN_SUCCESS)
         return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
 	return false;
 }
 
@@ -957,15 +732,12 @@ bool CNTV2MacDriverInterface::StartDriver( DriverStartPhase phase )
 //	Note: When quicktime is using the board, desktop output on the board is disabled
 //	by the driver.
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::AcquireStreamForApplication( ULWord appType, int32_t pid )
+bool CNTV2MacDriverInterface::AcquireStreamForApplication (ULWord appType, int32_t pid)
 {
 	kern_return_t kernResult = KERN_FAILURE;
 
-	uint64_t	scalarI_64[2];
+	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
-
-	scalarI_64[0] = uint64_t(appType);
-	scalarI_64[1] = uint64_t(pid);
 
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
@@ -976,8 +748,7 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplication( ULWord appType, int32
 											   &outputCount);			// pointer to the number of scalar output values.
 	if (kernResult == KERN_SUCCESS)
         return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+	DIFAIL(KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
 	return false;
 }
 
@@ -988,12 +759,8 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplication( ULWord appType, int32
 bool CNTV2MacDriverInterface::ReleaseStreamForApplication( ULWord appType, int32_t pid )
 {
 	kern_return_t kernResult = KERN_FAILURE;
-
-	uint64_t	scalarI_64[2];
+	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
-
-	scalarI_64[0] = uint64_t(appType);
-	scalarI_64[1] = uint64_t(pid);
 
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
@@ -1002,11 +769,9 @@ bool CNTV2MacDriverInterface::ReleaseStreamForApplication( ULWord appType, int32
 											   2,						// the number of scalar input values.
 											   AJA_NULL,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
-
 	if (kernResult == KERN_SUCCESS)
         return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
 	return false;
 }
 
@@ -1021,15 +786,11 @@ bool CNTV2MacDriverInterface::ReleaseStreamForApplication( ULWord appType, int32
 //	Note: When quicktime is using the board, desktop output on the board is disabled
 //	by the driver.
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::AcquireStreamForApplicationWithReference( ULWord appType, int32_t pid )
+bool CNTV2MacDriverInterface::AcquireStreamForApplicationWithReference (ULWord appType, int32_t pid)
 {
 	kern_return_t kernResult = KERN_FAILURE;
-	
-	uint64_t	scalarI_64[2];
+	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
-
-	scalarI_64[0] = uint64_t(appType);
-	scalarI_64[1] = uint64_t(pid);
 
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
@@ -1040,8 +801,7 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplicationWithReference( ULWord a
 											   &outputCount);			// pointer to the number of scalar output values.
 	if (kernResult == KERN_SUCCESS)
         return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
 	return false;
 }
 
@@ -1052,15 +812,11 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplicationWithReference( ULWord a
 //  Do a reference counted release
 //  Use this call ONLY with AcquireStreamForApplicationWithReference
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::ReleaseStreamForApplicationWithReference( ULWord appType, int32_t pid )
+bool CNTV2MacDriverInterface::ReleaseStreamForApplicationWithReference (ULWord appType, int32_t pid)
 {
 	kern_return_t kernResult = KERN_FAILURE;
-
-	uint64_t	scalarI_64[2];
+	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
-
-	scalarI_64[0] = uint64_t(appType);
-	scalarI_64[1] = uint64_t(pid);
 
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
@@ -1071,36 +827,7 @@ bool CNTV2MacDriverInterface::ReleaseStreamForApplicationWithReference( ULWord a
 											   &outputCount);			// pointer to the number of scalar output values.
 	if (kernResult == KERN_SUCCESS)
         return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
-	return false;
-}
-
-
-//--------------------------------------------------------------------------------------------------------------------
-//	KernelLog
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::KernelLog( void* dataPtr, UInt32 dataSize )
-{
-	kern_return_t kernResult = KERN_FAILURE;
-	
-	uint64_t	scalarI_64[2];
-	uint32_t	outputCount = 0;
-	
-	scalarI_64[0] = uint64_t(dataPtr);
-	scalarI_64[1] = dataSize;
-
-	if (GetIOConnect())
-		kernResult = IOConnectCallScalarMethod(GetIOConnect(),		// an io_connect_t returned from IOServiceOpen().
-											   kDriverKernelLog,	// selector of the function to be called via the user client.
-											   scalarI_64,			// array of scalar (64-bit) input values.
-											   2,					// the number of scalar input values.
-											   AJA_NULL,			// array of scalar (64-bit) output values.
-											   &outputCount);		// pointer to the number of scalar output values.
-	if (kernResult == KERN_SUCCESS)
-        return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
 	return false;
 }
 
@@ -1114,15 +841,11 @@ bool CNTV2MacDriverInterface::KernelLog( void* dataPtr, UInt32 dataSize )
 //	Note: When quicktime is using the board, desktop output on the board is disabled
 //	by the driver.
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SetStreamingApplication( ULWord appType, int32_t pid )
+bool CNTV2MacDriverInterface::SetStreamingApplication (ULWord appType, int32_t pid)
 {
 	kern_return_t kernResult = KERN_FAILURE;
-
-	uint64_t	scalarI_64[2];
+	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
-
-	scalarI_64[0] = uint64_t(appType);
-	scalarI_64[1] = uint64_t(pid);
 
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
@@ -1133,8 +856,7 @@ bool CNTV2MacDriverInterface::SetStreamingApplication( ULWord appType, int32_t p
 											   &outputCount);			// pointer to the number of scalar output values.
 	if (kernResult == KERN_SUCCESS)
         return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
 	return false;
 }
 
@@ -1142,10 +864,9 @@ bool CNTV2MacDriverInterface::SetStreamingApplication( ULWord appType, int32_t p
 //--------------------------------------------------------------------------------------------------------------------
 //	GetStreamingApplication
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::GetStreamingApplication( ULWord *appType, int32_t *pid )
+bool CNTV2MacDriverInterface::GetStreamingApplication (ULWord * appType, int32_t * pid)
 {
 	kern_return_t kernResult = KERN_FAILURE;
-
 	uint64_t	scalarO_64[2];
 	uint32_t	outputCount = 2;
 
@@ -1156,12 +877,11 @@ bool CNTV2MacDriverInterface::GetStreamingApplication( ULWord *appType, int32_t 
 											   0,						// the number of scalar input values.
 											   scalarO_64,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
-	*appType = ULWord(scalarO_64[0]);
-	*pid = int32_t(scalarO_64[1]);
+	if (appType)	*appType	= ULWord(scalarO_64[0]);
+	if (pid)		*pid		= int32_t(scalarO_64[1]);
 	if (kernResult == KERN_SUCCESS)
         return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
 	return false;
 }
 
@@ -1175,14 +895,11 @@ bool CNTV2MacDriverInterface::GetStreamingApplication( ULWord *appType, int32_t 
 //
 //	This call adds the input PID to list of PIDs that is tracked by
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SetDefaultDeviceForPID( int32_t pid )
+bool CNTV2MacDriverInterface::SetDefaultDeviceForPID (int32_t pid)
 {
 	kern_return_t 	kernResult = KERN_FAILURE;
-
-	uint64_t		scalarI_64[1];
+	uint64_t		scalarI_64[1] = {uint64_t(pid)};
 	uint32_t		outputCount = 0;
-
-	scalarI_64[0] = uint64_t(pid);
 
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
@@ -1193,8 +910,7 @@ bool CNTV2MacDriverInterface::SetDefaultDeviceForPID( int32_t pid )
 											   &outputCount);			// pointer to the number of scalar output values.
 	if (kernResult == KERN_SUCCESS)
         return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
 	return false;
 }
 
@@ -1208,15 +924,12 @@ bool CNTV2MacDriverInterface::SetDefaultDeviceForPID( int32_t pid )
 //
 //	Returns true if the input process ID was previously marked as the default device using SetDefaultDeviceForPID.
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::IsDefaultDeviceForPID( int32_t pid )
+bool CNTV2MacDriverInterface::IsDefaultDeviceForPID (int32_t pid)
 {
 	kern_return_t 	kernResult = KERN_FAILURE;
-
-	uint64_t		scalarI_64[1];
+	uint64_t		scalarI_64[1] = {uint64_t(pid)};
 	uint64_t		scalarO_64 = 0;
 	uint32_t		outputCount = 1;
-
-	scalarI_64[0] = uint64_t(pid);
 
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
@@ -1226,33 +939,30 @@ bool CNTV2MacDriverInterface::IsDefaultDeviceForPID( int32_t pid )
 											   &scalarO_64,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
 	if (kernResult != KERN_SUCCESS)
-		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
 	return bool(scalarO_64);
 }
 
 
 //--------------------------------------------------------------------------------------------------------------------
-//	LockFormat	- deprecated
-//
-//	For Kona this is currently a no-op
-//	For IoHD this will for bitfile swaps / Isoch channel rebuilds based on vidoe mode / video format
+//	KernelLog
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::LockFormat( void )
+bool CNTV2MacDriverInterface::KernelLog (void * dataPtr, UInt32 dataSize)
 {
-	kern_return_t	kernResult	= KERN_FAILURE;
-	uint32_t		outputCount	= 0;
+	kern_return_t kernResult = KERN_FAILURE;
+	uint64_t	scalarI_64[2] = {uint64_t(dataPtr), dataSize};
+	uint32_t	outputCount = 0;
 
 	if (GetIOConnect())
-		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
-											   kDriverLockFormat,		// selector of the function to be called via the user client.
-											   AJA_NULL,				// array of scalar (64-bit) input values.
-											   0,						// the number of scalar input values.
-											   AJA_NULL,				// array of scalar (64-bit) output values.
-											   &outputCount);			// pointer to the number of scalar output values.
+		kernResult = IOConnectCallScalarMethod(GetIOConnect(),		// an io_connect_t returned from IOServiceOpen().
+											   kDriverKernelLog,	// selector of the function to be called via the user client.
+											   scalarI_64,			// array of scalar (64-bit) input values.
+											   2,					// the number of scalar input values.
+											   AJA_NULL,			// array of scalar (64-bit) output values.
+											   &outputCount);		// pointer to the number of scalar output values.
 	if (kernResult == KERN_SUCCESS)
         return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
 	return false;
 }
 
@@ -1264,49 +974,37 @@ bool CNTV2MacDriverInterface::LockFormat( void )
 //	Supply a timeout in milliseconds - if 0 (default), then never time out.
 //	Returns true if interrupt occurs, false if timeout.
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::WaitForInterrupt( INTERRUPT_ENUMS type, unsigned int  timeout )
+bool CNTV2MacDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS type, const ULWord timeout)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
 		return CNTV2DriverInterface::WaitForInterrupt(type, timeout);
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 
-	if (type != eChangeEvent)
-	{
-		kern_return_t 	kernResult = KERN_FAILURE;
-
-		uint64_t	scalarI_64[2];
-		uint64_t	scalarO_64 = 0;
-		uint32_t	outputCount = 1;
-
-		scalarI_64[0] = type;
-		scalarI_64[1] = timeout;
-
-
-		if (!NTV2_IS_VALID_INTERRUPT_ENUM (type))
-			kernResult = KERN_INVALID_VALUE;
-		else if (GetIOConnect())
-			kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
-												   kDriverWaitForInterrupt,	// selector of the function to be called via the user client.
-												   scalarI_64,				// array of scalar (64-bit) input values.
-												   2,						// the number of scalar input values.
-												   &scalarO_64,				// array of scalar (64-bit) output values.
-												   &outputCount);				// pointer to the number of scalar output values.
-		UInt32 interruptOccured = uint32_t(scalarO_64);
-
-		if (kernResult != KERN_SUCCESS)
-			MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
-
-		if (kernResult == KERN_SUCCESS && interruptOccured)
-		{
-            BumpEventCount (type);
-			return true;
-		}
-		else
-			return false;
-	}
-	else
+	if (type == eChangeEvent)
 		return WaitForChangeEvent(timeout);
+
+	kern_return_t 	kernResult = KERN_FAILURE;
+	uint64_t	scalarI_64[2] = {type, timeout};
+	uint64_t	scalarO_64 = 0;
+	uint32_t	outputCount = 1;
+
+	if (!NTV2_IS_VALID_INTERRUPT_ENUM(type))
+		kernResult = KERN_INVALID_VALUE;
+	else if (GetIOConnect())
+		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
+											   kDriverWaitForInterrupt,	// selector of the function to be called via the user client.
+											   scalarI_64,				// array of scalar (64-bit) input values.
+											   2,						// the number of scalar input values.
+											   &scalarO_64,				// array of scalar (64-bit) output values.
+											   &outputCount);				// pointer to the number of scalar output values.
+	UInt32 interruptOccurred = uint32_t(scalarO_64);
+	if (kernResult != KERN_SUCCESS)
+		{DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));  return false;}
+
+	if (interruptOccurred)
+		BumpEventCount(type);
+	return interruptOccurred;
 }
 
 
@@ -1315,15 +1013,12 @@ bool CNTV2MacDriverInterface::WaitForInterrupt( INTERRUPT_ENUMS type, unsigned i
 //
 //	Returns the number of interrupts that have occured for the specified interrupt type.
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::GetInterruptCount( INTERRUPT_ENUMS eInterrupt, ULWord *pCount )
+bool CNTV2MacDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterrupt, ULWord & outCount)
 {
 	kern_return_t 	kernResult = KERN_FAILURE;
-
-	uint64_t	scalarI_64[1];
+	uint64_t	scalarI_64[1] = {eInterrupt};
 	uint64_t	scalarO_64 = 0;
 	uint32_t	outputCount = 1;
-
-	scalarI_64[0] = eInterrupt;
 
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
@@ -1332,11 +1027,10 @@ bool CNTV2MacDriverInterface::GetInterruptCount( INTERRUPT_ENUMS eInterrupt, ULW
 											   1,						// the number of scalar input values.
 											   &scalarO_64,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
-	*pCount = ULWord(scalarO_64);
+	outCount = ULWord(scalarO_64);
 	if (kernResult == KERN_SUCCESS)
         return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+	DIFAIL(KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
 	return false;
 }
 
@@ -1348,16 +1042,12 @@ bool CNTV2MacDriverInterface::GetInterruptCount( INTERRUPT_ENUMS eInterrupt, ULW
 //	Supply a timeout in milliseconds - if 0 (default), then never time out.
 //	Returns true if change occurs, false if timeout.
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::WaitForChangeEvent( UInt32 timeout )
+bool CNTV2MacDriverInterface::WaitForChangeEvent (UInt32 timeout)
 {
 	kern_return_t 	kernResult = KERN_FAILURE;
-
-	uint64_t	scalarI_64[1];
+	uint64_t	scalarI_64[1] = {timeout};
 	uint64_t	scalarO_64 = 0;
 	uint32_t	outputCount = 1;
-
-	scalarI_64[0] = timeout;
-
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverWaitForChangeEvent,// selector of the function to be called via the user client.
@@ -1366,40 +1056,62 @@ bool CNTV2MacDriverInterface::WaitForChangeEvent( UInt32 timeout )
 											   &scalarO_64,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
 	if (kernResult != KERN_SUCCESS)
-		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		DIFAIL(KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
 	return bool(scalarO_64);
 }
 
 
-//--------------------------------------------------------------------------------------------------------------------
-//	GetQuickTimeTime
-// This is the number of QuickTime "ticks" per video frame, and is used to determine the
-// QuickTime "scale" that the Clock Component uses. Note that this number has to agree with
-// the Muxer -- see Muxer::GetTime()
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::GetQuickTimeTime( UInt32 *time, UInt32 *scale )
-{
-	kern_return_t 	kernResult = KERN_FAILURE;
 
-	uint64_t	scalarO_64[2];
-	uint32_t	outputCount = 2;
 
-	if (GetIOConnect())
-		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
-											   kDriverGetTime,			// selector of the function to be called via the user client.
-											   AJA_NULL,				// array of scalar (64-bit) input values.
-											   0,						// the number of scalar input values.
-											   scalarO_64,				// array of scalar (64-bit) output values.
-											   &outputCount);			// pointer to the number of scalar output values.
-	*time = UInt32(scalarO_64[0]);
-	*scale = UInt32(scalarO_64[1]);
+#if !defined(NTV2_DEPRECATE_15_6)
+	//--------------------------------------------------------------------------------------------------------------------
+	//	LockFormat	- deprecated
+	//	For Kona this is currently a no-op
+	//	For IoHD this will for bitfile swaps / Isoch channel rebuilds based on vidoe mode / video format
+	//--------------------------------------------------------------------------------------------------------------------
+	bool CNTV2MacDriverInterface::LockFormat (void)
+	{
+		kern_return_t	kernResult	= KERN_FAILURE;
+		uint32_t		outputCount	= 0;
+		if (GetIOConnect())
+			kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
+												   kDriverLockFormat,		// selector of the function to be called via the user client.
+												   AJA_NULL,				// array of scalar (64-bit) input values.
+												   0,						// the number of scalar input values.
+												   AJA_NULL,				// array of scalar (64-bit) output values.
+												   &outputCount);			// pointer to the number of scalar output values.
+		if (kernResult == KERN_SUCCESS)
+			return true;
+		DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
+		return false;
+	}
 
-	if (kernResult == KERN_SUCCESS)
-        return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this));
-	return false;
-}
+	//--------------------------------------------------------------------------------------------------------------------
+	//	GetQuickTimeTime
+	// This is the number of QuickTime "ticks" per video frame, and is used to determine the
+	// QuickTime "scale" that the Clock Component uses. Note that this number has to agree with
+	// the Muxer -- see Muxer::GetTime()
+	//--------------------------------------------------------------------------------------------------------------------
+	bool CNTV2MacDriverInterface::GetQuickTimeTime (UInt32 * time, UInt32 * scale)
+	{
+		kern_return_t 	kernResult = KERN_FAILURE;
+		uint64_t	scalarO_64[2];
+		uint32_t	outputCount = 2;
+		if (GetIOConnect())
+			kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
+												   kDriverGetTime,			// selector of the function to be called via the user client.
+												   AJA_NULL,				// array of scalar (64-bit) input values.
+												   0,						// the number of scalar input values.
+												   scalarO_64,				// array of scalar (64-bit) output values.
+												   &outputCount);			// pointer to the number of scalar output values.
+		if (time)	*time = UInt32(scalarO_64[0]);
+		if (scale)	*scale = UInt32(scalarO_64[1]);
+		if (kernResult == KERN_SUCCESS)
+			return true;
+		DIFAIL(KR(kernResult));
+		return false;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_15_6)
 
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -1420,25 +1132,14 @@ bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
 											const ULWord		inByteCount,
 											const bool			inSynchronous)
 {
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
-		return CNTV2DriverInterface::DmaTransfer(inDMAEngine, inIsRead, inFrameNumber, pFrameBuffer, inOffsetBytes, inByteCount,
-													inSynchronous);
-#else
-	(void)inSynchronous;
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-
+		return CNTV2DriverInterface::DmaTransfer(inDMAEngine, inIsRead, inFrameNumber, pFrameBuffer,
+												inOffsetBytes, inByteCount, inSynchronous);
+	if (!IsOpen())
+		return false;
 	kern_return_t kernResult = KERN_FAILURE;
-
-	uint64_t	scalarI_64[6];
+	uint64_t	scalarI_64[6] = {inDMAEngine, uint64_t(pFrameBuffer), inFrameNumber, inOffsetBytes, inByteCount, !inIsRead};
 	uint32_t	outputCount = 0;
-
-	scalarI_64[0] = inDMAEngine;
-	scalarI_64[1] = uint64_t(pFrameBuffer);
-	scalarI_64[2] = inFrameNumber;
-	scalarI_64[3] = inOffsetBytes;
-	scalarI_64[4] = inByteCount;
-	scalarI_64[5] = !inIsRead;
 
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
@@ -1449,9 +1150,8 @@ bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
 											   &outputCount);			// pointer to the number of scalar output values.
 	if (kernResult == KERN_SUCCESS)
         return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect())
-				<< ", eng=" << inDMAEngine << ", frm=" << inFrameNumber << ", off=" << HEX8(inOffsetBytes) << ", len=" << HEX8(inByteCount) << ", " << (inIsRead ? "R" : "W"));
+	DIFAIL(KR(kernResult) << ": con=" << HEX8(GetIOConnect()) << ", eng=" << inDMAEngine << ", frm=" << inFrameNumber
+			<< ", off=" << HEX8(inOffsetBytes) << ", len=" << HEX8(inByteCount) << ", " << (inIsRead ? "R" : "W"));
 	return false;
 }
 
@@ -1477,13 +1177,11 @@ bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine inDMAEngine,
 											const ULWord inSegmentCardPitch,
 											const bool inSynchronous)
 {
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
 		return CNTV2DriverInterface::DmaTransfer (inDMAEngine, inIsRead, inFrameNumber, pFrameBuffer, inCardOffsetBytes, inByteCount,
 													inNumSegments, inSegmentHostPitch, inSegmentCardPitch, inSynchronous);
-#else
-	(void)inSynchronous;
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
+	if (!IsOpen())
+		return false;
 	kern_return_t kernResult = KERN_FAILURE;
 	size_t	outputStructSize = 0;
 
@@ -1509,39 +1207,25 @@ bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine inDMAEngine,
 											   &outputStructSize);				// size of output structure
 	if (kernResult == KERN_SUCCESS)
         return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
 	return false;
 }
 
 
-bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine inDMAEngine,
-											const NTV2Channel inDMAChannel,
-											const bool inIsTarget,
-											const ULWord inFrameNumber,
-											const ULWord inCardOffsetBytes,
-											const ULWord inByteCount,
-											const ULWord inNumSegments,
-											const ULWord inSegmentHostPitch,
-											const ULWord inSegmentCardPitch,
-											const PCHANNEL_P2P_STRUCT & inP2PData)
+bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine			inDMAEngine,
+											const NTV2Channel			inDMAChannel,
+											const bool					inIsTarget,
+											const ULWord				inFrameNumber,
+											const ULWord				inCardOffsetBytes,
+											const ULWord				inByteCount,
+											const ULWord				inNumSegments,
+											const ULWord				inSegmentHostPitch,
+											const ULWord				inSegmentCardPitch,
+											const PCHANNEL_P2P_STRUCT &	inP2PData)
 {
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
 		return CNTV2DriverInterface::DmaTransfer (inDMAEngine, inDMAChannel, inIsTarget, inFrameNumber, inCardOffsetBytes, inByteCount,
 													inNumSegments, inSegmentHostPitch, inSegmentCardPitch, inP2PData);
-#else
-	(void) inDMAEngine;
-	(void) inDMAChannel;
-	(void) inIsTarget;
-	(void) inFrameNumber;
-	(void) inCardOffsetBytes;
-	(void) inByteCount;
-	(void) inNumSegments;
-	(void) inSegmentHostPitch;
-	(void) inSegmentCardPitch;
-	(void) inP2PData;
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	return false;
 }
 
@@ -1552,9 +1236,7 @@ bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine inDMAEngine,
 bool CNTV2MacDriverInterface::RestoreHardwareProcampRegisters( void )
 {
 	kern_return_t 	kernResult = KERN_FAILURE;
-
 	uint32_t	outputCount = 0;
-
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverRestoreProcAmpRegisters,	// selector of the function to be called via the user client.
@@ -1564,8 +1246,7 @@ bool CNTV2MacDriverInterface::RestoreHardwareProcampRegisters( void )
 											   &outputCount);			// pointer to the number of scalar output values.
 	if (kernResult == KERN_SUCCESS)
         return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
 	return false;
 }
 
@@ -1573,26 +1254,14 @@ bool CNTV2MacDriverInterface::RestoreHardwareProcampRegisters( void )
 //--------------------------------------------------------------------------------------------------------------------
 //	SystemControl
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SystemControl( void* dataPtr, SystemControlCode controlCode )
+bool CNTV2MacDriverInterface::SystemControl (void * dataPtr, SystemControlCode controlCode)
 {
 	kern_return_t 	kernResult = KERN_FAILURE;
-
-	uint64_t	scalarI_64[2];
+	uint64_t	scalarI_64[2] = {uint64_t(dataPtr), controlCode};
 	uint32_t	outputCount = 0;
-
-	scalarI_64[0] = uint64_t(dataPtr);
-	scalarI_64[1] = controlCode;
-
-	switch (controlCode)
-	{
-		case SCC_Test:
-			break;
-
-		default:
-			return false;
-	}
-
-	if (GetIOConnect())
+	if (controlCode != SCC_Test)
+		kernResult = KERN_INVALID_ARGUMENT;
+	else if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverSystemControl,	// selector of the function to be called via the user client.
 											   scalarI_64,				// array of scalar (64-bit) input values.
@@ -1601,8 +1270,7 @@ bool CNTV2MacDriverInterface::SystemControl( void* dataPtr, SystemControlCode co
 											   &outputCount);			// pointer to the number of scalar output values.
 	if (kernResult == KERN_SUCCESS)
         return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+	DIFAIL (KR(kernResult) << ", con=" << HEX8(GetIOConnect()));
 	return false;
 }
 
@@ -1638,67 +1306,6 @@ bool CNTV2MacDriverInterface::SystemStatus( void* dataPtr, SystemStatusCode stat
 
 	if (kernResult == KERN_SUCCESS)
         return true;
-
-	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
-	return false;
-}
-
-
-//--------------------------------------------------------------------------------------------------------------------
-//	Get/Set include/exclude debug filter strings
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SetDebugFilterStrings( const char* includeString,const char* excludeString )
-{
-	kern_return_t 	kernResult = KERN_FAILURE;
-
-	size_t	outputStructSize = 0;
-
-	KonaDebugFilterStringInfo filterStringInfo;
-	memcpy(&filterStringInfo.includeString[0],includeString,KONA_DEBUGFILTER_STRINGLENGTH);
-	memcpy(&filterStringInfo.excludeString[0],excludeString,KONA_DEBUGFILTER_STRINGLENGTH);
-
-
-	if (GetIOConnect())
-		kernResult = IOConnectCallStructMethod(GetIOConnect(),					// an io_connect_t returned from IOServiceOpen().
-											   kDriverSetDebugFilterStrings,	// selector of the function to be called via the user client.
-											   &filterStringInfo,				// pointer to the input structure
-											   sizeof(KonaDebugFilterStringInfo),// size of input structure
-											   AJA_NULL,						// pointer to the output structure
-											   &outputStructSize);				// size of output structure
-	if (kernResult == KERN_SUCCESS)
-        return true;
-	else
-	{
-		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
-		return false;
-	}
-}
-
-
-//--------------------------------------------------------------------------------------------------------------------
-//	GetDebugFilterStrings
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::GetDebugFilterStrings( char* includeString,char* excludeString )
-{
-	kern_return_t 	kernResult = KERN_FAILURE;
-
-	size_t	outputStructSize = sizeof(KonaDebugFilterStringInfo);
-
-	KonaDebugFilterStringInfo filterStringInfo;
-
-	if (GetIOConnect())
-		kernResult = IOConnectCallStructMethod(GetIOConnect(),					// an io_connect_t returned from IOServiceOpen().
-											   kDriverGetDebugFilterStrings,	// selector of the function to be called via the user client.
-											   AJA_NULL,						// pointer to the input structure
-											   0,								// size of input structure
-											   &filterStringInfo,				// pointer to the output structure
-											   &outputStructSize);				// size of output structure
-	if (kernResult == KERN_SUCCESS)
-	{
-		memcpy(includeString, &filterStringInfo.includeString[0],KONA_DEBUGFILTER_STRINGLENGTH);
-		memcpy(excludeString, &filterStringInfo.excludeString[0],KONA_DEBUGFILTER_STRINGLENGTH);
-        return true;
-	}
 
 	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 	return false;
@@ -1911,232 +1518,63 @@ bool CNTV2MacDriverInterface::NTV2Message (NTV2_HEADER * pInOutMessage)
 
 #pragma mark Old Driver Calls
 
+#if !defined(NTV2_DEPRECATE_15_6)
+	bool CNTV2MacDriverInterface::SetUserModeDebugLevel (ULWord level)		{return WriteRegister(kVRegMacUserModeDebugLevel, level);}
+	bool CNTV2MacDriverInterface::GetUserModeDebugLevel (ULWord* level)		{return ReadRegister(kVRegMacUserModeDebugLevel, *level);}
+	bool CNTV2MacDriverInterface::SetKernelModeDebugLevel (ULWord level)	{return WriteRegister(kVRegMacKernelModeDebugLevel, level);}
+	bool CNTV2MacDriverInterface::GetKernelModeDebugLevel (ULWord* level)	{return ReadRegister(kVRegMacKernelModeDebugLevel, *level);}
+	bool CNTV2MacDriverInterface::SetUserModePingLevel (ULWord level)		{return WriteRegister(kVRegMacUserModePingLevel,level);}
+	bool CNTV2MacDriverInterface::GetUserModePingLevel (ULWord* level)		{return ReadRegister(kVRegMacUserModePingLevel, *level);}
+	bool CNTV2MacDriverInterface::SetKernelModePingLevel (ULWord level)		{return WriteRegister(kVRegMacKernelModePingLevel,level);}
+	bool CNTV2MacDriverInterface::GetKernelModePingLevel (ULWord* level)	{return ReadRegister(kVRegMacKernelModePingLevel, *level);}
+	bool CNTV2MacDriverInterface::SetLatencyTimerValue (ULWord value)		{return WriteRegister(kVRegLatencyTimerValue,value);}
+	bool CNTV2MacDriverInterface::GetLatencyTimerValue (ULWord* value)		{return ReadRegister(kVRegLatencyTimerValue, *value);}
 
-//--------------------------------------------------------------------------------------------------------------------
-//	Get/Set Debug Levels
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SetUserModeDebugLevel( ULWord level )
-{
-	return WriteRegister(kVRegMacUserModeDebugLevel, level);
-}
-
-bool CNTV2MacDriverInterface::GetUserModeDebugLevel( ULWord* level )
-{
-	return ReadRegister(kVRegMacUserModeDebugLevel, *level);
-}
-
-bool CNTV2MacDriverInterface::SetKernelModeDebugLevel( ULWord level )
-{
-	return WriteRegister(kVRegMacKernelModeDebugLevel, level);
-}
-
-bool CNTV2MacDriverInterface::GetKernelModeDebugLevel( ULWord* level )
-{
-	return ReadRegister(kVRegMacKernelModeDebugLevel, *level);
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-//	Get/Set Ping Levels
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SetUserModePingLevel( ULWord level )
-{
-	return WriteRegister(kVRegMacUserModePingLevel,level);
-}
-
-bool CNTV2MacDriverInterface::GetUserModePingLevel( ULWord* level )
-{
-	return ReadRegister(kVRegMacUserModePingLevel, *level);
-}
-
-bool CNTV2MacDriverInterface::SetKernelModePingLevel( ULWord level )
-{
-	return WriteRegister(kVRegMacKernelModePingLevel,level);
-}
-
-bool CNTV2MacDriverInterface::GetKernelModePingLevel( ULWord* level )
-{
-	return ReadRegister(kVRegMacKernelModePingLevel, *level);
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-//	Get/Set Latency Timer
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SetLatencyTimerValue( ULWord value )
-{
-	return WriteRegister(kVRegLatencyTimerValue,value);
-}
-
-bool CNTV2MacDriverInterface::GetLatencyTimerValue( ULWord* value )
-{
-	return ReadRegister(kVRegLatencyTimerValue, *value);
-}
-
-
-#if !defined(NTV2_DEPRECATE_15_1)
-	//--------------------------------------------------------------------------------------------------------------------
-	//	Get/Set Output Timecode settings
-	//--------------------------------------------------------------------------------------------------------------------
-	bool CNTV2MacDriverInterface::SetOutputTimecodeOffset( ULWord frames )
+	bool CNTV2MacDriverInterface::SetDebugFilterStrings( const char* includeString,const char* excludeString )
 	{
-		return WriteRegister(kVRegOutputTimecodeOffset, frames);
-	}
-
-	bool CNTV2MacDriverInterface::GetOutputTimecodeOffset( ULWord* pFrames )
-	{
-		return ReadRegister(kVRegOutputTimecodeOffset, *pFrames);
-	}
-	
-	bool CNTV2MacDriverInterface::SetOutputTimecodeType( ULWord type )
-	{
-		return WriteRegister( kVRegOutputTimecodeType, type );
-	}
-
-	bool CNTV2MacDriverInterface::GetOutputTimecodeType( ULWord* pType )
-	{
-		return ReadRegister(kVRegOutputTimecodeType, *pType);
-	}
-#endif	//	!defined(NTV2_DEPRECATE_15_1)
-
-
-
-//--------------------------------------------------------------------------------------------------------------------
-//	ReadRP188Registers
-//
-//	Read the current RP188 registers (which typically give you the timecode corresponding
-//   to the LAST frame).
-//
-//   NOTE: this is a hack to avoid making a "real" driver call!
-//   Since the RP188 data requires three ReadRegister() calls, there is a chance that it
-//   can straddle a VBI, which could give skewed results. To try to avoid this, we read the
-//   3 registers until we get two consecutive passes that give us the same data (someday it
-//   would be nice if the driver automatically read these as part of its VBI IRQ handler...)
-//--------------------------------------------------------------------------------------------------------------------
-
-bool CNTV2MacDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used*/, RP188_STRUCT* pRP188Data )
-{
-	bool bSuccess = false;
-	RP188_STRUCT rp188;
-	NTV2DeviceID boardID = DEVICE_ID_NOTFOUND;
-	RP188SourceFilterSelect source = kRP188SourceEmbeddedLTC;
-	ULWord dbbReg(0), msReg(0), lsReg(0);
-
-	CNTV2DriverInterface::ReadRegister(kRegBoardID, boardID);
-	CNTV2DriverInterface::ReadRegister(kVRegRP188SourceSelect, source);
-	bool bLTCPort = (source == kRP188SourceLTCPort);
-
-	// values come from LTC port registers
-	if (bLTCPort)
-	{
-		ULWord ltcPresent;
-		ReadRegister (kRegStatus, ltcPresent, kRegMaskLTCInPresent, kRegShiftLTCInPresent);
-
-		// there is no equivalent DBB for LTC port - we synthesize it here
-		rp188.DBB = (ltcPresent) ? 0xFE000000 | NEW_SELECT_RP188_RCVD : 0xFE000000;
-
-		// LTC port registers
-		dbbReg = 0; // don't care - does not exist
-		msReg = kRegLTCAnalogBits0_31;
-		lsReg  = kRegLTCAnalogBits32_63;
-	}
-	else
-	{
-		// values come from RP188 registers
-		NTV2Channel channel = NTV2_CHANNEL1;
-		NTV2InputVideoSelect inputSelect = NTV2_Input1Select;
-
-		if(NTV2DeviceGetNumVideoInputs(boardID) > 1)
-		{
-			CNTV2DriverInterface::ReadRegister (kVRegInputSelect, inputSelect);
-			channel = (inputSelect == NTV2_Input2Select) ? NTV2_CHANNEL2 : NTV2_CHANNEL1;
-		}
+		kern_return_t 	kernResult = KERN_FAILURE;
+		size_t	outputStructSize = 0;
+		KonaDebugFilterStringInfo filterStringInfo;
+		memcpy(&filterStringInfo.includeString[0],includeString,KONA_DEBUGFILTER_STRINGLENGTH);
+		memcpy(&filterStringInfo.excludeString[0],excludeString,KONA_DEBUGFILTER_STRINGLENGTH);
+		if (GetIOConnect())
+			kernResult = IOConnectCallStructMethod(GetIOConnect(),					// an io_connect_t returned from IOServiceOpen().
+												   kDriverSetDebugFilterStrings,	// selector of the function to be called via the user client.
+												   &filterStringInfo,				// pointer to the input structure
+												   sizeof(KonaDebugFilterStringInfo),// size of input structure
+												   AJA_NULL,						// pointer to the output structure
+												   &outputStructSize);				// size of output structure
+		if (kernResult == KERN_SUCCESS)
+			return true;
 		else
 		{
-			channel = NTV2_CHANNEL1;
+			MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+			return false;
 		}
-
-		// rp188 registers
-		dbbReg = (channel == NTV2_CHANNEL1 ? kRegRP188InOut1DBB : kRegRP188InOut2DBB);
-		//Check to see if TC is received
-		uint32_t tcReceived = 0;
-		ReadRegister(dbbReg, tcReceived, BIT(16), 16);
-		if(tcReceived == 0)
-			return false;//No TC recevied
-
-		ReadRegister (dbbReg, rp188.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB );
-		switch(rp188.DBB)//What do we have?
-		{
-		default:
-		case 0x01:
-		case 0x02:
-			{
-				//We have VITC - what do we want?
-				if(pRP188Data->DBB == 0x01 || pRP188Data->DBB == 0x02)
-				{
-					//We want VITC
-					msReg  = (channel == NTV2_CHANNEL1 ? kRegRP188InOut1Bits0_31  : kRegRP188InOut2Bits0_31 );
-					lsReg  = (channel == NTV2_CHANNEL1 ? kRegRP188InOut1Bits32_63 : kRegRP188InOut2Bits32_63);
-					break;
-				}
-				else
-				{
-					//We want Embedded LTC, so we should check one other place
-					uint32_t ltcPresent = 0;
-					ReadRegister(dbbReg, ltcPresent, BIT(18), 18);
-					if(ltcPresent == 1)
-					{
-						//Read LTC registers
-						msReg  = (channel == NTV2_CHANNEL1 ? kRegLTCEmbeddedBits0_31  : kRegLTC2EmbeddedBits0_31 );
-						lsReg  = (channel == NTV2_CHANNEL1 ? kRegLTCEmbeddedBits32_63 : kRegLTC2EmbeddedBits32_63);
-						break;
-					}
-					else
-						return false;
-				}
-			}
-		case 0x00:
-			{
-				//We have LTC - do we want it?
-				if(pRP188Data->DBB != 0x00)
-					return false;
-				else
-				{
-					msReg  = (channel == NTV2_CHANNEL1 ? kRegRP188InOut1Bits0_31  : kRegRP188InOut2Bits0_31 );
-					lsReg  = (channel == NTV2_CHANNEL1 ? kRegRP188InOut1Bits32_63 : kRegRP188InOut2Bits32_63);
-				}
-				break;
-			}
-		}
-		//Re-Read the whole register just in case something is expecting other status values
-		ReadRegister (dbbReg, rp188.DBB);
 	}
-	ReadRegister (msReg,  rp188.Low );
-	ReadRegister (lsReg,  rp188.High);
 
-	// register stability filter
-	do
+	bool CNTV2MacDriverInterface::GetDebugFilterStrings( char* includeString,char* excludeString )
 	{
-		// struct copy to result
-		*pRP188Data = rp188;
-
-		// read again into local struct
-		if (!bLTCPort)
-			ReadRegister (dbbReg, rp188.DBB );
-		ReadRegister (msReg,  rp188.Low );
-		ReadRegister (lsReg,  rp188.High);
-
-		// if the new read equals the previous read, consider it done
-		if ( (rp188.DBB  == pRP188Data->DBB) &&
-			 (rp188.Low  == pRP188Data->Low) &&
-			 (rp188.High == pRP188Data->High) )
+		kern_return_t 	kernResult = KERN_FAILURE;
+		size_t	outputStructSize = sizeof(KonaDebugFilterStringInfo);
+		KonaDebugFilterStringInfo filterStringInfo;
+		if (GetIOConnect())
+			kernResult = IOConnectCallStructMethod(GetIOConnect(),					// an io_connect_t returned from IOServiceOpen().
+												   kDriverGetDebugFilterStrings,	// selector of the function to be called via the user client.
+												   AJA_NULL,						// pointer to the input structure
+												   0,								// size of input structure
+												   &filterStringInfo,				// pointer to the output structure
+												   &outputStructSize);				// size of output structure
+		if (kernResult == KERN_SUCCESS)
 		{
-			bSuccess = true;
+			memcpy(includeString, &filterStringInfo.includeString[0],KONA_DEBUGFILTER_STRINGLENGTH);
+			memcpy(excludeString, &filterStringInfo.excludeString[0],KONA_DEBUGFILTER_STRINGLENGTH);
+			return true;
 		}
-
-	} while (bSuccess == false);
-
-	return true;
-}
-
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
+		return false;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_15_6)
 
 //--------------------------------------------------------------------------------------------------------------------
 //	Get/Set Audio Output Mode
@@ -2150,20 +1588,6 @@ bool CNTV2MacDriverInterface::SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mo
 bool CNTV2MacDriverInterface::GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode)
 {
 	return mode ? CNTV2DriverInterface::ReadRegister(kVRegGlobalAudioPlaybackMode, *mode) : false;
-}
-
-#if !defined(NTV2_DEPRECATE_16_0)
-	Word CNTV2MacDriverInterface::SleepMs (LWord milliseconds) const
-	{
-		AJATime::Sleep(milliseconds);
-		return 0;
-	}
-#endif //defined(NTV2_DEPRECATE_16_0)
-
-
-bool CNTV2MacDriverInterface::ConfigureSubscription (bool bSubscribe, INTERRUPT_ENUMS eInterruptType, PULWord & hSubscription)
-{
-	return CNTV2DriverInterface::ConfigureSubscription (bSubscribe, eInterruptType, hSubscription);
 }
 
 

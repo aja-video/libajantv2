@@ -89,13 +89,13 @@ protected:
 };	//	NTV2NubRPCAPI
 
 //	Factory method to create NTV2NubRPCAPI instance
-NTV2RPCAPI * NTV2RPCAPI::MakeNTV2NubRPCAPI (const std::string & inHostName, const UWord inDeviceIndex)
+NTV2RPCAPI * NTV2RPCAPI::MakeNTV2NubRPCAPI (const std::string & inSpec, const std::string & inPort)
 {
 	NTV2NubRPCAPI * pResult(new NTV2NubRPCAPI);
 	if (!pResult)
 		return pResult;
 	//	Open the device on the remote system...
-	pResult->NTV2Connect(inHostName, inDeviceIndex);
+	pResult->NTV2Connect(inSpec, inPort.empty() ? 0 : UWord(aja::stoul(inPort)));
 	return pResult;
 }
 
@@ -1400,7 +1400,7 @@ ostream &	NTV2NubRPCAPI::Print (ostream & oss) const
 
 
 
-#define FAKE_DEVICE_SHARE_NAME		"aja-shm-fakedevice"
+#define FAKE_DEVICE_SHARE_NAME		"ntv2shmdev"
 //	Fake Device Shared Memory Layout:
 //	[1K Hdr][---- 128MB Reg Memory ----][-------------------- 1024MB FrameBuffer Memory --------------------][2MB InternalAC]
 
@@ -1424,17 +1424,17 @@ static const uint32_t		kFakeDevCookie		(0xFACEDE00);
 static AJANTV2FakeDevice *	spFakeDevice		(AJA_NULL);
 static AJALock				sLock;
 
-//	Specific NTV2RPCAPI implementation to talk to fake device
-class AJAExport NTV2FakeDevice : public NTV2RPCAPI
+//	Specific NTV2RPCAPI implementation to talk to software device
+class AJAExport NTV2SoftwareDevice : public NTV2RPCAPI
 {
 private:
 	UWord	_remoteIndex;			///< @brief	Remote device index number
 public:
-	NTV2FakeDevice()
+	NTV2SoftwareDevice()
 		:	_remoteIndex(0)
 	{
 	}
-	AJA_VIRTUAL	~NTV2FakeDevice()
+	AJA_VIRTUAL	~NTV2SoftwareDevice()
 	{
 		NTV2Disconnect();
 	}
@@ -1443,7 +1443,7 @@ public:
 	AJA_VIRTUAL inline	LWord						Handle (void) const				{return 0;}
 	AJA_VIRTUAL inline	NTV2NubProtocolVersion		ProtocolVersion (void) const	{return maxKnownProtocolVersion;}
 	AJA_VIRTUAL	inline	UWord						DeviceIndex (void) const		{return _remoteIndex;}
-	AJA_VIRTUAL	int		NTV2Connect					(const string & inHostname, const UWord inDeviceIndexNum);
+	AJA_VIRTUAL	int		NTV2Connect					(const string & inName, const UWord inNum, const string & inQuery);
 	AJA_VIRTUAL	int		NTV2Disconnect				(void);
 	AJA_VIRTUAL	int		NTV2ReadRegisterRemote		(const ULWord regNum, ULWord & outRegValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
 	AJA_VIRTUAL	int		NTV2WriteRegisterRemote		(const ULWord regNum, const ULWord regValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
@@ -1472,24 +1472,22 @@ private:
 	AJA_VIRTUAL	void	InitRegs (void);
 };	//	NTV2FakeDevice
 
-NTV2RPCAPI * NTV2RPCAPI::MakeNTV2FakeDevice (const std::string & inHostName, const UWord inDeviceIndex)
+NTV2RPCAPI * NTV2RPCAPI::MakeNTV2FakeDevice (const string & inSpec, const std::string & inPort)
 {
-	NTV2FakeDevice * pResult(new NTV2FakeDevice);
+	NTV2SoftwareDevice * pResult(new NTV2SoftwareDevice);
 	if (!pResult)
 		return pResult;
 	//	Open the fake device...
-	if (pResult->NTV2Connect(inHostName, inDeviceIndex))
+	if (pResult->NTV2Connect(inSpec, inPort.empty() ? 0 : UWord(aja::stoul(inPort)), ""))
 		{delete pResult; pResult = AJA_NULL;}	//	Failed
 	return pResult;
 }
 
-int NTV2FakeDevice::NTV2Connect (const string & inHostname, const UWord inDeviceIndexNum)
-{	(void) inDeviceIndexNum;
-	_hostname = "fakedevice";
-	string name(inHostname);
-	aja::strip(aja::lower(name));
-	if (name != Name())
+int NTV2SoftwareDevice::NTV2Connect (const string & inName, const UWord inNum, const string & inQuery)
+{	(void) inNum;
+	if (inName != FAKE_DEVICE_SHARE_NAME)
 		return -1;	//	Wrong name
+	_hostname = inName;
 	if (!sLock.IsValid())
 		return -1;	//	No lock object
 	AJAAutoLock lock(&sLock);
@@ -1554,17 +1552,17 @@ int NTV2FakeDevice::NTV2Connect (const string & inHostname, const UWord inDevice
 	return 0;
 }
 
-int NTV2FakeDevice::NTV2Disconnect (void)
+int NTV2SoftwareDevice::NTV2Disconnect (void)
 {
 	return 0;
 }
 
-int NTV2FakeDevice::NTV2OpenRemote (const UWord inDeviceIndex)
+int NTV2SoftwareDevice::NTV2OpenRemote (const UWord inDeviceIndex)
 {	(void) inDeviceIndex;
 	return 0;
 }
 
-bool NTV2FakeDevice::AllMemory (NTV2_POINTER & outAllMemory) const
+bool NTV2SoftwareDevice::AllMemory (NTV2_POINTER & outAllMemory) const
 {
 	outAllMemory.Allocate(0);
 	AJAAutoLock lock(&sLock);
@@ -1575,7 +1573,7 @@ bool NTV2FakeDevice::AllMemory (NTV2_POINTER & outAllMemory) const
 	return outAllMemory.Set(spFakeDevice, kFakeDevTotalBytes);
 }
 
-bool NTV2FakeDevice::RegMemory (NTV2_POINTER & outRegMemory) const
+bool NTV2SoftwareDevice::RegMemory (NTV2_POINTER & outRegMemory) const
 {
 	outRegMemory.Allocate(0);
 	NTV2_POINTER allMemory;
@@ -1585,7 +1583,7 @@ bool NTV2FakeDevice::RegMemory (NTV2_POINTER & outRegMemory) const
 	return outRegMemory.Set(allMemory.GetHostAddress(kOffsetToRegBytes), spFakeDevice->fNumRegBytes);
 }
 
-bool NTV2FakeDevice::FBMemory (NTV2_POINTER & outFBMemory) const
+bool NTV2SoftwareDevice::FBMemory (NTV2_POINTER & outFBMemory) const
 {
 	outFBMemory.Allocate(0);
 	NTV2_POINTER allMemory;
@@ -1596,7 +1594,7 @@ bool NTV2FakeDevice::FBMemory (NTV2_POINTER & outFBMemory) const
 													spFakeDevice->fNumFBBytes);
 }
 
-bool NTV2FakeDevice::ACMemory (NTV2_POINTER & outACMemory) const
+bool NTV2SoftwareDevice::ACMemory (NTV2_POINTER & outACMemory) const
 {
 	outACMemory.Allocate(0);
 	NTV2_POINTER allMemory;
@@ -1607,7 +1605,7 @@ bool NTV2FakeDevice::ACMemory (NTV2_POINTER & outACMemory) const
 													spFakeDevice->fNumACBytes);
 }
 
-int NTV2FakeDevice::NTV2ReadRegisterRemote (const ULWord inRegNum, ULWord & outRegValue, const ULWord inRegMask, const ULWord inRegShift)
+int NTV2SoftwareDevice::NTV2ReadRegisterRemote (const ULWord inRegNum, ULWord & outRegValue, const ULWord inRegMask, const ULWord inRegShift)
 {
 	outRegValue = 0;
 	if (inRegShift > 31)
@@ -1628,7 +1626,7 @@ int NTV2FakeDevice::NTV2ReadRegisterRemote (const ULWord inRegNum, ULWord & outR
 	return 0;
 }
 
-int NTV2FakeDevice::NTV2WriteRegisterRemote (const ULWord inRegNum, const ULWord inRegVal, const ULWord inRegMask, const ULWord inRegShift)
+int NTV2SoftwareDevice::NTV2WriteRegisterRemote (const ULWord inRegNum, const ULWord inRegVal, const ULWord inRegMask, const ULWord inRegShift)
 {
 	if (inRegShift > 31)
 		return -1;
@@ -1651,7 +1649,7 @@ int NTV2FakeDevice::NTV2WriteRegisterRemote (const ULWord inRegNum, const ULWord
 }
 
 
-int NTV2FakeDevice::NTV2AutoCirculateRemote (AUTOCIRCULATE_DATA & autoCircData)
+int NTV2SoftwareDevice::NTV2AutoCirculateRemote (AUTOCIRCULATE_DATA & autoCircData)
 {
 	::memset(&autoCircData, 0, sizeof(autoCircData));
 	AJAAutoLock lock(&sLock);
@@ -1667,7 +1665,7 @@ int NTV2FakeDevice::NTV2AutoCirculateRemote (AUTOCIRCULATE_DATA & autoCircData)
 	return 0;
 }
 
-int NTV2FakeDevice::NTV2WaitForInterruptRemote (const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs)
+int NTV2SoftwareDevice::NTV2WaitForInterruptRemote (const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs)
 {
 	AJAAutoLock lock(&sLock);
 	if (!spFakeDevice)
@@ -1678,35 +1676,35 @@ int NTV2FakeDevice::NTV2WaitForInterruptRemote (const INTERRUPT_ENUMS eInterrupt
 	return 0;
 }
 
-int NTV2FakeDevice::NTV2DriverGetBitFileInformationRemote (BITFILE_INFO_STRUCT & outInfo, const NTV2BitFileType inType)
+int NTV2SoftwareDevice::NTV2DriverGetBitFileInformationRemote (BITFILE_INFO_STRUCT & outInfo, const NTV2BitFileType inType)
 {	(void) inType;
 	::memset(&outInfo, 0, sizeof(outInfo));
 	return -1;
 }
 
-int NTV2FakeDevice::NTV2DriverGetBuildInformationRemote (BUILD_INFO_STRUCT & outInfo)
+int NTV2SoftwareDevice::NTV2DriverGetBuildInformationRemote (BUILD_INFO_STRUCT & outInfo)
 {
 	::memset(&outInfo, 0, sizeof(outInfo));
 	return -1;
 }
 
-int NTV2FakeDevice::NTV2DownloadTestPatternRemote (const NTV2Channel channel, const NTV2PixelFormat testPatternFBF,
-													const UWord signalMask, const bool testPatDMAEnb, const ULWord testPatNum)
+int NTV2SoftwareDevice::NTV2DownloadTestPatternRemote (const NTV2Channel channel, const NTV2PixelFormat testPatternFBF,
+														const UWord signalMask, const bool testPatDMAEnb, const ULWord testPatNum)
 {
 	NTV2TestPatternGen foo;
 	return -1;
 }
 
-int NTV2FakeDevice::NTV2ReadRegisterMultiRemote (const ULWord numRegs, ULWord & outFailedRegister, NTV2RegInfo outRegs[])
+int NTV2SoftwareDevice::NTV2ReadRegisterMultiRemote (const ULWord numRegs, ULWord & outFailedRegister, NTV2RegInfo outRegs[])
 {
 	return -1;
 }
 
-int NTV2FakeDevice::NTV2DMATransferRemote (	const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
-											const ULWord inFrameNumber,			ULWord * pFrameBuffer,
-											const ULWord inCardOffsetBytes,		const ULWord inTotalByteCount,
-											const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
-											const ULWord inSegmentCardPitch,	const bool inSynchronous)
+int NTV2SoftwareDevice::NTV2DMATransferRemote (	const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
+												const ULWord inFrameNumber,			ULWord * pFrameBuffer,
+												const ULWord inCardOffsetBytes,		const ULWord inTotalByteCount,
+												const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
+												const ULWord inSegmentCardPitch,	const bool inSynchronous)
 {
 	NTV2_POINTER fbMemory;
 	AJAAutoLock lock(&sLock);
@@ -1753,7 +1751,7 @@ int NTV2FakeDevice::NTV2DMATransferRemote (	const NTV2DMAEngine inDMAEngine,	con
 	}
 }
 
-int NTV2FakeDevice::NTV2MessageRemote (NTV2_HEADER * pInMessage)
+int NTV2SoftwareDevice::NTV2MessageRemote (NTV2_HEADER * pInMessage)
 {
 	if (!pInMessage)
 		return -1;
@@ -1762,7 +1760,7 @@ int NTV2FakeDevice::NTV2MessageRemote (NTV2_HEADER * pInMessage)
 	return -1;
 }
 
-void NTV2FakeDevice::InitRegs (void)
+void NTV2SoftwareDevice::InitRegs (void)
 {
 	NTV2WriteRegisterRemote (kRegGlobalControl, 0x30000202);  // Reg 0  // Frame Rate: 59.94, Frame Geometry: 1920x1080, Standard: 1080p, Reference Source: Reference In, Ch 2 link B 1080p 50/60: Off, LEDs ...., Register Clocking: Sync To Field, Ch 1 RP-188 output: Enabled, Ch 2 RP-188 output: Enabled, Color Correction: Channel: 1 Bank 0
 	NTV2WriteRegisterRemote (kRegCh1Control, 0x00200080);  // Reg 1  // Mode: Display, Format: NTV2_FBF_10BIT_YCBCR, Channel: Disabled, Viper Squeeze: Normal, Flip Vertical: Normal, DRT Display: Off, Frame Buffer Mode: Frame, Dither: No dithering, Frame Size: 8 MB, RGB Range: Black = 0, VANC Data Shift: Normal 8 bit conversion

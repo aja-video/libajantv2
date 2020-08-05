@@ -52,12 +52,14 @@
 #define NTV2_REMOTE_ACCESS_NOT_DRIVER_GET_BUILD_INFO		-26
 #define NTV2_REMOTE_ACCESS_UNIMPLEMENTED					-27
 
-
+/**
+	@brief	Interface to remote or fake devices.
+**/
 class AJAExport NTV2RPCAPI
 {
 	public:
-		static NTV2RPCAPI *		MakeNTV2NubRPCAPI (const std::string & inHostName, const UWord inDeviceIndex);
-		static NTV2RPCAPI *		MakeNTV2FakeDevice (const std::string & inHostName, const UWord inDeviceIndex);
+		static NTV2RPCAPI *		MakeNTV2NubRPCAPI (const std::string & inSpec, const std::string & inPort = "");
+		static NTV2RPCAPI *		MakeNTV2FakeDevice (const std::string & inSpec, const std::string & inPort = "");
 
 	public:
 						NTV2RPCAPI ()	:	_hostname()	{}
@@ -74,8 +76,8 @@ class AJAExport NTV2RPCAPI
 									}
 		AJA_VIRTUAL NTV2NubProtocolVersion	ProtocolVersion (void) const	{return ntv2NubProtocolVersionNone;}
 
-		AJA_VIRTUAL int	NTV2Connect		(const std::string & inHostname, const UWord inDeviceIndex)
-																		{(void) inDeviceIndex; _hostname = inHostname;	return 0;}
+//		AJA_VIRTUAL int	NTV2Connect		(const std::string & inHostname, const UWord inDeviceIndex)
+//																		{(void) inDeviceIndex; _hostname = inHostname;	return 0;}
 		AJA_VIRTUAL int	NTV2Disconnect	(void)							{return NTV2CloseRemote();}
 
 		AJA_VIRTUAL int	NTV2ReadRegisterRemote	(const ULWord regNum, ULWord & outRegValue, const ULWord regMask, const ULWord regShift)

@@ -320,20 +320,20 @@ std::vector<std::string> split(const std::string& str, const char delim)
     return elems;
 }
 
-std::vector<std::string> split(const std::string& str, const std::string & delim)
+std::vector<std::string> split (const std::string & inStr, const std::string & inDelim)
 {
 	std::vector<std::string> result;
     size_t	startPos(0);
-    size_t	delimPos(str.find(delim, startPos));
+    size_t	delimPos(inStr.find(inDelim, startPos));
     while(delimPos != std::string::npos)
     {
-        const std::string item (str.substr(startPos, delimPos - startPos));
+        const std::string item (inStr.substr(startPos, delimPos - startPos));
         result.push_back(item);
-        startPos = delimPos + delim.length();
-        delimPos = str.find(delim, startPos);
+        startPos = delimPos + inDelim.length();
+        delimPos = inStr.find(inDelim, startPos);
 	}
     // if last character in string matches the split delim add an empty string
-    if (startPos == str.length())
+    if (startPos == inStr.length())
         result.push_back(std::string());
     return result;
 }

@@ -25,18 +25,33 @@ static string ToUpper (const string & inStr)
 	return aja::upper(result);
 }
 
-static bool IsLegalDecimalNumber (const string & inStr)
+bool CNTV2DeviceScanner::IsHexDigit (const char inChr)
+{	static const string sHexDigits("0123456789ABCDEFabcdef");
+	return sHexDigits.find(inChr) != string::npos;
+}
+
+bool CNTV2DeviceScanner::IsDecimalDigit (const char inChr)
 {	static const string sDecDigits("0123456789");
-	if (inStr.length() > 2)
+	return sDecDigits.find(inChr) != string::npos;
+}
+
+bool CNTV2DeviceScanner::IsAlphaNumeric (const char inChr)
+{	static const string sLegalChars("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+	return sLegalChars.find(inChr) != string::npos;
+}
+
+bool CNTV2DeviceScanner::IsLegalDecimalNumber (const string & inStr, const size_t inMaxLength)
+{
+	if (inStr.length() > inMaxLength)
 		return false;	//	Too long
 	for (size_t ndx(0);  ndx < inStr.size();  ndx++)
-		if (sDecDigits.find(inStr.at(ndx)) == string::npos)
+		if (!IsDecimalDigit(inStr.at(ndx)))
 			return false;
 	return true;
 }
 
-static uint64_t IsLegalHexSerialNumber (const string & inStr)	//	0x3236333331375458
-{	static const string sHexDigits("0123456789abcdef");
+uint64_t CNTV2DeviceScanner::IsLegalHexSerialNumber (const string & inStr)	//	0x3236333331375458
+{
 	if (inStr.length() < 3)
 		return 0ULL;	//	Too small
 	string hexStr(::ToLower(inStr));
@@ -45,7 +60,7 @@ static uint64_t IsLegalHexSerialNumber (const string & inStr)	//	0x3236333331375
 	if (hexStr.length() > 16)
 		return 0ULL;	//	Too big
 	for (size_t ndx(0);  ndx < hexStr.size();  ndx++)
-		if (sHexDigits.find(hexStr.at(ndx)) == string::npos)
+		if (!IsHexDigit(hexStr.at(ndx)))
 			return 0ULL;	//	Invalid hex digit
 	while (hexStr.length() != 16)
 		hexStr = '0' + hexStr;	//	prepend another '0'
@@ -55,15 +70,15 @@ static uint64_t IsLegalHexSerialNumber (const string & inStr)	//	0x3236333331375
 	return u64;
 }
 
-static bool IsAlphaNumeric (const string & inStr)
-{	static const string sLegalChars("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+bool CNTV2DeviceScanner::IsAlphaNumeric (const string & inStr)
+{
 	for (size_t ndx(0);  ndx < inStr.size();  ndx++)
-		if (sLegalChars.find(inStr.at(ndx)) == string::npos)
+		if (!IsAlphaNumeric(inStr.at(ndx)))
 			return false;
 	return true;
 }
 
-static bool IsLegalSerialNumber (const string & inStr)
+bool CNTV2DeviceScanner::IsLegalSerialNumber (const string & inStr)
 {
 	if (inStr.length() != 8  &&  inStr.length() != 9)
 		return false;
@@ -168,7 +183,10 @@ void CNTV2DeviceScanner::ScanHardware (void)
 
 				info.deviceIndex		= boardNum;
 				info.deviceID			= deviceID;
+				info.pciSlot			= 0;
+#if !defined(NTV2_DEPRECATE_16_0)
 				info.pciSlot			= tmpDevice.GetPCISlotNumber();
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
 				info.deviceSerialNumber	= tmpDevice.GetSerialNumber();
 
 				oss << ::NTV2DeviceIDToString (deviceID, bRetail) << " - " << boardNum;
@@ -271,7 +289,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithID (const NTV2DeviceID inDeviceID, CN
 bool CNTV2DeviceScanner::GetFirstDeviceWithName (const string & inNameSubString, CNTV2Card & outDevice)
 {
 	outDevice.Close();
-	if (!::IsAlphaNumeric(inNameSubString))
+	if (!IsAlphaNumeric(inNameSubString))
 		return false;
 
 	CNTV2DeviceScanner	scanner;
@@ -339,7 +357,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 		return false;
 
 	//	Index number:
-	if (::IsLegalDecimalNumber(inArgument))
+	if (IsLegalDecimalNumber(inArgument))
 		return GetDeviceAtIndex (ULWord(aja::stoul(inArgument)), outDevice);
 
 	CNTV2DeviceScanner	scanner;
@@ -363,7 +381,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 	}
 
 	//	Serial number (string):
-	if (::IsLegalSerialNumber(upperArg))
+	if (IsLegalSerialNumber(upperArg))
 	{
 		if (upperArg.length() == 9)	//	Special case for DNXIV serial numbers
 			upperArg.erase(0,1);	//	Remove 1st character
@@ -373,7 +391,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 	}
 
 	//	Hex serial number:
-	const uint64_t serialNumber(::IsLegalHexSerialNumber(inArgument));
+	const uint64_t serialNumber(IsLegalHexSerialNumber(inArgument));
 	if (serialNumber)
 		if (GetDeviceWithSerial(serialNumber, outDevice))
 			if (outDevice.IsOpen())

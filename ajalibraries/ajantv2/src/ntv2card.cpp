@@ -9,6 +9,7 @@
 #include "ntv2debug.h"
 #include "ntv2utils.h"
 #include <sstream>
+#include "ajabase/common/common.h"
 
 using namespace std;
 
@@ -26,8 +27,11 @@ CNTV2Card::CNTV2Card ()
 
 CNTV2Card::CNTV2Card (const UWord inDeviceIndex, const string &	inHostName)
 {
+	string hostName(inHostName);
+	aja::strip(hostName);
 	_boardOpened = false;
-	if (Open(inDeviceIndex, inHostName))
+	bool openOK = hostName.empty()  ?  Open(inDeviceIndex) :  Open(hostName);
+	if (openOK)
 	{
 		if (IsBufferSizeSetBySW())
 		{
@@ -58,8 +62,11 @@ CNTV2Card::CNTV2Card (const UWord boardNumber, const bool displayErrorMessage, c
 {
 	(void) displayErrorMessage;
 	(void) ulBoardType;
+	string hostName(hostname ? hostname : "");
+	aja::strip(hostName);
 	_boardOpened = false;
-	if (Open(boardNumber, string(hostname ? hostname : "")))
+	bool openOK = hostName.empty()  ?  Open(boardNumber) :  Open(hostName);
+	if (openOK)
 	{
 		if (IsBufferSizeSetBySW())
 		{
@@ -182,51 +189,14 @@ bool CNTV2Card::GetDriverVersionComponents (UWord & outMajor, UWord & outMinor, 
 	ULWord	driverVersionULWord	(0);
 	if (!ReadRegister (kVRegDriverVersion, driverVersionULWord))
 		return false;
-
-	#if defined(MSWindows)
-		if (!driverVersionULWord)	//	If zero --- pre-15.0 Win driver?
-			if (ReadRegister(10002, driverVersionULWord))	//	Try reg 10002
-				if (driverVersionULWord)					//	Valid?
-				{	//	Decode pre-15.0 Win driver version info...
-					outMajor = (driverVersionULWord >>  4) & 0x000F;
-					outMinor = (driverVersionULWord      ) & 0x000F;
-					outPoint = (driverVersionULWord >>  8) & 0x000F;
-					outBuild = (driverVersionULWord >> 16) & 0xFFFF;
-					return true;
-				}
-	#elif defined(AJAMac)
-		if (!driverVersionULWord)	//	Zero? Pre-15.0 Mac driver?
-		{	//	The Mac DeviceMap keeps the driver's version
-			driverVersionULWord = GetMacRawDriverVersion();	//	Get DeviceMap's driver version
-			outMajor = UWord(driverVersionULWord >> 24) & 0x00FF;	//	major
-			outMinor = UWord(driverVersionULWord >> 16) & 0x00FF;	//	minor
-			outPoint = UWord(driverVersionULWord >>  8) & 0x00FF;	//	point
-			outBuild = UWord(driverVersionULWord      ) & 0x00FF;	//	build
-			return true;
-		}
-	#else
-	#endif
+	if (!driverVersionULWord)	//	If zero --- pre-15.0 driver?
+		return false;
 
 	//	The normal 15.0+ way of decoding the 32-bit driver version value:
 	outMajor = UWord(NTV2DriverVersionDecode_Major(driverVersionULWord));
 	outMinor = UWord(NTV2DriverVersionDecode_Minor(driverVersionULWord));
 	outPoint = UWord(NTV2DriverVersionDecode_Point(driverVersionULWord));
 	outBuild = UWord(NTV2DriverVersionDecode_Build(driverVersionULWord));
-
-	#if defined(AJALinux)
-		const UWord	oldMajor	((driverVersionULWord >>  4) & 0x0000000F);
-		const UWord	oldMinor	((driverVersionULWord      ) & 0x0000000F);
-		const UWord	oldPoint	((driverVersionULWord >>  8) & 0x0000003F);
-		const UWord	oldBuild	((driverVersionULWord >> 16) & 0x0000FFFF);
-		if (!outMajor  &&  !outMinor  &&  outBuild)		//	Pre-15.0 Lin driver?
-		{	//	Decode pre-15.0 Linux driver version:
-			outMajor = oldMajor;
-			outMinor = oldMinor;
-			outPoint = oldPoint;
-			outBuild = oldBuild;
-		}
-	#endif
-
 	return true;
 }
 
