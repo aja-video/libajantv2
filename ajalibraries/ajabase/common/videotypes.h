@@ -39,11 +39,8 @@ enum AJA_VideoFormat
 	AJA_VideoFormat_1080p_2997,
 	AJA_VideoFormat_1080p_3000,
     AJA_VideoFormat_1080p_5000,
-    AJA_VideoFormat_1080p_5000_B,
     AJA_VideoFormat_1080p_5994,
-    AJA_VideoFormat_1080p_5994_B,
     AJA_VideoFormat_1080p_6000,
-    AJA_VideoFormat_1080p_6000_B,
     AJA_VideoFormat_2K_1080psf_2398,		// 2Kx1080
 	AJA_VideoFormat_2K_1080psf_2400,
 	AJA_VideoFormat_2K_1080psf_2500,
