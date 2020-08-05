@@ -15,6 +15,8 @@
 #include "ajabase/system/debug.h"
 #include <iostream>
 #include <iomanip>
+#include "ntv2testpatterngen.h"
+#include "ntv2bft.h"
 
 
 using namespace std;
