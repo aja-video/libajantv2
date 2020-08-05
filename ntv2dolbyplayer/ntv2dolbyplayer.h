@@ -17,6 +17,9 @@
 #include "ajabase/system/file_io.h"
 #include "ajaanc/includes/ancillarydata.h"
 
+//	Define to parse ec3 files with multiple sync frames per HDMI burst vs single sync frame per HDMI burst.
+#define DOLBY_FULL_PARSER
+
 /**
 	@brief	I am an object that can play out a test pattern (with timecode) to an output of an AJA device
 			with or without audio tone in real time. I make use of the AJACircularBuffer, which simplifies
@@ -83,6 +86,107 @@ class NTV2DolbyPlayer
 
 	//	Protected Instance Methods
 	protected:
+		struct NTV2DolbyBSI
+		{
+			uint32_t strmtyp;
+			uint32_t substreamid;
+			uint32_t frmsiz;
+			uint32_t fscod;
+			uint32_t numblkscod;
+			uint32_t acmod;
+			uint32_t lfeon;
+			uint32_t bsid;
+			uint32_t dialnorm;
+			uint32_t compre;
+			uint32_t compr;
+			uint32_t dialnorm2;
+			uint32_t compr2e;
+			uint32_t compr2;
+			uint32_t chanmape;
+			uint32_t chanmap;
+			uint32_t mixmdate;
+			uint32_t dmixmod;
+			uint32_t ltrtcmixlev;
+			uint32_t lorocmixlev;
+			uint32_t ltrtsurmixlev;
+			uint32_t lorosurmixlev;
+			uint32_t lfemixlevcode;
+			uint32_t lfemixlevcod;
+			uint32_t pgmscle;
+			uint32_t pgmscl;
+			uint32_t pgmscl2e;
+			uint32_t pgmscl2;
+			uint32_t extpgmscle;
+			uint32_t extpgmscl;
+			uint32_t mixdef;
+			uint32_t premixcmpsel;
+			uint32_t drcsrc;
+			uint32_t premixcmpscl;
+			uint32_t mixdata;
+			uint32_t mixdeflen;
+			uint32_t mixdata2e;
+			uint32_t extpgmlscle;
+			uint32_t extpgmlscl;
+			uint32_t extpgmcscle;
+			uint32_t extpgmcscl;
+			uint32_t extpgmrscle;
+			uint32_t extpgmrscl;
+			uint32_t extpgmlsscle;
+			uint32_t extpgmlsscl;
+			uint32_t extpgmrsscle;
+			uint32_t extpgmrsscl;
+			uint32_t extpgmlfescle;
+			uint32_t extpgmlfescl;
+			uint32_t dmixscle;
+			uint32_t dmixscl;
+			uint32_t addche;
+			uint32_t extpgmaux1scle;
+			uint32_t extpgmaux1scl;
+			uint32_t extpgmaux2scle;
+			uint32_t extpgmaux2scl;
+			uint32_t mixdata3e;
+			uint32_t spchdat;
+			uint32_t addspchdate;
+			uint32_t spchdat1;
+			uint32_t spchan1att;
+			uint32_t addspchdat1e;
+			uint32_t addspdat1e;
+			uint32_t spchdat2;
+			uint32_t spchan2att;
+			uint8_t mixdatabuffer[64];
+			uint32_t paninfoe;
+			uint32_t panmean;
+			uint32_t paninfo;
+			uint32_t paninfo2e;
+			uint32_t panmean2;
+			uint32_t paninfo2;
+			uint32_t frmmixcfginfoe;
+			uint32_t blkmixcfginfo[6];
+			uint32_t blkmixcfginfoe;
+			uint32_t infomdate;
+			uint32_t bsmod;
+			uint32_t copyrightb;
+			uint32_t origbs;
+			uint32_t dsurmod;
+			uint32_t dheadphonmod;
+			uint32_t dsurexmod;
+			uint32_t audprodie;
+			uint32_t mixlevel;
+			uint32_t roomtyp;
+			uint32_t adconvtyp;
+			uint32_t audprodi2e;
+			uint32_t mixlevel2;
+			uint32_t roomtyp2;
+			uint32_t adconvtyp2;
+			uint32_t sourcefscod;
+			uint32_t convsync;
+			uint32_t blkid;
+			uint32_t frmsizecod;
+			uint32_t addbsie;
+			uint32_t addbsil;
+			uint8_t addbsibuffer[64];
+		};
+
 		/**
 			@brief	Sets up everything I need to play video.
 		**/
@@ -141,8 +245,47 @@ class NTV2DolbyPlayer
              @param[out]	audioBuffer		Specifies a valid, non-NULL pointer to the buffer that is to receive
                                             the audio tone data.
              @return	Total number of bytes written into the buffer.
-         **/
-         virtual uint32_t		AddDolby (ULWord * audioBuffer);
+		 **/
+		virtual uint32_t		AddDolby (ULWord * audioBuffer);
+
+#ifdef DOLBY_FULL_PARSER
+		/**
+			@brief	Get a dolby audio audio frame from the input file.
+			@param[out]	pInDolbyBuffer		Specifies a valid, non-NULL pointer to the buffer that is to receive
+												the dolby frame data.
+			@param[out]	sync				This is a dolby sync frame.
+			@param[out]	numSamples			Number of samples in the buffer.
+			@param[out]	numBlocks			Number of dolby audio block in the buffer.
+			@return	True if valid sync frame in buffer.
+		 **/
+		virtual bool GetDolbyFrame (uint16_t * pInDolbyBuffer, uint32_t & numSamples);
+
+		/**
+			@brief	Parse the dolby audio bit stream information block.
+			@param[out]	pInDolbyBuffer		Specifies a valid, non-NULL pointer to the buffer that is to receive
+												the dolby frame data.
+			@param[out]	numSamples			Number of samples in the buffer.
+			@param[out]	pBsi				Parsed Dolby header data.
+			@return	True if parser suceeded.
+		 **/
+		virtual bool ParseBSI(uint16_t * pInDolbyBuffer, uint32_t numSamples, NTV2DolbyBSI * pBsi);
+
+
+		/**
+			@brief	Set the bitstream buffer for bit retrieval
+			@param[in]	pBuffer				Specifies a valid, non-NULL pointer to the bitstream buffer
+			@param[in]	size				Bitstream buffer size
+		 **/
+		virtual void SetBitBuffer(uint8_t * pBuffer, uint32_t size);
+
+		/**
+			@brief	Retreive the specified number of bits from the bitstream buffer
+			@param[out]	data				Bitstream data
+			@param[out]	BITS				Number of bits to retrieve from the buffer
+			@return	True if suceeded.
+		 **/
+		virtual bool GetBits(uint32_t & data, uint32_t bits);
+#endif
 
     //	Protected Class Methods
 	protected:
@@ -205,13 +348,22 @@ class NTV2DolbyPlayer
 		AVDataBuffer				mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
 		MyCirculateBuffer			mAVCircularBuffer;						///< @brief	My ring buffer
 
-        AJAFileIO *                 mDolbyFile;                 ///< @brief	Dolby audio source file
-        uint16_t *                  mDolbyBuffer;               ///< @brief	Dolby audio file data buffer
-        uint32_t                    mDolbyOffset;               ///< @brief	Dolby audio file data offset
-        uint32_t                    mDolbySize;                 ///< @brief	Dolby audio file data size
-        uint32_t                    mBurstOffset;               ///< @brief	HDMI burst audio offset
-        uint32_t                    mBurstSize;                 ///< @brief	HDMI burst audio size
+		uint32_t                    mBurstIndex;				///< @brief	HDMI burst sample index
+		uint32_t                    mBurstSamples;				///< @brief	HDMI burst sample size
 
+		uint16_t *                  mBurstBuffer;               ///< @brief	HDMI burst audio data buffer
+		uint32_t                    mBurstSize;                 ///< @brief	HDMI burst audio data size
+		uint32_t                    mBurstOffset;               ///< @brief	HDMI burst audio data offset
+		uint32_t                    mBurstMax;			        ///< @brief	HDMI burst and dolby max size
+
+		AJAFileIO *                 mDolbyFile;                 ///< @brief	Dolby audio source file
+		uint16_t *                  mDolbyBuffer;               ///< @brief	Dolby audio data buffer
+		uint32_t                    mDolbySize;                 ///< @brief	Dolby audio data size
+		uint32_t					mDolbyBlocks;				///< @brief	Dolby audio block count
+
+		uint8_t *					mBitBuffer;
+		ULWord						mBitSize;
+		ULWord						mBitIndex;
 };	//	NTV2DolbyPlayer
 
 #endif	//	_NTV2DOLBY_H
