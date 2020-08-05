@@ -627,7 +627,6 @@ typedef enum
 
 typedef NTV2RegisterNumber	RegisterNum;
 
-
 #define kRegCh1ColorCorrectioncontrol	kRegCh1ColorCorrectionControl	//	CamelCase fixed in SDK 16.0
 #define	kRegCh2ColorCorrectioncontrol	kRegCh2ColorCorrectionControl	//	CamelCase fixed in SDK 16.0
 
@@ -2312,11 +2311,10 @@ typedef enum
 	kRegMaskHDMIOutAudio8Of16SelectMode = BIT(5),
 	kRegMaskHDMIOutAudio2ChannelSelect = BIT(29) + BIT(30),
 	kRegMaskHDMIOutUserOveride = BIT(1),
-	kRegMaskHDMIOutCropMode = BIT(24),
-	
-	
+	kRegMaskHDMIOutCropMode = BIT(24)
 
 #if !defined (NTV2_DEPRECATE)
+	,
 	// kRegSDIInput3GStatus
 	kLHIRegMaskSDIIn3GbpsMode = BIT(0),
 	kLHIRegMaskSDIIn3GbpsSMPTELevelBMode = BIT(1),
@@ -5560,15 +5558,21 @@ typedef enum
 	shiftField1CutoffLine = 0,
 	maskField2CutoffLine = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26),
 	shiftField2CutoffLine = 16,
-	maskTotalBytesIn = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	maskTotalBytesIn = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) +
+							BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15) +
+							BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23),
 	shiftTotalBytesIn = 0,
 	maskTotalOverrun = BIT(28),
 	shiftTotalOverrun = 28,
-	maskField1BytesIn = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	maskField1BytesIn = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) +
+							BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15) +
+							BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23),
 	shiftField1BytesIn = 0,
 	maskField1Overrun = BIT(28),
 	shiftField1Overrun = 28,
-	maskField2BytesIn = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	maskField2BytesIn = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) +
+							BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15) +
+							BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23),
 	shiftField2BytesIn = 0,
 	maskField2Overrun = BIT(28),
 	shiftField2Overrun = 28,
@@ -5649,7 +5653,7 @@ typedef enum
 	regAncInsBlankCStartLine,
 	regAncInsBlankField1CLines,
 	regAncInsBlankField2CLines,
-	regAncInsReserved14,
+	regAncInsFieldBytesHigh,
 	regAncInsReserved15,
 	regAncInsRtpPayloadID,
 	regAncInsRtpSSRC,
@@ -5675,6 +5679,12 @@ typedef enum
 	shiftInsSetProgressive = 24,
 	maskInsDisableInserter = BIT(28),
 	shiftInsDisableInserter = 28,
+	maskInsExtendedMode = BIT(29),
+	shiftInsExtendedMode = 29,
+	maskInsField1x512 = BIT(29),
+	shiftInsField1x512 = 29,
+	maskInsField2x512 = BIT(30),
+	shiftInsField2x512 = 30,
 	maskInsEnablePktSplitSD = BIT(31),
 	shiftInsEnablePktSplitSD = 31,
 	maskInsHancDelay = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9),

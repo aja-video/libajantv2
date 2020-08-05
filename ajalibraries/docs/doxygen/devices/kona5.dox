@@ -79,21 +79,21 @@
 
 	@par	Video Formats
 
-	-	<b>8K:</b> 8192×4320P 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
-	-	<b>UHD2:</b> 7680×4320P 23.98, 24, 25, 29.97, 30, 50, 59.94, 60
-	-	<b>4K:</b> 4096×2160P 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
-	-	<b>UHD:</b> 3840×2160P 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
-	-	<b>2K:</b>
-		-	2048×1080p 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
-		-	2048×1080PsF 23.98, 24, 25, 29.97, 30
+	-	<b>SD:</b>
+		-	625i 50
+		-	525i 59.94
 	-	<b>HD:</b>
 		-	1080p 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
 		-	1080PsF 23.98, 24, 25, 29.97, 30
 		-	1080i 50, 59.94, 60
 		-	720p 50, 59.94, 60
-	-	<b>SD:</b>
-		-	625i 50
-		-	525i 59.94
+	-	<b>2K:</b>
+		-	2048×1080p 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
+		-	2048×1080PsF 23.98, 24, 25, 29.97, 30
+	-	<b>UHD:</b> 3840×2160P 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
+	-	<b>4K:</b> 4096×2160P 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
+	-	<b>UHD2:</b> 7680×4320P 23.98, 24, 25, 29.97, 30, 50, 59.94, 60
+	-	<b>8K:</b> 8192×4320P 23.98, 24, 25, 29.97, 30, 47.95, 48, 50, 59.94, 60
 
 
 	@par	Ancillary Data
@@ -113,10 +113,12 @@
 
 	@par	SDK Support
 
-	-	Introduced in <a href="https://sdksupport.aja.com/docs/NTV2SDK_docs_15_0">SDK v15.0</a>.
+	-	Introduced in 2018 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/ntv2-sdk-1501-for-linux-macos-and-windows-18dec2018">SDK v15.0</a>.
 
-	@par	Firmware (8K)
-	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/kona-5-8k>
+	@par	Firmware 
+	-	<b>8K:</b>					<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/kona-5-8k>
+	-	<b>8K (Mixer/Keyer):</b>	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/kona-5-8k-mk>
+	-	<b>Retail:</b>				<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/kona-5-retail-firmware>
 
 	@par	Physical
 

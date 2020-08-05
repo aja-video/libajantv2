@@ -862,7 +862,7 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBu
 		unsigned		retries			(0);	//	Retry count
 		const unsigned	MAX_RETRIES		(4);	//	Max number of U32s past the end of an RTP packet to look for another
 
-		while (!ancBuffer.IsNULL()  &&  retries++ < MAX_RETRIES)
+		while (ancBuffer  &&  retries++ < MAX_RETRIES)
 		{
 			if (AJARTPAncPayloadHeader::BufferStartsWithRTPHeader(ancBuffer))
 			{
@@ -891,7 +891,7 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBu
 				retries = 0;	//	Reset our retry counter when we get a good header
 
 				//	Process the full RTP packet U32s...
-				AJAStatus result (outPackets.AddReceivedAncillaryData(U32s));
+				result = outPackets.AddReceivedAncillaryData(U32s);
 				if (AJA_FAILURE(result))
 					break;	//	Done -- failed!
 

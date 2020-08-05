@@ -346,6 +346,7 @@ typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief	An alias for NTV2Fram
 typedef enum
 {
 	NTV2_FG_1920x1080	= 0,	///< @brief	1920x1080, for 1080i and 1080p, ::NTV2_VANCMODE_OFF
+	NTV2_FG_FIRST		= NTV2_FG_1920x1080,	///< @brief	The ordinally first geometry (New in SDK 16.0)
 	NTV2_FG_1280x720	= 1,	///< @brief	1280x720, for 720p, ::NTV2_VANCMODE_OFF
 	NTV2_FG_720x486		= 2,	///< @brief	720x486, for NTSC 525i and 525p60, ::NTV2_VANCMODE_OFF
 	NTV2_FG_720x576		= 3,	///< @brief	720x576, for PAL 625i, ::NTV2_VANCMODE_OFF
@@ -365,11 +366,12 @@ typedef enum
 	NTV2_FG_4x2048x1080 = 17,	///< @brief	4096x2160, for 4K, ::NTV2_VANCMODE_OFF
 	NTV2_FG_4x3840x2160	= 18,	///< @brief	7680x4320, for UHD2, ::NTV2_VANCMODE_OFF
 	NTV2_FG_4x4096x2160	= 19,	///< @brief	8192x4320, for 8K, ::NTV2_VANCMODE_OFF
+	NTV2_FG_LAST		= NTV2_FG_4x4096x2160,	///< @brief	The ordinally last geometry (New in SDK 16.0)
 	NTV2_FG_NUMFRAMEGEOMETRIES,
 	NTV2_FG_INVALID	= NTV2_FG_NUMFRAMEGEOMETRIES
 } NTV2FrameGeometry;
 
-#define	NTV2_IS_VALID_NTV2FrameGeometry(__s__)	((__s__) >= NTV2_FG_1920x1080 && (__s__) < NTV2_FG_NUMFRAMEGEOMETRIES)
+#define	NTV2_IS_VALID_NTV2FrameGeometry(__s__)	((__s__) >= NTV2_FG_FIRST && (__s__) < NTV2_FG_NUMFRAMEGEOMETRIES)
 
 #define NTV2_IS_QUAD_QUAD_FRAME_GEOMETRY(geom) \
 	(geom == NTV2_FG_4x3840x2160 || geom == NTV2_FG_4x4096x2160)
@@ -399,38 +401,62 @@ typedef enum
 
 /**
 	@brief	Identifies a particular video frame rate.
+	@note	These match the hardware register values.
 **/
 typedef enum
 {
-	//	These are tied to the hardware register values
-	NTV2_FRAMERATE_UNKNOWN	= 0,
-	NTV2_FRAMERATE_6000		= 1,
-	NTV2_FRAMERATE_5994		= 2,
-	NTV2_FRAMERATE_3000		= 3,
-	NTV2_FRAMERATE_2997		= 4,
-	NTV2_FRAMERATE_2500		= 5,
-	NTV2_FRAMERATE_2400		= 6,
-	NTV2_FRAMERATE_2398		= 7,
-	NTV2_FRAMERATE_5000		= 8,
-	NTV2_FRAMERATE_4800		= 9,
-	NTV2_FRAMERATE_4795		= 10,
-	NTV2_FRAMERATE_12000	= 11,
-	NTV2_FRAMERATE_11988	= 12,
-	NTV2_FRAMERATE_1500		= 13,
-	NTV2_FRAMERATE_1498		= 14,
-
+	NTV2_FRAMERATE_UNKNOWN	= 0,	///< @brief	Represents an unknown or invalid frame rate
+	NTV2_FRAMERATE_6000		= 1,	///< @brief	60 frames per second
+	NTV2_FRAMERATE_FIRST	= NTV2_FRAMERATE_6000,	///< @brief	First ordinal value (new in SDK 16.0)
+	NTV2_FRAMERATE_5994		= 2,	///< @brief	Fractional rate of 60,000 frames per 1,001 seconds
+	NTV2_FRAMERATE_3000		= 3,	///< @brief	30 frames per second
+	NTV2_FRAMERATE_2997		= 4,	///< @brief	Fractional rate of 30,000 frames per 1,001 seconds
+	NTV2_FRAMERATE_2500		= 5,	///< @brief	25 frames per second
+	NTV2_FRAMERATE_2400		= 6,	///< @brief	24 frames per second
+	NTV2_FRAMERATE_2398		= 7,	///< @brief	Fractional rate of 24,000 frames per 1,001 seconds
+	NTV2_FRAMERATE_5000		= 8,	///< @brief	50 frames per second
+	NTV2_FRAMERATE_4800		= 9,	///< @brief	48 frames per second
+	NTV2_FRAMERATE_4795		= 10,	///< @brief	Fractional rate of 48,000 frames per 1,001 seconds
+	NTV2_FRAMERATE_12000	= 11,	///< @brief	120 frames per second
+	NTV2_FRAMERATE_11988	= 12,	///< @brief	Fractional rate of 120,000 frames per 1,001 seconds
+	NTV2_FRAMERATE_1500		= 13,	///< @brief	15 frames per second
+	NTV2_FRAMERATE_1498		= 14,	///< @brief	Fractional rate of 15,000 frames per 1,001 seconds
+#if !defined(NTV2_DEPRECATE_16_0)
 	// These were never implemented, and are here so old code will still compile
-	NTV2_FRAMERATE_1900		= 15,	// Used to be 09 in previous SDKs
-	NTV2_FRAMERATE_1898		= 16, 	// Used to be 10 in previous SDKs
-	NTV2_FRAMERATE_1800		= 17,	// Used to be 11 in previous SDKs
-	NTV2_FRAMERATE_1798		= 18,	// Used to be 12 in previous SDKs
-
+	NTV2_FRAMERATE_1900		= 15,	///< @deprecated	19 fps -- obsolete, was ordinal value 9 in old SDKs
+	NTV2_FRAMERATE_1898		= 16,	///< @deprecated	19,000 frames per 1,001 seconds -- obsolete, was ordinal value 10 in old SDKs
+	NTV2_FRAMERATE_1800		= 17,	///< @deprecated	18 fps -- obsolete, was ordinal value 11 in old SDKs
+	NTV2_FRAMERATE_1798		= 18,	///< @deprecated	18,000 frames per 1,001 seconds -- obsolete, was ordinal value 12 in old SDKs
+	NTV2_FRAMERATE_LAST		= NTV2_FRAMERATE_1798,	///< @brief	Last ordinal value (new in SDK 16.0)
+#else	//	!defined(NTV2_DEPRECATE_16_0)
+	NTV2_FRAMERATE_LAST		= NTV2_FRAMERATE_1498,	///< @brief	Last ordinal value (new in SDK 16.0)
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
 	NTV2_NUM_FRAMERATES,
 	NTV2_FRAMERATE_INVALID = NTV2_FRAMERATE_UNKNOWN
 } NTV2FrameRate;
 
 #define	NTV2_IS_VALID_NTV2FrameRate(__r__)		((__r__) >= NTV2_FRAMERATE_6000 && (__r__) < NTV2_NUM_FRAMERATES)
 #define	NTV2_IS_SUPPORTED_NTV2FrameRate(__r__)	((__r__) >= NTV2_FRAMERATE_6000 && (__r__) <= NTV2_FRAMERATE_1498)
+
+#if !defined(NTV2_DEPRECATE_16_0)
+	#define NTV2_IS_FRACTIONAL_NTV2FrameRate(__r__)						\
+		(	(__r__) == NTV2_FRAMERATE_1498	||							\
+			(__r__) == NTV2_FRAMERATE_1798	||							\
+			(__r__) == NTV2_FRAMERATE_1898	||							\
+			(__r__) == NTV2_FRAMERATE_2398	||							\
+			(__r__) == NTV2_FRAMERATE_2997	||							\
+			(__r__) == NTV2_FRAMERATE_4795	||							\
+			(__r__) == NTV2_FRAMERATE_5994	||							\
+			(__r__) == NTV2_FRAMERATE_11988	)
+#else	//	!defined(NTV2_DEPRECATE_16_0)
+	#define NTV2_IS_FRACTIONAL_NTV2FrameRate(__r__)						\
+		(	(__r__) == NTV2_FRAMERATE_1498	||							\
+			(__r__) == NTV2_FRAMERATE_2398	||							\
+			(__r__) == NTV2_FRAMERATE_2997	||							\
+			(__r__) == NTV2_FRAMERATE_4795	||							\
+			(__r__) == NTV2_FRAMERATE_5994	||							\
+			(__r__) == NTV2_FRAMERATE_11988	)
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 #define NTV2_IS_HIGH_NTV2FrameRate(__r__)							\
 	(	(__r__) == NTV2_FRAMERATE_4795	||							\
@@ -4256,9 +4282,10 @@ typedef enum
 typedef enum
 {
 	VPIDBitDepth_8				= 0x0,
+	VPIDBitDepth_10_Full		= 0x0,
 	VPIDBitDepth_10				= 0x1,
 	VPIDBitDepth_12				= 0x2,
-	VPIDBitDepth_Reserved3		= 0x3
+	VPIDBitDepth_12_Full		= 0x3
 } VPIDBitDepth;
 
 typedef enum
@@ -4390,6 +4417,12 @@ typedef enum
 	NTV2_VPID_Luminance_YCbCr,
 	NTV2_VPID_Luminance_ICtCp
 } NTV2VPIDLuminance, NTV2HDRLuminance;
+		
+typedef enum
+{
+	NTV2_VPID_Range_Narrow,
+	NTV2_VPID_Range_Full
+} NTV2VPIDRGBRange;
 
 
 #if !defined (NTV2_DEPRECATE)

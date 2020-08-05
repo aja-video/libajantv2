@@ -38,6 +38,7 @@ typedef struct
 	NTV2VPIDTransferCharacteristics	transferCharacteristics;	///< @brief Describes the transfer characteristics
 	NTV2VPIDColorimetry		colorimetry;			///< @brief Describes the Colorimetry
 	NTV2VPIDLuminance		luminance;				///< @brief Describes the luminance and color difference
+	NTV2VPIDRGBRange		rgbRange;				///< @brief Describes the RGB range as full or SMPTE
 	bool					isMultiLink;			///< @brief If true, the video stream is 12G -> 3G multi-link
 } VPIDSpec;
 

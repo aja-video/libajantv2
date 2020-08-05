@@ -8,14 +8,14 @@
 
 	This page describes the <b>Corvid</b> (sometimes called the <b>Corvid 1</b>), and the <b>Corvid 3G</b> OEM video capture/playout boards.
 
-	@note	These boards have been superseded by \ref kona1  (announced 28Nov2018).
-			See the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/215">Corvid 1 EOL Announcement</a> for details.
-			See the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/216">Corvid 3G EOL Announcement</a> for details.
+	@note	These products have been superceded by \ref kona1 .
+			See the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/215">Corvid 1 EOL Announcement</a>
+			and <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/216">Corvid 3G EOL Announcement</a>.
 
-	It has one SDI input, one SDI output, one LTC input or output, and one RS-422 port.
+	The <b>Corvid 1</b> – identified by ::DEVICE_ID_CORVID1 – has one SDI input, one SDI output, one LTC input or output, and one RS-422 port.
 	It can handle 8 or 10 bit video up to 720p60 and 1080p30.
 
-	The Corvid 3G has one SDI input, one SDI output, one LTC input, and one RS-422 port.
+	The <b>Corvid 3G</b> – identified by ::DEVICE_ID_CORVID3G – has one SDI input, one SDI output, one LTC input, and one RS-422 port.
 	It has a video processing module (mixer/keyer), and can handle 2K and 3Gb video formats.
 
 	@image	html	corvid3g.jpg
@@ -70,13 +70,13 @@
 
 	@par		SDK Support
 
-	-	Feature-complete in <a href="https://sdksupport.aja.com/docs/NTV2SDK_docs_15_0">SDK v15.0</a>.
+	-	Since before 2009 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/3">SDK v2.1 (MacOS)</a>.
+	-	Feature-complete in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/ntv2-sdk-1501-for-linux-macos-and-windows-18dec2018">SDK v15.0</a>.
 
 	@par		Firmware
 
-	<b>Corvid 1:</b>  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/128/25>
-
-	<b>Corvid 3G:</b>  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/132/25>
+	-	<b>Corvid 1:</b>  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/128/25>
+	-	<b>Corvid 3G:</b>  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/132/25>
 
 	@par	Physical
 

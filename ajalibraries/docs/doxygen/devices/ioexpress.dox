@@ -12,8 +12,7 @@
 	@image	html	ioexpressfront.jpg
 	@image	html	ioexpressrear.jpg
 
-	The IoExpress supports 8/10-bit single-channel SD/HD SDI or HDMI ingest/playout through a PCMCIA
-	connector.
+	The IoExpress supports 8/10-bit single-channel SD/HD SDI or HDMI ingest/playout through a PCMCIA connector.
 
 	@par	PCI Interface
 
@@ -24,8 +23,8 @@
 
 	@par	Inputs & Outputs
 
-	-	1 × SDI input
-	-	1 × SDI output
+	-	1 × 1.5G SDI input
+	-	1 × 1.5G SDI output
 	-	1 × HDMI input
 	-	1 × HDMI output
 	-	1 × reference/LTC input
@@ -37,7 +36,7 @@
 
 	-	256 MB SDRAM
 	-	32 × 8MB frames
-	-	16 × 16MB frames for 2K (1080x2048), 1920x1080 VANC (YCbCr only)
+	-	16 × 16MB frames for 2K (1080×2048), 1920×1080 VANC (YCbCr only)
 
 	@par	Audio
 
@@ -47,13 +46,17 @@
 
 	@par	Video Formats
 
-	-	Supports most standard video formats.
+	-	Supports most standard SD and HD video formats.
 	-	Does not support DVCPro HD or HDV.
 	-	RGB is not supported.
 
 	@par		Ancillary Data
 
 	-	\ref vancframegeometries only
+
+	@par	SDK Support
+
+	-	At least since 2009 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/3">SDK v2.1 (MacOS)</a>.
 
 	@par		Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/135/25>

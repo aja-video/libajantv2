@@ -80,11 +80,24 @@ public:
 	inline bool		IsPlanar (void) const				{return GetNumPlanes() > 1 || NTV2_IS_FBF_PLANAR (mPixelFormat);}	///< @return	True if planar format;  otherwise false.
 
 	/**
+		@return		The number of samples spanned per sample used, usually 1 for most formats.
+					Returns zero if an invalid plane is specified.
+		@param[in]	inPlaneIndex0		Specifies the plane of interest. Defaults to zero.
+		@note		Used for asymmetric vertical sampling, such as 3-plane 4:2:0 formats,
+					where N=1 for the Y plane, and N=2 for the Cb and Cr chroma planes.
+	**/
+	ULWord			GetVerticalSampleRatio (const UWord inPlaneIndex0 = 0) const;	//	New in SDK 16.0
+
+	/**
 		@return		The total number of bytes required to hold the raster, including any VANC.
+					Returns zero upon error.
 		@note		To determine the byte count of all planes of a planar format, call GetTotalBytes.
 		@param[in]	inPlaneIndex0		Specifies the plane of interest. Defaults to zero.
 	**/
-	inline ULWord	GetTotalRasterBytes (const UWord inPlaneIndex0 = 0) const	{return GetFullRasterHeight() * GetBytesPerRow(inPlaneIndex0);}
+	inline ULWord	GetTotalRasterBytes (const UWord inPlaneIndex0 = 0) const
+					{	const ULWord vSamp(GetVerticalSampleRatio(inPlaneIndex0));
+						return vSamp ? GetFullRasterHeight() * GetBytesPerRow(inPlaneIndex0) / vSamp : 0;
+					}
 
 	/**
 		@return		The total number of bytes required to hold the raster, including any VANC, and all planes of planar formats.

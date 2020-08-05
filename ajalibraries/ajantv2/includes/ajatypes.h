@@ -35,6 +35,8 @@
 #define	AJA_STATIC		static		//	Do not change this.
 #define NTV2_WRITEREG_PROFILING		//	If defined, enables register write profiling
 //#define AJABASE_CPP11_IMPL		//	If defined, uses C++11 thread/event/mutex implementations
+#define	NTV2_UNUSED(__p__)			(void)__p__
+#define NTV2_USE_CPLUSPLUS11		//	New in SDK 16.0. If defined (now default), 'ajalibraries/ajantv2' will use C++11 features (requires C++11 compiler)
 
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
 	#if defined(AJAMac)
@@ -220,8 +222,13 @@
 		#endif /* LINUX_VERSION_CODE */
 	#endif /* __KERNEL__ */
 
+	#if defined(NTV2_USE_CPLUSPLUS11)
+		#undef NTV2_USE_CPLUSPLUS11	//	Linux c++11-in-SDK TBD
+	#endif
+
     #if defined (MODULE)
         #define NTV2_BUILDING_DRIVER
+		#undef NTV2_USE_CPLUSPLUS11
     #endif
 
     #if !defined (NTV2_BUILDING_DRIVER)
@@ -240,6 +247,10 @@
 
         typedef int32_t				AJASocket;
     #else
+		#if defined (AJAVirtual)
+			#include <stdbool.h>
+        	#include <stdint.h>
+		#endif
         typedef long				HANDLE;
         // this is what is is in Windows:
         // typedef void *				HANDLE;

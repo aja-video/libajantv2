@@ -552,7 +552,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
 	// When we have extracted the useful data from the packet, we return the packet size, in bytes, so the
 	// caller can find the start of the next packet (if any).
 
-	if (pInData == NULL)
+	if (pInData == AJA_NULL)
 	{
 		outPacketByteCount = 0;
 		LOGMYERROR("AJA_STATUS_NULL: NULL pointer");

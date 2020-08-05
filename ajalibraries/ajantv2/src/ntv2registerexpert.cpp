@@ -581,7 +581,7 @@ private:
 														"F2 Start Address",		"Pixel Delay",			"Active Start",
 														"Pixels Per Line",		"Lines Per Frame",		"Field ID Lines",
 														"Payload ID Control",	"Payload ID",			"Chroma Blank Lines",
-														"F1 C Blanking Mask",	"F2 C Blanking Mask",	"Reserved 14",
+														"F1 C Blanking Mask",	"F2 C Blanking Mask",	"Field Bytes High",
 														"Reserved 15",			"RTP Payload ID",		"RTP SSRC",
 														"IP Channel"};
 		static const uint32_t	AncExtPerChlRegBase []	=	{	0x1000,	0x1040,	0x1080,	0x10C0,	0x1100,	0x1140,	0x1180,	0x11C0	};
@@ -646,6 +646,7 @@ private:
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlankCStartLine,				"",	mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlankField1CLines,				"",	mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlankField2CLines,				"",	mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsFieldBytesHigh,				"",	mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsRtpPayloadID,					"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsRtpSSRC,						"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsIpChannel,						"",	mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
@@ -1368,7 +1369,15 @@ private:
 		DefineRegName	(kVRegHdrInMaxCLLCh1,					"kVRegHdrInMaxCLLCh1");
 		DefineRegName	(kVRegHdrInMaxFALLCh1,					"kVRegHdrInMaxFALLCh1");
 		DefineRegName	(kVRegHDRInOverrideState,				"kVRegHDRInOverrideState");
-		
+		DefineRegName	(kVRegNTV2VPIDRGBRange1,				"kVRegNTV2VPIDRGBRange1");
+		DefineRegName	(kVRegNTV2VPIDRGBRange2,				"kVRegNTV2VPIDRGBRange2");
+		DefineRegName	(kVRegNTV2VPIDRGBRange3,				"kVRegNTV2VPIDRGBRange3");
+		DefineRegName	(kVRegNTV2VPIDRGBRange4,				"kVRegNTV2VPIDRGBRange4");
+		DefineRegName	(kVRegNTV2VPIDRGBRange5,				"kVRegNTV2VPIDRGBRange5");
+		DefineRegName	(kVRegNTV2VPIDRGBRange6,				"kVRegNTV2VPIDRGBRange6");
+		DefineRegName	(kVRegNTV2VPIDRGBRange7,				"kVRegNTV2VPIDRGBRange7");
+		DefineRegName	(kVRegNTV2VPIDRGBRange8,				"kVRegNTV2VPIDRGBRange8");
+
 		DefineRegName	(kVRegPCIMaxReadRequestSize,			"kVRegPCIMaxReadRequestSize");
 		DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
 		DefineRegName	(kVRegFirstOEM,							"kVRegFirstOEM");
@@ -2806,7 +2815,7 @@ private:
 			(void) inDeviceID;
 			ostringstream	oss;
 			const uint32_t	which		(inRegNum & 0x1F);
-			const uint32_t	byteTotal	(inRegValue & 0xFFFF);
+			const uint32_t	byteTotal	(inRegValue & 0xFFFFFF);
 			const bool		overrun		((inRegValue & BIT(28)) ? true : false);
 			switch (which)
 			{
@@ -2873,8 +2882,8 @@ private:
 			
 			switch (which)
 			{
-				case 0:		oss	<< "F1 byte count: "				<< valueLow				<< endl
-								<< "F2 byte count: "				<< valueHigh;
+				case 0:		oss	<< "F1 byte count low: "			<< valueLow				<< endl
+								<< "F2 byte count low: "			<< valueHigh;
 					break;
 				case 4:		oss	<< "HANC pixel delay: "				<< (valueLow & 0x3FF)	<< endl
 								<< "VANC pixel delay: "				<< (valueHigh & 0x7FF);
@@ -2890,6 +2899,9 @@ private:
 					break;
 				case 11:	oss	<< "F1 chroma blnk start line: "	<< (valueLow & 0x7FF)	<< endl
 								<< "F2 chroma blnk start line: "	<< (valueHigh & 0x7FF);
+					break;
+				case 14:	oss	<< "F1 byte count high: "			<< valueLow				<< endl
+								<< "F2 byte count high: "			<< valueHigh;
 					break;
 				default:	return "Invalid register type";
 			}

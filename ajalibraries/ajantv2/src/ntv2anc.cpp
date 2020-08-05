@@ -47,24 +47,27 @@ typedef struct ANCInserterInitParams
 	uint32_t	totalLines;
 	uint32_t	fidLow;
 	uint32_t	fidHigh;
+	uint32_t	field1SwitchLine;
+	uint32_t	field2SwitchLine;
+	uint32_t	pixelDelay;
 } ANCInserterInitParams;
 
 static const ANCInserterInitParams  inserterInitParamsTable [NTV2_NUM_STANDARDS] = {
-//						F1		F2		Horz					
-//						Active	Active	Active	Total	Total	FID		FID
-//	Standard			Line	Line	Pixels	Pixels	Lines	Lo		Hi
-/* 1080       */	{	21,		564,	1920,	2200,	1125,	1125,	563	},
-/* 720        */	{	26,		0,		1280,	1280,	750,	0,		0	},
-/* 525        */	{	21,		283,	720,	720,	525,	3,		265	},
-/* 625        */	{	23,		336,	720,	864,	625,	625,	312	},
-/* 1080p      */	{	42,		0,		1920,	2640,	1125,	0,		0	},
-/* 2K         */	{	42,		0,		2048,	2640,	1125,	0,		0	},
-/* 2Kx1080p   */	{	42,		0,		2048,	2640,	1125,	0,		0	},
-/* 2Kx1080i   */	{	21,		564,	2048,	2200,	1125,	1125,	563	},
-/* 3840x2160p */	{	42,		0,		1920,	2640,	1125,	0,		0	},
-/* 4096x2160p */	{	42,		0,		2048,	2640,	1125,	0,		0	},
-/* 3840HFR    */	{	42,		0,		1920,	2640,	1125,	0,		0	},
-/* 4096HFR    */	{	42,		0,		2048,	2640,	1125,	0,		0	}
+//						F1		F2		Horz									F1		F2
+//						Active	Active	Active	Total	Total	FID		FID		Switch	Switch	Pixel
+//	Standard			Line	Line	Pixels	Pixels	Lines	Lo		Hi		Line	Line	Delay
+/* 1080       */	{	21,		564,	1920,	2200,	1125,	1125,	563,	7,		569,	8,		},
+/* 720        */	{	26,		0,		1280,	1280,	750,	0,		0,		7,		0,		8,		},
+/* 525        */	{	21,		283,	720,	720,	525,	3,		265,	10,		273,	8,		},
+/* 625        */	{	23,		336,	720,	864,	625,	625,	312,	6,		319,	8,		},
+/* 1080p      */	{	42,		0,		1920,	2640,	1125,	0,		0,		7,		0,		8,		},
+/* 2K         */	{	42,		0,		2048,	2640,	1125,	0,		0,		7,		0,		8,		},
+/* 2Kx1080p   */	{	42,		0,		2048,	2640,	1125,	0,		0,		7,		0,		8,		},
+/* 2Kx1080i   */	{	21,		564,	2048,	2200,	1125,	1125,	563,	7,		569,	8,		},
+/* 3840x2160p */	{	42,		0,		1920,	2640,	1125,	0,		0,		7,		0,		8,		},
+/* 4096x2160p */	{	42,		0,		2048,	2640,	1125,	0,		0,		7,		0,		8,		},
+/* 3840HFR    */	{	42,		0,		1920,	2640,	1125,	0,		0,		7,		0,		8,		},
+/* 4096HFR    */	{	42,		0,		2048,	2640,	1125,	0,		0,		7,		0,		8,		}
 };
 
 
@@ -82,6 +85,8 @@ typedef struct ANCExtractorInitParams
 	uint32_t	totalLines;
 	uint32_t	fidLow;
 	uint32_t	fidHigh;
+	uint32_t	field1SwitchLine;
+	uint32_t	field2SwitchLine;
 	uint32_t	field1AnalogStartLine;
 	uint32_t	field2AnalogStartLine;
 	uint32_t	field1AnalogYFilter;
@@ -89,26 +94,68 @@ typedef struct ANCExtractorInitParams
 	uint32_t	field1AnalogCFilter;
 	uint32_t	field2AnalogCFilter;
 	uint32_t	analogActiveLineLength;
-}ANCExtractorInitParams;
+} ANCExtractorInitParams;
 
 const static ANCExtractorInitParams  extractorInitParamsTable [NTV2_NUM_STANDARDS] = {
-//					F1		F1		F2		F2								F1Anlg	F2Anlg	F1			F2			F1		F2		Analog
-//					Start	Cutoff	Start	Cutoff	Total	FID		FID		Start	Start	Anlg		Anlg		Anlg	Anlg	Active
-// Standard			Line	Line	Line	Line	Lines	Low		High	Line	Line	Y Filt		Y Filt		C Filt	C Filt	LineLength
-/* 1080       */{	561,	26,		1124,	588,	1125,	1125,	563,	0,		0,		0,			0,			0,		0,		0x07800000	},
-/* 720        */{	746,	745,	0,		0,		750,	0,		0,		0,		0,		0,			0,			0,		0,		0x05000000	},
-/* 525        */{	264,	30,		1,		293,	525,	3,		265,	4,		266,	0x20000,	0x40000,	0,		0,		0x02D00000	},
-/* 625        */{	311,	33,		1,		346,	625,	625,	312,	5,		318,	0x10000,	0x10000,	0,		0,		0x02D00000	},
-/* 1080p      */{	1122,	1125,	0,		0,		1125,	0,		0,		0,		0,		0,			0,			0,		0,		0x07800000	},
-/* 2K         */{	1122,	1125,	0,		0,		1125,	0,		0,		0,		0,		0,			0,			0,		0,		0x07800000	},
-/* 2Kx1080p   */{	1122,	1125,	0,		0,		1125,	0,		0,		0,		0,		0,			0,			0,		0,		0x07800000	},
-/* 2Kx1080i   */{	561,	26,		1124,	588,	1125,	1125,	563,	0,		0,		0,			0,			0,		0,		0x07800000	},
-/* 3840x2160p */{	1122,	1125,	0,		0,		1125,	0,		0,		0,		0,		0,			0,			0,		0,		0x07800000	},
-/* 4096x2160p */{	1122,	1125,	0,		0,		1125,	0,		0,		0,		0,		0,			0,			0,		0,		0x07800000	},
-/* 3840HFR    */{	1122,	1125,	0,		0,		1125,	0,		0,		0,		0,		0,			0,			0,		0,		0x07800000	},
-/* 4096HFR    */{	1122,	1125,	0,		0,		1125,	0,		0,		0,		0,		0,			0,			0,		0,		0x07800000	},
+//					F1		F1		F2		F2								F1		F2		F1Anlg	F2Anlg	F1			F2			F1		F2		Analog
+//					Start	Cutoff	Start	Cutoff	Total	FID		FID		Switch	Switch	Start	Start	Anlg		Anlg		Anlg	Anlg	Active
+// Standard			Line	Line	Line	Line	Lines	Low		High	Line	Line	Line	Line	Y Filt		Y Filt		C Filt	C Filt	LineLength
+/* 1080       */{	561,	26,		1124,	588,	1125,	1125,	563,	7,		569,	0,		0,		0,			0,			0,		0,		0x07800000	},
+/* 720        */{	746,	745,	0,		0,		750,	0,		0,		7,		0,		0,		0,		0,			0,			0,		0,		0x05000000	},
+/* 525        */{	264,	30,		1,		293,	525,	3,		265,	10,		273,	4,		266,	0x20000,	0x40000,	0,		0,		0x02D00000	},
+/* 625        */{	311,	33,		1,		346,	625,	625,	312,	6,		319,	5,		318,	0x10000,	0x10000,	0,		0,		0x02D00000	},
+/* 1080p      */{	1122,	1125,	0,		0,		1125,	0,		0,		7,		0,		0,		0,		0,			0,			0,		0,		0x07800000	},
+/* 2K         */{	1122,	1125,	0,		0,		1125,	0,		0,		7,		0,		0,		0,		0,			0,			0,		0,		0x07800000	},
+/* 2Kx1080p   */{	1122,	1125,	0,		0,		1125,	0,		0,		7,		0,		0,		0,		0,			0,			0,		0,		0x07800000	},
+/* 2Kx1080i   */{	561,	26,		1124,	588,	1125,	1125,	563,	7,		569,	0,		0,		0,			0,			0,		0,		0x07800000	},
+/* 3840x2160p */{	1122,	1125,	0,		0,		1125,	0,		0,		7,		0,		0,		0,		0,			0,			0,		0,		0x07800000	},
+/* 4096x2160p */{	1122,	1125,	0,		0,		1125,	0,		0,		7,		0,		0,		0,		0,			0,			0,		0,		0x07800000	},
+/* 3840HFR    */{	1122,	1125,	0,		0,		1125,	0,		0,		7,		0,		0,		0,		0,			0,			0,		0,		0x07800000	},
+/* 4096HFR    */{	1122,	1125,	0,		0,		1125,	0,		0,		7,		0,		0,		0,		0,			0,			0,		0,		0x07800000	},
 };
 
+
+/////////////////////////////////////////////
+///////////   ANC FRAME BUFFER    ///////////
+/////////////////////////////////////////////
+
+bool CNTV2Card::AncSetFrameBufferSize (const ULWord inF1Size, const ULWord inF2Size)
+{
+	if (!::NTV2DeviceCanDoCustomAnc(_boardID))
+		return false;
+
+	bool ok(true);
+	if (ok) ok = WriteRegister(kVRegAncField1Offset, inF1Size + inF2Size);
+	if (ok) ok = WriteRegister(kVRegAncField2Offset, inF2Size);
+	return ok;
+}
+
+static bool GetAncOffsets (CNTV2Card & inDevice, ULWord & outF1Offset, ULWord & outF2Offset)
+{
+	outF1Offset = outF2Offset = 0;
+	return inDevice.ReadRegister(kVRegAncField1Offset, outF1Offset)
+		&&  inDevice.ReadRegister(kVRegAncField2Offset, outF2Offset);
+}
+
+static bool GetAncField1Size (CNTV2Card & inDevice, ULWord & outFieldBytes)
+{
+	outFieldBytes = 0;
+	ULWord	ancF1Offset(0), ancF2Offset(0);
+	if (!GetAncOffsets(inDevice, ancF1Offset, ancF2Offset))
+		return false;
+	outFieldBytes = ancF1Offset - ancF2Offset;
+	return true;
+}
+
+static bool GetAncField2Size (CNTV2Card & inDevice, ULWord & outFieldBytes)
+{
+	outFieldBytes = 0;
+	ULWord	ancF1Offset(0), ancF2Offset(0);
+	if (!GetAncOffsets(inDevice, ancF1Offset, ancF2Offset))
+		return false;
+	outFieldBytes = ancF2Offset;
+	return true;
+}
 
 
 /////////////////////////////////////////////
@@ -117,12 +164,18 @@ const static ANCExtractorInitParams  extractorInitParamsTable [NTV2_NUM_STANDARD
 
 static bool SetAncInsField1Bytes (CNTV2Card & inDevice, const UWord inSDIOutput, uint32_t numberOfBytes)
 {
-    return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsFieldBytes), numberOfBytes, maskInsField1Bytes, shiftInsField1Bytes);
+	return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsFieldBytes), numberOfBytes & 0xffff,
+								  maskInsField1Bytes, shiftInsField1Bytes) &&
+			inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsFieldBytesHigh), numberOfBytes >> 16,
+											  maskInsField1Bytes, shiftInsField1Bytes);
 }
 
 static bool SetAncInsField2Bytes (CNTV2Card & inDevice, const UWord inSDIOutput, uint32_t numberOfBytes)
 {
-    return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsFieldBytes), numberOfBytes, (uint32_t)maskInsField2Bytes, shiftInsField2Bytes);
+	return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsFieldBytes), numberOfBytes & 0xffff,
+								  maskInsField2Bytes, shiftInsField2Bytes) &&
+			inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsFieldBytesHigh), numberOfBytes >> 16,
+											  maskInsField2Bytes, shiftInsField2Bytes);
 }
 
 static bool EnableAncInsHancY (CNTV2Card & inDevice, const UWord inSDIOutput, bool bEnable)
@@ -132,7 +185,7 @@ static bool EnableAncInsHancY (CNTV2Card & inDevice, const UWord inSDIOutput, bo
 
 static bool EnableAncInsHancC (CNTV2Card & inDevice, const UWord inSDIOutput, bool bEnable)
 {
-    return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsControl), bEnable ? 1 : 0, maskInsEnableHancC, shiftInsEnableHancY);
+	return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsControl), bEnable ? 1 : 0, maskInsEnableHancC, shiftInsEnableHancC);
 }
 
 static bool EnableAncInsVancY (CNTV2Card & inDevice, const UWord inSDIOutput, bool bEnable)
@@ -225,21 +278,15 @@ static bool SetAncInsIPChannel (CNTV2Card & inDevice, const UWord inSDIOutput, u
 	return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsIpChannel), channel);
 }
 
-static bool GetAncOffsets (CNTV2Card & inDevice, ULWord & outF1Offset, ULWord & outF2Offset)
+static bool GetAncInsExtendedMode (CNTV2Card & inDevice, const UWord inSDIOutput, bool& extendedMode)
 {
-	outF1Offset = outF2Offset = 0;
-	return inDevice.ReadRegister(kVRegAncField1Offset, outF1Offset)
-		&&  inDevice.ReadRegister(kVRegAncField2Offset, outF2Offset);
-}
-
-static bool GetAncFieldByteCount (CNTV2Card & inDevice, ULWord & outFieldBytes)
-{
-	outFieldBytes = 0;
-	ULWord	ancF1Offset(0), ancF2Offset(0);
-	if (!GetAncOffsets(inDevice, ancF1Offset, ancF2Offset))
-		return false;
-	outFieldBytes = (ancF2Offset - ancF1Offset) - 1;
-	return true;
+	bool		ok(true);
+	uint32_t	regValue(0);
+	extendedMode = false;
+	if (ok) ok = inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsControl), 1, maskInsExtendedMode, shiftInsExtendedMode);
+	if (ok) ok = inDevice.ReadRegister(AncInsRegNum(inSDIOutput, regAncInsControl), regValue, maskInsExtendedMode, shiftInsExtendedMode);
+	if (ok) extendedMode = (regValue == 1);
+	return ok;
 }
 
 bool CNTV2Card::AncInsertInit (const UWord inSDIOutput, const NTV2Channel inChannel, const NTV2Standard inStandard)
@@ -265,17 +312,19 @@ bool CNTV2Card::AncInsertInit (const UWord inSDIOutput, const NTV2Channel inChan
 
 	const ANCInserterInitParams & initParams(inserterInitParamsTable[theStandard]);
 	bool ok(true);
+	bool extendedMode(false);
+	if (ok) ok = GetAncInsExtendedMode (*this, inSDIOutput, extendedMode);
 	if (ok)	ok = SetAncInsField1ActiveLine (*this, inSDIOutput, initParams.field1ActiveLine);
 	if (ok)	ok = SetAncInsField2ActiveLine (*this, inSDIOutput, initParams.field2ActiveLine);
 	if (ok)	ok = SetAncInsHActivePixels (*this, inSDIOutput, initParams.hActivePixels);
 	if (ok)	ok = SetAncInsHTotalPixels (*this, inSDIOutput, initParams.hTotalPixels);
 	if (ok)	ok = SetAncInsTotalLines (*this, inSDIOutput, initParams.totalLines);
-	if (ok)	ok = SetAncInsFidLow (*this, inSDIOutput, initParams.fidLow);
-	if (ok)	ok = SetAncInsFidHi (*this, inSDIOutput, initParams.fidHigh);
+	if (ok)	ok = SetAncInsFidLow (*this, inSDIOutput, extendedMode? initParams.field1SwitchLine : initParams.fidLow);
+	if (ok)	ok = SetAncInsFidHi (*this, inSDIOutput, extendedMode? initParams.field2SwitchLine : initParams.fidHigh);
 	if (ok)	ok = SetAncInsProgressive (*this, inSDIOutput, NTV2_IS_PROGRESSIVE_STANDARD(theStandard));
 	if (ok)	ok = SetAncInsSDPacketSplit (*this, inSDIOutput, NTV2_IS_SD_STANDARD(theStandard));
-	if (ok)	ok = EnableAncInsHancC (*this, inSDIOutput, true);
-	if (ok)	ok = EnableAncInsHancY (*this, inSDIOutput, true);
+	if (ok)	ok = EnableAncInsHancC (*this, inSDIOutput, false);
+	if (ok)	ok = EnableAncInsHancY (*this, inSDIOutput, false);
 	if (ok)	ok = EnableAncInsVancC (*this, inSDIOutput, true);
 	if (ok)	ok = EnableAncInsVancY (*this, inSDIOutput, true);
 	if (ok)	ok = SetAncInsHancPixelDelay (*this, inSDIOutput, 0);
@@ -283,14 +332,33 @@ bool CNTV2Card::AncInsertInit (const UWord inSDIOutput, const NTV2Channel inChan
 	if (ok)	ok = WriteRegister (AncInsRegNum(inSDIOutput, regAncInsBlankCStartLine), 0);
 	if (ok)	ok = WriteRegister (AncInsRegNum(inSDIOutput, regAncInsBlankField1CLines), 0);
 	if (ok)	ok = WriteRegister (AncInsRegNum(inSDIOutput, regAncInsBlankField2CLines), 0);
+	if (ok)	ok = WriteRegister (AncInsRegNum(inSDIOutput, regAncInsPixelDelay), extendedMode? initParams.pixelDelay : 0);
 
-	ULWord	fieldBytes(0);
-	if (ok)	ok = GetAncFieldByteCount(*this, fieldBytes);
-	if (ok)	ok = SetAncInsField1Bytes (*this, inSDIOutput, fieldBytes);
-	if (ok)	ok = SetAncInsField2Bytes (*this, inSDIOutput, fieldBytes);
+	ULWord	field1Bytes(0);
+	ULWord	field2Bytes(0);
+	if (ok)	ok = GetAncField1Size(*this, field1Bytes);
+	if (ok)	ok = GetAncField2Size(*this, field2Bytes);
+	if (ok)	ok = SetAncInsField1Bytes (*this, inSDIOutput, field1Bytes);
+	if (ok)	ok = SetAncInsField2Bytes (*this, inSDIOutput, field2Bytes);
 	return ok;
 }
 
+bool CNTV2Card::AncInsertSetComponents (const UWord inSDIOutput,
+										const bool inVancY, const bool inVancC,
+										const bool inHancY, const bool inHancC)
+{
+	bool ok(true);
+	bool extendedMode(false);
+	if (ok)	ok = EnableAncInsVancY(*this, inSDIOutput, inVancY);
+	if (ok)	ok = EnableAncInsVancC(*this, inSDIOutput, inVancC);
+	if (ok) ok = GetAncInsExtendedMode (*this, inSDIOutput, extendedMode);
+	if (extendedMode)
+	{
+		if (ok)	ok = EnableAncInsHancY(*this, inSDIOutput, inHancY);
+		if (ok)	ok = EnableAncInsHancC(*this, inSDIOutput, inHancC);
+	}
+	return ok;
+}
 
 bool CNTV2Card::AncInsertSetEnable (const UWord inSDIOutput, const bool inIsEnabled)
 {
@@ -315,7 +383,6 @@ bool CNTV2Card::AncInsertSetEnable (const UWord inSDIOutput, const bool inIsEnab
     return ok;
 }
 
-
 bool CNTV2Card::AncInsertIsEnabled (const UWord inSDIOutput, bool & outIsRunning)
 {
 	outIsRunning = false;
@@ -332,7 +399,6 @@ bool CNTV2Card::AncInsertIsEnabled (const UWord inSDIOutput, bool & outIsRunning
 	outIsRunning = (value & BIT(28)) ? false : true;
 	return true;
 }
-
 
 bool CNTV2Card::AncInsertSetReadParams (const UWord inSDIOutput, const ULWord inFrameNumber, const ULWord inF1Size,
 										const NTV2Channel inChannel, const NTV2Framesize inFrameSize)
@@ -492,6 +558,16 @@ static bool SetAncExtField2CutoffLine (CNTV2Card & inDevice, const UWord inSDIIn
     return inDevice.WriteRegister(AncExtRegNum(inSDIInput, regAncExtFieldCutoffLine), lineNumber, maskField2CutoffLine, shiftField2CutoffLine);
 }
 
+static bool GetAncExtField1Status (CNTV2DriverInterface & inDevice, const UWord inSDIInput, ULWord & outF1Status)
+{
+	return inDevice.ReadRegister(AncExtRegNum(inSDIInput, regAncExtField1Status), outF1Status);
+}
+
+static bool GetAncExtField2Status (CNTV2DriverInterface & inDevice, const UWord inSDIInput, ULWord & outF2Status)
+{
+	return inDevice.ReadRegister(AncExtRegNum(inSDIInput, regAncExtField2Status), outF2Status);
+}
+
 static bool IsAncExtOverrun (CNTV2DriverInterface & inDevice, const UWord inSDIInput, bool & outIsOverrun)
 {
 	return inDevice.ReadRegister(AncExtRegNum(inSDIInput, regAncExtTotalStatus), outIsOverrun, maskTotalOverrun, shiftTotalOverrun);
@@ -552,6 +628,16 @@ static bool SetAncExtField2AnalogCFilter (CNTV2Card & inDevice, const UWord inSD
     return inDevice.WriteRegister(AncExtRegNum(inSDIInput, regAncExtField2AnalogCFilter), lineFilter);
 }
 
+static bool GetAncExtExtendedMode (CNTV2Card & inDevice, const UWord inSDIInput, bool& extendedMode)
+{
+	bool		ok(true);
+	uint32_t	regValue(0);
+	extendedMode = false;
+	if (ok) ok = inDevice.WriteRegister(AncInsRegNum(inSDIInput, regAncInsControl), 1, maskInsExtendedMode, shiftInsExtendedMode);
+	if (ok) ok = inDevice.ReadRegister(AncInsRegNum(inSDIInput, regAncInsControl), regValue, maskInsExtendedMode, shiftInsExtendedMode);
+	if (ok) extendedMode = (regValue == 1);
+	return ok;
+}
 
 bool CNTV2Card::AncExtractInit (const UWord inSDIInput, const NTV2Channel inChannel, const NTV2Standard inStandard)
 {
@@ -576,11 +662,13 @@ bool CNTV2Card::AncExtractInit (const UWord inSDIInput, const NTV2Channel inChan
 
 	const ANCExtractorInitParams &  extractorParams (extractorInitParamsTable[theStandard]);
 	bool ok(true);
+	bool extendedMode(false);
+	if (ok) ok = GetAncExtExtendedMode (*this, inSDIInput, extendedMode);
 	if (ok)	ok = SetAncExtProgressive (*this, inSDIInput, NTV2_IS_PROGRESSIVE_STANDARD(theStandard));
 	if (ok)	ok = SetAncExtField1StartLine (*this, inSDIInput, extractorParams.field1StartLine);
-	if (ok)	ok = SetAncExtField1CutoffLine (*this, inSDIInput, extractorParams.field1CutoffLine);
+	if (ok)	ok = SetAncExtField1CutoffLine (*this, inSDIInput, extendedMode? extractorParams.field1SwitchLine : extractorParams.field1CutoffLine);
 	if (ok)	ok = SetAncExtField2StartLine (*this, inSDIInput, extractorParams.field2StartLine);
-	if (ok)	ok = SetAncExtField2CutoffLine (*this, inSDIInput, extractorParams.field2CutoffLine);
+	if (ok)	ok = SetAncExtField2CutoffLine (*this, inSDIInput, extendedMode? extractorParams.field2SwitchLine : extractorParams.field2CutoffLine);
 	if (ok)	ok = SetAncExtTotalFrameLines (*this, inSDIInput, extractorParams.totalLines);
 	if (ok)	ok = SetAncExtFidLow (*this, inSDIInput, extractorParams.fidLow);
 	if (ok)	ok = SetAncExtFidHi (*this, inSDIInput, extractorParams.fidHigh);
@@ -602,6 +690,18 @@ bool CNTV2Card::AncExtractInit (const UWord inSDIInput, const NTV2Channel inChan
 	if (ok)	ok = SetAncExtField1EndAddr (*this, inSDIInput, 0);
 	if (ok)	ok = SetAncExtField2StartAddr (*this, inSDIInput, 0);
 	if (ok)	ok = SetAncExtField2EndAddr (*this, inSDIInput, 0);
+	return ok;
+}
+
+bool CNTV2Card::AncExtractSetComponents (const UWord inSDIInput,
+											const bool inVancY, const bool inVancC,
+											const bool inHancY, const bool inHancC)
+{
+	bool ok(true);
+	if (ok)	ok = EnableAncExtVancY(*this, inSDIInput, inVancY);
+	if (ok)	ok = EnableAncExtVancC(*this, inSDIInput, inVancC);
+	if (ok)	ok = EnableAncExtHancY(*this, inSDIInput, inHancY);
+	if (ok)	ok = EnableAncExtHancC(*this, inSDIInput, inHancC);
 	return ok;
 }
 
@@ -777,6 +877,48 @@ bool CNTV2Card::AncExtractSetFilterDIDs (const UWord inSDIInput, const NTV2DIDSe
 		WriteRegister (firstIgnoreRegNum + regNdx,  regValue);
 	}
 	return true;
+}
+
+bool CNTV2Card::AncExtractGetField1Size (const UWord inSDIInput, ULWord & outF1Size)
+{
+	outF1Size = 0;
+	if (!::NTV2DeviceCanDoCapture(_boardID))
+		return false;
+	if (!::NTV2DeviceCanDoCustomAnc(_boardID))
+		return false;
+	if (IS_INPUT_SPIGOT_INVALID(inSDIInput))
+		return false;
+
+	bool	ok			(true);
+	ULWord	regValue	(0);
+
+	ok = GetAncExtField1Status(*this, inSDIInput, regValue);
+	if (!ok || ((regValue & maskField1Overrun) != 0))
+		return false;
+	outF1Size = regValue & maskField1BytesIn;
+
+	return ok;
+}
+
+bool CNTV2Card::AncExtractGetField2Size (const UWord inSDIInput, ULWord & outF2Size)
+{
+	outF2Size = 0;
+	if (!::NTV2DeviceCanDoCapture(_boardID))
+		return false;
+	if (!::NTV2DeviceCanDoCustomAnc(_boardID))
+		return false;
+	if (IS_INPUT_SPIGOT_INVALID(inSDIInput))
+		return false;
+
+	bool	ok			(true);
+	ULWord	regValue	(0);
+
+	ok = GetAncExtField2Status(*this, inSDIInput, regValue);
+	if (!ok || ((regValue & maskField2Overrun) != 0))
+		return false;
+	outF2Size = regValue & maskField2BytesIn;
+
+	return ok;
 }
 
 bool CNTV2Card::AncExtractGetBufferOverrun (const UWord inSDIInput, bool & outIsOverrun)

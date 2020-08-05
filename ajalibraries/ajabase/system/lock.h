@@ -9,6 +9,16 @@
 
 #include "ajabase/common/public.h"
 
+#if defined(AJA_USE_CPLUSPLUS11)
+	#include <mutex>
+	#include <string>
+	using std::recursive_timed_mutex;
+	using std::string;
+#endif
+
+#define LOCK_TIME_INFINITE 0xffffffff
+
+
 // forward declarations
 class AJALockImpl;
 
@@ -39,7 +49,7 @@ public:
 	 *				AJA_STATUS_OPEN		Lock not initialized
 	 *				AJA_STATUS_FAIL		Lock failed
 	 */
-	virtual AJAStatus Lock(uint32_t timeout = 0xffffffff);
+	virtual AJAStatus Lock(uint32_t timeout = LOCK_TIME_INFINITE);
 
 	/**
 	 *	Release the lock.
@@ -53,11 +63,22 @@ public:
 	 *	@return		True if valid (has implementation).
 	 *				False if not valid.
 	 */
-	virtual inline bool IsValid(void) const {return mpImpl != NULL;}
+	virtual inline bool IsValid(void) const
+		{
+			#if defined(AJA_USE_CPLUSPLUS11)
+				return mpMutex != nullptr;
+			#else
+				return mpImpl != NULL;
+			#endif
+		}
 
 private:
-
+#if defined(AJA_USE_CPLUSPLUS11)
+	recursive_timed_mutex* mpMutex={nullptr};
+	string name;
+#else
 	AJALockImpl* mpImpl;
+#endif
 };
 
 /**
