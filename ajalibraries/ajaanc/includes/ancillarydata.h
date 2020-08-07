@@ -1166,6 +1166,9 @@ class AJAExport AJARTPAncPayloadHeader
 		virtual inline bool		NoFieldSpecified (void) const		{return IsProgressive();}		///< @return	True if my Field Bits indicate No Field Specified.
 		virtual inline bool		IsField1 (void) const				{return mFieldSignal == 2;}		///< @return	True if my Field Bits indicate Field1.
 		virtual inline bool		IsField2 (void) const				{return mFieldSignal == 3;}		///< @return	True if my Field Bits indicate Field2.
+		virtual inline bool		IsValidFieldSignal (void) const		{return mFieldSignal != 1;}		///< @return	True if my Field Bits are valid.
+		virtual inline bool		HasPaddingBytes (void) const		{return mPBit;}					///< @return	True if my Padding Bit is set.
+		virtual inline bool		HasExtendedHeader (void) const		{return mXBit;}					///< @return	True if my Header Extension Bit is set.
 
 		/**
 			@return		True if the RHS payload header state matches my own current state;  otherwise false.
