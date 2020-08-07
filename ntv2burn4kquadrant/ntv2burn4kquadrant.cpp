@@ -605,10 +605,9 @@ void NTV2Burn4KQuadrant::PlayFrames (void)
 			//	Transfer the timecode-burned frame to the device for playout...
 			outputXferInfo.SetVideoBuffer(playData->fVideoBuffer, playData->fVideoBufferSize);
 			outputXferInfo.SetAudioBuffer(playData->fAudioBuffer, playData->fAudioBufferSize);
-			outputXferInfo.SetOutputTimeCode((NTV2_RP188)playData->fRP188Data, NTV2_TCDEST_SDI1);
-			outputXferInfo.SetOutputTimeCode((NTV2_RP188)playData->fRP188Data, NTV2_TCDEST_SDI1_LTC);
+			outputXferInfo.SetOutputTimeCode(NTV2_RP188(playData->fRP188Data), NTV2_TCINDEX_SDI1);
+			outputXferInfo.SetOutputTimeCode(NTV2_RP188(playData->fRP188Data), NTV2_TCINDEX_SDI1_LTC);
 			outputXferInfo.acRP188 = playData->fRP188Data;
-
 
 			// Output the time code in the autocirculate struct
 			mOutputDevice.AutoCirculateTransfer (mOutputChannel, outputXferInfo);
@@ -704,7 +703,7 @@ void NTV2Burn4KQuadrant::CaptureFrames (void)
 
 			//	Remember the audio & anc data byte counts...
 			NTV2_RP188	defaultTimeCode;
-			inputXferInfo.acTransferStatus.acFrameStamp.GetInputTimeCode (defaultTimeCode, NTV2_TCSOURCE_SDI1);
+			inputXferInfo.acTransferStatus.acFrameStamp.GetInputTimeCode (defaultTimeCode, NTV2_TCINDEX_SDI1);
 			captureData->fAudioBufferSize = inputXferInfo.GetCapturedAudioByteCount ();
 			captureData->fRP188Data = defaultTimeCode;
 			
