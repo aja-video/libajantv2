@@ -3,17 +3,15 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QDebug>
-
 #include "ajatypes.h"
 #include "ntv2enums.h"
 #include "ntv2democommon.h"
 #include "ntv2endian.h"
-
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
-
+#include "ajabase/system/systemtime.h"
 #if defined (AJALinux) || defined (AJAMac)
-#include <arpa/inet.h>
+	#include <arpa/inet.h>
 #endif
 
 using std::endl;
@@ -315,7 +313,7 @@ bool CKonaIpJsonSetup::setupBoard2022(std::string deviceSpec)
     while (!mDevice.IsMBSystemReady())
     {
         cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << endl;
-        mDevice.SleepMs (1000);
+        AJATime::Sleep(1000);
         if (mDevice.IsMBSystemReady ())
         {
             cout << "## NOTE:  Device is ready" << endl;
@@ -519,7 +517,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
     while (!device.IsMBSystemReady())
     {
         cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << endl;
-        device.SleepMs (1000);
+        AJATime::Sleep(1000);
         if (device.IsMBSystemReady ())
         {
             cout << "## NOTE:  Device is ready" << endl;

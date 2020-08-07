@@ -2,13 +2,13 @@
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
-
 #include "ajatypes.h"
 #include "ntv2enums.h"
 #include "ntv2utils.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
 #include "ntv2configts2022.h"
+#include "ajabase/system/systemtime.h"
 
 
 CKonaIpJ2kJsonReader::CKonaIpJ2kJsonReader()
@@ -166,7 +166,7 @@ bool CKonaIpEncoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetu
     while (!mDevice.IsMBSystemReady())
     {
         std::cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << std::endl;
-        mDevice.SleepMs (1000);
+        AJATime::Sleep(1000);
         if (mDevice.IsMBSystemReady ())
         {
             std::cout << "## NOTE:  Device is ready" << std::endl;
@@ -245,7 +245,7 @@ bool CKonaIpDecoderSetup::setupBoard(std::string pDeviceSpec, KonaIPParamJ2KSetu
     while (!mDevice.IsMBSystemReady())
     {
         std::cout << "## NOTE:  Waiting for device to become ready... (Ctrl-C will abort)" << std::endl;
-        mDevice.SleepMs (1000);
+        AJATime::Sleep(1000);
         if (mDevice.IsMBSystemReady ())
         {
             std::cout << "## NOTE:  Device is ready" << std::endl;
