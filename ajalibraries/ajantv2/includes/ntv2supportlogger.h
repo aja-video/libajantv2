@@ -44,7 +44,7 @@ public:
 								Defaults to zero, the first device found.
 		@param[in]	sections	Optionally specifies which sections to include in the log. Defaults to all sections.
 	**/
-    CNTV2SupportLogger(int cardIndex = 0,
+    CNTV2SupportLogger(UWord cardIndex = 0,
                        NTV2SupportLoggerSections sections = NTV2_SupportLoggerSectionsAll);
 
     virtual ~CNTV2SupportLogger();	///< @brief	My default destructor
