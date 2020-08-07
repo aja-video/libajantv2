@@ -13,9 +13,9 @@
 #include "ntv2driverinterface.h"
 
 
-//--------------------------------------------------------------------------------------------------------------------
-//	class CNTV2MacDriverInterface
-//--------------------------------------------------------------------------------------------------------------------
+/**
+	class CNTV2MacDriverInterface
+**/
 class CNTV2MacDriverInterface : public CNTV2DriverInterface
 {
 	/**
@@ -26,81 +26,21 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 							CNTV2MacDriverInterface();	///< @brief	My default constructor.
 		AJA_VIRTUAL			~CNTV2MacDriverInterface();	///< @brief	My destructor.
 
-	// Driver calls
-	AJA_VIRTUAL bool	ReadRegister (const ULWord inRegisterNumber,
-									  ULWord & outValue,
-									  const ULWord inRegisterMask = 0xFFFFFFFF,
-									  const ULWord inRegisterShift = 0x0);
-#if !defined(NTV2_DEPRECATE_14_3)
-	virtual inline NTV2_DEPRECATED_f(bool	ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0x0))
-	{
-		return pOutValue ? ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift) : false;
-	}
-#endif	//	!defined(NTV2_DEPRECATE_14_3)
-	AJA_VIRTUAL bool	WriteRegister( ULWord registerNumber,
-									   ULWord registerValue,
-									   ULWord registerMask = 0xFFFFFFFF,
-									   ULWord registerShift = 0x0 );
+	//	Mac-Specific Implementations of CNTV2DriverInterface Functions
+	AJA_VIRTUAL bool	WriteRegister (const ULWord inRegNum,  const ULWord inValue,  const ULWord inMask = 0xFFFFFFFF,  const ULWord inShift = 0);
+	AJA_VIRTUAL bool	ReadRegister (const ULWord inRegNum,  ULWord & outValue,  const ULWord inMask = 0xFFFFFFFF,  const ULWord inShift = 0);
 
-	AJA_VIRTUAL bool	StartDriver( DriverStartPhase phase );
+	AJA_VIRTUAL bool	StartDriver (DriverStartPhase phase);
 
-	/**
-		@brief		Reserves exclusive use of the AJA device for a given process, preventing other processes on the host
-					from acquiring it until subsequently released.
-		@result		True if successful; otherwise false.
-		@param[in]	inApplicationType	An unsigned 32-bit value that uniquely and globally identifies the calling
-										application or process that is requesting exclusive use of the device.
-		@param[in]	inProcessID			Specifies the OS-specific process identifier that uniquely identifies the
-										running process on the host machine that is requesting exclusive use of the device.
-		@details	This method asks the AJA device driver to reserve exclusive use of the AJA device by the given running host process.
-					The AJA device driver records the "process ID" of the process granted this exclusive access,
-					and also records the 4-byte "application type" that was specified by the caller. This "application
-					type" is interpreted as a four-byte (ASCII) identifier, and is displayed by the AJA Control Panel
-					application to show the device is being used exclusively by the given application.
-					If another host process has already reserved the device, the function will fail and return false.
-		@note		AJA recommends saving the device's NTV2EveryFrameTaskMode at the time AcquireStreamForApplication
-					is called, and restoring it after releasing the device.
-	**/
 	AJA_VIRTUAL bool	AcquireStreamForApplication (ULWord inApplicationType, int32_t inProcessID);
-
-	/**
-		@brief		Releases exclusive use of the AJA device for a given process, permitting other processes to acquire it.
-		@result		True if successful; otherwise false.
-		@param[in]	inApplicationType	A 32-bit value that uniquely and globally identifies the calling application or
-										process that is releasing exclusive use of the device. This value must match the
-										appType that was specified in the prior call to AcquireStreamForApplication.
-		@param[in]	inProcessID			Specifies the OS-specific process identifier that uniquely identifies the running
-										process on the host machine that is releasing exclusive use of the device. This
-										value must match the "process ID" that was specified in the prior call to AcquireStreamForApplication.
-		@details	This method asks the AJA device driver to release exclusive use of the AJA device by the given running host process.
-					The AJA device driver records the "process ID" of the process granted this exclusive access, and
-					also records the 4-byte "application type" that was specified by the caller.
-					This method will fail and return false if the specified application type or process ID values
-					don't match those used in the prior call to AcquireStreamForApplication.
-		@note		AJA recommends saving the device's NTV2EveryFrameTaskMode at the time AcquireStreamForApplication
-					is called, and restoring it after releasing the device.
-	**/
 	AJA_VIRTUAL bool	ReleaseStreamForApplication (ULWord inApplicationType, int32_t inProcessID);
-
 	AJA_VIRTUAL bool	AcquireStreamForApplicationWithReference (ULWord inApplicationType, int32_t inProcessID);
 	AJA_VIRTUAL bool	ReleaseStreamForApplicationWithReference (ULWord inApplicationType, int32_t inProcessID);
-	
-	AJA_VIRTUAL bool	KernelLog( void* dataPtr, UInt32 dataSize );
-
 	AJA_VIRTUAL bool	SetStreamingApplication (const ULWord appType, const int32_t pid);
+	AJA_VIRTUAL bool	GetStreamingApplication (ULWord & outAppType, int32_t & outProcessID);
+	AJA_VIRTUAL bool	SetDefaultDeviceForPID (const int32_t pid);
+	AJA_VIRTUAL bool	IsDefaultDeviceForPID (const int32_t pid);
 
-	/**
-		@brief		Answers whether or not an application is currently using the AJA device, and if so, reports the host process ID.
-		@param[out]	pOutAppFourCC	If non-NULL, specifies a valid pointer to the variable that is to receive the "four CC"
-									identifier of the application that's currently using the AJA device.
-		@param[out]	pOutAppPID		If non-NULL, specifies a valid pointer to the variable that is to receive the host process
-									identifier of the application that's currently using the AJA device.
-		@result		True if successful; otherwise false.
-	**/
-	AJA_VIRTUAL bool	GetStreamingApplication (ULWord * pOutAppFourCC, int32_t * pOutAppPID);
-
-	AJA_VIRTUAL bool	SetDefaultDeviceForPID( int32_t pid );
-	AJA_VIRTUAL bool	IsDefaultDeviceForPID( int32_t pid );
 	AJA_VIRTUAL bool	WaitForInterrupt (const INTERRUPT_ENUMS type,  const ULWord timeout = 50);
 	AJA_VIRTUAL bool	GetInterruptCount (const INTERRUPT_ENUMS eInterrupt, ULWord & outCount);
 	AJA_VIRTUAL bool	WaitForChangeEvent( UInt32 timeout = 0 );
@@ -134,18 +74,22 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 									const ULWord inSegmentCardPitch,
 									const PCHANNEL_P2P_STRUCT & inP2PData);
 
-	AJA_VIRTUAL bool	AutoCirculate( AUTOCIRCULATE_DATA &autoCircData );
+	AJA_VIRTUAL bool	AutoCirculate (AUTOCIRCULATE_DATA & autoCircData);
 	AJA_VIRTUAL bool	NTV2Message (NTV2_HEADER * pInMessage);
-	AJA_VIRTUAL bool	ControlDriverDebugMessages( NTV2_DriverDebugMessageSet /*msgSet*/, bool /*enable*/ ) {return false;}
-	AJA_VIRTUAL bool	RestoreHardwareProcampRegisters( void );
+	AJA_VIRTUAL bool	ControlDriverDebugMessages (NTV2_DriverDebugMessageSet /*msgSet*/, bool /*enable*/) {return false;}
+	AJA_VIRTUAL bool	RestoreHardwareProcampRegisters (void);
 
 	AJA_VIRTUAL bool	SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode);
 	AJA_VIRTUAL bool	GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode);
 
 	AJA_VIRTUAL bool	SystemStatus( void* dataPtr, SystemStatusCode systemStatusCode );
-
+	AJA_VIRTUAL bool	KernelLog( void* dataPtr, UInt32 dataSize );
 	AJA_VIRTUAL bool	ConfigureInterrupt( bool /*bEnable*/, INTERRUPT_ENUMS /*eInterruptType*/ ) {return true;}
 
+#if !defined(NTV2_DEPRECATE_14_3)
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0x0))
+												{return pOutValue ? ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift) : false;}
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 #if !defined(NTV2_DEPRECATE_15_6)
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetUserModeDebugLevel (ULWord  level));	///< @deprecated	Obsolete starting after SDK 15.5.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetUserModeDebugLevel (ULWord* level));	///< @deprecated	Obsolete starting after SDK 15.5.
@@ -163,6 +107,7 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetQuickTimeTime (UInt32 *time, UInt32 *scale));	//	Formerly called "GetTime" which shadowed CNTV2KonaFlashProgram::GetTime
 #endif	//	!defined(NTV2_DEPRECATE_15_6)
 #if !defined(NTV2_DEPRECATE_16_0)
+	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetStreamingApplication(ULWord * pAppType, int32_t * pPID))	{return pAppType && pPID ? GetStreamingApplication(*pAppType,*pPID) : false;}	///< @deprecated	Deprecated starting in SDK 16.0.
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool SystemControl(void* dataPtr, SystemControlCode systemControlCode));		///< @deprecated	Obsolete starting in SDK 16.0.
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void Sleep(int))		 	{}			///< @deprecated	Obsolete starting in SDK 16.0.
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapFrameBuffers(void));			///< @deprecated	Obsolete starting in SDK 16.0.

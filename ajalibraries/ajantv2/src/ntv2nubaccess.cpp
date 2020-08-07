@@ -580,13 +580,13 @@ int NTV2NubRPCAPI::NTV2OpenRemote (const UWord inDeviceIndex)
 						break;
 			
 				default: // got some data.  Open response packet?
-						if (deNBOifyNTV2NubPkt(pPkt, numbytes)) 
+						if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
 						{
 							if (isNubOpenRespPacket(pPkt)) 
 							{
 								// printf("Got an open response packet\n");
 								NTV2BoardOpenInfo * pBoardOpenInfo;
-								pBoardOpenInfo = (NTV2BoardOpenInfo *)getNubPktPayload(pPkt);
+								pBoardOpenInfo = reinterpret_cast<NTV2BoardOpenInfo*>(getNubPktPayload(pPkt));
 								_remoteHandle = LWord(ntohl(pBoardOpenInfo->handle));
 								// printf("Handle = %d\n", _remoteHandle);
 								if (Handle() == LWord(INVALID_NUB_HANDLE))
@@ -659,7 +659,7 @@ int NTV2NubRPCAPI::NTV2ReadRegisterRemote (const ULWord regNum, ULWord & outRegV
 							break;
 
 				default: // got some data.  Open response packet?
-						if (deNBOifyNTV2NubPkt(pPkt, numbytes)) 
+						if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
 						{
 							if (isNubReadRegisterRespPacket(pPkt)) 
 							{
@@ -748,7 +748,7 @@ int NTV2NubRPCAPI::NTV2WriteRegisterRemote (const ULWord regNum, const ULWord re
 							break;
 
 				default: // got some data.  Open response packet?
-						if (deNBOifyNTV2NubPkt(pPkt, numbytes)) 
+						if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
 						{
 							if (isNubWriteRegisterRespPacket(pPkt)) 
 							{
@@ -835,7 +835,7 @@ int NTV2NubRPCAPI::NTV2AutoCirculateRemote (AUTOCIRCULATE_DATA & autoCircData)
 							break;
 			
 				default: // got some data.  Autocirculate response packet?
-						if (deNBOifyNTV2NubPkt(pPkt, numbytes)) 
+						if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
 						{
 							if (isNubGetAutoCirculateRespPacket(pPkt)) 
 							{
@@ -946,7 +946,7 @@ int NTV2NubRPCAPI::NTV2WaitForInterruptRemote (const INTERRUPT_ENUMS eInterrupt,
 							break;
 			
 				default:	// got some data.  Open response packet?
-							if (deNBOifyNTV2NubPkt(pPkt, numbytes)) 
+							if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
 							{
 								if (isNubWaitForInterruptRespPacket(pPkt)) 
 								{
@@ -1033,7 +1033,7 @@ int NTV2NubRPCAPI::NTV2DriverGetBitFileInformationRemote (BITFILE_INFO_STRUCT & 
 							break;
 			
 				default:	// got some data.  Open response packet?
-							if (deNBOifyNTV2NubPkt(pPkt, numbytes)) 
+							if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
 							{
 								if (isNubDriverGetBitFileInformationRespPacket(pPkt)) 
 								{
@@ -1123,7 +1123,7 @@ int NTV2NubRPCAPI::NTV2DriverGetBuildInformationRemote (BUILD_INFO_STRUCT & outB
 							break;
 			
 				default:	// got some data.  Open response packet?
-							if (deNBOifyNTV2NubPkt(pPkt, numbytes)) 
+							if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
 							{
 								if (isNubDriverGetBuildInformationRespPacket((NTV2NubPkt *)pPkt)) 
 								{
@@ -1316,13 +1316,13 @@ int NTV2NubRPCAPI::NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULWord & o
 							if (numbytestotal <  maxPktFetchsize)
 								goto defrag;
 
-							if (deNBOifyNTV2NubPkt(pPkt, numbytestotal)) 
+							if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytestotal))) 
 							{
 								if (isNubReadRegisterMultiRespPacket((NTV2NubPkt *)pPkt)) 
 								{
 									// printf("Got a read register multi response packet\n");
 									NTV2ReadWriteMultiRegisterPayload * pRWMRP;
-									pRWMRP = (NTV2ReadWriteMultiRegisterPayload *)getNubPktPayload(pPkt);
+									pRWMRP = reinterpret_cast<NTV2ReadWriteMultiRegisterPayload*>(getNubPktPayload(pPkt));
 									// Did card go away?
 									LWord hdl = ntohl(pRWMRP->payloadHeader.handle);
 									// printf("hdl = %d\n", hdl);
@@ -1484,7 +1484,7 @@ NTV2RPCAPI * NTV2RPCAPI::MakeNTV2FakeDevice (const string & inSpec, const std::s
 }
 
 int NTV2SoftwareDevice::NTV2Connect (const string & inName, const UWord inNum, const string & inQuery)
-{	(void) inNum;
+{	(void) inNum; (void) inQuery;
 	if (inName != FAKE_DEVICE_SHARE_NAME)
 		return -1;	//	Wrong name
 	_hostname = inName;
@@ -1666,7 +1666,7 @@ int NTV2SoftwareDevice::NTV2AutoCirculateRemote (AUTOCIRCULATE_DATA & autoCircDa
 }
 
 int NTV2SoftwareDevice::NTV2WaitForInterruptRemote (const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs)
-{
+{	(void)eInterrupt; (void)timeOutMs;
 	AJAAutoLock lock(&sLock);
 	if (!spFakeDevice)
 		return -1;
@@ -1690,13 +1690,13 @@ int NTV2SoftwareDevice::NTV2DriverGetBuildInformationRemote (BUILD_INFO_STRUCT &
 
 int NTV2SoftwareDevice::NTV2DownloadTestPatternRemote (const NTV2Channel channel, const NTV2PixelFormat testPatternFBF,
 														const UWord signalMask, const bool testPatDMAEnb, const ULWord testPatNum)
-{
+{	(void)channel; (void)testPatternFBF;(void)signalMask;(void)testPatDMAEnb;(void)testPatNum;
 	NTV2TestPatternGen foo;
 	return -1;
 }
 
 int NTV2SoftwareDevice::NTV2ReadRegisterMultiRemote (const ULWord numRegs, ULWord & outFailedRegister, NTV2RegInfo outRegs[])
-{
+{	(void)numRegs;(void)outFailedRegister;(void)outRegs;
 	return -1;
 }
 

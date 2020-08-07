@@ -1047,7 +1047,7 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 //--------------------------------------------------------------------------------------------------------------------
 //	Application acquire and release stuff
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2DriverInterface::AcquireStreamForApplicationWithReference (ULWord appCode, int32_t pid)
+bool CNTV2DriverInterface::AcquireStreamForApplicationWithReference (const ULWord inAppCode, const int32_t inProcessID)
 {
 	ULWord currentCode(0), currentPID(0);
 	if (!ReadRegister(kVRegApplicationCode, currentCode) || !ReadRegister(kVRegApplicationPID, currentPID))
@@ -1068,23 +1068,22 @@ bool CNTV2DriverInterface::AcquireStreamForApplicationWithReference (ULWord appC
 		if (!currentPID)
 		{
 			// Nothing has the board
-			if (!WriteRegister(kVRegApplicationCode, appCode))
+			if (!WriteRegister(kVRegApplicationCode, inAppCode))
 				return false;
 			// Just in case this is not zero
 			WriteRegister(kVRegAcquireLinuxReferenceCount, 0);
 			WriteRegister(kVRegAcquireLinuxReferenceCount, 1);
-			return WriteRegister(kVRegApplicationPID, ULWord(pid));
+			return WriteRegister(kVRegApplicationPID, ULWord(inProcessID));
 		}
-		else if (currentCode == appCode  &&  currentPID == ULWord(pid))
+		else if (currentCode == inAppCode  &&  currentPID == ULWord(inProcessID))
 			return WriteRegister(kVRegAcquireLinuxReferenceCount, 1);	// Process already acquired, so bump the count
 		// Someone else has the board, so wait and try again
 		AJATime::Sleep(50);
 	}
-
 	return false;
 }
 
-bool CNTV2DriverInterface::ReleaseStreamForApplicationWithReference (ULWord appCode, int32_t pid)
+bool CNTV2DriverInterface::ReleaseStreamForApplicationWithReference (const ULWord inAppCode, const int32_t inProcessID)
 {
 	ULWord currentCode(0), currentPID(0), currentCount(0);
 	if (!ReadRegister(kVRegApplicationCode, currentCode)
@@ -1092,24 +1091,24 @@ bool CNTV2DriverInterface::ReleaseStreamForApplicationWithReference (ULWord appC
 		|| !ReadRegister(kVRegAcquireLinuxReferenceCount, currentCount))
 			return false;
 
-	if (currentCode == appCode  &&  currentPID == ULWord(pid))
+	if (currentCode == inAppCode  &&  currentPID == ULWord(inProcessID))
 	{
 		if (currentCount > 1)
 			return WriteRegister(kVRegReleaseLinuxReferenceCount, 1);
 		if (currentCount == 1)
-			return ReleaseStreamForApplication(appCode, pid);
+			return ReleaseStreamForApplication(inAppCode, inProcessID);
 		return true;
 	}
 	return false;
 }
 
-bool CNTV2DriverInterface::AcquireStreamForApplication (ULWord appCode, int32_t pid)
+bool CNTV2DriverInterface::AcquireStreamForApplication (const ULWord inAppCode, const int32_t inProcessID)
 {
 	// Loop for a while trying to acquire the board
 	for (int count(0);  count < 20;  count++)
 	{
-		if (WriteRegister(kVRegApplicationCode, appCode))
-			return WriteRegister(kVRegApplicationPID, ULWord(pid));
+		if (WriteRegister(kVRegApplicationCode, inAppCode))
+			return WriteRegister(kVRegApplicationPID, ULWord(inProcessID));
 		AJATime::Sleep(50);
 	}
 
@@ -1124,19 +1123,18 @@ bool CNTV2DriverInterface::AcquireStreamForApplication (ULWord appCode, int32_t 
 		ReleaseStreamForApplication (currentCode, int32_t(currentPID));
 		for (int count(0);  count < 20;  count++)
 		{
-			if (WriteRegister(kVRegApplicationCode, appCode))
-				return WriteRegister(kVRegApplicationPID, ULWord(pid));
+			if (WriteRegister(kVRegApplicationCode, inAppCode))
+				return WriteRegister(kVRegApplicationPID, ULWord(inProcessID));
 			AJATime::Sleep(50);
 		}
 	}
-
-	// Currect owner is alive, so don't interfere
+	// Current owner is alive, so don't interfere
 	return false;
 }
 
-bool CNTV2DriverInterface::ReleaseStreamForApplication (ULWord appCode, int32_t pid)
-{	(void)appCode;
-	if (WriteRegister(kVRegReleaseApplication, ULWord(pid)))
+bool CNTV2DriverInterface::ReleaseStreamForApplication (const ULWord inAppCode, const int32_t inProcessID)
+{	(void)inAppCode;	//	Don't care which appCode
+	if (WriteRegister(kVRegReleaseApplication, ULWord(inProcessID)))
 	{
 		WriteRegister(kVRegAcquireLinuxReferenceCount, 0);
 		return true;	// We don't care if the above call failed
@@ -1144,30 +1142,18 @@ bool CNTV2DriverInterface::ReleaseStreamForApplication (ULWord appCode, int32_t 
 	return false;
 }
 
-bool CNTV2DriverInterface::SetStreamingApplication (ULWord appCode, int32_t pid)
+bool CNTV2DriverInterface::SetStreamingApplication (const ULWord inAppCode, const int32_t inProcessID)
 {
-	if (!WriteRegister(kVRegForceApplicationCode, appCode))
+	if (!WriteRegister(kVRegForceApplicationCode, inAppCode))
 		return false;
-	return WriteRegister(kVRegForceApplicationPID, ULWord(pid));
+	return WriteRegister(kVRegForceApplicationPID, ULWord(inProcessID));
 }
 
-bool CNTV2DriverInterface::GetStreamingApplication (ULWord * appCode, int32_t * pid)
+bool CNTV2DriverInterface::GetStreamingApplication (ULWord & outAppType, int32_t & outProcessID)
 {
-	if (!(appCode  &&  ReadRegister(kVRegApplicationCode, *appCode)))
+	if (!ReadRegister(kVRegApplicationCode, outAppType))
 		return false;
-	return pid  &&  CNTV2DriverInterface::ReadRegister(kVRegApplicationPID, *pid);
-}
-
-bool CNTV2DriverInterface::SetDefaultDeviceForPID (int32_t pid)
-{	(void)pid;
-	//stub
-	return false;
-}
-
-bool CNTV2DriverInterface::IsDefaultDeviceForPID( int32_t pid )
-{	(void)pid;
-	//stub
-	return false;
+	return CNTV2DriverInterface::ReadRegister(kVRegApplicationPID, outProcessID);
 }
 
 //	This function is used by the retail ControlPanel.

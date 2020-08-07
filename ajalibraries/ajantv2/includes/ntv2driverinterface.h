@@ -419,51 +419,102 @@ class AJAExport CNTV2DriverInterface
 		@name	Device Ownership
 	**/
 	///@{
-		AJA_VIRTUAL bool AcquireStreamForApplicationWithReference( ULWord appType, int32_t pid );
-		AJA_VIRTUAL bool ReleaseStreamForApplicationWithReference( ULWord appType, int32_t pid );
+		/**
+			@brief		A reference-counted version of CNTV2DriverInterface::AcquireStreamForApplication useful for
+						process groups.
+			@result		True if successful; otherwise false.
+			@param[in]	inAppType		A 32-bit value that uniquely and globally identifies the calling application
+										or process that is requesting exclusive use of the device.
+			@param[in]	inProcessID		Specifies the OS-specific process identifier that uniquely identifies the running
+										process on the host machine that is requesting exclusive use of the device.
+			@details	This method reserves exclusive use of the AJA device by the given running host process,
+						recording both the "process ID" and 4-byte "application type" specified by the caller, and if
+						already reserved for the given application, increments a reference counter. If a different host
+						process has already reserved the device, the function will fail.
+			@note		AJA recommends saving the device's ::NTV2EveryFrameTaskMode when this function is called, and
+						restoring the task mode after releasing the device (when CNTV2DriverInterface::ReleaseStreamForApplicationWithReference
+						is called).
+			@note		Each call to CNTV2DriverInterface::AcquireStreamForApplicationWithReference should be balanced by
+						the same number of calls to CNTV2DriverInterface::ReleaseStreamForApplicationWithReference.
+		**/
+		AJA_VIRTUAL bool AcquireStreamForApplicationWithReference (const ULWord inAppType, const int32_t inProcessID);
+
+		/**
+			@brief		A reference-counted version of CNTV2DriverInterface::ReleaseStreamForApplication useful for
+						process groups.
+			@result		True if successful; otherwise false.
+			@param[in]	inAppType		A 32-bit value that uniquely and globally identifies the calling application
+										or process that is releasing exclusive use of the device.
+			@param[in]	inProcessID		Specifies the OS-specific process identifier that uniquely identifies the running
+										process on the host machine that is releasing exclusive use of the device.
+			@details	This method releases exclusive use of the AJA device by the given host process once the reference
+						count goes to zero. This method will fail if the specified application type or process ID values
+						don't match those used in the prior call to CNTV2DriverInterface::AcquireStreamForApplication.
+			@note		AJA recommends restoring the device's original ::NTV2EveryFrameTaskMode as it was when
+						CNTV2DriverInterface::AcquireStreamForApplicationWithReference was first called, and restoring it
+						after the final call to this function (when the device has truly been released).
+			@note		Each call to CNTV2DriverInterface::AcquireStreamForApplicationWithReference should be balanced by
+						the same number of calls to CNTV2DriverInterface::ReleaseStreamForApplicationWithReference.
+		**/
+		AJA_VIRTUAL bool ReleaseStreamForApplicationWithReference (const ULWord inAppType, const int32_t inProcessID);
 
 		/**
 			@brief		Reserves exclusive use of the AJA device for a given process, preventing other processes on the host
 						from acquiring it until subsequently released.
 			@result		True if successful; otherwise false.
-			@param[in]	appType			A 32-bit value that uniquely and globally identifies the calling application
+			@param[in]	inAppType		A 32-bit value that uniquely and globally identifies the calling application
 										or process that is requesting exclusive use of the device.
-			@param[in]	pid				Specifies the OS-specific process identifier that uniquely identifies the running
+			@param[in]	inProcessID		Specifies the OS-specific process identifier that uniquely identifies the running
 										process on the host machine that is requesting exclusive use of the device.
 			@details	This method reserves exclusive use of the AJA device by the given running host process.
-						The AJA device records the "process ID" of the process granted this exclusive access,
-						and also records the 4-byte "application type" that was specified by the caller. This "application
-						type" is interpreted as a four-byte (ASCII) identifier, and is displayed by the AJA Control Panel
-						application to show the device is being used exclusively by the given application.
-						If another host process has already reserved the device, the function will fail and return false.
-			@note		AJA recommends saving the device's NTV2EveryFrameTaskMode at the time AcquireStreamForApplication
-						is called, and restoring it after releasing the device.
+						The AJA device records both the "process ID" and 4-byte "application type". If another host process
+						has already reserved the device, this function will fail.
+			@note		AJA recommends saving the device's ::NTV2EveryFrameTaskMode when this function is called, and
+						restoring it after CNTV2DriverInterface::ReleaseStreamForApplication is called to release the device.
+			@note		A call to CNTV2DriverInterface::AcquireStreamForApplication should be balanced by a call to
+						CNTV2DriverInterface::ReleaseStreamForApplication.
 		**/
-		AJA_VIRTUAL bool AcquireStreamForApplication( ULWord appType, int32_t pid );
+		AJA_VIRTUAL bool AcquireStreamForApplication (const ULWord inAppType, const int32_t inProcessID);
 
 		/**
 			@brief		Releases exclusive use of the AJA device for a given process, permitting other processes to acquire it.
 			@result		True if successful; otherwise false.
-			@param[in]	appType			A 32-bit value that uniquely and globally identifies the calling application or
-										process that is releasing exclusive use of the device. This value must match the
-										appType that was specified in the prior call to AcquireStreamForApplication.
-			@param[in]	pid				Specifies the OS-specific process identifier that uniquely identifies the running
-										process on the host machine that is releasing exclusive use of the device. This
-										value must match the "process ID" that was specified in the prior call to AcquireStreamForApplication.
-			@details	This method releases exclusive use of the AJA device by the given running host process.
-						The AJA device records the "process ID" of the process granted this exclusive access, and
-						also records the 4-byte "application type" that was specified by the caller.
-						This method will fail and return false if the specified application type or process ID values
-						don't match those used in the prior call to AcquireStreamForApplication.
-			@note		AJA recommends saving the device's NTV2EveryFrameTaskMode at the time AcquireStreamForApplication
-						is called, and restoring it after releasing the device.
+			@param[in]	inAppType		A 32-bit value that uniquely and globally identifies the calling application
+										or process that is requesting exclusive use of the device.
+			@param[in]	inProcessID		Specifies the OS-specific process identifier that uniquely identifies the running
+										process on the host machine that is requesting exclusive use of the device.
+			@details	This method releases exclusive use of the AJA device by the given host process. This method will
+						fail if the specified application type or process ID values don't match those used in the prior
+						call to CNTV2DriverInterface::AcquireStreamForApplication.
+			@note		AJA recommends saving the device's ::NTV2EveryFrameTaskMode at the time
+						CNTV2DriverInterface::AcquireStreamForApplication is called, and restoring it after releasing
+						the device.
+			@note		A call to CNTV2DriverInterface::AcquireStreamForApplication should be balanced by a call to
+						CNTV2DriverInterface::ReleaseStreamForApplication.
 		**/
-		AJA_VIRTUAL bool ReleaseStreamForApplication( ULWord appType, int32_t pid );
+		AJA_VIRTUAL bool ReleaseStreamForApplication (const ULWord inAppType, const int32_t inProcessID);
 	
-		AJA_VIRTUAL bool SetStreamingApplication( ULWord appType, int32_t pid );
-		AJA_VIRTUAL bool GetStreamingApplication( ULWord *appType, int32_t  *pid );
-		AJA_VIRTUAL bool SetDefaultDeviceForPID( int32_t pid );
-		AJA_VIRTUAL bool IsDefaultDeviceForPID( int32_t pid );
+		AJA_VIRTUAL bool SetStreamingApplication (const ULWord inAppType, const int32_t inProcessID);
+		AJA_VIRTUAL bool GetStreamingApplication (ULWord & outAppType, int32_t & outProcessID);
+
+		/**
+			@brief		Associates this device as the default or "native" device to use with the given host process.
+			@result		True if successful; otherwise false.
+			@param[in]	inProcessID		Specifies the OS-specific process identifier that uniquely identifies a running
+										process on the host machine.
+			@note		Not implemented on Windows or Linux.
+			@see		CNTV2DriverInterface::IsDefaultDeviceForPID
+		**/
+		AJA_VIRTUAL bool SetDefaultDeviceForPID (const int32_t inProcessID)		{(void)inProcessID; return false;}
+
+		/**
+			@return		True if the given host process is associated with this device;  otherwise false.
+			@param[in]	inProcessID		Specifies the OS-specific process identifier that uniquely identifies a running
+										process on the host machine.
+			@note		Not implemented on Windows or Linux.
+			@see		CNTV2DriverInterface::SetDefaultDeviceForPID
+		**/
+		AJA_VIRTUAL bool IsDefaultDeviceForPID (const int32_t inProcessID)		{(void)inProcessID; return false;}
 	///@}
 
 		AJA_VIRTUAL bool			ReadRP188Registers (const NTV2Channel inChannel, RP188_STRUCT * pRP188Data);

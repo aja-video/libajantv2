@@ -3,7 +3,8 @@
 	@brief		Implementation of CNTV2TestPattern class.
 	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
-
+#include "ajatypes.h"
+#if defined(CNTV2TESTPATTERN)
 #include "ntv2card.h"
 #include "ntv2utils.h"
 #include "ntv2formatdescriptor.h"
@@ -2142,7 +2143,7 @@ void CNTV2Card::DownloadSegmentedTestPattern(SegmentTestPatternData* pTestPatter
 		return;	//	Unsupported video standard/framebuffer format
 
 	// determine where we're going to render the frame to
-	ULWord *hostBuff = NULL;
+	NTV2_POINTER hostBuff(0);
 	ULWord *currentAddress;
 	if (_clientDownloadBuffer)
 	{
@@ -2151,18 +2152,21 @@ void CNTV2Card::DownloadSegmentedTestPattern(SegmentTestPatternData* pTestPatter
 	}
 	else if (_bDMAtoBoard)
 	{
-		hostBuff = new ULWord[linePitch*numLines];			// render the test pattern to a host buffer, then DMA it
-		assert(hostBuff);
-		currentAddress = hostBuff;
+		hostBuff.Allocate(formatDescriptor.GetTotalBytes());	// render the test pattern to a host buffer, then DMA it
+		NTV2_ASSERT(hostBuff);
+		currentAddress = reinterpret_cast<ULWord*>(hostBuff.GetHostAddress(0));
 		baseAddress = currentAddress;
 	}
+#if defined(NTV2_DEPRECATE_16_0)
+	else NTV2_ASSERT(false && "GetBaseAddress/PIO deprecated");
+#else
 	else
 	{
 		GetBaseAddress(_channel,&baseAddress);
-		assert (baseAddress);
+		NTV2_ASSERT(baseAddress);
 		currentAddress = baseAddress;
 	}
-
+#endif !defined(NTV2_DEPRECATE_16_0)
 
 	// Assume 1080 format
 	// Start with Black.
@@ -2176,123 +2180,117 @@ void CNTV2Card::DownloadSegmentedTestPattern(SegmentTestPatternData* pTestPatter
 		// copy to formatted line to the frame buffer
 		CopyMemory(currentAddress,packedBuffer,linePitch*4);
 		currentAddress += linePitch;
-
 	}	
 
-	for ( UWord segmentCount = 0; segmentCount < NumTestPatternSegments; segmentCount++ )
+	for (UWord segmentCount = 0;  segmentCount < NumTestPatternSegments;  segmentCount++)
 	{
 		SegmentDescriptor *	segmentDescriptor = &pTestPatternSegmentData->segmentDescriptor[standard][segmentCount];
 		const ULWord *		data = segmentDescriptor->data;
-		if ( data != NULL )
+		if (!data)
+			continue;
+		UWord startLine = segmentDescriptor->startLine;
+		UWord nLines = (segmentDescriptor->endLine - startLine) + 1;
+		currentAddress = baseAddress + ((firstActiveLine+startLine)*linePitch);
+		// go through hoops to mask out undesired components
+		memcpy(packedBuffer,data,dataLinePitch*4);
+		// We are using the 1920 standard test patterns for 2k 
+		if (numPixels == HD_NUMCOMPONENTPIXELS_2K)
+			::UnpackLine_10BitYUVto16BitYUV(packedBuffer, unPackedBuffer, HD_NUMCOMPONENTPIXELS_1080);
+		else
+			::UnpackLine_10BitYUVto16BitYUV(packedBuffer, unPackedBuffer, numPixels);
+
+		if ( _signalMask != NTV2_SIGNALMASK_ALL)
+			MaskYCbCrLine(unPackedBuffer, _signalMask , numPixels);
+				
+		bool  bIsSD;
+		IsSDStandard(bIsSD);
+		switch(_fbFormat) 
 		{
-			UWord startLine = segmentDescriptor->startLine;
-			UWord nLines = (segmentDescriptor->endLine - startLine) + 1;
-			currentAddress = baseAddress + ((firstActiveLine+startLine)*linePitch);
-			// go through hoops to mask out undesired components
-			memcpy(packedBuffer,data,dataLinePitch*4);
-			// We are using the 1920 standard test patterns for 2k 
-			if (numPixels == HD_NUMCOMPONENTPIXELS_2K)
-				::UnpackLine_10BitYUVto16BitYUV(packedBuffer, unPackedBuffer, HD_NUMCOMPONENTPIXELS_1080);
-			else
-				::UnpackLine_10BitYUVto16BitYUV(packedBuffer, unPackedBuffer, numPixels);
-
-			if ( _signalMask != NTV2_SIGNALMASK_ALL)
-				MaskYCbCrLine(unPackedBuffer, _signalMask , numPixels);
-					
-            bool  bIsSD;
-            IsSDStandard(bIsSD);
-			switch(_fbFormat) 
-			{
-	            case NTV2_FBF_10BIT_YCBCR:
-		            ::PackLine_16BitYUVto10BitYUV(unPackedBuffer, packedBuffer,numPixels);
-                    break;
-				case NTV2_FBF_8BIT_YCBCR:
-					ConvertLineto8BitYCbCr(unPackedBuffer,(UByte*)packedBuffer,numPixels);
-					break;
-				case NTV2_FBF_ARGB:
-					ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD);
-					break;
-				case NTV2_FBF_RGBA:
-					ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD);
-					ConvertARGBYCbCrToRGBA((UByte*)packedBuffer,numPixels);
-					break;
-				case NTV2_FBF_10BIT_RGB:
-					ConvertLineto10BitRGB(unPackedBuffer,(RGBAlpha10BitPixel*)packedBuffer,numPixels, bIsSD);
-					PackRGB10BitFor10BitRGB((RGBAlpha10BitPixel*)packedBuffer,numPixels);
-					break;
-				case NTV2_FBF_10BIT_RGB_PACKED:
-					ConvertLineto10BitRGB(unPackedBuffer,(RGBAlpha10BitPixel*)packedBuffer,numPixels, bIsSD);
-					PackRGB10BitFor10BitRGBPacked((RGBAlpha10BitPixel*)packedBuffer,numPixels);
-					break;
-				case NTV2_FBF_8BIT_YCBCR_YUY2:
-					ConvertLineto8BitYCbCr(unPackedBuffer,(UByte*)packedBuffer,numPixels);
-					Convert8BitYCbCrToYUY2((UByte*)packedBuffer,numPixels);
-					break;
-				case NTV2_FBF_ABGR:
-					ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD);
-					ConvertARGBYCbCrToABGR((UByte*)packedBuffer,numPixels);
-					break;
-				case NTV2_FBF_10BIT_DPX:
-					ConvertLineto10BitRGB(unPackedBuffer,(RGBAlpha10BitPixel*)packedBuffer,numPixels, bIsSD);
-					PackRGB10BitFor10BitDPX((RGBAlpha10BitPixel*)packedBuffer,numPixels);
-					break;
-				case NTV2_FBF_10BIT_YCBCR_DPX:
-					::PackLine_16BitYUVto10BitYUV(unPackedBuffer, packedBuffer,numPixels);
-					RePackLineDataForYCbCrDPX(packedBuffer,linePitch);
-					break;
-				case NTV2_FBF_8BIT_DVCPRO:
-				case NTV2_FBF_8BIT_HDV:
-					// need to squeeze test pattern to # of pixels.
-					ReSampleYCbCrSampleLine((Word*)unPackedBuffer,(Word*)unPackedBuffer,numPixels,numOutputPixels);
-					ConvertLineto8BitYCbCr(unPackedBuffer,(UByte*)packedBuffer,numOutputPixels);
-					break;
-				case NTV2_FBF_24BIT_RGB:
-					ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD);
-					ConvertARGBToRGB((UByte*)packedBuffer ,(UByte *) packedBuffer, numPixels);
-					break;
-				case NTV2_FBF_24BIT_BGR:
-					ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD);
-					ConvertARGBToBGR((UByte*)packedBuffer ,(UByte *) packedBuffer, numPixels);
-					break;
-				case NTV2_FBF_10BIT_YCBCRA:
-					ConvertLineto10BitYCbCrA(unPackedBuffer,packedBuffer,numPixels);
-					break;
-                case NTV2_FBF_10BIT_DPX_LE:
-					ConvertLineto10BitRGB(unPackedBuffer,(RGBAlpha10BitPixel*)packedBuffer,numPixels, bIsSD);
-					PackRGB10BitFor10BitDPX((RGBAlpha10BitPixel*)packedBuffer,numPixels,false);
-					break;
-				case NTV2_FBF_48BIT_RGB:
-					ConvertLineto16BitRGB(unPackedBuffer,(RGBAlpha16BitPixel*)packedBuffer,numPixels, bIsSD);
-					Convert16BitARGBTo16BitRGB((RGBAlpha16BitPixel*)packedBuffer ,(UWord *) packedBuffer, numPixels);
-					break;
-				case NTV2_FBF_12BIT_RGB_PACKED:
-					ConvertLineto16BitRGB(unPackedBuffer,(RGBAlpha16BitPixel*)packedBuffer,numPixels, bIsSD);
-					Convert16BitARGBTo12BitRGBPacked((RGBAlpha16BitPixel*)packedBuffer ,(UByte *) packedBuffer, numPixels);
-					break;
-				default:	return;	//	Unsupported framebuffer standard requested
-			}
-			
-			for ( UWord lineCount = 0; lineCount < nLines; lineCount++ )
-			{
-				CopyMemory(currentAddress,packedBuffer,linePitch*4);
-				currentAddress += linePitch;
-			}
-
+			case NTV2_FBF_10BIT_YCBCR:
+				::PackLine_16BitYUVto10BitYUV(unPackedBuffer, packedBuffer,numPixels);
+				break;
+			case NTV2_FBF_8BIT_YCBCR:
+				ConvertLineto8BitYCbCr(unPackedBuffer,(UByte*)packedBuffer,numPixels);
+				break;
+			case NTV2_FBF_ARGB:
+				ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD);
+				break;
+			case NTV2_FBF_RGBA:
+				ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD);
+				ConvertARGBYCbCrToRGBA((UByte*)packedBuffer,numPixels);
+				break;
+			case NTV2_FBF_10BIT_RGB:
+				ConvertLineto10BitRGB(unPackedBuffer,(RGBAlpha10BitPixel*)packedBuffer,numPixels, bIsSD);
+				PackRGB10BitFor10BitRGB((RGBAlpha10BitPixel*)packedBuffer,numPixels);
+				break;
+			case NTV2_FBF_10BIT_RGB_PACKED:
+				ConvertLineto10BitRGB(unPackedBuffer,(RGBAlpha10BitPixel*)packedBuffer,numPixels, bIsSD);
+				PackRGB10BitFor10BitRGBPacked((RGBAlpha10BitPixel*)packedBuffer,numPixels);
+				break;
+			case NTV2_FBF_8BIT_YCBCR_YUY2:
+				ConvertLineto8BitYCbCr(unPackedBuffer,(UByte*)packedBuffer,numPixels);
+				Convert8BitYCbCrToYUY2((UByte*)packedBuffer,numPixels);
+				break;
+			case NTV2_FBF_ABGR:
+				ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD);
+				ConvertARGBYCbCrToABGR((UByte*)packedBuffer,numPixels);
+				break;
+			case NTV2_FBF_10BIT_DPX:
+				ConvertLineto10BitRGB(unPackedBuffer,(RGBAlpha10BitPixel*)packedBuffer,numPixels, bIsSD);
+				PackRGB10BitFor10BitDPX((RGBAlpha10BitPixel*)packedBuffer,numPixels);
+				break;
+			case NTV2_FBF_10BIT_YCBCR_DPX:
+				::PackLine_16BitYUVto10BitYUV(unPackedBuffer, packedBuffer,numPixels);
+				RePackLineDataForYCbCrDPX(packedBuffer,linePitch);
+				break;
+			case NTV2_FBF_8BIT_DVCPRO:
+			case NTV2_FBF_8BIT_HDV:
+				// need to squeeze test pattern to # of pixels.
+				ReSampleYCbCrSampleLine((Word*)unPackedBuffer,(Word*)unPackedBuffer,numPixels,numOutputPixels);
+				ConvertLineto8BitYCbCr(unPackedBuffer,(UByte*)packedBuffer,numOutputPixels);
+				break;
+			case NTV2_FBF_24BIT_RGB:
+				ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD);
+				ConvertARGBToRGB((UByte*)packedBuffer ,(UByte *) packedBuffer, numPixels);
+				break;
+			case NTV2_FBF_24BIT_BGR:
+				ConvertLinetoRGB(unPackedBuffer,(RGBAlphaPixel*)packedBuffer,numPixels, bIsSD);
+				ConvertARGBToBGR((UByte*)packedBuffer ,(UByte *) packedBuffer, numPixels);
+				break;
+			case NTV2_FBF_10BIT_YCBCRA:
+				ConvertLineto10BitYCbCrA(unPackedBuffer,packedBuffer,numPixels);
+				break;
+			case NTV2_FBF_10BIT_DPX_LE:
+				ConvertLineto10BitRGB(unPackedBuffer,(RGBAlpha10BitPixel*)packedBuffer,numPixels, bIsSD);
+				PackRGB10BitFor10BitDPX((RGBAlpha10BitPixel*)packedBuffer,numPixels,false);
+				break;
+			case NTV2_FBF_48BIT_RGB:
+				ConvertLineto16BitRGB(unPackedBuffer,(RGBAlpha16BitPixel*)packedBuffer,numPixels, bIsSD);
+				Convert16BitARGBTo16BitRGB((RGBAlpha16BitPixel*)packedBuffer ,(UWord *) packedBuffer, numPixels);
+				break;
+			case NTV2_FBF_12BIT_RGB_PACKED:
+				ConvertLineto16BitRGB(unPackedBuffer,(RGBAlpha16BitPixel*)packedBuffer,numPixels, bIsSD);
+				Convert16BitARGBTo12BitRGBPacked((RGBAlpha16BitPixel*)packedBuffer ,(UByte *) packedBuffer, numPixels);
+				break;
+			default:	return;	//	Unsupported framebuffer standard requested
 		}
-	}
-	
-	// DMA the resulting frame to Kona memory
-	if (_bDMAtoBoard && hostBuff != NULL)
-	{
-			// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
-		ULWord pciAccessFrame;
-		GetPCIAccessFrame (_channel, pciAccessFrame);
-		if ( pciAccessFrame > GetNumFrameBuffers())
-			pciAccessFrame = 0;
-
-		DMAWriteFrame (pciAccessFrame, hostBuff, (numLines * linePitch * 4));
 		
-		delete [] hostBuff;
+		for ( UWord lineCount = 0; lineCount < nLines; lineCount++ )
+		{
+			CopyMemory(currentAddress,packedBuffer,linePitch*4);
+			currentAddress += linePitch;
+		}
+	}	//	for each segment
+	
+	// DMA the resulting frame to device memory
+	if (_bDMAtoBoard && hostBuff)
+	{
+		// kind of a kludge - we're still assuming the current PIO frame is the frame we want to download to...
+		ULWord accessFrameNum(0);
+		GetPCIAccessFrame (_channel, accessFrameNum);
+		if (accessFrameNum > GetNumFrameBuffers())
+			accessFrameNum = 0;
+		DMAWriteFrame (accessFrameNum, reinterpret_cast<const ULWord*>(hostBuff.GetHostPointer()), hostBuff.GetByteCount());
 	}
 
 	if ( _clientDownloadBuffer == NULL)
@@ -2342,13 +2340,16 @@ void CNTV2Card::DownloadBlackTestPattern(  )
 		assert(hostBuff);
 		currentAddress = hostBuff;
 	}
+#if defined(NTV2_DEPRECATE_16_0)
+	else NTV2_ASSERT(false && "GetBaseAddress/PIO deprecated");
+#else
 	else
 	{
 		GetBaseAddress(_channel,&baseAddress);
-		assert (baseAddress);
+		NTV2_ASSERT(baseAddress);
 		currentAddress = baseAddress;
 	}
-
+#endif !defined(NTV2_DEPRECATE_16_0)
 
 	// or if fbFormat is not 10 Bit YCbCr
 	switch(pixelFormat) 
@@ -3457,3 +3458,4 @@ void CNTV2Card::AdjustFor2048x1080(ULWord& numPixels,ULWord& linePitch)
 			break;
 	}
 }
+#endif	//	defined(CNTV2TESTPATTERN)

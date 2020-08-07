@@ -21,8 +21,10 @@ CNTV2Card::CNTV2Card ()
 
     #if defined (NTV2_DEPRECATE)
         //InitNTV2ColorCorrection ();
-		InitNTV2TestPattern ();
 	#endif	//	defined (NTV2_DEPRECATE)
+	#if defined(CNTV2TESTPATTERN)
+		InitNTV2TestPattern ();
+	#endif	//	defined(CNTV2TESTPATTERN)
 }
 
 CNTV2Card::CNTV2Card (const UWord inDeviceIndex, const string &	inHostName)
@@ -52,9 +54,9 @@ CNTV2Card::CNTV2Card (const UWord inDeviceIndex, const string &	inHostName)
 		}
 	}
 
-    #if defined(NTV2_DEPRECATE)
-		InitNTV2TestPattern();
-	#endif	//	defined(NTV2_DEPRECATE)
+	#if defined(CNTV2TESTPATTERN)
+		InitNTV2TestPattern ();
+	#endif	//	defined(CNTV2TESTPATTERN)
 }
 
 #if !defined(NTV2_DEPRECATE_14_3)
@@ -86,9 +88,9 @@ CNTV2Card::CNTV2Card (const UWord boardNumber, const bool displayErrorMessage, c
 			_ulNumFrameBuffers = ::NTV2DeviceGetNumberFrameBuffers (GetDeviceID (), fg, format);
 		}
 	}
-    #if defined(NTV2_DEPRECATE)
-		InitNTV2TestPattern();
-	#endif	//	defined(NTV2_DEPRECATE)
+	#if defined(CNTV2TESTPATTERN)
+		InitNTV2TestPattern ();
+	#endif	//	defined(CNTV2TESTPATTERN)
 }	//	constructor
 #endif	//	!defined(NTV2_DEPRECATE_14_3)
 
@@ -414,53 +416,48 @@ bool CNTV2Card::CanWarmBootFPGA (bool & outCanWarmBoot)
 }
 
 
-bool CNTV2Card::GetInput1Autotimed (void)
-{
-	ULWord	status	(0);
-	ReadRegister (kRegInputStatus, status);
-	return !(status & BIT_3);
-}
-
-
-bool CNTV2Card::GetInput2Autotimed (void)
-{
-	ULWord	status	(0);
-	ReadRegister (kRegInputStatus, status);
-	return !(status & BIT_11);
-}
-
-
-bool CNTV2Card::GetAnalogInputAutotimed (void)
-{
-	ULWord	value	(0);
-	ReadRegister (kRegAnalogInputStatus, value, kRegMaskInputStatusLock, kRegShiftInputStatusLock);
-	return value == 1;
-}
-
-
-bool CNTV2Card::GetHDMIInputAutotimed (void)
-{
-	ULWord	value	(0);
-	ReadRegister (kRegHDMIInputStatus, value, kRegMaskInputStatusLock, kRegShiftInputStatusLock);
-	return value == 1;
-}
-
-
-bool CNTV2Card::GetInputAutotimed (int inInputNum)
-{
-	bool bResult = false;
-
-	ULWord status;
-	ReadInputStatusRegister(&status);
-
-	switch (inInputNum)
+#if defined(CNTV2STATUS)
+	bool CNTV2Card::GetInput1Autotimed (void)
 	{
-		case 0:	bResult = !(status & BIT_3);	break;
-		case 1: bResult = !(status & BIT_11);	break;
+		ULWord	status	(0);
+		ReadRegister (kRegInputStatus, status);
+		return !(status & BIT_3);
 	}
-	
-	return bResult;
-}
+
+	bool CNTV2Card::GetInput2Autotimed (void)
+	{
+		ULWord	status	(0);
+		ReadRegister (kRegInputStatus, status);
+		return !(status & BIT_11);
+	}
+
+	bool CNTV2Card::GetAnalogInputAutotimed (void)
+	{
+		ULWord	value	(0);
+		ReadRegister (kRegAnalogInputStatus, value, kRegMaskInputStatusLock, kRegShiftInputStatusLock);
+		return value == 1;
+	}
+
+	bool CNTV2Card::GetHDMIInputAutotimed (void)
+	{
+		ULWord	value	(0);
+		ReadRegister (kRegHDMIInputStatus, value, kRegMaskInputStatusLock, kRegShiftInputStatusLock);
+		return value == 1;
+	}
+
+	bool CNTV2Card::GetInputAutotimed (int inInputNum)
+	{
+		bool bResult = false;
+		ULWord status;
+		ReadInputStatusRegister(&status);
+		switch (inInputNum)
+		{
+			case 0:	bResult = !(status & BIT_3);	break;
+			case 1: bResult = !(status & BIT_11);	break;
+		}
+		return bResult;
+	}
+#endif	//	defined(CNTV2STATUS)
 
 
 NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)

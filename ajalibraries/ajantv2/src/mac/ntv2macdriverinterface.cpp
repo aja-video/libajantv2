@@ -528,10 +528,7 @@ bool CNTV2MacDriverInterface::CloseLocalPhysical (void)
 		}	//	if _boardOpened && GetIOConnect()
 		return result;
 	}	//	GetPCISlotNumber
-#endif	//	!defined(NTV2_DEPRECATE_16_0)
 
-
-#if !defined(NTV2_DEPRECATE_16_0)
 	//--------------------------------------------------------------------------------------------------------------------
 	//	MapMemory
 	//	Return a pointer and size of either the register map or frame buffer memory.
@@ -608,6 +605,26 @@ bool CNTV2MacDriverInterface::CloseLocalPhysical (void)
 								&size, kIOMapDefaultCache | kIOMapAnywhere);
 			return size > 0;
 		}
+		return false;
+	}
+
+	bool CNTV2MacDriverInterface::SystemControl (void * dataPtr, SystemControlCode controlCode)
+	{
+		kern_return_t 	kernResult		= KERN_FAILURE;
+		uint64_t		scalarI_64[2]	= {uint64_t(dataPtr), controlCode};
+		uint32_t		outputCount		= 0;
+		if (controlCode != SCC_Test)
+			kernResult = KERN_INVALID_ARGUMENT;
+		else if (GetIOConnect())
+			kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
+												   kDriverSystemControl,	// selector of the function to be called via the user client.
+												   scalarI_64,				// array of scalar (64-bit) input values.
+												   2,						// the number of scalar input values.
+												   AJA_NULL,				// array of scalar (64-bit) output values.
+												   &outputCount);			// pointer to the number of scalar output values.
+		if (kernResult == KERN_SUCCESS)
+			return true;
+		DIFAIL (KR(kernResult) << ", con=" << HEX8(GetIOConnect()));
 		return false;
 	}
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
@@ -864,11 +881,11 @@ bool CNTV2MacDriverInterface::SetStreamingApplication (ULWord appType, int32_t p
 //--------------------------------------------------------------------------------------------------------------------
 //	GetStreamingApplication
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::GetStreamingApplication (ULWord * appType, int32_t * pid)
+bool CNTV2MacDriverInterface::GetStreamingApplication (ULWord & outAppType, int32_t & outProcessID)
 {
 	kern_return_t kernResult = KERN_FAILURE;
-	uint64_t	scalarO_64[2];
-	uint32_t	outputCount = 2;
+	uint64_t	scalarO_64[2]	= {0, 0};
+	uint32_t	outputCount(2);
 
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
@@ -877,8 +894,8 @@ bool CNTV2MacDriverInterface::GetStreamingApplication (ULWord * appType, int32_t
 											   0,						// the number of scalar input values.
 											   scalarO_64,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
-	if (appType)	*appType	= ULWord(scalarO_64[0]);
-	if (pid)		*pid		= int32_t(scalarO_64[1]);
+	outAppType   = ULWord(scalarO_64[0]);
+	outProcessID = int32_t(scalarO_64[1]);
 	if (kernResult == KERN_SUCCESS)
         return true;
 	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
@@ -887,20 +904,16 @@ bool CNTV2MacDriverInterface::GetStreamingApplication (ULWord * appType, int32_t
 
 
 //--------------------------------------------------------------------------------------------------------------------
-//	SetDefaultDeviceForPID
-//
 //	Used for multicard support with QT components. (Also see IsDefaultDeviceForPID)
 //	QT components are created and destroyed multiple times in the lifetime of running app. This call allows a component
 //	to mark a device as its default device, so that each time the component reopens, it can find the device it used last.
-//
-//	This call adds the input PID to list of PIDs that is tracked by
+//	This call adds the input PID to driver/device's PID list.
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::SetDefaultDeviceForPID (int32_t pid)
 {
-	kern_return_t 	kernResult = KERN_FAILURE;
-	uint64_t		scalarI_64[1] = {uint64_t(pid)};
-	uint32_t		outputCount = 0;
-
+	kern_return_t 	kernResult		= KERN_FAILURE;
+	uint64_t		scalarI_64[1]	= {uint64_t(pid)};
+	uint32_t		outputCount		= 0;
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverSetDefaultDeviceForPID,// selector of the function to be called via the user client.
@@ -916,21 +929,17 @@ bool CNTV2MacDriverInterface::SetDefaultDeviceForPID (int32_t pid)
 
 
 //--------------------------------------------------------------------------------------------------------------------
-//	IsDefaultDeviceForPID
-//
 //	Used for multicard support with QT components. (Also see SetDefaultDeviceForPID)
 //	QT components are created and destroyed multiple times in the lifetime of running app. This call allows a component
 //	to mark a device as its default device, so that each time the component reopens, it can find the device it used last.
-//
 //	Returns true if the input process ID was previously marked as the default device using SetDefaultDeviceForPID.
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::IsDefaultDeviceForPID (int32_t pid)
+bool CNTV2MacDriverInterface::IsDefaultDeviceForPID (const int32_t inProcessID)
 {
-	kern_return_t 	kernResult = KERN_FAILURE;
-	uint64_t		scalarI_64[1] = {uint64_t(pid)};
-	uint64_t		scalarO_64 = 0;
-	uint32_t		outputCount = 1;
-
+	kern_return_t 	kernResult		= KERN_FAILURE;
+	uint64_t		scalarI_64[1]	= {uint64_t(inProcessID)};
+	uint64_t		scalarO_64		= 0;
+	uint32_t		outputCount		= 1;
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverIsDefaultDeviceForPID,// selector of the function to be called via the user client.
@@ -949,10 +958,9 @@ bool CNTV2MacDriverInterface::IsDefaultDeviceForPID (int32_t pid)
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::KernelLog (void * dataPtr, UInt32 dataSize)
 {
-	kern_return_t kernResult = KERN_FAILURE;
-	uint64_t	scalarI_64[2] = {uint64_t(dataPtr), dataSize};
-	uint32_t	outputCount = 0;
-
+	kern_return_t kernResult	= KERN_FAILURE;
+	uint64_t	scalarI_64[2]	= {uint64_t(dataPtr), dataSize};
+	uint32_t	outputCount		= 0;
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),		// an io_connect_t returned from IOServiceOpen().
 											   kDriverKernelLog,	// selector of the function to be called via the user client.
@@ -966,28 +974,17 @@ bool CNTV2MacDriverInterface::KernelLog (void * dataPtr, UInt32 dataSize)
 	return false;
 }
 
-
-//--------------------------------------------------------------------------------------------------------------------
-//	WaitForInterrupt
-//
-//	Block the current thread until the specified interrupt occurs.
-//	Supply a timeout in milliseconds - if 0 (default), then never time out.
-//	Returns true if interrupt occurs, false if timeout.
-//--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS type, const ULWord timeout)
 {
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
 		return CNTV2DriverInterface::WaitForInterrupt(type, timeout);
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-
 	if (type == eChangeEvent)
 		return WaitForChangeEvent(timeout);
 
-	kern_return_t 	kernResult = KERN_FAILURE;
-	uint64_t	scalarI_64[2] = {type, timeout};
-	uint64_t	scalarO_64 = 0;
-	uint32_t	outputCount = 1;
+	kern_return_t 	kernResult	= KERN_FAILURE;
+	uint64_t	scalarI_64[2]	= {type, timeout};
+	uint64_t	scalarO_64		= 0;
+	uint32_t	outputCount		= 1;
 
 	if (!NTV2_IS_VALID_INTERRUPT_ENUM(type))
 		kernResult = KERN_INVALID_VALUE;
@@ -1001,25 +998,17 @@ bool CNTV2MacDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS type, cons
 	UInt32 interruptOccurred = uint32_t(scalarO_64);
 	if (kernResult != KERN_SUCCESS)
 		{DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));  return false;}
-
 	if (interruptOccurred)
 		BumpEventCount(type);
 	return interruptOccurred;
 }
 
-
-//--------------------------------------------------------------------------------------------------------------------
-//	GetInterruptCount
-//
-//	Returns the number of interrupts that have occured for the specified interrupt type.
-//--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterrupt, ULWord & outCount)
 {
-	kern_return_t 	kernResult = KERN_FAILURE;
-	uint64_t	scalarI_64[1] = {eInterrupt};
-	uint64_t	scalarO_64 = 0;
-	uint32_t	outputCount = 1;
-
+	kern_return_t 	kernResult	= KERN_FAILURE;
+	uint64_t	scalarI_64[1]	= {eInterrupt};
+	uint64_t	scalarO_64		= 0;
+	uint32_t	outputCount		= 1;
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverGetInterruptCount,// selector of the function to be called via the user client.
@@ -1034,20 +1023,12 @@ bool CNTV2MacDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterrup
 	return false;
 }
 
-
-//--------------------------------------------------------------------------------------------------------------------
-//	WaitForChangeEvent
-//
-//	Block the current thread until a register changes.
-//	Supply a timeout in milliseconds - if 0 (default), then never time out.
-//	Returns true if change occurs, false if timeout.
-//--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::WaitForChangeEvent (UInt32 timeout)
 {
-	kern_return_t 	kernResult = KERN_FAILURE;
-	uint64_t	scalarI_64[1] = {timeout};
-	uint64_t	scalarO_64 = 0;
-	uint32_t	outputCount = 1;
+	kern_return_t 	kernResult	= KERN_FAILURE;
+	uint64_t	scalarI_64[1]	= {timeout};
+	uint64_t	scalarO_64		= 0;
+	uint32_t	outputCount		= 1;
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverWaitForChangeEvent,// selector of the function to be called via the user client.
@@ -1059,8 +1040,6 @@ bool CNTV2MacDriverInterface::WaitForChangeEvent (UInt32 timeout)
 		DIFAIL(KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
 	return bool(scalarO_64);
 }
-
-
 
 
 #if !defined(NTV2_DEPRECATE_15_6)
@@ -1094,9 +1073,9 @@ bool CNTV2MacDriverInterface::WaitForChangeEvent (UInt32 timeout)
 	//--------------------------------------------------------------------------------------------------------------------
 	bool CNTV2MacDriverInterface::GetQuickTimeTime (UInt32 * time, UInt32 * scale)
 	{
-		kern_return_t 	kernResult = KERN_FAILURE;
-		uint64_t	scalarO_64[2];
-		uint32_t	outputCount = 2;
+		kern_return_t 	kernResult	= KERN_FAILURE;
+		uint64_t	scalarO_64[2]	= {0, 0};
+		uint32_t	outputCount		= 2;
 		if (GetIOConnect())
 			kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 												   kDriverGetTime,			// selector of the function to be called via the user client.
@@ -1115,8 +1094,6 @@ bool CNTV2MacDriverInterface::WaitForChangeEvent (UInt32 timeout)
 
 
 //--------------------------------------------------------------------------------------------------------------------
-//	DmaTransfer
-//
 //	Start a memory transfer using the specified DMA engine.
 //	Optional - call PrepareDMAMemory on the dataPtr before the first use of memory block
 //	for DMA and CompleteDMAMemory when done.  This will speed up the DMA by not requiring
@@ -1157,8 +1134,6 @@ bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
 
 
 //--------------------------------------------------------------------------------------------------------------------
-//	DmaTransfer
-//
 //	Start a memory transfer using the specified DMA engine.
 //	Optional - call PrepareDMAMemory on the dataPtr before the first use of memory block
 //	for DMA and CompleteDMAMemory when done.  This will speed up the DMA by not requiring
@@ -1229,14 +1204,10 @@ bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine			inDMAEngine,
 	return false;
 }
 
-
-//--------------------------------------------------------------------------------------------------------------------
-//	RestoreHardwareProcampRegisters
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::RestoreHardwareProcampRegisters( void )
+bool CNTV2MacDriverInterface::RestoreHardwareProcampRegisters (void)
 {
-	kern_return_t 	kernResult = KERN_FAILURE;
-	uint32_t	outputCount = 0;
+	kern_return_t 	kernResult	= KERN_FAILURE;
+	uint32_t		outputCount	= 0;
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverRestoreProcAmpRegisters,	// selector of the function to be called via the user client.
@@ -1250,44 +1221,11 @@ bool CNTV2MacDriverInterface::RestoreHardwareProcampRegisters( void )
 	return false;
 }
 
-
-//--------------------------------------------------------------------------------------------------------------------
-//	SystemControl
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SystemControl (void * dataPtr, SystemControlCode controlCode)
+bool CNTV2MacDriverInterface::SystemStatus ( void* dataPtr, SystemStatusCode statusCode)
 {
-	kern_return_t 	kernResult = KERN_FAILURE;
-	uint64_t	scalarI_64[2] = {uint64_t(dataPtr), controlCode};
-	uint32_t	outputCount = 0;
-	if (controlCode != SCC_Test)
-		kernResult = KERN_INVALID_ARGUMENT;
-	else if (GetIOConnect())
-		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
-											   kDriverSystemControl,	// selector of the function to be called via the user client.
-											   scalarI_64,				// array of scalar (64-bit) input values.
-											   2,						// the number of scalar input values.
-											   AJA_NULL,				// array of scalar (64-bit) output values.
-											   &outputCount);			// pointer to the number of scalar output values.
-	if (kernResult == KERN_SUCCESS)
-        return true;
-	DIFAIL (KR(kernResult) << ", con=" << HEX8(GetIOConnect()));
-	return false;
-}
-
-
-//--------------------------------------------------------------------------------------------------------------------
-//	SystemStatus
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SystemStatus( void* dataPtr, SystemStatusCode statusCode )
-{
-	kern_return_t 	kernResult = KERN_FAILURE;
-
-	uint64_t	scalarI_64[2];
-	uint32_t	outputCount = 0;
-
-	scalarI_64[0] = uint64_t(dataPtr);
-	scalarI_64[1] = statusCode;
-
+	kern_return_t 	kernResult		= KERN_FAILURE;
+	uint64_t		scalarI_64[2]	= {uint64_t(dataPtr), statusCode};
+	uint32_t		outputCount		= 0;
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverSystemStatus,		// selector of the function to be called via the user client.
@@ -1295,187 +1233,154 @@ bool CNTV2MacDriverInterface::SystemStatus( void* dataPtr, SystemStatusCode stat
 											   2,						// the number of scalar input values.
 											   AJA_NULL,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
-	switch (statusCode)
-	{
-		case SSC_GetFirmwareProgress:
-			break;
-
-		default:
-			return false;
-	}
-
+	if (statusCode != SSC_GetFirmwareProgress)
+		return false;
 	if (kernResult == KERN_SUCCESS)
         return true;
-
 	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 	return false;
 }
 
-
-//--------------------------------------------------------------------------------------------------------------------
-// AutoCirculate
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::AutoCirculate( AUTOCIRCULATE_DATA &autoCircData )
+bool CNTV2MacDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 {
 	bool success = true;
 	UserClientCommandCodes	whichMethod	(kNumberUserClientCommands);
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
+		return CNTV2DriverInterface::AutoCirculate(autoCircData);
+
+	kern_return_t 	kernResult = KERN_FAILURE;
+	io_connect_t	conn(GetIOConnect());
+	if (!conn)
+		return false;
+
+	switch (autoCircData.eCommand)
 	{
-		if (!CNTV2DriverInterface::AutoCirculate (autoCircData))
+		case eInitAutoCirc:
+		case eStartAutoCirc:
+		case eStopAutoCirc:
+		case eAbortAutoCirc:
+		case ePauseAutoCirc:
+		case eFlushAutoCirculate:
+		case ePrerollAutoCirculate:
+		case eSetActiveFrame:
+		case eStartAutoCircAtTime:
 		{
-			MDIFAIL (INSTP(this) << ":  NTV2AutoCirculateRemote failed");
-			success = false;
-		}
-	}
-	else
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-	{
-		kern_return_t 	kernResult = KERN_FAILURE;
+			// Pass the autoCircData structure to the driver. The driver knows the implicit meanings of the
+			// members of the structure based on the the command contained within it.
+			size_t	outputStructSize = 0;
+			whichMethod = kDriverAutoCirculateControl;
+			AUTOCIRCULATE_DATA_64 autoCircData64;
+			CopyTo_AUTOCIRCULATE_DATA_64 (&autoCircData, &autoCircData64);
 
-		if (!GetIOConnect())
-			return false;
+			kernResult = IOConnectCallStructMethod(conn,							// an io_connect_t returned from IOServiceOpen().
+												   kDriverAutoCirculateControl,		// selector of the function to be called via the user client.
+												   &autoCircData64,					// pointer to the input structure
+												   sizeof(AUTOCIRCULATE_DATA_64),	// size of input structure
+												   AJA_NULL,						// pointer to the output structure
+												   &outputStructSize);				// size of output structure
+			break;
+		}	//	eInit, eStart, eStop, eAbort, etc...
 
-		switch (autoCircData.eCommand)
+		case eGetAutoCirc:
 		{
-			case eInitAutoCirc:
-			case eStartAutoCirc:
-			case eStopAutoCirc:
-			case eAbortAutoCirc:
-			case ePauseAutoCirc:
-			case eFlushAutoCirculate:
-			case ePrerollAutoCirculate:
-			case eSetActiveFrame:
-            case eStartAutoCircAtTime:
-			{
-				// Pass the autoCircData structure to the driver. The driver knows the implicit meanings of the
-				// members of the structure based on the the command contained within it.
-				size_t	outputStructSize = 0;
-				whichMethod = kDriverAutoCirculateControl;
-				AUTOCIRCULATE_DATA_64 autoCircData64;
-				CopyTo_AUTOCIRCULATE_DATA_64 (&autoCircData, &autoCircData64);
-
-				if (GetIOConnect())
-					kernResult = IOConnectCallStructMethod(GetIOConnect(),					// an io_connect_t returned from IOServiceOpen().
-														   kDriverAutoCirculateControl,		// selector of the function to be called via the user client.
-														   &autoCircData64,					// pointer to the input structure
-														   sizeof(AUTOCIRCULATE_DATA_64),	// size of input structure
-														   AJA_NULL,						// pointer to the output structure
-														   &outputStructSize);				// size of output structure
-			}
+			uint64_t	scalarI_64[1];
+			uint32_t	outputCount = 0;
+			size_t		outputStructSize = sizeof(AUTOCIRCULATE_STATUS_STRUCT);
+			whichMethod = kDriverAutoCirculateStatus;
+			scalarI_64[0] = autoCircData.channelSpec;
+			kernResult = IOConnectCallMethod(conn,							// an io_connect_t returned from IOServiceOpen().
+											 kDriverAutoCirculateStatus,	// selector of the function to be called via the user client.
+											 scalarI_64,					// array of scalar (64-bit) input values.
+											 1,								// the number of scalar input values.
+											 AJA_NULL,						// pointer to the input structure
+											 0,								// size of input structure
+											 AJA_NULL,						// array of scalar (64-bit) output values.
+											 &outputCount,					// the number of scalar output values.
+											 autoCircData.pvVal1,			// pointer to the output structure
+											 &outputStructSize);			// size of output structure
 			break;
+		}	//	eGetAutoCirc
 
-			case eGetAutoCirc:
-			{
-				uint64_t	scalarI_64[1];
-				uint32_t	outputCount = 0;
-				size_t		outputStructSize = sizeof(AUTOCIRCULATE_STATUS_STRUCT);
-				whichMethod = kDriverAutoCirculateStatus;
+		case eGetFrameStamp:
+		case eGetFrameStampEx2:
+		{
+			whichMethod = kDriverAutoCirculateFramestamp;
+			// Make sure task structure does not get passed in with eGetFrameStamp call.
+			if ( autoCircData.eCommand == eGetFrameStamp)
+				autoCircData.pvVal2 = AJA_NULL;
 
-				scalarI_64[0] = autoCircData.channelSpec;
+			size_t	outputStructSize = sizeof(AUTOCIRCULATE_DATA_64);
 
-				if (GetIOConnect())
-					kernResult = IOConnectCallMethod(GetIOConnect(),				// an io_connect_t returned from IOServiceOpen().
-													 kDriverAutoCirculateStatus,	// selector of the function to be called via the user client.
-													 scalarI_64,					// array of scalar (64-bit) input values.
-													 1,								// the number of scalar input values.
-													 AJA_NULL,						// pointer to the input structure
-													 0,								// size of input structure
-													 AJA_NULL,						// array of scalar (64-bit) output values.
-													 &outputCount,					// the number of scalar output values.
-													 autoCircData.pvVal1,			// pointer to the output structure
-													 &outputStructSize);			// size of output structure
-			}
+			// promote base data structure
+			AUTOCIRCULATE_DATA_64 autoCircData64;
+			CopyTo_AUTOCIRCULATE_DATA_64 (&autoCircData, &autoCircData64);
+
+			if (GetIOConnect())
+				kernResult = IOConnectCallStructMethod(conn,							// an io_connect_t returned from IOServiceOpen().
+													   kDriverAutoCirculateFramestamp,	// selector of the function to be called via the user client.
+													   &autoCircData64,					// pointer to the input structure
+													   sizeof(AUTOCIRCULATE_DATA_64),	// size of input structure
+													   &autoCircData64,					// pointer to the output structure
+													   &outputStructSize);				// size of output structure
 			break;
+		}	//	eGetFrameStamp
 
-
-			case eGetFrameStamp:
-			case eGetFrameStampEx2:
+		case eTransferAutoCirculate:
+		case eTransferAutoCirculateEx:
+		case eTransferAutoCirculateEx2:
+		{
+			whichMethod = kDriverAutoCirculateTransfer;
+			// Pass the autoCircData structure to the driver. The driver knows the implicit meanings of the
+			// members of the structure based on the the command contained within it.
+			// Make sure routing table and task structure does not get passed in with eTransferAutoCirculate call.
+			if (autoCircData.eCommand == eTransferAutoCirculate)
 			{
-				whichMethod = kDriverAutoCirculateFramestamp;
-				// Make sure task structure does not get passed in with eGetFrameStamp call.
-				if ( autoCircData.eCommand == eGetFrameStamp)
-					autoCircData.pvVal2 = AJA_NULL;
-
-				size_t	outputStructSize = sizeof(AUTOCIRCULATE_DATA_64);
-
-				// promote base data structure
-				AUTOCIRCULATE_DATA_64 autoCircData64;
-				CopyTo_AUTOCIRCULATE_DATA_64 (&autoCircData, &autoCircData64);
-
-				if (GetIOConnect())
-					kernResult = IOConnectCallStructMethod(GetIOConnect(),					// an io_connect_t returned from IOServiceOpen().
-														   kDriverAutoCirculateFramestamp,	// selector of the function to be called via the user client.
-														   &autoCircData64,					// pointer to the input structure
-														   sizeof(AUTOCIRCULATE_DATA_64),	// size of input structure
-														   &autoCircData64,					// pointer to the output structure
-														   &outputStructSize);				// size of output structure
+				autoCircData.pvVal3 = AJA_NULL;
+				autoCircData.pvVal4 = AJA_NULL;
 			}
-			break;
 
+			// Make sure task structure does not get passed in with eTransferAutoCirculateEx call.
+			if (autoCircData.eCommand == eTransferAutoCirculateEx)
+				autoCircData.pvVal4 = AJA_NULL;
 
-			case eTransferAutoCirculate:
-			case eTransferAutoCirculateEx:
-			case eTransferAutoCirculateEx2:
+			size_t	outputStructSize = sizeof(AUTOCIRCULATE_TRANSFER_STATUS_STRUCT);
+
+			// promote base data structure
+			AUTOCIRCULATE_DATA_64 autoCircData64;
+			CopyTo_AUTOCIRCULATE_DATA_64 (&autoCircData, &autoCircData64);
+
+			// promote AUTOCIRCULATE_TRANSFER_STRUCT
+			AUTOCIRCULATE_TRANSFER_STRUCT_64 autoCircTransfer64;
+			CopyTo_AUTOCIRCULATE_TRANSFER_STRUCT_64 (reinterpret_cast<AUTOCIRCULATE_TRANSFER_STRUCT*>(autoCircData.pvVal1), &autoCircTransfer64);
+			autoCircData64.pvVal1 = Pointer64(&autoCircTransfer64);
+
+			AUTOCIRCULATE_TASK_STRUCT_64 autoCircTask64;
+			if (autoCircData.pvVal4 != AJA_NULL)
 			{
-				whichMethod = kDriverAutoCirculateTransfer;
-				// Pass the autoCircData structure to the driver. The driver knows the implicit meanings of the
-				// members of the structure based on the the command contained within it.
-				// Make sure routing table and task structure does not get passed in with eTransferAutoCirculate call.
-				if ( autoCircData.eCommand == eTransferAutoCirculate)
-				{
-					autoCircData.pvVal3 = AJA_NULL;
-					autoCircData.pvVal4 = AJA_NULL;
-				}
-
-				// Make sure task structure does not get passed in with eTransferAutoCirculateEx call.
-				if ( autoCircData.eCommand == eTransferAutoCirculateEx)
-				{
-					autoCircData.pvVal4 = AJA_NULL;
-				}
-
-
-				size_t	outputStructSize = sizeof(AUTOCIRCULATE_TRANSFER_STATUS_STRUCT);
-
-				// promote base data structure
-				AUTOCIRCULATE_DATA_64 autoCircData64;
-				CopyTo_AUTOCIRCULATE_DATA_64 (&autoCircData, &autoCircData64);
-
-				// promote AUTOCIRCULATE_TRANSFER_STRUCT
-				AUTOCIRCULATE_TRANSFER_STRUCT_64 autoCircTransfer64;
-				CopyTo_AUTOCIRCULATE_TRANSFER_STRUCT_64 (reinterpret_cast<AUTOCIRCULATE_TRANSFER_STRUCT*>(autoCircData.pvVal1), &autoCircTransfer64);
-				autoCircData64.pvVal1 = Pointer64(&autoCircTransfer64);
-
-				AUTOCIRCULATE_TASK_STRUCT_64 autoCircTask64;
-				if (autoCircData.pvVal4 != AJA_NULL)
-				{
-					CopyTo_AUTOCIRCULATE_TASK_STRUCT_64 (reinterpret_cast<AUTOCIRCULATE_TASK_STRUCT*>(autoCircData.pvVal4), &autoCircTask64);
-					autoCircData64.pvVal4 = Pointer64(&autoCircTask64);
-				}
-
-				if (GetIOConnect())
-					kernResult = IOConnectCallStructMethod(GetIOConnect(),					// an io_connect_t returned from IOServiceOpen().
-														   kDriverAutoCirculateTransfer,	// selector of the function to be called via the user client.
-														   &autoCircData64,					// pointer to the input structure
-														   sizeof(AUTOCIRCULATE_DATA_64),	// size of input structure
-														   autoCircData.pvVal2,				// pointer to the output structure
-														   &outputStructSize);				// size of output structure
+				CopyTo_AUTOCIRCULATE_TASK_STRUCT_64 (reinterpret_cast<AUTOCIRCULATE_TASK_STRUCT*>(autoCircData.pvVal4), &autoCircTask64);
+				autoCircData64.pvVal4 = Pointer64(&autoCircTask64);
 			}
+
+			kernResult = IOConnectCallStructMethod(conn,							// an io_connect_t returned from IOServiceOpen().
+												   kDriverAutoCirculateTransfer,	// selector of the function to be called via the user client.
+												   &autoCircData64,					// pointer to the input structure
+												   sizeof(AUTOCIRCULATE_DATA_64),	// size of input structure
+												   autoCircData.pvVal2,				// pointer to the output structure
+												   &outputStructSize);				// size of output structure
 			break;
+		}	//	eTransferAutoCirculate
 
-			default:
-				//DisplayNTV2Error("Unsupported AC command type in AutoCirculate()\n");
-				kernResult =  KERN_INVALID_ARGUMENT;
-				break;
-		}
-
-		success = (kernResult == KERN_SUCCESS);
-		if (kernResult != KERN_SUCCESS && kernResult != kIOReturnOffline)
-			MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()) << ", eCmd=" << autoCircData.eCommand);
+		default:
+			//DisplayNTV2Error("Unsupported AC command type in AutoCirculate()\n");
+			kernResult =  KERN_INVALID_ARGUMENT;
+			break;
 	}
 
+	success = (kernResult == KERN_SUCCESS);
+	if (kernResult != KERN_SUCCESS && kernResult != kIOReturnOffline)
+		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(conn) << ", eCmd=" << autoCircData.eCommand);
 	return success;
-}
+}	//	AutoCirculate
 
 
 bool CNTV2MacDriverInterface::NTV2Message (NTV2_HEADER * pInOutMessage)
@@ -1486,20 +1391,13 @@ bool CNTV2MacDriverInterface::NTV2Message (NTV2_HEADER * pInOutMessage)
 		return false;
 	if (!pInOutMessage->GetSizeInBytes())
 		return false;
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
 		return CNTV2DriverInterface::NTV2Message (pInOutMessage);
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 
 	kern_return_t 	kernResult	(KERN_FAILURE);
 	io_connect_t	connection	(GetIOConnect ());
-	uint64_t		scalarI_64 [2];
+	uint64_t		scalarI_64 [2]	= {uint64_t(pInOutMessage), pInOutMessage->GetSizeInBytes()};
 	uint32_t		numScalarOutputs(0);
-
-	//	The NTV2Message call passes two things to the driver:
-	scalarI_64[0] = uint64_t(pInOutMessage);			//	Pointer to the NTV2 Message/struct
-	scalarI_64[1] = pInOutMessage->GetSizeInBytes();	//	The size, in bytes, of the entire message/struct
-
 	if (connection)
 		kernResult = IOConnectCallScalarMethod (connection,			//	an io_connect_t returned from IOServiceOpen
 											   kDriverNTV2Message,	//	selector of the function to be called via the user client
@@ -1509,7 +1407,6 @@ bool CNTV2MacDriverInterface::NTV2Message (NTV2_HEADER * pInOutMessage)
 											   &numScalarOutputs);	//	pointer (in: number of scalar output values capable of receiving;  out: actual number of scalar output values)
 	if (kernResult != KERN_SUCCESS  &&  kernResult != kIOReturnOffline)
 		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(connection) << endl << *pInOutMessage);
-
 	return kernResult == KERN_SUCCESS;
 
 }	//	NTV2Message
@@ -1576,16 +1473,12 @@ bool CNTV2MacDriverInterface::NTV2Message (NTV2_HEADER * pInOutMessage)
 	}
 #endif	//	!defined(NTV2_DEPRECATE_15_6)
 
-//--------------------------------------------------------------------------------------------------------------------
-//	Get/Set Audio Output Mode
-//
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode)
+bool CNTV2MacDriverInterface::SetAudioOutputMode (NTV2_GlobalAudioPlaybackMode mode)
 {
 	return WriteRegister(kVRegGlobalAudioPlaybackMode,mode);
 }
 
-bool CNTV2MacDriverInterface::GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode)
+bool CNTV2MacDriverInterface::GetAudioOutputMode (NTV2_GlobalAudioPlaybackMode* mode)
 {
 	return mode ? CNTV2DriverInterface::ReadRegister(kVRegGlobalAudioPlaybackMode, *mode) : false;
 }
@@ -1852,12 +1745,12 @@ void CNTV2MacDriverInterface::CopyTo_AUTOCIRCULATE_TASK_STRUCT_64 (AUTOCIRCULATE
 	void CNTV2MacDriverInterface::SetDebugLogging (const uint64_t inWhichUserClientCommands)
 	{	(void) inWhichUserClientCommands;	//	Ignored -- replaced by AJADebug logging facility
 	}
-#endif
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 
 void CNTV2MacDriverInterface::DumpDeviceMap (void)
 {
-	gDeviceMap.Dump ();
+	gDeviceMap.Dump();
 }
 
 UWord CNTV2MacDriverInterface::GetConnectionCount (void)
@@ -1867,7 +1760,7 @@ UWord CNTV2MacDriverInterface::GetConnectionCount (void)
 
 ULWord CNTV2MacDriverInterface::GetConnectionChecksum (void)
 {
-	return gDeviceMap.GetConnectionChecksum ();
+	return gDeviceMap.GetConnectionChecksum();
 }
 
 
