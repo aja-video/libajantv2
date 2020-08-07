@@ -4102,7 +4102,7 @@ typedef enum
 #define	NTV2_IS_SDI_TIMECODE_INDEX(__x__)				(NTV2_IS_VALID_TIMECODE_INDEX(__x__)  &&  !NTV2_IS_ANALOG_TIMECODE_INDEX(__x__))
 
 
-//	These will be deprecated in the SDK 13 era		#if !defined (NTV2_DEPRECATE)
+#if !defined(NTV2_DEPRECATE)
 	typedef	NTV2TCIndex						NTV2TCSource;					///< @deprecated	Use NTV2TCIndex instead.
 	#define	NTV2_TCSOURCE_DEFAULT			NTV2_TCINDEX_DEFAULT			///< @deprecated	Use NTV2_TCINDEX_DEFAULT instead.
 	#define	NTV2_TCSOURCE_SDI1				NTV2_TCINDEX_SDI1				///< @deprecated	Use NTV2_TCINDEX_SDI1 instead.
@@ -4150,7 +4150,7 @@ typedef enum
 	#define	NTV2_MAX_NUM_TIMECODE_DESTS		NTV2_MAX_NUM_TIMECODE_INDEXES	///< @deprecated	Use NTV2_MAX_NUM_TIMECODE_INDEXES instead.
 	#define	NTV2_TCDEST_INVALID				NTV2_TCINDEX_INVALID			///< @deprecated	Use NTV2_TCINDEX_INVALID instead.
 	#define	NTV2_NUM_TCDESTS				NTV2_MAX_NUM_TIMECODE_INDEXES	///< @deprecated	Use NTV2_MAX_NUM_TIMECODE_INDEXES instead.
-//	#endif	//	!defined (NTV2_DEPRECATE)
+#endif	//	!defined(NTV2_DEPRECATE)
 
 
 typedef enum

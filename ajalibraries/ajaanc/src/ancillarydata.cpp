@@ -1992,8 +1992,9 @@ bool AJARTPAncPayloadHeader::IsNULL(void) const
 
 bool AJARTPAncPayloadHeader::IsValid(void) const
 {	//	Simple validation -- Check that...
-	return	mVBits == 0x02				//	Version == 2
-		&&	GetFieldSignal() != 0x01;	//	Field signal is 0x00, 0x10, or 0x11, but never 0x01
+	return	mVBits == 0x02			//	Version == 2
+		&&	!IsNULL()				//	Not NULL
+		&&  IsValidFieldSignal();	//	Valid field bits
 }
 
 
