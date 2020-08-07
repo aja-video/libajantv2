@@ -85,8 +85,8 @@ AJAStatus NTV2Capture::Init (void)
 
 	ULWord	appSignature	(0);
 	int32_t	appPID			(0);
-	mDevice.GetStreamingApplication (&appSignature, &appPID);	//	Who currently "owns" the device?
-	mDevice.GetEveryFrameServices(mSavedTaskMode);				//	Save the current device state
+	mDevice.GetStreamingApplication (appSignature, appPID);	//	Who currently "owns" the device?
+	mDevice.GetEveryFrameServices(mSavedTaskMode);			//	Save the current device state
 	if (!mConfig.fDoMultiFormat)
 	{
 		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))

@@ -96,8 +96,8 @@ int main (int argc, const char ** argv)
     if (eotf < 0 || eotf > 3)
         {cerr << "## ERROR:  valid eotf values are 0, 1, 2 or 3" << endl; return 2;}
 
-    device.GetEveryFrameServices (savedTaskMode);             // Save the current device state
-    device.GetStreamingApplication (&appSignature, &appPID);  // Who currently "owns" the device?
+    device.GetEveryFrameServices (savedTaskMode);			// Save the current device state
+    device.GetStreamingApplication (appSignature, appPID);	// Who currently "owns" the device?
 
     if (!device.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
     {

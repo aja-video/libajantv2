@@ -104,7 +104,7 @@ AJAStatus NTV2LLBurn::Init (void)
 	ULWord	appSignature	(0);
 	int32_t	appPID			(0);
 	mDevice.GetEveryFrameServices (mSavedTaskMode);				//	Save the current device state
-	mDevice.GetStreamingApplication (&appSignature, &appPID);	//	Who currently "owns" the device?
+	mDevice.GetStreamingApplication (appSignature, appPID);		//	Who currently "owns" the device?
 	if (!mDoMultiChannel)
 	{
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
@@ -199,7 +199,7 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 		case NTV2_INPUTSOURCE_HDMI1:	mOutputChannel = numFrameStores < 3 ? NTV2_CHANNEL2 : NTV2_CHANNEL3;
 										mAudioSystem = NTV2_AUDIOSYSTEM_2;
 										break;
-		default:
+//		default:
 		case NTV2_INPUTSOURCE_INVALID:	cerr << "## ERROR:  Bad input source" << endl;  return AJA_STATUS_BAD_PARAM;
 	}
 	mOutputChannel = NTV2_CHANNEL2;

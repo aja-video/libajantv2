@@ -105,8 +105,8 @@ AJAStatus NTV2FieldBurn::Init (void)
 
 	ULWord	appSignature	(0);
 	int32_t	appPID			(0);
-	mDevice.GetStreamingApplication (&appSignature, &appPID);	//	Who currently "owns" the device?
-	mDevice.GetEveryFrameServices(mSavedTaskMode);				//	Save the current device state
+	mDevice.GetStreamingApplication (appSignature, appPID);	//	Who currently "owns" the device?
+	mDevice.GetEveryFrameServices(mSavedTaskMode);			//	Save the current device state
 	if (!mDoMultiChannel)
 	{
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
