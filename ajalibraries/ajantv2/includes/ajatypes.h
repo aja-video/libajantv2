@@ -32,10 +32,14 @@
 
 #define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
 #define	AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
+#define	AJA_STATIC		static		//	Do not change this.
 #define NTV2_WRITEREG_PROFILING		//	If defined, enables register write profiling
-//#define NTV2_FORCE_NO_DEVICE		//	If defined, forces "NO DEVICE"
 #define	NTV2_UNUSED(__p__)			(void)__p__
 #define NTV2_USE_CPLUSPLUS11		//	New in SDK 16.0. If defined (now default), 'ajalibraries/ajantv2' will use C++11 features (requires C++11 compiler)
+
+#define CNTV2STATUS			//	Retail code still uses these APIs
+#define CNTV2TESTPATTERN	//	Retail code still uses these APIs
+#define CNTV2VIDPROC		//	Retail code still uses these APIs
 
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
 	#if defined(AJAMac)

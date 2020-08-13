@@ -10,6 +10,7 @@
 #include <assert.h>
 
 
+#if defined(CNTV2VIDPROC)
 void CNTV2Card::SetupDefaultVidProc()
 {
 	// Setup for Horizontal Split between input 1 and channel 1
@@ -451,3 +452,4 @@ void CNTV2Card::SetMatteColor(YCbCr10BitPixel ycbcrPixel)
 		SetMatteColor(YCbCrMatte);
 	}
 #endif	//	AJALinux
+#endif	//	defined(CNTV2VIDPROC)

@@ -6595,14 +6595,16 @@ public:
 	**/
 	AJA_VIRTUAL bool			AddDynamicDirectory (const std::string & inDirectory);
 
+#if defined(CNTV2STATUS)
 				//////////////////////////////////////////////////////////
 	public:		//////////	From CNTV2Status				//////////////
 				//////////////////////////////////////////////////////////
-	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL bool			GetInput1Autotimed (void));				//	DEPRECATION CANDIDATE
-	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL bool			GetInput2Autotimed (void));				//	DEPRECATION CANDIDATE
-	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL bool			GetAnalogInputAutotimed (void));		//	DEPRECATION CANDIDATE
-	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL bool			GetHDMIInputAutotimed (void));			//	DEPRECATION CANDIDATE
-	NTV2_SHOULD_BE_DEPRECATED(AJA_VIRTUAL bool			GetInputAutotimed (int inInputNum));	//	DEPRECATION CANDIDATE
+	NTV2_DEPRECATED_f(AJA_VIRTUAL bool			GetInput1Autotimed (void));				///< @deprecated	Starting in SDK 16.0.
+	NTV2_DEPRECATED_f(AJA_VIRTUAL bool			GetInput2Autotimed (void));				///< @deprecated	Starting in SDK 16.0.
+	NTV2_DEPRECATED_f(AJA_VIRTUAL bool			GetAnalogInputAutotimed (void));		///< @deprecated	Starting in SDK 16.0.
+	NTV2_DEPRECATED_f(AJA_VIRTUAL bool			GetHDMIInputAutotimed (void));			///< @deprecated	Starting in SDK 16.0.
+	NTV2_DEPRECATED_f(AJA_VIRTUAL bool			GetInputAutotimed (int inInputNum));	///< @deprecated	Starting in SDK 16.0.
+#endif	//	defined(CNTV2STATUS)
 
 	/**
 		@brief		Returns a string containing the decoded, human-readable device serial number.
@@ -6619,53 +6621,54 @@ public:
 		NUM_COLORS
 	} ColorCorrectionColor;	//	From CNTV2ColorCorrection
 
+#if defined(CNTV2TESTPATTERN)
 				//////////////////////////////////////////////////////////
 	public:		//////////	From CNTV2TestPattern			//////////////
 				//////////////////////////////////////////////////////////
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(void						SetChannel (NTV2Channel channel))									{_channel = channel;}				///< Originally in CNTV2TestPattern.
-    AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(NTV2Channel				GetChannel (void))													{return _channel;}					///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(void						SetSignalMask (UWord signalMask))									{_signalMask = signalMask & 0x7;}	///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(UWord						GetSignalMask (void) const)											{return _signalMask;}				///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(void						SetTestPatternFrameBufferFormat (NTV2FrameBufferFormat fbFormat))	{_fbFormat = fbFormat;}				///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(NTV2FrameBufferFormat		GetTestPatternFrameBufferFormat (void) const)						{return _fbFormat;}					///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(void						SetDualLinkTestPatternOutputEnable (bool enable))					{_dualLinkOutputEnable = enable;}	///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool						GetDualLinkTestPatternOutputEnable (void) const)					{return _dualLinkOutputEnable;}		///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(const TestPatternList &	GetTestPatternList (void) const)									{return _testPatternList;}			///< Originally in CNTV2TestPattern.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(void SetChannel (NTV2Channel channel))	{_channel = channel;}	///< @deprecated	Starting in SDK 16.0.
+    AJA_VIRTUAL inline NTV2_DEPRECATED_f(NTV2Channel GetChannel (void))	{return _channel;}	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(void SetSignalMask (UWord signalMask))	{_signalMask = signalMask & 0x7;}	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(UWord GetSignalMask (void) const)	{return _signalMask;}	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(void SetTestPatternFrameBufferFormat (NTV2FrameBufferFormat fbFormat))	{_fbFormat = fbFormat;}	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(NTV2FrameBufferFormat GetTestPatternFrameBufferFormat (void) const)	{return _fbFormat;}	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(void SetDualLinkTestPatternOutputEnable (bool enable))	{_dualLinkOutputEnable = enable;}	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetDualLinkTestPatternOutputEnable (void) const)	{return _dualLinkOutputEnable;}	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(const TestPatternList & GetTestPatternList (void) const)	{return _testPatternList;}	///< @deprecated	Starting in SDK 16.0.
 
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(void						SetClientDownloadBuffer (ULWord * buffer))							{_clientDownloadBuffer = buffer;}	///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(ULWord *					GetClientDownloadBuffer (void) const)								{return _clientDownloadBuffer;}		///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(void						SetTestPatternDMAEnable (bool enable))								{_bDMAtoBoard = enable;}			///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool						GetTestPatternDMAEnable (void) const)								{return _bDMAtoBoard; }				///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(void						EnableFlipFlipPage (bool enable))									{_flipFlopPage = enable;}			///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool						GetEnableFlipFlipPage (void) const)									{return _flipFlopPage;}				///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(void						SetAutoRouteOnXena2 (bool autoRoute))								{_autoRouteOnXena2 = autoRoute;}	///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool						GetAutoRouteOnXena2 (void) const)									{return _autoRouteOnXena2;}			///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool							DownloadTestPattern (UWord testPatternNumber));						///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							DownloadTestPattern (char * testPatternName));						///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							DownloadBlackTestPattern (void));									///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							DownloadBorderTestPattern (void));									///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							DownloadSlantRampTestPattern (void));								///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							DownloadYCbCrSlantRampTestPattern (void));							///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							Download48BitRGBSlantRampTestPattern (void));						///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							DownloadVerticalSweepTestPattern (void));							///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							DownloadZonePlateTestPattern (void));								///< Originally in CNTV2TestPattern.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(void SetClientDownloadBuffer (ULWord * buffer))	{_clientDownloadBuffer = buffer;}	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(ULWord * GetClientDownloadBuffer (void) const)	{return _clientDownloadBuffer;}	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(void SetTestPatternDMAEnable (bool enable))	{_bDMAtoBoard = enable;}	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetTestPatternDMAEnable (void) const)	{return _bDMAtoBoard; }	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(void EnableFlipFlipPage (bool enable))	{_flipFlopPage = enable;}	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetEnableFlipFlipPage (void) const)	{return _flipFlopPage;}	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(void SetAutoRouteOnXena2 (bool autoRoute))	{_autoRouteOnXena2 = autoRoute;}	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAutoRouteOnXena2 (void) const)	{return _autoRouteOnXena2;}	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DownloadTestPattern (UWord testPatternNumber));	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(void DownloadTestPattern (char * testPatternName));	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(void DownloadBlackTestPattern (void));	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(void DownloadBorderTestPattern (void));	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(void DownloadSlantRampTestPattern (void));	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(void DownloadYCbCrSlantRampTestPattern (void));	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(void Download48BitRGBSlantRampTestPattern (void));	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(void DownloadVerticalSweepTestPattern (void));	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(void DownloadZonePlateTestPattern (void));	///< @deprecated	Starting in SDK 16.0.
 
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							RenderTestPatternToBuffer (UWord testPatternNumber, ULWord * buffer));					///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool							RenderTestPatternBuffer (NTV2Channel channel, UByte * buffer, NTV2VideoFormat videoFormat, NTV2FrameBufferFormat fbFormat, ULWord width, ULWord height, ULWord rowBytes));	///< @deprecated	Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							DownloadTestPatternBuffer (ULWord * buffer, ULWord size = 0));							///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(ULWord						GetPatternBufferSize (ULWord * width = AJA_NULL, ULWord * height = AJA_NULL, ULWord * rowBytes = AJA_NULL, ULWord * firstLine = AJA_NULL));	///< Originally in CNTV2TestPattern.
-	
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(int							MakeSineWaveVideo (double radians, bool bChroma));										///< Originally in CNTV2TestPattern.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							ConvertLinePixelFormat (UWord * unPackedBuffer, ULWord * packedBuffer, int numPixels));	///< Originally in CNTV2TestPattern.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(void RenderTestPatternToBuffer (UWord testPatternNumber, ULWord * buffer));	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool RenderTestPatternBuffer (NTV2Channel channel, UByte * buffer, NTV2VideoFormat videoFormat, NTV2FrameBufferFormat fbFormat, ULWord width, ULWord height, ULWord rowBytes));	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(void DownloadTestPatternBuffer (ULWord * buffer, ULWord size = 0));	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord GetPatternBufferSize (ULWord * width = AJA_NULL, ULWord * height = AJA_NULL, ULWord * rowBytes = AJA_NULL, ULWord * firstLine = AJA_NULL));	///< @deprecated	Starting in SDK 16.0.
+
+	AJA_VIRTUAL NTV2_DEPRECATED_f(int MakeSineWaveVideo (double radians, bool bChroma));	///< @deprecated	Starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(void ConvertLinePixelFormat (UWord * unPackedBuffer, ULWord * packedBuffer, int numPixels));	///< @deprecated	Starting in SDK 16.0.
 
 #ifdef AJAMac
-//	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void							DownloadRGBPicture (char * pSrc, ULWord srcWidthPixels, ULWord srcHeightPixels, ULWord srcRowBytes));	///< Originally in CNTV2TestPattern.
+//	AJA_VIRTUAL NTV2_DEPRECATED_f(void DownloadRGBPicture (char * pSrc, ULWord srcWidthPixels, ULWord srcHeightPixels, ULWord srcRowBytes));		///< @deprecated	Starting in SDK 16.0.
 #endif
 
 	protected:	//	CNTV2TestPattern Data
-		void													InitNTV2TestPattern (void);														///< Originally in CNTV2TestPattern.
-		AJA_VIRTUAL void										DownloadSegmentedTestPattern (SegmentTestPatternData * pTestPatternSegmentData);///< Originally in CNTV2TestPattern.
-		AJA_VIRTUAL void										AdjustFor2048x1080 (ULWord & numPixels, ULWord & linePitch);					///< Originally in CNTV2TestPattern.
+		void					NTV2_DEPRECATED_f(InitNTV2TestPattern(void));	///< @deprecated	Starting in SDK 16.0.
+		AJA_VIRTUAL void		NTV2_DEPRECATED_f(DownloadSegmentedTestPattern(SegmentTestPatternData * pTestPatternSegmentData));	///< @deprecated	Starting in SDK 16.0.
+		AJA_VIRTUAL void		NTV2_DEPRECATED_f(AdjustFor2048x1080(ULWord & numPixels, ULWord & linePitch));	///< @deprecated	Starting in SDK 16.0.
 		
 		NTV2Channel				_channel;	//	Also in CNTV2ColorCorrection
 		TestPatternList			_testPatternList;
@@ -6676,8 +6679,10 @@ public:
 		bool					_autoRouteOnXena2;
 		bool					_flipFlopPage;
 		ULWord *				_clientDownloadBuffer;
+#endif //	defined(CNTV2TESTPATTERN)
 
 
+#if defined(CNTV2VIDPROC)
 				//////////////////////////////////////////////////////////
 	public:		//////////	From CNTV2VidProc				//////////////
 				//////////////////////////////////////////////////////////
@@ -6749,6 +6754,7 @@ public:
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadFlatMatte3Value (ULWord *pValue))							{return pValue ? ReadRegister(kRegFlatMatte3Value, *pValue) : false;}
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	WriteFlatMatte4Value (const ULWord inValue))					{return WriteRegister(kRegFlatMatte4Value, inValue);}
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool	ReadFlatMatte4Value (ULWord *pValue))							{return pValue ? ReadRegister(kRegFlatMatte4Value, *pValue) : false;}
+#endif	//	defined(CNTV2VIDPROC)
 
 protected:
 	static NTV2_POINTER	NULL_POINTER;	///< @brief	Used for default empty NTV2_POINTER parameters -- do not modify.
