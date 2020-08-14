@@ -2349,7 +2349,7 @@ void CNTV2Card::DownloadBlackTestPattern(  )
 		NTV2_ASSERT(baseAddress);
 		currentAddress = baseAddress;
 	}
-#endif !defined(NTV2_DEPRECATE_16_0)
+#endif	// !defined(NTV2_DEPRECATE_16_0)
 
 	// or if fbFormat is not 10 Bit YCbCr
 	switch(pixelFormat) 
