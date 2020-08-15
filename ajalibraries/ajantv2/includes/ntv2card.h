@@ -5261,6 +5261,24 @@ public:
 	**/
 	AJA_VIRTUAL bool		GetHDMIInBitDepth (NTV2HDMIBitDepth & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
+	/**
+		@brief						Answers with the given HDMI input's current audio channel 3/4 swap setting.
+		@param[out]	outIsSwapped	Receives true if channels 3 & 4 are currently being swapped;  otherwise false.
+		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+		@return						True if successful;  otherwise false.
+		@see						CNTV2Card::SetHDMIInAudioChannel34Swap
+	**/
+	AJA_VIRTUAL bool		GetHDMIInAudioChannel34Swap (bool & outIsSwapped, const NTV2Channel inChannel = NTV2_CHANNEL1);	//	New in SDK v16.0
+
+	/**
+		@brief						Sets the given HDMI input's audio channel 3/4 swap state.
+		@param[in]	inIsSwapped		Specify true to swap channels 3 & 4;  otherwise false.
+		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+		@return						True if successful;  otherwise false.
+		@see						CNTV2Card::GetHDMIInAudioChannel34Swap
+	**/
+	AJA_VIRTUAL bool		SetHDMIInAudioChannel34Swap (const bool inIsSwapped, const NTV2Channel inChannel = NTV2_CHANNEL1);	//	New in SDK v16.0
+
 
 	/**
 		@brief						Answers with the given HDMI input's video black/white range.
@@ -5345,6 +5363,22 @@ public:
 		@return						True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValue, NTV2AudioSystem & outAudioSystem);
+
+	/**
+		@brief						Answers with the HDMI output's current audio channel 3/4 swap setting.
+		@param[out]	outIsSwapped	Receives true if channels 3 & 4 are currently being swapped;  otherwise false.
+		@return						True if successful;  otherwise false.
+		@see						CNTV2Card::SetHDMIOutAudioChannel34Swap
+	**/
+	AJA_VIRTUAL bool	GetHDMIOutAudioChannel34Swap (bool & outIsSwapped);	//	New in SDK v16.0
+
+	/**
+		@brief						Sets the HDMI output's audio channel 3/4 swap state.
+		@param[in]	inIsSwapped		Specify true to swap channels 3 & 4;  otherwise false.
+		@return						True if successful;  otherwise false.
+		@see						CNTV2Card::GetHDMIOutAudioChannel34Swap
+	**/
+	AJA_VIRTUAL bool	SetHDMIOutAudioChannel34Swap (const bool inIsSwapped);	//	New in SDK v16.0
 
 	/**
 		@brief						Sets the HDMI output's audio rate

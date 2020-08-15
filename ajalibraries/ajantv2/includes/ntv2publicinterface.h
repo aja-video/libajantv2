@@ -1683,6 +1683,8 @@ typedef enum
 	kRegMaskHDMIOutForceConfig	= BIT(1),
 	kRegMaskHDMIAudioPairSelect = BIT(2)+BIT(3),
 	kRegMaskHDMISampleRateConverterEnable = BIT(4),
+	kRegMaskHDMISwapInputAudCh34	= BIT(5),
+	kRegMaskHDMISwapOutputAudCh34	= BIT(6),
 	kRegMaskHDMIOutPrefer420	= BIT(7),
 	kRegMaskHDMIOut12Bit		= BIT(26),
 	kRegMaskHDMIInputRange		= BIT(28),
@@ -3472,6 +3474,8 @@ typedef enum
 	kRegShiftHDMIOutAudio8Of16SelectMode = 5,
 	kRegShiftHDMIOutAudio2ChannelSelect = 29,
 	kRegShiftHDMIOutUserOveride = 1,
+	kRegShiftHDMISwapInputAudCh34	= 5,
+	kRegShiftHDMISwapOutputAudCh34	= 6,
 	kRegShiftHDMIOutCropMode = 24
 
 
