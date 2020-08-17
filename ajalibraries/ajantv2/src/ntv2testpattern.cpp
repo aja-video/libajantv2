@@ -3,7 +3,8 @@
 	@brief		Implementation of CNTV2TestPattern class.
 	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
-
+#include "ajatypes.h"
+#if defined(CNTV2TESTPATTERN)
 #include "ntv2card.h"
 #include "ntv2utils.h"
 #include "ntv2formatdescriptor.h"
@@ -3485,3 +3486,4 @@ void CNTV2Card::AdjustFor2048x1080(ULWord& numPixels,ULWord& linePitch)
 			break;
 	}
 }
+#endif	//	defined(CNTV2TESTPATTERN)
