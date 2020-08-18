@@ -49,7 +49,7 @@ static uint32_t	gCloseCount(0);		//	Number of Close calls made
 NTV2StringList CNTV2DriverInterface::GetLegalSchemeNames (void)
 {
 	NTV2StringList result;
-	result.push_back("ntv2nub"); result.push_back("ntv2vm"); result.push_back("ntv2local");
+	result.push_back("ntv2nub"); result.push_back("ntv2"); result.push_back("ntv2local");
 	return result;
 }
 
@@ -227,11 +227,13 @@ bool CNTV2DriverInterface::Close (void)
 bool CNTV2DriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 {	(void) inDeviceIndex;
 	NTV2_ASSERT(false && "Requires platform-specific implementation");
+	return false;
 }
 
 bool CNTV2DriverInterface::CloseLocalPhysical (void)
 {
 	NTV2_ASSERT(false && "Requires platform-specific implementation");
+	return false;
 }
 
 
@@ -377,9 +379,9 @@ bool CNTV2DriverInterface::CloseLocalPhysical (void)
 			{
 				_pRPCAPI = NTV2RPCAPI::MakeNTV2NubRPCAPI(ipv4, port);
 			}
-			else if (scheme == "ntv2vm")
+			else if (scheme == "ntv2")
 			{
-				_pRPCAPI = NTV2RPCAPI::MakeNTV2FakeDevice(hostname);
+				_pRPCAPI = NTV2RPCAPI::MakeNTV2SoftwareDevice(hostname);
 			}
 			else
 				{DIFAIL("Invalid URL scheme '" << scheme << "' in '" << urlspec << "'");  return false;}
@@ -440,11 +442,24 @@ bool CNTV2DriverInterface::SetInterruptEventCount (const INTERRUPT_ENUMS inInter
 	return true;
 }
 
+bool CNTV2DriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterrupt,  ULWord & outCount)
+{
+	outCount = 0;
+	NTV2_ASSERT(false && "Needs subclass implementation");
+	return false;
+}
+
 HANDLE CNTV2DriverInterface::GetInterruptEvent (const INTERRUPT_ENUMS eInterruptType)
 {
 	if (!NTV2_IS_VALID_INTERRUPT_ENUM(eInterruptType))
 		return HANDLE(0);
 	return HANDLE(uint64_t(mInterruptEventHandles.at(eInterruptType)));
+}
+
+bool CNTV2DriverInterface::ConfigureInterrupt (const bool bEnable, const INTERRUPT_ENUMS eInterruptType)
+{
+	NTV2_ASSERT(false && "Needs subclass implementation");
+	return false;
 }
 
 bool CNTV2DriverInterface::ConfigureSubscription (const bool bSubscribe, const INTERRUPT_ENUMS eInterruptType, PULWord & outSubscriptionHdl)

@@ -2166,7 +2166,7 @@ void CNTV2Card::DownloadSegmentedTestPattern(SegmentTestPatternData* pTestPatter
 		NTV2_ASSERT(baseAddress);
 		currentAddress = baseAddress;
 	}
-#endif !defined(NTV2_DEPRECATE_16_0)
+#endif //!defined(NTV2_DEPRECATE_16_0)
 
 	// Assume 1080 format
 	// Start with Black.

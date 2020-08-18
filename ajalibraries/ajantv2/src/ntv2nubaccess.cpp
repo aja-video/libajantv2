@@ -10,7 +10,15 @@
 #include <string.h>
 #include <sys/types.h>
 #include "ajatypes.h"
-#ifdef MSWindows
+
+#if defined(AJALinux ) || defined(AJAMac)
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <arpa/inet.h>
+	#include <netdb.h>
+	#include <unistd.h>
+#elif defined(MSWindows)
+	#include <WinSock.h>
 	#include <WinSock2.h>
 #endif
 #include "ntv2discover.h"
@@ -42,50 +50,50 @@ using namespace std;
 //	Specific NTV2RPCAPI implementation to talk to remote host
 class AJAExport NTV2NubRPCAPI : public NTV2RPCAPI
 {
-private:
-	AJASocket				_sockfd;				///< @brief	Socket descriptor
-	LWord					_remoteHandle;			///< @brief	Remote host handle
-	NTV2NubProtocolVersion	_nubProtocolVersion;	///< @brief	Protocol version
-	UWord					_remoteIndex;			///< @brief	Remote device index number
-public:
-	NTV2NubRPCAPI()
-		:	_sockfd				(-1),
-			_remoteHandle		(INVALID_NUB_HANDLE),
-			_nubProtocolVersion	(ntv2NubProtocolVersionNone),
-			_remoteIndex		(0)
-	{
-	}
-	AJA_VIRTUAL	~NTV2NubRPCAPI()
-	{
-		NTV2Disconnect();
-	}
-	AJA_VIRTUAL inline	bool					IsConnected	(void) const		{return Socket() != -1  &&  Handle() != INVALID_NUB_HANDLE;}
-	AJA_VIRTUAL inline	AJASocket				Socket (void) const				{return _sockfd;}
-	AJA_VIRTUAL inline	LWord					Handle (void) const				{return _remoteHandle;}
-	AJA_VIRTUAL inline	NTV2NubProtocolVersion	ProtocolVersion (void) const	{return _nubProtocolVersion;}
-	AJA_VIRTUAL	inline	UWord					DeviceIndex (void) const		{return _remoteIndex;}
-	AJA_VIRTUAL	int		NTV2Connect (const string & inHostname, const UWord inDeviceIndexNum);
-	AJA_VIRTUAL	int		NTV2Disconnect (void);
-	AJA_VIRTUAL	int		NTV2ReadRegisterRemote	(const ULWord regNum, ULWord & outRegValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
-	AJA_VIRTUAL	int		NTV2WriteRegisterRemote	(const ULWord regNum, const ULWord regValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
-	AJA_VIRTUAL	int		NTV2AutoCirculateRemote	(AUTOCIRCULATE_DATA & autoCircData);
-	AJA_VIRTUAL	int		NTV2WaitForInterruptRemote	(const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs);
-	AJA_VIRTUAL	int		NTV2DriverGetBitFileInformationRemote	(BITFILE_INFO_STRUCT & outInfo, const NTV2BitFileType inType);
-	AJA_VIRTUAL	int		NTV2DriverGetBuildInformationRemote	(BUILD_INFO_STRUCT & outBuildInfo);
-	AJA_VIRTUAL	int		NTV2DownloadTestPatternRemote	(const NTV2Channel channel, const NTV2PixelFormat testPatternFBF,
-														const UWord signalMask, const bool testPatDMAEnb, const ULWord testPatNum);
-	AJA_VIRTUAL	int		NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULWord & outFailedRegNum,  NTV2RegInfo aRegs[]);
-	AJA_VIRTUAL	int		NTV2GetDriverVersionRemote	(ULWord & outDriverVersion)		{(void) outDriverVersion;	return -1;}
-	AJA_VIRTUAL	int		NTV2DMATransferRemote		(const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
-													const ULWord inFrameNumber,			ULWord * pFrameBuffer,
-													const ULWord inCardOffsetBytes,		const ULWord inTotalByteCount,
-													const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
-													const ULWord inSegmentCardPitch,	const bool inSynchronous);
-	AJA_VIRTUAL	int		NTV2MessageRemote	(NTV2_HEADER *	pInMessage);
-	AJA_VIRTUAL ostream &	Print (ostream & oss) const;
-protected:
-	AJA_VIRTUAL	int		NTV2OpenRemote (const UWord inDeviceIndex);
-	AJA_VIRTUAL	int		NTV2CloseRemote (void)	{return -1;}
+	//	Instance Methods
+	public:
+		NTV2NubRPCAPI()
+			:	_sockfd				(-1),
+				_remoteHandle		(INVALID_NUB_HANDLE),
+				_nubProtocolVersion	(ntv2NubProtocolVersionNone),
+				_remoteIndex		(0)
+		{
+		}
+		AJA_VIRTUAL									~NTV2NubRPCAPI()				{NTV2Disconnect();}
+		AJA_VIRTUAL inline	bool					IsConnected	(void) const		{return Socket() != -1  &&  Handle() != INVALID_NUB_HANDLE;}
+		AJA_VIRTUAL inline	AJASocket				Socket (void) const				{return _sockfd;}
+		AJA_VIRTUAL inline	LWord					Handle (void) const				{return _remoteHandle;}
+		AJA_VIRTUAL inline	NTV2NubProtocolVersion	ProtocolVersion (void) const	{return _nubProtocolVersion;}
+		AJA_VIRTUAL	inline	UWord					DeviceIndex (void) const		{return _remoteIndex;}
+		AJA_VIRTUAL	int		NTV2Connect (const string & inHostname, const UWord inDeviceIndexNum);
+		AJA_VIRTUAL	int		NTV2Disconnect (void);
+		AJA_VIRTUAL	int		NTV2ReadRegisterRemote	(const ULWord regNum, ULWord & outRegValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
+		AJA_VIRTUAL	int		NTV2WriteRegisterRemote	(const ULWord regNum, const ULWord regValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
+		AJA_VIRTUAL	int		NTV2AutoCirculateRemote	(AUTOCIRCULATE_DATA & autoCircData);
+		AJA_VIRTUAL	int		NTV2WaitForInterruptRemote	(const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs);
+		AJA_VIRTUAL	int		NTV2DriverGetBitFileInformationRemote	(BITFILE_INFO_STRUCT & outInfo, const NTV2BitFileType inType);
+		AJA_VIRTUAL	int		NTV2DriverGetBuildInformationRemote	(BUILD_INFO_STRUCT & outBuildInfo);
+		AJA_VIRTUAL	int		NTV2DownloadTestPatternRemote	(const NTV2Channel channel, const NTV2PixelFormat testPatternFBF,
+															const UWord signalMask, const bool testPatDMAEnb, const ULWord testPatNum);
+		AJA_VIRTUAL	int		NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULWord & outFailedRegNum,  NTV2RegInfo aRegs[]);
+		AJA_VIRTUAL	int		NTV2GetDriverVersionRemote	(ULWord & outDriverVersion)		{(void) outDriverVersion;	return -1;}
+		AJA_VIRTUAL	int		NTV2DMATransferRemote		(const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
+														const ULWord inFrameNumber,			ULWord * pFrameBuffer,
+														const ULWord inCardOffsetBytes,		const ULWord inTotalByteCount,
+														const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
+														const ULWord inSegmentCardPitch,	const bool inSynchronous);
+		AJA_VIRTUAL	int		NTV2MessageRemote	(NTV2_HEADER *	pInMessage);
+		AJA_VIRTUAL ostream &	Print (ostream & oss) const;
+	protected:
+		AJA_VIRTUAL	int		NTV2OpenRemote (const UWord inDeviceIndex);
+		AJA_VIRTUAL	int		NTV2CloseRemote (void)	{return -1;}
+
+	//	Instance Data
+	private:
+		AJASocket				_sockfd;				///< @brief	Socket descriptor
+		LWord					_remoteHandle;			///< @brief	Remote host handle
+		NTV2NubProtocolVersion	_nubProtocolVersion;	///< @brief	Protocol version
+		UWord					_remoteIndex;			///< @brief	Remote device index number
 };	//	NTV2NubRPCAPI
 
 //	Factory method to create NTV2NubRPCAPI instance
@@ -1427,52 +1435,54 @@ static AJALock				sLock;
 //	Specific NTV2RPCAPI implementation to talk to software device
 class AJAExport NTV2SoftwareDevice : public NTV2RPCAPI
 {
-private:
-	UWord	_remoteIndex;			///< @brief	Remote device index number
-public:
-	NTV2SoftwareDevice()
-		:	_remoteIndex(0)
-	{
-	}
-	AJA_VIRTUAL	~NTV2SoftwareDevice()
-	{
-		NTV2Disconnect();
-	}
-	AJA_VIRTUAL inline	bool						IsConnected	(void) const		{return spFakeDevice ? true : false;}
-	AJA_VIRTUAL inline	AJASocket					Socket (void) const				{return -1;}
-	AJA_VIRTUAL inline	LWord						Handle (void) const				{return 0;}
-	AJA_VIRTUAL inline	NTV2NubProtocolVersion		ProtocolVersion (void) const	{return maxKnownProtocolVersion;}
-	AJA_VIRTUAL	inline	UWord						DeviceIndex (void) const		{return _remoteIndex;}
-	AJA_VIRTUAL	int		NTV2Connect					(const string & inName, const UWord inNum, const string & inQuery);
-	AJA_VIRTUAL	int		NTV2Disconnect				(void);
-	AJA_VIRTUAL	int		NTV2ReadRegisterRemote		(const ULWord regNum, ULWord & outRegValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
-	AJA_VIRTUAL	int		NTV2WriteRegisterRemote		(const ULWord regNum, const ULWord regValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
-	AJA_VIRTUAL	int		NTV2AutoCirculateRemote		(AUTOCIRCULATE_DATA & autoCircData);
-	AJA_VIRTUAL	int		NTV2WaitForInterruptRemote	(const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs);
-	AJA_VIRTUAL	int		NTV2DriverGetBitFileInformationRemote	(BITFILE_INFO_STRUCT & outInfo, const NTV2BitFileType inType);
-	AJA_VIRTUAL	int		NTV2DriverGetBuildInformationRemote		(BUILD_INFO_STRUCT & outBuildInfo);
-	AJA_VIRTUAL	int		NTV2DownloadTestPatternRemote(const NTV2Channel channel, const NTV2FrameBufferFormat testPatternFBF,
-													const UWord signalMask, const bool testPatDMAEnb, const ULWord testPatNum);
-	AJA_VIRTUAL	int		NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULWord & outFailedRegNum,  NTV2RegInfo outRegs[]);
-	AJA_VIRTUAL	int		NTV2GetDriverVersionRemote	(ULWord & outDriverVersion)		{(void) outDriverVersion;	return -1;}
-	AJA_VIRTUAL	int		NTV2DMATransferRemote		(const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
-													const ULWord inFrameNumber,			ULWord * pFrameBuffer,
-													const ULWord inCardOffsetBytes,		const ULWord inByteCount,
-													const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
-													const ULWord inSegmentCardPitch,	const bool inSynchronous);
-	AJA_VIRTUAL	int		NTV2MessageRemote			(NTV2_HEADER * pInMessage);
-protected:
-	AJA_VIRTUAL	int		NTV2OpenRemote (const UWord inDeviceIndex);
-	AJA_VIRTUAL	int		NTV2CloseRemote (void)	{return -1;}
-	AJA_VIRTUAL bool	AllMemory					(NTV2_POINTER & outAllMemory) const;
-	AJA_VIRTUAL bool	RegMemory					(NTV2_POINTER & outRegMemory) const;
-	AJA_VIRTUAL bool	FBMemory					(NTV2_POINTER & outFBMemory) const;
-	AJA_VIRTUAL bool	ACMemory					(NTV2_POINTER & outACMemory) const;
-private:
-	AJA_VIRTUAL	void	InitRegs (void);
-};	//	NTV2FakeDevice
+	//	Instance Methods
+	public:
+		NTV2SoftwareDevice()
+			:	_remoteIndex(0)
+		{
+		}
+		AJA_VIRTUAL										~NTV2SoftwareDevice()			{NTV2Disconnect();}
+		AJA_VIRTUAL inline	bool						IsConnected	(void) const		{return spFakeDevice ? true : false;}
+		AJA_VIRTUAL inline	AJASocket					Socket (void) const				{return -1;}
+		AJA_VIRTUAL inline	LWord						Handle (void) const				{return 0;}
+		AJA_VIRTUAL inline	NTV2NubProtocolVersion		ProtocolVersion (void) const	{return maxKnownProtocolVersion;}
+		AJA_VIRTUAL	inline	UWord						DeviceIndex (void) const		{return _remoteIndex;}
+		AJA_VIRTUAL	int		NTV2Connect					(const string & inName, const UWord inNum, const string & inQuery);
+		AJA_VIRTUAL	int		NTV2Disconnect				(void);
+		AJA_VIRTUAL	int		NTV2ReadRegisterRemote		(const ULWord regNum, ULWord & outRegValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
+		AJA_VIRTUAL	int		NTV2WriteRegisterRemote		(const ULWord regNum, const ULWord regValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
+		AJA_VIRTUAL	int		NTV2AutoCirculateRemote		(AUTOCIRCULATE_DATA & autoCircData);
+		AJA_VIRTUAL	int		NTV2WaitForInterruptRemote	(const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs);
+		AJA_VIRTUAL	int		NTV2DriverGetBitFileInformationRemote	(BITFILE_INFO_STRUCT & outInfo, const NTV2BitFileType inType);
+		AJA_VIRTUAL	int		NTV2DriverGetBuildInformationRemote		(BUILD_INFO_STRUCT & outBuildInfo);
+		AJA_VIRTUAL	int		NTV2DownloadTestPatternRemote(const NTV2Channel channel, const NTV2FrameBufferFormat testPatternFBF,
+														const UWord signalMask, const bool testPatDMAEnb, const ULWord testPatNum);
+		AJA_VIRTUAL	int		NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULWord & outFailedRegNum,  NTV2RegInfo outRegs[]);
+		AJA_VIRTUAL	int		NTV2GetDriverVersionRemote	(ULWord & outDriverVersion)		{(void) outDriverVersion;	return -1;}
+		AJA_VIRTUAL	int		NTV2DMATransferRemote		(const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
+														const ULWord inFrameNumber,			ULWord * pFrameBuffer,
+														const ULWord inCardOffsetBytes,		const ULWord inByteCount,
+														const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
+														const ULWord inSegmentCardPitch,	const bool inSynchronous);
+		AJA_VIRTUAL	int		NTV2MessageRemote			(NTV2_HEADER * pInMessage);
 
-NTV2RPCAPI * NTV2RPCAPI::MakeNTV2FakeDevice (const string & inSpec, const std::string & inPort)
+	//	Protected & Private Instance Methods
+	protected:
+		AJA_VIRTUAL	int		NTV2OpenRemote (const UWord inDeviceIndex);
+		AJA_VIRTUAL	int		NTV2CloseRemote (void)	{return -1;}
+		AJA_VIRTUAL bool	AllMemory					(NTV2_POINTER & outAllMemory) const;
+		AJA_VIRTUAL bool	RegMemory					(NTV2_POINTER & outRegMemory) const;
+		AJA_VIRTUAL bool	FBMemory					(NTV2_POINTER & outFBMemory) const;
+		AJA_VIRTUAL bool	ACMemory					(NTV2_POINTER & outACMemory) const;
+	private:
+		AJA_VIRTUAL	void	InitRegs (void);
+
+	//	Instance Data
+	private:
+		UWord	_remoteIndex;			///< @brief	Remote device index number
+};	//	NTV2SoftwareDevice
+
+NTV2RPCAPI * NTV2RPCAPI::MakeNTV2SoftwareDevice (const string & inSpec, const std::string & inPort)
 {
 	NTV2SoftwareDevice * pResult(new NTV2SoftwareDevice);
 	if (!pResult)
@@ -1567,9 +1577,9 @@ bool NTV2SoftwareDevice::AllMemory (NTV2_POINTER & outAllMemory) const
 	outAllMemory.Allocate(0);
 	AJAAutoLock lock(&sLock);
 	if (!IsConnected())
-		return -1;	//	Not connected
+		return false;	//	Not connected
 	if (spFakeDevice->fVersion != 1)
-		return -1;
+		return false;
 	return outAllMemory.Set(spFakeDevice, kFakeDevTotalBytes);
 }
 
@@ -1579,7 +1589,7 @@ bool NTV2SoftwareDevice::RegMemory (NTV2_POINTER & outRegMemory) const
 	NTV2_POINTER allMemory;
 	AJAAutoLock lock(&sLock);
 	if (!AllMemory(allMemory))
-		return -1;
+		return false;
 	return outRegMemory.Set(allMemory.GetHostAddress(kOffsetToRegBytes), spFakeDevice->fNumRegBytes);
 }
 
@@ -1589,7 +1599,7 @@ bool NTV2SoftwareDevice::FBMemory (NTV2_POINTER & outFBMemory) const
 	NTV2_POINTER allMemory;
 	AJAAutoLock lock(&sLock);
 	if (!AllMemory(allMemory))
-		return -1;
+		return false;
 	return outFBMemory.Set(allMemory.GetHostAddress(kOffsetToRegBytes + spFakeDevice->fNumRegBytes),
 													spFakeDevice->fNumFBBytes);
 }
@@ -1600,7 +1610,7 @@ bool NTV2SoftwareDevice::ACMemory (NTV2_POINTER & outACMemory) const
 	NTV2_POINTER allMemory;
 	AJAAutoLock lock(&sLock);
 	if (!AllMemory(allMemory))
-		return -1;
+		return false;
 	return outACMemory.Set(allMemory.GetHostAddress(kOffsetToRegBytes + spFakeDevice->fNumFBBytes),
 													spFakeDevice->fNumACBytes);
 }

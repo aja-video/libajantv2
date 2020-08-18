@@ -7,20 +7,7 @@
 #ifndef NTV2NUBACCESS_H
 #define NTV2NUBACCESS_H
 
-#if defined(AJALinux ) || defined(AJAMac)
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <unistd.h>
-#endif
-
 #include "ajaexport.h"
-
-#ifdef MSWindows
-#include <WinSock.h>
-#endif
-
 #include "ntv2nubtypes.h"
 
 #define NTV2_REMOTE_ACCESS_SUCCESS						  	 0
@@ -59,7 +46,7 @@ class AJAExport NTV2RPCAPI
 {
 	public:
 		static NTV2RPCAPI *		MakeNTV2NubRPCAPI (const std::string & inSpec, const std::string & inPort = "");
-		static NTV2RPCAPI *		MakeNTV2FakeDevice (const std::string & inSpec, const std::string & inPort = "");
+		static NTV2RPCAPI *		MakeNTV2SoftwareDevice (const std::string & inSpec, const std::string & inPort = "");
 
 	public:
 						NTV2RPCAPI ()	:	_hostname()	{}

@@ -144,8 +144,8 @@ static std::string GetKernErrStr (const DWORD inError)
 
 
 CNTV2WinDriverInterface::CNTV2WinDriverInterface()
-	:	_hDevInfoSet				(INVALID_HANDLE_VALUE)
-		,_pspDevIFaceDetailData		(AJA_NULL)
+	:	_pspDevIFaceDetailData		(AJA_NULL)
+		,_hDevInfoSet				(INVALID_HANDLE_VALUE)
 		,_hDevice					(INVALID_HANDLE_VALUE)
 		,_previousAudioState		(0)
 		,_previousAudioSelection	(0)
@@ -230,7 +230,6 @@ bool CNTV2WinDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 		return false; // out of memory
 	}
 
-	ULWord deviceID = 0x0;
 	ULONG deviceInstanceSize = 0;
 	CM_Get_Device_ID_Size(&deviceInstanceSize, _spDevInfoData.DevInst, 0);
 	char* deviceInstance = (char*)new BYTE[deviceInstanceSize*2];
@@ -238,8 +237,7 @@ bool CNTV2WinDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 	boardStr = deviceInstance;
 	delete [] deviceInstance;
 
-	_hDevice = CreateFile(_pspDevIFaceDetailData->DevicePath, GENERIC_READ | GENERIC_WRITE, dwShareMode, NULL,
-							OPEN_EXISTING, dwFlagsAndAttributes, NULL);
+	_hDevice = CreateFile(_pspDevIFaceDetailData->DevicePath, GENERIC_READ | GENERIC_WRITE, dwShareMode, NULL, OPEN_EXISTING, dwFlagsAndAttributes, NULL);
 	if (_hDevice == INVALID_HANDLE_VALUE)
 	{
 		WDIFAIL("CreateFile failed for '" << boardStr << "'");
@@ -1271,7 +1269,14 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 				WDIFAIL("ACSetCaptureTask failed: " << ::GetKernErrStr(GetLastError()));
 			break;
 		}	//	eSetCaptureTask
-	}
+
+		case eSetActiveFrame:
+		case AUTO_CIRC_NUM_COMMANDS:
+		{	bRes = false;
+			WDIFAIL("Bad AC command %d" << autoCircData.eCommand);
+			break;
+		}
+	}	//	switch on autoCircData.eCommand
 	return bRes;
 }	//	AutoCirculate
 
@@ -1297,43 +1302,6 @@ bool CNTV2WinDriverInterface::HevcSendMessage (HevcMessageHeader* pInMessage)
 	return true;
 }
 
-
-bool CNTV2WinDriverInterface::ControlDriverDebugMessages (NTV2_DriverDebugMessageSet msgSet, bool enable)
-{
-    return false;
-}
-
-
-bool CNTV2WinDriverInterface::SetRelativeVideoPlaybackDelay (ULWord frameDelay)
-{
-	return WriteRegister (kVRegRelativeVideoPlaybackDelay, frameDelay);
-}
-
-bool CNTV2WinDriverInterface::GetRelativeVideoPlaybackDelay (ULWord* frameDelay)
-{
-	return frameDelay ? ReadRegister (kVRegRelativeVideoPlaybackDelay, *frameDelay) : false;
-}
-
-bool CNTV2WinDriverInterface::SetAudioRecordPinDelay (ULWord millisecondDelay)
-{
-	return WriteRegister (kVRegAudioRecordPinDelay, millisecondDelay);
-}
-
-bool CNTV2WinDriverInterface::GetStrictTiming (ULWord* strictTiming)
-{
-	return strictTiming ? ReadRegister (kVRegStrictTiming, *strictTiming) : false;
-}
-
-bool CNTV2WinDriverInterface::SetStrictTiming (ULWord strictTiming)
-{
-	return WriteRegister (kVRegStrictTiming, strictTiming);
-}
-
-
-bool CNTV2WinDriverInterface::GetAudioRecordPinDelay (ULWord* millisecondDelay)
-{
-	return millisecondDelay ? ReadRegister (kVRegAudioRecordPinDelay, *millisecondDelay) : false;
-}
 
 bool CNTV2WinDriverInterface::SetAudioOutputMode (NTV2_GlobalAudioPlaybackMode mode)
 {

@@ -111,16 +111,16 @@ class CNTV2LinuxDriverInterface : public CNTV2DriverInterface
 
 public:
 #if !defined(NTV2_DEPRECATE_13_0)
-	AJA_VIRTUAL bool SetRelativeVideoPlaybackDelay (ULWord frmDelay)	{(void)frmDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
-	AJA_VIRTUAL bool GetRelativeVideoPlaybackDelay (ULWord* frmDelay)	{(void)frmDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
-	AJA_VIRTUAL bool SetAudioPlaybackPinDelay (ULWord msDelay)	{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
-	AJA_VIRTUAL bool GetAudioPlaybackPinDelay (ULWord* msDelay)	{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
-	AJA_VIRTUAL bool SetAudioRecordPinDelay (ULWord msDelay)	{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
-	AJA_VIRTUAL bool GetAudioRecordPinDelay (ULWord* msDelay)	{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetRelativeVideoPlaybackDelay (ULWord frmDelay))	{(void)frmDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetRelativeVideoPlaybackDelay (ULWord* frmDelay)){(void)frmDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetAudioPlaybackPinDelay (ULWord msDelay))	{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetAudioPlaybackPinDelay (ULWord* msDelay))	{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetAudioRecordPinDelay (ULWord msDelay))		{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetAudioRecordPinDelay (ULWord* msDelay))	{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
 #endif	//	!defined(NTV2_DEPRECATE_13_0)
 #if !defined(NTV2_DEPRECATE_16_0)
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetStreamingApplication(ULWord & outAppType, int32_t & outPID))	{return CNTV2DriverInterface::GetStreamingApplication(outAppType,outPID);}	///< @deprecated	Deprecated starting in SDK 16.0.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetStreamingApplication(ULWord * pAppType, int32_t * pPID))	{return pAppType && pPID ? CNTV2DriverInterface::GetStreamingApplication(*pAppType,*pPID) : false;}	///< @deprecated	Deprecated starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetStreamingApplication(ULWord * pAppType, int32_t * pPID))		{return pAppType && pPID ? CNTV2DriverInterface::GetStreamingApplication(*pAppType,*pPID) : false;}	///< @deprecated	Deprecated starting in SDK 16.0.
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapFrameBuffers(void));		///< @deprecated	Obsolete starting in SDK 16.0.
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool UnmapFrameBuffers(void));	///< @deprecated	Obsolete starting in SDK 16.0.
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapRegisters(void));			///< @deprecated	Obsolete starting in SDK 16.0.
