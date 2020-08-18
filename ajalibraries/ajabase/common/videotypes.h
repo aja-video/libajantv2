@@ -9,15 +9,15 @@
 
 enum AJA_VideoFormat
 {
-	AJA_VideoFormat_Unknown,
-	AJA_VideoFormat_525i_2997,				// 525
+	AJA_VideoFormat_Unknown,				// 0
+	AJA_VideoFormat_525i_2997,				// 1 525
 	AJA_VideoFormat_525p_5994,
 	AJA_VideoFormat_525i_2398,
     AJA_VideoFormat_525_2400,
     AJA_VideoFormat_525psf_2997,
-    AJA_VideoFormat_625psf_2500,			// 625
+	AJA_VideoFormat_625psf_2500,			// 6 625
 	AJA_VideoFormat_625i_2500,
-	AJA_VideoFormat_720p_2398,				// HD - 720
+	AJA_VideoFormat_720p_2398,				// 8 HD - 720
 	AJA_VideoFormat_720p_2400,
 	AJA_VideoFormat_720p_2500,
 	AJA_VideoFormat_720p_2997,
@@ -25,7 +25,7 @@ enum AJA_VideoFormat
 	AJA_VideoFormat_720p_5000,
 	AJA_VideoFormat_720p_5994,
 	AJA_VideoFormat_720p_6000,
-	AJA_VideoFormat_1080i_2500,				// HD-1080
+	AJA_VideoFormat_1080i_2500,				// 16 HD-1080
 	AJA_VideoFormat_1080i_2997,
 	AJA_VideoFormat_1080i_3000,
 	AJA_VideoFormat_1080psf_2398,
@@ -34,14 +34,14 @@ enum AJA_VideoFormat
 	AJA_VideoFormat_1080psf_2997,
 	AJA_VideoFormat_1080psf_3000,
 	AJA_VideoFormat_1080p_2398,
-	AJA_VideoFormat_1080p_2400,
+	AJA_VideoFormat_1080p_2400,				// 25
 	AJA_VideoFormat_1080p_2500,
 	AJA_VideoFormat_1080p_2997,
 	AJA_VideoFormat_1080p_3000,
     AJA_VideoFormat_1080p_5000,
     AJA_VideoFormat_1080p_5994,
     AJA_VideoFormat_1080p_6000,
-    AJA_VideoFormat_2K_1080psf_2398,		// 2Kx1080
+	AJA_VideoFormat_2K_1080psf_2398,		// 32 2Kx1080
 	AJA_VideoFormat_2K_1080psf_2400,
 	AJA_VideoFormat_2K_1080psf_2500,
 	AJA_VideoFormat_2K_1080psf_2997,
@@ -63,12 +63,12 @@ enum AJA_VideoFormat
 	AJA_VideoFormat_2K_1556psf_2500,
 	AJA_VideoFormat_2K_1556psf_2997,
 	AJA_VideoFormat_2K_1556psf_3000,
-	AJA_VideoFormat_Quad_1080psf_2398,		// UltaHD
+	AJA_VideoFormat_Quad_1080psf_2398,		// 54 UltaHD
 	AJA_VideoFormat_Quad_1080psf_2400,
 	AJA_VideoFormat_Quad_1080psf_2500,
 	AJA_VideoFormat_Quad_1080psf_2997,
 	AJA_VideoFormat_Quad_1080psf_3000,
-	AJA_VideoFormat_Quad_1080p_2398,
+	AJA_VideoFormat_Quad_1080p_2398,		// 59
 	AJA_VideoFormat_Quad_1080p_2400,
 	AJA_VideoFormat_Quad_1080p_2500,
 	AJA_VideoFormat_Quad_1080p_2997,
@@ -76,7 +76,7 @@ enum AJA_VideoFormat
 	AJA_VideoFormat_Quad_1080p_5000,
 	AJA_VideoFormat_Quad_1080p_5994,
 	AJA_VideoFormat_Quad_1080p_6000,
-	AJA_VideoFormat_4K_1080psf_2398,		// 4K
+	AJA_VideoFormat_4K_1080psf_2398,		// 67 4K
 	AJA_VideoFormat_4K_1080psf_2400,
 	AJA_VideoFormat_4K_1080psf_2500,
 	AJA_VideoFormat_4K_1080psf_2997,

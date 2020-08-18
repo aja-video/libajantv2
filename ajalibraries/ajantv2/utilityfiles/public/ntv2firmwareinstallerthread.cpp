@@ -87,11 +87,22 @@ int NeedsFirmwareUpdate (const NTV2DeviceInfo & inDeviceInfo, string & outReason
 					return -1;	//	on-device firmware older than on-disk bitfile firmware
 				}
 			}
-		}
+        }
 		else if (device.GetInstalledBitfileInfo (numBytes, installedDate, installedTime))
 		{
 			if (bitfile.Open (firmwarePath))
 			{
+                //if we can dynamically reconfig return true
+                if(device.IsDynamicDevice())
+                {
+                    device.AddDynamicDirectory((::NTV2GetFirmwareFolderPath ()));
+                    NTV2DeviceID desiredID (bitfile.GetDeviceID());
+#ifdef AJA_WINDOWS
+                    if(device.CanLoadDynamicDevice(desiredID))
+                        return false;
+#endif
+                }
+
 				//cout << inDeviceInfo.deviceIdentifier << ":  file: " << bitfile.GetDate () << "  device: " << installedDate << endl;
 				if (bitfile.GetDate () == installedDate)
 					return 0;	//	Identical!
@@ -134,7 +145,23 @@ CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread (const NTV2DeviceInfo
 		m_bitfilePath		(inBitfilePath),
 		m_updateSuccessful	(false),
 		m_verbose			(inVerbose),
-		m_forceUpdate		(inForceUpdate)
+		m_forceUpdate		(inForceUpdate),
+		m_useDynamicReconfig (false)
+{
+	::memset (&m_statusStruct, 0, sizeof (m_statusStruct));
+}
+
+CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread (const NTV2DeviceInfo & inDeviceInfo,
+															const string & inDRFilesPath,
+															const NTV2DeviceID inDesiredID,
+															const bool inVerbose)
+	:	m_deviceInfo		(inDeviceInfo),
+		m_desiredID			(inDesiredID),
+        m_drFilesPath		(inDRFilesPath),
+		m_updateSuccessful	(false),
+		m_verbose			(inVerbose),
+		m_forceUpdate		(false),
+		m_useDynamicReconfig (true)
 {
 	::memset (&m_statusStruct, 0, sizeof (m_statusStruct));
 }
@@ -149,7 +176,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  Device not open" << endl;
 		return AJA_STATUS_OPEN;
 	}
-	if (m_bitfilePath.empty ())
+	if (m_bitfilePath.empty () && !m_useDynamicReconfig)
 	{
 		cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  Bitfile path is empty!" << endl;
 		return AJA_STATUS_BAD_PARAM;
@@ -222,46 +249,59 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
         cout << "## NOTE:  CNTV2FirmwareInstallerThread:  MCS update succeeded" << endl;
         return AJA_STATUS_SUCCESS;
     }
-
+	else
 	{
-		CNTV2Bitfile	bitfile;
-
-		if (!bitfile.Open (m_bitfilePath))
+		if(m_useDynamicReconfig)
 		{
-			const string	extraInfo	(bitfile.GetLastError());
-			cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  Bitfile '" << m_bitfilePath << "' open/parse error";
-			if (!extraInfo.empty())
-				cerr << ": " << extraInfo;
-			cerr << endl;
-			return AJA_STATUS_OPEN;
-		}
-
-		const unsigned	bitfileLength	(bitfile.GetFileStreamLength ());
-		unsigned char *	bitfileBuffer	(new unsigned char [bitfileLength + 512]);
-		if (bitfileBuffer == NULL)
-		{
-			cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  Unable to allocate bitfile buffer" << endl;
-			return AJA_STATUS_MEMORY;
-		}
-
-		::memset (bitfileBuffer, 0xFF, bitfileLength + 512);
-		const unsigned	readBytes	(bitfile.GetFileByteStream (bitfileBuffer, bitfileLength));
-		const string	designName	(bitfile.GetDesignName ());
-		newFirmwareDescription = m_bitfilePath + " - " + bitfile.GetDate () + " " + bitfile.GetTime ();
-		if (readBytes != bitfileLength)
-		{
-			delete [] bitfileBuffer;
-			cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  Invalid bitfile length, read " << readBytes << " bytes, expected " << bitfileLength << endl;
-			return AJA_STATUS_FAIL;
-		}
-
-		if (!m_forceUpdate)
-		{
-			if (!bitfile.CanFlashDevice (m_deviceInfo.deviceID))
+			m_device.AddDynamicDirectory(::NTV2GetFirmwareFolderPath());
+			if(!m_device.CanLoadDynamicDevice(m_desiredID))
 			{
-				cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  Bitfile design '" << designName << "' is not compatible with device '"
+				cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread: '" << m_desiredID << "' is not compatible with device '"
 						<< m_deviceInfo.deviceIdentifier << "'" << endl;
 				return AJA_STATUS_FAIL;
+			}
+		}
+		else
+		{
+			CNTV2Bitfile	bitfile;
+	
+			if (!bitfile.Open (m_bitfilePath))
+			{
+				const string	extraInfo	(bitfile.GetLastError());
+				cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  Bitfile '" << m_bitfilePath << "' open/parse error";
+				if (!extraInfo.empty())
+                    cerr << ": " << extraInfo;
+				cerr << endl;
+				return AJA_STATUS_OPEN;
+			}
+	
+            const unsigned	bitfileLength	(bitfile.GetFileStreamLength ());
+			unsigned char *	bitfileBuffer	(new unsigned char [bitfileLength + 512]);
+			if (bitfileBuffer == NULL)
+			{
+				cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  Unable to allocate bitfile buffer" << endl;
+				return AJA_STATUS_MEMORY;
+			}
+	
+			::memset (bitfileBuffer, 0xFF, bitfileLength + 512);
+			const unsigned	readBytes	(bitfile.GetFileByteStream (bitfileBuffer, bitfileLength));
+			const string	designName	(bitfile.GetDesignName ());
+			newFirmwareDescription = m_bitfilePath + " - " + bitfile.GetDate () + " " + bitfile.GetTime ();
+			if (readBytes != bitfileLength)
+			{
+				delete [] bitfileBuffer;
+				cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  Invalid bitfile length, read " << readBytes << " bytes, expected " << bitfileLength << endl;
+				return AJA_STATUS_FAIL;
+			}
+	
+			if (!m_forceUpdate)
+			{
+				if (!bitfile.CanFlashDevice (m_deviceInfo.deviceID))
+				{
+					cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  Bitfile design '" << designName << "' is not compatible with device '"
+							<< m_deviceInfo.deviceIdentifier << "'" << endl;
+					return AJA_STATUS_FAIL;
+				}
 			}
 		}
 	}
@@ -275,16 +315,29 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 
 	if (REALLY_UPDATE)
 	{
-		//	ProgramMainFlash used to be able to throw (because XilinxBitfile could throw), but with 12.1 SDK, this is no longer the case.
-		m_updateSuccessful = m_device.ProgramMainFlash (m_bitfilePath.c_str (), m_forceUpdate, !m_verbose);
-		if (!m_updateSuccessful)
+		if(m_useDynamicReconfig)
 		{
-			cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  'ProgramMainFlash' failed" << endl
-					<< "     bitfile: " << m_bitfilePath << endl
-					<< "      device: " << m_deviceInfo.deviceIdentifier << ", S/N " << serialNumStr << endl
-					<< "   serialNum: " << serialNumStr << endl
-					<< "    firmware: " << newFirmwareDescription << endl;
-			m_updateSuccessful = false;
+			m_updateSuccessful = m_device.LoadDynamicDevice(m_desiredID);
+			if (!m_updateSuccessful)
+			{
+				cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  'Dynamic Reconfig' failed" << endl
+						<< "     desired: " << m_desiredID << endl;
+				m_updateSuccessful = false;
+			}
+		}
+		else
+		{
+			//	ProgramMainFlash used to be able to throw (because XilinxBitfile could throw), but with 12.1 SDK, this is no longer the case.
+			m_updateSuccessful = m_device.ProgramMainFlash (m_bitfilePath.c_str (), m_forceUpdate, !m_verbose);
+			if (!m_updateSuccessful)
+			{
+				cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  'ProgramMainFlash' failed" << endl
+						<< "     bitfile: " << m_bitfilePath << endl
+						<< "      device: " << m_deviceInfo.deviceIdentifier << ", S/N " << serialNumStr << endl
+						<< "   serialNum: " << serialNumStr << endl
+						<< "    firmware: " << newFirmwareDescription << endl;
+				m_updateSuccessful = false;
+			}
 		}
 	}	//	if REALLY_UPDATE
 	else
@@ -388,7 +441,8 @@ CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread ()
 		m_bitfilePath		(),
 		m_updateSuccessful	(false),
 		m_verbose			(false),
-		m_forceUpdate		(false)
+		m_forceUpdate		(false),
+		m_useDynamicReconfig (false)
 {
 	NTV2_ASSERT (false);
 }
@@ -398,7 +452,8 @@ CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread (const CNTV2FirmwareI
 		m_bitfilePath		(),
 		m_updateSuccessful	(false),
 		m_verbose			(false),
-		m_forceUpdate		(false)
+		m_forceUpdate		(false),
+		m_useDynamicReconfig (false)
 {
 	(void) inObj;
 	NTV2_ASSERT (false);

@@ -65,6 +65,12 @@ class CNTV2FirmwareInstallerThread : public AJAThread
 																				  const std::string & inBitfilePath,
 																				  const bool inVerbose = true,
 																				  const bool inForce = false);
+	
+		explicit									CNTV2FirmwareInstallerThread (const NTV2DeviceInfo & inDeviceInfo,
+																					const std::string & inDRFilesPath,
+																					const NTV2DeviceID inDesiredID,
+																					const bool inVerbose);
+	
 		virtual inline								~CNTV2FirmwareInstallerThread ()				{}
 
 		/**
@@ -119,12 +125,16 @@ class CNTV2FirmwareInstallerThread : public AJAThread
 	//	Instance Data
 	protected:
 		const NTV2DeviceInfo						m_deviceInfo;			///< @brief	Device info passed to me at construction
+		NTV2DeviceID								m_desiredID;			///< @brief Desired dynamic reconfig profile
 		std::string									m_bitfilePath;			///< @brief	Absolute path to bitfile on host that's to be flashed into device
+		std::string									m_drFilesPath;			///< @brief Path to group of dynamic reconfig files
 		bool										m_updateSuccessful;		///< @brief	Initially False, is set True if firmware successfully installed
 		const bool									m_verbose;				///< @brief	Verbose logging to cout/cerr?
 		const bool									m_forceUpdate;			///< @brief	Force the install of the bitfile
+		const bool									m_useDynamicReconfig;	///< @brief Use dyanmic reconfig
 		mutable CNTV2Card							m_device;				///< @brief	Talks to the AJA device
 		mutable SSC_GET_FIRMWARE_PROGRESS_STRUCT	m_statusStruct;			///< @brief	Firmware update progress
+		
 
 };	//	CNTV2FirmwareInstallerThread
 
