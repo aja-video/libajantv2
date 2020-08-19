@@ -5370,7 +5370,7 @@ public:
 		@return						True if successful;  otherwise false.
 		@see						CNTV2Card::SetHDMIOutAudioChannel34Swap
 	**/
-	AJA_VIRTUAL bool	GetHDMIOutAudioChannel34Swap (bool & outIsSwapped);	//	New in SDK v16.0
+	AJA_VIRTUAL bool	GetHDMIOutAudioChannel34Swap (bool & outIsSwapped, const NTV2Channel inChannel = NTV2_CHANNEL1);	//	New in SDK v16.0
 
 	/**
 		@brief						Sets the HDMI output's audio channel 3/4 swap state.
@@ -5378,7 +5378,7 @@ public:
 		@return						True if successful;  otherwise false.
 		@see						CNTV2Card::GetHDMIOutAudioChannel34Swap
 	**/
-	AJA_VIRTUAL bool	SetHDMIOutAudioChannel34Swap (const bool inIsSwapped);	//	New in SDK v16.0
+	AJA_VIRTUAL bool	SetHDMIOutAudioChannel34Swap (const bool inIsSwapped, const NTV2Channel inChannel = NTV2_CHANNEL1);	//	New in SDK v16.0
 
 	/**
 		@brief						Sets the HDMI output's audio rate
