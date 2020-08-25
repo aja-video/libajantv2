@@ -51,7 +51,8 @@ class NTV2LLBurn
 										const NTV2InputSource		inInputSource		= NTV2_INPUTSOURCE_SDI1,
 										const NTV2TCIndex			inTCIndex			= NTV2_TCINDEX_SDI1,
 										const bool					inDoMultiChannel	= false,
-										const bool					inWithAnc			= false);
+										const bool					inWithAnc			= false,
+										const bool					inWithHanc			= false);
 		virtual				~NTV2LLBurn ();
 
 		/**
@@ -149,7 +150,7 @@ class NTV2LLBurn
 		CNTV2Card					mDevice;				///< @brief	My CNTV2Card instance
 		NTV2DeviceID				mDeviceID;				///< @brief	My device identifier
 		const std::string			mDeviceSpecifier;		///< @brief	Specifies the device I should use
-		const bool					mWithAudio;				///< @brief	Capture and playout audio?
+		bool						mWithAudio;				///< @brief	Capture and playout audio?
 		NTV2Channel					mInputChannel;			///< @brief	The input channel I'm using
 		NTV2Channel					mOutputChannel;			///< @brief	The output channel I'm using
 		NTV2InputSource				mInputSource;			///< @brief	The input source I'm using
@@ -162,6 +163,7 @@ class NTV2LLBurn
 		NTV2AudioSystem				mAudioSystem;			///< @brief	The audio system I'm using
 		bool						mDoMultiChannel;		///< @brief	Set the board up for multi-format
 		bool						mWithAnc;				///< @brief	Capture and Playout packetized ANC data
+		bool						mWithHanc;				///< @brief	Capture and Playout packetized ANC data with audio
 
 		bool						mGlobalQuit;			///< @brief	Set "true" to gracefully stop
 		AJATimeCodeBurn				mTCBurner;				///< @brief	My timecode burner

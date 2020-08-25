@@ -43,6 +43,7 @@ int main (int argc, const char ** argv)
 	int				noAudio			(0);		//	Disable audio?
 	int				doMultiChannel	(0);		//  Set the board up for multi-channel/format
 	int				doAnc			(0);		//	Use the Anc Extractor/Inserter
+	int				doHanc			(0);		//	Use the Anc Extractor/Inserter with Audio
 	poptContext		optionsContext;				//	Context for parsing command line arguments
 	AJADebug::Open();
 
@@ -59,6 +60,7 @@ int main (int argc, const char ** argv)
 		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio?",					AJA_NULL},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multichannel/multiformat?",	AJA_NULL},
 		{"anc",			'a',	POPT_ARG_NONE,		&doAnc,			0,	"use Anc data extractor/inserter",	AJA_NULL},
+		{"hanc",		'h',	POPT_ARG_NONE,		&doHanc,		0,	"use Anc data extractor/inserter with audio",	AJA_NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -125,7 +127,8 @@ int main (int argc, const char ** argv)
 						vidSource,						//	Video input source
 						tcSource,						//	Timecode source
 						doMultiChannel ? true : false,	//  Multi-channel/format?
-						doAnc ? true : false);			//	Use Anc Extractor/Inserter?
+						doAnc ? true : false,			//	Use Anc Extractor/Inserter?
+						doHanc? true : false);			//	Use Hanc Extractor/Inserter?
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)
