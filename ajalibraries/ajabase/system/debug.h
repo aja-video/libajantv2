@@ -249,7 +249,7 @@ public:
 	 *	@return		AJA_STATUS_SUCCESS	Debug system initialized
 	 *				AJA_STATUS_FAIL		Initialization failed
 	 */
-    static AJAStatus Open(bool incrementRefCount = false);
+    static AJAStatus Open (bool incrementRefCount = false);
 
 	/** 
 	 *	Release resources used by the debug system.  
@@ -263,7 +263,7 @@ public:
 	 *	@return		AJA_STATUS_SUCCESS	Debug system closed
 	 *				AJA_STATUS_FAIL		Close failed
 	 */
-    static AJAStatus Close(bool decrementRefCount = false);
+    static AJAStatus Close (bool decrementRefCount = false);
 
 	/**
 	 *	Enable delivery of messages to the destination index.
@@ -274,7 +274,7 @@ public:
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_RANGE			Index out of range
 	 */
-	static AJAStatus Enable(int32_t index, uint32_t destination = AJA_DEBUG_DESTINATION_NONE);
+	static AJAStatus Enable (int32_t index, uint32_t destination = AJA_DEBUG_DESTINATION_NONE);
 
 	/**
 	 *	Disable delivery of messages to the destination index.
@@ -285,7 +285,7 @@ public:
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_RANGE			Index out of range
 	 */
-	static AJAStatus Disable(int32_t index, uint32_t destination = AJA_DEBUG_DESTINATION_NONE);
+	static AJAStatus Disable (int32_t index, uint32_t destination = AJA_DEBUG_DESTINATION_NONE);
 
 	/**
 	 *	Enable delivery of messages to the destination index.
@@ -296,19 +296,19 @@ public:
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_RANGE			Index out of range
 	 */
-	static AJAStatus SetDestination(int32_t index, uint32_t destination = AJA_DEBUG_DESTINATION_NONE);
+	static AJAStatus SetDestination (int32_t index, uint32_t destination = AJA_DEBUG_DESTINATION_NONE);
 
 	/**
 	 *	Get the destination associated with a debug group.
 	 *
 	 *	@param[in]	index						Index of the group destination to return.
-	 *	@param[out]	pDestination				The current destination
+	 *	@param[out]	outDestination				Receives the current destination
 	 *	@return		AJA_STATUS_SUCCESS			Destination disabled
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-	static AJAStatus GetDestination(int32_t index, uint32_t* pDestination);
+	static AJAStatus GetDestination (const int32_t inGroup, uint32_t & outDestination);
 
 	/**
 	 *	Is the destination index active.
@@ -317,7 +317,7 @@ public:
      *	@return		true                    Destination enabled
      *				false                   Destination disabled, Debug system not open, or Index out of range
 	 */
-    static bool IsActive(int32_t index);
+    static bool IsActive (int32_t index);
 
 	/**
 	 *	Is the debug system open?
@@ -325,7 +325,7 @@ public:
      *	@return		true                    Debug system is open and ready for use.
      *				false                   Debug system not open.
 	 */
-    static bool IsOpen(void);
+    static bool IsOpen (void);
 
 	/** 
 	 *	Is this class built with AJA_DEBUG defined. 
@@ -333,7 +333,7 @@ public:
      *	@return		true                    Debug build
      *				false                   Release build
 	 */
-    static bool IsDebugBuild();
+    static bool IsDebugBuild (void);
 
 	/**
 	 *	Report debug message to the specified destination index.
@@ -344,7 +344,7 @@ public:
 	 *	@param[in]	lineNumber	The line number in the source file reporting the message.
 	 *  @param[in]	...			Format parameters to be passed to vsprintf. The first is the format itself.
 	 */
-	static void Report(int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, ...);
+	static void Report (int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, ...);
 
     /**
      *	Report debug message to the specified destination index.
@@ -355,7 +355,7 @@ public:
      *	@param[in]	lineNumber	The line number in the source file reporting the message.
      *  @param[in]	message		The message to report.
      */
-    static void Report(int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, const std::string& message);
+    static void Report (int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, const std::string& message);
 
 	/**
      *	Assert that an unexpected error has occurred.
@@ -364,18 +364,18 @@ public:
 	 *	@param[in]	lineNumber		The line number in the source file reporting the assertion.
 	 *  @param[in]	pExpression		Expression that caused the assertion.
 	 */
-    static void AssertWithMessage(const char* pFileName, int32_t lineNumber, const std::string& pExpression);
+    static void AssertWithMessage (const char* pFileName, int32_t lineNumber, const std::string& pExpression);
 
     /**
      *	Get the reference count for the number of clients accessing shared debug info
      *
-     *	@param[out]	pRefCount                   The current client reference count.
+     *	@param[out]	outRefCount                 Receives the current client reference count.
      *	@return		AJA_STATUS_SUCCESS			Reference count returned
      *				AJA_STATUS_OPEN				Debug system not open
      *				AJA_STATUS_RANGE			Index out of range
      *				AJA_STATUS_NULL				Null output pointer
      */
-    static AJAStatus GetClientReferenceCount(int32_t* pRefCount);
+    static AJAStatus GetClientReferenceCount (int32_t & outRefCount);
 
     /**
      *	Set the reference count for the number of clients accessing shared debug info
@@ -387,173 +387,173 @@ public:
      *				AJA_STATUS_OPEN				Debug system not open
      *				AJA_STATUS_RANGE			Index out of range
      */
-    static AJAStatus SetClientReferenceCount(int32_t refCount);
+    static AJAStatus SetClientReferenceCount (int32_t refCount);
 
 	/**
 	 *	Get the sequence number of the latest message
 	 *
-	 *	@param[out]	pSequenceNumber				The current sequence number.
+	 *	@param[out]	outSequenceNumber			Receives the current sequence number.
 	 *	@return		AJA_STATUS_SUCCESS			Sequence number returned
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-    static AJAStatus GetSequenceNumber(uint64_t* pSequenceNumber);
+    static AJAStatus GetSequenceNumber (uint64_t & outSequenceNumber);
 
 	/**
 	 *	Get the sequence number recorded in the message.
 	 *
 	 *	@param[in]	sequenceNumber				Sequence number of the message.
-     *	@param[out]	pSequenceNumber				Sequence number recorded in the message.
+     *	@param[out]	outSequenceNumber			Receives the sequence number recorded in the message.
 	 *	@return		AJA_STATUS_SUCCESS			Group index returned
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-    static AJAStatus GetMessageSequenceNumber(uint64_t sequenceNumber, uint64_t *pSequenceNumber);
+    static AJAStatus GetMessageSequenceNumber (const uint64_t sequenceNumber, uint64_t & outSequenceNumber);
 
 	/**
 	 *	Get the group index that reported the message.
 	 *
 	 *	@param[in]	sequenceNumber				Sequence number of the message.
-	 *	@param[out]	pGroupIndex					Group that reported the message.
+	 *	@param[out]	outGroupIndex				Receives the group that reported the message.
 	 *	@return		AJA_STATUS_SUCCESS			Group index returned
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-    static AJAStatus GetMessageGroup(uint64_t sequenceNumber, int32_t* pGroupIndex);
+    static AJAStatus GetMessageGroup (const uint64_t sequenceNumber, int32_t & outGroupIndex);
 
 	/**
 	 *	Get the destination of the message.
 	 *
 	 *	@param[in]	sequenceNumber				Sequence number of the message.
-	 *	@param[out]	pDestination				Destination of the message.
+	 *	@param[out]	outDestination				Receives the destination of the message.
 	 *	@return		AJA_STATUS_SUCCESS			Destination returned
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-    static AJAStatus GetMessageDestination(uint64_t sequenceNumber, uint32_t* pDestination);
+    static AJAStatus GetMessageDestination (const uint64_t sequenceNumber, uint32_t & outDestination);
 
 	/**
 	 *	Get the time the message was reported.
 	 *
 	 *	@param[in]	sequenceNumber			Sequence number of the message.
-	 *	@param[out]	pTime					Time the message was reported.
+	 *	@param[out]	outTime					Receives the time the message was reported.
 	 *	@return		AJA_STATUS_SUCCESS		message time returned
 	 *				AJA_STATUS_OPEN			debug system not open
 	 *				AJA_STATUS_RANGE		index out of range
 	 *				AJA_STATUS_NULL			null output pointer
 	 */
-    static AJAStatus GetMessageTime(uint64_t sequenceNumber, uint64_t* pTime);
+    static AJAStatus GetMessageTime (const uint64_t sequenceNumber, uint64_t & outTime);
 
     /**
      *	Get the wall clock time the message was reported.
      *
      *	@param[in]	sequenceNumber			Sequence number of the message.
-     *	@param[out]	pTime					Wall clock time the message was reported, as returned from time()
+     *	@param[out]	outTime					Receives the wall clock time the message was reported, as returned from time()
      *	@return		AJA_STATUS_SUCCESS		message time returned
      *				AJA_STATUS_OPEN			debug system not open
      *				AJA_STATUS_RANGE		index out of range
      *				AJA_STATUS_NULL			null output pointer
      */
-    static AJAStatus GetMessageWallClockTime(uint64_t sequenceNumber, int64_t *pTime);
+    static AJAStatus GetMessageWallClockTime (const uint64_t sequenceNumber, int64_t & outTime);
 
 
 	/**
 	 *	Get the source file name that reported the message.
 	 *
 	 *	@param[in]	sequenceNumber				Sequence number of the message.
-	 *	@param[out]	ppFileName					Source file name that reported the message.
+	 *	@param[out]	outFileName					Receives the source file name that reported the message.
 	 *	@return		AJA_STATUS_SUCCESS			Message file name returned
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-    static AJAStatus GetMessageFileName(uint64_t sequenceNumber, const char** ppFileName);
+    static AJAStatus GetMessageFileName (const uint64_t sequenceNumber, std::string & outFileName);
 
 	/**
 	 *	Get the source line number that reported the message.
 	 *
 	 *	@param[in]	sequenceNumber				Sequence number of the message.
-	 *	@param[out]	pLineNumber					Source line number that reported the message.
+	 *	@param[out]	outLineNumber				Receives the source line number that reported the message.
 	 *	@return		AJA_STATUS_SUCCESS			Sequence number returned
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-    static AJAStatus GetMessageLineNumber(uint64_t sequenceNumber, int32_t* pLineNumber);
+    static AJAStatus GetMessageLineNumber (const uint64_t sequenceNumber, int32_t & outLineNumber);
 
 	/**
 	 *	Get the severity of the reported message.
 	 *
 	 *	@param[in]	sequenceNumber				Sequence number of the message.
-	 *	@param[out]	pSeverity					Severity of the reported message.
+	 *	@param[out]	outSeverity					Receives the severity of the reported message.
 	 *	@return		AJA_STATUS_SUCCESS			Message severity returned
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-    static AJAStatus GetMessageSeverity(uint64_t sequenceNumber, int32_t* pSeverity);
+    static AJAStatus GetMessageSeverity (const uint64_t sequenceNumber, int32_t & outSeverity);
 
 	/**
 	 *	Get the message.
 	 *
 	 *	@param[in]	sequenceNumber				Sequence number of the message.
-	 *	@param[out]	ppMessage					The message text
+	 *	@param[out]	outMessage					Receives the message text
 	 *	@return		AJA_STATUS_SUCCESS			Message text returned
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_RANGE			Index out of range
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-    static AJAStatus GetMessageText(uint64_t sequenceNumber, const char** ppMessage);
+    static AJAStatus GetMessageText (const uint64_t sequenceNumber, std::string & outMessage);
 
     /**
      *	Get the Process Id that reported the message.
      *
      *	@param[in]	sequenceNumber			Sequence number of the message.
-     *	@param[out]	pPid                    Process Id that reported the message.
+     *	@param[out]	outPid                  Process Id that reported the message.
      *	@return		AJA_STATUS_SUCCESS		message time returned
      *				AJA_STATUS_OPEN			debug system not open
      *				AJA_STATUS_RANGE		index out of range
      *				AJA_STATUS_NULL			null output pointer
      */
-    static AJAStatus GetProcessId(uint64_t sequenceNumber, uint64_t* pPid);
+    static AJAStatus GetProcessId (const uint64_t sequenceNumber, uint64_t & outPid);
 
     /**
      *	Get the Thread Id that reported the message.
      *
      *	@param[in]	sequenceNumber			Sequence number of the message.
-     *	@param[out]	pTid                    Thread Id that reported the message.
+     *	@param[out]	outTid                  Receives the thread Id that reported the message.
      *	@return		AJA_STATUS_SUCCESS		message time returned
      *				AJA_STATUS_OPEN			debug system not open
      *				AJA_STATUS_RANGE		index out of range
      *				AJA_STATUS_NULL			null output pointer
      */
-    static AJAStatus GetThreadId(uint64_t sequenceNumber, uint64_t* pTid);
+    static AJAStatus GetThreadId (const uint64_t sequenceNumber, uint64_t & outTid);
 
     /**
      *	Get the number of messages accepted into the ring since creation.
      *
-     *	@param[out]	pCount                      The number of messages
+     *	@param[out]	outCount                    Receives the number of messages
      *	@return		AJA_STATUS_SUCCESS			Number of messages returned
      *				AJA_STATUS_OPEN				Debug system not open
      *				AJA_STATUS_RANGE			Index out of range
      *				AJA_STATUS_NULL				Null output pointer
      */
-    static AJAStatus GetMessagesAccepted(uint64_t* pCount);
+    static AJAStatus GetMessagesAccepted (uint64_t & outCount);
 
     /**
      *	Get the number of messages ignored and not put into the ring since creation.
      *
-     *	@param[out]	pCount                      The number of messages
+     *	@param[out]	outCount                    Receives the number of messages
      *	@return		AJA_STATUS_SUCCESS			Number of messages returned
      *				AJA_STATUS_OPEN				Debug system not open
      *				AJA_STATUS_RANGE			Index out of range
      *				AJA_STATUS_NULL				Null output pointer
      */
-    static AJAStatus GetMessagesIgnored(uint64_t* pCount);
+    static AJAStatus GetMessagesIgnored (uint64_t & outCount);
 
 	/**
 	 *	Get the string associated with a debug severity.
@@ -561,7 +561,8 @@ public:
 	 *	@param[in]	severity	Index of the severity string to return.
 	 *	@return				Severity string
 	 */
-	static const char* GetSeverityString(int32_t severity);
+	static const char* GetSeverityString (int32_t severity);
+	static const std::string & GetSeverityName (const int32_t severity);
 
     /**
      *	Get the string associated with a debug message group.
@@ -569,7 +570,7 @@ public:
      *	@param[in]	group	Index of the message group string to return.
      *	@return				Group string
      */
-    static const char* GetGroupString(int32_t group);
+    static const char* GetGroupString (int32_t group);
 
     /**
      *	Get the string associated with a debug message group.
@@ -577,7 +578,7 @@ public:
      *	@param[in]	group	Index of the message group string to return.
      *	@return				Group string
      */
-    static const std::string & GetGroupName(const int32_t group);
+    static const std::string & GetGroupName (const int32_t group);
 
 	/**
 	 *	Write group state to a file.
@@ -587,7 +588,7 @@ public:
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-	static AJAStatus SaveState(char* pFileName);
+	static AJAStatus SaveState (char* pFileName);
 
 	/**
 	 *	Read group state from a file.
@@ -597,18 +598,124 @@ public:
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-	static AJAStatus RestoreState(char* pFileName);
+	static AJAStatus RestoreState (char* pFileName);
+
+	/**
+	 *	Registers/adds new stat, prepares for first use.
+	 *
+	 *	@param[in]	inKey						The timer/counter key to be registered/allocated.
+	 *	@return		AJA_STATUS_SUCCESS if successful.
+	 */
+	static AJAStatus StatAllocate (const uint32_t inKey);
+
+	/**
+	 *	Unregisters/deletes the given stat.
+	 *
+	 *	@param[in]	inKey						The timer/counter to be unregistered/deleted.
+	 *	@return		AJA_STATUS_SUCCESS if successful.
+	 */
+	static AJAStatus StatFree (const uint32_t inKey);
+
+	/**
+	 *	Answers if the given stat is allocated (in use).
+	 *
+	 *	@param[in]	inKey						The timer/counter of interest.
+	 *	@return		True if stat is allocated;  otherwise false.
+	 */
+	static bool StatIsAllocated (const uint32_t inKey);
+
+	/**
+	 *	Resets/clears the given timer/counter stat.
+	 *
+	 *	@param[in]	inKey						The timer/counter of interest.
+	 *	@return		AJA_STATUS_SUCCESS if successful.
+	 */
+	static AJAStatus StatReset (const uint32_t inKey);
+
+	/**
+	 *	Starts the given timer stat by recording the host OS' high-resolution clock.
+	 *
+	 *	@param[in]	inKey						The timer of interest.
+	 *	@return		AJA_STATUS_SUCCESS if successful.
+	 */
+	static AJAStatus StatTimerStart (const uint32_t inKey);
+
+	/**
+	 *	Stops the given timer stat, storing the elapsed time since the last Start call
+	 *	into the timer's deque of elapsed times.
+	 *
+	 *	@param[in]	inKey						The timer of interest.
+	 *	@return		AJA_STATUS_SUCCESS if successful.
+	 */
+	static AJAStatus StatTimerStop (const uint32_t inKey);
+
+	/**
+	 *	Increments the given counter stat.
+	 *
+	 *	@param[in]	inKey						The counter of interest.
+	 *	@param[in]	inIncrement					Optionally specifies the increment value. Defaults to 1.
+	 *	@return		AJA_STATUS_SUCCESS if successful.
+	 */
+	static AJAStatus StatCounterIncrement (const uint32_t inKey, const uint32_t inIncrement = 1);
+
+	/**
+	 *	Records a new value for the stat.
+	 *
+	 *	@param[in]	inKey						The counter of interest.
+	 *	@param[in]	inValue						Specifies the value.
+	 *	@return		AJA_STATUS_SUCCESS if successful.
+	 */
+	static AJAStatus StatSetValue (const uint32_t inKey, const uint32_t inValue);
+
+	/**
+	 *	Answers with the given stat's info.
+	 *
+	 *	@param[in]	inKey						The timer/counter of interest.
+	 *	@param[out]	outInfo						Receives the timer/counter info.
+	 *	@return		AJA_STATUS_SUCCESS if successful.
+	 */
+	static AJAStatus StatGetInfo (const uint32_t inKey, AJADebugStat & outInfo);
+
+	/**
+	 *	Answers with the given stat's info.
+	 *
+	 *	@param[out]	outKeys						Receives the list of allocated stats.
+	 *	@param[out]	outSeqNum					Receives the list change sequence number (to detect if the list changed).
+	 *	@return		AJA_STATUS_SUCCESS if successful.
+	 */
+	static AJAStatus StatGetKeys (std::vector<uint32_t> & outKeys, uint32_t & outSeqNum);
 
 	/**
 	 *	Get the current time at the debug rate.
 	 *
 	 *	@return		The current time in debug ticks.
 	 */
-	static int64_t DebugTime();
+	static int64_t DebugTime (void);
 
+	//	Old APIs
+	static AJAStatus GetDestination (int32_t index, uint32_t* pDestination)	{return pDestination ? GetDestination(index, *pDestination) : AJA_STATUS_NULL;}
+    static AJAStatus GetClientReferenceCount (int32_t* pRefCount)			{return pRefCount ? GetClientReferenceCount(*pRefCount) : AJA_STATUS_NULL;}
+    static AJAStatus GetSequenceNumber (uint64_t* pSequenceNumber)			{return pSequenceNumber ? GetSequenceNumber(*pSequenceNumber) : AJA_STATUS_NULL;}
+    static AJAStatus GetMessageSequenceNumber (uint64_t sequenceNumber, uint64_t *pSequenceNumber)	{return pSequenceNumber ? GetMessageSequenceNumber(sequenceNumber, *pSequenceNumber) : AJA_STATUS_NULL;}
+    static AJAStatus GetMessageGroup (uint64_t sequenceNumber, int32_t* pGroupIndex)				{return pGroupIndex ? GetMessageGroup(sequenceNumber, *pGroupIndex) : AJA_STATUS_NULL;}
+    static AJAStatus GetMessageDestination (uint64_t sequenceNumber, uint32_t* pDestination)		{return pDestination ? GetMessageDestination(sequenceNumber, *pDestination) : AJA_STATUS_NULL;}
+    static AJAStatus GetMessageTime (uint64_t sequenceNumber, uint64_t* pTime)						{return pTime ? GetMessageTime(sequenceNumber, *pTime) : AJA_STATUS_NULL;}
+    static AJAStatus GetMessageWallClockTime (uint64_t sequenceNumber, int64_t *pTime)				{return pTime ? GetMessageWallClockTime(sequenceNumber, *pTime) : AJA_STATUS_NULL;}
+    static AJAStatus GetMessageFileName (uint64_t sequenceNumber, const char** ppFileName);
+    static AJAStatus GetMessageLineNumber (uint64_t sequenceNumber, int32_t* pLineNumber)			{return pLineNumber ? GetMessageLineNumber(sequenceNumber, *pLineNumber) : AJA_STATUS_NULL;}
+    static AJAStatus GetMessageSeverity (uint64_t sequenceNumber, int32_t* pSeverity)				{return pSeverity ? GetMessageSeverity(sequenceNumber, *pSeverity) : AJA_STATUS_NULL;}
+    static AJAStatus GetMessageText (uint64_t sequenceNumber, const char** ppMessage);
+    static AJAStatus GetProcessId (uint64_t sequenceNumber, uint64_t* pPid)							{return pPid ? GetProcessId(sequenceNumber, *pPid) : AJA_STATUS_NULL;}
+    static AJAStatus GetThreadId (uint64_t sequenceNumber, uint64_t* pTid)							{return pTid ? GetThreadId(sequenceNumber, *pTid) : AJA_STATUS_NULL;}
+    static AJAStatus GetMessagesAccepted (uint64_t* pCount)					{return pCount ? GetMessagesAccepted(*pCount) : AJA_STATUS_NULL;}
+    static AJAStatus GetMessagesIgnored (uint64_t* pCount)					{return pCount ? GetMessagesIgnored(*pCount) : AJA_STATUS_NULL;}
+
+	//	Other APIs
 	static void * GetPrivateDataLoc (void);
 	static size_t GetPrivateDataLen (void);
-private:
-};
+
+};	//	AJADebug
+
+std::ostream & operator << (std::ostream & oss, const AJADebugStat & inStat);
 
 #endif	//	AJA_DEBUG_H

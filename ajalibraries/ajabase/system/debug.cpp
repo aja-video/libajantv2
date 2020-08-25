@@ -15,9 +15,8 @@
 #include "ajabase/system/thread.h"
 
 #if defined(AJA_LINUX)
-#include <stdarg.h>
+	#include <stdarg.h>
 #endif
-
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
@@ -41,8 +40,7 @@ AJADebug::~AJADebug()
 }
 
 
-AJAStatus 
-AJADebug::Open(bool incrementRefCount)
+AJAStatus AJADebug::Open (bool incrementRefCount)
 {
 	if (!sLock.IsValid())
 		return AJA_STATUS_INITIALIZE;
@@ -58,39 +56,42 @@ AJADebug::Open(bool incrementRefCount)
 	try
 	{
 		// allocate the shared data structure for messages
-		if (spShare == NULL)
+		if (!spShare)
 		{
 			// allocate the shared memory storage
-			size_t size = sizeof(AJADebugShare);
-			spShare = (AJADebugShare*)AJAMemory::AllocateShared(&size, AJA_DEBUG_SHARE_NAME);
-			if (spShare == NULL || spShare == (void*)(-1))
+			size_t size (sizeof(AJADebugShare));
+			spShare = reinterpret_cast<AJADebugShare*>(AJAMemory::AllocateShared(&size, AJA_DEBUG_SHARE_NAME));
+			if (spShare == NULL || spShare == reinterpret_cast<void*>(-1))
 			{
 				spShare = NULL;
 				Close();
 				return AJA_STATUS_FAIL;
 			}
 
-			if (size < sizeof(AJADebugShare))
-			{
+			if (size < (sizeof(AJADebugShare) - sizeof(AJADebugStat)*AJA_DEBUG_MAX_NUM_STATS))
+			{	//	Fail anything smaller than v110's size
 				Close();
 				return AJA_STATUS_FAIL;
 			}
 
 			// check version
 			if (spShare->version == 0)
-			{
+			{	//	Initialize shared memory region...
 				memset(spShare, 0, sizeof(AJADebugShare));
-                spShare->magicId                 = AJA_DEBUG_MAGIC_ID;
-                spShare->version                 = AJA_DEBUG_VERSION;
-                spShare->writeIndex              = 0;
-                spShare->clientRefCount          = 0;
-                spShare->messageRingCapacity     = AJA_DEBUG_MESSAGE_RING_SIZE;
-                spShare->messageTextCapacity     = AJA_DEBUG_MESSAGE_MAX_SIZE;
-                spShare->messageFileNameCapacity = AJA_DEBUG_FILE_NAME_MAX_SIZE;
-                spShare->unitArraySize           = AJA_DEBUG_UNIT_ARRAY_SIZE;
-                spShare->statsMessagesAccepted   = 0;
-                spShare->statsMessagesIgnored    = 0;
-
+                spShare->magicId					= AJA_DEBUG_MAGIC_ID;
+                spShare->version					= AJA_DEBUG_VERSION;
+                spShare->writeIndex					= 0;
+                spShare->clientRefCount				= 0;
+                spShare->messageRingCapacity		= AJA_DEBUG_MESSAGE_RING_SIZE;
+                spShare->messageTextCapacity		= AJA_DEBUG_MESSAGE_MAX_SIZE;
+                spShare->messageFileNameCapacity	= AJA_DEBUG_FILE_NAME_MAX_SIZE;
+                spShare->unitArraySize				= AJA_DEBUG_UNIT_ARRAY_SIZE;
+                spShare->statsMessagesAccepted		= 0;
+                spShare->statsMessagesIgnored		= 0;
+				spShare->statCapacity				= AJA_DEBUG_MAX_NUM_STATS;
+				spShare->statAllocChanges			= 0;
+				for (size_t num(0);  num < size_t(AJA_DEBUG_MAX_NUM_STATS/64);  num++)
+					spShare->statAllocMask[num]		= 0;
 				spShare->unitArray[AJA_DebugUnit_Critical] = AJA_DEBUG_DESTINATION_CONSOLE;
 			}
 
@@ -188,281 +189,212 @@ AJADebug::Open(bool incrementRefCount)
 }
 
 
-AJAStatus 
-AJADebug::Close(bool decrementRefCount)
+AJAStatus AJADebug::Close (bool decrementRefCount)
 {
 	AJAAutoLock lock(&sLock);
-
 	try
 	{		
-        if(spShare != NULL)
-        {
-            if (decrementRefCount)
-            {
-                // decrement reference count
-                spShare->clientRefCount--;
+		if (spShare)
+		{
+			if (decrementRefCount)
+			{
+				spShare->clientRefCount--;	// decrement reference count
+				if (spShare->clientRefCount <= 0)
+					spShare->clientRefCount = 0;
+			}
 
-                if(spShare->clientRefCount <= 0)
-                {
-                    spShare->clientRefCount = 0;
-                }
-            }
-
-            // free the shared data structure
-            if(spShare != NULL)
-            {
-                AJAMemory::FreeShared(spShare);
-            }
-        }
+			// free the shared data structure
+			if (spShare)
+				AJAMemory::FreeShared(spShare);
+		}
 	}
 	catch(...)
 	{
 	}
-
 	spShare = NULL;
-
 	return AJA_STATUS_SUCCESS;
 }
 
 
-AJAStatus 
-AJADebug::Enable(int32_t index, uint32_t destination)
+AJAStatus AJADebug::Enable (int32_t index, uint32_t destination)
 {
-	uint32_t currentDestination;
-	AJAStatus status;
-
-	status = GetDestination(index, &currentDestination);
-	if(status != AJA_STATUS_SUCCESS)
-	{
+	uint32_t currentDestination = 0;
+	AJAStatus status = GetDestination(index, &currentDestination);
+	if (status != AJA_STATUS_SUCCESS)
 		return status;
-	}
 	return SetDestination(index, currentDestination | destination);
 }
 
 	
-AJAStatus 
-AJADebug::Disable(int32_t index, uint32_t destination)
+AJAStatus AJADebug::Disable (int32_t index, uint32_t destination)
 {
-	uint32_t currentDestination;
-	AJAStatus status;
-
-	status = GetDestination(index, &currentDestination);
-	if(status != AJA_STATUS_SUCCESS)
-	{
+	uint32_t currentDestination = 0;
+	AJAStatus status = GetDestination(index, &currentDestination);
+	if (status != AJA_STATUS_SUCCESS)
 		return status;
-	}
 	return SetDestination(index, currentDestination & ~destination);
 }
 
 
-AJAStatus 
-AJADebug::SetDestination(int32_t index, uint32_t destination)
+AJAStatus AJADebug::SetDestination (int32_t index, uint32_t destination)
 {
-	// check for open
-	if (spShare == NULL)
-	{
-		return AJA_STATUS_INITIALIZE;
-	}
-
-	// check for valid index
-	if ((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
-	{
-		return AJA_STATUS_RANGE;
-	}
-
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;	//	Not open
+	if (index < 0  ||  index >= AJA_DEBUG_UNIT_ARRAY_SIZE)
+		return AJA_STATUS_RANGE;	// Bad index
 	try
-	{
-		// save the destination
+	{	// save the destination
 		spShare->unitArray[index] = destination;
 	}
 	catch(...)
 	{
 		return AJA_STATUS_FAIL;
 	}
-
 	return AJA_STATUS_SUCCESS;
 }
 
 
-AJAStatus 
-AJADebug::GetDestination(int32_t index, uint32_t* pDestination)
+AJAStatus AJADebug::GetDestination (const int32_t index, uint32_t & outDestination)
 {
-	if(spShare == NULL)
-	{
+	if (!spShare)
 		return AJA_STATUS_INITIALIZE;
-	}
-
-	if((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
-	{
+	if (index < 0  ||  index >= AJA_DEBUG_UNIT_ARRAY_SIZE)
 		return AJA_STATUS_RANGE;
-	}
-
-	if(pDestination == NULL)
-	{
-		return AJA_STATUS_NULL;
-	}
-
 	try
 	{
-		*pDestination = spShare->unitArray[index];
+		outDestination = spShare->unitArray[index];
 	}
 	catch(...)
 	{
 		return AJA_STATUS_FAIL;
 	}
-
 	return AJA_STATUS_SUCCESS;
 }
 
 
-bool
-AJADebug::IsActive(int32_t index)
+bool AJADebug::IsActive (int32_t index)
 {
-	// check for open
-	if (spShare == NULL)
-	{
-        return false;
-	}
-
-	// check for valid index
-	if ((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
-	{
-        return false;
-	}
-
+	if (!spShare)
+		return false;	//	Not open
+	if (index < 0  ||  index >= AJA_DEBUG_UNIT_ARRAY_SIZE)
+		return false;	//	Bad index
 	try
-	{
-		// if no destination return false
+	{	// if no destination return false
 		if (spShare->unitArray[index] == AJA_DEBUG_DESTINATION_NONE)
-		{
-            return false;
-		}
+			return false;
 	}
 	catch(...)
 	{
-        return false;
+		return false;
 	}
-
-    return true;
+	return true;
 }
 
 
-bool
-AJADebug::IsOpen(void)
+bool AJADebug::IsOpen (void)
 {
 	return spShare != NULL;
 }
 
 
-bool
-AJADebug::IsDebugBuild()
+bool AJADebug::IsDebugBuild (void)
 {
     return sDebug;
 }
 
-inline int64_t debug_time()
+inline int64_t debug_time (void)
 {
     int64_t ticks = AJATime::GetSystemCounter();
     int64_t rate = AJATime::GetSystemFrequency();
     int64_t time = ticks / rate * AJA_DEBUG_TICK_RATE;
     time += (ticks % rate) * AJA_DEBUG_TICK_RATE / rate;
-
     return time;
 }
 
 inline uint64_t report_common(int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, uint64_t& writeIndex, int32_t& messageIndex)
 {
-    bool isGood = false;
-    if (spShare)
-    {
-        // check for active client to receive messages
-        if (spShare->clientRefCount <= 0)
-        {
-            // nobody is listening so bail quickly
-            return isGood;
-        }
+	static const char * spUnknown = "unknown";
+	if (!spShare)
+		return false;
 
-        // check for valid index
-        if ((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
-        {
-            index = AJA_DebugUnit_Unknown;
-        }
-        // check for destination
-        if (spShare->unitArray[index] == AJA_DEBUG_DESTINATION_NONE)
-        {
-            AJAAtomic::Increment(&spShare->statsMessagesIgnored);
-            return isGood;
-        }
+	// check for active client to receive messages
+	if (spShare->clientRefCount <= 0)
+	{
+		// nobody is listening so bail quickly
+		return false;
+	}
 
-        // check for valid severity
-        if ((severity < 0) || (severity >= AJA_DebugSeverity_Size))
-        {
-            severity = AJA_DebugSeverity_Warning;
-        }
+	// check for valid index
+	if ((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
+	{
+		index = AJA_DebugUnit_Unknown;
+	}
+	// check for destination
+	if (spShare->unitArray[index] == AJA_DEBUG_DESTINATION_NONE)
+	{
+		AJAAtomic::Increment(&spShare->statsMessagesIgnored);
+		return false;
+	}
 
-        // check for valid file name
-        if (pFileName == NULL)
-        {
-            pFileName = (char*) "unknown";
-        }
+	// check for valid severity
+	if ((severity < 0) || (severity >= AJA_DebugSeverity_Size))
+	{
+		severity = AJA_DebugSeverity_Warning;
+	}
 
-        // increment the message write index
-        writeIndex = AJAAtomic::Increment(&spShare->writeIndex);
+	// check for valid file name
+	if (!pFileName)
+		pFileName = spUnknown;
 
-        // modulo the ring size to determine the message array index
-        messageIndex = writeIndex % AJA_DEBUG_MESSAGE_RING_SIZE;
+	// increment the message write index
+	writeIndex = AJAAtomic::Increment(&spShare->writeIndex);
 
-        // save the message data
-        spShare->messageRing[messageIndex].groupIndex = index;
-        spShare->messageRing[messageIndex].destinationMask = spShare->unitArray[index];
-        spShare->messageRing[messageIndex].time = debug_time();
-        spShare->messageRing[messageIndex].wallTime = (int64_t)time(NULL);
-        aja::safer_strncpy(spShare->messageRing[messageIndex].fileName, pFileName, strlen(pFileName), AJA_DEBUG_FILE_NAME_MAX_SIZE);
-        spShare->messageRing[messageIndex].lineNumber = lineNumber;
-        spShare->messageRing[messageIndex].severity = severity;
-        spShare->messageRing[messageIndex].pid = AJAProcess::GetPid();
-        spShare->messageRing[messageIndex].tid = AJAThread::GetThreadId();
+	// modulo the ring size to determine the message array index
+	messageIndex = writeIndex % AJA_DEBUG_MESSAGE_RING_SIZE;
 
-        isGood = true;
-    }
+	// save the message data
+	spShare->messageRing[messageIndex].groupIndex = index;
+	spShare->messageRing[messageIndex].destinationMask = spShare->unitArray[index];
+	spShare->messageRing[messageIndex].time = debug_time();
+	spShare->messageRing[messageIndex].wallTime = (int64_t)time(NULL);
+	aja::safer_strncpy(spShare->messageRing[messageIndex].fileName, pFileName, strlen(pFileName), AJA_DEBUG_FILE_NAME_MAX_SIZE);
+	spShare->messageRing[messageIndex].lineNumber = lineNumber;
+	spShare->messageRing[messageIndex].severity = severity;
+	spShare->messageRing[messageIndex].pid = AJAProcess::GetPid();
+	spShare->messageRing[messageIndex].tid = AJAThread::GetThreadId();
 
-    return isGood;
+	return true;
 }
 
 
-void 
-AJADebug::Report(int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, ...)
+void AJADebug::Report (int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, ...)
 {
-	// check for open
-	if (spShare == NULL)
-	{
-		return;
-	}
-
+	if (!spShare)
+		return;	//	Not open
 	try
 	{
-        uint64_t writeIndex = 0;
-        int32_t messageIndex = 0;
-        if (report_common(index, severity, pFileName, lineNumber, writeIndex, messageIndex))
-        {
-            // format the message
-            va_list vargs;
-            va_start(vargs, lineNumber);
-            const char* pFormat = va_arg(vargs, const char*);
-            // check for valid message
-            if (pFormat == NULL)
-            {
-                pFormat = (char*) "no message";
-            }
-            ajavsnprintf(spShare->messageRing[messageIndex].messageText,
-                         AJA_DEBUG_MESSAGE_MAX_SIZE,
-                         pFormat, vargs);
-            va_end(vargs);
+		uint64_t writeIndex = 0;
+		int32_t messageIndex = 0;
+		if (report_common(index, severity, pFileName, lineNumber, writeIndex, messageIndex))
+		{
+			// format the message
+			va_list vargs;
+			va_start(vargs, lineNumber);
+			const char* pFormat = va_arg(vargs, const char*);
+			// check for valid message
+			if (pFormat == NULL)
+			{
+				pFormat = (char*) "no message";
+			}
+			ajavsnprintf(spShare->messageRing[messageIndex].messageText,
+						 AJA_DEBUG_MESSAGE_MAX_SIZE,
+						 pFormat, vargs);
+			va_end(vargs);
 
-            // set last to indicate message complete
-            AJAAtomic::Exchange(&spShare->messageRing[messageIndex].sequenceNumber, writeIndex);
-            AJAAtomic::Increment(&spShare->statsMessagesAccepted);
-        }
+			// set last to indicate message complete
+			AJAAtomic::Exchange(&spShare->messageRing[messageIndex].sequenceNumber, writeIndex);
+			AJAAtomic::Increment(&spShare->statsMessagesAccepted);
+		}
 	}
 	catch (...)
 	{
@@ -470,332 +402,256 @@ AJADebug::Report(int32_t index, int32_t severity, const char* pFileName, int32_t
 }
 
 
-void
-AJADebug::Report(int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, const std::string& message)
+void AJADebug::Report (int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, const std::string& message)
 {
-    // check for open
-    if (spShare == NULL)
-    {
-        return;
-    }
+	if (!spShare)
+		return;	//	Not open
+	try
+	{
+		uint64_t writeIndex = 0;
+		int32_t messageIndex = 0;
+		if (report_common(index, severity, pFileName, lineNumber, writeIndex, messageIndex))
+		{
+			// copy the message
+			aja::safer_strncpy(spShare->messageRing[messageIndex].messageText, message.c_str(), message.length()+1, AJA_DEBUG_MESSAGE_MAX_SIZE);
 
-    try
-    {
-        uint64_t writeIndex = 0;
-        int32_t messageIndex = 0;
-        if (report_common(index, severity, pFileName, lineNumber, writeIndex, messageIndex))
-        {
-            // copy the message
-            aja::safer_strncpy(spShare->messageRing[messageIndex].messageText, message.c_str(), message.length()+1, AJA_DEBUG_MESSAGE_MAX_SIZE);
-
-            // set last to indicate message complete
-            AJAAtomic::Exchange(&spShare->messageRing[messageIndex].sequenceNumber, writeIndex);
-            AJAAtomic::Increment(&spShare->statsMessagesAccepted);
-        }
-    }
-    catch (...)
-    {
-    }
+			// set last to indicate message complete
+			AJAAtomic::Exchange(&spShare->messageRing[messageIndex].sequenceNumber, writeIndex);
+			AJAAtomic::Increment(&spShare->statsMessagesAccepted);
+		}
+	}
+	catch (...)
+	{
+	}
 }
 
-void
-AJADebug::AssertWithMessage(const char* pFileName, int32_t lineNumber, const std::string& pExpression)
+void AJADebug::AssertWithMessage (const char* pFileName, int32_t lineNumber, const std::string& pExpression)
 {
 #if defined(AJA_DEBUG)
 	// check for open
-	if (spShare == NULL)
-	{
-        assert(false);
-	}
+	if (!spShare)
+		assert(false);
 
 	try
 	{
-        // check for active client to receive messages
-        if (spShare->clientRefCount > 0)
-        {
-            // check for valid file name
-            if (pFileName == NULL)
-            {
-                pFileName = (char*) "unknown";
-            }
+		// check for active client to receive messages
+		if (spShare->clientRefCount > 0)
+		{
+			// check for valid file name
+			if (pFileName == NULL)
+			{
+				pFileName = (char*) "unknown";
+			}
 
-            // increment the message write index
-            uint64_t writeIndex = AJAAtomic::Increment(&spShare->writeIndex);
+			// increment the message write index
+			uint64_t writeIndex = AJAAtomic::Increment(&spShare->writeIndex);
 
-            // modulo the ring size to determine the message array index
-            int32_t messageIndex = writeIndex % AJA_DEBUG_MESSAGE_RING_SIZE;
+			// modulo the ring size to determine the message array index
+			int32_t messageIndex = writeIndex % AJA_DEBUG_MESSAGE_RING_SIZE;
 
-            // save the message data
-            spShare->messageRing[messageIndex].groupIndex = AJA_DebugUnit_Critical;
-            spShare->messageRing[messageIndex].destinationMask = spShare->unitArray[AJA_DebugUnit_Critical];
-            spShare->messageRing[messageIndex].time = debug_time();
-            spShare->messageRing[messageIndex].wallTime = (int64_t)time(NULL);
-            aja::safer_strncpy(spShare->messageRing[messageIndex].fileName, pFileName, strlen(pFileName), AJA_DEBUG_FILE_NAME_MAX_SIZE);
-            spShare->messageRing[messageIndex].lineNumber = lineNumber;
-            spShare->messageRing[messageIndex].severity = AJA_DebugSeverity_Assert;
-            spShare->messageRing[messageIndex].pid = AJAProcess::GetPid();
-            spShare->messageRing[messageIndex].tid = AJAThread::GetThreadId();
+			// save the message data
+			spShare->messageRing[messageIndex].groupIndex = AJA_DebugUnit_Critical;
+			spShare->messageRing[messageIndex].destinationMask = spShare->unitArray[AJA_DebugUnit_Critical];
+			spShare->messageRing[messageIndex].time = debug_time();
+			spShare->messageRing[messageIndex].wallTime = (int64_t)time(NULL);
+			aja::safer_strncpy(spShare->messageRing[messageIndex].fileName, pFileName, strlen(pFileName), AJA_DEBUG_FILE_NAME_MAX_SIZE);
+			spShare->messageRing[messageIndex].lineNumber = lineNumber;
+			spShare->messageRing[messageIndex].severity = AJA_DebugSeverity_Assert;
+			spShare->messageRing[messageIndex].pid = AJAProcess::GetPid();
+			spShare->messageRing[messageIndex].tid = AJAThread::GetThreadId();
 
-            // format the message
-            ajasnprintf(spShare->messageRing[messageIndex].messageText,
-                        AJA_DEBUG_MESSAGE_MAX_SIZE,
-                        "assertion failed (file %s, line %d):  %s\n",
-                        pFileName, lineNumber, pExpression.c_str());
+			// format the message
+			ajasnprintf(spShare->messageRing[messageIndex].messageText,
+						AJA_DEBUG_MESSAGE_MAX_SIZE,
+						"assertion failed (file %s, line %d):  %s\n",
+						pFileName, lineNumber, pExpression.c_str());
 
-            // set last to indicate message complete
-            AJAAtomic::Exchange(&spShare->messageRing[messageIndex].sequenceNumber, writeIndex);
-            AJAAtomic::Increment(&spShare->statsMessagesAccepted);
-        }
+			// set last to indicate message complete
+			AJAAtomic::Exchange(&spShare->messageRing[messageIndex].sequenceNumber, writeIndex);
+			AJAAtomic::Increment(&spShare->statsMessagesAccepted);
+		}
 	}
 	catch (...)
 	{
 	}
 
-    assert(false);
+	assert(false);
 #else
-    AJA_UNUSED(pFileName);
-    AJA_UNUSED(lineNumber);
-    AJA_UNUSED(pExpression);
+	AJA_UNUSED(pFileName);
+	AJA_UNUSED(lineNumber);
+	AJA_UNUSED(pExpression);
 #endif
 }
 
 
-AJAStatus
-AJADebug::GetClientReferenceCount(int32_t *pRefCount)
+AJAStatus AJADebug::GetClientReferenceCount (int32_t & outRefCount)
 {
-    if(spShare == NULL)
-    {
-        *pRefCount = 0;
-        return AJA_STATUS_INITIALIZE;
-    }
-    if(pRefCount == NULL)
-    {
-        return AJA_STATUS_NULL;
-    }
-    try
-    {
-        *pRefCount = spShare->clientRefCount;
-    }
-    catch(...)
-    {
-        *pRefCount = 0;
-        return AJA_STATUS_FAIL;
-    }
-
-    return AJA_STATUS_SUCCESS;
-}
-
-
-AJAStatus
-AJADebug::SetClientReferenceCount(int32_t refCount)
-{
-    if(spShare == NULL)
-    {
-        return AJA_STATUS_INITIALIZE;
-    }
-    try
-    {
-        spShare->clientRefCount = refCount;
-        if (refCount <= 0)
-        {
-            // this will handle shuting everything down if ref count goes to 0 or less
-            AJADebug::Close();
-        }
-    }
-    catch(...)
-    {
-        return AJA_STATUS_FAIL;
-    }
-
-    return AJA_STATUS_SUCCESS;
-}
-
-
-AJAStatus 
-AJADebug::GetSequenceNumber(uint64_t *pSequenceNumber)
-{
-	if(spShare == NULL)
-	{
+	outRefCount = 0;
+	if (!spShare)
 		return AJA_STATUS_INITIALIZE;
-	}
-
-	if(pSequenceNumber == NULL)
-	{
-		return AJA_STATUS_NULL;
-	}
-
 	try
 	{
-		*pSequenceNumber = spShare->writeIndex;
+		outRefCount = spShare->clientRefCount;
 	}
 	catch(...)
 	{
 		return AJA_STATUS_FAIL;
 	}
+	return AJA_STATUS_SUCCESS;
+}
 
+
+AJAStatus AJADebug::SetClientReferenceCount (int32_t refCount)
+{
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	try
+	{
+		spShare->clientRefCount = refCount;
+		if (refCount <= 0)
+		{
+			// this will handle shuting everything down if ref count goes to 0 or less
+			AJADebug::Close();
+		}
+	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
+
+
+AJAStatus AJADebug::GetSequenceNumber (uint64_t & outSequenceNumber)
+{
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	try
+	{
+		outSequenceNumber = spShare->writeIndex;
+	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
 	return AJA_STATUS_SUCCESS; 
 }
 
 
-AJAStatus
-AJADebug::GetMessageSequenceNumber(uint64_t sequenceNumber, uint64_t* pSequenceNumber)
+AJAStatus AJADebug::GetMessageSequenceNumber (const uint64_t sequenceNumber, uint64_t & outSequenceNumber)
 {
-	if(spShare == NULL)
-	{
+	if (!spShare)
 		return AJA_STATUS_INITIALIZE;
-	}
-	if(sequenceNumber > spShare->writeIndex)
-	{
+	if (sequenceNumber > spShare->writeIndex)
 		return AJA_STATUS_RANGE;
-	}
-	if(pSequenceNumber == NULL)
-	{
-		return AJA_STATUS_NULL;
-	}
-
 	try
 	{        
-		*pSequenceNumber = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].sequenceNumber;
+		outSequenceNumber = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].sequenceNumber;
 	}
 	catch(...)
 	{
 		return AJA_STATUS_FAIL;
 	}
-
 	return AJA_STATUS_SUCCESS;
 }
 
 
-AJAStatus
-AJADebug::GetMessageGroup(uint64_t sequenceNumber, int32_t* pGroupIndex)
+AJAStatus AJADebug::GetMessageGroup (const uint64_t sequenceNumber, int32_t & outGroupIndex)
 {
-	if(spShare == NULL)
-	{
+	if (!spShare)
 		return AJA_STATUS_INITIALIZE;
-	}
-	if(sequenceNumber > spShare->writeIndex)
-	{
+	if (sequenceNumber > spShare->writeIndex)
 		return AJA_STATUS_RANGE;
-	}
-	if(pGroupIndex == NULL)
-	{
-		return AJA_STATUS_NULL;
-	}
-
 	try
 	{
-		*pGroupIndex = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].groupIndex;
+		outGroupIndex = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].groupIndex;
 	}
 	catch(...)
 	{
 		return AJA_STATUS_FAIL;
 	}
-
 	return AJA_STATUS_SUCCESS;
 }
 
 
-AJAStatus
-AJADebug::GetMessageDestination(uint64_t sequenceNumber, uint32_t* pDestination)
+AJAStatus AJADebug::GetMessageDestination (const uint64_t sequenceNumber, uint32_t & outDestination)
 {
-	if(spShare == NULL)
-	{
+	if (!spShare)
 		return AJA_STATUS_INITIALIZE;
-	}
-	if(sequenceNumber > spShare->writeIndex)
-	{
+	if (sequenceNumber > spShare->writeIndex)
 		return AJA_STATUS_RANGE;
-	}
-	if(pDestination == NULL)
-	{
-		return AJA_STATUS_NULL;
-	}
-
 	try
 	{
-		*pDestination = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].destinationMask;
+		outDestination = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].destinationMask;
 	}
 	catch(...)
 	{
 		return AJA_STATUS_FAIL;
 	}
-
 	return AJA_STATUS_SUCCESS;
 }
 
 
-AJAStatus 
-AJADebug::GetMessageTime(uint64_t sequenceNumber, uint64_t* pTime)
+AJAStatus AJADebug::GetMessageTime (const uint64_t sequenceNumber, uint64_t & outTime)
 {
-	if(spShare == NULL)
-	{
+	if (!spShare)
 		return AJA_STATUS_INITIALIZE;
-	}
-	if(sequenceNumber > spShare->writeIndex)
-	{
+	if (sequenceNumber > spShare->writeIndex)
 		return AJA_STATUS_RANGE;
-	}
-	if(pTime == NULL)
-	{
-		return AJA_STATUS_NULL;
-	}
-
 	try
 	{
-		*pTime = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].time;
+		outTime = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].time;
 	}
 	catch(...)
 	{
 		return AJA_STATUS_FAIL;
 	}
-
 	return AJA_STATUS_SUCCESS;
 }
 
-AJAStatus
-AJADebug::GetMessageWallClockTime(uint64_t sequenceNumber, int64_t* pTime)
+AJAStatus AJADebug::GetMessageWallClockTime (const uint64_t sequenceNumber, int64_t & outTime)
 {
-    if(spShare == NULL)
-    {
-        return AJA_STATUS_INITIALIZE;
-    }
-    if(sequenceNumber > spShare->writeIndex)
-    {
-        return AJA_STATUS_RANGE;
-    }
-    if(pTime == NULL)
-    {
-        return AJA_STATUS_NULL;
-    }
-
-    try
-    {
-        *pTime = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].wallTime;
-    }
-    catch(...)
-    {
-        return AJA_STATUS_FAIL;
-    }
-
-    return AJA_STATUS_SUCCESS;
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	if (sequenceNumber > spShare->writeIndex)
+		return AJA_STATUS_RANGE;
+	try
+	{
+		outTime = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].wallTime;
+	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
 }
 
-AJAStatus 
-AJADebug::GetMessageFileName(uint64_t sequenceNumber, const char** ppFileName)
+AJAStatus AJADebug::GetMessageFileName (const uint64_t sequenceNumber, std::string & outFileName)
 {
-	if(spShare == NULL)
-	{
+	outFileName.clear();
+	if (!spShare)
 		return AJA_STATUS_INITIALIZE;
-	}
-	if(sequenceNumber > spShare->writeIndex)
-	{
+	if (sequenceNumber > spShare->writeIndex)
 		return AJA_STATUS_RANGE;
-	}
-	if(ppFileName == NULL)
+	try
 	{
-		return AJA_STATUS_NULL;
+		outFileName = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].fileName;
 	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
 
+AJAStatus AJADebug::GetMessageFileName (uint64_t sequenceNumber, const char** ppFileName)
+{
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	if (sequenceNumber > spShare->writeIndex)
+		return AJA_STATUS_RANGE;
+	if (ppFileName == NULL)
+		return AJA_STATUS_NULL;
 	try
 	{
 		*ppFileName = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].fileName;
@@ -804,85 +660,72 @@ AJADebug::GetMessageFileName(uint64_t sequenceNumber, const char** ppFileName)
 	{
 		return AJA_STATUS_FAIL;
 	}
-
 	return AJA_STATUS_SUCCESS;
 }
 
 
-AJAStatus
-AJADebug::GetMessageLineNumber(uint64_t sequenceNumber, int32_t* pLineNumber)
+AJAStatus AJADebug::GetMessageLineNumber (const uint64_t sequenceNumber, int32_t & outLineNumber)
 {
-	if(spShare == NULL)
-	{
+	if (!spShare)
 		return AJA_STATUS_INITIALIZE;
-	}
-	if(sequenceNumber > spShare->writeIndex)
-	{
+	if (sequenceNumber > spShare->writeIndex)
 		return AJA_STATUS_RANGE;
-	}
-	if(pLineNumber == NULL)
-	{
-		return AJA_STATUS_NULL;
-	}
-
 	try
 	{
-		*pLineNumber = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].lineNumber;
+		outLineNumber = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].lineNumber;
 	}
 	catch(...)
 	{
 		return AJA_STATUS_FAIL;
 	}
-
 	return AJA_STATUS_SUCCESS;
 }
 
 
-AJAStatus
-AJADebug::GetMessageSeverity(uint64_t sequenceNumber, int32_t* pSeverity)
+AJAStatus AJADebug::GetMessageSeverity (const uint64_t sequenceNumber, int32_t & outSeverity)
 {
-	if(spShare == NULL)
-	{
+	if (!spShare)
 		return AJA_STATUS_INITIALIZE;
-	}
-	if(sequenceNumber > spShare->writeIndex)
-	{
+	if (sequenceNumber > spShare->writeIndex)
 		return AJA_STATUS_RANGE;
-	}
-	if(pSeverity == NULL)
-	{
-		return AJA_STATUS_NULL;
-	}
-
 	try
 	{
-		*pSeverity = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].severity;
+		outSeverity = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].severity;
 	}
 	catch(...)
 	{
 		return AJA_STATUS_FAIL;
 	}
-
 	return AJA_STATUS_SUCCESS;
 }
 
 
-AJAStatus 
-AJADebug::GetMessageText(uint64_t sequenceNumber, const char** ppMessage)
+AJAStatus AJADebug::GetMessageText (const uint64_t sequenceNumber, std::string & outMessage)
 {
-	if(spShare == NULL)
-	{
+	outMessage.clear();
+	if (!spShare)
 		return AJA_STATUS_INITIALIZE;
-	}
-	if(sequenceNumber > spShare->writeIndex)
-	{
+	if (sequenceNumber > spShare->writeIndex)
 		return AJA_STATUS_RANGE;
-	}
-	if(ppMessage == NULL)
+	try
 	{
-		return AJA_STATUS_NULL;
+		outMessage = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].messageText;
 	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
 
+AJAStatus AJADebug::GetMessageText (uint64_t sequenceNumber, const char** ppMessage)
+{
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	if (sequenceNumber > spShare->writeIndex)
+		return AJA_STATUS_RANGE;
+	if (!ppMessage)
+		return AJA_STATUS_NULL;
 	try
 	{
 		*ppMessage = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].messageText;
@@ -891,193 +734,127 @@ AJADebug::GetMessageText(uint64_t sequenceNumber, const char** ppMessage)
 	{
 		return AJA_STATUS_FAIL;
 	}
-
 	return AJA_STATUS_SUCCESS;
 }
 
 
-AJAStatus
-AJADebug::GetProcessId(uint64_t sequenceNumber, uint64_t* pPid)
+AJAStatus AJADebug::GetProcessId (const uint64_t sequenceNumber, uint64_t & outPid)
 {
-    if(spShare == NULL)
-    {
-        return AJA_STATUS_INITIALIZE;
-    }
-    if(sequenceNumber > spShare->writeIndex)
-    {
-        return AJA_STATUS_RANGE;
-    }
-    if(pPid == NULL)
-    {
-        return AJA_STATUS_NULL;
-    }
-
-    try
-    {
-        *pPid = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].pid;
-    }
-    catch(...)
-    {
-        return AJA_STATUS_FAIL;
-    }
-
-    return AJA_STATUS_SUCCESS;
-}
-
-
-AJAStatus
-AJADebug::GetThreadId(uint64_t sequenceNumber, uint64_t* pTid)
-{
-    if(spShare == NULL)
-    {
-        return AJA_STATUS_INITIALIZE;
-    }
-    if(sequenceNumber > spShare->writeIndex)
-    {
-        return AJA_STATUS_RANGE;
-    }
-    if(pTid == NULL)
-    {
-        return AJA_STATUS_NULL;
-    }
-
-    try
-    {
-        *pTid = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].tid;
-    }
-    catch(...)
-    {
-        return AJA_STATUS_FAIL;
-    }
-
-    return AJA_STATUS_SUCCESS;
-}
-
-
-AJAStatus
-AJADebug::GetMessagesAccepted(uint64_t* pCount)
-{
-    if(spShare == NULL)
-    {
-        return AJA_STATUS_INITIALIZE;
-    }
-
-    if(pCount == NULL)
-    {
-        return AJA_STATUS_NULL;
-    }
-
-    try
-    {
-        *pCount = spShare->statsMessagesAccepted;
-    }
-    catch(...)
-    {
-        return AJA_STATUS_FAIL;
-    }
-
-    return AJA_STATUS_SUCCESS;
-}
-
-
-AJAStatus
-AJADebug::GetMessagesIgnored(uint64_t* pCount)
-{
-    if(spShare == NULL)
-    {
-        return AJA_STATUS_INITIALIZE;
-    }
-
-    if(pCount == NULL)
-    {
-        return AJA_STATUS_NULL;
-    }
-
-    try
-    {
-        *pCount = spShare->statsMessagesIgnored;
-    }
-    catch(...)
-    {
-        return AJA_STATUS_FAIL;
-    }
-
-    return AJA_STATUS_SUCCESS;
-}
-
-
-const char* 
-AJADebug::GetSeverityString(int32_t severity)
-{
-	if((severity < 0) || (severity >= (int32_t)(sizeof(sSeverityString)/sizeof(sSeverityString[0]))))
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	if (sequenceNumber > spShare->writeIndex)
+		return AJA_STATUS_RANGE;
+	try
 	{
-		return "severity range error";
+		outPid = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].pid;
 	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
 
+
+AJAStatus AJADebug::GetThreadId (const uint64_t sequenceNumber, uint64_t & outTid)
+{
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	if (sequenceNumber > spShare->writeIndex)
+		return AJA_STATUS_RANGE;
+	try
+	{
+		outTid = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].tid;
+	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
+
+
+AJAStatus AJADebug::GetMessagesAccepted (uint64_t & outCount)
+{
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	try
+	{
+		outCount = spShare->statsMessagesAccepted;
+	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
+
+
+AJAStatus AJADebug::GetMessagesIgnored (uint64_t & outCount)
+{
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	try
+	{
+		outCount = spShare->statsMessagesIgnored;
+	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
+
+
+const char* AJADebug::GetSeverityString (int32_t severity)
+{
+	if (severity < 0  ||  severity >= int32_t(sizeof(sSeverityString)/sizeof(sSeverityString[0])))
+		return "severity range error";
 	return sSeverityString[severity];
 }
 
 
-const char*
-AJADebug::GetGroupString(int32_t group)
+const char* AJADebug::GetGroupString (int32_t group)
 {
-    if(group < 0 || group >= (int32_t)sGroupLabelVector.size())
-    {
-        return "index range error";
-    }
-
-    if(sGroupLabelVector.at(group).empty())
-    {
-        return "no label";
-    }
-
-    return sGroupLabelVector.at(group).c_str();
+	if (group < 0  ||  group >= int32_t(sGroupLabelVector.size()))
+		return "index range error";
+	if (sGroupLabelVector.at(size_t(group)).empty())
+		return "no label";
+	return sGroupLabelVector.at(size_t(group)).c_str();
 }
 
 
-const std::string &
-AJADebug::GetGroupName(const int32_t group)
+const std::string & AJADebug::GetGroupName (const int32_t group)
 {
 	static const std::string sRangeErr("<bad index>");
 	static const std::string sNoLabelErr("<empty>");
-    if(group < 0 || group >= (int32_t)sGroupLabelVector.size())
-        return sRangeErr;
-
-    if(sGroupLabelVector.at(group).empty())
-        return sNoLabelErr;
-
-    return sGroupLabelVector.at(group);
+	if (group < 0  ||  group >= int32_t(sGroupLabelVector.size()))
+		return sRangeErr;
+	if (sGroupLabelVector.at(size_t(group)).empty())
+		return sNoLabelErr;
+	return sGroupLabelVector.at(size_t(group));
 }
 
 
-AJAStatus
-AJADebug::SaveState(char* pFileName)
+AJAStatus AJADebug::SaveState (char* pFileName)
 {
-	FILE* pFile;
-
-	if(spShare == NULL)
-	{
+	FILE* pFile(NULL);
+	if (!spShare)
 		return AJA_STATUS_INITIALIZE;
-	}
 
 	// open a new state file
 	pFile = fopen(pFileName, "w");
-	if(pFile == NULL)
-	{
+	if (!pFile)
 		return AJA_STATUS_FAIL;
-	}
 
 	try
-	{
-		// write the header
+	{	// write the header
 		fprintf(pFile, "AJADebugVersion: %d\n", spShare->version);
 		fprintf(pFile, "AJADebugStateFileVersion: %d\n", AJA_DEBUG_STATE_FILE_VERSION);
-
-		int i;
-		for (i = 0; i < AJA_DEBUG_UNIT_ARRAY_SIZE; i++)
+		for (int i = 0; i < AJA_DEBUG_UNIT_ARRAY_SIZE; i++)
 		{
 			// write groups with destinations enabled
-			if (spShare->unitArray[i] != 0)
+			if (spShare->unitArray[i])
 			{
                 if (i < AJA_DebugUnit_Size)
                     fprintf(pFile, "GroupDestination: %6d : %08x\n", i, spShare->unitArray[i]);
@@ -1090,29 +867,21 @@ AJADebug::SaveState(char* pFileName)
 	{
 		return AJA_STATUS_FAIL;
 	}
-
 	fclose(pFile);
-
 	return AJA_STATUS_SUCCESS;
 }
 
 
-AJAStatus
-AJADebug::RestoreState(char* pFileName)
+AJAStatus AJADebug::RestoreState (char* pFileName)
 {
-	FILE* pFile;
-
-	if(spShare == NULL)
-	{
+	FILE* pFile(NULL);
+	if (!spShare)
 		return AJA_STATUS_INITIALIZE;
-	}
 
-	// open an existing file
+	// open existing file
 	pFile = fopen(pFileName, "r");
-	if(pFile == NULL)
-	{
+	if (!pFile)
 		return AJA_STATUS_FAIL;
-	}
 
 	try
 	{
@@ -1173,8 +942,7 @@ AJADebug::RestoreState(char* pFileName)
 }
 
 
-int64_t
-AJADebug::DebugTime()
+int64_t AJADebug::DebugTime (void)
 {
     // wrapper around the inlined local version
     return debug_time();
@@ -1227,8 +995,7 @@ std::string AJAStatusToString (const AJAStatus inStatus)
 }
 
 
-void *
-AJADebug::GetPrivateDataLoc()
+void * AJADebug::GetPrivateDataLoc (void)
 {
 	if (!sLock.IsValid())
 		return NULL;
@@ -1237,11 +1004,285 @@ AJADebug::GetPrivateDataLoc()
 }
 
 
-size_t
-AJADebug::GetPrivateDataLen()
+size_t AJADebug::GetPrivateDataLen (void)
 {
 	if (!sLock.IsValid())
 		return 0;
 	AJAAutoLock lock(&sLock);
 	return spShare ? sizeof(AJADebugShare) : 0;
+}
+
+#if 0	//	Old way
+	#define	STAT_BIT_SHIFT		(1<<inKey)
+	#define	STAT_BIT_TEST		(spShare->statAllocMask & STAT_BIT_SHIFT)
+	#define	IS_STAT_BAD			!STAT_BIT_TEST
+	#define	STAT_BIT_SET		spShare->statAllocMask |= STAT_BIT_SHIFT
+	#define	STAT_BIT_CLEAR		spShare->statAllocMask &= 0xFFFFFFFFFFFFFFFF - STAT_BIT_SHIFT
+#else	//	New way
+	#define	STAT_BIT_SHIFT		(1<<(inKey%64))
+	#define	STAT_BIT_TEST		(spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] & STAT_BIT_SHIFT)
+	#define	IS_STAT_BAD			!STAT_BIT_TEST
+	#define	STAT_BIT_SET		spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] |= STAT_BIT_SHIFT
+	#define	STAT_BIT_CLEAR		spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] &= 0xFFFFFFFFFFFFFFFF - STAT_BIT_SHIFT
+#endif
+
+AJAStatus AJADebug::StatAllocate (const uint32_t inKey)
+{
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	if (inKey >= spShare->statCapacity)
+		return AJA_STATUS_RANGE;
+	try
+	{
+		if (STAT_BIT_TEST)
+			return AJA_STATUS_FAIL;
+		STAT_BIT_SET;
+		AJAAtomic::Increment(&spShare->statAllocChanges);
+		return StatReset(inKey);
+	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
+
+AJAStatus AJADebug::StatFree (const uint32_t inKey)
+{
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	if (inKey >= spShare->statCapacity)
+		return AJA_STATUS_RANGE;
+	try
+	{
+		if (IS_STAT_BAD)
+			return AJA_STATUS_FAIL;
+		StatReset(inKey);
+		STAT_BIT_CLEAR;
+		AJAAtomic::Increment(&spShare->statAllocChanges);
+	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
+
+bool AJADebug::StatIsAllocated (const uint32_t inKey)
+{
+	if (!spShare)
+		return false;
+	if (inKey >= spShare->statCapacity)
+		return false;
+	try
+	{
+		return IS_STAT_BAD ? false : true;
+	}
+	catch(...)
+	{
+		return false;
+	}
+}
+
+AJAStatus AJADebug::StatReset (const uint32_t inKey)
+{
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	if (inKey >= spShare->statCapacity)
+		return AJA_STATUS_RANGE;
+	try
+	{
+		if (IS_STAT_BAD)
+			return AJA_STATUS_FAIL;
+		AJADebugStat & stat(spShare->stats[inKey]);
+		stat.Reset();
+	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
+
+AJAStatus AJADebug::StatTimerStart (const uint32_t inKey)
+{
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	if (inKey >= spShare->statCapacity)
+		return AJA_STATUS_RANGE;
+	try
+	{
+		if (IS_STAT_BAD)
+			return AJA_STATUS_FAIL;
+		AJADebugStat & stat(spShare->stats[inKey]);
+		stat.Start();
+	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
+
+AJAStatus AJADebug::StatTimerStop (const uint32_t inKey)
+{
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	if (inKey >= spShare->statCapacity)
+		return AJA_STATUS_RANGE;
+	try
+	{
+		if (IS_STAT_BAD)
+			return AJA_STATUS_FAIL;
+		AJADebugStat & stat(spShare->stats[inKey]);
+		stat.Stop();
+	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
+
+AJAStatus AJADebug::StatCounterIncrement (const uint32_t inKey, const uint32_t inIncrement)
+{
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	if (inKey >= spShare->statCapacity)
+		return AJA_STATUS_RANGE;
+	try
+	{
+		if (IS_STAT_BAD)
+			return AJA_STATUS_FAIL;
+		AJADebugStat & stat(spShare->stats[inKey]);
+		stat.Increment(inIncrement);
+	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
+
+AJAStatus AJADebug::StatSetValue (const uint32_t inKey, const uint32_t inValue)
+{
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	if (inKey >= spShare->statCapacity)
+		return AJA_STATUS_RANGE;
+	try
+	{
+		if (IS_STAT_BAD)
+			return AJA_STATUS_FAIL;
+		AJADebugStat & stat(spShare->stats[inKey]);
+		stat.SetValue(inValue);
+	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
+
+AJAStatus AJADebug::StatGetInfo (const uint32_t inKey, AJADebugStat & outInfo)
+{
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	if (inKey >= spShare->statCapacity)
+		return AJA_STATUS_RANGE;
+	try
+	{
+		if (IS_STAT_BAD)
+			return AJA_STATUS_FAIL;
+		outInfo = spShare->stats[inKey];
+	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
+
+AJAStatus AJADebug::StatGetKeys (std::vector<uint32_t> & outKeys, uint32_t & outSeqNum)
+{
+	outKeys.clear();
+	outSeqNum = 0;
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	if (!spShare->statCapacity)
+		return AJA_STATUS_FEATURE;
+	try
+	{
+		for (uint32_t inKey(0);  inKey < spShare->statCapacity;  inKey++)
+			if (STAT_BIT_TEST)
+				outKeys.push_back(inKey);
+		outSeqNum = spShare->statAllocChanges;
+	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
+
+uint64_t AJADebugStat::Sum (size_t inNum) const
+{
+	uint64_t result(0);
+	if (!inNum  ||  inNum > AJA_DEBUG_STAT_DEQUE_SIZE)
+		inNum = AJA_DEBUG_STAT_DEQUE_SIZE;
+	for (size_t n(0);  n < inNum;  n++)
+		result += fValues[n];
+	return result;
+}
+
+double AJADebugStat::Average(void) const
+{
+	if (!fCount)
+		return 0.00;
+	if (fCount < 2)
+		return double(fValues[0]);
+	return double(Sum(fCount)) / double(fCount);
+}
+
+void AJADebugStat::Start (void)
+{
+	fLastTimeStamp = AJATime::GetSystemMicroseconds();
+}
+
+void AJADebugStat::Stop (void)
+{
+	SetValue(uint32_t(AJATime::GetSystemMicroseconds() - fLastTimeStamp), /*zero timestamp*/false);
+}
+
+void AJADebugStat::Increment (uint32_t inIncrement, const bool inRollOver)
+{
+	if (inRollOver  ||  fCount != 0xFFFFFFFF)
+		while (inIncrement--)
+			AJAAtomic::Increment(&fCount);
+	fLastTimeStamp = AJATime::GetSystemMicroseconds();
+}
+
+void AJADebugStat::Decrement (uint32_t inDecrement, const bool inRollUnder)
+{
+	if (inRollUnder  ||  fCount != 0xFFFFFFFF)
+		while (inDecrement--)
+			AJAAtomic::Decrement(&fCount);
+	fLastTimeStamp = AJATime::GetSystemMicroseconds();
+}
+
+void AJADebugStat::SetValue (const uint32_t inValue, const bool inStamp)
+{
+	fValues[fCount % AJA_DEBUG_STAT_DEQUE_SIZE] = inValue;
+	AJAAtomic::Increment(&fCount);
+	if (inValue < fMin)
+		fMin = inValue;
+	if (inValue > fMax)
+		fMax = inValue;
+	fLastTimeStamp = inStamp ? AJATime::GetSystemMicroseconds() : 0;
+}
+
+std::ostream & operator << (std::ostream & oss, const AJADebugStat & inStat)
+{
+	oss << inStat.fMin << " (min), " << inStat.Average() << " (avg), " << inStat.fMax << " (max), " << inStat.fCount << " (cnt), " << inStat.fLastTimeStamp;
+	return oss;
 }
