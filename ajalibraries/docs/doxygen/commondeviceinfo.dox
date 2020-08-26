@@ -1380,12 +1380,14 @@
 	-	the “main” partition — for the normal FPGA bitfile image;
 	-	the “failsafe” boot — for a fallback FPGA bitfile image.
 
-	Traditionally, the FPGA is only loaded from flash memory upon power-up.
-	The “failsafe” bitfile only loads if the board’s “failsafe” button is held down while power is applied to the board.
-
 	Some AJA devices — like the \ref konaip — have, in addition to the normal FPGA hardware, a microprocessor, which requires
 	an additional, separate firmware bitfile that bootstraps and operates it. This extra firmware is bundled into a “package” that is
 	also stored in (and loaded from) a separate partition in the EEPROM.
+
+	Traditionally, the FPGA is only loaded from flash memory upon power-up.
+	The “failsafe” bitfile loads if…
+	-	the board’s “failsafe” button is held down while power is applied to the board;
+	-	the “main” FPGA bitfile image was invalid or otherwise failed to load.
 
 	All NTV2 devices have two on-board LEDs that indicate readiness:
 	-#	<b>Power</b> — If the board has power, this will indicate <b>Green</b>; otherwise it won’t be lit.
