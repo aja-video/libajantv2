@@ -13,6 +13,7 @@
 	#include <sys/stat.h>
 	#include <sys/types.h>
 	#include <unistd.h>
+	#include <string.h>	//	for strerror
 #endif
 
 #include "ajabase/system/system.h"
@@ -310,7 +311,7 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 		if (newData.pMemory == MAP_FAILED)
 		{
 			std::ostringstream oss; oss << "AJAMemory::AllocateShared: 'mmap' failed, '" << name << "' fd=" << newData.fileDescriptor
-					<< " size=" << sizeInBytes << " trunc=" << (needsTruncate?"Y":"N") << " errno=" << errno << " -- " << std::strerror(errno);
+					<< " size=" << sizeInBytes << " trunc=" << (needsTruncate?"Y":"N") << " errno=" << errno << " -- " << strerror(errno);
 			syslog(LOG_ERR, "%s\n", oss.str().c_str());
 			// Just because we failed, don't ruin it for others.  If we unlink, nobody will
 			// be able to attach to the shared memory ever again.
