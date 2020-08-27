@@ -3,12 +3,11 @@
 
 @section	usingajalogger		“AJA Logger”
 
-This page describes how to use the <b>AJA Logger</b> utility to monitor logging activity of AJA software.
+This page describes how to use the <b>AJA Logger</b> utility to monitor AJA software.
 
-The <b>AJA Logger</b> application allows you to monitor, in real time, log messages generated from the ::AJADebug facility.
+The <b>AJA Logger</b> application allows you to monitor, in real time, log messages originated by the ::AJADebug facility.
 It includes a filtering mechanism that can focus on seeing specific classifications and/or severities of messages.
 It can also monitor third-party AJA client software, if they choose to post messages using the AJA Debug API.
-AJA plans to incorporate ::AJADebug based logging into more of its software going forward.
 
 @par	General Operation
 
@@ -28,16 +27,32 @@ The<b>AJA Logger</b>’s user interface consists of one main window, the main wi
 
 @subsection	logger-operation	AJA Logger Operation
 
-@image	html	logger-in-action.png
+@image	html	logger-toolbar.png
 
-The <b>Main View</b> shows log messages in tabular fashion, one log entry per table row, with the log entry data shown in columns:
--	<b>Index</b>: The unique index number of the log message. This number is reset to zero when the host OS is started.
--	<b>PID</b>: The host process ID where the log message originated.
--	<b>TID</b>: The host thread ID where the log message originated.
--	<b>Time</b>: The host timestamp when the log message was created.
--	<b>Group</b>: The log message classification group (see ::AJADebugUnit).
--	<b>Severity</b>: The severity of the log message (see ::AJADebugSeverity).
--	<b>File</b>: The name of the source file where the log message originated (if known).
+The <b>Main View</b> shows log messages in tabular fashion, one log entry per table row, with the log entry data shown in columns.
+The tool bar at the top has the following controls:
+-	<b>Enables</b>: Click to open the configuration dialog box. \see logger-config for details.
+-	<b>Log</b>: Enables or disables logging to a log file.
+-	<b>Fonts</b>: Opens a font dialog to change the font and size of the log display.
+-	<b>Clear</b>: Erases everything in the log display.
+-	<b>Scroll</b>: Toggles the auto-scrolling feature.
+-	<b>Pause</b>: Pauses or resumes the capture/display of new messages.
+-	<b>Add Marker</b>: Inserts a marker into the log.
+-	<b>Reset Ref Count</b>: Resets the reference counter.
+-	<b>Auto Group</b>: Specifies a “quiet time”, in seconds, that if no messages are logged in that interval, the first that arrives
+	after it transpires will automatically be preceded by a marker entry.
+-	<b>Message Filter</b>: If non-empty, filters the log display such that it will only show messages containing the filter text.
+
+@image	html	logger-msg-fields.png
+
+The data columns are as follows:
+-	<b>Index</b>: The unique index number of the message. This number starts at zero when the AJA Debug Facility is initialized.
+-	<b>PID</b>: The ID of the message’s originating host process.
+-	<b>TID</b>: The ID of the message’s originating host thread.
+-	<b>Time</b>: The host timestamp when the message entered the AJA Debug Facility’s ring buffer.
+-	<b>Group</b>: The message’s classification group (see ::AJADebugUnit).
+-	<b>Severity</b>: The message’s severity (see ::AJADebugSeverity).
+-	<b>File</b>: The message’s originating source file name and line number (if known).
 -	<b>Message</b>: The log message text.
 
 Messages are always displayed in increasing index order, top-to-bottom.
@@ -62,7 +77,7 @@ Otherwise, the <b>Main View</b> remains at its current scroll position.
 
 @note	Log messages containing line breaks (newline characters) are displayed in a single row, with the message text
 		truncated at the first line break in the message. If logging to a file is enabled, the message text is written
-		to the log file unchanged.
+		to the log file unchanged (including line breaks).
 
 
 
@@ -156,6 +171,13 @@ edit box in the Toolbar … then press Return, Enter or Tab. Henceforth, you’
 @note	This will only affect messages received by AJA Logger <i>after</i> changing the <b>Message Filter</b> text.
 
 To stop filtering displayed messages, delete all text from the <b>Message Filter</b> edit box … then press Return, Enter or Tab.
+
+
+
+@par	AJA Debug System Information
+
+Choose “<b>About AJALogger</b>” from the “Help” menu (Windows and Linux) or the “<b>AJA Logger</b>” menu (MacOS).
+Scroll down to view the AJA Debug facility version and its other technical details.
 
 
 

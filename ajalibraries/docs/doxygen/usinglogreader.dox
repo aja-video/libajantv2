@@ -19,7 +19,9 @@ A command-line tool that streams ::AJADebug log messages to standard output (or 
 	  --tid=thread ID                                           Thread ID filter
 	  -t, --threshold=deb|inf|not|warn|err|assert|alert|emerg   Stderr severity threshold
 	  --setdu                                                   Set debug units
+	  --stats                                                   Show active stats, then exit
 	  -v  --verbose                                             Show extra information when starting
+	  -V                                                        Show debug facility version
 	Help options:
 	  -?, --help                                                Show this help message
 	      --usage                                               Show brief usage message
