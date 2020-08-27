@@ -234,8 +234,8 @@ class AJA_EXPORT AJADebug
 {
 public:
 
-	AJADebug();
-	virtual ~AJADebug();
+	AJADebug()			{}
+	virtual ~AJADebug()	{}
 
     /**
      *	@return		The debug facility's version number.
