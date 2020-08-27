@@ -722,6 +722,7 @@ typedef enum
 	kRegAudioMixerMutes,					//	2309
 	kRegAudioMixerAux1GainCh2,				//	2310
 	kRegAudioMixerAux2GainCh2,				//	2311
+    kRegAudioMixerOutGain,                  //  2312
 	kRegAudioMixerAux1InputLevels = 2318,	//	2318
 	kRegAudioMixerAux2InputLevels,			//	2319
 	kRegAudioMixerMainInputLevelsPair0,		//	2320
@@ -932,6 +933,11 @@ typedef enum _NTV2HDMIRegisters
 	kRegHDMIInputStatus4        = 0x3013,
 	kRegHDMIControl4            = 0x3014
 } NTV2HDMIRegisters;
+
+typedef enum
+{
+    kRegRotaryEncoder = 0x940
+} NTV2RotaryEncoderRegister;
 
 #define NTV2_HDMIAuxMaxFrames	8
 #define NTV2_HDMIAuxDataSize	32
@@ -2313,7 +2319,10 @@ typedef enum
 	kRegMaskHDMIOutAudio8Of16SelectMode = BIT(5),
 	kRegMaskHDMIOutAudio2ChannelSelect = BIT(29) + BIT(30),
 	kRegMaskHDMIOutUserOveride = BIT(1),
-	kRegMaskHDMIOutCropMode = BIT(24)
+	kRegMaskHDMIOutCropMode = BIT(24),
+    
+    kRegMaskRotaryEncoderValue = BIT(7)+BIT(6)+BIT(5)+BIT(4)+BIT(3)+BIT(2)+BIT(1)+BIT(0),
+    kRegMaskRotaryEncoderGain = BIT(13)+BIT(12)+BIT(11)+BIT(10)+BIT(9)+BIT(8)
 
 #if !defined (NTV2_DEPRECATE)
 	,
@@ -2592,7 +2601,7 @@ typedef enum
 	kRegShiftVidProcMode				= 24,
 	kRegShiftVidProcSyncFail			= 26,
 	kRegShiftVidProcSplitStd			= 28,
-	kRegShiftVidProcSubtitleEnable	= BIT(31),
+	kRegShiftVidProcSubtitleEnable	= 31,
 
 
 	// Note:  See more bitfields for this register below, in the 'Xena2K and Konax Video Processing.' section
@@ -3476,7 +3485,10 @@ typedef enum
 	kRegShiftHDMIOutUserOveride = 1,
 	kRegShiftHDMISwapInputAudCh34	= 5,
 	kRegShiftHDMISwapOutputAudCh34	= 6,
-	kRegShiftHDMIOutCropMode = 24
+	kRegShiftHDMIOutCropMode = 24,
+    
+    kRegShiftRotaryEncoderValue = 0,
+    kRegShiftRotaryEncoderGain = 8
 
 
 #if !defined (NTV2_DEPRECATE)

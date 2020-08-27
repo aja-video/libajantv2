@@ -2440,7 +2440,7 @@ public:
 		@param[in]	inChannelPair	Specifies the new ::NTV2AudioChannelPair that is to drive the audio mixer's input.
 		@return		True if successful;  otherwise false.
 		@note		Audio mixer inputs ::NTV2_AudioMixerInputAux1 and ::NTV2_AudioMixerInputAux2 are currently fixed to ::NTV2_AudioChannel1_2 and cannot be changed.
-		@see		CNTV2Card::GetAudioMixerInputChannelSelect, \ref audiomixer
+		@see		CNTV2Card::SetAudioMixerInputChannelSelect, \ref audiomixer
 	**/
 	AJA_VIRTUAL bool		SetAudioMixerInputChannelSelect (const NTV2AudioMixerInput inMixerInput, const NTV2AudioChannelPair inChannelPair);
 
@@ -2453,7 +2453,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@note		Currently, the Audio Mixer's Main input gain control affects both audio channels 1 & 2 (L & R),
 					while the Aux 1 & 2 inputs have separate gain settings for audio channels 1 & 2 (L & R).
-		@see		CNTV2Card::SetAudioMixerInputGain, \ref audiomixer
+		@see		CNTV2Card::GetAudioMixerInputGain, \ref audiomixer
 	**/
 	AJA_VIRTUAL bool		GetAudioMixerInputGain (const NTV2AudioMixerInput inMixerInput, const NTV2AudioMixerChannel inChannel, ULWord & outGainValue);
 
@@ -2466,9 +2466,47 @@ public:
 		@return		True if successful;  otherwise false.
 		@note		Currently, the Audio Mixer's Main input gain control affects both audio channels 1 & 2 (L & R),
 					while the Aux 1 & 2 inputs have separate gain settings for audio channels 1 & 2 (L & R).
-		@see		CNTV2Card::GetAudioMixerInputGain, \ref audiomixer
+		@see		CNTV2Card::SetAudioMixerInputGain, \ref audiomixer
 	**/
 	AJA_VIRTUAL bool		SetAudioMixerInputGain (const NTV2AudioMixerInput inMixerInput, const NTV2AudioMixerChannel inChannel, const ULWord inGainValue);
+    
+    /**
+		@brief		Answers with the current gain setting for the Audio Mixer's output.
+		@param[in]	inChannel		Specifies the audio channel of interest.
+		@param[out]	outGainValue	Receives the current main input gain level.
+									This is a signed 18-bit value, where unity gain is 0x10000.
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetAudioMixerOutputGain, \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		GetAudioMixerOutputGain (const NTV2AudioMixerChannel inChannel, ULWord & outGainValue);
+
+	/**
+		@brief		Sets the gain for the output of the Audio Mixer.
+		@param[in]	inChannel		Specifies the audio channel of interest.
+		@param[in]	inGainValue		Specifies the new input gain level.
+									This is a signed 18-bit value, where unity gain is 0x10000.
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetAudioMixerOutputGain, \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		SetAudioMixerOutputGain (const NTV2AudioMixerChannel inChannel, const ULWord inGainValue);
+    
+    /**
+		@brief		Answers with the current gain setting for the headphone out.
+		@param[out]	outGainValue	Receives the current headphone gain level.
+									This is a signed 18-bit value, where unity gain is 0x10000.
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetHeadphoneOutputGain, \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		GetHeadphoneOutputGain (ULWord & outGainValue);
+
+	/**
+		@brief		Sets the gain for the headphone out.
+		@param[in]	inGainValue		Specifies the new headphone gain level.
+									This is a signed 18-bit value, where unity gain is 0x10000.
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetHeadphoneOutputGain, \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		SetHeadphoneOutputGain (const ULWord inGainValue);
 
 	/**
 		@brief		Answers with a std::bitset that indicates which input audio channels of the given Audio Mixer input are currently muted.
