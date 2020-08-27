@@ -23,7 +23,7 @@
 #include <time.h>
 
 static std::vector<std::string> sGroupLabelVector;
-static const char* sSeverityString[] = {"emergency", "alert", "assert", "error", "warning", "notice", "info", "debug"};
+static const std::string sSeverityString[] = {"emergency", "alert", "assert", "error", "warning", "notice", "info", "debug"};
 static AJALock sLock;
 static AJADebugShare* spShare = NULL;
 static bool sDebug = false;
@@ -290,6 +290,21 @@ bool AJADebug::IsActive (int32_t index)
 	return true;
 }
 
+uint32_t AJADebug::Version (void)
+{
+	if (!spShare)
+		return 0;	//	Not open
+	return spShare->version;
+}
+
+uint32_t AJADebug::TotalBytes (void)
+{
+	if (!spShare)
+		return 0;	//	Not open
+	if (HasStats())
+		return uint32_t(sizeof(AJADebugShare));
+	return uint32_t(sizeof(AJADebugShare))  -  AJA_DEBUG_MAX_NUM_STATS * uint32_t(sizeof(AJADebugStat)); 
+}
 
 bool AJADebug::IsOpen (void)
 {
@@ -481,6 +496,14 @@ void AJADebug::AssertWithMessage (const char* pFileName, int32_t lineNumber, con
 	AJA_UNUSED(lineNumber);
 	AJA_UNUSED(pExpression);
 #endif
+}
+
+
+uint32_t AJADebug::MessageRingCapacity (void)
+{
+	if (!spShare)
+		return 0;
+	return spShare->messageRingCapacity;
 }
 
 
@@ -808,8 +831,15 @@ AJAStatus AJADebug::GetMessagesIgnored (uint64_t & outCount)
 
 const char* AJADebug::GetSeverityString (int32_t severity)
 {
-	if (severity < 0  ||  severity >= int32_t(sizeof(sSeverityString)/sizeof(sSeverityString[0])))
+	if (severity < 0  ||  severity > 7)
 		return "severity range error";
+	return sSeverityString[severity].c_str();
+}
+
+const std::string & AJADebug::SeverityName (const int32_t severity)
+{	static const string emptystr;
+	if (severity < 0  ||  severity > 7)
+		return emptystr;
 	return sSeverityString[severity];
 }
 
@@ -824,7 +854,7 @@ const char* AJADebug::GetGroupString (int32_t group)
 }
 
 
-const std::string & AJADebug::GetGroupName (const int32_t group)
+const std::string & AJADebug::GroupName (const int32_t group)
 {
 	static const std::string sRangeErr("<bad index>");
 	static const std::string sNoLabelErr("<empty>");
@@ -1025,6 +1055,18 @@ size_t AJADebug::GetPrivateDataLen (void)
 	#define	STAT_BIT_SET		spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] |= STAT_BIT_SHIFT
 	#define	STAT_BIT_CLEAR		spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] &= 0xFFFFFFFFFFFFFFFF - STAT_BIT_SHIFT
 #endif
+
+uint32_t AJADebug::StatsCapacity (void)
+{
+	if (!spShare)
+		return 0;
+	return spShare->statCapacity;
+}
+
+bool AJADebug::HasStats (void)
+{
+	return StatsCapacity() ? true : false;
+}
 
 AJAStatus AJADebug::StatAllocate (const uint32_t inKey)
 {

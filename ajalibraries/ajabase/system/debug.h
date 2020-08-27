@@ -237,6 +237,16 @@ public:
 	AJADebug();
 	virtual ~AJADebug();
 
+    /**
+     *	@return		The debug facility's version number.
+     */
+    static uint32_t Version (void);
+
+    /**
+     *	@return		The size of the debug facility's shared memory region.
+     */
+    static uint32_t TotalBytes (void);
+
 	/** 
 	 *	Initialize the debug system.  
 	 *
@@ -311,27 +321,18 @@ public:
 	static AJAStatus GetDestination (const int32_t inGroup, uint32_t & outDestination);
 
 	/**
-	 *	Is the destination index active.
-	 *
-	 *	@param[in]	index					Query active for this index.
-     *	@return		true                    Destination enabled
-     *				false                   Destination disabled, Debug system not open, or Index out of range
+	 *	@param[in]	index					The destination index of interest.
+     *	@return		True if the debug facility is open, and the destination index is valid and active;  otherwise false.
 	 */
     static bool IsActive (int32_t index);
 
 	/**
-	 *	Is the debug system open?
-	 *
-     *	@return		true                    Debug system is open and ready for use.
-     *				false                   Debug system not open.
+     *	@return		True if the debug facility is open;  otherwise false.
 	 */
     static bool IsOpen (void);
 
 	/** 
-	 *	Is this class built with AJA_DEBUG defined. 
-	 *
-     *	@return		true                    Debug build
-     *				false                   Release build
+     *	@return		True if this class was built with AJA_DEBUG defined;  otherwise false.
 	 */
     static bool IsDebugBuild (void);
 
@@ -365,6 +366,11 @@ public:
 	 *  @param[in]	pExpression		Expression that caused the assertion.
 	 */
     static void AssertWithMessage (const char* pFileName, int32_t lineNumber, const std::string& pExpression);
+
+    /**
+     *	@return		The capacity of the debug logging facility's message ring.
+     */
+	static uint32_t MessageRingCapacity (void);
 
     /**
      *	Get the reference count for the number of clients accessing shared debug info
@@ -556,29 +562,17 @@ public:
     static AJAStatus GetMessagesIgnored (uint64_t & outCount);
 
 	/**
-	 *	Get the string associated with a debug severity.
-	 *
-	 *	@param[in]	severity	Index of the severity string to return.
-	 *	@return				Severity string
+	 *	@param[in]	severity	The Severity of interest.
+	 *	@return					A human-readable string containing the name associated with the given Severity value.
 	 */
-	static const char* GetSeverityString (int32_t severity);
-	static const std::string & GetSeverityName (const int32_t severity);
+	static const std::string & SeverityName (const int32_t severity);
+
 
     /**
-     *	Get the string associated with a debug message group.
-     *
-     *	@param[in]	group	Index of the message group string to return.
-     *	@return				Group string
+     *	@param[in]	group	The Message Group of interest.
+     *	@return				A human-readable string containing the name associated with the given Message Group.
      */
-    static const char* GetGroupString (int32_t group);
-
-    /**
-     *	Get the string associated with a debug message group.
-     *
-     *	@param[in]	group	Index of the message group string to return.
-     *	@return				Group string
-     */
-    static const std::string & GetGroupName (const int32_t group);
+    static const std::string & GroupName (const int32_t group);
 
 	/**
 	 *	Write group state to a file.
@@ -599,6 +593,16 @@ public:
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
 	static AJAStatus RestoreState (char* pFileName);
+
+    /**
+     *	@return		The capacity of the debug facility's stats buffer.
+     */
+	static uint32_t StatsCapacity (void);
+
+	/**
+	 *	@return		True if stats are supported; otherwise false.
+	 */
+	static bool HasStats (void);
 
 	/**
 	 *	Registers/adds new stat, prepares for first use.
@@ -693,6 +697,8 @@ public:
 	static int64_t DebugTime (void);
 
 	//	Old APIs
+	static const char* GetSeverityString (int32_t severity);
+    static const char* GetGroupString (int32_t group);
 	static AJAStatus GetDestination (int32_t index, uint32_t* pDestination)	{return pDestination ? GetDestination(index, *pDestination) : AJA_STATUS_NULL;}
     static AJAStatus GetClientReferenceCount (int32_t* pRefCount)			{return pRefCount ? GetClientReferenceCount(*pRefCount) : AJA_STATUS_NULL;}
     static AJAStatus GetSequenceNumber (uint64_t* pSequenceNumber)			{return pSequenceNumber ? GetSequenceNumber(*pSequenceNumber) : AJA_STATUS_NULL;}
