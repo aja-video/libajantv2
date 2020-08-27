@@ -837,7 +837,7 @@ const char* AJADebug::GetSeverityString (int32_t severity)
 }
 
 const std::string & AJADebug::SeverityName (const int32_t severity)
-{	static const string emptystr;
+{	static const std::string emptystr;
 	if (severity < 0  ||  severity > 7)
 		return emptystr;
 	return sSeverityString[severity];
