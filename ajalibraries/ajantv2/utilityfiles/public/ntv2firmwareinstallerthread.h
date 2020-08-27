@@ -114,8 +114,8 @@ class CNTV2FirmwareInstallerThread : public AJAThread
 		/**
 			@return		True if the bitfile can be flashed onto the device; otherwise false.
 		**/
-		virtual bool								ShouldUpdate(const NTV2DeviceID inDeviceID, const std::string designName) const;
-		virtual std::string							GetPrimaryDesignName(const NTV2DeviceID inDeviceID) const;
+		virtual bool								ShouldUpdate (const NTV2DeviceID inDeviceID, const std::string & designName) const;
+		virtual std::string							GetPrimaryDesignName (const NTV2DeviceID inDeviceID) const;
 
 	private:
 													CNTV2FirmwareInstallerThread ();											//	hidden
