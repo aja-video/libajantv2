@@ -443,7 +443,7 @@ bool CNTV2DriverInterface::SetInterruptEventCount (const INTERRUPT_ENUMS inInter
 }
 
 bool CNTV2DriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterrupt,  ULWord & outCount)
-{
+{	(void) eInterrupt;
 	outCount = 0;
 	NTV2_ASSERT(false && "Needs subclass implementation");
 	return false;
@@ -457,7 +457,7 @@ HANDLE CNTV2DriverInterface::GetInterruptEvent (const INTERRUPT_ENUMS eInterrupt
 }
 
 bool CNTV2DriverInterface::ConfigureInterrupt (const bool bEnable, const INTERRUPT_ENUMS eInterruptType)
-{
+{	(void) bEnable;  (void) eInterruptType;
 	NTV2_ASSERT(false && "Needs subclass implementation");
 	return false;
 }

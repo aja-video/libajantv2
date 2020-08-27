@@ -18,7 +18,7 @@
 	#include <netdb.h>
 	#include <unistd.h>
 #elif defined(MSWindows)
-	#include <WinSock.h>
+	//#include <WinSock.h>
 	#include <WinSock2.h>
 #endif
 #include "ntv2discover.h"
@@ -60,9 +60,11 @@ class AJAExport NTV2NubRPCAPI : public NTV2RPCAPI
 		{
 		}
 		AJA_VIRTUAL									~NTV2NubRPCAPI()				{NTV2Disconnect();}
-		AJA_VIRTUAL inline	bool					IsConnected	(void) const		{return Socket() != -1  &&  Handle() != INVALID_NUB_HANDLE;}
+		AJA_VIRTUAL inline	bool					IsConnected	(void) const		{return SocketValid()  &&  HandleValid();}
 		AJA_VIRTUAL inline	AJASocket				Socket (void) const				{return _sockfd;}
+		AJA_VIRTUAL			bool					SocketValid (void) const;
 		AJA_VIRTUAL inline	LWord					Handle (void) const				{return _remoteHandle;}
+		AJA_VIRTUAL			bool					HandleValid (void) const;
 		AJA_VIRTUAL inline	NTV2NubProtocolVersion	ProtocolVersion (void) const	{return _nubProtocolVersion;}
 		AJA_VIRTUAL	inline	UWord					DeviceIndex (void) const		{return _remoteIndex;}
 		AJA_VIRTUAL	int		NTV2Connect (const string & inHostname, const UWord inDeviceIndexNum);
@@ -410,7 +412,7 @@ int NTV2NubRPCAPI::NTV2Connect (const string & inHostName, const UWord inDeviceI
 	}
 
 	_sockfd = ::socket(PF_INET, SOCK_STREAM, 0);
-	if (_sockfd == -1) 
+	if (!SocketValid()) 
 	{
 		NBFAIL("'socket' failed, socket=" << Socket() << ": " << ::strerror(errno));
 		return -1;
@@ -426,8 +428,7 @@ int NTV2NubRPCAPI::NTV2Connect (const string & inHostName, const UWord inDeviceI
 	if (retval == -1) 
 	{
 		NBFAIL("'connect' failed: " << ::strerror(errno) << ", socket=" << Socket() << ", hostName='" << inHostName << "'");
-		::close(Socket());
-		_sockfd = -1;
+		NTV2Disconnect();
 	}
 	if (retval < 0)
 		return retval;
@@ -464,11 +465,21 @@ int NTV2NubRPCAPI::NTV2Connect (const string & inHostName, const UWord inDeviceI
 
 }	//	NTV2NubRPCAPI::NTV2Connect
 
+bool NTV2NubRPCAPI::SocketValid (void) const
+{
+	return Socket() != AJASocket(-1);
+}
+
+bool NTV2NubRPCAPI::HandleValid (void) const
+{
+	return Handle() != INVALID_NUB_HANDLE;
+}
+
 
 int NTV2NubRPCAPI::NTV2Disconnect (void)
 {
 	NTV2CloseRemote();
-	if (_sockfd != -1)
+	if (SocketValid())
 	{
 		#ifdef MSWindows
 			closesocket(_sockfd);
@@ -550,7 +561,7 @@ static void deNBOifyAndCopyGetDriverBuildInformation( BUILD_INFO_STRUCT &localBu
 int NTV2NubRPCAPI::NTV2OpenRemote (const UWord inDeviceIndex)
 {
 	// Connected?
-	if (Socket() == -1)
+	if (!SocketValid())
 		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
 
 	// Construct open query
@@ -629,7 +640,7 @@ int NTV2NubRPCAPI::NTV2OpenRemote (const UWord inDeviceIndex)
 int NTV2NubRPCAPI::NTV2ReadRegisterRemote (const ULWord regNum, ULWord & outRegValue, const ULWord regMask, const ULWord regShift)
 {
 	// Connected?
-	if (Socket() == -1)
+	if (!SocketValid())
 		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
 
 	// Construct open query
@@ -718,7 +729,7 @@ int NTV2NubRPCAPI::NTV2ReadRegisterRemote (const ULWord regNum, ULWord & outRegV
 int NTV2NubRPCAPI::NTV2WriteRegisterRemote (const ULWord regNum, const ULWord regValue, const ULWord regMask, const ULWord regShift)
 {
 	// Connected?
-	if (Socket() == -1)
+	if (!SocketValid())
 		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
 
 	// Construct open query
@@ -805,7 +816,7 @@ int NTV2NubRPCAPI::NTV2WriteRegisterRemote (const ULWord regNum, const ULWord re
 int NTV2NubRPCAPI::NTV2AutoCirculateRemote (AUTOCIRCULATE_DATA & autoCircData)
 {
 	// Connected?
-	if (Socket() == -1)
+	if (!SocketValid())
 		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
 
 	// Construct autocirculate query packet.
@@ -917,7 +928,7 @@ int NTV2NubRPCAPI::NTV2AutoCirculateRemote (AUTOCIRCULATE_DATA & autoCircData)
 int NTV2NubRPCAPI::NTV2WaitForInterruptRemote (const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs)
 {
 	// Connected?
-	if (Socket() == -1)
+	if (!SocketValid())
 		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
 
 	// Construct open query
@@ -935,7 +946,7 @@ int NTV2NubRPCAPI::NTV2WaitForInterruptRemote (const INTERRUPT_ENUMS eInterrupt,
 		else
 		{
 			// Wait for response
-			int numbytes = ::recvtimeout_sec(_sockfd, (char *)pPkt, sizeof(NTV2NubPkt), 2); // 2 second timeout
+			int numbytes = ::recvtimeout_sec(Socket(), (char *)pPkt, sizeof(NTV2NubPkt), 2); // 2 second timeout
 			switch (numbytes)
 			{
 				case  0:	// Remote side closed connection
@@ -944,7 +955,7 @@ int NTV2NubRPCAPI::NTV2WaitForInterruptRemote (const INTERRUPT_ENUMS eInterrupt,
 							break;
 
 				case -1:	// error occurred
-							NBFAIL("'recvtimeout_sec' failed on sockfd " << _sockfd << ": " << ::strerror(errno));
+							NBFAIL("'recvtimeout_sec' failed on sockfd " << Socket() << ": " << ::strerror(errno));
 							retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
 							break;
 			
@@ -1003,7 +1014,7 @@ int NTV2NubRPCAPI::NTV2WaitForInterruptRemote (const INTERRUPT_ENUMS eInterrupt,
 int NTV2NubRPCAPI::NTV2DriverGetBitFileInformationRemote (BITFILE_INFO_STRUCT & outInfo,  const NTV2BitFileType inType)
 {
 	// Connected?
-	if (Socket() == -1)
+	if (!SocketValid())
 		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
 
 	// Construct open query
@@ -1021,7 +1032,7 @@ int NTV2NubRPCAPI::NTV2DriverGetBitFileInformationRemote (BITFILE_INFO_STRUCT & 
 		else
 		{
 			// Wait for response
-			int numbytes = ::recvtimeout_sec(_sockfd, (char *)pPkt, sizeof(NTV2NubPkt), 2); // 2 second timeout
+			int numbytes = ::recvtimeout_sec(Socket(), (char *)pPkt, sizeof(NTV2NubPkt), 2); // 2 second timeout
 
 			switch (numbytes)
 			{
@@ -1093,7 +1104,7 @@ int NTV2NubRPCAPI::NTV2DriverGetBitFileInformationRemote (BITFILE_INFO_STRUCT & 
 int NTV2NubRPCAPI::NTV2DriverGetBuildInformationRemote (BUILD_INFO_STRUCT & outBuildInfo)
 {
 	// Connected?
-	if (Socket() == -1)
+	if (!SocketValid())
 		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
 
 	// Construct open query
@@ -1182,7 +1193,7 @@ int NTV2NubRPCAPI::NTV2DownloadTestPatternRemote	(const NTV2Channel channel, con
 													const UWord signalMask, const bool testPatDMAEnb, const ULWord testPatNum)
 {
 	// Connected?
-	if (Socket() == -1)
+	if (!SocketValid())
 		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
 
 	// Construct open query
@@ -1269,7 +1280,7 @@ int NTV2NubRPCAPI::NTV2DownloadTestPatternRemote	(const NTV2Channel channel, con
 int NTV2NubRPCAPI::NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULWord & outFailedRegNum,  NTV2RegInfo outRegs[])
 {
 	// Connected?
-	if (Socket() == -1)
+	if (!SocketValid())
 		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
 
 	// Construct open query

@@ -180,6 +180,8 @@
 
 	#define AJATargetBigEndian  0
 	#define	AJAFUNC		__FUNCTION__
+	#define NTV2_CPP_MIN(__x__,__y__)		min((__x__),(__y__))
+	#define NTV2_CPP_MAX(__x__,__y__)		max((__x__),(__y__))
 
 									//////////////////////////////////////////////////////////////////
 #elif defined (AJAMac)				////////////////////////	MAC		//////////////////////////////
@@ -194,6 +196,8 @@
 
 	#define AJATargetBigEndian  0
 	#define	AJAFUNC		__func__
+	#define NTV2_CPP_MIN(__x__,__y__)		std::min((__x__),(__y__))
+	#define NTV2_CPP_MAX(__x__,__y__)		std::max((__x__),(__y__))
 
 	#define MAX_PATH 4096
 
@@ -249,6 +253,8 @@
         typedef uint32_t            DWORD; /* 32 bits on 32 or 64 bit CPUS */
 
         typedef int32_t				AJASocket;
+		#define NTV2_CPP_MIN(__x__,__y__)		std::min((__x__),(__y__))
+		#define NTV2_CPP_MAX(__x__,__y__)		std::max((__x__),(__y__))
     #else
 		#if defined (AJAVirtual)
 			#include <stdbool.h>
