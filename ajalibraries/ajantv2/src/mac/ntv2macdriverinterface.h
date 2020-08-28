@@ -137,6 +137,17 @@ protected:
 		AJA_VIRTUAL bool	OpenLocalPhysical (const UWord inDeviceIndex);
 		AJA_VIRTUAL bool	CloseLocalPhysical (void);
 
+#if !defined(NTV2_DEPRECATE_14_3)
+	virtual bool		Open (UWord inDeviceIndex,
+							  bool displayError,
+							  NTV2DeviceType eDeviceType,
+							  const char * hostName);
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
+	AJA_VIRTUAL bool	Open (const UWord inDeviceIndex = 0,
+							  const std::string & inHostName = std::string());
+	AJA_VIRTUAL bool	TestOpen();
+	AJA_VIRTUAL bool	Close (void);
+
 private:
 	AJA_VIRTUAL io_connect_t	GetIOConnect (const bool inDoNotAllocate = false) const;	//	For internal use only
 

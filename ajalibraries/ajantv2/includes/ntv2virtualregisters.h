@@ -578,8 +578,12 @@ typedef enum
 	kVRegNTV2VPIDRGBRange8					= VIRTUALREG_START+600,
 
 	kVRegRotaryGainOverrideEnable			= VIRTUALREG_START+601,
+	kVRegAudioMixerMasterGain				= VIRTUALREG_START+602,
+	kVRegAudioMixerHeadphoneGain			= VIRTUALREG_START+603,
+	kVRegAudioMixerMasterEnable				= VIRTUALREG_START+604,
+	kVRegAudioMixerHeadphoneEnable			= VIRTUALREG_START+605,
 
-	kVRegLastAJA							= VIRTUALREG_START+602,		///< @brief	The last AJA virtual register slot
+	kVRegLastAJA							= VIRTUALREG_START+604,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 

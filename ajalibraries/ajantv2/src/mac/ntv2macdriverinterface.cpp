@@ -1934,3 +1934,182 @@ static const char * GetKernErrStr (const kern_return_t inError)
 		default:						return "";
 	}
 }	//	GetKernErrStr
+
+#if !defined(NTV2_DEPRECATE_15_1)
+	//--------------------------------------------------------------------------------------------------------------------
+	//	Get/Set Output Timecode settings
+	//--------------------------------------------------------------------------------------------------------------------
+	bool CNTV2MacDriverInterface::SetOutputTimecodeOffset( ULWord frames )
+	{
+		return WriteRegister(kVRegOutputTimecodeOffset, frames);
+	}
+
+	bool CNTV2MacDriverInterface::GetOutputTimecodeOffset( ULWord* pFrames )
+	{
+		return ReadRegister(kVRegOutputTimecodeOffset, *pFrames);
+	}
+	
+	bool CNTV2MacDriverInterface::SetOutputTimecodeType( ULWord type )
+	{
+		return WriteRegister( kVRegOutputTimecodeType, type );
+	}
+
+	bool CNTV2MacDriverInterface::GetOutputTimecodeType( ULWord* pType )
+	{
+		return ReadRegister(kVRegOutputTimecodeType, *pType);
+	}
+#endif	//	!defined(NTV2_DEPRECATE_15_1)
+
+
+
+//--------------------------------------------------------------------------------------------------------------------
+//	ReadRP188Registers
+//
+//	Read the current RP188 registers (which typically give you the timecode corresponding
+//   to the LAST frame).
+//
+//   NOTE: this is a hack to avoid making a "real" driver call!
+//   Since the RP188 data requires three ReadRegister() calls, there is a chance that it
+//   can straddle a VBI, which could give skewed results. To try to avoid this, we read the
+//   3 registers until we get two consecutive passes that give us the same data (someday it
+//   would be nice if the driver automatically read these as part of its VBI IRQ handler...)
+//--------------------------------------------------------------------------------------------------------------------
+
+bool CNTV2MacDriverInterface::ReadRP188Registers( NTV2Channel /*channel-not-used*/, RP188_STRUCT* pRP188Data )
+{
+	bool bSuccess = false;
+	RP188_STRUCT rp188;
+	NTV2DeviceID boardID = DEVICE_ID_NOTFOUND;
+	RP188SourceFilterSelect source = kRP188SourceEmbeddedLTC;
+	ULWord dbbReg(0), msReg(0), lsReg(0);
+
+	CNTV2DriverInterface::ReadRegister(kRegBoardID, boardID);
+	CNTV2DriverInterface::ReadRegister(kVRegRP188SourceSelect, source);
+	bool bLTCPort = (source == kRP188SourceLTCPort);
+
+	// values come from LTC port registers
+	if (bLTCPort)
+	{
+		ULWord ltcPresent;
+		ReadRegister (kRegStatus, ltcPresent, kRegMaskLTCInPresent, kRegShiftLTCInPresent);
+
+		// there is no equivalent DBB for LTC port - we synthesize it here
+		rp188.DBB = (ltcPresent) ? 0xFE000000 | NEW_SELECT_RP188_RCVD : 0xFE000000;
+
+		// LTC port registers
+		dbbReg = 0; // don't care - does not exist
+		msReg = kRegLTCAnalogBits0_31;
+		lsReg  = kRegLTCAnalogBits32_63;
+	}
+	else
+	{
+		// values come from RP188 registers
+		NTV2Channel channel = NTV2_CHANNEL1;
+		NTV2InputVideoSelect inputSelect = NTV2_Input1Select;
+
+		if(NTV2DeviceGetNumVideoInputs(boardID) > 1)
+		{
+			CNTV2DriverInterface::ReadRegister (kVRegInputSelect, inputSelect);
+			channel = (inputSelect == NTV2_Input2Select) ? NTV2_CHANNEL2 : NTV2_CHANNEL1;
+		}
+		else
+		{
+			channel = NTV2_CHANNEL1;
+		}
+
+		// rp188 registers
+		dbbReg = (channel == NTV2_CHANNEL1 ? kRegRP188InOut1DBB : kRegRP188InOut2DBB);
+		//Check to see if TC is received
+		uint32_t tcReceived = 0;
+		ReadRegister(dbbReg, tcReceived, BIT(16), 16);
+		if(tcReceived == 0)
+			return false;//No TC recevied
+
+		ReadRegister (dbbReg, rp188.DBB, kRegMaskRP188DBB, kRegShiftRP188DBB );
+		switch(rp188.DBB)//What do we have?
+		{
+		default:
+		case 0x01:
+		case 0x02:
+			{
+				//We have VITC - what do we want?
+				if(pRP188Data->DBB == 0x01 || pRP188Data->DBB == 0x02)
+				{
+					//We want VITC
+					msReg  = (channel == NTV2_CHANNEL1 ? kRegRP188InOut1Bits0_31  : kRegRP188InOut2Bits0_31 );
+					lsReg  = (channel == NTV2_CHANNEL1 ? kRegRP188InOut1Bits32_63 : kRegRP188InOut2Bits32_63);
+					break;
+				}
+				else
+				{
+					//We want Embedded LTC, so we should check one other place
+					uint32_t ltcPresent = 0;
+					ReadRegister(dbbReg, ltcPresent, BIT(18), 18);
+					if(ltcPresent == 1)
+					{
+						//Read LTC registers
+						msReg  = (channel == NTV2_CHANNEL1 ? kRegLTCEmbeddedBits0_31  : kRegLTC2EmbeddedBits0_31 );
+						lsReg  = (channel == NTV2_CHANNEL1 ? kRegLTCEmbeddedBits32_63 : kRegLTC2EmbeddedBits32_63);
+						break;
+					}
+					else
+						return false;
+				}
+			}
+		case 0x00:
+			{
+				//We have LTC - do we want it?
+				if(pRP188Data->DBB != 0x00)
+					return false;
+				else
+				{
+					msReg  = (channel == NTV2_CHANNEL1 ? kRegRP188InOut1Bits0_31  : kRegRP188InOut2Bits0_31 );
+					lsReg  = (channel == NTV2_CHANNEL1 ? kRegRP188InOut1Bits32_63 : kRegRP188InOut2Bits32_63);
+				}
+				break;
+			}
+		}
+		//Re-Read the whole register just in case something is expecting other status values
+		ReadRegister (dbbReg, rp188.DBB);
+	}
+	ReadRegister (msReg,  rp188.Low );
+	ReadRegister (lsReg,  rp188.High);
+
+	// register stability filter
+	do
+	{
+		// struct copy to result
+		*pRP188Data = rp188;
+
+		// read again into local struct
+		if (!bLTCPort)
+			ReadRegister (dbbReg, rp188.DBB );
+		ReadRegister (msReg,  rp188.Low );
+		ReadRegister (lsReg,  rp188.High);
+
+		// if the new read equals the previous read, consider it done
+		if ( (rp188.DBB  == pRP188Data->DBB) &&
+			 (rp188.Low  == pRP188Data->Low) &&
+			 (rp188.High == pRP188Data->High) )
+		{
+			bSuccess = true;
+		}
+
+	} while (bSuccess == false);
+
+	return true;
+}
+
+#if !defined(NTV2_DEPRECATE_16_0)
+	Word CNTV2MacDriverInterface::SleepMs (LWord milliseconds) const
+	{
+		AJATime::Sleep(milliseconds);
+		return 0;
+	}
+#endif //defined(NTV2_DEPRECATE_16_0)
+
+
+bool CNTV2MacDriverInterface::ConfigureSubscription (bool bSubscribe, INTERRUPT_ENUMS eInterruptType, PULWord & hSubscription)
+{
+	return CNTV2DriverInterface::ConfigureSubscription (bSubscribe, eInterruptType, hSubscription);
+}

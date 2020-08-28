@@ -49,82 +49,73 @@ int NeedsFirmwareUpdate (const NTV2DeviceInfo & inDeviceInfo, string & outReason
 {
 	string			installedDate, installedTime, serialNumStr, newFirmwareDescription;
 	ULWord			numBytes		(0);
-	const string	firmwarePath	(::GetFirmwarePath (inDeviceInfo.deviceID));
-	CNTV2Card		device			(inDeviceInfo.deviceIndex);
+	const string	firmwarePath	(::GetFirmwarePath(inDeviceInfo.deviceID));
+	CNTV2Card		device			(UWord(inDeviceInfo.deviceIndex));
 	CNTV2Bitfile	bitfile;
 	CNTV2MCSfile	mcsFile;
 
-	outReason.clear ();
-    if (device.IsOpen () && device.IsDeviceReady(false))
+	outReason.clear();
+	if (!device.IsOpen())
+		{outReason = "device '" + inDeviceInfo.deviceIdentifier + "' not open";		return kFirmwareUpdateCheckFailed;}
+	if (!device.IsDeviceReady(false))
+		{outReason = "device '" + inDeviceInfo.deviceIdentifier + "' not ready";	return kFirmwareUpdateCheckFailed;}
+	if (device.IsRemote())
+		{outReason = "device '" + inDeviceInfo.deviceIdentifier + "' not local physical";	return kFirmwareUpdateCheckFailed;}
+	if (firmwarePath.find(".mcs") != std::string::npos)
 	{
-		if (firmwarePath.find(".mcs") != std::string::npos)
-		{
-			//We have an mcs file?
-            CNTV2KonaFlashProgram kfp;
-            kfp.SetBoard(device.GetIndexNumber());
-            kfp.GetMCSInfo();
-            if(!mcsFile.GetMCSHeaderInfo(firmwarePath))
-			{
-				outReason = "MCS File open failed";
-				return kFirmwareUpdateCheckFailed;
-			}
-			else
-			{
-				string fileDate = mcsFile.GetMCSPackageDateString();
-				string fileVersion = mcsFile.GetMCSPackageVersionString();
-				PACKAGE_INFO_STRUCT currentInfo;
-				device.GetPackageInformation(currentInfo);
-				if(fileDate == currentInfo.date)
-					return 0;
-				else if(currentInfo.date > fileDate)
-				{
-					outReason = "on-device firmware " + installedDate + " newer than on-disk bitfile firmware " + bitfile.GetDate ();
-					return 1;	//	on-device firmware newer than on-disk bitfile firmware
-				}
-				else
-				{
-					outReason = "on-device firmware " + installedDate + " older than on-disk bitfile firmware " + bitfile.GetDate ();
-					return -1;	//	on-device firmware older than on-disk bitfile firmware
-				}
-			}
-        }
-		else if (device.GetInstalledBitfileInfo (numBytes, installedDate, installedTime))
-		{
-			if (bitfile.Open (firmwarePath))
-			{
-                //if we can dynamically reconfig return true
-                if(device.IsDynamicDevice())
-                {
-                    device.AddDynamicDirectory((::NTV2GetFirmwareFolderPath ()));
-                    NTV2DeviceID desiredID (bitfile.GetDeviceID());
-#ifdef AJA_WINDOWS
-                    if(device.CanLoadDynamicDevice(desiredID))
-                        return false;
-#endif
-                }
+		//	We have an mcs file?
+		CNTV2KonaFlashProgram kfp;
+		kfp.SetBoard(device.GetIndexNumber());
+		kfp.GetMCSInfo();
+		if (!mcsFile.GetMCSHeaderInfo(firmwarePath))
+			{outReason = "MCS File open failed";	return kFirmwareUpdateCheckFailed;}
 
-				//cout << inDeviceInfo.deviceIdentifier << ":  file: " << bitfile.GetDate () << "  device: " << installedDate << endl;
-				if (bitfile.GetDate () == installedDate)
-					return 0;	//	Identical!
-				else if (installedDate > bitfile.GetDate ())
-				{
-					outReason = "on-device firmware " + installedDate + " newer than on-disk bitfile firmware " + bitfile.GetDate ();
-					return 1;	//	on-device firmware newer than on-disk bitfile firmware
-				}
-				else
-				{
-					outReason = "on-device firmware " + installedDate + " older than on-disk bitfile firmware " + bitfile.GetDate ();
-					return -1;	//	on-device firmware older than on-disk bitfile firmware
-				}
+		string fileDate = mcsFile.GetMCSPackageDateString();
+		string fileVersion = mcsFile.GetMCSPackageVersionString();
+		PACKAGE_INFO_STRUCT currentInfo;
+		device.GetPackageInformation(currentInfo);
+		if (fileDate == currentInfo.date)
+			return 0;	//	All good
+		if (currentInfo.date > fileDate)
+		{
+			outReason = "on-device firmware " + installedDate + " newer than on-disk bitfile firmware " + bitfile.GetDate ();
+			return 1;	//	on-device firmware newer than on-disk bitfile firmware
+		}
+		outReason = "on-device firmware " + installedDate + " older than on-disk bitfile firmware " + bitfile.GetDate ();
+		return -1;	//	on-device firmware older than on-disk bitfile firmware
+	}
+
+	if (device.GetInstalledBitfileInfo (numBytes, installedDate, installedTime))
+	{
+		if (bitfile.Open (firmwarePath))
+		{
+			//	If we can dynamically reconfig return true
+			if(device.IsDynamicDevice())
+			{
+				device.AddDynamicDirectory((::NTV2GetFirmwareFolderPath()));
+#ifdef AJA_WINDOWS
+				NTV2DeviceID desiredID (bitfile.GetDeviceID());
+				if (device.CanLoadDynamicDevice(desiredID))
+					return false;
+#endif
 			}
-			else
-				outReason = bitfile.GetLastError ();
+
+			//cout << inDeviceInfo.deviceIdentifier << ":  file: " << bitfile.GetDate() << "  device: " << installedDate << endl;
+			if (bitfile.GetDate() == installedDate)
+				return 0;	//	Identical!
+			if (installedDate > bitfile.GetDate())
+			{
+				outReason = "on-device firmware " + installedDate + " newer than on-disk bitfile firmware " + bitfile.GetDate();
+				return 1;	//	on-device firmware newer than on-disk bitfile firmware
+			}
+			outReason = "on-device firmware " + installedDate + " older than on-disk bitfile firmware " + bitfile.GetDate();
+			return -1;	//	on-device firmware older than on-disk bitfile firmware
 		}
 		else
-			outReason = "GetInstalledBitfileInfo failed for device '" + inDeviceInfo.deviceIdentifier + "'";
+			outReason = bitfile.GetLastError();
 	}
 	else
-		outReason = "device '" + inDeviceInfo.deviceIdentifier + "' not open";
+		outReason = "GetInstalledBitfileInfo failed for device '" + inDeviceInfo.deviceIdentifier + "'";
 	return kFirmwareUpdateCheckFailed;	//	failure
 }
 
@@ -170,13 +161,13 @@ CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread (const NTV2DeviceInfo
 
 AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 {
-	m_device.Open (m_deviceInfo.deviceIndex);
-	if (!m_device.IsOpen ())
+	m_device.Open(UWord(m_deviceInfo.deviceIndex));
+	if (!m_device.IsOpen())
 	{
 		cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  Device not open" << endl;
 		return AJA_STATUS_OPEN;
 	}
-	if (m_bitfilePath.empty () && !m_useDynamicReconfig)
+	if (m_bitfilePath.empty() && !m_useDynamicReconfig)
 	{
 		cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  Bitfile path is empty!" << endl;
 		return AJA_STATUS_BAD_PARAM;
@@ -222,7 +213,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 			}
 		}
 
-        m_device. WriteRegister(kVRegFlashStatus,kfp.NextMcsStep());
+        m_device. WriteRegister(kVRegFlashStatus, ULWord(kfp.NextMcsStep()));
         rv = kfp.SetMCSFile(m_bitfilePath.c_str());
         if (!rv)
         {
@@ -275,16 +266,16 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 				return AJA_STATUS_OPEN;
 			}
 	
-            const unsigned	bitfileLength	(bitfile.GetFileStreamLength ());
+            const size_t	bitfileLength	(bitfile.GetFileStreamLength());
 			unsigned char *	bitfileBuffer	(new unsigned char [bitfileLength + 512]);
-			if (bitfileBuffer == NULL)
+			if (bitfileBuffer == AJA_NULL)
 			{
 				cerr << "## ERROR:  CNTV2FirmwareInstallerThread:  Unable to allocate bitfile buffer" << endl;
 				return AJA_STATUS_MEMORY;
 			}
 	
 			::memset (bitfileBuffer, 0xFF, bitfileLength + 512);
-			const unsigned	readBytes	(bitfile.GetFileByteStream (bitfileBuffer, bitfileLength));
+			const size_t	readBytes	(bitfile.GetFileByteStream (bitfileBuffer, bitfileLength));
 			const string	designName	(bitfile.GetDesignName ());
 			newFirmwareDescription = m_bitfilePath + " - " + bitfile.GetDate () + " " + bitfile.GetTime ();
 			if (readBytes != bitfileLength)
@@ -395,21 +386,18 @@ string CNTV2FirmwareInstallerThread::GetStatusString (void) const
 		case kProgramStateProgramFlash:				return "Programming...";
 		case kProgramStateVerifyFlash:				return "Verifying...";
 		case kProgramStateFinished:					return "Done";
-        case kProgramStateEraseBank3:               return "Erasing bank 3...";
-        case kProgramStateProgramBank3:             return "Programmming bank 3...";
-        case kProgramStateVerifyBank3:              return "Verifying bank 3...";
-        case kProgramStateEraseBank4:               return "Erasing bank 4...";
-        case kProgramStateProgramBank4:             return "Programming bank 4...";
-        case kProgramStateVerifyBank4:              return "Verifying bank 4...";
-        case kProgramStateCalculating:              return "Calculating.....";
-        case kProgramStateErasePackageInfo:         return "Erasing Package Info...";
-        case kProgramStateProgramPackageInfo:       return "Programming Package Info...";
-        case kProgramStateVerifyPackageInfo:        return "VerifyingPackageInfo....";
-        default:
-            return "Internal error";
+		case kProgramStateEraseBank3:               return "Erasing bank 3...";
+		case kProgramStateProgramBank3:             return "Programmming bank 3...";
+		case kProgramStateVerifyBank3:              return "Verifying bank 3...";
+		case kProgramStateEraseBank4:               return "Erasing bank 4...";
+		case kProgramStateProgramBank4:             return "Programming bank 4...";
+		case kProgramStateVerifyBank4:              return "Verifying bank 4...";
+		case kProgramStateCalculating:              return "Calculating.....";
+		case kProgramStateErasePackageInfo:         return "Erasing Package Info...";
+		case kProgramStateProgramPackageInfo:       return "Programming Package Info...";
+		case kProgramStateVerifyPackageInfo:        return "VerifyingPackageInfo....";
 	}
-
-	return "";
+	return "Internal error";
 }
 
 uint32_t CNTV2FirmwareInstallerThread::GetProgressValue (void) const
@@ -467,9 +455,9 @@ CNTV2FirmwareInstallerThread & CNTV2FirmwareInstallerThread::operator = (const C
 	return *this;
 }
 
-bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, const std::string designName) const
+bool CNTV2FirmwareInstallerThread::ShouldUpdate (const NTV2DeviceID inDeviceID, const string & designName) const
 {
-    std::string name;
+	string name;
 
 #if 0
     name = GetPrimaryDesignName(DEVICE_ID_KONAIP_2022);
@@ -507,7 +495,7 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
     if (designName == name)
         return true;
 
-    printf("Make sure we can install %s, replacing %s\n", designName.c_str(), name.c_str());
+    cout << "Be sure we can install '" << designName.c_str() << "', replacing '" << name.c_str() << "'" << endl;
 
 	//	Special cases -- e.g. bitfile flipping, P2P, etc...
 	switch (inDeviceID)
@@ -596,7 +584,7 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate(const NTV2DeviceID inDeviceID, c
 	return false;
 }
 
-std::string CNTV2FirmwareInstallerThread::GetPrimaryDesignName(const NTV2DeviceID inDeviceID) const
+string CNTV2FirmwareInstallerThread::GetPrimaryDesignName (const NTV2DeviceID inDeviceID) const
 {
 	switch (inDeviceID)
 	{

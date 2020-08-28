@@ -9,7 +9,6 @@
 #ifndef AJA_DEBUGSHARE_H
 #define AJA_DEBUGSHARE_H
 
-
 /**
  *	The list of debug message severity codes.
  *	@ingroup AJAGroupDebug
@@ -167,6 +166,7 @@ typedef enum _AJADebugUnit
 /**
 	@defgroup	AJAGroupVarious	AJA_DEBUG
 	Various parameters that define the characteristics of the shared debug memory space.
+	SDK 16.0 introduced a new stats measurement feature that still allows logging to work in pre-16.0 clients.
 	@ingroup	AJAGroupDebug
 **/
 ///@{
@@ -174,6 +174,8 @@ typedef enum _AJADebugUnit
 #define AJA_DEBUG_VERSION				110					/**< Version of the debug system */
 #define AJA_DEBUG_UNIT_ARRAY_SIZE		65536				/**< Number of unit destinations */
 #define AJA_DEBUG_SEVERITY_ARRAY_SIZE	64					/**< Number of severity destinations */
+#define AJA_DEBUG_MAX_NUM_STATS			256					/**< Max number of individual stats measurements (multiple of 64) */
+#define	AJA_DEBUG_STAT_DEQUE_SIZE		11
 #define AJA_DEBUG_MESSAGE_MAX_SIZE		512					/**< Maximum size of a message */
 #define AJA_DEBUG_MESSAGE_RING_SIZE		4096				/**< Size of the message ring */
 #define AJA_DEBUG_FILE_NAME_MAX_SIZE	512					/**< Maximum size of a file name */
@@ -205,29 +207,93 @@ typedef struct _AJADebugMessage
 	char		messageText[AJA_DEBUG_MESSAGE_MAX_SIZE];	/**< Text generated for this message */
 } AJADebugMessage;
 
+
+/**
+	64-byte structure representing an unsigned 32-bit measurement (timer, counter or data value).
+	As a timer, it stores minimum, maximum and average elapsed time in microseconds.
+	As a data value, it stores minimum, maximum, moving average value, and last update usec timestamp.
+	As a counter, it can increment or decrement, with or without rollover/rollunder.
+	@ingroup	AJAGroupDebug
+**/
+class AJADebugStat
+{
+	public:
+	uint32_t	fMin;								/**< Smallest value yet seen. (Fixed at 0xFFFFFFFF and unused for counters.) */
+	uint32_t	fMax;								/**< Largest value yet seen. (Fixed at zero and unused for counters.) */
+	uint32_t	fCount;								/**< Update/change count */
+	uint64_t	fLastTimeStamp;						/**< Timestamp (start time for timer, zero if not running;  last update time for counter or data value) */
+	uint32_t	fValues[AJA_DEBUG_STAT_DEQUE_SIZE];	/**< Deque that provides an 11-sample moving average. (Unused for counters.) */
+
+	AJADebugStat()		{Reset();}
+
+	void Reset (void)
+	{
+		fMin = 0xFFFFFFFF;
+		fMax = fCount = 0;
+		fLastTimeStamp = 0;
+		for (size_t n(0);  n < AJA_DEBUG_STAT_DEQUE_SIZE;  n++)
+			fValues[n] = 0;
+	}
+
+	double Average(void) const;	/**< Returns the average of the stored values */
+	uint64_t Sum (const size_t inNum = 0) const;	/**< Returns the sum of the first "inNum" stored values */
+	void Start (void);	/**< Starts a timer by setting fLastTimeStamp to the high-resolution host OS system timestamp */
+
+	/**
+	 *	Stops the timer, stores the elapsed time in the deque, bumps fCount, and clears fLastTimeStamp.
+	 *	Also updates fMin and/or fMax if necessary.
+	 */
+	void Stop (void);
+
+	/**
+	 *	Increments fCount by the given amount, and sets fLastTimeStamp.
+	 *	@param[in]	inIncrement		Optionally specifies a different increment value. Defaults to 1.
+	 *	@param[in]	inRollOver		Optionally controls if overflow is permitted. Defaults to true.
+	 */
+	void Increment (const uint32_t inIncrement = 1, const bool inRollOver = true);
+
+	/**
+	 *	Decrements fCount by the given amount, and sets fLastTimeStamp.
+	 *	@param[in]	inDecrement		Optionally specifies a different increment value. Defaults to 1.
+	 *	@param[in]	inRollUnder		Optionally controls if underflow is permitted. Defaults to true.
+	 */
+	void Decrement (const uint32_t inDecrement = 1, const bool inRollUnder = true);
+
+	/**
+	 *	Inserts the given value into the deque, bumps fCount, and sets fLastTimeStamp to the current time.
+	 *	@param[in]	inValue		Specifies the value to store.
+	 *	@param[in]	inStamp		Optionally specifies whether to set the timestamp or not. Defaults to true.
+	 */
+	void SetValue (const uint32_t inValue, const bool inStamp = true);
+};
+
+
 /**
 	Structure representing the shared debug groups and messages.
 	@ingroup	AJAGroupDebug
 **/
 typedef struct _AJADebugShare
 {
-    uint32_t            magicId;                                        /**< Magic cookie identifier used to id this as an AJADebugShare structure */
-	uint32_t			version;										/**< Version of the debug system */
-    uint64_t volatile	writeIndex;										/**< Write index for the message ring */
-    int32_t volatile    clientRefCount;                                 /**< A count of current number of clients using structure*/
+	uint32_t			magicId;									/**< Magic cookie identifier used to id this as an AJADebugShare structure */
+	uint32_t			version;									/**< Version of the debug system */
+	uint64_t volatile	writeIndex;									/**< Write index for the message ring */
+	int32_t volatile	clientRefCount;								/**< A count of current number of clients using structure*/
 
-    uint32_t            messageRingCapacity;                            /**< The number of messages that can be in the ring*/
-    uint32_t            messageTextCapacity;                            /**< The maximum text capacity of message in bytes */
-    uint32_t            messageFileNameCapacity;                        /**< The maximum text capacity of message filename in bytes */
-    uint32_t            unitArraySize;                                  /**< The number of unit destinations */
+	uint32_t			messageRingCapacity;						/**< The number of messages that can be in the ring */
+	uint32_t			messageTextCapacity;						/**< The maximum text capacity of message in bytes */
+	uint32_t			messageFileNameCapacity;					/**< The maximum text capacity of message filename in bytes */
+	uint32_t			unitArraySize;								/**< The number of unit destinations */
 
-    uint64_t volatile   statsMessagesAccepted;                          /**< The number of messages accepted into the ring since creation */
-    uint64_t volatile   statsMessagesIgnored;                           /**< The number of messages ignored since creation, filtered out */
+	uint64_t volatile	statsMessagesAccepted;						/**< The number of messages accepted into the ring since creation */
+	uint64_t volatile	statsMessagesIgnored;						/**< The number of messages ignored since creation, filtered out */
 
-    uint32_t            reserved[128];                                  /**< Reserved */
-
-	uint32_t			unitArray[AJA_DEBUG_UNIT_ARRAY_SIZE];			/**< Array of message destinations by unit */
-	AJADebugMessage		messageRing[AJA_DEBUG_MESSAGE_RING_SIZE];		/**< Message ring holding current message data */
+	uint32_t			statCapacity;								/**< The number of stats that can be stored, or zero if no stat facility (new in SDK 16) */
+	uint32_t volatile	statAllocChanges;							/**< Number of changes to statAllocMask (new in SDK 16.0) */
+	uint64_t			statAllocMask[AJA_DEBUG_MAX_NUM_STATS/64];	/**< Stats allocation bitmask, 1 bit per stats measurement (new in SDK 16.0) */
+	uint32_t			reserved[128 - 1 - 1 - 2*AJA_DEBUG_MAX_NUM_STATS/64];	/**< Reserved (was [128] in version 110) */
+	uint32_t			unitArray[AJA_DEBUG_UNIT_ARRAY_SIZE];		/**< Array of message destinations by unit */
+	AJADebugMessage		messageRing[AJA_DEBUG_MESSAGE_RING_SIZE];	/**< Message ring holding current message data */
+	AJADebugStat		stats[AJA_DEBUG_MAX_NUM_STATS];				/**< Per-stat measurement data (new in v111) */
 } AJADebugShare;
 
 #pragma pack(pop)
