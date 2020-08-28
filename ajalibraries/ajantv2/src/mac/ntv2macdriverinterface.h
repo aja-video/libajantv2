@@ -143,10 +143,6 @@ protected:
 							  NTV2DeviceType eDeviceType,
 							  const char * hostName);
 #endif	//	!defined(NTV2_DEPRECATE_14_3)
-	AJA_VIRTUAL bool	Open (const UWord inDeviceIndex = 0,
-							  const std::string & inHostName = std::string());
-	AJA_VIRTUAL bool	TestOpen();
-	AJA_VIRTUAL bool	Close (void);
 
 private:
 	AJA_VIRTUAL io_connect_t	GetIOConnect (const bool inDoNotAllocate = false) const;	//	For internal use only
