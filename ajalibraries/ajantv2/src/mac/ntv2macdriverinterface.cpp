@@ -488,10 +488,15 @@ bool CNTV2MacDriverInterface::CloseLocalPhysical (void)
 	_boardNumber = 0;
 	return true; // success
 
-}	//	Close
+}	//	CloseLocalPhysical
 
 
 #if !defined(NTV2_DEPRECATE_16_0)
+	//--------------------------------------------------------------------------------------------------------------------
+	//	GetPCISlotNumber
+	//
+	//	Returns my PCI slot number, if known; otherwise returns zero.
+	//--------------------------------------------------------------------------------------------------------------------
 	ULWord CNTV2MacDriverInterface::GetPCISlotNumber (void) const
 	{
 		ULWord				result (0);
@@ -530,7 +535,8 @@ bool CNTV2MacDriverInterface::CloseLocalPhysical (void)
 	}	//	GetPCISlotNumber
 
 	//--------------------------------------------------------------------------------------------------------------------
-	//	MapMemory
+	//	MapFrameBuffers
+	//
 	//	Return a pointer and size of either the register map or frame buffer memory.
 	//--------------------------------------------------------------------------------------------------------------------
 	bool CNTV2MacDriverInterface::MapFrameBuffers (void)
@@ -577,7 +583,7 @@ bool CNTV2MacDriverInterface::CloseLocalPhysical (void)
 	//--------------------------------------------------------------------------------------------------------------------
 	//	Map / Unmap Xena2Flash
 	//--------------------------------------------------------------------------------------------------------------------
-	bool CNTV2MacDriverInterface::MapXena2Flash ( void )
+	bool CNTV2MacDriverInterface::MapXena2Flash (void)
 	{
 		ULWord	*baseAddr;
 		if (!MapMemory (kXena2FlashMemory, reinterpret_cast<void**>(&baseAddr)))
@@ -588,15 +594,21 @@ bool CNTV2MacDriverInterface::CloseLocalPhysical (void)
 		_pXena2FlashBaseAddress = reinterpret_cast<ULWord*>(baseAddr);
 		return true;
 	}
-	
+
 	bool CNTV2MacDriverInterface::UnmapXena2Flash (void)
 	{
 		_pXena2FlashBaseAddress = AJA_NULL;
 		return true;
 	}
 
+	//--------------------------------------------------------------------------------------------------------------------
+	//	MapMemory
+	//--------------------------------------------------------------------------------------------------------------------
 	bool CNTV2MacDriverInterface::MapMemory (const MemoryType memType, void **memPtr)
 	{
+#ifndef __LP64__
+		return false;
+#endif
 		if (GetIOConnect())
 		{
 			mach_vm_size_t	size(0);
@@ -608,6 +620,9 @@ bool CNTV2MacDriverInterface::CloseLocalPhysical (void)
 		return false;
 	}
 
+	//--------------------------------------------------------------------------------------------------------------------
+	//	SystemControl
+	//--------------------------------------------------------------------------------------------------------------------
 	bool CNTV2MacDriverInterface::SystemControl (void * dataPtr, SystemControlCode controlCode)
 	{
 		kern_return_t 	kernResult		= KERN_FAILURE;
@@ -651,18 +666,20 @@ bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outV
 	uint64_t	scalarI_64[2] = {inRegNum, inMask};
 	uint64_t	scalarO_64 = outValue;
 	uint32_t	outputCount = 1;
-
 	if (GetIOConnect())
+	{
+		AJADebug::StatTimerStart(kDriverReadRegister);
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverReadRegister,		// selector of the function to be called via the user client.
 											   scalarI_64,				// array of scalar (64-bit) input values.
 											   2,						// the number of scalar input values.
 											   &scalarO_64,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
+		AJADebug::StatTimerStop(kDriverReadRegister);
+	}
 	outValue = uint32_t(scalarO_64);
 	if (kernResult == KERN_SUCCESS)
 		return true;
-
 	DIFAIL(KR(kernResult) << ": ndx=" << _boardNumber << ", con=" << HEX8(GetIOConnect(false))
 			<< " -- reg=" << DEC(inRegNum) << ", mask=" << HEX8(inMask) << ", shift=" << HEX8(inShift));
 	return false;
@@ -695,18 +712,20 @@ bool CNTV2MacDriverInterface::WriteRegister (const ULWord inRegNum, const ULWord
 	if (IsRemote())
 		return CNTV2DriverInterface::WriteRegister(inRegNum, inValue, inMask, inShift);
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-
 	kern_return_t kernResult(KERN_FAILURE);
 	uint64_t	scalarI_64[3] = {inRegNum, inValue, inMask};
 	uint32_t	outputCount = 0;
-
 	if (GetIOConnect())
+	{
+		AJADebug::StatTimerStart(kDriverWriteRegister);
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverWriteRegister,	// selector of the function to be called via the user client.
 											   scalarI_64,				// array of scalar (64-bit) input values.
 											   3,						// the number of scalar input values.
 											   AJA_NULL,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
+		AJADebug::StatTimerStop(kDriverWriteRegister);
+	}
 	if (kernResult == KERN_SUCCESS)
 		return true;
 	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()) << " -- reg=" << inRegNum
@@ -726,7 +745,6 @@ bool CNTV2MacDriverInterface::StartDriver (DriverStartPhase phase)
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[1] = {phase};
 	uint32_t	outputCount = 0;
-
 	if (GetIOConnect())
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),		// an io_connect_t returned from IOServiceOpen().
 											   kDriverStartDriver,	// selector of the function to be called via the user client.
@@ -752,17 +770,19 @@ bool CNTV2MacDriverInterface::StartDriver (DriverStartPhase phase)
 bool CNTV2MacDriverInterface::AcquireStreamForApplication (ULWord appType, int32_t pid)
 {
 	kern_return_t kernResult = KERN_FAILURE;
-
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
-
 	if (GetIOConnect())
+	{
+		AJADebug::StatTimerStart(kDriverAcquireStreamForApplication);
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverAcquireStreamForApplication,	// selector of the function to be called via the user client.
 											   scalarI_64,				// array of scalar (64-bit) input values.
 											   2,						// the number of scalar input values.
 											   AJA_NULL,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
+		AJADebug::StatTimerStop(kDriverAcquireStreamForApplication);
+	}
 	if (kernResult == KERN_SUCCESS)
         return true;
 	DIFAIL(KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
@@ -773,19 +793,22 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplication (ULWord appType, int32
 //--------------------------------------------------------------------------------------------------------------------
 //	ReleaseStreamForApplication
 //--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::ReleaseStreamForApplication( ULWord appType, int32_t pid )
+bool CNTV2MacDriverInterface::ReleaseStreamForApplication (ULWord appType, int32_t pid)
 {
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
-
 	if (GetIOConnect())
+	{
+		AJADebug::StatTimerStart(kDriverReleaseStreamForApplication);
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverReleaseStreamForApplication,	// selector of the function to be called via the user client.
 											   scalarI_64,				// array of scalar (64-bit) input values.
 											   2,						// the number of scalar input values.
 											   AJA_NULL,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
+		AJADebug::StatTimerStop(kDriverReleaseStreamForApplication);
+	}
 	if (kernResult == KERN_SUCCESS)
         return true;
 	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
@@ -808,14 +831,17 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplicationWithReference (ULWord a
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
-
 	if (GetIOConnect())
+	{
+		AJADebug::StatTimerStart(kDriverAcquireStreamForApplicationWithReference);
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverAcquireStreamForApplicationWithReference,	// selector of the function to be called via the user client.
 											   scalarI_64,				// array of scalar (64-bit) input values.
 											   2,						// the number of scalar input values.
 											   AJA_NULL,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
+		AJADebug::StatTimerStop(kDriverAcquireStreamForApplicationWithReference);
+	}
 	if (kernResult == KERN_SUCCESS)
         return true;
 	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
@@ -834,14 +860,17 @@ bool CNTV2MacDriverInterface::ReleaseStreamForApplicationWithReference (ULWord a
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
-
 	if (GetIOConnect())
+	{
+		AJADebug::StatTimerStart(kDriverReleaseStreamForApplicationWithReference);
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverReleaseStreamForApplicationWithReference,	// selector of the function to be called via the user client.
 											   scalarI_64,				// array of scalar (64-bit) input values.
 											   2,						// the number of scalar input values.
 											   AJA_NULL,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
+		AJADebug::StatTimerStop(kDriverReleaseStreamForApplicationWithReference);
+	}
 	if (kernResult == KERN_SUCCESS)
         return true;
 	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
@@ -863,14 +892,17 @@ bool CNTV2MacDriverInterface::SetStreamingApplication (ULWord appType, int32_t p
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
-
 	if (GetIOConnect())
+	{
+		AJADebug::StatTimerStart(kDriverSetStreamForApplication);
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverSetStreamForApplication,	// selector of the function to be called via the user client.
 											   scalarI_64,				// array of scalar (64-bit) input values.
 											   2,						// the number of scalar input values.
 											   AJA_NULL,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
+		AJADebug::StatTimerStop(kDriverSetStreamForApplication);
+	}
 	if (kernResult == KERN_SUCCESS)
         return true;
 	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
@@ -886,14 +918,17 @@ bool CNTV2MacDriverInterface::GetStreamingApplication (ULWord & outAppType, int3
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarO_64[2]	= {0, 0};
 	uint32_t	outputCount(2);
-
 	if (GetIOConnect())
+	{
+		AJADebug::StatTimerStart(kDriverGetStreamForApplication);
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverGetStreamForApplication,	// selector of the function to be called via the user client.
 											   AJA_NULL,				// array of scalar (64-bit) input values.
 											   0,						// the number of scalar input values.
 											   scalarO_64,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
+		AJADebug::StatTimerStop(kDriverGetStreamForApplication);
+	}
 	outAppType   = ULWord(scalarO_64[0]);
 	outProcessID = int32_t(scalarO_64[1]);
 	if (kernResult == KERN_SUCCESS)
@@ -904,6 +939,8 @@ bool CNTV2MacDriverInterface::GetStreamingApplication (ULWord & outAppType, int3
 
 
 //--------------------------------------------------------------------------------------------------------------------
+//	SetDefaultDeviceForPID
+//
 //	Used for multicard support with QT components. (Also see IsDefaultDeviceForPID)
 //	QT components are created and destroyed multiple times in the lifetime of running app. This call allows a component
 //	to mark a device as its default device, so that each time the component reopens, it can find the device it used last.
@@ -915,12 +952,16 @@ bool CNTV2MacDriverInterface::SetDefaultDeviceForPID (int32_t pid)
 	uint64_t		scalarI_64[1]	= {uint64_t(pid)};
 	uint32_t		outputCount		= 0;
 	if (GetIOConnect())
+	{
+		AJADebug::StatTimerStart(kDriverSetDefaultDeviceForPID);
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverSetDefaultDeviceForPID,// selector of the function to be called via the user client.
 											   scalarI_64,				// array of scalar (64-bit) input values.
 											   1,						// the number of scalar input values.
 											   AJA_NULL,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
+		AJADebug::StatTimerStop(kDriverSetDefaultDeviceForPID);
+	}
 	if (kernResult == KERN_SUCCESS)
         return true;
 	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
@@ -929,6 +970,8 @@ bool CNTV2MacDriverInterface::SetDefaultDeviceForPID (int32_t pid)
 
 
 //--------------------------------------------------------------------------------------------------------------------
+//	IsDefaultDeviceForPID
+//
 //	Used for multicard support with QT components. (Also see SetDefaultDeviceForPID)
 //	QT components are created and destroyed multiple times in the lifetime of running app. This call allows a component
 //	to mark a device as its default device, so that each time the component reopens, it can find the device it used last.
@@ -974,6 +1017,14 @@ bool CNTV2MacDriverInterface::KernelLog (void * dataPtr, UInt32 dataSize)
 	return false;
 }
 
+
+//--------------------------------------------------------------------------------------------------------------------
+//	WaitForInterrupt
+//
+//	Block the current thread until the specified interrupt occurs.
+//	Supply a timeout in milliseconds - if 0 (default), then never time out.
+//	Returns true if interrupt occurs, false if timeout.
+//--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS type, const ULWord timeout)
 {
 	if (IsRemote())
@@ -989,12 +1040,16 @@ bool CNTV2MacDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS type, cons
 	if (!NTV2_IS_VALID_INTERRUPT_ENUM(type))
 		kernResult = KERN_INVALID_VALUE;
 	else if (GetIOConnect())
+	{
+		AJADebug::StatTimerStart(kDriverWaitForInterrupt);
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverWaitForInterrupt,	// selector of the function to be called via the user client.
 											   scalarI_64,				// array of scalar (64-bit) input values.
 											   2,						// the number of scalar input values.
 											   &scalarO_64,				// array of scalar (64-bit) output values.
 											   &outputCount);				// pointer to the number of scalar output values.
+		AJADebug::StatTimerStop(kDriverWaitForInterrupt);
+	}
 	UInt32 interruptOccurred = uint32_t(scalarO_64);
 	if (kernResult != KERN_SUCCESS)
 		{DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));  return false;}
@@ -1003,6 +1058,11 @@ bool CNTV2MacDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS type, cons
 	return interruptOccurred;
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+//	GetInterruptCount
+//
+//	Returns the number of interrupts that have occured for the specified interrupt type.
+//--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterrupt, ULWord & outCount)
 {
 	kern_return_t 	kernResult	= KERN_FAILURE;
@@ -1010,12 +1070,16 @@ bool CNTV2MacDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterrup
 	uint64_t	scalarO_64		= 0;
 	uint32_t	outputCount		= 1;
 	if (GetIOConnect())
+	{
+		AJADebug::StatTimerStart(kDriverGetInterruptCount);
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverGetInterruptCount,// selector of the function to be called via the user client.
 											   scalarI_64,				// array of scalar (64-bit) input values.
 											   1,						// the number of scalar input values.
 											   &scalarO_64,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
+		AJADebug::StatTimerStop(kDriverGetInterruptCount);
+	}
 	outCount = ULWord(scalarO_64);
 	if (kernResult == KERN_SUCCESS)
         return true;
@@ -1023,6 +1087,13 @@ bool CNTV2MacDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterrup
 	return false;
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+//	WaitForChangeEvent
+//
+//	Block the current thread until a register changes.
+//	Supply a timeout in milliseconds - if 0 (default), then never time out.
+//	Returns true if change occurs, false if timeout.
+//--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::WaitForChangeEvent (UInt32 timeout)
 {
 	kern_return_t 	kernResult	= KERN_FAILURE;
@@ -1094,6 +1165,8 @@ bool CNTV2MacDriverInterface::WaitForChangeEvent (UInt32 timeout)
 
 
 //--------------------------------------------------------------------------------------------------------------------
+//	DmaTransfer
+//
 //	Start a memory transfer using the specified DMA engine.
 //	Optional - call PrepareDMAMemory on the dataPtr before the first use of memory block
 //	for DMA and CompleteDMAMemory when done.  This will speed up the DMA by not requiring
@@ -1117,14 +1190,17 @@ bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[6] = {inDMAEngine, uint64_t(pFrameBuffer), inFrameNumber, inOffsetBytes, inByteCount, !inIsRead};
 	uint32_t	outputCount = 0;
-
 	if (GetIOConnect())
+	{
+		AJADebug::StatTimerStart(kDriverDMATransfer);
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverDMATransfer,		// selector of the function to be called via the user client.
 											   scalarI_64,				// array of scalar (64-bit) input values.
 											   6,						// the number of scalar input values.
 											   AJA_NULL,				// array of scalar (64-bit) output values.
 											   &outputCount);			// pointer to the number of scalar output values.
+		AJADebug::StatTimerStop(kDriverDMATransfer);
+	}
 	if (kernResult == KERN_SUCCESS)
         return true;
 	DIFAIL(KR(kernResult) << ": con=" << HEX8(GetIOConnect()) << ", eng=" << inDMAEngine << ", frm=" << inFrameNumber
@@ -1134,6 +1210,8 @@ bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
 
 
 //--------------------------------------------------------------------------------------------------------------------
+//	DmaTransfer
+//
 //	Start a memory transfer using the specified DMA engine.
 //	Optional - call PrepareDMAMemory on the dataPtr before the first use of memory block
 //	for DMA and CompleteDMAMemory when done.  This will speed up the DMA by not requiring
@@ -1174,12 +1252,16 @@ bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine inDMAEngine,
 	dmaTransfer64.dmaToCard				= !inIsRead;						// direction of DMA transfer
 
 	if (GetIOConnect())
+	{
+		AJADebug::StatTimerStart(kDriverDMATransferEx);
 		kernResult = IOConnectCallStructMethod(GetIOConnect(),					// an io_connect_t returned from IOServiceOpen().
 											   kDriverDMATransferEx,			// selector of the function to be called via the user client.
 											   &dmaTransfer64,					// pointer to the input structure
 											   sizeof(DMA_TRANSFER_STRUCT_64),	// size of input structure
 											   AJA_NULL,						// pointer to the output structure
 											   &outputStructSize);				// size of output structure
+		AJADebug::StatTimerStop(kDriverDMATransferEx);
+	}
 	if (kernResult == KERN_SUCCESS)
         return true;
 	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
@@ -1204,6 +1286,10 @@ bool CNTV2MacDriverInterface::DmaTransfer (	const NTV2DMAEngine			inDMAEngine,
 	return false;
 }
 
+
+//--------------------------------------------------------------------------------------------------------------------
+//	RestoreHardwareProcampRegisters
+//--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::RestoreHardwareProcampRegisters (void)
 {
 	kern_return_t 	kernResult	= KERN_FAILURE;
@@ -1221,6 +1307,10 @@ bool CNTV2MacDriverInterface::RestoreHardwareProcampRegisters (void)
 	return false;
 }
 
+
+//--------------------------------------------------------------------------------------------------------------------
+//	SystemStatus
+//--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::SystemStatus ( void* dataPtr, SystemStatusCode statusCode)
 {
 	kern_return_t 	kernResult		= KERN_FAILURE;
@@ -1241,6 +1331,10 @@ bool CNTV2MacDriverInterface::SystemStatus ( void* dataPtr, SystemStatusCode sta
 	return false;
 }
 
+
+//--------------------------------------------------------------------------------------------------------------------
+// AutoCirculate
+//--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 {
 	bool success = true;
@@ -1272,12 +1366,14 @@ bool CNTV2MacDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 			AUTOCIRCULATE_DATA_64 autoCircData64;
 			CopyTo_AUTOCIRCULATE_DATA_64 (&autoCircData, &autoCircData64);
 
+			AJADebug::StatTimerStart(kDriverAutoCirculateControl);
 			kernResult = IOConnectCallStructMethod(conn,							// an io_connect_t returned from IOServiceOpen().
 												   kDriverAutoCirculateControl,		// selector of the function to be called via the user client.
 												   &autoCircData64,					// pointer to the input structure
 												   sizeof(AUTOCIRCULATE_DATA_64),	// size of input structure
 												   AJA_NULL,						// pointer to the output structure
 												   &outputStructSize);				// size of output structure
+			AJADebug::StatTimerStop(kDriverAutoCirculateControl);
 			break;
 		}	//	eInit, eStart, eStop, eAbort, etc...
 
@@ -1288,6 +1384,7 @@ bool CNTV2MacDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 			size_t		outputStructSize = sizeof(AUTOCIRCULATE_STATUS_STRUCT);
 			whichMethod = kDriverAutoCirculateStatus;
 			scalarI_64[0] = autoCircData.channelSpec;
+			AJADebug::StatTimerStart(kDriverAutoCirculateStatus);
 			kernResult = IOConnectCallMethod(conn,							// an io_connect_t returned from IOServiceOpen().
 											 kDriverAutoCirculateStatus,	// selector of the function to be called via the user client.
 											 scalarI_64,					// array of scalar (64-bit) input values.
@@ -1298,6 +1395,7 @@ bool CNTV2MacDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 											 &outputCount,					// the number of scalar output values.
 											 autoCircData.pvVal1,			// pointer to the output structure
 											 &outputStructSize);			// size of output structure
+			AJADebug::StatTimerStop(kDriverAutoCirculateStatus);
 			break;
 		}	//	eGetAutoCirc
 
@@ -1315,15 +1413,16 @@ bool CNTV2MacDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 			AUTOCIRCULATE_DATA_64 autoCircData64;
 			CopyTo_AUTOCIRCULATE_DATA_64 (&autoCircData, &autoCircData64);
 
-			if (GetIOConnect())
-				kernResult = IOConnectCallStructMethod(conn,							// an io_connect_t returned from IOServiceOpen().
-													   kDriverAutoCirculateFramestamp,	// selector of the function to be called via the user client.
-													   &autoCircData64,					// pointer to the input structure
-													   sizeof(AUTOCIRCULATE_DATA_64),	// size of input structure
-													   &autoCircData64,					// pointer to the output structure
-													   &outputStructSize);				// size of output structure
+			AJADebug::StatTimerStart(kDriverAutoCirculateFramestamp);
+			kernResult = IOConnectCallStructMethod(conn,							// an io_connect_t returned from IOServiceOpen().
+												   kDriverAutoCirculateFramestamp,	// selector of the function to be called via the user client.
+												   &autoCircData64,					// pointer to the input structure
+												   sizeof(AUTOCIRCULATE_DATA_64),	// size of input structure
+												   &autoCircData64,					// pointer to the output structure
+												   &outputStructSize);				// size of output structure
+			AJADebug::StatTimerStop(kDriverAutoCirculateFramestamp);
 			break;
-		}	//	eGetFrameStamp
+		}	//	eGetFrameStamp, eGetFrameStampEx2
 
 		case eTransferAutoCirculate:
 		case eTransferAutoCirculateEx:
@@ -1361,20 +1460,22 @@ bool CNTV2MacDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 				autoCircData64.pvVal4 = Pointer64(&autoCircTask64);
 			}
 
+			AJADebug::StatTimerStart(kDriverAutoCirculateTransfer);
 			kernResult = IOConnectCallStructMethod(conn,							// an io_connect_t returned from IOServiceOpen().
 												   kDriverAutoCirculateTransfer,	// selector of the function to be called via the user client.
 												   &autoCircData64,					// pointer to the input structure
 												   sizeof(AUTOCIRCULATE_DATA_64),	// size of input structure
 												   autoCircData.pvVal2,				// pointer to the output structure
 												   &outputStructSize);				// size of output structure
+			AJADebug::StatTimerStop(kDriverAutoCirculateTransfer);
 			break;
-		}	//	eTransferAutoCirculate
+		}	//	eTransferAutoCirculate, eTransferAutoCirculateEx, eTransferAutoCirculateEx2
 
 		default:
 			//DisplayNTV2Error("Unsupported AC command type in AutoCirculate()\n");
 			kernResult =  KERN_INVALID_ARGUMENT;
 			break;
-	}
+	}	//	switch
 
 	success = (kernResult == KERN_SUCCESS);
 	if (kernResult != KERN_SUCCESS && kernResult != kIOReturnOffline)
@@ -1399,12 +1500,16 @@ bool CNTV2MacDriverInterface::NTV2Message (NTV2_HEADER * pInOutMessage)
 	uint64_t		scalarI_64 [2]	= {uint64_t(pInOutMessage), pInOutMessage->GetSizeInBytes()};
 	uint32_t		numScalarOutputs(0);
 	if (connection)
+	{
+		AJADebug::StatTimerStart(kDriverNTV2Message);
 		kernResult = IOConnectCallScalarMethod (connection,			//	an io_connect_t returned from IOServiceOpen
 											   kDriverNTV2Message,	//	selector of the function to be called via the user client
 											   scalarI_64,			//	array of scalar (64-bit) input values
 											   2,					//	the number of scalar input values
 											   AJA_NULL,			//	array of scalar (64-bit) output values
 											   &numScalarOutputs);	//	pointer (in: number of scalar output values capable of receiving;  out: actual number of scalar output values)
+		AJADebug::StatTimerStop(kDriverNTV2Message);
+	}
 	if (kernResult != KERN_SUCCESS  &&  kernResult != kIOReturnOffline)
 		MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(connection) << endl << *pInOutMessage);
 	return kernResult == KERN_SUCCESS;
@@ -1599,7 +1704,6 @@ void CNTV2MacDriverInterface::CopyTo_AUTOCIRCULATE_TRANSFER_STRUCT_64 (AUTOCIRCU
 	p64->videoQuarterSizeExpand		= p->videoQuarterSizeExpand;
 
 #if 0
-
 	printf("----------------------\n");
 	printf("sizeof					= %d\n", (int)sizeof(AUTOCIRCULATE_TRANSFER_STRUCT_64));
 
@@ -1614,11 +1718,9 @@ void CNTV2MacDriverInterface::CopyTo_AUTOCIRCULATE_TRANSFER_STRUCT_64 (AUTOCIRCU
 
 #endif
 
-
 	#if 0
 		printf("----------------------\n");
 		printf("sizeof					= %d\n", (int)sizeof(AUTOCIRCULATE_TRANSFER_STRUCT_64));
-
 
 	// note that p is native structure, either 64 or 32 bit
 	printf("channelSpec %x\n", p64->channelSpec);
@@ -1664,11 +1766,7 @@ void CNTV2MacDriverInterface::CopyTo_AUTOCIRCULATE_TRANSFER_STRUCT_64 (AUTOCIRCU
 	printf("videoSegmentCardPitch %x\n",p64->videoSegmentCardPitch);
 
 	printf("videoQuarterSizeExpand %x\n",p64->videoQuarterSizeExpand);
-
 	#endif
-
-
-
 }
 
 

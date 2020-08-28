@@ -14,7 +14,7 @@
 
 
 /**
-	class CNTV2MacDriverInterface
+	@brief	A Mac-specific implementation of CNTV2DriverInterface.
 **/
 class CNTV2MacDriverInterface : public CNTV2DriverInterface
 {
@@ -23,14 +23,16 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 	**/
 	///@{
 	public:
-							CNTV2MacDriverInterface();	///< @brief	My default constructor.
-		AJA_VIRTUAL			~CNTV2MacDriverInterface();	///< @brief	My destructor.
+						CNTV2MacDriverInterface();	///< @brief	My default constructor.
+	AJA_VIRTUAL			~CNTV2MacDriverInterface();	///< @brief	My destructor.
+	///@}
 
-	//	Mac-Specific Implementations of CNTV2DriverInterface Functions
+	/**
+		@name	Overloaded Methods
+	**/
+	///@{
 	AJA_VIRTUAL bool	WriteRegister (const ULWord inRegNum,  const ULWord inValue,  const ULWord inMask = 0xFFFFFFFF,  const ULWord inShift = 0);
 	AJA_VIRTUAL bool	ReadRegister (const ULWord inRegNum,  ULWord & outValue,  const ULWord inMask = 0xFFFFFFFF,  const ULWord inShift = 0);
-
-	AJA_VIRTUAL bool	StartDriver (DriverStartPhase phase);
 
 	AJA_VIRTUAL bool	AcquireStreamForApplication (ULWord inApplicationType, int32_t inProcessID);
 	AJA_VIRTUAL bool	ReleaseStreamForApplication (ULWord inApplicationType, int32_t inProcessID);
@@ -43,7 +45,7 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 
 	AJA_VIRTUAL bool	WaitForInterrupt (const INTERRUPT_ENUMS type,  const ULWord timeout = 50);
 	AJA_VIRTUAL bool	GetInterruptCount (const INTERRUPT_ENUMS eInterrupt, ULWord & outCount);
-	AJA_VIRTUAL bool	WaitForChangeEvent( UInt32 timeout = 0 );
+	AJA_VIRTUAL bool	WaitForChangeEvent (UInt32 timeout = 0);
 	AJA_VIRTUAL bool	DmaTransfer (const NTV2DMAEngine inDMAEngine,
 									const bool		inIsRead,
 									const ULWord	inFrameNumber,
@@ -78,16 +80,10 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 	AJA_VIRTUAL bool	NTV2Message (NTV2_HEADER * pInMessage);
 	AJA_VIRTUAL bool	ControlDriverDebugMessages (NTV2_DriverDebugMessageSet /*msgSet*/, bool /*enable*/) {return false;}
 	AJA_VIRTUAL bool	RestoreHardwareProcampRegisters (void);
-
-	AJA_VIRTUAL bool	SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode);
-	AJA_VIRTUAL bool	GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode);
-
-	AJA_VIRTUAL bool	SystemStatus( void* dataPtr, SystemStatusCode systemStatusCode );
-	AJA_VIRTUAL bool	KernelLog( void* dataPtr, UInt32 dataSize );
-	AJA_VIRTUAL bool	ConfigureInterrupt( bool /*bEnable*/, INTERRUPT_ENUMS /*eInterruptType*/ ) {return true;}
+	///@}
 
 #if !defined(NTV2_DEPRECATE_14_3)
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0x0))
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0x0))
 												{return pOutValue ? ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift) : false;}
 #endif	//	!defined(NTV2_DEPRECATE_14_3)
 #if !defined(NTV2_DEPRECATE_15_6)
@@ -119,6 +115,14 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(ULWord GetPCISlotNumber(void) const);	///< @deprecated	Obsolete starting in SDK 16.0.
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapMemory(const MemoryType memType, void **memPtr));	///< @deprecated	Obsolete starting in SDK 16.0.
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
+
+	AJA_VIRTUAL bool	SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode);
+	AJA_VIRTUAL bool	GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode);
+
+	AJA_VIRTUAL bool	StartDriver (DriverStartPhase phase);
+	AJA_VIRTUAL bool	SystemStatus( void* dataPtr, SystemStatusCode systemStatusCode );
+	AJA_VIRTUAL bool	KernelLog( void* dataPtr, UInt32 dataSize );
+	AJA_VIRTUAL bool	ConfigureInterrupt( bool /*bEnable*/, INTERRUPT_ENUMS /*eInterruptType*/ ) {return true;}
 
 public:
 	static const std::string &	GetIOServiceName (void);	//	For internal use only
