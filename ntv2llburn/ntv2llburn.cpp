@@ -27,7 +27,8 @@ NTV2LLBurn::NTV2LLBurn (const string &				inDeviceSpecifier,
 						const NTV2InputSource		inInputSource,
 						const NTV2TCIndex			inTCIndex,
 						const bool					inDoMultiChannel,
-						const bool					inWithAnc)
+						const bool					inWithAnc,
+						const bool					inWithHanc)
 
 	:	mRunThread				(AJAThread()),
 		mDeviceID				(DEVICE_ID_NOTFOUND),
@@ -45,6 +46,7 @@ NTV2LLBurn::NTV2LLBurn (const string &				inDeviceSpecifier,
 		mAudioSystem			(NTV2_AUDIOSYSTEM_1),
 		mDoMultiChannel			(inDoMultiChannel),
 		mWithAnc				(inWithAnc),
+		mWithHanc				(inWithHanc),
 		mGlobalQuit				(false),
 		mFramesProcessed		(0),
 		mFramesDropped			(0)
@@ -135,8 +137,15 @@ AJAStatus NTV2LLBurn::Init (void)
 		AJATime::Sleep (500);
 	}
 
+	if (mWithHanc)
+	{
+		//	Transfer audio using HANC extractor/inserter
+		mWithAnc = true;
+		mWithAudio = false;
+	}
+
 	if (mWithAnc && !::NTV2DeviceCanDoCustomAnc(mDeviceID))
-		{cerr << "## WARNING: Device doesn't support custom Anc, '-a' option ignored" << endl;  mWithAnc = false;}
+		{cerr << "## WARNING: Device doesn't support custom Anc, '-a -h' option ignored" << endl;  mWithAnc = false; mWithHanc = false;}
 
 	//	Set up the video and audio...
 	status = SetupVideo ();
@@ -167,6 +176,7 @@ AJAStatus NTV2LLBurn::Init (void)
 AJAStatus NTV2LLBurn::SetupVideo (void)
 {
 	const uint16_t	numFrameStores	(::NTV2DeviceGetNumFrameStores (mDeviceID));
+	const uint16_t	numSDIOutputs	(::NTV2DeviceGetNumVideoOutputs(mDeviceID));
 
 	//	Can the device support the desired input source?
 	if (!::NTV2DeviceCanDoInputSource (mDeviceID, mInputSource))
@@ -179,7 +189,7 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 	//	Pick an appropriate output NTV2Channel, and enable its frame buffer...
 	switch (mInputSource)
 	{
-		case NTV2_INPUTSOURCE_SDI1:		mOutputChannel = numFrameStores == 2 || numFrameStores > 4 ? NTV2_CHANNEL2 : NTV2_CHANNEL3;	break;
+		case NTV2_INPUTSOURCE_SDI1:		mOutputChannel = numSDIOutputs < 3 || numFrameStores == 2 || numFrameStores > 4 ? NTV2_CHANNEL2 : NTV2_CHANNEL3;	break;
 
 		case NTV2_INPUTSOURCE_HDMI2:
 		case NTV2_INPUTSOURCE_SDI2:		mOutputChannel = numFrameStores > 4 ? NTV2_CHANNEL3 : NTV2_CHANNEL4;						break;
@@ -202,7 +212,6 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 //		default:
 		case NTV2_INPUTSOURCE_INVALID:	cerr << "## ERROR:  Bad input source" << endl;  return AJA_STATUS_BAD_PARAM;
 	}
-	mOutputChannel = NTV2_CHANNEL2;
 
 	bool	isTransmit	(false);
 	if (::NTV2DeviceHasBiDirectionalSDI (mDevice.GetDeviceID ())			//	If device has bidirectional SDI connectors...
@@ -492,7 +501,6 @@ void NTV2LLBurn::RunThreadStatic (AJAThread * pThread, void * pContext)		//	stat
 }	//	RunThreadStatic
 
 
-static const bool	EXTRACT_INSERT_HANC_AUDIO					(false);
 static const bool	CLEAR_HOST_ANC_BUFFER_BEFORE_READ			(false);
 static const bool	PRINT_ANC_PACKETS_AFTER_READ				(false);
 static const bool	CLEAR_DEVICE_ANC_BUFFER_AFTER_READ			(false);
@@ -533,31 +541,35 @@ void NTV2LLBurn::ProcessFrames (void)
 		// Configure extractor
 		mDevice.AncExtractInit(sdiInput, mInputChannel);
 
-		if (EXTRACT_INSERT_HANC_AUDIO)
+		if (mWithHanc)
 		{
+			//	Configure ANC extractor not to filter audio
 			NTV2DIDSet dids;
-			dids.insert(0xe0);
-			dids.insert(0xe1);
-			dids.insert(0xe2);
-//			dids.insert(0xe3);
-			dids.insert(0xe4);
-			dids.insert(0xe5);
-			dids.insert(0xe6);
-//			dids.insert(0xe7);
-			dids.insert(0xa0);
+//			dids.insert(0xe0);	// HD audio group 4 control
+//			dids.insert(0xe1);	// HD audio group 3 control
+//			dids.insert(0xe2);	// HD audio group 2 control
+//			dids.insert(0xe3);	// HD audio group 1 control
+//			dids.insert(0xe4);	// HD audio group 4 data
+//			dids.insert(0xe5);	// HD audio group 3 data
+//			dids.insert(0xe6);	// HD audio group 2 data
+//			dids.insert(0xe7);	// HD audio group 1 data
+			dids.insert(0xa0);	// SD audio insertion not tested
 			dids.insert(0xa1);
 			dids.insert(0xa3);
 			dids.insert(0xa4);
 			dids.insert(0xa5);
 			dids.insert(0xa6);
 			dids.insert(0xa7);
-			dids.insert(0x41); // vpid
-			dids.insert(0x60); // timecode
+			dids.insert(0x41);	// Filter vpid (inserted by sdi output)
+			dids.insert(0x60);	// Filter timecode (inserted by sdi output)
 			mDevice.AncExtractSetFilterDIDs (sdiInput, dids);
+
+			//	Enable HANC extraction
 			mDevice.AncExtractSetComponents (sdiInput, true, true, true, true);
 		}
 		else
 		{
+			//	Disable HANC extraction
 			mDevice.AncExtractSetComponents (sdiInput, true, true, false, false);
 		}
 
@@ -569,12 +581,14 @@ void NTV2LLBurn::ProcessFrames (void)
 	{
 		// Configure inserter
 		mDevice.AncInsertInit (sdiOutput, mInputChannel);
-		if (EXTRACT_INSERT_HANC_AUDIO)
+		if (mWithHanc)
 		{
+			//	Enable HANC insertion
 			mDevice.AncInsertSetComponents (sdiOutput, true, true, true, true);
 		}
 		else
 		{
+			//	Disable HANC insertion
 			mDevice.AncInsertSetComponents (sdiOutput, true, true, false, false);
 		}
 		mDevice.AncInsertSetReadParams (sdiOutput, 0, 0, mOutputChannel);
