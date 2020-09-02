@@ -103,7 +103,7 @@ NTV2_WgtLUT1
 
 // GetNums		(see 'getnum_canon.gen' for legal values)
 NTV2DeviceGetActiveMemorySize					0x40000000
-NTV2DeviceGetHDMIVersion						5
+NTV2DeviceGetHDMIVersion						4
 NTV2DeviceGetLUTVersion							2
 NTV2DeviceGetMaxAudioChannels					16
 NTV2DeviceGetMaxRegisterNumber					kRegReserved511

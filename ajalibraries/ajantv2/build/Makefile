@@ -118,12 +118,10 @@ AJA_LIB_SRCS =\
 		ntv2spiinterface.cpp \
 		ntv2subscriptions.cpp \
 		ntv2supportlogger.cpp \
-		ntv2testpattern.cpp \
 		ntv2transcode.cpp \
 		ntv2utf8.cpp \
 		ntv2utils.cpp \
 		ntv2verticalfilter.cpp \
-		ntv2vidproc.cpp \
 		ntv2vpid.cpp \
 		ntv2vpidfromspec.cpp \
 		ntv2task.cpp \

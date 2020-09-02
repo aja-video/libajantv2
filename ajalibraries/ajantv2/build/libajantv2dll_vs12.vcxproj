@@ -302,7 +302,6 @@
     <ClCompile Include="..\src\ntv2subscriptions.cpp" />
     <ClCompile Include="..\src\ntv2supportlogger.cpp" />
     <ClCompile Include="..\src\ntv2task.cpp" />
-    <ClCompile Include="..\src\ntv2testpattern.cpp" />
     <ClCompile Include="..\src\ntv2testpatterngen.cpp" />
     <ClCompile Include="..\src\ntv2transcode.cpp" />
     <ClCompile Include="..\src\ntv2utf8.cpp" />
@@ -310,7 +309,6 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
     </ClCompile>
-    <ClCompile Include="..\src\ntv2vidproc.cpp" />
     <ClCompile Include="..\src\ntv2vpid.cpp" />
     <ClCompile Include="..\src\ntv2vpidfromspec.cpp" />
     <ClCompile Include="..\src\ntv2serialcontrol.cpp" />
@@ -427,12 +425,9 @@
     <ClInclude Include="..\includes\ntv2signalrouter.h" />
     <ClInclude Include="..\includes\ntv2status.h" />
     <ClInclude Include="..\includes\ntv2task.h" />
-    <ClInclude Include="..\includes\ntv2testpattern.h" />
     <ClInclude Include="..\includes\ntv2tshelper.h" />
     <ClInclude Include="..\includes\ntv2utf8.h" />
     <ClInclude Include="..\includes\ntv2utils.h" />
-    <ClInclude Include="..\includes\ntv2vidproc.h" />
-    <ClInclude Include="..\includes\ntv2vidprocmasks.h" />
     <ClInclude Include="..\includes\ntv2vpid.h" />
     <ClInclude Include="..\includes\ntv2vpidfromspec.h" />
     <ClInclude Include="..\includes\testpatterndata.h" />
