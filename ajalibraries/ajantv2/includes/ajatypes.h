@@ -37,10 +37,6 @@
 #define	NTV2_UNUSED(__p__)			(void)__p__
 #define NTV2_USE_CPLUSPLUS11		//	New in SDK 16.0. If defined (now default), 'ajalibraries/ajantv2' will use C++11 features (requires C++11 compiler)
 
-#define CNTV2STATUS			//	Retail code still uses these APIs
-#define CNTV2TESTPATTERN	//	Retail code still uses these APIs
-#define CNTV2VIDPROC		//	Retail code still uses these APIs
-
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
 	#if defined(AJAMac)
 		#if defined(__clang__)

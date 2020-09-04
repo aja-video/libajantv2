@@ -719,6 +719,40 @@ bool CNTV2Card::SetAudioMixerInputGain (const NTV2AudioMixerInput inMixerInput, 
 							: sAudioMixerInputGainCh2Regs[inMixerInput], inGainValue);
 }
 
+bool CNTV2Card::GetAudioMixerOutputGain (const NTV2AudioMixerChannel inChannel, ULWord & outGainValue)
+{
+	outGainValue = 0;
+	if (!DeviceCanDoAudioMixer())
+		return false;	//	No Audio Mixer -- shouldn't be calling this function
+	if (!NTV2_IS_AUDIO_MIXER_CHANNELS_1_OR_2(inChannel))
+		return false;	//	Bad audio channel specified -- must be Ch1 or Ch2
+	return ReadRegister (kRegAudioMixerMixedChannelOutputLevels, outGainValue);
+}
+
+bool CNTV2Card::SetAudioMixerOutputGain (const NTV2AudioMixerChannel inChannel, const ULWord inGainValue)
+{
+	if (!DeviceCanDoAudioMixer())
+		return false;	//	No Audio Mixer -- shouldn't be calling this function
+	if (!NTV2_IS_AUDIO_MIXER_CHANNELS_1_OR_2(inChannel))
+		return false;	//	Bad audio channel specified -- must be Ch1 or Ch2
+	return WriteRegister(kRegAudioMixerMixedChannelOutputLevels, inGainValue);
+}
+
+bool CNTV2Card::GetHeadphoneOutputGain (ULWord & outGainValue)
+{
+	outGainValue = 0;
+	if (!NTV2DeviceHasRotaryEncoder(GetDeviceID()))
+		return false;	//	No Audio Mixer -- shouldn't be calling this function
+	return ReadRegister (kRegRotaryEncoder, outGainValue, kRegMaskRotaryEncoderGain, kRegShiftRotaryEncoderGain);
+}
+
+bool CNTV2Card::SetHeadphoneOutputGain (const ULWord inGainValue)
+{
+	if (!NTV2DeviceHasRotaryEncoder(GetDeviceID()))
+		return false;	//	No Audio Mixer -- shouldn't be calling this function
+	return WriteRegister(kRegRotaryEncoder, inGainValue, kRegMaskRotaryEncoderGain, kRegShiftRotaryEncoderGain);
+}
+
 #if !defined(NTV2_DEPRECATE_15_5)
 	bool CNTV2Card::SetAudioMixerAux1InputGain (const NTV2AudioMixerChannel inChannel, const ULWord inGainValue)
 	{

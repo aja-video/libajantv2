@@ -16,6 +16,7 @@ else
 	AJA_LIB = ajantv2
 endif
 AJA_LIB_PATH = $(A_UBER_LIB)/lib$(AJA_LIB).a
+#AJA_LIB_PATH_SO = $(A_UBER_LIB)/lib$(AJA_LIB).so
 
 KERNEL_INCLUDES	:= /lib/modules/$(shell uname -r)/build
 
@@ -60,7 +61,6 @@ AJA_LIB_SRCS =\
 		memory.cpp \
 		options_popt.cpp \
 		performance.cpp \
-		persistence.cpp \
 		pixelformat.cpp \
 		pnp.cpp \
 		pnpimpl.cpp \
@@ -118,12 +118,10 @@ AJA_LIB_SRCS =\
 		ntv2spiinterface.cpp \
 		ntv2subscriptions.cpp \
 		ntv2supportlogger.cpp \
-		ntv2testpattern.cpp \
 		ntv2transcode.cpp \
 		ntv2utf8.cpp \
 		ntv2utils.cpp \
 		ntv2verticalfilter.cpp \
-		ntv2vidproc.cpp \
 		ntv2vpid.cpp \
 		ntv2vpidfromspec.cpp \
 		ntv2task.cpp \
@@ -134,6 +132,10 @@ AJA_LIB_SRCS =\
         ntv2m31vaparam.cpp \
         ntv2m31vinparam.cpp \
         ntv2m31viparam.cpp 
+
+ifndef AJA_LIB_PATH_SO
+	AJA_LIB_SRCS += persistence.cpp
+endif
 
 include $(DIR)/../../../build/common.mk
 

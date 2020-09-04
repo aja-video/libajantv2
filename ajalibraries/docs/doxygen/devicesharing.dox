@@ -1,11 +1,11 @@
 /**
 @page	devicesharing		Sharing AJA Devices With Other Applications
 
-If it's possible that your OEM application might coexist with another AJA-aware application on the host computer,
-it's very likely neither application will run correctly if they both attempt to use the same AJA device at the same time.
+If itʼs possible that your OEM application might coexist with another AJA-aware application on the host computer,
+itʼs very likely neither application will run correctly if they both attempt to use the same AJA device at the same time.
 
 Once your application has found the device it needs to use, AJA strongly recommends obtaining exclusive use of it to
-prevent collisions with other applications, including AJA's own utilities and applications.
+prevent collisions with other applications, including AJAʼs own utilities and applications.
 
 On <b>Mac OS X</b>, AJA provides an agent (<b>AJAAgent</b>) that manages device ownership and provides convenient device widget
 routing and configuration services to “retail” client applications (e.g., Adobe, Avid, etc.). On <b>Windows</b>, AJA provides an
@@ -14,11 +14,15 @@ installer that installs a daemon that performs these tasks.
 
 @image	html	ajacontrolpanel.png
 
-The <b>AJA ControlPanel</b> application provides a user interface for end-users to set default routing, conversions and
-other device settings. It communicates configuration changes to the system service through a database stored on the host
-computer's file system.
+The <b>AJA ControlPanel</b> application provides a user interface for end-users to set default routing, conversions and other
+device settings. It communicates configuration changes to the AJA system service (daemon) through a database stored on the host
+computerʼs file system.
 
-@note	AJA does not provide an API for interrogating or controlling the Control Panel settings.
+@note		AJA does not provide an API for interrogating or controlling the Control Panel settings.
+
+@warning	OEM applications must not rely on <b>AJA ControlPanel</b> behavior, nor on any device configuration that results
+			from any <b>ControlPanel</b> settings, as these are subject to change without notice. OEM applications must
+			configure the AJA device(s) to meet their application requirements using API function calls provided in the NTV2 SDK.
 
 
 @section	devshareisinuse		Determining if an AJA Device is Being Used
@@ -39,7 +43,7 @@ Control Panel services, application writers should call CNTV2Card::GetStreamingA
 	{
 		cout << "Device is being used by process " << appPID << endl;
 		//	Note that the "appFourCC" typically contains a human-readable 4-character "string" that identifies the
-		//	application that's controlling the device, e.g., 'EnGr' is AJA Control Room, 'AJAT' is AJA System Test, etc.
+		//	application thatʼs controlling the device, e.g., 'EnGr' is AJA Control Room, 'AJAT' is AJA System Test, etc.
 	}
 	else
 		cout << "Device is available" << endl;
@@ -62,7 +66,7 @@ or CNTV2Card::ReleaseStreamForApplication, respectively.
 		//  My app now has exclusive use of the AJA device!
 		RunMyApplicationUsingDevice (theDevice);
 
-		//  I'm done, so I can relinquish my exclusive use of it...
+		//  Iʼm done, so I can relinquish my exclusive use of it...
 		theDevice.ReleaseStreamForApplication (kAppSignature, appPID);
 	}  //  if acquired ok
 @endcode
@@ -70,7 +74,7 @@ or CNTV2Card::ReleaseStreamForApplication, respectively.
 
 @section	devsharefullcontrol		Getting Full Control Over Device Configuration
 
-In addition to ensuring that other applications won't use use the same AJA device, many applications often need to
+In addition to ensuring that other applications wonʼt use use the same AJA device, many applications often need to
 configure the device differently than the Control Panel settings dictate. These applications must disable the retail
 (<b>AJA ControlPanel</b>) services by running in “OEM mode”, which is done by calling CNTV2Card::SetEveryFrameServices,
 passing it ::NTV2_OEM_TASKS. To be a good citizen, before changing this setting, the old setting should be saved (by
@@ -96,7 +100,7 @@ The demonstration applications all use these techniques, and can be used as “b
 @section	devshareprocessfam		Reserving Exclusive Use of a Device by a “Process Family”
 
 Some applications may require several programs that run concurrently, all using the same AJA device.
-For example, there may be one capture or playout process instance running for each AutoCirculate channel that's
+For example, there may be one capture or playout process instance running for each AutoCirculate channel thatʼs
 available on the device.
 
 In this case, AJA recommends using a controlling (parent) process that does the following:
