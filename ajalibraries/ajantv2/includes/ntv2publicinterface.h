@@ -733,7 +733,15 @@ typedef enum
 	kRegAudioMixerMainInputLevelsPair5,		//	2325
 	kRegAudioMixerMainInputLevelsPair6,		//	2326
 	kRegAudioMixerMainInputLevelsPair7,		//	2327
-	kRegAudioMixerMixedChannelOutputLevels	//	2328
+	kRegAudioMixerMixedChannelOutputLevels,	//	2328
+	kRegAudioMixerMainOutputLevelsPair0 = kRegAudioMixerMixedChannelOutputLevels,	//	2328
+	kRegAudioMixerMainOutputLevelsPair1,	//	2329
+	kRegAudioMixerMainOutputLevelsPair2,	//	2330
+	kRegAudioMixerMainOutputLevelsPair3,	//	2331
+	kRegAudioMixerMainOutputLevelsPair4,	//	2332
+	kRegAudioMixerMainOutputLevelsPair5,	//	2333
+	kRegAudioMixerMainOutputLevelsPair6,	//	2334
+	kRegAudioMixerMainOutputLevelsPair7,	//	2335	
 }NTV2AudioMixerRegisters;
 
 //	Discontinuous block of registers used for detecting non-PCM embedded audio.

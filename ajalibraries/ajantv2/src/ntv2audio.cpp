@@ -719,23 +719,69 @@ bool CNTV2Card::SetAudioMixerInputGain (const NTV2AudioMixerInput inMixerInput, 
 							: sAudioMixerInputGainCh2Regs[inMixerInput], inGainValue);
 }
 
-bool CNTV2Card::GetAudioMixerOutputGain (const NTV2AudioMixerChannel inChannel, ULWord & outGainValue)
+bool CNTV2Card::GetAudioMixerOutputGain (ULWord & outGainValue)
 {
 	outGainValue = 0;
 	if (!DeviceCanDoAudioMixer())
 		return false;	//	No Audio Mixer -- shouldn't be calling this function
-	if (!NTV2_IS_AUDIO_MIXER_CHANNELS_1_OR_2(inChannel))
-		return false;	//	Bad audio channel specified -- must be Ch1 or Ch2
-	return ReadRegister (kRegAudioMixerMixedChannelOutputLevels, outGainValue);
+	return ReadRegister (kRegAudioMixerOutGain, outGainValue);
 }
 
-bool CNTV2Card::SetAudioMixerOutputGain (const NTV2AudioMixerChannel inChannel, const ULWord inGainValue)
+bool CNTV2Card::SetAudioMixerOutputGain (const ULWord inGainValue)
 {
 	if (!DeviceCanDoAudioMixer())
 		return false;	//	No Audio Mixer -- shouldn't be calling this function
-	if (!NTV2_IS_AUDIO_MIXER_CHANNELS_1_OR_2(inChannel))
-		return false;	//	Bad audio channel specified -- must be Ch1 or Ch2
-	return WriteRegister(kRegAudioMixerMixedChannelOutputLevels, inGainValue);
+	return WriteRegister(kRegAudioMixerOutGain, inGainValue);
+}
+
+bool CNTV2Card::GetAudioMixerOutputLevels (const NTV2AudioChannelPairs & inChannelPairs,
+											vector<uint32_t> & outLevels)
+{
+	static const ULWord	gAudMxrMainOutLvlRegs[] ={kRegAudioMixerMainOutputLevelsPair0, kRegAudioMixerMainOutputLevelsPair1,
+												 kRegAudioMixerMainOutputLevelsPair2, kRegAudioMixerMainOutputLevelsPair3,
+												 kRegAudioMixerMainOutputLevelsPair4, kRegAudioMixerMainOutputLevelsPair5,
+												 kRegAudioMixerMainOutputLevelsPair6, kRegAudioMixerMainOutputLevelsPair7, 0};
+	outLevels.clear();
+	if (!DeviceCanDoAudioMixer())
+		return false;
+
+	//	If caller specified empty channelPairs set, do "all" possible pairs...
+	NTV2AudioChannelPairs	chanPairs;
+	if (inChannelPairs.empty())
+	{
+		for (NTV2AudioChannelPair chPr(NTV2_AudioChannel1_2);  NTV2_IS_WITHIN_AUDIO_CHANNELS_1_TO_16(chPr);  chPr = NTV2AudioChannelPair(chPr+1))
+			chanPairs.insert(chPr);	//	Main supports Ch 1-16
+	}
+	else
+		chanPairs = inChannelPairs;	//	Non-empty set:  do what the caller requested
+
+	//	Build a bulk register read...
+	NTV2RegisterReads	regs;
+	std::set<ULWord>	regsToRead;
+	for (NTV2AudioChannelPairsConstIter it(chanPairs.begin());  it != chanPairs.end();  ++it)
+	{
+		const NTV2AudioChannelPair	chanPair(*it);
+		if (!NTV2_IS_WITHIN_AUDIO_CHANNELS_1_TO_16(chanPair))
+			return false;
+		uint32_t regNum(gAudMxrMainOutLvlRegs[chanPair]);
+		regsToRead.insert(regNum);
+	}	//	for each audio channel pair
+	for (std::set<ULWord>::const_iterator it(regsToRead.begin());  it != regsToRead.end();  ++it)
+		regs.push_back(NTV2RegInfo(*it));
+
+	//	Read the level registers...
+	const bool result(ReadRegisters(regs));
+	if (result)
+		for (NTV2RegisterReadsConstIter it(regs.begin());  it != regs.end();  ++it)
+		{
+			ULWord	rawLevels(it->IsValid() ? it->registerValue : 0);
+			outLevels.push_back(uint32_t((rawLevels & kRegMaskAudioMixerInputLeftLevel) >> kRegShiftAudioMixerInputLeftLevel));
+			outLevels.push_back(uint32_t((rawLevels & kRegMaskAudioMixerInputRightLevel) >> kRegShiftAudioMixerInputRightLevel));
+		}
+	else
+		while (outLevels.size() < chanPairs.size() * 2)
+			outLevels.push_back(0);
+	return result;
 }
 
 bool CNTV2Card::GetHeadphoneOutputGain (ULWord & outGainValue)

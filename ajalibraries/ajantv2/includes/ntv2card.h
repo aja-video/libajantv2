@@ -2471,7 +2471,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::GetAudioMixerOutputGain, \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		GetAudioMixerOutputGain (const NTV2AudioMixerChannel inChannel, ULWord & outGainValue);
+	AJA_VIRTUAL bool		GetAudioMixerOutputGain (ULWord & outGainValue);
 
 	/**
 		@brief		Sets the gain for the output of the Audio Mixer.
@@ -2481,7 +2481,18 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::SetAudioMixerOutputGain, \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		SetAudioMixerOutputGain (const NTV2AudioMixerChannel inChannel, const ULWord inGainValue);
+	AJA_VIRTUAL bool		SetAudioMixerOutputGain (const ULWord inGainValue);
+	
+	/**
+		@brief		Answers with the Audio Mixer's current audio output levels.
+		@param[in]	inChannelPairs		Specifies the audio channel pair(s) of interest.
+										Use an empty list to retrieve all available audio channels.
+		@param[out]	outLevels			A std::vector of ULWord values, one per audio channel, in ascending audio
+										channel order (per the ::NTV2AudioChannelPairs that were specified).
+		@return		True if successful;  otherwise false.
+		@see		See \ref audiomixer
+	**/
+	AJA_VIRTUAL bool		GetAudioMixerOutputLevels (const NTV2AudioChannelPairs & inChannelPairs, std::vector<uint32_t> & outLevels);
     
     /**
 		@brief		Answers with the current gain setting for the headphone out.
