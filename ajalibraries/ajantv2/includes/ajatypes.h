@@ -22,7 +22,7 @@
 #define NTV2_DEPRECATE_14_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.1 (never released)
 #define NTV2_DEPRECATE_14_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.2
 #define NTV2_DEPRECATE_14_3		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.3
-//#define NTV2_DEPRECATE_15_0		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.0
+#define NTV2_DEPRECATE_15_0		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.0
 //#define NTV2_DEPRECATE_15_1		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.1
 //#define NTV2_DEPRECATE_15_2		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.2
 //#define NTV2_DEPRECATE_15_3		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.3 (never released)
@@ -36,10 +36,6 @@
 #define NTV2_WRITEREG_PROFILING		//	If defined, enables register write profiling
 #define	NTV2_UNUSED(__p__)			(void)__p__
 #define NTV2_USE_CPLUSPLUS11		//	New in SDK 16.0. If defined (now default), 'ajalibraries/ajantv2' will use C++11 features (requires C++11 compiler)
-
-#define CNTV2STATUS			//	Retail code still uses these APIs
-#define CNTV2TESTPATTERN	//	Retail code still uses these APIs
-#define CNTV2VIDPROC		//	Retail code still uses these APIs
 
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
 	#if defined(AJAMac)
@@ -180,6 +176,8 @@
 
 	#define AJATargetBigEndian  0
 	#define	AJAFUNC		__FUNCTION__
+	#define NTV2_CPP_MIN(__x__,__y__)		min((__x__),(__y__))
+	#define NTV2_CPP_MAX(__x__,__y__)		max((__x__),(__y__))
 
 									//////////////////////////////////////////////////////////////////
 #elif defined (AJAMac)				////////////////////////	MAC		//////////////////////////////
@@ -194,6 +192,8 @@
 
 	#define AJATargetBigEndian  0
 	#define	AJAFUNC		__func__
+	#define NTV2_CPP_MIN(__x__,__y__)		std::min((__x__),(__y__))
+	#define NTV2_CPP_MAX(__x__,__y__)		std::max((__x__),(__y__))
 
 	#define MAX_PATH 4096
 
@@ -249,6 +249,8 @@
         typedef uint32_t            DWORD; /* 32 bits on 32 or 64 bit CPUS */
 
         typedef int32_t				AJASocket;
+		#define NTV2_CPP_MIN(__x__,__y__)		std::min((__x__),(__y__))
+		#define NTV2_CPP_MAX(__x__,__y__)		std::max((__x__),(__y__))
     #else
 		#if defined (AJAVirtual)
 			#include <stdbool.h>

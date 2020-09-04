@@ -285,6 +285,28 @@ public:
 														NTV2DeviceInfoList & outDevicesAdded,
 														NTV2DeviceInfoList & outDevicesRemoved);
 
+	/**
+		@return	True if the string contains a legal decimal number.
+		@param[in]	inStr	The string to be tested.
+	**/
+	static bool			IsLegalDecimalNumber (const std::string & inStr, const size_t inMaxLength = 2);
+	static uint64_t		IsLegalHexSerialNumber (const std::string & inStr);	//	0x3236333331375458
+	static bool			IsHexDigit (const char inChr);
+	static bool			IsDecimalDigit (const char inChr);
+	static bool			IsAlphaNumeric (const char inStr);
+
+	/**
+		@return	True if the string contains letters and/or decimal digits.
+		@param[in]	inStr	The string to be tested.
+	**/
+	static bool			IsAlphaNumeric (const std::string & inStr);
+
+	/**
+		@return	True if the string contains a legal serial number.
+		@param[in]	inStr	The string to be tested.
+	**/
+	static bool			IsLegalSerialNumber (const std::string & inStr);
+
 //	Instance Methods
 public:
 	//	Construction, Copying, Assigning

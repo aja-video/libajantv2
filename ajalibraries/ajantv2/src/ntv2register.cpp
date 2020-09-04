@@ -1592,9 +1592,9 @@ bool CNTV2Card::GetTsiFrameEnable (bool & outIsEnabled, const NTV2Channel inChan
 	bool	readOkay	(false);
 
 	if (::NTV2DeviceCanDo12gRouting(_boardID))
-	{
-		readOkay = GetQuadQuadFrameEnable(returnVal, inChannel);
-		if (!returnVal)
+	{	bool is8k(false);
+		readOkay = GetQuadQuadFrameEnable(is8k, inChannel);
+		if (!is8k)
 			readOkay = ReadRegister(gChannelToGlobalControlRegNum[inChannel], returnVal, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
 	}
 	else
@@ -3561,103 +3561,75 @@ bool CNTV2Card::SetMixerMatteColor (const UWord inWhichMixer, const YCbCr10BitPi
 //  Mapping methods
 ////////////////////////////////////////////////////////////////////
 
-
-// Method:	GetBaseAddress
-// Input:	NTV2Channel channel
-// Output:	bool status and modifies ULWord **pBaseAddress
-bool CNTV2Card::GetBaseAddress (NTV2Channel channel, ULWord **pBaseAddress)
-{
-	ULWord ulFrame;
-	if (IS_CHANNEL_INVALID (channel))
-		return false;
-
-	GetPCIAccessFrame (channel, ulFrame);
-	if ( ulFrame > GetNumFrameBuffers())
-		ulFrame = 0;
-
-	if (::NTV2DeviceIsDirectAddressable(GetDeviceID()))
+#if !defined(NTV2_DEPRECATE_16_0)
+	// Method:	GetBaseAddress
+	// Input:	NTV2Channel channel
+	// Output:	bool status and modifies ULWord **pBaseAddress
+	bool CNTV2Card::GetBaseAddress (NTV2Channel channel, ULWord **pBaseAddress)
 	{
-	    if (!_pFrameBaseAddress)
-	    {
-		    if (MapFrameBuffers () == false)
-			    return false;
-	    }
-		*pBaseAddress = _pFrameBaseAddress + ((ulFrame * _ulFrameBufferSize) / sizeof(ULWord));
-		
-	}
-	else						// must be an _MM board
-	{
-		if (!_pCh1FrameBaseAddress)
+		ULWord ulFrame;
+		if (IS_CHANNEL_INVALID (channel))
+			return false;
+		GetPCIAccessFrame (channel, ulFrame);
+		if (ulFrame > GetNumFrameBuffers())
+			ulFrame = 0;
+	
+		if (::NTV2DeviceIsDirectAddressable(GetDeviceID()))
 		{
-			if (MapFrameBuffers () == false)
-				return false;
+			if (!_pFrameBaseAddress)
+				if (!MapFrameBuffers())
+					return false;
+			*pBaseAddress = _pFrameBaseAddress + ((ulFrame * _ulFrameBufferSize) / sizeof(ULWord));
 		}
-		
-		if ( channel == NTV2_CHANNEL1)
-			*pBaseAddress = _pCh1FrameBaseAddress;		//	DEPRECATE!
-		else
-			*pBaseAddress = _pCh2FrameBaseAddress;		//	DEPRECATE!
-		
+		else	// must be an _MM board
+		{
+			if (!_pCh1FrameBaseAddress)
+				if (!MapFrameBuffers())
+					return false;
+			*pBaseAddress = (channel == NTV2_CHANNEL1) ? _pCh1FrameBaseAddress : _pCh2FrameBaseAddress;	//	DEPRECATE!
+		}
+		return true;
 	}
 
-	return true;
-}
-
-// Method:	GetBaseAddress
-// Input:	None
-// Output:	bool status and modifies ULWord *pBaseAddress
-bool CNTV2Card::GetBaseAddress (ULWord **pBaseAddress)
-{
-	if (!_pFrameBaseAddress)
+	// Method:	GetBaseAddress
+	// Input:	None
+	// Output:	bool status and modifies ULWord *pBaseAddress
+	bool CNTV2Card::GetBaseAddress (ULWord **pBaseAddress)
 	{
-		if (MapFrameBuffers () == false)
+		if (!_pFrameBaseAddress)
+			if (!MapFrameBuffers())
+				return false;
+		*pBaseAddress = _pFrameBaseAddress;
+		return true;
+	}
+
+	// Method:	GetRegisterBaseAddress
+	// Input:	ULWord regNumber
+	// Output:	bool status and modifies ULWord **pBaseAddress
+	bool CNTV2Card::GetRegisterBaseAddress (ULWord regNumber, ULWord **pBaseAddress)
+	{
+		if (!_pRegisterBaseAddress)
+			if (!MapRegisters())
+				return false;
+		#ifdef MSWindows
+		if ((regNumber*4) >= _pRegisterBaseAddressLength)
 			return false;
+		#endif	//	MSWindows
+		*pBaseAddress = _pRegisterBaseAddress + regNumber;
+		return true;
 	}
 
-	*pBaseAddress = _pFrameBaseAddress;
-
-	return true;
-}
-
-// Method:	GetRegisterBaseAddress
-// Input:	ULWord regNumber
-// Output:	bool status and modifies ULWord **pBaseAddress
-bool CNTV2Card::GetRegisterBaseAddress (ULWord regNumber, ULWord **pBaseAddress)
-{
-	if (!_pRegisterBaseAddress)
+	// Method:	GetXena2FlashBaseAddress
+	// Output:	bool status and modifies ULWord **pXena2FlashAddress
+	bool CNTV2Card::GetXena2FlashBaseAddress (ULWord **pXena2FlashAddress)
 	{
-		if (MapRegisters () == false)
-			return false;
+		if (!_pXena2FlashBaseAddress)
+			if (!MapXena2Flash())
+				return false;
+		*pXena2FlashAddress = _pXena2FlashBaseAddress;
+		return true;
 	}
-
-#ifdef MSWindows
-	if ((regNumber*4) >= _pRegisterBaseAddressLength)
-	{
-		return false;
-	}
-#endif
-
-	*pBaseAddress = _pRegisterBaseAddress + regNumber;
-
-	return true;
-}
-
-// Method:	GetXena2FlashBaseAddress
-// Input:	
-// Output:	bool status and modifies ULWord **pXena2FlashAddress
-bool CNTV2Card::GetXena2FlashBaseAddress ( ULWord **pXena2FlashAddress)
-{
-	if (!_pXena2FlashBaseAddress)
-	{
-		if (MapXena2Flash () == false)
-			return false;
-	}
-
-	*pXena2FlashAddress = _pXena2FlashBaseAddress;
-
-	return true;
-}
-
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 bool CNTV2Card::SetDualLinkOutputEnable (const bool enable)
 {
@@ -6972,47 +6944,33 @@ bool CNTV2Card::SetWarmBootFirmwareReload(bool enable)
 	return WriteRegister(kRegCPLDVersion, enable ? 1:0, BIT(8), 8);
 }
 
-bool CNTV2Card::ReadRegisters (const NTV2RegNumSet & inRegisters,  NTV2RegisterValueMap & outValues)
-{
-	outValues.clear ();
-	if (!_boardOpened)
-		return false;		//	Device not open!
-
-	NTV2GetRegisters	getRegsParams (inRegisters);
-	if (NTV2Message (reinterpret_cast <NTV2_HEADER *> (&getRegsParams)))
-		return getRegsParams.GetRegisterValues (outValues);
-	else	//	Non-atomic user-space workaround until GETREGS implemented in driver...
-		for (NTV2RegNumSetConstIter iter(inRegisters.begin());  iter != inRegisters.end();  ++iter)
-		{
-			ULWord	tempVal	(0);
-			if (*iter != kRegXenaxFlashDOUT)	//	Prevent firmware erase/program/verify failures
-				if (ReadRegister (*iter, tempVal))
-					outValues[*iter] = tempVal;
-		}
-
-	return outValues.size() == inRegisters.size();
-}
-
-bool CNTV2Card::ReadRegisters (NTV2RegisterReads & inOutValues)
-{
-	if (!_boardOpened)
-		return false;		//	Device not open!
-	if (inOutValues.empty())
-		return true;		//	Nothing to do!
-
-	NTV2GetRegisters	getRegsParams (inOutValues);
-	if (NTV2Message (reinterpret_cast<NTV2_HEADER*>(&getRegsParams)))
+#if defined(READREGMULTICHANGE)
+	bool CNTV2Card::ReadRegisters (const NTV2RegNumSet & inRegisters,  NTV2RegisterValueMap & outValues)
 	{
-		if (!getRegsParams.GetRegisterValues (inOutValues))
-			return false;
+		outValues.clear ();
+		if (!IsOpen())
+			return false;		//	Device not open!
+		if (inRegisters.empty())
+			return false;		//	Nothing to do!
+	
+		NTV2GetRegisters getRegsParams (inRegisters);
+		if (NTV2Message(reinterpret_cast <NTV2_HEADER*>(&getRegsParams)))
+		{
+			if (!getRegsParams.GetRegisterValues(outValues))
+				return false;
+		}
+		else	//	Non-atomic user-space workaround until GETREGS implemented in driver...
+			for (NTV2RegNumSetConstIter iter(inRegisters.begin());  iter != inRegisters.end();  ++iter)
+			{
+				ULWord	tempVal	(0);
+				if (*iter != kRegXenaxFlashDOUT)	//	Prevent firmware erase/program/verify failures
+					if (ReadRegister (*iter, tempVal))
+						outValues[*iter] = tempVal;
+			}
+		return outValues.size() == inRegisters.size();
 	}
-	else	//	Non-atomic user-space workaround until GETREGS implemented in driver...
-		for (NTV2RegisterReadsIter iter(inOutValues.begin());  iter != inOutValues.end();  ++iter)
-			if (iter->registerNumber != kRegXenaxFlashDOUT)	//	Prevent firmware erase/program/verify failures
-				if (!ReadRegister (iter->registerNumber, iter->registerValue))
-					return false;
-	return true;
-}
+#endif	//	!defined(READREGMULTICHANGE)
+
 
 bool CNTV2Card::WriteRegisters (const NTV2RegisterWrites & inRegWrites)
 {

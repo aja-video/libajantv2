@@ -9,7 +9,7 @@
 #include "ntv2devicescanner.h"
 #include "ntv2endian.h"
 #include "ntv2registers2022.h"
-
+#include "ajabase/system/systemtime.h"
 #ifdef MSWindows
 	#pragma warning(disable: 4305) // Initialization warnings.
 	#pragma warning(disable: 4309)
@@ -1147,7 +1147,7 @@ bool CNTV2KonaFlashProgram::CreateEDIDIntelRecord()
 		{
 			WriteRegister(kRegFS1I2C1Address, i2cVal);
 
-			SleepMs(100);
+			AJATime::Sleep(100);
 
 			uint32_t flashValue;
 			ReadRegister(kRegFS1I2C1Data, flashValue);

@@ -114,15 +114,13 @@ typedef enum
 	DEVICE_ID_KONAIP_2IN_2OUT		= DEVICE_ID_KONAIP_2022,	//	Will deprecate eventually
 	DEVICE_ID_KONAIP_4I				= DEVICE_ID_KONAIP_4CH_2SFP,//	Will deprecate eventually
 #endif	//	NTV2_DEPRECATE_14_0
-#if !defined(NTV2_DEPRECATE_15_6)
-//	DEVICE_ID_KONAIP_2RX_1SFP_J2K		= 0x10646704,		//	Never built or shipped
-#endif	//	NTV2_DEPRECATE_15_6
-	DEVICE_ID_NOTFOUND				= -1
+	DEVICE_ID_NOTFOUND				= 0xFFFFFFFF,		///< @brief Invalid or "not found"
+	DEVICE_ID_INVALID				= DEVICE_ID_NOTFOUND
 
 } NTV2DeviceID;
 
-#define DEVICE_ID_CORVID44_12G DEVICE_ID_CORVID44_8KMK
-#define DEVICE_ID_KONA5_4X12G DEVICE_ID_KONA5_8K
+#define DEVICE_ID_CORVID44_12G	DEVICE_ID_CORVID44_8KMK
+#define DEVICE_ID_KONA5_4X12G	DEVICE_ID_KONA5_8K
 
 #if !defined (NTV2_DEPRECATE)
 	typedef NTV2DeviceID	NTV2BoardID;	///< @deprecated	Use NTV2DeviceID instead. Identifiers with "board" in them are being phased out.

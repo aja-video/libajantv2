@@ -7,20 +7,7 @@
 #ifndef NTV2NUBACCESS_H
 #define NTV2NUBACCESS_H
 
-#if defined(AJALinux ) || defined(AJAMac)
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <unistd.h>
-#endif
-
 #include "ajaexport.h"
-
-#ifdef MSWindows
-#include <WinSock.h>
-#endif
-
 #include "ntv2nubtypes.h"
 
 #define NTV2_REMOTE_ACCESS_SUCCESS						  	 0
@@ -52,97 +39,84 @@
 #define NTV2_REMOTE_ACCESS_NOT_DRIVER_GET_BUILD_INFO		-26
 #define NTV2_REMOTE_ACCESS_UNIMPLEMENTED					-27
 
-AJAExport int NTV2ConnectToNub (const char *hostname,  AJASocket *sockfd);
-AJAExport int NTV2DisconnectFromNub (AJASocket & inOutSockFD);
+/**
+	@brief	Interface to remote or fake devices.
+**/
+class AJAExport NTV2RPCAPI
+{
+	public:
+		static NTV2RPCAPI *		MakeNTV2NubRPCAPI (const std::string & inSpec, const std::string & inPort = "");
+		static NTV2RPCAPI *		MakeNTV2SoftwareDevice (const std::string & inSpec, const std::string & inPort = "");
 
-AJAExport int NTV2OpenRemoteCard (AJASocket sockfd, UWord inDeviceIndex, UWord boardType, 
-									LWord *handle, NTV2NubProtocolVersion *nubProtocolVersion);
-AJAExport int NTV2CloseRemoteCard (AJASocket sockfd, LWord handle);
+	public:
+						NTV2RPCAPI ()	:	_hostname()	{}
+		AJA_VIRTUAL		~NTV2RPCAPI()	{}
 
-AJAExport int
-NTV2ReadRegisterRemote(	AJASocket sockfd,
-						LWord  handle,
-						NTV2NubProtocolVersion nubProtocolVersion,
-						ULWord registerNumber,
-						ULWord *registerValue,
-						ULWord registerMask,
-						ULWord registerShift);
+		//	Inquiry
+		AJA_VIRTUAL bool			IsConnected	(void) const			{return false;}
+		AJA_VIRTUAL std::string		Name (void) const					{return _hostname;}
+		AJA_VIRTUAL std::ostream &	Print (std::ostream & oss) const
+									{	oss << (IsConnected()?"Connected":"Disconnected");
+										if (IsConnected() && !Name().empty())
+											oss << " to '" << Name() << "'";
+										return oss;
+									}
+		AJA_VIRTUAL NTV2NubProtocolVersion	ProtocolVersion (void) const	{return ntv2NubProtocolVersionNone;}
 
-AJAExport int
-NTV2WriteRegisterRemote(AJASocket sockfd,
-						LWord  handle,
-						NTV2NubProtocolVersion nubProtocolVersion,
-						ULWord registerNumber,
-						ULWord registerValue,
-						ULWord registerMask,
-						ULWord registerShift);
+//		AJA_VIRTUAL int	NTV2Connect		(const std::string & inHostname, const UWord inDeviceIndex)
+//																		{(void) inDeviceIndex; _hostname = inHostname;	return 0;}
+		AJA_VIRTUAL int	NTV2Disconnect	(void)							{return NTV2CloseRemote();}
 
-AJAExport int 
-NTV2AutoCirculateRemote(AJASocket sockfd,
-						LWord handle,
-						NTV2NubProtocolVersion nubProtocolVersion,
-						AUTOCIRCULATE_DATA &autoCircData);
+		AJA_VIRTUAL int	NTV2ReadRegisterRemote	(const ULWord regNum, ULWord & outRegValue, const ULWord regMask, const ULWord regShift)
+												{(void) regNum;  (void) outRegValue; (void) regMask; (void) regShift; return -1;}
+	
+		AJA_VIRTUAL int	NTV2WriteRegisterRemote	(const ULWord regNum, const ULWord regValue, const ULWord regMask, const ULWord regShift)
+												{(void) regNum; (void) regValue; (void) regMask; (void) regShift;  return -1;}
+	
+		AJA_VIRTUAL int	NTV2AutoCirculateRemote	(AUTOCIRCULATE_DATA & autoCircData)
+												{(void) autoCircData;	return -1;}
+	
+		AJA_VIRTUAL int	NTV2WaitForInterruptRemote	(const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs)
+													{(void) eInterrupt; (void) timeOutMs;  return -1;}
+	
+		AJA_VIRTUAL int	NTV2DriverGetBitFileInformationRemote	(BITFILE_INFO_STRUCT & bitFileInfo, const NTV2BitFileType bitFileType)
+																{(void) bitFileInfo; (void) bitFileType; return -1;}
+	
+		AJA_VIRTUAL int	NTV2DriverGetBuildInformationRemote	(BUILD_INFO_STRUCT & buildInfo)
+															{(void) buildInfo;  return -1;}
+	
+		AJA_VIRTUAL int	NTV2DownloadTestPatternRemote	(const NTV2Channel channel, const NTV2PixelFormat testPatternFBF,
+														const UWord signalMask, const bool testPatDMAEnb, const ULWord testPatNum)
+														{(void) channel;  (void) testPatternFBF; (void) signalMask; (void) testPatDMAEnb; (void) testPatNum;
+														return -1;}
+	
+		AJA_VIRTUAL int	NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULWord & outFailedRegNum, NTV2RegInfo outRegs[])
+													{(void) numRegs; (void) outFailedRegNum; (void) outRegs;
+													return -1;}
+	
+		AJA_VIRTUAL int	NTV2GetDriverVersionRemote	(ULWord & outDriverVersion)
+													{outDriverVersion = 0xFFFFFFFF; return -1;}
+	
+		AJA_VIRTUAL int	NTV2DMATransferRemote	(const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
+												const ULWord inFrameNumber,			ULWord * pFrameBuffer,
+												const ULWord inCardOffsetBytes,		const ULWord inTotalByteCount,
+												const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
+												const ULWord inSegmentCardPitch,	const bool inSynchronous)
+												{(void) inDMAEngine; (void) inIsRead;	(void) inFrameNumber; (void) pFrameBuffer;
+												(void) inCardOffsetBytes; (void) inTotalByteCount; (void) inNumSegments; (void) inSegmentHostPitch;
+												(void) inSegmentCardPitch; (void) inSynchronous;
+												return -1;}
+	
+		AJA_VIRTUAL int	NTV2MessageRemote	(NTV2_HEADER *	pInMessage)		{(void) pInMessage;  return -1;}
 
-AJAExport int
-NTV2WaitForInterruptRemote(AJASocket sockfd,
-						LWord  handle,
-						NTV2NubProtocolVersion nubProtocolVersion,
-						INTERRUPT_ENUMS eInterrupt,
-						ULWord timeOutMs);
+	protected:
+		AJA_VIRTUAL int	NTV2OpenRemote	(const UWord inDeviceIndex)		{(void) inDeviceIndex;  return -1;}
+		AJA_VIRTUAL int	NTV2CloseRemote	(void)							{_hostname.clear();  return 0;}
 
-AJAExport int
-NTV2DriverGetBitFileInformationRemote(	AJASocket sockfd,
-										LWord  handle,
-										NTV2NubProtocolVersion nubProtocolVersion,
-										BITFILE_INFO_STRUCT &bitFileInfo,
-										NTV2BitFileType bitFileType);
+	protected:
+		std::string	_hostname;
+};	//	NTV2RPCAPI
 
-AJAExport int
-NTV2DriverGetBuildInformationRemote(	AJASocket sockfd,
-										LWord  handle,
-										NTV2NubProtocolVersion nubProtocolVersion,
-										BUILD_INFO_STRUCT &buildInfo);
+inline std::ostream & operator << (std::ostream & oss, const NTV2RPCAPI & inObj)	{return inObj.Print(oss);}
 
-
-AJAExport int
-NTV2DownloadTestPatternRemote(AJASocket sockfd,	
-								LWord handle,
-								NTV2NubProtocolVersion nubProtocolVersion,
-								NTV2Channel channel,
-								NTV2FrameBufferFormat testPatternFrameBufferFormat,
-								UWord signalMask,
-								bool testPatternDMAEnable,
-								ULWord testPatternNumber);
-
-AJAExport int 
-NTV2ReadRegisterMultiRemote(AJASocket sockfd,
-							LWord remoteHandle,
-							NTV2NubProtocolVersion nubProtocolVersion,
-							ULWord numRegs,
-							ULWord *whichRegisterFailed,
-							NTV2ReadWriteRegisterSingle aRegs[]);
-
-AJAExport int 
-NTV2GetDriverVersionRemote(AJASocket sockfd,
-							LWord remoteHandle,
-							NTV2NubProtocolVersion nubProtocolVersion,
-							ULWord *driverVersion);
-
-AJAExport int 
-NTV2DMATransferRemote (AJASocket sockfd,
-						LWord remoteHandle,
-						NTV2NubProtocolVersion nubProtocolVersion,
-						const NTV2DMAEngine	inDMAEngine,
-						const bool			inIsRead,
-						const ULWord		inFrameNumber,
-						ULWord *			pFrameBuffer,
-						const ULWord		inOffsetBytes,
-						const ULWord		inByteCount,
-						const bool			inSynchronous);
-
-AJAExport int 
-NTV2MessageRemote (AJASocket sockfd,
-					LWord remoteHandle,
-					NTV2NubProtocolVersion nubProtocolVersion,
-					NTV2_HEADER *	pInMessage);
 #endif	//	NTV2NUBACCESS_H

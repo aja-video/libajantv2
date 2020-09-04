@@ -93,8 +93,8 @@ typedef enum _AJADebugUnit
     AJA_DebugUnit_CSC						= 53,
     AJA_DebugUnit_LUT						= 54,
     AJA_DebugUnit_Cables					= 55,
-    AJA_DebugUnit_RPCXmit					= 56,
-    AJA_DebugUnit_RPCRcv					= 57,
+    AJA_DebugUnit_RPCServer					= 56,
+    AJA_DebugUnit_RPCClient					= 57,
 
     // to add a new unit:
     //

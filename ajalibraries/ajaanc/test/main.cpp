@@ -2317,7 +2317,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				SHOULD_BE_TRUE(rtpHdr.WriteToBuffer(buff, /*offset*/sz/4%8));
 				if (AJA_FAILURE(AJAAncillaryList::SetFromDeviceAncBuffers(buff, nullBuffer, pkts)))
 					LOGMYINFO("whoa, got AJAAncillaryList::SetFromDeviceAncBuffers to fail!");
-				if (pkts.CountAncillaryData());
+				if (pkts.CountAncillaryData())
 					LOGMYINFO("whoa, got one or more packets! " << pkts);
 			}
 			//	Exercise GUMP (variable-length runs of random data)

@@ -30,14 +30,11 @@ static bool sDebug = false;
 
 #define addDebugGroupToLabelVector(x) sGroupLabelVector.push_back(#x)
 
-AJADebug::AJADebug()
-{
-}
-
-
-AJADebug::~AJADebug()
-{
-}
+#define	STAT_BIT_SHIFT		(1ULL<<(inKey%64))
+#define	STAT_BIT_TEST		(spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] & STAT_BIT_SHIFT)
+#define	IS_STAT_BAD			!STAT_BIT_TEST
+#define	STAT_BIT_SET		spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] |= STAT_BIT_SHIFT
+#define	STAT_BIT_CLEAR		spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] &= 0xFFFFFFFFFFFFFFFF - STAT_BIT_SHIFT
 
 
 AJAStatus AJADebug::Open (bool incrementRefCount)
@@ -166,8 +163,8 @@ AJAStatus AJADebug::Open (bool incrementRefCount)
             addDebugGroupToLabelVector(AJA_DebugUnit_CSC);
             addDebugGroupToLabelVector(AJA_DebugUnit_LUT);
             addDebugGroupToLabelVector(AJA_DebugUnit_Cables);
-            addDebugGroupToLabelVector(AJA_DebugUnit_RPCXmit);
-            addDebugGroupToLabelVector(AJA_DebugUnit_RPCRcv);
+            addDebugGroupToLabelVector(AJA_DebugUnit_RPCServer);
+            addDebugGroupToLabelVector(AJA_DebugUnit_RPCClient);
 
             for (int i(AJA_DebugUnit_FirstUnused);  i < AJA_DebugUnit_Size;  i++)
             {
@@ -1042,19 +1039,6 @@ size_t AJADebug::GetPrivateDataLen (void)
 	return spShare ? sizeof(AJADebugShare) : 0;
 }
 
-#if 0	//	Old way
-	#define	STAT_BIT_SHIFT		(1<<inKey)
-	#define	STAT_BIT_TEST		(spShare->statAllocMask & STAT_BIT_SHIFT)
-	#define	IS_STAT_BAD			!STAT_BIT_TEST
-	#define	STAT_BIT_SET		spShare->statAllocMask |= STAT_BIT_SHIFT
-	#define	STAT_BIT_CLEAR		spShare->statAllocMask &= 0xFFFFFFFFFFFFFFFF - STAT_BIT_SHIFT
-#else	//	New way
-	#define	STAT_BIT_SHIFT		(1<<(inKey%64))
-	#define	STAT_BIT_TEST		(spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] & STAT_BIT_SHIFT)
-	#define	IS_STAT_BAD			!STAT_BIT_TEST
-	#define	STAT_BIT_SET		spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] |= STAT_BIT_SHIFT
-	#define	STAT_BIT_CLEAR		spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] &= 0xFFFFFFFFFFFFFFFF - STAT_BIT_SHIFT
-#endif
 
 uint32_t AJADebug::StatsCapacity (void)
 {
