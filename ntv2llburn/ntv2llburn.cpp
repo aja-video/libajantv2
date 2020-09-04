@@ -553,13 +553,14 @@ void NTV2LLBurn::ProcessFrames (void)
 //			dids.insert(0xe5);	// HD audio group 3 data
 //			dids.insert(0xe6);	// HD audio group 2 data
 //			dids.insert(0xe7);	// HD audio group 1 data
-			dids.insert(0xa0);	// SD audio insertion not tested
-			dids.insert(0xa1);
-			dids.insert(0xa3);
-			dids.insert(0xa4);
-			dids.insert(0xa5);
-			dids.insert(0xa6);
-			dids.insert(0xa7);
+			dids.insert(0xa0);	// 3G audio group 8 control
+			dids.insert(0xa1);	// 3G audio group 7 control
+			dids.insert(0xa2);	// 3G audio group 6 control
+			dids.insert(0xa3);	// 3G audio group 5 control
+			dids.insert(0xa4);	// 3G audio group 8 data
+			dids.insert(0xa5);	// 3G audio group 7 data
+			dids.insert(0xa6);	// 3G audio group 6 data
+			dids.insert(0xa7);	// 3G audio group 5 data
 			dids.insert(0x41);	// Filter vpid (inserted by sdi output)
 			dids.insert(0x60);	// Filter timecode (inserted by sdi output)
 			mDevice.AncExtractSetFilterDIDs (sdiInput, dids);
