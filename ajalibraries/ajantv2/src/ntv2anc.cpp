@@ -425,7 +425,15 @@ bool CNTV2Card::AncInsertSetReadParams (const UWord inSDIOutput, const ULWord in
 	bool ok(true);
 	//	Calculate where ANC Inserter will read the data
 	const ULWord	frameNumber (inFrameNumber + 1);	//	Start at beginning of next frame (then subtract offset later)
-	const ULWord	frameLocation (::NTV2FramesizeToByteCount(theFrameSize) * frameNumber);
+	ULWord	frameLocation (::NTV2FramesizeToByteCount(theFrameSize) * frameNumber);
+	bool quadEnabled(false), quadQuadEnabled(false);
+	GetQuadFrameEnable(quadEnabled, inChannel);
+	GetQuadQuadFrameEnable(quadQuadEnabled, inChannel);
+	if (quadEnabled)
+		frameLocation *= 4;
+	if (quadQuadEnabled)
+		frameLocation *= 4;
+
 	ULWord			F1Offset(0);
 	if (ok)	ok = ReadRegister (kVRegAncField1Offset, F1Offset);
 	const ULWord	ANCStartMemory (frameLocation - F1Offset);
@@ -459,7 +467,15 @@ bool CNTV2Card::AncInsertSetField2ReadParams (const UWord inSDIOutput, const ULW
 	bool ok(true);
 	//	Calculate where ANC Inserter will read the data
 	const ULWord	frameNumber (inFrameNumber + 1);	//	Start at beginning of next frame (then subtract offset later)
-	const ULWord	frameLocation (::NTV2FramesizeToByteCount(theFrameSize) * frameNumber);
+	ULWord	frameLocation (::NTV2FramesizeToByteCount(theFrameSize) * frameNumber);
+	bool quadEnabled(false), quadQuadEnabled(false);
+	GetQuadFrameEnable(quadEnabled, inChannel);
+	GetQuadQuadFrameEnable(quadQuadEnabled, inChannel);
+	if (quadEnabled)
+		frameLocation *= 4;
+	if (quadQuadEnabled)
+		frameLocation *= 4;
+
 	ULWord			F2Offset(0);
 	if (ok)	ok = ReadRegister (kVRegAncField2Offset, F2Offset);
 	const ULWord	ANCStartMemory (frameLocation - F2Offset);
@@ -770,17 +786,21 @@ bool CNTV2Card::AncExtractSetWriteParams (const UWord inSDIInput, const ULWord i
 	//	Calculate where ANC Extractor will put the data...
 	bool			ok					(true);
 	const ULWord	frameNumber			(inFrameNumber + 1);	//	This is so the next calculation will point to the beginning of the next frame - subtract offset for memory start
-	ULWord			endOfFrameLocation	(::NTV2FramesizeToByteCount(theFrameSize) * frameNumber);
+	ULWord			frameLocation	(::NTV2FramesizeToByteCount(theFrameSize) * frameNumber);
 	bool			isQuadFormatEnabled	(false);
-	if (ok)	ok = GetQuadFrameEnable (isQuadFormatEnabled, theChannel);
-	if (isQuadFormatEnabled)
-		endOfFrameLocation *= 4;
+	bool quadEnabled(false), quadQuadEnabled(false);
+	GetQuadFrameEnable(quadEnabled, inChannel);
+	GetQuadQuadFrameEnable(quadQuadEnabled, inChannel);
+	if (quadEnabled)
+		frameLocation *= 4;
+	if (quadQuadEnabled)
+		frameLocation *= 4;
 
 	ULWord F1Offset(0), F2Offset(0);
 	if (ok)	ok = GetAncOffsets (*this, F1Offset, F2Offset);
 
-	const ULWord	ANCStartMemory	(endOfFrameLocation - F1Offset);
-	const ULWord	ANCStopMemory	(endOfFrameLocation - F2Offset - 1);
+	const ULWord	ANCStartMemory	(frameLocation - F1Offset);
+	const ULWord	ANCStopMemory	(frameLocation - F2Offset - 1);
 	if (ok)	ok = SetAncExtField1StartAddr (*this, inSDIInput, ANCStartMemory);
 	if (ok)	ok = SetAncExtField1EndAddr (*this, inSDIInput, ANCStopMemory);
 	return ok;
@@ -813,17 +833,21 @@ bool CNTV2Card::AncExtractSetField2WriteParams (const UWord inSDIInput, const UL
 	//	Calculate where ANC Extractor will put the data...
 	bool			ok					(true);
 	const ULWord	frameNumber			(inFrameNumber + 1);	//	This is so the next calculation will point to the beginning of the next frame - subtract offset for memory start
-	ULWord			endOfFrameLocation	(::NTV2FramesizeToByteCount(theFrameSize) * frameNumber);
+	ULWord			frameLocation	(::NTV2FramesizeToByteCount(theFrameSize) * frameNumber);
 	bool			isQuadFormatEnabled	(false);
-	if (ok)	ok = GetQuadFrameEnable (isQuadFormatEnabled, theChannel);
-	if (isQuadFormatEnabled)
-		endOfFrameLocation *= 4;
+	bool quadEnabled(false), quadQuadEnabled(false);
+	GetQuadFrameEnable(quadEnabled, inChannel);
+	GetQuadQuadFrameEnable(quadQuadEnabled, inChannel);
+	if (quadEnabled)
+		frameLocation *= 4;
+	if (quadQuadEnabled)
+		frameLocation *= 4;
 
 	ULWord	F2Offset(0);
 	if (ok)	ok = ReadRegister(kVRegAncField2Offset, F2Offset);
 
-	const ULWord	ANCStartMemory	(endOfFrameLocation - F2Offset);
-	const ULWord	ANCStopMemory	(endOfFrameLocation - 1);
+	const ULWord	ANCStartMemory	(frameLocation - F2Offset);
+	const ULWord	ANCStopMemory	(frameLocation - 1);
 	if (ok)	ok = SetAncExtField2StartAddr (*this, inSDIInput, ANCStartMemory);
 	if (ok)	ok = SetAncExtField2EndAddr (*this, inSDIInput, ANCStopMemory);
     return true;
