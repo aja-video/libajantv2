@@ -1069,7 +1069,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const ULWordSequence & inU32s,
 	if (inOutU32Ndx < numU32s)
 		inOutU32Ndx++;	//	Bump to next Anc packet, if any
 
-	//	Did we got the whole packet?
+	//	Did we get the whole packet?
 	if (dataCount > (u16s.size()-3))		//	DC > (u16s.size minus DID, SID, DC)?
 	{	//	Uh-oh:  too few u16s -- someone's pulling our leg
 		RCV2110ERR("Incomplete/bad packet: " << DEC(u16s.size()) << " U16s, but missing " << DEC(dataCount - (u16s.size()-3))
