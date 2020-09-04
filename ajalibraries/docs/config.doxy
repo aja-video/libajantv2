@@ -1631,7 +1631,9 @@ INCLUDE_FILE_PATTERNS  =
 # undefined via #undef or recursively expanded use the := operator
 # instead of the = operator.
 
-PREDEFINED             =	AJAMac   AJA_Mac
+PREDEFINED             =	AJAMac		AJA_Mac		NTV2_DEPRECATE			NTV2_DEPRECATE_12_5		NTV2_DEPRECATE_12_6		NTV2_DEPRECATE_12_7		\
+							NTV2_DEPRECATE_13_0		NTV2_DEPRECATE_13_1		NTV2_DEPRECATE_14_0		NTV2_DEPRECATE_14_1		NTV2_DEPRECATE_14_2		\
+							NTV2_DEPRECATE_14_3
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then
 # this tag can be used to specify a list of macro names that should be expanded.
