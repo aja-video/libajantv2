@@ -2465,7 +2465,6 @@ public:
     
     /**
 		@brief		Answers with the current gain setting for the Audio Mixer's output.
-		@param[in]	inChannel		Specifies the audio channel of interest.
 		@param[out]	outGainValue	Receives the current main input gain level.
 									This is a signed 18-bit value, where unity gain is 0x10000.
 		@return		True if successful;  otherwise false.
@@ -2475,7 +2474,6 @@ public:
 
 	/**
 		@brief		Sets the gain for the output of the Audio Mixer.
-		@param[in]	inChannel		Specifies the audio channel of interest.
 		@param[in]	inGainValue		Specifies the new input gain level.
 									This is a signed 18-bit value, where unity gain is 0x10000.
 		@return		True if successful;  otherwise false.
