@@ -25,7 +25,7 @@ using namespace std;
 	#undef min
 #endif
 
-#if defined(_DEBUG)
+#if 0
 	//	Debug builds can clear Anc buffers during A/C capture
 	#define	AJA_NTV2_CLEAR_DEVICE_ANC_BUFFER_AFTER_CAPTURE_XFER		//	Requires non-zero kVRegZeroDeviceAncPostCapture
 	#define AJA_NTV2_CLEAR_HOST_ANC_BUFFER_TAIL_AFTER_CAPTURE_XFER	//	Requires non-zero kVRegZeroHostAncPostCapture
