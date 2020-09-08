@@ -283,7 +283,7 @@ public:
 	explicit							CNTV2Card ( const UWord		inDeviceIndex,
 													const std::string &	inHostName		= std::string());
 #if !defined(NTV2_DEPRECATE_14_3)
-	explicit NTV2_DEPRECATED_f(CNTV2Card (const UWord inDeviceIndex,, const bool inDisplayError, const UWord inDeviceType, const char*	pInHostName));
+	explicit NTV2_DEPRECATED_f(CNTV2Card (const UWord inDeviceIndex, const bool inDisplayError, const UWord inDeviceType, const char*	pInHostName));
 #endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 	/**
