@@ -26,8 +26,7 @@ CNTV2SerialControl::CNTV2SerialControl (const UWord inDeviceIndexNumber, const U
 		_receiveRegisterNum	(kRegRS422Receive),
 		_transmitRegisterNum(kRegRS422Transmit)
 {
-	_ntv2Card.Open (inDeviceIndexNumber);
-	if (_ntv2Card.IsOpen ())
+	if (CNTV2DeviceScanner::GetDeviceAtIndex(inDeviceIndexNumber, _ntv2Card))
 	{
 		if (inSerialPortIndexNum < ::NTV2DeviceGetNumSerialPorts (_ntv2Card.GetDeviceID ()))
 		{

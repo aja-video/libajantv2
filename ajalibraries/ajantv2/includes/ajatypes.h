@@ -11,7 +11,22 @@
 	#define	NTV2_USE_STDINT
 #endif	//	if not MSWindows
 
-//	NOTE: Symbols/APIs within #ifdef blocks using these names aren't defined by default in this SDK:
+/**
+	SYMBOL & API DEPRECATION MACROS
+
+	These macros control which deprecated symbols and APIs are included or excluded from compilation.
+
+	-	To activate/include the symbols/APIs that were deprecated in a particular SDK, comment out
+		(undefine) the SDK's corresponding macro.
+
+	-	To deactivate/exclude the symbols/APIs that were deprecated in a particular SDK, leave the
+		SDK's corresponding macro defined.
+
+	WARNING:	Do not sparesely mix-and-match across SDK versions.
+				It's best to activate/include symbols/APIs contiguously from the latest SDK
+				(starting at the bottom), and continue activating/including to the SDK at which
+				symbols/APIs should start to be deactivated/excluded.
+**/
 #define NTV2_DEPRECATE			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
 #define NTV2_DEPRECATE_12_5		//	If defined, excludes all symbols/APIs first deprecated in SDK 12.5
 #define NTV2_DEPRECATE_12_6		//	If defined, excludes all symbols/APIs first deprecated in SDK 12.6
@@ -29,7 +44,6 @@
 //#define NTV2_DEPRECATE_15_5		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.5
 //#define NTV2_DEPRECATE_15_6		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.6 (never released)
 //#define NTV2_DEPRECATE_16_0		//	If defined, excludes all symbols/APIs to be deprecated in SDK 16.0
-
 #define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
 #define	AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
 #define	AJA_STATIC		static		//	Do not change this.

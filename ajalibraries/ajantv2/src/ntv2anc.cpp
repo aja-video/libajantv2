@@ -787,7 +787,6 @@ bool CNTV2Card::AncExtractSetWriteParams (const UWord inSDIInput, const ULWord i
 	bool			ok					(true);
 	const ULWord	frameNumber			(inFrameNumber + 1);	//	This is so the next calculation will point to the beginning of the next frame - subtract offset for memory start
 	ULWord			frameLocation	(::NTV2FramesizeToByteCount(theFrameSize) * frameNumber);
-	bool			isQuadFormatEnabled	(false);
 	bool quadEnabled(false), quadQuadEnabled(false);
 	GetQuadFrameEnable(quadEnabled, inChannel);
 	GetQuadQuadFrameEnable(quadQuadEnabled, inChannel);
@@ -834,7 +833,6 @@ bool CNTV2Card::AncExtractSetField2WriteParams (const UWord inSDIInput, const UL
 	bool			ok					(true);
 	const ULWord	frameNumber			(inFrameNumber + 1);	//	This is so the next calculation will point to the beginning of the next frame - subtract offset for memory start
 	ULWord			frameLocation	(::NTV2FramesizeToByteCount(theFrameSize) * frameNumber);
-	bool			isQuadFormatEnabled	(false);
 	bool quadEnabled(false), quadQuadEnabled(false);
 	GetQuadFrameEnable(quadEnabled, inChannel);
 	GetQuadQuadFrameEnable(quadQuadEnabled, inChannel);

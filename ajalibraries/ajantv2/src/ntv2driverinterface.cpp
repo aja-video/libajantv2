@@ -183,8 +183,7 @@ bool CNTV2DriverInterface::Open (const std::string & inURLSpec)
 
 #if !defined(NTV2_DEPRECATE_14_3)
 	bool CNTV2DriverInterface::Open (UWord boardNumber, bool displayError, NTV2DeviceType eBoardType, const char* hostname)
-	{
-		(void) eBoardType;  (void) displayError;
+	{	(void) eBoardType;  (void) displayError;	//	Ignored
 		const string host(hostname ? hostname : "");
 		if (host.empty())
 			return Open(boardNumber);
