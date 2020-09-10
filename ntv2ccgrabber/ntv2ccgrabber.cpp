@@ -26,6 +26,7 @@ using namespace std::rel_ops;
 
 #define AsConstUBytePtr(__p__)		reinterpret_cast<const UByte*>(__p__)
 #define AsConstULWordPtr(__p__)		reinterpret_cast<const ULWord*>(__p__)
+#define AsULWordPtr(__p__)			reinterpret_cast<ULWord*>(__p__)
 #define AsUBytePtr(__p__)			reinterpret_cast<UByte*>(__p__)
 
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
@@ -520,7 +521,7 @@ void NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 	mActiveSDIInputs = ::NTV2MakeChannelSet(sdiInputs);
 
 	//	E-E ROUTING
-	if (false /* not ready for prime-time */ &&  !mConfig.fBurnCaptions  &&  !mConfig.fDoMultiFormat)
+	if ((false) /* not ready for prime-time */ &&  !mConfig.fBurnCaptions  &&  !mConfig.fDoMultiFormat)
 	{	//	Not doing caption burn-in:  route E-E pass-thru...
 		NTV2ChannelList sdiOutputs;
 		if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
@@ -1429,27 +1430,26 @@ void NTV2CCGrabber::PlayFrames (void)
 		if (mDevice.AutoCirculateGetStatus (mOutputChannel, acStatus))	//	Find out which buffers we got
 			fbNum = ULWord(acStatus.acStartFrame);	//	Use them
 
-	const NTV2FormatDescriptor	formatDesc		(videoFormat, mPlayoutFBF, vancMode);
-	const ULWord				bytesPerRow		(formatDesc.GetBytesPerRow ());
-	const uint32_t				bufferSizeBytes	(formatDesc.GetTotalRasterBytes ());
-	const uint32_t				activeSizeBytes	(formatDesc.GetVisibleRasterBytes ());
-	ULWord						pingPong		(0);	//	Bounce between 0 and 1
-	UByte *						pHostBuffer		(reinterpret_cast <UByte *> (AJAMemory::AllocateAligned (bufferSizeBytes, AJA_PAGE_SIZE)));	//	Top of buffer
-	UByte *						pActiveBuffer	(formatDesc.GetTopVisibleRowAddress (pHostBuffer));											//	Points to SAV
-	UWord						consecSyncErrs	(0);
+	const NTV2FormatDesc	formatDesc		(videoFormat, mPlayoutFBF, vancMode);
+	const uint32_t			bufferSizeBytes	(formatDesc.GetTotalRasterBytes ());
+	const uint32_t			activeSizeBytes	(formatDesc.GetVisibleRasterBytes ());
+	ULWord					pingPong		(0);	//	Bounce between 0 and 1
+	UWord					consecSyncErrs	(0);
 	//	Caption status head-up-display...
-	static uint64_t				frameTally		(0);
-	const string				strVideoFormat	(CNTV2DemoCommon::StripFormatString (::NTV2VideoFormatToString (videoFormat)));
-	ULWord						lastErrorTally	(0);
+	static uint64_t			frameTally		(0);
+	const string			strVideoFormat	(CNTV2DemoCommon::StripFormatString (::NTV2VideoFormatToString (videoFormat)));
+	ULWord					lastErrorTally	(0);
 
 	//	Allocate host frame buffer for blitting captions into...
-	if (!pHostBuffer)
+	NTV2_POINTER hostBuffer;
+	if (!hostBuffer.Allocate(bufferSizeBytes, /*pageAligned*/true))
 		{cerr << "## NOTE:  Caption burn-in failed -- unable to allocate " << bufferSizeBytes << "-byte caption video buffer" << endl;	return;}
+	NTV2_POINTER visibleRgn (formatDesc.GetTopVisibleRowAddress(AsUBytePtr(hostBuffer.GetHostPointer())),activeSizeBytes);
 
-	//	Clear it (to fully transparent, all black), then transfer it to both device ping/pong buffers...
-	::memset (pHostBuffer, 0, bufferSizeBytes);
-	mDevice.DMAWriteFrame (fbNum + 0, reinterpret_cast <ULWord *> (pHostBuffer), bufferSizeBytes);
-	mDevice.DMAWriteFrame (fbNum + 1, reinterpret_cast <ULWord *> (pHostBuffer), bufferSizeBytes);
+	//	Clear both device ping/pong buffers to fully transparent, all black...
+	hostBuffer.Fill(ULWord(0));
+	mDevice.DMAWriteFrame (fbNum + 0, AsULWordPtr(hostBuffer.GetHostPointer()), bufferSizeBytes);
+	mDevice.DMAWriteFrame (fbNum + 1, AsULWordPtr(hostBuffer.GetHostPointer()), bufferSizeBytes);
 	mDevice.SetOutputFrame (mOutputChannel, fbNum + pingPong);
 	pingPong = pingPong ? 0 : 1;
 
@@ -1461,7 +1461,7 @@ void NTV2CCGrabber::PlayFrames (void)
 		if (pFrameData)
 		{
 			//	"Burn" captions into the host buffer before it gets sent to the AJA device...
-			m608Decoder->BurnCaptions (pActiveBuffer, formatDesc.GetVisibleRasterDimensions(), mPlayoutFBF, UWord(bytesPerRow));
+			m608Decoder->BurnCaptions (hostBuffer, formatDesc);
 			m608Decoder->IdleFrame();	//	This is needed for captions that flash/blink
 
 			if (mHeadUpDisplayOn)
@@ -1475,7 +1475,7 @@ void NTV2CCGrabber::PlayFrames (void)
 
 				const ULWord					newErrorTally	(mErrorTally);
 				const NTV2Line21Attributes &	color			(lastErrorTally != newErrorTally ? kRedOnTransparentBG : kGreenOnTransparentBG);
-				CNTV2CaptionRenderer::BurnString (oss.str(), color, pActiveBuffer, formatDesc.GetVisibleRasterDimensions(), mPlayoutFBF, UWord(bytesPerRow), 7, 1);
+				CNTV2CaptionRenderer::BurnString (oss.str(), color, hostBuffer, formatDesc, 7, 1);
 				lastErrorTally = newErrorTally;
 
 				if (!pFrameData->fTimecodes.empty())
@@ -1483,18 +1483,17 @@ void NTV2CCGrabber::PlayFrames (void)
 					const NTV2_RP188 & tc (pFrameData->fTimecodes.begin()->second);
 					if (tc.IsValid()  &&  tc.fDBB & BIT(16))	//	Bit 16 will be set if this frame had timecode
 					{
-						CRP188	rp188	(tc);
-						CNTV2CaptionRenderer::BurnString (string(rp188.GetRP188CString()), kGreenOnTransparentBG, pActiveBuffer,
-															formatDesc.GetVisibleRasterDimensions(), mPlayoutFBF, UWord(bytesPerRow), 8, 1);
+						CRP188	rp188(tc);
+						CNTV2CaptionRenderer::BurnString (rp188.GetRP188CString(), kGreenOnTransparentBG, hostBuffer, formatDesc, 8, 1);
 					}
 				}
 			}
 
 			//	Transfer the caption raster to the device, then ping-pong it into the mixer foreground...
-			mDevice.DMAWriteFrame (fbNum + pingPong, reinterpret_cast <ULWord *> (pActiveBuffer), activeSizeBytes);
-			mDevice.SetOutputFrame (mOutputChannel, fbNum + pingPong);
-			pingPong = pingPong ? 0 : 1;
-			::memset (pActiveBuffer, 0, activeSizeBytes);	//	Clear host buffer to fully-transparent, all-black again
+			mDevice.DMAWriteFrame (fbNum + pingPong, AsULWordPtr(visibleRgn.GetHostPointer()), activeSizeBytes);
+			mDevice.SetOutputFrame (mOutputChannel, fbNum + pingPong);	//	Toggle device frame buffer
+			pingPong = pingPong ? 0 : 1;	//	Switch device frame numbers for next time
+			visibleRgn.Fill(ULWord(0));		//	Clear visible region of host buffer to fully-transparent, all-black again
 
 			//	Signal that the frame has been "consumed"...
 			mCircularBuffer.EndConsumeNextBuffer ();
@@ -1522,7 +1521,6 @@ void NTV2CCGrabber::PlayFrames (void)
 
 	if (!acStatus.IsStopped())
 		mDevice.AutoCirculateStop(mOutputChannel);
-	delete [] pHostBuffer;
 	CAPNOTE("Thread completed, will exit");
 
 }	//	PlayFrames
