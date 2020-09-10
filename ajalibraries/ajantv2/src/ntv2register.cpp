@@ -1588,25 +1588,24 @@ bool CNTV2Card::GetTsiFrameEnable (bool & outIsEnabled, const NTV2Channel inChan
 		return false;
 	// Return true (1) Quad Frame Geometry is enabled
 	// Return false (0) if this mode is disabled
-	ULWord	returnVal	(0);
-	bool	readOkay	(false);
+	bool returnVal(false), readOkay(false);
 
 	if (::NTV2DeviceCanDo12gRouting(_boardID))
-	{	bool is8k(false);
-		readOkay = GetQuadQuadFrameEnable(is8k, inChannel);
-		if (!is8k)
-			readOkay = ReadRegister(gChannelToGlobalControlRegNum[inChannel], returnVal, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
+	{
+		readOkay = GetQuadQuadFrameEnable(returnVal, inChannel);
+		if (!returnVal)
+			readOkay = CNTV2DriverInterface::ReadRegister(gChannelToGlobalControlRegNum[inChannel], returnVal, kRegMaskQuadTsiEnable, kRegShiftQuadTsiEnable);
 	}
 	else
 	{
 		if (inChannel < NTV2_CHANNEL3)
-			readOkay = ReadRegister (kRegGlobalControl2, returnVal, kRegMask425FB12, kRegShift425FB12);
+			readOkay = CNTV2DriverInterface::ReadRegister (kRegGlobalControl2, returnVal, kRegMask425FB12, kRegShift425FB12);
 		else if (inChannel < NTV2_CHANNEL5)
-			readOkay = ReadRegister (kRegGlobalControl2, returnVal, kRegMask425FB34, kRegShift425FB34);
+			readOkay = CNTV2DriverInterface::ReadRegister (kRegGlobalControl2, returnVal, kRegMask425FB34, kRegShift425FB34);
 		else if (inChannel < NTV2_CHANNEL7)
-			readOkay = ReadRegister (kRegGlobalControl2, returnVal, kRegMask425FB56, kRegShift425FB56);
+			readOkay = CNTV2DriverInterface::ReadRegister (kRegGlobalControl2, returnVal, kRegMask425FB56, kRegShift425FB56);
 		else
-			readOkay = ReadRegister(kRegGlobalControl2, returnVal, kRegMask425FB78, kRegShift425FB78);
+			readOkay = CNTV2DriverInterface::ReadRegister(kRegGlobalControl2, returnVal, kRegMask425FB78, kRegShift425FB78);
 	}
 
 	outIsEnabled = readOkay ? returnVal : 0;
