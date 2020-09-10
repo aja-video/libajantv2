@@ -210,7 +210,6 @@ protected:
 #if !defined(NTV2_DEPRECATE_14_3)
 	typedef	NTV2TestPatternGen					AJATestPatternGenEx;				///< @deprecated	Use NTV2TestPatternGen instead.
 	typedef NTV2TestPatternBuffer				AJATestPatternBufferEx;				///< @deprecated	Use NTV2TestPatternBuffer instead.
-	typedef	NTV2TestPatternList					AJATestPatternListEx;				///< @deprecated	Use NTV2TestPatternNames instead.
 	typedef NTV2TestPatternSelect				AJATestPatternSelectEx;				///< @deprecated	Use NTV2TestPatternSelect instead.
 	#define	AJA_TestPattEx_ColorBars100			NTV2_TestPatt_ColorBars100			///< @deprecated	Use NTV2_TestPatt_ColorBars100 instead.
 	#define	AJA_TestPattEx_ColorBars75			NTV2_TestPatt_ColorBars75			///< @deprecated	Use NTV2_TestPatt_ColorBars75 instead.
@@ -230,6 +229,8 @@ protected:
 	#define	AJA_TestPattEx_ColorQuadrantBorder	NTV2_TestPatt_ColorQuadrantBorder	///< @deprecated	Use NTV2_TestPatt_ColorQuadrantBorder instead.
 	#define	AJA_TestPattEx_ColorQuadrantTsi		NTV2_TestPatt_ColorQuadrantTsi		///< @deprecated	Use NTV2_TestPatt_ColorQuadrantTsi instead.
 	#define	AJA_TestPattEx_All					NTV2_TestPatt_All					///< @deprecated	Use NTV2_TestPatt_All instead.
-#endif	//	NTV2_DEPRECATE_14_3
+#elif !defined(NTV2_DEPRECATE_15_0)
+	typedef	NTV2TestPatternList					AJATestPatternListEx;				///< @deprecated	Use NTV2TestPatternNames instead.
+#endif	//	NTV2_DEPRECATE_15_0
 
 #endif	//	NTV2_TESTPATTERN_GEN_
