@@ -455,6 +455,13 @@ AJAExport NTV2FrameGeometry		GetNormalizedFrameGeometry (const NTV2FrameGeometry
 AJAExport NTV2FrameGeometry		GetVANCFrameGeometry (const NTV2FrameGeometry inFrameGeometry, const NTV2VANCMode inVancMode);
 
 /**
+	@return		The first matching ::NTV2FrameGeometry that matches the given ::NTV2FrameDimensions,
+				or ::NTV2_FG_INVALID if none match.
+	@param[in]	inFD	Specifies the ::NTV2FrameDimensions of interest.
+**/
+AJAExport NTV2FrameGeometry		GetGeometryFromFrameDimensions (const NTV2FrameDimensions & inFD);
+
+/**
 	@return		True if the given ::NTV2FrameGeometry has tall or taller geometries associated with it;
 				otherwise false.
 	@param[in]	inFrameGeometry	Specifies the ::NTV2FrameGeometry.
