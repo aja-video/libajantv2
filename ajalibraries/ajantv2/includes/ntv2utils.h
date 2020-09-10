@@ -270,19 +270,18 @@ AJAExport bool	SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 	@note		The use of unsigned values precludes positioning the source raster above the top line of the destination raster,
 				or to the left of the destination raster's left edge. This function will, however, clip the source raster if it
 				overhangs the bottom and/or right edge of the destination raster.
+	@note		This function probably can't be made to work with planar formats.
 	@bug		Needs implementations for NTV2_FBF_10BIT_YCBCRA, NTV2_FBF_10BIT_RGB_PACKED, NTV2_FBF_10BIT_ARGB,
-				NTV2_FBF_16BIT_ARGB, the 3-plane planar formats NTV2_FBF_8BIT_YCBCR_420PL3, NTV2_FBF_8BIT_YCBCR_422PL3,
-				NTV2_FBF_10BIT_YCBCR_420PL3_LE, and NTV2_FBF_10BIT_YCBCR_422PL3_LE, plus the 2-plane planar formats
-				NTV2_FBF_10BIT_YCBCR_420PL2, NTV2_FBF_10BIT_YCBCR_422PL2, NTV2_FBF_8BIT_YCBCR_420PL2, and NTV2_FBF_8BIT_YCBCR_422PL2.
+				NTV2_FBF_16BIT_ARGB.
 **/
 AJAExport bool	CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,
 							UByte *						pDstBuffer,
-							const ULWord					inDstBytesPerLine,
+							const ULWord				inDstBytesPerLine,
 							const UWord					inDstTotalLines,
 							const UWord					inDstVertLineOffset,
 							const UWord					inDstHorzPixelOffset,
 							const UByte *				pSrcBuffer,
-							const ULWord					inSrcBytesPerLine,
+							const ULWord				inSrcBytesPerLine,
 							const UWord					inSrcTotalLines,
 							const UWord					inSrcVertLineOffset,
 							const UWord					inSrcVertLinesToCopy,
