@@ -19,6 +19,8 @@
 #include <iostream>
 #include <iomanip>
 
+#define	AsULWordPtr(_p_)	reinterpret_cast<const ULWord*>	(_p_)
+
 
 using namespace std;
 
@@ -29,16 +31,18 @@ const uint32_t	kAppSignature	(NTV2_FOURCC('T','e','s','t'));
 NTV2OutputTestPattern::NTV2OutputTestPattern (	const std::string &		inDeviceSpecifier,
 												const std::string &		inTestPatternSpec,
 												const NTV2VideoFormat	inVideoFormat,
-												const NTV2Channel		inChannel)
+												const NTV2PixelFormat	inPixelFormat,
+												const NTV2Channel		inChannel,
+												const NTV2VANCMode		inVancMode)
 	:	mDeviceID			(DEVICE_ID_NOTFOUND),
 		mDeviceSpecifier	(inDeviceSpecifier),
 		mTestPatternSpec	(inTestPatternSpec.empty() ? "100% ColorBars" : inTestPatternSpec),
 		mOutputChannel		(inChannel),
-		mPixelFormat		(NTV2_FBF_8BIT_YCBCR),
+		mPixelFormat		(inPixelFormat),
 		mVideoFormat		(inVideoFormat),
 		mSavedTaskMode		(NTV2_TASK_MODE_INVALID),
 		mSavedConnections	(),
-		mVancMode			(NTV2_VANCMODE_INVALID)
+		mVancMode			(inVancMode)
 {
 }	//	constructor
 
@@ -88,12 +92,22 @@ AJAStatus NTV2OutputTestPattern::Init (void)
 		{	cerr << "## ERROR: SetVideoFormat '" << ::NTV2VideoFormatToString(mVideoFormat) << "' failed" << endl;
 			return AJA_STATUS_FAIL;
 		}
+
+		//	Set the VANC mode
+		if (!mDevice.SetEnableVANCData (NTV2_IS_VANCMODE_ON(mVancMode), NTV2_IS_VANCMODE_TALLER(mVancMode), mOutputChannel))
+		{	cerr << "## ERROR: SetEnableVANCData '" << ::NTV2VANCModeToString(mVancMode,true) << "' failed" << endl;
+			return AJA_STATUS_FAIL;
+		}
 	}
 	else
 	{
 		//	User didn't specify a video format.
 		//  Get the device's current video format and use it to create the test pattern...
 		if (!mDevice.GetVideoFormat (mVideoFormat, mOutputChannel))
+			return AJA_STATUS_FAIL;
+
+		//  Read the current VANC mode, as this can affect the NTV2FormatDescriptor and host frame buffer size...
+		if (!mDevice.GetVANCMode (mVancMode, mOutputChannel))
 			return AJA_STATUS_FAIL;
 	}
 
@@ -102,10 +116,6 @@ AJAStatus NTV2OutputTestPattern::Init (void)
 	{	cerr << "## ERROR: This demo only supports SD/HD/2K1080, not '" << ::NTV2VideoFormatToString(mVideoFormat) << "'" << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
-
-	//  Read the current VANC mode, as this can affect the NTV2FormatDescriptor and host frame buffer size...
-	if (!mDevice.GetVANCMode (mVancMode, mOutputChannel))
-		return AJA_STATUS_FAIL;
 
 	return AJA_STATUS_SUCCESS;
 
@@ -216,7 +226,9 @@ AJAStatus NTV2OutputTestPattern::EmitPattern (void)
 		return AJA_STATUS_FAIL;	//	ReadRegister failure?
 
 	//	Now simply transfer the contents of the host buffer to the device's current output frame...
-	if (!mDevice.DMAWriteFrame (currentOutputFrame,  reinterpret_cast<uint32_t*>(hostBuffer.GetHostPointer()),  hostBuffer.GetByteCount()))
+	if (!mDevice.DMAWriteFrame (currentOutputFrame,				//	Device frame number
+								AsULWordPtr(fd.GetRowAddress(hostBuffer.GetHostPointer(), 0)),	//	Host buffer address
+								hostBuffer.GetByteCount()))		//	# bytes to xfer
 		return AJA_STATUS_FAIL;
 
 	return AJA_STATUS_SUCCESS;

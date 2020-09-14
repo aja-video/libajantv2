@@ -10,6 +10,7 @@
 #include "ajabase/common/types.h"
 #include "ajabase/common/options_popt.h"
 #include "ajabase/system/debug.h"
+#include "ajabase/common/common.h"
 #include "ntv2outputtestpattern.h"
 #include "ntv2democommon.h"
 #include <iostream>
@@ -26,6 +27,8 @@ int main (int argc, const char ** argv)
 	char *		pDeviceSpec		(AJA_NULL);	//	Which device to use
 	char *		pTestPattern	(AJA_NULL);	//	Test pattern argument
 	char *		pVideoFormat	(AJA_NULL);	//	Video format argument
+	char *		pPixelFormat	(AJA_NULL);	//	Pixel format argument
+	char *		pVancMode		(AJA_NULL);	//	VANC mode argument
 	ULWord		channelNumber	(1);		//	Which channel to use
 	poptContext	optionsContext;				//	Context for parsing command line arguments
 	AJADebug::Open();
@@ -40,6 +43,8 @@ int main (int argc, const char ** argv)
 		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,	0,	"channel to use",		"1-8"	},
 		{"pattern",		'p',	POPT_ARG_STRING,	&pTestPattern,	0,	"test pattern to show",	"0-15, name or '?' to list"	},
 		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"video format to use",	"'?' or 'list' to list"},
+		{"pixelFormat",	0,		POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",	"'?' or 'list' to list"},
+		{"vanc",		0,		POPT_ARG_STRING,	&pVancMode,		0,	"vanc mode",			"off|none|0|on|tall|1|taller|tallest|2"},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -88,8 +93,45 @@ int main (int argc, const char ** argv)
 	}
 	const NTV2VideoFormat vFmt(vfStr.empty() ? NTV2_FORMAT_UNKNOWN : CNTV2DemoCommon::GetVideoFormatFromString(vfStr));
 
+	//	PixelFormat
+	const string pixelFormatStr	(pPixelFormat  ?  pPixelFormat  :  "");
+	NTV2PixelFormat pFmt (pixelFormatStr.empty() ? NTV2_FBF_8BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr));
+	if (pixelFormatStr == "?" || pixelFormatStr == "list")
+		{cout << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
+	else if (!pixelFormatStr.empty() && !NTV2_IS_VALID_FRAME_BUFFER_FORMAT(pFmt))
+	{
+		cerr	<< "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl
+				<< CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;
+		return 2;
+	}
+
+	//	VANC Mode
+	NTV2VANCMode vancMode(NTV2_VANCMODE_OFF);
+	string vancStr (pVancMode ? pVancMode : "");
+	aja::lower(vancStr);
+	if (vancStr == "?" || vancStr == "list")
+	{
+		cout	<< "\t0      \tNTV2_VANCMODE_OFF"    << endl << "\toff    \t" << endl << "\tnone   \t" << endl
+				<< "\t1      \tNTV2_VANCMODE_TALL"   << endl << "\ton     \t" << endl << "\ttall   \t" << endl
+				<< "\t2      \tNTV2_VANCMODE_TALLER" << endl << "\ttaller \t" << endl << "\ttallest\t" << endl;
+		return 0;
+	}
+	if (vFmt == NTV2_FORMAT_UNKNOWN  && !vancStr.empty())
+		{cerr << "## ERROR: '--vanc' option also requires --videoFormat option" << endl;  return 2;}
+	if (!vancStr.empty() && (vancStr == "0" || vancStr == "off" || vancStr == "none"))
+		vancMode = NTV2_VANCMODE_OFF;
+	else if (!vancStr.empty() && (vancStr == "1" || vancStr == "on" || vancStr == "tall"))
+		vancMode = NTV2_VANCMODE_TALL;
+	else if (!vancStr.empty() && (vancStr == "2" || vancStr == "taller" || vancStr == "tallest"))
+		vancMode = NTV2_VANCMODE_TALLER;
+	else if (!vancStr.empty())
+	{	cerr	<< "## ERROR:  Invalid '--vanc' value '" << vancStr << "' -- expected values: "
+				<< "0|off|none|1|on|tall|2|taller|tallest" << endl;
+		return 2;
+	}
+
 	//	Create the object that will display the test pattern...
-	NTV2OutputTestPattern outputTestPattern (deviceSpec, tpSpec, vFmt, channel);
+	NTV2OutputTestPattern outputTestPattern (deviceSpec, tpSpec, vFmt, pFmt, channel, vancMode);
 
 	//	Make sure the requested device can be acquired...
 	if (AJA_FAILURE(outputTestPattern.Init()))
