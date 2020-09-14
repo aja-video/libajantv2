@@ -29,7 +29,7 @@ CNTV2Card::CNTV2Card (const UWord inDeviceIndex, const string &	inHostName)
 	string hostName(inHostName);
 	aja::strip(hostName);
 	_boardOpened = false;
-	bool openOK = hostName.empty()  ?  Open(inDeviceIndex) :  Open(hostName);
+	bool openOK = hostName.empty()  ?  CNTV2DriverInterface::Open(inDeviceIndex) :  CNTV2DriverInterface::Open(hostName);
 	if (openOK)
 	{
 		if (IsBufferSizeSetBySW())
@@ -60,7 +60,7 @@ CNTV2Card::CNTV2Card (const UWord boardNumber, const bool displayErrorMessage, c
 	string hostName(hostname ? hostname : "");
 	aja::strip(hostName);
 	_boardOpened = false;
-	bool openOK = hostName.empty()  ?  Open(boardNumber) :  Open(hostName);
+	bool openOK = hostName.empty()  ?  CNTV2DriverInterface::Open(boardNumber) :  CNTV2DriverInterface::Open(hostName);
 	if (openOK)
 	{
 		if (IsBufferSizeSetBySW())
@@ -839,18 +839,14 @@ ostream &	operator << (ostream & inOutStr, const NTV2DIDSet & inDIDs)
 
 	UWord CNTV2Card::GetNumNTV2Boards()
 	{
-		ULWord numBoards = 0;
+		ULWord numBoards(0);
 		CNTV2Card ntv2Card;
-
-		for (ULWord boardCount = 0;  boardCount < NTV2_MAXBOARDS;  boardCount++)
+		for (ULWord boardCount(0);  boardCount < NTV2_MAXBOARDS;  boardCount++)
 		{
-			if (ntv2Card.Open (boardCount))
-			{
-				numBoards++;
-				ntv2Card.Close ();
-			}
+			if (AsNTV2DriverInterfaceRef(ntv2Card).Open(boardCount))
+				numBoards++;	//	Opened, keep going
 			else
-				break;
+				break;	//	Failed to open, we're done
 		}
 		return numBoards;
 	}
@@ -867,7 +863,7 @@ ostream &	operator << (ostream & inOutStr, const NTV2DIDSet & inDIDs)
 
 	bool CNTV2Card::SetBoard (UWord inDeviceIndexNumber)
 	{
-		return Open (inDeviceIndexNumber);
+		return CNTV2DriverInterface::Open(inDeviceIndexNumber);
 	}
 
 	string CNTV2Card::GetBoardIDString (void)
@@ -881,7 +877,7 @@ ostream &	operator << (ostream & inOutStr, const NTV2DIDSet & inDIDs)
 	void CNTV2Card::GetBoardIDString(std::string & outString)
 	{
 		outString = GetBoardIDString();
-	}	///< @deprecated	Obsolete. Convert the result of GetDeviceID() into a hexa string instead.
+	}
 
 #endif	//	!defined (NTV2_DEPRECATE)
 

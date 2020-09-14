@@ -223,28 +223,6 @@ AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DIDSet 
 //////////////////////////////////////////////////////////
 
 
-//////////////////////////////////////////////////////////
-//////////	From CNTV2TestPattern			//////////////
-//////////////////////////////////////////////////////////
-	typedef std::vector <const char *>			TestPatternList;
-
-	typedef struct
-	{
-		int				startLine;
-		int				endLine;
-		const ULWord *	data;
-	} SegmentDescriptor;
-
-	const UWord NumTestPatternSegments = 8;
-
-	typedef struct
-	{
-		const char *		name;
-		SegmentDescriptor	segmentDescriptor [NTV2_NUM_STANDARDS] [NumTestPatternSegments];
-	} SegmentTestPatternData;
-//////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////
-
 typedef std::bitset<16>		NTV2AudioChannelsMuted16;				///< @brief	Per-audio-channel mute state for up to 16 audio channels.
 const NTV2AudioChannelsMuted16	NTV2AudioChannelsMuteAll = NTV2AudioChannelsMuted16(0xFFFF);	///< @brief	All 16 audio channels muted/disabled.
 const NTV2AudioChannelsMuted16	NTV2AudioChannelsEnableAll = NTV2AudioChannelsMuted16(0x0000);	///< @brief	All 16 audio channels unmuted/enabled.
@@ -283,7 +261,7 @@ public:
 	explicit							CNTV2Card ( const UWord		inDeviceIndex,
 													const std::string &	inHostName		= std::string());
 #if !defined(NTV2_DEPRECATE_14_3)
-	explicit NTV2_DEPRECATED_f(CNTV2Card (const UWord inDeviceIndex,, const bool inDisplayError, const UWord inDeviceType, const char*	pInHostName));
+	explicit NTV2_DEPRECATED_f(CNTV2Card (const UWord inDeviceIndex, const bool inDisplayError, const UWord inDeviceType, const char*	pInHostName));
 #endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 	/**
@@ -2615,7 +2593,7 @@ public:
 	AJA_VIRTUAL bool	ReadGlobalControl (ULWord *value);
 
 	#if !defined (NTV2_DEPRECATE)
-		virtual NTV2_DEPRECATED_f(bool	SetBoard (UWord inDeviceIndex));	///< @deprecated	Use CNTV2DeviceScanner or Open(deviceIndex) instead.
+		virtual NTV2_DEPRECATED_f(bool	SetBoard (UWord inDeviceIndex));	///< @deprecated	Use ::CNTV2DeviceScanner instead.
 		AJA_VIRTUAL inline NTV2_DEPRECATED_f(NTV2BoardID	GetBoardID (void))				{return GetDeviceID ();}		///< @deprecated	Use GetDeviceID instead.
 		AJA_VIRTUAL inline NTV2_DEPRECATED_f(UWord		GetBoardNumber (void) const)		{return GetIndexNumber ();}		///< @deprecated	Use GetIndexNumber instead.
 		NTV2_DEPRECATED_f(AJA_VIRTUAL	NTV2BoardType		GetBoardType (void) const);										///< @deprecated	NTV2BoardType is obsolete.

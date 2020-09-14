@@ -48,6 +48,10 @@
 #endif
 
 
+#define	AsNTV2DriverInterfaceRef(_x_)	reinterpret_cast<CNTV2DriverInterface&>(_x_)
+#define	AsNTV2DriverInterfacePtr(_x_)	reinterpret_cast<CNTV2DriverInterface*>(_x_)
+
+
 typedef struct
 {
 	std::string		buildNumber;
@@ -538,7 +542,7 @@ class AJAExport CNTV2DriverInterface
 		{
 			return pOutValue ? ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift) : false;
 		}
-		AJA_VIRTUAL bool	Open (UWord inDeviceIndex, bool displayError, NTV2DeviceType eDeviceType, const char *hostName) = 0;
+		AJA_VIRTUAL bool	Open (const UWord inDeviceIndex, const bool inDisplayError, const NTV2DeviceType eDeviceType, const char * pInHostName);
 #endif	//	!defined(NTV2_DEPRECATE_14_3)
 #if !defined(NTV2_DEPRECATE_15_0)
 		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool IsKonaIPDevice(void))	{return IsIPDevice();}	///< @deprecated	Call CNTV2Card::IsIPDevice instead.

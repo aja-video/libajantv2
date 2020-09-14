@@ -128,7 +128,7 @@ public:
 	static const std::string &	GetIOServiceName (void);	//	For internal use only
 #if !defined(NTV2_DEPRECATE_14_3)
 	static void			SetDebugLogging (const uint64_t inWhichUserClientCommands);
-#endif
+#endif	//	NTV2_DEPRECATE_14_3
 	static void			DumpDeviceMap (void);
 	static UWord		GetConnectionCount (void);
 	static ULWord		GetConnectionChecksum (void);
@@ -136,13 +136,6 @@ public:
 protected:
 		AJA_VIRTUAL bool	OpenLocalPhysical (const UWord inDeviceIndex);
 		AJA_VIRTUAL bool	CloseLocalPhysical (void);
-
-#if !defined(NTV2_DEPRECATE_14_3)
-	virtual bool		Open (UWord inDeviceIndex,
-							  bool displayError,
-							  NTV2DeviceType eDeviceType,
-							  const char * hostName);
-#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 private:
 	AJA_VIRTUAL io_connect_t	GetIOConnect (const bool inDoNotAllocate = false) const;	//	For internal use only

@@ -3867,6 +3867,15 @@ NTV2FrameGeometry GetVANCFrameGeometry (const NTV2FrameGeometry inFrameGeometry,
 	return NTV2_FG_INVALID;	//	fail
 }
 
+NTV2FrameGeometry GetGeometryFromFrameDimensions (const NTV2FrameDimensions & inFD)
+{
+	for (NTV2FrameGeometry fg(NTV2_FG_FIRST);  fg < NTV2_FG_NUMFRAMEGEOMETRIES;  fg = NTV2FrameGeometry(fg+1))
+		if (::GetNTV2FrameGeometryWidth(fg) == inFD.GetWidth())
+			if (::GetNTV2FrameGeometryHeight(fg) == inFD.GetHeight())
+				return fg;
+	return NTV2_FG_INVALID;
+}
+
 bool HasVANCGeometries (const NTV2FrameGeometry inFG)
 {
 	switch (inFG)

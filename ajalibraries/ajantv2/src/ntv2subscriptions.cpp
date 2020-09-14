@@ -288,10 +288,10 @@ bool CNTV2Card::WaitForInputFieldID (const NTV2FieldID inFieldID, const NTV2Chan
 	bool CNTV2Card::GetInput6VerticalInterruptCount		(ULWord *pCount)	{return pCount ? GetInputVerticalInterruptCount (*pCount, NTV2_CHANNEL6) : false;}
 	bool CNTV2Card::GetInput7VerticalInterruptCount		(ULWord *pCount)	{return pCount ? GetInputVerticalInterruptCount (*pCount, NTV2_CHANNEL7) : false;}
 	bool CNTV2Card::GetInput8VerticalInterruptCount		(ULWord *pCount)	{return pCount ? GetInputVerticalInterruptCount (*pCount, NTV2_CHANNEL8) : false;}
-	bool CNTV2Card::GetAudioInterruptCount				(ULWord *pCount)	{return pCount ? GetInterruptCount (eAudio,					pCount) : false;}
-	bool CNTV2Card::GetAudioInWrapInterruptCount		(ULWord *pCount)	{return pCount ? GetInterruptCount (eAudioInWrap,			pCount) : false;}
-	bool CNTV2Card::GetAuxVerticalInterruptCount		(ULWord *pCount)	{return pCount ? GetInterruptCount (eAuxVerticalInterrupt,	pCount) : false;}
-	bool CNTV2Card::GetAudioOutWrapInterruptCount		(ULWord *pCount)	{return pCount ? GetInterruptCount (eAudioOutWrap,			pCount) : false;}
+	bool CNTV2Card::GetAudioInterruptCount				(ULWord *pCount)	{return pCount ? GetInterruptCount (eAudio,					*pCount) : false;}
+	bool CNTV2Card::GetAudioInWrapInterruptCount		(ULWord *pCount)	{return pCount ? GetInterruptCount (eAudioInWrap,			*pCount) : false;}
+	bool CNTV2Card::GetAuxVerticalInterruptCount		(ULWord *pCount)	{return pCount ? GetInterruptCount (eAuxVerticalInterrupt,	*pCount) : false;}
+	bool CNTV2Card::GetAudioOutWrapInterruptCount		(ULWord *pCount)	{return pCount ? GetInterruptCount (eAudioOutWrap,			*pCount) : false;}
 
 	//	Get event count
 	bool CNTV2Card::GetOutputVerticalEventCount			(ULWord *pCount)	{return pCount ? GetOutputVerticalEventCount (*pCount, NTV2_CHANNEL1) : false;}

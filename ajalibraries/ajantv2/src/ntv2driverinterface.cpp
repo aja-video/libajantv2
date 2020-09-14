@@ -171,6 +171,7 @@ bool CNTV2DriverInterface::Open (const UWord inDeviceIndex)
 bool CNTV2DriverInterface::Open (const std::string & inURLSpec)
 {
 	Close();
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (OpenRemote(inURLSpec))
 	{
 		FinishOpen();
@@ -178,13 +179,13 @@ bool CNTV2DriverInterface::Open (const std::string & inURLSpec)
 		DIDBG(DEC(gOpenCount) << " opens, " << DEC(gCloseCount) << " closes");
 		return true;
 	}
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	return false;
 }
 
 #if !defined(NTV2_DEPRECATE_14_3)
 	bool CNTV2DriverInterface::Open (UWord boardNumber, bool displayError, NTV2DeviceType eBoardType, const char* hostname)
-	{
-		(void) eBoardType;  (void) displayError;
+	{	(void) eBoardType;  (void) displayError;	//	Ignored
 		const string host(hostname ? hostname : "");
 		if (host.empty())
 			return Open(boardNumber);
@@ -201,10 +202,12 @@ bool CNTV2DriverInterface::Close (void)
 		for (INTERRUPT_ENUMS eInt(eNumInterruptTypes);  eInt < eNumInterruptTypes;  eInt = INTERRUPT_ENUMS(eInt+1))
 			ConfigureSubscription (false, eInt, mInterruptEventHandles[eInt]);
 
-		bool closeOK(false);
+		bool closeOK(true);
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
 		if (IsRemote())
 			closeOK = CloseRemote();
 		else
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 		{	//	Local/physical device:
 			closeOK = CloseLocalPhysical();
 			//	Common to all platforms:
@@ -501,16 +504,13 @@ NTV2DeviceID CNTV2DriverInterface::GetDeviceID (void)
 
 // Common remote card read register.  Subclasses have overloaded function
 // that does platform-specific read of register on local card.
-bool CNTV2DriverInterface::ReadRegister (const ULWord inRegisterNumber, ULWord & outRegisterValue, const ULWord inRegisterMask, const ULWord inRegisterShift)
+bool CNTV2DriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outValue, const ULWord inMask, const ULWord inShift)
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
-		return !_pRPCAPI->NTV2ReadRegisterRemote (inRegisterNumber, outRegisterValue, inRegisterMask, inRegisterShift);
+		return !_pRPCAPI->NTV2ReadRegisterRemote (inRegNum, outValue, inMask, inShift);
 #else
-	(void) inRegisterNumber;
-	(void) outRegisterValue;
-	(void) inRegisterMask;
-	(void) inRegisterShift;
+	(void) inRegNum;	(void) outValue;	(void) inMask;	(void) inShift;
 #endif
 	return false;
 }
@@ -593,10 +593,7 @@ bool CNTV2DriverInterface::WriteRegister (const ULWord inRegNum, const ULWord in
 	//	If we get here, must be a non-physical device connection...
 	return IsRemote() ? !_pRPCAPI->NTV2WriteRegisterRemote(inRegNum, inValue, inMask, inShift) : false;
 #else
-	(void) registerNumber;
-	(void) registerValue;
-	(void) registerMask;
-	(void) registerShift;
+	(void) inRegNum;	(void) inValue;	(void) inMask;	(void) inShift;
 	return false;
 #endif
 }
@@ -615,13 +612,8 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 	return !_pRPCAPI->NTV2DMATransferRemote(inDMAEngine, inIsRead, inFrameNumber, pFrameBuffer, inCardOffsetBytes,
 											inTotalByteCount, 0/*numSegs*/,  0/*hostPitch*/,  0/*cardPitch*/, inSynchronous);
 #else
-	(void) inDMAEngine;
-	(void) inIsRead;
-	(void) inFrameNumber;
-	(void) pFrameBuffer;
-	(void) inCardOffsetBytes;
-	(void) inTotalByteCount;
-	(void) inSynchronous;
+	(void) inDMAEngine;	(void) inIsRead;	(void) inFrameNumber;	(void) pFrameBuffer;	(void) inCardOffsetBytes;
+	(void) inTotalByteCount;	(void) inSynchronous;
 	return false;
 #endif
 }
@@ -643,16 +635,8 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 											inTotalByteCount, inNumSegments, inHostPitchPerSeg, inCardPitchPerSeg,
 											inSynchronous);
 #else
-	(void) inDMAEngine;
-	(void) inIsRead;
-	(void) inFrameNumber;
-	(void) pFrameBuffer;
-	(void) inCardOffsetBytes;
-	(void) inTotalByteCount;
-	(void) inNumSegments;
-	(void) inHostPitchPerSeg;
-	(void) inCardPitchPerSeg;
-	(void) inSynchronous;
+	(void) inDMAEngine;	(void) inIsRead;	(void) inFrameNumber;	(void) pFrameBuffer;	(void) inCardOffsetBytes;
+	(void) inTotalByteCount;	(void) inNumSegments;	(void) inHostPitchPerSeg;	(void) inCardPitchPerSeg;	(void) inSynchronous;
 	return false;
 #endif
 }
@@ -732,7 +716,11 @@ bool CNTV2DriverInterface::NTV2Message (NTV2_HEADER * pInMessage)
 bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bitFileInfo, const NTV2BitFileType bitFileType)
 {
 	if (IsRemote())
+#if defined (NTV2_NUB_CLIENT_SUPPORT)
 		return !_pRPCAPI->NTV2DriverGetBitFileInformationRemote(bitFileInfo, bitFileType);
+#else
+		return false;
+#endif
 	if (!::NTV2DeviceHasSPIFlash(_boardID))
 		return false;
 

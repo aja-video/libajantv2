@@ -128,7 +128,7 @@ void CNTV2KonaFlashProgram::SetMBReset()
 
 bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, uint32_t index)
 {
-	if (!Open (boardNumber))
+	if (!AsNTV2DriverInterfaceRef(*this).Open(boardNumber))
 		return false;
 
 	if (!SetDeviceProperties())
