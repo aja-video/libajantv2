@@ -47,12 +47,7 @@
 #define FRAME_QUADHD_8BIT_SIZE					(FRAME_1080_8BIT_LINEPITCH*2160)
 #define FRAME_BASE(__frameNum__,__frameSize__)	((__frameNum__)*(__frameSize__))
 
-/**
-	@param[in]	inPixelFormat		Specifies the pixel format.
-	@param[in]	inPixelWidth		Specifies the width of the line, in pixels.
-	@return		The minimum number of bytes necessary to accommodate the given number of pixels in the specified pixel format.
-**/
-AJAExport uint32_t CalcRowBytesForFormat (const NTV2FrameBufferFormat inPixelFormat, const uint32_t inPixelWidth);
+AJAExport NTV2_SHOULD_BE_DEPRECATED(uint32_t CalcRowBytesForFormat (const NTV2FrameBufferFormat inPF, const uint32_t pixWidth));	///< @deprecated	This function doesn't support planar pixel formats. Use ::NTV2FormatDescriptor instead.
 AJAExport void UnPack10BitYCbCrBuffer (uint32_t* packedBuffer, uint16_t* ycbcrBuffer, uint32_t numPixels);
 AJAExport void PackTo10BitYCbCrBuffer (const uint16_t *ycbcrBuffer, uint32_t *packedBuffer, const uint32_t numPixels);
 AJAExport void MakeUnPacked10BitYCbCrBuffer (uint16_t* buffer, uint16_t Y , uint16_t Cb , uint16_t Cr,uint32_t numPixels);

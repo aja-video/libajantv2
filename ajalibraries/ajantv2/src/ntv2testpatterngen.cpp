@@ -14,8 +14,15 @@
 #include "ntv2transcode.h"
 #include "ntv2resample.h"
 #include "ajabase/system/lock.h"
+#include "ajabase/system/debug.h"
 #include "ajabase/common/common.h"
 #include "math.h"
+
+#define	TPGFAIL(__x__)	AJA_sERROR  (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
+#define	TPGWARN(__x__)	AJA_sWARNING(AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
+#define	TPGNOTE(__x__)	AJA_sNOTICE (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
+#define	TPGINFO(__x__)	AJA_sINFO   (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
+#define	TPGDBUG(__x__)	AJA_sDEBUG  (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
 
 
 using namespace std;
@@ -2324,19 +2331,19 @@ static TPStringMap & CreateTPStringMap (TPStringMap & outMap)
 	NTV2_ASSERT(sNumPatterns == NTV2_TestPatt_Black);
 	for (NTV2TestPatternSelect tpSelect(NTV2_TestPatt_FIRST);  tpSelect < sNumPatterns;  tpSelect = NTV2TestPatternSelect(tpSelect+1))
 		outMap.insert(TPStringPair(tpSelect, string(NTV2TestPatternSegments[tpSelect].name)));
-	outMap.insert(TPStringPair(NTV2_TestPatt_Black,				string("Black")));
-	outMap.insert(TPStringPair(NTV2_TestPatt_White,				string("White")));
+	outMap.insert(TPStringPair(NTV2_TestPatt_Black,					string("Black")));
+	outMap.insert(TPStringPair(NTV2_TestPatt_White,					string("White")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_Border,				string("Border")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_LinearRamp,			string("Linear Ramp")));
-	outMap.insert(TPStringPair(NTV2_TestPatt_SlantRamp,			string("Slant Ramp")));
-	outMap.insert(TPStringPair(NTV2_TestPatt_ZonePlate,			string("Zone Plate")));
-	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrant,		string("Color Quadrant")));
+	outMap.insert(TPStringPair(NTV2_TestPatt_SlantRamp,				string("Slant Ramp")));
+	outMap.insert(TPStringPair(NTV2_TestPatt_ZonePlate,				string("Zone Plate")));
+	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrant,			string("Color Quadrant")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrantBorder,	string("Color Quadrant Border")));
-	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrantTsi,	string("Color Quadrant Tsi")));
-	outMap.insert(TPStringPair(NTV2_TestPatt_ZonePlate_12b_RGB,	string("ZonePlate 12b RGB")));
+	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrantTsi,		string("Color Quadrant Tsi")));
+	outMap.insert(TPStringPair(NTV2_TestPatt_ZonePlate_12b_RGB,		string("ZonePlate 12b RGB")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_LinearRamp_12b_RGB,	string("LinearRamp 12b RGB")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_HLG_Narrow_12b_RGB,	string("HLG_Narrow 12b RGB")));
-	outMap.insert(TPStringPair(NTV2_TestPatt_PQ_Narrow_12b_RGB,	string("PQ_Narrow 12b RGB")));
+	outMap.insert(TPStringPair(NTV2_TestPatt_PQ_Narrow_12b_RGB,		string("PQ_Narrow 12b RGB")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_PQ_Wide_12b_RGB,		string("PQ_Wide 12b RGB")));
 	return outMap;
 }
@@ -2586,20 +2593,19 @@ ULWord NTV2TestPatternGen::findRGBColorByName (const string & inName)
 	return iter != strToWebColors.end()  ?  iter->second  :  0UL;
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-NTV2TestPatternGen::NTV2TestPatternGen() :
-	_sliderValue(DEFAULT_PATT_GAIN),
-	_signalMask(NTV2_SIGNALMASK_ALL),
-	mNumPixels(1920)
+NTV2TestPatternGen::NTV2TestPatternGen()
+	:	mSliderValue(DEFAULT_PATT_GAIN),
+		mSignalMask(NTV2_SIGNALMASK_ALL),
+		mNumPixels(1920)
 {
 }
 
 bool NTV2TestPatternGen::drawIt (void)
 {
 	bool result(false);
-	switch (_patternNumber)
+	switch (mPatternID)
 	{
 		case NTV2_TestPatt_ColorBars100:
 		case NTV2_TestPatt_ColorBars75:
@@ -2635,12 +2641,18 @@ bool NTV2TestPatternGen::drawIt (void)
 	}
 	delete [] _pPackedLineBuffer;
 	delete [] _pUnPackedLineBuffer;
+	if (!result)
+	{
+		const NTV2TestPatternNames names(getTestPatternNames());
+		if (mPatternID < names.size())
+			TPGFAIL("Failed for pattern '" << names.at(mPatternID) << "'");
+		else
+			TPGFAIL("Failed for pattern " << DEC(mPatternID));
+	}
 	return result;
 }
 
-// DrawTestPattern()
-//	Note: "dSlider" is expected to range between 0.0 and 1.0
-//
+#if !defined(NTV2_DEPRECATE_16_0)
 bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern,
 											const uint32_t frameWidth,
 											const uint32_t frameHeight,
@@ -2648,96 +2660,102 @@ bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern,
 											NTV2TestPatBuffer & testPatternBuffer)
 {
 	// Save this away for worker methods.
-	_patternNumber = inPattern;
-	_frameWidth  = frameWidth;
-	_frameHeight = frameHeight;
-	_pixelFormat = pixelFormat;
+	mPatternID = inPattern;
+	mDstFrameWidth  = frameWidth;
+	mDstFrameHeight = frameHeight;
+	mDstPixelFormat = pixelFormat;
 	mNumPixels = frameWidth;
 	
 	// HDR test pattern compatibility check
 	if (NTV2_IS_12B_PATTERN(inPattern))
 	{	//	HDR test pattern requested...
-		if (_frameWidth % 1920)
-			return false;	//	Pixel width must be evenly divisible by 1920
-		if (!NTV2_IS_FBF_12BIT_RGB(_pixelFormat))
-			return false;	//	Pixel format must be RGB-12b
+		if (mDstFrameWidth % 1920)
+			{TPGFAIL("Pixel width " << DEC(mDstFrameWidth) << " not evenly divisible by 1920"); return false;}
+		if (!NTV2_IS_FBF_12BIT_RGB(mDstPixelFormat))
+			{TPGFAIL("Pixel format " << ::NTV2FrameBufferFormatToString(mDstPixelFormat) << " not 12-bit RGB"); return false;}
 	}
 
-	_linePitch = CalcRowBytesForFormat(_pixelFormat, _frameWidth);				// BYTES per line of frame buffer format
-	if (!_linePitch)
-		return false;
-	_dataLinePitch = CalcRowBytesForFormat(NTV2_FBF_10BIT_YCBCR, _frameWidth);	// BYTES per line of test pattern data (always stored as 10-bit YCbCr)
+	mDstLinePitch = ::CalcRowBytesForFormat(mDstPixelFormat, mDstFrameWidth);				// BYTES per line of frame buffer format
+	if (!mDstLinePitch)
+		{TPGFAIL("CalcRowBytesForFormat failed for " << ::NTV2FrameBufferFormatToString(mDstPixelFormat) << " pxWidth=" << DEC(mDstFrameWidth)); return false;}
+	mSrcLinePitch = ::CalcRowBytesForFormat(NTV2_FBF_10BIT_YCBCR, mDstFrameWidth);	// BYTES per line of test pattern data (always stored as 10-bit YCbCr)
 
-	_bufferSize = _linePitch*_frameHeight;
-	if (!_bufferSize)
-		return false;
+	mDstBufferSize = mDstLinePitch*mDstFrameHeight;
+	if (!mDstBufferSize)
+		{TPGFAIL("Buffer size zero, linePitch=" << DEC(mDstLinePitch) << " height=" << DEC(mDstFrameHeight)); return false;}
 
-	if ( testPatternBuffer.size() != _bufferSize )
-		testPatternBuffer.resize(_bufferSize);
+	if (testPatternBuffer.size() != mDstBufferSize)
+		testPatternBuffer.resize(mDstBufferSize);
 
 	mRGBBuffer.resize(frameWidth * frameHeight * 3 + 1);
 
-	_pTestPatternBuffer = &testPatternBuffer[0];
+	mpDstBuffer = &testPatternBuffer[0];
 
-	_pPackedLineBuffer = new uint32_t[_frameWidth*2];
-	_pUnPackedLineBuffer = new uint16_t[_frameWidth*4];
-	MakeUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer,CCIR601_10BIT_BLACK,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET,_frameWidth);
+	_pPackedLineBuffer = new uint32_t[mDstFrameWidth*2];
+	_pUnPackedLineBuffer = new uint16_t[mDstFrameWidth*4];
+	MakeUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer,CCIR601_10BIT_BLACK,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET,mDstFrameWidth);
 	if (NTV2_IS_12B_PATTERN(inPattern))
 		HDRTPGeometry geom(mNumPixels, mNumLines);	//	setupHDRTestPatternGeometries();
-
 	return drawIt();
 }
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 
 bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern,
 											const NTV2FormatDescriptor & inFormatDesc,
 											NTV2_POINTER & buffer)
 {
+	if (!NTV2_IS_VALID_PATTERN(inPattern))
+		{TPGFAIL("Invalid pattern selector " << DEC(inPattern)); return false;}
 	if (!buffer)
-		return false;
+		{TPGFAIL("NULL buffer"); return false;}
 	if (!inFormatDesc.IsValid())
-		return false;
+		{TPGFAIL("Invalid format descriptor"); return false;}
+	if (inFormatDesc.IsPlanar())
+		{TPGFAIL("Planar format " << ::NTV2FrameBufferFormatToString(mDstPixelFormat) << " not implemented"); return false;}
 
 	// Save this away for worker methods.
-	_patternNumber = inPattern;
-	_frameWidth  = inFormatDesc.GetRasterWidth();
-	_frameHeight = inFormatDesc.GetRasterHeight();
-	_pixelFormat = inFormatDesc.GetPixelFormat();
-	mNumPixels = _frameWidth;
+	mPatternID = inPattern;
+	mDstFrameWidth  = inFormatDesc.GetRasterWidth();
+	mDstFrameHeight = inFormatDesc.GetVisibleRasterHeight();
+	mDstPixelFormat = inFormatDesc.GetPixelFormat();
+	mNumPixels = mDstFrameWidth;
 	
 	// HDR test pattern compatibility check
 	if (NTV2_IS_12B_PATTERN(inPattern))
 	{	//	HDR test pattern requested...
-		if (_frameWidth % 1920)
-			return false;	//	Pixel width must be evenly divisible by 1920
-		if (!NTV2_IS_FBF_12BIT_RGB(_pixelFormat))
+		if (mDstFrameWidth % 1920)
+			{TPGFAIL("Pixel width " << DEC(mDstFrameWidth) << " not evenly divisible by 1920"); return false;}
+		if (!NTV2_IS_FBF_12BIT_RGB(mDstPixelFormat))
 			return false;	//	Pixel format must be RGB-12b
 	}
 
 	// BYTES per line of frame buffer format
-	_linePitch = inFormatDesc.GetBytesPerRow();
-	if (!_linePitch)
-		return false;
-	NTV2_ASSERT(_linePitch == ::CalcRowBytesForFormat(_pixelFormat, _frameWidth));
+	mDstLinePitch = inFormatDesc.GetBytesPerRow();
+	if (!mDstLinePitch)
+		{TPGFAIL("Zero line pitch for pattern " << DEC(inPattern)); return false;}
+	if (mDstLinePitch != ::CalcRowBytesForFormat(mDstPixelFormat, mDstFrameWidth))
+		{TPGFAIL("Pattern " << DEC(inPattern) << ", " << inFormatDesc << ", linePitch " << DEC(mDstLinePitch) << " differs from CalcRowBytesForFormat result"); return false;}
 
 	// BYTES per line of test pattern data (always stored as 10-bit YCbCr)
-	_dataLinePitch = CalcRowBytesForFormat(NTV2_FBF_10BIT_YCBCR, _frameWidth);
+	mSrcLinePitch = CalcRowBytesForFormat(NTV2_FBF_10BIT_YCBCR, mDstFrameWidth);
 
-	_bufferSize = inFormatDesc.GetTotalRasterBytes();
-	if (!_bufferSize)
-		return false;
-	NTV2_ASSERT(_bufferSize == _linePitch * _frameHeight);
+	mDstBufferSize = inFormatDesc.GetVisibleRasterBytes();
+	if (!mDstBufferSize)
+		{TPGFAIL("Buffer size is zero: " << inFormatDesc); return false;}
+	if (mDstBufferSize != mDstLinePitch * mDstFrameHeight)
+		{TPGFAIL("Buffer size " << DEC(mDstBufferSize) << " != " << DEC(mDstLinePitch*mDstFrameHeight) << " pitch=" << DEC(mDstLinePitch) << " * hght=" << DEC(mDstFrameHeight)); return false;}
 
-	if (buffer.GetByteCount() < _bufferSize)
-		return false;	//	buffer too small
+	if (buffer.GetByteCount() < mDstBufferSize)
+		{TPGFAIL("Actual buffer size " << DEC(buffer.GetByteCount()) << " < reqd size " << DEC(mDstBufferSize)); return false;}
 
-	mRGBBuffer.resize(_frameWidth * _frameHeight * 3 + 1);
+	mRGBBuffer.resize(mDstFrameWidth * mDstFrameHeight * 3 + 1);
 
-	_pTestPatternBuffer = inFormatDesc.GetTopVisibleRowAddress(AsUBytePtr(buffer.GetHostPointer()));
+	mpDstBuffer = inFormatDesc.GetTopVisibleRowAddress(AsUBytePtr(buffer.GetHostPointer()));
 
-	_pPackedLineBuffer = new uint32_t[_frameWidth*2];
-	_pUnPackedLineBuffer = new uint16_t[_frameWidth*4];
-	MakeUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer,CCIR601_10BIT_BLACK,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET,_frameWidth);
+	_pPackedLineBuffer = new uint32_t[mDstFrameWidth*2];
+	_pUnPackedLineBuffer = new uint16_t[mDstFrameWidth*4];
+	MakeUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer,CCIR601_10BIT_BLACK,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET,mDstFrameWidth);
 	if (NTV2_IS_12B_PATTERN(inPattern))
 		HDRTPGeometry geom(mNumPixels, mNumLines);	//	setupHDRTestPatternGeometries();
 
@@ -2752,74 +2770,74 @@ bool NTV2TestPatternGen::DrawTestPattern (const string & inStartsWith,
 	string startsWith(inStartsWith);
 	aja::strip(startsWith);
 	if (startsWith.empty())
-		return false;
+		{TPGFAIL("Empty 'startsWith' string"); return false;}
 	if (!inBuffer)
-		return false;
+		{TPGFAIL("NULL buffer"); return false;}
 	if (!inFormatDesc.IsValid())
-		return false;
+		{TPGFAIL("Invalid format descriptor"); return false;}
+	if (inFormatDesc.IsPlanar())
+		{TPGFAIL("Planar format " << ::NTV2FrameBufferFormatToString(mDstPixelFormat) << " not implemented"); return false;}
 
-	//	Test patterns first...
+	//	Try test pattern first...
 	NTV2TestPatternSelect testPat(findTestPatternByName(startsWith));
 	if (NTV2_IS_VALID_PATTERN(testPat))
 		return DrawTestPattern(testPat, inFormatDesc, inBuffer);
 
-	//	Web colors last...
+	//	Must be a web color...?
 	ULWord rgbValue(findRGBColorByName(startsWith));
 	if (!rgbValue)
-		return false;	//	No such color
+		{TPGFAIL("No pattern or color that starts with '" << startsWith << "'"); return false;}
 
 	// Save this away for worker methods.
-	_patternNumber = NTV2_TestPatt_INVALID;
-	_frameWidth  = inFormatDesc.GetRasterWidth();
-	_frameHeight = inFormatDesc.GetRasterHeight();
-	_pixelFormat = inFormatDesc.GetPixelFormat();
-	mNumPixels = _frameWidth;
+	mPatternID = NTV2_TestPatt_INVALID;
+	mDstFrameWidth  = inFormatDesc.GetRasterWidth();
+	mDstFrameHeight = inFormatDesc.GetVisibleRasterHeight();
+	mDstPixelFormat = inFormatDesc.GetPixelFormat();
+	mNumPixels = mDstFrameWidth;
 
 	// BYTES per line of frame buffer format
-	_linePitch = inFormatDesc.GetBytesPerRow();
-	if (!_linePitch)
-		return false;
-	NTV2_ASSERT(_linePitch == ::CalcRowBytesForFormat(_pixelFormat, _frameWidth));
+	mDstLinePitch = inFormatDesc.GetBytesPerRow();
+	if (!mDstLinePitch)
+		{TPGFAIL("Line pitch is zero: " << inFormatDesc); return false;}
+	const uint32_t tmpPitch(::CalcRowBytesForFormat(mDstPixelFormat, mDstFrameWidth));
+	if (mDstLinePitch != tmpPitch)
+		{TPGFAIL("Line pitch " << DEC(mDstLinePitch) << " from formatDesc doesn't match CalcRowBytesForFormat(" << DEC(mDstPixelFormat)
+				<< "," << DEC(mDstFrameWidth) << ") result: " << DEC(tmpPitch)); return false;}
 
 	// BYTES per line of test pattern data (always stored as 10-bit YCbCr)
-	_dataLinePitch = CalcRowBytesForFormat(NTV2_FBF_10BIT_YCBCR, _frameWidth);
+	mSrcLinePitch = ::CalcRowBytesForFormat(NTV2_FBF_10BIT_YCBCR, mDstFrameWidth);
 
-	_bufferSize = inFormatDesc.GetTotalRasterBytes();
-	if (!_bufferSize)
-		return false;
-	NTV2_ASSERT(_bufferSize == _linePitch * _frameHeight);
+	mDstBufferSize = inFormatDesc.GetVisibleRasterBytes();
+	if (!mDstBufferSize)
+		{TPGFAIL("Buffer size is zero: " << inFormatDesc); return false;}
+	if (mDstBufferSize != mDstLinePitch * mDstFrameHeight)
+		{TPGFAIL("Buffer size " << DEC(mDstBufferSize) << " != " << DEC(mDstLinePitch*mDstFrameHeight) << " pitch=" << DEC(mDstLinePitch) << " * hght=" << DEC(mDstFrameHeight)); return false;}
 
-	if (inBuffer.GetByteCount() < _bufferSize)
-		return false;	//	buffer too small
+	if (inBuffer.GetByteCount() < mDstBufferSize)
+		{TPGFAIL("Actual buffer size " << DEC(inBuffer.GetByteCount()) << " < reqd size " << DEC(mDstBufferSize)); return false;}
 
-	mRGBBuffer.resize(_frameWidth * _frameHeight * 3 + 1);
-	_pTestPatternBuffer = inFormatDesc.GetTopVisibleRowAddress(AsUBytePtr(inBuffer.GetHostPointer()));
-	_pPackedLineBuffer = new uint32_t[_frameWidth*2];
-	_pUnPackedLineBuffer = new uint16_t[_frameWidth*4];
-	MakeUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer,CCIR601_10BIT_BLACK,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET,_frameWidth);
+	mRGBBuffer.resize(mDstFrameWidth * mDstFrameHeight * 3 + 1);
+	mpDstBuffer = inFormatDesc.GetTopVisibleRowAddress(AsUBytePtr(inBuffer.GetHostPointer()));
+	_pPackedLineBuffer = new uint32_t[mDstFrameWidth*2];
+	_pUnPackedLineBuffer = new uint16_t[mDstFrameWidth*4];
+	MakeUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer,CCIR601_10BIT_BLACK,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET,mDstFrameWidth);
 
-	RGBAlphaPixel rgbaPixel;
+	RGBAlphaPixel rgbaPixel;	//	Future: make this 12-bit?
 	rgbaPixel.Alpha = 0;
 	rgbaPixel.Red = (rgbValue & 0x00FF0000) >> 16;
 	rgbaPixel.Green = (rgbValue & 0x0000FF00) >> 8;
 	rgbaPixel.Blue = rgbValue & 0x000000FF;
-	/* future: 12-bit?
-	AJA_RGB16BitPixel rgb16;
-	rgb16.Red = rgbaPixel.Red;		rgb16.Red <<= 4;
-	rgb16.Green = rgbaPixel.Green;	rgb16.Green <<= 4;
-	rgb16.Blue = rgbaPixel.Blue;	rgb16.Blue <<= 4;
-	*/
 	YCbCr10BitPixel yCbCrPixel;
 	if (inFormatDesc.IsSDFormat())
 		SDConvertRGBAlphatoYCbCr(&rgbaPixel, &yCbCrPixel);
 	else
 		HDConvertRGBAlphatoYCbCr(&rgbaPixel, &yCbCrPixel);
-	MakeUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer, yCbCrPixel.y, yCbCrPixel.cb, yCbCrPixel.cr, _frameWidth);
-	ConvertUnpacked10BitYCbCrToPixelFormat(_pUnPackedLineBuffer, _pPackedLineBuffer, _frameWidth, _pixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
-	for (uint32_t line(0);  line < _frameHeight;  line++)
+	MakeUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer, yCbCrPixel.y, yCbCrPixel.cb, yCbCrPixel.cr, mDstFrameWidth);
+	ConvertUnpacked10BitYCbCrToPixelFormat(_pUnPackedLineBuffer, _pPackedLineBuffer, mDstFrameWidth, mDstPixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
+	for (uint32_t line(0);  line < mDstFrameHeight;  line++)
 	{
-		memcpy(_pTestPatternBuffer, _pPackedLineBuffer, _linePitch);
-		_pTestPatternBuffer += _linePitch;
+		memcpy(mpDstBuffer, _pPackedLineBuffer, mDstLinePitch);
+		mpDstBuffer += mDstLinePitch;
 	}
 	return true;
 }
@@ -2834,7 +2852,7 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 		return false;
 
 	// find the appropriate test pattern descriptor
-	const SegmentTestPatternData & testPatternSegmentData (NTV2TestPatternSegments[_patternNumber]);
+	const SegmentTestPatternData & testPatternSegmentData (NTV2TestPatternSegments[mPatternID]);
 
 	// walk through the segments
 	for (int segmentCount(0);  segmentCount < NumTestPatternSegments;  segmentCount++)
@@ -2845,15 +2863,15 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 			continue;	//	Try next segment
 
 		// copy the test pattern line to the local "_pPackedLineBuffer"
-		memcpy(_pPackedLineBuffer, data, _dataLinePitch);
+		memcpy(_pPackedLineBuffer, data, mSrcLinePitch);
 		
-		if (_frameWidth == HD_NUMCOMPONENTPIXELS_2K || _frameWidth == HD_NUMCOMPONENTPIXELS_2K * 2 || _frameWidth == HD_NUMCOMPONENTPIXELS_2K * 4)
+		if (mDstFrameWidth == HD_NUMCOMPONENTPIXELS_2K || mDstFrameWidth == HD_NUMCOMPONENTPIXELS_2K * 2 || mDstFrameWidth == HD_NUMCOMPONENTPIXELS_2K * 4)
 		{
 			UnPack10BitYCbCrBuffer(_pPackedLineBuffer, _pUnPackedLineBuffer, HD_NUMCOMPONENTPIXELS_1080);
 			ReSampleYCbCrSampleLine(AsWordPtr(_pUnPackedLineBuffer), AsWordPtr(_pUnPackedLineBuffer), 1920, 2048);
 		}
 		else
-			UnPack10BitYCbCrBuffer(_pPackedLineBuffer, _pUnPackedLineBuffer, _frameWidth);
+			UnPack10BitYCbCrBuffer(_pPackedLineBuffer, _pUnPackedLineBuffer, mDstFrameWidth);
 
 		int startLine = segmentDescriptor.startLine;
 		int numLines  = (segmentDescriptor.endLine - startLine) + 1;
@@ -2864,9 +2882,9 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 			numLines *= 2;
 
 			// stretch line by copying pixels.
-			uint16_t* pLineSrc  = &_pUnPackedLineBuffer[_frameWidth-1];
-			uint16_t* pLineDest = &_pUnPackedLineBuffer[_frameWidth*2-1];
-			for ( uint32_t count = 0; count < _frameWidth/4; count ++)
+			uint16_t* pLineSrc  = &_pUnPackedLineBuffer[mDstFrameWidth-1];
+			uint16_t* pLineDest = &_pUnPackedLineBuffer[mDstFrameWidth*2-1];
+			for ( uint32_t count = 0; count < mDstFrameWidth/4; count ++)
 			{
 				uint16_t y2  = *pLineSrc--;
 				uint16_t cr1 = *pLineSrc--;
@@ -2890,9 +2908,9 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 			numLines *= 4;
 
 			// stretch line by copying pixels.
-			uint16_t* pLineSrc = &_pUnPackedLineBuffer[_frameWidth - 1];
-			uint16_t* pLineDest = &_pUnPackedLineBuffer[_frameWidth * 4 - 1];
-			for (uint32_t count = 0; count < _frameWidth / 4; count++)
+			uint16_t* pLineSrc = &_pUnPackedLineBuffer[mDstFrameWidth - 1];
+			uint16_t* pLineDest = &_pUnPackedLineBuffer[mDstFrameWidth * 4 - 1];
+			for (uint32_t count = 0; count < mDstFrameWidth / 4; count++)
 			{
 				uint16_t y2 = *pLineSrc--;
 				uint16_t cr1 = *pLineSrc--;
@@ -2919,23 +2937,23 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 		}
 
 		// go through hoops to mask out undesired components
-		if (_patternNumber == NTV2_TestPatt_MultiBurst || _patternNumber == NTV2_TestPatt_LineSweep )// || _patternNumber == NTV2_TestPatt_Ramp)
+		if (mPatternID == NTV2_TestPatt_MultiBurst || mPatternID == NTV2_TestPatt_LineSweep )// || _patternNumber == NTV2_TestPatt_Ramp)
 		{
-			_signalMask = NTV2_SIGNALMASK_Y;		// just assume that Multiburst and LineSweep are "Y Only"
-			MaskUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer, uint16_t(_signalMask), _frameWidth);
+			mSignalMask = NTV2_SIGNALMASK_Y;		// just assume that Multiburst and LineSweep are "Y Only"
+			MaskUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer, uint16_t(mSignalMask), mDstFrameWidth);
 		}
 
 		// now RE-pack, according to the desired pixel format
-		ConvertUnpacked10BitYCbCrToPixelFormat(_pUnPackedLineBuffer, _pPackedLineBuffer, _frameWidth, _pixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
+		ConvertUnpacked10BitYCbCrToPixelFormat(_pUnPackedLineBuffer, _pPackedLineBuffer, mDstFrameWidth, mDstPixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
 
 		// calculate address of first line of segment in destination frame buffer
-		uint8_t *pBuffer = _pTestPatternBuffer + (uint32_t(startLine) * _linePitch);
+		uint8_t *pBuffer = mpDstBuffer + (uint32_t(startLine) * mDstLinePitch);
 
 		// copy and repeat for as many lines as called for in segment
 		for (int line(0);  line < numLines;  line++)
 		{
-			memcpy(pBuffer, _pPackedLineBuffer, _linePitch);
-			pBuffer += _linePitch;
+			memcpy(pBuffer, _pPackedLineBuffer, mDstLinePitch);
+			pBuffer += mDstLinePitch;
 		}
 	}	//	for each segment
 
@@ -2945,13 +2963,13 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 bool NTV2TestPatternGen::DrawYCbCrFrame(uint16_t Y, uint16_t Cb, uint16_t Cr)
 {
 	// Make a BlackLine
-	MakeUnPacked10BitYCbCrBuffer( _pUnPackedLineBuffer, Y , Cb , Cr ,_frameWidth );
-	ConvertUnpacked10BitYCbCrToPixelFormat(_pUnPackedLineBuffer, _pPackedLineBuffer, _frameWidth, _pixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
+	MakeUnPacked10BitYCbCrBuffer( _pUnPackedLineBuffer, Y , Cb , Cr ,mDstFrameWidth );
+	ConvertUnpacked10BitYCbCrToPixelFormat(_pUnPackedLineBuffer, _pPackedLineBuffer, mDstFrameWidth, mDstPixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
 
-	for (uint32_t line = 0; line < _frameHeight; line++)
+	for (uint32_t line = 0; line < mDstFrameHeight; line++)
 	{
-		memcpy(_pTestPatternBuffer, _pPackedLineBuffer, _linePitch);
-		_pTestPatternBuffer += _linePitch;
+		memcpy(mpDstBuffer, _pPackedLineBuffer, mDstLinePitch);
+		mpDstBuffer += mDstLinePitch;
 	}
 
 	return true;
@@ -2961,7 +2979,7 @@ bool NTV2TestPatternGen::DrawLinearRampFrame()
 {
 	// Ramp from 0x40-0x3AC
 	uint16_t value = 0x40;
-	for ( uint16_t pixel = 0; pixel < _frameWidth; pixel++ )
+	for ( uint16_t pixel = 0; pixel < mDstFrameWidth; pixel++ )
 	{
 		_pUnPackedLineBuffer[pixel*2] = value;
 		_pUnPackedLineBuffer[pixel*2+1] = value;
@@ -2969,12 +2987,12 @@ bool NTV2TestPatternGen::DrawLinearRampFrame()
 		if ( value > 0x3AC )
 			value = 0x40;
 	}
-	ConvertUnpacked10BitYCbCrToPixelFormat(_pUnPackedLineBuffer, _pPackedLineBuffer,_frameWidth,_pixelFormat,_bRGBSmpteRange, _bAlphaFromLuma);
+	ConvertUnpacked10BitYCbCrToPixelFormat(_pUnPackedLineBuffer, _pPackedLineBuffer,mDstFrameWidth,mDstPixelFormat,_bRGBSmpteRange, _bAlphaFromLuma);
 
-	for ( uint32_t line = 0; line < _frameHeight; line++ )
+	for ( uint32_t line = 0; line < mDstFrameHeight; line++ )
 	{
-		::memcpy(_pTestPatternBuffer,_pPackedLineBuffer,_linePitch);
-		_pTestPatternBuffer += _linePitch;
+		::memcpy(mpDstBuffer,_pPackedLineBuffer,mDstLinePitch);
+		mpDstBuffer += mDstLinePitch;
 	}
 	return true;
 
@@ -2984,11 +3002,11 @@ bool NTV2TestPatternGen::DrawLinearRampFrame()
 bool NTV2TestPatternGen::DrawSlantRampFrame()
 {
 	// Ramp from 0x40-0x3AC
-	for ( uint32_t line = 0; line < _frameHeight; line++ )
+	for ( uint32_t line = 0; line < mDstFrameHeight; line++ )
 	{
 		uint16_t value = (line%(0x3AC-0x40))+0x40;
 
-		for ( uint16_t pixel = 0; pixel < _frameWidth; pixel++ )
+		for ( uint16_t pixel = 0; pixel < mDstFrameWidth; pixel++ )
 		{
 			_pUnPackedLineBuffer[pixel*2] = value;
 			_pUnPackedLineBuffer[pixel*2+1] = value;
@@ -2996,41 +3014,41 @@ bool NTV2TestPatternGen::DrawSlantRampFrame()
 			if ( value > 0x3AC )
 				value = 0x40;
 		}
-		ConvertUnpacked10BitYCbCrToPixelFormat(_pUnPackedLineBuffer, _pPackedLineBuffer,_frameWidth,_pixelFormat,_bRGBSmpteRange, _bAlphaFromLuma);
-		::memcpy(_pTestPatternBuffer,_pPackedLineBuffer,_linePitch);
-		_pTestPatternBuffer += _linePitch;
+		ConvertUnpacked10BitYCbCrToPixelFormat(_pUnPackedLineBuffer, _pPackedLineBuffer,mDstFrameWidth,mDstPixelFormat,_bRGBSmpteRange, _bAlphaFromLuma);
+		::memcpy(mpDstBuffer,_pPackedLineBuffer,mDstLinePitch);
+		mpDstBuffer += mDstLinePitch;
 	}
 	return true;
 }
 
 bool NTV2TestPatternGen::DrawBorderFrame()
 {
-	uint32_t* pPackedWhiteLineBuffer= new uint32_t[_frameWidth*2];
-	uint32_t* pPackedEdgeLineBuffer= new uint32_t[_frameWidth*2];
-	uint16_t* pUnPackedEdgeBuffer= new uint16_t[_frameWidth*2];
-	uint16_t* pUnPackedWhiteBuffer= new uint16_t[_frameWidth*2];
+	uint32_t* pPackedWhiteLineBuffer= new uint32_t[mDstFrameWidth*2];
+	uint32_t* pPackedEdgeLineBuffer= new uint32_t[mDstFrameWidth*2];
+	uint16_t* pUnPackedEdgeBuffer= new uint16_t[mDstFrameWidth*2];
+	uint16_t* pUnPackedWhiteBuffer= new uint16_t[mDstFrameWidth*2];
 
-	MakeUnPacked10BitYCbCrBuffer(pUnPackedEdgeBuffer,CCIR601_10BIT_BLACK,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET,_frameWidth);
-	MakeUnPacked10BitYCbCrBuffer(pUnPackedWhiteBuffer,CCIR601_10BIT_WHITE,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET,_frameWidth);
+	MakeUnPacked10BitYCbCrBuffer(pUnPackedEdgeBuffer,CCIR601_10BIT_BLACK,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET,mDstFrameWidth);
+	MakeUnPacked10BitYCbCrBuffer(pUnPackedWhiteBuffer,CCIR601_10BIT_WHITE,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET,mDstFrameWidth);
 
 	// Put in White Edge.
 	pUnPackedEdgeBuffer[0] = CCIR601_10BIT_CHROMAOFFSET;
 	pUnPackedEdgeBuffer[+1] = CCIR601_10BIT_WHITE;
 	pUnPackedEdgeBuffer[+2] = CCIR601_10BIT_CHROMAOFFSET;
-	pUnPackedEdgeBuffer[(_frameWidth)*2-1] = CCIR601_10BIT_WHITE;
-	pUnPackedEdgeBuffer[(_frameWidth)*2-2] = CCIR601_10BIT_CHROMAOFFSET;
+	pUnPackedEdgeBuffer[(mDstFrameWidth)*2-1] = CCIR601_10BIT_WHITE;
+	pUnPackedEdgeBuffer[(mDstFrameWidth)*2-2] = CCIR601_10BIT_CHROMAOFFSET;
 
-	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedWhiteBuffer, pPackedWhiteLineBuffer,_frameWidth,_pixelFormat,_bRGBSmpteRange, _bAlphaFromLuma);
-	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedEdgeBuffer, pPackedEdgeLineBuffer,_frameWidth,_pixelFormat,_bRGBSmpteRange, _bAlphaFromLuma);
+	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedWhiteBuffer, pPackedWhiteLineBuffer,mDstFrameWidth,mDstPixelFormat,_bRGBSmpteRange, _bAlphaFromLuma);
+	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedEdgeBuffer, pPackedEdgeLineBuffer,mDstFrameWidth,mDstPixelFormat,_bRGBSmpteRange, _bAlphaFromLuma);
 
-	for ( uint32_t line = 0; line < _frameHeight; line++ )
+	for ( uint32_t line = 0; line < mDstFrameHeight; line++ )
 	{
-		if ( line == 0 || line == (_frameHeight-1))
-			::memcpy(_pTestPatternBuffer,pPackedWhiteLineBuffer,_linePitch);
+		if ( line == 0 || line == (mDstFrameHeight-1))
+			::memcpy(mpDstBuffer,pPackedWhiteLineBuffer,mDstLinePitch);
 		else
-			::memcpy(_pTestPatternBuffer,pPackedEdgeLineBuffer,_linePitch);
+			::memcpy(mpDstBuffer,pPackedEdgeLineBuffer,mDstLinePitch);
 
-		_pTestPatternBuffer += _linePitch;
+		mpDstBuffer += mDstLinePitch;
 	}
 
 	delete [] pPackedWhiteLineBuffer;
@@ -3074,33 +3092,33 @@ static uint16_t MakeSineWaveVideoEx (const double radians, const bool bChroma, c
 bool NTV2TestPatternGen::DrawZonePlateFrame()
 {
 	static const double kPi(3.1415926535898);
-	double pattScale = (kPi*.5 ) / (_frameWidth + 1);
+	double pattScale = (kPi*.5 ) / (mDstFrameWidth + 1);
 
-	for (uint32_t line(0);  line < _frameHeight;  line++)
+	for (uint32_t line(0);  line < mDstFrameHeight;  line++)
 	{
-		for (uint16_t pixel(0);  pixel < _frameWidth;  pixel++)
+		for (uint16_t pixel(0);  pixel < mDstFrameWidth;  pixel++)
 		{
-			double xDist = double(pixel) - (double(_frameWidth)  / 2.0);
-			double yDist = double(line) - (double(_frameHeight) / 2.0);
+			double xDist = double(pixel) - (double(mDstFrameWidth)  / 2.0);
+			double yDist = double(line) - (double(mDstFrameHeight) / 2.0);
 			double r = ((xDist * xDist) + (yDist * yDist)) * pattScale;
 
-			_pUnPackedLineBuffer[pixel*2+1] = MakeSineWaveVideoEx(r, false, _sliderValue);
-			_pUnPackedLineBuffer[pixel*2  ] = MakeSineWaveVideoEx(r,  true, _sliderValue);
+			_pUnPackedLineBuffer[pixel*2+1] = MakeSineWaveVideoEx(r, false, mSliderValue);
+			_pUnPackedLineBuffer[pixel*2  ] = MakeSineWaveVideoEx(r,  true, mSliderValue);
 
 		}
-		ConvertUnpacked10BitYCbCrToPixelFormat(_pUnPackedLineBuffer, _pPackedLineBuffer,_frameWidth,_pixelFormat,_bRGBSmpteRange, _bAlphaFromLuma);
-		::memcpy(_pTestPatternBuffer,_pPackedLineBuffer,_linePitch);
-		_pTestPatternBuffer += _linePitch;
+		ConvertUnpacked10BitYCbCrToPixelFormat(_pUnPackedLineBuffer, _pPackedLineBuffer,mDstFrameWidth,mDstPixelFormat,_bRGBSmpteRange, _bAlphaFromLuma);
+		::memcpy(mpDstBuffer,_pPackedLineBuffer,mDstLinePitch);
+		mpDstBuffer += mDstLinePitch;
 	}
 	return true;
 }
 
 bool NTV2TestPatternGen::DrawColorQuadrantFrame()
 {
-	uint32_t* pPackedUpperLineBuffer= new uint32_t[_frameWidth*2];
-	uint16_t* pUnPackedUpperLineBuffer= new uint16_t[_frameWidth*2];
-	uint32_t* pPackedLowerLineBuffer= new uint32_t[_frameWidth*2];
-	uint16_t* pUnPackedLowerLineBuffer= new uint16_t[_frameWidth*2];
+	uint32_t* pPackedUpperLineBuffer= new uint32_t[mDstFrameWidth*2];
+	uint16_t* pUnPackedUpperLineBuffer= new uint16_t[mDstFrameWidth*2];
+	uint32_t* pPackedLowerLineBuffer= new uint32_t[mDstFrameWidth*2];
+	uint16_t* pUnPackedLowerLineBuffer= new uint16_t[mDstFrameWidth*2];
 
 	// Colors for the quadrants are from SMPTE 435-1-2009 section 6.4.2
 	static const unsigned char fullRange = 235;
@@ -3113,39 +3131,39 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrame()
 	rgbaPixel.Green = fullRange;
 	rgbaPixel.Blue = lowRange;
 	HDConvertRGBAlphatoYCbCr(&rgbaPixel, &yCbCrPixel);
-	MakeUnPacked10BitYCbCrBuffer(pUnPackedUpperLineBuffer,yCbCrPixel.y,yCbCrPixel.cb,yCbCrPixel.cr,_frameWidth/2);
+	MakeUnPacked10BitYCbCrBuffer(pUnPackedUpperLineBuffer,yCbCrPixel.y,yCbCrPixel.cb,yCbCrPixel.cr,mDstFrameWidth/2);
 	rgbaPixel.Alpha = 0;  // Upper right - blue
 	rgbaPixel.Red = midRange;
 	rgbaPixel.Green = fullRange;
 	rgbaPixel.Blue = fullRange;
 	HDConvertRGBAlphatoYCbCr(&rgbaPixel, &yCbCrPixel);
-	MakeUnPacked10BitYCbCrBuffer(&pUnPackedUpperLineBuffer[_frameWidth],yCbCrPixel.y,yCbCrPixel.cb,yCbCrPixel.cr,_frameWidth/2);
+	MakeUnPacked10BitYCbCrBuffer(&pUnPackedUpperLineBuffer[mDstFrameWidth],yCbCrPixel.y,yCbCrPixel.cb,yCbCrPixel.cr,mDstFrameWidth/2);
 	rgbaPixel.Alpha = 0;  // Lower left - green
 	rgbaPixel.Red = lowRange;
 	rgbaPixel.Green = fullRange;
 	rgbaPixel.Blue = lowRange;
 	HDConvertRGBAlphatoYCbCr(&rgbaPixel, &yCbCrPixel);
-	MakeUnPacked10BitYCbCrBuffer(pUnPackedLowerLineBuffer,yCbCrPixel.y,yCbCrPixel.cb,yCbCrPixel.cr,_frameWidth/2);
+	MakeUnPacked10BitYCbCrBuffer(pUnPackedLowerLineBuffer,yCbCrPixel.y,yCbCrPixel.cb,yCbCrPixel.cr,mDstFrameWidth/2);
 	rgbaPixel.Alpha = 0;  // Lower right - pink
 	rgbaPixel.Red = fullRange;
 	rgbaPixel.Green = lowRange;
 	rgbaPixel.Blue = midRange;
 	HDConvertRGBAlphatoYCbCr(&rgbaPixel, &yCbCrPixel);
-	MakeUnPacked10BitYCbCrBuffer(&pUnPackedLowerLineBuffer[_frameWidth],yCbCrPixel.y,yCbCrPixel.cb,yCbCrPixel.cr,_frameWidth/2);
+	MakeUnPacked10BitYCbCrBuffer(&pUnPackedLowerLineBuffer[mDstFrameWidth],yCbCrPixel.y,yCbCrPixel.cb,yCbCrPixel.cr,mDstFrameWidth/2);
 
-	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedUpperLineBuffer, pPackedUpperLineBuffer, _frameWidth, _pixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
-	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedLowerLineBuffer, pPackedLowerLineBuffer, _frameWidth, _pixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
+	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedUpperLineBuffer, pPackedUpperLineBuffer, mDstFrameWidth, mDstPixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
+	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedLowerLineBuffer, pPackedLowerLineBuffer, mDstFrameWidth, mDstPixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
 
 	uint32_t line;
-	for ( line = 0; line < _frameHeight/2; line++ )
+	for ( line = 0; line < mDstFrameHeight/2; line++ )
 	{
-		::memcpy(_pTestPatternBuffer,pPackedUpperLineBuffer,_linePitch);
-		_pTestPatternBuffer += _linePitch;
+		::memcpy(mpDstBuffer,pPackedUpperLineBuffer,mDstLinePitch);
+		mpDstBuffer += mDstLinePitch;
 	}
-	for ( line = 0; line < _frameHeight/2; line++ )
+	for ( line = 0; line < mDstFrameHeight/2; line++ )
 	{
-		::memcpy(_pTestPatternBuffer,pPackedLowerLineBuffer,_linePitch);
-		_pTestPatternBuffer += _linePitch;
+		::memcpy(mpDstBuffer,pPackedLowerLineBuffer,mDstLinePitch);
+		mpDstBuffer += mDstLinePitch;
 	}
 
 	delete [] pUnPackedUpperLineBuffer;
@@ -3158,12 +3176,12 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrame()
 }
 bool NTV2TestPatternGen::DrawQuadrantBorderFrame()
 {
-	uint32_t* pPackedRedLineBuffer= new uint32_t[_frameWidth*2];
-	uint16_t* pUnPackedRedLineBuffer= new uint16_t[_frameWidth*2];
-	uint32_t* pPackedBlueLineBuffer= new uint32_t[_frameWidth*2];
-	uint16_t* pUnPackedBlueLineBuffer= new uint16_t[_frameWidth*2];
-	uint32_t* pPackedMagentaGreenLineBuffer= new uint32_t[_frameWidth*2];
-	uint16_t* pUnPackedMagentaGreenLineBuffer= new uint16_t[_frameWidth*2];
+	uint32_t* pPackedRedLineBuffer= new uint32_t[mDstFrameWidth*2];
+	uint16_t* pUnPackedRedLineBuffer= new uint16_t[mDstFrameWidth*2];
+	uint32_t* pPackedBlueLineBuffer= new uint32_t[mDstFrameWidth*2];
+	uint16_t* pUnPackedBlueLineBuffer= new uint16_t[mDstFrameWidth*2];
+	uint32_t* pPackedMagentaGreenLineBuffer= new uint32_t[mDstFrameWidth*2];
+	uint16_t* pUnPackedMagentaGreenLineBuffer= new uint16_t[mDstFrameWidth*2];
 
 	RGBAlphaPixel rgbaRedPixel;
 	rgbaRedPixel.Alpha = 0;
@@ -3194,53 +3212,53 @@ bool NTV2TestPatternGen::DrawQuadrantBorderFrame()
 	YCbCr10BitPixel yCbCrMagentaPixel;
 	HDConvertRGBAlphatoYCbCr(&rgbaMagentaPixel, &yCbCrMagentaPixel);
 
-	MakeUnPacked10BitYCbCrBuffer(pUnPackedRedLineBuffer,yCbCrRedPixel.y,yCbCrRedPixel.cb,yCbCrRedPixel.cr,_frameWidth);
+	MakeUnPacked10BitYCbCrBuffer(pUnPackedRedLineBuffer,yCbCrRedPixel.y,yCbCrRedPixel.cb,yCbCrRedPixel.cr,mDstFrameWidth);
 
-	MakeUnPacked10BitYCbCrBuffer(pUnPackedBlueLineBuffer,yCbCrBluePixel.y,yCbCrBluePixel.cb,yCbCrBluePixel.cr,_frameWidth);
-	MakeUnPacked10BitYCbCrBuffer(pUnPackedMagentaGreenLineBuffer,0x40,0x200,0x200,_frameWidth);
+	MakeUnPacked10BitYCbCrBuffer(pUnPackedBlueLineBuffer,yCbCrBluePixel.y,yCbCrBluePixel.cb,yCbCrBluePixel.cr,mDstFrameWidth);
+	MakeUnPacked10BitYCbCrBuffer(pUnPackedMagentaGreenLineBuffer,0x40,0x200,0x200,mDstFrameWidth);
 	pUnPackedMagentaGreenLineBuffer[0] = yCbCrMagentaPixel.cb;
 	pUnPackedMagentaGreenLineBuffer[1] = yCbCrMagentaPixel.y;
 	pUnPackedMagentaGreenLineBuffer[2] = yCbCrMagentaPixel.cr;
 
-	pUnPackedMagentaGreenLineBuffer[_frameWidth-1] = yCbCrGreenPixel.y;
-	pUnPackedMagentaGreenLineBuffer[_frameWidth-4] = yCbCrGreenPixel.cb;
-	pUnPackedMagentaGreenLineBuffer[_frameWidth-3] = yCbCrGreenPixel.y;
-	pUnPackedMagentaGreenLineBuffer[_frameWidth-2] = yCbCrGreenPixel.cr;
+	pUnPackedMagentaGreenLineBuffer[mDstFrameWidth-1] = yCbCrGreenPixel.y;
+	pUnPackedMagentaGreenLineBuffer[mDstFrameWidth-4] = yCbCrGreenPixel.cb;
+	pUnPackedMagentaGreenLineBuffer[mDstFrameWidth-3] = yCbCrGreenPixel.y;
+	pUnPackedMagentaGreenLineBuffer[mDstFrameWidth-2] = yCbCrGreenPixel.cr;
 
-	pUnPackedMagentaGreenLineBuffer[_frameWidth] = yCbCrMagentaPixel.cb;
-	pUnPackedMagentaGreenLineBuffer[_frameWidth+1] = yCbCrMagentaPixel.y;
-	pUnPackedMagentaGreenLineBuffer[_frameWidth+2] = yCbCrMagentaPixel.cr;
+	pUnPackedMagentaGreenLineBuffer[mDstFrameWidth] = yCbCrMagentaPixel.cb;
+	pUnPackedMagentaGreenLineBuffer[mDstFrameWidth+1] = yCbCrMagentaPixel.y;
+	pUnPackedMagentaGreenLineBuffer[mDstFrameWidth+2] = yCbCrMagentaPixel.cr;
 
-	pUnPackedMagentaGreenLineBuffer[_frameWidth*2-1] = yCbCrGreenPixel.y;
-	pUnPackedMagentaGreenLineBuffer[_frameWidth*2-4] = yCbCrGreenPixel.cb;
-	pUnPackedMagentaGreenLineBuffer[_frameWidth*2-3] = yCbCrGreenPixel.y;
-	pUnPackedMagentaGreenLineBuffer[_frameWidth*2-2] = yCbCrGreenPixel.cr;
+	pUnPackedMagentaGreenLineBuffer[mDstFrameWidth*2-1] = yCbCrGreenPixel.y;
+	pUnPackedMagentaGreenLineBuffer[mDstFrameWidth*2-4] = yCbCrGreenPixel.cb;
+	pUnPackedMagentaGreenLineBuffer[mDstFrameWidth*2-3] = yCbCrGreenPixel.y;
+	pUnPackedMagentaGreenLineBuffer[mDstFrameWidth*2-2] = yCbCrGreenPixel.cr;
 
-	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedRedLineBuffer, pPackedRedLineBuffer, _frameWidth, _pixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
-	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedBlueLineBuffer, pPackedBlueLineBuffer, _frameWidth, _pixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
-	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedMagentaGreenLineBuffer, pPackedMagentaGreenLineBuffer, _frameWidth, _pixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
+	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedRedLineBuffer, pPackedRedLineBuffer, mDstFrameWidth, mDstPixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
+	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedBlueLineBuffer, pPackedBlueLineBuffer, mDstFrameWidth, mDstPixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
+	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedMagentaGreenLineBuffer, pPackedMagentaGreenLineBuffer, mDstFrameWidth, mDstPixelFormat, _bRGBSmpteRange, _bAlphaFromLuma);
 
-	for (uint32_t line(0);  line < _frameHeight;  line++)
+	for (uint32_t line(0);  line < mDstFrameHeight;  line++)
 	{
 		switch (line)
 		{
 			case 0:
-				::memcpy(_pTestPatternBuffer,pPackedRedLineBuffer,_linePitch);
+				::memcpy(mpDstBuffer,pPackedRedLineBuffer,mDstLinePitch);
 				break;
 			case 1079:
-				::memcpy(_pTestPatternBuffer,pPackedBlueLineBuffer,_linePitch);
+				::memcpy(mpDstBuffer,pPackedBlueLineBuffer,mDstLinePitch);
 				break;
 			case 1080:
-				::memcpy(_pTestPatternBuffer,pPackedRedLineBuffer,_linePitch);
+				::memcpy(mpDstBuffer,pPackedRedLineBuffer,mDstLinePitch);
 				break;
 			case 2159:
-				::memcpy(_pTestPatternBuffer,pPackedBlueLineBuffer,_linePitch);
+				::memcpy(mpDstBuffer,pPackedBlueLineBuffer,mDstLinePitch);
 				break;
 			default:
-				::memcpy(_pTestPatternBuffer,pPackedMagentaGreenLineBuffer,_linePitch);
+				::memcpy(mpDstBuffer,pPackedMagentaGreenLineBuffer,mDstLinePitch);
 				break;
 		}
-		_pTestPatternBuffer += _linePitch;
+		mpDstBuffer += mDstLinePitch;
 	}
 
 	delete [] pPackedRedLineBuffer;
@@ -3254,10 +3272,10 @@ bool NTV2TestPatternGen::DrawQuadrantBorderFrame()
 
 bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi()
 {
-	uint32_t* pPackedUpperLineBuffer= new uint32_t[_frameWidth*2];
-	uint16_t* pUnPackedUpperLineBuffer= new uint16_t[_frameWidth*2];
-	uint32_t* pPackedLowerLineBuffer= new uint32_t[_frameWidth*2];
-	uint16_t* pUnPackedLowerLineBuffer= new uint16_t[_frameWidth*2];
+	uint32_t* pPackedUpperLineBuffer= new uint32_t[mDstFrameWidth*2];
+	uint16_t* pUnPackedUpperLineBuffer= new uint16_t[mDstFrameWidth*2];
+	uint32_t* pPackedLowerLineBuffer= new uint32_t[mDstFrameWidth*2];
+	uint16_t* pUnPackedLowerLineBuffer= new uint16_t[mDstFrameWidth*2];
 
 	YCbCr10BitPixel yCbCrPixelYellow;
 	YCbCr10BitPixel yCbCrPixelBlue;
@@ -3293,7 +3311,7 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi()
 	rgbaPixel.Blue = midRange;
 	HDConvertRGBAlphatoYCbCr(&rgbaPixel, &yCbCrPixelPink);
 
-	for (uint32_t i(0);  i < _frameWidth*2;  i += 8)
+	for (uint32_t i(0);  i < mDstFrameWidth*2;  i += 8)
 	{
 		pUnPackedUpperLineBuffer [i + 0] = yCbCrPixelYellow.cb;
 		pUnPackedUpperLineBuffer [i + 1] = yCbCrPixelYellow.y;
@@ -3306,7 +3324,7 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi()
 		pUnPackedUpperLineBuffer [i + 7] = yCbCrPixelBlue.y;
 	}
 
-	for (uint32_t i(0);  i < _frameWidth*2;  i += 8)
+	for (uint32_t i(0);  i < mDstFrameWidth*2;  i += 8)
 	{
 		pUnPackedLowerLineBuffer [i + 0] = yCbCrPixelGreen.cb;
 		pUnPackedLowerLineBuffer [i + 1] = yCbCrPixelGreen.y;
@@ -3319,16 +3337,16 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi()
 		pUnPackedLowerLineBuffer [i + 7] = yCbCrPixelPink.y;
 	}
 
-	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedUpperLineBuffer, pPackedUpperLineBuffer, _frameWidth, _pixelFormat);
-	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedLowerLineBuffer, pPackedLowerLineBuffer, _frameWidth, _pixelFormat);
+	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedUpperLineBuffer, pPackedUpperLineBuffer, mDstFrameWidth, mDstPixelFormat);
+	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedLowerLineBuffer, pPackedLowerLineBuffer, mDstFrameWidth, mDstPixelFormat);
 
-	for (uint32_t line(0);  line < _frameHeight;  line += 2)
+	for (uint32_t line(0);  line < mDstFrameHeight;  line += 2)
 	{
-		::memcpy(_pTestPatternBuffer, pPackedUpperLineBuffer, _linePitch);
-		_pTestPatternBuffer += _linePitch;
+		::memcpy(mpDstBuffer, pPackedUpperLineBuffer, mDstLinePitch);
+		mpDstBuffer += mDstLinePitch;
 
-		::memcpy(_pTestPatternBuffer, pPackedLowerLineBuffer, _linePitch);
-		_pTestPatternBuffer += _linePitch;
+		::memcpy(mpDstBuffer, pPackedLowerLineBuffer, mDstLinePitch);
+		mpDstBuffer += mDstLinePitch;
 	}
 
 	delete [] pUnPackedUpperLineBuffer;
@@ -3338,36 +3356,36 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi()
 	return true;
 }
 
-bool NTV2TestPatternGen::GetStandard (int & outStandard, bool & outIs4K, bool & outIs8K)
+bool NTV2TestPatternGen::GetStandard (int & outStandard, bool & outIs4K, bool & outIs8K) const
 {
 	outIs4K = outIs8K = false;
 
-	if		(_frameWidth == 1920)
+	if		(mDstFrameWidth == 1920)
 		outStandard = int(NTV2_STANDARD_1080);
 
-	else if (_frameWidth == 2048)
+	else if (mDstFrameWidth == 2048)
 		outStandard = int(NTV2_STANDARD_1080);
 
-	else if (_frameWidth == 1280)
+	else if (mDstFrameWidth == 1280)
 		outStandard = int(NTV2_STANDARD_720);
 
-	else if (_frameWidth == 720 && _frameHeight == 486)
+	else if (mDstFrameWidth == 720 && mDstFrameHeight == 486)
 		outStandard = int(NTV2_STANDARD_525);
 
-	else if (_frameWidth == 720 && _frameHeight == 576)
+	else if (mDstFrameWidth == 720 && mDstFrameHeight == 576)
 		outStandard = int(NTV2_STANDARD_625);
 
-	else if (_frameWidth == 2048 && _frameHeight == 1556)
+	else if (mDstFrameWidth == 2048 && mDstFrameHeight == 1556)
 		outStandard = int(NTV2_STANDARD_2K);	//	Obsolete
 
-	else if ((_frameWidth == 3840 && _frameHeight == 2160) || 
-			(_frameWidth == 4096 && _frameHeight == 2160))
+	else if ((mDstFrameWidth == 3840 && mDstFrameHeight == 2160) || 
+			(mDstFrameWidth == 4096 && mDstFrameHeight == 2160))
 	{
 		outStandard = int(NTV2_STANDARD_1080);
 		outIs4K = true;
 	}
-	else if ((_frameWidth == 7680 && _frameHeight == 4320) ||
-			(_frameWidth == 8192 && _frameHeight == 4320))
+	else if ((mDstFrameWidth == 7680 && mDstFrameHeight == 4320) ||
+			(mDstFrameWidth == 8192 && mDstFrameHeight == 4320))
 	{
 		outStandard = int(NTV2_STANDARD_1080);
 		outIs8K = true;
@@ -3379,7 +3397,7 @@ bool NTV2TestPatternGen::GetStandard (int & outStandard, bool & outIs4K, bool & 
 }
 
 
-bool NTV2TestPatternGen::IsSDStandard()
+bool NTV2TestPatternGen::IsSDStandard(void) const
 {
 	int standard;
 	bool b4K, b8K;
@@ -3466,7 +3484,7 @@ void NTV2TestPatternGen::PrepareForOutput()
 		*rgb16BitBuffer++ = g; //g
 		*rgb16BitBuffer++ = r;
 	}
-	::memcpy(_pTestPatternBuffer, AsUInt8Ptr(buffer), _bufferSize);
+	::memcpy(mpDstBuffer, AsUInt8Ptr(buffer), mDstBufferSize);
 }
 
 

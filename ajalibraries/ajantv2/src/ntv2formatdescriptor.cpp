@@ -721,8 +721,9 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 		return;	//	bad FBF
 	if (!NTV2_IS_VALID_VANCMODE(inVancMode))
 		return;	//	bad Vanc mode
-	if (NTV2_IS_FBF_PLANAR(inFrameBufferFormat) && NTV2_IS_VANCMODE_ON(inVancMode))
-		return;	//	can't do VANC mode for planar formats
+//	In SDK 16.0, some experimental Corvid88 firmware can do this now:
+//	if (NTV2_IS_FBF_PLANAR(inFrameBufferFormat) && NTV2_IS_VANCMODE_ON(inVancMode))
+//		return;	//	can't do VANC mode for planar formats
 
 	*this = formatDescriptorTable[inStandard][inFrameBufferFormat];		//	The 'formatDescriptorTable' handles everything but VANC
 
@@ -956,7 +957,7 @@ ULWord NTV2FormatDescriptor::GetVerticalSampleRatio (const UWord inPlaneIndex0) 
 		default:
 			break;
 	}
-	return 1;
+	return 1;	//	Defaults to 1
 }
 
 bool NTV2FormatDescriptor::Is2KFormat (void) const

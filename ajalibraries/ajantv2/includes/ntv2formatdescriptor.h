@@ -22,6 +22,7 @@
 	@brief	This provides additional information about a video frame for a given video standard or format and pixel format,
 			including the total number of lines, number of pixels per line, line pitch, and which line contains the start
 			of active video.
+	@note	It is possible to construct a format descriptor that is not supported by the AJA device.
 **/
 class AJAExport NTV2FormatDescriptor
 {
@@ -75,28 +76,28 @@ public:
 											const NTV2FrameBufferFormat	inFrameBufferFormat,
 											const NTV2VANCMode			inVancMode	= NTV2_VANCMODE_OFF);
 
-	inline bool		IsValid (void) const				{return numLines && numPixels && mNumPlanes && mLinePitch[0];}	///< @return	True if valid;  otherwise false.
-	inline bool		IsVANC (void) const					{return firstActiveLine > 0;}									///< @return	True if VANC geometry;  otherwise false.
-	inline bool		IsPlanar (void) const				{return GetNumPlanes() > 1 || NTV2_IS_FBF_PLANAR (mPixelFormat);}	///< @return	True if planar format;  otherwise false.
+	inline bool		IsValid (void) const		{return numLines && numPixels && mNumPlanes && mLinePitch[0];}	///< @return	True if valid;  otherwise false.
+	inline bool		IsVANC (void) const			{return firstActiveLine > 0;}									///< @return	True if VANC geometry;  otherwise false.
+	inline bool		IsPlanar (void) const		{return GetNumPlanes() > 1 || NTV2_IS_FBF_PLANAR (mPixelFormat);}	///< @return	True if planar format;  otherwise false.
 
 	/**
 		@return		The number of samples spanned per sample used, usually 1 for most formats.
 					Returns zero if an invalid plane is specified.
 		@param[in]	inPlaneIndex0		Specifies the plane of interest. Defaults to zero.
-		@note		Used for asymmetric vertical sampling, such as 3-plane 4:2:0 formats,
-					where N=1 for the Y plane, and N=2 for the Cb and Cr chroma planes.
+		@note		Used for asymmetric vertical sampling, such as 3-plane 4:2:0 formats, where
+					the returned value is 1 for the Y plane, and 2 for the Cb/Cr planes.
 	**/
 	ULWord			GetVerticalSampleRatio (const UWord inPlaneIndex0 = 0) const;	//	New in SDK 16.0
 
 	/**
-		@return		The total number of bytes required to hold the raster, including any VANC.
+		@return		The total number of bytes required to hold the raster plane, including any VANC lines.
 					Returns zero upon error.
 		@note		To determine the byte count of all planes of a planar format, call GetTotalBytes.
 		@param[in]	inPlaneIndex0		Specifies the plane of interest. Defaults to zero.
 	**/
 	inline ULWord	GetTotalRasterBytes (const UWord inPlaneIndex0 = 0) const
 					{	const ULWord vSamp(GetVerticalSampleRatio(inPlaneIndex0));
-						return vSamp ? GetFullRasterHeight() * GetBytesPerRow(inPlaneIndex0) / vSamp : 0;
+						return vSamp ? (GetFullRasterHeight() * GetBytesPerRow(inPlaneIndex0) / vSamp) : 0;
 					}
 
 	/**
@@ -106,7 +107,7 @@ public:
 
 	/**
 		@return		The total number of bytes required to hold the visible raster (i.e. active lines after any VANC lines).
-		@param[in]	inPlaneIndex0	Specifies the plane of interest. Defaults to zero.
+		@param[in]	inPlaneIndex0	Specifies the plane of interest. Defaults to zero, the first plane.
 	**/
 	inline ULWord	GetVisibleRasterBytes (const UWord inPlaneIndex0 = 0) const	{return GetVisibleRasterHeight() * GetBytesPerRow(inPlaneIndex0);}
 
@@ -309,9 +310,9 @@ public:
 		UWord					mNumPlanes;			///< @brief	Number of planes
 		NTV2FrameGeometry		mFrameGeometry;		///< @brief My originating frame geometry
 
-};
+};	//	NTV2FormatDescriptor
 
-typedef NTV2FormatDescriptor NTV2FormatDesc;	///< @brief Same as NTV2FormatDescriptor
+typedef NTV2FormatDescriptor NTV2FormatDesc;	///< @brief Shorthand for ::NTV2FormatDescriptor
 
 
 /**
