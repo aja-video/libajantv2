@@ -17,6 +17,8 @@ The ::NTV2OutputTestPattern class demonstrates…
 -	how to programmatically perform device configuration and signal routing;
 -	how to be a “good citizen” to detect if another application is already using the device.
 
+@note	This demo only works for non-UHD/4K/UHD2/8K formats.
+
 The critical parts of the demo (for troubleshooting):
 -	Configuring the FrameStore/Channel being used:
 	-	Enabling a FrameStore using CNTV2Card::EnableChannel.
@@ -54,6 +56,14 @@ The critical parts of the demo (for troubleshooting):
 	-v|--videoFormat {spec}    Optionally specifies the video format to use.
 	                           Defaults to whatever video format the device is currently using.
 	                           Specify '?' or 'list' to list the available video formats.
+
+	--pixelFormat {spec}       Optionally specifies the pixel format to use. Defaults to 8-bit YCbCr.
+	                           Specify '?' or 'list' to list the available formats.
+
+	--vanc {spec}              Optionally specifies the VANC mode to use:
+	                                0 | off | none           Disables VANC
+	                                1 | on | tall            Enables "tall" VANC
+	                                2 | taller | tallest     Enables "taller" VANC
 
 	-?|--help|--usage          Shows how to use this command.
 @endcode
