@@ -170,23 +170,37 @@ class AJAExport NTV2TestPatternGen
 																										inDesc.GetVisibleRasterHeight(),
 																										inDesc.GetPixelFormat(),
 																										outBuffer);}
+#if !defined(NTV2_DEPRECATE_16_0)
 		/**
 			@deprecated	Use the DrawTestPattern method that requires an NTV2_POINTER to specify the buffer to fill.
 		**/
 		virtual bool			DrawTestPattern (const NTV2TestPatternSelect inPattern,
-												uint32_t inFrameWidth, uint32_t inFrameHeight,
+												const uint32_t inFrameWidth,
+												const uint32_t inFrameHeight,
 												const NTV2FrameBufferFormat inPixelFormat,
 												NTV2TestPatBuffer & outBuffer);
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
 		///@}
 
-		inline void				setUseRGBSmpteRange (bool useRGBSmpteRange)		{_bRGBSmpteRange = useRGBSmpteRange;}
+		/**
+			@name	Getters
+		**/
+		///@{
 		inline bool				getUseRGBSmpteRange (void) const				{return _bRGBSmpteRange;}
-		inline void				setSignalMask (const NTV2SignalMask signalMask)	{mSignalMask = signalMask;}
 		inline NTV2SignalMask	getSignalMask (void) const						{return mSignalMask;}
-		inline void				setSliderValue (const double & sliderValue)		{mSliderValue = sliderValue;}
 		inline const double &	getSliderValue (void) const						{return mSliderValue;}
-		inline void				setAlphaFromLuma (bool alphaFromLuma)			{_bAlphaFromLuma = alphaFromLuma;}
 		inline bool				getAlphaFromLuma (void) const					{return _bAlphaFromLuma;}
+		///@}
+
+		/**
+			@name	Setters
+		**/
+		///@{
+		inline void				setUseRGBSmpteRange (bool useRGBSmpteRange)		{_bRGBSmpteRange = useRGBSmpteRange;}
+		inline void				setSignalMask (const NTV2SignalMask signalMask)	{mSignalMask = signalMask;}
+		inline void				setSliderValue (const double & sliderValue)		{mSliderValue = sliderValue;}
+		inline void				setAlphaFromLuma (bool alphaFromLuma)			{_bAlphaFromLuma = alphaFromLuma;}
+		///@}
 
 	//	INTERNAL METHODS
 	protected:

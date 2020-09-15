@@ -2629,7 +2629,7 @@ bool NTV2TestPatternGen::drawIt (void)
 		case NTV2_TestPatt_SlantRamp:			result = DrawSlantRampFrame();			break;
 		case NTV2_TestPatt_ZonePlate:			result = DrawZonePlateFrame();			break;
 		case NTV2_TestPatt_ColorQuadrant:		result = DrawColorQuadrantFrame();		break;
-		case NTV2_TestPatt_ColorQuadrantBorder:	result = DrawQuadrantBorderFrame();	break;
+		case NTV2_TestPatt_ColorQuadrantBorder:	result = DrawQuadrantBorderFrame();		break;
 		case NTV2_TestPatt_LinearRamp:			result = DrawLinearRampFrame();			break;
 		case NTV2_TestPatt_ColorQuadrantTsi:	result = DrawColorQuadrantFrameTsi();	break;
 		case NTV2_TestPatt_ZonePlate_12b_RGB:	result = Draw12BitZonePlate();			break;
@@ -2650,54 +2650,53 @@ bool NTV2TestPatternGen::drawIt (void)
 			TPGFAIL("Failed for pattern " << DEC(mPatternID));
 	}
 	return result;
-}
+}	//	drawIt
 
 #if !defined(NTV2_DEPRECATE_16_0)
-bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern,
-											const uint32_t frameWidth,
-											const uint32_t frameHeight,
-											const NTV2FrameBufferFormat pixelFormat,
-											NTV2TestPatBuffer & testPatternBuffer)
-{
-	// Save this away for worker methods.
-	mPatternID = inPattern;
-	mDstFrameWidth  = frameWidth;
-	mDstFrameHeight = frameHeight;
-	mDstPixelFormat = pixelFormat;
-	mNumPixels = frameWidth;
+	bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern,
+												const uint32_t frameWidth,
+												const uint32_t frameHeight,
+												const NTV2FrameBufferFormat pixelFormat,
+												NTV2TestPatBuffer & testPatternBuffer)
+	{
+		// Save this away for worker methods.
+		mPatternID = inPattern;
+		mDstFrameWidth  = frameWidth;
+		mDstFrameHeight = frameHeight;
+		mDstPixelFormat = pixelFormat;
+		mNumPixels = frameWidth;
 	
-	// HDR test pattern compatibility check
-	if (NTV2_IS_12B_PATTERN(inPattern))
-	{	//	HDR test pattern requested...
-		if (mDstFrameWidth % 1920)
-			{TPGFAIL("Pixel width " << DEC(mDstFrameWidth) << " not evenly divisible by 1920"); return false;}
-		if (!NTV2_IS_FBF_12BIT_RGB(mDstPixelFormat))
-			{TPGFAIL("Pixel format " << ::NTV2FrameBufferFormatToString(mDstPixelFormat) << " not 12-bit RGB"); return false;}
-	}
+		// HDR test pattern compatibility check
+		if (NTV2_IS_12B_PATTERN(inPattern))
+		{	//	HDR test pattern requested...
+			if (mDstFrameWidth % 1920)
+				{TPGFAIL("Pixel width " << DEC(mDstFrameWidth) << " not evenly divisible by 1920"); return false;}
+			if (!NTV2_IS_FBF_12BIT_RGB(mDstPixelFormat))
+				{TPGFAIL("Pixel format " << ::NTV2FrameBufferFormatToString(mDstPixelFormat) << " not 12-bit RGB"); return false;}
+		}
 
-	mDstLinePitch = ::CalcRowBytesForFormat(mDstPixelFormat, mDstFrameWidth);				// BYTES per line of frame buffer format
-	if (!mDstLinePitch)
-		{TPGFAIL("CalcRowBytesForFormat failed for " << ::NTV2FrameBufferFormatToString(mDstPixelFormat) << " pxWidth=" << DEC(mDstFrameWidth)); return false;}
-	mSrcLinePitch = ::CalcRowBytesForFormat(NTV2_FBF_10BIT_YCBCR, mDstFrameWidth);	// BYTES per line of test pattern data (always stored as 10-bit YCbCr)
+		mDstLinePitch = ::CalcRowBytesForFormat(mDstPixelFormat, mDstFrameWidth);				// BYTES per line of frame buffer format
+		if (!mDstLinePitch)
+			{TPGFAIL("CalcRowBytesForFormat failed for " << ::NTV2FrameBufferFormatToString(mDstPixelFormat) << " pxWidth=" << DEC(mDstFrameWidth)); return false;}
+		mSrcLinePitch = ::CalcRowBytesForFormat(NTV2_FBF_10BIT_YCBCR, mDstFrameWidth);	// BYTES per line of test pattern data (always stored as 10-bit YCbCr)
 
-	mDstBufferSize = mDstLinePitch*mDstFrameHeight;
-	if (!mDstBufferSize)
-		{TPGFAIL("Buffer size zero, linePitch=" << DEC(mDstLinePitch) << " height=" << DEC(mDstFrameHeight)); return false;}
+		mDstBufferSize = mDstLinePitch*mDstFrameHeight;
+		if (!mDstBufferSize)
+			{TPGFAIL("Buffer size zero, linePitch=" << DEC(mDstLinePitch) << " height=" << DEC(mDstFrameHeight)); return false;}
 
-	if (testPatternBuffer.size() != mDstBufferSize)
-		testPatternBuffer.resize(mDstBufferSize);
+		if (testPatternBuffer.size() != mDstBufferSize)
+			testPatternBuffer.resize(mDstBufferSize);
 
-	mRGBBuffer.resize(frameWidth * frameHeight * 3 + 1);
+		mRGBBuffer.resize(frameWidth * frameHeight * 3 + 1);
+		mpDstBuffer = &testPatternBuffer[0];
 
-	mpDstBuffer = &testPatternBuffer[0];
-
-	_pPackedLineBuffer = new uint32_t[mDstFrameWidth*2];
-	_pUnPackedLineBuffer = new uint16_t[mDstFrameWidth*4];
-	MakeUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer,CCIR601_10BIT_BLACK,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET,mDstFrameWidth);
-	if (NTV2_IS_12B_PATTERN(inPattern))
-		HDRTPGeometry geom(mNumPixels, mNumLines);	//	setupHDRTestPatternGeometries();
-	return drawIt();
-}
+		_pPackedLineBuffer = new uint32_t[mDstFrameWidth*2];
+		_pUnPackedLineBuffer = new uint16_t[mDstFrameWidth*4];
+		MakeUnPacked10BitYCbCrBuffer(_pUnPackedLineBuffer,CCIR601_10BIT_BLACK,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET,mDstFrameWidth);
+		if (NTV2_IS_12B_PATTERN(inPattern))
+			HDRTPGeometry geom(mNumPixels, mNumLines);	//	setupHDRTestPatternGeometries();
+		return drawIt();
+	}	//	DrawTestPattern
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 
@@ -2760,7 +2759,7 @@ bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern,
 		HDRTPGeometry geom(mNumPixels, mNumLines);	//	setupHDRTestPatternGeometries();
 
 	return drawIt();
-}
+}	//	DrawTestPattern
 
 
 bool NTV2TestPatternGen::DrawTestPattern (const string & inStartsWith,
@@ -2840,7 +2839,7 @@ bool NTV2TestPatternGen::DrawTestPattern (const string & inStartsWith,
 		mpDstBuffer += mDstLinePitch;
 	}
 	return true;
-}
+}	//	DrawTestPattern
 
 bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 {
@@ -2958,7 +2957,7 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 	}	//	for each segment
 
 	return true;
-}
+}	//	DrawSegmentedTestPattern
 
 bool NTV2TestPatternGen::DrawYCbCrFrame(uint16_t Y, uint16_t Cb, uint16_t Cr)
 {
@@ -3172,8 +3171,8 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrame()
 	delete [] pPackedLowerLineBuffer;
 
 	return true;
+}	//	DrawColorQuadrantFrame
 
-}
 bool NTV2TestPatternGen::DrawQuadrantBorderFrame()
 {
 	uint32_t* pPackedRedLineBuffer= new uint32_t[mDstFrameWidth*2];
