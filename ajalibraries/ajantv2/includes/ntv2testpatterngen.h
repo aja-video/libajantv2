@@ -186,20 +186,22 @@ class AJAExport NTV2TestPatternGen
 			@name	Getters
 		**/
 		///@{
-		inline bool				getUseRGBSmpteRange (void) const				{return _bRGBSmpteRange;}
-		inline NTV2SignalMask	getSignalMask (void) const						{return mSignalMask;}
-		inline const double &	getSliderValue (void) const						{return mSliderValue;}
-		inline bool				getAlphaFromLuma (void) const					{return _bAlphaFromLuma;}
+		inline bool				getUseRGBSmpteRange (void) const		{return mSetRGBSmpteRange;}
+		inline NTV2SignalMask	getSignalMask (void) const				{return mSignalMask;}
+		inline const double &	getSliderValue (void) const				{return mSliderValue;}
+		inline bool				getAlphaFromLuma (void) const			{return mSetAlphaFromLuma;}
+		inline bool				setVANCToLegalBlack (void) const		{return mSetDstVancBlack;}
 		///@}
 
 		/**
 			@name	Setters
 		**/
 		///@{
-		inline void				setUseRGBSmpteRange (bool useRGBSmpteRange)		{_bRGBSmpteRange = useRGBSmpteRange;}
-		inline void				setSignalMask (const NTV2SignalMask signalMask)	{mSignalMask = signalMask;}
-		inline void				setSliderValue (const double & sliderValue)		{mSliderValue = sliderValue;}
-		inline void				setAlphaFromLuma (bool alphaFromLuma)			{_bAlphaFromLuma = alphaFromLuma;}
+		inline NTV2TestPatternGen &	setUseRGBSmpteRange (const bool useRGBSmpteRange)	{mSetRGBSmpteRange = useRGBSmpteRange; return *this;}
+		inline NTV2TestPatternGen &	setSignalMask (const NTV2SignalMask signalMask)		{mSignalMask = signalMask; return *this;}
+		inline NTV2TestPatternGen &	setSliderValue (const double & sliderValue)			{mSliderValue = sliderValue; return *this;}
+		inline NTV2TestPatternGen &	setAlphaFromLuma (const bool alphaFromLuma)			{mSetAlphaFromLuma = alphaFromLuma; return *this;}
+		inline NTV2TestPatternGen &	setVANCToLegalBlack (const bool inClearVANC)		{mSetDstVancBlack = inClearVANC; return *this;}
 		///@}
 
 	//	INTERNAL METHODS
@@ -228,33 +230,33 @@ class AJAExport NTV2TestPatternGen
 
 	//	INSTANCE DATA
 	protected:
-		NTV2TestPatternID	mPatternID;			//	Pattern number
-//		NTV2FormatDesc		mDstFormat;			//	Dest format
-		uint32_t			mDstFrameWidth;		//	Dest width (pixels)
-		uint32_t			mDstFrameHeight;	//	Dest height (lines)
-		uint32_t			mDstLinePitch;		//	Dest bytes per row
-		uint32_t			mSrcLinePitch;		//	Src bytes per row
-		uint32_t			mDstBufferSize;		//	Dest visible buffer size (bytes)
-		uint8_t *			mpDstBuffer;		//	Dest buffer (start of active video)
-		uint32_t *			_pPackedLineBuffer;
-		uint16_t *			_pUnPackedLineBuffer;
-		bool				_bRGBSmpteRange;
-		bool				_bAlphaFromLuma;
+		NTV2TestPatternID	mPatternID;			///< @brief	Pattern number
+//		NTV2FormatDesc		mDstFormat;			///< @brief	Dest format
+		NTV2PixelFormat		mDstPixelFormat;	///< @brief	Dest pixel format
+		uint32_t			mDstFrameWidth;		///< @brief	Dest width (pixels)
+		uint32_t			mDstFrameHeight;	///< @brief	Dest height (lines)
+		uint32_t			mDstLinePitch;		///< @brief	Dest bytes per row
+		uint32_t			mSrcLinePitch;		///< @brief	Src bytes per row
+		uint32_t			mDstBufferSize;		///< @brief	Dest visible buffer size (bytes)
+		uint8_t *			mpDstBuffer;		///< @brief	Dest buffer (start of active video)
+		uint32_t *			mpPackedLineBuffer;
+		uint16_t *			mpUnpackedLineBuffer;
+		bool				mSetRGBSmpteRange;
+		bool				mSetAlphaFromLuma;
+		bool				mSetDstVancBlack;	///< @brief	Set destination VANC lines to legal black?
+		double				mSliderValue;		///< @brief	Used for Zone Plate
+		NTV2SignalMask		mSignalMask;		///< @brief	Component mask for MultiBurst, LineSweep
 
-		double				mSliderValue;		//	Used for Zone Plate
-		NTV2SignalMask		mSignalMask;		//	Component mask for MultiBurst, LineSweep
-		NTV2PixelFormat		mDstPixelFormat;	//	Dest pixel format
-
-		uint32_t mNumPixels;
-		uint32_t mNumLines;
-		uint32_t mBitsPerComponent;
-		uint32_t mSamplesPerPixel;
-		uint16_t mCompressionType;
-		uint32_t mDataOffset;
-		uint32_t mDataSize;
-		std::vector<char> mData;
-		std::vector<uint16_t> mUnPackedRAWBuffer;
-		std::vector<uint16_t> mRGBBuffer;
+		uint32_t			mNumPixels;
+		uint32_t			mNumLines;
+		uint32_t			mBitsPerComponent;
+		uint32_t			mSamplesPerPixel;
+		uint16_t			mCompressionType;
+		uint32_t			mDataOffset;
+		uint32_t			mDataSize;
+		std::vector<char>		mData;
+		std::vector<uint16_t>	mUnPackedRAWBuffer;
+		std::vector<uint16_t>	mRGBBuffer;
 
 };	//	NTV2TestPatternGen
 
