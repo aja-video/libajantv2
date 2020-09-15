@@ -217,6 +217,7 @@ AJAStatus NTV2OutputTestPattern::EmitPattern (void)
 
 	//	Write the requested test pattern into host buffer...
 	NTV2TestPatternGen	testPatternGen;
+	testPatternGen.setVANCToLegalBlack(fd.IsVANC());
 	if (!testPatternGen.DrawTestPattern (mTestPatternSpec,	fd,	hostBuffer))
 		return AJA_STATUS_FAIL;
 
