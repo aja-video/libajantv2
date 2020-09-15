@@ -36,13 +36,19 @@ class NTV2OutputTestPattern
 			@param[in]	inTestPatternSpec	Optionally specifies the test pattern (or flat-field color) to use.
 											If empty (the default), uses 100% bars.
 			@param[in]	inVideoFormat		If not NTV2_FORMAT_UNKNOWN, specifies the video format to use.
-											If NTV2_FORMAT_UNKNOWN (the default), uses the current video format.
-			@param[in]	inChannel			Specifies the FrameStore to use. Defaults to NTV2_CHANNEL1.
+											If NTV2_FORMAT_UNKNOWN (the default), uses the FrameStore's current
+											video format.
+			@param[in]	inPixelFormat		Optionally specifies the pixel format to use. Defaults to 8-bit YCBCr.
+			@param[in]	inChannel			Optionally specifies which FrameStore to use, a zero-based index number.
+											Defaults to NTV2_CHANNEL1.
+			@param[in]	inVancMode			Optionally specifies the ::NTV2VANCMode to use. Defaults to NTV2_VANCMODE_OFF.
 		**/
 		NTV2OutputTestPattern (	const std::string &		inDeviceSpecifier	= "0",
 								const std::string &		inTestPatternSpec	= "",
 								const NTV2VideoFormat	inVideoFormat		= NTV2_FORMAT_UNKNOWN,
-								const NTV2Channel		inChannel			= NTV2_CHANNEL1);
+								const NTV2PixelFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
+								const NTV2Channel		inChannel			= NTV2_CHANNEL1,
+								const NTV2VANCMode		inVancMode			= NTV2_VANCMODE_OFF);
 
 		~NTV2OutputTestPattern (void);
 

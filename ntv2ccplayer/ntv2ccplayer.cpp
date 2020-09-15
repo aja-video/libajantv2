@@ -1023,21 +1023,13 @@ AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 	//	Generate the test pattern...
 	NTV2TestPatternGen			testPatternGen;
 	const NTV2FormatDescriptor	formatDesc	(mConfig.fVideoFormat, mConfig.fPixelFormat, mVancMode);
+	testPatternGen.setVANCToLegalBlack(formatDesc.IsVANC());	//	Also clear the VANC region to legal black
 
 	if (!testPatternGen.DrawTestPattern (mConfig.fTestPatternName, formatDesc, mVideoBuffer))
 	{
 		cerr << "## ERROR:  DrawTestPattern failed, formatDesc: " << formatDesc << endl;
 		return AJA_STATUS_FAIL;
 	}
-
-	//	Set the VANC area, if any, to legal black...
-	if (formatDesc.IsVANC())
-		if (!::SetRasterLinesBlack(mConfig.fPixelFormat, AsUBytePtr(mVideoBuffer.GetHostPointer()),
-									UWord(formatDesc.GetBytesPerRow()), UWord(formatDesc.firstActiveLine)))
-		{
-			cerr << "## ERROR:  Cannot set video buffer's VANC area to legal black" << endl;
-			return AJA_STATUS_FAIL;
-		}
 
 	//	Add info to the display...
 	const string	strVideoFormat	(CNTV2DemoCommon::StripFormatString (::NTV2VideoFormatToString(mConfig.fVideoFormat)));
