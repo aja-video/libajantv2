@@ -39,7 +39,7 @@
 			/**
 				@brief		Given a generic ::AJAAncillaryData object, attempts to guess what kind of specific
 							::AJAAncillaryData object it might be from its raw packet data.
-				@param[in]	pInAncData	An ::AJAAncillaryData object that contains "raw" packet data.
+				@param[in]	inAncData	An ::AJAAncillaryData object that contains "raw" packet data.
 				@return		The guessed ::AJAAncillaryDataType (or ::AJAAncillaryDataType_Unknown if no idea...).
 			**/
 			static AJAAncillaryDataType		GuessAncillaryDataType (const AJAAncillaryData & inAncData);

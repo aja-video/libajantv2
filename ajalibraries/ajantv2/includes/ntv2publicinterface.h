@@ -4368,7 +4368,6 @@ typedef enum
 
 	/**
 		@param[in]	inChannels		Specifies the NTV2Channels that should go into the NTV2ChannelList.
-		@param		inNumChannels	Specifies the number of channels.
 		@return		An NTV2ChannelList having the same channels as contained in the specified set.
 	**/
 	AJAExport NTV2ChannelList NTV2MakeChannelList (const NTV2ChannelSet inChannels);
@@ -8720,9 +8719,9 @@ typedef enum
 			AJAExport NTV2StandardSet & operator += (NTV2StandardSet & inOutSet, const NTV2StandardSet inSet);
 
 			/**
-				@brief		Returns a set of distinct ::NTV2Geometry values supported on the given device.
+				@brief		Returns a set of distinct ::NTV2FrameGeometry values supported on the given device.
 				@param[in]	inDeviceID		Specifies the ::NTV2DeviceID of the device of interest.
-				@param[out]	outGeometries	Receives the set of distinct ::NTV2Geometry values supported by the device.
+				@param[out]	outGeometries	Receives the set of distinct ::NTV2FrameGeometry values supported by the device.
 				@return		True if successful;  otherwise false.
 				@todo		Needs to be moved to a C++ compatible "device features" module.
 			**/

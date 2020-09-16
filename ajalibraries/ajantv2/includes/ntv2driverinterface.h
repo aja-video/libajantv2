@@ -382,10 +382,10 @@ class AJAExport CNTV2DriverInterface
 
 		/**
 			@brief	Sends an HEVC message to the NTV2 driver.
-			@param	pAutoCircData	Points to the HevcMessageHeader that contains the HEVC message.
+			@param	pMessage	Points to the HevcMessageHeader that contains the HEVC message.
 			@return	False. This must be implemented by the platform-specific subclass.
 		**/
-	    AJA_VIRTUAL inline bool	HevcSendMessage (HevcMessageHeader * /*pMessage*/)		{return false;}
+	    AJA_VIRTUAL inline bool	HevcSendMessage (HevcMessageHeader * pMessage)		{(void) pMessage; return false;}
 
 		AJA_VIRTUAL bool	ControlDriverDebugMessages (NTV2_DriverDebugMessageSet msgSet,  bool enable) = 0;
 	///@}
@@ -399,7 +399,7 @@ class AJAExport CNTV2DriverInterface
 			@param[in]	inBitFileType	Optionally specifies the bitfile type of interest. Defaults to NTV2_VideoProcBitFile.
 			@return		True if successful;  otherwise false.
 		**/
-		AJA_VIRTUAL bool DriverGetBitFileInformation (BITFILE_INFO_STRUCT & outBitFileInfo,  const NTV2BitFileType bitFileType = NTV2_VideoProcBitFile);
+		AJA_VIRTUAL bool DriverGetBitFileInformation (BITFILE_INFO_STRUCT & outBitFileInfo,  const NTV2BitFileType inBitFileType = NTV2_VideoProcBitFile);
 
 		/**
 			@brief		Answers with the driver's build information.

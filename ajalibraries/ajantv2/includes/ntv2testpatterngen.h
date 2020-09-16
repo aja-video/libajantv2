@@ -132,12 +132,13 @@ class AJAExport NTV2TestPatternGen
 		///@{
 		/**
 			@brief		Renders the given test pattern or color into a host raster buffer.
-			@param[in]	inTPName		Specifies the name of the test pattern or color to be drawn.
+			@param[in]	inTPName		Specifies the name of the test pattern or web color to be drawn.
 			@param[in]	inFormatDesc	Describes the raster memory.
 			@param		inBuffer		Specifies the host memory buffer to be written.
-			@note		If the format descriptor describes a "tall" or "taller" (VANC) raster geometry, the
-						first byte in the specified buffer is presumed to be the start of the VANC region.
-						Only the buffer's visible region will be written with the requested pattern.
+			@note		If the format descriptor describes a "tall" or "taller" (VANC) raster geometry,
+						the first byte in the specified buffer is presumed to be the start of the VANC region.
+			@note		If my mSetDstVancBlack member is true, the buffer's VANC region will also be cleared
+						to legal black.
 			@return		True if successful;  otherwise false.
 			@bug		Needs planar pixel format implementations.
 		**/
@@ -151,7 +152,8 @@ class AJAExport NTV2TestPatternGen
 			@param		inBuffer		Specifies the host memory buffer to be written.
 			@note		If the format descriptor describes a "tall" or "taller" (VANC) geometry, the
 						first byte in the specified buffer is presumed to be the start of the VANC region.
-						Only the buffer's visible region will be written with the requested pattern.
+			@note		If my mSetDstVancBlack member is true, the buffer's VANC region will also be cleared
+						to legal black.
 			@return		True if successful;  otherwise false.
 			@bug		Needs planar pixel format implementations.
 		**/
@@ -190,7 +192,7 @@ class AJAExport NTV2TestPatternGen
 		inline NTV2SignalMask	getSignalMask (void) const				{return mSignalMask;}
 		inline const double &	getSliderValue (void) const				{return mSliderValue;}
 		inline bool				getAlphaFromLuma (void) const			{return mSetAlphaFromLuma;}
-		inline bool				setVANCToLegalBlack (void) const		{return mSetDstVancBlack;}
+		inline bool				setVANCToLegalBlack (void) const		{return mSetDstVancBlack;}	///< @return	True if DrawTestPattern will also set VANC lines (if any) to legal black.
 		///@}
 
 		/**
@@ -201,6 +203,11 @@ class AJAExport NTV2TestPatternGen
 		inline NTV2TestPatternGen &	setSignalMask (const NTV2SignalMask signalMask)		{mSignalMask = signalMask; return *this;}
 		inline NTV2TestPatternGen &	setSliderValue (const double & sliderValue)			{mSliderValue = sliderValue; return *this;}
 		inline NTV2TestPatternGen &	setAlphaFromLuma (const bool alphaFromLuma)			{mSetAlphaFromLuma = alphaFromLuma; return *this;}
+		/**
+			@brief		Changes my "clear VANC lines to legal black" setting.
+			@param[in]	inClearVANC		Specify true to have my DrawTestPattern method automatically clear the VANC region (if any) to legal black.
+			@return		A non-constant reference to me.
+		**/
 		inline NTV2TestPatternGen &	setVANCToLegalBlack (const bool inClearVANC)		{mSetDstVancBlack = inClearVANC; return *this;}
 		///@}
 
