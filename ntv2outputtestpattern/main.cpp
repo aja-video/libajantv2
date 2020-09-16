@@ -7,12 +7,11 @@
 
 
 //	Includes
-#include "ajabase/common/types.h"
+#include "ntv2outputtestpattern.h"
+#include "ntv2democommon.h"
 #include "ajabase/common/options_popt.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/common/common.h"
-#include "ntv2outputtestpattern.h"
-#include "ntv2democommon.h"
 #include <iostream>
 #include <iomanip>
 

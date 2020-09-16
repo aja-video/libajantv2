@@ -8,14 +8,7 @@
 #ifndef _NTV2OUTPUT_TEST_PATTERN_H
 #define _NTV2OUTPUT_TEST_PATTERN_H
 
-#include "ntv2enums.h"
-#include "ntv2devicefeatures.h"
-#include "ntv2devicescanner.h"
-#include "ntv2utils.h"
-#include "ntv2testpatterngen.h"
-#include "ajabase/common/types.h"
-#include "ajabase/common/videotypes.h"
-#include "ajabase/system/process.h"
+#include "ntv2card.h"
 
 
 /**

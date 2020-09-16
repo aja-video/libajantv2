@@ -832,7 +832,6 @@ NTV2AudioSystem CNTV2DemoCommon::GetAudioSystemFromString (const string & inStr)
 
 string CNTV2DemoCommon::GetTestPatternStrings (void)
 {
-	typedef set<string>	NTV2StringSet;
 	typedef map<string,string>	NTV2StringMap;
 	NTV2StringSet keys;
 	for (String2TPNamesMapConstIter it(gString2TPNamesMap.begin());  it != gString2TPNamesMap.end();  ++it)
@@ -1347,99 +1346,99 @@ bool CNTV2DemoCommon::BFT(void)
 	}
 	if (true)
 	{
-		CNTV2DemoCommon::ACFrameRange sVFmtDict(0);
-		SHOULD_BE_FALSE(sVFmtDict.valid());
-		cerr << sVFmtDict.setFromString("") << endl;
-		SHOULD_BE_FALSE(sVFmtDict.valid());	//	Nothing -- empty string
-		cerr << sVFmtDict.setFromString("    \t    ") << endl;
-		SHOULD_BE_FALSE(sVFmtDict.valid());	//	Nothing -- whitespace
+		CNTV2DemoCommon::ACFrameRange fRange(0);
+		SHOULD_BE_FALSE(fRange.valid());
+		cerr << fRange.setFromString("") << endl;
+		SHOULD_BE_FALSE(fRange.valid());	//	Nothing -- empty string
+		cerr << fRange.setFromString("    \t    ") << endl;
+		SHOULD_BE_FALSE(fRange.valid());	//	Nothing -- whitespace
 
-		cerr << sVFmtDict.setFromString("10") << endl;
-		SHOULD_BE_TRUE(sVFmtDict.valid());
-		SHOULD_BE_TRUE(sVFmtDict.isCount());
-		SHOULD_BE_FALSE(sVFmtDict.isFrameRange());
-		SHOULD_BE_EQUAL(sVFmtDict.count(), 10);
+		cerr << fRange.setFromString("10") << endl;
+		SHOULD_BE_TRUE(fRange.valid());
+		SHOULD_BE_TRUE(fRange.isCount());
+		SHOULD_BE_FALSE(fRange.isFrameRange());
+		SHOULD_BE_EQUAL(fRange.count(), 10);
 
-		SHOULD_BE_FALSE(sVFmtDict.makeInvalid().valid());
+		SHOULD_BE_FALSE(fRange.makeInvalid().valid());
 
-		cerr << sVFmtDict.setFromString("   \t   15   \t   ") << endl;
-		SHOULD_BE_TRUE(sVFmtDict.valid());
-		SHOULD_BE_TRUE(sVFmtDict.isCount());
-		SHOULD_BE_FALSE(sVFmtDict.isFrameRange());
-		SHOULD_BE_EQUAL(sVFmtDict.count(), 15);
+		cerr << fRange.setFromString("   \t   15   \t   ") << endl;
+		SHOULD_BE_TRUE(fRange.valid());
+		SHOULD_BE_TRUE(fRange.isCount());
+		SHOULD_BE_FALSE(fRange.isFrameRange());
+		SHOULD_BE_EQUAL(fRange.count(), 15);
 
-		cerr << sVFmtDict.setFromString("@") << endl;
-		SHOULD_BE_FALSE(sVFmtDict.valid());	//	Missing integer values
-		cerr << sVFmtDict.setFromString("20@") << endl;
-		SHOULD_BE_FALSE(sVFmtDict.valid());	//	Missing 2nd integer value
-		cerr << sVFmtDict.setFromString("@20") << endl;
-		SHOULD_BE_FALSE(sVFmtDict.valid());	//	Missing 1st integer value
+		cerr << fRange.setFromString("@") << endl;
+		SHOULD_BE_FALSE(fRange.valid());	//	Missing integer values
+		cerr << fRange.setFromString("20@") << endl;
+		SHOULD_BE_FALSE(fRange.valid());	//	Missing 2nd integer value
+		cerr << fRange.setFromString("@20") << endl;
+		SHOULD_BE_FALSE(fRange.valid());	//	Missing 1st integer value
 
-		cerr << sVFmtDict.setFromString("20@10") << endl;
-		SHOULD_BE_TRUE(sVFmtDict.valid());
-		SHOULD_BE_FALSE(sVFmtDict.isCount());
-		SHOULD_BE_TRUE(sVFmtDict.isFrameRange());
-		SHOULD_BE_EQUAL(sVFmtDict.count(), 0);
-		SHOULD_BE_EQUAL(sVFmtDict.firstFrame(), 10);
-		SHOULD_BE_EQUAL(sVFmtDict.lastFrame(), 29);
+		cerr << fRange.setFromString("20@10") << endl;
+		SHOULD_BE_TRUE(fRange.valid());
+		SHOULD_BE_FALSE(fRange.isCount());
+		SHOULD_BE_TRUE(fRange.isFrameRange());
+		SHOULD_BE_EQUAL(fRange.count(), 0);
+		SHOULD_BE_EQUAL(fRange.firstFrame(), 10);
+		SHOULD_BE_EQUAL(fRange.lastFrame(), 29);
 
-		cerr << sVFmtDict.setFromString("   \t   25   @   15   \t   ") << endl;
-		SHOULD_BE_TRUE(sVFmtDict.valid());
-		SHOULD_BE_FALSE(sVFmtDict.isCount());
-		SHOULD_BE_TRUE(sVFmtDict.isFrameRange());
-		SHOULD_BE_EQUAL(sVFmtDict.count(), 0);
-		SHOULD_BE_EQUAL(sVFmtDict.firstFrame(), 15);
-		SHOULD_BE_EQUAL(sVFmtDict.lastFrame(), 39);
+		cerr << fRange.setFromString("   \t   25   @   15   \t   ") << endl;
+		SHOULD_BE_TRUE(fRange.valid());
+		SHOULD_BE_FALSE(fRange.isCount());
+		SHOULD_BE_TRUE(fRange.isFrameRange());
+		SHOULD_BE_EQUAL(fRange.count(), 0);
+		SHOULD_BE_EQUAL(fRange.firstFrame(), 15);
+		SHOULD_BE_EQUAL(fRange.lastFrame(), 39);
 
-		cerr << sVFmtDict.setFromString("   \t   2.5   @   1 $ 5   \t   ") << endl;
-		SHOULD_BE_FALSE(sVFmtDict.valid());
-		cerr << sVFmtDict.setFromString("~!@#$%^&*()_+{}|[]:;<>?/.,`") << endl;
-		SHOULD_BE_FALSE(sVFmtDict.valid());
-		cerr << sVFmtDict.setFromString("@@@@@@@@@--------") << endl;
-		SHOULD_BE_FALSE(sVFmtDict.valid());
-		cerr << sVFmtDict.setFromString("1@2@3@4@5@6@7@8@9@1") << endl;
-		SHOULD_BE_FALSE(sVFmtDict.valid());
+		cerr << fRange.setFromString("   \t   2.5   @   1 $ 5   \t   ") << endl;
+		SHOULD_BE_FALSE(fRange.valid());
+		cerr << fRange.setFromString("~!@#$%^&*()_+{}|[]:;<>?/.,`") << endl;
+		SHOULD_BE_FALSE(fRange.valid());
+		cerr << fRange.setFromString("@@@@@@@@@--------") << endl;
+		SHOULD_BE_FALSE(fRange.valid());
+		cerr << fRange.setFromString("1@2@3@4@5@6@7@8@9@1") << endl;
+		SHOULD_BE_FALSE(fRange.valid());
 
-		cerr << sVFmtDict.setFromString("-") << endl;
-		SHOULD_BE_FALSE(sVFmtDict.valid());	//	Missing integer values
-		cerr << sVFmtDict.setFromString("10-") << endl;
-		SHOULD_BE_FALSE(sVFmtDict.valid());	//	Missing 2nd integer value
-		cerr << sVFmtDict.setFromString("-10") << endl;
-		SHOULD_BE_FALSE(sVFmtDict.valid());	//	Missing 1st integer value
-		cerr << sVFmtDict.setFromString("1-2-3-4-5-6-7-8-9-1") << endl;
-		SHOULD_BE_FALSE(sVFmtDict.valid());
-		cerr << sVFmtDict.setFromString("-1-2-3-4-5-6-7-8-9-") << endl;
-		SHOULD_BE_FALSE(sVFmtDict.valid());
+		cerr << fRange.setFromString("-") << endl;
+		SHOULD_BE_FALSE(fRange.valid());	//	Missing integer values
+		cerr << fRange.setFromString("10-") << endl;
+		SHOULD_BE_FALSE(fRange.valid());	//	Missing 2nd integer value
+		cerr << fRange.setFromString("-10") << endl;
+		SHOULD_BE_FALSE(fRange.valid());	//	Missing 1st integer value
+		cerr << fRange.setFromString("1-2-3-4-5-6-7-8-9-1") << endl;
+		SHOULD_BE_FALSE(fRange.valid());
+		cerr << fRange.setFromString("-1-2-3-4-5-6-7-8-9-") << endl;
+		SHOULD_BE_FALSE(fRange.valid());
 
-		cerr << sVFmtDict.setFromString("20-30") << endl;
-		SHOULD_BE_TRUE(sVFmtDict.valid());
-		SHOULD_BE_FALSE(sVFmtDict.isCount());
-		SHOULD_BE_TRUE(sVFmtDict.isFrameRange());
-		SHOULD_BE_EQUAL(sVFmtDict.count(), 0);
-		SHOULD_BE_EQUAL(sVFmtDict.firstFrame(), 20);
-		SHOULD_BE_EQUAL(sVFmtDict.lastFrame(), 30);
+		cerr << fRange.setFromString("20-30") << endl;
+		SHOULD_BE_TRUE(fRange.valid());
+		SHOULD_BE_FALSE(fRange.isCount());
+		SHOULD_BE_TRUE(fRange.isFrameRange());
+		SHOULD_BE_EQUAL(fRange.count(), 0);
+		SHOULD_BE_EQUAL(fRange.firstFrame(), 20);
+		SHOULD_BE_EQUAL(fRange.lastFrame(), 30);
 
-		cerr << sVFmtDict.setFromString("2.0-3#0") << endl;
-		SHOULD_BE_FALSE(sVFmtDict.valid());
+		cerr << fRange.setFromString("2.0-3#0") << endl;
+		SHOULD_BE_FALSE(fRange.valid());
 
-		cerr << sVFmtDict.setFromString("                   25            -                35         ") << endl;
-		SHOULD_BE_TRUE(sVFmtDict.valid());
-		SHOULD_BE_FALSE(sVFmtDict.isCount());
-		SHOULD_BE_TRUE(sVFmtDict.isFrameRange());
-		SHOULD_BE_EQUAL(sVFmtDict.count(), 0);
-		SHOULD_BE_EQUAL(sVFmtDict.firstFrame(), 25);
-		SHOULD_BE_EQUAL(sVFmtDict.lastFrame(), 35);
+		cerr << fRange.setFromString("                   25            -                35         ") << endl;
+		SHOULD_BE_TRUE(fRange.valid());
+		SHOULD_BE_FALSE(fRange.isCount());
+		SHOULD_BE_TRUE(fRange.isFrameRange());
+		SHOULD_BE_EQUAL(fRange.count(), 0);
+		SHOULD_BE_EQUAL(fRange.firstFrame(), 25);
+		SHOULD_BE_EQUAL(fRange.lastFrame(), 35);
 
-		cerr << sVFmtDict.setFromString("36-36") << endl;
-		SHOULD_BE_TRUE(sVFmtDict.valid());
-		SHOULD_BE_FALSE(sVFmtDict.isCount());
-		SHOULD_BE_TRUE(sVFmtDict.isFrameRange());
-		SHOULD_BE_EQUAL(sVFmtDict.count(), 0);
-		SHOULD_BE_EQUAL(sVFmtDict.firstFrame(), 36);
-		SHOULD_BE_EQUAL(sVFmtDict.lastFrame(), 36);
+		cerr << fRange.setFromString("36-36") << endl;
+		SHOULD_BE_TRUE(fRange.valid());
+		SHOULD_BE_FALSE(fRange.isCount());
+		SHOULD_BE_TRUE(fRange.isFrameRange());
+		SHOULD_BE_EQUAL(fRange.count(), 0);
+		SHOULD_BE_EQUAL(fRange.firstFrame(), 36);
+		SHOULD_BE_EQUAL(fRange.lastFrame(), 36);
 
-		cerr << sVFmtDict.setFromString("36-1") << endl;
-		SHOULD_BE_FALSE(sVFmtDict.valid());
+		cerr << fRange.setFromString("36-1") << endl;
+		SHOULD_BE_FALSE(fRange.valid());
 	}
 	return true;
 }

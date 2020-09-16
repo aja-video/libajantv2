@@ -1,9 +1,7 @@
 /**
 	@file		ntv2democommon.h
 	@brief		This file contains some structures, constants, classes and functions that are used in some of the demo applications.
-				There is nothing magical about anything in this file. In your applications you may use a different
-				number of circular buffers, or store different data in the AVDataBuffer. What's listed below
-				are simply values that work well with the demos.
+				There is nothing magical about anything in this file. What's in here simply works well with the demos.
 	@copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
@@ -128,11 +126,11 @@ AJAExport class NTV2FrameData
 																	&& fAudioBuffer.IsNULL() && fAncBuffer.IsNULL()
 																	&& fAncBuffer2.IsNULL();}
 		//	Modifier Methods
-		inline void		ZeroBuffers (void)					{	if (fVideoBuffer)	fVideoBuffer.Fill(0ULL);
-																if (fVideoBuffer2)	fVideoBuffer2.Fill(0LL);
-																if (fAudioBuffer)	fAudioBuffer.Fill(0LL);
-																if (fAncBuffer)		fAncBuffer.Fill(0LL);
-																if (fAncBuffer2)	fAncBuffer2.Fill(0LL);
+		inline void		ZeroBuffers (void)					{	if (fVideoBuffer)	fVideoBuffer.Fill(ULWord(0));
+																if (fVideoBuffer2)	fVideoBuffer2.Fill(ULWord(0));
+																if (fAudioBuffer)	fAudioBuffer.Fill(ULWord(0));
+																if (fAncBuffer)		fAncBuffer.Fill(ULWord(0));
+																if (fAncBuffer2)	fAncBuffer2.Fill(ULWord(0));
 																fNumAudioBytes = fNumAncBytes = fNumAnc2Bytes = 0;
 															}
 		bool			LockAll								(CNTV2Card & inDevice);
