@@ -140,46 +140,42 @@ class NTV2LLBurn
 		static void	RunThreadStatic (AJAThread * pThread, void * pContext);
 
 
-		typedef std::set <NTV2Channel>			NTV2ChannelSet;
-		typedef NTV2ChannelSet::const_iterator	NTV2ChannelSetConstIter;
-
-
 	//	Private Member Data
 	private:
-		AJAThread					mRunThread;				///< @brief	My worker thread object
+		AJAThread				mRunThread;				///< @brief	My worker thread object
 
-		CNTV2Card					mDevice;				///< @brief	My CNTV2Card instance
-		NTV2DeviceID				mDeviceID;				///< @brief	My device identifier
-		const std::string			mDeviceSpecifier;		///< @brief	Specifies the device I should use
-		bool						mWithAudio;				///< @brief	Capture and playout audio?
-		NTV2Channel					mInputChannel;			///< @brief	The input channel I'm using
-		NTV2Channel					mOutputChannel;			///< @brief	The output channel I'm using
-		NTV2InputSource				mInputSource;			///< @brief	The input source I'm using
-		NTV2TCIndex					mTimecodeIndex;			///< @brief	The timecode of interest
-		NTV2OutputDestination		mOutputDestination;		///< @brief	The output I'm using
-		NTV2VideoFormat				mVideoFormat;			///< @brief	My video format
-		NTV2FrameBufferFormat		mPixelFormat;			///< @brief	My pixel format
-		NTV2EveryFrameTaskMode		mSavedTaskMode;			///< @brief	Previous task mode to restore
-		NTV2VANCMode				mVancMode;				///< @brief	VANC mode
-		NTV2AudioSystem				mAudioSystem;			///< @brief	The audio system I'm using
-		bool						mDoMultiChannel;		///< @brief	Set the board up for multi-format
-		bool						mWithAnc;				///< @brief	Capture and Playout packetized ANC data
-		bool						mWithHanc;				///< @brief	Capture and Playout packetized ANC data with audio
+		CNTV2Card				mDevice;				///< @brief	My CNTV2Card instance
+		NTV2DeviceID			mDeviceID;				///< @brief	My device identifier
+		const std::string		mDeviceSpecifier;		///< @brief	Specifies the device I should use
+		bool					mWithAudio;				///< @brief	Capture and playout audio?
+		NTV2Channel				mInputChannel;			///< @brief	The input channel I'm using
+		NTV2Channel				mOutputChannel;			///< @brief	The output channel I'm using
+		NTV2InputSource			mInputSource;			///< @brief	The input source I'm using
+		NTV2TCIndex				mTimecodeIndex;			///< @brief	The timecode of interest
+		NTV2OutputDestination	mOutputDestination;		///< @brief	The output I'm using
+		NTV2VideoFormat			mVideoFormat;			///< @brief	My video format
+		NTV2PixelFormat			mPixelFormat;			///< @brief	My pixel format
+		NTV2TaskMode			mSavedTaskMode;			///< @brief	Previous task mode to restore
+		NTV2VANCMode			mVancMode;				///< @brief	VANC mode
+		NTV2AudioSystem			mAudioSystem;			///< @brief	The audio system I'm using
+		bool					mDoMultiChannel;		///< @brief	Set the board up for multi-format
+		bool					mWithAnc;				///< @brief	Capture and Playout packetized ANC data
+		bool					mWithHanc;				///< @brief	Capture and Playout packetized ANC data with audio
 
-		bool						mGlobalQuit;			///< @brief	Set "true" to gracefully stop
-		AJATimeCodeBurn				mTCBurner;				///< @brief	My timecode burner
-		NTV2ChannelSet				mRP188Outputs;			///< @brief	SDI outputs into which I'll inject timecode
+		bool					mGlobalQuit;			///< @brief	Set "true" to gracefully stop
+		AJATimeCodeBurn			mTCBurner;				///< @brief	My timecode burner
+		NTV2ChannelSet			mRP188Outputs;			///< @brief	SDI outputs into which I'll inject timecode
 
-		NTV2_POINTER				mpHostVideoBuffer;		///< @brief My host video buffer for burning in the timecode
-		NTV2_POINTER				mpHostAudioBuffer;		///< @brief My host audio buffer for the samples matching the video buffer
-		NTV2_POINTER				mpHostF1AncBuffer;		///< @brief My host Anc buffer (F1)
-		NTV2_POINTER				mpHostF2AncBuffer;		///< @brief My host Anc buffer (F2)
+		NTV2_POINTER			mpHostVideoBuffer;		///< @brief My host video buffer for burning in the timecode
+		NTV2_POINTER			mpHostAudioBuffer;		///< @brief My host audio buffer for the samples matching the video buffer
+		NTV2_POINTER			mpHostF1AncBuffer;		///< @brief My host Anc buffer (F1)
+		NTV2_POINTER			mpHostF2AncBuffer;		///< @brief My host Anc buffer (F2)
 
-		uint32_t					mAudioInLastAddress;	///< @brief My record of the location of the last audio sample captured
-		uint32_t					mAudioOutLastAddress;	///< @brief My record of the location of the last audio sample played
+		uint32_t				mAudioInLastAddress;	///< @brief My record of the location of the last audio sample captured
+		uint32_t				mAudioOutLastAddress;	///< @brief My record of the location of the last audio sample played
 
-		uint32_t					mFramesProcessed;		///< @brief My count of the number of burned frames produced
-		uint32_t					mFramesDropped;			///< @brief My count of the number of dropped frames
+		uint32_t				mFramesProcessed;		///< @brief My count of the number of burned frames produced
+		uint32_t				mFramesDropped;			///< @brief My count of the number of dropped frames
 
 };	//	NTV2LLBurn
 
