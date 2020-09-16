@@ -1304,18 +1304,19 @@ AJAStatus NTV2CCGrabber::SetupOutputVideo (const NTV2VideoFormat inVideoFormat)
 	//	Configure the output FrameStore...
 	mDevice.EnableChannel (mOutputChannel);
 	mDevice.SetMode (mOutputChannel, NTV2_MODE_DISPLAY);
-	mDevice.SetVideoFormat (inVideoFormat,  /*retailMode?*/false,  /*keepVANC?*/true,  /*channel*/mOutputChannel);
 	mDevice.SetFrameBufferFormat (mOutputChannel, mPlayoutFBF);
+	mDevice.SetVideoFormat (inVideoFormat,  /*retailMode?*/false,  /*keepVANC?*/false,  /*channel*/mOutputChannel);
+	mDevice.SetEnableVANCData(NTV2_IS_VANCMODE_TALL(mVancMode), NTV2_IS_VANCMODE_TALLER(mVancMode), mOutputChannel);
 
 	//	RGB:  Set up mixer to "mix" mode, FG raster "unshaped", BG raster "full raster" and VANC pass-thru from BG...
-	const UWord	mixerNumber	(gMixerNums [mOutputChannel]);
+	const UWord	mixerNumber	(gMixerNums[mOutputChannel]);
 	mDevice.SetMixerMode (mixerNumber, NTV2MIXERMODE_FOREGROUND_ON);
 	mDevice.SetMixerFGInputControl (mixerNumber, NTV2MIXERINPUTCONTROL_UNSHAPED);
 	mDevice.SetMixerBGInputControl (mixerNumber, NTV2MIXERINPUTCONTROL_FULLRASTER);
 	mDevice.SetMixerVancOutputFromForeground (mixerNumber, false);	//	false means "use BG VANC, not FG"
-	cerr	<< "## NOTE:  Caption burn-in using mixer/keyer " << (mixerNumber+1) << " on " << ::NTV2ChannelToString (mOutputChannel)
-			<< ", " << ::NTV2FrameBufferFormatToString (mPlayoutFBF)
-			<< ", " << ::NTV2VideoFormatToString (inVideoFormat) << endl;
+	cerr	<< "## NOTE:  Caption burn-in using mixer/keyer " << (mixerNumber+1) << " on " << ::NTV2ChannelToString(mOutputChannel)
+			<< ", " << ::NTV2FrameBufferFormatToString(mPlayoutFBF)
+			<< ", " << ::NTV2VideoFormatToString(inVideoFormat) << endl;
 
 	return AJA_STATUS_SUCCESS;
 
