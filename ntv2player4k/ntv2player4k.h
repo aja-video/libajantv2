@@ -69,7 +69,8 @@ typedef struct Player4KConfig
 /**
 	@brief		Renders a human-readable representation of a Player4KConfig into an output stream.
 	@param		strm	The output stream.
-	@return		A reference to the output stream.
+	@param[in]	inObj	The configuration to be rendered into the output stream.
+	@return		A reference to the specified output stream.
 **/
 inline std::ostream &	operator << (std::ostream & strm, const Player4KConfig & inObj)		{return inObj.Print(strm);}
 

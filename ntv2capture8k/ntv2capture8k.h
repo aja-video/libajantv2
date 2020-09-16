@@ -37,6 +37,7 @@ class NTV2Capture8K
 											or release the device. If false (the default), acquires/releases exclusive use of the device.
 			@param[in]	inWithAnc			If true, captures ancillary data using the new AutoCirculate APIs (if the device supports it).
 											Defaults to false.
+			@param[in]	inDoTsiRouting		If true, routes for TSI;  otherwise routes for quad-quad.  Defaults to false.
 		**/
 		NTV2Capture8K (	const std::string			inDeviceSpecifier	= "0",
 						const bool					inWithAudio			= true,

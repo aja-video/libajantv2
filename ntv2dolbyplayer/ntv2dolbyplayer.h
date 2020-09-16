@@ -17,8 +17,8 @@
 #include "ajabase/system/file_io.h"
 #include "ajaanc/includes/ancillarydata.h"
 
-//	Define to parse ec3 files with multiple sync frames per HDMI burst vs single sync frame per HDMI burst.
-#define DOLBY_FULL_PARSER
+
+#define DOLBY_FULL_PARSER	//	If defined, parse EC3 files with multiple sync frames per HDMI burst;  otherwise parse with single sync frame per HDMI burst.
 
 /**
 	@brief	I am an object that can play out a test pattern (with timecode) to an output of an AJA device
@@ -253,9 +253,7 @@ class NTV2DolbyPlayer
 			@brief	Get a dolby audio audio frame from the input file.
 			@param[out]	pInDolbyBuffer		Specifies a valid, non-NULL pointer to the buffer that is to receive
 												the dolby frame data.
-			@param[out]	sync				This is a dolby sync frame.
 			@param[out]	numSamples			Number of samples in the buffer.
-			@param[out]	numBlocks			Number of dolby audio block in the buffer.
 			@return	True if valid sync frame in buffer.
 		 **/
 		virtual bool GetDolbyFrame (uint16_t * pInDolbyBuffer, uint32_t & numSamples);
@@ -268,7 +266,7 @@ class NTV2DolbyPlayer
 			@param[out]	pBsi				Parsed Dolby header data.
 			@return	True if parser suceeded.
 		 **/
-		virtual bool ParseBSI(uint16_t * pInDolbyBuffer, uint32_t numSamples, NTV2DolbyBSI * pBsi);
+		virtual bool ParseBSI (uint16_t * pInDolbyBuffer, uint32_t numSamples, NTV2DolbyBSI * pBsi);
 
 
 		/**
@@ -276,15 +274,15 @@ class NTV2DolbyPlayer
 			@param[in]	pBuffer				Specifies a valid, non-NULL pointer to the bitstream buffer
 			@param[in]	size				Bitstream buffer size
 		 **/
-		virtual void SetBitBuffer(uint8_t * pBuffer, uint32_t size);
+		virtual void SetBitBuffer (uint8_t * pBuffer, uint32_t size);
 
 		/**
 			@brief	Retreive the specified number of bits from the bitstream buffer
-			@param[out]	data				Bitstream data
-			@param[out]	BITS				Number of bits to retrieve from the buffer
+			@param		data				Bitstream data
+			@param[in]	inBitCount			Number of bits to retrieve from the buffer
 			@return	True if suceeded.
 		 **/
-		virtual bool GetBits(uint32_t & data, uint32_t bits);
+		virtual bool GetBits (uint32_t & data, uint32_t inBitCount);
 #endif
 
     //	Protected Class Methods

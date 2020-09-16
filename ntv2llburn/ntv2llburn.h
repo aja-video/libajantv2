@@ -44,6 +44,7 @@ class NTV2LLBurn
 			@param[in]	inDoMultiChannel	If true, enables multichannel mode (if the device supports it), and won't acquire
 											or release the device. If false (the default), acquires/releases exclusive use of the device.
 			@param[in]	inWithAnc			If true, capture & play ancillary data. Defaults to false.
+			@param[in]	inWithHanc			If true, capture & play HANC data. Defaults to false.
 		**/
 							NTV2LLBurn (const std::string &			inDeviceSpecifier	= "0",
 										const bool					inWithAudio			= true,
