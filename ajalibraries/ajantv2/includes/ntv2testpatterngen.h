@@ -89,7 +89,7 @@ class AJAExport NTV2TestPatternGen
 		static NTV2TestPatternNames		getTestPatternNames (void);
 
 		/**
-			@return		An ordered collection of strings containing the names of all available flat-field colors.
+			@return		An ordered collection of strings containing the names of all available flat-field "web colors".
 		**/
 		static NTV2StringList			getColorNames (void);
 
@@ -100,16 +100,16 @@ class AJAExport NTV2TestPatternGen
 		static NTV2TestPatternSelect	findTestPatternByName (const std::string & inName);
 
 		/**
-			@return		The flat-field RGB color value that corresponds to the given name.
+			@return		The flat-field RGB "web color" value that corresponds to the given name.
 						The highest-order byte in the 32-bit result is 0x00; the next-lower byte
 						is the Red value (0-255); the next-lower byte is the Green value (0-255);
 						the lowest-order byte is the Blue value (0-255). A zero return value
 						means "not found".
-			@param[in]	inName	Specifies the color name. The search is done case-insensitively.
+			@param[in]	inName	Specifies the "web color" name. The search is done case-insensitively.
 			@note		"Black" and "White" are not returned, as these are available as ordinary
-						test patterns.
+						test patterns NTV2_TestPatt_Black and NTV2_TestPatt_White, respectively.
 		**/
-		static ULWord					findRGBColorByName (const std::string & inStartsWith);
+		static ULWord					findRGBColorByName (const std::string & inName);
 
 		#if !defined(NTV2_DEPRECATE_15_0)
 		static NTV2_SHOULD_BE_DEPRECATED (NTV2TestPatternList &		getTestPatternList (void));

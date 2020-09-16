@@ -1317,7 +1317,7 @@ ostream & CNTV2VPID::Print (ostream & ostrm) const
 				<< " samp=" << sVPIDSampling[GetSampling()]
 				<< " chan=" << sVPIDChannel[GetChannel()]
 				<< " links=" << (VPIDStandardIsSingleLink(GetStandard()) ? "1" : "mult")
-				//<< " dynRange=" << sVPIDDynamicRange[GetDynamicRange()]
+			//	<< " dynRange=" << sVPIDDynamicRange[GetDynamicRange()]
 				<< " bitd=" << sVPIDBitDepth[GetBitDepth()]
 				<< " 3Ga=" << YesNo(IsStandard3Ga())
 				<< " tsi=" << YesNo(IsStandardTwoSampleInterleave())

@@ -75,7 +75,6 @@ class AJAExport CNTV2DriverInterface
 			@brief		Specifies if subsequent Open calls should open the device in shared mode or not.
 			@note		On some platforms, this function may have no effect.
 			@param[in]	inSharedMode	Specify true for shared mode;  otherwise use false.
-			@result		True if successful; otherwise false.
 		**/
 		static void				SetShareMode (const bool inSharedMode);
 		static bool				GetShareMode (void);	///< @return	True if local devices will be opened in shared mode; otherwise false.
@@ -84,7 +83,6 @@ class AJAExport CNTV2DriverInterface
 			@brief		Specifies if the next Open call should try to open the device in shared mode or not.
 			@note		On some platforms,  this function may have no effect.
 			@param[in]	inOverlapMode	Specify true for overlapped mode;  otherwise use false.
-			@result		True if successful; otherwise false.
 		**/
 		static void				SetOverlappedMode (const bool inOverlapMode);
 		static bool				GetOverlappedMode (void);	///< @return	True if local devices will be opened in overlapped mode; otherwise false.

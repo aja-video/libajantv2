@@ -2994,12 +2994,12 @@ private:
 				{
 					const NTV2OutputXptID outputXpt(*it);
 					const string name(::NTV2OutputCrosspointIDToString(outputXpt,true));
-					ostringstream oss;
+					ostringstream ss;
 					if (name.empty())
-						oss << xHEX0N(outputXpt,2) << "(" << DEC(outputXpt) << ")";
+						ss << xHEX0N(outputXpt,2) << "(" << DEC(outputXpt) << ")";
 					else
-						oss << "'" << name << "'";
-					outputXptNames.push_back(oss.str());
+						ss << "'" << name << "'";
+					outputXptNames.push_back(ss.str());
 				}
 				if (!outputXptNames.empty())
 					oss << "Valid Xpts: " << outputXptNames;

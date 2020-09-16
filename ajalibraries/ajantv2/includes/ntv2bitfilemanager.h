@@ -113,7 +113,7 @@ private:
 
 	/**
 		@brief		Read the specified bitstream.
-		@param[in]	index		Specifies the index of the bitfile info.
+		@param[in]	inIndex		Specifies the index of the bitfile info.
 		@return		True if the bitstream was read; otherwise false.
 	**/
 	bool ReadBitstream (const size_t inIndex);

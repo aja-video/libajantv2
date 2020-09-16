@@ -165,7 +165,6 @@ public:
 	 *	@param[out]	createTime			Time of file creation, measured in seconds since 1970
 	 *	@param[out]	modTime				Last time file was modified, measured in seconds since 1970
 	 *	@param[out]	size				Size of the file in bytes
-	 *  @param[out] filePath			Full path to the file specified in Open().
 	 *
 	 *	@return		AJA_STATUS_SUCCESS	Was able to get info from the file
 	 */

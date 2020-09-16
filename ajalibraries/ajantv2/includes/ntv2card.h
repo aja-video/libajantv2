@@ -4489,15 +4489,22 @@ public:
 	AJA_VIRTUAL bool		SetLUTV2OutputBank (const NTV2Channel inLUTWidget, const ULWord inBank);
 	AJA_VIRTUAL bool		GetLUTV2OutputBank (const NTV2Channel inLUTWidget, ULWord & outBank);
 
-	AJA_VIRTUAL bool		Has12BitLUTSupport ();
+	AJA_VIRTUAL bool		Has12BitLUTSupport (void);
 	
 	/**
-		@brief		Sets/Gets the LUT table plane select.
-		@param[in]	inLUTPlaneSelect
+		@brief		Sets the LUT plane.
+		@param[in]	inLUTPlane	Specifies the LUT plane of interest.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool		Set12BitLUTPlaneSelect(NTV2LUTPlaneSelect inLUTPlaneSelect);
-	AJA_VIRTUAL bool		Get12BitLUTPlaneSelect(NTV2LUTPlaneSelect & outLUTPlaneSelect);
+	AJA_VIRTUAL bool		Set12BitLUTPlaneSelect (const NTV2LUTPlaneSelect inLUTPlane);
+
+	/**
+		@brief		Answers with the current LUT plane.
+		@param[out]	outLUTPlane	Receives the current LUT plane.
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		Get12BitLUTPlaneSelect (NTV2LUTPlaneSelect & outLUTPlane);
+
 	/**
 		@brief		Sets the RGB range for the given CSC.
 		@param[in]	inRange		Specifies the new RGB range (::NTV2_CSC_RGB_RANGE_FULL or ::NTV2_CSC_RGB_RANGE_SMPTE).
@@ -4586,7 +4593,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::GetColorCorrectionOutputBank, \ref vidop-lut
 	**/
-	AJA_VIRTUAL bool		SetColorCorrectionOutputBank (const NTV2Channel inChannel, const ULWord inBank);
+	AJA_VIRTUAL bool		SetColorCorrectionOutputBank (const NTV2Channel inLUTWidget, const ULWord inBank);
 
 	/**
 		@brief		Answers with the current LUT bank in use for the given LUT.
@@ -5368,7 +5375,7 @@ public:
 		@return						True if successful;  otherwise false.
 		@see						CNTV2Card::SetHDMIOutAudioChannel34Swap
 	**/
-	AJA_VIRTUAL bool	GetHDMIOutAudioChannel34Swap (bool & outIsSwapped, const NTV2Channel inChannel = NTV2_CHANNEL1);	//	New in SDK v16.0
+	AJA_VIRTUAL bool	GetHDMIOutAudioChannel34Swap (bool & outIsSwapped, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK v16.0
 
 	/**
 		@brief						Sets the HDMI output's audio channel 3/4 swap state.
@@ -5378,7 +5385,7 @@ public:
 		@return						True if successful;  otherwise false.
 		@see						CNTV2Card::GetHDMIOutAudioChannel34Swap
 	**/
-	AJA_VIRTUAL bool	SetHDMIOutAudioChannel34Swap (const bool inIsSwapped, const NTV2Channel inChannel = NTV2_CHANNEL1);	//	New in SDK v16.0
+	AJA_VIRTUAL bool	SetHDMIOutAudioChannel34Swap (const bool inIsSwapped, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK v16.0
 
 	/**
 		@brief						Sets the HDMI output's audio rate
