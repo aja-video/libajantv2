@@ -176,7 +176,7 @@ bool CNTV2MCSfile::InsertBitFile(const string & inBitFileName, const string & in
 		return false;
 	}
 
-	uint32_t	bitfileLength(bitfile.GetFileStreamLength());
+	size_t	bitfileLength(bitfile.GetFileStreamLength());
 	unsigned char *	bitfileBuffer(new unsigned char[bitfileLength + 512]);
 	if (bitfileBuffer == NULL)
 	{
@@ -185,7 +185,7 @@ bool CNTV2MCSfile::InsertBitFile(const string & inBitFileName, const string & in
 	}
 
 	::memset(bitfileBuffer, 0xFF, bitfileLength + 512);
-	const unsigned	readBytes(bitfile.GetFileByteStream(bitfileBuffer, bitfileLength));
+	const size_t	readBytes(bitfile.GetFileByteStream(bitfileBuffer, bitfileLength));
 	const string	designName(bitfile.GetDesignName());
 	if (readBytes != bitfileLength)
 	{
@@ -194,9 +194,9 @@ bool CNTV2MCSfile::InsertBitFile(const string & inBitFileName, const string & in
 		return false;
 	}
 
-	//First we will write out the bitfile then add the date and comment and then the mcs file
+	//	First, write out the bitfile, then add the date and comment, and then the mcs file...
 	uint64_t bytesLeftToWrite = bitfileLength;
-	while(bytesLeftToWrite > 0)
+	while (bytesLeftToWrite)
 	{
 		recordSize = bytesLeftToWrite > 16 ? 16 : bytesLeftToWrite;
 		int i = 0;

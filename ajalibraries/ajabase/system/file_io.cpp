@@ -50,7 +50,7 @@ using std::vector;
 	}
 #else
 	// Posix helper functions
-	string GetEnvVar(string const & key)
+	static string GetEnvVar(string const & key)
 	{
 		char * val = getenv( key.c_str() );
 		return val == NULL ? string("") : string(val);

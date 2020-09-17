@@ -55,7 +55,8 @@ AJAExport bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0);
 
 /**
 	@return	True if the device having the given ID supports the given output destination connector;  otherwise false.
-	@param[in]	inDeviceID	Specifies the NTV2DeviceID of the device of interest.
+	@param[in]	inDeviceID		Specifies the NTV2DeviceID of the device of interest.
+	@param[in]	inOutputDest	Specifies the NTV2OutputDestination of interest.
 **/
 AJAExport bool NTV2DeviceCanDoOutputDestination (const NTV2DeviceID inDeviceID, const NTV2OutputDestination inOutputDest);
 

@@ -333,8 +333,8 @@ typedef struct AJAAncillaryDataLocation
 						For HD, this is the number of luma samples (see SMPTE ST274).
 						For SD, this is the number of Y/C muxed words (see SMPTE ST125).
 						Can also be one of these predefined values:
-						-	::AJAAncDataHorizOffset_Default -- i.e., anywhere after SAV.
-						-	::AJAAncDataHorizOffset_Unspecified -- unspecified.
+						-	::AJAAncDataHorizOffset_Anywhere -- i.e., anywhere after SAV.
+						-	::AJAAncDataHorizOffset_Unknown -- unspecified.
 						-	::AJAAncDataHorizOffset_AnyHanc -- i.e., any legal area of the raster line after EAV.
 						-	::AJAAncDataHorizOffset_AnyVanc -- i.e., any legal area of raster line after SAV, but before EAV.
 		**/

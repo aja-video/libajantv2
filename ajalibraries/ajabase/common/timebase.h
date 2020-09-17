@@ -167,10 +167,10 @@ public:
 	/**
 	 *	Convert time scale units to time in seconds.
 	 *
-	 *	@param[in]	Time scale units to convert.
+	 *	@param[in]	num		Time scale units to convert.
 	 *	@return				Time in seconds.
 	 */
-	double ScaleUnitsToSeconds(int64_t frames) const;
+	double ScaleUnitsToSeconds(int64_t num) const;
 
 	/**
 	 *	Convert video frames to time in microseconds.

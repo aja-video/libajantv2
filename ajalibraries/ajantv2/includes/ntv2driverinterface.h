@@ -75,7 +75,6 @@ class AJAExport CNTV2DriverInterface
 			@brief		Specifies if subsequent Open calls should open the device in shared mode or not.
 			@note		On some platforms, this function may have no effect.
 			@param[in]	inSharedMode	Specify true for shared mode;  otherwise use false.
-			@result		True if successful; otherwise false.
 		**/
 		static void				SetShareMode (const bool inSharedMode);
 		static bool				GetShareMode (void);	///< @return	True if local devices will be opened in shared mode; otherwise false.
@@ -84,7 +83,6 @@ class AJAExport CNTV2DriverInterface
 			@brief		Specifies if the next Open call should try to open the device in shared mode or not.
 			@note		On some platforms,  this function may have no effect.
 			@param[in]	inOverlapMode	Specify true for overlapped mode;  otherwise use false.
-			@result		True if successful; otherwise false.
 		**/
 		static void				SetOverlappedMode (const bool inOverlapMode);
 		static bool				GetOverlappedMode (void);	///< @return	True if local devices will be opened in overlapped mode; otherwise false.
@@ -382,10 +380,10 @@ class AJAExport CNTV2DriverInterface
 
 		/**
 			@brief	Sends an HEVC message to the NTV2 driver.
-			@param	pAutoCircData	Points to the HevcMessageHeader that contains the HEVC message.
+			@param	pMessage	Points to the HevcMessageHeader that contains the HEVC message.
 			@return	False. This must be implemented by the platform-specific subclass.
 		**/
-	    AJA_VIRTUAL inline bool	HevcSendMessage (HevcMessageHeader * /*pMessage*/)		{return false;}
+	    AJA_VIRTUAL inline bool	HevcSendMessage (HevcMessageHeader * pMessage)		{(void) pMessage; return false;}
 
 		AJA_VIRTUAL bool	ControlDriverDebugMessages (NTV2_DriverDebugMessageSet msgSet,  bool enable) = 0;
 	///@}
@@ -399,7 +397,7 @@ class AJAExport CNTV2DriverInterface
 			@param[in]	inBitFileType	Optionally specifies the bitfile type of interest. Defaults to NTV2_VideoProcBitFile.
 			@return		True if successful;  otherwise false.
 		**/
-		AJA_VIRTUAL bool DriverGetBitFileInformation (BITFILE_INFO_STRUCT & outBitFileInfo,  const NTV2BitFileType bitFileType = NTV2_VideoProcBitFile);
+		AJA_VIRTUAL bool DriverGetBitFileInformation (BITFILE_INFO_STRUCT & outBitFileInfo,  const NTV2BitFileType inBitFileType = NTV2_VideoProcBitFile);
 
 		/**
 			@brief		Answers with the driver's build information.

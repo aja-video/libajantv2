@@ -208,7 +208,6 @@ public:
 	
     /**
 	 *	Print tag, appended tag, and delta-time since last reset.
-	 *  @param[in]	addedTag        add this tag to current tag
 	 *  @param[in]	bReset          true if time is reset after print
 	 */
     void PrintDelta(bool bReset=true);
@@ -221,7 +220,6 @@ public:
     /**
 	 *	Optional print tag, appended tag, and delta-time since last reset.
 	 *  @param[in]	bEnable         true to print, false inhibits printing
-	 *  @param[in]	addedTag        add this tag to current tag
 	 *  @param[in]	bReset          true if time is reset after print
 	 */
 	inline void PrintDeltaIf(bool bEnable, bool bReset=true)
@@ -240,7 +238,6 @@ public:
     /**
 	 *	Optional print tag, appended tag, and delta-time since last reset.
 	 *  @param[in]	val        		value to print
-	 *  @param[in]	addedTag        add this tag to current tag
 	 */
 	void PrintValue(int64_t val);
 	void PrintValue(int64_t val, const char* addedTag);

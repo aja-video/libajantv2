@@ -714,35 +714,35 @@ typedef enum NTV2RXSDIStatusRegister
 
 typedef enum
 {
-	kRegAudioMixerInputSelects = 2304,		//	2304
-	kRegAudioMixerMainGain,					//	2305
-	kRegAudioMixerAux1GainCh1,				//	2306
-	kRegAudioMixerAux2GainCh1,				//	2307
-	kRegAudioMixerChannelSelect,			//	2308
-	kRegAudioMixerMutes,					//	2309
-	kRegAudioMixerAux1GainCh2,				//	2310
-	kRegAudioMixerAux2GainCh2,				//	2311
-    kRegAudioMixerOutGain,                  //  2312
-	kRegAudioMixerAux1InputLevels = 2318,	//	2318
-	kRegAudioMixerAux2InputLevels,			//	2319
-	kRegAudioMixerMainInputLevelsPair0,		//	2320
-	kRegAudioMixerMainInputLevelsPair1,		//	2321
-	kRegAudioMixerMainInputLevelsPair2,		//	2322
-	kRegAudioMixerMainInputLevelsPair3,		//	2323
-	kRegAudioMixerMainInputLevelsPair4,		//	2324
-	kRegAudioMixerMainInputLevelsPair5,		//	2325
-	kRegAudioMixerMainInputLevelsPair6,		//	2326
-	kRegAudioMixerMainInputLevelsPair7,		//	2327
-	kRegAudioMixerMixedChannelOutputLevels,	//	2328
-	kRegAudioMixerMainOutputLevelsPair0 = kRegAudioMixerMixedChannelOutputLevels,	//	2328
-	kRegAudioMixerMainOutputLevelsPair1,	//	2329
-	kRegAudioMixerMainOutputLevelsPair2,	//	2330
-	kRegAudioMixerMainOutputLevelsPair3,	//	2331
-	kRegAudioMixerMainOutputLevelsPair4,	//	2332
-	kRegAudioMixerMainOutputLevelsPair5,	//	2333
-	kRegAudioMixerMainOutputLevelsPair6,	//	2334
-	kRegAudioMixerMainOutputLevelsPair7,	//	2335	
-}NTV2AudioMixerRegisters;
+	kRegAudioMixerInputSelects = 2304		//	2304
+	,kRegAudioMixerMainGain					//	2305
+	,kRegAudioMixerAux1GainCh1				//	2306
+	,kRegAudioMixerAux2GainCh1				//	2307
+	,kRegAudioMixerChannelSelect			//	2308
+	,kRegAudioMixerMutes					//	2309
+	,kRegAudioMixerAux1GainCh2				//	2310
+	,kRegAudioMixerAux2GainCh2				//	2311
+	,kRegAudioMixerOutGain					//  2312
+	,kRegAudioMixerAux1InputLevels = 2318	//	2318
+	,kRegAudioMixerAux2InputLevels			//	2319
+	,kRegAudioMixerMainInputLevelsPair0		//	2320
+	,kRegAudioMixerMainInputLevelsPair1		//	2321
+	,kRegAudioMixerMainInputLevelsPair2		//	2322
+	,kRegAudioMixerMainInputLevelsPair3		//	2323
+	,kRegAudioMixerMainInputLevelsPair4		//	2324
+	,kRegAudioMixerMainInputLevelsPair5		//	2325
+	,kRegAudioMixerMainInputLevelsPair6		//	2326
+	,kRegAudioMixerMainInputLevelsPair7		//	2327
+	,kRegAudioMixerMixedChannelOutputLevels	//	2328
+	,kRegAudioMixerMainOutputLevelsPair0 = kRegAudioMixerMixedChannelOutputLevels	//	2328
+	,kRegAudioMixerMainOutputLevelsPair1	//	2329
+	,kRegAudioMixerMainOutputLevelsPair2	//	2330
+	,kRegAudioMixerMainOutputLevelsPair3	//	2331
+	,kRegAudioMixerMainOutputLevelsPair4	//	2332
+	,kRegAudioMixerMainOutputLevelsPair5	//	2333
+	,kRegAudioMixerMainOutputLevelsPair6	//	2334
+	,kRegAudioMixerMainOutputLevelsPair7	//	2335	
+} NTV2AudioMixerRegisters;
 
 //	Discontinuous block of registers used for detecting non-PCM embedded audio.
 typedef enum _NTV2NonPCMAudioDetectRegisters
@@ -4354,7 +4354,6 @@ typedef enum
 
 	/**
 		@param[in]	inChannels		Specifies the NTV2Channels that should go into the NTV2ChannelSet.
-		@param		inNumChannels	Specifies the number of channels.
 		@return		An NTV2ChannelSet having the same channels as contained in the specified list.
 	**/
 	AJAExport NTV2ChannelSet NTV2MakeChannelSet (const NTV2ChannelList inChannels);
@@ -4368,7 +4367,6 @@ typedef enum
 
 	/**
 		@param[in]	inChannels		Specifies the NTV2Channels that should go into the NTV2ChannelList.
-		@param		inNumChannels	Specifies the number of channels.
 		@return		An NTV2ChannelList having the same channels as contained in the specified set.
 	**/
 	AJAExport NTV2ChannelList NTV2MakeChannelList (const NTV2ChannelSet inChannels);
@@ -6154,8 +6152,8 @@ typedef enum
 
 				/**
 					@brief		Writes a human-readable description of me into a given output stream.
-					@param		inStrm		A non-constant reference to the output stream that will receive the description.
-					@param[in]	inDumpSegs	If true, also dumps a description of each segment. Defaults to false.
+					@param		inStrm			A non-constant reference to the output stream that will receive the description.
+					@param[in]	inDumpSegments	If true, also dumps a description of each segment. Defaults to false.
 					@return		A reference to the output stream.
 				**/
 				std::ostream &	Print (std::ostream & inStrm, const bool inDumpSegments = false) const;
@@ -8492,9 +8490,9 @@ typedef enum
 
 				/**
 					@brief	Sets the maximum lock size for use in a subsequent call to CNTV2Card::DMABufferLock.
-					@param	inFlags			Specifies maximum lock size in bytes
+					@param	inNumBytes		Specifies maximum lock size, in bytes.
 				**/
-				inline void	SetMaxLockSize (const ULWord64 inSize)		{NTV2_ASSERT_STRUCT_VALID;  mMaxLockSize = inSize;}
+				inline void	SetMaxLockSize (const ULWord64 inNumBytes)		{NTV2_ASSERT_STRUCT_VALID;  mMaxLockSize = inNumBytes;}
 
 				/**
 					@brief	Resets the struct to its initialized state.
@@ -8720,9 +8718,9 @@ typedef enum
 			AJAExport NTV2StandardSet & operator += (NTV2StandardSet & inOutSet, const NTV2StandardSet inSet);
 
 			/**
-				@brief		Returns a set of distinct ::NTV2Geometry values supported on the given device.
+				@brief		Returns a set of distinct ::NTV2FrameGeometry values supported on the given device.
 				@param[in]	inDeviceID		Specifies the ::NTV2DeviceID of the device of interest.
-				@param[out]	outGeometries	Receives the set of distinct ::NTV2Geometry values supported by the device.
+				@param[out]	outGeometries	Receives the set of distinct ::NTV2FrameGeometry values supported by the device.
 				@return		True if successful;  otherwise false.
 				@todo		Needs to be moved to a C++ compatible "device features" module.
 			**/

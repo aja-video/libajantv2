@@ -1,7 +1,7 @@
 /**
 @page	toolsandutilities
 
-@section	usingsystemtest		"AJA System Test"
+@section	usingsystemtest		“AJA System Test”
 
 This page describes how to use the <b>AJA System Test</b> utility to measure the read/write performance of an AJA device and/or local host disk storage.
 
@@ -9,24 +9,24 @@ This page describes how to use the <b>AJA System Test</b> utility to measure the
 
 @par	General Operation
 
-The user interface consists of a single main window, with...
+The user interface consists of a single main window, with…
 -	<b>Write</b> and <b>Read</b> progress indicators featured prominently in the middle.
 -	The big, green <b>Start</b> button, which starts a test running. When a test is running, it turns into a big, red <b>Stop</b> button.
--	<b>Operation Mode</b> buttons (at the top). These are mutually exclusive -- only one mode can be active at any given time.
+-	<b>Operation Mode</b> buttons (at the top). These are mutually exclusive — only one mode can be active at any given time.
 -	<b>Settings</b> (on the left). These allow you to choose resolution, file size, codec type, device, target disk, etc.
 -	A graph icon (at the bottom) to toggle the display of performance charts.
 
 
 The <b>Settings</b> panel (on the left) makes it easy to both see and change the relevant test settings. Just click on the heading to change the setting.
-	-	<b>Resolution</b> -- Selects the video format (and frame dimensions) of interest.
+	-	<b>Resolution</b> — Selects the video format (and frame dimensions) of interest.
 		(For device tests, the available formats may vary depending on the selected device capabilities.)
-	-	<b>Test File Size</b> -- Selects the size of the test file to be created and used in the test. Choose from 256MB to 16GB.
-	-	<b>Codec Type</b> -- Selects the codec type to be used in the test. Choose from a variety of uncompressed YUV or RGB formats, and many compressed formats.
-	-	<b>Target Disk</b> -- Selects the host disk volume to be used for the test.
+	-	<b>Test File Size</b> — Selects the size of the test file to be created and used in the test. Choose from 256MB to 16GB.
+	-	<b>Codec Type</b> — Selects the codec type to be used in the test. Choose from a variety of uncompressed YUV or RGB formats, and many compressed formats.
+	-	<b>Target Disk</b> — Selects the host disk volume to be used for the test.
 		@note	The volume must be writable and have sufficient free space to accommodate the test file(s) that the test will create.
-	-	<b>Pixel Format</b> -- Selects a pixel format. The available formats will vary, depending on the selected device capabilities.
-	-	<b>AJA Device</b> -- Selects an AJA device to test.
-	-	<b>Settings</b> -- Used to configure other lesser-used settings (see below).
+	-	<b>Pixel Format</b> — Selects a pixel format. The available formats will vary, depending on the selected device capabilities.
+	-	<b>AJA Device</b> — Selects an AJA device to test.
+	-	<b>Settings</b> — Used to configure other lesser-used settings (see below).
 
 
 
@@ -36,7 +36,7 @@ The <b>Settings</b> panel (on the left) makes it easy to both see and change the
 
 The <b>System Disk Test</b> measures the read/write performance of local host storage.
 
-To measure disk performance for a particular local host volume...
+To measure disk performance for a particular local host volume…
 -#	Choose a video <b>Resolution</b>.
 -#	Choose a <b>Test File Size</b>.
 -#	Choose a <b>Codec Type</b>.
@@ -53,9 +53,9 @@ To measure disk performance for a particular local host volume...
 
 @image	html	systest-devicetest.png
 
-The <b>AJA Device Test</b> measures the host's-device's DMA read/write performance.
+The <b>AJA Device Test</b> measures the hostʼs-deviceʼs DMA read/write performance.
 
-To measure DMA performance for a particular device...
+To measure DMA performance for a particular device…
 -#	Choose a video <b>Resolution</b>.
 -#	Choose a <b>Pixel Format</b>.
 -#	Choose a device.
@@ -71,10 +71,10 @@ To measure DMA performance for a particular device...
 
 @image	html	systest-diskdevicetest.png
 
-The <b>Disk + Device Test</b> measures more "real-world" read/write performance by performing DMA reads followed by host disk writes (for capture),
+The <b>Disk + Device Test</b> measures more “real-world” read/write performance by performing DMA reads followed by host disk writes (for capture),
 and host disk reads followed by DMA writes (for playout).
 
-To measure combined DMA and host disk I/O performance...
+To measure combined DMA and host disk I/O performance…
 -#	Choose a video <b>Resolution</b>.
 -#	Choose a <b>Test File Size</b>.
 -#	Choose a <b>Codec Type</b>.
@@ -93,13 +93,13 @@ To measure combined DMA and host disk I/O performance...
 
 @image	html	systest-settings.png
 
-The "Settings" dialog box is used to configure other lesser-used settings.
+The “Settings” dialog box is used to configure other lesser-used settings.
 
-	-	<b>Start Test</b> -- Configures whether the test runs once (the default) or continuously.
-	-	<b>Disk Test</b> -- Configures the Disk Test to create and use one "File per Frame" or use one "Single file" for all frames. Defaults to "Single file".
-	-	<b>Disk Cache</b> -- Enables or disables the local host operating system's disk cache. Defaults to "Disable".
-	-	<b>Disk Mode</b> -- Configures the Disk Test to measure "Read/Write", "Write-only" or "Read-only (write once)" performance. Defaults to "Read/Write".
-	-	<b>DMA Mode</b> -- Configures the Device Test to use one ("Single Engine") or two ("Dual Engines") DMA engines. Defaults to "Dual Engines".
+	-	<b>Start Test</b> — Configures whether the test runs once (the default) or continuously.
+	-	<b>Disk Test</b> — Configures the Disk Test to create and use one “File per Frame” or use one “Single file” for all frames. Defaults to “Single file”.
+	-	<b>Disk Cache</b> — Enables or disables the local host operating systemʼs disk cache. Defaults to “Disable”.
+	-	<b>Disk Mode</b> — Configures the Disk Test to measure “Read/Write”, “Write-only” or “Read-only (write once)” performance. Defaults to “Read/Write”.
+	-	<b>DMA Mode</b> — Configures the Device Test to use one (“Single Engine”) or two (“Dual Engines”) DMA engines. Defaults to “Dual Engines”.
 
 
 
@@ -109,17 +109,17 @@ The "Settings" dialog box is used to configure other lesser-used settings.
 
 The <b>System Report</b> shows detailed information about the host system and the attached AJA device(s) that may affect read/write performance.
 
-To export a <b>.pdf</b> file that contains the report...
+To export a <b>.pdf</b> file that contains the report…
 -#	Be sure the <b>Generate System Report File (.spx)</b> checkbox is unchecked (clear).
 -#	Click <b>Save</b>.
 -#	A folder-picker dialog box will appear. Choose a folder in which to save the PDF file, then click <b>Open</b>.
 
-To export a <b>.spx</b> file that contains the full report of the host system configuration...
+To export a <b>.spx</b> file that contains the full report of the host system configuration…
 -#	Be sure the <b>Generate System Report File (.spx)</b> checkbox is checked (ticked).
 -#	Click <b>Save</b>.
 -#	A folder-picker dialog box will appear. Choose a folder in which to save the SPX file, then click <b>Open</b>.
 
-To copy all or part of the report text out of the report window...
+To copy all or part of the report text out of the report window…
 -#	Left-click and drag through the text in the window, or right-click and choose <b>Select All</b> (or press Ctrl-A).
 -#	Right-click and choose <b>Copy</b> (or press Ctrl-C).
 -#	You may now paste (using Ctrl-V) the copied text into a document being edited in another running application.

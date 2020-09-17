@@ -71,12 +71,12 @@ typedef Widget2InputXpts::const_iterator				Widget2InputXptsConstIter;
 
 /**
 	@brief	Answers with the ::NTV2InputXptID and ::NTV2OutputXptIDSet for the given ROM register value.
-	@param[in]	inROMRegNum		Specifies the ROM register number.
-	@param[in]	inROMRegValue	Specifies the ROM register value.
-	@param[out]	outInputXpt		Receives the input crosspoint associated with the ROM register.
-	@param[out]	outOutputXpts	Receives the valid (implemented) output crosspoint routes.
-	@param[in]	inAppendXpts	If true, appends output crosspoints to the output set;
-								otherwise clears the output crosspoint set (the default).
+	@param[in]	inROMRegNum			Specifies the ROM register number.
+	@param[in]	inROMRegValue		Specifies the ROM register value.
+	@param[out]	outInputXpt			Receives the input crosspoint associated with the ROM register.
+	@param[out]	outOutputXpts		Receives the valid (implemented) output crosspoint routes.
+	@param[in]	inAppendOutputXpts	If true, appends output crosspoints to the output set;
+									otherwise clears the output crosspoint set (the default).
 	@return	True if successful;  otherwise false.
 **/
 AJAExport bool GetRouteROMInfoFromReg (const ULWord inROMRegNum, const ULWord inROMRegValue,
@@ -128,7 +128,7 @@ class AJAExport CNTV2SignalRouter
 		#endif	//	!defined (NTV2_DEPRECATE)
 
 		#if !defined (NTV2_DEPRECATE_12_5)
-			virtual NTV2_DEPRECATED_f(bool	addWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue));				///< @deprecated	Use AddConnection with ::NTV2InputXptIDs instead.
+			virtual NTV2_DEPRECATED_f(bool	addWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue));				///< @deprecated	Use AddConnection with ::NTV2InputXptIDSet instead.
 			virtual NTV2_DEPRECATED_f(bool	AddConnection (const NTV2RoutingEntry & inEntry, const NTV2OutputCrosspointID inSignalOutput = NTV2_XptBlack));	///< @deprecated	Use AddConnection(::NTV2InputXptID, ::NTV2OutputXptID) instead.
 		#endif	//	!defined (NTV2_DEPRECATE_12_5)
 
@@ -400,7 +400,7 @@ class AJAExport CNTV2SignalRouter
 		/**
 			@brief		Returns the input crosspoints known to be "owned" by the given widget.
 			@param[in]	inWidgetID		Specifies the ::NTV2WidgetID of the widget of interest.
-			@param[out]	outInputs		Receives the set of ::NTV2InputXptIDs that are "owned" by the widget
+			@param[out]	outInputs		Receives the set of ::NTV2InputXptIDSet that are "owned" by the widget
 										(or empty upon failure).
 			@return		True if successful;  otherwise false.
 		**/
@@ -409,7 +409,7 @@ class AJAExport CNTV2SignalRouter
 		/**
 			@brief		Returns all known widget input crosspoints for the given device.
 			@param[in]	inDeviceID		Specifies the ::NTV2DeviceID of the device of interest.
-			@param[out]	outInputs		Receives the ::NTV2InputXptIDs (or empty upon failure).
+			@param[out]	outInputs		Receives the ::NTV2InputXptIDSet (or empty upon failure).
 			@return		True if successful;  otherwise false.
 		**/
 		static bool					GetAllWidgetInputs (const NTV2DeviceID inDeviceID, NTV2InputXptIDSet & outInputs);
@@ -424,8 +424,8 @@ class AJAExport CNTV2SignalRouter
 
 		/**
 			@brief		Returns the output crosspoints known to be "owned" by the given widget.
-			@param[in]	inWidgetID		Specifies the NTV2WidgetID of the widget of interest.
-			@param[out]	outOutputs		Receives the set of ::NTV2OutputXptIDs that are "owned" by the widget
+			@param[in]	inWidgetID		Specifies the ::NTV2WidgetID of the widget of interest.
+			@param[out]	outOutputs		Receives the set of ::NTV2OutputXptIDSet that are "owned" by the widget
 										(or empty upon failure).
 			@return		True if successful;  otherwise false.
 		**/
@@ -441,19 +441,19 @@ class AJAExport CNTV2SignalRouter
 		static bool					GetConnectionsFromRegs (const NTV2InputXptIDSet & inInputXptIDs, const NTV2RegisterReads & inRegValues, NTV2XptConnections & outConnections);
 
 		/**
-			@param[in]	inInputXptID	Specifies the input crosspoint ID of interest.
+			@param[in]	inInputXpt	Specifies the input crosspoint ID of interest.
 			@return		True if the input only accepts RGB;  otherwise false.
 		**/
 		static bool					IsRGBOnlyInputXpt (const NTV2InputXptID inInputXpt);
 
 		/**
-			@param[in]	inInputXptID	Specifies the input crosspoint ID of interest.
+			@param[in]	inInputXpt	Specifies the input crosspoint ID of interest.
 			@return		True if the input only accepts YCbCr;  otherwise false.
 		**/
 		static bool					IsYUVOnlyInputXpt (const NTV2InputXptID inInputXpt);
 
 		/**
-			@param[in]	inInputXptID	Specifies the input crosspoint ID of interest.
+			@param[in]	inInputXpt	Specifies the input crosspoint ID of interest.
 			@return		True if the input is a mask/key input;  otherwise false.
 		**/
 		static bool					IsKeyInputXpt (const NTV2InputXptID inInputXpt);

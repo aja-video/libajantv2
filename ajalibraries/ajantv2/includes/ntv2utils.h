@@ -405,18 +405,18 @@ AJAExport NTV2_SHOULD_BE_DEPRECATED(bool NTV2DeviceCanDoFormat (const NTV2Device
 	@brief	Returns the number of audio samples for a given video frame rate, audio sample rate, and frame number.
 			This is useful since AJA devices use fixed audio sample rates (typically 48KHz), and some video frame
 			rates will necessarily result in some frames having more audio samples than others.
-	@param[in]	frameRate		Specifies the video frame rate.
-	@param[in]	audioRate		Specifies the audio sample rate. Must be one of NTV2_AUDIO_48K or NTV2_AUDIO_96K.
-	@param[in]	cadenceFrame	Optionally specifies a frame number for maintaining proper cadence in a frame sequence,
-								for those video frame rates that don't accommodate an even number of audio samples.
-								Defaults to zero.
-	@param[in]	smpte372Enabled	Specifies that 1080p60, 1080p5994 or 1080p50 is being used. In this mode, the device's
-								framerate might be NTV2_FRAMERATE_3000, but since 2 links are coming out, the video rate
-								is effectively NTV2_FRAMERATE_6000. Defaults to false.
+	@param[in]	inFrameRate			Specifies the video frame rate.
+	@param[in]	inAudioRate			Specifies the audio sample rate. Must be one of NTV2_AUDIO_48K or NTV2_AUDIO_96K.
+	@param[in]	inCadenceFrame		Optionally specifies a frame number for maintaining proper cadence in a frame sequence,
+									for those video frame rates that don't accommodate an even number of audio samples.
+									Defaults to zero.
+	@param[in]	inIsSMPTE372Enabled	Specifies that 1080p60, 1080p5994 or 1080p50 is being used. In this mode, the device's
+									framerate might be NTV2_FRAMERATE_3000, but since 2 links are coming out, the video rate
+									is effectively NTV2_FRAMERATE_6000. Defaults to false.
 	@return	The number of audio samples.
 	@see	See \ref audiosamplecount
 **/
-AJAExport ULWord				GetAudioSamplesPerFrame (const NTV2FrameRate frameRate, const NTV2AudioRate audioRate, ULWord inCadenceFrame = 0, bool inIsSMPTE372Enabled = false);
+AJAExport ULWord				GetAudioSamplesPerFrame (const NTV2FrameRate inFrameRate, const NTV2AudioRate inAudioRate, ULWord inCadenceFrame = 0, bool inIsSMPTE372Enabled = false);
 AJAExport LWord64				GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr (NTV2FrameRate frameRate, NTV2AudioRate audioRate, ULWord frameNbrNonInclusive);
 
 AJAExport NTV2_SHOULD_BE_DEPRECATED(ULWord GetVaricamRepeatCount (const NTV2FrameRate inSequenceRate, const NTV2FrameRate inPlayRate, const ULWord inCadenceFrame = 0));

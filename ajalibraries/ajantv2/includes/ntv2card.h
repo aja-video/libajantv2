@@ -253,7 +253,7 @@ public:
 	/**
 		@brief	Constructor that opens the device.
 		@param[in]	inDeviceIndex	A zero-based index number that identifies which device to open,
-									which should be the number received from the ::NTV2DeviceScanner.
+									which should be the number received from the ::CNTV2DeviceScanner.
 		@param[in]	inHostName		If non-empty, must contain the name of a host that has one or more
 									AJA devices. Defaults to empty string (the local host).
 		@nosubgrouping
@@ -490,7 +490,7 @@ public:
 	/**
 		@brief		Transfers a single frame from the AJA device to the host. This call is multi-format compatible.
 		@param[in]	inFrameNumber	Specifies the zero-based frame number of the frame to be read from the device.
-		@param[in]	pOutFrameBuffer	Specifies the non-NULL address of the host buffer that is to receive the frame data.
+		@param[in]	pFrameBuffer	Specifies the non-NULL address of the host buffer that is to receive the frame data.
 									The memory it points to must be writeable.
 		@param[in]	inByteCount		Specifies the total number of bytes to transfer.
 		@param[in]	inChannel		Specified for multi-format
@@ -3074,7 +3074,7 @@ public:
 	/**
 		@brief		Prevents the CNTV2Card instance from waiting for and responding to input vertical blanking
 					interrupts originating from the given frameStore(s) on the device.
-		@param[in]	channel		Specifies the frameStore(s) of interest.
+		@param[in]	inFrameStores		Specifies the frameStore(s) of interest.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	DisableInputInterrupt (const NTV2ChannelSet & inFrameStores);
@@ -3777,7 +3777,7 @@ public:
 		@param[in]	inStartTime		Optionally specifies a future start time as an unsigned 64-bit host-OS-dependent time value.
 									If zero, the default, AutoCirculate will switch to the ::NTV2_AUTOCIRCULATE_RUNNING state at
 									the next VBI received by the given channel. If non-zero, AutoCirculate will remain in the
-									::NTV2_AUTOCIRCULATE_START_AT_TIME state until the system tick clock exceeds this value, at
+									::NTV2_AUTOCIRCULATE_STARTING_AT_TIME state until the system tick clock exceeds this value, at
 									which point it will switch to the ::NTV2_AUTOCIRCULATE_RUNNING state. This value is denominated
 									in the same time units as the finest-grained time counter available on the host's operating system.
 		@details	This function performs the following tasks:
@@ -4489,15 +4489,22 @@ public:
 	AJA_VIRTUAL bool		SetLUTV2OutputBank (const NTV2Channel inLUTWidget, const ULWord inBank);
 	AJA_VIRTUAL bool		GetLUTV2OutputBank (const NTV2Channel inLUTWidget, ULWord & outBank);
 
-	AJA_VIRTUAL bool		Has12BitLUTSupport ();
+	AJA_VIRTUAL bool		Has12BitLUTSupport (void);
 	
 	/**
-		@brief		Sets/Gets the LUT table plane select.
-		@param[in]	inLUTPlaneSelect
+		@brief		Sets the LUT plane.
+		@param[in]	inLUTPlane	Specifies the LUT plane of interest.
 		@return		True if successful;  otherwise false.
 	**/
-	AJA_VIRTUAL bool		Set12BitLUTPlaneSelect(NTV2LUTPlaneSelect inLUTPlaneSelect);
-	AJA_VIRTUAL bool		Get12BitLUTPlaneSelect(NTV2LUTPlaneSelect & outLUTPlaneSelect);
+	AJA_VIRTUAL bool		Set12BitLUTPlaneSelect (const NTV2LUTPlaneSelect inLUTPlane);
+
+	/**
+		@brief		Answers with the current LUT plane.
+		@param[out]	outLUTPlane	Receives the current LUT plane.
+		@return		True if successful;  otherwise false.
+	**/
+	AJA_VIRTUAL bool		Get12BitLUTPlaneSelect (NTV2LUTPlaneSelect & outLUTPlane);
+
 	/**
 		@brief		Sets the RGB range for the given CSC.
 		@param[in]	inRange		Specifies the new RGB range (::NTV2_CSC_RGB_RANGE_FULL or ::NTV2_CSC_RGB_RANGE_SMPTE).
@@ -4586,7 +4593,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::GetColorCorrectionOutputBank, \ref vidop-lut
 	**/
-	AJA_VIRTUAL bool		SetColorCorrectionOutputBank (const NTV2Channel inChannel, const ULWord inBank);
+	AJA_VIRTUAL bool		SetColorCorrectionOutputBank (const NTV2Channel inLUTWidget, const ULWord inBank);
 
 	/**
 		@brief		Answers with the current LUT bank in use for the given LUT.
@@ -4595,7 +4602,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::SetColorCorrectionOutputBank, \ref vidop-lut
 	**/
-	AJA_VIRTUAL bool		GetColorCorrectionOutputBank (const NTV2Channel inChannel, ULWord & outBank);
+	AJA_VIRTUAL bool		GetColorCorrectionOutputBank (const NTV2Channel inLUTWidget, ULWord & outBank);
 
 	AJA_VIRTUAL bool		SetColorCorrectionHostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue);
 	AJA_VIRTUAL bool		GetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
@@ -5363,18 +5370,22 @@ public:
 	/**
 		@brief						Answers with the HDMI output's current audio channel 3/4 swap setting.
 		@param[out]	outIsSwapped	Receives true if channels 3 & 4 are currently being swapped;  otherwise false.
+		@param[in]	inWhichHDMIOut	Optionally specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first HDMI output.
 		@return						True if successful;  otherwise false.
 		@see						CNTV2Card::SetHDMIOutAudioChannel34Swap
 	**/
-	AJA_VIRTUAL bool	GetHDMIOutAudioChannel34Swap (bool & outIsSwapped, const NTV2Channel inChannel = NTV2_CHANNEL1);	//	New in SDK v16.0
+	AJA_VIRTUAL bool	GetHDMIOutAudioChannel34Swap (bool & outIsSwapped, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK v16.0
 
 	/**
 		@brief						Sets the HDMI output's audio channel 3/4 swap state.
 		@param[in]	inIsSwapped		Specify true to swap channels 3 & 4;  otherwise false.
+		@param[in]	inWhichHDMIOut	Optionally specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first HDMI output.
 		@return						True if successful;  otherwise false.
 		@see						CNTV2Card::GetHDMIOutAudioChannel34Swap
 	**/
-	AJA_VIRTUAL bool	SetHDMIOutAudioChannel34Swap (const bool inIsSwapped, const NTV2Channel inChannel = NTV2_CHANNEL1);	//	New in SDK v16.0
+	AJA_VIRTUAL bool	SetHDMIOutAudioChannel34Swap (const bool inIsSwapped, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK v16.0
 
 	/**
 		@brief						Sets the HDMI output's audio rate
@@ -6344,15 +6355,15 @@ public:
 										const NTV2Standard inStandard = NTV2_STANDARD_INVALID);
 
 	/**
-		@brief		Enables or disables the given SDI output's Anc extraction components.
-					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
+		@brief		Enables or disables the given SDI input's Anc extraction components.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc extractor firmware.)
 		@return		True if successful; otherwise false.
-		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
 		@param[in]	inVancY			Specify true to enable Vanc Y component extraction;  otherwise false to disable it.
 		@param[in]	inVancC			Specify true to enable Vanc C component extraction;  otherwise false to disable it.
 		@param[in]	inHancY			Specify true to enable Hanc Y component extraction;  otherwise false to disable it.
 		@param[in]	inHancC			Specify true to enable Hanc C component extraction;  otherwise false to disable it.
-		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
+		@note		Use this function only with \ref aboutpingpong or other capture methods that don't
 					use \ref aboutautocirculate.
 	**/
 	AJA_VIRTUAL bool	AncExtractSetComponents (const UWord inSDIInput,
@@ -6363,9 +6374,9 @@ public:
 		@brief		Enables or disables the given SDI input's Anc extractor.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc extractor firmware.)
 		@return		True if successful; otherwise false.
-		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
 		@param[in]	inIsEnabled		Specify true to enable the Anc extractor;  otherwise false to disable it.
-		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
+		@note		Use this function only with \ref aboutpingpong or other capture methods that don't
 					use \ref aboutautocirculate.
 		@see		CNTV2Card::AncExtractIsEnabled, \ref anccapture
 	**/
@@ -6393,7 +6404,7 @@ public:
 									that corresponds to the SDI input (e.g., ::NTV2_CHANNEL1 == 0 == SDIIn1).
 		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Anc buffer location
 									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
-		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
+		@note		Use this function only with \ref aboutpingpong or other capture methods that don't
 					use \ref aboutautocirculate.
 		@see		CNTV2Card::AncExtractSetField2WriteParams, \ref anccapture
 	**/
@@ -6413,7 +6424,7 @@ public:
 									that corresponds to the SDI input (e.g., ::NTV2_CHANNEL1 == 0 == SDIIn1).
 		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Anc buffer location
 									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
-		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
+		@note		Use this function only with \ref aboutpingpong or other capture methods that don't
 					use \ref aboutautocirculate.
 		@see		CNTV2Card::AncExtractSetWriteParams, \ref anccapture
 	**/

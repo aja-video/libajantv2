@@ -311,7 +311,7 @@ public:
 	/**
 	 *	Get the destination associated with a debug group.
 	 *
-	 *	@param[in]	index						Index of the group destination to return.
+	 *	@param[in]	inGroup						Index of the group destination to return.
 	 *	@param[out]	outDestination				Receives the current destination
 	 *	@return		AJA_STATUS_SUCCESS			Destination disabled
 	 *				AJA_STATUS_OPEN				Debug system not open
