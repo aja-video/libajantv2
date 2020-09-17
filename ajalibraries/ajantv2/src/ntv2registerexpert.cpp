@@ -1030,7 +1030,7 @@ private:
 		DefineRegName	(kVRegFrameBuffer2RGBRange,				"kVRegFrameBuffer2RGBRange");
 		DefineRegName	(kVRegFrameBuffer2Stereo3DMode,			"kVRegFrameBuffer2Stereo3DMode");
 		DefineRegName	(kVRegAudioGainDisable,					"kVRegAudioGainDisable");
-		DefineRegName	(kVRegDBLAudioEnable,					"kVRegDBLAudioEnable");
+		DefineRegName	(kVRegLTCOnRefInSelect,					"kVRegLTCOnRefInSelect");
 		DefineRegName	(kVRegActiveVideoOutFilter,				"kVRegActiveVideoOutFilter");
 		DefineRegName	(kVRegAudioInputMapSelect,				"kVRegAudioInputMapSelect");
 		DefineRegName	(kVRegAudioInputDelay,					"kVRegAudioInputDelay");

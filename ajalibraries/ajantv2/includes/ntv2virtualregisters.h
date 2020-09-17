@@ -146,7 +146,7 @@ typedef enum
 	kVRegFrameBuffer2RGBRange				= VIRTUALREG_START+154,
 	kVRegFrameBuffer2Stereo3DMode			= VIRTUALREG_START+155,		// deprecated
 	kVRegAudioGainDisable					= VIRTUALREG_START+156,
-	kVRegDBLAudioEnable						= VIRTUALREG_START+157,		// deprecated
+	kVRegLTCOnRefInSelect					= VIRTUALREG_START+157,
 	kVRegActiveVideoOutFilter				= VIRTUALREG_START+158,		// deprecated
 	kVRegAudioInputMapSelect				= VIRTUALREG_START+159,
 
@@ -704,7 +704,7 @@ typedef enum
 	#define	kRegFrameBuffer2RGBRange			kVRegFrameBuffer2RGBRange
 	#define	kRegFrameBuffer2Stereo3DMode		kVRegFrameBuffer2Stereo3DMode
 	#define	kRegAudioGainDisable				kVRegAudioGainDisable
-	#define	kDBLAudioEnable						kVRegDBLAudioEnable
+	#define	kDBLAudioEnable						kVRegLTCOnRefInSelect
 	#define	kActiveVideoOutFilter				kVRegActiveVideoOutFilter
 	#define	kRegAudioInputMapSelect				kVRegAudioInputMapSelect
 	#define	kAudioInputDelay					kVRegAudioInputDelay
