@@ -627,8 +627,8 @@
 			which, after many repetitions of this, can result in their exhaustion. The are three ways to
 			recover from this: 1) Reboot the machine. 2) Manually disabling and re-enabling the AJA driver
 			(after closing all running NTV2 client applications, including the AJA Service. 3) Set virtual
-			register kVRegClearAllSubscriptions to a non-zero value (this can be easily done in NTV2Watcher’s
-			\ref inspectorregs ).
+			register kVRegClearAllSubscriptions to a non-zero value (this can be easily done in \ref usingntv2watcher
+			tool’s \ref inspectorregs ).
 
 
 	@subsection	vidop-fbconflict	When Frame Stores Access the Same Frame Buffer Memory
@@ -875,7 +875,7 @@
 	-	Some newer device firmware supports 12-bit LUTs. In 12-bit mode, the LUT table is expanded in size to 4,096 values
 		per component, and the legal (output) values assume the range <tt>0x000 - 0xFFF</tt>.
 	-	See \ref widget_lut for a discussion on how to route signals to and from <b>LUT</b> widgets.
-	-	The NTV2Watcher toolʼs \ref inspectorlut can be used to inspect and/or modify <b>LUT</b> configuration.
+	-	The \ref usingntv2watcher tool’s \ref inspectorlut can be used to inspect and/or modify <b>LUT</b> configuration.
 
 	@note	The reading and writing of any 10-bit “version 2” LUT bank table data flows through registers 512-2047,
 			with host access controlled by register 376 (<tt>kRegLUTV2Control</tt>). There is no software mutex
@@ -1030,6 +1030,9 @@
 	@warning	It is easy to write video data into an audio buffer and vice-versa, which leads to noisy,
 				garbled audio and/or bad video frame(s). SDK clients must take precautions to ensure that frame
 				buffers used by your application never coincide with any of the audio buffers.
+
+	@note	The \ref usingntv2watcher tool’s \ref inspectoraudio allows you to interactively view each Audio System’s
+			capture or playout buffer, as well as inspect or change its current configuration.
 
 
 	<hr size="50px">
@@ -1218,6 +1221,9 @@
 			definition of “synchronized” in SMPTE 299 § 7.2.1.3, because the embedder doesn’t set the <b>Frame Sequence Number</b>
 			in the <b>AES header</b>. SMPTE 299, however, stipulates that receivers should correctly receive audio even from
 			equipment that doesn’t fully conform to § 7.2.1.3.
+
+	The \ref usingntv2watcher tool has a \ref tonegenerator that can be used to fill any Audio System’s output buffer, either statically
+	(one-time data fill) or dynamically (continuously).
 
 
 	<hr size="50px">
