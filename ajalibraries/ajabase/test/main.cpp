@@ -951,7 +951,7 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 			AJAFileIO::GetWorkingDirectory(tempDirCwdWStr);
 			aja::string_to_wstring(tempDir, tempDirWStr);
 #if defined(AJA_WINDOWS)
-			CHECK_EQ(tempDirWStr, tempDirCwdWStr + AJAFileIO::kPathSeparator);
+			CHECK_EQ(tempDirWStr, tempDirCwdWStr + AJAFileIO::kPathSeparatorWide);
 #else
             CHECK_EQ(tempDirWStr, tempDirCwdWStr);
 #endif

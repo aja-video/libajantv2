@@ -276,12 +276,24 @@ public:
 	 *
 	 * @param[in] 	path	Path from which to extract the directory name
 	 * 
-	 * @param[out]  directory	Path of the directory extracted from specified path.
+	 * @param[out]  directory	Path of the directory extracted from specified path
 	 * 
-	 * @return		AJA_STATUS_SUCCESS If and only if the directory name is extracted.
+	 * @return		AJA_STATUS_SUCCESS If and only if the directory name is extracted
 	 */
 	static AJAStatus GetDirectoryName(const std::string& path, std::string& directory);
 	static AJAStatus GetDirectoryName(const std::wstring& path, std::wstring& directory);
+
+	/**
+	 * Retrieves the filename (with extension) from the specified path.
+	 *
+	 * @param[in] 	path	Path from which to extract the filename
+	 * 
+	 * @param[out]  filename	Filename extracted from specified path
+	 * 
+	 * @return		AJA_STATUS_SUCCESS If and only if the filename is extracted
+	 */
+	static AJAStatus GetFileName(const std::string& path, std::string& filename);
+	static AJAStatus GetFileName(const std::wstring& path, std::wstring& filename);
 
 #if defined(AJA_WINDOWS)
 	static const char kPathSeparator = '\\';

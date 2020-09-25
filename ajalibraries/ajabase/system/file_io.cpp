@@ -1209,12 +1209,42 @@ AJAFileIO::GetDirectoryName(const std::string& path, std::string& directory)
 AJAStatus
 AJAFileIO::GetDirectoryName(const std::wstring& path, std::wstring& directory)
 {
-	const size_t lastSlashIndex = path.rfind(kPathSeparator);
+	const size_t lastSlashIndex = path.rfind(kPathSeparatorWide);
 
 	directory = L"";
 
 	if (std::wstring::npos != lastSlashIndex) {
 		directory = path.substr(0, lastSlashIndex);
+		return AJA_STATUS_SUCCESS;
+	}
+
+	return AJA_STATUS_NOT_FOUND;
+}
+
+AJAStatus
+AJAFileIO::GetFileName(const std::string& path, std::string& filename)
+{
+	const size_t lastSlashIndex = path.rfind(kPathSeparator);
+
+	filename = "";
+
+	if (std::string::npos != lastSlashIndex) {
+		filename = path.substr(lastSlashIndex + 1, path.length() - lastSlashIndex);
+		return AJA_STATUS_SUCCESS;
+	}
+
+	return AJA_STATUS_NOT_FOUND;
+}
+
+AJAStatus
+AJAFileIO::GetFileName(const std::wstring& path, std::wstring& filename)
+{
+	const size_t lastSlashIndex = path.rfind(kPathSeparatorWide);
+
+	filename = L"";
+
+	if (std::wstring::npos != lastSlashIndex) {
+		filename = path.substr(lastSlashIndex + 1, path.length() - lastSlashIndex);
 		return AJA_STATUS_SUCCESS;
 	}
 
