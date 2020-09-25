@@ -1167,7 +1167,7 @@ AJAFileIO::GetWorkingDirectory(std::string& cwd)
 
 	if (buf != NULL)
 	{
-		cwd = std::string(buf) + AJAFileIO::kPathSeparator;
+		cwd = std::string(buf);
 	}
 	else
 	{
@@ -1199,7 +1199,7 @@ AJAFileIO::GetDirectoryName(const std::string& path, std::string& directory)
 	directory = "";
 
 	if (std::string::npos != lastSlashIndex) {
-		directory = path.substr(0, lastSlashIndex) + AJAFileIO::kPathSeparator;
+		directory = path.substr(0, lastSlashIndex);
 		return AJA_STATUS_SUCCESS;
 	}
 
@@ -1214,7 +1214,7 @@ AJAFileIO::GetDirectoryName(const std::wstring& path, std::wstring& directory)
 	directory = L"";
 
 	if (std::wstring::npos != lastSlashIndex) {
-		directory = path.substr(0, lastSlashIndex) + AJAFileIO::kPathSeparatorWide;
+		directory = path.substr(0, lastSlashIndex);
 		return AJA_STATUS_SUCCESS;
 	}
 
