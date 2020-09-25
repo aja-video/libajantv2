@@ -934,9 +934,9 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 		CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetWorkingDirectory(std::wstring&) failed");
 
 		// Check GetWorkingDirectory path values
-		std::string tempDirCwd;
-		std::wstring tempDirCwdWStr;
-		std::wstring tempDirWStr;
+        std::string tempDirCwd;
+        std::wstring tempDirCwdWStr;
+        std::wstring tempDirWStr;
 		if (status == AJA_STATUS_SUCCESS)
 		{
 			chdir(tempDir.c_str());
@@ -1040,20 +1040,19 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
         std::wstring dirNameWide;
         status = AJAFileIO::GetDirectoryName(tempFilePath, dirName);
         CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetDirectoryName(const std::string&, std::string&) failed");
-        CHECK(dirName == pathsep + "tmp");
+        CHECK_EQ(tempDir, dirName);
 
-        status = AJAFileIO::GetDirectoryName(tempDir + pathsep + "foo" + pathsep + "bar.txt", dirName);
+        status = AJAFileIO::GetDirectoryName(tempDir + "foo" + pathsep + "bar.txt", dirName);
         CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetDirectoryName(const std::string&, std::string&) failed");
-        CHECK(dirName == pathsep + "tmp" + pathsep + "foo");
+        CHECK_EQ(tempDir + "foo" + pathsep, dirName);
 
         // GetDirectoryName std::wstring
         const std::wstring pathSepWide = std::wstring(1, AJAFileIO::kPathSeparatorWide);
         status = AJAFileIO::GetDirectoryName(
-            tempDirWStr + pathSepWide +
-            L"foo" + pathSepWide + L"bar.txt", dirNameWide
+            tempDirWStr + L"foo" + pathSepWide + L"bar.txt", dirNameWide
         );
         CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetDirectoryName(const std::string&, std::string&) failed");
-        CHECK(dirNameWide == pathSepWide + L"tmp" + pathSepWide + L"foo");
+        CHECK_EQ(tempDirWStr + L"foo" + pathSepWide, dirNameWide);
 	}
 
 } //file

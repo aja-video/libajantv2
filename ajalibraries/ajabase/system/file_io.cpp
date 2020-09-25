@@ -12,6 +12,7 @@
 
 #if defined(AJA_WINDOWS)
 	// Windows includes
+	#include <direct.h>
 #else
 	// Posix includes
 	#include <fcntl.h>
@@ -1166,7 +1167,7 @@ AJAFileIO::GetWorkingDirectory(std::string& cwd)
 
 	if (buf != NULL)
 	{
-		cwd = std::string(buf);
+		cwd = std::string(buf) + AJAFileIO::kPathSeparator;
 	}
 	else
 	{
@@ -1184,6 +1185,8 @@ AJAFileIO::GetWorkingDirectory(std::wstring& directory)
 	std::string buf;
 	if (GetWorkingDirectory(buf) == AJA_STATUS_SUCCESS)
 		ok = aja::string_to_wstring(buf, directory);
+	else
+		directory = L"";
 
 	return ok ? AJA_STATUS_SUCCESS : AJA_STATUS_FAIL;
 }
@@ -1192,8 +1195,11 @@ AJAStatus
 AJAFileIO::GetDirectoryName(const std::string& path, std::string& directory)
 {
 	const size_t lastSlashIndex = path.rfind(kPathSeparator);
+
+	directory = "";
+
 	if (std::string::npos != lastSlashIndex) {
-		directory = path.substr(0, lastSlashIndex);
+		directory = path.substr(0, lastSlashIndex) + AJAFileIO::kPathSeparator;
 		return AJA_STATUS_SUCCESS;
 	}
 
@@ -1204,8 +1210,11 @@ AJAStatus
 AJAFileIO::GetDirectoryName(const std::wstring& path, std::wstring& directory)
 {
 	const size_t lastSlashIndex = path.rfind(kPathSeparator);
+
+	directory = L"";
+
 	if (std::wstring::npos != lastSlashIndex) {
-		directory = path.substr(0, lastSlashIndex);
+		directory = path.substr(0, lastSlashIndex) + AJAFileIO::kPathSeparatorWide;
 		return AJA_STATUS_SUCCESS;
 	}
 
