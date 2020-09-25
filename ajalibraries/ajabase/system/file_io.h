@@ -14,6 +14,14 @@
 #include <vector>
 #include <string>
 
+#if defined(AJA_WINDOWS)
+	const char AJA_PATHSEP = '\\';
+	const wchar_t AJA_PATHSEP_WIDE = L'\\';
+#else
+	const char AJA_PATHSEP = '/';
+	const wchar_t AJA_PATHSEP_WIDE = L'/';
+#endif
+
 typedef enum
 {
 	eAJACreateAlways     = 1,
@@ -294,14 +302,6 @@ public:
 	 */
 	static AJAStatus GetFileName(const std::string& path, std::string& filename);
 	static AJAStatus GetFileName(const std::wstring& path, std::wstring& filename);
-
-#if defined(AJA_WINDOWS)
-	static const char kPathSeparator = '\\';
-	static const wchar_t kPathSeparatorWide = L'\\';
-#else
-	static const char kPathSeparator = '/';
-	static const wchar_t kPathSeparatorWide = L'/';
-#endif
 
 #if defined(AJA_WINDOWS)
 	void     *GetHandle(void) {return mFileDescriptor;}

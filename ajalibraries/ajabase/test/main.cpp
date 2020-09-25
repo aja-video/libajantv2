@@ -943,7 +943,7 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 
 			AJAFileIO::GetWorkingDirectory(tempDirCwd);
 #if defined(AJA_WINDOWS)
-            CHECK_EQ(tempDir, tempDirCwd + AJAFileIO::kPathSeparator);
+            CHECK_EQ(tempDir, tempDirCwd + AJA_PATHSEP);
 #else
 			CHECK_EQ(tempDir, tempDirCwd);
 #endif
@@ -951,7 +951,7 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 			AJAFileIO::GetWorkingDirectory(tempDirCwdWStr);
 			aja::string_to_wstring(tempDir, tempDirWStr);
 #if defined(AJA_WINDOWS)
-			CHECK_EQ(tempDirWStr, tempDirCwdWStr + AJAFileIO::kPathSeparatorWide);
+			CHECK_EQ(tempDirWStr, tempDirCwdWStr + AJA_PATHSEP_WIDE);
 #else
             CHECK_EQ(tempDirWStr, tempDirCwdWStr);
 #endif
@@ -959,7 +959,7 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 			chdir(cwdStr.c_str());
 		}
 
-        const std::string pathsep = std::string(1, AJAFileIO::kPathSeparator);
+        const std::string pathsep = std::string(1, AJA_PATHSEP);
 
         std::string tempFilePath = tempDir;        
 		
@@ -967,8 +967,9 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 		// then add the pathsep, simple way to sanitize the created path
 		aja::rstrip(tempFilePath, pathsep);
 		tempFilePath += pathsep;
-		tempFilePath += "AJAFileIO_unittest_file_";
-		tempFilePath += aja::to_string((unsigned long)AJATime::GetSystemMilliseconds()) + ".txt";
+        std::string tempFileName = "AJAFileIO_unittest_file_" + 
+            aja::to_string((unsigned long)AJATime::GetSystemMilliseconds()) + ".txt";
+		tempFilePath += tempFileName;
 
 		AJAFileIO file;
 		status = file.Open(tempFilePath, eAJAReadWrite|eAJACreateAlways, 0);
@@ -1043,13 +1044,19 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 		CHECK(status == AJA_STATUS_SUCCESS);
 		CHECK(AJAFileIO::FileExists(tempFilePath) == false);
 
-         // GetDirectoryName std::string
+        // GetFileName std::string
+        std::string gotFileName;
+        status = AJAFileIO::GetFileName(tempFilePath, gotFileName);
+        CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetFileName(const std::string& std::string&) failed");
+        CHECK_EQ(tempFileName, gotFileName);
+
+        // GetDirectoryName std::string
         std::string dirName;
         std::wstring dirNameWide;
         status = AJAFileIO::GetDirectoryName(tempFilePath, dirName);
         CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetDirectoryName(const std::string&, std::string&) failed");
 #if defined(AJA_WINDOWS)
-        CHECK_EQ(tempDir, dirName + AJAFileIO::kPathSeparator);
+        CHECK_EQ(tempDir, dirName + AJA_PATHSEP);
 #else
         CHECK_EQ(tempDir, dirName);
 #endif
@@ -1057,17 +1064,17 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 #if defined(AJA_WINDOWS)
         status = AJAFileIO::GetDirectoryName(tempDir + "foo" + pathsep + "bar.txt", dirName);
 #else
-        status = AJAFileIO::GetDirectoryName(tempDir + AJAFileIO::kPathSeparator + "foo" + pathsep + "bar.txt", dirName);
+        status = AJAFileIO::GetDirectoryName(tempDir + AJA_PATHSEP + "foo" + pathsep + "bar.txt", dirName);
 #endif
         CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetDirectoryName(const std::string&, std::string&) failed");
 #if defined (AJA_WINDOWS)
         CHECK_EQ(tempDir + "foo", dirName);
 #else   
-        CHECK_EQ(tempDir + AJAFileIO::kPathSeparator + "foo", dirName);
+        CHECK_EQ(tempDir + AJA_PATHSEP + "foo", dirName);
 #endif
 
         // GetDirectoryName std::wstring
-        const std::wstring pathSepWide = std::wstring(1, AJAFileIO::kPathSeparatorWide);
+        const std::wstring pathSepWide = std::wstring(1, AJA_PATHSEP_WIDE);
 #if defined(AJA_WINDOWS)
         status = AJAFileIO::GetDirectoryName(tempDirWStr + L"foo" + pathSepWide + L"bar.txt", dirNameWide);
 #else

@@ -1194,7 +1194,7 @@ AJAFileIO::GetWorkingDirectory(std::wstring& directory)
 AJAStatus
 AJAFileIO::GetDirectoryName(const std::string& path, std::string& directory)
 {
-	const size_t lastSlashIndex = path.rfind(kPathSeparator);
+	const size_t lastSlashIndex = path.rfind(AJA_PATHSEP);
 
 	directory = "";
 
@@ -1209,7 +1209,7 @@ AJAFileIO::GetDirectoryName(const std::string& path, std::string& directory)
 AJAStatus
 AJAFileIO::GetDirectoryName(const std::wstring& path, std::wstring& directory)
 {
-	const size_t lastSlashIndex = path.rfind(kPathSeparatorWide);
+	const size_t lastSlashIndex = path.rfind(AJA_PATHSEP_WIDE);
 
 	directory = L"";
 
@@ -1224,7 +1224,7 @@ AJAFileIO::GetDirectoryName(const std::wstring& path, std::wstring& directory)
 AJAStatus
 AJAFileIO::GetFileName(const std::string& path, std::string& filename)
 {
-	const size_t lastSlashIndex = path.rfind(kPathSeparator);
+	const size_t lastSlashIndex = path.rfind(AJA_PATHSEP);
 
 	filename = "";
 
@@ -1239,7 +1239,7 @@ AJAFileIO::GetFileName(const std::string& path, std::string& filename)
 AJAStatus
 AJAFileIO::GetFileName(const std::wstring& path, std::wstring& filename)
 {
-	const size_t lastSlashIndex = path.rfind(kPathSeparatorWide);
+	const size_t lastSlashIndex = path.rfind(AJA_PATHSEP_WIDE);
 
 	filename = L"";
 
