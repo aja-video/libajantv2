@@ -942,11 +942,19 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 			chdir(tempDir.c_str());
 
 			AJAFileIO::GetWorkingDirectory(tempDirCwd);
+#if defined(AJA_WINDOWS)
+            CHECK_EQ(tempDir, tempDirCwd + AJAFileIO::kPathSeparator);
+#else
 			CHECK_EQ(tempDir, tempDirCwd);
+#endif
 
 			AJAFileIO::GetWorkingDirectory(tempDirCwdWStr);
 			aja::string_to_wstring(tempDir, tempDirWStr);
-			CHECK_EQ(tempDirWStr, tempDirCwdWStr);
+#if defined(AJA_WINDOWS)
+			CHECK_EQ(tempDirWStr, tempDirCwdWStr + AJAFileIO::kPathSeparator);
+#else
+            CHECK_EQ(tempDirWStr, tempDirCwdWStr);
+#endif
 
 			chdir(cwdStr.c_str());
 		}
@@ -1040,19 +1048,37 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
         std::wstring dirNameWide;
         status = AJAFileIO::GetDirectoryName(tempFilePath, dirName);
         CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetDirectoryName(const std::string&, std::string&) failed");
+#if defined(AJA_WINDOWS)
+        CHECK_EQ(tempDir, dirName + AJAFileIO::kPathSeparator);
+#else
         CHECK_EQ(tempDir, dirName);
+#endif
 
+#if defined(AJA_WINDOWS)
         status = AJAFileIO::GetDirectoryName(tempDir + "foo" + pathsep + "bar.txt", dirName);
+#else
+        status = AJAFileIO::GetDirectoryName(tempDir + AJAFileIO::kPathSeparator + "foo" + pathsep + "bar.txt", dirName);
+#endif
         CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetDirectoryName(const std::string&, std::string&) failed");
-        CHECK_EQ(tempDir + "foo" + pathsep, dirName);
+#if defined (AJA_WINDOWS)
+        CHECK_EQ(tempDir + "foo", dirName);
+#else   
+        CHECK_EQ(tempDir + AJAFileIO::kPathSeparator + "foo", dirName);
+#endif
 
         // GetDirectoryName std::wstring
         const std::wstring pathSepWide = std::wstring(1, AJAFileIO::kPathSeparatorWide);
-        status = AJAFileIO::GetDirectoryName(
-            tempDirWStr + L"foo" + pathSepWide + L"bar.txt", dirNameWide
-        );
+#if defined(AJA_WINDOWS)
+        status = AJAFileIO::GetDirectoryName(tempDirWStr + L"foo" + pathSepWide + L"bar.txt", dirNameWide);
+#else
+        status = AJAFileIO::GetDirectoryName(tempDirWStr + pathSepWide + L"foo" + pathSepWide + L"bar.txt", dirNameWide);
+#endif
         CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetDirectoryName(const std::string&, std::string&) failed");
-        CHECK_EQ(tempDirWStr + L"foo" + pathSepWide, dirNameWide);
+#if defined(AJA_WINDOWS)
+        CHECK_EQ(tempDirWStr + L"foo", dirNameWide);
+#else
+        CHECK_EQ(tempDirWStr + pathSepWide + L"foo", dirNameWide);
+#endif
 	}
 
 } //file
