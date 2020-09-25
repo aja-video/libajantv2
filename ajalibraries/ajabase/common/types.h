@@ -17,6 +17,8 @@
 
 	#define AJA_PAGE_SIZE (4096)
 
+	#define AJA_MAX_PATH (256)
+
 	typedef signed __int8    int8_t;
 	typedef signed __int16   int16_t;
 	typedef signed __int32   int32_t;
@@ -79,6 +81,8 @@
 		#endif
 
       #define AJA_PAGE_SIZE (4096)
+
+	  #define AJA_MAX_PATH (4096)
 
       #if defined(MODULE)
          // We're building the code as a kernel module
@@ -155,6 +159,7 @@
 #if defined(AJA_MAC)
 
 	#define AJA_PAGE_SIZE (4096)
+	#define AJA_MAX_PATH (1024)
 	#define AJA_LITTLE_ENDIAN
 
 	#include <stdint.h>

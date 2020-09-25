@@ -261,6 +261,35 @@ public:
 	static AJAStatus TempDirectory(std::string& directory);
 	static AJAStatus TempDirectory(std::wstring& directory);
 
+	/**
+	 * Retrieves the path to the current working directory
+	 * 
+	 * @param[out]	directory	Path of the current working directory
+	 * 
+	 * @return		AJA_STATUS_SUCCESS If and only if current working directory retrieved.
+	 */
+	static AJAStatus GetWorkingDirectory(std::string& directory);
+	static AJAStatus GetWorkingDirectory(std::wstring& directory);
+
+	/**
+	 * Retrieves the directory name from the specified path.
+	 *
+	 * @param[in] 	path	Path from which to extract the directory name
+	 * 
+	 * @param[out]  directory	Path of the directory extracted from specified path.
+	 * 
+	 * @return		AJA_STATUS_SUCCESS If and only if the directory name is extracted.
+	 */
+	static AJAStatus GetDirectoryName(const std::string& path, std::string& directory);
+	static AJAStatus GetDirectoryName(const std::wstring& path, std::wstring& directory);
+
+#if defined(AJA_WINDOWS)
+	static const char kPathSeparator = '\\';
+	static const wchar_t kPathSeparatorWide = L'\\';
+#else
+	static const char kPathSeparator = '/';
+	static const wchar_t kPathSeparatorWide = L'/';
+#endif
 
 #if defined(AJA_WINDOWS)
 	void     *GetHandle(void) {return mFileDescriptor;}

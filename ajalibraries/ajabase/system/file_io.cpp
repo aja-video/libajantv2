@@ -1150,3 +1150,64 @@ AJAFileIO::TempDirectory(std::wstring& directory)
 	return status;
 #endif
 }
+
+AJAStatus
+AJAFileIO::GetWorkingDirectory(std::string& cwd)
+{
+	AJAStatus status = AJA_STATUS_SUCCESS;
+
+	char buf[AJA_MAX_PATH+1];
+
+#if defined(AJA_WINDOWS)
+	_getcwd(buf, AJA_MAX_PATH);
+#else
+	getcwd(buf, AJA_MAX_PATH);
+#endif
+
+	if (buf != NULL)
+	{
+		cwd = std::string(buf);
+	}
+	else
+	{
+		cwd = std::string();
+		status = AJA_STATUS_NULL;
+	}
+
+	return status;
+}
+
+AJAStatus
+AJAFileIO::GetWorkingDirectory(std::wstring& directory)
+{
+	bool ok = false;
+	std::string buf;
+	if (GetWorkingDirectory(buf) == AJA_STATUS_SUCCESS)
+		ok = aja::string_to_wstring(buf, directory);
+
+	return ok ? AJA_STATUS_SUCCESS : AJA_STATUS_FAIL;
+}
+
+AJAStatus
+AJAFileIO::GetDirectoryName(const std::string& path, std::string& directory)
+{
+	const size_t lastSlashIndex = path.rfind(kPathSeparator);
+	if (std::string::npos != lastSlashIndex) {
+		directory = path.substr(0, lastSlashIndex);
+		return AJA_STATUS_SUCCESS;
+	}
+
+	return AJA_STATUS_NOT_FOUND;
+}
+
+AJAStatus
+AJAFileIO::GetDirectoryName(const std::wstring& path, std::wstring& directory)
+{
+	const size_t lastSlashIndex = path.rfind(kPathSeparator);
+	if (std::wstring::npos != lastSlashIndex) {
+		directory = path.substr(0, lastSlashIndex);
+		return AJA_STATUS_SUCCESS;
+	}
+
+	return AJA_STATUS_NOT_FOUND;
+}
