@@ -902,190 +902,237 @@ TEST_SUITE("info" * doctest::description("functions in ajabase/system/info.h")) 
 void file_marker() {}
 TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h")) {
 
+    // Shared amongst sub-cases
+    AJAStatus status = AJA_STATUS_FAIL;
+    std::string tempDir;
+    std::wstring tempDirWStr;
+    std::string tempFileName;
+    std::string tempFilePath;
+    const std::string pathSepStr = std::string(1, AJA_PATHSEP);
+    const std::wstring pathSepWStr = std::wstring(1, AJA_PATHSEP_WIDE);
+
 	TEST_CASE("AJAFileIO")
 	{
-		std::string tempDir;
-		AJAStatus status = AJAFileIO::TempDirectory(tempDir);
-		WARN_MESSAGE(status == AJA_STATUS_SUCCESS, "TempDirectory() could not find standard temp dir, trying secondary location.");
+        SUBCASE("::TempDirectory")
+        {
+            status = AJAFileIO::TempDirectory(tempDir);
+            WARN_MESSAGE(status == AJA_STATUS_SUCCESS, "AJAFileIO::TempDirectory() could not find platform temp dir, trying secondary location.");
 
-		if (status != AJA_STATUS_SUCCESS)
-		{
-			tempDir = "ajafileio_tmp_dir";
+            if (status != AJA_STATUS_SUCCESS)
+            {
+                tempDir = "ajafileio_tmp_dir";
+    #if defined(AJA_WINDOWS)
+                _mkdir(tempDir.c_str());
+    #else
+                if (mkdir(tempDir.c_str(), ACCESSPERMS) == 0)
+                {
+                    chmod(tempDir.c_str(), ACCESSPERMS);
+                }
+    #endif
+            }
+        }
+
+        SUBCASE("::DoesDirectoryExist")
+        {
+            CHECK_GT(tempDir.size(), 0);
+            status = AJAFileIO::DoesDirectoryExist(tempDir);
+	    	CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "Expected temp directory '" + tempDir + "' not found! Check result of ::TempDirectory sub-case.");
+        }
+
+        SUBCASE("::GetWorkingDirectory")
+        {
+            CHECK_GT(tempDir.size(), 0);
+
+            // GetWorkingDirectory std::string
+            std::string cwdStr;
+            std::string cwdWStr;
+            status = AJAFileIO::GetWorkingDirectory(cwdStr);
+            CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetWorkingDirectory(std::string&) failed!");
+
+            status = AJAFileIO::GetWorkingDirectory(cwdWStr);
+            CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetWorkingDirectory(std::wstring&) failed!");
+
+            // Check GetWorkingDirectory path values
+            if (status == AJA_STATUS_SUCCESS)
+            {
+                std::string tempDirCwd;
+                std::wstring tempDirCwdWStr;
+                chdir(tempDir.c_str());
+
+                status = AJAFileIO::GetWorkingDirectory(tempDirCwd);
 #if defined(AJA_WINDOWS)
-			_mkdir(tempDir.c_str());
+                // GetWorkingDirectory appends a path separator on Windows
+                CHECK_EQ(tempDir, tempDirCwd + AJA_PATHSEP);
 #else
-			if (mkdir(tempDir.c_str(), ACCESSPERMS) == 0)
-			{
-				chmod(tempDir.c_str(), ACCESSPERMS);
-			}
+                CHECK_EQ(tempDir, tempDirCwd);
 #endif
-		}
-
-		status = AJAFileIO::DoesDirectoryExist(tempDir);
-		CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "expected: temp dir '" + tempDir + "' to exist");
-
-		// GetWorkingDirectory tests
-		std::string cwdStr;
-		status = AJAFileIO::GetWorkingDirectory(cwdStr);
-		CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetWorkingDirectory(std::string&) failed");
-
-		std::wstring cwdWStr;
-		status = AJAFileIO::GetWorkingDirectory(cwdWStr);
-		CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetWorkingDirectory(std::wstring&) failed");
-
-		// Check GetWorkingDirectory path values
-        std::string tempDirCwd;
-        std::wstring tempDirCwdWStr;
-        std::wstring tempDirWStr;
-		if (status == AJA_STATUS_SUCCESS)
-		{
-			chdir(tempDir.c_str());
-
-			AJAFileIO::GetWorkingDirectory(tempDirCwd);
+                // GetWorkingDirectory std::wstring
+                status = AJAFileIO::GetWorkingDirectory(tempDirCwdWStr);
+                CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetWorkingDirectory(std::wstring&) failed!");
+                aja::string_to_wstring(tempDir, tempDirWStr);
 #if defined(AJA_WINDOWS)
-            CHECK_EQ(tempDir, tempDirCwd + AJA_PATHSEP);
+                CHECK_EQ(tempDirWStr, tempDirCwdWStr + AJA_PATHSEP_WIDE);
 #else
-			CHECK_EQ(tempDir, tempDirCwd);
+                CHECK_EQ(tempDirWStr, tempDirCwdWStr);
 #endif
+                chdir(cwdStr.c_str());
+    		}
+        }
 
-			AJAFileIO::GetWorkingDirectory(tempDirCwdWStr);
-			aja::string_to_wstring(tempDir, tempDirWStr);
-#if defined(AJA_WINDOWS)
-			CHECK_EQ(tempDirWStr, tempDirCwdWStr + AJA_PATHSEP_WIDE);
-#else
-            CHECK_EQ(tempDirWStr, tempDirCwdWStr);
-#endif
+        SUBCASE("FileInfo")
+        {
 
-			chdir(cwdStr.c_str());
-		}
-
-        const std::string pathsep = std::string(1, AJA_PATHSEP);
-
-        std::string tempFilePath = tempDir;        
+            tempFilePath = tempDir;
 		
-        // remove any trailing path separator on tempDir
-		// then add the pathsep, simple way to sanitize the created path
-		aja::rstrip(tempFilePath, pathsep);
-		tempFilePath += pathsep;
-        std::string tempFileName = "AJAFileIO_unittest_file_" + 
-            aja::to_string((unsigned long)AJATime::GetSystemMilliseconds()) + ".txt";
-		tempFilePath += tempFileName;
+            // remove any trailing path separator on tempDir
+            // then add the pathSepStr, simple way to sanitize the created path
+            aja::rstrip(tempFilePath, pathSepStr);
+            tempFilePath += pathSepStr;
+            tempFileName = "AJAFileIO_unittest_file_" + 
+                aja::to_string((unsigned long)AJATime::GetSystemMilliseconds()) + ".txt";
+            tempFilePath += tempFileName;
 
-		AJAFileIO file;
-		status = file.Open(tempFilePath, eAJAReadWrite|eAJACreateAlways, 0);
-		REQUIRE_MESSAGE(status == AJA_STATUS_SUCCESS, "expected: file '" + tempFilePath + "' to be created");
-		CHECK(file.IsOpen() == true);
-		CHECK(file.Tell() == 0);
-		// seek forward 64
-		status = file.Seek(64, eAJASeekSet);
-		CHECK(status == AJA_STATUS_SUCCESS);
-		CHECK(file.Tell() == 64);
-		// seek backward 32
-		status = file.Seek(-32, eAJASeekCurrent);
-		CHECK(status == AJA_STATUS_SUCCESS);
-		CHECK(file.Tell() == 32);
-		status = file.Truncate(16);
-		CHECK(status == AJA_STATUS_SUCCESS);
-		// truncate should not change offset
-		CHECK(file.Tell() == 32);
-		status = file.Sync();
-		CHECK(status == AJA_STATUS_SUCCESS);
-		int64_t createTime;
-		int64_t modTime;
-		int64_t size;
-		status = file.FileInfo(createTime, modTime, size);
-		CHECK(status == AJA_STATUS_SUCCESS);
-		std::string fullFilePath;
-		status = file.FileInfo(createTime, modTime, size, fullFilePath);
-		CHECK(status == AJA_STATUS_SUCCESS);
-		// Checking this way because on Mac it returns /private/var/folders... for fullFilePath
-		// while tempFilePath is /var/folders...
-		// var is a symbolic link to /private/var
-		CHECK(fullFilePath.find(tempFilePath) != std::string::npos);
-		// size should equal the truncate
-		CHECK(size == 16);
-		status = file.Seek(0, eAJASeekSet);
-		CHECK(status == AJA_STATUS_SUCCESS);
-		CHECK(file.Write("test") == 4);
-		status = file.Truncate(4);
-		CHECK(status == AJA_STATUS_SUCCESS);
-		status = file.Close();
-		CHECK(status == AJA_STATUS_SUCCESS);
+            AJAFileIO file;
+            status = file.Open(tempFilePath, eAJAReadWrite|eAJACreateAlways, 0);
+            REQUIRE_MESSAGE(status == AJA_STATUS_SUCCESS, "Error creating temp file: '" + tempFilePath + "'");
+            CHECK(file.IsOpen() == true);
+            CHECK(file.Tell() == 0);
+            // seek forward 64
+            status = file.Seek(64, eAJASeekSet);
+            CHECK(status == AJA_STATUS_SUCCESS);
+            CHECK(file.Tell() == 64);
+            // seek backward 32
+            status = file.Seek(-32, eAJASeekCurrent);
+            CHECK(status == AJA_STATUS_SUCCESS);
+            CHECK(file.Tell() == 32);
+            status = file.Truncate(16);
+            CHECK(status == AJA_STATUS_SUCCESS);
+            // truncate should not change offset
+            CHECK(file.Tell() == 32);
+            status = file.Sync();
+            CHECK(status == AJA_STATUS_SUCCESS);
+            int64_t createTime;
+            int64_t modTime;
+            int64_t size;
+            status = file.FileInfo(createTime, modTime, size);
+            CHECK(status == AJA_STATUS_SUCCESS);
+            std::string fullFilePath;
+            status = file.FileInfo(createTime, modTime, size, fullFilePath);
+            CHECK(status == AJA_STATUS_SUCCESS);
+            // Checking this way because on Mac it returns /private/var/folders... for fullFilePath
+            // while tempFilePath is /var/folders...
+            // var is a symbolic link to /private/var
+            CHECK(fullFilePath.find(tempFilePath) != std::string::npos);
+            // size should equal the truncate
+            CHECK(size == 16);
+            status = file.Seek(0, eAJASeekSet);
+            CHECK(status == AJA_STATUS_SUCCESS);
+            CHECK(file.Write("test") == 4);
+            status = file.Truncate(4);
+            CHECK(status == AJA_STATUS_SUCCESS);
+            status = file.Close();
+            CHECK(status == AJA_STATUS_SUCCESS);
 
-		AJAFileIO fileRead;
-		status = fileRead.Open(tempFilePath, eAJAReadOnly, 0);
-		CHECK(status == AJA_STATUS_SUCCESS);
-		status = fileRead.FileInfo(createTime, modTime, size);
-		CHECK(status == AJA_STATUS_SUCCESS);
-		std::vector<uint8_t> tmp;
-		tmp.resize(size);
-		CHECK(fileRead.Read((uint8_t*)&tmp[0], (uint32_t)size) == size);
-		status = fileRead.Seek(0, eAJASeekSet);
-		CHECK(status == AJA_STATUS_SUCCESS);
-		std::string fileContents;
-		CHECK(fileRead.Read(fileContents, 4) == 4);
-		status = fileRead.Close();
-		CHECK(status == AJA_STATUS_SUCCESS);
+            AJAFileIO fileRead;
+            status = fileRead.Open(tempFilePath, eAJAReadOnly, 0);
+            CHECK(status == AJA_STATUS_SUCCESS);
+            status = fileRead.FileInfo(createTime, modTime, size);
+            CHECK(status == AJA_STATUS_SUCCESS);
+            std::vector<uint8_t> tmp;
+            tmp.resize(size);
+            CHECK(fileRead.Read((uint8_t*)&tmp[0], (uint32_t)size) == size);
+            status = fileRead.Seek(0, eAJASeekSet);
+            CHECK(status == AJA_STATUS_SUCCESS);
+            std::string fileContents;
+            CHECK(fileRead.Read(fileContents, 4) == 4);
+            status = fileRead.Close();
+            CHECK(status == AJA_STATUS_SUCCESS);
+        }
 
-		// should not be empty
-		status = AJAFileIO::IsDirectoryEmpty(tempDir);
-		CHECK(status != AJA_STATUS_SUCCESS);
+        SUBCASE("::IsDirectoryEmpty")
+        {
+            // temp dir should not be empty if previous sub-case passed
+            status = AJAFileIO::IsDirectoryEmpty(tempDir);
+            CHECK(status != AJA_STATUS_SUCCESS);
+        }
 
-		// should be atleast one from above test
-		status = AJAFileIO::DoesDirectoryContain(tempDir, "*");
-		CHECK(status == AJA_STATUS_SUCCESS);
+        SUBCASE("::DoesDirectoryContain")
+        {
+            // should be at least one file in temp dir from FileInfo test
+            status = AJAFileIO::DoesDirectoryContain(tempDir, "*");
+            CHECK(status == AJA_STATUS_SUCCESS);
 
-		// should not exist
-		status = AJAFileIO::DoesDirectoryContain(tempDir, "*.someBonkersExt");
-		CHECK(status != AJA_STATUS_SUCCESS);
+            // should not exist
+            status = AJAFileIO::DoesDirectoryContain(tempDir, "*.someBonkersExt");
+            CHECK(status != AJA_STATUS_SUCCESS);
+        }
 
-		CHECK(AJAFileIO::FileExists(tempFilePath));
-		status = AJAFileIO::Delete(tempFilePath);
-		CHECK(status == AJA_STATUS_SUCCESS);
-		CHECK(AJAFileIO::FileExists(tempFilePath) == false);
+        SUBCASE("::FileExists")
+        {
+            CHECK(AJAFileIO::FileExists(tempFilePath));
+            status = AJAFileIO::Delete(tempFilePath);
+            CHECK(status == AJA_STATUS_SUCCESS);
+            CHECK(AJAFileIO::FileExists(tempFilePath) == false);
+        }
 
-        // GetFileName std::string
-        std::string gotFileName;
-        status = AJAFileIO::GetFileName(tempFilePath, gotFileName);
-        CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetFileName(const std::string& std::string&) failed");
-        CHECK_EQ(tempFileName, gotFileName);
+        SUBCASE("::GetFileName")
+        {
+            std::string gotFileName;
+            std::wstring tempFilePathWStr;
+            std::wstring gotFileNameWStr;
+            std::wstring tempFileNameWStr;
 
-        // GetDirectoryName std::string
-        std::string dirName;
-        std::wstring dirNameWide;
-        status = AJAFileIO::GetDirectoryName(tempFilePath, dirName);
-        CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetDirectoryName(const std::string&, std::string&) failed");
-#if defined(AJA_WINDOWS)
-        CHECK_EQ(tempDir, dirName + AJA_PATHSEP);
-#else
-        CHECK_EQ(tempDir, dirName);
-#endif
+            // GetFileName std::string
+            status = AJAFileIO::GetFileName(tempFilePath, gotFileName);
+            CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetFileName(const std::string&, std::string&) failed!");
+            CHECK_EQ(tempFileName, gotFileName);
 
-#if defined(AJA_WINDOWS)
-        status = AJAFileIO::GetDirectoryName(tempDir + "foo" + pathsep + "bar.txt", dirName);
-#else
-        status = AJAFileIO::GetDirectoryName(tempDir + AJA_PATHSEP + "foo" + pathsep + "bar.txt", dirName);
-#endif
-        CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetDirectoryName(const std::string&, std::string&) failed");
-#if defined (AJA_WINDOWS)
-        CHECK_EQ(tempDir + "foo", dirName);
-#else   
-        CHECK_EQ(tempDir + AJA_PATHSEP + "foo", dirName);
-#endif
+            // GetFileName std::wstring
+            CHECK_EQ(aja::string_to_wstring(tempFilePath, tempFilePathWStr), true);
+            CHECK_EQ(aja::string_to_wstring(tempFileName, tempFileNameWStr), true);
+            status = AJAFileIO::GetFileName(tempFilePathWStr, gotFileNameWStr);
+            CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetFileName(const std::wstring&, std::wstring&) failed!");
+            CHECK_EQ(tempFileNameWStr, gotFileNameWStr);
+        }
 
-        // GetDirectoryName std::wstring
-        const std::wstring pathSepWide = std::wstring(1, AJA_PATHSEP_WIDE);
-#if defined(AJA_WINDOWS)
-        status = AJAFileIO::GetDirectoryName(tempDirWStr + L"foo" + pathSepWide + L"bar.txt", dirNameWide);
-#else
-        status = AJAFileIO::GetDirectoryName(tempDirWStr + pathSepWide + L"foo" + pathSepWide + L"bar.txt", dirNameWide);
-#endif
-        CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetDirectoryName(const std::string&, std::string&) failed");
-#if defined(AJA_WINDOWS)
-        CHECK_EQ(tempDirWStr + L"foo", dirNameWide);
-#else
-        CHECK_EQ(tempDirWStr + pathSepWide + L"foo", dirNameWide);
-#endif
+        SUBCASE("::GetDirectoryName")
+        {
+            // GetDirectoryName std::string
+            std::string dirName;
+            std::wstring dirNameWide;
+            status = AJAFileIO::GetDirectoryName(tempFilePath, dirName);
+            CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetDirectoryName(const std::string&, std::string&) failed");
+    #if defined(AJA_WINDOWS)
+            CHECK_EQ(tempDir, dirName + AJA_PATHSEP);
+    #else
+            CHECK_EQ(tempDir, dirName);
+    #endif
+
+    #if defined(AJA_WINDOWS)
+            status = AJAFileIO::GetDirectoryName(tempDir + "foo" + pathSepStr + "bar.txt", dirName);
+    #else
+            status = AJAFileIO::GetDirectoryName(tempDir + AJA_PATHSEP + "foo" + pathSepStr + "bar.txt", dirName);
+    #endif
+            CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetDirectoryName(const std::string&, std::string&) failed");
+    #if defined (AJA_WINDOWS)
+            CHECK_EQ(tempDir + "foo", dirName);
+    #else   
+            CHECK_EQ(tempDir + AJA_PATHSEP + "foo", dirName);
+    #endif
+
+            // GetDirectoryName std::wstring
+    #if defined(AJA_WINDOWS)
+            status = AJAFileIO::GetDirectoryName(tempDirWStr + L"foo" + pathSepWStr + L"bar.txt", dirNameWide);
+    #else
+            status = AJAFileIO::GetDirectoryName(tempDirWStr + pathSepWStr + L"foo" + pathSepWStr + L"bar.txt", dirNameWide);
+    #endif
+            CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetDirectoryName(const std::string&, std::string&) failed");
+    #if defined(AJA_WINDOWS)
+            CHECK_EQ(tempDirWStr + L"foo", dirNameWide);
+    #else
+            CHECK_EQ(tempDirWStr + pathSepWStr + L"foo", dirNameWide);
+    #endif
+        }
 	}
 
 } //file
