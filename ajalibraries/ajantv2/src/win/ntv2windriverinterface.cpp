@@ -1062,7 +1062,7 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 					autoCircControl.lVal2 = autoCircData.lVal2;
 					break;
 
-				default:	NTV2_ASSERT(false && "Bad eCommand");
+				default:	break; //NTV2_ASSERT(false && "Bad eCommand");
 			}
 
 			bRes = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_AUTOCIRC_CONTROL, &autoCircControl, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S),
