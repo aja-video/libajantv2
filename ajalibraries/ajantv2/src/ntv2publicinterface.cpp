@@ -333,99 +333,9 @@ string & NTV2_POINTER::Dump (	string &		inOutputString,
 								const bool		inShowAscii,
 								const size_t	inAddrOffset) const
 {
-	if (IsNULL())
-		return inOutputString;
-	if (inRadix != 8 && inRadix != 10 && inRadix != 16 && inRadix != 2)
-		return inOutputString;
-	if (inAddressRadix != 0 && inAddressRadix != 8 && inAddressRadix != 10 && inAddressRadix != 16)
-		return inOutputString;
-	if (inBytesPerGroup == 0)
-		return inOutputString;
-
-	{
-		const void *	pInStartAddress		(GetHostAddress(ULWord(inStartOffset)));
-		size_t			bytesRemaining		(inByteCount ? inByteCount : GetByteCount());
-		size_t			bytesInThisGroup	(0);
-		size_t			groupsInThisRow		(0);
-		const unsigned	maxByteWidth		(inRadix == 8 ? 4 : (inRadix == 10 ? 3 : (inRadix == 2 ? 8 : 2)));
-		const UByte *	pBuffer				(reinterpret_cast <const UByte *> (pInStartAddress));
-		const size_t	asciiBufferSize		(inShowAscii && inGroupsPerRow ? (inBytesPerGroup * inGroupsPerRow + 1) * sizeof (UByte) : 0);	//	Size in bytes, not chars
-		UByte *			pAsciiBuffer		(asciiBufferSize ? new UByte[asciiBufferSize / sizeof(UByte)] : AJA_NULL);
-
-		if (!pInStartAddress)
-			return inOutputString;
-
-		if (pAsciiBuffer)
-			::memset (pAsciiBuffer, 0, asciiBufferSize);
-
-		if (inGroupsPerRow && inAddressRadix)
-		{	ostringstream ossA;
-			ossA << print_address_offset (inAddressRadix, ULWord64(pBuffer) - ULWord64(pInStartAddress) + ULWord64(inAddrOffset));
-			inOutputString += ossA.str();
-		}
-		while (bytesRemaining)
-		{
-			ostringstream	ossD;
-			if (inRadix == 2)
-				ossD << BIN08(*pBuffer);
-			else if (inRadix == 8)
-				ossD << oOCT(uint16_t(*pBuffer));
-			else if (inRadix == 10)
-				ossD << DEC0N(uint16_t(*pBuffer),maxByteWidth);
-			else if (inRadix == 16)
-				ossD << HEX0N(uint16_t(*pBuffer),2);
-
-			if (pAsciiBuffer)
-				pAsciiBuffer[groupsInThisRow * inBytesPerGroup + bytesInThisGroup] = isprint(*pBuffer) ? *pBuffer : '.';
-			pBuffer++;
-			bytesRemaining--;
-
-			bytesInThisGroup++;
-			if (bytesInThisGroup >= inBytesPerGroup)
-			{
-				groupsInThisRow++;
-				if (inGroupsPerRow && groupsInThisRow >= inGroupsPerRow)
-				{
-					if (pAsciiBuffer)
-					{
-						ossD << " " << pAsciiBuffer;
-						::memset (pAsciiBuffer, 0, asciiBufferSize);
-					}
-					ossD << endl;
-					if (inAddressRadix && bytesRemaining)
-						ossD << print_address_offset (inAddressRadix, reinterpret_cast <ULWord64> (pBuffer) - reinterpret_cast <ULWord64> (pInStartAddress) + ULWord64 (inAddrOffset));
-					groupsInThisRow = 0;
-				}	//	if time for new row
-				else
-					ossD << " ";
-				bytesInThisGroup = 0;
-			}	//	if time for new group
-			inOutputString += ossD.str();
-		}	//	loop til no bytes remaining
-
-		ostringstream	ossZ;
-		if (bytesInThisGroup && bytesInThisGroup < inBytesPerGroup && pAsciiBuffer)
-		{
-			groupsInThisRow++;
-			ossZ << string((inBytesPerGroup - bytesInThisGroup) * maxByteWidth + 1, ' ');
-		}
-
-		if (groupsInThisRow)
-		{
-			if (groupsInThisRow < inGroupsPerRow && pAsciiBuffer)
-				ossZ << string(((inGroupsPerRow - groupsInThisRow) * inBytesPerGroup * maxByteWidth + (inGroupsPerRow - groupsInThisRow)), ' ');
-			if (pAsciiBuffer)
-				ossZ << pAsciiBuffer;
-			ossZ << endl;
-		}
-		else if (bytesInThisGroup && bytesInThisGroup < inBytesPerGroup)
-			ossZ << endl;
-
-		inOutputString += ossZ.str();
-		if (pAsciiBuffer)
-			delete [] pAsciiBuffer;
-	}	//	else radix is 16, 10, 8 or 2
-
+	ostringstream oss;
+	Dump (oss, inStartOffset, inByteCount, inRadix, inBytesPerGroup, inGroupsPerRow, inAddressRadix, inShowAscii, inAddrOffset);
+	inOutputString = oss.str();
 	return inOutputString;
 }
 
@@ -1189,8 +1099,8 @@ NTV2SegmentedXferInfo & NTV2SegmentedXferInfo::swapSourceAndDestination (void)
 
 
 NTV2_POINTER::NTV2_POINTER (const void * pInUserPointer, const size_t inByteCount)
-	:	fUserSpacePtr		(NTV2_POINTER_TO_ULWORD64 (pInUserPointer)),
-		fByteCount			(static_cast <ULWord> (inByteCount)),
+	:	fUserSpacePtr		(inByteCount ? NTV2_POINTER_TO_ULWORD64(pInUserPointer) : 0),
+		fByteCount			(static_cast<ULWord>(pInUserPointer ? inByteCount : 0)),
 		fFlags				(0),
 	#if defined (AJAMac)
 		fKernelSpacePtr		(0),
@@ -1216,8 +1126,8 @@ NTV2_POINTER::NTV2_POINTER (const size_t inByteCount)
 	#endif
 {
 	if (inByteCount)
-		if (Allocate (inByteCount))
-			Fill (UByte (0));
+		if (Allocate(inByteCount))
+			Fill(UByte(0));
 }
 
 
@@ -1233,8 +1143,8 @@ NTV2_POINTER::NTV2_POINTER (const NTV2_POINTER & inObj)
 		fKernelHandle		(0)
 	#endif
 {
-	if (Allocate (inObj.GetByteCount ()))
-		SetFrom (inObj);
+	if (Allocate(inObj.GetByteCount()))
+		SetFrom(inObj);
 }
 
 
@@ -1242,13 +1152,14 @@ NTV2_POINTER & NTV2_POINTER::operator = (const NTV2_POINTER & inRHS)
 {
 	if (&inRHS != this)
 	{
-		if (inRHS.IsNULL ())
+		if (inRHS.IsNULL())
 			Set (AJA_NULL, 0);
+		else if (GetByteCount() == inRHS.GetByteCount())
+			SetFrom(inRHS);
+		else if (Allocate(inRHS.GetByteCount()))
+			SetFrom(inRHS);
 		else
-		{
-			if (Allocate (inRHS.GetByteCount ()))
-				SetFrom (inRHS);
-		}
+			;	//	Error
 	}
 	return *this;
 }
@@ -1299,20 +1210,16 @@ bool NTV2_POINTER::ByteSwap16 (void)
 bool NTV2_POINTER::Set (const void * pInUserPointer, const size_t inByteCount)
 {
 	Deallocate();
-	fUserSpacePtr = NTV2_POINTER_TO_ULWORD64 (pInUserPointer);
-	fByteCount = static_cast <ULWord> (inByteCount);
-	return (GetHostPointer() && GetByteCount())  ||  (!GetHostPointer() && !GetByteCount());
+	fUserSpacePtr = inByteCount ? NTV2_POINTER_TO_ULWORD64(pInUserPointer) : 0;
+	fByteCount = static_cast<ULWord>(pInUserPointer ? inByteCount : 0);
+	//	Return true only if both UserPointer and ByteCount are non-zero, or both are zero.
+	return (pInUserPointer && inByteCount)  ||  (!pInUserPointer && !inByteCount);
 }
 
 
 bool NTV2_POINTER::SetAndFill (const void * pInUserPointer, const size_t inByteCount, const UByte inValue)
 {
-	if (Set (pInUserPointer, inByteCount))
-	{
-		Fill (inValue);
-		return true;
-	}
-	return false;
+	return Set(pInUserPointer, inByteCount)  &&  Fill(inValue);
 }
 
 
@@ -1396,7 +1303,7 @@ bool NTV2_POINTER::SetFrom (const NTV2_POINTER & inBuffer)
 	if (inBuffer.GetByteCount() == GetByteCount()  &&  inBuffer.GetHostPointer() == GetHostPointer())
 		return true;	//	Same buffer
 
-	size_t	bytesToCopy	(inBuffer.GetByteCount());
+	size_t bytesToCopy(inBuffer.GetByteCount());
 	if (bytesToCopy > GetByteCount())
 		bytesToCopy = GetByteCount();
 	::memcpy (GetHostPointer(), inBuffer.GetHostPointer(), bytesToCopy);
