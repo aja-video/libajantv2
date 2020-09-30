@@ -26,8 +26,6 @@ static const ULWord	gChannelToSDIOutControlRegNum []	= {	kRegSDIOut1Control, kRe
 static const ULWord	gChannelToAudioControlRegNum []		= {	kRegAud1Control,		kRegAud2Control,		kRegAud3Control,		kRegAud4Control,
 															kRegAud5Control,		kRegAud6Control,		kRegAud7Control,		kRegAud8Control,		0};
 #endif	//	!defined (NTV2_DEPRECATE)
-static const ULWord	gChannelToAudioSrcSelectRegNum []	= {	kRegAud1SourceSelect,	kRegAud2SourceSelect,	kRegAud3SourceSelect,	kRegAud4SourceSelect,
-															kRegAud5SourceSelect,	kRegAud6SourceSelect,	kRegAud7SourceSelect,	kRegAud8SourceSelect,	0};
 
 static const ULWord gAudioSystemToSrcSelectRegNum []	= {	kRegAud1SourceSelect,	kRegAud2SourceSelect,	kRegAud3SourceSelect,	kRegAud4SourceSelect,
 															kRegAud5SourceSelect,	kRegAud6SourceSelect,	kRegAud7SourceSelect,	kRegAud8SourceSelect,	0};
@@ -471,15 +469,10 @@ bool CNTV2Card::ReadAudioLastOut (ULWord & outValue, const NTV2Channel inChannel
 	return ReadRegister (gChannelToAudioOutLastAddrRegNum [inChannel], outValue);
 }
 
-bool CNTV2Card::ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel)
-{
-	return ReadRegister(gChannelToAudioSrcSelectRegNum [inChannel], outValue);
-}
-
-bool CNTV2Card::WriteAudioSource (const ULWord inValue, const NTV2Channel inChannel)
-{
-	return WriteRegister (gChannelToAudioSrcSelectRegNum [inChannel], inValue);
-}
+#if !defined(NTV2_DEPRECATE_16_0)
+	bool CNTV2Card::ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel)	{return ReadRegister(gAudioSystemToSrcSelectRegNum[inChannel], outValue);}
+	bool CNTV2Card::WriteAudioSource (const ULWord inValue, const NTV2Channel inChannel)	{return WriteRegister(gAudioSystemToSrcSelectRegNum[inChannel], inValue);}
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 
 bool CNTV2Card::SetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, const NTV2AudioSource inAudioSource, const NTV2EmbeddedAudioInput inEmbeddedSource)
