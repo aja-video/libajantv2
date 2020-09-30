@@ -2824,7 +2824,7 @@ typedef enum NTV2OutputCrosspointID
 	NTV2_XptLUT8Out						= 0xE1,
 	NTV2_XptRuntimeCalc					= 0xFF,
 	NTV2_LAST_OUTPUT_CROSSPOINT			= 0xFF,
-	NTV2_OUTPUT_CROSSPOINT_INVALID		= 0xFF
+	NTV2_OUTPUT_CROSSPOINT_INVALID		= 0xFF,
 	#if !defined(NTV2_DEPRECATE_16_0)
 		,NTV2_XptLUT1RGB				= NTV2_XptLUT1Out					///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptLUT1Out
 		,NTV2_XptLUT2RGB				= NTV2_XptLUT2Out					///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptLUT2Out
@@ -2873,6 +2873,14 @@ typedef enum NTV2OutputCrosspointID
 		NTV2_XptDuallinkOut				= NTV2_XptDuallinkOut1,		///< @deprecated	Use NTV2_XptDuallinkOut1 instead.
 		NTV2_XptDuallinkOutDS2			= NTV2_XptDuallinkOut1DS2	///< @deprecated	Use NTV2_XptDuallinkOut1DS2 instead.
 	#endif	//	!defined (NTV2_DEPRECATE)
+		NTV2_XptDuallinkIn1DS2	= 0x100,
+		NTV2_XptDuallinkIn2DS2	= 0x101,
+		NTV2_XptDuallinkIn3DS2	= 0x102,
+		NTV2_XptDuallinkIn4DS2	= 0x103,
+		NTV2_XptDuallinkIn5DS2	= 0x104,
+		NTV2_XptDuallinkIn6DS2	= 0x105,
+		NTV2_XptDuallinkIn7DS2	= 0x106,
+		NTV2_XptDuallinkIn8DS2	= 0x107
 } NTV2OutputCrosspointID, NTV2OutputXptID;
 
 #if !defined(NTV2_DEPRECATE_16_0)
