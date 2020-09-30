@@ -1031,25 +1031,47 @@
 				garbled audio and/or bad video frame(s). SDK clients must take precautions to ensure that frame
 				buffers used by your application never coincide with any of the audio buffers.
 
-	@note	The \ref usingntv2watcher tool’s \ref inspectoraudio allows you to interactively view each Audio System’s
+	@note	The \ref usingntv2watcher tool’s \ref inspectoraudio allows you to monitor each Audio System’s
 			capture or playout buffer, as well as inspect or change its current configuration.
 
 
 	<hr size="50px">
 	@subsection	audiocapture		Audio Capture
 
-	Incoming audio is de-embedded from incoming audio HANC packets (SMPTE 299M for HD, SMPTE 272M for SD).
-	For <b>HD</b>, each audio sample consists of 24 bits of sample data (normally PCM).
-	For <b>SD</b>, each audio sample consists of 20 bits of sample data (normally PCM) — audio extended packets are ignored.
-
-	Call CNTV2Card::IsAudioInputRunning to determine if the capture side of the <b>Audio System</b> is running or not.
-	Call CNTV2Card::StartAudioInput to start the capture side of the <b>Audio System</b> running.
-	Call CNTV2Card::StopAudioInput to stop the capture side of the <b>Audio System</b> running.
+	For devices that are capable of capturing video, each <b>Audio System</b> constantly extracts audio samples from its
+	<b>Input Source</b> (assuming the source is locked to a valid signal). If there’s no input signal, the <b>Audio System</b>
+	invents zero values (silence) across all audio channels.
+	-	Generally, the <b>Input Source</b> is selectable, to receive samples from any of the device’s video (and possibly audio)
+		<b>Input Source</b>s, including embedded SDI, HDMI, external AES and analog inputs.
+		-	Call CNTV2Card::GetAudioSystemInputSource to determine the <b>Audio System</b>’s current <b>Input Source</b>.
+		-	Call CNTV2Card::SetAudioSystemInputSource to change the <b>Audio System</b>’s <b>Input Source</b>.
+	-	<b>SDI Sources:</b>  Audio samples are de-embedded from incoming audio HANC packets:
+		-	<b>HD:</b> follows SMPTE 299M: Each audio sample consists of 24 bits of sample data (normally PCM).
+		-	<b>SD:</b> follows SMPTE 272M: Each audio sample consists of 20 bits of PCM sample data — audio extended packets are ignored.
+		-	For devices that support 3Gb Level B inputs, the audio can be taken from data stream 1 or 2.
+		-	Missing Embedded Audio Group packets (each containing two audio channel pairs) in the data stream result in silence (zeroes)
+			for their respective audio channels.
+		-	The firmware continually notes which Embedded Audio Group packets are present and which are missing, and coalesces this
+			information into a hardware register. Call CNTV2Card::GetDetectedAudioChannelPairs to query this information.
+	-	<b>HDMI Sources:</b>  Audio samples are pulled from the HDMI input hardware.
+		-	Call CNTV2Card::GetHDMIInputAudioChannels to determine if the HDMI input is supplying 2 or 8 channels of audio.
+		-	Call CNTV2Card::SetHDMIInputAudioChannels to change the HDMI audio input configuration.
+	-	<b>AES:</b>  Audio samples are obtained from the AES inputs.
+		-	Call CNTV2Card::GetDetectedAESChannelPairs to determine which audio channel pairs have valid sample data.
+	-	<b>Analog:</b>  Audio samples for audio channels 1&amp;2 are obtained from the analog video input.
 
 	When the <b>Audio System</b> is running, each 24-bit sample is copied as-is into the most-significant 3 bytes of each 4-byte
 	sample word in the <b>Audio Input Buffer</b> in device memory at the address specified by the <b>Audio System</b>’s Audio Input
-	Last Address register (i.e., the <b>Record Head</b> or “write head”). On older (non-stacked-audio) devices, this sample-copying
-	process is done in 128-byte chunks. On newer (stacked-audio) devices, 512-byte chunks are used.
+	Last Address register (i.e., the <b>Record Head</b> or “write head”).
+	-	On older (non-stacked-audio) devices, this sample-copying process is done in 128-byte chunks.
+	-	On newer (stacked-audio) devices, 512-byte chunks are used.
+	-	Call CNTV2Card::IsAudioInputRunning to determine if the capture side of the <b>Audio System</b> is running or not.
+	-	Call CNTV2Card::StartAudioInput to start the capture aspect of the <b>Audio System</b> running.
+	-	Call CNTV2Card::StopAudioInput to stop the capture aspect of the <b>Audio System</b> running.
+	-	Call CNTV2Card::SetAudioCaptureEnable to enable or disable writing into the <b>Audio System</b>’s <b>Input Buffer</b> memory.
+		Note that <b>Input Buffer</b> writing can be disabled while the <b>Audio System</b> is running — the <b>Audio System</b>
+		will continue to go through the motions of Capture, advancing the <b>Record Head</b> as needed, but the <b>Input Buffer</b>’s
+		contents won’t change.
 
 	Call CNTV2Card::ReadAudioLastIn to obtain the current <b>Record Head</b> position. Audio data continues to be written into the
 	<b>Input Buffer</b> until filled, whereupon the <b>Record Head</b> wraps back to the start of the buffer, where writing
@@ -1063,16 +1085,13 @@
 	fixed at 4 MB, to be absolutely safe should this ever change, call CNTV2Card::GetAudioReadOffset to obtain the
 	actual offset being used by the driver and SDK.
 
-	If AutoCirculate is used for capture, AutoCirculate completely and automatically runs the <b>Audio System</b>.
-	When CNTV2Card::AutoCirculateInitForInput is called with a valid ::NTV2AudioSystem, and then CNTV2Card::AutoCirculateStart is called,
-	AutoCirculate starts the <b>Audio System</b>. CNTV2Card::AutoCirculateTransfer automatically transfers the correct number of captured
-	audio samples from the device Audio System’s <b>Input Buffer</b> that are associated with the video frame being transferred.
-	AUTOCIRCULATE_TRANSFER::GetCapturedAudioByteCount will return the exact number of transferred audio bytes for the frame that was just
-	transferred to the host. See \ref autocirculatecapture for more information.
-
-	If the Embedded Audio Group packet (containing two audio channel pairs) is not present in the data stream, its samples in the buffer
-	will be set to zero (silence). The firmware notes which audio group packets are present and which are missing, and coalesces this
-	information into a hardware register. Client software can query this information by calling CNTV2Card::GetDetectedAudioChannelPairs.
+	@note	If \ref aboutautocirculate is used for capture, \ref aboutautocirculate completely and automatically runs the <b>Audio System</b> —
+			there is no need to call CNTV2Card::StartAudioInput or CNTV2Card::SetAudioCaptureEnable. When CNTV2Card::AutoCirculateInitForInput
+			is called with a valid ::NTV2AudioSystem, and CNTV2Card::AutoCirculateStart is subsequently called, \ref aboutautocirculate starts
+			the <b>Audio System</b>. CNTV2Card::AutoCirculateTransfer automatically transfers the correct number of captured audio samples
+			from the device Audio System’s <b>Input Buffer</b> that are associated with the video frame being transferred.
+			AUTOCIRCULATE_TRANSFER::GetCapturedAudioByteCount will return the exact number of transferred audio bytes for the frame that was just
+			transferred to the host. See \ref autocirculatecapture for more information.
 
 	Upstream equipment may indicate one or more audio channel pairs is not carrying PCM data (e.g., Dolby-E) via certain bits in the AES
 	header in the audio stream. On newer AJA devices (see ::NTV2DeviceCanDoPCMDetection), the <b>Audio System</b>’s de-embedder makes this
@@ -1084,11 +1103,6 @@
 			The formatting of the AC-3 data into the channel pairs is quite flexible, but usually a channel pair (e.g. 5&amp;6) is considered a single AC-3 stream.
 			The specification allows AC-3 data to be carried in 16, 20 or 24 bits of the PCM sample.
 			This flexibility requires the application to know how the source has formatted the data into the AES samples.
-
-	Generally, each <b>Audio System</b>’s <b>Input Source</b> is selectable, to receive samples from any of the device’s video
-	(and possibly audio) Input Sources, including embedded SDI, HDMI, external AES and analog inputs
-	(see CNTV2Card::SetAudioSystemInputSource). For devices that support 3Gb Level B inputs, the audio can be taken from data
-	stream 1 or 2. HDMI inputs can be configured to supply 2 or 8 audio channels (see CNTV2Card::GetHDMIInputAudioChannels ).
 
 	Newer AJA hardware firmware implements an adjustable input delay that can be applied while samples are being written into the
 	<b>Audio Input Buffer</b>. Call ::NTV2DeviceCanDoAudioDelay to determine if this feature is available. Call CNTV2Card::GetAudioInputDelay
