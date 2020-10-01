@@ -35,10 +35,10 @@ using namespace std;
 #endif	//	!defined (NTV2_DEPRECATE)
 
 // Macros to simplify returning of strings for given enum
-#define NTV2UTILS_ENUM_CASE_RETURN_STR(enum_name) case(enum_name): return #enum_name;
+#define NTV2UTILS_ENUM_CASE_RETURN_STR(enum_name) case(enum_name): return #enum_name
 
 #define NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(condition, retail_name, enum_name)\
-	case(enum_name): return condition ? retail_name : #enum_name;
+	case(enum_name): return condition ? retail_name : #enum_name
 
 //////////////////////////////////////////////////////
 //	BEGIN SECTION MOVED FROM 'videoutilities.cpp'
