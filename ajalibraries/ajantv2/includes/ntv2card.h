@@ -1887,7 +1887,7 @@ public:
 	AJA_VIRTUAL bool		IsAudioInputRunning (const NTV2AudioSystem inAudioSystem, bool & outIsRunning);
 
 	/**
-		@brief		Enables or disables audio capture for the given Audio System on the AJA device.
+		@brief		Enables or disables the writing of incoming audio into the given Audio System's capture buffer.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem	Specifies the Audio System of interest.
 		@param[in]	inEnable		If true, the Audio System will write captured samples into device audio buffer
