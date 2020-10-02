@@ -284,7 +284,6 @@ AJAStatus NTV2Player::SetUpAudio (void)
 
 }	//	SetUpAudio
 
-#define AsU8Ptr(__p__)	reinterpret_cast<uint8_t*>(__p__)
 #define	AJAAncDataType_HDR_SDR		AJAAncillaryDataType_HDR_SDR
 #define	AJAAncDataType_HDR_HDR10	AJAAncillaryDataType_HDR_HDR10
 #define	AJAAncDataType_HDR_HLG		AJAAncillaryDataType_HDR_HLG
@@ -306,9 +305,9 @@ void NTV2Player::SetUpHostBuffers (void)
 		uint32_t pktSize(0);
 		switch (mConfig.fTransmitHDRType)
 		{
-			case AJAAncDataType_HDR_SDR:	sdrPkt.GenerateTransmitData(AsU8Ptr(ancBuf.GetHostPointer()),	ancBuf.GetByteCount(), pktSize);	break;
-			case AJAAncDataType_HDR_HDR10:	hdr10Pkt.GenerateTransmitData(AsU8Ptr(ancBuf.GetHostPointer()),	ancBuf.GetByteCount(), pktSize);	break;
-			case AJAAncDataType_HDR_HLG:	hlgPkt.GenerateTransmitData(AsU8Ptr(ancBuf.GetHostPointer()),	ancBuf.GetByteCount(), pktSize);	break;
+			case AJAAncDataType_HDR_SDR:	sdrPkt.GenerateTransmitData(ancBuf,		ancBuf.GetByteCount(), pktSize);	break;
+			case AJAAncDataType_HDR_HDR10:	hdr10Pkt.GenerateTransmitData(ancBuf,	ancBuf.GetByteCount(), pktSize);	break;
+			case AJAAncDataType_HDR_HLG:	hlgPkt.GenerateTransmitData(ancBuf,		ancBuf.GetByteCount(), pktSize);	break;
 			default:						break;
 		}
 		#ifdef NTV2_BUFFER_LOCK
@@ -489,7 +488,7 @@ void NTV2Player::PlayFrames (void)
 			//	Transfer the timecode-burned frame to the device for playout...
 			xferInfo.SetVideoBuffer (pFrameData->VideoBuffer(), pFrameData->VideoBufferSize());
 			//	If also playing audio...
-			if (pFrameData->HasAudio())	//	...also xfer this frame's audio samples...
+			if (pFrameData->AudioBuffer())	//	...also xfer this frame's audio samples...
 				xferInfo.SetAudioBuffer (pFrameData->AudioBuffer(), pFrameData->fNumAudioBytes);
 
 			//	Perform the DMA transfer to the device...
@@ -631,7 +630,7 @@ void NTV2Player::ProduceFrames (void)
 			pFrameData->fTimecodes[*it] = NTV2_IS_ATC_VITC2_TIMECODE_INDEX(*it) ? tcF2 : tcF1;
 
 		//	Burn current timecode into the video buffer...
-		mTCBurner.BurnTimeCode (pFrameData->VideoBytes(), tcString.c_str(), 80);
+		mTCBurner.BurnTimeCode (pFrameData->VideoBuffer(), tcString.c_str(), 80);
 		TCDBG("F" << DEC0N(mCurrentFrame-1,6) << ": " << tcF1 << ": " << tcString);
 
 		//	If also playing audio...

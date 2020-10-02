@@ -94,32 +94,22 @@ AJAExport class NTV2FrameData
 				fFrameFlags(0)	{}
 
 		//	Inquiry Methods
-		inline bool		HasVideo (void) const				{return fVideoBuffer;}
-		inline char *	VideoBytes (void) const				{return reinterpret_cast<char*>(fVideoBuffer.GetHostPointer());}
-		inline ULWord *	VideoBuffer (void) const			{return reinterpret_cast<ULWord*>(fVideoBuffer.GetHostPointer());}
+		inline NTV2_POINTER &	VideoBuffer (void)			{return fVideoBuffer;}
 		inline ULWord	VideoBufferSize (void) const		{return fVideoBuffer.GetByteCount();}
 
-		inline bool		HasAudio (void) const				{return fAudioBuffer;}
-		inline char *	AudioBytes (void) const				{return reinterpret_cast<char*>(fAudioBuffer.GetHostPointer());}
-		inline ULWord *	AudioBuffer (void) const			{return reinterpret_cast<ULWord*>(fAudioBuffer.GetHostPointer());}
+		inline NTV2_POINTER &	AudioBuffer (void)			{return fAudioBuffer;}
 		inline ULWord	AudioBufferSize (void) const		{return fAudioBuffer.GetByteCount();}
 		inline ULWord	NumCapturedAudioBytes (void) const	{return fNumAudioBytes;}
 
-		inline bool		HasAnc (void) const					{return fAncBuffer;}
-		inline char *	AncBytes (void) const				{return reinterpret_cast<char*>(fAncBuffer.GetHostPointer());}
-		inline ULWord *	AncBuffer (void) const				{return reinterpret_cast<ULWord*>(fAncBuffer.GetHostPointer());}
+		inline NTV2_POINTER &	AncBuffer (void)			{return fAncBuffer;}
 		inline ULWord	AncBufferSize (void) const			{return fAncBuffer.GetByteCount();}
 		inline ULWord	NumCapturedAncBytes (void) const	{return fNumAncBytes;}
 
-		inline bool		HasAnc2 (void) const				{return fAncBuffer2;}
-		inline char *	AncBytes2 (void) const				{return reinterpret_cast<char*>(fAncBuffer2.GetHostPointer());}
-		inline ULWord *	AncBuffer2 (void) const				{return reinterpret_cast<ULWord*>(fAncBuffer2.GetHostPointer());}
+		inline NTV2_POINTER &	AncBuffer2 (void)			{return fAncBuffer2;}
 		inline ULWord	AncBuffer2Size (void) const			{return fAncBuffer2.GetByteCount();}
 		inline ULWord	NumCapturedAnc2Bytes (void) const	{return fNumAnc2Bytes;}
 
-		inline bool		HasVideo2 (void) const				{return fVideoBuffer2;}
-		inline char *	VideoBytes2 (void) const			{return reinterpret_cast<char*>(fVideoBuffer2.GetHostPointer());}
-		inline ULWord *	VideoBuffer2 (void) const			{return reinterpret_cast<ULWord*>(fVideoBuffer2.GetHostPointer());}
+		inline NTV2_POINTER &	VideoBuffer2 (void)			{return fVideoBuffer2;}
 		inline ULWord	VideoBufferSize2 (void) const		{return fVideoBuffer2.GetByteCount();}
 
 		inline bool		IsNULL (void) const					{return fVideoBuffer.IsNULL() && fVideoBuffer2.IsNULL()

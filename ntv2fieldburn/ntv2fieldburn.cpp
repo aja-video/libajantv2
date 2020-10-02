@@ -351,9 +351,9 @@ AJAStatus NTV2FieldBurn::SetupHostBuffers (void)
 			frameData.fAudioBuffer.Allocate(NTV2_AUDIOSIZE_MAX, /*pageAligned*/true);
 
 		//	Check for memory allocation failures...
-		if (!frameData.HasVideo()
-			|| (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem) && !frameData.HasAudio())
-			|| (!frameData.HasVideo2() && !mIsFieldMode))
+		if (!frameData.VideoBuffer()
+			|| (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem) && !frameData.AudioBuffer())
+			|| (!frameData.VideoBuffer2() && !mIsFieldMode))
 				failures.push_back(ULWord(mHostBuffers.size()+1));
 		mAVCircularBuffer.Add(&frameData);
 	}	//	for each NTV2FrameData

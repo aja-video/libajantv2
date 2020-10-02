@@ -440,7 +440,7 @@ void NTV2Capture::CaptureFrames (void)
 									pCaptureData->fNumAncBytes);
 				stale.Fill(uint32_t(0));
 			}
-			if (acStatus.WithCustomAnc()  &&  pCaptureData->HasAnc2())
+			if (acStatus.WithCustomAnc()  &&  pCaptureData->AncBuffer2())
 			{
 				pCaptureData->fNumAnc2Bytes = inputXfer.GetCapturedAncByteCount(/*isF2*/true);
 				NTV2_POINTER excess(pCaptureData->fAncBuffer2.GetHostAddress(inputXfer.GetCapturedAncByteCount(/*isF2*/true), /*fromEnd*/true),
