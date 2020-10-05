@@ -3196,7 +3196,7 @@ private:
 		}
 		virtual	~DecodeHDMIOutHDRControl()	{}
 	}	mDecodeHDMIOutHDRControl;
-	
+
 	struct DecodeSDIOutputControl : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
