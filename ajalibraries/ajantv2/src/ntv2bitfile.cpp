@@ -97,15 +97,24 @@ bool CNTV2Bitfile::Open (const string & inBitfileName)
 
 }	//	Open
 
-string CNTV2Bitfile::ParseHeaderFromBuffer(const uint8_t* inBitfileBuffer)
+string CNTV2Bitfile::ParseHeaderFromBuffer(const uint8_t* inBitfileBuffer, const size_t inBufferSize)
 {
 	Close();
 
 	do
 	{
 		//	Preload bitfile header into mem
-		for (int i = 0; i < MAX_BITFILEHEADERSIZE - 1; i++)
-			_fileHeader.push_back(inBitfileBuffer[i]);
+		for (int i = 0; i < MAX_BITFILEHEADERSIZE - 1; i++) 
+		{
+			if (i < inBufferSize) 
+			{
+				_fileHeader.push_back(inBitfileBuffer[i]);
+			}
+			else 
+			{
+				break;
+			}
+		}
 
 		_lastError = ParseHeader();
 		if (!_lastError.empty())
@@ -129,6 +138,7 @@ string CNTV2Bitfile::ParseHeader ()
 
 	//	This really is bad form -- it precludes the ability to make this method 'const' (which it really is), plus it's safer to use iterators...
 	char *	p	(reinterpret_cast <char *> (&_fileHeader [0]));
+	size_t maxPosValue(_fileHeader.size());
 
 	do
 	{
@@ -224,7 +234,7 @@ string CNTV2Bitfile::ParseHeader ()
 		//Search for the start signature
 		bool bFound = (strncmp(p, reinterpret_cast<const char*>(signature), 8) == 0);
 		int i = 0;
-		while (bFound == false && i < 1000)
+		while (bFound == false && i < 1000 && pos < maxPosValue)
 		{
 			bFound = strncmp(p, reinterpret_cast<const char*>(signature), 8) == 0;
 			if(!bFound)

@@ -1033,7 +1033,7 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 	}
 
 	CNTV2Bitfile fileInfo;
-	std::string headerError (fileInfo.ParseHeaderFromBuffer(reinterpret_cast<uint8_t*>(bitFilePtr)));
+	std::string headerError (fileInfo.ParseHeaderFromBuffer(reinterpret_cast<uint8_t*>(bitFilePtr), dwordSizeCount * 4));
 	if (headerError.size() == 0)
 	{
 		::strncpy(bitFileInfo.dateStr, fileInfo.GetDate().c_str(), NTV2_BITFILE_DATETIME_STRINGLENGTH);

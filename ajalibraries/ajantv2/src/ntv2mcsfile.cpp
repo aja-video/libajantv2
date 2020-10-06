@@ -112,7 +112,7 @@ void CNTV2MCSfile::GetMCSInfo()
 	if (mainBitfilePartition.size() > 0)
 	{
 		CNTV2Bitfile bitfileInfo;
-		bitfileInfo.ParseHeaderFromBuffer(&mainBitfilePartition[0]);
+		bitfileInfo.ParseHeaderFromBuffer(&mainBitfilePartition[0], mainBitfilePartition.size());
 		mBitfileDate = bitfileInfo.GetDate();
 		mBitfileDesignName = bitfileInfo.GetDesignName();
 		mBitfilePartName = bitfileInfo.GetPartName();

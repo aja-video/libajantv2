@@ -56,9 +56,10 @@ class AJAExport CNTV2Bitfile
 		/**
 			@brief		Parse a bitfile header in a buffer.
 			@param[in]	inBitfileBuffer	Specifies the buffer of the bitfile to be parsed.
+			@param[in]	inBufferSize	Specifies the size of the buffer to be parsed.
 			@return		A std::string containing parsing errors.
 		**/
-		virtual std::string					ParseHeaderFromBuffer(const uint8_t* inBitfileBuffer);
+		virtual std::string					ParseHeaderFromBuffer(const uint8_t* inBitfileBuffer, const size_t inBufferSize);
 
 		/**
 			@brief		Answers with the bitfile build date, as extracted from the bitfile.
