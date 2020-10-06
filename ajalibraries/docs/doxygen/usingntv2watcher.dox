@@ -436,6 +436,8 @@ The display highlights changed content with a brighter color.
 		-	<b>Start</b> — Click this button to start/run the audio system. If already running, the button is dimmed and indicates “Running”.
 		-	<b>Stop</b> — Click this button to stop the audio system. If already stopped, the button is dimmed and indicates “Stopped”.
 		-	<b>Loopback</b> — If checked, audio samples from the audio system’s source are routed directly into the output embedder(s) that are sourced from this audio system.
+		-	<b>Write-Enable</b> — (Shown only in <b>Input</b> mode.) If checked, and if the capture audio system is running, captured audio will be written into
+			the audio system’s capture buffer at the <b>Write Head</b>. Otherwise, the audio system will not be permitted to write into the capture buffer.
 		-	<b>Erase</b> — (Shown only in <b>Output</b> mode.) If checked, the audio system will automatically write silence (i.e., zero values) into the output buffer
 			immediately behind the <b>Read Head</b>.
 		-	<b>Embed</b> — (Shown only in <b>Output</b> mode.) If checked, the audio system’s output audio embedder is enabled.

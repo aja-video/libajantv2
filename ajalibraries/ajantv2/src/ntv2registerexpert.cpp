@@ -3196,7 +3196,7 @@ private:
 		}
 		virtual	~DecodeHDMIOutHDRControl()	{}
 	}	mDecodeHDMIOutHDRControl;
-	
+
 	struct DecodeSDIOutputControl : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -3206,11 +3206,11 @@ private:
 			ostringstream		oss;
 			const uint32_t		vidStd	(inRegValue & (BIT(0)|BIT(1)|BIT(2)));
 			static const string	sStds[32] = {"1080i", "720p", "480i", "576i", "1080p", "1556i", "6", "7"};
-			oss	<< "Video Standard : "			<< sStds[vidStd]										<< endl
+			oss	<< "Video Standard: "			<< sStds[vidStd]										<< endl
 				<< "2Kx1080 mode: "				<< (inRegValue & BIT(3) ? "2048x1080" : "1920x1080")	<< endl
 				<< "HBlank RGB Range: Black="	<< (inRegValue & BIT(7) ? "0x40" : "0x04")				<< endl
 				<< "12G enable: "				<< YesNo(inRegValue & BIT(17))							<< endl
-				<< "6G enalbe: "				<< YesNo(inRegValue & BIT(16))							<< endl
+				<< "6G enable: "				<< YesNo(inRegValue & BIT(16))							<< endl
 				<< "3G enable: "				<< YesNo(inRegValue & BIT(24))							<< endl
 				<< "3G mode: "					<< (inRegValue & BIT(25) ? "b" : "a")					<< endl
 				<< "VPID insert enable: "		<< YesNo(inRegValue & BIT(26))							<< endl

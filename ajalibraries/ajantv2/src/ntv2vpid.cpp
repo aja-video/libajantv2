@@ -695,6 +695,7 @@ NTV2VideoFormat CNTV2VPID::GetVideoFormat (void) const
 	case VPIDStandard_1080_3Ga:
 	case VPIDStandard_1080_3Gb:
 	case VPIDStandard_1080_DualLink_3Gb:
+	case VPIDStandard_1080_Dual_3Ga:
 		if (vpidProgPicture)
 		{
 			if (vpidProgTransport)

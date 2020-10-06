@@ -35,10 +35,10 @@ using namespace std;
 #endif	//	!defined (NTV2_DEPRECATE)
 
 // Macros to simplify returning of strings for given enum
-#define NTV2UTILS_ENUM_CASE_RETURN_STR(enum_name) case(enum_name): return #enum_name;
+#define NTV2UTILS_ENUM_CASE_RETURN_STR(enum_name) case(enum_name): return #enum_name
 
 #define NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(condition, retail_name, enum_name)\
-	case(enum_name): return condition ? retail_name : #enum_name;
+	case(enum_name): return condition ? retail_name : #enum_name
 
 //////////////////////////////////////////////////////
 //	BEGIN SECTION MOVED FROM 'videoutilities.cpp'
@@ -599,7 +599,7 @@ bool YUVComponentsTo10BitYUVPackedBuffer (const vector<uint16_t> & inYCbCrLine, 
 		return false;	//	Buffer too small
 
 	pOutPackedLine = reinterpret_cast<uint32_t*>(inDescriptor.GetWriteableRowAddress(inFrameBuffer.GetHostAddress(0), inLineOffset));
-	if (pOutPackedLine == AJA_NULL)
+	if (!pOutPackedLine)
 		return false;	//	Buffer too small
 
 	for (uint32_t inputCount = 0, outputCount = 0;   inputCount < pixPerLineX2;   outputCount += 4, inputCount += 12)
@@ -7115,6 +7115,14 @@ string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID inValue, con
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL In 6", NTV2_XptDuallinkIn6);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL In 7", NTV2_XptDuallinkIn7);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL In 8", NTV2_XptDuallinkIn8);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL In 1 DS2", NTV2_XptDuallinkIn1DS2);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL In 2 DS2", NTV2_XptDuallinkIn2DS2);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL In 3 DS2", NTV2_XptDuallinkIn3DS2);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL In 4 DS2", NTV2_XptDuallinkIn4DS2);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL In 5 DS2", NTV2_XptDuallinkIn5DS2);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL In 6 DS2", NTV2_XptDuallinkIn6DS2);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL In 7 DS2", NTV2_XptDuallinkIn7DS2);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DL In 8 DS2", NTV2_XptDuallinkIn8DS2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425Mux 1a YUV", NTV2_Xpt425Mux1AYUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425Mux 1a RGB", NTV2_Xpt425Mux1ARGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "425Mux 1b YUV", NTV2_Xpt425Mux1BYUV);

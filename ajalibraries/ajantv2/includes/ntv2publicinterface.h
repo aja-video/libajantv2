@@ -6362,14 +6362,17 @@ typedef enum
 				/**
 					@brief		Constructs me from a client-supplied address and size.
 					@param[in]	pInUserPointer	Specifies the user-space virtual memory address. The client is entirely responsible for it.
-					@param[in]	inByteCount		Specifies the byte count.
+												Ignored if inByteCount is zero.
+					@param[in]	inByteCount		Specifies the byte count. Ignored if pInUserPointer is NULL.
 				**/
 				explicit		NTV2_POINTER (const void * pInUserPointer, const size_t inByteCount);
 
 				/**
-					@brief		Constructs me from a client-specified byte count. In this case, I assume full responsibility for the memory I allocate.
-					@param[in]	inByteCount		Specifies the size of the allocated buffer, in bytes. If non-zero, causes Allocate to be called, and
-												if successful, zeroes the buffer. If zero, I don't allocate anything, and my host pointer will be NULL.
+					@brief		Constructs me from a client-specified byte count.
+								In this case, I assume full responsibility for automatically freeing the memory I allocate.
+					@param[in]	inByteCount		Optionally specifies the size of the allocated buffer, in bytes. Defaults to zero.
+												If non-zero, causes Allocate to be called, and if successful, automatically zeroes the buffer.
+												If zero (the default), I don't allocate anything, and my host pointer will be NULL.
 				**/
 								NTV2_POINTER (const size_t inByteCount = 0);
 
@@ -6378,12 +6381,6 @@ typedef enum
 					@param[in]	inObj		NTV2_POINTER instance to "deep" copy into me.
 				**/
 				explicit		NTV2_POINTER (const NTV2_POINTER & inObj);
-
-				/**
-					@brief		Assigns me from another NTV2_POINTER instance.
-					@param[in]	inRHS		Specifies the NTV2_POINTER instance to assign ("deep" copy) to me.
-				**/
-				NTV2_POINTER &	operator = (const NTV2_POINTER & inRHS);
 
 				/**
 					@brief		My destructor. If I'm responsible for the memory, I free it here.
@@ -6400,10 +6397,10 @@ typedef enum
 				**/
 				inline void *	GetHostPointer (void) const
 				{
-					if (sizeof (int *) == 4)
-						return reinterpret_cast <void *> ((fUserSpacePtr & 0xFFFFFFFF00000000) >> 32);
+					if (sizeof(int*) == 4)
+						return reinterpret_cast <void*>((fUserSpacePtr & 0xFFFFFFFF00000000) >> 32);
 					else
-						return reinterpret_cast <void *> (fUserSpacePtr);
+						return reinterpret_cast <void*>(fUserSpacePtr);
 				}
 
 				/**
@@ -6437,7 +6434,12 @@ typedef enum
 				/**
 					@return		True if my host pointer is non-NULL and my byte count is non-zero;  otherwise false.
 				**/
-				inline operator bool() const	{return !IsNULL();}
+				inline			operator bool() const					{return !IsNULL();}
+
+				/**
+					@return		My size, in bytes, as a size_t.
+				**/
+				inline			operator size_t() const					{return size_t(GetByteCount());}
 
 				/**
 					@param[in]	inByteOffset	Specifies the offset from the start (or end) of my memory buffer.
@@ -6552,9 +6554,16 @@ typedef enum
 				}
 
 				/**
+					@brief		Assigns me from another NTV2_POINTER instance.
+					@param[in]	inRHS		Specifies the NTV2_POINTER instance to assign ("deep" copy) to me.
+				**/
+				NTV2_POINTER &	operator = (const NTV2_POINTER & inRHS);
+
+				/**
 					@brief		Sets (or resets) me from a client-supplied address and size.
 					@param[in]	pInUserPointer	Specifies the user-space virtual memory address. The client is entirely responsible for it.
-					@param[in]	inByteCount		Specifies the byte count.
+												Ignored if inByteCount is zero.
+					@param[in]	inByteCount		Specifies the byte count. Ignored if pInUserPointer is NULL.
 					@return		True if both pInUserPointer and inByteCount agree (i.e. if pInUserPointer
 								and inByteCount are both zero, or if they're both non-zero);  otherwise false
 								if they don't agree (i.e. one is non-zero and the other is zero, or vice-versa).
@@ -6565,15 +6574,18 @@ typedef enum
 				/**
 					@brief		Sets (or resets) me from a client-supplied address and size.
 					@param[in]	pInUserPointer	Specifies the user-space virtual memory address. The client is entirely responsible for it.
-					@param[in]	inByteCount		Specifies the byte count.
+												Ignored if inByteCount is zero.
+					@param[in]	inByteCount		Specifies the byte count. Ignored if pInUserPointer is NULL.
 					@param[in]	inValue			Specifies the value to fill the buffer with.
-					@return		True if successful;  otherwise false.
+					@return		True if both pInUserPointer and inByteCount agree (i.e. if pInUserPointer and inByteCount
+								are both zero, or if they're both non-zero);  otherwise false if they don't agree (i.e. one
+								is non-zero and the other is zero, or vice-versa).
 					@note		Any memory that I was referencing prior to this call that I was responsible for will automatically be freed.
 				**/
 				bool			SetAndFill (const void * pInUserPointer, const size_t inByteCount, const UByte inValue);
 
 				/**
-					@brief		Replaces my contents from the given memory buffer.
+					@brief		Replaces my contents from the given memory buffer without resizing me.
 					@param[in]	inBuffer	Specifies the memory buffer whose contents are to be copied into my own.
 											If this buffer is larger than I am, I am not resized; instead, only
 											those bytes that fit in me will be copied.
@@ -6723,7 +6735,57 @@ typedef enum
 				///@}
 
 				/**
-					@name	Conversion To/From Vectors
+					@name	Data Access
+				**/
+				///@{
+				/**
+					@return		My host address casted to a const T pointer.
+				**/
+				template<typename T>	operator const T*() const		{return reinterpret_cast<const T*>(GetHostPointer());}
+
+				/**
+					@return		My host address casted to a non-const T pointer.
+				**/
+				template<typename T>	operator T*() const				{return reinterpret_cast<T*>(GetHostPointer());}
+
+				/**
+					@return		A copy of the value at the given zero-based index position.
+					@param[in]	inIndex		Specifies the zero-based index position (e.g. 0 is first value at start of my memory).
+											If negative, indexes from the end of my memory (e.g. -1 is last value).
+					@warning	Bad index values will result in access violation exceptions.
+				**/
+				inline	uint8_t			U8 (const int inIndex) const	{const uint8_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()) + inIndex : inIndex];}
+
+				/**
+					@return		A writeable (non-const) reference to the value at the given zero-based index position.
+					@param[in]	inIndex		Specifies the zero-based index position (e.g. 0 is first value at start of my memory).
+											If negative, indexes from the end of my memory (e.g. -1 is last value).
+					@warning	Bad index values will result in access violation exceptions.
+				**/
+				inline	uint8_t &		U8 (const int inIndex)			{uint8_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()) + inIndex : inIndex];}
+
+				inline	int8_t			I8 (const int inIndex) const	{const int8_t* pVal(*this);		return pVal[inIndex < 0 ? int(GetByteCount()) + inIndex : inIndex];}
+				inline	int8_t &		I8 (const int inIndex)			{int8_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()) + inIndex : inIndex];}
+				inline	uint16_t		U16 (const int inIndex) const	{const uint16_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/2) + inIndex : inIndex];}
+				inline	uint16_t &		U16 (const int inIndex)			{uint16_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/2) + inIndex : inIndex];}
+				inline	int16_t			I16 (const int inIndex) const	{const int16_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/2) + inIndex : inIndex];}
+				inline	int16_t &		I16 (const int inIndex)			{int16_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/2) + inIndex : inIndex];}
+				inline	uint32_t		U32 (const int inIndex) const	{const uint32_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/4) + inIndex : inIndex];}
+				inline	uint32_t &		U32 (const int inIndex)			{uint32_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/4) + inIndex : inIndex];}
+				inline	int32_t			I32 (const int inIndex) const	{const int32_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/4) + inIndex : inIndex];}
+				inline	int32_t &		I32 (const int inIndex)			{int32_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/4) + inIndex : inIndex];}
+				inline	uint64_t		U64 (const int inIndex) const	{const uint64_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/8) + inIndex : inIndex];}
+				inline	uint64_t &		U64 (const int inIndex)			{uint64_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/8) + inIndex : inIndex];}
+				inline	int64_t			I64 (const int inIndex) const	{const int64_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/8) + inIndex : inIndex];}
+				inline	int64_t &		I64 (const int inIndex)			{int64_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/8) + inIndex : inIndex];}
+				inline	float			FL (const int inIndex) const	{const float* pVal(*this);		return pVal[inIndex < 0 ? int(GetByteCount()/sizeof(float)) + inIndex : inIndex];}
+				inline	float &			FL (const int inIndex)			{float* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/sizeof(float)) + inIndex : inIndex];}
+				inline	double			DBL (const int inIndex) const	{const double* pVal(*this);		return pVal[inIndex < 0 ? int(GetByteCount()/sizeof(double)) + inIndex : inIndex];}
+				inline	double &		DBL (const int inIndex)			{double* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/sizeof(double)) + inIndex : inIndex];}
+				///@}
+
+				/**
+					@name	Vector Conversion
 				**/
 				///@{
 				/**

@@ -1887,11 +1887,12 @@ public:
 	AJA_VIRTUAL bool		IsAudioInputRunning (const NTV2AudioSystem inAudioSystem, bool & outIsRunning);
 
 	/**
-		@brief		Enables or disables audio capture for the given Audio System on the AJA device.
+		@brief		Enables or disables the writing of incoming audio into the given Audio System's capture buffer.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem	Specifies the Audio System of interest.
-		@param[in]	inEnable		If true, the Audio System will capture samples into memory, if not currently reset.
-									If false, the Audio System will not capture samples.
+		@param[in]	inEnable		If true, the Audio System will write captured samples into device audio buffer
+									memory (if currently running). If false, the Audio System will not write captured
+									samples into device audio buffer memory.
 		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
 					configures the Audio System automatically.
 		@see		CNTV2Card::GetAudioCaptureEnable, \ref audiocapture
@@ -1899,12 +1900,13 @@ public:
 	AJA_VIRTUAL bool		SetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, const bool inEnable);
 
 	/**
-		@brief		Answers whether or not the Audio System is configured for capturing audio samples.
+		@brief		Answers whether or not the Audio System is configured to write captured audio samples into
+					device audio buffer memory.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem		Specifies the Audio System of interest.
-		@param[in]	outEnable			Receives 'true' if the Audio System will capture samples to memory when
-										not in reset mode;  otherwise 'false' if the Audio System is inhibited from
-										capturing samples.
+		@param[in]	outEnable			Receives 'true' if the Audio System will write captured samples into device
+										audio buffer memory when running;  otherwise 'false' if the Audio System is
+										prohibited from writing captured samples into device audio buffer memory.
 		@see		CNTV2Card::SetAudioCaptureEnable, \ref audiocapture
 	**/
 	AJA_VIRTUAL bool		GetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, bool & outEnable);
@@ -2364,12 +2366,14 @@ public:
 
 	AJA_VIRTUAL bool		CanDoAudioWaitForVBI (void);	///< @return	True if the device firmware supports audio start delay-til-VBI.
 
-	AJA_VIRTUAL bool NTV2_SHOULD_BE_DEPRECATED(WriteAudioSource (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1));
-	AJA_VIRTUAL bool NTV2_SHOULD_BE_DEPRECATED(ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1));
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioOutput(inAudioSystem) : StartAudioOutput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioOutput or CNTV2Card::StopAudioOutput instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioOutputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioOutputRunning instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioInputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioInput(inAudioSystem) : StartAudioInput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioInput or CNTV2Card::StopAudioInput instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioInputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioInputRunning instead.
+#if !defined(NTV2_DEPRECATE_16_0)
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool WriteAudioSource (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	This function is obsolete.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	This function is obsolete.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioOutput(inAudioSystem) : StartAudioOutput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioOutput or CNTV2Card::StopAudioOutput instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioOutputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioOutputRunning instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioInputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioInput(inAudioSystem) : StartAudioInput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioInput or CNTV2Card::StopAudioInput instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioInputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioInputRunning instead.
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
 	///@}
 
 	/**

@@ -1009,10 +1009,11 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 	NTV2_POINTER	savedAncF1,  savedAncF2;
 	if (::NTV2DeviceCanDo2110(_boardID)  &&  NTV2_IS_OUTPUT_CROSSPOINT(crosspoint))
 	{
-		//	S2110 Playout:	So that most Retail & OEM playout apps "just work" with S2110 RTP Anc streams, our classic SDI
-		//					Anc data that device firmware normally embeds into SDI output as derived from registers -- e.g.
-		//					VPID, RP188, etc. -- the SDK here will automatically insert these packets into the outgoing RTP
-		//					streams, even if the client didn't provide Anc buffers or specify AUTOCIRCULATE_WITH_ANC.
+		//	S2110 Playout:	So that most Retail & OEM playout apps "just work" with S2110 RTP Anc streams,
+		//					our classic SDI Anc data that device firmware normally embeds into SDI output
+		//					as derived from registers -- VPID & RP188 -- the SDK here automatically inserts
+		//					these packets into the outgoing RTP streams, even if the client didn't provide
+		//					Anc buffers in the AUTOCIRCULATE_TRANSFER object, or specify AUTOCIRCULATE_WITH_ANC.
 		ULWord	F1OffsetFromBottom(0),  F2OffsetFromBottom(0);
 		size_t	F1SizeInBytes(0), F2SizeInBytes(0);
 		if (GetAncRegionOffsetFromBottom(F1OffsetFromBottom, NTV2_AncRgn_Field1)
@@ -1465,8 +1466,8 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 
 	if (ancF1 || ancF2)
 	{
-		//	Import anc packet list that AutoCirculateTransfer's caller put into Xfer
-		//	struct's Anc buffers ... because we're going to add VPID and A/C timecodes...
+		//	Import anc packet list that AutoCirculateTransfer's caller put into Xfer struct's Anc buffers (GUMP or RTP).
+		//	We're going to add VPID and timecode packets to the list.
 		if (AJA_FAILURE(AJAAncillaryList::SetFromDeviceAncBuffers(ancF1, ancF2, packetList)))
 			return false;	//	Packet import failed
 
@@ -1569,6 +1570,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 		else if (isMonitoring)	{XMTWARN("GetSDIOutVPID failed for SDI spigot " << ::NTV2ChannelToString(SDISpigotChannel,true));}
 	}	//	if no VPID pkts in buffer
 	else if (isMonitoring)	{XMTDBG(DEC(packetList.CountAncillaryDataWithID(0x41,0x01)) << " VPID packet(s) already provided, won't insert any here");}
+	//	IoIP monitor GUMP VPID cannot be overridden -- SDI anc insert always inserts VPID via firmware
 
 	//	Callers can override our register-based RP188 values...
 	if (!packetList.CountAncillaryDataWithType(AJAAncillaryDataType_Timecode_ATC)		//	if no caller-specified ATC timecodes...
@@ -1621,6 +1623,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 		else if (isMonitoring)	{XMTWARN("Cannot insert ATC/VITC -- Xfer struct has no acOutputTimeCodes array!");}
 	}	//	if no ATC/VITC packets in buffer
 	else if (isMonitoring)	{XMTDBG("ATC and/or VITC packet(s) already provided, won't insert any here");}
+	//	IoIP monitor GUMP VPID cannot be overridden -- SDI anc inserter inserts RP188 via firmware
 
 	if (generateRTP)	//	if anything added (or forced conversion from GUMP)
 	{	//	Re-encode packets into the XferStruct buffers as RTP...
