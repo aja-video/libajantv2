@@ -61,7 +61,7 @@ class AJAExport NTV2RPCAPI
 											oss << " to '" << Name() << "'";
 										return oss;
 									}
-		AJA_VIRTUAL NTV2NubProtocolVersion	ProtocolVersion (void) const	{return ntv2NubProtocolVersionNone;}
+		AJA_VIRTUAL NTV2NubProtocolVersion	NubProtocolVersion (void) const	{return ntv2NubProtocolVersionNone;}
 
 //		AJA_VIRTUAL int	NTV2Connect		(const std::string & inHostname, const UWord inDeviceIndex)
 //																		{(void) inDeviceIndex; _hostname = inHostname;	return 0;}

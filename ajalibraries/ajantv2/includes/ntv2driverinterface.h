@@ -523,7 +523,7 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL std::string		GetHostName (void) const;	///< @return	String containing the name of the host (if connected to a remote device) or the name of the non-physical device;  otherwise an empty string.
 		AJA_VIRTUAL bool			IsRemote (void) const;	///< @return	True if I'm connected to a non-local or non-physical device;  otherwise false.
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-		AJA_VIRTUAL inline NTV2NubProtocolVersion	GetNubProtocolVersion (void) const	{return _pRPCAPI ? _pRPCAPI->ProtocolVersion() : ntv2NubProtocolVersionNone;}	///< @return	My nub protocol version.
+		AJA_VIRTUAL inline NTV2NubProtocolVersion	GetNubProtocolVersion (void) const	{return _pRPCAPI ? _pRPCAPI->NubProtocolVersion() : ntv2NubProtocolVersionNone;}	///< @return	My nub protocol version.
 #endif
 
 		//	DEPRECATED FUNCTIONS	
