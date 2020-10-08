@@ -918,7 +918,7 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
             status = AJAFileIO::TempDirectory(tempDir);
             WARN_MESSAGE(status == AJA_STATUS_SUCCESS, "AJAFileIO::TempDirectory() could not find platform temp dir, trying secondary location.");
 
-            if (status == AJA_STATUS_SUCCESS)
+            if (status != AJA_STATUS_SUCCESS)
             {
 				tempDir = "ajafileio_tmp_dir";
 				char cwdBuf[AJA_MAX_PATH+1] = "";
