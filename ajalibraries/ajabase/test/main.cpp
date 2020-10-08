@@ -918,17 +918,24 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
             status = AJAFileIO::TempDirectory(tempDir);
             WARN_MESSAGE(status == AJA_STATUS_SUCCESS, "AJAFileIO::TempDirectory() could not find platform temp dir, trying secondary location.");
 
-            if (status != AJA_STATUS_SUCCESS)
+            if (status == AJA_STATUS_SUCCESS)
             {
-                tempDir = "ajafileio_tmp_dir";
+				tempDir = "ajafileio_tmp_dir";
+				char cwdBuf[AJA_MAX_PATH+1] = "";
     #if defined(AJA_WINDOWS)
                 _mkdir(tempDir.c_str());
+				_getcwd(cwdBuf, AJA_MAX_PATH);
     #else
                 if (mkdir(tempDir.c_str(), ACCESSPERMS) == 0)
                 {
                     chmod(tempDir.c_str(), ACCESSPERMS);
                 }
+                getcwd(cwdBuf, AJA_MAX_PATH);
     #endif
+                // prepend full working directory path so rest of tests complete
+                std::string cwdStr = cwdBuf;
+                aja::rstrip(cwdStr, pathSepStr);
+                tempDir = std::string(cwdBuf) + pathSepStr + tempDir;
             }
         }
 

@@ -1157,7 +1157,7 @@ AJAFileIO::GetWorkingDirectory(std::string& cwd)
 {
 	AJAStatus status = AJA_STATUS_SUCCESS;
 
-	char buf[AJA_MAX_PATH+1];
+	char buf[AJA_MAX_PATH+1] = "";
 
 #if defined(AJA_WINDOWS)
 	_getcwd(buf, AJA_MAX_PATH);
