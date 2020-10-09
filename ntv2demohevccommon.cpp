@@ -720,7 +720,7 @@ AJAStatus CNTV2DemoHevcCommon::SetupHEVC (CNTV2m31 * pM31, M31VideoPreset preset
         // Now lets configure the device for a given preset.  First we must clear out all of the params which
         // is necessary since the param space is basically uninitialized memory.
         pM31->ClearAllParams();
-        
+
         // Now load params for M31 preset into local structures in CNTV2m31
         if (!pM31->LoadAllParams(preset))
         { cerr << "## ERROR:  LoadAllPresets failed" << endl;  return AJA_STATUS_INITIALIZE; }
@@ -739,11 +739,11 @@ AJAStatus CNTV2DemoHevcCommon::SetupHEVC (CNTV2m31 * pM31, M31VideoPreset preset
         { cerr << "## ERROR:  SetVideoPreset failed ch1 " << endl;  return AJA_STATUS_INITIALIZE; }
         
 		// Here is where you can alter params sent to the M31 because all of these structures are public
-		pM31->mpM31EHParam->SetFrameNumInGOP(16, (M31VirtualChannel)encodeChannel);
-		pM31->mpM31EHParam->SetIpPeriod(4, (M31VirtualChannel)encodeChannel);
-		pM31->mpM31EHParam->SetClosedGOP(1, (M31VirtualChannel)encodeChannel);
-		pM31->mpM31EHParam->SetGOPHierarchy(0, (M31VirtualChannel)encodeChannel);
-		pM31->mpM31EHParam->SetBitRate(1000, (M31VirtualChannel)encodeChannel);
+//		pM31->mpM31EHParam->SetFrameNumInGOP(16, (M31VirtualChannel)encodeChannel);
+//		pM31->mpM31EHParam->SetIpPeriod(4, (M31VirtualChannel)encodeChannel);
+//		pM31->mpM31EHParam->SetClosedGOP(1, (M31VirtualChannel)encodeChannel);
+//		pM31->mpM31EHParam->SetGOPHierarchy(0, (M31VirtualChannel)encodeChannel);
+//		pM31->mpM31EHParam->SetBitRate(10000, (M31VirtualChannel)encodeChannel);
 
 		if (withInfo)
         {
