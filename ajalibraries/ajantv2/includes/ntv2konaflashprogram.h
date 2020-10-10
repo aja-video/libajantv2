@@ -38,7 +38,7 @@ typedef enum
 	MAC_FLASHBLOCK,
 	MCS_INFO_BLOCK,
 	LICENSE_BLOCK
-}FlashBlockID;
+} FlashBlockID;
 
 typedef enum
 {
@@ -46,7 +46,7 @@ typedef enum
 	BANK_1,
 	BANK_2,
 	BANK_3
-}BankSelect;
+} BankSelect;
 
 struct MacAddr
 {
@@ -55,36 +55,48 @@ struct MacAddr
 };
 
 
+class AJAExport CNTV2FlashProgress
+{
+	public:
+		static CNTV2FlashProgress &	nullUpdater;
+
+						CNTV2FlashProgress()	{}
+		virtual			~CNTV2FlashProgress()	{}
+		virtual bool	UpdatePercentage (const size_t inPercentage)	{(void) inPercentage; return true;}
+};	//	CNTV2PercentUpdater
+
+
 class AJAExport CNTV2KonaFlashProgram : public CNTV2Card
 {
 public:
 	CNTV2KonaFlashProgram();
-
 	CNTV2KonaFlashProgram (const UWord boardNumber);
-
 	virtual ~CNTV2KonaFlashProgram();
+	static std::string	FlashBlockIDToString (const FlashBlockID inID, const bool inShortDisplay = false);
 
 public:
 	virtual bool	SetBoard (UWord boardNumber, uint32_t index = 0);
 	bool			ReadHeader (FlashBlockID flashBlock);
 	bool			ReadInfoString();
 	void			SetBitFile (const char *bitFileName, FlashBlockID blockNumber = AUTO_FLASHBLOCK);
+	bool			SetBitFile (const std::string & inBitfileName, const FlashBlockID blockNumber = AUTO_FLASHBLOCK);
 	bool			SetMCSFile (const char *sMCSFileName);
-    void			Program (bool fullVerify = false);
-    bool            ProgramFromMCS(bool verify);
-    bool            ProgramSOC(bool verify = true);
+	void			Program (bool fullVerify = false);
+	bool            ProgramFromMCS(bool verify);
+	bool            ProgramSOC(bool verify = true);
 	void			ProgramCustom ( const char *sCustomFileName, const uint32_t addr);
 	void			EraseBlock (FlashBlockID blockNumber);
 	bool			EraseChip (UWord chip = 0);
 	bool			CreateSRecord (bool bChangeEndian);
 	bool			CreateEDIDIntelRecord ();
-    void			SetQuietMode ();
+	void			SetQuietMode ();
 	bool			VerifyFlash (FlashBlockID flashBlockNumber, bool fullVerify = false);
+	bool			ReadFlash (NTV2_POINTER & outBuffer, const FlashBlockID flashID, CNTV2FlashProgress & inFlashProgress = CNTV2FlashProgress::nullUpdater);
 	bool			SetBankSelect (BankSelect bankNumber);
 	bool			SetFlashBlockIDBank(FlashBlockID blockID);
-    bool            ROMHasBankSelect();
-	uint32_t			ReadBankSelect ();
-    void            SetMBReset();
+	bool            ROMHasBankSelect();
+	uint32_t		ReadBankSelect ();
+	void            SetMBReset();
 
 	std::string & GetDesignName()
 	{
@@ -100,23 +112,11 @@ public:
 		}
 		return _designName;
 	}
-	std::string & GetPartName()
-	{
-		return _partName;
-	}
-	std::string & GetDate()
-	{
-		return _date;
-	}
-	std::string & GetTime()
-	{
-		return _time;
-	}
-	uint32_t GetNumBytes()
-	{
-		return _numBytes;
-	}
-	std::string & GetMCSInfo()
+	const std::string & GetPartName (void) const	{return _partName;}
+	const std::string & GetDate (void) const		{return _date;}
+	const std::string & GetTime (void) const		{return _time;}
+	uint32_t GetNumBytes(void) const				{return _numBytes;}
+	std::string & GetMCSInfo(void)
 	{
 		std::string::size_type f = _mcsInfo.find("\xFF\xFF");
 		_mcsInfo = _mcsInfo.substr(0, f);
@@ -144,7 +144,7 @@ public:
 	bool CheckFlashErasedWithBlockID(FlashBlockID flashBlockNumber);
 	uint32_t ReadDeviceID();
 	bool SetDeviceProperties();
-	void DetermingFlashTypeAndBlockNumberFromFileName(const char* bitFileName);
+	void DetermineFlashTypeAndBlockNumberFromFileName(const std::string & bitFileName);
 	void SRecordOutput (const char *pSRecord);
 
 	uint32_t GetSectorAddressForSector(FlashBlockID flashBlockNumber,uint32_t sectorNumber)
@@ -187,54 +187,55 @@ public:
 	bool CheckAndFixMACs();
 	bool MakeMACsFromSerial( const char *sSerialNumber, MacAddr *pMac1, MacAddr *pMac2 );
 
-	uint8_t*	  _bitFileBuffer;
-	uint8_t*	  _customFileBuffer;
-	uint32_t		  _bitFileSize;
-	std::string       _bitFileName;
-	std::string       _date;
-	std::string       _time;
-	std::string       _designName;
-	std::string       _partName;
-	std::string		  _mcsInfo;
-	uint32_t			  _spiDeviceID;
-	uint32_t			  _flashSize;
-	uint32_t			  _bankSize;
-	uint32_t			  _sectorSize;
-	uint32_t			  _mainOffset;
-	uint32_t			  _failSafeOffset;
-	uint32_t			  _macOffset;
-    uint32_t            _mcsInfoOffset;
-	uint32_t			_licenseOffset;
-    uint32_t			  _soc1Offset;
-    uint32_t			  _soc2Offset;
-	uint32_t			  _numSectorsMain;
-	uint32_t			  _numSectorsSOC1;
-	uint32_t			  _numSectorsSOC2;
-	uint32_t			  _numSectorsFailSafe;
-	uint32_t			  _numBytes;
-	FlashBlockID	  _flashID;
-	uint32_t			  _deviceID;
-	bool			  _bQuiet;
-    int32_t               _mcsStep;
+protected:
+	uint8_t *		_bitFileBuffer;
+	uint8_t *		_customFileBuffer;
+	uint32_t		_bitFileSize;
+	std::string		_bitFileName;
+	std::string		_date;
+	std::string		_time;
+	std::string		_designName;
+	std::string		_partName;
+	std::string		_mcsInfo;
+	uint32_t		_spiDeviceID;
+	uint32_t		_flashSize;
+	uint32_t		_bankSize;
+	uint32_t		_sectorSize;
+	uint32_t		_mainOffset;
+	uint32_t		_failSafeOffset;
+	uint32_t		_macOffset;
+    uint32_t		_mcsInfoOffset;
+	uint32_t		_licenseOffset;
+    uint32_t		_soc1Offset;
+    uint32_t		_soc2Offset;
+	uint32_t		_numSectorsMain;
+	uint32_t		_numSectorsSOC1;
+	uint32_t		_numSectorsSOC2;
+	uint32_t		_numSectorsFailSafe;
+	uint32_t		_numBytes;
+	FlashBlockID	_flashID;
+	uint32_t		_deviceID;
+	bool			_bQuiet;
+    int32_t			_mcsStep;
     CNTV2MCSfile	_mcsFile;
 	std::vector<uint8_t> _partitionBuffer;
-    uint32_t        _failSafePadding;
+    uint32_t		_failSafePadding;
+    CNTV2SpiFlash *	_spiFlash;
 
 	typedef enum {
-		READID_COMMAND=0x9F,
-		WRITEENABLE_COMMAND=0x06,
-		WRITEDISABLE_COMMAND=0x04,
-		READSTATUS_COMMAND=0x05,
-		WRITESTATUS_COMMAND=0x01,
-		READFAST_COMMAND=0x0B,
-		PAGEPROGRAM_COMMAND=0x02,
-		SECTORERASE_COMMAND=0xD8,
-		CHIPERASE_COMMAND=0xC7,
-		BANKSELECT_COMMMAND=0x17,
-		READBANKSELECT_COMMAND=0x16
-	} _FLASH_STUFF ;
+		READID_COMMAND			= 0x9F,
+		WRITEENABLE_COMMAND		= 0x06,
+		WRITEDISABLE_COMMAND	= 0x04,
+		READSTATUS_COMMAND		= 0x05,
+		WRITESTATUS_COMMAND		= 0x01,
+		READFAST_COMMAND		= 0x0B,
+		PAGEPROGRAM_COMMAND		= 0x02,
+		SECTORERASE_COMMAND		= 0xD8,
+		CHIPERASE_COMMAND		= 0xC7,
+		BANKSELECT_COMMMAND		= 0x17,
+		READBANKSELECT_COMMAND	= 0x16
+	} _FLASH_STUFF;
 
-    CNTV2SpiFlash*   _spiFlash;
-};
+};	//	CNTV2KonaFlashProgram
 
 #endif	//	NTV2KONAFLASHPROGRAM_H
