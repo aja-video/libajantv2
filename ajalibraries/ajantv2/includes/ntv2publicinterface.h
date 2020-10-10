@@ -6451,6 +6451,41 @@ typedef enum
 				void *			GetHostAddress (const ULWord inByteOffset, const bool inFromEnd = false) const;
 
 				/**
+					@brief		Searches me for the given scalar value of type T starting at a given index position.
+					@param[in]	inValue			Specifies the scalar value to be searched for.
+					@param		inOutIndex		On entry, specifies where searching begins.
+												On exit, receives the index of the matching value.
+												Negative indexes search backward from the end of the buffer, where -1
+												is the last T in the buffer (with the highest physical memory address).
+					@return		True if successfully found; otherwise false.
+				**/
+				template<typename T> bool	Find (const T & inValue, int & inOutIndex)
+				{
+					const bool isAscending(inOutIndex >= 0);
+					if (isAscending  &&  inOutIndex >= int(GetByteCount()))
+						return false;	//	Past end
+					if (!isAscending  &&  (1 - inOutIndex) >= int(GetByteCount()))
+						return false;	//	Before start
+					const T * pValues(*this);
+					const int maxNdx(int(GetByteCount()) / sizeof(T));
+					if (isAscending)
+					{
+						for (int ndx(inOutIndex);  ndx < maxNdx;  ndx++)
+							if (pValues[ndx] == inValue)
+								{inOutIndex = ndx;  return true;}
+					}
+					else
+					{
+						const int minNdx(0 - maxNdx);
+						for (int ndx(inOutIndex);  ndx >= minNdx;  ndx++)
+							if (pValues[maxNdx + ndx] == inValue)
+								{inOutIndex = ndx;  return true;}
+					}
+					inOutIndex = 0;
+					return false;	//	Not found
+				}
+
+				/**
 					@return		True if the given memory buffer's contents are identical to my own.
 					@param[in]	inBuffer		Specifies the memory buffer whose contents are to be compared with mine.
 					@param[in]	inByteOffset	Specifies the byte offset to start comparing. Defaults to the first byte.
