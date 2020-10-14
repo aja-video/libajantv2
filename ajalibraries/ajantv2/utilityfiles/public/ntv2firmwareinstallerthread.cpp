@@ -524,9 +524,11 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate (const NTV2DeviceID inDeviceID, 
 	case DEVICE_ID_CORVID44_8KMK:
 	case DEVICE_ID_CORVID44_8K:
 	case DEVICE_ID_CORVID44_2X4K:
+	case DEVICE_ID_CORVID44_PLNR:
         return (designName == GetPrimaryDesignName(DEVICE_ID_CORVID44_8KMK) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_CORVID44_8K) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_CORVID44_2X4K));
+				designName == GetPrimaryDesignName(DEVICE_ID_CORVID44_2X4K) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_CORVID44_PLNR));
 	case DEVICE_ID_IO4K:
 		return (designName == GetPrimaryDesignName(DEVICE_ID_IO4KUFC));
 	case DEVICE_ID_IO4KUFC:
@@ -625,6 +627,7 @@ string CNTV2FirmwareInstallerThread::GetPrimaryDesignName (const NTV2DeviceID in
 		case DEVICE_ID_KONA5_8K:					return "kona5_8k";
 		case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k";
 		case DEVICE_ID_CORVID44_2X4K:				return "c44_12g_2X4K";
+		case DEVICE_ID_CORVID44_PLNR:				return "c44_12g_plnr";
 		case DEVICE_ID_TTAP_PRO:					return "t_tap_pro";
         default: return "";
 	}

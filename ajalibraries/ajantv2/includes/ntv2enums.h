@@ -70,6 +70,7 @@ typedef enum
 	DEVICE_ID_CORVID44_8KMK				= 0x10832400,	///< @brief	See \ref corvid4412g
 	DEVICE_ID_CORVID44_8K				= 0X10832401,	///< @brief	See \ref corvid4412g
 	DEVICE_ID_CORVID44_2X4K				= 0X10832402,	///< @brief	See \ref corvid4412g
+	DEVICE_ID_CORVID44_PLNR				= 0X10832403,	///< @brief	See \ref corvid4412g
 	DEVICE_ID_CORVID88					= 0x10538200,	///< @brief	See \ref corvid88
 	DEVICE_ID_CORVIDHBR					= 0x10668200,	///< @brief	See \ref corvidhbr
 	DEVICE_ID_CORVIDHEVC				= 0x10634500,	///< @brief	See \ref corvidhevc
@@ -3535,6 +3536,7 @@ typedef enum
 	NTV2_BITFILE_KONA5_2X4K_MAIN	= 62,
 	NTV2_BITFILE_CORVID44_2X4K_MAIN	= 63,
 	NTV2_BITFILE_KONA5_3DLUT_MAIN	= 64,
+	NTV2_BITFILE_CORVID44_PLNR_MAIN	= 65,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 
