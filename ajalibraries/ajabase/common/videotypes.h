@@ -254,4 +254,32 @@ enum AJA_VideoConversion
 	AJA_VideoConversion_Size
 };
 
+
+enum AJA_HdrColorimetry		// compare R2HdrColorimetry
+{
+	AJA_HdrColor_Auto,
+	AJA_HdrColor_SDR,
+	AJA_HdrColor_P3,
+	AJA_HdrColor_2020,
+	AJA_HdrColor_Custom
+};
+
+
+enum AJA_HdrTransfer		// compare R2HdrTransfer
+{
+	AJA_HdrTrans_Auto,
+	AJA_HdrTrans_SDR,
+	AJA_HdrTrans_HLG,
+	AJA_HdrTrans_PQ,
+};
+
+
+enum AJA_HdrLuminance		// compare R2HdrLuminance
+{
+	AJA_Luminance_Auto,
+	AJA_Luminance_YCbCr,
+	AJA_Luminance_ICtCp
+};
+
+
 #endif	//	AJA_VIDEODEFINES
