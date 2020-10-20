@@ -177,14 +177,14 @@ the byte count required to hold the frame, the byte offset to a particular line,
 
 @subsection	devicefbformats		Device Frame Buffer Formats
 
-Non-planar, uncompressed RGB and YCbCr video data in the device frame buffer is always stored full-frame.
+Uncompressed RGB and YCbCr video data in the device frame buffer is always stored full-frame.
 Interlaced video is always stored in the frame buffer with the first line of Field 1 (F1L1) at the top of the buffer,
 followed by the first line of Field 2 (F2L1), then F1L2, F2L2, F1L3, F2L3, etc., alternating to the end of the frame.
-(A very VERY long time ago, AJA made devices that stored all of Field 1’s lines in the top half of the buffer, and all of Field 2’s
-lines in the bottom half of the buffer. These devices and buffer formats are no longer supported.)
+(A very <i>VERY</i> long time ago, AJA made devices that stored all of Field 1’s lines in the top half of the buffer,
+and all of Field 2’s lines in the bottom half of the buffer. These devices and buffer formats are no longer supported.)
 
 The frame buffer format describes what kind of data is stored in each frame and how the data is arranged in memory.
-Each format is identified by a specific ::NTV2FrameBufferFormat enumeration constant.
+Each format is identified by a specific ::NTV2FrameBufferFormat (aka ::NTV2PixelFormat) enumeration constant.
 
 @note	The format of video data on the NTV2 device is identical to the format of the video data on the host,
 		whether after transferring captured frames from the device to the host, or before transferring frames to be
@@ -211,8 +211,6 @@ Many AJA devices support most of these additional frame buffer formats:
 	<tr><td><b>24-Bit BGR</b>					<td>::NTV2_FBF_24BIT_BGR
 	<tr><td><b>10-Bit DPX little-endian</b>		<td>::NTV2_FBF_10BIT_DPX_LE
 	<tr><td><b>48-Bit RGB 16 bpc</b>			<td>::NTV2_FBF_48BIT_RGB
-	<tr><td><b>10-Bit Raw YCbCr</b>				<td>::NTV2_FBF_10BIT_RAW_YCBCR
-	<tr><td><b>10-Bit Raw RGB</b>				<td>::NTV2_FBF_10BIT_RAW_RGB
 </table>
 
 New pixel formats:
@@ -458,5 +456,28 @@ with the most-significant 6 bits set to zero. Thus, the size, in bytes, of the l
 The chroma planes immediately follow the luma plane in memory, each half the size of the luma plane, the Cb plane preceding the Cr plane.
 Chroma values are 10-bit (0-1023) values, stored identically to the luma values, one chroma value per horizontal pixel pair
 (horizontal-only subsampling).
+
+
+@subsubsection		fbformats10bitycbcr420pl2	10-Bit YCbCr 4:2:0 Two-Plane
+
+This format, identified by the ::NTV2_FBF_10BIT_YCBCR_420PL2 enumeration constant, is a two-plane format commonly used with video encoders,
+including the \ref corvidhevc.
+
+@image	html	fbf-10bitycbcr420planar2-75.png
+
+The raster pixel left-to-right, top-to-bottom scan order coincides with increasing address order.
+
+The Luma Plane is a sequence of 10-bit (0-1023) luminance values stored in a packed succession of 8-bit chunks,
+requiring 5 bytes for every 4 pixels.
+
+Thus, the size, in bytes, of the Luma Plane is <b>W × H × 5 ÷ 4</b> bytes, where <b>W</b> is the raster width (in pixels),
+and <b>H</b> is the raster height (in lines). For example, for HD 1920×1080, each line requires exactly 2,400 bytes;
+2,592,000 bytes for the entire image.
+
+The Luma Plane should terminate on a 64-bit (8-byte) boundary — i.e., the <b>W × H</b> product should be divisible by 8.
+
+The Chroma Plane immediately follows the Luma Plane in memory, half the size of the Luma plane.
+
+Chroma values are 10-bit (0-1023) values, one <b>Cb</b>/<b>Cr</b> pair per 2×2 pixel quad (horizontal and vertical subsampling).
 
 **/

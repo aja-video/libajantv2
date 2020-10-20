@@ -19,6 +19,9 @@
 static unsigned char signature[8] = {0xFF,0xFF,0xFF,0xFF,0xAA,0x99,0x55,0x66};
 static unsigned char head13[]   = { 0x00, 0x09, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x00, 0x00, 0x01 };
 
+#define ENUM_CASE_RETURN_VAL_OR_ENUM_STR(condition, retail_name, enum_name)\
+	case(enum_name): return condition ? retail_name : #enum_name
+
 using namespace std;
 
 string MacAddr::AsString(void) const
@@ -29,11 +32,31 @@ string MacAddr::AsString(void) const
 	return oss.str();
 }
 
+static CNTV2FlashProgress gNullUpdater;
+
+CNTV2FlashProgress &	CNTV2FlashProgress::nullUpdater	= gNullUpdater;
+
+string CNTV2KonaFlashProgram::FlashBlockIDToString (const FlashBlockID inID, const bool inShortDisplay)
+{
+	switch (inID)
+	{
+		ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inShortDisplay, "Main",		MAIN_FLASHBLOCK);
+		ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inShortDisplay, "FailSafe",	FAILSAFE_FLASHBLOCK);
+		ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inShortDisplay, "Auto",		AUTO_FLASHBLOCK);
+		ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inShortDisplay, "SOC1",		SOC1_FLASHBLOCK);
+		ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inShortDisplay, "SOC2",		SOC2_FLASHBLOCK);
+		ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inShortDisplay, "Mac",			MAC_FLASHBLOCK);
+		ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inShortDisplay, "MCS",			MCS_INFO_BLOCK);
+		ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inShortDisplay, "License",		LICENSE_BLOCK);
+	}
+	return "";
+}
+
 
 CNTV2KonaFlashProgram::CNTV2KonaFlashProgram ()
 	:	CNTV2Card (),
-		_bitFileBuffer		(NULL),
-		_customFileBuffer	(NULL),
+		_bitFileBuffer		(AJA_NULL),
+		_customFileBuffer	(AJA_NULL),
 		_bitFileSize		(0),
 		_flashSize			(0),
 		_bankSize			(0),
@@ -55,14 +78,14 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram ()
 		_bQuiet				(false),
         _mcsStep            (0),
         _failSafePadding    (0),
-        _spiFlash           (NULL)
+        _spiFlash           (AJA_NULL)
 {
 }
 
 CNTV2KonaFlashProgram::CNTV2KonaFlashProgram (const UWord boardNumber)
 	:	CNTV2Card (boardNumber),
-        _bitFileBuffer      (NULL),
-        _customFileBuffer   (NULL),
+        _bitFileBuffer      (AJA_NULL),
+        _customFileBuffer   (AJA_NULL),
         _bitFileSize        (0),
         _flashSize          (0),
         _bankSize           (0),
@@ -84,7 +107,7 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram (const UWord boardNumber)
         _bQuiet             (false),
         _mcsStep            (0),
         _failSafePadding    (0),
-        _spiFlash           (NULL)
+        _spiFlash           (AJA_NULL)
 {
 	SetDeviceProperties();
 }
@@ -354,8 +377,8 @@ void CNTV2KonaFlashProgram::SetBitFile(const char *bitFileName, FlashBlockID blo
 	}
 	_bitFileName = bitFileName;
 
-	if ( blockNumber == AUTO_FLASHBLOCK )
-		DetermingFlashTypeAndBlockNumberFromFileName(bitFileName);
+	if (blockNumber == AUTO_FLASHBLOCK)
+		DetermineFlashTypeAndBlockNumberFromFileName(bitFileName);
 	else if ( blockNumber >= MAIN_FLASHBLOCK && blockNumber <= FAILSAFE_FLASHBLOCK )
 		_flashID = blockNumber;
 	else
@@ -390,11 +413,51 @@ void CNTV2KonaFlashProgram::SetBitFile(const char *bitFileName, FlashBlockID blo
 		throw "Device Not Recognized";
 }
 
-void CNTV2KonaFlashProgram::DetermingFlashTypeAndBlockNumberFromFileName(const char* bitFileName)
+bool CNTV2KonaFlashProgram::SetBitFile (const string & inBitfileName, const FlashBlockID blockNumber)
 {
+	if (_bitFileBuffer)
+	{
+		delete [] _bitFileBuffer;
+		_bitFileBuffer = AJA_NULL;
+	}
+	_bitFileName = inBitfileName;
 
+	if (blockNumber == AUTO_FLASHBLOCK)
+		DetermineFlashTypeAndBlockNumberFromFileName(inBitfileName);
+	else if (blockNumber >= MAIN_FLASHBLOCK  &&  blockNumber <= FAILSAFE_FLASHBLOCK)
+		_flashID = blockNumber;
+	else
+		throw "Invalid block number";
+
+	FILE* pFile = AJA_NULL;
+	struct stat fsinfo;
+	stat(inBitfileName.c_str(), &fsinfo);
+	_bitFileSize = uint32_t(fsinfo.st_size);
+	pFile = fopen(inBitfileName.c_str(), "rb");
+	if (!pFile)
+		return false;	//	Bit file can't be opened
+
+	// +_256 for fastFlash Programming
+	_bitFileBuffer = new unsigned char[_bitFileSize+512];
+	memset(_bitFileBuffer, 0xFF, _bitFileSize+512);
+
+	fseek(pFile, 0, SEEK_SET);
+	fread(_bitFileBuffer, 1, _bitFileSize, pFile);
+	fclose(pFile);
+
+	// Parse header to make sure this is a xilinx bitfile.
+	if (!ParseHeader((char *)_bitFileBuffer))
+		return false;	//	Can't Parse Header
+
+	if (!SetDeviceProperties())
+		return false;	//	Device Not Recognized
+	return true;
+}
+
+void CNTV2KonaFlashProgram::DetermineFlashTypeAndBlockNumberFromFileName (const string & bitFileName)
+{
 	_flashID = MAIN_FLASHBLOCK;
-	if (strstr(bitFileName, "_fs_") != NULL)
+	if (bitFileName.find("_fs_") != string::npos)
 		_flashID = FAILSAFE_FLASHBLOCK;
 }
 
@@ -842,6 +905,66 @@ bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID, bool fullVerify)
 			printf("Program verify: 100%%                    \n");
 	}
 
+	return true;
+}
+
+bool CNTV2KonaFlashProgram::ReadFlash (NTV2_POINTER & outBuffer, const FlashBlockID inFlashID, CNTV2FlashProgress & inFlashProgress)
+{
+	uint32_t baseAddress(GetBaseAddressForProgramming(inFlashID));
+	const uint32_t numDWords((_bitFileSize+4)/4);
+	if (outBuffer.GetByteCount() < numDWords*4)
+		if (!outBuffer.Allocate(numDWords * 4))
+			return false;
+
+	size_t lastPercent(0);
+	inFlashProgress.UpdatePercentage(lastPercent);
+	switch (_flashID)
+	{
+		default:
+		case MAIN_FLASHBLOCK:
+			SetBankSelect(BANK_0);
+			break;
+		case FAILSAFE_FLASHBLOCK:
+			SetBankSelect(NTV2DeviceHasSPIv5(_boardID) ? BANK_2 : BANK_1);
+			break;
+	}
+	WriteRegister(kVRegFlashState, kProgramStateVerifyFlash);
+	WriteRegister(kVRegFlashSize, numDWords);
+	for (uint32_t dword(0);  dword < numDWords;  )
+	{
+		if (NTV2DeviceHasSPIv5(_boardID)  &&  baseAddress == _bankSize)
+		{
+			baseAddress = 0;
+			switch (_flashID)
+			{
+				default:
+				case MAIN_FLASHBLOCK:
+					SetBankSelect(BANK_1);
+					break;
+				case FAILSAFE_FLASHBLOCK:
+					SetBankSelect(BANK_3);
+					break;
+			}
+		}
+		WriteRegister(kRegXenaxFlashAddress, baseAddress);
+		WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+		WaitForFlashNOTBusy();
+		uint32_t flashValue;
+		ReadRegister(kRegXenaxFlashDOUT, flashValue);
+		outBuffer.U32(int(dword)) = flashValue;
+		WriteRegister(kVRegFlashStatus, dword);
+
+		dword += 1;
+		size_t percent(dword * 100 / numDWords);
+		if (percent != lastPercent)
+			if (!inFlashProgress.UpdatePercentage(percent))
+				{SetBankSelect(BANK_0);  return false;}
+		lastPercent = percent;
+		if ((dword % 0x10000) == 0)	cerr << xHEX0N(dword,8) << " of " << xHEX0N(numDWords,8) << endl;
+		baseAddress += 4;
+	}
+	SetBankSelect(BANK_0);
+	inFlashProgress.UpdatePercentage(100);
 	return true;
 }
 

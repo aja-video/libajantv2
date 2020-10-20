@@ -736,6 +736,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 		case DEVICE_ID_CORVID44_2X4K:               bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44_2X4K_MAIN;			break;
 		case DEVICE_ID_CORVID44_8K:                 bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44_8K_MAIN;			break;
 		case DEVICE_ID_CORVID44_8KMK:               bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44_8KMK_MAIN;			break;
+		case DEVICE_ID_CORVID44_PLNR:               bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44_PLNR_MAIN;			break;
 		case DEVICE_ID_CORVID88:					bitFileInfo.bitFileType = NTV2_BITFILE_CORVID88;					break;
 		case DEVICE_ID_CORVIDHBR:					bitFileInfo.bitFileType = NTV2_BITFILE_NUMBITFILETYPES;				break;
 		case DEVICE_ID_CORVIDHEVC:					bitFileInfo.bitFileType = NTV2_BITFILE_CORVIDHEVC;					break;
