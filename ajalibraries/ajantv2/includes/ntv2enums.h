@@ -319,6 +319,22 @@ typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief	An alias for NTV2Fram
 											||	(__fbf__) == NTV2_FBF_8BIT_DVCPRO				\
 										)
 
+#define NTV2_IS_FBF_10BIT(__fbf__)		(		(__fbf__) == NTV2_FBF_10BIT_YCBCR				\
+											||	(__fbf__) == NTV2_FBF_10BIT_RGB					\
+											||	(__fbf__) == NTV2_FBF_10BIT_DPX					\
+											||	(__fbf__) == NTV2_FBF_10BIT_YCBCR_DPX			\
+											||	(__fbf__) == NTV2_FBF_10BIT_YCBCRA				\
+											||	(__fbf__) == NTV2_FBF_10BIT_DPX_LE				\
+											||	(__fbf__) == NTV2_FBF_10BIT_RGB_PACKED			\
+											||	(__fbf__) == NTV2_FBF_10BIT_ARGB				\
+											||	(__fbf__) == NTV2_FBF_10BIT_RAW_RGB				\
+											||	(__fbf__) == NTV2_FBF_10BIT_RAW_YCBCR			\
+											||	(__fbf__) == NTV2_FBF_10BIT_YCBCR_420PL3_LE		\
+											||	(__fbf__) == NTV2_FBF_10BIT_YCBCR_422PL3_LE		\
+											||	(__fbf__) == NTV2_FBF_10BIT_YCBCR_420PL2		\
+											||	(__fbf__) == NTV2_FBF_10BIT_YCBCR_422PL2		\
+										)
+
 #define	NTV2_FBF_HAS_ALPHA(__fbf__)		(		(__fbf__) == NTV2_FBF_ARGB						\
 											||	(__fbf__) == NTV2_FBF_RGBA						\
 											||	(__fbf__) == NTV2_FBF_ABGR						\
