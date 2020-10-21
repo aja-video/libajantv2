@@ -305,9 +305,9 @@ void NTV2Player::SetUpHostBuffers (void)
 		uint32_t pktSize(0);
 		switch (mConfig.fTransmitHDRType)
 		{
-			case AJAAncDataType_HDR_SDR:	sdrPkt.GenerateTransmitData(ancBuf,		ancBuf.GetByteCount(), pktSize);	break;
-			case AJAAncDataType_HDR_HDR10:	hdr10Pkt.GenerateTransmitData(ancBuf,	ancBuf.GetByteCount(), pktSize);	break;
-			case AJAAncDataType_HDR_HLG:	hlgPkt.GenerateTransmitData(ancBuf,		ancBuf.GetByteCount(), pktSize);	break;
+			case AJAAncDataType_HDR_SDR:	sdrPkt.GenerateTransmitData(ancBuf,		ancBuf, pktSize);	break;
+			case AJAAncDataType_HDR_HDR10:	hdr10Pkt.GenerateTransmitData(ancBuf,	ancBuf, pktSize);	break;
+			case AJAAncDataType_HDR_HLG:	hlgPkt.GenerateTransmitData(ancBuf,		ancBuf, pktSize);	break;
 			default:						break;
 		}
 		#ifdef NTV2_BUFFER_LOCK

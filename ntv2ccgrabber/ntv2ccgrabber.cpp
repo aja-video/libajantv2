@@ -1007,14 +1007,14 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 		//	Get all VANC packets...
 		if (NTV2_IS_VANCMODE_ON(vancMode))
 		{
-			AJAAncillaryList::SetFromVANCData (mInputXferInfo.acVideoBuffer, formatDesc, vancPackets);
+			AJAAncillaryList::SetFromVANCData (mInputXferInfo.acVideoBuffer, formatDesc, vancPackets, inFrameNum);
 			vancPackets.ParseAllAncillaryData();
 		}
 
 		//	Get all anc extractor packets...
 		if (DeviceAncExtractorIsAvailable())
 		{
-			AJAAncillaryList::SetFromDeviceAncBuffers (mInputXferInfo.acANCBuffer, mInputXferInfo.acANCField2Buffer, ancPackets);
+			AJAAncillaryList::SetFromDeviceAncBuffers (mInputXferInfo.acANCBuffer, mInputXferInfo.acANCField2Buffer, ancPackets, inFrameNum);
 			ancPackets.ParseAllAncillaryData();
 			if (NTV2_IS_VANCMODE_ON(vancMode))
 			{	//	Compare with what we got from VANC lines:

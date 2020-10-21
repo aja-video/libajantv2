@@ -570,12 +570,12 @@ void NTV2Player8K::PlayFrames (void)
 	mDevice.WaitForOutputFieldID (NTV2_FIELD0, mChannel);
 
 	uint32_t*	fAncBuffer = mAncType != AJAAncillaryDataType_Unknown ? reinterpret_cast <uint32_t *> (AJAMemory::AllocateAligned (NTV2_ANCSIZE_MAX, AJA_PAGE_SIZE)) : AJA_NULL;
-	uint32_t	fAncBufferSize = mAncType != AJAAncillaryDataType_Unknown ? NTV2_ANCSIZE_MAX : 0;
+	size_t		fAncBufferSize = mAncType != AJAAncillaryDataType_Unknown ? NTV2_ANCSIZE_MAX : 0;
 
 	if (fAncBuffer != AJA_NULL)
 	{
-		::memset((void*)fAncBuffer, 0x00, fAncBufferSize);
-		mDevice.DMABufferLock(fAncBuffer, fAncBufferSize, true);
+		::memset(fAncBuffer, 0x00, fAncBufferSize);
+		mDevice.DMABufferLock(fAncBuffer, uint32_t(fAncBufferSize), true);
 	}
 
 	uint32_t	packetSize = 0;

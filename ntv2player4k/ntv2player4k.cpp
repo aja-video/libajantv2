@@ -1189,8 +1189,7 @@ void NTV2Player4K::ConsumeFrames (void)
 	{	//	Allocate page-aligned host Anc buffer...
 		outputXferInfo.acANCBuffer.Allocate(NTV2_ANCSIZE_MAX, /*pageAligned=*/true);
 		outputXferInfo.acANCBuffer.Fill(0LL);	//	Zero it
-		pPkt->GenerateTransmitData (reinterpret_cast<uint8_t*>(outputXferInfo.acANCBuffer.GetHostPointer()),
-									outputXferInfo.acANCBuffer.GetByteCount(),  hdrPktSize);
+		pPkt->GenerateTransmitData (outputXferInfo.acANCBuffer, outputXferInfo.acANCBuffer,  hdrPktSize);
 		acOptions |= AUTOCIRCULATE_WITH_ANC;
 	}
 
@@ -1201,18 +1200,17 @@ void NTV2Player4K::ConsumeFrames (void)
 	}
 #endif
 	//	Initialize & start AutoCirculate...
+	UWord startNum(0), endNum(0);
     if (::NTV2DeviceCanDo12gRouting(mDeviceID))
     {
-		uint32_t startNum(0), endNum(0);
 		startNum = numACFramesPerChannel * mConfig.fOutputChannel;
 		endNum = startNum + numACFramesPerChannel - 1;
         mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  0,	//	0 frameCount: we'll specify start & end frame numbers
 											mConfig.fAudioSystem,  acOptions,
-                                            1 /*numChannels*/,  UByte(startNum),  UByte(endNum));
+                                            1 /*numChannels*/,  startNum,  endNum);
     }
     else
     {
-		uint32_t startNum(0), endNum(0);
 		switch(mConfig.fOutputChannel)
 		{	default:
 			case NTV2_CHANNEL1:
