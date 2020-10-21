@@ -107,10 +107,11 @@ void AJAAncillaryData::Init()
 	m_SID			= 0x00;
 	m_checksum		= 0;
 	m_frameID		= 0;
+	m_userData		= 0;
+	m_rcvDataValid	= false;
 	m_coding		= AJAAncillaryDataCoding_Digital;
 	m_ancType		= AJAAncillaryDataType_Unknown;
 	m_bufferFmt		= AJAAncillaryBufferFormat_Unknown;
-	m_rcvDataValid	= false;
 	//	Default location:
 	m_location.SetDataLink(AJAAncillaryDataLink_A)					//	LinkA
 				.SetDataStream(AJAAncillaryDataStream_1)			//	DS1
@@ -516,7 +517,7 @@ AJAStatus AJAAncillaryData::ParsePayloadData (void)
 //**********
 //	[Re]Initializes me from the 8-bit GUMP buffer received from extractor (ingest)
 AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
-													const uint32_t					inMaxBytes,
+													const size_t					inMaxBytes,
 													const AJAAncillaryDataLocation & inLocationInfo,
 													uint32_t &						outPacketByteCount)
 {
@@ -552,6 +553,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
 	// When we have extracted the useful data from the packet, we return the packet size, in bytes, so the
 	// caller can find the start of the next packet (if any).
 
+	const uint32_t maxBytes(uint32_t(inMaxBytes+0));
 	if (pInData == AJA_NULL)
 	{
 		outPacketByteCount = 0;
@@ -560,10 +562,10 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
 	}
 
 	//	The minimum size for a packet (i.e. no payload) is 7 bytes
-	if (inMaxBytes < AJAAncillaryDataWrapperSize)
+	if (maxBytes < AJAAncillaryDataWrapperSize)
 	{
-		outPacketByteCount = inMaxBytes;
-		LOGMYERROR("AJA_STATUS_RANGE: Buffer size " << inMaxBytes << " smaller than " << AJAAncillaryDataWrapperSize << " bytes");
+		outPacketByteCount = maxBytes;
+		LOGMYERROR("AJA_STATUS_RANGE: Buffer size " << maxBytes << " smaller than " << AJAAncillaryDataWrapperSize << " bytes");
 		return AJA_STATUS_RANGE;
 	}
 
@@ -581,9 +583,9 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
 	const uint32_t	totalBytes	(pInData[5] + AJAAncillaryDataWrapperSize);
 
 	//	If the reported packet size extends beyond the end of the buffer, we're toast...
-	if (totalBytes > inMaxBytes)
+	if (totalBytes > maxBytes)
 	{
-		outPacketByteCount = inMaxBytes;
+		outPacketByteCount = maxBytes;
 		LOGMYERROR("AJA_STATUS_RANGE: Reported packet size " << totalBytes << " [bytes] extends past end of buffer " << inMaxBytes << " by " << (totalBytes-inMaxBytes) << " byte(s)");
 		return AJA_STATUS_RANGE;
 	}
@@ -679,14 +681,14 @@ AJAStatus AJAAncillaryData::GetRawPacketSize (uint32_t & outPacketSize) const
 //**********
 //	Writes my payload data into the given 8-bit GUMP buffer (playback)
 
-AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_t inMaxBytes, uint32_t & outPacketSize)
+AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const size_t inMaxBytes, uint32_t & outPacketSize)
 {
-	AJAStatus status	(GeneratePayloadData());
+	AJAStatus status (GeneratePayloadData());
 
 	outPacketSize = 0;
 
-	// make sure the caller has allocated enough space to hold what we're going to generate
-	uint32_t	myPacketSize	(0);
+	//	Verify that the caller has allocated enough space to hold what's going to be generated
+	uint32_t myPacketSize(0), maxBytes(uint32_t(inMaxBytes+0));
 	GetRawPacketSize(myPacketSize);
 
 	if (myPacketSize == 0)
@@ -694,9 +696,9 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (uint8_t * pData, const uint32_
 		LOGMYERROR("AJA_STATUS_FAIL: nothing to do -- raw packet size is zero: " << AsString(32));
 		return AJA_STATUS_FAIL;
 	}
-	if (myPacketSize > inMaxBytes)
+	if (myPacketSize > maxBytes)
 	{
-		LOGMYERROR("AJA_STATUS_FAIL: " << inMaxBytes << "-byte client buffer too small to hold " << myPacketSize << " byte(s): " << AsString(32));
+		LOGMYERROR("AJA_STATUS_FAIL: " << maxBytes << "-byte client buffer too small to hold " << myPacketSize << " byte(s): " << AsString(32));
 		return AJA_STATUS_FAIL;
 	}
 	if (!IsDigital() && !IsRaw())	//	Coding not set: don't generate anything

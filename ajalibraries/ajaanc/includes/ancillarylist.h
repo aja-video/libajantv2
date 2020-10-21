@@ -11,6 +11,7 @@
 #include "ntv2formatdescriptor.h"
 #include <list>
 #include <map>
+#include <set>
 
 
 // used for "match any" searches and counts
@@ -32,6 +33,11 @@ typedef AJAU32Pkts::iterator		AJAU32PktsIter;					///< @brief	Handy non-const it
 typedef UByteSequence				AJAAncPktCounts;				///< @brief	Ordered sequence of SMPTE Anc packet counts
 typedef AJAAncPktCounts::const_iterator	AJAAncPktCountsConstIter;	///< @brief	Handy const iterator over AJAAncPktCounts
 class CNTV2Card;
+
+typedef std::set<AJAAncPktDIDSID>			AJAAncPktDIDSIDSet;				///< @brief	Set of distinct packet DID/SIDs
+typedef AJAAncPktDIDSIDSet::const_iterator	AJAAncPktDIDSIDSetConstIter;	///< @brief	Handy const iterator for AJAAncPktDIDSIDSet
+typedef AJAAncPktDIDSIDSet::iterator		AJAAncPktDIDSIDSetIter;			///< @brief	Handy non-const iterator for AJAAncPktDIDSIDSet
+
 
 /**
 	@brief		I am an ordered collection of AJAAncillaryData instances which represent one or more SMPTE 291
@@ -59,6 +65,7 @@ public:	//	CLASS METHODS
 		@param[in]	inFrameBuffer		Specifies the NTV2 frame buffer (or at least the portion containing the VANC lines).
 		@param[in]	inFormatDesc		Describes the frame buffer (pixel format, video standard, etc.).
 		@param[out]	outPackets			Receives the packets found.
+		@param[in]	inFrameNum			If non-zero, specifies/sets the frame identifier for the packets.
 		@return		AJA_STATUS_SUCCESS if successful.
 		@bug		The ::AJAAncillaryDataLink in the ::AJAAncillaryDataLocation in each of the returned packets
 					is currently ::AJAAncillaryDataLink_A, which will be incorrect if, for example, the FrameStore
@@ -66,18 +73,21 @@ public:	//	CLASS METHODS
 	**/
 	static AJAStatus						SetFromVANCData (const NTV2_POINTER & inFrameBuffer,
 															const NTV2FormatDescriptor & inFormatDesc,
-															AJAAncillaryList & outPackets);
+															AJAAncillaryList & outPackets,
+															const uint32_t inFrameNum = 0);
 
 	/**
 		@brief		Returns all ancillary data packets found in the given F1 and F2 ancillary data buffers.
 		@param[in]	inF1AncBuffer		Specifies the F1 ancillary data buffer.
 		@param[in]	inF2AncBuffer		Specifies the F2 ancillary data buffer.
 		@param[out]	outPackets			Receives the packet list.
+		@param[in]	inFrameNum			If non-zero, replaces the frame identifier of new packets that have a zero frame ID.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	static AJAStatus						SetFromDeviceAncBuffers (const NTV2_POINTER & inF1AncBuffer,
 																	const NTV2_POINTER & inF2AncBuffer,
-																	AJAAncillaryList & outPackets);
+																	AJAAncillaryList & outPackets,
+																	const uint32_t inFrameNum = 0);
 
 	#if !defined(NTV2_DEPRECATE_15_2)
 		static inline AJAStatus	SetFromSDIAncData (const NTV2_POINTER & inF1, const NTV2_POINTER & inF2, AJAAncillaryList & outPkts)	{return SetFromDeviceAncBuffers(inF1, inF2, outPkts);}	///< @deprecated	Use SetFromDeviceAncBuffers instead.
@@ -218,6 +228,8 @@ public:	//	INSTANCE METHODS
 		@note		The AJAAncillaryList owns the returned object. If the list gets Cleared or deleted, the returned pointer will become invalid.
 	**/
 	virtual AJAAncillaryData *				GetAncillaryDataWithID (const uint8_t inDID, const uint8_t inSID, const uint32_t inIndex = 0) const;
+
+	virtual AJAAncPktDIDSIDSet				GetAncillaryPacketIDs (void) const;	///< @return	The set of DID/SID pairs of all of my packets.
 	///@}
 
 
@@ -465,9 +477,10 @@ public:	//	INSTANCE METHODS
 					into separate AJAAncillaryData objects and appends them to me.
 		@param[in]	pInReceivedData		Specifies a valid, non-NULL address of the first byte of "raw" ancillary data received by an AncExtractor widget.
 		@param[in]	inByteCount			Specifies the number of bytes of data in the specified buffer to process.
+		@param[in]	inFrameNum			If non-zero, replaces the frame identifier of new packets that have a zero frame ID.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						AddReceivedAncillaryData (const uint8_t * pInReceivedData, const uint32_t inByteCount);
+	virtual AJAStatus						AddReceivedAncillaryData (const uint8_t * pInReceivedData, const uint32_t inByteCount, const uint32_t inFrameNum = 0);
 
 
 	/**
@@ -485,10 +498,12 @@ public:	//	INSTANCE METHODS
 										six elements must be 0x0000, 0x03ff, 0x03ff, DID, SDID, DC, data words, and CS.
 										Each word will have its upper byte masked off.
 		@param[in]	inLocation			Specifies where the packet was found.
+		@param[in]	inFrameNum			If non-zero, specifies/sets the frame identifier for the added packets.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						AddVANCData (const UWordSequence & inPacketWords,
-														const AJAAncillaryDataLocation & inLocation);
+														const AJAAncillaryDataLocation & inLocation,
+														const uint32_t inFrameNum = 0);
 
 	/**
 		@brief		Answers true if multiple RTP packets are allowed for capture/receive.
@@ -567,11 +582,13 @@ protected:
 		@brief		Appends whatever can be decoded from the given device Anc buffer to the AJAAncillaryList.
 		@param[in]	inAncBuffer			Specifies the Anc buffer to be parsed.
 		@param		outPacketList		The AJAAncillaryList to be appended to, for whatever packets are found in the buffer.
+		@param[in]	inFrameNum			If non-zero, replaces the frame identifier of packets that have a zero frame ID.
 		@note		Called by SetFromDeviceAncBuffers, once for the F1 buffer, another time for the F2 buffer.
 		@return		AJA_STATUS_SUCCESS if successful, including if no Anc packets are found and added to the list.
 	**/
 	static AJAStatus						AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBuffer,
-																	AJAAncillaryList & outPacketList);
+																	AJAAncillaryList & outPacketList,
+																	const uint32_t inFrameNum = 0);
 
 	/**
 		@brief		Answers with my F1 & F2 SMPTE anc packets encoded as RTP ULWordSequences.
@@ -635,5 +652,13 @@ inline std::ostream & operator << (std::ostream & inOutStream, const AJAAncillar
 	@return		A non-constant reference to the specified output stream.
 **/
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const AJAU32Pkts & inPkts);
+
+/**
+	@brief		Writes the given AJAAncPktDIDSIDSet set into the given output stream in a human-readable format.
+	@param		inOutStream		Specifies the output stream to be written.
+	@param[in]	inSet			Specifies the AJAAncPktDIDSIDSet to be rendered into the output stream.
+	@return		A non-constant reference to the specified output stream.
+**/
+AJAExport std::ostream & operator << (std::ostream & inOutStream, const AJAAncPktDIDSIDSet & inSet);
 
 #endif	// AJA_ANCILLARYLIST_H
