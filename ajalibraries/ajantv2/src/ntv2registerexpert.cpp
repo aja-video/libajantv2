@@ -1377,6 +1377,22 @@ private:
 		DefineRegName	(kVRegNTV2VPIDRGBRange6,				"kVRegNTV2VPIDRGBRange6");
 		DefineRegName	(kVRegNTV2VPIDRGBRange7,				"kVRegNTV2VPIDRGBRange7");
 		DefineRegName	(kVRegNTV2VPIDRGBRange8,				"kVRegNTV2VPIDRGBRange8");
+		DefineRegName	(kVRegDmaTransferRateC2H1,				"kVRegDmaTransferRateC2H1");
+		DefineRegName	(kVRegDmaHardwareRateC2H1,				"kVRegDmaHardwareRateC2H1");
+		DefineRegName	(kVRegDmaTransferRateH2C1,				"kVRegDmaTransferRateH2C1");
+		DefineRegName	(kVRegDmaHardwareRateH2C1,				"kVRegDmaHardwareRateH2C1");
+		DefineRegName	(kVRegDmaTransferRateC2H2,				"kVRegDmaTransferRateC2H2");
+		DefineRegName	(kVRegDmaHardwareRateC2H2,				"kVRegDmaHardwareRateC2H2");
+		DefineRegName	(kVRegDmaTransferRateH2C2,				"kVRegDmaTransferRateH2C2");
+		DefineRegName	(kVRegDmaHardwareRateH2C2,				"kVRegDmaHardwareRateH2C2");
+		DefineRegName	(kVRegDmaTransferRateC2H3,				"kVRegDmaTransferRateC2H3");
+		DefineRegName	(kVRegDmaHardwareRateC2H3,				"kVRegDmaHardwareRateC2H3");
+		DefineRegName	(kVRegDmaTransferRateH2C3,				"kVRegDmaTransferRateH2C3");
+		DefineRegName	(kVRegDmaHardwareRateH2C3,				"kVRegDmaHardwareRateH2C3");
+		DefineRegName	(kVRegDmaTransferRateC2H4,				"kVRegDmaTransferRateC2H4");
+		DefineRegName	(kVRegDmaHardwareRateC2H4,				"kVRegDmaHardwareRateC2H4");
+		DefineRegName	(kVRegDmaTransferRateH2C4,				"kVRegDmaTransferRateH2C4");
+		DefineRegName	(kVRegDmaHardwareRateH2C4,				"kVRegDmaHardwareRateH2C4");
 
 		DefineRegName	(kVRegPCIMaxReadRequestSize,			"kVRegPCIMaxReadRequestSize");
 		DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
