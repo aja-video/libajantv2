@@ -25,7 +25,10 @@ const uint8_t AJAAncillaryData_AnalogDID = 0x00;
 const uint8_t AJAAncillaryData_AnalogSID = 0x00;
 
 
-typedef std::pair <uint8_t, uint8_t>			AJAAncillaryDIDSIDPair;		///< @brief	A DID/SID pair, typically used as an indexing key.
+typedef std::pair <uint8_t, uint8_t>		AJAAncillaryDIDSIDPair;	///< @brief	A DID/SID pair, typically used as an indexing key.
+typedef uint16_t							AJAAncPktDIDSID;		///< @brief	Packet DID/SID pair: DID (MS 8 bits) and SID (LS 8 bits)
+#define ToAJAAncPktDIDSID(_d_,_s_)			(uint16_t((_d_) << 8) | uint16_t(_s_))
+#define FromAJAAncPktDIDSID(_k_,_d_,_s_)	(_d_) = uint8_t(((_k_) & 0xFF00) >> 8); (_d_) = uint8_t(_k_ & 0x00FF);
 
 /**
 	@brief	Writes a human-readable rendition of the given AJAAncillaryDIDSIDPair into the given output stream.
@@ -573,8 +576,8 @@ public:
 	AJAAncillaryData (const AJAAncillaryData * pInClone);
 
 	virtual									~AJAAncillaryData ();	///< @brief		My destructor.
-	virtual void							Clear (void);			///< @brief	Frees my allocated memory, if any, and resets my members to their default values.
-	virtual AJAAncillaryData *				Clone (void) const;	//	@return	A clone of myself.
+	virtual void							Clear (void);			///< @brief		Frees my allocated memory, if any, and resets my members to their default values.
+	virtual AJAAncillaryData *				Clone (void) const;		///< @return	A clone of myself.
 	///@}
 
 
@@ -586,6 +589,8 @@ public:
 	virtual inline uint8_t					GetDID (void) const							{return m_DID;}							///< @return	My Data ID (DID).
 	virtual inline uint8_t					GetSID (void) const							{return m_SID;}							///< @return	My secondary data ID (SID).
 	virtual inline uint32_t					GetDC (void) const							{return uint32_t(m_payload.size());}	///< @return	My payload data count, in bytes.
+	virtual inline AJAAncillaryDIDSIDPair	GetDIDSIDPair (void) const					{return AJAAncillaryDIDSIDPair(GetDID(),GetSID());}	///< @return	My DID & SID as an AJAAncillaryDIDSIDPair.
+	virtual inline AJAAncPktDIDSID			GetDIDSID (void) const						{return ToAJAAncPktDIDSID(GetDID(),GetSID());}		///< @return	My DID & SID as an AJAAncPktDIDSID.
 	virtual inline size_t					GetPayloadByteCount (void) const			{return size_t(GetDC());}				///< @return	My current payload byte count.
 	virtual AJAAncillaryDataType			GetAncillaryDataType (void) const			{return m_ancType;}						///< @return	My anc data type (if known).
 	virtual inline uint32_t					GetFrameID (void) const						{return m_frameID;}						///< @return	My frame identifier (if known).
@@ -602,6 +607,7 @@ public:
 	virtual inline uint16_t					GetLocationLineNumber (void) const			{return GetDataLocation().GetLineNumber();}				///< @return	My current frame line number value (SMPTE line numbering).
 	virtual inline uint16_t					GetLocationHorizOffset (void) const			{return GetDataLocation().GetHorizontalOffset();}		///< @return	My current horizontal offset value.
 	virtual uint16_t						GetStreamInfo (void) const;																			///< @return	My 7-bit stream info (if relevant)
+	virtual inline const uint64_t &			UserData (void) const						{return m_userData;}					///< @return	My user data (if any).
 
 	/**
 		@return	True if I have valid DataLink/DataStream stream information (rather than unknown).
@@ -685,11 +691,18 @@ public:
 	virtual AJAStatus						SetDID (const uint8_t inDataID);
 
 	/**
-		@brief		Sets/Gets the Secondary Data ID (SID) - (aka the Data Block Number (DBN) for "Type 1" SMPTE-291 packets).
-		@param[in]	inSID		Secondary Data ID (for digital ancillary data, usually the "official" SMPTE packet ID)
+		@brief		Sets my Secondary Data ID (SID) - (aka the Data Block Number (DBN) for "Type 1" SMPTE-291 packets).
+		@param[in]	inSID		Specifies my new secondary Data ID.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						SetSID (const uint8_t inSID);
+
+	/**
+		@brief		Sets both my Data ID (DID) and Secondary Data ID (SID).
+		@param[in]	inDIDSID	The AJAAncillaryDIDSIDPair that specifies both a DID and SID value.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual inline AJAStatus				SetDIDSID (const AJAAncillaryDIDSIDPair & inDIDSID)		{SetDID(inDIDSID.first); return SetSID(inDIDSID.second);}
 
 	/**
 		@brief		Sets my 8-bit checksum. Note that it is not usually necessary to generate an 8-bit checksum, since the ANC Insertion
@@ -785,6 +798,8 @@ public:
 		@return		A non-constant reference to myself.
 	**/
 	virtual inline AJAAncillaryData &		SetBufferFormat (const AJAAncillaryBufferFormat inFmt)	{m_bufferFmt = inFmt;  return *this;}
+
+	virtual inline uint64_t &				UserData (void)			{return m_userData;}	///< @return	Returns a non-constant reference to my user data.
 
 #if !defined(NTV2_DEPRECATE_14_2)
 		/**
@@ -919,7 +934,7 @@ public:
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						InitWithReceivedData (	const uint8_t *						pInData,
-																	const uint32_t						inMaxBytes,
+																	const size_t						inMaxBytes,
 																	const AJAAncillaryDataLocation &	inLocationInfo,
 																	uint32_t &							outPacketByteCount);
 	/**
@@ -966,7 +981,7 @@ public:
 		@param[out]	outPacketSize		Receives the size, in bytes, of the generated packet.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						GenerateTransmitData (uint8_t * pBuffer, const uint32_t inMaxBytes, uint32_t & outPacketSize);
+	virtual AJAStatus						GenerateTransmitData (uint8_t * pBuffer, const size_t inMaxBytes, uint32_t & outPacketSize);
 
 	/**
 		@brief		Generates "raw" 10-bit ancillary packet component data from my internal ancillary data (playback).
@@ -1020,7 +1035,7 @@ public:
 		@param[in]	inDumpMaxBytes		Number of payload bytes to dump into the returned string. Defaults to zero (none).
 	**/
 	virtual std::string						AsString (const uint16_t inDumpMaxBytes = 0) const;
-	virtual inline AJAAncillaryDIDSIDPair	GetDIDSIDPair (void) const		{return AJAAncillaryDIDSIDPair(GetDID(),GetSID());}
+	
 
 	/**
 		@return	A string containing a human-readable representation of the given DID/SDID values,
@@ -1104,6 +1119,7 @@ public:
 		AJAAncillaryDataType		m_ancType;		///< @brief	One of a known set of ancillary data types (or "Custom" if not identified)
 		AJAAncillaryBufferFormat	m_bufferFmt;	///< @brief	My originating buffer format, if known
 		uint32_t					m_frameID;		///< @brief	ID of my originating frame, if known
+		uint64_t					m_userData;		///< @brief	User data (for client use)
 
 };	//	AJAAncillaryData
 
@@ -1114,7 +1130,7 @@ public:
 	@param[in]	inAncData		Specifies the AJAAncillaryData to be rendered into the output stream.
 	@return		A non-constant reference to the specified output stream.
 **/
-static inline std::ostream & operator << (std::ostream & inOutStream, const AJAAncillaryData & inAncData)		{return inAncData.Print (inOutStream);}
+static inline std::ostream & operator << (std::ostream & inOutStream, const AJAAncillaryData & inAncData)		{return inAncData.Print(inOutStream);}
 
 
 /**

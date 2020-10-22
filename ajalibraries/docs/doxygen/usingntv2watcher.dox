@@ -606,14 +606,18 @@ A menu/combobox is provided for each of the <b>VANC</b>, <b>F1 Anc</b> and <b>F2
 		-	<b>CS</b> — The checksum of the payload data. Note that on playout, this value is irrelevant, since the inserter/embedder performs the checksum computation.
 		-	<b>Data</b> — The payload data bytes.
 
-Finally, a checkbox is provided to show or hide the <b>EIA-608/CEA-608 Caption Viewer</b> window.
-By default, the viewer window is hidden. To reveal it, check the box;  to hide it, un-check the box.
-
-When device polling is enabled, this inspector repeatedly monitors the device frame buffer.
+When device polling is enabled, this inspector repeatedly monitors the device frame buffer at every VBI of the selected Channel/FrameStore,
+ignoring the <b>Interval</b> slider setting.
 It reads the portions of the buffer that contain anc data into host memory and compares it to what was read the last time.
-Changed data are highlighted with a brighter color.
- 
+Changed values are drawn with a brighter color.
+Old packets that were detected earlier but are now currently absent are shown in a very dim color.
+To clear the old packets from the display, right-click in the packet list and choose “Clear Old Packets” from the menu that appears.
+
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the displayed information to the Clipboard.
+
+This inspector can be used to drive the \ref anc608viewer for monitoring closed-captions. To prevent duplicate or multiple caption byte streams
+from being sent to the \ref anc608viewer , it’s best to have only one of the Anc buffer regions visible and set to display “Packets”, and also,
+if only one caption packet is in the monitored buffer.
 
 
 <hr size="50px">
