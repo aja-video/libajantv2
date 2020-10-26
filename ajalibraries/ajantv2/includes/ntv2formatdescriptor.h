@@ -163,6 +163,17 @@ public:
 	inline ULWord	GetVisibleRasterHeight (void) const								{return GetFullRasterHeight() - GetFirstActiveLine();}
 
 	/**
+		@brief		Answers with an NTV2_POINTER that describes the given row (and plane) given the NTV2_POINTER
+					that describes the frame buffer.
+		@param[in]	inFrameBuffer		Specifies the frame buffer (that includes all planes, if planar).
+		@param		inOutRowBuffer		Receives the NTV2_POINTER that references the row (and plane) in the frame buffer.
+		@param[in]	inRowIndex0			Specifies the row of interest in the buffer, where zero is the topmost row.
+		@param[in]	inPlaneIndex0		Specifies the plane of interest. Defaults to zero.
+		@return		True if successful;  otherwise false.
+	**/
+	bool							GetRowBuffer (const NTV2_POINTER & inFrameBuffer, NTV2_POINTER & inOutRowBuffer,  const ULWord inRowIndex0,  const UWord inPlaneIndex0 = 0) const;
+
+	/**
 		@return		A pointer to the start of the given row in the given buffer, or NULL if row index is bad
 					(using my description of the buffer contents).
 		@param[in]	pInStartAddress		A pointer to the raster buffer.
