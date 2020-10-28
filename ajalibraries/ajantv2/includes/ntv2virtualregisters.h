@@ -585,7 +585,24 @@ typedef enum
 	kVRegAudioEncoderOutputEnable			= VIRTUALREG_START+606,
 	kVRegAudioEncoderHeadphoneEnable		= VIRTUALREG_START+607,
 
-	kVRegLastAJA							= VIRTUALREG_START+608,		///< @brief	The last AJA virtual register slot
+	kVRegDmaTransferRateC2H1				= VIRTUALREG_START+608,
+	kVRegDmaHardwareRateC2H1				= VIRTUALREG_START+609,
+	kVRegDmaTransferRateH2C1				= VIRTUALREG_START+610,
+	kVRegDmaHardwareRateH2C1				= VIRTUALREG_START+611,
+	kVRegDmaTransferRateC2H2				= VIRTUALREG_START+612,
+	kVRegDmaHardwareRateC2H2				= VIRTUALREG_START+613,
+	kVRegDmaTransferRateH2C2				= VIRTUALREG_START+614,
+	kVRegDmaHardwareRateH2C2				= VIRTUALREG_START+615,
+	kVRegDmaTransferRateC2H3				= VIRTUALREG_START+616,
+	kVRegDmaHardwareRateC2H3				= VIRTUALREG_START+617,
+	kVRegDmaTransferRateH2C3				= VIRTUALREG_START+618,
+	kVRegDmaHardwareRateH2C3				= VIRTUALREG_START+619,
+	kVRegDmaTransferRateC2H4				= VIRTUALREG_START+620,
+	kVRegDmaHardwareRateC2H4				= VIRTUALREG_START+621,
+	kVRegDmaTransferRateH2C4				= VIRTUALREG_START+622,
+	kVRegDmaHardwareRateH2C4				= VIRTUALREG_START+623,
+
+	kVRegLastAJA							= VIRTUALREG_START+624,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 

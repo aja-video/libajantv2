@@ -274,6 +274,17 @@ page and/or the device firmware page in the <a href="https://sdksupport.aja.com/
 <hr size="50px">
 @section		gs-sdkbuild		Building the Libraries
 
+@note	NTV2 SDK version 16.0 is the first SDK that requires a C++11 compliant compiler by default.
+		However, if it’s necessary, the SDK can still be built without requiring C++11 compiler support:
+		-	Comment out the line that defines the macro <b>NTV2_USE_CPLUSPLUS11</b> in ‘ajalibraries/ajantv2/includes/ajatypes.hʼ:
+			@code
+			//#define NTV2_USE_CPLUSPLUS11
+			@endcode
+		-	Comment out the line that defines the macro <b>AJA_USE_CPLUSPLUS11</b> in ‘ajalibraries/ajabase/common/ajatypes.hʼ:
+			@code
+			//#define AJA_USE_CPLUSPLUS11
+			@endcode
+
 @subsection		gs-linuxsdkbuild	Building on Linux
 
 On Linux, the libraries and device drivers are not pre-built, and must be compiled and linked on the host they are expected to run on.
@@ -452,14 +463,24 @@ Many OEM developers choose to create their own NTV2-based Xcode projects “from
 -	Add the following to the “Other Linker Flags” setting:
 	-	\c -lajantv2 (Release) or <b>-lajantv2d</b> (Debug)
 	-	\c -lajacc, if the \ref ajacc is needed
+-	Link with the following frameworks:
+	-	<b>Foundation.framework</b>
+	-	<b>CoreFoundation.framework</b>
+	-	<b>IOKit.framework</b>
+	-	<b>CoreServices.framework</b>
 
 @warning	The libraries shipped with the SDK for MacOS are \c x86_64 (64-bit) only.
 			AJA no longer supports the \c i386 (Intel 32-bit) or PowerPC architectures.
 
-@note	The libraries shipped with the SDK for MacOS are built without referencing C++11 standard library support.
+@note	The libraries shipped with the SDK for MacOS are built with the latest C++11 standard library support.
 		The Xcode build setting that controls this is \c CLANG_CXX_LIBRARY (a.k.a. “C++ Standard Library”).
 		This build setting must match for all compilands passed to the linker — otherwise “undefined symbols” errors will result.
 		See \ref gs-macsdkbuild for more information.
+
+@warning	<b>App Sandboxing</b>, introduced in MacOS 10.7 (“Lion”), is not supported by the NTV2 SDK, because Apple has not
+			furnished any entitlements for executables that link to the IOKit framework. The NTV2 SDK must link to the IOKit
+			framework in order to communicate with the AJA NTV2 device driver. If the NTV2 SDK is called from a sandboxed
+			executable, it will not find any NTV2 devices.
 
 
 @subsection	gs-newwinprojects	Windows
