@@ -323,19 +323,20 @@ std::vector<std::string> split (const std::string & str, const char delim)
 std::vector<std::string> split (const std::string & inStr, const std::string & inDelim)
 {
 	std::vector<std::string> result;
-    size_t	startPos(0);
-    size_t	delimPos(inStr.find(inDelim, startPos));
-    while(delimPos != std::string::npos)
-    {
-        const std::string item (inStr.substr(startPos, delimPos - startPos));
-        result.push_back(item);
-        startPos = delimPos + inDelim.length();
-        delimPos = inStr.find(inDelim, startPos);
+	size_t	startPos(0);
+	size_t	delimPos(inStr.find(inDelim, startPos));
+	while (delimPos != std::string::npos)
+	{
+		const std::string item (inStr.substr(startPos, delimPos - startPos));
+		result.push_back(item);
+		startPos = delimPos + inDelim.length();
+		delimPos = inStr.find(inDelim, startPos);
 	}
-    // if last character in string matches the split delim add an empty string
-    if (startPos == inStr.length())
-        result.push_back(std::string());
-    return result;
+	if (startPos < inStr.length())			//	add last piece
+		result.push_back(inStr.substr(startPos, inStr.length()-startPos));
+	else if (startPos == inStr.length())	//	if last character in string matches the split delim add an empty string
+		result.push_back(std::string());
+	return result;
 }
 
 std::string & lower (std::string & str)

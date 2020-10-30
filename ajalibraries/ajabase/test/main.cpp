@@ -278,8 +278,9 @@ TEST_SUITE("common" * doctest::description("functions in ajabase/common/common.h
     TEST_CASE("aja::split")
     {
         std::string tosplit("Larry,Moe,Curly,Shemp");
+        const std::string urlParam("foo=bar&two=2");
         std::vector<std::string> results;
-        SUBCASE("return style")
+        SUBCASE("return style (ch)")
         {
             results = aja::split(tosplit, ',');
             CHECK(results.size() == 4);
@@ -288,7 +289,7 @@ TEST_SUITE("common" * doctest::description("functions in ajabase/common/common.h
             CHECK(results.at(2) == "Curly");
             CHECK(results.at(3) == "Shemp");
         }
-        SUBCASE("parameter style")
+        SUBCASE("parameter style (ch)")
         {
             aja::split(tosplit, ',', results);
             CHECK(results.size() == 4);
@@ -297,30 +298,79 @@ TEST_SUITE("common" * doctest::description("functions in ajabase/common/common.h
             CHECK(results.at(2) == "Curly");
             CHECK(results.at(3) == "Shemp");
         }
-        SUBCASE("split not found")
+        SUBCASE("split not found (ch)")
         {
             aja::split(tosplit, '?', results);
             CHECK(results.size() == 1);
             CHECK(results.at(0) == tosplit);
         }
-        SUBCASE("split at front")
+        SUBCASE("split at front (ch)")
         {
             aja::split(tosplit, 'L', results);
             CHECK(results.size() == 2);
             CHECK(results.at(0) == "");
             CHECK(results.at(1) == "arry,Moe,Curly,Shemp");
         }
-        SUBCASE("split at end")
+        SUBCASE("split at end (ch)")
         {
             aja::split(tosplit, 'p', results);
             CHECK(results.size() == 2);
             CHECK(results.at(0) == "Larry,Moe,Curly,Shem");
             CHECK(results.at(1) == "");
         }
-        SUBCASE("split all delims")
+        SUBCASE("split all delims (ch)")
         {
             std::string alldelims = "???";
             aja::split(alldelims, '?', results);
+            CHECK(results.size() == 4);
+            CHECK(results.at(0) == "");
+            CHECK(results.at(1) == "");
+            CHECK(results.at(2) == "");
+            CHECK(results.at(3) == "");
+        }
+
+        SUBCASE("return style (str)")
+        {
+            results = aja::split(tosplit, ",");
+            CHECK(results.size() == 4);
+            CHECK(results.at(0) == "Larry");
+            CHECK(results.at(1) == "Moe");
+            CHECK(results.at(2) == "Curly");
+            CHECK(results.at(3) == "Shemp");
+        }
+        SUBCASE("return style 2 (str)")
+        {
+            results = aja::split(tosplit, ",");
+            CHECK(results.size() == 4);
+            CHECK(results.at(0) == "Larry");
+            CHECK(results.at(1) == "Moe");
+            CHECK(results.at(2) == "Curly");
+            CHECK(results.at(3) == "Shemp");
+        }
+        SUBCASE("split not found (str)")
+        {
+            results = aja::split(tosplit, "?");
+            CHECK(results.size() == 1);
+            CHECK(results.at(0) == tosplit);
+        }
+        SUBCASE("split at front (str)")
+        {
+            results = aja::split(tosplit, "L");
+            CHECK(results.size() == 2);
+            CHECK(results.at(0) == "");
+            CHECK(results.at(1) == "arry,Moe,Curly,Shemp");
+        }
+        SUBCASE("split at end (str)")
+        {
+            results = aja::split(tosplit, "p");
+            CHECK(results.size() == 2);
+            CHECK(results.at(0) == "Larry,Moe,Curly,Shem");
+            CHECK(results.at(1) == "");
+        }
+        SUBCASE("split all delims (str)")
+        {
+            std::string alldelims = "???";
+            results = aja::split(alldelims, "?");
             CHECK(results.size() == 4);
             CHECK(results.at(0) == "");
             CHECK(results.at(1) == "");
