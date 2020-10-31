@@ -219,6 +219,7 @@ bool CNTV2DriverInterface::Close (void)
 		}
 		if (closeOK)
 			AJAAtomic::Increment(&gCloseCount);
+		_boardID = DEVICE_ID_NOTFOUND;
 		DIDBG(DEC(gOpenCount) << " opens, " << DEC(gCloseCount) << " closes");
 		return closeOK;
 	}
@@ -278,10 +279,9 @@ bool CNTV2DriverInterface::CloseLocalPhysical (void)
 				...where...		{ipv4}		A dotted quad or 'localhost' that designates the host IP address.
 								port		Optional unsigned decimal integer that designates the port number to use.
 								query		Optionally specifies which device to open on the remote host.
-			'ntv2soft://'{name}[':'{number}]'/'{query}
-				...where...		{name}		Alphanumeric name that designates the software device to open.
-								number		Optionally specifies a software device index number.
-								query		Optionally specifies other parameters.
+			'ntv2://'{name}['/'{query}
+				...where...		{name}		Alphanumeric name that designates a software device to open (e.g. dylib/DLL name).
+								query		Optionally specifies other parameters passed to dylib/DLL's Connect method.
 			'ntv2local://'{model}|{hexnum}|{serial}|{indexnum}
 				...where...		{model}		NTV2 device model name (e.g. 'corvid44').
 								{hexnum}	NTV2DeviceID: '0x'|'0X' followed by at least 2 and up to 8 hex digits.
@@ -380,11 +380,22 @@ bool CNTV2DriverInterface::CloseLocalPhysical (void)
 			}
 			if (scheme == "ntv2nub")
 			{
+				//cerr << "TOK: " << aja::join(tokens, "|") << endl << "DEL: " << aja::join(delims, "|") << endl;
 				_pRPCAPI = NTV2RPCAPI::MakeNTV2NubRPCAPI(ipv4, port);
 			}
 			else if (scheme == "ntv2")
-			{
-				_pRPCAPI = NTV2RPCAPI::MakeNTV2SoftwareDevice(hostname);
+			{	//	Software device:  dylib/DLL name is in "hostname"
+				string params;	//	Reconstruct arguments/parameters
+				do
+				{
+					if (!delims.empty())
+						{params += delims.front();	delims.erase(delims.begin());}
+					if (!tokens.empty())
+						{params += tokens.front();  tokens.erase(tokens.begin());}
+				} while (!delims.empty() || !tokens.empty());
+				if (!params.empty()  &&  params.at(0) == '?')
+					params.erase(params.begin());	//	Lop off any leading '?' character
+				_pRPCAPI = NTV2RPCAPI::FindNTV2SoftwareDevice(hostname, params);
 			}
 			else
 				{DIFAIL("Invalid URL scheme '" << scheme << "' in '" << urlspec << "'");  return false;}
@@ -404,11 +415,11 @@ bool CNTV2DriverInterface::CloseLocalPhysical (void)
 			return false;
 		}*/
 		if (IsRemote())
-			_boardOpened = true;
+			_boardOpened = ReadRegister(kRegBoardID, _boardID);
 		if (!IsRemote() || !IsOpen())
 			DIFAIL("Failed to open '" << urlspec << "'");
 		return IsRemote() && IsOpen();
-	}
+	}	//	OpenRemote
 
 
 	bool CNTV2DriverInterface::CloseRemote()
