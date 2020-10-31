@@ -289,7 +289,11 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithName (const string & inNameSubString,
 {
 	outDevice.Close();
 	if (!IsAlphaNumeric(inNameSubString))
+	{
+		if (inNameSubString.find(":") != string::npos)
+			return outDevice.Open(inNameSubString);
 		return false;
+	}
 
 	CNTV2DeviceScanner	scanner;
 	string				nameSubString(::ToLower(inNameSubString));

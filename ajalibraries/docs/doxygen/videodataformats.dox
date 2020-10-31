@@ -192,38 +192,38 @@ Each format is identified by a specific ::NTV2FrameBufferFormat (aka ::NTV2Pixel
 
 All AJA devices support these basic frame buffer formats:
 <table>
-	<tr><td><b>10-Bit YCbCr [v210]</b>	<td>::NTV2_FBF_10BIT_YCBCR
-	<tr><td><b>8-Bit YCbCr [UYVY]</b>	<td>::NTV2_FBF_8BIT_YCBCR
+	<tr><td>\ref fbformat10bitycbcr				<td>::NTV2_FBF_10BIT_YCBCR
+	<tr><td>\ref fbformat8bitycbcr				<td>::NTV2_FBF_8BIT_YCBCR
 </table>
 
-Many AJA devices support most of these additional frame buffer formats:
+Many AJA devices support these additional frame buffer formats:
 <table>
+	<tr><td>\ref fbformats10bitrgb				<td>::NTV2_FBF_10BIT_RGB
+	<tr><td>\ref fbformatsyuy2					<td>::NTV2_FBF_8BIT_YCBCR_YUY2
 	<tr><td><b>32-Bit ARGB (PC) 8 bpc</b>		<td>::NTV2_FBF_ARGB
 	<tr><td><b>32-Bit RGBA (Mac) 8 bpc</b>		<td>::NTV2_FBF_RGBA
-	<tr><td><b>10-Bit RGB</b>					<td>::NTV2_FBF_10BIT_RGB
-	<tr><td><b>Alternate 8-Bit YCbCr [YUY2]</b>	<td>::NTV2_FBF_8BIT_YCBCR_YUY2
 	<tr><td><b>32-Bit ABGR (OpenGL) 8 bpc</b>	<td>::NTV2_FBF_ABGR
-	<tr><td><b>10-Bit RGB - DPX</b>				<td>::NTV2_FBF_10BIT_DPX
-	<tr><td><b>10-Bit YCbCr - DPX</b>			<td>::NTV2_FBF_10BIT_YCBCR_DPX
-	<tr><td><b>8-Bit DVCPro</b>					<td>::NTV2_FBF_8BIT_DVCPRO
-	<tr><td><b>8-Bit HDV</b>					<td>::NTV2_FBF_8BIT_HDV
-	<tr><td><b>24-Bit RGB</b>					<td>::NTV2_FBF_24BIT_RGB
-	<tr><td><b>24-Bit BGR</b>					<td>::NTV2_FBF_24BIT_BGR
-	<tr><td><b>10-Bit DPX little-endian</b>		<td>::NTV2_FBF_10BIT_DPX_LE
-	<tr><td><b>48-Bit RGB 16 bpc</b>			<td>::NTV2_FBF_48BIT_RGB
+	<tr><td>fbformats10bitrgbdpx				<td>::NTV2_FBF_10BIT_DPX
+	<tr><td>\ref fbformats10bitycbcrdpx			<td>::NTV2_FBF_10BIT_YCBCR_DPX
+	<tr><td>\ref fbformats8bitdvcpro			<td>::NTV2_FBF_8BIT_DVCPRO
+	<tr><td>\ref fbformats8bithdv				<td>::NTV2_FBF_8BIT_HDV
+	<tr><td>\ref fbformats24bitrgb				<td>::NTV2_FBF_24BIT_RGB
+	<tr><td>\ref fbformats24bitbgr				<td>::NTV2_FBF_24BIT_BGR
+	<tr><td>\ref fbformats10bitdpxle			<td>::NTV2_FBF_10BIT_DPX_LE
+	<tr><td>\ref fbformats48bitrgb				<td>::NTV2_FBF_48BIT_RGB
 </table>
 
-New pixel formats:
+New HDR pixel formats:
 <table>
-	<tr><td><b>12-Bit Packed RGB</b>			<td>::NTV2_FBF_12BIT_RGB_PACKED
+	<tr><td>\ref fbformats12bitpackedrgb			<td>::NTV2_FBF_12BIT_RGB_PACKED
 </table>
 
 Some AJA devices support planar frame buffer formats:
 <table>
-	<tr><td><b>8-Bit YCbCr 420 3-Plane [I420]</b>	<td>::NTV2_FBF_8BIT_YCBCR_420PL3
-	<tr><td><b>8-Bit YCbCr 422 3-Plane [Y42B]</b>	<td>::NTV2_FBF_8BIT_YCBCR_422PL3
-	<tr><td><b>10-Bit YCbCr 420 3-Plane LE</b>		<td>::NTV2_FBF_10BIT_YCBCR_420PL3_LE
-	<tr><td><b>10-Bit YCbCr 422 3-Plane LE</b>		<td>::NTV2_FBF_10BIT_YCBCR_422PL3_LE
+	<tr><td>\ref fbformats8bitycbcrplanar3			<td>::NTV2_FBF_8BIT_YCBCR_420PL3
+	<tr><td>\ref fbformats8bitycbcr422pl3			<td>::NTV2_FBF_8BIT_YCBCR_422PL3
+	<tr><td>\ref fbformats10bitycbcr420pl3			<td>::NTV2_FBF_10BIT_YCBCR_420PL3_LE
+	<tr><td>\ref fbformats10bitycbcr422pl3			<td>::NTV2_FBF_10BIT_YCBCR_422PL3_LE
 	<tr><td>\ref fbformats10bitycbcr420pl2			<td>::NTV2_FBF_10BIT_YCBCR_420PL2
 	<tr><td>\ref fbformats10bitycbcr422pl2			<td>::NTV2_FBF_10BIT_YCBCR_422PL2
 	<tr><td><b>8-Bit YCbCr 420 2-Plane</b>			<td>::NTV2_FBF_8BIT_YCBCR_420PL2
@@ -253,9 +253,9 @@ This format, identified by the ::NTV2_FBF_8BIT_YCBCR enumeration constant, is us
 @subsubsection		fbformat10bitycbcr	10-Bit YCbCr Format
 
 This format, identified by the ::NTV2_FBF_10BIT_YCBCR enumeration constant, has twelve 10-bit unsigned components
-that are packed into four 32-bit little-endian words. (Six pixels are represented in each 16 bytes.)
-This is the format used by Quicktime to store 10-bit YCbCr video and is referred to (in both QuickTime and Windows)
-as the 'v210' “FourCC” format.
+that are packed into four 32-bit little-endian words (i.e. 6 pixels are represented in each 16 bytes).
+This is the format used in QuickTime movie files to store 10-bit YCbCr video and is referred to (by Apple and in
+MS-Windows) as the 'v210' format.
 
 Here are the four 32-bit words (six pixels) in increasing address order:
 
