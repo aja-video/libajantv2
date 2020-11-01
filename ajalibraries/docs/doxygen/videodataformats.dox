@@ -203,7 +203,7 @@ Many AJA devices support these additional frame buffer formats:
 	<tr><td><b>32-Bit ARGB (PC) 8 bpc</b>		<td>::NTV2_FBF_ARGB
 	<tr><td><b>32-Bit RGBA (Mac) 8 bpc</b>		<td>::NTV2_FBF_RGBA
 	<tr><td><b>32-Bit ABGR (OpenGL) 8 bpc</b>	<td>::NTV2_FBF_ABGR
-	<tr><td>fbformats10bitrgbdpx				<td>::NTV2_FBF_10BIT_DPX
+	<tr><td>\ref fbformats10bitrgbdpx			<td>::NTV2_FBF_10BIT_DPX
 	<tr><td>\ref fbformats10bitycbcrdpx			<td>::NTV2_FBF_10BIT_YCBCR_DPX
 	<tr><td>\ref fbformats8bitdvcpro			<td>::NTV2_FBF_8BIT_DVCPRO
 	<tr><td>\ref fbformats8bithdv				<td>::NTV2_FBF_8BIT_HDV
