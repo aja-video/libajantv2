@@ -5295,7 +5295,23 @@ public:
 	**/
 	AJA_VIRTUAL bool		GetHDMIInVideoRange (NTV2HDMIRange & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool		SetHDMIOut3DPresent (const bool inIs3DPresent);
+    /**
+        @brief						Answers with the given HDMI input's video dynamic range and mastering information.
+        @param[in]	outRegValue     Receives the HDMI input's current HDRRegValues data.
+        @param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+        @return						True if successful;  false if no information present.
+    **/
+    AJA_VIRTUAL bool		GetHDMIInDynamicRange (HDRRegValues & outRegValues, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+    /**
+        @brief						Answers with the given HDMI input's video dynamic range and mastering information.
+        @param[in]	outFloatValue	Receives the HDMI input's current HDRFloatValues data.
+        @param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+        @return						True if successful;  false if no information present.
+    **/
+    AJA_VIRTUAL bool		GetHDMIInDynamicRange (HDRFloatValues & outFloatValues, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+    AJA_VIRTUAL bool		SetHDMIOut3DPresent (const bool inIs3DPresent);
 	AJA_VIRTUAL bool		GetHDMIOut3DPresent (bool & outIs3DPresent);
 
 	AJA_VIRTUAL bool		SetHDMIOut3DMode (const NTV2HDMIOut3DMode inValue);

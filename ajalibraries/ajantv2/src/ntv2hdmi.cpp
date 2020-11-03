@@ -72,6 +72,87 @@ bool CNTV2Card::GetHDMIInVideoRange (NTV2HDMIRange & outValue, const NTV2Channel
 	return false;
 }
 
+bool CNTV2Card::GetHDMIInDynamicRange (HDRRegValues & outRegValues, const NTV2Channel inChannel)
+{
+    ULWord outValue;
+    bool ok;
+
+    memset(&outRegValues, 0, sizeof(HDRRegValues));
+
+    if (inChannel == NTV2_CHANNEL1)
+    {
+        ok = CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRPresent1, outValue);
+        if (!ok || (outValue == 0))
+            return false;
+        outRegValues.staticMetadataDescriptorID = 0;
+        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDREOTF1, outValue);
+        outRegValues.electroOpticalTransferFunction = (uint16_t)outValue;
+        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRGreenPrimary1, outValue);
+        outRegValues.greenPrimaryX = (uint16_t)((outValue & kRegMaskHDMIHDRGreenPrimaryX) >> kRegShiftHDMIHDRGreenPrimaryX);
+        outRegValues.greenPrimaryY = (uint16_t)((outValue & kRegMaskHDMIHDRGreenPrimaryY) >> kRegShiftHDMIHDRGreenPrimaryY);
+        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRBluePrimary1, outValue);
+        outRegValues.bluePrimaryX = (uint16_t)((outValue & kRegMaskHDMIHDRBluePrimaryX) >> kRegShiftHDMIHDRBluePrimaryX);
+        outRegValues.bluePrimaryY = (uint16_t)((outValue & kRegMaskHDMIHDRBluePrimaryY) >> kRegShiftHDMIHDRBluePrimaryY);
+        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRRedPrimary1, outValue);
+        outRegValues.redPrimaryX = (uint16_t)((outValue & kRegMaskHDMIHDRRedPrimaryX) >> kRegShiftHDMIHDRRedPrimaryX);
+        outRegValues.redPrimaryY = (uint16_t)((outValue & kRegMaskHDMIHDRRedPrimaryY) >> kRegShiftHDMIHDRRedPrimaryY);
+        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRWhitePoint1, outValue);
+        outRegValues.whitePointX = (uint16_t)((outValue & kRegMaskHDMIHDRWhitePointX) >> kRegShiftHDMIHDRWhitePointX);
+        outRegValues.whitePointY = (uint16_t)((outValue & kRegMaskHDMIHDRWhitePointX) >> kRegShiftHDMIHDRWhitePointX);
+        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRMasteringLuminence1, outValue);
+        outRegValues.maxMasteringLuminance = (uint16_t)((outValue & kRegMaskHDMIHDRMaxMasteringLuminance) >> kRegShiftHDMIHDRMaxMasteringLuminance);
+        outRegValues.minMasteringLuminance = (uint16_t)((outValue & kRegMaskHDMIHDRMinMasteringLuminance) >> kRegShiftHDMIHDRMinMasteringLuminance);
+        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRLightLevel1, outValue);
+        outRegValues.maxContentLightLevel = (uint16_t)((outValue & kRegMaskHDMIHDRMaxContentLightLevel) >> kRegShiftHDMIHDRMaxContentLightLevel);
+        outRegValues.maxFrameAverageLightLevel = (uint16_t)((outValue & kRegMaskHDMIHDRMaxFrameAverageLightLevel) >> kRegShiftHDMIHDRMaxFrameAverageLightLevel);
+    }
+    else if (inChannel == NTV2_CHANNEL2)
+    {
+        ok = CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRPresent2, outValue);
+        if (!ok || (outValue == 0))
+            return false;
+        outRegValues.staticMetadataDescriptorID = 0;
+        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDREOTF2, outValue);
+        outRegValues.electroOpticalTransferFunction = (uint16_t)outValue;
+        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRGreenPrimary2, outValue);
+        outRegValues.greenPrimaryX = (uint16_t)((outValue & kRegMaskHDMIHDRGreenPrimaryX) >> kRegShiftHDMIHDRGreenPrimaryX);
+        outRegValues.greenPrimaryY = (uint16_t)((outValue & kRegMaskHDMIHDRGreenPrimaryY) >> kRegShiftHDMIHDRGreenPrimaryY);
+        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRBluePrimary2, outValue);
+        outRegValues.bluePrimaryX = (uint16_t)((outValue & kRegMaskHDMIHDRBluePrimaryX) >> kRegShiftHDMIHDRBluePrimaryX);
+        outRegValues.bluePrimaryY = (uint16_t)((outValue & kRegMaskHDMIHDRBluePrimaryY) >> kRegShiftHDMIHDRBluePrimaryY);
+        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRRedPrimary2, outValue);
+        outRegValues.redPrimaryX = (uint16_t)((outValue & kRegMaskHDMIHDRRedPrimaryX) >> kRegShiftHDMIHDRRedPrimaryX);
+        outRegValues.redPrimaryY = (uint16_t)((outValue & kRegMaskHDMIHDRRedPrimaryY) >> kRegShiftHDMIHDRRedPrimaryY);
+        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRWhitePoint2, outValue);
+        outRegValues.whitePointX = (uint16_t)((outValue & kRegMaskHDMIHDRWhitePointX) >> kRegShiftHDMIHDRWhitePointX);
+        outRegValues.whitePointY = (uint16_t)((outValue & kRegMaskHDMIHDRWhitePointX) >> kRegShiftHDMIHDRWhitePointX);
+        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRMasteringLuminence2, outValue);
+        outRegValues.maxMasteringLuminance = (uint16_t)((outValue & kRegMaskHDMIHDRMaxMasteringLuminance) >> kRegShiftHDMIHDRMaxMasteringLuminance);
+        outRegValues.minMasteringLuminance = (uint16_t)((outValue & kRegMaskHDMIHDRMinMasteringLuminance) >> kRegShiftHDMIHDRMinMasteringLuminance);
+        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRLightLevel2, outValue);
+        outRegValues.maxContentLightLevel = (uint16_t)((outValue & kRegMaskHDMIHDRMaxContentLightLevel) >> kRegShiftHDMIHDRMaxContentLightLevel);
+        outRegValues.maxFrameAverageLightLevel = (uint16_t)((outValue & kRegMaskHDMIHDRMaxFrameAverageLightLevel) >> kRegShiftHDMIHDRMaxFrameAverageLightLevel);
+    }
+    else
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool CNTV2Card::GetHDMIInDynamicRange (HDRFloatValues & outFloatValues, const NTV2Channel inChannel)
+{
+    HDRRegValues registerValues;
+
+    memset(&outFloatValues, 0, sizeof(HDRFloatValues));
+
+    if (!GetHDMIInDynamicRange(registerValues, inChannel))
+        return false;
+
+    return convertHDRRegisterToFloatValues(registerValues, outFloatValues);
+}
+
 // kRegHDMIInputControl
 bool CNTV2Card::SetHDMIInputRange (const NTV2HDMIRange inValue, const NTV2Channel inChannel)
 {
