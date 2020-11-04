@@ -478,6 +478,9 @@ public:	//	INSTANCE METHODS
 		@param[in]	pInReceivedData		Specifies a valid, non-NULL address of the first byte of "raw" ancillary data received by an AncExtractor widget.
 		@param[in]	inByteCount			Specifies the number of bytes of data in the specified buffer to process.
 		@param[in]	inFrameNum			If non-zero, replaces the frame identifier of new packets that have a zero frame ID.
+		@details	For each packet parsed from the received data, AJAAncillaryDataFactory::GuessAncillaryDataType
+					is called to ascertain the packet's AJAAncillaryDataType, then AJAAncillaryDataFactory::Create
+					is used to instantiate the specific AJAAncillaryData subclass instance.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						AddReceivedAncillaryData (const uint8_t * pInReceivedData, const uint32_t inByteCount, const uint32_t inFrameNum = 0);
@@ -487,6 +490,9 @@ public:	//	INSTANCE METHODS
 		@brief		Parse a "raw" RTP packet received from hardware (ingest) in network byte order into separate
 					AJAAncillaryData objects and appends them to me.
 		@param[in]	inReceivedData		The received packet words in network byte order.
+		@details	For each packet parsed from the received data, AJAAncillaryDataFactory::GuessAncillaryDataType
+					is called to ascertain the packet's AJAAncillaryDataType, then AJAAncillaryDataFactory::Create
+					is used to instantiate the specific AJAAncillaryData subclass instance.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						AddReceivedAncillaryData (const ULWordSequence & inReceivedData);

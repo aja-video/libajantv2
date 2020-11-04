@@ -897,17 +897,19 @@ public:
 
 	/**
 		@brief		Parses (interprets) the "local" ancillary data from my payload data.
-		@note		This abstract method is overridden for specific Anc data types.
+		@note		This method is overridden by specific packet types (e.g. AJAAncillaryData_Cea608_Vanc).
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						ParsePayloadData (void);
 
 	/**
-		@brief		Used following ParsePayloadData() to determine whether or not the object thinks it contains
-					valid ancillary data.
-		@note		The "depth" of the ParsePayloadData method depends on the packet type. In some cases, 'true'
-					just means "I see some data there", in others there is more detailed data checking.
 		@return		True if I think I have valid ancillary data;  otherwise false.
+		@details	This result will only be trustworthy if I'm an AJAAncillaryData subclass (e.g. AJAAncillaryData_Cea708),
+					and my ParsePayloadData method was previously called, to determine whether or not my packet
+					data is legit or not. Typically, AJAAncillaryDataFactory::GuessAncillaryDataType is called
+					to ascertain a packet's AJAAncillaryDataType, then AJAAncillaryDataFactory::Create is used
+					to instantiate the specific AJAAncillaryData subclass instance. This is done automatically
+					by AJAAncillaryList::AddReceivedAncillaryData.
 	**/
 	virtual inline bool						GotValidReceiveData (void) const			{return m_rcvDataValid;}
 

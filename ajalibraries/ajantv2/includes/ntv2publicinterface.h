@@ -5919,7 +5919,7 @@ typedef enum
 
 		// Bitstream registers
 		#define BITSTREAM_EXT_CAP					0			///< @brief Extended capability register
-		#define BITSTREAM_VENDOR_HEADER				1			///< @brief Vender specific register
+		#define BITSTREAM_VENDOR_HEADER				1			///< @brief Vendor-specific register
 		#define BITSTREAM_JTAG_ID					2			///< @brief JTAG ID register
 		#define BITSTREAM_VERSION					3			///< @brief Bitstream version register
 		#define BITSTREAM_MCAP_STATUS				4			///< @brief MCAP status register

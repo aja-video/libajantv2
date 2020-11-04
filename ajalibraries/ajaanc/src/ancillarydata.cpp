@@ -1292,7 +1292,7 @@ ostream & AJAAncillaryData::Print (ostream & inOutStream, const bool inDumpPaylo
 				<< "Coding:\t\t"<< ::AJAAncillaryDataCodingToString(m_coding)				<< endl
 				<< "Frame:\t\t"	<< xHEX0N(GetFrameID(),8)									<< endl
 				<< "Format:\t\t"<< ::AJAAncillaryBufferFormatToString(GetBufferFormat())	<< endl
-				<< "Valid:\t\t"	<< (m_rcvDataValid ? "Yes" : "No");
+				<< "Valid:\t\t"	<< (GotValidReceiveData() ? "Yes" : "No");
 	if (inDumpPayload)
 		{inOutStream << endl;  DumpPayload (inOutStream);}
 	return inOutStream;
