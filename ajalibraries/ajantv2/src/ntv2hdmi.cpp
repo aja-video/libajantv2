@@ -98,7 +98,7 @@ bool CNTV2Card::GetHDMIInDynamicRange (HDRRegValues & outRegValues, const NTV2Ch
         outRegValues.redPrimaryY = (uint16_t)((outValue & kRegMaskHDMIHDRRedPrimaryY) >> kRegShiftHDMIHDRRedPrimaryY);
         CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRWhitePoint1, outValue);
         outRegValues.whitePointX = (uint16_t)((outValue & kRegMaskHDMIHDRWhitePointX) >> kRegShiftHDMIHDRWhitePointX);
-        outRegValues.whitePointY = (uint16_t)((outValue & kRegMaskHDMIHDRWhitePointX) >> kRegShiftHDMIHDRWhitePointX);
+		outRegValues.whitePointY = (uint16_t)((outValue & kRegMaskHDMIHDRWhitePointY) >> kRegShiftHDMIHDRWhitePointY);
         CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRMasteringLuminence1, outValue);
         outRegValues.maxMasteringLuminance = (uint16_t)((outValue & kRegMaskHDMIHDRMaxMasteringLuminance) >> kRegShiftHDMIHDRMaxMasteringLuminance);
         outRegValues.minMasteringLuminance = (uint16_t)((outValue & kRegMaskHDMIHDRMinMasteringLuminance) >> kRegShiftHDMIHDRMinMasteringLuminance);
@@ -125,7 +125,7 @@ bool CNTV2Card::GetHDMIInDynamicRange (HDRRegValues & outRegValues, const NTV2Ch
         outRegValues.redPrimaryY = (uint16_t)((outValue & kRegMaskHDMIHDRRedPrimaryY) >> kRegShiftHDMIHDRRedPrimaryY);
         CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRWhitePoint2, outValue);
         outRegValues.whitePointX = (uint16_t)((outValue & kRegMaskHDMIHDRWhitePointX) >> kRegShiftHDMIHDRWhitePointX);
-        outRegValues.whitePointY = (uint16_t)((outValue & kRegMaskHDMIHDRWhitePointX) >> kRegShiftHDMIHDRWhitePointX);
+		outRegValues.whitePointY = (uint16_t)((outValue & kRegMaskHDMIHDRWhitePointY) >> kRegShiftHDMIHDRWhitePointY);
         CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRMasteringLuminence2, outValue);
         outRegValues.maxMasteringLuminance = (uint16_t)((outValue & kRegMaskHDMIHDRMaxMasteringLuminance) >> kRegShiftHDMIHDRMaxMasteringLuminance);
         outRegValues.minMasteringLuminance = (uint16_t)((outValue & kRegMaskHDMIHDRMinMasteringLuminance) >> kRegShiftHDMIHDRMinMasteringLuminance);
