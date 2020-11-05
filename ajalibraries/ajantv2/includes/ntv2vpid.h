@@ -57,8 +57,9 @@ public:
 	virtual NTV2VPIDXferChars		GetTransferCharacteristics (void) const;
 	virtual NTV2VPIDColorimetry		GetColorimetry (void) const;
 	virtual NTV2VPIDLuminance		GetLuminance (void) const;
-	virtual std::ostream &			Print (std::ostream & ostrm) const;
-	virtual std::string				AsString (const bool inTabular = false) const;
+                                virtual std::ostream &			Print (std::ostream & ostrm) const;
+                                virtual std::ostream &			PrintPretty (std::ostream & ostrm) const;
+    virtual std::string				AsString (const bool inTabular = false) const;
 	///@}
 
 	/**

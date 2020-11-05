@@ -1329,6 +1329,27 @@ ostream & CNTV2VPID::Print (ostream & ostrm) const
 	return ostrm;
 }
 
+ostream & CNTV2VPID::PrintPretty (ostream & ostrm) const
+{
+    ostrm	<< "VPID " << xHEX0N(m_uVPID,8) << endl;
+    if (IsValid())
+        ostrm	<< "Version = " << ::VPIDVersionToString(GetVersion()) << endl
+                << "Standard =  " << ::VPIDStandardToString(GetStandard()) << endl
+                << "Format =  " << ::NTV2VideoFormatToString(GetVideoFormat()) << endl
+                << "Frame Rate = " << sVPIDPictureRate[GetPictureRate()] << endl
+                << "Sampling = " << sVPIDSampling[GetSampling()] << endl
+                << "Channel = " << sVPIDChannel[GetChannel()] << endl
+                << "Links = " << (VPIDStandardIsSingleLink(GetStandard()) ? "1" : "mult") << endl
+            //	<< " dynRange=" << sVPIDDynamicRange[GetDynamicRange()] << endl
+                << "Bit Depth =" << sVPIDBitDepth[GetBitDepth()] << endl
+                << "3Ga= " << YesNo(IsStandard3Ga()) << endl
+                << "TSI = " << YesNo(IsStandardTwoSampleInterleave()) << endl
+                << "16x9 = " << YesNo(GetImageAspect16x9()) << endl
+                << "Xfer Char = " << sVPIDTransfer[GetTransferCharacteristics()] << endl
+                << "Colorimitry ="  << sVPIDColorimetry[GetColorimetry()] << endl
+                << "Luminance = " << sVPIDLuminance[GetLuminance()] << endl;
+    return ostrm;
+}
 
 #define	YesOrNo(__x__)		((__x__) ? "Yes" : "No")
 
