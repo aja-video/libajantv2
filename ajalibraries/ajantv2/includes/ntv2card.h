@@ -5295,7 +5295,23 @@ public:
 	**/
 	AJA_VIRTUAL bool		GetHDMIInVideoRange (NTV2HDMIRange & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool		SetHDMIOut3DPresent (const bool inIs3DPresent);
+    /**
+        @brief						Answers with the given HDMI input's video dynamic range and mastering information.
+        @param[in]	outRegValue     Receives the HDMI input's current HDRRegValues data.
+        @param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+        @return						True if successful;  false if no information present.
+    **/
+    AJA_VIRTUAL bool		GetHDMIInDynamicRange (HDRRegValues & outRegValues, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+    /**
+        @brief						Answers with the given HDMI input's video dynamic range and mastering information.
+        @param[in]	outFloatValue	Receives the HDMI input's current HDRFloatValues data.
+        @param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+        @return						True if successful;  false if no information present.
+    **/
+    AJA_VIRTUAL bool		GetHDMIInDynamicRange (HDRFloatValues & outFloatValues, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+    AJA_VIRTUAL bool		SetHDMIOut3DPresent (const bool inIs3DPresent);
 	AJA_VIRTUAL bool		GetHDMIOut3DPresent (bool & outIs3DPresent);
 
 	AJA_VIRTUAL bool		SetHDMIOut3DMode (const NTV2HDMIOut3DMode inValue);
@@ -6247,14 +6263,14 @@ public:
 									that corresponds to the given SDI output (e.g., ::NTV2_CHANNEL1 == 0 == SDIOut1).
 		@param[in]	inStandard		Optionally overrides the ::NTV2Standard used to initialize the Anc inserter.
 									Defaults to using the ::NTV2Standard of the ::NTV2Channel being used.
-		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
-					use \ref aboutautocirculate.
+		@note		This function is provided for playback methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
 	**/
 	AJA_VIRTUAL bool	AncInsertInit (const UWord inSDIOutput, const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
 										const NTV2Standard inStandard = NTV2_STANDARD_INVALID);
 
 	/**
-		@brief		Enables or disables the given SDI output's Anc insertion component.
+		@brief		Enables or disables individual Anc insertion components for the given SDI output.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
@@ -6262,8 +6278,8 @@ public:
 		@param[in]	inVancC			Specify true to enable Vanc C component insertion;  otherwise false to disable it.
 		@param[in]	inHancY			Specify true to enable Hanc Y component insertion;  otherwise false to disable it.
 		@param[in]	inHancC			Specify true to enable Hanc C component insertion;  otherwise false to disable it.
-		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
-					use \ref aboutautocirculate.
+		@note		This function is provided for playback methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
 	**/
 	AJA_VIRTUAL bool	AncInsertSetComponents (const UWord inSDIOutput,
 												const bool inVancY, const bool inVancC,
@@ -6275,8 +6291,8 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
 		@param[in]	inIsEnabled		Specify true to enable the Anc inserter;  otherwise false to disable it.
-		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
-					use \ref aboutautocirculate.
+		@note		This function is provided for playback methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
 	**/
     AJA_VIRTUAL bool	AncInsertSetEnable (const UWord inSDIOutput, const bool inIsEnabled);
 
@@ -6302,8 +6318,8 @@ public:
 									that corresponds to the given SDI output (e.g., ::NTV2_CHANNEL1 == 0 == SDIOut1).
 		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Anc buffer location
 									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
-		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
-					use \ref aboutautocirculate.
+		@note		This function is provided for playback methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
 	**/
     AJA_VIRTUAL bool	AncInsertSetReadParams (const UWord inSDIOutput, const ULWord inFrameNumber, const ULWord inF1Size,
 												const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
@@ -6322,8 +6338,8 @@ public:
 									that corresponds to the given SDI output (e.g., ::NTV2_CHANNEL1 == 0 == SDIOut1).
 		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Anc buffer location
 									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
-		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
-					use \ref aboutautocirculate.
+		@note		This function is provided for playback methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
 	**/
     AJA_VIRTUAL bool	AncInsertSetField2ReadParams (const UWord inSDIOutput, const ULWord inFrameNumber, const ULWord inF2Size,
 														const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
@@ -6350,8 +6366,8 @@ public:
 									that corresponds to the given SDI input (e.g., ::NTV2_CHANNEL1 == 0 == SDIIn1).
 		@param[in]	inStandard		Optionally overrides the ::NTV2Standard used to initialize the Anc extractor.
 									Defaults to using the ::NTV2Standard of the ::NTV2Channel being used.
-		@note		Use this function only with \ref aboutpingpong or other capture/playout methods that don't
-					use \ref aboutautocirculate.
+		@note		This function is provided for capture methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
 		@see		CNTV2Card::AncExtractSetEnable, CNTV2Card::AncExtractSetWriteParams,
 					CNTV2Card::AncExtractSetFilterDIDs, \ref anccapture
 	**/
@@ -6359,20 +6375,20 @@ public:
 										const NTV2Standard inStandard = NTV2_STANDARD_INVALID);
 
 	/**
-		@brief		Enables or disables the given SDI input's Anc extraction components.
+		@brief		Enables or disables the Anc extraction components for the given SDI input.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc extractor firmware.)
 		@return		True if successful; otherwise false.
-		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
-		@param[in]	inVancY			Specify true to enable Vanc Y component extraction;  otherwise false to disable it.
-		@param[in]	inVancC			Specify true to enable Vanc C component extraction;  otherwise false to disable it.
-		@param[in]	inHancY			Specify true to enable Hanc Y component extraction;  otherwise false to disable it.
-		@param[in]	inHancC			Specify true to enable Hanc C component extraction;  otherwise false to disable it.
-		@note		Use this function only with \ref aboutpingpong or other capture methods that don't
-					use \ref aboutautocirculate.
+		@param[in]	inSDIInput	Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
+		@param[in]	inVancY		Specify true to enable Vanc Y component extraction;  otherwise false to disable it.
+		@param[in]	inVancC		Specify true to enable Vanc C component extraction;  otherwise false to disable it.
+		@param[in]	inHancY		Specify true to enable Hanc Y component extraction;  otherwise false to disable it.
+		@param[in]	inHancC		Specify true to enable Hanc C component extraction;  otherwise false to disable it.
+		@note		This function is provided for capture methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
 	**/
 	AJA_VIRTUAL bool	AncExtractSetComponents (const UWord inSDIInput,
 													const bool inVancY, const bool inVancC,
-													const bool inHancY, const bool inHancC);
+													const bool inHancY, const bool inHancC);	//	New in SDK 16.0
 
 	/**
 		@brief		Enables or disables the given SDI input's Anc extractor.
@@ -6380,8 +6396,8 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
 		@param[in]	inIsEnabled		Specify true to enable the Anc extractor;  otherwise false to disable it.
-		@note		Use this function only with \ref aboutpingpong or other capture methods that don't
-					use \ref aboutautocirculate.
+		@note		This function is provided for capture methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
 		@see		CNTV2Card::AncExtractIsEnabled, \ref anccapture
 	**/
     AJA_VIRTUAL bool	AncExtractSetEnable (const UWord inSDIInput, const bool inIsEnabled);
@@ -6408,8 +6424,8 @@ public:
 									that corresponds to the SDI input (e.g., ::NTV2_CHANNEL1 == 0 == SDIIn1).
 		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Anc buffer location
 									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
-		@note		Use this function only with \ref aboutpingpong or other capture methods that don't
-					use \ref aboutautocirculate.
+		@note		This function is provided for capture methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
 		@see		CNTV2Card::AncExtractSetField2WriteParams, \ref anccapture
 	**/
     AJA_VIRTUAL bool	AncExtractSetWriteParams (const UWord inSDIInput, const ULWord inFrameNumber,
@@ -6428,8 +6444,8 @@ public:
 									that corresponds to the SDI input (e.g., ::NTV2_CHANNEL1 == 0 == SDIIn1).
 		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Anc buffer location
 									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
-		@note		Use this function only with \ref aboutpingpong or other capture methods that don't
-					use \ref aboutautocirculate.
+		@note		This function is provided for capture methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
 		@see		CNTV2Card::AncExtractSetWriteParams, \ref anccapture
 	**/
     AJA_VIRTUAL bool	AncExtractSetField2WriteParams (const UWord inSDIInput, const ULWord inFrameNumber,

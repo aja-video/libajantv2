@@ -203,7 +203,7 @@ Many AJA devices support these additional frame buffer formats:
 	<tr><td><b>32-Bit ARGB (PC) 8 bpc</b>		<td>::NTV2_FBF_ARGB
 	<tr><td><b>32-Bit RGBA (Mac) 8 bpc</b>		<td>::NTV2_FBF_RGBA
 	<tr><td><b>32-Bit ABGR (OpenGL) 8 bpc</b>	<td>::NTV2_FBF_ABGR
-	<tr><td>fbformats10bitrgbdpx				<td>::NTV2_FBF_10BIT_DPX
+	<tr><td>\ref fbformats10bitrgbdpx			<td>::NTV2_FBF_10BIT_DPX
 	<tr><td>\ref fbformats10bitycbcrdpx			<td>::NTV2_FBF_10BIT_YCBCR_DPX
 	<tr><td>\ref fbformats8bitdvcpro			<td>::NTV2_FBF_8BIT_DVCPRO
 	<tr><td>\ref fbformats8bithdv				<td>::NTV2_FBF_8BIT_HDV
@@ -460,8 +460,7 @@ Chroma values are 10-bit (0-1023) values, stored identically to the luma values,
 
 @subsubsection		fbformats10bitycbcr420pl2	2-Plane 10-Bit YCbCr 4:2:0
 
-This format, identified by the ::NTV2_FBF_10BIT_YCBCR_420PL2 enumeration constant, is a two-plane format commonly used with video encoders,
-including the \ref corvidhevc.
+This format, identified by the ::NTV2_FBF_10BIT_YCBCR_420PL2 enumeration constant, is a two-plane format commonly used with video encoders.
 
 @image	html	fbf-10bitycbcr420planar2-75.png
 
@@ -484,8 +483,8 @@ Chroma values are 10-bit (0-1023) values, one <b>Cb</b>/<b>Cr</b> pair per 2×2 
 
 @subsubsection		fbformats10bitycbcr422pl2	2-Plane 10-Bit YCbCr 4:2:2
 
-This format, identified by the ::NTV2_FBF_10BIT_YCBCR_422PL2 enumeration constant, is a two-plane format commonly used with video encoders,
-including the \ref corvidhevc. It’s identical to its 4:2:0 sibling (above) except the Chroma plane is full-height, not half-height:
+This format, identified by the ::NTV2_FBF_10BIT_YCBCR_422PL2 enumeration constant, is a two-plane format commonly used with video encoders.
+It’s identical to its 4:2:0 sibling (above) except the Chroma plane is full-height, not half-height:
 
 @image	html	fbf-10bitycbcr422planar2-75.png
 

@@ -1394,7 +1394,25 @@ private:
 		DefineRegName	(kVRegDmaTransferRateH2C4,				"kVRegDmaTransferRateH2C4");
 		DefineRegName	(kVRegDmaHardwareRateH2C4,				"kVRegDmaHardwareRateH2C4");
 
-		DefineRegName	(kVRegPCIMaxReadRequestSize,			"kVRegPCIMaxReadRequestSize");
+        DefineRegName	(kVRegHDMIInHDRPresent1,				"kVRegHDMIInHDRPresent1");
+        DefineRegName	(kVRegHDMIInHDREOTF1,                   "kVRegHDMIInHDREOTF1");
+        DefineRegName	(kVRegHDMIInHDRGreenPrimary1,			"kVRegHDMIInHDRGreenPrimary1");
+        DefineRegName	(kVRegHDMIInHDRBluePrimary1,			"kVRegHDMIInHDRBluePrimary1");
+        DefineRegName	(kVRegHDMIInHDRRedPrimary1,				"kVRegHDMIInHDRRedPrimary1");
+        DefineRegName	(kVRegHDMIInHDRWhitePoint1,				"kVRegHDMIInHDRWhitePoint1");
+        DefineRegName	(kVRegHDMIInHDRMasteringLuminence1,		"kVRegHDMIInHDRMasteringLuminence1");
+        DefineRegName	(kVRegHDMIInHDRLightLevel1,				"kVRegHDMIInHDRLightLevel1");
+
+        DefineRegName	(kVRegHDMIInHDRPresent2,				"kVRegHDMIInHDRPresent2");
+        DefineRegName	(kVRegHDMIInHDREOTF2,                   "kVRegHDMIInHDREOTF2");
+        DefineRegName	(kVRegHDMIInHDRGreenPrimary2,			"kVRegHDMIInHDRGreenPrimary2");
+        DefineRegName	(kVRegHDMIInHDRBluePrimary2,			"kVRegHDMIInHDRBluePrimary2");
+        DefineRegName	(kVRegHDMIInHDRRedPrimary2,				"kVRegHDMIInHDRRedPrimary2");
+        DefineRegName	(kVRegHDMIInHDRWhitePoint2,				"kVRegHDMIInHDRWhitePoint2");
+        DefineRegName	(kVRegHDMIInHDRMasteringLuminence2,		"kVRegHDMIInHDRMasteringLuminence2");
+        DefineRegName	(kVRegHDMIInHDRLightLevel2,				"kVRegHDMIInHDRLightLevel2");
+
+        DefineRegName	(kVRegPCIMaxReadRequestSize,			"kVRegPCIMaxReadRequestSize");
 		DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
 		DefineRegName	(kVRegFirstOEM,							"kVRegFirstOEM");
 

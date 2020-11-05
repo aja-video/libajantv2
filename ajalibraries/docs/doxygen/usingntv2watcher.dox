@@ -619,6 +619,13 @@ This inspector can be used to drive the \ref anc608viewer for monitoring closed-
 from being sent to the \ref anc608viewer , it’s best to have only one of the Anc buffer regions visible and set to display “Packets”, and also,
 if only one caption packet is in the monitored buffer.
 
+<b>Drag and Drop</b> support:
+	-	Dropping a single file from outside the inspector window is supported only if <b>Auto</b> mode is disabled.
+	-	Dropping the file into the <b>F1 Anc</b> or <b>F2 Anc</b> data areas (if visible, in either <b>Raw</b>
+		or <b>Packets</b> view) will write the binary contents of the file into the Anc region of the frame buffer.
+	-	Dropping the file into the <b>VANC Anc</b> data area (if visible, in either <b>Raw</b> or <b>Packets</b>
+		view) will write the binary contents of the file into the VANC lines (if VANC mode enabled) of the frame buffer.
+
 
 <hr size="50px">
 @subsection	inspectorac		AutoCirculate Inspector

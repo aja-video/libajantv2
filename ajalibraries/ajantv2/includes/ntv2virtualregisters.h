@@ -602,7 +602,25 @@ typedef enum
 	kVRegDmaTransferRateH2C4				= VIRTUALREG_START+622,
 	kVRegDmaHardwareRateH2C4				= VIRTUALREG_START+623,
 
-	kVRegLastAJA							= VIRTUALREG_START+624,		///< @brief	The last AJA virtual register slot
+	kVRegHDMIInHDRPresent1					= VIRTUALREG_START+624,
+	kVRegHDMIInHDREOTF1						= VIRTUALREG_START+625,
+	kVRegHDMIInHDRGreenPrimary1				= VIRTUALREG_START+626,
+	kVRegHDMIInHDRBluePrimary1				= VIRTUALREG_START+627,
+	kVRegHDMIInHDRRedPrimary1				= VIRTUALREG_START+628,
+	kVRegHDMIInHDRWhitePoint1				= VIRTUALREG_START+629,
+	kVRegHDMIInHDRMasteringLuminence1		= VIRTUALREG_START+630,
+	kVRegHDMIInHDRLightLevel1				= VIRTUALREG_START+631,
+
+	kVRegHDMIInHDRPresent2					= VIRTUALREG_START+632,
+	kVRegHDMIInHDREOTF2						= VIRTUALREG_START+633,
+	kVRegHDMIInHDRGreenPrimary2				= VIRTUALREG_START+634,
+	kVRegHDMIInHDRBluePrimary2				= VIRTUALREG_START+635,
+	kVRegHDMIInHDRRedPrimary2				= VIRTUALREG_START+636,
+	kVRegHDMIInHDRWhitePoint2				= VIRTUALREG_START+637,
+	kVRegHDMIInHDRMasteringLuminence2		= VIRTUALREG_START+638,
+	kVRegHDMIInHDRLightLevel2				= VIRTUALREG_START+639,
+	
+	kVRegLastAJA							= VIRTUALREG_START+640,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 
