@@ -258,6 +258,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 	case DEVICE_ID_IOXT:
 	case DEVICE_ID_TTAP:
 	case DEVICE_ID_KONA1:
+	case DEVICE_ID_IOX3:
 		switch (inFrameGeometry)
 		{
 		case NTV2_FG_2048x1080:
@@ -467,6 +468,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 	case DEVICE_ID_IOXT:
 	case DEVICE_ID_TTAP:
 	case DEVICE_ID_KONA1:
+	case DEVICE_ID_IOX3:
 		switch (inFrameGeometry)
 		{
 		case NTV2_FG_2048x1080:

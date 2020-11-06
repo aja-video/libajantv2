@@ -444,6 +444,7 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_CORVID44_2X4K:	return "c44_12g_2x4k";
 		case DEVICE_ID_CORVID44_PLNR:	return "c44_12g_plnr";
 		case DEVICE_ID_TTAP_PRO:		return "t_tap_pro";
+		case DEVICE_ID_IOX3:			return "iox3";
 		default:						break;
 	}
 	return "";
