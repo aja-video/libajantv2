@@ -629,7 +629,7 @@ string CNTV2FirmwareInstallerThread::GetPrimaryDesignName (const NTV2DeviceID in
 		case DEVICE_ID_CORVID44_2X4K:				return "c44_12g_2X4K";
 		case DEVICE_ID_CORVID44_PLNR:				return "c44_12g_plnr";
 		case DEVICE_ID_TTAP_PRO:					return "t_tap_pro";
-		case DEVICE_ID_IOXT:						return "iox3";
+		case DEVICE_ID_IOX3:						return "iox3";
         default: return "";
 	}
 }
