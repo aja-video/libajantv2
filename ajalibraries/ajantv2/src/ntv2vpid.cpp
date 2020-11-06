@@ -534,6 +534,44 @@ NTV2VPIDLuminance CNTV2VPID::GetLuminance (void) const
 	return NTV2VPIDLuminance((m_uVPID & kRegmaskVPIDLuminance) >> kRegShiftVPIDLuminance); 
 }
 
+CNTV2VPID & CNTV2VPID::SetRGBRange (const NTV2VPIDRGBRange inRGBRange)
+{	
+	switch(GetBitDepth())
+	{
+	case VPIDBitDepth_10_Full:
+	case VPIDBitDepth_10:
+		if(inRGBRange == NTV2_VPID_Range_Narrow || !IsRGBSampling())
+			SetBitDepth(VPIDBitDepth_10);
+		else
+			SetBitDepth(VPIDBitDepth_10_Full);
+	break;
+	case VPIDBitDepth_12_Full:
+	case VPIDBitDepth_12:
+		if(inRGBRange == NTV2_VPID_Range_Narrow || !IsRGBSampling())
+			SetBitDepth(VPIDBitDepth_12);
+		else
+			SetBitDepth(VPIDBitDepth_12_Full);
+	}
+
+	return *this;
+}
+
+
+NTV2VPIDRGBRange CNTV2VPID::GetRGBRange (void) const
+{
+	if(!IsRGBSampling())
+		return NTV2_VPID_Range_Narrow;
+	
+	switch(GetBitDepth())
+	{
+	case VPIDBitDepth_10_Full:
+	case VPIDBitDepth_12_Full:
+		return NTV2_VPID_Range_Full;
+	default:
+		return NTV2_VPID_Range_Narrow;
+	}
+}
+
 #if !defined (NTV2_DEPRECATE)
 void CNTV2VPID::SetDynamicRange (const VPIDDynamicRange inDynamicRange)
 {

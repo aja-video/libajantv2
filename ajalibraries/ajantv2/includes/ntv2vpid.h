@@ -57,6 +57,7 @@ public:
 	virtual NTV2VPIDXferChars		GetTransferCharacteristics (void) const;
 	virtual NTV2VPIDColorimetry		GetColorimetry (void) const;
 	virtual NTV2VPIDLuminance		GetLuminance (void) const;
+	virtual NTV2VPIDRGBRange		GetRGBRange (void) const;
                                 virtual std::ostream &			Print (std::ostream & ostrm) const;
                                 virtual std::ostream &			PrintPretty (std::ostream & ostrm) const;
     virtual std::string				AsString (const bool inTabular = false) const;
@@ -96,6 +97,7 @@ public:
 	virtual CNTV2VPID &			SetTransferCharacteristics	(const NTV2VPIDXferChars inXferChars);
 	virtual CNTV2VPID &			SetColorimetry				(const NTV2VPIDColorimetry inColorimetry);
 	virtual CNTV2VPID &			SetLuminance				(const NTV2VPIDLuminance inLuminance);
+	virtual CNTV2VPID &			SetRGBRange					(const NTV2VPIDRGBRange inRGBRange);
 	virtual inline CNTV2VPID &	MakeInvalid					(void)		{return SetVPID(0);}
 								
 	///@}
