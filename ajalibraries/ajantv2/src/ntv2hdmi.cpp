@@ -1031,26 +1031,26 @@ bool CNTV2Card::SetHDMIOutAudioChannel34Swap (const bool inIsSwapped, const NTV2
 
 bool CNTV2Card::EnableHDMIOutUserOverride(bool enable)
 {
-	return WriteRegister(kRegHDMIInputControl, enable ? 1 : 0, kRegMaskHDMIOutUserOveride, kRegShiftHDMIOutUserOveride);
+	return WriteRegister(kRegHDMIInputControl, enable ? 1 : 0, kRegMaskHDMIOutForceConfig, kRegShiftHDMIOutForceConfig);
 }
 
 bool CNTV2Card::GetEnableHDMIOutUserOverride(bool & isEnabled)
 {
 	ULWord enable = 0;
-	bool status = ReadRegister(kRegHDMIInputControl, enable, kRegMaskHDMIOutUserOveride, kRegShiftHDMIOutUserOveride);
+	bool status = ReadRegister(kRegHDMIInputControl, enable, kRegMaskHDMIOutForceConfig, kRegShiftHDMIOutForceConfig);
 	isEnabled = enable ? true : false;
 	return status;
 }
 
 bool CNTV2Card::EnableHDMIOutCenterCrop(bool enable)
 {
-	return WriteRegister(kRegHDMIInputControl, enable ? 1 : 0, kRegMaskHDMIOutCropMode, kRegShiftHDMIOutCropMode);
+	return WriteRegister(kRegHDMIInputControl, enable ? 1 : 0, kRegMaskHDMIOutCropEnable, kRegShiftHDMIOutCropEnable);
 }
 
 bool CNTV2Card::GetEnableHDMIOutCenterCrop(bool & isEnabled)
 {
 	ULWord enable = 0;
-	bool status = ReadRegister(kRegHDMIInputControl, enable, kRegMaskHDMIOutCropMode, kRegShiftHDMIOutCropMode);
+	bool status = ReadRegister(kRegHDMIInputControl, enable, kRegMaskHDMIOutCropEnable, kRegShiftHDMIOutCropEnable);
 	isEnabled = enable ? true : false;
 	return status;
 }

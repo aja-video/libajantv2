@@ -3093,8 +3093,8 @@ private:
 			(void) inRegNum;
 			ostringstream	oss;
 			const ULWord	hdmiVers(::NTV2DeviceGetHDMIVersion (inDeviceID));
-			const uint32_t	vidStd	(hdmiVers >= 2 ? (inRegValue & kRegMaskHDMIInV2VideoStd) >> kRegShiftHDMIInputStatusV2Std : (inRegValue & kRegMaskHDMIInStandard) >> kRegShiftInputStatusStd);
-			const uint32_t	rate	((inRegValue & kRegMaskHDMIInFPS) >> kRegShiftInputStatusFPS);
+			const uint32_t	vidStd	(hdmiVers >= 2 ? (inRegValue & kRegMaskHDMIInV2VideoStd) >> kRegShiftHDMIInV2VideoStd : (inRegValue & kRegMaskInputStatusStd) >> kRegShiftInputStatusStd);
+			const uint32_t	rate	((inRegValue & kRegMaskInputStatusFPS) >> kRegShiftInputStatusFPS);
 			static const string	sStds[32] = {"1080i", "720p", "480i", "576i", "1080p", "SXGA", "2K1080p", "2K1080i", "3840p", "4096p"};
 			static const string	sRates[32] = {"invalid", "60.00", "59.94", "30.00", "29.97", "25.00", "24.00", "23.98", "50.00", "48.00", "47.95" };
 			oss	<< "HDMI Input: " << (inRegValue & BIT(0) ? "Locked" : "Unlocked")			<< endl
