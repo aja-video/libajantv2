@@ -1668,7 +1668,7 @@ typedef enum
 	kRegMaskHDMIOutPowerDown	= BIT(25),
 	kRegMaskHDMIOutRange		= BIT(28),
 	kRegMaskHDMIOutAudioCh		= BIT(29),
-	kRegMaskHDMIProtocol		= BIT(30),
+	kLHIRegMaskHDMIOutDVI		= BIT(30),
 
 	//kRegHDMIInputStatus
 	kRegMaskInputStatusLock		= BIT(0),								// rename to kRegMaskAnalogInputStatusLock
@@ -2854,7 +2854,7 @@ typedef enum
 	kRegShiftHDMIOutPowerDown			= 25,
 	kRegShiftHDMIOutRange				= 28,
 	kRegShiftHDMIOutAudioCh				= 29,
-	kRegShiftHDMIProtocol				= 30,
+	kLHIRegShiftHDMIOutDVI 				= 30,
 
 	//kRegHDMIInputStatus
 	kRegShiftInputStatusLock			= 0,
