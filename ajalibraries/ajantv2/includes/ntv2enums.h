@@ -3773,6 +3773,24 @@ typedef enum
 
 
 /**
+	@brief	This specifies the colorimetry of HDMI
+**/
+typedef enum
+{
+	NTV2_HDMIColorimetryNoData,
+	NTV2_HDMIColorimetry601,
+	NTV2_HDMIColorimetry709,
+	NTV2_HDMIColorimetry2020,
+	NTV2_HDMIColorimetry2020CL,
+	NTV2_HDMIColorimetryDCI,
+	NTV2_MAX_NUM_HDMIColorimetry,
+	NTV2_INVALID_HDMI_Colorimetry	= NTV2_MAX_NUM_HDMIColorimetry
+} NTV2HDMIColorimetry;
+
+#define	NTV2_IS_VALID_HDMI_RANGE(__x__)		((__x__) < NTV2_MAX_NUM_HDMIRanges)
+
+
+/**
 	@brief	This specifies the number of audio channels on output for HDMI
 **/
 typedef enum

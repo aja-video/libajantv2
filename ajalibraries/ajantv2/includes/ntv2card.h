@@ -5311,6 +5311,24 @@ public:
     **/
     AJA_VIRTUAL bool		GetHDMIInDynamicRange (HDRFloatValues & outFloatValues, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
+	/**
+		@brief						Answers with the given HDMI input's current colorimetry.
+		@param[out]	outColorimetry	Receives the input channels colorimetry.
+		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+		@return						True if successful;  otherwise false.
+		@see						CNTV2Card::SetHDMIInAudioChannel34Swap
+	**/
+	AJA_VIRTUAL bool		GetHDMIInColorimetry (NTV2HDMIColorimetry & outColorimetry, const NTV2Channel inChannel = NTV2_CHANNEL1);	//	New in SDK v16.0
+
+	/**
+		@brief						Answers with the given HDMI input's Dolby Vision flag is set.
+		@param[out]	outIsDolbyVision	Receives true if Dolby Vision input detected;  otherwise false.
+		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
+		@return						True if successful;  otherwise false.
+		@see						CNTV2Card::SetHDMIInAudioChannel34Swap
+	**/
+	AJA_VIRTUAL bool		GetHDMIInDolbyVision (bool & outIsDolbyVision, const NTV2Channel inChannel = NTV2_CHANNEL1);	//	New in SDK v16.0
+
     AJA_VIRTUAL bool		SetHDMIOut3DPresent (const bool inIs3DPresent);
 	AJA_VIRTUAL bool		GetHDMIOut3DPresent (bool & outIs3DPresent);
 

@@ -81,55 +81,53 @@ bool CNTV2Card::GetHDMIInDynamicRange (HDRRegValues & outRegValues, const NTV2Ch
 
     if (inChannel == NTV2_CHANNEL1)
     {
-        ok = CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRPresent1, outValue);
-        if (!ok || (outValue == 0))
+		ok = CNTV2DriverInterface::ReadRegister(kVRegHDMIInDrmInfo1, outValue);
+		if (!ok || ((outValue & kVRegMaskHDMIInPresent) == 0))
             return false;
-        outRegValues.staticMetadataDescriptorID = 0;
-        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDREOTF1, outValue);
-        outRegValues.electroOpticalTransferFunction = (uint16_t)outValue;
-        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRGreenPrimary1, outValue);
+		outRegValues.electroOpticalTransferFunction = (uint16_t)((outValue & kVRegMaskHDMIInEOTF) >> kVRegShiftHDMIInEOTF);
+		outRegValues.staticMetadataDescriptorID = (uint16_t)((outValue & kVRegMaskHDMIInMetadataID) >> kVRegShiftHDMIInMetadataID);
+		CNTV2DriverInterface::ReadRegister(kVRegHDMIInDrmGreenPrimary1, outValue);
         outRegValues.greenPrimaryX = (uint16_t)((outValue & kRegMaskHDMIHDRGreenPrimaryX) >> kRegShiftHDMIHDRGreenPrimaryX);
         outRegValues.greenPrimaryY = (uint16_t)((outValue & kRegMaskHDMIHDRGreenPrimaryY) >> kRegShiftHDMIHDRGreenPrimaryY);
-        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRBluePrimary1, outValue);
+		CNTV2DriverInterface::ReadRegister(kVRegHDMIInDrmBluePrimary1, outValue);
         outRegValues.bluePrimaryX = (uint16_t)((outValue & kRegMaskHDMIHDRBluePrimaryX) >> kRegShiftHDMIHDRBluePrimaryX);
         outRegValues.bluePrimaryY = (uint16_t)((outValue & kRegMaskHDMIHDRBluePrimaryY) >> kRegShiftHDMIHDRBluePrimaryY);
-        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRRedPrimary1, outValue);
+		CNTV2DriverInterface::ReadRegister(kVRegHDMIInDrmRedPrimary1, outValue);
         outRegValues.redPrimaryX = (uint16_t)((outValue & kRegMaskHDMIHDRRedPrimaryX) >> kRegShiftHDMIHDRRedPrimaryX);
         outRegValues.redPrimaryY = (uint16_t)((outValue & kRegMaskHDMIHDRRedPrimaryY) >> kRegShiftHDMIHDRRedPrimaryY);
-        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRWhitePoint1, outValue);
+		CNTV2DriverInterface::ReadRegister(kVRegHDMIInDrmWhitePoint1, outValue);
         outRegValues.whitePointX = (uint16_t)((outValue & kRegMaskHDMIHDRWhitePointX) >> kRegShiftHDMIHDRWhitePointX);
 		outRegValues.whitePointY = (uint16_t)((outValue & kRegMaskHDMIHDRWhitePointY) >> kRegShiftHDMIHDRWhitePointY);
-        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRMasteringLuminence1, outValue);
+		CNTV2DriverInterface::ReadRegister(kVRegHDMIInDrmMasteringLuminence1, outValue);
         outRegValues.maxMasteringLuminance = (uint16_t)((outValue & kRegMaskHDMIHDRMaxMasteringLuminance) >> kRegShiftHDMIHDRMaxMasteringLuminance);
         outRegValues.minMasteringLuminance = (uint16_t)((outValue & kRegMaskHDMIHDRMinMasteringLuminance) >> kRegShiftHDMIHDRMinMasteringLuminance);
-        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRLightLevel1, outValue);
+		CNTV2DriverInterface::ReadRegister(kVRegHDMIInDrmLightLevel1, outValue);
         outRegValues.maxContentLightLevel = (uint16_t)((outValue & kRegMaskHDMIHDRMaxContentLightLevel) >> kRegShiftHDMIHDRMaxContentLightLevel);
         outRegValues.maxFrameAverageLightLevel = (uint16_t)((outValue & kRegMaskHDMIHDRMaxFrameAverageLightLevel) >> kRegShiftHDMIHDRMaxFrameAverageLightLevel);
     }
     else if (inChannel == NTV2_CHANNEL2)
     {
-        ok = CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRPresent2, outValue);
-        if (!ok || (outValue == 0))
-            return false;
-        outRegValues.staticMetadataDescriptorID = 0;
-        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDREOTF2, outValue);
-        outRegValues.electroOpticalTransferFunction = (uint16_t)outValue;
-        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRGreenPrimary2, outValue);
+		ok = CNTV2DriverInterface::ReadRegister(kVRegHDMIInDrmInfo2, outValue);
+		if (!ok || ((outValue & kVRegMaskHDMIInPresent) == 0))
+			return false;
+		outRegValues.electroOpticalTransferFunction = (uint16_t)((outValue & kVRegMaskHDMIInEOTF) >> kVRegShiftHDMIInEOTF);
+		outRegValues.staticMetadataDescriptorID = (uint16_t)((outValue & kVRegMaskHDMIInMetadataID) >> kVRegShiftHDMIInMetadataID);
+		CNTV2DriverInterface::ReadRegister(kVRegHDMIInDrmGreenPrimary2, outValue);
         outRegValues.greenPrimaryX = (uint16_t)((outValue & kRegMaskHDMIHDRGreenPrimaryX) >> kRegShiftHDMIHDRGreenPrimaryX);
         outRegValues.greenPrimaryY = (uint16_t)((outValue & kRegMaskHDMIHDRGreenPrimaryY) >> kRegShiftHDMIHDRGreenPrimaryY);
-        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRBluePrimary2, outValue);
+		CNTV2DriverInterface::ReadRegister(kVRegHDMIInDrmBluePrimary2, outValue);
         outRegValues.bluePrimaryX = (uint16_t)((outValue & kRegMaskHDMIHDRBluePrimaryX) >> kRegShiftHDMIHDRBluePrimaryX);
         outRegValues.bluePrimaryY = (uint16_t)((outValue & kRegMaskHDMIHDRBluePrimaryY) >> kRegShiftHDMIHDRBluePrimaryY);
-        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRRedPrimary2, outValue);
+		CNTV2DriverInterface::ReadRegister(kVRegHDMIInDrmRedPrimary2, outValue);
         outRegValues.redPrimaryX = (uint16_t)((outValue & kRegMaskHDMIHDRRedPrimaryX) >> kRegShiftHDMIHDRRedPrimaryX);
         outRegValues.redPrimaryY = (uint16_t)((outValue & kRegMaskHDMIHDRRedPrimaryY) >> kRegShiftHDMIHDRRedPrimaryY);
-        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRWhitePoint2, outValue);
+		CNTV2DriverInterface::ReadRegister(kVRegHDMIInDrmWhitePoint2, outValue);
         outRegValues.whitePointX = (uint16_t)((outValue & kRegMaskHDMIHDRWhitePointX) >> kRegShiftHDMIHDRWhitePointX);
 		outRegValues.whitePointY = (uint16_t)((outValue & kRegMaskHDMIHDRWhitePointY) >> kRegShiftHDMIHDRWhitePointY);
-        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRMasteringLuminence2, outValue);
+		CNTV2DriverInterface::ReadRegister(kVRegHDMIInDrmMasteringLuminence2, outValue);
         outRegValues.maxMasteringLuminance = (uint16_t)((outValue & kRegMaskHDMIHDRMaxMasteringLuminance) >> kRegShiftHDMIHDRMaxMasteringLuminance);
         outRegValues.minMasteringLuminance = (uint16_t)((outValue & kRegMaskHDMIHDRMinMasteringLuminance) >> kRegShiftHDMIHDRMinMasteringLuminance);
-        CNTV2DriverInterface::ReadRegister(kVRegHDMIInHDRLightLevel2, outValue);
+		CNTV2DriverInterface::ReadRegister(kVRegHDMIInDrmLightLevel2, outValue);
         outRegValues.maxContentLightLevel = (uint16_t)((outValue & kRegMaskHDMIHDRMaxContentLightLevel) >> kRegShiftHDMIHDRMaxContentLightLevel);
         outRegValues.maxFrameAverageLightLevel = (uint16_t)((outValue & kRegMaskHDMIHDRMaxFrameAverageLightLevel) >> kRegShiftHDMIHDRMaxFrameAverageLightLevel);
     }
@@ -151,6 +149,50 @@ bool CNTV2Card::GetHDMIInDynamicRange (HDRFloatValues & outFloatValues, const NT
         return false;
 
     return convertHDRRegisterToFloatValues(registerValues, outFloatValues);
+}
+
+bool CNTV2Card::GetHDMIInColorimetry (NTV2HDMIColorimetry & outColorimetry, const NTV2Channel inChannel)
+{
+	ULWord outValue;
+	bool ok = false;;
+
+	outColorimetry = NTV2_HDMIColorimetryNoData;
+	if (inChannel == NTV2_CHANNEL1)
+	{
+		ok = CNTV2DriverInterface::ReadRegister(kVRegHDMIInAviInfo1, outValue, kVRegMaskHDMIInColorimetry, kVRegShiftHDMIInColorimetry);
+	}
+	else if (inChannel == NTV2_CHANNEL2)
+	{
+		ok = CNTV2DriverInterface::ReadRegister(kVRegHDMIInAviInfo2, outValue, kVRegMaskHDMIInColorimetry, kVRegShiftHDMIInColorimetry);
+	}
+
+	if (!ok)
+		return false;
+
+	outColorimetry = (NTV2HDMIColorimetry)outValue;
+	return true;
+}
+
+bool CNTV2Card::GetHDMIInDolbyVision (bool & outIsDolbyVision, const NTV2Channel inChannel)
+{
+	ULWord outValue;
+	bool ok = false;;
+
+	outIsDolbyVision = false;
+	if (inChannel == NTV2_CHANNEL1)
+	{
+		ok = CNTV2DriverInterface::ReadRegister(kVRegHDMIInAviInfo1, outValue, kVRegMaskHDMIInDolbyVision, kVRegShiftHDMIInDolbyVision);
+	}
+	else if (inChannel == NTV2_CHANNEL2)
+	{
+		ok = CNTV2DriverInterface::ReadRegister(kVRegHDMIInAviInfo2, outValue, kVRegMaskHDMIInDolbyVision, kVRegShiftHDMIInDolbyVision);
+	}
+
+	if (!ok)
+		return false;
+
+	outIsDolbyVision = (outValue != 0);
+	return true;
 }
 
 // kRegHDMIInputControl
