@@ -1342,6 +1342,7 @@ static const string	sVPIDAudio[]		= {	"Unknown", "Copied", "Additional", "Reserv
 static const string sVPIDTransfer[]		= { "SDR", "HLG", "PQ", "Unspecified" };
 static const string sVPIDColorimetry[]	= { "Rec709", "Reserved", "UHDTV", "Unknown" };
 static const string sVPIDLuminance[]	= { "YCbCr", "ICtCp" };
+static const string sVPIDRGBRange[]	= { "Narrow", "Full" };
 
 
 
@@ -1363,7 +1364,8 @@ ostream & CNTV2VPID::Print (ostream & ostrm) const
 				<< " 16x9=" << YesNo(GetImageAspect16x9())
 				<< " xfer=" << sVPIDTransfer[GetTransferCharacteristics()]
 				<< " colo=" << sVPIDColorimetry[GetColorimetry()]
-				<< " lumi=" << sVPIDLuminance[GetLuminance()];
+                << " lumi=" << sVPIDLuminance[GetLuminance()]
+                << " rng=" << sVPIDRGBRange[GetRGBRange()];
 	return ostrm;
 }
 
@@ -1385,7 +1387,8 @@ ostream & CNTV2VPID::PrintPretty (ostream & ostrm) const
                 << "16x9 = " << YesNo(GetImageAspect16x9()) << endl
                 << "Xfer Char = " << sVPIDTransfer[GetTransferCharacteristics()] << endl
                 << "Colorimitry ="  << sVPIDColorimetry[GetColorimetry()] << endl
-                << "Luminance = " << sVPIDLuminance[GetLuminance()] << endl;
+                << "Luminance = " << sVPIDLuminance[GetLuminance()] << endl
+                << "RGB Range = " << sVPIDRGBRange[GetRGBRange()] << endl;
     return ostrm;
 }
 
