@@ -1640,75 +1640,79 @@ typedef enum
     kRegMaskOutputTimingFinePhase = BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4) + BIT(5)+BIT(6)+BIT(7)+BIT(8),
 	
 	//kRegAnalogInputStatus
-	kRegMaskAnalogCompositeLocked  = BIT(16),
-	kRegMaskAnalogCompositeFormat625  = BIT(18),
-	
-	//kRegHDMIInputStatus / kRegAnalogInputStatus
-	kRegMaskInputStatusLock = BIT(0),								// rename to kRegMaskAnalogInputStatusLock
-	kLHIRegMaskHDMIInputColorSpace = BIT(2),
-	kLHIRegMaskHDMIInputBitDepth = BIT(3),
-	kRegMaskInputStatusV2Std = BIT(7)+BIT(6)+BIT(5)+BIT(4),
-	kLHIRegMaskHDMIOutputEDIDRGB = BIT(10),
-	kLHIRegMaskHDMIOutputEDID10Bit = BIT(11),
-	kLHIRegMaskHDMIInput2ChAudio = BIT(12),
-	kRegMaskHDMIInputProgressive = BIT(13),
 	kRegMaskAnalogInputSD = BIT(14),
 	kRegMaskAnalogInputIntegerRate = BIT(15),
-	kLHIRegMaskHDMIOutputEDIDDVI = BIT(15),
-	kRegMaskInputStatusStd = BIT(26)+BIT(25)+BIT(24),				// rename to kRegMaskAnalogInputStatusStd
-	kLHIRegMaskHDMIInputProtocol = BIT(27),
-	kRegMaskInputStatusFPS = BIT(31)+BIT(30)+BIT(29)+BIT(28),		// rename to kRegMaskAnalogInputStatusFPS
+	kRegMaskAnalogCompositeLocked  = BIT(16),
+	kRegMaskAnalogCompositeFormat625  = BIT(18),
 	
 	//kRegAnalogInputControl  (Note - on some boards, ADC mode is set in Reg 128, kK2RegAnalogOutControl!)
 	kRegMaskAnalogInputADCMode  = BIT(4)+BIT(3)+BIT(2)+BIT(1)+BIT(0),
 	
 	//kRegHDMIOut3DControl
-	kRegMaskHDMIOut3DPresent	= BIT(3),
-	kRegMaskHDMIOut3DMode		= BIT(4)+BIT(5)+BIT(6)+BIT(7),
+	kRegMaskHDMIOut3DPresent		= BIT(3),
+	kRegMaskHDMIOut3DMode			= BIT(4)+BIT(5)+BIT(6)+BIT(7),
 	
 	//kRegHDMIOutControl
-	kRegMaskHDMIOutVideoStd		= BIT(2)+BIT(1)+BIT(0),
-	kRegMaskHDMIOutV2VideoStd	= BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskHDMIOutVideoStd			= BIT(2)+BIT(1)+BIT(0),
+	kRegMaskHDMIOutV2VideoStd		= BIT(3)+BIT(2)+BIT(1)+BIT(0),
 	kRegMaskHDMIOut8ChGroupSelect	= BIT(5),
-	kRegMaskHDMIV2TxBypass		= BIT(7),
-	kLHIRegMaskHDMIOutColorSpace = BIT(8),
-	kLHIRegMaskHDMIOutFPS		= BIT(12)+BIT(11)+BIT(10)+BIT(9),
-	kRegMaskHDMIOutProgressive	= BIT(13),
-	kLHIRegMaskHDMIOutBitDepth	= BIT(14),
-	kRegMaskHDMIV2YCColor		= BIT(15),
-	kRegMaskHDMISampling		= BIT(19)+BIT(18),
-	kRegMaskHDMIAudioRate		= BIT(21)+BIT(20),
-	kRegMaskSourceIsRGB			= BIT(23),
-	kRegMaskHDMIOutPowerDown	= BIT(25),
-    kRegMaskHDMIAudioFormat		= BIT(27)+BIT(26),
-	kRegMaskHDMIOutRange		= BIT(28),
-	kRegMaskHDMIOutAudioCh		= BIT(29),
-	kLHIRegMaskHDMIOutDVI		= BIT(30),
+	kRegMaskHDMIV2TxBypass			= BIT(7),
+	kLHIRegMaskHDMIOutColorSpace	= BIT(8),
+	kLHIRegMaskHDMIOutFPS			= BIT(12)+BIT(11)+BIT(10)+BIT(9),
+	kRegMaskHDMIOutProgressive		= BIT(13),
+	kLHIRegMaskHDMIOutBitDepth		= BIT(14),
+	kRegMaskHDMIV2YCColor			= BIT(15),
+	kRegMaskHDMIOutAudioFormat		= BIT(17)+BIT(16),
+	kRegMaskHDMISampling			= BIT(19)+BIT(18),
+	kRegMaskHDMIAudioRate			= BIT(21)+BIT(20),
+	kRegMaskSourceIsRGB				= BIT(23),
+	kRegMaskHDMIOutPowerDown		= BIT(25),
+	kRegMaskHDMITxEnable			= BIT(26),
+	kRegMaskHDMIRxEnable			= BIT(27),
+	kRegMaskHDMIOutRange			= BIT(28),
+	kRegMaskHDMIOutAudioCh			= BIT(29),
+	kLHIRegMaskHDMIOutDVI			= BIT(30),
 
 	//kRegHDMIInputStatus
-	kRegMaskVideoCode			= BIT(4)+BIT(5)+BIT(6)+BIT(7)+BIT(8)+BIT(9),
-	kRegMaskHDMIInV2VideoStd	= BIT(4)+BIT(5)+BIT(6)+BIT(7)+BIT(8)+BIT(9),
-	kLHIRegMaskHDMIDownStreamDeviceYCbCrMode = BIT(10),
-	kLHIRegMaskHDMIDownStreamDevice10BitMode = BIT(11),
-	kRegMaskHDMIInStandard		= BIT(24)+BIT(25)+BIT(26),
-	kRegMaskHDMIInFPS			= BIT(28)+BIT(29)+BIT(30)+BIT(31),
+	kRegMaskInputStatusLock			= BIT(0),								// rename to kRegMaskAnalogInputStatusLock
+	kRegMaskStable					= BIT(1),
+	kLHIRegMaskHDMIInputColorSpace	= BIT(2),
+	kLHIRegMaskHDMIInputBitDepth	= BIT(3),
+	kRegMaskHDMIInV2VideoStd		= BIT(4)+BIT(5)+BIT(6)+BIT(7)+BIT(8)+BIT(9),
+	kLHIRegMaskHDMIOutputEDIDRGB	= BIT(10),
+	kLHIRegMaskHDMIOutputEDID10Bit	= BIT(11),
+	kLHIRegMaskHDMIInput2ChAudio	= BIT(12),
+	kRegMaskHDMIInputProgressive	= BIT(13),
+	kRegMaskVideoSD					= BIT(14),
+	kLHIRegMaskHDMIOutputEDIDDVI	= BIT(15),
+	kRegMaskHDMIInAudioRate			= BIT(19)+BIT(18)+BIT(17)+BIT(16),
+	kRegMaskAudioWorkLength			= BIT(23)+BIT(22)+BIT(21)+BIT(20),
+	kRegMaskInputStatusStd			= BIT(24)+BIT(25)+BIT(26),
+	kLHIRegMaskHDMIInputProtocol	= BIT(27),
+	kRegMaskInputStatusFPS			= BIT(28)+BIT(29)+BIT(30)+BIT(31),
 	
 	//kRegHDMIInputControl
-	kRegMaskHDMIOutForceConfig	= BIT(1),
-	kRegMaskHDMIAudioPairSelect = BIT(2)+BIT(3),
+	kRegMaskHDMIOutForceConfig		= BIT(1),
+	kRegMaskHDMIAudioPairSelect		= BIT(3)+BIT(2),
 	kRegMaskHDMISampleRateConverterEnable = BIT(4),
 	kRegMaskHDMISwapInputAudCh34	= BIT(5),
 	kRegMaskHDMISwapOutputAudCh34	= BIT(6),
-	kRegMaskHDMIOutPrefer420	= BIT(7),
-	kRegMaskHDMIOut12Bit		= BIT(26),
-	kRegMaskHDMIInputRange		= BIT(28),
-	kRegMaskHDMIInfoRange		= BIT(31),
+	kRegMaskHDMIOutPrefer420		= BIT(7),
+	kRegMaskHDMIInColorDepth		= BIT(13)+BIT(12),
+	kRegMaskHDMIInColorSpace		= BIT(15)+BIT(14),
+	kRegMaskHDMIOutSourceSelect		= BIT(23)+BIT(22)+BIT(21)+BIT(20),
+	kRegMaskHDMIOutCropEnable		= BIT(24),
+	kRegMaskHDMIOutForceHPD			= BIT(25),
+	kRegMaskHDMIOut12Bit			= BIT(26),
+	kRegMaskHDMIDebug				= BIT(27),
+	kRegMaskHDMIInputRange			= BIT(28),
+	kRegMaskHDMIOutAudio2ChannelSelect	= BIT(30)+BIT(29),
+	kRegMaskHDMIInfoRange			= BIT(31),
 	
 	//kRegHDMIInputControl / kRegHDMIOutControl
-	kRegMaskHDMIColorSpace		= BIT(4)+BIT(5),
-	kRegMaskHDMIProtocol		= BIT(30),
-	kRegMaskHDMIPolarity		= BIT(16)+BIT(17)+BIT(18)+BIT(19),
-	
+	kRegMaskHDMIColorSpace			= BIT(4)+BIT(5),
+	kRegMaskHDMIPolarity			= BIT(16)+BIT(17)+BIT(18)+BIT(19),
+
 	//kK2RegAnalogOutControl - (controls Analog Inputs also, for some boards)
 	kK2RegMaskVideoDACMode		= BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4),
 	kFS1RegMaskVideoDAC2Mode    = BIT(8)+BIT(9)+BIT(10)+BIT(11)+BIT(12),
@@ -2323,12 +2327,6 @@ typedef enum
 	kRegMaskAudioMixerInputRightLevel = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
 	kRegMaskAudioMixerLevelSampleCount	= BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
 
-	kRegMaskHDMIOutAudioEngineSelect = BIT(20) + BIT(21) + BIT(22) + BIT(23),
-	kRegMaskHDMIOutAudio8Of16SelectMode = BIT(5),
-	kRegMaskHDMIOutAudio2ChannelSelect = BIT(29) + BIT(30),
-	kRegMaskHDMIOutUserOveride = BIT(1),
-	kRegMaskHDMIOutCropMode = BIT(24),
-    
     kRegMaskRotaryEncoderValue = BIT(7)+BIT(6)+BIT(5)+BIT(4)+BIT(3)+BIT(2)+BIT(1)+BIT(0),
     kRegMaskRotaryEncoderGain = BIT(13)+BIT(12)+BIT(11)+BIT(10)+BIT(9)+BIT(8)
 
@@ -2830,24 +2828,10 @@ typedef enum
     kRegShiftOutputTimingFinePhase = 0,
 	
     //kRegAnalogInputStatus
-	kRegShiftAnalogCompositeLocked		= 16,
-	kRegShiftAnalogCompositeFormat625	= 18,
-
-	//kRegHDMIInputStatus / kRegAnalogInputStatus
-	kRegShiftInputStatusLock			= 0,
-	kLHIRegShiftHDMIInputColorSpace		= 2,
-	kLHIRegShiftHDMIInputBitDepth		= 3,
-	kRegShiftHDMIInputStatusV2Std		= 4,
-	kLHIRegShiftHDMIOutputEDIDRGB		= 10,
-	kLHIRegShiftHDMIOutputEDID10Bit		= 11,
-	kLHIRegShiftHDMIInput2ChAudio		= 12,
-	kRegShiftHDMIInputProgressive		= 13,
 	kRegShiftAnalogInputSD				= 14,
 	kRegShiftAnalogInputIntegerRate		= 15,
-	kLHIRegShiftHDMIOutputEDIDDVI		= 15,
-	kRegShiftInputStatusStd				= 24,
-	kLHIRegShiftHDMIInputProtocol		= 27,
-	kRegShiftInputStatusFPS				= 28,
+	kRegShiftAnalogCompositeLocked		= 16,
+	kRegShiftAnalogCompositeFormat625	= 18,
 
 	//kRegAnalogInputControl
 	kRegShiftAnalogInputADCMode			= 0,
@@ -2870,24 +2854,49 @@ typedef enum
 	kRegShiftHDMIAudioRate				= 20,
 	kRegShiftSourceIsRGB				= 23,
 	kRegShiftHDMIOutPowerDown			= 25,
-	kRegShiftHDMIAudioFormat			= 26,
 	kRegShiftHDMIOutRange				= 28,
 	kRegShiftHDMIOutAudioCh				= 29,
 	kLHIRegShiftHDMIOutDVI 				= 30,
-	
+
+	//kRegHDMIInputStatus
+	kRegShiftInputStatusLock			= 0,
+	kRegShiftStable						= 1,
+	kLHIRegShiftHDMIInputColorSpace		= 2,
+	kLHIRegShiftHDMIInputBitDepth		= 3,
+	kRegShiftHDMIInV2VideoStd			= 4,
+	kLHIRegShiftHDMIOutputEDIDRGB		= 10,
+	kLHIRegShiftHDMIOutputEDID10Bit		= 11,
+	kLHIRegShiftHDMIInput2ChAudio		= 12,
+	kRegShiftHDMIInputProgressive		= 13,
+	kLHIRegShiftHDMIOutputEDIDDVI		= 15,
+	kRegShiftHDMIInAudioRate			= 16,
+	kRegShiftAudioWorkLength			= 20,
+	kRegShiftInputStatusStd				= 24,
+	kLHIRegShiftHDMIInputProtocol		= 27,
+	kRegShiftInputStatusFPS				= 28,
+
 	//kRegHDMIInputControl
 	kRegShiftHDMIOutForceConfig			= 1,
-	kRegShiftHDMIAudioPairSelect		= 2,
+	kRegShiftHDMIAudioPairSelect 		= 2,
 	kRegShiftHDMISampleRateConverterEnable = 4,
+	kRegShiftHDMISwapInputAudCh34		= 5,
+	kRegShiftHDMISwapOutputAudCh34		= 6,
 	kRegShiftHDMIOutPrefer420			= 7,
+    kRegShiftHDMIOutAudioFormat			= 8,
+	kRegShiftHDMIInColorDepth			= 12,
+	kRegShiftHDMIInColorSpace			= 14,
+	kRegShiftHDMIOutSourceSelect		= 20,
+	kRegShiftHDMIOutCropEnable			= 24,
+	kRegShiftHDMIOutForceHPD			= 25,
 	kRegShiftHDMIOut12Bit				= 26,
+	kRegShiftHDMIDebug					= 27,
 	kRegShiftHDMIInputRange				= 28,
-	kRegShiftHDMIInputPolarity			= 16,
+	kRegShiftHDMIOutAudio2ChannelSelect	= 29,
 	kRegShiftHDMIInfoRange				= 31,
 	
-	//kRegHDMIInputControl / kRegHDMIOutControl
+	//kRegHDMIInputControl / kRegHDMIOutControl ???
 	kRegShiftHDMIColorSpace				= 4,
-	kRegShiftHDMIProtocol				= 30,
+	kRegShiftHDMIPolarity				= 16,
 
 	//kK2RegAnalogOutControl,
 	kK2RegShiftVideoDACMode				= 0,
@@ -3487,17 +3496,8 @@ typedef enum
 	kRegShiftAudioMixerInputRightLevel = 16,
 	kRegShiftAudioMixerLevelSampleCount = 8,
 
-	kRegShiftHDMIOutAudioEngineSelect = 20,
-	kRegShiftHDMIOutAudio8Of16SelectMode = 5,
-	kRegShiftHDMIOutAudio2ChannelSelect = 29,
-	kRegShiftHDMIOutUserOveride = 1,
-	kRegShiftHDMISwapInputAudCh34	= 5,
-	kRegShiftHDMISwapOutputAudCh34	= 6,
-	kRegShiftHDMIOutCropMode = 24,
-    
     kRegShiftRotaryEncoderValue = 0,
     kRegShiftRotaryEncoderGain = 8
-
 
 #if !defined (NTV2_DEPRECATE)
 	// kRegSDIInput3GStatus
