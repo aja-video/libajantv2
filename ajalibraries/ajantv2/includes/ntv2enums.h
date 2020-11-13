@@ -4025,9 +4025,9 @@ typedef enum
 		
 typedef enum
 {
-	NTV2_REDPLANE = 0x1,
+	NTV2_REDPLANE = 0x3,
 	NTV2_GREENPLANE = 0x2,
-	NTV2_BLUEPLANE = 0x3
+	NTV2_BLUEPLANE = 0x1
 } NTV2LUTPlaneSelect;
 
 
