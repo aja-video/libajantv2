@@ -1316,6 +1316,16 @@ ostream & NTV2FormatDescriptor::PrintSMPTELineNumber (ostream & inOutStream, con
 	return inOutStream;
 }
 
+NTV2FrameDimensions NTV2FormatDescriptor::GetFullRasterDimensions (void) const
+{
+	return NTV2FrameDimensions (GetRasterWidth(), GetRasterHeight(false));
+}
+
+NTV2FrameDimensions NTV2FormatDescriptor::GetVisibleRasterDimensions (void) const
+{
+	return NTV2FrameDimensions (GetRasterWidth(), GetRasterHeight(true));
+}
+
 
 NTV2SegmentedXferInfo & NTV2FormatDescriptor::GetSegmentedXferInfo (NTV2SegmentedXferInfo & inSegmentInfo, const bool inIsSource) const
 {
@@ -1353,4 +1363,69 @@ ULWord NTV2SmpteLineNumber::GetLastLine (const NTV2FieldID inRasterFieldID) cons
 		return firstFieldTop ? LineNumbersF1Last[mStandard] : LineNumbersF2Last[mStandard];
 	else
 		return firstFieldTop ? LineNumbersF2Last[mStandard] : LineNumbersF1Last[mStandard];
+}
+
+
+ostream & NTV2PrintRasterLineOffsets(const NTV2RasterLineOffsets & inObj, ostream & inOutStream)
+{
+	NTV2StringList	pieces;
+	NTV2RasterLineOffsetsConstIter	iter (inObj.begin());
+	ULWord	current		(0xFFFFFFFF);
+	ULWord	previous	(0xFFFFFFFF);
+	ULWord	first		(0xFFFFFFFF);
+	ULWord	last		(0xFFFFFFFF);
+
+	#if 0
+		//	Verify sorted ascending...
+		current = 0;
+		while (iter != inObj.end())
+		{
+			NTV2_ASSERT (current < previous);
+			previous = current;
+		}
+		iter = inObj.begin();
+	#endif	//	_DEBUG
+
+	while (iter != inObj.end())
+	{
+		current = *iter;
+		if (previous == 0xFFFFFFFF)
+			previous = first = last = current;	//	First time -- always start new sequence
+		else if (current == (previous + 1))
+			last = previous = current;			//	Continue sequence
+		else if (current == previous)
+			;
+		else
+		{
+			ostringstream	oss;
+			if (first == last)
+				oss << first;
+			else
+				oss << first << "-" << last;
+			pieces.push_back (oss.str ());
+
+			first = last = previous = current;	//	Start new sequence...
+		}	//	else sequence break
+		++iter;
+	}
+
+	if (first != 0xFFFFFFFF && last != 0xFFFFFFFF)
+	{
+		ostringstream	oss;
+		if (first == last)
+			oss << first;
+		else
+			oss << first << "-" << last;
+		pieces.push_back (oss.str ());
+	}
+
+	for (NTV2StringListConstIter it (pieces.begin());  ; )
+	{
+		inOutStream << *it;
+		if (++it != pieces.end())
+			inOutStream << ",";
+		else
+			break;
+	}
+	return inOutStream;
 }

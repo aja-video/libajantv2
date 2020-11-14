@@ -13,10 +13,23 @@
 #include "ntv2publicinterface.h"
 #include <string>
 #include <iostream>
+#include <vector>
 #if defined (AJALinux)
 	#include <stdint.h>
 #endif
 
+
+typedef std::vector <ULWord>					NTV2RasterLineOffsets;				///< @brief	An ordered sequence of zero-based line offsets into a frame buffer.
+typedef NTV2RasterLineOffsets::const_iterator	NTV2RasterLineOffsetsConstIter;		///< @brief	A handy const iterator into an NTV2RasterLineOffsets.
+typedef NTV2RasterLineOffsets::iterator			NTV2RasterLineOffsetsIter;			///< @brief	A handy non-const iterator into an NTV2RasterLineOffsets.
+
+/**
+	@brief		Streams a human-readable dump of the given NTV2RasterLineOffsets sequence into the specified output stream.
+	@param[in]	inObj			Specifies the NTV2RasterLineOffsets to be streamed to the output stream.
+	@param		inOutStream		Specifies the output stream to receive the dump. Defaults to std::cout.
+	@return		A non-constant reference to the given output stream.
+**/
+AJAExport std::ostream & NTV2PrintRasterLineOffsets (const NTV2RasterLineOffsets & inObj, std::ostream & inOutStream = std::cout);
 
 /**
 	@brief	This provides additional information about a video frame for a given video standard or format and pixel format,
@@ -242,12 +255,12 @@ public:
 	/**
 		@return		The full-raster NTV2FrameDimensions (including VANC lines, if any).
 	**/
-	inline NTV2FrameDimensions		GetFullRasterDimensions (void) const					{return NTV2FrameDimensions (GetRasterWidth(), GetRasterHeight(false));}
+	NTV2FrameDimensions				GetFullRasterDimensions (void) const;
 
 	/**
 		@return		The visible NTV2FrameDimensions (excluding VANC lines, if any).
 	**/
-	inline NTV2FrameDimensions		GetVisibleRasterDimensions (void) const					{return NTV2FrameDimensions (GetRasterWidth(), GetRasterHeight(true));}
+	NTV2FrameDimensions				GetVisibleRasterDimensions (void) const;
 
 	/**
 		@brief		Answers with the equivalent SMPTE line number for the given line offset into the frame buffer I describe.

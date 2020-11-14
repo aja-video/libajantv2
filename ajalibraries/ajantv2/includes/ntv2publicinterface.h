@@ -4295,18 +4295,6 @@ typedef enum
 	**/
 	AJAExport std::ostream & NTV2PrintULWordVector (const NTV2ULWordVector & inObj, std::ostream & inOutStream = std::cout);
 
-	typedef std::vector <ULWord>					NTV2RasterLineOffsets;				///< @brief	An ordered sequence of zero-based line offsets into a frame buffer.
-	typedef NTV2RasterLineOffsets::const_iterator	NTV2RasterLineOffsetsConstIter;		///< @brief	A handy const iterator into an NTV2RasterLineOffsets.
-	typedef NTV2RasterLineOffsets::iterator			NTV2RasterLineOffsetsIter;			///< @brief	A handy non-const iterator into an NTV2RasterLineOffsets.
-
-	/**
-		@brief		Streams a human-readable dump of the given NTV2RasterLineOffsets sequence into the specified output stream.
-		@param[in]	inObj			Specifies the NTV2RasterLineOffsets to be streamed to the output stream.
-		@param		inOutStream		Specifies the output stream to receive the dump. Defaults to std::cout.
-		@return		A non-constant reference to the given output stream.
-	**/
-	AJAExport std::ostream & NTV2PrintRasterLineOffsets (const NTV2RasterLineOffsets & inObj, std::ostream & inOutStream = std::cout);
-
 	typedef std::vector <NTV2Channel>				NTV2ChannelList;			///< @brief	An ordered sequence of NTV2Channel values.
 	typedef NTV2ChannelList::const_iterator			NTV2ChannelListConstIter;	///< @brief	A handy const iterator into an NTV2ChannelList.
 
@@ -6037,12 +6025,12 @@ typedef enum
 						-	A segment count.
 						It also has some optional attributes:
 						-	Element size, in bytes. Defaults to 1 byte per element. Must be power-of-2. Maximum is 8.
-						-	Optional “source vertical flip” flag to indicate that the source offset is interpreted as an offset, in elements,
+						-	Optional "source vertical flip" flag to indicate that the source offset is interpreted as an offset, in elements,
 							from the bottom of the source buffer, and during the transfer, the source pitch is subtracted instead of added.
-							Defaults to normal “from top” source offset reference.
-						-	Optional “destination vertical flip” flag to indicate that the destination offset is interpreted as an offset, in
+							Defaults to normal "from top" source offset reference.
+						-	Optional "destination vertical flip" flag to indicate that the destination offset is interpreted as an offset, in
 							elements, from the bottom of the destination buffer, and during the transfer, the destination pitch is subtracted
-							instead of added. Defaults to normal “from top” destination offset reference.
+							instead of added. Defaults to normal "from top" destination offset reference.
 		**/
 		class AJAExport NTV2SegmentedXferInfo
 		{
@@ -6164,6 +6152,26 @@ typedef enum
 								instance that will perfectly match me.
 				**/
 				std::string		getSourceCode (const bool inInclDecl = true) const;
+
+				/**
+					@param[in]	inElementOffset		Specifies the element offset of interest.
+					@return		True if the element is contained within me.
+				**/
+				bool			containsElementAtOffset (const ULWord inElementOffset) const;
+
+				/**
+					@param[in]	inRHS	Specifies the NTV2SegmentedXferInfo to compare with me.
+					@return		True if not equal.
+					@note		The element sizes must match (though this ought to be compensated for in the comparison).
+				**/
+				bool			operator != (const NTV2SegmentedXferInfo & inRHS) const;
+
+				/**
+					@param[in]	inRHS	Specifies the NTV2SegmentedXferInfo to compare with me.
+					@return		True if equal.
+					@note		The element sizes must match (though this ought to be compensated for in the comparison).
+				**/
+				inline bool		operator == (const NTV2SegmentedXferInfo & inRHS) const		{return !(*this != inRHS);}
 				///@}
 
 				/**
