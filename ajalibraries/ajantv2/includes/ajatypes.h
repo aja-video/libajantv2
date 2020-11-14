@@ -99,7 +99,7 @@
 	#endif
 #elif defined(__GNUC__)
 	#if __GNUC__ >= 5
-		#define AJA_FALL_THRU	[[gnu::fallthrough]];
+		#define AJA_FALL_THRU	[[gnu::fallthrough]]
 	#else
 		#define AJA_FALL_THRU
 	#endif
