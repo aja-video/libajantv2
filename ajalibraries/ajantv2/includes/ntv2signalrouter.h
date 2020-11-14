@@ -11,6 +11,7 @@
 #include <stddef.h>
 #include <sstream>
 #include <set>
+#include <map>
 
 
 typedef std::set <NTV2OutputXptID>			NTV2OutputCrosspointIDSet,			NTV2OutputXptIDSet;				///< @brief	A collection of distinct ::NTV2OutputXptID values.

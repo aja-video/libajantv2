@@ -9,6 +9,7 @@
 
 #include "ajaexport.h"
 #include "ntv2nubtypes.h"
+#include <string>
 
 #define NTV2_REMOTE_ACCESS_SUCCESS						  	 0
 #define NTV2_REMOTE_ACCESS_NOT_CONNECTED  				 	-1
