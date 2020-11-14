@@ -14,7 +14,6 @@ using namespace std;
 
 
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
-#define NTV2_ANCSIZE_MAX	(0x2000)
 //#define NTV2_BUFFER_LOCK
 
 

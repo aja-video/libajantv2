@@ -37,6 +37,9 @@
 #define	BURNNOTE(_expr_)	AJA_sNOTICE	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
 #define	BURNINFO(_expr_)	AJA_sINFO	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
 
+#define NTV2_AUDIOSIZE_MAX	(401 * 1024)
+#define NTV2_ANCSIZE_MAX	(0x2000)		//	8K
+
 
 /**
 	@brief	This structure encapsulates the video, audio and anc buffers used in the AutoCirculate demos.

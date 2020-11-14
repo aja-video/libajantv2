@@ -29,8 +29,6 @@ using namespace std::rel_ops;
 #define AsULWordPtr(__p__)			reinterpret_cast<ULWord*>(__p__)
 #define AsUBytePtr(__p__)			reinterpret_cast<UByte*>(__p__)
 
-#define NTV2_AUDIOSIZE_MAX	(401 * 1024)
-#define NTV2_ANCSIZE_MAX	(2048)
 
 static const ULWord					kAppSignature				NTV2_FOURCC ('C','C','G','R');
 static const NTV2Line21Attributes	kRedOnTransparentBG			(NTV2_CC608_Red, NTV2_CC608_Blue, NTV2_CC608_Transparent);

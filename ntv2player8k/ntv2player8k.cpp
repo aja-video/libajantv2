@@ -18,8 +18,6 @@
 
 using namespace std;
 
-#define NTV2_ANCSIZE_MAX	(0x2000)
-
 /**
 	@brief	The alignment of the video and audio buffers has a big impact on the efficiency of
 			DMA transfers. When aligned to the page size of the architecture, only one DMA

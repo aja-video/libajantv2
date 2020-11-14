@@ -22,10 +22,6 @@ using namespace std;
 static const uint32_t	BUFFER_ALIGNMENT	(4096);		// The correct size for many systems
 
 
-#define NTV2_AUDIOSIZE_MAX	(401 * 1024)
-#define NTV2_ANCSIZE_MAX	(0x2000)
-
-
 NTV2Capture8K::NTV2Capture8K (const string					inDeviceSpecifier,
 							  const bool					withAudio,
 							  const NTV2Channel				channel,

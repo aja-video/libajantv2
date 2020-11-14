@@ -19,12 +19,11 @@
 
 using namespace std;
 
-#define					AS_INT32(_x_)		static_cast<int32_t>(_x_)
-#define					APP_PROCESS_ID		AS_INT32(AJAProcess::GetPid())
+#define	AS_INT32(_x_)		static_cast<int32_t>(_x_)
+#define	APP_PROCESS_ID		AS_INT32(AJAProcess::GetPid())
 
 //#define NTV2_BUFFER_LOCK
 
-static const size_t		NTV2_ANCSIZE_MAX	(0x2000);
 static const uint32_t	APP_SIGNATURE		(NTV2_FOURCC('D','E','M','O'));
 
 /**

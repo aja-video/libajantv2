@@ -24,6 +24,7 @@ typedef struct PlayerConfig
 {
 	public:
 		std::string						fDeviceSpecifier;	///< @brief	The AJA device to use
+		std::string						fAncDataFilePath;	///< @brief	Optional path to Anc binary data file to playout
 		NTV2Channel						fOutputChannel;		///< @brief	The device channel to use
 		NTV2OutputDestination			fOutputDestination;	///< @brief	The desired output connector to use
 		NTV2VideoFormat					fVideoFormat;		///< @brief	The video format to use
@@ -40,6 +41,7 @@ typedef struct PlayerConfig
 		**/
 		inline explicit	PlayerConfig (const std::string & inDeviceSpecifier	= "0")
 			:	fDeviceSpecifier	(inDeviceSpecifier),
+				fAncDataFilePath	(),
 				fOutputChannel		(NTV2_CHANNEL1),
 				fOutputDestination	(NTV2_OUTPUTDESTINATION_SDI2),
 				fVideoFormat		(NTV2_FORMAT_1080i_5994),

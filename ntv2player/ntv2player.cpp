@@ -18,6 +18,7 @@
 #include "ajaanc/includes/ancillarydata_hdr_hdr10.h"
 #include "ajaanc/includes/ancillarydata_hdr_hlg.h"
 #include "ajaanc/includes/ancillarylist.h"
+#include <fstream>	//	For ifstream
 
 using namespace std;
 
@@ -28,7 +29,6 @@ using namespace std;
 #define	TCINFO(_expr_)	AJA_sINFO	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
 #define	TCDBG(_expr_)	AJA_sDEBUG	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
 
-#define NTV2_ANCSIZE_MAX		(0x2000)
 //#define NTV2_BUFFER_LOCK		//	Define this to pre-lock video/audio buffers in kernel
 
 
@@ -46,6 +46,7 @@ AJALabelValuePairs PlayerConfig::Get(const bool inCompact) const
 	AJASystemInfo::append(result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
 	AJASystemInfo::append(result, "Suppress Audio",		fSuppressAudio ? "Y" : "N");
 	AJASystemInfo::append(result, "Embedded Timecode",	fTransmitLTC ? "LTC" : "VITC");
+	AJASystemInfo::append(result, "Anc Data File",		fAncDataFilePath);
 //	AJASystemInfo::append(result, "Level Conversion",	fDoLevelConversion ? "Y" : "N");
 	return result;
 }
@@ -335,6 +336,12 @@ void NTV2Player::SetUpHostBuffers (void)
 		#endif
 		if (ancBuf  &&  mHostBuffers.size() == 1)	//	Only first has Anc buffer
 			frameData.fAncBuffer.CopyFrom(ancBuf.GetHostPointer(), ancBuf.GetByteCount());
+		else if (!mConfig.fAncDataFilePath.empty())
+		{
+			frameData.fAncBuffer.Allocate(NTV2_ANCSIZE_MAX, /*pageAlign*/true);
+			if (NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mConfig.fVideoFormat))
+				frameData.fAncBuffer2.Allocate(NTV2_ANCSIZE_MAX, /*pageAlign*/true);
+		}
 		mAVCircularBuffer.Add(&frameData);
 	}	//	for each NTV2FrameData
 
@@ -449,9 +456,18 @@ void NTV2Player::PlayFrames (void)
 {
 	ULWord	acOptions(AUTOCIRCULATE_WITH_RP188), goodXfers(0), badXfers(0), prodWaits(0), noRoomWaits(0);
 	AUTOCIRCULATE_TRANSFER	xferInfo;
+	ifstream ancistrm;
 
 	PLNOTE("Thread started");
-	if (mHostBuffers.at(0).fAncBuffer)	//	HDR anc in 1st NTV2FrameData's anc buffer (see SetUpHostBuffers)
+	if (!mConfig.fAncDataFilePath.empty())
+	{
+		ancistrm = ifstream(mConfig.fAncDataFilePath, ios::binary);
+		if (ancistrm.good())
+			acOptions |= AUTOCIRCULATE_WITH_ANC;
+		else
+			PLWARN("Unable to open anc data file '" << mConfig.fAncDataFilePath << "' -- anc insertion disabled");
+	}
+	else if (mConfig.fTransmitHDRType  &&  mHostBuffers.at(0).fAncBuffer)	//	HDR anc in 1st NTV2FrameData's anc buffer (see SetUpHostBuffers)
 	{	//	Since HDR anc packet data doesn't change per-frame, set it once here...
 		NTV2_POINTER & ancBuf(mHostBuffers.at(0).fAncBuffer);
 		xferInfo.acANCBuffer.CopyFrom(ancBuf.GetHostPointer(), ancBuf.GetByteCount());
@@ -490,6 +506,15 @@ void NTV2Player::PlayFrames (void)
 			//	If also playing audio...
 			if (pFrameData->AudioBuffer())	//	...also xfer this frame's audio samples...
 				xferInfo.SetAudioBuffer (pFrameData->AudioBuffer(), pFrameData->fNumAudioBytes);
+
+			if (ancistrm.good() && pFrameData->AncBuffer())	//	Injecting pre-recorded anc from binary data file?
+			{
+				ancistrm.read(pFrameData->AncBuffer(), streamsize(pFrameData->AncBufferSize()));
+				if (pFrameData->AncBuffer2())
+					ancistrm.read(pFrameData->AncBuffer2(), streamsize(pFrameData->AncBuffer2Size()));
+				xferInfo.SetAncBuffers (pFrameData->AncBuffer(), pFrameData->AncBufferSize(),
+										pFrameData->AncBuffer2(), pFrameData->AncBuffer2Size());
+			}
 
 			//	Perform the DMA transfer to the device...
 			if (mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, xferInfo))

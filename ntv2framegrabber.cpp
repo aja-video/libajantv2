@@ -15,10 +15,6 @@
 	using namespace std;
 #endif
 
-
-
-#define NTV2_AUDIOSIZE_MAX	(401*1024)
-#define	NTV2_ANCSIZE_MAX	(512)
 #define NTV2_NUM_IMAGES		(10)
 
 //	Convenience macros for EZ logging:

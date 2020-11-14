@@ -15,7 +15,6 @@
 using namespace std;
 
 
-#define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 #define NTV2_ANCSIZE_MAX	(256 * 1024)
 
 const uint32_t	kAppSignature	(NTV2_FOURCC('L','l','b','u'));

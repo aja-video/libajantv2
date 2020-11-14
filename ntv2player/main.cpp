@@ -34,6 +34,7 @@ int main (int argc, const char ** argv)
 	char *			pPixelFormat	(AJA_NULL);	//	Pixel format argument
     char *			pDeviceSpec 	(AJA_NULL);	//	Device argument
 	char *			pFramesSpec		(AJA_NULL);	//	AutoCirculate frames spec
+	char *			pAncFilePath	(AJA_NULL);	//	Anc data filepath
 	uint32_t		channelNumber	(1);		//	Number of the channel to use
 	int				noAudio			(0);		//	Disable audio tone?
 	int				doMultiChannel	(0);		//	Enable multi-format?
@@ -52,6 +53,7 @@ int main (int argc, const char ** argv)
 		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"video format to use",		"'?' or 'list' to list"},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",		"'?' or 'list' to list"},
 		{"frames",		0,		POPT_ARG_STRING,	&pFramesSpec,	0,	"frames to AutoCirculate",	"num[@min] or min-max"},
+		{"anc",			'a',	POPT_ARG_STRING,	&pAncFilePath,	0,	"playout anc data file",	AJA_NULL},
 		{"hdrType",		't',	POPT_ARG_INT,		&hdrType,		0,	"which HDR pkt to send",	"1:SDR,2:HDR10,3:HLG"},
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",		"number of the channel"},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multi-channel/format",	AJA_NULL},
@@ -103,7 +105,8 @@ int main (int argc, const char ** argv)
 	playerConfig.fDoMultiFormat = doMultiChannel ? true : false;
 	playerConfig.fTransmitLTC = xmitLTC ? true : false;
 
-	//	HDRType
+	//	Anc / HDRType
+	const string ancFilePath (pAncFilePath ? pAncFilePath : "");
 	switch (hdrType)
 	{
 		case 1:		playerConfig.fTransmitHDRType = AJAAncillaryDataType_HDR_SDR;		break;
@@ -111,6 +114,8 @@ int main (int argc, const char ** argv)
 		case 3:		playerConfig.fTransmitHDRType = AJAAncillaryDataType_HDR_HLG;		break;
 		default:	break;
 	}
+	if (playerConfig.fTransmitHDRType != AJAAncillaryDataType_Unknown  &&  !ancFilePath.empty())
+		{cerr << "## ERROR:  conflicting options '--hdrType' and '--anc'" << endl;  return 2;}
 
 	//	Frames
 	const string framesSpec(pFramesSpec ? pFramesSpec : "");
