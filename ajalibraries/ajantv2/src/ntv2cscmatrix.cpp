@@ -84,7 +84,6 @@ void CNTV2CSCMatrix::InitMatrix (const NTV2ColorSpaceMatrixType inPreset)
 
         // RGB full range -> YCbCr Rec 2020
     case NTV2_GBRFull_to_YCbCr_Rec2020_Matrix:
-        //////New++
         mA0 =  0.58057;		// G -> Y
         mA1 =  0.05078;		// B -> Y
         mA2 =  0.22495;		// R -> Y
@@ -149,7 +148,6 @@ void CNTV2CSCMatrix::InitMatrix (const NTV2ColorSpaceMatrixType inPreset)
 
         // RGB SMPTE range -> YCbCr Rec 2020
     case NTV2_GBRSMPTE_to_YCbCr_Rec2020_Matrix:
-        //////New++
         mA0 =  0.67800;		// G -> Y
         mA1 =  0.05930;		// B -> Y
         mA2 =  0.26270;		// R -> Y
@@ -215,7 +213,6 @@ void CNTV2CSCMatrix::InitMatrix (const NTV2ColorSpaceMatrixType inPreset)
 
         // YCbCr -> RGB full range Rec 2020
     case NTV2_YCbCr_to_GBRFull_Rec2020_Matrix:
-        //////New++
         mA0 =  1.167786;		// Y  -> G
         mA1 = -0.187877;		// Cb -> G
         mA2 = -0.652337;		// Cr -> G
@@ -279,7 +276,6 @@ void CNTV2CSCMatrix::InitMatrix (const NTV2ColorSpaceMatrixType inPreset)
 
         // YCbCr -> RGB SMPTE range Rec 2020
     case NTV2_YCbCr_to_GBRSMPTE_Rec2020_Matrix:
-        //////New++
         mA0 =  1.000000;		// Y  -> G
         mA1 = -0.160880066;		// Cb -> G
         mA2 = -0.5585997088;		// Cr -> G
