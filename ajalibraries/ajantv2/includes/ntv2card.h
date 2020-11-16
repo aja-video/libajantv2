@@ -3249,6 +3249,25 @@ public:
 	**/
 	AJA_VIRTUAL bool	SetInputVerticalEventCount (const ULWord inCount, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
+	//
+	//	Current field ID
+	//
+
+	/**
+		@brief		Returns the current field ID of the specified output channel.
+		@param[in]	inChannel		Specifies the Frame Store of interest as an ::NTV2Channel (a zero-based index number).
+		@param[out]	outFieldID		The current field ID of the specified output channel.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetOutputFieldID (const NTV2Channel channel, NTV2FieldID & outFieldID);
+
+	/**
+		@brief		Returns the current field ID of the specified input channel.
+		@param[in]	inChannel		Specifies the Frame Store of interest as an ::NTV2Channel (a zero-based index number).
+		@param[out]	outFieldID		The current field ID of the specified input channel.
+		@return		True if successful; otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetInputFieldID (const NTV2Channel channel, NTV2FieldID & outFieldID);
 
 	//
 	//	Wait for event

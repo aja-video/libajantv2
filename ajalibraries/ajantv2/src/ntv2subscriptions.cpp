@@ -160,19 +160,30 @@ bool CNTV2Card::WaitForInputVerticalInterrupt (const NTV2Channel inChannel, UWor
 }
 
 
-bool CNTV2Card::WaitForOutputFieldID (const NTV2FieldID inFieldID, const NTV2Channel channel)
+bool CNTV2Card::GetOutputFieldID (const NTV2Channel channel, NTV2FieldID & outFieldID)
 {
 	//           	         	 	   CHANNEL1    CHANNEL2     CHANNEL3     CHANNEL4     CHANNEL5     CHANNEL6     CHANNEL7     CHANNEL8
 	static ULWord	regNum []	=	{kRegStatus, kRegStatus,  kRegStatus,  kRegStatus, kRegStatus2, kRegStatus2, kRegStatus2, kRegStatus2, 0};
 	static ULWord	bitShift []	=	{        23,          5,           3,           1,           9,           7,           5,           3, 0};
 
+	// Check status register to see if it is the one we want.
+	ULWord	statusValue	(0);
+	ReadRegister (regNum[channel], statusValue);
+	outFieldID = static_cast <NTV2FieldID> ((statusValue >> bitShift [channel]) & 0x1);
+
+	return true;
+
+}	//	GetOutputFieldID
+
+
+bool CNTV2Card::WaitForOutputFieldID (const NTV2FieldID inFieldID, const NTV2Channel channel)
+{
 	//	Wait for next field interrupt...
 	bool	bInterruptHappened	(WaitForOutputVerticalInterrupt (channel));
 
 	// Check status register to see if it is the one we want.
-	ULWord	statusValue	(0);
-	ReadRegister (regNum[channel], statusValue);
-	NTV2FieldID	currentFieldID	(static_cast <NTV2FieldID> ((statusValue >> bitShift [channel]) & 0x1));
+	NTV2FieldID	currentFieldID (NTV2_FIELD0);
+	GetOutputFieldID(channel, currentFieldID);
 
 	//	If not, wait for another field interrupt...
 	if (currentFieldID != inFieldID)
@@ -183,19 +194,30 @@ bool CNTV2Card::WaitForOutputFieldID (const NTV2FieldID inFieldID, const NTV2Cha
 }	//	WaitForOutputFieldID
 
 
-bool CNTV2Card::WaitForInputFieldID (const NTV2FieldID inFieldID, const NTV2Channel channel)
+bool CNTV2Card::GetInputFieldID (const NTV2Channel channel, NTV2FieldID & outFieldID)
 {
 	//           	         	 	   CHANNEL1    CHANNEL2     CHANNEL3     CHANNEL4     CHANNEL5     CHANNEL6     CHANNEL7     CHANNEL8
 	static ULWord	regNum []	=	{kRegStatus, kRegStatus, kRegStatus2, kRegStatus2, kRegStatus2, kRegStatus2, kRegStatus2, kRegStatus2, 0};
 	static ULWord	bitShift []	=	{        21,         19,          21,          19,          17,          15,          13,           3, 0};
 
+	//	See if the field ID of the last input vertical interrupt is the one of interest...
+	ULWord	statusValue (0);
+	ReadRegister (regNum[channel], statusValue);
+	outFieldID = static_cast <NTV2FieldID> ((statusValue >> bitShift [channel]) & 0x1);
+
+	return true;
+
+}	//	GetInputFieldID
+
+
+bool CNTV2Card::WaitForInputFieldID (const NTV2FieldID inFieldID, const NTV2Channel channel)
+{
 	//	Wait for next field interrupt...
 	bool	bInterruptHappened	(WaitForInputVerticalInterrupt (channel));
 
 	//	See if the field ID of the last input vertical interrupt is the one of interest...
-	ULWord	statusValue (0);
-	ReadRegister (regNum[channel], statusValue);
-	NTV2FieldID	currentFieldID	(static_cast <NTV2FieldID> ((statusValue >> bitShift [channel]) & 0x1));
+	NTV2FieldID	currentFieldID (NTV2_FIELD0);
+	GetInputFieldID(channel, currentFieldID);
 
 	//	If not, wait for another field interrupt...
 	if (currentFieldID != inFieldID)
