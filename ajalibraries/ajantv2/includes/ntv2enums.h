@@ -3787,7 +3787,7 @@ typedef enum
 	NTV2_INVALID_HDMI_Colorimetry	= NTV2_MAX_NUM_HDMIColorimetry
 } NTV2HDMIColorimetry;
 
-#define	NTV2_IS_VALID_HDMI_RANGE(__x__)		((__x__) < NTV2_MAX_NUM_HDMIRanges)
+#define	NTV2_IS_VALID_HDMI_COLORIMETRY(__x__)		((__x__) < NTV2_MAX_NUM_HDMIColorimetry)
 
 
 /**
