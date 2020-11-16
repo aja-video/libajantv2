@@ -456,13 +456,13 @@ void NTV2Player::PlayFrames (void)
 {
 	ULWord	acOptions(AUTOCIRCULATE_WITH_RP188), goodXfers(0), badXfers(0), prodWaits(0), noRoomWaits(0);
 	AUTOCIRCULATE_TRANSFER	xferInfo;
-	ifstream ancistrm;
+	ifstream * pAncistrm(AJA_NULL);
 
 	PLNOTE("Thread started");
 	if (!mConfig.fAncDataFilePath.empty())
 	{
-		ancistrm = ifstream(mConfig.fAncDataFilePath, ios::binary);
-		if (ancistrm.good())
+		pAncistrm = new ifstream(mConfig.fAncDataFilePath, ios::binary);
+		if (pAncistrm->good())
 			acOptions |= AUTOCIRCULATE_WITH_ANC;
 		else
 			PLWARN("Unable to open anc data file '" << mConfig.fAncDataFilePath << "' -- anc insertion disabled");
@@ -507,11 +507,11 @@ void NTV2Player::PlayFrames (void)
 			if (pFrameData->AudioBuffer())	//	...also xfer this frame's audio samples...
 				xferInfo.SetAudioBuffer (pFrameData->AudioBuffer(), pFrameData->fNumAudioBytes);
 
-			if (ancistrm.good() && pFrameData->AncBuffer())	//	Injecting pre-recorded anc from binary data file?
+			if (pAncistrm->good() && pFrameData->AncBuffer())	//	Injecting pre-recorded anc from binary data file?
 			{
-				ancistrm.read(pFrameData->AncBuffer(), streamsize(pFrameData->AncBufferSize()));
+				pAncistrm->read(pFrameData->AncBuffer(), streamsize(pFrameData->AncBufferSize()));
 				if (pFrameData->AncBuffer2())
-					ancistrm.read(pFrameData->AncBuffer2(), streamsize(pFrameData->AncBuffer2Size()));
+					pAncistrm->read(pFrameData->AncBuffer2(), streamsize(pFrameData->AncBuffer2Size()));
 				xferInfo.SetAncBuffers (pFrameData->AncBuffer(), pFrameData->AncBufferSize(),
 										pFrameData->AncBuffer2(), pFrameData->AncBuffer2Size());
 			}
@@ -536,6 +536,8 @@ void NTV2Player::PlayFrames (void)
 	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
 	PLNOTE("Thread completed: " << DEC(goodXfers) << " xfers, " << DEC(badXfers) << " failed, "
 			<< DEC(prodWaits) << " starves, " << DEC(noRoomWaits) << " VBI waits");
+	if (pAncistrm)
+		delete pAncistrm;
 
 }	//	PlayFrames
 
