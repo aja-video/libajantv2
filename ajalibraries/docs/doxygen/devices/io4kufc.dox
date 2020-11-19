@@ -38,9 +38,9 @@
 
 	@par	Frame Buffer
 
-	-	512MB SDRAM
-	-	64 × 8MB frames
-	-	32 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
+	-	888MB SDRAM
+	-	111 × 8MB frames
+	-	55 × 16MB frames for 2K (1080x2048), 1920x1080 VANC, and 16-bit RGB
 
 	@par	Audio
 

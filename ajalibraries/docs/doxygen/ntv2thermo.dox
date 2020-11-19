@@ -38,8 +38,8 @@ A command-line tool that interrogates and/or controls temperature-related parame
 @note	On devices for which automatic fan control is supported, using <b>on</b>, <b>off</b>, <b>lo</b>, <b>med</b>, or <b>hi</b> will
 		override and disable the automatic fan control.
 
-@note	<b>CAUTION!</b>	Turning the fan “off” or disabling a device’s automatic fan control can cause the device to overheat,
-		and result in permanent damage to the device!
+@warning	<b><i>CAUTION!</i>	Turning the fan “off” or disabling a device’s automatic fan control can cause the device to overheat,
+			and result in permanent damage to the device!</b>
 
 
 
