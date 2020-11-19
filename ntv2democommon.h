@@ -13,6 +13,7 @@
 #include "ntv2publicinterface.h"
 #include "ntv2testpatterngen.h"
 #include "ntv2card.h"
+#include "ajabase/common/options_popt.h"
 #include "ajabase/common/timecodeburn.h"
 #include "ajabase/system/debug.h"
 #include <algorithm>
@@ -570,6 +571,23 @@ class CNTV2DemoCommon
 			UWord	mLastFrame;		///< @brief	Last frame (mIsCountOnly == false).
 	};
 
+
+	typedef struct poptOption	PoptOpts;
+	class Popt
+	{
+		public:
+			Popt (const int inArgc, const char ** pArgs, const PoptOpts * pInOptionsTable);
+			virtual								~Popt();
+			virtual inline int					parseResult(void) const		{return mResult;}
+			virtual inline bool					isGood (void) const			{return parseResult() == -1;}
+			virtual inline						operator bool() const		{return isGood();}
+			virtual inline const std::string &	errorStr (void) const		{return mError;}
+		private:
+			poptContext	mContext;
+			int			mResult;
+			std::string	mError;
+	};
+
 	static bool	BFT(void);
 
 };	//	CNTV2DemoCommon
@@ -628,38 +646,5 @@ class CNTV2DemoCommon
 	#define		AJA_NTV2_AUDIO_RECORD_DO			
 	#define		AJA_NTV2_AUDIO_RECORD_END		
 #endif
-
-
-//	These AJA_NTV2_ANC_RECORD* macros can, if enabled, record raw ancillary data into a file in the current directory.
-//	Optionally used in the CNTV2Capture demo.
-#if defined(AJA_RAW_ANC_RECORD)
-	#include "ntv2debug.h"					//	For NTV2DeviceString
-	#include <fstream>						//	For ofstream
-	#define		AJA_NTV2_ANC_RECORD_BEGIN		ostringstream _ancfn; uint64_t _ancTally(0);								\
-												_ancfn	<< ::NTV2DeviceString(mDeviceID) << "-" << mDevice.GetIndexNumber()	\
-														<< "." << ::NTV2ChannelToString(mConfig.fInputChannel,true)					\
-														<< "." << ::NTV2InputSourceToString(mConfig.fInputSource, true)				\
-														<< "." << ::NTV2VideoFormatToString(mVideoFormat)					\
-														<< "." << AJAProcess::GetPid()										\
-														<< ".anc";															\
-												ofstream _ancostrm(_ancfn.str(), ios::binary);
-
-	#define		AJA_NTV2_ANC_RECORD_DO			if (!_ancTally++) cerr << "Writing raw anc to '" << _ancfn.str() << "', "	\
-													<< DEC(pFrameData->AncBufferSize() + pFrameData->AncBuffer2Size())		\
-													<< " bytes per frame" << endl;											\
-												if (pFrameData->fAncBuffer)													\
-													_ancostrm.write(pFrameData->AncBytes(),									\
-																	streamsize(pFrameData->AncBufferSize()));				\
-												if (pFrameData->fAncBuffer2)												\
-													_ancostrm.write(pFrameData->AncBytes2(),								\
-																	streamsize(pFrameData->AncBuffer2Size()));
-
-	#define		AJA_NTV2_ANC_RECORD_END			cerr << "Wrote " << DEC(_ancTally) << " frames of raw anc data" << endl;
-#else
-	#define		AJA_NTV2_ANC_RECORD_BEGIN		
-	#define		AJA_NTV2_ANC_RECORD_DO			
-	#define		AJA_NTV2_ANC_RECORD_END		
-#endif
-
 
 #endif	//	_NTV2DEMOCOMMON_H

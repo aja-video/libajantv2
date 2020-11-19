@@ -25,21 +25,23 @@
 typedef struct CaptureConfig
 {
 	public:
-		std::string						fDeviceSpec;	///< @brief	The AJA device to use
-		NTV2Channel						fInputChannel;	///< @brief	The device channel to use
-		NTV2InputSource					fInputSource;	///< @brief	The device input connector to use
-		CNTV2DemoCommon::ACFrameRange	fFrames;		///< @brief	AutoCirculate frame count or range
-		NTV2PixelFormat					fPixelFormat;	///< @brief	Pixel format to use
-		bool							fABConversion;	///< @brief	If true, do level-A/B conversion
-		bool							fDoMultiFormat;	///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
-		bool							fWithAnc;		///< @brief	If true, also capture Anc
-		bool							fWithAudio;		///< @brief	If true, also capture Audio
+		std::string						fDeviceSpec;		///< @brief	The AJA device to use
+		std::string						fAncDataFilePath;	///< @brief	Optional path to Anc binary data file
+		NTV2Channel						fInputChannel;		///< @brief	The device channel to use
+		NTV2InputSource					fInputSource;		///< @brief	The device input connector to use
+		CNTV2DemoCommon::ACFrameRange	fFrames;			///< @brief	AutoCirculate frame count or range
+		NTV2PixelFormat					fPixelFormat;		///< @brief	Pixel format to use
+		bool							fABConversion;		///< @brief	If true, do level-A/B conversion
+		bool							fDoMultiFormat;		///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
+		bool							fWithAnc;			///< @brief	If true, also capture Anc
+		bool							fWithAudio;			///< @brief	If true, also capture Audio
 
 		/**
 			@brief	Constructs a default NTV2Capture configuration.
 		**/
 		inline explicit	CaptureConfig (const std::string & inDeviceSpec	= "0")
 			:	fDeviceSpec		(inDeviceSpec),
+				fAncDataFilePath(),
 				fInputChannel	(NTV2_CHANNEL_INVALID),
 				fInputSource	(NTV2_INPUTSOURCE_INVALID),
 				fFrames			(7),

@@ -4,15 +4,16 @@
 	@copyright	(C) 2012-2020 AJA Video Systems, Inc.  All rights reserved.
 **/
 
-//#define AJA_RAW_ANC_RECORD	//	Uncomment to record raw anc data file
 //#define AJA_RAW_AUDIO_RECORD	//	Uncomment to record raw audio file
 //#define AJA_WAV_AUDIO_RECORD	//	Uncomment to record WAV audio file
 #include "ntv2capture.h"
 #include "ntv2utils.h"
+#include "ntv2debug.h"	//	for NTV2DeviceString
 #include "ntv2devicefeatures.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
 #include <iterator>	//	for inserter
+#include <fstream>	//	for ofstream
 
 using namespace std;
 
@@ -336,7 +337,8 @@ void NTV2Capture::ConsumeFrames (void)
 {
 	CAPNOTE("Thread started");
 	AJA_NTV2_AUDIO_RECORD_BEGIN	//	Active when AJA_RAW_AUDIO_RECORD or AJA_WAV_AUDIO_RECORD defined
-	AJA_NTV2_ANC_RECORD_BEGIN	//	Active when AJA_RAW_ANC_RECORD is defined
+	uint64_t ancTally(0);
+	ofstream * pOFS(mConfig.fAncDataFilePath.empty() ? AJA_NULL : new ofstream(mConfig.fAncDataFilePath, ios::binary));
 	while (!mGlobalQuit)
 	{
 		//	Wait for the next frame to become ready to "consume"...
@@ -347,14 +349,22 @@ void NTV2Capture::ConsumeFrames (void)
 			//	. . .		. . .		. . .		. . .
 			//		. . .		. . .		. . .		. . .
 			//			. . .		. . .		. . .		. . .
-			AJA_NTV2_ANC_RECORD_DO		//	Active when AJA_RAW_ANC_RECORD is defined
 			AJA_NTV2_AUDIO_RECORD_DO	//	Active when AJA_RAW_AUDIO_RECORD or AJA_WAV_AUDIO_RECORD defined
+			if (pOFS  &&  !ancTally++)
+				cerr << "Writing raw anc to '" << mConfig.fAncDataFilePath << "', "
+					<< DEC(pFrameData->AncBufferSize() + pFrameData->AncBuffer2Size())
+					<< " bytes per frame" << endl;
+			if (pOFS  &&  pFrameData->fAncBuffer)
+				pOFS->write(pFrameData->AncBuffer(), streamsize(pFrameData->AncBufferSize()));
+			if (pOFS  &&  pFrameData->fAncBuffer2)
+				pOFS->write(pFrameData->AncBuffer2(), streamsize(pFrameData->AncBuffer2Size()));
 
 			//	Now release and recycle the buffer...
 			mAVCircularBuffer.EndConsumeNextBuffer ();
 		}	//	if pFrameData
 	}	//	loop til quit signaled
-	AJA_NTV2_ANC_RECORD_END		//	Active when AJA_RAW_ANC_RECORD is defined
+	if (pOFS)
+		{delete pOFS; cerr << "Wrote " << DEC(ancTally) << " frames of raw anc data" << endl;}
 	AJA_NTV2_AUDIO_RECORD_END	//	Active when AJA_RAW_AUDIO_RECORD or AJA_WAV_AUDIO_RECORD defined
 	CAPNOTE("Thread completed, will exit");
 
@@ -392,7 +402,7 @@ void NTV2Capture::CaptureFrames (void)
 	AUTOCIRCULATE_TRANSFER	inputXfer;	//	My A/C input transfer info
 	NTV2AudioChannelPairs	nonPcmPairs, oldNonPcmPairs;
 	ULWord					acOptions (AUTOCIRCULATE_WITH_RP188);
-	if (mConfig.fWithAnc  &&  ::NTV2DeviceCanDoCustomAnc(mDeviceID))
+	if (mConfig.fWithAnc)
 		acOptions |= AUTOCIRCULATE_WITH_ANC;
 
 	CAPNOTE("Thread started");
@@ -522,6 +532,7 @@ AJALabelValuePairs CaptureConfig::Get (const bool inCompact) const
 	AJASystemInfo::append(result, "A/B Conversion",		fABConversion ? "Y" : "N");
 	AJASystemInfo::append(result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
 	AJASystemInfo::append(result, "Capture Anc",		fWithAnc ? "Y" : "N");
+	AJASystemInfo::append(result, "Anc Capture File",	fAncDataFilePath);
 	AJASystemInfo::append(result, "Capture Audio",		fWithAudio ? "Y" : "N");
 	return result;
 }

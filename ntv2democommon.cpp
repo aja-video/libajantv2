@@ -1211,6 +1211,22 @@ string CNTV2DemoCommon::ACFrameRange::toString(void) const
 	return oss.str();
 }
 
+CNTV2DemoCommon::Popt::Popt (const int inArgc, const char ** pArgs, const PoptOpts * pInOptionsTable)
+{
+	mContext = ::poptGetContext(AJA_NULL, inArgc, pArgs, pInOptionsTable, 0);
+	mResult = ::poptGetNextOpt(mContext);
+	if (mResult < -1)
+	{	ostringstream oss;
+		oss << ::poptBadOption(mContext, 0) << ": " << ::poptStrerror(mResult);
+		mError = oss.str();
+	}
+}
+
+CNTV2DemoCommon::Popt::~Popt()
+{
+	mContext = ::poptFreeContext(mContext);
+}
+
 
 bool CNTV2DemoCommon::BFT(void)
 {

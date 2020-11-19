@@ -53,7 +53,7 @@ int main (int argc, const char ** argv)
 		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"video format to use",		"'?' or 'list' to list"},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",		"'?' or 'list' to list"},
 		{"frames",		0,		POPT_ARG_STRING,	&pFramesSpec,	0,	"frames to AutoCirculate",	"num[@min] or min-max"},
-		{"anc",			'a',	POPT_ARG_STRING,	&pAncFilePath,	0,	"playout anc data file",	AJA_NULL},
+		{"anc",			'a',	POPT_ARG_STRING,	&pAncFilePath,	0,	"playout prerecorded anc",	"path to binary data file"},
 		{"hdrType",		't',	POPT_ARG_INT,		&hdrType,		0,	"which HDR pkt to send",	"1:SDR,2:HDR10,3:HLG"},
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",		"number of the channel"},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multi-channel/format",	AJA_NULL},
