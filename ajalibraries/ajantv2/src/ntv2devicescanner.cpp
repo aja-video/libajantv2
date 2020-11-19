@@ -519,6 +519,30 @@ bool CNTV2DeviceScanner::CompareDeviceInfoLists (const NTV2DeviceInfoList & inOl
 }	//	CompareDeviceInfoLists
 
 
+string CNTV2DeviceScanner::GetDeviceRefName (CNTV2Card & inDevice)
+{	//	Name that will find given device via CNTV2DeviceScanner::GetFirstDeviceFromArgument
+	if (!inDevice.IsOpen())
+		return string();
+	//	Nub address 1st...
+	if (!inDevice.GetHostName().empty()  &&  inDevice.IsRemote())
+		return inDevice.GetHostName();	//	Nub host/device
+
+	//	Serial number 2nd...
+	string str;
+	if (inDevice.GetSerialNumberString(str))
+		return str;
+
+	//	Model name 3rd...
+	str = ::NTV2DeviceIDToString(inDevice.GetDeviceID(), false);
+	if (!str.empty() &&  str != "???")
+		return str;
+
+	//	Index number last...
+	ostringstream oss;  oss << DEC(inDevice.GetIndexNumber());
+	return oss.str();
+}
+
+
 ostream &	operator << (ostream & inOutStr, const NTV2AudioSampleRateList & inList)
 {
 	for (NTV2AudioSampleRateListConstIter iter (inList.begin ()); iter != inList.end (); ++iter)

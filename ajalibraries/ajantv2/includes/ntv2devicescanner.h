@@ -280,10 +280,16 @@ public:
 		@param[out]	outDevicesRemoved	Receives a list of devices that exist in the "old" list that don't exist in the "new" list.
 		@return		True if the two lists differ in any way; otherwise false if they match.
 	**/
-	static bool					CompareDeviceInfoLists (const NTV2DeviceInfoList & inOldList,
-														const NTV2DeviceInfoList & inNewList,
-														NTV2DeviceInfoList & outDevicesAdded,
-														NTV2DeviceInfoList & outDevicesRemoved);
+	static bool									CompareDeviceInfoLists (const NTV2DeviceInfoList & inOldList,
+																		const NTV2DeviceInfoList & inNewList,
+																		NTV2DeviceInfoList & outDevicesAdded,
+																		NTV2DeviceInfoList & outDevicesRemoved);
+
+	/**
+		@param[in]	inDevice			The CNTV2Card instance that's open for the device of interest.
+		@return		A string containing the device name that will find the same given device using CNTV2DeviceScanner::GetFirstDeviceFromArgument.
+	**/
+	static std::string							GetDeviceRefName (CNTV2Card & inDevice);
 
 	/**
 		@return	True if the string contains a legal decimal number.
