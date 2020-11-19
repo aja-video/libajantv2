@@ -14,10 +14,17 @@
 
 using namespace std;
 
+//	Override NTV2_ANCSIZE_MAX for testing new HANC insertion feature
+#if defined(NTV2_ANCSIZE_MAX)
+	#undef NTV2_ANCSIZE_MAX
+#endif
+#define NTV2_ANCSIZE_MAX (256 * 1024)	//	Super Size Me!	0x40000
 
-#define NTV2_ANCSIZE_MAX	(256 * 1024)
 
 const uint32_t	kAppSignature	(NTV2_FOURCC('L','l','b','u'));
+
+#define AsULWordPtr(_p_)		reinterpret_cast<ULWord*>(_p_)
+#define AsCU8Ptr(_p_)			reinterpret_cast<const uint8_t*>(_p_)
 
 
 NTV2LLBurn::NTV2LLBurn (const string &				inDeviceSpecifier,
@@ -671,10 +678,10 @@ void NTV2LLBurn::ProcessFrames (void)
 				//	Do the calculations and transfer from the last address to the end of the buffer...
 				audioBytesCaptured 	= audioInWrapAddress - mAudioInLastAddress;
 
-				mDevice.DMAReadAudio (mAudioSystem, (ULWord*)mpHostAudioBuffer.GetHostPointer(), mAudioInLastAddress, audioBytesCaptured);
+				mDevice.DMAReadAudio (mAudioSystem, mpHostAudioBuffer, mAudioInLastAddress, audioBytesCaptured);
 
 				//	Transfer the new samples from the start of the buffer to the current address...
-				mDevice.DMAReadAudio (mAudioSystem, (ULWord*)mpHostAudioBuffer.GetHostAddress(audioBytesCaptured),
+				mDevice.DMAReadAudio (mAudioSystem, AsULWordPtr(mpHostAudioBuffer.GetHostAddress(audioBytesCaptured)),
 										audioReadOffset, currentAudioInAddress - audioReadOffset);
 
 				audioBytesCaptured += currentAudioInAddress - audioReadOffset;
@@ -684,14 +691,14 @@ void NTV2LLBurn::ProcessFrames (void)
 				audioBytesCaptured = currentAudioInAddress - mAudioInLastAddress;
 
 				//	No wrap, so just perform a linear DMA from the buffer...
-				mDevice.DMAReadAudio (mAudioSystem, (ULWord*)mpHostAudioBuffer.GetHostPointer(), mAudioInLastAddress, audioBytesCaptured);
+				mDevice.DMAReadAudio (mAudioSystem, mpHostAudioBuffer, mAudioInLastAddress, audioBytesCaptured);
 			}
 
 			mAudioInLastAddress = currentAudioInAddress;
 		}	//	if mWithAudio
 
 		//	Transfer the new frame to system memory...
-		mDevice.DMAReadFrame (currentInFrame, (ULWord*)mpHostVideoBuffer.GetHostPointer(), mpHostVideoBuffer.GetByteCount());
+		mDevice.DMAReadFrame (currentInFrame, mpHostVideoBuffer, mpHostVideoBuffer.GetByteCount());
 
 		if (doAncInput)
 		{	//	Transfer received Anc data into my F1 & F2 buffers...
@@ -757,10 +764,10 @@ void NTV2LLBurn::ProcessFrames (void)
 			if ((mAudioOutLastAddress + audioBytesCaptured) > audioOutWrapAddress)
 			{
 				//	The audio will wrap. Transfer enough bytes to fill the buffer to the end...
-				mDevice.DMAWriteAudio (mAudioSystem, (ULWord*)mpHostAudioBuffer.GetHostPointer(), mAudioOutLastAddress, audioOutWrapAddress - mAudioOutLastAddress);
+				mDevice.DMAWriteAudio (mAudioSystem, mpHostAudioBuffer, mAudioOutLastAddress, audioOutWrapAddress - mAudioOutLastAddress);
 
 				//	Now transfer the remaining bytes to the front of the buffer...
-				mDevice.DMAWriteAudio (mAudioSystem, (ULWord*)mpHostAudioBuffer.GetHostAddress(audioOutWrapAddress - mAudioOutLastAddress),
+				mDevice.DMAWriteAudio (mAudioSystem, AsULWordPtr(mpHostAudioBuffer.GetHostAddress(audioOutWrapAddress - mAudioOutLastAddress)),
 									   0, audioBytesCaptured - (audioOutWrapAddress - mAudioOutLastAddress));
 
 				mAudioOutLastAddress = audioBytesCaptured - (audioOutWrapAddress - mAudioOutLastAddress);
@@ -768,14 +775,14 @@ void NTV2LLBurn::ProcessFrames (void)
 			else
 			{
 				//	No wrap, so just do a linear DMA from the buffer...
-				mDevice.DMAWriteAudio (mAudioSystem, (ULWord*)mpHostAudioBuffer.GetHostPointer(), mAudioOutLastAddress, audioBytesCaptured);
+				mDevice.DMAWriteAudio (mAudioSystem, mpHostAudioBuffer, mAudioOutLastAddress, audioBytesCaptured);
 
 				mAudioOutLastAddress += audioBytesCaptured;
 			}
 		}	//	if mWithAudio
 
 		//	Send the updated frame back to the board for display...
-		mDevice.DMAWriteFrame (currentOutFrame, (ULWord*)mpHostVideoBuffer.GetHostPointer(), mpHostVideoBuffer.GetByteCount());
+		mDevice.DMAWriteFrame (currentOutFrame, mpHostVideoBuffer, mpHostVideoBuffer.GetByteCount());
 
 		if (doAncOutput)
 		{
@@ -783,9 +790,9 @@ void NTV2LLBurn::ProcessFrames (void)
 			{
 				AJAAncillaryData pkt;	AJAAncillaryList pkts;
 				AJAAncillaryDataLocation F2Loc(F1AncDataLoc);
-				LWord pktData(NTV2EndianSwap32(mFramesProcessed));
+				ULWord pktData(NTV2EndianSwap32(mFramesProcessed));
 				pkt.SetDID(0xC0);  pkt.SetSID(0x00);  pkt.SetDataLocation(F1AncDataLoc);  pkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
-				pkt.SetPayloadData((const uint8_t*) &pktData, 4);
+				pkt.SetPayloadData(AsCU8Ptr(&pktData), 4);
 				pkts.AddAncillaryData(pkt);
 				if (isInterlace)
 				{
@@ -794,7 +801,7 @@ void NTV2LLBurn::ProcessFrames (void)
 													- smpteLineNumInfo.GetFirstActiveLine(NTV2_FIELD0)));
 					pkt.SetDID(0xC1);  pkt.SetSID(0x01);  pkt.SetDataLocation(F2Loc);
 					pktData = ULWord(pktData << 16) | ULWord(pktData >> 16);
-					pkt.SetPayloadData((const uint8_t*) &pktData, 4);
+					pkt.SetPayloadData(AsCU8Ptr(&pktData), 4);
 					pkts.AddAncillaryData(pkt);
 				}
 				//pkts.Print(cerr, true); cerr << endl;
@@ -825,13 +832,13 @@ void NTV2LLBurn::ProcessFrames (void)
 			mFramesProcessed++;
 
 		//	Tell the hardware which buffers to start using at the beginning of the next frame...
-		mDevice.SetInputFrame	(mInputChannel,  currentInFrame);
+		mDevice.SetInputFrame (mInputChannel,  currentInFrame);
 		if (doAncInput)
 			mDevice.AncExtractSetWriteParams (sdiInput, currentInFrame, mInputChannel);
 		if (doAncInput && isInterlace)
 			mDevice.AncExtractSetField2WriteParams (sdiInput, currentInFrame, mInputChannel);
 
-		mDevice.SetOutputFrame	(mOutputChannel, currentOutFrame);
+		mDevice.SetOutputFrame (mOutputChannel, currentOutFrame);
 		if (doAncOutput)
 			mDevice.AncInsertSetReadParams (sdiOutput, currentOutFrame, ancBytesCapturedF1, mOutputChannel);
 		if (doAncOutput && isInterlace)
@@ -839,9 +846,7 @@ void NTV2LLBurn::ProcessFrames (void)
 
 		//	Enable ANC insertion on first output frame
 		if (mFramesProcessed == 1)
-		{
 			mDevice.AncInsertSetEnable (sdiOutput, true);
-		}
 
 	}	//	loop til quit signaled
 
