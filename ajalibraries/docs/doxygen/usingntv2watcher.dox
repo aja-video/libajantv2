@@ -97,6 +97,8 @@ Here’s what’s in the menu bar:
 	-	<b>SDK Support Login</b> — Opens your web browser to the AJA SDK Support site’s home/login page.
 	-	<b>Generate Support Log</b> — Generates a “register log” (aka “support log”) file, which is essential for AJA SDK Support staff
 		to diagnose issues and ascertain the state of the AJA device.
+	-	<b>Capture SDRAM Contents</b> — Records the contents of device SDRAM into a “.raw” binary data file.
+		This may be requested on rare occasion by AJA SDK Support staff in order to diagnose certain issues.
 	-	<b>SDK Documentation</b> — Opens your web browser to the main page of the online SDK Documentation.
 	-	<b>NTV2Watcher User Guide</b> — Opens your web browser to the online \ref usingntv2watcher User Guide.
 
