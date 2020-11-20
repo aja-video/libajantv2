@@ -18,6 +18,7 @@ a separate binary dump file.
 	  -d, --device=index#|serial#|model      Which device to use
 	  -s, --stdout                           Dump to stdout instead of file?
       -r, --sdram                            Also dump device SDRAM to .raw file?
+	  -v  --verbose                          Verbose mode?
 	  -w  --wait=seconds                     Time to wait before capturing
 	Help options:
 	  -?, --help                             Show this help message
