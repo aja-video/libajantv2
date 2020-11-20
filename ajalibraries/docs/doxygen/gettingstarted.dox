@@ -194,6 +194,55 @@ Deprecation history:
 	-	CNTV2Card::GetQuadFrameEnable and CNTV2Card::GetQuadQuadFrameEnable.
 	-	The RP188_STRUCT based variants of CNTV2Card’s Get/SetRP188Data and Get/SetRP188Source.
 	-	The RP188SourceSelect type definition was deprecated in favor of the more meaningful ::RP188SourceFilterSelect.
+-	<b>SDK 15.5:</b> ::NTV2_DEPRECATE_15_3 and ::NTV2_DEPRECATE_15_5 macros defined in <b>ajatypes.h</b>. Deprecated APIs:
+	-	AJARTPAncPayloadHeader::GetPacketLength was deprecated.
+	-	An overloaded version of AJAAncillaryList::GetIPTransmitData was deprecated.
+	-	An overloaded version of AJAAncillaryList::GetIPTransmitDataLength was deprecated.
+	-	The original Audio Mixer API in ::CNTV2Card was deprecated and replaced with a new, improved API.
+-	<b>SDK 16.0:</b> ::NTV2_DEPRECATE_15_6 and ::NTV2_DEPRECATE_16_0 macros defined in <b>ajatypes.h</b>.
+	By default, all symbols that were deprecated before SDK 15.0 are deprecated in SDK 16.0.
+	Newly-deprecated items starting in SDK 16.0:
+	-	In CNTV2Card:
+		-	The original SDI Relay APIs: GetSDIRelayPosition12, GetSDIRelayPosition34, GetSDIRelayManualControl12,
+			GetSDIRelayManualControl34, GetSDIWatchdogEnable12, GetSDIWatchdogEnable34, SetSDIRelayManualControl12,
+			SetSDIRelayManualControl34, SetSDIWatchdogEnable12, SetSDIWatchdogEnable34, GetSDIWatchdogState,
+			and SetSDIWatchdogState have all been deprecated and replaced with a new Relay API.
+		-	The Audio API functions WriteAudioSource, ReadAudioSource, SetAudioOutputReset, GetAudioOutputReset,
+			SetAudioInputReset, and GetAudioInputReset have been deprecated.
+		-	GetBaseAddress, GetBaseAddress, GetRegisterBaseAddress, and GetXena2FlashBaseAddress have been deprecated.
+		-	SetRegisterWritemode and GetRegisterWritemode have been deprecated.
+	-	In CNTV2DriverInterface:
+		-	LockFormat, StartDriver, SetUserModeDebugLevel, GetUserModeDebugLevel, SetKernelModeDebugLevel,
+			GetKernelModeDebugLevel, SetUserModePingLevel, GetUserModePingLevel, SetKernelModePingLevel,
+			GetKernelModePingLevel, SetLatencyTimerValue, GetLatencyTimerValue, SetDebugFilterStrings,
+			and GetDebugFilterStrings have all been deprecated.
+		-	SuspendAudio, ResumeAudio, MapFrameBuffers, UnmapFrameBuffers, MapRegisters, UnmapRegisters,
+			MapXena2Flash, UnmapXena2Flash, DmaUnlock, CompleteMemoryForDMA, PrepareMemoryForDMA, GetInterruptCount,
+			ReadRegisterMulti, GetPCISlotNumber, SleepMs, and GetAudioFrameBufferNumber have all been deprecated.
+	-	In NTV2MacDriverInterface:
+		-	SetUserModeDebugLevel, GetUserModeDebugLevel, SetKernelModeDebugLevel, GetKernelModeDebugLevel,
+			SetUserModePingLevel, GetUserModePingLevel, SetKernelModePingLevel, GetKernelModePingLevel, SetLatencyTimerValue,
+			GetLatencyTimerValue, SetDebugFilterStrings, GetDebugFilterStrings, LockFormat, and GetQuickTimeTime
+			have all been deprecated.
+		-	GetStreamingApplication, SystemControl, Sleep, MapFrameBuffers, UnmapFrameBuffers, MapRegisters, UnmapRegisters,
+			MapXena2Flash, UnmapXena2Flash, GetPCISlotNumber, and MapMemory have all been deprecated.
+	-	In NTV2WinDriverInterface:
+		-	SetStrictTiming, GetStrictTiming, GetStreamingApplication, and GetStreamingApplication have all been deprecated.
+		-	MapFrameBuffers, UnmapFrameBuffers, MapRegisters, UnmapRegisters, MapXena2Flash, UnmapXena2Flash, MapMemory,
+			DmaUnlock, CompleteMemoryForDMA, and PrepareMemoryForDMA have all been deprecated.
+	-	In NTV2LinuxDriverInterface:
+		-	GetStreamingApplication, GetStreamingApplication, MapFrameBuffers, UnmapFrameBuffers, MapRegisters, UnmapRegisters,
+			GetBA0MemorySize, GetBA1MemorySize, GetBA2MemorySize, GetBA4MemorySize, MapXena2Flash, UnmapXena2Flash,
+			MapDNXRegisters, and UnmapDNXRegisters have all been deprecated.
+	-	::NTV2DeviceCanConnect is deprecated.
+	-	An overloaded version of CNTV2CaptionDecoder608::BurnCaptions was deprecated.
+	-	An overloaded version of NTV2TestPatternGen::DrawTestPattern has been deprecated.
+	-	In CNTV2CaptionRenderer, overloaded versions of these functions are now deprecated:
+		-	CNTV2CaptionRenderer::GetRenderer
+		-	CNTV2CaptionRenderer::BurnChar
+		-	CNTV2CaptionRenderer::BurnString
+		-	CNTV2CaptionRenderer::BurnStringAtXY
+
 
 To build with an SDK’s deprecated API, comment out or remove its corresponding \c #define ::NTV2_DEPRECATE…
 line in <b>ajatypes.h</b>, then rebuild the <b>ajantv2</b> library.

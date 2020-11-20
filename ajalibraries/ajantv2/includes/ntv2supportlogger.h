@@ -108,10 +108,10 @@ private:
 public:
 	static std::string	InventLogFilePathAndName (CNTV2Card & inDevice,
 													std::string inPrefix = "aja_supportlog",
-													std::string inExtension = "log");
+													std::string inExtension = "log");	//	New in SDK 16.0
 	static bool			DumpDeviceSDRAM (CNTV2Card & inDevice,
 										const std::string & inFilePath,
-										std::ostream & msgStream);
+										std::ostream & msgStream);	//	New in SDK 16.0
 };	//	CNTV2SupportLogger
 
 

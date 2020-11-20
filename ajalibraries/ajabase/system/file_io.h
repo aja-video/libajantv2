@@ -266,8 +266,8 @@ public:
 	 *
 	 *	@return		AJA_STATUS_SUCCESS	If and only if a temp directory found
 	 */
-	static AJAStatus TempDirectory(std::string& directory);
-	static AJAStatus TempDirectory(std::wstring& directory);
+	static AJAStatus TempDirectory(std::string& directory);		//	New in SDK 16.0
+	static AJAStatus TempDirectory(std::wstring& directory);	//	New in SDK 16.0
 
 	/**
 	 * Retrieves the path to the current working directory
@@ -276,8 +276,8 @@ public:
 	 * 
 	 * @return		AJA_STATUS_SUCCESS If and only if current working directory retrieved.
 	 */
-	static AJAStatus GetWorkingDirectory(std::string& directory);
-	static AJAStatus GetWorkingDirectory(std::wstring& directory);
+	static AJAStatus GetWorkingDirectory(std::string& directory);	//	New in SDK 16.0
+	static AJAStatus GetWorkingDirectory(std::wstring& directory);	//	New in SDK 16.0
 
 	/**
 	 * Retrieves the directory name from the specified path.
@@ -288,8 +288,8 @@ public:
 	 * 
 	 * @return		AJA_STATUS_SUCCESS If and only if the directory name is extracted
 	 */
-	static AJAStatus GetDirectoryName(const std::string& path, std::string& directory);
-	static AJAStatus GetDirectoryName(const std::wstring& path, std::wstring& directory);
+	static AJAStatus GetDirectoryName(const std::string& path, std::string& directory);		//	New in SDK 16.0
+	static AJAStatus GetDirectoryName(const std::wstring& path, std::wstring& directory);	//	New in SDK 16.0
 
 	/**
 	 * Retrieves the filename (with extension) from the specified path.
@@ -300,8 +300,8 @@ public:
 	 * 
 	 * @return		AJA_STATUS_SUCCESS If and only if the filename is extracted
 	 */
-	static AJAStatus GetFileName(const std::string& path, std::string& filename);
-	static AJAStatus GetFileName(const std::wstring& path, std::wstring& filename);
+	static AJAStatus GetFileName(const std::string& path, std::string& filename);	//	New in SDK 16.0
+	static AJAStatus GetFileName(const std::wstring& path, std::wstring& filename);	//	New in SDK 16.0
 
 #if defined(AJA_WINDOWS)
 	void     *GetHandle(void) {return mFileDescriptor;}

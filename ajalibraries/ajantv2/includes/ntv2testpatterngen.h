@@ -91,13 +91,13 @@ class AJAExport NTV2TestPatternGen
 		/**
 			@return		An ordered collection of strings containing the names of all available flat-field "web colors".
 		**/
-		static NTV2StringList			getColorNames (void);
+		static NTV2StringList			getColorNames (void);	//	New in SDK 16.0
 
 		/**
 			@return		The test pattern that corresponds to the given name.
 			@param[in]	inName	Specifies the test pattern name. The search is done case-insensitively.
 		**/
-		static NTV2TestPatternSelect	findTestPatternByName (const std::string & inName);
+		static NTV2TestPatternSelect	findTestPatternByName (const std::string & inName);	//	New in SDK 16.0
 
 		/**
 			@return		The flat-field RGB "web color" value that corresponds to the given name.
@@ -109,7 +109,7 @@ class AJAExport NTV2TestPatternGen
 			@note		"Black" and "White" are not returned, as these are available as ordinary
 						test patterns NTV2_TestPatt_Black and NTV2_TestPatt_White, respectively.
 		**/
-		static ULWord					findRGBColorByName (const std::string & inName);
+		static ULWord					findRGBColorByName (const std::string & inName);	//	New in SDK 16.0
 
 		#if !defined(NTV2_DEPRECATE_15_0)
 		static NTV2_SHOULD_BE_DEPRECATED (NTV2TestPatternList &		getTestPatternList (void));
@@ -144,7 +144,7 @@ class AJAExport NTV2TestPatternGen
 		**/
 		virtual bool			DrawTestPattern (const std::string & inTPName,
 												const NTV2FormatDescriptor & inFormatDesc,
-												NTV2_POINTER & inBuffer);
+												NTV2_POINTER & inBuffer);	//	New in SDK 16.0
 		/**
 			@brief		Renders the given test pattern into a host raster buffer.
 			@param[in]	inPattern		Specifies the test pattern to be drawn.
@@ -159,7 +159,7 @@ class AJAExport NTV2TestPatternGen
 		**/
 		virtual bool			DrawTestPattern (const NTV2TestPatternSelect inPattern,
 												const NTV2FormatDescriptor & inFormatDesc,
-												NTV2_POINTER & inBuffer);
+												NTV2_POINTER & inBuffer);	//	New in SDK 16.0
 
 		/**
 			@deprecated	Use the DrawTestPattern method that requires an NTV2_POINTER to specify the buffer to fill.

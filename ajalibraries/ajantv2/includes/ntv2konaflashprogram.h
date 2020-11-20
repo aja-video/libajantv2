@@ -72,14 +72,14 @@ public:
 	CNTV2KonaFlashProgram();
 	CNTV2KonaFlashProgram (const UWord boardNumber);
 	virtual ~CNTV2KonaFlashProgram();
-	static std::string	FlashBlockIDToString (const FlashBlockID inID, const bool inShortDisplay = false);
+	static std::string	FlashBlockIDToString (const FlashBlockID inID, const bool inShortDisplay = false);	//	New in SDK 16.0
 
 public:
 	virtual bool	SetBoard (UWord boardNumber, uint32_t index = 0);
 	bool			ReadHeader (FlashBlockID flashBlock);
 	bool			ReadInfoString();
 	void			SetBitFile (const char *bitFileName, FlashBlockID blockNumber = AUTO_FLASHBLOCK);
-	bool			SetBitFile (const std::string & inBitfileName, const FlashBlockID blockNumber = AUTO_FLASHBLOCK);
+	bool			SetBitFile (const std::string & inBitfileName, const FlashBlockID blockNumber = AUTO_FLASHBLOCK);	//	New in SDK 16.0
 	bool			SetMCSFile (const char *sMCSFileName);
 	void			Program (bool fullVerify = false);
 	bool            ProgramFromMCS(bool verify);
@@ -91,7 +91,7 @@ public:
 	bool			CreateEDIDIntelRecord ();
 	void			SetQuietMode ();
 	bool			VerifyFlash (FlashBlockID flashBlockNumber, bool fullVerify = false);
-	bool			ReadFlash (NTV2_POINTER & outBuffer, const FlashBlockID flashID, CNTV2FlashProgress & inFlashProgress = CNTV2FlashProgress::nullUpdater);
+	bool			ReadFlash (NTV2_POINTER & outBuffer, const FlashBlockID flashID, CNTV2FlashProgress & inFlashProgress = CNTV2FlashProgress::nullUpdater);	//	New in SDK 16.0
 	bool			SetBankSelect (BankSelect bankNumber);
 	bool			SetFlashBlockIDBank(FlashBlockID blockID);
 	bool            ROMHasBankSelect();

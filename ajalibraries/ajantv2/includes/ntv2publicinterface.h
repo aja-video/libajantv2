@@ -4293,7 +4293,7 @@ typedef enum
 		@param		inOutStream		Specifies the output stream to receive the dump. Defaults to std::cout.
 		@return		A non-constant reference to the given output stream.
 	**/
-	AJAExport std::ostream & NTV2PrintULWordVector (const NTV2ULWordVector & inObj, std::ostream & inOutStream = std::cout);
+	AJAExport std::ostream & NTV2PrintULWordVector (const NTV2ULWordVector & inObj, std::ostream & inOutStream = std::cout);	//	New in SDK 16.0
 
 	typedef std::vector <NTV2Channel>				NTV2ChannelList;			///< @brief	An ordered sequence of NTV2Channel values.
 	typedef NTV2ChannelList::const_iterator			NTV2ChannelListConstIter;	///< @brief	A handy const iterator into an NTV2ChannelList.
@@ -4305,14 +4305,14 @@ typedef enum
 		@param		inOutStream		Specifies the output stream to receive the dump. Defaults to std::cout.
 		@return		A non-constant reference to the given output stream.
 	**/
-	AJAExport std::ostream & NTV2PrintChannelList (const NTV2ChannelList & inObj, const bool inCompact = true, std::ostream & inOutStream = std::cout);
+	AJAExport std::ostream & NTV2PrintChannelList (const NTV2ChannelList & inObj, const bool inCompact = true, std::ostream & inOutStream = std::cout);	//	New in SDK 16.0
 
 	/**
 		@return		A human-readable string containing a dump of the channel list.
 		@param[in]	inObj			Specifies the NTV2ChannelList to be converted.
 		@param		inCompact		Use 'true' for a compact display (the default);  otherwise use 'false' for a long-format.
 	**/
-	AJAExport std::string NTV2ChannelListToStr (const NTV2ChannelList & inObj, const bool inCompact = true);
+	AJAExport std::string NTV2ChannelListToStr (const NTV2ChannelList & inObj, const bool inCompact = true);	//	New in SDK 16.0
 
 	typedef std::set <NTV2Channel>					NTV2ChannelSet;				///< @brief	A set of distinct NTV2Channel values.
 	typedef NTV2ChannelSet::const_iterator			NTV2ChannelSetConstIter;	///< @brief	A handy const iterator into an NTV2ChannelSet.
@@ -4324,40 +4324,40 @@ typedef enum
 		@param		inOutStream		Specifies the output stream to receive the dump. Defaults to std::cout.
 		@return		A non-constant reference to the given output stream.
 	**/
-	AJAExport std::ostream & NTV2PrintChannelSet (const NTV2ChannelSet & inObj, const bool inCompact = true, std::ostream & inOutStream = std::cout);
+	AJAExport std::ostream & NTV2PrintChannelSet (const NTV2ChannelSet & inObj, const bool inCompact = true, std::ostream & inOutStream = std::cout);	//	New in SDK 16.0
 
 	/**
 		@return		A human-readable string containing a dump of the channel set.
 		@param[in]	inObj			Specifies the NTV2ChannelSet to be converted.
 		@param		inCompact		Use 'true' for a compact display (the default);  otherwise use 'false' for a long-format.
 	**/
-	AJAExport std::string NTV2ChannelSetToStr (const NTV2ChannelSet & inObj, const bool inCompact = true);
+	AJAExport std::string NTV2ChannelSetToStr (const NTV2ChannelSet & inObj, const bool inCompact = true);	//	New in SDK 16.0
 
 	/**
 		@param[in]	inFirstChannel	Specifies the first NTV2Channel.
 		@param		inNumChannels	Specifies the number of channels.
 		@return		An NTV2ChannelSet having the specified contiguous range of channels.
 	**/
-	AJAExport NTV2ChannelSet NTV2MakeChannelSet (const NTV2Channel inFirstChannel, const UWord inNumChannels = 1);
+	AJAExport NTV2ChannelSet NTV2MakeChannelSet (const NTV2Channel inFirstChannel, const UWord inNumChannels = 1);	//	New in SDK 16.0
 
 	/**
 		@param[in]	inChannels		Specifies the NTV2Channels that should go into the NTV2ChannelSet.
 		@return		An NTV2ChannelSet having the same channels as contained in the specified list.
 	**/
-	AJAExport NTV2ChannelSet NTV2MakeChannelSet (const NTV2ChannelList inChannels);
+	AJAExport NTV2ChannelSet NTV2MakeChannelSet (const NTV2ChannelList inChannels);	//	New in SDK 16.0
 
 	/**
 		@param[in]	inFirstChannel	Specifies the first NTV2Channel.
 		@param		inNumChannels	Specifies the number of channels.
 		@return		An NTV2ChannelList having the specified contiguous range of channels.
 	**/
-	AJAExport NTV2ChannelList NTV2MakeChannelList (const NTV2Channel inFirstChannel, const UWord inNumChannels = 1);
+	AJAExport NTV2ChannelList NTV2MakeChannelList (const NTV2Channel inFirstChannel, const UWord inNumChannels = 1);	//	New in SDK 16.0
 
 	/**
 		@param[in]	inChannels		Specifies the NTV2Channels that should go into the NTV2ChannelList.
 		@return		An NTV2ChannelList having the same channels as contained in the specified set.
 	**/
-	AJAExport NTV2ChannelList NTV2MakeChannelList (const NTV2ChannelSet inChannels);
+	AJAExport NTV2ChannelList NTV2MakeChannelList (const NTV2ChannelSet inChannels);	//	New in SDK 16.0
 #endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 
@@ -4435,7 +4435,7 @@ typedef struct NTV2RegInfo
 			@param[in]	inRadix			Specifies the radix to use for the my register value. Defaults to hexadecimal (base 16).
 			@return		The output stream.
 		**/
-		AJAExport std::ostream & PrintCode (std::ostream & outputStream, const int inRadix = 16) const;
+		AJAExport std::ostream & PrintCode (std::ostream & outputStream, const int inRadix = 16) const;	//	New in SDK 16.0
 	#endif	//	not NTV2_BUILDING_DRIVER
 } NTV2RegInfo;
 
@@ -6129,13 +6129,13 @@ typedef enum
 				/**
 					@return	The offset to the first element immediately past the last source segment.
 				**/
-				inline ULWord	getSourceEndOffset (void) const
+				inline ULWord	getSourceEndOffset (void) const	//	New in SDK 16.0
 								{return getSourceOffset()  +  getSourcePitch() * getSegmentCount()  +  getSegmentLength();}
 
 				/**
 					@return	The offset to the first element immediately past the last destination segment.
 				**/
-				inline ULWord	getDestEndOffset (void) const
+				inline ULWord	getDestEndOffset (void) const	//	New in SDK 16.0
 								{return getDestOffset()  +  getDestPitch() * getSegmentCount()  +  getSegmentLength();}
 
 				/**
@@ -6151,27 +6151,27 @@ typedef enum
 					@return		A string containing C++ source code that, when compiled, will result in a NTV2SegmentedXferInfo
 								instance that will perfectly match me.
 				**/
-				std::string		getSourceCode (const bool inInclDecl = true) const;
+				std::string		getSourceCode (const bool inInclDecl = true) const;	//	New in SDK 16.0
 
 				/**
 					@param[in]	inElementOffset		Specifies the element offset of interest.
 					@return		True if the element is contained within me.
 				**/
-				bool			containsElementAtOffset (const ULWord inElementOffset) const;
+				bool			containsElementAtOffset (const ULWord inElementOffset) const;	//	New in SDK 16.0
 
 				/**
 					@param[in]	inRHS	Specifies the NTV2SegmentedXferInfo to compare with me.
 					@return		True if not equal.
 					@note		The element sizes must match (though this ought to be compensated for in the comparison).
 				**/
-				bool			operator != (const NTV2SegmentedXferInfo & inRHS) const;
+				bool			operator != (const NTV2SegmentedXferInfo & inRHS) const;	//	New in SDK 16.0
 
 				/**
 					@param[in]	inRHS	Specifies the NTV2SegmentedXferInfo to compare with me.
 					@return		True if equal.
 					@note		The element sizes must match (though this ought to be compensated for in the comparison).
 				**/
-				inline bool		operator == (const NTV2SegmentedXferInfo & inRHS) const		{return !(*this != inRHS);}
+				inline bool		operator == (const NTV2SegmentedXferInfo & inRHS) const		{return !(*this != inRHS);}	//	New in SDK 16.0
 				///@}
 
 				/**
@@ -6295,7 +6295,7 @@ typedef enum
 					@brief		Swaps my source and destination offsets and pitches.
 					@return		A reference to me.
 				**/
-				NTV2SegmentedXferInfo &			swapSourceAndDestination (void);
+				NTV2SegmentedXferInfo &			swapSourceAndDestination (void);	//	New in SDK 16.0
 				///@}
 
 			private:
@@ -6447,7 +6447,7 @@ typedef enum
 				/**
 					@return		My size, in bytes, as a size_t.
 				**/
-				inline			operator size_t() const					{return size_t(GetByteCount());}
+				inline			operator size_t() const					{return size_t(GetByteCount());}	//	New in SDK 16.0
 
 				/**
 					@param[in]	inByteOffset	Specifies the offset from the start (or end) of my memory buffer.
@@ -6467,7 +6467,7 @@ typedef enum
 												is the last T in the buffer (with the highest physical memory address).
 					@return		True if successfully found; otherwise false.
 				**/
-				template<typename T> bool	Find (const T & inValue, int & inOutIndex)
+				template<typename T> bool	Find (const T & inValue, int & inOutIndex)	//	New in SDK 16.0
 				{
 					const bool isAscending(inOutIndex >= 0);
 					if (isAscending  &&  inOutIndex >= int(GetByteCount()))
@@ -6681,21 +6681,21 @@ typedef enum
 					@return		True if successful;  otherwise false.
 					@note		If my size (in bytes) is not evenly divisible by 8, the very last byte(s) won't get swapped.
 				**/
-				bool			ByteSwap64 (void);
+				bool			ByteSwap64 (void);	//	New in SDK 16.0
 
 				/**
 					@brief		Byte-swaps my contents 32-bits at a time.
 					@return		True if successful;  otherwise false.
 					@note		If my size (in bytes) is not evenly divisible by 4, the very last byte(s) won't get swapped.
 				**/
-				bool			ByteSwap32 (void);
+				bool			ByteSwap32 (void);	//	New in SDK 16.0
 
 				/**
 					@brief		Byte-swaps my contents 16-bits at a time.
 					@return		True if successful;  otherwise false.
 					@note		If my size (in bytes) is not evenly divisible by 2, the very last byte won't get swapped.
 				**/
-				bool			ByteSwap16 (void);
+				bool			ByteSwap16 (void);	//	New in SDK 16.0
 				///@}
 
 				/**
@@ -6784,12 +6784,12 @@ typedef enum
 				/**
 					@return		My host address casted to a const T pointer.
 				**/
-				template<typename T>	operator const T*() const		{return reinterpret_cast<const T*>(GetHostPointer());}
+				template<typename T>	operator const T*() const		{return reinterpret_cast<const T*>(GetHostPointer());}	//	New in SDK 16.0
 
 				/**
 					@return		My host address casted to a non-const T pointer.
 				**/
-				template<typename T>	operator T*() const				{return reinterpret_cast<T*>(GetHostPointer());}
+				template<typename T>	operator T*() const				{return reinterpret_cast<T*>(GetHostPointer());}	//	New in SDK 16.0
 
 				/**
 					@return		A copy of the value at the given zero-based index position.
@@ -6797,7 +6797,7 @@ typedef enum
 											If negative, indexes from the end of my memory (e.g. -1 is last value).
 					@warning	Bad index values will result in access violation exceptions.
 				**/
-				inline	uint8_t			U8 (const int inIndex) const	{const uint8_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()) + inIndex : inIndex];}
+				inline	uint8_t			U8 (const int inIndex) const	{const uint8_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()) + inIndex : inIndex];}	//	New in SDK 16.0
 
 				/**
 					@return		A writeable (non-const) reference to the value at the given zero-based index position.
@@ -6805,26 +6805,26 @@ typedef enum
 											If negative, indexes from the end of my memory (e.g. -1 is last value).
 					@warning	Bad index values will result in access violation exceptions.
 				**/
-				inline	uint8_t &		U8 (const int inIndex)			{uint8_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()) + inIndex : inIndex];}
+				inline	uint8_t &		U8 (const int inIndex)			{uint8_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()) + inIndex : inIndex];}	//	New in SDK 16.0
 
-				inline	int8_t			I8 (const int inIndex) const	{const int8_t* pVal(*this);		return pVal[inIndex < 0 ? int(GetByteCount()) + inIndex : inIndex];}
-				inline	int8_t &		I8 (const int inIndex)			{int8_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()) + inIndex : inIndex];}
-				inline	uint16_t		U16 (const int inIndex) const	{const uint16_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/2) + inIndex : inIndex];}
-				inline	uint16_t &		U16 (const int inIndex)			{uint16_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/2) + inIndex : inIndex];}
-				inline	int16_t			I16 (const int inIndex) const	{const int16_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/2) + inIndex : inIndex];}
-				inline	int16_t &		I16 (const int inIndex)			{int16_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/2) + inIndex : inIndex];}
-				inline	uint32_t		U32 (const int inIndex) const	{const uint32_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/4) + inIndex : inIndex];}
-				inline	uint32_t &		U32 (const int inIndex)			{uint32_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/4) + inIndex : inIndex];}
-				inline	int32_t			I32 (const int inIndex) const	{const int32_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/4) + inIndex : inIndex];}
-				inline	int32_t &		I32 (const int inIndex)			{int32_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/4) + inIndex : inIndex];}
-				inline	uint64_t		U64 (const int inIndex) const	{const uint64_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/8) + inIndex : inIndex];}
-				inline	uint64_t &		U64 (const int inIndex)			{uint64_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/8) + inIndex : inIndex];}
-				inline	int64_t			I64 (const int inIndex) const	{const int64_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/8) + inIndex : inIndex];}
-				inline	int64_t &		I64 (const int inIndex)			{int64_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/8) + inIndex : inIndex];}
-				inline	float			FL (const int inIndex) const	{const float* pVal(*this);		return pVal[inIndex < 0 ? int(GetByteCount()/sizeof(float)) + inIndex : inIndex];}
-				inline	float &			FL (const int inIndex)			{float* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/sizeof(float)) + inIndex : inIndex];}
-				inline	double			DBL (const int inIndex) const	{const double* pVal(*this);		return pVal[inIndex < 0 ? int(GetByteCount()/sizeof(double)) + inIndex : inIndex];}
-				inline	double &		DBL (const int inIndex)			{double* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/sizeof(double)) + inIndex : inIndex];}
+				inline	int8_t			I8 (const int inIndex) const	{const int8_t* pVal(*this);		return pVal[inIndex < 0 ? int(GetByteCount()) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	int8_t &		I8 (const int inIndex)			{int8_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	uint16_t		U16 (const int inIndex) const	{const uint16_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/2) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	uint16_t &		U16 (const int inIndex)			{uint16_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/2) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	int16_t			I16 (const int inIndex) const	{const int16_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/2) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	int16_t &		I16 (const int inIndex)			{int16_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/2) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	uint32_t		U32 (const int inIndex) const	{const uint32_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/4) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	uint32_t &		U32 (const int inIndex)			{uint32_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/4) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	int32_t			I32 (const int inIndex) const	{const int32_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/4) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	int32_t &		I32 (const int inIndex)			{int32_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/4) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	uint64_t		U64 (const int inIndex) const	{const uint64_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/8) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	uint64_t &		U64 (const int inIndex)			{uint64_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/8) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	int64_t			I64 (const int inIndex) const	{const int64_t* pVal(*this);	return pVal[inIndex < 0 ? int(GetByteCount()/8) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	int64_t &		I64 (const int inIndex)			{int64_t* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/8) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	float			FL (const int inIndex) const	{const float* pVal(*this);		return pVal[inIndex < 0 ? int(GetByteCount()/sizeof(float)) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	float &			FL (const int inIndex)			{float* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/sizeof(float)) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	double			DBL (const int inIndex) const	{const double* pVal(*this);		return pVal[inIndex < 0 ? int(GetByteCount()/sizeof(double)) + inIndex : inIndex];}	//	New in SDK 16.0
+				inline	double &		DBL (const int inIndex)			{double* pVal(*this);			return pVal[inIndex < 0 ? int(GetByteCount()/sizeof(double)) + inIndex : inIndex];}	//	New in SDK 16.0
 				///@}
 
 				/**
@@ -7491,32 +7491,32 @@ typedef enum
 				/**
 					@return		The option flags.
 				**/
-				inline ULWord			OptionFlags (void) const							{return acOptionFlags;}
+				inline ULWord			OptionFlags (void) const							{return acOptionFlags;}	//	New in SDK 16.0
 
 				/**
 					@return		True if operating the custom Anc inserter/extractor;  otherwise false.
 				**/
-				inline bool				WithCustomAnc (void) const							{return OptionFlags() & AUTOCIRCULATE_WITH_ANC;}
+				inline bool				WithCustomAnc (void) const							{return OptionFlags() & AUTOCIRCULATE_WITH_ANC;}	//	New in SDK 16.0
 
 				/**
 					@return		True if capturing/playing RP188 timecode;  otherwise false.
 				**/
-				inline bool				WithRP188 (void) const								{return OptionFlags() & AUTOCIRCULATE_WITH_RP188;}
+				inline bool				WithRP188 (void) const								{return OptionFlags() & AUTOCIRCULATE_WITH_RP188;}	//	New in SDK 16.0
 
 				/**
 					@return		True if capturing/playing analog LTC timecode;  otherwise false.
 				**/
-				inline bool				WithLTC (void) const								{return OptionFlags() & AUTOCIRCULATE_WITH_LTC;}
+				inline bool				WithLTC (void) const								{return OptionFlags() & AUTOCIRCULATE_WITH_LTC;}	//	New in SDK 16.0
 
 				/**
 					@return		True if running in field mode;  otherwise false.
 				**/
-				inline bool				IsFieldMode (void) const							{return OptionFlags() & AUTOCIRCULATE_WITH_FIELDS;}
+				inline bool				IsFieldMode (void) const							{return OptionFlags() & AUTOCIRCULATE_WITH_FIELDS;}	//	New in SDK 16.0
 
 				/**
 					@return		True if capturing/playing with HDMI auxiliary data;  otherwise false.
 				**/
-				inline bool				WithHDMIAuxData (void) const						{return OptionFlags() & AUTOCIRCULATE_WITH_HDMIAUX;}
+				inline bool				WithHDMIAuxData (void) const						{return OptionFlags() & AUTOCIRCULATE_WITH_HDMIAUX;}	//	New in SDK 16.0
 
 				/**
 					@return		True if capturing;  otherwise false.
@@ -7531,7 +7531,7 @@ typedef enum
 				/**
 					@return		The NTV2Mode, whether NTV2_MODE_OUTPUT, NTV2_MODE_INPUT or NTV2_MODE_INVALID (if stopped).
 				**/
-				inline NTV2Mode			GetMode (void) const								{return IsStopped() ? NTV2_MODE_INVALID : (IsInput() ? NTV2_MODE_INPUT : NTV2_MODE_OUTPUT);}
+				inline NTV2Mode			GetMode (void) const								{return IsStopped() ? NTV2_MODE_INVALID : (IsInput() ? NTV2_MODE_INPUT : NTV2_MODE_OUTPUT);}	//	New in SDK 15.5
 
 				/**
 					@return		My channel.
@@ -7815,7 +7815,7 @@ typedef enum
 					@return		A non-const reference to the NTV2SDIInputStatus record for the given SDI input.
 					@param[in]	inSDIInputIndex0	Specifies the zero-based index of the SDI input of interest.
 				**/
-				NTV2SDIInputStatus &	operator [] (const size_t inSDIInputIndex0);
+				NTV2SDIInputStatus &	operator [] (const size_t inSDIInputIndex0);	//	New in SDK 16.0
 
 				/**
 					@brief	Prints a human-readable representation of me to the given output stream.
@@ -8562,7 +8562,7 @@ typedef enum
 					@param	inMaxLockSize	Specifies the maximum lock size in bytes
 					@param	inFlags			Specifies action flags (lock, unlock, etc)
 				**/
-				explicit	NTV2BufferLock (const ULWord64 inMaxLockSize, const ULWord inFlags);
+				explicit	NTV2BufferLock (const ULWord64 inMaxLockSize, const ULWord inFlags);	//	New in SDK 16.0
 ///@}
 
 				/**
@@ -8597,7 +8597,7 @@ typedef enum
 					@brief	Sets the maximum lock size for use in a subsequent call to CNTV2Card::DMABufferLock.
 					@param	inNumBytes		Specifies maximum lock size, in bytes.
 				**/
-				inline void	SetMaxLockSize (const ULWord64 inNumBytes)		{NTV2_ASSERT_STRUCT_VALID;  mMaxLockSize = inNumBytes;}
+				inline void	SetMaxLockSize (const ULWord64 inNumBytes)		{NTV2_ASSERT_STRUCT_VALID;  mMaxLockSize = inNumBytes;}	//	New in SDK 16.0
 
 				/**
 					@brief	Resets the struct to its initialized state.
@@ -8625,7 +8625,7 @@ typedef enum
 
 
 		/**
-			@brief	This is used for bitstream maintainance.
+			@brief	This is used for bitstream maintainance.	(New in SDK 16.0)
 			@note	This struct uses a constructor to properly initialize itself.
 					Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
@@ -8869,7 +8869,7 @@ typedef enum
 				@param[in]	inSet		Specifies the set to be streamed.
 				@return		The "inOStream" that was specified.
 			**/
-			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2OutputDestinations & inSet);
+			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2OutputDestinations & inSet);	//	New in SDK 16.0
 
 			/**
 				@brief		Appends the given ::NTV2OutputDestinations' contents into the given set.
@@ -8877,7 +8877,7 @@ typedef enum
 				@param[in]	inSet		Specifies the set whose contents will be appended.
 				@return		A reference to the modified set.
 			**/
-			AJAExport NTV2OutputDestinations & operator += (NTV2OutputDestinations & inOutSet, const NTV2OutputDestinations & inSet);
+			AJAExport NTV2OutputDestinations & operator += (NTV2OutputDestinations & inOutSet, const NTV2OutputDestinations & inSet);	//	New in SDK 16.0
 
 
 			/**
