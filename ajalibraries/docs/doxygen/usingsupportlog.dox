@@ -85,8 +85,6 @@ For example, to capture a log after delaying 10 seconds:
 $ ./bin/supportlog  --wait 10
 \endcode
 
-<hr size="50px">
-
 
 
 @par	Capturing Device SDRAM Contents
@@ -95,5 +93,7 @@ If AJA SDK Support requests a snapshot of the device’s SDRAM contents, use the
 
 @note	The resulting dump file will be quite large. Be sure the host storage volume on which your home
 		directory resides has plenty of free space.
+
+<hr size="50px">
 
 **/
