@@ -35,7 +35,7 @@ The NTV2Player class demonstrates…
 	-p|--pixelFormat {pixFormat}    Specifies the pixel format to use. Use '?' or 'list' to list available formats.
 
 	-a|--anc {filePath}             Optionally emits ancillary data as read from the specified binary data file.
-	                                These files can be recorded using the \ref ntv2capture using its ‘--ancʼ option.
+	                                These files can be recorded using ntv2capture using its ‘--ancʼ option.
 
 	-t|--hdrType {hdrSpec}          Emits HDR ancillary data packets. Use 'SDR', 'HDR10' or 'HLG'.
 

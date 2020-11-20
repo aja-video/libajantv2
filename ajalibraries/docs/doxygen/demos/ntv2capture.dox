@@ -34,7 +34,7 @@ The NTV2Capture class demonstrates…
 	                           the captured raw anc buffer data into the specified binary data file. If {filePath}
 	                           is an empty string, a file name will be created for you.
 	                           
-	                           This file can be played back using the \ref ntv2player via its ‘--ancʼ option.
+	                           This file can be played back using ntv2player via its ‘--ancʼ option.
 	
 	--noaudio                  Disables audio capture.
 	
