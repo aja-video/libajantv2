@@ -44,7 +44,7 @@ int main (int argc, const char ** argv)
 	AJADebug::Open();
 
 	//	Command line option descriptions:
-	const struct poptOption userOptionsTable [] =
+	const struct poptOption optionsTable [] =
 	{
 		#if !defined(NTV2_DEPRECATE_16_0)	//	--board option is deprecated!
 		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",		"(deprecated)"},
@@ -63,10 +63,9 @@ int main (int argc, const char ** argv)
 		POPT_TABLEEND
 	};
 
-	//	Read command line arguments...
-	optionsContext = ::poptGetContext (AJA_NULL, argc, argv, userOptionsTable, 0);
-	::poptGetNextOpt (optionsContext);
-	optionsContext = ::poptFreeContext (optionsContext);
+	CNTV2DemoCommon::Popt popt(argc, argv, optionsTable);
+	if (!popt)
+		{cerr << "## ERROR: " << popt.errorStr() << endl;  return 2;}
 
 	//	Device
 	const string deviceSpec	(pDeviceSpec ? pDeviceSpec : "0");
@@ -106,7 +105,8 @@ int main (int argc, const char ** argv)
 	playerConfig.fTransmitLTC = xmitLTC ? true : false;
 
 	//	Anc / HDRType
-	const string ancFilePath (pAncFilePath ? pAncFilePath : "");
+	if (pAncFilePath)
+		playerConfig.fAncDataFilePath = pAncFilePath;
 	switch (hdrType)
 	{
 		case 1:		playerConfig.fTransmitHDRType = AJAAncillaryDataType_HDR_SDR;		break;
@@ -114,7 +114,7 @@ int main (int argc, const char ** argv)
 		case 3:		playerConfig.fTransmitHDRType = AJAAncillaryDataType_HDR_HLG;		break;
 		default:	break;
 	}
-	if (playerConfig.fTransmitHDRType != AJAAncillaryDataType_Unknown  &&  !ancFilePath.empty())
+	if (playerConfig.fTransmitHDRType != AJAAncillaryDataType_Unknown  &&  !playerConfig.fAncDataFilePath.empty())
 		{cerr << "## ERROR:  conflicting options '--hdrType' and '--anc'" << endl;  return 2;}
 
 	//	Frames

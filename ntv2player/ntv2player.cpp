@@ -507,7 +507,7 @@ void NTV2Player::PlayFrames (void)
 			if (pFrameData->AudioBuffer())	//	...also xfer this frame's audio samples...
 				xferInfo.SetAudioBuffer (pFrameData->AudioBuffer(), pFrameData->fNumAudioBytes);
 
-			if (pAncistrm->good() && pFrameData->AncBuffer())	//	Injecting pre-recorded anc from binary data file?
+			if (pAncistrm  &&  pAncistrm->good()  &&  pFrameData->AncBuffer())	//	Injecting pre-recorded anc from binary data file?
 			{
 				pAncistrm->read(pFrameData->AncBuffer(), streamsize(pFrameData->AncBufferSize()));
 				if (pFrameData->AncBuffer2())
