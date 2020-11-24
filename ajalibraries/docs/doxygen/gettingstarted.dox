@@ -424,6 +424,17 @@ The \ref ajantv2 source code is provided, and the libraries can be built with de
 		<b>Starting in Xcode 10, the GNU-ABI-based ‘libstdc++’ standard libraries and headers are gone.</b><br>
 		To build using the older GNU-ABI-based ‘libstdc++’ libraries and headers, use Xcode 9 or earlier.
 
+@par XCode 12 and MacOS Big Sur
+
+XCode 12 produces “fat” libraries and executables for both <b>arm64</b> and <b>x86_64</b> architectures.
+In SDK 16.0, our .xcodeproj project files have been changed to ONLY build for the <b>x86_64</b> architecture.
+Weʼll revert this change when we release a native Apple Silicon compatible driver and SDK.
+
+To build a single ajantv2 library for both <b>arm64</b> and <b>x86_64</b> architectures, run this command:
+	\code{.sh}
+	$ xcrun xcodebuild -project ajalibraries/ajantv2/build/ajantv2.xcodeproj  -target BuildAll  -configuration Debug  ARCHS=arm64,x86_64  clean build
+	\endcode
+
 
 @subsection		gs-winsdkbuild	Building on Windows
 
