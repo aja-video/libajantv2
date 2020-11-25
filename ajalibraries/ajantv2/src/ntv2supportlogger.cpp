@@ -975,7 +975,7 @@ bool CNTV2SupportLogger::DumpDeviceSDRAM (CNTV2Card & inDevice, const string & i
 	const ULWord byteCount(::NTV2FramesizeToByteCount(frmsz)), megs(byteCount/1024/1024), numFrames(maxBytes / byteCount);
 	NTV2_POINTER buffer(byteCount);
 	NTV2ULWordVector goodFrames, badDMAs, badWrites;
-	ofstream ofs(inFilePath, std::ofstream::out | std::ofstream::binary);
+	ofstream ofs(inFilePath.c_str(), std::ofstream::out | std::ofstream::binary);
 	if (!ofs)
 		{msgStrm << "## ERROR: Unable to open '" << inFilePath << "' for writing" << endl;  return false;}
 
