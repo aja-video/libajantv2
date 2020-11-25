@@ -248,7 +248,7 @@ public:
 		@param[in]	inSerialStr			Specifies the device serial value to search for.
 		@param[out]	outDevice			Receives the open, ready-to-use CNTV2Card instance of the first matching device.
 	**/
-	static bool									GetFirstDeviceWithSerial (const std::string & inSerialStr, CNTV2Card & outDevice);
+	static bool									GetFirstDeviceWithSerial (const std::string & inSerialStr, CNTV2Card & outDevice);	//	New in SDK 16.0
 
 	/**
 		@brief		Rescans the host, and returns an open CNTV2Card instance for the first AJA device whose serial number matches the given value.
@@ -256,7 +256,7 @@ public:
 		@param[in]	inSerialNumber		Specifies the device serial value to search for.
 		@param[out]	outDevice			Receives the open, ready-to-use CNTV2Card instance.
 	**/
-	static bool									GetDeviceWithSerial (const uint64_t inSerialNumber, CNTV2Card & outDevice);
+	static bool									GetDeviceWithSerial (const uint64_t inSerialNumber, CNTV2Card & outDevice);	//	New in SDK 16.0
 
 	/**
 		@brief		Rescans the host, and returns an open CNTV2Card instance for the AJA device that matches a command line argument
@@ -280,32 +280,38 @@ public:
 		@param[out]	outDevicesRemoved	Receives a list of devices that exist in the "old" list that don't exist in the "new" list.
 		@return		True if the two lists differ in any way; otherwise false if they match.
 	**/
-	static bool					CompareDeviceInfoLists (const NTV2DeviceInfoList & inOldList,
-														const NTV2DeviceInfoList & inNewList,
-														NTV2DeviceInfoList & outDevicesAdded,
-														NTV2DeviceInfoList & outDevicesRemoved);
+	static bool									CompareDeviceInfoLists (const NTV2DeviceInfoList & inOldList,
+																		const NTV2DeviceInfoList & inNewList,
+																		NTV2DeviceInfoList & outDevicesAdded,
+																		NTV2DeviceInfoList & outDevicesRemoved);
+
+	/**
+		@param[in]	inDevice			The CNTV2Card instance that's open for the device of interest.
+		@return		A string containing the device name that will find the same given device using CNTV2DeviceScanner::GetFirstDeviceFromArgument.
+	**/
+	static std::string							GetDeviceRefName (CNTV2Card & inDevice);	//	New in SDK 16.0
 
 	/**
 		@return	True if the string contains a legal decimal number.
 		@param[in]	inStr	The string to be tested.
 	**/
-	static bool			IsLegalDecimalNumber (const std::string & inStr, const size_t inMaxLength = 2);
-	static uint64_t		IsLegalHexSerialNumber (const std::string & inStr);	//	0x3236333331375458
-	static bool			IsHexDigit (const char inChr);
-	static bool			IsDecimalDigit (const char inChr);
-	static bool			IsAlphaNumeric (const char inStr);
+	static bool			IsLegalDecimalNumber (const std::string & inStr, const size_t inMaxLength = 2);	//	New in SDK 16.0
+	static uint64_t		IsLegalHexSerialNumber (const std::string & inStr);	//	New in SDK 16.0		//	e.g. "0x3236333331375458"
+	static bool			IsHexDigit (const char inChr);	//	New in SDK 16.0
+	static bool			IsDecimalDigit (const char inChr);	//	New in SDK 16.0
+	static bool			IsAlphaNumeric (const char inStr);	//	New in SDK 16.0
 
 	/**
 		@return	True if the string contains letters and/or decimal digits.
 		@param[in]	inStr	The string to be tested.
 	**/
-	static bool			IsAlphaNumeric (const std::string & inStr);
+	static bool			IsAlphaNumeric (const std::string & inStr);	//	New in SDK 16.0
 
 	/**
 		@return	True if the string contains a legal serial number.
 		@param[in]	inStr	The string to be tested.
 	**/
-	static bool			IsLegalSerialNumber (const std::string & inStr);
+	static bool			IsLegalSerialNumber (const std::string & inStr);	//	New in SDK 16.0
 
 //	Instance Methods
 public:

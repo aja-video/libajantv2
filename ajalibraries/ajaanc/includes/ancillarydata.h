@@ -702,7 +702,7 @@ public:
 		@param[in]	inDIDSID	The AJAAncillaryDIDSIDPair that specifies both a DID and SID value.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual inline AJAStatus				SetDIDSID (const AJAAncillaryDIDSIDPair & inDIDSID)		{SetDID(inDIDSID.first); return SetSID(inDIDSID.second);}
+	virtual inline AJAStatus				SetDIDSID (const AJAAncillaryDIDSIDPair & inDIDSID)		{SetDID(inDIDSID.first); return SetSID(inDIDSID.second);}	//	New in SDK 16.0
 
 	/**
 		@brief		Sets my 8-bit checksum. Note that it is not usually necessary to generate an 8-bit checksum, since the ANC Insertion
@@ -799,7 +799,7 @@ public:
 	**/
 	virtual inline AJAAncillaryData &		SetBufferFormat (const AJAAncillaryBufferFormat inFmt)	{m_bufferFmt = inFmt;  return *this;}
 
-	virtual inline uint64_t &				UserData (void)			{return m_userData;}	///< @return	Returns a non-constant reference to my user data.
+	virtual inline uint64_t &				UserData (void)			{return m_userData;}	///< @return	Returns a non-constant reference to my user data. (New in SDK 16.0)
 
 #if !defined(NTV2_DEPRECATE_14_2)
 		/**
@@ -1184,9 +1184,9 @@ class AJAExport AJARTPAncPayloadHeader
 		virtual inline bool		NoFieldSpecified (void) const		{return IsProgressive();}		///< @return	True if my Field Bits indicate No Field Specified.
 		virtual inline bool		IsField1 (void) const				{return mFieldSignal == 2;}		///< @return	True if my Field Bits indicate Field1.
 		virtual inline bool		IsField2 (void) const				{return mFieldSignal == 3;}		///< @return	True if my Field Bits indicate Field2.
-		virtual inline bool		IsValidFieldSignal (void) const		{return mFieldSignal != 1;}		///< @return	True if my Field Bits are valid.
-		virtual inline bool		HasPaddingBytes (void) const		{return mPBit;}					///< @return	True if my Padding Bit is set.
-		virtual inline bool		HasExtendedHeader (void) const		{return mXBit;}					///< @return	True if my Header Extension Bit is set.
+		virtual inline bool		IsValidFieldSignal (void) const		{return mFieldSignal != 1;}		///< @return	True if my Field Bits are valid. (New in SDK 16.0)
+		virtual inline bool		HasPaddingBytes (void) const		{return mPBit;}					///< @return	True if my Padding Bit is set. (New in SDK 16.0)
+		virtual inline bool		HasExtendedHeader (void) const		{return mXBit;}					///< @return	True if my Header Extension Bit is set. (New in SDK 16.0)
 
 		/**
 			@return		True if the RHS payload header state matches my own current state;  otherwise false.

@@ -97,6 +97,8 @@ Here’s what’s in the menu bar:
 	-	<b>SDK Support Login</b> — Opens your web browser to the AJA SDK Support site’s home/login page.
 	-	<b>Generate Support Log</b> — Generates a “register log” (aka “support log”) file, which is essential for AJA SDK Support staff
 		to diagnose issues and ascertain the state of the AJA device.
+	-	<b>Capture SDRAM Contents</b> — Records the contents of device SDRAM into a “.raw” binary data file.
+		This may be requested on rare occasion by AJA SDK Support staff in order to diagnose certain issues.
 	-	<b>SDK Documentation</b> — Opens your web browser to the main page of the online SDK Documentation.
 	-	<b>NTV2Watcher User Guide</b> — Opens your web browser to the online \ref usingntv2watcher User Guide.
 
@@ -375,7 +377,6 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 			(<b>Line</b> or <b>Raw</b> views only) will copy the underlying raster data to where it’s dropped in the frame buffer.
 		-	Dropping files and/or folders from outside the NTV2Watcher window are supported.
 			(Prior to SDK 15.3, only one file having a particular name extension could be dropped at one time.)
-			-	One frame buffer is modified per dropped file.
 			-	The first frame buffer to be changed is determined by the <b>frame number</b> spinbox control.
 				Subsequent files are loaded into successive frame buffers.
 			-	The order of the files (and therefore which frame(s) get which file’s data) is host operating-system dependent.
@@ -391,7 +392,8 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 				-	The frame’s buffer content is replaced byte-for-byte with the raw data from the file.
 				-	If the raw file is smaller than the frame buffer, only the bytes from the file will overwrite the frame buffer.
 					All subsequent content in the buffer will remain unchanged.
-				-	If the raw file is larger than the frame buffer, only the current frame being written will be changed.
+				-	If the raw file is larger than the frame buffer, subsequent frames will continue to be written until the
+					remaining bytes from the file are read (or until the highest-numbered frame in device SDRAM has been DMA’d).
 
 
 

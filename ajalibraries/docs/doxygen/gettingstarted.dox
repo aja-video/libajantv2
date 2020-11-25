@@ -194,6 +194,74 @@ Deprecation history:
 	-	CNTV2Card::GetQuadFrameEnable and CNTV2Card::GetQuadQuadFrameEnable.
 	-	The RP188_STRUCT based variants of CNTV2Card’s Get/SetRP188Data and Get/SetRP188Source.
 	-	The RP188SourceSelect type definition was deprecated in favor of the more meaningful ::RP188SourceFilterSelect.
+-	<b>SDK 15.5:</b> ::NTV2_DEPRECATE_15_3 and ::NTV2_DEPRECATE_15_5 macros defined in <b>ajatypes.h</b>. Deprecated APIs:
+	-	AJARTPAncPayloadHeader::GetPacketLength was deprecated.
+	-	An overloaded version of AJAAncillaryList::GetIPTransmitData was deprecated.
+	-	An overloaded version of AJAAncillaryList::GetIPTransmitDataLength was deprecated.
+	-	The original Audio Mixer API in ::CNTV2Card was deprecated and replaced with a new, improved API.
+-	<b>SDK 16.0:</b> Defined macros ::NTV2_DEPRECATE_15_6 and ::NTV2_DEPRECATE_16_0 in <b>ajatypes.h</b>.
+	As-shipped, all <b>NTV2_DEPRECATE_</b> macros preceding SDK 15.0 are defined in SDK 16.0 (making all symbols they deprecate unavailable).
+	Here are the functions that have newly been marked for deprecation in SDK 16.0:
+	-	In CNTV2Card:
+		-	Deprecated the original <b>SDI Relay</b> APIs, and replaced them with a new, cleaner API: CNTV2Card::GetSDIRelayPosition12,
+			CNTV2Card::GetSDIRelayPosition34, CNTV2Card::GetSDIRelayManualControl12, CNTV2Card::GetSDIRelayManualControl34,
+			CNTV2Card::GetSDIWatchdogEnable12, CNTV2Card::GetSDIWatchdogEnable34, CNTV2Card::SetSDIRelayManualControl12,
+			CNTV2Card::SetSDIRelayManualControl34, CNTV2Card::SetSDIWatchdogEnable12, CNTV2Card::SetSDIWatchdogEnable34,
+			CNTV2Card::GetSDIWatchdogState, and CNTV2Card::SetSDIWatchdogState
+		-	Deprecated these <b>Audio</b> API functions: CNTV2Card::WriteAudioSource, CNTV2Card::ReadAudioSource,
+			CNTV2Card::SetAudioOutputReset, CNTV2Card::GetAudioOutputReset, CNTV2Card::SetAudioInputReset, and
+			CNTV2Card::GetAudioInputReset
+		-	Deprecated CNTV2Card::GetBaseAddress, CNTV2Card::GetBaseAddress, CNTV2Card::GetRegisterBaseAddress, and
+			CNTV2Card::GetXena2FlashBaseAddress
+		-	Deprecated CNTV2Card::SetRegisterWritemode and CNTV2Card::GetRegisterWritemode
+	-	In CNTV2DriverInterface:
+		-	Deprecated CNTV2DriverInterface::LockFormat, CNTV2DriverInterface::StartDriver, CNTV2DriverInterface::SetUserModeDebugLevel,
+			CNTV2DriverInterface::GetUserModeDebugLevel, CNTV2DriverInterface::SetKernelModeDebugLevel,
+			CNTV2DriverInterface::GetKernelModeDebugLevel, CNTV2DriverInterface::SetUserModePingLevel,
+			CNTV2DriverInterface::GetUserModePingLevel, CNTV2DriverInterface::SetKernelModePingLevel,
+			CNTV2DriverInterface::GetKernelModePingLevel, CNTV2DriverInterface::SetLatencyTimerValue,
+			CNTV2DriverInterface::GetLatencyTimerValue, CNTV2DriverInterface::SetDebugFilterStrings,
+			and CNTV2DriverInterface::GetDebugFilterStrings
+		-	Deprecated CNTV2DriverInterface::SuspendAudio, CNTV2DriverInterface::ResumeAudio, CNTV2DriverInterface::MapFrameBuffers,
+			CNTV2DriverInterface::UnmapFrameBuffers, CNTV2DriverInterface::MapRegisters, CNTV2DriverInterface::UnmapRegisters,
+			CNTV2DriverInterface::MapXena2Flash, CNTV2DriverInterface::UnmapXena2Flash, CNTV2DriverInterface::DmaUnlock,
+			CNTV2DriverInterface::CompleteMemoryForDMA, CNTV2DriverInterface::PrepareMemoryForDMA, CNTV2DriverInterface::GetInterruptCount,
+			CNTV2DriverInterface::ReadRegisterMulti, CNTV2DriverInterface::GetPCISlotNumber, CNTV2DriverInterface::SleepMs,
+			and CNTV2DriverInterface::GetAudioFrameBufferNumber
+	-	In CNTV2MacDriverInterface:
+		-	Deprecated CNTV2MacDriverInterface::SetUserModeDebugLevel, CNTV2MacDriverInterface::GetUserModeDebugLevel,
+			CNTV2MacDriverInterface::SetKernelModeDebugLevel, CNTV2MacDriverInterface::GetKernelModeDebugLevel,
+			CNTV2MacDriverInterface::SetUserModePingLevel, CNTV2MacDriverInterface::GetUserModePingLevel,
+			CNTV2MacDriverInterface::SetKernelModePingLevel, CNTV2MacDriverInterface::GetKernelModePingLevel,
+			CNTV2MacDriverInterface::SetLatencyTimerValue, CNTV2MacDriverInterface::GetLatencyTimerValue,
+			CNTV2MacDriverInterface::SetDebugFilterStrings, CNTV2MacDriverInterface::GetDebugFilterStrings,
+			CNTV2MacDriverInterface::LockFormat, and CNTV2MacDriverInterface::GetQuickTimeTime
+		-	Deprecated CNTV2MacDriverInterface::GetStreamingApplication, CNTV2MacDriverInterface::SystemControl,
+			CNTV2MacDriverInterface::Sleep, CNTV2MacDriverInterface::MapFrameBuffers, CNTV2MacDriverInterface::UnmapFrameBuffers,
+			CNTV2MacDriverInterface::MapRegisters, CNTV2MacDriverInterface::UnmapRegisters, CNTV2MacDriverInterface::MapXena2Flash,
+			CNTV2MacDriverInterface::UnmapXena2Flash, CNTV2MacDriverInterface::GetPCISlotNumber, and CNTV2MacDriverInterface::MapMemory
+	-	In CNTV2WinDriverInterface:
+		-	Deprecated CNTV2WinDriverInterface::SetStrictTiming, CNTV2WinDriverInterface::GetStrictTiming,
+			CNTV2WinDriverInterface::GetStreamingApplication, and CNTV2WinDriverInterface::GetStreamingApplication
+		-	Deprecated CNTV2WinDriverInterface::MapFrameBuffers, CNTV2WinDriverInterface::UnmapFrameBuffers,
+			CNTV2WinDriverInterface::MapRegisters, CNTV2WinDriverInterface::UnmapRegisters, CNTV2WinDriverInterface::MapXena2Flash,
+			CNTV2WinDriverInterface::UnmapXena2Flash, CNTV2WinDriverInterface::MapMemory, CNTV2WinDriverInterface::DmaUnlock,
+			CNTV2WinDriverInterface::CompleteMemoryForDMA, and CNTV2WinDriverInterface::PrepareMemoryForDMA
+	-	In CNTV2LinuxDriverInterface:
+		-	Deprecated CNTV2LinuxDriverInterface::GetStreamingApplication, CNTV2LinuxDriverInterface::GetStreamingApplication,
+			CNTV2LinuxDriverInterface::MapFrameBuffers, CNTV2LinuxDriverInterface::UnmapFrameBuffers, CNTV2LinuxDriverInterface::MapRegisters,
+			CNTV2LinuxDriverInterface::UnmapRegisters, CNTV2LinuxDriverInterface::GetBA0MemorySize, CNTV2LinuxDriverInterface::GetBA1MemorySize,
+			CNTV2LinuxDriverInterface::GetBA2MemorySize, CNTV2LinuxDriverInterface::GetBA4MemorySize, CNTV2LinuxDriverInterface::MapXena2Flash,
+			CNTV2LinuxDriverInterface::UnmapXena2Flash,
+			MapDNXRegisters, and UnmapDNXRegisters have all been deprecated.
+	-	Deprecated ::NTV2DeviceCanConnect
+	-	In CNTV2CaptionDecoder608:
+		-	Deprecated an overloaded version of CNTV2CaptionDecoder608::BurnCaptions
+	-	In NTV2TestPatternGen:
+		-	Deprecated an overloaded version of NTV2TestPatternGen::DrawTestPattern
+	-	In CNTV2CaptionRenderer:
+		-	Deprecated these overloaded functions: CNTV2CaptionRenderer::GetRenderer, CNTV2CaptionRenderer::BurnChar,
+			CNTV2CaptionRenderer::BurnString, CNTV2CaptionRenderer::BurnStringAtXY
 
 To build with an SDK’s deprecated API, comment out or remove its corresponding \c #define ::NTV2_DEPRECATE…
 line in <b>ajatypes.h</b>, then rebuild the <b>ajantv2</b> library.
@@ -356,6 +424,17 @@ The \ref ajantv2 source code is provided, and the libraries can be built with de
 		<b>Starting in Xcode 10, the GNU-ABI-based ‘libstdc++’ standard libraries and headers are gone.</b><br>
 		To build using the older GNU-ABI-based ‘libstdc++’ libraries and headers, use Xcode 9 or earlier.
 
+@par XCode 12 and MacOS Big Sur
+
+XCode 12 produces “fat” libraries and executables for both <b>arm64</b> and <b>x86_64</b> architectures.
+In SDK 16.0, our .xcodeproj project files have been changed to ONLY build for the <b>x86_64</b> architecture.
+Weʼll revert this change when we release a native Apple Silicon compatible driver and SDK.
+
+To build a single ajantv2 library for both <b>arm64</b> and <b>x86_64</b> architectures, run this command:
+	\code{.sh}
+	$ xcrun xcodebuild -project ajalibraries/ajantv2/build/ajantv2.xcodeproj  -target BuildAll  -configuration Debug  ARCHS=arm64,x86_64  clean build
+	\endcode
+
 
 @subsection		gs-winsdkbuild	Building on Windows
 
@@ -477,10 +556,23 @@ Many OEM developers choose to create their own NTV2-based Xcode projects “from
 		This build setting must match for all compilands passed to the linker — otherwise “undefined symbols” errors will result.
 		See \ref gs-macsdkbuild for more information.
 
-@warning	<b>App Sandboxing</b>, introduced in MacOS 10.7 (“Lion”), is not supported by the NTV2 SDK, because Apple has not
-			furnished any entitlements for executables that link to the IOKit framework. The NTV2 SDK must link to the IOKit
-			framework in order to communicate with the AJA NTV2 device driver. If the NTV2 SDK is called from a sandboxed
-			executable, it will not find any NTV2 devices.
+@par	App Sandboxing
+
+<b>App Sandboxing</b>, introduced in MacOS 10.7 (“Lion”), is not supported by default in the NTV2 SDK, because Apple has not
+furnished any entitlements for executables that link to the IOKit framework. The NTV2 SDK must link to <b>IOKit.framework</b>
+in order to communicate directly with the AJA NTV2 device driver.
+
+@warning	If the NTV2 SDK is called from a sandboxed application, no attached NTV2 devices will be found,
+			even though they’re present in the <b>IORegistry</b>.
+
+It is possible for an application that links with \ref ajantv2 to be sandboxed if the library is built without
+any references to the IOKit. To do this, define the macro <b>NTV2_NULL_DEVICE</b>, and rebuild the library.
+
+An application linked to this “NTV2_NULL_DEVICE” library would only be able to connect to real or virtual NTV2 devices
+through the ::NTV2RPCAPI interface. This is done by using a properly-formatted URL specification passed to
+CNTV2DeviceScanner::GetFirstDeviceFromArgument, CNTV2DeviceScanner::GetFirstDeviceWithName, or CNTV2DriverInterface::Open.
+(There currently is no device discovery supported by ::NTV2RPCAPI.) For more information about this alternate interface,
+<a href="https://sdksupport.aja.com/index.php?/Tickets/Submit">submit a Ticket</a>.
 
 
 @subsection	gs-newwinprojects	Windows

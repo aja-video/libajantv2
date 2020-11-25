@@ -7,7 +7,8 @@
 @par	Description
 
 A command-line tool that generates a support log file that contains state information about the
-device and driver for one or more connected AJA devices.
+device and driver for one or more AJA devices, and can optionally capture device SDRAM contents into
+a separate binary dump file.
 
 
 @par	Synopsis
@@ -15,7 +16,9 @@ device and driver for one or more connected AJA devices.
 \code{.sh}
 	supportlog [OPTION...]
 	  -d, --device=index#|serial#|model      Which device to use
-	  -s, --stdout                           Dump to stdout instead of file
+	  -s, --stdout                           Dump to stdout instead of file?
+      -r, --sdram                            Also dump device SDRAM to .raw file?
+	  -v  --verbose                          Verbose mode?
 	  -w  --wait=seconds                     Time to wait before capturing
 	Help options:
 	  -?, --help                             Show this help message
@@ -53,7 +56,7 @@ $ ./bin/supportlog  --device 00T12345
 
 @par	Log Files
 
-Log files are always written into the currently logged-in user’s home directory:
+Files are always written into the currently logged-in user’s home directory:
 \code{.sh}
 $ ls ~/*log
 -rw-r--r--  1 demo  staff   130K Sep 20 15:53 /Users/demo/aja_supportlog_0_1537484005.log
@@ -81,6 +84,15 @@ For example, to capture a log after delaying 10 seconds:
 \code{.sh}
 $ ./bin/supportlog  --wait 10
 \endcode
+
+
+
+@par	Capturing Device SDRAM Contents
+
+If AJA SDK Support requests a snapshot of the device’s SDRAM contents, use the “<tt>--sdram</tt>” option.
+
+@note	The resulting dump file will be quite large. Be sure the host storage volume on which your home
+		directory resides has plenty of free space.
 
 <hr size="50px">
 

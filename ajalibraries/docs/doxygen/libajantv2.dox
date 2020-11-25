@@ -2,20 +2,27 @@
 	@page	ajantv2		“libajantv2” Class Library
 
 	This library contains the principal classes and data types that interface with the NTV2 device driver,
-	plus a number of utility classes that deal with NTV2-specific data formats,
-	including…
+	plus a number of utility classes that deal with NTV2-specific data formats.
 
-    @par		The Principal Classes
-
-	- ::CNTV2DeviceScanner — enumerates attached devices
-	- ::CNTV2Card — queries and/or controls a device
-	- ::CNTV2SignalRouter — a collection of signal routes that can be applied to a device
+	Most NTV2 functions and class methods return a <b>bool</b> value of <b>true</b> for “success” and <b>false</b> for “failure”.
+	NTV2 functions and classes do not intentionally or explicitly throw exceptions.
+	Under unusual and extreme conditions (e.g. memory exhaustion), it's possible for an exception to be thrown (e.g. std::bad_alloc).
 
 
+    @par		Principal Classes
 
-	@section	ntv2devicescannerclass		Device Scanner Class
+	-	::CNTV2DeviceScanner — enumerates attached devices
+	-	::CNTV2Card — queries and/or controls a device
+	-	::CNTV2SignalRouter — a collection of signal routes that can be applied to a device
+	-	::CNTV2FormatDescriptor — describes an NTV2 raster image
+	-	::NTV2_POINTER — describes memory buffers and perform operations on them
+	-	::AUTOCIRCULATE_TRANSFER — Provides information used in CNTV2Card::AutoCirculateTransfer calls
 
-	The “CNTV2DeviceScanner” class is used to enumerate or find available devices.
+
+
+	@par		Device Scanner Class
+
+	The ::CNTV2DeviceScanner class is used to enumerate or find available devices.
 
 	@par	Example: Discovering all attached devices
 	@code{.cpp}
@@ -31,17 +38,28 @@
 
 
 
-	@section	ntv2cardclass		CNTV2Card Class
+	@par		CNTV2Card Class
 
-	The “CNTV2Card” class is used to interrogate and control an NTV2 device.
-	Normally an instance of this class is obtained from one of the CNTV2DeviceScanner functions.
+	The ::CNTV2Card class is used to interrogate and control an NTV2 device.
+	Normally an instance of this class is obtained from one of the ::CNTV2DeviceScanner class methods.
+	For multiple, concurrent ingest or playout threads, it's recommended to use separate CNTV2Card instances for better performance.
+
+	@par	Example: Read FrameStore 1 Control Register
+	@code{.cpp}
+		CNTV2Card device;
+		if (CNTV2DeviceScanner::GetDeviceAtIndex (0, device))
+		{
+			ULWord value(0);
+			device.ReadRegister(1, value);
+		}
+	@endcode
 
 
 
-	@section	ntv2devicefeatures		Device Features API
+	@par		Device Features API
 
-	The “NTV2Device…” functions describe AJA NTV2 device capabilities. All of the functions accept an ::NTV2DeviceID parameter,
-	which identifies the AJA device model of interest.
+	The “NTV2Device…” functions describe AJA NTV2 device capabilities.
+	All of the functions accept an ::NTV2DeviceID parameter that identifies the AJA device model of interest.
 
 	@note	A device need not be installed in or attached to the host to use these functions.
 

@@ -27,13 +27,22 @@ The NTV2Player class demonstrates…
 	-d|--device {spec}              Specifies the device to use by index number, serial number or generic model name.
 	                                Defaults to first device (index 0).
 	                                If model name specified, uses lowest-numbered matching device.
+
 	-c|--channel {channelSpec}      Specifies the framestore/channel as an unsigned integer number 1 thru 8.
+
 	-v|--videoFormat {vidFormat}    Specifies the video format to use. Use '?' or 'list' to list available formats.
+
 	-p|--pixelFormat {pixFormat}    Specifies the pixel format to use. Use '?' or 'list' to list available formats.
-	-a|--anc {filePath}             Optionally emits ancillary data from a given previously-recorded binary data file.
+
+	-a|--anc {filePath}             Optionally emits ancillary data as read from the specified binary data file.
+	                                These files can be recorded using ntv2capture using its ‘--ancʼ option.
+
 	-t|--hdrType {hdrSpec}          Emits HDR ancillary data packets. Use 'SDR', 'HDR10' or 'HLG'.
+
 	-m|--multiChannel               Enables multichannel/multiformat mode, and shares the device with other processes.
+
 	--noaudio                       Omits audio.
+
 	-?|--help|--usage               Shows how to use this command.
 @endcode
 **/

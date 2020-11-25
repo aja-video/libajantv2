@@ -82,7 +82,7 @@ typedef Widget2InputXpts::const_iterator				Widget2InputXptsConstIter;
 **/
 AJAExport bool GetRouteROMInfoFromReg (const ULWord inROMRegNum, const ULWord inROMRegValue,
 										NTV2InputXptID & outInputXpt, NTV2OutputXptIDSet & outOutputXpts,
-										const bool inAppendOutputXpts = false);
+										const bool inAppendOutputXpts = false);	//	New in SDK 16.0
 
 /**
 	@brief		Answers with the implemented crosspoint connections as obtained from the given ROM registers.
@@ -90,14 +90,14 @@ AJAExport bool GetRouteROMInfoFromReg (const ULWord inROMRegNum, const ULWord in
 	@param[out]	outConnections	Receives the legal implemented connections/routes.
 	@return	True if successful;  otherwise false.
 **/
-AJAExport bool GetPossibleConnections (const NTV2RegReads & inROMRegisters, NTV2PossibleConnections & outConnections);
+AJAExport bool GetPossibleConnections (const NTV2RegReads & inROMRegisters, NTV2PossibleConnections & outConnections);	//	New in SDK 16.0
 
 /**
 	@brief		Prepares an initialized, zeroed NTV2RegReads that's prepared to read all ROM registers from a device.
 	@param[out]	outROMRegisters	Receives the prepared NTV2RegReads.
 	@return		True if successful;  otherwise false.
 **/
-AJAExport bool MakeRouteROMRegisters (NTV2RegReads & outROMRegisters);
+AJAExport bool MakeRouteROMRegisters (NTV2RegReads & outROMRegisters);	//	New in SDK 16.0
 
 /**
 	@brief	This class is a collection of widget input-to-output connections that can be applied all-at-once to an NTV2 device.
@@ -196,7 +196,7 @@ class AJAExport CNTV2SignalRouter
 			@return		True if successful;  otherwise false.
 			@see		CNTV2SignalRouter::Reset
 		**/
-		virtual bool								ResetFrom (const NTV2XptConnections & inConnections)	{mConnections = inConnections; return true;}
+		virtual bool								ResetFrom (const NTV2XptConnections & inConnections)	{mConnections = inConnections; return true;}	//	New in SDK 16.0
 
 		/**
 			@return	The current number of connections (signal routes).
@@ -439,25 +439,25 @@ class AJAExport CNTV2SignalRouter
 			@param[out]	outConnections	Receives the connections found in the given register values.
 			@return		True if successful;  otherwise false.
 		**/
-		static bool					GetConnectionsFromRegs (const NTV2InputXptIDSet & inInputXptIDs, const NTV2RegisterReads & inRegValues, NTV2XptConnections & outConnections);
+		static bool					GetConnectionsFromRegs (const NTV2InputXptIDSet & inInputXptIDs, const NTV2RegisterReads & inRegValues, NTV2XptConnections & outConnections);	//	New in SDK 16.0
 
 		/**
 			@param[in]	inInputXpt	Specifies the input crosspoint ID of interest.
 			@return		True if the input only accepts RGB;  otherwise false.
 		**/
-		static bool					IsRGBOnlyInputXpt (const NTV2InputXptID inInputXpt);
+		static bool					IsRGBOnlyInputXpt (const NTV2InputXptID inInputXpt);	//	New in SDK 16.0
 
 		/**
 			@param[in]	inInputXpt	Specifies the input crosspoint ID of interest.
 			@return		True if the input only accepts YCbCr;  otherwise false.
 		**/
-		static bool					IsYUVOnlyInputXpt (const NTV2InputXptID inInputXpt);
+		static bool					IsYUVOnlyInputXpt (const NTV2InputXptID inInputXpt);	//	New in SDK 16.0
 
 		/**
 			@param[in]	inInputXpt	Specifies the input crosspoint ID of interest.
 			@return		True if the input is a mask/key input;  otherwise false.
 		**/
-		static bool					IsKeyInputXpt (const NTV2InputXptID inInputXpt);
+		static bool					IsKeyInputXpt (const NTV2InputXptID inInputXpt);	//	New in SDK 16.0
 
 		/**
 			@brief		Compares two sets of crosspoint connections.
@@ -470,7 +470,7 @@ class AJAExport CNTV2SignalRouter
 		static bool					CompareConnections (const NTV2XptConnections & inLHS,
 														const NTV2XptConnections & inRHS,
 														NTV2XptConnections & outNew,
-														NTV2XptConnections & outRemoved);
+														NTV2XptConnections & outRemoved);	//	New in SDK 16.0
 
 		/**
 			@brief		Decodes a given string into a map of crosspoint connections.
@@ -481,7 +481,7 @@ class AJAExport CNTV2SignalRouter
 											It will be empty if this function fails.
 			@return		True if successful;  otherwise false.
 		**/
-		static bool					CreateFromString (const std::string & inString, NTV2XptConnections & outConnections);
+		static bool					CreateFromString (const std::string & inString, NTV2XptConnections & outConnections);	//	New in SDK 16.0
 
 		/**
 			@brief		Sets the router from the given string.
@@ -503,7 +503,7 @@ class AJAExport CNTV2SignalRouter
 			@return		True if successful;  otherwise false.
 		**/
 		static bool					ToCodeString (std::string & outCode, const NTV2XptConnections & inConnections,
-													const PrintCodeConfig & inConfig = PrintCodeConfig());
+													const PrintCodeConfig & inConfig = PrintCodeConfig());	//	New in SDK 16.0
 
 
 		#if !defined (NTV2_DEPRECATE_12_5)
@@ -552,7 +552,7 @@ AJAExport NTV2InputXptID			GetCSCInputXptFromChannel (const NTV2Channel inCSC, c
 	@return		The appropriate ::NTV2InputXptID for the given LUT widget.
 	@param[in]	inLUT			Specifies the LUT of interest, expressed as an ::NTV2Channel (a zero-based index value).
 **/
-AJAExport NTV2InputXptID			GetLUTInputXptFromChannel (const NTV2Channel inLUT);
+AJAExport NTV2InputXptID			GetLUTInputXptFromChannel (const NTV2Channel inLUT);	//	New in SDK 16.0
 
 /**
 @return		The appropriate ::NTV2InputXptID for the given Dual-Link Input widget.
@@ -580,7 +580,7 @@ AJAExport NTV2OutputCrosspointID	GetCSCOutputXptFromChannel (const NTV2Channel i
 	@return		The appropriate NTV2OutputCrosspointID for the given LUT widget.
 	@param[in]	inLUT			Specifies the LUT of interest, expressed as an ::NTV2Channel (a zero-based index value).
 **/
-AJAExport NTV2OutputCrosspointID	GetLUTOutputXptFromChannel (const NTV2Channel inLUT);
+AJAExport NTV2OutputCrosspointID	GetLUTOutputXptFromChannel (const NTV2Channel inLUT);	//	New in SDK 16.0
 
 /**
 	@return		The appropriate NTV2OutputCrosspointID for the given FrameStore.

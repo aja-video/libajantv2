@@ -36,7 +36,7 @@ public:
 		@name	Inquiry
 	**/
 	///@{
-	virtual inline ULWord			GetVPID (void) const					{return m_uVPID;}	///< @return	My current 4-byte VPID value.
+	virtual inline ULWord			GetVPID (void) const			{return m_uVPID;}	///< @return	My current 4-byte VPID value.
 	virtual VPIDVersion				GetVersion (void) const;
 	virtual NTV2VideoFormat			GetVideoFormat (void) const;
 	virtual bool					IsStandard3Ga (void) const;
@@ -48,7 +48,7 @@ public:
 	virtual VPIDPictureRate			GetPictureRate (void) const;
 	virtual bool					GetImageAspect16x9 (void) const;
 	virtual VPIDSampling			GetSampling (void) const;
-	virtual bool					IsRGBSampling (void) const;
+	virtual bool					IsRGBSampling (void) const;						//	New in SDK 16.0
 	virtual VPIDChannel				GetChannel (void) const;
 	virtual VPIDChannel				GetDualLinkChannel (void) const;
 	virtual VPIDBitDepth			GetBitDepth (void) const;
@@ -57,10 +57,10 @@ public:
 	virtual NTV2VPIDXferChars		GetTransferCharacteristics (void) const;
 	virtual NTV2VPIDColorimetry		GetColorimetry (void) const;
 	virtual NTV2VPIDLuminance		GetLuminance (void) const;
-	virtual NTV2VPIDRGBRange		GetRGBRange (void) const;
-                                virtual std::ostream &			Print (std::ostream & ostrm) const;
-                                virtual std::ostream &			PrintPretty (std::ostream & ostrm) const;
-    virtual std::string				AsString (const bool inTabular = false) const;
+	virtual NTV2VPIDRGBRange		GetRGBRange (void) const;						//	New in SDK 16.0
+	virtual std::ostream &			Print (std::ostream & ostrm) const;
+	virtual std::ostream &			PrintPretty (std::ostream & ostrm) const;		//	New in SDK 16.0
+    virtual std::string				AsString (const bool inTabular = false) const;	//	New in SDK 16.0
 	///@}
 
 	/**
@@ -97,8 +97,8 @@ public:
 	virtual CNTV2VPID &			SetTransferCharacteristics	(const NTV2VPIDXferChars inXferChars);
 	virtual CNTV2VPID &			SetColorimetry				(const NTV2VPIDColorimetry inColorimetry);
 	virtual CNTV2VPID &			SetLuminance				(const NTV2VPIDLuminance inLuminance);
-	virtual CNTV2VPID &			SetRGBRange					(const NTV2VPIDRGBRange inRGBRange);
-	virtual inline CNTV2VPID &	MakeInvalid					(void)		{return SetVPID(0);}
+	virtual CNTV2VPID &			SetRGBRange					(const NTV2VPIDRGBRange inRGBRange);	//	New in SDK 16.0
+	virtual inline CNTV2VPID &	MakeInvalid					(void)		{return SetVPID(0);}		//	New in SDK 16.0
 								
 	///@}
 
@@ -128,21 +128,21 @@ public:
 											const NTV2VPIDXferChars	inXferChars = NTV2_VPID_TC_SDR_TV,
 											const NTV2VPIDColorimetry	inColorimetry = NTV2_VPID_Color_Rec709,
 											const NTV2VPIDLuminance	inLuminance = NTV2_VPID_Luminance_YCbCr,
-											const NTV2VPIDRGBRange	inRGBRange = NTV2_VPID_Range_Narrow);
+											const NTV2VPIDRGBRange	inRGBRange = NTV2_VPID_Range_Narrow);	//	New in SDK 16.0
 
-	static const std::string	VersionString				(const VPIDVersion version);
-	static const std::string	StandardString				(const VPIDStandard std);
-	static const std::string	PictureRateString			(const VPIDPictureRate rate);
-	static const std::string	SamplingString				(const VPIDSampling sample);
-	static const std::string	ChannelString				(const VPIDChannel chan);
-	static const std::string	DynamicRangeString			(const VPIDDynamicRange range);
-	static const std::string	BitDepthString				(const VPIDBitDepth depth);
-	static const std::string	LinkString					(const VPIDLink link);
-	static const std::string	AudioString					(const VPIDAudio audio);
-	static bool					VPIDStandardIsSingleLink	(const VPIDStandard inStd);
-	static bool					VPIDStandardIsDualLink		(const VPIDStandard inStd);
-	static bool					VPIDStandardIsQuadLink		(const VPIDStandard inStd);
-	static bool					VPIDStandardIsOctLink		(const VPIDStandard inStd);
+	static const std::string	VersionString				(const VPIDVersion version);	//	New in SDK 15.5
+	static const std::string	StandardString				(const VPIDStandard std);		//	New in SDK 15.5
+	static const std::string	PictureRateString			(const VPIDPictureRate rate);	//	New in SDK 15.5
+	static const std::string	SamplingString				(const VPIDSampling sample);	//	New in SDK 15.5
+	static const std::string	ChannelString				(const VPIDChannel chan);		//	New in SDK 15.5
+	static const std::string	DynamicRangeString			(const VPIDDynamicRange range);	//	New in SDK 15.5
+	static const std::string	BitDepthString				(const VPIDBitDepth depth);		//	New in SDK 15.5
+	static const std::string	LinkString					(const VPIDLink link);			//	New in SDK 15.5
+	static const std::string	AudioString					(const VPIDAudio audio);		//	New in SDK 15.5
+	static bool					VPIDStandardIsSingleLink	(const VPIDStandard inStd);		//	New in SDK 16.0
+	static bool					VPIDStandardIsDualLink		(const VPIDStandard inStd);		//	New in SDK 16.0
+	static bool					VPIDStandardIsQuadLink		(const VPIDStandard inStd);		//	New in SDK 16.0
+	static bool					VPIDStandardIsOctLink		(const VPIDStandard inStd);		//	New in SDK 16.0
 	#if !defined (NTV2_DEPRECATE)
 		virtual VPIDDynamicRange NTV2_DEPRECATED_f(GetDynamicRange (void) const);
 		virtual void NTV2_DEPRECATED_f(SetDynamicRange (const VPIDDynamicRange inDynamicRange));	

@@ -591,7 +591,7 @@ public:
 	/**
 		@brief		Synchronously transfers audio data from a given Audio System's buffer memory on the AJA device to the specified host
 					buffer, blocking until the transfer has completed.
-		@param[in]	inAudioEngine		Specifies the Audio System on the device that is to supply the audio data.
+		@param[in]	inAudioSystem		Specifies the Audio System on the device that is to supply the audio data.
 		@param		pOutAudioBuffer		Specifies a valid, non-NULL pointer to the host buffer that is to receive the audio data.
 										This buffer must be large enough to accommodate "inByteCount" bytes of data specified (below).
 		@param[in]	inOffsetBytes		Specifies the offset into the Audio System's buffer memory on the device from which to transfer
@@ -603,7 +603,7 @@ public:
 		@note		This function can also be used to read audio samples from the output (playout) portion of the Audio System's buffer
 					memory.
 	**/
-	AJA_VIRTUAL bool	DMAReadAudio (	const NTV2AudioSystem	inAudioEngine,
+	AJA_VIRTUAL bool	DMAReadAudio (	const NTV2AudioSystem	inAudioSystem,
 										ULWord *				pOutAudioBuffer,
 										const ULWord			inOffsetBytes,
 										const ULWord			inByteCount);
@@ -611,7 +611,7 @@ public:
 	/**
 		@brief		Synchronously transfers audio data from the specified host buffer to the given Audio System's buffer memory
 					on the AJA device, blocking until the transfer has completed.
-		@param[in]	inAudioEngine		Specifies the Audio System on the device that is to receive the audio data.
+		@param[in]	inAudioSystem		Specifies the Audio System on the device that is to receive the audio data.
 		@param[in]	pInAudioBuffer		Specifies a valid, non-NULL pointer to the host buffer that is to supply the audio data.
 		@param[in]	inOffsetBytes		Specifies the offset into the Audio System's buffer memory on the device to which audio data
 										will be transferred. Use zero for the start of the playout portion of the Audio System's buffer
@@ -621,9 +621,9 @@ public:
 										buffer, nor the device's audio buffer.
 		@return		True if successful; otherwise false.
 		@note		This function can also be used to write audio samples into the capture portion of the Audio System's buffer
-					memory (which will quickly be overwritten if the capture engine has been started).
+					memory (which will quickly be overwritten if the capture audio system has been started).
 	**/
-	AJA_VIRTUAL bool	DMAWriteAudio (	const NTV2AudioSystem	inAudioEngine,
+	AJA_VIRTUAL bool	DMAWriteAudio (	const NTV2AudioSystem	inAudioSystem,
 										const ULWord *			pInAudioBuffer,
 										const ULWord			inOffsetBytes,
 										const ULWord			inByteCount);
@@ -694,7 +694,7 @@ public:
 		@param[in]	inMap		Also try to lock the segment map.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap = false);
+	AJA_VIRTUAL bool	DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap = false);	//	New in SDK 15.5
 
 	/**
 		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
@@ -929,7 +929,7 @@ public:
 		@param[in]	inEnable	Specify true to enable the frame pulse reference; otherwise specify false.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL	bool		EnableFramePulseReference (const bool inEnable);
+	AJA_VIRTUAL	bool		EnableFramePulseReference (const bool inEnable);	//	New in SDK 15.5
 	
 	/**
 		@brief			Answers whether or not the device's current frame pulse reference source is enabled.
@@ -937,7 +937,7 @@ public:
 		@param[out]		outEnabled		Receives true if the frame pulse reference is enabled; otherwise false.
 		@return			True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL	bool		GetEnableFramePulseReference (bool & outEnabled);
+	AJA_VIRTUAL	bool		GetEnableFramePulseReference (bool & outEnabled);	//	New in SDK 15.5
 	
 	/**
 		@brief		Sets the device's frame pulse reference source. See \ref deviceclockingandsync for more information.
@@ -945,14 +945,14 @@ public:
 		@param[in]	inRefSource		Specifies the ::NTV2ReferenceSource to use for the device's frame pulse reference.
 					
 	**/
-	AJA_VIRTUAL	bool		SetFramePulseReference (const NTV2ReferenceSource inRefSource);
+	AJA_VIRTUAL	bool		SetFramePulseReference (const NTV2ReferenceSource inRefSource);	//	New in SDK 15.5
 	
 	/**
 		@brief			Answers with the device's current frame pulse reference source.
 		@return			True if successful; otherwise false.
 		@param[out]		outRefSource	Receives the ::NTV2ReferenceSource value.
 	**/
-	AJA_VIRTUAL	bool		GetFramePulseReference (NTV2ReferenceSource & outRefSource);
+	AJA_VIRTUAL	bool		GetFramePulseReference (NTV2ReferenceSource & outRefSource);	//	New in SDK 15.5
 
 	/**
 		@brief		Retrieves the device's current "retail service" task mode.
@@ -1661,10 +1661,10 @@ public:
 	/**
 		@brief		Enables or disables ::NTV2AudioLoopBack mode for the given ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
-		@param[in]	inMode			Specify ::NTV2_AUDIO_LOOPBACK_ON to force the Audio System's output embedder, when the playout engine
-									is stopped (i.e., "Reset" mode), to pull audio samples from the Audio System's input de-embedder.
+		@param[in]	inMode			Specify ::NTV2_AUDIO_LOOPBACK_ON to force the Audio System's output embedder, when the playout audio
+									system is stopped (i.e., "Reset" mode), to pull audio samples from the Audio System's input de-embedder.
 									Specify ::NTV2_AUDIO_LOOPBACK_OFF to have the output embedder emit silence (zeroes) when the playout
-									engine is stopped.
+									audio system is stopped.
 		@param[in]	inAudioSystem	Optionally specifies the Audio System on the device to be affected. Defaults to ::NTV2_AUDIOSYSTEM_1.
 		@see		CNTV2Card::GetAudioLoopBack, \ref audioplayout
 	**/
@@ -1674,9 +1674,9 @@ public:
 		@brief		Answers if ::NTV2AudioLoopBack mode is currently on or off for the given ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
 		@param[in]	outMode			Receives ::NTV2_AUDIO_LOOPBACK_ON if the Audio System's output embedder will pull audio samples from
-									the Audio System's input de-embedder when the playout engine is stopped;
+									the Audio System's input de-embedder when the playout audio system is stopped;
 									otherwise receives ::NTV2_AUDIO_LOOPBACK_OFF if the output embedder emits silence (zeroes) when the
-									playout engine is stopped.
+									playout audio system is stopped.
 		@param[in]	inAudioSystem	Optionally specifies the Audio System on the device to be affected. Defaults to ::NTV2_AUDIOSYSTEM_1.
 		@see		CNTV2Card::SetAudioLoopBack, \ref audioplayout
 	**/
@@ -2388,7 +2388,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::SetAudioMixerInputAudioSystem, \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		GetAudioMixerInputAudioSystem (const NTV2AudioMixerInput inMixerInput, NTV2AudioSystem & outAudioSystem);
+	AJA_VIRTUAL bool		GetAudioMixerInputAudioSystem (const NTV2AudioMixerInput inMixerInput, NTV2AudioSystem & outAudioSystem);	//	New in SDK 15.5
 
 	/**
 		@brief		Sets the Audio System that will drive the given input of the Audio Mixer.
@@ -2397,7 +2397,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::GetAudioMixerInputAudioSystem, \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		SetAudioMixerInputAudioSystem (const NTV2AudioMixerInput inMixerInput, const NTV2AudioSystem inAudioSystem);
+	AJA_VIRTUAL bool		SetAudioMixerInputAudioSystem (const NTV2AudioMixerInput inMixerInput, const NTV2AudioSystem inAudioSystem);	//	New in SDK 15.5
 
 	/**
 		@brief		Answers with the Audio Channel Pair that's currently driving the given input of the Audio Mixer.
@@ -2407,7 +2407,7 @@ public:
 		@note		Audio mixer inputs ::NTV2_AudioMixerInputAux1 and ::NTV2_AudioMixerInputAux2 currently return ::NTV2_AudioChannel1_2.
 		@see		CNTV2Card::SetAudioMixerInputChannelSelect, \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		GetAudioMixerInputChannelSelect (const NTV2AudioMixerInput inMixerInput, NTV2AudioChannelPair & outChannelPair);
+	AJA_VIRTUAL bool		GetAudioMixerInputChannelSelect (const NTV2AudioMixerInput inMixerInput, NTV2AudioChannelPair & outChannelPair);	//	New in SDK 15.5
 
 	/**
 		@brief		Specifies the Audio Channel Pair that will drive the given input of the Audio Mixer.
@@ -2417,7 +2417,7 @@ public:
 		@note		Audio mixer inputs ::NTV2_AudioMixerInputAux1 and ::NTV2_AudioMixerInputAux2 are currently fixed to ::NTV2_AudioChannel1_2 and cannot be changed.
 		@see		CNTV2Card::SetAudioMixerInputChannelSelect, \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		SetAudioMixerInputChannelSelect (const NTV2AudioMixerInput inMixerInput, const NTV2AudioChannelPair inChannelPair);
+	AJA_VIRTUAL bool		SetAudioMixerInputChannelSelect (const NTV2AudioMixerInput inMixerInput, const NTV2AudioChannelPair inChannelPair);	//	New in SDK 15.5
 
 	/**
 		@brief		Answers with the current gain setting for the Audio Mixer's given input.
@@ -2430,7 +2430,7 @@ public:
 					while the Aux 1 & 2 inputs have separate gain settings for audio channels 1 & 2 (L & R).
 		@see		CNTV2Card::GetAudioMixerInputGain, \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		GetAudioMixerInputGain (const NTV2AudioMixerInput inMixerInput, const NTV2AudioMixerChannel inChannel, ULWord & outGainValue);
+	AJA_VIRTUAL bool		GetAudioMixerInputGain (const NTV2AudioMixerInput inMixerInput, const NTV2AudioMixerChannel inChannel, ULWord & outGainValue);	//	New in SDK 15.5
 
 	/**
 		@brief		Sets the gain for the given input of the Audio Mixer.
@@ -2443,7 +2443,7 @@ public:
 					while the Aux 1 & 2 inputs have separate gain settings for audio channels 1 & 2 (L & R).
 		@see		CNTV2Card::SetAudioMixerInputGain, \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		SetAudioMixerInputGain (const NTV2AudioMixerInput inMixerInput, const NTV2AudioMixerChannel inChannel, const ULWord inGainValue);
+	AJA_VIRTUAL bool		SetAudioMixerInputGain (const NTV2AudioMixerInput inMixerInput, const NTV2AudioMixerChannel inChannel, const ULWord inGainValue);	//	New in SDK 15.5
     
     /**
 		@brief		Answers with the current gain setting for the Audio Mixer's output.
@@ -2452,7 +2452,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::GetAudioMixerOutputGain, \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		GetAudioMixerOutputGain (ULWord & outGainValue);
+	AJA_VIRTUAL bool		GetAudioMixerOutputGain (ULWord & outGainValue);	//	New in SDK 15.5
 
 	/**
 		@brief		Sets the gain for the output of the Audio Mixer.
@@ -2461,7 +2461,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::SetAudioMixerOutputGain, \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		SetAudioMixerOutputGain (const ULWord inGainValue);
+	AJA_VIRTUAL bool		SetAudioMixerOutputGain (const ULWord inGainValue);	//	New in SDK 15.5
 	
 	/**
 		@brief		Answers with the Audio Mixer's current audio output levels.
@@ -2472,7 +2472,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		See \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		GetAudioMixerOutputLevels (const NTV2AudioChannelPairs & inChannelPairs, std::vector<uint32_t> & outLevels);
+	AJA_VIRTUAL bool		GetAudioMixerOutputLevels (const NTV2AudioChannelPairs & inChannelPairs, std::vector<uint32_t> & outLevels);	//	New in SDK 15.5
     
     /**
 		@brief		Answers with the current gain setting for the headphone out.
@@ -2501,7 +2501,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::SetAudioMixerInputChannelsMute, \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		GetAudioMixerInputChannelsMute (const NTV2AudioMixerInput inMixerInput, NTV2AudioChannelsMuted16 & outMutes);
+	AJA_VIRTUAL bool		GetAudioMixerInputChannelsMute (const NTV2AudioMixerInput inMixerInput, NTV2AudioChannelsMuted16 & outMutes);	//	New in SDK 15.5
 
 	/**
 		@brief		Mutes (or enables) the given output audio channel of the Audio Mixer.
@@ -2513,7 +2513,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::GetAudioMixerInputChannelsMute, \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		SetAudioMixerInputChannelsMute (const NTV2AudioMixerInput inMixerInput, const NTV2AudioChannelsMuted16 inMutes);
+	AJA_VIRTUAL bool		SetAudioMixerInputChannelsMute (const NTV2AudioMixerInput inMixerInput, const NTV2AudioChannelsMuted16 inMutes);	//	New in SDK 15.5
 
 	/**
 		@brief		Answers with the Audio Mixer's current audio input levels.
@@ -2525,7 +2525,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		See \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		GetAudioMixerInputLevels (const NTV2AudioMixerInput inMixerInput, const NTV2AudioChannelPairs & inChannelPairs, std::vector<uint32_t> & outLevels);
+	AJA_VIRTUAL bool		GetAudioMixerInputLevels (const NTV2AudioMixerInput inMixerInput, const NTV2AudioChannelPairs & inChannelPairs, std::vector<uint32_t> & outLevels);	//	New in SDK 15.5
 
 	/**
 		@brief		Answers with the Audio Mixer's current sample count used for measuring audio levels.
@@ -2533,7 +2533,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		See \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		GetAudioMixerLevelsSampleCount (ULWord & outSampleCount);
+	AJA_VIRTUAL bool		GetAudioMixerLevelsSampleCount (ULWord & outSampleCount);	//	New in SDK 15.5
 
 	/**
 		@brief		Sets the Audio Mixer's sample count it uses for measuring audio levels.
@@ -2542,7 +2542,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		See \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		SetAudioMixerLevelsSampleCount (const ULWord inSampleCount);
+	AJA_VIRTUAL bool		SetAudioMixerLevelsSampleCount (const ULWord inSampleCount);	//	New in SDK 15.5
 
 	/**
 		@brief		Answers with a std::bitset that indicates which output audio channels of the Audio Mixer are currently muted.
@@ -2551,7 +2551,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::SetAudioMixerOutputChannelsMute, \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		GetAudioMixerOutputChannelsMute (NTV2AudioChannelsMuted16 & outMutes);
+	AJA_VIRTUAL bool		GetAudioMixerOutputChannelsMute (NTV2AudioChannelsMuted16 & outMutes);	//	New in SDK 15.5
 
 	/**
 		@brief		Mutes or enables the individual output audio channels of the Audio Mixer.
@@ -2561,7 +2561,7 @@ public:
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::GetAudioMixerOutputChannelsMute, \ref audiomixer
 	**/
-	AJA_VIRTUAL bool		SetAudioMixerOutputChannelsMute (const NTV2AudioChannelsMuted16 inMutes);
+	AJA_VIRTUAL bool		SetAudioMixerOutputChannelsMute (const NTV2AudioChannelsMuted16 inMutes);	//	New in SDK 15.5
 
 #if !defined(NTV2_DEPRECATE_15_5)
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerMainInputAudioSystem(NTV2AudioSystem & outAudioSystem))		{return GetAudioMixerInputAudioSystem(NTV2_AudioMixerInputMain, outAudioSystem);}	///< @deprecated	Call CNTV2Card::GetAudioMixerInputAudioSystem instead.
@@ -4968,7 +4968,7 @@ public:
 		@param[out]	outOutputXpt	Receives the output (signal source) the given input is connected to (if connected),
 									or NTV2_XptBlack if not connected.
 		@return		True if successful;  otherwise false.
-		@see		ntv2signalrouting, CNTV2Card::GetConnectedInput, CNTV2Card::IsConnected
+		@see		\ref ntv2signalrouting, CNTV2Card::GetConnectedInput, CNTV2Card::IsConnected
 	**/
 	AJA_VIRTUAL bool	GetConnectedOutput (const NTV2InputCrosspointID inInputXpt, NTV2OutputCrosspointID & outOutputXpt);
 
@@ -4978,7 +4978,7 @@ public:
 		@param[out]	outInputXpt		Receives one of the input (signal sink) the given output is connected to (if connected),
 									or NTV2_XptBlack if not connected.
 		@return		True if successful;  otherwise false.
-		@see		ntv2signalrouting, CNTV2Card::GetConnectedOutput, CNTV2Card::IsConnected
+		@see		\ref ntv2signalrouting, CNTV2Card::GetConnectedOutput, CNTV2Card::IsConnected
 		@bug		If the output is connected to more than one widget input, this function only returns the first one found.
 	**/
 	AJA_VIRTUAL bool	GetConnectedInput (const NTV2OutputCrosspointID inOutputXpt, NTV2InputCrosspointID & outInputXpt);
@@ -4989,9 +4989,9 @@ public:
 		@param[out]	outInputXpts	Receives the ::NTV2InputCrosspointIDSet of the inputs (signal sinks) the given output
 									is connected to (if connected). If none are connected, the set will be empty.
 		@return		True if successful;  otherwise false.
-		@see		ntv2signalrouting, CNTV2Card::GetConnectedOutput, CNTV2Card::IsConnected
+		@see		\ref ntv2signalrouting, CNTV2Card::GetConnectedOutput, CNTV2Card::IsConnected
 	**/
-	AJA_VIRTUAL bool	GetConnectedInputs (const NTV2OutputCrosspointID inOutputXpt, NTV2InputCrosspointIDSet & outInputXpts);
+	AJA_VIRTUAL bool	GetConnectedInputs (const NTV2OutputCrosspointID inOutputXpt, NTV2InputCrosspointIDSet & outInputXpts);	//	New in SDK 15.5
 
 	/**
 		@brief		Connects the given widget signal input (sink) to the given widget signal output (source).
@@ -5002,7 +5002,7 @@ public:
 									before writing the crosspoint register;  otherwise writes the crosspoint register
 									regardless. Defaults to false.
 		@return		True if successful;  otherwise false.
-		@see		ntv2signalrouting, CNTV2Card::Disconnect, CNTV2Card::IsConnected
+		@see		\ref ntv2signalrouting, CNTV2Card::Disconnect, CNTV2Card::IsConnected
 	**/
 	AJA_VIRTUAL bool	Connect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, const bool inValidate = false);
 
@@ -5010,7 +5010,7 @@ public:
 		@brief		Disconnects the given widget signal input (sink) from whatever output (source) it may be connected.
 		@param[in]	inInputXpt		Specifies the input (signal sink) to be disconnected.
 		@return		True if successful;  otherwise false.
-		@see		ntv2signalrouting, CNTV2Card::Connect
+		@see		\ref ntv2signalrouting, CNTV2Card::Connect
 	**/
 	AJA_VIRTUAL bool	Disconnect (const NTV2InputCrosspointID inInputXpt);
 
@@ -5020,7 +5020,7 @@ public:
 		@param[out]	outIsConnected	Receives true if the input is connected to any other output (other than NTV2_XptBlack).
 		@return		True if successful;  otherwise false.
 		@note		If the input is connected to NTV2_XptBlack, "outIsConnected" will be "false".
-		@see		ntv2signalrouting, CNTV2Card::IsConnectedTo
+		@see		\ref ntv2signalrouting, CNTV2Card::IsConnectedTo
 	**/
 	AJA_VIRTUAL bool	IsConnected (const NTV2InputCrosspointID inInputXpt, bool & outIsConnected);
 
@@ -5030,7 +5030,7 @@ public:
 		@param[in]	inOutputXpt		Specifies the output (signal source) of interest. It's okay to specify NTV2_XptBlack.
 		@param[out]	outIsConnected	Receives true if the input is connected to the specified output.
 		@return		True if successful;  otherwise false.
-		@see		ntv2signalrouting, CNTV2Card::IsConnected
+		@see		CNTV2Card::IsConnected, \ref ntv2signalrouting
 	**/
 	AJA_VIRTUAL bool	IsConnectedTo (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, bool & outIsConnected);
 
@@ -5042,7 +5042,7 @@ public:
 		@param[out]	outCanConnect	Receives true if the input can be connected to the specified output;  otherwise false.
 		@return		True if successful;  otherwise false.
 		@note		This function will return false (failure) if the device firmware doesn't support route validation.
-		@see		ntv2signalrouting, CNTV2Card::Connect
+		@see		\ref ntv2signalrouting, CNTV2Card::Connect
 	**/
 	AJA_VIRTUAL bool	CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, bool & outCanConnect);
 
@@ -5063,7 +5063,7 @@ public:
 					are built and then applied to the device in this function call.
 					This function iterates over each connection that's specified in the given routing table and updates
 					the appropriate register in the device.
-		@see		ntv2signalrouting, CNTV2SignalRouter
+		@see		\ref ntv2signalrouting, CNTV2SignalRouter
 	**/
 	AJA_VIRTUAL bool	ApplySignalRoute (const CNTV2SignalRouter & inRouter, const bool inReplace = false);
 
@@ -5084,7 +5084,7 @@ public:
 					are built and then applied to the device in this function call.
 					This function iterates over each connection that's specified in the given routing table and updates
 					the appropriate register in the device.
-		@see		ntv2signalrouting
+		@see		\ref ntv2signalrouting
 	**/
 	AJA_VIRTUAL bool	ApplySignalRoute (const NTV2XptConnections & inConnections, const bool inReplace = false);
 
@@ -5092,7 +5092,7 @@ public:
 		@brief		Removes the given widget routing connections from the AJA device.
 		@return		True if successful; otherwise false.
 		@param[in]	inConnections	Specifies the routing connections to be removed from the device.
-		@see		ntv2signalrouting
+		@see		\ref ntv2signalrouting
 	**/
 	AJA_VIRTUAL bool	RemoveConnections (const NTV2XptConnections & inConnections);
 
@@ -5101,7 +5101,7 @@ public:
 		@return		True if successful; otherwise false.
 		@details	This function writes zeroes into all crosspoint selection registers, effectively
 					clearing any existing routing configuration on the device.
-		@see		ntv2signalrouting
+		@see		\ref ntv2signalrouting
 	**/
 	AJA_VIRTUAL bool	ClearRouting (void);
 
@@ -5109,7 +5109,7 @@ public:
 		@brief		Answers with the current signal routing between any and all widgets on the AJA device.
 		@param[out]	outRouting	Receives the current signal routing.
 		@return		True if successful; otherwise false.
-		@see		ntv2signalrouting, CNTV2SignalRouter, CNTV2Card::GetRoutingForChannel, CNTV2Card::ApplySignalRoute
+		@see		\ref ntv2signalrouting, CNTV2SignalRouter, CNTV2Card::GetRoutingForChannel, CNTV2Card::ApplySignalRoute
 	**/
 	AJA_VIRTUAL bool	GetRouting (CNTV2SignalRouter & outRouting);
 
@@ -5117,7 +5117,7 @@ public:
 		@brief		Answers with the device's current widget routing connections.
 		@return		True if successful; otherwise false.
 		@param[out]	outConnections	Receives the current routing connections.
-		@see		ntv2signalrouting
+		@see		\ref ntv2signalrouting
 	**/
 	AJA_VIRTUAL bool	GetConnections (NTV2XptConnections & outConnections);	//	New in SDK 16.0
 
@@ -5126,7 +5126,7 @@ public:
 		@param[in]	inChannel	Specifies the NTV2Channel of interest.
 		@param[out]	outRouting	Receives the current signal routing for the given channel.
 		@return		True if successful; otherwise false.
-		@see		ntv2signalrouting, CNTV2SignalRouter, CNTV2Card::GetRouting, CNTV2Card::ApplySignalRoute
+		@see		\ref ntv2signalrouting, CNTV2SignalRouter, CNTV2Card::GetRouting, CNTV2Card::ApplySignalRoute
 	**/
 	AJA_VIRTUAL bool	GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRouter & outRouting);
 

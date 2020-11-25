@@ -34,9 +34,9 @@ typedef UByteSequence				AJAAncPktCounts;				///< @brief	Ordered sequence of SMP
 typedef AJAAncPktCounts::const_iterator	AJAAncPktCountsConstIter;	///< @brief	Handy const iterator over AJAAncPktCounts
 class CNTV2Card;
 
-typedef std::set<AJAAncPktDIDSID>			AJAAncPktDIDSIDSet;				///< @brief	Set of distinct packet DID/SIDs
-typedef AJAAncPktDIDSIDSet::const_iterator	AJAAncPktDIDSIDSetConstIter;	///< @brief	Handy const iterator for AJAAncPktDIDSIDSet
-typedef AJAAncPktDIDSIDSet::iterator		AJAAncPktDIDSIDSetIter;			///< @brief	Handy non-const iterator for AJAAncPktDIDSIDSet
+typedef std::set<AJAAncPktDIDSID>			AJAAncPktDIDSIDSet;				///< @brief	Set of distinct packet DID/SIDs (New in SDK 16.0)
+typedef AJAAncPktDIDSIDSet::const_iterator	AJAAncPktDIDSIDSetConstIter;	///< @brief	Handy const iterator for AJAAncPktDIDSIDSet (New in SDK 16.0)
+typedef AJAAncPktDIDSIDSet::iterator		AJAAncPktDIDSIDSetIter;			///< @brief	Handy non-const iterator for AJAAncPktDIDSIDSet (New in SDK 16.0)
 
 
 /**
@@ -229,7 +229,7 @@ public:	//	INSTANCE METHODS
 	**/
 	virtual AJAAncillaryData *				GetAncillaryDataWithID (const uint8_t inDID, const uint8_t inSID, const uint32_t inIndex = 0) const;
 
-	virtual AJAAncPktDIDSIDSet				GetAncillaryPacketIDs (void) const;	///< @return	The set of DID/SID pairs of all of my packets.
+	virtual AJAAncPktDIDSIDSet				GetAncillaryPacketIDs (void) const;	///< @return	The set of DID/SID pairs of all of my packets. (New in SDK 16.0)
 	///@}
 
 
@@ -665,6 +665,6 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const AJAU32Pk
 	@param[in]	inSet			Specifies the AJAAncPktDIDSIDSet to be rendered into the output stream.
 	@return		A non-constant reference to the specified output stream.
 **/
-AJAExport std::ostream & operator << (std::ostream & inOutStream, const AJAAncPktDIDSIDSet & inSet);
+AJAExport std::ostream & operator << (std::ostream & inOutStream, const AJAAncPktDIDSIDSet & inSet);	//	New in SDK 16.0
 
 #endif	// AJA_ANCILLARYLIST_H

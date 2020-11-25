@@ -3615,6 +3615,11 @@ typedef enum
 	NTV2_GBRFull_to_GBRSMPTE_Matrix,		// RGB full  range -> RGB SMPTE range
 	NTV2_GBRSMPTE_to_GBRFull_Matrix,		// RGB SMPTE range -> RGB full  range
 
+    NTV2_GBRFull_to_YCbCr_Rec2020_Matrix,	// RGB full  range -> YCbCr Rec 2020
+    NTV2_GBRSMPTE_to_YCbCr_Rec2020_Matrix,	// RGB SMPTE range -> YCbCr Rec 2020
+    NTV2_YCbCr_to_GBRFull_Rec2020_Matrix,	// YCbCr -> RGB full  range Rec 2020
+    NTV2_YCbCr_to_GBRSMPTE_Rec2020_Matrix,	// YCbCr -> RGB SMPTE range Rec 2020
+
 	#if !defined (NTV2_DEPRECATE)
 		NTV2K2_Rec709Matrix		= NTV2_Rec709Matrix,
 		NTV2K2_Rec601Matrix		= NTV2_Rec601Matrix,

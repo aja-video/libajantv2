@@ -4,7 +4,7 @@
     @copyright	(C) 2017-2020 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
 **/
 #include "ntv2supportlogger.h"
-
+#include "ntv2devicescanner.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2konaflashprogram.h"
 #include "ntv2registerexpert.h"
@@ -15,6 +15,12 @@
 #include <sstream>
 #include <vector>
 #include <iterator>
+
+#if defined(MSWindows)
+	#define	PATH_DELIMITER	"\\"
+#else
+	#define	PATH_DELIMITER	"/"
+#endif
 
 using namespace std;
 
@@ -262,29 +268,33 @@ AJAExport std::ostream & operator << (std::ostream & outStream, const CNTV2Suppo
     return outStream;
 }
 
-CNTV2SupportLogger::CNTV2SupportLogger(CNTV2Card& card, NTV2SupportLoggerSections sections)
-    : mSections(sections)
+CNTV2SupportLogger::CNTV2SupportLogger (CNTV2Card & card, NTV2SupportLoggerSections sections)
+    :	mDevice		(card),
+		mDispose	(false),
+		mSections	(sections)
 {
-    AsNTV2DriverInterfaceRef(mDevice).Open(card.GetIndexNumber());
 }
 
-CNTV2SupportLogger::CNTV2SupportLogger(UWord cardIndex, NTV2SupportLoggerSections sections)
-    : mSections(sections)
+CNTV2SupportLogger::CNTV2SupportLogger (UWord cardIndex, NTV2SupportLoggerSections sections)
+    :	mDevice		(*(new CNTV2Card(cardIndex))),
+		mDispose	(true),
+		mSections	(sections)
 {
-    AsNTV2DriverInterfaceRef(mDevice).Open(cardIndex);
 }
 
 CNTV2SupportLogger::~CNTV2SupportLogger()
 {
+	if (mDispose)
+		delete &mDevice;
 }
 
-int CNTV2SupportLogger::Version(void)
+int CNTV2SupportLogger::Version (void)
 {
     // Bump this whenever the formatting of the support log changes drastically
     return 2;
 }
 
-void CNTV2SupportLogger::PrependToSection(uint32_t section, const std::string& sectionData)
+void CNTV2SupportLogger::PrependToSection (uint32_t section, const string & sectionData)
 {
     if (mPrependMap.find(section) != mPrependMap.end())
     {
@@ -298,7 +308,7 @@ void CNTV2SupportLogger::PrependToSection(uint32_t section, const std::string& s
     }
 }
 
-void CNTV2SupportLogger::AppendToSection(uint32_t section, const std::string& sectionData)
+void CNTV2SupportLogger::AppendToSection (uint32_t section, const string & sectionData)
 {
     if (mAppendMap.find(section) != mAppendMap.end())
     {
@@ -312,7 +322,7 @@ void CNTV2SupportLogger::AppendToSection(uint32_t section, const std::string& se
     }
 }
 
-void CNTV2SupportLogger::AddHeader(const std::string& sectionName, const std::string& sectionData)
+void CNTV2SupportLogger::AddHeader(const string & sectionName, const string & sectionData)
 {
     ostringstream oss;
     makeHeader(oss, sectionName);
@@ -320,7 +330,7 @@ void CNTV2SupportLogger::AddHeader(const std::string& sectionName, const std::st
     mHeaderStr.append(oss.str());
 }
 
-void CNTV2SupportLogger::AddFooter(const std::string& sectionName, const std::string& sectionData)
+void CNTV2SupportLogger::AddFooter (const string & sectionName, const string & sectionData)
 {
     ostringstream oss;
     makeHeader(oss, sectionName);
@@ -348,72 +358,61 @@ void CNTV2SupportLogger::AddFooter(const std::string& sectionName, const std::st
 
 std::string CNTV2SupportLogger::ToString(void) const
 {
-    ostringstream oss;
+	ostringstream oss;
+	vector<char> dateBufferLocal(128, 0);
+	vector<char> dateBufferUTC(128, 0);
 
-    vector<char> dateBufferLocal(128, 0);
-    vector<char> dateBufferUTC(128, 0);
+	// get the wall time and format it
+	time_t now = time(AJA_NULL);
+	struct tm *localTimeinfo;
+	localTimeinfo = localtime(reinterpret_cast<const time_t*>(&now));
+	strcpy(&dateBufferLocal[0], "");
+	if (localTimeinfo)
+		::strftime(&dateBufferLocal[0], dateBufferLocal.size(), "%B %d, %Y %I:%M:%S %p %Z (local)", localTimeinfo);
 
-    // get the wall time and format it
-    time_t now = time(AJA_NULL);
-    struct tm *localTimeinfo;
-    localTimeinfo = localtime(reinterpret_cast<const time_t*>(&now));
-    strcpy(&dateBufferLocal[0], "");
-    if (localTimeinfo)
-    {
-        ::strftime(&dateBufferLocal[0], dateBufferLocal.size(), "%B %d, %Y %I:%M:%S %p %Z (local)", localTimeinfo);
-    }
+	struct tm *utcTimeinfo;
+	utcTimeinfo = gmtime(reinterpret_cast<const time_t*>(&now));
+	strcpy(&dateBufferUTC[0], "");
+	if (utcTimeinfo)
+		::strftime(&dateBufferUTC[0], dateBufferUTC.size(), "%Y-%m-%dT%H:%M:%SZ UTC", utcTimeinfo);
 
-    struct tm *utcTimeinfo;
-    utcTimeinfo = gmtime(reinterpret_cast<const time_t*>(&now));
-    strcpy(&dateBufferUTC[0], "");
-    if (utcTimeinfo)
-    {
-        ::strftime(&dateBufferUTC[0], dateBufferUTC.size(), "%Y-%m-%dT%H:%M:%SZ UTC", utcTimeinfo);
-    }
+	oss << "Begin NTV2 Support Log" << "\n" <<
+		   "Version: "   << CNTV2SupportLogger::Version() << "\n"
+		   "Generated: " << &dateBufferLocal[0] <<
+		   "           " << &dateBufferUTC[0] << "\n\n" << flush;
 
-    oss << "Begin NTV2 Support Log" << "\n" <<
-           "Version: "   << CNTV2SupportLogger::Version() << "\n"
-           "Generated: " << &dateBufferLocal[0] <<
-           "           " << &dateBufferUTC[0] << "\n\n" << flush;
+	if (!mHeaderStr.empty())
+		oss << mHeaderStr;
 
-    if (mHeaderStr.empty() == false)
-    {
-        oss << mHeaderStr;
-    }
+	// Go ahead and show info even if the device is not open
+	LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionInfo, "Info", FetchInfoLog)
 
-    // Go ahead and show info even if the device is not open
-    LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionInfo, "Info", FetchInfoLog);
+	if (mDevice.IsOpen())
+	{
+		LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionAutoCirculate, "AutoCirculate", FetchAutoCirculateLog)
+		LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionAudio, "Audio", FetchAudioLog)
+		LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionRouting, "Routing", FetchRoutingLog)
+		LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionRegisters, "Regs", FetchRegisterLog)
+	}
 
-    if (mDevice.IsOpen())
-    {
-        LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionAutoCirculate, "AutoCirculate", FetchAutoCirculateLog);
-        LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionAudio, "Audio", FetchAudioLog);
-        LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionRouting, "Routing", FetchRoutingLog);
-        LoggerSectionToFunctionMacro(NTV2_SupportLoggerSectionRegisters, "Regs", FetchRegisterLog);
-    }
-
-    if (!mFooterStr.empty())
-    {
-        oss << mFooterStr;
-    }
-
-    oss << endl << "End NTV2 Support Log";
-
-    return oss.str();
+	if (!mFooterStr.empty())
+		oss << mFooterStr;
+	oss << endl << "End NTV2 Support Log";
+	return oss.str();
 }
 
-void CNTV2SupportLogger::ToString(std::string& outString) const
+void CNTV2SupportLogger::ToString (string & outString) const
 {
-    outString = ToString();
+	outString = ToString();
 }
 
 static inline std::string HEX0NStr(const uint32_t inNum, const uint16_t inWidth)	{ostringstream	oss;  oss << HEX0N(inNum,inWidth);  return oss.str();}
 static inline std::string xHEX0NStr(const uint32_t inNum, const uint16_t inWidth)	{ostringstream	oss;  oss << xHEX0N(inNum,inWidth);  return oss.str();}
 template <class T> std::string DECStr (const T & inT)								{ostringstream	oss;  oss << DEC(inT);  return oss.str();}
 
-void CNTV2SupportLogger::FetchInfoLog(std::ostringstream& oss) const
+void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 {
-    string str;
+	string str;
 	AJALabelValuePairs	infoTable;
 	AJASystemInfo::append(infoTable, "SDK/DRIVER INFO",	"");
 	AJASystemInfo::append(infoTable, "NTV2 SDK Version",	::NTV2GetVersionString(true));
@@ -447,105 +446,105 @@ void CNTV2SupportLogger::FetchInfoLog(std::ostringstream& oss) const
 		AJASystemInfo::append(infoTable, "Installed Bitfile Build Date",	dateStr + " " + timeStr);
 	}
 
-    if (mDevice.IsIPDevice())
-    {
-        PACKAGE_INFO_STRUCT pkgInfo;
-        if (mDevice.GetPackageInformation(pkgInfo))
-        {
+	if (mDevice.IsIPDevice())
+	{
+		PACKAGE_INFO_STRUCT pkgInfo;
+		if (mDevice.GetPackageInformation(pkgInfo))
+		{
 			AJASystemInfo::append(infoTable, "Package",		DECStr(pkgInfo.packageNumber));
 			AJASystemInfo::append(infoTable, "Build",		DECStr(pkgInfo.buildNumber));
 			AJASystemInfo::append(infoTable, "Build Date",	pkgInfo.date);
 			AJASystemInfo::append(infoTable, "Build Time",	pkgInfo.time);
 		}
 
-        CNTV2KonaFlashProgram ntv2Card(mDevice.GetIndexNumber());
-        MacAddr mac1, mac2;
-        if (ntv2Card.ReadMACAddresses(mac1, mac2))
-        {
+		CNTV2KonaFlashProgram ntv2Card(mDevice.GetIndexNumber());
+		MacAddr mac1, mac2;
+		if (ntv2Card.ReadMACAddresses(mac1, mac2))
+		{
 			AJASystemInfo::append(infoTable, "MAC1",	mac1.AsString());
 			AJASystemInfo::append(infoTable, "MAC2",	mac2.AsString());
 		}
 
-        ULWord cfg(0);
-        mDevice.ReadRegister((kRegSarekFwCfg + SAREK_REGS), cfg);
-        if (cfg & SAREK_2022_2)
-        {
+		ULWord cfg(0);
+		mDevice.ReadRegister((kRegSarekFwCfg + SAREK_REGS), cfg);
+		if (cfg & SAREK_2022_2)
+		{
 			ULWord dnaLo(0), dnaHi(0);
 			if (ntv2Card.ReadRegister(kRegSarekDNALow + SAREK_REGS, dnaLo))
 				if (ntv2Card.ReadRegister(kRegSarekDNAHi + SAREK_REGS, dnaHi))
 					AJASystemInfo::append(infoTable, "Device DNA",	string(HEX0NStr(dnaHi,8)+HEX0NStr(dnaLo,8)));
-        }
+		}
 
-        string licenseInfo;
-        ntv2Card.ReadLicenseInfo(licenseInfo);
+		string licenseInfo;
+		ntv2Card.ReadLicenseInfo(licenseInfo);
 		AJASystemInfo::append(infoTable, "License",	licenseInfo);
 
-        if (cfg & SAREK_2022_2)
-        {
+		if (cfg & SAREK_2022_2)
+		{
 			ULWord licenseStatus(0);
 			ntv2Card.ReadRegister(kRegSarekLicenseStatus + SAREK_REGS, licenseStatus);
 			AJASystemInfo::append(infoTable, "License Present",	licenseStatus & SAREK_LICENSE_PRESENT ? "Yes" : "No");
 			AJASystemInfo::append(infoTable, "License Status",	licenseStatus & SAREK_LICENSE_VALID ? "License is valid" : "License NOT valid");
 			AJASystemInfo::append(infoTable, "License Enable Mask",	xHEX0NStr(licenseStatus & 0xff,2));
-        }
-    }
+		}
+	}
 
-    //	Host info
-    AJASystemInfo	hostInfo;
+	//	Host info
+	AJASystemInfo	hostInfo;
 	oss << AJASystemInfo::ToString(infoTable) << endl
 		<< hostInfo.ToString() << endl;
 }
 
-void CNTV2SupportLogger::FetchRegisterLog(std::ostringstream& oss) const
+void CNTV2SupportLogger::FetchRegisterLog (ostringstream & oss) const
 {
-    NTV2RegisterReads	regs;
-    const NTV2DeviceID	deviceID	(mDevice.GetDeviceID());
-    NTV2RegNumSet		deviceRegs	(CNTV2RegisterExpert::GetRegistersForDevice (deviceID));
-    const NTV2RegNumSet	virtualRegs	(CNTV2RegisterExpert::GetRegistersForClass (kRegClass_Virtual));
-    static const string	sDashes		(96, '-');
+	NTV2RegisterReads	regs;
+	const NTV2DeviceID	deviceID	(mDevice.GetDeviceID());
+	NTV2RegNumSet		deviceRegs	(CNTV2RegisterExpert::GetRegistersForDevice (deviceID));
+	const NTV2RegNumSet	virtualRegs	(CNTV2RegisterExpert::GetRegistersForClass (kRegClass_Virtual));
+	static const string	sDashes		(96, '-');
 
 	//	Dang, GetRegistersForDevice doesn't/can't read kRegCanDoRegister, so add the CanConnectROM regs here...
 	if (mDevice.HasCanConnectROM())
 		for (ULWord regNum(kRegFirstValidXptROMRegister);  regNum < ULWord(kRegInvalidValidXptROMRegister);  regNum++)
 			deviceRegs.insert(regNum);
 
-    oss	<< endl << deviceRegs.size() << " Device Registers " << sDashes << endl << endl;
-    regs = ::FromRegNumSet (deviceRegs);
-    if (!mDevice.ReadRegisters (regs))
-        oss	<< "## NOTE:  One or more of these registers weren't returned by the driver -- these will have a zero value." << endl;
-    for (NTV2RegisterReadsConstIter it (regs.begin());  it != regs.end();  ++it)
-    {
-        const NTV2RegInfo &	regInfo	(*it);
-        const uint32_t		regNum	(regInfo.registerNumber);
-        //const uint32_t	offset	(regInfo.registerNumber * 4);
-        const uint32_t		value	(regInfo.registerValue);
-        oss	<< endl
+	oss	<< endl << deviceRegs.size() << " Device Registers " << sDashes << endl << endl;
+	regs = ::FromRegNumSet (deviceRegs);
+	if (!mDevice.ReadRegisters (regs))
+		oss	<< "## NOTE:  One or more of these registers weren't returned by the driver -- these will have a zero value." << endl;
+	for (NTV2RegisterReadsConstIter it (regs.begin());  it != regs.end();  ++it)
+	{
+		const NTV2RegInfo &	regInfo	(*it);
+		const uint32_t		regNum	(regInfo.registerNumber);
+		//const uint32_t	offset	(regInfo.registerNumber * 4);
+		const uint32_t		value	(regInfo.registerValue);
+		oss	<< endl
 			<< "Register Name: " << CNTV2RegisterExpert::GetDisplayName(regNum) << endl
 			<< "Register Number: " << regNum << endl
 			<< "Register Value: " << value << " : " << xHEX0N(value,8) << endl
 			<< "Register Classes: " << CNTV2RegisterExpert::GetRegisterClasses(regNum) << endl
 			<< CNTV2RegisterExpert::GetDisplayValue	(regNum, value, deviceID) << endl;
-    }
+	}
 
-    regs = ::FromRegNumSet (virtualRegs);
-    oss	<< endl << virtualRegs.size() << " Virtual Registers " << sDashes << endl << endl;
-    if (!mDevice.ReadRegisters (regs))
-        oss	<< "## NOTE:  One or more of these registers weren't returned by the driver -- these will have a zero value." << endl;
-    for (NTV2RegisterReadsConstIter it (regs.begin());  it != regs.end();  ++it)
-    {
-        const NTV2RegInfo &	regInfo	(*it);
-        const uint32_t		regNum	(regInfo.registerNumber);
-        //const uint32_t	offset	(regInfo.registerNumber * 4);
-        const uint32_t		value	(regInfo.registerValue);
-        oss	<< endl
+	regs = ::FromRegNumSet (virtualRegs);
+	oss	<< endl << virtualRegs.size() << " Virtual Registers " << sDashes << endl << endl;
+	if (!mDevice.ReadRegisters (regs))
+		oss	<< "## NOTE:  One or more of these registers weren't returned by the driver -- these will have a zero value." << endl;
+	for (NTV2RegisterReadsConstIter it (regs.begin());  it != regs.end();  ++it)
+	{
+		const NTV2RegInfo &	regInfo	(*it);
+		const uint32_t		regNum	(regInfo.registerNumber);
+		//const uint32_t	offset	(regInfo.registerNumber * 4);
+		const uint32_t		value	(regInfo.registerValue);
+		oss	<< endl
 			<< "VReg Name: " << CNTV2RegisterExpert::GetDisplayName(regNum) << endl
 			<< "VReg Number: " << setw(10) << regNum << endl
 			<< "VReg Value: " << value << " : " << xHEX0N(value,8) << endl
-            << CNTV2RegisterExpert::GetDisplayValue	(regNum, value, deviceID)	<< endl;
-    }
+			<< CNTV2RegisterExpert::GetDisplayValue	(regNum, value, deviceID)	<< endl;
+	}
 }
 
-void CNTV2SupportLogger::FetchAutoCirculateLog (std::ostringstream & oss) const
+void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
 {
     ULWord					appSignature	(0);
     int32_t					appPID			(0);
@@ -644,7 +643,7 @@ void CNTV2SupportLogger::FetchAutoCirculateLog (std::ostringstream & oss) const
     }	//	for each channel
 }
 
-void CNTV2SupportLogger::FetchAudioLog(std::ostringstream& oss) const
+void CNTV2SupportLogger::FetchAudioLog (ostringstream & oss) const
 {
 
     const UWord		maxNumChannels		(::NTV2DeviceGetMaxAudioChannels(mDevice.GetDeviceID()));
@@ -742,25 +741,25 @@ void CNTV2SupportLogger::FetchAudioLog(std::ostringstream& oss) const
     }
 }
 
-void CNTV2SupportLogger::FetchRoutingLog(std::ostringstream& oss) const
+void CNTV2SupportLogger::FetchRoutingLog (ostringstream & oss) const
 {
     //	Dump routing info...
     CNTV2SignalRouter	router;
-    string				codeStr;
     mDevice.GetRouting (router);
     oss << "(NTV2InputCrosspointID <== NTV2OutputCrosspointID)" << endl;
     router.Print (oss, false);
-
+/**
     //	Dump routing registers...
     NTV2RegNumSet		deviceRoutingRegs;
     const NTV2RegNumSet	routingRegs	(CNTV2RegisterExpert::GetRegistersForClass (kRegClass_Routing));
     const NTV2RegNumSet	deviceRegs	(CNTV2RegisterExpert::GetRegistersForDevice (mDevice.GetDeviceID()));
     //	Get the intersection of the deviceRegs|routingRegs sets...
-    set_intersection (routingRegs.begin(), routingRegs.end(),  deviceRegs.begin(), deviceRegs.end(),  std::inserter (deviceRoutingRegs, deviceRoutingRegs.begin()));
+    set_intersection (routingRegs.begin(), routingRegs.end(),  deviceRegs.begin(), deviceRegs.end(),  std::inserter(deviceRoutingRegs, deviceRoutingRegs.begin()));
     NTV2RegisterReads	regsToRead	(::FromRegNumSet (deviceRoutingRegs));
     mDevice.ReadRegisters (regsToRead);	//	Read the routing regs
     oss << endl
-        << deviceRoutingRegs.size() << " Routing Registers:" << endl;
+        << deviceRoutingRegs.size() << " Routing Registers:" << endl << regsToRead << endl;
+**/
 }
 
 struct registerToLoadString
@@ -947,5 +946,58 @@ bool CNTV2SupportLogger::LoadFromLog (const std::string & inLogFilePath, const b
 	}
 
 	return true;
+}
 
+string CNTV2SupportLogger::InventLogFilePathAndName (CNTV2Card & inDevice, const string inPrefix, const string inExtension)
+{
+	string homePath;
+	AJASystemInfo info;
+	time_t rawtime;
+	ostringstream oss;
+	const string deviceName (CNTV2DeviceScanner::GetDeviceRefName(inDevice));
+
+	info.GetValue(AJA_SystemInfoTag_Path_UserHome, homePath);
+	if (!homePath.empty())
+		oss << homePath << PATH_DELIMITER;
+	oss << inPrefix << "_" << deviceName << "_" << ::time(&rawtime) << "." << inExtension;
+	return oss.str();
+}
+
+bool CNTV2SupportLogger::DumpDeviceSDRAM (CNTV2Card & inDevice, const string & inFilePath, ostream & msgStrm)
+{
+	if (!inDevice.IsOpen())
+		return false;
+	if (inFilePath.empty())
+		return false;
+	NTV2Framesize frmsz(NTV2_FRAMESIZE_INVALID);
+	const ULWord maxBytes(::NTV2DeviceGetActiveMemorySize(inDevice.GetDeviceID()));
+	inDevice.GetFrameBufferSize(NTV2_CHANNEL1, frmsz);
+	const ULWord byteCount(::NTV2FramesizeToByteCount(frmsz)), megs(byteCount/1024/1024), numFrames(maxBytes / byteCount);
+	NTV2_POINTER buffer(byteCount);
+	NTV2ULWordVector goodFrames, badDMAs, badWrites;
+	ofstream ofs(inFilePath, std::ofstream::out | std::ofstream::binary);
+	if (!ofs)
+		{msgStrm << "## ERROR: Unable to open '" << inFilePath << "' for writing" << endl;  return false;}
+
+	for (ULWord frameNdx(0);  frameNdx < numFrames;  frameNdx++)
+	{
+		if (!inDevice.DMAReadFrame(frameNdx, buffer, byteCount, NTV2_CHANNEL1))
+			{badDMAs.push_back(frameNdx);  continue;}
+		if (!ofs.write(buffer, streamsize(buffer.GetByteCount())).good())
+			{badWrites.push_back(frameNdx);  continue;}
+		goodFrames.push_back(frameNdx);
+	}	//	for each frame
+	if (!badDMAs.empty())
+	{
+		msgStrm << "## ERROR: DMARead failed for " << DEC(badDMAs.size()) << " " << DEC(megs) << "MB frame(s): ";
+		::NTV2PrintULWordVector(badDMAs, msgStrm); msgStrm << endl;
+	}
+	if (!badWrites.empty())
+	{
+		msgStrm << "## ERROR: Write failures for " << DEC(badWrites.size()) << " " << DEC(megs) << "MB frame(s): ";
+		::NTV2PrintULWordVector(badWrites, msgStrm); msgStrm << endl;
+	}
+	msgStrm << "## NOTE: " << DEC(goodFrames.size()) << " x " << DEC(megs) << "MB frames from device '"
+						<< CNTV2DeviceScanner::GetDeviceRefName(inDevice) << "' written to '" << inFilePath << "'" << endl;
+	return true;
 }

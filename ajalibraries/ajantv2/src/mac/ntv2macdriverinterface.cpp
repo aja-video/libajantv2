@@ -67,7 +67,7 @@ static uint64_t				RECHECK_INTERVAL		(1024LL);					///	Number of calls to Device
 #endif
 
 #if !defined (NTV2_NULL_DEVICE)
-	//	This section builds 'classes.a' with the normal linkage to the IOKit...
+	//	This section builds 'libajantv2.a' with the normal linkage to the IOKit...
 	#define	OS_IOMasterPort(_x_,_y_)								::IOMasterPort ((_x_), (_y_))
 	#define	OS_IOServiceClose(_x_)									::IOServiceClose ((_x_))
 	#define	OS_IOServiceMatching(_x_)								::IOServiceMatching ((_x_))
@@ -79,7 +79,7 @@ static uint64_t				RECHECK_INTERVAL		(1024LL);					///	Number of calls to Device
 	#define	OS_IOKitGetBusyState(_x_,_y_)							::IOKitGetBusyState ((_x_), (_y_))
 	#define	OS_IOKitWaitQuiet(_x_,_y_)								::IOKitWaitQuiet ((_x_), (_y_))
 #else	//	NTV2_NULL_DEVICE defined
-	//	This version builds 'classes.a' that has no linkage to the IOKit...
+	//	This version builds 'libajantv2.a' that has no linkage to the IOKit...
 	static IOReturn OS_IOMasterPort (const mach_port_t inPort, mach_port_t * pOutPort)
 	{
 		cerr << "## NOTE:  NTV2_NULL_DEVICE -- will not connect to IOKit" << endl;

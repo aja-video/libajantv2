@@ -28,7 +28,13 @@ The NTV2Capture class demonstrates…
 	-m|--multiFormat           Enables multichannel/multiformat mode, and shares the device with other processes.
 	                           By default, it assumes full control over the device.
 	
-	-a|--anc                   Captures ancillary data using device's Anc extractor firmware.
+	-a                         Enables capture of ancillary data using deviceʼs Anc extractor firmware.
+	
+	--anc {filePath}           Enables capture of ancillary data using deviceʼs Anc extractor firmware, and records
+	                           the captured raw anc buffer data into the specified binary data file. If {filePath}
+	                           is an empty string, a file name will be created for you.
+	                           
+	                           This file can be played back using ntv2player via its ‘--ancʼ option.
 	
 	--noaudio                  Disables audio capture.
 	
@@ -39,7 +45,4 @@ The NTV2Capture class demonstrates…
 	-?|--help|--usage          Shows command usage and options.
 @endcode
 
-@note	This demo can be built to record the raw anc buffer contents into a binary data file by defining the
-		AJA_RAW_ANC_RECORD macro in ntv2capture.cpp. This data file can be played back using the ‘--ancʼ option
-		in the \ref ntv2player.
 **/

@@ -422,7 +422,7 @@ AJAExport LWord64				GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr (NTV2Frame
 AJAExport NTV2_SHOULD_BE_DEPRECATED(ULWord GetVaricamRepeatCount (const NTV2FrameRate inSequenceRate, const NTV2FrameRate inPlayRate, const ULWord inCadenceFrame = 0));
 AJAExport ULWord				GetScaleFromFrameRate (const NTV2FrameRate inFrameRate);
 AJAExport NTV2FrameRate			GetFrameRateFromScale (long scale, long duration, NTV2FrameRate playFrameRate);
-AJAExport NTV2FrameRate			GetNTV2FrameRateFromNumeratorDenominator (const ULWord inNumerator, const ULWord inDenominator);
+AJAExport NTV2FrameRate			GetNTV2FrameRateFromNumeratorDenominator (const ULWord inNumerator, const ULWord inDenominator);	//	New in SDK 16.0
 
 /**
 	@return		The NTV2FrameRate of the given NTV2VideoFormat.
@@ -453,7 +453,7 @@ AJAExport NTV2FrameGeometry		GetVANCFrameGeometry (const NTV2FrameGeometry inFra
 				or ::NTV2_FG_INVALID if none match.
 	@param[in]	inFD	Specifies the ::NTV2FrameDimensions of interest.
 **/
-AJAExport NTV2FrameGeometry		GetGeometryFromFrameDimensions (const NTV2FrameDimensions & inFD);
+AJAExport NTV2FrameGeometry		GetGeometryFromFrameDimensions (const NTV2FrameDimensions & inFD);	//	New in SDK 16.0
 
 /**
 	@return		True if the given ::NTV2FrameGeometry has tall or taller geometries associated with it;
@@ -1052,8 +1052,8 @@ AJAExport std::string NTV2VANCModeToString				(const NTV2VANCMode				inValue,	co
 AJAExport std::string NTV2MixerKeyerModeToString		(const NTV2MixerKeyerMode		inValue,	const bool inCompactDisplay = false);
 AJAExport std::string NTV2MixerInputControlToString		(const NTV2MixerKeyerInputControl inValue,	const bool inCompactDisplay = false);
 AJAExport std::string NTV2VideoLimitingToString			(const NTV2VideoLimiting		inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2BreakoutTypeToString			(const NTV2BreakoutType			inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2AncDataRgnToStr				(const NTV2AncDataRgn			inValue,	const bool inCompactDisplay = false);
+AJAExport std::string NTV2BreakoutTypeToString			(const NTV2BreakoutType			inValue,	const bool inCompactDisplay = false);	//	New in SDK 15.5
+AJAExport std::string NTV2AncDataRgnToStr				(const NTV2AncDataRgn			inValue,	const bool inCompactDisplay = false);	//	New in SDK 15.5
 AJAExport bool	convertHDRFloatToRegisterValues			(const HDRFloatValues & inFloatValues,		HDRRegValues & outRegisterValues);
 AJAExport bool	convertHDRRegisterToFloatValues			(const HDRRegValues & inRegisterValues,		HDRFloatValues & outFloatValues);
 AJAExport void  setHDRDefaultsForBT2020                 (HDRRegValues & outRegisterValues);
@@ -1069,7 +1069,7 @@ typedef NTV2StringSet::const_iterator	NTV2StringSetConstIter;
 AJAExport std::string NTV2EmbeddedAudioInputToString	(const NTV2EmbeddedAudioInput	inValue,	const bool inCompactDisplay = false);
 AJAExport std::string NTV2AudioSourceToString			(const NTV2AudioSource			inValue,	const bool inCompactDisplay = false);
 
-AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringList & inData);
+AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringList & inData);	//	New in SDK 15.5
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringSet & inData);
 
 

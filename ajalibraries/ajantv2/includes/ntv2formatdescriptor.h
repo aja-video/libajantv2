@@ -193,7 +193,7 @@ public:
 		@param[in]	inPlaneIndex0		Optionally specifies the plane of interest. Defaults to zero.
 		@return		True if successful;  otherwise false.
 	**/
-	bool			GetRowBuffer (const NTV2_POINTER & inFrameBuffer, NTV2_POINTER & inOutRowBuffer,  const ULWord inRowIndex0,  const UWord inPlaneIndex0 = 0) const;
+	bool			GetRowBuffer (const NTV2_POINTER & inFrameBuffer, NTV2_POINTER & inOutRowBuffer,  const ULWord inRowIndex0,  const UWord inPlaneIndex0 = 0) const;	//	New in SDK 16.0
 
 	/**
 		@return		A pointer to the start of the given row in the given buffer, or NULL if row index is bad

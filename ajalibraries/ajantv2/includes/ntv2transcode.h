@@ -217,7 +217,7 @@ AJAExport void	Convert16BitARGBTo16BitRGB (RGBAlpha16BitPixel *	rgbaLineBuffer,
 											UWord *					rgbLineBuffer,
 											ULWord					numPixels);
 
-// Convert 16 Bit ARGB to 12 bit RGB Packed
+// Convert 16 Bit ARGB to 12 bit RGB Packed	//	New in SDK 15.5
 AJAExport void Convert16BitARGBTo12BitRGBPacked(RGBAlpha16BitPixel *rgbaLineBuffer ,
 												UByte * rgbLineBuffer,
 												ULWord numPixels);

@@ -68,8 +68,8 @@ class AJAExport CNTV2DriverInterface
 {
 	//	STATIC (CLASS) METHODS
 	public:
-		static NTV2StringList	GetLegalSchemeNames (void);	///< @return	A list of legal scheme names that can be used to open remote or non-physical devices.
-		static inline UWord		MaxNumDevices (void)	{return 32;}	///< @return	Maximum number of local/physical device connections.
+		static NTV2StringList	GetLegalSchemeNames (void);	///< @return	A list of legal scheme names that can be used to open remote or non-physical devices. (New in SDK 16.0)
+		static inline UWord		MaxNumDevices (void)	{return 32;}	///< @return	Maximum number of local/physical device connections. (New in SDK 16.0)
 
 		/**
 			@brief		Specifies if subsequent Open calls should open the device in shared mode or not.
@@ -77,7 +77,7 @@ class AJAExport CNTV2DriverInterface
 			@param[in]	inSharedMode	Specify true for shared mode;  otherwise use false.
 		**/
 		static void				SetShareMode (const bool inSharedMode);
-		static bool				GetShareMode (void);	///< @return	True if local devices will be opened in shared mode; otherwise false.
+		static bool				GetShareMode (void);	///< @return	True if local devices will be opened in shared mode; otherwise false. (New in SDK 16.0)
 
 		/**
 			@brief		Specifies if the next Open call should try to open the device in shared mode or not.
@@ -85,7 +85,7 @@ class AJAExport CNTV2DriverInterface
 			@param[in]	inOverlapMode	Specify true for overlapped mode;  otherwise use false.
 		**/
 		static void				SetOverlappedMode (const bool inOverlapMode);
-		static bool				GetOverlappedMode (void);	///< @return	True if local devices will be opened in overlapped mode; otherwise false.
+		static bool				GetOverlappedMode (void);	///< @return	True if local devices will be opened in overlapped mode; otherwise false. (New in SDK 16.0)
 
 
 	/**

@@ -240,12 +240,12 @@ public:
     /**
      *	@return		The debug facility's version number.
      */
-    static uint32_t Version (void);
+    static uint32_t Version (void);	//	New in SDK 16.0
 
     /**
      *	@return		The size of the debug facility's shared memory region.
      */
-    static uint32_t TotalBytes (void);
+    static uint32_t TotalBytes (void);	//	New in SDK 16.0
 
 	/** 
 	 *	Initialize the debug system.  
@@ -370,7 +370,7 @@ public:
     /**
      *	@return		The capacity of the debug logging facility's message ring.
      */
-	static uint32_t MessageRingCapacity (void);
+	static uint32_t MessageRingCapacity (void);	//	New in SDK 16.0
 
     /**
      *	Get the reference count for the number of clients accessing shared debug info
@@ -597,12 +597,12 @@ public:
     /**
      *	@return		The capacity of the debug facility's stats buffer.
      */
-	static uint32_t StatsCapacity (void);
+	static uint32_t StatsCapacity (void);	//	New in SDK 16.0
 
 	/**
 	 *	@return		True if stats are supported; otherwise false.
 	 */
-	static bool HasStats (void);
+	static bool HasStats (void);	//	New in SDK 16.0
 
 	/**
 	 *	Registers/adds new stat, prepares for first use.
@@ -610,7 +610,7 @@ public:
 	 *	@param[in]	inKey						The timer/counter key to be registered/allocated.
 	 *	@return		AJA_STATUS_SUCCESS if successful.
 	 */
-	static AJAStatus StatAllocate (const uint32_t inKey);
+	static AJAStatus StatAllocate (const uint32_t inKey);	//	New in SDK 16.0
 
 	/**
 	 *	Unregisters/deletes the given stat.
@@ -618,7 +618,7 @@ public:
 	 *	@param[in]	inKey						The timer/counter to be unregistered/deleted.
 	 *	@return		AJA_STATUS_SUCCESS if successful.
 	 */
-	static AJAStatus StatFree (const uint32_t inKey);
+	static AJAStatus StatFree (const uint32_t inKey);	//	New in SDK 16.0
 
 	/**
 	 *	Answers if the given stat is allocated (in use).
@@ -626,7 +626,7 @@ public:
 	 *	@param[in]	inKey						The timer/counter of interest.
 	 *	@return		True if stat is allocated;  otherwise false.
 	 */
-	static bool StatIsAllocated (const uint32_t inKey);
+	static bool StatIsAllocated (const uint32_t inKey);	//	New in SDK 16.0
 
 	/**
 	 *	Resets/clears the given timer/counter stat.
@@ -634,7 +634,7 @@ public:
 	 *	@param[in]	inKey						The timer/counter of interest.
 	 *	@return		AJA_STATUS_SUCCESS if successful.
 	 */
-	static AJAStatus StatReset (const uint32_t inKey);
+	static AJAStatus StatReset (const uint32_t inKey);	//	New in SDK 16.0
 
 	/**
 	 *	Starts the given timer stat by recording the host OS' high-resolution clock.
@@ -642,7 +642,7 @@ public:
 	 *	@param[in]	inKey						The timer of interest.
 	 *	@return		AJA_STATUS_SUCCESS if successful.
 	 */
-	static AJAStatus StatTimerStart (const uint32_t inKey);
+	static AJAStatus StatTimerStart (const uint32_t inKey);	//	New in SDK 16.0
 
 	/**
 	 *	Stops the given timer stat, storing the elapsed time since the last Start call
@@ -651,7 +651,7 @@ public:
 	 *	@param[in]	inKey						The timer of interest.
 	 *	@return		AJA_STATUS_SUCCESS if successful.
 	 */
-	static AJAStatus StatTimerStop (const uint32_t inKey);
+	static AJAStatus StatTimerStop (const uint32_t inKey);	//	New in SDK 16.0
 
 	/**
 	 *	Increments the given counter stat.
@@ -660,7 +660,7 @@ public:
 	 *	@param[in]	inIncrement					Optionally specifies the increment value. Defaults to 1.
 	 *	@return		AJA_STATUS_SUCCESS if successful.
 	 */
-	static AJAStatus StatCounterIncrement (const uint32_t inKey, const uint32_t inIncrement = 1);
+	static AJAStatus StatCounterIncrement (const uint32_t inKey, const uint32_t inIncrement = 1);	//	New in SDK 16.0
 
 	/**
 	 *	Records a new value for the stat.
@@ -669,7 +669,7 @@ public:
 	 *	@param[in]	inValue						Specifies the value.
 	 *	@return		AJA_STATUS_SUCCESS if successful.
 	 */
-	static AJAStatus StatSetValue (const uint32_t inKey, const uint32_t inValue);
+	static AJAStatus StatSetValue (const uint32_t inKey, const uint32_t inValue);	//	New in SDK 16.0
 
 	/**
 	 *	Answers with the given stat's info.
@@ -678,7 +678,7 @@ public:
 	 *	@param[out]	outInfo						Receives the timer/counter info.
 	 *	@return		AJA_STATUS_SUCCESS if successful.
 	 */
-	static AJAStatus StatGetInfo (const uint32_t inKey, AJADebugStat & outInfo);
+	static AJAStatus StatGetInfo (const uint32_t inKey, AJADebugStat & outInfo);	//	New in SDK 16.0
 
 	/**
 	 *	Answers with the given stat's info.
@@ -687,7 +687,7 @@ public:
 	 *	@param[out]	outSeqNum					Receives the list change sequence number (to detect if the list changed).
 	 *	@return		AJA_STATUS_SUCCESS if successful.
 	 */
-	static AJAStatus StatGetKeys (std::vector<uint32_t> & outKeys, uint32_t & outSeqNum);
+	static AJAStatus StatGetKeys (std::vector<uint32_t> & outKeys, uint32_t & outSeqNum);	//	New in SDK 16.0
 
 	/**
 	 *	Get the current time at the debug rate.
