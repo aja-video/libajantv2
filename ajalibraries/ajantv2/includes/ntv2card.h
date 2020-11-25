@@ -591,7 +591,7 @@ public:
 	/**
 		@brief		Synchronously transfers audio data from a given Audio System's buffer memory on the AJA device to the specified host
 					buffer, blocking until the transfer has completed.
-		@param[in]	inAudioEngine		Specifies the Audio System on the device that is to supply the audio data.
+		@param[in]	inAudioSystem		Specifies the Audio System on the device that is to supply the audio data.
 		@param		pOutAudioBuffer		Specifies a valid, non-NULL pointer to the host buffer that is to receive the audio data.
 										This buffer must be large enough to accommodate "inByteCount" bytes of data specified (below).
 		@param[in]	inOffsetBytes		Specifies the offset into the Audio System's buffer memory on the device from which to transfer
@@ -603,7 +603,7 @@ public:
 		@note		This function can also be used to read audio samples from the output (playout) portion of the Audio System's buffer
 					memory.
 	**/
-	AJA_VIRTUAL bool	DMAReadAudio (	const NTV2AudioSystem	inAudioEngine,
+	AJA_VIRTUAL bool	DMAReadAudio (	const NTV2AudioSystem	inAudioSystem,
 										ULWord *				pOutAudioBuffer,
 										const ULWord			inOffsetBytes,
 										const ULWord			inByteCount);
@@ -611,7 +611,7 @@ public:
 	/**
 		@brief		Synchronously transfers audio data from the specified host buffer to the given Audio System's buffer memory
 					on the AJA device, blocking until the transfer has completed.
-		@param[in]	inAudioEngine		Specifies the Audio System on the device that is to receive the audio data.
+		@param[in]	inAudioSystem		Specifies the Audio System on the device that is to receive the audio data.
 		@param[in]	pInAudioBuffer		Specifies a valid, non-NULL pointer to the host buffer that is to supply the audio data.
 		@param[in]	inOffsetBytes		Specifies the offset into the Audio System's buffer memory on the device to which audio data
 										will be transferred. Use zero for the start of the playout portion of the Audio System's buffer
@@ -621,9 +621,9 @@ public:
 										buffer, nor the device's audio buffer.
 		@return		True if successful; otherwise false.
 		@note		This function can also be used to write audio samples into the capture portion of the Audio System's buffer
-					memory (which will quickly be overwritten if the capture engine has been started).
+					memory (which will quickly be overwritten if the capture audio system has been started).
 	**/
-	AJA_VIRTUAL bool	DMAWriteAudio (	const NTV2AudioSystem	inAudioEngine,
+	AJA_VIRTUAL bool	DMAWriteAudio (	const NTV2AudioSystem	inAudioSystem,
 										const ULWord *			pInAudioBuffer,
 										const ULWord			inOffsetBytes,
 										const ULWord			inByteCount);
@@ -1661,10 +1661,10 @@ public:
 	/**
 		@brief		Enables or disables ::NTV2AudioLoopBack mode for the given ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
-		@param[in]	inMode			Specify ::NTV2_AUDIO_LOOPBACK_ON to force the Audio System's output embedder, when the playout engine
-									is stopped (i.e., "Reset" mode), to pull audio samples from the Audio System's input de-embedder.
+		@param[in]	inMode			Specify ::NTV2_AUDIO_LOOPBACK_ON to force the Audio System's output embedder, when the playout audio
+									system is stopped (i.e., "Reset" mode), to pull audio samples from the Audio System's input de-embedder.
 									Specify ::NTV2_AUDIO_LOOPBACK_OFF to have the output embedder emit silence (zeroes) when the playout
-									engine is stopped.
+									audio system is stopped.
 		@param[in]	inAudioSystem	Optionally specifies the Audio System on the device to be affected. Defaults to ::NTV2_AUDIOSYSTEM_1.
 		@see		CNTV2Card::GetAudioLoopBack, \ref audioplayout
 	**/
@@ -1674,9 +1674,9 @@ public:
 		@brief		Answers if ::NTV2AudioLoopBack mode is currently on or off for the given ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
 		@param[in]	outMode			Receives ::NTV2_AUDIO_LOOPBACK_ON if the Audio System's output embedder will pull audio samples from
-									the Audio System's input de-embedder when the playout engine is stopped;
+									the Audio System's input de-embedder when the playout audio system is stopped;
 									otherwise receives ::NTV2_AUDIO_LOOPBACK_OFF if the output embedder emits silence (zeroes) when the
-									playout engine is stopped.
+									playout audio system is stopped.
 		@param[in]	inAudioSystem	Optionally specifies the Audio System on the device to be affected. Defaults to ::NTV2_AUDIOSYSTEM_1.
 		@see		CNTV2Card::SetAudioLoopBack, \ref audioplayout
 	**/
