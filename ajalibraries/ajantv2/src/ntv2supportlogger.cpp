@@ -117,14 +117,35 @@ static uint32_t maxSampleCountForNTV2AudioBufferSize (const NTV2AudioBufferSize 
     return 0;
 }
 
-static NTV2VideoFormat getVideoFormat(CNTV2Card& device, const NTV2Channel inChannel)
+static NTV2VideoFormat getVideoFormat (CNTV2Card & device, const NTV2Channel inChannel)
 {
     NTV2VideoFormat	result(NTV2_FORMAT_UNKNOWN);
     device.GetVideoFormat(result, inChannel);
     return result;
 }
 
-static ULWord readCurrentAudioPosition(CNTV2Card& device, NTV2AudioSystem audioSystem, NTV2Mode mode)
+static NTV2PixelFormat getPixelFormat (CNTV2Card & device, const NTV2Channel inChannel)
+{
+    NTV2PixelFormat	result(NTV2_FBF_INVALID);
+    device.GetFrameBufferFormat(inChannel, result);
+    return result;
+}
+
+static NTV2Mode getMode (CNTV2Card & device, const NTV2Channel inChannel)
+{
+    NTV2Mode	result(NTV2_MODE_INVALID);
+    device.GetMode(inChannel, result);
+    return result;
+}
+
+static bool	isEnabled (CNTV2Card & device, const NTV2Channel inChannel)
+{
+	bool result(false);
+	device.IsChannelEnabled(inChannel, result);
+	return result;
+}
+
+static ULWord readCurrentAudioPosition(CNTV2Card & device, NTV2AudioSystem audioSystem, NTV2Mode mode)
 {
     ULWord result(0);
     if (NTV2_IS_OUTPUT_MODE (mode))
@@ -134,25 +155,25 @@ static ULWord readCurrentAudioPosition(CNTV2Card& device, NTV2AudioSystem audioS
     return result;
 }
 
-static ULWord getNumAudioChannels(CNTV2Card& device, NTV2AudioSystem audioSystem)
+static ULWord getNumAudioChannels(CNTV2Card & device, NTV2AudioSystem audioSystem)
 {
     ULWord numChannels = 1;
     device.GetNumberAudioChannels(numChannels, audioSystem);
     return numChannels;
 }
 
-static ULWord bytesToSamples(CNTV2Card& device, NTV2AudioSystem audioSystem, const ULWord inBytes)
+static ULWord bytesToSamples(CNTV2Card & device, NTV2AudioSystem audioSystem, const ULWord inBytes)
 {
     return inBytes / sizeof (uint32_t) / getNumAudioChannels(device, audioSystem);
 }
 
-static ULWord getCurrentPositionSamples(CNTV2Card& device, NTV2AudioSystem audioSystem, NTV2Mode mode)
+static ULWord getCurrentPositionSamples(CNTV2Card & device, NTV2AudioSystem audioSystem, NTV2Mode mode)
 {
     ULWord bytes = readCurrentAudioPosition(device, audioSystem, mode);
     return bytesToSamples(device, audioSystem, bytes);
 }
 
-static ULWord getMaxNumSamples(CNTV2Card& device, NTV2AudioSystem audioSystem)
+static ULWord getMaxNumSamples(CNTV2Card & device, NTV2AudioSystem audioSystem)
 {
     NTV2AudioBufferSize bufferSize;
     device.GetAudioBufferSize(bufferSize, audioSystem);
@@ -160,7 +181,7 @@ static ULWord getMaxNumSamples(CNTV2Card& device, NTV2AudioSystem audioSystem)
     return maxSampleCountForNTV2AudioBufferSize (bufferSize, uint16_t(getNumAudioChannels(device, audioSystem)));
 }
 
-static NTV2Channel findActiveACChannel(CNTV2Card& device, NTV2AudioSystem audioSystem, AUTOCIRCULATE_STATUS & outStatus)
+static NTV2Channel findActiveACChannel(CNTV2Card & device, NTV2AudioSystem audioSystem, AUTOCIRCULATE_STATUS & outStatus)
 {
     for (UWord chan (0);  chan < ::NTV2DeviceGetNumVideoChannels (device.GetDeviceID());  chan++)
         if (device.AutoCirculateGetStatus (NTV2Channel(chan), outStatus))
@@ -176,7 +197,7 @@ static NTV2Channel findActiveACChannel(CNTV2Card& device, NTV2AudioSystem audioS
     return NTV2_CHANNEL_INVALID;
 }
 
-static bool detectInputChannelPairs(CNTV2Card& device, const NTV2AudioSource inAudioSource,
+static bool detectInputChannelPairs(CNTV2Card & device, const NTV2AudioSource inAudioSource,
                              const NTV2EmbeddedAudioInput inEmbeddedSource,
                              NTV2AudioChannelPairs & outChannelPairsPresent)
 {
@@ -213,7 +234,7 @@ static bool detectInputChannelPairs(CNTV2Card& device, const NTV2AudioSource inA
     return false;
 }
 
-static bool getBitfileDate(CNTV2Card& device, std::string &bitFileDateString, NTV2XilinxFPGA whichFPGA)
+static bool getBitfileDate(CNTV2Card & device, std::string &bitFileDateString, NTV2XilinxFPGA whichFPGA)
 {
     BITFILE_INFO_STRUCT bitFileInfo;
     memset(&bitFileInfo, 0, sizeof(BITFILE_INFO_STRUCT));
@@ -256,9 +277,7 @@ static bool getBitfileDate(CNTV2Card& device, std::string &bitFileDateString, NT
         }
     }
     else
-    {
         return false;
-    }
     return true;
 }
 
@@ -546,102 +565,111 @@ void CNTV2SupportLogger::FetchRegisterLog (ostringstream & oss) const
 
 void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
 {
-    ULWord					appSignature	(0);
-    int32_t					appPID			(0);
-    ChannelToACStatus		perChannelStatus;	//	Per-channel AUTOCIRCULATE_STATUS
-    ChannelToPerFrameTCList	perChannelTCs;		//	Per-channel collection of per-frame TCs
-    NTV2EveryFrameTaskMode	taskMode	(NTV2_DISABLE_TASKS);
-    static const string		dashes		(25, '-');
+	ULWord					appSignature	(0);
+	int32_t					appPID			(0);
+	ChannelToACStatus		perChannelStatus;	//	Per-channel AUTOCIRCULATE_STATUS
+	ChannelToPerFrameTCList	perChannelTCs;		//	Per-channel collection of per-frame TCs
+	NTV2EveryFrameTaskMode	taskMode	(NTV2_DISABLE_TASKS);
+	static const string		dashes		(25, '-');
+	const ULWord			numChannels	(::NTV2DeviceGetNumVideoChannels(mDevice.GetDeviceID()));
 
-    //	This code block takes a snapshot of the current AutoCirculate state of the device...
-    {
-        //QMutexLocker	tmpLock (&mutex);
-        mDevice.GetEveryFrameServices(taskMode);
-        mDevice.GetStreamingApplication(&appSignature, &appPID);
+	//	This code block takes a snapshot of the current AutoCirculate state of the device...
+	mDevice.GetEveryFrameServices(taskMode);
+	mDevice.GetStreamingApplication(&appSignature, &appPID);
 
-        //	Grab A/C status for each channel...
-        for (NTV2Channel chan (NTV2_CHANNEL1);  chan < NTV2_MAX_NUM_CHANNELS;  chan = NTV2Channel(chan+1))
-        {
-            FrameToTCList			perFrameTCs;
-            AUTOCIRCULATE_STATUS	acStatus;
-            if (NTV2_IS_INPUT_CROSSPOINT (acStatus.acCrosspoint))	mDevice.WaitForInputVerticalInterrupt (chan);
-            else													mDevice.WaitForOutputVerticalInterrupt (chan);
-            mDevice.AutoCirculateGetStatus (chan, acStatus);
-            perChannelStatus.insert (ChannelToACStatusPair (chan, acStatus));
-            if (!acStatus.IsStopped())
-            {
-                for (uint16_t frameNum (acStatus.GetStartFrame());  frameNum <= acStatus.GetEndFrame();  frameNum++)
-                {
-                    FRAME_STAMP			frameStamp;
-                    NTV2TimeCodeList	timecodes;
-                    mDevice.AutoCirculateGetFrameStamp (chan, frameNum, frameStamp);
-                    frameStamp.GetInputTimeCodes (timecodes);
-                    perFrameTCs.insert (FrameToTCListPair (frameNum, timecodes));
-                }	//	for each A/C frame
-                perChannelTCs.insert (ChannelToPerFrameTCListPair (chan, perFrameTCs));
-            }	//	if not stopped
-        }	//	for each channel
-    }	//	lock scope
+	//	Grab A/C status for each channel...
+	for (NTV2Channel chan(NTV2_CHANNEL1);  chan < NTV2Channel(numChannels);  chan = NTV2Channel(chan+1))
+	{
+		FrameToTCList			perFrameTCs;
+		AUTOCIRCULATE_STATUS	acStatus;
+		if (NTV2_IS_INPUT_CROSSPOINT(acStatus.acCrosspoint))
+			mDevice.WaitForInputVerticalInterrupt(chan);
+		else
+			mDevice.WaitForOutputVerticalInterrupt(chan);
+		mDevice.AutoCirculateGetStatus (chan, acStatus);
+		perChannelStatus.insert(ChannelToACStatusPair(chan, acStatus));
+		if (!acStatus.IsStopped())
+		{
+			for (uint16_t frameNum (acStatus.GetStartFrame());  frameNum <= acStatus.GetEndFrame();  frameNum++)
+			{
+				FRAME_STAMP			frameStamp;
+				NTV2TimeCodeList	timecodes;
+				mDevice.AutoCirculateGetFrameStamp (chan, frameNum, frameStamp);
+				frameStamp.GetInputTimeCodes(timecodes);
+				perFrameTCs.insert(FrameToTCListPair(frameNum, timecodes));
+			}	//	for each A/C frame
+			perChannelTCs.insert(ChannelToPerFrameTCListPair(chan, perFrameTCs));
+		}	//	if not stopped
+	}	//	for each channel
 
-    oss	<< "Task mode:  " << ::NTV2TaskModeToString(taskMode) << ", PID=" << pidToString(uint32_t(appPID)) << ", signature=" << appSignatureToString(appSignature) << endl
-        << endl
-        << "AutoCirculate:    State  Start   End   Act FramesProc FramesDrop BufLvl                             A u t o C i r c u l a t e   O p t i o n s           VideoFormat" << endl
-        << "-------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
-    for (ChannelToACStatusConstIter iter (perChannelStatus.begin());  iter != perChannelStatus.end();  ++iter)
-    {
-        const NTV2Channel				chan	(iter->first);
-        const AUTOCIRCULATE_STATUS	&	status	(iter->second);
-        if (status.IsStopped())
-            continue;
-        oss << ::NTV2ChannelToString (chan, true) << ": " << (NTV2_IS_INPUT_CROSSPOINT (status.acCrosspoint) ? " Input" : "Output")
-            << setw (12) << ::NTV2AutoCirculateStateToString (status.acState)
-            << "  " << setw (5) << status.acStartFrame
-            << setw (6) << status.acEndFrame
-            << setw (6) << status.acActiveFrame
-            << setw (11) << status.acFramesProcessed
-            << setw (11) << status.acFramesDropped
-            << setw (7) << status.acBufferLevel
-            << setw (10) << ::NTV2AudioSystemToString (status.acAudioSystem, true)
-            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_RP188		? "+RP188"		: "-RP188")
-            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_LTC			? "+LTC"		: "-LTC")
-            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_FBFCHANGE	? "+FBFchg"		: "-FBFchg")
-            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_FBOCHANGE	? "+FBOchg"		: "-FBOchg")
-            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_COLORCORRECT	? "+ColCor"		: "-ColCor")
-            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_VIDPROC		? "+VidProc"	: "-VidProc")
-            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_ANC			? "+AncData"	: "-AncData")
-            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_FIELDS		? "+FldMode"	: "-FldMode")
-            << setw (10) << (status.acOptionFlags & AUTOCIRCULATE_WITH_HDMIAUX		? "+HDMIAux"	: "-HDMIAux")
-            << setw (22) << ::NTV2VideoFormatToString (getVideoFormat(mDevice, chan))
-            << endl;
-    }	//	for each channel
+	oss	<< "Task mode:  " << ::NTV2TaskModeToString(taskMode) << ", PID=" << pidToString(uint32_t(appPID)) << ", signature=" << appSignatureToString(appSignature) << endl
+		<< endl
+		<< "Chan/FrameStore   State  Start   End   Act FrmProc FrmDrop BufLvl    AudSys    ACOptions                                                                                VidFormat    PixFormat" << endl
+		<< "----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+	for (ChannelToACStatusConstIter iter (perChannelStatus.begin());  iter != perChannelStatus.end();  ++iter)
+	{
+		const NTV2Channel				chan(iter->first);
+		const AUTOCIRCULATE_STATUS	&	status(iter->second);
+		//	The following should mirror what ntv2watcher/pages/page_autocirculate::fetchSupportLogInfo does...
+		if (status.IsStopped())
+			oss << ::NTV2ChannelToString(chan, true) << ": "
+				<< (::isEnabled(mDevice,chan) ? NTV2_IS_INPUT_MODE(::getMode(mDevice,chan)) ? " Input" : "Output" : "Off   ")
+				<< setw(12) << ::NTV2AutoCirculateStateToString(status.acState) << "  "
+				<< setw( 5) << "---"
+				<< setw( 6) << "---"
+				<< setw( 6) << "---"
+				<< setw( 8) << "---"
+				<< setw( 8) << "---"
+				<< setw( 7) << "---"
+				<< setw(10) << "---"
+				<< setw(10) << "---"
+				<< setw(10) << "---"
+				<< setw(10) << "---"
+				<< setw(10) << "---"
+				<< setw(10) << "---"
+				<< setw(10) << "---"
+				<< setw(10) << "---"
+				<< setw(10) << "---"
+				<< setw(10) << "---";
+		else
+			oss << status;	//	see operator << (ostream&, const AUTOCIRCULATE_STATUS&) in ntv2publicinterface.cpp
+		if (!status.IsStopped() || isEnabled(mDevice,chan))
+			oss	<< setw(12) << ::NTV2VideoFormatToString(::getVideoFormat(mDevice, chan))
+				<< setw(13) << ::NTV2FrameBufferFormatToString(::getPixelFormat(mDevice, chan), true)
+				<< endl;
+		else
+			oss	<< setw(12) << "---"
+				<< setw(13) << "---"
+				<< endl;
+	}	//	for each channel
 
-    for (ChannelToACStatusConstIter iter (perChannelStatus.begin());  iter != perChannelStatus.end();  ++iter)
-    {
-        const NTV2Channel				chan	(iter->first);
-        const AUTOCIRCULATE_STATUS	&	status	(iter->second);
-        if (status.IsStopped())
-            continue;	//	Stopped -- skip this channel
+	for (ChannelToACStatusConstIter iter (perChannelStatus.begin());  iter != perChannelStatus.end();  ++iter)
+	{
+		const NTV2Channel				chan(iter->first);
+		const AUTOCIRCULATE_STATUS &	status(iter->second);
+		if (status.IsStopped())
+			continue;	//	Stopped -- skip this channel
 
-        ChannelToPerFrameTCListConstIter	it	(perChannelTCs.find (chan));
-        if (it == perChannelTCs.end())
-            continue;	//	Channel not in perChannelTCs
+		ChannelToPerFrameTCListConstIter it(perChannelTCs.find(chan));
+		if (it == perChannelTCs.end())
+			continue;	//	Channel not in perChannelTCs
 
-        const FrameToTCList	perFrameTCs	(it->second);
-        oss << endl << dashes << " " << (NTV2_IS_INPUT_CROSSPOINT (status.acCrosspoint) ? "Input " : "Output ") << (chan+1) << " Per-Frame Timecodes:" << endl;
-        for (FrameToTCListConstIter i (perFrameTCs.begin());  i != perFrameTCs.end();  ++i)
-        {
-            const uint16_t				frameNum	(i->first);
-            const NTV2TimeCodeList &	timecodes	(i->second);
-            oss << "Frame " << frameNum << ":" << endl;
-            for (uint16_t tcNdx (0);  tcNdx < timecodes.size();  tcNdx++)
-            {
-                const NTV2TimecodeIndex	tcIndex	(static_cast <NTV2TimecodeIndex> (tcNdx));
-                oss << "\t" << setw(10) << ::NTV2TCIndexToString (tcIndex, true) << setw(0) << ":\t"
-                    << setw(12) << timecodeToString(timecodes[tcNdx]) << setw(0) << "\t" << timecodes[tcNdx] << endl;
-            }	//	for each timecode
-        }	//	for each frame
-    }	//	for each channel
-}
+		const FrameToTCList	perFrameTCs(it->second);
+		oss << endl << dashes << " " << (NTV2_IS_INPUT_CROSSPOINT(status.acCrosspoint) ? "Input " : "Output ") << (chan+1) << " Per-Frame Timecodes:" << endl;
+		for (FrameToTCListConstIter i(perFrameTCs.begin());  i != perFrameTCs.end();  ++i)
+		{
+			const uint16_t				frameNum(i->first);
+			const NTV2TimeCodeList &	timecodes(i->second);
+			oss << "Frame " << frameNum << ":" << endl;
+			for (uint16_t tcNdx(0);  tcNdx < timecodes.size();  tcNdx++)
+			{
+				const NTV2TimecodeIndex	tcIndex	(static_cast<NTV2TimecodeIndex>(tcNdx));
+				oss << "\t" << setw(10) << ::NTV2TCIndexToString(tcIndex, true) << setw(0) << ":\t"
+					<< setw(12) << timecodeToString(timecodes[tcNdx]) << setw(0) << "\t" << timecodes[tcNdx] << endl;
+			}	//	for each timecode
+		}	//	for each frame
+	}	//	for each channel
+}	//	FetchAutoCirculateLog
 
 void CNTV2SupportLogger::FetchAudioLog (ostringstream & oss) const
 {

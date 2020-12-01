@@ -7509,6 +7509,26 @@ typedef enum
 				inline bool				WithLTC (void) const								{return OptionFlags() & AUTOCIRCULATE_WITH_LTC;}	//	New in SDK 16.0
 
 				/**
+					@return		True if AUTOCIRCULATE_WITH_FBFCHANGE enabled; otherwise false.
+				**/
+				inline bool				WithFBFChange (void) const							{return OptionFlags() & AUTOCIRCULATE_WITH_FBFCHANGE;}	//	New in SDK 16.0
+
+				/**
+					@return		True if AUTOCIRCULATE_WITH_FBOCHANGE enabled; otherwise false.
+				**/
+				inline bool				WithFBOChange (void) const							{return OptionFlags() & AUTOCIRCULATE_WITH_FBOCHANGE;}	//	New in SDK 16.0
+
+				/**
+					@return		True if AUTOCIRCULATE_WITH_COLORCORRECT enabled; otherwise false.
+				**/
+				inline bool				WithColorCorrect (void) const						{return OptionFlags() & AUTOCIRCULATE_WITH_COLORCORRECT;}	//	New in SDK 16.0
+
+				/**
+					@return		True if AUTOCIRCULATE_WITH_VIDPROC enabled; otherwise false.
+				**/
+				inline bool				WithVidProc (void) const							{return OptionFlags() & AUTOCIRCULATE_WITH_VIDPROC;}	//	New in SDK 16.0
+
+				/**
 					@return		True if running in field mode;  otherwise false.
 				**/
 				inline bool				IsFieldMode (void) const							{return OptionFlags() & AUTOCIRCULATE_WITH_FIELDS;}	//	New in SDK 16.0
@@ -7521,12 +7541,12 @@ typedef enum
 				/**
 					@return		True if capturing;  otherwise false.
 				**/
-				inline bool				IsInput (void) const								{return NTV2_IS_INPUT_CROSSPOINT (acCrosspoint);}
+				inline bool				IsInput (void) const								{return NTV2_IS_INPUT_CROSSPOINT(acCrosspoint);}
 
 				/**
 					@return		True if playing out;  otherwise false.
 				**/
-				inline bool				IsOutput (void) const								{return NTV2_IS_OUTPUT_CROSSPOINT (acCrosspoint);}
+				inline bool				IsOutput (void) const								{return NTV2_IS_OUTPUT_CROSSPOINT(acCrosspoint);}
 
 				/**
 					@return		The NTV2Mode, whether NTV2_MODE_OUTPUT, NTV2_MODE_INPUT or NTV2_MODE_INVALID (if stopped).

@@ -727,37 +727,29 @@ ostream & operator << (ostream & inOutStream, const FRAME_STAMP & inObj)
 }
 
 
-ostream & operator << (ostream & inOutStream, const AUTOCIRCULATE_STATUS & inObj)
+ostream & operator << (ostream & oss, const AUTOCIRCULATE_STATUS & inObj)
 {
-	string	str	(::NTV2CrosspointToString (inObj.acCrosspoint));
-	while (str.find (' ') != string::npos)
-		str.erase (str.find (' '), 1);
-	inOutStream << inObj.acHeader << " " << str << " " << ::NTV2AutoCirculateStateToString (inObj.acState);
-	if (inObj.acState != NTV2_AUTOCIRCULATE_DISABLED)
-	{
-		inOutStream	<< " startFrm=" << inObj.acStartFrame
-					<< " endFrm=" << inObj.acEndFrame
-					<< " actFrm=" << inObj.acActiveFrame
-					<< " proc=" << inObj.acFramesProcessed
-					<< " drop=" << inObj.acFramesDropped
-					<< " bufLvl=" << inObj.acBufferLevel;
-		if (NTV2_IS_VALID_AUDIO_SYSTEM (inObj.acAudioSystem))
-			inOutStream	<< " +" << ::NTV2AudioSystemToString (inObj.acAudioSystem, true);
-		inOutStream	<< (inObj.acOptionFlags & AUTOCIRCULATE_WITH_RP188			? " +RP188" : "")
-					<< (inObj.acOptionFlags & AUTOCIRCULATE_WITH_LTC			? " +LTC" : "")
-					<< (inObj.acOptionFlags & AUTOCIRCULATE_WITH_FBFCHANGE		? " +FBFCHG" : "")
-					<< (inObj.acOptionFlags & AUTOCIRCULATE_WITH_FBOCHANGE		? " +FBOCHG" : "")
-					<< (inObj.acOptionFlags & AUTOCIRCULATE_WITH_COLORCORRECT	? " +COLORCORR" : "")
-					<< (inObj.acOptionFlags & AUTOCIRCULATE_WITH_VIDPROC		? " +VIDPROC" : "")
-					<< (inObj.acOptionFlags & AUTOCIRCULATE_WITH_ANC			? " +ANC" : "")
-					<< (inObj.acOptionFlags & AUTOCIRCULATE_WITH_FIELDS			? " +FldMode" : "")
-					<< (inObj.acOptionFlags & AUTOCIRCULATE_WITH_HDMIAUX		? " +HDMIAux" : "");
-					//	<< inObj.acRDTSCStartTime
-					//	<< inObj.acAudioClockStartTime
-					//	<< inObj.acRDTSCCurrentTime
-					//	<< inObj.acAudioClockCurrentTime
-	}
-	return inOutStream << " " << inObj.acTrailer;
+	if (!inObj.IsStopped())
+		oss << ::NTV2ChannelToString(inObj.GetChannel(), true) << ": "
+			<< (inObj.IsInput() ? "Input " : "Output")
+			<< setw(12) << ::NTV2AutoCirculateStateToString(inObj.acState) << "  "
+			<< setw( 5) << inObj.acStartFrame
+			<< setw( 6) << inObj.acEndFrame
+			<< setw( 6) << inObj.acActiveFrame
+			<< setw( 8) << inObj.acFramesProcessed
+			<< setw( 8) << inObj.acFramesDropped
+			<< setw( 7) << inObj.acBufferLevel
+			<< setw(10) << ::NTV2AudioSystemToString(inObj.acAudioSystem, true)
+			<< setw(10) << (inObj.WithRP188()			? "+RP188"		: "-RP188")
+			<< setw(10) << (inObj.WithLTC()				? "+LTC"		: "-LTC")
+			<< setw(10) << (inObj.WithFBFChange()		? "+FBFchg"		: "-FBFchg")
+			<< setw(10) << (inObj.WithFBOChange()		? "+FBOchg"		: "-FBOchg")
+			<< setw(10) << (inObj.WithColorCorrect()	? "+ColCor"		: "-ColCor")
+			<< setw(10) << (inObj.WithVidProc()			? "+VidProc"	: "-VidProc")
+			<< setw(10) << (inObj.WithCustomAnc()		? "+AncData"	: "-AncData")
+			<< setw(10) << (inObj.IsFieldMode()			? "+FldMode"	: "-FldMode")
+			<< setw(10) << (inObj.WithHDMIAuxData()		? "+HDMIAux"	: "-HDMIAux");
+	return oss;
 }
 
 
@@ -2016,7 +2008,7 @@ void AUTOCIRCULATE_STATUS::Clear (void)
 
 NTV2Channel AUTOCIRCULATE_STATUS::GetChannel (void) const
 {
-	return ::NTV2CrosspointToNTV2Channel (acCrosspoint);
+	return ::NTV2CrosspointToNTV2Channel(acCrosspoint);
 }
 
 

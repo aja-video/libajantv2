@@ -4932,15 +4932,15 @@ NTV2Crosspoint GetNTV2CrosspointChannelForIndex (const ULWord index)
 {
 	switch(index)
 	{
-	default:
-	case 0:	return NTV2CROSSPOINT_CHANNEL1;
-	case 1:	return NTV2CROSSPOINT_CHANNEL2;
-	case 2:	return NTV2CROSSPOINT_CHANNEL3;
-	case 3:	return NTV2CROSSPOINT_CHANNEL4;
-	case 4:	return NTV2CROSSPOINT_CHANNEL5;
-	case 5:	return NTV2CROSSPOINT_CHANNEL6;
-	case 6:	return NTV2CROSSPOINT_CHANNEL7;
-	case 7:	return NTV2CROSSPOINT_CHANNEL8;
+		default:
+		case 0:	return NTV2CROSSPOINT_CHANNEL1;
+		case 1:	return NTV2CROSSPOINT_CHANNEL2;
+		case 2:	return NTV2CROSSPOINT_CHANNEL3;
+		case 3:	return NTV2CROSSPOINT_CHANNEL4;
+		case 4:	return NTV2CROSSPOINT_CHANNEL5;
+		case 5:	return NTV2CROSSPOINT_CHANNEL6;
+		case 6:	return NTV2CROSSPOINT_CHANNEL7;
+		case 7:	return NTV2CROSSPOINT_CHANNEL8;
 	}
 }
 
@@ -4948,15 +4948,15 @@ ULWord GetIndexForNTV2CrosspointChannel (const NTV2Crosspoint channel)
 {
 	switch(channel)
 	{
-	default:
-	case NTV2CROSSPOINT_CHANNEL1:	return 0;
-	case NTV2CROSSPOINT_CHANNEL2:	return 1;
-	case NTV2CROSSPOINT_CHANNEL3:	return 2;
-	case NTV2CROSSPOINT_CHANNEL4:	return 3;
-	case NTV2CROSSPOINT_CHANNEL5:	return 4;
-	case NTV2CROSSPOINT_CHANNEL6:	return 5;
-	case NTV2CROSSPOINT_CHANNEL7:	return 6;
-	case NTV2CROSSPOINT_CHANNEL8:	return 7;
+		default:
+		case NTV2CROSSPOINT_CHANNEL1:	return 0;
+		case NTV2CROSSPOINT_CHANNEL2:	return 1;
+		case NTV2CROSSPOINT_CHANNEL3:	return 2;
+		case NTV2CROSSPOINT_CHANNEL4:	return 3;
+		case NTV2CROSSPOINT_CHANNEL5:	return 4;
+		case NTV2CROSSPOINT_CHANNEL6:	return 5;
+		case NTV2CROSSPOINT_CHANNEL7:	return 6;
+		case NTV2CROSSPOINT_CHANNEL8:	return 7;
 	}
 }
 
@@ -4964,15 +4964,15 @@ NTV2Crosspoint GetNTV2CrosspointInputForIndex (const ULWord index)
 {
 	switch(index)
 	{
-	default:
-	case 0:	return NTV2CROSSPOINT_INPUT1;
-	case 1:	return NTV2CROSSPOINT_INPUT2;
-	case 2:	return NTV2CROSSPOINT_INPUT3;
-	case 3:	return NTV2CROSSPOINT_INPUT4;
-	case 4:	return NTV2CROSSPOINT_INPUT5;
-	case 5:	return NTV2CROSSPOINT_INPUT6;
-	case 6:	return NTV2CROSSPOINT_INPUT7;
-	case 7:	return NTV2CROSSPOINT_INPUT8;
+		default:
+		case 0:	return NTV2CROSSPOINT_INPUT1;
+		case 1:	return NTV2CROSSPOINT_INPUT2;
+		case 2:	return NTV2CROSSPOINT_INPUT3;
+		case 3:	return NTV2CROSSPOINT_INPUT4;
+		case 4:	return NTV2CROSSPOINT_INPUT5;
+		case 5:	return NTV2CROSSPOINT_INPUT6;
+		case 6:	return NTV2CROSSPOINT_INPUT7;
+		case 7:	return NTV2CROSSPOINT_INPUT8;
 	}
 }
 
@@ -4980,15 +4980,15 @@ ULWord GetIndexForNTV2CrosspointInput (const NTV2Crosspoint channel)
 {
 	switch(channel)
 	{
-	default:
-	case NTV2CROSSPOINT_INPUT1:	return 0;
-	case NTV2CROSSPOINT_INPUT2:	return 1;
-	case NTV2CROSSPOINT_INPUT3:	return 2;
-	case NTV2CROSSPOINT_INPUT4:	return 3;
-	case NTV2CROSSPOINT_INPUT5:	return 4;
-	case NTV2CROSSPOINT_INPUT6:	return 5;
-	case NTV2CROSSPOINT_INPUT7:	return 6;
-	case NTV2CROSSPOINT_INPUT8:	return 7;
+		default:
+		case NTV2CROSSPOINT_INPUT1:	return 0;
+		case NTV2CROSSPOINT_INPUT2:	return 1;
+		case NTV2CROSSPOINT_INPUT3:	return 2;
+		case NTV2CROSSPOINT_INPUT4:	return 3;
+		case NTV2CROSSPOINT_INPUT5:	return 4;
+		case NTV2CROSSPOINT_INPUT6:	return 5;
+		case NTV2CROSSPOINT_INPUT7:	return 6;
+		case NTV2CROSSPOINT_INPUT8:	return 7;
 	}
 }
 
@@ -4996,23 +4996,23 @@ NTV2Crosspoint GetNTV2CrosspointForIndex (const ULWord index)
 {
 	switch(index)
 	{
-	default:
-	case 0:	return NTV2CROSSPOINT_CHANNEL1;
-	case 1:	return NTV2CROSSPOINT_CHANNEL2;
-	case 2:	return NTV2CROSSPOINT_CHANNEL3;
-	case 3:	return NTV2CROSSPOINT_CHANNEL4;
-	case 4:	return NTV2CROSSPOINT_INPUT1;
-	case 5:	return NTV2CROSSPOINT_INPUT2;
-	case 6:	return NTV2CROSSPOINT_INPUT3;
-	case 7:	return NTV2CROSSPOINT_INPUT4;
-	case 8:	return NTV2CROSSPOINT_CHANNEL5;
-	case 9:	return NTV2CROSSPOINT_CHANNEL6;
-	case 10:return NTV2CROSSPOINT_CHANNEL7;
-	case 11:return NTV2CROSSPOINT_CHANNEL8;
-	case 12:return NTV2CROSSPOINT_INPUT5;
-	case 13:return NTV2CROSSPOINT_INPUT6;
-	case 14:return NTV2CROSSPOINT_INPUT7;
-	case 15:return NTV2CROSSPOINT_INPUT8;
+		default:
+		case 0:	return NTV2CROSSPOINT_CHANNEL1;
+		case 1:	return NTV2CROSSPOINT_CHANNEL2;
+		case 2:	return NTV2CROSSPOINT_CHANNEL3;
+		case 3:	return NTV2CROSSPOINT_CHANNEL4;
+		case 4:	return NTV2CROSSPOINT_INPUT1;
+		case 5:	return NTV2CROSSPOINT_INPUT2;
+		case 6:	return NTV2CROSSPOINT_INPUT3;
+		case 7:	return NTV2CROSSPOINT_INPUT4;
+		case 8:	return NTV2CROSSPOINT_CHANNEL5;
+		case 9:	return NTV2CROSSPOINT_CHANNEL6;
+		case 10:return NTV2CROSSPOINT_CHANNEL7;
+		case 11:return NTV2CROSSPOINT_CHANNEL8;
+		case 12:return NTV2CROSSPOINT_INPUT5;
+		case 13:return NTV2CROSSPOINT_INPUT6;
+		case 14:return NTV2CROSSPOINT_INPUT7;
+		case 15:return NTV2CROSSPOINT_INPUT8;
 	}
 }
 
@@ -5020,36 +5020,36 @@ ULWord GetIndexForNTV2Crosspoint (const NTV2Crosspoint channel)
 {
 	switch(channel)
 	{
-	default:
-	case NTV2CROSSPOINT_CHANNEL1:	return 0;
-	case NTV2CROSSPOINT_CHANNEL2:	return 1;
-	case NTV2CROSSPOINT_CHANNEL3:	return 2;
-	case NTV2CROSSPOINT_CHANNEL4:	return 3;
-	case NTV2CROSSPOINT_INPUT1:		return 4;
-	case NTV2CROSSPOINT_INPUT2:		return 5;
-	case NTV2CROSSPOINT_INPUT3:		return 6;
-	case NTV2CROSSPOINT_INPUT4:		return 7;
-	case NTV2CROSSPOINT_CHANNEL5:	return 8;
-	case NTV2CROSSPOINT_CHANNEL6:	return 9;
-	case NTV2CROSSPOINT_CHANNEL7:	return 10;
-	case NTV2CROSSPOINT_CHANNEL8:	return 11;
-	case NTV2CROSSPOINT_INPUT5:		return 12;
-	case NTV2CROSSPOINT_INPUT6:		return 13;
-	case NTV2CROSSPOINT_INPUT7:		return 14;
-	case NTV2CROSSPOINT_INPUT8:		return 15;
+		default:
+		case NTV2CROSSPOINT_CHANNEL1:	return 0;
+		case NTV2CROSSPOINT_CHANNEL2:	return 1;
+		case NTV2CROSSPOINT_CHANNEL3:	return 2;
+		case NTV2CROSSPOINT_CHANNEL4:	return 3;
+		case NTV2CROSSPOINT_INPUT1:		return 4;
+		case NTV2CROSSPOINT_INPUT2:		return 5;
+		case NTV2CROSSPOINT_INPUT3:		return 6;
+		case NTV2CROSSPOINT_INPUT4:		return 7;
+		case NTV2CROSSPOINT_CHANNEL5:	return 8;
+		case NTV2CROSSPOINT_CHANNEL6:	return 9;
+		case NTV2CROSSPOINT_CHANNEL7:	return 10;
+		case NTV2CROSSPOINT_CHANNEL8:	return 11;
+		case NTV2CROSSPOINT_INPUT5:		return 12;
+		case NTV2CROSSPOINT_INPUT6:		return 13;
+		case NTV2CROSSPOINT_INPUT7:		return 14;
+		case NTV2CROSSPOINT_INPUT8:		return 15;
 	}
 }
 
 
 bool IsNTV2CrosspointInput (const NTV2Crosspoint inChannel)
 {
-	return NTV2_IS_INPUT_CROSSPOINT (inChannel);
+	return NTV2_IS_INPUT_CROSSPOINT(inChannel);
 }
 
 
 bool IsNTV2CrosspointOutput (const NTV2Crosspoint inChannel)
 {
-	return NTV2_IS_OUTPUT_CROSSPOINT (inChannel);
+	return NTV2_IS_OUTPUT_CROSSPOINT(inChannel);
 }
 
 
@@ -6829,8 +6829,8 @@ string NTV2AudioMonitorSelectToString (const NTV2AudioMonitorSelect	inValue, con
 string NTV2CrosspointToString (const NTV2Crosspoint inChannel)
 {
 	std::ostringstream	oss;
-	oss	<< (::IsNTV2CrosspointInput (inChannel) ? "Capture " : "Playout ")
-		<< (::IsNTV2CrosspointInput (inChannel) ? ::GetIndexForNTV2CrosspointInput (inChannel) : ::GetIndexForNTV2CrosspointChannel (inChannel)) + 1;
+	oss	<< (::IsNTV2CrosspointInput(inChannel) ? "Capture " : "Playout ")
+		<< (::IsNTV2CrosspointInput(inChannel) ? ::GetIndexForNTV2CrosspointInput(inChannel) : ::GetIndexForNTV2CrosspointChannel(inChannel)) + 1;
 	return oss.str ();
 }
 
