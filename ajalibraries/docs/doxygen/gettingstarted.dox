@@ -519,9 +519,9 @@ Many OEM developers choose to create their own NTV2-based projects “from scrat
 
 @subsection	gs-newmacprojects	Mac OS X
 
-NTV2-based MacOS applications must be built using the provided static libraries, or by including the NTV2 source
-code directly into the Xcode project. AJA will not provide dynamically-loaded libraries (<b>.dylib</b>s) or frameworks
-for any of its libraries on the MacOS platform.
+NTV2-based MacOS applications currently are built using static libraries, or by including the NTV2 source code directly
+into the Xcode project. Historically, AJA has never provided dynamically-loaded libraries (<b>.dylib</b>s) or frameworks
+for its libraries on the MacOS platform, but this may change.
 
 Many OEM developers choose to create their own NTV2-based Xcode projects “from scratch.” At a minimum, the following
 <b>XCode</b> build parameters must be set:
