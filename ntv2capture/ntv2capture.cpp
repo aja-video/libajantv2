@@ -338,7 +338,7 @@ void NTV2Capture::ConsumeFrames (void)
 	CAPNOTE("Thread started");
 	AJA_NTV2_AUDIO_RECORD_BEGIN	//	Active when AJA_RAW_AUDIO_RECORD or AJA_WAV_AUDIO_RECORD defined
 	uint64_t ancTally(0);
-	ofstream * pOFS(mConfig.fAncDataFilePath.empty() ? AJA_NULL : new ofstream(mConfig.fAncDataFilePath, ios::binary));
+	ofstream * pOFS(mConfig.fAncDataFilePath.empty() ? AJA_NULL : new ofstream(mConfig.fAncDataFilePath.c_str(), ios::binary));
 	while (!mGlobalQuit)
 	{
 		//	Wait for the next frame to become ready to "consume"...
