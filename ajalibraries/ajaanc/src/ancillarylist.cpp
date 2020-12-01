@@ -476,8 +476,6 @@ static bool TestForAnalogContinuation (AJAAncillaryData * pPrevData, AJAAncillar
 	if (!pPrevData || !pNewData)
 		return false;
 
-	bool bResult = false;
-
 	//	Get coding type and location for the previous ancillary packet...
 	AJAAncillaryDataCoding		prevCoding	(pPrevData->GetDataCoding ());
 	AJAAncillaryDataLocation	prevLoc		(pPrevData->GetDataLocation ());
@@ -491,15 +489,12 @@ static bool TestForAnalogContinuation (AJAAncillaryData * pPrevData, AJAAncillar
 		&& (newCoding  == AJAAncillaryDataCoding_Analog)
 		&& (prevLoc.GetLineNumber()  == newLoc.GetLineNumber())
 		&& (prevLoc.GetHorizontalOffset()  == newLoc.GetHorizontalOffset())	// technically, these should ALWAYS be the same for "analog"...?
-		&& (prevLoc.GetDataSpace()   == newLoc.GetDataSpace())		//
-		&& (prevLoc.GetDataLink()    == newLoc.GetDataLink())		//
-		&& (prevLoc.GetDataStream()  == newLoc.GetDataStream())		//
-		&& (prevLoc.GetDataChannel() == newLoc.GetDataChannel()) )	//
-	{
-		bResult = true;
-	}
-
-	return bResult;
+		&& (prevLoc.GetDataSpace()   == newLoc.GetDataSpace())		//	Should always be VANC
+		&& (prevLoc.GetDataLink()    == newLoc.GetDataLink())		//	Link A or B -- should match
+		&& (prevLoc.GetDataStream()  == newLoc.GetDataStream())		//	DS1 or DS2 -- should match
+		&& (prevLoc.GetDataChannel() == newLoc.GetDataChannel()) )	//	Y or C -- should match
+			return true;
+	return false;
 }
 
 
@@ -520,17 +515,17 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 		return AJA_STATUS_NULL;
 
 	//	Use this as an uninitialized template...
-	AJAAncillaryData			newAncData;
-	AJAAncillaryDataLocation	defaultLoc		(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 9);
-	int32_t						remainingSize	(static_cast <int32_t> (dataSize));
-	const uint8_t *				pInputData		(pRcvData);
-	bool						bMoreData		(true);
+	AJAAncillaryData	newAncData;
+	AJAAncDataLoc		defaultLoc		(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 9);
+	int32_t				remainingSize	(int32_t(dataSize + 0));
+	const uint8_t *		pInputData		(pRcvData);
+	bool				bMoreData		(true);
 
 	while (bMoreData)
 	{
-		bool					bInsertNew	(false);		//	We'll set this 'true' if/when we find a new Anc packet to insert
-		AJAAncillaryDataType	newAncType	(AJAAncillaryDataType_Unknown);	//	We'll set this to the proper type once we know it
-		uint32_t				packetSize	(0);			//	This is where the AncillaryData object returns the number of bytes that were "consumed" from the input stream
+		bool bInsertNew	(false);	//	We'll set this 'true' if/when we find a new Anc packet to insert
+		AJAAncillaryDataType newAncType	(AJAAncillaryDataType_Unknown);	//	We'll set this to the proper type once we know it
+		uint32_t packetSize	(0);	//	This is where the AncillaryData object returns the number of bytes that were "consumed" from the input stream
 
 		//	Reset the AncData object, then load itself from the next GUMP packet...
 		newAncData.Clear();
@@ -552,36 +547,33 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 			bInsertNew = true;		//	Add it to the list
 		}	// digital anc data
 		else if (newAncData.IsAnalog())
-		{
-			//	"Analog" packets are trickier... First, digitized analog lines are broken into multiple
-			//	packets by the hardware, which need to be recombined into a single AJAAncillaryData object.
-			//	Second, it is harder to classify the data type, since there is no single easy-to-read
-			//	ID. Instead, we rely on the user to tell us what lines are expected to contain what kind
-			//	of data (e.g. "expect line 21 to carry 608 captioning...").
+		{	//	"Analog" packets are trickier...
+			//	1)	Digitized analog lines are broken into multiple packets by the hardware,
+			//		which need to be recombined into a single AJAAncillaryData object.
+			//	2)	It is harder to classify the data type, since there is no single easy-to-read
+			//		ID. Instead, we rely on the user to tell us what lines are expected to contain
+			//		what kind of data (e.g. "expect line 21 to carry 608 captioning...").
 
 			//	First, see if the LAST AJAAncillaryData object came from analog space and the same
-			//	location as this new one. If so, we're going to assume that the new data is simply a
-			//	continuation of the previous packet, and append the payload data accordingly.
-			bool bAppendAnalog = false;
+			//	location as this new one. If so, assume that the new data is simply a continuation
+			//	of the previous packet, and append the payload data accordingly.
+			bool bAppendAnalog (false);
 
 			if (!m_ancList.empty())
 			{
-				AJAAncillaryData *	pPrevData		(m_ancList.back());
-				bool				bAnlgContinue	(TestForAnalogContinuation (pPrevData, &newAncData));
-
-				if (bAnlgContinue)
-				{
-					//	The new data is just a continuation of the previous packet: simply append the
-					//	new payload data to the previous payload...
-					pPrevData->AppendPayload (newAncData);
+				AJAAncillaryData *	pPrevData (m_ancList.back());
+				if (::TestForAnalogContinuation (pPrevData, &newAncData))
+				{	//	The new data is just a continuation of the previous packet:
+					//	simply append the new payload data to the previous payload...
+					pPrevData->AppendPayload(newAncData);
 					bAppendAnalog = true;
 				}
 			}
 
 			if (!bAppendAnalog)
-			{
-				//	If this is NOT a "continuation" packet, then this is a new analog packet. see if the
-				//	user has specified an expected Anc data type that matches the location of the new data...
+			{	//	If this is NOT a "continuation" packet, then this is a new analog packet.
+				//	See if the user has specified an expected Anc data type that matches the
+				//	location of the new data...
 				newAncType = GetAnalogAncillaryDataType(newAncData);
 				bInsertNew = true;
 			}
@@ -602,16 +594,16 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 					catch(...)	{status = AJA_STATUS_FAIL;}
 				}
 				else ::BumpZeroLengthPacketCount();
-				if (inFrameNum  &&  !pData->GetFrameID()  &&  pData->IsDigital())
+				if (inFrameNum  &&  !pData->GetFrameID())
 					pData->SetFrameID(inFrameNum);
 			}
 			else
 				status = AJA_STATUS_FAIL;
 		}
 
-		remainingSize -= packetSize;		//	Decrease the remaining data size by the amount we just "consumed"
-		pInputData += packetSize;			//	Advance the input data pointer by the same amount
-		if (remainingSize <= 0)				//	All of the input data consumed?
+		remainingSize -= packetSize;	//	Decrease the remaining data size by the amount we just "consumed"
+		pInputData += packetSize;		//	Advance the input data pointer by the same amount
+		if (remainingSize <= 0)			//	All of the input data consumed?
 			bMoreData = false;
 	}	// while (bMoreData)
 
