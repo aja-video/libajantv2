@@ -401,6 +401,7 @@ void NTV2Capture::CaptureFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	inputXfer;	//	My A/C input transfer info
 	NTV2AudioChannelPairs	nonPcmPairs, oldNonPcmPairs;
+	const bool				isRecordingAnc (!mConfig.fAncDataFilePath.empty());
 	ULWord					acOptions (AUTOCIRCULATE_WITH_RP188);
 	if (mConfig.fWithAnc)
 		acOptions |= AUTOCIRCULATE_WITH_ANC;
@@ -432,8 +433,14 @@ void NTV2Capture::CaptureFrames (void)
 			if (acStatus.WithAudio())
 				inputXfer.SetAudioBuffer (pCaptureData->AudioBuffer(), pCaptureData->AudioBufferSize());
 			if (acStatus.WithCustomAnc())
+			{
+				if (isRecordingAnc  &&  pCaptureData->AncBuffer())	//	Driver will only copy up to acAncTransferSize...
+					pCaptureData->AncBuffer().Fill(ULWord(0));		//	...so clear stale data
+				if (isRecordingAnc  &&  pCaptureData->AncBuffer2())
+					pCaptureData->AncBuffer2().Fill(ULWord(0));
 				inputXfer.SetAncBuffers (pCaptureData->AncBuffer(), pCaptureData->AncBufferSize(),
 										 pCaptureData->AncBuffer2(), pCaptureData->AncBuffer2Size());
+			}
 
 			//	Transfer video/audio/anc from the device into our host buffers...
 			mDevice.AutoCirculateTransfer (mConfig.fInputChannel, inputXfer);
