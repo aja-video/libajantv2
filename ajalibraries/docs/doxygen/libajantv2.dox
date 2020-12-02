@@ -14,7 +14,7 @@
 	-	::CNTV2DeviceScanner — enumerates attached devices
 	-	::CNTV2Card — queries and/or controls a device
 	-	::CNTV2SignalRouter — a collection of signal routes that can be applied to a device
-	-	::CNTV2FormatDescriptor — describes an NTV2 raster image
+	-	::NTV2FormatDescriptor — describes an NTV2 raster image
 	-	::NTV2_POINTER — describes memory buffers and perform operations on them
 	-	::AUTOCIRCULATE_TRANSFER — Provides information used in CNTV2Card::AutoCirculateTransfer calls
 
