@@ -145,6 +145,20 @@ static bool	isEnabled (CNTV2Card & device, const NTV2Channel inChannel)
 	return result;
 }
 
+static string getActiveFrameStr (CNTV2Card & device, const NTV2Channel inChannel)
+{
+	if (!isEnabled(device, inChannel))
+		return "---";
+	ULWord frameNum(0);
+	if (NTV2_IS_INPUT_MODE(::getMode(device, inChannel)))
+		device.GetInputFrame(inChannel, frameNum);
+	else
+		device.GetOutputFrame(inChannel, frameNum);
+	ostringstream oss;
+	oss << DEC(frameNum);
+    return oss.str();
+}
+
 static ULWord readCurrentAudioPosition(CNTV2Card & device, NTV2AudioSystem audioSystem, NTV2Mode mode)
 {
     ULWord result(0);
@@ -615,12 +629,12 @@ void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
 			oss << ::NTV2ChannelToString(chan, true) << ": "
 				<< (::isEnabled(mDevice,chan) ? NTV2_IS_INPUT_MODE(::getMode(mDevice,chan)) ? " Input" : "Output" : "Off   ")
 				<< setw(12) << ::NTV2AutoCirculateStateToString(status.acState) << "  "
-				<< setw( 5) << "---"
-				<< setw( 6) << "---"
-				<< setw( 6) << "---"
-				<< setw( 8) << "---"
-				<< setw( 8) << "---"
-				<< setw( 7) << "---"
+				<< setw( 5) << "---"	//	acStartFrame
+				<< setw( 6) << "---"	//	acEndFrame
+				<< setw( 6) << ::getActiveFrameStr(mDevice,chan)	//	acActiveFrame
+				<< setw( 8) << "---"	//	acFramesProcessed
+				<< setw( 8) << "---"	//	acFramesDropped
+				<< setw( 7) << "---"	//	acBufferLevel
 				<< setw(10) << "---"
 				<< setw(10) << "---"
 				<< setw(10) << "---"

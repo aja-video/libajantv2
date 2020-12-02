@@ -733,12 +733,12 @@ ostream & operator << (ostream & oss, const AUTOCIRCULATE_STATUS & inObj)
 		oss << ::NTV2ChannelToString(inObj.GetChannel(), true) << ": "
 			<< (inObj.IsInput() ? "Input " : "Output")
 			<< setw(12) << ::NTV2AutoCirculateStateToString(inObj.acState) << "  "
-			<< setw( 5) << inObj.acStartFrame
-			<< setw( 6) << inObj.acEndFrame
-			<< setw( 6) << inObj.acActiveFrame
-			<< setw( 8) << inObj.acFramesProcessed
-			<< setw( 8) << inObj.acFramesDropped
-			<< setw( 7) << inObj.acBufferLevel
+			<< setw( 5) << inObj.GetStartFrame()
+			<< setw( 6) << inObj.GetEndFrame()
+			<< setw( 6) << inObj.GetActiveFrame()
+			<< setw( 8) << inObj.GetProcessedFrameCount()
+			<< setw( 8) << inObj.GetDroppedFrameCount()
+			<< setw( 7) << inObj.GetBufferLevel()
 			<< setw(10) << ::NTV2AudioSystemToString(inObj.acAudioSystem, true)
 			<< setw(10) << (inObj.WithRP188()			? "+RP188"		: "-RP188")
 			<< setw(10) << (inObj.WithLTC()				? "+LTC"		: "-LTC")
