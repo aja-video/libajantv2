@@ -461,7 +461,7 @@ void NTV2Player::PlayFrames (void)
 	PLNOTE("Thread started");
 	if (!mConfig.fAncDataFilePath.empty())
 	{
-		pAncistrm = new ifstream(mConfig.fAncDataFilePath, ios::binary);
+		pAncistrm = new ifstream(mConfig.fAncDataFilePath.c_str(), ios::binary);
 		if (pAncistrm->good())
 			acOptions |= AUTOCIRCULATE_WITH_ANC;
 		else
