@@ -9,22 +9,22 @@ This page describes how to use the <b>NTV2 Watcher</b> tool to interactively mon
 	-	Device Selection
 	-	Common Settings
 	-	<b>Inspectors</b>
-		-	\ref inspectorframebuffer
-		-	\ref inspectoraudio
-		-	\ref inspectoranc
-		-	\ref inspectorac
-		-	\ref inspectormixerkeyer
-		-	\ref inspectorlut
-		-	\ref inspectorregs
-		-	\ref inspectorroute
+		-	\ref inspectorframebuffer — Views/edits device frame buffer memory
+		-	\ref inspectoraudio — Views/edits device audio buffer memory
+		-	\ref inspectoranc — Monitors device ancillary data
+		-	\ref inspectorac — Monitors driver \ref aboutautocirculate status
+		-	\ref inspectormixerkeyer — Views/edits Mixer/Keyer state
+		-	\ref inspectorlut — Views/edits LUTs
+		-	\ref inspectorregs — Views/edits registers
+		-	\ref inspectorroute — Views/edits device widget routing
 
 <b>Tool Windows:</b>
-	-	\ref fillbufferdlog
-	-	\ref anc608viewer
-	-	\ref regautocycler
-	-	\ref tonegenerator
-	-	\ref memmapdlog
-	-	\ref scraptool
+	-	\ref fillbufferdlog — for changing the contents of frame buffer memory
+	-	\ref anc608viewer — for viewing/setting EIA608 captions
+	-	\ref regautocycler — for periodically changing a register value
+	-	\ref tonegenerator — writes tone values into an audio buffer
+	-	\ref memmapdlog — shows device memory utilization
+	-	\ref scraptool — displays contents of arbitrary host buffers
 
 
 
@@ -45,6 +45,10 @@ The user interface consists of a main window that contains these major elements:
 	-	<b>Status Message</b> — for messages;
 	-	<b>Selection Indicator</b> — Some inspectors allow data portions to be selected interactively using the keyboard or mouse.
 		This part of the Status Bar indicates the current selection.
+	-	<b>Endianness</b> — Some inspectors display 2/4/8-byte values.
+		This indicator shows the current endianness of the data display as <b>BE</b> (“Big Endian”) or <b>LE</b> (“Little Endian”).
+		It’s colored Green if it’s the native endianness, or Yellow if not native.
+	-	<b>Die Temperature</b> — Indicates the die temperature of the FPGA.
 	-	<b>Refresh Rate</b> — This part of the Status Bar shows the measured refresh rate of the inspector display (a moving average).
 
 
