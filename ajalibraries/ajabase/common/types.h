@@ -340,14 +340,17 @@ typedef enum
 	AJA_STATUS_STREAMRUNNING	=-108,	/**< Streams is running, should be stopped */
 
 // Other
-	AJA_STATUS_REBOOT			= 1000,	/**< Device requires reboot */
-	AJA_STATUS_POWER_CYCLE		= 1001	/**< Device requires a machine power-cycle */
+	AJA_STATUS_REBOOT			= -109,	/**< Device requires reboot */
+	AJA_STATUS_POWER_CYCLE		= -110	/**< Device requires a machine power-cycle */
 
 } AJAStatus;
 ///@}
 
 // Use to silence "unused parameter" warnings
 #define AJA_UNUSED(_x_) (void)_x_;
+
+#define AJA_CHECK_NULL(_ptr_, _res_) { if (__ptr__ == NULL) { return _res_; } }
+#define AJA_RETURN_STATUS(_status_) { const AJAStatus s = _status_; if (s != AJA_STATUS_SUCCESS) { return s; } }
 
 #ifndef NUMELMS
    #define NUMELMS(aa) (sizeof(aa)/sizeof((aa)[0]))
