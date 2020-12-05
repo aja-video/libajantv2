@@ -400,7 +400,7 @@ bool CNTV2VPID::GetImageAspect16x9 (void) const
 CNTV2VPID & CNTV2VPID::SetSampling (const VPIDSampling inSampling)
 {
 	m_uVPID = (m_uVPID & ~kRegMaskVPIDSampling) |
-		(((ULWord)inSampling << kRegShiftVPIDSampling) & kRegMaskVPIDSampling);
+		((ULWord(inSampling) << kRegShiftVPIDSampling) & kRegMaskVPIDSampling);
 	return *this;
 }
 
@@ -659,7 +659,7 @@ bool CNTV2VPID::SetVPIDData (ULWord &				outVPID,
 	VPIDSpec vpidSpec;
 
 
-	::memset ((void *)&vpidSpec, 0, sizeof (vpidSpec));
+	::memset (&vpidSpec, 0, sizeof(vpidSpec));
 
 	vpidSpec.videoFormat			= inOutputFormat;
 	vpidSpec.pixelFormat			= inIsRGB48Bit ? NTV2_FBF_48BIT_RGB : NTV2_FBF_INVALID;
@@ -722,7 +722,7 @@ NTV2VideoFormat CNTV2VPID::GetVideoFormat (void) const
 			videoFormat = NTV2_FORMAT_720p_6000;
 			break;
 		default:
-			break;;
+			break;
 		}
 		break;
 	case VPIDStandard_720_3Gb:
@@ -837,7 +837,7 @@ NTV2VideoFormat CNTV2VPID::GetVideoFormat (void) const
 }
 
 // Macro to simplify returning of string for given enum
-#define VPID_ENUM_CASE_RETURN_STR(enum_name) case(enum_name): return #enum_name;
+#define VPID_ENUM_CASE_RETURN_STR(enum_name) case(enum_name): return #enum_name
 
 const string CNTV2VPID::VersionString (const VPIDVersion version)
 {
@@ -1348,10 +1348,10 @@ static const string sVPIDRGBRange[]	= { "Narrow", "Full" };
 
 ostream & CNTV2VPID::Print (ostream & ostrm) const
 {
-	ostrm	<< "VPID " << xHEX0N(m_uVPID,8);
+	ostrm	<< "VPID " << xHEX0N(m_uVPID,8)
+			<< ": v" << ::VPIDVersionToString(GetVersion());
 	if (IsValid())
-		ostrm	<< ": v" << ::VPIDVersionToString(GetVersion())
-				<< " " << ::VPIDStandardToString(GetStandard())
+		ostrm	<< " " << ::VPIDStandardToString(GetStandard())
 				<< " " << ::NTV2VideoFormatToString(GetVideoFormat())
 				<< " rate=" << sVPIDPictureRate[GetPictureRate()]
 				<< " samp=" << sVPIDSampling[GetSampling()]
@@ -1364,57 +1364,60 @@ ostream & CNTV2VPID::Print (ostream & ostrm) const
 				<< " 16x9=" << YesNo(GetImageAspect16x9())
 				<< " xfer=" << sVPIDTransfer[GetTransferCharacteristics()]
 				<< " colo=" << sVPIDColorimetry[GetColorimetry()]
-                << " lumi=" << sVPIDLuminance[GetLuminance()]
-                << " rng=" << sVPIDRGBRange[GetRGBRange()];
+				<< " lumi=" << sVPIDLuminance[GetLuminance()]
+				<< " rng=" << sVPIDRGBRange[GetRGBRange()];
 	return ostrm;
 }
 
 ostream & CNTV2VPID::PrintPretty (ostream & ostrm) const
 {
-    ostrm	<< "VPID " << xHEX0N(m_uVPID,8) << endl;
-    if (IsValid())
-        ostrm	<< "Version = " << ::VPIDVersionToString(GetVersion()) << endl
-                << "Standard =  " << ::VPIDStandardToString(GetStandard()) << endl
-                << "Format =  " << ::NTV2VideoFormatToString(GetVideoFormat()) << endl
-                << "Frame Rate = " << sVPIDPictureRate[GetPictureRate()] << endl
-                << "Sampling = " << sVPIDSampling[GetSampling()] << endl
-                << "Channel = " << sVPIDChannel[GetChannel()] << endl
-                << "Links = " << (VPIDStandardIsSingleLink(GetStandard()) ? "1" : "mult") << endl
+	ostrm	<< "VPID " << xHEX0N(m_uVPID,8) << endl
+			<< "Version = " << ::VPIDVersionToString(GetVersion()) << endl;
+	if (IsValid())
+		ostrm	<< "Standard =  " << ::VPIDStandardToString(GetStandard()) << endl
+				<< "Format =  " << ::NTV2VideoFormatToString(GetVideoFormat()) << endl
+				<< "Frame Rate = " << sVPIDPictureRate[GetPictureRate()] << endl
+				<< "Sampling = " << sVPIDSampling[GetSampling()] << endl
+				<< "Channel = " << sVPIDChannel[GetChannel()] << endl
+				<< "Links = " << (VPIDStandardIsSingleLink(GetStandard()) ? "1" : "mult") << endl
             //	<< " dynRange=" << sVPIDDynamicRange[GetDynamicRange()] << endl
-                << "Bit Depth =" << sVPIDBitDepth[GetBitDepth()] << endl
-                << "3Ga= " << YesNo(IsStandard3Ga()) << endl
-                << "TSI = " << YesNo(IsStandardTwoSampleInterleave()) << endl
-                << "16x9 = " << YesNo(GetImageAspect16x9()) << endl
-                << "Xfer Char = " << sVPIDTransfer[GetTransferCharacteristics()] << endl
-                << "Colorimitry ="  << sVPIDColorimetry[GetColorimetry()] << endl
-                << "Luminance = " << sVPIDLuminance[GetLuminance()] << endl
-                << "RGB Range = " << sVPIDRGBRange[GetRGBRange()] << endl;
-    return ostrm;
+				<< "Bit Depth =" << sVPIDBitDepth[GetBitDepth()] << endl
+				<< "3Ga= " << YesNo(IsStandard3Ga()) << endl
+				<< "TSI = " << YesNo(IsStandardTwoSampleInterleave()) << endl
+				<< "16x9 = " << YesNo(GetImageAspect16x9()) << endl
+				<< "Xfer Char = " << sVPIDTransfer[GetTransferCharacteristics()] << endl
+				<< "Colorimetry ="  << sVPIDColorimetry[GetColorimetry()] << endl
+				<< "Luminance = " << sVPIDLuminance[GetLuminance()] << endl
+				<< "RGB Range = " << sVPIDRGBRange[GetRGBRange()] << endl;
+	return ostrm;
 }
 
 #define	YesOrNo(__x__)		((__x__) ? "Yes" : "No")
 
 AJALabelValuePairs & CNTV2VPID::GetInfo (AJALabelValuePairs & outInfo) const
 {
-	if (!IsValid())
-		return outInfo;
 	ostringstream hexConv;	hexConv << xHEX0N(m_uVPID,8);
 	AJASystemInfo::append(outInfo, "Raw Value",				hexConv.str());
 	AJASystemInfo::append(outInfo, "Version",				::VPIDVersionToString(GetVersion()));
+	if (!IsValid())
+		return outInfo;
 	AJASystemInfo::append(outInfo, "Standard",				::VPIDStandardToString(GetStandard()));
 	AJASystemInfo::append(outInfo, "Video Format",			::NTV2VideoFormatToString(GetVideoFormat()));
 	AJASystemInfo::append(outInfo, "Progressive Transport",	YesOrNo(GetProgressiveTransport()));
 	AJASystemInfo::append(outInfo, "Progressive Picture",	YesOrNo(GetProgressivePicture()));
-	AJASystemInfo::append(outInfo, "Picture Rate",			sVPIDPictureRate[GetPictureRate()]);
-	AJASystemInfo::append(outInfo, "Aspect Ratio",			GetImageAspect16x9() ? "16x9" : "4x3");
+	AJASystemInfo::append(outInfo, "Frame Rate",			sVPIDPictureRate[GetPictureRate()]);
 	AJASystemInfo::append(outInfo, "Sampling",				sVPIDSampling[GetSampling()]);
 	AJASystemInfo::append(outInfo, "Channel",				sVPIDChannel[GetChannel()]);
+	AJASystemInfo::append(outInfo, "Links",					VPIDStandardIsSingleLink(GetStandard()) ? "1" : "multiple");
+//	AJASystemInfo::append(outInfo, "Dynamic Range",			sVPIDDynamicRange[GetDynamicRange()]);
 	AJASystemInfo::append(outInfo, "Bit Depth",				sVPIDBitDepth[GetBitDepth()]);
 	AJASystemInfo::append(outInfo, "3Ga",					YesOrNo(IsStandard3Ga()));
 	AJASystemInfo::append(outInfo, "Two Sample Interleave",	YesOrNo(IsStandardTwoSampleInterleave()));
+	AJASystemInfo::append(outInfo, "Aspect Ratio",			GetImageAspect16x9() ? "16x9" : "4x3");
 	AJASystemInfo::append(outInfo, "Xfer Characteristics",	sVPIDTransfer[GetTransferCharacteristics()]);
 	AJASystemInfo::append(outInfo, "Colorimetry",			sVPIDColorimetry[GetColorimetry()]);
 	AJASystemInfo::append(outInfo, "Luminance",				sVPIDLuminance[GetLuminance()]);
+	AJASystemInfo::append(outInfo, "RGB Range",				sVPIDRGBRange[GetRGBRange()]);
 	return outInfo;
 }
 
