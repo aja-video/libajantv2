@@ -519,9 +519,8 @@ Many OEM developers choose to create their own NTV2-based projects “from scrat
 
 @subsection	gs-newmacprojects	Mac OS X
 
-NTV2-based MacOS applications currently are built using static libraries, or by including the NTV2 source code directly
-into the Xcode project. Historically, AJA has never provided dynamically-loaded libraries (<b>.dylib</b>s) or frameworks
-for its libraries on the MacOS platform, but this may change.
+Typically, NTV2-based MacOS applications are built using static libraries, or by including the NTV2 source code directly
+into the Xcode project.
 
 Many OEM developers choose to create their own NTV2-based Xcode projects “from scratch.” At a minimum, the following
 <b>XCode</b> build parameters must be set:
@@ -573,6 +572,37 @@ through the ::NTV2RPCAPI interface. This is done by using a properly-formatted U
 CNTV2DeviceScanner::GetFirstDeviceFromArgument, CNTV2DeviceScanner::GetFirstDeviceWithName, or CNTV2DriverInterface::Open.
 (There currently is no device discovery supported by ::NTV2RPCAPI.) For more information about this alternate interface,
 <a href="https://sdksupport.aja.com/index.php?/Tickets/Submit">submit a Ticket</a>.
+
+@par	Using NTV2 Dynamically-Loaded Libraries
+
+Starting in SDK 16.0.1, AJA began shipping pre-built dynamically-loaded libraries (<b>.dylib</b>s) in the ‘bin’ folder.
+By default, the libraries have these characteristics:
+-	Version numbers all default to “1.0.0”.
+-	All symbols are exported for “strong” linkage.
+-	The dylibs are intended for “tight” integration with client applications. Thus, changing even one NTV2 data type, class
+	definition or function signature without rebuilding both the SDK dylib and the client application(s) will likely yield
+	unexpected results, including crashes and data loss.
+
+To change the ‘demoapps.xcodeproj’ Xcode project to build the SDK command-line demo apps with “hard links” to the <b>.dylib</b>s:
+-	In the project settings, stop linking with the static libraries:  Remove (delete) the Linker’s “Other Linker Flags” at both
+	the project level, and then for the <b>ntv2ccgrabber</b> and <b>ntv2ccplayer</b> targets.
+-	From the Finder, drag the <b>ajantv2d.dylib</b> from the SDK <b>bin</b> folder, and drop it inside the <b>Frameworks</b> folder
+	in Xcode’s Project Navigator. Check the box next to each of the demo app build targets. Leave them as “Required”.
+-	From the Finder, drag the <b>ajaccd.dylib</b> from the SDK <b>bin</b> folder, and drop it inside the <b>Frameworks</b> folder
+	in Xcode’s Project Navigator. Check the box next to the <b>ntv2ccgrabber</b> and <b>ntv2ccplayer</b> build targets.
+-	Rebuild the demo apps.
+
+To run the demo apps, the MacOS dynamic loader must be told where to find the <b>dylib</b>s:
+-	From the command line, it’s easiest to set the <b>DYLD_LIBRARY_PATH</b> environment variable to point to the SDK <b>bin</b> folder,
+	where the <b>dylib</b>s are located by default.
+-	After <b>cd</b>’ing into the unzipped SDK folder:
+	\code{.sh}
+	$ DYLD_LIBRARY_PATH=./bin  ./bin/ntv2outputtestpattern
+	## NOTE:  Press Enter or Return to exit...
+	\endcode
+
+There are many ways to configure how to install the NTV2 <b>dylib</b>s or bundle them into a client application.
+See Apple’s “Dynamic Library Design Guidelines” document, available online.
 
 
 @subsection	gs-newwinprojects	Windows
