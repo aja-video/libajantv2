@@ -221,7 +221,7 @@ AJAStatus NTV2Burn::SetupVideo (void)
 
 	//	Pick an appropriate output spigot based on the output channel...
 	mOutputDestination	= ::NTV2ChannelToOutputDestination (mOutputChannel);
-	if (!::NTV2DeviceCanDoWidget (mDeviceID, NTV2_Wgt3GSDIOut2) && !::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtSDIOut2))
+	if (!::NTV2DeviceCanDoWidget (mDeviceID, NTV2_Wgt12GSDIOut2) && !::NTV2DeviceCanDoWidget (mDeviceID, NTV2_Wgt3GSDIOut2) && !::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtSDIOut2))
 		mOutputDestination = NTV2_OUTPUTDESTINATION_SDI1;			//	If device has only one SDI output
 	if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID)					//	If device has bidirectional SDI connectors...
 		&& NTV2_OUTPUT_DEST_IS_SDI (mOutputDestination))			//	...and output destination is SDI...
@@ -262,6 +262,9 @@ AJAStatus NTV2Burn::SetupVideo (void)
 			mDevice.SetSDITransmitEnable (tcChannel, false);			//	...then disable transmit mode...
 			AJATime::Sleep (500);										//	...and give the device a dozen frames or so to lock to the input signal
 		}	//	if input SDI connector needs to switch from transmit mode
+
+		// configure for vitc capture (should the driver do this?)
+		mDevice.SetRP188SourceFilter(tcChannel, 0x01);
 
 		const NTV2VideoFormat	tcInputVideoFormat	(mDevice.GetInputVideoFormat (::NTV2TimecodeIndexToInputSource (mTCSource)));
 		if (tcInputVideoFormat == NTV2_FORMAT_UNKNOWN)
@@ -465,7 +468,8 @@ void NTV2Burn::RouteOutputSignal (void)
 
 		for (NTV2Channel chan (startNum);  chan < endNum;  chan = NTV2Channel (chan + 1))
 		{
-			mDevice.SetRP188SourceFilter (chan, 0);	//	Set all SDI spigots to capture embedded LTC (VITC could be an option)
+			// this kills vitc capture
+//			mDevice.SetRP188SourceFilter (chan, 0);	//	Set all SDI spigots to capture embedded LTC (VITC could be an option)
 
 			if (chan == mInputChannel || chan == mOutputChannel)
 				continue;	//	Skip the input & output channel, already routed
@@ -473,7 +477,7 @@ void NTV2Burn::RouteOutputSignal (void)
 				continue;	//	Skip the timecode input channel
 			if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID))
 				mDevice.SetSDITransmitEnable (chan, true);
-			if (CNTV2SignalRouter::GetWidgetForInput (::GetSDIOutputInputXpt (chan, ::NTV2DeviceCanDoDualLink (mDeviceID)), outputWidgetID))
+			if (CNTV2SignalRouter::GetWidgetForInput (::GetSDIOutputInputXpt (chan, ::NTV2DeviceCanDoDualLink (mDeviceID)), outputWidgetID, mDeviceID))
 				if (::NTV2DeviceCanDoWidget (mDeviceID, outputWidgetID))
 				{
 					mDevice.Connect (::GetSDIOutputInputXpt (chan), outputXpt);
