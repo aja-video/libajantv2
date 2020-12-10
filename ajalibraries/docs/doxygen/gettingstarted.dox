@@ -414,26 +414,18 @@ The \ref ajantv2 source code is provided, and the libraries can be built with de
 -#	Choose <b>Build</b> from the <b>Product</b> menu.
 -#	Look for the new \c libajantv2d.a library in the \c lib folder.
 
-@note	The \ref ajantv2 in the SDK is built to link with the latest C++11 standard library.
-		If your application must use the older \c stdc++ standard library, you must rebuild it to reference the stdc++ standard library:
-		\code{.sh}
-		$ xcrun xcodebuild -workspace ntv2.xcworkspace  -scheme 'All - libs and demos'  -configuration Debug  CLANG_CXX_LIBRARY=libstdc++  clean build
-		\endcode
-		If you use the \ref ajacc, AJA supplies a stdc++-compatible version of this library inside the <b>lib/libstdc++</b> folder.
-		Swap it with the counterpart in the <b>lib</b> folder.<br><br>
-		<b>Starting in Xcode 10, the GNU-ABI-based ‘libstdc++’ standard libraries and headers are gone.</b><br>
-		To build using the older GNU-ABI-based ‘libstdc++’ libraries and headers, use Xcode 9 or earlier.
-
 @par XCode 12 and MacOS Big Sur
 
 XCode 12 produces “fat” libraries and executables for both <b>arm64</b> and <b>x86_64</b> architectures.
-In SDK 16.0, our .xcodeproj project files have been changed to ONLY build for the <b>x86_64</b> architecture.
-Weʼll revert this change when we release a native Apple Silicon compatible driver and SDK.
+In SDK 16.0, the <tt>.xcodeproj</t> project files have changed to ONLY build for the <b>x86_64</b> architecture.
+Weʼll revert this change when we release a native Apple Silicon <b>arm64</b>-compatible driver and SDK.
 
 To build a single ajantv2 library for both <b>arm64</b> and <b>x86_64</b> architectures, run this command:
 	\code{.sh}
 	$ xcrun xcodebuild -project ajalibraries/ajantv2/build/ajantv2.xcodeproj  -target BuildAll  -configuration Debug  ARCHS=arm64,x86_64  clean build
 	\endcode
+
+See also \ref gs-newmacprojects for more information on other Xcode configuration settings.
 
 
 @subsection		gs-winsdkbuild	Building on Windows
@@ -524,54 +516,71 @@ into the Xcode project.
 
 Many OEM developers choose to create their own NTV2-based Xcode projects “from scratch.” At a minimum, the following
 <b>XCode</b> build parameters must be set:
--	Use the “Latest Mac OS X” SDK. (The SDK can be built against MacOS SDK 10.9 or later.)
--	Use a “Mac OS X Deployment Target” of 10.9 (“Mountain Lion”) or later.
--	Use \c x86_64 (64-bit) architecture.
--	Define both preprocessor macros \c AJAMac and \c AJA_MAC.
--	Add the following header search paths:
-	-	\c sdkdir/ajalibraries/ajantv2/includes
-	-	\c sdkdir/ajalibraries/ajantv2/src/mac
-	-	\c sdkdir/ajalibraries/ajabase
-	-	\c sdkdir/ajalibraries/ajaanc
-	-	\c sdkdir/ajalibraries/ajacc (only if the \ref ajacc is needed)
--	It is not necessary to always search “user” header paths.
--	Use inch marks (i.e. "), and not angle brackets (i.e. <>) when quoting AJA header file names in \c #include statements.
--	Add the following library search paths:
-	-	\c sdkdir/lib
--	Add the following to the “Other Linker Flags” setting:
-	-	\c -lajantv2 (Release) or <b>-lajantv2d</b> (Debug)
-	-	\c -lajacc, if the \ref ajacc is needed
--	Link with the following frameworks:
-	-	<b>Foundation.framework</b>
-	-	<b>CoreFoundation.framework</b>
-	-	<b>IOKit.framework</b>
-	-	<b>CoreServices.framework</b>
-
-@warning	The libraries shipped with the SDK for MacOS are \c x86_64 (64-bit) only.
-			AJA no longer supports the \c i386 (Intel 32-bit) or PowerPC architectures.
-
-@note	The libraries shipped with the SDK for MacOS are built with the latest C++11 standard library support.
-		The Xcode build setting that controls this is \c CLANG_CXX_LIBRARY (a.k.a. “C++ Standard Library”).
-		This build setting must match for all compilands passed to the linker — otherwise “undefined symbols” errors will result.
-		See \ref gs-macsdkbuild for more information.
-
-@par	App Sandboxing
-
-<b>App Sandboxing</b>, introduced in MacOS 10.7 (“Lion”), is not supported by default in the NTV2 SDK, because Apple has not
-furnished any entitlements for executables that link to the IOKit framework. The NTV2 SDK must link to <b>IOKit.framework</b>
-in order to communicate directly with the AJA NTV2 device driver.
-
-@warning	If the NTV2 SDK is called from a sandboxed application, no attached NTV2 devices will be found,
+-	Use the “Latest Mac OS X” SDK. (The SDK should be able to build against earlier MacOS SDKs by using older versions of Xcode.)
+-	Use a “Mac OS X Deployment Target” of 10.13 (“High Sierra”) or later. (If an older MacOS SDK is used, this setting will need to be adjusted.)
+-	<b>Architectures:</b>
+	-	The libraries shipped with the SDK for MacOS are <b>x86_64</b> (Intel 64-bit) only.
+	-	Use the 64-bit Intel architecture:  <tt>ARCHS=x86_64</tt>
+	-	AJA no longer supports the <b>i386</b> (Intel 32-bit) or PowerPC architectures.
+	-	The Apple Silicon <b>arm64</b> architecture is supported (using Xcode 12.2 or later).
+		-	The ::CNTV2DeviceScanner class will not report any attached NTV2 devices until <b>arm64</b> support is added to the
+			NTV2 device driver (sometime in 2021).
+-	<b>App Sandboxing:</b>
+	-	Sandboxing, introduced in MacOS 10.7 (“Lion”), is not supported by the NTV2 SDK, since Apple did not furnish entitlements
+		for executables that link to the IOKit framework. The NTV2 SDK must link to <b>IOKit.framework</b> in order to communicate
+		directly with the NTV2 device driver.
+	-	It’s possible for an application that links with \ref ajantv2 to be sandboxed <i>if the library is built without
+		any references to the IOKit</i>. To do this, define the macro <b>NTV2_NULL_DEVICE</b>, and rebuild the library.
+		-	The ::CNTV2DeviceScanner class, in a library built with “NTV2_NULL_DEVICE”, will report no attached NTV2 devices,
 			even though they’re present in the <b>IORegistry</b>.
+		-	An application linked to this “NTV2_NULL_DEVICE” library would only be able to connect to real or virtual NTV2 devices
+			through the ::NTV2RPCAPI interface. This is done by using a properly-formatted URL specification passed to
+			CNTV2DeviceScanner::GetFirstDeviceFromArgument, CNTV2DeviceScanner::GetFirstDeviceWithName, or CNTV2DriverInterface::Open.
+			(There currently is no device discovery supported by ::NTV2RPCAPI.) For more information about this alternate interface,
+			<a href="https://sdksupport.aja.com/index.php?/Tickets/Submit">submit a Ticket</a>.
+-	<b>Pre-processor Macros:</b>
+	-	Define <b>AJAMac</b>
+	-	Define <b>AJA_MAC</b>
+-	<b>Header Files:</b>
+	-	Add these user header search paths (\c USER_HEADER_SEARCH_PATHS):
+		-	<i>sdklib</i>/<b>ajalibraries/ajantv2/includes</b>
+		-	<i>sdklib</i>/<b>ajalibraries/ajantv2/src/mac</b>
+		-	<i>sdklib</i>/<b>ajalibraries/ajabase</b>
+		-	<i>sdklib</i>/<b>ajalibraries/ajaanc</b>
+		-	<i>sdklib</i>/<b>ajalibraries/ajacc</b> (only if the \ref ajacc is needed)
+	-	Disable the \c ALWAYS_SEARCH_USER_PATHS setting (deprecated in Xcode 8.3).
+	-	Use inch marks (i.e. "), and not angle brackets (i.e. <>) when quoting AJA header file names in \c #include statements.
+-	<b>Standard Library Support:</b>
+	-	The libraries shipped with the SDK for MacOS are built to link with the default “LLVM C++ Standard Library with C++11 Support”
+		(<tt>CLANG_CXX_LIBRARY=libc++</tt>).
+	-	To use the older “GNU C++ Standard Library”:
+		-	Use Xcode 9 or earler (Apple removed the GNU-ABI-based ‘libstdc++’ standard libraries and headers in Xcode 10)
+		-	Set <tt>CLANG_CXX_LIBRARY=libstdc+</tt>
+		-	Rebuild \ref ajantv2 with <tt>CLANG_CXX_LIBRARY=libstdc++</tt>
+		-	If \ref ajacc is required, AJA supplies <b>libstdc++</b>-compatible versions of this library, static and dynamic,
+			debug and release, in the <i>sdklib</i>/<b>lib/libstdc++</b> folder. Swap it with its counterpart in <i>sdklib</i>/<b>lib</b>
+			(static) or <i>sdklib</i>/<b>bin</b> (dynamic).
+		-	If this build setting is mismatched for any compilands passed to the linker, numerous “undefined symbol” errors will result.
+-	<b>Static Linking:</b>
+	-	Add the following library search paths (\c LIBRARY_SEARCH_PATHS):
+		-	<i>sdklib</i>/<b>lib</b>
+	-	Add the following to the “Other Linker Flags” setting (\c OTHER_LDFLAGS):
+		-	<b>-lajantv2</b> (Release) or <b>-lajantv2d</b> (Debug)
+		-	<b>-lajacc</b>, if the \ref ajacc is needed
+	-	Link with these frameworks/dylibs (in “Build Phases”, in “Link Binary With Libraries”):
+		-	<b>CoreFoundation.framework</b>
+		-	<b>CoreServices.framework</b>
+		-	<b>Foundation.framework</b>
+		-	<b>IOKit.framework</b>
+-	<b>Dynamic Linking:</b>
+	-	Link with these frameworks/dylibs (in “Build Phases”, in “Link Binary With Libraries”) as “Required”:
+		-	<b>CoreFoundation.framework</b>
+		-	<b>CoreServices.framework</b>
+		-	<b>Foundation.framework</b>
+		-	<b>IOKit.framework</b>
+		-	<b>ajantv2d.dylib</b> (Debug) or <b>ajantv2.dylib</b> (Release)
+		-	<b>ajaccd.dylib</b> (Debug) or <b>ajacc.dylib</b> (Release) if \ref ajacc is needed.
 
-It is possible for an application that links with \ref ajantv2 to be sandboxed if the library is built without
-any references to the IOKit. To do this, define the macro <b>NTV2_NULL_DEVICE</b>, and rebuild the library.
-
-An application linked to this “NTV2_NULL_DEVICE” library would only be able to connect to real or virtual NTV2 devices
-through the ::NTV2RPCAPI interface. This is done by using a properly-formatted URL specification passed to
-CNTV2DeviceScanner::GetFirstDeviceFromArgument, CNTV2DeviceScanner::GetFirstDeviceWithName, or CNTV2DriverInterface::Open.
-(There currently is no device discovery supported by ::NTV2RPCAPI.) For more information about this alternate interface,
-<a href="https://sdksupport.aja.com/index.php?/Tickets/Submit">submit a Ticket</a>.
 
 @par	Using NTV2 Dynamically-Loaded Libraries
 
