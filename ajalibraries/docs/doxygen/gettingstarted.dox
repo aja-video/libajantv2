@@ -588,7 +588,7 @@ Many OEM developers choose to create their own NTV2-based Xcode projects “from
 			definition or function signature without rebuilding both the SDK dylib and the client application(s) will likely
 			yield <b>dyld</b> failures at launch, or unexpected results (e.g. crashes).
 	-	Set the “Runpath Search Paths” (\c LD_RUNPATH_SEARCH_PATHS) based on the expected runtime location of the AJA <b>dylib</b>(s) —
-		e.g. <b>@rpath</b>/…, <b>@executablepath</b>/…, <b>@loader_path</b>/…, etc.
+		e.g. <b>\@rpath</b>/…, <b>\@executablepath</b>/…, <b>\@loader_path</b>/…, etc.
 		See Apple’s “<a href="https://developer.apple.com/library/content/documentation/DeveloperTools/Conceptual/DynamicLibraries/000-Introduction/Introduction.html">Dynamic
 		Library Design Guidelines</a>” document for more information.  For command line executables, it’s easy from the <b>bash</b> (or equiv.) shell to set the
 		<b>DYLD_LIBRARY_PATH</b> environment variable to point to <i>sdkroot</i>/<b>bin</b> that contains the AJA <b>dylib</b>s.
