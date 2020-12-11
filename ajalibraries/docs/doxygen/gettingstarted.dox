@@ -538,16 +538,17 @@ Many OEM developers choose to create their own NTV2-based Xcode projects “from
 			CNTV2DeviceScanner::GetFirstDeviceFromArgument, CNTV2DeviceScanner::GetFirstDeviceWithName, or CNTV2DriverInterface::Open.
 			(There currently is no device discovery supported by ::NTV2RPCAPI.) For more information about this alternate interface,
 			<a href="https://sdksupport.aja.com/index.php?/Tickets/Submit">submit a Ticket</a>.
--	<b>Pre-processor Macros:</b>
-	-	Define <b>AJAMac</b>
-	-	Define <b>AJA_MAC</b>
+-	<b>Pre-processor:</b>
+	-	These macros must be defined (\c GCC_PREPROCESSOR_DEFINITIONS):
+		-	<b>AJAMac</b>
+		-	<b>AJA_MAC</b>
 -	<b>Header Files:</b>
 	-	Add these user header search paths (\c USER_HEADER_SEARCH_PATHS):
-		-	<i>sdklib</i>/<b>ajalibraries/ajantv2/includes</b>
-		-	<i>sdklib</i>/<b>ajalibraries/ajantv2/src/mac</b>
-		-	<i>sdklib</i>/<b>ajalibraries/ajabase</b>
-		-	<i>sdklib</i>/<b>ajalibraries/ajaanc</b>
-		-	<i>sdklib</i>/<b>ajalibraries/ajacc</b> (only if the \ref ajacc is needed)
+		-	<i>sdkroot</i>/<b>ajalibraries/ajantv2/includes</b>
+		-	<i>sdkroot</i>/<b>ajalibraries/ajantv2/src/mac</b>
+		-	<i>sdkroot</i>/<b>ajalibraries/ajabase</b>
+		-	<i>sdkroot</i>/<b>ajalibraries/ajaanc</b>
+		-	<i>sdkroot</i>/<b>ajalibraries/ajacc</b> (only if the \ref ajacc is needed)
 	-	Disable the \c ALWAYS_SEARCH_USER_PATHS setting (deprecated in Xcode 8.3).
 	-	Use inch marks (i.e. "), and not angle brackets (i.e. <>) when quoting AJA header file names in \c #include statements.
 -	<b>Standard Library Support:</b>
@@ -558,12 +559,12 @@ Many OEM developers choose to create their own NTV2-based Xcode projects “from
 		-	Set <tt>CLANG_CXX_LIBRARY=libstdc+</tt>
 		-	Rebuild \ref ajantv2 with <tt>CLANG_CXX_LIBRARY=libstdc++</tt>
 		-	If \ref ajacc is required, AJA supplies <b>libstdc++</b>-compatible versions of this library, static and dynamic,
-			debug and release, in the <i>sdklib</i>/<b>lib/libstdc++</b> folder. Swap it with its counterpart in <i>sdklib</i>/<b>lib</b>
-			(static) or <i>sdklib</i>/<b>bin</b> (dynamic).
+			debug and release, in the <i>sdkroot</i>/<b>lib/libstdc++</b> folder. Swap it with its counterpart in <i>sdkroot</i>/<b>lib</b>
+			(static) or <i>sdkroot</i>/<b>bin</b> (dynamic).
 		-	If this build setting is mismatched for any compilands passed to the linker, numerous “undefined symbol” errors will result.
 -	<b>Static Linking:</b>
 	-	Add the following library search paths (\c LIBRARY_SEARCH_PATHS):
-		-	<i>sdklib</i>/<b>lib</b>
+		-	<i>sdkroot</i>/<b>lib</b>
 	-	Add the following to the “Other Linker Flags” setting (\c OTHER_LDFLAGS):
 		-	<b>-lajantv2</b> (Release) or <b>-lajantv2d</b> (Debug)
 		-	<b>-lajacc</b>, if the \ref ajacc is needed
@@ -578,40 +579,19 @@ Many OEM developers choose to create their own NTV2-based Xcode projects “from
 		-	<b>CoreServices.framework</b>
 		-	<b>Foundation.framework</b>
 		-	<b>IOKit.framework</b>
-		-	<b>ajantv2d.dylib</b> (Debug) or <b>ajantv2.dylib</b> (Release)
-		-	<b>ajaccd.dylib</b> (Debug) or <b>ajacc.dylib</b> (Release) if \ref ajacc is needed.
-
-
-@par	Using NTV2 Dynamically-Loaded Libraries
-
-Starting in SDK 16.0.1, AJA began shipping pre-built dynamically-loaded libraries (<b>.dylib</b>s) in the ‘bin’ folder.
-By default, the libraries have these characteristics:
--	Version numbers all default to “1.0.0”.
--	All symbols are exported for “strong” linkage.
--	The dylibs are intended for “tight” integration with client applications. Thus, changing even one NTV2 data type, class
-	definition or function signature without rebuilding both the SDK dylib and the client application(s) will likely yield
-	unexpected results, including crashes and data loss.
-
-To change the ‘demoapps.xcodeproj’ Xcode project to build the SDK command-line demo apps with “hard links” to the <b>.dylib</b>s:
--	In the project settings, stop linking with the static libraries:  Remove (delete) the Linker’s “Other Linker Flags” at both
-	the project level, and then for the <b>ntv2ccgrabber</b> and <b>ntv2ccplayer</b> targets.
--	From the Finder, drag the <b>ajantv2d.dylib</b> from the SDK <b>bin</b> folder, and drop it inside the <b>Frameworks</b> folder
-	in Xcode’s Project Navigator. Check the box next to each of the demo app build targets. Leave them as “Required”.
--	From the Finder, drag the <b>ajaccd.dylib</b> from the SDK <b>bin</b> folder, and drop it inside the <b>Frameworks</b> folder
-	in Xcode’s Project Navigator. Check the box next to the <b>ntv2ccgrabber</b> and <b>ntv2ccplayer</b> build targets.
--	Rebuild the demo apps.
-
-To run the demo apps, the MacOS dynamic loader must be told where to find the <b>dylib</b>s:
--	From the command line, it’s easiest to set the <b>DYLD_LIBRARY_PATH</b> environment variable to point to the SDK <b>bin</b> folder,
-	where the <b>dylib</b>s are located by default.
--	After <b>cd</b>’ing into the unzipped SDK folder:
-	\code{.sh}
-	$ DYLD_LIBRARY_PATH=./bin  ./bin/ntv2outputtestpattern
-	## NOTE:  Press Enter or Return to exit...
-	\endcode
-
-There are many ways to configure how to install the NTV2 <b>dylib</b>s or bundle them into a client application.
-See Apple’s “Dynamic Library Design Guidelines” document, available online.
+		-	<i>sdkroot</i>/lib/<b>ajantv2d.dylib</b> (Debug) or <i>sdkroot</i>/lib/<b>ajantv2.dylib</b> (Release)
+		-	If \ref ajacc is required, <i>sdkroot</i>/lib/<b>ajaccd.dylib</b> (Debug) or <i>sdkroot</i>/lib/<b>ajacc.dylib</b> (Release)
+	-	The supplied <b>dylib</b>s have these characteristics:
+		-	Version numbers all default to “1.0.0”.
+		-	All public, non-static symbols are exported for “strong” linkage.
+		-	The <b>dylib</b>s are intended for “tight” integration with client applications. Changing even one NTV2 data type, class
+			definition or function signature without rebuilding both the SDK dylib and the client application(s) will likely
+			yield <b>dyld</b> failures at launch, or unexpected results (e.g. crashes).
+	-	Set the “Runpath Search Paths” (\c LD_RUNPATH_SEARCH_PATHS) based on the expected runtime location of the AJA <b>dylib</b>(s) —
+		e.g. <b>@rpath</b>/…, <b>@executablepath</b>/…, <b>@loader_path</b>/…, etc.
+		See Apple’s “<a href="https://developer.apple.com/library/content/documentation/DeveloperTools/Conceptual/DynamicLibraries/000-Introduction/Introduction.html">Dynamic
+		Library Design Guidelines</a>” document for more information.  For command line executables, it’s easy from the <b>bash</b> (or equiv.) shell to set the
+		<b>DYLD_LIBRARY_PATH</b> environment variable to point to <i>sdkroot</i>/<b>bin</b> that contains the AJA <b>dylib</b>s.
 
 
 @subsection	gs-newwinprojects	Windows
