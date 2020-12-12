@@ -1422,7 +1422,7 @@ public:
 
 
 #if !defined(NTV2_DEPRECATE_16_0)
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetEnableVANCData (const NTV2ChannelSet & inChannels, const bool inVANCenable, const bool inTallerVANC = false))	{return SetVANCMode(inChannels, );}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetEnableVANCData (const NTV2ChannelSet & inChannels, const bool inVANCenable, const bool inTallerVANC = false))	{return SetVANCMode(inChannels, NTV2VANCModeFromBools(inVANCenable, inTallerVANC));}
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard st, const NTV2FrameGeometry fg,
 																	const NTV2Channel inChannel = NTV2_CHANNEL1))	{(void) st; (void) fg; return SetVANCMode(inVancMode, inChannel);}
 #endif	//	NTV2_DEPRECATE_16_0
