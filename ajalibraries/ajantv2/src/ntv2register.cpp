@@ -3104,80 +3104,69 @@ bool CNTV2Card::GetVideoLimiting (NTV2VideoLimiting & outValue)
 
 
 //SetEnableVANCData
-// You need to call SetVideoFormat with the desired
-// video format BEFORE you call this funciton
-// SetVideoFormat overwrites with nonvanc framegeometry
-// wideVANC is a kludge so we can be backards compatible.
+// Call SetVideoFormat with the desired video format BEFORE you call this function!
 bool CNTV2Card::SetEnableVANCData (const bool inVANCenable, const bool inTallerVANC, const NTV2Channel inChannel)
 {
-	const NTV2Channel	channel	(IsMultiFormatActive() ? inChannel : NTV2_CHANNEL1);
-	if (IS_CHANNEL_INVALID(channel))
-		return false;
-
-	NTV2Standard standard;
-	GetStandard (standard, channel);
-	if (NTV2_IS_QUAD_STANDARD(standard)  &&  (inVANCenable || inTallerVANC))
-		return false;	//	Tall/taller VANC not supported in 4K/UHD
-
-	NTV2FrameGeometry frameGeometry;
-	GetFrameGeometry (frameGeometry, channel);
-	return SetVANCMode (NTV2VANCModeFromBools (inVANCenable, inTallerVANC), standard, frameGeometry, channel);
+	return SetVANCMode (NTV2VANCModeFromBools(inVANCenable, inTallerVANC), IsMultiFormatActive() ? inChannel : NTV2_CHANNEL1);
 }
 
-bool CNTV2Card::SetEnableVANCData (const NTV2ChannelSet & inChannels, const bool inVANCenable, const bool inTallerVANC)
+bool CNTV2Card::SetVANCMode (const NTV2ChannelSet & inChannels, const NTV2VANCMode inVancMode)
 {
 	size_t errors(0);
 	for (NTV2ChannelSetConstIter it(inChannels.begin());  it != inChannels.end();  ++it)
-		if (!SetEnableVANCData (inVANCenable, inTallerVANC, *it))
+		if (!SetEnableVANCData (inVancMode, *it))
 			errors++;
 	return !errors;
 }
 
 
-bool CNTV2Card::SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard inStandard, const NTV2FrameGeometry inFrameGeometry, const NTV2Channel inChannel)
+bool CNTV2Card::SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Channel inChannel)
 {
-	NTV2Channel			channel			(IsMultiFormatActive () ? inChannel : NTV2_CHANNEL1);
-	NTV2FrameGeometry	frameGeometry	(inFrameGeometry);
-	if (IS_CHANNEL_INVALID (channel))
+	const NTV2Channel ch (IsMultiFormatActive() ? inChannel : NTV2_CHANNEL1);
+	if (IS_CHANNEL_INVALID(ch))
 		return false;
-	if (!NTV2_IS_VALID_VANCMODE (inVancMode))
+	if (!NTV2_IS_VALID_VANCMODE(inVancMode))
 		return false;
 
-	switch (inStandard)
+	NTV2FrameGeometry	fg(NTV2_FG_INVALID);
+	NTV2Standard		st(NTV2_STANDARD_INVALID);
+	GetStandard(st, ch);
+	GetFrameGeometry(fg, ch);
+	switch (st)
 	{
 		case NTV2_STANDARD_1080:
 		case NTV2_STANDARD_1080p:
-			if (frameGeometry == NTV2_FG_1920x1112  ||  frameGeometry == NTV2_FG_1920x1114  ||  frameGeometry == NTV2_FG_1920x1080)
-				frameGeometry = NTV2_IS_VANCMODE_TALLER (inVancMode) ? NTV2_FG_1920x1114 : (NTV2_IS_VANCMODE_TALL (inVancMode) ? NTV2_FG_1920x1112 : NTV2_FG_1920x1080);
-			else if (NTV2_IS_QUAD_FRAME_GEOMETRY (frameGeometry))		// 4K
+			if (fg == NTV2_FG_1920x1112  ||  fg == NTV2_FG_1920x1114  ||  fg == NTV2_FG_1920x1080)
+				fg = NTV2_IS_VANCMODE_TALLER(inVancMode) ? NTV2_FG_1920x1114 : (NTV2_IS_VANCMODE_TALL(inVancMode) ? NTV2_FG_1920x1112 : NTV2_FG_1920x1080);
+			else if (NTV2_IS_QUAD_FRAME_GEOMETRY(fg))		// 4K
 				;	// do nothing for now
-			else if (NTV2_IS_2K_1080_FRAME_GEOMETRY (frameGeometry))	// 2Kx1080
-				frameGeometry = NTV2_IS_VANCMODE_TALLER (inVancMode) ? NTV2_FG_2048x1114 : (NTV2_IS_VANCMODE_TALL (inVancMode) ? NTV2_FG_2048x1112 : NTV2_FG_2048x1080);
+			else if (NTV2_IS_2K_1080_FRAME_GEOMETRY(fg))	// 2Kx1080
+				fg = NTV2_IS_VANCMODE_TALLER(inVancMode) ? NTV2_FG_2048x1114 : (NTV2_IS_VANCMODE_TALL(inVancMode) ? NTV2_FG_2048x1112 : NTV2_FG_2048x1080);
 			break;
 
 		case NTV2_STANDARD_720:
-			frameGeometry = NTV2_IS_VANCMODE_ON (inVancMode) ? NTV2_FG_1280x740 : NTV2_FG_1280x720;
-			if (NTV2_IS_VANCMODE_TALLER (inVancMode))
+			fg = NTV2_IS_VANCMODE_ON(inVancMode) ? NTV2_FG_1280x740 : NTV2_FG_1280x720;
+			if (NTV2_IS_VANCMODE_TALLER(inVancMode))
 				CVIDWARN("'taller' mode requested for 720p -- using 'tall' geometry instead");
 			break;
 
 		case NTV2_STANDARD_525:
-			frameGeometry = NTV2_IS_VANCMODE_TALLER (inVancMode) ? NTV2_FG_720x514 : (NTV2_IS_VANCMODE_TALL (inVancMode) ? NTV2_FG_720x508 : NTV2_FG_720x486);
+			fg = NTV2_IS_VANCMODE_TALLER(inVancMode) ? NTV2_FG_720x514 : (NTV2_IS_VANCMODE_TALL(inVancMode) ? NTV2_FG_720x508 : NTV2_FG_720x486);
 			break;
 
 		case NTV2_STANDARD_625:
-			frameGeometry = NTV2_IS_VANCMODE_TALLER (inVancMode) ? NTV2_FG_720x612 : (NTV2_IS_VANCMODE_TALL (inVancMode) ? NTV2_FG_720x598 : NTV2_FG_720x576);
+			fg = NTV2_IS_VANCMODE_TALLER(inVancMode) ? NTV2_FG_720x612 : (NTV2_IS_VANCMODE_TALL(inVancMode) ? NTV2_FG_720x598 : NTV2_FG_720x576);
 			break;
 
 		case NTV2_STANDARD_2K:
-			frameGeometry = NTV2_IS_VANCMODE_ON (inVancMode) ? NTV2_FG_2048x1588 : NTV2_FG_2048x1556;
-			if (NTV2_IS_VANCMODE_TALLER (inVancMode))
-				CVIDWARN("'taller' mode requested for 2K standard '" << ::NTV2StandardToString(inStandard) << "' -- using 'tall' instead");
+			fg = NTV2_IS_VANCMODE_ON(inVancMode) ? NTV2_FG_2048x1588 : NTV2_FG_2048x1556;
+			if (NTV2_IS_VANCMODE_TALLER(inVancMode))
+				CVIDWARN("'taller' mode requested for 2K standard '" << ::NTV2StandardToString(st) << "' -- using 'tall' instead");
 			break;
 
 		case NTV2_STANDARD_2Kx1080p:
 		case NTV2_STANDARD_2Kx1080i:
-			frameGeometry = NTV2_IS_VANCMODE_TALLER (inVancMode) ? NTV2_FG_2048x1114 : (NTV2_IS_VANCMODE_TALL (inVancMode) ? NTV2_FG_2048x1112 : NTV2_FG_2048x1080);
+			fg = NTV2_IS_VANCMODE_TALLER(inVancMode) ? NTV2_FG_2048x1114 : (NTV2_IS_VANCMODE_TALL(inVancMode) ? NTV2_FG_2048x1112 : NTV2_FG_2048x1080);
 			break;
 
 		case NTV2_STANDARD_3840x2160p:
@@ -3189,7 +3178,7 @@ bool CNTV2Card::SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard i
 		case NTV2_STANDARD_3840i:
 		case NTV2_STANDARD_4096i:
 			if (NTV2_IS_VANCMODE_ON(inVancMode))
-				CVIDWARN("'tall' or 'taller' mode requested for '" << ::NTV2StandardToString(inStandard) << "' -- using non-VANC geometry instead");
+				CVIDWARN("'tall' or 'taller' mode requested for '" << ::NTV2StandardToString(st) << "' -- using non-VANC geometry instead");
 			break;
 	#if defined(_DEBUG)
 		case NTV2_STANDARD_INVALID:		return false;
@@ -3197,12 +3186,12 @@ bool CNTV2Card::SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard i
 		default:						return false;
 	#endif	//	_DEBUG
 	}
-	SetFrameGeometry (frameGeometry, false/*ajaRetail*/, inChannel);
-	CVIDINFO("'" << GetDisplayName() << "' Ch" << DEC(channel+1) << ": set to " << ::NTV2VANCModeToString(inVancMode) << " for " << ::NTV2StandardToString(inStandard) << " and " << ::NTV2FrameGeometryToString(frameGeometry));
+	SetFrameGeometry (fg, false/*ajaRetail*/, ch);
+	CVIDINFO("'" << GetDisplayName() << "' Ch" << DEC(ch+1) << ": set to " << ::NTV2VANCModeToString(inVancMode) << " for " << ::NTV2StandardToString(st) << " and " << ::NTV2FrameGeometryToString(fg));
 
 	//	Only muck with limiting if not the xena2k board. Xena2k only turns off limiting in VANC area. Active video uses vidproccontrol setting...
 	if (!::NTV2DeviceNeedsRoutingSetup(GetDeviceID()))
-		SetVideoLimiting (NTV2_IS_VANCMODE_ON (inVancMode) ? NTV2_VIDEOLIMITING_OFF : NTV2_VIDEOLIMITING_LEGALSDI);
+		SetVideoLimiting (NTV2_IS_VANCMODE_ON(inVancMode) ? NTV2_VIDEOLIMITING_OFF : NTV2_VIDEOLIMITING_LEGALSDI);
 
 	return true;
 }
@@ -3210,10 +3199,10 @@ bool CNTV2Card::SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard i
 
 //SetEnableVANCData - extended params
 bool CNTV2Card::SetEnableVANCData (const bool inVANCenabled, const bool inTallerVANC, const NTV2Standard inStandard, const NTV2FrameGeometry inFrameGeometry, const NTV2Channel inChannel)
-{
+{	(void) inStandard; (void) inFrameGeometry;
 	if (inTallerVANC && !inVANCenabled)
 		return false;	//	conflicting VANC params
-	return SetVANCMode (NTV2VANCModeFromBools (inVANCenabled, inTallerVANC), inStandard, inFrameGeometry, inChannel);
+	return SetVANCMode (NTV2VANCModeFromBools (inVANCenabled, inTallerVANC), inChannel);
 }
 
 

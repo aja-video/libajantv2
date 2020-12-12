@@ -1343,20 +1343,25 @@ public:
 
 	AJA_VIRTUAL bool		SetEnableVANCData (const bool inVANCenabled, const bool inTallerVANC, const NTV2Standard inStandard, const NTV2FrameGeometry inGeometry, const NTV2Channel inChannel = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool		SetEnableVANCData (const bool inVANCenabled, const bool inTallerVANC = false, const NTV2Channel inChannel = NTV2_CHANNEL1);
-	AJA_VIRTUAL bool		SetEnableVANCData (const NTV2ChannelSet & inChannels, const bool inVANCenable, const bool inTallerVANC = false);
 
 	/**
-		@brief		Sets the VANC mode for the given Frame Store.
+		@brief		Sets the VANC mode for the given FrameStore.
 		@param[in]	inVancMode		Specifies the new ::NTV2VANCMode setting.
-		@param[in]	inStandard		Specifies the ::NTV2Standard setting.
-		@param[in]	inFrameGeometry	Specifies the ::NTV2FrameGeometry setting.
-		@param[in]	inChannel		Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
+		@param[in]	inChannel		Specifies the FrameStore of interest as an ::NTV2Channel, a zero-based index number.
 									Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 		@see		CNTV2Card::GetVANCMode, \ref vancframegeometries
 	**/
-	AJA_VIRTUAL bool		SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard inStandard,
-										const NTV2FrameGeometry inFrameGeometry, const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Channel inChannel = NTV2_CHANNEL1);
+
+	/**
+		@brief		Sets the VANC mode for the given FrameStores.
+		@param[in]	inChannels		Specifies the FrameStores of interest as any number of ::NTV2Channel values, each a zero-based index number.
+		@param[in]	inVancMode		Specifies the new ::NTV2VANCMode setting.
+		@return		True if successful; otherwise false.
+		@see		CNTV2Card::GetVANCMode, \ref vancframegeometries
+	**/
+	AJA_VIRTUAL bool		SetVANCMode (const NTV2ChannelSet & inChannels, const NTV2VANCMode inVancMode);
 
 	/**
 		@brief		Retrieves the current VANC mode for the given Frame Store.
@@ -1416,6 +1421,11 @@ public:
 	AJA_VIRTUAL bool		ReadLineCount (ULWord & outValue);
 
 
+#if !defined(NTV2_DEPRECATE_16_0)
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetEnableVANCData (const NTV2ChannelSet & inChannels, const bool inVANCenable, const bool inTallerVANC = false))	{return SetVANCMode(inChannels, );}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard st, const NTV2FrameGeometry fg,
+																	const NTV2Channel inChannel = NTV2_CHANNEL1))	{(void) st; (void) fg; return SetVANCMode(inVancMode, inChannel);}
+#endif	//	NTV2_DEPRECATE_16_0
 #if !defined(NTV2_DEPRECATE_15_2)
 	AJA_VIRTUAL inline bool NTV2_DEPRECATED_f(GetQuadFrameEnable (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1))	{ bool enb(false); if(!GetQuadFrameEnable(enb, inChannel)) return false; outValue = enb?1:0; return true; }		///< @deprecated	Call the 'bool &' flavor of this function instead.
 	AJA_VIRTUAL inline bool NTV2_DEPRECATED_f(GetQuadQuadFrameEnable (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1))	{ bool enb(false); if(!GetQuadQuadFrameEnable(enb, inChannel)) return false; outValue = enb?1:0; return true; }	///< @deprecated	Call the 'bool &' flavor of this function instead.
