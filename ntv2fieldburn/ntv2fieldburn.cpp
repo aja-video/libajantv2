@@ -256,10 +256,8 @@ AJAStatus NTV2FieldBurn::SetupVideo (void)
 
 	//	Now that newer AJA devices can capture/play anc data from separate buffers,
 	//	there's no need to enable VANC frame geometries...
-	NTV2FrameGeometry	geometry	(NTV2_FG_INVALID);
-	mDevice.GetFrameGeometry (geometry, mInputChannel);
-	mDevice.SetVANCMode (mVancMode, ::GetNTV2StandardFromVideoFormat(mVideoFormat), geometry, mInputChannel);
-	mDevice.SetVANCMode (mVancMode, ::GetNTV2StandardFromVideoFormat(mVideoFormat), geometry, mOutputChannel);
+	mDevice.SetVANCMode (mVancMode, mInputChannel);
+	mDevice.SetVANCMode (mVancMode, mOutputChannel);
 	if (::Is8BitFrameBufferFormat (mPixelFormat))
 	{
 		//	8-bit FBFs require bit shift for VANC geometries, or no shift for normal geometries...

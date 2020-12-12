@@ -659,7 +659,7 @@ void NTV2CCGrabber::CaptureFrames (void)
 				mDevice.SetTsiFrameEnable(true, mConfig.fInputChannel);
 		}
 		mVancMode = mConfig.fUseVanc ? NTV2_VANCMODE_TALL : NTV2_VANCMODE_OFF;	//	"Tall" mode is sufficient to grab captions
-		mDevice.SetEnableVANCData(mInputFrameStores, NTV2_IS_VANCMODE_TALL(mVancMode), NTV2_IS_VANCMODE_TALLER(mVancMode));
+		mDevice.SetVANCMode(mInputFrameStores, mVancMode);
 		if (::Is8BitFrameBufferFormat(mConfig.fPixelFormat)  &&  NTV2_IS_VANCMODE_ON(mVancMode))
 			mDevice.SetVANCShiftMode (mConfig.fInputChannel, NTV2_VANCDATA_8BITSHIFT_ENABLE);	//	8-bit FBFs require VANC bit shift
 

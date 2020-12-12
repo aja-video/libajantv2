@@ -1151,12 +1151,10 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 	//
 	//	Enable VANC only if device has no Anc inserters, or if --vanc specified...
 	//
-	NTV2FrameGeometry	geometry(NTV2_FG_INVALID);
-	mDevice.GetFrameGeometry(geometry, mConfig.fOutputChannel);
 	if (NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
 		NTV2_ASSERT(NTV2_IS_VANCMODE_OFF(mVancMode));
 	for (NTV2ChannelSetConstIter it(mActiveFrameStores.begin());  it != mActiveFrameStores.end();  ++it)
-		mDevice.SetVANCMode (mVancMode, mVideoStandard, geometry, *it);
+		mDevice.SetVANCMode (mVancMode, *it);
 	if (!NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
 		if (NTV2_IS_VANCMODE_ON(mVancMode))
 			if (::Is8BitFrameBufferFormat(mConfig.fPixelFormat))

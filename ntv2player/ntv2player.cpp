@@ -217,15 +217,9 @@ AJAStatus NTV2Player::SetUpVideo (void)
 	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
 	mDevice.GetVANCMode(vancMode, mConfig.fOutputChannel);
 	if (NTV2_IS_VANCMODE_ON(vancMode))
-	{
-		NTV2Standard	standard(NTV2_STANDARD_UNDEFINED);
-		NTV2FrameGeometry	fg(NTV2_FG_INVALID);
-		mDevice.GetStandard(standard, mConfig.fOutputChannel);
-		mDevice.GetFrameGeometry(fg, mConfig.fOutputChannel);
-		mDevice.SetVANCMode(NTV2_VANCMODE_OFF, standard, fg, mConfig.fOutputChannel);
-		if (::Is8BitFrameBufferFormat(mConfig.fPixelFormat))
-			mDevice.SetVANCShiftMode(mConfig.fOutputChannel, NTV2_VANCDATA_NORMAL);
-	}
+		mDevice.SetVANCMode(NTV2_VANCMODE_OFF, mConfig.fOutputChannel);
+	if (::Is8BitFrameBufferFormat(mConfig.fPixelFormat))
+		mDevice.SetVANCShiftMode(mConfig.fOutputChannel, NTV2_VANCDATA_NORMAL);
 
 	//	The output interrupt is Enabled by default, but on some platforms, you must subscribe to it...
 	mDevice.SubscribeOutputVerticalEvent(mConfig.fOutputChannel);
