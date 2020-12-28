@@ -6669,6 +6669,7 @@ public:
 	AJA_VIRTUAL bool			CanWarmBootFPGA (bool & outCanWarmBoot);
 
 	AJA_VIRTUAL bool				IsDynamicDevice (void);			///< @return	True if this device can quickly change bitfiles;  otherwise false.
+	AJA_VIRTUAL	bool				IsDynamicFirmwareLoaded(void);	///< @return	True if the device has been dynamically reconfigured;  otherwise false.
 	AJA_VIRTUAL NTV2DeviceIDList	GetDynamicDeviceList (void);	///< @return	A list of supported/available dynamic device IDs.
 	AJA_VIRTUAL NTV2DeviceIDSet		GetDynamicDeviceIDs (void);		///< @return	A set of supported/available dynamic device IDs.
 

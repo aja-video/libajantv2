@@ -634,7 +634,9 @@ typedef enum
 	kVRegHDMIInDrmMasteringLuminence2		= VIRTUALREG_START+638,
 	kVRegHDMIInDrmLightLevel2				= VIRTUALREG_START+639,
 	
-	kVRegLastAJA							= VIRTUALREG_START+640,		///< @brief	The last AJA virtual register slot
+	kVRegBaseFirmwareDeviceID				= VIRTUALREG_START+640,
+	
+	kVRegLastAJA							= VIRTUALREG_START+641,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 

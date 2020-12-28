@@ -34,6 +34,19 @@ bool CNTV2Card::IsDynamicDevice (void)
 	return true;
 }
 
+bool CNTV2Card::IsDynamicFirmwareLoaded()
+{
+	if(!IsDynamicDevice())
+		return false;
+	
+	ULWord value(0);
+	ReadRegister(kRegBoardID, value);
+	if(GetDeviceID() == static_cast<NTV2DeviceID>(value))
+		return false;
+	else
+		return true;
+}
+
 NTV2DeviceIDList CNTV2Card::GetDynamicDeviceList (void)
 {
 	NTV2DeviceIDList	result;
