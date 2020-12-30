@@ -226,7 +226,7 @@ AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DIDSet 
 typedef std::bitset<16>		NTV2AudioChannelsMuted16;				///< @brief	Per-audio-channel mute state for up to 16 audio channels.
 const NTV2AudioChannelsMuted16	NTV2AudioChannelsMuteAll = NTV2AudioChannelsMuted16(0xFFFF);	///< @brief	All 16 audio channels muted/disabled.
 const NTV2AudioChannelsMuted16	NTV2AudioChannelsEnableAll = NTV2AudioChannelsMuted16(0x0000);	///< @brief	All 16 audio channels unmuted/enabled.
-
+const ULWord LUTTablePartitionSize(0x40000);
 
 
 /**
@@ -687,6 +687,18 @@ public:
 										NTV2_POINTER &		inAncF1Buffer,
 										NTV2_POINTER &		inAncF2Buffer	= NULL_POINTER,
 										const NTV2Channel	inChannel		= NTV2_CHANNEL1);
+	
+
+	/**
+		@brief		Synchronously transfers LUT data from the specified host buffer to the given buffer memory
+					on the AJA device, blocking until the transfer has completed.
+		@param[in]	pInLUTBuffer		Specifies a valid, non-NULL pointer to the host buffer that is to supply the LUT data.
+		@param[in]	inLUTIndex			Specifies the index of the LUT
+		@return		True if successful; otherwise false.
+		@note		This function can also be used to write LUT Tables into memory
+	**/
+	AJA_VIRTUAL bool DMAWriteLUTTable (	const ULWord *			pInLUTBuffer,
+										const ULWord			inLUTIndex); 
 
 	/**
 		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
@@ -6670,6 +6682,7 @@ public:
 
 	AJA_VIRTUAL bool				IsDynamicDevice (void);			///< @return	True if this device can quickly change bitfiles;  otherwise false.
 	AJA_VIRTUAL	bool				IsDynamicFirmwareLoaded(void);	///< @return	True if the device has been dynamically reconfigured;  otherwise false.
+	AJA_VIRTUAL NTV2DeviceID		GetBaseDeviceID();				///< @return	Return base device id for IsDynamicDevice, otherwise DEVICE_ID_INVALID
 	AJA_VIRTUAL NTV2DeviceIDList	GetDynamicDeviceList (void);	///< @return	A list of supported/available dynamic device IDs.
 	AJA_VIRTUAL NTV2DeviceIDSet		GetDynamicDeviceIDs (void);		///< @return	A set of supported/available dynamic device IDs.
 
@@ -6995,7 +7008,7 @@ public:
 	AJA_VIRTUAL bool SetVPIDRGBRange (const NTV2VPIDRGBRange inValue, const NTV2Channel inChannel);
 	AJA_VIRTUAL bool GetVPIDRGBRange (NTV2VPIDRGBRange & outValue, const NTV2Channel inChannel);
 	
-	AJA_VIRTUAL bool Set3DLUTTableLocation (const ULWord frameNumber);
+	AJA_VIRTUAL bool Set3DLUTTableLocation (const ULWord inFrameNumber, ULWord inLUTIndex = 0);
 	AJA_VIRTUAL bool Load3DLUTTable ();
 
 	///@}

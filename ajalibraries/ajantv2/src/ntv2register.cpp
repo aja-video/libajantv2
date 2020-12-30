@@ -7187,11 +7187,12 @@ bool CNTV2Card::GetVPIDRGBRange (NTV2VPIDRGBRange & outValue, const NTV2Channel 
 	return true;
 }
 
-bool CNTV2Card::Set3DLUTTableLocation (const ULWord frameNumber)
-{
+bool CNTV2Card::Set3DLUTTableLocation (const ULWord inFrameNumber, ULWord inLUTIndex)
+{ 
 	NTV2Framesize theFrameSize;
+	ULWord LUTTableIndexOffset = LUTTablePartitionSize * inLUTIndex;
 	GetFrameBufferSize(NTV2_CHANNEL1, theFrameSize);
-	ULWord lutTableLocation ((::NTV2FramesizeToByteCount(theFrameSize) * frameNumber)/4);
+	ULWord lutTableLocation (((::NTV2FramesizeToByteCount(theFrameSize) * inFrameNumber)/4) + LUTTableIndexOffset);
 	return WriteRegister(kReg3DLUTLoadControl, lutTableLocation, 0x3FFFFFFF, 0);
 }
 
