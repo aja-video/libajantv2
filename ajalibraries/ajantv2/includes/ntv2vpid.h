@@ -139,6 +139,8 @@ public:
 	static const std::string	BitDepthString				(const VPIDBitDepth depth);		//	New in SDK 15.5
 	static const std::string	LinkString					(const VPIDLink link);			//	New in SDK 15.5
 	static const std::string	AudioString					(const VPIDAudio audio);		//	New in SDK 15.5
+	static const std::string	VPIDVersionToString			(const VPIDVersion inVers);		//  New in SDK 16.0.1
+	static const std::string	VPIDStandardToString		(const VPIDStandard inStd);		//  New in SDK 16.0.1
 	static bool					VPIDStandardIsSingleLink	(const VPIDStandard inStd);		//	New in SDK 16.0
 	static bool					VPIDStandardIsDualLink		(const VPIDStandard inStd);		//	New in SDK 16.0
 	static bool					VPIDStandardIsQuadLink		(const VPIDStandard inStd);		//	New in SDK 16.0

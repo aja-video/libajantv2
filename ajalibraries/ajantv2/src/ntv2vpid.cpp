@@ -1029,7 +1029,7 @@ const string CNTV2VPID::AudioString (const VPIDAudio audio)
 	return "";
 }
 
-static string VPIDVersionToString (const VPIDVersion inVers)
+const string CNTV2VPID::VPIDVersionToString (const VPIDVersion inVers)
 {
 	switch (inVers)
 	{
@@ -1042,7 +1042,7 @@ static string VPIDVersionToString (const VPIDVersion inVers)
 	return "";
 }
 
-static string VPIDStandardToString (const VPIDStandard inStd)
+const string CNTV2VPID::VPIDStandardToString (const VPIDStandard inStd)
 {
 	switch (inStd)
 	{
@@ -1349,9 +1349,9 @@ static const string sVPIDRGBRange[]	= { "Narrow", "Full" };
 ostream & CNTV2VPID::Print (ostream & ostrm) const
 {
 	ostrm	<< "VPID " << xHEX0N(m_uVPID,8)
-			<< ": v" << ::VPIDVersionToString(GetVersion());
+			<< ": v" << CNTV2VPID::VPIDVersionToString(GetVersion());
 	if (IsValid())
-		ostrm	<< " " << ::VPIDStandardToString(GetStandard())
+		ostrm	<< " " << CNTV2VPID::VPIDStandardToString(GetStandard())
 				<< " " << ::NTV2VideoFormatToString(GetVideoFormat())
 				<< " rate=" << sVPIDPictureRate[GetPictureRate()]
 				<< " samp=" << sVPIDSampling[GetSampling()]
@@ -1372,9 +1372,9 @@ ostream & CNTV2VPID::Print (ostream & ostrm) const
 ostream & CNTV2VPID::PrintPretty (ostream & ostrm) const
 {
 	ostrm	<< "VPID " << xHEX0N(m_uVPID,8) << endl
-			<< "Version = " << ::VPIDVersionToString(GetVersion()) << endl;
+			<< "Version = " << CNTV2VPID::VPIDVersionToString(GetVersion()) << endl;
 	if (IsValid())
-		ostrm	<< "Standard =  " << ::VPIDStandardToString(GetStandard()) << endl
+		ostrm	<< "Standard =  " << CNTV2VPID::VPIDStandardToString(GetStandard()) << endl
 				<< "Format =  " << ::NTV2VideoFormatToString(GetVideoFormat()) << endl
 				<< "Frame Rate = " << sVPIDPictureRate[GetPictureRate()] << endl
 				<< "Sampling = " << sVPIDSampling[GetSampling()] << endl
@@ -1398,10 +1398,10 @@ AJALabelValuePairs & CNTV2VPID::GetInfo (AJALabelValuePairs & outInfo) const
 {
 	ostringstream hexConv;	hexConv << xHEX0N(m_uVPID,8);
 	AJASystemInfo::append(outInfo, "Raw Value",				hexConv.str());
-	AJASystemInfo::append(outInfo, "Version",				::VPIDVersionToString(GetVersion()));
+	AJASystemInfo::append(outInfo, "Version",				CNTV2VPID::VPIDVersionToString(GetVersion()));
 	if (!IsValid())
 		return outInfo;
-	AJASystemInfo::append(outInfo, "Standard",				::VPIDStandardToString(GetStandard()));
+	AJASystemInfo::append(outInfo, "Standard",				CNTV2VPID::VPIDStandardToString(GetStandard()));
 	AJASystemInfo::append(outInfo, "Video Format",			::NTV2VideoFormatToString(GetVideoFormat()));
 	AJASystemInfo::append(outInfo, "Progressive Transport",	YesOrNo(GetProgressiveTransport()));
 	AJASystemInfo::append(outInfo, "Progressive Picture",	YesOrNo(GetProgressivePicture()));
