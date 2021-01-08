@@ -724,7 +724,8 @@ bool CNTV2Card::SetAudioMixerOutputGain (const ULWord inGainValue)
 {
 	if (!DeviceCanDoAudioMixer())
 		return false;	//	No Audio Mixer -- shouldn't be calling this function
-	return WriteRegister(kRegAudioMixerOutGain, inGainValue);
+	WriteRegister(kRegAudioMixerOutLGain, inGainValue);
+	return  WriteRegister(kRegAudioMixerOutRGain, inGainValue);
 }
 
 bool CNTV2Card::GetAudioMixerOutputLevels (const NTV2AudioChannelPairs & inChannelPairs,

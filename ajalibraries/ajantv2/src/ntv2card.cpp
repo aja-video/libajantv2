@@ -377,6 +377,7 @@ string CNTV2Card::GetBitfileInfoString (const BITFILE_INFO_STRUCT & inBitFileInf
 		case NTV2_BITFILE_KONA5_8KMK_MAIN:		oss << "Kona5 8KMK";			break;
 		case NTV2_BITFILE_CORVID44_8K_MAIN:		oss << "Corvid44 8K";			break;
 		case NTV2_BITFILE_CORVID44_8KMK_MAIN:	oss << "Corvid44 8KMK";			break;
+		case NTV2_BITFILE_TTAP_PRO_MAIN:		oss << "T-Tap Pro Main";		break;
 		default:								oss << "(bad bitfile type!!!)";	break;
 	}
 	return oss.str();

@@ -723,6 +723,8 @@ typedef enum
 	,kRegAudioMixerAux1GainCh2				//	2310
 	,kRegAudioMixerAux2GainCh2				//	2311
 	,kRegAudioMixerOutGain					//  2312
+	,kRegAudioMixerOutLGain	= kRegAudioMixerOutGain
+	,kRegAudioMixerOutRGain					//	2313
 	,kRegAudioMixerAux1InputLevels = 2318	//	2318
 	,kRegAudioMixerAux2InputLevels			//	2319
 	,kRegAudioMixerMainInputLevelsPair0		//	2320
