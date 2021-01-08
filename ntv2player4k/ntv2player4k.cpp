@@ -653,7 +653,8 @@ void NTV2Player4K::RouteHDMIOutput (void)
 	if (mConfig.fDoHDMIOutput &&
 		(::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v2)
 			|| ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v3)
-			|| ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v4)) )
+			|| ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v4)
+			|| ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v5)) )
 	{
 		if (::NTV2DeviceCanDo12gRouting(mDeviceID))
 			mDevice.Connect (NTV2_XptHDMIOutInput, ::GetFrameBufferOutputXptFromChannel (mConfig.fOutputChannel,  isRGB,  false/*is425*/));
