@@ -354,15 +354,14 @@ bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
 	return result;
 }
 
-bool CNTV2Card::DMAWriteLUTTable (	const ULWord *			pInLUTBuffer,
-									const ULWord			inLUTIndex)
+bool CNTV2Card::DMAWriteLUTTable (const ULWord inFrameNumber, const ULWord * pInLUTBuffer, const ULWord inLUTIndex)
 {
 	if (!pInLUTBuffer)
 		return false;	//	NULL buffer
 
 	ULWord LUTIndexByteOffset = LUTTablePartitionSize * inLUTIndex;
 
-	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, 0, const_cast <ULWord *> (pInLUTBuffer), LUTIndexByteOffset, LUTTablePartitionSize, true);
+	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, inFrameNumber, const_cast <ULWord *> (pInLUTBuffer), LUTIndexByteOffset, LUTTablePartitionSize, true);
 }
 
 
