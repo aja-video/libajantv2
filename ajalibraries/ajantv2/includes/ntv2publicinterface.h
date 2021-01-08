@@ -427,7 +427,7 @@ typedef enum
 
 	kRegXptSelectGroup18,			// 352
 
-	kRegReserved353,				// 353
+	kReg1DLUTLoadControl,			// 353
 	
 	kRegDC1,						// 354
 	kRegDC2,						// 355

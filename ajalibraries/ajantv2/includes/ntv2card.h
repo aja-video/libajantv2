@@ -7010,6 +7010,8 @@ public:
 	
 	AJA_VIRTUAL bool Set3DLUTTableLocation (const ULWord inFrameNumber, ULWord inLUTIndex = 0);
 	AJA_VIRTUAL bool Load3DLUTTable ();
+	AJA_VIRTUAL bool Set1DLUTTableLocation (const ULWord inFrameNumber, ULWord inLUTIndex = 0);
+	AJA_VIRTUAL bool Load1DLUTTable ();
 
 	///@}
 
