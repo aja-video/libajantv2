@@ -427,7 +427,7 @@ typedef enum
 
 	kRegXptSelectGroup18,			// 352
 
-	kReg1DLUTLoadControl,			// 353
+	kRegReserved353,				// 353
 	
 	kRegDC1,						// 354
 	kRegDC2,						// 355
@@ -711,6 +711,18 @@ typedef enum NTV2RXSDIStatusRegister
 
 	kRegNumRXSDIRegisters = 2113 - 2048 + 1
 } NTV2RXSDIStatusRegisters;
+
+typedef enum
+{
+	kReg1DLUTLoadControl1 = 2200,	//2200
+	kReg1DLUTLoadControl2,			//2201
+	kReg1DLUTLoadControl3,			//2202
+	kReg1DLUTLoadControl4,			//2203
+	kReg1DLUTLoadControl5,			//2204
+	kReg1DLUTLoadControl6,			//2205
+	kReg1DLUTLoadControl7,			//2206
+	kReg1DLUTLoadControl8			//2207
+}NTV2LUTControlRegisters;
 
 typedef enum
 {

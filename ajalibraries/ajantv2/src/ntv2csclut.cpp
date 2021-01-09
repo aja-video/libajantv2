@@ -57,8 +57,8 @@ static const ULWord	gChannelToCSCoeff78RegNum []		= {	kRegCSCoefficients7_8,	kRe
 static const ULWord	gChannelToCSCoeff910RegNum []		= {	kRegCSCoefficients9_10,	kRegCS2Coefficients9_10,	kRegCS3Coefficients9_10,	kRegCS4Coefficients9_10,
 															kRegCS5Coefficients9_10,	kRegCS6Coefficients9_10,	kRegCS7Coefficients9_10,	kRegCS8Coefficients9_10,	0};
 
-static const ULWord	gChannelTo1DLutControlRegNum []		= {	kReg1DLUTLoadControl,	kReg1DLUTLoadControl,	kReg1DLUTLoadControl,	kReg1DLUTLoadControl,
-															kReg1DLUTLoadControl,	kReg1DLUTLoadControl,	kReg1DLUTLoadControl,	kReg1DLUTLoadControl,	0};
+static const ULWord	gChannelTo1DLutControlRegNum []		= {	kReg1DLUTLoadControl1,	kReg1DLUTLoadControl2,	kReg1DLUTLoadControl3,	kReg1DLUTLoadControl4,
+															kReg1DLUTLoadControl5,	kReg1DLUTLoadControl6,	kReg1DLUTLoadControl7,	kReg1DLUTLoadControl8,	0};
 
 
 //////////////////////////////////////////////////////////////////
