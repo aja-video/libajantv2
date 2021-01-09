@@ -104,7 +104,7 @@ string CNTV2Bitfile::ParseHeaderFromBuffer(const uint8_t* inBitfileBuffer, const
 	do
 	{
 		//	Preload bitfile header into mem
-		for (int i = 0; i < MAX_BITFILEHEADERSIZE - 1; i++) 
+		for (size_t i = 0; i < MAX_BITFILEHEADERSIZE - 1; i++)
 		{
 			if (i < inBufferSize) 
 			{
