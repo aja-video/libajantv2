@@ -69,6 +69,14 @@ AJATimeBase::AJATimeBase(int64_t frameTimeScale, int64_t frameDuration, int64_t 
 	mAudioRate		= audioRate;
 }
 
+AJATimeBase::AJATimeBase(const AJATimeBase &other)
+{
+	mFrameTimeScale = other.mFrameTimeScale;
+	mFrameDuration = other.mFrameDuration;
+	mAudioRate = other.mAudioRate;
+	mTickRate = other.mTickRate;
+}
+
 AJATimeBase::~AJATimeBase()
 {
 }
