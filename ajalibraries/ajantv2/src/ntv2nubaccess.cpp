@@ -1585,10 +1585,13 @@ NTV2RPCAPI * NTV2RPCAPI::FindNTV2SoftwareDevice (const string & inName, const st
 	AJA_sINFO(AJA_DebugUnit_RPCClient, AJAFUNC << ": Success: 'CreateNTV2SoftwareDevice' returned non-NULL object");
 	return pRPCObject;	//	It's caller's responsibility to delete pRPCObject
 #elif defined(MSWindows)
+	(void) inName;
 	(void) inParams;
 #elif defined(AJALinux)
+	(void) inName;
 	(void) inParams;
 #else
+	(void) inName;
 	(void) inParams;
 #endif
 	return AJA_NULL;

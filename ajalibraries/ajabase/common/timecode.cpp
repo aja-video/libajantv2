@@ -63,6 +63,12 @@ AJATimeCode::AJATimeCode(const std::string &str, const AJATimeBase& timeBase)
     Set(str.c_str(), timeBase);
 }
 
+AJATimeCode::AJATimeCode(const AJATimeCode& other)
+{
+	m_frame = other.m_frame;
+	m_stdTimecodeForHfr = other.m_stdTimecodeForHfr;
+}
+
 //---------------------------------------------------------------------------------------------------------------------
 //  Name:   ~AJATimeCode
 //---------------------------------------------------------------------------------------------------------------------
@@ -525,6 +531,7 @@ AJATimeCode& AJATimeCode::operator=(const AJATimeCode &val)
 	if (this != &val)
 	{
 		m_frame = val.m_frame;
+		m_stdTimecodeForHfr = val.m_stdTimecodeForHfr;
 	}
 	return *this;
 } //end '='

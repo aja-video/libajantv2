@@ -20,6 +20,7 @@ public:
 	AJATimeCode(uint32_t frame);
     AJATimeCode(const std::string &str, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTc=false);
     AJATimeCode(const std::string &str, const AJATimeBase& timeBase);
+	AJATimeCode(const AJATimeCode& other);
 
 	virtual	~AJATimeCode();
 	

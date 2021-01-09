@@ -853,7 +853,7 @@ bool NTV2DeviceGetSupportedVideoFormats (const NTV2DeviceID inDeviceID, NTV2Vide
 		{
 			outFormats.insert(videoFormat);
 		}
-		catch (std::bad_alloc)
+		catch (std::bad_alloc & ba)
 		{
 			isOkay = false;
 			outFormats.clear();
@@ -880,7 +880,7 @@ bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2Fram
 			{
 				outFormats.insert (pixelFormat);
 			}
-			catch (std::bad_alloc)
+			catch (std::bad_alloc & ba)
 			{
 				isOkay = false;
 				outFormats.clear ();

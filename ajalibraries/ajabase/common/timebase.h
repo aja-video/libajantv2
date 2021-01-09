@@ -44,6 +44,13 @@ public:
 	 */
 	AJATimeBase(int64_t frameTimeScale, int64_t frameDuration, int64_t audioRate);
 
+	/**
+	 *  Copy constructor
+	 *
+	 *  @param[in]	other				AJATimeBase to copy
+	 */
+	AJATimeBase(const AJATimeBase &other);
+
 	virtual ~AJATimeBase();
 
 	/**

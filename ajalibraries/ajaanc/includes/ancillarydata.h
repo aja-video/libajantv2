@@ -643,6 +643,8 @@ public:
 	**/
 	virtual bool							ChecksumOK (void) const						{return m_checksum == Calculate8BitChecksum ();}
 
+	virtual AJAAncillaryData &				operator = (const AJAAncillaryData & inRHS);
+
 	/**
 		@param[in]	inRHS	The packet I am to be compared with.
 		@return		True if I'm identical to the RHS packet.

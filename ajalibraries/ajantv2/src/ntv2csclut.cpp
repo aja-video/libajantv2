@@ -57,6 +57,9 @@ static const ULWord	gChannelToCSCoeff78RegNum []		= {	kRegCSCoefficients7_8,	kRe
 static const ULWord	gChannelToCSCoeff910RegNum []		= {	kRegCSCoefficients9_10,	kRegCS2Coefficients9_10,	kRegCS3Coefficients9_10,	kRegCS4Coefficients9_10,
 															kRegCS5Coefficients9_10,	kRegCS6Coefficients9_10,	kRegCS7Coefficients9_10,	kRegCS8Coefficients9_10,	0};
 
+static const ULWord	gChannelTo1DLutControlRegNum []		= {	kReg1DLUTLoadControl1,	kReg1DLUTLoadControl2,	kReg1DLUTLoadControl3,	kReg1DLUTLoadControl4,
+															kReg1DLUTLoadControl5,	kReg1DLUTLoadControl6,	kReg1DLUTLoadControl7,	kReg1DLUTLoadControl8,	0};
+
 
 //////////////////////////////////////////////////////////////////
 // OEM Color Correction Methods (KHD-22 only )
@@ -1377,6 +1380,36 @@ bool CNTV2Card::LoadLUTTable (const double * pInTable)
 
 	//	Call the function that accepts NTV2DoubleArrays...
 	return LoadLUTTables(rgbLUT, rgbLUT, rgbLUT);
+}
+
+bool CNTV2Card::Set3DLUTTableLocation (const ULWord inFrameNumber, ULWord inLUTIndex)
+{ 
+	NTV2Framesize theFrameSize;
+	ULWord LUTTableIndexOffset = LUTTablePartitionSize * inLUTIndex;
+	GetFrameBufferSize(NTV2_CHANNEL1, theFrameSize);
+	ULWord lutTableLocation (((::NTV2FramesizeToByteCount(theFrameSize) * inFrameNumber)/4) + LUTTableIndexOffset);
+	return WriteRegister(kReg3DLUTLoadControl, lutTableLocation, 0x3FFFFFFF, 0);
+}
+
+bool CNTV2Card::Load3DLUTTable ()
+{
+	WriteRegister(kReg3DLUTLoadControl, 0, 0x80000000, 31);
+	return WriteRegister(kReg3DLUTLoadControl, 1, 0x80000000, 31);
+}
+
+bool CNTV2Card::Set1DLUTTableLocation (const NTV2Channel inChannel, const ULWord inFrameNumber, ULWord inLUTIndex)
+{ 
+	NTV2Framesize theFrameSize;
+	ULWord LUTTableIndexOffset = LUTTablePartitionSize * inLUTIndex;
+	GetFrameBufferSize(NTV2_CHANNEL1, theFrameSize);
+	ULWord lutTableLocation (((::NTV2FramesizeToByteCount(theFrameSize) * inFrameNumber)/4) + LUTTableIndexOffset);
+	return WriteRegister(gChannelTo1DLutControlRegNum[inChannel], lutTableLocation, kRegMaskLUTAddress, kRegShiftLUTAddress);
+}
+
+bool CNTV2Card::Load1DLUTTable (const NTV2Channel inChannel)
+{
+	WriteRegister(gChannelTo1DLutControlRegNum[inChannel], 0, static_cast<ULWord>(kRegMaskLUTLoad), kRegShiftLUTLoad);
+	return WriteRegister(gChannelTo1DLutControlRegNum[inChannel], 1, static_cast<ULWord>(kRegMaskLUTLoad), kRegShiftLUTLoad);
 }
 
 
