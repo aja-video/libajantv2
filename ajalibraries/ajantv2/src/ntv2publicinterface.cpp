@@ -339,6 +339,17 @@ string & NTV2_POINTER::Dump (	string &		inOutputString,
 	return inOutputString;
 }
 
+NTV2_POINTER & NTV2_POINTER::Segment (NTV2_POINTER & outPtr, const ULWord inByteOffset, const ULWord inByteCount) const
+{
+	outPtr.Set(AJA_NULL, 0);	//	Make invalid
+	if (inByteOffset >= GetByteCount())
+		return outPtr;	//	Offset past end
+	if (inByteOffset+inByteCount >= GetByteCount())
+		return outPtr;	//	Segment too long
+	outPtr.Set(GetHostAddress(inByteOffset), inByteCount);
+	return outPtr;
+}
+
 
 bool NTV2_POINTER::GetU64s (ULWord64Sequence & outUint64s, const size_t inU64Offset, const size_t inMaxSize, const bool inByteSwap) const
 {
@@ -457,7 +468,7 @@ bool NTV2_POINTER::GetU8s (UByteSequence & outUint8s, const size_t inU8Offset, c
 	if (IsNULL())
 		return false;
 
-	size_t			maxSize	(GetByteCount());
+	size_t	maxSize	(GetByteCount());
 	if (maxSize < inU8Offset)
 		return false;	//	Past end
 	maxSize -= inU8Offset;	//	Remove starting offset
@@ -493,7 +504,7 @@ bool NTV2_POINTER::GetString (std::string & outString, const size_t inU8Offset, 
 	if (IsNULL())
 		return false;
 
-	size_t			maxSize	(GetByteCount());
+	size_t maxSize(GetByteCount());
 	if (maxSize < inU8Offset)
 		return false;		//	Past end
 	maxSize -= inU8Offset;	//	Remove starting offset

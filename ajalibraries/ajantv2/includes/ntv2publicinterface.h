@@ -16,6 +16,7 @@
 	#include <vector>
 	#include <iomanip>
 	#include <bitset>
+	#include <string>
 	#include "ajaexport.h"
 	#include "string.h"
 	#if defined(MSWindows)
@@ -6794,6 +6795,16 @@ typedef enum
 				template<typename T>	operator T*() const				{return reinterpret_cast<T*>(GetHostPointer());}	//	New in SDK 16.0
 
 				/**
+					@brief		Resets an NTV2_POINTER instance to reference a contiguous segment of my memory buffer.
+					@param[out]	outPtr			The NTV2_POINTER to be reset to my sub-segment.
+					@param[in]	inByteOffset	Specifies the offset, in bytes, where the segment starts.
+					@param[in]	inByteCount		Specifies the segment length, in bytes.
+					@return		The specified NTV2_POINTER.  It will be set to null/empty upon failure.
+					@note		The offset and byte count are both checked against my buffer size.
+				**/
+				NTV2_POINTER &			Segment (NTV2_POINTER & outPtr, const ULWord inByteOffset, const ULWord inByteCount) const;
+
+				/**
 					@return		A copy of the value at the given zero-based index position.
 					@param[in]	inIndex		Specifies the zero-based index position (e.g. 0 is first value at start of my memory).
 											If negative, indexes from the end of my memory (e.g. -1 is last value).
@@ -6847,7 +6858,7 @@ typedef enum
 					@return						True if successful;  otherwise false.
 					@note		If my length is not evenly divisible by 8, my last bytes won't appear in the resulting vector. 
 				**/
-				bool							GetU64s (ULWord64Sequence & outU64s, const size_t inU64Offset = 0, const size_t inMaxSize = 16, const bool inByteSwap = false) const;
+				bool						GetU64s (ULWord64Sequence & outU64s, const size_t inU64Offset = 0, const size_t inMaxSize = 16, const bool inByteSwap = false) const;
 
 				/**
 					@return		My contents as a vector of unsigned 64-bit values.
@@ -6861,7 +6872,7 @@ typedef enum
 												Defaults to 'false'.
 					@note		If my length is not evenly divisible by 8, my last bytes won't appear in the resulting vector. 
 				**/
-				inline ULWord64Sequence			GetU64s (const size_t inU64Offset = 0, const size_t inMaxSize = 16, const bool inByteSwap = false) const	{ULWord64Sequence result; GetU64s(result, inU64Offset, inMaxSize, inByteSwap); return result;}
+				inline ULWord64Sequence		GetU64s (const size_t inU64Offset = 0, const size_t inMaxSize = 16, const bool inByteSwap = false) const	{ULWord64Sequence result; GetU64s(result, inU64Offset, inMaxSize, inByteSwap); return result;}
 
 				/**
 					@brief		Answers with my contents as a vector of unsigned 32-bit values.
@@ -6877,7 +6888,7 @@ typedef enum
 					@return						True if successful;  otherwise false.
 					@note		If my length is not evenly divisible by 4, my last bytes won't appear in the resulting vector. 
 				**/
-				bool							GetU32s (ULWordSequence & outU32s, const size_t inU32Offset = 0, const size_t inMaxSize = 32, const bool inByteSwap = false) const;
+				bool						GetU32s (ULWordSequence & outU32s, const size_t inU32Offset = 0, const size_t inMaxSize = 32, const bool inByteSwap = false) const;
 
 				/**
 					@return		My contents as a vector of unsigned 32-bit values.
@@ -6891,7 +6902,7 @@ typedef enum
 												Defaults to 'false'.
 					@note		If my length is not evenly divisible by 4, my last bytes won't appear in the resulting vector. 
 				**/
-				inline ULWordSequence			GetU32s (const size_t inU32Offset = 0, const size_t inMaxSize = 32, const bool inByteSwap = false) const	{ULWordSequence result; GetU32s(result, inU32Offset, inMaxSize, inByteSwap); return result;}
+				inline ULWordSequence		GetU32s (const size_t inU32Offset = 0, const size_t inMaxSize = 32, const bool inByteSwap = false) const	{ULWordSequence result; GetU32s(result, inU32Offset, inMaxSize, inByteSwap); return result;}
 
 				/**
 					@brief		Answers with my contents as a vector of unsigned 16-bit values.
@@ -6907,7 +6918,7 @@ typedef enum
 					@return						True if successful;  otherwise false.
 					@note		If my length is not evenly divisible by 2, my last byte won't appear in the resulting vector. 
 				**/
-				bool							GetU16s (UWordSequence & outU16s, const size_t inU16Offset = 0, const size_t inMaxSize = 64, const bool inByteSwap = false) const;
+				bool						GetU16s (UWordSequence & outU16s, const size_t inU16Offset = 0, const size_t inMaxSize = 64, const bool inByteSwap = false) const;
 
 				/**
 					@return		My contents as a vector of unsigned 16-bit values.
@@ -6921,7 +6932,7 @@ typedef enum
 												Defaults to 'false'.
 					@note		If my length is not evenly divisible by 2, my last byte won't appear in the resulting vector. 
 				**/
-				inline UWordSequence			GetU16s (const size_t inU16Offset = 0, const size_t inMaxSize = 64, const bool inByteSwap = false) const	{UWordSequence result; GetU16s(result, inU16Offset, inMaxSize, inByteSwap); return result;}
+				inline UWordSequence		GetU16s (const size_t inU16Offset = 0, const size_t inMaxSize = 64, const bool inByteSwap = false) const	{UWordSequence result; GetU16s(result, inU16Offset, inMaxSize, inByteSwap); return result;}
 
 				/**
 					@brief		Answers with my contents as a vector of unsigned 8-bit values.
@@ -6933,7 +6944,7 @@ typedef enum
 												Defaults to 128.
 					@return						True if successful;  otherwise false.
 				**/
-				bool							GetU8s (UByteSequence & outU8s, const size_t inU8Offset = 0, const size_t inMaxSize = 128) const;
+				bool						GetU8s (UByteSequence & outU8s, const size_t inU8Offset = 0, const size_t inMaxSize = 128) const;
 
 				/**
 					@return		My contents as a vector of unsigned 8-bit values.
@@ -6943,7 +6954,7 @@ typedef enum
 												The actual number of returned 8-bit values may be less than this, depending on my size.
 												Defaults to 128.
 				**/
-				inline UByteSequence			GetU8s (const size_t inU8Offset = 0, const size_t inMaxSize = 128) const	{UByteSequence result; GetU8s(result, inU8Offset, inMaxSize); return result;}
+				inline UByteSequence		GetU8s (const size_t inU8Offset = 0, const size_t inMaxSize = 128) const	{UByteSequence result; GetU8s(result, inU8Offset, inMaxSize); return result;}
 
 				/**
 					@brief		Answers with my contents as a character string.
@@ -6956,7 +6967,7 @@ typedef enum
 					@return						True if successful;  otherwise false.
 					@note		This function blindly copies my contents into the outgoing string, without checking for validity.
 				**/
-				bool							GetString (std::string & outString, const size_t inU8Offset = 0, const size_t inMaxSize = 128) const;
+				bool						GetString (std::string & outString, const size_t inU8Offset = 0, const size_t inMaxSize = 128) const;
 
 				/**
 					@return		My contents as a character string.
@@ -6967,7 +6978,7 @@ typedef enum
 												Defaults to 128.
 					@note		This function blindly copies my contents into the outgoing string, without checking for validity.
 				**/
-				inline std::string				GetString (const size_t inU8Offset = 0, const size_t inMaxSize = 128) const	{std::string result; GetString(result, inU8Offset, inMaxSize); return result;}
+				inline std::string			GetString (const size_t inU8Offset = 0, const size_t inMaxSize = 128) const	{std::string result; GetString(result, inU8Offset, inMaxSize); return result;}
 
 				/**
 					@brief		Copies a vector of unsigned 64-bit values into me.
@@ -6978,7 +6989,7 @@ typedef enum
 												Specify 'true' to byte-swap;  otherwise specify 'false'. Defaults to 'false'.
 					@return						True if successful;  otherwise false.
 				**/
-				bool							PutU64s (const ULWord64Sequence & inU64s, const size_t inU64Offset = 0, const bool inByteSwap = false);
+				bool						PutU64s (const ULWord64Sequence & inU64s, const size_t inU64Offset = 0, const bool inByteSwap = false);
 
 				/**
 					@brief		Copies a vector of unsigned 32-bit values into me.
@@ -6989,7 +7000,7 @@ typedef enum
 												Specify 'true' to byte-swap;  otherwise specify 'false'. Defaults to 'false'.
 					@return						True if successful;  otherwise false.
 				**/
-				bool							PutU32s (const ULWordSequence & inU32s, const size_t inU32Offset = 0, const bool inByteSwap = false);
+				bool						PutU32s (const ULWordSequence & inU32s, const size_t inU32Offset = 0, const bool inByteSwap = false);
 
 				/**
 					@brief		Copies a vector of unsigned 16-bit values into me.
@@ -7000,7 +7011,7 @@ typedef enum
 												Specify 'true' to byte-swap;  otherwise specify 'false'. Defaults to 'false'.
 					@return						True if successful;  otherwise false.
 				**/
-				bool							PutU16s (const UWordSequence & inU16s, const size_t inU16Offset = 0, const bool inByteSwap = false);
+				bool						PutU16s (const UWordSequence & inU16s, const size_t inU16Offset = 0, const bool inByteSwap = false);
 
 				/**
 					@brief		Copies a vector of unsigned 8-bit values into me.
@@ -7009,7 +7020,7 @@ typedef enum
 												Defaults to zero.
 					@return						True if successful;  otherwise false.
 				**/
-				bool							PutU8s (const UByteSequence & inU8s, const size_t inU8Offset = 0);
+				bool						PutU8s (const UByteSequence & inU8s, const size_t inU8Offset = 0);
 				///@}
 
 				/**
@@ -7019,14 +7030,14 @@ typedef enum
 				/**
 					@return		Default page size, in bytes.
 				**/
-				static size_t					DefaultPageSize (void);
+				static size_t				DefaultPageSize (void);
 
 				/**
 					@brief		Changes the default page size for use in future page-aligned allocations.
 					@param[in]	inNewSize		The new page size value, in bytes. Must be a power of 2.
 					@return		True if successful;  otherwise false.
 				**/
-				static bool						SetDefaultPageSize (const size_t inNewSize);
+				static bool					SetDefaultPageSize (const size_t inNewSize);
 				///@}
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_POINTER)

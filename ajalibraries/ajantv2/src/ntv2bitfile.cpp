@@ -6,6 +6,9 @@
 #include "ntv2bitfile.h"
 #include "ntv2card.h"
 #include "ntv2utils.h"
+#include "ntv2endian.h"
+#include "ajabase/system/debug.h"
+#include "ajabase/common/common.h"
 #include <iostream>
 #include <sys/stat.h>
 #include <assert.h>
@@ -19,45 +22,30 @@ using namespace std;
 
 // TODO: Handle compressed bit-files
 #define MAX_BITFILEHEADERSIZE 512
-static unsigned char signature[8] = {0xFF,0xFF,0xFF,0xFF,0xAA,0x99,0x55,0x66};
-static const unsigned char Head13[] = { 0x00, 0x09, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x00, 0x00, 0x01 };
+static const unsigned char gSignature[8]= {0xFF, 0xFF, 0xFF, 0xFF, 0xAA, 0x99, 0x55, 0x66};
+static const unsigned char gHead13[]	= {0x00, 0x09, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x00, 0x00, 0x01};
 
 
 CNTV2Bitfile::CNTV2Bitfile ()
 {
-	Init ();	//	Initialize everything
+	Close();	//	Initialize everything
 }
 
 CNTV2Bitfile::~CNTV2Bitfile ()
 {
-	Close ();
+	Close();
 }
 
 void CNTV2Bitfile::Close (void)
 {
 	if (_fileReady)
 		_bitFileStream.close();
-	_fileReady = false;
-	_programStreamPos = 0;
-	_fileStreamPos = 0;
+	_fileHeader.clear();
 	_fileProgrammingPosition = 0;
 	_date = _time = _designName = _partName = _lastError = "";
-	_tandem = false;
-	_partial = false;
-	_clear = false;
-	_compress = false;
-	_userID = 0;
-	_designID = 0;
-	_designVersion = 0;
-	_bitfileID = 0;
-	_bitfileVersion = 0;
-}
-
-
-void CNTV2Bitfile::Init (void)
-{
-	_fileReady = false;
-	Close ();
+	_numBytes = _fileSize = _programStreamPos = _fileStreamPos = 0;
+	_fileReady = _tandem = _partial = _clear = _compress = false;
+	_userID = _designID = _designVersion = _bitfileID = _bitfileVersion = 0;
 }
 
 
@@ -68,215 +56,187 @@ void CNTV2Bitfile::Init (void)
 
 bool CNTV2Bitfile::Open (const string & inBitfileName)
 {
-	Close ();
+	Close();
 
+	ostringstream oss;
 	struct stat	fsinfo;
-	::stat (inBitfileName.c_str (), &fsinfo);
+	::stat(inBitfileName.c_str(), &fsinfo);
 	_fileSize = unsigned(fsinfo.st_size);
-
 	_bitFileStream.open (inBitfileName.c_str (), std::ios::binary|std::ios::in);
 
 	do
 	{
-		if (_bitFileStream.fail ())
-			{_lastError = "Unable to open bitfile";		break;}
+		if (_bitFileStream.fail())
+			{oss << "Unable to open bitfile '" << inBitfileName << "'";  break;}
 
 		//	Preload bitfile header into mem
-		for (int i = 0; i < MAX_BITFILEHEADERSIZE - 1; i++)
+		for (size_t ndx(0);  ndx < MAX_BITFILEHEADERSIZE - 1;  ndx++)
 			_fileHeader.push_back (static_cast<unsigned char>(_bitFileStream.get()));
 
-		_lastError = ParseHeader ();
-		if (!_lastError.empty ())
+		oss << ParseHeader();
+		if (!oss.str().empty())
 			break;
 
 		_fileReady = true;
-	}
-	while (false);
-
-	return _fileReady;
-
-}	//	Open
-
-string CNTV2Bitfile::ParseHeaderFromBuffer(const uint8_t* inBitfileBuffer, const size_t inBufferSize)
-{
-	Close();
-
-	do
-	{
-		//	Preload bitfile header into mem
-		for (int i = 0; i < MAX_BITFILEHEADERSIZE - 1; i++) 
-		{
-			if (i < inBufferSize) 
-			{
-				_fileHeader.push_back(inBitfileBuffer[i]);
-			}
-			else 
-			{
-				break;
-			}
-		}
-
-		_lastError = ParseHeader();
-		if (!_lastError.empty())
-			break;
-
-		_fileReady = false;
 	} while (false);
 
-	return _lastError;
-
+	_lastError = oss.str();
+	return _fileReady;
 }	//	Open
+
+
+string CNTV2Bitfile::ParseHeaderFromBuffer (const uint8_t* inBitfileBuffer, const size_t inBufferSize)
+{
+	return ParseHeaderFromBuffer (NTV2_POINTER(inBitfileBuffer, inBufferSize));
+}
+
+
+string CNTV2Bitfile::ParseHeaderFromBuffer (const NTV2_POINTER & inBitfileBuffer)
+{
+	Close();
+	//	Preload bitfile header into mem
+	if (!inBitfileBuffer.GetU8s (_fileHeader, /*U8Offset*/ 0, /*MaxSize*/ MAX_BITFILEHEADERSIZE))
+		{ostringstream oss;  oss << inBitfileBuffer;  return oss.str();}
+
+	_lastError = ParseHeader();
+	_fileReady = _lastError.empty();
+	return _lastError;
+}
+
+#define BUMP_POS(_inc_)	pos += (_inc_);																			\
+						if (pos >= headerLength)																\
+						{																						\
+							oss << "Failed, offset " << DEC(pos) << " is past end, length=" << DEC(headerLength);	\
+							break;	\
+						}
 
 
 //	ParseHeader returns empty string if header looks OK, otherwise string will contain failure explanation
-string CNTV2Bitfile::ParseHeader ()
+string CNTV2Bitfile::ParseHeader (void)
 {
+	static const NTV2_POINTER	Header13 (gHead13, sizeof(gHead13));
+	static const NTV2_POINTER	Signature (gSignature, sizeof(gSignature));
+	const NTV2_POINTER			fileHeader (&_fileHeader[0], _fileHeader.size());
 	uint32_t		fieldLen	(0);	//	Holds size of various header fields, in bytes
 	int				pos			(0);	//	Byte offset during parse
 	char			testByte	(0);	//	Used when checking against expected header bytes
 	ostringstream	oss;				//	Receives parse error information
 
-	//	This really is bad form -- it precludes the ability to make this method 'const' (which it really is), plus it's safer to use iterators...
-	char *	p	(reinterpret_cast <char *> (&_fileHeader [0]));
-	size_t maxPosValue(_fileHeader.size());
+	const int headerLength(int(_fileHeader.size()));
 
 	do
 	{
 		//	Make sure first 13 bytes are what we expect...
-		if (::memcmp (p, Head13, 13))
-			{oss << "ParseHeader failed, byte mismatch in first 13 bytes";	break;}
+		NTV2_POINTER portion;
+		if (!Header13.IsContentEqual(fileHeader.Segment(portion, 0, 13)))
+			{oss << "Failed, byte mismatch in first 13 bytes";	break;}
+		BUMP_POS(13)					// skip over header header -- now pointing at 'a'
 
-		p += 13;						// skip over header header
-		pos += 13;
 
-
-		//	The next byte should be 'a'...
-		testByte = *p++;
+		//	'a' SECTION
+		testByte = fileHeader.I8(pos);
 		if (testByte != 'a')
-			{oss << "ParseHeader failed at or near byte offset " << pos << ", expected 'a', instead got '" << testByte << "'";	break;}
-		pos++;
-		
-		fieldLen = htons(*(reinterpret_cast<uint16_t*>(p)));// the next 2 bytes are the length of the FileName (including /0)
+			{oss << "Failed at byte offset " << DEC(pos) << ", expected " << xHEX0N(UWord('a'),2) << ", instead got " << xHEX0N(UWord(testByte),2);	break;}
+		BUMP_POS(1)						//	skip 'a'
 
-		p += 2;							// now pointing at the beginning of the file name
-		pos += 2;
+		if (fileHeader.Segment(portion, ULWord(pos), 2).IsNULL())	//	next 2 bytes have FileName length (big-endian)
+			{oss << "Failed fetching 2-byte segment starting at offset " << DEC(pos) << " from " << DEC(headerLength) << "-byte header"; break;}
+		fieldLen = NTV2EndianSwap16BtoH(portion.U16(0));	//	FileName length includes terminating NUL
+		BUMP_POS(2)						//	now at start of FileName
 
-		SetDesignName (p, fieldLen);	// grab design name
-		SetDesignFlags (p, fieldLen);	// grab design flags
-		SetDesignUserID (p, fieldLen);	// grab design userid
+		if (fileHeader.Segment(portion, ULWord(pos), fieldLen).IsNULL())	//	set DesignName/Flags/UserID portion
+			{oss << "Failed fetching " << DEC(fieldLen) << "-byte segment starting at offset " << DEC(pos) << " from " << DEC(headerLength) << "-byte header"; break;}
+		const string designBuffer (portion.GetString());
+		if (!SetDesignName(designBuffer))	//	grab design Name
+			{oss << "Bad design name in '" << designBuffer << "', offset=" << DEC(pos) << ", headerLength=" << DEC(headerLength); break;}
+		SetDesignFlags(designBuffer);	//	grab design Flags
+		SetDesignUserID(designBuffer);	//	grab design UserId
+		BUMP_POS(fieldLen)				//	skip over DesignName - now at 'b'
 
-		p += fieldLen;					// skip over design name - now pointing to beginning of 'b' field
-		pos += fieldLen;
 
-
-		//	The next byte should be 'b'...
-		testByte = *p++;
+		//	'b' SECTION
+		testByte = fileHeader.I8(pos);
 		if (testByte != 'b')
-			{oss << "ParseHeader failed at or near byte offset " << pos << ", expected 'b', instead got '" << testByte << "'";	break;}
-		pos++;
-		
-		fieldLen = htons(*(reinterpret_cast<uint16_t*>(p)));// the next 2 bytes are the length of the Part Name (including /0)
+			{oss << "Failed at byte offset " << DEC(pos) << ", expected " << xHEX0N(UWord('b'),2) << ", instead got " << xHEX0N(UWord(testByte),2);	break;}
+		BUMP_POS(1)						//	skip 'b'
 
-		p += 2;							// now pointing at the beginning of the part name
-		pos += 2;
+		if (fileHeader.Segment(portion, ULWord(pos), 2).IsNULL())	//	next 2 bytes have PartName length (big-endian)
+			{oss << "Failed fetching 2-byte segment starting at offset " << DEC(pos) << " from " << DEC(headerLength) << "-byte header"; break;}
+		fieldLen = NTV2EndianSwap16BtoH(portion.U16(0));	//	PartName length includes terminating NUL
+		BUMP_POS(2)						//	now at start of PartName
 
-		_partName = p;					// grab part name
+		if (fileHeader.Segment(portion, ULWord(pos), fieldLen).IsNULL())	//	set PartName portion
+			{oss << "Failed fetching " << DEC(fieldLen) << "-byte segment starting at offset " << DEC(pos) << " from " << DEC(headerLength) << "-byte header"; break;}
+		_partName = portion.GetString();//	grab PartName
+		BUMP_POS(fieldLen)				//	skip past PartName - now at start of 'c' field
 
-		p += fieldLen;					// skip over part name - now pointing to beginning of 'c' field
-		pos += fieldLen;
 
-		//	The next byte should be 'c'...
-		testByte = *p++;
+		//	'c' SECTION
+		testByte = fileHeader.I8(pos);
 		if (testByte != 'c')
-			{oss << "ParseHeader failed at or near byte offset " << pos << ", expected 'c', instead got '" << testByte << "'";	break;}
-		pos++;
+			{oss << "Failed at byte offset " << DEC(pos) << ", expected " << xHEX0N(UWord('c'),2) << ", instead got " << xHEX0N(UWord(testByte),2);	break;}
+		BUMP_POS(1)
 
-		fieldLen = htons (*(reinterpret_cast<uint16_t*>(p)));// the next 2 bytes are the length of the date string (including /0)
+		if (fileHeader.Segment(portion, ULWord(pos), 2).IsNULL())	//	next 2 bytes have Date length (big-endian)
+			{oss << "Failed fetching 2-byte segment starting at offset " << DEC(pos) << " from " << DEC(headerLength) << "-byte header"; break;}
+		fieldLen = NTV2EndianSwap16BtoH(portion.U16(0));	//	Date length includes terminating NUL
+		BUMP_POS(2)						//	now at start of Date string
 
-		p += 2;							// now pointing at the beginning of the date string
-		pos += 2;
+		if (fileHeader.Segment(portion, ULWord(pos), fieldLen).IsNULL())	//	set Date portion
+			{oss << "Failed fetching " << DEC(fieldLen) << "-byte segment starting at offset " << DEC(pos) << " from " << DEC(headerLength) << "-byte header"; break;}
+		_date = portion.GetString();	//	grab Date string
+		BUMP_POS(fieldLen)				//	skip past Date string - now at start of 'd' field
 
-		_date = p;						// grab date string
 
-		p += fieldLen;					// skip over date string - now pointing to beginning of 'd' field
-		pos += fieldLen;
-
-		//	The next byte should be 'd'...
-		testByte = *p++;
+		//	'd' SECTION
+		testByte = fileHeader.I8(pos);
 		if (testByte != 'd')
-			{oss << "ParseHeader failed at or near byte offset " << pos << ", expected 'd', instead got '" << testByte << "'";	break;}
-		pos++;
+			{oss << "Failed at byte offset " << DEC(pos) << ", expected " << xHEX0N(UWord('d'),2) << ", instead got " << xHEX0N(UWord(testByte),2);	break;}
+		BUMP_POS(1)
 
-		fieldLen = htons (*(reinterpret_cast<uint16_t*>(p)));// the next 2 bytes are the length of the time string (including /0)
+		if (fileHeader.Segment(portion, ULWord(pos), 2).IsNULL())	//	next 2 bytes have Time length (big-endian)
+			{oss << "Failed fetching 2-byte segment starting at offset " << DEC(pos) << " from " << DEC(headerLength) << "-byte header"; break;}
+		fieldLen = NTV2EndianSwap16BtoH(portion.U16(0));	//	Time length includes terminating NUL
+		BUMP_POS(2)						//	now at start of Time string
 
-		p += 2;							// now pointing at the beginning of the time string
-		pos += 2;
-
-		_time = p;						// grab time string
-
-		p += fieldLen;					// skip over time string - now pointing to beginning of 'e' field
-		pos += fieldLen;
+		if (fileHeader.Segment(portion, ULWord(pos), fieldLen).IsNULL())	//	set Time portion
+			{oss << "Failed fetching " << DEC(fieldLen) << "-byte segment starting at offset " << DEC(pos) << " from " << DEC(headerLength) << "-byte header"; break;}
+		_time = portion.GetString();	//	grab Time string
+		BUMP_POS(fieldLen)				//	skip past Time string - now at start of 'e' field
 
 
-		//	The next byte should be 'e'...
-		testByte = *p++;
+		//	'e' SECTION
+		testByte = fileHeader.I8(pos);
 		if (testByte != 'e')
-			{oss << "ParseHeader failed at or near byte offset " << pos << ", expected 'e', instead got '" << testByte << "'";	break;}
-		pos++;
+			{oss << "Failed at byte offset " << DEC(pos) << ", expected " << xHEX0N(UWord('e'),2) << ", instead got " << xHEX0N(UWord(testByte),2);	break;}
+		BUMP_POS(1)						//	skip past 'e'
 
-		_numBytes = htonl (*(reinterpret_cast<uint32_t*>(p)));	// the next 4 bytes are the length of the raw program data
-
-		p += 4;							// now pointing at the beginning of the time string
-		pos += 4;
+		if (fileHeader.Segment(portion, ULWord(pos), 4).IsNULL())	//	next 4 bytes have Raw Program Data length (big-endian)
+			{oss << "Failed fetching 4-byte segment starting at offset " << DEC(pos) << " from " << DEC(headerLength) << "-byte header"; break;}
+		_numBytes = NTV2EndianSwap32BtoH(portion.U32(0));	//	Raw Program Data length, in bytes
+		BUMP_POS(4)						//	now at start of Program Data
 		
 		_fileProgrammingPosition = pos;	// this is where to start the programming stream
 
-		//Search for the start signature
-		bool bFound = (strncmp(p, reinterpret_cast<const char*>(signature), 8) == 0);
-		int i = 0;
-		while (bFound == false && i < 1000 && pos < maxPosValue)
+		//	Search for the start signature...
+		bool bFound(false);		int ndx(0);
+		while (!bFound  &&  ndx < 1000  &&  pos < headerLength)
 		{
-			bFound = strncmp(p, reinterpret_cast<const char*>(signature), 8) == 0;
-			if(!bFound)
-			{
-				p++;
-				i++;
-				pos++;
-			}
+			bFound = fileHeader.Segment(portion, ULWord(pos), 8).IsContentEqual(Signature);
+			if (!bFound)
+				{ndx++;  pos++;}
 		}
 		if (!bFound)
-			{oss << "ParseHeader failed at or near byte offset " << pos << ", signature not found";	break;}
+			{oss << "Failed at byte offset " << DEC(pos) << ", signature not found"; break;}
 
-		assert (oss.str().empty());	//	If we made it this far it must be an OK Header - and no error messages
+		NTV2_ASSERT(oss.str().empty());	//	If we made it this far, the header must be OK -- no error messages
 	} while (false);
 
+	if (!oss.str().empty())
+		AJA_sERROR(AJA_DebugUnit_Application, AJAFUNC << ": " << oss.str());
 	return oss.str();
 
 }	//	ParseHeader
-
-
-// Get length of program stream. 
-// Return value:
-//   Length of program stream
-//   Return value < 0 indicates error
-size_t CNTV2Bitfile::GetProgramStreamLength (void) const
-{
-	if (!_fileReady)
-		return 0;
-	return _numBytes;
-}
-
-
-// Get length of file 
-// Return value:
-//   Length of file
-//   Return value < 0 indicates error
-size_t CNTV2Bitfile::GetFileStreamLength (void) const
-{
-	if (!_fileReady)
-		return 0;
-	return _fileSize;
-}
 
 
 // Get maximum of bufferLength bytes worth of configuration stream data in buffer.
@@ -392,77 +352,56 @@ size_t CNTV2Bitfile::GetFileByteStream (NTV2_POINTER & outBuffer)
 }
 
 
-void CNTV2Bitfile::SetDesignName (const char * pInBuffer, const size_t bufferLength)
+bool CNTV2Bitfile::SetDesignName (const string & inBuffer)
 {
-	if (!pInBuffer)
-		return;
-	
-	for (unsigned pos (0);  pos < bufferLength;  pos++)
+	for (size_t pos(0);  pos < inBuffer.length();  pos++)
 	{
-		const char ch (pInBuffer [pos]);
+		const char ch (inBuffer.at(pos));
 		if ((ch < 'A' || ch > 'Z') && (ch < 'a' || ch > 'z') && (ch < '0' || ch > '9') && ch != '_')
 			break;	//	Stop here
 		_designName += ch;
 	}
+	return _designName.length() > 0;
 }
 
 
-void CNTV2Bitfile::SetDesignFlags (const char * pInBuffer, const size_t bufferLength)
+bool CNTV2Bitfile::SetDesignFlags (const string & inBuffer)
 {
-	if (!pInBuffer)
-		return;
-
-	const string buffer(pInBuffer, bufferLength);
-	
-	if (buffer.find("TANDEM=TRUE") != string::npos)
+	if (inBuffer.find("TANDEM=TRUE") != string::npos)
 		_tandem = true;
-	if (buffer.find("PARTIAL=TRUE") != string::npos)
+	if (inBuffer.find("PARTIAL=TRUE") != string::npos)
 		_partial = true;
-	if (buffer.find("CLEAR=TRUE") != string::npos)
+	if (inBuffer.find("CLEAR=TRUE") != string::npos)
 		_clear = true;
-	if (buffer.find("COMPRESS=TRUE") != string::npos)
+	if (inBuffer.find("COMPRESS=TRUE") != string::npos)
 		_compress = true;
+	return true;
 }
 
 
-void CNTV2Bitfile::SetDesignUserID (const char * pInBuffer, const size_t bufferLength)
+bool CNTV2Bitfile::SetDesignUserID (const string & inBuffer)
 {
-	_userID = 0;
-	_designID = 0;
-	_designVersion = 0;
-	_bitfileID = 0;
-	_bitfileVersion = 0;
+	_userID = _designID = _designVersion = _bitfileID = _bitfileVersion = 0;
+	ULWord userID (0xffffffff);
+	size_t pos (inBuffer.find("UserID=0X"));
+	if (pos != string::npos  &&  pos <= (inBuffer.length() - 17))
+		//	FUTURE: _userID = aja::stoull(inBuffer.substr(pos+9, 8), AJA_NULL, 16);
+		::sscanf(inBuffer.substr(pos+9, 8).c_str(), "%x", &userID);	//	FOR NOW
 
-	if (!pInBuffer)
-		return;
-		
-	string buffer(pInBuffer, size_t(bufferLength));
+	if (userID == 0xffffffff)
+	{
+		pos = inBuffer.find("UserID=");
+		if (pos != string::npos  &&  pos <= (inBuffer.length() - 15))
+			//	FUTURE: _userID = aja::stoull(inBuffer.substr(pos+7, 8), AJA_NULL, 16);
+			::sscanf(inBuffer.substr(pos+7, 8).c_str(), "%x", &userID);	//	FOR NOW
+	}
 
-    ULWord userID = 0xffffffff;
-
-    if (userID == 0xffffffff)
-    {
-        size_t pos = buffer.find("UserID=0X");
-        if ((pos != string::npos) && (pos <= (bufferLength - 17)))
-        {
-            sscanf(buffer.substr(pos + 9, 8).c_str(), "%x", &userID);
-        }
-    }
-	
-    if (userID == 0xffffffff)
-    {
-        size_t pos = buffer.find("UserID=");
-        if ((pos != string::npos) && (pos <= (bufferLength - 15)))
-        {
-            sscanf(buffer.substr(pos + 7, 8).c_str(), "%x", &userID);
-        }
-    }
-
-    _userID = userID;
-	_designID = GetDesignID(userID);
-	_designVersion = GetDesignVersion(userID);
-	_bitfileID = GetBitfileID(userID);
-	_bitfileVersion = GetBitfileVersion(userID);
+	_userID			= userID;
+	_designID		= GetDesignID(userID);
+	_designVersion	= GetDesignVersion(userID);
+	_bitfileID		= GetBitfileID(userID);
+	_bitfileVersion	= GetBitfileVersion(userID);
+	return true;
 }
 
 
@@ -690,4 +629,3 @@ ULWord CNTV2Bitfile::ConvertToBitfileID (const NTV2DeviceID deviceID)
 {
 	return sDesignPairToIDMapMaker.DeviceIDToBitfileID(deviceID);
 }
-

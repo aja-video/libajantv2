@@ -633,6 +633,7 @@ class AJAExport CNTV2DriverInterface
 			@brief		Initializes my member variables after a successful Open.
 		**/
 		AJA_VIRTUAL void			FinishOpen (void);
+		AJA_VIRTUAL bool			ReadFlashULWord (const ULWord inAddress, ULWord & outValue, const ULWord inRetryCount = 1000);
 
 
 	//	PRIVATE TYPES

@@ -468,7 +468,11 @@ bool CNTV2MacDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 		}
 		DIDBG("Retry succeeded, ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber, false)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
 	}
-	if (legalDeviceIDs.find (_boardID) == legalDeviceIDs.end ())
+#if 0	//	Fake out:
+	if (_boardID == DEVICE_ID_CORVID88)	//	Pretend a Corvid88 is a TTapPro
+		_boardID = DEVICE_ID_TTAP_PRO;
+#endif
+	if (legalDeviceIDs.find(_boardID) == legalDeviceIDs.end ())
 	{
 		DIFAIL("Unsupported _boardID " << HEX8(_boardID) << ", ndx=" << inDeviceIndex << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndex, false)));
 		Close();

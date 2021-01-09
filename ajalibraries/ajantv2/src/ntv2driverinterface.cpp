@@ -502,6 +502,10 @@ NTV2DeviceID CNTV2DriverInterface::GetDeviceID (void)
 	ULWord value(0);
 	if (IsOpen()  &&  ReadRegister(kRegBoardID, value))
 	{
+#if 0	//	Fake out:
+	if (value == ULWord(DEVICE_ID_CORVID88))	//	Pretend a Corvid88 is a TTapPro
+		value = ULWord(DEVICE_ID_TTAP_PRO);
+#endif
 		const NTV2DeviceID currentValue(NTV2DeviceID(value+0));
 		if (currentValue != _boardID)
 			DIWARN(xHEX0N(this,16) << ":  NTV2DeviceID " << xHEX0N(value,8) << " (" << ::NTV2DeviceIDToString(currentValue)
@@ -980,9 +984,6 @@ void CNTV2DriverInterface::FinishOpen (void)
 
 bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 {
-	ULWord baseAddress(0);
-	static const ULWord dwordSizeCount(256/4);
-
 	if (!IsDeviceReady(false))
 		return false;	// cannot read flash
 
@@ -1016,37 +1017,27 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 			return false;
 	}
 
-	ULWord* bitFilePtr (new ULWord[dwordSizeCount]);
+	//	Allocate header buffer, read/fill from SPI-flash...
+	static const ULWord dwordCount(256/4);
+	NTV2_POINTER bitFileHdrBuffer(dwordCount * sizeof(ULWord));
+	if (!bitFileHdrBuffer)
+		return false;
 
-	for (ULWord count(0);  count < dwordSizeCount;  count++, baseAddress += 4)
-	{
-		WriteRegister(kRegXenaxFlashAddress, baseAddress);
-		WriteRegister(kRegXenaxFlashControlStatus, 0x0B);
-		bool busy = true;
-		ULWord timeoutCount = 1000;
-		do
-		{
-			ULWord regValue;
-			ReadRegister(kRegXenaxFlashControlStatus, regValue);
-			if (regValue & BIT(8))
-			{
-				busy = true;
-				timeoutCount--;
-			}
-			else
-				busy = false;
-		} while (busy  &&  timeoutCount);
-		if (!timeoutCount)
-		{
-			delete [] bitFilePtr;
+	ULWord* pULWord(bitFileHdrBuffer),  baseAddress(0);
+	for (ULWord count(0);  count < dwordCount;  count++, baseAddress += 4)
+		if (!ReadFlashULWord(baseAddress, pULWord[count]))
 			return false;
-		}
-		ReadRegister(kRegXenaxFlashDOUT, bitFilePtr[count]);
-	}
 
 	CNTV2Bitfile fileInfo;
-	std::string headerError (fileInfo.ParseHeaderFromBuffer(reinterpret_cast<uint8_t*>(bitFilePtr), dwordSizeCount * 4));
-	if (headerError.size() == 0)
+	std::string headerError;
+#if 0	//	Fake out:
+	if (_boardID == DEVICE_ID_TTAP_PRO)	//	Fake TTapPro -- load "flash" from on-disk bitfile:
+	{	fileInfo.Open("/Users/demo/dev-svn/firmware/T3_Tap/t_tap_pro.bit");
+		headerError = fileInfo.GetLastError();
+	} else
+#endif
+	headerError = fileInfo.ParseHeaderFromBuffer(bitFileHdrBuffer);
+	if (headerError.empty())
 	{
 		::strncpy(bitFileInfo.dateStr, fileInfo.GetDate().c_str(), NTV2_BITFILE_DATETIME_STRINGLENGTH);
 		::strncpy(bitFileInfo.timeStr, fileInfo.GetTime().c_str(), NTV2_BITFILE_DATETIME_STRINGLENGTH);
@@ -1054,10 +1045,34 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 		::strncpy(bitFileInfo.partNameStr, fileInfo.GetPartName().c_str(), NTV2_BITFILE_PARTNAME_STRINGLENGTH);
 		bitFileInfo.numBytes = ULWord(fileInfo.GetProgramStreamLength());
 	}
-
-	delete [] bitFilePtr;
 	return headerError.empty();
+}	//	ParseFlashHeader
+
+bool CNTV2DriverInterface::ReadFlashULWord (const ULWord inAddress, ULWord & outValue, const ULWord inRetryCount)
+{
+	if (!WriteRegister(kRegXenaxFlashAddress, inAddress))
+		return false;
+	if (!WriteRegister(kRegXenaxFlashControlStatus, 0x0B))
+		return false;
+	bool busy(true);
+	ULWord timeoutCount(inRetryCount);
+	do
+	{
+		ULWord regValue(0);
+		ReadRegister(kRegXenaxFlashControlStatus, regValue);
+		if (regValue & BIT(8))
+		{
+			busy = true;
+			timeoutCount--;
+		}
+		else
+			busy = false;
+	} while (busy  &&  timeoutCount);
+	if (!timeoutCount)
+		return false;
+	return ReadRegister(kRegXenaxFlashDOUT, outValue);
 }
+
 
 //--------------------------------------------------------------------------------------------------------------------
 //	Application acquire and release stuff
