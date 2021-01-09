@@ -145,7 +145,7 @@ AJAStatus AJAAncillaryData::AllocDataMemory(uint32_t numBytes)
 			m_payload.push_back(0);
 		status = AJA_STATUS_SUCCESS;
 	}
-	catch(bad_alloc)
+	catch(bad_alloc & ba)
 	{
 		m_payload.clear();
 		status = AJA_STATUS_MEMORY;
@@ -418,7 +418,7 @@ AJAStatus AJAAncillaryData::AppendPayloadData (const uint8_t * pInData, const ui
 		for (uint32_t ndx(0);  ndx < inNumBytes;  ndx++)
 			m_payload.push_back(pInData[ndx]);
 	}
-	catch(bad_alloc)
+	catch(bad_alloc & ba)
 	{
 		return AJA_STATUS_MEMORY;
 	}
@@ -439,7 +439,7 @@ AJAStatus AJAAncillaryData::AppendPayload (const AJAAncillaryData & inAnc)
 		for (uint32_t ndx(0);  ndx < numBytes;  ndx++)
 			m_payload.push_back(pInData[ndx]);
 	}
-	catch(bad_alloc)
+	catch(bad_alloc & ba)
 	{
 		return AJA_STATUS_MEMORY;
 	}
@@ -1417,6 +1417,25 @@ string AJAAncillaryData::CompareWithInfo (const AJAAncillaryData & inRHS, const 
 	return oss.str();
 }
 
+AJAAncillaryData & AJAAncillaryData::operator = (const AJAAncillaryData & inRHS)
+{
+	if (this != &inRHS)
+	{
+		m_DID = inRHS.m_DID;
+		m_SID = inRHS.m_SID;
+		m_checksum = inRHS.m_checksum;
+		m_location = inRHS.m_location;
+		m_coding = inRHS.m_coding;
+		m_payload = inRHS.m_payload;
+		m_rcvDataValid = inRHS.m_rcvDataValid;
+		m_ancType = inRHS.m_ancType;
+		m_bufferFmt = inRHS.m_bufferFmt;
+		m_frameID = inRHS.m_frameID;
+		m_userData = inRHS.m_userData;
+	}
+
+	return *this;
+}
 
 bool AJAAncillaryData::operator == (const AJAAncillaryData & inRHS) const
 {
