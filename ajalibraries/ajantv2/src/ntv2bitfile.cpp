@@ -62,7 +62,7 @@ bool CNTV2Bitfile::Open (const string & inBitfileName)
 	struct stat	fsinfo;
 	::stat(inBitfileName.c_str(), &fsinfo);
 	_fileSize = unsigned(fsinfo.st_size);
-	_bitFileStream.open (inBitfileName.c_str (), std::ios::binary|std::ios::in);
+	_bitFileStream.open (inBitfileName.c_str(),  std::ios::binary | std::ios::in);
 
 	do
 	{
@@ -184,8 +184,8 @@ string CNTV2Bitfile::ParseHeader (void)
 
 		if (fileHeader.Segment(portion, ULWord(pos), fieldLen).IsNULL())	//	set Date portion
 			{oss << "Failed fetching " << DEC(fieldLen) << "-byte segment starting at offset " << DEC(pos) << " from " << DEC(headerLength) << "-byte header"; break;}
-		_date = portion.GetString();	//	grab Date string
-		BUMP_POS(fieldLen)				//	skip past Date string - now at start of 'd' field
+		_date = portion.GetString(0, 10);	//	grab Date string (10 chars max)
+		BUMP_POS(fieldLen)					//	skip past Date string - now at start of 'd' field
 
 
 		//	'd' SECTION
@@ -201,7 +201,7 @@ string CNTV2Bitfile::ParseHeader (void)
 
 		if (fileHeader.Segment(portion, ULWord(pos), fieldLen).IsNULL())	//	set Time portion
 			{oss << "Failed fetching " << DEC(fieldLen) << "-byte segment starting at offset " << DEC(pos) << " from " << DEC(headerLength) << "-byte header"; break;}
-		_time = portion.GetString();	//	grab Time string
+		_time = portion.GetString(0, 8);//	grab Time string (8 chars max)
 		BUMP_POS(fieldLen)				//	skip past Time string - now at start of 'e' field
 
 
