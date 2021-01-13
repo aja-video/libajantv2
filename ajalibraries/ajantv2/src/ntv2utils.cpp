@@ -854,7 +854,7 @@ bool Fill10BitYCbCrVideoFrame (void * pBaseVideoAddress,
 }
 
 
-void Make8BitBlackLine(UByte* lineData,UWord numPixels,NTV2FrameBufferFormat fbFormat)
+void Make8BitBlackLine(UByte* lineData,ULWord numPixels,NTV2FrameBufferFormat fbFormat)
 {
 	// assumes lineData is large enough for numPixels
 	if ( fbFormat == NTV2_FBF_8BIT_YCBCR )
@@ -876,7 +876,7 @@ void Make8BitBlackLine(UByte* lineData,UWord numPixels,NTV2FrameBufferFormat fbF
 	}
 }
 
-void Make8BitWhiteLine(UByte* lineData,UWord numPixels,NTV2FrameBufferFormat fbFormat)
+void Make8BitWhiteLine(UByte* lineData,ULWord numPixels,NTV2FrameBufferFormat fbFormat)
 {
 	// assumes lineData is large enough for numPixels
 	// assumes lineData is large enough for numPixels

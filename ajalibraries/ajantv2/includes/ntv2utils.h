@@ -168,8 +168,8 @@ AJAExport bool Fill10BitYCbCrVideoFrame (void * pBaseVideoAddress,
 										 const YCbCr10BitPixel inPixelColor,
 										 const NTV2VANCMode inVancMode = NTV2_VANCMODE_OFF);
 
-AJAExport void Make8BitBlackLine(UByte* lineData,UWord numPixels=1920,NTV2FrameBufferFormat=NTV2_FBF_8BIT_YCBCR);
-AJAExport void Make8BitWhiteLine(UByte* lineData,UWord numPixels=1920,NTV2FrameBufferFormat=NTV2_FBF_8BIT_YCBCR);
+AJAExport void Make8BitBlackLine(UByte* lineData,ULWord numPixels=1920,NTV2FrameBufferFormat=NTV2_FBF_8BIT_YCBCR);
+AJAExport void Make8BitWhiteLine(UByte* lineData,ULWord numPixels=1920,NTV2FrameBufferFormat=NTV2_FBF_8BIT_YCBCR);
 AJAExport void Make10BitLine(UWord* lineData, const UWord Y, const UWord Cb, const UWord Cr, const ULWord numPixels = 1920);
 AJAExport void Make8BitLine(UByte* lineData, UByte Y , UByte Cb , UByte Cr,ULWord numPixels=1920,NTV2FrameBufferFormat=NTV2_FBF_8BIT_YCBCR);
 #if !defined(NTV2_DEPRECATE_13_0)
