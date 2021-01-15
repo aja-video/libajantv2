@@ -195,6 +195,8 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	case NTV2_FORMAT_1080p_2K_6000_B:
 		if (isRGB)
 			byte1 = isLevelB ? (uint8_t) VPIDStandard_1080_Dual_3Gb : (uint8_t) VPIDStandard_1080_Dual_3Ga;		//	0x95 : 0x94
+		else if (isDualLink)
+			byte1 = isLevelB ? (uint8_t)VPIDStandard_1080_DualLink_3Gb : (uint8_t)VPIDStandard_1080_DualLink;		//	0x8A : 0x87
 		else
 			byte1 = isLevelB ? (uint8_t) VPIDStandard_1080_DualLink_3Gb : (uint8_t) VPIDStandard_1080_3Ga;			//	0x8A : 0x89
 		break;
