@@ -226,7 +226,8 @@ AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DIDSet 
 typedef std::bitset<16>		NTV2AudioChannelsMuted16;				///< @brief	Per-audio-channel mute state for up to 16 audio channels.
 const NTV2AudioChannelsMuted16	NTV2AudioChannelsMuteAll = NTV2AudioChannelsMuted16(0xFFFF);	///< @brief	All 16 audio channels muted/disabled.
 const NTV2AudioChannelsMuted16	NTV2AudioChannelsEnableAll = NTV2AudioChannelsMuted16(0x0000);	///< @brief	All 16 audio channels unmuted/enabled.
-const ULWord LUTTablePartitionSize(0x40000);
+const ULWord LUTTablePartitionSize = ULWord(0x40000);
+
 
 
 /**
