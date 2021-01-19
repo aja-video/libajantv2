@@ -859,7 +859,7 @@ void Make8BitBlackLine(UByte* lineData,ULWord numPixels,NTV2FrameBufferFormat fb
 	// assumes lineData is large enough for numPixels
 	if ( fbFormat == NTV2_FBF_8BIT_YCBCR )
 	{
-		for ( int count = 0; count < numPixels*2; count+=2 )
+		for ( uint32_t count = 0; count < numPixels*2; count+=2 )
 		{
 			lineData[count] = UWord(CCIR601_8BIT_CHROMAOFFSET);
 			lineData[count+1] = UWord(CCIR601_8BIT_BLACK);
@@ -868,7 +868,7 @@ void Make8BitBlackLine(UByte* lineData,ULWord numPixels,NTV2FrameBufferFormat fb
 	else
 	{
 		// NTV2_FBF_8BIT_YCBCR_YUY2
-		for ( int count = 0; count < numPixels*2; count+=2 )
+		for ( uint32_t count = 0; count < numPixels*2; count+=2 )
 		{
 			lineData[count] = UWord(CCIR601_8BIT_BLACK);
 			lineData[count+1] = UWord(CCIR601_8BIT_CHROMAOFFSET);
@@ -882,7 +882,7 @@ void Make8BitWhiteLine(UByte* lineData,ULWord numPixels,NTV2FrameBufferFormat fb
 	// assumes lineData is large enough for numPixels
 	if ( fbFormat == NTV2_FBF_8BIT_YCBCR )
 	{
-		for ( int count = 0; count < numPixels*2; count+=2 )
+		for ( uint32_t count = 0; count < numPixels*2; count+=2 )
 		{
 			lineData[count] = UWord(CCIR601_8BIT_CHROMAOFFSET);
 			lineData[count+1] = UWord(CCIR601_8BIT_WHITE);
@@ -891,7 +891,7 @@ void Make8BitWhiteLine(UByte* lineData,ULWord numPixels,NTV2FrameBufferFormat fb
 	else
 	{
 		// NTV2_FBF_8BIT_YCBCR_YUY2
-		for ( int count = 0; count < numPixels*2; count+=2 )
+		for ( uint32_t count = 0; count < numPixels*2; count+=2 )
 		{
 			lineData[count] = UWord(CCIR601_8BIT_WHITE);
 			lineData[count+1] = UWord(CCIR601_8BIT_CHROMAOFFSET);
