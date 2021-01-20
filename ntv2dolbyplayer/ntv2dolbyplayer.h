@@ -1,7 +1,7 @@
 /**
 	@file		ntv2dolbyplayer.h
 	@brief		Header file for NTV2DolbyPlayer demonstration class
-	@copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 

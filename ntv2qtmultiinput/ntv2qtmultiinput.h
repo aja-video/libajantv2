@@ -3,7 +3,7 @@
 	@brief		Header file for NTV2QtMultiInput demonstration application. Demonstrates how to
 				capture several SDI AV streams from NTV2-based AJA devices (e.g., Kona3G in Quad
 				mode, and Corvid24). Shows how to make use of the NTV2FrameGrabber class.
-	@copyright	(C) 2013-2020 AJA Video Systems, Inc. All rights reserved.
+	@copyright	(C) 2013-2021 AJA Video Systems, Inc. All rights reserved.
 **/
 
 #ifndef NTV2QTMULTIINPUT_H

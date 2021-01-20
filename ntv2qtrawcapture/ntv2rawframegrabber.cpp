@@ -1,7 +1,7 @@
 /**
 	@file		ntv2rawframegrabber.cpp
 	@brief		Contains the implementation of the NTV2RawFrameGrabber class.
-	@copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 

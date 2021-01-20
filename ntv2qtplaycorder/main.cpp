@@ -1,7 +1,7 @@
 /**
 	@file		ntv2qtplaycorder/main.cpp  
 	@brief		Demonstration application that records or plays frames to/from disk in DPX format.
-	@copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved. 
+	@copyright	(C) 2013-2021 AJA Video Systems, Inc.  All rights reserved. 
 **/
 
 #include "ntv2qtplaycorder.h"

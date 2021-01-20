@@ -1,7 +1,7 @@
 /**
 	@file		ntv2player4k.cpp
 	@brief		Implementation of ntv2player4k class.
-	@copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ntv2player4k.h"
