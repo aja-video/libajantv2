@@ -1,7 +1,7 @@
 /**
     @file		ntv2registersmb.h
     @brief		Defines the KonaIP/IoIP registers.
-    @copyright	(C) 2014-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @copyright	(C) 2014-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef REGISTERS_MB_H

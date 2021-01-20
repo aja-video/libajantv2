@@ -1,7 +1,7 @@
 /**
 	@file		ntv2registers2022.h
 	@brief		Defines the KonaIP/IoIP S2022 registers.
-	@copyright	(C) 2014-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2014-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef REGISTERS_2022_H

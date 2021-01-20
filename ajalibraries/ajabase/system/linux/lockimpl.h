@@ -1,7 +1,7 @@
 /**
 	@file		linux/lockimpl.h
 	@brief		Declares the AJALockImpl class.
-	@copyright	(C) 2009-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_LOCK_IMPL_H

@@ -1,7 +1,7 @@
 /**
 	@file		ajaexport.h
 	@brief		Defines the import/export macros for producing DLLs or LIBs.
-	@copyright	(C) 2008-2020 AJA Video Systems, Inc.  Proprietary and Confidential information.
+	@copyright	(C) 2008-2021 AJA Video Systems, Inc.  Proprietary and Confidential information.
 **/
 
 #ifndef AJAEXPORT_H

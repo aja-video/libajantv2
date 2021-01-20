@@ -1,7 +1,7 @@
 /**
 	@file		timecode.h
 	@brief		Declares the AJATimeCode class.
-	@copyright	(C) 2010-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2010-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_TIMECODE_H

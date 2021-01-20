@@ -1,7 +1,7 @@
 /**
     @file		linux/infoimpl.cpp
     @brief		Implements the AJASystemInfoImpl class on the Linux platform.
-	@copyright	(C) 2009-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ajabase/system/file_io.h"

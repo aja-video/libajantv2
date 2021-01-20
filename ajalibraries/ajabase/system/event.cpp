@@ -1,7 +1,7 @@
 /**
 	@file		event.cpp
 	@brief		Implements the AJAEvent class.
-	@copyright	(C) 2009-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 // include the system dependent implementation class

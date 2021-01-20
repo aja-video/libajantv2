@@ -1,7 +1,7 @@
 /**
     @file		ntv2config2022.h
     @brief		Declares the NTV2ChoosableBoard struct used for "nub" discovery.
-    @copyright	(C) 2005-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @copyright	(C) 2005-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #ifndef NTV2CHOOSABLEBOARD_H

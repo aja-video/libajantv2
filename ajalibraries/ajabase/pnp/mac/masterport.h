@@ -1,7 +1,7 @@
 /**
 	@file		pnp/mac/masterport.h
 	@brief		Declares the MasterPort class.
-	@copyright	(C) 2013-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #if !defined (__MASTERPORT_H__)

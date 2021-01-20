@@ -1,7 +1,7 @@
 /**
 	@file		ntv2spiinterface.cpp
 	@brief		Implementation of CNTV2AxiSpiFlash class.
-	@copyright	(C) 2017-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2017-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 #include "ntv2spiinterface.h"
 

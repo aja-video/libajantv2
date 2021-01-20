@@ -1,7 +1,7 @@
 /**
 	@file		ntv2hevc.cpp
 	@brief		Implementations of HEVC-related CNTV2Card methods.
-	@copyright	(C) 2004-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2devicefeatures.h"

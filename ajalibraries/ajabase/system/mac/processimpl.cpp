@@ -1,7 +1,7 @@
 /**
 	@file		mac/processimpl.cpp
 	@brief		Implements the AJAProcessImpl class on the Mac platform.
-	@copyright	(C) 2011-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2011-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ajabase/system/mac/processimpl.h"

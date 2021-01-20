@@ -1,7 +1,7 @@
 /**
 	@file		event.h
 	@brief		Declares the AJAEvent class.
-	@copyright	(C) 2009-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_EVENT_H

@@ -1,7 +1,7 @@
 /**
 	@file		ntv2linuxdriverinterface.cpp
 	@brief		Implementation of the CNTV2LinuxDriverInterface class.
-	@copyright	(C) 2003-2020 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2003-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include <errno.h>

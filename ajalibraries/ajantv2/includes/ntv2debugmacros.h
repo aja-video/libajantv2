@@ -1,7 +1,7 @@
 /**
 	@file		ntv2debugMacros.h
 	@brief		Declares several macros useful for debugging.
-	@copyright	(C) 2004-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2004-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef DEBUGMACROS_H

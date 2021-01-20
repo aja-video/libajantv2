@@ -1,7 +1,7 @@
 /**
 	@file		mac/threadimpl.cpp
 	@brief		Implements the AJAThreadImpl class on the Mac platform.
-	@copyright	(C) 2009-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include <errno.h>

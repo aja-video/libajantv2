@@ -1,7 +1,7 @@
 /**
 	@file		atomic.h
 	@brief		Declares the AJAAtomic class.
-	@copyright	(C) 2009-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_ATOMIC_H

@@ -1,7 +1,7 @@
 /**
 	@file		wavewriter.cpp
 	@brief		Implements the AJAWavWriter class.
-	@copyright	(C) 2015-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2015-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "wavewriter.h"

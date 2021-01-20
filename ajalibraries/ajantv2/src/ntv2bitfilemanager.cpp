@@ -1,7 +1,7 @@
 /**
 	@file		ntv2bitfilemanager.cpp
 	@brief		Implementation of CNTV2BitfileManager class.
-	@copyright	(C) 2019-2020 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
+	@copyright	(C) 2019-2021 AJA Video Systems, Inc.  Proprietary and Confidential information.  All rights reserved.
 **/
 #include "ntv2bitfilemanager.h"
 #include "ntv2bitfile.h"

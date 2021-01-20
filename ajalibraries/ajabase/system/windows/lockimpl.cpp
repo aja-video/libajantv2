@@ -1,7 +1,7 @@
 /**
 	@file		windows/lockimpl.cpp
 	@brief		Implements the AJALockImpl class on the Windows platform.
-	@copyright	(C) 2009-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ajabase/system/windows/lockimpl.h"

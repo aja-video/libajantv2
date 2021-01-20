@@ -1,7 +1,7 @@
 /**
 	@file		process.h
 	@brief		Declares the AJAProcess class.
-	@copyright	(C) 2011-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2011-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_PROCESS_H

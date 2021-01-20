@@ -1,7 +1,7 @@
 /**
 	@file		bytestream.h
 	@brief		Declaration of AJAByteStream class.
-	@copyright	(C) 2012-2020 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2012-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
  
 #ifndef AJA_BYTESTREAM_H
