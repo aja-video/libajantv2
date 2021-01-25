@@ -1200,8 +1200,9 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 	mConnections.clear();
 
 	//	Does device have RGB conversion capability for the desired channel?
-	if (UWord(mConfig.fOutputChannel) > ::NTV2DeviceGetNumCSCs(mDeviceID))
-		{cerr << "## ERROR:  No CSC for channel " << (mConfig.fOutputChannel+1) << endl;  return AJA_STATUS_UNSUPPORTED;}
+	if (isRGBFBF != isRGBWire	//	if any CSC(s) are needed
+		&& UWord(mConfig.fOutputChannel) > ::NTV2DeviceGetNumCSCs(mDeviceID))
+			{cerr << "## ERROR:  No CSC for channel " << (mConfig.fOutputChannel+1) << endl;  return AJA_STATUS_UNSUPPORTED;}
 	//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ClearRouting();
 
 	mDevice.SetSDITransmitEnable(sdiOuts, true);
