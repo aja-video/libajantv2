@@ -333,9 +333,9 @@ AJA always recommends that NTV2-based applications be built from the same SDK ve
 
 @subsubsection		gs-forwardcomp		Firmware and Device Features
 
-For a given SDK release, the \ref ntv2devicefeatures responses should be correct for all supported devices running the latest
-firmware available on or after the SDK release date. AJA will do its best to document any exceptions on the SDK’s download
-page and/or the device firmware page in the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/List">Knowledgebase</a>.
+For a given SDK release, the “CanDoXXXX”, “GetNumXXXX”, etc. <b>Device Features API</b> responses should be correct for all supported devices
+running the latest firmware available on or after the SDK release date. AJA will do its best to document any exceptions on the SDK’s
+download page and/or the device firmware page in the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/List">Knowledgebase</a>.
 
 
 
