@@ -4819,7 +4819,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
         case DEVICE_ID_KONALHEPLUS:             return inForRetailDisplay ?	"KONA LHe+"                 : "KonaLHe+";
         case DEVICE_ID_IOXT:                    return inForRetailDisplay ?	"IoXT"                      : "IoXT";
         case DEVICE_ID_CORVID24:                return inForRetailDisplay ?	"Corvid 24"                 : "Corvid24";
-        case DEVICE_ID_TTAP:                    return inForRetailDisplay ?	"T-Tap"                     : "TTap";
+        case DEVICE_ID_TTAP:                    return inForRetailDisplay ?	"T-TAP"                     : "TTap";
 		case DEVICE_ID_IO4K:					return inForRetailDisplay ?	"Io4K"						: "Io4K";
 		case DEVICE_ID_IO4KUFC:					return inForRetailDisplay ?	"Io4K UFC"					: "Io4KUfc";
 		case DEVICE_ID_KONA4:					return inForRetailDisplay ?	"KONA 4"					: "Kona4";
@@ -4848,7 +4848,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONA5_8K:				return inForRetailDisplay ?	"KONA 5 8K"					: "Kona5-8K";
 		case DEVICE_ID_CORVID44_8K:				return inForRetailDisplay ?	"Corvid 44 8K"				: "Corvid44-8K";
 		case DEVICE_ID_CORVID44_2X4K:			return inForRetailDisplay ?	"Corvid 44 2x4K"			: "Corvid44-2x4K";
-		case DEVICE_ID_TTAP_PRO:				return inForRetailDisplay ? "T-Tap-Pro"					: "TTapPro";
+		case DEVICE_ID_TTAP_PRO:				return inForRetailDisplay ? "T-TAP Pro"					: "TTapPro";
 #if defined(_DEBUG)
 #else
 	    default:					break;
