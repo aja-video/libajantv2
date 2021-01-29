@@ -11,7 +11,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fltkgl", "..\..\..\non-aja\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libajantv2", "libajantv2_vs12.vcxproj", "{5CB46D0F-27CA-4A59-AB0A-1DFBDB44CAA2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libajantv2dll", "libajantv2dll_vs12.vcxproj", "{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libajantv2dll", "libajantv2dll_vs141.vcxproj", "{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xenacables", "..\..\..\ajaapps\crossplatform\xenacablesfltk\xenacables.vcxproj", "{08030E2C-2622-450E-8D76-19F9DC03DCE9}"
 EndProject
