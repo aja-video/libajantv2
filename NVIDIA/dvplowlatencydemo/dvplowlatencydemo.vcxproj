@@ -215,7 +215,7 @@
     <ClInclude Include="AJA_Logo_Small.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\ajalibraries\ajantv2\build\libajantv2dll_vs12.vcxproj">
+    <ProjectReference Include="..\..\..\..\..\ajalibraries\ajantv2\build\libajantv2dll_vs141.vcxproj">
       <Project>{8e9fcb9f-934a-4dfa-b9eb-8f0359ebe589}</Project>
     </ProjectReference>
   </ItemGroup>

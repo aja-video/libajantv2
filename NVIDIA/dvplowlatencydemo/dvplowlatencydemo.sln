@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dvplowlatencydemo", "dvplow
 		{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589} = {8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libajantv2dll", "..\..\..\..\..\ajalibraries\ajantv2\build\libajantv2dll_vs12.vcxproj", "{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libajantv2dll", "..\..\..\..\..\ajalibraries\ajantv2\build\libajantv2dll_vs141.vcxproj", "{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
