@@ -1061,6 +1061,7 @@ AJAExport void  setHDRDefaultsForDCIP3                  (HDRRegValues & outRegis
 
 //	New in 12.5 SDK...
 typedef std::vector <std::string>		NTV2StringList;
+typedef NTV2StringList::iterator		NTV2StringListIter;	//	New in SDK 16.0
 typedef NTV2StringList::const_iterator	NTV2StringListConstIter;
 typedef std::set <std::string>			NTV2StringSet;
 typedef NTV2StringSet::const_iterator	NTV2StringSetConstIter;
