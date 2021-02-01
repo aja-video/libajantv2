@@ -53,7 +53,7 @@
 	-	8-bit YCbCr or 10-bit YCbCr frame buffer formats.
 
 	Beyond these common characteristics, AJA devices fan out into a diverse array of capabilities to suit many different applications.
-	To determine the features of an AJA device, use the \ref ntv2devicefeatures.
+	To determine the features of an AJA device, use the <b>Device Features API</b> in the \ref ajantv2 .
 
 	Most devices can capture and play video, but some may only capture, while others may only playout.
 	-	To determine if a device can capture video, call ::NTV2DeviceCanDoCapture.

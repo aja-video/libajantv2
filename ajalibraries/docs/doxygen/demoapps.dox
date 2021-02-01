@@ -26,7 +26,8 @@
 	-#	Open the resulting unzipped folder.
 	-#	To build the demonstration applications:
 		-	<b>Windows</b> (natively):
-			-#	Open <b>ntv2_vs12.sln</b> with Visual Studio.
+			-#	Open <b>ntv2_vs141.sln</b> with Visual Studio.
+			-#  Select the appropriate build configuration for your version of Visual Studio (Debug/Release + Win32/x64). Includes support for VS2013, 2015 and 2017.
 			-#	Choose the project configuration (x64).
 			-#	Build solution.
 		-	<b>Mac OS X</b> (natively):
