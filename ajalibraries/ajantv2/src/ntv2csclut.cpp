@@ -1402,8 +1402,8 @@ bool CNTV2Card::Set1DLUTTableLocation (const NTV2Channel inChannel, const ULWord
 	NTV2Framesize theFrameSize;
 	ULWord LUTTableIndexOffset = LUTTablePartitionSize * inLUTIndex;
 	GetFrameBufferSize(NTV2_CHANNEL1, theFrameSize);
-	ULWord lutTableLocation (((::NTV2FramesizeToByteCount(theFrameSize) * inFrameNumber)/4) + LUTTableIndexOffset);
-	return WriteRegister(gChannelTo1DLutControlRegNum[inChannel], lutTableLocation, kRegMaskLUTAddress, kRegShiftLUTAddress);
+    ULWord lutTableLocation ((((::NTV2FramesizeToByteCount(theFrameSize) * inFrameNumber)) + LUTTableIndexOffset)/4);
+    return WriteRegister(gChannelTo1DLutControlRegNum[inChannel], lutTableLocation, kRegMaskLUTAddress, kRegShiftLUTAddress);
 }
 
 bool CNTV2Card::Load1DLUTTable (const NTV2Channel inChannel)
