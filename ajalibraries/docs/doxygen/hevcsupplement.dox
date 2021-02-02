@@ -110,8 +110,9 @@ installs the Microsoft Visual Studio runtime environment required to use the pre
 
 @subsection	hevcwindowsbuildsdk		Building the Windows SDK
 
-To build the SDK libraries and samples, open the Windows Visual Studio solution file \c APIandSamples\\ajalibraries\\ajantv2\\build\\ntv2_vs12.sln.
-Choose the solution platform (win32 or x64) and the configuration (debug or release) for the build and select build all. 
+To build the SDK libraries and samples, open the Windows Visual Studio solution file \c APIandSamples\\ajalibraries\\ajantv2\\build\\ntv2_vs141.sln.
+Select the appropriate build configuration for your version of Visual Studio (Debug/Release + Win32/x64). Includes support for VS2013, 2015 and 2017.
+Select Build Solution.
 This will build the libraries to the \c lib directory and the binaries to the \c bin directory.
 
 @subsection	hevcwindowsinstallfirmware		Installing the HEVC firmware

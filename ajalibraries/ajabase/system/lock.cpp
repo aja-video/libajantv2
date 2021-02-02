@@ -53,7 +53,7 @@ AJALock::Lock(uint32_t timeout)
 	if (timeout != LOCK_TIME_INFINITE)
 	{
 		bool success = mpMutex->try_lock_for(std::chrono::milliseconds(timeout));
-		return success ? AJA_STATUS_SUCCESS : AJA_STATUS_FAIL;
+		return success ? AJA_STATUS_SUCCESS : AJA_STATUS_TIMEOUT;
 	}
 	else
 	{

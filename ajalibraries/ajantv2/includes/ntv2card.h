@@ -695,11 +695,12 @@ public:
 					on the AJA device, blocking until the transfer has completed.
 		@param[in]	inFrameNumber		Specifies the zero-based frame number of the frame buffer to be read on the device.
 		@param[in]	pInLUTBuffer		Specifies a valid, non-NULL pointer to the host buffer that is to supply the LUT data.
-		@param[in]	inLUTIndex			Specifies the index of the LUT
-		@return		True if successful; otherwise false.
+        @param[in]	inLUTIndex			Specifies the index of the LUT
+        @param[in]	inByteCount			Specifies the amount to DMA
+        @return		True if successful; otherwise false.
 		@note		This function can also be used to write LUT Tables into memory
 	**/
-	AJA_VIRTUAL bool DMAWriteLUTTable (	const ULWord inFrameNumber, const ULWord * pInLUTBuffer, const ULWord inLUTIndex); 
+    AJA_VIRTUAL bool DMAWriteLUTTable (	const ULWord inFrameNumber, const ULWord * pInLUTBuffer, const ULWord inLUTIndex,const ULWord inByteCount = LUTTablePartitionSize);
 
 	/**
 		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
