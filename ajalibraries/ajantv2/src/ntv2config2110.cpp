@@ -2519,6 +2519,18 @@ bool CNTV2Config2110::ExtractRxVideoConfigFromSDP(std::string sdp, multiRx_2110C
 			}
 		}
 
+        //if there is a source-filter attribute, it overrides the o= source attribute
+        rv = getDescriptionValue(index,"a=source-filter",value);
+        if (rv > index)
+        {
+            tokens = split(value.c_str(), ' ');
+            if (tokens.size() >= 5 && !tokens[4].empty())
+            {
+                rxConfig.rx2110Config[i].sourceIP = tokens[4];
+                rxMatch |= RX_MATCH_2110_SOURCE_IP;
+            }
+        }
+
 		rv = getDescriptionValue(index,"a=rtpmap",value);
 		if (rv > index)
 		{
@@ -2693,6 +2705,18 @@ bool CNTV2Config2110::ExtractRxVideoConfigFromSDP(std::string sdp, rx_2110Config
 			}
 		}
 	}
+
+    // if there is a source-filter attribute, it overrides the o= source attribute
+    rv = getDescriptionValue(index,"a=source-filter",value);
+    if (rv > index)
+    {
+		tokens = split(value.c_str(), ' ');
+        if (tokens.size() >= 5 && !tokens[4].empty())
+        {
+            rxConfig.sourceIP = tokens[4];
+            rxMatch |= RX_MATCH_2110_SOURCE_IP;
+        }
+    }
 
 	rv = getDescriptionValue(index,"a=rtpmap",value);
 	if (rv > index)
@@ -2869,6 +2893,18 @@ bool CNTV2Config2110::ExtractRxAudioConfigFromSDP(std::string sdp, rx_2110Config
 		}
 	}
 
+    // if there is a source-filter attribute, it overrides the o= source attribute
+    rv = getDescriptionValue(index,"a=source-filter",value);
+    if (rv > index)
+    {
+		tokens = split(value.c_str(), ' ');
+        if (tokens.size() >= 5 && !tokens[4].empty())
+        {
+            rxConfig.sourceIP = tokens[4];
+            rxMatch |= RX_MATCH_2110_SOURCE_IP;
+        }
+    }
+
 	rv = getDescriptionValue(index,"a=rtpmap",value);
 	if (rv > index)
 	{
@@ -3012,6 +3048,18 @@ bool CNTV2Config2110::ExtractRxAncConfigFromSDP(std::string sdp, rx_2110Config &
 			}
 		}
 	}
+
+    // if there is a source-filter attribute, it overrides the o= source attribute
+    rv = getDescriptionValue(index,"a=source-filter",value);
+    if (rv > index)
+    {
+		tokens = split(value.c_str(), ' ');
+        if (tokens.size() >= 5 && !tokens[4].empty())
+        {
+            rxConfig.sourceIP = tokens[4];
+            rxMatch |= RX_MATCH_2110_SOURCE_IP;
+        }
+    }
 
 	rv = getDescriptionValue(index,"a=rtpmap",value);
 	if (rv > index)
