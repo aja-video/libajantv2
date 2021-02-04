@@ -2695,7 +2695,6 @@ typedef enum NTV2OutputCrosspointID
 	,NTV2_XptMixer1VidYUV				= 0x12
 	,NTV2_XptMixer1KeyYUV				= 0x13
 	,NTV2_XptMixer1VidRGB				= NTV2_XptMixer1VidYUV  | 0x80
-	,NTV2_XptMixer1KeyRGB				= NTV2_XptMixer1KeyYUV  | 0x80
 	,NTV2_XptMultiLinkOut1DS1			= 0x14								///< @brief	New in SDK 16.0
 	,NTV2_XptMultiLinkOut1DS2			= 0x15								///< @brief	New in SDK 16.0
 	,NTV2_XptAnalogIn					= 0x16
@@ -2712,7 +2711,6 @@ typedef enum NTV2OutputCrosspointID
 	,NTV2_XptMixer2VidYUV				= 0x20
 	,NTV2_XptMixer2KeyYUV				= 0x21
 	,NTV2_XptMixer2VidRGB				= NTV2_XptMixer2VidYUV | 0x80
-	,NTV2_XptMixer2KeyRGB				= NTV2_XptMixer2KeyYUV | 0x80
 	,NTV2_XptDCIMixerVidYUV				= 0x22
 	,NTV2_XptDCIMixerVidRGB				= NTV2_XptDCIMixerVidYUV | 0x80
 	,NTV2_XptStereoCompressorOut		= 0x23
@@ -2772,11 +2770,9 @@ typedef enum NTV2OutputCrosspointID
 	,NTV2_XptMixer3VidYUV				= 0x55
 	,NTV2_XptMixer3KeyYUV				= 0x56
 	,NTV2_XptMixer3VidRGB				= NTV2_XptMixer3VidYUV | 0x80
-	,NTV2_XptMixer3KeyRGB				= NTV2_XptMixer3KeyYUV | 0x80
 	,NTV2_XptMixer4VidYUV				= 0x57
 	,NTV2_XptMixer4KeyYUV				= 0x58
 	,NTV2_XptMixer4VidRGB				= NTV2_XptMixer4VidYUV | 0x80
-	,NTV2_XptMixer4KeyRGB				= NTV2_XptMixer4KeyYUV | 0x80
 	,NTV2_XptCSC6VidYUV					= 0x59
 	,NTV2_XptCSC6VidRGB					= NTV2_XptCSC6VidYUV | 0x80
 	,NTV2_XptCSC6KeyYUV					= 0x5A
