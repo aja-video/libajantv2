@@ -3480,7 +3480,7 @@ bool CNTV2Card::GetMixerFGMatteEnabled (const UWord inWhichMixer, bool & outIsEn
 	return !CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outIsEnabled, kRegMaskVidProcFGMatteEnable, kRegShiftVidProcFGMatteEnable);
 }
 
-bool CNTV2Card::SetMixerFGMatteEnabled (const UWord inWhichMixer, const bool & inIsEnabled)
+bool CNTV2Card::SetMixerFGMatteEnabled (const UWord inWhichMixer, const bool inIsEnabled)
 {
 	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
@@ -3495,7 +3495,7 @@ bool CNTV2Card::GetMixerBGMatteEnabled (const UWord inWhichMixer, bool & outIsEn
 	return !CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outIsEnabled, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
 }
 
-bool CNTV2Card::SetMixerBGMatteEnabled (const UWord inWhichMixer, const bool & inIsEnabled)
+bool CNTV2Card::SetMixerBGMatteEnabled (const UWord inWhichMixer, const bool inIsEnabled)
 {
 	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
@@ -3519,7 +3519,7 @@ bool CNTV2Card::GetMixerMatteColor (const UWord inWhichMixer, YCbCr10BitPixel & 
 	return true;
 }
 
-bool CNTV2Card::SetMixerMatteColor (const UWord inWhichMixer, const YCbCr10BitPixel & inYCbCrValue)
+bool CNTV2Card::SetMixerMatteColor (const UWord inWhichMixer, const YCbCr10BitPixel inYCbCrValue)
 {
 	YCbCr10BitPixel	ycbcrPixel	(inYCbCrValue);
 	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
@@ -3542,6 +3542,28 @@ bool CNTV2Card::SetMixerMatteColor (const UWord inWhichMixer, const YCbCr10BitPi
 
 	//	Write it...
 	return WriteRegister(gMatteColorRegs[inWhichMixer], packedValue);
+}
+
+bool CNTV2Card::MixerHasRGBModeSupport (const UWord inWhichMixer, bool & outIsSupported)
+{
+	outIsSupported = false;
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
+		return false;
+	return !CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outIsSupported, kRegMaskVidProcRGBModeSupported, kRegShiftVidProcRGBModeSupported);
+}
+
+bool CNTV2Card::SetMixerRGBRange (const UWord inWhichMixer, const NTV2MixerRGBRange & inRGBRange)
+{
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
+		return false;
+	return !WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inRGBRange, kRegMaskVidProcRGBRange, kRegShiftVidProcRGBRange);
+}
+
+bool CNTV2Card::GetMixerRGBRange (const UWord inWhichMixer, NTV2MixerRGBRange & outRGBRange)
+{
+	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
+		return false;
+	return !CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outRGBRange, kRegMaskVidProcRGBRange, kRegShiftVidProcRGBRange);
 }
 
 
