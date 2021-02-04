@@ -1626,7 +1626,7 @@ public:
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
 		@param[in]	inRGBRange			Specifies the new RGB range value to use.
 	**/
-	AJA_VIRTUAL bool	SetMixerRGBRange (const UWord inWhichMixer, const NTV2MixerRGBRange & inRGBRange);
+	AJA_VIRTUAL bool	SetMixerRGBRange (const UWord inWhichMixer, const NTV2MixerRGBRange inRGBRange);
 	
 	/**
 		@brief		Answers with the given mixer/keyer's current RGB Range.

@@ -3552,7 +3552,7 @@ bool CNTV2Card::MixerHasRGBModeSupport (const UWord inWhichMixer, bool & outIsSu
 	return !CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outIsSupported, kRegMaskVidProcRGBModeSupported, kRegShiftVidProcRGBModeSupported);
 }
 
-bool CNTV2Card::SetMixerRGBRange (const UWord inWhichMixer, const NTV2MixerRGBRange & inRGBRange)
+bool CNTV2Card::SetMixerRGBRange (const UWord inWhichMixer, const NTV2MixerRGBRange inRGBRange)
 {
 	if (inWhichMixer >= ::NTV2DeviceGetNumMixers(GetDeviceID()))
 		return false;
