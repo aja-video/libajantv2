@@ -1290,7 +1290,7 @@ bool NTV2_POINTER::Allocate (const size_t inByteCount, const bool inPageAligned)
 		else
 			try
 				{pBuffer = new UByte[inByteCount];}
-			catch (std::bad_alloc & ba)
+			catch (const std::bad_alloc &)
 				{pBuffer = AJA_NULL;}
 		if (pBuffer  &&  Set(pBuffer, inByteCount))
 		{	//	SDK owns this memory -- set NTV2_POINTER_ALLOCATED bit -- I'm responsible for deleting

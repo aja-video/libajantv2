@@ -1205,7 +1205,7 @@ bool CNTV2SignalRouter::GetRegisterWrites (NTV2RegisterWrites & outRegWrites) co
         {
             outRegWrites.push_back (regInfo);
         }
-		catch (bad_alloc & ba)
+		catch (const bad_alloc &)
         {
             outRegWrites.clear ();
             return false;
