@@ -652,7 +652,6 @@ void RoutingExpert::InitOutputXpt2String(void)
 	gString2OutputXpt ["fb6yuv"]		= NTV2_XptFrameBuffer6YUV;
 	gString2OutputXpt ["fb7yuv"]		= NTV2_XptFrameBuffer7YUV;
 	gString2OutputXpt ["fb8yuv"]		= NTV2_XptFrameBuffer8YUV;
-	gString2OutputXpt ["lut1"]			= NTV2_XptLUT1YUV;
 	gString2OutputXpt ["mixer1keyyuv"]	= NTV2_XptMixer1KeyYUV;
 	gString2OutputXpt ["mixer1vid"]		= NTV2_XptMixer1VidYUV;
 	gString2OutputXpt ["mixer1vidyuv"]	= NTV2_XptMixer1VidYUV;
