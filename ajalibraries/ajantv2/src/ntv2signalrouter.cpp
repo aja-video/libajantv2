@@ -534,6 +534,7 @@ void RoutingExpert::InitOutputXpt2String(void)
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptLUT8Out,	"LUT8");	//	Formerly "LUT8RGB"
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptMixer1KeyYUV,	"Mixer1Key");	//	, "Mixer1KeyYUV");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptMixer1VidYUV,	"Mixer1");		//	, "Mixer1Vid", "Mixer1VidYUV");
+	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptMixer1VidRGB,	"Mixer1RGB");	//	, "Mixer1VidRGB", "Mixer1VidRGB");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptMixer2KeyYUV,	"Mixer2Key");	//	, "Mixer2KeyYUV");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptMixer2VidYUV,	"Mixer2");		//	, "Mixer2Vid", "Mixer2VidYUV");
 	NTV2SR_ASSIGN_BOTH(gOutputXpt2String, gString2OutputXpt, NTV2_XptMixer3KeyYUV,	"Mixer3Key");	//	, "Mixer3KeyYUV");
@@ -655,6 +656,7 @@ void RoutingExpert::InitOutputXpt2String(void)
 	gString2OutputXpt ["mixer1keyyuv"]	= NTV2_XptMixer1KeyYUV;
 	gString2OutputXpt ["mixer1vid"]		= NTV2_XptMixer1VidYUV;
 	gString2OutputXpt ["mixer1vidyuv"]	= NTV2_XptMixer1VidYUV;
+	gString2OutputXpt ["mixer1vidrgb"]	= NTV2_XptMixer1VidRGB;
 	gString2OutputXpt ["mixer2keyyuv"]	= NTV2_XptMixer2KeyYUV;
 	gString2OutputXpt ["mixer2vid"]		= NTV2_XptMixer2VidYUV;
 	gString2OutputXpt ["mixer2vidyuv"]	= NTV2_XptMixer2VidYUV;
@@ -1085,6 +1087,7 @@ void RoutingExpert::InitOutputXpt2WidgetIDs(void)
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptLUT8Out,				NTV2_WgtLUT8));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMixer1KeyYUV,			NTV2_WgtMixer1));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMixer1VidYUV,			NTV2_WgtMixer1));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMixer1VidRGB,			NTV2_WgtMixer1));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMixer2KeyYUV,			NTV2_WgtMixer2));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMixer2VidYUV,			NTV2_WgtMixer2));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMixer3KeyYUV,			NTV2_WgtMixer3));
