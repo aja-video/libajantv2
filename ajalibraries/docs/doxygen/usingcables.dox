@@ -1,9 +1,0 @@
-/**
-@page	toolsandutilities
-
-@section	usingcables		“Cables”
-
-The <b>Cables</b> utility has been replaced by the \ref inspectorroute that’s now inside the \ref usingntv2watcher utility.
-
-<hr size="50px">
-**/

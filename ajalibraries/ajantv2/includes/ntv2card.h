@@ -1574,7 +1574,7 @@ public:
 		@param[in]	inIsEnabled			Specify true to enable the mixer's foreground matte;  otherwise false to disable it.
 		@see		CNTV2Card::GetMixerFGMatteEnabled, CNTV2Card::SetMixerBGMatteEnabled, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
-	AJA_VIRTUAL bool	SetMixerFGMatteEnabled (const UWord inWhichMixer, const bool & inIsEnabled);
+	AJA_VIRTUAL bool	SetMixerFGMatteEnabled (const UWord inWhichMixer, const bool inIsEnabled);
 
 	/**
 		@brief		Answers if the given mixer/keyer's background matte is enabled or not.
@@ -1592,7 +1592,7 @@ public:
 		@param[in]	inIsEnabled			Specify true to enable the mixer's background matte;  otherwise false to disable it.
 		@see		CNTV2Card::GetMixerBGMatteEnabled, CNTV2Card::SetMixerFGMatteEnabled, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
-	AJA_VIRTUAL bool	SetMixerBGMatteEnabled (const UWord inWhichMixer, const bool & inIsEnabled);
+	AJA_VIRTUAL bool	SetMixerBGMatteEnabled (const UWord inWhichMixer, const bool inIsEnabled);
 
 	/**
 		@brief		Answers with the given mixer/keyer's current matte color value being used.
@@ -1610,7 +1610,31 @@ public:
 		@param[in]	inYCbCrValue		Specifies the new matte color value to use.
 		@see		CNTV2Card::GetMixerMatteColor, CNTV2Card::GetMixerFGMatteEnabled, CNTV2Card::SetMixerFGMatteEnabled, CNTV2Card::GetMixerBGMatteEnabled, CNTV2Card::SetMixerBGMatteEnabled, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
-	AJA_VIRTUAL bool	SetMixerMatteColor (const UWord inWhichMixer, const YCbCr10BitPixel & inYCbCrValue);
+	AJA_VIRTUAL bool	SetMixerMatteColor (const UWord inWhichMixer, const YCbCr10BitPixel inYCbCrValue);
+	
+	/**
+		@brief		Answers if the given mixer/keyer's has RGB mode support.
+		@return		True if successful; otherwise false.
+		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
+		@param[in]	outIsSupported		Receives true if the mixer has RGB mode support.
+	**/
+	AJA_VIRTUAL bool	MixerHasRGBModeSupport (const UWord inWhichMixer, bool & outIsSupported);
+	
+	/**
+		@brief		Sets the RGB range for the given mixer/keyer.
+		@return		True if successful; otherwise false.
+		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
+		@param[in]	inRGBRange			Specifies the new RGB range value to use.
+	**/
+	AJA_VIRTUAL bool	SetMixerRGBRange (const UWord inWhichMixer, const NTV2MixerRGBRange inRGBRange);
+	
+	/**
+		@brief		Answers with the given mixer/keyer's current RGB Range.
+		@return		True if successful; otherwise false.
+		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
+		@param[in]	outRGBRange		Receives the mixer's current matte color value.
+	**/
+	AJA_VIRTUAL bool	GetMixerRGBRange (const UWord inWhichMixer, NTV2MixerRGBRange & outRGBRange);
 	///@}
 
 

@@ -145,7 +145,7 @@ AJAStatus AJAAncillaryData::AllocDataMemory(uint32_t numBytes)
 			m_payload.push_back(0);
 		status = AJA_STATUS_SUCCESS;
 	}
-	catch(bad_alloc & ba)
+	catch(const bad_alloc &)
 	{
 		m_payload.clear();
 		status = AJA_STATUS_MEMORY;
@@ -418,7 +418,7 @@ AJAStatus AJAAncillaryData::AppendPayloadData (const uint8_t * pInData, const ui
 		for (uint32_t ndx(0);  ndx < inNumBytes;  ndx++)
 			m_payload.push_back(pInData[ndx]);
 	}
-	catch(bad_alloc & ba)
+	catch(const bad_alloc &)
 	{
 		return AJA_STATUS_MEMORY;
 	}
@@ -439,7 +439,7 @@ AJAStatus AJAAncillaryData::AppendPayload (const AJAAncillaryData & inAnc)
 		for (uint32_t ndx(0);  ndx < numBytes;  ndx++)
 			m_payload.push_back(pInData[ndx]);
 	}
-	catch(bad_alloc & ba)
+	catch(const bad_alloc &)
 	{
 		return AJA_STATUS_MEMORY;
 	}
