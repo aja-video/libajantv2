@@ -738,32 +738,6 @@ ostream & operator << (ostream & inOutStream, const FRAME_STAMP & inObj)
 }
 
 
-ostream & operator << (ostream & oss, const AUTOCIRCULATE_STATUS & inObj)
-{
-	if (!inObj.IsStopped())
-		oss << ::NTV2ChannelToString(inObj.GetChannel(), true) << ": "
-			<< (inObj.IsInput() ? "Input " : "Output")
-			<< setw(12) << ::NTV2AutoCirculateStateToString(inObj.acState) << "  "
-			<< setw( 5) << inObj.GetStartFrame()
-			<< setw( 6) << inObj.GetEndFrame()
-			<< setw( 6) << inObj.GetActiveFrame()
-			<< setw( 8) << inObj.GetProcessedFrameCount()
-			<< setw( 8) << inObj.GetDroppedFrameCount()
-			<< setw( 7) << inObj.GetBufferLevel()
-			<< setw(10) << ::NTV2AudioSystemToString(inObj.acAudioSystem, true)
-			<< setw(10) << (inObj.WithRP188()			? "+RP188"		: "-RP188")
-			<< setw(10) << (inObj.WithLTC()				? "+LTC"		: "-LTC")
-			<< setw(10) << (inObj.WithFBFChange()		? "+FBFchg"		: "-FBFchg")
-			<< setw(10) << (inObj.WithFBOChange()		? "+FBOchg"		: "-FBOchg")
-			<< setw(10) << (inObj.WithColorCorrect()	? "+ColCor"		: "-ColCor")
-			<< setw(10) << (inObj.WithVidProc()			? "+VidProc"	: "-VidProc")
-			<< setw(10) << (inObj.WithCustomAnc()		? "+AncData"	: "-AncData")
-			<< setw(10) << (inObj.IsFieldMode()			? "+FldMode"	: "-FldMode")
-			<< setw(10) << (inObj.WithHDMIAuxData()		? "+HDMIAux"	: "-HDMIAux");
-	return oss;
-}
-
-
 ostream & operator << (ostream & inOutStream, const NTV2SegmentedDMAInfo & inObj)
 {
 	if (inObj.acNumSegments > 1)
@@ -2044,36 +2018,62 @@ string AUTOCIRCULATE_STATUS::operator [] (const unsigned inIndexNum) const
 {
 	ostringstream	oss;
 	if (inIndexNum == 0)
-		oss << ::NTV2AutoCirculateStateToString (acState);
+		oss << ::NTV2AutoCirculateStateToString(acState);
 	else if (!IsStopped())
 		switch (inIndexNum)
 		{
-			case 1:		oss << DEC(acStartFrame);					break;
-			case 2:		oss << DEC(acEndFrame);						break;
-			case 3:		oss << DEC(acEndFrame - acStartFrame + 1);	break;
-			case 4:		oss << DEC(acActiveFrame);					break;
-			case 5:		oss << xHEX0N(acRDTSCStartTime,16);			break;
-			case 6:		oss << xHEX0N(acAudioClockStartTime,16);	break;
-			case 7:		oss << DEC(acRDTSCCurrentTime);				break;
-			case 8:		oss << DEC(acAudioClockCurrentTime);		break;
-			case 9:		oss << CommaStr (acFramesProcessed);		break;
-			case 10:	oss << CommaStr (acFramesDropped);			break;
-			case 11:	oss << DEC(acBufferLevel);					break;
-			case 12:	oss << ::NTV2AudioSystemToString (acAudioSystem, true);						break;
-			case 13:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_RP188		? "Yes" : "No");	break;
-			case 14:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_LTC			? "Yes" : "No");	break;
-			case 15:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_FBFCHANGE	? "Yes" : "No");	break;
-			case 16:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_FBOCHANGE	? "Yes" : "No");	break;
-			case 17:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_COLORCORRECT	? "Yes" : "No");	break;
-			case 18:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_VIDPROC		? "Yes" : "No");	break;
-			case 19:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_ANC			? "Yes" : "No");	break;
-			case 20:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_HDMIAUX		? "Yes" : "No");	break;
-			case 21:	oss << (acOptionFlags & AUTOCIRCULATE_WITH_FIELDS		? "Yes" : "No");	break;
+			case 1:		oss << DEC(GetStartFrame());					break;
+			case 2:		oss << DEC(GetEndFrame());						break;
+			case 3:		oss << DEC(GetFrameCount());					break;
+			case 4:		oss << DEC(GetActiveFrame());					break;
+			case 5:		oss << xHEX0N(acRDTSCStartTime,16);				break;
+			case 6:		oss << xHEX0N(acAudioClockStartTime,16);		break;
+			case 7:		oss << DEC(acRDTSCCurrentTime);					break;
+			case 8:		oss << DEC(acAudioClockCurrentTime);			break;
+			case 9:		oss << CommaStr(GetProcessedFrameCount());		break;
+			case 10:	oss << CommaStr(GetDroppedFrameCount());		break;
+			case 11:	oss << DEC(GetBufferLevel());					break;
+			case 12:	oss << ::NTV2AudioSystemToString(acAudioSystem, true);	break;
+			case 13:	oss << (WithRP188()			? "Yes" : "No");	break;
+			case 14:	oss << (WithLTC()			? "Yes" : "No");	break;
+			case 15:	oss << (WithFBFChange()		? "Yes" : "No");	break;
+			case 16:	oss << (WithFBOChange()		? "Yes" : "No");	break;
+			case 17:	oss << (WithColorCorrect()	? "Yes" : "No");	break;
+			case 18:	oss << (WithVidProc()		? "Yes" : "No");	break;
+			case 19:	oss << (WithCustomAnc()		? "Yes" : "No");	break;
+			case 20:	oss << (WithHDMIAuxData()	? "Yes" : "No");	break;
+			case 21:	oss << (IsFieldMode()		? "Yes" : "No");	break;
 			default:	break;
 		}
 	else if (inIndexNum < 22)
 		oss << "---";
 	return oss.str();
+}
+
+
+ostream & operator << (ostream & oss, const AUTOCIRCULATE_STATUS & inObj)
+{
+	if (!inObj.IsStopped())
+		oss << ::NTV2ChannelToString(inObj.GetChannel(), true) << ": "
+			<< (inObj.IsInput() ? "Input " : "Output")
+			<< setw(12) << ::NTV2AutoCirculateStateToString(inObj.acState) << "  "
+			<< setw( 5) << inObj.GetStartFrame()
+			<< setw( 6) << inObj.GetEndFrame()
+			<< setw( 6) << inObj.GetActiveFrame()
+			<< setw( 8) << inObj.GetProcessedFrameCount()
+			<< setw( 8) << inObj.GetDroppedFrameCount()
+			<< setw( 7) << inObj.GetBufferLevel()
+			<< setw(10) << ::NTV2AudioSystemToString(inObj.acAudioSystem, true)
+			<< setw(10) << (inObj.WithRP188()			? "+RP188"		: "-RP188")
+			<< setw(10) << (inObj.WithLTC()				? "+LTC"		: "-LTC")
+			<< setw(10) << (inObj.WithFBFChange()		? "+FBFchg"		: "-FBFchg")
+			<< setw(10) << (inObj.WithFBOChange()		? "+FBOchg"		: "-FBOchg")
+			<< setw(10) << (inObj.WithColorCorrect()	? "+ColCor"		: "-ColCor")
+			<< setw(10) << (inObj.WithVidProc()			? "+VidProc"	: "-VidProc")
+			<< setw(10) << (inObj.WithCustomAnc()		? "+AncData"	: "-AncData")
+			<< setw(10) << (inObj.IsFieldMode()			? "+FldMode"	: "-FldMode")
+			<< setw(10) << (inObj.WithHDMIAuxData()		? "+HDMIAux"	: "-HDMIAux");
+	return oss;
 }
 
 

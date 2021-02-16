@@ -59,8 +59,8 @@ static std::string timecodeToString(const NTV2_RP188 & inRP188)
 static std::string appSignatureToString(const ULWord inAppSignature)
 {
     ostringstream oss;
-    const string sigStr	(NTV2_4CC_AS_STRING (inAppSignature));
-    if (isprint (sigStr.at (0)) && isprint (sigStr.at (1)) && isprint (sigStr.at (2)) && isprint (sigStr.at (3)))
+    const string sigStr(NTV2_4CC_AS_STRING(inAppSignature));
+    if (isprint(sigStr.at(0))  &&  isprint(sigStr.at(1))  &&  isprint(sigStr.at(2))  &&  isprint(sigStr.at(3)))
         oss << "'" << sigStr << "'";
     else if (inAppSignature)
         oss << "0x" << hex << setw (8) << setfill ('0') << inAppSignature << dec << " (" << inAppSignature << ")";
@@ -589,7 +589,7 @@ void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
 
 	//	This code block takes a snapshot of the current AutoCirculate state of the device...
 	mDevice.GetEveryFrameServices(taskMode);
-	mDevice.GetStreamingApplication(&appSignature, &appPID);
+	mDevice.GetStreamingApplication(appSignature, appPID);
 
 	//	Grab A/C status for each channel...
 	for (NTV2Channel chan(NTV2_CHANNEL1);  chan < NTV2Channel(numChannels);  chan = NTV2Channel(chan+1))
@@ -618,35 +618,32 @@ void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
 
 	oss	<< "Task mode:  " << ::NTV2TaskModeToString(taskMode) << ", PID=" << pidToString(uint32_t(appPID)) << ", signature=" << appSignatureToString(appSignature) << endl
 		<< endl
-		<< "Chan/FrameStore   State  Start   End   Act FrmProc FrmDrop BufLvl    AudSys    ACOptions                                                                                VidFormat    PixFormat" << endl
-		<< "----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+		<< "Chan/FrameStore   State  Start   End   Act   FrmProc   FrmDrop BufLvl    Audio   RP188     LTC   FBFch   FBOch   Color   VidPr     Anc   HDMIx   Field      VidFmt       PixFmt" << endl
+		<< "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
 	for (ChannelToACStatusConstIter iter (perChannelStatus.begin());  iter != perChannelStatus.end();  ++iter)
 	{
 		const NTV2Channel				chan(iter->first);
 		const AUTOCIRCULATE_STATUS	&	status(iter->second);
 		//	The following should mirror what ntv2watcher/pages/page_autocirculate::fetchSupportLogInfo does...
-		if (status.IsStopped())
 			oss << ::NTV2ChannelToString(chan, true) << ": "
-				<< (::isEnabled(mDevice,chan) ? NTV2_IS_INPUT_MODE(::getMode(mDevice,chan)) ? " Input" : "Output" : "Off   ")
-				<< setw(12) << ::NTV2AutoCirculateStateToString(status.acState) << "  "
-				<< setw( 5) << "---"	//	acStartFrame
-				<< setw( 6) << "---"	//	acEndFrame
-				<< setw( 6) << ::getActiveFrameStr(mDevice,chan)	//	acActiveFrame
-				<< setw( 8) << "---"	//	acFramesProcessed
-				<< setw( 8) << "---"	//	acFramesDropped
-				<< setw( 7) << "---"	//	acBufferLevel
-				<< setw(10) << "---"
-				<< setw(10) << "---"
-				<< setw(10) << "---"
-				<< setw(10) << "---"
-				<< setw(10) << "---"
-				<< setw(10) << "---"
-				<< setw(10) << "---"
-				<< setw(10) << "---"
-				<< setw(10) << "---"
-				<< setw(10) << "---";
-		else
-			oss << status;	//	see operator << (ostream&, const AUTOCIRCULATE_STATUS&) in ntv2publicinterface.cpp
+				<< (::isEnabled(mDevice,chan) ? NTV2_IS_INPUT_MODE(::getMode(mDevice,chan)) ? "Input " : "Output" : "Off   ")
+				<< setw(12) << status[0]	//	State
+				<< setw( 7) << status[1]	//	Start
+				<< setw( 6) << status[2]	//	End
+				<< setw( 6) << (status.IsStopped() ? ::getActiveFrameStr(mDevice,chan) : status[4])	//	Act
+				<< setw(10) << status[9]	//	FrmProc
+				<< setw(10) << status[10]	//	FrmDrop
+				<< setw( 7) << status[11]	//	BufLvl
+				<< setw( 9) << status[12]	//	Audio
+				<< setw( 8) << status[13]	//	RP188
+				<< setw( 8) << status[14]	//	LTC
+				<< setw( 8) << status[15]	//	FBFchg
+				<< setw( 8) << status[16]	//	FBOchg
+				<< setw( 8) << status[17]	//	ColCor
+				<< setw( 8) << status[18]	//	VidProc
+				<< setw( 8) << status[19]	//	Anc
+				<< setw( 8) << status[20]	//	HDMIAux
+				<< setw( 8) << status[21];	//	Fld
 		if (!status.IsStopped() || isEnabled(mDevice,chan))
 			oss	<< setw(12) << ::NTV2VideoFormatToString(::getVideoFormat(mDevice, chan))
 				<< setw(13) << ::NTV2FrameBufferFormatToString(::getPixelFormat(mDevice, chan), true)
