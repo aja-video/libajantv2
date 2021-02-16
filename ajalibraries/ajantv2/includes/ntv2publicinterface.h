@@ -5821,10 +5821,10 @@ typedef enum
 															((uint32_t(_c_)) <<  8)	|		\
 															((uint32_t(_d_)) <<  0) )
 				#if !defined (NTV2_BUILDING_DRIVER)
-					#define	NTV2_4CC_AS_STRING(_x_)			std::string (1, (char((_x_) & 0xFF000000) >> 24)) +	\
-															std::string (1, (char((_x_) & 0x00FF0000) >> 16)) +	\
-															std::string (1, (char((_x_) & 0x0000FF00) >>  8)) +	\
-															std::string (1, (char((_x_) & 0x000000FF) >>  0))
+					#define	NTV2_4CC_AS_STRING(_x_)			std::string(1, char((uint32_t(_x_) & 0xFF000000) >> 24)) +	\
+															std::string(1, char((uint32_t(_x_) & 0x00FF0000) >> 16)) +	\
+															std::string(1, char((uint32_t(_x_) & 0x0000FF00) >>  8)) +	\
+															std::string(1, char((uint32_t(_x_) & 0x000000FF) >>  0))
 				#endif	//	!defined (NTV2_BUILDING_DRIVER)
 			#else
 				#define	NTV2_4CC(_str_)					(	((uint32_t)(((UByte *)(_str_))[3]) <<  0)  |	\
@@ -5837,7 +5837,7 @@ typedef enum
 															(((uint32_t)(_c_)) <<  8)	|		\
 															(((uint32_t)(_d_)) <<  0) )
 			#endif	//	C
-		#endif
+		#endif	//	else Little-Endian
 
 
 		/**
