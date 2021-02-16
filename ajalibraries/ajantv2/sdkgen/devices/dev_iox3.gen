@@ -95,7 +95,7 @@ NTV2_WgtDualLinkV2Out4
 NTV2_WgtCSC3
 NTV2_WgtCSC4
 NTV2_WgtHDMIIn1v2
-NTV2_WgtHDMIOut1v2
+NTV2_WgtHDMIOut1v4
 
 
 // NTV2InputSources
@@ -108,7 +108,7 @@ NTV2_INPUTSOURCE_SDI4
 
 // GetNums		(see 'getnum_canon.gen' for legal values)
 NTV2DeviceGetActiveMemorySize					0x40000000
-NTV2DeviceGetHDMIVersion						2
+NTV2DeviceGetHDMIVersion						4
 NTV2DeviceGetLUTVersion							1
 NTV2DeviceGetMaxAudioChannels					16
 NTV2DeviceGetMaxRegisterNumber					kRegReserved511
