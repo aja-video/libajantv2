@@ -31,7 +31,7 @@ public:
 
 	/**
 		@brief		Returns the frequency of the host system's high-resolution time counter.
-		@return		The high resolution counter frequency.
+		@return		The high resolution counter frequency in ticks per second.
 	**/
 	static int64_t	GetSystemFrequency (void);
 
