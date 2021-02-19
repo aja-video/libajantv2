@@ -1176,7 +1176,7 @@ To close the <b>Register Cycler</b>:
 <hr size="50px">
 @subsection	tonegenerator		“Tone Generator” Tool
 
-The <b>Tone Generator</b> is a handy tool for generating one or more channels of sinusoidal audio tones.
+The <b>Tone Generator</b> is a handy tool for generating one or more channels of audio tones.
 
 @image	html	watcher-tool-tonegen.png
 
@@ -1184,10 +1184,10 @@ The <b>Tone Generator</b> is a handy tool for generating one or more channels of
 	-	“Channel Enable” checkboxes — There’s one checkbox for each audio channel.
 		-	Disabled channels always produce silence (zero values).
 		-	An enabled channel has its own additional controls:
-			-	<b>Freq</b> — Adjusts the frequency of the generated waveform.
+			-	<b>Frequency</b> — Adjusts the frequency of the generated waveform.
 			-	<b>Phase</b> — Adjusts the phase of the generated waveform.
-			-	<b>Ampl</b> — Adjusts the amplitude of the generated waveform.
-			-	<b>Offs</b> — Adjusts the (amplitude) offset of the generated waveform (like adding a DC component to it).
+			-	<b>Amplitude</b> — Adjusts the amplitude of the generated waveform.
+			-	<b>Offset</b> — Adjusts the (amplitude) offset of the generated waveform (like adding a DC component to it).
 	-	<b>Audio System</b> popup menu — Specifies the target Audio System whose buffer will receive the generated audio samples.
 		Choosing a new Audio System will automatically stop the generator (if running).
 	-	<b>Fill</b> — Generates samples and Fills the given Audio System’s output buffer.
@@ -1231,7 +1231,7 @@ It can readily indicate \ref vidop-fbconflict and/or \ref audioclobber.
 			by an \ref aboutautocirculate channel.
 			-	Color depends on the Channel video format: green for SD, purple for HD, etc.
 			-	Label identifies the Mode and Channel (e.g. “In1", “Out2”, etc.).
-			-	When in <b>Quad Mode</b> (4K/UHD) or <b>Quad-Quad Mode</b> (8K/UHD2), the logical frame size is 4 or 8 times
+			-	When in <b>Quad Mode</b> (4K/UHD) or <b>Quad-Quad Mode</b> (8K/UHD2), the logical frame size is 4 or 16 times
 				(respectively) the device’s intrinsic frame size.
 			-	Double-click to open the \ref inspectorac.
 			-	Right-click and choose <b>Inspect</b> to open the \ref inspectorac.
