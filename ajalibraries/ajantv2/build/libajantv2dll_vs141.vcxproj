@@ -328,150 +328,150 @@
   </PropertyGroup>
   <!-- Visual Studio 2013 -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_2013|Win32'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs12_32d</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_2013_MD|Win32'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs12_32MDd</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_2013|Win32'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs12_32</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_2013_MD|Win32'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs12_32MD</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_2013|x64'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs12_64d</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_2013_MD|x64'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs12_64MDd</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_2013|x64'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs12_64</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_2013_MD|x64'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs12_64MD</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <!-- Visual Studio 2015 -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_2015|Win32'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs14_32d</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_2015_MD|Win32'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs14_32MDd</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_2015|Win32'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs14_32</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_2015_MD|Win32'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs14_32MD</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_2015|x64'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs14_64d</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_2015_MD|x64'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs14_64MDd</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_2015|x64'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs14_64</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_2015_MD|x64'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs14_64MD</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <!-- Visual Studio 2017 -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs141_32d</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_MD|Win32'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs141_32MDd</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs141_32</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_MD|Win32'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs141_32MD</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs141_64d</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_MD|x64'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs141_64MDd</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs141_64</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_MD|x64'">
-    <OutDir>..\..\..\bin\</OutDir>
+    <OutDir>..\..\..\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>.\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)_vs141_64MD</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <!-- Visual Studio 2013 -->
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_2013|Win32'">
