@@ -7512,9 +7512,19 @@ typedef enum
 				inline bool				IsRunning (void) const								{return GetState () == NTV2_AUTOCIRCULATE_RUNNING;}
 
 				/**
+					@return		True if my state is currently NTV2_AUTOCIRCULATE_STARTING or NTV2_AUTOCIRCULATE_STARTING_AT_TIME;  otherwise false.
+				**/
+				inline bool				IsStarting (void) const								{return GetState () == NTV2_AUTOCIRCULATE_STARTING  ||  GetState () == NTV2_AUTOCIRCULATE_STARTING_AT_TIME;}
+
+				/**
 					@return		True if my state is currently NTV2_AUTOCIRCULATE_DISABLED;  otherwise false.
 				**/
 				inline bool				IsStopped (void) const								{return GetState () == NTV2_AUTOCIRCULATE_DISABLED;}
+
+				/**
+					@return		True if my state is currently NTV2_AUTOCIRCULATE_STOPPING;  otherwise false.
+				**/
+				inline bool				IsStopping (void) const								{return GetState () == NTV2_AUTOCIRCULATE_STOPPING;}
 
 				/**
 					@return		True if circulating with audio;  otherwise false.
