@@ -5596,9 +5596,9 @@ public:
 	AJA_VIRTUAL bool		GetHDMIV2Mode (NTV2HDMIV2Mode & outMode);
 
     //protected:	SHOULD BE PROTECTED/PRIVATE:
-		AJA_VIRTUAL bool	GetHDMIInputStatus (ULWord & outValue,  const NTV2Channel inChannel = NTV2_CHANNEL1);	///< @brief	Answers with the contents of the HDMI Input status register for the given HDMI input.
+		AJA_VIRTUAL bool	GetHDMIInputStatus (ULWord & outValue,  const NTV2Channel inChannel = NTV2_CHANNEL1, const bool in12BitDetection = false);	///< @brief	Answers with the contents of the HDMI Input status register for the given HDMI input.
     protected:
-		AJA_VIRTUAL bool	GetHDMIInputStatusRegNum (ULWord & outRegNum,  const NTV2Channel inChannel = NTV2_CHANNEL1);	///< @brief	Answers with the HDMI Input status register number for the given HDMI input.
+		AJA_VIRTUAL bool	GetHDMIInputStatusRegNum (ULWord & outRegNum,  const NTV2Channel inChannel = NTV2_CHANNEL1, const bool in12BitDetection = false);	///< @brief	Answers with the HDMI Input status register number for the given HDMI input.
 
 	public:
 	#if !defined(NTV2_DEPRECATE_14_3)

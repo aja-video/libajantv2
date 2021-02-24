@@ -24,7 +24,7 @@ static const ULWord gHDMIChannelToControlRegNum [] =    { kRegHDMIControl1, kReg
 // HDMI
 
 // kRegHDMIInputStatus
-bool CNTV2Card::GetHDMIInputStatusRegNum (ULWord & outRegNum, const NTV2Channel inChannel)
+bool CNTV2Card::GetHDMIInputStatusRegNum (ULWord & outRegNum, const NTV2Channel inChannel, const bool in12BitDetection)
 {
     const ULWord	numInputs	(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
 	outRegNum = 0;
@@ -34,16 +34,16 @@ bool CNTV2Card::GetHDMIInputStatusRegNum (ULWord & outRegNum, const NTV2Channel 
 		return false;
     if (numInputs == 1)
 	{
-        outRegNum = kRegHDMIInputStatus;
+        outRegNum = in12BitDetection ?  kRegHDMIInputControl : kRegHDMIInputStatus;
 		return true;
 	}
 	outRegNum = gHDMIChannelToInputStatusRegNum[inChannel];
 	return true;
 }
-bool CNTV2Card::GetHDMIInputStatus (ULWord & outValue, const NTV2Channel inChannel)
+bool CNTV2Card::GetHDMIInputStatus (ULWord & outValue, const NTV2Channel inChannel, const bool in12BitDetection)
 {
     ULWord regNum (0);
-    if (!GetHDMIInputStatusRegNum(regNum, inChannel))
+    if (!GetHDMIInputStatusRegNum(regNum, inChannel, in12BitDetection))
 		return false;
 	return ReadRegister (regNum, outValue);
 }
@@ -215,10 +215,13 @@ bool CNTV2Card::SetHDMIInBitDepth (const NTV2HDMIBitDepth inNewValue, const NTV2
 bool CNTV2Card::GetHDMIInBitDepth (NTV2HDMIBitDepth & outValue, const NTV2Channel inChannel)
 {
 	outValue = NTV2_INVALID_HDMIBitDepth;
-	ULWord status(0);
-	if (!GetHDMIInputStatus(status, inChannel))
+	ULWord status(0), maskVal, shiftVal;
+	bool bV4(NTV2DeviceGetHDMIVersion(_boardID) >= 4);
+	maskVal = bV4 ? kRegMaskHDMIInColorDepth : kLHIRegMaskHDMIInputBitDepth;
+	shiftVal = bV4 ? kRegShiftHDMIInColorDepth : kLHIRegShiftHDMIInputBitDepth;
+	if (!GetHDMIInputStatus(status, inChannel, bV4))
 		return false;
-	outValue = NTV2HDMIBitDepth((status & kLHIRegMaskHDMIInputBitDepth) >> kLHIRegShiftHDMIInputBitDepth);
+	outValue = NTV2HDMIBitDepth((status & maskVal) >> shiftVal);
 	return NTV2_IS_VALID_HDMI_BITDEPTH(outValue);
 }
 
