@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		wavewriter.h
 	@brief		Declares the AJAWavWriter class.

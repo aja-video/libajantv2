@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2cscmatrix.h
 	@brief		Declares the utility class for abstract color space matrix operations.

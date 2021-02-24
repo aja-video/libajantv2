@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2interrupts.cpp
 	@brief		Implementation of CNTV2Card's interrupt functions.

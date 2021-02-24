@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		ajabase/system/mac/infoimpl.h
     @brief		Declares the AJASystemInfoImpl class.

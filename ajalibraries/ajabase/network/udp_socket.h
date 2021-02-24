@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		udp_socket.h
 	@brief		Declares the AJAUDPSocket class.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		file_io.cpp
 	@brief		Implements the AJAFileIO class based on platform, Windows/Posix.

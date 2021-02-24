@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		diskstatus.h
 	@brief		Declares the AJADiskStatus class.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		timecodeburn.cpp
 	@brief		Implements the AJATimeCodeBurn class.

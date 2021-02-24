@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2hevc.cpp
 	@brief		Implementations of HEVC-related CNTV2Card methods.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2enums.h
 	@brief		Enumerations for controlling NTV2 devices.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		timecode.h
 	@brief		Declares the AJATimeCode class.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2videodefines.h
 	@brief		Declares common video macros and structs used in the SDK.

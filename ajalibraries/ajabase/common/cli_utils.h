@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		cli_utils.h
 	@brief		Declaration of GetNumber, GetString and GetCharAsInt functions.

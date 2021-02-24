@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		testpatterngen.cpp
 	@brief		Implements the AJATestPatternGen class.

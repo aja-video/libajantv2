@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		atomic.h
 	@brief		Declares the AJAAtomic class.

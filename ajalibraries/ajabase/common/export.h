@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		export.h
 	@brief		Declares system-dependent import/export macros and libraries.

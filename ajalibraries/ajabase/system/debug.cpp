@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		debug.cpp
 	@brief		Implements the AJADebug class.

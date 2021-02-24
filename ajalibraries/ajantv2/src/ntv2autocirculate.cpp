@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2autocirculate.cpp
 	@brief		Implements the CNTV2Card AutoCirculate API functions.

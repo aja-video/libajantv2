@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2enhancedcsc.h
 	@brief		Declares the CNTV2EnhancedCSC class.

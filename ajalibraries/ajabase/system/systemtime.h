@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		systemtime.h
 	@brief		Declares the AJATime class.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file	ntv2audio.cpp
 	@brief	Implementations of audio-centric CNTV2Card methods.

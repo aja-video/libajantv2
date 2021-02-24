@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ancillarydata_cea708.h
 	@brief		Declares the AJAAncillaryData_Cea708 class.

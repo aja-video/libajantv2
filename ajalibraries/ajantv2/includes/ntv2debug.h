@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2debug.cpp
 	@brief		Declares the NTV2 debug output functions, including 'odprintf'.

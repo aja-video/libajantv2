@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 //
 //  main.cpp
 //  ntv2hdrsetup

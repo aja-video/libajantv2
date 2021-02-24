@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		systemtime.cpp
 	@brief		Implements the AJATime class.

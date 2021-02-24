@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		linux/eventimpl.h
 	@brief		Declares the AJAEventImpl class.

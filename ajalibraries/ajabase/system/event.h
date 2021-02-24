@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		event.h
 	@brief		Declares the AJAEvent class.

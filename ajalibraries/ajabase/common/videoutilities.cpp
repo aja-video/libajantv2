@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		videoutilities.cpp
 	@brief		Declares the ajabase library's video utility functions.

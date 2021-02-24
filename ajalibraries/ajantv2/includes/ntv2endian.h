@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2endian.h
 	@brief		Defines a number of handy byte-swapping macros.

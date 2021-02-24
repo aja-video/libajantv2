@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		public.h
 	@brief		Master header for the ajabase library.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		pnp/windows/pnpimpl.cpp
 	@brief		Implements the AJAPnpImpl class on the Windows platform.

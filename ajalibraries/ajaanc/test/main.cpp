@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		main.cpp
 	@brief		Basic Functionality Tests for the AJA Anc Library.

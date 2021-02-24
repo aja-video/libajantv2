@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2formatdescriptor.cpp
 	@brief		Implementation of the NTV2FormatDescriptor class.

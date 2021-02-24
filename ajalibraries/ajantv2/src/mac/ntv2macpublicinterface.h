@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2macpublicinterface.h
 	@brief		Declares MacOS-only enums used by the Mac driver and the SDK.

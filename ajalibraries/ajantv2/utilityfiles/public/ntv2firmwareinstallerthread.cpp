@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2firmwareinstallerthread.cpp
 	@brief		Implementation of CNTV2FirmwareInstallerThread class.

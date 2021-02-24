@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2konaflashprogram.h
 	@brief		Declares the CNTV2KonaFlashProgram class.

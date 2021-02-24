@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2discover.h
 	@brief		Declares the NTV nub discovery functions.

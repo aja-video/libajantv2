@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2task.cpp
 	@brief		Implements the CNTV2Task class.

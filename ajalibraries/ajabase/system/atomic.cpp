@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		atomic.cpp
 	@brief		Implements the AJAAtomic class.

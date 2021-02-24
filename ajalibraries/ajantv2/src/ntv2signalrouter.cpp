@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2signalrouter.cpp
     @brief		CNTV2SignalRouter implementation.

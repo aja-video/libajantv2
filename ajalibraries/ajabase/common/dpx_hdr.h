@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		dpx_hdr.h
 	@brief		Declaration of DpxHdr class adapted from STwo's dpx file I/O.

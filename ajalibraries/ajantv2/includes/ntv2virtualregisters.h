@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2virtualregisters.h
 	@brief		Declares enums for virtual registers used in all platform drivers and the SDK.

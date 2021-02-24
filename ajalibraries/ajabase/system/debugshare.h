@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		debugshare.h
 	@brief		Declares the constants used for sharing debug messages. These structures are used

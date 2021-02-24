@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		lock.cpp
 	@brief		Implements the AJALock class.

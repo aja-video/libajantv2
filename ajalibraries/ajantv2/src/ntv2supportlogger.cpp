@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		ntv2supportlogger.cpp
     @brief		Implementation of CNTV2SupportLogger class.

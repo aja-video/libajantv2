@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ip_socket.cpp
 	@brief		Implements the AJAIPSocket class.

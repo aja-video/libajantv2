@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2konaflashprogram.cpp
 	@brief		Implementation of CNTV2KonaFlashProgram class.

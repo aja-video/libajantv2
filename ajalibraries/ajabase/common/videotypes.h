@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		videotypes.h
 	@brief		Declares the enumeration constants used in the ajabase library.

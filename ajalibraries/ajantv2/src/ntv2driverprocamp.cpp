@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2driverprocamp.cpp
 	@brief		Implementation of driver procamp utility functions.

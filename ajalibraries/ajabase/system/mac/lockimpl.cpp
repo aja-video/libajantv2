@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		mac/lockimpl.cpp
 	@brief		Implements the AJALockImpl class on the Mac platform.

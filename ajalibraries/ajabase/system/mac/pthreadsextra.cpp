@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		mac/pthreadsextra.cpp
 	@brief		Declares extra symbols to make the Mac threads implementation look more like Unix.

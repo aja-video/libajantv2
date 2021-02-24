@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2nubtypes.h
 	@brief		Declares data types and structures used in NTV2 "nub" packets.

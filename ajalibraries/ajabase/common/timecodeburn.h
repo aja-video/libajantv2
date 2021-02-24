@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		timecodeburn.h
 	@brief		Declares the AJATimeCodeBurn class.

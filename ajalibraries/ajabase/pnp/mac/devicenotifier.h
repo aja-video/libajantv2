@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		devicenotifier.h
 	@brief		Declares the MacOS-specific KonaNotifier and DeviceNotifier classes, which invoke

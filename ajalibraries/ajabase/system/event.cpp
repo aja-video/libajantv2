@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		event.cpp
 	@brief		Implements the AJAEvent class.

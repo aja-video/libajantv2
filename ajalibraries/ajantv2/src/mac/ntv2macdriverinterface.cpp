@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2macdriverinterface.h
 	@brief		Implements the MacOS-specific flavor of CNTV2DriverInterface.

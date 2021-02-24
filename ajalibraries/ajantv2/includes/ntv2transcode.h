@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2transcode.h
 	@brief		Declares a number of pixel format transcoder functions.

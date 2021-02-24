@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ajarefptr.h
 	@copyright	(C) 2013-2021 AJA Video Systems, Inc.  All rights reserved.

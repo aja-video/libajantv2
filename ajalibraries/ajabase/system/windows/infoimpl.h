@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		windows/infoimpl.h
     @brief		Declares the AJASystemInfoImpl class.

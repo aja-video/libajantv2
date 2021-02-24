@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ajantv2/includes/ntv2testpatterngen.h
 	@brief		Declares the NTV2TestPatternGen class.

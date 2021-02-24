@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2vpidfromspec.h
 	@brief		Declares functions for the C implementations of VPID generation from a VPIDSpec.

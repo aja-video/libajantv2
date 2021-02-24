@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		file_io.h
 	@brief		Declares the AJAFileIO class.

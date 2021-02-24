@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		linux/lockimpl.cpp
 	@brief		Implements the AJALockImpl class on the Linux platform.

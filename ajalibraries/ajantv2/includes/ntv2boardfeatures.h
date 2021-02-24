@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2boardfeatures.h
 	@deprecated	Please include ntv2devicefeatures.h instead.

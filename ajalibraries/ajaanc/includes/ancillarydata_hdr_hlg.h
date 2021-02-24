@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ancillarydata_hdr_hlg.h
 	@brief		Declares the AJAAncillaryData_HDR_HLG class.

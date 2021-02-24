@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2enhancedcsc.cpp
 	@brief		Implementation of CNTV2EnhancedCSC class.

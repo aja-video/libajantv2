@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2linuxdriverinterface.cpp
 	@brief		Implementation of the CNTV2LinuxDriverInterface class.

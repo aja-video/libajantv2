@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		guid.cpp
 	@brief		Generates a new, unique UUID as an STL string.
