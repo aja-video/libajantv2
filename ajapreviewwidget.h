@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #ifndef AJAPREVIEW_WIDGET_H
 #define AJAPREVIEW_WIDGET_H
 

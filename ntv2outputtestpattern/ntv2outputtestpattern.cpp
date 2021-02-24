@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2outputtestpattern.cpp
 	@brief		Implementation of NTV2OutputTestPattern demonstration class.

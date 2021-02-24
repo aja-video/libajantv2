@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 @file		AMDSDIInput/main.cpp
 @brief		Demonstration application to capture frames from SDI to GPU using GMA.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2rawpreview.cpp
 	@brief		Implementation if the NTV2RawPreview class.

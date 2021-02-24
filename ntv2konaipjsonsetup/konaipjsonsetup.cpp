@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #include "konaipjsonsetup.h"
 #include <QFile>
 #include <QJsonArray>

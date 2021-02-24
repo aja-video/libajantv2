@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2demohevccommon.cpp
 	@brief		Common implementation code used by many of the demo applications.

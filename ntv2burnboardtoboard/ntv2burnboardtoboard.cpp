@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2burnboardtoboard.cpp
 	@brief		Implementation of NTV2Burn demonstration class.

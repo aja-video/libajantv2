@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2outputtestpattern/main.cpp
 	@brief		Demonstration application to display test patterns on an AJA device's output using

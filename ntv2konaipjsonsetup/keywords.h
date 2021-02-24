@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #ifndef KEYWORDS_H
 #define KEYWORDS_H
 

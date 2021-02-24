@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2enumerateboards.h
 	@brief		Header file that defines the NTV2EnumerateDevices class

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 
 #ifndef _OPENGL_
 #define _OPENGL_

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #ifndef NTV2PLAYBACKDPX_H
 #define NTV2PLAYBACKDPX_H
 

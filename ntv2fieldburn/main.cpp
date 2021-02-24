@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2fieldburn/main.cpp
 	@brief		Demonstration application to capture frames from the SDI input as two distinct fields

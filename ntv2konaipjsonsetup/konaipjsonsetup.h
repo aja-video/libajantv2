@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #ifndef KONAIPBOARD_H
 #define KONAIPBOARD_H
 

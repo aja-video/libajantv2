@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2encodehevcvif.cpp
 	@brief		Implementation of NTV2EncodeHEVCVif class.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #include <GL/glew.h>
 
 #include "RenderTarget.h"

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2framegrabber.h
 	@brief		Header file for the NTV2FrameGrabber class.

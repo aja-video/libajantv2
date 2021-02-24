@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #if defined(AJA_WINDOWS)
 #include <windows.h>
 #else

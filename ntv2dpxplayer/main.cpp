@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #include "ntv2dpxplayer.h"
 #include <QtGui/QApplication>
 #include "ajainternal/gui/ajaapplication.h"

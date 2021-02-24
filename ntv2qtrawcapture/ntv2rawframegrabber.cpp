@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2rawframegrabber.cpp
 	@brief		Contains the implementation of the NTV2RawFrameGrabber class.

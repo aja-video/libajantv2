@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2qtstereopreview.h
 	@brief		Header file for NTV2QtStereoPreview demo application.

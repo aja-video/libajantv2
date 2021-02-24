@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2qtmultiinput.h
 	@brief		Header file for NTV2QtMultiInput demonstration application. Demonstrates how to

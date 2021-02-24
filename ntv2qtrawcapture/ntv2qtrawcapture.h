@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2qtrawcapture.h
 	@brief		Header file for NTV2QtRawCapture demo application.

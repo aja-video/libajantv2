@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2dolby/main.cpp
 	@brief		Demonstration application that uses AutoCirculate to playout video and Doly audio to HDMI.

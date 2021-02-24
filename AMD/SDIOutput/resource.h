@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by SDIOutput.rc

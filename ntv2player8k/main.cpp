@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2player4k/main.cpp
 	@brief		Demonstration application that uses AutoCirculate to playout 4k frames to SDI output

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 static const struct {
    unsigned int 	 width;
    unsigned int 	 height;

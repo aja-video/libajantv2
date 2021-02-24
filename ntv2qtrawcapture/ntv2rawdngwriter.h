@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2rawdngwriter.h
 	@brief		Header file for the NTV2RawDngWriter class that is used to write frames

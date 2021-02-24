@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #ifndef NTV2OglOutput_H
 #define NTV2OglOutput_H
 

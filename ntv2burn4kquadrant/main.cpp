@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2burn4kquadrant/main.cpp
 	@brief		Demonstration application to "burn" timecode into frames captured from SDI input,

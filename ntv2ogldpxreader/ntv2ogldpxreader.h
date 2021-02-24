@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #ifndef NTV2OglDPXReader_H
 #define NTV2OglDPXReader_H
 

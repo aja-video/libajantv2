@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 
 #include "ntv2rendertotexture.h"
 

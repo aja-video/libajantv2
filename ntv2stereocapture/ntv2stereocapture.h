@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2stereocapture.h
 	@brief		Header file for the NTV2StereoCapture class.

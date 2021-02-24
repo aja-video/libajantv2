@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2player4k.h
 	@brief		Header file for NTV2Player4K demonstration class

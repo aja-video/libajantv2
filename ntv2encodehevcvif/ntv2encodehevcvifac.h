@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2encodehevcvifac.h
 	@brief		Declares the NTV2EncodeHEVCVifAc class.

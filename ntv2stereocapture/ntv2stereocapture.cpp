@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2stereocapture.cpp
 	@brief		Contains the implementation of the NTV2StereoCapture class.

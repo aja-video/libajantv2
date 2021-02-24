@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file	ntv2llburn.h
 	@brief	Header file for the low latency NTV2Burn demonstration class.

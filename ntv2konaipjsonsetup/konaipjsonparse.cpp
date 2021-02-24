@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 //-------------------------------------------------------------------------------------------
 //	konaipjsonparse.cpp
 //  Implementation of ip json parser for 2110.

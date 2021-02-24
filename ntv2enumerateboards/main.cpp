@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2enumerateboards/main.cpp
 	@brief		Demonstration application to enumerate the AJA devices for the host system.

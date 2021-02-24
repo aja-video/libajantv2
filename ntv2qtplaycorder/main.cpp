@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2qtplaycorder/main.cpp  
 	@brief		Demonstration application that records or plays frames to/from disk in DPX format.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2fieldburn.cpp
 	@brief		Implementation of NTV2FieldBurn demonstration class.

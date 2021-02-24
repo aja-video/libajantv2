@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file       ntv2hdrsetup/main.cpp
     @brief      Demonstration application that shows how to enable HDR capabilities of 

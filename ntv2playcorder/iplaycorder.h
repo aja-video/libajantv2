@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		i_playcorder.h
 	@brief		Header file for the interface between a playcorder UI

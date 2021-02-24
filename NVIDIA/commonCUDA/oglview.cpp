@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 
 #include "oglview.h"
 #include <stdio.h>

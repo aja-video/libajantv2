@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 		@file			ntv2qtplaycorder.cpp
 		@brief			Implementation file for the NTV2QtPlaycorder demonstration application.

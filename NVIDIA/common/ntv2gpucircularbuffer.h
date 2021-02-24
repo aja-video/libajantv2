@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 //
 // Copyright (C) 2012 AJA Video Systems, Inc.
 // Proprietary and Confidential information.

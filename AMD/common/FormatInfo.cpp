@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 
 #include <string>
 #include "GL/glew.h"

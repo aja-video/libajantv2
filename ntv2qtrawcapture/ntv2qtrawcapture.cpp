@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2qtrawcapture.cpp
 	@brief		Implementation of the NTV2QtRawCapture class.

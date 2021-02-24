@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2capture.h
 	@brief		Declares the NTV2Capture class.

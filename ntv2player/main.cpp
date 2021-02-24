@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2player/main.cpp
 	@brief		Demonstration application that uses AutoCirculate to playout frames to SDI output

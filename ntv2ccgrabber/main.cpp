@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2ccgrabber/main.cpp
 	@brief		Demonstration application that grabs closed-captioning data from frames captured

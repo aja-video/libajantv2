@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2rawpreview.h
 	@brief		Header file for the NTV2RawPreview class that is used to prepare frames

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2dolbyplayer.cpp
 	@brief		Implementation of NTV2DolbyPlayer class.

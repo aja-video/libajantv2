@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 // CUDA array transfer class
 
 #ifndef _NTV2_CUDA_ARRAY_TRANSFER_NV_

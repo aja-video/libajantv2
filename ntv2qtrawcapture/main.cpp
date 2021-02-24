@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2qtrawcapture/main.cpp
 	@brief		Demonstration application that uses AutoCirculate to capture frames in raw format

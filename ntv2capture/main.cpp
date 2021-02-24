@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2capture/main.cpp
 	@brief		Demonstration application to capture frames from SDI input.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2qtpreview.cpp
 	@brief		Implementation of the NTV2QtPreview class.

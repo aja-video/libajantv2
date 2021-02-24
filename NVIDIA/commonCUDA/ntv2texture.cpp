@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 
 #include "ntv2texture.h"
 #include "ntv2debug.h"

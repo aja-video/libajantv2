@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 // Video I/O Helper Class Definition
 
 #include <ajatypes.h>

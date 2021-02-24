@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2demohevccommon.h
 	@brief		This file contains some structures, constants, classes and functions that are used in some of the hevc demo applications.

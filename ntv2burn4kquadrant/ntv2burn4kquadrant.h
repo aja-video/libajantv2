@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2burn4kquadrant.h
 	@brief		Header file for the NTV2Burn4KQuadrant demonstration class.

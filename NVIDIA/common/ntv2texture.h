@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 
 #ifndef _CNTV2_TEXTURE_
 #define _CNTV2_TEXTURE_

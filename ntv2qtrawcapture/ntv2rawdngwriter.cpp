@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2rawdngwriter.cpp
 	@brief		Implementation if the NTV2RawDNGWriter class.

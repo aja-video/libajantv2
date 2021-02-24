@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file	ntv2burn.h
 	@brief	Header file for the NTV2Burn demonstration class.

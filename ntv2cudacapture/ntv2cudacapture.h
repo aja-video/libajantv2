@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #ifndef NTV2CudaCapture_H
 #define NTV2CudaCapture_H
 

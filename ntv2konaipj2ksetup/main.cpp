@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #include <QCoreApplication>
 #include <QCommandLineParser>
 #include "konaipj2ksetup.h"

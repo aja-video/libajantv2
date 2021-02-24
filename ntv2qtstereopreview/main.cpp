@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		main.cpp
 	@brief		Demonstration application that uses AutoCirculate to capture 3D video and display

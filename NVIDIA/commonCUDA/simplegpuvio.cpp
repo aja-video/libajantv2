@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #include "simplegpuvio.h"
 #include "ntv2signalrouter.h"
 #include "systemtime.h"

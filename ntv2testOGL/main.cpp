@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2testOGL/main.cpp
 	@copyright	(C) 2012-2021 AJA Video Systems, Inc.  All rights reserved.

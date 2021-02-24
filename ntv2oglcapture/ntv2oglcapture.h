@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #ifndef NTV2OGLCAPTURE_H
 #define NTV2OGLCAPTURE_H
 

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2democommon.h
 	@brief		This file contains some structures, constants, classes and functions that are used in some of the demo applications.

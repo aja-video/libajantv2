@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 // CUDA array transfer class
 
 #include "ntv2cudaArrayTransferNV.h"

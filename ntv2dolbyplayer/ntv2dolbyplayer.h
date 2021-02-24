@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2dolbyplayer.h
 	@brief		Header file for NTV2DolbyPlayer demonstration class

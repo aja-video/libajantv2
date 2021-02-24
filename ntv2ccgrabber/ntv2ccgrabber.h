@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2ccgrabber.h
 	@brief		Header file for NTV2CCGrabber demonstration class

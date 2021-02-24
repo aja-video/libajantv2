@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2player4k.cpp
 	@brief		Implementation of ntv2player4k class.

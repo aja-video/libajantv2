@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 // Basic GPU Video I/O Helper Class Definition
 
 #ifndef SIMPLE_GPU_VIO_

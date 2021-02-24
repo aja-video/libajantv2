@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2capture8k.cpp
 	@brief		Implementation of NTV2Capture class.

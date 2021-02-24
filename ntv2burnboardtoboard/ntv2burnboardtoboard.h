@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file	ntv2burnboardtoboard.h
 	@brief	Header file for the NTV2BurnBoardToBoard demonstration class.

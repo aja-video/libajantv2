@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2qtmultiinput/main.cpp
 	@brief		Demonstration application that uses AutoCirculate to capture frames from 1, 2, 3,
