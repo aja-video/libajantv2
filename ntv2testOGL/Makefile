@@ -1,8 +1,7 @@
+# SPDX-License-Identifier: MIT
 #
-# Copyright (C) 2004, 2005, 2006, 2007, 2008, 2012 AJA Video Systems, Inc.
-# Proprietary and Confidential information.  All Rights Reserved
+# Copyright (C) 2004 - 2021 AJA Video Systems, Inc.
 #
-# You no longer need to define NTV2TARGET as either KSD, KHD or XENA2
 
 NTV2_ROOT	?= $(shell pwd)/../..
 AJA_API_ROOT ?= $(NTV2_ROOT)/../../ajaapi

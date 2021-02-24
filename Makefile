@@ -1,14 +1,15 @@
+# SPDX-License-Identifier: MIT
+#
+# Copyright (C) 2004 - 2021 AJA Video Systems, Inc.
+#
+
 #
 # Top level Makefile for AJA Video demo applications
-#
-# Copyright (C) 2019 AJA Video Systems, Inc.
-# Proprietary and Confidential information.
 #
 # Control Flags for Make
 #
 # AJA_NO_QT - if this environment variable is defined the demo applications
 #             that build against the Qt libraries will be skipped.
-
 
 SUBDIRS = ntv2burn \
 		  ntv2burn4kquadrant \
