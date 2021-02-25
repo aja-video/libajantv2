@@ -1110,6 +1110,7 @@ void RoutingExpert::InitOutputXpt2WidgetIDs(void)
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMultiLinkOut2DS2,		NTV2_WgtMultiLinkOut2));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMultiLinkOut2DS3,		NTV2_WgtMultiLinkOut2));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptMultiLinkOut2DS4,		NTV2_WgtMultiLinkOut2));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt3DLUT1YUV,				NTV2_Wgt3DLUT1));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt3DLUT1RGB,				NTV2_Wgt3DLUT1));
 
 	//	gWidget2OutputXpts
