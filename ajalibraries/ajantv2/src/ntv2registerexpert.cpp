@@ -463,7 +463,14 @@ private:
 		DefineRegister (kRegAudioMixerMainInputLevelsPair5,		"kRegAudioMixerMainInputLevelsPair5",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
 		DefineRegister (kRegAudioMixerMainInputLevelsPair6,		"kRegAudioMixerMainInputLevelsPair6",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
 		DefineRegister (kRegAudioMixerMainInputLevelsPair7,		"kRegAudioMixerMainInputLevelsPair7",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
-		DefineRegister (kRegAudioMixerMixedChannelOutputLevels,	"kRegAudioMixerMixedChannelOutputLevels",	mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainOutputLevelsPair0,	"kRegAudioMixerMainOutputLevelsPair0",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainOutputLevelsPair1,	"kRegAudioMixerMainOutputLevelsPair1",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainOutputLevelsPair2,	"kRegAudioMixerMainOutputLevelsPair2",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainOutputLevelsPair3,	"kRegAudioMixerMainOutputLevelsPair3",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainOutputLevelsPair4,	"kRegAudioMixerMainOutputLevelsPair4",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainOutputLevelsPair5,	"kRegAudioMixerMainOutputLevelsPair5",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainOutputLevelsPair6,	"kRegAudioMixerMainOutputLevelsPair6",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
+		DefineRegister (kRegAudioMixerMainOutputLevelsPair7,	"kRegAudioMixerMainOutputLevelsPair7",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL,	kRegClass_NULL);
 	}
 	
 	void SetupDMARegs(void)
@@ -1568,7 +1575,7 @@ public:
 		{
 			for (ULWord regNum(kRegAudioMixerInputSelects);  regNum <= kRegAudioMixerAux2GainCh2;  regNum++)
 				result.insert(regNum);
-			for (ULWord regNum(kRegAudioMixerAux1InputLevels);  regNum <= kRegAudioMixerMixedChannelOutputLevels; regNum++)
+			for (ULWord regNum(kRegAudioMixerAux1InputLevels);  regNum <= kRegAudioMixerMainOutputLevelsPair7; regNum++)
 				result.insert(regNum);
 		}
 
