@@ -485,10 +485,8 @@ void NTV2Burn::RouteOutputSignal (void)
 		}	//	for each output spigot
 
 		//	If HDMI and/or analog video outputs are available, route them, too...
-		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1))
-			mDevice.Connect (NTV2_XptHDMIOutInput, outputXpt);			//	Route the output signal to the HDMI output
-		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v2))
-			mDevice.Connect (NTV2_XptHDMIOutQ1Input, outputXpt);		//	Route the output signal to the HDMI output
+		if (::NTV2DeviceGetNumHDMIVideoOutputs(mDeviceID) > 0)
+			mDevice.Connect (NTV2_XptHDMIOutQ1Input, outputXpt);	//	Route the output signal to the HDMI output
 		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtAnalogOut1))
 			mDevice.Connect (NTV2_XptAnalogOutInput, outputXpt);		//	Route the output signal to the Analog output
 		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtSDIMonOut1))
