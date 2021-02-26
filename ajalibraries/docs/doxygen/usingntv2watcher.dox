@@ -1228,7 +1228,8 @@ It can readily indicate \ref vidop-fbconflict and/or \ref audioclobber.
 			-	The width indicates the device’s <b>Intrinsic Frame Size</b>. At this time, NTV2 devices use an
 				intrinsic frame size of either 8MB or 16MB.
 			-	Double-click to open the \ref inspectorframebuffer and view the raw frame data.
-			-	Right-click and choose <b>Inspect</b> to open the \ref inspectorframebuffer and view the raw frame data.
+			-	Right-click for a context menu:
+				-	<b>Inspect</b> — opens the \ref inspectorframebuffer to view the raw frame data.
 		-	<b>AutoCirculate</b> — These translucent boxes span multiple Frames, and represents the frames being used
 			by an \ref aboutautocirculate channel.
 			-	Color depends on the Channel video format: green for SD, purple for HD, etc.
@@ -1236,7 +1237,11 @@ It can readily indicate \ref vidop-fbconflict and/or \ref audioclobber.
 			-	When in <b>Quad Mode</b> (4K/UHD) or <b>Quad-Quad Mode</b> (8K/UHD2), the logical frame size is 4 or 16 times
 				(respectively) the device’s intrinsic frame size.
 			-	Double-click to open the \ref inspectorac.
-			-	Right-click and choose <b>Inspect</b> to open the \ref inspectorac.
+			-	Right-click for a context menu:
+				-	<b>Inspect</b> — opens the \ref inspectorac.
+				-	<b>Stop</b> — stops the channel.
+				-	<b>Pause</b> — pauses the channel.
+				-	<b>Resume</b> — resumes the channel.
 			-	Drag to change the channel’s frame range (it will be restarted).
 		-	<b>Video Read</b> — (Green) — Represents the “Output Frame” being read by an enabled FrameStore.
 			-	Labeled with the FrameStore’s channel number (e.g. “1”, “2”, etc.).
@@ -1244,24 +1249,32 @@ It can readily indicate \ref vidop-fbconflict and/or \ref audioclobber.
 				(at the lowest address).
 			-	The width of the box indicates how much memory is being read by the FrameStore.
 			-	Double-click to open the \ref inspectorframebuffer and view the frame image.
-			-	Right-click and choose <b>Inspect</b> to open the \ref inspectorframebuffer and view the frame image.
-			-	Drag to change the FrameStore’s “Output Frame”.
+			-	Right-click for a context menu:
+				-	<b>Inspect</b> — opens the \ref inspectorframebuffer to view the frame image.
+				-	<b>Disable</b> — disables (turns off) the FrameStore.
+			-	Drag to interactively change the FrameStore’s “Output Frame”.
 		-	<b>Video Write</b> — (Red) — Represents the “Input Frame” being written by an enabled FrameStore.
 			-	Labeled with the FrameStore’s channel number (e.g. “1”, “2”, etc.).
 			-	In memory, NTV2 FrameStore widgets (see \ref vidop-fs ) always write video starting at the frame boundary
 				(at the lowest address).
 			-	The width of the box indicates how much memory is being written by the FrameStore.
 			-	Double-click to open the \ref inspectorframebuffer and view the frame image.
-			-	Right-click and choose <b>Inspect</b> to open the \ref inspectorframebuffer and view the frame image.
-			-	Drag to change the FrameStore’s “Input Frame”.
+			-	Right-click for a context menu:
+				-	<b>Inspect</b> — opens the \ref inspectorframebuffer to view the frame image.
+				-	<b>Disable</b> — disables (turns off) the FrameStore.
+			-	Drag to interactively change the FrameStore’s “Input Frame”.
 		-	<b>Audio Read</b> — (Green) — Represents the playout audio buffer being read during \ref audioplayout .
 			-	Labeled with the Audio System (e.g. “A1", “A2”, etc.).
 			-	Double-click to open the \ref inspectoraudio and reveal the audio buffer’s contents.
-			-	Right-click and choose <b>Inspect</b> to open the \ref inspectoraudio and reveal the audio buffer’s contents.
+			-	Right-click for a context menu:
+				-	<b>Inspect</b> — opens the \ref inspectoraudio to reveal the audio buffer’s contents.
+				-	<b>Stop Playback</b> — stops the audio system’s playback engine.
 		-	<b>Audio Write</b> — (Red) — Represents the capture audio buffer being written during \ref audiocapture .
 			-	Labeled with the Audio System (e.g. “A1", “A2”, etc.).
 			-	Double-click to open the \ref inspectoraudio and reveal the audio buffer’s contents.
-			-	Right-click and choose <b>Inspect</b> to open the \ref inspectoraudio and reveal the audio buffer’s contents.
+			-	Right-click for a context menu:
+				-	<b>Inspect</b> — opens the \ref inspectoraudio to reveal the audio buffer’s contents.
+				-	<b>Stop Recording</b> — stops the audio system’s record/capture engine.
 		-	You can <b>hover</b> over any object to display a tooltip that contains detailed information about the region.
 
 To close the <b>Memory Map</b> tool window:
