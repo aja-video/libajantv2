@@ -351,6 +351,9 @@ AJAStatus NTV2Burn::SetupAudio (void)
 		if (SDIoutput >= ::NTV2DeviceGetNumVideoOutputs(mDeviceID))
 			SDIoutput = ::NTV2DeviceGetNumVideoOutputs(mDeviceID) - 1;
 		mDevice.SetSDIOutputAudioSystem (NTV2Channel(SDIoutput), mAudioSystem);
+		
+		if (::NTV2DeviceGetNumHDMIVideoOutputs(mDeviceID) > 0)
+			mDevice.SetHDMIOutAudioSource2Channel(NTV2_AudioChannel1_2, mAudioSystem);
 	}
 
 	//
