@@ -2780,10 +2780,12 @@ private:
 			static const string sLabels[] = {	"Aux Input 1", "Aux Input 2", "Main Input Audio Channels 1|2", "Main Input Audio Channels 3|4",
 												"Main Input Audio Channels 5|6", "Main Input Audio Channels 7|8", "Main Input Audio Channels 9|10",
 												"Main Input Audio Channels 11|12", "Main Input Audio Channels 13|14", "Main Input Audio Channels 15|16",
-												"Main Output (Mixed) Audio"};
+												"Main Output Audio Channels 1|2", "Main Output Audio Channels 3|4", "Main Output Audio Channels 5|6",
+												"Main Output Audio Channels 7|8", "Main Output Audio Channels 9|10", "Main Output Audio Channels 11|12",
+												"Main Output Audio Channels 13|14", "Main Output Audio Channels 15|16"};
 			NTV2_ASSERT(inRegNum >= kRegAudioMixerAux1InputLevels);
 			const uint32_t	labelOffset(inRegNum - kRegAudioMixerAux1InputLevels);
-			NTV2_ASSERT(labelOffset < 12);
+			NTV2_ASSERT(labelOffset < 18);
 			const string &	label(sLabels[labelOffset]);
 			const uint16_t	leftLevel	((inRegValue & kRegMaskAudioMixerInputLeftLevel) >> kRegShiftAudioMixerInputLeftLevel);
 			const uint16_t	rightLevel	((inRegValue & kRegMaskAudioMixerInputRightLevel) >> kRegShiftAudioMixerInputRightLevel);
