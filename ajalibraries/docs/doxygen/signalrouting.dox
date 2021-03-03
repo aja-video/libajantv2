@@ -156,7 +156,8 @@
 	-	Older devices that only support 1.5Gbps SDI use “non-3G” SDI output widgets — ::NTV2_WgtSDIOut1, ::NTV2_WgtSDIOut2, etc.
 	-	Devices that support 3Gbps SDI have “3G” SDI output widgets — ::NTV2_Wgt3GSDIOut1, ::NTV2_Wgt3GSDIOut2, etc.
 	-	Devices that support 6Gbps or higher SDI have “12G” SDI output widgets — ::NTV2_Wgt12GSDIOut1, ::NTV2_Wgt12GSDIOut2, etc.
-	-	3Gbps SDI outputs have two input crosspoints — one for DS1, another for DS2, the latter used in dual-link applications.
+	-	3Gbps SDI outputs have two input crosspoints:  one for data stream 1 (DS1), another for data stream 2 (DS2),
+		DS2 used in dual-link applications (see \ref duallinkoverview ).
 	-	There are two ways to obtain an SDI output’s ::NTV2InputCrosspointID …
 		-	Call ::GetSDIOutputInputXpt …
 			-	Specify the SDI output connector by ::NTV2Channel (e.g. use ::NTV2_CHANNEL3 for SDI Out 3);
