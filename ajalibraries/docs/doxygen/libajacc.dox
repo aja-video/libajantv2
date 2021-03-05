@@ -11,6 +11,8 @@
 	@note	The library currently is very focused on CEA-608. It does not support “full/native” CEA-708, Teletext, OP-42/47,
 			ARIB STD-B37, etc.
 
+	As this library is AJA proprietary, source code is not provided.
+	
 	@par	Demonstration Applications
 	-	\ref ntv2ccgrabber
 	-	\ref ntv2ccplayer

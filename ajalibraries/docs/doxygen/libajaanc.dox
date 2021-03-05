@@ -5,6 +5,11 @@
 	from host buffers in a manner that is compatible with the ways in which NTV2 devices transmit and/or
 	receive ancillary data. See \ref ancillarydata for more information.
 
+	Full source code is provided.
+
+	Prior to SDK 15.0, these classes were compiled into their own <b>libajaanc</b> library.
+	Starting with SDK 15.0, they were merged into the <b>libajantv2</b> library.
+
 	@par	Demonstration Applications
 	-	\ref ntv2ccgrabber
 	-	\ref ntv2ccplayer
