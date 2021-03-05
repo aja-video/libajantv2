@@ -8485,6 +8485,19 @@ std::string NTV2GetVersionString (const bool inDetailed)
 	return oss.str ();
 }
 
+UWord NTV2GetSDKVersionComponent (const int inVersionComponent)
+{
+	switch (inVersionComponent)
+	{
+		case 0:		return AJA_NTV2_SDK_VERSION_MAJOR;
+		case 1:		return AJA_NTV2_SDK_VERSION_MINOR;
+		case 2:		return AJA_NTV2_SDK_VERSION_POINT;
+		case 3:		return AJA_NTV2_SDK_BUILD_NUMBER;
+		default:	break;
+	}
+	return 0;
+}
+
 
 string NTV2RegisterNumberToString (const NTV2RegisterNumber inValue)
 {

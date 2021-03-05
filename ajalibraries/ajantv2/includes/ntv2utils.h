@@ -992,6 +992,15 @@ AJAExport NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds
 
 AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DeviceIDSet & inSet);		///<	@brief	Handy ostream writer for NTV2DeviceIDSet.
 
+/**
+	@brief		Returns an SDK version component value.
+	@param[in]	inVersionComponent	Optionally specifies which version component to return.
+									Legal values are 0 (major version), 1 (minor version), 2 (point or "dot" version),
+									and 3 (build number).  Defaults to 0 (the major version).
+	@return		The value of the requested version component, or zero if an invalid version component is specified.
+**/
+AJAExport UWord NTV2GetSDKVersionComponent (const int inVersionComponent = 0);	//	New in SDK 16.1
+
 
 typedef std::vector <NTV2OutputCrosspointID>		NTV2OutputCrosspointIDs;			///< @brief	An ordered sequence of NTV2OutputCrosspointID values.
 typedef NTV2OutputCrosspointIDs::iterator			NTV2OutputCrosspointIDsIter;		///< @brief	A convenient non-const iterator for NTV2OutputCrosspointIDs.

@@ -106,7 +106,7 @@ in the SDK.
 In addition, when the first NTV2 SDK was released, the video capture/playout devices it supported were circuit
 boards fixed in a specific motherboard slot with barely enough I/O capability to handle a single stream of 4:2:2
 YUV SD video. Today’s devices are hot-pluggable, support multiple channels, each with its own signal format, up
-to 4Kp60 and beyond. As the SDK expanded over the years to support newer, faster devices, the older functions,
+to 4:4:4 4Kp60 and beyond. As the SDK expanded over the years to support newer, faster devices, the older functions,
 data types and constants remained, which resulted in a very unwieldy and confusing SDK that made it difficult
 for OEM developers to quickly get up to speed.
 
@@ -262,8 +262,8 @@ Deprecation history:
 		-	Deprecated these overloaded functions: CNTV2CaptionRenderer::GetRenderer, CNTV2CaptionRenderer::BurnChar,
 			CNTV2CaptionRenderer::BurnString, CNTV2CaptionRenderer::BurnStringAtXY
 
-To build with an SDK’s deprecated API, comment out or remove its corresponding \c #define ::NTV2_DEPRECATE…
-line in <b>ajatypes.h</b>, then rebuild the <b>ajantv2</b> library.
+To build the <b>ajantv2</b> library to include a deprecated API, comment out or remove its corresponding \c #define ::NTV2_DEPRECATE…
+line in <b>ajatypes.h</b>, then rebuild the library.
 
 
 @note	It’s best to undefine macros from oldest-to-newest SDKs in contiguous blocks or unexpected results may occur.
@@ -335,6 +335,37 @@ AJA always recommends that NTV2-based applications be built from the same SDK ve
 For a given SDK release, the “CanDoXXXX”, “GetNumXXXX”, etc. <b>Device Features API</b> responses should be correct for all supported devices
 running the latest firmware available on or after the SDK release date. AJA will do its best to document any exceptions on the SDK’s
 download page and/or the device firmware page in the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/List">Knowledgebase</a>.
+
+
+@subsubsection		gs-dylibs	Using Dynamic Libraries
+
+Starting in SDK 16.1, AJA opened the NTV2 SDK to the open source community, and started to distribute dynamic libraries, not only with
+the SDK on public forums, but also in its MacOS, Windows, and Linux retail desktop software installers.
+Click <a href="https://www.aja.com/opensource/">here</a> for more information about this initiative.
+
+@par Determining dynamic library SDK version
+
+There are two utility functions that can be called to determine the SDK version:
+-	::NTV2GetVersionString – returns a string that starts with "<i>major</i><b>.</b><i>minor</i><b>.</b><i>point</i>"
+	that includes the <i>major</i>, <i>minor</i>, and <i>point</i> version number values in decimal form.
+-	::NTV2GetSDKVersionComponent – returns any of the <i>major</i>, <i>minor</i>, and <i>point</i> version number values
+	by passing 0, 1, 2 or 3, respectively, for the <i>version component</i> being requested.
+
+@note	It is strongly recommended that the SDK client software operates with the SDK dynamic library that has the same version.
+
+@warning	Do not use an SDK dynamic library whose <i>major</i> version number differs from that of the SDK client.
+
+
+@par Dynamic library locations
+
+AJA’s retail desktop installers will install the NTV2 dynamic libraries into the following locations on the host:
+-	<b>Linux</b> — <tt>/opt/aja</tt>
+	-	<b>ajantv2_</b><i>MM</i><b>.so</b> — contains the \ref ajantv2 including the \ref ajabase and \ref ajaanc
+-	<b>MacOS</b> — <tt>/Library/Application Support/AJA</tt>
+	-	<b>ajantv2_</b><i>MM</i><b>.dylib</b> — contains the \ref ajantv2 including the \ref ajabase and \ref ajaanc
+	-	<b>ajantv2d_</b><i>MM</i><b>.dylib</b> — if present, the debug version of the library
+-	<b>Windows</b> — <tt>\\Program Files\\AJA</tt>
+	-	<i>MM</i><b><b>AJANTV2</b>.DLL</b> — contains the \ref ajantv2 including the \ref ajabase and \ref ajaanc
 
 
 
@@ -409,19 +440,23 @@ On Linux, the libraries and device drivers are not pre-built, and must be compil
 On MacOS, the device driver is normally provided from the AJA Software installer, while the libraries are provided pre-built in the <tt>sdk/lib</tt> folder.
 The \ref ajantv2 source code is provided, and the libraries can be built with debugging symbols as a troubleshooting aid.
 -#	Launch <b>Xcode</b> and open the <b>ajantv2.xcodeproj</b> project file that’s inside the <tt>ajalibraries/ajantv2/build</tt> folder.
--#	Select the <b>libclasses</b> or <b>BuildAll</b> target as the current target.
+-#	Select the desired build target:
+	-	<b>libajantv2</b> — Builds the static library.
+	-	<b>libajantv2.dylib</b> — Builds the dynamic library(s).
+	-	<b>BuildAll</b> — Builds both the static and dynamic libraries.
 -#	Choose <b>Build</b> from the <b>Product</b> menu.
--#	Look for the new \c libajantv2d.a library in the \c lib folder.
+-#	The static library(s) will appear in the <b>lib</b> folder;  the dynamic library(s) will appear in the <b>bin</b> folder.
 
 @par XCode 12 and MacOS Big Sur
 
 XCode 12 produces “fat” libraries and executables for both <b>arm64</b> and <b>x86_64</b> architectures.
-In SDK 16.0, the <tt>.xcodeproj</tt> project files have changed to ONLY build for the <b>x86_64</b> architecture.
-Weʼll revert this change when we release a native Apple Silicon <b>arm64</b>-compatible driver and SDK.
+Starting in SDK 16.0, the <tt>.xcodeproj</tt> project files have changed to ONLY build for the <b>x86_64</b> architecture.
+This change will be reverted when AJA releases a native Apple Silicon <b>arm64</b>-compatible driver and SDK.
 
-To build a single ajantv2 library for both <b>arm64</b> and <b>x86_64</b> architectures, run this command:
+<b>Example:</b> To build the Debug version of the NTV2 static and dynamic libraries for both <b>arm64</b> and <b>x86_64</b> architectures,
+in a Terminal window, “cd” into the SDK root, then run this command:
 	\code{.sh}
-	$ xcrun xcodebuild -project ajalibraries/ajantv2/build/ajantv2.xcodeproj  -target BuildAll  -configuration Debug  ARCHS=arm64,x86_64  clean build
+	$ xcrun xcodebuild -project ajalibraries/ajantv2/build/ajantv2.xcodeproj  -target BuildAll  -configuration Debug  ARCHS=arm64,x86_64
 	\endcode
 
 See also \ref gs-newmacprojects for more information on other Xcode configuration settings.
@@ -432,11 +467,14 @@ See also \ref gs-newmacprojects for more information on other Xcode configuratio
 On Windows, the device driver is normally installed from the provided \c .msi, and the libraries are provided pre-built in the \c sdk\\lib folder.
 However, the \ref ajantv2 source code is provided, and the libraries can be built with debugging symbols as a troubleshooting aid.
 -#	Launch <b>Visual Studio</b> and do one of the following:
-	-	open the <b>ntv2_vs141.sln</b> solution file that’s inside \c sdk, or…
-	-	drag one of <b>libajantv2_vs12.vcxproj</b> or <b>libajantv2dll_vs141.vcxproj</b> project files from \c sdk\\ajalibraries\\ajantv2\\build into your solution.
+	-	To build the <b>static</b> library and demo apps, open the <b>ntv2_vs</b><i>NN</i><b>.sln</b> solution file that’s in the SDK build root.
+	-	To build and use the <b>static</b> library in your project solution, drag <b>libajantv2_vs</b><i>NN</i><b>.vcxproj</b>
+		from \c ajalibraries\\ajantv2\\build into your solution.
+	-	To build and use the <b>dynamic</b> library in your project solution, drag <b>libajantv2dll_vs</b><i>NN</i><b>.vcxproj</b>
+		from \c ajalibraries\\ajantv2\\build into your solution.
 -#	Select the appropriate build configuration for your version of Visual Studio (Debug/Release + Win32/x64). Includes support for VS2013, 2015 and 2017.
--#	Build the \ref ajantv2.
-Look for the <b>.DLL</b> in \c sdk\\bin, or the <b>.LIB</b> in \c sdk\\lib.
+-#	Build the project.
+-#	The <b>.DLL</b> will appear in the <b>bin</b> folder;  the <b>.LIB</b> will appear in the <b>lib</b> folder.
 
 @note	If the device doesn’t show up in the Windows <b>Device Manager</b>, see the \ref dev-firmware-loading section
 		for more information on how to diagnose the problem.
@@ -484,7 +522,9 @@ Assuming <a href="https://doc.qt.io/qtcreator/" target="_qtcreator">Qt Creator</
 -#	<a href="https://doc.qt.io/qtcreator/creator-targets.html" target="_qtcreator">Assign it a kit</a>.
 -#	Build the project.
 
-The built libraries will be in \c lib ; the built executables will be in \c bin (both are peers to \c ajalibraries).
+The built libraries will appear in the <b>lib</b> folder;  the built executables will appear in the <b>bin</b> folder.
+
+@note	The Qt build configurations do not currently work with dynamic libraries.
 
 
 <hr size="50px">
