@@ -801,7 +801,9 @@ NTV2VideoFormat NTV2CCGrabber::WaitForStableInputSignal (void)
 	while (result == NTV2_FORMAT_UNKNOWN)
 	{
 		//	Determine the input video signal format...
+		//	Warning:  if there's no input signal, this loop won't exit until mGlobalQuit goes true!
 		mVPIDInfoDS1.MakeInvalid();  mVPIDInfoDS2.MakeInvalid();	//	Reset VPID info
+		UWord loopCount(0);
 		while (result == NTV2_FORMAT_UNKNOWN)
 		{
 			mDevice.WaitForInputVerticalInterrupt(mConfig.fInputChannel);
@@ -810,7 +812,11 @@ NTV2VideoFormat NTV2CCGrabber::WaitForStableInputSignal (void)
 
 			const NTV2VideoFormat currVF (mDevice.GetInputVideoFormat(mConfig.fInputSource));
 			if (currVF == NTV2_FORMAT_UNKNOWN)
-				;	//	Wait for video signal to appear
+			{	//	Wait for video signal to appear
+				if (++loopCount % 500 == 0)	//	Log message every minute or so at ~50ms
+					CAPDBG("Waiting for valid video signal to appear at "
+							<< ::NTV2InputSourceToString(mConfig.fInputSource,true));
+			}
 			else if (numConsecutiveFrames == 0)
 			{
 				lastVF = currVF;		//	First valid video format to appear
