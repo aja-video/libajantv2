@@ -1,6 +1,6 @@
-//	@file		dev_io4k.gen
-//	@brief		Io4K Quad (DEVICE_ID_IO4K) device features.
-//	@copyright	Copyright (C) 2017-2018 AJA Video Systems, Inc.  Proprietary and Confidential information.
+//	@file		dev_iox3.gen
+//	@brief		IoX3 (DEVICE_ID_IOX3) device features.
+//	@copyright	Copyright (C) 2020-2021 AJA Video Systems, Inc.  Proprietary and Confidential information.
 
 
 // NTV2VideoFormats
