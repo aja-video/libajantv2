@@ -1726,7 +1726,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 
 		static bool BFT_AncListToFBYUV10ToAncList (void)
 		{
-			const NTV2VideoFormat	vFormats[]	=	{/*NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000,*/ NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
+			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, /*NTV2_FORMAT_625_5000,*/ NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
 			if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToFBYUV10ToAncList..." << endl;
 			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 			{
@@ -1790,7 +1790,6 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				//	Transmit the packets into the 10-bit YCbCr frame buffer...
 				NTV2_POINTER	vanc10(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
 				vanc10.Fill(uint8_t(0x80));
-				txPkts.SortListByLocation();	//	To match rxPkts order in Compare (below)
 				SHOULD_SUCCEED(txPkts.GetVANCTransmitData (vanc10, fd));
 /* cerr << ::NTV2VideoFormatToString(vFormat) << " " << ::NTV2FrameBufferFormatToString(fd.GetPixelFormat()) << " VANC: " << endl;
 for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset++) {
